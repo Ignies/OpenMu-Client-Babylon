@@ -1,4 +1,4 @@
-import { isKey } from '../../../../../common/keyBindings';
+import { isKey } from '../../../../../controllers/interface/keyBindings';
 import { t } from '../../../../../i18n';
 import './style.less';
 import { observer } from 'mobx-react-lite';
@@ -14,7 +14,7 @@ import { MsgWinCode } from '../../../../../common/msgWin';
 import { devQueryNumber } from '../../../../../core/devSeams';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuButton } from '../../../../components/muButton';
-import { playUiSound } from '../../../../../libs/sfx';
+import { playUiSound } from '../../../../../controllers/sound/sfx';
 import { toggleMasterSkillsWindow } from '../masterSkills/windowState';
 import { togglePetInfoWindow } from '../petInfo/windowState';
 import {

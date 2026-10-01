@@ -1,8 +1,8 @@
 import { t } from './i18n';
 import { characterSkinBody } from './common/transformedBody';
 import type { PlayerObject } from './common/playerObject';
-import { playUiSound } from './libs/sfx';
-import { consumeSound, upgradedItemSound } from './sound/ui';
+import { playUiSound } from './controllers/sound/sfx';
+import { consumeSound, upgradedItemSound } from './controllers/sound/ui';
 import {
   CharacterClassNumber,
   ENUM_WORLD,

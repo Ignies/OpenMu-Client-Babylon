@@ -56,7 +56,7 @@ import {
 } from '../../versions/shared/packets/ServerToClientPackets';
 import type { ENUM_WORLD } from '../core/types';
 import { EventBus } from '../core/eventBus';
-import { playUiSound } from '../libs/sfx';
+import { playUiSound } from '../controllers/sound/sfx';
 import { Store } from '../store';
 import type { QuestLayer } from './layer';
 import { questDataReady, questProgressEntry, questProgressKeys, questWordLines, questWords } from './questData';

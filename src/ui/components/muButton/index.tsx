@@ -1,6 +1,6 @@
 import { useState, type CSSProperties } from 'react';
 import { MuSpriteFrame } from '../muSprite';
-import { uiClick } from '../../../libs/sfx';
+import { uiClick } from '../../../controllers/sound/sfx';
 
 export type MuButtonFrames = {
   up: number;

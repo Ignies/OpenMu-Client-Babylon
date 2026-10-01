@@ -1,4 +1,4 @@
-import type { Emission } from '../../common/effectParticles';
+import type { Emission } from '../../controllers/fx/effectParticles';
 import { ENUM_WORLD } from '../../core/types';
 
 /**

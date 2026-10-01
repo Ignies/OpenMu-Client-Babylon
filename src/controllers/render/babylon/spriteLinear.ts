@@ -4,7 +4,7 @@ import { ShaderStore } from '@babylonjs/core/Engines/shaderStore';
 import { VertexBuffer } from '@babylonjs/core/Buffers/buffer';
 import type { Effect } from '@babylonjs/core/Materials/effect';
 import type { Scene } from '@babylonjs/core/scene';
-import { linearBufferActive } from '../../../common/lightModel';
+import { linearBufferActive } from '../../lighting/lightModel';
 import { installSpriteReplay } from './spriteReplay';
 
 /**

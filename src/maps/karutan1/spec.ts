@@ -1,6 +1,6 @@
-import type { Emission } from '../../common/effectParticles';
+import type { Emission } from '../../controllers/fx/effectParticles';
 import type { MeshAnimation } from '../../controllers/render/meshAnimation';
-import type { LightEmitter } from '../../lighting/mapObjectLights';
+import type { LightEmitter } from '../../controllers/lighting/mapObjectLights';
 
 /**
  * Karutan 1 (`WD_80KARUTAN1`, `World81`/`Object81`) and Karutan 2

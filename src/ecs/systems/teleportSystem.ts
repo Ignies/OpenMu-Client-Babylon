@@ -1,10 +1,10 @@
 import type { Entity, ISystemFactory, World } from '../world';
 import { PlayerAction } from '../../common/objects/enum';
-import { applyPlayerActionSpeed } from '../../common/playSpeed';
+import { applyPlayerActionSpeed } from '../../controllers/anim/playSpeed';
 import { playTeleportFlash } from '../../common/skillVisuals';
-import { COMBAT_BUS } from '../../common/combatSounds';
-import { playSfx } from '../../libs/sfx';
-import type { Sounds } from '../../sound/recipes';
+import { COMBAT_BUS } from '../../controllers/sound/combatSounds';
+import { playSfx } from '../../controllers/sound/sfx';
+import type { Sounds } from '../../controllers/sound/recipes';
 import type { Tile } from '../../common/teleportRules';
 
 /**

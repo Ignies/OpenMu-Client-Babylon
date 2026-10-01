@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { t } from '../../../i18n';
-import { playUiSound, uiClick } from '../../../libs/sfx';
+import { playUiSound, uiClick } from '../../../controllers/sound/sfx';
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { Store, UIState } from '../../../store';

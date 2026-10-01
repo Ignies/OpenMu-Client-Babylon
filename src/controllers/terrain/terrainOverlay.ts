@@ -1,9 +1,9 @@
 import { Vector3, type Effect, type Scene } from '../render/babylon/exports';
-import { sunLightOf } from '../../lighting/keyRig';
+import { sunLightOf } from '../lighting/keyRig';
 import { ENUM_WORLD } from '../../core/types';
 import { GameOptions } from '../../common/gameOptions';
-import { SNOW_GROUND_MAPS, snowCover } from '../../weather/snowCover';
-import { snowTrailPainted, snowTrailTexture } from '../../weather/snowTrail';
+import { SNOW_GROUND_MAPS, snowCover } from '../weather/snowCover';
+import { snowTrailPainted, snowTrailTexture } from '../weather/snowTrail';
 import {
   MELT_EDGE,
   MELT_LOBE_2,
@@ -12,13 +12,13 @@ import {
   MELT_SPOTS,
   snowMeltCount,
   snowMeltUniform,
-} from '../../weather/snowMelt';
-import { puddleCover, wetness } from '../../weather/wetness';
-import { rainStrength } from '../../weather/rainState';
-import { pointLightPoolLights } from '../../common/pointLightPool';
-import { linearBufferActive } from '../../common/lightModel';
+} from '../weather/snowMelt';
+import { puddleCover, wetness } from '../weather/wetness';
+import { rainStrength } from '../weather/rainState';
+import { pointLightPoolLights } from '../lighting/pointLightPool';
+import { linearBufferActive } from '../lighting/lightModel';
 import { SNOW_ART, type ArtMatch } from '../assets/mu/artMatch';
-import { lookDirector } from '../../lighting/director';
+import { lookDirector } from '../lighting/director';
 import { TERRAIN_BRANCH } from './terrainLighting';
 import { devQuery } from '../../core/devSeams';
 

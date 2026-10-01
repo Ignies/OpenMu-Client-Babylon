@@ -3,7 +3,7 @@ import { lazy, Suspense } from 'react';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
 import { Store } from '../../../store';
-import { isKey } from '../../../common/keyBindings';
+import { isKey } from '../../../controllers/interface/keyBindings';
 import { useEventBus } from '../../../hooks/useEventBus';
 import { WorldObjects } from '../../components/worldObjects';
 import { DamageNumbers } from '../../components/damageNumbers';

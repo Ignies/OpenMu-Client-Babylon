@@ -1,6 +1,6 @@
 import type { ISystemFactory } from '../world';
-import { lighting } from '../../lighting';
-import { characterLightFor } from '../../lighting/characters';
+import { lighting } from '../../controllers/lighting';
+import { characterLightFor } from '../../controllers/lighting/characters';
 
 /**
  * Consumer of the lighting layer's `characters` entry: walks the entities

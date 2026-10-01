@@ -2,7 +2,7 @@ import './style.less';
 import { t, type TextKey } from '../../../../../i18n';
 import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { isKey } from '../../../../../common/keyBindings';
+import { isKey } from '../../../../../controllers/interface/keyBindings';
 import { Store } from '../../../../../store';
 import { Messenger, type MessengerTab } from '../../../../../messenger';
 import { ChatRooms } from '../../../../../chatRooms';
@@ -13,7 +13,7 @@ import {
   isFriendOnline,
 } from '../../../../../common/messenger';
 import { useEventBus } from '../../../../../hooks/useEventBus';
-import { uiClick } from '../../../../../libs/sfx';
+import { uiClick } from '../../../../../controllers/sound/sfx';
 import { MuButton } from '../../../../components/muButton';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuItemWindow, MuTableFrame } from '../../../../components/muWindow';

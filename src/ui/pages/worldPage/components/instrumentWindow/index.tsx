@@ -18,7 +18,7 @@ import {
   toggleInstrumentWindow,
 } from '../../../../../common/band';
 import { PERCUSSION_CHANNEL } from '../../../../../common/band/bandState';
-import { uiClick } from '../../../../../libs/sfx';
+import { uiClick } from '../../../../../controllers/sound/sfx';
 import { MuButton } from '../../../../components/muButton';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuItemWindow, MuTableFrame } from '../../../../components/muWindow';

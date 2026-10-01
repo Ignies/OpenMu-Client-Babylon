@@ -1,5 +1,5 @@
-import type { LightEmitter } from '../../lighting/mapObjectLights';
-import type { Emission } from '../../common/effectParticles';
+import type { LightEmitter } from '../../controllers/lighting/mapObjectLights';
+import type { Emission } from '../../controllers/fx/effectParticles';
 
 /**
  * Noria (WD_3NORIA, World4 / Object4). Plain data - no scene imports, so the

@@ -10,7 +10,7 @@ import {
   vitalWarning,
   type VitalWarning,
 } from '../../../../../common/lowVitals';
-import { playSfx } from '../../../../../libs/sfx';
+import { playSfx } from '../../../../../controllers/sound/sfx';
 import { Heartbeat } from './heartbeat';
 
 /**

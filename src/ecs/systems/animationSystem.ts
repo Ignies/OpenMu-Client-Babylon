@@ -2,7 +2,7 @@ import type { AnimationGroup } from '@babylonjs/core/Animations/animationGroup';
 import { MonsterActionType, PlayerAction } from '../../common/objects/enum';
 import type { ISystemFactory } from '../world';
 import { isPlayerBody, type PlayerObject } from '../../common/playerObject';
-import { isOneShotPlayerAction } from '../../common/playerActionMapper';
+import { isOneShotPlayerAction } from '../../controllers/anim/playerActionMapper';
 import { monsterClipFor } from '../../common/transformedBody';
 import type { ModelObject } from '../../controllers/render/modelObject';
 import {
@@ -31,7 +31,7 @@ import {
   debuffSlowsClip,
   playerPlaySpeed,
   wingsPlaySpeed,
-} from '../../common/playSpeed';
+} from '../../controllers/anim/playSpeed';
 import { debuffSlow } from '../../common/debuffBody';
 import { attackSpeedOf, magicSpeedOf } from '../../common/characterStats';
 import { BaseClass, getBaseClass } from '../../common/characterStats';

@@ -4,7 +4,7 @@ import { Store } from '../../../../../store';
 import { InventoryConstants } from '../../../../../common/inventoryConstants';
 import { PET_GROUP } from '../../../../../common/pets';
 import { PetCommandModeEnum } from '../../../../../../versions/shared/packets/ClientToServerPackets';
-import { uiClick } from '../../../../../libs/sfx';
+import { uiClick } from '../../../../../controllers/sound/sfx';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 
 /**

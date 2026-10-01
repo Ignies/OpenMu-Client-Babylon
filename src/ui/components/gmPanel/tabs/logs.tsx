@@ -4,7 +4,7 @@ import { t, type TextKey } from '../../../../i18n';
 import { GmPanel } from '../../../../gmPanel';
 import { AdminFeed } from '../../../../admin/feed';
 import { EVENT_KINDS, type EventKind, type TrackEvent } from '../../../../controllers/net/protocols/adminProtocol';
-import { uiClick } from '../../../../libs/sfx';
+import { uiClick } from '../../../../controllers/sound/sfx';
 import { FeedNotice, clockText } from '../shared';
 
 /**

@@ -10,26 +10,26 @@ import {
 import { TERRAIN_SIZE, TWFlags } from './consts';
 import { isFlagInBinaryMask } from '../assets/download';
 import { TERRAIN_INDEX } from './utils';
-import { registerTerrainMaterial } from '../../scenes/shadows';
-import { CLOUD_UNIFORMS } from '../../lighting/clouds';
+import { registerTerrainMaterial } from '../render/scenes/shadows';
+import { CLOUD_UNIFORMS } from '../lighting/clouds';
 import { ENUM_WORLD } from '../../core/types';
 import { GameOptions } from '../../common/gameOptions';
-import { tierIndex } from '../../common/lightingQuality';
+import { tierIndex } from '../lighting/lightingQuality';
 import { grassInkStart } from '../render/renderingStyle';
 import { GRASS_CARD_SLOTS, type GrassCards } from './terrainGrassCards';
 import { SNOW_COVER } from './terrainOverlay';
-import { snowCover } from '../../weather/snowCover';
-import { GROUND_WIND } from '../../weather/ambientWeather';
+import { snowCover } from '../weather/snowCover';
+import { GROUND_WIND } from '../weather/ambientWeather';
 import {
   grassBurnActive,
   grassBurnTexture,
   setGrassProbe,
   setGroundProbe,
-} from '../../weather/grassBurn';
-import { lookDirector } from '../../lighting/director';
+} from '../weather/grassBurn';
+import { lookDirector } from '../lighting/director';
 import { devQueryNumber } from '../../core/devSeams';
 import { maps } from '../../maps';
-import { LUMA_GLSL } from '../../lighting/lightTint';
+import { LUMA_GLSL } from '../lighting/lightTint';
 import {
   TERRAIN_CSM_SAMPLERS,
   TERRAIN_LIGHT_UNIFORMS,

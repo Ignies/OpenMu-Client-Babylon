@@ -17,7 +17,7 @@ import {
 import { prefetchWorldTerrain } from '../../controllers/assets/mu/prefetchWorld';
 import { warmWorldObjects } from '../../controllers/assets/mu/warmWorld';
 import { LOGIN_SCENE_ABSENT_MODELS } from '../../maps/loginscene/spec';
-import { pregameLoad } from '../../common/pregameLoad';
+import { pregameLoad } from '../../controllers/loading/pregameLoad';
 import { loadVersionUi, versionUi } from '../../version';
 import type {
   PregameBackdrop,

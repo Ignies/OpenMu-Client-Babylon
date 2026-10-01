@@ -16,7 +16,7 @@ import {
   type Plane,
 } from './babylon/exports';
 import type { IVector3Like } from './babylon/exports';
-import { PLAY_SPEED_TO_RATIO } from '../../common/playSpeed';
+import { PLAY_SPEED_TO_RATIO } from '../anim/playSpeed';
 
 /** Rotation half of C⁻¹, the inverse of the model-root basis change applied in load(). */
 const DEFAULT_BONE_LINK_ROTATION = Quaternion.FromEulerAngles(
@@ -46,12 +46,12 @@ import { BlendState } from '../../common/objects/enum';
 // the monster classes that extend this one (B14, see `storeRef.ts`).
 import { storeRef } from '../../common/storeRef';
 import { settleStillAnimations } from './staticClips';
-import { requestGlowProbe } from '../../scenes/sceneLook';
+import { requestGlowProbe } from './scenes/sceneLook';
 import {
   shadowReceiverChanged,
   shadowReceiversChanged,
-} from '../../scenes/csmBounds';
-import type { MapObjectLights } from '../../common/mapObjectLights';
+} from './scenes/csmBounds';
+import type { MapObjectLights } from '../lighting/mapObjectLightAdapter';
 
 const BoundingUpdateInterval = 5;
 

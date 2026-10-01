@@ -7,11 +7,11 @@ import {
 } from '../../controllers/render/babylon/exports';
 import type { EntityTypeFromQuery, ISystemFactory } from '../world';
 import { canAttackPlayer, isAttackableEntity } from './attackSystem';
-import { isMobileDevice } from '../../common/mobile';
+import { isMobileDevice } from '../../controllers/interface/mobile';
 import { Commands } from '../../commands';
 import { Store } from '../../store';
 import { TELEPORT_ALLY } from '../../common/skillCasting';
-import { aimX, aimY } from '../../camera';
+import { aimX, aimY } from '../../controllers/camera';
 import { requestPing } from '../../ping/pingNet';
 import { pickGround } from '../../controllers/terrain/terrainPick';
 

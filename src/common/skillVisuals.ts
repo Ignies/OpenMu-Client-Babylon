@@ -1,28 +1,28 @@
 import { Matrix, Quaternion, Vector3 } from '../controllers/render/babylon/exports';
 import type { Scene } from '../controllers/render/babylon/exports';
 import type { Entity } from '../ecs/world';
-import { lighting } from '../lighting';
-import { effectLight } from '../lighting/recipes';
-import type { LightRecipe, LightSource } from '../lighting/lightSource';
+import { lighting } from '../controllers/lighting';
+import { effectLight } from '../controllers/lighting/recipes';
+import type { LightRecipe, LightSource } from '../controllers/lighting/lightSource';
 import { combat } from '../combat';
-import { weather } from '../weather';
-import { effects, type EffectHandle } from '../effects';
-import { boneLocalPos, bonePos, delay, effectTexture, emitBurst, entityGone, entityPos, entityYaw, fadeOut, fixedPoint, followEntity, fxNow, lerp, scaleRGB, type ParticleRecipe, type PointSource, type RGB, type SheetCells } from '../effects/core';
-import type { SpriteOptions } from '../effects/sprite';
-import type { ShroudOptions } from '../effects/shroud';
-import type { SpiritSwarmOptions, SwarmSpirit } from '../effects/spiritSwarm';
-import { spawnModel, type ModelHandle, type ModelOptions } from '../effects/model';
-import type { StampsHandle } from '../effects/stamps';
-import type { CardOptions } from '../effects/cards';
-import type { RingOptions } from '../effects/ring';
-import type { ParticlesOptions } from '../effects/particles';
-import type { ProjectileHead, ProjectileOptions } from '../effects/projectile';
-import type { JointOptions, TaperShape } from '../effects/joint';
-import type { Ray } from '../effects/rays';
-import type { AuraOptions, BoneGlow, SpearJoints } from '../effects/aura';
-import type { SummonBody } from '../effects/summon';
-import type { Ribbon, RibbonOptions, StripOptions, TailStrip, TickedFx } from '../effects/ticked';
-import { spawnLinkedModel } from '../effects/linkedModel';
+import { weather } from '../controllers/weather';
+import { effects, type EffectHandle } from '../controllers/fx';
+import { boneLocalPos, bonePos, delay, effectTexture, emitBurst, entityGone, entityPos, entityYaw, fadeOut, fixedPoint, followEntity, fxNow, lerp, scaleRGB, type ParticleRecipe, type PointSource, type RGB, type SheetCells } from '../controllers/fx/core';
+import type { SpriteOptions } from '../controllers/fx/sprite';
+import type { ShroudOptions } from '../controllers/fx/shroud';
+import type { SpiritSwarmOptions, SwarmSpirit } from '../controllers/fx/spiritSwarm';
+import { spawnModel, type ModelHandle, type ModelOptions } from '../controllers/fx/model';
+import type { StampsHandle } from '../controllers/fx/stamps';
+import type { CardOptions } from '../controllers/fx/cards';
+import type { RingOptions } from '../controllers/fx/ring';
+import type { ParticlesOptions } from '../controllers/fx/particles';
+import type { ProjectileHead, ProjectileOptions } from '../controllers/fx/projectile';
+import type { JointOptions, TaperShape } from '../controllers/fx/joint';
+import type { Ray } from '../controllers/fx/rays';
+import type { AuraOptions, BoneGlow, SpearJoints } from '../controllers/fx/aura';
+import type { SummonBody } from '../controllers/fx/summon';
+import type { Ribbon, RibbonOptions, StripOptions, TailStrip, TickedFx } from '../controllers/fx/ticked';
+import { spawnLinkedModel } from '../controllers/fx/linkedModel';
 import {
   ARC_MOTES,
   BLOOD_CHIPS,
@@ -72,21 +72,21 @@ import {
   ENERGY_BALL_BURST,
   LANCE_SPARKS,
   LANCE_STRIKE,
-} from '../effects/recipes';
+} from '../controllers/fx/recipes';
 import { ItemsDatabase } from './itemsDatabase';
 import { MonsterActionType, PlayerAction } from './objects/enum';
-import { playCombat, playLandingSound, SKILL_SOUNDS, stopCombat } from '../sound/combat';
-import type { Sounds } from '../sound/recipes';
+import { playCombat, playLandingSound, SKILL_SOUNDS, stopCombat } from '../controllers/sound/combat';
+import type { Sounds } from '../controllers/sound/recipes';
 import { itemObjectAttribute } from './itemObjectAttribute';
 import { inHellas } from './locomotion';
 import { fenrirVariant, mountKind } from './pets';
 import { skillDefinition, type SkillDefinition } from './skillsDatabase';
 import { storeRef } from './storeRef';
-import { BLAST_LIGHT, BOSS_LASER_LIGHT, HELLFIRE_CIRCLE_LIGHT, METEOR_LIGHT, SUMMON_ARRIVAL_LIGHT } from '../lighting/skills';
-import { tierIndex } from './lightingQuality';
+import { BLAST_LIGHT, BOSS_LASER_LIGHT, HELLFIRE_CIRCLE_LIGHT, METEOR_LIGHT, SUMMON_ARRIVAL_LIGHT } from '../controllers/lighting/skills';
+import { tierIndex } from '../controllers/lighting/lightingQuality';
 import { TWFlags } from '../controllers/terrain/consts';
-import { COMBAT_BUS, playSfx } from '../sound';
-import { earthQuake } from '../camera';
+import { COMBAT_BUS, playSfx } from '../controllers/sound';
+import { earthQuake } from '../controllers/camera';
 import { warmGLTF } from '../controllers/assets/modelLoader';
 import { ENUM_WORLD } from '../core/types';
 import { TW_NOGROUND, TW_NOMOVE, TW_WATER } from '../controllers/terrain/consts';

@@ -4,7 +4,7 @@ import { prefetchItemIcons } from './controllers/assets/itemIconPack';
 import { Store } from './store';
 import { Social } from './social';
 import type { Item } from './ecs/world';
-import { playUiSound } from './libs/sfx';
+import { playUiSound } from './controllers/sound/sfx';
 import { Notices } from './common/notices';
 import {
   CHAOS_CARD_WIRE_STORAGE,

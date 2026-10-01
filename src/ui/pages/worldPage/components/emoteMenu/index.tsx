@@ -1,4 +1,4 @@
-import { isKey } from '../../../../../common/keyBindings';
+import { isKey } from '../../../../../controllers/interface/keyBindings';
 import { t } from '../../../../../i18n';
 import './style.less';
 import { useEffect, useState } from 'react';
@@ -7,7 +7,7 @@ import { Store } from '../../../../../store';
 import { Social } from '../../../../../social';
 import { useEventBus } from '../../../../../hooks/useEventBus';
 import { useWindowStackEntry } from '../../../../components/muWindow/useWindowChrome';
-import { playUiSound } from '../../../../../libs/sfx';
+import { playUiSound } from '../../../../../controllers/sound/sfx';
 import {
   EMOTE_RINGS,
   EMOTES,

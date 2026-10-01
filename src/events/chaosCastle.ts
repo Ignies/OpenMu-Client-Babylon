@@ -15,7 +15,7 @@ import {
   MiniGameOpeningStatePacket,
   MiniGameScoreTablePacket,
 } from '../../versions/shared/packets/ServerToClientPackets';
-import { playSfx } from '../libs/sfx';
+import { playSfx } from '../controllers/sound/sfx';
 import {
   PILLAR_TYPE,
   nextThunderSeconds,

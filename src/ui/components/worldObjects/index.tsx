@@ -8,7 +8,7 @@ import { PartyBars } from '../partyBars';
 import { EmojiBubbles } from '../emojiBubbles';
 import { useRenderId } from '../../../hooks';
 import { useEventBus } from '../../../hooks/useEventBus';
-import { onScreenPosition } from '../../../libs/screenPositionBus';
+import { onScreenPosition } from '../../../controllers/interface/screenPositionBus';
 import { DROP_TIER_COLOURS, dropTier } from '../../../common/dropTier';
 import { dropPassesLootFilter } from '../../../common/lootFilter';
 import { GameOptions } from '../../../common/gameOptions';

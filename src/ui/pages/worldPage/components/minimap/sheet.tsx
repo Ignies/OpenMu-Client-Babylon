@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
 import { Store } from '../../../../../store';
-import { uiClick } from '../../../../../libs/sfx';
+import { uiClick } from '../../../../../controllers/sound/sfx';
 import type { WorldMinimap } from '../../../../../controllers/terrain/minimap';
 import type { MinimapMarker } from '../../../../../controllers/terrain/minimapData';
 import { useMuSprite } from '../../../../components/muSprite';

@@ -1,6 +1,6 @@
 import type { ENUM_WORLD } from '../core/types';
 import type { World } from '../ecs/world';
-import type { Emission } from '../common/effectParticles';
+import type { Emission } from '../controllers/fx/effectParticles';
 
 /**
  * The contract every map entry implements. One folder per map,

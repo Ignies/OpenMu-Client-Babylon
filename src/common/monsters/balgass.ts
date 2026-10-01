@@ -1,12 +1,12 @@
 import type { Entity, World } from '../../ecs/world';
-import { effects } from '../../effects';
-import { bonePos, entityPos, tmpA } from '../../effects/core';
+import { effects } from '../../controllers/fx';
+import { bonePos, entityPos, tmpA } from '../../controllers/fx/core';
 import {
   EXPLOSION_CELLS,
   MODEL,
   SAND_SMOKE,
   TEX,
-} from '../../effects/recipes';
+} from '../../controllers/fx/recipes';
 import { loadGLTF } from '../../controllers/assets/modelLoader';
 import { MonsterObject } from '../monsterObject';
 import { MonsterActionType } from '../objects/enum';

@@ -10,7 +10,7 @@ import {
   type BalgassEntryKind,
 } from '../../../../../quests/balgassEntry';
 import { isTypingInField } from '../../../../../ecs/systems/keyboardInputSystem';
-import { playUiSound } from '../../../../../libs/sfx';
+import { playUiSound } from '../../../../../controllers/sound/sfx';
 import { MsgBoxFrame, msgBoxHeight } from '../../../../components/msgBoxFrame';
 import { MuButton } from '../../../../components/muButton';
 import { UI_STAGE_HEIGHT, UI_STAGE_WIDTH, useUiViewport } from '../../../../components/uiStage';

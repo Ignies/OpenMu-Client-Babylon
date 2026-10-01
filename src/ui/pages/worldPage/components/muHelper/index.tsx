@@ -5,14 +5,14 @@ import { runInAction } from 'mobx';
 import { t } from '../../../../../i18n';
 import { Store } from '../../../../../store';
 import { gameVersion } from '../../../../../version';
-import { isKey } from '../../../../../common/keyBindings';
+import { isKey } from '../../../../../controllers/interface/keyBindings';
 import { BaseClass, getBaseClass } from '../../../../../common/characterStats';
 import {
   skillDefinition,
   type SkillDefinition,
 } from '../../../../../common/skillsDatabase';
 import { skillDisplayName } from '../../../../../common/skillNames';
-import { uiClick } from '../../../../../libs/sfx';
+import { uiClick } from '../../../../../controllers/sound/sfx';
 import { useEventBus } from '../../../../../hooks/useEventBus';
 import { MuButton } from '../../../../components/muButton';
 import { MuSpriteFrame } from '../../../../components/muSprite';

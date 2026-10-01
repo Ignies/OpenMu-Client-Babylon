@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { t } from '../../../i18n';
 import { Store } from '../../../store';
-import { playUiSound } from '../../../libs/sfx';
+import { playUiSound } from '../../../controllers/sound/sfx';
 import { registerApiUrl } from '../../../common/serverServices';
 import {
   MAX_ACCOUNT_LENGTH,

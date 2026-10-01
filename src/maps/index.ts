@@ -1,6 +1,6 @@
 import { ENUM_WORLD } from '../core/types';
 import type { World } from '../ecs/world';
-import type { Emission } from '../common/effectParticles';
+import type { Emission } from '../controllers/fx/effectParticles';
 import type { MapLayer, Room, Spawn } from './layer';
 import { MAP_LAYERS } from './layers';
 

@@ -1,5 +1,5 @@
-import type { Emission } from '../../common/effectParticles';
-import type { LightEmitter } from '../../lighting/mapObjectLights';
+import type { Emission } from '../../controllers/fx/effectParticles';
+import type { LightEmitter } from '../../controllers/lighting/mapObjectLights';
 
 /**
  * Tarkan (World 9 / `Object9`), the plain-data half. Nothing in here may

@@ -17,11 +17,11 @@ import {
   type BonedEmission,
   type HeldLook,
   type HeldPoint,
-} from './effectParticles';
-import { effects } from '../effects';
-import { TICK, darkCardGain, lightCardGain } from '../effects/core';
-import { spawnModel } from '../effects/model';
-import { MODEL, TEX } from '../effects/recipes';
+} from '../controllers/fx/effectParticles';
+import { effects } from '../controllers/fx';
+import { TICK, darkCardGain, lightCardGain } from '../controllers/fx/core';
+import { spawnModel } from '../controllers/fx/model';
+import { MODEL, TEX } from '../controllers/fx/recipes';
 import {
   wingBone,
   wingLinkMatrix,

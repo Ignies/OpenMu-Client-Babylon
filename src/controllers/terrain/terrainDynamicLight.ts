@@ -6,7 +6,7 @@ import {
 } from '../render/babylon/exports';
 import { TERRAIN_SIZE } from './consts';
 import { TERRAIN_INDEX, TERRAIN_INDEX_REPEAT } from './utils';
-import { dynamicLightGain } from '../../common/lightingQuality';
+import { dynamicLightGain } from '../lighting/lightingQuality';
 
 export type TerrainLightColor = { r: number; g: number; b: number };
 

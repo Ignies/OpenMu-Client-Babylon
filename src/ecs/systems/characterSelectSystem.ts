@@ -21,7 +21,7 @@ import {
   characterSlotAngle,
   characterSlotPosition,
 } from '../../common/characterSelect';
-import { setSceneHold } from '../../common/sceneGate';
+import { setSceneHold } from '../../controllers/loading/sceneGate';
 import { createCharacterSelectBackdrop } from '../../common/characterSelectBackdrop';
 import { PlayerAction } from '../../common/objects/enum';
 import { genderedEmoteAction } from '../../common/emotes';
@@ -29,8 +29,8 @@ import { isRidingMount } from '../../common/pets';
 import {
   registerPointLightEmitter,
   type PointLightEmitter,
-} from '../../common/pointLightPool';
-import { PRIORITY_EFFECT } from '../../lighting/lightSource';
+} from '../../controllers/lighting/pointLightPool';
+import { PRIORITY_EFFECT } from '../../controllers/lighting/lightSource';
 import type { TerrainLightColor } from '../../controllers/terrain/terrainDynamicLight';
 
 type CircleVisual = {

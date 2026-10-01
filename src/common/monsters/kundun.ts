@@ -2,7 +2,7 @@ import type { Entity, World } from '../../ecs/world';
 import { loadGLTF } from '../../controllers/assets/modelLoader';
 import { MonsterObject } from '../monsterObject';
 import { MonsterActionType } from '../objects/enum';
-import { monsterPlaySpeed } from '../playSpeed';
+import { monsterPlaySpeed } from '../../controllers/anim/playSpeed';
 import { monsterModelFile, monsterScaleOf } from './monsterModelTable';
 
 // [NpcInfo(275, "Kundun")] - MODEL_ILLUSION_OF_KUNDUN at Scale 2.0 with the

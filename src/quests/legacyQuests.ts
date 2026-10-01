@@ -46,7 +46,7 @@ import {
 } from '../../versions/shared/packets/ServerToClientPackets';
 import type { CharacterClassNumber } from '../core/types';
 import { EventBus } from '../core/eventBus';
-import { playUiSound } from '../libs/sfx';
+import { playUiSound } from '../controllers/sound/sfx';
 import { showObjectEffect } from '../ecs/systems/objectEffectSystem';
 import { MAX_QUESTS, QuestActKind, type QuestDefinition } from '../controllers/assets/mu/questFiles';
 import { Store } from '../store';

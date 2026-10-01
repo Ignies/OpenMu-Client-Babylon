@@ -2,10 +2,10 @@ import { observable, runInAction } from 'mobx';
 import { Vector3 } from '../controllers/render/babylon/exports';
 import { ENUM_WORLD } from '../core/types';
 import { EventBus } from '../core/eventBus';
-import { playSfx } from '../libs/sfx';
+import { playSfx } from '../controllers/sound/sfx';
 import { Store } from '../store';
-import { effects } from '../effects';
-import { MODEL } from '../effects/recipes';
+import { effects } from '../controllers/fx';
+import { MODEL } from '../controllers/fx/recipes';
 import {
   KanturuEnterRequestPacket,
   KanturuInfoRequestPacket,
@@ -23,7 +23,7 @@ import {
   KanturuBattleResultBattleResultEnum as BattleResult,
   KanturuMayaWideAreaAttackAttackTypeEnum as MayaAttack,
 } from '../../versions/shared/packets/ServerToClientPackets';
-import type { Sounds } from '../sound/recipes';
+import type { Sounds } from '../controllers/sound/recipes';
 import { startGatewayTurn } from '../maps/kanturu2/gateway';
 import type { EventLayer } from './layer';
 import { EVENT_TEXT, formatText } from './recipes';

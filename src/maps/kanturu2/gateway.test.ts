@@ -9,7 +9,7 @@ import {
 } from 'vitest';
 import type { Sound } from '@babylonjs/core/Audio/sound';
 import { EventBus } from '../../core/eventBus';
-import { SoundsManager } from '../../libs/soundsManager';
+import { SoundsManager } from '../../controllers/sound/soundsManager';
 import { kanturu2Layer } from './index';
 import {
   GATEWAY_TURN_MS,

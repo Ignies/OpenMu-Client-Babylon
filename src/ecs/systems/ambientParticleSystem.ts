@@ -5,7 +5,7 @@ import {
   createAmbientSystem,
   type AmbientRecipe,
   type AmbientSystem,
-} from '../../common/ambientParticles';
+} from '../../controllers/fx/ambientParticles';
 import {
   ATLANS_BUBBLES,
   ATLANS_DRIFT,
@@ -20,9 +20,9 @@ import {
   SNOWFALL_MAPS,
   TAVERN_DUST,
   UNDERWATER_MAPS,
-} from '../../weather/ambientWeather';
+} from '../../controllers/weather/ambientWeather';
 import { maps } from '../../maps';
-import { ambientStrengthAt } from '../../weather/ambientSchedule';
+import { ambientStrengthAt } from '../../controllers/weather/ambientSchedule';
 import {
   DEVIAS_EAST_HEARTH_HOUSE,
   DEVIAS_READING_ROOM,
@@ -31,12 +31,12 @@ import {
   type Room,
 } from '../../maps/devias/rooms';
 import { serverNow } from '../../controllers/net/serverTime';
-import { lookDirector } from '../../lighting/director';
-import { roomMaskActive } from '../../scenes/roomMask';
-import { roomClipAvailable, setRoomWeatherClip } from '../../weather/roomClip';
+import { lookDirector } from '../../controllers/lighting/director';
+import { roomMaskActive } from '../../controllers/render/scenes/roomMask';
+import { roomClipAvailable, setRoomWeatherClip } from '../../controllers/weather/roomClip';
 import { Vector3 } from '../../controllers/render/babylon/exports';
 import { GameOptions } from '../../common/gameOptions';
-import { rainStrength, rainTarget } from '../../weather/rainState';
+import { rainStrength, rainTarget } from '../../controllers/weather/rainState';
 import type { ISystemFactory } from '../world';
 
 /**

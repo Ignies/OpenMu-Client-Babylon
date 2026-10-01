@@ -2,7 +2,7 @@ import './style.less';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Store } from '../../../store';
 import { useEventBus } from '../../../hooks/useEventBus';
-import { aimX, aimY } from '../../../camera';
+import { aimX, aimY } from '../../../controllers/camera';
 import { loadInterfaceSprite, type MuSprite } from '../../../controllers/assets/mu/sprites';
 import {
   CURSOR_FILES,

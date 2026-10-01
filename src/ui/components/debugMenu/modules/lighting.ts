@@ -10,7 +10,7 @@ import {
   setGameOption,
 } from '../../../../common/gameOptions';
 import { ENUM_WORLD } from '../../../../core/types';
-import { lookDirector, type LookState } from '../../../../lighting/director';
+import { lookDirector, type LookState } from '../../../../controllers/lighting/director';
 
 /**
  * Lighting: the director's `LookState` read live, plus the two image knobs

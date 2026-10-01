@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { useEffect, useRef } from 'react';
 import { Store } from '../../../store';
 import { isReservedName } from '../../../common/reservedNames';
-import { playUiSound } from '../../../libs/sfx';
+import { playUiSound } from '../../../controllers/sound/sfx';
 import { MuButton } from '../../components/muButton';
 import { MuSpriteFrame } from '../../components/muSprite';
 import { TEXT_COLOR } from '../serversPage/layout';

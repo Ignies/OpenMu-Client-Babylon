@@ -1,7 +1,7 @@
-import { createEffectLight, type EffectLight } from '../../common/effectLights';
+import { createEffectLight, type EffectLight } from '../../controllers/lighting/effectLights';
 import { MapTileObject } from '../../controllers/terrain/mapTileObject';
-import { lightMapObject } from '../../lighting/mapObjectLights';
-import type { LightSource } from '../../lighting/lightSource';
+import { lightMapObject } from '../../controllers/lighting/mapObjectLights';
+import type { LightSource } from '../../controllers/lighting/lightSource';
 import { Store } from '../../store';
 import type { Entity, World } from '../../ecs/world';
 import { findBone, type BoneNode } from './bones';

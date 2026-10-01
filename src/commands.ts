@@ -12,7 +12,7 @@ import {
   DuelStartRequestPacket,
   DuelStopRequestPacket,
 } from '../versions/shared/packets/ClientToServerPackets';
-import { playUiSound } from './libs/sfx';
+import { playUiSound } from './controllers/sound/sfx';
 import { isAttackablePlayer } from './ecs/systems/attackSystem';
 
 /**

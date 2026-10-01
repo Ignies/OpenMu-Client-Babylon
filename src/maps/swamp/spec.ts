@@ -1,5 +1,5 @@
-import type { Emission } from '../../common/effectParticles';
-import type { LightEmitter } from '../../lighting/mapObjectLights';
+import type { Emission } from '../../controllers/fx/effectParticles';
+import type { LightEmitter } from '../../controllers/lighting/mapObjectLights';
 
 /**
  * Swamp of Calmness (`WD_56MAP_SWAMP_OF_QUIET`, `World57`/`Object57`), the

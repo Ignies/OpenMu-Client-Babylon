@@ -4,9 +4,9 @@ import {
 } from '../../../common/gameOptions';
 import {
   LIGHTING_QUALITY_LABEL_KEYS,
-} from '../../../common/lightingQuality';
+} from '../../../controllers/lighting/lightingQuality';
 import { MATERIAL_QUALITY_LABEL_KEYS } from '../../../controllers/render/materialQuality';
-import { ITEM_EFFECT_MODE_LABEL_KEYS } from '../../../common/itemEffectMode';
+import { ITEM_EFFECT_MODE_LABEL_KEYS } from '../../../controllers/item_fx/itemEffectMode';
 import {
   OUTLINE_MODE_LABEL_KEYS,
   RENDERING_STYLES,

@@ -1,7 +1,7 @@
 import {
   CAMERA_FOV_MAX_DEG,
   CAMERA_FOV_MIN_DEG,
-} from '../../../camera/recipes';
+} from '../../../controllers/camera/recipes';
 import {
   BRIGHTNESS_MAX,
   BRIGHTNESS_MIN,
@@ -13,11 +13,11 @@ import {
 import {
   KEY_ACTION_LABEL_KEYS,
   type KeyAction,
-} from '../../../common/keyBindings';
+} from '../../../controllers/interface/keyBindings';
 import {
   ITEM_EFFECT_MODE_LABEL_KEYS,
   ITEM_EFFECT_MODE_MAX,
-} from '../../../common/itemEffectMode';
+} from '../../../controllers/item_fx/itemEffectMode';
 import {
   COMPARE_TOOLTIP_LABEL_KEYS,
   COMPARE_TOOLTIP_MAX,
@@ -27,7 +27,7 @@ import {
   LIGHTING_QUALITY_MAX,
   MSAA_MAX,
   MSAA_STEPS,
-} from '../../../common/lightingQuality';
+} from '../../../controllers/lighting/lightingQuality';
 import {
   ANISOTROPY_MAX,
   ANISOTROPY_STEPS,
@@ -60,7 +60,7 @@ import {
 } from '../../../controllers/render/renderScale';
 import { LOOT_ZEN_MAX, lootZenThreshold } from '../../../common/lootFilter';
 import { CHAT_EMOJI_SIZE_LABEL_KEYS, CHAT_EMOJI_SIZE_MAX } from '../../../common/chatEmojis';
-import { BUS_VOLUME_MAX } from '../../../sound/buses';
+import { BUS_VOLUME_MAX } from '../../../controllers/sound/buses';
 import {
   LOW_VITAL_MAX_PERCENT,
   LOW_VITAL_MIN_PERCENT,

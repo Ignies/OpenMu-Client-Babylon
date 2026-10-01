@@ -20,7 +20,7 @@ import {
   noteOff,
   noteOn,
   setPerformerPosition,
-} from '../../sound/instruments';
+} from '../../controllers/sound/instruments';
 import { MidiFileError, parseMidi, type MidiEvent, type ParsedMidi } from './midiFile';
 import { Sequencer, type BatchEvent } from './sequencer';
 import { Receiver, receiverDelay } from './receiver';

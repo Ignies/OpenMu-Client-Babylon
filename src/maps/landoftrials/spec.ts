@@ -1,5 +1,5 @@
-import type { Emission } from '../../common/effectParticles';
-import type { LightEmitter } from '../../lighting/mapObjectLights';
+import type { Emission } from '../../controllers/fx/effectParticles';
+import type { LightEmitter } from '../../controllers/lighting/mapObjectLights';
 
 /**
  * Land of Trials (`WD_31HUNTING_GROUND`, `World32`/`Object32`), the plain-data

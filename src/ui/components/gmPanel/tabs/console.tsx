@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react-lite';
 import { t } from '../../../../i18n';
 import { GmPanel } from '../../../../gmPanel';
-import { uiClick } from '../../../../libs/sfx';
+import { uiClick } from '../../../../controllers/sound/sfx';
 import { CommandCard } from '../commandForm';
 
 /** A raw line, and every command in the catalogue, searchable. */

@@ -3,7 +3,7 @@ import { ISystemFactory } from '../world';
 import { toRenderAngles } from '../../controllers/render/renderAngles';
 import { publishViewPlanes } from '../../controllers/render/viewPlanes';
 import { ENUM_WORLD } from '../../core/types';
-import { weather } from '../../weather';
+import { weather } from '../../controllers/weather';
 import { debuffBodyLight, debuffBrightBody } from '../../common/debuffBody';
 import { outlawBodyLight } from '../../common/nameTags';
 import {

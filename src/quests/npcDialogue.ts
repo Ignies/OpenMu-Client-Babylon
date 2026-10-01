@@ -29,7 +29,7 @@ import { AvailableQuestsPacket, QuestStepInfoPacket } from '../../versions/share
 import type { ENUM_WORLD } from '../core/types';
 import { monsterDisplayName } from '../common/monstersDatabase';
 import { EventBus } from '../core/eventBus';
-import { playUiSound } from '../libs/sfx';
+import { playUiSound } from '../controllers/sound/sfx';
 import { Store } from '../store';
 import type { QuestLayer } from './layer';
 import {

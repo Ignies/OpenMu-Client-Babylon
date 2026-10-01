@@ -6,7 +6,7 @@ import { ChatRooms, type ChatRoom } from '../../../../../chatRooms';
 import { Messenger } from '../../../../../messenger';
 import { isFriendOnline } from '../../../../../common/messenger';
 import { Store } from '../../../../../store';
-import { uiClick } from '../../../../../libs/sfx';
+import { uiClick } from '../../../../../controllers/sound/sfx';
 import { useWindowChrome } from '../../../../components/muWindow/useWindowChrome';
 import { EmojiText } from '../../../../components/emojiText';
 

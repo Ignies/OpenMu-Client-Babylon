@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { uiClick } from '../../../libs/sfx';
+import { uiClick } from '../../../controllers/sound/sfx';
 import { t } from '../../../i18n';
 import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH } from '../../../consts';
 import {

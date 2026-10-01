@@ -1,5 +1,5 @@
 import { MapTileObject } from '../../controllers/terrain/mapTileObject';
-import { spawnParticle } from '../../common/effectParticles';
+import { spawnParticle } from '../../controllers/fx/effectParticles';
 import type { Scene } from '../../controllers/render/babylon/exports';
 import type { Entity, World } from '../../ecs/world';
 

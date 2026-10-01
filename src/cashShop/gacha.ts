@@ -1,4 +1,4 @@
-import type { UiSound } from '../libs/sfx';
+import type { UiSound } from '../controllers/sound/sfx';
 
 /**
  * The drop: every number the gacha reveal is tuned by, in one place.

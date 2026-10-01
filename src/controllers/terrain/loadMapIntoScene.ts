@@ -24,22 +24,22 @@ import {
   propBatchingActive,
   propTypeCarriesLight,
 } from '../render/propBatches';
-import { LightCarrier } from '../../common/lightCarrier';
+import { LightCarrier } from '../lighting/lightCarrier';
 import { IVector3Like } from '../render/babylon/exports';
 import { EventBus } from '../../core/eventBus';
 import { DISABLE_OBJECTS_LOADING } from '../../consts';
-import { sound } from '../../sound';
+import { sound } from '../sound';
 import { evictWorldMinimaps, prefetchWorldMinimap } from './minimap';
-import { weather } from '../../weather';
+import { weather } from '../weather';
 import { events } from '../../events';
-import { lighting } from '../../lighting';
+import { lighting } from '../lighting';
 import { quests } from '../../quests';
-import { effects } from '../../effects';
+import { effects } from '../fx';
 import { skills } from '../../skills';
 import { combat } from '../../combat';
 import { resetTerrainMask } from './terrainMask';
 import { setShadowWorld } from '../render/objectShadow';
-import { lookDirector } from '../../lighting/director';
+import { lookDirector } from '../lighting/director';
 
 /** Bumped per warp request; a load whose serial is stale abandons its work. */
 let warpSerial = 0;

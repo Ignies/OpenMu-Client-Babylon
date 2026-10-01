@@ -1,10 +1,10 @@
 import type { Entity, World } from '../../ecs/world';
 import { Vector3 } from '../../controllers/render/babylon/exports';
-import { effects } from '../../effects';
-import { TEX } from '../../effects/recipes';
+import { effects } from '../../controllers/fx';
+import { TEX } from '../../controllers/fx/recipes';
 import { loadGLTF } from '../../controllers/assets/modelLoader';
 import { ModelObject } from '../../controllers/render/modelObject';
-import { TerrainDecal } from '../moveTargetEffect';
+import { TerrainDecal } from '../../controllers/fx/moveTargetEffect';
 import { npcModelFile } from './npcModelTable';
 
 /**

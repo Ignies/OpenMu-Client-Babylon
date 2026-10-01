@@ -1,4 +1,4 @@
-import { playUiSound } from '../../../libs/sfx';
+import { playUiSound } from '../../../controllers/sound/sfx';
 import './style.less';
 import { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
@@ -24,7 +24,7 @@ import {
   setCapturingKey,
   setKeyBinding,
   type KeyAction,
-} from '../../../common/keyBindings';
+} from '../../../controllers/interface/keyBindings';
 import { SessionExit, type ExitKind } from '../../../common/sessionExit';
 import { t, type TextKey } from '../../../i18n';
 import { EN_TEXT } from '../../../i18n/recipes';

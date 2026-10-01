@@ -18,8 +18,8 @@ import {
   questItemLink,
   RIGHT_HAND_BONE,
 } from './weaponAttachment';
-import { itemVisualTier, type ItemVisualTier } from './itemVisualTier';
-import { requestGlowProbe } from '../scenes/sceneLook';
+import { itemVisualTier, type ItemVisualTier } from '../controllers/item_fx/itemVisualTier';
+import { requestGlowProbe } from '../controllers/render/scenes/sceneLook';
 import { WingObject } from './wingObject';
 import { WING_BONE, wingSpec } from './wings';
 import { ItemsDatabase } from './itemsDatabase';
@@ -29,8 +29,8 @@ import { angleLinkMatrix } from '../controllers/render/boneLink';
 import { chooseIdleAction, isPhoenixSoulStar } from './weaponClass';
 import { getBaseClass } from './characterStats';
 import { isFemaleClass } from './mapPlayerNetClassToModelClass';
-import { playerPlaySpeed } from './playSpeed';
-import type { ShatterDeath } from './deathVisuals';
+import { playerPlaySpeed } from '../controllers/anim/playSpeed';
+import type { ShatterDeath } from '../controllers/fx/deathVisuals';
 
 export class PlayerObject extends ModelObject {
   /**

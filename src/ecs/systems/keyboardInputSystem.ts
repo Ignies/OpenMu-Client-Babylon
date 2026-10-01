@@ -4,7 +4,7 @@ import {
   isCapturingKey,
   isKey,
   WALK_KEY_CODES,
-} from '../../common/keyBindings';
+} from '../../controllers/interface/keyBindings';
 import { GameOptions } from '../../common/gameOptions';
 import { ITEM_HOTKEY_CODES } from '../../common/itemHotkeys';
 import { MuWindows } from '../../ui/components/muWindow/windowState';

@@ -1,7 +1,7 @@
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { Store, UIState } from '../../../../../store';
-import { useIsMobile } from '../../../../../common/mobile';
+import { useIsMobile } from '../../../../../controllers/interface/mobile';
 import { MoveButton } from './moveButton';
 import { MenuCluster } from './menuCluster';
 import { SkillPad } from './skillPad';

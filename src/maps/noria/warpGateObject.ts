@@ -1,4 +1,4 @@
-import { ParticleEmitter } from '../../common/effectParticles';
+import { ParticleEmitter } from '../../controllers/fx/effectParticles';
 import { loadGLTF } from '../../controllers/assets/modelLoader';
 import { ModelObject } from '../../controllers/render/modelObject';
 import { Rand } from '../../core/rand';

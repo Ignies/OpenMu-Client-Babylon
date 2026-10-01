@@ -1,10 +1,10 @@
 import {
   BonedParticleEmitter,
   type BonedEmission,
-} from '../../common/effectParticles';
+} from '../../controllers/fx/effectParticles';
 import { MapTileObject } from '../../controllers/terrain/mapTileObject';
-import { lightMapObject } from '../../lighting/mapObjectLights';
-import type { LightSource } from '../../lighting/lightSource';
+import { lightMapObject } from '../../controllers/lighting/mapObjectLights';
+import type { LightSource } from '../../controllers/lighting/lightSource';
 import { Store } from '../../store';
 import type { Entity, World } from '../../ecs/world';
 import { findBone } from './bones';

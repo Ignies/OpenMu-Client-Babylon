@@ -1,8 +1,8 @@
 import {
   BonedParticleEmitter,
   type BonedEmission,
-} from '../../common/effectParticles';
-import { createMovableFlare, type MovableFlare } from '../../common/effectLights';
+} from '../../controllers/fx/effectParticles';
+import { createMovableFlare, type MovableFlare } from '../../controllers/lighting/effectLights';
 import { MapTileObject } from '../../controllers/terrain/mapTileObject';
 import type { TransformNode } from '../../controllers/render/babylon/exports';
 import type { Entity, World } from '../../ecs/world';

@@ -12,7 +12,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { uiClick } from '../../../libs/sfx';
+import { uiClick } from '../../../controllers/sound/sfx';
 import { i18n, t } from '../../../i18n';
 import { MuFlag } from '../muFlag';
 

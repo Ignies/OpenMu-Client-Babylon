@@ -1,6 +1,6 @@
 import { Texture, type AbstractMesh } from './babylon/exports';
 import { GameOptions } from '../../common/gameOptions';
-import { lightingTier } from '../../common/lightingQuality';
+import { lightingTier } from '../lighting/lightingQuality';
 import type { TextKey } from '../../i18n';
 
 /**

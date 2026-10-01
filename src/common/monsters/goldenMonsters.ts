@@ -1,7 +1,7 @@
 import type { Entity, World } from '../../ecs/world';
-import { effects } from '../../effects';
-import { bonePos, tmpA } from '../../effects/core';
-import { FLAME_TONGUES } from '../../effects/recipes';
+import { effects } from '../../controllers/fx';
+import { bonePos, tmpA } from '../../controllers/fx/core';
+import { FLAME_TONGUES } from '../../controllers/fx/recipes';
 import { loadGLTF } from '../../controllers/assets/modelLoader';
 import { MonsterObject } from '../monsterObject';
 import { MonsterActionType } from '../objects/enum';

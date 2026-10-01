@@ -12,11 +12,11 @@ import {
 import { ServerList } from '../../../common/serverList';
 import { loadVersionUi, versionTags, versionUi } from '../../../version';
 import type { PregameBackdrop } from '../../../version/uiContract';
-import { uiClick } from '../../../libs/sfx';
-import { COMBAT_BUS, playSfx, sound, type Sounds } from '../../../sound';
-import { SoundsManager } from '../../../libs/soundsManager';
+import { uiClick } from '../../../controllers/sound/sfx';
+import { COMBAT_BUS, playSfx, sound, type Sounds } from '../../../controllers/sound';
+import { SoundsManager } from '../../../controllers/sound/soundsManager';
 import { setSceneCovered } from '../../../controllers/render/sceneCover';
-import { pregameLoad } from '../../../common/pregameLoad';
+import { pregameLoad } from '../../../controllers/loading/pregameLoad';
 import { MuFlag } from '../../components/muFlag';
 import { Backdrop } from './backdrop';
 import { Button, Icon, Select, type IconName } from './controls';

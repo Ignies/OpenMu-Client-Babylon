@@ -8,7 +8,7 @@
  *
  * Ids are OpenMU's MagicEffectNumber, the original's `eBuffState`.
  */
-import type { RGB } from '../effects/core';
+import type { RGB } from '../controllers/fx/core';
 
 /** eDeBuff_Freeze (Ice, the Chilling / Ice Storm slow). */
 const FREEZE = 56;

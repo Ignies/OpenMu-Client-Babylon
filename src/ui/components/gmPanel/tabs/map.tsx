@@ -7,7 +7,7 @@ import type { WorldView } from '../../../../gmWorld';
 import { className, type TrackedPlayer } from '../../../../controllers/net/protocols/adminProtocol';
 import { GM_MAPS, mapName } from '../../../../common/gmMaps';
 import { gmCommand } from '../../../../common/gmCommands';
-import { uiClick } from '../../../../libs/sfx';
+import { uiClick } from '../../../../controllers/sound/sfx';
 import { MapView } from '../mapView';
 import { TileMenu } from '../tileMenu';
 import { PlayerMenu } from '../playerMenu';

@@ -7,7 +7,7 @@ import { PlayerAction } from './objects/enum';
 import {
   improvedItemEffectsOn,
   legacyItemEffectsOn,
-} from './itemEffectMode';
+} from '../controllers/item_fx/itemEffectMode';
 
 /**
  * `c->Helper` - the pet / mount slot of the appearance (group 13, indices

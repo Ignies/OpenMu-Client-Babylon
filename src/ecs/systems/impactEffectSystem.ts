@@ -1,6 +1,6 @@
 import type { ISystemFactory } from '../world';
 import { EventBus } from '../../core/eventBus';
-import { spawnHitImpact } from '../../common/impactVisuals';
+import { spawnHitImpact } from '../../controllers/fx/impactVisuals';
 
 /**
  * Hit impacts: the **consumer** that turns the `ObjectHit` packet into

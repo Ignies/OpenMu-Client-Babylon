@@ -4,11 +4,11 @@ import {
   setItemGlowClock,
   strongestTierOf,
   type ItemVisualTier,
-} from '../../common/itemVisualTier';
+} from '../../controllers/item_fx/itemVisualTier';
 import {
   improvedItemEffectsOn,
   itemEffectSignature,
-} from '../../common/itemEffectMode';
+} from '../../controllers/item_fx/itemEffectMode';
 import type { PlayerObject } from '../../common/playerObject';
 import type { ModelObject } from '../../controllers/render/modelObject';
 import {
@@ -16,16 +16,16 @@ import {
   type ItemAura,
   type ItemAuraKind,
   type ItemAuraSlot,
-} from '../../effects/itemAura';
-import { createItemCrackle, type ItemCrackle } from '../../effects/itemCrackle';
-import type { ItemSparkleKind } from '../../effects/itemSparkle';
-import { effects, type EffectHandle } from '../../effects';
-import { bonePos, entityGone, entityPos, entityYaw, followEntity, tmpA } from '../../effects/core';
+} from '../../controllers/fx/itemAura';
+import { createItemCrackle, type ItemCrackle } from '../../controllers/fx/itemCrackle';
+import type { ItemSparkleKind } from '../../controllers/fx/itemSparkle';
+import { effects, type EffectHandle } from '../../controllers/fx';
+import { bonePos, entityGone, entityPos, entityYaw, followEntity, tmpA } from '../../controllers/fx/core';
 import type { Vector3 } from '../../controllers/render/babylon/exports';
-import { requestGlowProbe } from '../../scenes/sceneLook';
+import { requestGlowProbe } from '../../controllers/render/scenes/sceneLook';
 import { EventBus } from '../../core/eventBus';
-import { itemSelfLight, lightItem, type ItemLampKind } from '../../lighting/items';
-import type { LightSource } from '../../lighting/lightSource';
+import { itemSelfLight, lightItem, type ItemLampKind } from '../../controllers/lighting/items';
+import type { LightSource } from '../../controllers/lighting/lightSource';
 
 /**
  * Item glow.

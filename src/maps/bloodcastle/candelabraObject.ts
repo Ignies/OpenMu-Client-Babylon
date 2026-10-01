@@ -1,10 +1,10 @@
 import {
   createMovableFlare,
   type MovableFlare,
-} from '../../common/effectLights';
+} from '../../controllers/lighting/effectLights';
 import { MapTileObject } from '../../controllers/terrain/mapTileObject';
-import { lightMapObjectWith } from '../../lighting/mapObjectLights';
-import { PRIORITY_TORCH, type LightSource } from '../../lighting/lightSource';
+import { lightMapObjectWith } from '../../controllers/lighting/mapObjectLights';
+import { PRIORITY_TORCH, type LightSource } from '../../controllers/lighting/lightSource';
 import { Store } from '../../store';
 import type { Entity, World } from '../../ecs/world';
 import { findBone, bonePosed, type BoneNode } from './bones';

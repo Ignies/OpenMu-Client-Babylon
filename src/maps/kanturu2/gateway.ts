@@ -1,8 +1,8 @@
 import type { Sound } from '@babylonjs/core/Audio/sound';
 import type { Item } from '../../ecs/world';
 import { EventBus } from '../../core/eventBus';
-import { SoundsManager } from '../../libs/soundsManager';
-import type { Sounds } from '../../sound/recipes';
+import { SoundsManager } from '../../controllers/sound/soundsManager';
+import type { Sounds } from '../../controllers/sound/recipes';
 import {
   DARK_HORSE,
   HORN_OF_DINORANT,

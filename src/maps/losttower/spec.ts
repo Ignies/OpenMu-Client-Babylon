@@ -1,5 +1,5 @@
-import type { LightEmitter } from '../../lighting/mapObjectLights';
-import type { Emission } from '../../common/effectParticles';
+import type { LightEmitter } from '../../controllers/lighting/mapObjectLights';
+import type { Emission } from '../../controllers/fx/effectParticles';
 
 /**
  * Lost Tower (WD_4LOSTTOWER, world 4, `Object5`/`World5`). Object5 ships 40

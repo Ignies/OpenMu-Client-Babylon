@@ -5,7 +5,7 @@ import { t, type TextKey } from '../../../../../i18n';
 import { Commands } from '../../../../../commands';
 import { GameOptions, uiScaleFactor } from '../../../../../common/gameOptions';
 import type { CommandKind } from '../../../../../common/chatCommands';
-import { playUiSound, uiClick } from '../../../../../libs/sfx';
+import { playUiSound, uiClick } from '../../../../../controllers/sound/sfx';
 import { MuSpriteFrame, useMuSprite } from '../../../../components/muSprite';
 import { MuText } from '../../../../components/muText';
 import { useWindowStackEntry } from '../../../../components/muWindow/useWindowChrome';

@@ -12,7 +12,7 @@ import { observer } from 'mobx-react-lite';
 import { useEffect, useState } from 'react';
 import { runInAction } from 'mobx';
 import { t } from '../../../../src/i18n';
-import { uiClick } from '../../../../src/libs/sfx';
+import { uiClick } from '../../../../src/controllers/sound/sfx';
 import { Store } from '../../../../src/store';
 import { useEventBus } from '../../../../src/hooks/useEventBus';
 import {

@@ -1,4 +1,4 @@
-import type { Emission } from '../../common/effectParticles';
+import type { Emission } from '../../controllers/fx/effectParticles';
 
 /**
  * Doppelganger 3 (`WD_67DOPPLEGANGER3`, `World68`/`Object68`), the plain-data

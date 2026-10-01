@@ -22,7 +22,7 @@ import {
   LetterSendRequestPacket,
   SetFriendOnlineStatePacket,
 } from '../versions/shared/packets/ClientToServerPackets';
-import { playUiSound } from './libs/sfx';
+import { playUiSound } from './controllers/sound/sfx';
 
 export type MessengerTab = 'friends' | 'letters' | 'rooms';
 

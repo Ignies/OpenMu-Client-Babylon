@@ -1,5 +1,5 @@
-import type { Emission } from '../../common/effectParticles';
-import type { LightEmitter } from '../../lighting/mapObjectLights';
+import type { Emission } from '../../controllers/fx/effectParticles';
+import type { LightEmitter } from '../../controllers/lighting/mapObjectLights';
 
 /**
  * Crywolf Fortress (`WD_34CRYWOLF_1ST`, `World35`/`Object35`), the plain-data

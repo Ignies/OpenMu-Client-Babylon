@@ -1,5 +1,5 @@
 import { EventBus } from '../../core/eventBus';
-import { isKey } from '../../common/keyBindings';
+import { isKey } from '../../controllers/interface/keyBindings';
 import { isAttackableEntity } from './attackSystem';
 import type { Entity, ISystemFactory } from '../world';
 

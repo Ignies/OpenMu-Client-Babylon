@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Store } from '../../../store';
 import { useEventBus } from '../../../hooks/useEventBus';
-import { uiClick } from '../../../libs/sfx';
+import { uiClick } from '../../../controllers/sound/sfx';
 import { MuSpriteFrame } from '../muSprite';
 import { MuButton } from '../muButton';
 import { MuResizeGrip, useWindowChrome } from '../muWindow/useWindowChrome';

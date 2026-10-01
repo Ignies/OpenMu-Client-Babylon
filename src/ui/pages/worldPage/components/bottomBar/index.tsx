@@ -1,4 +1,4 @@
-import { uiClick } from '../../../../../libs/sfx';
+import { uiClick } from '../../../../../controllers/sound/sfx';
 import { t } from '../../../../../i18n';
 import './style.less';
 import { observer } from 'mobx-react-lite';
@@ -22,7 +22,7 @@ import {
   MAIN_FRAME_BUTTON_HEIGHT,
   MAIN_FRAME_BUTTON_WIDTH,
 } from './mainFrameButtons';
-import { isKey } from '../../../../../common/keyBindings';
+import { isKey } from '../../../../../controllers/interface/keyBindings';
 import { BOTTOM_BAR_ID } from '../../../../components/muWindow';
 import { skillDefinition } from '../../../../../common/skillsDatabase';
 import {

@@ -1,0 +1,1188 @@
+import { TILE_CM } from '../terrain/consts';
+import {
+  Color4,
+  Constants,
+  Sprite,
+  SpriteManager,
+  type Scene,
+} from '../render/babylon/exports';
+import { downloadDataFile, hasDataFile } from '../assets/mu/dataFolder';
+import { maps } from '../../maps';
+import { EFFECT_RENDERING_GROUP, darkCardGain, keepDepthForEffects, spriteLevel } from './core';
+import { devQuery, devQueryNumber } from '../../core/devSeams';
+import { viewDepth } from '../render/viewPlanes';
+
+const TICKS_PER_SECOND = 25;
+
+/** Dev seam: `?emitterGate=0` lets every emitter spawn whether in view or not. */
+const EMITTER_GATE = devQuery('emitterGate') !== '0';
+
+
+const OZJ_HEADER_SIZE = 24;
+
+const POOL_SIZE = 2048;
+
+type TextureKey =
+  | 'smoke'
+  | 'cloud'
+  | 'fire01'
+  | 'fire03'
+  | 'fireHik1'
+  | 'fireHik2'
+  | 'fireHik3'
+  | 'fireHik3Mono'
+  | 'waterfall5'
+  | 'spark03'
+  | 'flareBlue'
+  | 'fantaB'
+  | 'clud64'
+  | 'flare01';
+
+const TEXTURES: Record<
+  TextureKey,
+  { file: string; size: number; frames?: number }
+> = {
+  smoke: { file: 'Effect/smoke01.OZJ', size: 64 },
+  cloud: { file: 'Effect/clouds.OZJ', size: 256 },
+  fire01: { file: 'Effect/Fire01.OZJ', size: 64, frames: 4 },
+  fire03: { file: 'Effect/Fire03.OZJ', size: 64, frames: 4 },
+  fireHik1: { file: 'Effect/firehik01.OZJ', size: 64 },
+  fireHik2: { file: 'Effect/firehik02.OZJ', size: 64 },
+  fireHik3: { file: 'Effect/firehik03.OZJ', size: 64 },
+  fireHik3Mono: { file: 'Effect/firehik_mono03.OZJ', size: 64 },
+  waterfall5: { file: 'Effect/waterFall5.OZJ', size: 64 },
+  spark03: { file: 'Effect/Spark03.OZJ', size: 32 },
+  flareBlue: { file: 'Effect/flareBlue.OZJ', size: 64 },
+  fantaB: { file: 'Effect/fantaB.OZJ', size: 64 },
+  clud64: { file: 'Effect/clud64.OZJ', size: 64 },
+  flare01: { file: 'Effect/flare01.OZJ', size: 64 },
+};
+
+/**
+ * `dark` is a held sprite's `EnableAlphaBlendMinus`: black, with the sheet's
+ * luminance as its coverage (`coverageSheet`), the rule the effects draw dark
+ * art by (effects/core `darkCardGain`).
+ */
+type Blend = 'add' | 'subtract' | 'dark';
+
+type Particle = {
+  live: boolean;
+  kind: ParticleKind;
+  sprite: Sprite;
+  lifeTime: number;
+  scale: number;
+  alpha: number;
+  gravity: number;
+  rotation: number;
+  px: number;
+  py: number;
+  pz: number;
+  vx: number;
+  vy: number;
+  vz: number;
+  angleZ: number;
+  lr: number;
+  lg: number;
+  lb: number;
+  tr: number;
+  tg: number;
+  tb: number;
+  pixelSize: number;
+  frame: number;
+  frames: number;
+};
+
+type ParticleKind = {
+  readonly texture: TextureKey;
+  readonly blend: Blend;
+  init(p: Particle, scale: number, light: readonly [number, number, number]): void;
+  update(p: Particle, f: number, worldTimeMs: number): void;
+  color(p: Particle, out: Color4): void;
+};
+
+const rand = (n: number) => Math.floor(Math.random() * n);
+
+const WHITE: readonly [number, number, number] = [1, 1, 1];
+
+const plainColor = (p: Particle, out: Color4) => out.set(p.lr, p.lg, p.lb, 1);
+
+function fireKind(
+  texture: TextureKey,
+  opts: {
+    lifeBase: number;
+    lifeRand: number;
+    fadeBelow: number;
+    gravityBase: number;
+    shrinkBase: number;
+    shrinkRand: number;
+    scaleBase?: number;
+    gravityRand?: number;
+  }
+): ParticleKind {
+  return {
+    texture,
+    blend: 'add',
+    init(p, scale, light) {
+      p.lifeTime = rand(5) + opts.lifeBase;
+      p.scale = (rand(72) + (opts.scaleBase ?? 72)) * 0.01 * scale;
+      p.rotation = rand(360);
+      p.gravity = (rand(opts.gravityRand ?? 24) + opts.gravityBase) * 0.1;
+      p.alpha = 0;
+
+      [p.tr, p.tg, p.tb] = light;
+      p.lr = p.lg = p.lb = 0;
+    },
+    update(p, f) {
+      if (p.lifeTime < opts.fadeBelow) {
+        p.alpha -= f * 0.2;
+
+        // Only a particle on its way out is cut here. The ramp below starts
+        // at 0 and climbs by a frame-scaled step, so testing it against a
+        // fixed floor killed every particle whose first frame was shorter
+        // than the original's tick: half of them at 60 Hz (the step lands on
+        // 0.083 or 0.125), all of them past 120, which left a torch with
+        // nothing but its flare card.
+        if (p.alpha < 0.1) {
+          p.live = false;
+          return;
+        }
+      } else if (p.alpha < 1) {
+        p.alpha += f * (rand(2) + 2) * 0.1;
+      } else {
+        p.alpha = 1;
+      }
+
+      p.lr = p.tr * p.alpha;
+      p.lg = p.tg * p.alpha;
+      p.lb = p.tb * p.alpha;
+
+      if (p.scale > 0) {
+        p.scale -= f * (rand(opts.shrinkRand) + opts.shrinkBase) * 0.01;
+      } else {
+        p.live = false;
+        return;
+      }
+
+      p.pz += p.gravity * f;
+      p.rotation += 3 * f;
+    },
+    color: plainColor,
+  };
+}
+
+function stripFireKind(texture: TextureKey): ParticleKind {
+  return {
+    texture,
+    blend: 'add',
+    init(p, scale, light) {
+      p.lifeTime = 24;
+
+      p.vz = (rand(16) + 32) * 0.1;
+
+      p.scale = (rand(64) + 128) * 0.01 * scale;
+      p.rotation = 0;
+
+      [p.tr, p.tg, p.tb] = light;
+    },
+    update(p, fps) {
+      p.gravity += 0.004 * fps;
+      p.scale -= 0.04 * fps;
+      p.frame = Math.floor((23 - p.lifeTime) / 6);
+      p.pz += p.gravity * 10 * fps;
+
+      const luminosity = p.lifeTime / 24;
+
+      p.lr = p.tr * luminosity;
+      p.lg = p.tg * luminosity;
+      p.lb = p.tb * luminosity;
+    },
+    color: plainColor,
+  };
+}
+
+const KINDS = {
+  fire1: fireKind('fireHik1', {
+    lifeBase: 27,
+    lifeRand: 5,
+    fadeBelow: 15,
+    gravityBase: 64,
+    shrinkBase: 5,
+    shrinkRand: 3,
+  }),
+
+  fire3: fireKind('fireHik3', {
+    lifeBase: 17,
+    lifeRand: 5,
+    fadeBelow: 10,
+    gravityBase: 64,
+    shrinkBase: 7,
+    shrinkRand: 3,
+  }),
+
+  // `BITMAP_FIRE_CURSEDLICH` SubType 4, the one every torch asks for
+  // (ZzzEffectParticle.cpp:317-326). SubType 6 is the only one that leans -
+  // `Velocity = (2.5 + r, -5 - r, 0)` - and no torch spawns it, so a fire2
+  // that carried it drew a second plume next to the flame.
+  fire2: fireKind('fireHik2', {
+    lifeBase: 12,
+    lifeRand: 5,
+    fadeBelow: 10,
+    gravityBase: 64,
+    shrinkBase: 6,
+    shrinkRand: 3,
+  }),
+
+  fire157: fireKind('fireHik3Mono', {
+    lifeBase: 17,
+    lifeRand: 5,
+    fadeBelow: 10,
+    gravityBase: 44,
+    gravityRand: 14,
+    scaleBase: 52,
+    shrinkBase: 7,
+    shrinkRand: 3,
+  }),
+
+  ember: {
+    texture: 'spark03',
+    blend: 'add',
+    init(p, scale, light) {
+      p.lifeTime = rand(12) + 20;
+      p.scale = (rand(60) + 90) * 0.01 * scale;
+      p.rotation = rand(360);
+      p.alpha = 1;
+
+      p.gravity = (rand(12) + 10) * 0.1;
+
+      const a = Math.random() * Math.PI * 2;
+      const r = Math.random() * 0.5;
+
+      p.angleZ = 0;
+      p.vx = Math.cos(a) * r;
+      p.vy = Math.sin(a) * r;
+      p.vz = 0;
+
+      [p.tr, p.tg, p.tb] = light;
+    },
+    update(p, f) {
+      p.gravity += 0.03 * f;
+      p.pz += p.gravity * f;
+
+      p.rotation += 5 * f;
+      p.scale -= 0.004 * f;
+
+      const t = Math.max(0, Math.min(1, p.lifeTime / 26));
+
+      const flicker = 0.75 + Math.random() * 0.25;
+
+      p.lr = p.tr * t * flicker;
+      p.lg = p.tg * t * t * flicker;
+      p.lb = p.tb * t * t * t * flicker;
+    },
+    color: plainColor,
+  },
+
+  fire0: stripFireKind('fire01'),
+
+  fire0b: stripFireKind('fire03'),
+
+  /**
+   * The elf lamps' blue flame (`BITMAP_TRUE_BLUE`, GMNewTown.cpp:283-289):
+   * the login braziers' fire burning the original's blue sheet instead of
+   * an orange one. Tinting a firehik sheet blue only makes it muddy - the
+   * colour has to come from the texture.
+   */
+  fireBlue: fireKind('fantaB', {
+    lifeBase: 17,
+    lifeRand: 5,
+    fadeBelow: 10,
+    gravityBase: 20,
+    gravityRand: 16,
+    shrinkBase: 7,
+    shrinkRand: 3,
+  }),
+
+  smoke0: {
+    texture: 'smoke',
+    blend: 'add',
+    init(p) {
+      p.lifeTime = 16;
+      p.scale = (rand(32) + 48) * 0.01;
+      p.rotation = rand(360);
+    },
+    update(p, fps) {
+      const luminosity = p.lifeTime / 8;
+
+      p.lr = p.lg = p.lb = luminosity;
+
+      p.gravity += 0.2 * fps;
+      p.pz += p.gravity * fps;
+      p.scale += fps * 0.05;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
+
+  smoke2: {
+    texture: 'smoke',
+    blend: 'subtract',
+    init(p) {
+      p.lifeTime = 50;
+      p.scale = (rand(64) + 64) * 0.01;
+      p.rotation = rand(360);
+      p.gravity = (rand(32) + 60) * 0.1;
+    },
+    update(p, fps) {
+      const luminosity = p.lifeTime / 50;
+
+      p.lr = p.lg = p.lb = luminosity;
+
+      p.gravity -= 0.1 * fps;
+      p.px -= p.gravity * 0.2 * fps;
+      p.pz += p.gravity * fps;
+      p.scale -= fps * 0.01;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
+
+  smoke65: {
+    texture: 'smoke',
+    blend: 'add',
+    init(p, scale) {
+      p.lifeTime = 45;
+      p.scale = scale * (rand(64) + 64) * 0.005;
+      p.rotation = rand(360);
+      p.gravity = (rand(10) + 18) * 0.1;
+    },
+    update(p, f, worldTimeMs) {
+      const luminosity = p.lifeTime / 40;
+
+      p.lr = p.lg = p.lb = luminosity * 0.4;
+
+      p.gravity -= 0.05 * f;
+      p.px += p.gravity * Math.sin(worldTimeMs) * 0.05 * f;
+      p.pz += p.gravity * f;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
+
+  cloud21: {
+    texture: 'cloud',
+    blend: 'add',
+    init(p, scale, light) {
+      p.lifeTime = 100;
+      p.gravity = rand(1000);
+      p.alpha = 0.6;
+
+      p.px += rand(200) - 100;
+      p.py += rand(200) - 100;
+      p.pz += rand(20) - 20;
+
+      p.scale = (rand(20) + 180) * 0.01 * scale;
+      [p.lr, p.lg, p.lb] = light;
+    },
+    update(p, f) {
+      if (p.lifeTime <= 0) {
+        p.live = false;
+      } else if (p.lifeTime > 50) {
+        if (p.alpha < 1) p.alpha += f * 0.04;
+        p.pz += 2 * f;
+      } else {
+        if (p.alpha > 0.1) p.alpha -= f * 0.005;
+        p.pz -= 1 * f;
+      }
+    },
+    color: (p, out) =>
+      out.set(p.lr * p.alpha, p.lg * p.alpha, p.lb * p.alpha, 1),
+  } satisfies ParticleKind,
+
+  smoke21: {
+    texture: 'smoke',
+    blend: 'subtract',
+    init(p, scale) {
+      p.lifeTime = 80;
+      p.scale = scale * (rand(64) + 64) * 0.005;
+      p.rotation = rand(360);
+      p.gravity = (rand(32) + 60) * 0.1;
+    },
+    update(p, f) {
+      const lum = p.lifeTime / 50;
+      p.lr = p.lg = p.lb = lum;
+
+      p.gravity -= 0.1 * f;
+      p.px -= p.gravity * 0.2 * f;
+      p.pz += p.gravity * f;
+      p.scale -= f * 0.01;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
+
+  smoke22: {
+    texture: 'smoke',
+    blend: 'add',
+    init(p, scale) {
+      p.lifeTime = 60;
+      p.scale = scale * (rand(64) + 64) * 0.005;
+      p.rotation = rand(360);
+      p.gravity = (rand(32) + 60) * 0.1;
+    },
+    update(p, f, t) {
+      const lum = p.lifeTime / 50;
+      p.lr = lum * 0.9;
+      p.lg = lum * 0.5;
+      p.lb = lum * 0.5;
+
+      p.gravity -= 0.1 * f;
+      p.px += p.gravity * Math.sin(t) * 0.05 * f;
+      p.pz += p.gravity * f;
+      p.scale += f * 0.04;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
+
+  smoke60: {
+    texture: 'smoke',
+    blend: 'add',
+    init(p, scale) {
+      p.lifeTime = 60;
+      p.scale = scale * (rand(64) + 64) * 0.005;
+      p.rotation = rand(360);
+      p.gravity = (rand(32) + 60) * 0.1;
+      p.lr = p.lg = p.lb = 0.4;
+    },
+    update(p, f, t) {
+      const lum = p.lifeTime / 50;
+      p.lr = p.lg = p.lb = lum * 0.4;
+
+      p.gravity -= 0.1 * f;
+      p.px += p.gravity * Math.sin(t) * 0.05 * f;
+      p.pz += p.gravity * f;
+      p.scale += f * 0.04;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
+
+  waterfall5_9: {
+    texture: 'waterfall5',
+    blend: 'add',
+    init(p, scale) {
+      p.lifeTime = 30;
+      p.rotation = rand(360);
+      p.scale = 0.6 + scale;
+      p.vz = -(rand(5) + 7);
+      p.lr = p.lg = p.lb = 0.2;
+    },
+    update(p, f) {
+      p.scale -= f * 0.005;
+      p.vz += 0.1 * f;
+
+      const gain =
+        p.lifeTime < 8
+          ? Math.pow(1 / 1.2, f)
+          : p.lifeTime > 20
+            ? Math.pow(1.1, f)
+            : 1;
+
+      p.lr *= gain;
+      p.lg *= gain;
+      p.lb *= gain;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
+
+  spark03_24: {
+    texture: 'spark03',
+    blend: 'add',
+    init(p) {
+      p.alpha = 1;
+
+      p.vx = (rand(3) - 1) * 2;
+      p.vy = (rand(3) - 1) * 2;
+      p.vz = (rand(3) - 1) * 2;
+
+      p.lifeTime = 16;
+      p.rotation = 0;
+      p.scale = rand(5) / 10 + 0.4;
+    },
+    update(p, f) {
+      if (p.lifeTime < 10 && p.rotation === 0) {
+        p.vx = -p.vx;
+        p.vy = -p.vy;
+        p.vz = -p.vz;
+        p.rotation = 1;
+      }
+
+      if (p.lifeTime <= 10) {
+        p.alpha -= f * 0.05;
+        if (p.alpha < 0) p.alpha = 0;
+
+        const gain = Math.pow(p.alpha, f);
+        p.lr *= gain;
+        p.lg *= gain;
+        p.lb *= gain;
+      }
+
+      p.scale -= f * 0.02;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
+
+  /**
+   * Wings of Darkness membrane flare (ZzzObject.cpp:9860-9884). The original
+   * re-creates a BITMAP_FLARE_BLUE sprite at each of ten wing bones every
+   * frame; a short-lived pooled particle reads the same and costs a tenth of
+   * the sprites.
+   */
+  wingFlareBlue: {
+    texture: 'flareBlue',
+    blend: 'add',
+    init(p, scale, light) {
+      p.lifeTime = 6;
+      p.scale = scale;
+      p.rotation = rand(360);
+      [p.tr, p.tg, p.tb] = light;
+    },
+    update(p) {
+      // Sprite scale follows sinf(WorldTime * 0.004) * 0.3 + 0.3 in the
+      // original; the emitter passes that in, so only the fade is left.
+      const t = Math.max(0, Math.min(1, p.lifeTime / 6));
+      p.lr = p.tr * t;
+      p.lg = p.tg * t;
+      p.lb = p.tb * t;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
+
+  /**
+   * Wing of Storm cloud aura (ZzzObject.cpp:9896-9915): BITMAP_CLUD64 at 25
+   * wing bones, luminosity |sin(WorldTime * 0.0004)| * 0.4 + 0.5.
+   */
+  wingCloud: {
+    texture: 'clud64',
+    blend: 'add',
+    init(p, scale, light) {
+      p.lifeTime = 8;
+      p.scale = scale;
+      p.rotation = rand(360);
+      [p.tr, p.tg, p.tb] = light;
+    },
+    update(p, f) {
+      const t = Math.max(0, Math.min(1, p.lifeTime / 8));
+      p.rotation += f;
+      p.lr = p.tr * t;
+      p.lg = p.tg * t;
+      p.lb = p.tb * t;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
+} satisfies Record<string, ParticleKind>;
+
+export type KindName = keyof typeof KINDS;
+
+export type Emission = {
+  readonly kinds: readonly KindName[];
+  readonly every: number;
+  readonly count?: number;
+  readonly light?:
+    | readonly [number, number, number]
+    | (() => readonly [number, number, number]);
+  readonly scale?: number;
+  readonly jitter?: number;
+};
+
+/**
+ * Emissions for an object type on a world - `MapLayer.emissions` on each map
+ * entry (`src/maps/<name>/spec.ts`), read through the facade.
+ */
+export function emissionsFor(
+  world: number,
+  type: number
+): readonly Emission[] | undefined {
+  return maps.emissionsFor(world, type);
+}
+
+type Pool = {
+  manager: SpriteManager;
+  pixelSize: number;
+  frames: number;
+  free: Sprite[];
+  /** A `dark` sheet's brightest texel, which its alpha was stretched from. */
+  cover: number;
+};
+
+/**
+ * The sheet as coverage: black, alpha = luminance stretched to the sheet's
+ * brightest texel (clud64 peaks at 0.51), so a sprite's own alpha can carry
+ * a gain past the sheet's level without the product running over 1.
+ */
+async function coverageSheet(jpeg: Blob): Promise<{ url: string; cover: number }> {
+  const bitmap = await createImageBitmap(jpeg);
+  const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+  const context = canvas.getContext('2d')!;
+  context.drawImage(bitmap, 0, 0);
+  bitmap.close();
+
+  const image = context.getImageData(0, 0, canvas.width, canvas.height);
+  const px = image.data;
+  let peak = 1;
+  for (let i = 0; i < px.length; i += 4) {
+    peak = Math.max(peak, 0.2126 * px[i] + 0.7152 * px[i + 1] + 0.0722 * px[i + 2]);
+  }
+  for (let i = 0; i < px.length; i += 4) {
+    const luma = 0.2126 * px[i] + 0.7152 * px[i + 1] + 0.0722 * px[i + 2];
+    px[i] = px[i + 1] = px[i + 2] = 0;
+    px[i + 3] = Math.round((luma / peak) * 255);
+  }
+  context.putImageData(image, 0, 0);
+
+  const png = await canvas.convertToBlob({ type: 'image/png' });
+  return { url: URL.createObjectURL(png), cover: peak / 255 };
+}
+
+let scene: Scene | null = null;
+const pools = new Map<string, Pool>();
+const loading = new Map<string, Promise<Pool | null>>();
+const particles: Particle[] = [];
+let worldTimeMs = 0;
+let tickObserver: unknown = null;
+
+const poolKey = (texture: TextureKey, blend: Blend) => `${texture}:${blend}`;
+
+async function getPool(
+  target: Scene,
+  texture: TextureKey,
+  blend: Blend
+): Promise<Pool | null> {
+  const key = poolKey(texture, blend);
+
+  const existing = pools.get(key);
+  if (existing) return existing;
+
+  let inFlight = loading.get(key);
+
+  if (!inFlight) {
+    inFlight = (async () => {
+      const { file, size } = TEXTURES[texture];
+
+      // A sheet this version never shipped: no pool, no particles, and no
+      // fetch per emission for the rest of the session (`hasDataFile`).
+      if (!hasDataFile(file)) return null;
+
+      const ozj = await downloadDataFile(file);
+
+      const blob = new Blob([ozj.slice(OZJ_HEADER_SIZE)], {
+        type: 'image/jpeg',
+      });
+
+      const sheet =
+        blend === 'dark'
+          ? await coverageSheet(blob)
+          : { url: URL.createObjectURL(blob), cover: 1 };
+
+      const manager = new SpriteManager(
+        `effectParticles_${key}`,
+        sheet.url,
+        POOL_SIZE,
+        { width: size, height: size },
+        target
+      );
+
+      manager.blendMode =
+        blend === 'add'
+          ? Constants.ALPHA_ONEONE
+          : blend === 'dark'
+            ? Constants.ALPHA_COMBINE
+            : Constants.ALPHA_SUBTRACT;
+
+      manager.disableDepthWrite = true;
+      manager.isPickable = false;
+
+      // The group the flare card over the flame already sits in
+      // (`common/effectLights.ts`). Babylon draws sprites before the
+      // transparent queue, and MU's alpha-keyed meshes write depth in that
+      // queue, so a flame left in group 0 was drawn first and then painted
+      // over by the bridge rail, the fence or the bush standing in front of
+      // it. Dev seam: `?fxgroup=0` puts them back.
+      manager.renderingGroupId = devQueryNumber('fxgroup') ?? EFFECT_RENDERING_GROUP;
+      keepDepthForEffects(target);
+
+      const pool: Pool = {
+        manager,
+        pixelSize: size,
+        frames: TEXTURES[texture].frames ?? 1,
+        free: [],
+        cover: sheet.cover,
+      };
+      pools.set(key, pool);
+
+      return pool;
+    })();
+
+    loading.set(key, inFlight);
+  }
+
+  return inFlight;
+}
+
+function acquire(pool: Pool): Sprite | null {
+  const reused = pool.free.pop();
+
+  if (reused) {
+    reused.isVisible = true;
+    return reused;
+  }
+
+  if (pool.manager.sprites.length >= POOL_SIZE) return null;
+
+  const sprite = new Sprite('particle', pool.manager);
+  sprite.isPickable = false;
+
+  return sprite;
+}
+
+function ensureTicking(target: Scene) {
+  if (tickObserver && scene === target) return;
+
+  scene = target;
+
+  tickObserver = target.onBeforeRenderObservable.add(() => {
+    const deltaMs = target.getEngine().getDeltaTime();
+    worldTimeMs += deltaMs;
+
+    const f = Math.min(1, (deltaMs / 1000) * TICKS_PER_SECOND);
+
+    const color = new Color4(1, 1, 1, 1);
+
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+
+      p.lifeTime -= f;
+      if (p.lifeTime <= 0) p.live = false;
+
+      if (p.live) {
+        if (p.vx !== 0 || p.vy !== 0 || p.vz !== 0) {
+          const c = Math.cos(p.angleZ);
+          const s = Math.sin(p.angleZ);
+
+          p.px += (p.vx * c - p.vy * s) * f;
+          p.py += (p.vx * s + p.vy * c) * f;
+          p.pz += p.vz * f;
+        }
+
+        p.kind.update(p, f, worldTimeMs);
+      }
+
+      if (!p.live || p.scale <= 0) {
+        release(p);
+        particles.splice(i, 1);
+        continue;
+      }
+
+      const sprite = p.sprite;
+
+      sprite.position.set(
+        p.px / TILE_CM,
+        p.pz / TILE_CM,
+        p.py / TILE_CM
+      );
+
+      const size = (p.pixelSize * p.scale) / TILE_CM;
+      sprite.width = size;
+      sprite.height = size;
+      sprite.angle = (p.rotation * Math.PI) / 180;
+
+      if (p.frames > 1) {
+        sprite.cellIndex = ((p.frame % p.frames) + p.frames) % p.frames;
+      }
+
+      p.kind.color(p, color);
+      sprite.color.copyFrom(spriteLevel(target, color));
+    }
+  });
+}
+
+const releasePools = new Map<Sprite, Pool>();
+
+function release(p: Particle) {
+  p.sprite.isVisible = false;
+
+  const pool = releasePools.get(p.sprite);
+  if (pool) pool.free.push(p.sprite);
+}
+
+export async function spawnParticle(
+  target: Scene,
+  kindName: KindName,
+  position: { x: number; y: number; z: number },
+  angleZ: number,
+  scale: number,
+  light: readonly [number, number, number],
+  jitter = 0
+): Promise<void> {
+  const kind = KINDS[kindName] as ParticleKind;
+
+  const pool = await getPool(target, kind.texture, kind.blend);
+  if (!pool) return;
+
+  const sprite = acquire(pool);
+  if (!sprite) return;
+
+  releasePools.set(sprite, pool);
+  ensureTicking(target);
+
+  const p: Particle = {
+    live: true,
+    kind,
+    sprite,
+    pixelSize: pool.pixelSize,
+    frame: 0,
+    frames: pool.frames,
+    lifeTime: 2,
+    scale,
+    alpha: 1,
+    gravity: 0,
+    rotation: 0,
+    px: position.x * TILE_CM + (jitter ? rand(jitter * 2) - jitter : 0),
+    py: position.z * TILE_CM + (jitter ? rand(jitter * 2) - jitter : 0),
+    pz: position.y * TILE_CM + (jitter ? rand(jitter * 2) - jitter : 0),
+    vx: 0,
+    vy: 0,
+    vz: 0,
+    angleZ,
+    lr: light[0],
+    lg: light[1],
+    lb: light[2],
+    tr: light[0],
+    tg: light[1],
+    tb: light[2],
+  };
+
+  kind.init(p, scale, light);
+
+  particles.push(p);
+}
+
+type Reach = {
+  readonly travel: number;
+  readonly base: number;
+  readonly perScale: number;
+};
+
+/**
+ * Farthest any part of a kind's sprite gets from its spawn point, in tiles:
+ * the centre's travel over its whole life plus the sprite's half-diagonal at
+ * its largest, `base` plus `perScale` per unit of spawn scale. The view gate
+ * adds it to the frustum; effectParticles.test.ts plays each kind out against it.
+ */
+export const KIND_REACH: Record<KindName, Reach> = {
+  fire1: { travel: 2.7, base: 0, perScale: 0.65 },
+  fire3: { travel: 1.85, base: 0, perScale: 0.65 },
+  fire2: { travel: 1.4, base: 0, perScale: 0.65 },
+  fire157: { travel: 1.2, base: 0, perScale: 0.56 },
+  ember: { travel: 1, base: 0, perScale: 0.34 },
+  fire0: { travel: 1.4, base: 0, perScale: 0.87 },
+  fire0b: { travel: 1.4, base: 0, perScale: 0.87 },
+  fireBlue: { travel: 0.75, base: 0, perScale: 0.65 },
+  smoke0: { travel: 0.55, base: 0.72, perScale: 0 },
+  smoke2: { travel: 3.4, base: 0.58, perScale: 0 },
+  smoke65: { travel: 0.75, base: 0, perScale: 0.29 },
+  cloud21: { travel: 1.75, base: 0, perScale: 3.61 },
+  smoke21: { travel: 4.2, base: 0, perScale: 0.29 },
+  smoke22: { travel: 3.7, base: 1.09, perScale: 0.29 },
+  smoke60: { travel: 3.7, base: 1.09, perScale: 0.29 },
+  waterfall5_9: { travel: 2.9, base: 0.28, perScale: 0.46 },
+  spark03_24: { travel: 0.6, base: 0.19, perScale: 0 },
+  wingFlareBlue: { travel: 0, base: 0, perScale: 0.46 },
+  wingCloud: { travel: 0, base: 0, perScale: 0.46 },
+};
+
+/** The reach of a spawn picking any of `kinds`, as one base plus a per-scale slope. */
+function reachOf(kinds: readonly KindName[]): { base: number; perScale: number } {
+  let base = 0;
+  let perScale = 0;
+
+  for (const kind of kinds) {
+    const reach = KIND_REACH[kind];
+
+    base = Math.max(base, reach.travel + reach.base);
+    perScale = Math.max(perScale, reach.perScale);
+  }
+
+  return { base, perScale };
+}
+
+export class ParticleEmitter {
+  #due: number[];
+
+  /** Per emission, tiles past the widened frustum its sprites can still reach. */
+  #reach: number[];
+
+  constructor(
+    private readonly target: Scene,
+    private readonly emissions: readonly Emission[],
+    private readonly position: { x: number; y: number; z: number },
+    private readonly angleZ: number,
+    private readonly scale: number
+  ) {
+    this.#due = emissions.map(() => 0);
+
+    this.#reach = emissions.map(emission => {
+      const { base, perScale } = reachOf(emission.kinds);
+      const scaled = Math.abs(scale * (emission.scale ?? 1));
+
+      return (
+        base +
+        perScale * scaled +
+        (Math.sqrt(3) * (emission.jitter ?? 0)) / TILE_CM
+      );
+    });
+  }
+
+  update(): void {
+    const deltaSeconds = this.target.getEngine().getDeltaTime() / 1000;
+
+    // The original emits only for objects TestFrustrum2D keeps in view. The
+    // backlog is dropped too, so nothing bursts when the emitter comes back.
+    const depth = EMITTER_GATE
+      ? viewDepth(this.target, this.position.x, this.position.y, this.position.z)
+      : Infinity;
+
+    for (let i = 0; i < this.emissions.length; i++) {
+      const emission = this.emissions[i];
+
+      if (depth <= -this.#reach[i]) {
+        this.#due[i] = 0;
+        continue;
+      }
+
+      this.#due[i] += (deltaSeconds * TICKS_PER_SECOND) / emission.every;
+
+      if (this.#due[i] > 4) this.#due[i] = 4;
+
+      while (this.#due[i] >= 1) {
+        this.#due[i] -= 1;
+
+        const count = emission.count ?? 1;
+
+        for (let n = 0; n < count; n++) {
+          const kind =
+            emission.kinds[Math.floor(Math.random() * emission.kinds.length)];
+
+          const light =
+            typeof emission.light === 'function'
+              ? emission.light()
+              : (emission.light ?? WHITE);
+
+          void spawnParticle(
+            this.target,
+            kind,
+            this.position,
+            this.angleZ,
+            this.scale * (emission.scale ?? 1),
+            light,
+            emission.jitter
+          );
+        }
+      }
+    }
+  }
+}
+
+export type BonedEmission = {
+  readonly node: { getAbsolutePosition(): { x: number; y: number; z: number } };
+  readonly kinds: readonly KindName[];
+  readonly count: number;
+  /** Constant size, or one sampled per spawn (wing auras pulse with WorldTime). */
+  readonly scale: number | (() => number);
+  readonly light: readonly [number, number, number] | (() => readonly [number, number, number]);
+  readonly offsetY?: number;
+  /** Spawn only every n-th 25 Hz tick (default 1 = every tick). */
+  readonly every?: number;
+};
+
+export class BonedParticleEmitter {
+  #due = 0;
+  #tick = 0;
+
+  #reach: { base: number; perScale: number }[];
+
+  constructor(
+    private readonly target: Scene,
+    private readonly points: readonly BonedEmission[]
+  ) {
+    this.#reach = points.map(point => reachOf(point.kinds));
+  }
+
+  update(): void {
+    this.#due += (this.target.getEngine().getDeltaTime() / 1000) * TICKS_PER_SECOND;
+
+    if (this.#due > 4) this.#due = 4;
+
+    while (this.#due >= 1) {
+      this.#due -= 1;
+      this.#tick++;
+
+      for (let i = 0; i < this.points.length; i++) {
+        const point = this.points[i];
+
+        if (point.every && point.every > 1 && this.#tick % point.every !== 0) {
+          continue;
+        }
+
+        const base = point.node.getAbsolutePosition();
+        const position = point.offsetY
+          ? { x: base.x, y: base.y + point.offsetY, z: base.z }
+          : base;
+
+        const scale =
+          typeof point.scale === 'function' ? point.scale() : point.scale;
+
+        // Gated per point at its spawn position. The ticks still drain, so a
+        // point out of view cannot burst when it comes back.
+        if (EMITTER_GATE) {
+          const reach = this.#reach[i];
+          const depth = viewDepth(this.target, position.x, position.y, position.z);
+
+          if (depth <= -(reach.base + reach.perScale * Math.abs(scale))) continue;
+        }
+
+        const light =
+          typeof point.light === 'function' ? point.light() : point.light;
+
+        for (let n = 0; n < point.count; n++) {
+          const kind =
+            point.kinds[Math.floor(Math.random() * point.kinds.length)];
+
+          void spawnParticle(this.target, kind, position, 0, scale, light);
+        }
+      }
+    }
+  }
+}
+
+/** A sheet a held sprite can be drawn with. */
+export type HeldTexture = 'clud64' | 'flare01' | 'flareBlue';
+
+/** One sprite riding a node: `CreateSprite`'s sheet and SubType blend. */
+export type HeldPoint = {
+  readonly node: { getAbsolutePosition(): { x: number; y: number; z: number } };
+  readonly texture: HeldTexture;
+  /** `CreateSprite`'s SubType 0 (`EnableAlphaBlend`) or 1 (`EnableAlphaBlendMinus`). */
+  readonly blend: 'add' | 'subtract';
+};
+
+/** What a held sprite draws with this frame; `rotation` in degrees. */
+export type HeldLook = { scale: number; r: number; g: number; b: number; rotation: number };
+
+/**
+ * Sprites the original re-issues every frame (`CreateSprite` from a render
+ * pass lives for the frame it is drawn in): one per point, moved onto its
+ * node each frame. A pooled particle with a life trails the node and stacks
+ * with the ones spawned before it, which is what made the Wing of Storm's
+ * joint glows two and a half times too bright.
+ *
+ * A subtract sprite is drawn as dark art: black over its coverage, which is
+ * the sheet times the light's luminance times `darkCardGain`. Babylon's
+ * subtract decodes the sheet into the linear buffer first, and a mid-grey
+ * cloud texel at the map's level took every pixel under it to black.
+ */
+export class HeldSprites {
+  readonly #sprites: (Sprite | null)[];
+  readonly #owners: (Pool | null)[];
+  readonly #blends: Blend[];
+  readonly #look: HeldLook = { scale: 1, r: 1, g: 1, b: 1, rotation: 0 };
+  readonly #color = new Color4(1, 1, 1, 1);
+
+  constructor(
+    private readonly target: Scene,
+    private readonly points: readonly HeldPoint[]
+  ) {
+    this.#sprites = points.map(() => null);
+    this.#owners = points.map(() => null);
+    this.#blends = points.map(point => (point.blend === 'subtract' ? 'dark' : 'add'));
+  }
+
+  /** Places every sprite, or hides them all; `look(i, out)` fills point i's look. */
+  update(visible: boolean, look: (i: number, out: HeldLook) => void): void {
+    const darkGain = darkCardGain(this.target);
+
+    for (let i = 0; i < this.points.length; i++) {
+      const point = this.points[i];
+      const blend = this.#blends[i];
+      const pool = pools.get(poolKey(point.texture, blend)) ?? null;
+
+      // The pools go with the map; a sprite of a disposed manager is gone.
+      if (this.#owners[i] !== pool) {
+        this.#sprites[i] = null;
+        this.#owners[i] = null;
+      }
+
+      if (!pool) {
+        if (visible) void getPool(this.target, point.texture, blend);
+        continue;
+      }
+
+      let sprite = this.#sprites[i];
+
+      if (!sprite) {
+        if (!visible) continue;
+        sprite = acquire(pool);
+        if (!sprite) continue;
+        this.#sprites[i] = sprite;
+        this.#owners[i] = pool;
+      }
+
+      sprite.isVisible = visible;
+      if (!visible) continue;
+
+      const out = this.#look;
+      look(i, out);
+
+      const p = point.node.getAbsolutePosition();
+      sprite.position.set(p.x, p.y, p.z);
+
+      const size = (pool.pixelSize * out.scale) / TILE_CM;
+      sprite.width = size;
+      sprite.height = size;
+      sprite.angle = (out.rotation * Math.PI) / 180;
+
+      if (blend === 'dark') {
+        const luma = 0.2126 * out.r + 0.7152 * out.g + 0.0722 * out.b;
+        sprite.color.set(0, 0, 0, Math.min(1, luma * darkGain * pool.cover));
+      } else {
+        sprite.color.copyFrom(spriteLevel(this.target, this.#color.set(out.r, out.g, out.b, 1)));
+      }
+    }
+  }
+
+  dispose(): void {
+    for (let i = 0; i < this.#sprites.length; i++) {
+      const sprite = this.#sprites[i];
+      const pool = this.#owners[i];
+
+      if (sprite && pool && pools.get(poolKey(this.points[i].texture, this.#blends[i])) === pool) {
+        sprite.isVisible = false;
+        pool.free.push(sprite);
+      }
+
+      this.#sprites[i] = null;
+      this.#owners[i] = null;
+    }
+  }
+}
+
+export function disposeEffectParticles(): void {
+  for (const p of particles) p.sprite.dispose();
+  particles.length = 0;
+  releasePools.clear();
+
+  for (const pool of pools.values()) pool.manager.dispose();
+  pools.clear();
+  loading.clear();
+
+  if (tickObserver && scene) {
+    scene.onBeforeRenderObservable.remove(tickObserver as never);
+  }
+
+  tickObserver = null;
+  scene = null;
+}

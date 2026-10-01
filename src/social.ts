@@ -81,7 +81,7 @@ import {
   SELF_DEFENSE_MS,
 } from './common/nameTags';
 import { NetStats } from './controllers/net/roundTrip';
-import { playUiSound } from './libs/sfx';
+import { playUiSound } from './controllers/sound/sfx';
 
 export type PartyMember = {
   name: string;

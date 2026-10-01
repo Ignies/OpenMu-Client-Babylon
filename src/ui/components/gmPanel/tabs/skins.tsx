@@ -5,7 +5,7 @@ import { GmPanel } from '../../../../gmPanel';
 import { gmCommand } from '../../../../common/gmCommands';
 import { searchSkins, type SkinKind } from '../../../../admin/catalogues';
 import { skinCatalogue, skinDisplayName } from '../../../../admin/skins';
-import { uiClick } from '../../../../libs/sfx';
+import { uiClick } from '../../../../controllers/sound/sfx';
 
 /**
  * Every model the client can draw, one click to wear it.

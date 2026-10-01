@@ -10,7 +10,7 @@
  * `attackSystem` and `skillCastSystem` before they accept a click.
  */
 import type { ENUM_WORLD } from '../core/types';
-import { REFERENCE_FPS } from '../common/playSpeed';
+import { REFERENCE_FPS } from '../controllers/anim/playSpeed';
 import type { CombatLayer } from './layer';
 
 // ---- 1. tuning -------------------------------------------------------------

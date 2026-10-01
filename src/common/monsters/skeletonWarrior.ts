@@ -11,7 +11,7 @@ import {
 import { loadGLTF } from '../../controllers/assets/modelLoader';
 import { PlayerObject } from '../playerObject';
 import { CharacterClassNumber } from '../../core/types';
-import { skeletonShatter } from '../deathVisuals';
+import { skeletonShatter } from '../../controllers/fx/deathVisuals';
 
 /**
  * The Skill/Skeleton01..03 monsters (Skeleton Warrior, Skeleton Archer, Elite

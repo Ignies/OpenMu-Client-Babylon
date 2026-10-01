@@ -9,12 +9,12 @@ import {
   boidFactoryFor,
   boidsFor,
   type BoidSpec,
-} from '../../common/boids';
+} from '../../controllers/fx/boids';
 import { GameOptions } from '../../common/gameOptions';
-import { effects } from '../../effects';
-import { FIRE_PUFF, TEX } from '../../effects/recipes';
+import { effects } from '../../controllers/fx';
+import { FIRE_PUFF, TEX } from '../../controllers/fx/recipes';
 import { invasionEvent } from '../../events/invasion';
-import { playSfx } from '../../libs/sfx';
+import { playSfx } from '../../controllers/sound/sfx';
 import { TW_SAFEZONE } from '../../controllers/terrain/consts';
 import type { Entity, ISystemFactory } from '../world';
 

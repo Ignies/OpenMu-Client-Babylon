@@ -5,7 +5,7 @@ import type { With } from 'miniplex';
 import { Store } from '../../../store';
 import { Social } from '../../../social';
 import { useRenderId } from '../../../hooks';
-import { onScreenPosition } from '../../../libs/screenPositionBus';
+import { onScreenPosition } from '../../../controllers/interface/screenPositionBus';
 import type { Entity } from '../../../ecs/world';
 import { stableKeyOf } from './stableKey';
 

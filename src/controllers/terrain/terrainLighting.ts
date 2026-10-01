@@ -1,29 +1,29 @@
 import type { Effect, Scene } from '../render/babylon/exports';
 import { getTerrainLightTexture } from './terrainDynamicLight';
-import { pointLightPoolGroundLights } from '../../common/pointLightPool';
+import { pointLightPoolGroundLights } from '../lighting/pointLightPool';
 import {
   linearBufferActive,
   linearLightActive,
-} from '../../common/lightModel';
-import { lookDirector } from '../../lighting/director';
+} from '../lighting/lightModel';
+import { lookDirector } from '../lighting/director';
 import {
   bindClouds,
   cloudFieldGlsl,
   CLOUD_NOISE_SAMPLER,
   CLOUD_UNIFORMS,
-} from '../../lighting/clouds';
-import { SKY_CLOUDS_DEFAULT } from '../../lighting/profiles';
+} from '../lighting/clouds';
+import { SKY_CLOUDS_DEFAULT } from '../lighting/profiles';
 import {
   LIGHT_TINT_UNIFORM,
   lightTintGlsl,
   lightTintStrength,
-} from '../../lighting/lightTint';
+} from '../lighting/lightTint';
 import {
   TERRAIN_CSM_UNIFORMS,
   bindTerrainCsm,
   terrainCsmDefines,
   terrainCsmGlsl,
-} from '../../scenes/shadows';
+} from '../render/scenes/shadows';
 import {
   TOON_FILTER_UNIFORM,
   bindToonFilter,

@@ -1,9 +1,9 @@
 import { Vector3 } from '../controllers/render/babylon/exports';
 import { EventBus } from '../core/eventBus';
 import { Store } from '../store';
-import { effects } from '../effects';
-import { followEntity } from '../effects/core';
-import { TRAIL_ANCHOR, pingLiveFor } from '../effects/ping';
+import { effects } from '../controllers/fx';
+import { followEntity } from '../controllers/fx/core';
+import { TRAIL_ANCHOR, pingLiveFor } from '../controllers/fx/ping';
 import {
   PING_VERSION,
   PingSub,

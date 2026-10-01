@@ -7,7 +7,7 @@ import { GM_SECTIONS, GmPanel, type GmSection } from '../../../gmPanel';
 import { worldView, type WorldView } from '../../../gmWorld';
 import { AdminFeed } from '../../../admin/feed';
 import { useEventBus } from '../../../hooks/useEventBus';
-import { uiClick } from '../../../libs/sfx';
+import { uiClick } from '../../../controllers/sound/sfx';
 import { MuWindows } from '../muWindow/windowState';
 import { ChatLineType } from '../../../common/chat';
 import { mapName } from '../../../common/gmMaps';

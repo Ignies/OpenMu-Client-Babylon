@@ -3,7 +3,7 @@ import {
   CAMERA_FOV_DEG,
   CAMERA_FOV_MAX_DEG,
   CAMERA_FOV_MIN_DEG,
-} from '../camera/recipes';
+} from '../controllers/camera/recipes';
 import { RENDER_DISTANCE_MAX } from '../controllers/render/renderDistance';
 import {
   LOW_VITAL_DEFAULT_PERCENT,

@@ -1,15 +1,15 @@
 import { Vector3 } from '../../controllers/render/babylon/exports';
 import type { ISystemFactory } from '../world';
-import { effects } from '../../effects';
-import { boneLocalPos } from '../../effects/core';
-import { weaponBlurFor, type WeaponBlurRow } from '../../common/weaponBlur';
+import { effects } from '../../controllers/fx';
+import { boneLocalPos } from '../../controllers/fx/core';
+import { weaponBlurFor, type WeaponBlurRow } from '../../controllers/item_fx/weaponBlur';
 import {
   isPlayerAttackAction,
   isPlayerSkillAction,
-} from '../../common/playerActionMapper';
+} from '../../controllers/anim/playerActionMapper';
 import { PVP_MURDERER2, PVP_NEUTRAL } from '../../common/nameTags';
-import { tierIndex } from '../../common/lightingQuality';
-import { lighting } from '../../lighting';
+import { tierIndex } from '../../controllers/lighting/lightingQuality';
+import { lighting } from '../../controllers/lighting';
 
 /** The first lighting tier that draws the improved looks (common/skillVisuals.ts). */
 const ENHANCED_TIER = 1;

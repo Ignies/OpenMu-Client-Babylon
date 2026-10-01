@@ -9,7 +9,7 @@ import { MuItemWindow, MuTableFrame } from '../../../../components/muWindow';
 import { ItemGrid } from '../../../../components/itemGrid';
 import { QuickItemActions } from '../../../../../common/quickItemActions';
 import { useEventBus } from '../../../../../hooks/useEventBus';
-import { uiClick } from '../../../../../libs/sfx';
+import { uiClick } from '../../../../../controllers/sound/sfx';
 import {
   COLUMNS,
   GRID_X,

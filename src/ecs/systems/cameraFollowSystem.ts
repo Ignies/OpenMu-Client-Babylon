@@ -6,7 +6,7 @@ import {
   releaseMouseLook,
   showHeroBody,
   updateGameCamera,
-} from '../../camera';
+} from '../../controllers/camera';
 
 const v3Temp = Vector3.Zero();
 

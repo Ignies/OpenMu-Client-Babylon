@@ -6,7 +6,7 @@ import {
 } from '../../controllers/render/babylon/exports';
 import { TWFlags } from '../../controllers/terrain/consts';
 import { isFlagInBinaryMask } from '../../controllers/assets/download';
-import { aimX, aimY } from '../../camera';
+import { aimX, aimY } from '../../controllers/camera';
 import { LEAN_CURSOR_OBJECTS, findRestObject } from '../../controllers/terrain/restObjects';
 import { pickGround } from '../../controllers/terrain/terrainPick';
 import { Store } from '../../store';

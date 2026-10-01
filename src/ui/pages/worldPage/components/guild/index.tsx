@@ -1,4 +1,4 @@
-import { isKey } from '../../../../../common/keyBindings';
+import { isKey } from '../../../../../controllers/interface/keyBindings';
 import { t, type TextKey } from '../../../../../i18n';
 import './style.less';
 import { useEffect, useState } from 'react';
@@ -11,7 +11,7 @@ import {
   type GuildTab,
 } from '../../../../../social';
 import { useEventBus } from '../../../../../hooks/useEventBus';
-import { playUiSound, uiClick } from '../../../../../libs/sfx';
+import { playUiSound, uiClick } from '../../../../../controllers/sound/sfx';
 import { MuButton } from '../../../../components/muButton';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuItemWindow, MuTableFrame } from '../../../../components/muWindow';

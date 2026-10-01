@@ -3,7 +3,7 @@ import { EngineInstrumentation } from '@babylonjs/core/Instrumentation/engineIns
 import { netStats } from '../net/socketCost';
 import { GameOptions } from '../../common/gameOptions';
 import { renderScaleForStep } from './renderScale';
-import { upscaleActive } from '../../scenes/upscale';
+import { upscaleActive } from './scenes/upscale';
 import { texturePacks } from '../assets/texturePacks';
 import { propBatchStats } from './propBatches';
 import { configFingerprintLines } from '../../common/configFingerprint';

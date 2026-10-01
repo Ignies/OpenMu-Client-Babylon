@@ -9,7 +9,7 @@ import {
   swordformGlovesModel,
   type AttackPose,
 } from './weaponClass';
-import { playerPlaySpeed, RAGEFIGHTER_STOP_SPEED } from './playSpeed';
+import { playerPlaySpeed, RAGEFIGHTER_STOP_SPEED } from '../controllers/anim/playSpeed';
 import { PHOENIX_POSE } from './weaponAttachment';
 import type { Item } from '../ecs/world';
 

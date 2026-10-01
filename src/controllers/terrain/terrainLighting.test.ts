@@ -11,25 +11,25 @@ vi.mock('../../core/devSeams', () => ({
   devQuery: (key: string) => (key === 'terrainBranch' ? seam.terrainBranch : null),
 }));
 vi.mock('./terrainDynamicLight', () => ({ getTerrainLightTexture: () => null }));
-vi.mock('../../common/pointLightPool', () => ({ pointLightPoolGroundLights: () => pool.lights }));
-vi.mock('../../common/lightModel', () => ({
+vi.mock('../lighting/pointLightPool', () => ({ pointLightPoolGroundLights: () => pool.lights }));
+vi.mock('../lighting/lightModel', () => ({
   linearBufferActive: () => false,
   linearLightActive: () => false,
 }));
-vi.mock('../../lighting/director', () => ({ lookDirector: () => null }));
-vi.mock('../../lighting/clouds', () => ({
+vi.mock('../lighting/director', () => ({ lookDirector: () => null }));
+vi.mock('../lighting/clouds', () => ({
   bindClouds: () => {},
   cloudFieldGlsl: () => '',
   CLOUD_NOISE_SAMPLER: 'cloudNoise',
   CLOUD_UNIFORMS: [],
 }));
-vi.mock('../../lighting/profiles', () => ({ SKY_CLOUDS_DEFAULT: {} }));
-vi.mock('../../lighting/lightTint', () => ({
+vi.mock('../lighting/profiles', () => ({ SKY_CLOUDS_DEFAULT: {} }));
+vi.mock('../lighting/lightTint', () => ({
   LIGHT_TINT_UNIFORM: 'lightTint',
   lightTintGlsl: () => '',
   lightTintStrength: () => 0,
 }));
-vi.mock('../../scenes/shadows', () => ({
+vi.mock('../render/scenes/shadows', () => ({
   TERRAIN_CSM_UNIFORMS: [],
   bindTerrainCsm: () => {},
   terrainCsmDefines: () => [],

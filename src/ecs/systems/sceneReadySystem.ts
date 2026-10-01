@@ -1,7 +1,7 @@
 import type { ISystemFactory } from '../world';
 import { Store, UIState } from '../../store';
 import { EventBus } from '../../core/eventBus';
-import { isStaged, sceneHeld } from '../../common/sceneGate';
+import { isStaged, sceneHeld } from '../../controllers/loading/sceneGate';
 import { packRepaintsPending } from '../../controllers/assets/texturePacks';
 
 const READY_GRACE_SECONDS = 3;

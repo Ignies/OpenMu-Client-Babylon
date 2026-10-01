@@ -15,7 +15,7 @@ import { observer } from 'mobx-react-lite';
 import { t } from '../../../../../i18n';
 import { GameOptions, uiScaleFactor } from '../../../../../common/gameOptions';
 import { devQueryNumber } from '../../../../../core/devSeams';
-import { uiClick } from '../../../../../libs/sfx';
+import { uiClick } from '../../../../../controllers/sound/sfx';
 import { MuText } from '../../../../components/muText';
 import {
   objectiveCounted,

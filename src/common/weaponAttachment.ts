@@ -8,7 +8,7 @@ import {
 } from '../controllers/render/boneLink';
 import { BaseClass, getBaseClass } from './characterStats';
 import { PlayerAction } from './objects/enum';
-import { RAGEFIGHTER_STOP_SPEED } from './playSpeed';
+import { RAGEFIGHTER_STOP_SPEED } from '../controllers/anim/playSpeed';
 import type { PartPose } from '../controllers/render/modelObject';
 import type { PlayerObject } from './playerObject';
 import type { CharacterClassNumber } from '../core/types';

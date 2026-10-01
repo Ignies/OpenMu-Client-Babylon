@@ -5,7 +5,7 @@ import { observer } from 'mobx-react-lite';
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { Store } from '../../../store';
 import { useEventBus } from '../../../hooks/useEventBus';
-import { playUiSound } from '../../../libs/sfx';
+import { playUiSound } from '../../../controllers/sound/sfx';
 import { isTypingInField } from '../../../ecs/systems/keyboardInputSystem';
 import {
   CharacterFocusedPacket,

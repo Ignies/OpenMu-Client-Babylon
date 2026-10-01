@@ -1,5 +1,5 @@
 import { MapTileObject } from '../../controllers/terrain/mapTileObject';
-import { REFERENCE_FPS } from '../../common/playSpeed';
+import { REFERENCE_FPS } from '../../controllers/anim/playSpeed';
 import type { Entity, World } from '../../ecs/world';
 
 /**

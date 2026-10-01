@@ -6,11 +6,11 @@ import {
   MapEventStatePacket,
 } from '../../versions/shared/packets/ServerToClientPackets';
 import { devQueryNumber } from '../core/devSeams';
-import { effects } from '../effects';
-import { FIRE_TRAIL, MODEL, RGBS } from '../effects/recipes';
-import { lighting } from '../lighting';
-import { ember } from '../lighting/recipes';
-import { playSfx } from '../libs/sfx';
+import { effects } from '../controllers/fx';
+import { FIRE_TRAIL, MODEL, RGBS } from '../controllers/fx/recipes';
+import { lighting } from '../controllers/lighting';
+import { ember } from '../controllers/lighting/recipes';
+import { playSfx } from '../controllers/sound/sfx';
 import { Store } from '../store';
 import type { EventLayer } from './layer';
 

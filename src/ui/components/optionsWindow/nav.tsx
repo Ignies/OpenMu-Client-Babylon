@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite';
 import { MuSpriteFrame } from '../muSprite';
-import { uiClick } from '../../../libs/sfx';
+import { uiClick } from '../../../controllers/sound/sfx';
 import { t } from '../../../i18n';
 import { CATEGORIES, type Page } from './catalogue';
 import { FitText } from './controls';

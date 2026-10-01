@@ -21,7 +21,7 @@ import {
   Viewport,
 } from '../controllers/render/babylon/exports';
 import type { HighlightLayer } from '../controllers/render/babylon/exports';
-import type { TestScene } from '../scenes/testScene';
+import type { TestScene } from '../controllers/render/scenes/testScene';
 import type { CursorHover } from '../ui/components/gameCursor/cursors';
 
 export type EntityTypeFromQuery<TB extends Bucket<any> = Bucket<any>> =

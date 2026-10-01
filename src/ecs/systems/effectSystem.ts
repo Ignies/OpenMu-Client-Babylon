@@ -1,5 +1,5 @@
 import type { ISystemFactory } from '../world';
-import { effects } from '../../effects';
+import { effects } from '../../controllers/fx';
 
 /**
  * The effects layer's per-frame call site : steps every

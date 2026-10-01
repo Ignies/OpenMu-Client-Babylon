@@ -187,7 +187,7 @@ import {
 } from '../versions/shared/packets/ServerToClientPackets';
 import { ChangeMapServerInfoPacket } from './controllers/net/packets.ts';
 import { onEscrowResultPacket } from './marketplace/gameBridge';
-import { spawnFireworks } from './common/fireworks';
+import { spawnFireworks } from './controllers/fx/fireworks';
 import { InventoryConstants } from './common/inventoryConstants';
 import {
   ItemBoughtPacket,
@@ -258,7 +258,7 @@ import {
   isPlayerAttackAction,
   resolveGenderedAction,
   ServerToClientActionMap,
-} from './common/playerActionMapper';
+} from './controllers/anim/playerActionMapper';
 import { chooseAttackAction, isWeaponItem, type AttackPose } from './common/weaponClass';
 import { isWingItem } from './common/wings';
 import { PlayerObject, isPlayerBody, npcClassOf } from './common/playerObject';
@@ -289,7 +289,7 @@ import {
   playTargetedSkillVisual,
   setBuffVisual,
 } from './common/skillVisuals';
-import { monsterModelTypeOf, playerPlaySpeed } from './common/playSpeed';
+import { monsterModelTypeOf, playerPlaySpeed } from './controllers/anim/playSpeed';
 import { TRAP_MODEL_TABLE } from './common/npcs/trapNpc';
 import {
   KEEP_CLIP,
@@ -303,7 +303,7 @@ import {
   monsterSwing,
   playableMonsterClip,
   type MonsterAttackInput,
-} from './common/monsterAttackClip';
+} from './controllers/anim/monsterAttackClip';
 import {
   METEORITE_STORM,
   SWIRL_BLOOM,
@@ -315,23 +315,23 @@ import {
   santaActionSound,
   teleportCastSound,
   trapAttackSound,
-} from './sound/packetSounds';
-import { SoundsManager } from './libs/soundsManager';
-import { delay } from './effects/core';
+} from './controllers/sound/packetSounds';
+import { SoundsManager } from './controllers/sound/soundsManager';
+import { delay } from './controllers/fx/core';
 import { Vector3 } from './controllers/render/babylon/exports';
 import { EventBus } from './core/eventBus';
 import type { Events } from './core/eventBus/events';
-import { playDrop, playSkill } from './sound';
-import { playSfx, playUiSound, UI_BUS } from './libs/sfx';
+import { playDrop, playSkill } from './controllers/sound';
+import { playSfx, playUiSound, UI_BUS } from './controllers/sound/sfx';
 import {
   COMBAT_BUS,
   hitSound,
   pickupSound,
   usesMissileWeapon,
-} from './common/combatSounds';
+} from './controllers/sound/combatSounds';
 import { experienceForLevel } from './common/experience';
 import { SessionResume } from './common/sessionResume';
-import { WEATHER_RAIN } from './weather/rainState';
+import { WEATHER_RAIN } from './controllers/weather/rainState';
 import { combat } from './combat';
 import { COMBO_SOUND } from './combat/combo';
 import { SHOCK_IMMUNE_CLIPS, SKILL_DEFENSE } from './combat/recipes';

@@ -1,4 +1,4 @@
-import { isKey, actionOfKey } from '../../../../../common/keyBindings';
+import { isKey, actionOfKey } from '../../../../../controllers/interface/keyBindings';
 import { t } from '../../../../../i18n';
 import './style.less';
 import { observer } from 'mobx-react-lite';
@@ -32,7 +32,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuButton } from '../../../../components/muButton';
 import { MuItemWindow, MuTableFrame } from '../../../../components/muWindow';
-import { playUiSound } from '../../../../../libs/sfx';
+import { playUiSound } from '../../../../../controllers/sound/sfx';
 import {
   BUTTON_FRAMES,
   BUTTON_HEIGHT,

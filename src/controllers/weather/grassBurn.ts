@@ -1,0 +1,755 @@
+import type { WeatherLayer } from './layer';
+import {
+  Constants,
+  RawTexture,
+  Texture,
+  Vector3,
+  type Scene,
+} from '../render/babylon/exports';
+import type { ThinEngine } from '@babylonjs/core/Engines/thinEngine';
+import { GameOptions } from '../../common/gameOptions';
+import { devQuery } from '../../core/devSeams';
+import { effects } from '../fx';
+import { FIRE_SPARKS } from '../fx/recipes';
+import type { ParticleRecipe } from '../fx/core';
+
+/**
+ * Grass that has been set on fire, and the fire still doing it.
+ *
+ * Two things in one file because they are one thing: the fires are the only
+ * writer of the scar, and the scar is the only record the fires leave.
+ *
+ * A scar is not round and it is not bounded. A fight that moves leaves a
+ * wandering burnt path, and a fire that spreads leaves a blot with a shape of
+ * its own, so this is `snowTrail`'s world-space map rather than `snowMelt`'s
+ * pool of circles: one byte per texel, stamped as the fire passes, uploaded
+ * over a dirty rectangle rather than whole, and decayed by a pass that walks
+ * only what has been painted.
+ *
+ * A leaf, on purpose. `terrainOverlay.ts` imports `snowMelt.ts` and
+ * `snowCover.ts` imports `terrainOverlay.ts`, and naming another weather
+ * module at module scope from inside that cycle has already crashed the client
+ * on load once (`snowMelt.ts:33-43`). Nothing here imports the grass; the
+ * grass imports this, and hands its own "does anything grow at this point"
+ * back through `setGrassProbe`.
+ *
+ * Local, and it does not pretend otherwise. Two players watching the same
+ * fireball see different scars. A burn is a function of what somebody did
+ * rather than of the clock, so the `ambientSchedule` trick - world state as a
+ * pure function of `serverNow()` - does not reach it, and the protocol carries
+ * no timestamp for an impact today (`serverTime.ts:9-11`). `snowMelt` and
+ * `snowTrail` are both local for the same reason.
+ */
+
+// ---- 1. tuning -------------------------------------------------------------
+
+/**
+ * Texels per tile. Four puts a texel at 25 cm, finer than a blade is tall.
+ * The edge gets its raggedness from the per-blade hash in the shader, not from
+ * this, so there is nothing to buy by going higher: 1024x1024 is one megabyte
+ * against `snowTrail`'s four.
+ */
+export const BURN_RES = 4;
+
+/** Side of the burn map in texels. */
+export const BURN_SIZE = 256 * BURN_RES;
+
+/**
+ * Seconds for a full burn to grow back. The ask was "at least five minutes",
+ * and `snowTrail` next door has been running a 240-second fill on the same
+ * machinery, so this is a proven shape at a longer setting.
+ */
+const REGROW_SECONDS = 300;
+
+/**
+ * Seconds between decay passes; each walks the painted rectangle.
+ *
+ * One rather than two, so the freshness the flame front reads off this map
+ * steps about every 1.2 s instead of every 2.4. It is the resolution of the
+ * burning band, and it costs a second walk of a rectangle that is a few
+ * hundred texels.
+ */
+const DECAY_EVERY = 1;
+
+/** Fires alight at once. Past a handful they overlap into one blaze anyway. */
+const MAX_FIRES = 6;
+
+/**
+ * How fast a front travels at full vigour, in tiles a second, and how fast
+ * spreading costs it that vigour.
+ *
+ * The second is the whole of "it should die down the more it spreads": vigour
+ * falls at `radius / VIGOUR_SPAN`, so a fire that has got somewhere is a fire
+ * that is going out, and the further it has got the faster it goes out. A
+ * fireball's 1.2-tile hit reaches about four tiles before it gives up;
+ * Hellfire's 2.6 reaches further because it starts further, with no special
+ * case anywhere to say so.
+ *
+ * Both were roughly twice this, which burnt the whole patch out in about three
+ * seconds - the fire was over before the eye found it, and what was left was a
+ * black shape that had simply appeared. Half the rate against nearly three
+ * times the span covers the same ground over about ten seconds, so the front
+ * is something a player can watch cross the field.
+ */
+const SPREAD_RATE = 0.55;
+const VIGOUR_SPAN = 26;
+
+/** Past this a front is done however much vigour is left. */
+const FIRE_MAX_RADIUS = 7;
+
+/** Vigour lost per second where the ring finds nothing to burn. */
+const STARVE_RATE = 2.5;
+
+/** Points sampled around a ring to ask whether there is still fuel. */
+const FUEL_SAMPLES = 8;
+
+/**
+ * `?burnThrottle=0`: stamp every front every frame over its whole box. On, a
+ * front waits for half a texel or a tenth of a second and the walk skips what
+ * cannot be in the ring; the union of the rings is the same texels.
+ */
+const BURN_THROTTLE = devQuery('burnThrottle') !== '0';
+const STAMP_STEP = 0.5 / BURN_RES;
+const STAMP_EVERY = 0.1;
+
+/**
+ * Seconds between ember bursts from one front, and sparks a burst.
+ *
+ * Per front, which is what makes the rate matter: six fires at four sparks
+ * every eighth of a second is two hundred a second, and at any distance that
+ * stops being embers and becomes a pale haze hanging over the field. The
+ * texture and the size were right all along - it was the count.
+ */
+const EMBER_EVERY = 0.22;
+const EMBER_SPARKS = 1;
+
+/**
+ * Bearings lit per burst, spread evenly round the rim.
+ *
+ * The count is what stops the ring being a dotted line at a large radius and
+ * a bonfire at a small one, so it is paid per fire and the interval above is
+ * set against it: five points every 0.22 s is about twenty-two flames a
+ * second from one front, against two hundred when the rate was tuned for a
+ * single point.
+ */
+const RIM_POINTS = 5;
+
+/**
+ * The ember off burning grass.
+ *
+ * `FIRE_SPARKS` is the skills' own, sized for a fireball going off at chest
+ * height, and at a third of a tile it lies in the grass like an orange brick.
+ * Same texture and the same colours, a fifth of the size, and it falls rather
+ * than flying: this comes off a blade, not out of an explosion.
+ */
+const GRASS_EMBERS: ParticleRecipe = {
+  ...FIRE_SPARKS,
+  size: 0.03,
+  sizeJitter: 0.012,
+  life: 0.9,
+  power: 0.7,
+  gravity: -1.2,
+};
+
+/**
+ * How far the fire reaches off a perfect circle, per harmonic.
+ *
+ * The second harmonic gives a front a long axis, the third and fifth break
+ * that into lobes. Together they run the reach over roughly 0.57 to 1.43 of
+ * the nominal radius, which is enough that no two scars look alike and not so
+ * much that a fire tears into separate pieces.
+ */
+const LOBE_2 = 0.22;
+const LOBE_3 = 0.13;
+const LOBE_5 = 0.08;
+
+/** The most `reach` can return; the stamp box has to allow for it. */
+const MAX_REACH = 1 + LOBE_2 + LOBE_3 + LOBE_5;
+
+/** The least `reach` can return; nothing inside it is left to stamp. */
+const MIN_REACH = 1 - LOBE_2 - LOBE_3 - LOBE_5;
+
+/** How black a texel goes when the fire passes over it. */
+const CHAR = 255;
+
+// ---- 2. state --------------------------------------------------------------
+
+/** A texel rectangle, inclusive; `x0 > x1` means empty. */
+type Rect = { x0: number; z0: number; x1: number; z1: number };
+
+const emptyRect = (r: Rect): Rect => {
+  r.x0 = BURN_SIZE;
+  r.z0 = BURN_SIZE;
+  r.x1 = -1;
+  r.z1 = -1;
+  return r;
+};
+const rectEmpty = (r: Rect): boolean => r.x1 < r.x0 || r.z1 < r.z0;
+const growRect = (r: Rect, x0: number, z0: number, x1: number, z1: number) => {
+  if (x0 < r.x0) r.x0 = x0;
+  if (z0 < r.z0) r.z0 = z0;
+  if (x1 > r.x1) r.x1 = x1;
+  if (z1 > r.z1) r.z1 = z1;
+};
+
+/** A fire front: where it started, how far it has got, how much is left. */
+type Fire = {
+  x: number;
+  z: number;
+  /** Tiles from the centre the flame edge has reached. */
+  radius: number;
+  /** Tiles already burnt; the annulus between the two is what gets stamped. */
+  burnt: number;
+  vigour: number;
+  sinceEmber: number;
+  /** Seconds since the annulus up to `radius` was last stamped. */
+  sinceStamp: number;
+  /** Phases of this fire's own lobes; see `reach`. */
+  p1: number;
+  p2: number;
+  p3: number;
+};
+
+/**
+ * How far this fire has got in a given direction, as a fraction of its radius.
+ *
+ * A fire does not spread as a circle. Ours did, so every scar was a disc and a
+ * fight left a row of identical coins on the field - the one thing that says
+ * "stamped" rather than "burned".
+ *
+ * Three harmonics with the fire's own phases: the second gives it a long axis,
+ * the third and fifth break that up into lobes. Smooth, seamless at the wrap
+ * because they are all periodic in the angle, and no texture or noise lookup -
+ * the shape is three sines of a number the loop already has.
+ */
+function reach(fire: Fire, angle: number): number {
+  return (
+    1 +
+    LOBE_2 * Math.sin(angle * 2 + fire.p1) +
+    LOBE_3 * Math.sin(angle * 3 + fire.p2) +
+    LOBE_5 * Math.sin(angle * 5 + fire.p3)
+  );
+}
+
+const fires: Fire[] = [];
+
+/** The scar; allocated on the first burn. */
+let data: Uint8Array | null = null;
+
+/** Scratch for the sub-rect upload, grown to the largest rect seen. */
+let upload: Uint8Array = new Uint8Array(0);
+
+let texture: RawTexture | null = null;
+let sinceDecay = 0;
+/** Fractional bytes of regrowth the clock owes but has not spent yet. */
+let owed = 0;
+
+/** The scene the last ignition came from; the embers are drawn into it. */
+let emberScene: Scene | null = null;
+
+/** Texels written since the last upload. */
+const dirty: Rect = emptyRect({ x0: 0, z0: 0, x1: 0, z1: 0 });
+/** Every texel that may be non-zero; what the decay walks. */
+const painted: Rect = emptyRect({ x0: 0, z0: 0, x1: 0, z1: 0 });
+
+/**
+ * Does grass grow here? Handed over by the grass field rather than asked of
+ * it, so this module stays a leaf - see the header.
+ *
+ * Null before a field exists, which reads as "burn anywhere": a fire lit
+ * during a warp is not worth a special case, and the scar it leaves is
+ * invisible until the grass it is masking exists.
+ */
+let grassProbe: ((x: number, z: number) => boolean) | null = null;
+
+export function setGrassProbe(fn: ((x: number, z: number) => boolean) | null): void {
+  grassProbe = fn;
+}
+
+const hasFuel = (x: number, z: number): boolean => !grassProbe || grassProbe(x, z);
+
+/**
+ * The ground under a point. Handed over with the grass probe rather than
+ * looked up, for the same leaf reason.
+ */
+let heightProbe: ((x: number, z: number) => number) | null = null;
+
+export function setGroundProbe(fn: ((x: number, z: number) => number) | null): void {
+  heightProbe = fn;
+}
+
+const groundAt = (x: number, z: number): number => (heightProbe ? heightProbe(x, z) : 0);
+
+function ensureData(): Uint8Array {
+  if (!data) data = new Uint8Array(BURN_SIZE * BURN_SIZE);
+  return data;
+}
+
+/** The scar as a texture, created on first use for this scene. */
+export function grassBurnTexture(scene: Scene): RawTexture {
+  if (texture && texture.getScene() === scene) return texture;
+
+  // Allocated here rather than left null until the first fire.
+  //
+  // `snowTrail` gets away with a null-backed texture because nothing asks it
+  // for one until something has been ploughed. This one is bound by the
+  // terrain and the grass on the very first frame, so it would be created
+  // empty, and a texture Babylon was given no storage for is not one that a
+  // later `updateTextureData` can fill: every burn wrote into the CPU array,
+  // the uploads all reported success, and the shader sampled zero for ever.
+  // One megabyte of zeroes on a map that has grass, against that.
+  texture = RawTexture.CreateRTexture(
+    ensureData(),
+    BURN_SIZE,
+    BURN_SIZE,
+    scene,
+    false,
+    false,
+    Texture.BILINEAR_SAMPLINGMODE,
+    // The type, and it has to be said.
+    //
+    // `CreateRTexture` defaults to `TEXTURETYPE_FLOAT`, so a texture handed a
+    // `Uint8Array` is allocated as float and every byte written into it goes
+    // nowhere - silently. Everything else looked right the whole time: the CPU
+    // scar had 1.0 in it, `terrainBurnOn` bound as 1, the sampler bound the
+    // right texture by name, `updateTextureData` returned without complaint,
+    // and reading the texture back gave 1048576 zeroes. Only the embers ever
+    // showed, because the embers are the one part of this that does not read
+    // the map.
+    Constants.TEXTURETYPE_UNSIGNED_INT
+  );
+  texture.name = 'grassBurn';
+  texture.wrapU = Texture.CLAMP_ADDRESSMODE;
+  texture.wrapV = Texture.CLAMP_ADDRESSMODE;
+  texture.onDisposeObservable.addOnce(() => {
+    texture = null;
+  });
+
+  // A fresh texture holds nothing: whatever is painted must go up whole.
+  if (!rectEmpty(painted)) {
+    growRect(dirty, painted.x0, painted.z0, painted.x1, painted.z1);
+  }
+
+  return texture;
+}
+
+/** Whether anything is burnt or burning, so the shader can skip the fetch. */
+export function grassBurnActive(): boolean {
+  return !rectEmpty(painted) || fires.length > 0;
+}
+
+/** How burnt this point is, 0..1. The CPU's copy of what the shader reads. */
+export function grassBurnAt(x: number, z: number): number {
+  if (!data) return 0;
+
+  const tx = Math.floor(x * BURN_RES);
+  const tz = Math.floor(z * BURN_RES);
+
+  if (tx < 0 || tz < 0 || tx >= BURN_SIZE || tz >= BURN_SIZE) return 0;
+
+  return data[tz * BURN_SIZE + tx] / 255;
+}
+
+// ---- 3. burning ------------------------------------------------------------
+
+/** Char the texels `a..b` of row `tz` that lie in the annulus; whether any did. */
+function burnRow(
+  map: Uint8Array,
+  fire: Fire,
+  from: number,
+  to: number,
+  tz: number,
+  a: number,
+  b: number
+): boolean {
+  const wz = (tz + 0.5) / BURN_RES;
+  const dz = wz - fire.z;
+  const row = tz * BURN_SIZE;
+
+  let touched = false;
+
+  for (let tx = a; tx <= b; tx++) {
+    const wx = (tx + 0.5) / BURN_RES;
+    const dx = wx - fire.x;
+    const d2 = dx * dx + dz * dz;
+
+    // The front's own reach in this direction, not a radius. Both ends of
+    // the annulus take it, so the burnt inside and the advancing edge are
+    // the same shape and the ring does not cross itself as the fire grows.
+    const k = reach(fire, Math.atan2(dz, dx));
+    const inner = (from * k) ** 2;
+    const outer = (to * k) ** 2;
+
+    if (d2 < inner || d2 > outer) continue;
+    if (!hasFuel(wx, wz)) continue;
+
+    const i = row + tx;
+
+    // Written with `max`, so a second fire over the same ground does not
+    // stack past black and does not shorten what is already there.
+    if (map[i] >= CHAR) continue;
+
+    map[i] = CHAR;
+    touched = true;
+  }
+
+  return touched;
+}
+
+/**
+ * Stamp the annulus between `from` and `to` tiles of a fire's centre.
+ *
+ * The annulus and not the disc: the inside is already burnt, and re-stamping
+ * it would keep resetting its regrowth clock, so a fire that spread for four
+ * seconds would leave a scar that recovers all at once instead of from the
+ * outside in.
+ */
+function stamp(fire: Fire, from: number, to: number): void {
+  const map = ensureData();
+
+  // The box has to hold the longest lobe, not the nominal radius, or the
+  // shape is quietly cropped back to a square-cornered circle.
+  const span = to * MAX_REACH;
+  const x0 = Math.max(0, Math.floor((fire.x - span) * BURN_RES));
+  const x1 = Math.min(BURN_SIZE - 1, Math.ceil((fire.x + span) * BURN_RES));
+  const z0 = Math.max(0, Math.floor((fire.z - span) * BURN_RES));
+  const z1 = Math.min(BURN_SIZE - 1, Math.ceil((fire.z + span) * BURN_RES));
+
+  if (x1 < x0 || z1 < z0) return;
+
+  let touched = false;
+
+  if (!BURN_THROTTLE) {
+    for (let tz = z0; tz <= z1; tz++) {
+      if (burnRow(map, fire, from, to, tz, x0, x1)) touched = true;
+    }
+  } else {
+    // Each row walks the chord of the longest lobe less the chord of the
+    // shortest, so the trig runs only on the band that can hold the ring.
+    // Both circles are padded a texel the safe way, so rounding can only hand
+    // the exact test an extra texel, never take one from it.
+    const outer = to * MAX_REACH + 1 / BURN_RES;
+    const hole = from * MIN_REACH - 1 / BURN_RES;
+    const outer2 = outer * outer;
+    const hole2 = hole > 0 ? hole * hole : 0;
+
+    for (let tz = z0; tz <= z1; tz++) {
+      const dz = (tz + 0.5) / BURN_RES - fire.z;
+      const dz2 = dz * dz;
+
+      if (dz2 >= outer2) continue;
+
+      const half = Math.sqrt(outer2 - dz2);
+      const a = Math.max(x0, Math.floor((fire.x - half) * BURN_RES));
+      const b = Math.min(x1, Math.ceil((fire.x + half) * BURN_RES));
+
+      if (dz2 < hole2) {
+        const gap = Math.sqrt(hole2 - dz2);
+        const h0 = Math.ceil((fire.x - gap) * BURN_RES);
+        const h1 = Math.floor((fire.x + gap) * BURN_RES) - 1;
+
+        if (h0 <= h1) {
+          const l = burnRow(map, fire, from, to, tz, a, Math.min(b, h0 - 1));
+          const r = burnRow(map, fire, from, to, tz, Math.max(a, h1 + 1), b);
+          if (l || r) touched = true;
+          continue;
+        }
+      }
+
+      if (burnRow(map, fire, from, to, tz, a, b)) touched = true;
+    }
+  }
+
+  if (!touched) return;
+
+  growRect(dirty, x0, z0, x1, z1);
+  growRect(painted, x0, z0, x1, z1);
+}
+
+/** Stamp whatever the front has crossed since it was last stamped. */
+function catchUp(fire: Fire): void {
+  if (fire.radius > fire.burnt) {
+    stamp(fire, fire.burnt, fire.radius);
+    fire.burnt = fire.radius;
+  }
+
+  fire.sinceStamp = 0;
+}
+
+/**
+ * Whether a throttled front is stamped this frame. Until something is painted
+ * the decay clock is stopped, so the first char has to land on its own frame.
+ */
+const stampDue = (fire: Fire): boolean =>
+  rectEmpty(painted) ||
+  fire.radius - fire.burnt >= STAMP_STEP ||
+  fire.sinceStamp >= STAMP_EVERY;
+
+/** Is there anything left to burn around this ring? */
+function ringHasFuel(fire: Fire): boolean {
+  for (let i = 0; i < FUEL_SAMPLES; i++) {
+    const a = (i / FUEL_SAMPLES) * Math.PI * 2;
+
+    const r = fire.radius * reach(fire, a);
+
+    if (hasFuel(fire.x + Math.cos(a) * r, fire.z + Math.sin(a) * r)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Set the grass alight. `radius` in tiles is the hit itself; the fire spreads
+ * from there under its own vigour.
+ *
+ * Called by the fire rows of `common/skillVisuals.ts` through the same step
+ * list that melts snow, so every fire skill in the game reaches it and any
+ * added later does too.
+ */
+export function burnGrass(
+  scene: Scene,
+  x: number,
+  z: number,
+  radius: number,
+  strength = 1
+): void {
+  if (!GameOptions.advancedEffects) return;
+  if (!hasFuel(x, z)) return;
+
+  emberScene = scene;
+
+  // A hit inside a fire that is already going feeds it rather than starting a
+  // second one on top - otherwise a channelled spell stacks six fronts on one
+  // spot and they all spread together as a wall.
+  for (const f of fires) {
+    if (Math.hypot(f.x - x, f.z - z) <= f.radius) {
+      f.vigour = Math.max(f.vigour, strength);
+      return;
+    }
+  }
+
+  const fire: Fire = {
+    x,
+    z,
+    radius,
+    burnt: 0,
+    vigour: strength,
+    sinceEmber: 0,
+    sinceStamp: 0,
+    // Its own shape. Rolled once, so a fire keeps the outline it started with
+    // as it grows rather than writhing.
+    p1: Math.random() * Math.PI * 2,
+    p2: Math.random() * Math.PI * 2,
+    p3: Math.random() * Math.PI * 2,
+  };
+
+  // Full: the one with least left to give makes way.
+  if (fires.length >= MAX_FIRES) {
+    let worst = 0;
+    for (let i = 1; i < fires.length; i++) {
+      if (fires[i].vigour < fires[worst].vigour) worst = i;
+    }
+    catchUp(fires[worst]);
+    fires.splice(worst, 1);
+  }
+
+  stamp(fire, 0, radius);
+  fire.burnt = radius;
+  fires.push(fire);
+}
+
+/** Embers off the flame edge, where the fire actually is. */
+function embers(fire: Fire, dt: number): void {
+  const scene = emberScene;
+
+  if (!scene) return;
+
+  fire.sinceEmber += dt;
+
+  if (fire.sinceEmber < EMBER_EVERY) return;
+
+  fire.sinceEmber = 0;
+
+  // All the way round the rim, and only the rim.
+  //
+  // This took one random bearing a burst, which is not a fire front - it is a
+  // flame that jumps about the edge, and early on, while the radius is still
+  // small, every one of those lands in nearly the same place and they pile
+  // into a single white-hot ball sitting in the middle of the scar. What is
+  // burning is the whole advancing edge, so the whole advancing edge is what
+  // emits.
+  //
+  // The bearings are stratified rather than rolled - one per equal slice of
+  // the circle, jittered inside its own slice - so the ring is covered every
+  // burst instead of clumping wherever the dice fell.
+  for (let i = 0; i < RIM_POINTS; i++) {
+    const a = ((i + Math.random()) / RIM_POINTS) * Math.PI * 2;
+    const r = fire.radius * reach(fire, a);
+    const x = fire.x + Math.cos(a) * r;
+    const z = fire.z + Math.sin(a) * r;
+
+    // Nothing to burn here, so nothing burns here: the fire's edge goes dark
+    // where it has run up against stone, which is the same rule that stopped
+    // it spreading there.
+    if (!hasFuel(x, z)) continue;
+
+    const at = new Vector3(x, groundAt(x, z), z);
+
+    // Only the ember. The flame itself is drawn on the blades that are
+    // burning (see the vBurn block in terrainGrass.ts) rather than thrown as
+    // a sprite over them: a billboard is a picture of a fire standing near
+    // some grass, and at any size it hangs over the field instead of being
+    // the grass alight. What a sprite is still good for is the part that
+    // leaves the leaf and rides the air, which is this.
+    effects.spawn('particles', scene, at, {
+      recipe: GRASS_EMBERS,
+      count: EMBER_SPARKS,
+    });
+  }
+}
+
+// ---- 4. the clock ----------------------------------------------------------
+
+/**
+ * Grow the scar back by `amount` (of 255) over the painted rectangle, then
+ * shrink the rectangle to what is still burnt.
+ */
+function decay(amount: number): void {
+  if (!data || rectEmpty(painted)) return;
+
+  const { x0, z0, x1, z1 } = painted;
+  growRect(dirty, x0, z0, x1, z1);
+
+  let nx0 = BURN_SIZE;
+  let nz0 = BURN_SIZE;
+  let nx1 = -1;
+  let nz1 = -1;
+
+  for (let tz = z0; tz <= z1; tz++) {
+    const row = tz * BURN_SIZE;
+    for (let tx = x0; tx <= x1; tx++) {
+      const i = row + tx;
+      const v = data[i];
+      if (v === 0) continue;
+      const n = v > amount ? v - amount : 0;
+      data[i] = n;
+      if (n === 0) continue;
+      if (tx < nx0) nx0 = tx;
+      if (tx > nx1) nx1 = tx;
+      if (tz < nz0) nz0 = tz;
+      if (tz > nz1) nz1 = tz;
+    }
+  }
+
+  painted.x0 = nx0;
+  painted.z0 = nz0;
+  painted.x1 = nx1;
+  painted.z1 = nz1;
+}
+
+/** `texSubImage2D` of the dirty rectangle only. */
+function flush(): void {
+  if (rectEmpty(dirty) || !texture || !data) return;
+
+  const internal = texture.getInternalTexture();
+  const engine = texture.getScene()?.getEngine() as ThinEngine | undefined;
+  if (!internal || !engine || !internal.isReady) return;
+
+  const { x0, z0, x1, z1 } = dirty;
+  const w = x1 - x0 + 1;
+  const h = z1 - z0 + 1;
+
+  if (upload.length < w * h) upload = new Uint8Array(w * h);
+  for (let tz = 0; tz < h; tz++) {
+    const src = (z0 + tz) * BURN_SIZE + x0;
+    upload.set(data.subarray(src, src + w), tz * w);
+  }
+
+  engine.updateTextureData(internal, upload.subarray(0, w * h), x0, z0, w, h);
+
+  emptyRect(dirty);
+}
+
+function update(dt: number): void {
+  for (let i = fires.length - 1; i >= 0; i--) {
+    const f = fires[i];
+
+    f.radius += SPREAD_RATE * f.vigour * dt;
+
+    // The whole of "it dies down the more it spreads". Distance travelled is
+    // what costs the fire, so it slows as it goes and then stops.
+    f.vigour -= (dt * f.radius) / VIGOUR_SPAN;
+
+    // And it goes out where there is nothing left to take.
+    if (!ringHasFuel(f)) f.vigour -= dt * STARVE_RATE;
+
+    const out = f.vigour <= 0 || f.radius >= FIRE_MAX_RADIUS;
+
+    f.sinceStamp += dt;
+
+    // A front going out lays down what it still owes first.
+    if (!BURN_THROTTLE || out || stampDue(f)) catchUp(f);
+
+    embers(f, dt);
+
+    if (out) fires.splice(i, 1);
+  }
+
+  if (!rectEmpty(painted)) {
+    sinceDecay += dt;
+
+    if (sinceDecay >= DECAY_EVERY) {
+      // Owed rings go down before the pass, so it decays the same map the
+      // every-frame stamp would have left.
+      for (const f of fires) catchUp(f);
+
+      // The fraction is carried rather than rounded away. A pass every two
+      // seconds owes 255 * 2 / 300 = 1.7 of a byte, and rounding that to 2
+      // regrows the field in 255 seconds instead of 300 - measured at 239,
+      // against an ask that said five minutes at the least. Carrying the
+      // remainder spends exactly what the clock owes.
+      owed += (255 * sinceDecay) / REGROW_SECONDS;
+      sinceDecay = 0;
+
+      const amount = Math.floor(owed);
+
+      if (amount >= 1) {
+        decay(amount);
+        owed -= amount;
+      }
+    }
+  }
+
+  flush();
+}
+
+/** Put every fire out and wipe the scar: a map change or a teardown. */
+export function resetGrassBurn(): void {
+  fires.length = 0;
+  emberScene = null;
+
+  if (data && !rectEmpty(painted)) {
+    // Only the painted rectangle can hold anything, so only it is zeroed and
+    // only it goes back up.
+    for (let tz = painted.z0; tz <= painted.z1; tz++) {
+      const row = tz * BURN_SIZE;
+      data.fill(0, row + painted.x0, row + painted.x1 + 1);
+    }
+    growRect(dirty, painted.x0, painted.z0, painted.x1, painted.z1);
+  }
+
+  emptyRect(painted);
+  owed = 0;
+  sinceDecay = 0;
+  flush();
+}
+
+// ---- 5. the layer ----------------------------------------------------------
+
+export const grassBurnLayer: WeatherLayer = {
+  name: 'grassBurn',
+  update: (_map, dt) => update(dt),
+  reset: resetGrassBurn,
+};

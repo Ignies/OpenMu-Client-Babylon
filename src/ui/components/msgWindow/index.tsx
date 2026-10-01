@@ -4,7 +4,7 @@ import { observer } from 'mobx-react-lite';
 import { Store } from '../../../store';
 import { MuSpriteFrame } from '../muSprite';
 import { MuButton } from '../muButton';
-import { playUiSound } from '../../../libs/sfx';
+import { playUiSound } from '../../../controllers/sound/sfx';
 import { TEXT_COLOR } from '../../pages/serversPage/layout';
 import { MSG_WIN_MESSAGES, MsgWinCode, MsgWinType } from '../../../common/msgWin';
 import {

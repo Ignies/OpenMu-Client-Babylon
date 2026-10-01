@@ -8,7 +8,7 @@ import {
 } from '../versions/shared/packets/ClientToServerPackets';
 import { CHAT_SERVER_PORT, type ChatClient } from './controllers/net/protocols/chatRoomProtocol';
 import { openChatRoomSocket, type ChatRoomSocket } from './controllers/net/sockets/chatRoomSocket';
-import { playUiSound } from './libs/sfx';
+import { playUiSound } from './controllers/sound/sfx';
 
 export type ChatRoomLine = {
   sender: string;

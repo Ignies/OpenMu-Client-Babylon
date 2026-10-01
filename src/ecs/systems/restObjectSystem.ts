@@ -8,15 +8,15 @@ import {
   PlayerAction,
   ServerPlayerActionType,
 } from '../../common/objects/enum';
-import { resolveGenderedAction } from '../../common/playerActionMapper';
+import { resolveGenderedAction } from '../../controllers/anim/playerActionMapper';
 import { TWFlags } from '../../controllers/terrain/consts';
 import { devQuery } from '../../core/devSeams';
 import {
   findRestObject,
   type RestKind,
 } from '../../controllers/terrain/restObjects';
-import { aimX, aimY } from '../../camera';
-import { sound } from '../../sound';
+import { aimX, aimY } from '../../controllers/camera';
+import { sound } from '../../controllers/sound';
 import { Store } from '../../store';
 import type { ISystemFactory } from '../world';
 

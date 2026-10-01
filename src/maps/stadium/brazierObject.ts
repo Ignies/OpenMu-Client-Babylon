@@ -1,11 +1,11 @@
 import {
   createMovableFlare,
   type MovableFlare,
-} from '../../common/effectLights';
+} from '../../controllers/lighting/effectLights';
 import {
   BonedParticleEmitter,
   type BonedEmission,
-} from '../../common/effectParticles';
+} from '../../controllers/fx/effectParticles';
 import { MapTileObject } from '../../controllers/terrain/mapTileObject';
 import { Store } from '../../store';
 import type { Entity, World } from '../../ecs/world';

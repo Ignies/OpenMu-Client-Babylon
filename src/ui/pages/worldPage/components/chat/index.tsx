@@ -13,20 +13,20 @@ import { runInAction } from 'mobx';
 import { Social } from '../../../../../social';
 import { Store } from '../../../../../store';
 import { useEventBus } from '../../../../../hooks/useEventBus';
-import { playUiSound, uiClick } from '../../../../../libs/sfx';
+import { playUiSound, uiClick } from '../../../../../controllers/sound/sfx';
 import { MuButton } from '../../../../components/muButton';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuWindows } from '../../../../components/muWindow/windowState';
 import { bottomBarScreenHeight } from '../../../../components/muWindow';
 import { useUiViewport } from '../../../../components/uiStage';
-import { useIsMobile } from '../../../../../common/mobile';
+import { useIsMobile } from '../../../../../controllers/interface/mobile';
 import {
   MuResizeGrip,
   useWindowStackEntry,
 } from '../../../../components/muWindow/useWindowChrome';
 import { isTypingInField } from '../../../../../ecs/systems/keyboardInputSystem';
 import { GameOptions } from '../../../../../common/gameOptions';
-import { isKey } from '../../../../../common/keyBindings';
+import { isKey } from '../../../../../controllers/interface/keyBindings';
 import { EmojiText } from '../../../../components/emojiText';
 import { EMOJI_CATALOG } from '../../../../../emojis';
 import { EmojiPicker, RecentEmojis } from './emojiPicker';

@@ -2,8 +2,8 @@ import { MapTileObject } from '../../controllers/terrain/mapTileObject';
 import {
   lightMapObjectWith,
   tarkanGlowLamp,
-} from '../../lighting/mapObjectLights';
-import type { LightSource } from '../../lighting/lightSource';
+} from '../../controllers/lighting/mapObjectLights';
+import type { LightSource } from '../../controllers/lighting/lightSource';
 import type { AbstractMesh } from '../../controllers/render/babylon/exports';
 import type { Entity, World } from '../../ecs/world';
 

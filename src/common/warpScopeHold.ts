@@ -1,5 +1,5 @@
 import { EventBus } from '../core/eventBus';
-import { setSceneHold } from './sceneGate';
+import { setSceneHold } from '../controllers/loading/sceneGate';
 
 /**
  * After a warp OpenMU parks the hero until `ClientReadyAfterMapChange`, so

@@ -7,8 +7,8 @@ import { Messenger } from '../messenger';
 import { quests } from '../quests';
 import { LogOutPacket } from '../../versions/shared/packets/ClientToServerPackets';
 import { SessionResume } from './sessionResume';
-import { allowUnload } from './browserHotkeys';
-import { playUiSound } from '../sound/ui';
+import { allowUnload } from '../controllers/interface/browserHotkeys';
+import { playUiSound } from '../controllers/sound/ui';
 
 /**
  * The three ways out of a session: `CSystemMenuMsgBox`'s Exit Game, Select

@@ -17,7 +17,7 @@ import {
 } from '../../common/pets';
 import { createAngleDeg, turnAngle } from '../../core/turnAngle';
 import { inChaosCastle } from '../../common/locomotion';
-import { effects } from '../../effects';
+import { effects } from '../../controllers/fx';
 import {
   boneLocalPos,
   bonePos,
@@ -26,13 +26,13 @@ import {
   entityPos,
   fxNow,
   inWindow,
-} from '../../effects/core';
-import { FOOT_THUNDER_FRAMES, MODEL, RGBS, TEX } from '../../effects/recipes';
+} from '../../controllers/fx/core';
+import { FOOT_THUNDER_FRAMES, MODEL, RGBS, TEX } from '../../controllers/fx/recipes';
 import { Store } from '../../store';
 import { PlayerAction } from '../../common/objects/enum';
 import { RIDER_FLY_WORLDS } from '../../combat/recipes';
-import { playUiSound } from '../../sound/ui';
-import { playSfx } from '../../sound/listener';
+import { playUiSound } from '../../controllers/sound/ui';
+import { playSfx } from '../../controllers/sound/listener';
 import type { Entity, ISystemFactory, Item } from '../world';
 import { teleportMountAlpha } from './teleportSystem';
 

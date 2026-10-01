@@ -3,8 +3,8 @@ import { MonsterActionType, PlayerAction } from '../../common/objects/enum';
 import {
   isPlayerAttackAction,
   isStandingIdle,
-} from '../../common/playerActionMapper';
-import { monsterModelTypeOf } from '../../common/playSpeed';
+} from '../../controllers/anim/playerActionMapper';
+import { monsterModelTypeOf } from '../../controllers/anim/playSpeed';
 import { isPlayerBody } from '../../common/playerObject';
 import { HORN_OF_FENRIR, PET_GROUP } from '../../common/petConstants';
 import type { CharacterClassNumber } from '../../core/types';
@@ -19,14 +19,14 @@ import {
   playerDeathSound,
   playerPainSound,
   playerSwingSound,
-} from '../../common/combatSounds';
+} from '../../controllers/sound/combatSounds';
 import {
   playSfx,
   setSfxListener,
   type SfxOptions,
   type SfxPosition,
-} from '../../libs/sfx';
-import type { Sounds } from '../../sound/recipes';
+} from '../../controllers/sound/sfx';
+import type { Sounds } from '../../controllers/sound/recipes';
 import {
   MAP_VOICE_RANGE_TILES,
   fpsCheck,
@@ -36,8 +36,8 @@ import {
   stepCues,
   type CuePlayer,
   type CueState,
-} from '../../sound/mapMonsters';
-import { MonsterAttackEffects } from '../../sound/monsterEffects';
+} from '../../controllers/sound/mapMonsters';
+import { MonsterAttackEffects } from '../../controllers/sound/monsterEffects';
 import { Store } from '../../store';
 
 /**

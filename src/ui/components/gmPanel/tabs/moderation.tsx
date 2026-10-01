@@ -2,7 +2,7 @@ import { observer } from 'mobx-react-lite';
 import { t } from '../../../../i18n';
 import { GmPanel } from '../../../../gmPanel';
 import { gmCommand } from '../../../../common/gmCommands';
-import { uiClick } from '../../../../libs/sfx';
+import { uiClick } from '../../../../controllers/sound/sfx';
 import { CommandCard } from '../commandForm';
 
 /** Everything that takes access away. Each one confirms before it sends. */

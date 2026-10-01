@@ -59,7 +59,7 @@ import {
   requestBodyTerrainLight,
   requestTerrainLight,
 } from './terrainDynamicLight';
-import { lightingTier } from '../../common/lightingQuality';
+import { lightingTier } from '../lighting/lightingQuality';
 import { World, type TerrainLayers } from '../../ecs/world';
 import { DEBUG_SHOW_TERRAIN_ATTRIBUTES } from '../../consts';
 import { assetWorldNum } from '../assets/worldAssets';

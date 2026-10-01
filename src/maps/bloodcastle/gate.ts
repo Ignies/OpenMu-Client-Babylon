@@ -1,5 +1,5 @@
 import { TW_NOGROUND } from '../../controllers/terrain/consts';
-import { sound } from '../../sound';
+import { sound } from '../../controllers/sound';
 import type { World } from '../../ecs/world';
 import { BLOOD_CASTLE_MOAT } from './spec';
 

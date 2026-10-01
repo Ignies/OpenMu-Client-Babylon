@@ -30,8 +30,8 @@ import {
   terrainOutputDecodeGlsl,
   terrainSkyLightGlsl,
 } from './terrainLighting';
-import { registerTerrainMaterial } from '../../scenes/shadows';
-import { grassBurnActive, grassBurnTexture } from '../../weather/grassBurn';
+import { registerTerrainMaterial } from '../render/scenes/shadows';
+import { grassBurnActive, grassBurnTexture } from '../weather/grassBurn';
 import {
   bindTerrainWater,
   disposeTerrainWaterFrames,

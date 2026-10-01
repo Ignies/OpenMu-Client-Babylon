@@ -9,8 +9,8 @@ import { Social } from './social';
 import { Commands } from './commands';
 import { GmPanel } from './gmPanel';
 import { Economy } from './economy';
-import { weather } from './weather';
-import { sound } from './sound';
+import { weather } from './controllers/weather';
+import { sound } from './controllers/sound';
 import { Engine, SceneLoader } from './controllers/render/babylon/exports';
 import { createEngine } from './controllers/render/babylon/utils';
 import { devQuery } from './core/devSeams';
@@ -19,25 +19,25 @@ import {
   renderScaleForStep,
   renderScaleSeam,
 } from './controllers/render/renderScale';
-import { upscaleLive } from './scenes/upscale';
-import { TestScene } from './scenes/testScene';
+import { upscaleLive } from './controllers/render/scenes/upscale';
+import { TestScene } from './controllers/render/scenes/testScene';
 import { loadMapIntoScene } from './controllers/terrain/loadMapIntoScene';
 import { prefetchWorldTerrain } from './controllers/assets/mu/prefetchWorld';
 import { createWorld } from './ecs/createWorld';
 import { EventBus } from './core/eventBus';
-import { installLoginMusic } from './libs/loginMusic';
-import { setKeyProfile } from './common/keyBindings';
-import { installBrowserHotkeyGuard } from './common/browserHotkeys';
+import { installLoginMusic } from './controllers/sound/loginMusic';
+import { setKeyProfile } from './controllers/interface/keyBindings';
+import { installBrowserHotkeyGuard } from './controllers/interface/browserHotkeys';
 import { SessionResume } from './common/sessionResume';
 import { reaction } from 'mobx';
 import { watchStateWarnings } from './common/stateWarnings';
-import { watchPageTitle } from './common/pageTitle';
+import { watchPageTitle } from './controllers/interface/pageTitle';
 import {
   preloadPregameSprites,
   preloadWorldSprites,
 } from './controllers/assets/mu/preloadSprites';
 import { installPerfOverlay, recordFrame } from './controllers/render/perfOverlay';
-import { csmCacheStats } from './scenes/shadows';
+import { csmCacheStats } from './controllers/render/scenes/shadows';
 import { refreshServerList } from './common/serverList';
 import { ensureCacheWorker } from './controllers/assets/assetDownload';
 import { sceneCovered } from './controllers/render/sceneCover';

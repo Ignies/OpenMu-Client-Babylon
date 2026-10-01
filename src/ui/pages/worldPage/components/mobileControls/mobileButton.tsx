@@ -1,6 +1,6 @@
 import { useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { MuSpriteFrame } from '../../../../components/muSprite';
-import { uiClick } from '../../../../../libs/sfx';
+import { uiClick } from '../../../../../controllers/sound/sfx';
 
 /**
  * A touch button. `MuButton` cannot serve here: its hover and pressed frames

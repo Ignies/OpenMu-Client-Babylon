@@ -6,7 +6,7 @@ import { instrumentById, instrumentParts, isInstrumentId, type InstrumentPart } 
 import { loadGLTF } from '../../controllers/assets/modelLoader';
 import { ModelObject } from '../../controllers/render/modelObject';
 import type { PlayerAction } from '../../common/objects/enum';
-import { isStandingIdle } from '../../common/playerActionMapper';
+import { isStandingIdle } from '../../controllers/anim/playerActionMapper';
 import type { PlayerObject } from '../../common/playerObject';
 import {
   performanceEnded,
@@ -15,10 +15,10 @@ import {
 } from '../../common/band';
 import { instrumentClip } from '../../common/band/instrumentClip';
 import { startPerforming, stopPerforming } from '../../common/band/performing';
-import { audioNow, dropPerformer, setPerformerPosition } from '../../sound/instruments';
-import { effects } from '../../effects';
-import { entityYaw } from '../../effects/core';
-import { playUiSound } from '../../libs/sfx';
+import { audioNow, dropPerformer, setPerformerPosition } from '../../controllers/sound/instruments';
+import { effects } from '../../controllers/fx';
+import { entityYaw } from '../../controllers/fx/core';
+import { playUiSound } from '../../controllers/sound/sfx';
 import type { Entity, ISystemFactory } from '../world';
 
 /**

@@ -4,11 +4,11 @@ import {
 } from '../../controllers/render/babylon/exports';
 import type { ISystemFactory, World } from '../world';
 import { Store, UIState } from '../../store';
-import { isMobileDevice } from '../../common/mobile';
-import { MoveTargetEffect } from '../../common/moveTargetEffect';
+import { isMobileDevice } from '../../controllers/interface/mobile';
+import { MoveTargetEffect } from '../../controllers/fx/moveTargetEffect';
 import { GameOptions } from '../../common/gameOptions';
-import { WALK_KEYS } from '../../common/keyBindings';
-import { aimX, aimY } from '../../camera';
+import { WALK_KEYS } from '../../controllers/interface/keyBindings';
+import { aimX, aimY } from '../../controllers/camera';
 import { Commands } from '../../commands';
 import { teleportGate } from '../../common/teleportRules';
 import { teleportBusy } from './teleportSystem';

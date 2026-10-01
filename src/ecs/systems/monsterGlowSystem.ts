@@ -1,6 +1,6 @@
 import type { Entity, ISystemFactory } from '../world';
-import { glowMonster, monsterGlowFor } from '../../effects/monsterGlow';
-import type { EffectHandle } from '../../effects';
+import { glowMonster, monsterGlowFor } from '../../controllers/fx/monsterGlow';
+import type { EffectHandle } from '../../controllers/fx';
 
 /**
  * Consumer of the effects layer's `monsterGlow` entry: walks the entities

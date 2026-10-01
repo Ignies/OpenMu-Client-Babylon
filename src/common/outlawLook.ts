@@ -7,8 +7,8 @@ import {
   type Scene,
 } from '../controllers/render/babylon/exports';
 import type { ModelObject } from '../controllers/render/modelObject';
-import { tierIndex } from './lightingQuality';
-import { requestGlowProbe } from '../scenes/sceneLook';
+import { tierIndex } from '../controllers/lighting/lightingQuality';
+import { requestGlowProbe } from '../controllers/render/scenes/sceneLook';
 
 /**
  * Ultra's outlaw: in place of the original's flat red body light, the art

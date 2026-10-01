@@ -1,4 +1,4 @@
-import { isKey } from '../../../../../common/keyBindings';
+import { isKey } from '../../../../../controllers/interface/keyBindings';
 import { t } from '../../../../../i18n';
 import './style.less';
 import { observer } from 'mobx-react-lite';
@@ -7,7 +7,7 @@ import { Store } from '../../../../../store';
 import { MAX_PARTY_MEMBERS, Social } from '../../../../../social';
 import { Economy } from '../../../../../economy';
 import { useEventBus } from '../../../../../hooks/useEventBus';
-import { uiClick } from '../../../../../libs/sfx';
+import { uiClick } from '../../../../../controllers/sound/sfx';
 import { MuButton } from '../../../../components/muButton';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuItemWindow, MuTableFrame } from '../../../../components/muWindow';

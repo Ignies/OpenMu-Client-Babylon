@@ -3,21 +3,21 @@ import { getMaterial, loadGLTF } from '../assets/modelLoader';
 import { ModelObject } from '../render/modelObject';
 import { BlendState } from '../../common/objects/enum';
 import { ENUM_WORLD } from '../../core/types';
-import { SNOW_GROUND_MAPS } from '../../weather/snowCover';
+import { SNOW_GROUND_MAPS } from '../weather/snowCover';
 import { isEffectOnlyObject } from '../render/effectOnlyObjects';
-import { createEffectLight, type EffectLight } from '../../common/effectLights';
+import { createEffectLight, type EffectLight } from '../lighting/effectLights';
 import {
   LOGIN_CHANDELIER,
   LOGIN_WALL_TORCH,
   lightMapObject,
-} from '../../lighting/mapObjectLights';
-import type { LightSource } from '../../lighting/lightSource';
+} from '../lighting/mapObjectLights';
+import type { LightSource } from '../lighting/lightSource';
 import {
   BonedParticleEmitter,
   ParticleEmitter,
   emissionsFor,
   type BonedEmission,
-} from '../../common/effectParticles';
+} from '../fx/effectParticles';
 
 export class MapTileObject extends ModelObject {
   static Batchable = true;

@@ -3,8 +3,8 @@ import { prefetchSignPlates } from '../../common/signPlates';
 import { SignObject } from '../../common/signObject';
 import { signTypes } from '../../common/signLabels';
 import type { World } from '../../ecs/world';
-import { setAreaMood } from '../../scenes/sceneLook';
-import type { AreaLookName } from '../../lighting/profiles';
+import { setAreaMood } from '../../controllers/render/scenes/sceneLook';
+import type { AreaLookName } from '../../controllers/lighting/profiles';
 import { LeanBoxObject } from '../../common/operateBoxObject';
 import { DeviasCandleObject } from './candleObject';
 import {

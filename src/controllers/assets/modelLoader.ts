@@ -27,7 +27,7 @@ import {
   createItemMaterial,
   createItemPbrMaterial,
   useMeshAlphaTestTexture,
-} from '../../common/itemMaterial';
+} from '../item_fx/itemMaterial';
 import {
   isCharacterAsset,
   pbrCovers,

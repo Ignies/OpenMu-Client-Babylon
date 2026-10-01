@@ -1,6 +1,6 @@
 import type { Entity, ISystemFactory } from '../world';
 import { Store } from '../../store';
-import { applyPlayerActionSpeed, serverMinAttackInterval } from '../../common/playSpeed';
+import { applyPlayerActionSpeed, serverMinAttackInterval } from '../../controllers/anim/playSpeed';
 import { HitRequestPacket } from '../../../versions/shared/packets/ClientToServerPackets';
 import {
   MonsterActionType,

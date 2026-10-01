@@ -7,7 +7,7 @@ import type { WorldView } from '../../../../gmWorld';
 import { className, type TrackedPlayer } from '../../../../controllers/net/protocols/adminProtocol';
 import { mapName } from '../../../../common/gmMaps';
 import { gmCommand } from '../../../../common/gmCommands';
-import { uiClick } from '../../../../libs/sfx';
+import { uiClick } from '../../../../controllers/sound/sfx';
 import { RunButton } from '../commandForm';
 import { FeedNotice, heroStateLabel, playerMatches, sinceText } from '../shared';
 import { PlayerMenu } from '../playerMenu';

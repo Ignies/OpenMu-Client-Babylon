@@ -1,5 +1,5 @@
 import { ItemsDatabase } from '../../common/itemsDatabase';
-import { itemVisualTier } from '../../common/itemVisualTier';
+import { itemVisualTier } from '../../controllers/item_fx/itemVisualTier';
 import { inChaosCastle } from '../../common/locomotion';
 import type { ModelObject } from '../../controllers/render/modelObject';
 import { isPlayerBody, type PlayerObject } from '../../common/playerObject';

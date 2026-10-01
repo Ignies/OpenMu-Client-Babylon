@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react-lite';
 import { t, type TextKey } from '../../../i18n';
 import { GmPanel } from '../../../gmPanel';
-import { uiClick } from '../../../libs/sfx';
+import { uiClick } from '../../../controllers/sound/sfx';
 import type { GmCommand, GmParam } from '../../../common/gmCommands';
 
 /**

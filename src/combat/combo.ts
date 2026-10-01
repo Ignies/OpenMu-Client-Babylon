@@ -11,7 +11,7 @@
  * read by effects / HUD (`comboFlash`) and by the death system for the
  * knock-up (`comboKnockUp`).
  */
-import type { Sounds } from '../libs/soundsManager';
+import type { Sounds } from '../controllers/sound/soundsManager';
 import type { ENUM_WORLD } from '../core/types';
 import type { CombatLayer } from './layer';
 import { SKILL_COMBO } from './recipes';

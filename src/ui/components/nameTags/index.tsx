@@ -7,7 +7,7 @@ import {
   onAnyScreenPosition,
   onScreenPosition,
   onScreenPositionFrameEnd,
-} from '../../../libs/screenPositionBus';
+} from '../../../controllers/interface/screenPositionBus';
 import type { Entity } from '../../../ecs/world';
 import {
   CHAT_FADE_TICKS,

@@ -1,8 +1,8 @@
 import type { AbstractMesh } from '../../controllers/render/babylon/exports';
 import { ENUM_WORLD } from '../../core/types';
-import { lookDirector } from '../../lighting/director';
-import type { RoomVolume } from '../../lighting/profiles';
-import { shadowReceiverChanged } from '../../scenes/csmBounds';
+import { lookDirector } from '../../controllers/lighting/director';
+import type { RoomVolume } from '../../controllers/lighting/profiles';
+import { shadowReceiverChanged } from '../../controllers/render/scenes/csmBounds';
 import type { ISystemFactory } from '../world';
 
 /**

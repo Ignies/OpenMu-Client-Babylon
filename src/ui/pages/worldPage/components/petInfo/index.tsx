@@ -10,7 +10,7 @@ import {
   PetCommandModeEnum,
   PetTypeEnum,
 } from '../../../../../../versions/shared/packets/ClientToServerPackets';
-import { uiClick } from '../../../../../libs/sfx';
+import { uiClick } from '../../../../../controllers/sound/sfx';
 import { MuButton } from '../../../../components/muButton';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuItemWindow, MuTableFrame } from '../../../../components/muWindow';

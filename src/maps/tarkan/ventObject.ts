@@ -1,5 +1,5 @@
 import { MapTileObject } from '../../controllers/terrain/mapTileObject';
-import { ParticleEmitter, type Emission } from '../../common/effectParticles';
+import { ParticleEmitter, type Emission } from '../../controllers/fx/effectParticles';
 import type { Entity, World } from '../../ecs/world';
 
 const DEGREES_PER_RADIAN = 180 / Math.PI;

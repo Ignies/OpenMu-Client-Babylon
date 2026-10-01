@@ -16,7 +16,7 @@ import {
 } from '../../../../admin/catalogues';
 import { itemDisplayName, skinDisplayName, spawnCatalogue } from '../../../../admin/skins';
 import { GmLibrary } from '../../../../admin/gmLibrary';
-import { uiClick } from '../../../../libs/sfx';
+import { uiClick } from '../../../../controllers/sound/sfx';
 import { ItemIcon } from '../../itemIcon';
 import { CommandCard, QuickButton } from '../commandForm';
 

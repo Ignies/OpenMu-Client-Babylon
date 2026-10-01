@@ -10,15 +10,15 @@ import {
   warmFootprints,
   type PrintKind,
   type PrintLane,
-} from '../../weather/footprints';
-import { trackFor, type TrackRecipe } from '../../weather/recipes';
-import { monsterModelTypeOf } from '../../common/playSpeed';
-import { weather } from '../../weather';
+} from '../../controllers/weather/footprints';
+import { trackFor, type TrackRecipe } from '../../controllers/weather/recipes';
+import { monsterModelTypeOf } from '../../controllers/anim/playSpeed';
+import { weather } from '../../controllers/weather';
 import { isTileOpen } from '../../controllers/terrain/terrainMask';
-import { onSnowGround } from '../../weather/snowSink';
-import { SNOW_GROUND_MAPS } from '../../weather/snowCover';
+import { onSnowGround } from '../../controllers/weather/snowSink';
+import { SNOW_GROUND_MAPS } from '../../controllers/weather/snowCover';
 import { RUN_THRESHOLD } from '../../common/locomotion';
-import { ploughSnowTrail } from '../../weather/snowTrail';
+import { ploughSnowTrail } from '../../controllers/weather/snowTrail';
 import type { Entity, ISystemFactory } from '../world';
 import { isTeleporting } from './teleportSystem';
 

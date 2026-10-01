@@ -12,15 +12,15 @@ import {
 import type { Entity, World } from '../../ecs/world';
 import { ModelObject, extendByPosedLocalBounds } from './modelObject';
 import { GameOptions } from '../../common/gameOptions';
-import { lightingTier, type LightingTier } from '../../common/lightingQuality';
-import { packBodyLight, packBodyLightFor } from '../../common/itemMaterial';
+import { lightingTier, type LightingTier } from '../lighting/lightingQuality';
+import { packBodyLight, packBodyLightFor } from '../item_fx/itemMaterial';
 import { blendMeshFor } from './blendMeshes';
 import { isEffectOnlyObject } from './effectOnlyObjects';
 import { meshAnimationFor } from './meshAnimation';
 import {
   lightEmittersFor,
   recipeFromEmitter,
-} from '../../lighting/mapObjectLights';
+} from '../lighting/mapObjectLights';
 import { LEAN_CURSOR_OBJECTS, findRestObject } from '../terrain/restObjects';
 import { isMapDoorType } from '../../ecs/systems/mapDoorSystem';
 import { roomStructureTypes } from '../../maps/rooms';
@@ -51,11 +51,11 @@ import {
   terrainMaskVersion,
 } from '../terrain/terrainMask';
 import { needsTerrainMask } from '../terrain/terrainOverlay';
-import { SNOW_GROUND_MAPS } from '../../weather/snowCover';
-import { setSceneHold } from '../../common/sceneGate';
+import { SNOW_GROUND_MAPS } from '../weather/snowCover';
+import { setSceneHold } from '../loading/sceneGate';
 import { devQuery } from '../../core/devSeams';
 import { isStillAnimation } from './staticClips';
-import { CSM_CASTER_REACH } from '../../scenes/shadows';
+import { CSM_CASTER_REACH } from './scenes/shadows';
 import { renderDistanceRanges } from './renderDistance';
 import { ENUM_WORLD } from '../../core/types';
 import {

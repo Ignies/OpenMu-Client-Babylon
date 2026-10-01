@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import type { With } from 'miniplex';
 import { Store } from '../../../store';
 import { useRenderId } from '../../../hooks';
-import { onScreenPosition } from '../../../libs/screenPositionBus';
+import { onScreenPosition } from '../../../controllers/interface/screenPositionBus';
 import type { Entity } from '../../../ecs/world';
 import { guildMarkDataUrl, isEmptyGuildMark } from '../../../common/guildMark';
 

@@ -4,17 +4,17 @@ import { TW_ACTION, TW_NOGROUND } from '../../controllers/terrain/consts';
 import type { World } from '../world';
 
 const playSfx = vi.fn((..._args: unknown[]) => 1000);
-vi.mock('../../libs/sfx', () => ({
+vi.mock('../../controllers/sound/sfx', () => ({
   playSfx: (...args: unknown[]) => playSfx(...args),
 }));
 // These three reach the store through the effects layer / combat sounds.
 const spawnBomb = vi.fn();
-vi.mock('../../common/deathVisuals', () => ({
+vi.mock('../../controllers/fx/deathVisuals', () => ({
   shatterDeathFor: () => undefined,
   spawnBomb: (...args: unknown[]) => spawnBomb(...args),
 }));
-vi.mock('../../effects', () => ({ effects: { spawn: () => {} } }));
-vi.mock('../../common/combatSounds', () => ({ COMBAT_BUS: 'combat' }));
+vi.mock('../../controllers/fx', () => ({ effects: { spawn: () => {} } }));
+vi.mock('../../controllers/sound/combatSounds', () => ({ COMBAT_BUS: 'combat' }));
 
 const { DeathSystem } = await import('./deathSystem');
 

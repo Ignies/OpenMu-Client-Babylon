@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { MuSpriteFrame } from '../muSprite';
-import { uiClick } from '../../../libs/sfx';
+import { uiClick } from '../../../controllers/sound/sfx';
 import { t } from '../../../i18n';
 import {
   GameOptions,
@@ -11,8 +11,8 @@ import {
   KeyBindings,
   keyLabel,
   type KeyAction,
-} from '../../../common/keyBindings';
-import { isFullscreen, toggleFullscreen } from '../../../common/browserHotkeys';
+} from '../../../controllers/interface/keyBindings';
+import { isFullscreen, toggleFullscreen } from '../../../controllers/interface/browserHotkeys';
 import { PwaInstall } from '../../../common/pwaInstall';
 import {
   TIER_PRESETS,

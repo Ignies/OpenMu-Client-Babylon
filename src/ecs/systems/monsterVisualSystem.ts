@@ -1,7 +1,7 @@
 import type { Entity, ISystemFactory } from '../world';
 import { GameOptions } from '../../common/gameOptions';
-import { monsterVisualFor, visualMonster } from '../../effects/monsterVisuals';
-import type { EffectHandle } from '../../effects';
+import { monsterVisualFor, visualMonster } from '../../controllers/fx/monsterVisuals';
+import type { EffectHandle } from '../../controllers/fx';
 
 /**
  * Consumer of the effects layer's `monsterVisuals` entry: walks the entities

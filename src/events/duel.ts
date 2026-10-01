@@ -2,7 +2,7 @@ import { observable, runInAction } from 'mobx';
 import type { ENUM_WORLD } from '../core/types';
 import { cleanName } from '../common/chat';
 import { EventBus } from '../core/eventBus';
-import { playUiSound } from '../libs/sfx';
+import { playUiSound } from '../controllers/sound/sfx';
 import { Store } from '../store';
 import { t } from '../i18n';
 import {

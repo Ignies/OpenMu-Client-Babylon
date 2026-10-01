@@ -32,7 +32,7 @@ import { MonsterGlowSystem } from './systems/monsterGlowSystem';
 import { MonsterVisualSystem } from './systems/monsterVisualSystem';
 import { DrawDebugSystem } from './systems/drawDebugSystem';
 import { HighlightSystem } from './systems/highlightSystem';
-import type { TestScene } from '../scenes/testScene';
+import type { TestScene } from '../controllers/render/scenes/testScene';
 import { PointerInputSystem } from './systems/pointerInputSystem';
 import { KeyboardInputSystem } from './systems/keyboardInputSystem';
 import { InteractiveAreaSystem } from './systems/interactiveAreaSystem';

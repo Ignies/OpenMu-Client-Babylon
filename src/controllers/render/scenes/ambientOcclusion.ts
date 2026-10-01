@@ -1,0 +1,431 @@
+import {
+  Constants,
+  GeometryBufferRenderer,
+  Material,
+  PostProcess,
+  SSAO2RenderingPipeline,
+  ShaderStore,
+  SmartArray,
+  Texture,
+  Vector3,
+  type AbstractMesh,
+  type ArcRotateCamera,
+  type MultiRenderTarget,
+  type Scene,
+  type SubMesh,
+} from '../babylon/exports';
+// Side-effect import, and the order is the whole point: this module's body is
+// `ShaderStore.ShadersStore['ssaoCombinePixelShader'] = <Babylon's version>`.
+// ESM evaluates it before this file's body, so the override below lands last;
+// `SSAO2RenderingPipeline` then `import()`s the same specifier, gets the
+// cached module, and does *not* re-run the registration over the top of ours.
+import '@babylonjs/core/Shaders/ssaoCombine.fragment.js';
+import {
+  MSAA_HEAD_ONLY,
+  pipelineSamples,
+  sceneTargetSamples,
+  type LightingTier,
+} from '../../lighting/lightingQuality';
+import { devQuery, devQueryNumber, devQueryNumbers } from '../../../core/devSeams';
+import { GameOptions } from '../../../common/gameOptions';
+import { renderDistanceRanges } from '../renderDistance';
+import { CSM_CASTER_REACH, drawsSolidGeometry } from './shadows';
+import { driveRenderList } from './renderList';
+import { EFFECT_MASK_SAMPLER, effectMask } from './effectMask';
+import { gbufferFormats } from './gbufferFormats';
+
+/**
+ * Contact-scale SSAO2 (ARCHITECTURE §4.1, §4.8 step 1). Sole owner of the
+ * SSAO pipeline and the geometry buffer's predicate; the effect mask its
+ * combine reads is `effectMask.ts`.
+ *
+ * Contact-scale, not ambient-scale: the baked lightmap already carries the
+ * near-wall darkening (that darkening is the art) and the CSM the sun, so the
+ * AO reads as contact tightening, never as a halo at gameplay zoom.
+ *
+ * Dev seams: `?ssao=radius,strength,base` for live tuning; `?ssao=0` builds
+ * none of it (G-buffer included); `?gbufFormats=old` keeps the G-buffer's
+ * RGBA32F targets (`gbufferFormats.ts`).
+ */
+const SSAO_RADIUS = 0.35;
+const SSAO_STRENGTH = 0.75;
+const SSAO_BASE = 0.15;
+const SSAO_MAX_Z = 45;
+const SSAO_MIN_Z_ASPECT = 0.25;
+
+function ssaoOverride(): [number, number, number] | null {
+  return devQueryNumbers('ssao', 3) as [number, number, number] | null;
+}
+
+function ssaoForcedOff(): boolean {
+  return devQuery('ssao') === '0';
+}
+
+type Runtime = {
+  scene: Scene;
+  camera: ArcRotateCamera;
+  tier: LightingTier;
+  /** The G-buffer's ratio: the tier's, or 1 while the ink lines read it. */
+  gbufferRatio: number;
+  ssao: SSAO2RenderingPipeline;
+};
+
+let runtime: Runtime | null = null;
+
+/**
+ * What SSAO and the haze see: everything the camera sees that is matter.
+ *
+ * The haze reads one number per pixel - this buffer's depth - so a pixel that
+ * is missing here inherits the depth of whatever stands behind it and is
+ * hazed for that distance instead. Alpha-keyed meshes are in
+ * (`useMeshAlphaTestTexture` makes that safe: the G-buffer alpha-tests
+ * against the mesh's own texture), and the whitelist is `depthOccluder`, not
+ * `csmCaster`: an object the map marks `CastsShadow = false`, and every
+ * torch, candle and lamp, casts no sun shadow and is still solid geometry
+ * standing in front of the camera.
+ *
+ * The reach is the render distance's own, not the cascades': see `gbufferReach`.
+ */
+function occludes(mesh: AbstractMesh): boolean {
+  const meta = mesh.metadata;
+
+  if (!meta) return false;
+  if (meta.terrain === true) return true;
+
+  // The flattened shadow clones replace their metadata wholesale and so never
+  // carry `depthOccluder`, which keeps them out of the depth they would
+  // otherwise poison.
+  if (meta.depthOccluder !== true || meta.brightMesh) return false;
+
+  // A map object's alpha-keyed cards (Noria's canopies, grass, every fence
+  // and bar) were kept out: per object they were the bulk of the G-buffer's
+  // cost, and the haze read the depth behind them (§4.8 step 1). That is
+  // also why a tree at the ring's edge stood crisp over the fog band - a
+  // card against the sky carries the sky's depth, which is no haze at all.
+  // Batched, a chunk is one instanced draw per submesh and the cells hold
+  // the count, so the batches go in and the haze reads their own depth;
+  // the per-object cards (doors, rest spots, the rooms) stay out as before.
+  // A figure's keyed trim stays in: it is the body's own silhouette.
+  if (
+    meta.mapObject === true &&
+    meta.propBatch !== true &&
+    mesh.material?.transparencyMode === Material.MATERIAL_ALPHATESTANDBLEND
+  ) {
+    return false;
+  }
+
+  return drawsSolidGeometry(mesh, false, gbufferReach());
+}
+
+/**
+ * How far out this buffer has to reach, squared.
+ *
+ * `drawsSolidGeometry` defaults to the cascades' 48 tiles, which is right for
+ * a shadow map and wrong here: the haze reads this buffer's depth and returns
+ * a pixel with no depth in it untouched. Every object past 48 tiles was drawn
+ * at full contrast over terrain the haze had washed to the horizon colour - a
+ * hard line at eye level with crisp trunks and roofs standing above it, each
+ * one appearing whole as the render-distance ring reached it. So the reach is
+ * that ring instead, plus the stand-off: `nearby` is measured from the hero
+ * and this test from the camera, which orbits out behind them.
+ *
+ * Dev seam: `?gbreach=<tiles>`, and `?gbreach=0` restores the cascades' reach.
+ */
+const GBUFFER_CAMERA_STANDOFF = 32;
+
+let reachStep = -1;
+let reachSq = 0;
+
+// Read once: asked per mesh per frame, and a URL parse each time was 1.5 ms
+// of a dev frame.
+const reachDev = devQueryNumber('gbreach');
+
+function gbufferReach(): number {
+  const forced = reachDev;
+
+  if (forced !== null) {
+    return forced > 0 ? forced * forced : CSM_CASTER_REACH ** 2;
+  }
+
+  const step = GameOptions.renderDistance;
+
+  // Per mesh per frame; the ring only moves when the player moves the slider.
+  if (step !== reachStep) {
+    reachStep = step;
+
+    const ring =
+      renderDistanceRanges(step).nearby + GBUFFER_CAMERA_STANDOFF;
+
+    reachSq = ring * ring;
+  }
+
+  return reachSq;
+}
+
+/** Stand-in for a bucket a pass is not meant to draw this time round. */
+const NO_SUBMESHES = new SmartArray<SubMesh>(0);
+
+/**
+ * Draw the G-buffer's alpha-keyed meshes with depth writes on.
+ *
+ * Babylon files anything whose material needs alpha blending - which
+ * ALPHATESTANDBLEND does - into the *transparent* bucket, and the geometry
+ * buffer draws that bucket last with `setDepthWrite(false)` and unsorted
+ * (`RenderingGroup.render` hands a custom render function its buckets
+ * unsorted), so the last keyed mesh dispatched would win every pixel it
+ * covers whatever its distance. They are drawn a second time round through
+ * the *opaque* slot, where depth writes are on and the depth test resolves
+ * them; the G-buffer writes depth as a colour attachment and never blends,
+ * so "opaque" here only means "sorted by the depth buffer".
+ */
+function depthWriteAlphaKeyed(gbuffer: MultiRenderTarget): void {
+  const inner = gbuffer.customRenderFunction;
+
+  if (!inner) return;
+
+  gbuffer.customRenderFunction = (
+    opaque,
+    alphaTest,
+    transparent,
+    depthOnly,
+    beforeTransparents
+  ) => {
+    inner(opaque, alphaTest, NO_SUBMESHES, depthOnly, beforeTransparents);
+
+    if (transparent.length) {
+      inner(transparent, NO_SUBMESHES, NO_SUBMESHES, NO_SUBMESHES);
+    }
+  };
+}
+
+/**
+ * Babylon's combine pass is `sceneColor * ssaoColor` over the *finished*
+ * frame, glow cards included; the effect mask is subtracted out of it first
+ * and added back unoccluded, because a pixel that is itself a light source
+ * has nothing to occlude.
+ *
+ * The ground keeps a floor (§4.8 step 1): the lightmap already carries the
+ * near-wall darkening, so on an up-facing surface the AO is contact
+ * tightening only. "Ground" is read off the G-buffer normal (view space, so
+ * it is compared against the camera's up).
+ */
+const SSAO_COMBINE_SHADER = 'ssaoCombinePixelShader';
+
+const GROUND_AO_FLOOR = 0.8;
+const GROUND_NORMAL_SAMPLER = 'gbufferNormal';
+const GROUND_UP_UNIFORM = 'upView';
+
+let ssaoCombinePatched = false;
+
+function patchSsaoCombine(): void {
+  if (ssaoCombinePatched) return;
+
+  ssaoCombinePatched = true;
+
+  ShaderStore.ShadersStore[SSAO_COMBINE_SHADER] = `
+  uniform sampler2D textureSampler;
+  uniform sampler2D originalColor;
+  uniform sampler2D ${EFFECT_MASK_SAMPLER};
+  uniform sampler2D ${GROUND_NORMAL_SAMPLER};
+  uniform vec4 viewport;
+  uniform vec3 ${GROUND_UP_UNIFORM};
+  varying vec2 vUV;
+
+  const float GROUND_AO_FLOOR = ${GROUND_AO_FLOOR.toFixed(3)};
+
+  void main(void) {
+    vec2 uv = viewport.xy + vUV * viewport.zw;
+
+    vec4 ssaoColor = texture2D(textureSampler, uv);
+    vec4 sceneColor = texture2D(originalColor, uv);
+
+    // The mask is rendered through the same camera viewport as the passes
+    // above it, so it takes the same remapped uv rather than raw vUV.
+    vec3 effect = min(texture2D(${EFFECT_MASK_SAMPLER}, uv).rgb,
+      max(sceneColor.rgb, vec3(0.0)));
+    vec3 surface = sceneColor.rgb - effect;
+
+    vec3 normalV = texture2D(${GROUND_NORMAL_SAMPLER}, uv).xyz;
+    float ground = smoothstep(0.7, 0.9, dot(normalV, ${GROUND_UP_UNIFORM}));
+
+    vec3 ao = max(ssaoColor.rgb, vec3(ground * GROUND_AO_FLOOR));
+
+    gl_FragColor = vec4(surface * ao + effect, sceneColor.a * ssaoColor.a);
+  }
+  `;
+}
+
+/**
+ * Hand Babylon's combine pass the samplers and the uniform its patched shader
+ * declares. An `Effect` binds by the names it was *compiled* with, so the
+ * post-process is recompiled with the extra names; `onApplyObservable`
+ * because the pipeline has already spent `onApply` on `viewport` and
+ * `originalColor`.
+ */
+function bindCombine(
+  ssao: SSAO2RenderingPipeline,
+  camera: ArcRotateCamera,
+  normals: Texture | null
+): void {
+  const combine = (
+    ssao as unknown as { _ssaoCombinePostProcess: PostProcess | null }
+  )._ssaoCombinePostProcess;
+
+  if (!combine) return;
+
+  combine.updateEffect(
+    null,
+    ['viewport', GROUND_UP_UNIFORM],
+    ['textureSampler', 'originalColor', EFFECT_MASK_SAMPLER, GROUND_NORMAL_SAMPLER]
+  );
+
+  const upView = new Vector3();
+
+  combine.onApplyObservable.add(effect => {
+    const mask = effectMask();
+    if (mask) effect.setTexture(EFFECT_MASK_SAMPLER, mask);
+    if (normals) effect.setTexture(GROUND_NORMAL_SAMPLER, normals);
+
+    Vector3.TransformNormalToRef(Vector3.UpReadOnly, camera.getViewMatrix(), upView);
+    effect.setFloat3(GROUND_UP_UNIFORM, upView.x, upView.y, upView.z);
+  });
+}
+
+function createSsao(
+  scene: Scene,
+  camera: ArcRotateCamera,
+  tier: LightingTier,
+  gbufferRatio: number
+): SSAO2RenderingPipeline {
+  patchSsaoCombine();
+
+  // This call sizes the G-buffer and sets its formats. The pipeline below
+  // takes whatever exists (`enableGeometryBufferRenderer` returns the live
+  // renderer at any ratio); its own `ssaoRatio` sizes its blur targets only.
+  const engine = scene.getEngine();
+  const formats = gbufferFormats(engine.version, engine.getCaps());
+  const gbuffer = formats
+    ? scene.enableGeometryBufferRenderer(
+        gbufferRatio,
+        // What the default already resolves to on WebGL2. Never DEPTH24: it
+        // would change which surface wins at near-coplanar pixels.
+        Constants.TEXTUREFORMAT_DEPTH32_FLOAT,
+        formats
+      )
+    : scene.enableGeometryBufferRenderer(gbufferRatio);
+  let normals: Texture | null = null;
+
+  if (gbuffer) {
+    const target = gbuffer.getGBuffer();
+
+    driveRenderList(scene, target, occludes, 'active');
+    depthWriteAlphaKeyed(target);
+    normals = target.textures[
+      gbuffer.getTextureIndex(GeometryBufferRenderer.NORMAL_TEXTURE_TYPE)
+    ] ?? null;
+  }
+
+  const ssao = new SSAO2RenderingPipeline(
+    'enhancedSsao',
+    scene,
+    { ssaoRatio: tier.ssaoRatio, blurRatio: tier.ssaoRatio },
+    [camera],
+    true,
+    // The combine pass carries the scene colour on: 8-bit here quantises
+    // every linear value under display 0.05 to a hard zero.
+    Constants.TEXTURETYPE_HALF_FLOAT
+  );
+
+  const [radius, strength, base] = ssaoOverride() ?? [
+    SSAO_RADIUS,
+    SSAO_STRENGTH,
+    SSAO_BASE,
+  ];
+  ssao.radius = radius;
+  ssao.totalStrength = strength;
+  ssao.base = base;
+  ssao.samples = tier.ssaoSamples;
+  ssao.expensiveBlur = tier.ssaoRatio >= 1;
+  ssao.maxZ = SSAO_MAX_Z;
+  ssao.minZAspect = SSAO_MIN_Z_ASPECT;
+  if (!MSAA_HEAD_ONLY) ssao.textureSamples = pipelineSamples();
+
+  bindCombine(ssao, camera, normals);
+
+  return ssao;
+}
+
+export function disposeAmbientOcclusion(): void {
+  if (!runtime) return;
+
+  const { scene, ssao } = runtime;
+
+  ssao.dispose(true);
+
+  scene.disableGeometryBufferRenderer();
+
+  runtime = null;
+}
+
+/**
+ * Build or tear down the AO to match the tier and the post option. Returns
+ * true when the chain changed, so the director can re-order the post chain.
+ */
+export function syncAmbientOcclusion(
+  scene: Scene,
+  camera: ArcRotateCamera,
+  tier: LightingTier | null,
+  post: boolean,
+  /** The G-buffer's size relative to the backbuffer: the tier's ratio unless a reader needs more. */
+  gbufferRatio: number
+): boolean {
+  const want = tier !== null && post && !ssaoForcedOff();
+
+  if (
+    runtime &&
+    (!want ||
+      runtime.tier !== tier ||
+      runtime.gbufferRatio !== gbufferRatio ||
+      runtime.scene !== scene)
+  ) {
+    disposeAmbientOcclusion();
+    if (!want) return true;
+  }
+
+  if (runtime) {
+    // The MSAA option moves without the tier moving, and nothing above
+    // rebuilds this colour target for it.
+    const samples = pipelineSamples();
+
+    if (!MSAA_HEAD_ONLY && runtime.ssao.textureSamples !== samples) {
+      runtime.ssao.textureSamples = samples;
+    }
+
+    return false;
+  }
+
+  if (!want) return false;
+
+  const ssao = createSsao(scene, camera, tier, gbufferRatio);
+
+  runtime = { scene, camera, tier, gbufferRatio, ssao };
+
+  return true;
+}
+
+/**
+ * The MSAA of the original-colour pass, the one `textureSamples` sets: the
+ * scene target unless the upscale's entry sits ahead of it. Called once the
+ * camera's chain is final.
+ */
+export function syncAmbientOcclusionSamples(): void {
+  if (!runtime || !MSAA_HEAD_ONLY) return;
+
+  const { camera, ssao } = runtime;
+  const original = (
+    ssao as unknown as { _originalColorPostProcess: PostProcess | null }
+  )._originalColorPostProcess;
+  const samples = sceneTargetSamples(camera, original);
+
+  if (ssao.textureSamples !== samples) ssao.textureSamples = samples;
+}

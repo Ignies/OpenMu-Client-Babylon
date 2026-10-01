@@ -1,4 +1,4 @@
-import type { Emission } from '../../common/effectParticles';
+import type { Emission } from '../../controllers/fx/effectParticles';
 
 /**
  * Santa Village (`WD_62SANTA_TOWN`, `World63`/`Object63`), the plain-data

@@ -7,6 +7,7 @@ import { canonicalAssetPath, expectedModelPaths } from './assetCase';
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const ASSETS = join(ROOT, 'public/game-assets');
 const SRC = join(ROOT, 'src');
+const CODE_ROOTS = [SRC, join(ROOT, 'versions')];
 
 /**
  * NPC 68 (monster model 49) has no row in `monsters.json` and `Data/` ships no
@@ -30,9 +31,9 @@ const onDisk = new Map(filesUnder(ASSETS).map(f => [f.toLowerCase(), f]));
 /** Quoted `<folder>/<name>.glb` literals in the client. */
 function glbLiteralsInSource(): string[] {
   const found = new Set<string>();
-  for (const file of filesUnder(SRC)) {
+  for (const root of CODE_ROOTS) for (const file of filesUnder(root)) {
     if (!/\.tsx?$/.test(file)) continue;
-    const text = readFileSync(join(SRC, file), 'utf8');
+    const text = readFileSync(join(root, file), 'utf8');
     for (const [, path] of text.matchAll(
       /['"]([A-Za-z0-9_-]+\/[A-Za-z0-9_/-]+\.glb)['"]/g
     )) {
@@ -44,7 +45,7 @@ function glbLiteralsInSource(): string[] {
 
 function soundCatalogue(): string[] {
   const json = JSON.parse(
-    readFileSync(join(SRC, 'sound/recipes.json'), 'utf8')
+    readFileSync(join(SRC, 'controllers/sound/recipes.json'), 'utf8')
   ) as Record<string, string>;
   return [...new Set(Object.values(json))].sort();
 }

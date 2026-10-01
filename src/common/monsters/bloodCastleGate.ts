@@ -1,6 +1,6 @@
 import type { Entity, World } from '../../ecs/world';
-import { entityPos, tmpA, type RGB } from '../../effects/core';
-import { spawnCrystalShards } from '../deathVisuals';
+import { entityPos, tmpA, type RGB } from '../../controllers/fx/core';
+import { spawnCrystalShards } from '../../controllers/fx/deathVisuals';
 import { loadGLTF } from '../../controllers/assets/modelLoader';
 import { MonsterObject } from '../monsterObject';
 import { monsterModelFile, monsterScaleOf } from './monsterModelTable';

@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { useEffect, useState } from 'react';
 import { GameOptions, setGameOption } from '../../../../../common/gameOptions';
 import { formatRoundTrip } from '../../../../../common/hudFormat';
-import { isKey } from '../../../../../common/keyBindings';
+import { isKey } from '../../../../../controllers/interface/keyBindings';
 import { NetStats } from '../../../../../controllers/net/roundTrip';
 import { Store } from '../../../../../store';
 import { useEventBus } from '../../../../../hooks/useEventBus';

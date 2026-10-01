@@ -1,6 +1,6 @@
 import type { Entity, ISystemFactory } from '../world';
 import { Store } from '../../store';
-import { applyPlayerActionSpeed, serverMinAttackInterval } from '../../common/playSpeed';
+import { applyPlayerActionSpeed, serverMinAttackInterval } from '../../controllers/anim/playSpeed';
 import {
   AreaSkillPacket,
   EnterGateRequestPacket,
@@ -39,7 +39,7 @@ import { getBaseClass } from '../../common/characterStats';
 import { isWingItem } from '../../common/wings';
 import type { AttackPose } from '../../common/weaponClass';
 import { mountKind } from '../../common/pets';
-import { heroCastSound, playCombat, playSkill } from '../../sound/combat';
+import { heroCastSound, playCombat, playSkill } from '../../controllers/sound/combat';
 import { skills } from '../../skills';
 import { combat } from '../../combat';
 import { SKILL_DEFENSE, SKILL_NOVA, SKILL_NOVA_BEGIN } from '../../combat/recipes';
@@ -48,12 +48,12 @@ import { castsInPlace, castsOnSelfOnly } from '../../combat/castTargets';
 import { PlayerAction } from '../../common/objects/enum';
 import type { CastContext } from '../../combat';
 import { Vector3 } from '../../controllers/render/babylon/exports';
-import { effects } from '../../effects';
-import { boneLocalPos } from '../../effects/core';
-import { hasWarriorGlint, warriorGlint, warriorGlintStar, WARRIOR_GLINT_BONE, WARRIOR_GLINT_TIP } from '../../common/weaponBlur';
-import { tierIndex } from '../../common/lightingQuality';
-import { lighting } from '../../lighting';
-import { isPlayerAttackAction } from '../../common/playerActionMapper';
+import { effects } from '../../controllers/fx';
+import { boneLocalPos } from '../../controllers/fx/core';
+import { hasWarriorGlint, warriorGlint, warriorGlintStar, WARRIOR_GLINT_BONE, WARRIOR_GLINT_TIP } from '../../controllers/item_fx/weaponBlur';
+import { tierIndex } from '../../controllers/lighting/lightingQuality';
+import { lighting } from '../../controllers/lighting';
+import { isPlayerAttackAction } from '../../controllers/anim/playerActionMapper';
 
 /** The first lighting tier that draws the improved looks (common/skillVisuals.ts). */
 const ENHANCED_TIER = 1;

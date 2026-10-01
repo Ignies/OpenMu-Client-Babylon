@@ -15,7 +15,7 @@ import {
 } from '../../../admin/catalogues';
 import { itemDisplayName, skinDisplayName, spawnCatalogue } from '../../../admin/skins';
 import { GmLibrary, spread, type Macro, type MacroVars } from '../../../admin/gmLibrary';
-import { uiClick } from '../../../libs/sfx';
+import { uiClick } from '../../../controllers/sound/sfx';
 import { ItemIcon } from '../itemIcon';
 import { ContextMenu, type MenuPoint } from './contextMenu';
 

@@ -1,8 +1,8 @@
 import { TILE_CM } from '../../controllers/terrain/consts';
 import type { Observer, Scene } from '../../controllers/render/babylon/exports';
 import type { World } from '../../ecs/world';
-import { createMovableFlare, type MovableFlare } from '../../common/effectLights';
-import { strikeThunder } from '../../lighting/sky';
+import { createMovableFlare, type MovableFlare } from '../../controllers/lighting/effectLights';
+import { strikeThunder } from '../../controllers/lighting/sky';
 
 /** MU units per world unit. */
 

@@ -1,7 +1,7 @@
 import { Matrix } from '../controllers/render/babylon/exports';
 import type { Item } from '../ecs/world';
 import { angleLinkMatrix, type BmdLink } from '../controllers/render/boneLink';
-import type { HeldTexture } from './effectParticles';
+import type { HeldTexture } from '../controllers/fx/effectParticles';
 
 /**
  * The wing part (`c->Wing`) as the original renders it - `RenderCharacterBackItem`

@@ -1,7 +1,7 @@
 import { MapTileObject } from '../../controllers/terrain/mapTileObject';
 import { PlayerAction } from '../../common/objects/enum';
 import { toRadians } from '../../controllers/assets/download';
-import { playSfx } from '../../libs/sfx';
+import { playSfx } from '../../controllers/sound/sfx';
 import { Store } from '../../store';
 import type { Entity, World } from '../../ecs/world';
 

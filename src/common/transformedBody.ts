@@ -1,13 +1,13 @@
 import { PlayerObject } from './playerObject';
 import type { ModelObject } from '../controllers/render/modelObject';
-import type { ItemVisualTier } from './itemVisualTier';
-import { skeletonShatter } from './deathVisuals';
+import type { ItemVisualTier } from '../controllers/item_fx/itemVisualTier';
+import { skeletonShatter } from '../controllers/fx/deathVisuals';
 import { isKnownObjectType, resolveModelFactory } from './modelFactoryPerId';
 import { MonsterActionType, PlayerAction } from './objects/enum';
 import {
   isPlayerAttackAction,
   isPlayerSkillAction,
-} from './playerActionMapper';
+} from '../controllers/anim/playerActionMapper';
 import { TRANSFORMED_NPC_TABLE } from './npcs/playerNpcTables';
 
 /**

@@ -3,7 +3,7 @@ import {
   clearScreenPositionListeners,
   emitScreenPosition,
   emitScreenPositionFrameEnd,
-} from '../../libs/screenPositionBus';
+} from '../../controllers/interface/screenPositionBus';
 import { Entity, ISystemFactory } from '../world';
 
 const DIST = 10;

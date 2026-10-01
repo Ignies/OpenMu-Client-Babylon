@@ -2,8 +2,8 @@ import type { ENUM_WORLD } from '../core/types';
 import { parseTerrainObjects } from '../controllers/terrain/parseTerrainObjects';
 import { downloadDataBytesBuffer } from '../controllers/assets/download';
 import { assetWorldNum } from '../controllers/assets/worldAssets';
-import { setAreaMood } from '../scenes/sceneLook';
-import { roomVolumeOf, type AreaLookName } from '../lighting/profiles';
+import { setAreaMood } from '../controllers/render/scenes/sceneLook';
+import { roomVolumeOf, type AreaLookName } from '../controllers/lighting/profiles';
 import type { World } from '../ecs/world';
 import type { RoomFrame, RoomRecord, RoomSpec } from './roomEnumeration';
 

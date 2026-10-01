@@ -11,11 +11,11 @@ import {
   GlowLayer,
 } from './babylon/exports';
 import { getEmptyTexture } from './babylon/emptyTexture';
-import { sunLightOf } from '../../lighting/keyRig';
+import { sunLightOf } from '../lighting/keyRig';
 import { TERRAIN_SIZE, TILE_CM } from '../terrain/consts';
 import { ENUM_WORLD } from '../../core/types';
 import { GameOptions } from '../../common/gameOptions';
-import { blobShadowRefresh, csmActive } from '../../common/lightingQuality';
+import { blobShadowRefresh, csmActive } from '../lighting/lightingQuality';
 import {
   TERRAIN_HEIGHT_SCALE,
   getTerrainHeightMap,

@@ -19,7 +19,7 @@
  * that wants a hit-frame moment (`checkAttackTime`).
  */
 import type { PlayerAction } from '../common/objects/enum';
-import { REFERENCE_FPS } from '../common/playSpeed';
+import { REFERENCE_FPS } from '../controllers/anim/playSpeed';
 import type { ENUM_WORLD } from '../core/types';
 import type { CombatLayer } from './layer';
 import { DEFAULT_HIT_KEY, HIT_KEYS } from './recipes';

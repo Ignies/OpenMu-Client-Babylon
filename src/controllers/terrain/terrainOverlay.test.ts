@@ -10,35 +10,35 @@ vi.mock('../../core/devSeams', () => ({
 vi.mock('../render/babylon/exports', async () => ({
   Vector3: (await import('@babylonjs/core/Maths/math.vector')).Vector3,
 }));
-vi.mock('../../lighting/keyRig', () => ({ sunLightOf: () => null }));
+vi.mock('../lighting/keyRig', () => ({ sunLightOf: () => null }));
 vi.mock('../../common/gameOptions', () => ({
   GameOptions: { advancedEffects: true },
 }));
-vi.mock('../../weather/snowCover', () => ({
+vi.mock('../weather/snowCover', () => ({
   SNOW_GROUND_MAPS: new Set(),
   snowCover: () => 1,
 }));
-vi.mock('../../weather/snowTrail', () => ({
+vi.mock('../weather/snowTrail', () => ({
   snowTrailPainted: () => false,
   snowTrailTexture: () => null,
 }));
-vi.mock('../../weather/wetness', () => ({
+vi.mock('../weather/wetness', () => ({
   puddleCover: () => 0,
   wetness: () => 0,
 }));
-vi.mock('../../weather/rainState', () => ({ rainStrength: () => 0 }));
-vi.mock('../../common/pointLightPool', () => ({
+vi.mock('../weather/rainState', () => ({ rainStrength: () => 0 }));
+vi.mock('../lighting/pointLightPool', () => ({
   pointLightPoolLights: () => [],
 }));
-vi.mock('../../common/lightModel', () => ({ linearBufferActive: () => false }));
-vi.mock('../../lighting/director', () => ({ lookDirector: () => null }));
+vi.mock('../lighting/lightModel', () => ({ linearBufferActive: () => false }));
+vi.mock('../lighting/director', () => ({ lookDirector: () => null }));
 vi.mock('./terrainLighting', () => ({ TERRAIN_BRANCH: true }));
 
 async function load(snowGate: string | null) {
   seam.snowGate = snowGate;
   vi.resetModules();
   const overlay = await import('./terrainOverlay');
-  const melt = await import('../../weather/snowMelt');
+  const melt = await import('../weather/snowMelt');
 
   return { overlay, melt };
 }

@@ -1,4 +1,4 @@
-import { BonedParticleEmitter, type BonedEmission } from '../../common/effectParticles';
+import { BonedParticleEmitter, type BonedEmission } from '../../controllers/fx/effectParticles';
 import { ModelObject } from '../../controllers/render/modelObject';
 import type { Entity, World } from '../../ecs/world';
 
