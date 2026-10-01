@@ -1,4 +1,4 @@
-import { GameOptions } from '../../common/gameOptions';
+import { GameOptions } from '../../features/options/gameOptions';
 
 /**
  * The mixer's categories. Pure data over `GameOptions` - no Babylon, no

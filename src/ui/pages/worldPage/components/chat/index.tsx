@@ -10,9 +10,9 @@ import {
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
-import { Social } from '../../../../../social';
-import { Store } from '../../../../../store';
-import { useEventBus } from '../../../../../hooks/useEventBus';
+import { Social } from '../../../../../features/social/social';
+import { Store } from '../../../../../app/store';
+import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
 import { playUiSound, uiClick } from '../../../../../controllers/sound/sfx';
 import { MuButton } from '../../../../components/muButton';
 import { MuSpriteFrame } from '../../../../components/muSprite';
@@ -25,17 +25,17 @@ import {
   useWindowStackEntry,
 } from '../../../../components/muWindow/useWindowChrome';
 import { isTypingInField } from '../../../../../ecs/systems/keyboardInputSystem';
-import { GameOptions } from '../../../../../common/gameOptions';
+import { GameOptions } from '../../../../../features/options/gameOptions';
 import { isKey } from '../../../../../controllers/interface/keyBindings';
 import { EmojiText } from '../../../../components/emojiText';
-import { EMOJI_CATALOG } from '../../../../../emojis';
+import { EMOJI_CATALOG } from '../../../../../features/chat/emojis';
 import { EmojiPicker, RecentEmojis } from './emojiPicker';
 import { installItemLinkGesture } from './itemLinkGesture';
 import {
   labelsToWire,
   uniqueLinkLabel,
   wireToLabels,
-} from '../../../../../common/chatItemLinks';
+} from '../../../../../features/chat/chatItemLinks';
 import {
   chatEmojiSize,
   emojiPackLabel,
@@ -43,7 +43,7 @@ import {
   matchEmojiCodes,
   spliceChatText,
   type ChatEmoji,
-} from '../../../../../common/chatEmojis';
+} from '../../../../../features/chat/chatEmojis';
 import {
   chatEndIndex,
   chatInputBudget,
@@ -62,12 +62,12 @@ import {
   layoutChatRows,
   type ChatInputMode,
   type ChatLine,
-} from '../../../../../common/chat';
+} from '../../../../../features/chat/chat';
 import {
   CHAT_COMPLETION_ROWS,
   matchChatCommands,
   type ChatCommand,
-} from '../../../../../common/chatCommands';
+} from '../../../../../features/chat/chatCommands';
 
 /**
  * `CNewUIChatInputBox` + `CNewUIChatLogWindow`, drawn with the original's

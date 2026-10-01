@@ -1,5 +1,5 @@
 import { PlayerAction, ServerPlayerActionType } from '../../common/objects/enum';
-import { genderedEmoteAction, isPlayerEmoteAction } from '../../common/emotes';
+import { genderedEmoteAction, isPlayerEmoteAction } from '../../features/hero/emotes';
 
 export function isPlayerAttackAction(action: PlayerAction): boolean {
   return (

@@ -10,7 +10,7 @@ import {
   newTagSlot,
   syncTagInputs,
 } from './tagSync';
-import { CHAT_FADE_TICKS } from '../../../common/nameTags';
+import { CHAT_FADE_TICKS } from '../../../controllers/interface/nameTags';
 
 type FakeEl = {
   offsetWidth: number;

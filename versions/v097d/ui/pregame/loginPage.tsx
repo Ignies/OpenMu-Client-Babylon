@@ -11,11 +11,11 @@
  */
 import { observer } from 'mobx-react-lite';
 import { t } from '../../../../src/i18n';
-import { Store } from '../../../../src/store';
+import { Store } from '../../../../src/app/store';
 import {
   MAX_PASSWORD_LENGTH,
   MAX_USERNAME_LENGTH,
-} from '../../../../src/consts';
+} from '../../../../src/app/consts';
 import { MuSpriteFrame } from '../../../../src/ui/components/muSprite';
 import { MuButton } from '../../../../src/ui/components/muButton';
 import './style.less';

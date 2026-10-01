@@ -2,7 +2,7 @@ import { assetWorldNum } from '../../controllers/assets/worldAssets';
 import { prefetchSignPlates } from '../../common/signPlates';
 import { SignObject } from '../../common/signObject';
 import { signTypes } from '../../common/signLabels';
-import { OperateBoxObject } from '../../common/operateBoxObject';
+import { OperateBoxObject } from '../../controllers/actors/operateBoxObject';
 import type { World } from '../../ecs/world';
 
 /**

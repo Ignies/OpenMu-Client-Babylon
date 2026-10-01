@@ -1,6 +1,6 @@
 import './style.less';
 import { observer } from 'mobx-react-lite';
-import { SessionResume } from '../../../common/sessionResume';
+import { SessionResume } from '../../../features/session/sessionResume';
 import { uiClick } from '../../../controllers/sound/sfx';
 import { t } from '../../../i18n';
 

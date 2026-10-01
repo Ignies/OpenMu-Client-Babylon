@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { GM_COMMANDS, gmCommand } from '../../../common/gmCommands';
-import { GM_MAPS } from '../../../common/gmMaps';
+import { GM_COMMANDS, gmCommand } from '../../../features/gm/gmCommands';
+import { GM_MAPS } from '../../../features/gm/gmMaps';
 
 /**
  * The panel's screens name the commands they send as strings, and a name that

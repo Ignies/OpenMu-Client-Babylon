@@ -6,7 +6,7 @@ import {
   type Scene,
 } from '../render/babylon/exports';
 import { loadEffectTexture } from '../fx/moveTargetEffect';
-import { GameOptions } from '../../common/gameOptions';
+import { GameOptions } from '../../features/options/gameOptions';
 
 /**
  * The puff of loose snow a boot throws when it comes down.

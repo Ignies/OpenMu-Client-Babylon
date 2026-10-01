@@ -1,7 +1,7 @@
 import { PlayerAction } from '../../common/objects/enum';
 import type { Item } from '../../ecs/world';
-import { LEFT_HAND_BONE, RIGHT_HAND_BONE } from '../../common/weaponAttachment';
-import { GROUP_MACE, GROUP_SHIELD, GROUP_SPEAR, GROUP_SWORD } from '../../common/weaponClass';
+import { LEFT_HAND_BONE, RIGHT_HAND_BONE } from '../actors/weaponAttachment';
+import { GROUP_MACE, GROUP_SHIELD, GROUP_SPEAR, GROUP_SWORD } from '../actors/weaponClass';
 import type { EffectBlend, PointSource, RGB } from '../fx/core';
 import type { SpriteOptions } from '../fx/sprite';
 import { TEX } from '../fx/recipes';

@@ -1,6 +1,6 @@
 import './style.less';
 import { observer } from 'mobx-react-lite';
-import { Store, UIState } from '../../../store';
+import { Store, UIState } from '../../../app/store';
 import { LoadingArt, useSheetSizes } from './art';
 import { MuProgressBar } from './progressBar';
 

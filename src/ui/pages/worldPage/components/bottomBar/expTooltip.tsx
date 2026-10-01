@@ -1,11 +1,11 @@
 import { observer } from 'mobx-react-lite';
-import { SessionStats } from '../../../../../common/sessionStats';
+import { SessionStats } from '../../../../../features/session/sessionStats';
 import {
   formatExpPercent,
   formatExpProgress,
   formatTimeToLevel,
-} from '../../../../../common/hudFormat';
-import { Store } from '../../../../../store';
+} from '../../../../../controllers/interface/hudFormat';
+import { Store } from '../../../../../app/store';
 import { MuTipList, type TipLine } from '../../../../components/skillTooltip';
 import { t } from '../../../../../i18n';
 

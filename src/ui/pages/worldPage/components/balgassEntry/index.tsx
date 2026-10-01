@@ -8,7 +8,7 @@ import {
   enterBalgass,
   type BalgassEntryBox,
   type BalgassEntryKind,
-} from '../../../../../quests/balgassEntry';
+} from '../../../../../features/quests/balgassEntry';
 import { isTypingInField } from '../../../../../ecs/systems/keyboardInputSystem';
 import { playUiSound } from '../../../../../controllers/sound/sfx';
 import { MsgBoxFrame, msgBoxHeight } from '../../../../components/msgBoxFrame';

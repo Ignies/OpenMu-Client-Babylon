@@ -1,9 +1,9 @@
 import { isKey } from '../../../../../controllers/interface/keyBindings';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
-import { Store } from '../../../../../store';
-import { GameOptions } from '../../../../../common/gameOptions';
-import { useEventBus } from '../../../../../hooks/useEventBus';
+import { Store } from '../../../../../app/store';
+import { GameOptions } from '../../../../../features/options/gameOptions';
+import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
 import { playUiSound } from '../../../../../controllers/sound/sfx';
 import { MinimapSheet } from './sheet';
 import { MinimapCorner } from './corner';

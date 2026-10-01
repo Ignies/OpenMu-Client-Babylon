@@ -9,7 +9,7 @@ import { isFlagInBinaryMask } from '../../controllers/assets/download';
 import { aimX, aimY } from '../../controllers/camera';
 import { LEAN_CURSOR_OBJECTS, findRestObject } from '../../controllers/terrain/restObjects';
 import { pickGround } from '../../controllers/terrain/terrainPick';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 import type { CursorHover } from '../../ui/components/gameCursor/cursors';
 import type { Entity, ISystemFactory, World } from '../world';
 import { isAttackableEntity, isNpcOrTrapType } from './attackSystem';

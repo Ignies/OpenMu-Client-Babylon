@@ -1,4 +1,4 @@
-import { inDevilSquare } from '../../common/locomotion';
+import { inDevilSquare } from '../actors/locomotion';
 import { MonsterActionType as A } from '../../common/objects/enum';
 import { REFERENCE_FPS } from './playSpeed';
 import { ENUM_WORLD as W } from '../../core/types';

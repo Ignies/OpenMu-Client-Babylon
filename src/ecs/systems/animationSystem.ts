@@ -1,9 +1,9 @@
 import type { AnimationGroup } from '@babylonjs/core/Animations/animationGroup';
 import { MonsterActionType, PlayerAction } from '../../common/objects/enum';
 import type { ISystemFactory } from '../world';
-import { isPlayerBody, type PlayerObject } from '../../common/playerObject';
+import { isPlayerBody, type PlayerObject } from '../../controllers/actors/playerObject';
 import { isOneShotPlayerAction } from '../../controllers/anim/playerActionMapper';
-import { monsterClipFor } from '../../common/transformedBody';
+import { monsterClipFor } from '../../controllers/actors/transformedBody';
 import type { ModelObject } from '../../controllers/render/modelObject';
 import {
   chooseFenrirIdleAction,
@@ -17,11 +17,11 @@ import {
   isWeaponItem,
   type CharacterPose,
   type Hands,
-} from '../../common/weaponClass';
+} from '../../controllers/actors/weaponClass';
 import {
   applyWeaponAttachments,
   applyWeaponPoses,
-} from '../../common/weaponAttachment';
+} from '../../controllers/actors/weaponAttachment';
 import { TWFlags } from '../../controllers/terrain/consts';
 import { isFlagInBinaryMask } from '../../controllers/assets/download';
 import {
@@ -32,10 +32,10 @@ import {
   playerPlaySpeed,
   wingsPlaySpeed,
 } from '../../controllers/anim/playSpeed';
-import { debuffSlow } from '../../common/debuffBody';
-import { attackSpeedOf, magicSpeedOf } from '../../common/characterStats';
-import { BaseClass, getBaseClass } from '../../common/characterStats';
-import { isFemaleClass } from '../../common/mapPlayerNetClassToModelClass';
+import { debuffSlow } from '../../controllers/actors/debuffBody';
+import { attackSpeedOf, magicSpeedOf } from '../../features/hero/characterStats';
+import { BaseClass, getBaseClass } from '../../features/hero/characterStats';
+import { isFemaleClass } from '../../controllers/actors/mapPlayerNetClassToModelClass';
 import {
   FENRIR_RUN_DELAY,
   RUN_THRESHOLD,
@@ -46,10 +46,10 @@ import {
   inBloodCastle,
   inChaosCastle,
   isSwimWorld,
-} from '../../common/locomotion';
-import { isWingItem } from '../../common/wings';
-import { isRidingMount, petSpec } from '../../common/pets';
-import { Store } from '../../store';
+} from '../../controllers/actors/locomotion';
+import { isWingItem } from '../../controllers/actors/wings';
+import { isRidingMount, petSpec } from '../../features/pets/pets';
+import { Store } from '../../app/store';
 
 // Clip rates come from the original's PlaySpeed tables (common/playSpeed.ts);
 // attack/cast rates additionally scale with the attackSpeed/magicSpeed

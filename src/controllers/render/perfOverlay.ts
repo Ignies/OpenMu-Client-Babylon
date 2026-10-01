@@ -1,12 +1,12 @@
 import type { Scene } from './babylon/exports';
 import { EngineInstrumentation } from '@babylonjs/core/Instrumentation/engineInstrumentation';
 import { netStats } from '../net/socketCost';
-import { GameOptions } from '../../common/gameOptions';
+import { GameOptions } from '../../features/options/gameOptions';
 import { renderScaleForStep } from './renderScale';
 import { upscaleActive } from './scenes/upscale';
 import { texturePacks } from '../assets/texturePacks';
 import { propBatchStats } from './propBatches';
-import { configFingerprintLines } from '../../common/configFingerprint';
+import { configFingerprintLines } from '../../features/session/configFingerprint';
 
 /**
  * Render-budget overlay. Shift+Ctrl+Alt+P toggles it.

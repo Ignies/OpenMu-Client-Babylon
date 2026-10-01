@@ -7,7 +7,7 @@ import {
   isPlayerAttackAction,
   isPlayerSkillAction,
 } from '../../controllers/anim/playerActionMapper';
-import { PVP_MURDERER2, PVP_NEUTRAL } from '../../common/nameTags';
+import { PVP_MURDERER2, PVP_NEUTRAL } from '../../controllers/interface/nameTags';
 import { tierIndex } from '../../controllers/lighting/lightingQuality';
 import { lighting } from '../../controllers/lighting';
 

@@ -1,6 +1,6 @@
 import { runInAction } from 'mobx';
 import type { ISystemFactory } from '../world';
-import { Store, UIState } from '../../store';
+import { Store, UIState } from '../../app/store';
 import { ENUM_WORLD } from '../../common';
 import { EventBus } from '../../core/eventBus';
 import { Vector3, type ArcRotateCamera } from '../../controllers/render/babylon/exports';
@@ -13,7 +13,7 @@ import {
   characterCameraTarget,
   characterSelectView,
   characterSlotPosition,
-} from '../../common/characterSelect';
+} from '../../features/character_select/characterSelect';
 import { prefetchWorldTerrain } from '../../controllers/assets/mu/prefetchWorld';
 import { warmWorldObjects } from '../../controllers/assets/mu/warmWorld';
 import { LOGIN_SCENE_ABSENT_MODELS } from '../../maps/loginscene/spec';

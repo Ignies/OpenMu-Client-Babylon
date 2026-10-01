@@ -2,7 +2,7 @@ import { devQuery } from '../../core/devSeams';
 import { MapTileObject } from '../../controllers/terrain/mapTileObject';
 import { PlayerAction } from '../../common/objects/enum';
 import { waterSurfaceHeight } from '../../controllers/terrain/terrainWater';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 import type { Entity, World } from '../../ecs/world';
 
 /** MU world units per terrain tile. The original's `Position` is in these. */

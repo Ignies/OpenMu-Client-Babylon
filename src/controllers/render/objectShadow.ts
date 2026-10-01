@@ -14,7 +14,7 @@ import { getEmptyTexture } from './babylon/emptyTexture';
 import { sunLightOf } from '../lighting/keyRig';
 import { TERRAIN_SIZE, TILE_CM } from '../terrain/consts';
 import { ENUM_WORLD } from '../../core/types';
-import { GameOptions } from '../../common/gameOptions';
+import { GameOptions } from '../../features/options/gameOptions';
 import { blobShadowRefresh, csmActive } from '../lighting/lightingQuality';
 import {
   TERRAIN_HEIGHT_SCALE,

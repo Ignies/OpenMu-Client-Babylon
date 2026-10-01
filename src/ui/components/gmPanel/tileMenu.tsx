@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { t } from '../../../i18n';
-import { GmPanel } from '../../../gmPanel';
-import { mapName } from '../../../common/gmMaps';
-import { gmCommand } from '../../../common/gmCommands';
+import { GmPanel } from '../../../features/gm/gmPanel';
+import { mapName } from '../../../features/gm/gmMaps';
+import { gmCommand } from '../../../features/gm/gmCommands';
 import {
   DEFAULT_ITEM_SPEC,
   itemCommandValues,
@@ -12,9 +12,9 @@ import {
   type ItemEntry,
   type ItemSpec,
   type SkinEntry,
-} from '../../../admin/catalogues';
-import { itemDisplayName, skinDisplayName, spawnCatalogue } from '../../../admin/skins';
-import { GmLibrary, spread, type Macro, type MacroVars } from '../../../admin/gmLibrary';
+} from '../../../features/gm/admin/catalogues';
+import { itemDisplayName, skinDisplayName, spawnCatalogue } from '../../../features/gm/admin/skins';
+import { GmLibrary, spread, type Macro, type MacroVars } from '../../../features/gm/admin/gmLibrary';
 import { uiClick } from '../../../controllers/sound/sfx';
 import { ItemIcon } from '../itemIcon';
 import { ContextMenu, type MenuPoint } from './contextMenu';

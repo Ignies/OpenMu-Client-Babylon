@@ -4,7 +4,7 @@ import {
   type Scene,
 } from '../render/babylon/exports';
 import { ENUM_WORLD } from '../../core/types';
-import { GameOptions } from '../../common/gameOptions';
+import { GameOptions } from '../../features/options/gameOptions';
 import { lightingTier, tierIndex } from './lightingQuality';
 import {
   inkLinesActive,

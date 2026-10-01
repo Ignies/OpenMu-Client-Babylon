@@ -4,7 +4,7 @@ import { t } from '../../../i18n';
 import type { TrackedPlayer } from '../../../controllers/net/protocols/adminProtocol';
 import type { ENUM_WORLD } from '../../../core/types';
 import { loadWorldMinimap, type WorldMinimap } from '../../../controllers/terrain/minimap';
-import type { Nearby } from '../../../gmWorld';
+import type { Nearby } from '../../../features/gm/gmWorld';
 
 /**
  * One world's minimap picture with every tracked player on it.

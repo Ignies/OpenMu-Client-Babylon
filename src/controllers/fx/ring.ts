@@ -12,7 +12,7 @@
  */
 import { Vector3, type Scene } from '../render/babylon/exports';
 import { TerrainDecal } from './moveTargetEffect';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 import { LiveList, TICK, darkCardGain, fadeOut, lerp, luma, type PointSource, type RGB } from './core';
 import { RGBS, TEX } from './recipes';
 import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';

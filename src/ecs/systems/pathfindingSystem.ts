@@ -6,7 +6,7 @@ import {
 } from '../../controllers/render/babylon/exports';
 import type { ISystemFactory, World } from '../world';
 import { TERRAIN_SIZE } from '../../controllers/terrain/consts';
-import { DEBUG_PATHFINDING } from '../../consts';
+import { DEBUG_PATHFINDING } from '../../app/consts';
 import { EventBus } from '../../core/eventBus';
 
 export const PathfindingSystem: ISystemFactory = world => {

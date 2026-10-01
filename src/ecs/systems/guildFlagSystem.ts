@@ -1,7 +1,7 @@
-import { Store } from '../../store';
-import { GUILD_FLAG_BONE, GuildFlag, isThunderHawkArmor } from '../../common/guildFlag';
-import { isEmptyGuildMark } from '../../common/guildMark';
-import { inChaosCastle } from '../../common/locomotion';
+import { Store } from '../../app/store';
+import { GUILD_FLAG_BONE, GuildFlag, isThunderHawkArmor } from '../../controllers/actors/guildFlag';
+import { isEmptyGuildMark } from '../../features/social/guildMark';
+import { inChaosCastle } from '../../controllers/actors/locomotion';
 import type { Entity, ISystemFactory } from '../world';
 
 /**

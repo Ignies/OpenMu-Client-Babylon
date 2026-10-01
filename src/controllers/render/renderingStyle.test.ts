@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Effect } from './babylon/exports';
-import { GameOptions, setGameOption } from '../../common/gameOptions';
+import { GameOptions, setGameOption } from '../../features/options/gameOptions';
 import {
   ANIME_HALFTONE_SCALE_MAX,
   ANIME_HALFTONE_SCALE_MIN,

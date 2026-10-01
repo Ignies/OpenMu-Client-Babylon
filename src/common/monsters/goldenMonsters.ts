@@ -3,7 +3,7 @@ import { effects } from '../../controllers/fx';
 import { bonePos, tmpA } from '../../controllers/fx/core';
 import { FLAME_TONGUES } from '../../controllers/fx/recipes';
 import { loadGLTF } from '../../controllers/assets/modelLoader';
-import { MonsterObject } from '../monsterObject';
+import { MonsterObject } from '../../controllers/actors/monsterObject';
 import { MonsterActionType } from '../objects/enum';
 import { BUDGE_DRAGON_MODEL } from './genericMonster';
 import {

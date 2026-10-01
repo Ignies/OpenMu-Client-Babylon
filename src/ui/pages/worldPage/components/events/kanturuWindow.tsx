@@ -7,8 +7,8 @@ import {
   kanturuHud,
   kanturuResult,
   refreshKanturu,
-} from '../../../../../events/kanturu';
-import { EVENT_TEXT, formatText } from '../../../../../events/recipes';
+} from '../../../../../features/events/kanturu';
+import { EVENT_TEXT, formatText } from '../../../../../features/events/recipes';
 import { MsgBoxFrame } from '../../../../components/msgBoxFrame';
 import { MuButton } from '../../../../components/muButton';
 import { MuNumber } from '../../../../components/muNumber';

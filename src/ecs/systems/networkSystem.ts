@@ -1,8 +1,8 @@
 import type { IVector2Like } from '../../controllers/render/babylon/exports';
 import type { ISystemFactory } from '../world';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 import { truncatePathForAttack } from './attackSystem';
-import { truncatePathWithinRange } from '../../common/approachPath';
+import { truncatePathWithinRange } from '../../controllers/actors/approachPath';
 
 // Function returning CLIENT CODE (0-7) according to MU Online documentation
 // W=0, SW=1, S=2, SE=3, E=4, NE=5, N=6, NW=7

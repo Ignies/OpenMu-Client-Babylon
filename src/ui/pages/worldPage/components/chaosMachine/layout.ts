@@ -1,5 +1,5 @@
 import type { TextKey } from '../../../../../i18n';
-import { MIX_COLUMNS, MIX_ROWS } from '../../../../../common/itemStorage';
+import { MIX_COLUMNS, MIX_ROWS } from '../../../../../features/inventory/itemStorage';
 
 /**
  * `CNewUIMixInventory` (NewUIMixInventory.cpp): the 190×429 item frame, the

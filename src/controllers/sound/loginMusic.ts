@@ -1,6 +1,6 @@
 import { reaction } from 'mobx';
-import { Store, UIState } from '../../store';
-import { sound } from './';
+import { Store, UIState } from '../../app/store';
+import { sound } from '.';
 import { pregameLoad } from '../loading/pregameLoad';
 
 /**

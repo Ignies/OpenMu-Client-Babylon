@@ -5,7 +5,7 @@ import { playTeleportFlash } from '../../common/skillVisuals';
 import { COMBAT_BUS } from '../../controllers/sound/combatSounds';
 import { playSfx } from '../../controllers/sound/sfx';
 import type { Sounds } from '../../controllers/sound/recipes';
-import type { Tile } from '../../common/teleportRules';
+import type { Tile } from '../../features/warp/teleportRules';
 
 /**
  * The body side of Teleport and Teleport Ally: `CreateTeleportBegin` /

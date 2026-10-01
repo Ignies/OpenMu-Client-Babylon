@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { memo, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import type { Item } from '../../../ecs/world';
 import { ItemsDatabase } from '../../../common/itemsDatabase';
-import { Store } from '../../../store';
+import { Store } from '../../../app/store';
 import { ItemIcon } from '../itemIcon';
 import { ItemTooltip, type TooltipContext } from '../itemTooltip';
 import { MuSpriteFrame } from '../muSprite';

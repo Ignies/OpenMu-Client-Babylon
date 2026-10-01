@@ -1,6 +1,6 @@
 import type { Scene, Vector3 } from '../render/babylon/exports';
 import type { Entity } from '../../ecs/world';
-import { effects } from './';
+import { effects } from '.';
 import { entityPos, tmpA, type RGB } from './core';
 import {
   BLOOD_CHIPS,

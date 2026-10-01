@@ -2,7 +2,7 @@ import { uiClick } from '../../../../../controllers/sound/sfx';
 import { t } from '../../../../../i18n';
 import './style.less';
 import { observer } from 'mobx-react-lite';
-import { Store } from '../../../../../store';
+import { Store } from '../../../../../app/store';
 import { ItemIcon } from '../../../../components/itemIcon';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuButton } from '../../../../components/muButton';
@@ -30,14 +30,14 @@ import {
   SKILL_ICON_HEIGHT,
   SKILL_ICON_WIDTH,
 } from '../../../../../common/skillCasting';
-import { useEventBus } from '../../../../../hooks/useEventBus';
+import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { skills } from '../../../../../skills';
 import { onCooldownTick, skillCooldowns } from '../../../../../skills/cooldowns';
 import { SkillTooltip } from '../../../../components/skillTooltip';
 import { ExpTooltip } from './expTooltip';
-import { SessionStats } from '../../../../../common/sessionStats';
+import { SessionStats } from '../../../../../features/session/sessionStats';
 import { devQuery } from '../../../../../core/devSeams';
 import { itemBaseName } from '../../../../../common/itemsDatabase';
 import {
@@ -45,7 +45,7 @@ import {
   canRegisterItemHotkey,
   countHotkeyItems,
   findHotkeyItem,
-} from '../../../../../common/itemHotkeys';
+} from '../../../../../features/inventory/itemHotkeys';
 
 const BAR_ID = BOTTOM_BAR_ID;
 /** The skill fan is a window for Escape's purposes, nothing more. */

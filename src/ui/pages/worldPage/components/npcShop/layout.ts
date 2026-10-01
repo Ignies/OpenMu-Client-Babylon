@@ -1,5 +1,5 @@
 import type { TextKey } from '../../../../../i18n';
-import { SHOP_COLUMNS, SHOP_ROWS } from '../../../../../store';
+import { SHOP_COLUMNS, SHOP_ROWS } from '../../../../../app/store';
 
 /**
  * `CNewUINPCShop` (NewUINPCShop.cpp): the window is the 190×429 item frame,

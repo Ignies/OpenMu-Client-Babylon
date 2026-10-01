@@ -5,7 +5,7 @@ import { ModelObject } from '../render/modelObject';
 import { createMovableFlare, type MovableFlare } from '../lighting/effectLights';
 import { boneLocalPos } from './core';
 import { TILE_CM } from '../terrain/consts';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 import type { Sounds } from '../sound/soundsManager';
 import type { Entity, World } from '../../ecs/world';
 

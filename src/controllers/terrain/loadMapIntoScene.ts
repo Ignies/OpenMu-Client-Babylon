@@ -1,7 +1,7 @@
 import { disposeGrassField } from './terrainGrass';
 import { ENUM_WORLD } from '../../common';
 import type { World } from '../../ecs/world';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 import { maps } from '../../maps';
 // Side effect: the `ChangeTerrainAttributes` packet → `world.setTerrainFlags`.
 import './terrainAttributeUpdates';
@@ -27,13 +27,13 @@ import {
 import { LightCarrier } from '../lighting/lightCarrier';
 import { IVector3Like } from '../render/babylon/exports';
 import { EventBus } from '../../core/eventBus';
-import { DISABLE_OBJECTS_LOADING } from '../../consts';
+import { DISABLE_OBJECTS_LOADING } from '../../app/consts';
 import { sound } from '../sound';
 import { evictWorldMinimaps, prefetchWorldMinimap } from './minimap';
 import { weather } from '../weather';
-import { events } from '../../events';
+import { events } from '../../features/events';
 import { lighting } from '../lighting';
-import { quests } from '../../quests';
+import { quests } from '../../features/quests';
 import { effects } from '../fx';
 import { skills } from '../../skills';
 import { combat } from '../../combat';

@@ -1,5 +1,5 @@
 import type { ISystemFactory } from '../world';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 import { findEntranceGateAt, loadGates, type Gate } from '../../controllers/assets/mu/gates';
 import { EventBus } from '../../core/eventBus';
 import { prefetchWorldTerrain } from '../../controllers/assets/mu/prefetchWorld';

@@ -4,13 +4,13 @@ import { toRenderAngles } from '../../controllers/render/renderAngles';
 import { publishViewPlanes } from '../../controllers/render/viewPlanes';
 import { ENUM_WORLD } from '../../core/types';
 import { weather } from '../../controllers/weather';
-import { debuffBodyLight, debuffBrightBody } from '../../common/debuffBody';
-import { outlawBodyLight } from '../../common/nameTags';
+import { debuffBodyLight, debuffBrightBody } from '../../controllers/actors/debuffBody';
+import { outlawBodyLight } from '../../controllers/interface/nameTags';
 import {
   applyOutlawLook,
   OUTLAW_ULTRA_LIGHT,
   outlawUltraActive,
-} from '../../common/outlawLook';
+} from '../../controllers/actors/outlawLook';
 
 const v3Temp = Vector3.Zero();
 const v3Temp2 = Vector3.Zero();

@@ -1,19 +1,19 @@
 import { observer } from 'mobx-react-lite';
-import { Store } from '../../../store';
+import { Store } from '../../../app/store';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { With } from 'miniplex';
 import { WorldLabel } from '../worldLabel';
 import { NameTags } from '../nameTags';
 import { PartyBars } from '../partyBars';
 import { EmojiBubbles } from '../emojiBubbles';
-import { useRenderId } from '../../../hooks';
-import { useEventBus } from '../../../hooks/useEventBus';
+import { useRenderId } from '../../../controllers/interface/hooks';
+import { useEventBus } from '../../../controllers/interface/hooks/useEventBus';
 import { onScreenPosition } from '../../../controllers/interface/screenPositionBus';
-import { DROP_TIER_COLOURS, dropTier } from '../../../common/dropTier';
-import { dropPassesLootFilter } from '../../../common/lootFilter';
-import { GameOptions } from '../../../common/gameOptions';
+import { DROP_TIER_COLOURS, dropTier } from '../../../features/drops/dropTier';
+import { dropPassesLootFilter } from '../../../features/drops/lootFilter';
+import { GameOptions } from '../../../features/options/gameOptions';
 import { ItemTooltip } from '../itemTooltip';
-import { ItemLinkHover } from '../../../common/itemLinkHover';
+import { ItemLinkHover } from '../../../controllers/interface/itemLinkHover';
 import type { Entity } from '../../../ecs/world';
 import { stableKeyOf } from '../partyBars/stableKey';
 

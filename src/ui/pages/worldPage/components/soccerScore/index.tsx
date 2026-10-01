@@ -1,9 +1,9 @@
 import './style.less';
 import { observer } from 'mobx-react-lite';
-import { Store } from '../../../../../store';
-import { Social } from '../../../../../social';
+import { Store } from '../../../../../app/store';
+import { Social } from '../../../../../features/social/social';
 import { ENUM_WORLD } from '../../../../../core/types';
-import { guildMarkDataUrl } from '../../../../../common/guildMark';
+import { guildMarkDataUrl } from '../../../../../features/social/guildMark';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuText } from '../../../../components/muText';
 import {

@@ -29,7 +29,7 @@
  * This one owns chords and function keys.
  */
 
-import { GameOptions, onGameOptionsChanged } from '../../common/gameOptions';
+import { GameOptions, onGameOptionsChanged } from '../../features/options/gameOptions';
 
 /**
  * Ctrl (or Cmd) plus one of these is a browser command. None of them is

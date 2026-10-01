@@ -1,6 +1,6 @@
 import monsters from '../../src/common/monsters.json';
 import items from '../../src/common/items.json';
-import { mapName as gmMapName } from '../../src/common/gmMaps';
+import { mapName as gmMapName } from '../../src/features/gm/gmMaps';
 
 /**
  * The names a journal line needs, from the tables the client already ships.

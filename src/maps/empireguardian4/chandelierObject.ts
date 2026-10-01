@@ -5,7 +5,7 @@ import {
 import { MapTileObject } from '../../controllers/terrain/mapTileObject';
 import { lightMapObject } from '../../controllers/lighting/mapObjectLights';
 import type { LightSource } from '../../controllers/lighting/lightSource';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 import type { Entity, World } from '../../ecs/world';
 import { findBone } from './bones';
 import { EMPIRE_GUARDIAN_4_CHANDELIER } from './spec';

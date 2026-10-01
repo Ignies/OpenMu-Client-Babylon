@@ -3,9 +3,9 @@ import { PlayerAction } from '../objects/enum';
 import { Scene, TransformNode } from '../../controllers/render/babylon/exports';
 import { loadGLTF } from '../../controllers/assets/modelLoader';
 import { ItemGroups } from '../objects/enum';
-import { PlayerObject } from '../playerObject';
+import { PlayerObject } from '../../controllers/actors/playerObject';
 import { CharacterClassNumber, PlayerClass } from '../../core/types';
-import { WINGS_OF_SPIRITS, WING_GROUP } from '../wings';
+import { WINGS_OF_SPIRITS, WING_GROUP } from '../../controllers/actors/wings';
 
 const lvl = 9;
 const isExcellent = false;

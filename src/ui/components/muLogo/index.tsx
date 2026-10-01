@@ -1,7 +1,7 @@
 import './style.less';
 import { MuSprite, useMuSprite } from '../muSprite';
 import { useUiStageScale } from '../uiStage';
-import { useVersionUi } from '../../../hooks/useVersionUi';
+import { useVersionUi } from '../../../controllers/interface/hooks/useVersionUi';
 
 /**
  * `LoginScene::Render` in tour mode (Scenes/LoginScene.cpp:410-421): the glow

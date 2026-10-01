@@ -1,6 +1,6 @@
 import { PointerEventTypes } from '../../controllers/render/babylon/exports';
-import { Store } from '../../store';
-import { QuickItemActions } from '../../common/quickItemActions';
+import { Store } from '../../app/store';
+import { QuickItemActions } from '../../features/inventory/quickItemActions';
 import { pickGround } from '../../controllers/terrain/terrainPick';
 import type { Entity, ISystemFactory } from '../world';
 

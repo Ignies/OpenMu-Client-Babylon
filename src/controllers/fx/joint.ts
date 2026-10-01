@@ -42,7 +42,7 @@ import {
   type Scene,
 } from '../render/babylon/exports';
 import { clampAlpha } from './clampAlpha';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 import type { TestScene } from '../render/scenes/testScene';
 import {
   LiveList,

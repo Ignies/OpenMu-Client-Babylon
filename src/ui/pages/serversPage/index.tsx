@@ -2,12 +2,12 @@ import { t } from '../../../i18n';
 import './style.less';
 import { useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Store } from '../../../store';
+import { Store } from '../../../app/store';
 import { ConnectionInfoRequestPacket } from '../../../../versions/shared/packets/ConnectServerPackets';
 import {
   ServerConfig,
   type PublishedGameServer,
-} from '../../../common/serverConfig';
+} from '../../../features/servers/serverConfig';
 import { MuButton } from '../../components/muButton';
 import { MuSpriteFrame } from '../../components/muSprite';
 import { ServerItem } from './ServerItem';

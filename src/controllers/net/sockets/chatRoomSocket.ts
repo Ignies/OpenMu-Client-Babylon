@@ -1,4 +1,4 @@
-import { wsAddress } from '../../../common/serverConfig';
+import { wsAddress } from '../../../features/servers/serverConfig';
 import { Xor32Encryptor } from '../encryption/xor32';
 import {
   ChatFrameSplitter,

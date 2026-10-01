@@ -1,4 +1,4 @@
-import { LeanBoxObject } from '../../common/operateBoxObject';
+import { LeanBoxObject } from '../../controllers/actors/operateBoxObject';
 
 /**
  * Lorencia's "lean on the wall" trigger (MODEL_POSE_BOX, type 133). Clicking

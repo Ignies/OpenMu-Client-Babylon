@@ -2,7 +2,7 @@ import postgres from 'postgres';
 import bcrypt from 'bcryptjs';
 import { forgetSignupsBefore, recordAccount, recordSignup, signupsSince } from './db';
 import { BurstLimit, bucketFor, clientIp } from '../../src/core/rateLimit';
-import { isReservedName } from '../../src/common/reservedNames';
+import { isReservedName } from '../../src/features/servers/reservedNames';
 
 /**
  * The account-creation endpoint behind `register.ignies.net`.

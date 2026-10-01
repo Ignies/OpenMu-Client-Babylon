@@ -1,10 +1,10 @@
 import { ItemsDatabase } from '../../common/itemsDatabase';
 import { itemVisualTier } from '../../controllers/item_fx/itemVisualTier';
-import { inChaosCastle } from '../../common/locomotion';
+import { inChaosCastle } from '../../controllers/actors/locomotion';
 import type { ModelObject } from '../../controllers/render/modelObject';
-import { isPlayerBody, type PlayerObject } from '../../common/playerObject';
-import { applyWeaponAttachments } from '../../common/weaponAttachment';
-import { isBook, swordformGlovesModel } from '../../common/weaponClass';
+import { isPlayerBody, type PlayerObject } from '../../controllers/actors/playerObject';
+import { applyWeaponAttachments } from '../../controllers/actors/weaponAttachment';
+import { isBook, swordformGlovesModel } from '../../controllers/actors/weaponClass';
 import type { ISystemFactory, Item } from '../world';
 
 function loadPart(

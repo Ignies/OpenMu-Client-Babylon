@@ -21,7 +21,7 @@ import { TW_SAFEZONE } from '../controllers/terrain/consts';
 import type { Item } from '../ecs/world';
 import type { SkillLayer } from './layer';
 import { skillCooldownRemaining } from './cooldowns';
-import { Store } from '../store';
+import { Store } from '../app/store';
 
 // ---- 1. tuning -------------------------------------------------------------
 

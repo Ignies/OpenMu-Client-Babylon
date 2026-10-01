@@ -8,7 +8,7 @@ import {
   HORN_OF_DINORANT,
   HORN_OF_FENRIR,
   HORN_OF_UNIRIA,
-} from '../../common/petConstants';
+} from '../../features/pets/petConstants';
 import {
   CAPE_OF_LORD,
   HELPER_GROUP,
@@ -17,7 +17,7 @@ import {
   WING_OF_ELF,
   WING_OF_STORM,
   WINGS_OF_DARKNESS,
-} from '../../common/wings';
+} from '../../controllers/actors/wings';
 
 // The Gateway Machine's turn re-issues the 1-channel, unpositioned
 // kan_relic_hole every frame (GM_Kanturu_2nd.cpp:1125-1129, MapManager.cpp:441)

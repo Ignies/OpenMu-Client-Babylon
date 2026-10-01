@@ -2,14 +2,14 @@ import './style.less';
 import { useEffect } from 'react';
 import { reaction } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import { Store } from '../../../../../store';
-import { GameOptions } from '../../../../../common/gameOptions';
+import { Store } from '../../../../../app/store';
+import { GameOptions } from '../../../../../features/options/gameOptions';
 import {
   heartbeatDue,
   NO_WARNING,
   vitalWarning,
   type VitalWarning,
-} from '../../../../../common/lowVitals';
+} from '../../../../../features/hero/lowVitals';
 import { playSfx } from '../../../../../controllers/sound/sfx';
 import { Heartbeat } from './heartbeat';
 

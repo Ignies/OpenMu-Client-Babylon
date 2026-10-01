@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { GameOptions, setGameOption } from '../../common/gameOptions';
+import { GameOptions, setGameOption } from '../../features/options/gameOptions';
 import { BUS_VOLUME_MAX, busGain, busSilent, masterGain, trackGains } from './buses';
 
 /**

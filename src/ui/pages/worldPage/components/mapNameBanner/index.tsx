@@ -1,8 +1,8 @@
 import './style.less';
 import { useEffect, useRef, useState } from 'react';
 import { i18n } from '../../../../../i18n';
-import { Store } from '../../../../../store';
-import { useEventBus } from '../../../../../hooks/useEventBus';
+import { Store } from '../../../../../app/store';
+import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
 import { useMuSprite } from '../../../../components/muSprite';
 import { useUiStageScale } from '../../../../components/uiStage';
 

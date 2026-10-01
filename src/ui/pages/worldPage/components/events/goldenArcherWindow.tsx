@@ -1,11 +1,11 @@
 import { observer } from 'mobx-react-lite';
 import { t } from '../../../../../i18n';
-import { ItemGroup } from '../../../../../common/itemStats';
+import { ItemGroup } from '../../../../../features/items/itemStats';
 import {
   closeGoldenArcher,
   goldenArcherWindow,
   registerRena,
-} from '../../../../../events/goldenArcher';
+} from '../../../../../features/events/goldenArcher';
 import { MuButton } from '../../../../components/muButton';
 import { MuItemWindow } from '../../../../components/muWindow';
 import { ItemIcon } from '../../../../components/itemIcon';

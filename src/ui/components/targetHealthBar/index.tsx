@@ -1,7 +1,7 @@
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useState } from 'react';
-import { Store } from '../../../store';
+import { Store } from '../../../app/store';
 import { isNpcOrTrapType } from '../../../ecs/systems/attackSystem';
 
 const STEPS = 20;

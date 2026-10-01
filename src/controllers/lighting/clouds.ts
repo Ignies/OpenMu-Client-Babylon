@@ -5,7 +5,7 @@ import {
   type Effect,
   type Scene,
 } from '../render/babylon/exports';
-import { GameOptions } from '../../common/gameOptions';
+import { GameOptions } from '../../features/options/gameOptions';
 import { devQueryNumber } from '../../core/devSeams';
 import { lightingTier, tierIndex } from './lightingQuality';
 import { serverNow } from '../net/serverTime';

@@ -5,8 +5,8 @@ import {
   isStandingIdle,
 } from '../../controllers/anim/playerActionMapper';
 import { monsterModelTypeOf } from '../../controllers/anim/playSpeed';
-import { isPlayerBody } from '../../common/playerObject';
-import { HORN_OF_FENRIR, PET_GROUP } from '../../common/petConstants';
+import { isPlayerBody } from '../../controllers/actors/playerObject';
+import { HORN_OF_FENRIR, PET_GROUP } from '../../features/pets/petConstants';
 import type { CharacterClassNumber } from '../../core/types';
 import { CHAOS_CASTLE_WORLDS } from '../../controllers/assets/worldAssets';
 import {
@@ -38,7 +38,7 @@ import {
   type CueState,
 } from '../../controllers/sound/mapMonsters';
 import { MonsterAttackEffects } from '../../controllers/sound/monsterEffects';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 
 /**
  * Plays the sounds the original client fires from SetPlayerStop /

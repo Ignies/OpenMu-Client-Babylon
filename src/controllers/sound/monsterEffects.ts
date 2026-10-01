@@ -1,4 +1,4 @@
-import { inHellas } from '../../common/locomotion';
+import { inHellas } from '../actors/locomotion';
 import { monsterAttackState, type MonsterAttackState } from '../anim/monsterAttackClip';
 import { MonsterActionType as A } from '../../common/objects/enum';
 import { REFERENCE_FPS } from '../anim/playSpeed';

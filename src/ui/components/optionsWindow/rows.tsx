@@ -6,14 +6,14 @@ import { t } from '../../../i18n';
 import {
   GameOptions,
   type GameOptions as GameOptionsType,
-} from '../../../common/gameOptions';
+} from '../../../features/options/gameOptions';
 import {
   KeyBindings,
   keyLabel,
   type KeyAction,
 } from '../../../controllers/interface/keyBindings';
 import { isFullscreen, toggleFullscreen } from '../../../controllers/interface/browserHotkeys';
-import { PwaInstall } from '../../../common/pwaInstall';
+import { PwaInstall } from '../../../app/pwaInstall';
 import {
   TIER_PRESETS,
   TIER_PRESET_LABEL_KEYS,

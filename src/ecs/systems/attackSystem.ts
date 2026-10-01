@@ -1,5 +1,5 @@
 import type { Entity, ISystemFactory } from '../world';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 import { applyPlayerActionSpeed, serverMinAttackInterval } from '../../controllers/anim/playSpeed';
 import { HitRequestPacket } from '../../../versions/shared/packets/ClientToServerPackets';
 import {
@@ -8,20 +8,20 @@ import {
 } from '../../common/objects/enum';
 import { TWFlags } from '../../controllers/terrain/consts';
 import { isFlagInBinaryMask } from '../../controllers/assets/download';
-import { chooseAttackAction } from '../../common/weaponClass';
-import { getBaseClass } from '../../common/characterStats';
-import { isWingItem } from '../../common/wings';
-import { mountKind } from '../../common/pets';
+import { chooseAttackAction } from '../../controllers/actors/weaponClass';
+import { getBaseClass } from '../../features/hero/characterStats';
+import { isWingItem } from '../../controllers/actors/wings';
+import { mountKind } from '../../features/pets/pets';
 import { playBowShotVisual } from '../../common/skillVisuals';
 import { combat } from '../../combat';
 import { MOUSE_UPDATE_SECONDS_MAX } from '../../combat/inputGate';
 import { skillDefinition } from '../../common/skillsDatabase';
-import { truncatePathWithinRange } from '../../common/approachPath';
+import { truncatePathWithinRange } from '../../controllers/actors/approachPath';
 import { isHostilePlayer } from '../../combat/playerTarget';
-import { duelEnemyId } from '../../events/duel';
+import { duelEnemyId } from '../../features/events/duel';
 import { ammoReload, type Hands } from '../../combat/weaponRange';
-import { InventoryConstants } from '../../common/inventoryConstants';
-import { StorageKind } from '../../common/itemStorage';
+import { InventoryConstants } from '../../features/inventory/inventoryConstants';
+import { StorageKind } from '../../features/inventory/itemStorage';
 import { t } from '../../i18n';
 
 /**

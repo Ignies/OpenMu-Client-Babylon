@@ -2,7 +2,7 @@ import { MapTileObject } from '../../controllers/terrain/mapTileObject';
 import { PlayerAction } from '../../common/objects/enum';
 import { toRadians } from '../../controllers/assets/download';
 import { playSfx } from '../../controllers/sound/sfx';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 import type { Entity, World } from '../../ecs/world';
 
 /** MU world units per terrain tile. The original's `Position` is in these. */

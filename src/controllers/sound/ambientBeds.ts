@@ -1,5 +1,5 @@
 import { ENUM_WORLD } from '../../core/types';
-import { GameOptions } from '../../common/gameOptions';
+import { GameOptions } from '../../features/options/gameOptions';
 import { SoundsManager } from './soundsManager';
 import { busGain, type SoundBus } from './buses';
 import type { Sounds } from './recipes';
@@ -10,8 +10,8 @@ import {
   playSfx,
   type SfxPosition,
 } from './listener';
-import { bloodCastleTimer } from '../../events/bloodCastle';
-import { chaosCastleTimer } from '../../events/chaosCastle';
+import { bloodCastleTimer } from '../../features/events/bloodCastle';
+import { chaosCastleTimer } from '../../features/events/chaosCastle';
 import {
   BLOOD_CASTLE_WORLDS,
   CHAOS_CASTLE_WORLDS,

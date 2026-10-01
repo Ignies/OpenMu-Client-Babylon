@@ -2,7 +2,7 @@ import './style.less';
 import { useRef, type CSSProperties } from 'react';
 import { observer } from 'mobx-react-lite';
 import { t } from '../../../../../i18n';
-import { Store } from '../../../../../store';
+import { Store } from '../../../../../app/store';
 import {
   Band,
   instrumentById,
@@ -16,8 +16,8 @@ import {
   setLoop,
   stopPlaying,
   toggleInstrumentWindow,
-} from '../../../../../common/band';
-import { PERCUSSION_CHANNEL } from '../../../../../common/band/bandState';
+} from '../../../../../features/band/music';
+import { PERCUSSION_CHANNEL } from '../../../../../features/band/music/bandState';
 import { uiClick } from '../../../../../controllers/sound/sfx';
 import { MuButton } from '../../../../components/muButton';
 import { MuSpriteFrame } from '../../../../components/muSprite';

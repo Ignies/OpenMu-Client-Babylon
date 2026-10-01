@@ -1,8 +1,8 @@
 import { observer } from 'mobx-react-lite';
 import { t } from '../../../i18n';
-import { GmPanel } from '../../../gmPanel';
-import { mapName } from '../../../common/gmMaps';
-import { gmCommand, type GmCommand } from '../../../common/gmCommands';
+import { GmPanel } from '../../../features/gm/gmPanel';
+import { mapName } from '../../../features/gm/gmMaps';
+import { gmCommand, type GmCommand } from '../../../features/gm/gmCommands';
 import { className, type TrackedPlayer } from '../../../controllers/net/protocols/adminProtocol';
 import { uiClick } from '../../../controllers/sound/sfx';
 import { ContextMenu, type MenuPoint } from './contextMenu';

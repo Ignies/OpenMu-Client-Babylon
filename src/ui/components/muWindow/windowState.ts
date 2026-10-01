@@ -1,7 +1,7 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { LocalStorage } from '../../../core/localStorage';
 import { getUiViewport, onUiViewportChanged } from '../uiStage';
-import { GameOptions, uiScaleFactor } from '../../../common/gameOptions';
+import { GameOptions, uiScaleFactor } from '../../../features/options/gameOptions';
 
 const STORAGE_KEY = 'mu-windows';
 

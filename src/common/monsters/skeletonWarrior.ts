@@ -7,9 +7,9 @@ import {
   GROUP_SHIELD,
   GROUP_SPEAR,
   GROUP_SWORD,
-} from '../weaponClass';
+} from '../../controllers/actors/weaponClass';
 import { loadGLTF } from '../../controllers/assets/modelLoader';
-import { PlayerObject } from '../playerObject';
+import { PlayerObject } from '../../controllers/actors/playerObject';
 import { CharacterClassNumber } from '../../core/types';
 import { skeletonShatter } from '../../controllers/fx/deathVisuals';
 

@@ -1,12 +1,12 @@
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useState } from 'react';
-import { GameOptions, setGameOption } from '../../../../../common/gameOptions';
-import { formatRoundTrip } from '../../../../../common/hudFormat';
+import { GameOptions, setGameOption } from '../../../../../features/options/gameOptions';
+import { formatRoundTrip } from '../../../../../controllers/interface/hudFormat';
 import { isKey } from '../../../../../controllers/interface/keyBindings';
 import { NetStats } from '../../../../../controllers/net/roundTrip';
-import { Store } from '../../../../../store';
-import { useEventBus } from '../../../../../hooks/useEventBus';
+import { Store } from '../../../../../app/store';
+import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
 import { MuText } from '../../../../components/muText';
 import { useUiStageScale } from '../../../../components/uiStage';
 import { t } from '../../../../../i18n';

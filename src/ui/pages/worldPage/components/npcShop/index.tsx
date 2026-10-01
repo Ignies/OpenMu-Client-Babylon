@@ -2,7 +2,7 @@ import './style.less';
 import { t } from '../../../../../i18n';
 import { observer } from 'mobx-react-lite';
 import { useMemo, useRef, useState } from 'react';
-import { Store } from '../../../../../store';
+import { Store } from '../../../../../app/store';
 import { ItemIcon } from '../../../../components/itemIcon';
 import { ItemSearchBox, useItemSearch } from '../../../../components/itemSearch';
 import { ItemTooltip } from '../../../../components/itemTooltip';
@@ -14,12 +14,12 @@ import {
   usedMask,
 } from '../../../../components/itemGrid';
 import { ItemsDatabase } from '../../../../../common/itemsDatabase';
-import { isSellingBanned } from '../../../../../common/itemValue';
-import { QuickItemActions } from '../../../../../common/quickItemActions';
+import { isSellingBanned } from '../../../../../features/items/itemValue';
+import { QuickItemActions } from '../../../../../features/inventory/quickItemActions';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuButton } from '../../../../components/muButton';
 import { MuItemWindow, MuTableFrame } from '../../../../components/muWindow';
-import { goldColor } from '../../../../../common/goldColor';
+import { goldColor } from '../../../../../features/items/goldColor';
 import {
   BUTTON_FRAMES,
   BUTTON_HEIGHT,

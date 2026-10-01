@@ -1,40 +1,40 @@
 import './style.less';
 import { observer } from 'mobx-react-lite';
-import { Store } from '../../../../../store';
-import { events } from '../../../../../events';
+import { Store } from '../../../../../app/store';
+import { events } from '../../../../../features/events';
 import {
   bloodCastleImminent,
   bloodCastleScore,
   bloodCastleTimer,
   bloodCastleWindow,
   inBloodCastle,
-} from '../../../../../events/bloodCastle';
+} from '../../../../../features/events/bloodCastle';
 import {
   devilSquareResult,
   devilSquareWindow,
-} from '../../../../../events/devilSquare';
+} from '../../../../../features/events/devilSquare';
 import {
   chaosCastleImminent,
   chaosCastlePrompt,
   chaosCastleResult,
   chaosCastleTimer,
   inChaosCastle,
-} from '../../../../../events/chaosCastle';
-import { doppelgangerWindow } from '../../../../../events/doppelganger';
+} from '../../../../../features/events/chaosCastle';
+import { doppelgangerWindow } from '../../../../../features/events/doppelganger';
 import {
   CrywolfState,
   crywolfBarVisible,
   crywolfHud,
   crywolfNoticePage,
   crywolfResult,
-} from '../../../../../events/crywolf';
+} from '../../../../../features/events/crywolf';
 import {
   CRYWOLF_NOTICE_KEYS,
   DEVIL_SQUARE_INTRO_KEYS,
   EVENT_TEXT,
   RANK_HEADERS,
   formatText,
-} from '../../../../../events/recipes';
+} from '../../../../../features/events/recipes';
 import { GoldenArcherWindow } from './goldenArcherWindow';
 import { KanturuFigure, KanturuResult, KanturuWindow } from './kanturuWindow';
 import { EventTimers } from './eventTimers';

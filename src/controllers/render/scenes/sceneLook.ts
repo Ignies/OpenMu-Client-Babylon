@@ -7,7 +7,7 @@ import {
   type Texture,
 } from '../babylon/exports';
 import { driveRenderList } from './renderList';
-import { GameOptions, onGameOptionsChanged } from '../../../common/gameOptions';
+import { GameOptions, onGameOptionsChanged } from '../../../features/options/gameOptions';
 import { onTexturePackChanged } from '../../assets/texturePacks';
 import { syncTexturePack } from '../../assets/modelLoader';
 import {

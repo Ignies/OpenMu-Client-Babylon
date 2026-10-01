@@ -3,16 +3,16 @@ import { t, type TextKey } from '../../../../../i18n';
 import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { isKey } from '../../../../../controllers/interface/keyBindings';
-import { Store } from '../../../../../store';
-import { Messenger, type MessengerTab } from '../../../../../messenger';
-import { ChatRooms } from '../../../../../chatRooms';
+import { Store } from '../../../../../app/store';
+import { Messenger, type MessengerTab } from '../../../../../features/friends/messenger';
+import { ChatRooms } from '../../../../../features/chat/chatRooms';
 import {
   MAX_FRIENDS,
   MAX_LETTER_TEXT,
   MAX_LETTER_TITLE,
   isFriendOnline,
-} from '../../../../../common/messenger';
-import { useEventBus } from '../../../../../hooks/useEventBus';
+} from '../../../../../features/friends/friendList';
+import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
 import { uiClick } from '../../../../../controllers/sound/sfx';
 import { MuButton } from '../../../../components/muButton';
 import { MuSpriteFrame } from '../../../../components/muSprite';

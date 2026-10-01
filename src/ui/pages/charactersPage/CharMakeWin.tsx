@@ -1,8 +1,8 @@
 import { t } from '../../../i18n';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useRef } from 'react';
-import { Store } from '../../../store';
-import { isReservedName } from '../../../common/reservedNames';
+import { Store } from '../../../app/store';
+import { isReservedName } from '../../../features/servers/reservedNames';
 import { playUiSound } from '../../../controllers/sound/sfx';
 import { MuButton } from '../../components/muButton';
 import { MuSpriteFrame } from '../../components/muSprite';

@@ -1,6 +1,6 @@
 import './style.less';
 import { useState } from 'react';
-import { itemDisplayName } from '../../../common/itemTooltip';
+import { itemDisplayName } from '../../../controllers/interface/itemTooltip';
 import { t } from '../../../i18n';
 import type { Item } from '../../../ecs/world';
 

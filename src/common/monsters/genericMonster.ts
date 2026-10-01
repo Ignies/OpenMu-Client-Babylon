@@ -1,6 +1,6 @@
 import type { Entity, World } from '../../ecs/world';
 import { loadGLTF } from '../../controllers/assets/modelLoader';
-import { MonsterObject } from '../monsterObject';
+import { MonsterObject } from '../../controllers/actors/monsterObject';
 import { monsterModelFile } from './monsterModelTable';
 
 /** `MODEL_BUDGE_DRAGON`'s model index - the one monster model that hovers. */

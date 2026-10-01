@@ -1,6 +1,6 @@
 import { Vector3, type ArcRotateCamera } from '../../controllers/render/babylon/exports';
 import type { ISystemFactory } from '../world';
-import { Store, UIState } from '../../store';
+import { Store, UIState } from '../../app/store';
 import {
   installCameraControl,
   releaseMouseLook,

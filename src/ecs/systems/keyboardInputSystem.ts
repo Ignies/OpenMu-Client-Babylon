@@ -1,14 +1,14 @@
 import { EventBus } from '../../core/eventBus';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 import {
   isCapturingKey,
   isKey,
   WALK_KEY_CODES,
 } from '../../controllers/interface/keyBindings';
-import { GameOptions } from '../../common/gameOptions';
-import { ITEM_HOTKEY_CODES } from '../../common/itemHotkeys';
+import { GameOptions } from '../../features/options/gameOptions';
+import { ITEM_HOTKEY_CODES } from '../../features/inventory/itemHotkeys';
 import { MuWindows } from '../../ui/components/muWindow/windowState';
-import { openSystemMenu } from '../../common/sessionExit';
+import { openSystemMenu } from '../../features/session/sessionExit';
 import type { ISystemFactory } from '../world';
 
 /** Keys the page would scroll on; kept from doing so while playing. */

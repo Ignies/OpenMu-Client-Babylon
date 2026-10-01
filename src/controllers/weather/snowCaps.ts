@@ -1,5 +1,5 @@
 import type { WeatherLayer } from './layer';
-import { GameOptions } from '../../common/gameOptions';
+import { GameOptions } from '../../features/options/gameOptions';
 import { isTileOpen } from '../terrain/terrainMask';
 import { snowCover } from './snowCover';
 

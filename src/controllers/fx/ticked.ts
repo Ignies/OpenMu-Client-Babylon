@@ -25,7 +25,7 @@
 import { Mesh, Texture, VertexBuffer, VertexData, type Scene, type StandardMaterial, type Vector3 } from '../render/babylon/exports';
 import type { TestScene } from '../render/scenes/testScene';
 import { TerrainDecal } from './moveTargetEffect';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 import {
   EFFECT_RENDERING_GROUP,
   LiveList,

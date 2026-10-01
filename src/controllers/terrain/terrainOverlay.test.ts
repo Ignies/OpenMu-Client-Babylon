@@ -11,7 +11,7 @@ vi.mock('../render/babylon/exports', async () => ({
   Vector3: (await import('@babylonjs/core/Maths/math.vector')).Vector3,
 }));
 vi.mock('../lighting/keyRig', () => ({ sunLightOf: () => null }));
-vi.mock('../../common/gameOptions', () => ({
+vi.mock('../../features/options/gameOptions', () => ({
   GameOptions: { advancedEffects: true },
 }));
 vi.mock('../weather/snowCover', () => ({

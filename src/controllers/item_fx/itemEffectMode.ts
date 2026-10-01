@@ -1,4 +1,4 @@
-import { GameOptions } from '../../common/gameOptions';
+import { GameOptions } from '../../features/options/gameOptions';
 import type { TextKey } from '../../i18n';
 
 /**

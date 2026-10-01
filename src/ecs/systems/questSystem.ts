@@ -1,5 +1,5 @@
 import type { ISystemFactory } from '../world';
-import { quests } from '../../quests';
+import { quests } from '../../features/quests';
 
 /**
  * The one lifecycle call site of the quest system :

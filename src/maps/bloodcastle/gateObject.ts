@@ -1,7 +1,7 @@
 import { MapTileObject } from '../../controllers/terrain/mapTileObject';
 import { ParticleEmitter } from '../../controllers/fx/effectParticles';
 import { toRadians } from '../../controllers/assets/download';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 import type { Entity, World } from '../../ecs/world';
 import {
   bloodCastleGateDown,

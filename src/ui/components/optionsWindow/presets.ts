@@ -2,7 +2,7 @@ import {
   GameOptions,
   setGameOption,
   type GameOptions as GameOptionsType,
-} from '../../../common/gameOptions';
+} from '../../../features/options/gameOptions';
 import { LIGHTING_QUALITY_LABEL_KEYS } from '../../../controllers/lighting/lightingQuality';
 import type { TextKey } from '../../../i18n';
 

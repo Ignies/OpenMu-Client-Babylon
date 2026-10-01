@@ -8,12 +8,12 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   type ReactNode,
 } from 'react';
-import { Store } from '../../../../../store';
-import { Economy, type EconomyPrompt } from '../../../../../economy';
-import { itemDisplayName } from '../../../../../common/itemTooltip';
-import { itemValue } from '../../../../../common/itemValue';
-import { QuickItemActions } from '../../../../../common/quickItemActions';
-import { MAX_BULK_BUY } from '../../../../../common/quickItemRules';
+import { Store } from '../../../../../app/store';
+import { Economy, type EconomyPrompt } from '../../../../../features/economy/economy';
+import { itemDisplayName } from '../../../../../controllers/interface/itemTooltip';
+import { itemValue } from '../../../../../features/items/itemValue';
+import { QuickItemActions } from '../../../../../features/inventory/quickItemActions';
+import { MAX_BULK_BUY } from '../../../../../features/inventory/quickItemRules';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuButton } from '../../../../components/muButton';
 import { TEXT_COLOR } from '../../../serversPage/layout';

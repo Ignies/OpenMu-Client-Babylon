@@ -1,5 +1,5 @@
 import { Texture, type AbstractMesh } from './babylon/exports';
-import { GameOptions } from '../../common/gameOptions';
+import { GameOptions } from '../../features/options/gameOptions';
 import { lightingTier } from '../lighting/lightingQuality';
 import type { TextKey } from '../../i18n';
 

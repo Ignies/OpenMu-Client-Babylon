@@ -2,17 +2,17 @@ import './style.less';
 import { t } from '../../../../../i18n';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useState } from 'react';
-import { Store } from '../../../../../store';
-import { Economy, MAX_SHOP_TITLE } from '../../../../../economy';
+import { Store } from '../../../../../app/store';
+import { Economy, MAX_SHOP_TITLE } from '../../../../../features/economy/economy';
 import {
   StorageKind,
   isPersonalShopBanned,
-} from '../../../../../common/itemStorage';
+} from '../../../../../features/inventory/itemStorage';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuButton } from '../../../../components/muButton';
 import { MuItemWindow } from '../../../../components/muWindow';
 import { ItemGrid } from '../../../../components/itemGrid';
-import { useEventBus } from '../../../../../hooks/useEventBus';
+import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
 import {
   BROWSE_TITLE_Y,
   BUTTON_FRAMES,

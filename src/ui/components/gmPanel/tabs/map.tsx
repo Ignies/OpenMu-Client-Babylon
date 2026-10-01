@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { t } from '../../../../i18n';
-import { GmPanel } from '../../../../gmPanel';
-import { AdminFeed } from '../../../../admin/feed';
-import type { WorldView } from '../../../../gmWorld';
+import { GmPanel } from '../../../../features/gm/gmPanel';
+import { AdminFeed } from '../../../../features/gm/admin/feed';
+import type { WorldView } from '../../../../features/gm/gmWorld';
 import { className, type TrackedPlayer } from '../../../../controllers/net/protocols/adminProtocol';
-import { GM_MAPS, mapName } from '../../../../common/gmMaps';
-import { gmCommand } from '../../../../common/gmCommands';
+import { GM_MAPS, mapName } from '../../../../features/gm/gmMaps';
+import { gmCommand } from '../../../../features/gm/gmCommands';
 import { uiClick } from '../../../../controllers/sound/sfx';
 import { MapView } from '../mapView';
 import { TileMenu } from '../tileMenu';

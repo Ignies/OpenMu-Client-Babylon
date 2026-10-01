@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite';
 import { t } from '../../../../../i18n';
-import { Store } from '../../../../../store';
+import { Store } from '../../../../../app/store';
 import { useMuSprite } from '../../../../components/muSprite';
 import { MobileButton, ScaledFrame } from './mobileButton';
 import { SLOT_SCALE, SKILLBOX_SPRITE, SKILLBOX_USE_SPRITE, BOX_WIDTH, BOX_HEIGHT } from './consts';

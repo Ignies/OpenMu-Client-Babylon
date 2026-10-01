@@ -1,4 +1,4 @@
-import { OperateBoxObject } from '../../common/operateBoxObject';
+import { OperateBoxObject } from '../../controllers/actors/operateBoxObject';
 import { toRadians } from '../../controllers/assets/download';
 import type { World } from '../../ecs/world';
 import { Vector3 } from '../../controllers/render/babylon/exports';

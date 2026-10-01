@@ -1,11 +1,11 @@
 import './style.less';
 import { useEffect, useMemo, useRef } from 'react';
 import type { With } from 'miniplex';
-import { Store } from '../../../store';
-import { useRenderId } from '../../../hooks';
+import { Store } from '../../../app/store';
+import { useRenderId } from '../../../controllers/interface/hooks';
 import { onScreenPosition } from '../../../controllers/interface/screenPositionBus';
 import type { Entity } from '../../../ecs/world';
-import { guildMarkDataUrl, isEmptyGuildMark } from '../../../common/guildMark';
+import { guildMarkDataUrl, isEmptyGuildMark } from '../../../features/social/guildMark';
 
 type MarkEntity = With<Entity, 'guild' | 'screenPosition'>;
 

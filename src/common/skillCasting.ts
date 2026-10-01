@@ -3,10 +3,10 @@ import {
   chooseAttackAction,
   chooseHighBowAttackAction,
   type AttackPose,
-} from './weaponClass';
+} from '../controllers/actors/weaponClass';
 import { skillDefinition, type SkillDefinition } from './skillsDatabase';
 import { masterBase } from './skillAliases';
-import { BaseClass } from './characterStats';
+import { BaseClass } from '../features/hero/characterStats';
 import { magicClip, skillClip, type CastContext } from '../combat/skillClips';
 import { castsOnSelf } from '../combat/castTargets';
 import { SLASH_SKILLS } from '../combat/recipes';

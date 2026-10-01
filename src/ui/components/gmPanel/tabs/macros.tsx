@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { t, type TextKey } from '../../../../i18n';
-import { GmPanel } from '../../../../gmPanel';
-import type { WorldView } from '../../../../gmWorld';
-import { GmLibrary, MAX_DELAY_MS, type Macro, type MacroStep } from '../../../../admin/gmLibrary';
+import { GmPanel } from '../../../../features/gm/gmPanel';
+import type { WorldView } from '../../../../features/gm/gmWorld';
+import { GmLibrary, MAX_DELAY_MS, type Macro, type MacroStep } from '../../../../features/gm/admin/gmLibrary';
 import { uiClick } from '../../../../controllers/sound/sfx';
 
 /**

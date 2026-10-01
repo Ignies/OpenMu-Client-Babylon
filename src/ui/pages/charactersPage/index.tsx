@@ -3,8 +3,8 @@ import './style.less';
 import { runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { Fragment, useEffect, useRef, useState } from 'react';
-import { Store } from '../../../store';
-import { useEventBus } from '../../../hooks/useEventBus';
+import { Store } from '../../../app/store';
+import { useEventBus } from '../../../controllers/interface/hooks/useEventBus';
 import { playUiSound } from '../../../controllers/sound/sfx';
 import { isTypingInField } from '../../../ecs/systems/keyboardInputSystem';
 import {
@@ -12,7 +12,7 @@ import {
   CharacterListPacket,
   GuildMemberRoleEnum,
 } from '../../../../versions/shared/packets/ServerToClientPackets';
-import { MsgWinCode } from '../../../common/msgWin';
+import { MsgWinCode } from '../../../controllers/interface/msgWin';
 import { MuButton } from '../../components/muButton';
 import { MuSpriteFrame } from '../../components/muSprite';
 import { MsgWindow } from '../../components/msgWindow';

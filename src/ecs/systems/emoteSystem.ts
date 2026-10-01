@@ -1,8 +1,8 @@
 import { PlayerAction, ServerPlayerActionType } from '../../common/objects/enum';
-import { emoteById, genderedEmoteAction } from '../../common/emotes';
+import { emoteById, genderedEmoteAction } from '../../features/hero/emotes';
 import { isStandingIdle } from '../../controllers/anim/playerActionMapper';
 import { rotationByteOf } from '../../core/turnAngle';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 import type { ISystemFactory } from '../world';
 
 /**

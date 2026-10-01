@@ -2,7 +2,7 @@ import type { Entity, Item, World } from '../../ecs/world';
 import { PlayerAction, ItemGroups } from '../objects/enum';
 import { Scene, TransformNode } from '../../controllers/render/babylon/exports';
 import { loadGLTF } from '../../controllers/assets/modelLoader';
-import { PlayerObject } from '../playerObject';
+import { PlayerObject } from '../../controllers/actors/playerObject';
 import { CharacterClassNumber, PlayerClass } from '../../core/types';
 
 /**

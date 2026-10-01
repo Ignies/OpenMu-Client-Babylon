@@ -1,5 +1,5 @@
 // The per-frame half of the name tags, kept store-free so it can be tested.
-import { CHAT_FADE_TICKS } from '../../../common/nameTags';
+import { CHAT_FADE_TICKS } from '../../../controllers/interface/nameTags';
 
 export type TagAnchor = { screenPosition: { x: number; y: number } };
 

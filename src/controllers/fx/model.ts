@@ -31,7 +31,7 @@ import { clampAlpha } from './clampAlpha';
 import { chromeMaterial, disposeChromeMaterials } from './chrome';
 import { getMaterial, loadGLTF } from '../assets/modelLoader';
 import { BlendState } from '../../common/objects/enum';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 import type { TestScene } from '../render/scenes/testScene';
 import {
   EFFECT_RENDERING_GROUP,

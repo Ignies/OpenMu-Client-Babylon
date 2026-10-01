@@ -1,14 +1,14 @@
 import './style.less';
 import { t } from '../../../../../i18n';
 import { observer } from 'mobx-react-lite';
-import { Store } from '../../../../../store';
-import { Economy, MIX_MENU } from '../../../../../economy';
-import { StorageKind } from '../../../../../common/itemStorage';
+import { Store } from '../../../../../app/store';
+import { Economy, MIX_MENU } from '../../../../../features/economy/economy';
+import { StorageKind } from '../../../../../features/inventory/itemStorage';
 import { MuButton } from '../../../../components/muButton';
 import { MuItemWindow, MuTableFrame } from '../../../../components/muWindow';
 import { ItemGrid } from '../../../../components/itemGrid';
-import { QuickItemActions } from '../../../../../common/quickItemActions';
-import { useEventBus } from '../../../../../hooks/useEventBus';
+import { QuickItemActions } from '../../../../../features/inventory/quickItemActions';
+import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
 import { uiClick } from '../../../../../controllers/sound/sfx';
 import {
   COLUMNS,

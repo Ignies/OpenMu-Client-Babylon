@@ -1,7 +1,7 @@
 import type { Item } from '../../ecs/world';
 import { CharacterClassNumber } from '../../core/types';
-import { getBaseClass, BaseClass } from '../../common/characterStats';
-import { isFemaleClass } from '../../common/mapPlayerNetClassToModelClass';
+import { getBaseClass, BaseClass } from '../../features/hero/characterStats';
+import { isFemaleClass } from '../actors/mapPlayerNetClassToModelClass';
 import {
   GROUP_SPEAR,
   GROUP_SWORD,
@@ -9,7 +9,7 @@ import {
   isBow,
   isCrossbow,
   isWeaponItem,
-} from '../../common/weaponClass';
+} from '../actors/weaponClass';
 import type { SoundBus } from './buses';
 import type { Sounds } from './recipes';
 import type { SoundLayer } from './layer';

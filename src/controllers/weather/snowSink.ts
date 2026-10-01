@@ -1,6 +1,6 @@
 import type { ENUM_WORLD } from '../../core/types';
 import type { WeatherLayer } from './layer';
-import { GameOptions } from '../../common/gameOptions';
+import { GameOptions } from '../../features/options/gameOptions';
 import { isTileOpen } from '../terrain/terrainMask';
 import type { TerrainLayers, World } from '../../ecs/world';
 import { overlayBedShare, snowCoverFor } from '../terrain/terrainOverlay';

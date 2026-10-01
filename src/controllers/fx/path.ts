@@ -14,7 +14,7 @@
  * Driven by: `effects.spawn('path', …)`. Read by: nobody.
  */
 import { Constants, Mesh, Vector3, VertexBuffer, VertexData, type Scene, type Texture } from '../render/babylon/exports';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 import type { TestScene } from '../render/scenes/testScene';
 import { EFFECT_RENDERING_GROUP, LiveList, TICK, WHITE, additiveMaterial, fxNow, keepDepthForEffects, type RGB } from './core';
 import { addEffectGlow, releaseEffectGlow } from './glow';

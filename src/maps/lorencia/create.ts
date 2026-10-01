@@ -22,7 +22,7 @@ import {
 } from '../rooms';
 import { createAttributeSystem } from '../../core/attributeSystem';
 import { Vector3 } from '../../controllers/render/babylon/exports';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 import { BeerObject } from './beerObject';
 import { BonfireObject } from './bonfireObject';
 import { BridgeObject } from './bridgeObject';

@@ -1,7 +1,7 @@
 import { Vector3, type Effect, type Scene } from '../render/babylon/exports';
 import { sunLightOf } from '../lighting/keyRig';
 import { ENUM_WORLD } from '../../core/types';
-import { GameOptions } from '../../common/gameOptions';
+import { GameOptions } from '../../features/options/gameOptions';
 import { SNOW_GROUND_MAPS, snowCover } from '../weather/snowCover';
 import { snowTrailPainted, snowTrailTexture } from '../weather/snowTrail';
 import {

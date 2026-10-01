@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { t } from '../../../../../i18n';
-import { Store } from '../../../../../store';
-import { Social } from '../../../../../social';
+import { Store } from '../../../../../app/store';
+import { Social } from '../../../../../features/social/social';
 import { skills } from '../../../../../skills';
 import { onCooldownTick } from '../../../../../skills/cooldowns';
 import { isHotbarSkill, TELEPORT, TELEPORT_ALLY } from '../../../../../common/skillCasting';
-import { aimAlongFacing, teleportSquareOpen } from '../../../../../common/teleportRules';
+import { aimAlongFacing, teleportSquareOpen } from '../../../../../features/warp/teleportRules';
 import { skillDefinition } from '../../../../../common/skillsDatabase';
-import { MobileSkillSlots, MOBILE_SKILL_SLOTS } from '../../../../../common/mobileSkillSlots';
+import { MobileSkillSlots, MOBILE_SKILL_SLOTS } from '../../../../../features/options/mobileSkillSlots';
 import { isAttackableEntity } from '../../../../../ecs/systems/attackSystem';
 import { SkillIcon } from '../../../../components/skillIcon';
 import { MobileButton, ScaledFrame } from './mobileButton';

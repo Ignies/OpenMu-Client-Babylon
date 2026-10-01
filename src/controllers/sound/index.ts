@@ -3,7 +3,7 @@ import type { Scene } from '../render/babylon/exports';
 import type { World } from '../../ecs/world';
 import { SoundsManager } from './soundsManager';
 import { EventBus } from '../../core/eventBus';
-import { GameOptions, onGameOptionsChanged } from '../../common/gameOptions';
+import { GameOptions, onGameOptionsChanged } from '../../features/options/gameOptions';
 import { busGain, trackGains, type SoundBus } from './buses';
 import type { SoundLayer } from './layer';
 import { SOUND_LAYERS } from './layers';

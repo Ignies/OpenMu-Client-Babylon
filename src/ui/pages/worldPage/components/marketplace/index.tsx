@@ -5,18 +5,18 @@ import { useWindowChrome } from '../../../../components/muWindow/useWindowChrome
 import { ItemIcon } from '../../../../components/itemIcon';
 import { ItemTooltip } from '../../../../components/itemTooltip';
 import { t, type TextKey } from '../../../../../i18n';
-import { CATEGORIES, displayName } from '../../../../../marketplace/categories';
-import { cancellable, stateLabelKey, statePillKey } from '../../../../../marketplace/catalogue';
-import { lookClasses } from '../../../../../marketplace/tiers';
+import { CATEGORIES, displayName } from '../../../../../features/marketplace/categories';
+import { cancellable, stateLabelKey, statePillKey } from '../../../../../features/marketplace/catalogue';
+import { lookClasses } from '../../../../../features/marketplace/tiers';
 import {
   Marketplace,
   SORTS,
   formatZen,
   sinceLabel,
   type Tab,
-} from '../../../../../marketplace/state';
-import type { Listing } from '../../../../../marketplace/mockListings';
-import type { HistoryEntry } from '../../../../../marketplace/api';
+} from '../../../../../features/marketplace/state';
+import type { Listing } from '../../../../../features/marketplace/mockListings';
+import type { HistoryEntry } from '../../../../../features/marketplace/api';
 import { CONTENT, FRAME_H, FRAME_SRC, FRAME_W, PLAQUE, RAIL } from './layout';
 
 export const MARKETPLACE_ID = 'marketplace';

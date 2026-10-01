@@ -1,8 +1,8 @@
 import { With } from 'miniplex';
-import { MapPlayerNetClassToModelClass } from '../../common/mapPlayerNetClassToModelClass';
+import { MapPlayerNetClassToModelClass } from '../../controllers/actors/mapPlayerNetClassToModelClass';
 import { getModel, loadGLTF } from '../../controllers/assets/modelLoader';
 import { ModelObject } from '../../controllers/render/modelObject';
-import { PlayerObject } from '../../common/playerObject';
+import { PlayerObject } from '../../controllers/actors/playerObject';
 import { MapObjectLights } from '../../controllers/lighting/mapObjectLightAdapter';
 import { blendMeshFor } from '../../controllers/render/blendMeshes';
 import { toRenderAngles } from '../../controllers/render/renderAngles';

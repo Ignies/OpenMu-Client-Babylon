@@ -11,21 +11,21 @@ import {
   Vector3,
 } from '../../controllers/render/babylon/exports';
 import type { Entity, ISystemFactory } from '../world';
-import { Store, UIState } from '../../store';
+import { Store, UIState } from '../../app/store';
 import { ENUM_WORLD } from '../../common';
-import { spawnPlayer } from '../../logic';
-import { deserializeAppearance } from '../../common/deserializeAppearance';
+import { spawnPlayer } from '../../app/logic';
+import { deserializeAppearance } from '../../controllers/actors/deserializeAppearance';
 import { runInAction } from 'mobx';
 import {
   characterSelectView,
   characterSlotAngle,
   characterSlotPosition,
-} from '../../common/characterSelect';
+} from '../../features/character_select/characterSelect';
 import { setSceneHold } from '../../controllers/loading/sceneGate';
-import { createCharacterSelectBackdrop } from '../../common/characterSelectBackdrop';
+import { createCharacterSelectBackdrop } from '../../features/character_select/characterSelectBackdrop';
 import { PlayerAction } from '../../common/objects/enum';
-import { genderedEmoteAction } from '../../common/emotes';
-import { isRidingMount } from '../../common/pets';
+import { genderedEmoteAction } from '../../features/hero/emotes';
+import { isRidingMount } from '../../features/pets/pets';
 import {
   registerPointLightEmitter,
   type PointLightEmitter,

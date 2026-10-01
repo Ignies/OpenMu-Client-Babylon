@@ -2,19 +2,19 @@ import { Vector3 } from '../../controllers/render/babylon/exports';
 import { angleLinkMatrix } from '../../controllers/render/boneLink';
 import { devQuery, devQueryNumbers } from '../../core/devSeams';
 import type { BmdLink } from '../../controllers/render/boneLink';
-import { instrumentById, instrumentParts, isInstrumentId, type InstrumentPart } from '../../common/instruments';
+import { instrumentById, instrumentParts, isInstrumentId, type InstrumentPart } from '../../features/band/instruments';
 import { loadGLTF } from '../../controllers/assets/modelLoader';
 import { ModelObject } from '../../controllers/render/modelObject';
 import type { PlayerAction } from '../../common/objects/enum';
 import { isStandingIdle } from '../../controllers/anim/playerActionMapper';
-import type { PlayerObject } from '../../common/playerObject';
+import type { PlayerObject } from '../../controllers/actors/playerObject';
 import {
   performanceEnded,
   refused,
   takenOut,
-} from '../../common/band';
-import { instrumentClip } from '../../common/band/instrumentClip';
-import { startPerforming, stopPerforming } from '../../common/band/performing';
+} from '../../features/band/music';
+import { instrumentClip } from '../../features/band/music/instrumentClip';
+import { startPerforming, stopPerforming } from '../../features/band/music/performing';
 import { audioNow, dropPerformer, setPerformerPosition } from '../../controllers/sound/instruments';
 import { effects } from '../../controllers/fx';
 import { entityYaw } from '../../controllers/fx/core';

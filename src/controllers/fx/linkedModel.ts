@@ -20,7 +20,7 @@ import { Quaternion, TransformNode, VertexBuffer, type AbstractMesh, type Animat
 import type { Entity } from '../../ecs/world';
 import { loadGLTF } from '../assets/modelLoader';
 import { PLAY_SPEED_TO_RATIO } from '../anim/playSpeed';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 import type { TestScene } from '../render/scenes/testScene';
 import { LiveList, additiveMaterial, fxNow, WHITE, type RGB } from './core';
 import { addEffectGlow, releaseEffectGlow } from './glow';

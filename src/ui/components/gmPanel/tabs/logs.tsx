@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { t, type TextKey } from '../../../../i18n';
-import { GmPanel } from '../../../../gmPanel';
-import { AdminFeed } from '../../../../admin/feed';
+import { GmPanel } from '../../../../features/gm/gmPanel';
+import { AdminFeed } from '../../../../features/gm/admin/feed';
 import { EVENT_KINDS, type EventKind, type TrackEvent } from '../../../../controllers/net/protocols/adminProtocol';
 import { uiClick } from '../../../../controllers/sound/sfx';
 import { FeedNotice, clockText } from '../shared';

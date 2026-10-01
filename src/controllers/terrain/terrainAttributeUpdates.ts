@@ -1,6 +1,6 @@
 import { ChangeTerrainAttributesPacket } from '../../../versions/shared/packets/ServerToClientPackets';
 import { EventBus } from '../../core/eventBus';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 
 /**
  * `ReceiveSetAttribute` (WSclient.cpp:8320-8345): the server rewrites terrain

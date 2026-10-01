@@ -6,7 +6,7 @@ import {
   type RenderTargetTexture,
   type Scene,
 } from '../render/babylon/exports';
-import { GameOptions, onGameOptionsChanged } from '../../common/gameOptions';
+import { GameOptions, onGameOptionsChanged } from '../../features/options/gameOptions';
 import { devQuery, devQueryNumber } from '../../core/devSeams';
 import { driveRenderList } from '../render/scenes/renderList';
 

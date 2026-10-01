@@ -37,7 +37,7 @@ import {
   type Texture,
 } from '../render/babylon/exports';
 import { loadGLTF } from '../assets/modelLoader';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 import type { TestScene } from '../render/scenes/testScene';
 import { clampAlpha } from './clampAlpha';
 import { LiveList, darkCardGain, darkRibbonSheet, fadeOut, luma, type PointSource, type RGB } from './core';

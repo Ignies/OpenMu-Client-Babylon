@@ -7,7 +7,7 @@ import {
   type BonedEmission,
 } from '../../controllers/fx/effectParticles';
 import { MapTileObject } from '../../controllers/terrain/mapTileObject';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 import type { Entity, World } from '../../ecs/world';
 
 type BoneNode = BonedEmission['node'];

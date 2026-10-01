@@ -1,0 +1,671 @@
+import type { Item } from '../../ecs/world';
+import { BaseClass } from '../../features/hero/characterStats';
+import { ItemsDatabase } from '../../common/itemsDatabase';
+import { PlayerAction } from '../../common/objects/enum';
+import type { MountKind } from '../../features/pets/pets';
+
+/**
+ * Weapon-class rules transcribed from the original client
+ * (`SetPlayerStop` ZzzCharacter.cpp:255-335, `SetPlayerWalk` :549-620,
+ * `IsBackItem` :14937-14951). Item groups: 0 sword, 1 axe, 2 mace, 3 spear,
+ * 4 bow/crossbow, 5 staff (+ summoner sticks 14-20, books 21+), 6 shield.
+ */
+
+export const GROUP_SWORD = 0;
+export const GROUP_AXE = 1;
+export const GROUP_MACE = 2;
+export const GROUP_SPEAR = 3;
+export const GROUP_BOW = 4;
+export const GROUP_STAFF = 5;
+export const GROUP_SHIELD = 6;
+
+const BOLT_INDEX = 7;
+const ARROWS_INDEX = 15;
+
+// MODEL__SPEAR = MODEL_SPEAR + 1, MODEL_DRAGON_LANCE = MODEL_SPEAR + 2 (_enum.h:1557)
+const SPEAR_POSE_INDICES = new Set([1, 2]);
+// Dark Reign Blade 21, Explosion Blade 23, Sword Dancer 25, Rune Blade 31 (_enum.h:1515-1523)
+const TWO_HAND_SWORD_TWO_INDICES = new Set([21, 23, 25, 31]);
+const MISTERY_STICK = 14;
+const ETERNAL_WING_STICK = 20;
+const BOOK_OF_SAHAMUTT = 21;
+
+export type Hands = { leftHand: Item | null; rightHand: Item | null };
+
+export function isWeaponItem(item: Item | null): item is Item {
+  return !!item && item.group <= GROUP_SHIELD;
+}
+
+export function isAmmo(item: Item | null): boolean {
+  return (
+    !!item &&
+    item.group === GROUP_BOW &&
+    (item.num === BOLT_INDEX || item.num === ARROWS_INDEX)
+  );
+}
+
+export function isShield(item: Item | null): boolean {
+  return !!item && item.group === GROUP_SHIELD;
+}
+
+/**
+ * Summoner books (staff 21-29). `RenderLinkObject` returns before drawing
+ * them (ZzzCharacter.cpp:6453-6456): a book is never rendered on the
+ * character at all, in hand or on the back.
+ */
+export function isBook(item: Item | null): boolean {
+  return (
+    !!item &&
+    item.group === GROUP_STAFF &&
+    item.num >= BOOK_OF_SAHAMUTT &&
+    item.num <= 29
+  );
+}
+
+// The Rage Fighter's glove weapons (`CMonkSystem::RegistItem`,
+// MonkSystem.cpp:76-89). Each is a sword-group item worn one per hand, and
+// each carries three models: the inventory one items.json names, and a left /
+// right pair worn on the character. The Phoenix Soul Star additionally trails
+// a pair of phoenix wings (`RenderPhoenixGloves`, :241).
+const SACRED_GLOVE = 32;
+export const PHOENIX_SOUL_STAR = 35;
+
+/** `Item/` model stems, indexed from `SACRED_GLOVE`: [worn right, worn left]. */
+const SWORDFORM_GLOVE_MODELS: readonly (readonly [string, string])[] = [
+  ['SwordR33', 'SwordL33'], // Sacred Glove
+  ['SwordR34', 'SwordL34'], // Storm Hard Glove
+  ['SwordR35', 'SwordL35'], // Piercing Blade Glove
+  ['Sword36R', 'Sword36L'], // Phoenix Soul Star
+];
+
+export function isPhoenixSoulStar(item: Item | null | undefined): boolean {
+  return !!item && item.group === GROUP_SWORD && item.num === PHOENIX_SOUL_STAR;
+}
+
+/** `IsSwordformGloves` (MonkSystem.cpp:223). */
+export function isSwordformGloves(item: Item | null): boolean {
+  return (
+    !!item &&
+    item.group === GROUP_SWORD &&
+    item.num >= SACRED_GLOVE &&
+    item.num < SACRED_GLOVE + SWORDFORM_GLOVE_MODELS.length
+  );
+}
+
+/**
+ * `ModifyTypeSwordformGloves` (MonkSystem.cpp:254): the model actually worn,
+ * which is never the one items.json names. Slot 0 takes the right-hand model,
+ * slot 1 the left. `null` for anything that is not a glove weapon.
+ */
+export function swordformGlovesModel(
+  item: Item | null,
+  slot: 0 | 1
+): string | null {
+  if (!item || !isSwordformGloves(item)) return null;
+  return `${SWORDFORM_GLOVE_MODELS[item.num - SACRED_GLOVE][slot]}.glb`;
+}
+
+/** `IsBowModel` (CharacterManager.cpp:68): 0-6, Celestial 17, Viper…Stinger 20-23, Air Lyn 24. */
+export function isBow(item: Item | null): boolean {
+  if (!item || item.group !== GROUP_BOW) return false;
+  const n = item.num;
+  return n <= 6 || n === 17 || (n >= 20 && n <= 24);
+}
+
+/** `IsCrossbowModel` (CharacterManager.cpp:76): 8-14, Saint 16, Divine CB…Great Reign 18-19. */
+export function isCrossbow(item: Item | null): boolean {
+  if (!item || item.group !== GROUP_BOW) return false;
+  const n = item.num;
+  return (n >= 8 && n <= 14) || n === 16 || n === 18 || n === 19;
+}
+
+/**
+ * `GetEquipedBowType` (CharacterManager.cpp:267): a bow only counts from
+ * weapon slot 1 (appearance "rightHand"), a crossbow only from slot 0.
+ */
+export function equippedBowType(
+  hands: Hands | undefined
+): 'bow' | 'crossbow' | null {
+  if (!hands) return null;
+  if (isBow(hands.rightHand)) return 'bow';
+  if (isCrossbow(hands.leftHand)) return 'crossbow';
+  return null;
+}
+
+/**
+ * `ItemAttribute[].TwoHand` is not in items.json; the inventory width is the
+ * reliable proxy for swords/axes/maces (two-handers are 2 wide), spears are
+ * always two-handed, and staffs switch at Legendary Staff (index 5) - the
+ * summoner sticks/books are one-handed.
+ */
+export function isTwoHanded(item: Item): boolean {
+  switch (item.group) {
+    case GROUP_SWORD:
+    case GROUP_AXE:
+    case GROUP_MACE: {
+      const def = ItemsDatabase.getItem(item.group, item.num);
+      return (def?.X ?? 1) >= 2;
+    }
+    case GROUP_SPEAR:
+      return true;
+    case GROUP_STAFF:
+      return item.num >= 5 && item.num < MISTERY_STICK;
+    case GROUP_BOW:
+      return !isAmmo(item);
+    default:
+      return false;
+  }
+}
+
+/**
+ * `IsBackItem` (ZzzCharacter.cpp:14937): with a bow or crossbow equipped
+ * everything rides the back; otherwise anything sword…shield except the
+ * summoner books - the sticks (staff 14-20) do go to the back.
+ */
+export function isBackItem(item: Item, hands?: Hands): boolean {
+  if (equippedBowType(hands) !== null) return true;
+  return item.group <= GROUP_SHIELD && !isBook(item);
+}
+
+function equippedBow(hands: Hands): Item | null {
+  for (const h of [hands.leftHand, hands.rightHand]) {
+    if (isBow(h) || isCrossbow(h)) return h;
+  }
+  return null;
+}
+
+/**
+ * Everything `SetPlayerStop` / `SetPlayerWalk` read off the character before
+ * they reach the weapon switch (ZzzCharacter.cpp:157-679).
+ */
+export type CharacterPose = {
+  hands: Hands | undefined;
+  baseClass: BaseClass;
+  /**
+   * `gCharacterManager.IsFemale(c->Class)` - elf or summoner. Kept separate
+   * from `baseClass` because the walk branch tests it directly.
+   */
+  isFemale: boolean;
+  /**
+   * The "no weapon or safe zone" collapse:
+   * `(Weapon[0] == -1 && Weapon[1] == -1) || (SafeZone && !InBloodCastle())`.
+   */
+  weaponsStowed: boolean;
+  /** `gMapManager.InChaosCastle()`: summoners pose and walk male in there. */
+  inChaosCastle: boolean;
+};
+
+/** `SetPlayerStop`'s unarmed branch (ZzzCharacter.cpp:271-280). */
+function plainStop(pose: CharacterPose): PlayerAction {
+  switch (pose.baseClass) {
+    case BaseClass.Elf:
+      return PlayerAction.PLAYER_STOP_FEMALE;
+    case BaseClass.Summoner:
+      return pose.inChaosCastle
+        ? PlayerAction.PLAYER_STOP_MALE
+        : PlayerAction.PLAYER_STOP_SUMMONER;
+    case BaseClass.RageFighter:
+      return PlayerAction.PLAYER_STOP_RAGEFIGHTER;
+    default:
+      return PlayerAction.PLAYER_STOP_MALE;
+  }
+}
+
+/** `SetPlayerWalk`'s unarmed branch (ZzzCharacter.cpp:556-562). */
+function plainWalk(pose: CharacterPose): PlayerAction {
+  if (!pose.isFemale) return PlayerAction.PLAYER_WALK_MALE;
+  if (pose.baseClass === BaseClass.Summoner && pose.inChaosCastle) {
+    return PlayerAction.PLAYER_WALK_MALE;
+  }
+  return PlayerAction.PLAYER_WALK_FEMALE;
+}
+
+/** The two weapon slots, filtered to actual weapons. Slot 0 is the main hand. */
+function weapons(pose: CharacterPose): [Item | null, Item | null] {
+  const hands = pose.hands;
+  return [
+    hands && isWeaponItem(hands.leftHand) ? hands.leftHand : null,
+    hands && isWeaponItem(hands.rightHand) ? hands.rightHand : null,
+  ];
+}
+
+/** `SetPlayerStop` weapon branch. */
+export function chooseIdleAction(pose: CharacterPose): PlayerAction {
+  const [main, off] = weapons(pose);
+  if (pose.weaponsStowed || (!main && !off)) return plainStop(pose);
+
+  if (main) {
+    switch (main.group) {
+      case GROUP_SWORD:
+      case GROUP_AXE:
+      case GROUP_MACE:
+        if (!isTwoHanded(main)) return PlayerAction.PLAYER_STOP_SWORD;
+        return main.group === GROUP_SWORD && TWO_HAND_SWORD_TWO_INDICES.has(main.num)
+          ? PlayerAction.PLAYER_STOP_TWO_HAND_SWORD_TWO
+          : PlayerAction.PLAYER_STOP_TWO_HAND_SWORD;
+      case GROUP_SPEAR:
+        return SPEAR_POSE_INDICES.has(main.num)
+          ? PlayerAction.PLAYER_STOP_SPEAR
+          : PlayerAction.PLAYER_STOP_SCYTHE;
+      case GROUP_STAFF:
+        if (main.num >= MISTERY_STICK && main.num <= ETERNAL_WING_STICK) {
+          return PlayerAction.PLAYER_STOP_WAND;
+        }
+        if (main.num >= BOOK_OF_SAHAMUTT) break;
+        return isTwoHanded(main)
+          ? PlayerAction.PLAYER_STOP_SCYTHE
+          : PlayerAction.PLAYER_STOP_SWORD;
+    }
+  }
+
+  const bow = equippedBow(pose.hands!);
+  if (bow) {
+    return isCrossbow(bow)
+      ? PlayerAction.PLAYER_STOP_CROSSBOW
+      : PlayerAction.PLAYER_STOP_BOW;
+  }
+
+  return plainStop(pose);
+}
+
+/** `SetPlayerWalk`'s `c->Run < 40` branch (ZzzCharacter.cpp:567-612). */
+export function chooseWalkAction(pose: CharacterPose): PlayerAction {
+  const [main, off] = weapons(pose);
+  if (pose.weaponsStowed || (!main && !off)) return plainWalk(pose);
+
+  if (main) {
+    switch (main.group) {
+      case GROUP_SWORD:
+      case GROUP_AXE:
+      case GROUP_MACE:
+        if (!isTwoHanded(main)) return PlayerAction.PLAYER_WALK_SWORD;
+        return main.group === GROUP_SWORD && TWO_HAND_SWORD_TWO_INDICES.has(main.num)
+          ? PlayerAction.PLAYER_WALK_TWO_HAND_SWORD_TWO
+          : PlayerAction.PLAYER_WALK_TWO_HAND_SWORD;
+      case GROUP_STAFF:
+        if (main.num >= MISTERY_STICK && main.num <= ETERNAL_WING_STICK) {
+          return PlayerAction.PLAYER_WALK_WAND;
+        }
+        if (main.num >= BOOK_OF_SAHAMUTT) break;
+        return isTwoHanded(main)
+          ? PlayerAction.PLAYER_WALK_SCYTHE
+          : PlayerAction.PLAYER_WALK_SWORD;
+      case GROUP_SPEAR:
+        return SPEAR_POSE_INDICES.has(main.num)
+          ? PlayerAction.PLAYER_WALK_SPEAR
+          : PlayerAction.PLAYER_WALK_SCYTHE;
+    }
+  }
+
+  const bow = equippedBow(pose.hands!);
+  if (bow) {
+    return isCrossbow(bow)
+      ? PlayerAction.PLAYER_WALK_CROSSBOW
+      : PlayerAction.PLAYER_WALK_BOW;
+  }
+
+  return plainWalk(pose);
+}
+
+/**
+ * `SetPlayerWalk`'s `c->Run >= 40` branch (ZzzCharacter.cpp:615-670).
+ *
+ * Three ways it differs from the walk branch, all deliberate in the original:
+ * a second melee weapon selects the dual-wield run (a Rage Fighter runs
+ * plain instead), a two-handed staff runs with the *spear* clip rather than
+ * the scythe one, and the whole spear group runs with `PLAYER_RUN_SPEAR` -
+ * there is no Dragon Lance special case up here.
+ */
+export function chooseRunAction(pose: CharacterPose): PlayerAction {
+  const [main, off] = weapons(pose);
+  if (pose.weaponsStowed || (!main && !off)) return PlayerAction.PLAYER_RUN;
+
+  if (main) {
+    switch (main.group) {
+      case GROUP_SWORD:
+      case GROUP_AXE:
+      case GROUP_MACE:
+        if (off && off.group <= GROUP_MACE) {
+          return pose.baseClass === BaseClass.RageFighter
+            ? PlayerAction.PLAYER_RUN
+            : PlayerAction.PLAYER_RUN_TWO_SWORD;
+        }
+        if (!isTwoHanded(main)) return PlayerAction.PLAYER_RUN_SWORD;
+        return main.group === GROUP_SWORD && TWO_HAND_SWORD_TWO_INDICES.has(main.num)
+          ? PlayerAction.PLAYER_RUN_TWO_HAND_SWORD_TWO
+          : PlayerAction.PLAYER_RUN_TWO_HAND_SWORD;
+      case GROUP_STAFF:
+        if (main.num >= MISTERY_STICK && main.num <= ETERNAL_WING_STICK) {
+          return PlayerAction.PLAYER_RUN_WAND;
+        }
+        if (main.num >= BOOK_OF_SAHAMUTT) break;
+        return isTwoHanded(main)
+          ? PlayerAction.PLAYER_RUN_SPEAR
+          : PlayerAction.PLAYER_RUN_SWORD;
+      case GROUP_SPEAR:
+        return PlayerAction.PLAYER_RUN_SPEAR;
+    }
+  }
+
+  const bow = equippedBow(pose.hands!);
+  if (bow) {
+    return isCrossbow(bow)
+      ? PlayerAction.PLAYER_RUN_CROSSBOW
+      : PlayerAction.PLAYER_RUN_BOW;
+  }
+
+  return PlayerAction.PLAYER_RUN;
+}
+
+/** Social actions during which the original also stows weapons (`:14961`). */
+export function isSocialAction(action: PlayerAction): boolean {
+  return action >= PlayerAction.PLAYER_GREETING1 && action <= PlayerAction.PLAYER_SALUTE1;
+}
+
+// ---- Fenrir rider clips ----------------------------------------------------
+// The Fenrir branch of SetPlayerStop (ZzzCharacter.cpp:164-187) and
+// SetAction_Fenrir_Walk / _Run (ZzzAI.cpp:308-390): a two-hands weapon split,
+// with arrows in slot 0 / bolts in slot 1 counting as an empty hand, and the
+// run family picked per base class (Elf / Magic Gladiator / Rage Fighter).
+
+function isArrows(item: Item | null): boolean {
+  return !!item && item.group === GROUP_BOW && item.num === ARROWS_INDEX;
+}
+
+function isBolts(item: Item | null): boolean {
+  return !!item && item.group === GROUP_BOW && item.num === BOLT_INDEX;
+}
+
+export function chooseFenrirIdleAction(pose: CharacterPose): PlayerAction {
+  const [main, off] = weapons(pose);
+  const rage = pose.baseClass === BaseClass.RageFighter;
+
+  if (main && off) {
+    return rage
+      ? PlayerAction.PLAYER_RAGE_FENRIR_STAND_TWO_SWORD
+      : PlayerAction.PLAYER_FENRIR_STAND_TWO_SWORD;
+  }
+  if (main) {
+    return rage
+      ? PlayerAction.PLAYER_RAGE_FENRIR_STAND_ONE_RIGHT
+      : PlayerAction.PLAYER_FENRIR_STAND_ONE_RIGHT;
+  }
+  if (off) {
+    return rage
+      ? PlayerAction.PLAYER_RAGE_FENRIR_STAND_ONE_LEFT
+      : PlayerAction.PLAYER_FENRIR_STAND_ONE_LEFT;
+  }
+  return rage
+    ? PlayerAction.PLAYER_RAGE_FENRIR_STAND
+    : PlayerAction.PLAYER_FENRIR_STAND;
+}
+
+export function chooseFenrirWalkAction(pose: CharacterPose): PlayerAction {
+  const [main, off] = weapons(pose);
+
+  if (pose.baseClass === BaseClass.RageFighter) {
+    if (main && off) return PlayerAction.PLAYER_RAGE_FENRIR_WALK_TWO_SWORD;
+    if (main) return PlayerAction.PLAYER_RAGE_FENRIR_WALK_ONE_RIGHT;
+    if (off) return PlayerAction.PLAYER_RAGE_FENRIR_WALK_ONE_LEFT;
+    return PlayerAction.PLAYER_RAGE_FENRIR_WALK;
+  }
+
+  if (main && off && !isArrows(main) && !isBolts(off)) {
+    return PlayerAction.PLAYER_FENRIR_WALK_TWO_SWORD;
+  }
+  if (main && (!off || isBolts(off))) {
+    return PlayerAction.PLAYER_FENRIR_WALK_ONE_RIGHT;
+  }
+  if (off && (!main || isArrows(main))) {
+    return PlayerAction.PLAYER_FENRIR_WALK_ONE_LEFT;
+  }
+  return PlayerAction.PLAYER_FENRIR_WALK;
+}
+
+export function chooseFenrirRunAction(pose: CharacterPose): PlayerAction {
+  const [main, off] = weapons(pose);
+
+  const pick = (
+    plain: PlayerAction,
+    elf: PlayerAction,
+    magom: PlayerAction,
+    rage: PlayerAction
+  ): PlayerAction => {
+    switch (pose.baseClass) {
+      case BaseClass.Elf:
+        return elf;
+      case BaseClass.MagicGladiator:
+        return magom;
+      case BaseClass.RageFighter:
+        return rage;
+      default:
+        return plain;
+    }
+  };
+
+  if (main && off && !isArrows(main) && !isBolts(off)) {
+    return pick(
+      PlayerAction.PLAYER_FENRIR_RUN_TWO_SWORD,
+      PlayerAction.PLAYER_FENRIR_RUN_TWO_SWORD_ELF,
+      PlayerAction.PLAYER_FENRIR_RUN_TWO_SWORD_MAGOM,
+      PlayerAction.PLAYER_RAGE_FENRIR_RUN_TWO_SWORD
+    );
+  }
+  if (main && !off) {
+    return pick(
+      PlayerAction.PLAYER_FENRIR_RUN_ONE_RIGHT,
+      PlayerAction.PLAYER_FENRIR_RUN_ONE_RIGHT_ELF,
+      PlayerAction.PLAYER_FENRIR_RUN_ONE_RIGHT_MAGOM,
+      PlayerAction.PLAYER_RAGE_FENRIR_RUN_ONE_RIGHT
+    );
+  }
+  if (main && off && isBolts(off)) {
+    return PlayerAction.PLAYER_FENRIR_RUN_ONE_RIGHT_ELF;
+  }
+  if (!main && off) {
+    return pick(
+      PlayerAction.PLAYER_FENRIR_RUN_ONE_LEFT,
+      PlayerAction.PLAYER_FENRIR_RUN_ONE_LEFT_ELF,
+      PlayerAction.PLAYER_FENRIR_RUN_ONE_LEFT_MAGOM,
+      PlayerAction.PLAYER_RAGE_FENRIR_RUN_ONE_LEFT
+    );
+  }
+  if (main && off && isArrows(main)) {
+    return PlayerAction.PLAYER_FENRIR_RUN_ONE_LEFT_ELF;
+  }
+  return pick(
+    PlayerAction.PLAYER_FENRIR_RUN,
+    PlayerAction.PLAYER_FENRIR_RUN_ELF,
+    PlayerAction.PLAYER_FENRIR_RUN_MAGOM,
+    PlayerAction.PLAYER_RAGE_FENRIR_RUN
+  );
+}
+
+// ---- attack clips ----------------------------------------------------------
+// `SetPlayerAttack` (ZzzCharacter.cpp:988-1130) and `SetPlayerHighBowAttack`
+// (:949-985). Four families in the order the original tries them - Fenrir,
+// Dark Horse, the two horns, then the ground switch - and the repeated clips
+// cycle on `c->SwordCount` rather than alternating.
+
+/** MODEL_DOUBLE_POLEAXE = MODEL_SPEAR + 5: the mounts split the group here. */
+const DOUBLE_POLEAXE = 5;
+
+/**
+ * Everything `SetPlayerAttack` reads off the character that the weapon slots
+ * do not already say.
+ */
+export type AttackPose = {
+  hands: Hands | undefined;
+  baseClass: BaseClass;
+  /** `c->SwordCount`: swings so far. Cycles the repeated clips. */
+  swordCount: number;
+  /** `c->Wing.Type != -1`: the archer's swing has an airborne variant. */
+  wings?: boolean;
+  /** `c->Helper.Type`, already collapsed to `null` in a safe zone. */
+  mount?: MountKind | null;
+};
+
+function rnd(n: number): number {
+  return Math.floor(Math.random() * n);
+}
+
+/**
+ * The swing's bow lookup. `GetEquipedBowType` reads one fixed slot per type,
+ * but `chooseIdleAction` takes a launcher from either hand - so must this
+ * one, or a character standing in the bow pose would swing with his fists.
+ */
+function attackBowType(hands: Hands | undefined): 'bow' | 'crossbow' | null {
+  if (!hands) return null;
+  const launcher = equippedBow(hands);
+  if (!launcher) return null;
+  return isCrossbow(launcher) ? 'crossbow' : 'bow';
+}
+
+/** `SwordCount % 4` for a pair of one-handers (:1078-1086). */
+const DUAL_WIELD_CYCLE = [
+  PlayerAction.PLAYER_ATTACK_SWORD_RIGHT1,
+  PlayerAction.PLAYER_ATTACK_SWORD_LEFT1,
+  PlayerAction.PLAYER_ATTACK_SWORD_RIGHT2,
+  PlayerAction.PLAYER_ATTACK_SWORD_LEFT2,
+] as const;
+
+/** `Type >= MODEL_SWORD && Type < MODEL_MACE + MAX_ITEM_INDEX`: groups 0-2. */
+function isMelee(item: Item | null): boolean {
+  return !!item && item.group <= GROUP_MACE;
+}
+
+/** `SetPlayerAttack`'s Fenrir branch (:995-1024). */
+function fenrirAttack(pose: AttackPose, main: Item | null, off: Item | null): PlayerAction {
+  // The Dark Lord's sword swing wins over every other Fenrir clip: the
+  // original assigns it last, outside the ladder (:1021-1024).
+  if (pose.baseClass === BaseClass.DarkLord) {
+    return PlayerAction.PLAYER_FENRIR_ATTACK_DARKLORD_SWORD;
+  }
+  if (main && main.group === GROUP_SPEAR && main.num < DOUBLE_POLEAXE) {
+    return PlayerAction.PLAYER_FENRIR_ATTACK_SPEAR;
+  }
+  const bow = attackBowType(pose.hands);
+  if (bow === 'bow') return PlayerAction.PLAYER_FENRIR_ATTACK_BOW;
+  if (bow === 'crossbow') return PlayerAction.PLAYER_FENRIR_ATTACK_CROSSBOW;
+
+  if (main && off) return PlayerAction.PLAYER_FENRIR_ATTACK_TWO_SWORD;
+  if (main) return PlayerAction.PLAYER_FENRIR_ATTACK_ONE_SWORD;
+  if (off) {
+    return pose.baseClass === BaseClass.RageFighter
+      ? PlayerAction.PLAYER_RAGE_FENRIR_ATTACK_RIGHT
+      : PlayerAction.PLAYER_FENRIR_ATTACK_ONE_SWORD;
+  }
+  return PlayerAction.PLAYER_FENRIR_ATTACK;
+}
+
+/** Horn of Uniria / Dinorant (:1030-1067). */
+function hornAttack(pose: AttackPose, main: Item | null): PlayerAction {
+  if (main && main.group === GROUP_SPEAR) {
+    return main.num < DOUBLE_POLEAXE
+      ? PlayerAction.PLAYER_ATTACK_RIDE_SPEAR
+      : PlayerAction.PLAYER_ATTACK_RIDE_SCYTHE;
+  }
+  const bow = attackBowType(pose.hands);
+  if (bow === 'bow') return PlayerAction.PLAYER_ATTACK_RIDE_BOW;
+  if (bow === 'crossbow') return PlayerAction.PLAYER_ATTACK_RIDE_CROSSBOW;
+
+  const rage = pose.baseClass === BaseClass.RageFighter;
+  if (!main) {
+    return rage ? PlayerAction.PLAYER_RAGE_UNI_ATTACK : PlayerAction.PLAYER_ATTACK_RIDE_SWORD;
+  }
+  if (!isTwoHanded(main)) {
+    return rage ? PlayerAction.PLAYER_RAGE_UNI_ATTACK : PlayerAction.PLAYER_ATTACK_RIDE_SWORD;
+  }
+  return rage
+    ? PlayerAction.PLAYER_RAGE_UNI_ATTACK_ONE_RIGHT
+    : PlayerAction.PLAYER_ATTACK_RIDE_TWO_HAND_SWORD;
+}
+
+/** The on-foot weapon switch (:1069-1129). */
+function groundAttack(pose: AttackPose, main: Item | null, off: Item | null): PlayerAction {
+  if (!main && !off) return PlayerAction.PLAYER_ATTACK_FIST;
+  const n = pose.swordCount;
+
+  if (main && isMelee(main)) {
+    if (!isTwoHanded(main)) {
+      // A one-hander in each hand runs the four-clip cycle; alone, the two
+      // right-hand swings alternate.
+      if (isMelee(off)) return DUAL_WIELD_CYCLE[n % 4];
+      return PlayerAction.PLAYER_ATTACK_SWORD_RIGHT1 + (n % 2);
+    }
+    if (main.group === GROUP_SWORD && TWO_HAND_SWORD_TWO_INDICES.has(main.num)) {
+      return PlayerAction.PLAYER_ATTACK_TWO_HAND_SWORD_TWO;
+    }
+    return PlayerAction.PLAYER_ATTACK_TWO_HAND_SWORD1 + (n % 3);
+  }
+
+  // Reached with the main hand empty or holding something that is not a
+  // sword/axe/mace: an off-hand blade swings on its own.
+  if (isMelee(off)) return PlayerAction.PLAYER_ATTACK_SWORD_LEFT1 + rnd(2);
+
+  if (main && main.group === GROUP_STAFF) {
+    return isTwoHanded(main)
+      ? PlayerAction.PLAYER_SKILL_WEAPON1 + rnd(2)
+      : PlayerAction.PLAYER_ATTACK_SWORD_RIGHT1 + rnd(2);
+  }
+
+  if (main && main.group === GROUP_SPEAR) {
+    return SPEAR_POSE_INDICES.has(main.num)
+      ? PlayerAction.PLAYER_ATTACK_SPEAR1
+      : PlayerAction.PLAYER_ATTACK_SCYTHE1 + (n % 3);
+  }
+
+  const bow = attackBowType(pose.hands);
+  if (bow === 'bow') {
+    return pose.wings ? PlayerAction.PLAYER_ATTACK_FLY_BOW : PlayerAction.PLAYER_ATTACK_BOW;
+  }
+  if (bow === 'crossbow') {
+    return pose.wings
+      ? PlayerAction.PLAYER_ATTACK_FLY_CROSSBOW
+      : PlayerAction.PLAYER_ATTACK_CROSSBOW;
+  }
+
+  return PlayerAction.PLAYER_ATTACK_FIST;
+}
+
+/** `SetPlayerAttack`: the clip one basic swing plays. */
+export function chooseAttackAction(pose: AttackPose): PlayerAction {
+  const hands = pose.hands;
+  const main = hands && isWeaponItem(hands.leftHand) ? hands.leftHand : null;
+  const off = hands && isWeaponItem(hands.rightHand) ? hands.rightHand : null;
+
+  switch (pose.mount) {
+    case 'fenrir':
+      return fenrirAttack(pose, main, off);
+    case 'horse':
+      return PlayerAction.PLAYER_ATTACK_RIDE_HORSE_SWORD;
+    case 'uniria':
+    case 'dinorant':
+      return hornAttack(pose, main);
+    default:
+      return groundAttack(pose, main, off);
+  }
+}
+
+/**
+ * `SetPlayerHighBowAttack`: the aimed-up shot, which only Starfall uses. A
+ * crossbow has its own clip, wings and the horns each swap the pair again,
+ * and the Fenrir has none - a rider shoots with the ground clip.
+ */
+export function chooseHighBowAttackAction(pose: AttackPose): PlayerAction {
+  const crossbow = attackBowType(pose.hands) === 'crossbow';
+
+  if (pose.mount === 'uniria' || pose.mount === 'dinorant') {
+    return crossbow
+      ? PlayerAction.PLAYER_ATTACK_RIDE_CROSSBOW_UP
+      : PlayerAction.PLAYER_ATTACK_RIDE_BOW_UP;
+  }
+  if (pose.wings) {
+    return crossbow
+      ? PlayerAction.PLAYER_ATTACK_FLY_CROSSBOW_UP
+      : PlayerAction.PLAYER_ATTACK_FLY_BOW_UP;
+  }
+  return crossbow
+    ? PlayerAction.PLAYER_ATTACK_CROSSBOW_UP
+    : PlayerAction.PLAYER_ATTACK_BOW_UP;
+}

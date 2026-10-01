@@ -40,7 +40,7 @@ import { downloadDataFile } from '../controllers/assets/mu/dataFolder';
 import { decodeLocalText, downloadLocalDataFile } from '../controllers/assets/mu/localData';
 import { convertBux } from '../controllers/terrain/mapFileEncryption';
 import { skillDefinition } from '../common/skillsDatabase';
-import { Store } from '../store';
+import { Store } from '../app/store';
 import type { SkillLayer } from './layer';
 import { isWeaponSkill, skillRequirementsMet } from './usability';
 import { masterLevelUpPoints, setMasterLevelUpPoints } from './masterLevel';

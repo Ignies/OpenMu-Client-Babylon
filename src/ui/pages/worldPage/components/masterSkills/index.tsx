@@ -1,9 +1,9 @@
 import './style.less';
 import { Component, useEffect, useState, type ReactNode } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Store } from '../../../../../store';
+import { Store } from '../../../../../app/store';
 import { isKey } from '../../../../../controllers/interface/keyBindings';
-import { useEventBus } from '../../../../../hooks/useEventBus';
+import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
 import { useWindowStackEntry } from '../../../../components/muWindow/useWindowChrome';
 import { playUiSound } from '../../../../../controllers/sound/sfx';
 import { skillDefinition } from '../../../../../common/skillsDatabase';

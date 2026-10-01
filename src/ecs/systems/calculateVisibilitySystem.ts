@@ -1,5 +1,5 @@
 import type { ISystemFactory } from '../world';
-import { GameOptions } from '../../common/gameOptions';
+import { GameOptions } from '../../features/options/gameOptions';
 import { renderDistanceRanges } from '../../controllers/render/renderDistance';
 
 export const CalculateVisibilitySystem: ISystemFactory = world => {

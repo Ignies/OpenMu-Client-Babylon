@@ -5,7 +5,7 @@ import {
 import { MapTileObject } from '../../controllers/terrain/mapTileObject';
 import { lightMapObjectWith } from '../../controllers/lighting/mapObjectLights';
 import { PRIORITY_TORCH, type LightSource } from '../../controllers/lighting/lightSource';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 import type { Entity, World } from '../../ecs/world';
 import { findBone, bonePosed, type BoneNode } from './bones';
 

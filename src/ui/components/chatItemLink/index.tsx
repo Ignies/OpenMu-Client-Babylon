@@ -2,9 +2,9 @@ import './style.less';
 import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import type { Item } from '../../../ecs/world';
-import { Store } from '../../../store';
-import { itemLinkLabel } from '../../../common/chatItemLinks';
-import { itemNameColor } from '../../../common/itemTooltip';
+import { Store } from '../../../app/store';
+import { itemLinkLabel } from '../../../features/chat/chatItemLinks';
+import { itemNameColor } from '../../../controllers/interface/itemTooltip';
 import { ItemTooltip } from '../itemTooltip';
 
 /**

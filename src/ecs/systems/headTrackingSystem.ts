@@ -11,7 +11,7 @@ import {
   rotationByteOf,
   signedAngleDelta,
 } from '../../core/turnAngle';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 import type { Entity, ISystemFactory } from '../world';
 
 /**

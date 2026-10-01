@@ -1,15 +1,15 @@
 import { observer } from 'mobx-react-lite';
-import { Store } from '../../../../../store';
-import { GameOptions, uiScaleFactor } from '../../../../../common/gameOptions';
-import { events } from '../../../../../events';
+import { Store } from '../../../../../app/store';
+import { GameOptions, uiScaleFactor } from '../../../../../features/options/gameOptions';
+import { events } from '../../../../../features/events';
 import {
   eventSchedule,
   refreshEventSchedule,
   type EventScheduleKey,
   type EventScheduleRow,
-} from '../../../../../events/schedule';
-import { rowText } from '../../../../../events/scheduleClock';
-import { EVENT_TEXT } from '../../../../../events/recipes';
+} from '../../../../../features/events/schedule';
+import { rowText } from '../../../../../features/events/scheduleClock';
+import { EVENT_TEXT } from '../../../../../features/events/recipes';
 import { MuText } from '../../../../components/muText';
 import {
   EVENT_ROW_CLOCK_WIDTH,

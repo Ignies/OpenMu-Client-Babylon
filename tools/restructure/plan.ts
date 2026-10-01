@@ -59,7 +59,7 @@ export function specifiers(path: string, text: string): { spec: string; start: n
 
 function resolve(importer: string, spec: string, known: Set<string>): { file: string; suffix: string } | null {
   let base: string | null = null;
-  if (spec.startsWith('./') || spec.startsWith('../')) base = posix.normalize(posix.join(posix.dirname(importer), spec));
+  if (spec === '.' || spec === '..' || spec.startsWith('./') || spec.startsWith('../')) base = posix.normalize(posix.join(posix.dirname(importer), spec)).replace(/\/$/, '');
   else for (const [alias, dir] of ALIASES) if (spec.startsWith(alias)) base = dir + spec.slice(alias.length);
   if (base === null) return null;
   for (const ext of EXTS) if (known.has(base + ext)) return { file: base + ext, suffix: ext };
@@ -68,7 +68,7 @@ function resolve(importer: string, spec: string, known: Set<string>): { file: st
 
 function relative(fromFile: string, toFile: string): string {
   const r = posix.relative(posix.dirname(fromFile), toFile);
-  return r.startsWith('.') ? r : './' + r;
+  return r === '' ? '.' : r.startsWith('.') ? r : './' + r;
 }
 
 /** Rewrites a specifier so it points at `target` from `importer`, keeping the original style. */

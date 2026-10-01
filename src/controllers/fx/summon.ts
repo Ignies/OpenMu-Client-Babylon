@@ -29,7 +29,7 @@ import {
 } from '../render/babylon/exports';
 import { getMaterial, loadGLTF } from '../assets/modelLoader';
 import { BlendState } from '../../common/objects/enum';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 import type { TestScene } from '../render/scenes/testScene';
 import { LiveList, TICK, additiveMaterial, fxNow, pointSource, type RGB } from './core';
 import { addEffectGlow, releaseEffectGlow } from './glow';

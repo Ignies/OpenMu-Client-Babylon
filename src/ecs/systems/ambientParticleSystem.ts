@@ -1,5 +1,5 @@
 import { isHeroUnderRoof } from './ceilingHideSystem';
-import { inBloodCastle } from '../../common/locomotion';
+import { inBloodCastle } from '../../controllers/actors/locomotion';
 import { ENUM_WORLD } from '../../common';
 import {
   createAmbientSystem,
@@ -35,7 +35,7 @@ import { lookDirector } from '../../controllers/lighting/director';
 import { roomMaskActive } from '../../controllers/render/scenes/roomMask';
 import { roomClipAvailable, setRoomWeatherClip } from '../../controllers/weather/roomClip';
 import { Vector3 } from '../../controllers/render/babylon/exports';
-import { GameOptions } from '../../common/gameOptions';
+import { GameOptions } from '../../features/options/gameOptions';
 import { rainStrength, rainTarget } from '../../controllers/weather/rainState';
 import type { ISystemFactory } from '../world';
 

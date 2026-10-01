@@ -6,7 +6,7 @@ import {
   GROUP_SPEAR,
   GROUP_STAFF,
   GROUP_SWORD,
-} from '../weaponClass';
+} from '../../controllers/actors/weaponClass';
 import { CharacterClassNumber, PlayerClass } from '../../core/types';
 import type { NpcGear } from './gearedNpc';
 

@@ -1,5 +1,5 @@
 import { ENUM_WORLD } from '../../core/types';
-import { GameOptions } from '../../common/gameOptions';
+import { GameOptions } from '../../features/options/gameOptions';
 import {
   FADE_STEPS,
   FULL_STEPS,
@@ -17,7 +17,7 @@ import { weather } from '../../controllers/weather';
 import { isTileOpen } from '../../controllers/terrain/terrainMask';
 import { onSnowGround } from '../../controllers/weather/snowSink';
 import { SNOW_GROUND_MAPS } from '../../controllers/weather/snowCover';
-import { RUN_THRESHOLD } from '../../common/locomotion';
+import { RUN_THRESHOLD } from '../../controllers/actors/locomotion';
 import { ploughSnowTrail } from '../../controllers/weather/snowTrail';
 import type { Entity, ISystemFactory } from '../world';
 import { isTeleporting } from './teleportSystem';

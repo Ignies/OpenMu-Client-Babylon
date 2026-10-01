@@ -4,7 +4,7 @@ import {
   Texture,
   type Scene,
 } from '../render/babylon/exports';
-import { onGameOptionsChanged } from '../../common/gameOptions';
+import { onGameOptionsChanged } from '../../features/options/gameOptions';
 import { textureFiltering } from '../render/materialQuality';
 import { packLayers, type TilePixels } from './tilePack';
 import { decodeJpegPixels } from './terrainJpeg';

@@ -9,7 +9,7 @@ import {
   improvedItemEffectsOn,
   itemEffectSignature,
 } from '../../controllers/item_fx/itemEffectMode';
-import type { PlayerObject } from '../../common/playerObject';
+import type { PlayerObject } from '../../controllers/actors/playerObject';
 import type { ModelObject } from '../../controllers/render/modelObject';
 import {
   createItemAura,

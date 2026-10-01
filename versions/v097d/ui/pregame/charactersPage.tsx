@@ -13,8 +13,8 @@ import { useEffect, useState } from 'react';
 import { runInAction } from 'mobx';
 import { t } from '../../../../src/i18n';
 import { uiClick } from '../../../../src/controllers/sound/sfx';
-import { Store } from '../../../../src/store';
-import { useEventBus } from '../../../../src/hooks/useEventBus';
+import { Store } from '../../../../src/app/store';
+import { useEventBus } from '../../../../src/controllers/interface/hooks/useEventBus';
 import {
   CharacterFocusedPacket,
   CharacterListPacket,

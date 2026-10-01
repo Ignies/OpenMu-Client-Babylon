@@ -11,7 +11,7 @@ import {
 import { createPortal } from 'react-dom';
 import { observer } from 'mobx-react-lite';
 import type { Item } from '../../../../../ecs/world';
-import { Store } from '../../../../../store';
+import { Store } from '../../../../../app/store';
 import { UI_SOUNDS, uiClick } from '../../../../../controllers/sound/sfx';
 import { SoundsManager } from '../../../../../controllers/sound/soundsManager';
 import { MuSpriteFrame } from '../../../../components/muSprite';
@@ -38,7 +38,7 @@ import {
   WIN_HEIGHT,
   WIN_WIDTH,
 } from '../../../../components/msgWindow/layout';
-import { JEWEL_OF_CHAOS } from '../../../../../common/jewelUpgrade';
+import { JEWEL_OF_CHAOS } from '../../../../../features/inventory/jewelUpgrade';
 import { prefetchItemIcons } from '../../../../../controllers/assets/itemIconPack';
 import { t, type TextKey } from '../../../../../i18n';
 import {
@@ -59,7 +59,7 @@ import {
   type Product,
   type ProductLine,
   type Roll,
-} from '../../../../../cashShop/state';
+} from '../../../../../features/cash_shop/state';
 import {
   GACHA_SOUNDS,
   OPEN,
@@ -72,7 +72,7 @@ import {
   type Phase,
   type Tier,
   type TierLook,
-} from '../../../../../cashShop/gacha';
+} from '../../../../../features/cash_shop/gacha';
 import {
   BOX_FALL_FROM,
   BOX_GROUP,

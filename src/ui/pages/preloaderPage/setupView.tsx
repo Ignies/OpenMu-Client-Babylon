@@ -6,8 +6,8 @@ import {
   isInsecureWsUrl,
   ServerConfig,
   type ServerProfile,
-} from '../../../common/serverConfig';
-import { ServerList } from '../../../common/serverList';
+} from '../../../features/servers/serverConfig';
+import { ServerList } from '../../../features/servers/serverList';
 import { Button, Icon, TextField, Toggle } from './controls';
 
 /**

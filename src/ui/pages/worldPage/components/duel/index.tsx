@@ -2,8 +2,8 @@ import './style.less';
 import { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { t } from '../../../../../i18n';
-import { events } from '../../../../../events';
-import { Commands } from '../../../../../commands';
+import { events } from '../../../../../features/events';
+import { Commands } from '../../../../../features/chat/commands';
 import {
   duelBars,
   duelRequest,
@@ -11,8 +11,8 @@ import {
   duelScoreboard,
   duelSpectators,
   duelWatchWindow,
-} from '../../../../../events/duel';
-import { DUEL_CHANNELS } from '../../../../../events/duelRules';
+} from '../../../../../features/events/duel';
+import { DUEL_CHANNELS } from '../../../../../features/events/duelRules';
 import { MuButton } from '../../../../components/muButton';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuItemWindow } from '../../../../components/muWindow';

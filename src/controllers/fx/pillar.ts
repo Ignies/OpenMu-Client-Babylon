@@ -22,7 +22,7 @@ import {
   type Scene,
 } from '../render/babylon/exports';
 import { linearBufferActive } from '../lighting/lightModel';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 import type { TestScene } from '../render/scenes/testScene';
 import {
   EFFECT_RENDERING_GROUP,

@@ -17,7 +17,7 @@ import {
 } from '../../controllers/terrain/restObjects';
 import { aimX, aimY } from '../../controllers/camera';
 import { sound } from '../../controllers/sound';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 import type { ISystemFactory } from '../world';
 
 /** `?autoPick=1`: the old full scene pick, read only for its ray. */

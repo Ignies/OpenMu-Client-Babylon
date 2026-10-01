@@ -2,12 +2,12 @@ import { isKey, actionOfKey } from '../../../../../controllers/interface/keyBind
 import { t } from '../../../../../i18n';
 import './style.less';
 import { observer } from 'mobx-react-lite';
-import { Store } from '../../../../../store';
-import { Economy } from '../../../../../economy';
-import { events } from '../../../../../events';
+import { Store } from '../../../../../app/store';
+import { Economy } from '../../../../../features/economy/economy';
+import { events } from '../../../../../features/events';
 import { ItemIcon } from '../../../../components/itemIcon';
 import { ItemTooltip } from '../../../../components/itemTooltip';
-import { useEventBus } from '../../../../../hooks/useEventBus';
+import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
 import { Item } from '../../../../../ecs/world';
 import {
   GridSquares,
@@ -15,19 +15,19 @@ import {
   usedMask,
 } from '../../../../components/itemGrid';
 import { ItemsDatabase } from '../../../../../common/itemsDatabase';
-import { goldColor } from '../../../../../common/goldColor';
+import { goldColor } from '../../../../../features/items/goldColor';
 import {
   ITEM_HOTKEY_CODES,
   canRegisterItemHotkey,
-} from '../../../../../common/itemHotkeys';
-import { isUpgradeJewel } from '../../../../../common/jewelUpgrade';
+} from '../../../../../features/inventory/itemHotkeys';
+import { isUpgradeJewel } from '../../../../../features/inventory/jewelUpgrade';
 import {
   equipDestination,
   isEquipable,
-} from '../../../../../common/equipSlots';
-import { InventorySort } from '../../../../../common/inventorySort';
-import { QuickItemActions } from '../../../../../common/quickItemActions';
-import { StorageKind } from '../../../../../common/itemStorage';
+} from '../../../../../features/inventory/equipSlots';
+import { InventorySort } from '../../../../../features/inventory/inventorySort';
+import { QuickItemActions } from '../../../../../features/inventory/quickItemActions';
+import { StorageKind } from '../../../../../features/inventory/itemStorage';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuButton } from '../../../../components/muButton';

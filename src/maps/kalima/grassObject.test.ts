@@ -22,7 +22,7 @@ vi.mock('../../controllers/terrain/mapTileObject', () => ({
 vi.mock('../../controllers/terrain/terrainWater', () => ({
   waterSurfaceHeight: (x: number, z: number, t: number) => Math.sin(x + z + t),
 }));
-vi.mock('../../store', () => ({
+vi.mock('../../app/store', () => ({
   Store: {
     get world() {
       return store.world;

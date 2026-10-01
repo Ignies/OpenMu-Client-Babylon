@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { uiClick } from '../../../controllers/sound/sfx';
 import { t, type TextKey } from '../../../i18n';
-import { Store } from '../../../store';
+import { Store } from '../../../app/store';
 import {
   assetDownload,
   cancelDownload,

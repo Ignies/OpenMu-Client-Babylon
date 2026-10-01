@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { t } from '../../../i18n';
-import { Store } from '../../../store';
+import { Store } from '../../../app/store';
 import { playUiSound } from '../../../controllers/sound/sfx';
-import { registerApiUrl } from '../../../common/serverServices';
+import { registerApiUrl } from '../../../features/servers/serverServices';
 import {
   MAX_ACCOUNT_LENGTH,
   MAX_ACCOUNT_PASSWORD_LENGTH,
@@ -11,7 +11,7 @@ import {
   MIN_ACCOUNT_PASSWORD_LENGTH,
   validateSignup,
   type SignupProblem,
-} from '../../../common/registerRules';
+} from '../../../features/servers/registerRules';
 import { MuSpriteFrame } from '../../components/muSprite';
 import { MuButton } from '../../components/muButton';
 import { TEXT_COLOR } from '../serversPage/layout';

@@ -17,4 +17,4 @@ export {
   heroCastSound,
   pickupSound,
   type WeaponHands,
-} from './';
+} from '.';

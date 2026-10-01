@@ -6,7 +6,7 @@ import {
   type PostProcess,
   type Scene,
 } from '../babylon/exports';
-import { GameOptions } from '../../../common/gameOptions';
+import { GameOptions } from '../../../features/options/gameOptions';
 import {
   MSAA_HEAD_ONLY,
   pipelineSamples,

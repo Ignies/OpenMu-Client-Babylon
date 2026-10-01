@@ -15,7 +15,7 @@
  * Driven by: `effects.spawn('cards', ...)` from the skill table. Read by: nobody.
  */
 import { Vector3, type Scene, type StandardMaterial } from '../render/babylon/exports';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 import { TICK, acquireCard, additiveMaterial, clamp01, lerp, lightCardGain, releaseCard, type Card, type PointSource, type RGB } from './core';
 import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
 

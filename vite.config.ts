@@ -8,7 +8,7 @@ const alias = {
 };
 
 // Game versions are selected at runtime (versions/registry.ts, loaded by
-// src/main.tsx before the app boots); one build carries all of them.
+// src/app/main.tsx before the app boots); one build carries all of them.
 
 export default defineConfig({
   base: './',

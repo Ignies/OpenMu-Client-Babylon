@@ -1,7 +1,7 @@
 import { useState, type CSSProperties } from 'react';
 import type { TextKey } from '../../../i18n';
-import type { ServerProfile } from '../../../common/serverConfig';
-import type { Reach } from '../../../common/serverProbe';
+import type { ServerProfile } from '../../../features/servers/serverConfig';
+import type { Reach } from '../../../features/servers/serverProbe';
 
 /** What the status dot means, as its tooltip. `unknown` draws no dot. */
 export const REACH_TEXT: Record<Exclude<Reach, 'unknown'>, TextKey> = {

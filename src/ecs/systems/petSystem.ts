@@ -14,9 +14,9 @@ import {
   petSpec,
   type PetFollow,
   type PetSpec,
-} from '../../common/pets';
+} from '../../features/pets/pets';
 import { createAngleDeg, turnAngle } from '../../core/turnAngle';
-import { inChaosCastle } from '../../common/locomotion';
+import { inChaosCastle } from '../../controllers/actors/locomotion';
 import { effects } from '../../controllers/fx';
 import {
   boneLocalPos,
@@ -28,7 +28,7 @@ import {
   inWindow,
 } from '../../controllers/fx/core';
 import { FOOT_THUNDER_FRAMES, MODEL, RGBS, TEX } from '../../controllers/fx/recipes';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 import { PlayerAction } from '../../common/objects/enum';
 import { RIDER_FLY_WORLDS } from '../../combat/recipes';
 import { playUiSound } from '../../controllers/sound/ui';

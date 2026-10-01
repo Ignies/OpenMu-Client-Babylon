@@ -1,8 +1,8 @@
 import './style.less';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { With } from 'miniplex';
-import { Store } from '../../../store';
-import { useRenderId } from '../../../hooks';
+import { Store } from '../../../app/store';
+import { useRenderId } from '../../../controllers/interface/hooks';
 import {
   onAnyScreenPosition,
   onScreenPosition,
@@ -28,10 +28,10 @@ import {
   shopTitleColours,
   shopTitleSummary,
   unionLine,
-} from '../../../common/nameTags';
-import { Social } from '../../../social';
-import { guildMarkDataUrl, isEmptyGuildMark } from '../../../common/guildMark';
-import { Economy } from '../../../economy';
+} from '../../../controllers/interface/nameTags';
+import { Social } from '../../../features/social/social';
+import { guildMarkDataUrl, isEmptyGuildMark } from '../../../features/social/guildMark';
+import { Economy } from '../../../features/economy/economy';
 import { GuildMemberRoleEnum } from '../../../../versions/shared/packets/ServerToClientPackets';
 import { devQuery } from '../../../core/devSeams';
 import { onLanguageChanged } from '../../../i18n';

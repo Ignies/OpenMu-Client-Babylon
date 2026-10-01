@@ -5,12 +5,12 @@ import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
 import { useEffect, useRef, useState } from 'react';
 import { EventBus } from '../../../../../core/eventBus';
-import { useEventBus } from '../../../../../hooks/useEventBus';
-import { Store } from '../../../../../store';
-import { GameOptions } from '../../../../../common/gameOptions';
-import { StatAllocation } from '../../../../../common/statAllocation';
-import { clampAmount, needsConfirm } from '../../../../../common/statAmounts';
-import { MsgWinCode } from '../../../../../common/msgWin';
+import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
+import { Store } from '../../../../../app/store';
+import { GameOptions } from '../../../../../features/options/gameOptions';
+import { StatAllocation } from '../../../../../features/hero/statAllocation';
+import { clampAmount, needsConfirm } from '../../../../../features/hero/statAmounts';
+import { MsgWinCode } from '../../../../../controllers/interface/msgWin';
 import { devQueryNumber } from '../../../../../core/devSeams';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuButton } from '../../../../components/muButton';
@@ -22,8 +22,8 @@ import {
   MuTableFrame,
   MuTableRule,
 } from '../../../../components/muWindow';
-import { InventoryConstants } from '../../../../../common/inventoryConstants';
-import { pkTextColour, PVP_NEUTRAL } from '../../../../../common/nameTags';
+import { InventoryConstants } from '../../../../../features/inventory/inventoryConstants';
+import { pkTextColour, PVP_NEUTRAL } from '../../../../../controllers/interface/nameTags';
 import {
   BaseClass,
   deriveCharacterStats,
@@ -31,7 +31,7 @@ import {
   getClassName,
   getStatName,
   StatType,
-} from '../../../../../common/characterStats';
+} from '../../../../../features/hero/characterStats';
 import {
   AMOUNT_DY,
   AMOUNT_HEIGHT,

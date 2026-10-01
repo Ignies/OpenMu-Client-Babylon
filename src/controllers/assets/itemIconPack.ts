@@ -1,6 +1,6 @@
 import type { Item } from '../../ecs/world';
-import { ITEM_ICON_MANIFEST } from '../../common/itemIconManifest';
-import { itemLevelLook } from '../../common/itemLevelLook';
+import { ITEM_ICON_MANIFEST } from '../interface/item_icons/itemIconManifest';
+import { itemLevelLook } from '../../features/items/itemLevelLook';
 
 /**
  * The pre-rendered item icon pack (`public/items/item_<group>_<num>_<tint>[_e|_a].png`)

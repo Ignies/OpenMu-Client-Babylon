@@ -1,6 +1,6 @@
 import type { Entity, World } from '../../ecs/world';
 import { loadGLTF } from '../../controllers/assets/modelLoader';
-import { MonsterObject } from '../monsterObject';
+import { MonsterObject } from '../../controllers/actors/monsterObject';
 import { MONSTER_HIDDEN_MESH, monsterScaleOf } from './monsterModelTable';
 
 // [NpcInfo(1, "Hound")]

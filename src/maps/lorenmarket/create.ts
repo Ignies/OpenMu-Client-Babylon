@@ -1,4 +1,4 @@
-import { LeanBoxObject } from '../../common/operateBoxObject';
+import { LeanBoxObject } from '../../controllers/actors/operateBoxObject';
 import type { World } from '../../ecs/world';
 import { PlaySpeedObject } from '../shared/objectVariants';
 

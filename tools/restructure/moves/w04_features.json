@@ -1,0 +1,638 @@
+[
+ {
+  "from": "src/App.tsx",
+  "to": "src/app/App.tsx"
+ },
+ {
+  "from": "src/boot.tsx",
+  "to": "src/app/boot.tsx"
+ },
+ {
+  "from": "src/main.tsx",
+  "to": "src/app/main.tsx"
+ },
+ {
+  "from": "src/consts.ts",
+  "to": "src/app/consts.ts"
+ },
+ {
+  "from": "src/logic.ts",
+  "to": "src/app/logic.ts"
+ },
+ {
+  "from": "src/store.ts",
+  "to": "src/app/store.ts"
+ },
+ {
+  "from": "src/style.less",
+  "to": "src/app/style.less"
+ },
+ {
+  "from": "src/observableStores.test.ts",
+  "to": "src/app/observableStores.test.ts"
+ },
+ {
+  "from": "src/common/storeRef.ts",
+  "to": "src/app/storeRef.ts"
+ },
+ {
+  "from": "src/common/pwaInstall.ts",
+  "to": "src/app/pwaInstall.ts"
+ },
+ {
+  "from": "src/common/pwaInstall.test.ts",
+  "to": "src/app/pwaInstall.test.ts"
+ },
+ {
+  "from": "src/ping/pingNet.ts",
+  "to": "src/controllers/net/pingNet.ts"
+ },
+ {
+  "from": "src/common/itemTooltip.ts",
+  "to": "src/controllers/interface/itemTooltip.ts"
+ },
+ {
+  "from": "src/common/nameTags.ts",
+  "to": "src/controllers/interface/nameTags.ts"
+ },
+ {
+  "from": "src/common/nameTags.test.ts",
+  "to": "src/controllers/interface/nameTags.test.ts"
+ },
+ {
+  "from": "src/common/msgWin.ts",
+  "to": "src/controllers/interface/msgWin.ts"
+ },
+ {
+  "from": "src/common/slideHelp.ts",
+  "to": "src/controllers/interface/slideHelp.ts"
+ },
+ {
+  "from": "src/common/stateWarnings.ts",
+  "to": "src/controllers/interface/stateWarnings.ts"
+ },
+ {
+  "from": "src/common/hudFormat.ts",
+  "to": "src/controllers/interface/hudFormat.ts"
+ },
+ {
+  "from": "src/common/hudFormat.test.ts",
+  "to": "src/controllers/interface/hudFormat.test.ts"
+ },
+ {
+  "from": "src/common/itemLinkHover.ts",
+  "to": "src/controllers/interface/itemLinkHover.ts"
+ },
+ {
+  "from": "src/common/itemIconFit.ts",
+  "to": "src/controllers/interface/item_icons/itemIconFit.ts"
+ },
+ {
+  "from": "src/common/itemIconManifest.ts",
+  "to": "src/controllers/interface/item_icons/itemIconManifest.ts"
+ },
+ {
+  "from": "src/common/itemIconScale.ts",
+  "to": "src/controllers/interface/item_icons/itemIconScale.ts"
+ },
+ {
+  "from": "src/hooks",
+  "to": "src/controllers/interface/hooks"
+ },
+ {
+  "from": "src/common/playerObject.ts",
+  "to": "src/controllers/actors/playerObject.ts"
+ },
+ {
+  "from": "src/common/monsterObject.ts",
+  "to": "src/controllers/actors/monsterObject.ts"
+ },
+ {
+  "from": "src/common/modelFactoryPerId.ts",
+  "to": "src/controllers/actors/modelFactoryPerId.ts"
+ },
+ {
+  "from": "src/common/characterScale.ts",
+  "to": "src/controllers/actors/characterScale.ts"
+ },
+ {
+  "from": "src/common/deserializeAppearance.ts",
+  "to": "src/controllers/actors/deserializeAppearance.ts"
+ },
+ {
+  "from": "src/common/deserializeAppearance.test.ts",
+  "to": "src/controllers/actors/deserializeAppearance.test.ts"
+ },
+ {
+  "from": "src/common/mapPlayerNetClassToModelClass.ts",
+  "to": "src/controllers/actors/mapPlayerNetClassToModelClass.ts"
+ },
+ {
+  "from": "src/common/skinTexture.ts",
+  "to": "src/controllers/actors/skinTexture.ts"
+ },
+ {
+  "from": "src/common/skinTexture.test.ts",
+  "to": "src/controllers/actors/skinTexture.test.ts"
+ },
+ {
+  "from": "src/common/locomotion.ts",
+  "to": "src/controllers/actors/locomotion.ts"
+ },
+ {
+  "from": "src/common/heroMoveTrace.ts",
+  "to": "src/controllers/actors/heroMoveTrace.ts"
+ },
+ {
+  "from": "src/common/approachPath.ts",
+  "to": "src/controllers/actors/approachPath.ts"
+ },
+ {
+  "from": "src/common/approachPath.test.ts",
+  "to": "src/controllers/actors/approachPath.test.ts"
+ },
+ {
+  "from": "src/common/debuffBody.ts",
+  "to": "src/controllers/actors/debuffBody.ts"
+ },
+ {
+  "from": "src/common/transformedBody.ts",
+  "to": "src/controllers/actors/transformedBody.ts"
+ },
+ {
+  "from": "src/common/outlawLook.ts",
+  "to": "src/controllers/actors/outlawLook.ts"
+ },
+ {
+  "from": "src/common/wings.ts",
+  "to": "src/controllers/actors/wings.ts"
+ },
+ {
+  "from": "src/common/wingObject.ts",
+  "to": "src/controllers/actors/wingObject.ts"
+ },
+ {
+  "from": "src/common/weaponAttachment.ts",
+  "to": "src/controllers/actors/weaponAttachment.ts"
+ },
+ {
+  "from": "src/common/weaponClass.ts",
+  "to": "src/controllers/actors/weaponClass.ts"
+ },
+ {
+  "from": "src/common/itemAngle.ts",
+  "to": "src/controllers/actors/itemAngle.ts"
+ },
+ {
+  "from": "src/common/itemAngle.test.ts",
+  "to": "src/controllers/actors/itemAngle.test.ts"
+ },
+ {
+  "from": "src/common/itemObjectAttribute.ts",
+  "to": "src/controllers/actors/itemObjectAttribute.ts"
+ },
+ {
+  "from": "src/common/operateBoxObject.ts",
+  "to": "src/controllers/actors/operateBoxObject.ts"
+ },
+ {
+  "from": "src/common/guildFlag.ts",
+  "to": "src/controllers/actors/guildFlag.ts"
+ },
+ {
+  "from": "src/common/chat.ts",
+  "to": "src/features/chat/chat.ts"
+ },
+ {
+  "from": "src/common/chat.test.ts",
+  "to": "src/features/chat/chat.test.ts"
+ },
+ {
+  "from": "src/common/chatCommands.ts",
+  "to": "src/features/chat/chatCommands.ts"
+ },
+ {
+  "from": "src/common/chatEmojis.ts",
+  "to": "src/features/chat/chatEmojis.ts"
+ },
+ {
+  "from": "src/common/chatEmojis.test.ts",
+  "to": "src/features/chat/chatEmojis.test.ts"
+ },
+ {
+  "from": "src/common/chatItemLinks.ts",
+  "to": "src/features/chat/chatItemLinks.ts"
+ },
+ {
+  "from": "src/common/chatItemLinks.test.ts",
+  "to": "src/features/chat/chatItemLinks.test.ts"
+ },
+ {
+  "from": "src/common/chatTextWidth.ts",
+  "to": "src/features/chat/chatTextWidth.ts"
+ },
+ {
+  "from": "src/common/emojiBubbles.ts",
+  "to": "src/features/chat/emojiBubbles.ts"
+ },
+ {
+  "from": "src/common/emojiBubbles.test.ts",
+  "to": "src/features/chat/emojiBubbles.test.ts"
+ },
+ {
+  "from": "src/common/notices.ts",
+  "to": "src/features/chat/notices.ts"
+ },
+ {
+  "from": "src/chatRooms.ts",
+  "to": "src/features/chat/chatRooms.ts"
+ },
+ {
+  "from": "src/commands.ts",
+  "to": "src/features/chat/commands.ts"
+ },
+ {
+  "from": "src/emojis",
+  "to": "src/features/chat/emojis"
+ },
+ {
+  "from": "src/common/characterStats.ts",
+  "to": "src/features/hero/characterStats.ts"
+ },
+ {
+  "from": "src/common/statAllocation.ts",
+  "to": "src/features/hero/statAllocation.ts"
+ },
+ {
+  "from": "src/common/statAmounts.ts",
+  "to": "src/features/hero/statAmounts.ts"
+ },
+ {
+  "from": "src/common/statAmounts.test.ts",
+  "to": "src/features/hero/statAmounts.test.ts"
+ },
+ {
+  "from": "src/common/experience.ts",
+  "to": "src/features/hero/experience.ts"
+ },
+ {
+  "from": "src/common/lowVitals.ts",
+  "to": "src/features/hero/lowVitals.ts"
+ },
+ {
+  "from": "src/common/lowVitals.test.ts",
+  "to": "src/features/hero/lowVitals.test.ts"
+ },
+ {
+  "from": "src/common/emotes.ts",
+  "to": "src/features/hero/emotes.ts"
+ },
+ {
+  "from": "src/common/characterSelect.ts",
+  "to": "src/features/character_select/characterSelect.ts"
+ },
+ {
+  "from": "src/common/characterSelectBackdrop.ts",
+  "to": "src/features/character_select/characterSelectBackdrop.ts"
+ },
+ {
+  "from": "src/common/inventoryConstants.ts",
+  "to": "src/features/inventory/inventoryConstants.ts"
+ },
+ {
+  "from": "src/common/inventoryFit.ts",
+  "to": "src/features/inventory/inventoryFit.ts"
+ },
+ {
+  "from": "src/common/inventoryFit.test.ts",
+  "to": "src/features/inventory/inventoryFit.test.ts"
+ },
+ {
+  "from": "src/common/inventoryLayout.ts",
+  "to": "src/features/inventory/inventoryLayout.ts"
+ },
+ {
+  "from": "src/common/inventoryLayout.test.ts",
+  "to": "src/features/inventory/inventoryLayout.test.ts"
+ },
+ {
+  "from": "src/common/inventorySort.ts",
+  "to": "src/features/inventory/inventorySort.ts"
+ },
+ {
+  "from": "src/common/bulkMove.ts",
+  "to": "src/features/inventory/bulkMove.ts"
+ },
+ {
+  "from": "src/common/equipSlots.ts",
+  "to": "src/features/inventory/equipSlots.ts"
+ },
+ {
+  "from": "src/common/itemHotkeys.ts",
+  "to": "src/features/inventory/itemHotkeys.ts"
+ },
+ {
+  "from": "src/common/quickItemActions.ts",
+  "to": "src/features/inventory/quickItemActions.ts"
+ },
+ {
+  "from": "src/common/quickItemRules.ts",
+  "to": "src/features/inventory/quickItemRules.ts"
+ },
+ {
+  "from": "src/common/quickItemRules.test.ts",
+  "to": "src/features/inventory/quickItemRules.test.ts"
+ },
+ {
+  "from": "src/common/jewelUpgrade.ts",
+  "to": "src/features/inventory/jewelUpgrade.ts"
+ },
+ {
+  "from": "src/common/storageKind.ts",
+  "to": "src/features/inventory/storageKind.ts"
+ },
+ {
+  "from": "src/common/itemStorage.ts",
+  "to": "src/features/inventory/itemStorage.ts"
+ },
+ {
+  "from": "src/common/itemStats.ts",
+  "to": "src/features/items/itemStats.ts"
+ },
+ {
+  "from": "src/common/itemSerializer.ts",
+  "to": "src/features/items/itemSerializer.ts"
+ },
+ {
+  "from": "src/common/itemSerializer.test.ts",
+  "to": "src/features/items/itemSerializer.test.ts"
+ },
+ {
+  "from": "src/common/itemValue.ts",
+  "to": "src/features/items/itemValue.ts"
+ },
+ {
+  "from": "src/common/itemCompare.ts",
+  "to": "src/features/items/itemCompare.ts"
+ },
+ {
+  "from": "src/common/itemCompare.test.ts",
+  "to": "src/features/items/itemCompare.test.ts"
+ },
+ {
+  "from": "src/common/itemLevelLook.ts",
+  "to": "src/features/items/itemLevelLook.ts"
+ },
+ {
+  "from": "src/common/itemLevelLook.test.ts",
+  "to": "src/features/items/itemLevelLook.test.ts"
+ },
+ {
+  "from": "src/common/goldColor.ts",
+  "to": "src/features/items/goldColor.ts"
+ },
+ {
+  "from": "src/common/itemClasses.test.ts",
+  "to": "src/features/items/itemClasses.test.ts"
+ },
+ {
+  "from": "src/common/archangelWeapons.test.ts",
+  "to": "src/features/items/archangelWeapons.test.ts"
+ },
+ {
+  "from": "src/common/itemRequirements.test.ts",
+  "to": "src/features/items/itemRequirements.test.ts"
+ },
+ {
+  "from": "src/common/portedItems.test.ts",
+  "to": "src/features/items/portedItems.test.ts"
+ },
+ {
+  "from": "src/common/questItemLink.test.ts",
+  "to": "src/features/items/questItemLink.test.ts"
+ },
+ {
+  "from": "src/common/weaponAttack.test.ts",
+  "to": "src/features/items/weaponAttack.test.ts"
+ },
+ {
+  "from": "src/common/dropObject.ts",
+  "to": "src/features/drops/dropObject.ts"
+ },
+ {
+  "from": "src/common/dropModelProxy.ts",
+  "to": "src/features/drops/dropModelProxy.ts"
+ },
+ {
+  "from": "src/common/dropModelProxy.test.ts",
+  "to": "src/features/drops/dropModelProxy.test.ts"
+ },
+ {
+  "from": "src/common/dropTier.ts",
+  "to": "src/features/drops/dropTier.ts"
+ },
+ {
+  "from": "src/common/lootFilter.ts",
+  "to": "src/features/drops/lootFilter.ts"
+ },
+ {
+  "from": "src/common/zenPile.ts",
+  "to": "src/features/drops/zenPile.ts"
+ },
+ {
+  "from": "src/common/zenPile.test.ts",
+  "to": "src/features/drops/zenPile.test.ts"
+ },
+ {
+  "from": "src/common/pets.ts",
+  "to": "src/features/pets/pets.ts"
+ },
+ {
+  "from": "src/common/petConstants.ts",
+  "to": "src/features/pets/petConstants.ts"
+ },
+ {
+  "from": "src/common/serverAccounts.ts",
+  "to": "src/features/servers/serverAccounts.ts"
+ },
+ {
+  "from": "src/common/serverAccounts.test.ts",
+  "to": "src/features/servers/serverAccounts.test.ts"
+ },
+ {
+  "from": "src/common/serverConfig.ts",
+  "to": "src/features/servers/serverConfig.ts"
+ },
+ {
+  "from": "src/common/serverConfig.test.ts",
+  "to": "src/features/servers/serverConfig.test.ts"
+ },
+ {
+  "from": "src/common/serverList.ts",
+  "to": "src/features/servers/serverList.ts"
+ },
+ {
+  "from": "src/common/serverList.test.ts",
+  "to": "src/features/servers/serverList.test.ts"
+ },
+ {
+  "from": "src/common/serverProbe.ts",
+  "to": "src/features/servers/serverProbe.ts"
+ },
+ {
+  "from": "src/common/serverServices.ts",
+  "to": "src/features/servers/serverServices.ts"
+ },
+ {
+  "from": "src/common/serverServices.test.ts",
+  "to": "src/features/servers/serverServices.test.ts"
+ },
+ {
+  "from": "src/common/registerRules.ts",
+  "to": "src/features/servers/registerRules.ts"
+ },
+ {
+  "from": "src/common/registerRules.test.ts",
+  "to": "src/features/servers/registerRules.test.ts"
+ },
+ {
+  "from": "src/common/reservedNames.ts",
+  "to": "src/features/servers/reservedNames.ts"
+ },
+ {
+  "from": "src/common/sessionExit.ts",
+  "to": "src/features/session/sessionExit.ts"
+ },
+ {
+  "from": "src/common/sessionResume.ts",
+  "to": "src/features/session/sessionResume.ts"
+ },
+ {
+  "from": "src/common/sessionStats.ts",
+  "to": "src/features/session/sessionStats.ts"
+ },
+ {
+  "from": "src/common/configFingerprint.ts",
+  "to": "src/features/session/configFingerprint.ts"
+ },
+ {
+  "from": "src/common/configFingerprint.test.ts",
+  "to": "src/features/session/configFingerprint.test.ts"
+ },
+ {
+  "from": "src/common/gmCommands.ts",
+  "to": "src/features/gm/gmCommands.ts"
+ },
+ {
+  "from": "src/common/gmCommands.test.ts",
+  "to": "src/features/gm/gmCommands.test.ts"
+ },
+ {
+  "from": "src/common/gmMaps.ts",
+  "to": "src/features/gm/gmMaps.ts"
+ },
+ {
+  "from": "src/common/gmNearby.ts",
+  "to": "src/features/gm/gmNearby.ts"
+ },
+ {
+  "from": "src/common/gmNearby.test.ts",
+  "to": "src/features/gm/gmNearby.test.ts"
+ },
+ {
+  "from": "src/common/debugMenu.ts",
+  "to": "src/features/gm/debugMenu.ts"
+ },
+ {
+  "from": "src/gmPanel.ts",
+  "to": "src/features/gm/gmPanel.ts"
+ },
+ {
+  "from": "src/gmWorld.ts",
+  "to": "src/features/gm/gmWorld.ts"
+ },
+ {
+  "from": "src/admin",
+  "to": "src/features/gm/admin"
+ },
+ {
+  "from": "src/social.ts",
+  "to": "src/features/social/social.ts"
+ },
+ {
+  "from": "src/common/guildMark.ts",
+  "to": "src/features/social/guildMark.ts"
+ },
+ {
+  "from": "src/common/messenger.ts",
+  "to": "src/features/friends/friendList.ts"
+ },
+ {
+  "from": "src/messenger.ts",
+  "to": "src/features/friends/messenger.ts"
+ },
+ {
+  "from": "src/economy.ts",
+  "to": "src/features/economy/economy.ts"
+ },
+ {
+  "from": "src/cashShop",
+  "to": "src/features/cash_shop"
+ },
+ {
+  "from": "src/marketplace",
+  "to": "src/features/marketplace"
+ },
+ {
+  "from": "src/band",
+  "to": "src/features/band"
+ },
+ {
+  "from": "src/common/band",
+  "to": "src/features/band/music"
+ },
+ {
+  "from": "src/common/instruments.ts",
+  "to": "src/features/band/instruments.ts"
+ },
+ {
+  "from": "src/common/gameOptions.ts",
+  "to": "src/features/options/gameOptions.ts"
+ },
+ {
+  "from": "src/common/gameOptions.test.ts",
+  "to": "src/features/options/gameOptions.test.ts"
+ },
+ {
+  "from": "src/common/mobileSkillSlots.ts",
+  "to": "src/features/options/mobileSkillSlots.ts"
+ },
+ {
+  "from": "src/common/teleportRules.ts",
+  "to": "src/features/warp/teleportRules.ts"
+ },
+ {
+  "from": "src/common/teleportRules.test.ts",
+  "to": "src/features/warp/teleportRules.test.ts"
+ },
+ {
+  "from": "src/common/warpScopeHold.ts",
+  "to": "src/features/warp/warpScopeHold.ts"
+ },
+ {
+  "from": "src/common/warpFavourites.ts",
+  "to": "src/features/warp/warpFavourites.ts"
+ },
+ {
+  "from": "src/muHelper",
+  "to": "src/features/mu_helper"
+ },
+ {
+  "from": "src/quests",
+  "to": "src/features/quests"
+ },
+ {
+  "from": "src/events",
+  "to": "src/features/events"
+ }
+]

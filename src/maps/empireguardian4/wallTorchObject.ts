@@ -2,7 +2,7 @@ import { createEffectLight, type EffectLight } from '../../controllers/lighting/
 import { MapTileObject } from '../../controllers/terrain/mapTileObject';
 import { lightMapObject } from '../../controllers/lighting/mapObjectLights';
 import type { LightSource } from '../../controllers/lighting/lightSource';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 import type { Entity, World } from '../../ecs/world';
 import { findBone, type BoneNode } from './bones';
 import { EMPIRE_GUARDIAN_4_WALL_TORCH } from './spec';

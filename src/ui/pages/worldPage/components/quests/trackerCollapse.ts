@@ -8,7 +8,7 @@
  */
 import { observable, reaction, runInAction } from 'mobx';
 import { LocalStorage } from '../../../../../core/localStorage';
-import { Store } from '../../../../../store';
+import { Store } from '../../../../../app/store';
 
 const STORAGE_KEY = 'mu_quest_tracker';
 

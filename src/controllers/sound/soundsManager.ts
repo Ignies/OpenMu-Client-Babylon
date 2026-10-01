@@ -3,7 +3,7 @@ import { Sound } from '@babylonjs/core/Audio/sound';
 import { SoundTrack } from '@babylonjs/core/Audio/soundTrack';
 import { Engine, PointerEventTypes, type Scene } from '../render/babylon/exports';
 import { isMusicKey, soundUrl, type Sounds } from './recipes';
-import { ENABLE_BG_MUSIC } from '../../consts';
+import { ENABLE_BG_MUSIC } from '../../app/consts';
 
 /**
  * The mixer: two Babylon `SoundTrack`s (music / effects), one `Sound` per

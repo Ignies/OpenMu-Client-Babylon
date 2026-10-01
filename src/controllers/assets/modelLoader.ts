@@ -36,7 +36,7 @@ import {
 import { textureSourceName } from '../render/pbrMaps';
 import { getEmptyTexture } from '../render/babylon/emptyTexture';
 import { BlendState } from '../../common/objects/enum';
-import { isHideTexture, isSkinOrHairTexture } from '../../common/skinTexture';
+import { isHideTexture, isSkinOrHairTexture } from '../actors/skinTexture';
 import { parseTextureScriptFromPath } from '../render/textureScript';
 
 const reader = new BMDReader();

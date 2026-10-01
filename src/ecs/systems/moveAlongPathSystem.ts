@@ -1,14 +1,14 @@
 import { TILE_CM, TWFlags } from '../../controllers/terrain/consts';
 import { isFlagInBinaryMask } from '../../controllers/assets/download';
-import { InventoryConstants } from '../../common/inventoryConstants';
-import { Store } from '../../store';
-import { BaseClass, getBaseClass } from '../../common/characterStats';
-import { isSwimWorld } from '../../common/locomotion';
-import { isFastWing } from '../../common/wings';
-import { isRidingMount } from '../../common/pets';
+import { InventoryConstants } from '../../features/inventory/inventoryConstants';
+import { Store } from '../../app/store';
+import { BaseClass, getBaseClass } from '../../features/hero/characterStats';
+import { isSwimWorld } from '../../controllers/actors/locomotion';
+import { isFastWing } from '../../controllers/actors/wings';
+import { isRidingMount } from '../../features/pets/pets';
 import type { Entity, ISystemFactory } from '../world';
-import { distanceAlongPath } from '../../common/approachPath';
-import { debuffSlow } from '../../common/debuffBody';
+import { distanceAlongPath } from '../../controllers/actors/approachPath';
+import { debuffSlow } from '../../controllers/actors/debuffBody';
 
 /**
  * OpenMU walks every object by wall-clock time: each step takes

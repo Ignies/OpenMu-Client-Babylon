@@ -1,12 +1,12 @@
 import { Vector3, type Scene } from '../render/babylon/exports';
-import { delay, effects, fxNow } from './';
+import { delay, effects, fxNow } from '.';
 import { CM, TICK, type ParticleRecipe, type PointSource, type RGB } from './core';
 import { spawnModel } from './model';
 import { EXPLOSION_CELLS, TEX } from './recipes';
 import { playSfx } from '../sound/sfx';
 import { lighting } from '../lighting';
 import type { LightRecipe } from '../lighting/lightSource';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 
 /**
  * The GM fireworks and the Box of Luck drop burst: `ReceiveServerCommand`

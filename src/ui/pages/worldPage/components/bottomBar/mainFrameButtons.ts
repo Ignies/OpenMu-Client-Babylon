@@ -1,7 +1,7 @@
 import type { TextKey } from '../../../../../i18n';
-import { Store } from '../../../../../store';
-import { Messenger } from '../../../../../messenger';
-import { toggleMarketplace } from '../../../../../marketplace/gameBridge';
+import { Store } from '../../../../../app/store';
+import { Messenger } from '../../../../../features/friends/messenger';
+import { toggleMarketplace } from '../../../../../features/marketplace/gameBridge';
 
 /**
  * The five buttons on the right of the main frame (`newui_menu_Bt01..05`), in

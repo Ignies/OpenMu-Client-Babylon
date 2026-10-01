@@ -1,4 +1,4 @@
-import { DEBUG_SHOW_BOUNDING_BOXES } from '../../consts';
+import { DEBUG_SHOW_BOUNDING_BOXES } from '../../app/consts';
 import {
   CreateBox,
   Matrix,

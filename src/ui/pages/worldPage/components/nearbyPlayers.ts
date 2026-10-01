@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Store } from '../../../../store';
-import { INVITE_RANGE_TILES } from '../../../../social';
+import { Store } from '../../../../app/store';
+import { INVITE_RANGE_TILES } from '../../../../features/social/social';
 import type { GuildMemberRoleEnum } from '../../../../../versions/shared/packets/ServerToClientPackets';
 
 export type NearbyPlayer = {

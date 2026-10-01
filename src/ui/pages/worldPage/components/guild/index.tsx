@@ -4,13 +4,13 @@ import './style.less';
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
-import { Store } from '../../../../../store';
+import { Store } from '../../../../../app/store';
 import {
   GUILD_SECURITY_CODE_MAX,
   Social,
   type GuildTab,
-} from '../../../../../social';
-import { useEventBus } from '../../../../../hooks/useEventBus';
+} from '../../../../../features/social/social';
+import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
 import { playUiSound, uiClick } from '../../../../../controllers/sound/sfx';
 import { MuButton } from '../../../../components/muButton';
 import { MuSpriteFrame } from '../../../../components/muSprite';
@@ -22,7 +22,7 @@ import {
   GUILD_MARK_SIZE,
   guildMarkDataUrl,
   packGuildMark,
-} from '../../../../../common/guildMark';
+} from '../../../../../features/social/guildMark';
 import { TEXT_COLOR } from '../../../../pages/serversPage/layout';
 import {
   BACK_SPRITE,

@@ -3,9 +3,9 @@ import { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
 import { t, type TextKey } from '../../../../../i18n';
-import { Store, type PetInfo } from '../../../../../store';
-import { InventoryConstants } from '../../../../../common/inventoryConstants';
-import { PET_GROUP, DARK_HORSE, DARK_RAVEN } from '../../../../../common/pets';
+import { Store, type PetInfo } from '../../../../../app/store';
+import { InventoryConstants } from '../../../../../features/inventory/inventoryConstants';
+import { PET_GROUP, DARK_HORSE, DARK_RAVEN } from '../../../../../features/pets/pets';
 import {
   PetCommandModeEnum,
   PetTypeEnum,

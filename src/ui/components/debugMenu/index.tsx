@@ -2,8 +2,8 @@ import './style.less';
 import './modules';
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Store } from '../../../store';
-import { useEventBus } from '../../../hooks/useEventBus';
+import { Store } from '../../../app/store';
+import { useEventBus } from '../../../controllers/interface/hooks/useEventBus';
 import { uiClick } from '../../../controllers/sound/sfx';
 import { MuSpriteFrame } from '../muSprite';
 import { MuButton } from '../muButton';
@@ -13,7 +13,7 @@ import {
   DebugMenu,
   type DebugAction,
   type DebugRow,
-} from '../../../common/debugMenu';
+} from '../../../features/gm/debugMenu';
 
 /**
  * The offline debug window (documentation/debug_menu/ARCHITECTURE.md): the

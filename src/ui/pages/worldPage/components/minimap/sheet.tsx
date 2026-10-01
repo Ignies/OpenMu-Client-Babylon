@@ -3,7 +3,7 @@ import './style.less';
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
-import { Store } from '../../../../../store';
+import { Store } from '../../../../../app/store';
 import { uiClick } from '../../../../../controllers/sound/sfx';
 import type { WorldMinimap } from '../../../../../controllers/terrain/minimap';
 import type { MinimapMarker } from '../../../../../controllers/terrain/minimapData';

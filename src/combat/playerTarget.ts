@@ -10,7 +10,7 @@
  * Readers only. Read by `attackSystem.canAttackPlayer`, which adds the
  * safe-zone and liveness rules and feeds both click paths.
  */
-import { PVP_MURDERER2, PVP_NEUTRAL } from '../common/nameTags';
+import { PVP_MURDERER2, PVP_NEUTRAL } from '../controllers/interface/nameTags';
 import type { CombatLayer } from './layer';
 
 // ---- 2. readers ------------------------------------------------------------

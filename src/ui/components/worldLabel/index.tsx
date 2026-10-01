@@ -2,7 +2,7 @@ import { With } from 'miniplex';
 import './style.less';
 import { useRef, type PointerEvent } from 'react';
 import { Entity } from '../../../ecs/world';
-import { usePositionOnScreen } from '../../../hooks';
+import { usePositionOnScreen } from '../../../controllers/interface/hooks';
 
 type Props = {
   entity: With<Entity, 'transform' | 'screenPosition'>;

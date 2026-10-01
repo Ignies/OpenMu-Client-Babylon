@@ -1,7 +1,7 @@
 import { PointerEventTypes } from '../../controllers/render/babylon/exports';
-import { Store } from '../../store';
-import { events } from '../../events';
-import { quests } from '../../quests';
+import { Store } from '../../app/store';
+import { events } from '../../features/events';
+import { quests } from '../../features/quests';
 import type { Entity, ISystemFactory } from '../world';
 import { isNpcOrTrapType } from './attackSystem';
 

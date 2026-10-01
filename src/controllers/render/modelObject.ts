@@ -44,7 +44,7 @@ import { meshAnimationFor, type MeshAnimation } from './meshAnimation';
 import { BlendState } from '../../common/objects/enum';
 // Late-bound: a value import of `../store` closed an import cycle back to
 // the monster classes that extend this one (B14, see `storeRef.ts`).
-import { storeRef } from '../../common/storeRef';
+import { storeRef } from '../../app/storeRef';
 import { settleStillAnimations } from './staticClips';
 import { requestGlowProbe } from './scenes/sceneLook';
 import {

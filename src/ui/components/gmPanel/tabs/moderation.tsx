@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react-lite';
 import { t } from '../../../../i18n';
-import { GmPanel } from '../../../../gmPanel';
-import { gmCommand } from '../../../../common/gmCommands';
+import { GmPanel } from '../../../../features/gm/gmPanel';
+import { gmCommand } from '../../../../features/gm/gmCommands';
 import { uiClick } from '../../../../controllers/sound/sfx';
 import { CommandCard } from '../commandForm';
 

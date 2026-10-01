@@ -1,6 +1,6 @@
-import { inBloodCastle } from '../../common/locomotion';
-import type { PlayerObject } from '../../common/playerObject';
-import { bloodCastleQuestItem } from '../../events/bloodCastle';
+import { inBloodCastle } from '../../controllers/actors/locomotion';
+import type { PlayerObject } from '../../controllers/actors/playerObject';
+import { bloodCastleQuestItem } from '../../features/events/bloodCastle';
 import type { Entity, ISystemFactory } from '../world';
 
 /**

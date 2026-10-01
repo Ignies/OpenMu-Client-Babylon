@@ -1,5 +1,5 @@
 import type { Scene, Vector3 } from '../render/babylon/exports';
-import { effects } from './';
+import { effects } from '.';
 import type { RGB } from './core';
 import { BOMB_SPARKS, EXPLOSION_CELLS, FIRE_PUFF, MODEL, SMOKE, TEX } from './recipes';
 import type { Sounds } from '../sound/soundsManager';

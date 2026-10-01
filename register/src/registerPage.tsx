@@ -6,7 +6,7 @@ import {
   MIN_ACCOUNT_PASSWORD_LENGTH,
   validateSignup,
   type SignupProblem,
-} from '../../src/common/registerRules';
+} from '../../src/features/servers/registerRules';
 import { MuSpriteFrame } from './muSprite';
 import { MuButton } from './muButton';
 

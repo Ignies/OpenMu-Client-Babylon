@@ -3,17 +3,17 @@ import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
 import { t } from '../../../../../i18n';
-import { Store } from '../../../../../store';
+import { Store } from '../../../../../app/store';
 import { gameVersion } from '../../../../../version';
 import { isKey } from '../../../../../controllers/interface/keyBindings';
-import { BaseClass, getBaseClass } from '../../../../../common/characterStats';
+import { BaseClass, getBaseClass } from '../../../../../features/hero/characterStats';
 import {
   skillDefinition,
   type SkillDefinition,
 } from '../../../../../common/skillsDatabase';
 import { skillDisplayName } from '../../../../../common/skillNames';
 import { uiClick } from '../../../../../controllers/sound/sfx';
-import { useEventBus } from '../../../../../hooks/useEventBus';
+import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
 import { MuButton } from '../../../../components/muButton';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuItemWindow } from '../../../../components/muWindow';
@@ -25,14 +25,14 @@ import {
   MAX_OBTAINING_RANGE,
   type DarkRavenMode,
   type MuHelperConfig,
-} from '../../../../../muHelper/config';
+} from '../../../../../features/mu_helper/config';
 import {
   ensureMuHelperWatching,
   MuHelperState,
   resetMuHelperDraft,
   saveMuHelperConfig,
   toggleMuHelperWindow,
-} from '../../../../../muHelper/state';
+} from '../../../../../features/mu_helper/state';
 
 /**
  * `CNewUIMuHelper` (NewUIMuHelper.cpp): the S6 MU Helper settings dialog in

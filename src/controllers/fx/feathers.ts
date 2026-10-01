@@ -21,7 +21,7 @@
  * Read by: nobody.
  */
 import { Vector3, type Scene } from '../render/babylon/exports';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 import { CM, LiveList, TICK, WHITE, type RGB } from './core';
 import { spawnModel, type ModelHandle } from './model';
 import { MODEL } from './recipes';

@@ -1,5 +1,5 @@
 import type { Entity, ISystemFactory } from '../world';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 import { applyPlayerActionSpeed, serverMinAttackInterval } from '../../controllers/anim/playSpeed';
 import {
   AreaSkillPacket,
@@ -26,19 +26,19 @@ import {
   teleportGate,
   teleportRefusal,
   TELEPORT_PREVENTING_EFFECTS,
-} from '../../common/teleportRules';
+} from '../../features/warp/teleportRules';
 import { beginTeleport, endTeleport, teleportBusy } from './teleportSystem';
-import { Social } from '../../social';
+import { Social } from '../../features/social/social';
 import {
   isAttackableEntity,
   isAttackablePlayer,
   isOtherPlayer,
 } from './attackSystem';
-import { isFemaleClass } from '../../common/mapPlayerNetClassToModelClass';
-import { getBaseClass } from '../../common/characterStats';
-import { isWingItem } from '../../common/wings';
-import type { AttackPose } from '../../common/weaponClass';
-import { mountKind } from '../../common/pets';
+import { isFemaleClass } from '../../controllers/actors/mapPlayerNetClassToModelClass';
+import { getBaseClass } from '../../features/hero/characterStats';
+import { isWingItem } from '../../controllers/actors/wings';
+import type { AttackPose } from '../../controllers/actors/weaponClass';
+import { mountKind } from '../../features/pets/pets';
 import { heroCastSound, playCombat, playSkill } from '../../controllers/sound/combat';
 import { skills } from '../../skills';
 import { combat } from '../../combat';

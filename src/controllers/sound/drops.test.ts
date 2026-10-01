@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { GameOptions, setGameOption } from '../../common/gameOptions';
+import { GameOptions, setGameOption } from '../../features/options/gameOptions';
 import { dropSound, dropSoundAllowed, type DropSoundInfo } from './drops';
 import { pickupSound } from './combat';
 

@@ -10,10 +10,10 @@ import {
   boidsFor,
   type BoidSpec,
 } from '../../controllers/fx/boids';
-import { GameOptions } from '../../common/gameOptions';
+import { GameOptions } from '../../features/options/gameOptions';
 import { effects } from '../../controllers/fx';
 import { FIRE_PUFF, TEX } from '../../controllers/fx/recipes';
-import { invasionEvent } from '../../events/invasion';
+import { invasionEvent } from '../../features/events/invasion';
 import { playSfx } from '../../controllers/sound/sfx';
 import { TW_SAFEZONE } from '../../controllers/terrain/consts';
 import type { Entity, ISystemFactory } from '../world';

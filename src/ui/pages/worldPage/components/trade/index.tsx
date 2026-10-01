@@ -1,16 +1,16 @@
 import './style.less';
 import { t } from '../../../../../i18n';
 import { observer } from 'mobx-react-lite';
-import { Store } from '../../../../../store';
-import { Economy } from '../../../../../economy';
-import { StorageKind, isTradeBanned } from '../../../../../common/itemStorage';
+import { Store } from '../../../../../app/store';
+import { Economy } from '../../../../../features/economy/economy';
+import { StorageKind, isTradeBanned } from '../../../../../features/inventory/itemStorage';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuButton } from '../../../../components/muButton';
 import { MuItemWindow } from '../../../../components/muWindow';
 import { ItemGrid } from '../../../../components/itemGrid';
-import { QuickItemActions } from '../../../../../common/quickItemActions';
-import { useEventBus } from '../../../../../hooks/useEventBus';
-import { goldColor } from '../../../../../common/goldColor';
+import { QuickItemActions } from '../../../../../features/inventory/quickItemActions';
+import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
+import { goldColor } from '../../../../../features/items/goldColor';
 import {
   ACCEPT_FRAMES,
   ACCEPT_HEIGHT,

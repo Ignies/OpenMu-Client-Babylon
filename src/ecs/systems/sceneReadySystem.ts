@@ -1,5 +1,5 @@
 import type { ISystemFactory } from '../world';
-import { Store, UIState } from '../../store';
+import { Store, UIState } from '../../app/store';
 import { EventBus } from '../../core/eventBus';
 import { isStaged, sceneHeld } from '../../controllers/loading/sceneGate';
 import { packRepaintsPending } from '../../controllers/assets/texturePacks';

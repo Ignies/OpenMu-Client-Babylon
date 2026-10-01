@@ -4,7 +4,7 @@ import { isPlayerAttackAction } from '../../controllers/anim/playerActionMapper'
 import { BloodDecals } from '../../controllers/fx/bloodDecals';
 import { shatterDeathFor, spawnBomb } from '../../controllers/fx/deathVisuals';
 import { monsterModelTypeOf } from '../../controllers/anim/playSpeed';
-import { inBloodCastle, inChaosCastle } from '../../common/locomotion';
+import { inBloodCastle, inChaosCastle } from '../../controllers/actors/locomotion';
 import { TW_ACTION, TW_NOGROUND } from '../../controllers/terrain/consts';
 import { playSfx } from '../../controllers/sound/sfx';
 import { COMBAT_BUS } from '../../controllers/sound/combatSounds';
@@ -13,7 +13,7 @@ import { bonePos, entityYaw, type RGB } from '../../controllers/fx/core';
 import { NOVA_DEATH_MOTES } from '../../controllers/fx/recipes';
 import { SKILL_COMBO, SKILL_NOVA } from '../../combat/recipes';
 import type { DeathMotion, Entity, ISystemFactory } from '../world';
-import type { PlayerObject } from '../../common/playerObject';
+import type { PlayerObject } from '../../controllers/actors/playerObject';
 
 /**
  * DeadCharacter / SetPlayerDie / the Dead counter (ZzzCharacter.cpp:3105,

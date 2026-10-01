@@ -26,7 +26,7 @@
 import { readdirSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { PNG } from 'pngjs';
-import { ITEM_ICON_SCALE, ITEM_ICON_SCALE_DEFAULT } from '../src/common/itemIconScale';
+import { ITEM_ICON_SCALE, ITEM_ICON_SCALE_DEFAULT } from '../src/controllers/interface/item_icons/itemIconScale';
 import items from '../src/common/items.json';
 
 const ROOT = join(import.meta.dir, '..');

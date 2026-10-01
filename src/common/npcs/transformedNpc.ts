@@ -1,8 +1,8 @@
 import type { Entity, World } from '../../ecs/world';
 import { PlayerAction } from '../objects/enum';
 import { loadGLTF } from '../../controllers/assets/modelLoader';
-import { PlayerObject } from '../playerObject';
-import { transformedBodyFactory } from '../transformedBody';
+import { PlayerObject } from '../../controllers/actors/playerObject';
+import { transformedBodyFactory } from '../../controllers/actors/transformedBody';
 import { CharacterClassNumber } from '../../core/types';
 
 const cache = new Map<string, typeof PlayerObject>();

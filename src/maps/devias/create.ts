@@ -5,7 +5,7 @@ import { signTypes } from '../../common/signLabels';
 import type { World } from '../../ecs/world';
 import { setAreaMood } from '../../controllers/render/scenes/sceneLook';
 import type { AreaLookName } from '../../controllers/lighting/profiles';
-import { LeanBoxObject } from '../../common/operateBoxObject';
+import { LeanBoxObject } from '../../controllers/actors/operateBoxObject';
 import { DeviasCandleObject } from './candleObject';
 import {
   enumerateRooms,

@@ -1,0 +1,330 @@
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { App } from './App';
+import './style.less';
+import './logic';
+import { Store, UIState } from './store';
+import { GameOptions } from '../features/options/gameOptions';
+import { Social } from '../features/social/social';
+import { Commands } from '../features/chat/commands';
+import { GmPanel } from '../features/gm/gmPanel';
+import { Economy } from '../features/economy/economy';
+import { weather } from '../controllers/weather';
+import { sound } from '../controllers/sound';
+import { Engine, SceneLoader } from '../controllers/render/babylon/exports';
+import { createEngine } from '../controllers/render/babylon/utils';
+import { devQuery } from '../core/devSeams';
+import {
+  applyRenderScale,
+  renderScaleForStep,
+  renderScaleSeam,
+} from '../controllers/render/renderScale';
+import { upscaleLive } from '../controllers/render/scenes/upscale';
+import { TestScene } from '../controllers/render/scenes/testScene';
+import { loadMapIntoScene } from '../controllers/terrain/loadMapIntoScene';
+import { prefetchWorldTerrain } from '../controllers/assets/mu/prefetchWorld';
+import { createWorld } from '../ecs/createWorld';
+import { EventBus } from '../core/eventBus';
+import { installLoginMusic } from '../controllers/sound/loginMusic';
+import { setKeyProfile } from '../controllers/interface/keyBindings';
+import { installBrowserHotkeyGuard } from '../controllers/interface/browserHotkeys';
+import { SessionResume } from '../features/session/sessionResume';
+import { reaction } from 'mobx';
+import { watchStateWarnings } from '../controllers/interface/stateWarnings';
+import { watchPageTitle } from '../controllers/interface/pageTitle';
+import {
+  preloadPregameSprites,
+  preloadWorldSprites,
+} from '../controllers/assets/mu/preloadSprites';
+import { installPerfOverlay, recordFrame } from '../controllers/render/perfOverlay';
+import { csmCacheStats } from '../controllers/render/scenes/shadows';
+import { refreshServerList } from '../features/servers/serverList';
+import { ensureCacheWorker } from '../controllers/assets/assetDownload';
+import { sceneCovered } from '../controllers/render/sceneCover';
+
+if (APP_STAGE === 'dev' || QA_ENABLED) {
+  import('@babylonjs/core/Legacy/legacy');
+}
+
+// Durability / full grid / last potion / buff ending, on the notice banner.
+watchStateWarnings();
+
+// The browser tab: the client's name until the player is in, the world's after.
+watchPageTitle();
+
+// The asset cache worker, on every load rather than only once the player
+// opens the download screen: a browser will not offer to install a page it
+// has never seen register one.
+void ensureCacheWorker();
+
+// What a lost game server socket does before falling back to the server
+// list. Wired here rather than in logic.ts, which the store's own module
+// graph reaches before `Store` exists.
+Store.resumeHook = () => SessionResume.retry() || SessionResume.begin();
+
+// Hot keys are per character: the shared set is what a new one starts from.
+reaction(
+  () => Store.playerData.name,
+  name => setKeyProfile(name)
+);
+
+const canvas = document.querySelector('canvas')!;
+
+let useAntialiaing = false;
+
+let engine: Engine;
+try {
+  const result = createEngine(canvas, useAntialiaing);
+  engine = result.engine;
+  engine.hideLoadingUI();
+  // Babylon's loader screen polls `scene.isReady` over the whole scene every
+  // 100 ms per model load; ours covers loads. `?loaderPoll=1` keeps it.
+  SceneLoader.ShowLoadingScreen = devQuery('loaderPoll') === '1';
+} catch (e) {
+  console.error(e);
+  throw e;
+}
+
+// Before the first frame: the scene is drawn at this share of the window and
+// the browser scales it up. The HUD is DOM and keeps its own resolution.
+// The seam wins over the option so an A/B does not have to touch settings.
+//
+// Unless the upscale is on, and then the drawing buffer stays the size of the
+// window and the scale is taken out of the scene alone, with the frame
+// reconstructed on the way to the screen (`scenes/upscale.ts`). The two ways
+// of spending the same slider are exclusive; this is where they are chosen
+// between.
+const scaleSeam = renderScaleSeam();
+
+reaction(
+  () =>
+    upscaleLive()
+      ? 1
+      : scaleSeam ?? renderScaleForStep(GameOptions.renderScale),
+  scale => applyRenderScale(engine, scale),
+  { fireImmediately: true }
+);
+
+// The browser's own chords (Ctrl+W, Ctrl+R, F5, the zoom keys) taken off the
+// keyboard before anything else listens on it (`common/browserHotkeys.ts`).
+// The game's own keydown guards - page scroll keys, Tab, Alt, IME, the window
+// stack - live in `ecs/systems/keyboardInputSystem.ts`.
+installBrowserHotkeyGuard(
+  () =>
+    Store.uiState === UIState.World ||
+    Store.uiState === UIState.LoadingWorld ||
+    Store.uiState === UIState.Characters
+);
+
+const ignoredIds = ['scene-explorer-host', 'inspector-host'];
+
+// The right button is the cast button (`Attack()` with MouseRButton), and
+// the browser's context menu carries "Reload" - one right click that lands
+// on a HUD element, a window, a name tag or the page margin instead of the
+// canvas used to open it, and a slip from there reloaded the game. The
+// canvas already swallowed its own `contextmenu`; this covers everything
+// else on the page. Text fields keep theirs: an input's menu has no reload
+// entry and is how some players paste into chat.
+window.addEventListener('contextmenu', ev => {
+  let p = ev.target as HTMLElement | null;
+  while (p) {
+    if (p.isContentEditable) return;
+    const tag = p.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+    if (p.classList && ignoredIds.includes(p.id)) return;
+    p = p.parentElement;
+  }
+  ev.preventDefault();
+});
+window.addEventListener(
+  'wheel',
+  ev => {
+    let p = ev.target as HTMLElement;
+    while (p) {
+      if (
+        p.classList &&
+        (p.classList.contains('scrollable') || ignoredIds.includes(p.id))
+      )
+        return;
+
+      p = p.parentElement as any;
+    }
+
+    ev.preventDefault();
+  },
+  { passive: false }
+);
+
+let _hiddenAttr = '';
+const onVisibilityChanged = () => {
+  const hidden = !!document[_hiddenAttr as 'hidden'];
+
+  EventBus.emit('pageVisibilityChanged', !hidden);
+};
+
+if (document.hidden !== undefined) {
+  _hiddenAttr = 'hidden';
+  document.addEventListener('visibilitychange', onVisibilityChanged, false);
+}
+//@ts-ignore
+else if (document.mozHidden !== undefined) {
+  _hiddenAttr = 'mozHidden';
+  document.addEventListener('mozvisibilitychange', onVisibilityChanged, false);
+}
+//@ts-ignore
+else if (document.msHidden !== undefined) {
+  _hiddenAttr = 'msHidden';
+  document.addEventListener('msvisibilitychange', onVisibilityChanged, false);
+}
+//@ts-ignore
+else if (document.webkitHidden !== undefined) {
+  _hiddenAttr = 'webkitHidden';
+  document.addEventListener(
+    'webkitvisibilitychange',
+    onVisibilityChanged,
+    false
+  );
+}
+
+const scene = new TestScene(engine);
+
+sound.init(scene);
+// `MUSIC_LOGIN_THEME` over the server / login / character pages.
+installLoginMusic();
+
+const { world, updateSystems } = createWorld(scene);
+Store.world = world;
+
+// Render-budget overlay: Shift+Ctrl+Alt+P. Dormant until toggled.
+installPerfOverlay(scene);
+
+(window as any).__scene = scene;
+(window as any).__world = world;
+(window as any).__social = Social;
+(window as any).__commands = Commands;
+(window as any).__gmPanel = GmPanel;
+// Live instance for the CDP scenario scripts: a dynamic import('/src/economy.ts')
+// gets a second module copy (vite serves the live graph as `?t=`-stamped URLs)
+// whose state never changes.
+(window as any).__eco = Economy;
+(window as any).__store = Store;
+// The sound facade, for the headless verification scripts (`sound.unlocked`,
+// `sound.isPlaying(key)`, `sound.crackling`).
+(window as any).__sound = sound;
+// The weather facade, for the same reason. Fire, snow and rain are all things
+// a screenshot has to be able to *cause* before it can show them, and the only
+// other way in is to cast a real spell at a real monster.
+(window as any).__weather = weather;
+// Static-cascade cache counters: casters split, cache misses, held window
+// radius per cascade. What tells a shadow-pass number apart from a lucky one.
+(window as any).__csm = csmCacheStats;
+
+/**
+ * Longest step any system is handed. Coming back from an alt-tab (or from a
+ * map load that blocked the main thread) otherwise feeds a multi-second dt
+ * into movement, fades and timers at once: characters teleport along their
+ * path, death fades finish instantly, particle bursts skip their whole life.
+ * 100 ms is a hard frame-rate floor of 10 fps for simulation purposes.
+ */
+const MAX_FRAME_DELTA = 0.1;
+
+/**
+ * Babylon queues the next animation frame only after the render function
+ * returns: an exception out of a frame ends the render loop for good, and
+ * the game "hangs" in the worst possible way - the canvas freezes while the
+ * socket keeps delivering packets and the sounds keep playing (that is what
+ * a Summoner saw when a Drain Life tether expired). A frame that throws is
+ * logged and skipped; the next one runs. Logging is throttled so a fault
+ * that repeats every frame does not bury the console.
+ */
+const FRAME_ERROR_LOG_INTERVAL_MS = 5000;
+let lastFrameErrorAt = -Infinity;
+let frameErrorsSinceLog = 0;
+
+/**
+ * Once a covering page's scene has loaded, one frame in this many is drawn.
+ * Loading runs at full rate: its materials only compile on drawn frames.
+ */
+const COVERED_RENDER_EVERY = 6;
+let coveredFrames = 0;
+
+let lastTime = performance.now();
+engine.runRenderLoop(() => {
+  const now = performance.now();
+
+  const frameMs = now - lastTime;
+  const deltaTime = Math.min(frameMs / 1000, MAX_FRAME_DELTA);
+  // Advanced before the frame runs, so a frame that throws is not replayed
+  // as a double-length one by the next.
+  lastTime = now;
+
+  try {
+    world.gameTime.TotalGameTime.TotalSeconds += deltaTime;
+
+    const updateStarted = performance.now();
+    updateSystems(deltaTime);
+    const updateEnded = performance.now();
+
+    const idle = sceneCovered() && !Store.sceneLoading;
+
+    if (!idle || ++coveredFrames % COVERED_RENDER_EVERY === 0) {
+      scene.render();
+    }
+
+    // After the render, not before: the overlay's graph wants the whole of
+    // the main thread's frame, and `scene.render` is most of it.
+    recordFrame(
+      updateEnded - updateStarted,
+      frameMs,
+      performance.now() - updateStarted
+    );
+  } catch (err) {
+    frameErrorsSinceLog++;
+    if (now - lastFrameErrorAt >= FRAME_ERROR_LOG_INTERVAL_MS) {
+      console.error(
+        `frame threw (${frameErrorsSinceLog} since last report), continuing:`,
+        err
+      );
+      lastFrameErrorAt = now;
+      frameErrorsSinceLog = 0;
+    }
+  }
+});
+
+const onResize = () => engine.resize();
+
+window.addEventListener('resize', onResize);
+
+onResize();
+
+EventBus.on('requestWarp', ({ map, pos }) => {
+  // Every warp, the step from the login backdrop to the character one
+  // included: that one is a full terrain swap plus the character line-up, and
+  // skipping the screen for it meant watching both load on an open scene.
+  Store.setSceneLoading(true);
+
+  // The terrain files go out together, before the loader's first await; the
+  // loader picks up the same promises (prefetchWorld.ts).
+  if (map !== world.mapIndex) prefetchWorldTerrain(map);
+
+  loadMapIntoScene(world, map, pos);
+});
+
+preloadPregameSprites()
+  .finally(() => Store.setSpritesLoading(false))
+  .then(() => preloadWorldSprites());
+
+// The published server list (`common/serverList.ts`), once per launch. Nothing
+// waits on it: it fills the picker when it lands, and the saved servers are
+// what the client uses until then - or instead, if it never lands.
+refreshServerList();
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+
+if (Store.isOffline) {
+  Store.playOffline();
+}

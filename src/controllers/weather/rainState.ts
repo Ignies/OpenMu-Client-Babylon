@@ -1,6 +1,6 @@
 import { ENUM_WORLD } from '../../core/types';
 import type { WeatherLayer } from './layer';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 import { CHAOS_CASTLE_WORLDS, DEVIL_SQUARE_WORLDS } from '../assets/worldAssets';
 import { maps } from '../../maps';
 

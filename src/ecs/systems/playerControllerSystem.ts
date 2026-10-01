@@ -3,14 +3,14 @@ import {
   type ArcRotateCamera,
 } from '../../controllers/render/babylon/exports';
 import type { ISystemFactory, World } from '../world';
-import { Store, UIState } from '../../store';
+import { Store, UIState } from '../../app/store';
 import { isMobileDevice } from '../../controllers/interface/mobile';
 import { MoveTargetEffect } from '../../controllers/fx/moveTargetEffect';
-import { GameOptions } from '../../common/gameOptions';
+import { GameOptions } from '../../features/options/gameOptions';
 import { WALK_KEYS } from '../../controllers/interface/keyBindings';
 import { aimX, aimY } from '../../controllers/camera';
-import { Commands } from '../../commands';
-import { teleportGate } from '../../common/teleportRules';
+import { Commands } from '../../features/chat/commands';
+import { teleportGate } from '../../features/warp/teleportRules';
 import { teleportBusy } from './teleportSystem';
 import { pickGround } from '../../controllers/terrain/terrainPick';
 

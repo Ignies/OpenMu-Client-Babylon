@@ -3,7 +3,7 @@ import {
   type MovableFlare,
 } from '../../controllers/lighting/effectLights';
 import { MapTileObject } from '../../controllers/terrain/mapTileObject';
-import { Store } from '../../store';
+import { Store } from '../../app/store';
 import type { BonedEmission } from '../../controllers/fx/effectParticles';
 import type { Entity, World } from '../../ecs/world';
 

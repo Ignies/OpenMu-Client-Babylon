@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ItemSerializer } from '../../common/itemSerializer';
+import { ItemSerializer } from '../../features/items/itemSerializer';
 import {
   PlayerShopBuyResultPacket,
   PlayerShopBuyResultResultKindEnum,

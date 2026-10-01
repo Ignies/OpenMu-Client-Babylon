@@ -1,6 +1,6 @@
 import type { World } from '../../ecs/world';
 import { loadGLTF } from '../../controllers/assets/modelLoader';
-import { PlayerObject } from '../playerObject';
+import { PlayerObject } from '../../controllers/actors/playerObject';
 
 // Man01.glb is a rig-only BMD conversion (0 meshes - see
 //  the geometry ships as

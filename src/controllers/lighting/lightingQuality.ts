@@ -1,5 +1,5 @@
 import type { Camera, PostProcess, Scene } from '../render/babylon/exports';
-import { GameOptions } from '../../common/gameOptions';
+import { GameOptions } from '../../features/options/gameOptions';
 import { devQuery } from '../../core/devSeams';
 import type { TextKey } from '../../i18n';
 

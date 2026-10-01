@@ -1,7 +1,7 @@
 import type { Entity, World } from '../../ecs/world';
 import { PlayerAction } from '../objects/enum';
 import { loadGLTF } from '../../controllers/assets/modelLoader';
-import { PlayerObject } from '../playerObject';
+import { PlayerObject } from '../../controllers/actors/playerObject';
 import { CharacterClassNumber } from '../../core/types';
 
 // [NpcInfo(371, "Leo the Helper")]

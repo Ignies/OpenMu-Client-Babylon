@@ -1,6 +1,6 @@
 import type { Entity, World } from '../../ecs/world';
 import { loadGLTF } from '../../controllers/assets/modelLoader';
-import { MonsterObject } from '../monsterObject';
+import { MonsterObject } from '../../controllers/actors/monsterObject';
 import { MonsterActionType } from '../objects/enum';
 import { monsterModelFile, monsterScaleOf } from './monsterModelTable';
 

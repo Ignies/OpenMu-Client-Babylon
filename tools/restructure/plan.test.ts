@@ -90,6 +90,15 @@ describe('planMoves', () => {
     expect(plan.writes.get('versions/shared/ui/windows/inventory/index.tsx')).toBe(`import './style.less';`);
   });
 
+  it('writes "." for the index of the importer\'s own folder and resolves "./"', () => {
+    const plan = planMoves(
+      tree({ 'src/fx/index.ts': `export {};`, 'src/common/death.ts': `import '../fx';`, 'src/fx/old.ts': `import './';` }),
+      [{ from: 'src/common/death.ts', to: 'src/fx/death.ts' }, { from: 'src/fx/old.ts', to: 'src/fx/sub/old.ts' }]
+    );
+    expect(plan.writes.get('src/fx/death.ts')).toBe(`import '.';`);
+    expect(plan.writes.get('src/fx/sub/old.ts')).toBe(`import '..';`);
+  });
+
   it('reports relative imports it cannot resolve', () => {
     const plan = planMoves(tree({ 'src/a.ts': `import './missing';` }), []);
     expect(plan.unresolved).toEqual(['src/a.ts: ./missing']);

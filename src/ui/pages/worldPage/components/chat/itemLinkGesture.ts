@@ -1,7 +1,7 @@
-import { Store } from '../../../../../store';
-import { Social } from '../../../../../social';
-import { ItemLinkHover } from '../../../../../common/itemLinkHover';
-import { itemLinkLabel, itemLinkToken } from '../../../../../common/chatItemLinks';
+import { Store } from '../../../../../app/store';
+import { Social } from '../../../../../features/social/social';
+import { ItemLinkHover } from '../../../../../controllers/interface/itemLinkHover';
+import { itemLinkLabel, itemLinkToken } from '../../../../../features/chat/chatItemLinks';
 
 /**
  * Alt+click on any item whose tooltip is up links it into chat
