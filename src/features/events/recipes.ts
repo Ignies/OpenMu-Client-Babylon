@@ -1,4 +1,6 @@
 import { textTable, type TextKey } from '../../i18n';
+import { isMasterClass } from '../hero/characterStats';
+export { isMasterClass };
 import { CharacterClassNumber } from '../../core/types';
 
 /**
@@ -287,17 +289,3 @@ export const TICKETS = {
 /** `SendMiniGameOpeningStateRequest` first byte: which event a ticket asks about. */
 export const OPENING_STATE_GAME = { devilSquare: 1, bloodCastle: 2, chaosCastle: 4 } as const;
 
-/** `gCharacterManager.IsMasterLevel(Class)`: the third-class characters. */
-const MASTER_CLASSES: ReadonlySet<CharacterClassNumber> = new Set([
-  CharacterClassNumber.GrandMaster,
-  CharacterClassNumber.BladeMaster,
-  CharacterClassNumber.HighElf,
-  CharacterClassNumber.DuelMaster,
-  CharacterClassNumber.LordEmperor,
-  CharacterClassNumber.DimensionMaster,
-  CharacterClassNumber.FistMaster,
-]);
-
-export function isMasterClass(cls: CharacterClassNumber): boolean {
-  return MASTER_CLASSES.has(cls);
-}

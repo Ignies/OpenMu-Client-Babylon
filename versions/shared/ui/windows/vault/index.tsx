@@ -1,4 +1,5 @@
 import './style.less';
+import { masterLevel } from '@/features/skills/masterLevel';
 import { t } from '@/i18n';
 import { observer } from 'mobx-react-lite';
 import { Store } from '@/app/store';
@@ -75,7 +76,7 @@ export const Vault = observer(() => {
 
   const fee = vaultOpenCost(
     Store.playerData.level,
-    Store.playerData.masterLevel,
+    masterLevel(),
     locked
   );
 

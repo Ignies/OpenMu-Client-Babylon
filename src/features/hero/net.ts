@@ -7,7 +7,7 @@ import { Messenger } from '../friends/messenger';
 import { PlayerAction } from '@versions/shared/objects/enum';
 import { SessionResume } from '../session/sessionResume';
 import { Social } from '../social/social';
-import { StatType } from './characterStats';
+import { StatType, masterExperienceActive } from './characterStats';
 import { Store, UIState } from '@/app/store';
 import { convertDirectionToAngle } from '../_shared/net_helpers';
 import { experienceForLevel } from './experience';
@@ -413,9 +413,6 @@ EventBus.on('CharacterLevelUpdateExtended', packet =>
 
 EventBus.on('MasterCharacterLevelUpdate', packet => {
   const p = new MasterCharacterLevelUpdatePacket(packet);
-  runInAction(() => {
-    Store.playerData.masterLevel = p.MasterLevel;
-  });
   Store.addNotification(t('notify.masterLevelUp', { level: p.MasterLevel }));
 });
 
@@ -425,9 +422,9 @@ function applyExperienceGained(p: { AddedExperience: number; KilledObjectId: num
   const added = p.AddedExperience;
   if (added <= 0) return;
 
-  runInAction(() => {
-    Store.playerData.exp += added;
-  });
+  // ReceiveDieExp (WSclient.cpp:5719-5743): a master gains master experience instead (skills/masterLevel.ts).
+  const pd = Store.playerData;
+  if (!masterExperienceActive(pd.charClass, pd.level)) runInAction(() => (pd.exp += added));
 
   EventBus.emit('experienceGained', {
     added,
@@ -500,7 +497,6 @@ EventBus.on('MasterCharacterLevelUpdateExtended', packet => {
   if (packet.byteLength < MasterCharacterLevelUpdateExtendedPacket.Length!) return;
   const p = new MasterCharacterLevelUpdateExtendedPacket(packet);
   runInAction(() => {
-    Store.playerData.masterLevel = p.MasterLevel;
     Store.playerData.maxHP = p.MaximumHealth;
     Store.playerData.maxMP = p.MaximumMana;
     Store.playerData.maxSD = p.MaximumShield;

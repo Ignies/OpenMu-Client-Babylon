@@ -2,6 +2,8 @@
  * The hero's master level, master experience and unspent points (`Master_Level_Data`); see readme.md.
  */
 import { observable, runInAction } from 'mobx';
+import { Store } from '@/app/store';
+import { masterExperienceActive } from '../hero/characterStats';
 
 import { EventBus } from '../../core/eventBus';
 import {
@@ -137,7 +139,8 @@ EventBus.on('MasterCharacterLevelUpdateExtended', packet =>
 );
 
 function gained(p: { AddedExperience: number }): void {
-  if (!state.received || p.AddedExperience <= 0) return;
+  const pd = Store.playerData;
+  if (!state.received || p.AddedExperience <= 0 || !masterExperienceActive(pd.charClass, pd.level)) return;
   runInAction(() => {
     state.experience += p.AddedExperience;
   });

@@ -360,7 +360,6 @@ class PlayerData {
 
   level = 1;
   points = 5;
-  masterLevel = 0;
   /**
    * Attack / magic speed as the server computed them (CurrentStatsExtended /
    * CharacterInformationExtended); null until received, then authoritative
@@ -2004,11 +2003,10 @@ export const Store = new (class _Store {
       return;
     }
 
-    // A previous talk that never produced a window leaves OpenMU in
-    // NpcDialogOpened; it ignores new talks until a CloseNpcRequest resets it.
-    if (this.pendingNpcTalk) {
-      this.sendToGS(CloseNpcRequestPacket.createPacket().buffer);
-    }
+    // Reset OpenMU's dialog state first, every time: a talk that never produced a
+    // window (or one closed without a CloseNpcRequest) leaves it in NpcDialogOpened,
+    // and it ignores new talks until a CloseNpcRequest arrives.
+    this.sendToGS(CloseNpcRequestPacket.createPacket().buffer);
     const packet = TalkToNpcRequestPacket.createPacket();
     packet.NpcId = npc.netId;
     this.sendToGS(packet.buffer);

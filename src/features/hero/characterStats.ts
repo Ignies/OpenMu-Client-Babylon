@@ -630,3 +630,25 @@ export function deriveCharacterStats(input: CharacterStatsInput): DerivedStats {
     curseMax: Math.trunc(input.energy / 4),
   };
 }
+
+/** `gCharacterManager.IsMasterLevel(Class)`: the third-class characters. */
+const MASTER_CLASSES: ReadonlySet<CharacterClassNumber> = new Set([
+  CharacterClassNumber.GrandMaster,
+  CharacterClassNumber.BladeMaster,
+  CharacterClassNumber.HighElf,
+  CharacterClassNumber.DuelMaster,
+  CharacterClassNumber.LordEmperor,
+  CharacterClassNumber.DimensionMaster,
+  CharacterClassNumber.FistMaster,
+]);
+
+export function isMasterClass(cls: CharacterClassNumber): boolean {
+  return MASTER_CLASSES.has(cls);
+}
+
+/** `IsMasterExperienceActive` (CharacterManager.cpp:228-231): kills feed master experience instead of normal experience. */
+export const MASTER_EXPERIENCE_LEVEL = 400;
+
+export function masterExperienceActive(cls: CharacterClassNumber, level: number): boolean {
+  return isMasterClass(cls) && level >= MASTER_EXPERIENCE_LEVEL;
+}
