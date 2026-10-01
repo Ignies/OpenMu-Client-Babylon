@@ -218,13 +218,7 @@ EventBus.on('SkillAnimation', packet => {
     playTargetedSkillVisual(world.scene, p.SkillId, caster, target);
     return;
   }
-  if (target && target !== caster && !caster.localPlayer) {
-    const dx = target.transform.pos.x - caster.transform.pos.x;
-    const dz = target.transform.pos.z - caster.transform.pos.z;
-    if (dx * dx + dz * dz > 0.01) {
-      caster.transform.rot.y = Math.atan2(dz, dx) + Math.PI / 2;
-    }
-  }
+  faceTarget(caster, target);
   playCastAnimation(caster, p.SkillId, false);
   playTargetedSkillVisual(world.scene, p.SkillId, caster, target);
 });
@@ -496,13 +490,15 @@ EventBus.on('RageAttack', packet => {
   if (!caster) return;
   const target = world.getByNetId(p.TargetId & 0x7fff) ?? null;
 
-  if (target && target !== caster && !caster.localPlayer) {
-    const dx = target.transform.pos.x - caster.transform.pos.x;
-    const dz = target.transform.pos.z - caster.transform.pos.z;
-    if (dx * dx + dz * dz > 0.01) {
-      caster.transform.rot.y = Math.atan2(dz, dx) + Math.PI / 2;
-    }
-  }
+  faceTarget(caster, target);
   playCastAnimation(caster, p.SkillId, false);
   playTargetedSkillVisual(world.scene, p.SkillId, caster, target);
 });
+
+/** A remote caster turns to its target (the hero turns itself every frame). */
+function faceTarget(caster: Entity, target: Entity | null): void {
+  if (!target || target === caster || caster.localPlayer || !caster.transform || !target.transform) return;
+  const dx = target.transform.pos.x - caster.transform.pos.x;
+  const dz = target.transform.pos.z - caster.transform.pos.z;
+  if (dx * dx + dz * dz > 0.01) caster.transform.rot.y = Math.atan2(dz, dx) + Math.PI / 2;
+}

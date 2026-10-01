@@ -31,8 +31,10 @@ EventBus.on('AssignCharacterToGuild', packet => {
     const maskedId = member.PlayerId & 0x7fff;
     const obj = world.getByNetId(maskedId);
     if (obj) {
-      world.addComponent(obj, 'guild', { id: member.GuildId, role: member.Role });
-      obj.guild = { id: member.GuildId, role: member.Role };
+      const guild = { id: member.GuildId, role: member.Role };
+      // addComponent never overwrites, so a player already in a guild is updated in place.
+      if (obj.guild) obj.guild = guild;
+      else world.addComponent(obj, 'guild', guild);
     }
     if (maskedId === Store.playerId) {
       runInAction(() => {
