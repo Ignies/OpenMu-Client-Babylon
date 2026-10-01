@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BurstLimit, bucketFor, clientIp, isLoopback } from './rateLimit';
+import { BurstLimit, bucketFor, clientIp, isLoopback, trustedProxies } from './rateLimit';
 
 function request(forwarded?: string): Request {
   return new Request('http://127.0.0.1:3200/api/session', {
@@ -48,6 +48,19 @@ describe('clientIp', () => {
   it('ignores the header from a peer that is not on this box', () => {
     expect(clientIp(request('198.51.100.7'), peer('203.0.113.9'))).toBe('203.0.113.9');
     expect(clientIp(request('9.9.9.9, 198.51.100.7'), peer('::ffff:10.0.0.4'))).toBe('::ffff:10.0.0.4');
+  });
+
+  it('also believes a reverse proxy named in the trusted list', () => {
+    const trusted = ['172.30.77.10'];
+
+    expect(clientIp(request('198.51.100.7'), peer('172.30.77.10'), trusted)).toBe('198.51.100.7');
+    expect(clientIp(request('198.51.100.7'), peer('::ffff:172.30.77.10'), trusted)).toBe('198.51.100.7');
+    expect(clientIp(request('198.51.100.7'), peer('172.30.77.11'), trusted)).toBe('172.30.77.11');
+  });
+
+  it('reads the trusted list from TRUSTED_PROXIES', () => {
+    expect(trustedProxies({ TRUSTED_PROXIES: ' 172.30.77.10 ,, ::1 ' })).toEqual(['172.30.77.10', '::1']);
+    expect(trustedProxies({})).toEqual([]);
   });
 
   it('falls back to the socket, then to unknown', () => {

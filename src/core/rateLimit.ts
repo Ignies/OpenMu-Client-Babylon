@@ -60,20 +60,33 @@ export function isLoopback(address: string): boolean {
   return bare === '::1';
 }
 
+/** `TRUSTED_PROXIES`: exact addresses of reverse proxies that are not on loopback (a Caddy container). */
+export function trustedProxies(env: Record<string, string | undefined> = process.env): string[] {
+  return (env.TRUSTED_PROXIES ?? '').split(',').map(s => s.trim()).filter(Boolean);
+}
+
+const TRUSTED = typeof process === 'undefined' ? [] : trustedProxies();
+
+function isTrustedPeer(peer: string, trusted: readonly string[]): boolean {
+  const bare = bareAddress(peer);
+  return isLoopback(bare) || trusted.includes(bare.replace(/^::ffff:/, ''));
+}
+
 /**
  * The caller's address, as far as it can be trusted: the last
- * `X-Forwarded-For` entry, believed only from a loopback peer. See core/readme.md.
+ * `X-Forwarded-For` entry, believed only from a loopback or trusted peer. See core/readme.md.
  */
 // Structurally typed rather than `Bun.Server`: the pinned `bun-types` does not
 // export that name, and this is the only member needed.
 export function clientIp(
   req: Request,
-  server: { requestIP(req: Request): { address: string } | null }
+  server: { requestIP(req: Request): { address: string } | null },
+  trusted: readonly string[] = TRUSTED
 ): string {
   const peer = server.requestIP(req)?.address;
   const forwarded = req.headers.get('x-forwarded-for');
 
-  if (forwarded && peer && isLoopback(peer)) {
+  if (forwarded && peer && isTrustedPeer(peer, trusted)) {
     const hops = forwarded.split(',');
     const nearest = hops[hops.length - 1]?.trim();
 

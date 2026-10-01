@@ -36,7 +36,8 @@ pathfinding. Nothing here knows about a skill, a window or a map.
   modules can use it without pulling the engine. `controllers/assets/download.ts` re-exports it.
 - `rateLimit.ts`: shared so the services never disagree; IPv6 is counted per /64. Caddy appends
   to `X-Forwarded-For`, so `clientIp` takes the last entry (everything before it is the client's
-  own), and only when the socket peer is loopback (Caddy on the same box). Any other peer reached
+  own), and only when the socket peer is loopback (Caddy on the same box) or listed in
+  `TRUSTED_PROXIES` (Caddy in its own container, see install/). Any other peer reached
   the port directly, so its socket address is used.
 - `eventBus/index.ts` declines hot updates so Vite never makes a second bus.
 
