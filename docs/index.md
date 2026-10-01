@@ -1,6 +1,6 @@
 # Docs
 
-Start with [AGENTS.md](../AGENTS.md).
+Start with [AGENTS.md](../AGENTS.md), then [agents/](agents/readme.md) for how agents work here.
 
 - [file_tree.md](file_tree.md): every folder, one line each
 - [controllers.md](controllers.md): the generic services and how content plugs into them

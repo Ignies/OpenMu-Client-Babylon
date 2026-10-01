@@ -25,6 +25,7 @@ docs/           how things fit together and how to change them
 ```
 
 Full tree with one line per folder: [docs/file_tree.md](docs/file_tree.md).
+How agents work here (workflow, roles, tools, where things are): [docs/agents/](docs/agents/readme.md).
 
 ## The three rules of the layout
 
