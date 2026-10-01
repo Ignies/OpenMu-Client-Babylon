@@ -1,3 +1,4 @@
+import type { Controller } from '../controller';
 import type { ENUM_WORLD } from '../../core/types';
 import type { Scene, Vector3 } from '../render/babylon/exports';
 import type { EffectHandle, EffectLayer } from './layer';
@@ -32,7 +33,8 @@ export type EffectName = Layers['name'];
 export type EffectOptions<N extends EffectName> =
   Extract<Layers, { name: N }> extends EffectLayer<infer O, N> ? O : never;
 
-class Effects {
+class Effects implements Controller {
+  readonly id = 'fx';
   private readonly layers: EffectLayer[] = [...EFFECT_LAYERS];
   private readonly byName = new Map<string, EffectLayer>(
     EFFECT_LAYERS.map(l => [l.name, l as EffectLayer])

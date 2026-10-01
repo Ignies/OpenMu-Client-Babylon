@@ -1,3 +1,4 @@
+import type { Controller } from '../controller';
 import type { Item } from '../../ecs/world';
 import type { PlayerAction } from '../../../versions/shared/objects/enum';
 import type { AreaSkillHitPacket } from '../../../versions/shared/packets/ClientToServerPackets';
@@ -53,7 +54,8 @@ export type { CastTarget } from './castTargets';
  * public surface for the ECS consumers; every entry file stays importable
  * directly for anything that needs a single function.
  */
-class Combat {
+class Combat implements Controller {
+  readonly id = 'combat';
   private readonly layers: CombatLayer[] = [...COMBAT_LAYERS];
 
   /** Add an entry at runtime (tools, experiments). Returns the unregister. */

@@ -1,3 +1,4 @@
+import type { Controller } from '../controller';
 import type { ENUM_WORLD } from '../../core/types';
 import type { Scene } from '../render/babylon/exports';
 import type { Entity } from '../../ecs/world';
@@ -35,7 +36,8 @@ export type { LightRecipe, LightAnchor } from './lightSource';
  * `common/pointLightPool.ts` - are consumers of this folder: `LightSource`
  * registers into them, `TerrainLightSystem` steps them after `update`.
  */
-class Lighting {
+class Lighting implements Controller {
+  readonly id = 'lighting';
   private readonly layers: LightingLayer[] = [...LIGHTING_LAYERS];
 
   /** Add an entry at runtime (tools, experiments). Returns the unregister. */

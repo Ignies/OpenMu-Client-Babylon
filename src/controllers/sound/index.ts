@@ -1,5 +1,5 @@
+import type { Controller, ControllerContext } from '../controller';
 import type { ENUM_WORLD } from '../../core/types';
-import type { Scene } from '../render/babylon/exports';
 import type { World } from '../../ecs/world';
 import { SoundsManager } from './soundsManager';
 import { EventBus } from '../../core/eventBus';
@@ -98,7 +98,8 @@ export { OBJECT_LOOPS } from './objectLoops';
  * (`libs/soundsManager.ts`: the Babylon tracks and buffers); entries decide
  * *what* plays and command the mixer. The facade holds no state.
  */
-class Sound {
+class Sound implements Controller {
+  readonly id = 'sound';
   private readonly layers: SoundLayer[] = [...SOUND_LAYERS];
 
   /** Add an entry at runtime (tools, experiments). Returns the unregister. */
@@ -123,7 +124,7 @@ class Sound {
    * are read per play (`buses.ts`), so a slider move reaches the one-shots
    * and the loops without anything being pushed at all.
    */
-  init(scene: Scene): void {
+  init({ scene }: ControllerContext): void {
     const boot = trackGains();
     SoundsManager.initializeSounds(scene, boot.music, boot.effects);
 

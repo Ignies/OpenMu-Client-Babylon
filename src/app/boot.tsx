@@ -21,7 +21,9 @@ import {
 } from '../controllers/render/renderScale';
 import { upscaleLive } from '../controllers/render/scenes/upscale';
 import { TestScene } from '../controllers/render/scenes/testScene';
-import { loadMapIntoScene } from '../controllers/terrain/loadMapIntoScene';
+import { loadMapIntoScene, onMapChange } from '../controllers/terrain/loadMapIntoScene';
+import { initControllers } from '../controllers/controllers';
+import { resetForMapChange } from './lifecycle';
 import { prefetchWorldTerrain } from '../controllers/assets/mu/prefetchWorld';
 import { createWorld } from '../ecs/createWorld';
 import { EventBus } from '../core/eventBus';
@@ -188,7 +190,8 @@ else if (document.webkitHidden !== undefined) {
 
 const scene = new TestScene(engine);
 
-sound.init(scene);
+initControllers({ scene });
+onMapChange(resetForMapChange);
 // `MUSIC_LOGIN_THEME` over the server / login / character pages.
 installLoginMusic();
 

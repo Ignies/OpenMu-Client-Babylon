@@ -28,15 +28,7 @@ import { LightCarrier } from '../lighting/lightCarrier';
 import { IVector3Like } from '../render/babylon/exports';
 import { EventBus } from '../../core/eventBus';
 import { DISABLE_OBJECTS_LOADING } from '../../app/consts';
-import { sound } from '../sound';
 import { evictWorldMinimaps, prefetchWorldMinimap } from './minimap';
-import { weather } from '../weather';
-import { events } from '../../features/events';
-import { lighting } from '../lighting';
-import { quests } from '../../features/quests';
-import { effects } from '../fx';
-import { skills } from '../../features/skills';
-import { combat } from '../combat';
 import { resetTerrainMask } from './terrainMask';
 import { setShadowWorld } from '../render/objectShadow';
 import { lookDirector } from '../lighting/director';
@@ -72,6 +64,12 @@ let loadQueue: Promise<void> = Promise.resolve();
 
 /** The records of the map on screen, kept for `reloadMapObjects`. */
 let sceneObjects: MapObjectRecord[] = [];
+let mapChangeHook: () => void = () => {};
+
+/** Registers what runs when the map changes, before the new terrain loads. Set once at boot. */
+export function onMapChange(fn: () => void): void {
+  mapChangeHook = fn;
+}
 let sceneWorld: World | null = null;
 
 type MapObjectRecord = {
@@ -341,32 +339,8 @@ async function runLoad(
 
     unloadMap(world, oldMap, map);
 
-    // Weather is global - the proxy computes one sky for every client, and the
-    // packet is not re-sent on warp - so `Store.weather` deliberately carries
-    // across the gate: the same shower really is still falling on the far side.
-    // What is reset is only `RainCurrent`, so the rain fades back in over its
-    // ramp instead of being at full strength in the first frame of a map the
-    // player has not seen yet. Whether it may fall here at all is the rain
-    // slot's business (`maps.isOutdoor` / `SNOW_MAPS`), not this line's.
-    weather.reset();
-    // Every light source registered against the old terrain light field;
-    // the field is rebuilt from the new bake and nothing may outlive it.
-    lighting.reset();
-    // Every live skill effect and pooled card belongs to the old scene graph.
-    effects.reset();
-    // Every event window, clock and result box belongs to the map just left.
-    events.reset();
-    // Re-use delays belong to the world just left; buff stamps are rebased.
-    skills.reset();
-    // Swing latch, Nova charge, Dark Side follow-ups: all aimed at the old map.
-    combat.reset();
-    // The NPC quest dialogs belong to the NPC just walked away from; quest
-    // states are the character's and survive.
-    quests.reset();
-    // The old map's ambient beds, the footstep latch, the listener pin.
-    sound.reset();
-    // Whatever a map entry kept for the world just left.
-    maps.reset();
+    // Controllers and features drop everything that belonged to the old map (app/lifecycle.ts).
+    mapChangeHook();
     // Before the new map's terrain material binds the mask: otherwise the
     // first frames of a snow map would be masked by the last map's roofs.
     resetTerrainMask();

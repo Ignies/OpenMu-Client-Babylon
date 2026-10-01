@@ -1,3 +1,4 @@
+import type { Controller } from '../controller';
 import { ENUM_WORLD } from '../../core/types';
 import type { World } from '../../ecs/world';
 import type { Emission } from '../fx/effectParticles';
@@ -17,7 +18,8 @@ export type { MapLayer, Room, Spawn } from './layer';
  * data. The facade holds nothing of its own beyond the index it builds over
  * the list.
  */
-class Maps {
+class Maps implements Controller {
+  readonly id = 'maps';
   private readonly layers: MapLayer[] = [...MAP_LAYERS];
   private readonly byWorld = new Map<ENUM_WORLD, MapLayer>();
   private readonly effectOnlySets = new Map<MapLayer, ReadonlySet<number>>();

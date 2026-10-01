@@ -1,3 +1,4 @@
+import type { Controller } from '../controller';
 import type { ENUM_WORLD } from '../../core/types';
 import type { Scene } from '../render/babylon/exports';
 import type { World } from '../../ecs/world';
@@ -26,7 +27,8 @@ export type { WeatherLayer } from './layer';
  * every effect file stays importable directly for anything that needs a
  * single function.
  */
-class Weather {
+class Weather implements Controller {
+  readonly id = 'weather';
   private readonly layers: WeatherLayer[] = [...WEATHER_LAYERS];
 
   /** Add an effect at runtime (tools, experiments). Returns the unregister. */
