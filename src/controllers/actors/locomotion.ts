@@ -27,9 +27,6 @@ export const FENRIR_RUN_DELAY = 20;
 /** `c->Run += FPS_ANIMATION_FACTOR` once per frame → 25 units per second. */
 export const RUN_UNITS_PER_SECOND = REFERENCE_FPS;
 
-/** Seconds of continuous walking before the run clips take over. */
-export const RUN_DELAY_SECONDS = RUN_THRESHOLD / RUN_UNITS_PER_SECOND;
-
 /** `gMapManager.InChaosCastle()` (MapManager.cpp:1564). */
 export function inChaosCastle(world: number): boolean {
   return (

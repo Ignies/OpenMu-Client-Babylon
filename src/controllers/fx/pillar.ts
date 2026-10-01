@@ -112,11 +112,6 @@ export interface PillarOptions {
 
 const live = new LiveList();
 
-/** How many pillars are burning (debug). */
-export function pillarCount(): number {
-  return live.size;
-}
-
 const tmp = new Vector3();
 let seq = 0;
 

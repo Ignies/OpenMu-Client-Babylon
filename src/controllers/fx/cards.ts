@@ -110,11 +110,6 @@ const live: Live[] = [];
 const free: Live[] = [];
 let liveScene: Scene | null = null;
 
-/** How many cards are up (debug). */
-export function cardCount(): number {
-  return live.length;
-}
-
 const ramps = new Map<string, StandardMaterial[]>();
 const tmp = new Vector3();
 

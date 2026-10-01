@@ -99,11 +99,6 @@ export function questDefinition(index: number): QuestDefinition | undefined {
   return tables.get()?.quests[index];
 }
 
-/** Every legacy quest the table holds (an empty list before load). */
-export function questDefinitions(): readonly QuestDefinition[] {
-  return tables.get()?.quests ?? [];
-}
-
 /** `g_DialogScript[index]`. */
 export function dialogScript(index: number): DialogScript | undefined {
   return tables.get()?.dialogs[index];

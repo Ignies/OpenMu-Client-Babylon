@@ -121,11 +121,6 @@ export function learnableSkill(item: Item): number | undefined {
   return learnableSkillNumber(item.group, item.num, item.lvl ?? 0);
 }
 
-/** True for every orb / scroll / crystal that teaches a skill. */
-export function isSkillItem(item: Item): boolean {
-  return learnableSkill(item) !== undefined;
-}
-
 /**
  * Why `hero` cannot learn from `item` right now, or null when the use may
  * go to the server. `stats` are the item's effective requirements

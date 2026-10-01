@@ -53,7 +53,6 @@ export class MarketError extends Error {
   }
 }
 
-
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${marketApiUrl()}${path}`, {
     // Nothing is cookie-authenticated, and the preflight allows no header but
@@ -92,15 +91,6 @@ async function ticket(fresh = false): Promise<Ticket> {
   });
   heldAt = Date.now();
   return held;
-}
-
-/** Who the service says we are, or null when it will not vouch for us. */
-export async function whoAmI(): Promise<string | null> {
-  try {
-    return (await ticket()).account;
-  } catch {
-    return null;
-  }
 }
 
 /** Runs a call, exchanging the ticket once if the service says it is stale. */

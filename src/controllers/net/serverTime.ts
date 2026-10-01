@@ -21,10 +21,6 @@ export function setServerTimeOffset(ms: number): void {
   offsetMs = Number.isFinite(ms) ? ms : 0;
 }
 
-export function getServerTimeOffset(): number {
-  return offsetMs;
-}
-
 /** Epoch milliseconds on the shared clock. */
 export function serverNow(): number {
   return Date.now() + offsetMs;

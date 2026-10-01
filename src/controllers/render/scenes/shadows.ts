@@ -30,7 +30,7 @@ import {
   marginOf,
   type CsmCacheStats,
 } from './csmCache';
-import { CsmBounds, csmBoundsMode, type CsmBoundsStats } from './csmBounds';
+import { CsmBounds, csmBoundsMode } from './csmBounds';
 
 /**
  * The cascaded shadow map on the sun: sole owner of the
@@ -104,10 +104,6 @@ export function csmCacheStats(): CsmCacheStats | null {
 
 /** The casters' box writer, unless `?csmBounds=babylon` left it to Babylon. */
 let bounds: CsmBounds | null = null;
-
-export function csmBoundsStats(): CsmBoundsStats | null {
-  return bounds?.stats() ?? null;
-}
 
 function dropCache(): void {
   cacheTick?.remove();
@@ -714,8 +710,4 @@ export function syncShadows(
   }
 
   invalidate(scene);
-}
-
-export function shadowsActive(): boolean {
-  return runtime !== null && runtime.csm !== null;
 }

@@ -1,5 +1,5 @@
 import type { Item } from '../../ecs/world';
-import { ItemsDatabase, itemBaseName } from '@versions/shared/items/itemsDatabase';
+import { itemBaseName } from '@versions/shared/items/itemsDatabase';
 import { t, type TextKey } from '../../i18n';
 
 /**
@@ -35,7 +35,6 @@ export const CATEGORIES: readonly {
   { id: 'consumables', labelKey: 'marketplace.cat.consumables' },
   { id: 'misc', labelKey: 'marketplace.cat.misc' },
 ];
-
 
 const WING_INDEXES = new Set([0, 1, 2, 3, 4, 5, 6, 36, 37, 38, 39, 40, 41, 42, 43]);
 const PET_INDEXES = new Set([0, 1, 2, 3, 4, 5]);
@@ -76,12 +75,6 @@ export function itemName(item: Item): string {
     itemBaseName(item.group, item.num) ||
     t('quest.itemFallback', { id: item.group * 512 + item.num })
   );
-}
-
-/** Grid footprint, for the card's icon box. */
-export function itemFootprint(item: Item): { x: number; y: number } {
-  const def = ItemsDatabase.getItem(item.group, item.num);
-  return { x: def?.X ?? 1, y: def?.Y ?? 1 };
 }
 
 /**

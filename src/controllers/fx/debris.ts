@@ -90,11 +90,6 @@ type Piece = {
 
 const live = new LiveList();
 
-/** How many pieces are in the air (debug). */
-export function debrisCount(): number {
-  return live.size;
-}
-
 const tmp = new Vector3();
 
 /** cm/tick → tiles/s. */

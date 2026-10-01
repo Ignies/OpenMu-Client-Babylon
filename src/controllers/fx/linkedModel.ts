@@ -48,11 +48,6 @@ export interface LinkedModelHandle extends EffectHandle {
 
 const live = new LiveList();
 
-/** How many linked models are up (debug). */
-export function linkedModelCount(): number {
-  return live.size;
-}
-
 /** The loader basis every model root carries, undone by the bone socket (modelObject.ts DEFAULT_BONE_LINK_ROTATION). */
 const SOCKET = Quaternion.FromEulerAngles(Math.PI * 1.5, 0, 0);
 const UPRIGHT = Quaternion.FromEulerAngles(-Math.PI / 2, 0, 0);

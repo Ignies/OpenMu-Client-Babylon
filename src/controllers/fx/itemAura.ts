@@ -128,11 +128,6 @@ export interface ItemAuraOptions {
 /** Every aura handed out and not yet disposed - so a map change can end them. */
 const liveAuras = new Set<ItemAura>();
 
-/** How many auras are running (debug). */
-export function itemAuraCount(): number {
-  return liveAuras.size;
-}
-
 function tint(tier: ItemVisualTier): Color4 {
   if (tier.intensity > 0) {
     const [r, g, b] = tier.emissive;

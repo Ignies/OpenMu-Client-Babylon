@@ -682,8 +682,6 @@ export class MarketplaceStore {
 
 export const Marketplace = new MarketplaceStore();
 
-export const toggleMarketplaceWindow = () => Marketplace.toggle();
-
 export function formatZen(zen: number): string {
   // Grouping follows the player's language: 1,250,000 in English, 1.250.000
   // in Spanish and German, 1 250 000 in French.

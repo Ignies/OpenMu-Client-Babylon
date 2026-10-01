@@ -100,12 +100,3 @@ const BY_NUMBER = new Map(GM_MAPS.map(map => [map.number, map]));
 export function mapName(number: number): string {
   return BY_NUMBER.get(number)?.name ?? `Map ${number}`;
 }
-
-export function findMaps(query: string): readonly GmMap[] {
-  const needle = query.trim().toLowerCase();
-  if (!needle) return GM_MAPS;
-
-  return GM_MAPS.filter(
-    map => map.name.toLowerCase().includes(needle) || String(map.number) === needle
-  );
-}

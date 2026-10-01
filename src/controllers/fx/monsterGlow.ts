@@ -317,18 +317,6 @@ type LiveGlow = {
 
 const live = new Set<LiveGlow>();
 
-/** How many monsters are glowing (debug). */
-export function monsterGlowCount(): number {
-  return live.size;
-}
-
-/** How many sprites that costs (debug). */
-export function monsterGlowSpriteCount(): number {
-  let n = 0;
-  for (const g of live) n += g.sprites.length;
-  return n;
-}
-
 function skipped(glow: MonsterGlow, bone: number): boolean {
   for (const [from, to] of glow.skip ?? []) if (bone >= from && bone <= to) return true;
   return false;

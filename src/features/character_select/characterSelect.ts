@@ -16,8 +16,6 @@ export const CHARACTER_SLOTS = [
   { x: 8282, y: 19845, angle: 35 },
 ] as const;
 
-export const CHARACTER_HEIGHT = 169.5 / MU_SCALE;
-
 export function characterSlotPosition(slot: number): Vector3 | null {
   const entry = CHARACTER_SLOTS[slot];
   if (!entry) return null;

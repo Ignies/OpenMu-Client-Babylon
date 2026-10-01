@@ -191,22 +191,6 @@ export const TEX = {
   advSmoke: 'Effect/fi01.OZJ',
 } as const;
 
-export type EffectTexture = (typeof TEX)[keyof typeof TEX];
-
-/**
- * The fire family: a card drawn with one of these is a flame, and a flame is
- * light - it takes the map's `keyGain` like the torches do. Every other sheet
- * (a flare, a smoke roll, a spark) is authored art at its authored value.
- */
-export const FIRE_TEXTURES: ReadonlySet<string> = new Set<string>([
-  TEX.fire,
-  TEX.fire2,
-  TEX.fire3,
-  TEX.fire5,
-  TEX.flame,
-  TEX.torch,
-]);
-
 // ---- models (Data/Skill/*.bmd → *.glb) -----------------------------------------
 
 export const MODEL = {
@@ -392,8 +376,6 @@ export const MODEL = {
   neilGround2: 'Skill/nell_nifegrund02.glb',
   neilGround3: 'Skill/nell_nifegrund03.glb',
 } as const;
-
-export type EffectModel = (typeof MODEL)[keyof typeof MODEL];
 
 // ---- palette (linear RGB, the original's `Light[3]` per effect) ---------------
 
@@ -602,19 +584,6 @@ export const ARC_MOTES: ParticleRecipe = {
   spin: 6,
 };
 
-/** Water drops for the tide skills. */
-export const TIDE_DROPS: ParticleRecipe = {
-  texture: TEX.flare,
-  colour: RGBS.tide,
-  colourEnd: RGBS.frost,
-  size: 0.15,
-  life: 0.7,
-  power: 2.2,
-  gravity: -4,
-  dir1: [-1, 0.6, -1],
-  dir2: [1, 1, 1],
-};
-
 /** Holy motes: the elf buffs' warm sparkles drifting up around the body. */
 export const HOLY_MOTES: ParticleRecipe = {
   texture: TEX.shiny,
@@ -716,20 +685,6 @@ export const DUST: ParticleRecipe = {
   blend: 'add',
 };
 
-/** Wind streaks for cyclone/twister skills. */
-export const WIND_STREAKS: ParticleRecipe = {
-  texture: TEX.lines,
-  colour: RGBS.wind,
-  size: 0.5,
-  life: 0.6,
-  power: 2,
-  gravity: 1,
-  dir1: [-1, 0.2, -1],
-  dir2: [1, 0.8, 1],
-  spin: 5,
-  endScale: 0.4,
-};
-
 /**
  * BITMAP_SMOKE sub1, the Poison hit's cloud (ZzzEffectParticle.cpp:1274-1283 init, :5360-5365 move):
  * LT 50, Scale 0.80-1.11 of the 64 px sheet, upright, thrown 40-47 cm a tick and slowed x0.4 a tick
@@ -758,18 +713,6 @@ export const POISON_SMOKE: ParticleRecipe = {
     [1, 0],
   ],
   blend: 'add',
-};
-
-/** BITMAP_LIGHT motes in Nova's charge blue (0.3, 0.3, 1.0), gathering on the body. */
-export const NOVA_MOTES: ParticleRecipe = {
-  texture: TEX.flare,
-  colour: [0.3, 0.3, 1],
-  size: 0.35,
-  life: 0.5,
-  power: 0.4,
-  gravity: 0.5,
-  box: [0.3, 0.6, 0.3],
-  endScale: 0.3,
 };
 
 /** BITMAP_ENERGY (Thunder01) chips: the Lightning cast's hand crackle, Energy Ball's trail. */

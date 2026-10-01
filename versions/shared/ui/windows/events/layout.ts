@@ -214,24 +214,9 @@ export const EVENT_ROW_HEIGHT = 14;
 export const EVENT_ROW_LABEL_WIDTH = 84;
 export const EVENT_ROW_CLOCK_WIDTH = 38;
 
-/**
- * The whole block, from the bottom of the minimap slot to the bottom of the
- * last row, in interface units. Anything else that wants that corner offsets
- * by this.
- */
-export const EVENT_TIMERS_HEIGHT = EVENT_ROW_GAP + 3 * EVENT_ROW_HEIGHT;
-
 /** Counting down: the colour the in-event timer figure draws its lines in. */
 export const EVENT_ROW_COLOR = TIMER_COLOR;
 /** Open: the colour the match notice line uses. */
 export const EVENT_ROW_COLOR_OPEN = COUNTDOWN_COLOR;
 /** Nothing known yet, or the server never answered. */
 export const EVENT_ROW_COLOR_UNKNOWN = 'rgb(150,150,150)';
-
-export const EVENT_SPRITES = [
-  BUTTON_SPRITE,
-  EXIT_SPRITE,
-  TIMER_SPRITE,
-  DG_BUTTON_SPRITE,
-  DG_LINE_SPRITE,
-];

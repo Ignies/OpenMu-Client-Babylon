@@ -18,8 +18,6 @@ import type { CSSProperties } from 'react';
 
 export type MuFontFace = 'normal' | 'bold' | 'big' | 'fix';
 
-export const MU_FONT_FAMILY = 'Tahoma, Verdana, sans-serif';
-
 export const MU_FONT_CLASS: Record<MuFontFace, string> = {
   normal: 'mu-text',
   bold: 'mu-text mu-text-bold',

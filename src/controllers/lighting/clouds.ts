@@ -248,12 +248,6 @@ function cloudNoise(scene: Scene): RawTexture {
   return texture;
 }
 
-export function disposeClouds(): void {
-  noise?.dispose();
-  noise = null;
-  noiseScene = null;
-}
-
 /** True while the option, the tier and the map all want a cloud deck. */
 /**
  * Ultra marches the deck; every other tier draws the flat slab it always has.

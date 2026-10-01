@@ -42,8 +42,3 @@ export function chatTextWidth(text: string): number {
   if (!own) return text.length * FALLBACK_CHAR_WIDTH;
   return own.measureText(text).width;
 }
-
-/** The language changed, so the face the log paints with may have too. */
-export function resetChatTextWidth(): void {
-  context = undefined;
-}

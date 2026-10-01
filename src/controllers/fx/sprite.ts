@@ -134,11 +134,6 @@ export interface SpriteOptions {
 
 const live = new LiveList();
 
-/** How many sprite cards are alive (debug). */
-export function spriteCount(): number {
-  return live.size;
-}
-
 const tmp = new Vector3();
 let seed = 0;
 

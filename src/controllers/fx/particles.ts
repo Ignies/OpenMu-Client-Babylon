@@ -52,11 +52,6 @@ export interface ParticlesOptions {
 
 const live = new LiveList();
 
-/** How many streams are running (debug). */
-export function particleStreamCount(): number {
-  return live.size;
-}
-
 const tmp = new Vector3();
 
 function spawn(scene: Scene, at: Vector3, opts: ParticlesOptions): EffectHandle {

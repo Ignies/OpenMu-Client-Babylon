@@ -15,7 +15,7 @@ import {
 } from '../render/babylon/exports';
 import type { World } from '../../ecs/world';
 import { BMD, BMDReader } from './bmd';
-import { downloadDataBytesBuffer } from './download';
+
 import {
   fetchAsset,
   plainBytes,
@@ -54,23 +54,6 @@ export async function getModel(modelId: number) {
 }
 
 const cache: Partial<Record<string, Promise<BMD>>> = {};
-
-export async function loadBMD(filePath: string): Promise<BMD> {
-  if (cache[filePath]) return cache[filePath];
-
-  const dir = filePath.split('/').slice(0, -1).join('/') + '/';
-
-  cache[filePath] = new Promise(async r => {
-    try {
-      r(reader.read(await downloadDataBytesBuffer(filePath), dir));
-    } catch (error) {
-      console.error(`Error loading BMD from ${filePath}:`, error);
-      throw error;
-    }
-  });
-
-  return cache[filePath];
-}
 
 let skelId = 100;
 
@@ -428,7 +411,6 @@ export async function syncTexturePack(): Promise<void> {
   }
   await Promise.all(all.map(t => applyPackToTexture(t)));
 }
-
 
 export type LoadedModel = {
   mesh: AbstractMesh;

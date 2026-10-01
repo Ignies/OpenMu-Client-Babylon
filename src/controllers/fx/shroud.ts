@@ -64,11 +64,6 @@ export interface ShroudOptions {
 
 const live = new LiveList();
 
-/** How many shrouds are up (debug). */
-export function shroudCount(): number {
-  return live.size;
-}
-
 const tmp = new Vector3();
 let seq = 0;
 

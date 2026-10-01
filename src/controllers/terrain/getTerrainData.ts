@@ -20,7 +20,7 @@ import {
 } from './terrainMaterial';
 import { terrainOverlaysFor } from './terrainOverlay';
 import { createTerrainEdge } from './terrainEdge';
-import { disposeGrassField, installGrassField } from './terrainGrass';
+import { installGrassField } from './terrainGrass';
 import { loadGrassCards } from './terrainGrassCards';
 import {
   createTerrainWaterRuntime,
@@ -47,12 +47,7 @@ import {
   groundTiles,
   refreshGroundTile,
 } from './groundArrays';
-import {
-  SpecialHeight,
-  TERRAIN_SIZE,
-  TERRAIN_SIZE_MASK,
-  TWFlags,
-} from './consts';
+import { TERRAIN_SIZE, TERRAIN_SIZE_MASK, TWFlags } from './consts';
 import {
   initTerrainDynamicLight,
   packBakedTerrainLight,

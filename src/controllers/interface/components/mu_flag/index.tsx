@@ -156,9 +156,6 @@ const SHAPES: Record<FlagRegion, ReactNode> = {
   ),
 };
 
-/** The regions `SHAPES` actually draws - the language list is checked against it. */
-export const SHAPES_REGIONS = Object.keys(SHAPES) as FlagRegion[];
-
 export function MuFlag({
   region,
   width = 20,

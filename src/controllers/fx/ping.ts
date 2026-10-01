@@ -80,11 +80,6 @@ type Live = {
 const live = new LiveList();
 const byOwner = new Map<number, Live>();
 
-/** How many pointers are out (debug). */
-export function pingCount(): number {
-  return byOwner.size;
-}
-
 /** Whether this player already has a pointer out - the gate the gesture is refused by. */
 export function pingLiveFor(ownerId: number): boolean {
   return byOwner.has(ownerId);

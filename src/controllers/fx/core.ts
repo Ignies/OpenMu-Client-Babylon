@@ -1036,8 +1036,6 @@ export function disposePools(): void {
 /* ------------------------------------------------------------------ misc */
 
 export const tmpA = new Vector3();
-export const tmpB = new Vector3();
-export const tmpC = new Vector3();
 
 export function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t;

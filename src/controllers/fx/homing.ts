@@ -86,11 +86,6 @@ interface Batch {
 const live = new LiveList();
 const materials = new Map<string, StandardMaterial>();
 
-/** How many homing showers are running (debug). */
-export function homingCount(): number {
-  return live.size;
-}
-
 const centre = new Vector3();
 const right = new Vector3();
 const up = new Vector3();

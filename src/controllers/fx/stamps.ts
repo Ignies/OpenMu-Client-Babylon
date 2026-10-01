@@ -65,11 +65,6 @@ interface Baked {
 const live = new LiveList();
 const bakes = new WeakMap<Scene, Map<string, Promise<Baked | null>>>();
 
-/** How many trails are up (debug). */
-export function stampsCount(): number {
-  return live.size;
-}
-
 /**
  * The mesh posed by its clip's first key and skinned on the CPU once, in the
  * frame model.ts puts a model in before its node turns it.

@@ -249,11 +249,6 @@ export interface JointOptions {
 
 const live = new LiveList();
 
-/** How many joints are drawn (debug). */
-export function jointCount(): number {
-  return live.size;
-}
-
 const a = new Vector3();
 const b = new Vector3();
 const p = new Vector3();

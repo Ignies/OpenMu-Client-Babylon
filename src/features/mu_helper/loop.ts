@@ -562,9 +562,3 @@ export function updateMuHelperLoop(world: World, dt: number): void {
     else secondsAway = 0;
   }
 }
-
-/** Test/debug seam: drop all runtime state. */
-export function resetMuHelperLoop(): void {
-  resetRuntime();
-  wasActive = false;
-}

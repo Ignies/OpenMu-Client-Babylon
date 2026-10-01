@@ -37,11 +37,6 @@ export interface TailsOptions {
 
 const live = new LiveList();
 
-/** How many strips are drawn (debug). */
-export function tailsCount(): number {
-  return live.size;
-}
-
 function spawn(scene: Scene, _at: Vector3, opts: TailsOptions): EffectHandle {
   const tails = Math.max(2, Math.min(opts.maxTails, opts.points.length));
   const material = additiveMaterial(scene, opts.texture, opts.colour ?? WHITE);

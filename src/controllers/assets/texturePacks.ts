@@ -147,16 +147,6 @@ async function ensureActiveManifest(): Promise<void> {
   activeFor = id;
 }
 
-/** The converter's name for a texture, as Babylon kept it. */
-export function textureLabel(texture: Texture): string | null {
-  const internal = texture.getInternalTexture() as { label?: string } | null;
-  const label = internal?.label;
-  // After a swap the label is whatever URL was loaded; the original is the
-  // one remembered below.
-  const remembered = originals.get(texture);
-  return remembered?.label ?? (label && !label.includes('://') ? label : null);
-}
-
 type Original = {
   url: string;
   buffer: unknown;

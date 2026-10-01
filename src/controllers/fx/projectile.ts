@@ -72,11 +72,6 @@ export interface ProjectileOptions {
 
 const live = new LiveList();
 
-/** How many bolts are in the air (debug). */
-export function projectileCount(): number {
-  return live.size;
-}
-
 const target = new Vector3();
 const dir = new Vector3();
 const moved = new Vector3();

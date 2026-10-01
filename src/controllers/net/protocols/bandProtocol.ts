@@ -34,7 +34,6 @@ export const StopReason = {
   Order: 2,
   Gone: 3,
 } as const;
-export type StopReasonCode = (typeof StopReason)[keyof typeof StopReason];
 
 export const RefuseCause = {
   Cooldown: 1,
@@ -45,7 +44,6 @@ export const RefuseCause = {
   NotPerforming: 6,
   Rate: 7,
 } as const;
-export type RefuseCauseCode = (typeof RefuseCause)[keyof typeof RefuseCause];
 
 /** What the refusal was about: `what` in a refused frame. */
 export const RefuseWhat = { Start: 1, Join: 2 } as const;

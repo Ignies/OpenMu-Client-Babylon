@@ -31,7 +31,6 @@ const OZJ_HEADER_SIZE = 24;
 
 const FLARE_SIZE_PX = 64;
 
-
 const MAX_SPRITES_PER_MANAGER = 512;
 
 export type FlareSpec = {
@@ -114,14 +113,6 @@ async function getManager(scene: Scene): Promise<SpriteManager | null> {
   })();
 
   return pending;
-}
-
-export function disposeEffectLights(): void {
-  manager?.dispose();
-  manager = null;
-  managerScene = null;
-  pending = null;
-  repaints.clear();
 }
 
 export type EffectLight = {

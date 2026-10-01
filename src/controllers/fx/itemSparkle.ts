@@ -50,11 +50,6 @@ export interface ItemSparkleOptions {
 
 const live = new LiveList();
 
-/** How many sparkles are ticking (debug). */
-export function itemSparkleCount(): number {
-  return live.size;
-}
-
 const tmp = new Vector3();
 
 function spawn(scene: Scene, at: Vector3, opts: ItemSparkleOptions): EffectHandle {

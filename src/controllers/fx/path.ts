@@ -75,11 +75,6 @@ export interface PathAxes {
 
 const live = new LiveList();
 
-/** How many paths are drawn (debug). */
-export function pathCount(): number {
-  return live.size;
-}
-
 const X = new Vector3(1, 0, 0);
 const Y = new Vector3(0, 1, 0);
 

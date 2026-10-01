@@ -73,11 +73,6 @@ export function attackInFlight(): boolean {
   return attackTicks > 0;
 }
 
-/** The current swing's blow has landed (hit request sent). */
-export function attackHitLanded(): boolean {
-  return attackTicks > 0 && onHit === null;
-}
-
 /**
  * `CheckAttackTime(n)`: true once per swing, on the frame the counter sits
  * on tick `n`. Mark it consumed with `setLastAttackEffectTime()` like the

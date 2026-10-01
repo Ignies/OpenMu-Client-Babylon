@@ -63,7 +63,6 @@ const MSG_INVENTORY_FULL: TextKey = 'quest.inventoryFull';
 
 /** `RewardTypeEnum.Random`: the "one of these" reward group. */
 
-
 // ---- 2. state + readers ----------------------------------------------------
 
 /** `(group << 16) | number`, the original's `dwQuestIndex` (WSclient.cpp:10577), unsigned like the file's keys. */
@@ -856,11 +855,6 @@ EventBus.on('CharacterInformation', () => {
   }
   requestActiveQuests();
 });
-
-/** Used by the facade when the inventory is full on completion (`GlobalText[375]`). */
-export function questInventoryFullMessage(): string {
-  return t(MSG_INVENTORY_FULL);
-}
 
 function reset(): void {
   runInAction(() => {

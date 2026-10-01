@@ -89,11 +89,6 @@ const followTmp = new Vector3();
 const pools = new Map<string, TerrainDecal[]>();
 let seq = 0;
 
-/** How many rings are drawn (debug). */
-export function ringCount(): number {
-  return live.size;
-}
-
 function acquire(texture: string, blend: 'additive' | 'alpha' | 'subtract', maxScale = MAX_SCALE): TerrainDecal | null {
   const world = Store.world;
   if (!world) return null;

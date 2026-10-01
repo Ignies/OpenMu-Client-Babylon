@@ -1,14 +1,4 @@
-import {
-  Engine,
-  Scene,
-  type Node,
-  Animation,
-  Color3,
-  Vector3,
-  Matrix,
-  Quaternion,
-  type Viewport,
-} from './exports';
+import { Engine, Scene, type Node, Vector3, Matrix } from './exports';
 import { devQuery } from '@/core/devSeams';
 import { installBitmapDecode } from './bitmapDecode';
 
@@ -226,38 +216,3 @@ export const transformCoordinatesWithClippingToRef = (
 };
 
 const TmpMatrix = Matrix.Identity();
-
-export function projectWorldPositionToScreenRef(
-  scene: Scene,
-  pos: Vector3,
-  viewport: Viewport,
-  ref: Vector3
-) {
-  const projMatrix = scene.getTransformMatrix();
-  const projected = transformCoordinatesWithClippingToRef(pos, projMatrix, ref);
-  const viewportMatrix = TmpMatrix;
-
-  Matrix.FromValuesToRef(
-    viewport.width / 2.0,
-    0,
-    0,
-    0,
-    0,
-    -viewport.height / 2.0,
-    0,
-    0,
-    0,
-    0,
-    0.5,
-    0,
-    viewport.x + viewport.width / 2.0,
-    viewport.height / 2.0 + viewport.y,
-    0.5,
-    1,
-    viewportMatrix
-  );
-
-  Vector3.TransformCoordinatesToRef(projected, viewportMatrix, ref);
-
-  return ref;
-}

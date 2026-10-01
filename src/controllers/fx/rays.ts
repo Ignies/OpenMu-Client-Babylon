@@ -49,11 +49,6 @@ export interface RaysOptions {
 
 const live = new LiveList();
 
-/** How many bursts are running (debug). */
-export function raysCount(): number {
-  return live.size;
-}
-
 function spawn(scene: Scene, at: Vector3, opts: RaysOptions): EffectHandle {
   const rays = opts.rays;
   const n = rays.length;

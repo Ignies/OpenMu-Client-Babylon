@@ -215,14 +215,3 @@ export enum PlayerClass {
   AlchemicForce = 315,
   Creator = 415,
 }
-
-export function IsCharacterFemale(cls: PlayerClass): boolean {
-  return (
-    cls === PlayerClass.FairyElf ||
-    cls === PlayerClass.MuseElf ||
-    cls === PlayerClass.HighElf ||
-    cls === PlayerClass.Summoner ||
-    cls === PlayerClass.BloodySummoner ||
-    cls === PlayerClass.DimensionMaster
-  );
-}

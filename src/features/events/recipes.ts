@@ -1,7 +1,7 @@
 import { textTable, type TextKey } from '../../i18n';
 import { isMasterClass } from '../hero/characterStats';
 export { isMasterClass };
-import { CharacterClassNumber } from '../../core/types';
+
 
 /**
  * Pure data shared by the event entries: the original's `GlobalText` lines

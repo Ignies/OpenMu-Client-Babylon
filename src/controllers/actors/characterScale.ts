@@ -23,7 +23,3 @@ export function classWorldScale(cls: CharacterClassNumber): number {
       return 1.03;
   }
 }
-
-export function classSelectSceneScale(cls: CharacterClassNumber): number {
-  return getBaseClass(cls) === BaseClass.RageFighter ? 1.35 : 1.2;
-}

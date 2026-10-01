@@ -66,11 +66,6 @@ export interface BlurOptions {
 
 const live = new LiveList();
 
-/** How many trails are drawn (debug). */
-export function blurCount(): number {
-  return live.size;
-}
-
 const tip = new Vector3();
 const hilt = new Vector3();
 

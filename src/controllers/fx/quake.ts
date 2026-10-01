@@ -38,11 +38,6 @@ let pitch = 0;
 let applied = 0;
 const hooked = new WeakSet<Scene>();
 
-/** How many quakes are shaking (debug). */
-export function quakeCount(): number {
-  return live.size;
-}
-
 type Orbit = Camera & { beta?: number };
 
 function hook(scene: Scene): void {

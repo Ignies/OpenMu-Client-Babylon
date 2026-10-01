@@ -137,16 +137,6 @@ export function legacyQuestState(index: number): number {
   return state.states[index] ?? LegacyQuestState.None;
 }
 
-/** Every state, for the quest log tab. */
-export function legacyQuestStates(): readonly number[] {
-  return state.states;
-}
-
-/** `m_byCurrState` after the last check, including the dialog-only values. */
-export function legacyQuestDialogState(): number {
-  return state.dialogState;
-}
-
 /** The NPC's lines of the current page. */
 export function legacyQuestLines(): readonly string[] {
   return state.lines;
@@ -656,11 +646,6 @@ export function legacyQuestForNpc(npcType: number): QuestDefinition | undefined 
     mine.find(q => legacyQuestState(q.index) !== LegacyQuestState.Finished) ??
     mine[mine.length - 1]
   );
-}
-
-/** `Hero->byExtensionSkill`: the combo is unlocked by finishing `QUEST_COMBO`. */
-export function comboUnlocked(): boolean {
-  return legacyQuestState(QUEST_COMBO) === LegacyQuestState.Finished;
 }
 
 // ---- packet handlers (ReceiveQuestHistory / State / Result / Prize) -------

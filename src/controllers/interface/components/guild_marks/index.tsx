@@ -1,8 +1,8 @@
 import './style.less';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import type { With } from 'miniplex';
 import { Store } from '@/app/store';
-import { useRenderId } from '@/controllers/interface/hooks';
+
 import { onScreenPosition } from '@/controllers/interface/screenPositionBus';
 import type { Entity } from '@/ecs/world';
 import { guildMarkDataUrl, isEmptyGuildMark } from '@/features/social/guildMark';
@@ -63,30 +63,3 @@ function keyOf(entity: Entity): number {
   }
   return id;
 }
-
-export const GuildMarks = () => {
-  const world = Store.world!;
-  const { refresh } = useRenderId();
-  const query = useMemo(() => world.with('guild', 'screenPosition'), [world]);
-
-  useEffect(() => {
-    const a = query.onEntityAdded.subscribe(refresh);
-    const b = query.onEntityRemoved.subscribe(refresh);
-    // GuildInformation can arrive after the member did; re-check every so
-    // often so a mark that had no logo yet shows up.
-    const id = window.setInterval(refresh, 2000);
-    return () => {
-      a();
-      b();
-      window.clearInterval(id);
-    };
-  }, [query]);
-
-  return (
-    <div className="guild-marks">
-      {query.entities.map(entity => (
-        <GuildMark key={keyOf(entity)} entity={entity as MarkEntity} />
-      ))}
-    </div>
-  );
-};

@@ -47,13 +47,6 @@ export function hasItemIconFile(
   return (mask & (1 << (tintIndex + VARIANT_BIT[variant]))) !== 0;
 }
 
-/** URL of the file the item asks for, whether or not it exists. */
-export function itemIconPackUrl({ group, num, lvl, isExcellent }: Item): string {
-  const look = itemLevelLook(group, num, lvl);
-  if (look) return `/items/${look.icon}.png`;
-  return packUrl(group, num, itemIconTint(lvl ?? 0), isExcellent ? '_e' : '');
-}
-
 /**
  * The files to try for this item, best first, restricted to the ones that
  * exist: the exact tint and variant, then the tint dropped, then the

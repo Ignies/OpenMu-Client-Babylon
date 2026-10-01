@@ -160,7 +160,6 @@ export const FOOTPRINT_TUNING = {
   tint: [0.62, 0.66, 0.76] as [number, number, number],
 };
 
-
 /** Texture resolution of one sole. Enough to resolve the rim. */
 const TEX = 96;
 
@@ -276,7 +275,6 @@ function quadWidth(shape: TrackShape = 'boot'): number {
 function quadLength(): number {
   return FOOTPRINT_TUNING.length / SOLE_FILL;
 }
-
 
 /**
  * `drag` is the shallow trough between two footfalls, where the boot swings
@@ -912,22 +910,6 @@ function writeVariant(
       data[o + 3] = Math.round(Math.min(1, coverage[i]) * 255);
     }
   }
-}
-
-/** Atlas dimensions, for tests reading `buildSole`. */
-export const soleAtlasSize = (kind: PrintKind): [number, number] => [
-  atlasWidth(),
-  atlasHeight(kind),
-];
-
-/** Side of one sole within the atlas, and how the grid is laid out. */
-export const SOLE_TILE = TEX;
-export const SOLE_VARIANTS = VARIANTS;
-export const SOLE_SHAPES = DRAWN_SHAPES;
-
-/** Peak strength a print of this kind is applied at, before its fade. */
-export function solePeak(kind: PrintKind): number {
-  return PEAK[kind];
 }
 
 /** Colour a print of this kind is tinted toward at full depth. */
@@ -1754,55 +1736,6 @@ export function addFootprint(scene: Scene, spec: FootprintSpec): void {
  */
 const DRAG_WIDTH = 0.3;
 
-/**
- * Join two footfalls with a shallow trough.
- *
- * This is the difference between a row of separate holes and a trail: in snow
- * deep enough to sink into, the boot does not clear the surface between steps,
- * it ploughs through it. Called from the same stride that lays the print, with
- * the previous footfall's position.
- *
- * Length is the gap plus a little, so each end runs under the print it joins
- * instead of stopping short of it and leaving a visible seam.
- */
-export function addDragMark(
-  scene: Scene,
-  fromX: number,
-  fromZ: number,
-  toX: number,
-  toZ: number,
-  y: number,
-  strength: number,
-  up: { x: number; y: number; z: number } = UP,
-  width: number = DRAG_WIDTH
-): void {
-  if (strength <= 0 || width <= 0) return;
-
-  const dx = toX - fromX;
-  const dz = toZ - fromZ;
-  const gap = Math.hypot(dx, dz);
-
-  if (gap < 1e-3) return;
-
-  ensureShape(atlasFor(scene, 'drag'), 'drag', 'boot');
-
-  place(
-    ensurePool(scene, 'drag', 'hero'),
-    'drag',
-    'boot',
-    (fromX + toX) * 0.5,
-    y,
-    (fromZ + toZ) * 0.5,
-    Math.atan2(dx, dz),
-    width,
-    // Well over the gap, so every piece runs deep into both neighbours and
-    // the end tapers cross-fade rather than meeting.
-    gap * 1.7,
-    strength,
-    up
-  );
-}
-
 /** Ages every print and pushes the instance buffers. Call once a frame. */
 export function updateFootprints(dt: number): void {
   // The post-processing toggle moves the buffer between linear and display
@@ -1923,15 +1856,6 @@ if (typeof window !== 'undefined') {
       return { ...FOOTPRINT_TUNING };
     },
   };
-}
-
-/** Live print count across every pool. For tests. */
-export function footprintCount(): number {
-  let n = 0;
-  for (const pool of pools.values()) {
-    for (const print of pool.prints) if (print.age >= 0) n++;
-  }
-  return n;
 }
 
 /**

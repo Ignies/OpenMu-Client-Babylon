@@ -90,11 +90,6 @@ type Feather = {
 
 const live = new LiveList();
 
-/** How many feathers are in the air (debug). */
-export function feathersCount(): number {
-  return live.size;
-}
-
 function spawn(scene: Scene, at: Vector3, opts: FeathersOptions): EffectHandle {
   const world = Store.world;
   const count = opts.count ?? 1;

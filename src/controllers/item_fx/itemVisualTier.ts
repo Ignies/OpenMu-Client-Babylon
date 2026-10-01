@@ -251,13 +251,6 @@ export function strongestTierOf(
   return { tier: best, index };
 }
 
-/** The strongest tier across a set of equipped items (drives the body light). */
-export function strongestTier(
-  items: readonly (Item | null | undefined)[]
-): ItemVisualTier {
-  return strongestTierOf(items).tier;
-}
-
 // --- shared clock -----------------------------------------------------------
 
 let clock = 0;

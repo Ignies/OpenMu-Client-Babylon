@@ -26,8 +26,6 @@ export type ItemPreset = { id: string; name: string; spec: ItemSpec };
 /** Where a macro or a pinned line runs, and who it runs for. */
 export type MacroVars = { x: number; y: number; map: number; me: string; target: string };
 
-export const MACRO_TOKENS = ['{x}', '{y}', '{map}', '{me}', '{target}'] as const;
-
 /** The longest wait a step may ask for, ms. */
 export const MAX_DELAY_MS = 10 * 60 * 1000;
 

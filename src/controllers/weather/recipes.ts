@@ -302,13 +302,6 @@ const MODEL_TRACKS: Readonly<Record<number, TrackName>> = {
   105: 'beast', // Hell Maine
 };
 
-// ---- 2. state + readers ----------------------------------------------------
-
-/** The recipe by name. */
-export function trackNamed(name: TrackName): TrackRecipe {
-  return TRACKS[name];
-}
-
 /**
  * What this character leaves behind.
  *

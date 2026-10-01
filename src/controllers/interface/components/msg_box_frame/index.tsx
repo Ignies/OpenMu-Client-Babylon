@@ -17,13 +17,6 @@ export const MSGBOX_TOP_SPRITE = 'newui_msgbox_top.OZT';
 export const MSGBOX_MIDDLE_SPRITE = 'newui_msgbox_middle.OZT';
 export const MSGBOX_BOTTOM_SPRITE = 'newui_msgbox_bottom.OZT';
 
-export const MSGBOX_SPRITES = [
-  MSGBOX_BACK_SPRITE,
-  MSGBOX_TOP_SPRITE,
-  MSGBOX_MIDDLE_SPRITE,
-  MSGBOX_BOTTOM_SPRITE,
-];
-
 // `MSGBOX_WIDTH`, `MSGBOX_TOP_HEIGHT`, `MSGBOX_MIDDLE_HEIGHT`,
 // `MSGBOX_BOTTOM_HEIGHT` (NewUICommonMessageBox.h:30).
 export const MSGBOX_WIDTH = 230;

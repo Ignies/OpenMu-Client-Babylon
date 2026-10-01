@@ -61,11 +61,6 @@ export interface ColumnOptions {
 
 const live = new LiveList();
 
-/** How many columns are burning (debug). */
-export function columnCount(): number {
-  return live.size;
-}
-
 function recipeFor(opts: ColumnOptions): ParticleRecipe {
   if (opts.recipe) return opts.recipe;
   const r = opts.radius ?? DEFAULT_RADIUS;

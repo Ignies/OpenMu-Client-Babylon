@@ -136,11 +136,6 @@ export interface ItemCrackleOptions {
 /** Every crackle handed out and not yet disposed - so a map change can end them. */
 const liveCrackles = new Set<ItemCrackle>();
 
-/** How many crackles are running (debug). */
-export function itemCrackleCount(): number {
-  return liveCrackles.size;
-}
-
 const rand = (a: number, b: number) => a + Math.random() * (b - a);
 const mix = (a: number, b: number, t: number) => a + (b - a) * t;
 

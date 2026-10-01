@@ -126,11 +126,6 @@ const p0 = new Vector3();
 const p1 = new Vector3();
 const span = new Vector3();
 
-/** How many notes are flowing (debug). */
-export function bandNoteCount(): number {
-  return live.size;
-}
-
 /** Twelve hues around the octave, C red: the same pitch class is always the same colour. */
 export function pitchColour(pitch: number): RGB {
   const h = ((((pitch % 12) + 12) % 12) / 12) * 6;

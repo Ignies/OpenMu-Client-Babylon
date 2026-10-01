@@ -76,11 +76,6 @@ export function emitScreenPositionFrameEnd(): void {
   for (const listener of frameEndListeners) listener();
 }
 
-/** True when anything is listening - lets the producer skip the projection. */
-export function hasScreenPositionListener(entity: Entity): boolean {
-  return listeners.has(entity) || anyListeners.size > 0;
-}
-
 export function emitScreenPosition(
   entity: Entity,
   screenPosition: IVector2Like

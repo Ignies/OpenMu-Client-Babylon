@@ -35,11 +35,6 @@ export interface WeaponHideOptions {
 
 const live = new LiveList();
 
-/** How many hides are running (debug). */
-export function weaponHideCount(): number {
-  return live.size;
-}
-
 function weaponPart(e: Entity): ModelObject | null {
   return (e.modelObject as { Weapon1?: ModelObject } | undefined)?.Weapon1 ?? null;
 }

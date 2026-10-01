@@ -91,10 +91,6 @@ export function npcDialogueOpen(): boolean {
   return state.open;
 }
 
-export function npcDialogueNpcNumber(): number {
-  return state.npcNumber;
-}
-
 /** `g_QuestMng.GetNPCName()`. */
 export function npcDialogueNpcName(): string {
   return monsterDisplayName(state.npcNumber, `NPC ${state.npcNumber}`);
@@ -110,10 +106,6 @@ export function npcDialogueAnswers(): readonly NpcDialogueAnswer[] {
 
 export function npcDialogueBusy(): boolean {
   return state.busy;
-}
-
-export function npcDialogueQuestListMode(): boolean {
-  return state.questListMode;
 }
 
 /** Gens contribution to draw under the name; null unless a steward. */

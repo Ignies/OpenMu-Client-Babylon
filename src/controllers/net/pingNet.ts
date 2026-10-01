@@ -34,11 +34,6 @@ let installed = false;
 let available = false;
 let helloSocket: WebSocket | null = null;
 
-/** Whether the proxy on this connection relays pings at all. */
-export function pingAvailable(): boolean {
-  return available;
-}
-
 function targetOf(point: PingPoint): Vector3 | null {
   const world = Store.world;
   if (!world) return null;

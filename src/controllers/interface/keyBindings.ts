@@ -201,16 +201,6 @@ export function setKeyProfile(name: string): void {
   for (const listener of listeners) listener(KeyBindings);
 }
 
-/** The character whose bindings are live, '' for the shared set. */
-export function keyProfile(): string {
-  return profile;
-}
-
-/** The code bound to `action`. */
-export function keyFor(action: KeyAction): string {
-  return KeyBindings[action];
-}
-
 /** Whether `code` is the key bound to `action`. */
 export function isKey(action: KeyAction, code: string): boolean {
   return code !== '' && KeyBindings[action] === code;
@@ -248,11 +238,6 @@ export function setKeyBinding(action: KeyAction, code: string): boolean {
 export function resetKeyBindings(): void {
   runInAction(() => Object.assign(KeyBindings, DEFAULTS));
   save();
-}
-
-export function onKeyBindingsChanged(listener: Listener): () => void {
-  listeners.add(listener);
-  return () => listeners.delete(listener);
 }
 
 /**

@@ -535,11 +535,6 @@ let currentMap: ENUM_WORLD = ENUM_WORLD.WD_0LORENCIA;
 
 const live = new LiveList();
 
-/** How many monsters are drawing their effects (debug). */
-export function monsterVisualCount(): number {
-  return live.size;
-}
-
 const tmp = new Vector3();
 const tmpLocal = new Vector3();
 

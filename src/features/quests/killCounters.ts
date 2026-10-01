@@ -50,11 +50,6 @@ export function legacyKillCount(monsterType: number): number {
   return legacyServerKillCount(monsterType) + (state.local.get(monsterType) ?? 0);
 }
 
-/** The five slots, for the window. */
-export function legacyKillSlots(): readonly KillSlot[] {
-  return state.slots;
-}
-
 /** Drop the mirror: the server only counts kills for a running quest. */
 export function clearLocalKills(): void {
   runInAction(() => state.local.clear());

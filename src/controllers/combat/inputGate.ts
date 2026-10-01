@@ -41,11 +41,6 @@ export function consumeInputGate(): void {
   sinceConsumed = 0;
 }
 
-/** Command: `MouseUpdateTime = MouseUpdateTimeMax` - a swing fired, poll again next frame. */
-export function forceInputGate(): void {
-  sinceConsumed = MOUSE_UPDATE_SECONDS_MAX;
-}
-
 function update(_map: ENUM_WORLD, dt: number): void {
   if (sinceConsumed < MOUSE_UPDATE_SECONDS_MAX) sinceConsumed += dt;
 }

@@ -290,11 +290,6 @@ const wanted = new Set<Sounds>();
 /** `performance.now()` of each timed one-shot's last play; kept across maps. */
 const timedAt = new Map<Sounds, number>();
 
-/** The beds sounding right now (after the tile / weather gates). */
-export function ambientBedsPlaying(): ReadonlySet<Sounds> {
-  return playing;
-}
-
 function update(map: ENUM_WORLD, dt: number): void {
   const world = listenerWorld();
   if (!SoundsManager.pageInteracted || !world?.terrain) return;

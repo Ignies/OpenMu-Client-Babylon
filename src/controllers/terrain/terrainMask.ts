@@ -116,13 +116,3 @@ export function isTileOpen(x: number, z: number): boolean {
 
   return b[TERRAIN_INDEX(xi, zi)] !== 0;
 }
-
-/** Share of the map currently marked roofed - a one-line sanity check. */
-export function roofedTileCount(): number {
-  const b = ensureBytes();
-  let n = 0;
-  for (let i = 0; i < TERRAIN_SIZE * TERRAIN_SIZE; i++) {
-    if (b[i] === 0) n++;
-  }
-  return n;
-}

@@ -406,11 +406,6 @@ interface Part {
 
 const live = new LiveList();
 
-/** How many auras are up (debug). */
-export function auraCount(): number {
-  return live.size;
-}
-
 const tmp = new Vector3();
 let seed = 0;
 

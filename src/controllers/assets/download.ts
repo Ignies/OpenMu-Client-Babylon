@@ -37,7 +37,6 @@ export {
 //   return oldValue;
 // }
 
-
 export async function downloadBytesBuffer(url: string) {
   // Takes the build's gzip sidecar when there is one and falls back to the
   // plain file otherwise; the missing-file guard lives there too
@@ -158,28 +157,5 @@ export function toRadians(angle: number) {
 
 type Bitmask = number;
 
-export const createBinaryMask = (...flags: number[]) =>
-  flags.reduce((mask, flag) => mask | flag, 0);
-
 export const isFlagInBinaryMask = (mask: Bitmask, flag: number) =>
   (mask & flag) === flag;
-
-export const isMasksIntersect = (maskA: Bitmask, maskB: Bitmask) =>
-  (maskA & maskB) !== 0;
-
-export const addFlagToMask = (mask: Bitmask, flag: number) => mask | flag;
-
-export const removeFlagFromMask = (mask: Bitmask, flag: number) =>
-  mask - (mask & flag);
-
-export const toggleFlagInMask = (mask: Bitmask, flag: number) => mask ^ flag;
-
-export const mapNumber = (
-  value: number,
-  min: number,
-  max: number,
-  minOut: number,
-  maxOut: number
-) => {
-  return ((value - min) / (max - min)) * (maxOut - minOut) + minOut;
-};

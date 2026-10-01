@@ -134,11 +134,6 @@ export interface TickedOptions {
 
 const live = new LiveList();
 
-/** How many ticked effects are running (debug). */
-export function tickedCount(): number {
-  return live.size;
-}
-
 /** Batch meshes waiting for reuse, by texture, tint, length, faces and batch size. */
 const pools = new Map<Scene, Map<string, Batch[]>>();
 

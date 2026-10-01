@@ -17,10 +17,3 @@ export const SLOT_SCALE = 1.6;
 
 /** The five main-frame buttons (30x41) at 42x57. */
 export const MENU_SCALE = 1.4;
-
-/** The bottom bar is 51 px tall and unscaled; the pad clears it. */
-export const BAR_CLEARANCE = 63;
-
-/** Gap from the viewport edge, and between buttons. */
-export const EDGE_GAP = 12;
-export const BUTTON_GAP = 8;

@@ -266,11 +266,6 @@ export interface ModelHandle extends EffectHandle {
 
 const live = new LiveList();
 
-/** How many model effects are up (debug). */
-export function modelCount(): number {
-  return live.size;
-}
-
 /** Live `scrollU` / `uvScroll` spawns per shared GLB sheet. */
 const scrollUsers = new Map<Texture, number>();
 const tmp = new Vector3();

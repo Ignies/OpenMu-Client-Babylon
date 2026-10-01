@@ -52,9 +52,6 @@ const IDLE_ALTAR = 2;
 /** `TotDelay` at 25 fps: how long the success/failure banner stays. */
 const RESULT_SECONDS = 16;
 
-/** `GlobalText[1948]` cap: the dark elf line reads (n/12). */
-export const DARK_ELF_MAX = 12;
-
 /** `GetTimeCheck(10000)`: seconds each ready-state notice page stays. */
 const NOTICE_PAGE_SECONDS = 10;
 const NOTICE_PAGES = 4;
@@ -120,10 +117,6 @@ export function crywolfResult(): boolean | null {
 /** `RenderNoticesCryWolf`: which four-line notice page is up (READY only). */
 export function crywolfNoticePage(): number {
   return state.noticePage;
-}
-
-export function inCrywolf(map: ENUM_WORLD): boolean {
-  return MAPS.has(map);
 }
 
 /** `SendCrywolfContractRequest`: talk to the wolf statue during READY. */

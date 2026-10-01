@@ -116,11 +116,6 @@ export interface SpiritSwarmOptions {
 
 const live = new LiveList();
 
-/** How many swarms are up (debug). */
-export function spiritSwarmCount(): number {
-  return live.size;
-}
-
 function taper(s: number, shape: TaperShape): number {
   const noseWidth = shape.nose ?? NOSE_WIDTH;
   const span = shape.span ?? NOSE_SPAN;

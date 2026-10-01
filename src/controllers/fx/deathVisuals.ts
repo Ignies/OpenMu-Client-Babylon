@@ -1,7 +1,7 @@
 import type { Scene, Vector3 } from '../render/babylon/exports';
 import { effects } from '.';
 import type { RGB } from './core';
-import { BOMB_SPARKS, EXPLOSION_CELLS, FIRE_PUFF, MODEL, SMOKE, TEX } from './recipes';
+import { BOMB_SPARKS, EXPLOSION_CELLS, MODEL, SMOKE, TEX } from './recipes';
 import type { Sounds } from '../sound/soundsManager';
 
 /**
@@ -135,16 +135,6 @@ const SPECIAL_DEATHS: Readonly<Record<number, ShatterDeath>> = {
 /** The shatter this monster model dies with, or undefined for the Die clip. */
 export function shatterDeathFor(monsterModelType: number): ShatterDeath | undefined {
   return SPECIAL_DEATHS[monsterModelType];
-}
-
-/**
- * Small stone chips (MODEL_STONE1/2, `SubType 0`) with their fire puffs
- * (ZzzEffect.cpp:11019-11022) - what a breaking prop or a stone skill throws.
- * Exposed for the next consumer; no death uses it.
- */
-export function spawnStoneChips(scene: Scene, at: Vector3, count: number, light: RGB): void {
-  effects.spawn('debris', scene, at, { model: MODEL.stone, count: Math.ceil(count / 2), colour: light, puff: FIRE_PUFF });
-  effects.spawn('debris', scene, at, { model: MODEL.stone2, count: Math.floor(count / 2), colour: light, puff: FIRE_PUFF });
 }
 
 /** `CreateBomb(pos, true)` (ZzzEffect.cpp:6394-6466, SubType 0): 20 sparks + one grey explosion card. */

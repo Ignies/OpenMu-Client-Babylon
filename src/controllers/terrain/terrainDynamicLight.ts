@@ -99,20 +99,6 @@ export function initTerrainDynamicLight(liftedBaked: Float32Array): void {
   touchedVersion++;
 }
 
-export function disposeTerrainDynamicLight(): void {
-  baked = null;
-  primary = null;
-  floor = null;
-  bodyLift = null;
-  deltaBytes = null;
-  emitters.clear();
-  emitterTiles.clear();
-  touched = null;
-  touchedDirty = true;
-  touchedMask.fill(0);
-  touchedVersion++;
-}
-
 let deltaTexture: RawTexture | null = null;
 
 export function getTerrainLightTexture(scene: Scene): RawTexture {

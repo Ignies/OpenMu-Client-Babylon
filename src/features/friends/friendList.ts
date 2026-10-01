@@ -10,8 +10,6 @@
 export const MAX_FRIENDS = 50;
 /** `Server` 0xFF means the friend is offline (OpenMU FriendOnlineStateUpdate). */
 export const FRIEND_OFFLINE = 0xff;
-/** `MAX_ID_SIZE`: the name fields are ten bytes. */
-export const MAX_FRIEND_NAME = 10;
 /** `Title` of LetterSendRequest is 60 bytes; `Subject` comes back in 32. */
 export const MAX_LETTER_TITLE = 32;
 /** `MAX_LETTER_TEXT`: the body the original's edit box accepts. */

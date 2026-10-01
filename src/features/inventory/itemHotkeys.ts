@@ -16,7 +16,6 @@ export const HOTKEY_COUNT = 4;
 export const HOTKEY_Q = 0;
 export const HOTKEY_W = 1;
 export const HOTKEY_E = 2;
-export const HOTKEY_R = 3;
 
 /** The four key codes, in slot order. Ctrl + one of them binds that slot. */
 export const ITEM_HOTKEY_CODES: readonly string[] = ['KeyQ', 'KeyW', 'KeyE', 'KeyR'];

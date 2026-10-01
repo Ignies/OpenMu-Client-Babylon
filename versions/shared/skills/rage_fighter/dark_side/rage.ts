@@ -55,11 +55,6 @@ export function isDarkSide(skill: number): boolean {
   return skill === SKILL_DARK_SIDE;
 }
 
-/** A Dark Side cast is waiting for or working through its targets. */
-export function darkSideActive(): boolean {
-  return darkSideSkill !== 0;
-}
-
 /** Hits landed in the running Rage Fighter streak, 0 outside one. */
 export function rageStreak(): number {
   return streakHits;

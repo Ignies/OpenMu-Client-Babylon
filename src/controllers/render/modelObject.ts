@@ -1,20 +1,5 @@
 import { assetWorldNum } from '../assets/worldAssets';
-import {
-  Matrix,
-  Quaternion,
-  Vector3,
-  BoundingBox,
-  BoundingInfo,
-  Mesh,
-  type StandardMaterial,
-  TransformNode,
-  type Scene,
-  AbstractMesh,
-  Skeleton,
-  AnimationGroup,
-  CreateBox,
-  type Plane,
-} from './babylon/exports';
+import { Matrix, Quaternion, Vector3, BoundingBox, BoundingInfo, Mesh, type StandardMaterial, TransformNode, type Scene, AbstractMesh, Skeleton, AnimationGroup, type Plane } from './babylon/exports';
 import type { IVector3Like } from './babylon/exports';
 import { PLAY_SPEED_TO_RATIO } from '../anim/playSpeed';
 

@@ -67,10 +67,6 @@ export function getUiViewport(): UiViewport {
   return viewport;
 }
 
-export function getUiStageScale(): number {
-  return getUiViewport().scale;
-}
-
 /** Called after every change of the stage's size; returns the unsubscribe. */
 export function onUiViewportChanged(listener: Listener): () => void {
   watch();

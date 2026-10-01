@@ -93,11 +93,6 @@ export interface SummonBody {
 
 const live = new LiveList();
 
-/** How many summon effects are up (debug). */
-export function summonCount(): number {
-  return live.size;
-}
-
 /** One U-scrolled clone per GLB texture, shared by every spawn that scrolls it; the offset is written once a frame. */
 const scrolled = new Map<Texture, { tex: Texture; rate: number }>();
 
