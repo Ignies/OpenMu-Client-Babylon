@@ -24,7 +24,8 @@ import { playSkill } from '@/controllers/sound';
 import { setBuffVisual } from '@versions/shared/skills/skillVisuals';
 import { skillClip } from '@/controllers/combat/skillClips';
 import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
-import { summonDisplayName } from '@/app/logic';
+import { EventBus } from '@/core/eventBus';
+import type { Events } from '@/core/eventBus/events';
 
 /** MoveSpeed 10 x REFERENCE_FPS 25 / 100 units per tile (ZzzCharacter.cpp:11530). */
 const MONSTER_WALK_TILES_PER_SECOND = 2.5;
@@ -355,4 +356,26 @@ export function applyObjectEffect(obj: Parameters<typeof setBuffVisual>[1], effe
   else obj.buffs!.delete(effectId);
   // The persistent look of the buff (the Greater Defense knot, the Swell Life motes) - effects layer consumer.
   setBuffVisual(world.scene, obj, effectId, active);
+}
+
+/**
+ * ReceiveCreateSummonViewport (WSclient.cpp:2718-2727): the tag is the
+ * monster name plus "Of" + owner (GlobalText 485); the Castle Siege
+ * gates/statues (types 152-158) keep their plain name.
+ */
+export function summonDisplayName(type: number, owner: string): string {
+  const base = monsterDisplayName(type, 'NPC');
+  if (type >= 152 && type <= 158) return base;
+  return `${base} of ${owner}`;
+}
+
+export function emitObjectEffect(
+  netId: number,
+  effect: Events['objectEffect']['effect']
+) {
+  const world = Store.world;
+  if (!world) return;
+  const entity = world.getByNetId(netId);
+  if (!entity) return;
+  EventBus.emit('objectEffect', { entity, effect });
 }

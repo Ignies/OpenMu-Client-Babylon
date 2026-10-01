@@ -1,5 +1,5 @@
 import { makeAutoObservable } from 'mobx';
-import type { TextKey } from '../../i18n';
+import { t, type TextKey } from '../../i18n';
 
 /**
  * The golden server notice (ZzzInterface.cpp:491-603). `ReceiveNotice`
@@ -91,7 +91,7 @@ export const Notices = new (class _Notices {
 
   /** Type 2: `GlobalText[483]` around the text, colour 1. */
   createGuildNotice(text: string): void {
-    this.create(GUILD_NOTICE_FORMAT.replace('%s', text), NoticeColor.Guild);
+    this.create(t(GUILD_NOTICE_FORMAT).replace('%s', text), NoticeColor.Guild);
   }
 
   clear(): void {

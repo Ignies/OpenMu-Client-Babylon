@@ -1,5 +1,97 @@
 // Every packet handler lives in its feature's net.ts; importing them here registers them,
 // in the order the handlers had in this file (listener order per packet is kept).
+// What this file imported before its handlers moved out, in the same order: loading these
+// first keeps every import-time registration (quests, events, skills...) ahead of the nets.
+import '../features/band/bandNet';
+import '../controllers/net/pingNet';
+import '../i18n';
+import '@/core/types';
+import '../controllers/actors/deserializeAppearance';
+import '../features/hero/characterStats';
+import '../features/options/gameOptions';
+import '@versions/shared/items/itemsDatabase';
+import '../features/items/itemLevelLook';
+import '../controllers/actors/itemAngle';
+import '../features/drops/dropModelProxy';
+import '../features/drops/dropObject';
+import '../controllers/assets/itemIconPack';
+import '../features/items/itemSerializer';
+import '../controllers/actors/mapPlayerNetClassToModelClass';
+import '../controllers/actors/modelFactoryPerId';
+import '@versions/shared/monsters/monstersDatabase';
+import '../i18n/serverText';
+import '../controllers/assets/mu/npcNameFile';
+import '@versions/shared/objects/enum';
+import '@versions/shared/packets/ConnectServerPackets';
+import '@versions/shared/packets/ServerToClientPackets';
+import '../controllers/net/packets.ts';
+import '../features/marketplace/gameBridge';
+import '../controllers/fx/fireworks';
+import '../features/inventory/inventoryConstants';
+import '@versions/shared/packets/ClientToServerPackets';
+import '../features/social/social';
+import '../features/chat/commands';
+import '../controllers/interface/nameTags';
+import '../features/warp/warpScopeHold';
+import '../features/events';
+import '../features/economy/economy';
+import '../features/gm/gmPanel';
+import '../features/friends/messenger';
+import '../features/chat/chatRooms';
+import '../features/friends/friendList';
+import '../features/inventory/itemStorage';
+import '../controllers/net/roundTrip';
+import '../features/chat/notices';
+import '../controllers/interface/slideHelp';
+import '../features/chat/chat';
+import '../features/chat/emojiBubbles';
+import '../ecs/systems/emojiBubbleSystem';
+import '../features/chat/chatEmojis';
+import '../features/chat/emojis';
+import '../controllers/net/protocols/chatWire';
+import '../controllers/anim/playerActionMapper';
+import '../controllers/actors/weaponClass';
+import '../controllers/actors/wings';
+import '../controllers/actors/playerObject';
+import '../ecs/world';
+import '../core/attributeSystem';
+import '../controllers/actors/characterScale';
+import '@versions/shared/skills/skillsDatabase';
+import '../controllers/actors/heroMoveTrace';
+import '../features/skills/skillCasting';
+import '../controllers/combat/skillClips';
+import '../features/warp/teleportRules';
+import '../ecs/systems/teleportSystem';
+import '../features/skills/magicEffects';
+import '@versions/shared/skills/skillVisuals';
+import '../controllers/anim/playSpeed';
+import '@versions/shared/npcs/trap_npc';
+import '../controllers/anim/monsterAttackClip';
+import '../controllers/sound/packetSounds';
+import '../controllers/sound/soundsManager';
+import '../controllers/fx/core';
+import '../controllers/render/babylon/exports';
+import '../core/eventBus';
+import '../controllers/sound';
+import '../controllers/sound/sfx';
+import '../controllers/sound/combatSounds';
+import '../features/hero/experience';
+import '../features/session/sessionResume';
+import '../controllers/weather/rainState';
+import '../controllers/combat';
+import '@versions/shared/skills/dark_knight/combo/state';
+import '../controllers/combat/recipes';
+import '../features/pets/pets';
+import '../controllers/actors/locomotion';
+import '../controllers/actors/transformedBody';
+import '../features/quests';
+import '../features/session/sessionExit';
+import './store';
+import '../core/devSeams';
+import '../features/inventory/quickItemActions';
+import '../features/servers/serverConfig';
+import '../controllers/interface/msgWin';
+import '../features/character_select/messages';
 import '../features/session/net';
 import '../features/character_select/net';
 import '../features/hero/net';
@@ -25,6 +117,7 @@ import '../features/options/net';
 import '../features/quests/net';
 import '../features/pets/net';
 import '../features/mu_helper/net';
+import { emitObjectEffect, summonDisplayName } from '../features/_shared/net_helpers';
 import { EventBus } from '../core/eventBus';
 import { type Events } from '../core/eventBus/events';
 import { PingPacket } from '@versions/shared/packets/ClientToServerPackets';
@@ -66,16 +159,6 @@ onNpcNamesChanged(() => {
 // time a quest window or a language change asks for them.
 void loadNpcNames();
 
-/**
- * ReceiveCreateSummonViewport (WSclient.cpp:2718-2727): the tag is the
- * monster name plus "Of" + owner (GlobalText 485); the Castle Siege
- * gates/statues (types 152-158) keep their plain name.
- */
-export function summonDisplayName(type: number, owner: string): string {
-  const base = monsterDisplayName(type, 'NPC');
-  if (type >= 152 && type <= 158) return base;
-  return `${base} of ${owner}`;
-}
 
 // F3/0x40 (length 7) is shared by PlayFanfareSound (EffectType 2), ShowSwirl
 // (58), ShowFireworks (0), ShowChristmasFireworks (59) and ServerCommand; the
@@ -134,16 +217,6 @@ function spawnFireworksAt(x: number, y: number, christmas: boolean) {
   spawnFireworks(world.scene, at, christmas);
 }
 
-export function emitObjectEffect(
-  netId: number,
-  effect: Events['objectEffect']['effect']
-) {
-  const world = Store.world;
-  if (!world) return;
-  const entity = world.getByNetId(netId);
-  if (!entity) return;
-  EventBus.emit('objectEffect', { entity, effect });
-}
 
 /** Server command 58's cherry-blossom sound, then the blooms its effect replays while the target stays. */
 function playSwirlSounds(netId: number) {

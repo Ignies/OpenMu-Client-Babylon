@@ -4,7 +4,7 @@ import { ShowEffectEffectTypeEnum, ShowEffectPacket, ShowSwirlPacket, WeatherSta
 import { Store } from '@/app/store';
 import { UI_BUS, playSfx } from '@/controllers/sound/sfx';
 import { WEATHER_RAIN } from '@/controllers/weather/rainState';
-import { emitObjectEffect } from '@/app/logic';
+import { emitObjectEffect } from '../_shared/net_helpers';
 import { inChaosCastle } from '@/controllers/actors/locomotion';
 import { runInAction } from 'mobx';
 
