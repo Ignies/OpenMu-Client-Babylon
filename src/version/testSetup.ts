@@ -4,4 +4,8 @@
 import { DEFAULT_VERSION_ID } from '@versions/registry';
 import { loadGameVersion } from './index';
 
+// The client starts in the system language; tests expect English on every machine.
+Object.defineProperty(globalThis.navigator, 'language', { value: 'en-US', configurable: true });
+Object.defineProperty(globalThis.navigator, 'languages', { value: ['en-US'], configurable: true });
+
 await loadGameVersion(DEFAULT_VERSION_ID);

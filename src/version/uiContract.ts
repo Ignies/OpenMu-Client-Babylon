@@ -14,6 +14,7 @@
 import type { ComponentType } from 'react';
 import type { ENUM_WORLD } from '../core/types';
 import type { World } from '../ecs/world';
+import type { WindowDef } from '../controllers/interface/windows';
 
 /**
  * The scene behind the pre-game screens (start menu, server list, login,
@@ -95,4 +96,6 @@ export type VersionUi = {
   readonly preload: VersionPreload;
   /** In-game windows, one export per window. */
   readonly MasterSkillsWindow: ComponentType;
+  /** Windows this version draws its own way: each replaces the shared window with the same id. */
+  readonly windows?: readonly WindowDef[];
 };
