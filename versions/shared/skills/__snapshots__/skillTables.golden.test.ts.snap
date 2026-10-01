@@ -1,0 +1,8808 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`skill tables golden > skill 0 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 1b814f36f01a3193",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 1 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 22a23a10c1127884",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 2 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 54840e1760bcc6ca",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 3 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": "Sound/eThunder",
+  "light": "1/1 555165fe0b1e7276",
+  "sound": "Sound/eThunder",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 4 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 558d2d9ffe1ddbee",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 5 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": "Sound/sFlame",
+  "light": "0/1 1c74e2df7530bf75",
+  "sound": "Sound/sFlame",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 6 1`] = `
+{
+  "clip": [
+    151,
+  ],
+  "delay": null,
+  "heroSound": "Sound/sMagic",
+  "light": "2/2 313c06b3c7d592ce",
+  "sound": "Sound/sMagic",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 7 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 6498bce632ae908f",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 8 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 f68b7874e1f7f49c",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 9 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": "Sound/sEvil",
+  "light": "0/0 e98f4215fe300d26",
+  "sound": "Sound/sEvil",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 10 1`] = `
+{
+  "clip": [
+    154,
+  ],
+  "delay": null,
+  "heroSound": "Sound/sHellFire",
+  "light": "0/1 70af7be8a8b30e92",
+  "sound": "Sound/sHellFire",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 11 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 920e18a82f8c220d",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 12 1`] = `
+{
+  "clip": [
+    152,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 7379990621e357ca",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 13 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 31844a7ab4b1c431",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 14 1`] = `
+{
+  "clip": [
+    153,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 8efcf4be79f7e294",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 15 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": "Sound/eTelekinesis",
+  "light": "2/2 313c06b3c7d592ce",
+  "sound": "Sound/eTelekinesis",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 16 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "1/1 75b1979cc9f3f1a2",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 17 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 4e152ee574b9e348",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 18 1`] = `
+{
+  "clip": [
+    186,
+  ],
+  "delay": null,
+  "heroSound": "Sound/sKnightDefense",
+  "light": "0/0 07cf278ffae5a397",
+  "sound": "Sound/sKnightDefense",
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 19 1`] = `
+{
+  "clip": [
+    60,
+  ],
+  "delay": null,
+  "heroSound": "Sound/sKnightSkill1",
+  "light": "0/0 9369d11cc232fd08",
+  "sound": "Sound/sKnightSkill1",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 20 1`] = `
+{
+  "clip": [
+    61,
+  ],
+  "delay": null,
+  "heroSound": "Sound/sKnightSkill2",
+  "light": "0/0 9369d11cc232fd08",
+  "sound": "Sound/sKnightSkill2",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 21 1`] = `
+{
+  "clip": [
+    62,
+  ],
+  "delay": null,
+  "heroSound": "Sound/sKnightSkill3",
+  "light": "0/0 9369d11cc232fd08",
+  "sound": "Sound/sKnightSkill3",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 22 1`] = `
+{
+  "clip": [
+    63,
+  ],
+  "delay": null,
+  "heroSound": "Sound/sKnightSkill4",
+  "light": "0/0 9369d11cc232fd08",
+  "sound": "Sound/sKnightSkill4",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 23 1`] = `
+{
+  "clip": [
+    64,
+  ],
+  "delay": null,
+  "heroSound": "Sound/sKnightSkill4",
+  "light": "0/0 9369d11cc232fd08",
+  "sound": "Sound/sKnightSkill4",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 24 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 25 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 26 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "1/1 b9224bfe4f4113e8",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 27 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "1/1 b9224bfe4f4113e8",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 28 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "1/1 babe30dbc41d8180",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 29 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 30 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": "Sound/sKnightDefense",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/sKnightDefense",
+  "stepIn": null,
+  "target": "self",
+}
+`;
+
+exports[`skill tables golden > skill 31 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": "Sound/sKnightDefense",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/sKnightDefense",
+  "stepIn": null,
+  "target": "self",
+}
+`;
+
+exports[`skill tables golden > skill 32 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": "Sound/sKnightDefense",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/sKnightDefense",
+  "stepIn": null,
+  "target": "self",
+}
+`;
+
+exports[`skill tables golden > skill 33 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": "Sound/sKnightDefense",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/sKnightDefense",
+  "stepIn": null,
+  "target": "self",
+}
+`;
+
+exports[`skill tables golden > skill 34 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": "Sound/sKnightDefense",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/sKnightDefense",
+  "stepIn": null,
+  "target": "self",
+}
+`;
+
+exports[`skill tables golden > skill 35 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": "Sound/sKnightDefense",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/sKnightDefense",
+  "stepIn": null,
+  "target": "self",
+}
+`;
+
+exports[`skill tables golden > skill 36 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": "Sound/sKnightDefense",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/sKnightDefense",
+  "stepIn": null,
+  "target": "self",
+}
+`;
+
+exports[`skill tables golden > skill 37 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 38 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 e8b8695ab56df5a0",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 39 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 f513dfb62f73ef59",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 40 1`] = `
+{
+  "clip": [
+    73,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "1/1 3abcc2e1611aef94",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 41 1`] = `
+{
+  "clip": [
+    65,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 a5b5d98b869b6e56",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 42 1`] = `
+{
+  "clip": [
+    66,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 a8693adf729e5efd",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 43 1`] = `
+{
+  "clip": [
+    71,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 703828f9d95ffec2",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 44 1`] = `
+{
+  "clip": [
+    137,
+  ],
+  "delay": null,
+  "heroSound": "Sound/sKnightSkill2",
+  "light": "0/0 f58a59d665064c83",
+  "sound": "Sound/sKnightSkill2",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 45 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 211d3d3d6a5f0624",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 46 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": "Sound/battlecastle/sCFireArrow",
+  "light": "0/0 20f1ad84e8adcec8",
+  "sound": "Sound/battlecastle/sCFireArrow",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 47 1`] = `
+{
+  "clip": [
+    70,
+    99,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 52fa1dafe04bf843",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 48 1`] = `
+{
+  "clip": [
+    67,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 cc22de4fc631e073",
+  "sound": null,
+  "stepIn": null,
+  "target": "self",
+}
+`;
+
+exports[`skill tables golden > skill 49 1`] = `
+{
+  "clip": [
+    68,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 00a1dae41bc96749",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 50 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 51 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "2/1 c56dd9cfc51b0004",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 52 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": "Sound/ePiercing",
+  "light": "0/0 3ecd4dcd6fb303cb",
+  "sound": "Sound/ePiercing",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 53 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 54 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 55 1`] = `
+{
+  "clip": [
+    65,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "1/1 52d1faae4e3f550e",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 56 1`] = `
+{
+  "clip": [
+    145,
+    97,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 2ab1726ebfd3d0f3",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 57 1`] = `
+{
+  "clip": [
+    136,
+  ],
+  "delay": null,
+  "heroSound": "Sound/sKnightSkill2",
+  "light": "0/0 ad7b20db273ade00",
+  "sound": "Sound/sKnightSkill2",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 58 1`] = `
+{
+  "clip": [
+    72,
+  ],
+  "delay": null,
+  "heroSound": "Sound/eHellFire2_1",
+  "light": "0/0 27fb64e0fa453359",
+  "sound": "Sound/eHellFire2_1",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 59 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": "Sound/eCombo",
+  "light": "0/0 d72a7ccdd42389bc",
+  "sound": "Sound/eCombo",
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 60 1`] = `
+{
+  "clip": [
+    80,
+    82,
+    92,
+  ],
+  "delay": null,
+  "heroSound": "Sound/sKnightSkill1",
+  "light": "0/0 9c5fa8db9864a697",
+  "sound": "Sound/sKnightSkill1",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 61 1`] = `
+{
+  "clip": [
+    80,
+    82,
+    92,
+  ],
+  "delay": null,
+  "heroSound": "Sound/eFirebust",
+  "light": "0/0 9b6e7837a5aefe0f",
+  "sound": "Sound/eFirebust",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 62 1`] = `
+{
+  "clip": [
+    87,
+  ],
+  "delay": 10000,
+  "heroSound": "Sound/sDarkEarthQuake",
+  "light": "0/0 99602a3636714835",
+  "sound": "Sound/sDarkEarthQuake",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 63 1`] = `
+{
+  "clip": [
+    81,
+    83,
+    94,
+  ],
+  "delay": 30000,
+  "heroSound": null,
+  "light": "0/0 34728d11f9e864d3",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 64 1`] = `
+{
+  "clip": [
+    146,
+    86,
+    97,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 f673fbea33875e29",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 65 1`] = `
+{
+  "clip": [
+    152,
+    85,
+    95,
+  ],
+  "delay": 5000,
+  "heroSound": null,
+  "light": "0/0 c1c20b1a92375e52",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 66 1`] = `
+{
+  "clip": [
+    80,
+    82,
+    92,
+  ],
+  "delay": null,
+  "heroSound": "Sound/sKnightSkill1",
+  "light": "0/0 9c5fa8db9864a697",
+  "sound": "Sound/sKnightSkill1",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 67 1`] = `
+{
+  "clip": [
+    67,
+    68,
+    69,
+    86,
+    97,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 68 1`] = `
+{
+  "clip": [
+    139,
+    68,
+    69,
+    86,
+    97,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 69 1`] = `
+{
+  "clip": [
+    67,
+    68,
+    69,
+    86,
+    97,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 70 1`] = `
+{
+  "clip": [
+    67,
+    68,
+    69,
+    86,
+    97,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 71 1`] = `
+{
+  "clip": [
+    139,
+    68,
+    69,
+    86,
+    97,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 72 1`] = `
+{
+  "clip": [
+    67,
+    68,
+    69,
+    86,
+    97,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 883bbdb6d861a535",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 73 1`] = `
+{
+  "clip": [
+    138,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 78771a9f2fa09f9d",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 74 1`] = `
+{
+  "clip": [
+    80,
+    82,
+    92,
+  ],
+  "delay": null,
+  "heroSound": "Sound/eFirebust",
+  "light": "0/0 f264403cb9605892",
+  "sound": "Sound/eFirebust",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 75 1`] = `
+{
+  "clip": [
+    146,
+    86,
+    97,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 76 1`] = `
+{
+  "clip": null,
+  "delay": 1500,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 77 1`] = `
+{
+  "clip": [
+    228,
+  ],
+  "delay": 200,
+  "heroSound": "Sound/infinityArrow",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/infinityArrow",
+  "stepIn": null,
+  "target": "self",
+}
+`;
+
+exports[`skill tables golden > skill 78 1`] = `
+{
+  "clip": [
+    80,
+    82,
+    92,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 899d87e6a5f94b85",
+  "sound": "Sound/Darklord_firescream",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 79 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 80 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 81 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 82 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 83 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 84 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 85 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 86 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 87 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 88 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 89 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 90 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 91 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 92 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 93 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 94 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 95 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 96 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 97 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 98 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 99 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 100 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 101 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 102 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 103 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 104 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 105 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 106 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 107 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 108 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 109 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 110 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 111 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 112 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 113 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 114 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 115 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 116 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 117 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 118 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 119 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 120 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 121 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 122 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 123 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 124 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 125 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 126 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 127 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 128 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 129 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 130 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 131 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 132 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 133 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 134 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 135 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 136 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 137 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 138 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 139 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 140 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 141 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 142 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 143 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 144 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 145 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 146 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 147 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 148 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 149 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 150 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 151 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 152 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 153 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 154 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 155 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 156 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 157 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 158 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 159 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 160 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 161 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 162 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 163 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 164 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 165 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 166 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 167 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 168 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 169 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 170 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 171 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 172 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 173 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 174 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 175 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 176 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 177 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 178 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 179 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 180 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 181 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 182 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 183 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 184 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 185 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 186 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 187 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 188 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 189 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 190 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 191 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 192 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 193 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 194 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 195 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 196 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 197 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 198 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 199 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 200 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 201 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 202 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 203 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 204 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 205 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 206 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 207 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 208 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 209 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 210 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 211 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 212 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 213 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 214 1`] = `
+{
+  "clip": [
+    168,
+    169,
+    170,
+    171,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 07c3982aa02f6302",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 215 1`] = `
+{
+  "clip": [
+    160,
+    161,
+    162,
+    163,
+  ],
+  "delay": null,
+  "heroSound": "Sound/SE_Ch_summoner_skill08_chainlightning",
+  "light": "0/0 5fa500001e5db275",
+  "sound": "Sound/SE_Ch_summoner_skill08_chainlightning",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 216 1`] = `
+{
+  "clip": [
+    164,
+    165,
+    166,
+    167,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 e98f4215fe300d26",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 217 1`] = `
+{
+  "clip": [
+    156,
+  ],
+  "delay": 5000,
+  "heroSound": "Sound/SE_Ch_summoner_skill02_ssonze",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/SE_Ch_summoner_skill02_ssonze",
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 218 1`] = `
+{
+  "clip": [
+    156,
+  ],
+  "delay": 5000,
+  "heroSound": "Sound/Berserker",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/Berserker",
+  "stepIn": null,
+  "target": "self",
+}
+`;
+
+exports[`skill tables golden > skill 219 1`] = `
+{
+  "clip": [
+    156,
+    157,
+    158,
+    159,
+  ],
+  "delay": null,
+  "heroSound": "Sound/SE_Ch_summoner_skill03_sleep",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/SE_Ch_summoner_skill03_sleep",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 220 1`] = `
+{
+  "clip": [
+    156,
+  ],
+  "delay": null,
+  "heroSound": "Sound/SE_Ch_summoner_skill04_blind",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/SE_Ch_summoner_skill04_blind",
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 221 1`] = `
+{
+  "clip": [
+    156,
+    157,
+    158,
+    159,
+  ],
+  "delay": 4000,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "inPlace",
+}
+`;
+
+exports[`skill tables golden > skill 222 1`] = `
+{
+  "clip": [
+    156,
+    157,
+    158,
+    159,
+  ],
+  "delay": 4000,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "inPlace",
+}
+`;
+
+exports[`skill tables golden > skill 223 1`] = `
+{
+  "clip": [
+    172,
+    173,
+    174,
+    175,
+  ],
+  "delay": 4000,
+  "heroSound": "Sound/SE_Ch_summoner_skill05_explosion01",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/SE_Ch_summoner_skill05_explosion01",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 224 1`] = `
+{
+  "clip": [
+    172,
+    173,
+    174,
+    175,
+  ],
+  "delay": 4000,
+  "heroSound": "Sound/SE_Ch_summoner_skill06_requiem01",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/SE_Ch_summoner_skill06_requiem01",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 225 1`] = `
+{
+  "clip": [
+    172,
+    173,
+    174,
+    175,
+  ],
+  "delay": 4000,
+  "heroSound": "Sound/Rargle",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/Rargle",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 226 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 227 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 228 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 229 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 230 1`] = `
+{
+  "clip": [
+    185,
+  ],
+  "delay": null,
+  "heroSound": "Sound/lightning_shock",
+  "light": "0/0 e98f4215fe300d26",
+  "sound": "Sound/lightning_shock",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 231 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 232 1`] = `
+{
+  "clip": [
+    176,
+  ],
+  "delay": null,
+  "heroSound": "Sound/BLOW_OF_DESTRUCTION",
+  "light": "0/0 27a01ae3736c87b4",
+  "sound": "Sound/BLOW_OF_DESTRUCTION",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 233 1`] = `
+{
+  "clip": [
+    177,
+  ],
+  "delay": null,
+  "heroSound": "Sound/SwellofMagicPower",
+  "light": "2/2 55d4a1d708f79148",
+  "sound": "Sound/SwellofMagicPower",
+  "stepIn": null,
+  "target": "self",
+}
+`;
+
+exports[`skill tables golden > skill 234 1`] = `
+{
+  "clip": [
+    246,
+  ],
+  "delay": null,
+  "heroSound": "Sound/recover",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/recover",
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 235 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 236 1`] = `
+{
+  "clip": [
+    184,
+  ],
+  "delay": null,
+  "heroSound": "Sound/flame_strike",
+  "light": "0/0 c4782448521b96cf",
+  "sound": "Sound/flame_strike",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 237 1`] = `
+{
+  "clip": [
+    183,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 b919a07fd1b8140e",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 238 1`] = `
+{
+  "clip": [
+    80,
+    82,
+    92,
+  ],
+  "delay": null,
+  "heroSound": "Sound/caotic",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/caotic",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 239 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "1/1 25dc86de9ab325d7",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 240 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 241 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 242 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 243 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 244 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 245 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 246 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 247 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 248 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 249 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 250 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 251 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 252 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 253 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 254 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 255 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 256 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 257 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 258 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 259 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 260 1`] = `
+{
+  "clip": [
+    247,
+  ],
+  "delay": null,
+  "heroSound": "Sound/Ragefighter/Rage_Thrust",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/Ragefighter/Rage_Thrust",
+  "stepIn": "cast",
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 261 1`] = `
+{
+  "clip": [
+    248,
+  ],
+  "delay": null,
+  "heroSound": "Sound/Ragefighter/Rage_Stamp",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/Ragefighter/Rage_Stamp",
+  "stepIn": "midClip",
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 262 1`] = `
+{
+  "clip": [
+    249,
+  ],
+  "delay": 700,
+  "heroSound": "Sound/Ragefighter/Rage_Giantswing",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/Ragefighter/Rage_Giantswing",
+  "stepIn": "midClip",
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 263 1`] = `
+{
+  "clip": [
+    250,
+  ],
+  "delay": null,
+  "heroSound": "Sound/Ragefighter/Rage_Darkside",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/Ragefighter/Rage_Darkside",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 264 1`] = `
+{
+  "clip": [
+    253,
+  ],
+  "delay": 700,
+  "heroSound": "Sound/Ragefighter/Rage_Dragonlower",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/Ragefighter/Rage_Dragonlower",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 265 1`] = `
+{
+  "clip": [
+    252,
+  ],
+  "delay": 3000,
+  "heroSound": "Sound/Ragefighter/Rage_Dragonkick",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/Ragefighter/Rage_Dragonkick",
+  "stepIn": "midClip",
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 266 1`] = `
+{
+  "clip": [
+    255,
+  ],
+  "delay": null,
+  "heroSound": "Sound/Ragefighter/Rage_Buff_1",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/Ragefighter/Rage_Buff_1",
+  "stepIn": null,
+  "target": "self",
+}
+`;
+
+exports[`skill tables golden > skill 267 1`] = `
+{
+  "clip": [
+    255,
+  ],
+  "delay": null,
+  "heroSound": "Sound/Ragefighter/Rage_Buff_2",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/Ragefighter/Rage_Buff_2",
+  "stepIn": null,
+  "target": "self",
+}
+`;
+
+exports[`skill tables golden > skill 268 1`] = `
+{
+  "clip": [
+    255,
+  ],
+  "delay": null,
+  "heroSound": "Sound/Ragefighter/Rage_Buff_1",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/Ragefighter/Rage_Buff_1",
+  "stepIn": null,
+  "target": "self",
+}
+`;
+
+exports[`skill tables golden > skill 269 1`] = `
+{
+  "clip": [
+    137,
+  ],
+  "delay": null,
+  "heroSound": "Sound/battlecastle/sCHaveyBlow",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/battlecastle/sCHaveyBlow",
+  "stepIn": "cast",
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 270 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 271 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 272 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 273 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 274 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 275 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 276 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 277 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 278 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 279 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 280 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 281 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 282 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 283 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 284 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 285 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 286 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 287 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 288 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 289 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 290 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 291 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 292 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 293 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 294 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 295 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 296 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 297 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 298 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 299 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 300 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 301 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 302 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 303 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 304 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 305 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 306 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 307 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 308 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 309 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 310 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 311 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 312 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 313 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 314 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 315 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 316 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 317 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 318 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 319 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 320 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 321 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 322 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 323 1`] = `
+{
+  "clip": [
+    146,
+    86,
+    97,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "1/1 cdafae4c58abaaec",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 324 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 325 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 326 1`] = `
+{
+  "clip": [
+    63,
+  ],
+  "delay": null,
+  "heroSound": "Sound/sKnightSkill4",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/sKnightSkill4",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 327 1`] = `
+{
+  "clip": [
+    64,
+  ],
+  "delay": null,
+  "heroSound": "Sound/sKnightSkill4",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/sKnightSkill4",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 328 1`] = `
+{
+  "clip": [
+    60,
+  ],
+  "delay": null,
+  "heroSound": "Sound/sKnightSkill1",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/sKnightSkill1",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 329 1`] = `
+{
+  "clip": [
+    61,
+  ],
+  "delay": null,
+  "heroSound": "Sound/sKnightSkill2",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/sKnightSkill2",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 330 1`] = `
+{
+  "clip": [
+    65,
+  ],
+  "delay": null,
+  "heroSound": "Sound/sKnightSkill4",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/sKnightSkill4",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 331 1`] = `
+{
+  "clip": [
+    66,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 332 1`] = `
+{
+  "clip": [
+    65,
+  ],
+  "delay": null,
+  "heroSound": "Sound/sKnightSkill4",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/sKnightSkill4",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 333 1`] = `
+{
+  "clip": [
+    66,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 334 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 335 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 336 1`] = `
+{
+  "clip": [
+    71,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 337 1`] = `
+{
+  "clip": [
+    176,
+  ],
+  "delay": null,
+  "heroSound": "Sound/BLOW_OF_DESTRUCTION",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/BLOW_OF_DESTRUCTION",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 338 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 339 1`] = `
+{
+  "clip": [
+    71,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 340 1`] = `
+{
+  "clip": [
+    176,
+  ],
+  "delay": null,
+  "heroSound": "Sound/BLOW_OF_DESTRUCTION",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/BLOW_OF_DESTRUCTION",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 341 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 342 1`] = `
+{
+  "clip": [
+    71,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 343 1`] = `
+{
+  "clip": [
+    176,
+  ],
+  "delay": null,
+  "heroSound": "Sound/BLOW_OF_DESTRUCTION",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/BLOW_OF_DESTRUCTION",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 344 1`] = `
+{
+  "clip": [
+    65,
+  ],
+  "delay": null,
+  "heroSound": "Sound/sKnightSkill4",
+  "light": "0/0 e80d9c5875f95c37",
+  "sound": "Sound/sKnightSkill4",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 345 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 346 1`] = `
+{
+  "clip": [
+    65,
+  ],
+  "delay": null,
+  "heroSound": "Sound/sKnightSkill4",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/sKnightSkill4",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 347 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 348 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 349 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 350 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 351 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 352 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 353 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 354 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 355 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 356 1`] = `
+{
+  "clip": [
+    67,
+  ],
+  "delay": null,
+  "heroSound": "Sound/eSwellLife",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/eSwellLife",
+  "stepIn": null,
+  "target": "self",
+}
+`;
+
+exports[`skill tables golden > skill 357 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 358 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 359 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 360 1`] = `
+{
+  "clip": [
+    67,
+  ],
+  "delay": null,
+  "heroSound": "Sound/eSwellLife",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/eSwellLife",
+  "stepIn": null,
+  "target": "self",
+}
+`;
+
+exports[`skill tables golden > skill 361 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 362 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 363 1`] = `
+{
+  "clip": [
+    67,
+  ],
+  "delay": null,
+  "heroSound": "Sound/eSwellLife",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/eSwellLife",
+  "stepIn": null,
+  "target": "self",
+}
+`;
+
+exports[`skill tables golden > skill 364 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 365 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 366 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 367 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 368 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 369 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 370 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 371 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 372 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 373 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 374 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 375 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 376 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 377 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 378 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "1/1 25dc86de9ab325d7",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 379 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "1/1 25dc86de9ab325d7",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 380 1`] = `
+{
+  "clip": [
+    177,
+  ],
+  "delay": null,
+  "heroSound": "Sound/SwellofMagicPower",
+  "light": "2/2 55d4a1d708f79148",
+  "sound": "Sound/SwellofMagicPower",
+  "stepIn": null,
+  "target": "self",
+}
+`;
+
+exports[`skill tables golden > skill 381 1`] = `
+{
+  "clip": [
+    153,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 8efcf4be79f7e294",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 382 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 31844a7ab4b1c431",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 383 1`] = `
+{
+  "clip": [
+    177,
+  ],
+  "delay": null,
+  "heroSound": "Sound/SwellofMagicPower",
+  "light": "2/2 55d4a1d708f79148",
+  "sound": "Sound/SwellofMagicPower",
+  "stepIn": null,
+  "target": "self",
+}
+`;
+
+exports[`skill tables golden > skill 384 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 e98f4215fe300d26",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 385 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "1/1 25dc86de9ab325d7",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 386 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 387 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 e8b8695ab56df5a0",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 388 1`] = `
+{
+  "clip": [
+    154,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "1/1 25dc86de9ab325d7",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 389 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 e98f4215fe300d26",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 390 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 e98f4215fe300d26",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 391 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 f513dfb62f73ef59",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 392 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "1/1 3abcc2e1611aef94",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 393 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 f513dfb62f73ef59",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 394 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 e98f4215fe300d26",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 395 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "1/1 3abcc2e1611aef94",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 396 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 397 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "1/1 25dc86de9ab325d7",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 398 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "1/1 25dc86de9ab325d7",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 399 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 400 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 401 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "1/1 25dc86de9ab325d7",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 402 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 403 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "1/1 75b1979cc9f3f1a2",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 404 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "1/1 75b1979cc9f3f1a2",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 405 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 406 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "1/1 75b1979cc9f3f1a2",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 407 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 408 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 409 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 410 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 411 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 412 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 413 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 414 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 415 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 416 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 417 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 418 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 419 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 420 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 421 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 422 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 423 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 424 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 425 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 426 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 427 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 428 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 429 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 430 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 431 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 432 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 433 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 434 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 435 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 436 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 437 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 438 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 439 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 440 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 441 1`] = `
+{
+  "clip": [
+    228,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "self",
+}
+`;
+
+exports[`skill tables golden > skill 442 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 443 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 444 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 445 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 446 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 447 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 448 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 449 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 450 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 451 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 452 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 453 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 454 1`] = `
+{
+  "clip": [
+    156,
+    157,
+    158,
+    159,
+  ],
+  "delay": null,
+  "heroSound": "Sound/SE_Ch_summoner_skill03_sleep",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/SE_Ch_summoner_skill03_sleep",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 455 1`] = `
+{
+  "clip": [
+    160,
+    161,
+    162,
+    163,
+  ],
+  "delay": null,
+  "heroSound": "Sound/SE_Ch_summoner_skill08_chainlightning",
+  "light": "0/0 5fa500001e5db275",
+  "sound": "Sound/SE_Ch_summoner_skill08_chainlightning",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 456 1`] = `
+{
+  "clip": [
+    185,
+  ],
+  "delay": null,
+  "heroSound": "Sound/lightning_shock",
+  "light": "0/0 e98f4215fe300d26",
+  "sound": "Sound/lightning_shock",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 457 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 458 1`] = `
+{
+  "clip": [
+    168,
+    169,
+    170,
+    171,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 07c3982aa02f6302",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 459 1`] = `
+{
+  "clip": [
+    156,
+    157,
+    158,
+    159,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "inPlace",
+}
+`;
+
+exports[`skill tables golden > skill 460 1`] = `
+{
+  "clip": [
+    156,
+    157,
+    158,
+    159,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "inPlace",
+}
+`;
+
+exports[`skill tables golden > skill 461 1`] = `
+{
+  "clip": [
+    156,
+  ],
+  "delay": null,
+  "heroSound": "Sound/SE_Ch_summoner_skill04_blind",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/SE_Ch_summoner_skill04_blind",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 462 1`] = `
+{
+  "clip": [
+    168,
+    169,
+    170,
+    171,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 07c3982aa02f6302",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 463 1`] = `
+{
+  "clip": [
+    156,
+  ],
+  "delay": null,
+  "heroSound": "Sound/SE_Ch_summoner_skill04_blind",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/SE_Ch_summoner_skill04_blind",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 464 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 465 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 466 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 467 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 468 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 469 1`] = `
+{
+  "clip": [
+    156,
+  ],
+  "delay": null,
+  "heroSound": "Sound/Berserker",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/Berserker",
+  "stepIn": null,
+  "target": "self",
+}
+`;
+
+exports[`skill tables golden > skill 470 1`] = `
+{
+  "clip": [
+    156,
+  ],
+  "delay": null,
+  "heroSound": "Sound/Berserker",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/Berserker",
+  "stepIn": null,
+  "target": "self",
+}
+`;
+
+exports[`skill tables golden > skill 471 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 472 1`] = `
+{
+  "clip": [
+    156,
+  ],
+  "delay": null,
+  "heroSound": "Sound/Berserker",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/Berserker",
+  "stepIn": null,
+  "target": "self",
+}
+`;
+
+exports[`skill tables golden > skill 473 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 474 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 475 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 476 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 477 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 478 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 479 1`] = `
+{
+  "clip": [
+    63,
+    97,
+  ],
+  "delay": null,
+  "heroSound": "Sound/sKnightSkill4",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/sKnightSkill4",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 480 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": "Sound/eThunder",
+  "light": "1/1 b5e1fd5658d3c705",
+  "sound": "Sound/eThunder",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 481 1`] = `
+{
+  "clip": [
+    65,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 482 1`] = `
+{
+  "clip": [
+    145,
+    97,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 483 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": "Sound/sFlame",
+  "light": "0/1 9a27d55a1b2da924",
+  "sound": "Sound/sFlame",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 484 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 31844a7ab4b1c431",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 485 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 486 1`] = `
+{
+  "clip": [
+    153,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 8efcf4be79f7e294",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 487 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": "Sound/sEvil",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/sEvil",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 488 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 489 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 490 1`] = `
+{
+  "clip": [
+    65,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "1/1 8e524fdebf106f4f",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 491 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 492 1`] = `
+{
+  "clip": [
+    184,
+  ],
+  "delay": null,
+  "heroSound": "Sound/flame_strike",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/flame_strike",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 493 1`] = `
+{
+  "clip": [
+    65,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "1/1 8e524fdebf106f4f",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 494 1`] = `
+{
+  "clip": [
+    184,
+  ],
+  "delay": null,
+  "heroSound": "Sound/flame_strike",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/flame_strike",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 495 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": "Sound/sDarkEarthQuake",
+  "light": "1/1 ee80a160881334f6",
+  "sound": "Sound/sDarkEarthQuake",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 496 1`] = `
+{
+  "clip": [
+    183,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 497 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": "Sound/sDarkEarthQuake",
+  "light": "1/1 ee80a160881334f6",
+  "sound": "Sound/sDarkEarthQuake",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 498 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 499 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 500 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 501 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 502 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 503 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 504 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 505 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 506 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 507 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 508 1`] = `
+{
+  "clip": [
+    80,
+    82,
+    92,
+  ],
+  "delay": null,
+  "heroSound": "Sound/eFirebust",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/eFirebust",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 509 1`] = `
+{
+  "clip": [
+    80,
+    82,
+    92,
+  ],
+  "delay": null,
+  "heroSound": "Sound/sKnightSkill1",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/sKnightSkill1",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 510 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 511 1`] = `
+{
+  "clip": [
+    146,
+    86,
+    97,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 512 1`] = `
+{
+  "clip": [
+    87,
+  ],
+  "delay": null,
+  "heroSound": "Sound/sDarkEarthQuake",
+  "light": "0/0 99602a3636714835",
+  "sound": "Sound/sDarkEarthQuake",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 513 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 514 1`] = `
+{
+  "clip": [
+    80,
+    82,
+    92,
+  ],
+  "delay": null,
+  "heroSound": "Sound/eFirebust",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/eFirebust",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 515 1`] = `
+{
+  "clip": [
+    146,
+    86,
+    97,
+  ],
+  "delay": 10000,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 516 1`] = `
+{
+  "clip": [
+    87,
+  ],
+  "delay": 10000,
+  "heroSound": "Sound/sDarkEarthQuake",
+  "light": "0/0 99602a3636714835",
+  "sound": "Sound/sDarkEarthQuake",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 517 1`] = `
+{
+  "clip": [
+    146,
+    86,
+    97,
+  ],
+  "delay": 10000,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 518 1`] = `
+{
+  "clip": [
+    80,
+    82,
+    92,
+  ],
+  "delay": 10000,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/Darklord_firescream",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 519 1`] = `
+{
+  "clip": [
+    152,
+    85,
+    95,
+  ],
+  "delay": 10000,
+  "heroSound": null,
+  "light": "0/0 c1c20b1a92375e52",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 520 1`] = `
+{
+  "clip": [
+    80,
+    82,
+    92,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/Darklord_firescream",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 521 1`] = `
+{
+  "clip": [
+    146,
+    86,
+    97,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "1/1 cdafae4c58abaaec",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 522 1`] = `
+{
+  "clip": [
+    146,
+    86,
+    97,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 523 1`] = `
+{
+  "clip": [
+    80,
+    82,
+    92,
+  ],
+  "delay": null,
+  "heroSound": "Sound/caotic",
+  "light": "0/0 12438107cd988e1a",
+  "sound": "Sound/caotic",
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 524 1`] = `
+{
+  "clip": [
+    146,
+    86,
+    97,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "1/1 cdafae4c58abaaec",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 525 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 526 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 527 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 528 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 529 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 530 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 531 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 532 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 533 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 534 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 535 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 536 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 537 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 538 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 539 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 540 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 541 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 542 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 543 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 544 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 545 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 546 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 547 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 548 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 549 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 550 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 551 1`] = `
+{
+  "clip": [
+    247,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": "cast",
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 552 1`] = `
+{
+  "clip": [
+    248,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": "midClip",
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 553 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 554 1`] = `
+{
+  "clip": [
+    247,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": "cast",
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 555 1`] = `
+{
+  "clip": [
+    248,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": "midClip",
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 556 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 557 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 558 1`] = `
+{
+  "clip": [
+    249,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": "midClip",
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 559 1`] = `
+{
+  "clip": [
+    250,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 560 1`] = `
+{
+  "clip": [
+    253,
+  ],
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "enemy",
+}
+`;
+
+exports[`skill tables golden > skill 561 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 562 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 563 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 564 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 565 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 566 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 567 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 568 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 569 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "self",
+}
+`;
+
+exports[`skill tables golden > skill 570 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 571 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 572 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "self",
+}
+`;
+
+exports[`skill tables golden > skill 573 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "self",
+}
+`;
+
+exports[`skill tables golden > skill 574 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 575 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 576 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 577 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 578 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 579 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 580 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 581 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 582 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 583 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 584 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 585 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 586 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 587 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 588 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 589 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 590 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 591 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 592 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 593 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 594 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 595 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 596 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 597 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 598 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 599 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 600 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 601 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 602 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 603 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 604 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 605 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 606 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 607 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 608 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 609 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 610 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 611 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 612 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 613 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 614 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 615 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 616 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 617 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": "allyOrSelf",
+}
+`;
+
+exports[`skill tables golden > skill 618 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 619 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 620 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 621 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 622 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 623 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 624 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 625 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 626 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 627 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 628 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 629 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 630 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 631 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 632 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 633 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 634 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 635 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 636 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 637 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 638 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 639 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 640 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 641 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 642 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 643 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 644 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 645 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 646 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 647 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 648 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 649 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 650 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 651 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 652 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 653 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 654 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 655 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 656 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 657 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 658 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 659 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 660 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 661 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 662 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 663 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 664 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 665 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 666 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 667 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 668 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 669 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 670 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 671 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 672 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 673 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 674 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 675 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 676 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 677 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 678 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 679 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 680 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 681 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 682 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 683 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 684 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 685 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 686 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 687 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 688 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 689 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 690 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 691 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 692 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 693 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 694 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 695 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 696 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 697 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 698 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 699 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
+
+exports[`skill tables golden > skill 700 1`] = `
+{
+  "clip": null,
+  "delay": null,
+  "heroSound": null,
+  "light": "0/0 12438107cd988e1a",
+  "sound": null,
+  "stepIn": null,
+  "target": null,
+}
+`;
