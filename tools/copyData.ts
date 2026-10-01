@@ -2,7 +2,7 @@
 // runtime into `dist/Data`, so a `vite build` is self-contained.
 //
 // Everything the client reads from `./Data/` goes through
-// `src/libs/mu/dataFolder.ts` (sprites, effect textures, Local tables,
+// `src/controllers/assets/mu/dataFolder.ts` (sprites, effect textures, Local tables,
 // gate.bmd, PBR maps). Models, terrain and sounds live in the converted
 // `public/game-assets` and are picked up by Vite on their own. The rules
 // below were derived by grepping every `downloadDataFile`, `loadMuSprite`,
@@ -55,36 +55,11 @@ const RULES: Rule[] = [
   // common/signPlates.ts → the three signpost plates it repaints, out of
   // whichever Object<n> folder the sign's map draws from.
   { dir: 'Object', ext: [], names: ['notice.ozj', 'snotice.ozj', 'snotice02.ozj'], numbered: true },
-  // effects/recipes.ts → the one effect texture that lives outside Effect/:
-  // the mark a game master stands on (BITMAP_GM_AURORA).
-  { dir: 'Skill', ext: [], names: ['gmmzine.ozj'] },
+  // fx/recipes.ts → effect sprites kept in Skill/ (Recover's halo, skull, ice, the GM mark...).
+  { dir: 'Skill', ext: SPRITE },
   // libs/mu/terrainWater.ts → Object8/wt00..wt31.OZJ (Atlans caustics flipbook)
   { dir: 'Object8', ext: [], names: Array.from({ length: 32 }, (_, i) => `wt${String(i).padStart(2, '0')}.ozj`) },
 ];
-
-function arg(name: string, fallback: string): string {
-  const i = process.argv.indexOf(name);
-  return i >= 0 && process.argv[i + 1] ? process.argv[i + 1] : fallback;
-}
-
-const ROOT = resolve(import.meta.dir, '..');
-const SRC = resolve(ROOT, arg('--src', 'Data'));
-const OUT = resolve(ROOT, arg('--out', 'dist/Data'));
-const DRY = process.argv.includes('--dry');
-
-if ((process.env.DATA_COPY ?? 'on') === 'off') {
-  console.log('copyData: DATA_COPY=off, skipping');
-  process.exit(0);
-}
-
-if (!existsSync(SRC)) {
-  console.error(`copyData: source folder not found: ${SRC}`);
-  process.exit(1);
-}
-
-let files = 0;
-let bytes = 0;
-const perDir = new Map<string, { files: number; bytes: number }>();
 
 function keep(rule: Rule, file: string): boolean {
   const lower = file.toLowerCase();
@@ -94,59 +69,98 @@ function keep(rule: Rule, file: string): boolean {
   return rule.ext.includes(ext);
 }
 
-function copyTree(rule: Rule, from: string, recurse: boolean) {
-  for (const entry of readdirSync(from, { withFileTypes: true })) {
-    const full = join(from, entry.name);
-    if (entry.isDirectory()) {
-      if (recurse) copyTree(rule, full, true);
+/** Whether a path under Data/ (`Skill/ice.OZJ`) ends up in the build. */
+export function shipsDataFile(rel: string): boolean {
+  const parts = rel.split('/');
+  const file = parts[parts.length - 1];
+  return RULES.some(rule => {
+    if (rule.dir === '') return parts.length === 1 && keep(rule, file);
+    if (rule.numbered) return parts.length === 2 && new RegExp(`^${rule.dir}\\d+$`, 'i').test(parts[0]) && keep(rule, file);
+    return parts[0] === rule.dir && keep(rule, file);
+  });
+}
+
+function arg(name: string, fallback: string): string {
+  const i = process.argv.indexOf(name);
+  return i >= 0 && process.argv[i + 1] ? process.argv[i + 1] : fallback;
+}
+
+function main() {
+  const ROOT = resolve(import.meta.dir, '..');
+  const SRC = resolve(ROOT, arg('--src', 'Data'));
+  const OUT = resolve(ROOT, arg('--out', 'dist/Data'));
+  const DRY = process.argv.includes('--dry');
+
+  if ((process.env.DATA_COPY ?? 'on') === 'off') {
+    console.log('copyData: DATA_COPY=off, skipping');
+    process.exit(0);
+  }
+
+  if (!existsSync(SRC)) {
+    console.error(`copyData: source folder not found: ${SRC}`);
+    process.exit(1);
+  }
+
+  let files = 0;
+  let bytes = 0;
+  const perDir = new Map<string, { files: number; bytes: number }>();
+
+  function copyTree(rule: Rule, from: string, recurse: boolean) {
+    for (const entry of readdirSync(from, { withFileTypes: true })) {
+      const full = join(from, entry.name);
+      if (entry.isDirectory()) {
+        if (recurse) copyTree(rule, full, true);
+        continue;
+      }
+      if (!entry.isFile() || !keep(rule, entry.name)) continue;
+
+      const rel = relative(SRC, full);
+      const dest = join(OUT, rel);
+      const size = statSync(full).size;
+      if (!DRY) {
+        mkdirSync(join(dest, '..'), { recursive: true });
+        copyFileSync(full, dest);
+      }
+      files++;
+      bytes += size;
+      const top = rel.split(/[\\/]/)[0];
+      const stat = perDir.get(top) ?? { files: 0, bytes: 0 };
+      stat.files++;
+      stat.bytes += size;
+      perDir.set(top, stat);
+    }
+  }
+
+  if (!DRY) {
+    rmSync(OUT, { recursive: true, force: true });
+    mkdirSync(OUT, { recursive: true });
+  }
+
+  for (const rule of RULES) {
+    if (rule.dir === '') {
+      copyTree(rule, SRC, false);
       continue;
     }
-    if (!entry.isFile() || !keep(rule, entry.name)) continue;
-
-    const rel = relative(SRC, full);
-    const dest = join(OUT, rel);
-    const size = statSync(full).size;
-    if (!DRY) {
-      mkdirSync(join(dest, '..'), { recursive: true });
-      copyFileSync(full, dest);
-    }
-    files++;
-    bytes += size;
-    const top = rel.split(/[\\/]/)[0];
-    const stat = perDir.get(top) ?? { files: 0, bytes: 0 };
-    stat.files++;
-    stat.bytes += size;
-    perDir.set(top, stat);
-  }
-}
-
-if (!DRY) {
-  rmSync(OUT, { recursive: true, force: true });
-  mkdirSync(OUT, { recursive: true });
-}
-
-for (const rule of RULES) {
-  if (rule.dir === '') {
-    copyTree(rule, SRC, false);
-    continue;
-  }
-  if (rule.numbered) {
-    const re = new RegExp(`^${rule.dir}\\d+$`, 'i');
-    for (const entry of readdirSync(SRC, { withFileTypes: true })) {
-      if (entry.isDirectory() && re.test(entry.name)) {
-        copyTree(rule, join(SRC, entry.name), false);
+    if (rule.numbered) {
+      const re = new RegExp(`^${rule.dir}\\d+$`, 'i');
+      for (const entry of readdirSync(SRC, { withFileTypes: true })) {
+        if (entry.isDirectory() && re.test(entry.name)) {
+          copyTree(rule, join(SRC, entry.name), false);
+        }
       }
+      continue;
     }
-    continue;
+    const dir = join(SRC, rule.dir);
+    if (existsSync(dir)) copyTree(rule, dir, true);
   }
-  const dir = join(SRC, rule.dir);
-  if (existsSync(dir)) copyTree(rule, dir, true);
+
+  const mb = (n: number) => `${(n / 1024 / 1024).toFixed(1)} MB`;
+  for (const [dir, stat] of [...perDir].sort()) {
+    console.log(`  ${dir.padEnd(12)} ${String(stat.files).padStart(5)} files  ${mb(stat.bytes)}`);
+  }
+  console.log(
+    `copyData: ${DRY ? 'would copy' : 'copied'} ${files} files, ${mb(bytes)} → ${OUT}`
+  );
 }
 
-const mb = (n: number) => `${(n / 1024 / 1024).toFixed(1)} MB`;
-for (const [dir, stat] of [...perDir].sort()) {
-  console.log(`  ${dir.padEnd(12)} ${String(stat.files).padStart(5)} files  ${mb(stat.bytes)}`);
-}
-console.log(
-  `copyData: ${DRY ? 'would copy' : 'copied'} ${files} files, ${mb(bytes)} → ${OUT}`
-);
+if (import.meta.main) main();
