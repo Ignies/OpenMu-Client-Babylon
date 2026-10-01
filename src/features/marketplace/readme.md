@@ -2,7 +2,7 @@
 
 The player marketplace window's state and its link to the marketplace service and the game
 server. The service lives in the repo's `marketplace/` folder; the game server half is an OpenMU
-plugin ([../../../marketplace/openmu/README.md](../../../marketplace/openmu/README.md)).
+plugin ([../../../openmu/readme.md](../../../openmu/readme.md)).
 
 ## Public API
 - `Marketplace` (`state.ts`): the window store (tabs, filters, paging, sell form, `confirmBuy()`,

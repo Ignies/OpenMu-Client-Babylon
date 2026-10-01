@@ -5,6 +5,7 @@
 namespace MUnique.OpenMU.GameServer.RemoteView.Marketplace;
 
 using System.Buffers.Binary;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using MUnique.OpenMU.GameLogic.Marketplace;
 using MUnique.OpenMU.GameLogic.Views.Marketplace;
@@ -27,6 +28,11 @@ public class MarketplaceEscrowResultPlugIn : IMarketplaceEscrowResultPlugIn
     private const byte SubCode = 0x02;
     private const int FixedLength = 4 + 1 + 1 + 16 + 16 + 8 + 1;
 
+    /// <summary>`RemotePlayer.Connection` is internal to OpenMU; a plugin outside it reads it once by reflection.</summary>
+    private static readonly PropertyInfo ConnectionProperty =
+        typeof(RemotePlayer).GetProperty("Connection", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
+        ?? throw new MissingMemberException(nameof(RemotePlayer), "Connection");
+
     private readonly RemotePlayer _player;
 
     public MarketplaceEscrowResultPlugIn(RemotePlayer player) => this._player = player;
@@ -34,7 +40,7 @@ public class MarketplaceEscrowResultPlugIn : IMarketplaceEscrowResultPlugIn
     /// <inheritdoc />
     public async ValueTask ShowEscrowResultAsync(EscrowResult result)
     {
-        var connection = this._player.Connection;
+        var connection = ConnectionProperty.GetValue(this._player) as IConnection;
         if (connection is null)
         {
             return;
@@ -42,7 +48,7 @@ public class MarketplaceEscrowResultPlugIn : IMarketplaceEscrowResultPlugIn
 
         int Write()
         {
-            var serializer = this._player.ItemSerializer;
+            var serializer = this._player.ViewPlugIns.GetPlugIn<IItemSerializer>() ?? throw new InvalidOperationException("No item serializer available.");
             var size = FixedLength + (result.Item is null ? 0 : serializer.NeededSpace);
             var span = connection.Output.GetSpan(size)[..size];
             span.Clear();

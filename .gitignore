@@ -13,3 +13,7 @@ dist-register
 public/**/*.gz
 Data/**/*.gz
 Data-v097d/**/*.gz
+
+# .NET build output of the OpenMU plugins
+openmu/plugins/bin/
+openmu/plugins/obj/
