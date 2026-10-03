@@ -99,6 +99,8 @@ export const DECAY_LIGHT: SkillLight = {
 export default defineSkill({
   id: 38,
   name: "Decay",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [387],
   // 38 Decay (387 aliases here): 2x MODEL_FIRE sub6 on the cast point at AttackTime 15 (`decay`); Enhanced `decayGraded`.
   visual: { area: dw2AtAttackTime(decay), enhanced: { area: dw2AtAttackTime(decayGraded) } },
   light: DECAY_LIGHT,

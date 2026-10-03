@@ -19,6 +19,8 @@ const SLASH_CHIPS: ParticleRecipe = { ...STEEL_GLINTS, texture: TEX.spark2, colo
 export default defineSkill({
   id: 23,
   name: "Slash",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [327],
   poseClip: slashOddSwing,
   swordCount: true,
   // 23 Slash (327 by alias): the same on the even SWORD5 swing; atSwordBlow drops the odd

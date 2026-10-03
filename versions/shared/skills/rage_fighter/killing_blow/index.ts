@@ -10,6 +10,8 @@ import { A } from '@/controllers/combat/recipes';
 export default defineSkill({
   id: 260,
   name: "Killing Blow",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [551, 554],
   // 260-270 Rage Fighter (MonkSystem.cpp RageCreateEffect).
   // 260 Killing Blow: MODEL_WOLF_HEAD_EFFECT at the caster aimed at the target + BITMAP_SBUMB Scale 2.1 there.
   visual: {

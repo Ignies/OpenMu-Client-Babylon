@@ -1,6 +1,6 @@
 import { ARC_MOTES, BOMB_SPARKS, EXPLOSION_CELLS, FIRE_PUFF, FIRE_SPARKS, HOLY_MOTES, MODEL, RGBS, SHADE_MOTES, SMOKE, SPARKS, STEEL_GLINTS, TEX } from '@/controllers/fx/recipes';
 import { type AuraOptions, type SpearJoints } from '@/controllers/fx/aura';
-import { DARK_LORD_MASTER_ALIASES, MAGIC_GLADIATOR_MASTER_ALIASES } from '@/features/skills/skillAliases';
+
 import { effects, type EffectHandle } from '@/controllers/fx';
 import { type Entity } from '@/ecs/world';
 import { type ModelOptions } from '@/controllers/fx/model';
@@ -397,23 +397,10 @@ export let currentSkill = 0;
 /**
  * Master-level "Strengthener / Mastery" skills reuse their base skill's
  * look: the OpenMU numbers past 300 that are cast-able map onto the base
- * row by name prefix (the original's SKILL_REPLACEMENTS collapse).
+ * row (the original's SKILL_REPLACEMENTS collapse). Filled by `registerSkills`
+ * from each base skill's `lookAliases` and `masterAliases`.
  */
-const MASTER_ALIASES: Record<number, number> = {
-  326: 22, 327: 23, 328: 19, 329: 20, 330: 41, 331: 42, 332: 41, 333: 42, 336: 43, 337: 232, 339: 43, 340: 232, 342: 43, 343: 232,
-  346: 344, 356: 48, 360: 48, 363: 48,
-  378: 5, 379: 3, 380: 233, 381: 14, 382: 13, 383: 233, 384: 1, 385: 9, 387: 38, 388: 10, 389: 7, 390: 2, 391: 39, 392: 40, 393: 39, 394: 2, 395: 40,
-  403: 16, 404: 16, 406: 16,
-  411: 235, 413: 26, 414: 24, 416: 52, 417: 27, 418: 24, 420: 28, 422: 28, 423: 27, 424: 51, 431: 235, 441: 77,
-  454: 219, 455: 215, 456: 230, 458: 214, 459: 221, 460: 222, 461: 220, 462: 214, 463: 220, 469: 218, 470: 218, 472: 218,
-  497: 495,
-  ...DARK_LORD_MASTER_ALIASES,
-  ...MAGIC_GLADIATOR_MASTER_ALIASES,
-  // Generic Monster Skill: OpenMU sends 150 to the monsters the original draws under AT_SKILL_BOSS (50), which
-  // no case of the original matches; a deliberate translation, not in these sources.
-  150: 50,
-  551: 260, 552: 261, 554: 260, 555: 261, 558: 262, 559: 263, 560: 264, 569: 268, 572: 268, 573: 267,
-};
+export const LOOK_ALIASES: Record<number, number> = {};
 
 // ---- fallbacks by skill type -------------------------------------------------------
 
@@ -465,17 +452,17 @@ export function fallbackFor(def: SkillDefinition | undefined): SkillVisual {
  * must land on the same row as the skill it strengthens.
  */
 export function baseSkill(skill: number): number {
-  return SKILL_VISUALS[skill] ? skill : MASTER_ALIASES[skill] ?? skill;
+  return SKILL_VISUALS[skill] ? skill : LOOK_ALIASES[skill] ?? skill;
 }
 
 /** The row for a skill as the current tier draws it, through master aliases, else its type's fallback. */
 export function skillVisualFor(skill: number): SkillVisual {
-  return forTier(SKILL_VISUALS[skill] ?? SKILL_VISUALS[MASTER_ALIASES[skill] ?? -1] ?? fallbackFor(skillDefinition(skill)));
+  return forTier(SKILL_VISUALS[skill] ?? SKILL_VISUALS[LOOK_ALIASES[skill] ?? -1] ?? fallbackFor(skillDefinition(skill)));
 }
 
 /** How many skills have their own row (aliases included). */
 export function skillVisualCount(): number {
-  return Object.keys(SKILL_VISUALS).length + Object.keys(MASTER_ALIASES).length;
+  return Object.keys(SKILL_VISUALS).length + Object.keys(LOOK_ALIASES).length;
 }
 
 // ---- dispatch ---------------------------------------------------------------------

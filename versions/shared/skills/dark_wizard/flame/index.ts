@@ -23,6 +23,10 @@ const firePillars = (n: number, radius: number, every: number): Step => (at, c) 
 export default defineSkill({
   id: 5,
   name: "Flame",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [378],
+  // Master numbers cast, heard, lit and drawn as this skill (the original names them in its `case`).
+  masterAliases: [483],
   // 5 Flame: the renewed look - fire pillars out of molten rock around the point (controllers/fx/pillar.ts), in place
   // of the BITMAP_FLAME sub0 LT 40 tongue column the original stacked at SkillXY (ZzzCharacter.cpp:4485).
   visual: { area: seq(firePillars(3, 1.4, 0.1), scorch(1.5), burn(1.2)) },

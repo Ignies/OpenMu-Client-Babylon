@@ -100,6 +100,8 @@ const meteorImpact: Step = (p, c) => {
 export default defineSkill({
   id: 2,
   name: "Meteorite",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [390, 394],
   // 2 Meteorite: at the release, MODEL_FIRE sub0 falls on the target's feet; 6 chips and the explosion (meteor).
   // Enhanced: the same fall with a glow and embers, and a fuller landing (meteorImpact).
   visual: {

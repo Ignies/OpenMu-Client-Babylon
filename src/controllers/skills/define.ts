@@ -17,6 +17,10 @@ export interface SkillDef {
   readonly name: string;
   /** What the skill draws on cast / travel / impact / area (fx controller). */
   readonly visual?: SkillVisual;
+  /** Master numbers with no row of their own that draw as this skill (look only). */
+  readonly lookAliases?: readonly number[];
+  /** Master numbers that cast, sound, light and draw as this skill (`masterBase`). */
+  readonly masterAliases?: readonly number[];
   /** The light it throws (lighting controller). */
   readonly light?: SkillLight;
   /** Cast sound (sound controller). */

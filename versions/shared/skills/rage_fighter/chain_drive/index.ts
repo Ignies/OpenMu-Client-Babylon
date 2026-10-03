@@ -10,6 +10,8 @@ import { A } from '@/controllers/combat/recipes';
 export default defineSkill({
   id: 262,
   name: "Chain Drive",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [558],
   // A hit does not cut the swing short, and the target is swung round on the facing it started with
   // (ZzzCharacter.cpp:1283-1297, ZzzInterface.cpp:7394-7419).
   noFlinch: [A.PLAYER_SKILL_GIANTSWING],

@@ -248,6 +248,9 @@ export function buffIconCell(
   };
 }
 
+/** Master number → the base skill it casts, sounds and lights as (`skillAliases.ts`), for `registerSkills`. */
+export { MASTER_BASES } from './skillAliases';
+
 /** Skill number → re-use delay in milliseconds (Skill.bmd `Delay`). */
 export const SKILL_DELAY_MS: Readonly<Record<number, number>> = {};
 

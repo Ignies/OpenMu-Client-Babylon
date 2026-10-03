@@ -218,6 +218,8 @@ export const ELECTRIC_SPIKE_LIGHT: SkillLight = {
 export default defineSkill({
   id: 65,
   name: "Electric Spike",
+  // Master numbers cast, heard, lit and drawn as this skill (the original names them in its `case`).
+  masterAliases: [519],
   othersSee: OTHERS_SEE_FLASH,
   // 65 Electric Spike (519): a charge every tick of keys 1.2-1.6 (BITMAP_GATHERING sub2 + SOUND_ELEC_STRIKE_READY), the five
   // FLARE_FORCE joints at 5.5 with SOUND_ELEC_STRIKE, two MODEL_DARKLORD_SKILL at the weapon on keys 7-8

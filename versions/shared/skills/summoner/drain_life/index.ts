@@ -275,6 +275,8 @@ export const DRAIN_LIFE_LIGHT: SkillLight = {
 export default defineSkill({
   id: 214,
   name: "Drain Life",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [458, 462],
   soundOnLanding: true, // with the effect at AttackTime 15, 14 ticks after the echo (ZzzCharacter.cpp:4724-4754)
   // 214 Drain Life: MODEL_ALICE_DRAIN_LIFE at AttackTime 15 - red glows, ghost streaks from behind the caster, a
   // siphon off every other target bone homing back (drainLife).

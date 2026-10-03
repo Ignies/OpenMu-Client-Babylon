@@ -116,6 +116,8 @@ const POISON_LIGHT: LightRecipe = {
 export default defineSkill({
   id: 1,
   name: "Poison",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [384],
   // 1 Poison: at the release, MODEL_POISON + 10 BITMAP_SMOKE sub1 at the target's feet (poisonCloud).
   visual: { impact: poisonCloud(), enhanced: { impact: poisonCloud(poisonImproved) } },
   // Poison: MODEL_POISON's `(0.3, 1, 0.6) x Lum` range 2 for its 40 ticks, laid by the effect at the release

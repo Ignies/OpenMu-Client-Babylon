@@ -3,9 +3,9 @@ import type { Sounds } from '../sound/recipes';
 import { combat } from '../combat';
 import { SKILL_LIGHTS } from '../lighting/skills';
 import { LANDING_SOUNDS, SILENT_HERO_CASTS, SKILL_CLIP_SOUNDS, SKILL_SOUNDS } from '../sound/combat';
-import { SKILL_DELAY_MS, SKILL_EFFECTS } from '@/features/skills/recipes';
+import { MASTER_BASES, SKILL_DELAY_MS, SKILL_EFFECTS } from '@/features/skills/recipes';
 import type { SkillDef } from './define';
-import { BUFF_ARRIVALS, BUFF_HITS, BUFF_VISUALS, LAUNCHER_ARROWS, SKILL_VISUALS, type BuffLook } from './visuals';
+import { BUFF_ARRIVALS, BUFF_HITS, BUFF_VISUALS, LAUNCHER_ARROWS, LOOK_ALIASES, SKILL_VISUALS, type BuffLook } from './visuals';
 
 export { defineSkill, defineBuffLooks, type SkillDef, type Mount } from './define';
 
@@ -16,6 +16,8 @@ export function registerSkills(defs: readonly SkillDef[]): void {
     if (seen.has(d.id)) throw new Error(`skill ${d.id} is defined twice`);
     seen.add(d.id);
     if (d.visual) SKILL_VISUALS[d.id] = d.visual;
+    for (const id of d.lookAliases ?? []) LOOK_ALIASES[id] = d.id;
+    for (const id of d.masterAliases ?? []) LOOK_ALIASES[id] = MASTER_BASES[id] = d.id;
     if (d.light) SKILL_LIGHTS[d.id] = d.light;
     if (d.sound) (SKILL_SOUNDS as Record<number, Sounds>)[d.id] = d.sound;
     if (d.clipSound) SKILL_CLIP_SOUNDS[d.id] = d.clipSound;

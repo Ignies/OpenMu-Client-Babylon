@@ -117,6 +117,10 @@ const ICE_LIGHT: LightRecipe = {
 export default defineSkill({
   id: 7,
   name: "Ice",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [389],
+  // Master numbers cast, heard, lit and drawn as this skill (the original names them in its `case`).
+  masterAliases: [489, 491],
   // 7 Ice: at the release, MODEL_ICE + 5 MODEL_ICE_SMALL at the target's feet (iceCrystal). Enhanced: frost on the ground, mist and glints.
   visual: { impact: iceCrystal(), enhanced: { impact: iceCrystal(iceImproved) } },
   // Ice: MODEL_ICE takes `(0.4, 0.3, 0.2) x Lum` off the ground, range 2, while the crystal stands (ZzzEffect.cpp:7658-7660).

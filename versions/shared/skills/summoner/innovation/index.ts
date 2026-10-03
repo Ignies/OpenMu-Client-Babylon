@@ -11,6 +11,8 @@ const ZIN_ENERVATION: ZinCurse = { wide: [0.25, 1, 0.7], core: [0.25, 1, 0.7], r
 export default defineSkill({
   id: 222,
   name: "Innovation",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [460],
   soundOnLanding: true, // with the effect at AttackTime 15 (ZzzCharacter.cpp:5213-5223)
   visual: {
     cast: summonerHand(CURSE_HAND_ENERVATION),

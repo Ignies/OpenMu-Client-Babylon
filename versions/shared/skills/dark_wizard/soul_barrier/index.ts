@@ -120,6 +120,8 @@ export const SOUL_BARRIER_LIGHT: Omit<SkillLight, 'enhanced'> = {
 export default defineSkill({
   id: 16,
   name: "Soul Barrier",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [403, 404, 406],
   // 16 Soul Barrier: 5× CreateJoint(MODEL_SPEARSKILL sub0, width 20, white, LT 999999, MaxTails 30) - persistent,
   // so the ribbons live in BUFF_VISUALS[4] and end on MagicEffectStatus. Here only the arrival glimmer.
   // 16 Soul Barrier: nothing at the caster, the knot is the buff's look; 14 ticks on the impact plays the sound

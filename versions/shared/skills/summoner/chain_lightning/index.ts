@@ -245,6 +245,8 @@ export const CHAIN_LIGHTNING_LIGHT: SkillLight = {
 export default defineSkill({
   id: 215,
   name: "Chain Lightning",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [455],
   // 215 Chain Lightning: the hand crackle while the ground clip plays and the wav again at AttackTime 15; the
   // arcs come with the BF 0A hops (playChainLightningHop).
   visual: { cast: seq(chainHands, chainSoundAgain), enhanced: { cast: seq(chainHandsLit, chainSoundAgain) } },

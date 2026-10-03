@@ -401,6 +401,8 @@ const furyEmptyHand: Step = (_at, c) => {
 export default defineSkill({
   id: 42,
   name: "Rageful Blow",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [331, 333],
   // A hit does not cut the spin short, and it spins in place: no look-at-cursor (ZzzCharacter.cpp:1283-1297,
   // ZzzInterface.cpp:7394-7419).
   noFlinch: [A.PLAYER_ATTACK_SKILL_FURY_STRIKE],

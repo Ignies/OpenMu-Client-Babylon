@@ -129,6 +129,8 @@ const powerSlashEnhanced = mgPowerSlash(true);
 export default defineSkill({
   id: 56,
   name: "Power Slash",
+  // Master numbers cast, heard, lit and drawn as this skill (the original names them in its `case`).
+  masterAliases: [482],
   // 56 Power Slash: five hidden MODEL_MAGIC2 sub2 orbs at yaw -40..+40 (powerSlash). The weapon blur is weaponBlur.ts's.
   visual: { cast: powerSlash, enhanced: { cast: powerSlashEnhanced } },
   clip: { ground: A.PLAYER_ATTACK_TWO_HAND_SWORD_TWO, ...MOUNTED_SWORD }, // Power Slash (MG)

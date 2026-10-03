@@ -293,6 +293,8 @@ const giganticStormEnhanced = mgGiganticStorm(true);
 export default defineSkill({
   id: 237,
   name: "Gigantic Storm",
+  // Master numbers cast, heard, lit and drawn as this skill (the original names them in its `case`).
+  masterAliases: [496],
   // 237 Gigantic Storm: five sites round the caster at clip frame > 7 (giganticStorm above).
   visual: { cast: giganticStorm, enhanced: { cast: giganticStormEnhanced } },
   clip: { ground: A.PLAYER_SKILL_GIGANTICSTORM }, // Gigantic Storm (MG)

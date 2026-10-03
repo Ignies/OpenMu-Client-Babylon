@@ -12,6 +12,8 @@ const ARROW_SPEED = 17.5;
 export default defineSkill({
   id: 51,
   name: "Ice Arrow",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [424],
   // 51 Ice Arrow: cast - MODEL_ICE sub1 + sub2 (+180°) at the target LT 20, Scale 0.8, BlendMeshLight 0.5, 3× BITMAP_SMOKE,
   // a BITMAP_FIRE+2 sub10 orbiting r=60; impact: a single arrow.
   visual: {

@@ -196,6 +196,8 @@ function novaDeathGlow(body: Entity, frameTicks: number, dead: number, world: Wo
 export default defineSkill({
   id: SKILL_NOVA,
   name: "Nova",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [392, 395],
   // 40 Nova (release): 14 ticks after the packet, count+1 waves of 36 JOINT_SPIRIT sub6 heads from the caster's
   // feet + 100, the last wave with 36 sub7 in a ring (novaBurst). Enhanced: novaBurstEnhanced.
   visual: {

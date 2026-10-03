@@ -216,6 +216,8 @@ const blowOfDestructionPlus: Step = (at, c) => {
 export default defineSkill({
   id: 232,
   name: "Strike of Destruction",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [337, 340, 343],
   // The old skill -> effect table's row, labelled Ignore Defense (129, Rage Fighter 266); kept as found.
   effect: 129,
   // 232 Strike of Destruction (337/340/343 alias here, drawn at the target's feet): see `blowOfDestruction`.

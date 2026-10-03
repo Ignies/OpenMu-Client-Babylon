@@ -6,6 +6,8 @@ import { holy } from '@/controllers/lighting/recipes';
 export default defineSkill({
   id: 27,
   name: "Greater Defense",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [417, 423],
   effect: 2, // MagicEffectCancelled names skill 27: the buff it drops
   // 27 Greater Defense: BITMAP_MAGIC+1 sub2 LT 20 + 5× MODEL_SPEARSKILL sub4 (Light (0.4,0.8,0.2), LT 10000) →
   // the ribbons persist in BUFF_VISUALS[2].

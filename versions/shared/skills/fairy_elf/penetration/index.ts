@@ -10,6 +10,8 @@ import { arc } from '@/controllers/lighting/recipes';
 export default defineSkill({
   id: 52,
   name: "Penetration",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [416],
   // 52 Penetration: charge t=3 BITMAP_GATHERING sub0 LT 10 at (−100 fwd, +150 z) - 3 a frame JOINT_THUNDER sub3 /
   // SPARK+1 sub2 on a r=120 ring + SHINY+1 sprite; impact: CreateArrows(sub 2).
   visual: {
