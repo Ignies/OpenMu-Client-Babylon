@@ -5,8 +5,10 @@ Dark Knight skills, one folder per skill. Rules for skill folders: [../readme.md
 ## Public API
 - Each folder's default export is a `defineSkill`, found by glob in `../index.ts`.
 - `combo/state.ts`: `observeSkillAnimation`, `comboFlash`, `comboKnockUp`, `combosLanded`,
-  `COMBO_SOUND`, `comboLayer`. The combo itself is judged by the server; the client only hears
-  a `SkillAnimation` with id 59 and plays it.
+  `SKILL_COMBO`, `comboLayer`. The combo itself is judged by the server; the client only hears
+  a `SkillAnimation` with id 59 and plays its `sound` (eCombo). A combo kill knocks the body
+  back (`kill: { knock: true }`).
+- `slash/` exports `slashOddSwing` (the odd-SwordCount clip, also used by its strengthener).
 
 ## How it works
 

@@ -33,17 +33,18 @@ the Rage Fighter's Dark Side blows. This folder has only the handlers; it keeps 
 - Outgoing attacks are sent by `src/ecs/systems/attackSystem.ts` and `skillCastSystem.ts`, not here.
 
 ## Depends on / used by
-- uses: `src/controllers/combat` (`combat`, `SHOCK_IMMUNE_CLIPS`), `controllers/anim`, `controllers/actors`,
+- uses: `src/controllers/combat` (`combat`, `clipIgnoresHit`), `controllers/anim`, `controllers/actors`,
   `controllers/sound`, `controllers/fx` (`delay`), `_shared/net_helpers.ts`, `hero/characterStats.ts`,
   `skills/skillCasting.ts`, `skills/net.ts`, `pets/pets.ts` (`mountKind`),
-  `@versions/shared/skills/skillVisuals` and `dark_knight/combo/state`.
+  `@versions/shared/skills/skillVisuals` (`playBuffHits`: Soul Barrier's shell when the hero is hit).
+- A landed combo plays the Combo skill's own `sound` (`playSkill`).
 - used by: `src/app/logic.ts`. `objectDamaged` is read by `versions/shared/ui/hud/damage_numbers/` and
   `src/ecs/systems/impactEffectSystem.ts`.
 
 ## Change it
 - handle a new combat packet: add an `EventBus.on(...)` in `net.ts`.
-- change who flinches on a hit: `applyObjectHit` in `net.ts`; the clips that are never cut are
-  `SHOCK_IMMUNE_CLIPS` in `src/controllers/combat/recipes.ts`.
+- change who flinches on a hit: `applyObjectHit` in `net.ts`; the clips that are never cut are each
+  skill's `noFlinch` in its `versions/shared/skills/` file.
 - change how damage numbers look: `versions/shared/ui/hud/damage_numbers/index.tsx`.
 
 ## Tests

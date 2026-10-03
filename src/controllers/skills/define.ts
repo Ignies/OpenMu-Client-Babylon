@@ -55,6 +55,8 @@ export interface SkillDef {
   readonly target?: CastTarget;
   /** Walk one square in toward the target: as the cast is sent, or mid clip. */
   readonly stepIn?: 'cast' | 'midClip';
+  /** The client names the area cast's hits (0xDB) whatever the skill table's type says. */
+  readonly explicitHits?: true;
   /** What a kill with this skill does to the body (DeathSystem). */
   readonly kill?: SkillKill;
   /** Skill-owned combat state: a layer the combat controller steps and the hooks its facade forwards to. */

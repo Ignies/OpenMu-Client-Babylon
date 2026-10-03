@@ -10,14 +10,21 @@ It never sends packets or touches the scene; the ECS systems that fight read it 
   - swing latch: `attackTime`, `attackInFlight`, `checkAttackTime(n)`, `startAttack`,
     `hitDelaySeconds`, `cancelAttack`, `setLastAttackEffectTime`.
   - weapon: `attackRange(hands)`, `hasAmmo`, `equippedLauncher`.
-  - skills: `skillClip(skill, ctx)`, `magicClip`, `skillStepIn`, `stepInSquare`,
-    `clipHoldsFacing`, `castTarget(def)`, `castsOnSelf`, `castsOnSelfOnly`.
+  - skills: `skillClip(skill, ctx)`, `magicClip`, `othersSeeClip`, `castQuietOn`,
+    `clipIgnoresHit`, `skillKill`, `skillStepIn`, `stepInSquare`, `clipHoldsFacing`,
+    `castTarget(def)`, `castsOnSelf`, `castsOnSelfOnly`; `registerSkill(id, rules)` (called by
+    `registerSkills` only).
   - area hits: `needsAreaHit`, `areaHitRadius`, `buildAreaHit`.
-  - skill hooks: Nova (`beginNova`, `releaseNova`, `novaCharge`, ...), Combo (`comboFlash`,
+  - skill hooks: Nova (`novaSkill`, `novaBeginSkill`, `beginNova`, `releaseNova`, `novaCharge`, ...), Combo (`comboFlash`,
     `comboKnockUp`, ...), Dark Side (`beginDarkSide`, `nextDarkSideHit`, `rageStreak`, ...).
   - `register(layer)`, `update(map, dt)`, `reset()`.
 - `skillHooks` (`skillHooks.ts`): the Nova / Combo / Dark Side slots a skill file fills.
-- `recipes.ts`: `SKILL_CLIPS`, `HIT_KEYS` and skill numbers (`SKILL_NOVA`, `SKILL_COMBO`, ...).
+- `recipes.ts`: `SKILL_CLIPS`, `HIT_KEYS`, `SHOCK_IMMUNE_CLIPS`, `RIDER_FLY_WORLDS` (also on the
+  door, for Fire Breath and petSystem). No skill numbers: those live in the skill files.
+- `skillRules.ts`: `registerSkillRules` / `SkillCombatRules`, the combat half of a skill file.
+- `skillKills.ts`: `SkillKill` (`knock`, `dying`) and `skillKill(skill)`.
+- Door types: `CastContext`, `CastPose`, `PoseClip`, `ClipPick`, `SkillClipSet`, `SkillKill`,
+  `SkillCombatRules`.
 - Each entry file is importable on its own for a single function (`isHostilePlayer`,
   `ammoReload`, `MELEE_RANGE`, ...).
 
@@ -26,11 +33,14 @@ It never sends packets or touches the scene; the ECS systems that fight read it 
   entries (weapon range, skill clips, skill movement, cast targets, player target) and the 0xDB
   area-hit counters. `AttackSystem` calls `combat.update` once a frame; `app/lifecycle.ts`
   calls `combat.reset` on a map change.
-- Skills plug in through `registerSkills` (`controllers/skills/index.ts`): a skill's `clip`,
-  `target` and `stepIn` go into `SKILL_CLIPS`, `SKILL_TARGETS`, `SKILL_STEP_IN`; its
+- Skills plug in through `registerSkills` (`controllers/skills/index.ts`), which hands each
+  skill's combat fields to `combat.registerSkill` (`skillRules.ts`): `clip`, `poseClip`, `swing`,
+  `swordCount`, `castsAsSpell`, `othersSee`, `quietOn` (`skillClips.ts`), `noFlinch`
+  (`SHOCK_IMMUNE_CLIPS`), `holdsFacing`, `stepIn` (`skillMovement.ts`), `target`
+  (`castTargets.ts`), `explicitHits` (`areaHit.ts`), `kill` (`skillKills.ts`); its
   `combat.layer` is registered and its `combat.hooks` fill `skillHooks`. An empty slot answers
-  "nothing happening". Nova's charge, Combo and Dark Side live with their skills in
-  `versions/shared/skills/`.
+  "nothing happening". Nova's charge (with its two skill numbers), Combo and Dark Side live with
+  their skills in `versions/shared/skills/`. No file here tests a skill number.
 - Input gate (`inputGate.ts`, ZzzInterface.cpp:92-93, :7510-7791): a click is acted on only every
   `MouseUpdateTimeMax` (6 ticks, 0.24 s); a swing that fires opens it at once.
 - Weapon range (`weaponRange.ts`, ZzzInterface.cpp:3283-3299, `CheckArrow` :3148-3170): 1.8 tiles,
@@ -65,8 +75,9 @@ the hero for party buffs and heals, the selected object for everything else. Rea
 
 ### Notes: skillClips.ts
 The original's `UseSkill*` switches, `Attack*` branches and `ReceiveMagic` ladders become one
-lookup in `SKILL_CLIPS`, plus what a table cannot hold: the mount (never in a safe zone), the map
-(`AT_SKILL_RIDER` flies on Tarkan / Heaven / Maya) and two random picks. Read through
+lookup in `SKILL_CLIPS`, plus what a table cannot hold: the mount (never in a safe zone) and a
+skill's own pick (`ClipPick`: Fire Breath by the map, the Rage Fighter party buffs by a coin toss;
+`PoseClip`: Plasma Storm by the hands, Slash's odd swing). Read through
 `features/skills/skillCasting.ts` `chooseSkillAction`, used for the hero and remote casters.
 
 ### Notes: skillMovement.ts
@@ -90,10 +101,14 @@ the server sends the new square.
   If it needs a packet, expose a command for `attackSystem` / `skillCastSystem` to call.
 - state only one skill has: give the skill file a `combat: { layer, hooks }`; add a slot to
   `skillHooks.ts` and a forwarding method on the facade if the systems must read it.
-- a skill's clip, target or step-in: set `clip`, `target` or `stepIn` in its `defineSkill`.
+- a skill's clip, target, step-in or any other combat rule: set the field in its `defineSkill`.
+- a new kind of per-skill rule: add the field to `SkillCombatRules` (and `SkillDef`), a table
+  and a reader in the entry that uses it, and write it in `registerSkillRules`.
 - a hit key: `HIT_KEYS` in `recipes.ts`.
 
 ## Tests
 - `playerTarget.test.ts`: who is a hostile player (Ctrl, outlaws, warning states, duels).
 - `weaponRange.test.ts`: `ammoReload` puts arrows / bolts in the empty hand, reports an empty bag.
-- The skill golden tests in `versions/shared/skills/` cover clips, targets and step-in per skill.
+- `skillRules.test.ts`: `registerSkillRules` fills every table and the readers answer from them.
+- The skill golden tests in `versions/shared/skills/` cover clips, targets and step-in per skill
+  (`skillRules.golden.test.ts`, `castRules.test.ts`).

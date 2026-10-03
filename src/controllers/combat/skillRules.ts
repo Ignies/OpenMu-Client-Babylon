@@ -18,6 +18,7 @@ import {
   type PoseClip,
 } from './skillClips';
 import { SKILL_KILLS, type SkillKill } from './skillKills';
+import { EXPLICIT_HIT_SKILLS } from './areaHit';
 import { skillHooks, type CombatHooks } from './skillHooks';
 
 /** The fields of a skill file the combat controller reads (see `SkillDef` for each). */
@@ -33,6 +34,7 @@ export interface SkillCombatRules {
   readonly holdsFacing?: readonly PlayerAction[];
   readonly target?: CastTarget;
   readonly stepIn?: 'cast' | 'midClip';
+  readonly explicitHits?: true;
   readonly kill?: SkillKill;
   readonly combat?: { readonly layer?: CombatLayer; readonly hooks?: CombatHooks };
 }
@@ -50,6 +52,7 @@ export function registerSkillRules(id: number, d: SkillCombatRules, addLayer: (l
   for (const clip of d.holdsFacing ?? []) FACING_HELD_CLIPS.add(clip);
   if (d.target) SKILL_TARGETS[id] = d.target;
   if (d.stepIn) SKILL_STEP_IN[id] = d.stepIn;
+  if (d.explicitHits) EXPLICIT_HIT_SKILLS.add(id);
   if (d.kill) SKILL_KILLS[id] = d.kill;
   if (d.combat?.layer) addLayer(d.combat.layer);
   Object.assign(skillHooks, d.combat?.hooks);

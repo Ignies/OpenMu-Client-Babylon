@@ -4,10 +4,16 @@ Dark Wizard skills, one folder per skill. Rules for skill folders: [../readme.md
 
 ## Public API
 - Each folder's default export is a `defineSkill`, found by glob in `../index.ts`.
-- `teleport/` exports `playTeleportFlash`, `soul_barrier/` exports `playSoulBarrierShell`
-  (re-exported by `../skillVisuals.ts`).
-- `nova/charge.ts`: `beginNova`, `releaseNova`, `novaCharge`, `novaStage`, `novaStageOf`,
-  `novaCharging`, `novaChargeLayer` (the held-charge state the cast system drives).
+- `teleport/` exports `playTeleportFlash` (re-exported by `../skillVisuals.ts`). Soul Barrier's
+  hit shell is its `buffHits[4]`.
+- `nova/charge.ts`: `SKILL_NOVA`, `SKILL_NOVA_BEGIN`, `beginNova`, `releaseNova`, `novaCharge`,
+  `novaStage`, `novaStageOf`, `novaCharging`, `novaChargeLayer` (the held-charge state the cast
+  system drives through the Nova hook, which also names the two skill numbers). Nova's file holds
+  its kill rule: the knock back and the blue death motes.
+- `_shared.ts` holds the Fire Ball trail and embers (Fire Ball, Meteorite); Poison, Ice, Power
+  Wave, Energy Ball, Lance and Meteorite keep their own particle recipes.
+- `ice/strengthener_magic_gladiator.ts` (489) and `ice/mastery_magic_gladiator.ts` (491) only
+  say `castsAsSpell`.
 
 ## How it works
 

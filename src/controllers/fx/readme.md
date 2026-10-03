@@ -15,7 +15,9 @@ shared pools, textures and particle recipes other folders reuse.
   `entityYaw`, `bonePos`, `boneLocalPos`, `entityGone`, `inWindow`), `ParticleRecipe`, light gains
   (`lightCardGain`, `darkCardGain`, `spriteLevel`), `EFFECT_RENDERING_GROUP`, `keepDepthForEffects`.
 - `recipes.ts`: `TEX` (Data/Effect sheets), `MODEL` (Data/Skill models), `RGBS`, particle recipes
-  (`SPARKS`, `FIRE_PUFF`, `SMOKE`, ...), `EXPLOSION_CELLS`, `FOOT_THUNDER_FRAMES`.
+  several owners share (`SPARKS`, `FIRE_PUFF`, `SMOKE`, ...), `EXPLOSION_CELLS`,
+  `FOOT_THUNDER_FRAMES`. A recipe only one skill uses lives in that skill's file.
+- The door (`index.ts`) also exports the `ParticleRecipe` and `RGB` types.
 - Entry option types skill files import: `ModelOptions`, `SpriteOptions`, `RingOptions`,
   `ParticlesOptions`, `ProjectileOptions`, `AuraOptions`, `JointOptions`, `CardOptions`, ... and
   handles (`ModelHandle`, `StampsHandle`, `SummonBody`, `TailStrip`). `spawnModel` (`model.ts`) and
@@ -63,7 +65,8 @@ shared pools, textures and particle recipes other folders reuse.
 - add an effect entry: copy `_template.ts` to `<name>.ts`, set `name: '<name>'` and type it
   `EffectLayer<Options, '<name>'>`, then add it to `EFFECT_LAYERS` in `layers.ts` at the place
   its update order needs. `effects.spawn('<name>', ...)` is then typed.
-- add a shared texture, model, colour or particle recipe: `recipes.ts`.
+- add a shared texture, model, colour or particle recipe: `recipes.ts` (a recipe for one skill
+  goes in that skill's file).
 - change how cards, materials or particle pools work for every entry: `core.ts`.
 - remove an entry: delete its line in `layers.ts` and its file; tsc lists the callers.
 - change one skill's look: its file in `versions/shared/skills/`, not here.

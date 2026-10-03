@@ -527,7 +527,7 @@ export default defineSkill({
   // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
   lookAliases: [150],
   // 50 AT_SKILL_BOSS (OpenMU's Flame of Evil, the Lost Tower Meteorite Trap's): only AttackTime 1, then the
-  // caster's per-monster branch of AttackEffect on ticks 1..14 (bossSkill). 150 lands here too (MASTER_ALIASES).
+  // caster's per-monster branch of AttackEffect on ticks 1..14 (bossSkill). 150 lands here too (lookAliases).
   // Enhanced: the same pieces with glow, sparks, embers and ground contact, each lit by effectLight.
   visual: { impact: bossSkill, area: bossSkill, enhanced: { impact: bossSkillGraded, area: bossSkillGraded } },
 });

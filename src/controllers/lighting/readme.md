@@ -119,3 +119,9 @@ policy. It knows how to light something, never which skill or item asks for it.
   sky. The clear colour cannot be darkened because it also fills the top of a downward view. A
   screen-space mask cannot tell a hole from a card against the sky (both are depth 0), and tries
   at it blacked out grass cards on the rim; geometry riding the camera can.
+
+### Lights only one skill uses
+A light recipe only one skill uses lives in that skill's file: Flame of Evil's meteor, blast,
+hellfire circle and boss laser lights (`versions/shared/skills/monsters/flame_of_evil`), the summon
+arrival light (`versions/shared/skills/_shared.ts`). `skills.ts` keeps the shared ones
+(`EFFECT_LUMINOSITY`, `DEFAULT_WIZARDRY_CAST`, `ARROW_LIGHTS`, `CAST_HEIGHT`, `ARROW_SECONDS`).

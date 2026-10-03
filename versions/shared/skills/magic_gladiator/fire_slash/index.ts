@@ -265,7 +265,7 @@ function mgCrescent(c: SkillContext, strengthened: boolean, enh = false): void {
 }
 
 /**
- * Fire Slash (55, and 490 through MASTER_ALIASES): the WHEEL clip's charge and key (ZzzCharacter.cpp:2782-2817). Two
+ * Fire Slash (55, and 490 through its masterAliases): the WHEEL clip's charge and key (ZzzCharacter.cpp:2782-2817). Two
  * gatherings at AttackTime 1 and 2; at WHEEL frame 3 sKnightSkill3, the crescent, and the rest of the clip at
  * `0.54 + AttackSpeed * 0.004`. The skull and eBloodAttack come with the debuff (BUFF_VISUALS[58]).
  */
