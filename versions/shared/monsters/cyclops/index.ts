@@ -4,7 +4,7 @@ export default defineMonster({
   Numb: 17,
   Name: 'Cyclops',
   maxHealth: 850,
-  model: { type: 10, scale: 1 },
+  model: { type: 10, scale: 0.9 },
   stats: {
     Rate: 1,
     Level: 28,

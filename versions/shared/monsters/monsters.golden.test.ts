@@ -10,7 +10,7 @@ import { monsters } from './all';
  */
 const ROWS_HASH = '6c1233ed9b9d170eec6dc6a174a8e14978aeac5dc9ff8cdbc8ce1c7e955129e6';
 const HEALTH_HASH = '5f2f7fd14493321a0ae38909609cc52af6c05f355a66d609118274cff2d16d55';
-const MODELS_HASH = '62aa6c2694ae5114db6171f79a61ac255162e77e6401360005737e3173e564ff';
+const MODELS_HASH = '02093793a8f3fff577e403be65d353d3e5dc7fcc2d793523b8f057a08d2d2239';
 
 const hash = (v: unknown) => createHash('sha256').update(JSON.stringify(v)).digest('hex');
 const sortedKeys = (o: object) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));

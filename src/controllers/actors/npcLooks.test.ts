@@ -54,6 +54,19 @@ describe('NPC looks from the original client', () => {
   });
 
   it.each([
+    [11, 0.9], // Ghost: no Scale in its case (ZzzCharacter.cpp:14098-14105)
+    [17, 0.9], // Cyclops (:14060-14067)
+    [22, 0.9], // Ice Monster (:14020-14026)
+    [24, 0.9], // Worm (:14007-14011)
+    [32, 0.9], // Stone Golem (:13949-13953)
+    ...[161, 181, 189, 197, 267, 338].map(t => [t, 1.5]), // Illusion of Kundun 1-6 (GMHellas.cpp:897-912)
+    [502, 0.95], // Golden Rabbit, `1.0f * 0.95f` (:14865)
+    [515, 1.3], // Dark Ghost (GMEmpireGuardian2.cpp:94)
+  ])('monster %i spawns at the scale its case sets, %f', (type, scale) => {
+    expect(m.npcSpawnScale(m.resolveModelFactory(type))).toBeCloseTo(scale, 6);
+  });
+
+  it.each([
     [236, 1], // Golden Archer, :14387
     [257, 1], // Elf Soldier, MakeElfHelper :12469
     [297, 0.93], // PK Dark Knight: Skin = 1 (GMHuntingGround.cpp:291), SetCharacterScale :12157
