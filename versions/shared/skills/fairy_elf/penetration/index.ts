@@ -1,6 +1,6 @@
 import { defineSkill } from '@/controllers/skills/define';
 import { ARC_MOTES, MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
-import { CAST_HEIGHT, after, atCaster, cm, fanArrows, flash, offset, particles, repeat, seq, sprite, steelHit, ticks } from '@/controllers/skills/visuals';
+import { CAST_HEIGHT, NO_KEY, after, afterRelease, atCaster, cm, fanArrows, flash, offset, particles, repeat, seq, sprite, steelHit, ticks } from '@/controllers/skills/visuals';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
 
@@ -26,7 +26,8 @@ export default defineSkill({
       sprite({ texture: TEX.shiny2, colour: RGBS.arc, size: 1.2, seconds: ticks(10), grow: 1.6 }),
       particles({ recipe: ARC_MOTES, count: 12 })
     ), -1, 0.4), CAST_HEIGHT)),
-    area: (at, c) => fanArrows(at, c, 1, MODEL.arrowSteel, RGBS.arc),
+    // The arrow at the release, AttackTime 5: no clip key forces it (ZzzCharacter.cpp:2762-2780, :4898-4901).
+    area: afterRelease((at, c) => fanArrows(at, c, 1, MODEL.arrowSteel, RGBS.arc), { clips: NO_KEY, limit: 5 }),
     impact: seq(steelHit, flash(TEX.pierce, RGBS.arc, 1.2, 0.3)),
   },
   sound: 'Sound/ePiercing', // Penetration

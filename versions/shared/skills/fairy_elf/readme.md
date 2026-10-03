@@ -41,7 +41,8 @@ and its healing streaks at the caster) and `SUMMON_GRADED` (the graded look used
 stands then (ZzzCharacter.cpp:4910-4954), with their `strike` light there. The arrows leave at the release
 too (CreateArrows, ZzzCharacter.cpp:4811-4828, :4893-4909): Triple Shot's fan (`afterRelease`) and
 Starfall's and Ice Arrow's shot (`travel.release`); Ice Arrow's ice forms on the target at the packet
-(WSclient.cpp:4479-4500).
+(WSclient.cpp:4479-4500). Penetration's arrow leaves at AttackTime 5, its own `g_iLimitAttackTime`
+(`{ clips: NO_KEY, limit: 5 }`, ZzzCharacter.cpp:2762-2780).
 
 ## Depends on / used by
 - uses: `../_shared.ts`, `@/controllers/{skills,fx,lighting,sound,combat}`

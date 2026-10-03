@@ -107,7 +107,12 @@ export interface ReleaseRule {
   readonly key?: number;
   /** The clips that count; by default AttackStage's attack clips (`combat.releasesOnKey`). */
   readonly clips?: ReadonlySet<number>;
+  /** `g_iLimitAttackTime` for the cast: 15 by default, 5 for Penetration (ZzzCharacter.cpp:2779). */
+  readonly limit?: number;
 }
+
+/** `clips` for an AttackStage case that never forces the release: it comes when AttackTime runs out. */
+export const NO_KEY: ReadonlySet<number> = new Set();
 
 /** The caster's clip has passed the rule's key (`AnimationFrame >= key`, ZzzCharacter.cpp:2598-2604). */
 function keyReached(e: Entity, rule: ReleaseRule): boolean {
@@ -124,7 +129,7 @@ function keyReached(e: Entity, rule: ReleaseRule): boolean {
  * (attack / magic speed) releases sooner.
  */
 export function onRelease(c: SkillContext, fn: () => void, rule: ReleaseRule = {}): void {
-  const last = ticks(RELEASE_TICKS);
+  const last = ticks(rule.limit === undefined ? RELEASE_TICKS : rule.limit - 1);
   if (!c.caster.modelObject) {
     delay(last, fn);
     return;

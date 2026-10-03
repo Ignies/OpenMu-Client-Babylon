@@ -140,3 +140,14 @@ describe('the elf arrows leave at the release', () => {
     expect(shot(51, 600, false)).toEqual({ key: 4, release: 4 });
   });
 });
+
+describe('Penetration', () => {
+  // AttackStage sets g_iLimitAttackTime = 5 and forces nothing (ZzzCharacter.cpp:2762-2780): the arrow leaves at AttackTime 5.
+  const BOW = PlayerAction.PLAYER_ATTACK_BOW;
+  const shot = (attackSpeed: number) => timeline(52, BOW, playerPlaySpeed(BOW, attackSpeed), 5, 25, { area: true, only: 'projectile' });
+
+  it('shoots 4 ticks after the packet at any attack speed', () => {
+    expect(shot(0).release).toBe(4);
+    expect(shot(1000).release).toBe(4);
+  });
+});

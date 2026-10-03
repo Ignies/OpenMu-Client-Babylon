@@ -15,7 +15,7 @@ themselves are content in `versions/shared/skills/` (see [docs/content.md](../..
   `atCaster`, `scatter`, `ringOf`, `after`, `repeat`, `offset`, building blocks (`fireHit`,
   `arcHit`, `steelHit`, `explosion`, `scorch`, `burn`, `magicGround`, ...), travel (`bolt`, `arrow`),
   `fanArrows`, `onCurseLanding`, units (`ticks`, `cm`, `perTick`, `TICK`); the release: `onRelease(c, fn, rule?)`,
-  `afterRelease(step, rule?)`, `ReleaseRule`, `afterHeroRelease(fn)`.
+  `afterRelease(step, rule?)`, `ReleaseRule`, `NO_KEY`, `afterHeroRelease(fn)`.
 - Dispatch, used by modules and ECS systems through `versions/shared/skills/skillVisuals.ts`:
   `playTargetedSkillVisual`, `playAreaSkillVisual`, `playBowShotVisual`, `setBuffVisual`,
   `clearBuffVisuals`, `playBuffHits`, `skillVisualFor`, `baseSkill`, `fallbackFor`.
@@ -45,7 +45,8 @@ themselves are content in `versions/shared/skills/` (see [docs/content.md](../..
   reaches 15, 14 ticks later, unless AttackStage forces it first because the caster's clip passed its
   key (ZzzCharacter.cpp:2587-2604, :3052-3060, :4132-4140). By default the key is 5 and the clip one
   of `combat.releasesOnKey` (PLAYER_ATTACK_FIST .. PLAYER_RIDE_SKILL, a monster's Attack1 / 2); a
-  `ReleaseRule` names another key or clip set. Clip speed follows attack / magic speed, so a fast
+  `ReleaseRule` names another key or clip set (`NO_KEY`: none, the case forces nothing) and `limit`, the
+  cast's `g_iLimitAttackTime` (Penetration's 5). Clip speed follows attack / magic speed, so a fast
   caster releases on the clip (2 ticks for Fire Ball at magic speed 1400) and a slow one at 14.
   The live model is checked every frame from one tick after the packet; a caster with no model waits
   the 14 ticks.
