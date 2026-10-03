@@ -80,6 +80,19 @@ function baseline(name: string, current: string[]): string[] {
   fail('server code loads client code', [...new Set(bad)]);
 }
 
+// 6. Controllers are used through their door: code outside src/controllers/<name>/ imports its index.ts
+//    (an interface widget folder is its own door), so a controller can be rewritten behind it.
+{
+  const EXEMPT = /^src\/controllers\/render\/babylon\/|\/scenes\/testScene\.ts$/;
+  const door = /^src\/controllers\/[^/]+\/(index\.tsx?|components\/[^/]+\/index\.tsx?)$/;
+  const inner = (from: string, to: string) => {
+    const m = to.match(/^src\/controllers\/([^/]+)\//);
+    return !!m && !from.startsWith(`src/controllers/${m[1]}/`) && !door.test(to) && !EXEMPT.test(to) && !/\.test\.tsx?$/.test(from);
+  };
+  const hits = importGraph().filter(e => inner(e.from, e.to)).map(e => `${e.from} -> ${e.to}`);
+  fail('controller internals used from outside (import its index.ts)', baseline('controller_api', [...new Set(hits)].sort()));
+}
+
 if (failures.length) {
   console.error(failures.join('\n\n'));
   process.exit(1);

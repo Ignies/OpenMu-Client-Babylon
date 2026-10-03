@@ -22,6 +22,9 @@ run locally:
 - **Readmes:** every controller, feature, content and version folder has a `readme.md`.
 - **Doc names:** lowercase `snake_case` (README.md, AGENTS.md, CLAUDE.md excepted).
 - **No em-dashes** in code, comments or docs (data files excepted).
+- **Controllers through their door:** code outside `src/controllers/<name>/` imports that controller's
+  `index.ts` (an interface widget folder is its own door), so a controller can be rewritten behind it.
+  Existing deep imports are in `baselines/controller_api.json`, which only shrinks.
 - **Servers stay off the client:** no server entry (proxy, register, cash shop, marketplace, ops)
   may load `src/version/index.ts`, `src/app/`, Babylon or React at run time.
 

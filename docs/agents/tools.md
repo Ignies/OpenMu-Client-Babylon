@@ -14,6 +14,7 @@
 | Command | What it does |
 |---|---|
 | `bun tools/restructure/move.ts moves.json [--dry-run]` | moves files or folders and rewrites every import to them |
+| `bun tools/restructure/facadeImports.ts <controller> [--dry-run]` | points outside imports of a controller's inner files at its `index.ts` and adds the exports there |
 | `bun tools/restructure/aliasImports.ts` | turns long or cross-root relative imports into `@/` / `@versions/` |
 | `bun tools/restructure/dropUnusedImports.ts <dirs>` | removes import specifiers tsc reports unused |
 | `bun tools/restructure/deleteDeadExports.ts <list>` | deletes the exports listed by `unusedExports.ts` |
