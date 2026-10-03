@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 303,
   Name: 'Gigas Golem',
   maxHealth: 50000,
+  model: { type: 84, scale: 1.4 },
   stats: {
     Rate: 1,
     Level: 94,

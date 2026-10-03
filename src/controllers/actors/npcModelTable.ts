@@ -35,7 +35,7 @@ export const NPC_MODEL_TABLE: Readonly<
   474: ['xmassanta', 0.43],
   475: ['xmassanta', 0.43],
   // Castle Siege props and staff (GMBattleCastle.cpp:1286-1381). 220 (the
-  // guard) is a monster model and lives in MONSTER_MODEL_TABLE.
+  // guard) is a monster model and lives in its monster folder.
   215: ['NpcBarrier', 1.52],
   216: ['NpcCrown',  1.0],
   217: ['NpcCheckFloor',  1.0],

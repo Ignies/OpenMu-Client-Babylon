@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 300,
   Name: 'Hero Mutant',
   maxHealth: 20000,
+  model: { type: 45, scale: 1.5 },
   stats: {
     Rate: 1,
     Level: 82,

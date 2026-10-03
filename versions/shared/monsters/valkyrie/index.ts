@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 47,
   Name: 'Valkyrie',
   maxHealth: 3200,
+  model: { type: 35, scale: 1.1 },
   stats: {
     Rate: 1,
     Level: 46,

@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 162,
   Name: 'Chaos Castle 1',
   maxHealth: 700,
+  model: { type: 70, scale: 0.9 },
   stats: {
     Rate: 1,
     Level: 30,

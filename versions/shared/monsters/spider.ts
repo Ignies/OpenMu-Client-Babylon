@@ -2,19 +2,17 @@ import type { Entity, World } from '@/ecs/world';
 import { loadGLTF } from '@/controllers/assets/modelLoader';
 import { MonsterObject } from '@/controllers/actors/monsterObject';
 import { MonsterActionType } from '../objects/enum';
-import { MONSTER_HIDDEN_MESH, monsterScaleOf } from '@/controllers/actors/monsterModelTable';
+import { monsterHiddenMesh, monsterScaleOf } from '@/controllers/actors/monsterModelTable';
 
 // [NpcInfo(3, "Spider")]
 const NPC_TYPE = 3;
 
 export class Spider extends MonsterObject {
-  static {
-    // One source of truth for Object.Scale: the Setting_Monster table in
-    // monsterModelTable.ts, keyed by NPC type.
-    Spider.OverrideScale = monsterScaleOf(NPC_TYPE);
+  static get OverrideScale() {
+    return monsterScaleOf(NPC_TYPE);
   }
 
-  HiddenMesh = MONSTER_HIDDEN_MESH[NPC_TYPE] ?? -1;
+  HiddenMesh = monsterHiddenMesh(NPC_TYPE);
 
   async init(world: World, entity: Entity) {
     await super.init(world, entity);

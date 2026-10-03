@@ -7,7 +7,7 @@ import { MonsterObject } from '@/controllers/actors/monsterObject';
 import { MonsterActionType } from '../objects/enum';
 import { BUDGE_DRAGON_MODEL } from './generic_monster';
 import {
-  MONSTER_MODEL_TABLE,
+  monsterModelTypeOfNpc,
   monsterModelFile,
   monsterScaleOf,
 } from '@/controllers/actors/monsterModelTable';
@@ -41,7 +41,7 @@ abstract class GoldenMonster extends MonsterObject {
   async init(world: World, entity: Entity) {
     await super.init(world, entity);
 
-    const model = MONSTER_MODEL_TABLE[this.npcType]?.[0] ?? 0;
+    const model = Math.max(0, monsterModelTypeOfNpc(this.npcType));
     // Golden Budge Dragon shares MODEL_BUDGE_DRAGON and so shares the bob.
     this.BobsWhileMoving = model === BUDGE_DRAGON_MODEL;
     this.BodyShine.tint.set(GOLD_SHINE[0], GOLD_SHINE[1], GOLD_SHINE[2]);
@@ -53,16 +53,16 @@ abstract class GoldenMonster extends MonsterObject {
 
 // [NpcInfo(43, "Golden Budge Dragon")] (ZzzCharacter.cpp:13555-13560)
 export class GoldenBudgeDragon extends GoldenMonster {
-  static {
-    GoldenBudgeDragon.OverrideScale = monsterScaleOf(43);
+  static get OverrideScale() {
+    return monsterScaleOf(43);
   }
   protected readonly npcType = 43;
 }
 
 // [NpcInfo(53, "Golden Titan")] (ZzzCharacter.cpp:13978-13988)
 export class GoldenTitan extends GoldenMonster {
-  static {
-    GoldenTitan.OverrideScale = monsterScaleOf(53);
+  static get OverrideScale() {
+    return monsterScaleOf(53);
   }
   protected readonly npcType = 53;
   BlendMesh = 2;
@@ -70,48 +70,48 @@ export class GoldenTitan extends GoldenMonster {
 
 // [NpcInfo(54, "Golden Soldier")] (ZzzCharacter.cpp:13989-13999)
 export class GoldenSoldier extends GoldenMonster {
-  static {
-    GoldenSoldier.OverrideScale = monsterScaleOf(54);
+  static get OverrideScale() {
+    return monsterScaleOf(54);
   }
   protected readonly npcType = 54;
 }
 
 // [NpcInfo(78, "Golden Goblin")] (ZzzCharacter.cpp:13244-13251)
 export class GoldenGoblin extends GoldenMonster {
-  static {
-    GoldenGoblin.OverrideScale = monsterScaleOf(78);
+  static get OverrideScale() {
+    return monsterScaleOf(78);
   }
   protected readonly npcType = 78;
 }
 
 // [NpcInfo(79, "Golden Derkon")] (ZzzCharacter.cpp:13252-13257)
 export class GoldenDerkon extends GoldenMonster {
-  static {
-    GoldenDerkon.OverrideScale = monsterScaleOf(79);
+  static get OverrideScale() {
+    return monsterScaleOf(79);
   }
   protected readonly npcType = 79;
 }
 
 // [NpcInfo(80, "Golden Lizard King")] (ZzzCharacter.cpp:13531-13537)
 export class GoldenLizardKing extends GoldenMonster {
-  static {
-    GoldenLizardKing.OverrideScale = monsterScaleOf(80);
+  static get OverrideScale() {
+    return monsterScaleOf(80);
   }
   protected readonly npcType = 80;
 }
 
 // [NpcInfo(81, "Golden Vepar")] (ZzzCharacter.cpp:13538-13542)
 export class GoldenVepar extends GoldenMonster {
-  static {
-    GoldenVepar.OverrideScale = monsterScaleOf(81);
+  static get OverrideScale() {
+    return monsterScaleOf(81);
   }
   protected readonly npcType = 81;
 }
 
 // [NpcInfo(82, "Golden Tantallos")] (ZzzCharacter.cpp:13270-13281)
 export class GoldenTantallos extends GoldenMonster {
-  static {
-    GoldenTantallos.OverrideScale = monsterScaleOf(82);
+  static get OverrideScale() {
+    return monsterScaleOf(82);
   }
   protected readonly npcType = 82;
   BlendMesh = 2;
@@ -119,32 +119,32 @@ export class GoldenTantallos extends GoldenMonster {
 
 // [NpcInfo(83, "Golden Wheel")] (ZzzCharacter.cpp:13282-13292)
 export class GoldenWheel extends GoldenMonster {
-  static {
-    GoldenWheel.OverrideScale = monsterScaleOf(83);
+  static get OverrideScale() {
+    return monsterScaleOf(83);
   }
   protected readonly npcType = 83;
 }
 
 // [NpcInfo(493, "Golden Dark Knight")] (ZzzCharacter.cpp:14584-14591)
 export class GoldenDarkKnight extends GoldenMonster {
-  static {
-    GoldenDarkKnight.OverrideScale = monsterScaleOf(493);
+  static get OverrideScale() {
+    return monsterScaleOf(493);
   }
   protected readonly npcType = 493;
 }
 
 // [NpcInfo(494, "Golden Devil")] (ZzzCharacter.cpp:14593-14598)
 export class GoldenDevil extends GoldenMonster {
-  static {
-    GoldenDevil.OverrideScale = monsterScaleOf(494);
+  static get OverrideScale() {
+    return monsterScaleOf(494);
   }
   protected readonly npcType = 494;
 }
 
 // [NpcInfo(495, "Golden Stone Golem")] (ZzzCharacter.cpp:14599-14608)
 export class GoldenStoneGolem extends GoldenMonster {
-  static {
-    GoldenStoneGolem.OverrideScale = monsterScaleOf(495);
+  static get OverrideScale() {
+    return monsterScaleOf(495);
   }
   protected readonly npcType = 495;
 
@@ -157,8 +157,8 @@ export class GoldenStoneGolem extends GoldenMonster {
 
 // [NpcInfo(496, "Golden Crust")] (ZzzCharacter.cpp:14609-14619)
 export class GoldenCrust extends GoldenMonster {
-  static {
-    GoldenCrust.OverrideScale = monsterScaleOf(496);
+  static get OverrideScale() {
+    return monsterScaleOf(496);
   }
   protected readonly npcType = 496;
   BlendMesh = 1;
@@ -166,24 +166,24 @@ export class GoldenCrust extends GoldenMonster {
 
 // [NpcInfo(497, "Golden Satyros")] (ZzzCharacter.cpp:14620-14627)
 export class GoldenSatyros extends GoldenMonster {
-  static {
-    GoldenSatyros.OverrideScale = monsterScaleOf(497);
+  static get OverrideScale() {
+    return monsterScaleOf(497);
   }
   protected readonly npcType = 497;
 }
 
 // [NpcInfo(498, "Golden Twin Tail")] (ZzzCharacter.cpp:14628-14639)
 export class GoldenTwinTail extends GoldenMonster {
-  static {
-    GoldenTwinTail.OverrideScale = monsterScaleOf(498);
+  static get OverrideScale() {
+    return monsterScaleOf(498);
   }
   protected readonly npcType = 498;
 }
 
 // [NpcInfo(499, "Golden Iron Knight")] (ZzzCharacter.cpp:14640-14647)
 export class GoldenIronKnight extends GoldenMonster {
-  static {
-    GoldenIronKnight.OverrideScale = monsterScaleOf(499);
+  static get OverrideScale() {
+    return monsterScaleOf(499);
   }
   protected readonly npcType = 499;
 
@@ -198,8 +198,8 @@ export class GoldenIronKnight extends GoldenMonster {
 
 // [NpcInfo(500, "Golden Napin")] (ZzzCharacter.cpp:14648-14655)
 export class GoldenNapin extends GoldenMonster {
-  static {
-    GoldenNapin.OverrideScale = monsterScaleOf(500);
+  static get OverrideScale() {
+    return monsterScaleOf(500);
   }
   protected readonly npcType = 500;
 }
@@ -217,8 +217,8 @@ const GREAT_DRAGON_FLAME_HEIGHT = 1.2;
 // one golden that burns: FIRE_HIK3_MONO flames off the wing and neck bones
 // (:8520-8563), over the same gold as the rest of the line.
 export class GreatGoldenDragon extends GoldenMonster {
-  static {
-    GreatGoldenDragon.OverrideScale = monsterScaleOf(501);
+  static get OverrideScale() {
+    return monsterScaleOf(501);
   }
   protected readonly npcType = 501;
 
@@ -257,8 +257,8 @@ export class GreatGoldenDragon extends GoldenMonster {
 
 // [NpcInfo(502, "Golden Rabbit")] (ZzzCharacter.cpp:14576-14583)
 export class GoldenRabbit extends GoldenMonster {
-  static {
-    GoldenRabbit.OverrideScale = monsterScaleOf(502);
+  static get OverrideScale() {
+    return monsterScaleOf(502);
   }
   protected readonly npcType = 502;
 }

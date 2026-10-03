@@ -1,5 +1,5 @@
 import { MonsterActionType, PlayerAction } from '@versions/shared/objects/enum';
-import { MONSTER_MODEL_TABLE } from '../actors/monsterModelTable';
+import { monsterModelTypeOfNpc } from '../actors/monsterModelTable';
 
 /**
  * Animation play speeds in the original's units: `PlaySpeed` keys per tick at
@@ -365,7 +365,7 @@ export function monsterPlaySpeed(modelType: number, action: MonsterActionType): 
 
 export function monsterModelTypeOf(npcType: number | undefined): number {
   if (npcType === undefined) return -1;
-  return MONSTER_MODEL_TABLE[npcType]?.[0] ?? -1;
+  return monsterModelTypeOfNpc(npcType);
 }
 
 /**

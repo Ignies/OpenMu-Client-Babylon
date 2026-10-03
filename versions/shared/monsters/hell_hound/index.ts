@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 5,
   Name: 'Hell Hound',
   maxHealth: 1400,
+  model: { type: 1, scale: 1.1, hiddenMesh: 1 },
   stats: {
     Rate: 1,
     Level: 38,

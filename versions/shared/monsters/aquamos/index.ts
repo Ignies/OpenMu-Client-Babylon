@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 69,
   Name: 'Aquamos',
   maxHealth: 11500,
+  model: { type: 50, scale: 1 },
   stats: {
     Rate: 1,
     Level: 67,

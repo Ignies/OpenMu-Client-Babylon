@@ -20,8 +20,8 @@ const DIE_FAST_FRAME = 6;
 const DIE_FAST_FACTOR = 4;
 
 export class Kundun extends MonsterObject {
-  static {
-    Kundun.OverrideScale = monsterScaleOf(NPC_TYPE);
+  static get OverrideScale() {
+    return monsterScaleOf(NPC_TYPE);
   }
 
   async init(world: World, entity: Entity) {

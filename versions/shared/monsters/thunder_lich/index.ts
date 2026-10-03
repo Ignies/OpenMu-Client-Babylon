@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 9,
   Name: 'Thunder Lich',
   maxHealth: 2000,
+  model: { type: 4, scale: 1.1 },
   stats: {
     Rate: 1,
     Level: 44,

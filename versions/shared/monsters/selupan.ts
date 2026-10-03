@@ -14,8 +14,8 @@ const NPC_TYPE = 459;
 const MODEL_TYPE = 150;
 
 export class Selupan extends MonsterObject {
-  static {
-    Selupan.OverrideScale = monsterScaleOf(NPC_TYPE);
+  static get OverrideScale() {
+    return monsterScaleOf(NPC_TYPE);
   }
 
   async init(world: World, entity: Entity) {

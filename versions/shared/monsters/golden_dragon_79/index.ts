@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 79,
   Name: 'Golden Dragon',
   maxHealth: 22000,
+  model: { type: 31, scale: 0.9 },
   stats: {
     Rate: 1,
     Level: 80,

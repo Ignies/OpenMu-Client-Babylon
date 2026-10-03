@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 401,
   Name: 'Mirazu',
   maxHealth: 50,
+  model: { type: 123, scale: 1 },
   stats: {
     Rate: 1,
     Level: 2,

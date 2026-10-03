@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 23,
   Name: 'Hommerd',
   maxHealth: 700,
+  model: { type: 16, scale: 1.15 },
   stats: {
     Rate: 1,
     Level: 24,

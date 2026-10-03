@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 6,
   Name: 'Lich',
   maxHealth: 255,
+  model: { type: 4, scale: 0.85 },
   stats: {
     Rate: 1,
     Level: 14,

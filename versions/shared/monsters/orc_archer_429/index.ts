@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 429,
   Name: 'Orc Archer',
   maxHealth: 175000,
+  model: { type: 46, scale: 1.1 },
   stats: {
     Rate: 1,
     Level: 95,

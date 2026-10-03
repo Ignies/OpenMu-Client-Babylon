@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 81,
   Name: 'Golden Lizard King',
   maxHealth: 10000,
+  model: { type: 34, scale: 1 },
   stats: {
     Rate: 1,
     Level: 61,

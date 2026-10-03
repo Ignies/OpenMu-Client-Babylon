@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 51,
   Name: 'Great Bahamut',
   maxHealth: 7000,
+  model: { type: 33, scale: 1 },
   stats: {
     Rate: 1,
     Level: 66,

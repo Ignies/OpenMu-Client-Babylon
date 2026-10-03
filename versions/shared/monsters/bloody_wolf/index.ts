@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 60,
   Name: 'Bloody Wolf',
   maxHealth: 13500,
+  model: { type: 43, scale: 2.2 },
   stats: {
     Rate: 1,
     Level: 76,

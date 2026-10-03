@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 308,
   Name: 'Death Tree',
   maxHealth: 10000,
+  model: { type: 104, scale: 1.2 },
   stats: {
     Rate: 1,
     Level: 62,

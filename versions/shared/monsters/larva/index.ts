@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 12,
   Name: 'Larva',
   maxHealth: 750,
+  model: { type: 6, scale: 0.6 },
   stats: {
     Rate: 1,
     Level: 25,

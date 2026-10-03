@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 177,
   Name: 'Aegis',
   maxHealth: 1000,
+  model: { type: 66, scale: 1.4 },
   stats: {
     Rate: 1,
     Level: 42,

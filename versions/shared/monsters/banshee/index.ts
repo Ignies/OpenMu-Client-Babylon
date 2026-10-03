@@ -4,4 +4,5 @@ export default defineMonster({
   Numb: 516,
   Name: 'Banshee',
   maxHealth: 105000,
+  model: { type: 176, scale: 1.55 },
 });

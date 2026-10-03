@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 135,
   Name: 'White Wizard',
   maxHealth: 26000,
+  model: { type: 48, scale: 1.7 },
   stats: {
     Rate: 1,
     Level: 87,

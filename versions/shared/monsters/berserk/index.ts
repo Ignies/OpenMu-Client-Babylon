@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 435,
   Name: 'Berserk',
   maxHealth: 70000,
+  model: { type: 106, scale: 0.95 },
   stats: {
     Rate: 1,
     Level: 100,

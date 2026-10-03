@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 78,
   Name: 'Golden Goblin',
   maxHealth: 3200,
+  model: { type: 19, scale: 0.8 },
   stats: {
     Rate: 1,
     Level: 20,

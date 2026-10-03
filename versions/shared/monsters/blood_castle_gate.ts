@@ -72,8 +72,8 @@ function pushOriginNorth(entity: Entity, tiles: number): void {
 // [NpcInfo(131, "Castle Gate")] - the gate in the castle wall on the far side
 // of the moat. Breaking it is what opens the way in.
 export class CastleGate extends MonsterObject {
-  static {
-    CastleGate.OverrideScale = monsterScaleOf(CASTLE_GATE_NPC);
+  static get OverrideScale() {
+    return monsterScaleOf(CASTLE_GATE_NPC);
   }
 
   CastsShadow = false;
@@ -91,8 +91,8 @@ export class CastleGate extends MonsterObject {
 // thing the whole run is for. 133 and 134 are the same statue on the later
 // floors.
 export class StatueOfSaint extends MonsterObject {
-  static {
-    StatueOfSaint.OverrideScale = monsterScaleOf(STATUE_NPC);
+  static get OverrideScale() {
+    return monsterScaleOf(STATUE_NPC);
   }
 
   CastsShadow = false;

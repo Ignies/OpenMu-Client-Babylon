@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 32,
   Name: 'Stone Golem',
   maxHealth: 465,
+  model: { type: 25, scale: 1 },
   stats: {
     Rate: 1,
     Level: 18,

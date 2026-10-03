@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 312,
   Name: 'Bow Scout',
   maxHealth: 45000,
+  model: { type: 96, scale: 1.2 },
   stats: {
     Rate: 1,
     Level: 97,

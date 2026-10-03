@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 137,
   Name: 'Destructive archer',
   maxHealth: 12000,
+  model: { type: 46, scale: 1.2 },
   stats: {
     Rate: 1,
     Level: 74,

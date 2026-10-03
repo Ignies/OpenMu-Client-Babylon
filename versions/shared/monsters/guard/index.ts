@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 220,
   Name: 'Guard',
   maxHealth: 500,
+  model: { type: 77, scale: 1.1 },
   stats: {
     Rate: 1,
     Level: 2,

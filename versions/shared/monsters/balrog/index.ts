@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 38,
   Name: 'Balrog',
   maxHealth: 9000,
+  model: { type: 27, scale: 1.6 },
   stats: {
     Rate: 1,
     Level: 66,

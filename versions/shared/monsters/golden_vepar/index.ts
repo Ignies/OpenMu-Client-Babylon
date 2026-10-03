@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 80,
   Name: 'Golden Vepar',
   maxHealth: 25000,
+  model: { type: 36, scale: 1.4 },
   stats: {
     Rate: 1,
     Level: 83,

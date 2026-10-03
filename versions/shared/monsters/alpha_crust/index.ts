@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 74,
   Name: 'Alpha Crust',
   maxHealth: 34500,
+  model: { type: 52, scale: 1.1 },
   stats: {
     Rate: 1,
     Level: 92,

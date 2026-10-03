@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 278,
   Name: 'Life Stone',
   maxHealth: 15000,
+  model: { type: 86, scale: 1 },
   stats: {
     Rate: 1,
     Level: 2,

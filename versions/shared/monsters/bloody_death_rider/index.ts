@@ -4,4 +4,5 @@ export default defineMonster({
   Numb: 550,
   Name: 'Bloody Death Rider',
   maxHealth: 88000,
+  model: { type: 194, scale: 1.2 },
 });

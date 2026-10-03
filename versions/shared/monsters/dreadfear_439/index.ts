@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 439,
   Name: 'Dreadfear',
   maxHealth: 94000,
+  model: { type: 116, scale: 1.3 },
   stats: {
     Rate: 1,
     Level: 119,

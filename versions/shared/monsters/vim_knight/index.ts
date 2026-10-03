@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 61,
   Name: 'Vim Knight',
   maxHealth: 25000,
+  model: { type: 44, scale: 1.5 },
   stats: {
     Rate: 1,
     Level: 84,

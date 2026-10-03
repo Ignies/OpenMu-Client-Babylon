@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 66,
   Name: 'Cursed King',
   maxHealth: 38000,
+  model: { type: 48, scale: 1.7 },
   stats: {
     Rate: 1,
     Level: 86,

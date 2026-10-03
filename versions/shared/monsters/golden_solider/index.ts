@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 54,
   Name: 'Golden Solider',
   maxHealth: 5000,
+  model: { type: 40, scale: 1.1 },
   stats: {
     Rate: 1,
     Level: 46,

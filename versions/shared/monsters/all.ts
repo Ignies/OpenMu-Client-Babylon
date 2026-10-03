@@ -1,4 +1,4 @@
-import { MonsterRegistry, type MonsterDef } from '@/controllers/monsters';
+import { monsterRegistry, registerMonsters, type MonsterDef } from '@/controllers/monsters';
 
 /**
  * Every monster folder's data (`<name>/index.ts`), found by glob in the client build and in tests,
@@ -17,4 +17,7 @@ function monsterFiles(): MonsterDef[] {
   }
 }
 
-export const monsters = new MonsterRegistry(monsterFiles());
+registerMonsters(monsterFiles());
+
+/** The monsters controller's registry, filled with these folders. */
+export const monsters = monsterRegistry;

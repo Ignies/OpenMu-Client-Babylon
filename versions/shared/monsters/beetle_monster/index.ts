@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 28,
   Name: 'Beetle Monster',
   maxHealth: 165,
+  model: { type: 21, scale: 0.8 },
   stats: {
     Rate: 1,
     Level: 10,

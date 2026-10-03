@@ -4,4 +4,5 @@ export default defineMonster({
   Numb: 507,
   Name: 'Lucas',
   maxHealth: 1200000,
+  model: { type: 167, scale: 1.25 },
 });

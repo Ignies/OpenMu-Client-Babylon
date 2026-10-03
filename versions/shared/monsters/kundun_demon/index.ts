@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 275,
   Name: 'Kundun Demon',
   maxHealth: 140000,
+  model: { type: 64, scale: 2 },
   stats: {
     Rate: 1,
     Level: 148,

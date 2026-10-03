@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 42,
   Name: 'Red Dragon',
   maxHealth: 50000,
+  model: { type: 31, scale: 1.3 },
   stats: {
     Rate: 1,
     Level: 147,

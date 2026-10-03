@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 41,
   Name: 'Death Cow',
   maxHealth: 4500,
+  model: { type: 30, scale: 1.1 },
   stats: {
     Rate: 1,
     Level: 57,

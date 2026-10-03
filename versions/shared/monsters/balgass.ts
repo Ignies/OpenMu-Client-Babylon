@@ -35,8 +35,8 @@ const SLAM_CARD_SECONDS = 0.8;
 const WALK_SMOKE_INTERVAL = 0.4;
 
 export class Balgass extends MonsterObject {
-  static {
-    Balgass.OverrideScale = monsterScaleOf(NPC_TYPE);
+  static get OverrideScale() {
+    return monsterScaleOf(NPC_TYPE);
   }
 
   #world: World | null = null;

@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 48,
   Name: 'Lizard King',
   maxHealth: 9000,
+  model: { type: 36, scale: 1.4 },
   stats: {
     Rate: 1,
     Level: 70,

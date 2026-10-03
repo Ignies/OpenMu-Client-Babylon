@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 440,
   Name: 'Dark Elf',
   maxHealth: 1000000,
+  model: { type: 92, scale: 1.5 },
   stats: {
     Rate: 1,
     Level: 135,

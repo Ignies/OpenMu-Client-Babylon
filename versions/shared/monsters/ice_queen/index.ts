@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 25,
   Name: 'Ice Queen',
   maxHealth: 4000,
+  model: { type: 18, scale: 1.1 },
   stats: {
     Rate: 1,
     Level: 52,

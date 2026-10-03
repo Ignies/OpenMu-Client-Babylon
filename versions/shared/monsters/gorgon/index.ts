@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 18,
   Name: 'Gorgon',
   maxHealth: 6000,
+  model: { type: 11, scale: 1.5 },
   stats: {
     Rate: 1,
     Level: 55,

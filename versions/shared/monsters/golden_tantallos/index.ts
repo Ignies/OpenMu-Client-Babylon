@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 82,
   Name: 'Golden Tantallos',
   maxHealth: 32000,
+  model: { type: 42, scale: 1.8 },
   stats: {
     Rate: 1,
     Level: 90,

@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 309,
   Name: 'Hell Maine',
   maxHealth: 50000,
+  model: { type: 105, scale: 1.8 },
   stats: {
     Rate: 1,
     Level: 98,

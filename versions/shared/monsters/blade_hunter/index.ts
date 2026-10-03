@@ -4,4 +4,5 @@ export default defineMonster({
   Numb: 354,
   Name: 'Blade Hunter',
   maxHealth: 32000,
+  model: { type: 110, scale: 1.3 },
 });

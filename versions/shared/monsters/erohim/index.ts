@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 295,
   Name: 'Erohim',
   maxHealth: 3000000,
+  model: { type: 87, scale: 2 },
   stats: {
     Rate: 1,
     Level: 128,

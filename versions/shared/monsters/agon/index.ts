@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 31,
   Name: 'Agon',
   maxHealth: 340,
+  model: { type: 24, scale: 1.3 },
   stats: {
     Rate: 1,
     Level: 16,

@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 190,
   Name: 'Death Angel',
   maxHealth: 12000,
+  model: { type: 63, scale: 1.2 },
   stats: {
     Rate: 1,
     Level: 80,

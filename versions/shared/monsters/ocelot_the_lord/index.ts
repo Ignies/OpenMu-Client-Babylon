@@ -4,4 +4,5 @@ export default defineMonster({
   Numb: 520,
   Name: 'Ocelot the Lord',
   maxHealth: 53000,
+  model: { type: 180, scale: 1.1 },
 });

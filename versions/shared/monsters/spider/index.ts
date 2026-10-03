@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 3,
   Name: 'Spider',
   maxHealth: 30,
+  model: { type: 9, scale: 0.4 },
   stats: {
     Rate: 1,
     Level: 2,

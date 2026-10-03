@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 178,
   Name: 'Lord centurion',
   maxHealth: 1200,
+  model: { type: 67, scale: 1 },
   stats: {
     Rate: 1,
     Level: 44,

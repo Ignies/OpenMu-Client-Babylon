@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 30,
   Name: 'Forest Monster',
   maxHealth: 295,
+  model: { type: 23, scale: 0.75 },
   stats: {
     Rate: 1,
     Level: 15,

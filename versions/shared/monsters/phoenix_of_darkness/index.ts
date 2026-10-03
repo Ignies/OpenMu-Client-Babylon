@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 77,
   Name: 'Phoenix of Darkness',
   maxHealth: 95000,
+  model: { type: 55, scale: 1 },
   stats: {
     Rate: 1,
     Level: 113,

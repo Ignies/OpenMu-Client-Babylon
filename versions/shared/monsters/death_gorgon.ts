@@ -16,8 +16,8 @@ import { monsterModelFile, monsterScaleOf } from '@/controllers/actors/monsterMo
 
 // [NpcInfo(35, "Death Gorgon")] (ZzzCharacter.cpp:13623-13633)
 export class DeathGorgon extends MonsterObject {
-  static {
-    DeathGorgon.OverrideScale = monsterScaleOf(35);
+  static get OverrideScale() {
+    return monsterScaleOf(35);
   }
 
   async init(world: World, entity: Entity) {

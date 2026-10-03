@@ -4,4 +4,5 @@ export default defineMonster({
   Numb: 441,
   Name: 'Sapi-Unus',
   maxHealth: 37000,
+  model: { type: 136, scale: 1 },
 });

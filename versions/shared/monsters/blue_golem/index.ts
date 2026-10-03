@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 305,
   Name: 'Blue Golem',
   maxHealth: 25000,
+  model: { type: 101, scale: 1.35 },
   stats: {
     Rate: 1,
     Level: 74,

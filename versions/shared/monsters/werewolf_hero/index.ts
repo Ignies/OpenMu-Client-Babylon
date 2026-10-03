@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 315,
   Name: 'Werewolf(Hero)',
   maxHealth: 123000,
+  model: { type: 95, scale: 1.25 },
   stats: {
     Rate: 1,
     Level: 127,

@@ -27,6 +27,11 @@ export class MonsterRegistry {
     return this.defs.get(numb) ?? null;
   }
 
+  /** How the type is drawn, or null when no monster model is known for it. */
+  model(numb: number): NonNullable<MonsterDef['model']> | null {
+    return this.defs.get(numb)?.model ?? null;
+  }
+
   maxHealth(numb: number): number {
     return this.defs.get(numb)?.maxHealth ?? 0;
   }

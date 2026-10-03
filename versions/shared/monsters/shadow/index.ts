@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 36,
   Name: 'Shadow',
   maxHealth: 2800,
+  model: { type: 28, scale: 1.2 },
   stats: {
     Rate: 1,
     Level: 47,

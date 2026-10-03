@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 333,
   Name: 'Bloody Soldier',
   maxHealth: 97300,
+  model: { type: 65, scale: 0.8 },
   stats: {
     Rate: 1,
     Level: 118,

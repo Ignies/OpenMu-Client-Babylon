@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 301,
   Name: 'Omega Wing',
   maxHealth: 69000,
+  model: { type: 52, scale: 1.1 },
   stats: {
     Rate: 1,
     Level: 102,

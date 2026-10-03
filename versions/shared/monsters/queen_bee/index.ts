@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 293,
   Name: 'Queen Bee',
   maxHealth: 25000,
+  model: { type: 84, scale: 1.4 },
   stats: {
     Rate: 1,
     Level: 84,

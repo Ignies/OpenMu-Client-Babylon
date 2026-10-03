@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 311,
   Name: 'Lance Scout',
   maxHealth: 45000,
+  model: { type: 97, scale: 1.2 },
   stats: {
     Rate: 1,
     Level: 97,

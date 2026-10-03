@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 310,
   Name: 'Hammer Scout',
   maxHealth: 45000,
+  model: { type: 91, scale: 1.25 },
   stats: {
     Rate: 1,
     Level: 97,

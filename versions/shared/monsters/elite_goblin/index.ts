@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 33,
   Name: 'Elite Goblin',
   maxHealth: 120,
+  model: { type: 19, scale: 1.2 },
   stats: {
     Rate: 1,
     Level: 8,

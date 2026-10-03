@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 138,
   Name: 'King Orc',
   maxHealth: 29000,
+  model: { type: 47, scale: 1.1 },
   stats: {
     Rate: 1,
     Level: 85,

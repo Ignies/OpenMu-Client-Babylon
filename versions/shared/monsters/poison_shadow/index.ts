@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 39,
   Name: 'Poison Shadow',
   maxHealth: 3500,
+  model: { type: 28, scale: 1.2 },
   stats: {
     Rate: 1,
     Level: 50,

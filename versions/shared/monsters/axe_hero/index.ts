@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 302,
   Name: 'Axe Hero',
   maxHealth: 23000,
+  model: { type: 85, scale: 0.7 },
   stats: {
     Rate: 1,
     Level: 85,

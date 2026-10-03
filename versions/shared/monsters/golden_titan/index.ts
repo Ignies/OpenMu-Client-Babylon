@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 53,
   Name: 'Golden Titan',
   maxHealth: 6500,
+  model: { type: 39, scale: 1.8 },
   stats: {
     Rate: 1,
     Level: 53,

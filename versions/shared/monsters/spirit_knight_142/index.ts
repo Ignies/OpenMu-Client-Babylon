@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 142,
   Name: 'Spirit Knight',
   maxHealth: 55000,
+  model: { type: 57, scale: 1.19 },
   stats: {
     Rate: 1,
     Level: 98,

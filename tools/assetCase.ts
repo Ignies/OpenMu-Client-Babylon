@@ -1,7 +1,5 @@
-import {
-  MONSTER_MODEL_TABLE,
-  monsterModelFile,
-} from '../src/controllers/actors/monsterModelTable';
+import { monsterModelFile } from '../src/controllers/actors/monsterModelTable';
+import { monsters } from '../versions/shared/monsters/all';
 import {
   NPC_MODEL_TABLE,
   npcModelFile,
@@ -23,8 +21,9 @@ import {
 /** Paths the client builds from a table, keyed by their lower-case form. */
 const FROM_TABLES = new Map<string, string>();
 
-for (const entry of Object.values(MONSTER_MODEL_TABLE)) {
-  const path = monsterModelFile(entry[0]);
+for (const def of monsters.all()) {
+  if (!def.model) continue;
+  const path = monsterModelFile(def.model.type);
   FROM_TABLES.set(path.toLowerCase(), path);
 }
 

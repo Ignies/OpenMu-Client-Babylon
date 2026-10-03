@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 131,
   Name: 'Castle gate',
   maxHealth: 5000000,
+  model: { type: 61, scale: 0.8 },
   stats: {
     Rate: 1,
     Level: 0,

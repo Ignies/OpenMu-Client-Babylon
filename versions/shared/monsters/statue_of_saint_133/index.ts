@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 133,
   Name: 'Statue of Saint',
   maxHealth: 5000000,
+  model: { type: 60, scale: 0.8 },
   stats: {
     Rate: 1,
     Level: 0,

@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 316,
   Name: 'Valam',
   maxHealth: 140000,
+  model: { type: 96, scale: 1.2 },
   stats: {
     Rate: 1,
     Level: 123,

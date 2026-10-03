@@ -245,7 +245,7 @@ const TRACKS = {
 export type TrackName = keyof typeof TRACKS;
 
 /**
- * Monster model type -> track, in `MONSTER_MODEL_TABLE` order; absent takes `boot`. `none` only
+ * Monster model type -> track, in monster model order; absent takes `boot`. `none` only
  * with proof it is off the ground (`HoverHeight`), `slide` only for a legless body. See readme.md.
  */
 const MODEL_TRACKS: Readonly<Record<number, TrackName>> = {

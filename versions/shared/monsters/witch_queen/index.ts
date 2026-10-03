@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 304,
   Name: 'Witch Queen',
   maxHealth: 38500,
+  model: { type: 100, scale: 1.4 },
   stats: {
     Rate: 1,
     Level: 84,

@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 306,
   Name: 'Death Rider',
   maxHealth: 14000,
+  model: { type: 102, scale: 1.1 },
   stats: {
     Rate: 1,
     Level: 68,

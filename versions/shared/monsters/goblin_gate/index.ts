@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 234,
   Name: 'Goblin Gate',
   maxHealth: 50,
+  model: { type: 19, scale: 1.5 },
   stats: {
     Rate: 1,
     Level: 2,

@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 20,
   Name: 'Elite Yeti',
   maxHealth: 1200,
+  model: { type: 13, scale: 1.4 },
   stats: {
     Rate: 1,
     Level: 36,

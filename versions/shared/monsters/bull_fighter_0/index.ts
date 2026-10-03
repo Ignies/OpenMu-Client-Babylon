@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 0,
   Name: 'Bull Fighter',
   maxHealth: 100,
+  model: { type: 0, scale: 0.8, hiddenMesh: 0 },
   stats: {
     Rate: 1,
     Level: 6,

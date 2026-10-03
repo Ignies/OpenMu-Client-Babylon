@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 188,
   Name: 'Schriker',
   maxHealth: 8400,
+  model: { type: 69, scale: 1.2 },
   stats: {
     Rate: 1,
     Level: 80,

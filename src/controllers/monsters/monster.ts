@@ -36,6 +36,11 @@ export type MonsterDef = {
   Name: string;
   /** Maximum health, from the server's own definitions (the protocol never sends it). */
   maxHealth?: number;
+  /**
+   * How it is drawn (`Setting_Monster`, ZzzCharacter.cpp): the monster model (`Monster/Monster<type+1>.glb`),
+   * `Object.Scale`, and `Object.HiddenMesh` for types that share a model and hide a mesh.
+   */
+  model?: { type: number; scale: number; hiddenMesh?: number };
   stats?: MonsterStats;
 };
 

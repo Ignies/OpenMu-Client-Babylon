@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 290,
   Name: 'Fire Golem',
   maxHealth: 15000,
+  model: { type: 81, scale: 1.2 },
   stats: {
     Rate: 1,
     Level: 78,

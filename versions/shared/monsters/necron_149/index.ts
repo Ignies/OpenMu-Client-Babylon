@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 149,
   Name: 'Necron',
   maxHealth: 900,
+  model: { type: 68, scale: 1.2 },
   stats: {
     Rate: 1,
     Level: 38,

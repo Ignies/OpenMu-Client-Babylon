@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 136,
   Name: 'Destructive soldier',
   maxHealth: 9500,
+  model: { type: 47, scale: 1.3 },
   stats: {
     Rate: 1,
     Level: 70,

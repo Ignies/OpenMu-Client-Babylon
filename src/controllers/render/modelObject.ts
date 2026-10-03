@@ -376,7 +376,14 @@ function disposeGltf(gltf: {
 }
 
 export class ModelObject {
-  static OverrideScale = -1;
+  protected static overrideScaleValue = -1;
+  /** A class's fixed `Object.Scale`, or -1. Per class: setting it on a subclass shadows the base. */
+  static get OverrideScale(): number {
+    return this.overrideScaleValue;
+  }
+  static set OverrideScale(value: number) {
+    this.overrideScaleValue = value;
+  }
 
   /**
    * Set by `dispose`. An entity can be taken out of the world while its GLB

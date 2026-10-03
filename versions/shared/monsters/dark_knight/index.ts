@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 10,
   Name: 'Dark Knight',
   maxHealth: 3000,
+  model: { type: 3, scale: 0.8 },
   stats: {
     Rate: 1,
     Level: 48,

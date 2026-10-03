@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 434,
   Name: 'Gigantis"              98',
   maxHealth: 43000,
+  model: { type: 112, scale: 1.2 },
   stats: {
     Rate: 1,
     Level: 40000,

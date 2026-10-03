@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 40,
   Name: 'Death Knight',
   maxHealth: 5500,
+  model: { type: 29, scale: 1.3 },
   stats: {
     Rate: 1,
     Level: 62,

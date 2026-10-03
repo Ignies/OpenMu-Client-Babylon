@@ -2,8 +2,10 @@ import { monsterFactoryFor } from '@versions/shared/monsters/generic_monster';
 import {
   FALLBACK_MODEL_TYPE,
   FALLBACK_SCALE,
-  MONSTER_HIDDEN_MESH,
-  MONSTER_MODEL_TABLE,
+  hasMonsterModel,
+  monsterHiddenMesh,
+  monsterModelTypeOfNpc,
+  monsterScaleOf,
 } from './monsterModelTable';
 import { ModelObject } from '../render/modelObject';
 import { Balgass } from '@versions/shared/monsters/balgass';
@@ -152,12 +154,11 @@ export function resolveModelFactory(typeNumber: number): typeof ModelObject {
   // Before the monster table: a trap's model is the map's, not its own.
   if (TRAP_MODEL_TABLE[typeNumber]) return trapFactoryFor(typeNumber);
 
-  const monster = MONSTER_MODEL_TABLE[typeNumber];
-  if (monster) {
+  if (hasMonsterModel(typeNumber)) {
     return monsterFactoryFor(
-      monster[0],
-      monster[1],
-      MONSTER_HIDDEN_MESH[typeNumber] ?? -1
+      monsterModelTypeOfNpc(typeNumber),
+      monsterScaleOf(typeNumber),
+      monsterHiddenMesh(typeNumber)
     );
   }
 
@@ -177,7 +178,7 @@ export function isKnownObjectType(typeNumber: number): boolean {
   return (
     ModelFactoryPerId[typeNumber] !== undefined ||
     TRAP_MODEL_TABLE[typeNumber] !== undefined ||
-    MONSTER_MODEL_TABLE[typeNumber] !== undefined ||
+    hasMonsterModel(typeNumber) ||
     NPC_MODEL_TABLE[typeNumber] !== undefined ||
     GEARED_NPC_TABLE[typeNumber] !== undefined ||
     TRANSFORMED_NPC_TABLE[typeNumber] !== undefined

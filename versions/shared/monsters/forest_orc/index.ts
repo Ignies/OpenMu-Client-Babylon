@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 307,
   Name: 'Forest Orc',
   maxHealth: 11000,
+  model: { type: 103, scale: 1.15 },
   stats: {
     Rate: 1,
     Level: 64,

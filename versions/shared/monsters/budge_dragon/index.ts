@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 2,
   Name: 'Budge Dragon',
   maxHealth: 60,
+  model: { type: 2, scale: 0.5 },
   stats: {
     Rate: 1,
     Level: 4,

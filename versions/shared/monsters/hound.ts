@@ -1,20 +1,18 @@
 import type { Entity, World } from '@/ecs/world';
 import { loadGLTF } from '@/controllers/assets/modelLoader';
 import { MonsterObject } from '@/controllers/actors/monsterObject';
-import { MONSTER_HIDDEN_MESH, monsterScaleOf } from '@/controllers/actors/monsterModelTable';
+import { monsterHiddenMesh, monsterScaleOf } from '@/controllers/actors/monsterModelTable';
 
 // [NpcInfo(1, "Hound")]
 const NPC_TYPE = 1;
 
 export class Hound extends MonsterObject {
-  static {
-    // One source of truth for Object.Scale: the Setting_Monster table in
-    // monsterModelTable.ts, keyed by NPC type.
-    Hound.OverrideScale = monsterScaleOf(NPC_TYPE);
+  static get OverrideScale() {
+    return monsterScaleOf(NPC_TYPE);
   }
 
   // `c->Object.HiddenMesh = 0` - the Hell Hound variant's kit (:13856).
-  HiddenMesh = MONSTER_HIDDEN_MESH[NPC_TYPE] ?? -1;
+  HiddenMesh = monsterHiddenMesh(NPC_TYPE);
 
   async init(world: World, entity: Entity) {
     await super.init(world, entity);

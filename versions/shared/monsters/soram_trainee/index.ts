@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 437,
   Name: 'Soram (Trainee)',
   maxHealth: 100000,
+  model: { type: 94, scale: 1.3 },
   stats: {
     Rate: 1,
     Level: 134,

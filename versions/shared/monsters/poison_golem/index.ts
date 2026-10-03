@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 292,
   Name: 'Poison Golem',
   maxHealth: 34500,
+  model: { type: 83, scale: 1.4 },
   stats: {
     Rate: 1,
     Level: 92,

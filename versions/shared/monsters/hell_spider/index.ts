@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 13,
   Name: 'Hell Spider',
   maxHealth: 1600,
+  model: { type: 8, scale: 1.1 },
   stats: {
     Rate: 1,
     Level: 40,

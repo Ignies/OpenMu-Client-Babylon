@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 436,
   Name: 'Balram (Trainee)"      134',
   maxHealth: 90000,
+  model: { type: 91, scale: 1.25 },
   stats: {
     Rate: 1,
     Level: 55000,

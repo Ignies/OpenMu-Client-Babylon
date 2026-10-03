@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 151,
   Name: 'Gold Warrior',
   maxHealth: 4000,
+  model: { type: 40, scale: 1.1 },
   stats: {
     Rate: 1,
     Level: 58,

@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 59,
   Name: 'Zaikan',
   maxHealth: 34000,
+  model: { type: 42, scale: 2.1 },
   stats: {
     Rate: 1,
     Level: 90,

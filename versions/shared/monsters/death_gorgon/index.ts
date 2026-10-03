@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 35,
   Name: 'Death Gorgon',
   maxHealth: 6000,
+  model: { type: 11, scale: 1.3 },
   stats: {
     Rate: 1,
     Level: 64,

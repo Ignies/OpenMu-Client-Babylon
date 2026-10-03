@@ -2,19 +2,17 @@ import type { Entity, World } from '@/ecs/world';
 import { loadGLTF } from '@/controllers/assets/modelLoader';
 import { MonsterObject } from '@/controllers/actors/monsterObject';
 import { MonsterActionType } from '../objects/enum';
-import { MONSTER_HIDDEN_MESH, monsterScaleOf } from '@/controllers/actors/monsterModelTable';
+import { monsterHiddenMesh, monsterScaleOf } from '@/controllers/actors/monsterModelTable';
 
 // [NpcInfo(2, "Budge Dragon")]
 const NPC_TYPE = 2;
 
 export class BudgeDragon extends MonsterObject {
-  static {
-    // One source of truth for Object.Scale: the Setting_Monster table in
-    // monsterModelTable.ts, keyed by NPC type.
-    BudgeDragon.OverrideScale = monsterScaleOf(NPC_TYPE);
+  static get OverrideScale() {
+    return monsterScaleOf(NPC_TYPE);
   }
 
-  HiddenMesh = MONSTER_HIDDEN_MESH[NPC_TYPE] ?? -1;
+  HiddenMesh = monsterHiddenMesh(NPC_TYPE);
 
   /** `o->Position[2] += -|sin(Timer)| * 70 + 70` while walking (:6274). */
   BobsWhileMoving = true;

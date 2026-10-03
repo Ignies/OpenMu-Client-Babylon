@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 49,
   Name: 'Hydra',
   maxHealth: 19000,
+  model: { type: 37, scale: 1 },
   stats: {
     Rate: 1,
     Level: 74,

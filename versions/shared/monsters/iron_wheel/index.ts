@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 57,
   Name: 'Iron Wheel',
   maxHealth: 17000,
+  model: { type: 41, scale: 1.4 },
   stats: {
     Rate: 1,
     Level: 80,

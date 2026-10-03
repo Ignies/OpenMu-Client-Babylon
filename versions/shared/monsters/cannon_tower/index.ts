@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 288,
   Name: 'Cannon Tower',
   maxHealth: 50,
+  model: { type: 79, scale: 1 },
   stats: {
     Rate: 1,
     Level: 200,
