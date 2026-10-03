@@ -82,7 +82,6 @@ export const gameVersion: GameVersion = {
     rageFighter: false,
     muHelper: false,
     itemHotkeys: false,
-    cashShop: false,
     events: false,
     questDialogs: false,
   },

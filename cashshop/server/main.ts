@@ -11,7 +11,7 @@ import { BurstLimit, bucketFor, clientIp } from '../../src/core/rateLimit';
 /**
  * The cash shop service.
  *
- * The shop is an in-game window (`src/ui/pages/worldPage/components/cashShop`)
+ * The shop was an in-game window (removed from the client for now, see git history)
  * opened from the item shop button on the bottom bar, so there is no page to
  * serve and no sign-in: the player is already authenticated to the game
  * server, and the proxy that carries their socket is what vouches for them
@@ -70,7 +70,7 @@ const DATABASE_URL =
  * path, and no CORS header is involved at all.
  *
  * Set it when the service gets a host of its own (`api.example.net`), and
- * build the client with `VITE_CASHSHOP_API` pointing there. Exact origins
+ * point the client's shop window there. Exact origins
  * only, never `*`: every order carries a ticket, and a wildcard is how a page
  * on any origin gets to spend a player's jewels with a ticket it found.
  */
@@ -106,7 +106,7 @@ const PREVIEW_OPEN = process.env.CASHSHOP_PREVIEW === 'on';
  * is counted per account, which is the identity a ticket actually proves,
  * with a per-network bucket behind it only as a backstop against one address
  * driving many tickets. The account number comes from what the window does:
- * it polls the queue every 30 s (`ORDERS_POLL_MS` in `src/cashShop/state.ts`),
+ * it polls the queue every 30 s (`ORDERS_POLL_MS` in its old client state),
  * which is 20 reads a window doing nothing, refreshes after every order, and
  * the caps in `catalog.ts` allow about 140 orders a day of which the gacha's
  * 12 is the most a player places in one sitting. 120 lets a player buy the

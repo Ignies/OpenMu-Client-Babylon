@@ -23,9 +23,9 @@ create and delete actions still live in the central `Store` (`src/app/store.ts`)
 - `net.ts` writes the server's answers into the Store: `charactersList`, `focusedChar`,
   `deletingChar`, `creationUnlockFlags`, `charCreationPending`, `addCreatedCharacter(...)`, and pops
   message boxes with `Store.popUpMsgWin`.
-- `CharacterList` and `CharacterFocused` are not handled here: the pages handle them with
-  `useEventBus` (`versions/shared/ui/pages/character_select/index.tsx`,
-  `versions/v097d/ui/pregame/charactersPage.tsx`).
+- `CharacterList` and `CharacterFocused` are not handled here: the shared
+  `versions/shared/ui/pages/character_select/character_list` component (`CharacterList`) handles
+  them for both pages.
 - Outgoing packets are Store actions: `refreshCharactersListRequest`, `focusCharacterRequest`,
   `selectCharacterRequest`, `createCharacterRequest`, `deleteCharacterRequest`.
 

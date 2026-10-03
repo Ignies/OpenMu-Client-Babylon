@@ -77,29 +77,13 @@ export function registerApiUrl(
 }
 
 /**
- * Where the cash shop asks for its catalogue.
- *
- * A world being played from its own site keeps the relative path: that
- * deployment publishes the service under `/api` on the client's host, which
- * costs no CORS allowlist and no second certificate. It is only somebody
- * else's shop that has to be addressed by name.
- */
-export function shopApiUrl(profile: ServerProfile = ServerConfig.active): string {
-  if (profile.domain && !servedByWorld(profile.domain)) {
-    return `https://${serviceHost('api', profile.domain)}/api`;
-  }
-
-  return (env.VITE_CASHSHOP_API as string) || '/api';
-}
-
-/**
  * Where the marketplace window asks for its listings.
  *
- * The same rule as the shop, and for the same reason: a world played from its
- * own site keeps the relative path, and only somebody else's marketplace has
- * to be addressed by name. It shares `api.<domain>` with the shop because a
- * world publishes one service host, not one per window - the two answer on
- * different paths behind it.
+ * A world played from its own site keeps the relative path: that deployment
+ * publishes the service under `/api` on the client's host, which costs no CORS
+ * allowlist and no second certificate. Only somebody else's marketplace has to
+ * be addressed by name. It shares `api.<domain>` with the cash shop service
+ * because a world publishes one service host, not one per window.
  */
 export function marketApiUrl(profile: ServerProfile = ServerConfig.active): string {
   if (profile.domain && !servedByWorld(profile.domain)) {

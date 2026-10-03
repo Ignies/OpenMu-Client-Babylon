@@ -358,7 +358,7 @@ Bun.serve<WebSocketData>({
       return new Response("target not allowed", { status: 403 });
     }
 
-    // The page's session nonce (src/common/sessionNonce.ts), which lets the
+    // The page's session nonce (src/controllers/net/sessionNonce.ts), which lets the
     // cash shop put an account to this socket through the presence server's
     // /ticket/<nonce>. Absent or malformed is not a refusal: it only means
     // this socket can never be named by ticket, and the game must connect

@@ -35,7 +35,7 @@ import { SESSION_NONCE_RE } from "../src/controllers/net/sessionNonce";
  * `/ticket/<nonce>` is strictly more sensitive than `/presence/<account>`.
  * Presence says whether a name is playing, which anyone standing next to the
  * player could tell. The ticket route turns a nonce the browser chose for
- * itself (src/common/sessionNonce.ts, sent on the socket URL by
+ * itself (src/controllers/net/sessionNonce.ts, sent on the socket URL by
  * `createSocket`) into the account that logged in over it, and the cash shop
  * signs that answer into a bearer ticket: whoever can reach this server with
  * a nonce in hand is that account in the shop. Loopback-only is not tidiness

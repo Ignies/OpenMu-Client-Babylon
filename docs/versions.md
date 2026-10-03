@@ -15,7 +15,7 @@ versions/<id>/
   ui/          pre-game pages, preload lists, MasterSkillsWindow, and `windows` overrides
 ```
 
-- `features` flags (`masterSkills`, `socketItems`, `muHelper`, `cashShop`, ...) are how `src/`
+- `features` flags (`masterSkills`, `socketItems`, `muHelper`, ...) are how `src/`
   asks what a version supports. Never compare the version id in `src/`.
 - A version's `ui.windows` replaces shared windows by `id`
   (`versions/shared/ui/index.ts` registers them after the shared ones).

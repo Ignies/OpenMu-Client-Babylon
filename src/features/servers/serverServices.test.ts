@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { parseServerLine } from './serverList';
-import { marketApiUrl, registerApiUrl, registerUrl, shopApiUrl } from './serverServices';
+import { marketApiUrl, registerApiUrl, registerUrl } from './serverServices';
 import type { ServerProfile } from './serverConfig';
 
 const world = (line: string): ServerProfile => {
@@ -46,16 +46,6 @@ describe('registerApiUrl', () => {
   it('falls back to the build for a world with no domain', () => {
     vi.stubEnv('VITE_REGISTER_API', '/api/register');
     expect(registerApiUrl(addressed)).toBe('/api/register');
-  });
-});
-
-describe('shopApiUrl', () => {
-  it("asks a domain world's own service", () => {
-    expect(shopApiUrl(listed)).toBe('https://api.ignies.net/api');
-  });
-
-  it('falls back to the relative path for a world with no domain', () => {
-    expect(shopApiUrl(addressed)).toBe('/api');
   });
 });
 

@@ -145,7 +145,6 @@ export const gameVersion: GameVersion = {
     // The consumable belt row and the cash shop are Season 6; the 0.97d
     // client's 97-file Interface set has neither.
     itemHotkeys: false,
-    cashShop: false,
     // Devil Square: the client has World10, OpenMU Version095d runs
     // DevilSquareInitializer. Blood Castle has the map (World12) but no
     // server side yet; Chaos Castle does not exist in 0.97d.

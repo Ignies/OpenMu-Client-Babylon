@@ -13,7 +13,7 @@ connect server's own list (`Store.serverList`) is filled by `session/net.ts`.
 - `ServerList`, `refreshServerList()`, `parseServerList(text)`: the published list.
 - `ServerAccounts`: `list`, `of`, `select`, `add`, `update`, `forget`, `record(worldId, login)`.
 - `ServerProbe`: `check(profiles)`, `of(id)` -> `Reach` (`unknown`, `checking`, `up`, `down`).
-- `registerUrl()`, `registerApiUrl()`, `shopApiUrl()`, `marketApiUrl()`.
+- `registerUrl()`, `registerApiUrl()`, `marketApiUrl()`.
 - `validateSignup(signup)` and the length limits (`registerRules.ts`); `isReservedName(name)`.
 
 ## How it works
@@ -39,7 +39,7 @@ connect server's own list (`Store.serverList`) is filled by `session/net.ts`.
 ## Change it
 - add a profile field: `ServerProfile` and `sanitizeProfile` in `serverConfig.ts`.
 - change the list line format: the regexes and `parseServerLine` in `serverList.ts` (add a test).
-- add a world service: a function beside `shopApiUrl` in `serverServices.ts`.
+- add a world service: a function beside `marketApiUrl` in `serverServices.ts`.
 - change a signup rule: `registerRules.ts`; it applies to the client form, the page and the service.
 
 ## Tests
@@ -90,4 +90,4 @@ connect server's own list (`Store.serverList`) is filled by `session/net.ts`.
   (signup page and `/api/register`), `api.` (cash shop `/api`, marketplace `/api/market`).
 - That lets one published build play any world. A world played from its own site keeps relative
   shop and market paths. A world that does not follow the convention publishes full addresses and
-  gets no services; build variables (`VITE_REGISTER_URL`, `VITE_CASHSHOP_API`, ...) are the other way.
+  gets no services; build variables (`VITE_REGISTER_URL`, `VITE_MARKETPLACE_API`, ...) are the other way.

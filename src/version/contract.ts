@@ -100,8 +100,6 @@ export interface VersionFeatures {
   readonly muHelper: boolean;
   /** Item hotkeys / consumable belt row (S6). */
   readonly itemHotkeys: boolean;
-  /** Cash shop / in-game shop banner (S6). */
-  readonly cashShop: boolean;
   /** Blood Castle / Devil Square / Chaos Castle event windows. */
   readonly events: boolean;
   /** Quest system with the S6 NPC dialogue windows (`Quest_eng.bmd`). */
