@@ -142,3 +142,25 @@ never which skill or item asks for it.
   capped per performer and overall; the oldest voice gives way. Each performer has its own
   limiter ahead of the distance gain: with one limiter after the bus, a nearby performer was held
   at the ceiling and the first fifteen tiles of walking away changed nothing.
+
+## A map's own sound (MapLayer.sound)
+- A map's beds, one-shots, clocked one-shots, music, town tracks, object loops and monster cues
+  are the map's own: `MapSound` in `versions/shared/maps/<map>/sound.ts`, set as `sound` on its
+  entry. `ambientBeds.ts`, `music.ts`, `objectLoops.ts` and `mapMonsters.ts` are the engines and
+  read the rows through `maps.rowFor` at run time, never at module load. This replaces the per-map
+  tables those files used to hold: to change a map's bed, track, loop or voice, edit its
+  `sound.ts` (the "change a map's bed or music" line above predates this).
+- Row types (`MapSound`, `MapAmbientBed`, `MapAmbientOneShot`, `AmbientTimed`, `AmbientGate`,
+  `MapTown`, `MapObjectLoop`, `HeroContext`, `MonsterCue`, `VoiceSet`) are exported from
+  `index.ts`. A row names its event or option gate (`AmbientGate`: `bloodCastleRunning`,
+  `chaosCastleWaiting`, `chaosCastleRunning`, `ambientParticles`) and `ambientBeds.ts` answers it,
+  so map data stays plain. An object loop names its reach (`small`, `large` or tiles) and
+  `objectLoops.ts` turns it into tiles.
+- Left in the engines: the global monster voices (`GLOBAL_VOICES`), the Kanturu tower's event
+  music (`kanturuMusic`) and `WD_5UNKNOWN`'s Dungeon track (no map entry claims that world).
+  `crackle.ts` has no per-map rows.
+- Monster cues: `monsterCues` answers on the entry's own worlds (per world with `byWorld`, the
+  Fortress day 2), `monsterCuesAnyMap` from every map (the hooks with no world guard: Land of
+  Trials, Aida, Kanturu 1st / 2nd, Kalima's Kundun), merged in `MAP_LAYERS` order.
+- Test: `versions/shared/maps/mapRows.golden.test.ts` pins every world's beds, one-shots, timed
+  shots, music, town tracks, object loops and monster cues.

@@ -6,6 +6,8 @@ import {
   LAND_OF_TRIALS_EFFECT_ONLY_TYPES,
   LAND_OF_TRIALS_EMISSIONS,
 } from './spec';
+import { LAND_OF_TRIALS_SOUND } from './sound';
+import { LAND_OF_TRIALS_LIGHTING } from './lighting';
 
 /**
  * Land of Trials (`WD_31HUNTING_GROUND`, `World32`/`Object32`) - the map
@@ -47,7 +49,7 @@ import {
  *
  * `SOUND_BC_HUNTINGGROUND_AMBIENT` is fired once every 300 s
  * (`g_MusicStartStamp`, GMHuntingGround.cpp:112-116); the sample is a long
- * loop, so it is a bed in `ambientBeds.ts`. Music `Music/huntingground`
+ * loop, so it is a clocked one-shot in `sound.ts`. Music `Music/huntingground`
  * (`MUSIC_BC_HUNTINGGROUND`, SceneManager.cpp:1120-1125).
  */
 
@@ -80,4 +82,6 @@ export const landoftrialsLayer: MapLayer = {
   blendMeshes: LAND_OF_TRIALS_BLEND_MESHES,
   effectOnly: LAND_OF_TRIALS_EFFECT_ONLY_TYPES,
   emissions: LAND_OF_TRIALS_EMISSIONS,
+  sound: LAND_OF_TRIALS_SOUND,
+  lighting: LAND_OF_TRIALS_LIGHTING,
 };

@@ -5,6 +5,8 @@ import {
   KANTURU3_EFFECT_ONLY_TYPES,
   KANTURU3_EMISSIONS,
 } from './spec';
+import { KANTURU_3RD_SOUND } from './sound';
+import { KANTURU_3RD_LIGHTING } from './lighting';
 
 /**
  * Kanturu Remain (World40 / Object40) - the map entry: identity and the per-world data the
@@ -54,5 +56,7 @@ export const kanturu3Layer: MapLayer = {
   blendMeshes: KANTURU3_BLEND_MESHES,
   effectOnly: KANTURU3_EFFECT_ONLY_TYPES,
   emissions: KANTURU3_EMISSIONS,
+  sound: KANTURU_3RD_SOUND,
+  lighting: KANTURU_3RD_LIGHTING,
   create: world => import('./create').then(m => m.createKanturu3(world)),
 };

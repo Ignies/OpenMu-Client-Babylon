@@ -2,10 +2,13 @@
 
 The ground of a map: loading its terrain files (in a worker), the ground mesh, material and outer
 edge, its light (bake, torch light, roof mask), the weather overlays drawn on it, grass, animated
-water, ground picks, minimap data and the base class for map objects. There is no `index.ts`
-facade yet: callers import the files below directly.
+water, ground picks, minimap data and the base class for map objects. There is no facade yet:
+`index.ts` only exports the row types a map folder writes; callers import the files below directly.
 
 ## Public API
+- `index.ts`: the types only - `MapTerrain` (`mapTerrain.ts`, a map's `terrain` field:
+  `overlays`, `snowBed`, `water`, `rest`, `leanCursor`, `objectFixups`, `grass`),
+  `TerrainOverlayName`, `RestObject`, `RestKind`, `MapObjectFixup`, `TerrainWaterSpec`.
 - `loadMapIntoScene(world, map, pos?)` (`loadMapIntoScene.ts`): queue a warp to `map`.
   `onMapChange(fn)` sets what resets on map change (set once by `app/boot.tsx`);
   `reloadMapObjects()` rebuilds the map's objects after the batching option changes.
@@ -22,7 +25,8 @@ facade yet: callers import the files below directly.
 - `terrainOverlay.ts`: `PUDDLES`, `WET_GROUND`, `overlayAmountAt`, `overlayBedShare`,
   `snowCoverFor`, `needsTerrainMask`. `terrainGrass.ts`: `grassFieldForFrame`, `GrassActor`.
 - Smaller readers: `loadWorldMinimap`, `parseMinimapData`, `findRestObject` /
-  `LEAN_CURSOR_OBJECTS`, `parseTerrainObjects`, `decryptMapFile` / `convertBux`, `getTilesList`,
+  `leanCursorObjects` / `LEAN_CURSOR_OBJECTS` (a live per-world view), `mapObjectFixupsFor`,
+  `grassAllowed`, `parseTerrainObjects`, `decryptMapFile` / `convertBux`, `getTilesList`,
   `getTerrainHeightMap`, `waterSurfaceHeight`, `loadCameraWalkScript`, `liveTileArrays`.
 
 ## How it works
@@ -48,8 +52,12 @@ facade yet: callers import the files below directly.
 - `setTerrainFlags` (`AddTerrainAttributeRange`) patches the pathfinder and re-lays `NoGround`
   tiles (`refreshGroundTile`; the original tests it per draw, ZzzLodTerrain.cpp:1623). The server's
   `ChangeTerrainAttributes` (`ReceiveSetAttribute`, WSclient.cpp:8320-8345) goes through it.
-- Overlays: `terrainOverlaysFor(map)` gives wet ground and puddles on Noria and snow on
-  `SNOW_GROUND_MAPS`; their coverage reads the weather controller.
+- Overlays: `terrainOverlaysFor(map)` gives the layers the map names (`terrain.overlays`: wet
+  ground and puddles on Noria) and snow on `SNOW_GROUND_MAPS`; their coverage reads the weather
+  controller.
+- Per-map rows live with the map (`MapLayer.terrain` in `versions/shared/maps/<map>/`): overlays,
+  snow bed, water, rest objects, object fixups, grass off. The modules here read them through
+  `maps.layerFor` when they need them, never at module load.
 
 ## Depends on / used by
 - uses: `assets`, `maps` (tiles, cutout, spawn, `create`), `weather` (coverage, trail, melt,
@@ -61,17 +69,22 @@ facade yet: callers import the files below directly.
   the GM map view, and map content in `versions/shared/maps/`.
 
 ## Change it
-- give a map wet ground or another overlay: a row in `OVERLAYS_BY_WORLD` (`terrainOverlay.ts`);
-  a new layer is a `TerrainOverlay` recipe whose `coverage` reads a weather reader.
-- where snow lies on a snow map: its tile shares in `SNOW_BEDS` (or `SNOW_COVER.bed`).
-- give a map animated water: a row in `WATER_BY_WORLD` (`terrainWater.ts`).
-- a sit / pose / healing object: `REST_OBJECTS` in `restObjects.ts`; a misplaced object's height:
-  `MAP_OBJECT_FIXUPS` in `mapObjectFixups.ts`.
+- give a map wet ground or another overlay: `terrain.overlays` on its entry; a new layer is a
+  `TerrainOverlay` recipe whose `coverage` reads a weather reader, named in `OVERLAYS`
+  (`terrainOverlay.ts`) and `TerrainOverlayName` (`mapTerrain.ts`).
+- where snow lies on a snow map: `terrain.snowBed` on its entry (or `SNOW_COVER.bed` for Devias'
+  slots).
+- give a map animated water: `terrain.water` on its entry.
+- a sit / pose / healing object: `terrain.rest` (and `leanCursor`) on its entry, built with
+  `sit` / `pose` / `healing` (`versions/shared/maps/shared/terrain.ts`); a misplaced object's
+  height: `terrain.objectFixups`. Turn the grass off: `terrain.grass: false`.
 - change how the ground is lit: `terrainLighting.ts` only, so the grass follows.
 - a new parse step: write it pure (no Babylon, no DOM), add a request kind to
   `terrainParse.worker.ts` and a wrapper with an inline fallback in `terrainParseClient.ts`.
 
 ## Tests
+- `versions/shared/maps/mapRows.golden.test.ts`: every world's overlays, snow bed, water, rest
+  objects, lean boxes, fixups and grass, pinned across the move into the map folders.
 - `groundArrays.test.ts`: `refreshGroundTile` raises and drops a tile and leaves its neighbours;
   `groundTiles` copies tiles out with their own quads.
 - `terrainDynamicLight.test.ts`: `terrainLightTouchesSample` and its version, the bilinear sample.

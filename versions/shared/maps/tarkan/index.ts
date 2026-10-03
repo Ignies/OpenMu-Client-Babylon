@@ -6,6 +6,9 @@ import {
   TARKAN_EFFECT_ONLY_TYPES,
   TARKAN_EMISSIONS,
 } from './spec';
+import { TARKAN_SOUND } from './sound';
+import { TARKAN_LIGHTING } from './lighting';
+import { sit } from '../shared/terrain';
 
 /**
  * Tarkan (World9 / Object9) - the map entry: identity and the per-world data the
@@ -44,5 +47,8 @@ export const tarkanLayer: MapLayer = {
   blendMeshes: TARKAN_BLEND_MESHES,
   effectOnly: TARKAN_EFFECT_ONLY_TYPES,
   emissions: TARKAN_EMISSIONS,
+  sound: TARKAN_SOUND,
+  lighting: TARKAN_LIGHTING,
+  terrain: { rest: { 78: sit(false) } },
   create: world => import('./create').then(m => m.createTarkan(world)),
 };

@@ -6,6 +6,8 @@ import {
   RAKLION_EFFECT_ONLY_TYPES,
   RAKLION_EMISSIONS,
 } from './spec';
+import { RAKLION_SOUND } from './sound';
+import { RAKLION_LIGHTING } from './lighting';
 
 /**
  * Raklion (World58 / Object58) - the map entry: identity and the per-world data the
@@ -67,5 +69,7 @@ export const raklionLayer: MapLayer = {
   blendMeshes: RAKLION_BLEND_MESHES,
   effectOnly: RAKLION_EFFECT_ONLY_TYPES,
   emissions: RAKLION_EMISSIONS,
+  sound: RAKLION_SOUND,
+  lighting: RAKLION_LIGHTING,
   create: world => import('./create').then(m => m.createRaklion(world)),
 };

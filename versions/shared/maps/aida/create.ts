@@ -19,7 +19,7 @@ import { AlphaObject, PlaySpeedObject } from '../shared/objectVariants';
  * pass is materials work), the butterflies on 60, and `M33Aida::CreateMist`
  * (the leaves slot - a weather recipe). `SOUND_AIDA_AMBIENT` is
  * `PlayBuffer`ed from `MoveAidaObject` every frame, i.e. a bed
- * (`ambientBeds.ts`); music `Music/Aida`.
+ * (`sound.ts`); music `Music/Aida`.
  */
 export async function createAida(world: World) {
   const terrain = world.terrain;

@@ -68,7 +68,7 @@ export const DEVIL_SQUARE_EFFECT_ONLY_TYPES: readonly number[] = [];
  *    emitters would read as the rank being on fire.
  *
  * The rain itself is the weather layer's, and this map runs it at full
- * strength for good (`ALWAYS_RAINING` in `controllers/weather/rainState.ts`). Left empty
+ * strength for good (`weather.alwaysRain` in `index.ts`). Left empty
  * so the table says so.
  */
 export const DEVIL_SQUARE_EMISSIONS: Partial<

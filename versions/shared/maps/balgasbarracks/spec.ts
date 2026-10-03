@@ -22,7 +22,7 @@ export const BALGAS_BLEND_MESHES: Readonly<Record<number, number>> = {};
  * see `BALGAS_LIGHTS`); :103-113 hides 85-93. `RenderObjectVisual`
  * (:118-255) gives 2 (Barracks ×45 / Refuge ×10) and 5 (×0) the lava
  * spatter and 58-60 the smoke; 85-93 are the volcano's markers (the Refuge
- * places 92 five times; its fire sound is in `objectLoops.ts`).
+ * places 92 five times; its fire sound is in `sound.ts`).
  */
 export const BALGAS_EFFECT_ONLY_TYPES: readonly number[] = [
   2, 3, 5, 58, 59, 60, 85, 86, 87, 88, 89, 90, 91, 92, 93,

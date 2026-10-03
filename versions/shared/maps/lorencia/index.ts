@@ -3,9 +3,12 @@ import type { MapLayer } from '@/controllers/maps/layer';
 import { ROCK02_TILES } from '../recipes';
 import {
   LORENCIA_BLEND_MESHES,
+  LORENCIA_TERRAIN,
   LORENCIA_EFFECT_ONLY_TYPES,
   LORENCIA_EMISSIONS,
 } from './spec';
+import { LORENCIA_SOUND } from './sound';
+import { LORENCIA_LIGHTING } from './lighting';
 
 /**
  * Lorencia (World1 / Object1) - the map entry: identity and the per-world data the
@@ -41,5 +44,10 @@ export const lorenciaLayer: MapLayer = {
   blendMeshes: LORENCIA_BLEND_MESHES,
   effectOnly: LORENCIA_EFFECT_ONLY_TYPES,
   emissions: LORENCIA_EMISSIONS,
+  sound: LORENCIA_SOUND,
+  lighting: LORENCIA_LIGHTING,
+  // `MoveLeaves`' leaves on the wind (ZzzEffectFireLeave.cpp:292-313).
+  weather: { leaves: 'leaves' },
+  terrain: LORENCIA_TERRAIN,
   create: world => import('./create').then(m => m.createLorencia(world)),
 };

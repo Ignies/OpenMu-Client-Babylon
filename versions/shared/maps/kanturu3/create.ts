@@ -33,8 +33,8 @@ class Kanturu3TowerObject extends MapTileObject {
  *  - Type 0's render special-case (:207-256): the tower is drawn with mesh
  *    0 unhidden and a bone-34 smoke column only while the Maya scene runs.
  *  - The object loops (`kan_boss_incubator` on 25, `_crystal` on 40/41/42,
- *    `_gear` on 71, `_field` on 73) - positional-loop hook missing. The bed
- *    `w39/kan_boss_global` is in `ambientBeds.ts`.
+ *    `_gear` on 71, `_field` on 73) and the bed `w39/kan_boss_global` are in
+ *    `sound.ts`.
  */
 export async function createKanturu3(world: World) {
   const terrain = world.terrain;

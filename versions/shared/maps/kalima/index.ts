@@ -5,6 +5,8 @@ import {
   KALIMA_EFFECT_ONLY_TYPES,
   KALIMA_EMISSIONS,
 } from './spec';
+import { KALIMA_SOUND } from './sound';
+import { KALIMA_LIGHTING } from './lighting';
 
 /**
  * Kalima (World25 / Object25) - the map entry: identity and the per-world data the
@@ -76,5 +78,7 @@ export const kalimaLayer: MapLayer = {
   blendMeshes: KALIMA_BLEND_MESHES,
   effectOnly: KALIMA_EFFECT_ONLY_TYPES,
   emissions: KALIMA_EMISSIONS,
+  sound: KALIMA_SOUND,
+  lighting: KALIMA_LIGHTING,
   create: world => import('./create').then(m => m.createKalima(world)),
 };

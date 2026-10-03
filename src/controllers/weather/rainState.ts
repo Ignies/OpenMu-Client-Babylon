@@ -1,7 +1,6 @@
-import { ENUM_WORLD } from '../../core/types';
+import type { ENUM_WORLD } from '../../core/types';
 import type { WeatherLayer } from './layer';
 import { Store } from '../../app/store';
-import { CHAOS_CASTLE_WORLDS, DEVIL_SQUARE_WORLDS } from '../assets/worldAssets';
 import { maps } from '../maps';
 
 /**
@@ -26,18 +25,11 @@ const RAMP_DOWN_SECONDS = 45;
 const RAMP_UP_PER_SECOND = 1 / RAMP_UP_SECONDS;
 const RAMP_DOWN_PER_SECOND = 1 / RAMP_DOWN_SECONDS;
 
-/**
- * Maps that rain constantly and ignore the server. `MoveLeaves` overwrites
- * `RainTarget` every frame for Icarus (`MAX_LEAVES / 2` = 100, full
- * strength; ZzzEffectFireLeave.cpp:424-426), for Devil Square
- * (`CreateDevilSquareRain`, the full `MAX_LEAVES` budget, :422) and for
- * Chaos Castle (`InChaosCastle()` takes the same branch, :428-436).
+/*
+ * Maps that rain constantly and ignore the server declare it themselves
+ * (`MapWeather.alwaysRain`): Icarus, Devil Square and Chaos Castle, whose
+ * `RainTarget` `MoveLeaves` overwrites every frame.
  */
-const ALWAYS_RAINING: ReadonlySet<ENUM_WORLD> = new Set([
-  ENUM_WORLD.WD_10ICARUS,
-  ...DEVIL_SQUARE_WORLDS,
-  ...CHAOS_CASTLE_WORLDS,
-]);
 
 // ---- 2. state + readers ----------------------------------------------------
 
@@ -47,12 +39,12 @@ let seeded = false;
 
 /** Whether a world rains at full strength whatever the packet says. */
 export function alwaysRains(map: ENUM_WORLD): boolean {
-  return ALWAYS_RAINING.has(map);
+  return maps.layerFor(map)?.weather?.alwaysRain === true;
 }
 
 /** The target the packet (or the map) asks for, in 0…1. */
 export function rainTarget(map: ENUM_WORLD): number {
-  if (ALWAYS_RAINING.has(map)) return 1;
+  if (alwaysRains(map)) return 1;
 
   // The packet is global. A map where rain cannot fall stays dry under it,
   // so the ground, the splashes and the sound all agree with the sky.

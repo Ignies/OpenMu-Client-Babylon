@@ -1,5 +1,5 @@
 import { Color4, Vector3 } from '../render/babylon/exports';
-import { ENUM_WORLD } from '../../core/types';
+import type { ENUM_WORLD } from '../../core/types';
 import type { AmbientRecipe } from '../fx/ambientParticles';
 import type { AmbientSchedule } from './ambientSchedule';
 import { maps } from '../maps';
@@ -16,10 +16,10 @@ import { maps } from '../maps';
  * the weather byte is global - the proxy computes one sky for every client and
  * cannot know which map anyone is standing on.
  */
-export const SNOW_MAPS: ReadonlySet<ENUM_WORLD> = new Set(
+export const SNOW_MAPS: ReadonlySet<ENUM_WORLD> = maps.worldSet(
   // Declared per map as `MapLayer.snow` (Devias; `g_Raklion.CreateSnow` on
   // both Ice City worlds; `g_SantaTown.CreateSnow` - ZzzEffectFireLeave.cpp:481-482).
-  maps.worldsWhere(layer => layer.snow === true)
+  layer => layer.snow === true
 );
 
 /**
@@ -29,8 +29,8 @@ export const SNOW_MAPS: ReadonlySet<ENUM_WORLD> = new Set(
  * fall over them reads as dirt on the lens instead of weather, so the sky
  * stays snow (no rain on the ice field) with nothing coming out of it.
  */
-export const SNOWFALL_MAPS: ReadonlySet<ENUM_WORLD> = new Set(
-  maps.worldsWhere(layer => layer.snow === true && layer.snowfall !== false)
+export const SNOWFALL_MAPS: ReadonlySet<ENUM_WORLD> = maps.worldSet(
+  layer => layer.snow === true && layer.snowfall !== false
 );
 
 /**
@@ -43,8 +43,8 @@ export const SNOWFALL_MAPS: ReadonlySet<ENUM_WORLD> = new Set(
  *
  * The same flag is what puts the sea ambience on a map instead of leaves.
  */
-export const UNDERWATER_MAPS: ReadonlySet<ENUM_WORLD> = new Set(
-  maps.worldsWhere(layer => layer.underwater === true)
+export const UNDERWATER_MAPS: ReadonlySet<ENUM_WORLD> = maps.worldSet(
+  layer => layer.underwater === true
 );
 
 const v = (x: number, y: number, z: number) => new Vector3(x, y, z);
@@ -465,3 +465,14 @@ export const BLOOD_CASTLE_MOTES: AmbientRecipe = {
   fade: 0.33,
   ramp: 4,
 };
+
+/**
+ * The leaves a map's air carries (`MapWeather.leaves`): Lorencia's leaves or
+ * Noria's petals, null for none.
+ */
+export function ambientLeavesFor(world: ENUM_WORLD): AmbientRecipe | null {
+  const kind = maps.rowFor(world, layer => layer.weather?.leaves);
+  if (kind === 'leaves') return LORENCIA_LEAVES;
+  if (kind === 'petals') return NORIA_PETALS;
+  return null;
+}

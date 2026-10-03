@@ -5,6 +5,8 @@ import {
   KANTURU1_EFFECT_ONLY_TYPES,
   KANTURU1_EMISSIONS,
 } from '../kanturu1/spec';
+import { GM_AREA_SOUND } from './sound';
+import { GM_AREA_LIGHTING } from './lighting';
 
 /**
  * GM area (World41 / Object41) - the map entry: identity and the per-world data the
@@ -54,5 +56,7 @@ export const gmareaLayer: MapLayer = {
   blendMeshes: KANTURU1_BLEND_MESHES,
   effectOnly: KANTURU1_EFFECT_ONLY_TYPES,
   emissions: KANTURU1_EMISSIONS,
+  sound: GM_AREA_SOUND,
+  lighting: GM_AREA_LIGHTING,
   create: world => import('./create').then(m => m.createGmArea(world)),
 };

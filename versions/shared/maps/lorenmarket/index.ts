@@ -6,6 +6,9 @@ import {
   LOREN_MARKET_EFFECT_ONLY_TYPES,
   LOREN_MARKET_EMISSIONS,
 } from './spec';
+import { LOREN_MARKET_SOUND } from './sound';
+import { LOREN_MARKET_LIGHTING } from './lighting';
+import { pose } from '../shared/terrain';
 
 /**
  * Loren Market (World80 / Object80) - the map entry: identity and the per-world data the
@@ -39,5 +42,8 @@ export const lorenmarketLayer: MapLayer = {
   blendMeshes: LOREN_MARKET_BLEND_MESHES,
   effectOnly: LOREN_MARKET_EFFECT_ONLY_TYPES,
   emissions: LOREN_MARKET_EMISSIONS,
+  sound: LOREN_MARKET_SOUND,
+  lighting: LOREN_MARKET_LIGHTING,
+  terrain: { rest: { 67: pose(true) } },
   create: world => import('./create').then(m => m.createLorenMarket(world)),
 };

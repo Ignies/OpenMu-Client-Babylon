@@ -158,3 +158,7 @@ export const weather = new Weather();
 // of this singleton (same guard as app/store.ts).
 const hot = (import.meta as { hot?: { decline(): void } }).hot;
 if (hot) hot.decline();
+
+// ---- a map's own weather (MapLayer.weather), the row type its folder writes ----
+export type { MapWeather } from './mapWeather';
+export { ambientLeavesFor } from './ambientWeather';

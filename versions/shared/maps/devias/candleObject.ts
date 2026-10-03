@@ -1,8 +1,6 @@
 import { createMovableFlare, type MovableFlare } from '@/controllers/lighting/effectLights';
-import {
-  DEVIAS_CANDELABRA,
-  lightMapObject,
-} from '@/controllers/lighting/mapObjectLights';
+import { lightMapObject } from '@/controllers/lighting/mapObjectLights';
+import { DEVIAS_CANDELABRA } from './spec';
 import type { LightSource } from '@/controllers/lighting/lightSource';
 import { Store } from '@/app/store';
 import type { World } from '@/ecs/world';

@@ -6,6 +6,8 @@ import {
   AIDA_EFFECT_ONLY_TYPES,
   AIDA_EMISSIONS,
 } from './spec';
+import { AIDA_SOUND } from './sound';
+import { AIDA_LIGHTING } from './lighting';
 
 /**
  * Aida (World34 / Object34) - the map entry: identity and the per-world data the
@@ -42,5 +44,7 @@ export const aidaLayer: MapLayer = {
   blendMeshes: AIDA_BLEND_MESHES,
   effectOnly: AIDA_EFFECT_ONLY_TYPES,
   emissions: AIDA_EMISSIONS,
+  sound: AIDA_SOUND,
+  lighting: AIDA_LIGHTING,
   create: world => import('./create').then(m => m.createAida(world)),
 };

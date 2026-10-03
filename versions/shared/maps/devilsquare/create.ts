@@ -17,12 +17,12 @@ import { DevilSquareStorm } from './storm';
  *
  * What lives outside this directory, and why:
  *  - the rain: the weather layer, forced on for this world whatever the
- *    packet says (`ALWAYS_RAINING`, `controllers/weather/rainState.ts`), because
+ *    packet says (`weather.alwaysRain` on the entry, `index.ts`), because
  *    `CreateDevilSquareRain` (ZzzEffectFireLeave.cpp:120-127) gates on the
  *    world alone and `MoveLeaves` gives it the full `MAX_LEAVES` budget
  *    (:428).
- *  - the `aRain` bed and the silence where a map track would be:
- *    `controllers/sound/ambientBeds.ts` and `controllers/sound/music.ts`.
+ *  - the `aRain` bed and the silence where a map track would be: `sound.ts`,
+ *    played by `controllers/sound/ambientBeds.ts` and `controllers/sound/music.ts`.
  *  - the waves, the timer and the rank table: the event, not the map.
  */
 export async function createDevilSquare(world: World) {

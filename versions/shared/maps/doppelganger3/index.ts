@@ -5,6 +5,7 @@ import {
   DOPPELGANGER3_EFFECT_ONLY_TYPES,
   DOPPELGANGER3_EMISSIONS,
 } from './spec';
+import { DOPPELGANGER_SOUND } from '../doppelganger1/sound';
 
 /**
  * Doppelganger 3 (World68 / Object68) - the map entry: identity and the per-world data the
@@ -49,5 +50,8 @@ export const doppelganger3Layer: MapLayer = {
   blendMeshes: DOPPELGANGER3_BLEND_MESHES,
   effectOnly: DOPPELGANGER3_EFFECT_ONLY_TYPES,
   emissions: DOPPELGANGER3_EMISSIONS,
+  sound: DOPPELGANGER_SOUND,
+  // Atlans' art: the `RenderTerrain` grass guard (ZzzLodTerrain.cpp:2651).
+  terrain: { grass: false },
   create: world => import('./create').then(m => m.createDoppelganger3(world)),
 };

@@ -92,7 +92,7 @@ const PUB: Room = {
  * and keeps Classic's pub frame as it was), the shared room row for the
  * cabin. `AmbientParticleSystem`'s `LORENCIA_TAVERN` room matches the pub
  * footprint. The pub track follows the floor tile under the hero, in both
- * rooms, from `controllers/sound/music.ts`.
+ * rooms, from the `town` row in `sound.ts`.
  */
 async function createRooms(world: World) {
   const map = world.mapIndex;

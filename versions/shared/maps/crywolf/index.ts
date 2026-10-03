@@ -6,6 +6,8 @@ import {
   CRYWOLF_EFFECT_ONLY_TYPES,
   CRYWOLF_EMISSIONS,
 } from './spec';
+import { CRYWOLF_SOUND } from './sound';
+import { CRYWOLF_LIGHTING } from './lighting';
 
 /**
  * Crywolf (World35 / Object35) - the map entry: identity and the per-world data the
@@ -42,5 +44,7 @@ export const crywolfLayer: MapLayer = {
   blendMeshes: CRYWOLF_BLEND_MESHES,
   effectOnly: CRYWOLF_EFFECT_ONLY_TYPES,
   emissions: CRYWOLF_EMISSIONS,
+  sound: CRYWOLF_SOUND,
+  lighting: CRYWOLF_LIGHTING,
   create: world => import('./create').then(m => m.createCrywolf(world)),
 };

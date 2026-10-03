@@ -32,7 +32,7 @@ import { PRIORITY_TORCH, type LightRecipe, type LightSource } from '@/controller
  * in a per-type table, the way `versions/shared/maps/icarus/sky.ts` holds `MoveHeavenThunder`.
  *
  * The rain loop in the same block is `Sound/aRain` (`SOUND_RAIN01`,
- * ZzzOpenData.cpp:4744), already a bed in `controllers/sound/ambientBeds.ts`. The thunder
+ * ZzzOpenData.cpp:4744), already a bed in this map's `sound.ts`. The thunder
  * clap next to it is commented out in the original, so there is no sound.
  */
 

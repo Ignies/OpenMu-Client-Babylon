@@ -6,6 +6,9 @@ import {
   DUNGEON_EFFECT_ONLY_TYPES,
   DUNGEON_EMISSIONS,
 } from './spec';
+import { DUNGEON_SOUND } from './sound';
+import { DUNGEON_LIGHTING } from './lighting';
+import { pose, sit } from '../shared/terrain';
 
 /**
  * Dungeon (World2 / Object2) - the map entry: identity and the per-world data the
@@ -35,5 +38,8 @@ export const dungeonLayer: MapLayer = {
   blendMeshes: DUNGEON_BLEND_MESHES,
   effectOnly: DUNGEON_EFFECT_ONLY_TYPES,
   emissions: DUNGEON_EMISSIONS,
+  sound: DUNGEON_SOUND,
+  lighting: DUNGEON_LIGHTING,
+  terrain: { rest: { 59: sit(false), 60: pose(true) }, leanCursor: [60] },
   create: world => import('./create').then(m => m.createDungeon(world)),
 };

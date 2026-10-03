@@ -1,17 +1,17 @@
-import { ENUM_WORLD } from '../../core/types';
+import type { ENUM_WORLD } from '../../core/types';
 import { TW_SAFEZONE } from '../terrain/consts';
 import { SoundsManager } from './soundsManager';
 import { busGain, type SoundBus } from './buses';
 import type { Sounds } from './recipes';
 import type { SoundLayer } from './layer';
 import { listenerHero, listenerWorld } from './listener';
-import { KALIMA_WORLDS } from '../assets/worldAssets';
-import { KALIMA_OBJECT_LOOPS } from '@versions/shared/maps/kalima/spec';
+import { maps, type MapLayer } from '../maps';
 
 /**
  * Map-object loops: a world's per-object hook re-issuing `PlayBuffer(SOUND_x, o)` each frame (DSPlaySound.cpp:303;
  * `GMNewTown::PlayObjectSound`, `Sound_Kanturu2nd_Object`, `M39Kanturu3rd`, `CGMKarutan1::PlayObjectSound`,
- * `CGM3rdChangeUp::PlayEffectSound`). Notes in readme.md.
+ * `CGM3rdChangeUp::PlayEffectSound`). The rows are each map's own (`MapSound.objectLoops` in
+ * `versions/shared/maps/<map>/sound.ts`); this file is the engine. Notes in readme.md.
  */
 
 // ---- 1. tuning -------------------------------------------------------------
@@ -20,19 +20,20 @@ import { KALIMA_OBJECT_LOOPS } from '@versions/shared/maps/kalima/spec';
 const BUS: SoundBus = 'ambient';
 
 /**
- * A registered object sound: every placed instance of `types` on the map is a
- * source of `sound`.
+ * A registered object sound as a map writes it: every placed instance of
+ * `types` on the map is a source of `sound`.
  */
-export type ObjectLoop = {
+export type MapObjectLoop = {
   /** Object types (`modelId`, the world's `Object<N>` index) that carry it. */
   readonly types: readonly number[];
   readonly sound: Sounds;
   /** Share of the effects track at the source, 0…1 - under the beds' SFX. */
   readonly gain: number;
-  /** Tiles inside which the loop is at full `gain`. */
-  readonly full: number;
-  /** Tiles beyond which the source is silent and does not take a slot. */
-  readonly silent: number;
+  /**
+   * How far it carries: a `small` source (a brook, a gear), a `large` one (a
+   * waterfall, the great wheel, the volcano), or its own reach in tiles.
+   */
+  readonly reach: 'small' | 'large' | { readonly full: number; readonly silent: number };
   /**
    * The original's `LoadWaveFile` channel count: its `PlayBuffer` does nothing
    * while that many copies play, so at most this many sources sound. Omit = 1.
@@ -47,6 +48,14 @@ export type ObjectLoop = {
   readonly when?: (hero: HeroContext) => boolean;
 };
 
+/** A row as this engine plays it: the reach in tiles. */
+export type ObjectLoop = Omit<MapObjectLoop, 'reach'> & {
+  /** Tiles inside which the loop is at full `gain`. */
+  readonly full: number;
+  /** Tiles beyond which the source is silent and does not take a slot. */
+  readonly silent: number;
+};
+
 export type HeroContext = {
   /** Whether the tile under the hero carries `TW_SAFEZONE`. */
   inSafeZone: boolean;
@@ -54,144 +63,50 @@ export type HeroContext = {
   time: number;
 };
 
-const outsideSafeZone = (h: HeroContext): boolean => !h.inSafeZone;
-
-/**
- * GM3rdChangeUp.cpp:364-367: the pillar sounds only while its flame sine
- * (`(sin(WorldTime * 0.0005) + 1) / 2`) is above 0.9 - a burst every ~12.6 s.
- */
-const firePillarBurning = (h: HeroContext): boolean =>
-  (Math.sin(h.time * 0.0005) + 1) * 0.5 > 0.9;
-
 /**
  * Reach of a small source (a brook, a gear): full inside a hand's reach,
  * gone at 14 tiles - DirectSound's 3D rolloff on a sample that was set up to
  * be heard from across a courtyard, not across the map.
  */
-const SMALL_FULL = 2;
-const SMALL_SILENT = 14;
+const SMALL = { full: 2, silent: 14 } as const;
 /**
  * Reach of a large source (a waterfall, the great wheel, the volcano): the
  * original plays these unpositioned on Kanturu (`PlayBuffer(sound)` with no
  * object, GM_kanturu_1st.cpp:67-115) so they carry over the whole ruin; here
  * the nearest one fades over 30 tiles.
  */
-const LARGE_FULL = 6;
-const LARGE_SILENT = 30;
+const LARGE = { full: 6, silent: 30 } as const;
 
-const small = (
-  types: readonly number[],
-  sound: Sounds,
-  gain: number,
-  when?: ObjectLoop['when']
-): ObjectLoop => ({
-  types,
-  sound,
-  gain,
-  full: SMALL_FULL,
-  silent: SMALL_SILENT,
-  when,
-});
-const large = (
-  types: readonly number[],
-  sound: Sounds,
-  gain: number,
-  when?: ObjectLoop['when']
-): ObjectLoop => ({
-  types,
-  sound,
-  gain,
-  full: LARGE_FULL,
-  silent: LARGE_SILENT,
-  when,
-});
+const NONE: readonly ObjectLoop[] = [];
 
-/**
- * GM3rdChangeUp.cpp:352-371 (`PlayEffectSound`), run by `MoveObject` on the
- * Barracks and the Refuge alike (:57-62); cage01/02 are the original's coin
- * flip per call - one file per cage type here so the two never fight for one
- * channel. The Refuge is where the volcano and the fire pillars stand.
- */
-const CHANGE_UP_LOOPS: readonly ObjectLoop[] = [
-  small([74], 'Sound/w42/cage01', 0.3),
-  small([75], 'Sound/w42/cage02', 0.3),
-  large([79], 'Sound/w42/volcano', 0.4),
-  small([92], 'Sound/w42/firepillar', 0.35, firePillarBurning),
-];
+const loopsOf = (l: MapLayer) => l.sound?.objectLoops;
 
-/** The one object sound loaded with 3 channels (MapManager.cpp:994). */
-const KALIMA_LOOPS: readonly ObjectLoop[] = KALIMA_OBJECT_LOOPS.map(row => ({
-  channels: 3,
-  ...row,
-}));
-
-/**
- * THE table: which object types sound on which map. Pure data - the source
- * lines are the original's per-world sound hook.
- */
-export const OBJECT_LOOPS: ReadonlyMap<ENUM_WORLD, readonly ObjectLoop[]> =
-  new Map<ENUM_WORLD, readonly ObjectLoop[]>([
-    // GMNewTown.cpp:193-232 (`PlayObjectSound`).
-    [
-      ENUM_WORLD.WD_51ELBELAND,
-      [
-        small([2], 'Sound/w52/SE_Obj_watersmall01', 0.35, outsideSafeZone),
-        large([53], 'Sound/w52/SE_Amb_ravine01', 0.35, outsideSafeZone),
-        large([56], 'Sound/w52/SE_Amb_enteratlance01', 0.35),
-        large([59], 'Sound/w52/SE_Obj_waterfallsmall01', 0.4, outsideSafeZone),
-        large([85], 'Sound/w52/SE_Obj_enterdevias01', 0.35),
-        small([89], 'Sound/w52/SE_Obj_waterway01', 0.35, outsideSafeZone),
-        large([110], 'Sound/w52/SE_Obj_villageprotection01', 0.35),
-      ],
-    ],
-    // GM_kanturu_1st.cpp:60-115 (`MoveKanturu1stObject`).
-    [
-      ENUM_WORLD.WD_37KANTURU_1ST,
-      [
-        large([46], 'Sound/w37/kan_ruin_wheel', 0.35),
-        large([77], 'Sound/w37/kan_ruin_waterfall', 0.4),
-        small([92], 'Sound/w37/kan_ruin_elec', 0.35),
-        small([98], 'Sound/w37/kan_ruin_plant', 0.3),
-      ],
-    ],
-    // GM_Kanturu_2nd.cpp:194-210 (`Sound_Kanturu2nd_Object`).
-    [
-      ENUM_WORLD.WD_38KANTURU_2ND,
-      [
-        small([9], 'Sound/w38/kan_relic_gear', 0.35),
-        small([31, 35, 36, 37], 'Sound/w38/kan_relic_incubator', 0.3),
-      ],
-    ],
-    // GM_Kanturu_3rd.cpp:120-195 (`Sound_Kanturu3rd_Object`, idle map).
-    [
-      ENUM_WORLD.WD_39KANTURU_3RD,
-      [
-        small([25], 'Sound/w39/kan_boss_incubator', 0.3),
-        small([40, 41, 42], 'Sound/w39/kan_boss_crystal', 0.3),
-        small([71], 'Sound/w39/kan_boss_gear', 0.35),
-        large([73], 'Sound/w39/kan_boss_field', 0.35),
-      ],
-    ],
-    // GMKarutan1.cpp:349-357 (`PlayObjectSound`).
-    [
-      ENUM_WORLD.WD_80KARUTAN1,
-      [small([58, 66], 'Sound/Karutan/Karutan_insect_env', 0.3)],
-    ],
-    [ENUM_WORLD.WD_41CHANGEUP3RD_1ST, CHANGE_UP_LOOPS],
-    [ENUM_WORLD.WD_42CHANGEUP3RD_2ND, CHANGE_UP_LOOPS],
-    // GMHellas.cpp:479, :487 (`RenderHellasVisual`) - every Kalima floor.
-    ...KALIMA_WORLDS.map(
-      w => [w, KALIMA_LOOPS] as [ENUM_WORLD, readonly ObjectLoop[]]
-    ),
-  ]);
+/** Rows with their reach in tiles, once per row list. */
+const resolved = new WeakMap<readonly MapObjectLoop[], readonly ObjectLoop[]>();
 
 /** The object loops a world runs, empty for none. */
 export function objectLoopsFor(map: ENUM_WORLD): readonly ObjectLoop[] {
-  return OBJECT_LOOPS.get(map) ?? [];
+  const rows = maps.rowFor(map, loopsOf);
+  if (!rows) return NONE;
+  let out = resolved.get(rows);
+  if (!out) {
+    out = rows.map(({ reach, ...row }) => ({
+      ...row,
+      ...(reach === 'small' ? SMALL : reach === 'large' ? LARGE : reach),
+    }));
+    resolved.set(rows, out);
+  }
+  return out;
 }
 
-/** Maps this exists on: the keys of the table. */
-const MAPS: ReadonlySet<ENUM_WORLD> = new Set(OBJECT_LOOPS.keys());
+/** Which object types sound on which map: a live view over the map rows. */
+export const OBJECT_LOOPS: ReadonlyMap<ENUM_WORLD, readonly ObjectLoop[]> =
+  maps.worldMap(w => (maps.rowFor(w, loopsOf) ? objectLoopsFor(w) : undefined));
+
+/** Maps this exists on: the ones with rows. */
+const MAPS: ReadonlySet<ENUM_WORLD> = maps.worldSet(
+  (_layer, world) => maps.rowFor(world, loopsOf) !== undefined
+);
 
 /** Simultaneous object loops; past the sixth-nearest the rest are faint. */
 const MAX_SOURCES = 6;
@@ -270,9 +185,9 @@ function gainAt(row: ObjectLoop, d: number): number {
 function rescan(map: ENUM_WORLD): void {
   candidates = [];
   scannedMap = map;
-  const rows = OBJECT_LOOPS.get(map);
+  const rows = objectLoopsFor(map);
   const world = listenerWorld();
-  if (!rows || !world) return;
+  if (rows.length === 0 || !world) return;
 
   const byType = new Map<number, ObjectLoop>();
   for (const row of rows) for (const t of row.types) byType.set(t, row);

@@ -1,6 +1,10 @@
 import type { ENUM_WORLD } from '../../core/types';
 import type { World } from '../../ecs/world';
 import type { Emission } from '../fx/effectParticles';
+import type { MapSound } from '../sound';
+import type { MapLighting } from '../lighting';
+import type { MapWeather } from '../weather';
+import type { MapTerrain } from '../terrain';
 
 /**
  * The contract every map entry implements. One folder per map,
@@ -137,6 +141,22 @@ export interface MapLayer {
   /** Object type → particle emissions. Read by `controllers/fx/effectParticles.ts`. */
   readonly emissions?: Partial<Record<number, readonly Emission[]>>;
 
+  // ---- the map's own rows, one field per controller -----------------------
+  // Each controller owns its field's type and reads it through `maps.rowFor`
+  // at run time, never at module load. Omit a field for "nothing here".
+
+  /** Beds, one-shots, music, object loops, monster cues. The sound controller's. */
+  readonly sound?: MapSound;
+
+  /** Look profile, room looks, map-object lights. The lighting controller's. */
+  readonly lighting?: MapLighting;
+
+  /** Rain that ignores the packet, wet ground, leaves. The weather controller's. */
+  readonly weather?: MapWeather;
+
+  /** Ground overlays, water, rest objects, grass. The terrain controller's. */
+  readonly terrain?: MapTerrain;
+
   /**
    * Bind this map's object classes into `world.terrain.MapTileObjects` and
    * add whatever entities the map owns. Runs once per warp, after the terrain
@@ -153,6 +173,15 @@ export interface MapLayer {
   /** Map changed: drop anything belonging to the world just left. */
   reset?(): void;
 }
+
+/**
+ * A row that differs between the worlds one entry serves (the Empire
+ * Guardian days, the login scenes). A world left out has no row.
+ */
+export type ByWorld<T> = { readonly byWorld: Readonly<Partial<Record<number, T>>> };
+
+/** One row for every world the entry serves, or one per world. */
+export type PerWorld<T> = T | ByWorld<T>;
 
 /** A tile position on the 256×256 grid. */
 export type Spawn = { readonly x: number; readonly y: number };

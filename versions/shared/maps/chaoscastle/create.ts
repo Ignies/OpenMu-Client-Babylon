@@ -24,7 +24,7 @@ import {
  *  - 6-12 the smoke-box markers: `spec.ts` effect-only.
  *  - The black clear colour is the scene default; `SetWorldClearColor`
  *    (SceneManager.cpp:346) sets exactly that.
- *  - `aChaos` / `iChaosCastle` beds: `controllers/sound/ambientBeds.ts`, on the match state.
+ *  - `aChaos` / `iChaosCastle` beds: `sound.ts`, gated on the match state.
  *  - The pillars' thunder (`eElec1/2`): `thunder.ts`, driven from
  *    `features/events/chaosCastle.ts` as the original drives it from CSChaosCastle.cpp.
  *  - Auto-attack off, `c->Run = 40` forced, no wings/pets, the CC 70-72

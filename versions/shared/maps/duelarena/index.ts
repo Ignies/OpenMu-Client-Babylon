@@ -5,6 +5,8 @@ import {
   DUEL_ARENA_EFFECT_ONLY_TYPES,
   DUEL_ARENA_EMISSIONS,
 } from './spec';
+import { DUEL_ARENA_SOUND } from './sound';
+import { DUEL_ARENA_LIGHTING } from './lighting';
 
 /**
  * Duel Arena (World65 / Object65) - the map entry: identity and the per-world data the
@@ -74,5 +76,7 @@ export const duelarenaLayer: MapLayer = {
   blendMeshes: DUEL_ARENA_BLEND_MESHES,
   effectOnly: DUEL_ARENA_EFFECT_ONLY_TYPES,
   emissions: DUEL_ARENA_EMISSIONS,
+  sound: DUEL_ARENA_SOUND,
+  lighting: DUEL_ARENA_LIGHTING,
   create: world => import('./create').then(m => m.createDuelArena(world)),
 };

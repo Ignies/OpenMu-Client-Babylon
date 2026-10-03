@@ -52,7 +52,7 @@ export async function createAtlans(world: World) {
   tiles[22] = AtlansBubbleVentObject;
 
   // Atlans 39 (ZzzObject.cpp:4719-4723), ×4 - the "lean on the wall" pose
-  // trigger, already mapped as `pose(true)` in controllers/terrain/restObjects.ts.
+  // trigger, already mapped as `pose(true)` in `terrain.rest` (index.ts).
   //
   // `OperateBoxObject`, *not* `LeanBoxObject`: the Atlans case is
   // `CreateOperate(o); o->HiddenMesh = -2;` and nothing else. The

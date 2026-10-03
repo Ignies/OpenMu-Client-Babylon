@@ -13,11 +13,14 @@ recipes. One `weather` facade steps every effect (see [docs/controllers.md](../.
   - writers: `meltSnow(x, z, radius, strength)`, `burnGrass(scene, x, z, radius, strength)`,
     `snowSpray(scene, x, y, z, strength)`.
 - `WeatherLayer` (`layer.ts`): one effect's `name`, optional `maps`, `update(map, dt)`, `reset()`.
+- `MapWeather` (`mapWeather.ts`, exported from `index.ts`): the type of a map's `weather` field
+  (`alwaysRain`, `wetGround`, `leaves`). `ambientLeavesFor(world)` (`ambientWeather.ts`, also on
+  `index.ts`): the leaf recipe a map's `leaves` names.
 - Imported straight from the effect files:
   - `ambientWeather.ts`: the `AmbientRecipe`s (`RAIN`, `DEVIAS_SNOW`, `LORENCIA_LEAVES`, ...),
-    `SNOWFALL_MAPS`, `UNDERWATER_MAPS`, `GROUND_WIND`. `ambientSchedule.ts`: `ambientStrengthAt`.
+    `SNOW_MAPS`, `SNOWFALL_MAPS`, `UNDERWATER_MAPS` (live sets over the map flags), `GROUND_WIND`. `ambientSchedule.ts`: `ambientStrengthAt`.
   - `roomClip.ts`: `clipToRoom`, `roomClipAvailable`, `setRoomWeatherClip`. `rainState.ts`:
-    `WEATHER_RAIN`, `rainStrength`, `rainTarget`. `wetness.ts`: `wetness`, `puddleCover`.
+    `WEATHER_RAIN`, `rainStrength`, `rainTarget`, `alwaysRains`. `wetness.ts`: `wetness`, `puddleCover`.
   - `snowCover.ts`: `SNOW_GROUND_MAPS`, `snowCover`. `snowCaps.ts`: `snowCapAt`, `snowCapCover`,
     `SNOW_CAP_*`. `snowSink.ts`: `onSnowGround`. `snowMelt.ts`: `MELT_*`, `snowMeltUniform`,
     `snowMeltCount`. `snowTrail.ts`: `ploughSnowTrail`, `snowTrailTexture`, `snowTrailPainted`.
@@ -41,6 +44,10 @@ recipes. One `weather` facade steps every effect (see [docs/controllers.md](../.
 - `snowMelt.ts`, `snowTrail.ts` and `grassBurn.ts` must stay leaves (no imports from this folder):
   `terrainOverlay.ts` imports them and `snowCover.ts` imports `terrainOverlay.ts`, so a module-scope
   read inside that cycle crashes the client on load.
+- Per-map rows live with the map (`MapLayer.weather` and the climate flags in
+  `versions/shared/maps/<map>/index.ts`). The effects read them through `maps.layerFor`,
+  `maps.rowFor` and `maps.worldSet` at run time; nothing here reads a map at module load, so the
+  layers' `maps` sets are live views.
 - Gusts and squalls are rolled off `serverNow()`, so all clients agree; burns, melts, trails and
   snow depth are local to each client.
 - The module declines hot updates, so the singleton is never duplicated. `app/boot.tsx` puts it
@@ -64,16 +71,19 @@ recipes. One `weather` facade steps every effect (see [docs/controllers.md](../.
   after any layer it reads. If it shows on the ground, add a `TerrainOverlay` recipe in
   `terrain/terrainOverlay.ts` whose `coverage` reads your reader; if it falls from the sky, add an
   `AmbientRecipe` here and spawn it from `ecs/systems/ambientParticleSystem.ts`; for a sound, add a
-  bed row in `sound/ambientBeds.ts`. Add a facade reader in `index.ts` if others need it.
+  bed row in the map's `sound.ts`. Add a facade reader in `index.ts` if others need it.
 - remove an effect: drop its line from `layers.ts` and its file, then fix the importers tsc lists.
-- rain timing: `RAMP_UP_SECONDS` / `RAMP_DOWN_SECONDS`; maps that always rain: `ALWAYS_RAINING`
-  (`rainState.ts`). Wet maps: `WET_MAPS` (`wetness.ts`). Snow, snowfall and underwater maps:
-  the map's `MapLayer` flags in `versions/shared/maps/<map>/`.
+- rain timing: `RAMP_UP_SECONDS` / `RAMP_DOWN_SECONDS`. A map that always rains, gets wet ground
+  or carries leaves: `weather` on its entry (`alwaysRain`, `wetGround`, `leaves`). Snow, snowfall
+  and underwater maps: the map's `MapLayer` flags in `versions/shared/maps/<map>/`.
 - what a creature leaves in snow: a row in `MODEL_TRACKS` (`recipes.ts`).
 - the print look: dial it in the console (`muFootprints.set({...})`), then copy the numbers into
   `FOOTPRINT_TUNING`.
 
 ## Tests
+- `versions/shared/maps/mapRows.golden.test.ts`: which worlds always rain, get wet, snow, fall,
+  settle and sit under water, pinned across the move into the map folders.
+- `mapWeather.test.ts`: `ambientLeavesFor` per map.
 - `footprints.test.ts`: the `?printFast` shader early-outs (dead slots parked, stencil rule, the
   old shader with `?printFast=0`).
 - `grassBurn.test.ts`: the throttled stamp leaves the same scar as the every-frame stamp; the decay

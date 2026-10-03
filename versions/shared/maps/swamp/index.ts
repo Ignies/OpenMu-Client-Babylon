@@ -6,6 +6,8 @@ import {
   SWAMP_EFFECT_ONLY_TYPES,
   SWAMP_EMISSIONS,
 } from './spec';
+import { SWAMP_SOUND } from './sound';
+import { SWAMP_LIGHTING } from './lighting';
 
 /**
  * Swamp of Calmness (`WD_56MAP_SWAMP_OF_QUIET`, `World57`/`Object57`) - the
@@ -65,5 +67,7 @@ export const swampLayer: MapLayer = {
   blendMeshes: SWAMP_BLEND_MESHES,
   effectOnly: SWAMP_EFFECT_ONLY_TYPES,
   emissions: SWAMP_EMISSIONS,
+  sound: SWAMP_SOUND,
+  lighting: SWAMP_LIGHTING,
   create: world => import('./create').then(m => m.createSwamp(world)),
 };

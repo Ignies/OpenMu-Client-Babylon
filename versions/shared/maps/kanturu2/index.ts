@@ -7,6 +7,9 @@ import {
   KANTURU2_EFFECT_ONLY_TYPES,
   KANTURU2_EMISSIONS,
 } from './spec';
+import { KANTURU_2ND_SOUND } from './sound';
+import { KANTURU_2ND_LIGHTING } from './lighting';
+import { sit } from '../shared/terrain';
 
 /**
  * Kanturu Relics (World39 / Object39) - the map entry: identity and the per-world data the
@@ -40,6 +43,9 @@ export const kanturu2Layer: MapLayer = {
   blendMeshes: KANTURU2_BLEND_MESHES,
   effectOnly: KANTURU2_EFFECT_ONLY_TYPES,
   emissions: KANTURU2_EMISSIONS,
+  sound: KANTURU_2ND_SOUND,
+  lighting: KANTURU_2ND_LIGHTING,
+  terrain: { rest: { 3: sit(false) } },
   create: world => import('./create').then(m => m.createKanturu2(world)),
   reset: endGatewayTurn,
 };

@@ -4,6 +4,8 @@ import {
   ICARUS_BLEND_MESHES,
   ICARUS_EMISSIONS,
 } from './spec';
+import { ICARUS_SOUND } from './sound';
+import { ICARUS_LIGHTING } from './lighting';
 
 /**
  * Icarus (World11 / Object11) - the map entry: identity and the per-world data the
@@ -48,5 +50,10 @@ export const icarusLayer: MapLayer = {
   // `IcarusCloudObject`, which skips the model itself - not an effect-only row.
   blendMeshes: ICARUS_BLEND_MESHES,
   emissions: ICARUS_EMISSIONS,
+  sound: ICARUS_SOUND,
+  lighting: ICARUS_LIGHTING,
+  // `MoveLeaves` overwrites `RainTarget` every frame: `MAX_LEAVES / 2` =
+  // 100, full strength, whatever the packet says (ZzzEffectFireLeave.cpp:424-426).
+  weather: { alwaysRain: true },
   create: world => import('./create').then(m => m.createIcarus(world)),
 };

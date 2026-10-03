@@ -70,3 +70,13 @@ restyling the tooltip once restyles it everywhere.
 `versions/<id>/` holds what differs for one version: data paths, packet set, UI overrides (same
 window `id` replaces the shared one). Code in `src/` never asks which version runs; it reads the
 version's features and data. See [versions.md](versions.md).
+
+## A map's own rows
+
+A map folder (`versions/shared/maps/<map>/`) also carries what the other controllers used to keep
+per world: `sound.ts` (beds, music, object loops, monster voices: `MapSound`), `lighting.ts` (look,
+room looks, torch table: `MapLighting`), and on the entry itself `weather` (`MapWeather`) and
+`terrain` (`MapTerrain`). Each controller owns its row type and reads the active map's row through
+the `maps` controller at run time (`maps.rowFor`), so reworking sound or lighting is an edit to that
+controller only, and changing what one map sounds or looks like is an edit to that map only.
+Shared building blocks are in `maps/shared/` (`sound.ts`, `looks.ts`, `lights.ts`, `terrain.ts`).

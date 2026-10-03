@@ -1,10 +1,10 @@
 /**
  * Lights that belong to the map: torches, braziers, hearths, street lamps,
  * candelabra, the Tarkan glow lamps - anything a map object throws by being
- * there. The per-world tables live here (or in `versions/shared/maps/<map>/spec.ts` for the
- * maps that already have one), keyed by `Object<n>.obj` type; a host (the
- * `MapObjectLights` adapter on `ModelObject`, or a map object class) resolves
- * its rows and calls `lightMapObject`.
+ * there. Each map's table is its own (`MapLighting.objectLights`, usually in
+ * `versions/shared/maps/<map>/spec.ts`), keyed by `Object<n>.obj` type; a host
+ * (the `MapObjectLights` adapter on `ModelObject`, or a map object class)
+ * resolves its rows and calls `lightMapObject`.
  *
  * The original lights the ground under these objects with `AddTerrainLight`
  * from `MoveObjectSetting` / `RenderObjectVisual` (ZzzObject.cpp); the point
@@ -12,39 +12,9 @@
  * the walls and bodies around each flame.
  */
 import type { Scene } from '../render/babylon/exports';
-import { ENUM_WORLD } from '../../core/types';
+import type { ENUM_WORLD } from '../../core/types';
 import type { Emission } from '../fx/effectParticles';
-import { DUNGEON_LIGHTS } from '@versions/shared/maps/dungeon/spec';
-import { ICARUS_LIGHTS } from '@versions/shared/maps/icarus/spec';
-import { LOST_TOWER_LIGHTS } from '@versions/shared/maps/losttower/spec';
-import { ATLANS_LIGHTS } from '@versions/shared/maps/atlans/spec';
-import { NORIA_LIGHTS } from '@versions/shared/maps/noria/spec';
-import { TARKAN_LIGHTS } from '@versions/shared/maps/tarkan/spec';
-import { STADIUM_LIGHTS } from '@versions/shared/maps/stadium/spec';
-import { KALIMA_LIGHTS } from '@versions/shared/maps/kalima/spec';
-import { LAND_OF_TRIALS_LIGHTS } from '@versions/shared/maps/landoftrials/spec';
-import { AIDA_LIGHTS } from '@versions/shared/maps/aida/spec';
-import { CRYWOLF_LIGHTS } from '@versions/shared/maps/crywolf/spec';
-import { KANTURU1_LIGHTS } from '@versions/shared/maps/kanturu1/spec';
-import { KANTURU2_LIGHTS } from '@versions/shared/maps/kanturu2/spec';
-import { KANTURU3_LIGHTS } from '@versions/shared/maps/kanturu3/spec';
-import { BALGAS_LIGHTS } from '@versions/shared/maps/balgasbarracks/spec';
-import { ELBELAND_LIGHTS } from '@versions/shared/maps/elbeland/spec';
-import { SWAMP_LIGHTS } from '@versions/shared/maps/swamp/spec';
-import { VULCANUS_LIGHTS } from '@versions/shared/maps/vulcanus/spec';
-import { DUEL_ARENA_LIGHTS } from '@versions/shared/maps/duelarena/spec';
-import { DOPPELGANGER2_LIGHTS } from '@versions/shared/maps/doppelganger2/spec';
-import { DOPPELGANGER4_LIGHTS } from '@versions/shared/maps/doppelganger4/spec';
-import { EMPIRE_GUARDIAN_LIGHTS } from '@versions/shared/maps/empireguardian/spec';
-import { LOREN_MARKET_LIGHTS } from '@versions/shared/maps/lorenmarket/spec';
-import { KARUTAN_LIGHTS } from '@versions/shared/maps/karutan1/spec';
-import { CURSED_TEMPLE_LIGHTS } from '@versions/shared/maps/cursedtemple/spec';
-import { EMPIRE_GUARDIAN_4_LIGHTS } from '@versions/shared/maps/empireguardian4/spec';
-import {
-  CURSED_TEMPLE_WORLDS,
-  KALIMA_WORLDS,
-  onWorlds,
-} from '../assets/worldAssets';
+import { maps, type MapLayer } from '../maps';
 import type { LightingLayer } from './layer';
 import {
   LightSource,
@@ -97,169 +67,6 @@ export type LightEmitter = {
   };
 };
 
-function createFire(
-  offset: readonly [number, number, number]
-): LightEmitter {
-  return {
-    offset,
-    pointRange: 7,
-    wander: 0.12,
-    terrain: {
-      range: 4,
-      color: [1, 0.6, 0.4],
-      flicker: { min: 0.6, max: 1, steps: 5 },
-    },
-    emissions: [
-      {
-        kinds: ['fire0', 'fire0b'],
-        every: 2,
-        jitter: 8,
-      },
-    ],
-  };
-}
-
-/**
- * Lorencia 90, the street lamp (ZzzObject.cpp:3775-3779): `Luminosity =
- * (rand() % 2 + 6) * 0.1`, then `AddTerrainLight(x, y, (L, 0.8L, 0.6L), 3)`.
- * The colour and the two-step 0.6/0.7 roll are the original's; the flare and
- * the point light are ours.
- *
- * The original hangs its light on the post's map tile. `StreetLight01` puts
- * the lit part - the `streetlight_brightness2` glass, the model's second mesh
- * - out on an arm: bind-pose centre (0, -0.62, 2.26) tiles, 2.26 up and 0.62
- * along the arm, while the post itself stands at y 0. Lighting the tile under
- * the post left the pool a lamp's length from the lamp and the glass unlit,
- * so the row carries the offset and the flare and the pool both ride the
- * glass.
- */
-const STREET_LAMP_GLASS: readonly [number, number, number] = [0, -62, 226];
-
-const STREET_LAMP_COLOR: readonly [number, number, number] = [1, 0.8, 0.6];
-
-const LORENCIA_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
-  50: [createFire([0, 0, 200])],
-
-  51: [createFire([0, -30, 60])],
-
-  52: [createFire([0, 0, 60])],
-
-  55: [createFire([-150, -150, 140]), createFire([150, -150, 140])],
-
-  80: [createFire([90, -200, 30]), createFire([90, 200, 30])],
-
-  90: [
-    {
-      offset: STREET_LAMP_GLASS,
-      sprite: {
-        scale: 1.8,
-        color: STREET_LAMP_COLOR,
-        pulse: { speed: 0.0011, amount: 0.06, base: 0.34 },
-      },
-      pointRange: 6,
-      pointGain: 1.5,
-      terrain: {
-        range: 3,
-        color: STREET_LAMP_COLOR,
-        flicker: { min: 0.6, max: 0.7, steps: 2 },
-        falloff: 1.4,
-        floorGain: 1.8,
-      },
-    },
-  ],
-
-  130: [createFire([0, 0, 0])],
-
-  150: [
-    {
-      offset: [0, 0, 78],
-      pointDrop: -0.12,
-      sprite: { scale: 3, color: [1, 0.62, 0.22] },
-      pointRange: 5,
-      pointGain: 1.6,
-      wander: 0.05,
-      terrain: {
-        range: 5,
-        color: [1, 0.52, 0.16],
-        flicker: { min: 0.3, max: 0.6, steps: 4 },
-        falloff: 1.6,
-        floorGain: 2.5,
-      },
-    },
-  ],
-};
-
-/**
- * Devias (Object3). The original lights nothing here; these are ours, so
- * the placements were checked against EncTerrain3.obj first:
- *  - 36 fireplace + 66 fire sit on the same spot (tavern 232/27.5,
- *    202.5/62, 225/44.5); the fire gets the flame, the hearth nothing.
- *    66 also burns alone as the camp fires (11.5/77.5, 174/192, …).
- *  - 54 / 56 candelabra are DeviasCandleObject: flames and light come from
- *    the wick bones (DEVIAS_CANDELABRA below), nothing is needed here.
- */
-/** Above this object scale a Devias 66 is a camp fire, below it a hearth. */
-const DEVIAS_HEARTH_SCALE = 0.9;
-
-const DEVIAS_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
-  66: [
-    {
-      ...createFire([0, 0, 30]),
-      pointRange: 8,
-      sprite: { scale: 4.5, color: [1, 0.45, 0.15] },
-      terrain: {
-        range: 5,
-        color: [1, 0.6, 0.35],
-        flicker: { min: 0.6, max: 1, steps: 5 },
-      },
-      // EncTerrain3.obj carries 66 in two sizes and the emitter multiplies
-      // its sprites by the object's own scale, so one recipe cannot serve
-      // both:
-      //  - Hearths (0.70-0.78, always sharing a spot with a 36) come out
-      //    small, so spawn twice a tick to fill the grate and keep the smoke
-      //    tight - it is going up a chimney.
-      //  - Camp fires (1.00 at 11.5/77.5, 108.6/242.4, 174/192, 162.6/233.6,
-      //    plus the 0.72 one at 238.5/194.5) already have the mass at full
-      //    size, so one a tick is enough and the second only burned fill
-      //    rate. They spend it on wider, more frequent smoke instead -
-      //    that is what reads at distance against snow.
-      emissions: scale =>
-        scale < DEVIAS_HEARTH_SCALE
-          ? [
-              { kinds: ['fire0', 'fire0b'], every: 1, count: 2, jitter: 10 },
-              { kinds: ['smoke0'], every: 5, jitter: 10, scale: 1.4 },
-            ]
-          : [
-              { kinds: ['fire0', 'fire0b'], every: 1, count: 1, jitter: 16 },
-              { kinds: ['smoke0'], every: 3, jitter: 18, scale: 1.9 },
-            ],
-    },
-  ],
-};
-
-/**
- * Devias standing candelabra (Object3 types 54 / 56), lit from the average
- * of the three wick bones by `DeviasCandleObject`. Lorencia's table candle
- * (150 above) minus the fixed offset, reaching further and yellower: the
- * wicks sit ~1.7 tiles over the floor. A lower peak over a longer, softer
- * falloff - ~0.41 at two tiles, ~0.24 at three, ~0.13 at four - now that the
- * delta texture has a shoulder (`DELTA_KNEE`) and the interior key lifts the
- * floor between pools (`INTERIOR_GROUND_KEY`, sceneLook.ts).
- */
-export const DEVIAS_CANDELABRA: LightEmitter = {
-  pointRange: 7,
-  pointDrop: 0,
-  pointGain: 1.4,
-  wander: 0.05,
-  terrain: {
-    range: 5.5,
-    color: [1, 0.66, 0.3],
-    flicker: { min: 0.45, max: 0.75, steps: 4 },
-    falloff: 1.4,
-    floorGain: 1.3,
-  },
-};
-
 /**
  * Login-scene (World 74) chandelier, type 157: three wick bones with fire,
  * one light at the object origin. The colour is the table candle's.
@@ -305,53 +112,17 @@ export function tarkanGlowLamp(phaseMs: number): LightRecipe {
   };
 }
 
-const LIGHTS_BY_WORLD: Partial<
-  Record<ENUM_WORLD, Partial<Record<number, readonly LightEmitter[]>>>
-> = {
-  [ENUM_WORLD.WD_0LORENCIA]: LORENCIA_LIGHTS,
-  [ENUM_WORLD.WD_1DUNGEON]: DUNGEON_LIGHTS,
-  [ENUM_WORLD.WD_3NORIA]: NORIA_LIGHTS,
-  [ENUM_WORLD.WD_4LOSTTOWER]: LOST_TOWER_LIGHTS,
-  [ENUM_WORLD.WD_6STADIUM]: STADIUM_LIGHTS,
-  [ENUM_WORLD.WD_7ATLANSE]: ATLANS_LIGHTS,
-  [ENUM_WORLD.WD_8TARKAN]: TARKAN_LIGHTS,
-  [ENUM_WORLD.WD_10ICARUS]: ICARUS_LIGHTS,
-  [ENUM_WORLD.WD_2DEVIAS]: DEVIAS_LIGHTS,
-  // Season 2-6 worlds ("Later worlds").
-  ...onWorlds(KALIMA_WORLDS, KALIMA_LIGHTS),
-  [ENUM_WORLD.WD_31HUNTING_GROUND]: LAND_OF_TRIALS_LIGHTS,
-  [ENUM_WORLD.WD_33AIDA]: AIDA_LIGHTS,
-  [ENUM_WORLD.WD_34CRYWOLF_1ST]: CRYWOLF_LIGHTS,
-  [ENUM_WORLD.WD_37KANTURU_1ST]: KANTURU1_LIGHTS,
-  [ENUM_WORLD.WD_38KANTURU_2ND]: KANTURU2_LIGHTS,
-  [ENUM_WORLD.WD_39KANTURU_3RD]: KANTURU3_LIGHTS,
-  [ENUM_WORLD.WD_40AREA_FOR_GM]: KANTURU1_LIGHTS,
-  [ENUM_WORLD.WD_41CHANGEUP3RD_1ST]: BALGAS_LIGHTS,
-  [ENUM_WORLD.WD_42CHANGEUP3RD_2ND]: BALGAS_LIGHTS,
-  ...onWorlds(CURSED_TEMPLE_WORLDS, CURSED_TEMPLE_LIGHTS),
-  [ENUM_WORLD.WD_51ELBELAND]: ELBELAND_LIGHTS,
-  [ENUM_WORLD.WD_56MAP_SWAMP_OF_QUIET]: SWAMP_LIGHTS,
-  [ENUM_WORLD.WD_63PK_FIELD]: VULCANUS_LIGHTS,
-  [ENUM_WORLD.WD_64DUELARENA]: DUEL_ARENA_LIGHTS,
-  [ENUM_WORLD.WD_66DOPPLEGANGER2]: DOPPELGANGER2_LIGHTS,
-  [ENUM_WORLD.WD_68DOPPLEGANGER4]: DOPPELGANGER4_LIGHTS,
-  [ENUM_WORLD.WD_69EMPIREGUARDIAN1]: EMPIRE_GUARDIAN_LIGHTS,
-  [ENUM_WORLD.WD_70EMPIREGUARDIAN2]: EMPIRE_GUARDIAN_LIGHTS,
-  [ENUM_WORLD.WD_71EMPIREGUARDIAN3]: EMPIRE_GUARDIAN_LIGHTS,
-  [ENUM_WORLD.WD_79UNITEDMARKETPLACE]: LOREN_MARKET_LIGHTS,
-  [ENUM_WORLD.WD_80KARUTAN1]: KARUTAN_LIGHTS,
-  [ENUM_WORLD.WD_81KARUTAN2]: KARUTAN_LIGHTS,
-  [ENUM_WORLD.WD_72EMPIREGUARDIAN4]: EMPIRE_GUARDIAN_4_LIGHTS,
-  [ENUM_WORLD.WD_73NEW_LOGIN_SCENE]: EMPIRE_GUARDIAN_4_LIGHTS,
-  [ENUM_WORLD.WD_74NEW_CHARACTER_SCENE]: EMPIRE_GUARDIAN_4_LIGHTS,
-};
+/** A map's light table by object type (`MapLighting.objectLights`). */
+export type MapObjectLights = Partial<Record<number, readonly LightEmitter[]>>;
+
+const lightsOf = (l: MapLayer) => l.lighting?.objectLights;
 
 /** The rows for a map object type on a world, or nothing. */
 export function lightEmittersFor(
   world: ENUM_WORLD,
   type: number
 ): readonly LightEmitter[] | undefined {
-  return LIGHTS_BY_WORLD[world]?.[type];
+  return maps.rowFor(world, lightsOf)?.[type];
 }
 
 /**

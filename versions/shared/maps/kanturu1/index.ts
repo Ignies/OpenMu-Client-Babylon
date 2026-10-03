@@ -6,6 +6,8 @@ import {
   KANTURU1_EFFECT_ONLY_TYPES,
   KANTURU1_EMISSIONS,
 } from './spec';
+import { KANTURU_1ST_SOUND } from './sound';
+import { KANTURU_1ST_LIGHTING } from './lighting';
 
 /**
  * Kanturu Ruins (World38 / Object38) - the map entry: identity and the per-world data the
@@ -42,5 +44,7 @@ export const kanturu1Layer: MapLayer = {
   blendMeshes: KANTURU1_BLEND_MESHES,
   effectOnly: KANTURU1_EFFECT_ONLY_TYPES,
   emissions: KANTURU1_EMISSIONS,
+  sound: KANTURU_1ST_SOUND,
+  lighting: KANTURU_1ST_LIGHTING,
   create: world => import('./create').then(m => m.createKanturu1(world)),
 };

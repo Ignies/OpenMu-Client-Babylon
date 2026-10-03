@@ -16,16 +16,18 @@ policy. It knows how to light something, never which skill or item asks for it.
   `holy`, `spark`) and `effectLight(colour, extent, seconds)` for the graded tiers.
 - `skills.ts`: `SkillLight` (the type of a skill's `light` field), `SKILL_LIGHTS` (filled by
   `registerSkills`), `ARROW_LIGHTS`, `EFFECT_LUMINOSITY`, `CAST_HEIGHT`.
+- `mapLighting.ts`: `MapLighting`, the type of a map's `lighting` field (`look`, `areas`,
+  `objectLights`, `thunder`). The row types are exported from `index.ts` for the map folders.
 - `mapObjectLights.ts`: `LightEmitter` (map specs build their light tables from it),
-  `lightMapObject`, `lightEmittersFor`. `mapObjectLightAdapter.ts`: `MapObjectLights`, the
+  `MapObjectLights`, `lightMapObject`, `lightEmittersFor`. `mapObjectLightAdapter.ts`: `MapObjectLights`, the
   `ModelObject` host. `lightCarrier.ts`: `LightCarrier`, a light without a drawn body.
 - `effectLights.ts`: `createEffectLight`, `createMovableFlare` (flare cards; they light nothing).
 - `items.ts`: `lightItem`, `itemSelfLight`. `sky.ts`: `strikeThunder`.
 - `lightingQuality.ts`: the tiers (`lightingTier()`, `tierIndex()`: Classic, Enhanced, Ultra),
   `pointLightBudget`, MSAA and CSM state.
 - `pointLightPool.ts`: `initPointLightPool`, `updatePointLightPool`, `registerPointLightEmitter`.
-- Look: `director.ts` (`createLookDirector`, `lookDirector`), `profiles.ts` (per-map
-  `LookProfile`, area and omen looks), `keyRig.ts`, `shadowPolicy.ts`, `skyDome.ts`, `horizon.ts`,
+- Look: `director.ts` (`createLookDirector`, `lookDirector`), `profiles.ts` (`profileFor`,
+  `areaProfile`, `MapLook`, `MapArea`, the open and enclosed defaults, omen looks), `keyRig.ts`, `shadowPolicy.ts`, `skyDome.ts`, `horizon.ts`,
   `clouds.ts`, `lightModel.ts`, `lightTint.ts`; read by terrain, render, item_fx and weather.
 
 ## How it works
@@ -46,6 +48,10 @@ policy. It knows how to light something, never which skill or item asks for it.
   `bodies`, `spots`, `strike`, `timed`); `enhanced` replaces moments from the Enhanced tier up.
   Master skills fall back to their base row; unknown wizardry gets `DEFAULT_WIZARDRY_CAST`.
   `trail` lights only run on Ultra.
+- Per-map rows live with the map: `MapLayer.lighting` in `versions/shared/maps/<map>/lighting.ts`
+  (look over a default, room looks, the object light table from its `spec.ts`, thunder). The
+  entries read them through `maps.rowFor` / `maps.worldSet` at run time, never at load. Worlds no
+  map claims keep a small `UNCLAIMED` row here (`profiles.ts`: Crywolf 2nd).
 - The look: `director.ts` composes `LookState` once a frame from the map's `LookProfile`, the area
   (a tavern), the omen and `GameOptions`, then hands each writer its slice (key rig, shadows, sky
   dome, skyline, AO, haze, post chain). It writes no Babylon state itself. Classic keeps the
@@ -72,15 +78,19 @@ policy. It knows how to light something, never which skill or item asks for it.
   a packet handler, a map object class) stays where it happens and calls the command, or a facade
   wrapper when more than one consumer needs it.
 - change one skill's light: its `light` field in `versions/shared/skills/<class>/<skill>/index.ts`.
-- add a map's torches: rows keyed by object type in the map's `*_LIGHTS` table (its `spec.ts`,
-  or `mapObjectLights.ts` for maps without one), listed in `LIGHTS_BY_WORLD` (`mapObjectLights.ts`).
+- add a map's torches: rows keyed by object type in the map's `*_LIGHTS` table (its `spec.ts`),
+  set as `objectLights` in its `lighting.ts`.
 - add an NPC or monster light: a row in `CHARACTER_LIGHTS` (`characters.ts`).
-- change a map's look: its profile in `profiles.ts`.
+- change a map's look: `look` in its `lighting.ts` (only what differs from the open or
+  enclosed default; the shared skies are `versions/shared/maps/shared/looks.ts`). A room look:
+  `areas` there. Change every map's default: `DEFAULT_PROFILE` / `ENCLOSED_PROFILE` here.
 
 ## Tests
 - `clouds.test.ts`: cloud uniform values for a clock, scroll wrapping, the sun step, binding.
 - `lightingQuality.test.ts`: `sceneTargetSamples` (MSAA per pass, Classic at one sample).
 - `recipes.test.ts`: `effectLight` hue, reach and gain ceiling, minimum range.
+- `versions/shared/maps/mapRows.golden.test.ts`: every world's look, room looks, thunder and
+  map-object lights, pinned across the move into the map folders.
 - The skill golden tests (`versions/shared/skills/skillTables.golden.test.ts`,
   `skillVisuals.golden.test.ts`) record every skill's light.
 
