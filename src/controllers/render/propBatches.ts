@@ -210,10 +210,6 @@ function tableExclusion(map: ENUM_WORLD, type: number): string | null {
   if (findRestObject(map, type)) return 'rest object';
   if (leanCursorObjects(map)?.has(type)) return 'lean box';
   if (roomStructureTypes(map).has(type)) return 'room piece';
-  // Chandelier fire and wall torch are built inside MapTileObject.init.
-  if (map === ENUM_WORLD.WD_73NEW_LOGIN_SCENE && (type === 157 || type === 37)) {
-    return 'login fire';
-  }
   return null;
 }
 

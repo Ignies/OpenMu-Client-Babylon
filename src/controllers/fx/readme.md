@@ -24,7 +24,8 @@ shared pools, textures and particle recipes other folders reuse.
   `spawnLinkedModel` (`linkedModel.ts`) spawn without the facade and hand back a richer handle.
 - Modules the ECS systems and other controllers call directly:
   - `effectParticles.ts`: the map-object sprite pool (`Emission`, `ParticleEmitter`,
-    `BonedParticleEmitter`, `HeldSprites`, `spawnParticle`, `emissionsFor`).
+    `BonedParticleEmitter`, `HeldSprites`, `spawnParticle`, `emissionsFor`); `BonedParticleEmitter`
+    and `BonedEmission` are also on `index.ts` for map object classes.
   - `moveTargetEffect.ts`: `loadEffectTexture` (the shared effect texture cache), `TerrainDecal`,
     `MoveTargetEffect` (the click-to-move marker).
   - `ambientParticles.ts` `createAmbientSystem`, `boids.ts` `boidsFor` / `boidFactoryFor`,

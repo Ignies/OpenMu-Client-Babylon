@@ -2,36 +2,14 @@ import { Entity, World } from '../../ecs/world';
 import { getMaterial, loadGLTF } from '../assets/modelLoader';
 import { ModelObject } from '../render/modelObject';
 import { BlendState } from '@versions/shared/objects/enum';
-import { ENUM_WORLD } from '../../core/types';
 import { SNOW_GROUND_MAPS } from '../weather/snowCover';
 import { isEffectOnlyObject } from '../render/effectOnlyObjects';
-import { createEffectLight, type EffectLight } from '../lighting/effectLights';
-import {
-  LOGIN_CHANDELIER,
-  LOGIN_WALL_TORCH,
-  lightMapObject,
-} from '../lighting/mapObjectLights';
-import type { LightSource } from '../lighting/lightSource';
-import {
-  BonedParticleEmitter,
-  ParticleEmitter,
-  emissionsFor,
-  type BonedEmission,
-} from '../fx/effectParticles';
+import { ParticleEmitter, emissionsFor } from '../fx/effectParticles';
 
 export class MapTileObject extends ModelObject {
   static Batchable = true;
 
-  #light: EffectLight | null = null;
-
   #emitter: ParticleEmitter | null = null;
-
-  #boneEmitter: BonedParticleEmitter | null = null;
-
-  /** The light, when this type has one (login chandelier / wall torch). */
-  #source: LightSource | null = null;
-
-  #disposed = false;
 
   async init(world: World, entity: Entity) {
     await super.init(world, entity);
@@ -73,20 +51,6 @@ export class MapTileObject extends ModelObject {
 
     this.load(await loadGLTF(modelPath, world));
 
-    if (
-      this.Type === 157 &&
-      this.WorldIndex === ENUM_WORLD.WD_73NEW_LOGIN_SCENE
-    ) {
-      this.#boneEmitter = this.#createChandelierFire(world);
-    }
-
-    if (
-      this.WorldIndex === ENUM_WORLD.WD_73NEW_LOGIN_SCENE &&
-      this.Type === 37
-    ) {
-      this.#createWallTorch(world);
-    }
-
     if (modelPath === 'Object3/Object20.glb') {
       const m = this.getMesh(0)!;
       m.material = getMaterial(world.scene, false, 2, BlendState.ALPHA_ADD);
@@ -110,117 +74,8 @@ export class MapTileObject extends ModelObject {
     // already done, and took the decision away from them.
   }
 
-  #createChandelierFire(world: World): BonedParticleEmitter | null {
-    const root = this.gltf?.mesh;
-
-    if (!root) return null;
-
-    const nodeByBone = new Map<number, BonedEmission['node']>();
-
-    for (const node of root.getDescendants(false)) {
-      const match = /^bone_(\d+)_/.exec(node.name);
-
-      if (match && 'getAbsolutePosition' in node) {
-        nodeByBone.set(Number(match[1]), node as BonedEmission['node']);
-      }
-    }
-
-    const scale = this.node.scaling.x;
-    const points: BonedEmission[] = [];
-
-    for (const bone of [22, 23, 25]) {
-      const node = nodeByBone.get(bone);
-      if (!node) continue;
-
-      points.push(
-        { node, kinds: ['fire157'], count: 2, scale: scale * 0.2, light: [0.9, 0.5, 0] },
-        { node, kinds: ['fire157'], count: 2, scale: scale * 0.1, light: [0.75, 0.3, 0] }
-      );
-    }
-
-    for (const bone of [26, 24, 21]) {
-      const node = nodeByBone.get(bone);
-      if (!node) continue;
-
-      points.push({
-        node,
-        kinds: ['smoke65'],
-        count: 1,
-        scale: scale * 0.1,
-        light: [1, 1, 1],
-      });
-    }
-
-    if (!points.length) return null;
-
-    this.#source = lightMapObject(
-      world.scene,
-      LOGIN_CHANDELIER,
-      this.node.position
-    );
-
-    return new BonedParticleEmitter(world.scene, points);
-  }
-
-  #createWallTorch(world: World): void {
-    const scale = this.node.scaling.x;
-
-    const bone = this.gltf?.mesh
-      .getDescendants(false)
-      .find(n => n.name.startsWith('bone_1_'));
-
-    const anchor: BonedEmission['node'] =
-      bone && 'getAbsolutePosition' in bone
-        ? (bone as unknown as BonedEmission['node'])
-        : this.node;
-
-    const position = anchor.getAbsolutePosition();
-    const offsetY = 0;
-
-    const spritePosition = {
-      x: position.x,
-      y: position.y + offsetY,
-      z: position.z,
-    };
-
-    void createEffectLight(
-      world.scene,
-      LOGIN_WALL_TORCH.sprite!,
-      spritePosition,
-      scale
-    ).then(light => {
-      this.#light = light;
-
-      if (this.#disposed) {
-        this.#light?.dispose();
-        this.#light = null;
-      }
-    });
-
-    this.#source = lightMapObject(world.scene, LOGIN_WALL_TORCH, spritePosition);
-
-    this.#boneEmitter = new BonedParticleEmitter(world.scene, [
-      {
-        node: anchor,
-        kinds: ['fire1', 'fire2', 'fire3'],
-        count: 1,
-        scale: scale * 0.8,
-        light: [1, 1, 1],
-        offsetY,
-      },
-    ]);
-  }
-
   dispose(): void {
-    this.#disposed = true;
-    this.#light?.dispose();
-    this.#light = null;
-
-    this.#source?.dispose();
-    this.#source = null;
-
     this.#emitter = null;
-    this.#boneEmitter = null;
 
     super.dispose();
   }
@@ -231,7 +86,6 @@ export class MapTileObject extends ModelObject {
     if (!this.Ready) return;
 
     this.#emitter?.update();
-    this.#boneEmitter?.update();
 
     // The `Object8/Object24.glb` sine that pulsed mesh *visibility* here was
     // the Atlans water plane's `BlendMeshLight` done as alpha - it dimmed the

@@ -5,6 +5,8 @@ the Icarus thunder) and the per-map look around it: key lights, sky, clouds, haz
 policy. It knows how to light something, never which skill or item asks for it.
 
 ## Public API
+- For map object classes (`index.ts`): `lightMapObject`, `LOGIN_CHANDELIER`, `LOGIN_WALL_TORCH`,
+  `createEffectLight`, `EffectLight`.
 - `lighting` (`index.ts`): the facade. `update(map, dt)`, `reset()`, `register(layer)`,
   `layersFor(map)`; readers `emitters(map)`, `liveCount`, `characterIsLit(e)`, `look()`;
   commands `omen(name)`, `skillTargeted`, `skillArea`, `skillAt`, `skillTrail`, `skillCue`,

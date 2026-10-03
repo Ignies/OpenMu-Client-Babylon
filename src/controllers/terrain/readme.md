@@ -6,7 +6,8 @@ water, ground picks, minimap data and the base class for map objects. There is n
 `index.ts` only exports the row types a map folder writes; callers import the files below directly.
 
 ## Public API
-- `index.ts`: the types only - `MapTerrain` (`mapTerrain.ts`, a map's `terrain` field:
+- `index.ts`: `MapTileObject` (the base class a map folder's object classes extend; import it only
+  from code a map's `create.ts` loads) and the types - `MapTerrain` (`mapTerrain.ts`, a map's `terrain` field:
   `overlays`, `snowBed`, `water`, `rest`, `leanCursor`, `objectFixups`, `grass`, `hidden`),
   `TerrainOverlayName`, `RestObject`, `RestKind`, `MapObjectFixup`, `TerrainWaterSpec`.
 - `loadMapIntoScene(world, map, pos?)` (`loadMapIntoScene.ts`): queue a warp to `map`.

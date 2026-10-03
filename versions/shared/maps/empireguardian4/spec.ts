@@ -153,7 +153,7 @@ export const EMPIRE_GUARDIAN_4_WALL_TORCH: LightEmitter = {
 /**
  * Type 157's light, `Chandelier.smd` (x6). The original hangs no light on it
  * at all - this is ours, at the object origin with the table candle's colour,
- * and it is the row `controllers/terrain/mapTileObject.ts` already uses for the login
+ * and it is the row `maps/loginscene/` already uses for the login
  * scene under the name `LOGIN_CHANDELIER`.
  */
 export const EMPIRE_GUARDIAN_4_CHANDELIER: LightEmitter = {
@@ -172,7 +172,7 @@ export const EMPIRE_GUARDIAN_4_CHANDELIER: LightEmitter = {
  * 37 and 157 are not rows here on purpose: both need a bone, so they are
  * classes (`wallTorchObject.ts`, `chandelierObject.ts`) that call
  * `lightMapObject` with the two emitters above. Adding them to this table
- * would also double the login scene's torch, which `mapTileObject.ts` hosts
+ * would also double the login scene's torch, which `loginscene/wallTorchObject.ts` hosts
  * there already.
  */
 export const EMPIRE_GUARDIAN_4_LIGHTS: Partial<

@@ -266,3 +266,5 @@ export type {
   SunSpec,
 } from './profiles';
 export type { LightEmitter, MapObjectLights } from './mapObjectLights';
+export { LOGIN_CHANDELIER, LOGIN_WALL_TORCH, lightMapObject } from './mapObjectLights';
+export { createEffectLight, type EffectLight } from './effectLights';
