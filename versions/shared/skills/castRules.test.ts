@@ -59,4 +59,9 @@ describe('skill cast rules', () => {
     const wrong = Object.entries(SKILL_EFFECTS).filter(([id, effect]) => MAGIC_FINISH[+id] !== effect);
     expect(wrong).toEqual([]);
   });
+
+  it('every skill ReceiveMagicFinish handles names its cancel effect', () => {
+    const missing = Object.keys(MAGIC_FINISH).map(Number).filter(id => SKILL_EFFECTS[id] === undefined);
+    expect(missing).toEqual([]);
+  });
 });

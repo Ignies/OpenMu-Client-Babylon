@@ -14,6 +14,8 @@ const ALICE_THORNS: AliceCurse = { circle: THORNS, models: THORNS, flare: THORNS
 export default defineSkill({
   id: 217,
   name: "Damage Reflection",
+  // ReceiveMagicFinish drops eBuff_Thorns (WSclient.cpp:3975-3977).
+  effect: 71,
   // 217 Thorns (Damage Reflection): the SLEEP-clip hand in (0.8,0.5,0.2), then 14 ticks after the reply the
   // circle at the caster and the ALICE_BUFFSKILL rings on the target, or on the caster without one (aliceCurse).
   visual: {

@@ -185,6 +185,8 @@ const UPPER_BONES = [25, 26, 27, 20, 34, 35, 36] as const;
 export default defineSkill({
   id: 48,
   name: "Swell Life",
+  // ReceiveMagicFinish drops eBuff_Life (WSclient.cpp:3930-3934).
+  effect: 8,
   // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
   lookAliases: [356, 360, 363],
   noFlinch: [A.PLAYER_SKILL_VITALITY], // SetPlayerShock leaves the cast alone (ZzzCharacter.cpp:1283-1297)

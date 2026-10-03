@@ -116,6 +116,8 @@ const POISON_LIGHT: LightRecipe = {
 export default defineSkill({
   id: 1,
   name: "Poison",
+  // ReceiveMagicFinish drops eDeBuff_Poison (WSclient.cpp:3886-3889).
+  effect: 55,
   // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
   lookAliases: [384],
   // 1 Poison: at the release, MODEL_POISON + 10 BITMAP_SMOKE sub1 at the target's feet (poisonCloud).

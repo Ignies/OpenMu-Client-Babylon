@@ -181,6 +181,8 @@ export const ICE_STORM_LIGHT: SkillLight = {
 export default defineSkill({
   id: 39,
   name: "Ice Storm",
+  // ReceiveMagicFinish drops eDeBuff_Freeze (WSclient.cpp:3952-3954).
+  effect: 56,
   // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
   lookAliases: [391, 393],
   // 39 Ice Storm (391 / 393 alias here): 10x MODEL_BLIZZARD sub0 on the cast point at AttackTime 15 (`iceStorm`); Enhanced `iceStormGraded`.
