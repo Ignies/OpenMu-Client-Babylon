@@ -17,7 +17,8 @@ its own folder in `versions/shared/monsters/<name>/` and uses this controller.
 - Look fields: `light` (`MonsterLight`, read by `lighting/characters.ts`), `bodyFx`
   (`MonsterBodyFx`, `bodyFx.ts`: particles and cards by name, read by `fx/monsterVisuals.ts`;
   shared pieces in `versions/shared/monsters/_shared/bodyFx.ts`); on a body,
-  `MonsterModelDef.shatter` (`MonsterShatter`, read by `fx/deathVisuals.ts`).
+  `MonsterModelDef.shatter` (`MonsterShatter`, read by `fx/deathVisuals.ts`); `worldScale` (its
+  `Object.Scale` on given worlds, read by the actors controller's `npcSpawnScale`).
 - `defineMonster(def)`: a monster folder's default export.
 - `MonsterRegistry`: `get(numb)` (the table row or null), `def(numb)`, `model(numb)`,
   `maxHealth(numb)`, `having(field)` (every type that sets a field, with its value), `all()`, `add`

@@ -44,6 +44,8 @@ export type MonsterDef = {
    * `Object.Scale`, and `Object.HiddenMesh` for types that share a model and hide a mesh.
    */
   model?: { type: number; scale: number; hiddenMesh?: number };
+  /** `Object.Scale` on these worlds (by world index) in place of the drawn one. */
+  worldScale?: Readonly<Record<number, number>>;
   /** `c->SubType` the original creates this type with (9: Kalima's large centurions, Kundun's candidates). */
   subType?: number;
   /** Spawned but never drawn (`Object.Visible = false`): the actors controller loads no model. */

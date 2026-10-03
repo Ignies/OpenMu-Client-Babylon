@@ -50,8 +50,13 @@ export function resolveModelFactory(typeNumber: number): typeof ModelObject {
   return monsterFactoryFor(FALLBACK_MODEL_TYPE, FALLBACK_SCALE);
 }
 
-/** The `Object.Scale` an NPC spawns with: its class's own, else CreateCharacterPointer's 0.9. */
-export function npcSpawnScale(factory: typeof ModelObject): number {
+/**
+ * The `Object.Scale` an NPC spawns with: its folder's `worldScale` on that world, else its class's
+ * own, else CreateCharacterPointer's 0.9.
+ */
+export function npcSpawnScale(factory: typeof ModelObject, type = -1, world = -1): number {
+  const onWorld = monsterRegistry.def(type)?.worldScale?.[world];
+  if (onWorld !== undefined) return onWorld;
   return factory.OverrideScale >= 0 ? factory.OverrideScale : CHARACTER_DEFAULT_SCALE;
 }
 

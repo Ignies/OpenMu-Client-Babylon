@@ -16,9 +16,10 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 - Monster models from each monster's folder (through the monsters controller): `monsterModelFile`,
   `monsterModelTypeOfNpc`, `monsterScaleOf`, `monsterHiddenMesh`, `hasMonsterModel`;
   `monsterFactoryFor` (`genericMonster.ts`), the class every monster without its own uses.
-- NPC defaults: `npcFactoryFor(file, scale?)`, `trapFactoryFor`, `HiddenNpc`, `npcSpawnScale(factory)`
-  (`modelFactoryPerId.ts`); `gearedNpcFactory(gear)`, `transformedNpcFactory(dir, part, scale?)`
-  (`playerNpc.ts`); `CHARACTER_DEFAULT_SCALE` (`monsterModelTable.ts`).
+- NPC defaults: `npcFactoryFor(file, scale?)`, `trapFactoryFor`, `HiddenNpc`,
+  `npcSpawnScale(factory, type, world)` (`modelFactoryPerId.ts`); `gearedNpcFactory(gear)`,
+  `transformedNpcFactory(dir, part, scale?)` (`playerNpc.ts`); `CHARACTER_DEFAULT_SCALE`
+  (`monsterModelTable.ts`).
 - NPC tables, live views of the monster folders kept for the readers that list them:
   `NPC_MODEL_TABLE`, `TRAP_MODEL_TABLE`, `npcModelFile` (`npcModelTable.ts`, with `folderTable`),
   `GEARED_NPC_TABLE`, `TRANSFORMED_NPC_TABLE` (`playerNpcTables.ts`).
@@ -52,9 +53,10 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   (`Monster/Monster<modelType + 1>.glb`), `npcModel` (`NPC/<file>.glb`, or a path off the asset
   root when the file starts with `/`), `gear`, `transformed`, and falls back to monster model 0
   at scale 0.8. This folder imports no content: classes register themselves at boot.
-- An NPC spawns at `npcSpawnScale`: its class's `OverrideScale`, else 0.9, the `o->Scale`
-  CreateCharacterPointer gives every character (ZzzCharacter.cpp:11699). A folder names a scale only
-  when its CreateMonster case sets one; geared NPCs get SetCharacterScale's 0.9 on the CLASS_WIZARD rig.
+- An NPC spawns at `npcSpawnScale`: its folder's `worldScale` on that world, else its class's
+  `OverrideScale`, else 0.9, the `o->Scale` CreateCharacterPointer gives every character
+  (ZzzCharacter.cpp:11699). A folder names a scale only when its CreateMonster case sets one;
+  geared NPCs get SetCharacterScale's 0.9 on the CLASS_WIZARD rig.
 - `PlayerObject` loads `Player/player.glb` (a rig with no meshes) and hangs every part on it as a
   child `ModelObject`: helm, mask, armor, pants, gloves, boots, two weapons, two Phoenix wings,
   wings, quest item and pet. Weapons link to bones 33 / 42 (ZzzCharacter.cpp:11849-11850), wings

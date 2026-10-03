@@ -7,7 +7,9 @@ export default defineMonster({
   maxHealth: 4000,
   // ZzzCharacter.cpp:13907-13931: a player rig in Legendary +9 with the Legendary Staff and Shield;
   // the rig's class is CLASS_WIZARD (CreateCharacterPointer, :11732-11735). Not modelled: the red
-  // PVP_MURDERER2 body (:13925) and the class scale (SetCharacterScale, 1.0 in Devil Square).
+  // PVP_MURDERER2 body (:13925).
+  // SetCharacterScale's 0.9, but 1.0 in Devil Square (:13926-13930); map 32 is Devil Square 5-7.
+  worldScale: { 9: 1, 32: 1 },
   gear: {
     charClass: CharacterClassNumber.DarkWizard,
     playerClass: PlayerClass.DarkWizard,

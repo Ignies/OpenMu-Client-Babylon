@@ -46,6 +46,13 @@ describe('NPC looks from the original client', () => {
     expect(m.npcSpawnScale(m.resolveModelFactory(type))).toBe(0.9);
   });
 
+  // `if (gMapManager.InDevilSquare()) c->Object.Scale = 1.0f` (ZzzCharacter.cpp:13927-13930); map 32 is
+  // Devil Square 5-7, which the original loads as WD_9DEVILSQUARE.
+  it('the Cursed Wizard spawns at 1 in Devil Square and 0.9 elsewhere', () => {
+    const f = m.resolveModelFactory(34);
+    expect([9, 32, 0, 2].map(world => m.npcSpawnScale(f, 34, world))).toEqual([1, 1, 0.9, 0.9]);
+  });
+
   it.each([
     [236, 1], // Golden Archer, :14387
     [257, 1], // Elf Soldier, MakeElfHelper :12469

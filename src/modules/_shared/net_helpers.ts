@@ -103,7 +103,7 @@ export function addNpcToScope(world: World, npc: ScopeNpc) {
         npc.CurrentPositionY
       ),
       rot: new Vector3(0, convertDirectionToAngle(npc.Rotation), 0),
-      scale: npcSpawnScale(modelFactory),
+      scale: npcSpawnScale(modelFactory, npc.TypeNumber, world.mapIndex),
     },
     modelFactory,
     pathfinding: {
