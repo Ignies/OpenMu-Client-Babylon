@@ -5,6 +5,7 @@ export default defineMonster({
   Name: 'Golden Dragon',
   maxHealth: 15000,
   model: { type: 31, scale: 0.9 },
+  appearSound: { sound: 'Sound/mBullAttack1', channels: 2 }, // AppearMonster, WSclient.cpp:2842-2847
   stats: {
     Rate: 1,
     Level: 60,

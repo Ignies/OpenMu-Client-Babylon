@@ -7,6 +7,7 @@ export default defineMonster({
   // Kalima gate (ZzzCharacter.cpp:13046-13064): all seven share `MODEL_WARCRAFT`
   // (Skill/HellGate) and stand on animation frame 10.
   npcModel: { file: '/Skill/HellGate', scale: 1 },
+  summonSound: { sound: 'Sound/eWallFall', channels: 1 }, // 0x1F, WSclient.cpp:3117-3122
   stats: {
     Rate: 1,
     Level: 10,

@@ -66,6 +66,10 @@ export type MonsterDef = {
   quietCasts?: readonly number[];
   /** Its Teleport (skill 6) on `world` plays `sound` instead of CreateTeleportBegin. */
   teleport?: MonsterTeleport;
+  /** AppearMonster's sound when it spawns with the 0x8000 bit (WSclient.cpp:2837-2869). */
+  appearSound?: MonsterSound;
+  /** The 0x1F caller's own sound after AppearMonster, for a summoned spawn (WSclient.cpp:3117-3122). */
+  summonSound?: MonsterSound;
   /** The skill whose AttackTime replays the meteorite storm sound every frame (a trap's). */
   stormSkill?: number;
   /** The light it carries while in scope (the lighting controller's `characterLightFor`). */
@@ -90,6 +94,9 @@ export type MonsterLight =
       readonly height?: number;
       readonly color?: readonly [number, number, number] | 'lightning';
     };
+
+/** A one-shot a type plays: `channels` is the wave's `LoadWaveFile` count. */
+export type MonsterSound = { readonly sound: string; readonly channels: number };
 
 /** `MonsterDef.teleport`: `channels` is the wave's `LoadWaveFile` count. */
 export type MonsterTeleport = { readonly sound: string; readonly channels: number; readonly world: number };

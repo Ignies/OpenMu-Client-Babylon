@@ -5,6 +5,7 @@ export default defineMonster({
   Name: 'Orc Archer',
   maxHealth: 20000,
   model: { type: 46, scale: 1.1 },
+  appearSound: { sound: 'Sound/mOrcCapAttack1', channels: 2 }, // AppearMonster, WSclient.cpp:2862-2868
   stats: {
     Rate: 1,
     Level: 72,

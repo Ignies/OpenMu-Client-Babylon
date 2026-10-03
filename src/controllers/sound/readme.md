@@ -160,7 +160,9 @@ Weakness, Innovation and their masters) and `SILENT_HERO_CASTS` (Fire Scream) in
 filled by `registerSkills` from each skill's `sound`, `clipSound`, `soundOnLanding` and
 `silentHeroCast`. Change a skill's sound in its file under `versions/shared/skills/`. The
 per-monster rows `packetSounds.ts` reads are the monster's own: `quietCasts` (on the monster
-folder or its body file), `teleport` (the Nightmare) and `stormSkill` (the meteorite trap).
+folder or its body file), `teleport` (the Nightmare), `stormSkill` (the meteorite trap),
+`appearSound` (AppearMonster: Golden Dragon, Assassin, Chief Skeleton Archers 1-6) and
+`summonSound` (the Kalima gates by 0x1F).
 
 ## A map's own sound (MapLayer.sound)
 - A map's beds, one-shots, clocked one-shots, music, town tracks, object loops and monster cues

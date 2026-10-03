@@ -12,7 +12,8 @@ its own folder in `versions/shared/monsters/<name>/` and uses this controller.
   (`NpcGlobalVoice`, `NpcGlobalCue`).
 - Sound fields, read by `sound/packetSounds.ts`: `quietCasts` (skills whose cast sound the type
   never plays; also on a body, `MonsterModelDef.quietCasts`), `teleport` (`MonsterTeleport`: its
-  own teleport sound on one world) and `stormSkill` (the skill whose AttackTime replays the
+  own teleport sound on one world), `appearSound` and `summonSound` (`MonsterSound`: its spawn
+  sound, and the one only a 0x1F spawn plays) and `stormSkill` (the skill whose AttackTime replays the
   meteorite storm).
 - Look fields: `light` (`MonsterLight`, read by `lighting/characters.ts`), `bodyFx`
   (`MonsterBodyFx`, `bodyFx.ts`: particles and cards by name, read by `fx/monsterVisuals.ts`;
