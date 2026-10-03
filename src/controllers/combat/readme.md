@@ -10,7 +10,8 @@ It never sends packets or touches the scene; the ECS systems that fight read it 
   - swing latch: `attackTime`, `attackInFlight`, `checkAttackTime(n)`, `startAttack`,
     `hitDelaySeconds`, `cancelAttack`, `setLastAttackEffectTime`; the cast release rule:
     `releasesOnKey(action, monsterRig)`, `RELEASE_TICKS` (14), `RELEASE_KEY` (5), used by the skill
-    controller's `onRelease`.
+    controller's `onRelease`; `blowHeldTicks`, how long the last hit request waited for its blow
+    (`ObjectGotKilled` hands it to `DeathSystem`).
   - weapon: `attackRange(hands)`, `hasAmmo`, `equippedLauncher`.
   - skills: `skillClip(skill, ctx)`, `magicClip`, `othersSeeClip`, `castQuietOn`,
     `clipIgnoresHit`, `skillKill`, `skillStepIn`, `stepInSquare`, `clipHoldsFacing`,
@@ -109,6 +110,7 @@ the server sends the new square.
 - a hit key: `HIT_KEYS` in `recipes.ts`.
 
 ## Tests
+- `attackTiming.test.ts`: `blowHeldTicks` and its window, the clips that release a cast on their key.
 - `playerTarget.test.ts`: who is a hostile player (Ctrl, outlaws, warning states, duels).
 - `weaponRange.test.ts`: `ammoReload` puts arrows / bolts in the empty hand, reports an empty bag.
 - `skillRules.test.ts`: `registerSkillRules` fills every table and the readers answer from them.

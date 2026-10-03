@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ENUM_WORLD } from '../../core/types';
+import { MonsterActionType } from '@versions/shared/objects/enum';
 import { TW_ACTION, TW_NOGROUND } from '../../controllers/terrain/consts';
 import type { World } from '../world';
 
@@ -21,6 +22,12 @@ vi.mock('../../controllers/fx/deathVisuals', () => ({
 const spawn = vi.fn();
 vi.mock('../../controllers/fx', () => ({ effects: { spawn: (...args: unknown[]) => spawn(...args) } }));
 vi.mock('../../controllers/sound/combatSounds', () => ({ COMBAT_BUS: 'combat' }));
+vi.mock('../../controllers/fx/bloodDecals', () => ({
+  BloodDecals: class {
+    spawn() {}
+    update() {}
+  },
+}));
 
 // What a kill does to the body is the killing skill's (`kill` in its file): load the skills first.
 await import('@versions/shared/skills/skillVisuals');
@@ -42,6 +49,7 @@ function corpse() {
       shattered: false,
       offset: { x: 0, y: 0, z: 0 },
       pitch: 0,
+      held: 0,
     },
     // Not ready: the Die clip never starts, only the kill-tick motion and the bombs run.
     modelObject: { Ready: false },
@@ -161,5 +169,53 @@ describe('the Dead counter', () => {
     const { system } = killedBy(9001);
     for (let i = 0; i < 40; i++) system.update!(TICK);
     expect(seen).toEqual(Array.from({ length: 40 }, (_, i) => i + 1));
+  });
+});
+
+/** A monster killed on an open map, its model loaded; `held` as `ObjectGotKilled` would mark it. */
+function slain(held = 0) {
+  const body = {
+    ...corpse(),
+    monsterAnimation: { action: MonsterActionType.Stop1 },
+    modelObject: { Ready: true, Light: { x: 1, y: 1, z: 1 }, setAlpha: vi.fn() },
+  };
+  body.dying.held = held;
+  const world = {
+    mapIndex: ENUM_WORLD.WD_0LORENCIA,
+    scene: {},
+    getTerrainFlag: () => 0,
+    getByNetId: () => undefined,
+    with: () => [body],
+  };
+  return { body, system: DeathSystem(world as unknown as World) };
+}
+
+/** The tick the Die clip starts on. */
+function dieTick(held = 0): number {
+  const { body, system } = slain(held);
+  for (let tick = 1; tick <= 40; tick++) {
+    system.update!(TICK);
+    if (body.monsterAnimation.action === MonsterActionType.Die) return tick;
+  }
+  return -1;
+}
+
+describe('the Die clip', () => {
+  it('starts when Dead reaches 15, 14 ticks after the kill (ZzzCharacter.cpp:4074-4080)', () => {
+    expect(dieTick()).toBe(14);
+  });
+
+  it("counts from the swing's start when the hero's request waited for the blow", () => {
+    // The original sends the hit on the click; this client holds it to the blow (combat attackTiming).
+    expect(dieTick(5)).toBe(9);
+    expect(dieTick(20)).toBe(1);
+  });
+
+  it('fades from the kill, Rot += 0.02 a tick from Dead = 1 (ZzzCharacter.cpp:3215-3237)', () => {
+    const { body, system } = slain();
+    for (let i = 0; i < 49; i++) system.update!(TICK);
+    expect(body.dying.alpha).toBe(1);
+    for (let i = 0; i < 3; i++) system.update!(TICK);
+    expect(body.dying.alpha).toBeLessThan(1);
   });
 });

@@ -458,7 +458,6 @@
  "src/ecs/systems/deathSystem.ts -> src/controllers/actors/locomotion.ts",
  "src/ecs/systems/deathSystem.ts -> src/controllers/actors/playerObject.ts",
  "src/ecs/systems/deathSystem.ts -> src/controllers/anim/playSpeed.ts",
- "src/ecs/systems/deathSystem.ts -> src/controllers/anim/playerActionMapper.ts",
  "src/ecs/systems/deathSystem.ts -> src/controllers/fx/bloodDecals.ts",
  "src/ecs/systems/deathSystem.ts -> src/controllers/fx/core.ts",
  "src/ecs/systems/deathSystem.ts -> src/controllers/fx/deathVisuals.ts",

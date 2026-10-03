@@ -10,6 +10,7 @@ import { consumeInputGate, inputGateOpen, inputGateRemaining } from './inputGate
 import {
   attackInFlight,
   attackTime,
+  blowHeldTicks,
   cancelAttack,
   checkAttackTime,
   hitDelaySeconds,
@@ -150,6 +151,11 @@ class Combat implements Controller {
   /** AttackStage's default case lets this clip release a cast on its key (`attackTiming.ts`). */
   releasesOnKey(action: number, monsterRig: boolean): boolean {
     return releasesOnKey(action, monsterRig);
+  }
+
+  /** Ticks the hero's last hit request waited for its blow, while its kill can still arrive. */
+  get blowHeldTicks(): number {
+    return blowHeldTicks();
   }
 
   /** Drop the swing in flight without landing it. */

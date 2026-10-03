@@ -30,6 +30,9 @@ const MIN_PLAY_SPEED = 0.01;
  */
 const MAX_HIT_WAIT_TICKS = 40;
 
+/** Seconds a sent blow can still be the one its kill packet answers (a round trip, with room). */
+const BLOW_KILL_WINDOW = 1;
+
 // ---- 2. state + readers ----------------------------------------------------
 
 /** The running `AttackTime`, in reference ticks; 0 = no swing in flight. */
@@ -43,6 +46,19 @@ let hitTick = 0;
 
 /** Latched hit callback; fired once per swing when `attackTicks >= hitTick`. */
 let onHit: (() => void) | null = null;
+
+/** Ticks the last blow's request waited past its swing start, and seconds since it went out. */
+let blowHeld = 0;
+let sinceBlow = Infinity;
+
+/**
+ * Ticks the hero's last hit request was held past its swing start, while its kill can still arrive.
+ * The original sends it on the click (ZzzInterface.cpp:3355); `DeathSystem` counts the Die clip's
+ * 14 ticks from there.
+ */
+export function blowHeldTicks(): number {
+  return sinceBlow <= BLOW_KILL_WINDOW ? blowHeld : 0;
+}
 
 /**
  * Tick at which a clip at `playSpeed` reaches its hit key: `1 + key / playSpeed`,
@@ -133,6 +149,7 @@ export function cancelAttack(): void {
 }
 
 function update(_map: ENUM_WORLD, dt: number): void {
+  sinceBlow += dt;
   if (attackTicks <= 0) return;
 
   attackTicks += dt * REFERENCE_FPS;
@@ -140,6 +157,8 @@ function update(_map: ENUM_WORLD, dt: number): void {
   if (onHit && attackTicks >= hitTick) {
     const fire = onHit;
     onHit = null;
+    blowHeld = attackTicks - FIRST_TICK;
+    sinceBlow = 0;
     fire();
     // AttackStage: the hit key forces AttackTime to the limit.
     attackTicks = LIMIT_ATTACK_TICKS;
@@ -155,6 +174,8 @@ function update(_map: ENUM_WORLD, dt: number): void {
 
 function reset(): void {
   cancelAttack();
+  blowHeld = 0;
+  sinceBlow = Infinity;
 }
 
 // ---- self-check: the table above, in code ---------------------------------

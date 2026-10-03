@@ -18,8 +18,10 @@ the Rage Fighter's Dark Side blows. This folder has only the handlers; it keeps 
 - `ObjectHitExtended` carries `HealthStatus`, the server's own reading of the target's health in 1/250
   steps (`WSclient.cpp:3133-3143`); it replaces the client's estimate. Only the open-source client line
   (>= 106.3) gets it from OpenMU; on S6E3 the bar runs on the health table alone.
-- A kill adds the `dying` component; `DeathSystem` starts the Die clip, at once or when the hero's
-  swing connects (`WSclient.cpp:5362-5384`). A hero kill plays the energy sound once
+- A kill adds the `dying` component; `DeathSystem` starts the Die clip 14 ticks later
+  (`c->Dead >= 15`, ZzzCharacter.cpp:4074-4080). A hero's plain blow (skill 0) also marks `held`, the
+  ticks its request waited for the blow (`combat.blowHeldTicks`): the original sends it on the click,
+  so the 14 ticks count from the swing's start. A hero kill plays the energy sound once
   (`ZzzCharacter.cpp:5242-5247`, `ZzzEffectJoint.cpp:3369`).
 
 ## Packets

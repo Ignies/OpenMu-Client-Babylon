@@ -56,6 +56,8 @@ function markKilled(
     alpha: 1,
     sink: 0,
     killedByHero,
+    // A plain blow's request went out on the blow, not on the click (combat attackTiming).
+    held: killedByHero && skill === 0 ? combat.blowHeldTicks : 0,
     skill,
     killerNetId,
     shattered: false,
