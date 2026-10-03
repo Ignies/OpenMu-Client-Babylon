@@ -256,6 +256,21 @@ export const TIMED: Partial<Record<ENUM_WORLD, readonly AmbientTimed[]>> = {
   ],
 };
 
+/** The beds a world runs, empty for none. */
+export function ambientBedsFor(map: ENUM_WORLD): readonly AmbientBed[] {
+  return BEDS[map] ?? NONE;
+}
+
+/** The rolled one-shots a world runs, empty for none. */
+export function ambientOneShotsFor(map: ENUM_WORLD): readonly AmbientOneShot[] {
+  return ONE_SHOTS[map] ?? NONE;
+}
+
+/** The clocked one-shots a world runs, empty for none. */
+export function ambientTimedFor(map: ENUM_WORLD): readonly AmbientTimed[] {
+  return TIMED[map] ?? NONE;
+}
+
 /** Maps with anything to play: `layer.maps`, derived from the tables. */
 const MAPS: ReadonlySet<ENUM_WORLD> = new Set(
   [BEDS, ONE_SHOTS, TIMED].flatMap(table =>

@@ -45,6 +45,11 @@ let current = 0;
 /** False until the first `updateRain` after a reset - see `resetRain`. */
 let seeded = false;
 
+/** Whether a world rains at full strength whatever the packet says. */
+export function alwaysRains(map: ENUM_WORLD): boolean {
+  return ALWAYS_RAINING.has(map);
+}
+
 /** The target the packet (or the map) asks for, in 0…1. */
 export function rainTarget(map: ENUM_WORLD): number {
   if (ALWAYS_RAINING.has(map)) return 1;

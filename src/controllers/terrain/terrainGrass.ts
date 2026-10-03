@@ -1381,7 +1381,7 @@ export function createGrassField(
  * carry seabed textures, so without this it would sprout a lawn on the
  * ocean floor.
  */
-function grassAllowed(map: ENUM_WORLD): boolean {
+export function grassAllowed(map: ENUM_WORLD): boolean {
   if (map >= ENUM_WORLD.WD_11BLOODCASTLE1 && map <= ENUM_WORLD.WD_18CHAOS_CASTLE_END) {
     return false;
   }

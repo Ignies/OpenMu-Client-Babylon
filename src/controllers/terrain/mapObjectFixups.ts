@@ -19,6 +19,11 @@ const MAP_OBJECT_FIXUPS: Partial<Record<ENUM_WORLD, MapObjectFixup[]>> = {
   ],
 };
 
+/** The height fixes a world applies to its objects, empty for none. */
+export function mapObjectFixupsFor(map: ENUM_WORLD): readonly MapObjectFixup[] {
+  return MAP_OBJECT_FIXUPS[map] ?? [];
+}
+
 export function applyMapObjectFixups(
   map: ENUM_WORLD,
   objs: { id: number; pos: { x: number; y: number; z: number } }[]

@@ -185,6 +185,11 @@ export const OBJECT_LOOPS: ReadonlyMap<ENUM_WORLD, readonly ObjectLoop[]> =
     ),
   ]);
 
+/** The object loops a world runs, empty for none. */
+export function objectLoopsFor(map: ENUM_WORLD): readonly ObjectLoop[] {
+  return OBJECT_LOOPS.get(map) ?? [];
+}
+
 /** Maps this exists on: the keys of the table. */
 const MAPS: ReadonlySet<ENUM_WORLD> = new Set(OBJECT_LOOPS.keys());
 
