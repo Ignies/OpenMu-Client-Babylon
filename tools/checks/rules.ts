@@ -8,7 +8,7 @@ const under = (p: string, dir: string) => p.startsWith(dir);
 const isTest = (p: string) => /\.test\.tsx?$/.test(p);
 
 /** Content folders: what a version may load. Data tables (packets, databases, enums) are not content. */
-const CONTENT = ['versions/shared/skills/', 'versions/shared/ui/', 'versions/shared/maps/', 'versions/shared/monsters/', 'versions/shared/npcs/'];
+const CONTENT = ['versions/shared/skills/', 'versions/shared/ui/', 'versions/shared/maps/', 'versions/shared/monsters/'];
 const isContent = (p: string) => CONTENT.some(c => under(p, c)) && !/Database\.ts$/.test(p);
 
 export const RULES: Rule[] = [

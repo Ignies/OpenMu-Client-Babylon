@@ -63,7 +63,7 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
 
 ## Depends on / used by
 - uses: `@/controllers/maps` (contract, rooms), `@/controllers/terrain`, `@/controllers/render`,
-  `@/controllers/fx`, `versions/shared/objects`, `versions/shared/npcs`
+  `@/controllers/fx`, `versions/shared/objects`, `versions/shared/monsters` (the Elf Soldier class)
 - used by: `src/controllers/maps/index.ts` (`MAP_LAYERS`), `src/controllers/maps/_template.ts`
 
 ## Change it

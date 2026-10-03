@@ -14,7 +14,6 @@ Each subfolder has its own readme:
 | `monsters/` | one folder per monster or npc type (`defineMonster`), its `model.ts` when it has its own look |
 | `monster_models/` | one file per monster body (`defineMonsterModel`) |
 | `animations/` | one file per player clip (`defineAnimation`); monster swing and cast rules |
-| `npcs/` | a forward of `ElfSoldier` for the Lorencia map (npcs live in `monsters/`) |
 | `items/` | one file per item (`defineItem`) and per-launcher arrow looks |
 | `objects/` | world object model numbers and the signpost labels |
 | `packets/` | generated packet codecs (`bun run generate`) |
