@@ -37,6 +37,7 @@ import {
 import { isFemaleClass } from '../../common/mapPlayerNetClassToModelClass';
 import { getBaseClass } from '../../common/characterStats';
 import { isWingItem } from '../../common/wings';
+import { heldWeapons } from '../../common/chaosCastleUnit';
 import type { AttackPose } from '../../common/weaponClass';
 import { mountKind } from '../../common/pets';
 import { heroCastSound, playCombat, playSkill } from '../../sound/combat';
@@ -140,7 +141,7 @@ export const SkillCastSystem: ISystemFactory = world => {
     const hands = hero.charAppearance;
     const inSafeZone = !!hero.attributeSystem?.isAboveZero('inSafeZone');
     return {
-      hands,
+      hands: heldWeapons(hero, world.mapIndex),
       baseClass: getBaseClass(hands?.charClass ?? Store.playerData.charClass),
       swordCount: hero.playerAnimation?.swordCount ?? 0,
       wings: isWingItem(hands?.wings),

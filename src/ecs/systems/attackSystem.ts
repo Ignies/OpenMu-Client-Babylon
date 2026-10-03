@@ -9,6 +9,7 @@ import {
 import { TWFlags } from '../../common/terrain/consts';
 import { isFlagInBinaryMask } from '../../common/utils';
 import { chooseAttackAction } from '../../common/weaponClass';
+import { heldWeapons } from '../../common/chaosCastleUnit';
 import { getBaseClass } from '../../common/characterStats';
 import { isWingItem } from '../../common/wings';
 import { mountKind } from '../../common/pets';
@@ -283,7 +284,7 @@ export const AttackSystem: ISystemFactory = world => {
       const anim = playerEntity.playerAnimation;
       const swordCount = anim.swordCount ?? 0;
       const action = chooseAttackAction({
-        hands,
+        hands: heldWeapons(playerEntity, world.mapIndex),
         baseClass: getBaseClass(hands?.charClass ?? Store.playerData.charClass),
         swordCount,
         wings: isWingItem(hands?.wings),

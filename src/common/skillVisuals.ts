@@ -82,6 +82,7 @@ import { inHellas } from './locomotion';
 import { fenrirVariant, mountKind } from './pets';
 import { skillDefinition, type SkillDefinition } from './skillsDatabase';
 import { storeRef } from './storeRef';
+import { heldWeapons } from './chaosCastleUnit';
 import { BLAST_LIGHT, BOSS_LASER_LIGHT, HELLFIRE_CIRCLE_LIGHT, METEOR_LIGHT, SUMMON_ARRIVAL_LIGHT } from '../lighting/skills';
 import { tierIndex } from './lightingQuality';
 import { TWFlags } from './terrain/consts';
@@ -350,6 +351,8 @@ const orbiting = (caster: Entity, radius: number, height: number, rate: number, 
 };
 /** The caster's weapon bone. */
 const weaponBone = (caster: Entity): PointSource => out => bonePos(caster, WEAPON_BONE, out, CAST_HEIGHT);
+/** `c->Weapon`: the weapons a character holds, the castle's inside Chaos Castle. */
+const weaponsOf = (e: Entity) => heldWeapons(e, storeRef().world?.mapIndex ?? -1);
 /** A blur trail swept in front of the caster (CreateWeaponBlur on the weapon bone). */
 const slash = (colour: RGB = RGBS.steel, texture: string = TEX.swordBlur, reach = SLASH_REACH): Step => (_at, c) => {
   const t0 = fxNow();
@@ -2022,8 +2025,8 @@ interface CritHand {
  * `held`: the buff pulse also skips an empty hand (:10039, :10052).
  */
 function critHands(e: Entity, held: boolean): CritHand[] {
-  const right = e.charAppearance?.rightHand ?? null;
-  const left = e.charAppearance?.leftHand ?? null;
+  const right = weaponsOf(e)?.rightHand ?? null;
+  const left = weaponsOf(e)?.leftHand ?? null;
   const out: CritHand[] = [];
   if ((!held || right) && !(right?.group === GROUP_BOW && right.num === ARROWS)) out.push({ bone: RIGHT_HAND_BONE, sub: 0, bow: right?.group === GROUP_BOW });
   if ((!held || left) && !(left?.group === GROUP_BOW && left.num === BOLT) && left?.group !== GROUP_SHIELD) out.push({ bone: LEFT_HAND_BONE, sub: 1, bow: left?.group === GROUP_BOW });
@@ -4150,7 +4153,7 @@ const whenClipKey = (action: PlayerAction, key: number, maxTicks: number, step: 
 
 /** `c->Weapon[0]` - appearance slot 0 (`leftHand`), drawn in the right hand on bone 33 - with the level and tier it is drawn at. */
 function wieldedWeapon(e: Entity): { file: string; group: number; num: number; stamp: Record<string, unknown> } | null {
-  const part = e.charAppearance?.leftHand;
+  const part = weaponsOf(e)?.leftHand;
   if (!part) return null;
   const item = ItemsDatabase.getItem(part.group, part.num);
   if (!item) return null;
@@ -6427,7 +6430,7 @@ const bloodStormPlus: Step = (at, c) => {
 
 /** The book's tier: `Weapon[1].Level` >= 11 is 2, >= 7 is 1, else 0 (SummonSystem.cpp:128-135). */
 function bookTier(e: Entity): number {
-  const lvl = e.charAppearance?.leftHand?.lvl ?? 0;
+  const lvl = weaponsOf(e)?.leftHand?.lvl ?? 0;
   return lvl >= 11 ? 2 : lvl >= 7 ? 1 : 0;
 }
 
@@ -11946,7 +11949,7 @@ const ARROW_BURST = bomb(RGBS.fire);
  * bursts (ZzzEffect.cpp:6620).
  */
 export function playBowShotVisual(scene: Scene, shooter: Entity, target: Entity): void {
-  const launcher = combat.equippedLauncher(shooter.charAppearance);
+  const launcher = combat.equippedLauncher(weaponsOf(shooter));
   if (!launcher || entityGone(shooter) || entityGone(target)) return;
 
   const shot = LAUNCHER_ARROWS[launcher.num] ?? { model: MODEL.arrow, colour: RGBS.steel };
