@@ -1,4 +1,5 @@
 import { monsterRegistry, type MonsterDef } from '@/controllers/monsters';
+import { CHARACTER_DEFAULT_SCALE } from './monsterModelTable';
 
 /**
  * The NPC tables as they were before the data moved into the monster folders
@@ -28,7 +29,7 @@ export function folderTable<K extends keyof MonsterDef, R>(
 /** `type: [file, scale]` for every folder with an `npcModel`. */
 export const NPC_MODEL_TABLE: Readonly<Record<number, readonly [file: string, scale: number]>> = folderTable(
   'npcModel',
-  m => [m.file, m.scale] as const
+  m => [m.file, m.scale ?? CHARACTER_DEFAULT_SCALE] as const
 );
 
 /** `type: [modelIndex, castsShadow]` for every trap folder. */

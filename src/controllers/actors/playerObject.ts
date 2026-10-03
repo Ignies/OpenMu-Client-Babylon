@@ -47,6 +47,9 @@ export class PlayerObject extends ModelObject {
    */
   static NpcAlwaysFly = false;
 
+  /** `c->PK` a player-rig NPC is created with (`PVP_*`), or null: 6 draws the body red. */
+  static NpcHeroState: number | null = null;
+
   /**
    * A player-rig monster that bursts into pieces instead of playing
    * PLAYER_DIE1 (the Skeleton ring bodies, ZzzCharacter.cpp:1383-1390).
@@ -500,6 +503,11 @@ export function npcClassOf(
   factory: typeof ModelObject
 ): CharacterClassNumber | null {
   return (factory as typeof PlayerObject).NpcClass ?? null;
+}
+
+/** The `HeroState` (`c->PK`) a player-rig NPC factory spawns with, if it declares one. */
+export function npcHeroStateOf(factory: typeof ModelObject): number | null {
+  return (factory as typeof PlayerObject).NpcHeroState ?? null;
 }
 
 /**

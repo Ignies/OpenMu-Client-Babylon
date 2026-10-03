@@ -5,7 +5,7 @@ export default defineMonster({
   Name: 'Pasi Wizard',
   maxHealth: 50,
   // MODEL_SCIENTIST (ZzzCharacter.cpp:14531-14535).
-  npcModel: { file: 'Wizard01', scale: 1 },
+  npcModel: { file: 'Wizard01' },
   stats: {
     Rate: 1,
     Level: 2,

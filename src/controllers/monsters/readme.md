@@ -7,17 +7,19 @@ its own folder in `versions/shared/monsters/<name>/` and uses this controller.
 - `MonsterDef`: one type (`Numb`, `Name`, `maxHealth`, `model`, `subType`, `stats`, and the NPC
   fields below); `MonsterStats`: the original table's row; `MonsterRow`: that row with `Numb` and
   `Name`, as readers always got it.
-- NPC fields (`npc.ts`): `hidden`, `npcModel` (`NpcModel`), `gear` (`NpcGear`, `NpcItem`),
+- NPC fields (`npc.ts`): `hidden`, `npcModel` (`NpcModel`), `gear` (`NpcGear`, `NpcItem`; its `pk`),
   `transformed` (`NpcTransform`), `trap` (`NpcTrap`), `voice` (`NpcVoice`), `globalVoice`
   (`NpcGlobalVoice`, `NpcGlobalCue`).
 - Sound fields, read by `sound/packetSounds.ts`: `quietCasts` (skills whose cast sound the type
   never plays; also on a body, `MonsterModelDef.quietCasts`), `teleport` (`MonsterTeleport`: its
-  own teleport sound on one world) and `stormSkill` (the skill whose AttackTime replays the
+  own teleport sound on one world), `appearSound` and `summonSound` (`MonsterSound`: its spawn
+  sound, and the one only a 0x1F spawn plays) and `stormSkill` (the skill whose AttackTime replays the
   meteorite storm).
 - Look fields: `light` (`MonsterLight`, read by `lighting/characters.ts`), `bodyFx`
   (`MonsterBodyFx`, `bodyFx.ts`: particles and cards by name, read by `fx/monsterVisuals.ts`;
   shared pieces in `versions/shared/monsters/_shared/bodyFx.ts`); on a body,
-  `MonsterModelDef.shatter` (`MonsterShatter`, read by `fx/deathVisuals.ts`).
+  `MonsterModelDef.shatter` (`MonsterShatter`, read by `fx/deathVisuals.ts`); `worldScale` (its
+  `Object.Scale` on given worlds, read by the actors controller's `npcSpawnScale`).
 - `defineMonster(def)`: a monster folder's default export.
 - `MonsterRegistry`: `get(numb)` (the table row or null), `def(numb)`, `model(numb)`,
   `maxHealth(numb)`, `having(field)` (every type that sets a field, with its value), `all()`, `add`

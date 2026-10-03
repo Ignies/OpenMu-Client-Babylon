@@ -5,7 +5,7 @@ export default defineMonster({
   Name: 'Crown',
   maxHealth: 50,
   // Castle Siege (GMBattleCastle.cpp:1286-1381).
-  npcModel: { file: 'NpcCrown', scale: 1 },
+  npcModel: { file: 'NpcCrown' },
   stats: {
     Rate: 1,
     Level: 2,

@@ -12,6 +12,13 @@ export function monsterModelFile(modelType: number): string {
 export const FALLBACK_MODEL_TYPE = 0;
 export const FALLBACK_SCALE = 0.8;
 
+/**
+ * `o->Scale = 0.9f`, which CreateCharacterPointer gives every character (ZzzCharacter.cpp:11699) and
+ * an NPC keeps when its CreateMonster case sets none. SetCharacterScale gives the CLASS_WIZARD rig a
+ * geared NPC stands on the same 0.9 (:12144).
+ */
+export const CHARACTER_DEFAULT_SCALE = 0.9;
+
 /** The monster model a type uses, or -1 when its folder names none. */
 export function monsterModelTypeOfNpc(npcType: number): number {
   return monsterRegistry.model(npcType)?.type ?? -1;

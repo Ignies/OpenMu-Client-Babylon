@@ -1,8 +1,9 @@
 import type { Entity, World } from '@/ecs/world';
-import { monsterRegistry } from '@/controllers/monsters';
+import { monsterRegistry, type NpcModel } from '@/controllers/monsters';
 import { loadGLTF } from '@/controllers/assets';
 import { monsterFactoryFor } from './genericMonster';
 import {
+  CHARACTER_DEFAULT_SCALE,
   FALLBACK_MODEL_TYPE,
   FALLBACK_SCALE,
   hasMonsterModel,
@@ -40,13 +41,23 @@ export function resolveModelFactory(typeNumber: number): typeof ModelObject {
     );
   }
 
-  if (def?.npcModel) return npcFactoryFor(def.npcModel.file, def.npcModel.scale);
+  if (def?.npcModel) return npcFactoryFor(def.npcModel.file, def.npcModel.scale, def.npcModel.clipSpeeds);
 
   if (def?.gear) return gearedNpcFactory(def.gear);
 
   if (def?.transformed) return transformedNpcFactory(def.transformed.dir, def.transformed.part, def.transformed.scale);
 
   return monsterFactoryFor(FALLBACK_MODEL_TYPE, FALLBACK_SCALE);
+}
+
+/**
+ * The `Object.Scale` an NPC spawns with: its folder's `worldScale` on that world, else its class's
+ * own, else CreateCharacterPointer's 0.9.
+ */
+export function npcSpawnScale(factory: typeof ModelObject, type = -1, world = -1): number {
+  const onWorld = monsterRegistry.def(type)?.worldScale?.[world];
+  if (onWorld !== undefined) return onWorld;
+  return factory.OverrideScale >= 0 ? factory.OverrideScale : CHARACTER_DEFAULT_SCALE;
 }
 
 export function isKnownObjectType(typeNumber: number): boolean {
@@ -59,9 +70,16 @@ export function isKnownObjectType(typeNumber: number): boolean {
 
 const npcCache = new Map<string, typeof ModelObject>();
 
-/** An NPC drawn from its own model file (`npcModel`), at its scale. */
-export function npcFactoryFor(file: string, scale: number): typeof ModelObject {
-  const key = `${file}:${scale}`;
+/**
+ * An NPC drawn from its own model file (`npcModel`), at its scale (the default 0.9 when it has none)
+ * and with the clip speeds its case writes into the model.
+ */
+export function npcFactoryFor(
+  file: string,
+  scale = CHARACTER_DEFAULT_SCALE,
+  clipSpeeds: NpcModel['clipSpeeds'] = {}
+): typeof ModelObject {
+  const key = `${file}:${scale}:${JSON.stringify(clipSpeeds)}`;
   const cached = npcCache.get(key);
   if (cached) return cached;
 
@@ -70,6 +88,11 @@ export function npcFactoryFor(file: string, scale: number): typeof ModelObject {
   class GenericNpc extends ModelObject {
     static {
       GenericNpc.OverrideScale = scale;
+    }
+
+    constructor(...args: ConstructorParameters<typeof ModelObject>) {
+      super(...args);
+      for (const [action, speed] of Object.entries(clipSpeeds)) this.setActionSpeed(Number(action), speed!);
     }
 
     async init(world: World) {

@@ -34,8 +34,12 @@ _shared.ts                      helpers for several classes
 - Everything a controller does differently for one skill is a field of its file, never a branch
   in the controller: the clip pick (`clip` as a function, `poseClip`, `swing`), `swordCount`,
   `castsAsSpell`, `othersSee`, `quietOn`, `noFlinch`, `holdsFacing`, `clipSound`,
-  `soundOnLanding`, `silentHeroCast`, `kill`, `effect`, `buffHits`, `explicitHits`, and the
-  combat hooks (Nova, Combo, Dark Side).
+  `soundOnLanding`, `silentHeroCast`, `kill`, `effect`, `effectAliases`, `buffHits`,
+  `explicitHits`, and the combat hooks (Nova, Combo, Dark Side).
+- Deliberate deviation: `effectAliases` (on the base skill) and the Rage Fighter `effect`s 129-131
+  let a master or Rage Fighter `MagicEffectCancelled` drop its buff. The original's
+  ReceiveMagicFinish has those cases but reads the skill as a BYTE (WSclient.cpp:3884), so ids 256+
+  never match there and the buff stayed on until its timer ran out.
 - Classes: `dark_wizard`, `dark_knight`, `fairy_elf`, `magic_gladiator`, `dark_lord`, `summoner`,
   `rage_fighter`, plus `monsters` (monster-only skills) and `common` (every class or none).
 - `defineSkill` fields are listed in [docs/content.md](../../../docs/content.md).
@@ -62,7 +66,7 @@ _shared.ts                      helpers for several classes
   class, SwordCount, mount, gender, map and coin toss; SwordCount; clip-paired and landing
   sounds; the clips that hold facing or ignore a hit; master aliases; the cancel effect.
 - `castRules.test.ts`: the quiet mount (Defense), what others see (Electric Spike), the kill
-  rules (Nova, Combo), Nova's hook numbers, the cancel effects against `ReceiveMagicFinish`
+  rules (Nova, Combo), Nova's hook numbers, the cancel effects (masters included) against `ReceiveMagicFinish`
   (WSclient.cpp:3878). `rage_fighter/party_buffs.test.ts`: the party buffs'
   coin toss and its paired sound.
 - `releaseTiming.test.ts`: when Fire Ball leaves against the caster's magic speed: 14 ticks at a

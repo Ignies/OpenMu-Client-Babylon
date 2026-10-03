@@ -298,6 +298,7 @@ export default defineSkill({
   name: "Fire Slash",
   // ReceiveMagicFinish drops eDeBuff_Defense (WSclient.cpp:3939-3942).
   effect: 58,
+  effectAliases: [490],
   // UseSkillWarrior's glint (SkillCast.cpp:113-247, :357-376).
   warriorGlint: true,
   // Master numbers cast, heard, lit and drawn as this skill (the original names them in its `case`).

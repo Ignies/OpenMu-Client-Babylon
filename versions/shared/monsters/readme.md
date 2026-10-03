@@ -18,7 +18,9 @@ A folder's name is the type's name in snake_case, plus `_<number>` when two type
 table (`Monster.txt`) and the wire (`AddNpcsToScope`) number them the same way. NPCs without a table
 row are named from `NpcName_Eng.txt`, and so are the ones whose row names someone else (244 is
 Caren, not Lumen; 255 is Lumen; 258 is Luke, not Silvia; 229 is Marlon): the folder follows the
-original client's name, the row keeps its own.
+original client's name, the row keeps its own. The same goes for rows that name another monster
+(290-294, the Chief Skeleton Warriors, Giant Ogres and Magic Skeletons, 151, 318, 400, 401, 430,
+69): the folder follows `NpcName_Eng.txt` and `_enum.h`.
 
 ## Public API
 - `MonstersDatabase.get(id)`: the original table's row for a type (`stats` with `Numb` and `Name`),
@@ -46,10 +48,15 @@ original client's name, the row keeps its own.
 | `hidden: true` | nothing (the Crywolf altars) |
 | `trap: { object, shadow }` | the world object of the map it stands on (traps 100-106) |
 | `model: { type, scale, hiddenMesh }` | monster model `Monster/Monster<type+1>.glb` |
-| `npcModel: { file, scale }` | `Data/NPC/<file>` (or a path off the asset root when it starts with `/`) |
+| `npcModel: { file, scale?, clipSpeeds? }` | `Data/NPC/<file>` (or a path off the asset root when it starts with `/`) |
 | `gear: { charClass, set, mainHand, ... }` | a player rig in one armour set plus a kit |
-| `transformed: { dir, part, scale }` | a player rig whose body is one part file |
+| `transformed: { dir, part, scale? }` | a player rig whose body is one part file |
 | none | the Bull Fighter, as the original's default |
+
+- A scale is written only where the original's case sets one; without it the type spawns at 0.9,
+  CreateCharacterPointer's default (ZzzCharacter.cpp:11699), as do the classes that set none.
+  `npcModel.clipSpeeds` are the `Models[].Actions[].PlaySpeed` a case writes (Moss and Zyro, 0.33);
+  the animation system reads them through the model's `actionPlaySpeed`.
 
 - What it sounds like, besides its monster body's voices: `voice` (a town noise,
   `MoveCharacterVisual`) and `globalVoice` (`PlayMonsterSoundGlobal`, also heard from a player

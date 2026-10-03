@@ -5,7 +5,7 @@ export default defineMonster({
   Name: 'Trainer',
   maxHealth: 50,
   // MODEL_NPC_BREEDER (ZzzCharacter.cpp:14295-14299).
-  npcModel: { file: 'Breeder', scale: 1 },
+  npcModel: { file: 'Breeder' },
   stats: {
     Rate: 1,
     Level: 2,

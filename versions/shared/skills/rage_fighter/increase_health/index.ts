@@ -6,6 +6,9 @@ import { atCaster, flash } from '@/controllers/skills/visuals';
 export default defineSkill({
   id: 267,
   name: "Increase Health",
+  // ReceiveMagicFinish (WSclient.cpp:3966-3969) drops it; past its BYTE, so ours (skills readme).
+  effect: 130,
+  effectAliases: [573],
   // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
   lookAliases: [573],
   visual: { impact: flash(TEX.shiny, RGBS.holy, 1.3, 0.6), area: atCaster(flash(TEX.shiny, RGBS.holy, 1.3, 0.6), 0.8) },

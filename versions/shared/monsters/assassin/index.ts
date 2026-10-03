@@ -5,6 +5,7 @@ export default defineMonster({
   Name: 'Assassin',
   maxHealth: 800,
   model: { type: 14, scale: 0.95 },
+  appearSound: { sound: 'Sound/mAssassin1', channels: 1 }, // AppearMonster, WSclient.cpp:2848-2853
   stats: {
     Rate: 1,
     Level: 26,

@@ -4,10 +4,14 @@ import { combat } from '../combat';
 import { SKILL_LIGHTS } from '../lighting/skills';
 import { LANDING_SOUNDS, SILENT_HERO_CASTS, SKILL_CLIP_SOUNDS, SKILL_SOUNDS } from '../sound/combat';
 import { MASTER_BASES, SKILL_DELAY_MS, SKILL_EFFECTS } from '@/modules/skills/recipes';
-import type { SkillDef } from './define';
+import type { SkillCancel, SkillDef } from './define';
+import type { Entity } from '@/ecs/world';
+import type { Scene } from '../render/babylon/exports';
 import { BUFF_ARRIVALS, BUFF_HITS, BUFF_VISUALS, LAUNCHER_ARROWS, LOOK_ALIASES, SKILL_VISUALS, WARRIOR_GLINTS, type BuffLook } from './visuals';
 
-export { defineSkill, defineBuffLooks, type SkillDef, type Mount } from './define';
+export { defineSkill, defineBuffLooks, type SkillCancel, type SkillDef, type Mount } from './define';
+
+const SKILL_CANCELS: Record<number, SkillCancel> = {};
 
 /** Adds skills to every table the controllers read. A skill's file is the only place its data lives. */
 export function registerSkills(defs: readonly SkillDef[]): void {
@@ -24,7 +28,8 @@ export function registerSkills(defs: readonly SkillDef[]): void {
     if (d.soundOnLanding) LANDING_SOUNDS.add(d.id);
     if (d.silentHeroCast) SILENT_HERO_CASTS.add(d.id);
     if (d.delayMs !== undefined) (SKILL_DELAY_MS as Record<number, number>)[d.id] = d.delayMs;
-    if (d.effect !== undefined) SKILL_EFFECTS[d.id] = d.effect;
+    if (d.effect !== undefined) for (const id of [d.id, ...(d.effectAliases ?? [])]) SKILL_EFFECTS[id] = d.effect;
+    if (d.cancel) SKILL_CANCELS[d.id] = d.cancel;
     if (d.warriorGlint) WARRIOR_GLINTS[d.id] = d.warriorGlint;
     Object.assign(BUFF_VISUALS, d.buffs);
     Object.assign(BUFF_ARRIVALS, d.buffArrivals);
@@ -32,6 +37,17 @@ export function registerSkills(defs: readonly SkillDef[]): void {
     // Clip rules, target, step-in, kill, combat layer and hooks.
     combat.registerSkill(d.id, d);
   }
+}
+
+/**
+ * The effects a `MagicEffectCancelled` naming `skill` drops from `target`: its `cancel` hook's, which
+ * runs first, then the skill's `effect` (ReceiveMagicFinish, WSclient.cpp:3878-3987).
+ */
+export function cancelledEffects(skill: number, scene: Scene, target: Entity | null): readonly number[] {
+  const out = new Set(target ? (SKILL_CANCELS[skill]?.(scene, target) ?? []) : []);
+  const effect = SKILL_EFFECTS[skill];
+  if (effect !== undefined) out.add(effect);
+  return [...out];
 }
 
 /** Whether the hero's cast of `skill` takes UseSkillWarrior's glint (`SkillDef.warriorGlint`). */

@@ -5,7 +5,7 @@ export default defineMonster({
   Name: 'Wolf Statue',
   maxHealth: 50,
   // Crywolf statue (ZzzCharacter.cpp:14260).
-  npcModel: { file: '/Object35/Object82', scale: 1 },
+  npcModel: { file: '/Object35/Object82' },
   stats: {
     Rate: 1,
     Level: 2,

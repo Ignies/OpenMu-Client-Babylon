@@ -7,6 +7,14 @@ import type { CombatLayer } from '../combat/layer';
 import type { CastTarget } from '../combat/castTargets';
 import type { CombatHooks } from '../combat/skillHooks';
 import type { BuffArrival, BuffHit, BuffLook, SkillVisual } from './visuals';
+import type { Entity } from '@/ecs/world';
+import type { Scene } from '../render/babylon/exports';
+
+/**
+ * What `MagicEffectCancelled` for a skill does to its target before `effect` is dropped; returns any
+ * other effects it drops (ReceiveMagicFinish's SetActionDestroy_Def for 201 / 202).
+ */
+export type SkillCancel = (scene: Scene, target: Entity) => readonly number[];
 
 /** A mount as `CastContext` names it. */
 export type Mount = NonNullable<CastContext['mount']>;
@@ -65,6 +73,13 @@ export interface SkillDef {
   readonly warriorGlint?: true | 'mounted';
   /** The MagicEffect the skill applies; `MagicEffectCancelled` names the skill, not the effect. */
   readonly effect?: number;
+  /**
+   * Master numbers whose `MagicEffectCancelled` drops this `effect` too. Ours on purpose: the
+   * original reads the skill as a BYTE (WSclient.cpp:3884), so its 256+ cases never match.
+   */
+  readonly effectAliases?: readonly number[];
+  /** Work its cancel does on the target first (`SkillCancel`). */
+  readonly cancel?: SkillCancel;
   /** Persistent looks of the buffs this skill applies, by MagicEffect id. */
   readonly buffs?: Partial<Record<number, BuffLook>>;
   /** Work a buff does as it lands, by MagicEffect id. */

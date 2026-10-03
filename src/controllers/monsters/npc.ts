@@ -5,8 +5,16 @@ import type { CharacterClassNumber, PlayerClass } from '@/core/types';
  * monster folder's `index.ts`. Pure data; the actors and sound controllers read them. See readme.md.
  */
 
-/** An NPC model file (`OpenNpc`): relative to `Data/NPC/`, or to the asset root when it starts with `/`. */
-export type NpcModel = { readonly file: string; readonly scale: number };
+/**
+ * An NPC model file (`OpenNpc`): relative to `Data/NPC/`, or to the asset root when it starts with `/`.
+ * `scale` only when its case sets one; the default is CreateCharacterPointer's 0.9.
+ */
+export type NpcModel = {
+  readonly file: string;
+  readonly scale?: number;
+  /** Clip `PlaySpeed` by `MonsterActionType` its case writes into the model (`Models[].Actions[]`). */
+  readonly clipSpeeds?: Readonly<Partial<Record<number, number>>>;
+};
 
 /** An item an NPC wears or carries, by items.json (group, index). */
 export type NpcItem = { readonly group: number; readonly num: number; readonly lvl?: number };
@@ -34,11 +42,14 @@ export type NpcGear = {
   readonly wings?: NpcItem | null;
   /** `c->Helper` (group 13): the Dark Lord's mount. */
   readonly pet?: NpcItem | null;
+  /** `c->PK` (`PVP_*`) when its case sets one: 6, PVP_MURDERER2, draws the outlaw's red body. */
+  readonly pk?: number;
+  /** `Object.Scale` when its case sets one; else SetCharacterScale's 0.9 for the CLASS_WIZARD rig. */
   readonly scale?: number;
 };
 
-/** `MODEL_PLAYER` with `c->Object.SubType` set to a whole-body part file (`<dir><part>`). */
-export type NpcTransform = { readonly dir: string; readonly part: string; readonly scale: number };
+/** `MODEL_PLAYER` with `c->Object.SubType` set to a whole-body part file (`<dir><part>`); `scale` as `NpcModel`. */
+export type NpcTransform = { readonly dir: string; readonly part: string; readonly scale?: number };
 
 /** A trap: drawn with the world object `Object<world+1>/Object<object+1>` of the map it stands on. */
 export type NpcTrap = { readonly object: number; readonly shadow: boolean };

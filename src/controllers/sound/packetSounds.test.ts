@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { createHash } from 'node:crypto';
 import { monsterCast, monsterSwing, type MonsterAttackInput } from '../anim/monsterAttackClip';
 import { ServerPlayerActionType as S } from '@versions/shared/objects/enum';
 import { ENUM_WORLD as W } from '../../core/types';
@@ -64,6 +65,13 @@ describe('packetSounds', () => {
     }
     // Chief Skeleton Archer 7, the Golden Titan and the Crywolf elves: no sound.
     for (const silent of [139, 53, 54, 340, 440]) expect(appearSound(silent, false)).toBeUndefined();
+  });
+
+  // Every type's spawn sound, plain and by 0x1F: moving the rows must leave this hash alone.
+  it('keeps every spawn sound (golden)', () => {
+    const rows = Array.from({ length: 701 }, (_, t) => [false, true].map(s => appearSound(t, s) ?? null));
+    expect(rows.flat().filter(Boolean)).toHaveLength(23);
+    expect(createHash('sha256').update(JSON.stringify(rows)).digest('hex')).toBe('fe7c805ac714755f86ffacd856eff35868b4664fa5812efe7d5361ef3c4693c1');
   });
 
   it('drops the Kalima gate stone only when the gate comes by 0x1F', () => {

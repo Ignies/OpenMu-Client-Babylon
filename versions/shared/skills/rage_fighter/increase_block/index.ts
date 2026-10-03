@@ -6,6 +6,9 @@ import { atCaster, flash } from '@/controllers/skills/visuals';
 export default defineSkill({
   id: 268,
   name: "Increase Block",
+  // ReceiveMagicFinish (WSclient.cpp:3970-3973) drops it; past its BYTE, so ours (skills readme).
+  effect: 131,
+  effectAliases: [569, 572],
   // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
   lookAliases: [569, 572],
   visual: { impact: flash(TEX.shiny, RGBS.steel, 1.3, 0.6), area: atCaster(flash(TEX.shiny, RGBS.steel, 1.3, 0.6), 0.8) },

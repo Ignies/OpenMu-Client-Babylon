@@ -1,7 +1,7 @@
 import type { MonsterAttackState } from '../anim/monsterAttackClip';
 import { ServerPlayerActionType as S } from '@versions/shared/objects/enum';
 import { REFERENCE_FPS } from '../anim/playSpeed';
-import { monsterModelRegistry, monsterRegistry } from '../monsters';
+import { monsterModelRegistry, monsterRegistry, type MonsterSound } from '../monsters';
 import type { SoundBus } from './buses';
 import type { SfxOptions } from './listener';
 import type { Sounds } from './recipes';
@@ -41,28 +41,6 @@ const TRAP_FLAME = row('Sound/sFlame', 2, MONSTERS);
 export const METEORITE_STORM = row('Sound/eMeteorite', 2, MONSTERS);
 
 
-// AppearMonster's rows; the monster sounds load with Channel = 2 (ZzzOpenData.cpp:3374), the
-// Assassin with 1 (:4820).
-const BULL_ATTACK = row('Sound/mBullAttack1', 2, MONSTERS);
-const ORC_CAPTAIN_ATTACK = row('Sound/mOrcCapAttack1', 2, MONSTERS);
-const APPEAR_SOUNDS: ReadonlyMap<number, PacketSound> = new Map([
-  [44, BULL_ATTACK], // MONSTER_GOLDEN_DRAGON
-  [21, row('Sound/mAssassin1', 1, MONSTERS)], // MONSTER_ASSASSIN
-  // MONSTER_CHIEF_SKELETON_ARCHER_1..6 (the 7th, 139, is not listed).
-  [85, ORC_CAPTAIN_ATTACK],
-  [91, ORC_CAPTAIN_ATTACK],
-  [97, ORC_CAPTAIN_ATTACK],
-  [114, ORC_CAPTAIN_ATTACK],
-  [120, ORC_CAPTAIN_ATTACK],
-  [126, ORC_CAPTAIN_ATTACK],
-]);
-
-// The 0x1F caller's own row, after its AppearMonster call (WSclient.cpp:3117-3122); eWallFall
-// loads with 1 channel (ZzzOpenData.cpp:4869). A gate is a map door, so the world bus.
-const KALIMA_GATE_FALL = row('Sound/eWallFall', 1);
-const KALIMA_GATE_FIRST = 152;
-const KALIMA_GATE_LAST = 158;
-
 // ZzzOpenData.cpp:4935-4936, no channel count.
 export const SWIRL_START = row('Sound/cherryblossom/Eve_CherryBlossoms01', 4);
 export const SWIRL_BLOOM = row('Sound/cherryblossom/Eve_CherryBlossoms02', 4);
@@ -82,8 +60,20 @@ export const SWIRL_BLOOM_SECONDS: readonly number[] = SWIRL_BLOOM_AT.map(
 
 const SKILL_TELEPORT = 6;
 
-/** A monster's own teleport sound (`MonsterDef.teleport`), one row per type. */
+/** Rows from a type's own sounds (`MonsterDef.teleport`, `appearSound`, `summonSound`), one per type. */
 const teleportRows = new Map<number, PacketSound>();
+const appearRows = new Map<number, PacketSound>();
+const summonRows = new Map<number, PacketSound>();
+
+/** A type's row from its folder's sound, built once. */
+function typeRow(rows: Map<number, PacketSound>, monster: number, sound: MonsterSound, bus: SoundBus): PacketSound {
+  let out = rows.get(monster);
+  if (!out) {
+    out = row(sound.sound as Sounds, sound.channels, bus);
+    rows.set(monster, out);
+  }
+  return out;
+}
 
 // SOUND_XMAS_JUMP_SANTA + i in enum order, then SOUND_XMAS_TURN (Event.cpp:150-153).
 const SANTA_JUMPS: readonly PacketSound[] = [
@@ -116,14 +106,14 @@ export function meteoriteStormRunning(
 }
 
 /**
- * A monster that arrives with the 0x8000 spawn bit: AppearMonster (WSclient.cpp:2837-2869), or a
- * Kalima gate when it came by 0x1F (`summoned`). The two sets of types do not overlap.
+ * A monster that arrives with the 0x8000 spawn bit: its folder's `appearSound` (AppearMonster,
+ * WSclient.cpp:2837-2869), or its `summonSound` when it came by 0x1F (`summoned`: the Kalima gates,
+ * WSclient.cpp:3117-3122). No type has both. A gate is a map door, so that one is on the world bus.
  */
 export function appearSound(monster: number, summoned: boolean): PacketSound | undefined {
-  if (summoned && monster >= KALIMA_GATE_FIRST && monster <= KALIMA_GATE_LAST) {
-    return KALIMA_GATE_FALL;
-  }
-  return APPEAR_SOUNDS.get(monster);
+  const def = monsterRegistry.def(monster);
+  if (summoned && def?.summonSound) return typeRow(summonRows, monster, def.summonSound, 'world');
+  return def?.appearSound ? typeRow(appearRows, monster, def.appearSound, MONSTERS) : undefined;
 }
 
 /**
@@ -139,12 +129,7 @@ export function teleportCastSound(
   if (skill !== SKILL_TELEPORT) return undefined;
   const tele = monsterRegistry.def(monster)?.teleport;
   if (!tele || tele.world !== world) return undefined;
-  let out = teleportRows.get(monster);
-  if (!out) {
-    out = row(tele.sound as Sounds, tele.channels, MONSTERS);
-    teleportRows.set(monster, out);
-  }
-  return out;
+  return typeRow(teleportRows, monster, tele, MONSTERS);
 }
 
 /**

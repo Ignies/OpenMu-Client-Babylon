@@ -4,7 +4,7 @@ export default defineMonster({
   Numb: 11,
   Name: 'Ghost',
   maxHealth: 1000,
-  model: { type: 7, scale: 1 },
+  model: { type: 7, scale: 0.9 },
   stats: {
     Rate: 1,
     Level: 32,

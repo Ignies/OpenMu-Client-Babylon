@@ -44,6 +44,8 @@ export type MonsterDef = {
    * `Object.Scale`, and `Object.HiddenMesh` for types that share a model and hide a mesh.
    */
   model?: { type: number; scale: number; hiddenMesh?: number };
+  /** `Object.Scale` on these worlds (by world index) in place of the drawn one. */
+  worldScale?: Readonly<Record<number, number>>;
   /** `c->SubType` the original creates this type with (9: Kalima's large centurions, Kundun's candidates). */
   subType?: number;
   /** Spawned but never drawn (`Object.Visible = false`): the actors controller loads no model. */
@@ -64,6 +66,10 @@ export type MonsterDef = {
   quietCasts?: readonly number[];
   /** Its Teleport (skill 6) on `world` plays `sound` instead of CreateTeleportBegin. */
   teleport?: MonsterTeleport;
+  /** AppearMonster's sound when it spawns with the 0x8000 bit (WSclient.cpp:2837-2869). */
+  appearSound?: MonsterSound;
+  /** The 0x1F caller's own sound after AppearMonster, for a summoned spawn (WSclient.cpp:3117-3122). */
+  summonSound?: MonsterSound;
   /** The skill whose AttackTime replays the meteorite storm sound every frame (a trap's). */
   stormSkill?: number;
   /** The light it carries while in scope (the lighting controller's `characterLightFor`). */
@@ -87,7 +93,12 @@ export type MonsterLight =
       readonly range: number;
       readonly height?: number;
       readonly color?: readonly [number, number, number] | 'lightning';
+      /** The card it carries keeps one Luminosity, so the glow does not breathe. */
+      readonly steady?: true;
     };
+
+/** A one-shot a type plays: `channels` is the wave's `LoadWaveFile` count. */
+export type MonsterSound = { readonly sound: string; readonly channels: number };
 
 /** `MonsterDef.teleport`: `channels` is the wave's `LoadWaveFile` count. */
 export type MonsterTeleport = { readonly sound: string; readonly channels: number; readonly world: number };

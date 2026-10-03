@@ -135,6 +135,7 @@ export default defineSkill({
   buffHits: { 4: soulBarrierShell },
   // MagicEffectCancelled names the skill: the buff it drops.
   effect: 4,
+  effectAliases: [403, 404],
   // Soul Barrier (403 / 404 / 406 its master rows): no terrain light in the original; Enhanced only.
   light: { enhanced: SOUL_BARRIER_LIGHT },
   target: 'allyOrSelf',

@@ -4,7 +4,7 @@ import { type AttackPose } from '@/controllers/actors/weaponClass';
 import { CharacterClassNumber } from '@/core/types';
 import { Entity, World } from '@/ecs/world';
 import { KEEP_CLIP, isMonsterSwingClip, monsterAreaCast, monsterAttackState, monsterCast, monsterCastAttacks, monsterCastRewinds, playableMonsterClip, type MonsterAttackInput } from '@/controllers/anim/monsterAttackClip';
-import { METEORITE_STORM, appearSound, meteoriteStormRunning, monsterCastQuiet, teleportCastSound, trapAttackSound } from '@/controllers/sound/packetSounds';
+import { METEORITE_STORM, appearSound, meteoriteStormRunning, monsterCastQuiet, trapAttackSound } from '@/controllers/sound/packetSounds';
 import { MonsterActionType, PlayerAction } from '@versions/shared/objects/enum';
 
 import { Store } from '@/app/store';
@@ -14,8 +14,8 @@ import { advancesSwordCount, chooseSkillAction } from '../skills/skillCasting';
 import { createAttributeSystem } from '@/core/attributeSystem';
 import { getBaseClass } from '../hero/characterStats';
 import { isFemaleClass } from '@/controllers/actors/mapPlayerNetClassToModelClass';
-import { isKnownObjectType, resolveModelFactory } from '@/controllers/actors/modelFactoryPerId';
-import { isPlayerBody, npcClassOf } from '@/controllers/actors/playerObject';
+import { isKnownObjectType, npcSpawnScale, resolveModelFactory } from '@/controllers/actors/modelFactoryPerId';
+import { isPlayerBody, npcClassOf, npcHeroStateOf } from '@/controllers/actors/playerObject';
 import { isWingItem } from '@/controllers/actors/wings';
 import { monsterDisplayName, monsterMaxHealth } from '@versions/shared/monsters/monstersDatabase';
 import { monsterModelTypeOf } from '@/controllers/anim/playSpeed';
@@ -103,7 +103,7 @@ export function addNpcToScope(world: World, npc: ScopeNpc) {
         npc.CurrentPositionY
       ),
       rot: new Vector3(0, convertDirectionToAngle(npc.Rotation), 0),
-      scale: modelFactory.OverrideScale >= 0 ? modelFactory.OverrideScale : 1,
+      scale: npcSpawnScale(modelFactory, npc.TypeNumber, world.mapIndex),
     },
     modelFactory,
     pathfinding: {
@@ -139,6 +139,9 @@ export function addNpcToScope(world: World, npc: ScopeNpc) {
   });
 
   if (owner) world.addComponent(npcEntity, 'summonedBy', owner);
+  // `c->PK` of an outlaw NPC: the render system draws its body red (ZzzCharacter.cpp:9988-9991).
+  const heroState = npcHeroStateOf(modelFactory);
+  if (heroState !== null) world.addComponent(npcEntity, 'heroState', heroState);
 
   // 0x8000 is the original's CreateFlag (WSclient.cpp:3023-3026, :3111-3123). OpenMU also sets it
   // for a monster walking into a watched bucket (ObserverToWorldViewAdapter.cs:65), which replays it.
@@ -287,13 +290,9 @@ export function playCastAnimation(caster: Entity, skill: number, area: boolean) 
     return;
   }
   // ExecuteSkill's cast sound for everyone else (the hero's plays in SkillCastSystem).
+  // Teleport never comes here: playTeleportAnimation plays it, the Nightmare's own sound included.
   if (!caster.localPlayer && caster.transform) {
-    const tele = area
-      ? undefined
-      : teleportCastSound(Store.world?.mapIndex ?? -1, caster.npcType ?? -1, skill);
-    if (tele) {
-      playSfx(tele.key, caster.transform.pos, tele.opts);
-    } else if (
+    if (
       // A player's cast whose sound goes with its clip sounds below, once the clip is picked.
       !(caster.playerAnimation && hasClipSound(skill)) &&
       (caster.npcType === undefined ||

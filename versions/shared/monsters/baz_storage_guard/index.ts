@@ -5,7 +5,7 @@ export default defineMonster({
   Name: 'Baz, Storage Guard',
   maxHealth: 50,
   // MODEL_STORAGE (ZzzCharacter.cpp:14415-14418).
-  npcModel: { file: 'Storage01', scale: 1 },
+  npcModel: { file: 'Storage01' },
   stats: {
     Rate: 1,
     Level: 2,

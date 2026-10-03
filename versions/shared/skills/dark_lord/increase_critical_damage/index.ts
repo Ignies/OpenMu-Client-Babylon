@@ -215,6 +215,7 @@ export default defineSkill({
   name: "Increase Critical Damage",
   // ReceiveMagicFinish drops eBuff_AddCriticalDamage (WSclient.cpp:3924-3929).
   effect: 5,
+  effectAliases: [511, 515, 517],
   // Master numbers cast, heard, lit and drawn as this skill (the original names them in its `case`).
   masterAliases: [511, 515, 517, 522],
   // 64 Add Critical (Increase Critical Damage; 511/515/517/522): at AttackTime 15 a MODEL_DARKLORD_SKILL at each weapon's

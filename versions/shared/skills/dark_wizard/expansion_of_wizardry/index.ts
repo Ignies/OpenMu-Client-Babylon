@@ -213,6 +213,7 @@ export default defineSkill({
   lookAliases: [380, 383],
   // ReceiveMagicFinish drops eBuff_SwellOfMagicPower (WSclient.cpp:3978-3982).
   effect: 82,
+  effectAliases: [380, 383],
   // 233 Expansion of Wizardry: MODEL_SWELL_OF_MAGICPOWER at the caster, Light (0.3,0.2,0.9) (WSclient.cpp
   // AT_SKILL_SWELL_OF_MAGICPOWER cast).
   // 233 Expansion of Wizardry (380 / 383 alias): see swellOfMagic. Enhanced adds the old mote burst.

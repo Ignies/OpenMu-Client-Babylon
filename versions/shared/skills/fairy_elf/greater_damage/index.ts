@@ -12,6 +12,7 @@ export default defineSkill({
   // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
   lookAliases: [420, 422],
   effect: 1, // MagicEffectCancelled names skill 28: the buff it drops
+  effectAliases: [420, 422],
   // 28 Greater Damage: BITMAP_MAGIC+1 sub3 LT 20.
   visual: { impact: magicGround([1, 0.75, 0.55]) },
   buffs: {

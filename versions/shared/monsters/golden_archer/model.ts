@@ -8,6 +8,10 @@ import { CharacterClassNumber } from '@/core/types';
 export class GoldenArcher extends PlayerObject {
   static NpcClass = CharacterClassNumber.DarkKnight;
 
+  static {
+    GoldenArcher.OverrideScale = 1; // `o->Scale = 1.0f` (ZzzCharacter.cpp:14387)
+  }
+
   async init(world: World, entity: Entity) {
     this.load(await loadGLTF('Player/player.glb', world));
 
