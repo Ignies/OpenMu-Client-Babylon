@@ -97,3 +97,4 @@ export { bonePos, entityPos, tmpA } from './core';
 export type { RGB } from './core';
 export { skeletonShatter, spawnCrystalShards } from './deathVisuals';
 export { EXPLOSION_CELLS, FLAME_TONGUES, MODEL, SAND_SMOKE, TEX } from './recipes';
+export { TerrainDecal } from './moveTargetEffect';

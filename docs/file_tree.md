@@ -66,7 +66,7 @@ shared/            content any version can load
   ui/hud/<element>/         bottom bar, minimap, chat, buff bar, name tags...
   ui/pages/<page>/          login, server_select, character_select, preloader, world
   maps/<map>/               one folder per map: spec, create, object classes
-  monsters/ npcs/           one file per special monster / npc, plus the data tables
+  monsters/<name>/          one folder per monster or npc: data (index.ts), model.ts when it has a look of its own
   items/                    item table, launcher arrows
   objects/                  object enums, sign objects
   packets/                  generated packet codecs (bun run generate)

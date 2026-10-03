@@ -8,7 +8,7 @@ import { METEORITE_STORM, appearSound, meteoriteStormRunning, monsterCastQuiet, 
 import { MonsterActionType, PlayerAction } from '@versions/shared/objects/enum';
 import { RAGE_BUFF_SKILLS, SKILL_DEFENSE } from '@/controllers/combat/recipes';
 import { Store } from '@/app/store';
-import { TRAP_MODEL_TABLE } from '@versions/shared/npcs/trap_npc';
+import { TRAP_MODEL_TABLE } from '@/controllers/actors';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { advancesSwordCount, chooseSkillAction } from '../skills/skillCasting';
 import { createAttributeSystem } from '@/core/attributeSystem';

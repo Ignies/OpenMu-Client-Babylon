@@ -65,7 +65,6 @@ import '../ecs/systems/teleportSystem';
 import '../features/skills/magicEffects';
 import '@versions/shared/skills/skillVisuals';
 import '../controllers/anim/playSpeed';
-import '@versions/shared/npcs/trap_npc';
 import '../controllers/anim/monsterAttackClip';
 import '../controllers/sound/packetSounds';
 import '../controllers/sound/soundsManager';

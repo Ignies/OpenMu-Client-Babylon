@@ -1004,7 +1004,6 @@
  "versions/shared/maps/vulcanus/spec.ts -> src/controllers/fx/effectParticles.ts",
  "versions/shared/maps/vulcanus/spec.ts -> src/controllers/lighting/mapObjectLights.ts",
  "versions/shared/maps/vulcanus/spec.ts -> src/controllers/render/meshAnimation.ts",
- "versions/shared/npcs/archangel.ts -> src/controllers/fx/moveTargetEffect.ts",
  "versions/shared/objects/signs/signObject.ts -> src/controllers/render/modelObject.ts",
  "versions/shared/objects/signs/signObject.ts -> src/controllers/render/pbrMaps.ts",
  "versions/shared/objects/signs/signObject.ts -> src/controllers/terrain/mapTileObject.ts",

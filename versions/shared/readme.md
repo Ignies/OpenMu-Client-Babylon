@@ -11,9 +11,11 @@ Each subfolder has its own readme:
 | `skills/` | one folder per skill (`defineSkill`), found by glob; the server skill table |
 | `ui/` | windows, HUD elements and pages, found by glob from each `window.ts` |
 | `maps/` | one folder per map (`MapLayer`), listed in `maps/layers.ts` |
-| `monsters/` | monsters with their own look, the monster table and health table |
-| `npcs/` | npcs with their own look, generic and geared npc factories, traps |
-| `items/` | the item table and per-launcher arrow looks |
+| `monsters/` | one folder per monster or npc type (`defineMonster`), its `model.ts` when it has its own look |
+| `monster_models/` | one file per monster body (`defineMonsterModel`) |
+| `animations/` | one file per player clip (`defineAnimation`); monster swing and cast rules |
+| `npcs/` | a forward of `ElfSoldier` for the Lorencia map (npcs live in `monsters/`) |
+| `items/` | one file per item (`defineItem`) and per-launcher arrow looks |
 | `objects/` | world object model numbers and the signpost labels |
 | `packets/` | generated packet codecs (`bun run generate`) |
 

@@ -59,7 +59,7 @@ restyling the tooltip once restyles it everywhere.
 - `maps/<map>/`: the map's spec, its object classes (one file per object type) and `create.ts`.
 - `monsters/<name>/index.ts`: one folder per monster or npc type (`defineMonster`: number, name,
   max health, the original table row), found by glob; plus model classes for the ones with their
-  own look. `npcs/`: npc model classes.
+  own look.
 - `items/<group>/<item>.ts`: one file per item (`defineItem`), found by glob; plus item-driven looks
   (`launcher_arrows.ts`).
 - An area's master controller (`src/controllers/items`, `src/controllers/monsters`) owns the record
@@ -90,5 +90,5 @@ it as the 3D line-up's name plate.
   `npcModel`, `gear`, `transformed`, `trap`, `voice`, `globalVoice`. A class of its own is
   `<name>/model.ts`; a class several types share is `_<line>/model.ts`.
 - The generic NPC shapes (plain model, player rig in a kit, transformed rig, trap, hidden) are the
-  actors controller's. `versions/shared/npcs/` only keeps the archangels (until the fx door exports
-  `TerrainDecal`) and two forwarding files for older readers.
+  actors controller's. `versions/shared/npcs/` only keeps a forward of `ElfSoldier` for the
+  Lorencia map.

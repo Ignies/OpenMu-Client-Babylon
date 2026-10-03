@@ -69,7 +69,7 @@ row are named from `NpcName_Eng.txt`.
 | `amy_potion_girl/`, `liaman_barmaid/`, `_merchant_men/` | rig-only models with head / upper / lower parts (253, 255; Alex 230, Martin 248, Harold 250) |
 | `elf_soldier/` | Elf Soldier (257): an always-flying Fairy Elf |
 | `golden_archer/`, `leo_the_helper/`, `_plate_npc/` | player-rig NPCs in a fixed armour set (236, 371; 34, 258, 414) |
-| `../npcs/archangel.ts` | the archangels (232, 233), until the fx door exports `TerrainDecal` |
+| `_archangels/` | Archangel (232) and Messenger of Archangel (233): bright mesh, ground halo, feathers |
 
 A folder with both a `model.ts` and an `npcModel` draws with the class; the row is what the NPC
 tables list (Hanzo's 0.95 there is not applied: his class draws at 1).

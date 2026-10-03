@@ -1,11 +1,8 @@
 import type { Entity, World } from '@/ecs/world';
 import { Vector3 } from '@/controllers/render/babylon/exports';
-import { effects } from '@/controllers/fx';
-import { TEX } from '@/controllers/fx';
+import { TEX, TerrainDecal, effects } from '@/controllers/fx';
 import { loadGLTF } from '@/controllers/assets';
 import { ModelObject, npcModelFile, registerModelClass } from '@/controllers/actors';
-// Stays here, not in its monster folder, until the fx door exports TerrainDecal (see readme.md).
-import { TerrainDecal } from '@/controllers/fx/moveTargetEffect';
 
 /**
  * The Blood Castle archangels of Devias: Archangel (232, `BloodCastle01`)

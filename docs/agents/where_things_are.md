@@ -17,7 +17,7 @@
 | shared widgets (tooltip, item grid, frame, button) | `src/controllers/interface/components/` |
 | window open/close, z-order, placement | `src/controllers/interface/` |
 | a map, its objects | `versions/shared/maps/<map>/` |
-| a monster or npc with its own look | `versions/shared/monsters/`, `versions/shared/npcs/` |
+| a monster or npc with its own look | `versions/shared/monsters/<name>/model.ts` |
 | item table, monster table, skill table | `versions/shared/items/`, `monsters/`, `skills/skillsDatabase.ts` |
 | packet definitions | `versions/shared/packets/` (`bun run generate`) |
 | a game version's differences | `versions/<id>/` |
