@@ -14,4 +14,5 @@ Start with [AGENTS.md](../AGENTS.md), then [agents/](agents/readme.md) for how a
   [git](guidelines/git.md), [readme_template](guidelines/readme_template.md)
 - how to: [add_skill](how_to/add_skill.md), [change_a_window](how_to/change_a_window.md),
   [add_packet_handler](how_to/add_packet_handler.md), [new_controller_look](how_to/new_controller_look.md),
-  [move_files](how_to/move_files.md)
+  [move_files](how_to/move_files.md), [add_text](how_to/add_text.md),
+  [translate_text](how_to/translate_text.md), [add_language](how_to/add_language.md)
