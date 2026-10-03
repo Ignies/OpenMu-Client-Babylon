@@ -145,7 +145,8 @@ export { spawnPlayer } from '../features/scope/net';
  * change - has to walk them again.
  */
 onNpcNamesChanged(() => {
-  const world = Store.world;
+  // The table can land while store.ts is still loading (a test importing this first): no world yet.
+  const world = Store?.world;
   if (!world) return;
 
   for (const e of world.with('npcType', 'objectNameInWorld')) {
