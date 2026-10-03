@@ -163,4 +163,6 @@ never which skill or item asks for it.
   Fortress day 2), `monsterCuesAnyMap` from every map (the hooks with no world guard: Land of
   Trials, Aida, Kanturu 1st / 2nd, Kalima's Kundun), merged in `MAP_LAYERS` order.
 - Test: `versions/shared/maps/mapRows.golden.test.ts` pins every world's beds, one-shots, timed
-  shots, music, town tracks, object loops and monster cues.
+  shots, music, town tracks, object loops and monster cues. `mapSound.test.ts`: a registered
+  entry's rows are heard without a reload, gates answer the event state, reach turns into tiles,
+  unguarded hooks voice every map.

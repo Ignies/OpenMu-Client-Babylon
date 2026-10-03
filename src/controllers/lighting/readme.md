@@ -91,6 +91,8 @@ policy. It knows how to light something, never which skill or item asks for it.
 - `recipes.test.ts`: `effectLight` hue, reach and gain ceiling, minimum range.
 - `versions/shared/maps/mapRows.golden.test.ts`: every world's look, room looks, thunder and
   map-object lights, pinned across the move into the map folders.
+- `mapLighting.test.ts`: a look over the open or enclosed default, the sky's default for a map
+  with none, room looks by name, object lights and thunder from a registered entry.
 - The skill golden tests (`versions/shared/skills/skillTables.golden.test.ts`,
   `skillVisuals.golden.test.ts`) record every skill's light.
 

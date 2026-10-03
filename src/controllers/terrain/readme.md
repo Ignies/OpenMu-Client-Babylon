@@ -85,6 +85,8 @@ water, ground picks, minimap data and the base class for map objects. There is n
 ## Tests
 - `versions/shared/maps/mapRows.golden.test.ts`: every world's overlays, snow bed, water, rest
   objects, lean boxes, fixups and grass, pinned across the move into the map folders.
+- `mapTerrain.test.ts`: rest objects and lean boxes (also through `LEAN_CURSOR_OBJECTS`) and the
+  nearest-object height fix from a registered entry.
 - `groundArrays.test.ts`: `refreshGroundTile` raises and drops a tile and leaves its neighbours;
   `groundTiles` copies tiles out with their own quads.
 - `terrainDynamicLight.test.ts`: `terrainLightTouchesSample` and its version, the bilinear sample.
