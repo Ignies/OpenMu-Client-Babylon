@@ -4,7 +4,7 @@ export default defineMonster({
   Numb: 245,
   Name: 'Isabel, Wizard',
   maxHealth: 50,
-  npcModel: { file: 'SnowWizard01', scale: 1 },
+  npcModel: { file: 'SnowWizard01' },
   stats: {
     Rate: 1,
     Level: 2,

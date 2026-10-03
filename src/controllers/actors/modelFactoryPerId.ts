@@ -3,6 +3,7 @@ import { monsterRegistry } from '@/controllers/monsters';
 import { loadGLTF } from '@/controllers/assets';
 import { monsterFactoryFor } from './genericMonster';
 import {
+  CHARACTER_DEFAULT_SCALE,
   FALLBACK_MODEL_TYPE,
   FALLBACK_SCALE,
   hasMonsterModel,
@@ -49,6 +50,11 @@ export function resolveModelFactory(typeNumber: number): typeof ModelObject {
   return monsterFactoryFor(FALLBACK_MODEL_TYPE, FALLBACK_SCALE);
 }
 
+/** The `Object.Scale` an NPC spawns with: its class's own, else CreateCharacterPointer's 0.9. */
+export function npcSpawnScale(factory: typeof ModelObject): number {
+  return factory.OverrideScale >= 0 ? factory.OverrideScale : CHARACTER_DEFAULT_SCALE;
+}
+
 export function isKnownObjectType(typeNumber: number): boolean {
   if (registeredModelClass(typeNumber) !== undefined || hasMonsterModel(typeNumber)) return true;
   const def = monsterRegistry.def(typeNumber);
@@ -59,8 +65,8 @@ export function isKnownObjectType(typeNumber: number): boolean {
 
 const npcCache = new Map<string, typeof ModelObject>();
 
-/** An NPC drawn from its own model file (`npcModel`), at its scale. */
-export function npcFactoryFor(file: string, scale: number): typeof ModelObject {
+/** An NPC drawn from its own model file (`npcModel`), at its scale (the default 0.9 when it has none). */
+export function npcFactoryFor(file: string, scale = CHARACTER_DEFAULT_SCALE): typeof ModelObject {
   const key = `${file}:${scale}`;
   const cached = npcCache.get(key);
   if (cached) return cached;

@@ -30,7 +30,32 @@ describe('NPC looks from the original client', () => {
     [240, 'Storage01'],
     [254, 'Wizard01'],
   ])('%i is a plain NPC model (%s) with no class of its own', (type, file) => {
-    expect(m.resolveModelFactory(type)).toBe(m.npcFactoryFor(file, 1));
+    expect(m.resolveModelFactory(type)).toBe(m.npcFactoryFor(file));
+  });
+
+  // CreateCharacterPointer's `o->Scale = 0.9f` (ZzzCharacter.cpp:11699), kept by every case that sets
+  // none; SetCharacterScale gives the CLASS_WIZARD rig the same 0.9 (:12144).
+  it.each([
+    226, 231, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 254, 256, 259, 369, 370, 380, 406, 478, 567, // plain models
+    204, 216, 217, 218, // Wolf Statue, Crown and its switches
+    230, 248, 250, 253, 255, // the rig-only classes
+    229, 247, 249, 258, 371, 414, 375, 464, 34, // SetCharacterScale on a geared rig
+    503, 548, // the transformed Panda and Skeleton
+    100, 101, 102, 103, 104, 106, // traps
+  ])('%i spawns at the default 0.9', type => {
+    expect(m.npcSpawnScale(m.resolveModelFactory(type))).toBe(0.9);
+  });
+
+  it.each([
+    [236, 1], // Golden Archer, :14387
+    [257, 1], // Elf Soldier, MakeElfHelper :12469
+    [297, 0.93], // PK Dark Knight: Skin = 1 (GMHuntingGround.cpp:291), SetCharacterScale :12157
+    [251, 0.95], // Hanzo
+    [232, 1], // Archangel
+    [105, 1], // Cannon Trap (GM_Kanturu_2nd.cpp:1422)
+    [535, 1], // Doppelganger Knight
+  ])('%i spawns at its own %f', (type, scale) => {
+    expect(m.npcSpawnScale(m.resolveModelFactory(type))).toBe(scale);
   });
 
   it('Zyro wears the Moss model at 0.8, as Moss does (ZzzCharacter.cpp:14505-14516, :14846-14860)', () => {

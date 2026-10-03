@@ -6,6 +6,7 @@ import type { NpcGear } from '@/controllers/monsters';
 import { PlayerObject } from './playerObject';
 import { transformedBodyFactory } from './transformedBody';
 import { CharacterClassNumber } from '@/core/types';
+import { CHARACTER_DEFAULT_SCALE } from './monsterModelTable';
 
 /**
  * The two player-rig NPC shapes the original builds inline, from a monster folder's `gear` or
@@ -94,7 +95,7 @@ const transformedCache = new Map<string, typeof PlayerObject>();
  * here is only what an NPC needs on top: the knight rig it poses on, its
  * scale, and an idle to stand in.
  */
-export function transformedNpcFactory(dir: string, part: string, scale: number): typeof PlayerObject {
+export function transformedNpcFactory(dir: string, part: string, scale = CHARACTER_DEFAULT_SCALE): typeof PlayerObject {
   const key = `${dir}${part}:${scale}`;
   const cached = transformedCache.get(key);
   if (cached) return cached;

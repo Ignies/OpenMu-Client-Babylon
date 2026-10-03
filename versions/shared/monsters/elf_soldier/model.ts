@@ -16,6 +16,10 @@ export class ElfSoldier extends PlayerObject {
   /** `if (c->MonsterIndex == MONSTER_ELF_SOLDIER) Fly = true;` (:222). */
   static NpcAlwaysFly = true;
 
+  static {
+    ElfSoldier.OverrideScale = 1; // MakeElfHelper's `o->Scale = 1.f` (ZzzCharacter.cpp:12469)
+  }
+
   constructor(scene: Scene, parent: TransformNode) {
     super(scene, parent);
 

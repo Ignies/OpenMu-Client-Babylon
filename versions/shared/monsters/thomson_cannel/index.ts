@@ -22,7 +22,7 @@ export default defineMonster({
   // The brazier (MODEL_DEVIAS_TRADER): (0.5L, 0.3L, 0), range 3 (ZzzCharacter.cpp:5999-6000).
   light: { kind: 'forge', color: [0.5, 0.3, 0], range: 3 },
   maxHealth: 50,
-  npcModel: { file: 'DeviasTrader01', scale: 1 },
+  npcModel: { file: 'DeviasTrader01' },
   stats: {
     Rate: 1,
     Level: 2,

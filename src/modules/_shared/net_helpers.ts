@@ -14,7 +14,7 @@ import { advancesSwordCount, chooseSkillAction } from '../skills/skillCasting';
 import { createAttributeSystem } from '@/core/attributeSystem';
 import { getBaseClass } from '../hero/characterStats';
 import { isFemaleClass } from '@/controllers/actors/mapPlayerNetClassToModelClass';
-import { isKnownObjectType, resolveModelFactory } from '@/controllers/actors/modelFactoryPerId';
+import { isKnownObjectType, npcSpawnScale, resolveModelFactory } from '@/controllers/actors/modelFactoryPerId';
 import { isPlayerBody, npcClassOf } from '@/controllers/actors/playerObject';
 import { isWingItem } from '@/controllers/actors/wings';
 import { monsterDisplayName, monsterMaxHealth } from '@versions/shared/monsters/monstersDatabase';
@@ -103,7 +103,7 @@ export function addNpcToScope(world: World, npc: ScopeNpc) {
         npc.CurrentPositionY
       ),
       rot: new Vector3(0, convertDirectionToAngle(npc.Rotation), 0),
-      scale: modelFactory.OverrideScale >= 0 ? modelFactory.OverrideScale : 1,
+      scale: npcSpawnScale(modelFactory),
     },
     modelFactory,
     pathfinding: {
