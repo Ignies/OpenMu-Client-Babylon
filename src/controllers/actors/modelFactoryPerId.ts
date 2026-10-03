@@ -92,7 +92,7 @@ export function npcFactoryFor(
 
     constructor(...args: ConstructorParameters<typeof ModelObject>) {
       super(...args);
-      for (const [action, speed] of Object.entries(clipSpeeds)) this.setActionSpeed(Number(action), speed!);
+      for (const [action, speed] of Object.entries(clipSpeeds)) if (speed !== undefined) this.setActionSpeed(Number(action), speed);
     }
 
     async init(world: World) {
