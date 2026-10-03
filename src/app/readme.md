@@ -26,8 +26,8 @@ reset. This is the top of the graph: it wires modules, controllers and versions 
 - `App.tsx` picks the page from `Store.uiState`. Login and character pages come from the version
   (`loadVersionUi().pregame`), lazy loaded.
 - `logic.ts` installs the modules (`installModules(MODULES)`, `src/modules/modules.ts`); that list's order is the listener order per
-  packet. It also routes the shared F3/0x40 server command (swirl, fanfare, fireworks, message
-  box; `WSclient.cpp:7744`) and sends `Ping` every 5 s in the world.
+  packet. It also refreshes NPC names when their table loads and sends `Ping` every 5 s in the
+  world. The shared F3/0x40 server command is the world module's (`modules/world/net.ts`).
 - `lifecycle.ts` lists what resets on a map change, in order:
   `weather, lighting, effects, events, skills, combat, quests, sound, maps` (the order of the
   original inline sequence in `loadMapIntoScene`). Why each one resets:

@@ -10,14 +10,13 @@ export default tseslint.config(
   {
     ignores: [
       'dist/**',
+      'dist-register/**',
       'node_modules/**',
       'public/**',
       'Data/**',
+      'Data-v097d/**',
       // generated from OpenMU's packet XML - regenerate, never lint
       'versions/shared/packets/*Packets.ts',
-      // known dead files slated for deletion 
-      'src/common/walkerObject.ts',
-      'src/libs/fsm/**',
     ],
   },
   js.configs.recommended,
@@ -50,5 +49,11 @@ export default tseslint.config(
   {
     files: ['tools/**', 'proxy/**', 'versions/shared/packets/generate.ts', '*.config.{js,ts}'],
     rules: { 'no-console': 'off' },
+  },
+  {
+    // Content loaders: a Vite glob in the client, a synchronous `require` under Bun (servers and tools),
+    // where there is no glob. See versions/shared/items/all.ts.
+    files: ['versions/shared/*/all.ts', 'tools/itemFiles.ts', 'tools/monsterFiles.ts'],
+    rules: { '@typescript-eslint/no-require-imports': 'off' },
   }
 );

@@ -95,8 +95,6 @@ import { summonDisplayName } from '../modules/_shared/net_helpers';
 
 
 import { PingPacket } from '@versions/shared/packets/ClientToServerPackets';
-import { PlayFanfareSoundPacket, ServerCommandPacket, ShowChristmasFireworksPacket, ShowFireworksPacket, ShowSwirlPacket } from '@versions/shared/packets/ServerToClientPackets';
-import { SWIRL_BLOOM, SWIRL_BLOOM_SECONDS, SWIRL_START } from '../controllers/sound/packetSounds';
 
 import { Store, UIState } from './store';
 

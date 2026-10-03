@@ -74,7 +74,11 @@ function baseline(name: string, current: string[]): string[] {
       if (CLIENT_FILE.test(f)) bad.push(`${entry} reaches ${f}`);
       const bare = runtimeSpecifiers(f, readFileSync(f, 'utf8')).filter(s => CLIENT_PACKAGE.test(s));
       for (const s of bare) bad.push(`${entry} reaches ${s} (via ${f})`);
-      for (const to of next.get(f) ?? []) if (!seen.has(to)) (seen.add(to), queue.push(to));
+      for (const to of next.get(f) ?? []) {
+        if (seen.has(to)) continue;
+        seen.add(to);
+        queue.push(to);
+      }
     }
   }
   fail('server code loads client code', [...new Set(bad)]);

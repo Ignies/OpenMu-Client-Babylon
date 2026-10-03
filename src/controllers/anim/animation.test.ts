@@ -21,15 +21,20 @@ describe('AnimationRegistry', () => {
 describe('playerActionEnumSource', () => {
   const block = playerActionEnumSource([fist, set]);
 
-  it('writes every name with its id, aliases first, and MAX_PLAYER_ACTION one past the last', () => {
+  it('writes every id once, an alias first and the name referring to it, MAX_PLAYER_ACTION one past the last', () => {
     expect(block).toBe(
-      `${PLAYER_ACTION_ENUM_MARK}\nexport enum PlayerAction {\n  PLAYER_A = 0,\n  PLAYER_A_END = 1,\n  PLAYER_B = 1,\n  MAX_PLAYER_ACTION = 2,\n}\n`
+      `${PLAYER_ACTION_ENUM_MARK}\nexport enum PlayerAction {\n  PLAYER_A = 0,\n  PLAYER_A_END = 1,\n  PLAYER_B = PLAYER_A_END,\n  MAX_PLAYER_ACTION = 2,\n}\n`
     );
   });
 
   it('replaces only the marked block', () => {
     const text = `const a = 1;\n${PLAYER_ACTION_ENUM_MARK}\nexport enum PlayerAction {\n  OLD = 0,\n}\nconst b = 2;\n`;
     expect(replacePlayerActionEnum(text, block)).toBe(`const a = 1;\n${block}const b = 2;\n`);
+  });
+
+  it('keeps a CRLF file CRLF', () => {
+    const text = `const a = 1;\r\n${PLAYER_ACTION_ENUM_MARK}\r\nexport enum PlayerAction {\r\n  OLD = 0,\r\n}\r\nconst b = 2;\r\n`;
+    expect(replacePlayerActionEnum(text, block)).toBe(`const a = 1;\r\n${block.replace(/\n/g, '\r\n')}const b = 2;\r\n`);
   });
 });
 
