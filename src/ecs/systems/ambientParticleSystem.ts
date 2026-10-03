@@ -52,7 +52,7 @@ import type { ISystemFactory } from '../world';
  * own `<WorldName>/leaf01` (MapManager.cpp:1474-1476): Lorencia's dandelion
  * puffs, Noria's pink petals.
  */
-const LEAF_RECIPES: readonly { map: ENUM_WORLD; recipe: AmbientRecipe }[] = [
+export const LEAF_RECIPES: readonly { map: ENUM_WORLD; recipe: AmbientRecipe }[] = [
   { map: ENUM_WORLD.WD_0LORENCIA, recipe: LORENCIA_LEAVES },
   { map: ENUM_WORLD.WD_3NORIA, recipe: NORIA_PETALS },
 ];
@@ -65,7 +65,7 @@ const LORENCIA_TAVERN: Room = {
 };
 
 /** Dust rooms: the recipe runs while the hero stands inside the footprint. */
-const ROOMS: { map: ENUM_WORLD; room: Room; recipe: AmbientRecipe }[] = [
+export const ROOMS: { map: ENUM_WORLD; room: Room; recipe: AmbientRecipe }[] = [
   { map: ENUM_WORLD.WD_0LORENCIA, room: LORENCIA_TAVERN, recipe: TAVERN_DUST },
   { map: ENUM_WORLD.WD_2DEVIAS, room: DEVIAS_TAVERN, recipe: HEARTH_DUST },
   { map: ENUM_WORLD.WD_2DEVIAS, room: DEVIAS_READING_ROOM, recipe: TAVERN_DUST },
