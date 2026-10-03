@@ -97,49 +97,6 @@ export function spawnPlayer(
   return playerEntity;
 }
 
-EventBus.on('AddNpcsToScope', packet => {
-  const p = new AddNpcsToScopePacket(packet);
-
-  const world = Store.world;
-  if (!world) return;
-
-  p.getNPCs().forEach(npc => addNpcToScope(world, npc));
-});
-
-// 0x1F (ReceiveCreateSummonViewport): a player's summons enter scope. Same
-// spawn path as monsters, with the owner's name carried on the entity.
-EventBus.on('AddSummonedMonstersToScope', packet => {
-  const p = new AddSummonedMonstersToScopePacket(packet);
-
-  const world = Store.world;
-  if (!world) return;
-
-  p.getSummonedMonsters().forEach(m => {
-    const e = addNpcToScope(world, m);
-    // Key >> 15 is the create flag: a fresh summon plays its arrival (WSclient.cpp:3113-3117).
-    if (m.Id & 0x8000) playSummonArrival(world.scene, e);
-  });
-});
-
-// F3 20 (ReceiveSummonLife): percent health of the hero's own summon. The
-// original shows it as a gauge in the endurance panel; here it drives the
-// summon's health bar directly.
-EventBus.on('SummonHealthUpdate', packet => {
-  const p = new SummonHealthUpdatePacket(packet);
-
-  const world = Store.world;
-  if (!world) return;
-
-  const owner = Store.playerData.name;
-  for (const e of world.with('summonedBy', 'attributeSystem')) {
-    if (e.summonedBy !== owner || e.objOutOfScope) continue;
-    const max = e.attributeSystem.getValue('maxHealth');
-    if (max > 0) {
-      e.attributeSystem.setValue('currentHealth', (max * p.HealthPercent) / 100);
-    }
-  }
-});
-
 type ScopeCharacter = {
   Id: number;
   CurrentPositionX: number;
@@ -157,93 +114,6 @@ type ScopeCharacter = {
   /** PK / hero status byte (`c->PK`; OpenMU CharacterHeroState, same values). */
   HeroState?: number;
 };
-
-EventBus.on('AddCharactersToScope', packet => {
-  const p = new AddCharactersToScopePacket(packet);
-  const chars = p.getCharacters();
-
-  const world = Store.world;
-  if (!world) return;
-
-  chars.forEach(char => {
-    addCharacterToScope(world, {
-      ...char,
-      appearance: deserializeAppearance(char.Appearance),
-      // The classic packet carries the visible effects too, one record each;
-      // only the extended one names the field the way the entity wants it.
-      effects: char.Effects.map(e => e.Id),
-    });
-  });
-});
-
-// Extended protocol (client >= 106.3): one character per packet, extended
-// appearance layout, followed by a count + list of visible effect ids.
-EventBus.on('AddCharacterToScopeExtended', packet => {
-  const p = new AddCharacterToScopeExtendedPacket(packet);
-
-  const world = Store.world;
-  if (!world) return;
-
-  const data = p.AppearanceAndEffects;
-  const effects: number[] = [];
-  if (data.byteLength > APPEARANCE_EXTENDED_LENGTH) {
-    const count = data.getUint8(APPEARANCE_EXTENDED_LENGTH);
-    for (
-      let i = 0;
-      i < count && APPEARANCE_EXTENDED_LENGTH + 1 + i < data.byteLength;
-      i++
-    ) {
-      effects.push(data.getUint8(APPEARANCE_EXTENDED_LENGTH + 1 + i));
-    }
-  }
-
-  addCharacterToScope(world, {
-    Id: p.Id,
-    CurrentPositionX: p.CurrentPositionX,
-    CurrentPositionY: p.CurrentPositionY,
-    TargetPositionX: p.TargetPositionX,
-    TargetPositionY: p.TargetPositionY,
-    Rotation: p.Rotation,
-    Name: p.Name.replace(/\u0000+$/, ''),
-    appearance: deserializeAppearanceExtended(data),
-    attackSpeed: p.AttackSpeed,
-    magicSpeed: p.MagicSpeed,
-    effects,
-    HeroState: p.HeroState,
-  });
-});
-
-// 0x45: a player wearing a monster's appearance - a transformation ring, or
-// a game master's `/skin`. Same block as the classic scope packet plus the
-// monster number. Until this was handled a skinned player simply never
-// appeared: the frame was dropped and there was nothing on screen to click.
-EventBus.on('AddTransformedCharactersToScope', packet => {
-  const p = new AddTransformedCharactersToScopePacket(packet);
-
-  const world = Store.world;
-  if (!world) return;
-
-  for (const char of p.getCharacters()) {
-    const scoped: ScopeCharacter = {
-      ...char,
-      Name: char.Name.replace(/ +$/, ''),
-      appearance: deserializeAppearance(char.Appearance),
-      effects: char.Effects.map(e => e.Id),
-    };
-    // The hero is rebuilt as a player wearing the skin's body rather than as
-    // the monster itself: the controller, the camera and every clip it plays
-    // are the player rig's, and the original transforms it the same way -
-    // a MODEL_PLAYER with the skin as its subtype. Skins that are a whole
-    // monster instead have no body to lend, so the hero keeps its own.
-    if (char.Skin === 0) {
-      addCharacterToScope(world, scoped);
-    } else if (Store.playerId === (char.Id & 0x7fff)) {
-      addCharacterToScope(world, scoped, char.Skin);
-    } else {
-      addTransformedCharacterToScope(world, scoped, char.Skin);
-    }
-  }
-});
 
 /**
  * A player drawn as a monster. The body is the monster's model and rig, as
@@ -439,94 +309,6 @@ function addCharacterToScope(
   }
 }
 
-EventBus.on('MapObjectOutOfScope', packet => {
-  const p = new MapObjectOutOfScopePacket(packet);
-  p.getObjects(p.ObjectCount).forEach(obj => {
-    const maskedId = obj.Id & 0x7fff;
-
-    // `RemoveShopTitle`: the stall title goes with the player who left.
-    Economy.setShopTitle(maskedId, null);
-    Economy.dropBrowsedShop(maskedId);
-
-    const world = Store.world;
-    if (!world) return;
-
-    let objEntity = world.getByNetId(maskedId);
-    if (objEntity?.objOutOfScope) objEntity = undefined;
-    // A player teleporting away is dropped mid-fade; he goes once faded out.
-    if (objEntity && !deferLeave(objEntity)) {
-      world.addComponent(objEntity, 'objOutOfScope', true);
-    }
-  });
-});
-
-EventBus.on('ObjectMoved', packet => {
-  const p = new ObjectMovedPacket(packet);
-
-  const world = Store.world;
-  if (!world) return;
-
-  const maskedId = p.ObjectId & 0x7fff;
-  const obj = world.getByNetId(maskedId);
-  if (!obj) return;
-  if (isDeadMonster(obj)) return;
-
-  if (obj.localPlayer) {
-    traceHeroInstantMove(
-      obj,
-      { x: p.PositionX, y: p.PositionY },
-      { attack: world.attackTarget, cast: world.castApproach }
-    );
-  }
-
-  obj.transform.pos.x = p.PositionX;
-  obj.transform.pos.z = p.PositionY;
-  obj.transform.pos.y = world.getTerrainHeight(p.PositionX, p.PositionY);
-
-  if (obj.playerMoveTo) {
-    obj.playerMoveTo.point.x = p.PositionX;
-    obj.playerMoveTo.point.y = p.PositionY;
-    obj.playerMoveTo.handled = true;
-  }
-
-  if (obj.pathfinding) {
-    obj.pathfinding.path = null;
-    obj.pathfinding.from = { x: p.PositionX, y: p.PositionY };
-    obj.pathfinding.to = { x: p.PositionX, y: p.PositionY };
-  }
-
-  if (obj.movement) {
-    obj.movement.velocity.x = 0;
-    obj.movement.velocity.y = 0;
-  }
-});
-
-EventBus.on('ObjectWalked', packet => {
-  const p = new ObjectWalkedPacket(packet);
-
-  const world = Store.world;
-  if (!world) return;
-
-  const maskedId = p.ObjectId & 0x7fff;
-
-  const obj = world.getByNetId(maskedId);
-  if (!obj) return;
-
-  if (obj.localPlayer) return;
-  if (isDeadMonster(obj)) return;
-
-  if (obj.playerMoveTo) {
-    obj.playerMoveTo.handled = false;
-    obj.playerMoveTo.point.x = p.TargetX;
-    obj.playerMoveTo.point.y = p.TargetY;
-  } else {
-    obj.transform.pos.x = p.TargetX;
-    obj.transform.pos.z = p.TargetY;
-  }
-
-  obj.transform.rot.y = convertDirectionToAngle(p.TargetRotation);
-});
-
 /**
  * 0x25 - `ReceiveChangePlayer`: one equipment slot of a player in scope
  * changed. Slot numbers are the inventory's (`InventoryConstants`); a group
@@ -582,45 +364,266 @@ function applyAppearanceChange(
   cApp.changed = true;
 }
 
-// Legacy layout: a full serialized item whose byte 1 holds
-// `slot << 4 | glowLevel` (AppearanceChangedPlugIn); all 0xFF = unequipped.
-EventBus.on('AppearanceChanged', packet => {
-  const p = new AppearanceChangedPacket(packet);
-  const data = p.ItemData;
-  if (data.byteLength < ItemSerializer.NeededSpace) return;
+/** Registers this module's packet listeners (see ../module.ts). */
+export function installNet(): void {
+  EventBus.on('AddNpcsToScope', packet => {
+    const p = new AddNpcsToScopePacket(packet);
 
-  const bytes = new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
-  const slot = bytes[1] >> 4;
-  const unequipped = bytes[0] === 0xff && bytes[5] === 0xff;
-  if (unequipped) {
-    applyAppearanceChange(p.ChangedPlayerId, slot, null);
-    return;
-  }
+    const world = Store.world;
+    if (!world) return;
 
-  const item = ItemSerializer.DeserializeItem(bytes);
-  // Byte 1 does not carry the item level here: the server overwrites it with
-  // `slot << 4 | GetGlowLevel()` (AppearanceChangedPlugIn), so the low nibble
-  // is the same three-bit glow the scope preview sends, not a +0..+15.
-  item.lvl = itemLevelFromGlow(bytes[1] & 0x0f);
-  applyAppearanceChange(p.ChangedPlayerId, slot, item);
-});
+    p.getNPCs().forEach(npc => addNpcToScope(world, npc));
+  });
 
-// Extended layout (client >= 106.3): group / number / level / excellent
-// flags / ancient discriminator, like `deserializeAppearanceExtended`.
-EventBus.on('AppearanceChangedExtended', packet => {
-  if (packet.byteLength < AppearanceChangedExtendedPacket.Length!) return;
-  const p = new AppearanceChangedExtendedPacket(packet);
+  // 0x1F (ReceiveCreateSummonViewport): a player's summons enter scope. Same
+  // spawn path as monsters, with the owner's name carried on the entity.
+  EventBus.on('AddSummonedMonstersToScope', packet => {
+    const p = new AddSummonedMonstersToScopePacket(packet);
 
-  const item: Item | null =
-    p.ItemGroup === 0xff
-      ? null
-      : {
-          num: p.ItemNumber,
-          group: p.ItemGroup & 0xf,
-          lvl: p.ItemLevel,
-          isExcellent: (p.ExcellentFlags & 0x3f) !== 0,
-          excellentFlags: p.ExcellentFlags & 0x3f,
-          isAncient: p.AncientDiscriminator !== 0,
-        };
-  applyAppearanceChange(p.ChangedPlayerId, p.ItemSlot, item);
-});
+    const world = Store.world;
+    if (!world) return;
+
+    p.getSummonedMonsters().forEach(m => {
+      const e = addNpcToScope(world, m);
+      // Key >> 15 is the create flag: a fresh summon plays its arrival (WSclient.cpp:3113-3117).
+      if (m.Id & 0x8000) playSummonArrival(world.scene, e);
+    });
+  });
+
+  // F3 20 (ReceiveSummonLife): percent health of the hero's own summon. The
+  // original shows it as a gauge in the endurance panel; here it drives the
+  // summon's health bar directly.
+  EventBus.on('SummonHealthUpdate', packet => {
+    const p = new SummonHealthUpdatePacket(packet);
+
+    const world = Store.world;
+    if (!world) return;
+
+    const owner = Store.playerData.name;
+    for (const e of world.with('summonedBy', 'attributeSystem')) {
+      if (e.summonedBy !== owner || e.objOutOfScope) continue;
+      const max = e.attributeSystem.getValue('maxHealth');
+      if (max > 0) {
+        e.attributeSystem.setValue('currentHealth', (max * p.HealthPercent) / 100);
+      }
+    }
+  });
+
+  EventBus.on('AddCharactersToScope', packet => {
+    const p = new AddCharactersToScopePacket(packet);
+    const chars = p.getCharacters();
+
+    const world = Store.world;
+    if (!world) return;
+
+    chars.forEach(char => {
+      addCharacterToScope(world, {
+        ...char,
+        appearance: deserializeAppearance(char.Appearance),
+        // The classic packet carries the visible effects too, one record each;
+        // only the extended one names the field the way the entity wants it.
+        effects: char.Effects.map(e => e.Id),
+      });
+    });
+  });
+
+  // Extended protocol (client >= 106.3): one character per packet, extended
+  // appearance layout, followed by a count + list of visible effect ids.
+  EventBus.on('AddCharacterToScopeExtended', packet => {
+    const p = new AddCharacterToScopeExtendedPacket(packet);
+
+    const world = Store.world;
+    if (!world) return;
+
+    const data = p.AppearanceAndEffects;
+    const effects: number[] = [];
+    if (data.byteLength > APPEARANCE_EXTENDED_LENGTH) {
+      const count = data.getUint8(APPEARANCE_EXTENDED_LENGTH);
+      for (
+        let i = 0;
+        i < count && APPEARANCE_EXTENDED_LENGTH + 1 + i < data.byteLength;
+        i++
+      ) {
+        effects.push(data.getUint8(APPEARANCE_EXTENDED_LENGTH + 1 + i));
+      }
+    }
+
+    addCharacterToScope(world, {
+      Id: p.Id,
+      CurrentPositionX: p.CurrentPositionX,
+      CurrentPositionY: p.CurrentPositionY,
+      TargetPositionX: p.TargetPositionX,
+      TargetPositionY: p.TargetPositionY,
+      Rotation: p.Rotation,
+      Name: p.Name.replace(/\u0000+$/, ''),
+      appearance: deserializeAppearanceExtended(data),
+      attackSpeed: p.AttackSpeed,
+      magicSpeed: p.MagicSpeed,
+      effects,
+      HeroState: p.HeroState,
+    });
+  });
+
+  // 0x45: a player wearing a monster's appearance - a transformation ring, or
+  // a game master's `/skin`. Same block as the classic scope packet plus the
+  // monster number. Until this was handled a skinned player simply never
+  // appeared: the frame was dropped and there was nothing on screen to click.
+  EventBus.on('AddTransformedCharactersToScope', packet => {
+    const p = new AddTransformedCharactersToScopePacket(packet);
+
+    const world = Store.world;
+    if (!world) return;
+
+    for (const char of p.getCharacters()) {
+      const scoped: ScopeCharacter = {
+        ...char,
+        Name: char.Name.replace(/ +$/, ''),
+        appearance: deserializeAppearance(char.Appearance),
+        effects: char.Effects.map(e => e.Id),
+      };
+      // The hero is rebuilt as a player wearing the skin's body rather than as
+      // the monster itself: the controller, the camera and every clip it plays
+      // are the player rig's, and the original transforms it the same way -
+      // a MODEL_PLAYER with the skin as its subtype. Skins that are a whole
+      // monster instead have no body to lend, so the hero keeps its own.
+      if (char.Skin === 0) {
+        addCharacterToScope(world, scoped);
+      } else if (Store.playerId === (char.Id & 0x7fff)) {
+        addCharacterToScope(world, scoped, char.Skin);
+      } else {
+        addTransformedCharacterToScope(world, scoped, char.Skin);
+      }
+    }
+  });
+
+  EventBus.on('MapObjectOutOfScope', packet => {
+    const p = new MapObjectOutOfScopePacket(packet);
+    p.getObjects(p.ObjectCount).forEach(obj => {
+      const maskedId = obj.Id & 0x7fff;
+
+      // `RemoveShopTitle`: the stall title goes with the player who left.
+      Economy.setShopTitle(maskedId, null);
+      Economy.dropBrowsedShop(maskedId);
+
+      const world = Store.world;
+      if (!world) return;
+
+      let objEntity = world.getByNetId(maskedId);
+      if (objEntity?.objOutOfScope) objEntity = undefined;
+      // A player teleporting away is dropped mid-fade; he goes once faded out.
+      if (objEntity && !deferLeave(objEntity)) {
+        world.addComponent(objEntity, 'objOutOfScope', true);
+      }
+    });
+  });
+
+  EventBus.on('ObjectMoved', packet => {
+    const p = new ObjectMovedPacket(packet);
+
+    const world = Store.world;
+    if (!world) return;
+
+    const maskedId = p.ObjectId & 0x7fff;
+    const obj = world.getByNetId(maskedId);
+    if (!obj) return;
+    if (isDeadMonster(obj)) return;
+
+    if (obj.localPlayer) {
+      traceHeroInstantMove(
+        obj,
+        { x: p.PositionX, y: p.PositionY },
+        { attack: world.attackTarget, cast: world.castApproach }
+      );
+    }
+
+    obj.transform.pos.x = p.PositionX;
+    obj.transform.pos.z = p.PositionY;
+    obj.transform.pos.y = world.getTerrainHeight(p.PositionX, p.PositionY);
+
+    if (obj.playerMoveTo) {
+      obj.playerMoveTo.point.x = p.PositionX;
+      obj.playerMoveTo.point.y = p.PositionY;
+      obj.playerMoveTo.handled = true;
+    }
+
+    if (obj.pathfinding) {
+      obj.pathfinding.path = null;
+      obj.pathfinding.from = { x: p.PositionX, y: p.PositionY };
+      obj.pathfinding.to = { x: p.PositionX, y: p.PositionY };
+    }
+
+    if (obj.movement) {
+      obj.movement.velocity.x = 0;
+      obj.movement.velocity.y = 0;
+    }
+  });
+
+  EventBus.on('ObjectWalked', packet => {
+    const p = new ObjectWalkedPacket(packet);
+
+    const world = Store.world;
+    if (!world) return;
+
+    const maskedId = p.ObjectId & 0x7fff;
+
+    const obj = world.getByNetId(maskedId);
+    if (!obj) return;
+
+    if (obj.localPlayer) return;
+    if (isDeadMonster(obj)) return;
+
+    if (obj.playerMoveTo) {
+      obj.playerMoveTo.handled = false;
+      obj.playerMoveTo.point.x = p.TargetX;
+      obj.playerMoveTo.point.y = p.TargetY;
+    } else {
+      obj.transform.pos.x = p.TargetX;
+      obj.transform.pos.z = p.TargetY;
+    }
+
+    obj.transform.rot.y = convertDirectionToAngle(p.TargetRotation);
+  });
+
+  // Legacy layout: a full serialized item whose byte 1 holds
+  // `slot << 4 | glowLevel` (AppearanceChangedPlugIn); all 0xFF = unequipped.
+  EventBus.on('AppearanceChanged', packet => {
+    const p = new AppearanceChangedPacket(packet);
+    const data = p.ItemData;
+    if (data.byteLength < ItemSerializer.NeededSpace) return;
+
+    const bytes = new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
+    const slot = bytes[1] >> 4;
+    const unequipped = bytes[0] === 0xff && bytes[5] === 0xff;
+    if (unequipped) {
+      applyAppearanceChange(p.ChangedPlayerId, slot, null);
+      return;
+    }
+
+    const item = ItemSerializer.DeserializeItem(bytes);
+    // Byte 1 does not carry the item level here: the server overwrites it with
+    // `slot << 4 | GetGlowLevel()` (AppearanceChangedPlugIn), so the low nibble
+    // is the same three-bit glow the scope preview sends, not a +0..+15.
+    item.lvl = itemLevelFromGlow(bytes[1] & 0x0f);
+    applyAppearanceChange(p.ChangedPlayerId, slot, item);
+  });
+
+  // Extended layout (client >= 106.3): group / number / level / excellent
+  // flags / ancient discriminator, like `deserializeAppearanceExtended`.
+  EventBus.on('AppearanceChangedExtended', packet => {
+    if (packet.byteLength < AppearanceChangedExtendedPacket.Length!) return;
+    const p = new AppearanceChangedExtendedPacket(packet);
+
+    const item: Item | null =
+      p.ItemGroup === 0xff
+        ? null
+        : {
+            num: p.ItemNumber,
+            group: p.ItemGroup & 0xf,
+            lvl: p.ItemLevel,
+            isExcellent: (p.ExcellentFlags & 0x3f) !== 0,
+            excellentFlags: p.ExcellentFlags & 0x3f,
+            isAncient: p.AncientDiscriminator !== 0,
+          };
+    applyAppearanceChange(p.ChangedPlayerId, p.ItemSlot, item);
+  });
+}

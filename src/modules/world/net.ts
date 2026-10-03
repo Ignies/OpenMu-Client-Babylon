@@ -17,73 +17,8 @@ import { runInAction } from 'mobx';
 /** The "rain, intensity 0" value is logged once per session, not per packet. */
 let weatherZeroReported = false;
 
-EventBus.on('WeatherStatusUpdate', packet => {
-  const p = new WeatherStatusUpdatePacket(packet);
-  const weather = p.Weather;
-  const variation = p.Variation;
-
-  // The packet is the only thing that can start rain anywhere but Icarus, and
-  // nothing in the client reports when it does not arrive - so a weather
-  // change is worth one line. Only on change: the proxy heartbeats.
-  if (
-    weather !== Store.weather.weather ||
-    variation !== Store.weather.variation
-  ) {
-    if (weather === WEATHER_RAIN && variation === 0) {
-      // `RainTarget = (Value & 15) * 6` is zero: the original client simply
-      // shows no rain for this value. The proxy never emits it, but OpenMU
-      // itself does (kind 1 / variation 0 on map entry), several times a
-      // session - treated as clear, said once.
-      if (!weatherZeroReported) {
-        weatherZeroReported = true;
-        console.debug('[weather] rain with intensity 0 received - treated as clear');
-      }
-    } else {
-      console.log(
-        `[weather] ${weather === WEATHER_RAIN ? `rain ${variation}/15` : `clear (kind ${weather})`}`
-      );
-    }
-  }
-
-  runInAction(() => {
-    Store.weather = { weather, variation };
-  });
-});
-
 // ReceiveServerCommand (WSclient.cpp:8359-8360): command 2 is SOUND_MEDAL.
 const FANFARE_EFFECT = 2;
-EventBus.on('fanfare', ({ effectType }) => {
-  if (effectType === FANFARE_EFFECT) {
-    playSfx('Sound/eMedal', null, { bus: UI_BUS, channels: 1 });
-  }
-});
-
-// C1 48 - level-up beam, shield potion, shield lost.
-EventBus.on('ShowEffect', packet => {
-  const p = new ShowEffectPacket(packet);
-  const netId = p.PlayerId & 0x7fff;
-
-  switch (p.Effect) {
-    case ShowEffectEffectTypeEnum.LevelUp:
-      // SOUND_LEVEL_UP rides the burst (objectEffectSystem), the hero's included.
-      emitObjectEffect(netId, 'levelUp');
-      break;
-    case ShowEffectEffectTypeEnum.ShieldPotion:
-      emitObjectEffect(netId, 'shieldPotion');
-      break;
-    case ShowEffectEffectTypeEnum.ShieldLost: {
-      emitObjectEffect(netId, 'shieldLost');
-      // ReceiveDisplayEffectViewport (WSclient.cpp:9662-9668): SOUND_SHIELDCLASH,
-      // except in Chaos Castle.
-      const world = Store.world;
-      const who = world?.getByNetId(netId);
-      if (world && who?.transform && !inChaosCastle(world.mapIndex)) {
-        playSfx('Sound/shieldclash', who.transform.pos, { bus: COMBAT_BUS, channels: 1 });
-      }
-      break;
-    }
-  }
-});
 
 // F3/0x40 (length 7) is shared by PlayFanfareSound (EffectType 2), ShowSwirl
 // (58), ShowFireworks (0), ShowChristmasFireworks (59) and ServerCommand; the
@@ -130,9 +65,6 @@ function routeServerCommand(packet: DataView) {
     }
   }
 }
-for (const name of ['ServerCommand', 'ShowSwirl', 'ShowFireworks', 'ShowChristmasFireworks', 'PlayFanfareSound'] as const) {
-  EventBus.on(name, routeServerCommand);
-}
 
 /** ShowFireworks / ShowChristmasFireworks: the burst at the given tile. */
 function spawnFireworksAt(x: number, y: number, christmas: boolean) {
@@ -141,7 +73,6 @@ function spawnFireworksAt(x: number, y: number, christmas: boolean) {
   const at = new Vector3(x, world.getTerrainHeight(x, y), y);
   spawnFireworks(world.scene, at, christmas);
 }
-
 
 /** Server command 58's cherry-blossom sound, then the blooms its effect replays while the target stays. */
 function playSwirlSounds(netId: number) {
@@ -156,4 +87,77 @@ function playSwirlSounds(netId: number) {
     playSfx(SWIRL_BLOOM.key, target.transform.pos, SWIRL_BLOOM.opts);
   };
   for (const seconds of SWIRL_BLOOM_SECONDS) delay(seconds, bloom);
+}
+
+/** Registers this module's packet listeners (see ../module.ts). */
+export function installNet(): void {
+  EventBus.on('WeatherStatusUpdate', packet => {
+    const p = new WeatherStatusUpdatePacket(packet);
+    const weather = p.Weather;
+    const variation = p.Variation;
+
+    // The packet is the only thing that can start rain anywhere but Icarus, and
+    // nothing in the client reports when it does not arrive - so a weather
+    // change is worth one line. Only on change: the proxy heartbeats.
+    if (
+      weather !== Store.weather.weather ||
+      variation !== Store.weather.variation
+    ) {
+      if (weather === WEATHER_RAIN && variation === 0) {
+        // `RainTarget = (Value & 15) * 6` is zero: the original client simply
+        // shows no rain for this value. The proxy never emits it, but OpenMU
+        // itself does (kind 1 / variation 0 on map entry), several times a
+        // session - treated as clear, said once.
+        if (!weatherZeroReported) {
+          weatherZeroReported = true;
+          console.debug('[weather] rain with intensity 0 received - treated as clear');
+        }
+      } else {
+        console.log(
+          `[weather] ${weather === WEATHER_RAIN ? `rain ${variation}/15` : `clear (kind ${weather})`}`
+        );
+      }
+    }
+
+    runInAction(() => {
+      Store.weather = { weather, variation };
+    });
+  });
+
+  EventBus.on('fanfare', ({ effectType }) => {
+    if (effectType === FANFARE_EFFECT) {
+      playSfx('Sound/eMedal', null, { bus: UI_BUS, channels: 1 });
+    }
+  });
+
+  // C1 48 - level-up beam, shield potion, shield lost.
+  EventBus.on('ShowEffect', packet => {
+    const p = new ShowEffectPacket(packet);
+    const netId = p.PlayerId & 0x7fff;
+
+    switch (p.Effect) {
+      case ShowEffectEffectTypeEnum.LevelUp:
+        // SOUND_LEVEL_UP rides the burst (objectEffectSystem), the hero's included.
+        emitObjectEffect(netId, 'levelUp');
+        break;
+      case ShowEffectEffectTypeEnum.ShieldPotion:
+        emitObjectEffect(netId, 'shieldPotion');
+        break;
+      case ShowEffectEffectTypeEnum.ShieldLost: {
+        emitObjectEffect(netId, 'shieldLost');
+        // ReceiveDisplayEffectViewport (WSclient.cpp:9662-9668): SOUND_SHIELDCLASH,
+        // except in Chaos Castle.
+        const world = Store.world;
+        const who = world?.getByNetId(netId);
+        if (world && who?.transform && !inChaosCastle(world.mapIndex)) {
+          playSfx('Sound/shieldclash', who.transform.pos, { bus: COMBAT_BUS, channels: 1 });
+        }
+        break;
+      }
+    }
+  });
+
+  for (const name of ['ServerCommand', 'ShowSwirl', 'ShowFireworks', 'ShowChristmasFireworks', 'PlayFanfareSound'] as const) {
+    EventBus.on(name, routeServerCommand);
+  }
 }

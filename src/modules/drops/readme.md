@@ -4,7 +4,7 @@ Items and zen on the ground: the drop packets, the drop entity and model, the na
 and the loot filter for the ALT name overlay.
 
 ## Public API
-- none for packets. `net.ts` registers its handlers when `src/app/logic.ts` imports it.
+- none for packets. `installNet()` in `net.ts` registers its handlers (`module.ts`, installed by `src/app/logic.ts`).
 - `DropObject`: the model class of a drop (frozen pose, zen coin pile, the fall). `setPileFall(height)`.
 - `dropTier(drop)`, `DROP_TIER_COLOURS`, `HIGH_DROP_LEVEL` (7): name colour and ground glow tier.
 - `dropPassesLootFilter(drop)`, `lootZenThreshold(step)`, `LOOT_ZEN_MAX`: which names the latched overlay keeps.

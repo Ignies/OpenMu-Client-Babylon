@@ -4,9 +4,14 @@ Gameplay, one folder per module. A module owns its packets, its state and its ac
 `versions/shared/ui/` read the state and call the actions.
 
 ## What a module is
-- `net.ts`: the packet handlers (`EventBus.on('<Packet>', ...)`). Importing it registers the
-  handlers; only `scope` (`spawnPlayer`) and `skills` (`playTeleportAnimation`) export from it. `src/app/logic.ts` imports every `net.ts`, and that import order is the
-  listener order for a packet several modules handle. Keep it.
+- `module.ts`: `defineModule({ id, core?, requires?, install })`. `id` is the folder name; `core`
+  modules are always on; `requires` turns a module off when one it needs is off (`guild_war` needs
+  `guild`). `install` runs once at boot.
+- `net.ts`: the packet handlers, registered by `installNet()` (its `install`). Importing the file
+  registers nothing.
+- `modules.ts` lists every module in install order, and `src/app/logic.ts` calls
+  `installModules(MODULES)`. That order is the listener order for a packet several modules
+  handle (pinned by `src/app/listenerOrder.golden.test.ts`). Keep it.
 - state: a mobx store (`Social`, `Economy`, `Messenger`, `GmPanel`, ...) or plain module state.
 - actions: functions that check the rules and send packets (`Store.sendToGS`).
 - the classic rules it ports, with the original source cited next to the code.
@@ -62,9 +67,18 @@ and `masterTree.ts` through the `skills` facade, and `band` through `installBand
 
 ## Change it
 - handle a new packet: [../../docs/how_to/add_packet_handler.md](../../docs/how_to/add_packet_handler.md).
-- add a module: `src/modules/<name>/net.ts` plus one import line in `src/app/logic.ts`, and a
-  `readme.md` (`bun tools/checks/index.ts` checks it exists).
+- add a module: `src/modules/<name>/` with `net.ts` (`installNet`), `module.ts`, a `readme.md`
+  (`bun tools/checks/index.ts` checks it exists), and one line in `modules.ts` where its
+  listeners should run.
+- turn a module off: pass `enabled` to `installModules` (servers will choose this; not wired yet).
 - move state out of the Store: put it in the module, point the windows at the module.
 
+## Not modules yet
+- `events`, `quests` entry files, `skills/masterLevel.ts` and `masterTree.ts` still register at
+  import; `economy`, `social`, `gm`, `items`, `servers` have no `module.ts`. They are always on
+  until their state leaves the Store. Windows do not yet hide when their module is off.
+
 ## Tests
+- `module.test.ts`: install order, disabled and core modules, requirements.
+- `modules.test.ts`: every `module.ts` is listed once and named after its folder.
 - each module lists its own `*.test.ts`.

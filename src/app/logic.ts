@@ -1,5 +1,5 @@
-// Every packet handler lives in its feature's net.ts; importing them here registers them,
-// in the order the handlers had in this file (listener order per packet is kept).
+// Every packet handler lives in its module's net.ts and is registered by installModules below,
+// in the order of modules/modules.ts (listener order per packet is kept).
 // What this file imported before its handlers moved out, in the same order: loading these
 // first keeps every import-time registration (quests, events, skills...) ahead of the nets.
 import '../modules/band/bandNet';
@@ -91,31 +91,6 @@ import '../modules/inventory/quickItemActions';
 import '../modules/servers/serverConfig';
 import '../controllers/interface/msgWin';
 import '../modules/character_select/messages';
-import '../modules/session/net';
-import '../modules/character_select/net';
-import '../modules/hero/net';
-import '../modules/warp/net';
-import '../modules/inventory/net';
-import '../modules/scope/net';
-import '../modules/chat/net';
-import '../modules/guild/net';
-import '../modules/party/net';
-import '../modules/guild_war/net';
-import '../modules/friends/net';
-import '../modules/combat/net';
-import '../modules/skills/net';
-import '../modules/drops/net';
-import '../modules/world/net';
-import '../modules/marketplace/net';
-import '../modules/npc_shop/net';
-import '../modules/vault/net';
-import '../modules/chaos_mix/net';
-import '../modules/trade/net';
-import '../modules/personal_shop/net';
-import '../modules/options/net';
-import '../modules/quests/net';
-import '../modules/pets/net';
-import '../modules/mu_helper/net';
 import { summonDisplayName } from '../modules/_shared/net_helpers';
 
 
@@ -127,7 +102,8 @@ import { Store, UIState } from './store';
 
 
 
-import { installBandNet } from '../modules/band/bandNet';
+import { installModules } from '../modules/module';
+import { MODULES } from '../modules/modules';
 import { installPingNet } from '../controllers/net/pingNet';
 import { loadNpcNames, onNpcNamesChanged } from '../controllers/assets/mu/npcNameFile';
 import { monsterDisplayName } from '@versions/shared/monsters/monstersDatabase';
@@ -183,8 +159,8 @@ setInterval(() => {
 const hot = (import.meta as { hot?: { decline(): void } }).hot;
 if (hot) hot.decline();
 
-// The band system: the proxy relay listener and the transport the facade sends through.
-installBandNet();
+// Every gameplay module's listeners, in list order (see modules/modules.ts).
+installModules(MODULES);
 
 // The map ping: the proxy relay listener behind Shift + middle click.
 installPingNet();

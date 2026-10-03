@@ -95,183 +95,6 @@ function stopNetObjectAtTarget(obj: Entity) {
   }
 }
 
-EventBus.on('ObjectAnimation', packet => {
-  const p = new ObjectAnimationPacket(packet);
-
-  const maskedId = p.ObjectId & 0x7fff;
-  const world = Store.world;
-  const obj = world?.getByNetId(maskedId);
-
-  if (!world || !obj) return;
-
-  let serverActionId = p.Animation as ServerPlayerActionType;
-  let clientActionToPlay = serverActionId;
-  if (obj.monsterAnimation) {
-    clientActionToPlay = ((serverActionId & 0xe0) >> 5) & 0xff;
-  }
-
-  // The hero is driven locally: AttackSystem / EmoteSystem / RestObjectSystem
-  // already play the clip and face the target every frame, and the original
-  // client never applies its own viewport animation packets to the Hero.
-  // Applying the echo restarted the swing mid-clip (action === CurrentAction
-  // is true while swinging) and snapped rot.y to the server's 45°-quantised,
-  // often stale, direction.
-  if (obj.localPlayer) return;
-
-  // AttackPlayer: the last object whose attack animation arrived (ReceiveAction AT_ATTACK1/2, WSclient.cpp:3596-3608).
-  const attackAction = obj.monsterAnimation ? MonsterActionType.Attack1 : ServerPlayerActionType.Attack1;
-  if (clientActionToPlay === attackAction || clientActionToPlay === attackAction + 1) lastAttacker = obj;
-
-  if (obj.monsterAnimation) {
-    if (isDeadMonster(obj)) return;
-    const monsterAction = clientActionToPlay as unknown as MonsterActionType;
-    if (monsterAction === MonsterActionType.Attack1) {
-      // AT_ATTACK1 / AT_ATTACK2 (ReceiveAction, WSclient.cpp:3596-3600):
-      // SetPlayerAttack picks the clip, then AnimationFrame = 0.
-      const state = monsterAttackState(obj);
-      const input = attackInputOf(obj);
-      const storming = meteoriteStormRunning(input.monster, state, input.now);
-      setMonsterClip(obj, monsterSwing(state, input), true);
-      playTrapSounds(obj, input, true, storming);
-    } else {
-      if (
-        obj.monsterAnimation.action === monsterAction &&
-        obj.modelObject?.CurrentAction === monsterAction
-      ) {
-        // Same one-shot clip again: restart it.
-        obj.modelObject.restartAction();
-      }
-      obj.monsterAnimation.action = monsterAction;
-    }
-  } else if (obj.playerAnimation) {
-    let action = ServerToClientActionMap[clientActionToPlay];
-    if (
-      clientActionToPlay === ServerPlayerActionType.Attack1 ||
-      clientActionToPlay === ServerPlayerActionType.Attack2
-    ) {
-      action = chooseAttackAction(attackPoseOf(obj));
-      obj.playerAnimation.swordCount = (obj.playerAnimation.swordCount ?? 0) + 1;
-      // CreateArrows(): a bow in scope lets go at its clip's hit key. The
-      // hero's own shot is fired by AttackSystem, off the swing it latched.
-      const shotAt = world.getByNetId(p.TargetId & 0x7fff);
-      if (shotAt && combat.equippedLauncher(obj.charAppearance)) {
-        const playSpeed =
-          obj.modelObject?.actionPlaySpeed(action) ??
-          playerPlaySpeed(action, obj.attributeSystem?.getValue('attackSpeed') ?? 0);
-        delay(combat.hitDelaySeconds(action, playSpeed), () =>
-          playBowShotVisual(world.scene, obj, shotAt)
-        );
-      }
-      // AnimationFrame = 0 on every AT_ATTACK (WSclient.cpp:3596-3600). A monster body's clip is
-      // not the PlayerAction and every swing maps to its attack clips: restart whichever plays.
-      const model = obj.modelObject;
-      if (
-        model &&
-        (isPlayerBody(model)
-          ? obj.playerAnimation.action === action && model.CurrentAction === action
-          : isMonsterSwingClip(model.CurrentAction))
-      ) {
-        model.restartAction();
-      }
-    }
-    if (action !== undefined) {
-      if (
-        action >= PlayerAction.PLAYER_SIT1 &&
-        action <= PlayerAction.PLAYER_POSE_FEMALE1
-      ) {
-        stopNetObjectAtTarget(obj);
-      }
-
-      obj.playerAnimation.action = resolveGenderedAction(
-        action,
-        obj.attributeSystem?.isAboveZero('isFemale') ?? false
-      );
-    }
-    const santa = santaActionSound(clientActionToPlay);
-    if (santa) playSfx(santa.key, obj.transform.pos, santa.opts);
-  }
-
-  obj.transform.rot.y = convertDirectionToAngle(p.Direction);
-});
-
-EventBus.on('SkillAnimation', packet => {
-  const p = new SkillAnimationPacket(packet);
-  const world = Store.world;
-  if (!world) return;
-  const casterId = p.PlayerId & 0x7fff;
-  const targetId = p.TargetId & 0x7fff;
-  const caster = world.getByNetId(casterId);
-  if (!caster) return;
-  const target = world.getByNetId(targetId) ?? null;
-  if (!caster.localPlayer) lastAttacker = caster; // AttackPlayer (ReceiveMagic, WSclient.cpp:4161)
-
-  if (isTeleportSkill(p.SkillId)) {
-    playTeleportAnimation(world, p.SkillId, caster, target);
-    return;
-  }
-
-  // AT_SKILL_COMBO: the server announces a landed DK combo. The original leaves the caster's
-  // facing, target and clip alone and only plays SOUND_COMBO (WSclient.cpp:4167, :4829-4832).
-  if (combat.observeSkillAnimation(p.SkillId, target?.netId)) {
-    playSkill(p.SkillId, caster.transform.pos);
-    playTargetedSkillVisual(world.scene, p.SkillId, caster, target);
-    return;
-  }
-  faceTarget(caster, target);
-  playCastAnimation(caster, p.SkillId, false);
-  playTargetedSkillVisual(world.scene, p.SkillId, caster, target);
-});
-
-EventBus.on('ObjectGotKilled', packet => {
-  const p = new ObjectGotKilledPacket(packet);
-
-  const world = Store.world;
-  if (!world) return;
-
-  const killedId = p.KilledId & 0x7fff;
-  const obj = world.getByNetId(killedId);
-
-  if (!obj) {
-    if (killedId === Store.playerId) {
-      runInAction(() => {
-        Store.playerData.currentHP = 0;
-      });
-      const playerEntity = world.playerEntity;
-      if (playerEntity) {
-        playerEntity.attributeSystem.setValue('currentHealth', 0);
-        playerEntity.playerAnimation.action = PlayerAction.PLAYER_DIE1;
-      }
-    }
-    return;
-  }
-
-  if (obj.pathfinding) obj.pathfinding.path = null;
-  if (obj.movement) {
-    obj.movement.velocity.x = 0;
-    obj.movement.velocity.y = 0;
-  }
-  if (world.attackTarget === obj) {
-    world.attackTarget = null;
-  }
-  obj.attributeSystem?.setValue('currentHealth', 0);
-
-  if (obj.localPlayer) {
-    runInAction(() => {
-      Store.playerData.currentHP = 0;
-    });
-  }
-  if (world.currentPointerTarget === obj) {
-    world.currentPointerTarget = null;
-  }
-
-  // Dead = 1; the Die clip itself starts in DeathSystem (at once, or when
-  // the hero's killing swing connects - WSclient.cpp:5362-5384).
-  const killerId = p.KillerId & 0x7fff;
-  const heroKill = killerId === Store.playerId;
-  markKilled(world, obj, heroKill, p.SkillId, killerId);
-  if (heroKill && obj.npcType !== undefined) playKillEnergy(world, obj);
-});
-
 /** Ticks the energy orbs climb (LifeTime 120 -> 100) plus the turn back. */
 const ENERGY_BASE_TICKS = 22;
 /** Homing at up to 30 units a tick, turning as fast: fitted to MoveJoint. */
@@ -358,16 +181,6 @@ function applyHealthStatus(attributes: MUAttributeSystem, status: number): void 
 
 /** Bytes before the target list of RageAttackRangeResponse (C1 header 3 + skill 2 + count 1). */
 const RAGE_RANGE_TARGETS_OFFSET = 6;
-
-/** Dark Side (0x4B): the targets the server chose for the follow-up blows. */
-EventBus.on('RageAttackRangeResponse', packet => {
-  const p = new RageAttackRangeResponsePacket(packet);
-  const count = Math.floor((p.buffer.byteLength - RAGE_RANGE_TARGETS_OFFSET) / 2);
-  combat.observeDarkSideTargets(
-    p.SkillId,
-    p.getTargets(count).map(t => t.TargetId & 0x7fff)
-  );
-});
 
 /** The original's `AttackPlayer`: who last sent an attack or skill animation, for Soul Barrier's hit shell. */
 let lastAttacker: Entity | null = null;
@@ -470,34 +283,225 @@ function applyObjectHit(p: ObjectHitView) {
   }
 }
 
-EventBus.on('ObjectHit', packet => applyObjectHit(new ObjectHitPacket(packet)));
-// Extended plug-in variant (damage > 65535, health/shield status percentages).
-EventBus.on('ObjectHitExtended', packet =>
-  applyObjectHit(new ObjectHitExtendedPacket(packet))
-);
-
-/**
- * C3 4A - `RageAttack`: a rage fighter's Dark Side blow on one target, shown
- * to everyone in scope like a targeted skill animation.
- */
-EventBus.on('RageAttack', packet => {
-  if (packet.byteLength < RageAttackPacket.Length!) return;
-  const p = new RageAttackPacket(packet);
-  const world = Store.world;
-  if (!world) return;
-  const caster = world.getByNetId(p.SourceId & 0x7fff);
-  if (!caster) return;
-  const target = world.getByNetId(p.TargetId & 0x7fff) ?? null;
-
-  faceTarget(caster, target);
-  playCastAnimation(caster, p.SkillId, false);
-  playTargetedSkillVisual(world.scene, p.SkillId, caster, target);
-});
-
 /** A remote caster turns to its target (the hero turns itself every frame). */
 function faceTarget(caster: Entity, target: Entity | null): void {
   if (!target || target === caster || caster.localPlayer || !caster.transform || !target.transform) return;
   const dx = target.transform.pos.x - caster.transform.pos.x;
   const dz = target.transform.pos.z - caster.transform.pos.z;
   if (dx * dx + dz * dz > 0.01) caster.transform.rot.y = Math.atan2(dz, dx) + Math.PI / 2;
+}
+
+/** Registers this module's packet listeners (see ../module.ts). */
+export function installNet(): void {
+  EventBus.on('ObjectAnimation', packet => {
+    const p = new ObjectAnimationPacket(packet);
+
+    const maskedId = p.ObjectId & 0x7fff;
+    const world = Store.world;
+    const obj = world?.getByNetId(maskedId);
+
+    if (!world || !obj) return;
+
+    let serverActionId = p.Animation as ServerPlayerActionType;
+    let clientActionToPlay = serverActionId;
+    if (obj.monsterAnimation) {
+      clientActionToPlay = ((serverActionId & 0xe0) >> 5) & 0xff;
+    }
+
+    // The hero is driven locally: AttackSystem / EmoteSystem / RestObjectSystem
+    // already play the clip and face the target every frame, and the original
+    // client never applies its own viewport animation packets to the Hero.
+    // Applying the echo restarted the swing mid-clip (action === CurrentAction
+    // is true while swinging) and snapped rot.y to the server's 45°-quantised,
+    // often stale, direction.
+    if (obj.localPlayer) return;
+
+    // AttackPlayer: the last object whose attack animation arrived (ReceiveAction AT_ATTACK1/2, WSclient.cpp:3596-3608).
+    const attackAction = obj.monsterAnimation ? MonsterActionType.Attack1 : ServerPlayerActionType.Attack1;
+    if (clientActionToPlay === attackAction || clientActionToPlay === attackAction + 1) lastAttacker = obj;
+
+    if (obj.monsterAnimation) {
+      if (isDeadMonster(obj)) return;
+      const monsterAction = clientActionToPlay as unknown as MonsterActionType;
+      if (monsterAction === MonsterActionType.Attack1) {
+        // AT_ATTACK1 / AT_ATTACK2 (ReceiveAction, WSclient.cpp:3596-3600):
+        // SetPlayerAttack picks the clip, then AnimationFrame = 0.
+        const state = monsterAttackState(obj);
+        const input = attackInputOf(obj);
+        const storming = meteoriteStormRunning(input.monster, state, input.now);
+        setMonsterClip(obj, monsterSwing(state, input), true);
+        playTrapSounds(obj, input, true, storming);
+      } else {
+        if (
+          obj.monsterAnimation.action === monsterAction &&
+          obj.modelObject?.CurrentAction === monsterAction
+        ) {
+          // Same one-shot clip again: restart it.
+          obj.modelObject.restartAction();
+        }
+        obj.monsterAnimation.action = monsterAction;
+      }
+    } else if (obj.playerAnimation) {
+      let action = ServerToClientActionMap[clientActionToPlay];
+      if (
+        clientActionToPlay === ServerPlayerActionType.Attack1 ||
+        clientActionToPlay === ServerPlayerActionType.Attack2
+      ) {
+        action = chooseAttackAction(attackPoseOf(obj));
+        obj.playerAnimation.swordCount = (obj.playerAnimation.swordCount ?? 0) + 1;
+        // CreateArrows(): a bow in scope lets go at its clip's hit key. The
+        // hero's own shot is fired by AttackSystem, off the swing it latched.
+        const shotAt = world.getByNetId(p.TargetId & 0x7fff);
+        if (shotAt && combat.equippedLauncher(obj.charAppearance)) {
+          const playSpeed =
+            obj.modelObject?.actionPlaySpeed(action) ??
+            playerPlaySpeed(action, obj.attributeSystem?.getValue('attackSpeed') ?? 0);
+          delay(combat.hitDelaySeconds(action, playSpeed), () =>
+            playBowShotVisual(world.scene, obj, shotAt)
+          );
+        }
+        // AnimationFrame = 0 on every AT_ATTACK (WSclient.cpp:3596-3600). A monster body's clip is
+        // not the PlayerAction and every swing maps to its attack clips: restart whichever plays.
+        const model = obj.modelObject;
+        if (
+          model &&
+          (isPlayerBody(model)
+            ? obj.playerAnimation.action === action && model.CurrentAction === action
+            : isMonsterSwingClip(model.CurrentAction))
+        ) {
+          model.restartAction();
+        }
+      }
+      if (action !== undefined) {
+        if (
+          action >= PlayerAction.PLAYER_SIT1 &&
+          action <= PlayerAction.PLAYER_POSE_FEMALE1
+        ) {
+          stopNetObjectAtTarget(obj);
+        }
+
+        obj.playerAnimation.action = resolveGenderedAction(
+          action,
+          obj.attributeSystem?.isAboveZero('isFemale') ?? false
+        );
+      }
+      const santa = santaActionSound(clientActionToPlay);
+      if (santa) playSfx(santa.key, obj.transform.pos, santa.opts);
+    }
+
+    obj.transform.rot.y = convertDirectionToAngle(p.Direction);
+  });
+
+  EventBus.on('SkillAnimation', packet => {
+    const p = new SkillAnimationPacket(packet);
+    const world = Store.world;
+    if (!world) return;
+    const casterId = p.PlayerId & 0x7fff;
+    const targetId = p.TargetId & 0x7fff;
+    const caster = world.getByNetId(casterId);
+    if (!caster) return;
+    const target = world.getByNetId(targetId) ?? null;
+    if (!caster.localPlayer) lastAttacker = caster; // AttackPlayer (ReceiveMagic, WSclient.cpp:4161)
+
+    if (isTeleportSkill(p.SkillId)) {
+      playTeleportAnimation(world, p.SkillId, caster, target);
+      return;
+    }
+
+    // AT_SKILL_COMBO: the server announces a landed DK combo. The original leaves the caster's
+    // facing, target and clip alone and only plays SOUND_COMBO (WSclient.cpp:4167, :4829-4832).
+    if (combat.observeSkillAnimation(p.SkillId, target?.netId)) {
+      playSkill(p.SkillId, caster.transform.pos);
+      playTargetedSkillVisual(world.scene, p.SkillId, caster, target);
+      return;
+    }
+    faceTarget(caster, target);
+    playCastAnimation(caster, p.SkillId, false);
+    playTargetedSkillVisual(world.scene, p.SkillId, caster, target);
+  });
+
+  EventBus.on('ObjectGotKilled', packet => {
+    const p = new ObjectGotKilledPacket(packet);
+
+    const world = Store.world;
+    if (!world) return;
+
+    const killedId = p.KilledId & 0x7fff;
+    const obj = world.getByNetId(killedId);
+
+    if (!obj) {
+      if (killedId === Store.playerId) {
+        runInAction(() => {
+          Store.playerData.currentHP = 0;
+        });
+        const playerEntity = world.playerEntity;
+        if (playerEntity) {
+          playerEntity.attributeSystem.setValue('currentHealth', 0);
+          playerEntity.playerAnimation.action = PlayerAction.PLAYER_DIE1;
+        }
+      }
+      return;
+    }
+
+    if (obj.pathfinding) obj.pathfinding.path = null;
+    if (obj.movement) {
+      obj.movement.velocity.x = 0;
+      obj.movement.velocity.y = 0;
+    }
+    if (world.attackTarget === obj) {
+      world.attackTarget = null;
+    }
+    obj.attributeSystem?.setValue('currentHealth', 0);
+
+    if (obj.localPlayer) {
+      runInAction(() => {
+        Store.playerData.currentHP = 0;
+      });
+    }
+    if (world.currentPointerTarget === obj) {
+      world.currentPointerTarget = null;
+    }
+
+    // Dead = 1; the Die clip itself starts in DeathSystem (at once, or when
+    // the hero's killing swing connects - WSclient.cpp:5362-5384).
+    const killerId = p.KillerId & 0x7fff;
+    const heroKill = killerId === Store.playerId;
+    markKilled(world, obj, heroKill, p.SkillId, killerId);
+    if (heroKill && obj.npcType !== undefined) playKillEnergy(world, obj);
+  });
+
+  /** Dark Side (0x4B): the targets the server chose for the follow-up blows. */
+  EventBus.on('RageAttackRangeResponse', packet => {
+    const p = new RageAttackRangeResponsePacket(packet);
+    const count = Math.floor((p.buffer.byteLength - RAGE_RANGE_TARGETS_OFFSET) / 2);
+    combat.observeDarkSideTargets(
+      p.SkillId,
+      p.getTargets(count).map(t => t.TargetId & 0x7fff)
+    );
+  });
+
+  EventBus.on('ObjectHit', packet => applyObjectHit(new ObjectHitPacket(packet)));
+
+  // Extended plug-in variant (damage > 65535, health/shield status percentages).
+  EventBus.on('ObjectHitExtended', packet =>
+    applyObjectHit(new ObjectHitExtendedPacket(packet))
+  );
+
+  /**
+   * C3 4A - `RageAttack`: a rage fighter's Dark Side blow on one target, shown
+   * to everyone in scope like a targeted skill animation.
+   */
+  EventBus.on('RageAttack', packet => {
+    if (packet.byteLength < RageAttackPacket.Length!) return;
+    const p = new RageAttackPacket(packet);
+    const world = Store.world;
+    if (!world) return;
+    const caster = world.getByNetId(p.SourceId & 0x7fff);
+    if (!caster) return;
+    const target = world.getByNetId(p.TargetId & 0x7fff) ?? null;
+
+    faceTarget(caster, target);
+    playCastAnimation(caster, p.SkillId, false);
+    playTargetedSkillVisual(world.scene, p.SkillId, caster, target);
+  });
 }

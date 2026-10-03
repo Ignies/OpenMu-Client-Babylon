@@ -7,7 +7,7 @@ disband and guild creation. The guild state and the guild actions live in the `S
 [../guild_war/readme.md](../guild_war/readme.md).
 
 ## Public API
-- none. `net.ts` registers its handlers when `src/app/logic.ts` imports it.
+- none. `installNet()` in `net.ts` registers its handlers (`module.ts`, installed by `src/app/logic.ts`).
 
 ## How it works
 - The handlers port `ReceiveGuild*` (`WSclient.cpp:6987`).

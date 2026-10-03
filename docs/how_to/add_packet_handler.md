@@ -10,7 +10,7 @@
    EventBus.on('PartyList', p => { ... });
    ```
 
-4. A new module gets `src/modules/<module>/net.ts` and one import line in `src/app/logic.ts`.
-   Order in `logic.ts` is listener order for packets several modules handle; keep it.
+4. A new module gets `src/modules/<module>/net.ts` (`installNet`), a `module.ts` and one line in `src/modules/modules.ts`.
+   Order in `modules.ts` is listener order for packets several modules handle; keep it.
 5. A packet the generated codecs do not know yet: add it to
    `versions/shared/packets/packetsDefinitions/*.xml` and run `bun run generate`.

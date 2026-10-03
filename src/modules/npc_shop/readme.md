@@ -4,7 +4,7 @@ NPC talk and merchant packets (`ReceiveTalk` / `ReceiveShopItemList`, WSclient.c
 state and actions live in `Store` (`src/app/store.ts`); this folder only has the handlers.
 
 ## Public API
-- none. `net.ts` registers its handlers when `src/app/logic.ts` imports it.
+- none. `installNet()` in `net.ts` registers its handlers (`module.ts`, installed by `src/app/logic.ts`).
 
 ## How it works
 - `Store.talkToNpc` (called from ecs `npcTalkSystem`) sends `TalkToNpcRequest`; `NpcWindowResponse` says which

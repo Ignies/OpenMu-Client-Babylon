@@ -5,7 +5,7 @@ object effects (level-up beam, shield potion, shield lost, swirl). Weather state
 central `Store` (`Store.weather`).
 
 ## Public API
-- none. `net.ts` registers its handlers when `src/app/logic.ts` imports it.
+- none. `installNet()` in `net.ts` registers its handlers (`module.ts`, installed by `src/app/logic.ts`).
 
 ## How it works
 - `WeatherStatusUpdate` writes `{ weather, variation }` into `Store.weather`;

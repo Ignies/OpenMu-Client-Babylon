@@ -4,7 +4,7 @@ Player-to-player trade packets (`CNewUITrade`). The trade state and actions live
 store ([../economy/readme.md](../economy/readme.md)); this folder only has the handlers.
 
 ## Public API
-- none. `net.ts` registers its handlers when `src/app/logic.ts` imports it.
+- none. `installNet()` in `net.ts` registers its handlers (`module.ts`, installed by `src/app/logic.ts`).
 
 ## How it works
 - Outgoing packets are `Economy` actions: `requestTrade` (`TradeRequest`), `answerTradeRequest`,

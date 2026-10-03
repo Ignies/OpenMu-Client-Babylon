@@ -4,7 +4,7 @@ Combat packets from the game server: other objects' attack and skill animations,
 the Rage Fighter's Dark Side blows. This folder has only the handlers; it keeps no store.
 
 ## Public API
-- none. `net.ts` registers its handlers when `src/app/logic.ts` imports it.
+- none. `installNet()` in `net.ts` registers its handlers (`module.ts`, installed by `src/app/logic.ts`).
 
 ## How it works
 - Handlers read `Store.world` and write straight onto the entities (animation components,

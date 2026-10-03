@@ -4,7 +4,7 @@ Vault packets (`CNewUIStorageInventory`). The vault state and actions live in th
 ([../economy/readme.md](../economy/readme.md)); this folder only has the handlers.
 
 ## Public API
-- none. `net.ts` registers its handlers when `src/app/logic.ts` imports it.
+- none. `installNet()` in `net.ts` registers its handlers (`module.ts`, installed by `src/app/logic.ts`).
 
 ## How it works
 - The vault opens from `NpcWindowResponse(VaultStorage)` and its items arrive as `StoreItemList`; both are

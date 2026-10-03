@@ -4,7 +4,7 @@ Party packets from the game server. The party state and the party actions live i
 `Social` store ([../social/readme.md](../social/readme.md)); this folder only has the handlers.
 
 ## Public API
-- none. `net.ts` registers its handlers when `src/app/logic.ts` imports it.
+- none. `installNet()` in `net.ts` registers its handlers (`module.ts`, installed by `src/app/logic.ts`).
 
 ## How it works
 - The handlers port `ReceiveParty*` (`WSclient.cpp:6839`) and write into `Social`:

@@ -13,7 +13,7 @@ Not in the original client: the notes travel through our proxy (`proxy/band/`), 
 - `music/performing.ts`: `startPerforming`, `stopPerforming`, `BandHit` (the `performing` component).
 - `music/instrumentClip.ts`: `instrumentClip(model, source, from, to, sway)`.
 - `music/bandState.ts`: `PERCUSSION_CHANNEL`. `music/testMidi.ts`: `buildTestMidi()` (tools and tests).
-- `bandNet.ts`: `installBandNet()`, called once from `src/app/logic.ts`.
+- `bandNet.ts`: `installBandNet()`, the module's `install` (`module.ts`).
 
 ## How it works
 - `music/index.ts` is the facade: the Instrument window, the emote wheel, `BandSystem` and `bandNet.ts`

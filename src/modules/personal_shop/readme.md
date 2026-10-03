@@ -5,7 +5,7 @@ else's. The state and the actions live in the `Economy` store ([../economy/readm
 only has the handlers.
 
 ## Public API
-- none. `net.ts` registers its handlers when `src/app/logic.ts` imports it.
+- none. `installNet()` in `net.ts` registers its handlers (`module.ts`, installed by `src/app/logic.ts`).
 
 ## How it works
 - Ports `CNewUIMyShopInventory` (own stall) and `CNewUIPurchaseShopInventory` (browsing).

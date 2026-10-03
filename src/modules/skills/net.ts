@@ -9,7 +9,6 @@ import { applyObjectEffect, playCastAnimation } from '../_shared/net_helpers';
 import { beginTeleport, endTeleport, justArrived } from '@/ecs/systems/teleportSystem';
 import { playAreaSkillVisual, playChainLightningHop } from '@versions/shared/skills/skillVisuals';
 
-
 /**
  * F3 11 carries three shapes behind one sub-code: the full list, and the
  * add/remove notifications flagged by count 0xFE / 0xFF (OpenMU
@@ -74,29 +73,6 @@ export function playTeleportAnimation(world: World, skill: number, caster: Entit
   }
 }
 
-EventBus.on('AreaSkillAnimation', packet => {
-  const p = new AreaSkillAnimationPacket(packet);
-  const world = Store.world;
-  if (!world) return;
-  const casterId = p.PlayerId & 0x7fff;
-  const caster = world.getByNetId(casterId);
-  if (!caster) return;
-
-  if (!caster.localPlayer) {
-    // Rotation byte: Angle / 360 * 256 of the caster's yaw.
-    caster.transform.rot.y = (p.Rotation / 256) * Math.PI * 2;
-  }
-  playCastAnimation(caster, p.SkillId, true);
-  playAreaSkillVisual(
-    world.scene,
-    p.SkillId,
-    caster,
-    { x: p.PointX, y: p.PointY },
-    (x, y) => world.getTerrainHeight(x, y),
-    objectOnTile(world, caster, p.PointX, p.PointY)
-  );
-});
-
 /** The object (not `except`) standing nearest to tile (x, y), within a tile of it. */
 function objectOnTile(world: World, except: Entity, x: number, y: number): Entity | null {
   let best: Entity | null = null;
@@ -123,41 +99,69 @@ function setObjectEffect(objectId: number, effectId: number, active: boolean) {
   if (obj) applyObjectEffect(obj, effectId, active);
 }
 
-EventBus.on('MagicEffectStatus', packet => {
-  const p = new MagicEffectStatusPacket(packet);
-  setObjectEffect(p.PlayerId, p.EffectId, p.IsActive);
-});
+/** Registers this module's packet listeners (see ../module.ts). */
+export function installNet(): void {
+  EventBus.on('AreaSkillAnimation', packet => {
+    const p = new AreaSkillAnimationPacket(packet);
+    const world = Store.world;
+    if (!world) return;
+    const casterId = p.PlayerId & 0x7fff;
+    const caster = world.getByNetId(casterId);
+    if (!caster) return;
 
-EventBus.on('MagicEffectCancelled', packet => {
-  const p = new MagicEffectCancelledPacket(packet);
-  const effect = SKILL_EFFECTS[p.SkillId];
-  if (effect !== undefined) setObjectEffect(p.TargetId, effect, false);
-});
-
-EventBus.on('SkillListUpdate', applySkillListPacket);
-EventBus.on('SkillAdded', applySkillListPacket);
-EventBus.on('SkillRemoved', applySkillListPacket);
-
-/**
- * BF 0A - `ChainLightningHitInfo`: the server-picked hops of Chain Lightning
- * (skill 215). The cast came through the usual skill animation packet; here
- * the arcs are drawn caster -> target -> target, hop `i` from the previous
- * body, as ReceiveChainMagic's MODEL_CHAIN_LIGHTNING sub `i` (WSclient.cpp:5577-5629).
- */
-EventBus.on('ChainLightningHitInfo', packet => {
-  const p = new ChainLightningHitInfoPacket(packet);
-  const world = Store.world;
-  if (!world) return;
-  let from = world.getByNetId(p.PlayerId & 0x7fff);
-  if (!from) return;
-  const maxTargets = Math.max(0, Math.floor((packet.byteLength - 10) / 2));
-  let hop = 0;
-  for (const t of p.getTargets(Math.min(p.TargetCount, maxTargets))) {
-    const target = world.getByNetId(t.TargetId & 0x7fff);
-    if (target) {
-      playChainLightningHop(world.scene, p.SkillNumber, from, target, hop);
-      from = target;
+    if (!caster.localPlayer) {
+      // Rotation byte: Angle / 360 * 256 of the caster's yaw.
+      caster.transform.rot.y = (p.Rotation / 256) * Math.PI * 2;
     }
-    hop++;
-  }
-});
+    playCastAnimation(caster, p.SkillId, true);
+    playAreaSkillVisual(
+      world.scene,
+      p.SkillId,
+      caster,
+      { x: p.PointX, y: p.PointY },
+      (x, y) => world.getTerrainHeight(x, y),
+      objectOnTile(world, caster, p.PointX, p.PointY)
+    );
+  });
+
+  EventBus.on('MagicEffectStatus', packet => {
+    const p = new MagicEffectStatusPacket(packet);
+    setObjectEffect(p.PlayerId, p.EffectId, p.IsActive);
+  });
+
+  EventBus.on('MagicEffectCancelled', packet => {
+    const p = new MagicEffectCancelledPacket(packet);
+    const effect = SKILL_EFFECTS[p.SkillId];
+    if (effect !== undefined) setObjectEffect(p.TargetId, effect, false);
+  });
+
+  EventBus.on('SkillListUpdate', applySkillListPacket);
+
+  EventBus.on('SkillAdded', applySkillListPacket);
+
+  EventBus.on('SkillRemoved', applySkillListPacket);
+
+  /**
+   * BF 0A - `ChainLightningHitInfo`: the server-picked hops of Chain Lightning
+   * (skill 215). The cast came through the usual skill animation packet; here
+   * the arcs are drawn caster -> target -> target, hop `i` from the previous
+   * body, as ReceiveChainMagic's MODEL_CHAIN_LIGHTNING sub `i` (WSclient.cpp:5577-5629).
+   */
+  EventBus.on('ChainLightningHitInfo', packet => {
+    const p = new ChainLightningHitInfoPacket(packet);
+    const world = Store.world;
+    if (!world) return;
+    let from = world.getByNetId(p.PlayerId & 0x7fff);
+    if (!from) return;
+    const maxTargets = Math.max(0, Math.floor((packet.byteLength - 10) / 2));
+    let hop = 0;
+    for (const t of p.getTargets(Math.min(p.TargetCount, maxTargets))) {
+      const target = world.getByNetId(t.TargetId & 0x7fff);
+      if (target) {
+        playChainLightningHop(world.scene, p.SkillNumber, from, target, hop);
+        from = target;
+      }
+      hop++;
+    }
+  });
+}

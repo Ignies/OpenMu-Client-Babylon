@@ -120,101 +120,6 @@ function applyCharacterInformation(p: CharacterInformationView) {
   });
 }
 
-EventBus.on('CharacterInformation', packet =>
-  applyCharacterInformation(new CharacterInformationPacket(packet))
-);
-// F3 03 with 92 bytes: the server runs the extended plug-ins (stat values > 65535).
-EventBus.on('CharacterInformationExtended', packet =>
-  applyCharacterInformation(new CharacterInformationExtendedPacket(packet))
-);
-
-EventBus.on('CurrentHealthAndShield', packet => {
-  const p = new CurrentHealthAndShieldPacket(packet);
-
-  const playerEntity = Store.world?.playerEntity;
-  if (!playerEntity) return;
-  playerEntity.attributeSystem.setValue('currentHealth', p.Health);
-  runInAction(() => {
-    Store.playerData.currentHP = Math.floor(p.Health);
-    Store.playerData.currentSD = Math.floor(p.Shield);
-  });
-});
-
-EventBus.on('CurrentStatsExtended', packet => {
-  const p = new CurrentStatsExtendedPacket(packet);
-  const playerEntity = Store.world?.playerEntity;
-  playerEntity?.attributeSystem.setValue('currentHealth', p.Health);
-  playerEntity?.attributeSystem.setValue('currentMana', p.Mana);
-  runInAction(() => {
-    const pd = Store.playerData;
-    pd.currentHP = Math.floor(p.Health);
-    pd.currentSD = Math.floor(p.Shield);
-    pd.currentMP = Math.floor(p.Mana);
-    pd.currentAG = Math.floor(p.Ability);
-    pd.attackSpeed = p.AttackSpeed;
-    pd.magicSpeed = p.MagicSpeed;
-  });
-});
-
-EventBus.on('MaximumStatsExtended', packet => {
-  const p = new MaximumStatsExtendedPacket(packet);
-  runInAction(() => {
-    const pd = Store.playerData;
-    pd.maxHP = p.Health;
-    pd.maxSD = p.Shield;
-    pd.maxMP = p.Mana;
-    pd.maxAG = p.Ability;
-  });
-});
-
-EventBus.on('MaximumHealthAndShield', packet => {
-  const p = new MaximumHealthAndShieldPacket(packet);
-  runInAction(() => {
-    Store.playerData.maxHP = p.Health;
-    Store.playerData.maxSD = p.Shield;
-  });
-});
-
-EventBus.on('MaximumManaAndAbility', packet => {
-  const p = new MaximumManaAndAbilityPacket(packet);
-  runInAction(() => {
-    Store.playerData.maxMP = p.Mana;
-    Store.playerData.maxAG = p.Ability;
-  });
-});
-
-EventBus.on('CurrentManaAndAbility', packet => {
-  const p = new CurrentManaAndAbilityPacket(packet);
-
-  const playerEntity = Store.world?.playerEntity;
-  if (!playerEntity) return;
-
-  playerEntity.attributeSystem.setValue('currentMana', p.Mana);
-  runInAction(() => {
-    Store.playerData.currentMP = Math.floor(p.Mana);
-    Store.playerData.currentAG = Math.floor(p.Ability);
-  });
-});
-
-EventBus.on('HeroStateChanged', packet => {
-  const p = new HeroStateChangedPacket(packet);
-  const world = Store.world;
-  if (!world) return;
-  const maskedId = p.PlayerId & 0x7fff;
-  const obj = world.getByNetId(maskedId);
-  if (!obj) return;
-  obj.heroState = p.NewState;
-  if (obj.localPlayer) Store.playerData.heroState = p.NewState;
-  // `ReceivePK` (WSclient.cpp:6609): the change is announced in the log.
-  const msg = obj.objectNameInWorld
-    ? heroStateMessage(obj.objectNameInWorld, p.NewState)
-    : null;
-  if (msg) {
-    if (msg.error) Social.errorMessage(msg.text);
-    else Social.systemMessage(msg.text);
-  }
-});
-
 function handleRespawnAfterDeath(packet: DataView) {
   const isExtended = packet.byteLength >= RespawnAfterDeathExtendedPacket.Length;
   const isS6 = packet.byteLength >= RespawnAfterDeathPacket.Length;
@@ -296,75 +201,6 @@ function handleRespawnAfterDeath(packet: DataView) {
   pathfinding.to = { x: pos.x, y: pos.y };
 }
 
-// OpenMU Season 6 sends the 28-byte `RespawnAfterDeath` (0xF3/0x04); 075/095
-// are the old-client layouts and `Extended` (36 bytes) is client >= 106.3.
-// The dispatcher tells them apart by sub-code + length.
-EventBus.on('RespawnAfterDeath', handleRespawnAfterDeath);
-EventBus.on('RespawnAfterDeathExtended', handleRespawnAfterDeath);
-EventBus.on('RespawnAfterDeath075', handleRespawnAfterDeath);
-EventBus.on('RespawnAfterDeath095', handleRespawnAfterDeath);
-
-EventBus.on('PoisonDamage', packet => {
-  const p = new PoisonDamagePacket(packet);
-
-  runInAction(() => {
-    Store.playerData.currentHP = Math.max(
-      0,
-      Store.playerData.currentHP - p.HealthDamage
-    );
-    Store.playerData.currentSD = p.CurrentShield;
-  });
-
-  const playerEntity = Store.world?.playerEntity;
-  if (playerEntity) {
-    playerEntity.attributeSystem.setValue(
-      'currentHealth',
-      Store.playerData.currentHP
-    );
-  }
-});
-
-EventBus.on('CharacterStatIncreaseResponse', packet => {
-  const p = new CharacterStatIncreaseResponsePacket(packet);
-
-  if (!p.Success) {
-    Store.addNotification(t('notify.pointNotAdded'), 'error');
-    EventBus.emit('statPointAnswered', { stat: p.Attribute, added: 0 });
-    return;
-  }
-
-  const playerData = Store.playerData;
-
-  runInAction(() => {
-    switch (p.Attribute) {
-      case StatType.Strength:
-        playerData.str++;
-        break;
-      case StatType.Agility:
-        playerData.agi++;
-        break;
-      case StatType.Vitality:
-        playerData.sta++;
-        playerData.maxHP = p.UpdatedDependentMaximumStat;
-        break;
-      case StatType.Energy:
-        playerData.eng++;
-        playerData.maxMP = p.UpdatedDependentMaximumStat;
-        break;
-      case StatType.Leadership:
-        playerData.leadership++;
-        break;
-    }
-
-    playerData.maxSD = p.UpdatedMaximumShield;
-    playerData.maxAG = p.UpdatedMaximumAbility;
-
-    if (playerData.points > 0) playerData.points--;
-  });
-
-  EventBus.emit('statPointAnswered', { stat: p.Attribute, added: 1 });
-});
-
 type LevelUpdateView = Pick<
   CharacterLevelUpdatePacket,
   | 'Level'
@@ -404,18 +240,6 @@ function applyLevelUpdate(p: LevelUpdateView) {
   Store.addNotification(t('notify.levelUp', { level: p.Level }));
 }
 
-EventBus.on('CharacterLevelUpdate', packet =>
-  applyLevelUpdate(new CharacterLevelUpdatePacket(packet))
-);
-EventBus.on('CharacterLevelUpdateExtended', packet =>
-  applyLevelUpdate(new CharacterLevelUpdateExtendedPacket(packet))
-);
-
-EventBus.on('MasterCharacterLevelUpdate', packet => {
-  const p = new MasterCharacterLevelUpdatePacket(packet);
-  Store.addNotification(t('notify.masterLevelUp', { level: p.MasterLevel }));
-});
-
 // C3 16 - sent for every kill share. Without this handler the exp bar only
 // moved on relog (CharacterInformation).
 function applyExperienceGained(p: { AddedExperience: number; KilledObjectId: number }) {
@@ -432,79 +256,6 @@ function applyExperienceGained(p: { AddedExperience: number; KilledObjectId: num
   });
 }
 
-EventBus.on('ExperienceGained', packet =>
-  applyExperienceGained(new ExperienceGainedPacket(packet))
-);
-// Extended plug-in variant (exp > 65535 per kill, master exp).
-EventBus.on('ExperienceGainedExtended', packet =>
-  applyExperienceGained(new ExperienceGainedExtendedPacket(packet))
-);
-
-/**
- * F3 06 extended (client >= 106.3) - `ReceiveAddPointExtended`: the same as
- * the short form, with a 16-bit amount and 32-bit maximums for all four
- * pools. `Attribute` uses the same `StatType` order (str 0 … cmd 4).
- */
-EventBus.on('CharacterStatIncreaseResponseExtended', packet => {
-  if (packet.byteLength < CharacterStatIncreaseResponseExtendedPacket.Length!) return;
-  const p = new CharacterStatIncreaseResponseExtendedPacket(packet);
-  const added = p.AddedAmount;
-
-  if (added === 0) {
-    Store.addNotification(t('notify.pointNotAdded'), 'error');
-    EventBus.emit('statPointAnswered', { stat: p.Attribute, added: 0 });
-    return;
-  }
-
-  const playerData = Store.playerData;
-
-  runInAction(() => {
-    switch (p.Attribute) {
-      case StatType.Strength:
-        playerData.str += added;
-        break;
-      case StatType.Agility:
-        playerData.agi += added;
-        break;
-      case StatType.Vitality:
-        playerData.sta += added;
-        break;
-      case StatType.Energy:
-        playerData.eng += added;
-        break;
-      case StatType.Leadership:
-        playerData.leadership += added;
-        break;
-    }
-
-    playerData.maxHP = p.UpdatedMaximumHealth;
-    playerData.maxMP = p.UpdatedMaximumMana;
-    playerData.maxSD = p.UpdatedMaximumShield;
-    playerData.maxAG = p.UpdatedMaximumAbility;
-    playerData.points = Math.max(0, playerData.points - added);
-  });
-
-  EventBus.emit('statPointAnswered', { stat: p.Attribute, added });
-});
-
-/**
- * F3 51 extended - `Receive_Master_LevelUp` with `LPPMSG_MASTERLEVEL_UP_EXTENDED`:
- * the master level plus 32-bit maximum life / mana / shield / BP. The level
- * and points go to `modules/skills/masterLevel.ts` (its own handler); the maximums
- * belong to the hero's stats here.
- */
-EventBus.on('MasterCharacterLevelUpdateExtended', packet => {
-  if (packet.byteLength < MasterCharacterLevelUpdateExtendedPacket.Length!) return;
-  const p = new MasterCharacterLevelUpdateExtendedPacket(packet);
-  runInAction(() => {
-    Store.playerData.maxHP = p.MaximumHealth;
-    Store.playerData.maxMP = p.MaximumMana;
-    Store.playerData.maxSD = p.MaximumShield;
-    Store.playerData.maxAG = p.MaximumAbility;
-  });
-  Store.addNotification(t('notify.masterLevelUp', { level: p.MasterLevel }));
-});
-
 /** GlobalText 166…169 / 1900: the stat names of `ReceiveUseStateItem`. */
 const FRUIT_STAT_NAMES: Record<number, string> = {
   [FruitConsumptionResponseFruitStatTypeEnum.Energy]: 'Energy',
@@ -514,92 +265,350 @@ const FRUIT_STAT_NAMES: Record<number, string> = {
   [FruitConsumptionResponseFruitStatTypeEnum.Leadership]: 'Command',
 };
 
-/**
- * 2C - `ReceiveUseStateItem` (`LPPMSG_USE_STAT_FRUIT`): the result of eating
- * a Jewel of Life fruit. A success moves the stat by `StatPoints` and counts
- * the fruit points (`AddPoint`); everything else is the original's OK box,
- * shown as a notification. The server sends the current stats again anyway.
- */
-EventBus.on('FruitConsumptionResponse', packet => {
-  if (packet.byteLength < FruitConsumptionResponsePacket.Length!) return;
-  const p = new FruitConsumptionResponsePacket(packet);
-  const points = p.StatPoints;
-  const statName = FRUIT_STAT_NAMES[p.StatType] ?? 'stat';
-  const R = FruitConsumptionResponseFruitConsumptionResultEnum;
+/** Registers this module's packet listeners (see ../module.ts). */
+export function installNet(): void {
+  EventBus.on('CharacterInformation', packet =>
+    applyCharacterInformation(new CharacterInformationPacket(packet))
+  );
 
-  const move = (sign: 1 | -1) => {
-    const d = Store.playerData;
+  // F3 03 with 92 bytes: the server runs the extended plug-ins (stat values > 65535).
+  EventBus.on('CharacterInformationExtended', packet =>
+    applyCharacterInformation(new CharacterInformationExtendedPacket(packet))
+  );
+
+  EventBus.on('CurrentHealthAndShield', packet => {
+    const p = new CurrentHealthAndShieldPacket(packet);
+
+    const playerEntity = Store.world?.playerEntity;
+    if (!playerEntity) return;
+    playerEntity.attributeSystem.setValue('currentHealth', p.Health);
     runInAction(() => {
-      switch (p.StatType) {
-        case FruitConsumptionResponseFruitStatTypeEnum.Energy:
-          d.eng = Math.max(0, d.eng + sign * points);
-          break;
-        case FruitConsumptionResponseFruitStatTypeEnum.Vitality:
-          d.sta = Math.max(0, d.sta + sign * points);
-          break;
-        case FruitConsumptionResponseFruitStatTypeEnum.Agility:
-          d.agi = Math.max(0, d.agi + sign * points);
-          break;
-        case FruitConsumptionResponseFruitStatTypeEnum.Strength:
-          d.str = Math.max(0, d.str + sign * points);
-          break;
-        case FruitConsumptionResponseFruitStatTypeEnum.Leadership:
-          d.leadership = Math.max(0, d.leadership + sign * points);
-          break;
-      }
-      if (sign > 0) d.usedFruitPoints += points;
-      else {
-        d.usedNegativeFruitPoints += points;
-        d.points += points;
-      }
+      Store.playerData.currentHP = Math.floor(p.Health);
+      Store.playerData.currentSD = Math.floor(p.Shield);
     });
-  };
-
-  switch (p.Result) {
-    case R.PlusSuccess:
-      move(1);
-      Store.addNotification(t('notify.fruitAdd', { stat: statName, points }));
-      break;
-    case R.MinusSuccess:
-    case R.MinusSuccessCashShopFruit:
-      move(-1);
-      Store.addNotification(t('notify.fruitRemove', { stat: statName, points }));
-      break;
-    case R.PlusFailed:
-    case R.MinusFailed:
-      Store.addNotification(t('notify.fruitNoEffect'), 'error');
-      break;
-    case R.PlusPreventedByMaximum:
-    case R.MinusPreventedByMaximum:
-      Store.addNotification(t('notify.fruitLimit'), 'error');
-      break;
-    case R.MinusPreventedByDefault:
-      Store.addNotification(t('notify.fruitFloor', { stat: statName }), 'error');
-      break;
-    case R.PreventedByEquippedItems:
-      Store.addNotification(t('notify.fruitEquipped'), 'error');
-      break;
-    case R.PlusPrevented:
-    case R.MinusPrevented:
-    default:
-      Store.addNotification(t('notify.fruitNotNow'), 'error');
-      break;
-  }
-});
-
-/**
- * F3 32 - `BaseStatsExtended`: the server set the base stats outright (set
- * stats command, reset). Same store fields the character information fills.
- */
-EventBus.on('BaseStatsExtended', packet => {
-  if (packet.byteLength < BaseStatsExtendedPacket.Length!) return;
-  const p = new BaseStatsExtendedPacket(packet);
-  runInAction(() => {
-    const pd = Store.playerData;
-    pd.str = p.Strength;
-    pd.agi = p.Agility;
-    pd.sta = p.Vitality;
-    pd.eng = p.Energy;
-    pd.leadership = p.Command;
   });
-});
+
+  EventBus.on('CurrentStatsExtended', packet => {
+    const p = new CurrentStatsExtendedPacket(packet);
+    const playerEntity = Store.world?.playerEntity;
+    playerEntity?.attributeSystem.setValue('currentHealth', p.Health);
+    playerEntity?.attributeSystem.setValue('currentMana', p.Mana);
+    runInAction(() => {
+      const pd = Store.playerData;
+      pd.currentHP = Math.floor(p.Health);
+      pd.currentSD = Math.floor(p.Shield);
+      pd.currentMP = Math.floor(p.Mana);
+      pd.currentAG = Math.floor(p.Ability);
+      pd.attackSpeed = p.AttackSpeed;
+      pd.magicSpeed = p.MagicSpeed;
+    });
+  });
+
+  EventBus.on('MaximumStatsExtended', packet => {
+    const p = new MaximumStatsExtendedPacket(packet);
+    runInAction(() => {
+      const pd = Store.playerData;
+      pd.maxHP = p.Health;
+      pd.maxSD = p.Shield;
+      pd.maxMP = p.Mana;
+      pd.maxAG = p.Ability;
+    });
+  });
+
+  EventBus.on('MaximumHealthAndShield', packet => {
+    const p = new MaximumHealthAndShieldPacket(packet);
+    runInAction(() => {
+      Store.playerData.maxHP = p.Health;
+      Store.playerData.maxSD = p.Shield;
+    });
+  });
+
+  EventBus.on('MaximumManaAndAbility', packet => {
+    const p = new MaximumManaAndAbilityPacket(packet);
+    runInAction(() => {
+      Store.playerData.maxMP = p.Mana;
+      Store.playerData.maxAG = p.Ability;
+    });
+  });
+
+  EventBus.on('CurrentManaAndAbility', packet => {
+    const p = new CurrentManaAndAbilityPacket(packet);
+
+    const playerEntity = Store.world?.playerEntity;
+    if (!playerEntity) return;
+
+    playerEntity.attributeSystem.setValue('currentMana', p.Mana);
+    runInAction(() => {
+      Store.playerData.currentMP = Math.floor(p.Mana);
+      Store.playerData.currentAG = Math.floor(p.Ability);
+    });
+  });
+
+  EventBus.on('HeroStateChanged', packet => {
+    const p = new HeroStateChangedPacket(packet);
+    const world = Store.world;
+    if (!world) return;
+    const maskedId = p.PlayerId & 0x7fff;
+    const obj = world.getByNetId(maskedId);
+    if (!obj) return;
+    obj.heroState = p.NewState;
+    if (obj.localPlayer) Store.playerData.heroState = p.NewState;
+    // `ReceivePK` (WSclient.cpp:6609): the change is announced in the log.
+    const msg = obj.objectNameInWorld
+      ? heroStateMessage(obj.objectNameInWorld, p.NewState)
+      : null;
+    if (msg) {
+      if (msg.error) Social.errorMessage(msg.text);
+      else Social.systemMessage(msg.text);
+    }
+  });
+
+  // OpenMU Season 6 sends the 28-byte `RespawnAfterDeath` (0xF3/0x04); 075/095
+  // are the old-client layouts and `Extended` (36 bytes) is client >= 106.3.
+  // The dispatcher tells them apart by sub-code + length.
+  EventBus.on('RespawnAfterDeath', handleRespawnAfterDeath);
+
+  EventBus.on('RespawnAfterDeathExtended', handleRespawnAfterDeath);
+
+  EventBus.on('RespawnAfterDeath075', handleRespawnAfterDeath);
+
+  EventBus.on('RespawnAfterDeath095', handleRespawnAfterDeath);
+
+  EventBus.on('PoisonDamage', packet => {
+    const p = new PoisonDamagePacket(packet);
+
+    runInAction(() => {
+      Store.playerData.currentHP = Math.max(
+        0,
+        Store.playerData.currentHP - p.HealthDamage
+      );
+      Store.playerData.currentSD = p.CurrentShield;
+    });
+
+    const playerEntity = Store.world?.playerEntity;
+    if (playerEntity) {
+      playerEntity.attributeSystem.setValue(
+        'currentHealth',
+        Store.playerData.currentHP
+      );
+    }
+  });
+
+  EventBus.on('CharacterStatIncreaseResponse', packet => {
+    const p = new CharacterStatIncreaseResponsePacket(packet);
+
+    if (!p.Success) {
+      Store.addNotification(t('notify.pointNotAdded'), 'error');
+      EventBus.emit('statPointAnswered', { stat: p.Attribute, added: 0 });
+      return;
+    }
+
+    const playerData = Store.playerData;
+
+    runInAction(() => {
+      switch (p.Attribute) {
+        case StatType.Strength:
+          playerData.str++;
+          break;
+        case StatType.Agility:
+          playerData.agi++;
+          break;
+        case StatType.Vitality:
+          playerData.sta++;
+          playerData.maxHP = p.UpdatedDependentMaximumStat;
+          break;
+        case StatType.Energy:
+          playerData.eng++;
+          playerData.maxMP = p.UpdatedDependentMaximumStat;
+          break;
+        case StatType.Leadership:
+          playerData.leadership++;
+          break;
+      }
+
+      playerData.maxSD = p.UpdatedMaximumShield;
+      playerData.maxAG = p.UpdatedMaximumAbility;
+
+      if (playerData.points > 0) playerData.points--;
+    });
+
+    EventBus.emit('statPointAnswered', { stat: p.Attribute, added: 1 });
+  });
+
+  EventBus.on('CharacterLevelUpdate', packet =>
+    applyLevelUpdate(new CharacterLevelUpdatePacket(packet))
+  );
+
+  EventBus.on('CharacterLevelUpdateExtended', packet =>
+    applyLevelUpdate(new CharacterLevelUpdateExtendedPacket(packet))
+  );
+
+  EventBus.on('MasterCharacterLevelUpdate', packet => {
+    const p = new MasterCharacterLevelUpdatePacket(packet);
+    Store.addNotification(t('notify.masterLevelUp', { level: p.MasterLevel }));
+  });
+
+  EventBus.on('ExperienceGained', packet =>
+    applyExperienceGained(new ExperienceGainedPacket(packet))
+  );
+
+  // Extended plug-in variant (exp > 65535 per kill, master exp).
+  EventBus.on('ExperienceGainedExtended', packet =>
+    applyExperienceGained(new ExperienceGainedExtendedPacket(packet))
+  );
+
+  /**
+   * F3 06 extended (client >= 106.3) - `ReceiveAddPointExtended`: the same as
+   * the short form, with a 16-bit amount and 32-bit maximums for all four
+   * pools. `Attribute` uses the same `StatType` order (str 0 … cmd 4).
+   */
+  EventBus.on('CharacterStatIncreaseResponseExtended', packet => {
+    if (packet.byteLength < CharacterStatIncreaseResponseExtendedPacket.Length!) return;
+    const p = new CharacterStatIncreaseResponseExtendedPacket(packet);
+    const added = p.AddedAmount;
+
+    if (added === 0) {
+      Store.addNotification(t('notify.pointNotAdded'), 'error');
+      EventBus.emit('statPointAnswered', { stat: p.Attribute, added: 0 });
+      return;
+    }
+
+    const playerData = Store.playerData;
+
+    runInAction(() => {
+      switch (p.Attribute) {
+        case StatType.Strength:
+          playerData.str += added;
+          break;
+        case StatType.Agility:
+          playerData.agi += added;
+          break;
+        case StatType.Vitality:
+          playerData.sta += added;
+          break;
+        case StatType.Energy:
+          playerData.eng += added;
+          break;
+        case StatType.Leadership:
+          playerData.leadership += added;
+          break;
+      }
+
+      playerData.maxHP = p.UpdatedMaximumHealth;
+      playerData.maxMP = p.UpdatedMaximumMana;
+      playerData.maxSD = p.UpdatedMaximumShield;
+      playerData.maxAG = p.UpdatedMaximumAbility;
+      playerData.points = Math.max(0, playerData.points - added);
+    });
+
+    EventBus.emit('statPointAnswered', { stat: p.Attribute, added });
+  });
+
+  /**
+   * F3 51 extended - `Receive_Master_LevelUp` with `LPPMSG_MASTERLEVEL_UP_EXTENDED`:
+   * the master level plus 32-bit maximum life / mana / shield / BP. The level
+   * and points go to `modules/skills/masterLevel.ts` (its own handler); the maximums
+   * belong to the hero's stats here.
+   */
+  EventBus.on('MasterCharacterLevelUpdateExtended', packet => {
+    if (packet.byteLength < MasterCharacterLevelUpdateExtendedPacket.Length!) return;
+    const p = new MasterCharacterLevelUpdateExtendedPacket(packet);
+    runInAction(() => {
+      Store.playerData.maxHP = p.MaximumHealth;
+      Store.playerData.maxMP = p.MaximumMana;
+      Store.playerData.maxSD = p.MaximumShield;
+      Store.playerData.maxAG = p.MaximumAbility;
+    });
+    Store.addNotification(t('notify.masterLevelUp', { level: p.MasterLevel }));
+  });
+
+  /**
+   * 2C - `ReceiveUseStateItem` (`LPPMSG_USE_STAT_FRUIT`): the result of eating
+   * a Jewel of Life fruit. A success moves the stat by `StatPoints` and counts
+   * the fruit points (`AddPoint`); everything else is the original's OK box,
+   * shown as a notification. The server sends the current stats again anyway.
+   */
+  EventBus.on('FruitConsumptionResponse', packet => {
+    if (packet.byteLength < FruitConsumptionResponsePacket.Length!) return;
+    const p = new FruitConsumptionResponsePacket(packet);
+    const points = p.StatPoints;
+    const statName = FRUIT_STAT_NAMES[p.StatType] ?? 'stat';
+    const R = FruitConsumptionResponseFruitConsumptionResultEnum;
+
+    const move = (sign: 1 | -1) => {
+      const d = Store.playerData;
+      runInAction(() => {
+        switch (p.StatType) {
+          case FruitConsumptionResponseFruitStatTypeEnum.Energy:
+            d.eng = Math.max(0, d.eng + sign * points);
+            break;
+          case FruitConsumptionResponseFruitStatTypeEnum.Vitality:
+            d.sta = Math.max(0, d.sta + sign * points);
+            break;
+          case FruitConsumptionResponseFruitStatTypeEnum.Agility:
+            d.agi = Math.max(0, d.agi + sign * points);
+            break;
+          case FruitConsumptionResponseFruitStatTypeEnum.Strength:
+            d.str = Math.max(0, d.str + sign * points);
+            break;
+          case FruitConsumptionResponseFruitStatTypeEnum.Leadership:
+            d.leadership = Math.max(0, d.leadership + sign * points);
+            break;
+        }
+        if (sign > 0) d.usedFruitPoints += points;
+        else {
+          d.usedNegativeFruitPoints += points;
+          d.points += points;
+        }
+      });
+    };
+
+    switch (p.Result) {
+      case R.PlusSuccess:
+        move(1);
+        Store.addNotification(t('notify.fruitAdd', { stat: statName, points }));
+        break;
+      case R.MinusSuccess:
+      case R.MinusSuccessCashShopFruit:
+        move(-1);
+        Store.addNotification(t('notify.fruitRemove', { stat: statName, points }));
+        break;
+      case R.PlusFailed:
+      case R.MinusFailed:
+        Store.addNotification(t('notify.fruitNoEffect'), 'error');
+        break;
+      case R.PlusPreventedByMaximum:
+      case R.MinusPreventedByMaximum:
+        Store.addNotification(t('notify.fruitLimit'), 'error');
+        break;
+      case R.MinusPreventedByDefault:
+        Store.addNotification(t('notify.fruitFloor', { stat: statName }), 'error');
+        break;
+      case R.PreventedByEquippedItems:
+        Store.addNotification(t('notify.fruitEquipped'), 'error');
+        break;
+      case R.PlusPrevented:
+      case R.MinusPrevented:
+      default:
+        Store.addNotification(t('notify.fruitNotNow'), 'error');
+        break;
+    }
+  });
+
+  /**
+   * F3 32 - `BaseStatsExtended`: the server set the base stats outright (set
+   * stats command, reset). Same store fields the character information fills.
+   */
+  EventBus.on('BaseStatsExtended', packet => {
+    if (packet.byteLength < BaseStatsExtendedPacket.Length!) return;
+    const p = new BaseStatsExtendedPacket(packet);
+    runInAction(() => {
+      const pd = Store.playerData;
+      pd.str = p.Strength;
+      pd.agi = p.Agility;
+      pd.sta = p.Vitality;
+      pd.eng = p.Energy;
+      pd.leadership = p.Command;
+    });
+  });
+}

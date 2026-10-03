@@ -48,7 +48,7 @@ How agents work here (workflow, roles, tools, where things are): [docs/agents/](
 | change a master variant (Strengthener, Mastery) | the sibling file in the same folder |
 | add a skill | add `<class>/<skill>/index.ts` with `export default defineSkill({...})`; it is found by glob |
 | change how all effects / sounds / lights work | the controller folder in `src/controllers/` |
-| handle a new packet | `src/modules/<module>/net.ts` (import order lives in `src/app/logic.ts`) |
+| handle a new packet | `src/modules/<module>/net.ts` (listener order: `src/modules/modules.ts`) |
 | add a texture pack | build it into `public/packs/<pack>/`, list it in `public/packs/index.json` |
 | redraw a window or panel | `versions/shared/ui/windows/<window>/index.tsx` |
 | change one version only | `versions/<id>/` (override), never an `if (version)` in `src/` |

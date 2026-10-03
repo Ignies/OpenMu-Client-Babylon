@@ -59,22 +59,6 @@ function spawnMoneyDrop(
   });
 }
 
-EventBus.on('MoneyDropped', packet => {
-  // Same bytes as a one-item ItemsDropped (the dispatcher chose this class by
-  // length alone), and that item is not always zen: let the item path decide.
-  applyItemsDropped(new ItemsDroppedPacket(packet));
-});
-EventBus.on('MoneyDroppedExtended', packet => {
-  const p = new MoneyDroppedExtendedPacket(packet);
-  if (p.IsFreshDrop) {
-    playDrop(
-      { isMoney: true, group: ZEN_GROUP, num: ZEN_NUM },
-      { x: p.PositionX, z: p.PositionY }
-    );
-  }
-  spawnMoneyDrop(p.Id, p.PositionX, p.PositionY, p.Amount, p.IsFreshDrop);
-});
-
 /**
  * ItemsDropped (0x20): items and zen piles coming into view or just landing.
  * A zen pile (and a single-item drop) is 21 bytes, the same wire shape as
@@ -197,59 +181,79 @@ function dropName(
   return item ? itemLevelName(item.group, item.num, item.lvl, name) : name;
 }
 
-EventBus.on('ItemsDropped', packet => {
-  applyItemsDropped(new ItemsDroppedPacket(packet));
-});
+/** Registers this module's packet listeners (see ../module.ts). */
+export function installNet(): void {
+  EventBus.on('MoneyDropped', packet => {
+    // Same bytes as a one-item ItemsDropped (the dispatcher chose this class by
+    // length alone), and that item is not always zen: let the item path decide.
+    applyItemsDropped(new ItemsDroppedPacket(packet));
+  });
 
-EventBus.on('ItemDropRemoved', packet => {
-  const world = Store.world;
-  if (!world) return;
-
-  const p = new ItemDropRemovedPacket(packet);
-  p.getItemData(p.ItemCount).forEach(item => {
-    const maskedId = item.Id & 0x7fff;
-    const itemEntity = world.getByNetId(maskedId);
-    if (itemEntity) {
-      world.addComponent(itemEntity, 'objOutOfScope', true);
-    } else {
-      console.warn(`Item entity with netId ${maskedId} not found.`);
+  EventBus.on('MoneyDroppedExtended', packet => {
+    const p = new MoneyDroppedExtendedPacket(packet);
+    if (p.IsFreshDrop) {
+      playDrop(
+        { isMoney: true, group: ZEN_GROUP, num: ZEN_NUM },
+        { x: p.PositionX, z: p.PositionY }
+      );
     }
-  });
-});
-
-EventBus.on('ItemDropResponse', packet => {
-  const p = new ItemDropResponsePacket(packet);
-
-  if (!p.Success) {
-    console.warn(`Drop of slot ${p.InventorySlot} refused`);
-    Store.rollbackItemMove();
-    Store.addNotification(t('notify.cannotDropItem'), 'error');
-    return;
-  }
-
-  // ReceiveDropItem (WSclient.cpp:6197-6219) is silent: the thud is the item
-  // landing, when it appears on the ground.
-  runInAction(() => {
-    Store.playerData.items[p.InventorySlot] = null;
+    spawnMoneyDrop(p.Id, p.PositionX, p.PositionY, p.Amount, p.IsFreshDrop);
   });
 
-  Store.confirmItemMove(-1, null);
-});
+  EventBus.on('ItemsDropped', packet => {
+    applyItemsDropped(new ItemsDroppedPacket(packet));
+  });
 
-EventBus.on('ItemPickUpRequestFailed', packet => {
-  const p = new ItemPickUpRequestFailedPacket(packet);
+  EventBus.on('ItemDropRemoved', packet => {
+    const world = Store.world;
+    if (!world) return;
 
-  const reason = p.FailReason;
+    const p = new ItemDropRemovedPacket(packet);
+    p.getItemData(p.ItemCount).forEach(item => {
+      const maskedId = item.Id & 0x7fff;
+      const itemEntity = world.getByNetId(maskedId);
+      if (itemEntity) {
+        world.addComponent(itemEntity, 'objOutOfScope', true);
+      } else {
+        console.warn(`Item entity with netId ${maskedId} not found.`);
+      }
+    });
+  });
 
-  if (reason === ItemPickUpRequestFailedItemPickUpFailReasonEnum.ItemStacked) {
-    return;
-  }
+  EventBus.on('ItemDropResponse', packet => {
+    const p = new ItemDropResponsePacket(packet);
 
-  Store.addNotification(
-    reason ===
-      ItemPickUpRequestFailedItemPickUpFailReasonEnum.__MaximumInventoryMoneyReached
-      ? t('notify.carryingTooMuchZen')
-      : t('notify.cannotPickUp'),
-    'error'
-  );
-});
+    if (!p.Success) {
+      console.warn(`Drop of slot ${p.InventorySlot} refused`);
+      Store.rollbackItemMove();
+      Store.addNotification(t('notify.cannotDropItem'), 'error');
+      return;
+    }
+
+    // ReceiveDropItem (WSclient.cpp:6197-6219) is silent: the thud is the item
+    // landing, when it appears on the ground.
+    runInAction(() => {
+      Store.playerData.items[p.InventorySlot] = null;
+    });
+
+    Store.confirmItemMove(-1, null);
+  });
+
+  EventBus.on('ItemPickUpRequestFailed', packet => {
+    const p = new ItemPickUpRequestFailedPacket(packet);
+
+    const reason = p.FailReason;
+
+    if (reason === ItemPickUpRequestFailedItemPickUpFailReasonEnum.ItemStacked) {
+      return;
+    }
+
+    Store.addNotification(
+      reason ===
+        ItemPickUpRequestFailedItemPickUpFailReasonEnum.__MaximumInventoryMoneyReached
+        ? t('notify.carryingTooMuchZen')
+        : t('notify.cannotPickUp'),
+      'error'
+    );
+  });
+}

@@ -25,7 +25,7 @@ reset. This is the top of the graph: it wires modules, controllers and versions 
   context menu and wheel outside scrollables, and handles `requestWarp`.
 - `App.tsx` picks the page from `Store.uiState`. Login and character pages come from the version
   (`loadVersionUi().pregame`), lazy loaded.
-- `logic.ts` imports every `modules/<x>/net.ts`; the import order is the listener order per
+- `logic.ts` installs the modules (`installModules(MODULES)`, `src/modules/modules.ts`); that list's order is the listener order per
   packet. It also routes the shared F3/0x40 server command (swirl, fanfare, fireworks, message
   box; `WSclient.cpp:7744`) and sends `Ping` every 5 s in the world.
 - `lifecycle.ts` lists what resets on a map change, in order:
@@ -51,8 +51,8 @@ version resolves.
   are listed in `tools/checks/baselines/deps.json` and may only shrink.
 
 ## Change it
-- handle a new packet: add it to `src/modules/<module>/net.ts`; add a new module's `net.ts`
-  import to `logic.ts` (order matters per packet).
+- handle a new packet: add it to `installNet` in `src/modules/<module>/net.ts`; add a new module's
+  `module.ts` to `src/modules/modules.ts` (order matters per packet).
 - reset something on map change: give it a `reset()` and add it to `MAP_RESET` in `lifecycle.ts`.
 - start a new controller: list it in [../controllers/controllers.ts](../controllers/controllers.ts).
 - change default server endpoints: the `VITE_*` env vars read in `consts.ts`.

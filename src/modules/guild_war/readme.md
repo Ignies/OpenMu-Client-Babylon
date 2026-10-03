@@ -5,7 +5,7 @@ hero sends live in the `Social` store ([../social/readme.md](../social/readme.md
 has the handlers. Plain guild membership is in [../guild/readme.md](../guild/readme.md).
 
 ## Public API
-- none. `net.ts` registers its handlers when `src/app/logic.ts` imports it.
+- none. `installNet()` in `net.ts` registers its handlers (`module.ts`, installed by `src/app/logic.ts`).
 
 ## How it works
 - The handlers port `ReceiveGuildWar*` and `ReceiveUnion*`.

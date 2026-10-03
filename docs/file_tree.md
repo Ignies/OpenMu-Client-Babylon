@@ -23,7 +23,7 @@ docker/            local OpenMU stack
 ## src/ - the engine
 
 ```
-app/               boot (main.tsx, boot.tsx), App.tsx, the Store, logic.ts (module nets in order),
+app/               boot (main.tsx, boot.tsx), App.tsx, the Store, logic.ts (installs the modules),
                    lifecycle.ts (what resets on map change)
 core/              types, math, rand, queue, event bus, local storage, pathfinding
 ecs/               the miniplex world and its per-frame systems
