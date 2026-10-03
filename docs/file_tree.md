@@ -16,6 +16,8 @@ proxy/             WebSocket proxy between the browser and OpenMU (bun)
 cashshop/ marketplace/ register/ ops/   companion services and pages (bun)
 install/           the server installer and manager (`mu`): see install/readme.md
 openmu/            our OpenMU plugins, one DLL layered on the official OpenMU image
+servers/           one folder per listed world: its start-screen image (servers/readme.md)
+serverlist.md      the worlds the start screen offers (format inside)
 docker/            local OpenMU stack
 .github/           CI workflow, PR and issue templates
 ```

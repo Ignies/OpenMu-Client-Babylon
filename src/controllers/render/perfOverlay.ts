@@ -339,7 +339,7 @@ function gpuMsLine(): string {
 
 /**
  * Every setting the player has, as hex, so a screenshot of this overlay
- * carries the configuration that produced it. `configuration_hex.md` is the
+ * carries the configuration that produced it. `docs/configuration_hex.md` is the
  * table that reads it back.
  */
 function configLines(): string[] {

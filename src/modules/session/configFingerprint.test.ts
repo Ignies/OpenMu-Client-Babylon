@@ -19,7 +19,7 @@ import { configHexTable } from '../../../tools/configHexTable';
 describe('configuration_hex.md', () => {
   it('is what the current options generate', () => {
     const committed = readFileSync(
-      new URL('../../../configuration_hex.md', import.meta.url),
+      new URL('../../../docs/configuration_hex.md', import.meta.url),
       'utf8'
     ).replace(/\r\n/g, '\n');
 

@@ -29,7 +29,7 @@ still live in the central `Store` (`src/app/store.ts`).
 - `sessionStats.ts` listens to `experienceGained` and watches `Store.playerData.money`; it starts
   only when a panel calls `watch()`. A new character name resets it.
 - `configFingerprint.ts`: version byte, packed boolean options, biased number options, language and
-  a texture pack digest. `configuration_hex.md` (repo root, made by `tools/configHexTable.ts`) is
+  a texture pack digest. `docs/configuration_hex.md` (made by `tools/configHexTable.ts`) is
   the decoder table.
 - Store members used: `uiState`, `playerId`, `serverList`, `loginProcessing`, `loginError`,
   `lastGameServer`, `connectToGameServer`, `onGameServerReached`, `sendServerChangeAuthentication`,

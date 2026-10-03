@@ -4,7 +4,8 @@ The worlds this client offers on its start screen, one per line:
 
 `[VERSION:NAME:DESCRIPTION:LANGUAGE:IMAGE](TARGET)`
 
-`VERSION`, `IMAGE` and the description are optional.
+`VERSION`, `IMAGE` and the description are optional. A world's image lives in this repo at
+`servers/<servername>/img.<ext>` (linked by its raw URL), see [servers/readme.md](servers/readme.md).
 
 ## The target
 
@@ -67,7 +68,7 @@ list, which is why the examples above name nothing.
 
 Lines that do not parse are dropped, so the prose around them costs nothing.
 
-[S6EP3:Ignies:Season 6 Episode 3, played in the browser:es:https://github.com/Ignies/OpenMu-Client-Babylon/blob/main/2651842.jpg?raw=true](ignies.net)
+[S6EP3:Ignies:Season 6 Episode 3, played in the browser:es:https://github.com/Ignies/OpenMu-Client-Babylon/blob/main/servers/ignies/img.jpg?raw=true](ignies.net)
 - 0: Testing Server
   - 0: X100 PVP
   - 1: X100 PVE

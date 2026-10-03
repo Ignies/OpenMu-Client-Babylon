@@ -9,7 +9,7 @@ import { texturePacks } from '../../controllers/assets/texturePacks';
  * come with, and "it runs badly" means nothing without knowing what was
  * switched on: quality, render distance, the texture pack, whether the
  * post chain was even running. Printing eighty rows is not an option, so
- * the whole configuration goes out as hex and `configuration_hex.md` says
+ * the whole configuration goes out as hex and `docs/configuration_hex.md` says
  * how to read it back.
  *
  * The field order is taken from `GameOptions` itself, sorted, so it can
