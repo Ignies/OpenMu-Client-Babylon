@@ -29,6 +29,7 @@ export function gearedNpcFactory(gear: NpcGear): typeof PlayerObject {
 
   class GearedNpc extends PlayerObject {
     static NpcClass = charClass;
+    static NpcHeroState = gear.pk ?? null;
 
     static {
       GearedNpc.OverrideScale = gear.scale ?? -1;

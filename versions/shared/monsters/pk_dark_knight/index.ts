@@ -4,7 +4,7 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 297,
   Name: 'PK Dark Knight',
-  // GMHuntingGround.cpp:288-306. `PK = PVP_MURDERER2` (the red name) is not modelled.
+  // GMHuntingGround.cpp:288-306.
   gear: {
     charClass: CharacterClassNumber.DarkKnight,
     playerClass: PlayerClass.DarkKnight,
@@ -12,6 +12,7 @@ export default defineMonster({
     level: 9,
     mainHand: { group: 0, num: 16 }, // Sword of Destruction
     offHand: { group: 6, num: 13 }, // Dragon Shield
+    pk: 6, // PVP_MURDERER2 (:305): the outlaw's red body
     scale: 0.93, // `Skin = 1` (:291): SetCharacterScale's second row (ZzzCharacter.cpp:12157)
   },
 });

@@ -37,6 +37,8 @@ export type NpcGear = {
   readonly wings?: NpcItem | null;
   /** `c->Helper` (group 13): the Dark Lord's mount. */
   readonly pet?: NpcItem | null;
+  /** `c->PK` (`PVP_*`) when its case sets one: 6, PVP_MURDERER2, draws the outlaw's red body. */
+  readonly pk?: number;
   /** `Object.Scale` when its case sets one; else SetCharacterScale's 0.9 for the CLASS_WIZARD rig. */
   readonly scale?: number;
 };

@@ -6,8 +6,7 @@ export default defineMonster({
   Name: 'Cursed Wizard',
   maxHealth: 4000,
   // ZzzCharacter.cpp:13907-13931: a player rig in Legendary +9 with the Legendary Staff and Shield;
-  // the rig's class is CLASS_WIZARD (CreateCharacterPointer, :11732-11735). Not modelled: the red
-  // PVP_MURDERER2 body (:13925).
+  // the rig's class is CLASS_WIZARD (CreateCharacterPointer, :11732-11735).
   // SetCharacterScale's 0.9, but 1.0 in Devil Square (:13926-13930); map 32 is Devil Square 5-7.
   worldScale: { 9: 1, 32: 1 },
   gear: {
@@ -17,6 +16,7 @@ export default defineMonster({
     level: 9,
     mainHand: { group: 5, num: 5 }, // MODEL_LEGENDARY_STAFF
     offHand: { group: 6, num: 14 }, // MODEL_LEGENDARY_SHIELD
+    pk: 6, // PVP_MURDERER2 (:13925): the outlaw's red body
   },
   stats: {
     Rate: 1,

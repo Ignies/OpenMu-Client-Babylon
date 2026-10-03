@@ -6,7 +6,9 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 
 ## Public API
 - `PlayerObject` (the player rig with its part sockets; player-rig NPCs and monsters subclass it
-  and set `NpcClass`, `NpcAlwaysFly`, `DeathShatter`), `isPlayerBody`, `npcClassOf`;
+  and set `NpcClass`, `NpcAlwaysFly`, `NpcHeroState`, `DeathShatter`), `isPlayerBody`, `npcClassOf`,
+  `npcHeroStateOf` (a geared NPC's `pk`: net_helpers gives the entity that `heroState`, so the
+  render system draws an outlaw's red body, ZzzCharacter.cpp:9988-9991);
   `MonsterObject`; `OperateBoxObject`, `LeanBoxObject` (invisible click targets for maps).
 - `resolveModelFactory(type)`, `isKnownObjectType(type)` (`modelFactoryPerId.ts`): registered
   classes first, then the engine default the type's monster folder asks for.

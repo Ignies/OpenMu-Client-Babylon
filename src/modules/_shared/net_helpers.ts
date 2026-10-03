@@ -15,7 +15,7 @@ import { createAttributeSystem } from '@/core/attributeSystem';
 import { getBaseClass } from '../hero/characterStats';
 import { isFemaleClass } from '@/controllers/actors/mapPlayerNetClassToModelClass';
 import { isKnownObjectType, npcSpawnScale, resolveModelFactory } from '@/controllers/actors/modelFactoryPerId';
-import { isPlayerBody, npcClassOf } from '@/controllers/actors/playerObject';
+import { isPlayerBody, npcClassOf, npcHeroStateOf } from '@/controllers/actors/playerObject';
 import { isWingItem } from '@/controllers/actors/wings';
 import { monsterDisplayName, monsterMaxHealth } from '@versions/shared/monsters/monstersDatabase';
 import { monsterModelTypeOf } from '@/controllers/anim/playSpeed';
@@ -139,6 +139,9 @@ export function addNpcToScope(world: World, npc: ScopeNpc) {
   });
 
   if (owner) world.addComponent(npcEntity, 'summonedBy', owner);
+  // `c->PK` of an outlaw NPC: the render system draws its body red (ZzzCharacter.cpp:9988-9991).
+  const heroState = npcHeroStateOf(modelFactory);
+  if (heroState !== null) world.addComponent(npcEntity, 'heroState', heroState);
 
   // 0x8000 is the original's CreateFlag (WSclient.cpp:3023-3026, :3111-3123). OpenMU also sets it
   // for a monster walking into a watched bucket (ObserverToWorldViewAdapter.cs:65), which replays it.

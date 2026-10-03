@@ -7,7 +7,7 @@ its own folder in `versions/shared/monsters/<name>/` and uses this controller.
 - `MonsterDef`: one type (`Numb`, `Name`, `maxHealth`, `model`, `subType`, `stats`, and the NPC
   fields below); `MonsterStats`: the original table's row; `MonsterRow`: that row with `Numb` and
   `Name`, as readers always got it.
-- NPC fields (`npc.ts`): `hidden`, `npcModel` (`NpcModel`), `gear` (`NpcGear`, `NpcItem`),
+- NPC fields (`npc.ts`): `hidden`, `npcModel` (`NpcModel`), `gear` (`NpcGear`, `NpcItem`; its `pk`),
   `transformed` (`NpcTransform`), `trap` (`NpcTrap`), `voice` (`NpcVoice`), `globalVoice`
   (`NpcGlobalVoice`, `NpcGlobalCue`).
 - Sound fields, read by `sound/packetSounds.ts`: `quietCasts` (skills whose cast sound the type

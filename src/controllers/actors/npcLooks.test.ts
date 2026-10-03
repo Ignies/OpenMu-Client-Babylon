@@ -9,8 +9,9 @@ vi.mock('@/app/store', () => ({ Store: {}, UIState: {} }));
 async function load() {
   const resolve = await import('./modelFactoryPerId');
   const { gearedNpcFactory } = await import('./playerNpc');
+  const { npcHeroStateOf } = await import('./playerObject');
   await import('@versions/shared/monsters/models');
-  return { ...resolve, gearedNpcFactory };
+  return { ...resolve, gearedNpcFactory, npcHeroStateOf };
 }
 
 let m: Awaited<ReturnType<typeof load>>;
@@ -94,6 +95,11 @@ describe('NPC looks from the original client', () => {
       offHand: { group: 6, num: 14 },
     });
     expect(m.resolveModelFactory(34)).toBe(m.gearedNpcFactory(gear!));
+  });
+
+  // `c->PK = PVP_MURDERER2` (ZzzCharacter.cpp:13925, GMHuntingGround.cpp:305) draws the body red (:9988-9991).
+  it('the Cursed Wizard and the PK Dark Knight spawn as outlaws; the guards do not', () => {
+    expect([34, 297, 229, 247, 240].map(t => m.npcHeroStateOf(m.resolveModelFactory(t)))).toEqual([6, 6, null, null, null]);
   });
 
   it('Luke, Leo and Ellen are one plate-rig case (ZzzCharacter.cpp:14612-14625)', () => {
