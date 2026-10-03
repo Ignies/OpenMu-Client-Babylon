@@ -4,8 +4,6 @@ import type en from './en';
 
 export default {
   'preloader.playOffline': 'Играй офлайн',
-  'preloader.serverSetup': 'Настройка на сървъра',
-  'server.title': 'Настройка на сървъра',
   'server.list': 'Сървъри',
   'server.name': 'Име',
   'server.connectServer': 'Connect сървър',
@@ -64,7 +62,6 @@ export default {
   'worlds.hidePassword': 'Скрий паролата',
   'worlds.hasAccount': 'За този свят има запазен акаунт',
   'worlds.accountMark': 'ID',
-  'server.fromUrl': 'От адреса',
   'info.client': 'Клиент',
   'info.anyClient': 'Всеки',
   'info.address': 'Адрес',

@@ -4,8 +4,6 @@ import type en from './en';
 
 export default {
   'preloader.playOffline': 'Joacă offline',
-  'preloader.serverSetup': 'Configurare server',
-  'server.title': 'Configurare server',
   'server.list': 'Servere',
   'server.name': 'Nume',
   'server.connectServer': 'Server de conectare',
@@ -64,7 +62,6 @@ export default {
   'worlds.hidePassword': 'Ascunde parola',
   'worlds.hasAccount': 'Există un cont salvat pentru această lume',
   'worlds.accountMark': 'ID',
-  'server.fromUrl': 'Din URL',
   'info.client': 'Client',
   'info.anyClient': 'Oricare',
   'info.address': 'Adresă',

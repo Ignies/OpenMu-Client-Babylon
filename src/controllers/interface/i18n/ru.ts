@@ -27,7 +27,6 @@ export default {
   'stat.vitality': 'Выносливость',
   'stat.energy': 'Энергия',
   'stat.command': 'Командование',
-  'stat.short.command': 'КМД',
   'warn.durability': 'Прочность экипировки: {percent}%',
   'warn.inventoryFull': 'Инвентарь заполнен',
   'warn.noPotions': 'Лечебные зелья закончились',

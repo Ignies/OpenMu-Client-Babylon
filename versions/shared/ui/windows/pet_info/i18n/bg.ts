@@ -19,5 +19,4 @@ export default {
   'petInfo.cmdRandom': 'Случайна атака',
   'petInfo.cmdOwner': 'Атака заедно със стопанина',
   'petInfo.cmdTarget': 'Атака по целта',
-  'petInfo.close': 'Затвори',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -5,7 +5,6 @@ import type en from './en';
 export default {
   'duel.request': '{name} が決闘を申し込みました。',
   'duel.wins': '{winner} が {loser} との決闘に勝ちました。',
-  'duel.score': 'スコア',
   'duel.watchTitle': '決闘の状況',
   'duel.channel': '決闘チャンネル {number}',
   'duel.emptyChannel': '空のチャンネル',

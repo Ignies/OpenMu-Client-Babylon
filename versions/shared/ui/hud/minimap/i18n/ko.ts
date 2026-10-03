@@ -3,6 +3,5 @@
 import type en from './en';
 
 export default {
-  'minimap.close': '닫기',
   'minimap.center': '가운데로',
 } satisfies Partial<Record<keyof typeof en, string>>;

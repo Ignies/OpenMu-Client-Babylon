@@ -27,7 +27,6 @@ export default {
   'stat.vitality': 'Vitalität',
   'stat.energy': 'Energie',
   'stat.command': 'Führung',
-  'stat.short.command': 'FÜH',
   'warn.durability': 'Haltbarkeit der Ausrüstung bei {percent}%',
   'warn.inventoryFull': 'Das Inventar ist voll',
   'warn.noPotions': 'Keine Heiltränke mehr',

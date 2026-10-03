@@ -27,7 +27,6 @@ export default {
   'stat.vitality': 'Издръжливост',
   'stat.energy': 'Енергия',
   'stat.command': 'Командване',
-  'stat.short.command': 'КМД',
   'warn.durability': 'Издръжливост на екипировката: {percent}%',
   'warn.inventoryFull': 'Инвентарът е пълен',
   'warn.noPotions': 'Няма лечебни отвари',

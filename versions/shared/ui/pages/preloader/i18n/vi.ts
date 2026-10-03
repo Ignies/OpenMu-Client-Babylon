@@ -4,8 +4,6 @@ import type en from './en';
 
 export default {
   'preloader.playOffline': 'Chơi ngoại tuyến',
-  'preloader.serverSetup': 'Cài đặt máy chủ',
-  'server.title': 'Cài đặt máy chủ',
   'server.list': 'Máy chủ',
   'server.name': 'Tên',
   'server.connectServer': 'Máy chủ kết nối',
@@ -63,7 +61,6 @@ export default {
   'worlds.hidePassword': 'Ẩn mật khẩu',
   'worlds.hasAccount': 'Đã lưu một tài khoản cho thế giới này',
   'worlds.accountMark': 'ID',
-  'server.fromUrl': 'Từ URL',
   'info.client': 'Máy khách',
   'info.anyClient': 'Bất kỳ',
   'info.address': 'Địa chỉ',

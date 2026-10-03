@@ -4,8 +4,6 @@ import type en from './en';
 
 export default {
   'preloader.playOffline': '离线游戏',
-  'preloader.serverSetup': '服务器设置',
-  'server.title': '服务器设置',
   'server.list': '服务器',
   'server.name': '名称',
   'server.connectServer': '连接服务器',
@@ -62,7 +60,6 @@ export default {
   'worlds.hidePassword': '隐藏密码',
   'worlds.hasAccount': '此世界已保存账号',
   'worlds.accountMark': 'ID',
-  'server.fromUrl': '来自网址',
   'info.client': '客户端',
   'info.anyClient': '任意',
   'info.address': '地址',

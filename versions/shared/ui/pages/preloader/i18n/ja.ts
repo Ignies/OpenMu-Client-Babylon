@@ -4,8 +4,6 @@ import type en from './en';
 
 export default {
   'preloader.playOffline': 'オフラインで遊ぶ',
-  'preloader.serverSetup': 'サーバー設定',
-  'server.title': 'サーバー設定',
   'server.list': 'サーバー',
   'server.name': '名前',
   'server.connectServer': '接続サーバー',
@@ -64,7 +62,6 @@ export default {
   'worlds.hidePassword': 'パスワードを隠す',
   'worlds.hasAccount': 'このワールドのアカウントが保存されています',
   'worlds.accountMark': 'ID',
-  'server.fromUrl': 'URL から',
   'info.client': 'クライアント',
   'info.anyClient': '任意',
   'info.address': 'アドレス',

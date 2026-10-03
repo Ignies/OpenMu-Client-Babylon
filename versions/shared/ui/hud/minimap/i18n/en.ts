@@ -1,7 +1,6 @@
 /** English text of the `minimap` HUD element. See src/i18n/readme.md. */
 
 const en = {
-  'minimap.close': 'Close',
   'minimap.center': 'Center',
 };
 

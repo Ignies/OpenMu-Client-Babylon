@@ -3,7 +3,6 @@
 const en = {
   'duel.request': '{name} has challenged you to a duel.',
   'duel.wins': '{winner} has won the duel against {loser}.',
-  'duel.score': 'Score',
   'duel.watchTitle': 'Duel Status',
   'duel.channel': 'Duel Channel {number}',
   'duel.emptyChannel': 'Empty channel',

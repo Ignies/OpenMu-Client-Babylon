@@ -19,5 +19,4 @@ export default {
   'petInfo.cmdRandom': '무작위 공격',
   'petInfo.cmdOwner': '주인과 함께 공격',
   'petInfo.cmdTarget': '지정한 대상 공격',
-  'petInfo.close': '닫기',
 } satisfies Partial<Record<keyof typeof en, string>>;

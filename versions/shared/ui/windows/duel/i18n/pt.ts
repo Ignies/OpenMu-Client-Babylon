@@ -5,7 +5,6 @@ import type en from './en';
 export default {
   'duel.request': '{name} desafiou você para um duelo.',
   'duel.wins': '{winner} venceu o duelo contra {loser}.',
-  'duel.score': 'Placar',
   'duel.watchTitle': 'Situação do duelo',
   'duel.channel': 'Canal de duelo {number}',
   'duel.emptyChannel': 'Canal vazio',

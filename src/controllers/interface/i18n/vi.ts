@@ -26,7 +26,6 @@ export default {
   'stat.vitality': 'Thể lực',
   'stat.energy': 'Năng lượng',
   'stat.command': 'Mệnh lệnh',
-  'stat.short.command': 'CMD',
   'warn.durability': 'Độ bền trang bị còn {percent}%',
   'warn.inventoryFull': 'Hành trang đã đầy',
   'warn.noPotions': 'Đã hết bình máu',

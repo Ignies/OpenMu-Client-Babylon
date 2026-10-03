@@ -4,8 +4,6 @@ import type en from './en';
 
 export default {
   'preloader.playOffline': 'Jouer hors ligne',
-  'preloader.serverSetup': 'Configuration du serveur',
-  'server.title': 'Configuration du serveur',
   'server.list': 'Serveurs',
   'server.name': 'Nom',
   'server.connectServer': 'Serveur de connexion',
@@ -64,7 +62,6 @@ export default {
   'worlds.hidePassword': 'Masquer le mot de passe',
   'worlds.hasAccount': 'Un compte est enregistré pour ce monde',
   'worlds.accountMark': 'ID',
-  'server.fromUrl': 'Depuis l’URL',
   'info.client': 'Client',
   'info.anyClient': 'Indifférent',
   'info.address': 'Adresse',

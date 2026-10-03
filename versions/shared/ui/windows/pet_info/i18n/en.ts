@@ -18,7 +18,6 @@ const en = {
   'petInfo.cmdRandom': 'Random attack',
   'petInfo.cmdOwner': 'Attack with owner',
   'petInfo.cmdTarget': 'Attack target',
-  'petInfo.close': 'Close',
 };
 
 export default en;

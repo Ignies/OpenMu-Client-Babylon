@@ -5,7 +5,6 @@ import type en from './en';
 export default {
   'duel.request': '{name} ท้าดวลคุณ',
   'duel.wins': '{winner} ชนะการดวลกับ {loser}',
-  'duel.score': 'คะแนน',
   'duel.watchTitle': 'สถานะการดวล',
   'duel.channel': 'ช่องดวล {number}',
   'duel.emptyChannel': 'ช่องว่าง',

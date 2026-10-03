@@ -4,8 +4,6 @@ import type en from './en';
 
 export default {
   'preloader.playOffline': '오프라인으로 시작',
-  'preloader.serverSetup': '서버 설정',
-  'server.title': '서버 설정',
   'server.list': '서버',
   'server.name': '이름',
   'server.connectServer': '접속 서버',
@@ -64,7 +62,6 @@ export default {
   'worlds.hidePassword': '비밀번호 숨기기',
   'worlds.hasAccount': '이 월드에 저장된 계정이 있습니다',
   'worlds.accountMark': 'ID',
-  'server.fromUrl': 'URL에서',
   'info.client': '클라이언트',
   'info.anyClient': '모두',
   'info.address': '주소',

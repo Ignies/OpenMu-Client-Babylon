@@ -27,7 +27,6 @@ export default {
   'stat.vitality': 'Vitalitate',
   'stat.energy': 'Energie',
   'stat.command': 'Comandă',
-  'stat.short.command': 'CMD',
   'warn.durability': 'Durabilitatea echipamentului la {percent}%',
   'warn.inventoryFull': 'Inventarul este plin',
   'warn.noPotions': 'Nu mai sunt poțiuni de viață',

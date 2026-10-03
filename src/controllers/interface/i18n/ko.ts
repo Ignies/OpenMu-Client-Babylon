@@ -27,7 +27,6 @@ export default {
   'stat.vitality': '체력',
   'stat.energy': '에너지',
   'stat.command': '통솔',
-  'stat.short.command': '통',
   'warn.durability': '장비 내구도 {percent}%',
   'warn.inventoryFull': '인벤토리가 가득 찼습니다',
   'warn.noPotions': '회복 물약이 없습니다',

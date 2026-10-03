@@ -19,5 +19,4 @@ export default {
   'petInfo.cmdRandom': 'Tấn công ngẫu nhiên',
   'petInfo.cmdOwner': 'Tấn công cùng chủ',
   'petInfo.cmdTarget': 'Tấn công mục tiêu',
-  'petInfo.close': 'Đóng',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -4,8 +4,6 @@ import type en from './en';
 
 export default {
   'preloader.playOffline': 'เล่นออฟไลน์',
-  'preloader.serverSetup': 'ตั้งค่าเซิร์ฟเวอร์',
-  'server.title': 'ตั้งค่าเซิร์ฟเวอร์',
   'server.list': 'เซิร์ฟเวอร์',
   'server.name': 'ชื่อ',
   'server.connectServer': 'เซิร์ฟเวอร์เชื่อมต่อ',
@@ -64,7 +62,6 @@ export default {
   'worlds.hidePassword': 'ซ่อนรหัสผ่าน',
   'worlds.hasAccount': 'มีบัญชีที่บันทึกไว้สำหรับโลกนี้',
   'worlds.accountMark': 'ID',
-  'server.fromUrl': 'จาก URL',
   'info.client': 'ไคลเอนต์',
   'info.anyClient': 'ใดก็ได้',
   'info.address': 'ที่อยู่',

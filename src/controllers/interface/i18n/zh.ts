@@ -27,7 +27,6 @@ export default {
   'stat.vitality': '体力',
   'stat.energy': '能量',
   'stat.command': '统率',
-  'stat.short.command': '统',
   'warn.durability': '装备耐久度剩余 {percent}%',
   'warn.inventoryFull': '背包已满',
   'warn.noPotions': '没有治疗药水了',

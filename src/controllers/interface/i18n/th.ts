@@ -27,7 +27,6 @@ export default {
   'stat.vitality': 'พลังชีวิต',
   'stat.energy': 'พลังงาน',
   'stat.command': 'การบัญชาการ',
-  'stat.short.command': 'CMD',
   'warn.durability': 'ความทนทานของอุปกรณ์ {percent}%',
   'warn.inventoryFull': 'กระเป๋าเต็ม',
   'warn.noPotions': 'ไม่มียาฟื้นพลังชีวิตแล้ว',

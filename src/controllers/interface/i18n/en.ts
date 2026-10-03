@@ -28,7 +28,6 @@ const en = {
   'stat.vitality': 'Vitality',
   'stat.energy': 'Energy',
   'stat.command': 'Command',
-  'stat.short.command': 'CMD',
   'warn.durability': 'Equipment durability at {percent}%',
   'warn.inventoryFull': 'The inventory is full',
   'warn.noPotions': 'No healing potions left',

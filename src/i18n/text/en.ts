@@ -4,8 +4,6 @@ const en = {
   'common.ok': 'OK',
   'common.cancel': 'Cancel',
   'common.close': 'Close',
-  'common.yes': 'Yes',
-  'common.no': 'No',
   'common.none': 'None',
   'common.create': 'Create',
   'common.creating': 'Creating...',
@@ -22,23 +20,6 @@ const en = {
   // Slider value labels.
   'options.quality.classic': 'Classic',
   'options.quality.enhanced': 'Enhanced',
-
-  // The English name of each language, for the tooltip beside the native one.
-  'language.english': 'English',
-  'language.spanish': 'Spanish',
-  'language.french': 'French',
-  'language.italian': 'Italian',
-  'language.portuguese': 'Portuguese',
-  'language.russian': 'Russian',
-  'language.chinese': 'Chinese (Mandarin)',
-  'language.japanese': 'Japanese',
-  'language.thai': 'Thai',
-  'language.korean': 'Korean',
-  'language.bulgarian': 'Bulgarian',
-  'language.romanian': 'Romanian',
-  'language.german': 'German',
-  'language.polish': 'Polish',
-  'language.vietnamese': 'Vietnamese',
 };
 
 export default en;

@@ -19,5 +19,4 @@ export default {
   'petInfo.cmdRandom': 'โจมตีแบบสุ่ม',
   'petInfo.cmdOwner': 'โจมตีพร้อมเจ้าของ',
   'petInfo.cmdTarget': 'โจมตีเป้าหมาย',
-  'petInfo.close': 'ปิด',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -3,6 +3,5 @@
 import type en from './en';
 
 export default {
-  'minimap.close': 'Затвори',
   'minimap.center': 'Центрирай',
 } satisfies Partial<Record<keyof typeof en, string>>;

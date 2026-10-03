@@ -26,7 +26,6 @@ export default {
   'stat.vitality': 'Witalność',
   'stat.energy': 'Energia',
   'stat.command': 'Dowodzenie',
-  'stat.short.command': 'DOW',
   'warn.durability': 'Wytrzymałość ekwipunku: {percent}%',
   'warn.inventoryFull': 'Ekwipunek jest pełny',
   'warn.noPotions': 'Brak mikstur leczących',

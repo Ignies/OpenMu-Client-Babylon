@@ -2,9 +2,7 @@
 
 const en = {
   'preloader.playOffline': 'Play Offline',
-  'preloader.serverSetup': 'Server Setup',
 
-  'server.title': 'Server Setup',
   'server.list': 'Servers',
   'server.name': 'Name',
   'server.connectServer': 'Connect server',
@@ -64,7 +62,6 @@ const en = {
   'worlds.hasAccount': 'An account is saved for this world',
   /** One glyph on the card, so it must stay short in every language. */
   'worlds.accountMark': 'ID',
-  'server.fromUrl': 'From URL',
 
   // The details tab: what the published list knows about a world, before the
   // client has said a word to it.

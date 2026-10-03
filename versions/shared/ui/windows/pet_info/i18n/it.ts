@@ -19,5 +19,4 @@ export default {
   'petInfo.cmdRandom': 'Attacco casuale',
   'petInfo.cmdOwner': 'Attaccare con il padrone',
   'petInfo.cmdTarget': 'Attaccare il bersaglio',
-  'petInfo.close': 'Chiudi',
 } satisfies Partial<Record<keyof typeof en, string>>;

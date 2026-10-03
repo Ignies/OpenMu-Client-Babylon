@@ -27,7 +27,6 @@ export default {
   'stat.vitality': 'Vitalidad',
   'stat.energy': 'Energía',
   'stat.command': 'Mando',
-  'stat.short.command': 'MAN',
   'warn.durability': 'Durabilidad del equipo al {percent}%',
   'warn.inventoryFull': 'El inventario está lleno',
   'warn.noPotions': 'No quedan pociones de vida',
