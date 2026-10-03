@@ -69,8 +69,9 @@ a thin slab above head height; the piece over the hero seeds a flood fill throug
 at the same height. While a room is the active area, every slab inside the room seeds the set.
 
 ### deathSystem.ts
-1. Kill packet: Dead = 1, movement stops. If the hero landed the blow, the Die clip waits for the
-   swing (ATTACK_DIE, 15-tick fallback).
+1. Kill packet: Dead = 1, movement stops. `dying.time` counts 25 Hz ticks (`dt * 25` a frame, like
+   `c->Dead += FPS_ANIMATION_FACTOR`), so at 25 fps every tick lands on a whole number. If the
+   hero landed the blow, the Die clip waits for the swing (ATTACK_DIE, 15-tick fallback).
 2. Die clip plays once and holds; two blood splats under the head. Death Cow, Stone Golem and Ice
    Monster shatter instead (`controllers/fx/deathVisuals.ts`).
 3. Rot += 0.02 a tick; from Rot >= 1 (2 s) alpha fades over 2 s while the body sinks 0.4 cm a tick.

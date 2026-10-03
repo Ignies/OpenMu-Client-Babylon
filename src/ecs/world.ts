@@ -214,7 +214,7 @@ export type Entity = Partial<{
    * fade + sink and the final despawn.
    */
   dying: {
-    /** Seconds since the kill packet arrived. */
+    /** 25 Hz ticks since the kill packet: the original's `c->Dead` counter (ZzzCharacter.cpp:4076). */
     time: number;
     /** Die clip started (SetPlayerDie ran). */
     started: boolean;

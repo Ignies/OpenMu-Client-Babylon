@@ -260,9 +260,10 @@ export const DeathSystem: ISystemFactory = world => {
       for (const e of query) {
         const d = e.dying;
         const model = e.modelObject;
-        const tickBefore = d.time * TICKS_PER_SECOND;
-        d.time += dt;
-        const tickAfter = d.time * TICKS_PER_SECOND;
+        // `c->Dead += FPS_ANIMATION_FACTOR` (ZzzCharacter.cpp:4076): whole ticks at 25 fps, no float drift.
+        const tickBefore = d.time;
+        d.time += ticks;
+        const tickAfter = d.time;
 
         // ReceiveDie's motion setup runs on the kill tick, before the Die clip.
         if (tickBefore === 0) d.motion = startMotion(e);
@@ -279,7 +280,7 @@ export const DeathSystem: ISystemFactory = world => {
           const waitForHero = d.killedByHero && !heroSwingConnected();
           if (
             model.Ready &&
-            (!waitForHero || d.time * TICKS_PER_SECOND >= DIE_FALLBACK_TICKS)
+            (!waitForHero || d.time >= DIE_FALLBACK_TICKS)
           ) {
             d.started = true;
             startDie(e);

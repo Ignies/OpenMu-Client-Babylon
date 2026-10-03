@@ -152,3 +152,14 @@ describe('skill deaths', () => {
     expect(spawn).not.toHaveBeenCalled();
   });
 });
+
+describe('the Dead counter', () => {
+  it('counts whole ticks at 25 fps, like `c->Dead += FPS_ANIMATION_FACTOR`', async () => {
+    const { combat } = await import('../../controllers/combat');
+    const seen: number[] = [];
+    combat.registerSkill(9001, { kill: { dying: (_body, _ticks, dead) => void seen.push(dead) } });
+    const { system } = killedBy(9001);
+    for (let i = 0; i < 40; i++) system.update!(TICK);
+    expect(seen).toEqual(Array.from({ length: 40 }, (_, i) => i + 1));
+  });
+});
