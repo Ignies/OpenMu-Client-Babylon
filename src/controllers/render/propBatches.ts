@@ -21,7 +21,7 @@ import {
   lightEmittersFor,
   recipeFromEmitter,
 } from '../lighting/mapObjectLights';
-import { LEAN_CURSOR_OBJECTS, findRestObject } from '../terrain/restObjects';
+import { leanCursorObjects, findRestObject } from '../terrain/restObjects';
 import { isMapDoorType } from '../../ecs/systems/mapDoorSystem';
 import { roomStructureTypes } from '../maps/rooms';
 import { mayBeCeilingPiece } from '../../ecs/systems/ceilingHideSystem';
@@ -208,12 +208,8 @@ function tableExclusion(map: ENUM_WORLD, type: number): string | null {
   if (meshAnimationFor(map, type)) return 'mesh animation';
   if (isMapDoorType(map, type)) return 'door';
   if (findRestObject(map, type)) return 'rest object';
-  if (LEAN_CURSOR_OBJECTS[map]?.has(type)) return 'lean box';
+  if (leanCursorObjects(map)?.has(type)) return 'lean box';
   if (roomStructureTypes(map).has(type)) return 'room piece';
-  // Chandelier fire and wall torch are built inside MapTileObject.init.
-  if (map === ENUM_WORLD.WD_73NEW_LOGIN_SCENE && (type === 157 || type === 37)) {
-    return 'login fire';
-  }
   return null;
 }
 

@@ -1,5 +1,7 @@
 import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
 import type { Emission } from '@/controllers/fx/effectParticles';
+import type { MeshAnimations } from '@/controllers/render';
+import { saw } from '../shared/meshAnimation';
 
 /**
  * Lost Tower (WD_4LOSTTOWER, world 4, `Object5`/`World5`). Object5 ships 40
@@ -29,7 +31,7 @@ import type { Emission } from '@/controllers/fx/effectParticles';
  * `MoveObject` writes only `BlendMeshTexCoordU` for them and never a
  * `BlendMesh`, because the scroll is consumed by `StreamMesh = 1` in
  * `Draw_RenderObject` (ZzzObject.cpp:1022-1032) instead. That half lives in
- * controllers/render/meshAnimation.ts.
+ * the render.meshAnimations rows.
  */
 export const LOST_TOWER_BLEND_MESHES: Readonly<Record<number, number>> = {
   18: 1,
@@ -222,3 +224,16 @@ export const LOST_TOWER_LIGHTS: Partial<Record<number, readonly LightEmitter[]>>
       },
     ],
   };
+
+/**
+ * Lost Tower (ZzzObject.cpp:3952-3966). 3/4 are the glowing conduits - the
+ * original scrolls them and then re-draws mesh 1 through `StreamMesh` with a
+ * chrome pass (`Draw_RenderObject`:1002); we keep the scroll and the unlit
+ * pass, the chrome layer is materials work. 19/20 are the two tower machines.
+ */
+export const LOSTTOWER_MESH_ANIMATIONS: MeshAnimations = {
+  3: { mesh: 1, kind: 'stream', u: saw(1000, 0.001) },
+  4: { mesh: 1, kind: 'stream', u: saw(1000, 0.001) },
+  19: { mesh: 4, kind: 'blend', u: saw(1000, 0.001) },
+  20: { mesh: 4, kind: 'blend', u: saw(1000, 0.001) },
+};

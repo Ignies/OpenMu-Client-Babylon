@@ -1,4 +1,5 @@
 import type { Emission } from '@/controllers/fx/effectParticles';
+import type { MeshAnimations } from '@/controllers/render';
 
 /**
  * Raklion (`WD_57ICECITY`, `World58`/`Object58`) and its hatchery
@@ -31,10 +32,10 @@ import type { Emission } from '@/controllers/fx/effectParticles';
  * (×0 / ×2) - the hatchery's `icebot01/02/03_R` floor lamps - with
  * `RenderBody(RENDER_TEXTURE, Alpha, 0, fLumi, …)`: mesh 0 forced to the
  * additive pass. All three models are a single mesh, so this is the whole
- * body. `fLumi` is in `meshAnimation.ts`.
+ * body. `fLumi` is in the `render.meshAnimations` rows.
  *
  * No other `o->BlendMesh` write on either map; the `BlendMeshLight` sine on
- * 22 (:248-252, ×15 / ×0) is also in `meshAnimation.ts`.
+ * 22 (:248-252, ×15 / ×0) is also in the `render.meshAnimations` rows.
  */
 export const RAKLION_BLEND_MESHES: Readonly<Record<number, number>> = {
   68: 0,
@@ -63,4 +64,27 @@ export const RAKLION_EFFECT_ONLY_TYPES: readonly number[] = [70, 80];
 export const RAKLION_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {
   70: [{ kinds: ['fire157'], every: 2, light: [0.1, 0.4, 1] }],
   80: [{ kinds: ['fire157'], every: 2, light: [0.7, 0.2, 0.1] }],
+};
+
+/** Raklion + hatchery (GM_Raklion.cpp:250-254) and Doppelganger 1 (:176-180): the ice crystal. */
+export const RAKLION_MESH_ANIMATIONS: MeshAnimations = {
+  22: { mesh: 0, kind: 'blend', light: t => Math.sin(t * 0.001) + 1 },
+  // The hatchery's `icebot01/02/03_R` floor lamps: `RenderBody(RENDER_TEXTURE,
+  // Alpha, 0, fLumi, ...)` (GM_Raklion.cpp:1328-1334) forces mesh 0 additive
+  // on a 0.3...1.3 pulse. All three are single-mesh; World58 places none.
+  68: {
+    mesh: 0,
+    kind: 'blend',
+    light: t => (Math.sin(t * 0.001) + 1) * 0.5 + 0.3,
+  },
+  69: {
+    mesh: 0,
+    kind: 'blend',
+    light: t => (Math.sin(t * 0.001) + 1) * 0.5 + 0.3,
+  },
+  71: {
+    mesh: 0,
+    kind: 'blend',
+    light: t => (Math.sin(t * 0.001) + 1) * 0.5 + 0.3,
+  },
 };

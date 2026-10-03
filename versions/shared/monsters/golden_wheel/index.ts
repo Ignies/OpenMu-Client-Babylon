@@ -1,8 +1,11 @@
 import { defineMonster } from '@/controllers/monsters';
+import { dieSand, walkSand } from '../_shared/bodyFx';
 
 export default defineMonster({
   Numb: 83,
   Name: 'Golden wheel',
+  // MODEL_GOLDEN_WHEEL: sand walking and dying (ZzzCharacter.cpp:5980-5984).
+  bodyFx: [walkSand, dieSand],
   maxHealth: 15000,
   model: { type: 41, scale: 1.4 },
   stats: {

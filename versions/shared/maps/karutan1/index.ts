@@ -5,6 +5,7 @@ import {
   KARUTAN_BLEND_MESHES,
   KARUTAN_EFFECT_ONLY_TYPES,
   KARUTAN_EMISSIONS,
+  KARUTAN_MESH_ANIMATION,
 } from './spec';
 import { KARUTAN_1_SOUND } from './sound';
 import { KARUTAN_LIGHTING } from './lighting';
@@ -76,6 +77,7 @@ export const karutan1Layer: MapLayer = {
   blendMeshes: KARUTAN_BLEND_MESHES,
   effectOnly: KARUTAN_EFFECT_ONLY_TYPES,
   emissions: KARUTAN_EMISSIONS,
+  render: { meshAnimations: KARUTAN_MESH_ANIMATION },
   sound: KARUTAN_1_SOUND,
   lighting: KARUTAN_LIGHTING,
   create: world => import('./create').then(m => m.createKarutan1(world)),

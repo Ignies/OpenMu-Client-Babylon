@@ -216,21 +216,9 @@ export function weaponBlurFor(
 
 // ---- the warrior cast glint ----------------------------------------------------
 
-/**
- * Skills the hero casts through UseSkillWarrior (SkillWarrior's list and the weapon skills,
- * SkillCast.cpp:113-247, ZzzInterface.cpp:1320-1352), less the ones it gives no glint (Force,
- * Force Wave, Fire Burst, Space Split, Fire Scream, :357-373). Master ids ride with their base,
- * 339 / 342 (OpenMU's Death Stab ranks, no sven constant) included.
- */
-const WARRIOR_GLINT_SKILLS: ReadonlySet<number> = new Set([
-  19, 20, 21, 22, 23, 41, 43, 44, 49, 55, 57, 326, 327, 328, 329, 330, 332, 336, 339, 342, 479, 481, 490,
-]);
-/** Impale goes through SkillWarrior only from a mount (SkillCast.cpp:130). */
-const IMPALE = 47;
-
-export function hasWarriorGlint(skill: number, mounted: boolean): boolean {
-  return WARRIOR_GLINT_SKILLS.has(skill) || (skill === IMPALE && mounted);
-}
+// Which skills take the glint is each skill's own `warriorGlint` (`hasWarriorGlint` in the skills
+// controller): the ones cast through UseSkillWarrior, less Force, Force Wave, Fire Burst, Space
+// Split and Fire Scream (SkillCast.cpp:113-247, :357-373, ZzzInterface.cpp:1320-1352).
 
 /** The hand bone the glint rides: HandPosition's `Hero->Weapon[0].LinkBone`. */
 export const WARRIOR_GLINT_BONE = RIGHT_HAND_BONE;

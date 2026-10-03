@@ -6,6 +6,8 @@ import { slashOddSwing } from './';
 export default defineSkill({
   id: 327,
   name: "Slash Strengthener",
+  // UseSkillWarrior's glint (SkillCast.cpp:113-247, :357-376).
+  warriorGlint: true,
   poseClip: slashOddSwing,
   swordCount: true,
   sound: 'Sound/sKnightSkill4', // Slash Str

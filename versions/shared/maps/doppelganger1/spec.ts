@@ -1,5 +1,5 @@
 import type { Emission } from '@/controllers/fx/effectParticles';
-import type { MeshAnimation } from '@/controllers/render/meshAnimation';
+import type { MeshAnimation } from '@/controllers/render';
 
 /**
  * Doppelganger 1 (`WD_65DOPPLEGANGER1`, `World66`/`Object66`), the plain-data
@@ -83,7 +83,7 @@ export const DOPPELGANGER1_EMISSIONS: Partial<
 };
 
 /**
- * The per-frame mesh writes, for `controllers/render/meshAnimation.ts`. 22 is Raklion's
+ * The per-frame mesh writes, for the `render.meshAnimations` rows. 22 is Raklion's
  * ice crystal breathing (:172-176, `CGM_Raklion::MoveObject`
  * GM_Raklion.cpp:246-252) and x0 placed here; 33 and 102 are the two additive
  * sheets the render hooks scroll. `(int)WorldTime % 10000 * 0.0001f` climbs

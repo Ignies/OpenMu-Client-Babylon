@@ -1,7 +1,7 @@
 // Where each skill id lives: versions/shared/skills/<class>/<folder>/<file>.ts.
 // A base skill is <folder>/index.ts; its master variants sit beside it
 // (strengthener.ts, mastery.ts, ...), suffixed by class when another class owns them.
-import { readFileSync } from 'fs';
+import { readdirSync, readFileSync, statSync } from 'fs';
 import { SKILL_DEFINITIONS } from '../../versions/shared/skills/skillsDatabase';
 
 export type Home = { cls: string; folder: string; file: string; id?: number; name?: string };
@@ -47,12 +47,27 @@ const VARIANTS: [RegExp, string][] = [
 const defs = new Map<number, { name: string; classes: string }>(SKILL_DEFINITIONS.map(d => [d.num, d]));
 for (const [id, d] of Object.entries(EXTRA)) defs.set(Number(id), d);
 
-/** Master id -> base skill, from the game's own alias tables. */
+const walk = (d: string): string[] =>
+  readdirSync(d).flatMap(e => (statSync(`${d}/${e}`).isDirectory() ? walk(`${d}/${e}`) : [`${d}/${e}`]));
+
+/** Master id -> base skill: each base skill file's `lookAliases` and `masterAliases`. */
 const ALIASES = new Map<number, number>();
-for (const file of ['src/controllers/skills/visuals.ts', 'src/modules/skills/skillAliases.ts']) {
+for (const file of walk(ROOT).filter(f => f.endsWith('.ts') && !f.endsWith('.test.ts'))) {
   const text = readFileSync(file, 'utf8');
-  for (const block of text.matchAll(/(?:MASTER_ALIASES)[^=]*=\s*\{([\s\S]*?)\n\};/g))
-    for (const [, from, to] of block[1].matchAll(/(\d+):\s*(\d+)/g)) if (Number(from) >= 300) ALIASES.set(Number(from), Number(to));
+  let base = text.match(/defineSkill\(\{\s*id: (\w+)/)?.[1];
+  if (!base) continue;
+  // A named id (Nova's `SKILL_NOVA`) is a constant in the skill's folder.
+  if (!/^\d+$/.test(base)) {
+    const name = base;
+    const dir = file.slice(0, file.lastIndexOf('/'));
+    base = readdirSync(dir)
+      .filter(f => f.endsWith('.ts'))
+      .map(f => readFileSync(`${dir}/${f}`, 'utf8').match(new RegExp(`const ${name} = (\\d+)`))?.[1])
+      .find(Boolean);
+    if (!base) continue;
+  }
+  for (const [, list] of text.matchAll(/(?:lookAliases|masterAliases):\s*\[([\d,\s]*)\]/g))
+    for (const from of list.match(/\d+/g) ?? []) if (Number(from) >= 300) ALIASES.set(Number(from), Number(base));
 }
 
 export const snake = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');

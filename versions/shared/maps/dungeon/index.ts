@@ -5,6 +5,7 @@ import {
   DUNGEON_BLEND_MESHES,
   DUNGEON_EFFECT_ONLY_TYPES,
   DUNGEON_EMISSIONS,
+  DUNGEON_MESH_ANIMATIONS,
 } from './spec';
 import { DUNGEON_SOUND } from './sound';
 import { DUNGEON_LIGHTING } from './lighting';
@@ -38,6 +39,9 @@ export const dungeonLayer: MapLayer = {
   blendMeshes: DUNGEON_BLEND_MESHES,
   effectOnly: DUNGEON_EFFECT_ONLY_TYPES,
   emissions: DUNGEON_EMISSIONS,
+  render: { meshAnimations: DUNGEON_MESH_ANIMATIONS },
+  // What flies here (`MoveBoids`, GOBoid.cpp:1304-1346).
+  fx: { boids: 'bat' },
   sound: DUNGEON_SOUND,
   lighting: DUNGEON_LIGHTING,
   terrain: { rest: { 59: sit(false), 60: pose(true) }, leanCursor: [60] },

@@ -1,5 +1,7 @@
 import type { Emission } from '@/controllers/fx/effectParticles';
 import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
+import type { MeshAnimations } from '@/controllers/render';
+import { saw } from '../shared/meshAnimation';
 
 /**
  * Tarkan (World 9 / `Object9`), the plain-data half. Nothing in here may
@@ -24,9 +26,9 @@ import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
  * `o->BlendMesh` every frame - an additive, unlit second pass over one mesh:
  *
  *  - **2** (×4) the scrolling frieze, one mesh of `R.jpg`; its U scroll is in
- *    `meshAnimation.ts`.
+ *    the `render.meshAnimations` rows.
  *  - **7** (×98) the red glow lamp, one mesh of `redB.jpg`. Its
- *    `BlendMeshLight` is *not* in `meshAnimation.ts` and must not be: the
+ *    `BlendMeshLight` is *not* in the `render.meshAnimations` rows and must not be: the
  *    sine is phased by the lamp's own yaw, so no shared table can produce it.
  *    See `glowLampObject.ts`.
  *  - **61** (×2) and **65** (×1) the braziers, two meshes each - `gear` (the
@@ -128,7 +130,7 @@ export const TARKAN_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {
  * `AddTerrainLight(x, y, (L, L*0.6, L*0.2), 2, PrimaryTerrainLight);`
  * - the brazier, ZzzObject.cpp:4088-4092 (type 61) and :4102-4106 (65/66).
  * The flame itself is the type's blend mesh with its V scroll
- * (`meshAnimation.ts`), so nothing is added on top of it: no particles, no
+ * (the `render.meshAnimations` rows), so nothing is added on top of it: no particles, no
  * sprite. The original creates neither, and the scrolling `gearB` sheet is
  * already a fire.
  *
@@ -168,4 +170,29 @@ export const TARKAN_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
   61: [brazier],
   65: [brazier],
   66: [brazier],
+};
+
+/**
+ * Tarkan (ZzzObject.cpp:4041-4128, `StreamMesh` set at load in
+ * MapManager.cpp:1134). The sand-falls are the point of this table: six
+ * sheets scrolling V over a 10 s loop, plus 12 which drifts diagonally over
+ * 50 s. 61/65/66 are the braziers (their terrain light is in effectLights).
+ */
+export const TARKAN_MESH_ANIMATIONS: MeshAnimations = {
+  2: { mesh: 0, kind: 'blend', u: saw(1000, 0.001) },
+  11: { mesh: 0, kind: 'stream', v: saw(10000, 0.0002) },
+  12: {
+    mesh: 0,
+    kind: 'stream',
+    u: saw(50000, 0.00005),
+    v: saw(50000, 0.00005),
+  },
+  13: { mesh: 0, kind: 'stream', v: saw(10000, 0.0002) },
+  61: { mesh: 1, kind: 'blend', v: saw(1000, 0.001) },
+  65: { mesh: 1, kind: 'blend', v: saw(1000, 0.001) },
+  66: { mesh: 1, kind: 'blend', v: saw(1000, 0.001) },
+  72: { mesh: 0, kind: 'blend', v: saw(10000, 0.0002) },
+  73: { mesh: 0, kind: 'stream', v: saw(10000, 0.0002) },
+  75: { mesh: 0, kind: 'stream', v: saw(10000, 0.0002) },
+  79: { mesh: 0, kind: 'stream', v: saw(10000, 0.0002) },
 };

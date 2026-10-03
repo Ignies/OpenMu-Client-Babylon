@@ -18,7 +18,7 @@ import type { Entity, World } from '@/ecs/world';
  * -660 deg and +330 deg, i.e. offsets from -66 s to +33 s against a 3.14 s
  * period. The 98 lamps pulse out of step with each other, which is what the
  * `phase` on the recipe's pulse carries (`tarkanGlowLamp` in the lighting
- * layer's map-object table); the table in `meshAnimation.ts` cannot express
+ * layer's map-object table); the table in the `render.meshAnimations` rows cannot express
  * it, because it builds its functions from `WorldTime` alone.
  */
 const PHASE_MS_PER_DEGREE = 100;

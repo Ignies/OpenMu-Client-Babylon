@@ -1,6 +1,6 @@
 import { isHeroUnderRoof } from './ceilingHideSystem';
 import { inBloodCastle } from '../../controllers/actors/locomotion';
-import { ENUM_WORLD } from '@/core/types';
+import type { ENUM_WORLD } from '@/core/types';
 import {
   createAmbientSystem,
   type AmbientRecipe,
@@ -12,24 +12,16 @@ import {
   BLOOD_CASTLE_MOTES,
   DEVIAS_SNOW,
   DEVIAS_SNOW_BIG,
-  HEARTH_DUST,
-  HOUSE_HEARTH_DUST,
-  LORENCIA_LEAVES,
-  NORIA_PETALS,
+  LEAF_RECIPES,
   RAIN,
   SNOWFALL_MAPS,
-  TAVERN_DUST,
   UNDERWATER_MAPS,
+  allDustRooms,
+  ambientLeavesFor,
 } from '../../controllers/weather/ambientWeather';
 import { maps } from '../../controllers/maps';
 import { ambientStrengthAt } from '../../controllers/weather/ambientSchedule';
-import {
-  DEVIAS_EAST_HEARTH_HOUSE,
-  DEVIAS_READING_ROOM,
-  DEVIAS_TAVERN,
-  DEVIAS_WEST_HEARTH_HOUSE,
-  type Room,
-} from '@versions/shared/maps/devias/rooms';
+import type { Room } from '../../controllers/maps';
 import { serverNow } from '../../controllers/net/serverTime';
 import { lookDirector } from '../../controllers/lighting/director';
 import { roomMaskActive } from '../../controllers/render/scenes/roomMask';
@@ -47,39 +39,8 @@ import type { ISystemFactory } from '../world';
 // Maps with a sky (rain may fall) are declared per map as `MapLayer.outdoor`
 // and read through `maps.isOutdoor(map)`.
 
-/**
- * What falls out of the sky on the two maps that shed anything, each on its
- * own `<WorldName>/leaf01` (MapManager.cpp:1474-1476): Lorencia's dandelion
- * puffs, Noria's pink petals.
- */
-const LEAF_RECIPES: readonly { map: ENUM_WORLD; recipe: AmbientRecipe }[] = [
-  { map: ENUM_WORLD.WD_0LORENCIA, recipe: LORENCIA_LEAVES },
-  { map: ENUM_WORLD.WD_3NORIA, recipe: NORIA_PETALS },
-];
-
-/** Lorencia pub floor, matching the interactive area in loadMapIntoScene. */
-const LORENCIA_TAVERN: Room = {
-  min: { x: 120, y: 120 },
-  max: { x: 129, y: 136 },
-  centre: { x: 124.5, z: 128 },
-};
-
-/** Dust rooms: the recipe runs while the hero stands inside the footprint. */
-const ROOMS: { map: ENUM_WORLD; room: Room; recipe: AmbientRecipe }[] = [
-  { map: ENUM_WORLD.WD_0LORENCIA, room: LORENCIA_TAVERN, recipe: TAVERN_DUST },
-  { map: ENUM_WORLD.WD_2DEVIAS, room: DEVIAS_TAVERN, recipe: HEARTH_DUST },
-  { map: ENUM_WORLD.WD_2DEVIAS, room: DEVIAS_READING_ROOM, recipe: TAVERN_DUST },
-  {
-    map: ENUM_WORLD.WD_2DEVIAS,
-    room: DEVIAS_WEST_HEARTH_HOUSE,
-    recipe: HOUSE_HEARTH_DUST,
-  },
-  {
-    map: ENUM_WORLD.WD_2DEVIAS,
-    room: DEVIAS_EAST_HEARTH_HOUSE,
-    recipe: HOUSE_HEARTH_DUST,
-  },
-];
+// What the air carries (`MapWeather.leaves`, read through `ambientLeavesFor`) and the dust rooms
+// (`MapWeather.dust`, `allDustRooms`) are each map's own rows.
 
 type Slot = {
   recipe: AmbientRecipe;
@@ -104,11 +65,11 @@ export const AmbientParticleSystem: ISystemFactory = world => {
 
   const slots: Slot[] = [
     ...LEAF_RECIPES.map(
-      ({ map: leafMap, recipe }): Slot => ({
+      (recipe): Slot => ({
         recipe,
         followHero: true,
         active: (map, indoors) =>
-          GameOptions.ambientParticles && !indoors && map === leafMap,
+          GameOptions.ambientParticles && !indoors && ambientLeavesFor(map) === recipe,
       })
     ),
     // Atlans, and any other map declaring `MapLayer.underwater`. Both run
@@ -160,8 +121,8 @@ export const AmbientParticleSystem: ISystemFactory = world => {
         (rainTarget(map) > 0 || rainStrength() > 0),
       strength: () => rainStrength(),
     },
-    ...ROOMS.map(
-      ({ map, room, recipe }): Slot => ({
+    ...allDustRooms().map(
+      ({ world: map, room, recipe }): Slot => ({
         recipe,
         followHero: false,
         room,

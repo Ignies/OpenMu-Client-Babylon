@@ -1,8 +1,11 @@
 import { defineMonster } from '@/controllers/monsters';
+import { bone } from '../_shared/bodyFx';
 
 export default defineMonster({
   Numb: 40,
   Name: 'Death Knight',
+  // MODEL_DEATH_KNIGHT: `BITMAP_FIRE` from bone 2, one tick in two (ZzzCharacter.cpp:6002-6010).
+  bodyFx: [bone(2, 'firePuff', 2)],
   maxHealth: 5500,
   model: { type: 29, scale: 1.3 },
   stats: {

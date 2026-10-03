@@ -1,8 +1,13 @@
 import { defineMonster } from '@/controllers/monsters';
+import { bones } from '../_shared/bodyFx';
 
 export default defineMonster({
   Numb: 35,
   Name: 'Death Gorgon',
+  // MODEL_GORGON, `c->Level == 2`: ten `BITMAP_FIRE` on random bones every tick (ZzzCharacter.cpp:6060-6072).
+  bodyFx: [bones(1, 10, 'firePuff')],
+  // The one classic monster that lights the floor itself (MODEL_GORGON, Level 2): (0.8, 0.16, 0), range 2 (ZzzCharacter.cpp:5956-5957).
+  light: { kind: 'forge', color: [0.8, 0.16, 0], range: 2 },
   maxHealth: 6000,
   model: { type: 11, scale: 1.3 },
   stats: {

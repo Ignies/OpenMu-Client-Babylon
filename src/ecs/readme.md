@@ -57,7 +57,7 @@ Picks which weather / leaf / dust recipes (`controllers/weather/ambientWeather.t
 current map, weather and room, and drags hero-relative ones with the hero (`MoveLeaves`). Lorencia
 leaves (`CreateLorenciaLeaf`), Noria petals and Atlans drift (`CreateAtlanseLeaf` numbers), Devias
 snow (`CreateDeviasSnow`), Blood Castle embers (`MoveObjectOnEffect`), rain on outdoor maps while
-`WeatherStatusUpdate` says 1, dust inside tavern rooms. Sky weather is clipped by room openings
+`WeatherStatusUpdate` says 1, dust inside tavern rooms (each map's `weather.leaves` / `weather.dust`). Sky weather is clipped by room openings
 (`weather/roomClip.ts`). Nothing switches off at once: the emit rate ramps to zero and the emitter
 is disposed after its last particle dies, except on a map change. A recipe with a `schedule` reads
 gusts from `ambientSchedule.ts`, rolled from `serverNow()` so every client sees the same weather.

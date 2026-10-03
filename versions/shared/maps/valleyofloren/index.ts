@@ -5,6 +5,7 @@ import {
   VALLEY_OF_LOREN_BLEND_MESHES,
   VALLEY_OF_LOREN_EFFECT_ONLY_TYPES,
   VALLEY_OF_LOREN_EMISSIONS,
+  VALLEYOFLOREN_MESH_ANIMATIONS,
 } from './spec';
 import { VALLEY_OF_LOREN_SOUND } from './sound';
 import { VALLEY_OF_LOREN_LIGHTING } from './lighting';
@@ -45,6 +46,7 @@ export const valleyoflorenLayer: MapLayer = {
   blendMeshes: VALLEY_OF_LOREN_BLEND_MESHES,
   effectOnly: VALLEY_OF_LOREN_EFFECT_ONLY_TYPES,
   emissions: VALLEY_OF_LOREN_EMISSIONS,
+  render: { meshAnimations: VALLEYOFLOREN_MESH_ANIMATIONS },
   sound: VALLEY_OF_LOREN_SOUND,
   lighting: VALLEY_OF_LOREN_LIGHTING,
   terrain: { rest: { 84: sit(true) } },

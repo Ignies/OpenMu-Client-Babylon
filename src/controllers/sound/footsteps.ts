@@ -1,7 +1,7 @@
 import { ENUM_WORLD } from '../../core/types';
 import { PlayerAction } from '@versions/shared/objects/enum';
 import { Rand } from '../../core/rand';
-import { KALIMA_WORLDS, onWorlds } from '../assets/worldAssets';
+import { maps } from '../maps';
 import { SoundsManager } from './soundsManager';
 import { busGain, type SoundBus } from './buses';
 import type { Sounds } from './recipes';
@@ -29,18 +29,13 @@ export const FOOT_DOWN_FRAMES: readonly [number, number] = [1.5, 4.5];
 const PITCH_MIN = 0.95;
 const PITCH_MAX = 1.05;
 
-/** Devias tiles that are *not* snow (interior floor): 3 and 10+. */
-const DEVIAS_SNOW = (tile: number) => tile !== 3 && tile < 10;
-/** Grass tile on the outdoor maps. */
-const GRASS_TILE = 0;
-const onGrass = (tile: number) => tile === GRASS_TILE;
-
 /**
- * One `PlayWalkSound` branch: the step a world plays when `on` (the tile
+ * One `PlayWalkSound` branch: the step a map plays when `on` (the tile
  * under the hero) and `outsideSafeZone` (the swim rule) both hold. The
- * first matching row wins; no row falls through to `DEFAULT_STEP`.
+ * first matching row wins; no row falls through to `DEFAULT_STEP`. Each map
+ * writes its own (`MapSound.footsteps`).
  */
-type StepRule = {
+export type StepRule = {
   readonly sound: Sounds;
   /** Tile predicate; omit for every tile. */
   readonly on?: (tile: number) => boolean;
@@ -48,32 +43,8 @@ type StepRule = {
   readonly outsideSafeZone?: boolean;
 };
 
-const SNOW: StepRule = { sound: 'Sound/pWalk(Snow)' };
-const GRASS: StepRule = { sound: 'Sound/pWalk(Grass)', on: onGrass };
-const SWIM: StepRule = { sound: 'Sound/pSwim', outsideSafeZone: true };
-
-/** `PlayWalkSound`'s `else` branch. */
+/** `PlayWalkSound`'s `else` branch (ZzzCharacter.cpp). */
 const DEFAULT_STEP: Sounds = 'Sound/pWalk(Soil)';
-
-/** `PlayWalkSound` (ZzzCharacter.cpp), one row per world it tests. */
-const STEP_BY_WORLD: Partial<Record<ENUM_WORLD, readonly StepRule[]>> = {
-  // `HeroTile != 3 && HeroTile < 10`: the interior floors are boards.
-  [ENUM_WORLD.WD_2DEVIAS]: [{ ...SNOW, on: DEVIAS_SNOW }],
-  [ENUM_WORLD.WD_0LORENCIA]: [GRASS],
-  [ENUM_WORLD.WD_3NORIA]: [GRASS],
-  // Atlans, the Kalima floors and Doppelganger 3 are underwater / awash:
-  // `SOUND_HUMAN_SWIM` wherever the hero is not in the safe zone.
-  [ENUM_WORLD.WD_7ATLANSE]: [SWIM],
-  ...onWorlds(KALIMA_WORLDS, [SWIM] as readonly StepRule[]),
-  [ENUM_WORLD.WD_67DOPPLEGANGER3]: [SWIM],
-  // `else if (isIceCity) PlayBuffer(SOUND_HUMAN_WALK_SNOW)`, and the same
-  // for Santa Town: snow on every tile. `IsIceCity` counts Doppelganger 1
-  // (GM_Raklion.cpp:2294-2305).
-  [ENUM_WORLD.WD_57ICECITY]: [SNOW],
-  [ENUM_WORLD.WD_58ICECITY_BOSS]: [SNOW],
-  [ENUM_WORLD.WD_65DOPPLEGANGER1]: [SNOW],
-  [ENUM_WORLD.WD_62SANTA_TOWN]: [SNOW],
-};
 
 // ---- 2. state + readers ----------------------------------------------------
 
@@ -99,7 +70,7 @@ export function footstepSound(): Sounds | null {
   }
 
   const map = hero.worldIndex ?? ENUM_WORLD.WD_0LORENCIA;
-  const rules = STEP_BY_WORLD[map];
+  const rules = maps.rowFor(map, l => l.sound?.footsteps);
   if (!rules) return DEFAULT_STEP;
 
   const heroTile = world.getTerrainTile(

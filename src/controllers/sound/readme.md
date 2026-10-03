@@ -44,7 +44,8 @@ never which skill or item asks for it.
   40 ms.
 - Entries and their sources: beds (`ambientBeds.ts`, SceneManager.cpp:564-700), music
   (`music.ts`, `ManageBackgroundMusic` SceneManager.cpp:1027-1175), footsteps (`footsteps.ts`,
-  `PlayWalkSound`, foot-down frames ZzzCharacter.cpp:6241-6249), combat (`combat.ts`, swings
+  `PlayWalkSound`, foot-down frames ZzzCharacter.cpp:6241-6249; each map's `MapSound.footsteps`,
+  building blocks in `maps/shared/sound.ts`), combat (`combat.ts`, swings
   ZzzCharacter.cpp:1219-1233, pain :1420-1431, death :1477-1487), monster voices (`monsters.ts`, read from the body files in versions/shared/monster_models,
   ZzzOpenData.cpp `OpenMonsterModel`), interface (`ui.ts`, DSPlaySound.h), drops (`drops.ts`),
   NPC noises (`npcVoices.ts`), object loops (`objectLoops.ts`), torch crackle (`crackle.ts`,
@@ -76,7 +77,8 @@ never which skill or item asks for it.
 ## Tests
 - `buses.test.ts`: slider curves, the unnamed `world` bus, master folded into both tracks.
 - `drops.test.ts`: the key per drop, bundled jewels, each drop-sound filter row.
-- `footsteps.test.ts`: foot-down frames, no steps in a monster body, Doppelganger snow.
+- `footsteps.test.ts`: foot-down frames, no steps in a monster body, Doppelganger snow, the first
+  map row that holds. `versions/shared/contentRows.golden.test.ts` pins every map's steps.
 - `mapMonsters.test.ts`: cue table sanity, map and hook guards, latches, frame windows, the
   five-tile gate, spawn and period cues, channel caps.
 - `monsterEffects.test.ts`: `AttackEffect` rows, the tick queue, Kalima casters.
@@ -157,8 +159,8 @@ buffs' sound follows their coin-tossed clip), `LANDING_SOUNDS` (Drain Life, Ligh
 Weakness, Innovation and their masters) and `SILENT_HERO_CASTS` (Fire Scream) in `combat.ts` are
 filled by `registerSkills` from each skill's `sound`, `clipSound`, `soundOnLanding` and
 `silentHeroCast`. Change a skill's sound in its file under `versions/shared/skills/`. The
-per-monster rows of `packetSounds.ts` (quiet Energy Ball casters, the Nightmare's teleport, the
-meteorite trap) are monster data, still here.
+per-monster rows `packetSounds.ts` reads are the monster's own: `quietCasts` (on the monster
+folder or its body file), `teleport` (the Nightmare) and `stormSkill` (the meteorite trap).
 
 ## A map's own sound (MapLayer.sound)
 - A map's beds, one-shots, clocked one-shots, music, town tracks, object loops and monster cues

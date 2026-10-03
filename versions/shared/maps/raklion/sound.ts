@@ -1,6 +1,6 @@
 import { MonsterActionType } from '@versions/shared/objects/enum';
 import type { MonsterCue, MapSound, VoiceSet } from '@/controllers/sound';
-import { ATTACK_1_2, HOOK, oneChannel } from '../shared/sound';
+import { ATTACK_1_2, HOOK, SNOW_STEPS, oneChannel } from '../shared/sound';
 import { ICE_WALKER } from '../doppelganger1/sound';
 
 const A = MonsterActionType;
@@ -52,6 +52,7 @@ export const RAKLION: VoiceSet = oneChannel({
 
 /** Raklion's sound (`MapLayer.sound`), read by the sound controller. */
 export const RAKLION_SOUND: MapSound = {
+  footsteps: SNOW_STEPS,
   music: 'Music/Raklion',
   // `IsIceCity()` - Raklion and its boss room (GM_Raklion.cpp:2294-2299).
   monsterCues: RAKLION,

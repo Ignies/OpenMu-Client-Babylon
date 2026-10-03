@@ -3,7 +3,10 @@ import {
   PlaySpeedObject,
   bindAbsentModels,
 } from '../shared/objectVariants';
+import { ENUM_WORLD } from '@/core/types';
 import { LOGIN_SCENE_ABSENT_MODELS, LOGIN_SCENE_PLAY_SPEEDS } from './spec';
+import { LoginChandelierObject } from './chandelierObject';
+import { LoginWallTorchObject } from './wallTorchObject';
 
 /**
  * The login and character-select backdrops. The scene systems own the camera,
@@ -57,5 +60,11 @@ export async function createLoginScene(world: World) {
     for (const [type, speed] of Object.entries(speeds)) {
       tiles[Number(type)] = PlaySpeedObject.at(speed);
     }
+  }
+
+  // World74's lit chandeliers and wall torches (ours on this world; see the classes).
+  if (world.mapIndex === ENUM_WORLD.WD_73NEW_LOGIN_SCENE) {
+    tiles[157] = LoginChandelierObject;
+    tiles[37] = LoginWallTorchObject;
   }
 }

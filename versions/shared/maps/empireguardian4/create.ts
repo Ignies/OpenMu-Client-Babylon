@@ -56,7 +56,7 @@ import { EmpireGuardian4WallTorchObject } from './wallTorchObject';
  *  - **0/1/3/44 and 81** (:1342-1365 with GMEmpireGuardian1.cpp:1333-1339):
  *    deferred to `RenderAfterObjectMesh`, where 0/1/3/44 redraw mesh 2
  *    additive at `sin(WorldTime * 0.0015) * 0.4 + 0.6`. Only 0 (x6) and 81
- *    (x38) are placed. 81's UV scroll is already in `meshAnimation.ts`; the
+ *    (x38) are placed. 81's UV scroll is already in the `render.meshAnimations` rows; the
  *    extra bright pass is a draw-order change.
  *  - The ambience. `PlayObjectSound` answers day 4 with
  *    `SOUND_EMPIREGUARDIAN_INDOOR_SOUND`

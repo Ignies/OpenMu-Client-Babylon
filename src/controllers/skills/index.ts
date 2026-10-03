@@ -5,7 +5,7 @@ import { SKILL_LIGHTS } from '../lighting/skills';
 import { LANDING_SOUNDS, SILENT_HERO_CASTS, SKILL_CLIP_SOUNDS, SKILL_SOUNDS } from '../sound/combat';
 import { MASTER_BASES, SKILL_DELAY_MS, SKILL_EFFECTS } from '@/modules/skills/recipes';
 import type { SkillDef } from './define';
-import { BUFF_ARRIVALS, BUFF_HITS, BUFF_VISUALS, LAUNCHER_ARROWS, LOOK_ALIASES, SKILL_VISUALS, type BuffLook } from './visuals';
+import { BUFF_ARRIVALS, BUFF_HITS, BUFF_VISUALS, LAUNCHER_ARROWS, LOOK_ALIASES, SKILL_VISUALS, WARRIOR_GLINTS, type BuffLook } from './visuals';
 
 export { defineSkill, defineBuffLooks, type SkillDef, type Mount } from './define';
 
@@ -25,12 +25,19 @@ export function registerSkills(defs: readonly SkillDef[]): void {
     if (d.silentHeroCast) SILENT_HERO_CASTS.add(d.id);
     if (d.delayMs !== undefined) (SKILL_DELAY_MS as Record<number, number>)[d.id] = d.delayMs;
     if (d.effect !== undefined) SKILL_EFFECTS[d.id] = d.effect;
+    if (d.warriorGlint) WARRIOR_GLINTS[d.id] = d.warriorGlint;
     Object.assign(BUFF_VISUALS, d.buffs);
     Object.assign(BUFF_ARRIVALS, d.buffArrivals);
     Object.assign(BUFF_HITS, d.buffHits);
     // Clip rules, target, step-in, kill, combat layer and hooks.
     combat.registerSkill(d.id, d);
   }
+}
+
+/** Whether the hero's cast of `skill` takes UseSkillWarrior's glint (`SkillDef.warriorGlint`). */
+export function hasWarriorGlint(skill: number, mounted: boolean): boolean {
+  const glint = WARRIOR_GLINTS[skill];
+  return glint === true || (glint === 'mounted' && mounted);
 }
 
 export function registerBuffLooks(looks: Partial<Record<number, BuffLook>>): void {

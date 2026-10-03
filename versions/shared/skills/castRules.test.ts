@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import './skillVisuals';
 import { PlayerAction } from '@versions/shared/objects/enum';
 import { combat } from '@/controllers/combat';
+import { hasWarriorGlint } from '@/controllers/skills';
 import { SKILL_EFFECTS } from '@/modules/skills/recipes';
 
 vi.hoisted(() => {
@@ -37,6 +38,12 @@ describe('skill cast rules', () => {
   it('Nova and Combo kills knock the body back; only Nova glows', () => {
     expect(IDS.filter(id => combat.skillKill(id)?.knock)).toEqual([40, 59]);
     expect(IDS.filter(id => combat.skillKill(id)?.dying)).toEqual([40]);
+  });
+
+  it('the warrior glint: the UseSkillWarrior casts, and Impale only from a mount (SkillCast.cpp:130)', () => {
+    const glint = IDS.filter(id => hasWarriorGlint(id, false));
+    expect(glint).toEqual([19, 20, 21, 22, 23, 41, 43, 44, 49, 55, 57, 326, 327, 328, 329, 330, 332, 336, 339, 342, 479, 481, 490]);
+    expect(IDS.filter(id => hasWarriorGlint(id, true) && !glint.includes(id))).toEqual([47]);
   });
 
   it("Nova's file names the hold's two skill numbers", () => {

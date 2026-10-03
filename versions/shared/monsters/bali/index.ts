@@ -1,8 +1,11 @@
 import { defineMonster } from '@/controllers/monsters';
+import { BALI_FX } from './bodyFx';
 
 export default defineMonster({
   Numb: 150,
   Name: 'Bali',
+  // MODEL_BALI: see `bodyFx.ts`.
+  bodyFx: BALI_FX,
   maxHealth: 5000,
   model: { type: 32, scale: 0.12 },
   stats: {

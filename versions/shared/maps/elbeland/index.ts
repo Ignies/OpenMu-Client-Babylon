@@ -4,6 +4,7 @@ import {
   ELBELAND_BLEND_MESHES,
   ELBELAND_EFFECT_ONLY_TYPES,
   ELBELAND_EMISSIONS,
+  ELBELAND_MESH_ANIMATIONS,
 } from './spec';
 import { ELBELAND_SOUND } from './sound';
 import { ELBELAND_LIGHTING } from './lighting';
@@ -75,6 +76,7 @@ export const elbelandLayer: MapLayer = {
   blendMeshes: ELBELAND_BLEND_MESHES,
   effectOnly: ELBELAND_EFFECT_ONLY_TYPES,
   emissions: ELBELAND_EMISSIONS,
+  render: { meshAnimations: ELBELAND_MESH_ANIMATIONS },
   sound: ELBELAND_SOUND,
   lighting: ELBELAND_LIGHTING,
   terrain: { rest: { 103: sit(true) } },

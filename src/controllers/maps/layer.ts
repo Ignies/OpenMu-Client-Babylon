@@ -5,6 +5,8 @@ import type { MapSound } from '../sound';
 import type { MapLighting } from '../lighting';
 import type { MapWeather } from '../weather';
 import type { MapTerrain } from '../terrain';
+import type { MapRender } from '../render';
+import type { MapFx } from '../fx';
 
 /**
  * The contract every map entry implements. One folder per map,
@@ -156,6 +158,12 @@ export interface MapLayer {
 
   /** Ground overlays, water, rest objects, grass. The terrain controller's. */
   readonly terrain?: MapTerrain;
+
+  /** Per-frame mesh writes (UV scrolls, blend-mesh light). The render controller's. */
+  readonly render?: MapRender;
+
+  /** Ambient wildlife (boids). The fx controller's. */
+  readonly fx?: MapFx;
 
   /**
    * Bind this map's object classes into `world.terrain.MapTileObjects` and

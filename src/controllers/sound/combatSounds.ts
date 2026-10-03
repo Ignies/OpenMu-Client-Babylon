@@ -15,5 +15,6 @@ export {
   skillSound,
   heroCastSound,
   pickupSound,
+  mapDeathBurst,
   type WeaponHands,
 } from '.';

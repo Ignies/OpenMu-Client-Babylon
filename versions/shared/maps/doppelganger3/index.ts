@@ -4,8 +4,10 @@ import {
   DOPPELGANGER3_BLEND_MESHES,
   DOPPELGANGER3_EFFECT_ONLY_TYPES,
   DOPPELGANGER3_EMISSIONS,
+  DOPPELGANGER3_MESH_ANIMATIONS,
 } from './spec';
 import { DOPPELGANGER_SOUND } from '../doppelganger1/sound';
+import { SWIM_STEPS } from '../shared/sound';
 
 /**
  * Doppelganger 3 (World68 / Object68) - the map entry: identity and the per-world data the
@@ -50,7 +52,10 @@ export const doppelganger3Layer: MapLayer = {
   blendMeshes: DOPPELGANGER3_BLEND_MESHES,
   effectOnly: DOPPELGANGER3_EFFECT_ONLY_TYPES,
   emissions: DOPPELGANGER3_EMISSIONS,
-  sound: DOPPELGANGER_SOUND,
+  render: { meshAnimations: DOPPELGANGER3_MESH_ANIMATIONS },
+  // What flies here (`MoveBoids`, GOBoid.cpp:1304-1346).
+  fx: { boids: 'fish' },
+  sound: { ...DOPPELGANGER_SOUND, footsteps: SWIM_STEPS },
   // Atlans' art: the `RenderTerrain` grass guard (ZzzLodTerrain.cpp:2651).
   terrain: { grass: false },
   create: world => import('./create').then(m => m.createDoppelganger3(world)),

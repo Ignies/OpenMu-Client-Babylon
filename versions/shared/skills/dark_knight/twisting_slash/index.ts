@@ -203,6 +203,8 @@ const twistingSlash = twistingSlashOf(false);
 export default defineSkill({
   id: 41,
   name: "Twisting Slash",
+  // UseSkillWarrior's glint (SkillCast.cpp:113-247, :357-376).
+  warriorGlint: true,
   // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
   lookAliases: [330, 332],
   // Master numbers cast, heard, lit and drawn as this skill (the original names them in its `case`).

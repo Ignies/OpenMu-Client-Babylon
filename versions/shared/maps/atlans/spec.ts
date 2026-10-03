@@ -1,5 +1,6 @@
 import type { Emission } from '@/controllers/fx/effectParticles';
 import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
+import type { MeshAnimations } from '@/controllers/render';
 
 /**
  * Atlans (World 8 / `Object8`), the plain-data half. Nothing in here may
@@ -25,7 +26,7 @@ import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
  *
  *  - **23** (×10) the water plane, mesh 0 = `wt00.jpg`, the same caustics
  *    sheet the terrain's layer-2 flipbook uses. Breathes on
- *    `sin(WorldTime * 0.002) * 0.3 + 0.5` - table entry in `meshAnimation.ts`.
+ *    `sin(WorldTime * 0.002) * 0.3 + 0.5` - table entry in the `render.meshAnimations` rows.
  *  - **32** (×105) and **34** (×25), the glowing coral lamps. Both models are
  *    two meshes, `wood05` (the coral body) and `wood052` (the glow shell), so
  *    the blend index is 1 rather than 0; they pulse twice as fast and over
@@ -41,7 +42,7 @@ import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
  * `ALPHA_ADD`, plus a `sin(t*2)` mesh-visibility fade on `Object24.glb` that
  * is the type-23 `BlendMeshLight` done as alpha). They now duplicate - and,
  * for type 23, override the material of - what this table and
- * `meshAnimation.ts` do properly, and should be deleted with this wiring.
+ * the `render.meshAnimations` rows do properly, and should be deleted with this wiring.
  */
 export const ATLANS_BLEND_MESHES: Readonly<Record<number, number>> = {
   23: 0,
@@ -98,3 +99,16 @@ export const ATLANS_EMISSIONS: Partial<Record<number, readonly Emission[]>> =
  */
 export const ATLANS_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
   {};
+
+/**
+ * Atlans (ZzzObject.cpp:4012-4034). No UV scroll at all here - the movement
+ * is baked into the BMD bone animation. What the original does animate is
+ * `BlendMeshLight`, a slow breathing on the water plane (23), the two coral
+ * lamps (32/34) and the anemone (40).
+ */
+export const ATLANS_MESH_ANIMATIONS: MeshAnimations = {
+  23: { mesh: 0, kind: 'blend', light: t => Math.sin(t * 0.002) * 0.3 + 0.5 },
+  32: { mesh: 1, kind: 'blend', light: t => Math.sin(t * 0.004) * 0.5 + 0.5 },
+  34: { mesh: 1, kind: 'blend', light: t => Math.sin(t * 0.004) * 0.5 + 0.5 },
+  40: { mesh: 0, kind: 'blend', light: t => Math.sin(t * 0.004) * 0.3 + 0.5 },
+};

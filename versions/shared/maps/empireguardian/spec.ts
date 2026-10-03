@@ -1,5 +1,7 @@
 import type { Emission } from '@/controllers/fx/effectParticles';
 import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
+import type { MeshAnimations } from '@/controllers/render';
+import { perTick } from '../shared/meshAnimation';
 
 /**
  * Fortress of Imperial Guardian, days 1-4 (`WD_69EMPIREGUARDIAN1 …
@@ -20,7 +22,7 @@ import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
  * World78's total, not World73's.
  */
 
-/** No `o->BlendMesh` writes; 81's V scroll (`+0.015`/tick) is in `meshAnimation.ts`. */
+/** No `o->BlendMesh` writes; 81's V scroll (`+0.015`/tick) is in the `render.meshAnimations` rows. */
 export const EMPIRE_GUARDIAN_BLEND_MESHES: Readonly<Record<number, number>> = {};
 
 /**
@@ -68,4 +70,9 @@ export const EMPIRE_GUARDIAN_LIGHTS: Partial<
       },
     },
   ],
+};
+
+/** Fortress of Imperial Guardian (GMEmpireGuardian1.cpp:281-284 and copies): the rain sheet. */
+export const EMPIREGUARDIAN_MESH_ANIMATIONS: MeshAnimations = {
+  81: { mesh: 0, kind: 'blend', v: perTick(0.015) },
 };

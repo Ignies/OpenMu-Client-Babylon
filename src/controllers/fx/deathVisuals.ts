@@ -3,10 +3,11 @@ import { effects } from '.';
 import type { RGB } from './core';
 import { BOMB_SPARKS, EXPLOSION_CELLS, MODEL, SMOKE, TEX } from './recipes';
 import type { Sounds } from '../sound/soundsManager';
+import { monsterModelRegistry, type MonsterShatter } from '../monsters';
 
 /**
  * Special deaths: what a body breaks into (`SetPlayerDie` ZzzCharacter.cpp:1372-1420, `CreateBlood`
- * ZzzEffectBlurSpark.cpp:445-450), keyed by monster model type (ZzzOpenData.cpp:2313). See fx/readme.md.
+ * ZzzEffectBlurSpark.cpp:445-450), named by each monster body file's `shatter` (`versions/shared/monster_models/`). See fx/readme.md.
  */
 
 export interface ShatterDeath {
@@ -18,14 +19,6 @@ export interface ShatterDeath {
 
 /** `SOUND_BONE2`: mBone2.wav, the bone rattle every shatter plays. */
 const BONE_SOUND: Sounds = 'Sound/mBone2';
-
-/** MONSTER_MODEL_ICE_MONSTER / STONE_GOLEM / DEATH_COW (_enum.h:4162, :4172, :4177). */
-const MONSTER_MODEL_ICE_MONSTER = 15;
-const MONSTER_MODEL_STONE_GOLEM = 25;
-const MONSTER_MODEL_DEATH_COW = 30;
-/** MONSTER_MODEL_STATUE_OF_SAINT / CASTLE_GATE (_enum.h:4216-4217). */
-const MONSTER_MODEL_STATUE_OF_SAINT = 60;
-const MONSTER_MODEL_CASTLE_GATE = 61;
 
 /** `SOUND_HIT_GATE2` (eHitGate2): the crack both Blood Castle destructibles die on. */
 const GATE_BREAK_SOUND: Sounds = 'Sound/eHitGate2';
@@ -124,17 +117,19 @@ export function spawnCrystalShards(
  *  (`versions/shared/monsters/skeleton_warrior.ts`) take the same bone shatter. */
 export const skeletonShatter: ShatterDeath = boneShatter;
 
-const SPECIAL_DEATHS: Readonly<Record<number, ShatterDeath>> = {
-  [MONSTER_MODEL_DEATH_COW]: boneShatter,
-  [MONSTER_MODEL_STONE_GOLEM]: stoneShatter,
-  [MONSTER_MODEL_ICE_MONSTER]: iceShatter,
-  [MONSTER_MODEL_CASTLE_GATE]: gateShatter,
-  [MONSTER_MODEL_STATUE_OF_SAINT]: crystalShatter,
+/** What a body file's `shatter` names. */
+const SHATTERS: Readonly<Record<MonsterShatter, ShatterDeath>> = {
+  bone: boneShatter,
+  stone: stoneShatter,
+  ice: iceShatter,
+  gate: gateShatter,
+  crystal: crystalShatter,
 };
 
-/** The shatter this monster model dies with, or undefined for the Die clip. */
+/** The shatter this monster model dies with (its body file's `shatter`), or undefined for the Die clip. */
 export function shatterDeathFor(monsterModelType: number): ShatterDeath | undefined {
-  return SPECIAL_DEATHS[monsterModelType];
+  const kind = monsterModelRegistry.get(monsterModelType)?.shatter;
+  return kind ? SHATTERS[kind] : undefined;
 }
 
 /** `CreateBomb(pos, true)` (ZzzEffect.cpp:6394-6466, SubType 0): 20 sparks + one grey explosion card. */

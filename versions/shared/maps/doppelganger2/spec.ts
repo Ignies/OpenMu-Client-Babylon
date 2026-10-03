@@ -1,5 +1,5 @@
 import type { Emission } from '@/controllers/fx/effectParticles';
-import type { MeshAnimation } from '@/controllers/render/meshAnimation';
+import type { MeshAnimation } from '@/controllers/render';
 import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
 import {
   VULCANUS_EMISSIONS,
@@ -85,7 +85,7 @@ export const DOPPELGANGER2_LIGHTS: Partial<
 > = VULCANUS_LIGHTS;
 
 /**
- * The per-frame mesh writes, for `controllers/render/meshAnimation.ts`.
+ * The per-frame mesh writes, for the `render.meshAnimations` rows.
  *
  *  - **15** (x0, :247-254): `StreamMesh = 0` and the body's V ramped down
  *    over ten seconds. No model in Object67 and nothing placed; kept because

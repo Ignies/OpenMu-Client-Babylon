@@ -1,3 +1,4 @@
+import type { MonsterBodyFx } from './bodyFx';
 import type { NpcGear, NpcGlobalVoice, NpcModel, NpcTransform, NpcTrap, NpcVoice } from './npc';
 
 /** The original client's monster table row (`Monster.txt`), without the number and name. */
@@ -59,8 +60,37 @@ export type MonsterDef = {
   voice?: NpcVoice;
   /** Its `PlayMonsterSoundGlobal` lines, also heard from a player wearing it as a skin. */
   globalVoice?: NpcGlobalVoice;
+  /** Skills whose cast sound this type never plays (the sound controller's `monsterCastQuiet`). */
+  quietCasts?: readonly number[];
+  /** Its Teleport (skill 6) on `world` plays `sound` instead of CreateTeleportBegin. */
+  teleport?: MonsterTeleport;
+  /** The skill whose AttackTime replays the meteorite storm sound every frame (a trap's). */
+  stormSkill?: number;
+  /** The light it carries while in scope (the lighting controller's `characterLightFor`). */
+  light?: MonsterLight;
+  /** What its body throws off or carries (`bodyFx.ts`; the fx controller's `monsterVisualFor`). */
+  bodyFx?: MonsterBodyFx;
   stats?: MonsterStats;
 };
+
+/**
+ * `MonsterDef.light` (`MoveCharacterVisual`, ZzzCharacter.cpp:5790-6005): a flickering forge or
+ * brazier light at waist height; fire that takes light off the floor (-1.3, range 3); or a glow it
+ * carries (ours, Enhanced/Ultra only: `height` over the feet, waist when omitted; `color` the
+ * amber card when omitted, or the cyan of a hand holding `lightning2`).
+ */
+export type MonsterLight =
+  | { readonly kind: 'forge'; readonly color: readonly [number, number, number]; readonly range: number }
+  | { readonly kind: 'dark' }
+  | {
+      readonly kind: 'carried';
+      readonly range: number;
+      readonly height?: number;
+      readonly color?: readonly [number, number, number] | 'lightning';
+    };
+
+/** `MonsterDef.teleport`: `channels` is the wave's `LoadWaveFile` count. */
+export type MonsterTeleport = { readonly sound: string; readonly channels: number; readonly world: number };
 
 /** What `get` returns: the table row as it always was, number and name included. */
 export type MonsterRow = MonsterStats & { Numb: number; Name: string };

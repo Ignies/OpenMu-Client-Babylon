@@ -4,6 +4,7 @@ import {
   ATLANS_BLEND_MESHES,
   ATLANS_EFFECT_ONLY_TYPES,
   ATLANS_EMISSIONS,
+  ATLANS_MESH_ANIMATIONS,
 } from './spec';
 import { ATLANS_SOUND } from './sound';
 import { ATLANS_LIGHTING } from './lighting';
@@ -64,6 +65,9 @@ export const atlansLayer: MapLayer = {
   blendMeshes: ATLANS_BLEND_MESHES,
   effectOnly: ATLANS_EFFECT_ONLY_TYPES,
   emissions: ATLANS_EMISSIONS,
+  render: { meshAnimations: ATLANS_MESH_ANIMATIONS },
+  // What flies here (`MoveBoids`, GOBoid.cpp:1304-1346).
+  fx: { boids: 'fish' },
   sound: ATLANS_SOUND,
   lighting: ATLANS_LIGHTING,
   terrain: {

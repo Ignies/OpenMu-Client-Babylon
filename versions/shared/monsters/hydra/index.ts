@@ -3,6 +3,8 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 49,
   Name: 'Hydra',
+  // Ours: the big lightning2 flare over the head of a boss.
+  light: { kind: 'carried', range: 4, height: 1.2, color: 'lightning' },
   maxHealth: 19000,
   model: { type: 37, scale: 1 },
   stats: {

@@ -8,7 +8,6 @@ import { monsterModelTypeOf } from '../../controllers/anim/playSpeed';
 import { isPlayerBody } from '../../controllers/actors/playerObject';
 import { HORN_OF_FENRIR, PET_GROUP } from '../../modules/pets/petConstants';
 import type { CharacterClassNumber } from '../../core/types';
-import { CHAOS_CASTLE_WORLDS } from '../../controllers/assets/worldAssets';
 import {
   COMBAT_BUS,
   MONSTER_ASSASSIN,
@@ -19,6 +18,7 @@ import {
   playerDeathSound,
   playerPainSound,
   playerSwingSound,
+  mapDeathBurst,
 } from '../../controllers/sound/combatSounds';
 import {
   playSfx,
@@ -71,7 +71,6 @@ const FENRIR_RUN: readonly Sounds[] = ['Sound/pW_run-01', 'Sound/pW_run-02', 'So
 // The walk clips reuse the first two run waves; pW_step is loaded but never played (:777-786).
 const FENRIR_WALK: readonly Sounds[] = ['Sound/pW_run-01', 'Sound/pW_run-02'];
 const FENRIR_IDLE: readonly Sounds[] = ['Sound/pWidle1', 'Sound/pWidle2'];
-const CHAOS_CASTLE_DEATH: readonly Sounds[] = ['Sound/eMonsterBoom1', 'Sound/eMonsterBoom2'];
 
 const A = PlayerAction;
 
@@ -180,7 +179,8 @@ export const CombatSfxSystem: ISystemFactory = world => {
       const hero = world.playerEntity;
       if (hero) setSfxListener(hero.transform.pos.x, hero.transform.pos.z);
       const now = performance.now();
-      const chaosCastle = CHAOS_CASTLE_WORLDS.includes(world.mapIndex);
+      // The map's own death burst (Chaos Castle's), in place of every body's death sound.
+      const deathBurst = mapDeathBurst(world.mapIndex);
       attackEffects.drain(now, world.mapIndex);
 
       for (const e of query) {
@@ -256,7 +256,7 @@ export const CombatSfxSystem: ISystemFactory = world => {
             }
             case MonsterActionType.Die: {
               // Chaos Castle swaps every death for a burst (:1537-1540).
-              const sfx = chaosCastle ? pick(CHAOS_CASTLE_DEATH) : monsterDeathSound(type, npc);
+              const sfx = deathBurst ? pick(deathBurst) : monsterDeathSound(type, npc);
               if (sfx) playVoice(sfx, pos);
               break;
             }
@@ -293,8 +293,8 @@ export const CombatSfxSystem: ISystemFactory = world => {
               playSfx('Sound/pWpain2', pos, { bus: COMBAT_BUS, channels: 1 });
             }
           } else if (action === A.PLAYER_DIE1 || action === A.PLAYER_DIE2) {
-            if (chaosCastle) {
-              playSfx(pick(CHAOS_CASTLE_DEATH), pos, { bus: COMBAT_BUS, channels: 2 });
+            if (deathBurst) {
+              playSfx(pick(deathBurst), pos, { bus: COMBAT_BUS, channels: 2 });
             } else {
               playSfx(playerDeathSound(classOf(e)), pos, { bus: COMBAT_BUS });
               if (ridesFenrir(e)) playSfx('Sound/pWdeath', pos, { bus: COMBAT_BUS, channels: 1 });

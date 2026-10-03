@@ -304,6 +304,8 @@ const deathStab = deathStabOf(false);
 export default defineSkill({
   id: 43,
   name: "Death Stab",
+  // UseSkillWarrior's glint (SkillCast.cpp:113-247, :357-376).
+  warriorGlint: true,
   // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
   lookAliases: [336, 339, 342],
   // 43 Death Stab: red streaks gathering in front of the sword, the blue drill and the victim's electrified

@@ -225,6 +225,8 @@ const fireBreathPlus: Step = (at, c) => {
 export default defineSkill({
   id: 49,
   name: "Fire Breath",
+  // UseSkillWarrior's glint (SkillCast.cpp:113-247, :357-376).
+  warriorGlint: true,
   clip: riderClip,
   // 49 Fire Breath (AT_SKILL_RIDER): BITMAP_SHOTGUN and its sparks when the rider clip passes key 5, or
   // after the 14-tick AttackTime cap (ZzzCharacter.cpp:2910-2915, :4405-4409); see `fireBreath`.

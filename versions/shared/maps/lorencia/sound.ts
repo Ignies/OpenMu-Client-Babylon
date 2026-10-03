@@ -1,5 +1,5 @@
 import type { MapSound } from '@/controllers/sound';
-import { WIND } from '../shared/sound';
+import { GRASS_STEPS, WIND } from '../shared/sound';
 
 /**
  * `HeroTile == 4` (ZzzInterface.cpp:3315-3318): the plank floor of the
@@ -9,6 +9,7 @@ const PUB_TILE = 4;
 
 /** Lorencia's sound (`MapLayer.sound`), read by the sound controller. */
 export const LORENCIA_SOUND: MapSound = {
+  footsteps: GRASS_STEPS,
   // Wind outdoors, cut inside the buildings (tile 4,
   // SceneManager.cpp:885-895). No rain bed: the town stays dry.
   beds: [{ ...WIND, mutedOn: tile => tile === 4 }],

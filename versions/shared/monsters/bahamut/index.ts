@@ -3,6 +3,8 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 45,
   Name: 'Bahamut',
+  // Ours: the lure hangs off the head of a fish lying on the seabed, so the pool sits low.
+  light: { kind: 'carried', range: 3, height: 0.35 },
   maxHealth: 2400,
   model: { type: 33, scale: 0.6 },
   stats: {

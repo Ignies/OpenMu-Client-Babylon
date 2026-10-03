@@ -1,9 +1,10 @@
 import type { MapSound } from '@/controllers/sound';
-import { WIND } from '../shared/sound';
+import { SNOW_STEPS, WIND } from '../shared/sound';
 import { RAKLION } from '../raklion/sound';
 
 /** Raklion's hatchery sound (`MapLayer.sound`), read by the sound controller. */
 export const RAKLION_BOSS_SOUND: MapSound = {
+  footsteps: SNOW_STEPS,
   // Wind (SceneManager.cpp:620-622).
   beds: [WIND],
   // `CGM_Raklion::PlayBGM` (GM_Raklion.cpp:2938-2945) plays it only between

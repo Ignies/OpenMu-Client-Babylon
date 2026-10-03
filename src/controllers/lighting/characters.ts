@@ -4,6 +4,7 @@ import type { Entity } from '../../ecs/world';
 import { lightingTier } from './lightingQuality';
 import type { LightingLayer } from './layer';
 import { LightSource, type LightRecipe } from './lightSource';
+import { monsterRegistry, type MonsterLight } from '../monsters';
 
 /**
  * The light an NPC or monster carries while in scope, following its body:
@@ -64,114 +65,72 @@ type CharacterLight = LightRecipe & {
 function carried(
   range: number,
   heightOffset: number,
-  color: readonly [number, number, number] = CARRIED_GLOW_RGB,
-  pulse: typeof CARRIED_GLOW_PULSE | undefined = CARRIED_GLOW_PULSE
+  color: readonly [number, number, number] = CARRIED_GLOW_RGB
 ): CharacterLight {
   return {
     color,
     range,
     pointRange: range + 2,
     heightOffset,
-    pulse,
+    pulse: CARRIED_GLOW_PULSE,
     priority: PRIORITY_CHARACTER,
     improvedOnly: true,
   };
 }
 
-/** Keyed by NPC/monster type number (`MonstersDatabase`). */
-export const CHARACTER_LIGHTS: Partial<Record<number, CharacterLight>> = {
-  // 251 Hanzo the Blacksmith (MODEL_SMITH): (L, 0.4L, 0), range 3, :5970-5971.
-  251: {
-    color: [1, 0.4, 0],
-    range: 3,
-    pointRange: 5,
-    heightOffset: BODY_HEIGHT,
-    flicker: FORGE_FLICKER,
-    priority: PRIORITY_CHARACTER,
-  },
-  // 231 Devias trader (MODEL_DEVIAS_TRADER): (0.5L, 0.3L, 0), range 3, :5999-6000.
-  231: {
-    color: [0.5, 0.3, 0],
-    range: 3,
-    pointRange: 5,
-    heightOffset: BODY_HEIGHT,
-    flicker: FORGE_FLICKER,
-    priority: PRIORITY_CHARACTER,
-  },
-  // 59 Tantallos (`SubType 1`, :5968-5969) and 63 Death Beam Knight
-  // (:5910-5911): the fire around them *takes* light off the floor -
-  // `AddTerrainLight(…, (-1.3, -1.3, -1.3), 3)`, flat, every tick. The pool
-  // keeps the terrain radius (the usual +2 made a black hole of it) and the
-  // subtraction is scaled to linear light, DARK_FLOOR_GAIN.
-  59: {
-    color: [-1.3, -1.3, -1.3],
-    range: 3,
-    pointRange: 3,
-    heightOffset: BODY_HEIGHT,
-    gain: DARK_FLOOR_GAIN,
-    floorGain: DARK_FLOOR_GAIN,
-    priority: PRIORITY_CHARACTER,
-  },
-  63: {
-    color: [-1.3, -1.3, -1.3],
-    range: 3,
-    pointRange: 3,
-    heightOffset: BODY_HEIGHT,
-    gain: DARK_FLOOR_GAIN,
-    floorGain: DARK_FLOOR_GAIN,
-    priority: PRIORITY_CHARACTER,
-  },
-  // 35 Death Gorgon (MODEL_GORGON, `c->Level == 2`): the one monster in the
-  // classic set that lights the floor itself - (0.8, 0.16, 0), range 2
-  // (ZzzCharacter.cpp:5956-5957). Every tier: this one is the original's.
-  35: {
-    color: [0.8, 0.16, 0],
-    range: 2,
-    pointRange: 4,
-    heightOffset: BODY_HEIGHT,
-    flicker: FORGE_FLICKER,
-    priority: PRIORITY_CHARACTER,
-  },
-
-  // ---- carried glows: ours, Enhanced/Ultra only ----------------------------
-
-  // 45 Bahamut / 51 Great Bahamut: the lure hangs off the head of a fish
-  // lying on the seabed, so the pool sits low.
-  45: carried(3, 0.35),
-  51: carried(3, 0.5),
-  // 46 Vepar / 81 Golden Vepar: one `lightning2` light in each hand.
-  46: carried(3, 0.8, LIGHTNING_GLOW_RGB),
-  81: carried(3, 0.8, LIGHTNING_GLOW_RGB),
-  // 48 Lizard King / 80 Golden Lizard King: four burning spikes.
-  48: carried(3, 0.9),
-  80: carried(3, 0.9),
-  // 49 Hydra: the big `lightning2` flare over the head of a boss.
-  49: carried(4, 1.2, LIGHTNING_GLOW_RGB),
-  // 36 Shadow has no row on purpose: its body cards are `SubType 1`,
-  // `dst * (1 - src)` - a texture blend on the cards, not an
-  // `AddTerrainLight`; the original throws no floor light for it.
-  // 39 Poison Shadow: the same body, but additive, in `Vector(0.2, 0.7, 0.1)`.
-  39: carried(3, BODY_HEIGHT, [0.2, 0.7, 0.1], undefined),
-  // 27 Scorpion: the tail lamp, `Luminosity` 0.8 flat (:6037).
-  27: carried(2, 0.25, [0.8, 0.32, 0.16], undefined),
-  // 235 Priest Sevina, 238 Chaos Goblin: a held flare.
-  235: carried(3, 0.9),
-  238: carried(2, BODY_HEIGHT),
-};
+/** The recipe a type's `MonsterDef.light` row stands for. */
+function recipeOf(light: MonsterLight): CharacterLight {
+  switch (light.kind) {
+    case 'forge':
+      return {
+        color: light.color,
+        range: light.range,
+        pointRange: light.range + 2,
+        heightOffset: BODY_HEIGHT,
+        flicker: FORGE_FLICKER,
+        priority: PRIORITY_CHARACTER,
+      };
+    case 'dark':
+      // The pool keeps the terrain radius (the usual +2 made a black hole of it) and the
+      // subtraction is scaled to linear light, DARK_FLOOR_GAIN.
+      return {
+        color: [-1.3, -1.3, -1.3],
+        range: 3,
+        pointRange: 3,
+        heightOffset: BODY_HEIGHT,
+        gain: DARK_FLOOR_GAIN,
+        floorGain: DARK_FLOOR_GAIN,
+        priority: PRIORITY_CHARACTER,
+      };
+    case 'carried':
+      return carried(
+        light.range,
+        light.height ?? BODY_HEIGHT,
+        light.color === 'lightning' ? LIGHTNING_GLOW_RGB : light.color
+      );
+  }
+}
 
 // ---- 2. state + readers ----------------------------------------------------
 
 const sources = new Map<Entity, LightSource>();
+const recipes = new WeakMap<MonsterLight, CharacterLight>();
 
 /**
- * The recipe a character type carries, if any. Classic gets the original's
- * own lights only; the rows we added for a carried glow need a tier that
- * lights the floor dynamically in the first place.
+ * The recipe a character type carries, if any (its monster folder's `light`). Classic gets the
+ * original's own lights only; the rows we added for a carried glow need a tier that lights the
+ * floor dynamically in the first place.
  */
 export function characterLightFor(npcType: number): LightRecipe | undefined {
-  const row = CHARACTER_LIGHTS[npcType];
+  const light = monsterRegistry.def(npcType)?.light;
+  if (!light) return undefined;
+  let row = recipes.get(light);
+  if (!row) {
+    row = recipeOf(light);
+    recipes.set(light, row);
+  }
 
-  if (row?.improvedOnly && !lightingTier()) return undefined;
+  if (row.improvedOnly && !lightingTier()) return undefined;
 
   return row;
 }
@@ -220,7 +179,7 @@ function emitters(): readonly LightSource[] {
 
 // ---- 3. the layer ----------------------------------------------------------
 
-/** Every map: the table decides who is lit, not the world. */
+/** Every map: the monster's own row decides who is lit, not the world. */
 export const charactersLayer: LightingLayer = {
   name: 'characters',
   update: (_map: ENUM_WORLD) => {},

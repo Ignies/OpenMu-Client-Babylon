@@ -24,7 +24,8 @@ shared pools, textures and particle recipes other folders reuse.
   `spawnLinkedModel` (`linkedModel.ts`) spawn without the facade and hand back a richer handle.
 - Modules the ECS systems and other controllers call directly:
   - `effectParticles.ts`: the map-object sprite pool (`Emission`, `ParticleEmitter`,
-    `BonedParticleEmitter`, `HeldSprites`, `spawnParticle`, `emissionsFor`).
+    `BonedParticleEmitter`, `HeldSprites`, `spawnParticle`, `emissionsFor`); `BonedParticleEmitter`
+    and `BonedEmission` are also on `index.ts` for map object classes.
   - `moveTargetEffect.ts`: `loadEffectTexture` (the shared effect texture cache), `TerrainDecal`,
     `MoveTargetEffect` (the click-to-move marker).
   - `ambientParticles.ts` `createAmbientSystem`, `boids.ts` `boidsFor` / `boidFactoryFor`,
@@ -113,7 +114,7 @@ a soft wake. Driven by `ecs/systems/bandSystem.ts`, one spawn per hit.
 ### boids.ts
 `GOBoid.cpp` has two halves: `Mounts[]` (pets, Fenrir, the Dark Lord's horse) lives in
 `modules/pets/pets.ts` and `ecs/systems/petSystem.ts`; `Boids[]` (birds, bats, butterflies, crows,
-fish) is here. Each boid plays its own call sound (GOBoid.cpp:1481-1501). The ground crawlers
+fish) is here; each map names its species (`fx: { boids }` on the entry, `MapFx`). Each boid plays its own call sound (GOBoid.cpp:1481-1501). The ground crawlers
 (GOBoid.cpp:1690-1745) are not ported yet. `MAX_BOIDS` is 13, not the original array size of 40.
 
 ### cards.ts
@@ -128,8 +129,9 @@ cached `ParticleSystem` per recipe. `disposePools()` + `clearTimers()` are the f
 
 ### deathVisuals.ts
 `deathSystem.ts` asks `shatterDeathFor(monsterModelType)` when the Die clip would start; a row means
-the body vanishes at once (`o->Live = false`) and pieces fly instead of the corpse sinking. Keyed by
-`MONSTER_MODEL_*` through `monsterModelTypeOf` (`actors/monsterModelTable.ts`). `skeletonShatter` is
+the body vanishes at once (`o->Live = false`) and pieces fly instead of the corpse sinking. The
+body file names its shatter (`shatter` in `versions/shared/monster_models/<body>.ts`), found through
+`monsterModelTypeOf` (`actors/monsterModelTable.ts`). `skeletonShatter` is
 also used by `actors/transformedBody.ts` and `versions/shared/monsters/skeleton_warrior.ts`.
 
 ### debris.ts
@@ -198,7 +200,10 @@ Lost Tower Shadow alone is 39 cards. The matching floor light is in `lighting/ch
 ### monsterVisuals.ts
 Each `MoveCharacterVisual` arm is a `CreateParticle` behind `rand_fps_check(n)`; a tick bank per
 monster rolls the same 1/n. Spawns go into other entries' pools (`emitBurst`, `spawnJoint`,
-`spawnRing`, `spawnDebris`, `spawnSprite`); this entry keeps only handles and banks.
+`spawnRing`, `spawnDebris`, `spawnSprite`); this entry keeps only handles and banks. The rows are
+each monster folder's `bodyFx` (types in `controllers/monsters/bodyFx.ts`, shared pieces in
+`versions/shared/monsters/_shared/bodyFx.ts`); particle and texture names resolve here (`PARTICLES`,
+`TEXTURES`), once per row.
 
 ### ping.ts
 The ring drapes the marker over the terrain and a straight joint draws the trail, near end on the

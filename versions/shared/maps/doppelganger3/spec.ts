@@ -1,4 +1,5 @@
 import type { Emission } from '@/controllers/fx/effectParticles';
+import type { MeshAnimations } from '@/controllers/render';
 
 /**
  * Doppelganger 3 (`WD_67DOPPLEGANGER3`, `World68`/`Object68`), the plain-data
@@ -11,7 +12,7 @@ import type { Emission } from '@/controllers/fx/effectParticles';
  * `MoveObject`: 23 (×2) `BlendMesh = 0`, 32 (×0) / 34 (×2) `BlendMesh = 1`,
  * 38 (×30) `BlendMesh = 0`, 40 (×0) `BlendMesh = 0` - the Atlans lamp, coral
  * and anemone table (ZzzObject.cpp:4010-4034) verbatim. The breathing sines
- * are in `meshAnimation.ts`.
+ * are in the `render.meshAnimations` rows.
  */
 export const DOPPELGANGER3_BLEND_MESHES: Readonly<Record<number, number>> = {
   23: 0,
@@ -32,4 +33,12 @@ export const DOPPELGANGER3_EMISSIONS: Partial<
   Record<number, readonly Emission[]>
 > = {
   22: [{ kinds: ['smoke0'], every: 6, scale: 0.4 }],
+};
+
+/** Doppelganger 3 (GMDoppelGanger3.cpp:75-93): the Atlans sines verbatim. */
+export const DOPPELGANGER3_MESH_ANIMATIONS: MeshAnimations = {
+  23: { mesh: 0, kind: 'blend', light: t => Math.sin(t * 0.002) * 0.3 + 0.5 },
+  32: { mesh: 1, kind: 'blend', light: t => Math.sin(t * 0.004) * 0.5 + 0.5 },
+  34: { mesh: 1, kind: 'blend', light: t => Math.sin(t * 0.004) * 0.5 + 0.5 },
+  40: { mesh: 0, kind: 'blend', light: t => Math.sin(t * 0.004) * 0.3 + 0.5 },
 };

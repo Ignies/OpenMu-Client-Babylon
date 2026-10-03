@@ -10,6 +10,14 @@ its own folder in `versions/shared/monsters/<name>/` and uses this controller.
 - NPC fields (`npc.ts`): `hidden`, `npcModel` (`NpcModel`), `gear` (`NpcGear`, `NpcItem`),
   `transformed` (`NpcTransform`), `trap` (`NpcTrap`), `voice` (`NpcVoice`), `globalVoice`
   (`NpcGlobalVoice`, `NpcGlobalCue`).
+- Sound fields, read by `sound/packetSounds.ts`: `quietCasts` (skills whose cast sound the type
+  never plays; also on a body, `MonsterModelDef.quietCasts`), `teleport` (`MonsterTeleport`: its
+  own teleport sound on one world) and `stormSkill` (the skill whose AttackTime replays the
+  meteorite storm).
+- Look fields: `light` (`MonsterLight`, read by `lighting/characters.ts`), `bodyFx`
+  (`MonsterBodyFx`, `bodyFx.ts`: particles and cards by name, read by `fx/monsterVisuals.ts`;
+  shared pieces in `versions/shared/monsters/_shared/bodyFx.ts`); on a body,
+  `MonsterModelDef.shatter` (`MonsterShatter`, read by `fx/deathVisuals.ts`).
 - `defineMonster(def)`: a monster folder's default export.
 - `MonsterRegistry`: `get(numb)` (the table row or null), `def(numb)`, `model(numb)`,
   `maxHealth(numb)`, `having(field)` (every type that sets a field, with its value), `all()`, `add`

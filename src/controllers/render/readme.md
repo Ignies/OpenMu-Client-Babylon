@@ -24,6 +24,8 @@ There is no `index.ts` facade; other folders import the modules directly.
 - options: `materialQuality.ts`, `renderingStyle.ts`, `renderScale.ts`, `renderDistance.ts` (slider
   steps and readers for the Options window, the materials and boot).
 - `pbrMaps.ts`: `pbrMapsFor`, `pbrMapsIfReady`, `textureSourceName`.
+- `MapRender`, `MeshAnimation`, `MeshAnimations` (`meshAnimation.ts`, types on `index.ts`): a map's own
+  render row, `MapLayer.render`.
 - helpers: `boneLink.ts` (bone-link matrices), `meshAnimation.ts` (`meshAnimationFor`),
   `renderAngles.ts` (`toRenderAngles`), `viewPlanes.ts`, `frameSnapshot.ts`, `textureScript.ts`,
   `sceneCover.ts`, `blendMeshes.ts`, `effectOnlyObjects.ts`, `perfOverlay.ts` (Shift+Ctrl+Alt+P).
@@ -45,15 +47,16 @@ There is no `index.ts` facade; other folders import the modules directly.
 ## Depends on / used by
 - uses: `assets` (model loader, texture packs), `lighting`, `terrain`, `maps`, `item_fx`, `anim`,
   `net`, `ecs` (world types, two system helpers), `core`; old exceptions in `tools/checks/baselines/deps.json`: `modules/options`,
-  `modules/session`, `app/storeRef`, `versions/shared/maps/*/spec`.
+  `modules/session`, `app/storeRef`.
 - used by: `app/boot.tsx`, `ecs` systems, `actors`, `fx`, `lighting`, `terrain`, `item_fx`,
   `assets`, `modules`, `versions/shared` maps, npcs and the Options window.
 
 ## Change it
 - a new model class: extend `ModelObject`; set `static Batchable = true` only if it does nothing per
   object after `init()`.
-- a scrolling or pulsing mesh on a map object: add a row to `meshAnimation.ts` (or the map's
-  `spec.ts` table it imports).
+- a scrolling or pulsing mesh on a map object: add a row to the map's `*_MESH_ANIMATIONS` table in
+  its `spec.ts` (`render.meshAnimations` on the entry); `maps/shared/meshAnimation.ts` has the
+  `saw` / `sawUp` / `perTick` helpers.
 - a new post pass: add `scenes/<name>.ts` with `sync<Name>` / `dispose<Name>`, call it from
   `lighting/director.ts` in chain order, return true when the chain changed.
 - a new render option: add its steps and reader next to the others (e.g. `renderingStyle.ts`) and
@@ -62,6 +65,8 @@ There is no `index.ts` facade; other folders import the modules directly.
 
 ## Tests
 - `frameSnapshot.test.ts`: fills once per frame and per scene, refills after a throw.
+- `meshAnimation.test.ts`: `meshAnimationFor` reads the map row per world.
+- `versions/shared/contentRows.golden.test.ts`: every map's mesh animations, sampled over time.
 - `pbrDerive.test.ts`: `flipRows`, flat normal and emissive mask of `derivePbrMaps`.
 - `propBatchLight.test.ts`: `ChunkLight` re-packs match a whole-chunk re-pack on every tier.
 - `propBatchRules.test.ts`: `batchExclusion`, `chunkOf`, placement and instance matrices.
@@ -83,7 +88,8 @@ There is no `index.ts` facade; other folders import the modules directly.
   models stay Standard; terrain keeps its own shader. All lit meshes must move together because
   `directLightGain` (pi, to undo Burley's 1/pi) applies to every light at once.
 - `meshAnimation.ts`: `o->BlendMeshTexCoordU/V` and `o->BlendMeshLight` depend only on `WorldTime`,
-  so they are a table, not a class per object. `blend` targets the object's `BlendMesh`; `stream`
+  so they are a table, not a class per object; each map keeps its own (`MapRender.meshAnimations`),
+  read at run time through `maps.rowFor`. `blend` targets the object's `BlendMesh`; `stream`
   is `Models[type].StreamMesh`, textured but unlit with flat `BodyLight` (ZzzBMD.cpp:990-1001).
   C's `-(int)WorldTime % 1000` keeps the sign, so it ramps 0 to -0.999: `-(t % 1000)`.
 - `pbrMaps.ts`: the derivation reads the texture's encoded bytes (`texture._buffer` or `texture.url`),

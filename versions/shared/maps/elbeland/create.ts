@@ -10,7 +10,7 @@ import { PlaySpeedObject } from '../shared/objectVariants';
  * `CollisionRange = -300` (unpickable - no hook for that in `ModelObject`,
  * they stay pickable). `MoveObject` (:87-191): the fire pits, lamps, falls
  * and mist in `spec.ts`; the V scrolls on 2/53/55 (`+0.015` per 25 Hz tick)
- * and 89 (`+0.005`) and the 56 sine in `meshAnimation.ts`; 56's `Velocity =
+ * and 89 (`+0.005`) and the 56 sine in the `render.meshAnimations` rows; 56's `Velocity =
  * 0.05` here.
  *
  * `PlayObjectSound` (:193-232) is the seven object loops in `sound.ts`,

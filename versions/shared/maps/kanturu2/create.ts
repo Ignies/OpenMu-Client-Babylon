@@ -9,7 +9,7 @@ import { PlaySpeedObject } from '../shared/objectVariants';
  * `CreateOperate` - the healing / entry pads. `Move_Kanturu2nd_Object`
  * (:212-272): 10 (×21) `Velocity = 0.04` with a clamped `BlendMeshLight`
  * sine, 44 (×3) `Velocity = 0.02`; the rest are the hidden steam types in
- * `spec.ts` and the sines/scroll in `meshAnimation.ts`.
+ * `spec.ts` and the sines/scroll in the `render.meshAnimations` rows.
  *
  * The object loops (`kan_relic_gear` on 9, `kan_relic_incubator` on
  * 31/35/36/37 - `Sound_Kanturu2nd_Object`, :194-210) are in

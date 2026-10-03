@@ -61,7 +61,9 @@ hotbar share.
 - castability: `usability.ts`. Cast clip: `chooseSkillAction`. Orb / scroll skills: `skillItems.ts`.
 
 ## Tests
-- none in this folder. `versions/shared/skills/skillTables.golden.test.ts` snapshots `SKILL_DELAY_MS`.
+- `teleportSound.test.ts`: a monster teleporting plays its own sound only on its map (the
+  Nightmare in Kanturu 3rd); anyone else the plain one.
+- `versions/shared/skills/skillTables.golden.test.ts` snapshots `SKILL_DELAY_MS`.
 
 ## Notes
 ### cooldowns.ts

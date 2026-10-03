@@ -3,6 +3,8 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 103,
   Name: 'Meteorite',
+  // AttackEffect rains meteors and replays SOUND_METEORITE01 while it casts AT_SKILL_BOSS (ZzzCharacter.cpp:1993-1998).
+  stormSkill: 50,
   maxHealth: 1000,
   // MONSTER_METEORITE_TRAP (ZzzCharacter.cpp:14282).
   trap: { object: 25, shadow: true },

@@ -1,8 +1,11 @@
 import { defineMonster } from '@/controllers/monsters';
+import { haze } from '../_shared/bodyFx';
 
 export default defineMonster({
   Numb: 10,
   Name: 'Dark Knight',
+  // MODEL_DARK_KNIGHT: the haze (ZzzCharacter.cpp:6147).
+  bodyFx: [haze()],
   maxHealth: 3000,
   model: { type: 3, scale: 0.8 },
   stats: {

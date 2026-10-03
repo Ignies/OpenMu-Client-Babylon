@@ -5,6 +5,7 @@ import {
   AIDA_BLEND_MESHES,
   AIDA_EFFECT_ONLY_TYPES,
   AIDA_EMISSIONS,
+  AIDA_MESH_ANIMATIONS,
 } from './spec';
 import { AIDA_SOUND } from './sound';
 import { AIDA_LIGHTING } from './lighting';
@@ -44,6 +45,7 @@ export const aidaLayer: MapLayer = {
   blendMeshes: AIDA_BLEND_MESHES,
   effectOnly: AIDA_EFFECT_ONLY_TYPES,
   emissions: AIDA_EMISSIONS,
+  render: { meshAnimations: AIDA_MESH_ANIMATIONS },
   sound: AIDA_SOUND,
   lighting: AIDA_LIGHTING,
   create: world => import('./create').then(m => m.createAida(world)),

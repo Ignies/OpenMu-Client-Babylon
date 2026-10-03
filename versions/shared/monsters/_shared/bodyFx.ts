@@ -1,0 +1,98 @@
+import type { BodyFxEmitter, BodyParticle, BodyTexture } from '@/controllers/monsters';
+import { MonsterActionType as A } from '../../objects/enum';
+
+/**
+ * Building blocks the monster folders' `bodyFx` rows share (`MoveCharacterVisual`,
+ * ZzzCharacter.cpp:5583). Plain data, no engine: the fx controller draws them.
+ */
+
+type Cm3 = readonly [number, number, number];
+type RGB = readonly [number, number, number];
+
+export const body = (
+  every: number,
+  recipe: BodyParticle,
+  box: Cm3,
+  extra: Partial<Extract<BodyFxEmitter, { kind: 'body' }>> = {}
+): BodyFxEmitter => ({ kind: 'body', every, recipe, box, ...extra });
+
+export const bone = (
+  every: number,
+  recipe: BodyParticle,
+  at: number,
+  extra: Partial<Extract<BodyFxEmitter, { kind: 'bone' }>> = {}
+): BodyFxEmitter => ({ kind: 'bone', every, recipe, bone: at, ...extra });
+
+export const bones = (
+  every: number,
+  count: number,
+  recipe: BodyParticle,
+  extra: Partial<Extract<BodyFxEmitter, { kind: 'bones' }>> = {}
+): BodyFxEmitter => ({ kind: 'bones', every, count, recipe, ...extra });
+
+export const halo = (texture: BodyTexture, colour: RGB, size: number, heightCm: number): BodyFxEmitter => ({
+  kind: 'halo',
+  texture,
+  colour,
+  size,
+  heightCm,
+});
+
+export const mark = (texture: BodyTexture, colour: RGB, tiles: number, spin: number): BodyFxEmitter => ({
+  kind: 'mark',
+  texture,
+  colour,
+  tiles,
+  spin,
+});
+
+/** `MonsterMoveSandSmoke` (:5570): walking, one `SMOKE + 1` a tick within ±100 cm. */
+export const walkSand = body(1, 'sandSmoke', [100, 100, 0], {
+  gate: { action: [A.Walk] },
+});
+
+/** `MonsterDieSandSmoke` (:5551): Die frame 8, twenty `SMOKE + 1` SubType 1 in a ±32 x ±16 box. */
+export const dieSand = body(1, 'sandSmokeBurst', [32, 32, 16], {
+  count: 20,
+  gate: { action: [A.Die], frames: [[8, 9]] },
+});
+
+/**
+ * The Dark Knight / Larva / Chain Scorpion arm (:6157-6166): alive, one puff
+ * in four ticks, `BITMAP_SMOKE` on Devias and `SMOKE + 1` elsewhere.
+ */
+export const haze = (colour?: RGB): BodyFxEmitter =>
+  body(4, 'sandSmoke', [32, 32, 16], {
+    devias: 'bodySmoke',
+    colour,
+    gate: { alive: true },
+  });
+
+/** `c->Appear = 60` (WSclient.cpp:2856): ticks the golden bosses' arrival dust runs. */
+export const APPEAR_TICKS = 60;
+
+/**
+ * MODEL_BULL_FIGHTER (0 Bull Fighter, 4 Elite Bull Fighter, 8 Poison Bull, 364): the snort from
+ * bone 24, (0, -4, 0) cm, one tick in two, on Stop1 frames 15-20, Stop2 20-25 and Walk 2-3 / 5-6
+ * (:6189-6205).
+ */
+export const BULL_SNORT: readonly BodyFxEmitter[] = [
+  bone(2, 'bodySmoke', 24, {
+    local: [0, -4, 0],
+    gate: { action: [A.Stop1], frames: [[15, 20]] },
+  }),
+  bone(2, 'bodySmoke', 24, {
+    local: [0, -4, 0],
+    gate: { action: [A.Stop2], frames: [[20, 25]] },
+  }),
+  bone(2, 'bodySmoke', 24, {
+    local: [0, -4, 0],
+    gate: {
+      action: [A.Walk],
+      frames: [
+        [2, 3],
+        [5, 6],
+      ],
+    },
+  }),
+];

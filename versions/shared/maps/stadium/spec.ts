@@ -1,5 +1,7 @@
 import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
 import type { Emission } from '@/controllers/fx/effectParticles';
+import type { MeshAnimations } from '@/controllers/render';
+import { saw } from '../shared/meshAnimation';
 
 /**
  * Stadium (WD_6STADIUM, world 6, `Object7`/`World7`). Object7 ships 41 BMDs,
@@ -19,7 +21,7 @@ import type { Emission } from '@/controllers/fx/effectParticles';
  * `case 21: o->BlendMesh = 3` (ZzzObject.cpp:3996). Type 21 (n=11) is the
  * fountain; `Object7/Object22.glb` carries four meshes and mesh 3 is water.jpg,
  * so the basin surface is the additive one. The V scroll that runs across it
- * lives in controllers/render/meshAnimation.ts.
+ * lives in the render.meshAnimations rows.
  */
 export const STADIUM_BLEND_MESHES: Readonly<Record<number, number>> = {
   21: 3,
@@ -79,4 +81,9 @@ export const STADIUM_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = 
       },
     },
   ],
+};
+
+/** Stadium (ZzzObject.cpp:3996-3999): the fountain basin, mesh 3 = water.jpg. */
+export const STADIUM_MESH_ANIMATIONS: MeshAnimations = {
+  21: { mesh: 3, kind: 'blend', v: saw(1000, 0.001) },
 };

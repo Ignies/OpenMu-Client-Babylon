@@ -1,5 +1,6 @@
 import { Vector3 } from '../render/babylon/exports';
-import { ENUM_WORLD } from '../../core/types';
+import type { ENUM_WORLD } from '../../core/types';
+import { maps, type PerWorld } from '../maps';
 import { loadGLTF } from '../assets/modelLoader';
 import { ModelObject } from '../render/modelObject';
 import { createMovableFlare, type MovableFlare } from '../lighting/effectLights';
@@ -14,8 +15,9 @@ const eyeLocal = new Vector3();
 const eyeWorld = new Vector3();
 
 /**
- * `Boids[]`: the ambient wildlife (GOBoid.cpp:814-1500). Maps are what `LoadWorld` loads
- * (MapManager.cpp:45-166) and `MoveBoids` spawns (GOBoid.cpp:1313-1375). See fx/readme.md.
+ * `Boids[]`: the ambient wildlife (GOBoid.cpp:814-1500). Each map names its species
+ * (`MapFx.boids`): what `LoadWorld` loads (MapManager.cpp:45-166) and `MoveBoids` spawns
+ * (GOBoid.cpp:1313-1375). See fx/readme.md.
  */
 
 /**
@@ -239,27 +241,22 @@ const DRAGON: BoidSpec = {
  */
 const GOLDEN_DRAGON: BoidSpec = { ...DRAGON, shine: [1, 0.5, 0] };
 
-const BLOOD_CASTLE: readonly ENUM_WORLD[] = [
-  ENUM_WORLD.WD_11BLOODCASTLE1,
-  12,
-  13,
-  14,
-  15,
-  16,
-  ENUM_WORLD.WD_11BLOODCASTLE_END,
-  ENUM_WORLD.WD_52BLOODCASTLE_MASTER_LEVEL,
-] as ENUM_WORLD[];
+/** The species a map can name in its row. */
+export type MapBoids = 'bird' | 'bat' | 'butterfly' | 'crow' | 'fish';
 
-const BY_WORLD: Partial<Record<ENUM_WORLD, BoidSpec>> = {
-  [ENUM_WORLD.WD_0LORENCIA]: BIRD,
-  [ENUM_WORLD.WD_1DUNGEON]: BAT,
-  [ENUM_WORLD.WD_4LOSTTOWER]: BAT,
-  [ENUM_WORLD.WD_3NORIA]: BUTTERFLY,
-  [ENUM_WORLD.WD_7ATLANSE]: FISH,
-  [ENUM_WORLD.WD_67DOPPLEGANGER3]: FISH,
+/** A map's own fx rows, `MapLayer.fx`. */
+export type MapFx = {
+  /** What flies on the map (`MoveBoids`). Read by `boidsFor`. */
+  readonly boids?: PerWorld<MapBoids>;
 };
 
-for (const w of BLOOD_CASTLE) BY_WORLD[w] = CROW;
+const SPECIES: Readonly<Record<MapBoids, BoidSpec>> = {
+  bird: BIRD,
+  bat: BAT,
+  butterfly: BUTTERFLY,
+  crow: CROW,
+  fish: FISH,
+};
 
 /**
  * What flies on this map, or null. A running invasion (`MapEventState`, so 1
@@ -269,7 +266,8 @@ for (const w of BLOOD_CASTLE) BY_WORLD[w] = CROW;
 export function boidsFor(map: ENUM_WORLD, invasion = 0): BoidSpec | null {
   if (invasion) return invasion === 3 ? GOLDEN_DRAGON : DRAGON;
 
-  return BY_WORLD[map] ?? null;
+  const kind = maps.rowFor(map, l => l.fx?.boids);
+  return kind ? SPECIES[kind] : null;
 }
 
 const factories = new Map<string, typeof ModelObject>();

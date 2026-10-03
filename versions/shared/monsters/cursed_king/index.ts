@@ -3,6 +3,10 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 66,
   Name: 'Cursed King',
+  // MODEL_CURSED_KING: a blood pointer within ±14 cm, one tick in five (ZzzCharacter.cpp:5826-5833).
+  bodyFx: [{ kind: 'blood', every: 5, scatterCm: (10 * 100) / 70 }],
+  // Its Energy Ball (17) ends with no SOUND_MAGIC (ZzzCharacter.cpp:5087-5122).
+  quietCasts: [17],
   maxHealth: 38000,
   model: { type: 48, scale: 1.7 },
   stats: {

@@ -56,6 +56,7 @@ controller tests a skill number.
 | `clipSound`, `soundOnLanding`, `silentHeroCast` | sound | cast sound by clip; sound at the landing; no sound at the hero's click |
 | `effect` | modules/skills | the MagicEffect `MagicEffectCancelled` drops for this skill |
 | `buffHits` | skills | what a buff draws when its wearer is hit (Soul Barrier's shell) |
+| `warriorGlint` | skills (item_fx draws it) | UseSkillWarrior's blade glint at the cast; `'mounted'` for Impale |
 
 ## Windows and HUD
 
@@ -89,8 +90,11 @@ new window or module adds its text without touching it. Translators use one shee
 
 - `maps/<map>/`: the map's spec, its object classes (one file per object type) and `create.ts`.
 - `monsters/<name>/index.ts`: one folder per monster or npc type (`defineMonster`: number, name,
-  max health, the original table row), found by glob; plus model classes for the ones with their
-  own look.
+  max health, the original table row, and what the controllers do for this type alone: `light`,
+  `bodyFx`, `quietCasts`, `teleport`, `stormSkill`), found by glob; plus model classes for the ones
+  with their own look. A long row sits next to it (`<name>/bodyFx.ts`). A body file
+  (`monster_models/<body>.ts`) carries what follows the body: voices, clip speeds, `quietCasts`,
+  `shatter`.
 - `items/<group>/<item>.ts`: one file per item (`defineItem`), found by glob; plus item-driven looks
   (`launcher_arrows.ts`).
 - An area's master controller (`src/controllers/items`, `src/controllers/monsters`) owns the record
@@ -126,9 +130,11 @@ it as the 3D line-up's name plate.
 ## A map's own rows
 
 A map folder (`versions/shared/maps/<map>/`) also carries what the other controllers used to keep
-per world: `sound.ts` (beds, music, object loops, monster voices: `MapSound`), `lighting.ts` (look,
-room looks, torch table: `MapLighting`), and on the entry itself `weather` (`MapWeather`) and
-`terrain` (`MapTerrain`). Each controller owns its row type and reads the active map's row through
+per world: `sound.ts` (beds, music, object loops, monster voices, footsteps: `MapSound`),
+`lighting.ts` (look, room looks, torch table: `MapLighting`), the mesh animations in `spec.ts`
+(`render`: `MapRender`), and on the entry itself `weather` (`MapWeather`), `terrain`
+(`MapTerrain`) and `fx` (the boids: `MapFx`). Each controller owns its row type and reads the active map's row through
 the `maps` controller at run time (`maps.rowFor`), so reworking sound or lighting is an edit to that
 controller only, and changing what one map sounds or looks like is an edit to that map only.
-Shared building blocks are in `maps/shared/` (`sound.ts`, `looks.ts`, `lights.ts`, `terrain.ts`).
+Shared building blocks are in `maps/shared/` (`sound.ts`, `looks.ts`, `lights.ts`, `terrain.ts`,
+`meshAnimation.ts`).

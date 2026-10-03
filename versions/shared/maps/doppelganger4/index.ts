@@ -8,6 +8,7 @@ import {
 } from './spec';
 import { DOPPELGANGER_SOUND } from '../doppelganger1/sound';
 import { DOPPELGANGER4_LIGHTING } from './lighting';
+import { KANTURU1_MESH_ANIMATIONS } from '../kanturu1/spec';
 
 /**
  * Doppelganger 4 (World69 / Object69) - the map entry: identity and the per-world data the
@@ -37,6 +38,7 @@ export const doppelganger4Layer: MapLayer = {
   blendMeshes: DOPPELGANGER4_BLEND_MESHES,
   effectOnly: DOPPELGANGER4_EFFECT_ONLY_TYPES,
   emissions: DOPPELGANGER4_EMISSIONS,
+  render: { meshAnimations: KANTURU1_MESH_ANIMATIONS },
   sound: DOPPELGANGER_SOUND,
   lighting: DOPPELGANGER4_LIGHTING,
   create: world => import('./create').then(m => m.createDoppelganger4(world)),

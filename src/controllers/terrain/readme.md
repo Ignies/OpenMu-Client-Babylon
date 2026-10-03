@@ -6,7 +6,8 @@ water, ground picks, minimap data and the base class for map objects. There is n
 `index.ts` only exports the row types a map folder writes; callers import the files below directly.
 
 ## Public API
-- `index.ts`: the types only - `MapTerrain` (`mapTerrain.ts`, a map's `terrain` field:
+- `index.ts`: `MapTileObject` (the base class a map folder's object classes extend; import it only
+  from code a map's `create.ts` loads) and the types - `MapTerrain` (`mapTerrain.ts`, a map's `terrain` field:
   `overlays`, `snowBed`, `water`, `rest`, `leanCursor`, `objectFixups`, `grass`, `hidden`),
   `TerrainOverlayName`, `RestObject`, `RestKind`, `MapObjectFixup`, `TerrainWaterSpec`.
 - `loadMapIntoScene(world, map, pos?)` (`loadMapIntoScene.ts`): queue a warp to `map`.
@@ -25,7 +26,7 @@ water, ground picks, minimap data and the base class for map objects. There is n
 - `terrainOverlay.ts`: `PUDDLES`, `WET_GROUND`, `overlayAmountAt`, `overlayBedShare`,
   `snowCoverFor`, `needsTerrainMask`. `terrainGrass.ts`: `grassFieldForFrame`, `GrassActor`.
 - Smaller readers: `loadWorldMinimap`, `parseMinimapData`, `findRestObject` /
-  `leanCursorObjects` / `LEAN_CURSOR_OBJECTS` (a live per-world view), `mapObjectFixupsFor`,
+  `leanCursorObjects`, `mapObjectFixupsFor`,
   `grassAllowed`, `parseTerrainObjects`, `decryptMapFile` / `convertBux`, `getTilesList`,
   `getTerrainHeightMap`, `waterSurfaceHeight`, `loadCameraWalkScript`, `liveTileArrays`.
 
@@ -85,7 +86,7 @@ water, ground picks, minimap data and the base class for map objects. There is n
 ## Tests
 - `versions/shared/maps/mapRows.golden.test.ts`: every world's overlays, snow bed, water, rest
   objects, lean boxes, fixups and grass, pinned across the move into the map folders.
-- `mapTerrain.test.ts`: only Icarus hides its ground; rest objects and lean boxes (also through `LEAN_CURSOR_OBJECTS`) and the
+- `mapTerrain.test.ts`: only Icarus hides its ground; rest objects and lean boxes and the
   nearest-object height fix from a registered entry.
 - `groundArrays.test.ts`: `refreshGroundTile` raises and drops a tile and leaves its neighbours;
   `groundTiles` copies tiles out with their own quads.

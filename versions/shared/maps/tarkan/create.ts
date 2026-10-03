@@ -11,7 +11,7 @@ import { TarkanQuakeVentObject, TarkanSandVentObject } from './ventObject';
  * (ZzzObject.cpp:4727-4736) touches exactly one of the 88 types, `MoveObject`
  * (:4036-4129) fourteen and `RenderObjectVisual` (:2956-3034) six. The UV
  * scrolls and the unphased `BlendMeshLight` sines are in
- * `controllers/render/meshAnimation.ts`; the blend meshes, the effect-only markers, the
+ * the `render.meshAnimations` rows; the blend meshes, the effect-only markers, the
  * type 70 emitter and the brazier lights are in `spec.ts`. This file is the
  * seven class assignments and the notes.
  *
@@ -47,7 +47,7 @@ import { TarkanQuakeVentObject, TarkanSandVentObject } from './ventObject';
  *  - **Type 81's chrome pass.** `Draw_RenderObject` (:1034) renders the two
  *    81s twice, the second time with `RENDER_CHROME5` over `BITMAP_CHROME2`.
  *    The port has no per-object chrome pass; materials work, and the
- *    same note already stands on Lost Tower 3/4 in `meshAnimation.ts`.
+ *    same note already stands on Lost Tower 3/4 in the `render.meshAnimations` rows.
  *
  * Music (`Music/tarkan`) and the `Sound/desert` ambient bed are wired
  * elsewhere.

@@ -63,6 +63,8 @@ export const bloodcastleLayer: MapLayer = {
   blendMeshes: BLOOD_CASTLE_BLEND_MESHES,
   effectOnly: BLOOD_CASTLE_EFFECT_ONLY_TYPES,
   emissions: BLOOD_CASTLE_EMISSIONS,
+  // What flies here (`MoveBoids`, GOBoid.cpp:1304-1346).
+  fx: { boids: 'crow' },
   sound: BLOOD_CASTLE_SOUND,
   // `TerrainGrassEnable = false` (ZzzLodTerrain.cpp:326-329).
   terrain: { grass: false },

@@ -1,4 +1,5 @@
 import type { Emission } from '@/controllers/fx/effectParticles';
+import type { MeshAnimations } from '@/controllers/render';
 
 /**
  * Valley of Loren (`WD_30BATTLECASTLE`, `World31`/`Object31`), the plain-data
@@ -19,7 +20,7 @@ import type { Emission } from '@/controllers/fx/effectParticles';
  * `MoveBattleCastleObject` (:930-940): 81 and 83 both force `o->BlendMesh = 1`
  * with a full `BlendMeshLight` and a V scroll (`+0.0002`/ms on 81,
  * `-0.0004`/ms on 83) - the two banner/energy sheets on the castle. The
- * scrolls are in `meshAnimation.ts`. EncTerrain31.obj places one 81 and no
+ * scrolls are in the `render.meshAnimations` rows. EncTerrain31.obj places one 81 and no
  * 83; the table matches the source rather than the map.
  */
 export const VALLEY_OF_LOREN_BLEND_MESHES: Readonly<Record<number, number>> = {
@@ -41,3 +42,12 @@ export const VALLEY_OF_LOREN_EFFECT_ONLY_TYPES: readonly number[] = [
 export const VALLEY_OF_LOREN_EMISSIONS: Partial<
   Record<number, readonly Emission[]>
 > = {};
+
+/**
+ * Valley of Loren (GMBattleCastle.cpp:930-940): 81/83 force `BlendMesh = 1`
+ * and scroll V unbounded (`WorldTime * 0.0002`, `-WorldTime * 0.0004`).
+ */
+export const VALLEYOFLOREN_MESH_ANIMATIONS: MeshAnimations = {
+  81: { mesh: 1, kind: 'blend', v: t => (t * 0.0002) % 1 },
+  83: { mesh: 1, kind: 'blend', v: t => -((t * 0.0004) % 1) },
+};

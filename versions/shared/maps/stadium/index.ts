@@ -4,6 +4,7 @@ import {
   STADIUM_BLEND_MESHES,
   STADIUM_EFFECT_ONLY_TYPES,
   STADIUM_EMISSIONS,
+  STADIUM_MESH_ANIMATIONS,
 } from './spec';
 import { STADIUM_SOUND } from './sound';
 import { STADIUM_LIGHTING } from './lighting';
@@ -56,6 +57,7 @@ export const stadiumLayer: MapLayer = {
   blendMeshes: STADIUM_BLEND_MESHES,
   effectOnly: STADIUM_EFFECT_ONLY_TYPES,
   emissions: STADIUM_EMISSIONS,
+  render: { meshAnimations: STADIUM_MESH_ANIMATIONS },
   sound: STADIUM_SOUND,
   lighting: STADIUM_LIGHTING,
   create: world => import('./create').then(m => m.createStadium(world)),
