@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 261,
   Name: 'Death Centurion',
   maxHealth: 48000,
+  subType: 9,
   model: { type: 67, scale: 1.5 },
   stats: {
     Rate: 1,

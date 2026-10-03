@@ -41,6 +41,8 @@ export type MonsterDef = {
    * `Object.Scale`, and `Object.HiddenMesh` for types that share a model and hide a mesh.
    */
   model?: { type: number; scale: number; hiddenMesh?: number };
+  /** `c->SubType` the original creates this type with (9: Kalima's large centurions, Kundun's candidates). */
+  subType?: number;
   stats?: MonsterStats;
 };
 

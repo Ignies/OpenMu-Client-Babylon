@@ -55,7 +55,7 @@ export type MonsterCue = {
 
 const A = MonsterActionType;
 
-/** Model type -> its cues. Keys are `MONSTER_MODEL_x`, as in `MONSTER_SOUNDS`. */
+/** Model type -> its cues. Keys are `MONSTER_MODEL_x`, as in the body files (versions/shared/monster_models). */
 export type VoiceSet = Readonly<Record<number, readonly MonsterCue[]>>;
 
 /** `fDistance > 500.0f` in MU units - five tiles. */

@@ -8,7 +8,7 @@ import {
   stepCues,
   type MonsterCue,
 } from './mapMonsters';
-import { MONSTER_SOUNDS } from './monsters';
+import { monsterVoices } from './monsters';
 import { SOUND_FILES, type Sounds } from './recipes';
 import { MonsterActionType as A } from '@versions/shared/objects/enum';
 import { ENUM_WORLD } from '../../core/types';
@@ -56,7 +56,7 @@ describe('map monster voices', () => {
   it('never doubles up with the generic table', () => {
     // A `PlayMonsterSound` voice replaces Models[].Sounds[]; a hook's sound adds to it.
     const clash = everyCue()
-      .filter(({ type, cue }) => !cue.unranged && MONSTER_SOUNDS[type]?.some(s => s !== null))
+      .filter(({ type, cue }) => !cue.unranged && monsterVoices(type)?.some(s => s !== null))
       .map(({ world, type }) => `world ${world} model ${type}`);
 
     expect(clash).toEqual([]);
@@ -80,7 +80,7 @@ describe('map monster voices', () => {
         mapMonsterCues(ENUM_WORLD.WD_57ICECITY, type),
         `model ${type}`
       ).toBeTruthy();
-      expect(MONSTER_SOUNDS[type]?.every(slot => slot === null)).toBe(true);
+      expect(monsterVoices(type)?.every(slot => slot === null)).toBe(true);
     }
   });
 

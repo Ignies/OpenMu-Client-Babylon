@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { monsterModelRegistry } from '@/controllers/monsters';
 import {
-  MONSTER_SOUNDS,
+  monsterVoices,
   monsterAttackSound,
   monsterDeathSound,
   monsterIdleSound,
@@ -17,8 +18,10 @@ describe('monster voice table', () => {
   afterEach(() => vi.restoreAllMocks());
 
   it('names a catalogue key in every slot', () => {
-    const missing = Object.entries(MONSTER_SOUNDS).flatMap(([type, slots]) =>
-      slots
+    const bodies = monsterModelRegistry.all();
+    expect(bodies.length).toBeGreaterThan(150);
+    const missing = bodies.flatMap(({ type, voices }) =>
+      (voices ?? [])
         .filter((k): k is string => k !== null && !(k in SOUND_FILES))
         .map(k => `model ${type} -> ${k}`)
     );
@@ -27,7 +30,7 @@ describe('monster voice table', () => {
 
   it('gives the Devias yetis their own voice', () => {
     for (const type of [YETI, ELITE_YETI]) {
-      expect(MONSTER_SOUNDS[type].every(k => k?.startsWith('Sound/mYeti'))).toBe(true);
+      expect(monsterVoices(type)?.every(k => k?.startsWith('Sound/mYeti'))).toBe(true);
     }
   });
 

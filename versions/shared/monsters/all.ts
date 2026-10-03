@@ -1,4 +1,6 @@
 import { monsterRegistry, registerMonsters, type MonsterDef } from '@/controllers/monsters';
+// Monster bodies (voices, clip speeds) register with the monsters: same area, same load.
+import '../monster_models/all';
 
 /**
  * Every monster folder's data (`<name>/index.ts`), found by glob in the client build and in tests,

@@ -49,7 +49,7 @@ action numbers; the ECS `AnimationSystem` and the model objects apply them.
 ## Change it
 - a player clip speed: `playerPlaySpeed` (or `playerFrameSpeedScale` for per-frame changes) in
   `playSpeed.ts`; cite the original line.
-- a monster clip speed: `MONSTER_OVERRIDES` in `playSpeed.ts`, keyed by model index.
+- a monster clip speed: `clipSpeeds` / `speedScale` in the body file (versions/shared/monster_models/<body>.ts).
 - which clip a monster swings on a map: the hooks in `monsterAttackClip.ts`; add a case to
   `monsterAttackClip.test.ts` first.
 - a new server action: add it to `ServerToClientActionMap` in `playerActionMapper.ts`.

@@ -22,6 +22,7 @@ const value = (v: unknown) => (typeof v === 'string' ? `'${v.replace(/\\/g, '\\\
 export function renderMonster(d: MonsterDef): string {
   const lines = [`  Numb: ${d.Numb},`, `  Name: ${value(d.Name)},`];
   if (d.maxHealth !== undefined) lines.push(`  maxHealth: ${d.maxHealth},`);
+  if (d.subType !== undefined) lines.push(`  subType: ${d.subType},`);
   if (d.model) {
     const hidden = d.model.hiddenMesh !== undefined ? `, hiddenMesh: ${d.model.hiddenMesh}` : '';
     lines.push(`  model: { type: ${d.model.type}, scale: ${d.model.scale}${hidden} },`);

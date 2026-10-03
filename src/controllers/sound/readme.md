@@ -45,7 +45,7 @@ never which skill or item asks for it.
 - Entries and their sources: beds (`ambientBeds.ts`, SceneManager.cpp:564-700), music
   (`music.ts`, `ManageBackgroundMusic` SceneManager.cpp:1027-1175), footsteps (`footsteps.ts`,
   `PlayWalkSound`, foot-down frames ZzzCharacter.cpp:6241-6249), combat (`combat.ts`, swings
-  ZzzCharacter.cpp:1219-1233, pain :1420-1431, death :1477-1487), monster voices (`monsters.ts`,
+  ZzzCharacter.cpp:1219-1233, pain :1420-1431, death :1477-1487), monster voices (`monsters.ts`, read from the body files in versions/shared/monster_models,
   ZzzOpenData.cpp `OpenMonsterModel`), interface (`ui.ts`, DSPlaySound.h), drops (`drops.ts`),
   NPC noises (`npcVoices.ts`), object loops (`objectLoops.ts`), torch crackle (`crackle.ts`,
   ours) and instruments (`instruments/`).
@@ -114,8 +114,8 @@ never which skill or item asks for it.
   list, Elbeland, Swamp of Quiet, the active map (`TheMapProcess()`), then unguarded hooks. The
   original plays these 2D with a hard 500-unit (five-tile) cutoff; here they stay positioned and
   the cutoff is kept as their range.
-- `monsters.ts`: only the 74 model types whose case calls `SetMonsterSound` carry sounds; every
-  other row is `SILENT`. The generator once filled gaps with goblin placeholders, which is why
+- monster voices: only the 74 bodies whose case calls `SetMonsterSound` carry sounds; every
+  other body file has five nulls. The generator once filled gaps with goblin placeholders, which is why
   Raklion's Ice Giants used to sound like Noria.
 - `npcVoices.ts`: the original re-issues `PlayBuffer` every tick and a `Play` on a sounding channel
   is a no-op, so each row means "start again once finished while the condition holds"

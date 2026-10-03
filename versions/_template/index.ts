@@ -19,6 +19,8 @@
  */
 import { asciiBytes, type GameVersion } from '@/version/contract';
 import { templateData } from './data';
+// The shared monsters (and their bodies) this version spawns; a version with its own adds its folders.
+import '../shared/monsters/all';
 
 // Keep this export: the registry's load() hands the base game the packet
 // lists through it. Never import app code from this file - it evaluates

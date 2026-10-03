@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 267,
   Name: 'Illusion Kundun',
   maxHealth: 100000,
+  subType: 9,
   model: { type: 69, scale: 1 },
   stats: {
     Rate: 1,

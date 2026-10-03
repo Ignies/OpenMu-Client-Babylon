@@ -1,5 +1,6 @@
 import { MonsterActionType, PlayerAction } from '@versions/shared/objects/enum';
 import { monsterModelTypeOfNpc } from '../actors/monsterModelTable';
+import { monsterModelRegistry } from '@/controllers/monsters';
 
 /**
  * Animation play speeds in the original's units: `PlaySpeed` keys per tick at
@@ -302,31 +303,6 @@ export function wingsPlaySpeed(
 
 const M = MonsterActionType;
 
-/** Per-model overrides (`OpenMonsterModel`, ZzzOpenData.cpp:2380-2440; ids from _enum.h:4149+). */
-const MONSTER_OVERRIDES: Readonly<Record<number, Partial<Record<MonsterActionType, number>>>> = {
-  2: { [M.Walk]: 0.7 }, // Budge Dragon
-  6: { [M.Walk]: 0.6 }, // Larva
-  8: { [M.Walk]: 0.7 }, // Hell Spider
-  9: { [M.Walk]: 1.2 }, // Spider
-  10: { [M.Walk]: 0.28 }, // Cyclops
-  12: { [M.Walk]: 0.3 }, // Yeti
-  13: { [M.Walk]: 0.28 }, // Elite Yeti
-  17: { [M.Walk]: 0.5 }, // Worm
-  19: { [M.Walk]: 0.6 }, // Goblin
-  20: { [M.Walk]: 0.4 }, // Chain Scorpion
-  21: { [M.Walk]: 0.5 }, // Beetle Monster
-  28: { [M.Walk]: 0.3 }, // Shadow
-  39: { [M.Walk]: 0.22 }, // Titan
-  41: { [M.Walk]: 0.18 }, // Golden Wheel
-  42: { [M.Attack1]: 0.35, [M.Attack2]: 0.35 }, // Tantallos
-  44: { [M.Die]: 0.3 }, // Beam Knight
-  63: { [M.Die]: 0.1 }, // Death Angel
-  64: { [M.Attack1]: 0.3, [M.Attack2]: 0.25, [M.Shock]: 0.15, [M.Die]: 0.25 }, // Illusion of Kundun
-  66: { [M.Die]: 0.1 }, // Aegis
-  67: { [M.Attack1]: 0.2, [M.Attack2]: 0.3 }, // Death Centurion
-  69: { [M.Die]: 0.1 }, // Shriker
-};
-
 function monsterBasePlaySpeed(action: MonsterActionType): number {
   switch (action) {
     case M.Stop1:
@@ -353,14 +329,11 @@ function monsterBasePlaySpeed(action: MonsterActionType): number {
 /** Monster action table keyed by *model* index (not NPC type number). */
 export function monsterPlaySpeed(modelType: number, action: MonsterActionType): number {
   let speed = monsterBasePlaySpeed(action);
-  // Type multipliers apply to STOP1..SHOCK only (the loop stops before DIE).
-  if (action < M.Die) {
-    if (modelType === 3) speed *= 1.2;
-    if (modelType === 5 || modelType === 25) speed *= 0.7;
-    if (modelType === 37 || modelType === 42) speed *= 0.4;
-  }
-  const override = MONSTER_OVERRIDES[modelType]?.[action];
-  return override ?? speed;
+  // Each body's own numbers are in its file (versions/shared/monster_models): `OpenMonsterModel`,
+  // ZzzOpenData.cpp:2380-2440. The scale applies to STOP1..SHOCK only (the loop stops before DIE).
+  const body = monsterModelRegistry.get(modelType);
+  if (action < M.Die && body?.speedScale !== undefined) speed *= body.speedScale;
+  return body?.clipSpeeds?.[action] ?? speed;
 }
 
 export function monsterModelTypeOf(npcType: number | undefined): number {

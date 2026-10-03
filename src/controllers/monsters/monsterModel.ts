@@ -1,0 +1,39 @@
+/** A monster body's five voice slots: [0..1] idle / walk, [2..3] attack / hit, [4] death; null = silent. */
+export type MonsterVoiceSlots = readonly [string | null, string | null, string | null, string | null, string | null];
+
+/**
+ * One monster body (`MODEL_MONSTER01 + type`, `OpenMonsterModel` in ZzzOpenData.cpp): what it sounds
+ * like and how fast its clips play. Several monster types share a body, and these follow the body.
+ */
+export type MonsterModelDef = {
+  type: number;
+  name: string;
+  voices?: MonsterVoiceSlots;
+  /** The next five waves, played instead for monster types created with `SubType = 9`. */
+  subType9Voices?: MonsterVoiceSlots;
+  /** Clip speed by `MonsterActionType`, over the shared defaults. */
+  clipSpeeds?: Readonly<Partial<Record<number, number>>>;
+  /** Multiplier on Stop1..Shock (the original's per-body speed scale; Die is never scaled). */
+  speedScale?: number;
+};
+
+/** A monster body file's default export. */
+export function defineMonsterModel(model: MonsterModelDef): MonsterModelDef {
+  return model;
+}
+
+export class MonsterModelRegistry {
+  private readonly byType = new Map<number, MonsterModelDef>();
+
+  add(models: Iterable<MonsterModelDef>): void {
+    for (const m of models) this.byType.set(m.type, m);
+  }
+
+  get(type: number): MonsterModelDef | null {
+    return this.byType.get(type) ?? null;
+  }
+
+  all(): MonsterModelDef[] {
+    return [...this.byType.values()].sort((a, b) => a.type - b.type);
+  }
+}

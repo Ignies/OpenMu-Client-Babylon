@@ -66,7 +66,7 @@ export {
 export {
   MONSTER_ASSASSIN,
   MONSTER_BUS,
-  MONSTER_SOUNDS,
+  monsterVoices,
   monsterAttackSound,
   monsterDeathSound,
   monsterIdleSound,

@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 338,
   Name: 'Relics of Kundun',
   maxHealth: 140000,
+  subType: 9,
   model: { type: 69, scale: 1 },
   stats: {
     Rate: 1,
