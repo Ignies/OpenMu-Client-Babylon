@@ -1,8 +1,8 @@
-import { TILE_CM } from '../../common/terrain/consts';
 import { Sprite, type Scene } from '../../libs/babylon/exports';
 import type { Entity, World } from '../../ecs/world';
 import { HIDDEN_MESH_ALL, ModelObject } from '../../common/modelObject';
 import { spriteLevel } from '../../effects/core';
+import { CloudBank } from './cloudBank';
 import {
   CLOUD_LIGHT_TEXTURE,
   CLOUD_TEXTURE,
@@ -13,39 +13,9 @@ import {
 /**
  * Billboards per emitter, by type - `RenderObjectVisual` spawns 20 for types
  * 0-2 and 10 for types 3-5 (ZzzObject.cpp:3052-3096). The type is also the
- * particle's SubType, which is what decides the spin direction below.
+ * particle's SubType, which is what decides the spin direction.
  */
 const CLOUD_COUNT: readonly number[] = [20, 20, 20, 10, 10, 10];
-
-/** `o->Position` ± this on x/y at spawn (MU units, ZzzEffectParticle.cpp:7910). */
-const SPREAD_MU = 250;
-
-/** …and `+20 … +40` on z, the only axis the spread is one-sided on. */
-const RISE_MIN_MU = 20;
-const RISE_RANGE_MU = 21;
-
-/** `Scale = (rand()%20 + 180) * 0.01f` - 1.80 … 1.99, independent of `o->Scale`. */
-const SCALE_MIN = 1.8;
-const SCALE_RANGE = 0.2;
-
-/**
- * `Position.z = start.z + sinf((WorldTime + Gravity) / 5000.f) * 20.f`
- * (ZzzEffectParticle.cpp:9157). `Gravity` is a per-particle `rand()%1000`
- * phase, so a bank breathes out of step with itself; the period is
- * 2π·5000 ms ≈ 31 s and the throw is 20 MU, i.e. a drift you notice only by
- * looking away and back.
- */
-const BOB_PERIOD_MS = 5000;
-const BOB_AMPLITUDE_MU = 20;
-const BOB_PHASE_RANGE_MS = 1000;
-
-/**
- * `TurningForce = o->Scale + (rand()%30) * 0.01f`, spun at `±0.02 *
- * TurningForce` degrees per millisecond about the view axis - a full turn in
- * roughly 15-20 s at the map's usual object scales.
- */
-const SPIN_DEG_PER_MS = 0.02;
-const SPIN_JITTER = 0.3;
 
 /** `Light = (0.1f, 0.1f, 0.1f)` (ZzzObject.cpp:3054). Dim, and meant to stack. */
 const CLOUD_LIGHT = 0.1;
@@ -74,16 +44,6 @@ const GLOW_LIFE_TICKS = 12;
 /** Concurrent glows per emitter, so a stalled frame cannot burst the pool. */
 const GLOW_LIMIT = 2;
 
-type Cloud = {
-  readonly sprite: Sprite;
-  readonly baseX: number;
-  readonly baseY: number;
-  readonly baseZ: number;
-  readonly phase: number;
-  readonly spin: number;
-  angle: number;
-};
-
 type Glow = {
   readonly sprite: Sprite;
   life: number;
@@ -93,19 +53,6 @@ type Glow = {
 };
 
 const rand = (n: number) => Math.floor(Math.random() * n);
-
-/**
- * Which way a cloud turns, from its emitter's type (the particle SubType) and
- * its index in the bank (ZzzEffectParticle.cpp:3052). Types 1 and 4 turn one
- * way, 2 and 5 the other, and 0 and 3 split their own bank down the middle so
- * a single emitter's clouds counter-rotate against each other.
- */
-function spinSign(type: number, index: number): number {
-  if (type === 1 || type === 4) return 1;
-  if (type === 2 || type === 5) return -1;
-
-  return index % 2 === 0 ? 1 : -1;
-}
 
 /**
  * Icarus types 0-5: the cloud emitters.
@@ -130,11 +77,9 @@ export class IcarusCloudObject extends ModelObject {
 
   #scene: Scene | null = null;
 
-  #clouds: Cloud[] = [];
+  #bank: CloudBank | null = null;
 
   #glows: Glow[] = [];
-
-  #cloudPool: SkySpritePool | null = null;
 
   #glowPool: SkySpritePool | null = null;
 
@@ -157,57 +102,18 @@ export class IcarusCloudObject extends ModelObject {
     // visibility radius before its clouds ever appeared.
     if (!pool || this.#disposed) return;
 
-    this.#cloudPool = pool;
-    this.#spawnBank(pool);
+    this.#bank = new CloudBank(world.scene, pool);
+    this.#bank.spawn(this.node.position, this.node.scaling.x, {
+      count: CLOUD_COUNT[this.Type] ?? 0,
+      subType: this.Type,
+      light: [CLOUD_LIGHT, CLOUD_LIGHT, CLOUD_LIGHT],
+    });
 
     const glowPool = await getSkySpritePool(world.scene, CLOUD_LIGHT_TEXTURE);
 
     if (!glowPool || this.#disposed) return;
 
     this.#glowPool = glowPool;
-  }
-
-  #spawnBank(pool: SkySpritePool): void {
-    const origin = this.node.position;
-    const ownerScale = this.node.scaling.x;
-    const count = CLOUD_COUNT[this.Type] ?? 0;
-
-    for (let i = 0; i < count; i++) {
-      const sprite = pool.acquire();
-
-      // Budget spent (see CLOUD_TEXTURE): a thinner bank, not a dropped one.
-      if (!sprite) break;
-
-      const scale = SCALE_MIN + Math.random() * SCALE_RANGE;
-      const size = pool.sizeFor(scale);
-
-      sprite.width = size;
-      sprite.height = size;
-      spriteLevel(pool.manager.scene, sprite.color.set(CLOUD_LIGHT, CLOUD_LIGHT, CLOUD_LIGHT, 1));
-
-      // MU x/y are the ground plane and MU z is up, so the one-sided rise goes
-      // on Babylon's y. The original scales the offsets by the frame factor
-      // `CreateParticleFpsChecked` was called with, which is an artefact of
-      // spawning inside a per-frame call - a bank created once has no frame to
-      // be a fraction of.
-      const cloud: Cloud = {
-        sprite,
-        baseX: origin.x + (rand(SPREAD_MU * 2) - SPREAD_MU) / TILE_CM,
-        baseY:
-          origin.y + (RISE_MIN_MU + rand(RISE_RANGE_MU)) / TILE_CM,
-        baseZ: origin.z + (rand(SPREAD_MU * 2) - SPREAD_MU) / TILE_CM,
-        phase: rand(BOB_PHASE_RANGE_MS),
-        spin:
-          spinSign(this.Type, i) *
-          SPIN_DEG_PER_MS *
-          (ownerScale + Math.random() * SPIN_JITTER),
-        angle: rand(360),
-      };
-
-      sprite.position.set(cloud.baseX, cloud.baseY, cloud.baseZ);
-
-      this.#clouds.push(cloud);
-    }
   }
 
   /**
@@ -249,19 +155,7 @@ export class IcarusCloudObject extends ModelObject {
     const deltaMs = scene.getEngine().getDeltaTime();
     const worldTimeMs = gameTime.TotalGameTime.TotalSeconds * 1000;
 
-    for (const cloud of this.#clouds) {
-      cloud.angle += cloud.spin * deltaMs;
-
-      cloud.sprite.position.y =
-        cloud.baseY +
-        (Math.sin((worldTimeMs + cloud.phase) / BOB_PERIOD_MS) *
-          BOB_AMPLITUDE_MU) /
-          TILE_CM;
-
-      // Babylon's sprite angle is a rotation in the screen plane, which is
-      // what the original's spin about the view axis amounts to.
-      cloud.sprite.angle = (cloud.angle * Math.PI) / 180;
-    }
+    this.#bank?.update(deltaMs, worldTimeMs);
 
     // Everything below is a `rand_fps_check`, so it is counted in the
     // original's 25 Hz ticks rather than in frames.
@@ -297,13 +191,12 @@ export class IcarusCloudObject extends ModelObject {
   dispose(): void {
     this.#disposed = true;
 
-    for (const cloud of this.#clouds) this.#cloudPool?.release(cloud.sprite);
-    this.#clouds.length = 0;
+    this.#bank?.dispose();
+    this.#bank = null;
 
     for (const glow of this.#glows) this.#glowPool?.release(glow.sprite);
     this.#glows.length = 0;
 
-    this.#cloudPool = null;
     this.#glowPool = null;
     this.#scene = null;
 

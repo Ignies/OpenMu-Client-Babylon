@@ -1,4 +1,5 @@
 import type { Emission } from '../../common/effectParticles';
+import type { CloudBankSpec } from '../icarus/cloudBank';
 
 /**
  * Chaos Castle (worlds 18-23 + 53, all on `World19` / `Object19`), the
@@ -17,9 +18,10 @@ import type { Emission } from '../../common/effectParticles';
  *    at stage 2. **24-29**: the third, shown for stages 2-3, drop at stage 3.
  *    **18-21**: the innermost, shown from stage 3. Each ring comes with its
  *    girders at z ~ -780 (22/23, 28/29, 34/35 pair with the slabs above them).
- *  - **6-12**: `RenderChaosCastleVisual` types that puff a handful of `CLOUD`
- *    particles on their first frame and hide themselves (`HiddenMesh = -2`)
- *    - smoke-box markers, never drawn.
+ *  - **6-12**: `RenderChaosCastleVisual` types that hide themselves
+ *    (`HiddenMesh = -2`) and stand a bank of `BITMAP_CLOUD` in their place -
+ *    the fog. 6-8 ring the castle just past its floor, 10/11 sit in the two
+ *    pits, 12 hangs under the castle.
  *  - **3 with `PKKey`**: the lightning pillars; a `CreateJoint` thunder
  *    ribbon and `SOUND_CHAOS_THUNDER01/02` when the client's own roll picks
  *    one. The sound is `thunder.ts`; no ribbon primitive in the clone (see
@@ -29,15 +31,32 @@ import type { Emission } from '../../common/effectParticles';
 /** `CreateObject` has no Chaos Castle blend meshes; "checked, none". */
 export const CHAOS_CASTLE_BLEND_MESHES: Readonly<Record<number, number>> = {};
 
+/** `Light = (0.05f, 0.05f, 0.1f)` on every blue bank (CSChaosCastle.cpp:380). */
+const FOG_LIGHT = [0.05, 0.05, 0.1] as const;
+
 /**
- * Types 6-12 (`RenderChaosCastleVisual`, CSChaosCastle.cpp:375-470): each
- * spawns 5-10 `BITMAP_CLOUD` particles once - dim `(0.05, 0.05, 0.1)` puffs,
- * one per object lifetime - and sets `HiddenMesh = -2`. A single puff at load
- * is not worth an emitter, so they are plain markers here.
+ * Types 6-11 (`RenderChaosCastleVisual`, CSChaosCastle.cpp:375-450): 10 or 5
+ * `BITMAP_CLOUD` of SubType `type - 6`, alive for as long as the box is in
+ * view - the particle's default branch resets its life every frame its owner
+ * is `Visible`. `ChaosCastleCloudObject` stands them.
  */
-export const CHAOS_CASTLE_EFFECT_ONLY_TYPES: readonly number[] = [
-  6, 7, 8, 9, 10, 11, 12,
-];
+export const CHAOS_CASTLE_CLOUD_BANKS: Readonly<Record<number, CloudBankSpec>> =
+  {
+    6: { count: 10, subType: 0, light: FOG_LIGHT },
+    7: { count: 10, subType: 1, light: FOG_LIGHT },
+    8: { count: 10, subType: 2, light: FOG_LIGHT },
+    9: { count: 5, subType: 3, light: FOG_LIGHT },
+    10: { count: 5, subType: 4, light: FOG_LIGHT },
+    11: { count: 5, subType: 5, light: FOG_LIGHT },
+  };
+
+/**
+ * Type 12 (:452-462): seven SubType 7 clouds at 0.3 grey, drawn
+ * `EnableAlphaBlendMinus` - a darkening. All eight hang 2.5-4 tiles under the
+ * castle, in the black past its floor, where taking light away shows nothing,
+ * so they stay plain markers.
+ */
+export const CHAOS_CASTLE_EFFECT_ONLY_TYPES: readonly number[] = [12];
 
 /** Nothing on this map emits continuously; the ring-drop smoke is the arena's. */
 export const CHAOS_CASTLE_EMISSIONS: Partial<
