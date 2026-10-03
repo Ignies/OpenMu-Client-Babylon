@@ -6,6 +6,8 @@ import {
   LOST_TOWER_EFFECT_ONLY_TYPES,
   LOST_TOWER_EMISSIONS,
 } from './spec';
+import { LOST_TOWER_SOUND } from './sound';
+import { LOST_TOWER_LIGHTING } from './lighting';
 
 /**
  * Lost Tower (World5 / Object5) - the map entry: identity and the per-world data the
@@ -35,5 +37,7 @@ export const losttowerLayer: MapLayer = {
   blendMeshes: LOST_TOWER_BLEND_MESHES,
   effectOnly: LOST_TOWER_EFFECT_ONLY_TYPES,
   emissions: LOST_TOWER_EMISSIONS,
+  sound: LOST_TOWER_SOUND,
+  lighting: LOST_TOWER_LIGHTING,
   create: world => import('./create').then(m => m.createLostTower(world)),
 };

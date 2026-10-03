@@ -394,9 +394,9 @@ async function runLoad(
     evictWorldMinimaps(map);
     prefetchWorldMinimap(map);
 
-    // `RenderTerrain` is skipped outright for the sky map (MainScene.cpp:402):
-    // the mesh exists for its height field only.
-    if (map === ENUM_WORLD.WD_10ICARUS) {
+    // A map whose ground is never drawn keeps the mesh for its height field
+    // only (`MapTerrain.hidden`: Icarus).
+    if (maps.layerFor(map)?.terrain?.hidden) {
       terrain.isVisible = false;
     }
 

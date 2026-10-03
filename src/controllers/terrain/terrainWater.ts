@@ -1,5 +1,6 @@
 import { Texture, type Effect, type Scene } from '../render/babylon/exports';
-import { ENUM_WORLD } from '../../core/types';
+import type { ENUM_WORLD } from '../../core/types';
+import { maps } from '../maps';
 import { GameOptions } from '../../features/options/gameOptions';
 import { createOZJTexture } from '../assets/download';
 import { downloadDataFile } from '../assets/mu/dataFolder';
@@ -10,10 +11,11 @@ import { downloadDataFile } from '../assets/mu/dataFolder';
  * pure function of the `time` uniform, plus Atlans' additive 32-frame caustics
  * flipbook (ZzzLodTerrain.cpp:1591-1596) in the fragment.
  *
- * Same shape as terrainOverlay.ts: a registry keyed by ENUM_WORLD, read at
- * map load; the chunks compile in only where a map has them, so every other
- * map keeps the shader it always had, byte for byte. The `animatedWater`
- * option gates the registry the way `advancedEffects` gates the overlays.
+ * Same shape as terrainOverlay.ts: each map declares its own row
+ * (`MapTerrain.water`), read at map load; the chunks compile in only where a
+ * map has one, so every other map keeps the shader it always had, byte for
+ * byte. The `animatedWater` option gates it the way `advancedEffects` gates
+ * the overlays.
  */
 
 export type TerrainWaterSpec = {
@@ -25,17 +27,10 @@ export type TerrainWaterSpec = {
   readonly flipbook: boolean;
 };
 
-const WATER_BY_WORLD: Partial<Record<ENUM_WORLD, TerrainWaterSpec>> = {
-  // The one map the original gives the water treatment on its terrain.
-  // Doppelganger 3 reuses Atlans' art and takes one more line here when it
-  // lands; Hellas' dedicated surface plane could opt in the same way.
-  [ENUM_WORLD.WD_7ATLANSE]: { layer: 5, scale: 1, flipbook: true },
-};
-
 /** Read at map load, like `terrainOverlaysFor`: off = the old shader. */
 export function terrainWaterFor(map: ENUM_WORLD): TerrainWaterSpec | null {
   if (!GameOptions.animatedWater) return null;
-  return WATER_BY_WORLD[map] ?? null;
+  return maps.layerFor(map)?.terrain?.water ?? null;
 }
 
 /** SceneManager.cpp:305 - 32 frames, one per 25 Hz reference tick. */

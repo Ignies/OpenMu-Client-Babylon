@@ -6,6 +6,8 @@ import {
   KARUTAN_EFFECT_ONLY_TYPES,
   KARUTAN_EMISSIONS,
 } from './spec';
+import { KARUTAN_1_SOUND } from './sound';
+import { KARUTAN_LIGHTING } from './lighting';
 
 /**
  * Karutan 1 (World81 / Object81) - the map entry: identity and the per-world data the
@@ -22,7 +24,7 @@ import {
  *
  * Sound (SceneManager.cpp:943-946, `ASG_ADD_MAP_KARUTAN`):
  * `Karutan_desert_env` is the bed; `PlayObjectSound` (:345-354) adds
- * `Karutan_insect_env` on 58 (×4) and 66 (×6) - `controllers/sound/objectLoops.ts`.
+ * `Karutan_insect_env` on 58 (×4) and 66 (×6) - all in `sound.ts`.
  * `Music/Karutan_A`.
  */
 
@@ -55,7 +57,7 @@ const OUTDOOR = true;
 // Desert, the same climate flag Tarkan carries: no rain whatever the weather
 // byte says. Karutan is not one of the seven maps `CreateRain` names, its
 // bed is `Karutan_desert_env` and its sky profile is `DESERT_SKY`
-// (controllers/lighting/profiles.ts:186).
+// (`lighting.ts`).
 const DESERT = true;
 
 // ---- 2. state + readers ----------------------------------------------------
@@ -74,5 +76,7 @@ export const karutan1Layer: MapLayer = {
   blendMeshes: KARUTAN_BLEND_MESHES,
   effectOnly: KARUTAN_EFFECT_ONLY_TYPES,
   emissions: KARUTAN_EMISSIONS,
+  sound: KARUTAN_1_SOUND,
+  lighting: KARUTAN_LIGHTING,
   create: world => import('./create').then(m => m.createKarutan1(world)),
 };

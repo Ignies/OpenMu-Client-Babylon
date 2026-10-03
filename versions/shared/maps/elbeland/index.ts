@@ -5,6 +5,9 @@ import {
   ELBELAND_EFFECT_ONLY_TYPES,
   ELBELAND_EMISSIONS,
 } from './spec';
+import { ELBELAND_SOUND } from './sound';
+import { ELBELAND_LIGHTING } from './lighting';
+import { sit } from '../shared/terrain';
 
 /**
  * Elbeland (World52 / Object52) - the map entry: identity and the per-world data the
@@ -72,5 +75,8 @@ export const elbelandLayer: MapLayer = {
   blendMeshes: ELBELAND_BLEND_MESHES,
   effectOnly: ELBELAND_EFFECT_ONLY_TYPES,
   emissions: ELBELAND_EMISSIONS,
+  sound: ELBELAND_SOUND,
+  lighting: ELBELAND_LIGHTING,
+  terrain: { rest: { 103: sit(true) } },
   create: world => import('./create').then(m => m.createElbeland(world)),
 };

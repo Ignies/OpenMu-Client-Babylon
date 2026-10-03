@@ -9,12 +9,22 @@ One folder per map. Each folder exports one `MapLayer` (the contract in
 - `FULL_TILES`, `ROCK04_TILES`, `ROCK02_TILES` (`recipes.ts`): common tile-slot lists.
 - `shared/objectVariants.ts`: `AlphaObject.at(k)`, `PlaySpeedObject.at(k)`, `AbsentModelObject`,
   `bindAbsentModels(...)`: per-type settings without a subclass per map.
+- `shared/sound.ts` (`WIND`, `smallLoop` / `largeLoop`, `outsideSafeZone`, the monster hook
+  shorthands `hookWalk` / `hookOnce` / `hookPlay` / `oneChannel`), `shared/looks.ts` (`OPEN_SKY`,
+  `KANTURU_SKY`, `DESERT_SKY`, `GRADED_HAZE`, `sun`...), `shared/lights.ts` (`createFire`),
+  `shared/terrain.ts` (`sit`, `pose`, `healing`): plain building blocks the map rows share.
 
 ## How it works
 - A `MapLayer` is mostly data: `name` (= folder name), `worlds` it serves, `assetWorld` when the
   `World<n>` folder is not `world + 1`, `tiles` by slot, `cutoutTile`, `spawn`, sky kind
   (`outdoor`, `rain`, `snow`, `snowfall`, `underwater`, `desert`), `clearColor`, `rooms`, and the
   per-object-type tables `blendMeshes`, `effectOnly`, `emissions`.
+- The map's own rows for the other controllers: `sound` (beds, one-shots, music, town tracks,
+  object loops, monster cues), `lighting` (look, room looks, object lights, thunder), `weather`
+  (always rains, wet ground, leaves) and `terrain` (overlays, snow bed, water, rest objects,
+  object fixups, grass, a hidden ground). Reworking a controller never touches these; changing what a map sounds
+  or looks like is an edit here only. A row that differs between the entry's worlds is written
+  `{ byWorld: { [world]: row } }`.
 - `create(world)` binds the map's object classes into `world.terrain.MapTileObjects[type]` and adds
   entities the map owns. It runs once per warp. It is always written as
   `world => import('./create').then(m => m.createX(world))`; a static import is an import cycle.
@@ -25,7 +35,9 @@ One folder per map. Each folder exports one `MapLayer` (the contract in
 A map folder:
 ```
 <map>/index.ts    data + the exported <map>Layer
-<map>/spec.ts     plain tables: blend meshes, effect-only types, emissions (no scene imports)
+<map>/spec.ts     plain tables: blend meshes, effect-only types, emissions, lights (no scene imports)
+<map>/sound.ts    MapSound: beds, music, object loops, monster voices (plain data)
+<map>/lighting.ts MapLighting: look over the default, room looks, its spec's light table
 <map>/create.ts   object classes bound by type, map-owned entities
 <map>/*Object.ts  one file per object type with its own behaviour (Lorencia has 38)
 ```
@@ -61,8 +73,16 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
 - a tile file is missing in the world folder: name a tile the folder has in that slot, so the
   `EncTerrain<n>.map` indices stay put.
 - give an object type behaviour: add `<thing>Object.ts`, bind it by type in `create.ts`.
+- change a map's bed, track, object loop or monster voice: its `sound.ts`. Its look, room looks
+  or torches: `lighting.ts` (torch rows in `spec.ts`). Rain, wet ground, leaves: `weather` on the
+  entry. Overlays, water, seats, grass: `terrain` on the entry.
+- data files stay pure: import controller types only (`import type ... from '@/controllers/x'`),
+  and plain values from `shared/` or `@versions/shared/objects/enum`, never a controller at run
+  time - `layers.ts` loads every entry when the `maps` controller loads.
 
 ## Tests
+- `mapRows.golden.test.ts`: every per-map row the sound, lighting, weather and terrain
+  controllers answer for every world, as hashes; pinned before the rows moved here.
 - `tileFiles.test.ts`: every tile slot of every map names a file that exists in its world folder.
 - `chaoscastle/thunder.test.ts`: pillar thunder timing and when it strikes.
 - `kalima/grassObject.test.ts`: `KalimaWaterPlantObject`.

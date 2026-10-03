@@ -291,3 +291,15 @@ export const sound = new Sound();
 // of this singleton (same guard as app/store.ts).
 const hot = (import.meta as { hot?: { decline(): void } }).hot;
 if (hot) hot.decline();
+
+// ---- a map's own sound (MapLayer.sound), the row types its folder writes ----
+export type { MapSound } from './mapSound';
+export type {
+  AmbientGate,
+  AmbientTimed,
+  MapAmbientBed,
+  MapAmbientOneShot,
+} from './ambientBeds';
+export type { MapTown } from './music';
+export type { HeroContext, MapObjectLoop } from './objectLoops';
+export type { MonsterCue, VoiceSet } from './mapMonsters';

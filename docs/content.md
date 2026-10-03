@@ -110,3 +110,13 @@ it as the 3D line-up's name plate.
 - The generic NPC shapes (plain model, player rig in a kit, transformed rig, trap, hidden) are the
   actors controller's. `versions/shared/npcs/` only keeps a forward of `ElfSoldier` for the
   Lorencia map.
+
+## A map's own rows
+
+A map folder (`versions/shared/maps/<map>/`) also carries what the other controllers used to keep
+per world: `sound.ts` (beds, music, object loops, monster voices: `MapSound`), `lighting.ts` (look,
+room looks, torch table: `MapLighting`), and on the entry itself `weather` (`MapWeather`) and
+`terrain` (`MapTerrain`). Each controller owns its row type and reads the active map's row through
+the `maps` controller at run time (`maps.rowFor`), so reworking sound or lighting is an edit to that
+controller only, and changing what one map sounds or looks like is an edit to that map only.
+Shared building blocks are in `maps/shared/` (`sound.ts`, `looks.ts`, `lights.ts`, `terrain.ts`).

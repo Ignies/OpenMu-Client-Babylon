@@ -5,6 +5,8 @@ import {
   BALGAS_EFFECT_ONLY_TYPES,
   BALGAS_EMISSIONS,
 } from './spec';
+import { BALGAS_BARRACKS_SOUND } from './sound';
+import { BALGAS_LIGHTING } from './lighting';
 
 /**
  * Balgas Barracks (World42 / Object42) - the map entry: identity and the per-world data the
@@ -52,5 +54,7 @@ export const balgasbarracksLayer: MapLayer = {
   blendMeshes: BALGAS_BLEND_MESHES,
   effectOnly: BALGAS_EFFECT_ONLY_TYPES,
   emissions: BALGAS_EMISSIONS,
+  sound: BALGAS_BARRACKS_SOUND,
+  lighting: BALGAS_LIGHTING,
   create: world => import('./create').then(m => m.createBalgasBarracks(world)),
 };

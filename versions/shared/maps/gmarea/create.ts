@@ -11,7 +11,7 @@ import { AlphaObject, PlaySpeedObject } from '../shared/objectVariants';
  * of which only 44 is placed at all (none of 46/76/90/96 exist here).
  *
  * No `ManageBackgroundMusic` case and no `PlayWorldAmbientSounds` case:
- * silent, deliberately (`null` in `music.ts`). Not an OpenMU map, so the
+ * silent, deliberately (`null` in `sound.ts`). Not an OpenMU map, so the
  * offline spawn is a walkable cell in the ruins cluster (228,26) - the
  * map has 693 walkable cells, all there.
  */

@@ -6,6 +6,8 @@ import {
   KARUTAN_EFFECT_ONLY_TYPES,
   KARUTAN_EMISSIONS,
 } from '../karutan1/spec';
+import { KARUTAN_2_SOUND } from './sound';
+import { KARUTAN_LIGHTING } from '../karutan1/lighting';
 
 /**
  * Karutan 2 (World82 / Object82) - the map entry: identity and the per-world data the
@@ -21,7 +23,7 @@ import {
  *
  * Sound (SceneManager.cpp:947-958): the desert bed everywhere except on tile
  * 12, where it is swapped for `Kardamahal_entrance_env` - two beds with
- * opposite `mutedOn` gates in `ambientBeds.ts`. `Music/Karutan_B`.
+ * opposite `mutedOn` gates in `sound.ts`. `Music/Karutan_B`.
  */
 
 // ---- 1. data ---------------------------------------------------------------
@@ -51,7 +53,7 @@ const SPAWN = { x: 162, y: 16 } as const;
 const OUTDOOR = true;
 
 // Desert, as Karutan 1 and Tarkan are: no rain whatever the weather byte
-// says. Same bed, same `DESERT_SKY` profile (controllers/lighting/profiles.ts:186).
+// says. Same bed, same `DESERT_SKY` profile (`karutan1/lighting.ts`).
 const DESERT = true;
 
 // ---- 2. state + readers ----------------------------------------------------
@@ -71,5 +73,7 @@ export const karutan2Layer: MapLayer = {
   blendMeshes: KARUTAN_BLEND_MESHES,
   effectOnly: KARUTAN_EFFECT_ONLY_TYPES,
   emissions: KARUTAN_EMISSIONS,
+  sound: KARUTAN_2_SOUND,
+  lighting: KARUTAN_LIGHTING,
   create: world => import('./create').then(m => m.createKarutan2(world)),
 };

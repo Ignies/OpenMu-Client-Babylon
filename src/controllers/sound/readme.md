@@ -24,7 +24,7 @@ never which skill or item asks for it.
   swirl, the Nightmare teleport, santa emotes), played by `app/logic.ts` and feature nets.
 - `mapMonsters.ts`, `monsterEffects.ts`: per-map monster cues and `MonsterAttackEffects`, stepped
   by `combatSfxSystem`.
-- `objectLoops.ts`: the `ObjectLoop` row type (map specs supply rows, e.g. Kalima).
+- `objectLoops.ts`: plays the map's object loops (`MapObjectLoop` rows from each map's `sound.ts`).
 - `soundsManager.ts`: `SoundsManager`, the mixer (`loadSound`, `loopInstance`, `stopSoundEffect`).
 - `instruments/`: `ensureBank`, `bankReady`, `noteOn`, `noteOff`, `allNotesOff`,
   `setPerformerPosition`, `dropPerformer`, `audioNow`, `contextReady`, `instrumentVoices`.
@@ -55,7 +55,7 @@ never which skill or item asks for it.
 - uses: lighting (`crackle.ts` reads `lighting.emitters`), assets (data folder URLs, world sets),
   render (Babylon exports), terrain (`TW_SAFEZONE`), anim, actors, `core`, `ecs` types. Old exceptions to the dependency
   rule are listed in `tools/checks/baselines/deps.json` (options, events, hero, items, drops,
-  band, skill aliases, `app/store`, `app/consts`, the Kalima spec).
+  band, skill aliases, `app/store`, `app/consts`).
 - used by: `controllers.ts`, `app/boot.tsx`, `app/logic.ts`, `app/lifecycle.ts`, ECS systems
   (sound, combat sfx, skill cast, death, teleport, pets, band, boids, doors), most feature nets,
   `skills/index.ts` (`SKILL_SOUNDS`), fx (`playSfx`), interface components, skill files, map
@@ -71,7 +71,7 @@ never which skill or item asks for it.
 - add a sound file: add its key and path to `recipes.json`; the `Sounds` type follows.
 - give a skill a cast sound: set `sound` in its `defineSkill` file, not here.
 - add a slider category: add it to `SoundBus` and `BUS_VOLUME_OPTION` in `buses.ts`.
-- change a map's bed or music: the table in `ambientBeds.ts` or `music.ts`.
+- change a map's bed, music, loops or voices: that map's `sound.ts` (`versions/shared/maps/<map>/`).
 
 ## Tests
 - `buses.test.ts`: slider curves, the unnamed `world` bus, master folded into both tracks.
@@ -159,3 +159,27 @@ filled by `registerSkills` from each skill's `sound`, `clipSound`, `soundOnLandi
 `silentHeroCast`. Change a skill's sound in its file under `versions/shared/skills/`. The
 per-monster rows of `packetSounds.ts` (quiet Energy Ball casters, the Nightmare's teleport, the
 meteorite trap) are monster data, still here.
+
+## A map's own sound (MapLayer.sound)
+- A map's beds, one-shots, clocked one-shots, music, town tracks, object loops and monster cues
+  are the map's own: `MapSound` in `versions/shared/maps/<map>/sound.ts`, set as `sound` on its
+  entry. `ambientBeds.ts`, `music.ts`, `objectLoops.ts` and `mapMonsters.ts` are the engines and
+  read the rows through `maps.rowFor` at run time, never at module load. This replaces the per-map
+  tables those files used to hold: to change a map's bed, track, loop or voice, edit its
+  `sound.ts`.
+- Row types (`MapSound`, `MapAmbientBed`, `MapAmbientOneShot`, `AmbientTimed`, `AmbientGate`,
+  `MapTown`, `MapObjectLoop`, `HeroContext`, `MonsterCue`, `VoiceSet`) are exported from
+  `index.ts`. A row names its event or option gate (`AmbientGate`: `bloodCastleRunning`,
+  `chaosCastleWaiting`, `chaosCastleRunning`, `ambientParticles`) and `ambientBeds.ts` answers it,
+  so map data stays plain. An object loop names its reach (`small`, `large` or tiles) and
+  `objectLoops.ts` turns it into tiles.
+- Left in the engines: the global monster voices (`GLOBAL_VOICES`), the Kanturu tower's event
+  music (`kanturuMusic`) and `WD_5UNKNOWN`'s Dungeon track (no map entry claims that world).
+  `crackle.ts` has no per-map rows.
+- Monster cues: `monsterCues` answers on the entry's own worlds (per world with `byWorld`, the
+  Fortress day 2), `monsterCuesAnyMap` from every map (the hooks with no world guard: Land of
+  Trials, Aida, Kanturu 1st / 2nd, Kalima's Kundun), merged in `MAP_LAYERS` order.
+- Test: `versions/shared/maps/mapRows.golden.test.ts` pins every world's beds, one-shots, timed
+  shots, music, town tracks, object loops and monster cues. `mapSound.test.ts`: a registered
+  entry's rows are heard without a reload, gates answer the event state, reach turns into tiles,
+  unguarded hooks voice every map.

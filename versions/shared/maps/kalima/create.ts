@@ -53,7 +53,7 @@ import { KalimaWaterPlantObject } from './grassObject';
  *    `BITMAP_LIGHT` SubType 7 within +-4 tiles of the hero on a 1-in-5 tick,
  *    and one in fifteen of those also drops `CreateEffect(9)` 800 above with
  *    the falling-stone sound. The sound is already a one-shot in
- *    `controllers/sound/ambientBeds.ts`; the motes want a hero-relative weather recipe
+ *    `sound.ts`; the motes want a hero-relative weather recipe
  *    that does not exist yet.
  *  - **Kundun's roar** in the boss room (:319-329, tiles 25-51 x 44-119 on
  *    floor 7 only): needs the floor number, which is the server's, not the

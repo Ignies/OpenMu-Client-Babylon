@@ -32,7 +32,7 @@ import type { RoomFrame } from '@/controllers/maps/roomEnumeration';
  * tavern treatment applied to every roofed building the hero can walk into
  * (see rooms.ts), the two castle halls included. Dust lives in
  * AmbientParticleSystem. No room carries music: the original has no pub
- * track in Devias, and the church track is `controllers/sound/music.ts`'s.
+ * track in Devias, and the church track is the `town` row in `sound.ts`.
  */
 export async function createDevias(world: World) {
   const terrain = world.terrain;

@@ -5,6 +5,8 @@ import {
   VULCANUS_EFFECT_ONLY_TYPES,
   VULCANUS_EMISSIONS,
 } from './spec';
+import { VULCANUS_SOUND } from './sound';
+import { VULCANUS_LIGHTING } from './lighting';
 
 /**
  * Vulcanus / PK Field (World64 / Object64) - the map entry: identity and the per-world data the
@@ -76,5 +78,7 @@ export const vulcanusLayer: MapLayer = {
   blendMeshes: VULCANUS_BLEND_MESHES,
   effectOnly: VULCANUS_EFFECT_ONLY_TYPES,
   emissions: VULCANUS_EMISSIONS,
+  sound: VULCANUS_SOUND,
+  lighting: VULCANUS_LIGHTING,
   create: world => import('./create').then(m => m.createVulcanus(world)),
 };

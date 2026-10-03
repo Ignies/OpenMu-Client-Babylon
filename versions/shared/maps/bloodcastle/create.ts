@@ -46,7 +46,7 @@ import {
  * (WSclient.cpp:5440-5487); both flags are in EncTerrain12.att as shipped,
  * so nothing here has to set them.
  *
- * Sound: `iBloodCastle` loops from match state 0 (ambientBeds.ts); no music.
+ * Sound: `iBloodCastle` loops from match state 0 (`sound.ts`); no music.
  * Mood: none registered - `MOOD_BY_WORLD` has no row, so the map runs on the
  * default grade plus its own baked lightmap, which is red-brown by design.
  */

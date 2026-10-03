@@ -13,8 +13,8 @@ import {
   worldPlays,
 } from './music';
 
-// The mixer, the map registry and the listener stand in as fakes: the real
-// ones reach Babylon and every map module.
+// The mixer and the listener stand in as fakes: the real ones reach Babylon.
+// The tracks are the real map entries' rows.
 const mixer = vi.hoisted(() => {
   const m = {
     currentMusic: null as string | null,
@@ -59,17 +59,6 @@ vi.mock('./buses', () => ({ busSilent: () => bus.silent }));
 vi.mock('./listener', () => ({
   listenerWorld: () => scene.world,
   listenerHero: () => scene.world.playerEntity,
-}));
-vi.mock('../assets/worldAssets', () => ({
-  DEVIL_SQUARE_WORLDS: [9],
-  BLOOD_CASTLE_WORLDS: [11],
-  CHAOS_CASTLE_WORLDS: [18],
-  KALIMA_WORLDS: [24, 25],
-  CURSED_TEMPLE_WORLDS: [45, 46],
-  EMPIRE_GUARDIAN_WORLDS: [69],
-  DOPPELGANGER_WORLDS: [65],
-  onWorlds: (worlds: number[], value: unknown) =>
-    Object.fromEntries(worlds.map(w => [w, value])),
 }));
 
 const world = scene.world;

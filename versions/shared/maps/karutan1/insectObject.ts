@@ -21,7 +21,7 @@ const SWITCH_ODDS = 0.1;
  * Karutan 66 (`Object81/Object67.bmd`, `so_liveC01`), ×6 in World81 and none
  * in World82 - the insect on the oasis rocks, two glowing points on bones
  * 13/14 (`KARUTAN_LIGHTS`) and the carrier of `Karutan_insect_env`
- * (`controllers/sound/objectLoops.ts`).
+ * (`sound.ts`).
  *
  * `if (o->AnimationFrame >= 19) SetAction(o, rand_fps_check(10) ? 1 : 0)`
  * (GMKarutan1.cpp:182-188) is a roll *per frame* over the tail of a 20-key

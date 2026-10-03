@@ -6,6 +6,8 @@ import {
   DOPPELGANGER1_EFFECT_ONLY_TYPES,
   DOPPELGANGER1_EMISSIONS,
 } from './spec';
+import { DOPPELGANGER_SOUND } from './sound';
+import { DOPPELGANGER1_LIGHTING } from './lighting';
 
 /**
  * Doppelganger 1 (World66 / Object66) - the map entry: identity and the per-world data the
@@ -24,7 +26,7 @@ import {
  * `PlayMonsterSound` :618-688 - the ice walker, the two butchers and the
  * doppelganger itself), and `PlayBGM`'s `MUSIC_DOPPELGANGER`, which the
  * original only starts while the event is enabled (:692-718) - so `null` in
- * `music.ts`. Clear colour `(148, 179, 223)/256` (SceneManager.cpp:365) is
+ * `sound.ts`. Clear colour `(148, 179, 223)/256` (SceneManager.cpp:365) is
  * set by `loadMapIntoScene`.
  *
  * `CreateObject` (:40-47) is empty and nothing sets `Alpha` or `Velocity` per
@@ -75,5 +77,7 @@ export const doppelganger1Layer: MapLayer = {
   blendMeshes: DOPPELGANGER1_BLEND_MESHES,
   effectOnly: DOPPELGANGER1_EFFECT_ONLY_TYPES,
   emissions: DOPPELGANGER1_EMISSIONS,
+  sound: DOPPELGANGER_SOUND,
+  lighting: DOPPELGANGER1_LIGHTING,
   create: world => import('./create').then(m => m.createDoppelganger1(world)),
 };

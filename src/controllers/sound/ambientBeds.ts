@@ -1,4 +1,4 @@
-import { ENUM_WORLD } from '../../core/types';
+import type { ENUM_WORLD } from '../../core/types';
 import { GameOptions } from '../../features/options/gameOptions';
 import { SoundsManager } from './soundsManager';
 import { busGain, type SoundBus } from './buses';
@@ -12,17 +12,13 @@ import {
 } from './listener';
 import { bloodCastleTimer } from '../../features/events/bloodCastle';
 import { chaosCastleTimer } from '../../features/events/chaosCastle';
-import {
-  BLOOD_CASTLE_WORLDS,
-  CHAOS_CASTLE_WORLDS,
-  KALIMA_WORLDS,
-  DEVIL_SQUARE_WORLDS,
-  onWorlds,
-} from '../assets/worldAssets';
+import { maps, type MapLayer } from '../maps';
 
 /**
  * The environmental bed under each map: `PlayWorldAmbientSounds` /
- * `StopInactiveAmbientSounds` (Scenes/SceneManager.cpp:564-700). Notes in readme.md.
+ * `StopInactiveAmbientSounds` (Scenes/SceneManager.cpp:564-700). The rows are
+ * each map's own (`MapSound.beds` / `oneShots` / `timed` in
+ * `versions/shared/maps/<map>/sound.ts`); this file is the engine. Notes in readme.md.
  */
 
 // ---- 1. tuning -------------------------------------------------------------
@@ -33,7 +29,25 @@ const BUS: SoundBus = 'ambient';
 /** Reference frame rate the original's `rand_fps_check` counts against. */
 const REFERENCE_FPS = 25;
 
-export type AmbientBed = {
+/**
+ * A condition a map row names instead of carrying code: the event timers and
+ * the option a bed or a one-shot waits on. Answered by `GATES` below.
+ */
+export type AmbientGate =
+  | 'bloodCastleRunning'
+  | 'chaosCastleWaiting'
+  | 'chaosCastleRunning'
+  | 'ambientParticles';
+
+const GATES: Readonly<Record<AmbientGate, () => boolean>> = {
+  bloodCastleRunning: () => bloodCastleTimer().running,
+  chaosCastleWaiting: () => !chaosCastleTimer().running,
+  chaosCastleRunning: () => chaosCastleTimer().running,
+  ambientParticles: () => GameOptions.ambientParticles,
+};
+
+/** A bed as a map writes it (`MapSound.beds`). */
+export type MapAmbientBed = {
   readonly sound: Sounds;
   /** Share of the effects volume. Beds sit under the SFX, never on top. */
   readonly volume: number;
@@ -44,7 +58,12 @@ export type AmbientBed = {
    * use it test open-ended ranges, so this is a predicate rather than a list.
    */
   readonly mutedOn?: (heroTile: number) => boolean;
-  /** Extra condition, e.g. Lorencia's rain only while it is raining. */
+  /** Extra condition, e.g. Blood Castle's loop only while the match runs. */
+  readonly when?: AmbientGate;
+};
+
+/** A bed as this engine plays it: the row with its gate answered. */
+export type AmbientBed = Omit<MapAmbientBed, 'when'> & {
   readonly when?: () => boolean;
 };
 
@@ -57,8 +76,8 @@ export type AmbientTimed = {
   readonly every: number;
 };
 
-/** A `rand_fps_check(oneIn)` one-shot layered over the bed. */
-export type AmbientOneShot = {
+/** A `rand_fps_check(oneIn)` one-shot layered over the bed (`MapSound.oneShots`). */
+export type MapAmbientOneShot = {
   readonly sound: Sounds;
   readonly oneIn: number;
   /** Share of the effects track before distance attenuation. */
@@ -72,206 +91,16 @@ export type AmbientOneShot = {
   /** The wave's channel count when it is not the usual one. */
   readonly channels?: number;
   /** Extra condition, like a bed's. */
+  readonly when?: AmbientGate;
+};
+
+/** A one-shot as this engine plays it. */
+export type AmbientOneShot = Omit<MapAmbientOneShot, 'when'> & {
   readonly when?: () => boolean;
 };
 
-/**
- * The original's boids spawn within `rand() % 1024 - 512` units of the hero
- * (GOBoid.cpp:1300, 1678) - ±5.12 tiles - and only voice within 600 units.
- */
-const BOID_SPREAD_TILES = 5;
 /** Nearest a stand-in call is placed: the flock is never in the hero's ear. */
 const BOID_MIN_TILES = 2;
-
-const WIND: AmbientBed = { sound: 'Sound/aWind', volume: 0.35 };
-
-export const BEDS: Partial<Record<ENUM_WORLD, readonly AmbientBed[]>> = {
-  // Lorencia: wind outdoors, cut inside the buildings (tile 4,
-  // SceneManager.cpp:885-895). No rain bed: the town stays dry.
-  [ENUM_WORLD.WD_0LORENCIA]: [{ ...WIND, mutedOn: tile => tile === 4 }],
-
-  [ENUM_WORLD.WD_1DUNGEON]: [{ sound: 'Sound/aDungeon', volume: 0.4 }],
-
-  // Devias: the same wind, muted on the interior floor tiles. The original's
-  // test is `HeroTile == 3 || HeroTile >= 10`, the same one `footsteps.ts`
-  // uses to decide snow underfoot.
-  [ENUM_WORLD.WD_2DEVIAS]: [
-    { ...WIND, mutedOn: tile => tile === 3 || tile >= 10 },
-  ],
-
-  // Noria: wind with no gate at all, plus the forest one-shot below.
-  [ENUM_WORLD.WD_3NORIA]: [WIND],
-
-  [ENUM_WORLD.WD_4LOSTTOWER]: [{ sound: 'Sound/aTower', volume: 0.4 }],
-
-  [ENUM_WORLD.WD_7ATLANSE]: [{ sound: 'Sound/aWater', volume: 0.4 }],
-
-  [ENUM_WORLD.WD_8TARKAN]: [{ sound: 'Sound/desert', volume: 0.4 }],
-
-  // Devil Square: `PlayWorldAmbientSounds` has no case for it, but the rain
-  // loop is the one bed `StopInactiveAmbientSounds` never stops here
-  // (SceneManager.cpp:658: `WorldActive != WD_0LORENCIA && InDevilSquare() == false`),
-  // so whatever rain was playing keeps playing - and `MoveLeaves` gives the
-  // square the full `MAX_LEAVES` rain budget (ZzzEffectFireLeave.cpp:422).
-  ...onWorlds(DEVIL_SQUARE_WORLDS, [{ sound: 'Sound/aRain', volume: 0.4 }]),
-
-  // Blood Castle: `iBloodCastle` starts looping on state 0 (`SetMatchGameCommand`,
-  // NewBloodCastleSystem.cpp:42) and is the only sound the castle has.
-  ...onWorlds(BLOOD_CASTLE_WORLDS, [
-    { sound: 'Sound/iBloodCastle', volume: 0.4, when: () => bloodCastleTimer().running },
-  ] as readonly AmbientBed[]),
-
-  // Chaos Castle: `aChaos` (SOUND_CHAOS_ENVIR) while the arena waits, swapped
-  // for the `iChaosCastle` loop on state 5 and back on state 7
-  // (NewChaosCastleSystem.cpp:66-82).
-  ...onWorlds(CHAOS_CASTLE_WORLDS, [
-    { sound: 'Sound/aChaos', volume: 0.4, when: () => !chaosCastleTimer().running },
-    { sound: 'Sound/iChaosCastle', volume: 0.4, when: () => chaosCastleTimer().running },
-  ] as readonly AmbientBed[]),
-
-  [ENUM_WORLD.WD_10ICARUS]: [{ sound: 'Sound/aHeaven', volume: 0.4 }],
-
-  // ---- Season 2-6 worlds ("Later worlds"). Most of these are not
-  // in `PlayWorldAmbientSounds` at all: their map code `PlayBuffer`s a
-  // looping sample from its own `MoveObject` every frame, which is the same
-  // thing as a bed.
-
-  // Kalima: `MoveHellasObjectSetting` (GMHellas.cpp:309), plus the two
-  // one-shots and the falling stone below.
-  ...onWorlds(KALIMA_WORLDS, [
-    { sound: 'Sound/aKalima', volume: 0.4 },
-  ] as readonly AmbientBed[]),
-  // Valley of Loren: `SOUND_BC_AMBIENT` (GMBattleCastle.cpp:729), loaded looping.
-  [ENUM_WORLD.WD_30BATTLECASTLE]: [
-    { sound: 'Sound/battlecastle/aSiegeAmbi', volume: 0.4 },
-  ],
-  // Aida: `PlayBuffer(SOUND_AIDA_AMBIENT)` every frame (GMAida.cpp:92).
-  [ENUM_WORLD.WD_33AIDA]: [{ sound: 'Sound/w34/aida_ambi', volume: 0.4 }],
-  // Crywolf has none: `SOUND_CRY1ST_AMBIENT` is loaded (MapManager.cpp:194)
-  // and never played.
-  // The three Kanturu "global" loops (GM_kanturu_1st.cpp:122,
-  // GM_Kanturu_2nd.cpp:196, GM_Kanturu_3rd.cpp:192).
-  [ENUM_WORLD.WD_37KANTURU_1ST]: [
-    { sound: 'Sound/w37/kan_ruin_global', volume: 0.4 },
-  ],
-  [ENUM_WORLD.WD_38KANTURU_2ND]: [
-    { sound: 'Sound/w38/kan_relic_global', volume: 0.4 },
-  ],
-  [ENUM_WORLD.WD_39KANTURU_3RD]: [
-    { sound: 'Sound/w39/kan_boss_global', volume: 0.4 },
-  ],
-  // Raklion's hatchery: wind (SceneManager.cpp:620-622).
-  [ENUM_WORLD.WD_58ICECITY_BOSS]: [WIND],
-  // Imperial Guardian day 4: `ImperialGuardianFort_in`, re-issued by every
-  // object every frame (GMEmpireGuardian1.cpp:2962-2966) on the default four
-  // channels (MapManager.cpp:830), so the original stacks copies a frame
-  // apart; one bed here. Days 1-3 play `_out1/2/3` by the weather byte of the
-  // 0xF7 0x02 enter result, which nothing here receives; weather 0 plays
-  // nothing.
-  [ENUM_WORLD.WD_72EMPIREGUARDIAN4]: [
-    { sound: 'Sound/w69w70w71w72/ImperialGuardianFort_in', volume: 0.4 },
-  ],
-  // Loren Market: wind and rain, both unconditional (:623-628) and both
-  // spared by `StopInactiveAmbientSounds` - it always rains here.
-  [ENUM_WORLD.WD_79UNITEDMARKETPLACE]: [
-    WIND,
-    { sound: 'Sound/aRain', volume: 0.4 },
-  ],
-  // Karutan (:630-645, ASG_ADD_MAP_KARUTAN): the desert loop; on Karutan 2
-  // it gives way to the Kardamahal entrance loop on tile 12.
-  [ENUM_WORLD.WD_80KARUTAN1]: [
-    { sound: 'Sound/Karutan/Karutan_desert_env', volume: 0.4 },
-  ],
-  [ENUM_WORLD.WD_81KARUTAN2]: [
-    {
-      sound: 'Sound/Karutan/Karutan_desert_env',
-      volume: 0.4,
-      mutedOn: tile => tile === 12,
-    },
-    {
-      sound: 'Sound/Karutan/Kardamahal_entrance_env',
-      volume: 0.4,
-      mutedOn: tile => tile !== 12,
-    },
-  ],
-
-  // Stadium has no bed in the original - the arena is deliberately silent.
-};
-
-/** Dungeon rats alive at once: `MoveFishs`' three slots (GOBoid.cpp:1660-1667). */
-const RATS = 3;
-/**
- * A Dungeon rat (`MODEL_RAT01`, `aMouse.wav`): each one within 600 units
- * rolls 1-in-256 (GOBoid.cpp:1868-1869), so one roll stands in for all three.
- * `MoveFishs` runs only under `GetRenderAllEffects` (:1653), the same gate
- * as the bats' `MoveBoids`.
- */
-const RAT: AmbientOneShot = {
-  sound: 'Sound/aMouse',
-  oneIn: 256 / RATS,
-  volume: 0.4,
-  spread: BOID_SPREAD_TILES,
-  when: () => GameOptions.ambientParticles,
-};
-
-export const ONE_SHOTS: Partial<Record<ENUM_WORLD, readonly AmbientOneShot[]>> =
-  {
-    // Rats underfoot (GOBoid.cpp:1717); the bats overhead call from their boids.
-    [ENUM_WORLD.WD_1DUNGEON]: [RAT],
-
-    // `if (rand_fps_check(512)) PlayBuffer(SOUND_FOREST01);` - birdsong over
-    // the wind, roughly every 20 s (SceneManager.cpp:592). Noria's own boids
-    // are butterflies, which are silent.
-    [ENUM_WORLD.WD_3NORIA]: [
-      { sound: 'Sound/aForest', oneIn: 512, volume: 0.45 },
-    ],
-
-    // Kalima (GMHellas.cpp:311-315, :340-352): one of `aKalima01`/`02` every
-    // 4 s (`AmbientSoundInterval`), i.e. one roll in 100 ticks split over
-    // two rows, and the falling stone's `aKalimaStone` on
-    // `rand_fps_check(5) && rand_fps_check(15)` = one in 75.
-    ...onWorlds(KALIMA_WORLDS, [
-      { sound: 'Sound/aKalima01', oneIn: 200, volume: 0.45 },
-      { sound: 'Sound/aKalima02', oneIn: 200, volume: 0.45 },
-      // Loaded on three channels (MapManager.cpp:995).
-      {
-        sound: 'Sound/aKalimaStone',
-        oneIn: 75,
-        volume: 0.4,
-        spread: 4,
-        channels: 3,
-      },
-    ] as readonly AmbientOneShot[]),
-
-    // Atlans, Tarkan, Icarus, Stadium: the original's boids there are fish,
-    // bugs and dragons, none with a voice.
-  };
-
-export const TIMED: Partial<Record<ENUM_WORLD, readonly AmbientTimed[]>> = {
-  // Land of Trials: `aW31` once, never looped, whenever 300 s have passed
-  // on a global stamp that starts at 0 - so on arrival, and not again on a
-  // return inside the five minutes (GMHuntingGround.cpp:112-116).
-  [ENUM_WORLD.WD_31HUNTING_GROUND]: [
-    { sound: 'Sound/w31/aW31', volume: 0.4, every: 300 },
-  ],
-};
-
-/** Maps with anything to play: `layer.maps`, derived from the tables. */
-const MAPS: ReadonlySet<ENUM_WORLD> = new Set(
-  [BEDS, ONE_SHOTS, TIMED].flatMap(table =>
-    Object.keys(table).map(k => Number(k) as ENUM_WORLD)
-  )
-);
-
-/** Every bed any map can ask for, so leaving a map can silence the lot. */
-const ALL_BEDS: readonly Sounds[] = [
-  ...new Set(Object.values(BEDS).flatMap(beds => beds.map(bed => bed.sound))),
-];
-
-/** Every timed one-shot: a map's own ambience, cut when the map is left. */
-const ALL_TIMED: readonly Sounds[] = Object.values(TIMED).flatMap(shots =>
-  shots.map(shot => shot.sound)
-);
 
 /**
  * The one-shots' waves are loaded on one channel unless a row says otherwise
@@ -283,6 +112,59 @@ const ONE_CHANNEL = 1;
 const NONE: readonly never[] = [];
 
 // ---- 2. state + readers ----------------------------------------------------
+
+const bedsOf = (l: MapLayer) => l.sound?.beds;
+const oneShotsOf = (l: MapLayer) => l.sound?.oneShots;
+const timedOf = (l: MapLayer) => l.sound?.timed;
+
+/** Rows with their gates answered, once per row list. */
+const resolved = new WeakMap<object, readonly (AmbientBed | AmbientOneShot)[]>();
+
+function answer<R extends { readonly when?: AmbientGate }>(
+  rows: readonly R[] | undefined
+): readonly (Omit<R, 'when'> & { readonly when?: () => boolean })[] {
+  if (!rows) return NONE;
+  let out = resolved.get(rows);
+  if (!out) {
+    out = rows.map(r => (r.when ? { ...r, when: GATES[r.when] } : r)) as never;
+    resolved.set(rows, out);
+  }
+  return out as never;
+}
+
+/** The beds a world runs, empty for none. */
+export function ambientBedsFor(map: ENUM_WORLD): readonly AmbientBed[] {
+  return answer(maps.rowFor(map, bedsOf));
+}
+
+/** The rolled one-shots a world runs, empty for none. */
+export function ambientOneShotsFor(map: ENUM_WORLD): readonly AmbientOneShot[] {
+  return answer(maps.rowFor(map, oneShotsOf));
+}
+
+/** The clocked one-shots a world runs, empty for none. */
+export function ambientTimedFor(map: ENUM_WORLD): readonly AmbientTimed[] {
+  return maps.rowFor(map, timedOf) ?? NONE;
+}
+
+/** Maps with anything to play: `layer.maps`, read off the map rows. */
+const MAPS: ReadonlySet<ENUM_WORLD> = maps.worldSet(
+  (layer, world) =>
+    maps.rowFor(world, bedsOf) !== undefined ||
+    maps.rowFor(world, oneShotsOf) !== undefined ||
+    maps.rowFor(world, timedOf) !== undefined
+);
+
+/** Every timed one-shot any map has: a map's own ambience, cut when it is left. */
+function allTimed(): Sounds[] {
+  const out: Sounds[] = [];
+  for (const layer of maps.all) {
+    for (const world of layer.worlds) {
+      for (const shot of ambientTimedFor(world)) out.push(shot.sound);
+    }
+  }
+  return out;
+}
 
 const playing = new Set<Sounds>();
 /** Scratch: this frame's beds. Module-level so the update allocates nothing. */
@@ -300,7 +182,7 @@ function update(map: ENUM_WORLD, dt: number): void {
   // The ambience slider at 0 leaves `wanted` empty, so the pass below stops
   // every bed rather than looping them at silence.
   const gain = busGain(BUS);
-  const beds = gain > 0 ? (BEDS[map] ?? []) : [];
+  const beds = gain > 0 ? ambientBedsFor(map) : NONE;
 
   const heroTile = world.getTerrainTile(
     ~~hero.transform.pos.x,
@@ -321,11 +203,10 @@ function update(map: ENUM_WORLD, dt: number): void {
     SoundsManager.playAmbientLoop(bed.sound, bed.volume * gain);
   }
 
-  // Everything this map does not want right now - including a bed this
-  // map owns but has just muted - goes quiet.
-  for (const sound of ALL_BEDS) {
+  // Everything playing that this map does not want right now - including a
+  // bed this map owns but has just muted - goes quiet.
+  for (const sound of playing) {
     if (wanted.has(sound)) continue;
-    if (!playing.has(sound)) continue;
 
     SoundsManager.stopAmbientLoop(sound);
   }
@@ -333,7 +214,7 @@ function update(map: ENUM_WORLD, dt: number): void {
   playing.clear();
   for (const sound of wanted) playing.add(sound);
 
-  for (const shot of gain > 0 ? (ONE_SHOTS[map] ?? NONE) : NONE) {
+  for (const shot of gain > 0 ? ambientOneShotsFor(map) : NONE) {
     if (shot.when && !shot.when()) continue;
 
     // rand_fps_check(n) is a 1-in-n roll per reference frame; at any other
@@ -350,8 +231,8 @@ function update(map: ENUM_WORLD, dt: number): void {
     });
   }
 
-  const timed = gain > 0 ? TIMED[map] : undefined;
-  if (!timed) return;
+  const timed = gain > 0 ? ambientTimedFor(map) : NONE;
+  if (timed.length === 0) return;
 
   const now = performance.now();
   for (const shot of timed) {
@@ -387,7 +268,7 @@ function reset(): void {
   // A timed one-shot is as long as a bed; it does not follow the hero out.
   // Unguarded: one still decoding has only `autoplay` set, and would start
   // on the next map once the buffer lands.
-  for (const sound of ALL_TIMED) SoundsManager.stopSoundEffect(sound);
+  for (const sound of allTimed()) SoundsManager.stopSoundEffect(sound);
 }
 
 // ---- 3. the layer ----------------------------------------------------------

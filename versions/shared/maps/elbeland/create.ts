@@ -13,10 +13,9 @@ import { PlaySpeedObject } from '../shared/objectVariants';
  * and 89 (`+0.005`) and the 56 sine in `meshAnimation.ts`; 56's `Velocity =
  * 0.05` here.
  *
- * `PlayObjectSound` (:193-232) is the seven object loops in
- * `controllers/sound/objectLoops.ts`, safe-zone gating included. The map has no world
- * bed and no `PlayWorldAmbientSounds` case, so `ambientBeds.ts` carries
- * nothing for it.
+ * `PlayObjectSound` (:193-232) is the seven object loops in `sound.ts`,
+ * safe-zone gating included. The map has no world bed and no
+ * `PlayWorldAmbientSounds` case, so its `sound` row has no `beds`.
  *
  * Not built:
  *  - The eagle boids on 62, the decorative monsters on 133-155, the

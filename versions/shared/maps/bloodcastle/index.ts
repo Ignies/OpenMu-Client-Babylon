@@ -5,6 +5,7 @@ import {
   BLOOD_CASTLE_EFFECT_ONLY_TYPES,
   BLOOD_CASTLE_EMISSIONS,
 } from './spec';
+import { BLOOD_CASTLE_SOUND } from './sound';
 
 /**
  * Blood Castle (World12 / Object12) - the map entry: identity and the per-world data the
@@ -62,5 +63,8 @@ export const bloodcastleLayer: MapLayer = {
   blendMeshes: BLOOD_CASTLE_BLEND_MESHES,
   effectOnly: BLOOD_CASTLE_EFFECT_ONLY_TYPES,
   emissions: BLOOD_CASTLE_EMISSIONS,
+  sound: BLOOD_CASTLE_SOUND,
+  // `TerrainGrassEnable = false` (ZzzLodTerrain.cpp:326-329).
+  terrain: { grass: false },
   create: world => import('./create').then(m => m.createBloodCastle(world)),
 };

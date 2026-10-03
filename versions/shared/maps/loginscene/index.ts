@@ -2,6 +2,8 @@ import { ENUM_WORLD } from '@/core/types';
 import type { MapLayer } from '@/controllers/maps/layer';
 import { FULL_TILES } from '../recipes';
 import { LOGIN_SCENE_EFFECT_ONLY_TYPES, LOGIN_SCENE_EMISSIONS } from './spec';
+import { LOGIN_SCENE_SOUND } from './sound';
+import { LOGIN_SCENE_LIGHTING } from './lighting';
 
 /**
  * The login and character-select backdrops - the map entry: identity and the per-world data the
@@ -38,5 +40,7 @@ export const loginsceneLayer: MapLayer = {
   cutoutTile: 10,
   effectOnly: LOGIN_SCENE_EFFECT_ONLY_TYPES,
   emissions: LOGIN_SCENE_EMISSIONS,
+  sound: LOGIN_SCENE_SOUND,
+  lighting: LOGIN_SCENE_LIGHTING,
   create: world => import('./create').then(m => m.createLoginScene(world)),
 };

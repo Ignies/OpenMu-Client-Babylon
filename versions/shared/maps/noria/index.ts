@@ -5,6 +5,9 @@ import {
   NORIA_EFFECT_ONLY_TYPES,
   NORIA_EMISSIONS,
 } from './spec';
+import { NORIA_SOUND } from './sound';
+import { NORIA_LIGHTING } from './lighting';
+import { healing, sit } from '../shared/terrain';
 
 /**
  * Noria (World4 / Object4) - the map entry: identity and the per-world data the
@@ -54,5 +57,16 @@ export const noriaLayer: MapLayer = {
   blendMeshes: NORIA_BLEND_MESHES,
   effectOnly: NORIA_EFFECT_ONLY_TYPES,
   emissions: NORIA_EMISSIONS,
+  sound: NORIA_SOUND,
+  lighting: NORIA_LIGHTING,
+  // The streets darken and pool in the rain; the petals are Lorencia's
+  // leaves on Noria's own `leaf01` (ZzzEffectFireLeave.cpp:292-313).
+  weather: { wetGround: true, leaves: 'petals' },
+  terrain: {
+    // The rain's wet ground and its puddles (ours; `weather.wetGround` drives them).
+    overlays: ['wetGround', 'puddles'],
+    rest: { 8: sit(false), 38: healing(true) },
+    leanCursor: [38],
+  },
   create: world => import('./create').then(m => m.createNoria(world)),
 };

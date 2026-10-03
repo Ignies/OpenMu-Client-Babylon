@@ -5,6 +5,8 @@ import {
   DEVIL_SQUARE_EFFECT_ONLY_TYPES,
   DEVIL_SQUARE_EMISSIONS,
 } from './spec';
+import { DEVIL_SQUARE_SOUND } from './sound';
+import { DEVIL_SQUARE_LIGHTING } from './lighting';
 
 /**
  * Devil Square (World10 / Object10) - the map entry: identity and the
@@ -15,7 +17,7 @@ import {
  * squares 5-7. There is no `World33` anywhere: the original's `LoadWorld`
  * folds 32 into 9 outright (MapManager.cpp:1178), so `assetWorldNum`
  * (worldAssets.ts) draws map 32 from this same `World10`/`Object10` and every
- * per-world registry row is spread over `DEVIL_SQUARE_WORLDS`.
+ * row below (`sound`, `lighting`, `weather`) answers for both worlds.
  *
  * Every one of the 564 objects is the default `MapTileObject` - see
  * `create.ts` for why - and the map's own runtime is one thing:
@@ -27,14 +29,13 @@ import {
  * `CreateDevilSquareRain` (ZzzEffectFireLeave.cpp:120-127) checks the world
  * and nothing else - the `weather` byte only gates its Crywolf half - and
  * `MoveLeaves` hands this world the full `MAX_LEAVES` budget (:428) where
- * every other map gets 80. `controllers/weather/rainState.ts` has the world in
- * `ALWAYS_RAINING` for exactly that; `outdoor` here is what lets the rain
- * slot run at all.
+ * every other map gets 80. `weather.alwaysRain` below says exactly that;
+ * `outdoor` here is what lets the rain slot run at all.
  *
  * Sound: no `PlayWorldAmbientSounds` case, but `MoveObject` `PlayBuffer`s
  * `SOUND_RAIN01` every frame and `StopInactiveAmbientSounds`
  * (SceneManager.cpp:658) is the one place that spares the rain loop here, so
- * the `aRain` bed in `controllers/sound/ambientBeds.ts` is the original's. No music
+ * the `aRain` bed in `sound.ts` is the original's. No music
  * (`ManageBackgroundMusic` has no case; `devil_square_intro/outro.ogg` are
  * the event's stingers, not a map track).
  *
@@ -95,5 +96,10 @@ export const devilsquareLayer: MapLayer = {
   blendMeshes: DEVIL_SQUARE_BLEND_MESHES,
   effectOnly: DEVIL_SQUARE_EFFECT_ONLY_TYPES,
   emissions: DEVIL_SQUARE_EMISSIONS,
+  sound: DEVIL_SQUARE_SOUND,
+  lighting: DEVIL_SQUARE_LIGHTING,
+  // `CreateDevilSquareRain`: the full `MAX_LEAVES` budget whatever the
+  // packet says (ZzzEffectFireLeave.cpp:422).
+  weather: { alwaysRain: true },
   create: world => import('./create').then(m => m.createDevilSquare(world)),
 };

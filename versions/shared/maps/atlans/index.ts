@@ -5,6 +5,9 @@ import {
   ATLANS_EFFECT_ONLY_TYPES,
   ATLANS_EMISSIONS,
 } from './spec';
+import { ATLANS_SOUND } from './sound';
+import { ATLANS_LIGHTING } from './lighting';
+import { pose } from '../shared/terrain';
 
 /**
  * Atlans (World8 / Object8) - the map entry: identity and the per-world data the
@@ -61,5 +64,16 @@ export const atlansLayer: MapLayer = {
   blendMeshes: ATLANS_BLEND_MESHES,
   effectOnly: ATLANS_EFFECT_ONLY_TYPES,
   emissions: ATLANS_EMISSIONS,
+  sound: ATLANS_SOUND,
+  lighting: ATLANS_LIGHTING,
+  terrain: {
+    // The one map the original gives the water treatment on its terrain
+    // (CSWaterTerrain.cpp, the caustics ZzzLodTerrain.cpp:1591-1596).
+    // Doppelganger 3 reuses Atlans' art and could take the same row.
+    water: { layer: 5, scale: 1, flipbook: true },
+    rest: { 39: pose(true) },
+    // No grass on the sea floor: the `RenderTerrain` guard (ZzzLodTerrain.cpp:2651).
+    grass: false,
+  },
   create: world => import('./create').then(m => m.createAtlans(world)),
 };

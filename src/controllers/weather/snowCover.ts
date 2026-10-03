@@ -1,4 +1,4 @@
-import { ENUM_WORLD } from '../../core/types';
+import type { ENUM_WORLD } from '../../core/types';
 import type { WeatherLayer } from './layer';
 import { serverNow } from '../net/serverTime';
 import { ambientStrengthAt } from './ambientSchedule';
@@ -21,8 +21,8 @@ import { maps } from '../maps';
  * set, so nothing sitting on the settled snow can outrun the ground it
  * claims to stand on. `snowCover()` is 0 off it.
  */
-export const SNOW_GROUND_MAPS: ReadonlySet<ENUM_WORLD> = new Set(
-  [...SNOWFALL_MAPS].filter(world => maps.isOutdoor(world))
+export const SNOW_GROUND_MAPS: ReadonlySet<ENUM_WORLD> = maps.worldSet(
+  (_layer, world) => SNOWFALL_MAPS.has(world) && maps.isOutdoor(world)
 );
 
 /** Seconds of full-strength snowfall to go from bare ground to full cover. */

@@ -6,6 +6,8 @@ import {
   SANTA_TOWN_EFFECT_ONLY_TYPES,
   SANTA_TOWN_EMISSIONS,
 } from './spec';
+import { SANTA_TOWN_SOUND } from './sound';
+import { SANTA_TOWN_LIGHTING } from './lighting';
 
 /**
  * Santa Town (World63 / Object63) - the map entry: identity and the per-world data the
@@ -49,5 +51,13 @@ export const santatownLayer: MapLayer = {
   blendMeshes: SANTA_TOWN_BLEND_MESHES,
   effectOnly: SANTA_TOWN_EFFECT_ONLY_TYPES,
   emissions: SANTA_TOWN_EMISSIONS,
+  sound: SANTA_TOWN_SOUND,
+  lighting: SANTA_TOWN_LIGHTING,
+  terrain: {
+    // Where snow lies, by tile slot (Data/World63 shares Devias' slot list,
+    // not its art): the embers (4) stay bare, the dark rock and the grey
+    // stone take snow between them, the painted snow and white ice are solid.
+    snowBed: { 0: 1, 1: 1, 2: 1, 3: 1, 7: 1, 10: 1, 6: 0.55, 9: 0.55, 4: 0, 5: 0, 13: 0 },
+  },
   create: world => import('./create').then(m => m.createSantaTown(world)),
 };

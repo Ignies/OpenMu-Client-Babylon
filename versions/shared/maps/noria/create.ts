@@ -29,13 +29,13 @@ import {
  *  - The water tiles are terrain layer 5 on the generic scroll; Noria adds no
  *    terrain code of its own.
  *  - `Music/Noria`, the `Sound/aWind` bed and the 1-in-512 `Sound/aForest`
- *    one-shot are already wired in controllers/sound/music.ts / controllers/sound/ambientBeds.ts.
+ *    one-shot are this map's `sound.ts`.
  *  - Falling leaves are already Noria's: `LEAF_MAPS` in
  *    ambientParticleSystem.ts lists WD_3NORIA next to Lorencia and Atlans.
  *  - The 40 butterflies (`Object1/Butterfly01`, MapManager.cpp:88) need a
  *    boid flock the clone has no equivalent of. Future work, not faked.
  *  - The sit spot (type 8) and the healing spot (type 38) are already routed:
- *    `restObjects.ts` maps them to sit/healing and `cursorSystem` picks the
+ *    `terrain.rest` (index.ts) maps them to sit/healing and `cursorSystem` picks the
  *    rest cursor off `findRestObject`, so type 38 needs only its box below.
  */
 export async function createNoria(world: World) {

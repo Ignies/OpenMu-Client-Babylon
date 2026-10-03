@@ -6,13 +6,15 @@
  * `versions/shared/maps/icarus/sky.ts`, which calls `strikeThunder` when a strike is due.
  */
 import type { Scene } from '../render/babylon/exports';
-import { ENUM_WORLD } from '../../core/types';
+import type { ENUM_WORLD } from '../../core/types';
+import { maps } from '../maps';
 import type { LightingLayer } from './layer';
 import { LightSource, type LightRecipe } from './lightSource';
 
 // ---- 1. tuning -------------------------------------------------------------
 
-const MAPS: ReadonlySet<ENUM_WORLD> = new Set([ENUM_WORLD.WD_10ICARUS]);
+/** Maps whose sky throws thunder: `MapLighting.thunder` (Icarus). */
+const MAPS: ReadonlySet<ENUM_WORLD> = maps.worldSet(layer => layer.lighting?.thunder === true);
 
 /** `Luminosity = (rand()%4 + 4) * 0.05f` - 0.20, 0.25, 0.30 or 0.35. */
 const THUNDER_LUMI_MIN = 0.2;

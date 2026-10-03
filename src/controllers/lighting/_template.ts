@@ -3,15 +3,22 @@
  * The steps are in this folder's readme.md ("Change it").
  */
 import type { Scene } from '../render/babylon/exports';
-import { ENUM_WORLD } from '../../core/types';
+import type { ENUM_WORLD } from '../../core/types';
+import { maps } from '../maps';
 import type { LightingLayer } from './layer';
 import { LightSource, type LightRecipe } from './lightSource';
 import { flame } from './recipes';
 
 // ---- 1. tuning -------------------------------------------------------------
 
-/** Maps this exists on. Data - never `if (map === …)` inside logic. */
-const MAPS: ReadonlySet<ENUM_WORLD> = new Set([ENUM_WORLD.WD_0LORENCIA]);
+/**
+ * Maps this exists on: the ones whose entry asks for it - a field on
+ * `MapLighting` (`mapLighting.ts`) set in the map's folder, never
+ * `if (map === …)` here. Live, so nothing reads the maps at load.
+ */
+const MAPS: ReadonlySet<ENUM_WORLD> = maps.worldSet(
+  layer => layer.lighting?.thunder === true
+);
 
 /** Tiles above the anchor where the point light hangs. */
 const HEIGHT = 0.5;

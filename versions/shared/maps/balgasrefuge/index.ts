@@ -5,6 +5,8 @@ import {
   BALGAS_EFFECT_ONLY_TYPES,
   BALGAS_EMISSIONS,
 } from '../balgasbarracks/spec';
+import { BALGAS_REFUGE_SOUND } from './sound';
+import { BALGAS_LIGHTING } from '../balgasbarracks/lighting';
 
 /**
  * Balgas Refuge (World43 / Object43) - the map entry: identity and the per-world data the
@@ -53,5 +55,7 @@ export const balgasrefugeLayer: MapLayer = {
   blendMeshes: BALGAS_BLEND_MESHES,
   effectOnly: BALGAS_EFFECT_ONLY_TYPES,
   emissions: BALGAS_EMISSIONS,
+  sound: BALGAS_REFUGE_SOUND,
+  lighting: BALGAS_LIGHTING,
   create: world => import('./create').then(m => m.createBalgasRefuge(world)),
 };

@@ -2,10 +2,10 @@ import type { Controller } from '../controller';
 import { ENUM_WORLD } from '../../core/types';
 import type { World } from '../../ecs/world';
 import type { Emission } from '../fx/effectParticles';
-import type { MapLayer, Room, Spawn } from './layer';
+import type { ByWorld, MapLayer, PerWorld, Room, Spawn } from './layer';
 import { MAP_LAYERS } from '@versions/shared/maps/layers';
 
-export type { MapLayer, Room, Spawn } from './layer';
+export type { ByWorld, MapLayer, PerWorld, Room, Spawn } from './layer';
 
 /**
  * The map system: every world the client can load, behind one object. Copy `_template.ts` when adding to it.
@@ -72,6 +72,40 @@ class Maps implements Controller {
   /** Every world whose entry satisfies `pick`. */
   worldsWhere(pick: (layer: MapLayer) => boolean): readonly ENUM_WORLD[] {
     return this.layers.filter(pick).flatMap(l => l.worlds);
+  }
+
+  // ---- the map's own rows --------------------------------------------------
+
+  /**
+   * The row `pick` reads off this world's entry, resolved for the world
+   * (`PerWorld`): undefined when no entry claims the world or it has no row.
+   * What a controller calls at run time instead of keeping a per-world table.
+   */
+  rowFor<T>(
+    world: ENUM_WORLD,
+    pick: (layer: MapLayer) => PerWorld<T> | undefined
+  ): T | undefined {
+    const layer = this.byWorld.get(world);
+    return layer ? forWorld(pick(layer), world) : undefined;
+  }
+
+  /**
+   * A live set of the worlds whose entry satisfies `pick`: asked on every
+   * call, so it can stand in a module-level constant (a layer's `maps`)
+   * without reading the entries at load.
+   */
+  worldSet(
+    pick: (layer: MapLayer, world: ENUM_WORLD) => boolean
+  ): ReadonlySet<ENUM_WORLD> {
+    return new WorldSet(this, pick);
+  }
+
+  /**
+   * A live map from each claimed world to what `read` answers for it,
+   * leaving out the worlds it answers undefined for.
+   */
+  worldMap<T>(read: (world: ENUM_WORLD) => T | undefined): ReadonlyMap<ENUM_WORLD, T> {
+    return new WorldMap(this, read);
   }
 
   // ---- lifecycle ---------------------------------------------------------
@@ -199,6 +233,158 @@ class Maps implements Controller {
     type: number
   ): readonly Emission[] | undefined {
     return this.layerFor(world)?.emissions?.[type];
+  }
+}
+
+function isByWorld<T>(row: PerWorld<T>): row is ByWorld<T> {
+  return typeof row === 'object' && row !== null && 'byWorld' in row;
+}
+
+/** A `PerWorld` row as one world sees it. */
+export function forWorld<T>(
+  row: PerWorld<T> | undefined,
+  world: ENUM_WORLD
+): T | undefined {
+  if (row === undefined) return undefined;
+  return isByWorld(row) ? row.byWorld[world] : row;
+}
+
+/** Every world the entries serve, list order, with the entry serving it. */
+function* claimed(owner: Maps): Generator<[ENUM_WORLD, MapLayer]> {
+  for (const world of new Set(owner.all.flatMap(l => l.worlds))) {
+    const layer = owner.layerFor(world);
+    if (layer) yield [world, layer];
+  }
+}
+
+/** `maps.worldSet`: `has` is one lookup; iterating walks the entries. */
+class WorldSet implements ReadonlySet<ENUM_WORLD> {
+  constructor(
+    private readonly owner: Maps,
+    private readonly pick: (layer: MapLayer, world: ENUM_WORLD) => boolean
+  ) {}
+
+  has(world: ENUM_WORLD): boolean {
+    const layer = this.owner.layerFor(world);
+    return layer !== undefined && this.pick(layer, world);
+  }
+
+  private list(): ENUM_WORLD[] {
+    const out: ENUM_WORLD[] = [];
+    for (const [world, layer] of claimed(this.owner)) {
+      if (this.pick(layer, world)) out.push(world);
+    }
+    return out;
+  }
+
+  /** The worlds as a plain `Set` today, for the set algebra below. */
+  private snapshot(): Set<ENUM_WORLD> {
+    return new Set(this.list());
+  }
+
+  union<U>(other: ReadonlySetLike<U>): Set<ENUM_WORLD | U> {
+    return this.snapshot().union(other);
+  }
+
+  intersection<U>(other: ReadonlySetLike<U>): Set<ENUM_WORLD & U> {
+    return this.snapshot().intersection(other);
+  }
+
+  difference<U>(other: ReadonlySetLike<U>): Set<ENUM_WORLD> {
+    return this.snapshot().difference(other);
+  }
+
+  symmetricDifference<U>(other: ReadonlySetLike<U>): Set<ENUM_WORLD | U> {
+    return this.snapshot().symmetricDifference(other);
+  }
+
+  isSubsetOf(other: ReadonlySetLike<unknown>): boolean {
+    return this.snapshot().isSubsetOf(other);
+  }
+
+  isSupersetOf(other: ReadonlySetLike<unknown>): boolean {
+    return this.snapshot().isSupersetOf(other);
+  }
+
+  isDisjointFrom(other: ReadonlySetLike<unknown>): boolean {
+    return this.snapshot().isDisjointFrom(other);
+  }
+
+  get size(): number {
+    return this.list().length;
+  }
+
+  forEach(
+    fn: (value: ENUM_WORLD, key: ENUM_WORLD, set: ReadonlySet<ENUM_WORLD>) => void
+  ): void {
+    for (const w of this.list()) fn(w, w, this);
+  }
+
+  entries(): SetIterator<[ENUM_WORLD, ENUM_WORLD]> {
+    return this.snapshot().entries();
+  }
+
+  keys(): SetIterator<ENUM_WORLD> {
+    return this.snapshot().keys();
+  }
+
+  values(): SetIterator<ENUM_WORLD> {
+    return this.snapshot().values();
+  }
+
+  [Symbol.iterator](): SetIterator<ENUM_WORLD> {
+    return this.values();
+  }
+}
+
+/** `maps.worldMap`: `get` is one lookup; iterating walks the entries. */
+class WorldMap<T> implements ReadonlyMap<ENUM_WORLD, T> {
+  constructor(
+    private readonly owner: Maps,
+    private readonly read: (world: ENUM_WORLD) => T | undefined
+  ) {}
+
+  get(world: ENUM_WORLD): T | undefined {
+    return this.owner.layerFor(world) ? this.read(world) : undefined;
+  }
+
+  has(world: ENUM_WORLD): boolean {
+    return this.get(world) !== undefined;
+  }
+
+  private snapshot(): Map<ENUM_WORLD, T> {
+    const out = new Map<ENUM_WORLD, T>();
+    for (const [world] of claimed(this.owner)) {
+      const row = this.read(world);
+      if (row !== undefined) out.set(world, row);
+    }
+    return out;
+  }
+
+  get size(): number {
+    return this.snapshot().size;
+  }
+
+  forEach(
+    fn: (value: T, key: ENUM_WORLD, map: ReadonlyMap<ENUM_WORLD, T>) => void
+  ): void {
+    for (const [w, row] of this.snapshot()) fn(row, w, this);
+  }
+
+  entries(): MapIterator<[ENUM_WORLD, T]> {
+    return this.snapshot().entries();
+  }
+
+  keys(): MapIterator<ENUM_WORLD> {
+    return this.snapshot().keys();
+  }
+
+  values(): MapIterator<T> {
+    return this.snapshot().values();
+  }
+
+  [Symbol.iterator](): MapIterator<[ENUM_WORLD, T]> {
+    return this.entries();
   }
 }
 

@@ -5,13 +5,12 @@ import { maps } from '../maps';
  * Which `Data/World<n>` / `Data/Object<n>` folder a world draws from, and the
  * per-event world lists - the old names for what the map entries declare
  * (`MapLayer.worlds` / `MapLayer.assetWorld`, `versions/shared/maps/<name>/index.ts`).
- * Every export here is a thin reader over the `maps` facade, kept so
- * `modelObject`, the terrain loaders, the sound tables and the lighting
- * tables compile unchanged.
+ * Every export here is a thin reader over the `maps` facade, kept for the
+ * callers that still use the old names; new code asks `maps` itself.
  *
- * Import order: this module reads `maps` at evaluation time (the lists
- * below), so nothing on the `maps` import chain may import it. The entries
- * are data-only (their `create` is a dynamic import), which keeps that true.
+ * Import order: nothing here reads `maps` at evaluation time. The lists are
+ * live views that ask `maps.worldsOf` on first use, so this module may load
+ * before the map entries do.
  */
 
 /**
@@ -27,24 +26,41 @@ export function assetWorldNum(map: ENUM_WORLD): number {
   return maps.assetWorldNum(map);
 }
 
+/**
+ * A list of worlds read from the map entries on first use, not at load: an
+ * array to every reader (index, `length`, `includes`, spread, `for...of`).
+ */
+function lazyWorlds(...names: string[]): readonly ENUM_WORLD[] {
+  let list: readonly ENUM_WORLD[] | undefined;
+  const real = (): readonly ENUM_WORLD[] =>
+    (list ??= names.flatMap(name => maps.worldsOf(name)));
+  return new Proxy([] as ENUM_WORLD[], {
+    get: (_target, key) => {
+      const r = real();
+      const v: unknown = Reflect.get(r, key, r);
+      return typeof v === 'function' ? v.bind(r) : v;
+    },
+    has: (_target, key) => Reflect.has(real(), key),
+    ownKeys: () => Reflect.ownKeys(real()),
+    getOwnPropertyDescriptor: (_target, key) =>
+      Reflect.getOwnPropertyDescriptor(real(), key),
+  });
+}
+
 /** Devil Square 1-4 (map 9) and 5-7 (map 32): one `World10`, one list. */
-export const DEVIL_SQUARE_WORLDS: readonly ENUM_WORLD[] =
-  maps.worldsOf('devilsquare');
+export const DEVIL_SQUARE_WORLDS: readonly ENUM_WORLD[] = lazyWorlds('devilsquare');
 
 /** The seven Blood Castle floors and the master-level castle, one list. */
-export const BLOOD_CASTLE_WORLDS: readonly ENUM_WORLD[] =
-  maps.worldsOf('bloodcastle');
+export const BLOOD_CASTLE_WORLDS: readonly ENUM_WORLD[] = lazyWorlds('bloodcastle');
 
 /** The six Chaos Castle arenas and the master-level one. */
-export const CHAOS_CASTLE_WORLDS: readonly ENUM_WORLD[] =
-  maps.worldsOf('chaoscastle');
+export const CHAOS_CASTLE_WORLDS: readonly ENUM_WORLD[] = lazyWorlds('chaoscastle');
 
 /** The six Kalima floors and Kalima 7, one list. */
-export const KALIMA_WORLDS: readonly ENUM_WORLD[] = maps.worldsOf('kalima');
+export const KALIMA_WORLDS: readonly ENUM_WORLD[] = lazyWorlds('kalima');
 
 /** The six Illusion Temple levels. */
-export const CURSED_TEMPLE_WORLDS: readonly ENUM_WORLD[] =
-  maps.worldsOf('cursedtemple');
+export const CURSED_TEMPLE_WORLDS: readonly ENUM_WORLD[] = lazyWorlds('cursedtemple');
 
 /**
  * The four Fortress of Imperial Guardian days (`WD_69EMPIREGUARDIAN1 … 4`).
@@ -52,23 +68,23 @@ export const CURSED_TEMPLE_WORLDS: readonly ENUM_WORLD[] =
  * day 4 are two entries (day 4's tables are the login scene's), so this list
  * is only for the registries whose rows are identical across the four.
  */
-export const EMPIRE_GUARDIAN_WORLDS: readonly ENUM_WORLD[] = [
-  ...maps.worldsOf('empireguardian'),
-  ...maps.worldsOf('empireguardian4'),
-];
+export const EMPIRE_GUARDIAN_WORLDS: readonly ENUM_WORLD[] = lazyWorlds(
+  'empireguardian',
+  'empireguardian4'
+);
 
 /** The four Doppelganger arenas (`WD_65DOPPLEGANGER1 … 4`), `World66…69`. */
-export const DOPPELGANGER_WORLDS: readonly ENUM_WORLD[] = [
-  ...maps.worldsOf('doppelganger1'),
-  ...maps.worldsOf('doppelganger2'),
-  ...maps.worldsOf('doppelganger3'),
-  ...maps.worldsOf('doppelganger4'),
-];
+export const DOPPELGANGER_WORLDS: readonly ENUM_WORLD[] = lazyWorlds(
+  'doppelganger1',
+  'doppelganger2',
+  'doppelganger3',
+  'doppelganger4'
+);
 
 /**
  * The same table row for every world in a list - what a per-world table
- * (`BEDS`, `MAP_MUSIC`, the lighting tables) spreads in for an event whose
- * instances share one art set.
+ * outside the map entries spreads in for an event whose instances share one
+ * art set. Calling it at load reads the list then: prefer a row on the map.
  */
 export function onWorlds<T>(
   worlds: readonly ENUM_WORLD[],

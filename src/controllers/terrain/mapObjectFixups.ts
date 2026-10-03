@@ -1,6 +1,10 @@
-import { ENUM_WORLD } from '@/core/types';
-import { MODEL_CANDLE, MODEL_FURNITURE01 } from '@versions/shared/objects/enum';
+import type { ENUM_WORLD } from '@/core/types';
+import { maps } from '../maps';
 
+/**
+ * Height fixes for objects the shipped `.obj` places wrong. Each map declares
+ * its own (`MapTerrain.objectFixups`); this file matches and applies them.
+ */
 export interface MapObjectFixup {
   type: number;
   x: number;
@@ -10,21 +14,16 @@ export interface MapObjectFixup {
 
 const MATCH_EPSILON = 1;
 
-const MAP_OBJECT_FIXUPS: Partial<Record<ENUM_WORLD, MapObjectFixup[]>> = {
-  [ENUM_WORLD.WD_0LORENCIA]: [
-    { type: MODEL_FURNITURE01 + 3, x: 12494.65, y: 12235.38, z: 165 },
-    { type: MODEL_FURNITURE01 + 3, x: 12483.23, y: 12235.69, z: 165 },
-
-    { type: MODEL_CANDLE, x: 12531.0, y: 12253.23, z: 250 },
-  ],
-};
+/** The height fixes a world applies to its objects, empty for none. */
+export function mapObjectFixupsFor(map: ENUM_WORLD): readonly MapObjectFixup[] {
+  return maps.layerFor(map)?.terrain?.objectFixups ?? [];
+}
 
 export function applyMapObjectFixups(
   map: ENUM_WORLD,
   objs: { id: number; pos: { x: number; y: number; z: number } }[]
 ): void {
-  const fixups = MAP_OBJECT_FIXUPS[map];
-  if (!fixups) return;
+  const fixups = mapObjectFixupsFor(map);
 
   for (const fixup of fixups) {
     let target: (typeof objs)[number] | undefined;

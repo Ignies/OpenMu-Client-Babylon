@@ -1,6 +1,8 @@
 import { Vector3, type Effect, type Scene } from '../render/babylon/exports';
 import { sunLightOf } from '../lighting/keyRig';
-import { ENUM_WORLD } from '../../core/types';
+import type { ENUM_WORLD } from '../../core/types';
+import { maps } from '../maps';
+import type { TerrainOverlayName } from './mapTerrain';
 import { GameOptions } from '../../features/options/gameOptions';
 import { SNOW_GROUND_MAPS, snowCover } from '../weather/snowCover';
 import { snowTrailPainted, snowTrailTexture } from '../weather/snowTrail';
@@ -658,31 +660,38 @@ const RING_SLOPE = 0.04;
  */
 const RING_DENSITY_GAIN = 2.2;
 
-const OVERLAYS_BY_WORLD: Partial<Record<ENUM_WORLD, readonly TerrainOverlay[]>> =
-  {
-    [ENUM_WORLD.WD_3NORIA]: [WET_GROUND, PUDDLES],
-  };
+/** The layers a map can name in `MapTerrain.overlays`. */
+const OVERLAYS: Readonly<Record<TerrainOverlayName, TerrainOverlay>> = {
+  wetGround: WET_GROUND,
+  puddles: PUDDLES,
+};
+
+const namedOverlays = new WeakMap<readonly TerrainOverlayName[], readonly TerrainOverlay[]>();
+
+/** The weather layers a map declares (`MapTerrain.overlays`), or nothing. */
+function ownOverlays(map: ENUM_WORLD): readonly TerrainOverlay[] | undefined {
+  const names = maps.layerFor(map)?.terrain?.overlays;
+  if (!names) return undefined;
+  let own = namedOverlays.get(names);
+  if (!own) {
+    own = names.map(n => OVERLAYS[n]);
+    namedOverlays.set(names, own);
+  }
+  return own;
+}
 
 const NONE: readonly TerrainOverlay[] = [];
 
-/**
- * Where snow lies on the other snow maps, by tile slot (Data/World63 shares
- * Devias' slot list, not its art): Santa Town's embers (4) stay bare, its
- * dark rock and the grey stone take snow between them, the painted snow and
- * white ice are solid.
- *
- * No Ice City row: the ice fields declare `snowfall: false` and draw no
- * settled layer at all, so their ground is the original terrain art.
- */
-const SNOW_BEDS: Partial<Record<ENUM_WORLD, TerrainOverlay['bed']>> = {
-  [ENUM_WORLD.WD_62SANTA_TOWN]: { 0: 1, 1: 1, 2: 1, 3: 1, 7: 1, 10: 1, 6: 0.55, 9: 0.55, 4: 0, 5: 0, 13: 0 },
-};
-
 const snowCovers = new Map<ENUM_WORLD, TerrainOverlay>();
 
-/** The settled-snow layer as this map draws it: `SNOW_COVER` with the map's bed table. */
+/**
+ * The settled-snow layer as this map draws it: `SNOW_COVER` with the map's
+ * own bed table (`MapTerrain.snowBed`) when its slots are not Devias'.
+ * The ice fields need none: they declare `snowfall: false` and draw no
+ * settled layer at all, so their ground is the original terrain art.
+ */
 export function snowCoverFor(map: ENUM_WORLD): TerrainOverlay {
-  const bed = SNOW_BEDS[map];
+  const bed = maps.layerFor(map)?.terrain?.snowBed;
   if (!bed) return SNOW_COVER;
   let own = snowCovers.get(map);
   if (!own) {
@@ -707,7 +716,7 @@ export function snowCoverFor(map: ENUM_WORLD): TerrainOverlay {
  */
 export function terrainOverlaysFor(map: ENUM_WORLD): readonly TerrainOverlay[] {
   if (!GameOptions.advancedEffects) return NONE;
-  const own = OVERLAYS_BY_WORLD[map];
+  const own = ownOverlays(map);
   if (!SNOW_GROUND_MAPS.has(map)) return own ?? NONE;
   return [...(own ?? NONE), snowCoverFor(map)];
 }

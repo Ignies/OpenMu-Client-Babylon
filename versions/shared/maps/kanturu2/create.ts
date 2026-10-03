@@ -13,8 +13,8 @@ import { PlaySpeedObject } from '../shared/objectVariants';
  *
  * The object loops (`kan_relic_gear` on 9, `kan_relic_incubator` on
  * 31/35/36/37 - `Sound_Kanturu2nd_Object`, :194-210) are in
- * `controllers/sound/objectLoops.ts`; the map bed `w38/kan_relic_global` and
- * `Music/kanturu_2nd` are in the sound tables; the Gateway Machine's turn
+ * `sound.ts`, with the map bed `w38/kan_relic_global` and
+ * `Music/kanturu_2nd`; the Gateway Machine's turn
  * sound (`kan_relic_hole`) is `gateway.ts`. Not built: 55's
  * `MODEL_FENRIR_THUNDER`; the Gateway Machine NPC and the trap cannons, which
  * are server characters.

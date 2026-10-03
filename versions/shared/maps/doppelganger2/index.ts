@@ -5,6 +5,8 @@ import {
   DOPPELGANGER2_EFFECT_ONLY_TYPES,
   DOPPELGANGER2_EMISSIONS,
 } from './spec';
+import { DOPPELGANGER_SOUND } from '../doppelganger1/sound';
+import { DOPPELGANGER2_LIGHTING } from './lighting';
 
 /**
  * Doppelganger 2 (World67 / Object67) - the map entry: identity and the per-world data the
@@ -66,4 +68,6 @@ export const doppelganger2Layer: MapLayer = {
   blendMeshes: DOPPELGANGER2_BLEND_MESHES,
   effectOnly: DOPPELGANGER2_EFFECT_ONLY_TYPES,
   emissions: DOPPELGANGER2_EMISSIONS,
+  sound: DOPPELGANGER_SOUND,
+  lighting: DOPPELGANGER2_LIGHTING,
 };

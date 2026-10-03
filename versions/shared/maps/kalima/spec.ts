@@ -1,6 +1,6 @@
 import type { Emission } from '@/controllers/fx/effectParticles';
 import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
-import type { ObjectLoop } from '@/controllers/sound/objectLoops';
+import type { MapObjectLoop } from '@/controllers/sound';
 
 /**
  * Kalima (`WD_24HELLAS … _END` + Kalima 7 = world 36; one `World25`/`Object25`
@@ -69,16 +69,16 @@ export const KALIMA_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {
  * of water, so this fades: full inside four tiles, gone at twenty. The reach
  * is the only invented number here.
  *
- * Read by `controllers/sound/objectLoops.ts` for every Kalima floor, which loads it with
- * 3 channels (MapManager.cpp:994).
+ * Read by `controllers/sound/objectLoops.ts` for every Kalima floor (`sound.ts`),
+ * loaded with 3 channels (MapManager.cpp:994).
  */
-export const KALIMA_OBJECT_LOOPS: readonly ObjectLoop[] = [
+export const KALIMA_OBJECT_LOOPS: readonly MapObjectLoop[] = [
   {
+    channels: 3,
     types: [37, 38],
     sound: 'Sound/aKalimaWaterFall',
     gain: 0.35,
-    full: 4,
-    silent: 20,
+    reach: { full: 4, silent: 20 },
   },
 ];
 

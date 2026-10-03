@@ -1,4 +1,5 @@
-import { ENUM_WORLD } from '../../core/types';
+import type { ENUM_WORLD } from '../../core/types';
+import { maps } from '../maps';
 import type { WeatherLayer } from './layer';
 import { rainStrength, rainTarget } from './rainState';
 
@@ -10,7 +11,10 @@ import { rainStrength, rainTarget } from './rainState';
 /** Maps that get wet ground. Snow maps are excluded - Devias gets snow cover. */
 // ---- 1. tuning -------------------------------------------------------------
 
-const WET_MAPS: ReadonlySet<ENUM_WORLD> = new Set([ENUM_WORLD.WD_3NORIA]);
+/** Maps that declare wet ground (`MapWeather.wetGround`: Noria). */
+const WET_MAPS: ReadonlySet<ENUM_WORLD> = maps.worldSet(
+  layer => layer.weather?.wetGround === true
+);
 
 /** Seconds of full rain to soak dry ground. Stone darkens fast. */
 const WET_BUILD_SECONDS = 22;

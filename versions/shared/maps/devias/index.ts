@@ -5,6 +5,9 @@ import { DEVIAS_ROOMS } from './rooms';
 import {
   DEVIAS_BLEND_MESHES,
 } from './spec';
+import { DEVIAS_SOUND } from './sound';
+import { DEVIAS_LIGHTING } from './lighting';
+import { pose, sit } from '../shared/terrain';
 
 /**
  * Devias (World3 / Object3) - the map entry: identity and the per-world data the
@@ -41,5 +44,19 @@ export const deviasLayer: MapLayer = {
   snow: SNOW,
   rooms: DEVIAS_ROOMS,
   blendMeshes: DEVIAS_BLEND_MESHES,
+  sound: DEVIAS_SOUND,
+  lighting: DEVIAS_LIGHTING,
+  terrain: {
+    rest: {
+      22: sit(true),
+      25: sit(true),
+      40: sit(true),
+      45: sit(false),
+      55: sit(true),
+      73: sit(false),
+      91: pose(true),
+    },
+    leanCursor: [91],
+  },
   create: world => import('./create').then(m => m.createDevias(world)),
 };

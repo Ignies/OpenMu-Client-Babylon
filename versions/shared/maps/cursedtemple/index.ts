@@ -5,6 +5,8 @@ import {
   CURSED_TEMPLE_EFFECT_ONLY_TYPES,
   CURSED_TEMPLE_EMISSIONS,
 } from './spec';
+import { CURSED_TEMPLE_SOUND } from './sound';
+import { CURSED_TEMPLE_LIGHTING } from './lighting';
 
 /**
  * Illusion Temple (World47 / Object47) - the map entry: identity and the per-world data the
@@ -94,5 +96,7 @@ export const cursedtempleLayer: MapLayer = {
   blendMeshes: CURSED_TEMPLE_BLEND_MESHES,
   effectOnly: CURSED_TEMPLE_EFFECT_ONLY_TYPES,
   emissions: CURSED_TEMPLE_EMISSIONS,
+  sound: CURSED_TEMPLE_SOUND,
+  lighting: CURSED_TEMPLE_LIGHTING,
   create: world => import('./create').then(m => m.createCursedTemple(world)),
 };

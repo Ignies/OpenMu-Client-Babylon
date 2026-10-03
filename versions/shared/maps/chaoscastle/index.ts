@@ -6,6 +6,8 @@ import {
   CHAOS_CASTLE_EFFECT_ONLY_TYPES,
   CHAOS_CASTLE_EMISSIONS,
 } from './spec';
+import { CHAOS_CASTLE_SOUND } from './sound';
+import { CHAOS_CASTLE_LIGHTING } from './lighting';
 
 /**
  * Chaos Castle (World19 / Object19) - the map entry: identity and the per-world data the
@@ -37,8 +39,7 @@ const TILES = FULL_TILES;
 const SPAWN = { x: 34, y: 92 } as const;
 
 // Open sky: `MoveLeaves` rains on the castle unconditionally
-// (`InChaosCastle()`, ZzzEffectFireLeave.cpp:428-436); see
-// `controllers/weather/rainState.ts` ALWAYS_RAINING.
+// (`InChaosCastle()`, ZzzEffectFireLeave.cpp:428-436); see `weather` below.
 const OUTDOOR = true;
 
 // ---- 2. state + readers ----------------------------------------------------
@@ -56,5 +57,12 @@ export const chaoscastleLayer: MapLayer = {
   blendMeshes: CHAOS_CASTLE_BLEND_MESHES,
   effectOnly: CHAOS_CASTLE_EFFECT_ONLY_TYPES,
   emissions: CHAOS_CASTLE_EMISSIONS,
+  sound: CHAOS_CASTLE_SOUND,
+  lighting: CHAOS_CASTLE_LIGHTING,
+  // `InChaosCastle()` takes Devil Square's rain branch whatever the packet
+  // says (ZzzEffectFireLeave.cpp:428-436).
+  weather: { alwaysRain: true },
+  // `TerrainGrassEnable = false` (ZzzLodTerrain.cpp:326-329).
+  terrain: { grass: false },
   create: world => import('./create').then(m => m.createChaosCastle(world)),
 };

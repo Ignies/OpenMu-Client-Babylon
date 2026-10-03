@@ -6,6 +6,9 @@ import {
   VALLEY_OF_LOREN_EFFECT_ONLY_TYPES,
   VALLEY_OF_LOREN_EMISSIONS,
 } from './spec';
+import { VALLEY_OF_LOREN_SOUND } from './sound';
+import { VALLEY_OF_LOREN_LIGHTING } from './lighting';
+import { sit } from '../shared/terrain';
 
 /**
  * Valley of Loren (World31 / Object31) - the map entry: identity and the per-world data the
@@ -42,5 +45,8 @@ export const valleyoflorenLayer: MapLayer = {
   blendMeshes: VALLEY_OF_LOREN_BLEND_MESHES,
   effectOnly: VALLEY_OF_LOREN_EFFECT_ONLY_TYPES,
   emissions: VALLEY_OF_LOREN_EMISSIONS,
+  sound: VALLEY_OF_LOREN_SOUND,
+  lighting: VALLEY_OF_LOREN_LIGHTING,
+  terrain: { rest: { 84: sit(true) } },
   create: world => import('./create').then(m => m.createValleyOfLoren(world)),
 };

@@ -254,3 +254,15 @@ export const lighting = new Lighting();
 // of this singleton (same guard as app/store.ts).
 const hot = (import.meta as { hot?: { decline(): void } }).hot;
 if (hot) hot.decline();
+
+// ---- a map's own lighting (MapLayer.lighting), the row types its folder writes ----
+export type { MapLighting } from './mapLighting';
+export type {
+  LookProfile,
+  MapArea,
+  MapLook,
+  SkyLook,
+  SkylineLook,
+  SunSpec,
+} from './profiles';
+export type { LightEmitter, MapObjectLights } from './mapObjectLights';

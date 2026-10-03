@@ -6,6 +6,8 @@ import {
   EMPIRE_GUARDIAN_4_EFFECT_ONLY_TYPES,
   EMPIRE_GUARDIAN_4_EMISSIONS,
 } from './spec';
+import { EMPIRE_GUARDIAN_4_SOUND } from './sound';
+import { EMPIRE_GUARDIAN_4_LIGHTING } from './lighting';
 
 /**
  * Fortress of Imperial Guardian, day 4 (World73 / Object73) - the map entry: identity and the per-world data the
@@ -39,5 +41,7 @@ export const empireguardian4Layer: MapLayer = {
   blendMeshes: EMPIRE_GUARDIAN_4_BLEND_MESHES,
   effectOnly: EMPIRE_GUARDIAN_4_EFFECT_ONLY_TYPES,
   emissions: EMPIRE_GUARDIAN_4_EMISSIONS,
+  sound: EMPIRE_GUARDIAN_4_SOUND,
+  lighting: EMPIRE_GUARDIAN_4_LIGHTING,
   create: world => import('./create').then(m => m.createEmpireGuardian4(world)),
 };

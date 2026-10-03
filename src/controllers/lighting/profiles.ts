@@ -1,5 +1,5 @@
 import { ENUM_WORLD } from '../../core/types';
-import { maps } from '../maps';
+import { maps, type MapLayer } from '../maps';
 
 export type Rgb = readonly [number, number, number];
 
@@ -119,6 +119,7 @@ export const NO_FOG: LookProfile['fog'] = {
   color: null,
 };
 
+/** The open default's sky; a map's own look row names its own. */
 const OPEN_SKY: SkyLook = {
   zenith: [0.34, 0.55, 0.87],
   horizon: [0.72, 0.80, 0.90],
@@ -133,52 +134,12 @@ const OPEN_HAZE: LookProfile['fog'] = {
   color: null,
 };
 
-/**
- * The haze colour the five graded maps were measured on. It used to be their
- * sky's horizon, which tied the dome to the far field: a sky blue enough to
- * read as sky would have moved every one of their section 8 rows. The haze
- * keeps the pair it was graded with and the dome is free.
- */
-const GRADED_HAZE: LookProfile['fog'] = { ...OPEN_HAZE, color: [0.74, 0.76, 0.8] };
-
 const NOON_SUN = sun(215, 48);
-
-/**
- * Lorencia's far country: a rocky range over a dry plain, the strip cropped
- * to its painted band so its middle is the art's own skyline.
- *
- * The peaks reach 6.8 degrees over the eye, which is a range a day's walk
- * out rather than a wall at the fence - and the plain below the eye covers
- * the sliver of void the map edge leaves under the horizon.
- */
-const LORENCIA_SKYLINE: SkylineLook = {
-  art: '/skyline/lorencia_back.webp',
-  riseDeg: 6.8,
-  dropDeg: 6.2,
-  haze: 0.3,
-  fade: 0.4,
-};
-
-/** Ruins under a heavy deck; Kanturu's two open floors share it. */
-const KANTURU_SKY: SkyLook = {
-  zenith: [0.46, 0.54, 0.66],
-  horizon: [0.7, 0.72, 0.76],
-  clouds: 0.28,
-  halo: 0.12,
-};
-
-/** Karutan: near-clear desert, the disc warm and the halo wide. */
-const DESERT_SKY: SkyLook = {
-  zenith: [0.56, 0.68, 0.84],
-  horizon: [0.88, 0.82, 0.68],
-  sun: [1.0, 0.93, 0.78],
-  halo: 0.35,
-  clouds: 0.08,
-};
 
 /** The interior key: the roof takes the sun, what is left comes from the bake. */
 const INTERIOR_SUN = sun(0, 60, ENCLOSED_SUN_SHARE);
 
+/** An open map with no look row of its own. */
 export const DEFAULT_PROFILE: LookProfile = {
   ev: 1.3,
   whiteBalance: [1, 1, 1],
@@ -187,6 +148,7 @@ export const DEFAULT_PROFILE: LookProfile = {
   sun: NOON_SUN,
 };
 
+/** An enclosed map (no `outdoor`) with no look row of its own. */
 const ENCLOSED_PROFILE: LookProfile = {
   ...DEFAULT_PROFILE,
   sky: null,
@@ -195,189 +157,43 @@ const ENCLOSED_PROFILE: LookProfile = {
 };
 
 /**
- * The pre-game backdrops: the enclosed look with a key of their own. The
- * interior sun's 0.15 share left the hall's cascades at a cut the eye does
- * not register; a low key from across the carpet lays the pedestals, the
- * arches and the chandeliers out on the floor, which is what a tour shot at
- * head height looks at.
+ * A map's look as its folder writes it (`MapLighting.look`): laid over the
+ * open default, or over the enclosed one with `over: 'enclosed'`, so a row
+ * only names what differs.
  */
-const PREGAME_PROFILE: LookProfile = {
-  ...ENCLOSED_PROFILE,
-  ev: 1.0,
-  sun: sun(60, 40, 0.45),
+export type MapLook = Partial<LookProfile> & {
+  readonly over?: 'open' | 'enclosed';
 };
 
-/** An open map that takes the default level and haze and only names its sky. */
-const openMap = (sky: SkyLook): LookProfile => ({ ...DEFAULT_PROFILE, sky });
-
-const PROFILES: Partial<Record<ENUM_WORLD, LookProfile>> = {
-  [ENUM_WORLD.WD_0LORENCIA]: {
-    // Measured (wave 1, Standard mapper): 1.6 lands p50 0.424, 1.8 lands 0.451.
-    ev: 1.8,
-    whiteBalance: [1.02, 1.0, 0.97],
-    sky: { ...OPEN_SKY, skyline: LORENCIA_SKYLINE },
-    fog: GRADED_HAZE,
-    sun: NOON_SUN,
-  },
-  [ENUM_WORLD.WD_3NORIA]: {
-    ev: 1.5,
-    whiteBalance: [0.98, 1.02, 0.98],
-    sky: { zenith: [0.30, 0.53, 0.85], horizon: [0.74, 0.83, 0.84], clouds: 0.14 },
-    fog: { ...OPEN_HAZE, color: [0.72, 0.78, 0.72] },
-    sun: NOON_SUN,
-  },
-  [ENUM_WORLD.WD_2DEVIAS]: {
-    ev: 0.8,
-    whiteBalance: [0.97, 0.99, 1.04],
-    sky: { zenith: [0.44, 0.62, 0.88], horizon: [0.78, 0.85, 0.92], clouds: 0 },
-    fog: { start: 20, density: 0.012, cap: 0.9, height: 0.02, color: [0.7, 0.76, 0.86] },
-    // `top` is 0: the shallowest tile anyone can stand on here is 0.135, so
-    // none of the snow field is over it and none of it changes. The cliff
-    // faces along the ravines hang to about eight tiles under that, and the
-    // numbers are set so they are half gone by four - which is the fade the
-    // original's crevasses have, seen from the rim.
-    underworld: { top: 0, density: 0.075, falloff: 0.25, color: [0, 0, 0] },
-    sun: sun(200, 35),
-  },
-  [ENUM_WORLD.WD_8TARKAN]: {
-    ev: 1.2,
-    whiteBalance: [1.04, 1.0, 0.94],
-    sky: {
-      zenith: [0.40, 0.58, 0.86],
-      horizon: [0.90, 0.84, 0.70],
-      sun: [1.0, 0.94, 0.8],
-      halo: 0.35,
-      clouds: 0.06,
-    },
-    fog: { start: 25, density: 0.01, cap: 0.9, height: 0, color: [0.86, 0.8, 0.66] },
-    sun: sun(220, 55),
-  },
-  [ENUM_WORLD.WD_6STADIUM]: {
-    ev: 1.4,
-    whiteBalance: [1, 1, 1],
-    sky: { ...OPEN_SKY, clouds: 0.12 },
-    fog: { start: 25, density: 0.006, cap: 0.8, height: 0, color: [0.74, 0.76, 0.8] },
-    sun: sun(215, 50),
-  },
-
-  // The remaining open maps (sky_atmospherics §7). Each keeps the ev, fog and
-  // sun it has today: only the sky is authored here, against the map's own
-  // art rather than against a Lorencia gate.
-  [ENUM_WORLD.WD_79UNITEDMARKETPLACE]: openMap({ ...OPEN_SKY, clouds: 0.18 }),
-  [ENUM_WORLD.WD_30BATTLECASTLE]: openMap({ ...OPEN_SKY, clouds: 0.16 }),
-  [ENUM_WORLD.WD_33AIDA]: openMap({
-    zenith: [0.34, 0.42, 0.62],
-    horizon: [0.62, 0.66, 0.72],
-    clouds: 0.22,
-    halo: 0.15,
-  }),
-  [ENUM_WORLD.WD_34CRYWOLF_1ST]: openMap({
-    zenith: [0.45, 0.56, 0.78],
-    horizon: [0.72, 0.72, 0.74],
-    clouds: 0.24,
-  }),
-  [ENUM_WORLD.WD_35CRYWOLF_2ND]: openMap({
-    zenith: [0.45, 0.56, 0.78],
-    horizon: [0.72, 0.72, 0.74],
-    clouds: 0.24,
-  }),
-  /**
-   * The one map whose bake is already at level, so it takes no lift.
-   * `World52/TerrainLight.jpg` measures p50 0.63 with 22.6 % of it pure
-   * white, against Lorencia's 0.53 and 8.3 %. `keyGain` lands after the
-   * ground light's ceiling, so on a tile the bake already saturates the
-   * default +1.3 multiplies a 1.0 by 2.46 and takes the texture with it.
-   *
-   * Measured against the Classic frame at six walkable spots (ground p50,
-   * Classic / +1.3 / +0.3): 0.54/0.64/0.54, 0.52/0.64/0.54, 0.67/0.69/0.62,
-   * 0.26/0.41/0.30, 0.71/0.73/0.64, 0.58/0.66/0.62. +0.3 lands on the frame
-   * it is grading and drops Classic's own clipping (up to 6.2 % on the
-   * marble) to nothing; +1.3 sat a tenth of a stop of luma above it with the
-   * highlights flat.
-   */
-  [ENUM_WORLD.WD_51ELBELAND]: {
-    ...DEFAULT_PROFILE,
-    ev: 0.3,
-    sky: {
-      zenith: [0.48, 0.68, 0.86],
-      horizon: [0.76, 0.82, 0.76],
-      clouds: 0.14,
-    },
-  },
-  [ENUM_WORLD.WD_37KANTURU_1ST]: openMap(KANTURU_SKY),
-  [ENUM_WORLD.WD_38KANTURU_2ND]: openMap(KANTURU_SKY),
-  [ENUM_WORLD.WD_80KARUTAN1]: openMap(DESERT_SKY),
-  [ENUM_WORLD.WD_81KARUTAN2]: openMap(DESERT_SKY),
-  [ENUM_WORLD.WD_57ICECITY]: openMap({
-    zenith: [0.52, 0.64, 0.84],
-    horizon: [0.74, 0.8, 0.88],
-    clouds: 0.2,
-  }),
-  [ENUM_WORLD.WD_62SANTA_TOWN]: openMap({
-    zenith: [0.5, 0.62, 0.82],
-    horizon: [0.8, 0.84, 0.9],
-    // A snowfall sky has no disc to show through it.
-    sun: null,
-    clouds: 0.3,
-  }),
-  [ENUM_WORLD.WD_56MAP_SWAMP_OF_QUIET]: openMap({
-    zenith: [0.4, 0.5, 0.6],
-    horizon: [0.68, 0.7, 0.64],
-    clouds: 0.26,
-    halo: 0.15,
-  }),
-  [ENUM_WORLD.WD_63PK_FIELD]: openMap({
-    zenith: [0.44, 0.44, 0.54],
-    horizon: [0.82, 0.66, 0.56],
-    sun: [1.0, 0.82, 0.62],
-    clouds: 0.24,
-  }),
-  [ENUM_WORLD.WD_31HUNTING_GROUND]: openMap(OPEN_SKY),
-  [ENUM_WORLD.WD_9DEVILSQUARE]: openMap(OPEN_SKY),
-  [ENUM_WORLD.WD_18CHAOS_CASTLE]: openMap(OPEN_SKY),
-  [ENUM_WORLD.WD_65DOPPLEGANGER1]: openMap(OPEN_SKY),
-  [ENUM_WORLD.WD_69EMPIREGUARDIAN1]: openMap({ ...OPEN_SKY, clouds: 0.18 }),
-  [ENUM_WORLD.WD_70EMPIREGUARDIAN2]: openMap({ ...OPEN_SKY, clouds: 0.18 }),
-  [ENUM_WORLD.WD_71EMPIREGUARDIAN3]: openMap({ ...OPEN_SKY, clouds: 0.18 }),
-  [ENUM_WORLD.WD_1DUNGEON]: {
-    ...ENCLOSED_PROFILE,
-    ev: 1.0,
-  },
-  [ENUM_WORLD.WD_4LOSTTOWER]: {
-    ...ENCLOSED_PROFILE,
-    ev: 0.9,
-    whiteBalance: [0.98, 0.98, 1.03],
-  },
-  [ENUM_WORLD.WD_7ATLANSE]: {
-    ev: 1.2,
-    whiteBalance: [0.94, 1.0, 1.04],
-    // Skyless: the haze is the water's own murk, in its colour, and it
-    // starts past the hero like every other map's (a 4-tile start veiled the
-    // whole frame: lrms 0.012).
-    sky: null,
-    fog: { start: 25, density: 0.03, cap: 0.85, height: 0.02, color: [0.2, 0.46, 0.54] },
-    sun: sun(0, 80, ENCLOSED_SUN_SHARE),
-  },
-  // The login and character-select backdrops: the Fortress set at night,
-  // torch-lit under its own roofs, seen by a flying camera far enough for
-  // any open haze cap. No haze, no sky, the room key.
-  [ENUM_WORLD.WD_73NEW_LOGIN_SCENE]: PREGAME_PROFILE,
-  [ENUM_WORLD.WD_74NEW_CHARACTER_SCENE]: PREGAME_PROFILE,
-  [ENUM_WORLD.WD_77NEW_LOGIN_SCENE]: PREGAME_PROFILE,
-  [ENUM_WORLD.WD_78NEW_CHARACTER_SCENE]: PREGAME_PROFILE,
-  [ENUM_WORLD.WD_10ICARUS]: {
-    // The map has an authored clear colour and no ground (MainScene.cpp:402).
-    ev: 0.6,
-    whiteBalance: [0.97, 0.99, 1.04],
-    sky: null,
-    fog: NO_FOG,
-    sun: sun(200, 40),
+/**
+ * Worlds no map entry claims, so they have no folder to carry a row: Crywolf
+ * 2nd keeps the 1st's sky.
+ */
+const UNCLAIMED: Partial<Record<ENUM_WORLD, MapLook>> = {
+  [ENUM_WORLD.WD_35CRYWOLF_2ND]: {
+    sky: { zenith: [0.45, 0.56, 0.78], horizon: [0.72, 0.72, 0.74], clouds: 0.24 },
   },
 };
 
+const lookOf = (l: MapLayer) => l.lighting?.look;
+
+/** Each row laid over its default, once. */
+const composed = new WeakMap<MapLook, LookProfile>();
+
+function compose(row: MapLook): LookProfile {
+  let out = composed.get(row);
+  if (!out) {
+    const { over, ...own } = row;
+    out = { ...(over === 'enclosed' ? ENCLOSED_PROFILE : DEFAULT_PROFILE), ...own };
+    composed.set(row, out);
+  }
+  return out;
+}
+
+/** The map's look: its own row over a default, else the default its sky picks. */
 export function profileFor(world: ENUM_WORLD): LookProfile {
-  const own = PROFILES[world];
-  if (own) return own;
+  const own = maps.rowFor(world, lookOf) ?? UNCLAIMED[world];
+  if (own) return compose(own);
 
   return maps.isOutdoor(world) ? DEFAULT_PROFILE : ENCLOSED_PROFILE;
 }
@@ -441,55 +257,42 @@ const ROOM_SUN = sun(0, 80, 0.3);
 
 const WARM_ROOM: Rgb = [1.03, 1.0, 0.96];
 
-const room = (keyLevel: number, candles: number): AreaLook => ({
-  keyLevel,
-  whiteBalance: WARM_ROOM,
-  candles,
-  sun: ROOM_SUN,
-});
-
 /**
- * Lorencia rooms (map ev 1.8): the pub with candelabra on every table, the
- * cabin across the river. The room's share now scales the emitters as well as
- * the bake, so the level is one number again: 1.4 lands the pub at p50 0.196
- * against Classic's 0.200 with tex 0.203 against 0.162 (`w3_v2_pub_1.4`).
+ * A room look as a map writes it (`MapLighting.areas`): its level and its
+ * candles. The warm balance and the near-vertical key are every room's.
  */
-const LORENCIA_ROOM = room(1.4, 1);
+export type MapArea = {
+  /** The room's level in key units (`AreaLook.keyLevel`). */
+  readonly keyLevel: number;
+  /** How much more than the room's own level its emitters get (`AreaLook.candles`). */
+  readonly candles: number;
+};
 
-/**
- * Devias rooms (map ev 0.8): the tavern's hearth and door candelabra, the
- * reading room's desk candelabra, the hearth houses, the guard room. The map
- * sits 1.0 ev under Lorencia, so the same room level is a smaller share.
- */
-const DEVIAS_ROOM = room(1.3, 1);
+/** A room look's name, as a map's `create` registers it (`lorenciaTavern`). */
+export type AreaLookName = string;
 
-/**
- * The two castle halls: twenty tiles across with a colonnade down each side
- * and a handful of wall candelabra, so the candles reach far less of the room
- * than a tavern's do and its own level carries more of the picture.
- *
- * Not gated against Classic the way F14's rooms are, and it cannot be:
- * Classic never opens this roof (only the slabs within the hero's fill lift,
- * F11), so almost no interior surface is comparable between the tiers. On the
- * one that is - the banner wall over the cutaway, same camera - the hall reads
- * 0.81x Classic's mean, a little under. This is the knob if it wants raising.
- */
-const DEVIAS_CASTLE_HALL = room(1.45, 1);
+/** Every map's room looks by name, built on first ask; rebuilt when the list grows. */
+let areas: { readonly from: number; readonly byName: Map<string, AreaLook> } | null =
+  null;
 
-const AREAS = {
-  lorenciaTavern: LORENCIA_ROOM,
-  lorenciaCabin: LORENCIA_ROOM,
-  deviasTavern: DEVIAS_ROOM,
-  deviasReadingRoom: DEVIAS_ROOM,
-  deviasHearthHouse: DEVIAS_ROOM,
-  deviasGuardRoom: DEVIAS_ROOM,
-  deviasCastleHall: DEVIAS_CASTLE_HALL,
-} satisfies Record<string, AreaLook>;
-
-export type AreaLookName = keyof typeof AREAS;
-
-export function areaProfile(name: AreaLookName): AreaLook {
-  return AREAS[name];
+/** The room look a map declared under `name`, or undefined for none. */
+export function areaProfile(name: AreaLookName): AreaLook | undefined {
+  const all = maps.all;
+  if (areas?.from !== all.length) {
+    const byName = new Map<string, AreaLook>();
+    for (const layer of all) {
+      for (const [key, row] of Object.entries(layer.lighting?.areas ?? {})) {
+        byName.set(key, {
+          keyLevel: row.keyLevel,
+          whiteBalance: WARM_ROOM,
+          candles: row.candles,
+          sun: ROOM_SUN,
+        });
+      }
+    }
+    areas = { from: all.length, byName };
+  }
+  return areas.byName.get(name);
 }
 
 /** The map's profile with an area laid over it: no sky, no haze, its own balance and key direction; the map's ev stays. */
