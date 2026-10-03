@@ -196,6 +196,7 @@ type Blendable = {
     cap: number;
     height: number;
     color: [number, number, number] | null;
+    fromTarget?: boolean;
   };
 };
 
@@ -230,6 +231,7 @@ function lerpBlendable(a: Blendable, b: Blendable, t: number): Blendable {
       cap: lerp(a.fog.cap, b.fog.cap, t),
       height: lerp(a.fog.height, b.fog.height, t),
       color: color ? [...color] : null,
+      fromTarget: b.fog.fromTarget,
     },
   };
 }

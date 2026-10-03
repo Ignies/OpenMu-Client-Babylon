@@ -27,6 +27,11 @@ export type LookProfile = {
     readonly cap: number;
     readonly height: number;
     readonly color: Rgb | null;
+    /**
+     * `start` counts from the camera's target - the hero - rather than from
+     * the camera, so the haze keeps its distance from the hero at every zoom.
+     */
+    readonly fromTarget?: boolean;
   };
   /**
    * The fog that fills the bottom of the world, under `top` and thickening
@@ -227,17 +232,28 @@ const openMap = (sky: SkyLook): LookProfile => ({ ...DEFAULT_PROFILE, sky });
 
 /**
  * Chaos Castle stands in the dark. The original has no sky over it and clears
- * the frame to black (`InChaosCastle()`, SceneManager.cpp:572), so the void past
- * its walls is black, the far end of the floor fades into it, and the outer
- * walls fade out as they hang down into it.
+ * the frame to black, fog included (`SetClearAndFogColor(0, 0, 0)` for
+ * `InChaosCastle()`, SceneManager.cpp:572): the void past its walls is black,
+ * and whatever is far off - the rest of the castle, the floors past the gap,
+ * the spikes across it - fades into it.
  *
- * The floor is flat at 0, so the underworld starts just under it.
+ * The haze starts eight tiles past the hero at every zoom, the way the
+ * original's own fog follows its view distance. No underworld: the floor is
+ * flat at 0 and the camera comes down close to it, so a fog under the floor
+ * took in long runs of the frame through the void and went black over what
+ * stood in front.
  */
 const CHAOS_CASTLE_PROFILE: LookProfile = {
   ...DEFAULT_PROFILE,
   sky: null,
-  fog: { start: 15, density: 0.05, cap: 0.95, height: 0, color: [0, 0, 0] },
-  underworld: { top: -0.2, density: 0.1, falloff: 0.3, color: [0, 0, 0] },
+  fog: {
+    start: 8,
+    density: 0.15,
+    cap: 1,
+    height: 0,
+    color: [0, 0, 0],
+    fromTarget: true,
+  },
 };
 
 const PROFILES: Partial<Record<ENUM_WORLD, LookProfile>> = {

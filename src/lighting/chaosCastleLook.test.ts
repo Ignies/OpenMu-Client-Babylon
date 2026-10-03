@@ -19,14 +19,17 @@ describe('the Chaos Castle look', () => {
       expect(look.sky).toBeNull();
       expect(look.fog.density).toBeGreaterThan(0);
       expect(look.fog.color).toEqual([0, 0, 0]);
-      expect(look.underworld?.color).toEqual([0, 0, 0]);
     }
   });
 
-  it('keeps the castle floor out of the underworld', () => {
-    // The floor is flat at height 0.
-    const under = profileFor(ENUM_WORLD.WD_18CHAOS_CASTLE).underworld;
-    expect(under?.top ?? 0).toBeLessThan(0);
+  it('keeps the haze off the hero at every zoom', () => {
+    const fog = profileFor(ENUM_WORLD.WD_18CHAOS_CASTLE).fog;
+    expect(fog.fromTarget).toBe(true);
+    expect(fog.start).toBeGreaterThan(0);
+  });
+
+  it('has no fog under the floor to go black at a low camera', () => {
+    expect(profileFor(ENUM_WORLD.WD_18CHAOS_CASTLE).underworld).toBeUndefined();
   });
 
   it('leaves the open maps their sky', () => {
