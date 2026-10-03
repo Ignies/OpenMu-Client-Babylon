@@ -43,6 +43,10 @@ shared pools, textures and particle recipes other folders reuse.
   (`stepClock`, so a `delay` that comes due spawns this frame), then every entry in list order.
   Order matters: `projectile`, `debris` and `feathers` move points that `model` reads; `aura`
   drives ribbon heads `joint` reads; `monsterGlow` is last so its cards ride this frame's bones.
+- The clock counts 25 Hz ticks, like `c->AttackTime += FPS_ANIMATION_FACTOR`, and a delay of a whole
+  number of ticks is due on that tick: at 25 fps `delay(ticks(14))` fires on the 14th frame. Summed
+  float seconds made `ticks(n)` delays fire a frame late and a chain of `delay(TICK)` polls step
+  every other frame.
 - `effects.reset` runs on map change from `app/lifecycle.ts`: `clearTimers`, each entry's
   `reset`, then `disposePools` (materials, cards, particle systems, the effect glow layer).
 - An entry keeps its live effects in a `LiveList` (`core.ts`). A throwing update or release is
@@ -82,6 +86,8 @@ shared pools, textures and particle recipes other folders reuse.
   resizes and map changes.
 - `greasedLineRelease.test.ts`: releasing simple and textured lines never throws and keeps the
   shared empty-colours texture alive.
+- `clock.test.ts`: an n-tick delay fires on the n-th frame at 25 fps from any start, and on the first
+  due frame at 60 fps.
 - `softEdge.test.ts`: `fadeSheetEdges` / `fadeSheetSides` fade sheet borders and only touch alpha.
 - The skill golden tests (`versions/shared/skills/*.golden.test.ts`) drive `effects.spawn` and
   `effects.update` for every skill.

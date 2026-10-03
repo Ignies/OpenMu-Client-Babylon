@@ -972,9 +972,11 @@ export class Emitter {
  * every pending step so a warp or a death mid-cast leaves nothing to land
  * on the next map .
  */
-let clock = 0;
+/** Counted in 25 Hz ticks like `c->AttackTime += FPS_ANIMATION_FACTOR` (ZzzCharacter.cpp:4136): whole numbers at 25 fps. */
+let tickClock = 0;
 
 interface Timer extends LiveEffect {
+  /** The tick it fires on. */
   due: number;
   fn: () => void;
 }
@@ -983,16 +985,23 @@ const timers = new LiveList();
 
 /** Seconds on the effects clock. */
 export function fxNow(): number {
-  return clock;
+  return tickClock * TICK;
+}
+
+/** `seconds` in ticks; a whole tick count (`ticks(14)` = 0.56 s) stays whole, not 14.000000000000002. */
+function toTicks(seconds: number): number {
+  const t = seconds / TICK;
+  const whole = Math.round(t);
+  return Math.abs(t - whole) < 1e-6 ? whole : t;
 }
 
 /** Run `fn` once `seconds` of effects time have passed. `stop()` cancels it. */
 export function delay(seconds: number, fn: () => void): EffectHandle {
   const timer: Timer = {
-    due: clock + seconds,
+    due: tickClock + toTicks(seconds),
     fn,
     update() {
-      if (clock < this.due) return true;
+      if (tickClock < this.due) return true;
       this.fn();
       return false;
     },
@@ -1003,7 +1012,7 @@ export function delay(seconds: number, fn: () => void): EffectHandle {
 
 /** Advance the clock and fire what is due. The facade calls it before the layers step. */
 export function stepClock(dt: number): void {
-  clock += dt;
+  tickClock += dt / TICK;
   timers.update(dt);
 }
 
