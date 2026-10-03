@@ -73,6 +73,7 @@ const shown = {
   density: 0,
   cap: 0,
   height: 0,
+  fromTarget: false,
   underworld: null as Underworld | null,
 };
 
@@ -295,7 +296,9 @@ function createFog(scene: Scene, camera: ArcRotateCamera): PostProcess {
     );
 
     effect.setFloat3('fogColor', shown.color[0], shown.color[1], shown.color[2]);
-    effect.setFloat4('fogParams', shown.start, shown.density, shown.cap, shown.height);
+    const start = shown.start + (shown.fromTarget ? camera.radius : 0);
+
+    effect.setFloat4('fogParams', start, shown.density, shown.cap, shown.height);
     effect.setFloat('fogBaseY', fogBaseY);
     effect.setFloat('effectShare', effectHazeDev ?? EFFECT_HAZE_SHARE);
 
@@ -367,6 +370,7 @@ export function syncHeightFog(
   shown.density = density;
   shown.cap = fog.cap;
   shown.height = fog.height;
+  shown.fromTarget = fog.fromTarget === true;
 
   // Either fog is reason enough for the pass: a map may have holes in its
   // ground and no haze at all.
