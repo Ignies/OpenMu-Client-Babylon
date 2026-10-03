@@ -9,7 +9,8 @@ themselves are content in `versions/shared/skills/` (see [docs/content.md](../..
   and a set of buff looks. `SkillDef` lists the fields.
 - `registerSkills(defs)` (`index.ts`): copies each field into the table that reads it and throws
   if an id is defined twice. `registerBuffLooks`, `registerLauncherArrows` fill the buff look and
-  bow arrow tables. `hasWarriorGlint(skill, mounted)`: the skill's `warriorGlint` field, for
+  bow arrow tables. `cancelledEffects(skill, scene, target)`: the effects a `MagicEffectCancelled`
+  naming `skill` drops, after running its `cancel` hook (`SkillCancel`). `hasWarriorGlint(skill, mounted)`: the skill's `warriorGlint` field, for
   `skillCastSystem` (item_fx draws the glint).
 - `visuals.ts` step DSL, used by skill files: `sprite`, `particles`, `model`, `ring`, `seq`,
   `atCaster`, `scatter`, `ringOf`, `after`, `repeat`, `offset`, building blocks (`fireHit`,
@@ -24,7 +25,7 @@ themselves are content in `versions/shared/skills/` (see [docs/content.md](../..
   `LOOK_ALIASES` (and `MASTER_BASES`, `modules/skills/skillAliases.ts`), `light` into
   `lighting/skills.ts`, `sound` / `clipSound` / `soundOnLanding` / `silentHeroCast` into
   `sound/combat.ts`, `delayMs` and `effect` (also under each of its `effectAliases`) into
-  `modules/skills/recipes.ts`, `buffs` /
+  `modules/skills/recipes.ts`, `cancel` into the table `cancelledEffects` reads, `buffs` /
   `buffArrivals` / `buffHits` into `BUFF_VISUALS` / `BUFF_ARRIVALS` / `BUFF_HITS`, and hands
   the combat fields (clip rules, `target`, `stepIn`, `noFlinch`, `holdsFacing`, `quietOn`,
   `othersSee`, `explicitHits`, `kill`, `combat.layer` / `combat.hooks`) to

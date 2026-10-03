@@ -55,6 +55,7 @@ controller tests a skill number.
 | `explicitHits` | combat | send the 0xDB hit list whatever the skill type |
 | `clipSound`, `soundOnLanding`, `silentHeroCast` | sound | cast sound by clip; sound at the landing; no sound at the hero's click |
 | `effect`, `effectAliases` | modules/skills | the MagicEffect `MagicEffectCancelled` drops for this skill, and the master numbers that drop it too (ours: skills readme) |
+| `cancel` | skills | work its cancel does on the target first, and other effects it drops (`cancelledEffects`) |
 | `buffHits` | skills | what a buff draws when its wearer is hit (Soul Barrier's shell) |
 | `warriorGlint` | skills (item_fx draws it) | UseSkillWarrior's blade glint at the cast; `'mounted'` for Impale |
 
