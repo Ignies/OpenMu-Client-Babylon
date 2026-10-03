@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite';
 import { t } from '@/i18n';
-import { GmPanel } from '@/features/gm/gmPanel';
+import { GmPanel } from '@/modules/gm/gmPanel';
 import { uiClick } from '@/controllers/sound/sfx';
 import { CommandCard } from '../commandForm';
 

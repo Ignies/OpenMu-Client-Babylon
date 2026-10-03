@@ -19,7 +19,7 @@ stacking order (`src/controllers/interface/windows.ts`). Each window still decid
 open (today from Store flags; these are moving into the interface controller's window manager).
 
 ## Depends on / used by
-- uses: `src/controllers/interface` (registry, shared widgets), features and the Store for state.
+- uses: `src/controllers/interface` (registry, shared widgets), modules and the Store for state.
 - used by: `src/app/App.tsx` (pages), versions' UI modules (pre-game pages).
 
 ## Change it

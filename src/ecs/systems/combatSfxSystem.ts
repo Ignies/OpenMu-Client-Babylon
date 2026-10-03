@@ -6,7 +6,7 @@ import {
 } from '../../controllers/anim/playerActionMapper';
 import { monsterModelTypeOf } from '../../controllers/anim/playSpeed';
 import { isPlayerBody } from '../../controllers/actors/playerObject';
-import { HORN_OF_FENRIR, PET_GROUP } from '../../features/pets/petConstants';
+import { HORN_OF_FENRIR, PET_GROUP } from '../../modules/pets/petConstants';
 import type { CharacterClassNumber } from '../../core/types';
 import { CHAOS_CASTLE_WORLDS } from '../../controllers/assets/worldAssets';
 import {

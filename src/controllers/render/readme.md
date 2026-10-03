@@ -44,10 +44,10 @@ There is no `index.ts` facade; other folders import the modules directly.
 
 ## Depends on / used by
 - uses: `assets` (model loader, texture packs), `lighting`, `terrain`, `maps`, `item_fx`, `anim`,
-  `net`, `ecs` (world types, two system helpers), `core`; old exceptions in `tools/checks/baselines/deps.json`: `features/options`,
-  `features/session`, `app/storeRef`, `versions/shared/maps/*/spec`.
+  `net`, `ecs` (world types, two system helpers), `core`; old exceptions in `tools/checks/baselines/deps.json`: `modules/options`,
+  `modules/session`, `app/storeRef`, `versions/shared/maps/*/spec`.
 - used by: `app/boot.tsx`, `ecs` systems, `actors`, `fx`, `lighting`, `terrain`, `item_fx`,
-  `assets`, `features`, `versions/shared` maps, npcs and the Options window.
+  `assets`, `modules`, `versions/shared` maps, npcs and the Options window.
 
 ## Change it
 - a new model class: extend `ModelObject`; set `static Batchable = true` only if it does nothing per

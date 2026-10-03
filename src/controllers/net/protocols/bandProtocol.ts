@@ -50,7 +50,7 @@ export const RefuseWhat = { Start: 1, Join: 2 } as const;
 
 /**
  * The limits both ends agree on. The client sender keeps under them; the
- * proxy enforces them (SS14: 1000 features/events/s, 60 per batch, stop after 1
+ * proxy enforces them (SS14: 1000 events/s, 60 per batch, stop after 1
  * dropped or 8 lagged batches).
  */
 export const BAND_LIMITS = {

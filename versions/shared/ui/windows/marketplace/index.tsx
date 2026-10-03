@@ -5,18 +5,18 @@ import { useWindowChrome } from '@/controllers/interface/components/mu_window/us
 import { ItemIcon } from '@/controllers/interface/components/item_icon';
 import { ItemTooltip } from '@/controllers/interface/components/item_tooltip';
 import { t, type TextKey } from '@/i18n';
-import { CATEGORIES, displayName } from '@/features/marketplace/categories';
-import { cancellable, stateLabelKey, statePillKey } from '@/features/marketplace/catalogue';
-import { lookClasses } from '@/features/marketplace/tiers';
+import { CATEGORIES, displayName } from '@/modules/marketplace/categories';
+import { cancellable, stateLabelKey, statePillKey } from '@/modules/marketplace/catalogue';
+import { lookClasses } from '@/modules/marketplace/tiers';
 import {
   Marketplace,
   SORTS,
   formatZen,
   sinceLabel,
   type Tab,
-} from '@/features/marketplace/state';
-import type { Listing } from '@/features/marketplace/mockListings';
-import type { HistoryEntry } from '@/features/marketplace/api';
+} from '@/modules/marketplace/state';
+import type { Listing } from '@/modules/marketplace/mockListings';
+import type { HistoryEntry } from '@/modules/marketplace/api';
 import { CONTENT, FRAME_H, FRAME_SRC, FRAME_W, PLAQUE, RAIL } from './layout';
 
 export const MARKETPLACE_ID = 'marketplace';

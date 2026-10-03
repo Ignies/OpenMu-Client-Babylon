@@ -1,5 +1,5 @@
 import type { TextKey } from '@/i18n';
-import { TRADE_COLUMNS, TRADE_ROWS } from '@/features/inventory/itemStorage';
+import { TRADE_COLUMNS, TRADE_ROWS } from '@/modules/inventory/itemStorage';
 
 /**
  * `CNewUITrade` (NewUITrade.cpp): the 190×429 item frame split in two - the

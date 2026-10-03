@@ -29,7 +29,7 @@ versions/shared/skills/<class>/<skill>/
 | `light` | lighting | the light it throws |
 | `sound` | sound | cast sound |
 | `clip` | combat / anim | cast animation, on foot and per mount |
-| `delayMs` | features/skills | re-use delay |
+| `delayMs` | modules/skills | re-use delay |
 | `target` | combat | who the cast goes to when its type would say otherwise |
 | `stepIn` | combat | walk one square in toward the target |
 | `buffs`, `buffArrivals` | skills | persistent buff looks and their landing work |
@@ -54,7 +54,7 @@ controller tests a skill number.
 | `kill` | combat | what a kill does to the body (`knock`, per-frame `dying`: Nova, Combo) |
 | `explicitHits` | combat | send the 0xDB hit list whatever the skill type |
 | `clipSound`, `soundOnLanding`, `silentHeroCast` | sound | cast sound by clip; sound at the landing; no sound at the hero's click |
-| `effect` | features/skills | the MagicEffect `MagicEffectCancelled` drops for this skill |
+| `effect` | modules/skills | the MagicEffect `MagicEffectCancelled` drops for this skill |
 | `buffHits` | skills | what a buff draws when its wearer is hit (Soul Barrier's shell) |
 
 ## Windows and HUD

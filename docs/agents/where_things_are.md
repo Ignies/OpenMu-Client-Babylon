@@ -10,9 +10,9 @@
 | lights, sky, the skill light engine | `src/controllers/lighting/` |
 | rain, snow, footprints | `src/controllers/weather/` |
 | item glow, materials, weapon trails | `src/controllers/item_fx/` |
-| a packet's handling | `src/features/<feature>/net.ts` (load order: `src/app/logic.ts`) |
-| a feature's state and actions | `src/features/<feature>/` (some still in `src/app/store.ts`) |
-| a window or panel | `versions/shared/ui/windows/<window>/` (drawing) + its feature (state) |
+| a packet's handling | `src/modules/<module>/net.ts` (load order: `src/app/logic.ts`) |
+| a module's state and actions | `src/modules/<module>/` (some still in `src/app/store.ts`) |
+| a window or panel | `versions/shared/ui/windows/<window>/` (drawing) + its module (state) |
 | a HUD element | `versions/shared/ui/hud/<element>/` |
 | shared widgets (tooltip, item grid, frame, button) | `src/controllers/interface/components/` |
 | window open/close, z-order, placement | `src/controllers/interface/` |

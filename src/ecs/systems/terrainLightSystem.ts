@@ -9,7 +9,7 @@ import {
 } from '../../controllers/lighting/pointLightPool';
 import { lightingTier } from '../../controllers/lighting/lightingQuality';
 import { lighting } from '../../controllers/lighting';
-import { GameOptions } from '../../features/options/gameOptions';
+import { GameOptions } from '../../modules/options/gameOptions';
 import { updateSceneLook } from '../../controllers/render/scenes/sceneLook';
 import { lookDirector } from '../../controllers/lighting/director';
 

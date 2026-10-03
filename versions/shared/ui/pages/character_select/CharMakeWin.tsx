@@ -1,10 +1,10 @@
 import { MuWindows } from '@/controllers/interface/windowManager';
 import { t } from '@/i18n';
-import { CREATE_MESSAGES } from '@/features/character_select/messages';
+import { CREATE_MESSAGES } from '@/modules/character_select/messages';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useRef } from 'react';
 import { Store } from '@/app/store';
-import { isReservedName } from '@/features/servers/reservedNames';
+import { isReservedName } from '@/modules/servers/reservedNames';
 import { playUiSound } from '@/controllers/sound/sfx';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';

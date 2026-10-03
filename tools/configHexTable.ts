@@ -14,7 +14,7 @@ import {
   NUMBER_BIAS,
   flagFields,
   numberFields,
-} from '../src/features/session/configFingerprint';
+} from '../src/modules/session/configFingerprint';
 
 export function configHexTable(): string {
   const flags = flagFields();

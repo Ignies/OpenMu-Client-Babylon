@@ -16,8 +16,8 @@ import {
   setLoop,
   stopPlaying,
   toggleInstrumentWindow,
-} from '@/features/band/music';
-import { PERCUSSION_CHANNEL } from '@/features/band/music/bandState';
+} from '@/modules/band/music';
+import { PERCUSSION_CHANNEL } from '@/modules/band/music/bandState';
 import { uiClick } from '@/controllers/sound/sfx';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';

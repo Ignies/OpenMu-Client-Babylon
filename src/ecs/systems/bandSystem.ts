@@ -2,7 +2,7 @@ import { Vector3 } from '../../controllers/render/babylon/exports';
 import { angleLinkMatrix } from '../../controllers/render/boneLink';
 import { devQuery, devQueryNumbers } from '../../core/devSeams';
 import type { BmdLink } from '../../controllers/render/boneLink';
-import { instrumentById, instrumentParts, isInstrumentId, type InstrumentPart } from '../../features/band/instruments';
+import { instrumentById, instrumentParts, isInstrumentId, type InstrumentPart } from '../../modules/band/instruments';
 import { loadGLTF } from '../../controllers/assets/modelLoader';
 import { ModelObject } from '../../controllers/render/modelObject';
 import type { PlayerAction } from '@versions/shared/objects/enum';
@@ -12,9 +12,9 @@ import {
   performanceEnded,
   refused,
   takenOut,
-} from '../../features/band/music';
-import { instrumentClip } from '../../features/band/music/instrumentClip';
-import { startPerforming, stopPerforming } from '../../features/band/music/performing';
+} from '../../modules/band/music';
+import { instrumentClip } from '../../modules/band/music/instrumentClip';
+import { startPerforming, stopPerforming } from '../../modules/band/music/performing';
 import { audioNow, dropPerformer, setPerformerPosition } from '../../controllers/sound/instruments';
 import { effects } from '../../controllers/fx';
 import { entityYaw } from '../../controllers/fx/core';
@@ -24,7 +24,7 @@ import type { Entity, ISystemFactory } from '../world';
 /**
  * Performers: the hero with an instrument out, and every player in scope the
  * proxy says is playing. Gives them the row's pose - a few frames copied out
- * of an emote, looped (`features/band/instrumentClip.ts`) - hangs the model on the
+ * of an emote, looped (`modules/band/instrumentClip.ts`) - hangs the model on the
  * hand bone, and ends the performance the moment they step, get hit into
  * another clip, or die.
  *

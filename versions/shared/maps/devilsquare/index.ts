@@ -23,7 +23,7 @@ import { DEVIL_SQUARE_LIGHTING } from './lighting';
  * `create.ts` for why - and the map's own runtime is one thing:
  * `DevilSquareStorm`, the lightning `MoveObject` runs over the hero
  * (ZzzObject.cpp:3630-3644). The waves, the timer and the rank table are the
- * *event*, and live in `features/events/devilSquare.ts`.
+ * *event*, and live in `modules/events/devilSquare.ts`.
  *
  * Weather: it always rains here, and not because of any packet.
  * `CreateDevilSquareRain` (ZzzEffectFireLeave.cpp:120-127) checks the world

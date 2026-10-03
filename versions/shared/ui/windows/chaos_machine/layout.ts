@@ -1,12 +1,12 @@
 import type { TextKey } from '@/i18n';
-import { MIX_COLUMNS, MIX_ROWS } from '@/features/inventory/itemStorage';
+import { MIX_COLUMNS, MIX_ROWS } from '@/modules/inventory/itemStorage';
 
 /**
  * `CNewUIMixInventory` (NewUIMixInventory.cpp): the 190×429 item frame, the
  * 8×4 tray at (15, 110) and the 44×35 mix button centred on the bottom edge
  * at y = 380. The block the original fills with the recipe it matched
  * (`GetCurRecipeName`, `GetSourceName`) is the mix menu here - see the note
- * on `MIX_MENU` in features/economy/economy.ts.
+ * on `MIX_MENU` in modules/economy/economy.ts.
  */
 
 export const COLUMNS = MIX_COLUMNS;

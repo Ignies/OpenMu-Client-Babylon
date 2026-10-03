@@ -9,11 +9,11 @@ import {
   type ReactNode,
 } from 'react';
 import { Store } from '@/app/store';
-import { Economy, type EconomyPrompt } from '@/features/economy/economy';
+import { Economy, type EconomyPrompt } from '@/modules/economy/economy';
 import { itemDisplayName } from '@/controllers/interface/itemTooltip';
-import { itemValue } from '@/features/items/itemValue';
-import { QuickItemActions } from '@/features/inventory/quickItemActions';
-import { MAX_BULK_BUY } from '@/features/inventory/quickItemRules';
+import { itemValue } from '@/modules/items/itemValue';
+import { QuickItemActions } from '@/modules/inventory/quickItemActions';
+import { MAX_BULK_BUY } from '@/modules/inventory/quickItemRules';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { TEXT_COLOR } from '../../pages/server_select/layout';

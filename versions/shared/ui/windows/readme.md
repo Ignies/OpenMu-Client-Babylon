@@ -1,7 +1,7 @@
 # windows
 
-One folder per in-game window. A window draws; its state and actions belong to its feature
-(`src/features/<feature>`) or the Store. Recipe: [docs/how_to/change_a_window.md](../../../../docs/how_to/change_a_window.md).
+One folder per in-game window. A window draws; its state and actions belong to its module
+(`src/modules/<module>`) or the Store. Recipe: [docs/how_to/change_a_window.md](../../../../docs/how_to/change_a_window.md).
 
 ## Public API
 - Each `window.ts` default-exports one `defineWindow({ id, slot, order, component })` or an array
@@ -55,7 +55,7 @@ Other ids in the same stack: msg_window (360) and picked_item (500) from the int
 controller, and the HUD elements in `../hud`.
 
 ## Depends on / used by
-- uses: `src/features/*`, the Store, `src/controllers/interface` (registry, widgets, hooks)
+- uses: `src/modules/*`, the Store, `src/controllers/interface` (registry, widgets, hooks)
 - used by: `../index.ts` (glob); `versions/season6/ui` (sprite lists from `layout.ts`,
   `MasterSkillsWindow`); `src/app/App.tsx` (options)
 

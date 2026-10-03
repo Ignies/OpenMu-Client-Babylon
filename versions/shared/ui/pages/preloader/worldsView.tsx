@@ -6,10 +6,10 @@ import {
   playableHere,
   ServerConfig,
   type ServerProfile,
-} from '@/features/servers/serverConfig';
-import { ServerAccounts } from '@/features/servers/serverAccounts';
-import { refreshServerList, ServerList } from '@/features/servers/serverList';
-import { ServerProbe } from '@/features/servers/serverProbe';
+} from '@/modules/servers/serverConfig';
+import { ServerAccounts } from '@/modules/servers/serverAccounts';
+import { refreshServerList, ServerList } from '@/modules/servers/serverList';
+import { ServerProbe } from '@/modules/servers/serverProbe';
 import { versionTags } from '@/version';
 import { Button, Icon } from './controls';
 import { Banner, REACH_TEXT } from './banner';

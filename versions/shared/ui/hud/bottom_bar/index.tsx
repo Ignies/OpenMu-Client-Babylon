@@ -29,15 +29,15 @@ import {
   isHotbarSkill,
   SKILL_ICON_HEIGHT,
   SKILL_ICON_WIDTH,
-} from '@/features/skills/skillCasting';
+} from '@/modules/skills/skillCasting';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { skills } from '@/features/skills';
-import { onCooldownTick, skillCooldowns } from '@/features/skills/cooldowns';
+import { skills } from '@/modules/skills';
+import { onCooldownTick, skillCooldowns } from '@/modules/skills/cooldowns';
 import { SkillTooltip } from '@/controllers/interface/components/skill_tooltip';
 import { ExpTooltip } from './expTooltip';
-import { SessionStats } from '@/features/session/sessionStats';
+import { SessionStats } from '@/modules/session/sessionStats';
 import { devQuery } from '@/core/devSeams';
 import { itemBaseName } from '@versions/shared/items/itemsDatabase';
 import {
@@ -45,7 +45,7 @@ import {
   canRegisterItemHotkey,
   countHotkeyItems,
   findHotkeyItem,
-} from '@/features/inventory/itemHotkeys';
+} from '@/modules/inventory/itemHotkeys';
 
 const BAR_ID = BOTTOM_BAR_ID;
 /** The skill fan is a window for Escape's purposes, nothing more. */

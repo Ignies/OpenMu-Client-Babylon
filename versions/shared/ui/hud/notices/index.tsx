@@ -8,7 +8,7 @@ import {
   NOTICE_STYLE,
   NOTICE_Y,
   Notices as NoticeStore,
-} from '@/features/chat/notices';
+} from '@/modules/chat/notices';
 import { MuText } from '@/controllers/interface/components/mu_text';
 import { DEFAULT_SCALE } from '@/controllers/interface/windowManager';
 import { UI_STAGE_HEIGHT } from '@/controllers/interface/components/ui_stage';

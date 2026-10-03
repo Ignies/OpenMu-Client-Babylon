@@ -35,7 +35,7 @@ Always-on interface elements, one folder per element, same shape as a window. Re
 `name_tags`, `party_bars` and `emoji_bubbles` have no `window.ts`; `world_objects` draws them.
 
 ## Depends on / used by
-- uses: `src/features/*`, the Store, `src/controllers/interface` (registry, widgets, hooks)
+- uses: `src/modules/*`, the Store, `src/controllers/interface` (registry, widgets, hooks)
 - used by: `../index.ts` (glob); `../pages/world` draws them
 
 ## Change it

@@ -62,10 +62,10 @@ water, ground picks, minimap data and the base class for map objects. There is n
 ## Depends on / used by
 - uses: `assets`, `maps` (tiles, cutout, spawn, `create`), `weather` (coverage, trail, melt,
   burn), `lighting`, `render`, `fx`, `core`. Old exceptions to the dependency rule
-  (`tools/checks/baselines/deps.json`): `app/store`, `app/consts`, `features/options/gameOptions`.
+  (`tools/checks/baselines/deps.json`): `app/store`, `app/consts`, `modules/options/gameOptions`.
 - used by: `app/boot.tsx`, `ecs/world.ts`, ECS systems (`terrainLightSystem`, `terrainMaskSystem`,
   `terrainGrassSystem`, the cursor and pointer systems), the fx, lighting, render, sound, assets,
-  maps and weather controllers, `features` (skills, warp), the options window, the minimap HUD,
+  maps and weather controllers, `modules` (skills, warp), the options window, the minimap HUD,
   the GM map view, and map content in `versions/shared/maps/`.
 
 ## Change it

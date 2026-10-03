@@ -5,7 +5,7 @@
 Edit only `versions/shared/ui/windows/<window>/index.tsx` (and its `layout.ts` / `style.less`).
 Use the interface controller's widgets (`@/controllers/interface/components/*`): item grid,
 item tooltip, picked item, frames, buttons, text. A window draws; the state and the actions it
-calls belong to its feature (`src/features/<feature>`).
+calls belong to its module (`src/modules/<module>`).
 
 ## Restyle a shared widget everywhere
 

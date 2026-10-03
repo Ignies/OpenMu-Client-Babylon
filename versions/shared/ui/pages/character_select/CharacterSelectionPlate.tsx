@@ -3,8 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Matrix, Vector3, Viewport } from '@/controllers/render/babylon/exports';
 import { Store } from '@/app/store';
 import { classFromAppearance } from '@/controllers/actors/deserializeAppearance';
-import { getClassName } from '@/features/hero/characterStats';
-import { characterSelectView } from '@/features/character_select/characterSelect';
+import { getClassName } from '@/modules/hero/characterStats';
+import { characterSelectView } from '@/modules/character_select/characterSelect';
 import { t } from '@/i18n';
 import { TEXT_COLOR } from '../server_select/layout';
 

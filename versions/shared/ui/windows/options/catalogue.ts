@@ -9,7 +9,7 @@ import {
   UI_SCALE_MAX,
   uiScaleFactor,
   type GameOptions as GameOptionsType,
-} from '@/features/options/gameOptions';
+} from '@/modules/options/gameOptions';
 import {
   KEY_ACTION_LABEL_KEYS,
   type KeyAction,
@@ -21,7 +21,7 @@ import {
 import {
   COMPARE_TOOLTIP_LABEL_KEYS,
   COMPARE_TOOLTIP_MAX,
-} from '@/features/items/itemCompare';
+} from '@/modules/items/itemCompare';
 import {
   LIGHTING_QUALITY_LABEL_KEYS,
   LIGHTING_QUALITY_MAX,
@@ -58,13 +58,13 @@ import {
   RENDER_SCALE_STEP_MAX,
   renderScaleForStep,
 } from '@/controllers/render/renderScale';
-import { LOOT_ZEN_MAX, lootZenThreshold } from '@/features/drops/lootFilter';
-import { CHAT_EMOJI_SIZE_LABEL_KEYS, CHAT_EMOJI_SIZE_MAX } from '@/features/chat/chatEmojis';
+import { LOOT_ZEN_MAX, lootZenThreshold } from '@/modules/drops/lootFilter';
+import { CHAT_EMOJI_SIZE_LABEL_KEYS, CHAT_EMOJI_SIZE_MAX } from '@/modules/chat/chatEmojis';
 import { BUS_VOLUME_MAX } from '@/controllers/sound/buses';
 import {
   LOW_VITAL_MAX_PERCENT,
   LOW_VITAL_MIN_PERCENT,
-} from '@/features/hero/lowVitals';
+} from '@/modules/hero/lowVitals';
 import {
   RENDER_DISTANCE_MAX,
   renderDistanceRanges,

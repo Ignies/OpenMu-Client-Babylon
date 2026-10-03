@@ -9,10 +9,10 @@ import {
   comparedItem,
   compareTooltipsOn,
   CompareTooltips,
-} from '@/features/items/itemCompare';
-import { GameOptions } from '@/features/options/gameOptions';
-import type { HeroStats } from '@/features/items/itemStats';
-import { PET_GROUP } from '@/features/pets/pets';
+} from '@/modules/items/itemCompare';
+import { GameOptions } from '@/modules/options/gameOptions';
+import type { HeroStats } from '@/modules/items/itemStats';
+import { PET_GROUP } from '@/modules/pets/pets';
 import { PetTypeEnum } from '@versions/shared/packets/ClientToServerPackets';
 import { t } from '@/i18n';
 import {
@@ -22,7 +22,7 @@ import {
   needsRepair,
   repairCost,
   withTax,
-} from '@/features/items/itemValue';
+} from '@/modules/items/itemValue';
 import { placePair } from './placement';
 import { ItemLinkHover } from '@/controllers/interface/itemLinkHover';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';

@@ -29,9 +29,9 @@ import {
   shopTitleSummary,
   unionLine,
 } from '@/controllers/interface/nameTags';
-import { Social } from '@/features/social/social';
-import { guildMarkDataUrl, isEmptyGuildMark } from '@/features/social/guildMark';
-import { Economy } from '@/features/economy/economy';
+import { Social } from '@/modules/social/social';
+import { guildMarkDataUrl, isEmptyGuildMark } from '@/modules/social/guildMark';
+import { Economy } from '@/modules/economy/economy';
 import { GuildMemberRoleEnum } from '@versions/shared/packets/ServerToClientPackets';
 import { devQuery } from '@/core/devSeams';
 import { onLanguageChanged } from '@/i18n';
@@ -141,7 +141,7 @@ function buildLines(entity: TagEntity): Line[] {
   const ownMark = entity.guild ? Store.guilds.get(entity.guild.id)?.logo : undefined;
   // Self-defense outranks the PK tint for its 60s: the aggressor is marked
   // to the victim (violet in the official client; the state itself comes
-  // from OpenMU's blue message, features/social/social.ts trackSelfDefense).
+  // from OpenMU's blue message, modules/social/social.ts trackSelfDefense).
   const nameColour = isGm
     ? GM_NAME_TEXT
     : Social.isSelfDefenseActive(entity.objectNameInWorld)

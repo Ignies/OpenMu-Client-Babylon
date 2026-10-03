@@ -8,7 +8,7 @@ import {
   enterBalgass,
   type BalgassEntryBox,
   type BalgassEntryKind,
-} from '@/features/quests/balgassEntry';
+} from '@/modules/quests/balgassEntry';
 import { isTypingInField } from '@/ecs/systems/keyboardInputSystem';
 import { playUiSound } from '@/controllers/sound/sfx';
 import { MsgBoxFrame, msgBoxHeight } from '@/controllers/interface/components/msg_box_frame';
@@ -39,7 +39,7 @@ import {
 /**
  * `CMapEnterWerwolfMsgBoxLayout` / `CMapEnterGateKeeperMsgBoxLayout`: the
  * third class quests' entry boxes, OK / Cancel on the common message box.
- * Reads `features/quests/balgassEntry.ts` and owns no state.
+ * Reads `modules/quests/balgassEntry.ts` and owns no state.
  */
 
 /** One `AddMsg`; a null key is the original's `AddMsg(L" ")` spacer row. */

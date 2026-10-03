@@ -7,7 +7,7 @@ import { effects } from '@/controllers/fx';
 import { ENUM_WORLD } from '@/core/types';
 import { lighting } from '@/controllers/lighting';
 import type { Entity } from '@/ecs/world';
-import { GameOptions } from '@/features/options/gameOptions';
+import { GameOptions } from '@/modules/options/gameOptions';
 import { LIGHTING_QUALITY_MAX } from '@/controllers/lighting/lightingQuality';
 import { combat } from '@/controllers/combat';
 import {

@@ -7,8 +7,8 @@ import {
   emojiPackLabel,
   pushRecentEmoji,
   type ChatEmoji,
-} from '@/features/chat/chatEmojis';
-import { EMOJI_CATALOG } from '@/features/chat/emojis';
+} from '@/modules/chat/chatEmojis';
+import { EMOJI_CATALOG } from '@/modules/chat/emojis';
 
 const RECENT_KEY = 'mu_chat_emoji_recent';
 const RECENT_TAB = '';

@@ -26,7 +26,7 @@ The account's character list, used by every character page: the shared `Characte
 
 ## Change it
 - a new look: add it to `CharacterListProps` and draw it in `index.tsx`.
-- move the packet handling into `src/features/character_select`: then drop `source`.
+- move the packet handling into `src/modules/character_select`: then drop `source`.
 
 ## Tests
 - `roster.test.ts`: selection, free slot, every status input for both prompts, row order.

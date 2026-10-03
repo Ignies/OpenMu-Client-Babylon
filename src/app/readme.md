@@ -1,11 +1,11 @@
 # app
 
 Boot, the root React component, the `Store`, the list of packet handlers and the map-change
-reset. This is the top of the graph: it wires features, controllers and versions together.
+reset. This is the top of the graph: it wires modules, controllers and versions together.
 
 ## Public API
 - `Store`, `UIState` (`store.ts`): the global mobx store (sockets, hero data, inventory, windows,
-  world). Imported by most features, ECS systems and windows.
+  world). Imported by most modules, ECS systems and windows.
 - `storeRef()` (`storeRef.ts`): a late-bound handle on `Store` for modules inside the store's own
   import cycle (`render/modelObject.ts`, `skills/visuals.ts`).
 - `consts.ts`: default connect-server / ws-proxy endpoints (`VITE_CS_HOST`, `VITE_WS_HOST`, ...)
@@ -25,7 +25,7 @@ reset. This is the top of the graph: it wires features, controllers and versions
   context menu and wheel outside scrollables, and handles `requestWarp`.
 - `App.tsx` picks the page from `Store.uiState`. Login and character pages come from the version
   (`loadVersionUi().pregame`), lazy loaded.
-- `logic.ts` imports every `features/<x>/net.ts`; the import order is the listener order per
+- `logic.ts` imports every `modules/<x>/net.ts`; the import order is the listener order per
   packet. It also routes the shared F3/0x40 server command (swirl, fanfare, fireworks, message
   box; `WSclient.cpp:7744`) and sends `Ping` every 5 s in the world.
 - `lifecycle.ts` lists what resets on a map change, in order:
@@ -45,13 +45,13 @@ downloaded assets. The module imports nothing from the app so `main.tsx` can loa
 version resolves.
 
 ## Depends on / used by
-- uses: every feature (`net.ts`, state), most controllers, `src/ecs`, `src/version`, `versions/`.
-- used by: features, ECS systems, `versions/shared/ui` windows (mostly `Store`). Controllers and
+- uses: every module (`net.ts`, state), most controllers, `src/ecs`, `src/version`, `versions/`.
+- used by: modules, ECS systems, `versions/shared/ui` windows (mostly `Store`). Controllers and
   content may not import it (`tools/checks/rules.ts`); the old `store.ts` / `storeRef.ts` imports
   are listed in `tools/checks/baselines/deps.json` and may only shrink.
 
 ## Change it
-- handle a new packet: add it to `src/features/<feature>/net.ts`; add a new feature's `net.ts`
+- handle a new packet: add it to `src/modules/<module>/net.ts`; add a new module's `net.ts`
   import to `logic.ts` (order matters per packet).
 - reset something on map change: give it a `reset()` and add it to `MAP_RESET` in `lifecycle.ts`.
 - start a new controller: list it in [../controllers/controllers.ts](../controllers/controllers.ts).

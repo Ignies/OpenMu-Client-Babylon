@@ -1,5 +1,5 @@
 import type { ISystemFactory } from '../world';
-import { updateMuHelperLoop } from '../../features/mu_helper/loop';
+import { updateMuHelperLoop } from '../../modules/mu_helper/loop';
 
 /**
  * MU Helper automation (`CMuHelper::WorkLoop`): steps the helper loop, which

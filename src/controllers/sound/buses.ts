@@ -1,4 +1,4 @@
-import { GameOptions } from '../../features/options/gameOptions';
+import { GameOptions } from '../../modules/options/gameOptions';
 
 /**
  * The mixer's categories: pure data over `GameOptions` (master, the music / effects

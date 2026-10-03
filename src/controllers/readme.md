@@ -39,15 +39,15 @@ spawn an effect, time a swing), never which skill, item or window does it. The f
 - `update` is not called from here: each controller's own ECS system steps it
   (`EffectSystem` -> `effects.update`, `AttackSystem` -> `combat.update`, ...).
 - `reset` is not called from here either: `app/lifecycle.ts` resets weather, lighting, effects,
-  combat, sound and maps (plus three features) on every map change, in its own order.
+  combat, sound and maps (plus three modules) on every map change, in its own order.
 - Content plugs in through registries, never through imports from the controller:
   `registerSkills` (`skills/index.ts`), `registerWindows` (`interface/windows.ts`), the hook slots
   in `combat/skillHooks.ts`.
 
 ## Depends on / used by
 - uses: `src/core`, data tables, each other.
-- used by: `app/`, `ecs/systems`, features, content in `versions/`.
-- A controller never imports a feature, `app/` or content. `bun run check` enforces it; old
+- used by: `app/`, `ecs/systems`, modules, content in `versions/`.
+- A controller never imports a module, `app/` or content. `bun run check` enforces it; old
   exceptions are in `tools/checks/baselines/deps.json` and may only shrink.
 
 ## Change it

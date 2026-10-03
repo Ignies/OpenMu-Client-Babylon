@@ -32,7 +32,7 @@ launcher_arrows.ts    arrow model and colour per bow or crossbow index
 ## Depends on / used by
 - uses: the items controller, `@/controllers/assets/mu/itemNameFile`, `@/controllers/fx/recipes`
 - used by: the Store, item grid / tooltip widgets, actors, drops, inventory, items, marketplace,
-  quest and gm features; the cash shop, marketplace audit and proxy tracker read `all.ts`
+  quest and gm modules; the cash shop, marketplace audit and proxy tracker read `all.ts`
 
 ## Change it
 - change an item: edit its file. Add one: add a file in its group folder.

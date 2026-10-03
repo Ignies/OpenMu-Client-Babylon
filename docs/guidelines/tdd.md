@@ -16,8 +16,8 @@ cleanup with the test still green.
 - **Pure rules first.** Split decisions (which clip, which sound, how much damage, which slot) into
   plain functions with no Babylon objects, and test those. `propBatchRules.ts` next to
   `propBatches.ts` is the pattern.
-- **Packets.** A feature's `net.ts` reacts to packets: build the packet bytes, emit them on the
-  event bus, assert the feature's state.
+- **Packets.** A module's `net.ts` reacts to packets: build the packet bytes, emit them on the
+  event bus, assert the module's state.
 - **Babylon code.** Use `NullEngine` and a `Scene` (see `versions/shared/skills/*.golden.test.ts`
   and `src/controllers/render/staticClips.test.ts`). Spy on a controller facade
   (`vi.spyOn(effects, 'spawn')`) to see what was asked for.

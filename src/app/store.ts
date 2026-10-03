@@ -59,9 +59,9 @@ import {
   connectServerAddress,
   ServerConfig,
   wsAddress,
-} from '../features/servers/serverConfig';
+} from '../modules/servers/serverConfig';
 import { NetStats } from '../controllers/net/roundTrip';
-import { ServerAccounts } from '../features/servers/serverAccounts';
+import { ServerAccounts } from '../modules/servers/serverAccounts';
 import { createSocket } from '../controllers/net/sockets/createSocket';
 import { ensureActiveVersion, gameVersion } from '../version';
 import {
@@ -75,14 +75,14 @@ import {
 import { Item, World } from '../ecs/world';
 import { EventBus } from '../core/eventBus';
 import { Scalar } from '../controllers/render/babylon/exports';
-import { InventoryConstants } from '../features/inventory/inventoryConstants';
-import { StatType } from '../features/hero/characterStats';
-import { findFreeSlot, type Footprint } from '../features/inventory/inventoryFit';
-import { jewelTargetError } from '../features/inventory/jewelUpgrade';
+import { InventoryConstants } from '../modules/inventory/inventoryConstants';
+import { StatType } from '../modules/hero/characterStats';
+import { findFreeSlot, type Footprint } from '../modules/inventory/inventoryFit';
+import { jewelTargetError } from '../modules/inventory/jewelUpgrade';
 import { ItemGroups } from '@versions/shared/objects/enum';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { prefetchItemIcons } from '../controllers/assets/itemIconPack';
-import { ItemSerializer } from '../features/items/itemSerializer';
+import { ItemSerializer } from '../modules/items/itemSerializer';
 import {
   isRepairBanned,
   isSellingBanned,
@@ -90,16 +90,16 @@ import {
   needsRepair,
   repairAllCost,
   repairCost,
-} from '../features/items/itemValue';
+} from '../modules/items/itemValue';
 import {
   calcMaxDurability,
   classOf,
   itemDef,
   itemStats,
   type HeroStats,
-} from '../features/items/itemStats';
-import { learnSkillError, learnableSkill } from '../features/skills/skillItems';
-import { isHotbarSkill } from '../features/skills/skillCasting';
+} from '../modules/items/itemStats';
+import { learnSkillError, learnableSkill } from '../modules/skills/skillItems';
+import { isHotbarSkill } from '../modules/skills/skillCasting';
 import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
 import {
   StorageKind,
@@ -108,19 +108,19 @@ import {
   storageColumns,
   storageRows,
   wireSlotOf,
-} from '../features/inventory/itemStorage';
+} from '../modules/inventory/itemStorage';
 import {
   HOTKEY_COUNT,
   ItemHotkey,
   UNBOUND_HOTKEY,
   canRegisterItemHotkey,
   findHotkeyItem,
-} from '../features/inventory/itemHotkeys';
+} from '../modules/inventory/itemHotkeys';
 import { spawnPlayer } from './logic';
 import { registerStore } from './storeRef';
 import { devVitalPercent } from '../core/devSeams';
-import { Social } from '../features/social/social';
-import { Economy } from '../features/economy/economy';
+import { Social } from '../modules/social/social';
+import { Economy } from '../modules/economy/economy';
 
 /**
  * How long the game server named by `ConnectionInfo` has to say `GameServerEntered`
@@ -689,7 +689,7 @@ export const Store = new (class _Store {
   /**
    * Where the game server we are on lives, kept after the connection is
    * established so a dropped socket can be dialled again without walking
-   * the connect server a second time (`features/session/sessionResume.ts`).
+   * the connect server a second time (`modules/session/sessionResume.ts`).
    */
   lastGameServer: { host: string; port: number; fallbackHost: string | null } | null = null;
 
@@ -2283,7 +2283,7 @@ export const Store = new (class _Store {
    * The grid behind a storage kind. The inventory is the hero's own array;
    * vault, trade, chaos machine and the personal shop belong to `Economy`.
    *
-   * `features/economy/economy.ts` imports this module back, so `Economy` may only be read
+   * `modules/economy/economy.ts` imports this module back, so `Economy` may only be read
    * from inside a method - by then both modules have finished evaluating.
    */
   itemsOfStorage(storage: StorageKind): (Item | null)[] {
@@ -2378,7 +2378,7 @@ export const Store = new (class _Store {
 
   /**
    * Move an item to a named square of the same grid: the drag's lift and
-   * drop in one call, for the auto-arrange run (`features/inventory/inventorySort.ts`).
+   * drop in one call, for the auto-arrange run (`modules/inventory/inventorySort.ts`).
    * Returns false when the move cannot be started.
    */
   moveItemToSquare(storage: StorageKind, fromSlot: number, toSlot: number): boolean {
@@ -2419,7 +2419,7 @@ export const Store = new (class _Store {
     item: Item
   ): void {
     // The mix tray's wire byte depends on the NPC that owns it: 3 for the
-    // goblin, 9 for the Chaos Card Master (features/economy/economy.ts `mixWireStorage`).
+    // goblin, 9 for the Chaos Card Master (modules/economy/economy.ts `mixWireStorage`).
     const wireStorage = (storage: StorageKind): number =>
       storage === StorageKind.ChaosMachine ? Economy.mixWireStorage : storage;
 

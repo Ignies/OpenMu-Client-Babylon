@@ -2,15 +2,15 @@ import './style.less';
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { t } from '@/i18n';
-import { Social } from '@/features/social/social';
-import { GM_SECTIONS, GmPanel, type GmSection } from '@/features/gm/gmPanel';
-import { worldView, type WorldView } from '@/features/gm/gmWorld';
-import { AdminFeed } from '@/features/gm/admin/feed';
+import { Social } from '@/modules/social/social';
+import { GM_SECTIONS, GmPanel, type GmSection } from '@/modules/gm/gmPanel';
+import { worldView, type WorldView } from '@/modules/gm/gmWorld';
+import { AdminFeed } from '@/modules/gm/admin/feed';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { uiClick } from '@/controllers/sound/sfx';
 import { MuWindows } from '@/controllers/interface/windowManager';
-import { ChatLineType } from '@/features/chat/chat';
-import { mapName } from '@/features/gm/gmMaps';
+import { ChatLineType } from '@/modules/chat/chat';
+import { mapName } from '@/modules/gm/gmMaps';
 import { MuFrame } from '@/controllers/interface/components/mu_frame';
 import { TabIcon } from './icons';
 import { LiveTab } from './tabs/live';
@@ -22,7 +22,7 @@ import { CharacterTab } from './tabs/character';
 import { ModerationTab } from './tabs/moderation';
 import { EventsTab } from './tabs/events';
 import { MacrosTab } from './tabs/macros';
-import { GmLibrary, type Favourite, type MacroVars } from '@/features/gm/admin/gmLibrary';
+import { GmLibrary, type Favourite, type MacroVars } from '@/modules/gm/admin/gmLibrary';
 import { ConsoleTab } from './tabs/console';
 
 /**
@@ -30,11 +30,11 @@ import { ConsoleTab } from './tabs/console';
  * window, a sidebar of tabs, and the server as the proxy's tracker sees it.
  *
  * Everything it sends is a `/line` a game master could type
- * (`features/gm/gmCommands.ts` -> `features/gm/gmPanel.ts` -> `Social.sendChat`). The panel
+ * (`modules/gm/gmCommands.ts` -> `modules/gm/gmPanel.ts` -> `Social.sendChat`). The panel
  * grants nothing; the server re-checks `CharacterStatus` on every command it
  * receives, so hiding this from a normal player is presentation, not security.
  * What it *shows* of other players comes from the proxy's stream
- * (`features/gm/admin/feed.ts`), which the proxy only opens for a socket whose character
+ * (`modules/gm/admin/feed.ts`), which the proxy only opens for a socket whose character
  * the server flagged as a game master.
  *
  * Drawn like the world select's card, in the Babylon site's design system

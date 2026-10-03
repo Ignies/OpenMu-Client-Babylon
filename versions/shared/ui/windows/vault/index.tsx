@@ -1,21 +1,21 @@
 import { MuWindows } from '@/controllers/interface/windowManager';
 import './style.less';
-import { masterLevel } from '@/features/skills/masterLevel';
+import { masterLevel } from '@/modules/skills/masterLevel';
 import { t } from '@/i18n';
 import { observer } from 'mobx-react-lite';
 import { Store } from '@/app/store';
-import { Economy, vaultOpenCost } from '@/features/economy/economy';
-import { StorageKind, isVaultBanned } from '@/features/inventory/itemStorage';
+import { Economy, vaultOpenCost } from '@/modules/economy/economy';
+import { StorageKind, isVaultBanned } from '@/modules/inventory/itemStorage';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuItemWindow } from '@/controllers/interface/components/mu_window';
 import { ItemGrid } from '@/controllers/interface/components/item_grid';
 import { ItemSearchBox, useItemSearch } from '@/controllers/interface/components/item_search';
-import { BulkMove } from '@/features/inventory/bulkMove';
-import { QuickItemActions } from '@/features/inventory/quickItemActions';
-import { isJewel, itemDef } from '@/features/items/itemStats';
+import { BulkMove } from '@/modules/inventory/bulkMove';
+import { QuickItemActions } from '@/modules/inventory/quickItemActions';
+import { isJewel, itemDef } from '@/modules/items/itemStats';
 
-import { goldColor } from '@/features/items/goldColor';
+import { goldColor } from '@/modules/items/goldColor';
 import {
   BUTTON_FRAMES,
   BUTTON_HEIGHT,

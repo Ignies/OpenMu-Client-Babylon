@@ -5,7 +5,7 @@ import { Store } from '@/app/store';
 
 import { onScreenPosition } from '@/controllers/interface/screenPositionBus';
 import type { Entity } from '@/ecs/world';
-import { guildMarkDataUrl, isEmptyGuildMark } from '@/features/social/guildMark';
+import { guildMarkDataUrl, isEmptyGuildMark } from '@/modules/social/guildMark';
 
 type MarkEntity = With<Entity, 'guild' | 'screenPosition'>;
 

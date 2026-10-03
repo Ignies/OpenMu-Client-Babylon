@@ -1,4 +1,4 @@
-import { BaseClass, getBaseClass } from '../../features/hero/characterStats';
+import { BaseClass, getBaseClass } from '../../modules/hero/characterStats';
 import { ENUM_WORLD, type CharacterClassNumber } from '../../core/types';
 import type { Item } from '../../ecs/world';
 import { REFERENCE_FPS } from '../anim/playSpeed';

@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import './skillVisuals';
 import { PlayerAction } from '@versions/shared/objects/enum';
 import { combat } from '@/controllers/combat';
-import { SKILL_EFFECTS } from '@/features/skills/recipes';
+import { SKILL_EFFECTS } from '@/modules/skills/recipes';
 
 vi.hoisted(() => {
   const g = globalThis as Record<string, unknown>;

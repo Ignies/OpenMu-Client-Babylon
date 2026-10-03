@@ -1,7 +1,7 @@
 // OpenMU accounts: the rules a login must meet and the one place outside OpenMU that writes `data."Account"`.
 import type { Sql } from 'postgres';
 import bcrypt from 'bcryptjs';
-import { isReservedName } from '../../src/features/servers/reservedNames';
+import { isReservedName } from '../../src/modules/servers/reservedNames';
 
 /** OpenMU's `AccountState` (DataModel/Entities/Account.cs). */
 export const AccountState = { Normal: 0, GameMaster: 2, Banned: 4 } as const;

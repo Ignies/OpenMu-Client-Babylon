@@ -8,14 +8,14 @@ import { useWindowStackEntry } from '@/controllers/interface/components/mu_windo
 import { playUiSound } from '@/controllers/sound/sfx';
 import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
 import { t } from '@/i18n';
-import { skills, type MasterTreeEntry } from '@/features/skills';
+import { skills, type MasterTreeEntry } from '@/modules/skills';
 import {
   formatMasterText,
   MASTER_ICON_HEIGHT,
   MASTER_ICON_WIDTH,
   MASTER_TEXT,
   masterSkillIconCell,
-} from '@/features/skills/masterTree';
+} from '@/modules/skills/masterTree';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { useUiStageScale } from '@/controllers/interface/components/ui_stage';

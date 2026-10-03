@@ -6,7 +6,7 @@ MU 0.97d, the second version the client carries. OpenMU has no 0.97d data initia
 ## Public API
 - `gameVersion` (`index.ts`): id `v097d`, label `MU 0.97d`, list tag `V097D`, client version
   bytes `09704` (stored mangled), serial, pre-Season 6 Xor32 key, `variantRank`, data paths and
-  `features` (no master skills, sockets, ancient, harmony, Dark Lord, Summoner, Rage Fighter,
+  `modules` (no master skills, sockets, ancient, harmony, Dark Lord, Summoner, Rage Fighter,
   MU Helper, item hotkeys, cash shop or Season 6 quest dialogs).
 - `packets` (`packets/index.ts`): the shared generated set plus Season 6's three hand-written
   packets. Nothing extra to generate.

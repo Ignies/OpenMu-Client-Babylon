@@ -71,14 +71,14 @@ The skill table's target field is not enough (Soul Barrier reads `Explicit` but 
 yourself; Swell Life reads `ImplicitParty` but always goes as `HeroKey`). The original's
 `SendRequestMagic` key decides: the hero for self-only buffs, the selected party member or else
 the hero for party buffs and heals, the selected object for everything else. Read by
-`skillCastSystem` and `features/skills/skillCasting.ts` (`isSelfCastable`).
+`skillCastSystem` and `modules/skills/skillCasting.ts` (`isSelfCastable`).
 
 ### Notes: skillClips.ts
 The original's `UseSkill*` switches, `Attack*` branches and `ReceiveMagic` ladders become one
 lookup in `SKILL_CLIPS`, plus what a table cannot hold: the mount (never in a safe zone) and a
 skill's own pick (`ClipPick`: Fire Breath by the map, the Rage Fighter party buffs by a coin toss;
 `PoseClip`: Plasma Storm by the hands, Slash's odd swing). Read through
-`features/skills/skillCasting.ts` `chooseSkillAction`, used for the hero and remote casters.
+`modules/skills/skillCasting.ts` `chooseSkillAction`, used for the hero and remote casters.
 
 ### Notes: skillMovement.ts
 Stop: every `UseSkill*` starts with `LetHeroStop()`, so a cast is never taken mid-stride. Step in:
@@ -89,10 +89,10 @@ the server sends the new square.
 
 ## Depends on / used by
 - uses: `anim/playSpeed.ts`, `interface/nameTags.ts`, skill and packet tables in
-  `versions/shared`, `features/pets` and `features/skills/skillAliases` (baselined rule
+  `versions/shared`, `modules/pets` and `modules/skills/skillAliases` (baselined rule
   exceptions in `tools/checks/baselines/deps.json`).
 - used by: `ecs/systems` (attack, skill cast, death, pet), `controllers/skills`,
-  `features/combat/net.ts`, `features/skills/skillCasting.ts`, `app/lifecycle.ts`, skill files.
+  `modules/combat/net.ts`, `modules/skills/skillCasting.ts`, `app/lifecycle.ts`, skill files.
 
 ## Change it
 - add a combat entry: copy `_template.ts` to `<name>.ts`. Keep its three parts in order: tuning

@@ -13,7 +13,7 @@ import {
   characterCameraTarget,
   characterSelectView,
   characterSlotPosition,
-} from '../../features/character_select/characterSelect';
+} from '../../modules/character_select/characterSelect';
 import { prefetchWorldTerrain } from '../../controllers/assets/mu/prefetchWorld';
 import { warmWorldObjects } from '../../controllers/assets/mu/warmWorld';
 import { LOGIN_SCENE_ABSENT_MODELS } from '@versions/shared/maps/loginscene/spec';

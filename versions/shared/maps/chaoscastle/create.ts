@@ -26,7 +26,7 @@ import {
  *    (SceneManager.cpp:346) sets exactly that.
  *  - `aChaos` / `iChaosCastle` beds: `sound.ts`, gated on the match state.
  *  - The pillars' thunder (`eElec1/2`): `thunder.ts`, driven from
- *    `features/events/chaosCastle.ts` as the original drives it from CSChaosCastle.cpp.
+ *    `modules/events/chaosCastle.ts` as the original drives it from CSChaosCastle.cpp.
  *  - Auto-attack off, `c->Run = 40` forced, no wings/pets, the CC 70-72
  *    monster skins from `Npc/`: all in the events / locomotion / character
  *    lanes, none of it map data.

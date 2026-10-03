@@ -19,28 +19,28 @@ import {
   isTeleportSkill,
   rotationByte256,
   TELEPORT,
-} from '../../features/skills/skillCasting';
+} from '../../modules/skills/skillCasting';
 import {
   inSquareRange,
   pickAllySquare,
   teleportGate,
   teleportRefusal,
   TELEPORT_PREVENTING_EFFECTS,
-} from '../../features/warp/teleportRules';
+} from '../../modules/warp/teleportRules';
 import { beginTeleport, endTeleport, teleportBusy } from './teleportSystem';
-import { Social } from '../../features/social/social';
+import { Social } from '../../modules/social/social';
 import {
   isAttackableEntity,
   isAttackablePlayer,
   isOtherPlayer,
 } from './attackSystem';
 import { isFemaleClass } from '../../controllers/actors/mapPlayerNetClassToModelClass';
-import { getBaseClass } from '../../features/hero/characterStats';
+import { getBaseClass } from '../../modules/hero/characterStats';
 import { isWingItem } from '../../controllers/actors/wings';
 import type { AttackPose } from '../../controllers/actors/weaponClass';
-import { mountKind } from '../../features/pets/pets';
+import { mountKind } from '../../modules/pets/pets';
 import { clipCastSound, heroCastSound, playCombat, playSkill } from '../../controllers/sound/combat';
-import { skills } from '../../features/skills';
+import { skills } from '../../modules/skills';
 import { combat } from '../../controllers/combat';
 
 import { CONSECUTIVE_ATTACK_KEY } from '../../controllers/combat/skillMovement';

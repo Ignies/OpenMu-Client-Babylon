@@ -1,7 +1,7 @@
 import { EventBus } from '../../core/eventBus';
 import type { Entity, ISystemFactory, World } from '../world';
 import { isNpcOrTrapType } from './attackSystem';
-import { Economy } from '../../features/economy/economy';
+import { Economy } from '../../modules/economy/economy';
 import {
   bubbleLifetime,
   CHAT_LIFETIME,

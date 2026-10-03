@@ -3,11 +3,11 @@
  * as one lookup over `SKILL_CLIPS`, plus mount and the skills' own picks. See controllers/combat/readme.md.
  */
 import { PlayerAction } from '@versions/shared/objects/enum';
-import type { MountKind } from '../../features/pets/pets';
+import type { MountKind } from '../../modules/pets/pets';
 import type { ENUM_WORLD } from '../../core/types';
 import type { CombatLayer } from './layer';
 import type { Hands } from './weaponRange';
-import { masterBase } from '../../features/skills/skillAliases';
+import { masterBase } from '../../modules/skills/skillAliases';
 import { MAGIC_CLIPS, SKILL_CLIPS } from './recipes';
 
 // ---- 1. tuning -------------------------------------------------------------

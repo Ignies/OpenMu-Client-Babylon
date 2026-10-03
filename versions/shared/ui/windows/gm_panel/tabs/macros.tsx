@@ -1,16 +1,16 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { t, type TextKey } from '@/i18n';
-import { GmPanel } from '@/features/gm/gmPanel';
-import type { WorldView } from '@/features/gm/gmWorld';
-import { GmLibrary, MAX_DELAY_MS, type Macro, type MacroStep } from '@/features/gm/admin/gmLibrary';
+import { GmPanel } from '@/modules/gm/gmPanel';
+import type { WorldView } from '@/modules/gm/gmWorld';
+import { GmLibrary, MAX_DELAY_MS, type Macro, type MacroStep } from '@/modules/gm/admin/gmLibrary';
 import { uiClick } from '@/controllers/sound/sfx';
 
 /**
  * Macros for events: lines sent one after another, each with its own wait
  * after it (none sends the next as soon as chat allows). Placeholders are
  * filled in where it runs - here, where the game master stands; from the
- * map's menu, at the tile. Kept in this browser (`features/gm/admin/gmLibrary.ts`).
+ * map's menu, at the tile. Kept in this browser (`modules/gm/admin/gmLibrary.ts`).
  */
 
 /** Steps offered as a start, by the command they send. */

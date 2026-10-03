@@ -17,9 +17,9 @@ run locally:
 ## Structure checks (`tools/checks/index.ts`)
 
 - **Dependency direction** (`tools/checks/rules.ts`): core imports nothing of the game;
-  controllers never import features, the app or content; features never import windows; windows
+  controllers never import modules, the app or content; modules never import windows; windows
   stop reaching into the Store; versions do not reach into the app.
-- **Readmes:** every controller, feature, content and version folder has a `readme.md`.
+- **Readmes:** every controller, module, content and version folder has a `readme.md`.
 - **Doc names:** lowercase `snake_case` (README.md, AGENTS.md, CLAUDE.md excepted).
 - **No em-dashes** in code, comments or docs (data files excepted).
 - **Controllers through their door:** code outside `src/controllers/<name>/` imports that controller's

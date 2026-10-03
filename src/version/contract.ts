@@ -112,7 +112,7 @@ export interface GameVersion {
   readonly label: string;
   /**
    * The token a published server line puts first to say which client it wants
-   * (`[S6EP3:Name:…](…)`) - see `features/servers/serverList.ts`. A field rather than
+   * (`[S6EP3:Name:…](…)`) - see `modules/servers/serverList.ts`. A field rather than
    * something derived from `openMu`, because a version that is not a season
    * and an episode still has to name itself in one short word.
    *

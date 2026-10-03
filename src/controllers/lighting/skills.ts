@@ -6,7 +6,7 @@ import { MODEL } from '../fx/recipes';
 import type { LightingLayer } from './layer';
 import { LightSource, type LightRecipe } from './lightSource';
 import { tierIndex } from './lightingQuality';
-import { masterBase } from '../../features/skills/skillAliases';
+import { masterBase } from '../../modules/skills/skillAliases';
 import { effectLight } from './recipes';
 
 /**

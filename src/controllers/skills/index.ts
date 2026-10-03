@@ -3,7 +3,7 @@ import type { Sounds } from '../sound/recipes';
 import { combat } from '../combat';
 import { SKILL_LIGHTS } from '../lighting/skills';
 import { LANDING_SOUNDS, SILENT_HERO_CASTS, SKILL_CLIP_SOUNDS, SKILL_SOUNDS } from '../sound/combat';
-import { MASTER_BASES, SKILL_DELAY_MS, SKILL_EFFECTS } from '@/features/skills/recipes';
+import { MASTER_BASES, SKILL_DELAY_MS, SKILL_EFFECTS } from '@/modules/skills/recipes';
 import type { SkillDef } from './define';
 import { BUFF_ARRIVALS, BUFF_HITS, BUFF_VISUALS, LAUNCHER_ARROWS, LOOK_ALIASES, SKILL_VISUALS, type BuffLook } from './visuals';
 

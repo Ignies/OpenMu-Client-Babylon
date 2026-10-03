@@ -21,7 +21,7 @@ never which skill or item asks for it.
 - `listener.ts`: `playSfx(key, at?, { gain, bus, channels })`, the one positioned one-shot path.
 - `buses.ts`: `SoundBus`, `BUS_VOLUME_OPTION` (used by the Options window), `busGain`, `masterGain`.
 - `packetSounds.ts`: rows and selectors for packet one-shots (traps, spawns, the cherry-blossom
-  swirl, the Nightmare teleport, santa emotes), played by `app/logic.ts` and feature nets.
+  swirl, the Nightmare teleport, santa emotes), played by `app/logic.ts` and module nets.
 - `mapMonsters.ts`, `monsterEffects.ts`: per-map monster cues and `MonsterAttackEffects`, stepped
   by `combatSfxSystem`.
 - `objectLoops.ts`: plays the map's object loops (`MapObjectLoop` rows from each map's `sound.ts`).
@@ -57,7 +57,7 @@ never which skill or item asks for it.
   rule are listed in `tools/checks/baselines/deps.json` (options, events, hero, items, drops,
   band, skill aliases, `app/store`, `app/consts`).
 - used by: `controllers.ts`, `app/boot.tsx`, `app/logic.ts`, `app/lifecycle.ts`, ECS systems
-  (sound, combat sfx, skill cast, death, teleport, pets, band, boids, doors), most feature nets,
+  (sound, combat sfx, skill cast, death, teleport, pets, band, boids, doors), most module nets,
   `skills/index.ts` (`SKILL_SOUNDS`), fx (`playSfx`), interface components, skill files, map
   objects and most windows and pages in `versions/shared/ui/`.
 

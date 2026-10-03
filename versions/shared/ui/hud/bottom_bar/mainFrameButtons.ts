@@ -1,7 +1,7 @@
 import { MuWindows } from '@/controllers/interface/windowManager';
 import type { TextKey } from '@/i18n';
-import { Messenger } from '@/features/friends/messenger';
-import { toggleMarketplace } from '@/features/marketplace/gameBridge';
+import { Messenger } from '@/modules/friends/messenger';
+import { toggleMarketplace } from '@/modules/marketplace/gameBridge';
 
 /**
  * The five buttons on the right of the main frame (`newui_menu_Bt01..05`), in

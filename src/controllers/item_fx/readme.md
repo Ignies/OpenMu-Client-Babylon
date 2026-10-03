@@ -78,11 +78,11 @@ original client's item passes, the item glow tiers and the weapon swing trails.
 - uses: `render` (Babylon exports, `pbrMaps`, `materialQuality`, `renderingStyle`,
   `frameSnapshot`), `lighting` (light model, tiers, key rig, clouds, tint, point light pool),
   `weather/snowCaps`, `assets/mu/sprites`, `actors` (hand bones, weapon class), `fx` (types),
-  `features/options/gameOptions`, `version`.
+  `modules/options/gameOptions`, `version`.
 - used by: `assets/modelLoader.ts` (materials), `render/propBatches.ts` (`packBodyLight`),
   `render/scenes` (sceneLook, materialDebug), `actors`, `fx/itemAura.ts`, `fx/itemCrackle.ts`,
   `lighting/items.ts`, the appearance, item glow, skill cast and weapon trail ECS systems,
-  `features/pets`, the options window.
+  `modules/pets`, the options window.
 
 ## Change it
 - change a legacy colour: the tables in `itemLegacyEffects.ts`.

@@ -8,9 +8,9 @@ import { useEffect, useRef, useState } from 'react';
 import { EventBus } from '@/core/eventBus';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { Store } from '@/app/store';
-import { GameOptions } from '@/features/options/gameOptions';
-import { StatAllocation } from '@/features/hero/statAllocation';
-import { clampAmount, needsConfirm } from '@/features/hero/statAmounts';
+import { GameOptions } from '@/modules/options/gameOptions';
+import { StatAllocation } from '@/modules/hero/statAllocation';
+import { clampAmount, needsConfirm } from '@/modules/hero/statAmounts';
 import { MsgWinCode } from '@/controllers/interface/msgWin';
 import { devQueryNumber } from '@/core/devSeams';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
@@ -23,7 +23,7 @@ import {
   MuTableFrame,
   MuTableRule,
 } from '@/controllers/interface/components/mu_window';
-import { InventoryConstants } from '@/features/inventory/inventoryConstants';
+import { InventoryConstants } from '@/modules/inventory/inventoryConstants';
 import { pkTextColour, PVP_NEUTRAL } from '@/controllers/interface/nameTags';
 import {
   BaseClass,
@@ -32,7 +32,7 @@ import {
   getClassName,
   getStatName,
   StatType,
-} from '@/features/hero/characterStats';
+} from '@/modules/hero/characterStats';
 import {
   AMOUNT_DY,
   AMOUNT_HEIGHT,

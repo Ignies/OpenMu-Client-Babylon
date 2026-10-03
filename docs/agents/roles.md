@@ -5,13 +5,13 @@ edit the same file at the same time.
 
 ## Porter
 Brings a behaviour over from the original client.
-- Owns: the content or feature folder of the thing being ported.
+- Owns: the content or module folder of the thing being ported.
 - Reads the original source first; ports constants as they are; cites `File.cpp:line`.
 - Writes the test from the original's behaviour (numbers, order, timing), then the code.
 
 ## Builder
 Builds or changes one module.
-- Owns: exactly one folder (a skill, a window, a feature, a controller implementation).
+- Owns: exactly one folder (a skill, a window, a module, a controller implementation).
 - Never edits another module's folder. Needs a change in a shared or core file: asks the integrator.
 - Leaves the folder's `readme.md` and tests matching the code.
 

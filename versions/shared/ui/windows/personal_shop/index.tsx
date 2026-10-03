@@ -4,11 +4,11 @@ import { t } from '@/i18n';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useState } from 'react';
 import { Store } from '@/app/store';
-import { Economy, MAX_SHOP_TITLE } from '@/features/economy/economy';
+import { Economy, MAX_SHOP_TITLE } from '@/modules/economy/economy';
 import {
   StorageKind,
   isPersonalShopBanned,
-} from '@/features/inventory/itemStorage';
+} from '@/modules/inventory/itemStorage';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuItemWindow } from '@/controllers/interface/components/mu_window';

@@ -13,7 +13,7 @@
  */
 import { observer } from 'mobx-react-lite';
 import { t } from '@/i18n';
-import { GameOptions, uiScaleFactor } from '@/features/options/gameOptions';
+import { GameOptions, uiScaleFactor } from '@/modules/options/gameOptions';
 import { devQueryNumber } from '@/core/devSeams';
 import { uiClick } from '@/controllers/sound/sfx';
 import { MuText } from '@/controllers/interface/components/mu_text';
@@ -23,10 +23,10 @@ import {
   objectiveProgress,
   objectiveText,
   type QuestObjective,
-} from '@/features/quests/objectives';
-import { activeQuests, questProgressOf, questSubject } from '@/features/quests/questLog';
-import { legacyQuestObjectives, legacyQuestsInProgress } from '@/features/quests/legacyQuests';
-import { questDefinition } from '@/features/quests/questData';
+} from '@/modules/quests/objectives';
+import { activeQuests, questProgressOf, questSubject } from '@/modules/quests/questLog';
+import { legacyQuestObjectives, legacyQuestsInProgress } from '@/modules/quests/legacyQuests';
+import { questDefinition } from '@/modules/quests/questData';
 import { COLOR } from './layout';
 import { toggleTrackerFold, trackerFolded } from './trackerCollapse';
 

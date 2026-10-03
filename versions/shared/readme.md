@@ -20,14 +20,14 @@ Each subfolder has its own readme:
 | `packets/` | generated packet codecs (`bun run generate`) |
 
 ## How it works
-- Content imports controllers (`@/controllers/*`), core and, where it must, features. A
+- Content imports controllers (`@/controllers/*`), core and, where it must, modules. A
   controller exposes a registry or a hook slot that content fills (`registerSkills`,
   `registerWindows`, `MAP_LAYERS`).
 - A version takes what it needs from here and overrides in `versions/<id>/` (same window `id`
   replaces the shared one).
 
 ## Depends on / used by
-- uses: `src/controllers`, `src/core`, `src/features`, `src/ecs`
+- uses: `src/controllers`, `src/core`, `src/modules`, `src/ecs`
 - used by: `versions/season6`, `versions/v097d`, and many `src/` modules through `@versions/shared/*`
 
 ## Change it

@@ -7,8 +7,8 @@ import {
   kanturuHud,
   kanturuResult,
   refreshKanturu,
-} from '@/features/events/kanturu';
-import { EVENT_TEXT, formatText } from '@/features/events/recipes';
+} from '@/modules/events/kanturu';
+import { EVENT_TEXT, formatText } from '@/modules/events/recipes';
 import { MsgBoxFrame } from '@/controllers/interface/components/msg_box_frame';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuNumber } from '@/controllers/interface/components/mu_number';

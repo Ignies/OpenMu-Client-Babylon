@@ -277,7 +277,7 @@ export type ItemGridProps = {
   onPlace?: (square: number) => void;
   /** Right click on an occupied square. */
   onUse?: (square: number, item: Item) => void;
-  /** Ctrl + left click on an occupied square (`features/inventory/quickItemActions.ts`). */
+  /** Ctrl + left click on an occupied square (`modules/inventory/quickItemActions.ts`). */
   onQuickAction?: (square: number, item: Item) => void;
   tooltipContext?: TooltipContext;
   /** Personal-shop asking price shown in the tooltip and under the icon. */

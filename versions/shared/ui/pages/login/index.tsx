@@ -6,7 +6,7 @@ import './style.less';
 import { observer } from 'mobx-react-lite';
 import { Store } from '@/app/store';
 import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH } from '@/app/consts';
-import { registerApiUrl, registerUrl } from '@/features/servers/serverServices';
+import { registerApiUrl, registerUrl } from '@/modules/servers/serverServices';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuText } from '@/controllers/interface/components/mu_text';
 import { MuLogo } from '@/controllers/interface/components/mu_logo';

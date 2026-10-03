@@ -13,7 +13,7 @@ import { TERRAIN_INDEX } from './utils';
 import { registerTerrainMaterial } from '../render/scenes/shadows';
 import { CLOUD_UNIFORMS } from '../lighting/clouds';
 import { ENUM_WORLD } from '../../core/types';
-import { GameOptions } from '../../features/options/gameOptions';
+import { GameOptions } from '../../modules/options/gameOptions';
 import { tierIndex } from '../lighting/lightingQuality';
 import { grassInkStart } from '../render/renderingStyle';
 import { GRASS_CARD_SLOTS, type GrassCards } from './terrainGrassCards';

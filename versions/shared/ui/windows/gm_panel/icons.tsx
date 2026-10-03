@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite';
-import type { GmSection } from '@/features/gm/gmPanel';
+import type { GmSection } from '@/modules/gm/gmPanel';
 
 /**
  * One line icon per tab, drawn inline so the sidebar needs no sprite and

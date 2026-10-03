@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite';
-import { SessionStats } from '@/features/session/sessionStats';
+import { SessionStats } from '@/modules/session/sessionStats';
 import {
   formatExpPercent,
   formatExpProgress,

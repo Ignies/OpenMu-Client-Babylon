@@ -2,10 +2,10 @@ import './style.less';
 import { useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import type { Item } from '@/ecs/world';
-import { GameOptions } from '@/features/options/gameOptions';
-import { emojiSegments, type ChatEmoji } from '@/features/chat/chatEmojis';
-import { scanItemLinks } from '@/features/chat/chatItemLinks';
-import { EMOJI_CATALOG } from '@/features/chat/emojis';
+import { GameOptions } from '@/modules/options/gameOptions';
+import { emojiSegments, type ChatEmoji } from '@/modules/chat/chatEmojis';
+import { scanItemLinks } from '@/modules/chat/chatItemLinks';
+import { EMOJI_CATALOG } from '@/modules/chat/emojis';
 import { ChatItemLink } from '../chat_item_link';
 
 type Piece = string | ChatEmoji | { link: Item };
@@ -28,8 +28,8 @@ function chatPieces(text: string, emojis: boolean): Piece[] {
 
 /**
  * A chat line with its emoji codes drawn as their pictures
- * (features/chat/chatEmojis.ts) and its item links as the items' names
- * (features/chat/chatItemLinks.ts). A line with neither is the plain text.
+ * (modules/chat/chatEmojis.ts) and its item links as the items' names
+ * (modules/chat/chatItemLinks.ts). A line with neither is the plain text.
  */
 export const EmojiText = observer(
   ({

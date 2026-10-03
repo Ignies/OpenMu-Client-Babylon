@@ -1,7 +1,7 @@
 import { Store } from '@/app/store';
-import { Social } from '@/features/social/social';
+import { Social } from '@/modules/social/social';
 import { ItemLinkHover } from '@/controllers/interface/itemLinkHover';
-import { itemLinkLabel, itemLinkToken } from '@/features/chat/chatItemLinks';
+import { itemLinkLabel, itemLinkToken } from '@/modules/chat/chatItemLinks';
 
 /**
  * Alt+click on any item whose tooltip is up links it into chat

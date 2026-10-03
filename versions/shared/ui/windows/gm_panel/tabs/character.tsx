@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react-lite';
 import { t, type TextKey } from '@/i18n';
-import { GmPanel } from '@/features/gm/gmPanel';
-import { gmCommand } from '@/features/gm/gmCommands';
+import { GmPanel } from '@/modules/gm/gmPanel';
+import { gmCommand } from '@/modules/gm/gmCommands';
 import { CommandCard, CommandFields, RunButton } from '../commandForm';
 
 /** A read and a write of the same value, side by side. */

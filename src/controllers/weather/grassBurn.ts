@@ -7,7 +7,7 @@ import {
   type Scene,
 } from '../render/babylon/exports';
 import type { ThinEngine } from '@babylonjs/core/Engines/thinEngine';
-import { GameOptions } from '../../features/options/gameOptions';
+import { GameOptions } from '../../modules/options/gameOptions';
 import { devQuery } from '../../core/devSeams';
 import { effects } from '../fx';
 import { FIRE_SPARKS } from '../fx/recipes';

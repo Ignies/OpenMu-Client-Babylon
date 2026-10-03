@@ -14,15 +14,15 @@ themselves are content in `versions/shared/skills/` (see [docs/content.md](../..
   `atCaster`, `scatter`, `ringOf`, `after`, `repeat`, `offset`, building blocks (`fireHit`,
   `arcHit`, `steelHit`, `explosion`, `scorch`, `burn`, `magicGround`, ...), travel (`bolt`, `arrow`),
   `fanArrows`, `onCurseLanding`, units (`ticks`, `cm`, `perTick`, `TICK`).
-- Dispatch, used by features and ECS systems through `versions/shared/skills/skillVisuals.ts`:
+- Dispatch, used by modules and ECS systems through `versions/shared/skills/skillVisuals.ts`:
   `playTargetedSkillVisual`, `playAreaSkillVisual`, `playBowShotVisual`, `setBuffVisual`,
   `clearBuffVisuals`, `playBuffHits`, `skillVisualFor`, `baseSkill`, `fallbackFor`.
 
 ## How it works
 - `registerSkills` writes `visual` into `SKILL_VISUALS`, `lookAliases` / `masterAliases` into
-  `LOOK_ALIASES` (and `MASTER_BASES`, `features/skills/skillAliases.ts`), `light` into
+  `LOOK_ALIASES` (and `MASTER_BASES`, `modules/skills/skillAliases.ts`), `light` into
   `lighting/skills.ts`, `sound` / `clipSound` / `soundOnLanding` / `silentHeroCast` into
-  `sound/combat.ts`, `delayMs` and `effect` into `features/skills/recipes.ts`, `buffs` /
+  `sound/combat.ts`, `delayMs` and `effect` into `modules/skills/recipes.ts`, `buffs` /
   `buffArrivals` / `buffHits` into `BUFF_VISUALS` / `BUFF_ARRIVALS` / `BUFF_HITS`, and hands
   the combat fields (clip rules, `target`, `stepIn`, `noFlinch`, `holdsFacing`, `quietOn`,
   `othersSee`, `explicitHits`, `kill`, `combat.layer` / `combat.hooks`) to
@@ -54,11 +54,11 @@ themselves are content in `versions/shared/skills/` (see [docs/content.md](../..
 ## Depends on / used by
 - uses: fx (`effects.spawn`), lighting, combat, sound and weather (`scorch`, `burn`) controllers,
   `versions/shared/skills/skillsDatabase`. Old exceptions to the dependency rule (listed in
-  `tools/checks/baselines/deps.json`): `features/skills/recipes.ts`, `features/skills/skillAliases.ts`,
+  `tools/checks/baselines/deps.json`): `modules/skills/recipes.ts`, `modules/skills/skillAliases.ts`,
   `app/storeRef.ts` (dev hook only).
 - used by: every skill file in `versions/shared/skills/`, which registers them in
   `versions/shared/skills/index.ts`; `versions/shared/skills/skillVisuals.ts` re-exports the
-  dispatch for `features/combat`, `features/skills`, `features/_shared/net_helpers.ts` and the
+  dispatch for `modules/combat`, `modules/skills`, `modules/_shared/net_helpers.ts` and the
   attack and teleport ECS systems.
 
 ## Change it

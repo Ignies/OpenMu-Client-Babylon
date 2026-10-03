@@ -9,19 +9,19 @@ import {
 import { TWFlags } from '../../controllers/terrain/consts';
 import { isFlagInBinaryMask } from '../../controllers/assets/download';
 import { chooseAttackAction } from '../../controllers/actors/weaponClass';
-import { getBaseClass } from '../../features/hero/characterStats';
+import { getBaseClass } from '../../modules/hero/characterStats';
 import { isWingItem } from '../../controllers/actors/wings';
-import { mountKind } from '../../features/pets/pets';
+import { mountKind } from '../../modules/pets/pets';
 import { playBowShotVisual } from '@versions/shared/skills/skillVisuals';
 import { combat } from '../../controllers/combat';
 import { MOUSE_UPDATE_SECONDS_MAX } from '../../controllers/combat/inputGate';
 import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
 import { truncatePathWithinRange } from '../../controllers/actors/approachPath';
 import { isHostilePlayer } from '../../controllers/combat/playerTarget';
-import { duelEnemyId } from '../../features/events/duel';
+import { duelEnemyId } from '../../modules/events/duel';
 import { ammoReload, type Hands } from '../../controllers/combat/weaponRange';
-import { InventoryConstants } from '../../features/inventory/inventoryConstants';
-import { StorageKind } from '../../features/inventory/itemStorage';
+import { InventoryConstants } from '../../modules/inventory/inventoryConstants';
+import { StorageKind } from '../../modules/inventory/itemStorage';
 import { t } from '../../i18n';
 
 /**

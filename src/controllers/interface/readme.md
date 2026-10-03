@@ -69,10 +69,10 @@ windows themselves are content in `versions/shared/ui/` (see
 
 ## Depends on / used by
 - uses: `app/store`, `core` (event bus, storage), `assets` (sprites, item icon pack), `i18n`,
-  `version`, many features (items, skills, options, inventory). The feature imports are old
+  `version`, many modules (items, skills, options, inventory). The module imports are old
   exceptions listed in `tools/checks/baselines/deps.json`.
 - used by: `versions/shared/ui` (every window), `versions/<id>/ui`, `app` (boot, App, store),
-  ECS systems (name tags, screen positions, input), several features, `loading/classic`.
+  ECS systems (name tags, screen positions, input), several modules, `loading/classic`.
 
 ## Change it
 - add a window or HUD element: add `versions/shared/ui/{windows,hud}/<name>/window.ts` with

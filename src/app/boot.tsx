@@ -6,11 +6,11 @@ import './logic';
 // Content model classes register here, at boot, where no controller can reach (controllers import the Store, which imports logic.ts).
 import '@versions/shared/monsters/models';
 import { Store, UIState } from './store';
-import { GameOptions } from '../features/options/gameOptions';
-import { Social } from '../features/social/social';
-import { Commands } from '../features/chat/commands';
-import { GmPanel } from '../features/gm/gmPanel';
-import { Economy } from '../features/economy/economy';
+import { GameOptions } from '../modules/options/gameOptions';
+import { Social } from '../modules/social/social';
+import { Commands } from '../modules/chat/commands';
+import { GmPanel } from '../modules/gm/gmPanel';
+import { Economy } from '../modules/economy/economy';
 import { weather } from '../controllers/weather';
 import { sound } from '../controllers/sound';
 import { Engine, SceneLoader } from '../controllers/render/babylon/exports';
@@ -32,7 +32,7 @@ import { EventBus } from '../core/eventBus';
 import { installLoginMusic } from '../controllers/sound/loginMusic';
 import { setKeyProfile } from '../controllers/interface/keyBindings';
 import { installBrowserHotkeyGuard } from '../controllers/interface/browserHotkeys';
-import { SessionResume } from '../features/session/sessionResume';
+import { SessionResume } from '../modules/session/sessionResume';
 import { reaction } from 'mobx';
 import { watchStateWarnings } from '../controllers/interface/stateWarnings';
 import { watchPageTitle } from '../controllers/interface/pageTitle';
@@ -42,7 +42,7 @@ import {
 } from '../controllers/assets/mu/preloadSprites';
 import { installPerfOverlay, recordFrame } from '../controllers/render/perfOverlay';
 import { csmCacheStats } from '../controllers/render/scenes/shadows';
-import { refreshServerList } from '../features/servers/serverList';
+import { refreshServerList } from '../modules/servers/serverList';
 import { ensureCacheWorker } from '../controllers/assets/assetDownload';
 import { sceneCovered } from '../controllers/render/sceneCover';
 
@@ -319,7 +319,7 @@ preloadPregameSprites()
   .finally(() => Store.setSpritesLoading(false))
   .then(() => preloadWorldSprites());
 
-// The published server list (`features/servers/serverList.ts`), once per launch. Nothing
+// The published server list (`modules/servers/serverList.ts`), once per launch. Nothing
 // waits on it: it fills the picker when it lands, and the saved servers are
 // what the client uses until then - or instead, if it never lands.
 refreshServerList();

@@ -14,7 +14,7 @@ import {
   petSpec,
   type PetFollow,
   type PetSpec,
-} from '../../features/pets/pets';
+} from '../../modules/pets/pets';
 import { createAngleDeg, turnAngle } from '../../core/turnAngle';
 import { inChaosCastle } from '../../controllers/actors/locomotion';
 import { effects } from '../../controllers/fx';

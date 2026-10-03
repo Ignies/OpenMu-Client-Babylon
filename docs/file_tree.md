@@ -23,7 +23,7 @@ docker/            local OpenMU stack
 ## src/ - the engine
 
 ```
-app/               boot (main.tsx, boot.tsx), App.tsx, the Store, logic.ts (feature nets in order),
+app/               boot (main.tsx, boot.tsx), App.tsx, the Store, logic.ts (module nets in order),
                    lifecycle.ts (what resets on map change)
 core/              types, math, rand, queue, event bus, local storage, pathfinding
 ecs/               the miniplex world and its per-frame systems
@@ -47,11 +47,11 @@ controllers/       generic services; controllers.ts starts them, controller.ts i
   sound/           buses, music, combat sounds, sound manager
   terrain/         terrain loading, grass, water, masks, minimap data
   weather/         rain and snow
-features/          gameplay; each has net.ts (packets in) and its state and actions
+modules/           gameplay modules; each has net.ts (packets in) and its state and actions
   band chaos_mix character_select chat combat drops economy events friends gm guild guild_war
   hero inventory items marketplace mu_helper npc_shop options party personal_shop pets quests
   scope (objects in view) servers session skills social trade vault warp world (weather, fireworks)
-  _shared/         helpers more than one feature net uses
+  _shared/         helpers more than one module net uses
 ```
 
 ## versions/ - content

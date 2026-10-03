@@ -8,7 +8,7 @@
  * whole app graph behind it read `gameVersion` at module scope, so they are
  * imported only after it is assigned.
  */
-import { ServerConfig } from '../features/servers/serverConfig';
+import { ServerConfig } from '../modules/servers/serverConfig';
 import { loadGameVersion, versionIdForTag } from '../version';
 // Imported for its one side effect: the `mu-mobile` root class has to be on
 // the document before the first paint, or a phone flashes the desktop rules.

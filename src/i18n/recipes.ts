@@ -2007,7 +2007,7 @@ export const EN_TEXT = {
   'marketplace.escrow.failed': 'The market could not do that.',
   'marketplace.escrow.notSold': 'That listing has not sold.',
 
-  // ---- the game master panel (`features/gm/gmPanel.ts`, `features/gm/gmCommands.ts`) -------
+  // ---- the game master panel (`modules/gm/gmPanel.ts`, `modules/gm/gmCommands.ts`) -------
   // Map names are not here: `gmMaps.ts` carries the server's own
   // `GameMapDefinition.Name`, which is what `/move <name>` matches and what
   // the server prints back, so it is an identifier rather than prose.

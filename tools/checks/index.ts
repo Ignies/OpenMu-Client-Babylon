@@ -34,8 +34,8 @@ function baseline(name: string, current: string[]): string[] {
 {
   const dirs = (p: string) => (existsSync(p) ? readdirSync(p).filter(d => statSync(`${p}/${d}`).isDirectory() && !d.startsWith('_') && d !== '__snapshots__').map(d => `${p}/${d}`) : []);
   const folders = [
-    'src/app', 'src/core', 'src/ecs', 'src/version', 'src/i18n', 'src/controllers', 'src/features', 'versions', 'versions/shared',
-    ...dirs('src/controllers'), ...dirs('src/features'), ...dirs('versions/shared'), ...dirs('versions').filter(d => d !== 'versions/shared'),
+    'src/app', 'src/core', 'src/ecs', 'src/version', 'src/i18n', 'src/controllers', 'src/modules', 'versions', 'versions/shared',
+    ...dirs('src/controllers'), ...dirs('src/modules'), ...dirs('versions/shared'), ...dirs('versions').filter(d => d !== 'versions/shared'),
     ...dirs('versions/shared/skills'), ...dirs('versions/shared/ui'),
   ];
   fail('readme.md missing', baseline('missing_readmes', folders.filter(d => !existsSync(`${d}/readme.md`))));

@@ -5,7 +5,7 @@ import './style.less';
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Store } from '@/app/store';
-import { Social } from '@/features/social/social';
+import { Social } from '@/modules/social/social';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { useWindowStackEntry } from '@/controllers/interface/components/mu_window/useWindowChrome';
 import { playUiSound } from '@/controllers/sound/sfx';
@@ -13,20 +13,20 @@ import {
   EMOTE_RINGS,
   EMOTES,
   type EmoteDefinition,
-} from '@/features/hero/emotes';
+} from '@/modules/hero/emotes';
 import {
   EMOJI_BUBBLES,
   type EmojiBubbleDefinition,
-} from '@/features/chat/emojiBubbles';
+} from '@/modules/chat/emojiBubbles';
 import {
   INSTRUMENTS,
   type InstrumentDefinition,
-} from '@/features/band/instruments';
+} from '@/modules/band/instruments';
 import {
   Band,
   putAwayInstrument,
   takeOutInstrument,
-} from '@/features/band/music';
+} from '@/modules/band/music';
 
 /**
  * Radial emote menu on º/` by default (TAB is the minimap as in the original, E is a
@@ -47,7 +47,7 @@ const WEDGE_GAP_DEG = 1.6;
 /**
  * A wedge is either an animated emote (plays a clip, sent as an animation
  * request) or an emoji bubble (an overlay, sent as its chat token) - see
- * features/chat/emojiBubbles.ts for why those are separate things and why the
+ * modules/chat/emojiBubbles.ts for why those are separate things and why the
  * bubbles travel over chat.
  */
 type RadialEntry =

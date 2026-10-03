@@ -4,7 +4,7 @@ import { observer } from 'mobx-react-lite';
 import { useEffect, useState } from 'react';
 import { runInAction } from 'mobx';
 import { Store } from '@/app/store';
-import { SessionStats } from '@/features/session/sessionStats';
+import { SessionStats } from '@/modules/session/sessionStats';
 import { formatDuration } from '@/controllers/interface/hudFormat';
 import { isKey } from '@/controllers/interface/keyBindings';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';

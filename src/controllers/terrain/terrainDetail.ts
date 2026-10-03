@@ -4,7 +4,7 @@ import {
   type Effect,
   type Scene,
 } from '../render/babylon/exports';
-import { onGameOptionsChanged } from '../../features/options/gameOptions';
+import { onGameOptionsChanged } from '../../modules/options/gameOptions';
 import {
   materialQuality,
   pbrDetailStrength,

@@ -7,7 +7,7 @@ import { onScreenPosition } from '@/controllers/interface/screenPositionBus';
 import {
   BUBBLE_FADE_SECONDS,
   emojiBubbleById,
-} from '@/features/chat/emojiBubbles';
+} from '@/modules/chat/emojiBubbles';
 import type { Entity } from '@/ecs/world';
 
 type BubbleEntity = With<Entity, 'emojiBubble' | 'screenPosition'>;
@@ -17,7 +17,7 @@ const OFF_SCREEN = 'translate(-10000px, -10000px)';
 const PICTURE = { width: 44, height: 44 };
 
 /**
- * A character's emoji bubble (`features/chat/emojiBubbles.ts`).
+ * A character's emoji bubble (`modules/chat/emojiBubbles.ts`).
  *
  * Both placements ride their own projected world anchor - over the head, or
  * on the shoulder `EmojiBubbleSystem` picks as the one facing the camera.

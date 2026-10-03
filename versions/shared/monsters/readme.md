@@ -79,7 +79,7 @@ tables list (Hanzo's 0.95 there is not applied: his class draws at 1).
   `@/controllers/anim`, `@/core/types`, `../objects/enum`, `@/i18n`
 - used by: the actors controller (data through the monsters controller, classes through
   `registerModelClass`), the sound controller (`voice`, `globalVoice`), `src/app/logic.ts`
-  (`monsterDisplayName`), `src/app/boot.tsx` (`models.ts`), the gm feature, the proxy tracker
+  (`monsterDisplayName`), `src/app/boot.tsx` (`models.ts`), the gm module, the proxy tracker
   (`all.ts`), `versions/<id>/tables`
 
 ## Change it

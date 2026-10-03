@@ -4,12 +4,12 @@ import { Store } from '@/app/store';
 import {
   CrywolfOccupation,
   crywolfHud,
-} from '@/features/events/crywolf';
+} from '@/modules/events/crywolf';
 import type { Entity, World } from '@/ecs/world';
 
 /**
  * The Crywolf event staging (GMCrywolf1st.cpp), driven by the state in
- * `features/events/crywolf.ts` the way the Blood Castle gate polls its match state.
+ * `modules/events/crywolf.ts` the way the Blood Castle gate polls its match state.
  * Against stock OpenMU the state never leaves peace, so these render their
  * peace look until a server actually runs the event.
  */

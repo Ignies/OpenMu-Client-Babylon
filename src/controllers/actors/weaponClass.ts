@@ -1,8 +1,8 @@
 import type { Item } from '../../ecs/world';
-import { BaseClass } from '../../features/hero/characterStats';
+import { BaseClass } from '../../modules/hero/characterStats';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { PlayerAction } from '@versions/shared/objects/enum';
-import type { MountKind } from '../../features/pets/pets';
+import type { MountKind } from '../../modules/pets/pets';
 import { animations } from '../anim';
 
 /**

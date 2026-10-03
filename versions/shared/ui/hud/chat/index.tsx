@@ -10,7 +10,7 @@ import {
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
-import { Social } from '@/features/social/social';
+import { Social } from '@/modules/social/social';
 import { Store } from '@/app/store';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { playUiSound, uiClick } from '@/controllers/sound/sfx';
@@ -25,17 +25,17 @@ import {
   useWindowStackEntry,
 } from '@/controllers/interface/components/mu_window/useWindowChrome';
 import { isTypingInField } from '@/ecs/systems/keyboardInputSystem';
-import { GameOptions } from '@/features/options/gameOptions';
+import { GameOptions } from '@/modules/options/gameOptions';
 import { isKey } from '@/controllers/interface/keyBindings';
 import { EmojiText } from '@/controllers/interface/components/emoji_text';
-import { EMOJI_CATALOG } from '@/features/chat/emojis';
+import { EMOJI_CATALOG } from '@/modules/chat/emojis';
 import { EmojiPicker, RecentEmojis } from './emojiPicker';
 import { installItemLinkGesture } from './itemLinkGesture';
 import {
   labelsToWire,
   uniqueLinkLabel,
   wireToLabels,
-} from '@/features/chat/chatItemLinks';
+} from '@/modules/chat/chatItemLinks';
 import {
   chatEmojiSize,
   emojiPackLabel,
@@ -43,7 +43,7 @@ import {
   matchEmojiCodes,
   spliceChatText,
   type ChatEmoji,
-} from '@/features/chat/chatEmojis';
+} from '@/modules/chat/chatEmojis';
 import {
   chatEndIndex,
   chatInputBudget,
@@ -62,12 +62,12 @@ import {
   layoutChatRows,
   type ChatInputMode,
   type ChatLine,
-} from '@/features/chat/chat';
+} from '@/modules/chat/chat';
 import {
   CHAT_COMPLETION_ROWS,
   matchChatCommands,
   type ChatCommand,
-} from '@/features/chat/chatCommands';
+} from '@/modules/chat/chatCommands';
 
 /**
  * `CNewUIChatInputBox` + `CNewUIChatLogWindow`, drawn with the original's

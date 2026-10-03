@@ -45,7 +45,7 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 
 ## How it works
 - A spawned object's class comes from `resolveModelFactory(type)`, called by
-  `features/_shared/net_helpers.ts` and `features/scope/net.ts`. It checks, in order: a
+  `modules/_shared/net_helpers.ts` and `modules/scope/net.ts`. It checks, in order: a
   registered class (`versions/shared/monsters/<name>/model.ts`), then the type's folder:
   `hidden` (`HiddenNpc`), `trap` (the map's world object), `model`
   (`Monster/Monster<modelType + 1>.glb`), `npcModel` (`NPC/<file>.glb`, or a path off the asset
@@ -68,9 +68,9 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 ## Depends on / used by
 - uses: `render` (`ModelObject`, bone links), `assets`, `anim`, `fx`, `item_fx`, `lighting`,
   `monsters` (the folders' data), `core/types`, `ecs/world`. Baselined exceptions
-  (`tools/checks/baselines/deps.json`): `features/hero|pets|social|drops`, `app/store`.
-- used by: `ecs/systems`, `features/_shared/net_helpers.ts`, `features/scope`,
-  `features/character_select`, `features/drops`, `features/gm/admin/skins.ts`, `app/store.ts`,
+  (`tools/checks/baselines/deps.json`): `modules/hero|pets|social|drops`, `app/store`.
+- used by: `ecs/systems`, `modules/_shared/net_helpers.ts`, `modules/scope`,
+  `modules/character_select`, `modules/drops`, `modules/gm/admin/skins.ts`, `app/store.ts`,
   `sound`, `item_fx/weaponBlur.ts`, `anim`, `assets/modelLoader.ts`, monster, npc, map and skill
   content in `versions/shared/`, `tools/assetCase.ts`.
 
@@ -97,7 +97,7 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   shared classes) and the NPC tables, as hashes; update them on purpose. It runs the real model
   classes under Node with the Store mocked.
 - `skinTexture.test.ts`: skin / hair / level and hide texture names.
-- Also from `features/items/`: `portedItems`, `questItemLink`, `weaponAttack` tests.
+- Also from `modules/items/`: `portedItems`, `questItemLink`, `weaponAttack` tests.
 
 ## Notes
 

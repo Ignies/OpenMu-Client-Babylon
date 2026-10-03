@@ -61,7 +61,7 @@ clip is one file in `versions/shared/animations/` that says its own speed, flags
 - filled by: `versions/shared/animations/all.ts`, imported by each version's core module.
 - used by: ECS systems (animation, attack, skill cast, death, emote, band, weapon trail, ...),
   `actors/`, `combat/`, `render/modelObject.ts`, `sound/` monster and packet sounds,
-  `features/combat/net.ts`, some monster and map content.
+  `modules/combat/net.ts`, some monster and map content.
 
 ## Change it
 - a player clip's speed, flags or mappings: its file in `versions/shared/animations/`; cite the

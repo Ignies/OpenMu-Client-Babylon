@@ -1,6 +1,6 @@
 import { monsters } from '../../versions/shared/monsters/all';
 import { items as itemFiles } from '../../versions/shared/items/all';
-import { mapName as gmMapName } from '../../src/features/gm/gmMaps';
+import { mapName as gmMapName } from '../../src/modules/gm/gmMaps';
 
 /**
  * The names a journal line needs, from the tables the client already ships.

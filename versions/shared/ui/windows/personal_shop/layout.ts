@@ -2,7 +2,7 @@ import type { TextKey } from '@/i18n';
 import {
   PERSONAL_SHOP_COLUMNS,
   PERSONAL_SHOP_ROWS,
-} from '@/features/inventory/itemStorage';
+} from '@/modules/inventory/itemStorage';
 
 /**
  * `CNewUIMyShopInventory` / `CNewUIPurchaseShopInventory`

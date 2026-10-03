@@ -5,14 +5,14 @@ import { type Entity } from '@/ecs/world';
 import { type LightRecipe } from '@/controllers/lighting/lightSource';
 import { MonsterActionType, PlayerAction } from '@versions/shared/objects/enum';
 import type { PoseClip } from '@/controllers/combat';
-import { BaseClass } from '@/features/hero/characterStats';
+import { BaseClass } from '@/modules/hero/characterStats';
 import { delay, entityGone, entityPos, entityYaw, followEntity, scaleRGB, type ParticleRecipe, type RGB } from '@/controllers/fx/core';
 import { SkillContext, Step, TICK, after, cm, forwardOf, ticks } from '@/controllers/skills/visuals';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { createAngleDeg, turnAngle } from '@/core/turnAngle';
 import { effectLight } from '@/controllers/lighting/recipes';
 import { effects } from '@/controllers/fx';
-import { fenrirVariant } from '@/features/pets/pets';
+import { fenrirVariant } from '@/modules/pets/pets';
 import { playCombat } from '@/controllers/sound/combat';
 import { storeRef } from '@/app/storeRef';
 

@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { t } from '@/i18n';
-import { GmPanel } from '@/features/gm/gmPanel';
-import { gmCommand } from '@/features/gm/gmCommands';
-import { searchSkins, type SkinKind } from '@/features/gm/admin/catalogues';
-import { skinCatalogue, skinDisplayName } from '@/features/gm/admin/skins';
+import { GmPanel } from '@/modules/gm/gmPanel';
+import { gmCommand } from '@/modules/gm/gmCommands';
+import { searchSkins, type SkinKind } from '@/modules/gm/admin/catalogues';
+import { skinCatalogue, skinDisplayName } from '@/modules/gm/admin/skins';
 import { uiClick } from '@/controllers/sound/sfx';
 
 /**

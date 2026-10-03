@@ -7,7 +7,7 @@ import { ConnectionInfoRequestPacket } from '@versions/shared/packets/ConnectSer
 import {
   ServerConfig,
   type PublishedGameServer,
-} from '@/features/servers/serverConfig';
+} from '@/modules/servers/serverConfig';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { ServerItem } from './ServerItem';

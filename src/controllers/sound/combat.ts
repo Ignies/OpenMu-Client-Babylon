@@ -1,6 +1,6 @@
 import type { Item } from '../../ecs/world';
 import { CharacterClassNumber } from '../../core/types';
-import { getBaseClass, BaseClass } from '../../features/hero/characterStats';
+import { getBaseClass, BaseClass } from '../../modules/hero/characterStats';
 import { isFemaleClass } from '../actors/mapPlayerNetClassToModelClass';
 import {
   GROUP_SPEAR,
@@ -14,7 +14,7 @@ import type { SoundBus } from './buses';
 import type { Sounds } from './recipes';
 import type { SoundLayer } from './layer';
 import { playSfx, type SfxOptions, type SfxPosition } from './listener';
-import { masterBase } from '../../features/skills/skillAliases';
+import { masterBase } from '../../modules/skills/skillAliases';
 import { SoundsManager } from './soundsManager';
 
 /**

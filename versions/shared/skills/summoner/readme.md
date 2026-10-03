@@ -41,7 +41,7 @@ Summoner skills, one folder per skill. Rules for skill folders: [../readme.md](.
 
 ## Depends on / used by
 - uses: `../_shared.ts`, `@/controllers/{skills,fx,lighting,sound,combat}`
-- used by: `../index.ts` (glob); `playChainLightningHop` by `src/features/skills/net.ts`
+- used by: `../index.ts` (glob); `playChainLightningHop` by `src/modules/skills/net.ts`
 
 ## Change it
 - see [docs/how_to/add_skill.md](../../../../docs/how_to/add_skill.md).

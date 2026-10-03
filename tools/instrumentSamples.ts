@@ -27,8 +27,8 @@
  * is only paid by the players who hear it.
  */
 import { mkdirSync, writeFileSync } from 'fs';
-import { INSTRUMENTS, type InstrumentDefinition, type InstrumentId } from '../src/features/band/instruments';
-import { buildTestMidi } from '../src/features/band/music/testMidi';
+import { INSTRUMENTS, type InstrumentDefinition, type InstrumentId } from '../src/modules/band/instruments';
+import { buildTestMidi } from '../src/modules/band/music/testMidi';
 import { PROJECT_ROOT } from './shared';
 
 const DEFAULT_SOURCE = 'https://gleitz.github.io/midi-js-soundfonts/MusyngKite';

@@ -1,40 +1,40 @@
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { Store } from '@/app/store';
-import { events } from '@/features/events';
+import { events } from '@/modules/events';
 import {
   bloodCastleImminent,
   bloodCastleScore,
   bloodCastleTimer,
   bloodCastleWindow,
   inBloodCastle,
-} from '@/features/events/bloodCastle';
+} from '@/modules/events/bloodCastle';
 import {
   devilSquareResult,
   devilSquareWindow,
-} from '@/features/events/devilSquare';
+} from '@/modules/events/devilSquare';
 import {
   chaosCastleImminent,
   chaosCastlePrompt,
   chaosCastleResult,
   chaosCastleTimer,
   inChaosCastle,
-} from '@/features/events/chaosCastle';
-import { doppelgangerWindow } from '@/features/events/doppelganger';
+} from '@/modules/events/chaosCastle';
+import { doppelgangerWindow } from '@/modules/events/doppelganger';
 import {
   CrywolfState,
   crywolfBarVisible,
   crywolfHud,
   crywolfNoticePage,
   crywolfResult,
-} from '@/features/events/crywolf';
+} from '@/modules/events/crywolf';
 import {
   CRYWOLF_NOTICE_KEYS,
   DEVIL_SQUARE_INTRO_KEYS,
   EVENT_TEXT,
   RANK_HEADERS,
   formatText,
-} from '@/features/events/recipes';
+} from '@/modules/events/recipes';
 import { GoldenArcherWindow } from './goldenArcherWindow';
 import { KanturuFigure, KanturuResult, KanturuWindow } from './kanturuWindow';
 import { EventTimers } from './eventTimers';
@@ -737,7 +737,7 @@ function altarSprite(packed: number): string | null {
  * `CNewUICryWolf::Render`: the MVP bar in the lower right (statue shield,
  * the five altars, dark elf count, remaining time, Balgass strip), the READY
  * notices and the end-of-war banner. No window state: everything reads
- * `features/events/crywolf.ts`.
+ * `modules/events/crywolf.ts`.
  */
 const CrywolfBar = observer(() => {
   const hud = crywolfHud();

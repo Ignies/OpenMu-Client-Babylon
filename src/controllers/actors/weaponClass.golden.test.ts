@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createHash } from 'node:crypto';
-import { BaseClass } from '../../features/hero/characterStats';
+import { BaseClass } from '../../modules/hero/characterStats';
 import type { Item } from '../../ecs/world';
-import type { MountKind } from '../../features/pets/pets';
+import type { MountKind } from '../../modules/pets/pets';
 import {
   chooseAttackAction,
   chooseFenrirIdleAction,

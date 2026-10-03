@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { t, type TextKey } from '@/i18n';
-import { GmPanel } from '@/features/gm/gmPanel';
-import type { WorldView } from '@/features/gm/gmWorld';
-import { gmCommand } from '@/features/gm/gmCommands';
+import { GmPanel } from '@/modules/gm/gmPanel';
+import type { WorldView } from '@/modules/gm/gmWorld';
+import { gmCommand } from '@/modules/gm/gmCommands';
 import {
   DEFAULT_ITEM_SPEC,
   ITEM_GROUPS,
@@ -13,9 +13,9 @@ import {
   type ItemEntry,
   type ItemSpec,
   type SkinKind,
-} from '@/features/gm/admin/catalogues';
-import { itemDisplayName, skinDisplayName, spawnCatalogue } from '@/features/gm/admin/skins';
-import { GmLibrary } from '@/features/gm/admin/gmLibrary';
+} from '@/modules/gm/admin/catalogues';
+import { itemDisplayName, skinDisplayName, spawnCatalogue } from '@/modules/gm/admin/skins';
+import { GmLibrary } from '@/modules/gm/admin/gmLibrary';
 import { uiClick } from '@/controllers/sound/sfx';
 import { ItemIcon } from '@/controllers/interface/components/item_icon';
 import { CommandCard, QuickButton } from '../commandForm';

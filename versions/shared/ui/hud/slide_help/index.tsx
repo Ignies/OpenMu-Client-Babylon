@@ -7,7 +7,7 @@ import {
   type SlideLane,
   unpackSlideColor,
 } from '@/controllers/interface/slideHelp';
-import { GameOptions } from '@/features/options/gameOptions';
+import { GameOptions } from '@/modules/options/gameOptions';
 import { MU_FONT_CLASS } from '@/controllers/interface/components/mu_text';
 import { useUiStageScale } from '@/controllers/interface/components/ui_stage';
 

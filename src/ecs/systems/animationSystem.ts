@@ -33,8 +33,8 @@ import {
   wingsPlaySpeed,
 } from '../../controllers/anim/playSpeed';
 import { debuffSlow } from '../../controllers/actors/debuffBody';
-import { attackSpeedOf, magicSpeedOf } from '../../features/hero/characterStats';
-import { BaseClass, getBaseClass } from '../../features/hero/characterStats';
+import { attackSpeedOf, magicSpeedOf } from '../../modules/hero/characterStats';
+import { BaseClass, getBaseClass } from '../../modules/hero/characterStats';
 import { isFemaleClass } from '../../controllers/actors/mapPlayerNetClassToModelClass';
 import {
   FENRIR_RUN_DELAY,
@@ -48,7 +48,7 @@ import {
   isSwimWorld,
 } from '../../controllers/actors/locomotion';
 import { isWingItem } from '../../controllers/actors/wings';
-import { isRidingMount, petSpec } from '../../features/pets/pets';
+import { isRidingMount, petSpec } from '../../modules/pets/pets';
 import { Store } from '../../app/store';
 
 // Clip rates come from the original's PlaySpeed tables (controllers/anim/playSpeed.ts);

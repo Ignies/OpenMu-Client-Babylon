@@ -8,12 +8,12 @@ import { isKey } from '@/controllers/interface/keyBindings';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { playUiSound } from '@/controllers/sound/sfx';
 import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
-import { skills } from '@/features/skills';
+import { skills } from '@/modules/skills';
 import { SkillIcon } from '@/controllers/interface/components/skill_icon';
 import {
   SKILL_ICON_HEIGHT,
   SKILL_ICON_WIDTH,
-} from '@/features/skills/skillCasting';
+} from '@/modules/skills/skillCasting';
 import { MuItemWindow, MuTableFrame } from '@/controllers/interface/components/mu_window';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { toggleMasterSkillsWindow } from '../master_skills/windowState';

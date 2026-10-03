@@ -4,7 +4,7 @@ import { observer } from 'mobx-react-lite';
 import { t } from '@/i18n';
 import { Store } from '@/app/store';
 import { playUiSound } from '@/controllers/sound/sfx';
-import { registerApiUrl } from '@/features/servers/serverServices';
+import { registerApiUrl } from '@/modules/servers/serverServices';
 import {
   MAX_ACCOUNT_LENGTH,
   MAX_ACCOUNT_PASSWORD_LENGTH,
@@ -12,7 +12,7 @@ import {
   MIN_ACCOUNT_PASSWORD_LENGTH,
   validateSignup,
   type SignupProblem,
-} from '@/features/servers/registerRules';
+} from '@/modules/servers/registerRules';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { TEXT_COLOR } from '../server_select/layout';

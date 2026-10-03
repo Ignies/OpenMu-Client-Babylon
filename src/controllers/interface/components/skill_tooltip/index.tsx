@@ -4,9 +4,9 @@ import { observer } from 'mobx-react-lite';
 import { useLayoutEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
-import { skillDisplayName } from '@/features/skills/skillNames';
-import { skills, type SkillBlock } from '@/features/skills';
-import { skillDelaySeconds } from '@/features/skills/cooldowns';
+import { skillDisplayName } from '@/modules/skills/skillNames';
+import { skills, type SkillBlock } from '@/modules/skills';
+import { skillDelaySeconds } from '@/modules/skills/cooldowns';
 
 export type TipLine = {
   text: string;

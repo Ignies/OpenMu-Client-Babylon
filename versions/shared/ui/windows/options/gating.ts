@@ -1,7 +1,7 @@
 import {
   GameOptions,
   type GameOptions as GameOptionsType,
-} from '@/features/options/gameOptions';
+} from '@/modules/options/gameOptions';
 import {
   LIGHTING_QUALITY_LABEL_KEYS,
 } from '@/controllers/lighting/lightingQuality';

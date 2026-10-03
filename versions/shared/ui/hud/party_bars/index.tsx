@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { With } from 'miniplex';
 import { Store } from '@/app/store';
-import { Social } from '@/features/social/social';
+import { Social } from '@/modules/social/social';
 import { useRenderId } from '@/controllers/interface/hooks';
 import { onScreenPosition } from '@/controllers/interface/screenPositionBus';
 import type { Entity } from '@/ecs/world';

@@ -52,9 +52,9 @@ other folders import the modules below directly.
 ## Depends on / used by
 - uses: `render` (babylon, materials, `pbrMaps`, `textureScript`), `item_fx/itemMaterial`,
   `terrain` (`mapFileEncryption`, tile lists), `maps`, `net/wireUtils`, `interface/item_icons`,
-  `actors/skinTexture`, `version`, `i18n`, `core`, `features/options`, `features/items`.
+  `actors/skinTexture`, `version`, `i18n`, `core`, `modules/options`, `modules/items`.
 - used by: nearly every controller (`render`, `fx`, `terrain`, `sound`, `lighting`, `interface`,
-  `actors`, `maps`, `weather`), `ecs/systems`, `app/boot.tsx`, `app/store.ts`, `features`
+  `actors`, `maps`, `weather`), `ecs/systems`, `app/boot.tsx`, `app/store.ts`, `modules`
   (quests, skills, inventory, economy, character select), `versions/shared` (items, monsters, ui),
   and `tools/` (`bmdToGlb.ts`, `assetsIndex.ts`, `compressAssets.ts`).
 
@@ -114,7 +114,7 @@ accents were lost before they shipped.
 ### mu/itemNameFile.ts, mu/buffNameFile.ts
 `item_<lang>.bmd`: 8192 records of 84 bytes, a 30-byte name first, index = `group * 512 + num`;
 read first by `itemBaseName`. `BuffEffect_<lang>.bmd`: an `int` count then 158-byte records, id at
-0, name at 5 (50 bytes). `buffRecipe` (`features/skills/recipes.ts`) shows the pack name first.
+0, name at 5 (50 bytes). `buffRecipe` (`modules/skills/recipes.ts`) shows the pack name first.
 
 ### mu/moveReqFile.ts
 An `int` count, then 84-byte records: `index`, main name (32), `/move` alias (32), required level,

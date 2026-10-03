@@ -15,7 +15,7 @@ reader can see in the code.
 <A few lines: the flow, the data it keeps, what calls it. Original source refs here.>
 
 ## Depends on / used by
-- uses: <controllers, features>
+- uses: <controllers, modules>
 - used by: <who imports it>
 
 ## Change it

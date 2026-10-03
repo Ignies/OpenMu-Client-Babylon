@@ -1,14 +1,14 @@
 import {
   registerDebugModule,
   type DebugRow,
-} from '@/features/gm/debugMenu';
+} from '@/modules/gm/debugMenu';
 import {
   BRIGHTNESS_MAX,
   BRIGHTNESS_MIN,
   GameOptions,
   TONE_MAPPER_MAX,
   setGameOption,
-} from '@/features/options/gameOptions';
+} from '@/modules/options/gameOptions';
 import { ENUM_WORLD } from '@/core/types';
 import { lookDirector, type LookState } from '@/controllers/lighting/director';
 

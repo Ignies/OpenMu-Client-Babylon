@@ -49,7 +49,7 @@ for (const [id, d] of Object.entries(EXTRA)) defs.set(Number(id), d);
 
 /** Master id -> base skill, from the game's own alias tables. */
 const ALIASES = new Map<number, number>();
-for (const file of ['src/controllers/skills/visuals.ts', 'src/features/skills/skillAliases.ts']) {
+for (const file of ['src/controllers/skills/visuals.ts', 'src/modules/skills/skillAliases.ts']) {
   const text = readFileSync(file, 'utf8');
   for (const block of text.matchAll(/(?:MASTER_ALIASES)[^=]*=\s*\{([\s\S]*?)\n\};/g))
     for (const [, from, to] of block[1].matchAll(/(\d+):\s*(\d+)/g)) if (Number(from) >= 300) ALIASES.set(Number(from), Number(to));

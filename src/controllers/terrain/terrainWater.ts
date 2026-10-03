@@ -1,7 +1,7 @@
 import { Texture, type Effect, type Scene } from '../render/babylon/exports';
 import type { ENUM_WORLD } from '../../core/types';
 import { maps } from '../maps';
-import { GameOptions } from '../../features/options/gameOptions';
+import { GameOptions } from '../../modules/options/gameOptions';
 import { createOZJTexture } from '../assets/download';
 import { downloadDataFile } from '../assets/mu/dataFolder';
 

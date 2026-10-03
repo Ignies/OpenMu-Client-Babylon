@@ -2,8 +2,8 @@ import './style.less';
 import { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { t } from '@/i18n';
-import { events } from '@/features/events';
-import { Commands } from '@/features/chat/commands';
+import { events } from '@/modules/events';
+import { Commands } from '@/modules/chat/commands';
 import {
   duelBars,
   duelRequest,
@@ -11,8 +11,8 @@ import {
   duelScoreboard,
   duelSpectators,
   duelWatchWindow,
-} from '@/features/events/duel';
-import { DUEL_CHANNELS } from '@/features/events/duelRules';
+} from '@/modules/events/duel';
+import { DUEL_CHANNELS } from '@/modules/events/duelRules';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuItemWindow } from '@/controllers/interface/components/mu_window';
@@ -86,7 +86,7 @@ import {
 /**
  * Everything the duel draws: the challenge prompt, the duelist score panel,
  * the Titus channel window, the spectator bar + name list and the winner
- * box. Render-only: state lives in `features/events/duel.ts`, commands go through
+ * box. Render-only: state lives in `modules/events/duel.ts`, commands go through
  * the `events` facade.
  */
 
@@ -402,7 +402,7 @@ const DuelSpectatorList = observer(() => {
 
 // ---- the winner box ---------------------------------------------------------
 
-/** `CDuelResultMsgBox`: one line, self-clearing (features/events/duel.ts counts). */
+/** `CDuelResultMsgBox`: one line, self-clearing (modules/events/duel.ts counts). */
 const DuelResultBox = observer(() => {
   const result = duelResult();
   const stage = useStage();

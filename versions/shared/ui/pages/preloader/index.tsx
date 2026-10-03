@@ -9,8 +9,8 @@ import {
   matchesSearch,
   playableHere,
   ServerConfig,
-} from '@/features/servers/serverConfig';
-import { ServerList } from '@/features/servers/serverList';
+} from '@/modules/servers/serverConfig';
+import { ServerList } from '@/modules/servers/serverList';
 import { loadVersionUi, versionTags, versionUi } from '@/version';
 import type { PregameBackdrop } from '@/version/uiContract';
 import { uiClick } from '@/controllers/sound/sfx';
@@ -32,7 +32,7 @@ import { FooterStrike } from './footerStrike';
 import { MuFrame } from '@/controllers/interface/components/mu_frame';
 import { MuIcon } from './muIcon';
 import { REACH_TEXT } from './banner';
-import { ServerProbe } from '@/features/servers/serverProbe';
+import { ServerProbe } from '@/modules/servers/serverProbe';
 
 const GITHUB_URL = 'https://github.com/Ignies/OpenMu-Client-Babylon';
 

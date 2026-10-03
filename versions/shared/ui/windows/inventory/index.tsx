@@ -4,8 +4,8 @@ import { t } from '@/i18n';
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { Store } from '@/app/store';
-import { Economy } from '@/features/economy/economy';
-import { events } from '@/features/events';
+import { Economy } from '@/modules/economy/economy';
+import { events } from '@/modules/events';
 import { ItemIcon } from '@/controllers/interface/components/item_icon';
 import { ItemTooltip } from '@/controllers/interface/components/item_tooltip';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
@@ -16,19 +16,19 @@ import {
   usedMask,
 } from '@/controllers/interface/components/item_grid';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
-import { goldColor } from '@/features/items/goldColor';
+import { goldColor } from '@/modules/items/goldColor';
 import {
   ITEM_HOTKEY_CODES,
   canRegisterItemHotkey,
-} from '@/features/inventory/itemHotkeys';
-import { isUpgradeJewel } from '@/features/inventory/jewelUpgrade';
+} from '@/modules/inventory/itemHotkeys';
+import { isUpgradeJewel } from '@/modules/inventory/jewelUpgrade';
 import {
   equipDestination,
   isEquipable,
-} from '@/features/inventory/equipSlots';
-import { InventorySort } from '@/features/inventory/inventorySort';
-import { QuickItemActions } from '@/features/inventory/quickItemActions';
-import { StorageKind } from '@/features/inventory/itemStorage';
+} from '@/modules/inventory/equipSlots';
+import { InventorySort } from '@/modules/inventory/inventorySort';
+import { QuickItemActions } from '@/modules/inventory/quickItemActions';
+import { StorageKind } from '@/modules/inventory/itemStorage';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuButton } from '@/controllers/interface/components/mu_button';

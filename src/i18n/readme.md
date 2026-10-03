@@ -15,7 +15,7 @@ English is the source and the fallback.
   `MASTER_TEXT`, layout labels).
 - Types: `TextKey`, `LanguageLayer`, `FlagRegion`.
 - `matchServerText(text)`, `translateServerText(text)` (`serverText.ts`): used by
-  `features/chat/net.ts`.
+  `modules/chat/net.ts`.
 
 ## How it works
 - `recipes.ts` holds `EN_TEXT`; `TextKey` is derived from it, so a missing or misspelled key does
@@ -49,7 +49,7 @@ quest dialogue pages by number.
 
 ## Depends on / used by
 - uses: `core/localStorage`, mobx.
-- used by: almost every window, page and feature that shows text (`t`); `controllers/assets/mu`
+- used by: almost every window, page and module that shows text (`t`); `controllers/assets/mu`
   for the pack data; the options window for the selector.
 
 ## Change it

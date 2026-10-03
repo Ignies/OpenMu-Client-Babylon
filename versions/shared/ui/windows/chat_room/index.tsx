@@ -2,9 +2,9 @@ import './style.less';
 import { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { t } from '@/i18n';
-import { ChatRooms, type ChatRoom } from '@/features/chat/chatRooms';
-import { Messenger } from '@/features/friends/messenger';
-import { isFriendOnline } from '@/features/friends/friendList';
+import { ChatRooms, type ChatRoom } from '@/modules/chat/chatRooms';
+import { Messenger } from '@/modules/friends/messenger';
+import { isFriendOnline } from '@/modules/friends/friendList';
 import { Store } from '@/app/store';
 import { uiClick } from '@/controllers/sound/sfx';
 import { useWindowChrome } from '@/controllers/interface/components/mu_window/useWindowChrome';
@@ -13,7 +13,7 @@ import { EmojiText } from '@/controllers/interface/components/emoji_text';
 /**
  * `CUIChatWindow`, folded into one window with a tab per room the way the
  * original's `CUIChatRoomListTabWindow` lists them. Talking happens on the
- * chat server connection held by features/chat/chatRooms.ts; this component only renders
+ * chat server connection held by modules/chat/chatRooms.ts; this component only renders
  * its state.
  */
 

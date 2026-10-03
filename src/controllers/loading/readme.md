@@ -32,7 +32,7 @@ loading screen; a new look is a sibling implementation (`loading/<name>/`), neve
 ## Depends on / used by
 - uses: `app/store` (`Store`, `UIState`), `interface/components/mu_sprite`, `ecs/world` (types).
 - used by: `app/App.tsx` (`LoadingScreen`); `sceneReadySystem`, `characterSelectSystem`,
-  `features/warp/warpScopeHold.ts` (scene gate); `loginSceneSystem`,
+  `modules/warp/warpScopeHold.ts` (scene gate); `loginSceneSystem`,
   `versions/shared/ui/pages/preloader`, `sound/loginMusic.ts` (`pregameLoad`).
 
 ## Change it

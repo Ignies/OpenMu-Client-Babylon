@@ -3,9 +3,9 @@ import { t, type TextKey } from '@/i18n';
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Store } from '@/app/store';
-import { Commands } from '@/features/chat/commands';
+import { Commands } from '@/modules/chat/commands';
 import { isKey } from '@/controllers/interface/keyBindings';
-import type { CommandKind } from '@/features/chat/chatCommands';
+import type { CommandKind } from '@/modules/chat/chatCommands';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { uiClick } from '@/controllers/sound/sfx';
 import { MuButton } from '@/controllers/interface/components/mu_button';
@@ -19,7 +19,7 @@ import { TEXT_COLOR } from '../../pages/server_select/layout';
  * 108x29 `newui_btn_empty` buttons down the inventory-style frame, one per
  * player-to-player command. Clicking one arms it (the button stays in its
  * pressed frame and its label goes bold); the next right click on a player
- * within two tiles runs it (`RunCommand`, in features/chat/commands.ts). While armed, the
+ * within two tiles runs it (`RunCommand`, in modules/chat/commands.ts). While armed, the
  * name of the player under the cursor follows the mouse on
  * `newUI_cursorid_wnd` (128x32), white when the command can run and red when
  * it cannot (`m_bCanCommand`).

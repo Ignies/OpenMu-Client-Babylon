@@ -4,14 +4,14 @@ import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { isKey } from '@/controllers/interface/keyBindings';
 import { Store } from '@/app/store';
-import { Messenger, type MessengerTab } from '@/features/friends/messenger';
-import { ChatRooms } from '@/features/chat/chatRooms';
+import { Messenger, type MessengerTab } from '@/modules/friends/messenger';
+import { ChatRooms } from '@/modules/chat/chatRooms';
 import {
   MAX_FRIENDS,
   MAX_LETTER_TEXT,
   MAX_LETTER_TITLE,
   isFriendOnline,
-} from '@/features/friends/friendList';
+} from '@/modules/friends/friendList';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { uiClick } from '@/controllers/sound/sfx';
 import { MuButton } from '@/controllers/interface/components/mu_button';
@@ -23,7 +23,7 @@ import { MuItemWindow, MuTableFrame } from '@/controllers/interface/components/m
  * letter box, in the original's item-window frame with the `newui_guild_tab`
  * strip on top, plus the third tab: the chat-room list
  * (`CUIChatRoomListTabWindow`), listing the rooms open on MU's separate chat
- * server (features/chat/chatRooms.ts). Talk on an online friend opens a chat room, like
+ * server (modules/chat/chatRooms.ts). Talk on an online friend opens a chat room, like
  * the original's button 3; on an offline friend it falls back to the chat
  * box's whisper field.
  */

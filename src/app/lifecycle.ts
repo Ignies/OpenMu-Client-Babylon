@@ -4,9 +4,9 @@ import { effects } from '@/controllers/fx';
 import { combat } from '@/controllers/combat';
 import { sound } from '@/controllers/sound';
 import { maps } from '@/controllers/maps';
-import { events } from '@/features/events';
-import { skills } from '@/features/skills';
-import { quests } from '@/features/quests';
+import { events } from '@/modules/events';
+import { skills } from '@/modules/skills';
+import { quests } from '@/modules/quests';
 
 /**
  * What a map change resets, in this exact order (unchanged from the original

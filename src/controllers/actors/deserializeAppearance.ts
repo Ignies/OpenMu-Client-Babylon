@@ -7,7 +7,7 @@ import {
   PET_SKELETON,
   PET_UNICORN,
   SPIRIT_OF_GUARDIAN,
-} from '../../features/pets/petConstants';
+} from '../../modules/pets/petConstants';
 
 type Item = {
   num: number;

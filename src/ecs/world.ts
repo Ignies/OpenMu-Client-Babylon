@@ -1,14 +1,14 @@
-import type { EmoteId } from '../features/hero/emotes';
-import type { EmojiBubbleId } from '../features/chat/emojiBubbles';
-import type { ChatEmojiBubble } from '../features/chat/chatEmojis';
-import type { InstrumentId } from '../features/band/instruments';
-import type { BandHit } from '../features/band/music/performing';
+import type { EmoteId } from '../modules/hero/emotes';
+import type { EmojiBubbleId } from '../modules/chat/emojiBubbles';
+import type { ChatEmojiBubble } from '../modules/chat/chatEmojis';
+import type { InstrumentId } from '../modules/band/instruments';
+import type { BandHit } from '../modules/band/music/performing';
 import type { GuildMemberRoleEnum } from '@versions/shared/packets/ServerToClientPackets';
 import { type Bucket, type With, World as ECSWorld } from 'miniplex';
 import type { IVector2Like, IVector3Like, Mesh } from '../controllers/render/babylon/exports';
 import type { ModelObject } from '../controllers/render/modelObject';
 import type { MonsterActionType, PlayerAction } from '@versions/shared/objects/enum';
-import type { PetFollow, PetSpec } from '../features/pets/pets';
+import type { PetFollow, PetSpec } from '../modules/pets/pets';
 import type { MUAttributeSystem } from '../core/attributeSystem';
 import type { TerrainPicker } from '../controllers/terrain/terrainPick';
 import { TransformNode } from '../controllers/render/babylon/exports';
@@ -143,7 +143,7 @@ export type Entity = Partial<{
   /**
    * Playing an instrument (the band system): the held pose, the model in the
    * hand and the hits still to twitch on. `BandSystem` owns it; the facade in
-   * `features/band/music` adds and removes it through `features/band/music/performing.ts`.
+   * `modules/band/music` adds and removes it through `modules/band/music/performing.ts`.
    */
   performing: {
     instrument: InstrumentId;
@@ -260,7 +260,7 @@ export type Entity = Partial<{
   };
   /**
    * A short-lived emoji over (or beside) a character - see
-   * `features/chat/emojiBubbles.ts`. `EmojiBubbleSystem` owns the lifetime and the
+   * `modules/chat/emojiBubbles.ts`. `EmojiBubbleSystem` owns the lifetime and the
    * side anchor, `CalculateScreenPositionSystem` projects that anchor, and
    * the `EmojiBubbles` overlay draws it.
    */
@@ -378,7 +378,7 @@ export type Entity = Partial<{
     /**
      * A follower pet (`PetObject`): how it holds station on its owner, the
      * `PlaySpeed` of its one clip, and the seconds its body light pulses
-     * over when it has one. See `PetFollow` in features/pets/pets.ts.
+     * over when it has one. See `PetFollow` in modules/pets/pets.ts.
      */
     follow?: PetFollow;
     followSpeed?: number;

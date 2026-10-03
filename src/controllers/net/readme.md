@@ -2,7 +2,7 @@
 
 The network layer: the game socket, packet encryption, the active version's packet set, the
 small side protocols the proxy speaks (band, ping, admin, escrow, chat server) and the net
-readouts. Handlers for packets live in `src/features/<feature>/net.ts`, not here.
+readouts. Handlers for packets live in `src/modules/<module>/net.ts`, not here.
 
 ## Public API
 - `sockets/createSocket.ts`: `createSocket({ wsAddress, tcpIP, tcpPort })` opens a game or
@@ -61,15 +61,15 @@ readouts. Handlers for packets live in `src/features/<feature>/net.ts`, not here
 ## Depends on / used by
 - uses: `core` (event bus, binary utils), `version` (packet set, encryption keys, variant rank),
   `assets/download` (framing re-exports), `fx` (ping marker), `app/store` (`pingNet` only),
-  `features/servers/serverConfig` (`chatRoomSocket` only).
-- used by: `app/store.ts`, `app/logic.ts`, feature nets (session, band, chat, social,
+  `modules/servers/serverConfig` (`chatRoomSocket` only).
+- used by: `app/store.ts`, `app/logic.ts`, module nets (session, band, chat, social,
   marketplace, gm, events), `core/eventBus/events.ts`, `lighting/clouds.ts`,
   `weather/snowCover.ts`, `render/perfOverlay.ts`, `fx/ping.ts`, the pointer input and ambient
   particle systems, the gm panel window, and outside `src/`: `proxy/`, `marketplace/`,
   `cashshop/`.
 
 ## Change it
-- handle a new packet: `src/features/<feature>/net.ts` (see
+- handle a new packet: `src/modules/<module>/net.ts` (see
   [docs/how_to/add_packet_handler.md](../../../docs/how_to/add_packet_handler.md)).
 - a new proxy-side protocol: add `protocols/<name>Protocol.ts`, engine-free, modelled on
   `pingProtocol.ts`, with a `.test.ts` beside it.

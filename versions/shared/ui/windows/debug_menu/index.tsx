@@ -13,7 +13,7 @@ import {
   DebugMenu,
   type DebugAction,
   type DebugRow,
-} from '@/features/gm/debugMenu';
+} from '@/modules/gm/debugMenu';
 
 /**
  * The offline debug window: the

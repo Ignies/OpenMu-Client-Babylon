@@ -35,7 +35,7 @@ the loader that resolves which version this page runs. See [../../docs/versions.
 ## Depends on / used by
 - uses: `versions/registry.ts`; types from `core/types`, `ecs/world`, `controllers/interface/windows`.
 - used by: `app/` (main, App, store), `controllers/assets` loaders, `controllers/net/packets.ts`,
-  `controllers/item_fx`, features `servers` and `mu_helper`, `ecs/systems/loginSceneSystem.ts`,
+  `controllers/item_fx`, modules `servers` and `mu_helper`, `ecs/systems/loginSceneSystem.ts`,
   `versions/registry.ts`, every `versions/<id>/` and some shared windows.
 
 ## Change it

@@ -8,7 +8,7 @@ import {
   HORN_OF_DINORANT,
   HORN_OF_FENRIR,
   HORN_OF_UNIRIA,
-} from '@/features/pets/petConstants';
+} from '@/modules/pets/petConstants';
 import {
   CAPE_OF_LORD,
   HELPER_GROUP,

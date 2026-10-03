@@ -1,14 +1,14 @@
 import {
   CHAT_EMOJI_BUBBLE_SECONDS,
   type ChatEmojiBubble,
-} from '../../features/chat/chatEmojis';
+} from '../../modules/chat/chatEmojis';
 import {
   HEAD_ANCHOR_HEIGHT_RATIO,
   SIDE_ANCHOR_DISTANCE,
   SIDE_ANCHOR_HEIGHT_RATIO,
   emojiBubbleById,
   type EmojiBubbleId,
-} from '../../features/chat/emojiBubbles';
+} from '../../modules/chat/emojiBubbles';
 import type { Entity, ISystemFactory, World } from '../world';
 
 /**

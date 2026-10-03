@@ -9,9 +9,9 @@ import {
   playableHere,
   ServerConfig,
   type ServerProfile,
-} from '@/features/servers/serverConfig';
-import { ServerAccounts } from '@/features/servers/serverAccounts';
-import { ServerProbe } from '@/features/servers/serverProbe';
+} from '@/modules/servers/serverConfig';
+import { ServerAccounts } from '@/modules/servers/serverAccounts';
+import { ServerProbe } from '@/modules/servers/serverProbe';
 import { Button, Icon, TextField, Toggle } from './controls';
 import { Banner, REACH_TEXT } from './banner';
 

@@ -25,7 +25,7 @@ The full-screen pages: the pre-game screens and the world page that holds every 
 - `world/index.tsx` imports `../../index`, which registers every window and HUD element.
 
 ## Depends on / used by
-- uses: `src/features/{servers,character_select,hero}`, the Store, `src/controllers/interface`
+- uses: `src/modules/{servers,character_select,hero}`, the Store, `src/controllers/interface`
 - used by: `src/app/App.tsx`, `versions/season6/ui/index.ts`,
   `versions/v097d/ui/pregame/charactersPage.tsx` (`character_list`)
 

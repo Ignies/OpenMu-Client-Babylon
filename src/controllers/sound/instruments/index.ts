@@ -1,5 +1,5 @@
-import { GameOptions } from '@/features/options/gameOptions';
-import type { InstrumentId } from '@/features/band/instruments';
+import { GameOptions } from '@/modules/options/gameOptions';
+import type { InstrumentId } from '@/modules/band/instruments';
 import type { ENUM_WORLD } from '@/core/types';
 import { Engine, Vector3 } from '../../render/babylon/exports';
 import { SoundsManager } from '../soundsManager';

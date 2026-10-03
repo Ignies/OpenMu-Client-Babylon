@@ -3,7 +3,7 @@
 1. Write the moves as JSON (file or folder, a specific file wins over its folder):
 
    ```json
-   [{ "from": "src/controllers/old/thing.ts", "to": "src/features/thing/thing.ts" }]
+   [{ "from": "src/controllers/old/thing.ts", "to": "src/modules/thing/thing.ts" }]
    ```
 
 2. Dry run: `bun tools/restructure/move.ts moves.json --dry-run`. It lists config files that name

@@ -20,7 +20,7 @@ connect server.
 
 ## Depends on / used by
 - uses: `src/core/types` (`CharacterClassNumber`), `src/core/binaryUtils`
-- used by: `versions/season6/packets`, `versions/v097d/packets`, feature `net.ts` files and the
+- used by: `versions/season6/packets`, `versions/v097d/packets`, module `net.ts` files and the
   socket dispatcher, through `@versions/shared/packets/*`
 
 ## Change it

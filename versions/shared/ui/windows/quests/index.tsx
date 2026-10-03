@@ -13,9 +13,9 @@ import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuItemWindow, MuTableFrame } from '@/controllers/interface/components/mu_window';
 import { MsgBoxFrame, msgBoxHeight } from '@/controllers/interface/components/msg_box_frame';
-import { quests } from '@/features/quests';
-import { objectiveDone, objectiveProgress } from '@/features/quests/objectives';
-import { questDefinition } from '@/features/quests/questData';
+import { quests } from '@/modules/quests';
+import { objectiveDone, objectiveProgress } from '@/modules/quests/objectives';
+import { questDefinition } from '@/modules/quests/questData';
 import {
   LegacyQuestState,
   answerLegacyQuest,
@@ -33,7 +33,7 @@ import {
   legacyQuestWindowOpen,
   legacyQuestWindowTitle,
   wrapDialogText,
-} from '@/features/quests/legacyQuests';
+} from '@/modules/quests/legacyQuests';
 import {
   answerNpcDialogue,
   closeNpcDialogue,
@@ -43,7 +43,7 @@ import {
   npcDialogueLines,
   npcDialogueNpcName,
   npcDialogueOpen,
-} from '@/features/quests/npcDialogue';
+} from '@/modules/quests/npcDialogue';
 import {
   activeQuests,
   advanceQuestWords,
@@ -76,7 +76,7 @@ import {
   showMyQuestWindow,
   type MyQuestTab,
   type QuestRequirementLine,
-} from '@/features/quests/questLog';
+} from '@/modules/quests/questLog';
 import {
   COLOR,
   COMPLETE_BUTTON,

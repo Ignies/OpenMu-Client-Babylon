@@ -3,15 +3,15 @@ import './style.less';
 import { t } from '@/i18n';
 import { observer } from 'mobx-react-lite';
 import { Store } from '@/app/store';
-import { Economy } from '@/features/economy/economy';
-import { StorageKind, isTradeBanned } from '@/features/inventory/itemStorage';
+import { Economy } from '@/modules/economy/economy';
+import { StorageKind, isTradeBanned } from '@/modules/inventory/itemStorage';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuItemWindow } from '@/controllers/interface/components/mu_window';
 import { ItemGrid } from '@/controllers/interface/components/item_grid';
-import { QuickItemActions } from '@/features/inventory/quickItemActions';
+import { QuickItemActions } from '@/modules/inventory/quickItemActions';
 
-import { goldColor } from '@/features/items/goldColor';
+import { goldColor } from '@/modules/items/goldColor';
 import {
   ACCEPT_FRAMES,
   ACCEPT_HEIGHT,

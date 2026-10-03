@@ -10,7 +10,7 @@ import {
   defaultGameOption,
   setGameOption,
   type GameOptions as GameOptionsType,
-} from '@/features/options/gameOptions';
+} from '@/modules/options/gameOptions';
 import { invalidateShadowState } from '@/controllers/render/objectShadow';
 import { installApp } from '@/app/pwaInstall';
 import { reloadMapObjects } from '@/controllers/terrain/loadMapIntoScene';
@@ -24,7 +24,7 @@ import {
   setKeyBinding,
   type KeyAction,
 } from '@/controllers/interface/keyBindings';
-import { SessionExit, type ExitKind } from '@/features/session/sessionExit';
+import { SessionExit, type ExitKind } from '@/modules/session/sessionExit';
 import { t, type TextKey } from '@/i18n';
 import { EN_TEXT } from '@/i18n/recipes';
 import { applyTierPreset, type TierPreset } from './presets';

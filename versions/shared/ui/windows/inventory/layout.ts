@@ -1,5 +1,5 @@
 import type { TextKey } from '@/i18n';
-import { InventoryConstants } from '@/features/inventory/inventoryConstants';
+import { InventoryConstants } from '@/modules/inventory/inventoryConstants';
 
 export const GRID_X = 15;
 export const GRID_Y = 200;

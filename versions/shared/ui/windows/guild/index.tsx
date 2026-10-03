@@ -9,7 +9,7 @@ import {
   GUILD_SECURITY_CODE_MAX,
   Social,
   type GuildTab,
-} from '@/features/social/social';
+} from '@/modules/social/social';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { playUiSound, uiClick } from '@/controllers/sound/sfx';
 import { MuButton } from '@/controllers/interface/components/mu_button';
@@ -22,7 +22,7 @@ import {
   GUILD_MARK_SIZE,
   guildMarkDataUrl,
   packGuildMark,
-} from '@/features/social/guildMark';
+} from '@/modules/social/guildMark';
 import { TEXT_COLOR } from '../../pages/server_select/layout';
 import {
   BACK_SPRITE,

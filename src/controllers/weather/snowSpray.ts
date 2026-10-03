@@ -6,7 +6,7 @@ import {
   type Scene,
 } from '../render/babylon/exports';
 import { loadEffectTexture } from '../fx/moveTargetEffect';
-import { GameOptions } from '../../features/options/gameOptions';
+import { GameOptions } from '../../modules/options/gameOptions';
 
 /**
  * The puff of snow a boot throws when it lands: one particle system driven by

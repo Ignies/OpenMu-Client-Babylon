@@ -20,12 +20,12 @@ import {
   characterSelectView,
   characterSlotAngle,
   characterSlotPosition,
-} from '../../features/character_select/characterSelect';
+} from '../../modules/character_select/characterSelect';
 import { setSceneHold } from '../../controllers/loading/sceneGate';
-import { createCharacterSelectBackdrop } from '../../features/character_select/characterSelectBackdrop';
+import { createCharacterSelectBackdrop } from '../../modules/character_select/characterSelectBackdrop';
 import { PlayerAction } from '@versions/shared/objects/enum';
-import { genderedEmoteAction } from '../../features/hero/emotes';
-import { isRidingMount } from '../../features/pets/pets';
+import { genderedEmoteAction } from '../../modules/hero/emotes';
+import { isRidingMount } from '../../modules/pets/pets';
 import {
   registerPointLightEmitter,
   type PointLightEmitter,

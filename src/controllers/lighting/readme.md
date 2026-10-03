@@ -66,7 +66,7 @@ policy. It knows how to light something, never which skill or item asks for it.
 - used by: `controllers.ts`, `app/lifecycle.ts`, ECS systems (terrain light, character light,
   item glow, object effect, skill cast, weapon trail, model loader, character select), skills
   (`define.ts`, `index.ts`, `visuals.ts`), sound (`crackle.ts`), fx, terrain, render, item_fx,
-  weather, `features/events/invasion.ts` (`omen`), every skill file that lights itself, and the
+  weather, `modules/events/invasion.ts` (`omen`), every skill file that lights itself, and the
   map specs and object classes in `versions/shared/maps/`.
 
 ## Change it

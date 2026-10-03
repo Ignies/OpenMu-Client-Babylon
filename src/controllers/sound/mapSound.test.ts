@@ -8,7 +8,7 @@ vi.hoisted(() => {
   g.location ??= { href: 'http://localhost/', search: '', hostname: 'localhost', protocol: 'http:' };
 });
 
-import { chaosCastleTimer } from '../../features/events/chaosCastle';
+import { chaosCastleTimer } from '../../modules/events/chaosCastle';
 import { ambientBedsFor, ambientBedsLayer, ambientOneShotsFor } from './ambientBeds';
 import { objectLoopsFor, OBJECT_LOOPS } from './objectLoops';
 import { mapMonsterCues } from './mapMonsters';

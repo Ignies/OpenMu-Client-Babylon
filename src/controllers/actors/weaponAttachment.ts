@@ -6,7 +6,7 @@ import {
   toBabylon,
   type BmdLink,
 } from '../render/boneLink';
-import { BaseClass, getBaseClass } from '../../features/hero/characterStats';
+import { BaseClass, getBaseClass } from '../../modules/hero/characterStats';
 import { PlayerAction } from '@versions/shared/objects/enum';
 import { RAGEFIGHTER_STOP_SPEED } from '../anim/playSpeed';
 import type { PartPose } from '../render/modelObject';

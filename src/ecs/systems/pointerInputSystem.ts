@@ -8,9 +8,9 @@ import {
 import type { EntityTypeFromQuery, ISystemFactory } from '../world';
 import { canAttackPlayer, isAttackableEntity } from './attackSystem';
 import { isMobileDevice } from '../../controllers/interface/mobile';
-import { Commands } from '../../features/chat/commands';
+import { Commands } from '../../modules/chat/commands';
 import { Store } from '../../app/store';
-import { TELEPORT_ALLY } from '../../features/skills/skillCasting';
+import { TELEPORT_ALLY } from '../../modules/skills/skillCasting';
 import { aimX, aimY } from '../../controllers/camera';
 import { requestPing } from '../../controllers/net/pingNet';
 import { pickGround } from '../../controllers/terrain/terrainPick';

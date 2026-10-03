@@ -19,17 +19,17 @@ export const RULES: Rule[] = [
   },
   {
     name: 'controllers-are-generic',
-    why: 'a controller never imports a feature, the app or content; content registers itself into the controller',
-    test: e => under(e.from, 'src/controllers/') && !isTest(e.from) && (under(e.to, 'src/features/') || under(e.to, 'src/app/') || isContent(e.to)),
+    why: 'a controller never imports a module, the app or content; content registers itself into the controller',
+    test: e => under(e.from, 'src/controllers/') && !isTest(e.from) && (under(e.to, 'src/modules/') || under(e.to, 'src/app/') || isContent(e.to)),
   },
   {
-    name: 'features-do-not-draw',
-    why: 'a feature owns state and packets; windows read it, never the other way round',
-    test: e => under(e.from, 'src/features/') && !isTest(e.from) && (under(e.to, 'versions/shared/ui/') || under(e.to, 'src/app/App')),
+    name: 'modules-do-not-draw',
+    why: 'a module owns state and packets; windows read it, never the other way round',
+    test: e => under(e.from, 'src/modules/') && !isTest(e.from) && (under(e.to, 'versions/shared/ui/') || under(e.to, 'src/app/App')),
   },
   {
-    name: 'windows-use-features-not-store',
-    why: 'a window reads its feature and calls its actions; the Store is being split into features',
+    name: 'windows-use-modules-not-store',
+    why: 'a window reads its module and calls its actions; the Store is being split into modules',
     test: e => under(e.from, 'versions/shared/ui/') && e.to === 'src/app/store.ts',
   },
   {

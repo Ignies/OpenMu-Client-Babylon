@@ -6,12 +6,12 @@ import { t } from '@/i18n';
 import { Store } from '@/app/store';
 import { gameVersion } from '@/version';
 import { isKey } from '@/controllers/interface/keyBindings';
-import { BaseClass, getBaseClass } from '@/features/hero/characterStats';
+import { BaseClass, getBaseClass } from '@/modules/hero/characterStats';
 import {
   skillDefinition,
   type SkillDefinition,
 } from '@versions/shared/skills/skillsDatabase';
-import { skillDisplayName } from '@/features/skills/skillNames';
+import { skillDisplayName } from '@/modules/skills/skillNames';
 import { uiClick } from '@/controllers/sound/sfx';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { MuButton } from '@/controllers/interface/components/mu_button';
@@ -25,14 +25,14 @@ import {
   MAX_OBTAINING_RANGE,
   type DarkRavenMode,
   type MuHelperConfig,
-} from '@/features/mu_helper/config';
+} from '@/modules/mu_helper/config';
 import {
   ensureMuHelperWatching,
   MuHelperState,
   resetMuHelperDraft,
   saveMuHelperConfig,
   toggleMuHelperWindow,
-} from '@/features/mu_helper/state';
+} from '@/modules/mu_helper/state';
 
 /**
  * `CNewUIMuHelper` (NewUIMuHelper.cpp): the S6 MU Helper settings dialog in

@@ -5,10 +5,10 @@ import {
   isKey,
   WALK_KEY_CODES,
 } from '../../controllers/interface/keyBindings';
-import { GameOptions } from '../../features/options/gameOptions';
-import { ITEM_HOTKEY_CODES } from '../../features/inventory/itemHotkeys';
+import { GameOptions } from '../../modules/options/gameOptions';
+import { ITEM_HOTKEY_CODES } from '../../modules/inventory/itemHotkeys';
 import { MuWindows } from '../../controllers/interface/windowManager';
-import { openSystemMenu } from '../../features/session/sessionExit';
+import { openSystemMenu } from '../../modules/session/sessionExit';
 import type { ISystemFactory } from '../world';
 
 /** Keys the page would scroll on; kept from doing so while playing. */

@@ -13,7 +13,7 @@ per-map overrides and this client's extra zoom steps, drag and first-person mous
 - `isFirstPerson()`, `showHeroBody()`.
 - `aimX`, `aimY`, `isMouseLookActive`, `releaseMouseLook` (`mouseLook.ts`): every pick runs its
   pointer coordinates through `aimX` / `aimY` (pointer input, cursor, walk click, rest objects).
-- `recipes.ts` constants: the FOV range is read by `features/options/gameOptions.ts` and the
+- `recipes.ts` constants: the FOV range is read by `modules/options/gameOptions.ts` and the
   options window.
 
 ## How it works
@@ -49,7 +49,7 @@ Hides the hero's meshes with `isVisible` (reversible, unlike `HiddenMesh`), so w
 name plates, effect anchors and picking still work. Only meshes it hid are shown again.
 
 ## Depends on / used by
-- uses: `core/eventBus`, `render/babylon`, `features/options/gameOptions.ts` (a baselined rule
+- uses: `core/eventBus`, `render/babylon`, `modules/options/gameOptions.ts` (a baselined rule
   exception in `tools/checks/baselines/deps.json`).
 - used by: `ecs/systems` (camera follow, cursor, pointer input, player controller, rest object),
   the game cursor component, skills that shake the screen, the options window.

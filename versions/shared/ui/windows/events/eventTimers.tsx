@@ -1,15 +1,15 @@
 import { observer } from 'mobx-react-lite';
 import { Store } from '@/app/store';
-import { GameOptions, uiScaleFactor } from '@/features/options/gameOptions';
-import { events } from '@/features/events';
+import { GameOptions, uiScaleFactor } from '@/modules/options/gameOptions';
+import { events } from '@/modules/events';
 import {
   eventSchedule,
   refreshEventSchedule,
   type EventScheduleKey,
   type EventScheduleRow,
-} from '@/features/events/schedule';
-import { rowText } from '@/features/events/scheduleClock';
-import { EVENT_TEXT } from '@/features/events/recipes';
+} from '@/modules/events/schedule';
+import { rowText } from '@/modules/events/scheduleClock';
+import { EVENT_TEXT } from '@/modules/events/recipes';
 import { MuText } from '@/controllers/interface/components/mu_text';
 import {
   EVENT_ROW_CLOCK_WIDTH,
@@ -33,7 +33,7 @@ import {
  * slot's place whether the minimap panel is drawn in it or not, so nothing
  * below them moves when that option is toggled.
  *
- * Reads `features/events/schedule.ts` and writes nothing.
+ * Reads `modules/events/schedule.ts` and writes nothing.
  */
 
 const LABEL: Readonly<Record<EventScheduleKey, () => string>> = {

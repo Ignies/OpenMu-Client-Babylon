@@ -3,7 +3,7 @@ import './style.less';
 import { useLayoutEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Store } from '@/app/store';
-import { GameOptions, uiScaleFactor } from '@/features/options/gameOptions';
+import { GameOptions, uiScaleFactor } from '@/modules/options/gameOptions';
 import type { MinimapMarker } from '@/controllers/terrain/minimapData';
 import { MuTipText } from '@/controllers/interface/components/mu_text';
 import {

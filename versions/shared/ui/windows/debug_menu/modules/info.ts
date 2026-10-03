@@ -1,4 +1,4 @@
-import { registerDebugModule, type DebugRow } from '@/features/gm/debugMenu';
+import { registerDebugModule, type DebugRow } from '@/modules/gm/debugMenu';
 import { ENUM_WORLD } from '@/core/types';
 import { Store } from '@/app/store';
 
