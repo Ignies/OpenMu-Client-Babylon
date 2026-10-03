@@ -2,10 +2,14 @@
 
 Getting game files into the client: the two data roots, fetching with gzip sidecars, the glTF
 model cache and item materials, texture packs, the pre-game download, the item icon pack, the BMD
-reader (`bmd/`) and the readers for the original `Data/` tree (`mu/`). There is no `index.ts`;
-other folders import the modules below directly.
+reader (`bmd/`) and the readers for the original `Data/` tree (`mu/`). `index.ts` is the door
+for new imports (`loadGLTF`, `localisedNpcName`, `reportLoadFailure`, `settle`); older code still
+imports the modules below directly (baselined in `tools/checks`).
 
 ## Public API
+- `loadFailure.ts`: `reportLoadFailure(what)`, a `.catch` handler for fire-and-forget loads that
+  warns once per `what` and never rethrows; `settle(promise, what)`, the same as a promise that
+  resolves to `undefined` instead of rejecting.
 - Data roots: `resolveUrlToDataFolder(url)` (converted assets, `gameVersion.data.assets`);
   `mu/dataFolder.ts`: `resolveDataUrl`, `downloadDataFile`, `hasDataFile` (the original `Data/`
   tree, `gameVersion.data.folder`).
@@ -49,6 +53,10 @@ other folders import the modules below directly.
   restarting at every record. The item, skill and buff name tables only overlay the English names
   the client already has; they load nothing for English.
 
+- Fire-and-forget loads (`void loadX(file).then(...)`, nobody awaits them) end in
+  `.catch(reportLoadFailure(file))`, or go through `settle`. A missing file then logs one warning
+  per path and whatever it fed is simply not drawn, instead of an unhandled rejection per call.
+
 ## Depends on / used by
 - uses: `render` (babylon, materials, `pbrMaps`, `textureScript`), `item_fx/itemMaterial`,
   `terrain` (`mapFileEncryption`, tile lists), `maps`, `net/wireUtils`, `interface/item_icons`,
@@ -59,6 +67,8 @@ other folders import the modules below directly.
   and `tools/` (`bmdToGlb.ts`, `assetsIndex.ts`, `compressAssets.ts`).
 
 ## Change it
+- start a load nobody awaits: end it with `.catch(reportLoadFailure(file))` (or wrap it in
+  `settle`); never leave a bare `void load(x).then(...)`.
 - add a texture pack: build it into `public/packs/<id>/` and list it in `public/packs/index.json`
   ([texture_packs.md](../../../docs/texture_packs.md)). No code change.
 - add a gzip-compressed extension: add it to `COMPRESSED_EXTENSIONS`; `tools/compressAssets.ts`
@@ -70,6 +80,8 @@ other folders import the modules below directly.
 - change which interface sheets preload: `versions/<id>/ui/preload.ts`.
 
 ## Tests
+- `loadFailure.test.ts`: one warning per file, a different file warns again, `settle` passes a
+  value through and turns a failure into `undefined`.
 - `assetDownload.test.ts`: `urlsOf`, Core cannot be unticked, transfer totals.
 - `compressedAssets.test.ts`: sidecar only for listed extensions, gzip or host-unwrapped bytes,
   plain fallback, giving up after failures, SPA fallback treated as missing.
