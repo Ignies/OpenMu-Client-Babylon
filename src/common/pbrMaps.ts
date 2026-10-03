@@ -7,6 +7,7 @@ import {
   type Scene,
 } from '../libs/babylon/exports';
 import { resolveDataUrl } from '../libs/mu/dataFolder';
+import { textureLabel } from './texturePacks';
 import { onGameOptionsChanged } from './gameOptions';
 import { filterAnisotropy } from './materialQuality';
 import { derivePbrMaps, flipRows, ROUGH_MAX, type DerivedMaps } from './pbrDerive';
@@ -358,11 +359,24 @@ function loadManifest(): Promise<Manifest> {
   return manifest;
 }
 
-/** Source file name of a texture - the GLB label when loaded from one. */
+/**
+ * Source file name of a texture - the GLB label when loaded from one.
+ *
+ * Asked of the texture pack first. A pack swap (`updateURL`) replaces the
+ * internal texture, and until the pack image has arrived its label is the
+ * pack URL (`./packs/upscaled-512/Object3/snotice.ozj.webp`); the pack only
+ * re-stamps the converter's name once the load finishes. A model's textures
+ * start swapping the moment its GLB is first parsed, so whatever reads the
+ * name right after - the sign plates in `signObject.ts`, for one - read it
+ * mid-swap: every board near the hero kept its fake script, because
+ * `snotice.ozj.webp` is not a plate.
+ */
 export function textureSourceName(texture: BaseTexture): string {
   const internal = texture.getInternalTexture() as { label?: string } | null;
+  const name =
+    textureLabel(texture as Texture) || internal?.label || texture.name;
 
-  return (internal?.label || texture.name).split(/[\\/]/).pop() ?? '';
+  return name.split(/[\\/]/).pop() ?? '';
 }
 
 function authored(file: string, scene: Scene): Texture {
