@@ -36,7 +36,9 @@ The summon's own arrival is played from the create flag of the summoned monster
 (`playSummonArrival` in `../_shared.ts`), not by these skills.
 
 `_shared.ts` holds the elf summon cast: `elfSummon` (at the cast's release, `afterRelease`: the summon decal
-and its healing streaks at the caster) and `SUMMON_GRADED` (the graded look used by ids 30-36).
+and its healing streaks at the caster) and `SUMMON_GRADED` (the graded look used by ids 30-36);
+`atBuffRelease`: Heal, Greater Defense and Greater Damage draw at the cast's release on the target as it
+stands then (ZzzCharacter.cpp:4910-4954), with their `strike` light there.
 
 ## Depends on / used by
 - uses: `../_shared.ts`, `@/controllers/{skills,fx,lighting,sound,combat}`
@@ -46,4 +48,5 @@ and its healing streaks at the caster) and `SUMMON_GRADED` (the graded look used
 - see [docs/how_to/add_skill.md](../../../../docs/how_to/add_skill.md).
 
 ## Tests
-- Covered by the golden tests in `../` (`skillVisuals.golden.test.ts`, `skillTables.golden.test.ts`).
+- Covered by the golden tests in `../` (`skillVisuals.golden.test.ts`, `skillTables.golden.test.ts`);
+  `../releaseTiming.test.ts` times the buffs against the caster's magic speed.

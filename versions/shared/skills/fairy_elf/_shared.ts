@@ -1,10 +1,35 @@
 import { delay, entityGone, entityPos, entityYaw, fxNow, scaleRGB, type ParticleRecipe, type PointSource, type RGB } from '@/controllers/fx/core';
-import { SkillContext, Step, TICK, afterRelease, atCaster, cm, repeat, ring, seq, ticks } from '@/controllers/skills/visuals';
+import { IMPACT_HEIGHT, SkillContext, Step, TICK, afterRelease, atCaster, baseSkill, cm, currentSkill, repeat, ring, seq, ticks } from '@/controllers/skills/visuals';
+import { lighting } from '@/controllers/lighting';
 import { RGBS, TEX } from '@/controllers/fx/recipes';
 import { type TaperShape } from '@/controllers/fx/joint';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
 import { summonLight } from '../_shared';
+
+/**
+ * `step` at the cast's release on the target's chest as it stands then, with the row's `strike` light there: the
+ * buffs' BITMAP_MAGIC+1 is created in the release block (ZzzCharacter.cpp:4910-4954), not by the packet.
+ */
+export const atBuffRelease = (step: Step): Step => (at, c) => {
+  const skill = baseSkill(currentSkill);
+  afterRelease((p, cc) => {
+    const target = cc.target && !entityGone(cc.target) ? cc.target : null;
+    if (target) entityPos(target, IMPACT_HEIGHT, p);
+    step(p, cc);
+    const on = new Vector3();
+    lighting.skillStrike(cc.scene, skill, {
+      position: { x: p.x, y: p.y, z: p.z },
+      follow: out => {
+        if (target) entityPos(target, IMPACT_HEIGHT, on);
+        else on.copyFrom(p);
+        out.x = on.x;
+        out.y = on.y;
+        out.z = on.z;
+      },
+    });
+  })(at, c);
+};
 
 /** Ice shards / snow motes: BITMAP_FLARE tinted, slow, falling. */
 export const ICE_MOTES: ParticleRecipe = {

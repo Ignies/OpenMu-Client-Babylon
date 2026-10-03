@@ -98,3 +98,15 @@ describe('a Dark Lord strike lands on key 3 of its clip', () => {
     expect(timeline(FORCE, PlayerAction.PLAYER_STOP_MALE, 0.25, 3, 60).release).toBe(34);
   });
 });
+
+describe("the elf buffs land at the cast's release", () => {
+  // Heal, Greater Defense, Greater Damage: BITMAP_MAGIC+1 on the target in the release block (ZzzCharacter.cpp:4910-4954).
+  const at = (skill: number, magicSpeed: number) => timeline(skill, CLIP, playerPlaySpeed(CLIP, 0, magicSpeed), 5);
+
+  it('14 ticks after the packet at a low magic speed, on key 5 at a high one', () => {
+    for (const skill of [26, 27, 28]) {
+      expect(at(skill, 0)).toEqual({ key: 18, release: 14 });
+      expect(at(skill, 1400)).toEqual({ key: 2, release: 2 });
+    }
+  });
+});
