@@ -270,3 +270,5 @@ export function textTable<T extends Record<string, TextKey>>(
 
 export type { LanguageLayer, FlagRegion } from './layer';
 export type { TextKey } from './recipes';
+/** The English line of every key: the key list and the fallback. */
+export { EN_TEXT } from './recipes';
