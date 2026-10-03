@@ -59,6 +59,8 @@ export const noriaLayer: MapLayer = {
   effectOnly: NORIA_EFFECT_ONLY_TYPES,
   emissions: NORIA_EMISSIONS,
   render: { meshAnimations: NORIA_MESH_ANIMATIONS },
+  // What flies here (`MoveBoids`, GOBoid.cpp:1304-1346).
+  fx: { boids: 'butterfly' },
   sound: NORIA_SOUND,
   lighting: NORIA_LIGHTING,
   // The streets darken and pool in the rain; the petals are Lorencia's

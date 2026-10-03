@@ -66,6 +66,8 @@ export const atlansLayer: MapLayer = {
   effectOnly: ATLANS_EFFECT_ONLY_TYPES,
   emissions: ATLANS_EMISSIONS,
   render: { meshAnimations: ATLANS_MESH_ANIMATIONS },
+  // What flies here (`MoveBoids`, GOBoid.cpp:1304-1346).
+  fx: { boids: 'fish' },
   sound: ATLANS_SOUND,
   lighting: ATLANS_LIGHTING,
   terrain: {

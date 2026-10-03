@@ -32,17 +32,6 @@ export function leanCursorObjects(map: ENUM_WORLD): ReadonlySet<number> | undefi
   return set;
 }
 
-/**
- * `leanCursorObjects` as the per-world record its two outside readers
- * (`render/propBatches.ts`, `ecs/systems/cursorSystem.ts`) index. A live
- * view, read on every access; new code calls `leanCursorObjects`.
- */
-export const LEAN_CURSOR_OBJECTS: Partial<Record<ENUM_WORLD, ReadonlySet<number>>> =
-  new Proxy({} as Partial<Record<ENUM_WORLD, ReadonlySet<number>>>, {
-    get: (_target, key) =>
-      typeof key === 'string' ? leanCursorObjects(Number(key) as ENUM_WORLD) : undefined,
-  });
-
 export function findRestObject(
   map: ENUM_WORLD,
   objectType: number

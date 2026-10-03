@@ -40,6 +40,8 @@ export const dungeonLayer: MapLayer = {
   effectOnly: DUNGEON_EFFECT_ONLY_TYPES,
   emissions: DUNGEON_EMISSIONS,
   render: { meshAnimations: DUNGEON_MESH_ANIMATIONS },
+  // What flies here (`MoveBoids`, GOBoid.cpp:1304-1346).
+  fx: { boids: 'bat' },
   sound: DUNGEON_SOUND,
   lighting: DUNGEON_LIGHTING,
   terrain: { rest: { 59: sit(false), 60: pose(true) }, leanCursor: [60] },

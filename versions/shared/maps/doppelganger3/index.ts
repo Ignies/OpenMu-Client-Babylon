@@ -53,6 +53,8 @@ export const doppelganger3Layer: MapLayer = {
   effectOnly: DOPPELGANGER3_EFFECT_ONLY_TYPES,
   emissions: DOPPELGANGER3_EMISSIONS,
   render: { meshAnimations: DOPPELGANGER3_MESH_ANIMATIONS },
+  // What flies here (`MoveBoids`, GOBoid.cpp:1304-1346).
+  fx: { boids: 'fish' },
   sound: { ...DOPPELGANGER_SOUND, footsteps: SWIM_STEPS },
   // Atlans' art: the `RenderTerrain` grass guard (ZzzLodTerrain.cpp:2651).
   terrain: { grass: false },

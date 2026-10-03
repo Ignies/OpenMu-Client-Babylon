@@ -25,7 +25,7 @@ water, ground picks, minimap data and the base class for map objects. There is n
 - `terrainOverlay.ts`: `PUDDLES`, `WET_GROUND`, `overlayAmountAt`, `overlayBedShare`,
   `snowCoverFor`, `needsTerrainMask`. `terrainGrass.ts`: `grassFieldForFrame`, `GrassActor`.
 - Smaller readers: `loadWorldMinimap`, `parseMinimapData`, `findRestObject` /
-  `leanCursorObjects` / `LEAN_CURSOR_OBJECTS` (a live per-world view), `mapObjectFixupsFor`,
+  `leanCursorObjects`, `mapObjectFixupsFor`,
   `grassAllowed`, `parseTerrainObjects`, `decryptMapFile` / `convertBux`, `getTilesList`,
   `getTerrainHeightMap`, `waterSurfaceHeight`, `loadCameraWalkScript`, `liveTileArrays`.
 
@@ -85,7 +85,7 @@ water, ground picks, minimap data and the base class for map objects. There is n
 ## Tests
 - `versions/shared/maps/mapRows.golden.test.ts`: every world's overlays, snow bed, water, rest
   objects, lean boxes, fixups and grass, pinned across the move into the map folders.
-- `mapTerrain.test.ts`: only Icarus hides its ground; rest objects and lean boxes (also through `LEAN_CURSOR_OBJECTS`) and the
+- `mapTerrain.test.ts`: only Icarus hides its ground; rest objects and lean boxes and the
   nearest-object height fix from a registered entry.
 - `groundArrays.test.ts`: `refreshGroundTile` raises and drops a tile and leaves its neighbours;
   `groundTiles` copies tiles out with their own quads.

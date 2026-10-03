@@ -20,7 +20,7 @@ import { SNOW_GROUND_MAPS, snowCoverLayer } from '@/controllers/weather/snowCove
 import { snowSinkLayer } from '@/controllers/weather/snowSink';
 import { snowCoverFor, terrainOverlaysFor } from '@/controllers/terrain/terrainOverlay';
 import { terrainWaterFor } from '@/controllers/terrain/terrainWater';
-import { LEAN_CURSOR_OBJECTS, findRestObject } from '@/controllers/terrain/restObjects';
+import { leanCursorObjects, findRestObject } from '@/controllers/terrain/restObjects';
 import { mapObjectFixupsFor } from '@/controllers/terrain/mapObjectFixups';
 import { grassAllowed } from '@/controllers/terrain/terrainGrass';
 import {
@@ -204,7 +204,7 @@ describe('per-map rows', () => {
       snowBed: snowCoverFor(w).bed ?? null,
       water: terrainWaterFor(w),
       rest: OBJECT_TYPES.map(t => findRestObject(w, t) ?? null),
-      lean: [...(LEAN_CURSOR_OBJECTS[w] ?? [])],
+      lean: [...(leanCursorObjects(w) ?? [])],
       fixups: mapObjectFixupsFor(w),
       grass: grassAllowed(w),
     }));

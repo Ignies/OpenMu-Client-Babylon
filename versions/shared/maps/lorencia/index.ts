@@ -51,6 +51,8 @@ export const lorenciaLayer: MapLayer = {
   blendMeshes: LORENCIA_BLEND_MESHES,
   effectOnly: LORENCIA_EFFECT_ONLY_TYPES,
   emissions: LORENCIA_EMISSIONS,
+  // What flies here (`MoveBoids`, GOBoid.cpp:1304-1346).
+  fx: { boids: 'bird' },
   sound: LORENCIA_SOUND,
   lighting: LORENCIA_LIGHTING,
   // `MoveLeaves`' leaves on the wind (ZzzEffectFireLeave.cpp:292-313); dust in the pub (ours).

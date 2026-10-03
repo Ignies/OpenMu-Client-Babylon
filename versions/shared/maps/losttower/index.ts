@@ -39,6 +39,8 @@ export const losttowerLayer: MapLayer = {
   effectOnly: LOST_TOWER_EFFECT_ONLY_TYPES,
   emissions: LOST_TOWER_EMISSIONS,
   render: { meshAnimations: LOSTTOWER_MESH_ANIMATIONS },
+  // What flies here (`MoveBoids`, GOBoid.cpp:1304-1346).
+  fx: { boids: 'bat' },
   sound: LOST_TOWER_SOUND,
   lighting: LOST_TOWER_LIGHTING,
   create: world => import('./create').then(m => m.createLostTower(world)),

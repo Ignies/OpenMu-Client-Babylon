@@ -110,7 +110,7 @@ a soft wake. Driven by `ecs/systems/bandSystem.ts`, one spawn per hit.
 ### boids.ts
 `GOBoid.cpp` has two halves: `Mounts[]` (pets, Fenrir, the Dark Lord's horse) lives in
 `modules/pets/pets.ts` and `ecs/systems/petSystem.ts`; `Boids[]` (birds, bats, butterflies, crows,
-fish) is here. Each boid plays its own call sound (GOBoid.cpp:1481-1501). The ground crawlers
+fish) is here; each map names its species (`fx: { boids }` on the entry, `MapFx`). Each boid plays its own call sound (GOBoid.cpp:1481-1501). The ground crawlers
 (GOBoid.cpp:1690-1745) are not ported yet. `MAX_BOIDS` is 13, not the original array size of 40.
 
 ### cards.ts

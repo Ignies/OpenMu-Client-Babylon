@@ -7,7 +7,7 @@ import {
 import { TWFlags } from '../../controllers/terrain/consts';
 import { isFlagInBinaryMask } from '../../controllers/assets/download';
 import { aimX, aimY } from '../../controllers/camera';
-import { LEAN_CURSOR_OBJECTS, findRestObject } from '../../controllers/terrain/restObjects';
+import { leanCursorObjects, findRestObject } from '../../controllers/terrain/restObjects';
 import { pickGround } from '../../controllers/terrain/terrainPick';
 import { Store } from '../../app/store';
 import type { CursorHover } from '../../controllers/interface/components/game_cursor/cursors';
@@ -82,7 +82,7 @@ export const CursorSystem: ISystemFactory = world => {
         continue;
       }
 
-      return LEAN_CURSOR_OBJECTS[world.mapIndex]?.has(e.modelId)
+      return leanCursorObjects(world.mapIndex)?.has(e.modelId)
         ? 'lean'
         : 'sit';
     }

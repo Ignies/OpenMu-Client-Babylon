@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { ENUM_WORLD } from '../../core/types';
 import { maps, type MapLayer } from '../maps';
-import { LEAN_CURSOR_OBJECTS, findRestObject, leanCursorObjects } from './restObjects';
+import { findRestObject, leanCursorObjects } from './restObjects';
 import { applyMapObjectFixups, mapObjectFixupsFor } from './mapObjectFixups';
 
 // A world no real entry claims, served by a test entry.
@@ -29,13 +29,12 @@ describe("a map's terrain rows", () => {
     expect(maps.worldsWhere(l => l.terrain?.hidden === true)).toEqual([ENUM_WORLD.WD_10ICARUS]);
   });
 
-  it('give rest objects and lean boxes, live through the per-world record', () => {
-    expect(LEAN_CURSOR_OBJECTS[W]).toBeUndefined();
+  it('give rest objects and lean boxes, read live', () => {
+    expect(leanCursorObjects(W)).toBeUndefined();
     unregister = maps.register(entry);
     expect(findRestObject(W, 5)?.kind).toBe('sit');
     expect(findRestObject(W, 6)).toBeUndefined();
     expect(leanCursorObjects(W)?.has(5)).toBe(true);
-    expect(LEAN_CURSOR_OBJECTS[W]).toBe(leanCursorObjects(W));
   });
 
   it('fix the height of the object nearest each row', () => {
