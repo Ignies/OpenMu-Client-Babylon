@@ -1,0 +1,7 @@
+import { defineMonster } from '@/controllers/monsters';
+
+export default defineMonster({
+  Numb: 426,
+  Name: 'Chaos Castle 13',
+  maxHealth: 20000,
+});

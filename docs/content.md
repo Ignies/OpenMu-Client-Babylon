@@ -57,9 +57,13 @@ restyling the tooltip once restyles it everywhere.
 ## Maps, monsters, npcs, items
 
 - `maps/<map>/`: the map's spec, its object classes (one file per object type) and `create.ts`.
-- `monsters/`, `npcs/`: one file per monster or npc with its own look; the tables
-  (`monsters.json`, `monstersDatabase.ts`) cover the rest.
-- `items/`: the item table and item-driven looks (`launcher_arrows.ts`).
+- `monsters/<name>/index.ts`: one folder per monster or npc type (`defineMonster`: number, name,
+  max health, the original table row), found by glob; plus model classes for the ones with their
+  own look. `npcs/`: npc model classes.
+- `items/<group>/<item>.ts`: one file per item (`defineItem`), found by glob; plus item-driven looks
+  (`launcher_arrows.ts`).
+- An area's master controller (`src/controllers/items`, `src/controllers/monsters`) owns the record
+  type, the `define*` function and the registry; the files are the components that use it.
 
 ## Versions
 

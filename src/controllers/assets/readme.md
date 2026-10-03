@@ -123,7 +123,7 @@ max level, zen, gate. The shipped file pads to 50 slots; only `count` rows are r
 
 ### mu/npcNameFile.ts
 `NpcName_<Lang>.txt` is tab-separated text (`84\t1\t"Chief Skeleton Warrior"`, `//` comments). It is
-the base table for every language, English included, because `monsters.json` is from an older
+the base table for every language, English included, because the monster table is from an older
 version and misses or misnames many types. `monsterDisplayName()` in
 `versions/shared/monsters/monstersDatabase.ts` reads it.
 

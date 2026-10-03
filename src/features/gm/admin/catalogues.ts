@@ -1,4 +1,5 @@
-import monsters from '@versions/shared/monsters/monsters.json';
+import { monsters as monsterFiles } from '@versions/shared/monsters/all';
+import type { MonsterRow as TableRow } from '@/controllers/monsters';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 
 const items = ItemsDatabase.all();
@@ -21,7 +22,9 @@ export type SkinEntry = {
   kind: SkinKind;
 };
 
-export type MonsterRow = (typeof monsters)[number];
+export type MonsterRow = TableRow;
+
+const monsters = monsterFiles.all().flatMap(d => monsterFiles.get(d.Numb) ?? []);
 
 /**
  * A row with no attack type is something that stands in a town and talks;

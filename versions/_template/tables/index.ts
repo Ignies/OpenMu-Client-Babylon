@@ -7,7 +7,7 @@
  *             -> `tables/items.json`, wrapped in an `ItemsDatabase`-shaped class
  * - skills:   regenerate `SKILL_DEFINITIONS` from
  *             `OpenMU/src/Persistence/Initialization/<ver>/SkillsInitializer.cs`
- * - monsters: `<ver>/Monsters/*.cs` -> `monsters.json`
+ * - monsters: `<ver>/Monsters/*.cs` -> the monster folders
  * - jewels:   the jewel rules that exist in that version (`jewelUpgrade.ts` shape)
  * - NPC ids / shops / gates: `<ver>/Maps/*.cs`, that version's `gate.bmd`
  *

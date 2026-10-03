@@ -220,7 +220,7 @@ single-player offline demo.
 [▓▓▓▓▓▓▓░░░] NPCs & Monsters (7/10):
      [ NPCs ]: ~20 bespoke (Baz, Hanzo, Leo, Lumen, Pasi, Zyro, Trainer, Golden
                Archer, Chaos Card Master, guards, girl, man) + geared/plate/generic.
-     [ Monsters ]: monsters.json + model table; 5 bespoke (Budge Dragon, Hound,
+     [ Monsters ]: one folder per monster + model table; 5 bespoke (Budge Dragon, Hound,
                    Skeleton Warrior, Spider) + generic fallback.
      [ Gap ]: Most monsters run through genericMonster rather than bespoke behaviour.
 

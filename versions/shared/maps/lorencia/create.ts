@@ -212,7 +212,7 @@ terrain.MapTileObjects[133] = PoseBoxObject;
 
     const npcEntity = world.add({
       worldIndex: world.mapIndex,
-      // Elf Soldier (monsters.json 257): a KIND_NPC, so the cursor and the
+      // Elf Soldier (type 257): a KIND_NPC, so the cursor and the
       // hover name balloon treat it as one.
       npcType: 257,
       transform: {

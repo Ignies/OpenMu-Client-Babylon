@@ -1,5 +1,5 @@
 /**
- * Builds `src/common/monsterHealth.json` - the maximum health of every
+ * Writes `maxHealth` into every monster folder (versions/shared/monsters/<name>/index.ts) - the maximum health of every
  * monster type the client can meet, keyed by the type number the server puts
  * in `AddNpcsToScope`.
  *
@@ -8,7 +8,7 @@
  * carries no health reading at all (only `ObjectHitExtended`, which the
  * open-source client line uses, does). So the table is read straight out of
  * OpenMU's own monster definitions, the server this client is built against,
- * and falls back to the original client's `monsters.json` for the handful of
+ * and falls back to the original client's table (each file's `stats.HP`) for the handful of
  * monsters OpenMU does not define (the invasion bosses, the castle-siege
  * objects, the Death King line).
  *
@@ -22,9 +22,12 @@
  * Default path: `../OpenMU/OpenMU-master/src/Persistence/Initialization`,
  * beside the client checkout.
  */
-import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import monsters from '../versions/shared/monsters/monsters.json';
+import { readMonsterFiles, writeMonsterFiles } from './monsterFiles';
+
+const files = readMonsterFiles();
+const monsters = files.flatMap(f => (f.def.stats ? [{ Numb: f.def.Numb, Name: f.def.Name, HP: f.def.stats.HP }] : []));
 
 const LAYERS = ['Version075', 'Version095d', 'VersionSeasonSix'];
 
@@ -33,7 +36,6 @@ const SRC = resolve(
   ROOT,
   process.argv[2] ?? '../OpenMU/OpenMU-master/src/Persistence/Initialization'
 );
-const OUT = resolve(ROOT, 'src/common/monsterHealth.json');
 
 /** `monster.Number = 350;` - the type number the whole block below belongs to. */
 const NUMBER = /^\s*\w+\.Number\s*=\s*(?:\(short\))?\s*(\d+)\s*;/;
@@ -108,18 +110,15 @@ for (const monster of monsters) {
   table.set(monster.Numb, {
     health: monster.HP,
     name: monster.Name,
-    from: 'monsters.json',
+    from: 'the original table',
   });
   borrowed++;
 }
 
 const sorted = [...table.entries()].sort((a, b) => a[0] - b[0]);
-const json = `{\n${sorted
-  .map(([type, row]) => `  "${type}": ${row.health}`)
-  .join(',\n')}\n}\n`;
-
-writeFileSync(OUT, json);
+const byNumb = new Map(files.map(f => [f.def.Numb, f.def]));
+writeMonsterFiles(sorted.map(([type, row]) => ({ ...(byNumb.get(type) ?? { Numb: type, Name: row.name }), maxHealth: row.health })));
 
 console.log(
-  `${sorted.length} monsters written to ${OUT} (${borrowed} taken from monsters.json)`
+  `${sorted.length} monster files given a maxHealth (${borrowed} taken from the original table)`
 );

@@ -10,7 +10,7 @@ const SRC = join(ROOT, 'src');
 const CODE_ROOTS = [SRC, join(ROOT, 'versions')];
 
 /**
- * NPC 68 (monster model 49) has no row in `monsters.json` and `Data/` ships no
+ * NPC 68 (monster model 49) has no row in the monster table and `Data/` ships no
  * `Monster50.bmd`, so nothing can spawn it. An unreachable table row, not a
  * missing conversion.
  */

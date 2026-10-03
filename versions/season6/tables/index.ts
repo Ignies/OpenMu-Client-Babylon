@@ -6,7 +6,7 @@
  * version with different tables replaces them without touching base code.
  *
  * Sources: `items.json` (tools/convertItemTXTtoJson.ts from the S6 Item.txt),
- * `skillsDatabase.ts` (generated from `SkillsInitializer.cs`), `monsters.json`,
+ * `skillsDatabase.ts` (generated from `SkillsInitializer.cs`), the monster folders,
  * `jewelUpgrade.ts` (S6 jewel rules incl. Harmony / refine stones).
  */
 export { ItemsDatabase } from '../../shared/items/itemsDatabase';

@@ -1,6 +1,6 @@
 /**
  * `Data/Local/<lang>/NpcName_<Lang>.txt` monster and NPC names, the base table over
- * `monsters.json` (read by `monsterDisplayName()`). See assets/readme.md.
+ * monster folders (read by `monsterDisplayName()`). See assets/readme.md.
  */
 
 import { observable, runInAction } from 'mobx';
@@ -39,7 +39,7 @@ function parse(text: string): Map<number, string> {
 
 /**
  * Load the table for the active language. A no-op only for a language with no
- * pack at all, which falls back to `monsters.json`.
+ * pack at all, which falls back to the monster folders.
  */
 export function loadNpcNames(): Promise<void> {
   if (pending) return pending;
@@ -77,7 +77,7 @@ function set(map: ReadonlyMap<number, string>): void {
   for (const listener of listeners) listener();
 }
 
-/** The localised name for a type number, or undefined to use `monsters.json`. */
+/** The localised name for a type number, or undefined to use the monster folders. */
 export function localisedNpcName(type: number): string | undefined {
   return names.get().get(type);
 }
