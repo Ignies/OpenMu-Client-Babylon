@@ -1,6 +1,6 @@
 import { defineSkill } from '@/controllers/skills/define';
 import { DW1_RELEASE, bearing, monsterOf, placeBodyLight, releaseSound } from '../_shared';
-import { ENERGY_BALL_BURST, ENERGY_BALL_CORE, ENERGY_BALL_GLOW, ENERGY_BALL_POP, ENERGY_BALL_STAR, ENERGY_BALL_WAKE, TEX } from '@/controllers/fx/recipes';
+import { TEX } from '@/controllers/fx/recipes';
 import { delay, entityGone, entityPos, fxNow, type ParticleRecipe, type PointSource } from '@/controllers/fx/core';
 import { Step, TICK, cm, forwardOf, particles, perTick, seq, sprite, ticks } from '@/controllers/skills/visuals';
 import { Vector3 } from '@/controllers/render/babylon/exports';
@@ -9,6 +9,97 @@ import { lighting } from '@/controllers/lighting';
 
 import { type LightRecipe } from '@/controllers/lighting/lightSource';
 import { effectLight } from '@/controllers/lighting/recipes';
+
+/**
+ * The BITMAP_ENERGY particle a tick at the ball (ZzzEffect.cpp:6879; ZzzEffectParticle.cpp:723-726):
+ * Thunder01 x 0.6-1.3, random rotation turning 20 deg a tick, LT 2, so drawn for one tick at saturated light.
+ */
+const ENERGY_BALL_CORE: ParticleRecipe = {
+  texture: TEX.thunder,
+  colour: [1, 1, 1],
+  size: 0.61,
+  sizeJitter: 0.37,
+  life: 0.04,
+  lifeJitter: 0,
+  box: [0, 0, 0],
+  power: 0,
+  powerJitter: 0,
+  gravity: 0,
+  spin: 8.7,
+  fade: [
+    [0, 1],
+    [1, 1],
+  ],
+  blend: 'add',
+  capacity: 64,
+  realSeconds: true,
+};
+
+/** The BITMAP_SPARK+1 sub0 a tick at the ball: Spark03 at Scale 4, down to 3.5 by its one drawn tick (ZzzEffectParticle.cpp:6613-6616). */
+const ENERGY_BALL_STAR: ParticleRecipe = {
+  ...ENERGY_BALL_CORE,
+  texture: TEX.spark3,
+  size: 1.12,
+  sizeJitter: 0,
+  spin: 0,
+  upright: true,
+};
+
+/** CheckTargetRange's BITMAP_SPARK+1 sub1 (ZzzEffect.cpp:283-285): Scale 6, down to 4 by its one drawn tick, white. */
+const ENERGY_BALL_POP: ParticleRecipe = {
+  ...ENERGY_BALL_STAR,
+  size: 1.28,
+};
+
+/** The Energy Ball's halo on the graded tiers: a blue flare under each tick's cards, drawn one tick with them. */
+const ENERGY_BALL_GLOW: ParticleRecipe = {
+  ...ENERGY_BALL_CORE,
+  texture: TEX.flare,
+  colour: [0.15, 0.35, 0.8],
+  size: 1.4,
+  sizeJitter: 0,
+  // A shade under the tick and dimming, so the last tick's halo is gone or faint when the next one is laid.
+  life: 0.032,
+  spin: 0,
+  fade: [
+    [0, 1],
+    [1, 0.4],
+  ],
+};
+
+/** The Energy Ball's wake: small blue glints shed along its path, falling behind it as they die (flare01: Spark02's art is yellow). */
+const ENERGY_BALL_WAKE: ParticleRecipe = {
+  texture: TEX.flare,
+  colour: [0.65, 0.85, 1],
+  colourEnd: [0.15, 0.3, 1],
+  size: 0.14,
+  sizeJitter: 0.4,
+  life: 0.35,
+  lifeJitter: 0.3,
+  box: [0.1, 0.1, 0.1],
+  dir1: [-1, -0.5, -1],
+  dir2: [1, 0.8, 1],
+  power: 0.9,
+  powerJitter: 0.4,
+  gravity: -1.5,
+  spin: 4,
+  capacity: 256,
+  realSeconds: true,
+};
+
+/** The Energy Ball's pop: blue-white sparks flung out of the Spark03 flash. */
+const ENERGY_BALL_BURST: ParticleRecipe = {
+  ...ENERGY_BALL_WAKE,
+  colour: [0.8, 0.92, 1],
+  size: 0.12,
+  life: 0.4,
+  box: [0.05, 0.05, 0.05],
+  dir1: [-1, -0.6, -1],
+  dir2: [1, 1, 1],
+  power: 3.2,
+  settle: 0.6,
+  gravity: -1,
+};
 
 /** Monsters whose Energy Ball the original draws nothing for, and plays no sound (ZzzCharacter.cpp:5089-5122). */
 const ENERGY_BALL_UNDRAWN = new Set([37, 46, 61, 66, 69, 70, 73, 75, 77, 87, 89, 93, 95, 99, 112, 116, 118, 122, 124, 128, 130, 141, 143, 163, 165, 167, 169, 171, 173, 293, 303, 427]);

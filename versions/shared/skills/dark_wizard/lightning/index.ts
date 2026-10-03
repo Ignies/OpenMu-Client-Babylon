@@ -9,6 +9,10 @@ import { arc } from '@/controllers/lighting/recipes';
 export default defineSkill({
   id: 3,
   name: "Lightning",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [379],
+  // Master numbers cast, heard, lit and drawn as this skill (the original names them in its `case`).
+  masterAliases: [480],
   // 3 Lightning: SOUND_THUNDER01 at cast; per frame JOINT_THUNDER weaponBone → target (width 50 + width 10,
   // LT 2, MaxTails 50, Vel 50) + BITMAP_ENERGY particles at the bone. Bolts re-roll every 2 ticks for the clip.
   visual: {

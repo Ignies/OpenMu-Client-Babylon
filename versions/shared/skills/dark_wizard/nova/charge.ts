@@ -14,9 +14,13 @@ import type { ENUM_WORLD } from '@/core/types';
 import { SkillAnimationPacket, SkillStageUpdatePacket } from '@versions/shared/packets/ServerToClientPackets';
 import { EventBus } from '@/core/eventBus';
 import type { CombatLayer } from '@/controllers/combat/layer';
-import { SKILL_NOVA, SKILL_NOVA_BEGIN } from '@/controllers/combat/recipes';
 
 // ---- 1. tuning -------------------------------------------------------------
+
+/** AT_SKILL_NOVA: the release (charged) cast. */
+export const SKILL_NOVA = 40;
+/** AT_SKILL_NOVA_BEGIN: sent when the right button goes down; starts the charge. */
+export const SKILL_NOVA_BEGIN = 58;
 
 /**
  * Seconds of holding for a full charge. The server reports up to 12 stages

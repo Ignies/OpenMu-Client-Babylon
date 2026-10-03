@@ -133,6 +133,8 @@ function shockGrace(scene: Scene, at: Vector3, ground: number, yaw: number): voi
 export default defineSkill({
   id: 230,
   name: "Lightning Shock",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [456],
   // 230 Lightning Shock: MODEL_LIGHTNING_SHOCK falling red from 280 cm over the caster and opening the ground
   // (lightningShock). The five magic_ground cards and the stones get Scale 0 there and are not drawn.
   visual: { area: lightningShock, enhanced: { area: lightningShockStep(true) } },

@@ -1,7 +1,7 @@
 import { defineSkill } from '@/controllers/skills/define';
 import { DW1_RELEASE, bearing, monsterOf, releaseSound } from '../_shared';
-import { MODEL, POWER_WAVE_GLINTS, POWER_WAVE_SKIM, POWER_WAVE_SMOKE, RGBS, TEX } from '@/controllers/fx/recipes';
-import { delay, entityGone, entityPos, fxNow, type PointSource, type RGB } from '@/controllers/fx/core';
+import { MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
+import { delay, entityGone, entityPos, fxNow, type ParticleRecipe, type PointSource, type RGB } from '@/controllers/fx/core';
 import { SkillContext, Step, TICK, forwardOf, perTick, ticks } from '@/controllers/skills/visuals';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
@@ -10,6 +10,89 @@ import { rad } from '../../_shared';
 
 import { type LightRecipe } from '@/controllers/lighting/lightSource';
 import { effectLight } from '@/controllers/lighting/recipes';
+
+/**
+ * BITMAP_SMOKE sub3, 4 a tick off MODEL_MAGIC2 (ZzzEffectParticle.cpp:1250-1255, :5330-5334): rotation 0,
+ * thrown 40-47 cm a tick along a random yaw pitched +-45 deg with `Velocity *= 0.4` (about 0.7 m out),
+ * Scale +0.1 a tick, `Light = LT/8 x (0.8, 0.8, 1)` over its 9 drawn ticks.
+ */
+const POWER_WAVE_SMOKE: ParticleRecipe = {
+  texture: TEX.smoke,
+  colour: [0.8, 0.8, 1],
+  size: 0.675,
+  sizeJitter: 0.14,
+  life: 0.36,
+  lifeJitter: 0,
+  box: [0, 0, 0],
+  dir1: [-1, -0.7, -1],
+  dir2: [1, 0.7, 1],
+  power: 10.9,
+  powerJitter: 0.15,
+  settle: 0.37,
+  gravity: 0,
+  endScale: 1.76,
+  spin: 0,
+  upright: true,
+  fade: [
+    [0, 1],
+    [0.11, 1],
+    [1, 0],
+  ],
+  blend: 'add',
+  capacity: 512,
+  realSeconds: true,
+};
+
+/** Power Wave's wake on the graded tiers: cold glints thrown off the sheet's front, rising and twinkling out behind it. */
+const POWER_WAVE_GLINTS: ParticleRecipe = {
+  texture: TEX.shiny,
+  colour: [0.7, 0.85, 1],
+  colourEnd: [0.3, 0.5, 1],
+  size: 0.16,
+  sizeJitter: 0.45,
+  life: 0.45,
+  lifeJitter: 0.35,
+  box: [0.45, 0.35, 0.45],
+  dir1: [-0.4, 0.4, -0.4],
+  dir2: [0.4, 1, 0.4],
+  power: 0.8,
+  powerJitter: 0.4,
+  gravity: 0.4,
+  spin: 3,
+  fade: [
+    [0, 0],
+    [0.2, 1],
+    [1, 0],
+  ],
+  capacity: 256,
+  realSeconds: true,
+};
+
+/** Power Wave's ground skim: a low blue haze dragged along under the sheet, the wave's contact with the ground. */
+const POWER_WAVE_SKIM: ParticleRecipe = {
+  texture: TEX.smoke,
+  colour: [0.2, 0.35, 0.7],
+  size: 0.8,
+  sizeJitter: 0.25,
+  life: 0.5,
+  lifeJitter: 0.2,
+  box: [0.35, 0.03, 0.35],
+  dir1: [-1, 0, -1],
+  dir2: [1, 0.1, 1],
+  power: 0.8,
+  settle: 0.4,
+  gravity: 0,
+  spin: 0.5,
+  endScale: 1.8,
+  fade: [
+    [0, 0],
+    [0.2, 1],
+    [1, 0],
+  ],
+  blend: 'add',
+  capacity: 128,
+  realSeconds: true,
+};
 
 /** MODEL_ICE_QUEEN throws two more Power Waves at +-10 deg (ZzzCharacter.cpp:5045-5052). */
 const ICE_QUEEN = 25;

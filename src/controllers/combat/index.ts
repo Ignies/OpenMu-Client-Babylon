@@ -17,7 +17,7 @@ import {
   startAttack,
 } from './attackTiming';
 import { attackRange, equippedLauncher, hasAmmo, type Hands } from './weaponRange';
-import { magicClip, skillClip, type CastContext } from './skillClips';
+import { castQuietOn, magicClip, othersSeeClip, skillClip, type CastContext } from './skillClips';
 import {
   clipHoldsFacing,
   skillStepIn,
@@ -25,12 +25,20 @@ import {
 } from './skillMovement';
 import { castsOnSelf, castsOnSelfOnly, castTarget, type CastTarget } from './castTargets';
 import { skillHooks } from './skillHooks';
+import { skillKill, type SkillKill } from './skillKills';
+import { SHOCK_IMMUNE_CLIPS } from './recipes';
+import { registerSkillRules, type SkillCombatRules } from './skillRules';
 import { areaHitRadius, buildAreaHit, needsAreaHit } from './areaHit';
 
 export type { CombatLayer } from './layer';
 export type { Hands } from './weaponRange';
 export type { CastContext } from './skillClips';
 export type { CastTarget } from './castTargets';
+export type { SkillKill } from './skillKills';
+export type { SkillCombatRules } from './skillRules';
+export type { ClipPick, SkillClipSet } from './recipes';
+export type { CastPose, PoseClip } from './skillClips';
+export { RIDER_FLY_WORLDS } from './recipes';
 
 /**
  * The combat-timing layer: when a swing lands, when the next click counts,
@@ -55,6 +63,11 @@ class Combat implements Controller {
       const i = this.layers.indexOf(layer);
       if (i >= 0) this.layers.splice(i, 1);
     };
+  }
+
+  /** A skill file's combat fields (clip rules, target, step-in, kill, layer, hooks): `registerSkills` calls this. */
+  registerSkill(id: number, rules: SkillCombatRules): void {
+    registerSkillRules(id, rules, layer => this.register(layer));
   }
 
   /** Every entry that exists on this map. */
@@ -166,6 +179,26 @@ class Combat implements Controller {
     return magicClip(ctx);
   }
 
+  /** The clip everyone else plays for this skill's `clip`. */
+  othersSeeClip(skill: number, clip: PlayerAction): PlayerAction {
+    return othersSeeClip(skill, clip);
+  }
+
+  /** On this mount the cast is dropped for others and silent for the hero. */
+  castQuietOn(skill: number, mount: CastContext['mount']): boolean {
+    return castQuietOn(skill, mount);
+  }
+
+  /** `SetPlayerShock` leaves a player in this clip alone: the cast finishes. */
+  clipIgnoresHit(clip: PlayerAction): boolean {
+    return SHOCK_IMMUNE_CLIPS.has(clip);
+  }
+
+  /** What a kill with this skill does to the body, `undefined` when nothing. */
+  skillKill(skill: number): SkillKill | undefined {
+    return skillKill(skill);
+  }
+
   // ---- what a cast does to where the hero is ------------------------------
 
   /** Whether the skill relocates the caster, and when. */
@@ -204,6 +237,16 @@ class Combat implements Controller {
   }
 
   // ---- Nova --------------------------------------------------------------
+
+  /** The Nova release skill number, -1 when no skill fills the slot. */
+  get novaSkill(): number {
+    return skillHooks.nova?.skill ?? -1;
+  }
+
+  /** The skill number that starts the Nova charge, -1 when no skill fills the slot. */
+  get novaBeginSkill(): number {
+    return skillHooks.nova?.beginSkill ?? -1;
+  }
 
   /** The right button is down on a Nova charge. */
   get novaCharging(): boolean {

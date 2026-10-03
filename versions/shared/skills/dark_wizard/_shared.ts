@@ -1,4 +1,4 @@
-import { EXPLOSION_CELLS, FIRE_BALL_TRAIL, MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
+import { EXPLOSION_CELLS, MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
 import { effects, type EffectHandle } from '@/controllers/fx';
 import { type Entity } from '@/ecs/world';
 import { FIRE_BLEND_MESH, LANDING_SMOKE_LIFT } from '../_shared';
@@ -14,6 +14,49 @@ import { CAST_HEIGHT } from '@/controllers/lighting/skills';
 import { type LightRecipe } from '@/controllers/lighting/lightSource';
 import { TICK_SECONDS } from '../_shared';
 import { effectLight } from '@/controllers/lighting/recipes';
+
+/**
+ * BITMAP_FIRE sub5 as MODEL_FIRE sub0/sub1 leaves it every tick (ZzzEffect.cpp:7954; ZzzEffectParticle.cpp:407-419,
+ * :4555-4563): LT 24, 64 px x 1.28-1.91, shrinking 0.04 a tick, rising 12 cm, turning 5 deg a tick, and
+ * kept at its creation Light `(Lum, 0.1 Lum, 0)` until it dies. Deep red, not FIRE_TRAIL's orange.
+ */
+export const FIRE_BALL_TRAIL: ParticleRecipe = {
+  texture: TEX.fire,
+  cells: { w: 64, h: 64, count: 4 },
+  colour: [1, 0.1, 0],
+  size: 1.02,
+  sizeJitter: 0.2,
+  life: 0.96,
+  lifeJitter: 0,
+  power: 0,
+  powerJitter: 0,
+  gravity: 0.26,
+  box: [0.02, 0.02, 0.02],
+  spin: 2.2,
+  endScale: 0.4,
+  fade: [
+    [0, 1],
+    [1, 1],
+  ],
+};
+
+/** Hot chips a flying MODEL_FIRE sheds on the graded tiers: small, orange going red, falling away from the path. */
+export const FIRE_BALL_EMBERS: ParticleRecipe = {
+  texture: TEX.spark2,
+  colour: [1, 0.55, 0.15],
+  colourEnd: [0.7, 0.12, 0],
+  size: 0.09,
+  sizeJitter: 0.4,
+  life: 0.55,
+  lifeJitter: 0.3,
+  box: [0.12, 0.12, 0.12],
+  dir1: [-1, -0.2, -1],
+  dir2: [1, 0.8, 1],
+  power: 0.9,
+  gravity: -2.5,
+  spin: 4,
+  capacity: 256,
+};
 
 // ---- teleport steps --------------------------------------------------------------
 

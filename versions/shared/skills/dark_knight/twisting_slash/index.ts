@@ -203,6 +203,10 @@ const twistingSlash = twistingSlashOf(false);
 export default defineSkill({
   id: 41,
   name: "Twisting Slash",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [330, 332],
+  // Master numbers cast, heard, lit and drawn as this skill (the original names them in its `case`).
+  masterAliases: [481],
   // 41 Twisting Slash: at clip key 5 (or AttackTime 15) five copies of the wielded weapon whirl round the knight
   // with sparks, smoke, a glow and a grey light under each; see twistingSlash.
   visual: {

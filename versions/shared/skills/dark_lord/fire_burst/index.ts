@@ -194,6 +194,8 @@ const fireBurstGraded = (skill: number): Step => (_at, c) => {
 export default defineSkill({
   id: 61,
   name: "Fire Burst",
+  // Master numbers cast, heard, lit and drawn as this skill (the original names them in its `case`).
+  masterAliases: [508, 514],
   // 61 Fire Burst (and 508 / 514): at the strike key, three homing darts with their ghost trails and two
   // starburst cards at the caster; eFirebustBoom from the darts.
   visual: { impact: strikeKey(fireBurst, 'Sound/eFirebustBoom'), enhanced: { impact: litStrike(fireBurstGraded, 'Sound/eFirebustBoom') } },

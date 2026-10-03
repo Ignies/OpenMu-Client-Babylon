@@ -11,6 +11,8 @@ import { A } from '@/controllers/combat/recipes';
 export default defineSkill({
   id: 263,
   name: "Dark Side",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [559],
   // 263 Dark Side: MODEL_SHOCKWAVE01 sub3 dark wave (Light 0.2) chasing the target + BITMAP_DAMAGE2 bursts.
   visual: {
     cast: seq(

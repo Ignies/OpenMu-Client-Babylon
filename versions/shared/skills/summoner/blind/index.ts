@@ -10,6 +10,8 @@ const ALICE_BLIND: AliceCurse = { circle: [1, 1, 1], models: [1, 1, 1], flare: [
 export default defineSkill({
   id: 220,
   name: "Blind",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [461, 463],
   // 220 Blind (OpenMU's 461 / 463): Sleep's construction drawn entirely subtractive - black smoke at the
   // hand, a black disc spreading under the caster, a black imploding vortex on the target.
   visual: {

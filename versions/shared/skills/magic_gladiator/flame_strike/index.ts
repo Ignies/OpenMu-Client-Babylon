@@ -136,6 +136,8 @@ const flameStrikeEnhanced = mgFlameStrike(true);
 export default defineSkill({
   id: 236,
   name: "Flame Strike",
+  // Master numbers cast, heard, lit and drawn as this skill (the original names them in its `case`).
+  masterAliases: [492, 494],
   // 236 Flame Strike: the blade on the weapon link bone and its three blurs (flameStrike above); caster-bound, so both dispatch paths.
   visual: { cast: flameStrike, enhanced: { cast: flameStrikeEnhanced } },
   sound: 'Sound/flame_strike', // Flame Strike

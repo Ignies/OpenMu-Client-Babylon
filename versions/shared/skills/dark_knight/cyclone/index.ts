@@ -13,11 +13,15 @@ const CYCLONE_CHIPS: ParticleRecipe = { ...STEEL_GLINTS, texture: TEX.spark2, co
 export default defineSkill({
   id: 22,
   name: "Cyclone",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [326],
+  // Master numbers cast, heard, lit and drawn as this skill (the original names them in its `case`).
+  masterAliases: [479],
   // 22 Cyclone (326 by alias): the SWORD4 clip, its weapon trail and CreateSpark at the blow, as 19-21;
   // the name has no effect of its own (WSclient.cpp:4390-4396, ZzzCharacter.cpp:4884). Enhanced: 19-21's lit blow.
   visual: { impact: atSwordBlow(swordSpark), enhanced: { impact: litBlow(CYCLONE_CHIPS) } },
   sound: 'Sound/sKnightSkill4', // Cyclone
-  // 22 / 23 likewise (WSclient.cpp:4390-4410); Slash's odd swing is chooseSkillAction's (SLASH_SKILLS).
+  // 22 / 23 likewise (WSclient.cpp:4390-4410); Slash's odd swing is its own poseClip (slash/index.ts).
   clip: { ground: A.PLAYER_ATTACK_SKILL_SWORD4 }, // Cyclone
   // Cyclone / Slash (326 / 327 through their base): the same blow flash, the same light.
   light: { enhanced: { strike: effectLight([0.9, 0.95, 1], 0.9, 0.25) } },

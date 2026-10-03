@@ -10,6 +10,7 @@ import { lightAt } from '../../_shared';
 import { lighting } from '@/controllers/lighting';
 import { playCombat } from '@/controllers/sound/combat';
 import { tmpEmitter } from '../_shared';
+import { RIDER_FLY_WORLDS, type ClipPick } from '@/controllers/combat';
 
 import { effectLight } from '@/controllers/lighting/recipes';
 
@@ -37,6 +38,13 @@ const atClipKey = (key: number, actions: readonly number[], step: Step, cap = AT
 
 /** The two Fire Breath clips (SkillCast.cpp:314-319). */
 const RIDER_ACTIONS: readonly number[] = [PlayerAction.PLAYER_SKILL_RIDER, PlayerAction.PLAYER_SKILL_RIDER_FLY];
+
+/**
+ * `AT_SKILL_RIDER` is the one skill whose clip the *map* picks: Tarkan and Kalima/Heaven get the flying
+ * variant (UseSkillWarrior:2250-2255, WSclient.cpp:4424-4429), whatever the caster rides.
+ */
+const riderClip: ClipPick = ctx =>
+  ctx.world !== undefined && RIDER_FLY_WORLDS.has(ctx.world) ? PlayerAction.PLAYER_SKILL_RIDER_FLY : PlayerAction.PLAYER_SKILL_RIDER;
 /** BITMAP_FIRE+2 (Fire03, 256x64): four 64 px cells, `Frame = (23 - LifeTime) / 6` (ZzzEffectParticle.cpp:4617). */
 const FIRE3_CELLS: SheetCells = { w: 64, h: 64, count: 4 };
 /** BITMAP_EXPLOTION+1 (DinoE, 256x64): four 64 px cells over its 12 ticks (ZzzEffectParticle.cpp:4278-4280). */
@@ -217,6 +225,7 @@ const fireBreathPlus: Step = (at, c) => {
 export default defineSkill({
   id: 49,
   name: "Fire Breath",
+  clip: riderClip,
   // 49 Fire Breath (AT_SKILL_RIDER): BITMAP_SHOTGUN and its sparks when the rider clip passes key 5, or
   // after the 14-tick AttackTime cap (ZzzCharacter.cpp:2910-2915, :4405-4409); see `fireBreath`.
   visual: { cast: atClipKey(5, RIDER_ACTIONS, fireBreath), enhanced: { cast: atClipKey(5, RIDER_ACTIONS, fireBreathPlus) } },

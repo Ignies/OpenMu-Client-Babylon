@@ -43,6 +43,8 @@ const bodyFire = (tickCount: number, perTick: number): Step =>
 export default defineSkill({
   id: 10,
   name: "Hellfire",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [388],
   /**
    * 10 Hellfire. The skill is a leap: `SetAction(o, PLAYER_SKILL_HELL)` and
    * `c->AttackTime = 1` at the cast (ZzzInterface.cpp:5900-5906), the wizard

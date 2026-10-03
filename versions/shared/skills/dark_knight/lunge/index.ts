@@ -12,6 +12,8 @@ const LUNGE_CHIPS: ParticleRecipe = { ...STEEL_GLINTS, texture: TEX.spark2, colo
 export default defineSkill({
   id: 20,
   name: "Lunge",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [329],
   visual: { impact: atSwordBlow(swordSpark), enhanced: { impact: litBlow(LUNGE_CHIPS) } },
   sound: 'Sound/sKnightSkill2', // Lunge
   clip: { ground: A.PLAYER_ATTACK_SKILL_SWORD2 }, // Lunge

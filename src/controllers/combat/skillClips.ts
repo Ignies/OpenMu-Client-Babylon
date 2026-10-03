@@ -1,22 +1,14 @@
 /**
  * Which clip a cast plays: the `UseSkill*` / `Attack*` / `ReceiveMagic` switches
- * as one lookup over `SKILL_CLIPS`, plus mount, map and random picks. See controllers/combat/readme.md.
+ * as one lookup over `SKILL_CLIPS`, plus mount and the skills' own picks. See controllers/combat/readme.md.
  */
 import { PlayerAction } from '@versions/shared/objects/enum';
 import type { MountKind } from '../../features/pets/pets';
 import type { ENUM_WORLD } from '../../core/types';
 import type { CombatLayer } from './layer';
-import type { Sounds } from '../sound/recipes';
+import type { Hands } from './weaponRange';
 import { masterBase } from '../../features/skills/skillAliases';
-import {
-  MAGIC_CLIPS,
-  RAGE_BUFF_CLIPS,
-  RAGE_BUFF_SKILLS,
-  RIDER_CLIPS,
-  RIDER_FLY_WORLDS,
-  SKILL_CLIPS,
-  SKILL_RIDER,
-} from './recipes';
+import { MAGIC_CLIPS, SKILL_CLIPS } from './recipes';
 
 // ---- 1. tuning -------------------------------------------------------------
 
@@ -36,6 +28,35 @@ export type CastContext = {
   /** `rand() % 2` for the male hand cast; the caller alternates it. */
   readonly alternate?: boolean;
 };
+
+/** What a pose-picked clip reads off the caster: the `AttackPose` the swing rules build. */
+export type CastPose = {
+  readonly hands: Hands;
+  /** `BaseClass` of the caster. */
+  readonly baseClass: number;
+  /** `c->SwordCount`: swings so far. */
+  readonly swordCount: number;
+};
+
+/** A clip picked from the caster's hands and swing count; `null` = fall through to the clip table. */
+export type PoseClip = (pose: CastPose, ctx: CastContext) => PlayerAction | null;
+
+/**
+ * The per-skill clip rules beside `SKILL_CLIPS`, by exact skill number, each filled by
+ * `registerSkills` from the skill's file:
+ * - `SKILL_POSE_CLIPS`: picks ahead of the clip table (Plasma Storm by hands, Slash's odd swing).
+ * - `SKILL_SWINGS`: the skill swings a weapon clip of the attack rules ('highBow': Starfall).
+ * - `SKILL_SWORD_COUNT`: whether the cast advances `SwordCount`, where the clip rule alone is wrong.
+ * - `SPELL_CAST_SKILLS`: cast with `SetPlayerMagic` though the table types them physical.
+ * - `SKILL_OTHERS_SEE`: the clip everyone else plays in place of one of the skill's own.
+ * - `SKILL_QUIET_MOUNTS`: mounts on which the cast is dropped for others and silent for the hero.
+ */
+export const SKILL_POSE_CLIPS: Record<number, PoseClip> = {};
+export const SKILL_SWINGS: Record<number, 'highBow'> = {};
+export const SKILL_SWORD_COUNT: Record<number, boolean> = {};
+export const SPELL_CAST_SKILLS: Set<number> = new Set();
+export const SKILL_OTHERS_SEE: Record<number, Partial<Record<PlayerAction, PlayerAction>>> = {};
+export const SKILL_QUIET_MOUNTS: Record<number, readonly MountKind[]> = {};
 
 // ---- 2. state + readers ----------------------------------------------------
 
@@ -64,27 +85,15 @@ export function magicClip(ctx: CastContext = {}): PlayerAction {
 /**
  * The clip for a skill, or `null` when the skill has no dedicated clip and
  * the generic rule (`magicClip` for a spell, the weapon swing for a physical
- * skill) applies.
+ * skill) applies. A skill that picks its own (a coin toss, the map) is asked.
  */
 export function skillClip(
   skill: number,
   ctx: CastContext = {}
 ): PlayerAction | null {
-  // The party buffs are the one skill family that picks its clip by coin
-  // toss rather than by caster (`rand_fps_check(2)`, :2866-2874).
-  if (RAGE_BUFF_SKILLS.has(skill)) {
-    return RAGE_BUFF_CLIPS[Math.random() < 0.5 ? 0 : 1];
-  }
-
-  // Rider: the map decides, not the caster.
-  if (skill === SKILL_RIDER) {
-    return ctx.world !== undefined && RIDER_FLY_WORLDS.has(ctx.world)
-      ? RIDER_CLIPS.flying
-      : RIDER_CLIPS.ground;
-  }
-
   const set = SKILL_CLIPS[skill] ?? SKILL_CLIPS[masterBase(skill)];
   if (!set) return null;
+  if (typeof set === 'function') return set(ctx);
   if (ctx.mount) {
     const mounted = set[ctx.mount];
     if (mounted !== undefined) return mounted;
@@ -92,18 +101,40 @@ export function skillClip(
   return set.ground;
 }
 
-/**
- * A party buff's sound goes with the clip its coin toss picked (SkillCast.cpp:915-931):
- * ATT_UP with Rage_Buff_1, HP_UP with Rage_Buff_2. Null for every other skill.
- */
-export function rageBuffSound(skill: number, clip: PlayerAction): Sounds | null {
-  if (!RAGE_BUFF_SKILLS.has(skill)) return null;
-  return clip === RAGE_BUFF_CLIPS[1] ? 'Sound/Ragefighter/Rage_Buff_2' : 'Sound/Ragefighter/Rage_Buff_1';
-}
-
 /** Whether the skill has a dedicated clip (used to skip the alternate toggle). */
 export function hasSkillClip(skill: number): boolean {
-  return skill in SKILL_CLIPS || masterBase(skill) in SKILL_CLIPS || RAGE_BUFF_SKILLS.has(skill) || skill === SKILL_RIDER;
+  return skill in SKILL_CLIPS || masterBase(skill) in SKILL_CLIPS;
+}
+
+/** The skill's own pick from the caster's hands, ahead of the clip table; `null` when it has none. */
+export function poseClip(skill: number, pose: CastPose, ctx: CastContext = {}): PlayerAction | null {
+  return SKILL_POSE_CLIPS[skill]?.(pose, ctx) ?? null;
+}
+
+/** The attack-rule swing the skill casts with instead of a clip, if any. */
+export function castSwing(skill: number): 'highBow' | null {
+  return SKILL_SWINGS[skill] ?? null;
+}
+
+/** Whether the cast advances `SwordCount`, when the skill says so itself; `undefined` = the clip rule decides. */
+export function swordCountRule(skill: number): boolean | undefined {
+  return SKILL_SWORD_COUNT[skill];
+}
+
+/** Whether a skill the table types physical still casts with `SetPlayerMagic`. */
+export function castsAsSpell(skill: number): boolean {
+  return SPELL_CAST_SKILLS.has(skill);
+}
+
+/** The clip others in scope play for the skill's `clip` (the same unless the skill says otherwise). */
+export function othersSeeClip(skill: number, clip: PlayerAction): PlayerAction {
+  const row = SKILL_OTHERS_SEE[skill] ?? SKILL_OTHERS_SEE[masterBase(skill)];
+  return row?.[clip] ?? clip;
+}
+
+/** Whether a cast on this mount is dropped for others and silent for the hero. */
+export function castQuietOn(skill: number, mount: MountKind | null | undefined): boolean {
+  return !!mount && !!SKILL_QUIET_MOUNTS[skill]?.includes(mount);
 }
 
 // ---- 3. the layer ----------------------------------------------------------

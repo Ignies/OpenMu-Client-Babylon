@@ -150,3 +150,12 @@ never which skill or item asks for it.
   `npcVoiceOf(type)` / `globalNpcVoiceOf(type)`. Changing an NPC's noise is editing its folder.
 - `npcVoices.test.ts` pins that data (a hash; update it on purpose) and checks every sound is a
   catalogue key.
+
+## Skill sound rules come from the skill files
+`SKILL_SOUNDS`, `SKILL_CLIP_SOUNDS` (`clipCastSound`, `hasClipSound`: the Rage Fighter party
+buffs' sound follows their coin-tossed clip), `LANDING_SOUNDS` (Drain Life, Lightning Orb,
+Weakness, Innovation and their masters) and `SILENT_HERO_CASTS` (Fire Scream) in `combat.ts` are
+filled by `registerSkills` from each skill's `sound`, `clipSound`, `soundOnLanding` and
+`silentHeroCast`. Change a skill's sound in its file under `versions/shared/skills/`. The
+per-monster rows of `packetSounds.ts` (quiet Energy Ball casters, the Nightmare's teleport, the
+meteorite trap) are monster data, still here.

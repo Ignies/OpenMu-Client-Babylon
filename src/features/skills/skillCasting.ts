@@ -6,10 +6,16 @@ import {
 } from '../../controllers/actors/weaponClass';
 import { skillDefinition, type SkillDefinition } from '@versions/shared/skills/skillsDatabase';
 import { masterBase } from './skillAliases';
-import { BaseClass } from '../hero/characterStats';
-import { magicClip, skillClip, type CastContext } from '../../controllers/combat/skillClips';
+import {
+  castSwing,
+  castsAsSpell,
+  magicClip,
+  poseClip,
+  skillClip,
+  swordCountRule,
+  type CastContext,
+} from '../../controllers/combat/skillClips';
 import { castsOnSelf } from '../../controllers/combat/castTargets';
-import { SLASH_SKILLS } from '../../controllers/combat/recipes';
 
 /**
  * Client-side casting rules. The wire format is decided by the OpenMU skill
@@ -29,19 +35,6 @@ import { SLASH_SKILLS } from '../../controllers/combat/recipes';
 export const TELEPORT = 6;
 export const TELEPORT_ALLY = 15;
 
-/** `AT_SKILL_DEEPIMPACT`: the aimed-up bow shot, OpenMU's Starfall. */
-const STARFALL = 46;
-
-/**
- * Master skills the table types otherwise that the original still casts with their base's SetPlayerMagic: the MG's
- * Blast Strengthener (SkillCast.cpp:525-531), Ice Strengthener and Ice Mastery (AT_SKILL_ICE_STR_MG goes through
- * UseSkillWizard -> SetPlayerMagic, ZzzInterface.cpp:1362-1386, SkillCast.cpp:503-514), and Soul Barrier's
- * Strengthener, Proficiency and Mastery, still under their pre-inheritance DirectHit type (OpenMU casts them as
- * their base, SkillsInitializer.cs:1001-1025; ClassAttack.cpp:1153-1155).
- */
-const INHERITED_SPELLS: ReadonlySet<number> = new Set([484, 489, 491, 403, 404, 406]); // Blast Str, Ice Str (MG), Ice Mastery, Soul Barrier Str, Proficiency, Mastery
-/** Earth Prison and its Strengthener: Physical on OpenMU (SkillsInitializer.cs:539-541) with no clip in the original; a Grand Master casts them. */
-const WIZARD_PHYSICAL_SPELLS: ReadonlySet<number> = new Set([495, 497]);
 
 export function isTeleportSkill(num: number): boolean {
   return num === TELEPORT || num === TELEPORT_ALLY;
@@ -86,14 +79,14 @@ function castsAsBaseSpell(def: SkillDefinition): boolean {
  * The clip a cast plays, for the hero and for everyone else in scope alike.
  * Four tiers, in the order the original tries them:
  *
- *  1. Starfall, the one skill that shoots through `SetPlayerHighBowAttack`
- *     instead (`AT_SKILL_DEEPIMPACT`, ZzzInterface.cpp:2523-2527), and
- *     Plasma Storm, which picks its clip by the hands (`fenrirSkillClip`),
+ *  1. the skill's own rule: a weapon swing of the attack rules (`swing`,
+ *     Starfall's `SetPlayerHighBowAttack`) or a pick by the hands (`poseClip`,
+ *     Plasma Storm, Slash's odd swing),
  *  2. the per-skill clip (`controllers/combat/skillClips` - every `UseSkill*` /
  *     `Attack*` / `ReceiveMagic` case, with its mount and map branches),
  *  3. `SetPlayerMagic` for a spell (ZzzCharacter.cpp:1238-1262) - the
  *     female hand-raise, the male HAND1/HAND2 coin toss, or the mount's own
- *     cast clip,
+ *     cast clip - also for a skill marked `castsAsSpell`,
  *  4. the weapon swing, for a physical skill with no clip of its own.
  */
 export function chooseSkillAction(
@@ -101,38 +94,23 @@ export function chooseSkillAction(
   pose: AttackPose,
   ctx: CastContext = {}
 ): PlayerAction {
-  if (def.num === STARFALL) return chooseHighBowAttackAction(pose);
-  if (def.num === PLASMA_STORM) return fenrirSkillClip(pose);
-  if (SLASH_SKILLS.has(def.num) && pose.swordCount % 2 === 1) return PlayerAction.PLAYER_ATTACK_TWO_HAND_SWORD3;
+  if (castSwing(def.num) === 'highBow') return chooseHighBowAttackAction(pose);
+  const own = poseClip(def.num, pose, ctx);
+  if (own !== null) return own;
   const dedicated = skillClip(def.num, ctx);
   if (dedicated !== null) return dedicated;
-  if (isSpell(def) || castsAsBaseSpell(def) || INHERITED_SPELLS.has(def.num) || WIZARD_PHYSICAL_SPELLS.has(def.num)) return magicClip(ctx);
+  if (isSpell(def) || castsAsBaseSpell(def) || castsAsSpell(def.num)) return magicClip(ctx);
   return chooseAttackAction(pose);
 }
 
 /**
  * Whether the cast ends on `c->SwordCount++`: only SetPlayerAttack / SetPlayerHighBowAttack
- * (ZzzCharacter.cpp:1066, :1316) and Slash (WSclient.cpp:4409) advance it for a player;
- * SetPlayerMagic, SetAction_Fenrir_Skill and the other ReceiveMagic cases leave it alone.
+ * (ZzzCharacter.cpp:1066, :1316) advance it for a player; SetPlayerMagic, SetAction_Fenrir_Skill
+ * and the other ReceiveMagic cases leave it alone. A skill whose file says otherwise
+ * (`swordCount`: Starfall, Slash, Plasma Storm) decides itself.
  */
 export function advancesSwordCount(def: SkillDefinition, ctx: CastContext = {}): boolean {
-  if (def.num === STARFALL || SLASH_SKILLS.has(def.num)) return true;
-  if (def.num === PLASMA_STORM) return false;
-  return skillClip(def.num, ctx) === null && !isSpell(def);
-}
-
-/**
- * SetAction_Fenrir_Skill (ZzzAI.cpp:257-281), Plasma Storm's clip on every client: by which hands hold
- * something (`Weapon[0]` is `leftHand` here, as in chooseAttackAction), the Rage Fighter with his own four.
- */
-function fenrirSkillClip(pose: AttackPose): PlayerAction {
-  const first = !!pose.hands?.leftHand;
-  const second = !!pose.hands?.rightHand;
-  const rage = pose.baseClass === BaseClass.RageFighter;
-  if (first && second) return rage ? PlayerAction.PLAYER_RAGE_FENRIR_TWO_SWORD : PlayerAction.PLAYER_FENRIR_SKILL_TWO_SWORD;
-  if (first) return rage ? PlayerAction.PLAYER_RAGE_FENRIR_ONE_RIGHT : PlayerAction.PLAYER_FENRIR_SKILL_ONE_RIGHT;
-  if (second) return rage ? PlayerAction.PLAYER_RAGE_FENRIR_ONE_LEFT : PlayerAction.PLAYER_FENRIR_SKILL_ONE_LEFT;
-  return rage ? PlayerAction.PLAYER_RAGE_FENRIR : PlayerAction.PLAYER_FENRIR_SKILL;
+  return swordCountRule(def.num) ?? (skillClip(def.num, ctx) === null && !isSpell(def));
 }
 
 /** AreaSkill.Rotation: (BYTE)(Angle / 360 * 256) of the hero's yaw. */

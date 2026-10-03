@@ -1,12 +1,12 @@
 // Helpers more than one feature net uses.
-import { playCombat } from '@/controllers/sound/combat';
+import { clipCastSound, hasClipSound, playCombat } from '@/controllers/sound/combat';
 import { type AttackPose } from '@/controllers/actors/weaponClass';
 import { CharacterClassNumber } from '@/core/types';
 import { Entity, World } from '@/ecs/world';
 import { KEEP_CLIP, isMonsterSwingClip, monsterAreaCast, monsterAttackState, monsterCast, monsterCastAttacks, monsterCastRewinds, playableMonsterClip, type MonsterAttackInput } from '@/controllers/anim/monsterAttackClip';
 import { METEORITE_STORM, appearSound, meteoriteStormRunning, monsterCastQuiet, teleportCastSound, trapAttackSound } from '@/controllers/sound/packetSounds';
 import { MonsterActionType, PlayerAction } from '@versions/shared/objects/enum';
-import { RAGE_BUFF_SKILLS, SKILL_DEFENSE } from '@/controllers/combat/recipes';
+
 import { Store } from '@/app/store';
 import { TRAP_MODEL_TABLE } from '@/controllers/actors';
 import { Vector3 } from '@/controllers/render/babylon/exports';
@@ -23,7 +23,7 @@ import { mountKind } from '../pets/pets';
 import { playSfx } from '@/controllers/sound/sfx';
 import { playSkill } from '@/controllers/sound';
 import { setBuffVisual } from '@versions/shared/skills/skillVisuals';
-import { rageBuffSound, skillClip } from '@/controllers/combat/skillClips';
+import { castQuietOn, othersSeeClip, skillClip } from '@/controllers/combat/skillClips';
 import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
 import { EventBus } from '@/core/eventBus';
 import type { Events } from '@/core/eventBus/events';
@@ -279,10 +279,10 @@ export function playTrapSounds(
  */
 export function playCastAnimation(caster: Entity, skill: number, area: boolean) {
   const def = skillDefinition(skill);
+  // A cast its skill drops on this mount (a Dark Horse rider's guard): no clip, no sound.
   if (
-    skill === SKILL_DEFENSE &&
     !caster.localPlayer &&
-    mountKind(caster.charAppearance?.pet, !!caster.attributeSystem?.isAboveZero('inSafeZone')) === 'horse'
+    castQuietOn(skill, mountKind(caster.charAppearance?.pet, !!caster.attributeSystem?.isAboveZero('inSafeZone')))
   ) {
     return;
   }
@@ -294,8 +294,8 @@ export function playCastAnimation(caster: Entity, skill: number, area: boolean) 
     if (tele) {
       playSfx(tele.key, caster.transform.pos, tele.opts);
     } else if (
-      // A player's party buff sounds with its clip, below.
-      !(caster.playerAnimation && RAGE_BUFF_SKILLS.has(skill)) &&
+      // A player's cast whose sound goes with its clip sounds below, once the clip is picked.
+      !(caster.playerAnimation && hasClipSound(skill)) &&
       (caster.npcType === undefined ||
         !monsterCastQuiet(caster.npcType, monsterModelTypeOf(caster.npcType), skill))
     ) {
@@ -323,9 +323,9 @@ export function playCastAnimation(caster: Entity, skill: number, area: boolean) 
     let action = def
       ? chooseSkillAction(def, attackPoseOf(caster), ctx)
       : (skillClip(skill, ctx) ?? PlayerAction.PLAYER_SKILL_HAND1);
-    // Others see Electric Spike from a horse as the ground flash; only the Fenrir has its own (WSclient.cpp:5261-5265).
-    if (action === PlayerAction.PLAYER_ATTACK_RIDE_ATTACK_FLASH) action = PlayerAction.PLAYER_SKILL_FLASH;
-    const paired = rageBuffSound(skill, action);
+    // What others see of the clip, when the skill says it differs (Electric Spike from a horse).
+    action = othersSeeClip(skill, action);
+    const paired = clipCastSound(skill, action);
     if (paired && caster.transform) playCombat(paired, caster.transform.pos);
     if (def && advancesSwordCount(def, ctx)) {
       caster.playerAnimation.swordCount = (caster.playerAnimation.swordCount ?? 0) + 1;

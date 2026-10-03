@@ -1,12 +1,11 @@
 import { BaseClass, getBaseClass } from '../hero/characterStats';
 import { COMBAT_BUS, hitSound, usesMissileWeapon } from '@/controllers/sound/combatSounds';
-import { COMBO_SOUND } from '@versions/shared/skills/dark_knight/combo/state';
+import { playSkill } from '@/controllers/sound';
 import { Entity, World } from '@/ecs/world';
 import { EventBus } from '@/core/eventBus';
 import { type MUAttributeSystem } from '@/core/attributeSystem';
 import { MonsterActionType, PlayerAction, ServerPlayerActionType } from '@versions/shared/objects/enum';
 import { ObjectAnimationPacket, ObjectGotKilledPacket, ObjectHitExtendedPacket, ObjectHitPacket, RageAttackPacket, RageAttackRangeResponsePacket, SkillAnimationPacket } from '@versions/shared/packets/ServerToClientPackets';
-import { SHOCK_IMMUNE_CLIPS } from '@/controllers/combat/recipes';
 import { ServerToClientActionMap, isPlayerAttackAction, resolveGenderedAction } from '@/controllers/anim/playerActionMapper';
 import { Store } from '@/app/store';
 import { attackInputOf, attackPoseOf, convertDirectionToAngle, isDeadMonster, monsterNumberOf, playCastAnimation, playTrapSounds, setMonsterClip } from '../_shared/net_helpers';
@@ -18,7 +17,7 @@ import { isPlayerBody } from '@/controllers/actors/playerObject';
 import { isTeleportSkill } from '../skills/skillCasting';
 import { meteoriteStormRunning, santaActionSound } from '@/controllers/sound/packetSounds';
 import { mountKind } from '../pets/pets';
-import { playBowShotVisual, playSoulBarrierShell, playTargetedSkillVisual } from '@versions/shared/skills/skillVisuals';
+import { playBowShotVisual, playBuffHits, playTargetedSkillVisual } from '@versions/shared/skills/skillVisuals';
 import { playSfx } from '@/controllers/sound/sfx';
 import { playTeleportAnimation } from '../skills/net';
 import { playerPlaySpeed } from '@/controllers/anim/playSpeed';
@@ -214,7 +213,7 @@ EventBus.on('SkillAnimation', packet => {
   // AT_SKILL_COMBO: the server announces a landed DK combo. The original leaves the caster's
   // facing, target and clip alone and only plays SOUND_COMBO (WSclient.cpp:4167, :4829-4832).
   if (combat.observeSkillAnimation(p.SkillId, target?.netId)) {
-    playSfx(COMBO_SOUND, caster.transform.pos, { bus: COMBAT_BUS });
+    playSkill(p.SkillId, caster.transform.pos);
     playTargetedSkillVisual(world.scene, p.SkillId, caster, target);
     return;
   }
@@ -380,7 +379,7 @@ function applyObjectHit(p: ObjectHitView) {
   const maskedId = p.ObjectId & 0x7fff;
   const obj = world.getByNetId(maskedId);
   if (!obj) return;
-  if (obj.localPlayer) playSoulBarrierShell(world.scene, obj, lastAttacker);
+  if (obj.localPlayer) playBuffHits(world.scene, obj, lastAttacker);
 
   const totalDamage = p.HealthDamage + p.ShieldDamage;
   combat.observeRageHit(p.IsRageFighterStreakHit, p.IsRageFighterStreakFinalHit);
@@ -414,7 +413,7 @@ function applyObjectHit(p: ObjectHitView) {
   // SetPlayerShock (ZzzCharacter.cpp:1364-1390): `Hit` is the health damage;
   // nothing flinches once dead, a Uniria / Dinorant / Dark Horse rider never
   // does, a Fenrir rider flinches on the wolf, a player finishing one of the
-  // SHOCK_IMMUNE_CLIPS is not interrupted - every other clip is.
+  // clips a skill marks `noFlinch` is not interrupted - every other clip is.
   const mount = mountKind(obj.charAppearance?.pet);
   if (
     obj.playerAnimation &&
@@ -423,7 +422,7 @@ function applyObjectHit(p: ObjectHitView) {
     mount !== 'uniria' &&
     mount !== 'dinorant' &&
     mount !== 'horse' &&
-    !SHOCK_IMMUNE_CLIPS.has(obj.playerAnimation.action)
+    !combat.clipIgnoresHit(obj.playerAnimation.action)
   ) {
     const anim = obj.playerAnimation;
     if (anim.action !== PlayerAction.PLAYER_DIE1) {

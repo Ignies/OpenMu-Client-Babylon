@@ -134,6 +134,10 @@ export const INFERNO_LIGHT: SkillLight = {
 export default defineSkill({
   id: 14,
   name: "Inferno",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [381],
+  // Master numbers cast, heard, lit and drawn as this skill (the original names them in its `case`).
+  masterAliases: [486],
   // 14 Inferno (381 / 486 alias here): CreateInferno + MODEL_SKILL_INFERNO sub0 at the caster at AttackTime 15 (`inferno`).
   // Enhanced `infernoGraded`.
   visual: { area: dw2AtAttackTime(inferno), enhanced: { area: dw2AtAttackTime(infernoGraded) } },

@@ -3,8 +3,9 @@
  * (the `ExecuteSkill` / `UseSkillWarrior` / `SetRageSkillAni` switches of
  * the original, ZzzInterface.cpp:4803-6700, 2049-2200, MonkSystem.cpp:389),
  * the hit keys of the clips (the `AttackStage` / `AttackEffect` frame checks,
- * ZzzCharacter.cpp:2510-2960) and the skill numbers the entries key on.
- * No state, no imports from entries.
+ * ZzzCharacter.cpp:2510-2960) and the clips a hit does not interrupt.
+ * No state, no imports from entries. The per-skill rows are filled by
+ * `registerSkills` from each skill's file.
  *
  * Skill numbers are OpenMU's, which are the original's `ActionSkillType`
  * (`_enum.h:300-480`); the strengthened / mastery variants share the base
@@ -12,31 +13,6 @@
  */
 import { PlayerAction } from '@versions/shared/objects/enum';
 import { ENUM_WORLD } from '../../core/types';
-
-// ---- skill numbers the entries key on --------------------------------------
-
-/** AT_SKILL_NOVA: the release (charged) cast. */
-export const SKILL_NOVA = 40;
-/** AT_SKILL_NOVA_BEGIN: sent when the right button goes down; starts the charge. */
-export const SKILL_NOVA_BEGIN = 58;
-/** AT_SKILL_COMBO: the server announces a landed Dark Knight combo with this id. */
-export const SKILL_COMBO = 59;
-/** AT_SKILL_DARKSIDE: the one Rage Fighter skill that uses the 0x4A/0x4B pair. */
-export const SKILL_DARK_SIDE = 263;
-/** Rage Fighter party buffs (266..268) pick one of two clips at random. */
-export const RAGE_BUFF_SKILLS: ReadonlySet<number> = new Set([266, 267, 268]);
-/** AT_SKILL_RIDER: the one skill whose clip depends on the map, not the caster. */
-export const SKILL_RIDER = 49;
-/**
- * AT_SKILL_BLOCKING: ReceiveAction returns before the clip and the sound for a Dark Horse rider
- * outside a safe zone (WSclient.cpp:3577-3582); the hero's own cast still takes the guard pose.
- */
-export const SKILL_DEFENSE = 18;
-/**
- * AT_SKILL_SLASH / _STR: ReceiveMagic swings SWORD5 on an even SwordCount and TWO_HAND_SWORD3 on
- * an odd one, then advances it (WSclient.cpp:4398-4410).
- */
-export const SLASH_SKILLS: ReadonlySet<number> = new Set([23, 327]);
 
 // ---- per-skill cast clips --------------------------------------------------
 
@@ -71,29 +47,23 @@ export type SkillClipSet = {
  * reaches them either by naming them in the same `case` list or through
  * `MasterSkillToBaseSkillIndex` (`g_SkillPairs`), and both land here.
  */
-export const SKILL_CLIPS: Readonly<Record<number, SkillClipSet>> = {};
+export const SKILL_CLIPS: Readonly<Record<number, SkillClipSet | ClipPick>> = {};
 
 /**
- * `AT_SKILL_RIDER` is the one skill whose clip is chosen by the *map*:
- * Tarkan, Kalima/Heaven and the Kanturu Maya scene get the flying variant
- * (UseSkillWarrior:2250-2255, WSclient.cpp:4424-4429). Kept out of
- * `SKILL_CLIPS` because it needs the world, not the caster.
+ * A skill that picks its clip itself rather than by mount: a coin toss (the Rage Fighter
+ * party buffs) or the map (Fire Breath's rider). Gets the caster's `CastContext`.
+ */
+export type ClipPick = (ctx: { readonly world?: ENUM_WORLD }) => PlayerAction;
+
+/**
+ * The maps where a rider flies (`AT_SKILL_RIDER`'s flying clip, UseSkillWarrior:2250-2255,
+ * WSclient.cpp:4424-4429): Tarkan and Kalima/Heaven. Fire Breath's file and the mount's
+ * breath (petSystem) both read it.
  */
 export const RIDER_FLY_WORLDS: ReadonlySet<number> = new Set([
   ENUM_WORLD.WD_8TARKAN,
   ENUM_WORLD.WD_10ICARUS, // the reference calls it WD_10HEAVEN
 ]);
-
-export const RIDER_CLIPS = {
-  ground: A.PLAYER_SKILL_RIDER,
-  flying: A.PLAYER_SKILL_RIDER_FLY,
-} as const;
-
-/** The two clips a Rage Fighter party buff picks between, evens (:2866-2874). */
-export const RAGE_BUFF_CLIPS: readonly PlayerAction[] = [
-  A.PLAYER_SKILL_ATT_UP_OURFORCES,
-  A.PLAYER_SKILL_HP_UP_OURFORCES,
-];
 
 /**
  * `SetPlayerMagic` (ZzzCharacter.cpp:1238-1262) - the generic cast clip, and
@@ -137,14 +107,7 @@ export const HIT_KEYS: Readonly<Partial<Record<PlayerAction, number>>> = {
  * NOT flinch while in one of these - the swing / cast finishes. Everything
  * else (including a plain attack swing) is interrupted by PLAYER_SHOCK.
  * Riders of Uniria / Dinorant / Dark Horse never flinch either (the mount
- * check lives with the consumer, which knows the pet slot).
+ * check lives with the consumer, which knows the pet slot). Each skill lists its clips in
+ * `noFlinch`.
  */
-export const SHOCK_IMMUNE_CLIPS: ReadonlySet<PlayerAction> = new Set([
-  A.PLAYER_ATTACK_SKILL_FURY_STRIKE, // Rageful Blow
-  A.PLAYER_SKILL_VITALITY, // Swell Life
-  A.PLAYER_SKILL_HELL_BEGIN, // Nova charge
-  A.PLAYER_SKILL_ATT_UP_OURFORCES, // RF party buffs
-  A.PLAYER_SKILL_HP_UP_OURFORCES,
-  A.PLAYER_SKILL_GIANTSWING, // Chain Drive
-  A.PLAYER_SKILL_DRAGONLORE, // Dragon Roar
-]);
+export const SHOCK_IMMUNE_CLIPS: Set<PlayerAction> = new Set();

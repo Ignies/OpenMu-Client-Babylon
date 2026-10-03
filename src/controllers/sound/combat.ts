@@ -61,11 +61,21 @@ const MALE_SCREAMS = [
 /** Skill cast sounds by wire skill number, filled by `registerSkills` from each skill's `sound`. */
 export const SKILL_SOUNDS: Readonly<Record<number, Sounds>> = {};
 
-/**
- * Skills whose caster hears nothing at the click: Fire Scream's cast (ClassAttack.cpp:866-901) and the
- * caster's own echo (WSclient.cpp:5180, `sc != Hero`) are silent; it screams when the effect spawns.
- */
-const SILENT_HERO_CASTS: ReadonlySet<number> = new Set([78, 518, 520]);
+/** Skills whose caster hears nothing at the click (a skill's `silentHeroCast`, by exact number). */
+export const SILENT_HERO_CASTS: Set<number> = new Set();
+
+/** A cast sound that goes with the clip the cast played (a skill's `clipSound`, by exact number). */
+export const SKILL_CLIP_SOUNDS: Record<number, (clip: number) => Sounds> = {};
+
+/** The cast sound paired with `clip`, or null when the skill's sound does not depend on its clip. */
+export function clipCastSound(skill: number, clip: number): Sounds | null {
+  return SKILL_CLIP_SOUNDS[skill]?.(clip) ?? null;
+}
+
+/** Whether the skill's cast sound goes with its clip (so it plays once the clip is picked). */
+export function hasClipSound(skill: number): boolean {
+  return skill in SKILL_CLIP_SOUNDS;
+}
 
 /** The sound the hero's own cast plays as it starts. */
 export function heroCastSound(skill: number): Sounds | null {
@@ -136,11 +146,10 @@ export function playerDeathSound(cls: CharacterClassNumber): Sounds {
 }
 
 /**
- * Skills whose sound the original plays with the effect at AttackTime 15, 14 ticks after the
- * echo (ZzzCharacter.cpp:4724-4754, :5147-5156, :5213-5223), not at the cast: the skill row plays these
- * (`playLandingSound`, controllers/skills/visuals.ts), so the cast is silent here.
+ * Skills whose sound plays when the effect lands, not at the cast (a skill's `soundOnLanding`, by
+ * exact number): the skill row plays it (`playLandingSound`), so the cast is silent here.
  */
-const LANDING_SOUNDS: ReadonlySet<number> = new Set([214, 216, 221, 222, 458, 459, 460, 462]);
+export const LANDING_SOUNDS: Set<number> = new Set();
 
 export function skillSound(skill: number): Sounds | null {
   if (LANDING_SOUNDS.has(skill)) return null;

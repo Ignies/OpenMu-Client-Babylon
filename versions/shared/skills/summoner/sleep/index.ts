@@ -9,6 +9,8 @@ const CURSE_HAND_SLEEP: CurseHand = { shiny: [0.5, 0.2, 0.8], pin: [0.7, 0, 0.8]
 export default defineSkill({
   id: 219,
   name: "Sleep",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [454],
   // 219 Sleep (454 Str): the violet hand FX while the clip plays; 14 ticks after the reply the violet
   // circle at the caster and the ALICE rings, flares and homing streaks on the target (aliceCurse).
   visual: {

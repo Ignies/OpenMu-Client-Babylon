@@ -1,6 +1,6 @@
 import { defineSkill } from '@/controllers/skills/define';
-import { DW1_RELEASE, FireBallLook, fireBallFlight, lavaChips, perTickRoll, placeBodyLight, releaseSound, softExplosion } from '../_shared';
-import { FIRE_BALL_EMBERS, FIRE_PUFF, FIRE_SPARKS, TEX } from '@/controllers/fx/recipes';
+import { DW1_RELEASE, FIRE_BALL_EMBERS, FireBallLook, fireBallFlight, lavaChips, perTickRoll, placeBodyLight, releaseSound, softExplosion } from '../_shared';
+import { FIRE_PUFF, FIRE_SPARKS, TEX } from '@/controllers/fx/recipes';
 import { delay, entityGone, entityPos, type RGB } from '@/controllers/fx/core';
 import { Step, burn, cm, facing, hitSparks, particles, perTick, scorch, seq, ticks, toward } from '@/controllers/skills/visuals';
 import { Vector3 } from '@/controllers/render/babylon/exports';

@@ -1,10 +1,22 @@
 import { delay, entityGone, entityPos, entityYaw, fxNow, scaleRGB, type ParticleRecipe, type PointSource, type RGB } from '@/controllers/fx/core';
 import { SkillContext, Step, TICK, after, atCaster, cm, repeat, ring, seq, ticks } from '@/controllers/skills/visuals';
-import { TEX } from '@/controllers/fx/recipes';
+import { RGBS, TEX } from '@/controllers/fx/recipes';
 import { type TaperShape } from '@/controllers/fx/joint';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
 import { summonLight } from '../_shared';
+
+/** Ice shards / snow motes: BITMAP_FLARE tinted, slow, falling. */
+export const ICE_MOTES: ParticleRecipe = {
+  texture: TEX.flare,
+  colour: RGBS.ice,
+  colourEnd: RGBS.frost,
+  size: 0.18,
+  life: 0.9,
+  power: 1.2,
+  gravity: -1.5,
+  spin: 2,
+};
 
 // ---- misc steps -------------------------------------------------------------------
 

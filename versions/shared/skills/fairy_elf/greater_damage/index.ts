@@ -9,6 +9,9 @@ const HAND_SHINY_BONES = [33, 27, 26, 42, 36, 35] as const;
 export default defineSkill({
   id: 28,
   name: "Greater Damage",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [420, 422],
+  effect: 1, // MagicEffectCancelled names skill 28: the buff it drops
   // 28 Greater Damage: BITMAP_MAGIC+1 sub3 LT 20.
   visual: { impact: magicGround([1, 0.75, 0.55]) },
   buffs: {

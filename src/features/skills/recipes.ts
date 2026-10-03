@@ -248,5 +248,14 @@ export function buffIconCell(
   };
 }
 
+/** Master number → the base skill it casts, sounds and lights as (`skillAliases.ts`), for `registerSkills`. */
+export { MASTER_BASES } from './skillAliases';
+
 /** Skill number → re-use delay in milliseconds (Skill.bmd `Delay`). */
 export const SKILL_DELAY_MS: Readonly<Record<number, number>> = {};
+
+/**
+ * Skill number → the MagicEffect it applies, for `MagicEffectCancelled`, which names the skill.
+ * Filled by `registerSkills` from each skill's `effect`.
+ */
+export const SKILL_EFFECTS: Record<number, number> = {};

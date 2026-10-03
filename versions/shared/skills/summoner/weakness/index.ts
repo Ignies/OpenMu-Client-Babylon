@@ -12,6 +12,9 @@ const ZIN_WEAKNESS: ZinCurse = { wide: [2, 0.1, 0.1], core: [2, 0.4, 0.3], rain:
 export default defineSkill({
   id: 221,
   name: "Weakness",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [459],
+  soundOnLanding: true, // with the effect at AttackTime 15 (ZzzCharacter.cpp:5213-5223)
   // 221 Weakness (459 Str) / 222 Enervation (Innovation, 460 Str): the hand FX, then 14 ticks later at the
   // caster's feet the ZIN circles and ripples, the three Suhwanzin circles and the glitter rain, and the sound.
   visual: {

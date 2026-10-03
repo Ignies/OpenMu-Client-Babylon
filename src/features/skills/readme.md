@@ -14,7 +14,7 @@ hotbar share.
 - `cooldowns.ts`: `skillCooldowns`, `onCooldownTick(listener)`, `skillDelaySeconds(num)`.
   `recipes.ts`: `SKILL_DELAY_MS`, `buffIconCell(effectId)`. `masterTree.ts`: `MASTER_TEXT`,
   `formatMasterText`, `masterSkillIconCell`. `masterLevel.ts`: `MASTER_EXP_SUB_BARS`.
-- `masterBase(skill)` (`skillAliases.ts`), `learnableSkill(item)` / `learnSkillError(...)` (`skillItems.ts`),
+- `masterBase(skill)` (`skillAliases.ts`, `MASTER_BASES` filled from each base skill's `masterAliases`), `learnableSkill(item)` / `learnSkillError(...)` (`skillItems.ts`),
   `skillDisplayName(number)` (`skillNames.ts`), `playTeleportAnimation(...)` (`net.ts`).
 
 ## How it works
@@ -34,7 +34,8 @@ hotbar share.
 - `SkillListUpdate`, `SkillAdded`, `SkillRemoved` (F3 11): one handler; the count byte (0xFE add,
   0xFF remove) picks the shape, then `Store.setSkillList` / `addSkill` / `removeSkill`.
 - `MagicEffectStatus`: sets an effect on the object; the hero's also goes to `Store.setBuff`.
-- `MagicEffectCancelled`: maps the skill to its effect (`SKILL_TO_EFFECT`, `magicEffects.ts`) and clears it.
+- `MagicEffectCancelled`: maps the skill to its effect (`SKILL_EFFECTS`, `recipes.ts`, filled from
+  each skill's `effect`) and clears it.
 - `AreaSkillAnimation`: turns the caster, plays the cast clip and the area visual.
 - `ChainLightningHitInfo`: draws the hops caster -> target -> target (`WSclient.cpp:5577-5629`).
 - `MasterStatsUpdate`, `MasterCharacterLevelUpdate(Extended)`, `ExperienceGained(Extended)`: master level,

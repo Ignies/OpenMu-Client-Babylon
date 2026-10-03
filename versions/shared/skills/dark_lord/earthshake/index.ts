@@ -290,6 +290,8 @@ export const EARTHSHAKE_LIGHT: SkillLight = {
 export default defineSkill({
   id: 62,
   name: "Earthshake",
+  // Master numbers cast, heard, lit and drawn as this skill (the original names them in its `case`).
+  masterAliases: [512, 516],
   // 62 Earthshake (512 / 516): on the Dark Horse's action 3 - shock rings every 10 ticks, rings of
   // MODEL_GROUND_STONE on horse keys 8-9.5, the fury's burst 1.1 tiles ahead at tick 28 and five crack
   // chains at 29 (GOBoid.cpp:727-769, MoveHandlers.cpp:2940-3170).

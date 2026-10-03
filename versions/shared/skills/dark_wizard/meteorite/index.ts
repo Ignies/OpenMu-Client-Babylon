@@ -1,13 +1,58 @@
 import { defineSkill } from '@/controllers/skills/define';
-import { FIRE_BALL_EMBERS, FIRE_SPARKS, METEOR_BLAST, METEOR_DUST, RGBS, TEX } from '@/controllers/fx/recipes';
-import { FireBallLook, atRelease, fireBallFlight, groundFlare, lavaChips, perTickRoll, placeBodyLight, releaseSound, softExplosion } from '../_shared';
-import { type RGB } from '@/controllers/fx/core';
+import { FIRE_SPARKS, RGBS, TEX } from '@/controllers/fx/recipes';
+import { FIRE_BALL_EMBERS, FireBallLook, atRelease, fireBallFlight, groundFlare, lavaChips, perTickRoll, placeBodyLight, releaseSound, softExplosion } from '../_shared';
+import { type ParticleRecipe, type RGB } from '@/controllers/fx/core';
 import { Step, burn, cm, explosion, particles, ring, scorch, sprite } from '@/controllers/skills/visuals';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { playCombat } from '@/controllers/sound/combat';
 
 import { FIRE_BALL_LIGHT } from '../_shared';
 import { effectLight } from '@/controllers/lighting/recipes';
+
+/** The meteor's blast on the graded tiers: BITMAP_FIRE rolled out flat from the landing and rising as it burns off. */
+const METEOR_BLAST: ParticleRecipe = {
+  texture: TEX.fire,
+  cells: { w: 64, h: 64, count: 4 },
+  colour: [1, 0.5, 0.15],
+  colourEnd: [0.6, 0.08, 0],
+  size: 0.7,
+  sizeJitter: 0.3,
+  life: 0.55,
+  lifeJitter: 0.3,
+  box: [0.15, 0.05, 0.15],
+  dir1: [-1, 0.1, -1],
+  dir2: [1, 0.45, 1],
+  power: 2.6,
+  settle: 0.5,
+  gravity: 0.8,
+  spin: 2,
+  endScale: 1.8,
+};
+
+/** Dust and smoke the landing throws up: straight-alpha matter, so it darkens what it covers and never blooms. */
+const METEOR_DUST: ParticleRecipe = {
+  texture: TEX.smokeAlpha,
+  softEdge: true,
+  colour: [0.26, 0.23, 0.2],
+  size: 0.8,
+  sizeJitter: 0.3,
+  life: 1.5,
+  lifeJitter: 0.25,
+  box: [0.35, 0.05, 0.35],
+  dir1: [-0.5, 0.4, -0.5],
+  dir2: [0.5, 1, 0.5],
+  power: 0.9,
+  settle: 0.4,
+  gravity: 0.35,
+  spin: 0.6,
+  endScale: 2.6,
+  fade: [
+    [0, 0],
+    [0.15, 0.7],
+    [1, 0],
+  ],
+  blend: 'alpha',
+};
 
 /**
  * 2 Meteorite (ZzzCharacter.cpp:5007-5010): MODEL_FIRE sub0 from 130-161 cm along +x and 400 cm over the
@@ -55,6 +100,8 @@ const meteorImpact: Step = (p, c) => {
 export default defineSkill({
   id: 2,
   name: "Meteorite",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [390, 394],
   // 2 Meteorite: at the release, MODEL_FIRE sub0 falls on the target's feet; 6 chips and the explosion (meteor).
   // Enhanced: the same fall with a glow and embers, and a fuller landing (meteorImpact).
   visual: {

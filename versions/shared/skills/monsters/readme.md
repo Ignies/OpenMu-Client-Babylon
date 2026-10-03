@@ -18,8 +18,8 @@ Skills only monsters cast. Rules for skill folders: [../readme.md](../readme.md)
 | `potion_of_soul` | 204 | a soul-coloured flash and motes |
 | `doppelganger_self_explosion` | 239 | a fire hit and a wider fire shock ring |
 
-OpenMU's generic monster skill (150) is drawn as 50 through `MASTER_ALIASES` in
-`src/controllers/skills/visuals.ts`.
+OpenMU's generic monster skill (150) is drawn as 50 through `flame_of_evil`'s `lookAliases`.
+`flame_of_evil` also owns the boss lights (meteor, blast, hellfire circle, laser).
 
 There is no `_shared.ts` in this folder.
 

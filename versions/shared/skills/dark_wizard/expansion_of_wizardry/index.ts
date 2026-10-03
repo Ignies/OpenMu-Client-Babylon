@@ -209,6 +209,10 @@ export const SWELL_LIGHT: Omit<SkillLight, 'enhanced'> = {
 export default defineSkill({
   id: 233,
   name: "Expansion of Wizardry",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [380, 383],
+  // The old skill -> effect table's row, labelled Increase Health (130, Rage Fighter 267); kept as found.
+  effect: 130,
   // 233 Expansion of Wizardry: MODEL_SWELL_OF_MAGICPOWER at the caster, Light (0.3,0.2,0.9) (WSclient.cpp
   // AT_SKILL_SWELL_OF_MAGICPOWER cast).
   // 233 Expansion of Wizardry (380 / 383 alias): see swellOfMagic. Enhanced adds the old mote burst.

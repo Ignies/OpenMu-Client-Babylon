@@ -39,6 +39,24 @@ Golden tests (`versions/shared/skills/*.golden.test.ts`) record what every skill
 that alters a skill's look, sound or rules shows up there; update the snapshot only when the change
 is meant (`bunx vitest run versions/shared/skills -u`, and say why in the PR).
 
+### Skill-only rules (more `defineSkill` fields)
+
+Anything a controller does differently for one skill is a field of that skill's file; no
+controller tests a skill number.
+
+| Field | Controller | What |
+|---|---|---|
+| `lookAliases`, `masterAliases` | skills (+ combat, sound, lighting) | master numbers drawn as this skill; `masterAliases` also cast, sound and light as it |
+| `clip` as a function | combat | a pick of its own: the map (Fire Breath), a coin toss (Rage Fighter party buffs) |
+| `poseClip`, `swing`, `swordCount`, `castsAsSpell` | combat | clip by hands or SwordCount (Plasma Storm, Slash), the high bow swing (Starfall), SwordCount, `SetPlayerMagic` for a physical-typed master |
+| `othersSee`, `quietOn` | combat | the clip others play (Electric Spike on a horse); mounts that drop the cast (Defense on a horse) |
+| `noFlinch`, `holdsFacing` | combat | clips a hit does not cut; clips that keep the facing |
+| `kill` | combat | what a kill does to the body (`knock`, per-frame `dying`: Nova, Combo) |
+| `explicitHits` | combat | send the 0xDB hit list whatever the skill type |
+| `clipSound`, `soundOnLanding`, `silentHeroCast` | sound | cast sound by clip; sound at the landing; no sound at the hero's click |
+| `effect` | features/skills | the MagicEffect `MagicEffectCancelled` drops for this skill |
+| `buffHits` | skills | what a buff draws when its wearer is hit (Soul Barrier's shell) |
+
 ## Windows and HUD
 
 ```

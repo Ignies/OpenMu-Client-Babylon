@@ -242,6 +242,11 @@ const SCRATCH = new Vector3();
 export default defineSkill({
   id: 78,
   name: "Fire Scream",
+  // Master numbers cast, heard, lit and drawn as this skill (the original names them in its `case`).
+  masterAliases: [518, 520],
+  // The cast (ClassAttack.cpp:866-901) and the caster's own echo (WSclient.cpp:5180, `sc != Hero`) are silent;
+  // it screams when the effect spawns.
+  silentHeroCast: true,
   // 78 Fire Scream (DL): 14 ticks after the packet, 3 pairs MODEL_DARK_SCREAM + _FIRE at yaw and yaw ±10 moved ±80 cm
   // sideways, each with a ground streak, a puff and a flame card a tick (fireScream). Caster-anchored: 518 / 520 may
   // arrive as a targeted packet.

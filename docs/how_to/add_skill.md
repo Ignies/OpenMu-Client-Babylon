@@ -35,3 +35,19 @@
 - A skill file imports controllers and shared skill blocks, never another skill's folder.
 - Something two skills share moves to `<class>/_shared.ts` (one class) or `skills/_shared.ts`.
 - Cite the original source line for ported looks.
+
+## Skill-only rules
+
+A skill that behaves differently from the generic rules says so in its own file, never with a
+branch in a controller. The fields are listed in [docs/content.md](../content.md) (Skill-only
+rules). Examples:
+
+- a clip picked by the map or a coin toss: `clip: ctx => ...`; by the hands: `poseClip`.
+- a hit does not interrupt its clip: `noFlinch: [A.PLAYER_SKILL_...]`.
+- the sound plays when the effect lands: `soundOnLanding: true` (the visual calls `playLandingSound`).
+- a kill knocks the body back: `kill: { knock: true }`.
+- a master number with no file draws as this skill: add it to `lookAliases`.
+
+If no field fits, add one to `SkillDef` (`src/controllers/skills/define.ts`) and write it in
+`registerSkills` (combat fields: `src/controllers/combat/skillRules.ts`). Pin the behaviour with a
+test first (`versions/shared/skills/skillRules.golden.test.ts` covers the cast rules).

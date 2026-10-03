@@ -22,11 +22,11 @@ import type { CombatLayer } from './layer';
 const EXPLICIT_HITS_TYPE = 'AreaSkillExplicitHits';
 
 /**
- * Skills that send 0xDB whatever their database type says. Empty by
- * default: this data copy types every area skill as automatic hits. Add a
- * skill number here to force the follow-up for it.
+ * Skills that send 0xDB whatever their database type says: a skill's
+ * `explicitHits`. Empty today: this data copy types every area skill as
+ * automatic hits.
  */
-const EXPLICIT_HIT_SKILLS: ReadonlySet<number> = new Set<number>([]);
+export const EXPLICIT_HIT_SKILLS: Set<number> = new Set<number>();
 
 /**
  * Tiles around the cast point a target counts as inside when the skill

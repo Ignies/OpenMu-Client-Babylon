@@ -1,7 +1,7 @@
 import { defineSkill } from '@/controllers/skills/define';
-import { MODEL, RGBS, VENOM_MOTES } from '@/controllers/fx/recipes';
+import { MODEL, RGBS } from '@/controllers/fx/recipes';
 import { arrow } from '@/controllers/skills/visuals';
-import { venomHit } from './';
+import { VENOM_MOTES, venomHit } from './';
 
 export default defineSkill({
   id: 434,

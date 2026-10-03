@@ -80,6 +80,8 @@ const bloodStormPlus: Step = (at, c) => {
 export default defineSkill({
   id: 344,
   name: "Blood Storm",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [346],
   // 344 Blood Storm (346 Strengthener by alias): no original; a renewed look from original art (bloodStorm).
   visual: { area: bloodStorm, enhanced: { area: bloodStormPlus } },
   sound: 'Sound/sKnightSkill4', // Blood Storm (no original: the Twisting Slash sound, with its clip)

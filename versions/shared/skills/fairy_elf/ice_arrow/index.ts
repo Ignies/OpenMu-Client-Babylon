@@ -1,5 +1,6 @@
 import { defineSkill } from '@/controllers/skills/define';
-import { ICE_MOTES, MODEL, RGBS, SMOKE, TEX } from '@/controllers/fx/recipes';
+import { MODEL, RGBS, SMOKE, TEX } from '@/controllers/fx/recipes';
+import { ICE_MOTES } from '../_shared';
 import { IMPACT_HEIGHT, arrow, cm, hitSparks, orbiting, ticks } from '@/controllers/skills/visuals';
 import { effects } from '@/controllers/fx';
 
@@ -11,6 +12,8 @@ const ARROW_SPEED = 17.5;
 export default defineSkill({
   id: 51,
   name: "Ice Arrow",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [424],
   // 51 Ice Arrow: cast - MODEL_ICE sub1 + sub2 (+180°) at the target LT 20, Scale 0.8, BlendMeshLight 0.5, 3× BITMAP_SMOKE,
   // a BITMAP_FIRE+2 sub10 orbiting r=60; impact: a single arrow.
   visual: {

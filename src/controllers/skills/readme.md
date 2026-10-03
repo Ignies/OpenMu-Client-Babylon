@@ -16,14 +16,17 @@ themselves are content in `versions/shared/skills/` (see [docs/content.md](../..
   `fanArrows`, `onCurseLanding`, units (`ticks`, `cm`, `perTick`, `TICK`).
 - Dispatch, used by features and ECS systems through `versions/shared/skills/skillVisuals.ts`:
   `playTargetedSkillVisual`, `playAreaSkillVisual`, `playBowShotVisual`, `setBuffVisual`,
-  `clearBuffVisuals`, `skillVisualFor`, `baseSkill`, `fallbackFor`.
+  `clearBuffVisuals`, `playBuffHits`, `skillVisualFor`, `baseSkill`, `fallbackFor`.
 
 ## How it works
-- `registerSkills` writes `visual` into `SKILL_VISUALS`, `light` into `lighting/skills.ts`,
-  `sound` into `sound/combat.ts`, `clip` into `combat/recipes.ts`, `delayMs` into
-  `features/skills/recipes.ts`, `target` / `stepIn` into the combat tables, `buffs` /
-  `buffArrivals` into `BUFF_VISUALS` / `BUFF_ARRIVALS`, and `combat.layer` / `combat.hooks` into
-  the combat controller. It is the only writer of those tables.
+- `registerSkills` writes `visual` into `SKILL_VISUALS`, `lookAliases` / `masterAliases` into
+  `LOOK_ALIASES` (and `MASTER_BASES`, `features/skills/skillAliases.ts`), `light` into
+  `lighting/skills.ts`, `sound` / `clipSound` / `soundOnLanding` / `silentHeroCast` into
+  `sound/combat.ts`, `delayMs` and `effect` into `features/skills/recipes.ts`, `buffs` /
+  `buffArrivals` / `buffHits` into `BUFF_VISUALS` / `BUFF_ARRIVALS` / `BUFF_HITS`, and hands
+  the combat fields (clip rules, `target`, `stepIn`, `noFlinch`, `holdsFacing`, `quietOn`,
+  `othersSee`, `explicitHits`, `kill`, `combat.layer` / `combat.hooks`) to
+  `combat.registerSkill`. It is the only writer of those tables.
 - A `SkillVisual` row has four moments, each a `Step` (a function of a point and a
   `SkillContext`): `cast` at the caster, `travel` (a projectile whose arrival fires `impact`),
   `impact` at the target, `area` at the ground point. `enhanced` replaces moments from lighting
@@ -34,8 +37,8 @@ themselves are content in `versions/shared/skills/` (see [docs/content.md](../..
   `CreateEffect` / `CreateParticle` / `CreateJoint`).
 - Lookup (`skillVisualFor`): the skill's own row, else its master alias row, else `fallbackFor`
   the skill's type and damage type from `skillsDatabase`, so no skill is clip-only.
-  `MASTER_ALIASES` maps OpenMU master numbers (300+) to their base row (the original's
-  SKILL_REPLACEMENTS), plus the Dark Lord and Magic Gladiator alias tables and `150 -> 50`.
+  `LOOK_ALIASES` maps OpenMU master numbers (300+) to their base row (the original's
+  SKILL_REPLACEMENTS); each base skill lists its own, and `150 -> 50` is Flame of Evil's.
 - Light is not decided here: dispatch calls `lighting.skillTargeted` / `lighting.skillArea`, and
   every projectile goes through `shoot`, which asks `lighting.arrow` for a flight light.
 - `playBowShotVisual`: the plain bow / crossbow shot (ZzzCharacter.cpp:4700-4735,
@@ -44,6 +47,8 @@ themselves are content in `versions/shared/skills/` (see [docs/content.md](../..
 - Buff looks: `setBuffVisual` runs the effect's `BUFF_ARRIVALS` entry first, then keeps one
   `aura` effect per entity and effect id (`BUFF_VISUALS`, keyed by MagicEffect number =
   `eBuffState`). Ids 1, 2, 3 share one green joint knot (ZzzEffectJoint.cpp:4440).
+- Buff hits: `playBuffHits(scene, wearer, attacker)` runs every `BUFF_HITS` entry whose effect the
+  wearer holds (Soul Barrier's shell on the hero, WSclient.cpp:3282-3291).
 - In dev builds `window.__skillVisuals.area / targeted / buff` fire a row by hand.
 
 ## Depends on / used by
@@ -62,10 +67,16 @@ themselves are content in `versions/shared/skills/` (see [docs/content.md](../..
   `registerSkills` (`index.ts`).
 - add a step helper or building block: `visuals.ts`, next to the ones it resembles.
 - change what a skill with no row draws: `fallbackFor` in `visuals.ts`.
-- map a new master skill onto its base look: `MASTER_ALIASES` in `visuals.ts`.
+- map a new master skill onto its base look: add it to the base skill's `lookAliases` (look only)
+  or `masterAliases` (clip, sound, light and look).
+- a controller that treats one skill differently: add a `SkillDef` field and write it in
+  `registerSkills` (or `combat/skillRules.ts` for combat fields); never test a skill number there.
 
 ## Tests
 No tests in this folder. The golden tests in `versions/shared/skills/` cover it:
 - `skillVisuals.golden.test.ts`: what every skill id spawns on cast, area, bow shot and buff.
 - `skillTables.golden.test.ts`: what every id resolves to for light, sound, clip, target,
   step-in and delay.
+- `skillRules.golden.test.ts`: cast clip by pose, SwordCount, clip and landing sounds, flinch and
+  facing clips, master aliases, cancel effects. `castRules.test.ts`: quiet mounts, what others
+  see, kill rules, Nova's hook numbers.

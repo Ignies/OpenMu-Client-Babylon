@@ -76,6 +76,10 @@ export const COMETFALL_LIGHT: SkillLight = {
 export default defineSkill({
   id: 13,
   name: "Cometfall",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [382],
+  // Master numbers cast, heard, lit and drawn as this skill (the original names them in its `case`).
+  masterAliases: [484],
   // 13 Cometfall (382 / 484 alias here): 2x MODEL_SKILL_BLAST on the cast point at AttackTime 15 (`cometfall`); Enhanced `cometfallGraded`.
   visual: { area: dw2AtAttackTime(cometfall), enhanced: { area: dw2AtAttackTime(cometfallGraded) } },
   // Cometfall (382 / 484 too): each comet's (0.2, 0.4, 1) range 2 while it falls (MoveHandlers.cpp:2576-2577),

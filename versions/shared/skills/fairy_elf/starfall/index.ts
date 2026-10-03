@@ -8,6 +8,10 @@ import { holy } from '@/controllers/lighting/recipes';
 export default defineSkill({
   id: 46,
   name: "Starfall",
+  // AT_SKILL_DEEPIMPACT shoots through SetPlayerHighBowAttack, which advances SwordCount (ZzzInterface.cpp:2523-2527,
+  // ZzzCharacter.cpp:1316).
+  swing: 'highBow',
+  swordCount: true,
   // 46 Deep Impact (Starfall): the arrow, then MODEL_ARROW_IMPACT at its position.
   visual: { travel: arrow(MODEL.arrowLaser, RGBS.holy), impact: seq(model({ model: MODEL.arrowImpact, seconds: ticks(20), scale: 1, colour: RGBS.holy, grow: 1.4 }), steelHit) },
   sound: 'Sound/battlecastle/sCFireArrow', // Deep Impact

@@ -123,6 +123,7 @@ function orbBurstGrace(scene: Scene, at: Vector3): void {
 export default defineSkill({
   id: 216,
   name: "Lightning Orb",
+  soundOnLanding: true, // with the effect at AttackTime 15 (ZzzCharacter.cpp:5147-5156)
   // 216 Lightning Orb: the forearm crackle, then MODEL_LIGHTNING_ORB at AttackTime 15 (lightningOrb).
   visual: { cast: orbArm, impact: lightningOrb, enhanced: { cast: orbArmLit, impact: lightningOrbStep(true) } },
   sound: 'Sound/SE_Ch_summoner_skill01_lightningof', // Lightning Orb

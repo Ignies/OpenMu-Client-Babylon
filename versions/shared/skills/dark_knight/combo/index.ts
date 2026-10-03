@@ -85,7 +85,9 @@ export default defineSkill({
     area: atCaster(comboBurst, cm(50)),
     enhanced: { impact: atCaster(comboBurstPlus, cm(50)), area: atCaster(comboBurstPlus, cm(50)) },
   },
-  sound: 'Sound/eCombo', // Combo
+  sound: 'Sound/eCombo', // SOUND_COMBO, at the caster when the server announces a landed combo
+  // A combo kill knocks the body back from the killer (ZzzCharacter.cpp:3173-3193).
+  kill: { knock: true },
   // Combo: the original lights nothing. Graded: the rays' blue over the ~3 tiles they reach, for their 20 ticks.
   light: { enhanced: { spots: { burst: effectLight([0.3, 0.6, 1], 3, 0.8, { release: 0.56 }) } } },
   // Combo flash and knock-up timers (state.ts).

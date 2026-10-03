@@ -2,7 +2,7 @@ import { AreaSkillAnimationPacket, ChainLightningHitInfoPacket, MagicEffectCance
 import { ENUM_WORLD } from '@/core/types';
 import { Entity, World } from '@/ecs/world';
 import { EventBus } from '@/core/eventBus';
-import { SKILL_TO_EFFECT } from './magicEffects';
+import { SKILL_EFFECTS } from './recipes';
 import { Store } from '@/app/store';
 import { TELEPORT } from './skillCasting';
 import { applyObjectEffect, playCastAnimation } from '../_shared/net_helpers';
@@ -130,7 +130,7 @@ EventBus.on('MagicEffectStatus', packet => {
 
 EventBus.on('MagicEffectCancelled', packet => {
   const p = new MagicEffectCancelledPacket(packet);
-  const effect = SKILL_TO_EFFECT[p.SkillId];
+  const effect = SKILL_EFFECTS[p.SkillId];
   if (effect !== undefined) setObjectEffect(p.TargetId, effect, false);
 });
 

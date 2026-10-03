@@ -1,7 +1,8 @@
 import { defineSkill } from '@/controllers/skills/define';
-import { beginNova, novaCharge, novaChargeLayer, novaCharging, novaStage, releaseNova } from './charge';
+import { SKILL_NOVA, SKILL_NOVA_BEGIN, beginNova, novaCharge, novaChargeLayer, novaCharging, novaStage, releaseNova } from './charge';
 import { DUST, TEX } from '@/controllers/fx/recipes';
-import { delay, entityGone, entityPos, entityYaw, fxNow, type ParticleRecipe, type PointSource, type RGB } from '@/controllers/fx/core';
+import { bonePos, delay, entityGone, entityPos, entityYaw, fxNow, type ParticleRecipe, type PointSource, type RGB } from '@/controllers/fx/core';
+import type { Entity, World } from '@/ecs/world';
 import { Vector3, type Scene } from '@/controllers/render/babylon/exports';
 import { SkillContext, Step, TICK, after, cm, forwardOf, ticks } from '@/controllers/skills/visuals';
 import { effects } from '@/controllers/fx';
@@ -158,9 +159,45 @@ export const NOVA_LIGHT: Omit<SkillLight, 'enhanced'> = {
   trail: effectLight(NOVA_GRADED_LIGHT, 1.5, 0.8, { release: 0.5 }),
 };
 
+/**
+ * The Nova death's glow: `CreateParticle(BITMAP_LIGHT, bone, …, 5, 0.5 + rand()%100/50)`
+ * ten a tick from random bones for the first 30 ticks (ZzzCharacter.cpp:3184-3193),
+ * Light (0.3, 0.3, 1).
+ */
+const NOVA_DEATH_MOTES: ParticleRecipe = {
+  texture: TEX.flare,
+  colour: [0.3, 0.3, 1],
+  size: 0.45,
+  sizeJitter: 0.3,
+  life: 0.5,
+  power: 0.3,
+  gravity: 0.4,
+  endScale: 0.4,
+  capacity: 512,
+};
+/** `c->Dead <= 30`: ticks the motes fall from the body, 10 a tick from bones 0…31. */
+const NOVA_GLOW_TICKS = 30;
+const NOVA_MOTES_PER_TICK = 10;
+const NOVA_BONES = 32;
+const tmpBone = new Vector3();
+
+/** A body killed by Nova sheds blue motes from its bones while the Dead counter is <= 30. */
+function novaDeathGlow(body: Entity, frameTicks: number, dead: number, world: World): void {
+  if (dead > NOVA_GLOW_TICKS || body.dying?.shattered) return;
+  const count = Math.round(NOVA_MOTES_PER_TICK * frameTicks);
+  for (let i = 0; i < count; i++) {
+    bonePos(body, Math.floor(Math.random() * NOVA_BONES), tmpBone);
+    tmpBone.x -= world.mapParent.position.x;
+    tmpBone.z -= world.mapParent.position.z;
+    effects.spawn('particles', world.scene, tmpBone, { recipe: NOVA_DEATH_MOTES, count: 1 });
+  }
+}
+
 export default defineSkill({
-  id: 40,
+  id: SKILL_NOVA,
   name: "Nova",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [392, 395],
   // 40 Nova (release): 14 ticks after the packet, count+1 waves of 36 JOINT_SPIRIT sub6 heads from the caster's
   // feet + 100, the last wave with 36 sub7 in a ring (novaBurst). Enhanced: novaBurstEnhanced.
   visual: {
@@ -174,6 +211,18 @@ export default defineSkill({
   // Right-button hold: the charge timer and the stage count (charge.ts).
   combat: {
     layer: novaChargeLayer,
-    hooks: { nova: { charging: novaCharging, charge: novaCharge, stage: novaStage, begin: beginNova, release: releaseNova } },
+    hooks: {
+      nova: {
+        skill: SKILL_NOVA,
+        beginSkill: SKILL_NOVA_BEGIN,
+        charging: novaCharging,
+        charge: novaCharge,
+        stage: novaStage,
+        begin: beginNova,
+        release: releaseNova,
+      },
+    },
   },
+  // A Nova kill knocks the body back from the killer and sheds the glow (ZzzCharacter.cpp:3173-3193).
+  kill: { knock: true, dying: novaDeathGlow },
 });

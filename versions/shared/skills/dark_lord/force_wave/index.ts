@@ -9,6 +9,8 @@ import { effectLight } from '@/controllers/lighting/recipes';
 export default defineSkill({
   id: 66,
   name: "Force Wave",
+  // Master numbers cast, heard, lit and drawn as this skill (the original names them in its `case`).
+  masterAliases: [509],
   visual: {
     impact: strikeKey(force, 'Sound/sDarkSpear'),
     area: strikeKey(force, 'Sound/sDarkSpear'),

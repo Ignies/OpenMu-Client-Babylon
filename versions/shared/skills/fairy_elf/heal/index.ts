@@ -10,6 +10,8 @@ import { holy } from '@/controllers/lighting/recipes';
 export default defineSkill({
   id: 26,
   name: "Heal",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [413],
   // 26 Heal: BITMAP_MAGIC+1 sub1 LT 20 at the target → per frame 3× JOINT_HEALING from a r=200 sphere to the
   // target, width 5, LT 12, MaxTails 2.
   visual: {
