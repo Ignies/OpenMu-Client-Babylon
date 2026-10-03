@@ -1,4 +1,4 @@
-import { localisedNpcName } from '@/controllers/assets/mu/npcNameFile';
+import { localisedNpcName } from '@/controllers/assets';
 import type { MonsterRow } from '@/controllers/monsters';
 import { t } from '@/i18n';
 import { monsters } from './all';

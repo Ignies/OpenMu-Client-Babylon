@@ -1,7 +1,8 @@
 import type { Entity, World } from '@/ecs/world';
-import { loadGLTF } from '@/controllers/assets/modelLoader';
-import { MonsterObject } from '@/controllers/actors/monsterObject';
-import { monsterModelFile, monsterScaleOf } from '@/controllers/actors/monsterModelTable';
+import { loadGLTF } from '@/controllers/assets';
+import { MonsterObject } from '@/controllers/actors';
+import { monsterModelFile, monsterScaleOf } from '@/controllers/actors';
+import { registerModelClass } from '@/controllers/actors';
 
 /**
  * Death Gorgon is `MODEL_GORGON` with `c->Level == 2`, and that level is the
@@ -26,3 +27,6 @@ export class DeathGorgon extends MonsterObject {
     this.load(await loadGLTF(monsterModelFile(11), world));
   }
 }
+
+// Death Gorgon burns; the fire is what the floor light comes from.
+registerModelClass(35, DeathGorgon);

@@ -1,4 +1,4 @@
-import { monsterFactoryFor } from '@versions/shared/monsters/generic_monster';
+import { monsterFactoryFor } from './genericMonster';
 import {
   FALLBACK_MODEL_TYPE,
   FALLBACK_SCALE,
@@ -8,41 +8,7 @@ import {
   monsterScaleOf,
 } from './monsterModelTable';
 import { ModelObject } from '../render/modelObject';
-import { Balgass } from '@versions/shared/monsters/balgass';
-import { BudgeDragon } from '@versions/shared/monsters/budge_dragon';
-import { DeathGorgon } from '@versions/shared/monsters/death_gorgon';
-import {
-  GoldenBudgeDragon,
-  GoldenCrust,
-  GoldenDarkKnight,
-  GoldenDerkon,
-  GoldenDevil,
-  GoldenGoblin,
-  GoldenIronKnight,
-  GoldenLizardKing,
-  GoldenNapin,
-  GoldenRabbit,
-  GoldenSatyros,
-  GoldenSoldier,
-  GoldenStoneGolem,
-  GoldenTantallos,
-  GoldenTitan,
-  GoldenTwinTail,
-  GoldenVepar,
-  GoldenWheel,
-  GreatGoldenDragon,
-} from '@versions/shared/monsters/golden_monsters';
-import { Hound } from '@versions/shared/monsters/hound';
-import { Kundun } from '@versions/shared/monsters/kundun';
-import { Selupan } from '@versions/shared/monsters/selupan';
-import {
-  DeathBone,
-  DeathKing,
-  EliteSkeleton,
-  SkeletonArcher,
-  SkeletonWarrior,
-} from '@versions/shared/monsters/skeleton_warrior';
-import { Spider } from '@versions/shared/monsters/spider';
+import { registeredModelClass } from './modelClasses';
 import { Baz } from '@versions/shared/npcs/baz';
 import { ElfSoldier } from '@versions/shared/npcs/elf_soldier';
 import { Girl } from '@versions/shared/npcs/girl';
@@ -66,7 +32,6 @@ import {
 } from './playerNpcTables';
 import { NPC_MODEL_TABLE } from './npcModelTable';
 import { Archangel, ArchangelMessenger } from '@versions/shared/npcs/archangel';
-import { CastleGate, StatueOfSaint } from '@versions/shared/monsters/blood_castle_gate';
 
 export const ModelFactoryPerId: Record<number, typeof ModelObject> = {
   [226]: Trainer,
@@ -92,50 +57,7 @@ export const ModelFactoryPerId: Record<number, typeof ModelObject> = {
   // 375 Chaos Card Master renders through GEARED_NPC_TABLE (playerNpcTables.ts).
   [568]: Zyro,
 
-  [1]: Hound,
-  [2]: BudgeDragon,
-  [3]: Spider,
-  [14]: SkeletonWarrior,
-  [15]: SkeletonArcher,
-  [16]: EliteSkeleton,
-  [55]: DeathKing,
-  [56]: DeathBone,
-  // Death Gorgon burns; the fire is what the floor light comes from.
-  [35]: DeathGorgon,
   [236]: GoldenArcher,
-
-  // The golden invasion line; 44 (Golden Dragon) stays generic - the
-  // original gives it no gold pass (ZzzCharacter.cpp:13549-13554).
-  [43]: GoldenBudgeDragon,
-  [53]: GoldenTitan,
-  [54]: GoldenSoldier,
-  [78]: GoldenGoblin,
-  [79]: GoldenDerkon,
-  [80]: GoldenLizardKing,
-  [81]: GoldenVepar,
-  [82]: GoldenTantallos,
-  [83]: GoldenWheel,
-  [493]: GoldenDarkKnight,
-  [494]: GoldenDevil,
-  [495]: GoldenStoneGolem,
-  [496]: GoldenCrust,
-  [497]: GoldenSatyros,
-  [498]: GoldenTwinTail,
-  [499]: GoldenIronKnight,
-  [500]: GoldenNapin,
-  [501]: GreatGoldenDragon,
-  [502]: GoldenRabbit,
-
-  // Blood Castle's two destructibles: the gate in the wall and the crystal
-  // statue on the altar (ZzzCharacter.cpp:13407-13425).
-  [131]: CastleGate,
-  [132]: StatueOfSaint,
-  [133]: StatueOfSaint,
-  [134]: StatueOfSaint,
-
-  [275]: Kundun,
-  [349]: Balgass,
-  [459]: Selupan,
 
   [34]: PlateNpc,
 
@@ -148,6 +70,9 @@ export const ModelFactoryPerId: Record<number, typeof ModelObject> = {
 };
 
 export function resolveModelFactory(typeNumber: number): typeof ModelObject {
+  const registered = registeredModelClass(typeNumber);
+  if (registered) return registered;
+
   const explicit = ModelFactoryPerId[typeNumber];
   if (explicit) return explicit;
 
@@ -176,6 +101,7 @@ export function resolveModelFactory(typeNumber: number): typeof ModelObject {
 
 export function isKnownObjectType(typeNumber: number): boolean {
   return (
+    registeredModelClass(typeNumber) !== undefined ||
     ModelFactoryPerId[typeNumber] !== undefined ||
     TRAP_MODEL_TABLE[typeNumber] !== undefined ||
     hasMonsterModel(typeNumber) ||

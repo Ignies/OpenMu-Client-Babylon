@@ -1,8 +1,9 @@
 import type { Entity, World } from '@/ecs/world';
-import { loadGLTF } from '@/controllers/assets/modelLoader';
-import { MonsterObject } from '@/controllers/actors/monsterObject';
-import { MonsterActionType } from '../objects/enum';
-import { monsterHiddenMesh, monsterScaleOf } from '@/controllers/actors/monsterModelTable';
+import { loadGLTF } from '@/controllers/assets';
+import { MonsterObject } from '@/controllers/actors';
+import { MonsterActionType } from '../../objects/enum';
+import { monsterHiddenMesh, monsterScaleOf } from '@/controllers/actors';
+import { registerModelClass } from '@/controllers/actors';
 
 // [NpcInfo(2, "Budge Dragon")]
 const NPC_TYPE = 2;
@@ -25,3 +26,5 @@ export class BudgeDragon extends MonsterObject {
     this.setActionSpeed(MonsterActionType.Walk, 0.7);
   }
 }
+
+registerModelClass(2, BudgeDragon);

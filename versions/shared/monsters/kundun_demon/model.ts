@@ -1,9 +1,10 @@
 import type { Entity, World } from '@/ecs/world';
-import { loadGLTF } from '@/controllers/assets/modelLoader';
-import { MonsterObject } from '@/controllers/actors/monsterObject';
-import { MonsterActionType } from '../objects/enum';
-import { monsterPlaySpeed } from '@/controllers/anim/playSpeed';
-import { monsterModelFile, monsterScaleOf } from '@/controllers/actors/monsterModelTable';
+import { loadGLTF } from '@/controllers/assets';
+import { MonsterObject } from '@/controllers/actors';
+import { MonsterActionType } from '../../objects/enum';
+import { monsterPlaySpeed } from '@/controllers/anim';
+import { monsterModelFile, monsterScaleOf } from '@/controllers/actors';
+import { registerModelClass } from '@/controllers/actors';
 
 // [NpcInfo(275, "Kundun")] - MODEL_ILLUSION_OF_KUNDUN at Scale 2.0 with the
 // Staff of Kundun in the off hand (GMHellas.cpp:913-923). The staff waits on
@@ -43,3 +44,5 @@ export class Kundun extends MonsterObject {
     }
   }
 }
+
+registerModelClass(275, Kundun);

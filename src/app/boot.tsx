@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom/client';
 import { App } from './App';
 import './style.less';
 import './logic';
+// Content model classes register here, at boot, where no controller can reach (controllers import the Store, which imports logic.ts).
+import '@versions/shared/monsters/models';
 import { Store, UIState } from './store';
 import { GameOptions } from '../features/options/gameOptions';
 import { Social } from '../features/social/social';

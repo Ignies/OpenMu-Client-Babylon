@@ -1,8 +1,9 @@
 import type { Entity, World } from '@/ecs/world';
-import { loadGLTF } from '@/controllers/assets/modelLoader';
-import { MonsterObject } from '@/controllers/actors/monsterObject';
-import { MonsterActionType } from '../objects/enum';
-import { monsterModelFile, monsterScaleOf } from '@/controllers/actors/monsterModelTable';
+import { loadGLTF } from '@/controllers/assets';
+import { MonsterObject } from '@/controllers/actors';
+import { MonsterActionType } from '../../objects/enum';
+import { monsterModelFile, monsterScaleOf } from '@/controllers/actors';
+import { registerModelClass } from '@/controllers/actors';
 
 // [NpcInfo(459, "Selupan")] - MODEL_SELUPAN at Scale 2.0
 // (GM_Raklion.cpp:142-156). His attack voices (ZzzOpenData.cpp:3767-3776)
@@ -34,3 +35,5 @@ export class Selupan extends MonsterObject {
     this.setActionSpeed(MonsterActionType.Attack4, 0.25);
   }
 }
+
+registerModelClass(459, Selupan);

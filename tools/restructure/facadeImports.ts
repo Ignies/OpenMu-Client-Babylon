@@ -1,15 +1,19 @@
 // Points every import of a controller's inner file (from outside that controller) at the controller's
 // public door, `@/controllers/<name>`, and adds the imported names to that index.ts.
 // An interface widget folder (`interface/components/<widget>/`) is its own door.
-// Usage: bun tools/restructure/facadeImports.ts <controller> [--dry-run]
+// Usage: bun tools/restructure/facadeImports.ts <controller> [--from <path prefix>] [--dry-run]
+// `--from` limits the rewrite to importers under one folder (one area at a time keeps the door small).
 import ts from 'typescript';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { posix } from 'path';
 import { trackedFiles } from '../checks/graph';
 
-const [controller] = process.argv.slice(2).filter(a => !a.startsWith('--'));
-const dry = process.argv.includes('--dry-run');
-if (!controller) throw new Error('usage: facadeImports.ts <controller> [--dry-run]');
+const args = process.argv.slice(2);
+const fromAt = args.indexOf('--from');
+const fromPrefix = fromAt >= 0 ? args[fromAt + 1] : '';
+const [controller] = args.filter((a, i) => !a.startsWith('--') && (fromAt < 0 || i !== fromAt + 1));
+const dry = args.includes('--dry-run');
+if (!controller) throw new Error('usage: facadeImports.ts <controller> [--from <path prefix>] [--dry-run]');
 const ROOT = `src/controllers/${controller}`;
 const EXEMPT = /^src\/controllers\/render\/babylon\/|\/scenes\/testScene\.ts$/;
 
@@ -49,7 +53,7 @@ let rewritten = 0;
 
 for (const sf of program.getSourceFiles()) {
   const file = norm(sf.fileName);
-  if (!/^(src|versions)\//.test(file) || file.startsWith(ROOT + '/') || /\.test\.tsx?$/.test(file) || EXEMPT.test(file)) continue;
+  if (!/^(src|versions)\//.test(file) || !file.startsWith(fromPrefix) || file.startsWith(ROOT + '/') || /\.test\.tsx?$/.test(file) || EXEMPT.test(file)) continue;
   for (const st of sf.statements) {
     const isImport = ts.isImportDeclaration(st);
     if (!(isImport || ts.isExportDeclaration(st)) || !st.moduleSpecifier || !ts.isStringLiteral(st.moduleSpecifier)) continue;

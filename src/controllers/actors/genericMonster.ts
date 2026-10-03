@@ -1,5 +1,5 @@
 import type { Entity, World } from '@/ecs/world';
-import { loadGLTF } from '@/controllers/assets/modelLoader';
+import { loadGLTF } from '@/controllers/assets';
 import { MonsterObject } from '@/controllers/actors/monsterObject';
 import { monsterModelFile } from '@/controllers/actors/monsterModelTable';
 

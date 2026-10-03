@@ -1,7 +1,8 @@
 import type { Entity, World } from '@/ecs/world';
-import { loadGLTF } from '@/controllers/assets/modelLoader';
-import { MonsterObject } from '@/controllers/actors/monsterObject';
-import { monsterHiddenMesh, monsterScaleOf } from '@/controllers/actors/monsterModelTable';
+import { loadGLTF } from '@/controllers/assets';
+import { MonsterObject } from '@/controllers/actors';
+import { monsterHiddenMesh, monsterScaleOf } from '@/controllers/actors';
+import { registerModelClass } from '@/controllers/actors';
 
 // [NpcInfo(1, "Hound")]
 const NPC_TYPE = 1;
@@ -20,3 +21,5 @@ export class Hound extends MonsterObject {
     super.load(await loadGLTF('Monster/Monster02.glb', world));
   }
 }
+
+registerModelClass(1, Hound);

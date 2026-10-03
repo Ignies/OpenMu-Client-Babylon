@@ -1,8 +1,9 @@
 import type { Entity, World } from '@/ecs/world';
-import { loadGLTF } from '@/controllers/assets/modelLoader';
-import { MonsterObject } from '@/controllers/actors/monsterObject';
-import { MonsterActionType } from '../objects/enum';
-import { monsterHiddenMesh, monsterScaleOf } from '@/controllers/actors/monsterModelTable';
+import { loadGLTF } from '@/controllers/assets';
+import { MonsterObject } from '@/controllers/actors';
+import { MonsterActionType } from '../../objects/enum';
+import { monsterHiddenMesh, monsterScaleOf } from '@/controllers/actors';
+import { registerModelClass } from '@/controllers/actors';
 
 // [NpcInfo(3, "Spider")]
 const NPC_TYPE = 3;
@@ -22,3 +23,5 @@ export class Spider extends MonsterObject {
     this.setActionSpeed(MonsterActionType.Walk, 1.2);
   }
 }
+
+registerModelClass(3, Spider);

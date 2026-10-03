@@ -1,17 +1,18 @@
 import type { Entity, World } from '@/ecs/world';
 import type { Item } from '@/ecs/world';
-import { PlayerAction } from '../objects/enum';
+import { PlayerAction } from '../../objects/enum';
 import {
   GROUP_AXE,
   GROUP_BOW,
   GROUP_SHIELD,
   GROUP_SPEAR,
   GROUP_SWORD,
-} from '@/controllers/actors/weaponClass';
-import { loadGLTF } from '@/controllers/assets/modelLoader';
-import { PlayerObject } from '@/controllers/actors/playerObject';
+} from '@/controllers/actors';
+import { loadGLTF } from '@/controllers/assets';
+import { PlayerObject } from '@/controllers/actors';
 import { CharacterClassNumber } from '@/core/types';
-import { skeletonShatter } from '@/controllers/fx/deathVisuals';
+import { skeletonShatter } from '@/controllers/fx';
+import { registerModelClass } from '@/controllers/actors';
 
 /**
  * The Skill/Skeleton01..03 monsters (Skeleton Warrior, Skeleton Archer, Elite
@@ -162,3 +163,9 @@ export class EliteSkeleton extends SkeletonMonster {
   protected override readonly mainHand = TOMAHAWK;
   protected override readonly offHand = SKULL_SHIELD;
 }
+
+registerModelClass(14, SkeletonWarrior);
+registerModelClass(15, SkeletonArcher);
+registerModelClass(16, EliteSkeleton);
+registerModelClass(55, DeathKing);
+registerModelClass(56, DeathBone);

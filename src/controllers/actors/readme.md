@@ -8,9 +8,13 @@ type loads. There is no `index.ts`; other folders import the modules below direc
 - `PlayerObject` (the player rig with its part sockets; player-rig NPCs and monsters subclass it
   and set `NpcClass`, `NpcAlwaysFly`, `DeathShatter`), `isPlayerBody`, `npcClassOf`;
   `MonsterObject`; `OperateBoxObject`, `LeanBoxObject` (invisible click targets for maps).
-- `resolveModelFactory(type)`, `isKnownObjectType(type)`; the tables `MONSTER_MODEL_TABLE`,
-  `monsterModelFile`, `monsterScaleOf`, `MONSTER_HIDDEN_MESH`, `NPC_MODEL_TABLE`, `npcModelFile`,
-  `GEARED_NPC_TABLE`, `TRANSFORMED_NPC_TABLE`.
+- `resolveModelFactory(type)`, `isKnownObjectType(type)`: registered classes first, then the
+  generic paths.
+- `registerModelClass(types, Class)` (`modelClasses.ts`): content's own model classes.
+- Monster models from each monster's folder (through the monsters controller): `monsterModelFile`,
+  `monsterModelTypeOfNpc`, `monsterScaleOf`, `monsterHiddenMesh`, `hasMonsterModel`;
+  `monsterFactoryFor` (`genericMonster.ts`), the class every monster without its own uses.
+- NPC tables: `NPC_MODEL_TABLE`, `npcModelFile`, `GEARED_NPC_TABLE`, `TRANSFORMED_NPC_TABLE`.
 - `transformedBody.ts`: `transformedBodyFactory`, `characterSkinBody(skin)`, `monsterClipFor`.
 - `deserializeAppearance.ts`: `deserializeAppearance`, `deserializeAppearanceExtended`,
   `APPEARANCE_EXTENDED_LENGTH`, `classFromAppearance`, `emptyAppearance`, `withAppearanceClass`,
@@ -65,9 +69,9 @@ type loads. There is no `index.ts`; other folders import the modules below direc
   content in `versions/shared/`, `tools/assetCase.ts`.
 
 ## Change it
-- add a monster that only needs a model: add `type: [modelType, scale]` to `MONSTER_MODEL_TABLE`.
-- add a monster with its own behaviour: a class extending `MonsterObject` in
-  `versions/shared/monsters/<name>.ts`, then a `[type]: Class` row in `ModelFactoryPerId`.
+- a monster's model or scale: `model` in its folder (`versions/shared/monsters/<name>/index.ts`).
+- a monster with its own behaviour: `<name>/model.ts` with a `MonsterObject` subclass and
+  `registerModelClass(type, Class)`; nothing here changes.
 - add an NPC model: a `type: [file, scale]` row in `NPC_MODEL_TABLE` (relative to `Data/NPC/`);
   the test checks the file exists. A player-rig NPC goes in `GEARED_NPC_TABLE` or
   `TRANSFORMED_NPC_TABLE`.

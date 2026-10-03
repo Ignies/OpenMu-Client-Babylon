@@ -1,9 +1,10 @@
 import type { Entity, World } from '@/ecs/world';
-import { entityPos, tmpA, type RGB } from '@/controllers/fx/core';
-import { spawnCrystalShards } from '@/controllers/fx/deathVisuals';
-import { loadGLTF } from '@/controllers/assets/modelLoader';
-import { MonsterObject } from '@/controllers/actors/monsterObject';
-import { monsterModelFile, monsterScaleOf } from '@/controllers/actors/monsterModelTable';
+import { entityPos, tmpA, type RGB } from '@/controllers/fx';
+import { spawnCrystalShards } from '@/controllers/fx';
+import { loadGLTF } from '@/controllers/assets';
+import { MonsterObject } from '@/controllers/actors';
+import { monsterModelFile, monsterScaleOf } from '@/controllers/actors';
+import { registerModelClass } from '@/controllers/actors';
 
 /**
  * The two things in Blood Castle you break instead of kill. OpenMU sends them
@@ -151,3 +152,8 @@ export class StatueOfSaint extends MonsterObject {
     );
   }
 }
+
+// Blood Castle's two destructibles: the gate in the wall and the crystal statue on the altar
+// (ZzzCharacter.cpp:13407-13425).
+registerModelClass(131, CastleGate);
+registerModelClass([132, 133, 134], StatueOfSaint);

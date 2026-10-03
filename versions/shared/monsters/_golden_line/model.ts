@@ -1,16 +1,17 @@
 import type { Entity, World } from '@/ecs/world';
 import { effects } from '@/controllers/fx';
-import { bonePos, tmpA } from '@/controllers/fx/core';
-import { FLAME_TONGUES } from '@/controllers/fx/recipes';
-import { loadGLTF } from '@/controllers/assets/modelLoader';
-import { MonsterObject } from '@/controllers/actors/monsterObject';
-import { MonsterActionType } from '../objects/enum';
-import { BUDGE_DRAGON_MODEL } from './generic_monster';
+import { bonePos, tmpA } from '@/controllers/fx';
+import { FLAME_TONGUES } from '@/controllers/fx';
+import { loadGLTF } from '@/controllers/assets';
+import { MonsterObject } from '@/controllers/actors';
+import { MonsterActionType } from '../../objects/enum';
+import { BUDGE_DRAGON_MODEL } from '@/controllers/actors';
 import {
   monsterModelTypeOfNpc,
   monsterModelFile,
   monsterScaleOf,
-} from '@/controllers/actors/monsterModelTable';
+} from '@/controllers/actors';
+import { registerModelClass } from '@/controllers/actors';
 
 /**
  * The golden invasion line. The original draws every golden monster with the
@@ -262,3 +263,24 @@ export class GoldenRabbit extends GoldenMonster {
   }
   protected readonly npcType = 502;
 }
+
+// 44 (Golden Dragon) stays generic: the original gives it no gold pass (ZzzCharacter.cpp:13549-13554).
+registerModelClass(43, GoldenBudgeDragon);
+registerModelClass(53, GoldenTitan);
+registerModelClass(54, GoldenSoldier);
+registerModelClass(78, GoldenGoblin);
+registerModelClass(79, GoldenDerkon);
+registerModelClass(80, GoldenLizardKing);
+registerModelClass(81, GoldenVepar);
+registerModelClass(82, GoldenTantallos);
+registerModelClass(83, GoldenWheel);
+registerModelClass(493, GoldenDarkKnight);
+registerModelClass(494, GoldenDevil);
+registerModelClass(495, GoldenStoneGolem);
+registerModelClass(496, GoldenCrust);
+registerModelClass(497, GoldenSatyros);
+registerModelClass(498, GoldenTwinTail);
+registerModelClass(499, GoldenIronKnight);
+registerModelClass(500, GoldenNapin);
+registerModelClass(501, GreatGoldenDragon);
+registerModelClass(502, GoldenRabbit);
