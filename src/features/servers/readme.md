@@ -31,7 +31,7 @@ connect server's own list (`Store.serverList`) is filled by `session/net.ts`.
 ## Depends on / used by
 - uses: `core/localStorage`, `app/consts`, `src/version` (`versionByTag`).
 - used by: `src/app/store.ts`, `src/app/boot.tsx`, `src/app/main.tsx`, `session/net.ts`,
-  `cash_shop/state.ts`, `marketplace/api.ts`, `gm/admin/feed.ts`,
+  `marketplace/api.ts`, `gm/admin/feed.ts`,
   `controllers/interface/pageTitle.ts`, `controllers/net/sockets/chatRoomSocket.ts`, the pages
   `versions/shared/ui/pages/preloader/`, `pages/server_select/`, `pages/login/` and
   `pages/character_select/CharMakeWin.tsx`, and `register/`.

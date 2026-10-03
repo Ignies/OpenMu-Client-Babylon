@@ -63,7 +63,7 @@ readouts. Handlers for packets live in `src/features/<feature>/net.ts`, not here
   `assets/download` (framing re-exports), `fx` (ping marker), `app/store` (`pingNet` only),
   `features/servers/serverConfig` (`chatRoomSocket` only).
 - used by: `app/store.ts`, `app/logic.ts`, feature nets (session, band, chat, social,
-  marketplace, cash shop, gm, events), `core/eventBus/events.ts`, `lighting/clouds.ts`,
+  marketplace, gm, events), `core/eventBus/events.ts`, `lighting/clouds.ts`,
   `weather/snowCover.ts`, `render/perfOverlay.ts`, `fx/ping.ts`, the pointer input and ambient
   particle systems, the gm panel window, and outside `src/`: `proxy/`, `marketplace/`,
   `cashshop/`.

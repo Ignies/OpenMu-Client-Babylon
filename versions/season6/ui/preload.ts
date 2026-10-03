@@ -15,7 +15,6 @@ import { VAULT_SPRITES } from '../../shared/ui/windows/vault/layout';
 import { CHAOS_MACHINE_SPRITES } from '../../shared/ui/windows/chaos_machine/layout';
 import { TRADE_SPRITES } from '../../shared/ui/windows/trade/layout';
 import { PERSONAL_SHOP_SPRITES } from '../../shared/ui/windows/personal_shop/layout';
-import { CASH_SHOP_SPRITES } from '../../shared/ui/windows/cash_shop/layout';
 import type { VersionPreload } from '@/version/uiContract';
 
 const PREGAME_SPRITES = [
@@ -209,7 +208,6 @@ const WORLD_SPRITES = [
     ...CHAOS_MACHINE_SPRITES,
     ...TRADE_SPRITES,
     ...PERSONAL_SHOP_SPRITES,
-    ...CASH_SHOP_SPRITES,
     ...HUD_SPRITES,
   ]),
 ];

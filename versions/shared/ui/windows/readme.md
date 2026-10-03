@@ -27,7 +27,6 @@ One folder per in-game window. A window draws; its state and actions belong to i
 | `character_info` | character_info (150) | stats and stat point buttons | Store.playerData, hero, options |
 | `pet_info` | pet_info (160) | Dark Horse / Dark Raven sheet and raven commands | Store pet state, pets |
 | `mu_helper` | mu_helper (170) | MU Helper settings, hunt and obtain tabs | mu_helper, skills, hero |
-| `cash_shop` | cash_shop (180) | item shop paid in Jewels of Chaos for zen | cash_shop, inventory |
 | `marketplace` | marketplace (190) | listings from the marketplace service | marketplace |
 | `move_command_window` | move_command (200) | the "M" map list with level and zen | Store, warp, hero |
 | `emote_menu` | emote_menu (210) | radial emote menu | social, hero, chat, band |
