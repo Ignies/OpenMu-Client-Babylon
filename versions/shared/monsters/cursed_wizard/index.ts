@@ -1,9 +1,21 @@
+import { CharacterClassNumber, PlayerClass } from '@/core/types';
 import { defineMonster } from '@/controllers/monsters';
 
 export default defineMonster({
   Numb: 34,
   Name: 'Cursed Wizard',
   maxHealth: 4000,
+  // ZzzCharacter.cpp:13907-13931: a player rig in Legendary +9 with the Legendary Staff and Shield;
+  // the rig's class is CLASS_WIZARD (CreateCharacterPointer, :11732-11735). Not modelled: the red
+  // PVP_MURDERER2 body (:13925) and the class scale (SetCharacterScale, 1.0 in Devil Square).
+  gear: {
+    charClass: CharacterClassNumber.DarkWizard,
+    playerClass: PlayerClass.DarkWizard,
+    set: 3, // Legendary
+    level: 9,
+    mainHand: { group: 5, num: 5 }, // MODEL_LEGENDARY_STAFF
+    offHand: { group: 6, num: 14 }, // MODEL_LEGENDARY_SHIELD
+  },
   stats: {
     Rate: 1,
     Level: 54,

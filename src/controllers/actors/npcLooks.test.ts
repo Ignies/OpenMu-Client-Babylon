@@ -1,4 +1,6 @@
 import { beforeAll, describe, expect, it, vi } from 'vitest';
+import { monsterRegistry } from '@/controllers/monsters';
+import { CharacterClassNumber } from '@/core/types';
 
 // PlayerObject reaches the Store, which needs a browser; nothing here reads it.
 vi.mock('@/app/store', () => ({ Store: {}, UIState: {} }));
@@ -6,8 +8,9 @@ vi.mock('@/app/store', () => ({ Store: {}, UIState: {} }));
 /** NPCs drawn as the original client draws them, checked on the class `resolveModelFactory` hands out. */
 async function load() {
   const resolve = await import('./modelFactoryPerId');
+  const { gearedNpcFactory } = await import('./playerNpc');
   await import('@versions/shared/monsters/models');
-  return resolve;
+  return { ...resolve, gearedNpcFactory };
 }
 
 let m: Awaited<ReturnType<typeof load>>;
@@ -33,5 +36,18 @@ describe('NPC looks from the original client', () => {
   it('Zyro wears the Moss model at 0.8, as Moss does (ZzzCharacter.cpp:14505-14516, :14846-14860)', () => {
     expect(m.resolveModelFactory(568)).toBe(m.npcFactoryFor('gambler_moss', 0.8));
     expect(m.resolveModelFactory(568)).toBe(m.resolveModelFactory(492));
+  });
+
+  // CreateCharacter(MODEL_PLAYER) leaves c->Class = CLASS_WIZARD (ZzzCharacter.cpp:11732-11735).
+  it('the Cursed Wizard wears Legendary +9, staff and shield, on a wizard rig (ZzzCharacter.cpp:13907-13931)', () => {
+    const gear = monsterRegistry.def(34)?.gear;
+    expect(gear).toMatchObject({
+      charClass: CharacterClassNumber.DarkWizard,
+      set: 3,
+      level: 9,
+      mainHand: { group: 5, num: 5 },
+      offHand: { group: 6, num: 14 },
+    });
+    expect(m.resolveModelFactory(34)).toBe(m.gearedNpcFactory(gear!));
   });
 });
