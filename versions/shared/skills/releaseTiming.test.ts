@@ -132,4 +132,11 @@ describe('the elf arrows leave at the release', () => {
       expect(shot(skill, 600, area)).toEqual({ key: 4, release: 4 });
     }
   });
+
+  it('Ice Arrow: the ice on the target at the packet (WSclient.cpp:4479-4500), the arrow at the release (:4902-4905)', () => {
+    const ice = timeline(51, BOW, playerPlaySpeed(BOW, 0), 5, 25, { only: 'model' });
+    expect(ice.release).toBe(1);
+    expect(shot(51, 0, false)).toEqual({ key: 17, release: 14 });
+    expect(shot(51, 600, false)).toEqual({ key: 4, release: 4 });
+  });
 });

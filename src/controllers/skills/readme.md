@@ -51,7 +51,7 @@ themselves are content in `versions/shared/skills/` (see [docs/content.md](../..
   the 14 ticks.
 - `afterRelease` hands its step the skill dispatched with it as `currentSkill`, so a step that reads
   it (`fanArrows`) still sees its own skill. A row's `travel` with `release` leaves at the release
-  instead of the packet (Starfall).
+  instead of the packet (Starfall, Ice Arrow).
 - The hero's own casts are watched with the default rule: `afterHeroRelease(fn)` runs `fn` at the
   last one's release (or now when it has released), never later than 14 ticks after it. The kill's
   ATTACK_DIE energy waits on it (`modules/combat`, ZzzCharacter.cpp:5242-5247).

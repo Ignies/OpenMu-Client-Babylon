@@ -654,7 +654,7 @@ exports[`skill tables golden > skill 51 1`] = `
   "clip": null,
   "delay": null,
   "heroSound": null,
-  "light": "2/1 c56dd9cfc51b0004",
+  "light": "1/1 3e33de60527b56c3",
   "sound": null,
   "stepIn": null,
   "target": "enemy",
