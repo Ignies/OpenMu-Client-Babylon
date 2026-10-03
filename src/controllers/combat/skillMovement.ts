@@ -2,7 +2,7 @@
  * What a cast does to where the hero is: stop (ZzzInterface.cpp:1935), step in
  * (MonkSystem.cpp:445-485), root (ZzzInterface.cpp:7394-7419). See controllers/combat/readme.md.
  */
-import { PlayerAction } from '@versions/shared/objects/enum';
+import type { PlayerAction } from '@versions/shared/objects/enum';
 import type { CombatLayer } from './layer';
 
 // ---- 1. tuning -------------------------------------------------------------
@@ -23,14 +23,10 @@ export const CONSECUTIVE_ATTACK_KEY = 3;
 /**
  * Clips that hold the caster's facing for their whole length - the original
  * skips the look-at-cursor update for them (`bLookAtMouse = false`,
- * ZzzInterface.cpp:7394-7419). Rageful Blow spins in place, Chain Drive
- * swings the target round, and Beast Uppercut / Dragon Slasher would
- * otherwise snap away from the body they are throwing.
+ * ZzzInterface.cpp:7394-7419). Each skill lists its clips in `holdsFacing`
+ * (Rageful Blow spins in place, Chain Drive swings the target round).
  */
-const FACING_HELD_CLIPS: ReadonlySet<PlayerAction> = new Set([
-  PlayerAction.PLAYER_ATTACK_SKILL_FURY_STRIKE,
-  PlayerAction.PLAYER_SKILL_GIANTSWING,
-]);
+export const FACING_HELD_CLIPS: Set<PlayerAction> = new Set();
 
 // ---- 2. state + readers ----------------------------------------------------
 

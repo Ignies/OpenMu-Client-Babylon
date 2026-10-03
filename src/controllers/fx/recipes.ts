@@ -743,22 +743,6 @@ export const FLAME_TONGUES: ParticleRecipe = {
   capacity: 256,
 };
 
-/**
- * The Nova death's glow: `CreateParticle(BITMAP_LIGHT, bone, …, 5, 0.5 + rand()%100/50)`
- * ten a tick from random bones for the first 30 ticks (ZzzCharacter.cpp:3184-3193),
- * Light (0.3, 0.3, 1).
- */
-export const NOVA_DEATH_MOTES: ParticleRecipe = {
-  texture: TEX.flare,
-  colour: [0.3, 0.3, 1],
-  size: 0.45,
-  sizeJitter: 0.3,
-  life: 0.5,
-  power: 0.3,
-  gravity: 0.4,
-  endScale: 0.4,
-  capacity: 512,
-};
 
 /**
  * `CreateBomb(pos, true)` (ZzzEffect.cpp:6394): 20 BITMAP_SPARK chips thrown

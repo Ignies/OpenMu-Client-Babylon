@@ -185,6 +185,7 @@ const UPPER_BONES = [25, 26, 27, 20, 34, 35, 36] as const;
 export default defineSkill({
   id: 48,
   name: "Swell Life",
+  noFlinch: [A.PLAYER_SKILL_VITALITY], // SetPlayerShock leaves the cast alone (ZzzCharacter.cpp:1283-1297)
   // 48 Swell Life: at AttackTime 10 the spirit ring, its orange glows, the rising column and two ground rings; see swellLife.
   visual: { cast: swellLife, enhanced: { cast: swellLifeOf(true) } },
   buffs: {

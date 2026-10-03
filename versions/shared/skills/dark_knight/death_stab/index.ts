@@ -304,6 +304,8 @@ const deathStab = deathStabOf(false);
 export default defineSkill({
   id: 43,
   name: "Death Stab",
+  // The old skill -> effect table's row, labelled "Swell Life? (AG recovery)" (7); kept as found, it looks wrong.
+  effect: 7,
   // 43 Death Stab: red streaks gathering in front of the sword, the blue drill and the victim's electrified
   // skeleton, staged on AttackTime; see deathStab.
   visual: {

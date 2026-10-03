@@ -8,10 +8,8 @@ import { inBloodCastle, inChaosCastle } from '../../controllers/actors/locomotio
 import { TW_ACTION, TW_NOGROUND } from '../../controllers/terrain/consts';
 import { playSfx } from '../../controllers/sound/sfx';
 import { COMBAT_BUS } from '../../controllers/sound/combatSounds';
-import { effects } from '../../controllers/fx';
-import { bonePos, entityYaw, type RGB } from '../../controllers/fx/core';
-import { NOVA_DEATH_MOTES } from '../../controllers/fx/recipes';
-import { SKILL_COMBO, SKILL_NOVA } from '../../controllers/combat/recipes';
+import { entityYaw, type RGB } from '../../controllers/fx/core';
+import { combat } from '../../controllers/combat';
 import type { DeathMotion, Entity, ISystemFactory } from '../world';
 import type { PlayerObject } from '../../controllers/actors/playerObject';
 
@@ -30,7 +28,7 @@ const SWING_HIT_FRACTION = 0.5;
 const CM = 1 / 100;
 const DEG = Math.PI / 180;
 
-// ---- Nova / Combo knock (ZzzCharacter.cpp:3173-3193, WSclient.cpp:5527-5546)
+// ---- the skill knock (Nova, Combo: ZzzCharacter.cpp:3173-3193, WSclient.cpp:5527-5546)
 /** `c->Dead < 15`: ticks the slide lasts. */
 const KNOCK_TICKS = 15;
 /** `Direction[1] = rand() % 15 + 40` cm/tick. */
@@ -40,10 +38,6 @@ const KNOCK_SPEED_CM_SPAN = 15;
 const KNOCK_DECEL_MIN = 1.0;
 const KNOCK_DECEL_SPAN = 0.5;
 const KNOCK_DECEL_PER_TICK = 1;
-/** `c->Dead <= 30`: ticks the Nova motes fall from the body, 10 a tick from bones 0…31. */
-const NOVA_GLOW_TICKS = 30;
-const NOVA_MOTES_PER_TICK = 10;
-const NOVA_BONES = 32;
 
 // ---- castle falls (WSclient.cpp:5440-5487, ZzzCharacter.cpp:3014-3032)
 /** `Gravity = rand() % 10 + 10` (cm, the initial hop up). */
@@ -80,7 +74,6 @@ const PIT_SCREAM = 'Sound/pMaleScream';
 const PIT_SCREAM_CHANNELS = 1;
 
 const tmpHead = new Vector3();
-const tmpBone = new Vector3();
 const tmpBomb = new Vector3();
 
 export const DeathSystem: ISystemFactory = world => {
@@ -147,7 +140,8 @@ export const DeathSystem: ISystemFactory = world => {
       };
     }
     if (inBloodCastle(map) || inChaosCastle(map)) return undefined;
-    if (d.skill === SKILL_NOVA || d.skill === SKILL_COMBO) {
+    // A skill whose kill knocks the body back (its file's `kill.knock`).
+    if (combat.skillKill(d.skill)?.knock) {
       // Face the killer (`CreateAngle2D(o->Position, to->Position)`); the
       // slide runs along that heading. Without the killer in scope: own yaw.
       const killer = world.getByNetId(d.killerNetId);
@@ -196,15 +190,6 @@ export const DeathSystem: ISystemFactory = world => {
     d.offset.y = m.height * CM;
   }
 
-  function novaGlow(e: Entity, ticks: number): void {
-    const count = Math.round(NOVA_MOTES_PER_TICK * ticks);
-    for (let i = 0; i < count; i++) {
-      bonePos(e, Math.floor(Math.random() * NOVA_BONES), tmpBone);
-      tmpBone.x -= world.mapParent.position.x;
-      tmpBone.z -= world.mapParent.position.z;
-      effects.spawn('particles', world.scene, tmpBone, { recipe: NOVA_DEATH_MOTES, count: 1 });
-    }
-  }
 
   function chaosBombs(e: Entity, tickBefore: number, tickAfter: number): void {
     const start = e.dying!.motion?.kind === 'fall' ? BOMB_START_TICK_FALLING : BOMB_START_TICK;
@@ -286,9 +271,8 @@ export const DeathSystem: ISystemFactory = world => {
             stepMotion(e, d.motion, tick);
           }
         }
-        if (d.skill === SKILL_NOVA && tickAfter <= NOVA_GLOW_TICKS && !d.shattered) {
-          novaGlow(e, ticks);
-        }
+        // What the killing skill draws on the body while it dies (Nova's glow).
+        combat.skillKill(d.skill)?.dying?.(e, ticks, tickAfter, world);
         if (inChaosCastle(world.mapIndex)) chaosBombs(e, tickBefore, tickAfter);
 
         if (!d.started) {

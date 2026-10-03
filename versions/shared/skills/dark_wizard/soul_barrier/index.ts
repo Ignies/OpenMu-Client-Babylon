@@ -1,5 +1,5 @@
 import { defineSkill } from '@/controllers/skills/define';
-import { BUFF_VISUALS, BuffArrival, Step, after, cm, keepLook, seq, ticks } from '@/controllers/skills/visuals';
+import { BUFF_VISUALS, BuffArrival, type BuffHit, Step, after, cm, keepLook, seq, ticks } from '@/controllers/skills/visuals';
 import { CLOAK_EFFECT } from '../_shared';
 import { type Entity } from '@/ecs/world';
 import { MODEL, RGBS, SOUL_MOTES, TEX } from '@/controllers/fx/recipes';
@@ -52,7 +52,7 @@ const SHELL_FACING = (10 * Math.PI) / 180;
  * (EffectRegistry.cpp:56, EffectBehaviors.cpp:73-84). The original compares raw angles with no wrap;
  * this wraps, so a bearing across 0/360 still counts.
  */
-export function playSoulBarrierShell(scene: Scene, hero: Entity, attacker: Entity | null): void {
+const soulBarrierShell: BuffHit = (scene, hero, attacker) => {
   if (!attacker?.transform || !hero.transform || attacker === hero || !hero.buffs?.has(SOUL_BARRIER_EFFECT)) return;
   const bearing = Math.atan2(hero.transform.pos.z - attacker.transform.pos.z, hero.transform.pos.x - attacker.transform.pos.x) + Math.PI / 2;
   const off = bearing - attacker.transform.rot.y;
@@ -67,7 +67,7 @@ export function playSoulBarrierShell(scene: Scene, hero: Entity, attacker: Entit
     blendMesh: 0,
     fadeTail: 0.5,
   });
-}
+};
 
 /** SOUND_SOULBARRIER as the buff lands on a player (InsertBuffPhysicalEffect, WSclient.cpp:15484-15494). */
 function soulBarrierArrives(e: Entity): void {
@@ -131,6 +131,10 @@ export default defineSkill({
     4: e => ({ spearJoints: { ...SOUL_KNOT, width: soulKnotWidth.get(e) ?? SOUL_KNOT.width } }),
   },
   buffArrivals: { 4: soulBarrierArrival },
+  // The shell on the hero when a facing attacker hits him.
+  buffHits: { 4: soulBarrierShell },
+  // MagicEffectCancelled names the skill: the buff it drops.
+  effect: 4,
   // Soul Barrier (403 / 404 / 406 its master rows): no terrain light in the original; Enhanced only.
   light: { enhanced: SOUL_BARRIER_LIGHT },
   target: 'allyOrSelf',

@@ -1,18 +1,13 @@
 import type { RGB } from '../fx/core';
 import type { Sounds } from '../sound/recipes';
-import type { SkillClipSet } from '../combat/recipes';
-import { SKILL_CLIPS } from '../combat/recipes';
 import { combat } from '../combat';
-import { skillHooks } from '../combat/skillHooks';
-import { SKILL_TARGETS } from '../combat/castTargets';
-import { SKILL_STEP_IN } from '../combat/skillMovement';
 import { SKILL_LIGHTS } from '../lighting/skills';
-import { SKILL_SOUNDS } from '../sound/combat';
-import { SKILL_DELAY_MS } from '@/features/skills/recipes';
+import { LANDING_SOUNDS, SILENT_HERO_CASTS, SKILL_CLIP_SOUNDS, SKILL_SOUNDS } from '../sound/combat';
+import { SKILL_DELAY_MS, SKILL_EFFECTS } from '@/features/skills/recipes';
 import type { SkillDef } from './define';
-import { BUFF_ARRIVALS, BUFF_VISUALS, LAUNCHER_ARROWS, SKILL_VISUALS, type BuffLook } from './visuals';
+import { BUFF_ARRIVALS, BUFF_HITS, BUFF_VISUALS, LAUNCHER_ARROWS, SKILL_VISUALS, type BuffLook } from './visuals';
 
-export { defineSkill, defineBuffLooks, type SkillDef } from './define';
+export { defineSkill, defineBuffLooks, type SkillDef, type Mount } from './define';
 
 /** Adds skills to every table the controllers read. A skill's file is the only place its data lives. */
 export function registerSkills(defs: readonly SkillDef[]): void {
@@ -23,14 +18,16 @@ export function registerSkills(defs: readonly SkillDef[]): void {
     if (d.visual) SKILL_VISUALS[d.id] = d.visual;
     if (d.light) SKILL_LIGHTS[d.id] = d.light;
     if (d.sound) (SKILL_SOUNDS as Record<number, Sounds>)[d.id] = d.sound;
-    if (d.clip) (SKILL_CLIPS as Record<number, SkillClipSet>)[d.id] = d.clip;
+    if (d.clipSound) SKILL_CLIP_SOUNDS[d.id] = d.clipSound;
+    if (d.soundOnLanding) LANDING_SOUNDS.add(d.id);
+    if (d.silentHeroCast) SILENT_HERO_CASTS.add(d.id);
     if (d.delayMs !== undefined) (SKILL_DELAY_MS as Record<number, number>)[d.id] = d.delayMs;
-    if (d.target) SKILL_TARGETS[d.id] = d.target;
-    if (d.stepIn) SKILL_STEP_IN[d.id] = d.stepIn;
+    if (d.effect !== undefined) SKILL_EFFECTS[d.id] = d.effect;
     Object.assign(BUFF_VISUALS, d.buffs);
     Object.assign(BUFF_ARRIVALS, d.buffArrivals);
-    if (d.combat?.layer) combat.register(d.combat.layer);
-    Object.assign(skillHooks, d.combat?.hooks);
+    Object.assign(BUFF_HITS, d.buffHits);
+    // Clip rules, target, step-in, kill, combat layer and hooks.
+    combat.registerSkill(d.id, d);
   }
 }
 

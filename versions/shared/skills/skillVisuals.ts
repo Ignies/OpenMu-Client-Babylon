@@ -6,7 +6,7 @@ export type { Travel } from '@/controllers/skills/visuals';
 export type { SkillVisual } from '@/controllers/skills/visuals';
 export { playChainLightningHop } from './summoner/chain_lightning';
 export { playTeleportFlash } from './dark_wizard/teleport';
-export { playSoulBarrierShell } from './dark_wizard/soul_barrier';
+export { playBuffHits } from '@/controllers/skills/visuals';
 export { playSummonArrival } from './_shared';
 export { SKILL_VISUALS } from '@/controllers/skills/visuals';
 export { fallbackFor } from '@/controllers/skills/visuals';

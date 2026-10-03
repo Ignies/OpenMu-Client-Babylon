@@ -11,15 +11,13 @@
  * read by effects / HUD (`comboFlash`) and by the death system for the
  * knock-up (`comboKnockUp`).
  */
-import type { Sounds } from '@/controllers/sound/soundsManager';
 import type { ENUM_WORLD } from '@/core/types';
 import type { CombatLayer } from '@/controllers/combat/layer';
-import { SKILL_COMBO } from '@/controllers/combat/recipes';
 
 // ---- 1. tuning -------------------------------------------------------------
 
-/** `SOUND_COMBO`: eCombo.wav, once per landed combo. */
-export const COMBO_SOUND: Sounds = 'Sound/eCombo';
+/** AT_SKILL_COMBO: the server announces a landed Dark Knight combo with this id. */
+export const SKILL_COMBO = 59;
 
 /** Seconds the combo flash stays readable for effects (MODEL_COMBO's life). */
 const FLASH_SECONDS = 1.0;
@@ -52,7 +50,7 @@ export function combosLanded(): number {
 
 /**
  * Command: a `SkillAnimation` arrived. Returns `true` when it was a combo
- * (the caller plays the sound at the caster).
+ * (the caller plays the skill's sound at the caster).
  */
 export function observeSkillAnimation(
   skill: number,

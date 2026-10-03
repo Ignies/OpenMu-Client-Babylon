@@ -3,7 +3,9 @@ import { ARC_MOTES, TEX } from '@/controllers/fx/recipes';
 import { DEG, FX_FLICKER, dropOldest, lightHere, randInt, rideLightFor, writePath } from '../../_shared';
 import { type Entity } from '@/ecs/world';
 import { type LightRecipe } from '@/controllers/lighting/lightSource';
-import { MonsterActionType } from '@versions/shared/objects/enum';
+import { MonsterActionType, PlayerAction } from '@versions/shared/objects/enum';
+import type { PoseClip } from '@/controllers/combat';
+import { BaseClass } from '@/features/hero/characterStats';
 import { delay, entityGone, entityPos, entityYaw, followEntity, scaleRGB, type ParticleRecipe, type RGB } from '@/controllers/fx/core';
 import { SkillContext, Step, TICK, after, cm, forwardOf, ticks } from '@/controllers/skills/visuals';
 import { Vector3 } from '@/controllers/render/babylon/exports';
@@ -255,9 +257,26 @@ function plasmaGrace(c: SkillContext, type: number, targets: readonly Entity[], 
   if (coil) rideLightFor(c, effectLight(coil, 1.2, ticks(24), { release: ticks(10) }), followEntity(caster, cm(280)));
 }
 
+/**
+ * SetAction_Fenrir_Skill (ZzzAI.cpp:257-281), Plasma Storm's clip on every client: by which hands hold
+ * something (`Weapon[0]` is `leftHand` here, as in chooseAttackAction), the Rage Fighter with his own four.
+ */
+const fenrirSkillClip: PoseClip = pose => {
+  const first = !!pose.hands?.leftHand;
+  const second = !!pose.hands?.rightHand;
+  const rage = pose.baseClass === BaseClass.RageFighter;
+  if (first && second) return rage ? PlayerAction.PLAYER_RAGE_FENRIR_TWO_SWORD : PlayerAction.PLAYER_FENRIR_SKILL_TWO_SWORD;
+  if (first) return rage ? PlayerAction.PLAYER_RAGE_FENRIR_ONE_RIGHT : PlayerAction.PLAYER_FENRIR_SKILL_ONE_RIGHT;
+  if (second) return rage ? PlayerAction.PLAYER_RAGE_FENRIR_ONE_LEFT : PlayerAction.PLAYER_FENRIR_SKILL_ONE_LEFT;
+  return rage ? PlayerAction.PLAYER_RAGE_FENRIR : PlayerAction.PLAYER_FENRIR_SKILL;
+};
+
 export default defineSkill({
   id: 76,
   name: "Plasma Storm",
+  // The clip goes by the hands, and SetAction_Fenrir_Skill leaves SwordCount alone.
+  poseClip: fenrirSkillClip,
+  swordCount: false,
   // 76 Plasma Storm (Fenrir): 14 ticks after the 0x1E, homing JOINT_THUNDER / FLASH pairs back into the rider and
   // into every monster within 6 tiles, and six thunder coils over him, coloured by the Fenrir (plasmaStorm).
   // Enhanced: the bolts a touch under the clip, flashes, sparks and the thunder's light at both ends.

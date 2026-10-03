@@ -20,7 +20,9 @@
  */
 import type { ENUM_WORLD } from '@/core/types';
 import type { CombatLayer } from '@/controllers/combat/layer';
-import { SKILL_DARK_SIDE } from '@/controllers/combat/recipes';
+
+/** AT_SKILL_DARKSIDE: the one Rage Fighter skill that uses the 0x4A/0x4B pair. */
+const SKILL_DARK_SIDE = 263;
 
 // ---- 1. tuning -------------------------------------------------------------
 

@@ -3,6 +3,11 @@ import { ENUM_WORLD } from '../../core/types';
 import { TW_ACTION, TW_NOGROUND } from '../../controllers/terrain/consts';
 import type { World } from '../world';
 
+vi.hoisted(() => {
+  const g = globalThis as Record<string, unknown>;
+  g.location ??= { href: 'http://localhost/', search: '', hostname: 'localhost', protocol: 'http:' };
+});
+
 const playSfx = vi.fn((..._args: unknown[]) => 1000);
 vi.mock('../../controllers/sound/sfx', () => ({
   playSfx: (...args: unknown[]) => playSfx(...args),
@@ -17,6 +22,8 @@ const spawn = vi.fn();
 vi.mock('../../controllers/fx', () => ({ effects: { spawn: (...args: unknown[]) => spawn(...args) } }));
 vi.mock('../../controllers/sound/combatSounds', () => ({ COMBAT_BUS: 'combat' }));
 
+// What a kill does to the body is the killing skill's (`kill` in its file): load the skills first.
+await import('@versions/shared/skills/skillVisuals');
 const { DeathSystem } = await import('./deathSystem');
 
 const TICK = 1 / 25;

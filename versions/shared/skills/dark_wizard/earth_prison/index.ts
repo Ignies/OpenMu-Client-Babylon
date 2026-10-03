@@ -86,6 +86,8 @@ export const EARTH_PRISON_ENHANCED: Omit<SkillLight, 'enhanced'> = {
 export default defineSkill({
   id: 495,
   name: "Earth Prison",
+  // Physical on OpenMU (SkillsInitializer.cs:539-541) with no clip in the original; a Grand Master casts it.
+  castsAsSpell: true,
   // 495 Earth Prison (497 its Strengthener through the aliases): no source; the ground stone ring (earthPrison). Enhanced: earthPrisonEnhanced.
   visual: { impact: earthPrison, enhanced: { impact: earthPrisonEnhanced } },
   sound: 'Sound/sDarkEarthQuake', // Earth Prison: no source; the earthshake whose stone ring it borrows

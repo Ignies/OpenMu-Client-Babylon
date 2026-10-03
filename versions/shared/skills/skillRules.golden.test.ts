@@ -26,8 +26,8 @@ import type { CastContext } from '@/controllers/combat/skillClips';
 import { BaseClass } from '@/features/hero/characterStats';
 import { advancesSwordCount, chooseSkillAction } from '@/features/skills/skillCasting';
 import { masterBase } from '@/features/skills/skillAliases';
-import { SKILL_TO_EFFECT } from '@/features/skills/magicEffects';
-import { rageBuffSound } from '@/controllers/combat/skillClips';
+import { SKILL_EFFECTS } from '@/features/skills/recipes';
+import { clipCastSound } from '@/controllers/sound/combat';
 import { clipHoldsFacing } from '@/controllers/combat/skillMovement';
 import { SHOCK_IMMUNE_CLIPS } from '@/controllers/combat/recipes';
 import { playLandingSound } from '@/controllers/sound/combat';
@@ -89,7 +89,7 @@ describe('skill rules golden', () => {
     const out: Record<number, unknown> = {};
     const clips = [PlayerAction.PLAYER_SKILL_ATT_UP_OURFORCES, PlayerAction.PLAYER_SKILL_HP_UP_OURFORCES, PlayerAction.PLAYER_SKILL_HAND1];
     for (const id of IDS) {
-      const sounds = clips.map(c => rageBuffSound(id, c));
+      const sounds = clips.map(c => clipCastSound(id, c));
       if (sounds.some(s => s !== null)) out[id] = sounds;
     }
     expect(out).toMatchSnapshot();
@@ -124,7 +124,7 @@ describe('skill rules golden', () => {
 
   it('skill -> magic effect', () => {
     const out: Record<number, number> = {};
-    for (const id of IDS) if (SKILL_TO_EFFECT[id] !== undefined) out[id] = SKILL_TO_EFFECT[id];
+    for (const id of IDS) if (SKILL_EFFECTS[id] !== undefined) out[id] = SKILL_EFFECTS[id];
     expect(out).toMatchSnapshot();
   });
 });

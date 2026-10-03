@@ -4,6 +4,13 @@ import { RGBS, STEEL_GLINTS, TEX } from '@/controllers/fx/recipes';
 import { atSwordBlow, litBlow, swordSpark } from '../_shared';
 
 import { A } from '@/controllers/combat/recipes';
+import type { PoseClip } from '@/controllers/combat';
+
+/**
+ * AT_SKILL_SLASH / _STR: ReceiveMagic swings SWORD5 (the clip) on an even SwordCount and TWO_HAND_SWORD3 on an
+ * odd one, then advances it (WSclient.cpp:4398-4410).
+ */
+export const slashOddSwing: PoseClip = pose => (pose.swordCount % 2 === 1 ? A.PLAYER_ATTACK_TWO_HAND_SWORD3 : null);
 
 import { effectLight } from '@/controllers/lighting/recipes';
 
@@ -12,6 +19,8 @@ const SLASH_CHIPS: ParticleRecipe = { ...STEEL_GLINTS, texture: TEX.spark2, colo
 export default defineSkill({
   id: 23,
   name: "Slash",
+  poseClip: slashOddSwing,
+  swordCount: true,
   // 23 Slash (327 by alias): the same on the even SWORD5 swing; atSwordBlow drops the odd
   // TWO_HAND_SWORD3 swing, which gets no CreateSpark (WSclient.cpp:4398-4410, ZzzCharacter.cpp:4884). Enhanced: likewise.
   visual: { impact: atSwordBlow(swordSpark), enhanced: { impact: litBlow(SLASH_CHIPS) } },

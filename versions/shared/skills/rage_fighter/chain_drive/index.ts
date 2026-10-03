@@ -10,6 +10,10 @@ import { A } from '@/controllers/combat/recipes';
 export default defineSkill({
   id: 262,
   name: "Chain Drive",
+  // A hit does not cut the swing short, and the target is swung round on the facing it started with
+  // (ZzzCharacter.cpp:1283-1297, ZzzInterface.cpp:7394-7419).
+  noFlinch: [A.PLAYER_SKILL_GIANTSWING],
+  holdsFacing: [A.PLAYER_SKILL_GIANTSWING],
   // 262 Chain Drive: BITMAP_SWORDEFF at the caster; the giant-swing MODEL_SHOCKWAVE01 wave runs at the target.
   visual: {
     cast: seq(

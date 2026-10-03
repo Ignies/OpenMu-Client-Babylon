@@ -1,5 +1,4 @@
 import type { Entity, ISystemFactory } from '../world';
-import { rageBuffSound } from '../../controllers/combat/skillClips';
 import { Store } from '../../app/store';
 import { applyPlayerActionSpeed, serverMinAttackInterval } from '../../controllers/anim/playSpeed';
 import {
@@ -40,10 +39,10 @@ import { getBaseClass } from '../../features/hero/characterStats';
 import { isWingItem } from '../../controllers/actors/wings';
 import type { AttackPose } from '../../controllers/actors/weaponClass';
 import { mountKind } from '../../features/pets/pets';
-import { heroCastSound, playCombat, playSkill } from '../../controllers/sound/combat';
+import { clipCastSound, heroCastSound, playCombat, playSkill } from '../../controllers/sound/combat';
 import { skills } from '../../features/skills';
 import { combat } from '../../controllers/combat';
-import { SKILL_DEFENSE, SKILL_NOVA, SKILL_NOVA_BEGIN } from '../../controllers/combat/recipes';
+
 import { CONSECUTIVE_ATTACK_KEY } from '../../controllers/combat/skillMovement';
 import { castsInPlace, castsOnSelfOnly } from '../../controllers/combat/castTargets';
 import { PlayerAction } from '@versions/shared/objects/enum';
@@ -68,7 +67,8 @@ const glintTmp = new Vector3();
  * repeats the cast once the clip has played through.
  *
  * Timing and wire specials come from the `combat` layer: the per-skill clip
- * (through `chooseSkillAction`), the Nova hold (58 on press, 40 on release),
+ * (through `chooseSkillAction`), the Nova hold (its begin skill on press, the
+ * release on release, both named by Nova's file),
  * Dark Side's 0x4B/0x4A pair with its follow-up blows, and the 0xDB
  * `AreaSkillHit` for skills whose hits the client names. Re-use delays and
  * usability are the `skills` layer's verdict.
@@ -454,13 +454,14 @@ export const SkillCastSystem: ISystemFactory = world => {
       // while charging → AT_SKILL_NOVA at the selected target (`SkillKeyPush`).
       if (combat.novaCharging && (!world.rightPointerPressed || world.pointerPressed)) {
         combat.releaseNova();
-        const def = skillDefinition(SKILL_NOVA);
+        const nova = combat.novaSkill;
+        const def = skillDefinition(nova);
         const target = req?.target ?? null;
         const targetId =
           target && isAttackableEntity(world, target) && target.netId !== undefined
             ? target.netId
             : (Store.playerId ?? 0);
-        sendTargeted(SKILL_NOVA, targetId);
+        sendTargeted(nova, targetId);
         if (def) {
           const duration = playClip(hero, clipFor(hero, def));
           cooldown = Math.max(
@@ -515,7 +516,7 @@ export const SkillCastSystem: ISystemFactory = world => {
       if (combat.novaCharging) {
         const model = hero.modelObject;
         if (model?.ActionIterationWasFinished) {
-          const beginDef = skillDefinition(SKILL_NOVA_BEGIN);
+          const beginDef = skillDefinition(combat.novaBeginSkill);
           if (beginDef) playClip(hero, clipFor(hero, beginDef));
         }
         return;
@@ -588,14 +589,14 @@ export const SkillCastSystem: ISystemFactory = world => {
       }
 
       // ---- Nova: the press starts the charge on the hero, no target needed.
-      if (def.num === SKILL_NOVA) {
-        const beginDef = skillDefinition(SKILL_NOVA_BEGIN) ?? def;
-        if (!skills.canUse(SKILL_NOVA) || !combat.beginNova()) {
+      if (def.num === combat.novaSkill) {
+        const beginDef = skillDefinition(combat.novaBeginSkill) ?? def;
+        if (!skills.canUse(def.num) || !combat.beginNova()) {
           world.castRequest = null;
           return;
         }
-        skills.startCooldown(SKILL_NOVA);
-        sendTargeted(SKILL_NOVA_BEGIN, Store.playerId ?? 0);
+        skills.startCooldown(def.num);
+        sendTargeted(combat.novaBeginSkill, Store.playerId ?? 0);
         playClip(hero, clipFor(hero, beginDef));
         return;
       }
@@ -722,9 +723,11 @@ export const SkillCastSystem: ISystemFactory = world => {
         };
       }
 
-      // ExecuteSkill plays the skill's sound as the cast starts (Fire Scream's only at its spawn); a Dark Horse rider's guard has none.
-      const horseGuard = def.num === SKILL_DEFENSE && castContext(hero).mount === 'horse';
-      if (!horseGuard) playCombat(rageBuffSound(def.num, action) ?? heroCastSound(def.num), hero.transform.pos);
+      // ExecuteSkill plays the skill's sound as the cast starts (Fire Scream's only at its spawn); a cast
+      // its skill makes quiet on this mount (a Dark Horse rider's guard) has none.
+      if (!combat.castQuietOn(def.num, castContext(hero).mount)) {
+        playCombat(clipCastSound(def.num, action) ?? heroCastSound(def.num), hero.transform.pos);
+      }
 
       cooldown = Math.max(
         duration > 0 ? duration : FALLBACK_CAST_COOLDOWN,

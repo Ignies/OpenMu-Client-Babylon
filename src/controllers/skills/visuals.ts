@@ -645,6 +645,17 @@ export type BuffArrival = (scene: Scene, entity: Entity, active: boolean) => boo
 
 export const BUFF_ARRIVALS: Partial<Record<number, BuffArrival>> = {};
 
+/** What a buff draws when its wearer is hit, given who hit last (the original's `AttackPlayer`). */
+export type BuffHit = (scene: Scene, wearer: Entity, attacker: Entity | null) => void;
+
+export const BUFF_HITS: Partial<Record<number, BuffHit>> = {};
+
+/** Command: the wearer was hit; every buff it holds with a hit look draws it. */
+export function playBuffHits(scene: Scene, wearer: Entity, attacker: Entity | null): void {
+  if (!wearer.buffs) return;
+  for (const id in BUFF_HITS) if (wearer.buffs.has(+id)) BUFF_HITS[id]!(scene, wearer, attacker);
+}
+
 /**
  * One look kept up while any of its ids holds: the original keeps a single
  * set of five green joints on a body under Attack, Defense or HelpNpc

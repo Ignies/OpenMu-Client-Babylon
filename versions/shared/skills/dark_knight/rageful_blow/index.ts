@@ -401,6 +401,10 @@ const furyEmptyHand: Step = (_at, c) => {
 export default defineSkill({
   id: 42,
   name: "Rageful Blow",
+  // A hit does not cut the spin short, and it spins in place: no look-at-cursor (ZzzCharacter.cpp:1283-1297,
+  // ZzzInterface.cpp:7394-7419).
+  noFlinch: [A.PLAYER_ATTACK_SKILL_FURY_STRIKE],
+  holdsFacing: [A.PLAYER_ATTACK_SKILL_FURY_STRIKE],
   // 42 Rageful Blow: the hand empties as the FURY clip starts; at key 1 the weapon is thrown up and the ground
   // breaks in front of the knight; see furyStrike.
   visual: {

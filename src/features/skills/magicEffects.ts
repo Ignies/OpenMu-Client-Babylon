@@ -38,16 +38,3 @@ export const MAGIC_EFFECTS: Record<number, MagicEffectInfo> = {
   201: { nameKey: 'buff.alcohol', short: 'ALE', kind: 'buff' },
 };
 
-/** Skill number → effect it applies (for MagicEffectCancelled, which names the skill). */
-export const SKILL_TO_EFFECT: Record<number, number> = {
-  16: 4, // Soul Barrier
-  18: 2, // Defense
-  27: 2, // Greater Defense
-  28: 1, // Greater Damage
-  35: 6, // Infinity Arrow
-  30: 8, // Greater Fortitude
-  43: 7, // Swell Life? (AG recovery)
-  233: 130, // Increase Health
-  234: 131, // Increase Block
-  232: 129, // Ignore Defense
-};

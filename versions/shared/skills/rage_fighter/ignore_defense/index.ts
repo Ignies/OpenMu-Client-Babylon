@@ -1,5 +1,5 @@
 import { defineSkill } from '@/controllers/skills/define';
-import { OURFORCES_GLOW } from '../_shared';
+import { OURFORCES_GLOW, PARTY_BUFF_CLIPS, partyBuffClip, partyBuffSound } from '../_shared';
 import { RGBS, TEX } from '@/controllers/fx/recipes';
 import { flash } from '@/controllers/skills/visuals';
 
@@ -12,6 +12,9 @@ export default defineSkill({
     129: () => ({ boneGlow: OURFORCES_GLOW }),
     153: () => ({ boneGlow: OURFORCES_GLOW }),
   },
-  sound: 'Sound/Ragefighter/Rage_Buff_1', // default; at cast the sound follows the clip toss (rageBuffSound)
+  sound: 'Sound/Ragefighter/Rage_Buff_1', // default; at cast the sound follows the clip toss (clipSound)
+  clip: partyBuffClip,
+  clipSound: partyBuffSound,
+  noFlinch: PARTY_BUFF_CLIPS, // SetPlayerShock leaves the buff clips alone (ZzzCharacter.cpp:1283-1297)
   target: 'self',
 });

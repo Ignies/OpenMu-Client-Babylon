@@ -4,6 +4,10 @@
  * slot; an empty slot answers "nothing happening".
  */
 export interface NovaHooks {
+  /** The release cast, sent when the button comes up (`AT_SKILL_NOVA`). */
+  readonly skill: number;
+  /** Sent when the button goes down; starts the charge (`AT_SKILL_NOVA_BEGIN`). */
+  readonly beginSkill: number;
   charging(): boolean;
   charge(): number;
   stage(): number;
