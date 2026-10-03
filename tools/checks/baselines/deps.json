@@ -135,7 +135,6 @@
  "controllers-are-generic: src/controllers/render/scenes/upscale.ts -> src/features/options/gameOptions.ts",
  "controllers-are-generic: src/controllers/skills/index.ts -> src/features/skills/recipes.ts",
  "controllers-are-generic: src/controllers/skills/visuals.ts -> src/app/storeRef.ts",
- "controllers-are-generic: src/controllers/skills/visuals.ts -> src/features/skills/skillAliases.ts",
  "controllers-are-generic: src/controllers/sound/ambientBeds.ts -> src/features/events/bloodCastle.ts",
  "controllers-are-generic: src/controllers/sound/ambientBeds.ts -> src/features/events/chaosCastle.ts",
  "controllers-are-generic: src/controllers/sound/ambientBeds.ts -> src/features/options/gameOptions.ts",
