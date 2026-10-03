@@ -261,6 +261,7 @@ import {
 } from './common/playerActionMapper';
 import { chooseAttackAction, isWeaponItem, type AttackPose } from './common/weaponClass';
 import { isWingItem } from './common/wings';
+import { heldWeapons } from './common/chaosCastleUnit';
 import { PlayerObject, isPlayerBody, npcClassOf } from './common/playerObject';
 import { Entity, type Item, World } from './ecs/world';
 import { createAttributeSystem, type MUAttributeSystem } from './libs/attributeSystem';
@@ -2393,7 +2394,7 @@ function attackPoseOf(obj: Entity): AttackPose {
   const hands = obj.charAppearance;
   const inSafeZone = !!obj.attributeSystem?.isAboveZero('inSafeZone');
   return {
-    hands,
+    hands: heldWeapons(obj, Store.world?.mapIndex ?? -1),
     baseClass: getBaseClass(hands?.charClass ?? Store.playerData.charClass),
     swordCount: obj.playerAnimation?.swordCount ?? 0,
     wings: isWingItem(hands?.wings),
@@ -2591,7 +2592,7 @@ EventBus.on('ObjectAnimation', packet => {
       // CreateArrows(): a bow in scope lets go at its clip's hit key. The
       // hero's own shot is fired by AttackSystem, off the swing it latched.
       const shotAt = world.getByNetId(p.TargetId & 0x7fff);
-      if (shotAt && combat.equippedLauncher(obj.charAppearance)) {
+      if (shotAt && combat.equippedLauncher(heldWeapons(obj, world.mapIndex))) {
         const playSpeed =
           obj.modelObject?.actionPlaySpeed(action) ??
           playerPlaySpeed(action, obj.attributeSystem?.getValue('attackSpeed') ?? 0);

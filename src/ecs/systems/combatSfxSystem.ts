@@ -6,6 +6,7 @@ import {
 } from '../../common/playerActionMapper';
 import { monsterModelTypeOf } from '../../common/playSpeed';
 import { isPlayerBody } from '../../common/playerObject';
+import { heldWeapons } from '../../common/chaosCastleUnit';
 import { HORN_OF_FENRIR, PET_GROUP } from '../../common/petConstants';
 import type { CharacterClassNumber } from '../../common/types';
 import { CHAOS_CASTLE_WORLDS } from '../../common/worldAssets';
@@ -284,7 +285,7 @@ export const CombatSfxSystem: ISystemFactory = world => {
 
           // Rageful Blow and Swell Life are cast through AttackKnight, which never plays the swing (ClassAttack.cpp:960-994).
           if ((isPlayerAttackAction(action) && action !== A.PLAYER_ATTACK_SKILL_FURY_STRIKE && action !== A.PLAYER_SKILL_VITALITY) || MOUNTED_ATTACK_CLIPS.has(action)) {
-            const sfx = playerSwingSound(e.charAppearance);
+            const sfx = playerSwingSound(heldWeapons(e, world.mapIndex));
             if (sfx) playSfx(sfx, pos, { bus: COMBAT_BUS });
           } else if (action === A.PLAYER_SHOCK || fenrirDamage(action)) {
             playSfx(playerPainSound(classOf(e)), pos, { bus: COMBAT_BUS });

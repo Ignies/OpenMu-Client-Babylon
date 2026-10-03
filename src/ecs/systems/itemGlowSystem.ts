@@ -10,6 +10,7 @@ import {
   itemEffectSignature,
 } from '../../common/itemEffectMode';
 import type { PlayerObject } from '../../common/playerObject';
+import { shownGear, type Gear } from '../../common/chaosCastleUnit';
 import type { ModelObject } from '../../common/modelObject';
 import {
   createItemAura,
@@ -122,7 +123,7 @@ type Tracked = {
   sparkle: EffectHandle | null;
 };
 
-function anyExcellent(app: NonNullable<Entity['charAppearance']>): boolean {
+function anyExcellent(app: Gear): boolean {
   return !!(
     app.leftHand?.isExcellent ||
     app.rightHand?.isExcellent ||
@@ -155,7 +156,7 @@ function stampMeshes(part: ModelObject, item: Item | null | undefined): void {
 }
 
 /** Equipment slots and the part they load into (appearanceSystem.ts). */
-function stampPlayer(player: PlayerObject, app: NonNullable<Entity['charAppearance']>): void {
+function stampPlayer(player: PlayerObject, app: Gear): void {
   stampMeshes(player.HelmMask, app.helm);
   stampMeshes(player.Armor, app.armor);
   stampMeshes(player.Pants, app.pants);
@@ -323,7 +324,8 @@ export const ItemGlowSystem: ISystemFactory = world => {
       // --- characters -------------------------------------------------------
       for (const e of players) {
         const state = stateOf(e);
-        const { charAppearance: app, modelObject, transform } = e;
+        const { charAppearance, modelObject, transform } = e;
+        const app = shownGear(e, world.mapIndex) ?? charAppearance;
 
         // The apply counter leads: the lamp belongs to this character's
         // items, so it is re-examined whenever those items are put on the
@@ -332,7 +334,7 @@ export const ItemGlowSystem: ISystemFactory = world => {
         const signature =
           options +
           '|' +
-          (app.applied ?? 0) +
+          (charAppearance.applied ?? 0) +
           '|' +
           itemSignature(app.leftHand) +
           '|' +

@@ -48,6 +48,7 @@ import {
   isSwimWorld,
 } from '../../common/locomotion';
 import { isWingItem } from '../../common/wings';
+import { heldWeapons } from '../../common/chaosCastleUnit';
 import { isRidingMount, petSpec } from '../../common/pets';
 import { Store } from '../../store';
 
@@ -451,7 +452,7 @@ export const AnimationSystem: ISystemFactory = world => {
 
         playerAnimation.action = calculateAnimation({
           pose: {
-            hands,
+            hands: heldWeapons(entity, mapIndex),
             baseClass: getBaseClass(charClass),
             isFemale:
               npcClass !== undefined

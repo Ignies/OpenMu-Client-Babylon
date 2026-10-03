@@ -3,6 +3,7 @@ import type { ISystemFactory } from '../world';
 import { effects } from '../../effects';
 import { boneLocalPos } from '../../effects/core';
 import { weaponBlurFor, type WeaponBlurRow } from '../../common/weaponBlur';
+import { heldWeapons } from '../../common/chaosCastleUnit';
 import {
   isPlayerAttackAction,
   isPlayerSkillAction,
@@ -57,7 +58,7 @@ export const WeaponTrailSystem: ISystemFactory = world => {
           const action = model.CurrentAction;
           swing.row =
             isPlayerAttackAction(action) || isPlayerSkillAction(action)
-              ? weaponBlurFor(e.charAppearance, action, (e.heroState ?? PVP_NEUTRAL) >= PVP_MURDERER2)
+              ? weaponBlurFor(heldWeapons(e, world.mapIndex), action, (e.heroState ?? PVP_NEUTRAL) >= PVP_MURDERER2)
               : null;
         }
         const row = swing.row;
