@@ -65,6 +65,11 @@ export interface SkillDef {
   readonly warriorGlint?: true | 'mounted';
   /** The MagicEffect the skill applies; `MagicEffectCancelled` names the skill, not the effect. */
   readonly effect?: number;
+  /**
+   * Master numbers whose `MagicEffectCancelled` drops this `effect` too. Ours on purpose: the
+   * original reads the skill as a BYTE (WSclient.cpp:3884), so its 256+ cases never match.
+   */
+  readonly effectAliases?: readonly number[];
   /** Persistent looks of the buffs this skill applies, by MagicEffect id. */
   readonly buffs?: Partial<Record<number, BuffLook>>;
   /** Work a buff does as it lands, by MagicEffect id. */

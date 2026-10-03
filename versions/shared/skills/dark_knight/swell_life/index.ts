@@ -187,6 +187,7 @@ export default defineSkill({
   name: "Swell Life",
   // ReceiveMagicFinish drops eBuff_Life (WSclient.cpp:3930-3934).
   effect: 8,
+  effectAliases: [356, 360],
   // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
   lookAliases: [356, 360, 363],
   noFlinch: [A.PLAYER_SKILL_VITALITY], // SetPlayerShock leaves the cast alone (ZzzCharacter.cpp:1283-1297)

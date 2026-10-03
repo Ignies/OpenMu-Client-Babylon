@@ -23,7 +23,8 @@ themselves are content in `versions/shared/skills/` (see [docs/content.md](../..
 - `registerSkills` writes `visual` into `SKILL_VISUALS`, `lookAliases` / `masterAliases` into
   `LOOK_ALIASES` (and `MASTER_BASES`, `modules/skills/skillAliases.ts`), `light` into
   `lighting/skills.ts`, `sound` / `clipSound` / `soundOnLanding` / `silentHeroCast` into
-  `sound/combat.ts`, `delayMs` and `effect` into `modules/skills/recipes.ts`, `buffs` /
+  `sound/combat.ts`, `delayMs` and `effect` (also under each of its `effectAliases`) into
+  `modules/skills/recipes.ts`, `buffs` /
   `buffArrivals` / `buffHits` into `BUFF_VISUALS` / `BUFF_ARRIVALS` / `BUFF_HITS`, and hands
   the combat fields (clip rules, `target`, `stepIn`, `noFlinch`, `holdsFacing`, `quietOn`,
   `othersSee`, `explicitHits`, `kill`, `combat.layer` / `combat.hooks`) to

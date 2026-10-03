@@ -21,6 +21,14 @@ const MAGIC_FINISH: Record<number, number> = {
   67: 61, 69: 9, 70: 18, 75: 19, 201: 2, 202: 4, 217: 71, 218: 81, 232: 86, 233: 82,
 };
 
+// Its master and Rage Fighter cases, which the BYTE never reaches: ours on purpose (skill readme).
+const MAGIC_FINISH_MASTERS: Record<number, number> = {
+  384: 55, 387: 55, 389: 56, 489: 56, 337: 86, 420: 1, 422: 1, 417: 2, 423: 2, 511: 5, 515: 5, 517: 5,
+  356: 8, 360: 8, 424: 57, 490: 58, 403: 4, 404: 4, 380: 82, 383: 82, 469: 81,
+  266: 129, 267: 130, 573: 130, 268: 131, 569: 131, 572: 131,
+};
+const ALL_FINISH = { ...MAGIC_FINISH, ...MAGIC_FINISH_MASTERS };
+
 // The skill-only cast rules the skill files declare, read back through the combat facade.
 describe('skill cast rules', () => {
   it('only Defense is dropped on a mount: a Dark Horse rider (WSclient.cpp:3577-3582)', () => {
@@ -56,17 +64,22 @@ describe('skill cast rules', () => {
   });
 
   it('only skills ReceiveMagicFinish handles name a cancel effect', () => {
-    const extra = Object.keys(SKILL_EFFECTS).map(Number).filter(id => !(id in MAGIC_FINISH));
+    const extra = Object.keys(SKILL_EFFECTS).map(Number).filter(id => !(id in ALL_FINISH));
     expect(extra).toEqual([]);
   });
 
   it('each cancel effect is the buff ReceiveMagicFinish drops for that skill', () => {
-    const wrong = Object.entries(SKILL_EFFECTS).filter(([id, effect]) => MAGIC_FINISH[+id] !== effect);
+    const wrong = Object.entries(SKILL_EFFECTS).filter(([id, effect]) => ALL_FINISH[+id] !== effect);
     expect(wrong).toEqual([]);
   });
 
   it('every skill ReceiveMagicFinish handles names its cancel effect', () => {
     const missing = Object.keys(MAGIC_FINISH).map(Number).filter(id => SKILL_EFFECTS[id] === undefined);
+    expect(missing).toEqual([]);
+  });
+
+  it('the master and Rage Fighter cases cancel their effect too (a deliberate deviation)', () => {
+    const missing = Object.keys(MAGIC_FINISH_MASTERS).map(Number).filter(id => SKILL_EFFECTS[id] === undefined);
     expect(missing).toEqual([]);
   });
 });

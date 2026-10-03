@@ -119,6 +119,7 @@ export default defineSkill({
   name: "Ice",
   // ReceiveMagicFinish drops eDeBuff_Freeze (WSclient.cpp:3890-3894).
   effect: 56,
+  effectAliases: [389, 489],
   // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
   lookAliases: [389],
   // Master numbers cast, heard, lit and drawn as this skill (the original names them in its `case`).

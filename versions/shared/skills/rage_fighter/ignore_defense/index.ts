@@ -6,6 +6,8 @@ import { flash } from '@/controllers/skills/visuals';
 export default defineSkill({
   id: 266,
   name: "Ignore Defense",
+  // ReceiveMagicFinish (WSclient.cpp:3963-3965) drops it; past its BYTE, so ours (skills readme).
+  effect: 129,
   visual: { impact: flash(TEX.shiny, RGBS.blood, 1.3, 0.6) },
   buffs: {
     // 129-131 Ourforces (Rage Fighter): the red glow on 17 bones; 153-155 their power-ups.

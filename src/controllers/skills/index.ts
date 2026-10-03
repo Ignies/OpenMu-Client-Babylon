@@ -24,7 +24,7 @@ export function registerSkills(defs: readonly SkillDef[]): void {
     if (d.soundOnLanding) LANDING_SOUNDS.add(d.id);
     if (d.silentHeroCast) SILENT_HERO_CASTS.add(d.id);
     if (d.delayMs !== undefined) (SKILL_DELAY_MS as Record<number, number>)[d.id] = d.delayMs;
-    if (d.effect !== undefined) SKILL_EFFECTS[d.id] = d.effect;
+    if (d.effect !== undefined) for (const id of [d.id, ...(d.effectAliases ?? [])]) SKILL_EFFECTS[id] = d.effect;
     if (d.warriorGlint) WARRIOR_GLINTS[d.id] = d.warriorGlint;
     Object.assign(BUFF_VISUALS, d.buffs);
     Object.assign(BUFF_ARRIVALS, d.buffArrivals);

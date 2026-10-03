@@ -14,6 +14,7 @@ export default defineSkill({
   name: "Ice Arrow",
   // ReceiveMagicFinish drops eDeBuff_Harden (WSclient.cpp:3935-3938).
   effect: 57,
+  effectAliases: [424],
   // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
   lookAliases: [424],
   // 51 Ice Arrow: cast - MODEL_ICE sub1 + sub2 (+180°) at the target LT 20, Scale 0.8, BlendMeshLight 0.5, 3× BITMAP_SMOKE,

@@ -220,6 +220,7 @@ export default defineSkill({
   lookAliases: [337, 340, 343],
   // ReceiveMagicFinish drops eDeBuff_BlowOfDestruction (WSclient.cpp:3895-3898).
   effect: 86,
+  effectAliases: [337],
   // 232 Strike of Destruction (337/340/343 alias here, drawn at the target's feet): see `blowOfDestruction`.
   visual: { area: blowOfDestruction, enhanced: { area: blowOfDestructionPlus } },
   buffs: {
