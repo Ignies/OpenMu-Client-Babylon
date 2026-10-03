@@ -65,14 +65,15 @@ type CharacterLight = LightRecipe & {
 function carried(
   range: number,
   heightOffset: number,
-  color: readonly [number, number, number] = CARRIED_GLOW_RGB
+  color: readonly [number, number, number] = CARRIED_GLOW_RGB,
+  steady = false
 ): CharacterLight {
   return {
     color,
     range,
     pointRange: range + 2,
     heightOffset,
-    pulse: CARRIED_GLOW_PULSE,
+    pulse: steady ? undefined : CARRIED_GLOW_PULSE,
     priority: PRIORITY_CHARACTER,
     improvedOnly: true,
   };
@@ -106,7 +107,8 @@ function recipeOf(light: MonsterLight): CharacterLight {
       return carried(
         light.range,
         light.height ?? BODY_HEIGHT,
-        light.color === 'lightning' ? LIGHTNING_GLOW_RGB : light.color
+        light.color === 'lightning' ? LIGHTNING_GLOW_RGB : light.color,
+        light.steady
       );
   }
 }

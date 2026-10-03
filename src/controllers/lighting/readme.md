@@ -92,6 +92,7 @@ policy. It knows how to light something, never which skill or item asks for it.
 - `clouds.test.ts`: cloud uniform values for a clock, scroll wrapping, the sun step, binding.
 - `lightingQuality.test.ts`: `sceneTargetSamples` (MSAA per pass, Classic at one sample).
 - `recipes.test.ts`: `effectLight` hue, reach and gain ceiling, minimum range.
+- `characters.test.ts`: a steady carried glow (Poison Shadow) and one that breathes.
 - `versions/shared/maps/mapRows.golden.test.ts`: every world's look, room looks, thunder and
   map-object lights, pinned across the move into the map folders.
 - `mapLighting.test.ts`: a look over the open or enclosed default, the sky's default for a map
@@ -111,7 +112,8 @@ policy. It knows how to light something, never which skill or item asks for it.
   hangs. The row is the monster folder's `light` (`MonsterLight`), turned into a recipe here and
   cached per row. Player gear is `items.ts`, not this. Rows marked `improvedOnly` are ours: the floor light
   under a monster that carries a glow (Bahamut's lure, the Lost Tower Shadow); they pulse with
-  the glow card and are withheld on Classic. A negative row (Tantallos, Death Beam Knight:
+  the glow card (not a `steady` one: the Poison Shadow's card is drawn at Luminosity 1,
+  ZzzCharacter.cpp:11308-11318) and are withheld on Classic. A negative row (Tantallos, Death Beam Knight:
   `Vector(-1.3, -1.3, -1.3)`, range 3) darkens the floor: the terrain delta byte has no sign, so
   Classic shows nothing, and the pool on higher tiers carries it as a negative point light.
 - `skills.ts` (`ARROW_LIGHTS`): the original lights the arrow body every frame it flies, range 2,

@@ -93,6 +93,8 @@ export type MonsterLight =
       readonly range: number;
       readonly height?: number;
       readonly color?: readonly [number, number, number] | 'lightning';
+      /** The card it carries keeps one Luminosity, so the glow does not breathe. */
+      readonly steady?: true;
     };
 
 /** A one-shot a type plays: `channels` is the wave's `LoadWaveFile` count. */
