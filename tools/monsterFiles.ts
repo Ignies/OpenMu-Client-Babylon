@@ -1,7 +1,7 @@
 // Read and write the monster folders' data files (versions/shared/monsters/<name>/index.ts) for tools.
 // A monster keeps its folder (other files in it stay); a new one gets its name in snake_case
 // (plus `_<number>` when two share a name).
-import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'fs';
 import { join, resolve } from 'path';
 import type { MonsterDef } from '../src/controllers/monsters';
 
@@ -31,17 +31,31 @@ export function renderMonster(d: MonsterDef): string {
   return `import { defineMonster } from '@/controllers/monsters';\n\nexport default defineMonster({\n${lines.join('\n')}\n});\n`;
 }
 
-/** Writes each def into its folder: the existing one for a known number, a new one otherwise. */
+/** Sets (or removes) the `maxHealth` line of a monster file, leaving the rest as written. */
+function withMaxHealth(text: string, maxHealth: number | undefined): string {
+  const line = /^ {2}maxHealth: .*?(\r?\n)/m;
+  if (maxHealth === undefined) return text.replace(line, '');
+  if (line.test(text)) return text.replace(line, `  maxHealth: ${maxHealth},$1`);
+  return text.replace(/^( {2}Name: .*?(\r?\n))/m, `$1  maxHealth: ${maxHealth},$2`);
+}
+
+/**
+ * Writes each def's `maxHealth` into its folder: the existing file keeps everything else (the NPC
+ * fields and their comments are hand-written), a new number gets a new folder from `renderMonster`.
+ */
 export function writeMonsterFiles(defs: MonsterDef[]): void {
   const existing = new Map(readMonsterFiles().map(f => [f.def.Numb, f.folder]));
   const taken = new Set(existing.values());
   for (const d of defs) {
-    let folder = existing.get(d.Numb);
-    if (!folder) {
-      folder = taken.has(slug(d.Name)) ? `${slug(d.Name)}_${d.Numb}` : slug(d.Name);
-      taken.add(folder);
+    const folder = existing.get(d.Numb);
+    if (folder) {
+      const path = join(MONSTERS_DIR, folder, 'index.ts');
+      writeFileSync(path, withMaxHealth(readFileSync(path, 'utf8'), d.maxHealth));
+      continue;
     }
-    mkdirSync(join(MONSTERS_DIR, folder), { recursive: true });
-    writeFileSync(join(MONSTERS_DIR, folder, 'index.ts'), renderMonster(d));
+    const fresh = taken.has(slug(d.Name)) ? `${slug(d.Name)}_${d.Numb}` : slug(d.Name);
+    taken.add(fresh);
+    mkdirSync(join(MONSTERS_DIR, fresh), { recursive: true });
+    writeFileSync(join(MONSTERS_DIR, fresh, 'index.ts'), renderMonster(d));
   }
 }

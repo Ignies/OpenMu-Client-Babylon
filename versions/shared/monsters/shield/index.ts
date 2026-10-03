@@ -4,6 +4,8 @@ export default defineMonster({
   Numb: 215,
   Name: 'Shield',
   maxHealth: 50,
+  // Castle Siege (GMBattleCastle.cpp:1286-1381).
+  npcModel: { file: 'NpcBarrier', scale: 1.52 },
   stats: {
     Rate: 1,
     Level: 2,

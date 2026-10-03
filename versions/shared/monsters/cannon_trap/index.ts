@@ -4,6 +4,9 @@ export default defineMonster({
   Numb: 105,
   Name: 'Cannon Trap',
   maxHealth: 1000,
+  // Kanturu Relics canon trap (`CTrapCanon::Create_TrapCanon`, GM_Kanturu_2nd.cpp:1380-1391).
+  // Its render adds a sine-driven glow over the body (:1397-1404); only the body is here.
+  npcModel: { file: 'c_mon', scale: 1 },
   stats: {
     Rate: 1,
     Level: 80,

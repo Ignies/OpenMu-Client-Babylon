@@ -4,6 +4,8 @@ export default defineMonster({
   Numb: 106,
   Name: 'Laser Trap',
   maxHealth: 1000,
+  // MONSTER_LASER_TRAP (ZzzCharacter.cpp:14285).
+  trap: { object: 51, shadow: true },
   stats: {
     Rate: 1,
     Level: 80,

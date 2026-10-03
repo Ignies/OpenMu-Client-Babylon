@@ -4,6 +4,8 @@ export default defineMonster({
   Numb: 221,
   Name: 'Slingshot Attack',
   maxHealth: 50,
+  // Castle Siege (GMBattleCastle.cpp:1286-1381).
+  npcModel: { file: 'Model_Npc_Catapult_Att', scale: 0.8 },
   stats: {
     Rate: 1,
     Level: 2,

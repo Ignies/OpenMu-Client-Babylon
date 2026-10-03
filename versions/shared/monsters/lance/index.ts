@@ -4,6 +4,8 @@ export default defineMonster({
   Numb: 100,
   Name: 'Lance',
   maxHealth: 1000,
+  // MONSTER_LANCE_TRAP (ZzzCharacter.cpp:14273).
+  trap: { object: 39, shadow: true },
   stats: {
     Rate: 1,
     Level: 80,

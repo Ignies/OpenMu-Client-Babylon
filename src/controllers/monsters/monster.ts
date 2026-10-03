@@ -1,3 +1,5 @@
+import type { NpcGear, NpcGlobalVoice, NpcModel, NpcTransform, NpcTrap, NpcVoice } from './npc';
+
 /** The original client's monster table row (`Monster.txt`), without the number and name. */
 export type MonsterStats = {
   Rate: number;
@@ -43,6 +45,20 @@ export type MonsterDef = {
   model?: { type: number; scale: number; hiddenMesh?: number };
   /** `c->SubType` the original creates this type with (9: Kalima's large centurions, Kundun's candidates). */
   subType?: number;
+  /** Spawned but never drawn (`Object.Visible = false`): the actors controller loads no model. */
+  hidden?: boolean;
+  /** An NPC drawn from its own model file instead of a monster model. */
+  npcModel?: NpcModel;
+  /** A player-rig NPC in a fixed kit. */
+  gear?: NpcGear;
+  /** A player rig whose whole body is one part file. */
+  transformed?: NpcTransform;
+  /** A trap, drawn with the world object of the map it stands on. */
+  trap?: NpcTrap;
+  /** Its town noise (`MoveCharacterVisual`). */
+  voice?: NpcVoice;
+  /** Its `PlayMonsterSoundGlobal` lines, also heard from a player wearing it as a skin. */
+  globalVoice?: NpcGlobalVoice;
   stats?: MonsterStats;
 };
 

@@ -4,6 +4,8 @@ export default defineMonster({
   Numb: 103,
   Name: 'Meteorite',
   maxHealth: 1000,
+  // MONSTER_METEORITE_TRAP (ZzzCharacter.cpp:14282).
+  trap: { object: 25, shadow: true },
   stats: {
     Rate: 1,
     Level: 90,

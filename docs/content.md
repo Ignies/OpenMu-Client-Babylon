@@ -70,3 +70,12 @@ restyling the tooltip once restyles it everywhere.
 `versions/<id>/` holds what differs for one version: data paths, packet set, UI overrides (same
 window `id` replaces the shared one). Code in `src/` never asks which version runs; it reads the
 version's features and data. See [versions.md](versions.md).
+
+## NPCs in the monster folders
+- An NPC is a monster folder like any other (`versions/shared/monsters/<name>/`). Its look and
+  noise are optional fields of `index.ts` (types in `src/controllers/monsters/npc.ts`): `hidden`,
+  `npcModel`, `gear`, `transformed`, `trap`, `voice`, `globalVoice`. A class of its own is
+  `<name>/model.ts`; a class several types share is `_<line>/model.ts`.
+- The generic NPC shapes (plain model, player rig in a kit, transformed rig, trap, hidden) are the
+  actors controller's. `versions/shared/npcs/` only keeps the archangels (until the fx door exports
+  `TerrainDecal`) and two forwarding files for older readers.

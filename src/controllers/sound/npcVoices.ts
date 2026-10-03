@@ -1,4 +1,4 @@
-import { MonsterActionType } from '@versions/shared/objects/enum';
+import { monsterRegistry, type NpcGlobalVoice, type NpcVoice } from '@/controllers/monsters';
 import type { ENUM_WORLD } from '../../core/types';
 import type { Entity, World } from '../../ecs/world';
 import { SoundsManager } from './soundsManager';
@@ -9,7 +9,8 @@ import { listenerHero, listenerWorld, playSfx } from './listener';
 
 /**
  * Town NPC noises (Hanzo's anvil, the Chaos Machine goblin, the elf's harp) from `MoveCharacterVisual`
- * (ZzzCharacter.cpp:6080-6093, DSPlaySound.cpp:303), plus the `PlayMonsterSoundGlobal` voices. Notes in readme.md.
+ * (ZzzCharacter.cpp:6080-6093, DSPlaySound.cpp:303), plus the `PlayMonsterSoundGlobal` voices. Which type
+ * sounds like what is its monster folder's `voice` / `globalVoice`. Notes in readme.md.
  */
 
 // ---- 1. tuning -------------------------------------------------------------
@@ -26,141 +27,29 @@ const MAX_TICKS_PER_FRAME = 4;
 /** Share of the effects track at the source, 0…1 - under the beds' SFX. */
 const GAIN = 0.55;
 
-/**
- * A voice an NPC type carries. `oneIn` is the original's
- * `rand_fps_check(n)`: one chance in n, per tick. `frames` is a window on
- * the idle clip instead, and the sound fires as the clip enters it.
- */
-type NpcVoice = {
-  readonly sound: Sounds;
-  readonly oneIn?: number;
-  /** `[from, to]` on `o->AnimationFrame` while `o->CurrentAction == 0`. */
-  readonly frames?: readonly [number, number];
-};
-
-/**
- * ZzzCharacter.cpp:6080-6093, with the wave names from
- * ZzzOpenData.cpp:1870-1902. Keyed by NPC type number
- * (`controllers/actors/npcModelTable.ts`).
- */
-const NPC_VOICES: Readonly<Record<number, NpcVoice>> = {
-  // 238 Chaos Machine goblin (MODEL_MIX_NPC): `rand_fps_check(64)`, :6081.
-  238: { sound: 'Sound/nMix', oneIn: 64 },
-  // 242 Elf wizard (MODEL_ELF_WIZARD): `rand_fps_check(256)`, :6085.
-  242: { sound: 'Sound/nHarp', oneIn: 256 },
-  // 251 Hanzo the Blacksmith (MODEL_SMITH): every tick the idle clip sits in
-  // frames 5-10, so one clang per swing of the hammer (:6090-6092). The
-  // sparks off that same swing are `controllers/fx/monsterVisuals.ts`.
-  251: { sound: 'Sound/nBlackSmith', frames: [5, 10] },
-};
-
-/**
- * `PlayMonsterSoundGlobal` (ZzzCharacter.cpp:15118-15216): on the clip's start,
- * each loop of it (:3734) or while it holds (SetPlayerWalk each frame, :6439).
- */
-type GlobalCue = {
-  readonly on: MonsterActionType;
-  readonly when: 'start' | 'loop' | 'hold';
-  readonly sound: Sounds;
-  /** `rand_fps_check(n)` on the event. */
-  readonly oneIn?: number;
-};
-
-type GlobalVoice = {
-  readonly bus: SoundBus;
-  readonly cues: readonly GlobalCue[];
-};
-
 /** `if (fDistance > 500.0f) return true`, in tiles. */
 export const GLOBAL_RANGE_TILES = 5;
 
 /** MAX_CHANNEL (DSPlaySound.h:8); loop / hold cues take 1 so a line never stacks. */
 const GLOBAL_CHANNELS = 4;
 
-const TREASURE_BOX: GlobalVoice = {
-  bus: BUS,
-  cues: [
-    {
-      on: MonsterActionType.Die,
-      when: 'start',
-      sound: 'Sound/Doppelganger/treasurebox_open',
-    },
-  ],
-};
+// ---- 2. readers + state ----------------------------------------------------
 
-/** Keyed by the monster the character is drawn as: its NPC type, or a player's skin. */
-export const GLOBAL_NPC_VOICES: Readonly<Record<number, GlobalVoice>> = {
-  // 477 Transformed Snowman, also the Snowman ring's skin (:15167-15189). Its
-  // death line needs `LifeTime == 100`, which CreateMonster always sets for it
-  // (:14781-14786).
-  477: {
-    bus: 'monsters',
-    cues: [
-      {
-        on: MonsterActionType.Walk,
-        when: 'hold',
-        sound: 'Sound/xmas/SnowMan_Walk01',
-      },
-      {
-        on: MonsterActionType.Attack1,
-        when: 'start',
-        sound: 'Sound/xmas/SnowMan_Attack01',
-      },
-      {
-        on: MonsterActionType.Attack2,
-        when: 'start',
-        sound: 'Sound/xmas/SnowMan_Attack02',
-      },
-      {
-        on: MonsterActionType.Shock,
-        when: 'start',
-        sound: 'Sound/xmas/SnowMan_Damage01',
-      },
-      {
-        on: MonsterActionType.Die,
-        when: 'start',
-        sound: 'Sound/xmas/SnowMan_Death01',
-      },
-    ],
-  },
-  // 479 Gatekeeper Titus: every idle loop.
-  479: {
-    bus: BUS,
-    cues: [
-      {
-        on: MonsterActionType.Stop1,
-        when: 'loop',
-        sound: 'Sound/w64/GatekeeperTitus',
-      },
-    ],
-  },
-  // 540 Lugard: one idle loop in two.
-  540: {
-    bus: BUS,
-    cues: [
-      {
-        on: MonsterActionType.Stop1,
-        when: 'loop',
-        sound: 'Sound/Doppelganger/Lugard',
-        oneIn: 2,
-      },
-    ],
-  },
-  // 541 / 542 the Doppelganger boxes, as they open.
-  541: TREASURE_BOX,
-  542: TREASURE_BOX,
-};
-
-// ---- 2. state + readers ----------------------------------------------------
-
-/** The town noise an NPC type makes, if any. */
+/**
+ * The town noise an NPC type makes, if any: `voice` in its monster folder (ZzzCharacter.cpp:6080-6093,
+ * waves ZzzOpenData.cpp:1870-1902).
+ */
 export function npcVoiceOf(type: number): NpcVoice | undefined {
-  return NPC_VOICES[type];
+  return monsterRegistry.def(type)?.voice;
 }
 
-/** The `PlayMonsterSoundGlobal` voice of the monster a character is drawn as, if any. */
-export function globalNpcVoiceOf(type: number): GlobalVoice | undefined {
-  return GLOBAL_NPC_VOICES[type];
+/**
+ * The `PlayMonsterSoundGlobal` voice (ZzzCharacter.cpp:15118-15216) of the monster a character is drawn
+ * as, its NPC type or a player's skin: `globalVoice` in that monster's folder. A cue fires on the
+ * clip's start, each loop of it (:3734) or while it holds (SetPlayerWalk each frame, :6439).
+ */
+export function globalNpcVoiceOf(type: number): NpcGlobalVoice | undefined {
+  return monsterRegistry.def(type)?.globalVoice;
 }
 
 function buildQuery(world: World) {
@@ -197,7 +86,7 @@ type VoiceClock = {
 };
 const clocks = new WeakMap<Entity, VoiceClock>();
 
-function stepGlobalVoice(e: Voiced | Skinned, voice: GlobalVoice): void {
+function stepGlobalVoice(e: Voiced | Skinned, voice: NpcGlobalVoice): void {
   const model = e.modelObject;
   if (!model.Ready) return;
 
@@ -235,7 +124,7 @@ function stepGlobalVoice(e: Voiced | Skinned, voice: GlobalVoice): void {
       continue;
     }
     if (cue.oneIn && Math.random() * cue.oneIn >= 1) continue;
-    const ms = playSfx(cue.sound, null, {
+    const ms = playSfx(cue.sound as Sounds, null, {
       bus: voice.bus,
       channels: cue.when === 'start' ? GLOBAL_CHANNELS : 1,
     });
@@ -300,9 +189,9 @@ function update(_map: ENUM_WORLD, dt: number): void {
     }
 
     // `PlayBuffer` on a channel that is still sounding is a no-op.
-    if (SoundsManager.isPlaying(row.sound)) continue;
+    if (SoundsManager.isPlaying(row.sound as Sounds)) continue;
 
-    playSfx(row.sound, e.transform.pos, { bus: BUS, gain: GAIN });
+    playSfx(row.sound as Sounds, e.transform.pos, { bus: BUS, gain: GAIN });
   }
 }
 

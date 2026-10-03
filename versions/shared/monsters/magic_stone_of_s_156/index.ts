@@ -4,6 +4,9 @@ export default defineMonster({
   Numb: 156,
   Name: 'Magic stone of %s',
   maxHealth: 50,
+  // Kalima gate (ZzzCharacter.cpp:13046-13064): all seven share `MODEL_WARCRAFT`
+  // (Skill/HellGate) and stand on animation frame 10.
+  npcModel: { file: '/Skill/HellGate', scale: 1 },
   stats: {
     Rate: 1,
     Level: 10,

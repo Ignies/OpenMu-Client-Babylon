@@ -4,6 +4,9 @@ export default defineMonster({
   Numb: 242,
   Name: 'Elf Lala',
   maxHealth: 50,
+  npcModel: { file: 'ElfWizard01', scale: 1 },
+  // MODEL_ELF_WIZARD: `rand_fps_check(256)` (ZzzCharacter.cpp:6085).
+  voice: { sound: 'Sound/nHarp', oneIn: 256 },
   stats: {
     Rate: 1,
     Level: 2,

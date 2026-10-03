@@ -1,9 +1,18 @@
+import { CharacterClassNumber, PlayerClass } from '@/core/types';
 import { defineMonster } from '@/controllers/monsters';
 
 export default defineMonster({
   Numb: 375,
   Name: 'Chaos Card Master',
   maxHealth: 350000,
+  // Chaos Card Master (ZzzCharacter.cpp:14347-14367): Venom Mist +9, wings and no weapon.
+  gear: {
+    charClass: CharacterClassNumber.Summoner,
+    playerClass: PlayerClass.Summoner,
+    set: 30, // Venom Mist
+    level: 9,
+    wings: { group: 12, num: 1 }, // MODEL_WINGS_OF_HEAVEN
+  },
   stats: {
     Rate: 1,
     Level: 140,

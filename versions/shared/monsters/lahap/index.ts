@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 256,
   Name: 'Lahap',
   maxHealth: 50,
+  npcModel: { file: 'npc_mulyak', scale: 1 },
   stats: {
     Rate: 1,
     Level: 2,

@@ -4,6 +4,8 @@ export default defineMonster({
   Numb: 224,
   Name: 'Guardsman',
   maxHealth: 50,
+  // Castle Siege (GMBattleCastle.cpp:1286-1381).
+  npcModel: { file: 'NpcClerk', scale: 1 },
   stats: {
     Rate: 1,
     Level: 2,

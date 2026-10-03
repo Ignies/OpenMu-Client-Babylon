@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 243,
   Name: 'Eo, Craftsman',
   maxHealth: 50,
+  npcModel: { file: 'ElfMerchant01', scale: 1 },
   stats: {
     Rate: 1,
     Level: 2,

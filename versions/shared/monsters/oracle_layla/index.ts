@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 259,
   Name: 'Oracle Layla',
   maxHealth: 50,
+  npcModel: { file: 'kalnpc', scale: 1 },
   stats: {
     Rate: 1,
     Level: 2,

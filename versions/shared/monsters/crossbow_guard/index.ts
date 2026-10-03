@@ -1,9 +1,18 @@
+import { CharacterClassNumber, PlayerClass } from '@/core/types';
 import { defineMonster } from '@/controllers/monsters';
 
 export default defineMonster({
   Numb: 247,
   Name: 'Crossbow Guard',
   maxHealth: 10000,
+  // Town guard (ZzzCharacter.cpp:14464-14494): the plate set, told apart by what it carries.
+  gear: {
+    charClass: CharacterClassNumber.DarkKnight,
+    playerClass: PlayerClass.DarkKnight,
+    set: 9, // Plate
+    mainHand: { group: 4, num: 11 }, // Light Crossbow
+    offHand: { group: 4, num: 7 }, // Bolt
+  },
   stats: {
     Rate: 1,
     Level: 90,

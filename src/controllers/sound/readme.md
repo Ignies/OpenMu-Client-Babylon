@@ -142,3 +142,11 @@ never which skill or item asks for it.
   capped per performer and overall; the oldest voice gives way. Each performer has its own
   limiter ahead of the distance gain: with one limiter after the bus, a nearby performer was held
   at the ceiling and the first fifteen tiles of walking away changed nothing.
+
+## NPC voice data
+- The per-NPC rows of `npcVoices.ts` live in each NPC's monster folder
+  (`versions/shared/monsters/<name>/index.ts`): `voice` (the town noise) and `globalVoice` (the
+  `PlayMonsterSoundGlobal` lines). The layer reads them through the monsters controller with
+  `npcVoiceOf(type)` / `globalNpcVoiceOf(type)`. Changing an NPC's noise is editing its folder.
+- `npcVoices.test.ts` pins that data (a hash; update it on purpose) and checks every sound is a
+  catalogue key.
