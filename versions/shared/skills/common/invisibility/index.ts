@@ -8,6 +8,8 @@ import { MOUNTED_COMMAND } from '../../_shared';
 export default defineSkill({
   id: 70,
   name: "Invisibility",
+  // ReceiveMagicFinish drops eBuff_Cloaking (WSclient.cpp:3912-3914).
+  effect: 18,
   // 70 Cloaking / Invisible: BITMAP_MAGIC+1 sub6 at the target LT 60, Scale 2–4; BITMAP_LIGHT on random bones per frame.
   visual: { impact: seq(magicGround(RGBS.soul, ticks(60), 3), particles({ recipe: SOUL_MOTES, rate: 30, seconds: ticks(60), height: 0.5 })) },
   clip: { ground: A.PLAYER_SKILL_VITALITY, ...MOUNTED_COMMAND }, // Invisible

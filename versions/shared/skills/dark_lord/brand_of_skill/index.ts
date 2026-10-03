@@ -19,6 +19,8 @@ const addCritical: Step = (_at, c) => {
 export default defineSkill({
   id: 75,
   name: "Brand of Skill",
+  // ReceiveMagicFinish drops eBuff_AddSkill (WSclient.cpp:3918-3920).
+  effect: 19,
   // 75 Brand of Skill: MODEL_DARKLORD_SKILL at the weapon bones + MODEL_MANA_RUNE sub0 (LT 50, Scale 0→, Alpha 0.3, z+300).
   visual: { impact: seq(addCritical, atCaster(model({ model: MODEL.manaRune, seconds: ticks(50), scale: 0.2, grow: 5, colour: RGBS.gold, alpha: 0.3, yaw: Math.PI / 4 }), 3)) },
   clip: { ground: A.PLAYER_SKILL_HAND1, ...MOUNTED_HAND }, // Add Skill (Brand of Skill)

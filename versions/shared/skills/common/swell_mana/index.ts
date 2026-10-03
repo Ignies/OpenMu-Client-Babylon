@@ -21,6 +21,8 @@ const spiritBurst = (colour: RGB): Step =>
 export default defineSkill({
   id: 69,
   name: "Swell Mana",
+  // ReceiveMagicFinish drops eBuff_AddMana (WSclient.cpp:3915-3917).
+  effect: 9,
   // 69 Add Mana (Swell Mana): 36× JOINT_SPIRIT sub21 (= sub2) fan + BITMAP_MAGIC+1 sub10.
   visual: { impact: atCaster(spiritBurst(RGBS.soul), 1), area: atCaster(spiritBurst(RGBS.soul), 1) },
   clip: { ground: A.PLAYER_SKILL_VITALITY, ...MOUNTED_COMMAND }, // Mana

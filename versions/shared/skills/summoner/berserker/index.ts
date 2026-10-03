@@ -23,6 +23,8 @@ const berserkerWav: Step = (_at, c) => {
 export default defineSkill({
   id: 218,
   name: "Berserker",
+  // ReceiveMagicFinish drops eBuff_Berserker (WSclient.cpp:3983-3986).
+  effect: 81,
   // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
   lookAliases: [469, 470, 472],
   // 218 Berserker (469 / 470 / 472): the hand in (1,0.1,0.2), then 14 ticks after the reply the circle and the

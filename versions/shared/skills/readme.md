@@ -62,7 +62,8 @@ _shared.ts                      helpers for several classes
   class, SwordCount, mount, gender, map and coin toss; SwordCount; clip-paired and landing
   sounds; the clips that hold facing or ignore a hit; master aliases; the cancel effect.
 - `castRules.test.ts`: the quiet mount (Defense), what others see (Electric Spike), the kill
-  rules (Nova, Combo), Nova's hook numbers. `rage_fighter/party_buffs.test.ts`: the party buffs'
+  rules (Nova, Combo), Nova's hook numbers, the cancel effects against `ReceiveMagicFinish`
+  (WSclient.cpp:3878). `rage_fighter/party_buffs.test.ts`: the party buffs'
   coin toss and its paired sound.
 - Tests that load the skills import `./skillVisuals` first (it keeps the app import cycle in
   order) and stub `fetch` in `vi.hoisted`: Data/ is not there under Node.

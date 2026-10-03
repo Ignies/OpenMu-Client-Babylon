@@ -9,8 +9,6 @@ import { A } from '@/controllers/combat/recipes';
 export default defineSkill({
   id: 234,
   name: "Recovery",
-  // The old skill -> effect table's row, labelled Increase Block (131, Rage Fighter 268); kept as found.
-  effect: 131,
   // 234 Recover: cast - BITMAP_IMPACT at caster (0,−220,130), Light (0.7,0.6,0), LT 80, Scale 0→; target - 19× JOINT
   // FLARE sub47 width 40 + MODEL_SUMMON (LT 60, Scale 0.7) + BITMAP_TWLIGHT sub0/1/2 + 2× FLARE sub3 on random bones.
   visual: {

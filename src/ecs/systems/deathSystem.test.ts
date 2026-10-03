@@ -143,8 +143,8 @@ describe('skill deaths', () => {
   it('Nova sheds ten motes a tick while the Dead counter is <= 30, nothing else does', () => {
     const nova = killedBy(40);
     for (let i = 0; i < 40; i++) nova.system.update!(TICK);
-    // 29 frames: the summed 1/25 steps put the 30th just past 30.
-    expect(spawn.mock.calls.length).toBe(290);
+    // 30 frames at 25 fps: Dead runs 1..30 under the `<= 30` check (ZzzCharacter.cpp:3297, 4076).
+    expect(spawn.mock.calls.length).toBe(300);
     expect(spawn.mock.calls.every(c => c[0] === 'particles')).toBe(true);
     spawn.mockClear();
     const combo = killedBy(59);

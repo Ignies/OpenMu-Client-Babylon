@@ -117,6 +117,8 @@ const ICE_LIGHT: LightRecipe = {
 export default defineSkill({
   id: 7,
   name: "Ice",
+  // ReceiveMagicFinish drops eDeBuff_Freeze (WSclient.cpp:3890-3894).
+  effect: 56,
   // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
   lookAliases: [389],
   // Master numbers cast, heard, lit and drawn as this skill (the original names them in its `case`).
