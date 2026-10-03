@@ -3,6 +3,8 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 35,
   Name: 'Death Gorgon',
+  // The one classic monster that lights the floor itself (MODEL_GORGON, Level 2): (0.8, 0.16, 0), range 2 (ZzzCharacter.cpp:5956-5957).
+  light: { kind: 'forge', color: [0.8, 0.16, 0], range: 2 },
   maxHealth: 6000,
   model: { type: 11, scale: 1.3 },
   stats: {

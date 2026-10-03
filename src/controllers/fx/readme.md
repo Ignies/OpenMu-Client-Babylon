@@ -125,8 +125,9 @@ cached `ParticleSystem` per recipe. `disposePools()` + `clearTimers()` are the f
 
 ### deathVisuals.ts
 `deathSystem.ts` asks `shatterDeathFor(monsterModelType)` when the Die clip would start; a row means
-the body vanishes at once (`o->Live = false`) and pieces fly instead of the corpse sinking. Keyed by
-`MONSTER_MODEL_*` through `monsterModelTypeOf` (`actors/monsterModelTable.ts`). `skeletonShatter` is
+the body vanishes at once (`o->Live = false`) and pieces fly instead of the corpse sinking. The
+body file names its shatter (`shatter` in `versions/shared/monster_models/<body>.ts`), found through
+`monsterModelTypeOf` (`actors/monsterModelTable.ts`). `skeletonShatter` is
 also used by `actors/transformedBody.ts` and `versions/shared/monsters/skeleton_warrior.ts`.
 
 ### debris.ts

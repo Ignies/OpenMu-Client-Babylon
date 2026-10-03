@@ -14,6 +14,8 @@ its own folder in `versions/shared/monsters/<name>/` and uses this controller.
   never plays; also on a body, `MonsterModelDef.quietCasts`), `teleport` (`MonsterTeleport`: its
   own teleport sound on one world) and `stormSkill` (the skill whose AttackTime replays the
   meteorite storm).
+- Look fields: `light` (`MonsterLight`, read by `lighting/characters.ts`); on a body,
+  `MonsterModelDef.shatter` (`MonsterShatter`, read by `fx/deathVisuals.ts`).
 - `defineMonster(def)`: a monster folder's default export.
 - `MonsterRegistry`: `get(numb)` (the table row or null), `def(numb)`, `model(numb)`,
   `maxHealth(numb)`, `having(field)` (every type that sets a field, with its value), `all()`, `add`

@@ -3,6 +3,8 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 59,
   Name: 'Zaikan',
+  // The fire around it takes light off the floor: AddTerrainLight(-1.3, range 3) (SubType 1, ZzzCharacter.cpp:5968-5969).
+  light: { kind: 'dark' },
   maxHealth: 34000,
   model: { type: 42, scale: 2.1 },
   stats: {

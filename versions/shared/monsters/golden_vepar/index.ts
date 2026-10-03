@@ -3,6 +3,8 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 80,
   Name: 'Golden Vepar',
+  // Ours: four burning spikes.
+  light: { kind: 'carried', range: 3, height: 0.9 },
   maxHealth: 25000,
   model: { type: 36, scale: 1.4 },
   stats: {

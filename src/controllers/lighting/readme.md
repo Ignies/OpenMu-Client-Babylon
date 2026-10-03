@@ -80,7 +80,8 @@ policy. It knows how to light something, never which skill or item asks for it.
 - change one skill's light: its `light` field in `versions/shared/skills/<class>/<skill>/index.ts`.
 - add a map's torches: rows keyed by object type in the map's `*_LIGHTS` table (its `spec.ts`),
   set as `objectLights` in its `lighting.ts`.
-- add an NPC or monster light: a row in `CHARACTER_LIGHTS` (`characters.ts`).
+- add an NPC or monster light: `light` in its monster folder (`MonsterLight`: forge, dark or
+  carried); `characters.ts` turns it into a recipe.
 - change a map's look: `look` in its `lighting.ts` (only what differs from the open or
   enclosed default; the shared skies are `versions/shared/maps/shared/looks.ts`). A room look:
   `areas` there. Change every map's default: `DEFAULT_PROFILE` / `ENCLOSED_PROFILE` here.
@@ -105,7 +106,8 @@ policy. It knows how to light something, never which skill or item asks for it.
   into a swell), so `instant` defaults to true and map lights pass false.
 - `characters.ts`: driven by `CharacterLightSystem`, which calls `lightCharacter` /
   `snuffCharacter` for entities with an `npcType`; `heightOffset` is where on the body the light
-  hangs. Player gear is `items.ts`, not this. Rows marked `improvedOnly` are ours: the floor light
+  hangs. The row is the monster folder's `light` (`MonsterLight`), turned into a recipe here and
+  cached per row. Player gear is `items.ts`, not this. Rows marked `improvedOnly` are ours: the floor light
   under a monster that carries a glow (Bahamut's lure, the Lost Tower Shadow); they pulse with
   the glow card and are withheld on Classic. A negative row (Tantallos, Death Beam Knight:
   `Vector(-1.3, -1.3, -1.3)`, range 3) darkens the floor: the terrain delta byte has no sign, so

@@ -4,7 +4,8 @@ import { MonsterRegistry } from './registry';
 import { MonsterModelRegistry, type MonsterModelDef } from './monsterModel';
 
 export { defineMonster } from './monster';
-export type { MonsterDef, MonsterRow, MonsterStats, MonsterTeleport } from './monster';
+export type { MonsterDef, MonsterLight, MonsterRow, MonsterStats, MonsterTeleport } from './monster';
+export type { MonsterShatter } from './monsterModel';
 export type { NpcGear, NpcGlobalCue, NpcGlobalVoice, NpcItem, NpcModel, NpcTransform, NpcTrap, NpcVoice } from './npc';
 export { MonsterRegistry } from './registry';
 export { defineMonsterModel, MonsterModelRegistry } from './monsterModel';

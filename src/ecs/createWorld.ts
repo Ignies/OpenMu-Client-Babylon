@@ -122,7 +122,7 @@ const factories: ISystemFactory[] = [
   // After AnimationSystem: the shoulder flag reads this frame's bone 26 pose.
   GuildFlagSystem,
   ItemGlowSystem,
-  // Light layer: NPCs/monsters with a CHARACTER_LIGHTS row carry a light.
+  // Light layer: NPCs/monsters whose folder sets `light` carry a light.
   CharacterLightSystem,
   // ...and the ones with a MONSTER_GLOWS row carry their own glow cards.
   MonsterGlowSystem,

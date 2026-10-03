@@ -1,6 +1,9 @@
 /** A monster body's five voice slots: [0..1] idle / walk, [2..3] attack / hit, [4] death; null = silent. */
 export type MonsterVoiceSlots = readonly [string | null, string | null, string | null, string | null, string | null];
 
+/** The special deaths (`SetPlayerDie`, ZzzCharacter.cpp:1372-1420; `CreateBlood` for ice). */
+export type MonsterShatter = 'bone' | 'stone' | 'ice' | 'gate' | 'crystal';
+
 /**
  * One monster body (`MODEL_MONSTER01 + type`, `OpenMonsterModel` in ZzzOpenData.cpp): what it sounds
  * like and how fast its clips play. Several monster types share a body, and these follow the body.
@@ -15,6 +18,8 @@ export type MonsterModelDef = {
   clipSpeeds?: Readonly<Partial<Record<number, number>>>;
   /** Skills whose cast sound a monster in this body never plays (`monsterCastQuiet`). */
   quietCasts?: readonly number[];
+  /** What the body breaks into instead of playing Die (the fx controller's `shatterDeathFor`). */
+  shatter?: MonsterShatter;
   /** Multiplier on Stop1..Shock (the original's per-body speed scale; Die is never scaled). */
   speedScale?: number;
 };

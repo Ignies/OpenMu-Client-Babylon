@@ -3,6 +3,8 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 251,
   Name: 'Hanzo, Blacksmith',
+  // The forge (MODEL_SMITH): (L, 0.4L, 0), range 3 (ZzzCharacter.cpp:5970-5971).
+  light: { kind: 'forge', color: [1, 0.4, 0], range: 3 },
   maxHealth: 1000,
   // model.ts draws it at scale 1; this row is what the tables list.
   npcModel: { file: 'Smith01', scale: 0.95 },

@@ -3,6 +3,8 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 39,
   Name: 'Poison Shadow',
+  // Ours: the Shadow body, but additive, in Vector(0.2, 0.7, 0.1).
+  light: { kind: 'carried', range: 3, color: [0.2, 0.7, 0.1] },
   maxHealth: 3500,
   model: { type: 28, scale: 1.2 },
   stats: {

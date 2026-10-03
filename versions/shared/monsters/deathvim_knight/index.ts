@@ -3,6 +3,8 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 63,
   Name: 'Deathvim Knight',
+  // The fire around it takes light off the floor: AddTerrainLight(-1.3, range 3) (ZzzCharacter.cpp:5910-5911).
+  light: { kind: 'dark' },
   maxHealth: 40000,
   model: { type: 44, scale: 1.9 },
   stats: {

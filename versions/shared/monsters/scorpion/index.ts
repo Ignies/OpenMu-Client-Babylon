@@ -3,6 +3,8 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 27,
   Name: 'Scorpion',
+  // Ours: the tail lamp, Luminosity 0.8 (ZzzCharacter.cpp:6037).
+  light: { kind: 'carried', range: 2, height: 0.25, color: [0.8, 0.32, 0.16] },
   maxHealth: 80,
   model: { type: 20, scale: 1.1 },
   stats: {

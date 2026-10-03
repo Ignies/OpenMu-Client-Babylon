@@ -3,6 +3,8 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 235,
   Name: 'Priest Sevina',
+  // Ours: a held flare.
+  light: { kind: 'carried', range: 3, height: 0.9 },
   maxHealth: 50,
   npcModel: { file: 'Sevina01', scale: 1 },
   stats: {

@@ -3,6 +3,8 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 81,
   Name: 'Golden Lizard King',
+  // Ours: one lightning2 light in each hand.
+  light: { kind: 'carried', range: 3, height: 0.8, color: 'lightning' },
   maxHealth: 10000,
   model: { type: 34, scale: 1 },
   stats: {

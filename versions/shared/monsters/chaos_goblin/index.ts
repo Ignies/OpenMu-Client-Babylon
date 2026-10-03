@@ -3,6 +3,8 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 238,
   Name: 'Chaos Goblin',
+  // Ours: a held flare.
+  light: { kind: 'carried', range: 2 },
   maxHealth: 50,
   npcModel: { file: 'MixNpc01', scale: 1 },
   // MODEL_MIX_NPC: `rand_fps_check(64)` (ZzzCharacter.cpp:6081).

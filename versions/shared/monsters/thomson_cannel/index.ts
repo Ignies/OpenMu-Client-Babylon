@@ -3,6 +3,8 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 231,
   Name: 'Thomson Cannel',
+  // The brazier (MODEL_DEVIAS_TRADER): (0.5L, 0.3L, 0), range 3 (ZzzCharacter.cpp:5999-6000).
+  light: { kind: 'forge', color: [0.5, 0.3, 0], range: 3 },
   maxHealth: 50,
   npcModel: { file: 'DeviasTrader01', scale: 1 },
   stats: {

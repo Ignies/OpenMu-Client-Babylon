@@ -3,6 +3,8 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 51,
   Name: 'Great Bahamut',
+  // Ours: the lure's glow.
+  light: { kind: 'carried', range: 3, height: 0.5 },
   maxHealth: 7000,
   model: { type: 33, scale: 1 },
   stats: {

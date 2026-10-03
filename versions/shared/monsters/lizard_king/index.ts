@@ -3,6 +3,8 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 48,
   Name: 'Lizard King',
+  // Ours: four burning spikes.
+  light: { kind: 'carried', range: 3, height: 0.9 },
   maxHealth: 9000,
   model: { type: 36, scale: 1.4 },
   stats: {
