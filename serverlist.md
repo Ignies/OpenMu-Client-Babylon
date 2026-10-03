@@ -71,3 +71,6 @@ Lines that do not parse are dropped, so the prose around them costs nothing.
 - 0: Testing Server
   - 0: X100 PVP
   - 1: X100 PVE
+[S6EP3:openmu.com.br:Season 6 Episode 3,:br:](openmu.com.br)
+- 0: OpenMU.com.br Server
+  - 0: Server 1
