@@ -25,7 +25,7 @@ import { isSocialAction } from '../actors/weaponClass';
  * file per action; update on purpose.
  */
 const ENUM_HASH = 'efca3df993fae228e4d27e410d96f07ea30cfcf4c0bc0f57fc96b5a5a715bcd0';
-const SPEED_HASH = '32f45fe0f7126cb275a619d03781da3973d6fafa5a37f3c5100837ac0d36abab';
+const SPEED_HASH = 'd41c7458d26c9160db725d50506345f64ac80c7827751bd8d0e4095c2109cd3a';
 const FRAME_HASH = 'd910837c3501746ffd2eaa923c96de756dc4c3214a658cb46b6370567693680e';
 const FLAGS_HASH = 'aa89d1d4e6d53b5a3d7bbb65791d70add96cc77cc653a3c1ec29d502aa328ce5';
 

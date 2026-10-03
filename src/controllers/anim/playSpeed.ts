@@ -14,7 +14,7 @@ export const REFERENCE_FPS = 25;
 export const PLAY_SPEED_TO_RATIO = REFERENCE_FPS / BMD_KEYS_PER_SECOND;
 
 /**
- * `SetAttackSpeed()` stat scaling (ZzzCharacter.cpp:738-826): the piecewise
+ * `SetAttackSpeed()` stat scaling (ZzzCharacter.cpp:812-847): the piecewise
  * multiplier is the cap - there is no clamp on the result.
  */
 export function attackSpeedFactor(attackSpeed: number): number {
@@ -23,25 +23,28 @@ export function attackSpeedFactor(attackSpeed: number): number {
   return attackSpeed * 0.004;
 }
 
-/** Magic-speed multiplier used by most spells (`MagicSpeed2`). */
+/** `MagicSpeed2`'s steps, first match wins: [from, to, factor] (ZzzCharacter.cpp:849-908). */
+const MAGIC_SPEED_STEPS: readonly (readonly [number, number, number])[] = [
+  [455, 479, 0.00247],
+  [605, 636, 0.0019],
+  [637, 668, 0.0018],
+  [669, 688, 0.0017],
+  [855, 1040, 0.00163],
+  [1041, 1104, 0.00155],
+  [1301, 1500, 0.00175],
+  [1501, 1524, 0.0015],
+  [1525, 1800, 0.00145],
+  [1801, 1999, 0.0013],
+  [2000, 2167, 0.00125],
+  [2168, 2354, 0.00115],
+  [2855, 3011, 0.0009],
+  [3011, Infinity, 0.00081],
+];
+
+/** Magic-speed multiplier used by most spells (`MagicSpeed2`): 0.002 outside the steps. */
 export function magicSpeedFactor(magicSpeed: number): number {
-  const m = magicSpeed;
-  if (m <= 0) return 0;
-  if (m < 300) return m * 0.0020;
-  if (m < 350) return m * 0.00247;
-  if (m < 400) return m * 0.0019;
-  if (m < 450) return m * 0.0018;
-  if (m < 500) return m * 0.0017;
-  if (m < 550) return m * 0.00163;
-  if (m < 600) return m * 0.00155;
-  if (m < 650) return m * 0.00175;
-  if (m < 700) return m * 0.0015;
-  if (m < 750) return m * 0.00145;
-  if (m < 800) return m * 0.0013;
-  if (m < 850) return m * 0.00125;
-  if (m < 900) return m * 0.00115;
-  if (m < 950) return m * 0.0009;
-  return m * 0.00081;
+  for (const [from, to, factor] of MAGIC_SPEED_STEPS) if (magicSpeed >= from && magicSpeed <= to) return magicSpeed * factor;
+  return magicSpeed * 0.002;
 }
 
 const A = PlayerAction;

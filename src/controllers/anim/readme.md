@@ -11,7 +11,8 @@ clip is one file in `versions/shared/animations/` that says its own speed, flags
 - `playSpeed.ts`:
   - `playerPlaySpeed(action, attackSpeed, magicSpeed, isRageFighter)`: a player clip's `PlaySpeed`
     (ZzzOpenData.cpp:314-372, `SetAttackSpeed` ZzzCharacter.cpp:830-960, `SetPlayerWalk` :396-453).
-  - `attackSpeedFactor`, `magicSpeedFactor`: the stat multipliers (ZzzCharacter.cpp:738-826).
+  - `attackSpeedFactor`, `magicSpeedFactor`: the stat multipliers (`SetAttackSpeed`, ZzzCharacter.cpp:812-908;
+    `MagicSpeed2` steps on its own ranges, 0.002 outside them).
   - `playerFrameSpeedScale(action, frame, darkLord)`: per-frame slow-downs (ZzzCharacter.cpp:2497-2517).
   - `debuffSlowsClip(action)`: clips a Freeze or Cold slows (ZzzCharacter.cpp:496-542).
   - `wingsPlaySpeed`, `RAGEFIGHTER_STOP_SPEED`, `monsterPlaySpeed(modelType, action)`,
@@ -82,5 +83,5 @@ clip is one file in `versions/shared/animations/` that says its own speed, flags
 - `monsterAttackClip.test.ts`: the default swing count, `ReceiveMagic` on monsters, special
   bodies (Bali, traps, siege guards), Kalima and every map hook, when `c->Skill` clears,
   `playableMonsterClip`, `monsterFlinches`, `isMonsterSwingClip`, per-owner state.
-- `playSpeed.test.ts`: Dark Lord per-frame clip speeds (party teleport hold, Electric Spike
+- `playSpeed.test.ts`: the `MagicSpeed2` steps; Dark Lord per-frame clip speeds (party teleport hold, Electric Spike
   charge, Earthshake and ride clips, command clip after key 6).
