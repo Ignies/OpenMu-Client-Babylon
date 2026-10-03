@@ -27,8 +27,10 @@ import type { Texture } from '../libs/babylon/exports';
  *    lives on it as `label`. After a swap the label reads as the URL that was
  *    just loaded, and `pbrMaps.textureSourceName()` - which decides PBR map
  *    lookups, and via `parseTextureScript` the hide/bright/no-blend rules -
- *    starts reading nonsense. Every swap re-stamps it. (Measured: label
- *    `Object1/bird` came back as the swap URL.)
+ *    starts reading nonsense. Every swap re-stamps it once the image is in,
+ *    and until then `textureLabel()` answers from the name remembered before
+ *    the swap - which is what `textureSourceName()` asks first. (Measured:
+ *    label `Object1/bird` came back as the swap URL.)
  *
  *  - Going back to the base texture needs the original bytes, and they only
  *    exist because the glTF loader keeps them on `texture._buffer`. They are
