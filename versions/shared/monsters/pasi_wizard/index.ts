@@ -4,6 +4,8 @@ export default defineMonster({
   Numb: 254,
   Name: 'Pasi Wizard',
   maxHealth: 50,
+  // model.ts draws it; this row is what the tables list.
+  npcModel: { file: 'Wizard01', scale: 1 },
   stats: {
     Rate: 1,
     Level: 2,

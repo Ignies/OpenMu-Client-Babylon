@@ -36,6 +36,11 @@ export class MonsterRegistry {
     return this.defs.get(numb)?.maxHealth ?? 0;
   }
 
+  /** Every type whose folder sets `key`, in number order, with that value. */
+  having<K extends keyof MonsterDef>(key: K): [number, NonNullable<MonsterDef[K]>][] {
+    return this.all().flatMap(d => (d[key] != null ? [[d.Numb, d[key] as NonNullable<MonsterDef[K]>]] : []));
+  }
+
   all(): MonsterDef[] {
     return [...this.defs.values()].sort((a, b) => a.Numb - b.Numb);
   }

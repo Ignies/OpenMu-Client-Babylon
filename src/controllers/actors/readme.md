@@ -2,19 +2,25 @@
 
 The model objects for players, monsters and NPCs, and the rules for what they wear: body parts,
 weapons on the hands and back, wings and capes, the guild flag, and which model a server object
-type loads. There is no `index.ts`; other folders import the modules below directly.
+type loads. Its door is `index.ts`; older readers still import some modules directly (baselined).
 
 ## Public API
 - `PlayerObject` (the player rig with its part sockets; player-rig NPCs and monsters subclass it
   and set `NpcClass`, `NpcAlwaysFly`, `DeathShatter`), `isPlayerBody`, `npcClassOf`;
   `MonsterObject`; `OperateBoxObject`, `LeanBoxObject` (invisible click targets for maps).
-- `resolveModelFactory(type)`, `isKnownObjectType(type)`: registered classes first, then the
-  generic paths.
+- `resolveModelFactory(type)`, `isKnownObjectType(type)` (`modelFactoryPerId.ts`): registered
+  classes first, then the engine default the type's monster folder asks for.
 - `registerModelClass(types, Class)` (`modelClasses.ts`): content's own model classes.
+- `ModelObject` (forwarded from render, whose door exports it as a type only): the base of the
+  plain-model NPC classes in content.
 - Monster models from each monster's folder (through the monsters controller): `monsterModelFile`,
   `monsterModelTypeOfNpc`, `monsterScaleOf`, `monsterHiddenMesh`, `hasMonsterModel`;
   `monsterFactoryFor` (`genericMonster.ts`), the class every monster without its own uses.
-- NPC tables: `NPC_MODEL_TABLE`, `npcModelFile`, `GEARED_NPC_TABLE`, `TRANSFORMED_NPC_TABLE`.
+- NPC defaults: `npcFactoryFor(file, scale)`, `trapFactoryFor`, `HiddenNpc` (`modelFactoryPerId.ts`);
+  `gearedNpcFactory(gear)`, `transformedNpcFactory(dir, part, scale)` (`playerNpc.ts`).
+- NPC tables, live views of the monster folders kept for the readers that list them:
+  `NPC_MODEL_TABLE`, `TRAP_MODEL_TABLE`, `npcModelFile` (`npcModelTable.ts`, with `folderTable`),
+  `GEARED_NPC_TABLE`, `TRANSFORMED_NPC_TABLE` (`playerNpcTables.ts`).
 - `transformedBody.ts`: `transformedBodyFactory`, `characterSkinBody(skin)`, `monsterClipFor`.
 - `deserializeAppearance.ts`: `deserializeAppearance`, `deserializeAppearanceExtended`,
   `APPEARANCE_EXTENDED_LENGTH`, `classFromAppearance`, `emptyAppearance`, `withAppearanceClass`,
@@ -39,11 +45,12 @@ type loads. There is no `index.ts`; other folders import the modules below direc
 
 ## How it works
 - A spawned object's class comes from `resolveModelFactory(type)`, called by
-  `features/_shared/net_helpers.ts` and `features/scope/net.ts`. It checks, in order:
-  `ModelFactoryPerId` (a content class), `TRAP_MODEL_TABLE`, `MONSTER_MODEL_TABLE`
-  (`Monster/Monster<modelType + 1>.glb`), `NPC_MODEL_TABLE` (`NPC/<file>.glb`, or a path off the
-  asset root when the file starts with `/`), `GEARED_NPC_TABLE`, `TRANSFORMED_NPC_TABLE`, and
-  falls back to monster model 0 at scale 0.8.
+  `features/_shared/net_helpers.ts` and `features/scope/net.ts`. It checks, in order: a
+  registered class (`versions/shared/monsters/<name>/model.ts`), then the type's folder:
+  `hidden` (`HiddenNpc`), `trap` (the map's world object), `model`
+  (`Monster/Monster<modelType + 1>.glb`), `npcModel` (`NPC/<file>.glb`, or a path off the asset
+  root when the file starts with `/`), `gear`, `transformed`, and falls back to monster model 0
+  at scale 0.8. This folder imports no content: classes register themselves at boot.
 - `PlayerObject` loads `Player/player.glb` (a rig with no meshes) and hangs every part on it as a
   child `ModelObject`: helm, mask, armor, pants, gloves, boots, two weapons, two Phoenix wings,
   wings, quest item and pet. Weapons link to bones 33 / 42 (ZzzCharacter.cpp:11849-11850), wings
@@ -60,9 +67,8 @@ type loads. There is no `index.ts`; other folders import the modules below direc
 
 ## Depends on / used by
 - uses: `render` (`ModelObject`, bone links), `assets`, `anim`, `fx`, `item_fx`, `lighting`,
-  `core/types`, `ecs/world`. Baselined exceptions (`tools/checks/baselines/deps.json`):
-  `features/hero|pets|social|drops`, `app/store`, and `modelFactoryPerId.ts` /
-  `playerNpcTables.ts` importing `versions/shared/monsters` and `versions/shared/npcs`.
+  `monsters` (the folders' data), `core/types`, `ecs/world`. Baselined exceptions
+  (`tools/checks/baselines/deps.json`): `features/hero|pets|social|drops`, `app/store`.
 - used by: `ecs/systems`, `features/_shared/net_helpers.ts`, `features/scope`,
   `features/character_select`, `features/drops`, `features/gm/admin/skins.ts`, `app/store.ts`,
   `sound`, `item_fx/weaponBlur.ts`, `anim`, `assets/modelLoader.ts`, monster, npc, map and skill
@@ -72,9 +78,9 @@ type loads. There is no `index.ts`; other folders import the modules below direc
 - a monster's model or scale: `model` in its folder (`versions/shared/monsters/<name>/index.ts`).
 - a monster with its own behaviour: `<name>/model.ts` with a `MonsterObject` subclass and
   `registerModelClass(type, Class)`; nothing here changes.
-- add an NPC model: a `type: [file, scale]` row in `NPC_MODEL_TABLE` (relative to `Data/NPC/`);
-  the test checks the file exists. A player-rig NPC goes in `GEARED_NPC_TABLE` or
-  `TRANSFORMED_NPC_TABLE`.
+- an NPC's model, kit, trap object or class: its monster folder
+  (`versions/shared/monsters/<name>/`, see its readme); nothing here changes. A new kind of NPC
+  shape: a factory here and a branch in `resolveModelFactory`.
 - add a wing or cape: a constant and a `WINGS` / `CAPES` row in `wings.ts`; the model file comes
   from the item's `szModelFolder` / `szModelName` in its item file.
 - change where a weapon sits: `weaponAttachment.ts`. How a drop lies: `itemAngle.ts`. An item's
@@ -84,7 +90,12 @@ type loads. There is no `index.ts`; other folders import the modules below direc
 - `approachPath.test.ts`: walk truncation at range, distance along the sent path, stall capping.
 - `deserializeAppearance.test.ts`: `isAppearanceBlank` on empty and real previews.
 - `itemAngle.test.ts`: drop scale and pose per group, worn height, the `ItemAngle` tail rows.
-- `npcModelTable.test.ts`: every row names a file in `public/game-assets` and has a scale > 0.
+- `npcModelTable.test.ts`: every row names a file in `public/game-assets` and has a scale > 0; the
+  tables behave as plain objects and read the folders when asked.
+- `trapModels.test.ts`: every (map, trap) pair names an `Object<world+1>` model that exists.
+- `resolveModel.golden.test.ts`: what every type 0..600 is drawn with (class, scale, base, kit,
+  shared classes) and the NPC tables, as hashes; update them on purpose. It runs the real model
+  classes under Node with the Store mocked.
 - `skinTexture.test.ts`: skin / hair / level and hide texture names.
 - Also from `features/items/`: `portedItems`, `questItemLink`, `weaponAttack` tests.
 

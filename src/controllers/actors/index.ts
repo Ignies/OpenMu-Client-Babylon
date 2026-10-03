@@ -5,3 +5,9 @@ export { monsterHiddenMesh, monsterModelFile, monsterModelTypeOfNpc, monsterScal
 export { MonsterObject } from './monsterObject';
 export { PlayerObject } from './playerObject';
 export { GROUP_AXE, GROUP_BOW, GROUP_SHIELD, GROUP_SPEAR, GROUP_SWORD } from './weaponClass';
+
+// ---- NPCs: model resolution, the NPC tables (views of the monster folders), and what NPC classes extend ----
+export { ModelObject, isKnownObjectType, resolveModelFactory } from './modelFactoryPerId';
+export { NPC_MODEL_TABLE, TRAP_MODEL_TABLE, npcModelFile } from './npcModelTable';
+export { GEARED_NPC_TABLE, TRANSFORMED_NPC_TABLE } from './playerNpcTables';
+export { WINGS_OF_SPIRITS, WING_GROUP } from './wings';

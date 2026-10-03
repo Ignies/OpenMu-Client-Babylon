@@ -4,6 +4,8 @@ export default defineMonster({
   Numb: 240,
   Name: 'Baz, Storage Guard',
   maxHealth: 50,
+  // model.ts draws it; this row is what the tables list.
+  npcModel: { file: 'Storage01', scale: 1 },
   stats: {
     Rate: 1,
     Level: 2,

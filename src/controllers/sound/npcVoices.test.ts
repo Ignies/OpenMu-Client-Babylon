@@ -3,7 +3,8 @@ import { MonsterActionType } from '@versions/shared/objects/enum';
 import type { ENUM_WORLD } from '../../core/types';
 import type { World } from '../../ecs/world';
 import { attachListener, playSfx } from './listener';
-import { GLOBAL_NPC_VOICES, GLOBAL_RANGE_TILES, npcVoicesLayer } from './npcVoices';
+import { createHash } from 'node:crypto';
+import { GLOBAL_RANGE_TILES, globalNpcVoiceOf, npcVoiceOf, npcVoicesLayer } from './npcVoices';
 import { SOUND_FILES } from './recipes';
 
 vi.mock('./listener', async importOriginal => {
@@ -74,14 +75,26 @@ beforeEach(() => {
 
 afterEach(() => vi.restoreAllMocks());
 
-describe('PlayMonsterSoundGlobal voices', () => {
-  it('names a catalogue key in every cue', () => {
-    const missing = Object.values(GLOBAL_NPC_VOICES)
-      .flatMap(v => v.cues.map(c => c.sound))
+/** Every type the server can send, with its town noise and its global voice. */
+const voices = () => Array.from({ length: 601 }, (_, t) => [t, npcVoiceOf(t) ?? null, globalNpcVoiceOf(t) ?? null] as const);
+
+describe('NPC voice data', () => {
+  // The voices per type, as moved out of the old tables; update on purpose.
+  it('is unchanged', () => {
+    const rows = voices().filter(([, v, g]) => v || g);
+    expect(rows.map(([t]) => t)).toEqual([238, 242, 251, 477, 479, 540, 541, 542]);
+    expect(createHash('sha256').update(JSON.stringify(rows)).digest('hex')).toBe('890ba911820cc7cc601a459f54faadc60facad94dfe6fe472c6b3a13c2ca2c9b');
+  });
+
+  it('names a catalogue key in every sound', () => {
+    const missing = voices()
+      .flatMap(([, v, g]) => [...(v ? [v.sound] : []), ...(g?.cues.map(c => c.sound) ?? [])])
       .filter(k => !(k in SOUND_FILES));
     expect(missing).toEqual([]);
   });
+});
 
+describe('PlayMonsterSoundGlobal voices', () => {
   it('voices Titus each time his idle clip loops, 2D, one line at a time', () => {
     const titus: FakeEntity = { npcType: TITUS, transform: at(102, 100), modelObject: model() };
     entities.push(titus);

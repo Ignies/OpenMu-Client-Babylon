@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 235,
   Name: 'Priest Sevina',
   maxHealth: 50,
+  npcModel: { file: 'Sevina01', scale: 1 },
   stats: {
     Rate: 1,
     Level: 2,

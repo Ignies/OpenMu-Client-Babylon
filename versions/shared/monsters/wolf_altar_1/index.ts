@@ -4,6 +4,9 @@ export default defineMonster({
   Numb: 205,
   Name: 'Wolf Altar 1',
   maxHealth: 50,
+  // The Crywolf altars spawn invisible (`Object.Visible = false`, `HiddenMesh = -2`,
+  // ZzzCharacter.cpp:14266-14313); only the event turns them on.
+  hidden: true,
   stats: {
     Rate: 1,
     Level: 2,

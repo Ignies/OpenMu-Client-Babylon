@@ -4,6 +4,8 @@ export default defineMonster({
   Numb: 101,
   Name: 'Iron Stick',
   maxHealth: 1000,
+  // MONSTER_IRON_STICK_TRAP (ZzzCharacter.cpp:14276).
+  trap: { object: 40, shadow: true },
   stats: {
     Rate: 1,
     Level: 80,

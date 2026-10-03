@@ -4,6 +4,8 @@ export default defineMonster({
   Numb: 218,
   Name: 'Crown Switch1',
   maxHealth: 50,
+  // Castle Siege (GMBattleCastle.cpp:1286-1381).
+  npcModel: { file: 'NpcCheckFloor', scale: 1 },
   stats: {
     Rate: 1,
     Level: 2,

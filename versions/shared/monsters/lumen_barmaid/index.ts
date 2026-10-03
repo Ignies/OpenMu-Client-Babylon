@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 244,
   Name: 'Lumen, Barmaid',
   maxHealth: 50,
+  npcModel: { file: 'SnowMerchant01', scale: 1 },
   stats: {
     Rate: 1,
     Level: 2,

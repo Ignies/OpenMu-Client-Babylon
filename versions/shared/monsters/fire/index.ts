@@ -4,6 +4,8 @@ export default defineMonster({
   Numb: 102,
   Name: 'Fire',
   maxHealth: 1000,
+  // MONSTER_FIRE_TRAP (ZzzCharacter.cpp:14279).
+  trap: { object: 51, shadow: true },
   stats: {
     Rate: 1,
     Level: 80,

@@ -4,6 +4,8 @@ export default defineMonster({
   Numb: 255,
   Name: 'Liaman Barmaid',
   maxHealth: 50,
+  // model.ts draws it (with its part files); this row is what the tables list.
+  npcModel: { file: 'Female01', scale: 1 },
   stats: {
     Rate: 1,
     Level: 2,

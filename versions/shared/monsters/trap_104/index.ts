@@ -4,6 +4,8 @@ export default defineMonster({
   Numb: 104,
   Name: 'Trap',
   maxHealth: 50,
+  // MONSTER_TRAP, Castle Siege: `m_bRenderShadow = false` (GMBattleCastle.cpp:1285-1289).
+  trap: { object: 11, shadow: false },
   stats: {
     Rate: 1,
     Level: 2,

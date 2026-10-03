@@ -83,3 +83,12 @@ it as the 3D line-up's name plate.
 - `animations/monster_swings/`, `animations/monster_casts/`: the skill-keyed swing rules of some
   monsters and what each skill plays on a monster caster.
 - The master controller is `src/controllers/anim`: the record, the registry and every lookup.
+
+## NPCs in the monster folders
+- An NPC is a monster folder like any other (`versions/shared/monsters/<name>/`). Its look and
+  noise are optional fields of `index.ts` (types in `src/controllers/monsters/npc.ts`): `hidden`,
+  `npcModel`, `gear`, `transformed`, `trap`, `voice`, `globalVoice`. A class of its own is
+  `<name>/model.ts`; a class several types share is `_<line>/model.ts`.
+- The generic NPC shapes (plain model, player rig in a kit, transformed rig, trap, hidden) are the
+  actors controller's. `versions/shared/npcs/` only keeps the archangels (until the fx door exports
+  `TerrainDecal`) and two forwarding files for older readers.

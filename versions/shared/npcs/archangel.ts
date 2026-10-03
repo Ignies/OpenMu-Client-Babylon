@@ -1,11 +1,11 @@
 import type { Entity, World } from '@/ecs/world';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
-import { TEX } from '@/controllers/fx/recipes';
-import { loadGLTF } from '@/controllers/assets/modelLoader';
-import { ModelObject } from '@/controllers/render/modelObject';
+import { TEX } from '@/controllers/fx';
+import { loadGLTF } from '@/controllers/assets';
+import { ModelObject, npcModelFile, registerModelClass } from '@/controllers/actors';
+// Stays here, not in its monster folder, until the fx door exports TerrainDecal (see readme.md).
 import { TerrainDecal } from '@/controllers/fx/moveTargetEffect';
-import { npcModelFile } from '@/controllers/actors/npcModelTable';
 
 /**
  * The Blood Castle archangels of Devias: Archangel (232, `BloodCastle01`)
@@ -179,3 +179,6 @@ function archangelFactory(file: string): typeof ModelObject {
 // [NpcInfo(232, "Archangel")], [NpcInfo(233, "Messenger of Archangel")]
 export const Archangel = archangelFactory('BloodCastle01');
 export const ArchangelMessenger = archangelFactory('BloodCastle02');
+
+registerModelClass(232, Archangel);
+registerModelClass(233, ArchangelMessenger);

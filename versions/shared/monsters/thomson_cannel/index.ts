@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 231,
   Name: 'Thomson Cannel',
   maxHealth: 50,
+  npcModel: { file: 'DeviasTrader01', scale: 1 },
   stats: {
     Rate: 1,
     Level: 2,

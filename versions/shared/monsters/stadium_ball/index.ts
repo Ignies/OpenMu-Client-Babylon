@@ -4,6 +4,9 @@ export default defineMonster({
   Numb: 200,
   Name: 'Stadium Ball',
   maxHealth: 1000,
+  // Soccer ball (ZzzCharacter.cpp:14015-14021). Its `BlendMesh = 2` (the additive panel)
+  // is not modelled.
+  npcModel: { file: '/Skill/Ball01', scale: 1.8 },
   stats: {
     Rate: 1,
     Level: 12,

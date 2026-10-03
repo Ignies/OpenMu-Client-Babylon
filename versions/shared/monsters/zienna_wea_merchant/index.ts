@@ -4,6 +4,7 @@ export default defineMonster({
   Numb: 246,
   Name: 'Zienna, Wea Merchant',
   maxHealth: 1000,
+  npcModel: { file: 'SnowSmith01', scale: 1 },
   stats: {
     Rate: 1,
     Level: 20,

@@ -1,9 +1,17 @@
+import { CharacterClassNumber, PlayerClass } from '@/core/types';
 import { defineMonster } from '@/controllers/monsters';
 
 export default defineMonster({
   Numb: 249,
   Name: 'Berdysh Guard',
   maxHealth: 10000,
+  // Town guard (ZzzCharacter.cpp:14464-14494): the plate set, told apart by what it carries.
+  gear: {
+    charClass: CharacterClassNumber.DarkKnight,
+    playerClass: PlayerClass.DarkKnight,
+    set: 9, // Plate
+    mainHand: { group: 3, num: 7 }, // Berdysh
+  },
   stats: {
     Rate: 1,
     Level: 90,

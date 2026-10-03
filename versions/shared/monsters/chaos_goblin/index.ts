@@ -4,6 +4,9 @@ export default defineMonster({
   Numb: 238,
   Name: 'Chaos Goblin',
   maxHealth: 50,
+  npcModel: { file: 'MixNpc01', scale: 1 },
+  // MODEL_MIX_NPC: `rand_fps_check(64)` (ZzzCharacter.cpp:6081).
+  voice: { sound: 'Sound/nMix', oneIn: 64 },
   stats: {
     Rate: 1,
     Level: 2,

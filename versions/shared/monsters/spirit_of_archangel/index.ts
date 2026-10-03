@@ -4,6 +4,8 @@ export default defineMonster({
   Numb: 233,
   Name: 'Spirit of Archangel',
   maxHealth: 50,
+  // Drawn by the archangel class (versions/shared/npcs/archangel.ts).
+  npcModel: { file: 'BloodCastle02', scale: 1 },
   stats: {
     Rate: 1,
     Level: 2,

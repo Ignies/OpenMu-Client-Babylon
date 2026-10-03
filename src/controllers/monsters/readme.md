@@ -4,15 +4,32 @@ The monsters controller: what a monster (or NPC) type is and where types are kep
 its own folder in `versions/shared/monsters/<name>/` and uses this controller.
 
 ## Public API
-- `MonsterDef`: one type (`Numb`, `Name`, `maxHealth`, `stats`); `MonsterStats`: the original
-  table's row; `MonsterRow`: that row with `Numb` and `Name`, as readers always got it.
+- `MonsterDef`: one type (`Numb`, `Name`, `maxHealth`, `model`, `subType`, `stats`, and the NPC
+  fields below); `MonsterStats`: the original table's row; `MonsterRow`: that row with `Numb` and
+  `Name`, as readers always got it.
+- NPC fields (`npc.ts`): `hidden`, `npcModel` (`NpcModel`), `gear` (`NpcGear`, `NpcItem`),
+  `transformed` (`NpcTransform`), `trap` (`NpcTrap`), `voice` (`NpcVoice`), `globalVoice`
+  (`NpcGlobalVoice`, `NpcGlobalCue`).
 - `defineMonster(def)`: a monster folder's default export.
-- `MonsterRegistry`: `get(numb)` (the table row or null), `def(numb)`, `maxHealth(numb)`, `all()`,
-  `add` (a later def with the same number replaces the earlier one, for a version's own folder).
+- `MonsterRegistry`: `get(numb)` (the table row or null), `def(numb)`, `model(numb)`,
+  `maxHealth(numb)`, `having(field)` (every type that sets a field, with its value), `all()`, `add`
+  (a later def with the same number replaces the earlier one, for a version's own folder).
+- `monsterRegistry`, `registerMonsters`; the monster bodies: `defineMonsterModel`,
+  `monsterModelRegistry`, `registerMonsterModels`.
 
 ## How it works
-- Pure data, no engine imports, so the Bun servers use it too.
+- Pure data, no engine imports, so the Bun servers use it too. Sounds are keys (`string`), clip
+  states are `MonsterActionType` numbers.
 - The content side (`versions/shared/monsters/all.ts`) finds the folders and fills one registry.
+- Readers: the actors controller draws a type from its fields (`resolveModelFactory`), the sound
+  controller plays `voice` and `globalVoice` (`npcVoices.ts`).
+
+## Change it
+- a new kind of per-type data: an optional field on `MonsterDef` (its type in `npc.ts` when it is
+  an NPC's), read by the controller that uses it.
 
 ## Tests
+- `registry.test.ts`: `having`, `def` and a later folder replacing a type, NPC fields included.
 - `versions/shared/monsters/monsters.golden.test.ts` covers the registry with the real folders.
+- `src/controllers/actors/resolveModel.golden.test.ts` and `src/controllers/sound/npcVoices.test.ts`
+  cover the NPC fields as their readers see them.
