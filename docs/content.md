@@ -74,3 +74,12 @@ version's features and data. See [versions.md](versions.md).
 A version's own page reuses the shared page's parts instead of copying them: the 0.97d character
 page draws `versions/shared/ui/pages/character_select/character_list` as rows, the shared page draws
 it as the 3D line-up's name plate.
+
+## Animations
+
+- `animations/<action>.ts`: one file per player clip (`defineAnimation`: the PlayerAction id, its
+  name, speed rule and flags), found by glob. The PlayerAction enum is generated from them
+  (`bun versions/shared/animations/write_enum.ts`).
+- `animations/monster_swings/`, `animations/monster_casts/`: the skill-keyed swing rules of some
+  monsters and what each skill plays on a monster caster.
+- The master controller is `src/controllers/anim`: the record, the registry and every lookup.

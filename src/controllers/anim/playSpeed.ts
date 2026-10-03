@@ -1,6 +1,7 @@
 import { MonsterActionType, PlayerAction } from '@versions/shared/objects/enum';
 import { monsterModelTypeOfNpc } from '../actors/monsterModelTable';
 import { monsterModelRegistry } from '@/controllers/monsters';
+import { animations, type SpeedRule } from './animation';
 
 /**
  * Animation play speeds in the original's units: `PlaySpeed` keys per tick at
@@ -45,235 +46,50 @@ export function magicSpeedFactor(magicSpeed: number): number {
 
 const A = PlayerAction;
 
-/** Player action table (ZzzOpenData.cpp:314-372 + SetAttackSpeed bases). */
+/** A rule's rate at these stats (see `SpeedRule`). */
+function ruleSpeed(rule: SpeedRule, attackSpeed: number, magicSpeed: number, isRageFighter: boolean): number {
+  if (typeof rule === 'number') return rule;
+  if ('rageFighter' in rule) return isRageFighter ? rule.rageFighter : rule.base;
+  const plus =
+    rule.plus === 'attackSpeed'
+      ? attackSpeedFactor(attackSpeed)
+      : rule.plus === 'magicSpeed'
+        ? magicSpeedFactor(magicSpeed)
+        : attackSpeedFactor(magicSpeed);
+  const speed = rule.base + plus;
+  return rule.times === undefined ? speed : speed * rule.times;
+}
+
+/**
+ * A player clip's `PlaySpeed`: the base table (ZzzOpenData.cpp:314-372) with `SetAttackSpeed`
+ * (ZzzCharacter.cpp:830-960) and `SetPlayerWalk` over it. Each clip's rule is in its animation file;
+ * an id no file names gets the base table's default, 0.40 from PLAYER_SIT1 up and 0.28 below.
+ */
 export function playerPlaySpeed(
   action: PlayerAction,
   attackSpeed = 0,
   magicSpeed = 0,
   isRageFighter = false
 ): number {
-  const f = attackSpeedFactor(attackSpeed);
-
-  // --- basic attacks (SetAttackSpeed, ZzzCharacter.cpp:830-960)
-  if (action === A.PLAYER_ATTACK_FIST) return 0.6 + f;
-  // SetAttackSpeed's own lines for the Magic Gladiator clips (ZzzCharacter.cpp:929, :970, :972; the WHEEL's is below).
-  if (action === A.PLAYER_ATTACK_TWO_HAND_SWORD_TWO) return 0.25 + f;
-  if (action === A.PLAYER_ATTACK_ONE_FLASH) return 0.4 + f;
-  if (action === A.PLAYER_ATTACK_DEATH_CANNON) return 0.2 + f;
-  if (
-    action === A.PLAYER_ATTACK_BOW ||
-    action === A.PLAYER_ATTACK_CROSSBOW ||
-    action === A.PLAYER_ATTACK_FLY_BOW ||
-    action === A.PLAYER_ATTACK_FLY_CROSSBOW ||
-    action === A.PLAYER_ATTACK_RIDE_BOW ||
-    action === A.PLAYER_ATTACK_RIDE_CROSSBOW ||
-    (action >= A.PLAYER_ATTACK_BOW_UP && action <= A.PLAYER_ATTACK_RIDE_CROSSBOW_UP)
-  ) {
-    return 0.3 + f;
-  }
-  if (action >= A.PLAYER_ATTACK_SWORD_RIGHT1 && action <= A.PLAYER_ATTACK_RIDE_CROSSBOW) {
-    return 0.25 + f;
-  }
-  // SetAttackSpeed's own lines for these three (ZzzCharacter.cpp:923-924, :1007); Rageful Blow ignores attack speed.
-  if (action === A.PLAYER_ATTACK_SKILL_WHEEL) return 0.24 + f;
-  if (action === A.PLAYER_ATTACK_ONETOONE) return 0.25 + f;
-  if (action === A.PLAYER_ATTACK_SKILL_FURY_STRIKE) return 0.38;
-  // Set after the loop below, over it (ZzzCharacter.cpp:1008).
-  if (action === A.PLAYER_SKILL_VITALITY) return 0.34;
-  if (action === A.PLAYER_ATTACK_SKILL_SWORD3) return 0.27 + f; // Uppercut (ZzzCharacter.cpp:920)
-  if (action === A.PLAYER_ATTACK_SKILL_SWORD5) return 0.24 + f; // Slash (ZzzCharacter.cpp:922)
-  if (action === A.PLAYER_ATTACK_RUSH) return 0.3 + f; // Crescent Moon Slash (ZzzCharacter.cpp:971)
-  // Nova's two clips sit inside the range below but are set on their own lines: the charge at
-  // 0.5 + MagicSpeed, halved every frame it plays (ZzzCharacter.cpp:947, 2522-2525), the release flat (:1009).
-  if (action === A.PLAYER_SKILL_HELL_BEGIN) return (0.5 + magicSpeedFactor(magicSpeed)) / 2;
-  if (action === A.PLAYER_SKILL_HELL_START) return 0.3;
-  if (action >= A.PLAYER_ATTACK_SKILL_SWORD1 && action < A.PLAYER_ATTACK_END) {
-    return 0.3 + f;
-  }
-  if (action >= A.PLAYER_SKILL_HAND1 && action <= A.PLAYER_SKILL_WEAPON2) {
-    return 0.29 + magicSpeedFactor(magicSpeed);
-  }
-  // Teleport is set on its own line, past the loop above
-  // (ZzzCharacter.cpp:860), so it never got its magic speed here: the clip
-  // ran at the 0.28 default and held the cast for a full second.
-  if (action === A.PLAYER_SKILL_TELEPORT) return 0.3 + magicSpeedFactor(magicSpeed);
-  // The rest of `SetAttackSpeed`'s spell block (ZzzCharacter.cpp:860-866).
-  // Only Teleport above had ever been ported, so these five ran at the 0.28
-  // fallback at the bottom of this function - Hellfire's leap, which is the
-  // clip itself and not a code path, took 1.8× as long to come down as it
-  // does in the original.
-  if (action === A.PLAYER_SKILL_FLASH) return 0.4 + magicSpeedFactor(magicSpeed);
-  if (action === A.PLAYER_SKILL_INFERNO) return 0.6 + magicSpeedFactor(magicSpeed);
-  if (action === A.PLAYER_SKILL_HELL) return 0.5 + magicSpeedFactor(magicSpeed);
-  if (action === A.PLAYER_RIDE_SKILL) return 0.3 + magicSpeedFactor(magicSpeed);
-  // The Dark Lord's strike (Force, Fire Burst), on foot and mounted (ZzzCharacter.cpp:948-949).
-  if (action === A.PLAYER_ATTACK_STRIKE) return 0.25 + f;
-  if (action === A.PLAYER_ATTACK_RIDE_STRIKE) return 0.2 + f;
-  // Dark Lord clips the 0.28 fallback below missed (ZzzCharacter.cpp:951, :1011-1012).
-  if (action === A.PLAYER_ATTACK_RIDE_ATTACK_FLASH) return 0.4 + magicSpeedFactor(magicSpeed);
-  if (action === A.PLAYER_ATTACK_RIDE_TELEPORT) return 0.3;
-  if (action === A.PLAYER_ATTACK_DARKHORSE) return 0.3;
-  // No attack speed on it (ZzzCharacter.cpp:1003); it used to fall through to the 0.28 default.
-  if (action === A.PLAYER_SKILL_BLOW_OF_DESTRUCTION) return 0.3;
-  // The Summoner curse clip and its mounts (ZzzCharacter.cpp:974-977).
-  if (action >= A.PLAYER_SKILL_SLEEP && action <= A.PLAYER_SKILL_SLEEP_FENRIR) return 0.3 + magicSpeedFactor(magicSpeed);
-  // Lightning Orb, Chain Lightning, Drain Life and Lightning Shock with their mounts (ZzzCharacter.cpp:979-996).
-  if (action === A.PLAYER_SKILL_LIGHTNING_ORB) return 0.4 + magicSpeedFactor(magicSpeed);
-  if (action >= A.PLAYER_SKILL_LIGHTNING_ORB_UNI && action <= A.PLAYER_SKILL_LIGHTNING_ORB_FENRIR) return 0.25 + magicSpeedFactor(magicSpeed);
-  if (action === A.PLAYER_SKILL_CHAIN_LIGHTNING) return 0.25 + magicSpeedFactor(magicSpeed);
-  if (action >= A.PLAYER_SKILL_CHAIN_LIGHTNING_UNI && action <= A.PLAYER_SKILL_CHAIN_LIGHTNING_FENRIR) return 0.15 + magicSpeedFactor(magicSpeed);
-  if (action >= A.PLAYER_SKILL_DRAIN_LIFE && action <= A.PLAYER_SKILL_DRAIN_LIFE_FENRIR) return 0.25 + magicSpeedFactor(magicSpeed);
-  if (action === A.PLAYER_SKILL_LIGHTNING_SHOCK) return 0.35 + magicSpeedFactor(magicSpeed);
-  if (action === A.PLAYER_ATTACK_RIDE_ATTACK_MAGIC) return 0.3 + magicSpeedFactor(magicSpeed);
-  // The summons, with no magic speed (ZzzCharacter.cpp:998-1001).
-  if (action >= A.PLAYER_SKILL_SUMMON && action <= A.PLAYER_SKILL_SUMMON_FENRIR) return 0.25;
-  // A flat 0.2 from the base table; SetAttackSpeed never touches it (ZzzCharacter.cpp:1005).
-  if (action === A.PLAYER_SKILL_SWELL_OF_MP) return 0.2;
-  // The Magic Gladiator's two spell clips (ZzzCharacter.cpp:994-995): MagicSpeed1 is AttackSpeed1's stepped factor.
-  if (action === A.PLAYER_SKILL_GIGANTICSTORM) return 0.55 + attackSpeedFactor(magicSpeed);
-  if (action === A.PLAYER_SKILL_FLAMESTRIKE) return 0.69 + magicSpeedFactor(magicSpeed);
-
-  // --- idle
-  if (action >= A.PLAYER_STOP_MALE && action <= A.PLAYER_STOP_RIDE_WEAPON) {
-    switch (action) {
-      case A.PLAYER_STOP_SWORD:
-        return 0.26;
-      case A.PLAYER_STOP_TWO_HAND_SWORD:
-      case A.PLAYER_STOP_SPEAR:
-      case A.PLAYER_STOP_SUMMONER:
-        return 0.24;
-      case A.PLAYER_STOP_BOW:
-      case A.PLAYER_STOP_CROSSBOW:
-        return 0.22;
-      case A.PLAYER_STOP_WAND:
-        return 0.3;
-      default:
-        return 0.28;
-    }
-  }
-  if (action === A.PLAYER_STOP_TWO_HAND_SWORD_TWO) return 0.24;
-
-  // --- locomotion. The base table sets the whole PLAYER_WALK_MALE ..
-  // PLAYER_RUN_RIDE_WEAPON block to 0.30, but SetPlayerWalk rewrites it every
-  // frame it runs (ZzzCharacter.cpp:396-453): walk 0.33 (Rage Fighter 0.32)
-  // over PLAYER_WALK_MALE..PLAYER_WALK_CROSSBOW, run 0.34 (RF 0.28) over
-  // PLAYER_RUN..PLAYER_RUN_RIDE_WEAPON, then the two wand clips again on top.
-  // PLAYER_WALK_WAND and PLAYER_WALK_SWIM sit *after* PLAYER_WALK_CROSSBOW in
-  // the enum, so neither is touched by the walk loop; PLAYER_RUN_SWIM and the
-  // two fly clips *are* inside the run loop and so end up at 0.34, overriding
-  // the 0.35 the base table gave swimming.
-  if (action >= A.PLAYER_WALK_MALE && action <= A.PLAYER_WALK_CROSSBOW) {
-    return isRageFighter ? 0.32 : 0.33;
-  }
-  if (action === A.PLAYER_WALK_WAND) return 0.44;
-  if (action === A.PLAYER_WALK_SWIM) return 0.35;
-  if (action >= A.PLAYER_RUN && action <= A.PLAYER_RUN_RIDE_WEAPON) {
-    if (action === A.PLAYER_RUN_WAND) return 0.76;
-    return isRageFighter ? 0.28 : 0.34;
-  }
-  if (action === A.PLAYER_WALK_TWO_HAND_SWORD_TWO) return 0.3;
-  if (action === A.PLAYER_RUN_TWO_HAND_SWORD_TWO) return 0.3;
-
-  // --- Fenrir rider clips: 0.45 base over the whole block, run 0.71 and
-  // stand 0.40 on top (ZzzOpenData.cpp:388-401), attacks per SetAttackSpeed
-  // (ZzzCharacter.cpp:873-882).
-  if (action >= A.PLAYER_FENRIR_ATTACK && action <= A.PLAYER_FENRIR_WALK_ONE_LEFT) {
-    switch (action) {
-      case A.PLAYER_FENRIR_ATTACK:
-      case A.PLAYER_FENRIR_ATTACK_TWO_SWORD:
-      case A.PLAYER_FENRIR_ATTACK_SPEAR:
-      case A.PLAYER_FENRIR_ATTACK_ONE_SWORD:
-      case A.PLAYER_FENRIR_ATTACK_DARKLORD_SWORD:
-        return 0.25 + f;
-      case A.PLAYER_FENRIR_ATTACK_CROSSBOW:
-      case A.PLAYER_FENRIR_ATTACK_BOW:
-        return 0.3 + f;
-      case A.PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE:
-        return 0.2 + f;
-      case A.PLAYER_FENRIR_ATTACK_MAGIC:
-        return 0.37 + magicSpeedFactor(magicSpeed);
-      case A.PLAYER_FENRIR_ATTACK_DARKLORD_FLASH:
-        return 0.4 + magicSpeedFactor(magicSpeed);
-      case A.PLAYER_FENRIR_ATTACK_DARKLORD_TELEPORT:
-        return 0.3;
-    }
-    if (action >= A.PLAYER_FENRIR_RUN && action <= A.PLAYER_FENRIR_RUN_ONE_LEFT_ELF) return 0.71;
-    if (action >= A.PLAYER_FENRIR_STAND && action <= A.PLAYER_FENRIR_STAND_ONE_LEFT) return 0.4;
-    return 0.45;
-  }
-  // --- Rage Fighter Fenrir clips (ZzzOpenData.cpp:411-427).
-  if (action >= A.PLAYER_RAGE_FENRIR && action <= A.PLAYER_RAGE_FENRIR_ATTACK_RIGHT) {
-    if (action === A.PLAYER_RAGE_FENRIR_ATTACK_RIGHT) return 0.25 + f;
-    if (action >= A.PLAYER_RAGE_FENRIR_TWO_SWORD && action <= A.PLAYER_RAGE_FENRIR_ONE_LEFT) return 0.225;
-    if (action === A.PLAYER_RAGE_FENRIR_STAND) return 0.21;
-    if (action >= A.PLAYER_RAGE_FENRIR_STAND_TWO_SWORD && action <= A.PLAYER_RAGE_FENRIR_STAND_ONE_LEFT) return 0.2;
-    if (action >= A.PLAYER_RAGE_FENRIR_RUN && action <= A.PLAYER_RAGE_FENRIR_RUN_ONE_LEFT) return 0.355;
-    return 0.45;
-  }
-
-  // --- reactions
-  if (action >= A.PLAYER_DEFENSE1 && action <= A.PLAYER_SHOCK) return 0.32;
-  if (action === A.PLAYER_DIE1 || action === A.PLAYER_DIE2) return 0.45;
-
-  // The Rage Fighter's own stance and his Uniria clips are named overrides on
-  // top of the 0.40 the base table gives everything from PLAYER_SIT1 up
-  // (ZzzOpenData.cpp:339-340, :428-431). The two run clips are rewritten to
-  // 0.34 by SetPlayerWalk every frame it runs, like the rest of the run block
-  // (ZzzCharacter.cpp:435-437), and those clips only ever play while running.
-  switch (action) {
-    case A.PLAYER_STOP_RAGEFIGHTER:
-      return 0.16;
-    case A.PLAYER_RAGE_UNI_STOP_ONE_RIGHT:
-      return 0.18;
-    case A.PLAYER_RAGE_UNI_ATTACK_ONE_RIGHT:
-      return 0.2;
-    case A.PLAYER_RAGE_UNI_RUN:
-    case A.PLAYER_RAGE_UNI_RUN_ONE_RIGHT:
-      return 0.34;
-  }
-  if (action >= A.PLAYER_SIT1) return 0.4;
-
-  return 0.28;
+  const rule = animations.get(action)?.speed ?? (action >= A.PLAYER_SIT1 ? 0.4 : 0.28);
+  return ruleSpeed(rule, attackSpeed, magicSpeed, isRageFighter);
 }
 
 /**
- * The per-frame slowdowns `PlayAnimation` multiplies into the table rate
- * (ZzzCharacter.cpp:2497-2517): PLAYER_SKILL_VITALITY runs at half after key 6,
- * the Dark Lord's Party Teleport holds its raised hand at a tenth after key 5.5,
- * and his Electric Spike charges at half speed over keys 1-3. `frame` is the clip's `AnimationFrame`. The Electric
- * Spike x0.125 a caster in the hero's party gets is not ported.
+ * The per-frame slowdowns `PlayAnimation` multiplies into the table rate (ZzzCharacter.cpp:2497-2517),
+ * from each clip's `frameSpeeds`. `frame` is the clip's `AnimationFrame`.
  */
 export function playerFrameSpeedScale(action: PlayerAction, frame: number, darkLord: boolean): number {
-  if (action === A.PLAYER_SKILL_VITALITY && frame > 6) return 0.5;
-  if (
-    (action === A.PLAYER_ATTACK_TELEPORT ||
-      action === A.PLAYER_ATTACK_RIDE_TELEPORT ||
-      action === A.PLAYER_FENRIR_ATTACK_DARKLORD_TELEPORT) &&
-    frame > 5.5
-  ) {
-    return 0.1;
-  }
-  if (
-    darkLord &&
-    (action === A.PLAYER_SKILL_FLASH ||
-      action === A.PLAYER_ATTACK_RIDE_ATTACK_FLASH ||
-      action === A.PLAYER_FENRIR_ATTACK_DARKLORD_FLASH) &&
-    frame > 1 &&
-    frame < 3
-  ) {
-    return 0.5;
+  for (const f of animations.get(action)?.frameSpeeds ?? []) {
+    if (f.darkLordOnly && !darkLord) continue;
+    if (frame > f.after && (f.before === undefined || frame < f.before)) return f.scale;
   }
   return 1;
 }
 
-/**
- * The player clips a Freeze or Cold slows with the walk (ZzzCharacter.cpp:496-542): the walk and run blocks and
- * the horse and Dark Lord walks. PLAYER_RUN_WAND is rewritten after the slow, so it keeps its rate.
- */
+/** The player clips a Freeze or Cold slows with the walk (ZzzCharacter.cpp:496-542): `debuffSlows`. */
 export function debuffSlowsClip(action: PlayerAction): boolean {
-  if (action >= A.PLAYER_WALK_MALE && action <= A.PLAYER_WALK_CROSSBOW) return true;
-  if (action >= A.PLAYER_RUN && action <= A.PLAYER_RUN_RIDE_WEAPON) return action !== A.PLAYER_RUN_WAND;
-  return action === A.PLAYER_RUN_RIDE_HORSE || action === A.PLAYER_DARKLORD_WALK;
+  return !!animations.get(action)?.debuffSlows;
 }
 
 /**
@@ -293,10 +109,7 @@ export function wingsPlaySpeed(
 ): number {
   if (spec?.playSpeed !== undefined) return spec.playSpeed;
 
-  const flying =
-    playerAction === A.PLAYER_FLY || playerAction === A.PLAYER_FLY_CROSSBOW;
-
-  if (!flying) return 0.25;
+  if (!animations.get(playerAction)?.wingsFlap) return 0.25;
 
   return spec?.flyPlaySpeed ?? 1.0;
 }

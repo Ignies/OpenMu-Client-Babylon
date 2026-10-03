@@ -3,6 +3,7 @@ import { BaseClass } from '../../features/hero/characterStats';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { PlayerAction } from '@versions/shared/objects/enum';
 import type { MountKind } from '../../features/pets/pets';
+import { animations } from '../anim';
 
 /**
  * Weapon-class rules transcribed from the original client
@@ -357,9 +358,9 @@ export function chooseRunAction(pose: CharacterPose): PlayerAction {
   return PlayerAction.PLAYER_RUN;
 }
 
-/** Social actions during which the original also stows weapons (`:14961`). */
+/** Social actions during which the original also stows weapons (`:14961`): the clip's `social`. */
 export function isSocialAction(action: PlayerAction): boolean {
-  return action >= PlayerAction.PLAYER_GREETING1 && action <= PlayerAction.PLAYER_SALUTE1;
+  return !!animations.get(action)?.social;
 }
 
 // ---- Fenrir rider clips ----------------------------------------------------

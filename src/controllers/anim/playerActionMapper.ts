@@ -1,135 +1,48 @@
-import { PlayerAction, ServerPlayerActionType } from '@versions/shared/objects/enum';
-import { genderedEmoteAction, isPlayerEmoteAction } from '../../features/hero/emotes';
+import { PlayerAction } from '@versions/shared/objects/enum';
+import { animations } from './animation';
 
+// Player clip classes, each read off the clip's animation file (versions/shared/animations).
+
+/** A basic or skill swing: PLAYER_ATTACK_FIST .. PLAYER_ATTACK_END (`attack`). */
 export function isPlayerAttackAction(action: PlayerAction): boolean {
-  return (
-    action >= PlayerAction.PLAYER_ATTACK_FIST &&
-    action < PlayerAction.PLAYER_ATTACK_END
-  );
+  return !!animations.get(action)?.attack;
 }
 
 /**
- * Actions that play once and then hand control back to the idle/walk logic.
+ * Actions that play once and then hand control back to the idle/walk logic (`skill`).
  *
- * The bounds are the original's, read off the test it uses to decide whether
- * the hero is still busy with a clip (ZzzInterface.cpp:7570-7580): the block
- * runs `PLAYER_ATTACK_FIST … PLAYER_RIDE_SKILL`, then
- * `PLAYER_SKILL_SLEEP … PLAYER_SKILL_LIGHTNING_SHOCK`, `PLAYER_RECOVER_SKILL`
- * and `PLAYER_SKILL_THRUST … PLAYER_SKILL_HP_UP_OURFORCES`, and re-admits the
- * stand / walk / run clips that happen to sit inside the first range. Every
- * skill clip of `controllers/combat/recipes.ts` falls in one of these - a cast clip
- * outside them would loop for ever instead of returning to idle, which is
- * what the old `PLAYER_SKILL_HAND1 … PLAYER_SKILL_TELEPORT` bound did to
- * every clip past Teleport.
+ * The bounds are the original's, read off the test it uses to decide whether the hero is still busy
+ * with a clip (ZzzInterface.cpp:7570-7580): `PLAYER_ATTACK_FIST … PLAYER_RIDE_SKILL`,
+ * `PLAYER_SKILL_SLEEP … PLAYER_SKILL_LIGHTNING_SHOCK`, `PLAYER_RECOVER_SKILL` and
+ * `PLAYER_SKILL_THRUST … PLAYER_SKILL_HP_UP_OURFORCES`, less the stand / walk / run clips it
+ * re-admits by name. A cast clip without it would loop for ever instead of returning to idle.
  */
 export function isPlayerSkillAction(action: PlayerAction): boolean {
-  // The stand / walk / run clips the original re-admits by name.
-  if (
-    (action >= PlayerAction.PLAYER_DARKLORD_STAND &&
-      action <= PlayerAction.PLAYER_RUN_RIDE_HORSE) ||
-    (action >= PlayerAction.PLAYER_FENRIR_RUN &&
-      action <= PlayerAction.PLAYER_FENRIR_WALK_ONE_LEFT) ||
-    (action >= PlayerAction.PLAYER_STOP_TWO_HAND_SWORD_TWO &&
-      action <= PlayerAction.PLAYER_RUN_TWO_HAND_SWORD_TWO) ||
-    (action >= PlayerAction.PLAYER_RAGE_FENRIR_WALK &&
-      action <= PlayerAction.PLAYER_RAGE_FENRIR_STAND_ONE_LEFT)
-  ) {
-    return false;
-  }
-  return (
-    (action >= PlayerAction.PLAYER_ATTACK_FIST &&
-      action <= PlayerAction.PLAYER_RIDE_SKILL) ||
-    (action >= PlayerAction.PLAYER_SKILL_SLEEP &&
-      action <= PlayerAction.PLAYER_SKILL_LIGHTNING_SHOCK) ||
-    action === PlayerAction.PLAYER_RECOVER_SKILL ||
-    (action >= PlayerAction.PLAYER_SKILL_THRUST &&
-      action <= PlayerAction.PLAYER_SKILL_HP_UP_OURFORCES)
-  );
+  return !!animations.get(action)?.skill;
 }
 
-/** `SetActionClass` gate: the stop/idle clips, any weapon class. */
+/** `SetActionClass` gate: the stop/idle clips, any weapon class (`idle`). */
 export function isStandingIdle(action: PlayerAction): boolean {
-  return (
-    (action >= PlayerAction.PLAYER_STOP_MALE &&
-      action <= PlayerAction.PLAYER_STOP_RIDE_WEAPON) ||
-    action === PlayerAction.PLAYER_STOP_TWO_HAND_SWORD_TWO
-  );
+  return !!animations.get(action)?.idle;
 }
 
+/** Plays once, then idle takes over: attack, skill and emote clips, and those marked `oneShot`. */
 export function isOneShotPlayerAction(action: PlayerAction): boolean {
-  return (
-    isPlayerAttackAction(action) ||
-    isPlayerSkillAction(action) ||
-    isPlayerEmoteAction(action) ||
-    action === PlayerAction.PLAYER_SHOCK ||
-    (action >= PlayerAction.PLAYER_RAGE_FENRIR_DAMAGE &&
-      action <= PlayerAction.PLAYER_RAGE_FENRIR_DAMAGE_ONE_LEFT) ||
-    // Defense's guard pose (SkillCast.cpp:227) plays through before the idle takes over.
-    action === PlayerAction.PLAYER_DEFENSE1
-  );
+  const d = animations.get(action);
+  return !!d && !!(d.attack || d.skill || d.emote || d.oneShot);
 }
 
-export const ServerToClientActionMap: Partial<
-  Record<ServerPlayerActionType, PlayerAction>
-> = {
-  [ServerPlayerActionType.Attack1]: PlayerAction.PLAYER_ATTACK_FIST,
-  [ServerPlayerActionType.Attack2]: PlayerAction.PLAYER_ATTACK_FIST,
-  [ServerPlayerActionType.Stand1]: PlayerAction.PLAYER_STOP_MALE,
-  [ServerPlayerActionType.Stand2]: PlayerAction.PLAYER_STOP_MALE,
-  [ServerPlayerActionType.Move1]: PlayerAction.PLAYER_WALK_MALE,
-  [ServerPlayerActionType.Move2]: PlayerAction.PLAYER_WALK_MALE,
-  [ServerPlayerActionType.Damage1]: PlayerAction.PLAYER_SHOCK,
-  [ServerPlayerActionType.Die1]: PlayerAction.PLAYER_DIE1,
-  [ServerPlayerActionType.Sit]: PlayerAction.PLAYER_SIT1,
-  [ServerPlayerActionType.Healing]: PlayerAction.PLAYER_HEALING1,
-  [ServerPlayerActionType.Pose]: PlayerAction.PLAYER_POSE1,
-  [ServerPlayerActionType.Greeting]: PlayerAction.PLAYER_GREETING1,
-  [ServerPlayerActionType.Goodbye]: PlayerAction.PLAYER_GOODBYE1,
-  [ServerPlayerActionType.Clap]: PlayerAction.PLAYER_CLAP1,
-  [ServerPlayerActionType.Gesture]: PlayerAction.PLAYER_GESTURE1,
-  [ServerPlayerActionType.Direction]: PlayerAction.PLAYER_DIRECTION1,
-  [ServerPlayerActionType.Unknown]: PlayerAction.PLAYER_UNKNOWN1,
-  [ServerPlayerActionType.Cheer]: PlayerAction.PLAYER_CHEER1,
-  [ServerPlayerActionType.See]: PlayerAction.PLAYER_SEE1,
-  [ServerPlayerActionType.Win]: PlayerAction.PLAYER_WIN1,
-  [ServerPlayerActionType.Smile]: PlayerAction.PLAYER_SMILE1,
-  [ServerPlayerActionType.Sleep]: PlayerAction.PLAYER_SLEEP1,
-  [ServerPlayerActionType.Cold]: PlayerAction.PLAYER_COLD1,
-  [ServerPlayerActionType.Again]: PlayerAction.PLAYER_AGAIN1,
-  [ServerPlayerActionType.Respect]: PlayerAction.PLAYER_RESPECT1,
-  [ServerPlayerActionType.Salute]: PlayerAction.PLAYER_SALUTE1,
-  [ServerPlayerActionType.Rush]: PlayerAction.PLAYER_RUSH1,
-  [ServerPlayerActionType.Scissors]: PlayerAction.PLAYER_SCISSORS,
-  [ServerPlayerActionType.Rock]: PlayerAction.PLAYER_ROCK,
-  [ServerPlayerActionType.Paper]: PlayerAction.PLAYER_PAPER,
-  [ServerPlayerActionType.Hustle]: PlayerAction.PLAYER_HUSTLE,
-  [ServerPlayerActionType.Provocation]: PlayerAction.PLAYER_PROVOCATION,
-  [ServerPlayerActionType.LookAround]: PlayerAction.PLAYER_LOOK_AROUND,
-  [ServerPlayerActionType.Cheers]: PlayerAction.PLAYER_CHEERS,
-  [ServerPlayerActionType.Jack1]: PlayerAction.PLAYER_JACK_1,
-  [ServerPlayerActionType.Jack2]: PlayerAction.PLAYER_JACK_2,
-  [ServerPlayerActionType.Santa1_1]: PlayerAction.PLAYER_SANTA_1,
-  [ServerPlayerActionType.Santa1_2]: PlayerAction.PLAYER_SANTA_1,
-  [ServerPlayerActionType.Santa1_3]: PlayerAction.PLAYER_SANTA_1,
-  [ServerPlayerActionType.Santa2_1]: PlayerAction.PLAYER_SANTA_2,
-  [ServerPlayerActionType.Santa2_2]: PlayerAction.PLAYER_SANTA_2,
-  [ServerPlayerActionType.Santa2_3]: PlayerAction.PLAYER_SANTA_2,
-};
+/** A rest pose (sit, heal, pose) held until the character moves (`rest`). */
+export function isRestAction(action: PlayerAction): boolean {
+  return !!animations.get(action)?.rest;
+}
 
-export function resolveGenderedAction(
-  action: PlayerAction,
-  isFemale: boolean
-): PlayerAction {
+/** Server action (0x18) -> clip, from each animation file's `serverActions`. */
+export const ServerToClientActionMap = animations.serverToClient;
+
+/** The clip a female character plays for `action` (`SetActionClass`): the file's `female`. */
+export function resolveGenderedAction(action: PlayerAction, isFemale: boolean): PlayerAction {
   if (!isFemale) return action;
-
-  switch (action) {
-    case PlayerAction.PLAYER_SIT1:
-      return PlayerAction.PLAYER_SIT_FEMALE1;
-    case PlayerAction.PLAYER_HEALING1:
-      return PlayerAction.PLAYER_HEALING_FEMALE1;
-    case PlayerAction.PLAYER_POSE1:
-      return PlayerAction.PLAYER_POSE_FEMALE1;
-    default:
-      return genderedEmoteAction(action, isFemale);
-  }
+  const female = animations.get(action)?.female;
+  return female === undefined ? action : PlayerAction[female];
 }

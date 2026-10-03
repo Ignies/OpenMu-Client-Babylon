@@ -2,7 +2,7 @@ import type { AnimationGroup } from '@babylonjs/core/Animations/animationGroup';
 import { MonsterActionType, PlayerAction } from '@versions/shared/objects/enum';
 import type { ISystemFactory } from '../world';
 import { isPlayerBody, type PlayerObject } from '../../controllers/actors/playerObject';
-import { isOneShotPlayerAction } from '../../controllers/anim/playerActionMapper';
+import { isOneShotPlayerAction, isRestAction } from '../../controllers/anim/playerActionMapper';
 import { monsterClipFor } from '../../controllers/actors/transformedBody';
 import type { ModelObject } from '../../controllers/render/modelObject';
 import {
@@ -434,13 +434,7 @@ export const AnimationSystem: ISystemFactory = world => {
           }
         }
 
-        if (
-          playerAnimation.action >= PlayerAction.PLAYER_SIT1 &&
-          playerAnimation.action <= PlayerAction.PLAYER_POSE_FEMALE1 &&
-          !moving
-        ) {
-          continue;
-        }
+        if (isRestAction(playerAnimation.action) && !moving) continue;
 
         const npcClass =
           entity.npcType !== undefined

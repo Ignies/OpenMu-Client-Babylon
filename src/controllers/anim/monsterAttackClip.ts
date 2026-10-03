@@ -2,12 +2,13 @@ import { inDevilSquare } from '../actors/locomotion';
 import { MonsterActionType as A } from '@versions/shared/objects/enum';
 import { REFERENCE_FPS } from './playSpeed';
 import { ENUM_WORLD as W } from '../../core/types';
+import { KEEP_CLIP, monsterCastOf, monsterSwingRule, type MonsterSwingDef } from './monsterRules';
 
 // SetPlayerAttack / SetPlayerMagic for a body that is not MODEL_PLAYER (ZzzCharacter.cpp:1222-1348)
 // with their map hooks, and the monster side of ReceiveMagic (0x19) and ReceiveMagicContinue (0x1E).
+// What a skill does to a monster caster and the skill-keyed swing rules are data (monsterRules.ts).
 
-/** The hook ran but called no `SetAction`: the clip in hand plays on. */
-export const KEEP_CLIP = -1;
+export { KEEP_CLIP };
 
 const MONSTER_ILLUSION_OF_KUNDUN_7 = 275;
 
@@ -50,83 +51,24 @@ export function monsterAttackState(owner: object): MonsterAttackState {
   return state;
 }
 
-// ActionSkillType (_enum.h:309)
-const SKILL_POISON = 1;
-const SKILL_METEO = 2;
-const SKILL_LIGHTNING = 3;
-const SKILL_FIREBALL = 4;
-const SKILL_FLAME = 5;
-const SKILL_ICE = 7;
-const SKILL_POWERWAVE = 11;
-const SKILL_SOUL_BARRIER = 16;
-const SKILL_ENERGYBALL = 17;
-const SKILL_HEALING = 26;
-const SKILL_DEFENSE = 27;
-const SKILL_ATTACK = 28;
-const SKILL_SUMMON = 30;
-const SKILL_DECAY = 38;
-const SKILL_BOSS = 50;
-const SKILL_IMPROVE_AG = 53;
-const SKILL_FIRE_SLASH = 55;
-const SKILL_COMBO = 59;
-const SKILL_PARTY_TELEPORT = 63;
-const SKILL_MONSTER_SUMMON = 200;
-const SKILL_MONSTER_MAGIC_DEF = 201;
-const SKILL_MONSTER_PHY_DEF = 202;
-const SKILL_GIGANTIC_STORM = 237;
-const SKILL_CHAOTIC_DISEIER = 238;
-const SKILL_DOPPELGANGER_SELFDESTRUCTION = 239;
-const SKILL_POISON_STR = 384;
-const SKILL_FIRE_SLASH_STR = 490;
+/** `rand() % 2`: Attack1 or Attack2. */
+function coin(random: () => number): number {
+  return random() < 0.5 ? A.Attack1 : A.Attack2;
+}
 
-/** ReceiveMagic cases that run `SetPlayerAttack` on a monster and rewind it (`AnimationFrame = 0`). */
-const CAST_ATTACK = new Set([
-  SKILL_LIGHTNING, 379, 480, SKILL_FIREBALL, SKILL_METEO, SKILL_ICE, 389, 489,
-  SKILL_ENERGYBALL, SKILL_POWERWAVE, SKILL_POISON, SKILL_POISON_STR,
-  SKILL_FLAME, 378, 483, SKILL_FIRE_SLASH, SKILL_FIRE_SLASH_STR, SKILL_PARTY_TELEPORT,
-]);
-
-/** The ones that run it without the rewind. */
-const CAST_ATTACK_HELD = new Set([
-  SKILL_MONSTER_SUMMON, SKILL_MONSTER_MAGIC_DEF, SKILL_MONSTER_PHY_DEF, SKILL_CHAOTIC_DISEIER,
-]);
-
-/** `SetPlayerMagic` (for anyone but the hero), with the rewind. */
-const CAST_MAGIC = new Set([
-  SKILL_HEALING, 413, SKILL_ATTACK, 420, 422, SKILL_DEFENSE, 417, 423,
-  SKILL_SUMMON, SKILL_SUMMON + 1, SKILL_SUMMON + 2, SKILL_SUMMON + 3,
-  SKILL_SUMMON + 4, SKILL_SUMMON + 5, SKILL_SUMMON + 6,
-  SKILL_SOUL_BARRIER, 403, 404, SKILL_IMPROVE_AG,
-]);
-
-/** 0x19 skills whose case (or the default) starts no AttackTime, of those monsters cast or hooks read. */
-const CAST_WITHOUT_ATTACK_TIME = new Set([
-  SKILL_COMBO, SKILL_MONSTER_SUMMON, SKILL_CHAOTIC_DISEIER, SKILL_DOPPELGANGER_SELFDESTRUCTION,
-  SKILL_DECAY, SKILL_GIGANTIC_STORM,
-]);
-
-// SetCurrentAction_HellasMonster (GMHellas.cpp:960): Kalima 1-6, on any map.
-const DEATH_CENTURIONS = new Set([145, 175, 183, 191, 261, 269]);
-const AEGIS_AND_ROGUE_CENTURIONS = new Set([
-  147, 177, 185, 193, 263, 271, 148, 178, 186, 194, 264, 272,
-]);
-const NECRONS = new Set([149, 179, 187, 195, 265, 273]);
-const SCHRIKERS_AND_ILLUSIONS = new Set([
-  160, 180, 188, 196, 266, 274, 161, 181, 189, 197, 267, MONSTER_ILLUSION_OF_KUNDUN_7,
-]);
-const DEATH_CENTURION_ATTACK2 = new Set([
-  SKILL_ENERGYBALL, SKILL_FIRE_SLASH, SKILL_FIRE_SLASH_STR, SKILL_POISON, SKILL_POISON_STR,
-  SKILL_MONSTER_SUMMON, SKILL_MONSTER_MAGIC_DEF, SKILL_MONSTER_PHY_DEF,
-]);
+/** A swing rule's clip for the skill in hand (the rule files in versions/shared/animations/monster_swings). */
+function ruleClip(rule: MonsterSwingDef, skill: number, random: () => number): number {
+  const clip = rule.bySkill?.[skill] ?? rule.otherwise;
+  if (clip === 'keep') return KEEP_CLIP;
+  return clip === 'coin' ? coin(random) : clip;
+}
 
 const MONSTER_MODEL_BALI = 32;
 const MONSTER_MODEL_BATTLE_GUARD1 = 76;
 const MONSTER_MODEL_BATTLE_GUARD2 = 77;
-const MONSTER_MODEL_MEDUSA = 192;
 /** Sapi Queen, Ice Napin, Shadow Master, Wolf Status. */
 const SWAMP_ATTACK1_MODELS = new Set([201, 202, 203, 204]);
 
-const MONSTER_FIRE_GOLEM = 291;
 const MONSTER_MAYA = 364;
 const MONSTER_SELUPAN = 459;
 const MONSTER_LUCAS = 507;
@@ -164,26 +106,6 @@ function checkMonsterSkill(monster: number): number {
   return monster === MONSTER_MAYA ? KEEP_CLIP : A.Attack1;
 }
 
-function coin(random: () => number): number {
-  return random() < 0.5 ? A.Attack1 : A.Attack2;
-}
-
-function hellasAttack(state: MonsterAttackState, input: MonsterAttackInput): number | undefined {
-  const { monster, random } = input;
-  if (DEATH_CENTURIONS.has(monster)) {
-    return DEATH_CENTURION_ATTACK2.has(state.skill) ? A.Attack2 : A.Attack1;
-  }
-  if (AEGIS_AND_ROGUE_CENTURIONS.has(monster)) {
-    return state.skill === SKILL_ENERGYBALL ? A.Attack2 : A.Attack1;
-  }
-  if (NECRONS.has(monster)) {
-    if (state.skill === SKILL_POISON || state.skill === SKILL_POISON_STR) return A.Attack2;
-    return state.skill === SKILL_ENERGYBALL ? A.Attack1 : KEEP_CLIP;
-  }
-  if (SCHRIKERS_AND_ILLUSIONS.has(monster)) return coin(random);
-  return undefined;
-}
-
 /** `M38Kanturu2nd::Is_Kanturu2nd_3rd`. */
 function inKanturu2nd3rd(world: number): boolean {
   return world === W.WD_38KANTURU_2ND || world === W.WD_39KANTURU_3RD;
@@ -193,17 +115,19 @@ function inKanturu2nd3rd(world: number): boolean {
 function hookedAttack(state: MonsterAttackState, input: MonsterAttackInput): number | undefined {
   const { world, monster, model, random } = input;
 
-  const hellas = hellasAttack(state, input);
-  if (hellas !== undefined) return hellas;
+  // The any-map rules first (SetCurrentAction_HellasMonster, GMHellas.cpp:960).
+  const anyMap = monsterSwingRule(monster, model, world, false);
+  if (anyMap) return ruleClip(anyMap, state.skill, random);
 
   // battleCastle::SetCurrentAction_BattleCastleMonster, on any map.
   if (model === MONSTER_MODEL_BATTLE_GUARD1 || model === MONSTER_MODEL_BATTLE_GUARD2) {
     return A.Shock;
   }
 
-  if (world === W.WD_31HUNTING_GROUND && monster === MONSTER_FIRE_GOLEM) {
-    return state.skill === SKILL_BOSS ? A.Attack1 : A.Attack2;
-  }
+  // The map rules' worlds (Hunting Ground, Swamp of Quiet) are none of the hooks' below.
+  const mapped = monsterSwingRule(monster, model, world, true);
+  if (mapped) return ruleClip(mapped, state.skill, random);
+
   if (world === W.WD_33AIDA || world === W.WD_54CHARACTERSCENE) {
     if (AIDA_CHECKED.has(monster)) return checkMonsterSkill(monster);
     if (AIDA_ATTACK1.has(monster)) return A.Attack1;
@@ -230,11 +154,6 @@ function hookedAttack(state: MonsterAttackState, input: MonsterAttackInput): num
     return checkMonsterSkill(monster);
   }
   if (world === W.WD_56MAP_SWAMP_OF_QUIET) {
-    if (model === MONSTER_MODEL_MEDUSA) {
-      if (state.skill === SKILL_DECAY || state.skill === SKILL_CHAOTIC_DISEIER) return A.Attack2;
-      if (state.skill === SKILL_GIGANTIC_STORM) return A.Attack3;
-      return A.Attack1;
-    }
     if (SWAMP_ATTACK1_MODELS.has(model)) return A.Attack1;
   }
 
@@ -305,13 +224,15 @@ export function monsterMagic(state: MonsterAttackState): number {
 
 /** Whether that 0x19 runs `SetPlayerAttack`, a trap's branch included. */
 export function monsterCastAttacks(skill: number): boolean {
-  return CAST_ATTACK.has(skill) || CAST_ATTACK_HELD.has(skill);
+  const clip = monsterCastOf(skill)?.clip;
+  return clip === 'attack' || clip === 'attackHeld';
 }
 
 function castAction(state: MonsterAttackState, skill: number, input: MonsterAttackInput): number {
-  if (monsterCastAttacks(skill)) return monsterAttack(state, input);
-  if (CAST_MAGIC.has(skill)) return monsterMagic(state);
-  if (skill === SKILL_DOPPELGANGER_SELFDESTRUCTION) return A.Appear;
+  const clip = monsterCastOf(skill)?.clip;
+  if (clip === 'attack' || clip === 'attackHeld') return monsterAttack(state, input);
+  if (clip === 'magic') return monsterMagic(state);
+  if (clip === 'appear') return A.Appear;
   return KEEP_CLIP;
 }
 
@@ -322,15 +243,17 @@ export function monsterCast(
   input: MonsterAttackInput
 ): number {
   settleSkill(state, input.now);
-  if (skill !== SKILL_COMBO) state.skill = skill;
+  const cast = monsterCastOf(skill);
+  if (cast?.recordsSkill !== false) state.skill = skill;
   const action = castAction(state, skill, input);
-  if (!CAST_WITHOUT_ATTACK_TIME.has(skill)) state.skillClearsAt = input.now + ATTACK_TIME_MS;
+  if (cast?.attackTime !== false) state.skillClearsAt = input.now + ATTACK_TIME_MS;
   return action;
 }
 
 /** Whether that 0x19 also rewinds the clip it lands on (`AnimationFrame = 0`). */
 export function monsterCastRewinds(skill: number): boolean {
-  return CAST_ATTACK.has(skill) || CAST_MAGIC.has(skill);
+  const clip = monsterCastOf(skill)?.clip;
+  return clip === 'attack' || clip === 'magic';
 }
 
 /** ReceiveMagicContinue (0x1E) with a monster caster; it always rewinds. */
