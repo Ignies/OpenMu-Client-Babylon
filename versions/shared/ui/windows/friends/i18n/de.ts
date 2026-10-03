@@ -1,0 +1,36 @@
+/** German text of the `friends` window. */
+
+import type en from './en';
+
+export default {
+  'friends.title': 'Freundesliste',
+  'friends.tab.friends': 'Freunde',
+  'friends.tab.letters': 'Briefe',
+  'friends.empty': 'Deine Freundesliste ist leer.',
+  'friends.lettersEmpty': 'Dein Briefkasten ist leer.',
+  'friends.namePlaceholder': 'Charaktername',
+  'friends.server': 'Server {server}',
+  'friends.letter': 'Brief',
+  'friends.openingLetter': 'Brief wird geöffnet...',
+  'friends.writeLetter': 'Brief schreiben',
+  'friends.count': 'Freunde ({count}/{max})',
+  'friends.lettersCount': 'Briefe ({count}/{max})',
+  'friends.unread': ' {count} neu',
+  'friends.add': 'Hinzufügen',
+  'friends.talk': 'Reden',
+  'friends.letterButton': 'Brief',
+  'friends.delete': 'Löschen',
+  'friends.hide': 'Verbergen',
+  'friends.write': 'Schreiben',
+  'friends.read': 'Lesen',
+  'friends.reply': 'Antworten',
+  'friends.from': 'Von {sender} · {time}',
+  'friends.to': 'An',
+  'friends.subject': 'Betreff',
+  'friends.replyPrefix': 'Re: {subject}',
+  'friends.tab.rooms': 'Chat',
+  'friends.roomsEmpty': 'Keine offenen Chaträume.',
+  'friends.roomsCount': 'Chaträume ({count})',
+  'friends.roomAlert': 'Neu',
+  'friends.open': 'Öffnen',
+} satisfies Partial<Record<keyof typeof en, string>>;

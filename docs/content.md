@@ -66,11 +66,24 @@ versions/shared/ui/windows/<window>/
   layout.ts    geometry   style.less   readme.md (when the window has rules worth writing down)
 versions/shared/ui/hud/<element>/      same shape, for always-on elements
 versions/shared/ui/pages/<page>/       login, server select, character select, preloader, world
+  i18n/en.ts   the window's text; one <code>.ts per language next to it
 ```
 
 Shared widgets (item tooltip, item grid, picked item, frames, buttons, text, cursor, message box)
 are the interface controller's: `src/controllers/interface/components/`. A window uses them;
 restyling the tooltip once restyles it everywhere.
+
+## Text
+
+Text lives with its owner, one file per language: `<owner>/i18n/en.ts` (required) and
+`<owner>/i18n/<code>.ts`. Owners: a window, HUD element or page (`versions/shared/ui/.../<name>/`),
+a module (`src/modules/<module>/`, its packet and system messages), a controller or interface
+widget (`src/controllers/...`). Keys several owners use sit in the lowest layer that uses them,
+else `versions/shared/ui/i18n/`, `src/modules/_shared/i18n/` or `src/i18n/text/` (`common.*`).
+`src/i18n` is only the engine: languages, `t()`, the registry, the glob that finds the files. A
+new window or module adds its text without touching it. Translators use one sheet per language
+(`bun tools/i18n.ts export|import <code>`). See [src/i18n/readme.md](../src/i18n/readme.md) and
+[how_to/add_text.md](how_to/add_text.md).
 
 ## Maps, monsters, npcs, items
 

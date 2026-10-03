@@ -1,0 +1,43 @@
+/** Spanish text of the `hero` module. */
+
+import type en from './en';
+
+export default {
+  'class.elf': 'Elf',
+
+  'emote.greeting': 'Saludo',
+  'emote.goodbye': 'Despedida',
+  'emote.clap': 'Aplaudir',
+  'emote.cheer': 'Animar',
+  'emote.smile': 'Sonreír',
+  'emote.cry': 'Llorar',
+  'emote.respect': 'Respeto',
+  'emote.salute': 'Saludo militar',
+  'emote.win': 'Victoria',
+  'emote.gesture': 'Gesto',
+  'emote.direction': 'Señalar',
+  'emote.unknown': 'Confusión',
+  'emote.awkward': 'Apuro',
+  'emote.see': 'Mirar fijo',
+  'emote.sleep': 'Sueño',
+  'emote.cold': 'Frío',
+  'emote.again': 'Otra vez',
+  'emote.rush': 'Al ataque',
+  'emote.scissors': 'Tijera',
+  'emote.rock': 'Piedra',
+  'emote.paper': 'Papel',
+  'emote.hustle': 'Prisa',
+  'emote.provocation': 'Provocar',
+  'emote.lookAround': 'Mirar alrededor',
+  'emote.cheers': 'Brindis',
+  'notify.pointNotAdded': 'No se pudo añadir el punto',
+  'notify.levelUp': 'Nivel {level}',
+  'notify.masterLevelUp': 'Nivel de maestría {level}',
+  'notify.fruitAdd': '{stat} +{points} (fruta)',
+  'notify.fruitRemove': '{stat} -{points} (fruta)',
+  'notify.fruitNoEffect': 'La fruta no ha hecho nada',
+  'notify.fruitLimit': 'Hoy ya no puedes usar más frutas',
+  'notify.fruitFloor': '{stat} no puede bajar más',
+  'notify.fruitEquipped': 'Quítate antes los objetos que piden esta característica',
+  'notify.fruitNotNow': 'Ahora no puedes usar esta fruta',
+} satisfies Partial<Record<keyof typeof en, string>>;

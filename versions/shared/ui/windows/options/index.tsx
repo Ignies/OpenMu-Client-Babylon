@@ -25,8 +25,7 @@ import {
   type KeyAction,
 } from '@/controllers/interface/keyBindings';
 import { SessionExit, type ExitKind } from '@/modules/session/sessionExit';
-import { t, type TextKey } from '@/i18n';
-import { EN_TEXT } from '@/i18n/recipes';
+import { EN_TEXT, t, type TextKey } from '@/i18n';
 import { applyTierPreset, type TierPreset } from './presets';
 import {
   ALL_PAGES,

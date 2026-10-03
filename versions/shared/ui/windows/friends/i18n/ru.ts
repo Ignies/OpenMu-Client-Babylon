@@ -1,0 +1,36 @@
+/** Russian text of the `friends` window. */
+
+import type en from './en';
+
+export default {
+  'friends.title': 'Список друзей',
+  'friends.tab.friends': 'Друзья',
+  'friends.tab.letters': 'Письма',
+  'friends.empty': 'Ваш список друзей пуст.',
+  'friends.lettersEmpty': 'Ваш почтовый ящик пуст.',
+  'friends.namePlaceholder': 'Имя персонажа',
+  'friends.server': 'Сервер {server}',
+  'friends.letter': 'Письмо',
+  'friends.openingLetter': 'Открытие письма...',
+  'friends.writeLetter': 'Написать письмо',
+  'friends.count': 'Друзья ({count}/{max})',
+  'friends.lettersCount': 'Письма ({count}/{max})',
+  'friends.unread': ' {count} новых',
+  'friends.add': 'Добавить',
+  'friends.talk': 'Написать',
+  'friends.letterButton': 'Письмо',
+  'friends.delete': 'Удалить',
+  'friends.hide': 'Скрыться',
+  'friends.write': 'Написать',
+  'friends.read': 'Прочесть',
+  'friends.reply': 'Ответить',
+  'friends.from': 'От {sender} · {time}',
+  'friends.to': 'Кому',
+  'friends.subject': 'Тема',
+  'friends.replyPrefix': 'Re: {subject}',
+  'friends.tab.rooms': 'Чат',
+  'friends.roomsEmpty': 'Открытых чат-комнат нет.',
+  'friends.roomsCount': 'Чат-комнаты ({count})',
+  'friends.roomAlert': 'Новое',
+  'friends.open': 'Открыть',
+} satisfies Partial<Record<keyof typeof en, string>>;

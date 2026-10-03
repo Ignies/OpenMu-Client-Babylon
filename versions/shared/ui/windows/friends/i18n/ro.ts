@@ -1,0 +1,36 @@
+/** Romanian text of the `friends` window. */
+
+import type en from './en';
+
+export default {
+  'friends.title': 'Lista de prieteni',
+  'friends.tab.friends': 'Prieteni',
+  'friends.tab.letters': 'Scrisori',
+  'friends.empty': 'Lista ta de prieteni este goală.',
+  'friends.lettersEmpty': 'Cutia ta de scrisori este goală.',
+  'friends.namePlaceholder': 'Numele personajului',
+  'friends.server': 'Server {server}',
+  'friends.letter': 'Scrisoare',
+  'friends.openingLetter': 'Se deschide scrisoarea...',
+  'friends.writeLetter': 'Scrie o scrisoare',
+  'friends.count': 'Prieteni ({count}/{max})',
+  'friends.lettersCount': 'Scrisori ({count}/{max})',
+  'friends.unread': ' {count} noi',
+  'friends.add': 'Adaugă',
+  'friends.talk': 'Vorbește',
+  'friends.letterButton': 'Scrisoare',
+  'friends.delete': 'Șterge',
+  'friends.hide': 'Ascunde',
+  'friends.write': 'Scrie',
+  'friends.read': 'Citește',
+  'friends.reply': 'Răspunde',
+  'friends.from': 'De la {sender} · {time}',
+  'friends.to': 'Către',
+  'friends.subject': 'Subiect',
+  'friends.replyPrefix': 'Re: {subject}',
+  'friends.tab.rooms': 'Chat',
+  'friends.roomsEmpty': 'Nicio cameră de chat deschisă.',
+  'friends.roomsCount': 'Camere de chat ({count})',
+  'friends.roomAlert': 'Nou',
+  'friends.open': 'Deschide',
+} satisfies Partial<Record<keyof typeof en, string>>;

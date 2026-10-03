@@ -1,0 +1,36 @@
+/** Thai text of the `friends` window. */
+
+import type en from './en';
+
+export default {
+  'friends.title': 'รายชื่อเพื่อน',
+  'friends.tab.friends': 'เพื่อน',
+  'friends.tab.letters': 'จดหมาย',
+  'friends.empty': 'รายชื่อเพื่อนของคุณว่างเปล่า',
+  'friends.lettersEmpty': 'กล่องจดหมายของคุณว่างเปล่า',
+  'friends.namePlaceholder': 'ชื่อตัวละคร',
+  'friends.server': 'เซิร์ฟเวอร์ {server}',
+  'friends.letter': 'จดหมาย',
+  'friends.openingLetter': 'กำลังเปิดจดหมาย...',
+  'friends.writeLetter': 'เขียนจดหมาย',
+  'friends.count': 'เพื่อน ({count}/{max})',
+  'friends.lettersCount': 'จดหมาย ({count}/{max})',
+  'friends.unread': ' ใหม่ {count} ฉบับ',
+  'friends.add': 'เพิ่ม',
+  'friends.talk': 'กระซิบ',
+  'friends.letterButton': 'จดหมาย',
+  'friends.delete': 'ลบ',
+  'friends.hide': 'ซ่อนตัว',
+  'friends.write': 'เขียน',
+  'friends.read': 'อ่าน',
+  'friends.reply': 'ตอบกลับ',
+  'friends.from': 'จาก {sender} · {time}',
+  'friends.to': 'ถึง',
+  'friends.subject': 'หัวข้อ',
+  'friends.replyPrefix': 'Re: {subject}',
+  'friends.tab.rooms': 'แชท',
+  'friends.roomsEmpty': 'ไม่มีห้องแชทที่เปิดอยู่',
+  'friends.roomsCount': 'ห้องแชท ({count})',
+  'friends.roomAlert': 'ใหม่',
+  'friends.open': 'เปิด',
+} satisfies Partial<Record<keyof typeof en, string>>;

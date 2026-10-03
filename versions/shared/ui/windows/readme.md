@@ -13,7 +13,8 @@ One folder per in-game window. A window draws; its state and actions belong to i
 - The world page (`../pages/world`) draws every `hud` window in order. Each window hides itself
   when its Store flag or feature state says it is closed.
 - Folder shape: `index.tsx` (drawing), `window.ts`, `layout.ts` (geometry, sprite lists),
-  `style.less`. Shared widgets (item grid, tooltip, frames, buttons) are in
+  `style.less`, `i18n/<code>.ts` (the window's text: `en.ts` plus one file per language, found by
+  `src/i18n`'s glob; see [src/i18n/readme.md](../../../../src/i18n/readme.md)). Shared widgets (item grid, tooltip, frames, buttons) are in
   `src/controllers/interface/components/`.
 
 | Folder | id (order) | Shows | Reads |
@@ -62,6 +63,8 @@ controller, and the HUD elements in `../hud`.
 ## Change it
 - redraw a window: edit its `index.tsx`, `layout.ts` or `style.less`.
 - add a window: new folder with `index.tsx` and `window.ts`; pick an unused `order`.
+- change or add a window's words: its `i18n/en.ts` and every other `<code>.ts` there
+  ([docs/how_to/add_text.md](../../../../docs/how_to/add_text.md)).
 - one version draws it differently: export it in `windows` from `versions/<id>/ui` with the same id.
 
 ## Tests

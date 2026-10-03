@@ -2,12 +2,11 @@
  * THE CONTRACT - one language.
  *
  * An **entry** of this system is a language: one file, one exported
- * `<name>Layer`, one line in `layers.ts`. There is no `update` / `reset`: the
- * system holds one choice, not per-frame state, so the common lifecycle pair
- * is absent the way it is on `maps`.
+ * `<name>Layer`, one line in `layers.ts`. It holds what the selector and the
+ * `Data/Local` packs need; the text itself lives with its owners
+ * (`<owner>/i18n/<code>.ts`, see readme.md).
  */
 
-import type { TextKey } from './recipes';
 import type { PackRepairs } from './packRepairs';
 import type { ItemNameFixes } from './itemNames';
 import type { DialogPageFixes } from './dialogPages';
@@ -52,13 +51,6 @@ export interface LanguageLayer {
 
   /** The flag drawn beside `label`. */
   readonly region: FlagRegion;
-
-  /**
-   * The translations. Partial on purpose: a key with no line here falls back
-   * to the English catalogue, so adding a key to `recipes.ts` never breaks a
-   * language file. In dev the facade logs what each language is missing.
-   */
-  readonly strings: Partial<Record<TextKey, string>>;
 
   /**
    * Extra font families to put in front of the UI stack while this language is

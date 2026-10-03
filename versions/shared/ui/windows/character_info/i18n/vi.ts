@@ -1,0 +1,34 @@
+/** Vietnamese text of the `character_info` window. */
+
+import type en from './en';
+
+export default {
+  'stat.short.strength': 'STR',
+  'stat.short.agility': 'AGI',
+  'stat.short.vitality': 'VIT',
+  'stat.short.energy': 'ENE',
+  'charInfo.dmgRate': 'Sát thương (tỉ lệ): {min}~{max} ({rate})',
+  'charInfo.dmg': 'Sát thương: {min}~{max}',
+  'charInfo.attackRate': 'Tỉ lệ tấn công: {value}',
+  'charInfo.defenseRateFull': 'Phòng thủ (tỉ lệ):{defense} ({rate} +{bonus})',
+  'charInfo.defenseRate': 'Phòng thủ (tỉ lệ):{defense} ({rate})',
+  'charInfo.defenseFull': 'Phòng thủ: {defense} (+{bonus})',
+  'charInfo.defense': 'Phòng thủ: {defense}',
+  'charInfo.defenseRatePvp': 'Tỉ lệ phòng thủ: {value}',
+  'charInfo.hp': 'HP: {current} / {max}',
+  'charInfo.meleeDamage': 'Sát thương cận chiến: {value}%',
+  'charInfo.mana': 'Mana: {current} / {max}',
+  'charInfo.wizardryRate': 'Sát thương phép: {min}~{max} (+{rate})',
+  'charInfo.wizardry': 'Sát thương phép: {min}~{max}',
+  'charInfo.curseSpell': ' Phép nguyền: {min} ~ {max}',
+  'charInfo.skillDamage': 'Sát thương kỹ năng: {value}%',
+  'charInfo.divineDamage': 'Sát thương thần thánh (Roar, Slasher): {value}%',
+  'charInfo.aoeDamage': 'Sát thương diện rộng (Dark Side): {value}%',
+  'charInfo.addAmount': 'Số điểm cộng',
+  'charInfo.stopAdding': 'Dừng',
+  'characterInfo.title': 'Nhân vật',
+  'characterInfo.close': 'Đóng (C)',
+  'characterInfo.quest': 'Nhiệm vụ (T)',
+  'characterInfo.pet': 'Linh thú',
+  'characterInfo.masterTree': 'Cây kỹ năng Master (A)',
+} satisfies Partial<Record<keyof typeof en, string>>;

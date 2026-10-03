@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { storageBan, StorageKind } from './itemStorage';
 import { ItemGroup } from '../items/itemStats';
-import { EN_TEXT } from '../../i18n/recipes';
+import { EN_TEXT } from '../../i18n';
 import type { Item } from '../../ecs/world';
 
 const item = (over: Partial<Item> = {}): Item => ({ group: ItemGroup.Sword, num: 0, lvl: 0, ...over });

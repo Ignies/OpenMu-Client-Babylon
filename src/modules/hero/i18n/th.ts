@@ -1,0 +1,43 @@
+/** Thai text of the `hero` module. */
+
+import type en from './en';
+
+export default {
+  'class.elf': 'เอลฟ์',
+
+  'emote.greeting': 'ทักทาย',
+  'emote.goodbye': 'ลาก่อน',
+  'emote.clap': 'ปรบมือ',
+  'emote.cheer': 'เชียร์',
+  'emote.smile': 'ยิ้ม',
+  'emote.cry': 'ร้องไห้',
+  'emote.respect': 'เคารพ',
+  'emote.salute': 'วันทยหัตถ์',
+  'emote.win': 'ชัยชนะ',
+  'emote.gesture': 'ส่งสัญญาณ',
+  'emote.direction': 'ชี้',
+  'emote.unknown': 'งุนงง',
+  'emote.awkward': 'เก้อเขิน',
+  'emote.see': 'จ้องมอง',
+  'emote.sleep': 'ง่วง',
+  'emote.cold': 'หนาว',
+  'emote.again': 'อีกครั้ง',
+  'emote.rush': 'บุก',
+  'emote.scissors': 'กรรไกร',
+  'emote.rock': 'ค้อน',
+  'emote.paper': 'กระดาษ',
+  'emote.hustle': 'เร็วเข้า',
+  'emote.provocation': 'ยั่วยุ',
+  'emote.lookAround': 'มองไปรอบ ๆ',
+  'emote.cheers': 'ชนแก้ว',
+  'notify.pointNotAdded': 'เพิ่มแต้มไม่สำเร็จ',
+  'notify.levelUp': 'เลเวล {level}',
+  'notify.masterLevelUp': 'เลเวลมาสเตอร์ {level}',
+  'notify.fruitAdd': '{stat} +{points} (ผลไม้)',
+  'notify.fruitRemove': '{stat} -{points} (ผลไม้)',
+  'notify.fruitNoEffect': 'ผลไม้ไม่มีผล',
+  'notify.fruitLimit': 'วันนี้คุณใช้ผลไม้ไม่ได้อีกแล้ว',
+  'notify.fruitFloor': '{stat} ลดลงไปกว่านี้ไม่ได้',
+  'notify.fruitEquipped': 'ถอดไอเทมที่ต้องใช้ค่าสถานะนี้ออกก่อน',
+  'notify.fruitNotNow': 'ตอนนี้ใช้ผลไม้นี้ไม่ได้',
+} satisfies Partial<Record<keyof typeof en, string>>;

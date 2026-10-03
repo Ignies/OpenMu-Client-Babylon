@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { i18n, t } from './index';
-import { EN_TEXT, type TextKey } from './recipes';
+import { EN_TEXT, i18n, t, type TextKey } from './index';
 import {
   SERVER_MESSAGE_PREFIX,
   matchServerText,
@@ -28,7 +27,7 @@ describe('server text', () => {
 
   it('recognises every catalogued message as itself', () => {
     // Two entries whose patterns overlap resolve to the same key here, which
-    // is the failure this catches - order in `recipes.ts` decides the winner.
+    // is the failure this catches - order in the chat module's `i18n/en.ts` decides the winner.
     const wrong = KEYS.filter(key => matchServerText(asSent(key))?.key !== key);
 
     expect(wrong).toEqual([]);

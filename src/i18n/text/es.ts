@@ -1,0 +1,41 @@
+/** Spanish text of no single owner: shared by many (`common.*`, language names). */
+
+import type en from './en';
+
+export default {
+  'common.ok': 'Aceptar',
+  'common.cancel': 'Cancelar',
+  'common.close': 'Cerrar',
+  'common.yes': 'Sí',
+  'common.no': 'No',
+  'common.none': 'Ninguna',
+  'common.create': 'Crear',
+  'common.creating': 'Creando...',
+  'common.send': 'Enviar',
+  'common.sending': 'Enviando...',
+  'common.loading': 'Cargando...',
+  'common.warning': 'Aviso',
+  'common.level': 'Nivel',
+  'common.offline': 'Desconectado',
+  'common.off': 'No',
+  'common.zen': 'Zen',
+  'common.notEnoughZen': 'No tienes suficiente Zen',
+  'options.quality.classic': 'Clásica',
+  'options.quality.enhanced': 'Mejorada',
+
+  'language.english': 'Inglés',
+  'language.spanish': 'Español',
+  'language.french': 'Francés',
+  'language.italian': 'Italiano',
+  'language.portuguese': 'Portugués',
+  'language.russian': 'Ruso',
+  'language.chinese': 'Chino (mandarín)',
+  'language.japanese': 'Japonés',
+  'language.thai': 'Tailandés',
+  'language.korean': 'Coreano',
+  'language.bulgarian': 'Búlgaro',
+  'language.romanian': 'Rumano',
+  'language.german': 'Alemán',
+  'language.polish': 'Polaco',
+  'language.vietnamese': 'Vietnamita',
+} satisfies Partial<Record<keyof typeof en, string>>;

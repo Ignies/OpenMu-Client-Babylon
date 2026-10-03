@@ -1,0 +1,41 @@
+/** Bulgarian text of no single owner: shared by many (`common.*`, language names). */
+
+import type en from './en';
+
+export default {
+  'common.ok': 'ОК',
+  'common.cancel': 'Отказ',
+  'common.close': 'Затвори',
+  'common.yes': 'Да',
+  'common.no': 'Не',
+  'common.none': 'Няма',
+  'common.create': 'Създай',
+  'common.creating': 'Създава се...',
+  'common.send': 'Изпрати',
+  'common.sending': 'Изпраща се...',
+  'common.loading': 'Зарежда се...',
+  'common.warning': 'Внимание',
+  'common.level': 'Ниво',
+  'common.offline': 'Извън линия',
+  'common.off': 'Изкл.',
+  'common.zen': 'Zen',
+  'common.notEnoughZen': 'Нямаш достатъчно Zen',
+  'options.quality.classic': 'Класическо',
+  'options.quality.enhanced': 'Подобрено',
+
+  'language.english': 'Английски',
+  'language.spanish': 'Испански',
+  'language.french': 'Френски',
+  'language.italian': 'Италиански',
+  'language.portuguese': 'Португалски',
+  'language.russian': 'Руски',
+  'language.chinese': 'Китайски (мандарин)',
+  'language.japanese': 'Японски',
+  'language.thai': 'Тайски',
+  'language.korean': 'Корейски',
+  'language.bulgarian': 'Български',
+  'language.romanian': 'Румънски',
+  'language.german': 'Немски',
+  'language.polish': 'Полски',
+  'language.vietnamese': 'Виетнамски',
+} satisfies Partial<Record<keyof typeof en, string>>;

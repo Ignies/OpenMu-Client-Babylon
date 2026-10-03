@@ -1,0 +1,41 @@
+/** Thai text of no single owner: shared by many (`common.*`, language names). */
+
+import type en from './en';
+
+export default {
+  'common.ok': 'ตกลง',
+  'common.cancel': 'ยกเลิก',
+  'common.close': 'ปิด',
+  'common.yes': 'ใช่',
+  'common.no': 'ไม่',
+  'common.none': 'ไม่มี',
+  'common.create': 'สร้าง',
+  'common.creating': 'กำลังสร้าง...',
+  'common.send': 'ส่ง',
+  'common.sending': 'กำลังส่ง...',
+  'common.loading': 'กำลังโหลด...',
+  'common.warning': 'คำเตือน',
+  'common.level': 'เลเวล',
+  'common.offline': 'ออฟไลน์',
+  'common.off': 'ปิด',
+  'common.zen': 'เซน',
+  'common.notEnoughZen': 'เซนไม่พอ',
+  'options.quality.classic': 'คลาสสิก',
+  'options.quality.enhanced': 'ปรับปรุง',
+
+  'language.english': 'อังกฤษ',
+  'language.spanish': 'สเปน',
+  'language.french': 'ฝรั่งเศส',
+  'language.italian': 'อิตาลี',
+  'language.portuguese': 'โปรตุเกส',
+  'language.russian': 'รัสเซีย',
+  'language.chinese': 'จีน (กลาง)',
+  'language.japanese': 'ญี่ปุ่น',
+  'language.thai': 'ไทย',
+  'language.korean': 'เกาหลี',
+  'language.bulgarian': 'บัลแกเรีย',
+  'language.romanian': 'โรมาเนีย',
+  'language.german': 'เยอรมัน',
+  'language.polish': 'โปแลนด์',
+  'language.vietnamese': 'เวียดนาม',
+} satisfies Partial<Record<keyof typeof en, string>>;

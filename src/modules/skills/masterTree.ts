@@ -1,8 +1,7 @@
 /**
  * The master skill tree, `CNewUIMasterLevel` (NewUIMasterLevel.cpp, NewUIMasterLevel.h:31) minus the drawing; see readme.md.
  */
-import { onLanguageChanged, t, textTable } from '../../i18n';
-import type { TextKey } from '../../i18n/recipes';
+import { onLanguageChanged, t, textTable, type TextKey } from '../../i18n';
 import { observable, runInAction } from 'mobx';
 import { CharacterClassNumber } from '../../core/types';
 import { EventBus } from '../../core/eventBus';
