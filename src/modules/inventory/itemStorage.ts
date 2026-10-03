@@ -1,5 +1,5 @@
 import type { Item } from '../../ecs/world';
-import type { TextKey } from '../../i18n/recipes';
+import type { TextKey } from '../../i18n';
 import { ItemGroup } from '../items/itemStats';
 import { InventoryConstants } from './inventoryConstants';
 import { StorageKind, TRADE_COLUMNS, TRADE_ROWS, TRADE_SLOTS } from './storageKind';

@@ -23,6 +23,8 @@ The full-screen pages: the pre-game screens and the world page that holds every 
   `versions/season6/ui` re-exports these, `versions/v097d/ui` has its own, which draws
   `character_list` as rows.
 - `world/index.tsx` imports `../../index`, which registers every window and HUD element.
+- A page's text is in its `i18n/<code>.ts` (`en.ts` plus one file per language), found by
+  `src/i18n`'s glob. A version's own page (v097d login and characters) uses the shared page's keys.
 
 ## Depends on / used by
 - uses: `src/modules/{servers,character_select,hero}`, the Store, `src/controllers/interface`

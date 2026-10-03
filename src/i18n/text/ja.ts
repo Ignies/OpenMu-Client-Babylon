@@ -1,0 +1,41 @@
+/** Japanese text of no single owner: shared by many (`common.*`, language names). */
+
+import type en from './en';
+
+export default {
+  'common.ok': 'OK',
+  'common.cancel': 'キャンセル',
+  'common.close': '閉じる',
+  'common.yes': 'はい',
+  'common.no': 'いいえ',
+  'common.none': 'なし',
+  'common.create': '作成',
+  'common.creating': '作成中...',
+  'common.send': '送信',
+  'common.sending': '送信中...',
+  'common.loading': '読み込み中...',
+  'common.warning': '注意',
+  'common.level': 'レベル',
+  'common.offline': 'オフライン',
+  'common.off': 'オフ',
+  'common.zen': 'Zen',
+  'common.notEnoughZen': 'Zen が足りません',
+  'options.quality.classic': 'クラシック',
+  'options.quality.enhanced': '強化',
+
+  'language.english': '英語',
+  'language.spanish': 'スペイン語',
+  'language.french': 'フランス語',
+  'language.italian': 'イタリア語',
+  'language.portuguese': 'ポルトガル語',
+  'language.russian': 'ロシア語',
+  'language.chinese': '中国語（標準語）',
+  'language.japanese': '日本語',
+  'language.thai': 'タイ語',
+  'language.korean': '韓国語',
+  'language.bulgarian': 'ブルガリア語',
+  'language.romanian': 'ルーマニア語',
+  'language.german': 'ドイツ語',
+  'language.polish': 'ポーランド語',
+  'language.vietnamese': 'ベトナム語',
+} satisfies Partial<Record<keyof typeof en, string>>;

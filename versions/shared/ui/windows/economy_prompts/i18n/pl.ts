@@ -1,0 +1,38 @@
+/** Polish text of the `economy_prompts` window. */
+
+import type en from './en';
+
+export default {
+  'prompt.storeZen': 'Zdeponuj Zen',
+  'prompt.store': 'Zdeponuj',
+  'prompt.takeZen': 'Wypłać Zen',
+  'prompt.take': 'Wypłać',
+  'prompt.unlockVault': 'Odblokuj magazyn',
+  'prompt.enterPin': 'Wpisz PIN magazynu.',
+  'prompt.unlock': 'Odblokuj',
+  'prompt.setPin': 'Ustaw PIN magazynu',
+  'prompt.setPinButton': 'Ustaw PIN',
+  'prompt.removePin': 'Usuń PIN magazynu',
+  'prompt.removePinHint': 'Usunięcie PIN-u wymaga hasła do konta.',
+  'prompt.remove': 'Usuń',
+  'prompt.offerZen': 'Zaoferuj Zen',
+  'prompt.offer': 'Zaoferuj',
+  'prompt.setPrice': 'Ustaw cenę',
+  'prompt.askingPrice': 'Cena wywoławcza.',
+  'prompt.askingPriceFor': 'Cena wywoławcza za {name}.',
+  'prompt.set': 'Ustaw',
+  'prompt.buy': 'Kup',
+  'prompt.itemCosts': 'Cena {name}: {price}.',
+  'prompt.thisItem': 'Ten przedmiot',
+  'prompt.itemGone': 'Tego przedmiotu już nie ma.',
+  'prompt.buyHowMany': 'Ile sztuk {name}? {price} za sztukę.',
+  'prompt.quantity': 'Ilość',
+  'prompt.carrying': 'Masz przy sobie {amount}.',
+  'prompt.vaultHolds': 'W magazynie jest {amount}.',
+  'prompt.newPinHint': 'Nowy PIN wymaga hasła do konta.',
+  'prompt.pin': 'PIN',
+  'prompt.password': 'Hasło',
+  'prompt.accept': 'Akceptuj',
+  'prompt.refuse': 'Odrzuć',
+  'prompt.wantsToTrade': '{name} chce z tobą handlować.',
+} satisfies Partial<Record<keyof typeof en, string>>;

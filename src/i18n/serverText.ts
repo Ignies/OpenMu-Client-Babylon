@@ -3,8 +3,8 @@
  * (`GameLogic/Properties/PlayerMessage.resx`) and translates them. See i18n/readme.md.
  */
 
-import { EN_TEXT, type TextKey } from './recipes';
-import { t } from './index';
+import { ENGLISH, onTextRegistered } from './registry';
+import { t, type TextKey } from './index';
 
 export const SERVER_MESSAGE_PREFIX = 'serverMessage.';
 
@@ -17,28 +17,40 @@ type Pattern = {
 
 const exact = new Map<string, TextKey>();
 
-// In `recipes.ts` order, which is how ties break: `Reset #{0}: ... {3} x {4};
-// grants ...` has to be tried before the variant without the item, whose
-// pattern also fits it.
+// In registration order (the chat module's `i18n/en.ts` order), which is how
+// ties break: `Reset #{0}: ... {3} x {4}; grants ...` has to be tried before
+// the variant without the item, whose pattern also fits it.
 const patterns: Pattern[] = [];
+
+// Built on first use and again after new text registers.
+let stale = true;
+onTextRegistered(() => {
+  stale = true;
+});
 
 function escape(literal: string): string {
   return literal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-for (const key of Object.keys(EN_TEXT) as TextKey[]) {
-  if (!key.startsWith(SERVER_MESSAGE_PREFIX)) continue;
+function build(): void {
+  stale = false;
+  exact.clear();
+  patterns.length = 0;
 
-  const source = EN_TEXT[key];
-  const holes = [...source.matchAll(/\{(\d+)\}/g)].map(m => m[1]);
+  for (const key of Object.keys(ENGLISH) as TextKey[]) {
+    if (!key.startsWith(SERVER_MESSAGE_PREFIX)) continue;
 
-  if (!holes.length) {
-    exact.set(source, key);
-    continue;
+    const source = ENGLISH[key];
+    const holes = [...source.matchAll(/\{(\d+)\}/g)].map(m => m[1]);
+
+    if (!holes.length) {
+      exact.set(source, key);
+      continue;
+    }
+
+    const literals = source.split(/\{\d+\}/).map(escape);
+    patterns.push({ key, re: new RegExp(`^${literals.join('(.+?)')}$`), holes });
   }
-
-  const literals = source.split(/\{\d+\}/).map(escape);
-  patterns.push({ key, re: new RegExp(`^${literals.join('(.+?)')}$`), holes });
 }
 
 export type ServerTextMatch = {
@@ -48,6 +60,8 @@ export type ServerTextMatch = {
 
 /** The catalogue entry a server line is, or null when it is free text. */
 export function matchServerText(text: string): ServerTextMatch | null {
+  if (stale) build();
+
   const hit = exact.get(text);
   if (hit) return { key: hit, params: {} };
 

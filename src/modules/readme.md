@@ -15,6 +15,10 @@ Gameplay, one folder per module. A module owns its packets, its state and its ac
 - state: a mobx store (`Social`, `Economy`, `Messenger`, `GmPanel`, ...) or plain module state.
 - actions: functions that check the rules and send packets (`Store.sendToGS`).
 - the classic rules it ports, with the original source cited next to the code.
+- `i18n/<code>.ts`: its packet and system messages (`en.ts` required, one file per language),
+  found by `src/i18n`'s glob and read with `t()`. Keys several modules share sit in
+  `_shared/i18n/`. A streamed module calls `registerText` instead and needs only English. See
+  [../i18n/readme.md](../i18n/readme.md).
 
 Much state still lives in the central Store (`src/app/store.ts`): the hero (`playerData`), sockets,
 login, the merchant, item moves, hot keys, skills, buffs, pets and MU Helper flags. It is being split
@@ -58,6 +62,7 @@ and `masterTree.ts` through the `skills` facade, and `band` through `installBand
 - [warp](warp/readme.md): map changes, teleports, the loading hold after a warp.
 - [world](world/readme.md): weather, fanfare and map-wide object effects.
 - `_shared/net_helpers.ts`: helpers more than one `net.ts` uses (player names, monster attacks).
+  `_shared/i18n/`: text more than one module uses.
 
 ## Depends on / used by
 - uses: `src/controllers`, `src/core`, `src/ecs`, `src/app/store.ts`, packet codecs in

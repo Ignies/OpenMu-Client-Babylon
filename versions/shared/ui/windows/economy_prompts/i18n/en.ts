@@ -1,0 +1,44 @@
+/** English text of the `economy_prompts` window. See src/i18n/readme.md. */
+
+const en = {
+  'prompt.storeZen': 'Store Zen',
+  'prompt.store': 'Store',
+  'prompt.takeZen': 'Take Zen',
+  'prompt.take': 'Take',
+  'prompt.unlockVault': 'Unlock the vault',
+  'prompt.enterPin': 'Enter the vault pin.',
+  'prompt.unlock': 'Unlock',
+  'prompt.setPin': 'Set a vault pin',
+  'prompt.setPinButton': 'Set pin',
+  'prompt.removePin': 'Remove the vault pin',
+  'prompt.removePinHint': 'Removing the pin needs your account password.',
+  'prompt.remove': 'Remove',
+  'prompt.offerZen': 'Offer Zen',
+  'prompt.offer': 'Offer',
+  'prompt.setPrice': 'Set a price',
+  'prompt.askingPrice': 'Asking price.',
+  'prompt.askingPriceFor': 'Asking price for {name}.',
+  'prompt.set': 'Set',
+  'prompt.buy': 'Buy',
+  'prompt.itemCosts': '{name} costs {price}.',
+  'prompt.thisItem': 'This item',
+  'prompt.itemGone': 'This item is gone.',
+  'prompt.buyHowMany': 'How many {name}? {price} each.',
+  'prompt.quantity': 'Quantity',
+  'prompt.carrying': 'You are carrying {amount}.',
+  'prompt.vaultHolds': 'The vault holds {amount}.',
+  'prompt.newPinHint': 'A new pin needs your account password.',
+  'prompt.pin': 'Pin',
+  'prompt.password': 'Password',
+  'prompt.accept': 'Accept',
+  'prompt.refuse': 'Refuse',
+  'prompt.wantsToTrade': '{name} wants to trade with you.',
+};
+
+export default en;
+
+declare module '@/i18n' {
+  interface TextOwners {
+    'versions/shared/ui/windows/economy_prompts': typeof en;
+  }
+}

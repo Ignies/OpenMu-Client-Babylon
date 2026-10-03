@@ -1,0 +1,36 @@
+/** Korean text of the `friends` window. */
+
+import type en from './en';
+
+export default {
+  'friends.title': '친구 목록',
+  'friends.tab.friends': '친구',
+  'friends.tab.letters': '편지',
+  'friends.empty': '친구 목록이 비어 있습니다.',
+  'friends.lettersEmpty': '편지함이 비어 있습니다.',
+  'friends.namePlaceholder': '캐릭터 이름',
+  'friends.server': '서버 {server}',
+  'friends.letter': '편지',
+  'friends.openingLetter': '편지를 여는 중...',
+  'friends.writeLetter': '편지 쓰기',
+  'friends.count': '친구 ({count}/{max})',
+  'friends.lettersCount': '편지 ({count}/{max})',
+  'friends.unread': ' 새 편지 {count}통',
+  'friends.add': '추가',
+  'friends.talk': '귓속말',
+  'friends.letterButton': '편지',
+  'friends.delete': '삭제',
+  'friends.hide': '숨기기',
+  'friends.write': '쓰기',
+  'friends.read': '읽기',
+  'friends.reply': '답장',
+  'friends.from': '보낸이 {sender} · {time}',
+  'friends.to': '받는이',
+  'friends.subject': '제목',
+  'friends.replyPrefix': 'Re: {subject}',
+  'friends.tab.rooms': '대화',
+  'friends.roomsEmpty': '열려 있는 대화방이 없습니다.',
+  'friends.roomsCount': '대화방 ({count})',
+  'friends.roomAlert': '새 글',
+  'friends.open': '열기',
+} satisfies Partial<Record<keyof typeof en, string>>;

@@ -9,6 +9,8 @@ Always-on interface elements, one folder per element, same shape as a window. Re
 
 ## How it works
 - Registered by the same glob as the windows (`versions/shared/ui/index.ts`).
+- An element's text is in its `i18n/<code>.ts` (`en.ts` plus one file per language), found by
+  `src/i18n`'s glob ([src/i18n/readme.md](../../../../src/i18n/readme.md)).
 - `slot: 'world'` draws over the 3D view under the HUD and stays up when the hide-interface key is
   pressed; `slot: 'hud'` hides with the rest of the interface. Higher `order` draws on top.
 

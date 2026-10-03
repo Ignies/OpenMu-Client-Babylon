@@ -1,0 +1,38 @@
+/** Japanese text of the `economy_prompts` window. */
+
+import type en from './en';
+
+export default {
+  'prompt.storeZen': 'Zen を預ける',
+  'prompt.store': '預ける',
+  'prompt.takeZen': 'Zen を引き出す',
+  'prompt.take': '引き出す',
+  'prompt.unlockVault': '倉庫のロックを解除',
+  'prompt.enterPin': '倉庫の暗証番号を入力してください。',
+  'prompt.unlock': 'ロック解除',
+  'prompt.setPin': '倉庫の暗証番号を設定',
+  'prompt.setPinButton': '設定',
+  'prompt.removePin': '倉庫の暗証番号を削除',
+  'prompt.removePinHint': '暗証番号の削除にはアカウントのパスワードが必要です。',
+  'prompt.remove': '削除',
+  'prompt.offerZen': 'Zen を提示',
+  'prompt.offer': '提示',
+  'prompt.setPrice': '価格を設定',
+  'prompt.askingPrice': '希望価格。',
+  'prompt.askingPriceFor': '{name} の希望価格。',
+  'prompt.set': '設定',
+  'prompt.buy': '購入',
+  'prompt.itemCosts': '{name} の価格は {price} です。',
+  'prompt.thisItem': 'このアイテム',
+  'prompt.itemGone': 'このアイテムはもうありません。',
+  'prompt.buyHowMany': '{name} をいくつ買いますか？1個 {price}。',
+  'prompt.quantity': '数量',
+  'prompt.carrying': '所持金は {amount} です。',
+  'prompt.vaultHolds': '倉庫には {amount} があります。',
+  'prompt.newPinHint': '新しい暗証番号にはアカウントのパスワードが必要です。',
+  'prompt.pin': 'PIN',
+  'prompt.password': 'パスワード',
+  'prompt.accept': '受ける',
+  'prompt.refuse': '断る',
+  'prompt.wantsToTrade': '{name} が取引を申し込んでいます。',
+} satisfies Partial<Record<keyof typeof en, string>>;

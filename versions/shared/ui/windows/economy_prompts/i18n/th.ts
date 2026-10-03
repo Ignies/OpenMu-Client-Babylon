@@ -1,0 +1,38 @@
+/** Thai text of the `economy_prompts` window. */
+
+import type en from './en';
+
+export default {
+  'prompt.storeZen': 'ฝากเซน',
+  'prompt.store': 'ฝาก',
+  'prompt.takeZen': 'ถอนเซน',
+  'prompt.take': 'ถอน',
+  'prompt.unlockVault': 'ปลดล็อกคลัง',
+  'prompt.enterPin': 'กรอกรหัสคลัง',
+  'prompt.unlock': 'ปลดล็อก',
+  'prompt.setPin': 'ตั้งรหัสคลัง',
+  'prompt.setPinButton': 'ตั้งรหัส',
+  'prompt.removePin': 'ลบรหัสคลัง',
+  'prompt.removePinHint': 'การลบรหัสต้องใช้รหัสผ่านบัญชีของคุณ',
+  'prompt.remove': 'ลบ',
+  'prompt.offerZen': 'เสนอเซน',
+  'prompt.offer': 'เสนอ',
+  'prompt.setPrice': 'ตั้งราคา',
+  'prompt.askingPrice': 'ราคาที่ขอ',
+  'prompt.askingPriceFor': 'ราคาที่ขอสำหรับ {name}',
+  'prompt.set': 'ตั้ง',
+  'prompt.buy': 'ซื้อ',
+  'prompt.itemCosts': '{name} ราคา {price}',
+  'prompt.thisItem': 'ไอเทมนี้',
+  'prompt.itemGone': 'ไอเทมนี้ไม่อยู่แล้ว',
+  'prompt.buyHowMany': 'ต้องการ {name} กี่ชิ้น? ชิ้นละ {price}',
+  'prompt.quantity': 'จำนวน',
+  'prompt.carrying': 'คุณพกอยู่ {amount}',
+  'prompt.vaultHolds': 'ในคลังมี {amount}',
+  'prompt.newPinHint': 'การตั้งรหัสใหม่ต้องใช้รหัสผ่านบัญชีของคุณ',
+  'prompt.pin': 'รหัส PIN',
+  'prompt.password': 'รหัสผ่าน',
+  'prompt.accept': 'ตกลง',
+  'prompt.refuse': 'ปฏิเสธ',
+  'prompt.wantsToTrade': '{name} ต้องการแลกเปลี่ยนกับคุณ',
+} satisfies Partial<Record<keyof typeof en, string>>;

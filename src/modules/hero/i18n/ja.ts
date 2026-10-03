@@ -1,0 +1,43 @@
+/** Japanese text of the `hero` module. */
+
+import type en from './en';
+
+export default {
+  'class.elf': 'エルフ',
+
+  'emote.greeting': 'あいさつ',
+  'emote.goodbye': '別れ',
+  'emote.clap': '拍手',
+  'emote.cheer': '歓声',
+  'emote.smile': '笑顔',
+  'emote.cry': '泣く',
+  'emote.respect': '敬意',
+  'emote.salute': '敬礼',
+  'emote.win': '勝利',
+  'emote.gesture': '合図',
+  'emote.direction': '指さす',
+  'emote.unknown': '困惑',
+  'emote.awkward': '気まずい',
+  'emote.see': 'じっと見る',
+  'emote.sleep': '眠い',
+  'emote.cold': '寒い',
+  'emote.again': 'もう一度',
+  'emote.rush': '突撃',
+  'emote.scissors': 'チョキ',
+  'emote.rock': 'グー',
+  'emote.paper': 'パー',
+  'emote.hustle': '急ぐ',
+  'emote.provocation': '挑発',
+  'emote.lookAround': '見回す',
+  'emote.cheers': '乾杯',
+  'notify.pointNotAdded': 'ポイントを振り分けられませんでした',
+  'notify.levelUp': 'レベル {level}',
+  'notify.masterLevelUp': 'マスターレベル {level}',
+  'notify.fruitAdd': '{stat} +{points}（果実）',
+  'notify.fruitRemove': '{stat} -{points}（果実）',
+  'notify.fruitNoEffect': '果実の効果はありませんでした',
+  'notify.fruitLimit': '今日はこれ以上果実を使えません',
+  'notify.fruitFloor': '{stat} はこれ以上下げられません',
+  'notify.fruitEquipped': 'そのステータスを必要とする装備を先に外してください',
+  'notify.fruitNotNow': '今はこの果実を使えません',
+} satisfies Partial<Record<keyof typeof en, string>>;

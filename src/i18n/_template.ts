@@ -1,8 +1,9 @@
 /**
- * Copy me to add a language: `cp _template.ts <language>.ts`, fill the three
- * sections, then add `<language>Layer` to `layers.ts`. Nothing else changes -
- * the selector lists whatever `layers.ts` holds, and `muFlag` already draws
- * every region in `FlagRegion`.
+ * Copy me to add a language: `cp _template.ts <language>.ts`, fill the two
+ * sections, then add `<language>Layer` to `layers.ts`. The text comes next:
+ * `bun tools/i18n.ts export <code> sheet.csv`, translate, then
+ * `bun tools/i18n.ts import <code> sheet.csv` writes one `i18n/<code>.ts` into
+ * every owner folder (docs/how_to/add_language.md).
  *
  * Compiling but never imported, on purpose.
  */
@@ -21,10 +22,7 @@ const LABEL = 'Language';
  */
 const FONT: string | undefined = undefined;
 
-// ---- 2. state + readers ----------------------------------------------------
-// A language has neither: `strings` is data, and the facade owns the choice.
-
-// ---- 3. the layer ----------------------------------------------------------
+// ---- 2. the layer ----------------------------------------------------------
 
 export const templateLayer: LanguageLayer = {
   name: 'template',
@@ -32,7 +30,4 @@ export const templateLayer: LanguageLayer = {
   label: LABEL,
   region: 'GB',
   font: FONT,
-  strings: {
-    // 'common.ok': 'OK',
-  },
 };

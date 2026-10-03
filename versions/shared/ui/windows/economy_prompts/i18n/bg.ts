@@ -1,0 +1,38 @@
+/** Bulgarian text of the `economy_prompts` window. */
+
+import type en from './en';
+
+export default {
+  'prompt.storeZen': 'Внеси Zen',
+  'prompt.store': 'Внеси',
+  'prompt.takeZen': 'Изтегли Zen',
+  'prompt.take': 'Изтегли',
+  'prompt.unlockVault': 'Отключи трезора',
+  'prompt.enterPin': 'Въведи ПИН на трезора.',
+  'prompt.unlock': 'Отключи',
+  'prompt.setPin': 'Задай ПИН на трезора',
+  'prompt.setPinButton': 'Задай ПИН',
+  'prompt.removePin': 'Премахни ПИН на трезора',
+  'prompt.removePinHint': 'Премахването на ПИН иска паролата на акаунта.',
+  'prompt.remove': 'Премахни',
+  'prompt.offerZen': 'Предложи Zen',
+  'prompt.offer': 'Предложи',
+  'prompt.setPrice': 'Задай цена',
+  'prompt.askingPrice': 'Исканата цена.',
+  'prompt.askingPriceFor': 'Исканата цена за {name}.',
+  'prompt.set': 'Задай',
+  'prompt.buy': 'Купи',
+  'prompt.itemCosts': '{name} струва {price}.',
+  'prompt.thisItem': 'Този предмет',
+  'prompt.itemGone': 'Този предмет вече го няма.',
+  'prompt.buyHowMany': 'Колко {name}? По {price}.',
+  'prompt.quantity': 'Количество',
+  'prompt.carrying': 'Носиш {amount}.',
+  'prompt.vaultHolds': 'В трезора има {amount}.',
+  'prompt.newPinHint': 'Нов ПИН изисква паролата на акаунта ти.',
+  'prompt.pin': 'PIN',
+  'prompt.password': 'Парола',
+  'prompt.accept': 'Приеми',
+  'prompt.refuse': 'Откажи',
+  'prompt.wantsToTrade': '{name} иска да търгува с теб.',
+} satisfies Partial<Record<keyof typeof en, string>>;

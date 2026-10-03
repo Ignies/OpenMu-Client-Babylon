@@ -1,38 +1,24 @@
 import { describe, expect, it } from 'vitest';
-import { EN_TEXT, type TextKey } from './recipes';
 import { LANGUAGE_LAYERS } from './layers';
+import { builtInText } from './sources';
+import { textProblems } from './coverage';
 
 /**
- * A language that falls behind the catalogue still compiles - `strings` is
- * `Partial`, on purpose, so adding a key never breaks a language file - and
- * on screen it just quietly shows English. That is easy to ship by accident,
- * so the gap is a test failure rather than a dev-console warning.
+ * Every built-in owner (`<owner>/i18n/`) has an `en.ts` and translates every
+ * one of its keys in every language, keeping every `{hole}` and `%` spec. A
+ * missing line would only show English on screen, which is easy to ship by
+ * accident. Streamed modules need only English and are not checked here.
  */
 
-const KEYS = Object.keys(EN_TEXT) as TextKey[];
+const FILES = builtInText();
+const CODES = LANGUAGE_LAYERS.map(l => l.code);
 
-describe('language coverage', () => {
-  for (const layer of LANGUAGE_LAYERS) {
-    it(`${layer.name} translates every key`, () => {
-      const missing = KEYS.filter(key => layer.strings[key] === undefined);
-      expect(missing).toEqual([]);
-    });
+describe('text coverage', () => {
+  it('finds the built-in text', () => {
+    expect(FILES.filter(f => f.code === 'en').length).toBeGreaterThan(50);
+  });
 
-    it(`${layer.name} keeps every placeholder`, () => {
-      const holes = (text: string) =>
-        (text.match(/\{\w+\}/g) ?? []).slice().sort().join(',');
-      // `%d` / `%s` / `%%`: the original client's own format strings, spliced
-      // by their call sites, so a dropped one is a crash rather than a typo.
-      const specs = (text: string) =>
-        (text.match(/%(?:%|\d*\.?\d*[a-zA-Z]|I64d)/g) ?? []).join(',');
-
-      const broken = KEYS.filter(key => {
-        const line = layer.strings[key];
-        if (line === undefined) return false;
-        return holes(line) !== holes(EN_TEXT[key]) || specs(line) !== specs(EN_TEXT[key]);
-      });
-
-      expect(broken).toEqual([]);
-    });
-  }
+  it('every owner translates every key in every language', () => {
+    expect(textProblems(FILES, CODES)).toEqual([]);
+  });
 });

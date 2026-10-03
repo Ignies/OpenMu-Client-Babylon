@@ -1,0 +1,43 @@
+/** Chinese text of the `hero` module. */
+
+import type en from './en';
+
+export default {
+  'class.elf': '精灵',
+
+  'emote.greeting': '打招呼',
+  'emote.goodbye': '道别',
+  'emote.clap': '鼓掌',
+  'emote.cheer': '欢呼',
+  'emote.smile': '微笑',
+  'emote.cry': '哭泣',
+  'emote.respect': '敬意',
+  'emote.salute': '敬礼',
+  'emote.win': '胜利',
+  'emote.gesture': '手势',
+  'emote.direction': '指向',
+  'emote.unknown': '疑惑',
+  'emote.awkward': '尴尬',
+  'emote.see': '注视',
+  'emote.sleep': '困倦',
+  'emote.cold': '寒冷',
+  'emote.again': '再来',
+  'emote.rush': '冲啊',
+  'emote.scissors': '剪刀',
+  'emote.rock': '石头',
+  'emote.paper': '布',
+  'emote.hustle': '快点',
+  'emote.provocation': '挑衅',
+  'emote.lookAround': '环顾',
+  'emote.cheers': '干杯',
+  'notify.pointNotAdded': '无法分配该点数',
+  'notify.levelUp': '等级 {level}',
+  'notify.masterLevelUp': '大师等级 {level}',
+  'notify.fruitAdd': '{stat} +{points}（果实）',
+  'notify.fruitRemove': '{stat} -{points}（果实）',
+  'notify.fruitNoEffect': '果实没有效果',
+  'notify.fruitLimit': '今天不能再使用果实了',
+  'notify.fruitFloor': '{stat} 已经无法再降低',
+  'notify.fruitEquipped': '请先脱下需要该属性的装备',
+  'notify.fruitNotNow': '现在不能使用这个果实',
+} satisfies Partial<Record<keyof typeof en, string>>;

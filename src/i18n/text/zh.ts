@@ -1,0 +1,41 @@
+/** Chinese text of no single owner: shared by many (`common.*`, language names). */
+
+import type en from './en';
+
+export default {
+  'common.ok': '确定',
+  'common.cancel': '取消',
+  'common.close': '关闭',
+  'common.yes': '是',
+  'common.no': '否',
+  'common.none': '无',
+  'common.create': '创建',
+  'common.creating': '创建中...',
+  'common.send': '发送',
+  'common.sending': '发送中...',
+  'common.loading': '加载中...',
+  'common.warning': '注意',
+  'common.level': '等级',
+  'common.offline': '离线',
+  'common.off': '关',
+  'common.zen': '金币',
+  'common.notEnoughZen': '金币不足',
+  'options.quality.classic': '经典',
+  'options.quality.enhanced': '增强',
+
+  'language.english': '英语',
+  'language.spanish': '西班牙语',
+  'language.french': '法语',
+  'language.italian': '意大利语',
+  'language.portuguese': '葡萄牙语',
+  'language.russian': '俄语',
+  'language.chinese': '中文（普通话）',
+  'language.japanese': '日语',
+  'language.thai': '泰语',
+  'language.korean': '韩语',
+  'language.bulgarian': '保加利亚语',
+  'language.romanian': '罗马尼亚语',
+  'language.german': '德语',
+  'language.polish': '波兰语',
+  'language.vietnamese': '越南语',
+} satisfies Partial<Record<keyof typeof en, string>>;

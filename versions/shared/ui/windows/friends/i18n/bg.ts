@@ -1,0 +1,36 @@
+/** Bulgarian text of the `friends` window. */
+
+import type en from './en';
+
+export default {
+  'friends.title': 'Списък с приятели',
+  'friends.tab.friends': 'Приятели',
+  'friends.tab.letters': 'Писма',
+  'friends.empty': 'Списъкът ти с приятели е празен.',
+  'friends.lettersEmpty': 'Пощенската ти кутия е празна.',
+  'friends.namePlaceholder': 'Име на герой',
+  'friends.server': 'Сървър {server}',
+  'friends.letter': 'Писмо',
+  'friends.openingLetter': 'Писмото се отваря...',
+  'friends.writeLetter': 'Напиши писмо',
+  'friends.count': 'Приятели ({count}/{max})',
+  'friends.lettersCount': 'Писма ({count}/{max})',
+  'friends.unread': ' {count} нови',
+  'friends.add': 'Добави',
+  'friends.talk': 'Говори',
+  'friends.letterButton': 'Писмо',
+  'friends.delete': 'Изтрий',
+  'friends.hide': 'Скрий се',
+  'friends.write': 'Напиши',
+  'friends.read': 'Прочети',
+  'friends.reply': 'Отговори',
+  'friends.from': 'От {sender} · {time}',
+  'friends.to': 'До',
+  'friends.subject': 'Тема',
+  'friends.replyPrefix': 'Re: {subject}',
+  'friends.tab.rooms': 'Чат',
+  'friends.roomsEmpty': 'Няма отворени чат стаи.',
+  'friends.roomsCount': 'Чат стаи ({count})',
+  'friends.roomAlert': 'Ново',
+  'friends.open': 'Отвори',
+} satisfies Partial<Record<keyof typeof en, string>>;

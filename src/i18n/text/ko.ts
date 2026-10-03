@@ -1,0 +1,41 @@
+/** Korean text of no single owner: shared by many (`common.*`, language names). */
+
+import type en from './en';
+
+export default {
+  'common.ok': '확인',
+  'common.cancel': '취소',
+  'common.close': '닫기',
+  'common.yes': '예',
+  'common.no': '아니오',
+  'common.none': '없음',
+  'common.create': '생성',
+  'common.creating': '생성 중...',
+  'common.send': '보내기',
+  'common.sending': '보내는 중...',
+  'common.loading': '불러오는 중...',
+  'common.warning': '주의',
+  'common.level': '레벨',
+  'common.offline': '오프라인',
+  'common.off': '끔',
+  'common.zen': '젠',
+  'common.notEnoughZen': '젠이 부족합니다',
+  'options.quality.classic': '클래식',
+  'options.quality.enhanced': '향상',
+
+  'language.english': '영어',
+  'language.spanish': '스페인어',
+  'language.french': '프랑스어',
+  'language.italian': '이탈리아어',
+  'language.portuguese': '포르투갈어',
+  'language.russian': '러시아어',
+  'language.chinese': '중국어(표준어)',
+  'language.japanese': '일본어',
+  'language.thai': '태국어',
+  'language.korean': '한국어',
+  'language.bulgarian': '불가리아어',
+  'language.romanian': '루마니아어',
+  'language.german': '독일어',
+  'language.polish': '폴란드어',
+  'language.vietnamese': '베트남어',
+} satisfies Partial<Record<keyof typeof en, string>>;

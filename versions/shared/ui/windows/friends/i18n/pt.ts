@@ -1,0 +1,36 @@
+/** Portuguese text of the `friends` window. */
+
+import type en from './en';
+
+export default {
+  'friends.title': 'Lista de amigos',
+  'friends.tab.friends': 'Amigos',
+  'friends.tab.letters': 'Cartas',
+  'friends.empty': 'Sua lista de amigos está vazia.',
+  'friends.lettersEmpty': 'Sua caixa de cartas está vazia.',
+  'friends.namePlaceholder': 'Nome do personagem',
+  'friends.server': 'Servidor {server}',
+  'friends.letter': 'Carta',
+  'friends.openingLetter': 'Abrindo a carta...',
+  'friends.writeLetter': 'Escrever uma carta',
+  'friends.count': 'Amigos ({count}/{max})',
+  'friends.lettersCount': 'Cartas ({count}/{max})',
+  'friends.unread': ' {count} novas',
+  'friends.add': 'Adicionar',
+  'friends.talk': 'Falar',
+  'friends.letterButton': 'Carta',
+  'friends.delete': 'Excluir',
+  'friends.hide': 'Ocultar',
+  'friends.write': 'Escrever',
+  'friends.read': 'Ler',
+  'friends.reply': 'Responder',
+  'friends.from': 'De {sender} · {time}',
+  'friends.to': 'Para',
+  'friends.subject': 'Assunto',
+  'friends.replyPrefix': 'Re: {subject}',
+  'friends.tab.rooms': 'Chat',
+  'friends.roomsEmpty': 'Nenhuma sala de chat aberta.',
+  'friends.roomsCount': 'Salas de chat ({count})',
+  'friends.roomAlert': 'Novo',
+  'friends.open': 'Abrir',
+} satisfies Partial<Record<keyof typeof en, string>>;
