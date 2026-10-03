@@ -3,7 +3,7 @@ import { defineAnimation } from '@/controllers/anim';
 export default defineAnimation({
   action: 150,
   name: 'PLAYER_SKILL_ELF1',
-  // The base table's 0.28 default (ZzzOpenData.cpp:314-372).
-  speed: 0.28,
+  // SetAttackSpeed, run after the base table at load and on every cast (ZzzCharacter.cpp:936).
+  speed: { base: 0.25, plus: 'magicSpeedStepped' },
   skill: true,
 });

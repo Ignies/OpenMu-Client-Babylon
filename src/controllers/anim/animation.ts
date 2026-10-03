@@ -6,11 +6,12 @@ export type PlayerActionName = keyof typeof PlayerAction;
 /**
  * A clip's `PlaySpeed`: a flat rate, a base plus a stat factor (`(base + factor) * times`), or the
  * walk tables' Rage Fighter split. `attackSpeed` is `AttackSpeed1`, `magicSpeed` is `MagicSpeed2`
- * and `magicSpeedStepped` is `MagicSpeed1` (AttackSpeed1's stepped factor over the magic speed).
+ * `magicSpeedStepped` is `MagicSpeed1` (AttackSpeed1's stepped factor over the magic speed) and
+ * `rageAttackSpeed` is `RageAttackSpeed`, AttackSpeed * 0.002 (ZzzCharacter.cpp:1016).
  */
 export type SpeedRule =
   | number
-  | { base: number; plus: 'attackSpeed' | 'magicSpeed' | 'magicSpeedStepped'; times?: number }
+  | { base: number; plus: 'attackSpeed' | 'magicSpeed' | 'magicSpeedStepped' | 'rageAttackSpeed'; times?: number }
   | { base: number; rageFighter: number };
 
 /** A `PlayAnimation` slow-down: `scale` while `after < frame < before`, Dark Lords only if `darkLordOnly`. */

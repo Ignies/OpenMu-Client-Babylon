@@ -1,8 +1,8 @@
 import { defineSkill } from '@/controllers/skills/define';
-import { DW1_RELEASE, bearing, monsterOf, releaseSound } from '../_shared';
+import { bearing, monsterOf, releaseSound } from '../_shared';
 import { MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
-import { delay, entityGone, entityPos, fxNow, type ParticleRecipe, type PointSource, type RGB } from '@/controllers/fx/core';
-import { SkillContext, Step, TICK, forwardOf, perTick, ticks } from '@/controllers/skills/visuals';
+import { entityGone, entityPos, fxNow, type ParticleRecipe, type PointSource, type RGB } from '@/controllers/fx/core';
+import { SkillContext, Step, TICK, forwardOf, onRelease, perTick, ticks } from '@/controllers/skills/visuals';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
@@ -135,7 +135,7 @@ interface WaveLook {
 
 /** 11 Power Wave (ZzzCharacter.cpp:5044-5055): at the release, MODEL_MAGIC2 from the caster's feet toward the target; SOUND_MAGIC. */
 const powerWave = (look?: WaveLook): Step => (_at, c) => {
-  delay(DW1_RELEASE, () => {
+  onRelease(c, () => {
     if (entityGone(c.caster)) return;
     const feet = entityPos(c.caster, 0, new Vector3());
     const yaw = bearing(c, feet);

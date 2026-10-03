@@ -1,8 +1,8 @@
 import { defineSkill } from '@/controllers/skills/define';
-import { DW1_RELEASE, bearing, monsterOf, placeBodyLight, releaseSound } from '../_shared';
+import { bearing, monsterOf, placeBodyLight, releaseSound } from '../_shared';
 import { TEX } from '@/controllers/fx/recipes';
-import { delay, entityGone, entityPos, fxNow, type ParticleRecipe, type PointSource } from '@/controllers/fx/core';
-import { Step, TICK, cm, forwardOf, particles, perTick, seq, sprite, ticks } from '@/controllers/skills/visuals';
+import { entityGone, entityPos, fxNow, type ParticleRecipe, type PointSource } from '@/controllers/fx/core';
+import { Step, TICK, cm, forwardOf, onRelease, particles, perTick, seq, sprite, ticks } from '@/controllers/skills/visuals';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
@@ -119,7 +119,7 @@ interface EnergyBallLook {
  * flung 50 cm in a random direction (:244-285). A ball whose target is gone flies on. SOUND_MAGIC.
  */
 const energyBall = (look?: EnergyBallLook): Step => (_at, c) => {
-  delay(DW1_RELEASE, () => {
+  onRelease(c, () => {
     if (entityGone(c.caster) || ENERGY_BALL_UNDRAWN.has(monsterOf(c.caster))) return;
     const from = entityPos(c.caster, cm(100), new Vector3());
     const f = forwardOf(bearing(c, from));

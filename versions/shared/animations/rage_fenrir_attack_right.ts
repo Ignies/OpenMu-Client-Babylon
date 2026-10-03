@@ -3,6 +3,6 @@ import { defineAnimation } from '@/controllers/anim';
 export default defineAnimation({
   action: 282,
   name: 'PLAYER_RAGE_FENRIR_ATTACK_RIGHT',
-  // Rage Fighter Fenrir clips (ZzzOpenData.cpp:411-427).
-  speed: { base: 0.25, plus: 'attackSpeed' },
+  // SetAttackSpeed: 0.25 + AttackSpeed * 0.002, over the Fenrir table (ZzzCharacter.cpp:1027).
+  speed: { base: 0.25, plus: 'rageAttackSpeed' },
 });

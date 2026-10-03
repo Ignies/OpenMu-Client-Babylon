@@ -1,8 +1,8 @@
 import { defineSkill } from '@/controllers/skills/define';
-import { DW1_RELEASE, FIRE_BALL_EMBERS, FireBallLook, fireBallFlight, lavaChips, perTickRoll, placeBodyLight, releaseSound, softExplosion } from '../_shared';
+import { FIRE_BALL_EMBERS, FireBallLook, fireBallFlight, lavaChips, perTickRoll, placeBodyLight, releaseSound, softExplosion } from '../_shared';
 import { FIRE_PUFF, FIRE_SPARKS, TEX } from '@/controllers/fx/recipes';
-import { delay, entityGone, entityPos, type RGB } from '@/controllers/fx/core';
-import { Step, burn, cm, facing, hitSparks, particles, perTick, scorch, seq, ticks, toward } from '@/controllers/skills/visuals';
+import { entityGone, entityPos, type RGB } from '@/controllers/fx/core';
+import { Step, burn, cm, facing, hitSparks, onRelease, particles, perTick, scorch, seq, ticks, toward } from '@/controllers/skills/visuals';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 
 import { FIRE_BALL_LIGHT } from '../_shared';
@@ -15,7 +15,7 @@ import { effectLight } from '@/controllers/lighting/recipes';
  * `arrive` runs at the ball (CheckTargetRange, ZzzEffect.cpp:244-282); a ball whose target is gone flies on.
  */
 const fireBall = (arrive: Step, look?: FireBallLook & { tailRoll?: readonly [number, number, number] }): Step => (at, c) => {
-  delay(DW1_RELEASE, () => {
+  onRelease(c, () => {
     if (entityGone(c.caster)) return;
     releaseSound('Sound/eMeteorite')(at, c);
     const from = entityPos(c.caster, cm(120), new Vector3());

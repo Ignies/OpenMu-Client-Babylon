@@ -11,7 +11,7 @@ import { type RingOptions } from '@/controllers/fx/ring';
 import { Vector3, type Scene } from '@/controllers/render/babylon/exports';
 import { skillDefinition, type SkillDefinition } from '@versions/shared/skills/skillsDatabase';
 import { type SpriteOptions } from '@/controllers/fx/sprite';
-import { combat } from '@/controllers/combat';
+import { combat, RELEASE_KEY, RELEASE_TICKS } from '@/controllers/combat';
 import { lighting } from '@/controllers/lighting';
 import { storeRef } from '@/app/storeRef';
 import { tierIndex } from '@/controllers/lighting/lightingQuality';
@@ -101,6 +101,49 @@ export const after = (seconds: number, step: Step): Step => (at, c) => {
   const p = at.clone();
   delay(seconds, () => step(p, c));
 };
+/** What lets a cast release early: its caster's clip reaching `key` (AttackStage). See readme.md. */
+export interface ReleaseRule {
+  /** The clip key; `RELEASE_KEY` (5) by default. */
+  readonly key?: number;
+  /** The clips that count; by default AttackStage's attack clips (`combat.releasesOnKey`). */
+  readonly clips?: ReadonlySet<number>;
+}
+
+/** The caster's clip has passed the rule's key (`AnimationFrame >= key`, ZzzCharacter.cpp:2598-2604). */
+function keyReached(e: Entity, rule: ReleaseRule): boolean {
+  const m = e.modelObject;
+  if (!m) return false;
+  const monsterRig = !!e.monsterAnimation || (e.skin ?? -1) >= 0;
+  const counts = rule.clips ? rule.clips.has(m.CurrentAction) : combat.releasesOnKey(m.CurrentAction, monsterRig);
+  return counts && m.actionFrame() >= (rule.key ?? RELEASE_KEY);
+}
+
+/**
+ * Run `fn` at the cast's release (`AttackTime >= g_iLimitAttackTime`, ZzzCharacter.cpp:4132-4140): 14 ticks
+ * after the packet, or from the next tick on as soon as the caster's clip passes its key, so a faster clip
+ * (attack / magic speed) releases sooner.
+ */
+export function onRelease(c: SkillContext, fn: () => void, rule: ReleaseRule = {}): void {
+  const last = ticks(RELEASE_TICKS);
+  if (!c.caster.modelObject) {
+    delay(last, fn);
+    return;
+  }
+  const t0 = fxNow();
+  const poll = (): void => {
+    const t = fxNow() - t0 + 1e-9;
+    if (t >= last || keyReached(c.caster, rule)) fn();
+    else delay(0, poll);
+  };
+  delay(TICK, poll);
+}
+
+/** `step` at the cast's release (`onRelease`). */
+export const afterRelease = (step: Step, rule?: ReleaseRule): Step => (at, c) => {
+  const p = at.clone();
+  onRelease(c, () => step(p, c), rule);
+};
+
 /** `step` `n` times, `every` seconds apart (a per-frame spawn over a few frames). */
 export const repeat = (n: number, every: number, step: Step): Step => (at, c) => {
   for (let i = 0; i < n; i++) {

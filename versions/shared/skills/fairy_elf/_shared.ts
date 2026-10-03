@@ -1,5 +1,5 @@
 import { delay, entityGone, entityPos, entityYaw, fxNow, scaleRGB, type ParticleRecipe, type PointSource, type RGB } from '@/controllers/fx/core';
-import { SkillContext, Step, TICK, after, atCaster, cm, repeat, ring, seq, ticks } from '@/controllers/skills/visuals';
+import { SkillContext, Step, TICK, afterRelease, atCaster, cm, repeat, ring, seq, ticks } from '@/controllers/skills/visuals';
 import { RGBS, TEX } from '@/controllers/fx/recipes';
 import { type TaperShape } from '@/controllers/fx/joint';
 import { Vector3 } from '@/controllers/render/babylon/exports';
@@ -22,8 +22,6 @@ export const ICE_MOTES: ParticleRecipe = {
 
 /** BITMAP_MAGIC+1 sub3 and JOINT_HEALING sub3's tint (ZzzEffect.cpp:9860, ZzzEffectJoint.cpp:3677). */
 const SUMMON_TINT: RGB = [1, 0.6, 0.4];
-/** The circle opens when AttackTime reaches 15, 14 ticks after the 0x19 set it to 1 (ZzzCharacter.cpp:4132-4157). */
-const SUMMON_DELAY = ticks(14);
 /** JOINT_HEALING: LT 12 and it dies below 0, so 13 moves (ZzzEffectJoint.cpp:481-485, :6954-6957). */
 const HEALING_MOVES = 13;
 /** Velocity starts at 0 and gains 4 cm a tick, after the move (:2998-3003, :3639). */
@@ -140,8 +138,8 @@ const summonDecal: Step = (at, c) =>
     fadeTail: 0.25,
   })(at, c);
 
-/** The elf summons' cast, 14 ticks after the 0x19: the orange circle and its 60 streaks, where the caster stands then. */
-export const elfSummon: Step = after(SUMMON_DELAY, atCaster(seq(summonDecal, createHealing(SUMMON_TINT, 20)), 0));
+/** The elf summons' cast at the release (AttackTime 15 or the clip's key 5, ZzzCharacter.cpp:4132-4157): the orange circle and its 60 streaks, where the caster stands then. */
+export const elfSummon: Step = afterRelease(atCaster(seq(summonDecal, createHealing(SUMMON_TINT, 20)), 0));
 
 // Enhanced and Ultra: the same circle and streaks, drawn to read at our camera, with ground glow,
 // embers off the circle and the light they throw.
@@ -197,5 +195,5 @@ const summonGrace: Step = (feet, c) => {
   summonLight(c.scene, SUMMON_TINT, 1.45, ticks(20), feet, undefined, { attack: ticks(10), release: ticks(6), heightOffset: 0.4, floorGain: 0.4 });
 };
 
-const elfSummonGraded: Step = after(SUMMON_DELAY, atCaster(seq(summonDecal, createHealing(SUMMON_STREAK_TINT, 20, SUMMON_GRACE_STREAK), summonGrace), 0));
+const elfSummonGraded: Step = afterRelease(atCaster(seq(summonDecal, createHealing(SUMMON_STREAK_TINT, 20, SUMMON_GRACE_STREAK), summonGrace), 0));
 export const SUMMON_GRADED = { area: elfSummonGraded, impact: elfSummonGraded };

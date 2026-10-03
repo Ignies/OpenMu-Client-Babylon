@@ -2,7 +2,7 @@ import { EXPLOSION_CELLS, MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
 import { effects, type EffectHandle } from '@/controllers/fx';
 import { type Entity } from '@/ecs/world';
 import { FIRE_BLEND_MESH, LANDING_SMOKE_LIFT } from '../_shared';
-import { IMPACT_HEIGHT, SkillContext, Step, TICK, cm, perTick, ring, seq, sprite, ticks } from '@/controllers/skills/visuals';
+import { IMPACT_HEIGHT, SkillContext, Step, TICK, cm, onRelease, perTick, ring, seq, sprite, ticks } from '@/controllers/skills/visuals';
 import { bonePos, delay, entityGone, entityPos, entityYaw, followEntity, fxNow, type ParticleRecipe, type RGB } from '@/controllers/fx/core';
 import { type ProjectileHead } from '@/controllers/fx/projectile';
 import { type Sounds } from '@/controllers/sound/recipes';
@@ -173,16 +173,13 @@ export const teleportEnhanced = (moment: 'begin' | 'end'): Step => seq(teleportC
 // ---- dw1 steps --------------------------------------------------------------------
 
 /**
- * A spell's impact runs when `AttackTime`, set to 1 by its packet, reaches `g_iLimitAttackTime` 15
- * (ZzzCharacter.cpp:4132-4145, WSclient.cpp:4276-4304): 14 ticks later, for the hero too.
+ * `step` at the release (`onRelease`: AttackTime 15 or the cast clip's key 5, ZzzCharacter.cpp:4132-4145,
+ * WSclient.cpp:4276-4304), on the target's feet as they are then (`to->Position`); nothing if the caster has gone.
  */
-export const DW1_RELEASE = ticks(14);
-
-/** `step` at the release, on the target's feet as they are then (`to->Position`); nothing if the caster has gone. */
 export const atRelease = (step: Step): Step => (at, c) => {
   const feet = at.clone();
   feet.y -= IMPACT_HEIGHT;
-  delay(DW1_RELEASE, () => {
+  onRelease(c, () => {
     if (entityGone(c.caster)) return;
     if (c.target && !entityGone(c.target)) entityPos(c.target, 0, feet);
     step(feet, c);
@@ -308,13 +305,13 @@ export const monsterOf = (e: Entity): number => (e.charAppearance ? -1 : (e.npcT
 
 // ---- dw2 steps
 
-/** AttackTime runs from 1 at the echo to g_iLimitAttackTime 15 before the skill switch fires (ZzzCharacter.cpp:4132-4145). */
-const DW2_ATTACK_TIME = ticks(14);
-
-/** `step` at AttackTime 15, with the caster's facing as it is then; nothing if the caster left meanwhile. */
+/**
+ * `step` at the release (`onRelease`: AttackTime 15 or the cast clip's key 5, ZzzCharacter.cpp:4132-4145), with
+ * the caster's facing as it is then; nothing if the caster left meanwhile.
+ */
 export const dw2AtAttackTime = (step: Step): Step => (at, c) => {
   const p = at.clone();
-  delay(DW2_ATTACK_TIME, () => {
+  onRelease(c, () => {
     if (entityGone(c.caster)) return;
     step(p, { ...c, yaw: entityYaw(c.caster) });
   });

@@ -65,6 +65,8 @@ _shared.ts                      helpers for several classes
   rules (Nova, Combo), Nova's hook numbers, the cancel effects against `ReceiveMagicFinish`
   (WSclient.cpp:3878). `rage_fighter/party_buffs.test.ts`: the party buffs'
   coin toss and its paired sound.
+- `releaseTiming.test.ts`: when Fire Ball leaves against the caster's magic speed: 14 ticks at a
+  slow clip, on the clip's key 5 at a fast one.
 - Tests that load the skills import `./skillVisuals` first (it keeps the app import cycle in
   order) and stub `fetch` in `vi.hoisted`: Data/ is not there under Node.
 - Snapshots are in `__snapshots__/`. When a change is meant, update them with

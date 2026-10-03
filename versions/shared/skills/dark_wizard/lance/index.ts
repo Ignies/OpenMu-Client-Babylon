@@ -1,11 +1,11 @@
 import { defineSkill } from '@/controllers/skills/define';
-import { DW1_RELEASE, placeBodyLight, releaseSound } from '../_shared';
+import { placeBodyLight, releaseSound } from '../_shared';
 import { type Entity } from '@/ecs/world';
 import { MODEL, TEX } from '@/controllers/fx/recipes';
 import { spawnModel, type ModelHandle } from '@/controllers/fx/model';
 import { delay, entityGone, entityPos, entityYaw, fxNow, type ParticleRecipe, type PointSource, type RGB } from '@/controllers/fx/core';
 import { type ParticlesOptions } from '@/controllers/fx/particles';
-import { SkillContext, Step, TICK, cm, particles, seq, sprite, ticks } from '@/controllers/skills/visuals';
+import { SkillContext, Step, TICK, cm, onRelease, particles, seq, sprite, ticks } from '@/controllers/skills/visuals';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { deg, humTurn, rad } from '../../_shared';
 import { effects } from '@/controllers/fx';
@@ -224,7 +224,7 @@ function lanceStar(c: SkillContext, target: Entity, sub: number, look?: LanceLoo
  * silent elsewhere; it plays on every map here.
  */
 const lance = (look?: LanceLook): Step => (_at, c) => {
-  delay(DW1_RELEASE, () => {
+  onRelease(c, () => {
     if (entityGone(c.caster) || !c.target || entityGone(c.target)) return;
     for (let sub = 0; sub < 3; sub++) lanceStar(c, c.target, sub, look);
     releaseSound('Sound/battlecastle/sCShockWave')(_at, c);

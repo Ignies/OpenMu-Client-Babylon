@@ -47,7 +47,8 @@ Dark Wizard skills, one folder per skill. Rules for skill folders: [../readme.md
 
 `_shared.ts` holds:
 - teleport steps (`teleportColumn`, `teleportEnhanced`, `TELEPORT_LIGHT`);
-- release timing (`DW1_RELEASE`, `atRelease`, `releaseSound`, `dw2AtAttackTime`);
+- release timing (`atRelease`, `releaseSound`, `dw2AtAttackTime`, both on `onRelease`: AttackTime 15 or
+  the cast clip's key 5, whichever comes first);
 - fire ball flight and its light (`FireBallLook`, `fireBallFlight`, `FIRE_BALL_LIGHT`), lava chips,
   soft explosions and ground flares (`EXPLOSION_LIGHT`);
 - small helpers: `perTickRoll`, `placeBodyLight`, `bearing`, `monsterOf`, `smallerSmoke`,

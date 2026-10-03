@@ -1,5 +1,5 @@
 import { defineSkill } from '@/controllers/skills/define';
-import { CAST_HEIGHT, ENHANCED_TIER, Step, TICK, after, atCaster, cm, ticks } from '@/controllers/skills/visuals';
+import { CAST_HEIGHT, ENHANCED_TIER, Step, TICK, afterRelease, atCaster, cm, ticks } from '@/controllers/skills/visuals';
 import { COMBAT_BUS, playSfx } from '@/controllers/sound';
 import { DEG } from '../../_shared';
 import { type Entity } from '@/ecs/world';
@@ -96,8 +96,8 @@ function critPulseGlow(scene: Scene, e: Entity, hand: CritHand): void {
   effects.spawn('particles', scene, p, { recipe: CRIT_EMBERS, rate: 14, seconds: ticks(HELIX_MOVES - 2), follow });
 }
 
-/** The skill at AttackTime 15, 14 ticks after the packet: a card at each hand and SOUND_CRITICAL (ZzzCharacter.cpp:4366-4383). `hd`: a hot core and sparks at each card. */
-const critCastOf = (hd: boolean): Step => after(ticks(14), (at, c) => {
+/** The skill at the release (AttackTime 15 or the clip's key 5): a card at each hand and SOUND_CRITICAL (ZzzCharacter.cpp:4366-4383). `hd`: a hot core and sparks at each card. */
+const critCastOf = (hd: boolean): Step => afterRelease((at, c) => {
   if (entityGone(c.caster)) return;
   for (const hand of critHands(c.caster, false)) {
     critCard(c.scene, c.caster, hand);

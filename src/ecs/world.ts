@@ -214,7 +214,7 @@ export type Entity = Partial<{
    * fade + sink and the final despawn.
    */
   dying: {
-    /** Seconds since the kill packet arrived. */
+    /** 25 Hz ticks since the kill packet: the original's `c->Dead` counter (ZzzCharacter.cpp:4076). */
     time: number;
     /** Die clip started (SetPlayerDie ran). */
     started: boolean;
@@ -224,8 +224,10 @@ export type Entity = Partial<{
     alpha: number;
     /** World-unit drop applied while fading (0.4 cm per tick in the original). */
     sink: number;
-    /** The hero landed the killing blow: the death waits for the swing to connect. */
+    /** The hero landed the killing blow. */
     killedByHero: boolean;
+    /** Ticks the hero's hit request waited for its blow: the Die clip's 14 ticks count from the swing's start. */
+    held: number;
     /** ObjectGotKilled `SkillId` (`c->m_byDieType`, WSclient.cpp:5504): Nova / Combo pick the knock-up. */
     skill: number;
     /** ObjectGotKilled `KillerId` (the `TKey` a Nova / Combo victim turns to face, :5537-5546). */

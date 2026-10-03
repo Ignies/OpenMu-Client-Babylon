@@ -1,6 +1,5 @@
 import { Vector3 } from '../../controllers/render/babylon/exports';
 import { MonsterActionType, PlayerAction } from '@versions/shared/objects/enum';
-import { isPlayerAttackAction } from '../../controllers/anim/playerActionMapper';
 import { BloodDecals } from '../../controllers/fx/bloodDecals';
 import { shatterDeathFor, spawnBomb } from '../../controllers/fx/deathVisuals';
 import { monsterModelTypeOf } from '../../controllers/anim/playSpeed';
@@ -19,12 +18,11 @@ import type { PlayerObject } from '../../controllers/actors/playerObject';
  */
 
 const TICKS_PER_SECOND = 25;
-const DIE_FALLBACK_TICKS = 15;
+/** `c->Dead >= 15` -> SetPlayerDie (ZzzCharacter.cpp:4074-4080): Dead starts at 1, so 14 ticks after the kill. */
+const DIE_TICKS = 14;
 const ROT_PER_TICK = 0.02;
 const SINK_PER_TICK = 0.4 / 100; // 0.4 in the original's cm units
 const HEAD_BONE = 20;
-/** Fraction of the swing clip at which the blow is taken to connect (AttackFrame). */
-const SWING_HIT_FRACTION = 0.5;
 const CM = 1 / 100;
 const DEG = Math.PI / 180;
 
@@ -79,19 +77,6 @@ const tmpBomb = new Vector3();
 export const DeathSystem: ISystemFactory = world => {
   const query = world.with('dying', 'modelObject', 'transform');
   let blood: BloodDecals | null = null;
-
-  function heroSwingConnected(): boolean {
-    const hero = world.playerEntity;
-    if (!hero) return true;
-    const action = hero.playerAnimation.action;
-    if (!isPlayerAttackAction(action)) return true;
-    const model = hero.modelObject;
-    if (!model || model.CurrentAction !== action) return true;
-    return (
-      model.ActionIterationWasFinished ||
-      model.actionProgress() >= SWING_HIT_FRACTION
-    );
-  }
 
   /** Body origin in map-local tiles (what `o->Position` is to an effect). */
   function bodyOrigin(e: Entity, out: Vector3): Vector3 {
@@ -260,9 +245,10 @@ export const DeathSystem: ISystemFactory = world => {
       for (const e of query) {
         const d = e.dying;
         const model = e.modelObject;
-        const tickBefore = d.time * TICKS_PER_SECOND;
-        d.time += dt;
-        const tickAfter = d.time * TICKS_PER_SECOND;
+        // `c->Dead += FPS_ANIMATION_FACTOR` (ZzzCharacter.cpp:4076): whole ticks at 25 fps, no float drift.
+        const tickBefore = d.time;
+        d.time += ticks;
+        const tickAfter = d.time;
 
         // ReceiveDie's motion setup runs on the kill tick, before the Die clip.
         if (tickBefore === 0) d.motion = startMotion(e);
@@ -275,12 +261,13 @@ export const DeathSystem: ISystemFactory = world => {
         combat.skillKill(d.skill)?.dying?.(e, ticks, tickAfter, world);
         if (inChaosCastle(world.mapIndex)) chaosBombs(e, tickBefore, tickAfter);
 
+        // DeadCharacter's `c->Rot += 0.02` runs from the kill on, Die clip or not (ZzzCharacter.cpp:3215-3229).
+        d.rot += ROT_PER_TICK * ticks;
+
         if (!d.started) {
-          const waitForHero = d.killedByHero && !heroSwingConnected();
-          if (
-            model.Ready &&
-            (!waitForHero || d.time * TICKS_PER_SECOND >= DIE_FALLBACK_TICKS)
-          ) {
+          // A Blood Castle bridge fall dies at once (`m_bActionStart`, :4081-4084); `held` is the hero's blow wait.
+          const bridgeFall = d.motion?.kind === 'fall' && inBloodCastle(world.mapIndex);
+          if (model.Ready && d.time >= (bridgeFall ? 0 : DIE_TICKS - d.held)) {
             d.started = true;
             startDie(e);
           }
@@ -295,7 +282,6 @@ export const DeathSystem: ISystemFactory = world => {
           continue;
         }
 
-        d.rot += ROT_PER_TICK * ticks;
         if (d.rot >= 1) {
           d.alpha = Math.max(0, 1 - (d.rot - 1));
           model.setAlpha(d.alpha);

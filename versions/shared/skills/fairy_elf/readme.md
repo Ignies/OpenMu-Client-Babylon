@@ -35,7 +35,7 @@ Fairy Elf skills, one folder per skill. Rules for skill folders: [../readme.md](
 The summon's own arrival is played from the create flag of the summoned monster
 (`playSummonArrival` in `../_shared.ts`), not by these skills.
 
-`_shared.ts` holds the elf summon cast: `elfSummon` (14 ticks after the packet, the summon decal
+`_shared.ts` holds the elf summon cast: `elfSummon` (at the cast's release, `afterRelease`: the summon decal
 and its healing streaks at the caster) and `SUMMON_GRADED` (the graded look used by ids 30-36).
 
 ## Depends on / used by

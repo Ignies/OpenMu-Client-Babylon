@@ -43,8 +43,10 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
   ([../../docs/guidelines/performance.md](../../docs/guidelines/performance.md)).
 
 ## Tests
+- `systems/animationSystem.test.ts`: every player body takes the hero's attack and magic speed.
 - `systems/deathSystem.test.ts`: Chaos Castle bomb sounds on odd ticks 15..25, the pit scream,
-  no sound off the Blood Castle bridge.
+  no sound off the Blood Castle bridge, the skill knock and Nova motes, the Dead counter in whole
+  ticks at 25 fps, the Die clip at Dead 15 (less the hero's blow wait), the fade from the kill.
 - `systems/mapDoorSystem.test.ts`: Devias door creaks (repeat while the hero stays, stop out of
   range, one per wave, retry when a creak did not start).
 - `systems/restObjectRay.test.ts`: the rest-object picking ray matches `scene.pick`.
@@ -62,6 +64,12 @@ snow (`CreateDeviasSnow`), Blood Castle embers (`MoveObjectOnEffect`), rain on o
 is disposed after its last particle dies, except on a map change. A recipe with a `schedule` reads
 gusts from `ambientSchedule.ts`, rolled from `serverNow()` so every client sees the same weather.
 
+### animationSystem.ts
+Clip speeds come from `controllers/anim`. The attack and magic speeds that scale them are the
+hero's for every player body: the original's `SetAttackSpeed` writes `CharacterAttribute` into the
+one `MODEL_PLAYER` action table (ZzzCharacter.cpp:812-1028), so another player swings and casts at
+the hero's rate. The extended scope packet's own speeds are not used for clips (nor by the original).
+
 ### ceilingHideSystem.ts
 Fades the roof of the building the hero is in, so the fixed camera still sees inside (Devias; the
 Lorencia pub uses a hack in `loadMapIntoScene`). A mesh is a ceiling piece when its world AABB is
@@ -69,11 +77,15 @@ a thin slab above head height; the piece over the hero seeds a flood fill throug
 at the same height. While a room is the active area, every slab inside the room seeds the set.
 
 ### deathSystem.ts
-1. Kill packet: Dead = 1, movement stops. If the hero landed the blow, the Die clip waits for the
-   swing (ATTACK_DIE, 15-tick fallback).
+1. Kill packet: Dead = 1, movement stops. `dying.time` counts 25 Hz ticks (`dt * 25` a frame, like
+   `c->Dead += FPS_ANIMATION_FACTOR`), so at 25 fps every tick lands on a whole number. The Die
+   clip starts at `c->Dead >= 15`, 14 ticks after the kill (ZzzCharacter.cpp:4074-4080), less `held`
+   for a hero's blow whose request waited past the swing's start; a Blood Castle bridge fall dies at
+   once (`m_bActionStart`).
 2. Die clip plays once and holds; two blood splats under the head. Death Cow, Stone Golem and Ice
    Monster shatter instead (`controllers/fx/deathVisuals.ts`).
-3. Rot += 0.02 a tick; from Rot >= 1 (2 s) alpha fades over 2 s while the body sinks 0.4 cm a tick.
+3. Rot += 0.02 a tick from the kill; from Rot >= 1 (2 s) alpha fades over 2 s while the body
+   sinks 0.4 cm a tick.
 4. Render-only body motion: Nova / Combo kills slide toward the killer for 15 ticks (Nova also
    throws blue motes); Blood Castle bridge and Chaos Castle pit deaths fall off
    (`FallingCharacter`), Chaos Castle corpses pop `CreateBomb`s on odd ticks 15-25.
