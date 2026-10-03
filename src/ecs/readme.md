@@ -43,8 +43,10 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
   ([../../docs/guidelines/performance.md](../../docs/guidelines/performance.md)).
 
 ## Tests
+- `systems/animationSystem.test.ts`: every player body takes the hero's attack and magic speed.
 - `systems/deathSystem.test.ts`: Chaos Castle bomb sounds on odd ticks 15..25, the pit scream,
-  no sound off the Blood Castle bridge.
+  no sound off the Blood Castle bridge, the skill knock and Nova motes, the Dead counter in whole
+  ticks at 25 fps.
 - `systems/mapDoorSystem.test.ts`: Devias door creaks (repeat while the hero stays, stop out of
   range, one per wave, retry when a creak did not start).
 - `systems/restObjectRay.test.ts`: the rest-object picking ray matches `scene.pick`.
@@ -61,6 +63,12 @@ snow (`CreateDeviasSnow`), Blood Castle embers (`MoveObjectOnEffect`), rain on o
 (`weather/roomClip.ts`). Nothing switches off at once: the emit rate ramps to zero and the emitter
 is disposed after its last particle dies, except on a map change. A recipe with a `schedule` reads
 gusts from `ambientSchedule.ts`, rolled from `serverNow()` so every client sees the same weather.
+
+### animationSystem.ts
+Clip speeds come from `controllers/anim`. The attack and magic speeds that scale them are the
+hero's for every player body: the original's `SetAttackSpeed` writes `CharacterAttribute` into the
+one `MODEL_PLAYER` action table (ZzzCharacter.cpp:812-1028), so another player swings and casts at
+the hero's rate. The extended scope packet's own speeds are not used for clips (nor by the original).
 
 ### ceilingHideSystem.ts
 Fades the roof of the building the hero is in, so the fixed camera still sees inside (Devias; the

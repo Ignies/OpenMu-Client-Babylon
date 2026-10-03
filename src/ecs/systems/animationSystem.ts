@@ -53,7 +53,7 @@ import { Store } from '../../app/store';
 
 // Clip rates come from the original's PlaySpeed tables (controllers/anim/playSpeed.ts);
 // attack/cast rates additionally scale with the attackSpeed/magicSpeed
-// attributes (agility / class divisor, plus nothing else yet).
+// attributes, which every player body takes from the hero (SetAttackSpeed).
 // Death (delay, Die clip, corpse, fade, despawn) is owned by DeathSystem.
 
 const MONSTER_ONE_SHOT_ACTIONS = new Set<MonsterActionType>([
@@ -283,6 +283,10 @@ export const AnimationSystem: ISystemFactory = world => {
       const swimWorld = isSwimWorld(mapIndex);
       const chaosCastle = inChaosCastle(mapIndex);
       const bloodCastle = inBloodCastle(mapIndex);
+      // Server-computed speeds (CurrentStatsExtended) win over the client-side agility formula.
+      const pd = Store.playerData;
+      const heroAttackSpeed = pd.attackSpeed ?? attackSpeedOf(pd.charClass, pd.agi);
+      const heroMagicSpeed = pd.magicSpeed ?? magicSpeedOf(pd.charClass, pd.agi);
 
       for (const entity of playersQuery) {
         const { playerAnimation, movement, attributeSystem, modelObject } = entity;
@@ -301,19 +305,10 @@ export const AnimationSystem: ISystemFactory = world => {
           );
         }
 
-        if (entity.localPlayer) {
-          // Server-computed speeds (CurrentStatsExtended) win over the
-          // client-side agility formula once they have arrived.
-          const pd = Store.playerData;
-          attributeSystem.setValue(
-            'attackSpeed',
-            pd.attackSpeed ?? attackSpeedOf(pd.charClass, pd.agi)
-          );
-          attributeSystem.setValue(
-            'magicSpeed',
-            pd.magicSpeed ?? magicSpeedOf(pd.charClass, pd.agi)
-          );
-        }
+        // SetAttackSpeed writes the hero's speeds into the one MODEL_PLAYER action table
+        // (ZzzCharacter.cpp:812-1028), so every player body swings and casts at them.
+        attributeSystem.setValue('attackSpeed', heroAttackSpeed);
+        attributeSystem.setValue('magicSpeed', heroMagicSpeed);
 
         const inSafeZone = attributeSystem.isAboveZero('inSafeZone');
         const hands = entity.charAppearance;
