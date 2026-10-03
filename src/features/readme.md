@@ -21,7 +21,6 @@ and `masterTree.ts` through the `skills` facade, and `band` through `installBand
 
 ## The features
 - [band](band/readme.md): instruments and band play from MIDI files, relayed by the proxy.
-- [cash_shop](cash_shop/readme.md): cash shop catalogue, orders and the gacha drop.
 - [chaos_mix](chaos_mix/readme.md): chaos machine packets; state in `Economy`.
 - [character_select](character_select/readme.md): create / delete answers, line-up layout, backdrop.
 - [chat](chat/readme.md): chat packets, log model, notices, `/` commands, item links, emojis.

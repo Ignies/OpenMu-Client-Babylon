@@ -48,9 +48,9 @@ jewels, Q/W/E/R hotkeys). The bag itself and the item-move code live in `Store` 
 - uses: `items` (`ItemSerializer`, `itemDef`), `economy` (`Economy`), `drops/dropTier.ts`, `options` (`GameOptions`),
   `controllers/sound`, `controllers/net/roundTrip`, `controllers/assets/itemIconPack`, `src/i18n`.
 - used by: `src/app/logic.ts` (net), `Store`, `economy`, `personal_shop`, `items/itemCompare.ts`, `hero`, `mu_helper`,
-  `warp`, `scope`, `cash_shop`, `marketplace`, `cashshop/server/fulfilment.ts`, ecs systems (attack, pickup, keyboard).
+  `warp`, `scope`, `marketplace`, `cashshop/server/fulfilment.ts`, ecs systems (attack, pickup, keyboard).
 - windows: `inventory`, `vault`, `trade`, `chaos_machine`, `personal_shop`, `npc_shop`, `economy_prompts`,
-  `character_info`, `pet_info`, `cash_shop`; HUD `bottom_bar`.
+  `character_info`, `pet_info`; HUD `bottom_bar`.
 
 ## Change it
 - a new inventory packet: add an `EventBus.on(...)` in `net.ts`, keep state in `Store`.
