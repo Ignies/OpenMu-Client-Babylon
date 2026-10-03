@@ -56,6 +56,7 @@ controller tests a skill number.
 | `clipSound`, `soundOnLanding`, `silentHeroCast` | sound | cast sound by clip; sound at the landing; no sound at the hero's click |
 | `effect` | modules/skills | the MagicEffect `MagicEffectCancelled` drops for this skill |
 | `buffHits` | skills | what a buff draws when its wearer is hit (Soul Barrier's shell) |
+| `warriorGlint` | skills (item_fx draws it) | UseSkillWarrior's blade glint at the cast; `'mounted'` for Impale |
 
 ## Windows and HUD
 

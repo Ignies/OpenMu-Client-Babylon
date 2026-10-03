@@ -296,6 +296,8 @@ const FIRE_SLASH_LIGHT: SkillLight = {
 export default defineSkill({
   id: 55,
   name: "Fire Slash",
+  // UseSkillWarrior's glint (SkillCast.cpp:113-247, :357-376).
+  warriorGlint: true,
   // Master numbers cast, heard, lit and drawn as this skill (the original names them in its `case`).
   masterAliases: [490, 493],
   // 55 Fire Slash (MG): the WHEEL charge and crescent (fireSlash); the skull is the debuff's (BUFF_VISUALS[58]).

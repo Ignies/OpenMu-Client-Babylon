@@ -271,6 +271,8 @@ const impale = impaleOf(false);
 export default defineSkill({
   id: 47,
   name: "Impale",
+  // UseSkillWarrior's glint, only from a mount (SkillCast.cpp:130).
+  warriorGlint: 'mounted',
   // 47 Impale: t4 threads gather on the spear point, t8 a white spiral cone, t10 the sound, t13-14 six spears; see impale.
   visual: { cast: impale, enhanced: { cast: impaleOf(true) } },
   clip: { ground: A.PLAYER_ATTACK_SKILL_SPEAR, fenrir: A.PLAYER_FENRIR_ATTACK_SPEAR }, // Impale

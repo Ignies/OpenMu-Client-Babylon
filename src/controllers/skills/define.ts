@@ -61,6 +61,8 @@ export interface SkillDef {
   readonly kill?: SkillKill;
   /** Skill-owned combat state: a layer the combat controller steps and the hooks its facade forwards to. */
   readonly combat?: { readonly layer?: CombatLayer; readonly hooks?: CombatHooks };
+  /** UseSkillWarrior's cast glint on the blade: always, or only from a mount (Impale). */
+  readonly warriorGlint?: true | 'mounted';
   /** The MagicEffect the skill applies; `MagicEffectCancelled` names the skill, not the effect. */
   readonly effect?: number;
   /** Persistent looks of the buffs this skill applies, by MagicEffect id. */

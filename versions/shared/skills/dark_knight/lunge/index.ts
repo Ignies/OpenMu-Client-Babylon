@@ -12,6 +12,8 @@ const LUNGE_CHIPS: ParticleRecipe = { ...STEEL_GLINTS, texture: TEX.spark2, colo
 export default defineSkill({
   id: 20,
   name: "Lunge",
+  // UseSkillWarrior's glint (SkillCast.cpp:113-247, :357-376).
+  warriorGlint: true,
   // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
   lookAliases: [329],
   visual: { impact: atSwordBlow(swordSpark), enhanced: { impact: litBlow(LUNGE_CHIPS) } },

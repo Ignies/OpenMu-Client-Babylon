@@ -304,6 +304,8 @@ const deathStab = deathStabOf(false);
 export default defineSkill({
   id: 43,
   name: "Death Stab",
+  // UseSkillWarrior's glint (SkillCast.cpp:113-247, :357-376).
+  warriorGlint: true,
   // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
   lookAliases: [336, 339, 342],
   // The old skill -> effect table's row, labelled "Swell Life? (AG recovery)" (7); kept as found, it looks wrong.

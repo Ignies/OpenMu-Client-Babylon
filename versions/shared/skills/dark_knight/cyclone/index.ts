@@ -13,6 +13,8 @@ const CYCLONE_CHIPS: ParticleRecipe = { ...STEEL_GLINTS, texture: TEX.spark2, co
 export default defineSkill({
   id: 22,
   name: "Cyclone",
+  // UseSkillWarrior's glint (SkillCast.cpp:113-247, :357-376).
+  warriorGlint: true,
   // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
   lookAliases: [326],
   // Master numbers cast, heard, lit and drawn as this skill (the original names them in its `case`).

@@ -19,6 +19,8 @@ const SLASH_CHIPS: ParticleRecipe = { ...STEEL_GLINTS, texture: TEX.spark2, colo
 export default defineSkill({
   id: 23,
   name: "Slash",
+  // UseSkillWarrior's glint (SkillCast.cpp:113-247, :357-376).
+  warriorGlint: true,
   // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
   lookAliases: [327],
   poseClip: slashOddSwing,

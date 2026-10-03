@@ -402,6 +402,9 @@ export let currentSkill = 0;
  */
 export const LOOK_ALIASES: Record<number, number> = {};
 
+/** `SkillDef.warriorGlint` by skill id. */
+export const WARRIOR_GLINTS: Record<number, true | 'mounted'> = {};
+
 // ---- fallbacks by skill type -------------------------------------------------------
 
 const FALLBACK_WIZARDRY: SkillVisual = { cast: wizardCast, travel: bolt(TEX.thunder, RGBS.arc, ARC_MOTES), impact: arcHit };

@@ -119,6 +119,8 @@ const spiralSlashEnhanced = mgSpiralSlash(true);
 export default defineSkill({
   id: 57,
   name: "Spiral Slash",
+  // UseSkillWarrior's glint (SkillCast.cpp:113-247, :357-376).
+  warriorGlint: true,
   // 57 Spiral Slash: five BITMAP_FLARE sub23 ribbons in two waves on the ONE_FLASH clip (spiralSlash).
   visual: { cast: spiralSlash, enhanced: { cast: spiralSlashEnhanced } },
   sound: 'Sound/sKnightSkill2', // Spiral Slash

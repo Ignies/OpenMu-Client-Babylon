@@ -12,7 +12,7 @@ import { mapDeathBurst } from '@/controllers/sound';
 import { ambientDustFor, ambientLeavesFor } from '@/controllers/weather';
 import { boidsFor } from '@/controllers/fx/boids';
 import { meteoriteStormRunning, monsterCastQuiet, teleportCastSound } from '@/controllers/sound/packetSounds';
-import { hasWarriorGlint } from '@/controllers/item_fx/weaponBlur';
+import { hasWarriorGlint } from '@/controllers/skills';
 import { characterLightFor } from '@/controllers/lighting/characters';
 import { monsterVisualFor } from '@/controllers/fx/monsterVisuals';
 import { shatterDeathFor } from '@/controllers/fx/deathVisuals';

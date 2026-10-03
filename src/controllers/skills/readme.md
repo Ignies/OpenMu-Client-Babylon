@@ -9,7 +9,8 @@ themselves are content in `versions/shared/skills/` (see [docs/content.md](../..
   and a set of buff looks. `SkillDef` lists the fields.
 - `registerSkills(defs)` (`index.ts`): copies each field into the table that reads it and throws
   if an id is defined twice. `registerBuffLooks`, `registerLauncherArrows` fill the buff look and
-  bow arrow tables.
+  bow arrow tables. `hasWarriorGlint(skill, mounted)`: the skill's `warriorGlint` field, for
+  `skillCastSystem` (item_fx draws the glint).
 - `visuals.ts` step DSL, used by skill files: `sprite`, `particles`, `model`, `ring`, `seq`,
   `atCaster`, `scatter`, `ringOf`, `after`, `repeat`, `offset`, building blocks (`fireHit`,
   `arcHit`, `steelHit`, `explosion`, `scorch`, `burn`, `magicGround`, ...), travel (`bolt`, `arrow`),
@@ -79,4 +80,4 @@ No tests in this folder. The golden tests in `versions/shared/skills/` cover it:
   step-in and delay.
 - `skillRules.golden.test.ts`: cast clip by pose, SwordCount, clip and landing sounds, flinch and
   facing clips, master aliases, cancel effects. `castRules.test.ts`: quiet mounts, what others
-  see, kill rules, Nova's hook numbers.
+  see, kill rules, Nova's hook numbers, the warrior glint.

@@ -14,7 +14,8 @@ original client's item passes, the item glow tiers and the weapon swing trails.
   `createItemPbrMaterial(scene)`, `useMeshAlphaTestTexture(material)`, `packBodyLight` /
   `packBodyLightFor`, `syncPbrDetail()`, `livePbrMaterials()`, type `UvScroll`.
 - `weaponBlur.ts`: `weaponBlurFor(hands, action, hasLevel)` (type `WeaponBlurRow`), the warrior
-  glint (`hasWarriorGlint`, `warriorGlint`, `warriorGlintStar`, `WARRIOR_GLINT_BONE` / `_TIP`).
+  glint (`warriorGlint`, `warriorGlintStar`, `WARRIOR_GLINT_BONE` / `_TIP`); which skills take it is
+  each skill's `warriorGlint` field, read through the skills controller's `hasWarriorGlint`.
 
 ## How it works
 - Item effects option (Options > Video): Off, Legacy (the original passes only), Both, Improved

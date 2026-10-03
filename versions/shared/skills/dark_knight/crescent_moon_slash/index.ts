@@ -276,6 +276,8 @@ const crescentMoonSlash = crescentMoonSlashOf(false);
 export default defineSkill({
   id: 44,
   name: "Crescent Moon Slash",
+  // UseSkillWarrior's glint (SkillCast.cpp:113-247, :357-376).
+  warriorGlint: true,
   // 44 Crescent Moon Slash (Rush): the charge sprays sparks and fire at the feet until key 5 or 14 ticks, then the
   // sword force runs 3.9 m ahead growing, fading and lighting the ground; see crescentMoonSlash.
   visual: { cast: crescentMoonSlash, enhanced: { cast: crescentMoonSlashOf(true) } },
