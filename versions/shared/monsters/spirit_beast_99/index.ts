@@ -3,6 +3,8 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 99,
   Name: 'Spirit Beast',
+  // Its Energy Ball (17) ends with no SOUND_MAGIC (ZzzCharacter.cpp:5087-5122).
+  quietCasts: [17],
   maxHealth: 23000,
   model: { type: 58, scale: 0.8 },
   stats: {

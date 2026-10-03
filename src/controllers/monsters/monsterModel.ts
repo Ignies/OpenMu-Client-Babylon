@@ -13,6 +13,8 @@ export type MonsterModelDef = {
   subType9Voices?: MonsterVoiceSlots;
   /** Clip speed by `MonsterActionType`, over the shared defaults. */
   clipSpeeds?: Readonly<Partial<Record<number, number>>>;
+  /** Skills whose cast sound a monster in this body never plays (`monsterCastQuiet`). */
+  quietCasts?: readonly number[];
   /** Multiplier on Stop1..Shock (the original's per-body speed scale; Die is never scaled). */
   speedScale?: number;
 };

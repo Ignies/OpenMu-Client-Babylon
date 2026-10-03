@@ -3,6 +3,8 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 46,
   Name: 'Vepar',
+  // Its Energy Ball (17) ends with no SOUND_MAGIC (ZzzCharacter.cpp:5087-5122).
+  quietCasts: [17],
   maxHealth: 2800,
   model: { type: 34, scale: 1 },
   stats: {

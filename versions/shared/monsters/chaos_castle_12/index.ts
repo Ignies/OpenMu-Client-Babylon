@@ -3,6 +3,8 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 173,
   Name: 'Chaos Castle 12',
+  // Its Energy Ball (17) ends with no SOUND_MAGIC (ZzzCharacter.cpp:5087-5122).
+  quietCasts: [17],
   maxHealth: 18000,
   model: { type: 71, scale: 0.9 },
   stats: {

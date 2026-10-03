@@ -1,7 +1,7 @@
 import type { MonsterAttackState } from '../anim/monsterAttackClip';
 import { ServerPlayerActionType as S } from '@versions/shared/objects/enum';
 import { REFERENCE_FPS } from '../anim/playSpeed';
-import { ENUM_WORLD as W } from '../../core/types';
+import { monsterModelRegistry, monsterRegistry } from '../monsters';
 import type { SoundBus } from './buses';
 import type { SfxOptions } from './listener';
 import type { Sounds } from './recipes';
@@ -40,8 +40,6 @@ const TRAP_GRATE = row('Sound/aGrate', 1, MONSTERS);
 const TRAP_FLAME = row('Sound/sFlame', 2, MONSTERS);
 export const METEORITE_STORM = row('Sound/eMeteorite', 2, MONSTERS);
 
-const MONSTER_METEORITE_TRAP = 103;
-const SKILL_BOSS = 50;
 
 // AppearMonster's rows; the monster sounds load with Channel = 2 (ZzzOpenData.cpp:3374), the
 // Assassin with 1 (:4820).
@@ -82,24 +80,10 @@ export const SWIRL_BLOOM_SECONDS: readonly number[] = SWIRL_BLOOM_AT.map(
   lifeTime => (SWIRL_LIFETIME - lifeTime) / REFERENCE_FPS
 );
 
-// MapManager.cpp:504.
-const NIGHTMARE_TELE = row('Sound/w39/nightmare_tele', 1, MONSTERS);
-const MONSTER_NIGHTMARE = 361;
 const SKILL_TELEPORT = 6;
 
-// The Energy Ball casters whose AttackTime end plays no SOUND_MAGIC (ZzzCharacter.cpp:5087-5122).
-const SKILL_ENERGYBALL = 17;
-const QUIET_ENERGY_BALL: ReadonlySet<number> = new Set([
-  37, 46, 61, 66, 69, 70, 73, 75, 77, // Devil .. Dark Phoenix
-  89, 95, 112, 118, 124, 130, 143, // Magic Skeleton 1-7
-  87, 93, 99, 116, 122, 128, 141, // Giant Ogre 1-7
-  163, 165, 167, 169, 171, 173, 427, // Chaos Castle 2 .. 14
-  293, 303, // Poison Golem, Gigas Golem
-]);
-/** MODEL_YETI, MODEL_GRIZZLY, MODEL_SAPITRES throw their own missile, silently (:5124-5137). */
-const QUIET_ENERGY_BALL_MODELS: ReadonlySet<number> = new Set([12, 134, 138]);
-const SKILL_LIGHTNING = 3;
-const MODEL_QUEEN_BEE = 83;
+/** A monster's own teleport sound (`MonsterDef.teleport`), one row per type. */
+const teleportRows = new Map<number, PacketSound>();
 
 // SOUND_XMAS_JUMP_SANTA + i in enum order, then SOUND_XMAS_TURN (Event.cpp:150-153).
 const SANTA_JUMPS: readonly PacketSound[] = [
@@ -127,9 +111,8 @@ export function meteoriteStormRunning(
   state: MonsterAttackState,
   now: number
 ): boolean {
-  return (
-    monster === MONSTER_METEORITE_TRAP && state.skill === SKILL_BOSS && now < state.skillClearsAt
-  );
+  const skill = monsterRegistry.def(monster)?.stormSkill;
+  return skill !== undefined && state.skill === skill && now < state.skillClearsAt;
 }
 
 /**
@@ -144,29 +127,36 @@ export function appearSound(monster: number, summoned: boolean): PacketSound | u
 }
 
 /**
- * ReceiveMagic's AT_SKILL_TELEPORT (WSclient.cpp:4319-4330): the Nightmare leaving. It replaces
- * CreateTeleportBegin, so its SOUND_MAGIC does not play too.
+ * ReceiveMagic's AT_SKILL_TELEPORT (WSclient.cpp:4319-4330): a monster with its own teleport
+ * (`MonsterDef.teleport`, the Nightmare) leaving on its map. It replaces CreateTeleportBegin, so
+ * its SOUND_MAGIC does not play too.
  */
 export function teleportCastSound(
   world: number,
   monster: number,
   skill: number
 ): PacketSound | undefined {
-  return world === W.WD_39KANTURU_3RD && monster === MONSTER_NIGHTMARE && skill === SKILL_TELEPORT
-    ? NIGHTMARE_TELE
-    : undefined;
+  if (skill !== SKILL_TELEPORT) return undefined;
+  const tele = monsterRegistry.def(monster)?.teleport;
+  if (!tele || tele.world !== world) return undefined;
+  let out = teleportRows.get(monster);
+  if (!out) {
+    out = row(tele.sound as Sounds, tele.channels, MONSTERS);
+    teleportRows.set(monster, out);
+  }
+  return out;
 }
 
 /**
- * A monster's 0x19 whose skill cast sound the original never plays: Energy Ball for the casters
- * above, and ReceiveMagic's eThunder for MODEL_QUEEN_BEE (WSclient.cpp:4279). `model` is the
- * MONSTER_MODEL index.
+ * A monster's 0x19 whose skill cast sound the original never plays: the type's or its body's
+ * `quietCasts` (Energy Ball for the casters that end it silently, ZzzCharacter.cpp:5087-5137;
+ * ReceiveMagic's eThunder for MODEL_QUEEN_BEE, WSclient.cpp:4279). `model` is the MONSTER_MODEL index.
  */
 export function monsterCastQuiet(monster: number, model: number, skill: number): boolean {
-  if (skill === SKILL_ENERGYBALL) {
-    return QUIET_ENERGY_BALL.has(monster) || QUIET_ENERGY_BALL_MODELS.has(model);
-  }
-  return skill === SKILL_LIGHTNING && model === MODEL_QUEEN_BEE;
+  return (
+    monsterRegistry.def(monster)?.quietCasts?.includes(skill) === true ||
+    monsterModelRegistry.get(model)?.quietCasts?.includes(skill) === true
+  );
 }
 
 /** ReceiveAction AT_SANTA1_* / AT_SANTA2_* (WSclient.cpp:3763-3783). */

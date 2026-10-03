@@ -159,8 +159,8 @@ buffs' sound follows their coin-tossed clip), `LANDING_SOUNDS` (Drain Life, Ligh
 Weakness, Innovation and their masters) and `SILENT_HERO_CASTS` (Fire Scream) in `combat.ts` are
 filled by `registerSkills` from each skill's `sound`, `clipSound`, `soundOnLanding` and
 `silentHeroCast`. Change a skill's sound in its file under `versions/shared/skills/`. The
-per-monster rows of `packetSounds.ts` (quiet Energy Ball casters, the Nightmare's teleport, the
-meteorite trap) are monster data, still here.
+per-monster rows `packetSounds.ts` reads are the monster's own: `quietCasts` (on the monster
+folder or its body file), `teleport` (the Nightmare) and `stormSkill` (the meteorite trap).
 
 ## A map's own sound (MapLayer.sound)
 - A map's beds, one-shots, clocked one-shots, music, town tracks, object loops and monster cues

@@ -59,8 +59,17 @@ export type MonsterDef = {
   voice?: NpcVoice;
   /** Its `PlayMonsterSoundGlobal` lines, also heard from a player wearing it as a skin. */
   globalVoice?: NpcGlobalVoice;
+  /** Skills whose cast sound this type never plays (the sound controller's `monsterCastQuiet`). */
+  quietCasts?: readonly number[];
+  /** Its Teleport (skill 6) on `world` plays `sound` instead of CreateTeleportBegin. */
+  teleport?: MonsterTeleport;
+  /** The skill whose AttackTime replays the meteorite storm sound every frame (a trap's). */
+  stormSkill?: number;
   stats?: MonsterStats;
 };
+
+/** `MonsterDef.teleport`: `channels` is the wave's `LoadWaveFile` count. */
+export type MonsterTeleport = { readonly sound: string; readonly channels: number; readonly world: number };
 
 /** What `get` returns: the table row as it always was, number and name included. */
 export type MonsterRow = MonsterStats & { Numb: number; Name: string };

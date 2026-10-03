@@ -3,6 +3,8 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 70,
   Name: 'Queen Rainer',
+  // Its Energy Ball (17) ends with no SOUND_MAGIC (ZzzCharacter.cpp:5087-5122).
+  quietCasts: [17],
   maxHealth: 19000,
   model: { type: 51, scale: 1.3 },
   stats: {
