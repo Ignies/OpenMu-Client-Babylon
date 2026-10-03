@@ -7,6 +7,8 @@ import { asciiBytes, type GameVersion } from '@/version/contract';
 import { season6Data } from './data';
 // The shared monsters (and their bodies) this version spawns, registered with the monsters controller.
 import '../shared/monsters/all';
+// The player clips and monster swing / cast rules, registered with the anim controller.
+import '../shared/animations/all';
 
 // The packet lists ride along in the version chunk; UI does not (it reaches
 // app code and loads through the registry's loadUi, after this module).

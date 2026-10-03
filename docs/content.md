@@ -70,3 +70,12 @@ restyling the tooltip once restyles it everywhere.
 `versions/<id>/` holds what differs for one version: data paths, packet set, UI overrides (same
 window `id` replaces the shared one). Code in `src/` never asks which version runs; it reads the
 version's features and data. See [versions.md](versions.md).
+
+## Animations
+
+- `animations/<action>.ts`: one file per player clip (`defineAnimation`: the PlayerAction id, its
+  name, speed rule and flags), found by glob. The PlayerAction enum is generated from them
+  (`bun versions/shared/animations/write_enum.ts`).
+- `animations/monster_swings/`, `animations/monster_casts/`: the skill-keyed swing rules of some
+  monsters and what each skill plays on a monster caster.
+- The master controller is `src/controllers/anim`: the record, the registry and every lookup.
