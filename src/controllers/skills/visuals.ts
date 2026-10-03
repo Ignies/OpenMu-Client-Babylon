@@ -138,6 +138,33 @@ export function onRelease(c: SkillContext, fn: () => void, rule: ReleaseRule = {
   delay(TICK, poll);
 }
 
+/** The hero's last cast: when its packet came, and whether it has released since. */
+let heroCastAt = -Infinity;
+let heroReleased = true;
+
+/** A cast by the hero: watch its release (default rule) for `afterHeroRelease`. */
+function watchHeroRelease(c: SkillContext): void {
+  if (!c.caster.localPlayer) return;
+  const at = fxNow();
+  heroCastAt = at;
+  heroReleased = false;
+  onRelease(c, () => {
+    if (heroCastAt === at) heroReleased = true;
+  });
+}
+
+/**
+ * Run `fn` at the hero's cast release, or now when none is pending: the release block is where the
+ * kill's ATTACK_DIE energy is created (ZzzCharacter.cpp:5242-5247). Never later than 14 ticks after the cast.
+ */
+export function afterHeroRelease(fn: () => void): void {
+  const poll = (): void => {
+    if (heroReleased || fxNow() - heroCastAt + 1e-9 >= ticks(RELEASE_TICKS)) fn();
+    else delay(0, poll);
+  };
+  poll();
+}
+
 /** `step` at the cast's release (`onRelease`). */
 export const afterRelease = (step: Step, rule?: ReleaseRule): Step => (at, c) => {
   const p = at.clone();
@@ -553,6 +580,7 @@ export function playTargetedSkillVisual(
     currentSkill = skill;
     const row = skillVisualFor(skill);
     const ctx = contextFor(scene, caster, target);
+    watchHeroRelease(ctx);
     const at = target?.transform ? entityPos(target, IMPACT_HEIGHT, new Vector3()) : entityPos(caster, IMPACT_HEIGHT, new Vector3());
     row.cast?.(at, ctx);
     if (row.travel && target?.transform) runTravel(row, ctx, target);
@@ -591,6 +619,7 @@ export function playAreaSkillVisual(
     const row = skillVisualFor(skill);
     const aimed = target?.transform ? target : null;
     const ctx = contextFor(scene, caster, aimed);
+    watchHeroRelease(ctx);
     const at = new Vector3(x, y, z);
     row.cast?.(at, ctx);
     if (row.travel && aimed) runTravel(row, ctx, aimed);

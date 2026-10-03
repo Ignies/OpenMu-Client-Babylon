@@ -16,6 +16,7 @@ export { skillVisualCount } from '@/controllers/skills/visuals';
 export { playTargetedSkillVisual } from '@/controllers/skills/visuals';
 export { playAreaSkillVisual } from '@/controllers/skills/visuals';
 export { playBowShotVisual } from '@/controllers/skills/visuals';
+export { afterHeroRelease } from '@/controllers/skills/visuals';
 export { BUFF_VISUALS } from '@/controllers/skills/visuals';
 export { setBuffVisual } from '@/controllers/skills/visuals';
 export { clearBuffVisuals } from '@/controllers/skills/visuals';

@@ -21,8 +21,10 @@ the Rage Fighter's Dark Side blows. This folder has only the handlers; it keeps 
 - A kill adds the `dying` component; `DeathSystem` starts the Die clip 14 ticks later
   (`c->Dead >= 15`, ZzzCharacter.cpp:4074-4080). A hero's plain blow (skill 0) also marks `held`, the
   ticks its request waited for the blow (`combat.blowHeldTicks`): the original sends it on the click,
-  so the 14 ticks count from the swing's start. A hero kill plays the energy sound once
-  (`ZzzCharacter.cpp:5242-5247`, `ZzzEffectJoint.cpp:3369`).
+  so the 14 ticks count from the swing's start. A hero kill plays the energy sound once when its orbs
+  arrive (`playKillEnergy`, `ZzzEffectJoint.cpp:3369`); the orbs start at the hero's release, where the
+  original creates them (`ZzzCharacter.cpp:5242-5247`): a skill kill waits for the cast's release
+  (`afterHeroRelease`), a plain blow's has passed already (its request went out on it).
 
 ## Packets
 - `ObjectAnimation`: attack, emote and action clips of other players and monsters; faces the direction.
@@ -38,7 +40,8 @@ the Rage Fighter's Dark Side blows. This folder has only the handlers; it keeps 
 - uses: `src/controllers/combat` (`combat`, `clipIgnoresHit`), `controllers/anim`, `controllers/actors`,
   `controllers/sound`, `controllers/fx` (`delay`), `_shared/net_helpers.ts`, `hero/characterStats.ts`,
   `skills/skillCasting.ts`, `skills/net.ts`, `pets/pets.ts` (`mountKind`),
-  `@versions/shared/skills/skillVisuals` (`playBuffHits`: Soul Barrier's shell when the hero is hit).
+  `@versions/shared/skills/skillVisuals` (`playBuffHits`: Soul Barrier's shell when the hero is hit;
+  `afterHeroRelease` for the kill energy).
 - A landed combo plays the Combo skill's own `sound` (`playSkill`).
 - used by: `src/app/logic.ts`. `objectDamaged` is read by `versions/shared/ui/hud/damage_numbers/` and
   `src/ecs/systems/impactEffectSystem.ts`.
@@ -50,4 +53,5 @@ the Rage Fighter's Dark Side blows. This folder has only the handlers; it keeps 
 - change how damage numbers look: `versions/shared/ui/hud/damage_numbers/index.tsx`.
 
 ## Tests
-- none yet.
+- `killEnergy.test.ts`: the energy sound waits for the hero's cast release, and starts at the kill
+  after a plain blow; 22 ticks plus 3.5 a tile of flight.
