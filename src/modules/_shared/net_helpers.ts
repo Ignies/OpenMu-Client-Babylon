@@ -4,7 +4,7 @@ import { type AttackPose } from '@/controllers/actors/weaponClass';
 import { CharacterClassNumber } from '@/core/types';
 import { Entity, World } from '@/ecs/world';
 import { KEEP_CLIP, isMonsterSwingClip, monsterAreaCast, monsterAttackState, monsterCast, monsterCastAttacks, monsterCastRewinds, playableMonsterClip, type MonsterAttackInput } from '@/controllers/anim/monsterAttackClip';
-import { METEORITE_STORM, appearSound, meteoriteStormRunning, monsterCastQuiet, teleportCastSound, trapAttackSound } from '@/controllers/sound/packetSounds';
+import { METEORITE_STORM, appearSound, meteoriteStormRunning, monsterCastQuiet, trapAttackSound } from '@/controllers/sound/packetSounds';
 import { MonsterActionType, PlayerAction } from '@versions/shared/objects/enum';
 
 import { Store } from '@/app/store';
@@ -290,13 +290,9 @@ export function playCastAnimation(caster: Entity, skill: number, area: boolean) 
     return;
   }
   // ExecuteSkill's cast sound for everyone else (the hero's plays in SkillCastSystem).
+  // Teleport never comes here: playTeleportAnimation plays it, the Nightmare's own sound included.
   if (!caster.localPlayer && caster.transform) {
-    const tele = area
-      ? undefined
-      : teleportCastSound(Store.world?.mapIndex ?? -1, caster.npcType ?? -1, skill);
-    if (tele) {
-      playSfx(tele.key, caster.transform.pos, tele.opts);
-    } else if (
+    if (
       // A player's cast whose sound goes with its clip sounds below, once the clip is picked.
       !(caster.playerAnimation && hasClipSound(skill)) &&
       (caster.npcType === undefined ||
