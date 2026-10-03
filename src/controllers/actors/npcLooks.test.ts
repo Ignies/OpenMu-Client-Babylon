@@ -50,4 +50,9 @@ describe('NPC looks from the original client', () => {
     });
     expect(m.resolveModelFactory(34)).toBe(m.gearedNpcFactory(gear!));
   });
+
+  it('Luke, Leo and Ellen are one plate-rig case (ZzzCharacter.cpp:14612-14625)', () => {
+    expect(m.resolveModelFactory(371)).toBe(m.resolveModelFactory(258));
+    expect(m.resolveModelFactory(414)).toBe(m.resolveModelFactory(258));
+  });
 });

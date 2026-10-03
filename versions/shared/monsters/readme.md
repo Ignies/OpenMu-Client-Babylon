@@ -67,7 +67,7 @@ row are named from `NpcName_Eng.txt`.
 | `_skeleton_line/` | Skeleton Warrior, Archer, Elite, Death King, Death Bone: player-rig monsters |
 | `amy_potion_girl/`, `liaman_barmaid/`, `_merchant_men/` | rig-only models with head / upper / lower parts (253, 255; Alex 230, Martin 248, Harold 250) |
 | `elf_soldier/` | Elf Soldier (257): an always-flying Fairy Elf |
-| `golden_archer/`, `leo_the_helper/`, `_plate_npc/` | player-rig NPCs in a fixed armour set (236, 371; 258, 414) |
+| `golden_archer/`, `_plate_npc/` | player-rig NPCs in a fixed armour set (236; Luke 258, Leo 371, Ellen 414) |
 | `_archangels/` | Archangel (232) and Messenger of Archangel (233): bright mesh, ground halo, feathers |
 
 A folder with both a `model.ts` and an `npcModel` draws with the class; the row is what the NPC
