@@ -177,13 +177,15 @@ const NOVA_DEATH_MOTES: ParticleRecipe = {
 };
 /** `c->Dead <= 30`: ticks the motes fall from the body, 10 a tick from bones 0…31. */
 const NOVA_GLOW_TICKS = 30;
+/** Dead is 1..30 on exact steps at 25 fps (ZzzCharacter.cpp:4076); summed float seconds land a hair past 30. */
+const DEAD_DRIFT = 1e-6;
 const NOVA_MOTES_PER_TICK = 10;
 const NOVA_BONES = 32;
 const tmpBone = new Vector3();
 
 /** A body killed by Nova sheds blue motes from its bones while the Dead counter is <= 30. */
 function novaDeathGlow(body: Entity, frameTicks: number, dead: number, world: World): void {
-  if (dead > NOVA_GLOW_TICKS || body.dying?.shattered) return;
+  if (dead > NOVA_GLOW_TICKS + DEAD_DRIFT || body.dying?.shattered) return;
   const count = Math.round(NOVA_MOTES_PER_TICK * frameTicks);
   for (let i = 0; i < count; i++) {
     bonePos(body, Math.floor(Math.random() * NOVA_BONES), tmpBone);
