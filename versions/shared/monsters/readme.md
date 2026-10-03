@@ -16,7 +16,9 @@ monstersDatabase.ts   MonstersDatabase.get, monsterDisplayName, monsterMaxHealth
 A folder's name is the type's name in snake_case, plus `_<number>` when two types share a name
 (the Blood Castle and Devil Square levels, the Aegis line...). NPCs are in here too: the original
 table (`Monster.txt`) and the wire (`AddNpcsToScope`) number them the same way. NPCs without a table
-row are named from `NpcName_Eng.txt`.
+row are named from `NpcName_Eng.txt`, and so are the ones whose row names someone else (244 is
+Caren, not Lumen; 255 is Lumen; 258 is Luke, not Silvia; 229 is Marlon): the folder follows the
+original client's name, the row keeps its own.
 
 ## Public API
 - `MonstersDatabase.get(id)`: the original table's row for a type (`stats` with `Numb` and `Name`),
@@ -65,7 +67,7 @@ row are named from `NpcName_Eng.txt`.
 | `_blood_castle/` | Castle Gate (131) and Statue of Saint (132-134) |
 | `_golden_line/` | the golden invasion line, with extra additive body passes |
 | `_skeleton_line/` | Skeleton Warrior, Archer, Elite, Death King, Death Bone: player-rig monsters |
-| `amy_potion_girl/`, `liaman_barmaid/`, `_merchant_men/` | rig-only models with head / upper / lower parts (253, 255; Alex 230, Martin 248, Harold 250) |
+| `amy_potion_girl/`, `lumen_the_barmaid/`, `_merchant_men/` | rig-only models with head / upper / lower parts (253, 255; Alex 230, Martin 248, Harold 250) |
 | `elf_soldier/` | Elf Soldier (257): an always-flying Fairy Elf |
 | `golden_archer/`, `_plate_npc/` | player-rig NPCs in a fixed armour set (236; Luke 258, Leo 371, Ellen 414) |
 | `_archangels/` | Archangel (232) and Messenger of Archangel (233): bright mesh, ground halo, feathers |
