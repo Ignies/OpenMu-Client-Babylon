@@ -17,7 +17,7 @@ players, plus their moves and equipment changes. The entities live in the ECS wo
 - Players: `addCharacterToScope` spawns with `spawnPlayer`, places them on the terrain, copies the
   PK state (`WSclient.cpp:804`), buffs and the visible equipment. The hero gets `localPlayer`
   (and `isGm`, attack and magic speed from the packet); other players get `interactable`
-  (`ZzzInterface.cpp:8110`).
+  (`ZzzInterface.cpp:8110`) and, from the extended packet, their own `speeds` for their clips.
 - Transformed players (`AddTransformedCharactersToScope`, 0x45): skin 0 is a normal player; the
   hero keeps the player rig with the skin's body; other players are drawn with the monster's model
   but keep the player identity (no `npcType`).

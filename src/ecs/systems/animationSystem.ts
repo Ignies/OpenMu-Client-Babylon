@@ -53,7 +53,7 @@ import { Store } from '../../app/store';
 
 // Clip rates come from the original's PlaySpeed tables (controllers/anim/playSpeed.ts);
 // attack/cast rates additionally scale with the attackSpeed/magicSpeed
-// attributes, which every player body takes from the hero (SetAttackSpeed).
+// attributes: the hero's (SetAttackSpeed), or another player's own from the scope packet.
 // Death (delay, Die clip, corpse, fade, despawn) is owned by DeathSystem.
 
 const MONSTER_ONE_SHOT_ACTIONS = new Set<MonsterActionType>([
@@ -305,10 +305,11 @@ export const AnimationSystem: ISystemFactory = world => {
           );
         }
 
-        // SetAttackSpeed writes the hero's speeds into the one MODEL_PLAYER action table
-        // (ZzzCharacter.cpp:812-1028), so every player body swings and casts at them.
-        attributeSystem.setValue('attackSpeed', heroAttackSpeed);
-        attributeSystem.setValue('magicSpeed', heroMagicSpeed);
+        // The original plays every body at the hero's speeds (one MODEL_PLAYER table, ZzzCharacter.cpp:812-1028);
+        // another player with speeds from the scope packet plays at its own (controllers/anim/readme.md).
+        const own = entity.localPlayer ? undefined : entity.speeds;
+        attributeSystem.setValue('attackSpeed', own?.attack ?? heroAttackSpeed);
+        attributeSystem.setValue('magicSpeed', own?.magic ?? heroMagicSpeed);
 
         const inSafeZone = attributeSystem.isAboveZero('inSafeZone');
         const hands = entity.charAppearance;

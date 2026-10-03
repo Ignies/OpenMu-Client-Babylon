@@ -245,6 +245,8 @@ export type Entity = Partial<{
     motion?: DeathMotion;
   };
   attributeSystem: MUAttributeSystem;
+  /** Another player's own attack and magic speed, from the extended scope packet (AnimationSystem). */
+  speeds: { attack: number; magic: number };
   /** HeroStateChanged: PK / hero status byte of a player (name tint later). */
   heroState: number;
   /** Active MagicEffectStatus effect ids on this object (everyone in scope). */
