@@ -83,6 +83,8 @@ vi.mock('./core', () => ({
   darkCardGain: () => 1,
 }));
 vi.mock('../../core/devSeams', () => ({ devQuery: () => null, devQueryNumber: () => null }));
+// The real helper, without the rest of the assets door (the model loader).
+vi.mock('../assets', async () => ({ reportLoadFailure: (await import('../assets/loadFailure')).reportLoadFailure }));
 
 import {
   BonedParticleEmitter,

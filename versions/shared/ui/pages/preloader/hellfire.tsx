@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useMuSprite } from '@/controllers/interface/components/mu_sprite';
+import { reportLoadFailure } from '@/controllers/assets';
 
 /**
  * The Dark Wizard's Hellfire on the ground where Start was pressed, drawn with
@@ -139,7 +140,7 @@ export const Hellfire = () => {
       };
 
       raf = requestAnimationFrame(step);
-    });
+    }).catch(reportLoadFailure(RING));
 
     return () => {
       cancelled = true;

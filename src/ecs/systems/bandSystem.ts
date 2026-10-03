@@ -4,6 +4,7 @@ import { devQuery, devQueryNumbers } from '../../core/devSeams';
 import type { BmdLink } from '../../controllers/render/boneLink';
 import { instrumentById, instrumentParts, isInstrumentId, type InstrumentPart } from '../../modules/band/instruments';
 import { loadGLTF } from '../../controllers/assets/modelLoader';
+import { reportLoadFailure } from '../../controllers/assets';
 import { ModelObject } from '../../controllers/render/modelObject';
 import type { PlayerAction } from '@versions/shared/objects/enum';
 import { isStandingIdle } from '../../controllers/anim/playerActionMapper';
@@ -102,7 +103,7 @@ export const BandSystem: ISystemFactory = world => {
         mesh.metadata ??= {};
         mesh.metadata.timeOffset = 0;
       }
-    });
+    }).catch(reportLoadFailure(part.model));
     return model;
   }
 

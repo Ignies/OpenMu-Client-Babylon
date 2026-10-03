@@ -31,6 +31,7 @@ import {
 import { clampAlpha } from './clampAlpha';
 import { RGBS } from './recipes';
 import type { EffectHandle, EffectLayer } from './layer';
+import { reportLoadFailure } from '../assets';
 
 // ---- 1. tuning -------------------------------------------------------------
 
@@ -166,7 +167,7 @@ function darkMaterial(scene: Scene, texture: string, cover: number): StandardMat
     if (dead) return;
     tex.getAlphaFromRGB = true;
     mat.opacityTexture = tex;
-  });
+  }).catch(reportLoadFailure(texture));
   return mat;
 }
 

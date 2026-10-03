@@ -3,6 +3,7 @@ import type { Observer, Scene } from '@/controllers/render/babylon/exports';
 import type { World } from '@/ecs/world';
 import { createMovableFlare, type MovableFlare } from '@/controllers/lighting/effectLights';
 import { strikeThunder } from '@/controllers/lighting/sky';
+import { reportLoadFailure } from '@/controllers/assets';
 
 /** MU units per world unit. */
 
@@ -107,7 +108,7 @@ export class IcarusSky {
 
         flare.setLuminosity(0);
         this.#sparkles.push({ flare, life: 0 });
-      });
+      }).catch(reportLoadFailure('effect light flare'));
     }
 
     this.#observer = this.#scene.onBeforeRenderObservable.add(() =>

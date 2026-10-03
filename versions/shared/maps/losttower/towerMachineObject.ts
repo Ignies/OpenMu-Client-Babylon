@@ -6,6 +6,7 @@ import { MapTileObject } from '@/controllers/terrain/mapTileObject';
 import { Store } from '@/app/store';
 import type { BonedEmission } from '@/controllers/fx/effectParticles';
 import type { Entity, World } from '@/ecs/world';
+import { reportLoadFailure } from '@/controllers/assets';
 
 type BoneNode = BonedEmission['node'];
 
@@ -166,7 +167,7 @@ export class LostTowerMachineObject extends MapTileObject {
         flare.moveTo(p.x, p.y, p.z);
 
         emitter.flare = flare;
-      });
+      }).catch(reportLoadFailure('effect light flare'));
     }
   }
 

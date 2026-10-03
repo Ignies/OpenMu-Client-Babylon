@@ -14,6 +14,7 @@ import {
   type Texture,
 } from '../render/babylon/exports';
 import { loadEffectTexture } from './moveTargetEffect';
+import { reportLoadFailure } from '../assets';
 import { linearBufferActive } from '../lighting/lightModel';
 import { devQueryNumber } from '../../core/devSeams';
 import { lookDirector } from '../lighting/director';
@@ -435,7 +436,7 @@ export function additiveMaterial(
         mat.opacityTexture = softEdgeMask(scene, cols, rows);
       }
       mat.diffuseTexture = tex;
-    });
+    }).catch(reportLoadFailure(texture));
   } else {
     // A texture somebody else owns (a skill model's, from the GLB cache):
     // referenced, never disposed - `disposePools` drops the material only.
@@ -885,8 +886,8 @@ export function particleSystemFor(scene: Scene, r: ParticleRecipe): ParticleSyst
     }
     void particleSheet(scene, tex, r).then(own => {
       if (systems.get(scene)?.get(k) === created) created.particleTexture = own;
-    });
-  });
+    }).catch(reportLoadFailure(r.texture));
+  }).catch(reportLoadFailure(r.texture));
 
   if (r.groundFade) useGroundFade(ps, r.groundFade);
   ps.start();
@@ -1026,9 +1027,10 @@ export function disposePools(): void {
   cardPool.clear();
   for (const map of systems.values()) for (const ps of map.values()) ps.dispose(false);
   systems.clear();
-  for (const t of sheetTextures.values()) void t.then(tex => tex.dispose());
+  // A sheet that never loaded has nothing to dispose; its failure was reported where it was asked for.
+  for (const t of sheetTextures.values()) void t.then(tex => tex.dispose(), () => {});
   sheetTextures.clear();
-  for (const t of ribbonSheets.values()) void t.then(tex => tex.dispose());
+  for (const t of ribbonSheets.values()) void t.then(tex => tex.dispose(), () => {});
   ribbonSheets.clear();
   systemsByRecipe.clear();
 }

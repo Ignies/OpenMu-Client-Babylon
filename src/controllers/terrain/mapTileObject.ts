@@ -1,5 +1,6 @@
 import { Entity, World } from '../../ecs/world';
 import { getMaterial, loadGLTF } from '../assets/modelLoader';
+import { reportLoadFailure } from '../assets';
 import { ModelObject } from '../render/modelObject';
 import { BlendState } from '@versions/shared/objects/enum';
 import { ENUM_WORLD } from '../../core/types';
@@ -195,7 +196,7 @@ export class MapTileObject extends ModelObject {
         this.#light?.dispose();
         this.#light = null;
       }
-    });
+    }).catch(reportLoadFailure('effect light flare'));
 
     this.#source = lightMapObject(world.scene, LOGIN_WALL_TORCH, spritePosition);
 

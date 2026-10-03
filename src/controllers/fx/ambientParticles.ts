@@ -12,6 +12,7 @@ import {
 import type { AmbientSchedule } from '../weather/ambientSchedule';
 import { clipToRoom } from '../weather/roomClip';
 import { loadEffectTexture } from './moveTargetEffect';
+import { reportLoadFailure } from '../assets';
 
 /**
  * Ambient particles (weather, leaves, dust): one GPU or CPU system per recipe at an emitter the
@@ -490,7 +491,7 @@ export function createAmbientSystem(
   } else {
     void loadEffectTexture(scene, recipe.texture).then(texture => {
       if (!disposed) system.particleTexture = texture;
-    });
+    }).catch(reportLoadFailure(recipe.texture));
   }
 
   system.start();

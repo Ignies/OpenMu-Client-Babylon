@@ -25,6 +25,7 @@ import { Texture, Vector3 } from '@/controllers/render/babylon/exports';
 import { ModelObject } from '@/controllers/render/modelObject';
 import { loadGLTF } from '@/controllers/assets/modelLoader';
 import { toRadians } from '@/controllers/assets/download';
+import { reportLoadFailure } from '@/controllers/assets';
 import type { World } from '@/ecs/world';
 import type {
   PregamePhase,
@@ -211,7 +212,7 @@ export function createShipScene(world: World): PregameScene {
 
         if (texture) scrolling.push(texture);
       }
-    });
+    }).catch(reportLoadFailure(piece.file));
   }
 
   const target = new Vector3(0, 0, 0);

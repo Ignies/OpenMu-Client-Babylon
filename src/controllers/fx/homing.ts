@@ -31,6 +31,7 @@ import {
 } from './core';
 import { addEffectGlow, releaseEffectGlow } from './glow';
 import type { EffectHandle, EffectLayer } from './layer';
+import { reportLoadFailure } from '../assets';
 
 // ---- 1. tuning -------------------------------------------------------------
 
@@ -127,7 +128,7 @@ function materialFor(scene: Scene, texture: string, dark: boolean): StandardMate
     } else {
       mat.diffuseTexture = tex;
     }
-  });
+  }).catch(reportLoadFailure(texture));
   mat.onDisposeObservable.addOnce(() => {
     dead = true;
     own?.dispose();

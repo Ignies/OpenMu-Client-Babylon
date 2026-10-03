@@ -16,6 +16,7 @@ import {
 import { downloadDataFile, hasDataFile } from '../assets/mu/dataFolder';
 import { loadMuSprite } from '../assets/mu/sprites';
 import { getMaterial, loadGLTF } from '../assets/modelLoader';
+import { reportLoadFailure } from '../assets';
 import { BlendState } from '@versions/shared/objects/enum';
 import { spawnParticle } from './effectParticles';
 import { clampAlpha } from './clampAlpha';
@@ -96,7 +97,7 @@ export function loadEffectTexture(scene: Scene, file: string): Promise<Texture> 
     texture.onDisposeObservable.addOnce(() => {
       if (textureCache.get(file) === pending) textureCache.delete(file);
     });
-  });
+  }).catch(reportLoadFailure(file));
 
   textureCache.set(file, pending);
 
@@ -216,7 +217,7 @@ export class TerrainDecal {
       texture.hasAlpha = this.#material.alphaMode === Constants.ALPHA_COMBINE;
       this.#material.diffuseTexture = texture;
       this.#textured = true;
-    });
+    }).catch(reportLoadFailure(textureFile));
   }
 
   hide(): void {
@@ -388,7 +389,7 @@ class Ribbon {
       texture.hasAlpha = this.#material.alphaMode === Constants.ALPHA_COMBINE;
       this.#material.diffuseTexture = texture;
       this.#textured = true;
-    });
+    }).catch(reportLoadFailure(FLARE01));
   }
 
   reset(): void {
@@ -696,7 +697,7 @@ export class MoveTargetEffect {
         this.#yaw,
         1,
         ORANGE
-      );
+      ).catch(reportLoadFailure('particle spark03_24'));
     }
 
     const marker = Math.trunc(this.#lifeTime);
@@ -931,6 +932,6 @@ export class MoveTargetEffect {
       }
 
       node.setEnabled(this.#live);
-    });
+    }).catch(reportLoadFailure('Effect/MoveTargetPosEffect.glb'));
   }
 }

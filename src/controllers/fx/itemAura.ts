@@ -8,6 +8,7 @@ import {
 import { loadEffectTexture } from './moveTargetEffect';
 import type { ItemVisualTier } from '../item_fx/itemVisualTier';
 import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
+import { reportLoadFailure } from '../assets';
 
 /**
  * Item aura (improved look): falling sparks off the glowing item part from +11, one GPU (or CPU)
@@ -72,7 +73,7 @@ const FLARE = 'Effect/flare01.OZJ';
 function flareWhenLoaded(scene: Scene, ps: AuraSystem): void {
   void loadEffectTexture(scene, FLARE).then(texture => {
     if (scene.particleSystems.indexOf(ps) >= 0) ps.particleTexture = texture;
-  });
+  }).catch(reportLoadFailure(FLARE));
 }
 
 const EXC_TINT = new Color4(0.3, 1, 0.7, 1);

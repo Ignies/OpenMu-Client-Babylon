@@ -7,6 +7,7 @@ import {
 } from '../render/babylon/exports';
 import { loadEffectTexture } from '../fx/moveTargetEffect';
 import { GameOptions } from '../../modules/options/gameOptions';
+import { reportLoadFailure } from '../assets';
 
 /**
  * The puff of snow a boot throws when it lands: one particle system driven by
@@ -87,7 +88,7 @@ function ensureSystem(scene: Scene): ParticleSystem {
       ps.particleTexture = texture;
       ready = true;
     }
-  });
+  }).catch(reportLoadFailure('World3/leaf01.OZT'));
 
   ps.start();
   system = ps;

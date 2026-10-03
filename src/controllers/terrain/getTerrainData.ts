@@ -35,6 +35,7 @@ import {
   readOJZBufferAsJPEGBuffer,
 } from '../assets/download';
 import { consumeTerrainFile, terrainFilesFor } from '../assets/mu/prefetchWorld';
+import { reportLoadFailure } from '../assets';
 import { unpackTerrainLight } from './unpackTerrainLight';
 import {
   parseTerrainBulk,
@@ -205,7 +206,7 @@ export async function prepareTerrain(scene: Scene, map: ENUM_WORLD) {
   } catch (error) {
     for (const texture of terrainTextures) texture.dispose();
     // A light map that fails first leaves the array still packing.
-    void tileArrayReady.then(array => array?.texture.dispose());
+    void tileArrayReady.then(array => array?.texture.dispose()).catch(reportLoadFailure('terrain tile array'));
     throw error;
   }
 }

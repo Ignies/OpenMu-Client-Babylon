@@ -13,6 +13,7 @@ import {
   CHAOS_CASTLE_OUTER_RING,
   type TileRect,
 } from './spec';
+import { reportLoadFailure } from '@/controllers/assets';
 
 /**
  * The shrinking arena: `g_currentCastleLevel` + `SetActionObject(world, 1,
@@ -177,7 +178,7 @@ function puffCrack(crack: Crack): void {
     0,
     CRACK_SMOKE_SCALE,
     WHITE
-  );
+  ).catch(reportLoadFailure(`particle ${CRACK_SMOKE}`));
 }
 
 /** The ring is down: hidden for good, and its floor gone with it. */

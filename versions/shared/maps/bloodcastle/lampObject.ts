@@ -6,6 +6,7 @@ import { MapTileObject } from '@/controllers/terrain/mapTileObject';
 import { Store } from '@/app/store';
 import type { Entity, World } from '@/ecs/world';
 import { findBone, bonePosed, type BoneNode } from './bones';
+import { reportLoadFailure } from '@/controllers/assets';
 
 /** `b->TransformPosition(BoneTransform[3], …)` (ZzzObject.cpp:3186). */
 const FLARE_BONE = 3;
@@ -64,7 +65,7 @@ export class BloodCastleLampObject extends MapTileObject {
       const p = bone.getAbsolutePosition();
       flare.moveTo(p.x, p.y, p.z);
       this.#flare = flare;
-    });
+    }).catch(reportLoadFailure('effect light flare'));
   }
 
   dispose(): void {

@@ -6,6 +6,7 @@ import { isPlayerBody, type PlayerObject } from '../../controllers/actors/player
 import { applyWeaponAttachments } from '../../controllers/actors/weaponAttachment';
 import { isBook, swordformGlovesModel } from '../../controllers/actors/weaponClass';
 import type { ISystemFactory, Item } from '../world';
+import { settle } from '../../controllers/assets';
 
 function loadPart(
   part: Item | null,
@@ -25,13 +26,17 @@ function loadPart(
   const worn =
     (slot !== undefined && swordformGlovesModel(part, slot)) || item.szModelName;
 
-  playerObject.loadPartAsync(
-    item.szModelFolder,
-    socket,
-    worn,
-    part.lvl,
-    part.isExcellent,
-    itemVisualTier(part)
+  // A model that fails to load leaves the slot as it was.
+  void settle(
+    playerObject.loadPartAsync(
+      item.szModelFolder,
+      socket,
+      worn,
+      part.lvl,
+      part.isExcellent,
+      itemVisualTier(part)
+    ),
+    item.szModelFolder + worn
   );
 
   return true;
@@ -56,10 +61,9 @@ function wearChaosCastleSkin(playerObject: PlayerObject) {
   playerObject.Pants.Unload();
   playerObject.Gloves.Unload();
   playerObject.Boots.Unload();
-  void playerObject.loadPartAsync(
-    'Player/',
-    playerObject.Armor,
-    CHAOS_CASTLE_BODY
+  void settle(
+    playerObject.loadPartAsync('Player/', playerObject.Armor, CHAOS_CASTLE_BODY),
+    `Player/${CHAOS_CASTLE_BODY}`
   );
 
   void playerObject.setWingsAsync(null);
@@ -94,26 +98,26 @@ export const AppearanceSystem: ISystemFactory = world => {
           wearChaosCastleSkin(playerObject);
         } else {
           if (inCastleSkin.delete(playerObject)) {
-            void playerObject.setDefaultHelm();
+            void settle(playerObject.setDefaultHelm(), 'Player/HelmClass');
           }
 
           loadPart(charAppearance.helm, playerObject, playerObject.HelmMask) ||
             playerObject.setDefaultMask();
           loadPart(charAppearance.armor, playerObject, playerObject.Armor) ||
-            playerObject.setDefaultArmor();
+            void settle(playerObject.setDefaultArmor(), 'Player/ArmorClass');
           loadPart(charAppearance.pants, playerObject, playerObject.Pants) ||
-            playerObject.setDefaultPants();
+            void settle(playerObject.setDefaultPants(), 'Player/PantClass');
           loadPart(charAppearance.gloves, playerObject, playerObject.Gloves) ||
-            playerObject.setDefaultGloves();
+            void settle(playerObject.setDefaultGloves(), 'Player/GloveClass');
           loadPart(charAppearance.boots, playerObject, playerObject.Boots) ||
-            playerObject.setDefaultBoots();
+            void settle(playerObject.setDefaultBoots(), 'Player/BootClass');
 
           // c->Wing and the body-linked half of c->Helper. Both need their own
           // loader: the wing decides its bone (back vs cape) and blend mesh
           // before load, and the pet models live under Player/ rather than at
           // the Item/ path items.json carries for the horn items.
-          void playerObject.setWingsAsync(charAppearance.wings);
-          void playerObject.setBodyPetAsync(charAppearance.pet);
+          void settle(playerObject.setWingsAsync(charAppearance.wings), 'wings');
+          void settle(playerObject.setBodyPetAsync(charAppearance.pet), 'pet');
         }
 
         // Summoner books are never drawn on the character (`RenderLinkObject`
@@ -128,8 +132,8 @@ export const AppearanceSystem: ISystemFactory = world => {
           playerObject.Weapon1.Unload();
         loadPart(offHand, playerObject, playerObject.Weapon2, 1) ||
           playerObject.Weapon2.Unload();
-        void playerObject.setPhoenixWingAsync(0, mainHand);
-        void playerObject.setPhoenixWingAsync(1, offHand);
+        void settle(playerObject.setPhoenixWingAsync(0, mainHand), 'phoenix wing');
+        void settle(playerObject.setPhoenixWingAsync(1, offHand), 'phoenix wing');
 
         if (attributeSystem) {
           // Kept for consumers of the flag; reset properly on unequip and

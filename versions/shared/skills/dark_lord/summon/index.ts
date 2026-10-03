@@ -10,6 +10,7 @@ import { everyTick, muRotated, sfx, ticksLeft } from '../_shared';
 import { lighting } from '@/controllers/lighting';
 import { storeRef } from '@/app/storeRef';
 import { warmGLTF } from '@/controllers/assets/modelLoader';
+import { reportLoadFailure } from '@/controllers/assets';
 
 import { A } from '@/controllers/combat/recipes';
 
@@ -173,7 +174,7 @@ const partyCircle = partyCircleOf(false);
 
 /** Party Teleport's sheets and meshes, fetched at the packet so the circle is not late on a first cast. */
 const partyCircleWarm: Step = (_at, c) => {
-  for (const t of [TEX.magicEmblem, TEX.flareBlue, TEX.flare]) void effectTexture(c.scene, t);
+  for (const t of [TEX.magicEmblem, TEX.flareBlue, TEX.flare]) void effectTexture(c.scene, t).catch(reportLoadFailure(t));
   const world = storeRef().world;
   if (world) for (const m of [MODEL.circle, MODEL.circle2]) void warmGLTF(m, world);
 };

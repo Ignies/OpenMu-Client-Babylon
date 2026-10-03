@@ -6,6 +6,7 @@ import { Store } from '@/app/store';
 import type { World } from '@/ecs/world';
 import type { BonedEmission } from '@/controllers/fx/effectParticles';
 import { CandleObject } from '../lorencia/candleObject';
+import { reportLoadFailure } from '@/controllers/assets';
 
 const FLARE_SCALE = 1.6;
 const FLARE_COLOR: readonly [number, number, number] = [1, 0.62, 0.22];
@@ -131,7 +132,7 @@ export class DeviasCandleObject extends CandleObject {
           flare.moveTo(p.x, p.y, p.z);
           this.#flares.push(flare);
         }
-      );
+      ).catch(reportLoadFailure('effect light flare'));
     }
   }
 
