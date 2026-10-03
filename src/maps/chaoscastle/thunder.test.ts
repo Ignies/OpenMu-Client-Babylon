@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { SOUND_FILES } from '../../sound/recipes';
 import {
+  BOLT_DROP_MU,
+  BOLT_SEGMENTS,
   THUNDER_SOUNDS,
+  fallingBoltPath,
   nextThunderSeconds,
+  thunderPillar,
   thunderSound,
-  thunderStrikes,
 } from './thunder';
 
 /** A small LCG so the rate checks are the same on every run. */
@@ -28,23 +31,45 @@ describe('Chaos Castle pillar thunder', () => {
   });
 
   it('strikes nothing without two pillars in view', () => {
-    expect(thunderStrikes(0, () => 0.9)).toBe(false);
-    expect(thunderStrikes(1, () => 0.9)).toBe(false);
+    expect(thunderPillar(0, () => 0.9)).toBe(-1);
+    expect(thunderPillar(1, () => 0.9)).toBe(-1);
   });
 
   it('strikes nothing when the pillar draw comes up zero', () => {
-    expect(thunderStrikes(5, () => 0)).toBe(false);
-    expect(thunderStrikes(5, () => 0.19)).toBe(false);
-    expect(thunderStrikes(5, () => 0.2)).toBe(true);
+    expect(thunderPillar(5, () => 0)).toBe(-1);
+    expect(thunderPillar(5, () => 0.19)).toBe(-1);
+    expect(thunderPillar(5, () => 0.2)).toBe(0);
+  });
+
+  it('strikes the k-th pillar in view for a draw of k', () => {
+    expect(thunderPillar(5, () => 0.5)).toBe(1);
+    expect(thunderPillar(5, () => 0.99)).toBe(3);
   });
 
   it('strikes (visible - 1) / visible of the landed rolls', () => {
     const random = seeded(11);
     const rolls = 20000;
     let strikes = 0;
-    for (let i = 0; i < rolls; i++) if (thunderStrikes(10, random)) strikes++;
+    for (let i = 0; i < rolls; i++)
+      if (thunderPillar(10, random) >= 0) strikes++;
     expect(strikes / rolls).toBeGreaterThan(0.88);
     expect(strikes / rolls).toBeLessThan(0.92);
+  });
+
+  it('drops the bolt out of the sky onto the pillar', () => {
+    const to = { x: 30, y: 2, z: 80 };
+    const from = { x: 30, y: 2 + BOLT_DROP_MU / 100, z: 80 };
+    const out: number[] = [];
+    fallingBoltPath(from, to, out, seeded(3));
+
+    expect(out.length).toBe((BOLT_SEGMENTS + 1) * 3);
+    // The first point is one step under the top, the last is the pillar.
+    expect(out[1]).toBeCloseTo(from.y - 0.16, 5);
+    expect(out.slice(-3)).toEqual([to.x, to.y, to.z]);
+    // Straight down: never back up.
+    for (let k = 1; k < BOLT_SEGMENTS + 1; k++) {
+      expect(out[k * 3 + 1]).toBeLessThanOrEqual(out[(k - 1) * 3 + 1]);
+    }
   });
 
   it('picks one of the two catalogued thunder waves', () => {

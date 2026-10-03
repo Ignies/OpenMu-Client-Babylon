@@ -22,8 +22,8 @@ import type { Emission } from '../../common/effectParticles';
  *    - smoke-box markers, never drawn.
  *  - **3 with `PKKey`**: the lightning pillars; a `CreateJoint` thunder
  *    ribbon and `SOUND_CHAOS_THUNDER01/02` when the client's own roll picks
- *    one. The sound is `thunder.ts`; no ribbon primitive in the clone (see
- *    Icarus), so the bolt is not reproduced.
+ *    one. `thunder.ts` picks the pillar and lays the bolt's walk, `bolt.ts`
+ *    draws it.
  */
 
 /** `CreateObject` has no Chaos Castle blend meshes; "checked, none". */
