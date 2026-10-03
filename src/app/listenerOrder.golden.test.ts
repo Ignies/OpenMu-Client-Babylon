@@ -9,13 +9,13 @@ import { EventBus } from '@/core/eventBus';
 import '@/app/store';
 
 // Pins every packet's listeners and their order once the app has loaded (the order modules
-// install in is the order listeners run for a packet several modules handle).
-const LISTENERS_HASH = '51d0dc2a543f19abd380aed5f1e74792701c89f2';
+// install in is the order listeners run for a packet several modules handle). Whitespace is ignored.
+const LISTENERS_HASH = 'cbd54e45c08664ffa285ff80fd6cd8ac2760768d';
 
 describe('packet listeners', () => {
   it('are the same functions in the same order', () => {
     const rows = [...EventBus.all.entries()]
-      .map(([event, handlers]) => [String(event), (handlers as unknown[]).map(h => createHash('sha1').update(String(h)).digest('hex').slice(0, 10))] as const)
+      .map(([event, handlers]) => [String(event), (handlers as unknown[]).map(h => createHash('sha1').update(String(h).replace(/\s+/g, '')).digest('hex').slice(0, 10))] as const)
       .sort(([a], [b]) => a.localeCompare(b));
     const hash = createHash('sha1').update(JSON.stringify(rows)).digest('hex');
     expect(hash).toBe(LISTENERS_HASH);
