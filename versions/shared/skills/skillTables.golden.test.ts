@@ -22,8 +22,6 @@ import './skillVisuals';
 vi.hoisted(() => {
   const g = globalThis as Record<string, unknown>;
   g.location ??= { href: 'http://localhost/', search: '', hostname: 'localhost', protocol: 'http:' };
-  // Data/ is not there under Node: a fetch never answers, so no texture or name loader rejects later.
-  g.fetch = () => new Promise(() => {});
 });
 
 const round = (n: number) => Math.round(n * 1000) / 1000;
