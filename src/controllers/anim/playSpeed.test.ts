@@ -59,3 +59,25 @@ describe('SetAttackSpeed stat factors', () => {
     for (const [ms, factor] of cases) expect(magicSpeedFactor(ms)).toBeCloseTo(factor, 9);
   });
 });
+
+describe('SetAttackSpeed rows over the base table', () => {
+  const A = PlayerAction;
+  it('scales the Elf cast and the horse sword (ZzzCharacter.cpp:936, :950)', () => {
+    expect(playerPlaySpeed(A.PLAYER_SKILL_ELF1, 0, 100)).toBeCloseTo(0.65, 9);
+    expect(playerPlaySpeed(A.PLAYER_ATTACK_RIDE_HORSE_SWORD, 100, 0)).toBeCloseTo(0.65, 9);
+  });
+
+  it('pins the flat rows (ZzzCharacter.cpp:1004, :1025-1026)', () => {
+    expect(playerPlaySpeed(A.PLAYER_RECOVER_SKILL)).toBe(0.33);
+    expect(playerPlaySpeed(A.PLAYER_SKILL_ATT_UP_OURFORCES)).toBe(0.35);
+    expect(playerPlaySpeed(A.PLAYER_SKILL_HP_UP_OURFORCES)).toBe(0.35);
+  });
+
+  it('adds AttackSpeed * 0.002 to the Rage Fighter skills (ZzzCharacter.cpp:1016-1027)', () => {
+    for (const a of [A.PLAYER_SKILL_THRUST, A.PLAYER_SKILL_STAMP, A.PLAYER_SKILL_GIANTSWING, A.PLAYER_SKILL_DRAGONKICK])
+      expect(playerPlaySpeed(a, 100, 0, true)).toBeCloseTo(0.6, 9);
+    for (const a of [A.PLAYER_SKILL_DARKSIDE_READY, A.PLAYER_SKILL_DARKSIDE_ATTACK, A.PLAYER_SKILL_DRAGONLORE])
+      expect(playerPlaySpeed(a, 100, 0, true)).toBeCloseTo(0.5, 9);
+    expect(playerPlaySpeed(A.PLAYER_RAGE_FENRIR_ATTACK_RIGHT, 600, 0, true)).toBeCloseTo(1.45, 9);
+  });
+});

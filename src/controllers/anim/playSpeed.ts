@@ -58,14 +58,17 @@ function ruleSpeed(rule: SpeedRule, attackSpeed: number, magicSpeed: number, isR
       ? attackSpeedFactor(attackSpeed)
       : rule.plus === 'magicSpeed'
         ? magicSpeedFactor(magicSpeed)
-        : attackSpeedFactor(magicSpeed);
+        : rule.plus === 'rageAttackSpeed'
+          ? attackSpeed * 0.002
+          : attackSpeedFactor(magicSpeed);
   const speed = rule.base + plus;
   return rule.times === undefined ? speed : speed * rule.times;
 }
 
 /**
  * A player clip's `PlaySpeed`: the base table (ZzzOpenData.cpp:314-372) with `SetAttackSpeed`
- * (ZzzCharacter.cpp:830-960) and `SetPlayerWalk` over it. Each clip's rule is in its animation file;
+ * (ZzzCharacter.cpp:812-1028, run last at load and on every swing) and `SetPlayerWalk` over it.
+ * Each clip's rule is in its animation file;
  * an id no file names gets the base table's default, 0.40 from PLAYER_SIT1 up and 0.28 below.
  */
 export function playerPlaySpeed(
