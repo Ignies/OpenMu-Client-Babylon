@@ -4,7 +4,7 @@ export default defineMonster({
   Numb: 251,
   Name: 'Hanzo, Blacksmith',
   maxHealth: 1000,
-  // model.ts draws it at scale 1; this row is what the tables list.
+  // MODEL_SMITH at c->Object.Scale = 0.95 (ZzzCharacter.cpp:14517-14522).
   npcModel: { file: 'Smith01', scale: 0.95 },
   // MODEL_SMITH: every tick the idle clip sits in frames 5-10, so one clang per swing of the
   // hammer (ZzzCharacter.cpp:6090-6092). The sparks are controllers/fx/monsterVisuals.ts.

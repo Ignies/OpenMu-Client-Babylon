@@ -1,5 +1,5 @@
 import { prefetchSignPlates } from '../../objects/signs/signPlates';
-import { ElfSoldier } from '../../npcs/elf_soldier';
+import { ElfSoldier } from '../../monsters/elf_soldier/model';
 import {
   MODEL_HOUSE_WALL01,
   MODEL_HOUSE_WALL02,

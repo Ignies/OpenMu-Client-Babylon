@@ -121,8 +121,7 @@ it as the 3D line-up's name plate.
   `npcModel`, `gear`, `transformed`, `trap`, `voice`, `globalVoice`. A class of its own is
   `<name>/model.ts`; a class several types share is `_<line>/model.ts`.
 - The generic NPC shapes (plain model, player rig in a kit, transformed rig, trap, hidden) are the
-  actors controller's. `versions/shared/npcs/` only keeps a forward of `ElfSoldier` for the
-  Lorencia map.
+  actors controller's.
 
 ## A map's own rows
 

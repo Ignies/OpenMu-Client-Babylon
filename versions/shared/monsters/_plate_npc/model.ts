@@ -5,8 +5,8 @@ import { PlayerObject, registerModelClass } from '@/controllers/actors';
 import { CharacterClassNumber } from '@/core/types';
 
 /**
- * A player rig in the plate set. Luke (258) and Ellen (414) are one case in the original
- * (ZzzCharacter.cpp:14327-14340); the Cursed Wizard (34) is drawn the same way here.
+ * A player rig in the plate set. Luke (258), Leo (371) and Ellen (414) are one case in the
+ * original (ZzzCharacter.cpp:14612-14625).
  */
 export class PlateNpc extends PlayerObject {
   static NpcClass = CharacterClassNumber.DarkKnight;
@@ -41,4 +41,4 @@ export class PlateNpc extends PlayerObject {
   }
 }
 
-registerModelClass([34, 258, 414], PlateNpc);
+registerModelClass([258, 371, 414], PlateNpc);
