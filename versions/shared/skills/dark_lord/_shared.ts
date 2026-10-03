@@ -4,7 +4,7 @@ import { DUST, MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
 import { Matrix, Quaternion, Vector3 } from '@/controllers/render/babylon/exports';
 import { delay, entityGone, entityPos, entityYaw, fxNow, type ParticleRecipe, type RGB } from '@/controllers/fx/core';
 import { PlayerAction } from '../../objects/enum';
-import { SkillContext, Step, TICK, baseSkill, cm, currentSkill, facing, ticks } from '@/controllers/skills/visuals';
+import { type ReleaseRule, SkillContext, Step, TICK, baseSkill, cm, currentSkill, facing, onRelease, ticks } from '@/controllers/skills/visuals';
 import { type Sounds } from '@/controllers/sound/recipes';
 import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
@@ -14,36 +14,26 @@ import { A } from '@/controllers/combat/recipes';
 
 // ---- dl1 steps -------------------------------------------------------------------
 
-/** The Dark Lord's strike clips; key 3 releases Force and Fire Burst (ZzzCharacter.cpp:2865-2883). */
+/** The Dark Lord's strike clips; key 3 releases Force and Fire Burst (AttackStage, ZzzCharacter.cpp:2865-2883). */
 const STRIKE_CLIPS: ReadonlySet<number> = new Set([PlayerAction.PLAYER_ATTACK_STRIKE, PlayerAction.PLAYER_ATTACK_RIDE_STRIKE, PlayerAction.PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE]);
-const STRIKE_KEY = 3;
-/** AttackTime starts at 1 and fires at 15 (ZzzCharacter.cpp:4132-4140): 14 ticks at most. */
-export const STRIKE_MAX_TICKS = 14;
+const STRIKE_RELEASE: ReleaseRule = { key: 3, clips: STRIKE_CLIPS };
 /** Moves an effect has made when drawn `t` seconds after its spawn: the first runs in the frame it is created. */
 export const movesAt = (t: number): number => 1 + t / TICK;
 /** The caster's `Angle[2]` in degrees, for model.ts `angle`. */
 export const yawDegrees = (c: SkillContext): number => (entityYaw(c.caster) * 180) / Math.PI;
 
 /**
- * `step` once the caster's strike clip passes key 3, or 14 ticks after the packet, whichever comes first,
- * with `sound` as it fires. The original needs a live target for any of it (ZzzCharacter.cpp:4811-4839).
+ * `step` at the strike's release (`onRelease`: the strike clip's key 3, or 14 ticks after the packet), with
+ * `sound` as it fires. The original needs a live target for any of it (ZzzCharacter.cpp:4811-4839).
  */
 export const strikeKey = (step: Step, sound: Sounds): Step => (at, c) => {
   if (!c.target?.transform) return;
   const p = at.clone();
-  let waited = 0;
-  const poll = (): void => {
+  onRelease(c, () => {
     if (entityGone(c.caster)) return;
-    const m = c.caster.modelObject;
-    const struck = !!m && STRIKE_CLIPS.has(m.CurrentAction) && m.actionFrame() >= STRIKE_KEY;
-    if (!struck && waited++ < STRIKE_MAX_TICKS) {
-      delay(TICK, poll);
-      return;
-    }
     playCombat(sound, c.caster.transform!.pos);
     step(p, c);
-  };
-  poll();
+  }, STRIKE_RELEASE);
 };
 
 /** A MODEL_WAVES scale after `n` moves: `Scale += Gravity`, `Gravity += dg`, capped (MoveHandlers.cpp:5277-5290). */

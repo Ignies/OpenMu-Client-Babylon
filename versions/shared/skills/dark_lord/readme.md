@@ -26,7 +26,8 @@ Dark Lord skills, one folder per skill. Rules for skill folders: [../readme.md](
 "Enhanced" in a skill's comment is the graded look drawn on higher lighting tiers.
 
 `_shared.ts` holds:
-- strike timing: `strikeKey` (fire at the strike clip's key 3 or after `STRIKE_MAX_TICKS`),
+- strike timing: `strikeKey` (`onRelease` with `{ key: 3, clips: STRIKE_CLIPS }`: the strike clip's key 3
+  or 14 ticks after the packet, AttackStage ZzzCharacter.cpp:2865-2883),
   `litStrike`, `atFrame`, `everyTick`, `movesAt`, `ticksLeft`;
 - Force parts: `force`, `forceGraded`, `forceHeads`, `hummingDir`;
 - `SPLIT_EMBERS`, `sfx`;
