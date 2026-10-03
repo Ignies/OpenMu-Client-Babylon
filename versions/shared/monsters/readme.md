@@ -18,7 +18,9 @@ A folder's name is the type's name in snake_case, plus `_<number>` when two type
 table (`Monster.txt`) and the wire (`AddNpcsToScope`) number them the same way. NPCs without a table
 row are named from `NpcName_Eng.txt`, and so are the ones whose row names someone else (244 is
 Caren, not Lumen; 255 is Lumen; 258 is Luke, not Silvia; 229 is Marlon): the folder follows the
-original client's name, the row keeps its own.
+original client's name, the row keeps its own. The same goes for rows that name another monster
+(290-294, the Chief Skeleton Warriors, Giant Ogres and Magic Skeletons, 151, 318, 400, 401, 430,
+69): the folder follows `NpcName_Eng.txt` and `_enum.h`.
 
 ## Public API
 - `MonstersDatabase.get(id)`: the original table's row for a type (`stats` with `Numb` and `Name`),
