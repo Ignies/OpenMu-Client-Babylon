@@ -44,7 +44,6 @@ export default defineSkill({
   // AT_SKILL_BLOCKING: ReceiveAction returns before the clip and the sound for a Dark Horse rider outside a
   // safe zone (WSclient.cpp:3577-3582); the hero's own cast still takes the guard pose, silently.
   quietOn: ['horse'],
-  effect: 2, // MagicEffectCancelled names skill 18: the buff it drops
   // 18 Defense: the guard clip and sKnightDefense only; the original draws nothing (SkillCast.cpp:224-231,
   // WSclient.cpp:3610-3612). OpenMU answers with 0x19, so the echo carries ReceiveAction's clip and sound.
   // Enhanced adds a steel glint as the guard sets.

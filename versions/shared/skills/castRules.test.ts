@@ -15,6 +15,13 @@ vi.hoisted(() => {
 const IDS = Array.from({ length: 701 }, (_, i) => i);
 const MOUNTS = ['uniria', 'dinorant', 'horse', 'fenrir'] as const;
 
+// ReceiveMagicFinish (WSclient.cpp:3878-3987): skill -> the eBuffState it drops. Its `Value` is a BYTE
+// (WSclient.h:220), so the master cases (>= 256) never match and are left out.
+const MAGIC_FINISH: Record<number, number> = {
+  1: 55, 7: 56, 16: 4, 27: 2, 28: 1, 38: 55, 39: 56, 48: 8, 51: 57, 53: 7, 55: 58, 64: 5,
+  67: 61, 69: 9, 70: 18, 75: 19, 201: 2, 202: 4, 217: 71, 218: 81, 232: 86, 233: 82,
+};
+
 // The skill-only cast rules the skill files declare, read back through the combat facade.
 describe('skill cast rules', () => {
   it('only Defense is dropped on a mount: a Dark Horse rider (WSclient.cpp:3577-3582)', () => {
@@ -43,7 +50,8 @@ describe('skill cast rules', () => {
     expect(IDS.filter(id => combat.needsAreaHit({ num: id, type: 'AreaSkillAutomaticHits' } as never))).toEqual([]);
   });
 
-  it('every skill that names a cancel effect is one the old table listed', () => {
-    expect(Object.keys(SKILL_EFFECTS).map(Number).sort((a, b) => a - b)).toEqual([16, 18, 27, 28, 30, 35, 43, 232, 233, 234]);
+  it('only skills ReceiveMagicFinish handles name a cancel effect', () => {
+    const extra = Object.keys(SKILL_EFFECTS).map(Number).filter(id => !(id in MAGIC_FINISH));
+    expect(extra).toEqual([]);
   });
 });
