@@ -13,7 +13,8 @@ vi.mock('../../controllers/fx/deathVisuals', () => ({
   shatterDeathFor: () => undefined,
   spawnBomb: (...args: unknown[]) => spawnBomb(...args),
 }));
-vi.mock('../../controllers/fx', () => ({ effects: { spawn: () => {} } }));
+const spawn = vi.fn();
+vi.mock('../../controllers/fx', () => ({ effects: { spawn: (...args: unknown[]) => spawn(...args) } }));
 vi.mock('../../controllers/sound/combatSounds', () => ({ COMBAT_BUS: 'combat' }));
 
 const { DeathSystem } = await import('./deathSystem');
@@ -92,5 +93,55 @@ describe('Chaos Castle death sounds', () => {
 
     expect(playSfx).not.toHaveBeenCalled();
     expect(spawnBomb).not.toHaveBeenCalled();
+  });
+});
+
+/** A body killed on an open map by `skill`, its killer standing three tiles east. */
+function killedBy(skill: number) {
+  const body = corpse();
+  body.dying.skill = skill;
+  body.dying.killerNetId = 7;
+  const killer = { transform: { pos: { x: 33.5, y: 0, z: 90.5 } } };
+  const world = {
+    mapIndex: ENUM_WORLD.WD_0LORENCIA,
+    scene: {},
+    mapParent: { position: { x: 0, z: 0 } },
+    getTerrainFlag: () => 0,
+    getByNetId: (id: number) => (id === 7 ? killer : undefined),
+    with: () => [body],
+  };
+  return { body, system: DeathSystem(world as unknown as World) };
+}
+
+describe('skill deaths', () => {
+  beforeEach(() => spawn.mockClear());
+
+  it('Nova and Combo slide the body along the line to the killer for 15 ticks', () => {
+    for (const skill of [40, 59]) {
+      const { body, system } = killedBy(skill);
+      for (let i = 0; i < 40; i++) system.update!(TICK);
+      expect(body.dying.offset.x).toBeGreaterThan(0.5);
+      expect(Math.abs(body.dying.offset.z)).toBeLessThan(1e-9);
+    }
+  });
+
+  it('every other skill leaves the body where it fell', () => {
+    for (const skill of [0, 9, 41, 58, 392]) {
+      const { body, system } = killedBy(skill);
+      for (let i = 0; i < 40; i++) system.update!(TICK);
+      expect(body.dying.offset).toEqual({ x: 0, y: 0, z: 0 });
+    }
+  });
+
+  it('Nova sheds ten motes a tick while the Dead counter is <= 30, nothing else does', () => {
+    const nova = killedBy(40);
+    for (let i = 0; i < 40; i++) nova.system.update!(TICK);
+    // 29 frames: the summed 1/25 steps put the 30th just past 30.
+    expect(spawn.mock.calls.length).toBe(290);
+    expect(spawn.mock.calls.every(c => c[0] === 'particles')).toBe(true);
+    spawn.mockClear();
+    const combo = killedBy(59);
+    for (let i = 0; i < 40; i++) combo.system.update!(TICK);
+    expect(spawn).not.toHaveBeenCalled();
   });
 });
