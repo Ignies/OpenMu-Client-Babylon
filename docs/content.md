@@ -70,3 +70,7 @@ restyling the tooltip once restyles it everywhere.
 `versions/<id>/` holds what differs for one version: data paths, packet set, UI overrides (same
 window `id` replaces the shared one). Code in `src/` never asks which version runs; it reads the
 version's features and data. See [versions.md](versions.md).
+
+A version's own page reuses the shared page's parts instead of copying them: the 0.97d character
+page draws `versions/shared/ui/pages/character_select/character_list` as rows, the shared page draws
+it as the 3D line-up's name plate.

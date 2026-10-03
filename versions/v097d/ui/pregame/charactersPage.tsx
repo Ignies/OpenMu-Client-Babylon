@@ -5,20 +5,19 @@
  * Deferred, and stated in the PR: the 3D actors on the deck, and character
  * creation. The actors need `world.terrain`, which a set-piece backdrop does
  * not have (`RenderSystem` and `ModelLoaderSystem` both bail on it), so the
- * roster is the list rather than five figures to click; creation is the
- * `Card01..04` / `Face01..04` carousel, a screen of its own.
+ * roster is the shared `CharacterList` drawn as rows rather than five figures
+ * to click; creation is the `Card01..04` / `Face01..04` carousel, a screen of
+ * its own.
  */
 import { observer } from 'mobx-react-lite';
-import { useEffect, useState } from 'react';
-import { runInAction } from 'mobx';
+import { useState } from 'react';
 import { t } from '@/i18n';
-import { uiClick } from '@/controllers/sound/sfx';
 import { Store } from '@/app/store';
-import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import {
-  CharacterFocusedPacket,
-  CharacterListPacket,
-} from '@versions/shared/packets/ServerToClientPackets';
+  CharacterList,
+  listStatus,
+  selectedCharacter,
+} from '../../../shared/ui/pages/character_select/character_list';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import './style.less';
@@ -49,26 +48,15 @@ export const V097dCharactersPage = observer(() => {
   const [deleting, setDeleting] = useState(false);
   const [code, setCode] = useState('');
 
-  useEffect(() => {
-    Store.refreshCharactersListRequest();
-  }, []);
-
-  useEventBus('CharacterList', bytes => {
-    const p = new CharacterListPacket(bytes);
-    const characters = p.getCharacters();
-
-    runInAction(() => {
-      Store.loadingCharactersList = false;
-      Store.charactersList = characters;
-      Store.creationUnlockFlags = p.UnlockFlags;
-    });
-  });
-
-  useEventBus('CharacterFocused', bytes => {
-    Store.focusedChar = new CharacterFocusedPacket(bytes).CharacterName;
-  });
-
-  const selected = Store.charactersList.find(c => c.Name === Store.focusedChar);
+  const selected = selectedCharacter(Store.charactersList, Store.focusedChar);
+  const status = listStatus(
+    {
+      loading: Store.loadingCharactersList,
+      count: Store.charactersList.length,
+      selected: !!selected,
+    },
+    'empty'
+  );
 
   return (
     <div className="v097d-characters-page">
@@ -78,41 +66,15 @@ export const V097dCharactersPage = observer(() => {
           width={PLATE.width}
           height={PLATE.height}
         >
-          {Store.loadingCharactersList && (
+          {status === 'loading' && (
             <p className="v097d-characters-note">{t('characters.loading')}</p>
           )}
 
-          {!Store.loadingCharactersList &&
-            Store.charactersList.length === 0 && (
-              <p className="v097d-characters-note">{t('characters.select')}</p>
-            )}
+          {status === 'select' && (
+            <p className="v097d-characters-note">{t('characters.select')}</p>
+          )}
 
-          {Store.charactersList.map((character, index) => (
-            <button
-              key={character.Name}
-              type="button"
-              className={
-                character.Name === Store.focusedChar
-                  ? 'v097d-characters-row is-selected'
-                  : 'v097d-characters-row'
-              }
-              style={{
-                left: ROW.x,
-                top: ROW.y + index * ROW.height,
-                width: ROW.width,
-                height: ROW.height,
-              }}
-              onClick={uiClick(() => {
-                Store.focusedChar = character.Name;
-                Store.focusCharacterRequest(character.Name);
-              })}
-            >
-              <span>{character.Name}</span>
-              <span className="v097d-characters-level">
-                {`Lv ${character.Level}`}
-              </span>
-            </button>
-          ))}
+          <CharacterList source={Store} look="rows" row={ROW} />
 
           {deleting && (
             <MuSpriteFrame
