@@ -2,7 +2,7 @@ import { AreaSkillAnimationPacket, ChainLightningHitInfoPacket, MagicEffectCance
 import { teleportCastSound } from '@/controllers/sound';
 import { Entity, World } from '@/ecs/world';
 import { EventBus } from '@/core/eventBus';
-import { SKILL_EFFECTS } from './recipes';
+import { cancelledEffects } from '@/controllers/skills';
 import { Store } from '@/app/store';
 import { TELEPORT } from './skillCasting';
 import { applyObjectEffect, playCastAnimation } from '../_shared/net_helpers';
@@ -132,8 +132,11 @@ export function installNet(): void {
 
   EventBus.on('MagicEffectCancelled', packet => {
     const p = new MagicEffectCancelledPacket(packet);
-    const effect = SKILL_EFFECTS[p.SkillId];
-    if (effect !== undefined) setObjectEffect(p.TargetId, effect, false);
+    const world = Store.world;
+    if (!world) return;
+    // The skill's cancel hook (201/202 break a monster's barrier) runs first, then its effect drops.
+    const target = world.getByNetId(p.TargetId & 0x7fff) ?? null;
+    for (const e of cancelledEffects(p.SkillId, world.scene, target)) setObjectEffect(p.TargetId, e, false);
   });
 
   EventBus.on('SkillListUpdate', applySkillListPacket);

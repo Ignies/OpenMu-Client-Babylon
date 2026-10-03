@@ -57,7 +57,8 @@ export const WeaponTrailSystem: ISystemFactory = world => {
           const action = model.CurrentAction;
           swing.row =
             isPlayerAttackAction(action) || isPlayerSkillAction(action)
-              ? weaponBlurFor(e.charAppearance, action, (e.heroState ?? PVP_NEUTRAL) >= PVP_MURDERER2)
+              ? // The murderer blur reads a player's c->Level; a red NPC (heroState from its gear) never sets it.
+                weaponBlurFor(e.charAppearance, action, e.npcType === undefined && (e.heroState ?? PVP_NEUTRAL) >= PVP_MURDERER2)
               : null;
         }
         const row = swing.row;
