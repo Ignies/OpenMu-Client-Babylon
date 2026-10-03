@@ -90,7 +90,8 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 - `approachPath.test.ts`: walk truncation at range, distance along the sent path, stall capping.
 - `deserializeAppearance.test.ts`: `isAppearanceBlank` on empty and real previews.
 - `itemAngle.test.ts`: drop scale and pose per group, worn height, the `ItemAngle` tail rows.
-- `npcModelTable.test.ts`: every row names a file in `public/game-assets` and has a scale > 0.
+- `npcModelTable.test.ts`: every row names a file in `public/game-assets` and has a scale > 0; the
+  tables behave as plain objects and read the folders when asked.
 - `trapModels.test.ts`: every (map, trap) pair names an `Object<world+1>` model that exists.
 - `resolveModel.golden.test.ts`: what every type 0..600 is drawn with (class, scale, base, kit,
   shared classes) and the NPC tables, as hashes; update them on purpose. It runs the real model

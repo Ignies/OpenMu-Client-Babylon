@@ -1,7 +1,9 @@
 import { existsSync } from 'fs';
 import { join } from 'path';
 import { describe, expect, it } from 'vitest';
+import { monsterRegistry } from '@/controllers/monsters';
 import { NPC_MODEL_TABLE, npcModelFile } from './npcModelTable';
+import { GEARED_NPC_TABLE, TRANSFORMED_NPC_TABLE } from './playerNpcTables';
 
 /**
  * A row naming a file that is not there does not fail loudly: the load rejects
@@ -42,5 +44,24 @@ describe('NPC_MODEL_TABLE', () => {
     it('draws the Kanturu Relics canon trap', () => {
       expect(NPC_MODEL_TABLE[105]).toEqual(['c_mon', 1.0]);
     });
+  });
+});
+
+describe('the NPC tables as views of the monster folders', () => {
+  it('list, spread and index like the plain tables they were', () => {
+    const keys = Object.keys(NPC_MODEL_TABLE);
+    expect(keys).toEqual([...keys].sort((a, b) => Number(a) - Number(b)));
+    expect({ ...NPC_MODEL_TABLE }[105]).toEqual(['c_mon', 1]);
+    expect(105 in NPC_MODEL_TABLE).toBe(true);
+    expect(NPC_MODEL_TABLE[1]).toBeUndefined();
+    expect(1 in NPC_MODEL_TABLE).toBe(false);
+  });
+
+  it('read the folders when asked, not when loaded', () => {
+    monsterRegistry.add([{ Numb: 9001, Name: 'Test NPC', npcModel: { file: 'Test01', scale: 1.5 } }]);
+    expect(NPC_MODEL_TABLE[9001]).toEqual(['Test01', 1.5]);
+    expect(Object.keys(NPC_MODEL_TABLE)).toContain('9001');
+    expect(GEARED_NPC_TABLE[9001]).toBeUndefined();
+    expect(TRANSFORMED_NPC_TABLE[9001]).toBeUndefined();
   });
 });

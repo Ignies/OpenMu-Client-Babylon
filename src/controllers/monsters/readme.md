@@ -29,6 +29,7 @@ its own folder in `versions/shared/monsters/<name>/` and uses this controller.
   an NPC's), read by the controller that uses it.
 
 ## Tests
+- `registry.test.ts`: `having`, `def` and a later folder replacing a type, NPC fields included.
 - `versions/shared/monsters/monsters.golden.test.ts` covers the registry with the real folders.
 - `src/controllers/actors/resolveModel.golden.test.ts` and `src/controllers/sound/npcVoices.test.ts`
   cover the NPC fields as their readers see them.
