@@ -96,6 +96,8 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 - `resolveModel.golden.test.ts`: what every type 0..600 is drawn with (class, scale, base, kit,
   shared classes) and the NPC tables, as hashes; update them on purpose. It runs the real model
   classes under Node with the Store mocked.
+- `npcLooks.test.ts`: NPCs drawn as the original builds them (Hanzo's scale, the plain-model NPCs,
+  Zyro, the Cursed Wizard's kit, the plate helpers), each with its ZzzCharacter.cpp lines.
 - `skinTexture.test.ts`: skin / hair / level and hide texture names.
 - Also from `modules/items/`: `portedItems`, `questItemLink`, `weaponAttack` tests.
 
