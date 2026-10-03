@@ -1,5 +1,5 @@
 import type { Emission } from '@/controllers/fx/effectParticles';
-import type { MeshAnimation } from '@/controllers/render/meshAnimation';
+import type { MeshAnimation } from '@/controllers/render';
 import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
 
 /**
@@ -124,8 +124,7 @@ const lavaScrollDown = (t: number) => -((t % 10000) * 0.0001);
 const lavaScrollUp = (t: number) => (t % 10000) * 0.0001;
 
 /**
- * The four types `controllers/render/meshAnimation.ts` has no row for yet. Exported for
- * the integrator: this map owns no shared file.
+ * Vulcanus's `render.meshAnimations` row (`index.ts`):
  *
  *  - **15** (x9), `RenderObjectMesh` :404-411: `StreamMesh = 0` then
  *    `RenderBody(..., -(int)WorldTime % 10000 * 0.0001f)` - the `song_lava1`

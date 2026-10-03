@@ -26,7 +26,7 @@ import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
 /**
  * No `o->BlendMesh` writes anywhere in GMEmpireGuardian4.cpp. Type 81's
  * `o->BlendMeshTexCoordV += 0.015f` (:227-231) is a UV scroll, not a blend
- * mesh, and lives in `controllers/render/meshAnimation.ts`.
+ * mesh, and lives in the `render.meshAnimations` rows.
  */
 export const EMPIRE_GUARDIAN_4_BLEND_MESHES: Readonly<
   Record<number, number>

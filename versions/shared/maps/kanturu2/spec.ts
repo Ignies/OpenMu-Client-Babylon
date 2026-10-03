@@ -1,5 +1,7 @@
 import type { Emission } from '@/controllers/fx/effectParticles';
 import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
+import type { MeshAnimations } from '@/controllers/render';
+import { saw } from '../shared/meshAnimation';
 
 /**
  * Kanturu Relics (`WD_38KANTURU_2ND`, `World39`/`Object39`), the plain-data
@@ -17,7 +19,7 @@ import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
  * (:329-525).
  */
 
-/** No `o->BlendMesh` writes; the 10/38 sines and the 42 scroll are in `meshAnimation.ts`. */
+/** No `o->BlendMesh` writes; the 10/38 sines and the 42 scroll are in the `render.meshAnimations` rows. */
 export const KANTURU2_BLEND_MESHES: Readonly<Record<number, number>> = {};
 
 /**
@@ -82,3 +84,23 @@ export const KANTURU2_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
       },
     ],
   };
+
+/**
+ * Kanturu Relics (GM_Kanturu_2nd.cpp:219-241): 10's clamped sine, 38's
+ * sine, 42's diagonal scroll (no model for 42 in Object39 - kept to match
+ * the source).
+ */
+export const KANTURU2_MESH_ANIMATIONS: MeshAnimations = {
+  10: {
+    mesh: 0,
+    kind: 'blend',
+    light: t => Math.min(0.9, Math.max(0.1, Math.sin(t * 0.0015) + 1)),
+  },
+  38: { mesh: 0, kind: 'blend', light: t => Math.sin(t * 0.001) + 1 },
+  42: {
+    mesh: 0,
+    kind: 'blend',
+    u: saw(10000, 0.0002),
+    v: saw(10000, 0.0002),
+  },
+};

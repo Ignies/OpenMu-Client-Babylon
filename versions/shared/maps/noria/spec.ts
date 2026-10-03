@@ -1,5 +1,7 @@
 import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
 import type { Emission } from '@/controllers/fx/effectParticles';
+import type { MeshAnimations } from '@/controllers/render';
+import { saw, sawUp } from '../shared/meshAnimation';
 
 /**
  * Noria (WD_3NORIA, World4 / Object4). Plain data - no scene imports, so the
@@ -23,7 +25,7 @@ import type { Emission } from '@/controllers/fx/effectParticles';
  *  19 → Object20.glb, 1 mesh      37 → Object38.glb, 1 mesh
  *  39 → Object40.glb, 3 meshes    41 → Object42.glb, 1 mesh
  *
- * 18 and 41 also appear in `meshAnimation.ts` as `kind: 'blend'`. That table
+ * 18 and 41 also appear in the `render.meshAnimations` rows as `kind: 'blend'`. That table
  * only names the mesh the UV writes land on and never touches `BlendMesh`, so
  * without the entries here the mill water and the stream would scroll a fully
  * lit, opaque mesh instead of an additive one.
@@ -259,4 +261,16 @@ export const NORIA_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
       ],
     },
   ],
+};
+
+/**
+ * Noria (ZzzObject.cpp:3925-3944). 18 is the mill wheel's water, 41 the
+ * stream, 42/43 a mirrored pair of waterfall curtains - hence the opposite
+ * U signs.
+ */
+export const NORIA_MESH_ANIMATIONS: MeshAnimations = {
+  18: { mesh: 2, kind: 'blend', v: sawUp(1000, 0.001) },
+  41: { mesh: 0, kind: 'blend', v: sawUp(2000, 0.0005) },
+  42: { mesh: 0, kind: 'stream', u: saw(500, 0.002) },
+  43: { mesh: 0, kind: 'stream', u: sawUp(500, 0.002) },
 };

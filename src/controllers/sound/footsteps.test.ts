@@ -5,6 +5,7 @@ import type { World } from '../../ecs/world';
 import { SoundsManager } from './soundsManager';
 import { FOOT_DOWN_FRAMES, footstepSound, footstepsLayer } from './footsteps';
 import { attachListener } from './listener';
+import { maps } from '../maps';
 
 const hero = {
   worldIndex: ENUM_WORLD.WD_0LORENCIA,
@@ -82,5 +83,26 @@ describe('footsteps', () => {
     expect(footstepSound()).toBe('Sound/pWalk(Snow)');
     hero.worldIndex = ENUM_WORLD.WD_66DOPPLEGANGER2;
     expect(footstepSound()).toBe('Sound/pWalk(Soil)');
+  });
+
+  it('plays the first map row that holds', () => {
+    const W = 200 as ENUM_WORLD;
+    const off = maps.register({
+      name: 'zzTest',
+      worlds: [W],
+      tiles: [],
+      sound: {
+        footsteps: [
+          { sound: 'Sound/pSwim', outsideSafeZone: true },
+          { sound: 'Sound/pWalk(Grass)', on: t => t === 1 },
+        ],
+      },
+    });
+    hero.worldIndex = W;
+    expect(footstepSound()).toBe('Sound/pSwim');
+    hero.attributeSystem.isAboveZero = () => true;
+    expect(footstepSound()).toBe('Sound/pWalk(Grass)');
+    hero.attributeSystem.isAboveZero = () => false;
+    off();
   });
 });

@@ -5,6 +5,7 @@ import {
   TARKAN_BLEND_MESHES,
   TARKAN_EFFECT_ONLY_TYPES,
   TARKAN_EMISSIONS,
+  TARKAN_MESH_ANIMATIONS,
 } from './spec';
 import { TARKAN_SOUND } from './sound';
 import { TARKAN_LIGHTING } from './lighting';
@@ -47,6 +48,7 @@ export const tarkanLayer: MapLayer = {
   blendMeshes: TARKAN_BLEND_MESHES,
   effectOnly: TARKAN_EFFECT_ONLY_TYPES,
   emissions: TARKAN_EMISSIONS,
+  render: { meshAnimations: TARKAN_MESH_ANIMATIONS },
   sound: TARKAN_SOUND,
   lighting: TARKAN_LIGHTING,
   terrain: { rest: { 78: sit(false) } },

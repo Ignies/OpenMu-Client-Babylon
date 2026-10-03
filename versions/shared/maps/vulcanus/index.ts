@@ -4,6 +4,7 @@ import {
   VULCANUS_BLEND_MESHES,
   VULCANUS_EFFECT_ONLY_TYPES,
   VULCANUS_EMISSIONS,
+  VULCANUS_MESH_ANIMATIONS,
 } from './spec';
 import { VULCANUS_SOUND } from './sound';
 import { VULCANUS_LIGHTING } from './lighting';
@@ -78,6 +79,7 @@ export const vulcanusLayer: MapLayer = {
   blendMeshes: VULCANUS_BLEND_MESHES,
   effectOnly: VULCANUS_EFFECT_ONLY_TYPES,
   emissions: VULCANUS_EMISSIONS,
+  render: { meshAnimations: VULCANUS_MESH_ANIMATIONS },
   sound: VULCANUS_SOUND,
   lighting: VULCANUS_LIGHTING,
   create: world => import('./create').then(m => m.createVulcanus(world)),

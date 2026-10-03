@@ -5,6 +5,7 @@ import {
   EMPIRE_GUARDIAN_BLEND_MESHES,
   EMPIRE_GUARDIAN_EFFECT_ONLY_TYPES,
   EMPIRE_GUARDIAN_EMISSIONS,
+  EMPIREGUARDIAN_MESH_ANIMATIONS,
 } from './spec';
 import { EMPIRE_GUARDIAN_SOUND } from './sound';
 import { EMPIRE_GUARDIAN_LIGHTING } from './lighting';
@@ -45,6 +46,7 @@ export const empireguardianLayer: MapLayer = {
   blendMeshes: EMPIRE_GUARDIAN_BLEND_MESHES,
   effectOnly: EMPIRE_GUARDIAN_EFFECT_ONLY_TYPES,
   emissions: EMPIRE_GUARDIAN_EMISSIONS,
+  render: { meshAnimations: EMPIREGUARDIAN_MESH_ANIMATIONS },
   sound: EMPIRE_GUARDIAN_SOUND,
   lighting: EMPIRE_GUARDIAN_LIGHTING,
   create: world => import('./create').then(m => m.createEmpireGuardian(world)),

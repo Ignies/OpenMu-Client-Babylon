@@ -1,7 +1,13 @@
 import { ENUM_WORLD } from '@/core/types';
 import type { MapLayer } from '@/controllers/maps/layer';
 import { FULL_TILES } from '../recipes';
-import { DEVIAS_ROOMS } from './rooms';
+import {
+  DEVIAS_EAST_HEARTH_HOUSE,
+  DEVIAS_READING_ROOM,
+  DEVIAS_ROOMS,
+  DEVIAS_TAVERN,
+  DEVIAS_WEST_HEARTH_HOUSE,
+} from './rooms';
 import {
   DEVIAS_BLEND_MESHES,
 } from './spec';
@@ -46,6 +52,15 @@ export const deviasLayer: MapLayer = {
   blendMeshes: DEVIAS_BLEND_MESHES,
   sound: DEVIAS_SOUND,
   lighting: DEVIAS_LIGHTING,
+  // Dust in the lit interiors while the hero stands in one (ours).
+  weather: {
+    dust: [
+      { room: DEVIAS_TAVERN, dust: 'hearth' },
+      { room: DEVIAS_READING_ROOM, dust: 'tavern' },
+      { room: DEVIAS_WEST_HEARTH_HOUSE, dust: 'houseHearth' },
+      { room: DEVIAS_EAST_HEARTH_HOUSE, dust: 'houseHearth' },
+    ],
+  },
   terrain: {
     rest: {
       22: sit(true),

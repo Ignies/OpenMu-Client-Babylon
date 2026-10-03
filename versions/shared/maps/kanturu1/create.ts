@@ -6,7 +6,7 @@ import { AlphaObject, PlaySpeedObject } from '../shared/objectVariants';
  *
  * `MoveKanturu1stObject` (GM_kanturu_1st.cpp:41-125) is the runtime: the
  * hidden emitters and the brazier lights (`spec.ts`), the sines and the
- * waterfall scroll (`meshAnimation.ts`), and the per-object settings here:
+ * waterfall scroll (the `render.meshAnimations` rows), and the per-object settings here:
  *
  *  - **44** (×22) `Velocity = 0.02`, **46** (×43) `Velocity = 0.01` (the
  *    great wheel, with its `BlendMeshLight` sine), **90** (×19) `Velocity =

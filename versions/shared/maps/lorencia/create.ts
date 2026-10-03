@@ -90,7 +90,7 @@ const PUB: Room = {
  * The rooms: the two roof types lifted out of the way while the hero is in
  * the pub (the original never hides roofs; the lift predates the ceiling fade
  * and keeps Classic's pub frame as it was), the shared room row for the
- * cabin. `AmbientParticleSystem`'s `LORENCIA_TAVERN` room matches the pub
+ * cabin. The tavern dust room (`weather.dust` in `index.ts`) matches the pub
  * footprint. The pub track follows the floor tile under the hero, in both
  * rooms, from the `town` row in `sound.ts`.
  */

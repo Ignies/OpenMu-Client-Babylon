@@ -9,7 +9,7 @@ import { StadiumBrazierObject } from './brazierObject';
  * Stadium (WD_6STADIUM, world 6 / `Object7`).
  *
  * The map is table data almost end to end - spec.ts holds the fountain's blend
- * mesh, the hidden marker and the brazier light, and controllers/render/meshAnimation.ts
+ * mesh, the hidden marker and the brazier light, and the render.meshAnimations rows
  * holds the fountain's V scroll. One type needs a class, and it is wired here.
  *
  * The rest of Object7 is scenery the original never touches: 24/25 the two big

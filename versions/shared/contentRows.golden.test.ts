@@ -8,8 +8,8 @@ import '@/controllers/fx';
 import { meshAnimationFor } from '@/controllers/render/meshAnimation';
 import { footstepSound } from '@/controllers/sound/footsteps';
 import { attachListener } from '@/controllers/sound/listener';
-import { CHAOS_CASTLE_WORLDS } from '@/controllers/assets/worldAssets';
-import { LEAF_RECIPES, ROOMS } from '@/ecs/systems/ambientParticleSystem';
+import { mapDeathBurst } from '@/controllers/sound';
+import { ambientDustFor, ambientLeavesFor } from '@/controllers/weather';
 import { boidsFor } from '@/controllers/fx/boids';
 import { meteoriteStormRunning, monsterCastQuiet, teleportCastSound } from '@/controllers/sound/packetSounds';
 import { hasWarriorGlint } from '@/controllers/item_fx/weaponBlur';
@@ -97,16 +97,14 @@ describe('content rows', () => {
   });
 
   it('chaos castle death burst', () => {
-    const rows = WORLDS.map(w =>
-      CHAOS_CASTLE_WORLDS.includes(w) ? ['Sound/eMonsterBoom1', 'Sound/eMonsterBoom2'] : null
-    );
+    const rows = WORLDS.map(w => mapDeathBurst(w) ?? null);
     expect(hash(rows)).toBe(HASHES.deathBurst);
   });
 
   it('leaves and dust rooms', () => {
     const rows = WORLDS.map(w => ({
-      leaves: LEAF_RECIPES.find(l => l.map === w)?.recipe.name ?? null,
-      rooms: ROOMS.filter(r => r.map === w).map(r => ({ room: r.room, recipe: r.recipe.name })),
+      leaves: ambientLeavesFor(w)?.name ?? null,
+      rooms: ambientDustFor(w).map(r => ({ room: r.room, recipe: r.recipe.name })),
     }));
     expect(hash(rows)).toBe(HASHES.ambient);
   });

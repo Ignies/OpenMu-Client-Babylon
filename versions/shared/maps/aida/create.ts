@@ -6,7 +6,7 @@ import { AlphaObject, PlaySpeedObject } from '../shared/objectVariants';
  * and Crywolf.
  *
  * `MoveAidaObject` (GMAida.cpp:38-95) is the whole runtime: the UV scrolls
- * (`meshAnimation.ts`), the two glow lights and the eight hidden markers
+ * (the `render.meshAnimations` rows), the two glow lights and the eight hidden markers
  * (`spec.ts`), and two per-object settings that need a class:
  *
  *  - **41** (×21): `pObject->Alpha = 0.5f` - a translucent veil.

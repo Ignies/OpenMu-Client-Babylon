@@ -6,6 +6,7 @@ import {
   KANTURU2_BLEND_MESHES,
   KANTURU2_EFFECT_ONLY_TYPES,
   KANTURU2_EMISSIONS,
+  KANTURU2_MESH_ANIMATIONS,
 } from './spec';
 import { KANTURU_2ND_SOUND } from './sound';
 import { KANTURU_2ND_LIGHTING } from './lighting';
@@ -43,6 +44,7 @@ export const kanturu2Layer: MapLayer = {
   blendMeshes: KANTURU2_BLEND_MESHES,
   effectOnly: KANTURU2_EFFECT_ONLY_TYPES,
   emissions: KANTURU2_EMISSIONS,
+  render: { meshAnimations: KANTURU2_MESH_ANIMATIONS },
   sound: KANTURU_2ND_SOUND,
   lighting: KANTURU_2ND_LIGHTING,
   terrain: { rest: { 3: sit(false) } },

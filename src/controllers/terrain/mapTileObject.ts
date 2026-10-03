@@ -97,7 +97,7 @@ export class MapTileObject extends ModelObject {
     // god-ray (38) should look like, made before the map had a table; all
     // three are now the original's own `o->BlendMesh` values in
     // maps/atlans/spec.ts, with the breathing `BlendMeshLight` sines from
-    // ZzzObject.cpp:4014-4034 in common/meshAnimation.ts. Two were actively
+    // ZzzObject.cpp:4014-4034 in atlans/spec.ts. Two were actively
     // wrong: type 22 is `HiddenMesh = -2` and never drawn at all, and the
     // material override on 23 ran *after* `applyBlendMesh` and would have
     // silently beaten the table entry.
@@ -237,6 +237,6 @@ export class MapTileObject extends ModelObject {
     // the Atlans water plane's `BlendMeshLight` done as alpha - it dimmed the
     // whole mesh rather than the additive layer. ZzzObject.cpp:4016 is
     // `o->BlendMeshLight = sinf(WorldTime * 0.002f) * 0.3f + 0.5f`, which now
-    // lives in common/meshAnimation.ts as the ATLANS table's `light`.
+    // lives in atlans/spec.ts as the ATLANS_MESH_ANIMATIONS table's `light`.
   }
 }

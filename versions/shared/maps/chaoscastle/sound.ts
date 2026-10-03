@@ -11,4 +11,6 @@ export const CHAOS_CASTLE_SOUND: MapSound = {
   ],
   // No `ManageBackgroundMusic` case: the soundscape is the event loop above.
   music: null,
+  // `SOUND_CHAOS_MOB_BOOM01 + rand() % 2` in place of every death (ZzzCharacter.cpp:1537-1540).
+  deathBurst: ['Sound/eMonsterBoom1', 'Sound/eMonsterBoom2'],
 };

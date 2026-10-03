@@ -1,5 +1,7 @@
 import type { Emission } from '@/controllers/fx/effectParticles';
 import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
+import type { MeshAnimations } from '@/controllers/render';
+import { saw } from '../shared/meshAnimation';
 
 /**
  * Dungeon (World 2 / `Object2`), the plain-data half. Nothing in here may
@@ -16,7 +18,7 @@ import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
  * unlike Lorencia (9 types) and Devias (5). The additive second pass the other
  * two towns use for glass and flame is simply not part of this art set; what
  * glows here is the `StreamMesh` flesh curtain (22/23/24), which is unlit
- * rather than additive and lives in `meshAnimation.ts`.
+ * rather than additive and lives in the `render.meshAnimations` rows.
  *
  * Exported empty so the shared table carries one entry per world and a reader
  * can tell "checked, none" from "not looked at yet".
@@ -156,3 +158,14 @@ export const DUNGEON_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
 
     42: [wallTorch([0, 0, 190])],
   };
+
+/**
+ * Dungeon (ZzzObject.cpp:3830-3835). Types 22/23/24 are the same squid01/02
+ * flesh curtain in three variants; the original sets `StreamMesh = 1` every
+ * frame and scrolls V a whole texture per second, downward.
+ */
+export const DUNGEON_MESH_ANIMATIONS: MeshAnimations = {
+  22: { mesh: 1, kind: 'stream', v: saw(1000, 0.001) },
+  23: { mesh: 1, kind: 'stream', v: saw(1000, 0.001) },
+  24: { mesh: 1, kind: 'stream', v: saw(1000, 0.001) },
+};

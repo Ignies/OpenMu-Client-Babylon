@@ -19,7 +19,7 @@ import type { World } from '@/ecs/world';
  *
  * `MoveBattleCastleVisual` case 4 scrolls U at `0.0001`/ms with `HiddenMesh
  * = -1`, i.e. on *no* blend mesh - a no-op in the original's own renderer
- * unless the BMD flags a mesh, so it is left out of `meshAnimation.ts`.
+ * unless the BMD flags a mesh, so it is left out of the `render.meshAnimations` rows.
  *
  * Not built: the whole siege - `ExtState`-driven wall ruin swaps
  * (`CreateEffect(o->Type, …)` + `SOUND_BC_WALL_HIT`), `battleCastle::

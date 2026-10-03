@@ -5,8 +5,10 @@ import {
   DOPPELGANGER1_BLEND_MESHES,
   DOPPELGANGER1_EFFECT_ONLY_TYPES,
   DOPPELGANGER1_EMISSIONS,
+  DOPPELGANGER1_MESH_ANIMATION,
 } from './spec';
 import { DOPPELGANGER_SOUND } from './sound';
+import { SNOW_STEPS } from '../shared/sound';
 import { DOPPELGANGER1_LIGHTING } from './lighting';
 
 /**
@@ -77,7 +79,8 @@ export const doppelganger1Layer: MapLayer = {
   blendMeshes: DOPPELGANGER1_BLEND_MESHES,
   effectOnly: DOPPELGANGER1_EFFECT_ONLY_TYPES,
   emissions: DOPPELGANGER1_EMISSIONS,
-  sound: DOPPELGANGER_SOUND,
+  render: { meshAnimations: DOPPELGANGER1_MESH_ANIMATION },
+  sound: { ...DOPPELGANGER_SOUND, footsteps: SNOW_STEPS },
   lighting: DOPPELGANGER1_LIGHTING,
   create: world => import('./create').then(m => m.createDoppelganger1(world)),
 };

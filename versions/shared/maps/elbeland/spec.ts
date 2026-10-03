@@ -1,5 +1,7 @@
 import type { Emission } from '@/controllers/fx/effectParticles';
 import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
+import type { MeshAnimations } from '@/controllers/render';
+import { perTick } from '../shared/meshAnimation';
 
 /**
  * Elbeland (`WD_51ELBELAND` / `WD_51HOME_6TH_CHAR`, `World52`/`Object52`),
@@ -17,7 +19,7 @@ import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
  * `MoveObject` :127-131, type 56 (×4): `o->BlendMesh = 0; BlendMeshLight =
  * sin(t*0.003)*0.3+0.5; Velocity = 0.05` - the Atlans gate's water sheet
  * (56 is `SE_Amb_enteratlance01`'s object). The sine is in
- * `meshAnimation.ts`, the play speed in `index.ts`.
+ * the `render.meshAnimations` rows, the play speed in `index.ts`.
  */
 export const ELBELAND_BLEND_MESHES: Readonly<Record<number, number>> = {
   56: 0,
@@ -148,3 +150,16 @@ export const ELBELAND_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
       },
     ],
   };
+
+/**
+ * Elbeland (GMNewTown.cpp:105-149): the river (2), ravine (53), channel
+ * (55) and waterway (89) sheets scroll V up `0.015`/tick (89: `0.005`);
+ * 56 is the Atlans-gate water's breathing glow.
+ */
+export const ELBELAND_MESH_ANIMATIONS: MeshAnimations = {
+  2: { mesh: 0, kind: 'blend', v: perTick(0.015) },
+  53: { mesh: 0, kind: 'blend', v: perTick(0.015) },
+  55: { mesh: 0, kind: 'blend', v: perTick(0.015) },
+  56: { mesh: 0, kind: 'blend', light: t => Math.sin(t * 0.003) * 0.3 + 0.5 },
+  89: { mesh: 0, kind: 'blend', v: perTick(0.005) },
+};

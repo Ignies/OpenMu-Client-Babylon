@@ -8,7 +8,7 @@ import { AtlansBubbleVentObject } from './bubbleVentObject';
  * (ZzzObject.cpp:4718-4725) touches exactly one of the 41 types and
  * `MoveObject` (:4005-4034) six more; `RenderObjectVisual` has no World 8
  * case at all. Almost everything those seven cases need is table data and
- * lives in `spec.ts` or in `controllers/render/meshAnimation.ts` - this file is the three
+ * lives in `spec.ts` or in the `render.meshAnimations` rows - this file is the three
  * class assignments and the notes on what the original does here that we do
  * not.
  *

@@ -1,5 +1,7 @@
 import type { Emission } from '@/controllers/fx/effectParticles';
 import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
+import type { MeshAnimations } from '@/controllers/render';
+import { saw } from '../shared/meshAnimation';
 
 /**
  * Barracks of Balgass (`WD_41CHANGEUP3RD_1ST`, `World42`/`Object42`) and
@@ -14,7 +16,7 @@ import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
  * 36 types. Object42/43 ship 82/84 models, every referenced type present.
  */
 
-/** No `o->BlendMesh` writes; the 57 V scroll is in `meshAnimation.ts`. */
+/** No `o->BlendMesh` writes; the 57 V scroll is in the `render.meshAnimations` rows. */
 export const BALGAS_BLEND_MESHES: Readonly<Record<number, number>> = {};
 
 /**
@@ -54,4 +56,9 @@ export const BALGAS_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
       emissions: [{ kinds: ['fire1', 'fire3'], every: 2, jitter: 6 }],
     },
   ],
+};
+
+/** Balgas Barracks / Refuge (GM3rdChangeUp.cpp:87-89): the lava sheet. */
+export const BALGAS_MESH_ANIMATIONS: MeshAnimations = {
+  57: { mesh: 0, kind: 'blend', v: saw(10000, 0.0002) },
 };

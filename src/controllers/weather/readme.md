@@ -14,8 +14,9 @@ recipes. One `weather` facade steps every effect (see [docs/controllers.md](../.
     `snowSpray(scene, x, y, z, strength)`.
 - `WeatherLayer` (`layer.ts`): one effect's `name`, optional `maps`, `update(map, dt)`, `reset()`.
 - `MapWeather` (`mapWeather.ts`, exported from `index.ts`): the type of a map's `weather` field
-  (`alwaysRain`, `wetGround`, `leaves`). `ambientLeavesFor(world)` (`ambientWeather.ts`, also on
-  `index.ts`): the leaf recipe a map's `leaves` names.
+  (`alwaysRain`, `wetGround`, `leaves`, `dust`: `MapDustRoom`). `ambientLeavesFor(world)` and
+  `ambientDustFor(world)` (`ambientWeather.ts`, also on `index.ts`): the leaf recipe a map's
+  `leaves` names and its dust rooms with their recipes; `allDustRooms()` lists every map's.
 - Imported straight from the effect files:
   - `ambientWeather.ts`: the `AmbientRecipe`s (`RAIN`, `DEVIAS_SNOW`, `LORENCIA_LEAVES`, ...),
     `SNOW_MAPS`, `SNOWFALL_MAPS`, `UNDERWATER_MAPS` (live sets over the map flags), `GROUND_WIND`. `ambientSchedule.ts`: `ambientStrengthAt`.
@@ -83,7 +84,7 @@ recipes. One `weather` facade steps every effect (see [docs/controllers.md](../.
 ## Tests
 - `versions/shared/maps/mapRows.golden.test.ts`: which worlds always rain, get wet, snow, fall,
   settle and sit under water, pinned across the move into the map folders.
-- `mapWeather.test.ts`: `ambientLeavesFor` per map.
+- `mapWeather.test.ts`: `ambientLeavesFor` and `ambientDustFor` per map, `allDustRooms` order.
 - `footprints.test.ts`: the `?printFast` shader early-outs (dead slots parked, stencil rule, the
   old shader with `?printFast=0`).
 - `grassBurn.test.ts`: the throttled stamp leaves the same scar as the every-frame stamp; the decay

@@ -161,4 +161,5 @@ if (hot) hot.decline();
 
 // ---- a map's own weather (MapLayer.weather), the row type its folder writes ----
 export type { MapWeather } from './mapWeather';
-export { ambientLeavesFor } from './ambientWeather';
+export type { MapDustRoom } from './mapWeather';
+export { ambientLeavesFor, ambientDustFor } from './ambientWeather';

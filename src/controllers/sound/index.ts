@@ -294,6 +294,8 @@ if (hot) hot.decline();
 
 // ---- a map's own sound (MapLayer.sound), the row types its folder writes ----
 export type { MapSound } from './mapSound';
+export { mapDeathBurst } from './mapSound';
+export type { StepRule } from './footsteps';
 export type {
   AmbientGate,
   AmbientTimed,

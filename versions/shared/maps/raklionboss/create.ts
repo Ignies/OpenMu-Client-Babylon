@@ -14,7 +14,7 @@ import { PlaySpeedObject, bindAbsentModels } from '../shared/objectVariants';
  *  - **6** (×1) and **7** (×2), :1057-1076 - the ice scarps, flat grey.
  *  - **68** (×6), **69** (×4), **71** (×2), :1328-1334 - `icebot01/02/03_R`,
  *    the floor lamps: mesh 0 forced additive with a `BlendMeshLight` pulse
- *    (`spec.ts` and `controllers/render/meshAnimation.ts`). 68 is also one of the three
+ *    (`spec.ts` and the `render.meshAnimations` rows). 68 is also one of the three
  *    types driven by `Actions[].PlaySpeed` instead of `o->Velocity`
  *    (ZzzObject.cpp:3692) - and `LoadWorld` only writes that field on
  *    `WD_57ICECITY` (MapManager.cpp:1153-1163), while `Action_t` is

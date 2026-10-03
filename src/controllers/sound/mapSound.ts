@@ -1,9 +1,11 @@
-import type { PerWorld } from '../maps';
+import type { ENUM_WORLD } from '../../core/types';
+import { maps, type PerWorld } from '../maps';
 import type { Sounds } from './recipes';
 import type { AmbientTimed, MapAmbientBed, MapAmbientOneShot } from './ambientBeds';
 import type { MapTown } from './music';
 import type { MapObjectLoop } from './objectLoops';
 import type { VoiceSet } from './mapMonsters';
+import type { StepRule } from './footsteps';
 
 /**
  * A map's own sound, `MapLayer.sound`, written in the map's folder
@@ -30,4 +32,13 @@ export type MapSound = {
   readonly monsterCues?: PerWorld<VoiceSet>;
   /** Voices from a map hook with no world guard: heard on every map. */
   readonly monsterCuesAnyMap?: VoiceSet;
+  /** The hero's footsteps by tile (`footsteps.ts`); omitted plays soil. */
+  readonly footsteps?: PerWorld<readonly StepRule[]>;
+  /** Every death on the map plays one of these instead of its own (`combatSfxSystem`). */
+  readonly deathBurst?: PerWorld<readonly Sounds[]>;
 };
+
+/** The map's death burst (`MapSound.deathBurst`), or undefined for each body's own death sound. */
+export function mapDeathBurst(world: ENUM_WORLD): readonly Sounds[] | undefined {
+  return maps.rowFor(world, l => l.sound?.deathBurst);
+}

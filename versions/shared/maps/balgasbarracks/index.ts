@@ -4,6 +4,7 @@ import {
   BALGAS_BLEND_MESHES,
   BALGAS_EFFECT_ONLY_TYPES,
   BALGAS_EMISSIONS,
+  BALGAS_MESH_ANIMATIONS,
 } from './spec';
 import { BALGAS_BARRACKS_SOUND } from './sound';
 import { BALGAS_LIGHTING } from './lighting';
@@ -54,6 +55,7 @@ export const balgasbarracksLayer: MapLayer = {
   blendMeshes: BALGAS_BLEND_MESHES,
   effectOnly: BALGAS_EFFECT_ONLY_TYPES,
   emissions: BALGAS_EMISSIONS,
+  render: { meshAnimations: BALGAS_MESH_ANIMATIONS },
   sound: BALGAS_BARRACKS_SOUND,
   lighting: BALGAS_LIGHTING,
   create: world => import('./create').then(m => m.createBalgasBarracks(world)),

@@ -4,6 +4,7 @@ import {
   DOPPELGANGER2_BLEND_MESHES,
   DOPPELGANGER2_EFFECT_ONLY_TYPES,
   DOPPELGANGER2_EMISSIONS,
+  DOPPELGANGER2_MESH_ANIMATION,
 } from './spec';
 import { DOPPELGANGER_SOUND } from '../doppelganger1/sound';
 import { DOPPELGANGER2_LIGHTING } from './lighting';
@@ -68,6 +69,7 @@ export const doppelganger2Layer: MapLayer = {
   blendMeshes: DOPPELGANGER2_BLEND_MESHES,
   effectOnly: DOPPELGANGER2_EFFECT_ONLY_TYPES,
   emissions: DOPPELGANGER2_EMISSIONS,
+  render: { meshAnimations: DOPPELGANGER2_MESH_ANIMATION },
   sound: DOPPELGANGER_SOUND,
   lighting: DOPPELGANGER2_LIGHTING,
 };

@@ -15,7 +15,7 @@ import {
  *
  * Almost all of this map is data: the blend meshes, the lamp sprites and the
  * forge live in `spec.ts` and reach the engine through the shared registries,
- * and the UV scrolls for 18/41/42/43 are already in `meshAnimation.ts`. What
+ * and the UV scrolls for 18/41/42/43 are already in the `render.meshAnimations` rows. What
  * is left here is the one operate box and the warp gate, which the original
  * builds from `MapManager` rather than from EncTerrain4.obj.
  *

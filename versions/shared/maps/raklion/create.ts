@@ -12,7 +12,7 @@ import { bindAbsentModels } from '../shared/objectVariants';
  * `CGM_Raklion` is shared with the hatchery: every hook gates on
  * `IsIceCity()` (GM_Raklion.cpp:2294-2306), so `versions/shared/maps/raklionboss` binds the
  * same classes for the types it places. The tables are `spec.ts`
- * (blend meshes, the two braziers) and `controllers/render/meshAnimation.ts` (the
+ * (blend meshes, the two braziers) and the `render.meshAnimations` rows (the
  * `BlendMeshLight` sines on 22 and 68/69/71).
  *
  * Types with a case in the C++ and a class here:

@@ -114,9 +114,11 @@ it as the 3D line-up's name plate.
 ## A map's own rows
 
 A map folder (`versions/shared/maps/<map>/`) also carries what the other controllers used to keep
-per world: `sound.ts` (beds, music, object loops, monster voices: `MapSound`), `lighting.ts` (look,
-room looks, torch table: `MapLighting`), and on the entry itself `weather` (`MapWeather`) and
-`terrain` (`MapTerrain`). Each controller owns its row type and reads the active map's row through
+per world: `sound.ts` (beds, music, object loops, monster voices, footsteps: `MapSound`),
+`lighting.ts` (look, room looks, torch table: `MapLighting`), the mesh animations in `spec.ts`
+(`render`: `MapRender`), and on the entry itself `weather` (`MapWeather`) and `terrain`
+(`MapTerrain`). Each controller owns its row type and reads the active map's row through
 the `maps` controller at run time (`maps.rowFor`), so reworking sound or lighting is an edit to that
 controller only, and changing what one map sounds or looks like is an edit to that map only.
-Shared building blocks are in `maps/shared/` (`sound.ts`, `looks.ts`, `lights.ts`, `terrain.ts`).
+Shared building blocks are in `maps/shared/` (`sound.ts`, `looks.ts`, `lights.ts`, `terrain.ts`,
+`meshAnimation.ts`).

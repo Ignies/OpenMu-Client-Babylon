@@ -1,12 +1,13 @@
 import { MonsterActionType } from '@versions/shared/objects/enum';
 import type { MapSound } from '@/controllers/sound';
-import { HOOK } from '../shared/sound';
+import { HOOK, SWIM_STEPS } from '../shared/sound';
 import { KALIMA_OBJECT_LOOPS } from './spec';
 
 const A = MonsterActionType;
 
 /** Kalima's sound (`MapLayer.sound`), read by the sound controller. */
 export const KALIMA_SOUND: MapSound = {
+  footsteps: SWIM_STEPS,
   // Not in `PlayWorldAmbientSounds`: `MoveHellasObjectSetting`
   // `PlayBuffer`s the loop every frame (GMHellas.cpp:309), which is the same
   // thing as a bed.

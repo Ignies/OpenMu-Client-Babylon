@@ -13,7 +13,7 @@ const ANEMONE_PLAY_SPEED = 0.05;
 
 /**
  * Atlans 40 (ZzzObject.cpp:4030-4034), ×86. The blend mesh and its breathing
- * `BlendMeshLight` are table data (`spec.ts` and `meshAnimation.ts`); the
+ * `BlendMeshLight` are table data (`spec.ts` and the `render.meshAnimations` rows); the
  * only thing that needs an object is the play-speed override.
  *
  * `setAnimationSpeed` rather than a plain assignment: `MapTileObject.init`

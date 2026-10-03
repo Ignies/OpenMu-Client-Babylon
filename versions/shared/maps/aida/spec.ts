@@ -1,5 +1,7 @@
 import type { Emission } from '@/controllers/fx/effectParticles';
 import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
+import type { MeshAnimations } from '@/controllers/render';
+import { saw, sawUp, perTick } from '../shared/meshAnimation';
 
 /**
  * Aida (`WD_33AIDA`, `World34`/`Object34`), the plain-data half. Nothing here
@@ -15,7 +17,7 @@ import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
 /**
  * `CreateAidaObject` sets no `o->BlendMesh`. The scrolls on 25/28 (V) and
  * 65/66/77/78 (U, applied inside `RenderAidaObjectVisual`'s own `RenderMesh`
- * call on mesh 0) are in `meshAnimation.ts`; which mesh is additive comes off
+ * call on mesh 0) are in the `render.meshAnimations` rows; which mesh is additive comes off
  * the BMD flags.
  */
 export const AIDA_BLEND_MESHES: Readonly<Record<number, number>> = {};
@@ -95,4 +97,20 @@ export const AIDA_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
       sprite: { scale: 3, color: [1, 0.6, 0.2] },
     },
   ],
+};
+
+/**
+ * Aida (GMAida.cpp:49-54, :283-320). 25/28 scroll V down `0.015`/tick;
+ * 65/66 and 77/78 are drawn by `RenderAidaObjectVisual` with an explicit
+ * `RenderMesh(0, RENDER_TEXTURE, …, U)` - a plain textured pass, so
+ * `stream` rather than `blend`. Mesh indices for 25/28 are not set in the
+ * C++ (the BMD's own blend flag decides); 0 is the single-mesh case.
+ */
+export const AIDA_MESH_ANIMATIONS: MeshAnimations = {
+  25: { mesh: 0, kind: 'blend', v: t => -perTick(0.015)(t) },
+  28: { mesh: 0, kind: 'blend', v: t => -perTick(0.015)(t) },
+  65: { mesh: 0, kind: 'stream', u: saw(100000, 0.00005) },
+  66: { mesh: 0, kind: 'stream', u: saw(100000, 0.00005) },
+  77: { mesh: 0, kind: 'stream', u: sawUp(100000, 0.0002) },
+  78: { mesh: 0, kind: 'stream', u: sawUp(100000, 0.0002) },
 };

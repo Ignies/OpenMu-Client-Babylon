@@ -5,6 +5,7 @@ import {
   RAKLION_BLEND_MESHES,
   RAKLION_EFFECT_ONLY_TYPES,
   RAKLION_EMISSIONS,
+  RAKLION_MESH_ANIMATIONS,
 } from '../raklion/spec';
 import { RAKLION_BOSS_SOUND } from './sound';
 
@@ -55,6 +56,7 @@ export const raklionbossLayer: MapLayer = {
   blendMeshes: RAKLION_BLEND_MESHES,
   effectOnly: RAKLION_EFFECT_ONLY_TYPES,
   emissions: RAKLION_EMISSIONS,
+  render: { meshAnimations: RAKLION_MESH_ANIMATIONS },
   sound: RAKLION_BOSS_SOUND,
   create: world => import('./create').then(m => m.createRaklionBoss(world)),
 };

@@ -4,6 +4,7 @@ import {
   CURSED_TEMPLE_BLEND_MESHES,
   CURSED_TEMPLE_EFFECT_ONLY_TYPES,
   CURSED_TEMPLE_EMISSIONS,
+  CURSEDTEMPLE_MESH_ANIMATIONS,
 } from './spec';
 import { CURSED_TEMPLE_SOUND } from './sound';
 import { CURSED_TEMPLE_LIGHTING } from './lighting';
@@ -21,7 +22,7 @@ import { CURSED_TEMPLE_LIGHTING } from './lighting';
  *
  * Outside a match the map is ten hidden markers - mist, torches, falling
  * rubble - three breathing lamps and a floating star (`spec.ts`,
- * `meshAnimation.ts`). The match itself - the relic, the statues, the score
+ * the `render.meshAnimations` rows). The match itself - the relic, the statues, the score
  * gauge (`m_bGaugebarEnabled`, :330), `cursedtempleplay` replacing
  * `cursedtemplewait` - is server-driven and not built; the waiting music
  * `Music/cursedtemplewait` is what `PlayBGM` starts with.
@@ -96,6 +97,7 @@ export const cursedtempleLayer: MapLayer = {
   blendMeshes: CURSED_TEMPLE_BLEND_MESHES,
   effectOnly: CURSED_TEMPLE_EFFECT_ONLY_TYPES,
   emissions: CURSED_TEMPLE_EMISSIONS,
+  render: { meshAnimations: CURSEDTEMPLE_MESH_ANIMATIONS },
   sound: CURSED_TEMPLE_SOUND,
   lighting: CURSED_TEMPLE_LIGHTING,
   create: world => import('./create').then(m => m.createCursedTemple(world)),

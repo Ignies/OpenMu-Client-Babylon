@@ -5,6 +5,7 @@ import type {
   MapObjectLoop,
   MonsterCue,
   Sounds,
+  StepRule,
   VoiceSet,
 } from '@/controllers/sound';
 
@@ -89,3 +90,14 @@ export const hookPlay = (on: readonly MonsterActionType[], play: Play): MonsterC
  * Trials ones (`MapSound.monsterCuesAnyMap`). Those sets assume the home map
  * was visited, which the original does not guarantee.
  */
+
+// ---- footsteps (`PlayWalkSound`, ZzzCharacter.cpp:5347-5385) ---------------
+
+/** Snow on every tile: Ice City (`IsIceCity` counts Doppelganger 1) and Santa Town. */
+export const SNOW_STEPS: readonly StepRule[] = [{ sound: 'Sound/pWalk(Snow)' }];
+
+/** Grass on tile 0 (`HeroTile == 0`): Lorencia and Noria. */
+export const GRASS_STEPS: readonly StepRule[] = [{ sound: 'Sound/pWalk(Grass)', on: tile => tile === 0 }];
+
+/** `SOUND_HUMAN_WALK_SWIM` wherever the hero is not in the safe zone: Atlans, Kalima, Doppelganger 3. */
+export const SWIM_STEPS: readonly StepRule[] = [{ sound: 'Sound/pSwim', outsideSafeZone: true }];

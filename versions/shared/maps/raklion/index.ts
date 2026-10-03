@@ -5,6 +5,7 @@ import {
   RAKLION_BLEND_MESHES,
   RAKLION_EFFECT_ONLY_TYPES,
   RAKLION_EMISSIONS,
+  RAKLION_MESH_ANIMATIONS,
 } from './spec';
 import { RAKLION_SOUND } from './sound';
 import { RAKLION_LIGHTING } from './lighting';
@@ -15,7 +16,7 @@ import { RAKLION_LIGHTING } from './lighting';
  *
  * Raklion (`WD_57ICECITY`, `World58`/`Object58`) - the ice field. The object
  * behaviour is in `create.ts`, which also lists what is deliberately left
- * out; the plain tables are in `spec.ts` and `controllers/render/meshAnimation.ts`.
+ * out; the plain tables are in `spec.ts` and the `render.meshAnimations` rows.
  *
  * Snow: `g_Raklion.CreateSnow` (:2257-2280) is the leaves slot for both Ice
  * City worlds, so the two join `SNOW_MAPS` in `controllers/weather/ambientWeather.ts` -
@@ -69,6 +70,7 @@ export const raklionLayer: MapLayer = {
   blendMeshes: RAKLION_BLEND_MESHES,
   effectOnly: RAKLION_EFFECT_ONLY_TYPES,
   emissions: RAKLION_EMISSIONS,
+  render: { meshAnimations: RAKLION_MESH_ANIMATIONS },
   sound: RAKLION_SOUND,
   lighting: RAKLION_LIGHTING,
   create: world => import('./create').then(m => m.createRaklion(world)),

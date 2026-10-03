@@ -1,5 +1,7 @@
 import type { Emission } from '@/controllers/fx/effectParticles';
 import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
+import type { MeshAnimations } from '@/controllers/render';
+import { saw } from '../shared/meshAnimation';
 
 /**
  * Kanturu Ruins (`WD_37KANTURU_1ST`, `World38`/`Object38`), the plain-data
@@ -19,7 +21,7 @@ import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
 
 /**
  * No `o->BlendMesh` writes. The `BlendMeshLight` sines on 46 and 102 and the
- * V scroll on 77 are in `meshAnimation.ts`; the additive mesh is whichever
+ * V scroll on 77 are in the `render.meshAnimations` rows; the additive mesh is whichever
  * the BMD flags.
  */
 export const KANTURU1_BLEND_MESHES: Readonly<Record<number, number>> = {};
@@ -120,3 +122,14 @@ export const KANTURU1_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
       },
     ],
   };
+
+/**
+ * Kanturu Ruins (GM_kanturu_1st.cpp:64-69, :92-96, :113-115): the great
+ * wheel's glow (46), the waterfall sheet (77) and the crystal (102). Shared
+ * with the GM area (40) and Doppelganger 4 (GMDoppelGanger4.cpp:88-133).
+ */
+export const KANTURU1_MESH_ANIMATIONS: MeshAnimations = {
+  46: { mesh: 0, kind: 'blend', light: t => Math.sin(t * 0.0015) * 0.8 + 1 },
+  77: { mesh: 0, kind: 'blend', v: saw(10000, 0.0002) },
+  102: { mesh: 0, kind: 'blend', light: t => Math.sin(t * 0.001) + 1 },
+};

@@ -1,5 +1,6 @@
 import type { Emission } from '@/controllers/fx/effectParticles';
 import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
+import type { MeshAnimations } from '@/controllers/render';
 
 /**
  * Illusion Temple (`WD_45CURSEDTEMPLE_LV1 … LV6`, one `World47`/`Object47`
@@ -39,8 +40,8 @@ import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
  *    dragon statues did not earn one.
  *  - **type 32's scrolling mesh** (ZzzObject.cpp:660-666): `StreamMesh = 2`
  *    drawn twice with U scrolling `-(t%4000)*0.00025` and `-(t%5000)*0.0002`.
- *    That is a `meshAnimation.ts` row, which is a shared file; the report
- *    carries it for the integrator.
+ *    It would be a second row in `CURSEDTEMPLE_MESH_ANIMATIONS` below, which
+ *    holds one mesh per type; not built.
  *  - **the match itself**: the statues, the relic, the two baskets, the
  *    score gauge and `SetTerrainWaterState` are all `CHARACTER`s and event
  *    state, not map objects, and none of it exists outside a running
@@ -75,7 +76,7 @@ const tint256 = (r: number, g: number, b: number, step: number, base: number) =>
  * the mesh off its own material.
  *
  * The `BlendMeshLight = sin(t*0.001)*0.5+0.5` on 64/65/80 (:342-346) is in
- * `meshAnimation.ts`'s `CURSED_TEMPLE` table; it writes the same
+ * the `render.meshAnimations` rows' `CURSED_TEMPLE` table; it writes the same
  * `blendMeshLight` metadata the `_R` pass reads.
  */
 export const CURSED_TEMPLE_BLEND_MESHES: Readonly<Record<number, number>> = {};
@@ -220,4 +221,11 @@ export const CURSED_TEMPLE_LIGHTS: Partial<
       ],
     },
   ],
+};
+
+/** Illusion Temple (w_CursedTemple.cpp:337-341): the three breathing lamps. */
+export const CURSEDTEMPLE_MESH_ANIMATIONS: MeshAnimations = {
+  64: { mesh: 0, kind: 'blend', light: t => Math.sin(t * 0.001) * 0.5 + 0.5 },
+  65: { mesh: 0, kind: 'blend', light: t => Math.sin(t * 0.001) * 0.5 + 0.5 },
+  80: { mesh: 0, kind: 'blend', light: t => Math.sin(t * 0.001) * 0.5 + 0.5 },
 };

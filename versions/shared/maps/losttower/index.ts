@@ -5,6 +5,7 @@ import {
   LOST_TOWER_BLEND_MESHES,
   LOST_TOWER_EFFECT_ONLY_TYPES,
   LOST_TOWER_EMISSIONS,
+  LOSTTOWER_MESH_ANIMATIONS,
 } from './spec';
 import { LOST_TOWER_SOUND } from './sound';
 import { LOST_TOWER_LIGHTING } from './lighting';
@@ -37,6 +38,7 @@ export const losttowerLayer: MapLayer = {
   blendMeshes: LOST_TOWER_BLEND_MESHES,
   effectOnly: LOST_TOWER_EFFECT_ONLY_TYPES,
   emissions: LOST_TOWER_EMISSIONS,
+  render: { meshAnimations: LOSTTOWER_MESH_ANIMATIONS },
   sound: LOST_TOWER_SOUND,
   lighting: LOST_TOWER_LIGHTING,
   create: world => import('./create').then(m => m.createLostTower(world)),

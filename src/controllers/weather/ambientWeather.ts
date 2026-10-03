@@ -2,7 +2,8 @@ import { Color4, Vector3 } from '../render/babylon/exports';
 import type { ENUM_WORLD } from '../../core/types';
 import type { AmbientRecipe } from '../fx/ambientParticles';
 import type { AmbientSchedule } from './ambientSchedule';
-import { maps } from '../maps';
+import type { MapDustRoom } from './mapWeather';
+import { forWorld, maps, type Room } from '../maps';
 
 /**
  * Ambient particle recipes from `MoveLeaves` (ZzzEffectFireLeave.cpp) plus our own room dust.
@@ -475,4 +476,28 @@ export function ambientLeavesFor(world: ENUM_WORLD): AmbientRecipe | null {
   if (kind === 'leaves') return LORENCIA_LEAVES;
   if (kind === 'petals') return NORIA_PETALS;
   return null;
+}
+
+/** Every leaf recipe a map can name, one emitter slot each. */
+export const LEAF_RECIPES: readonly AmbientRecipe[] = [LORENCIA_LEAVES, NORIA_PETALS];
+
+const DUST: Record<MapDustRoom['dust'], AmbientRecipe> = {
+  tavern: TAVERN_DUST,
+  hearth: HEARTH_DUST,
+  houseHearth: HOUSE_HEARTH_DUST,
+};
+
+export type DustRoom = { readonly world: ENUM_WORLD; readonly room: Room; readonly recipe: AmbientRecipe };
+
+/** A map's dust rooms (`MapWeather.dust`), each with its recipe. */
+export function ambientDustFor(world: ENUM_WORLD): DustRoom[] {
+  const rows = maps.rowFor(world, layer => layer.weather?.dust) ?? [];
+  return rows.map(r => ({ world, room: r.room, recipe: DUST[r.dust] }));
+}
+
+/** Every dust room of every map, list order: one emitter slot each. */
+export function allDustRooms(): DustRoom[] {
+  return maps.all.flatMap(layer =>
+    layer.worlds.flatMap(world => (forWorld(layer.weather?.dust, world) ? ambientDustFor(world) : []))
+  );
 }

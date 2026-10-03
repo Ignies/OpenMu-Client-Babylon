@@ -6,7 +6,7 @@ import { LostTowerSkullObject } from './skullObject';
  * Lost Tower (WD_4LOSTTOWER, world 4 / `Object5`).
  *
  * Almost everything this map does is table data - see spec.ts for the blend
- * meshes, the two hidden types and the lights, and controllers/render/meshAnimation.ts for
+ * meshes, the two hidden types and the lights, and the render.meshAnimations rows for
  * the UV scrolls. Only three of the 40 types need behaviour that a table
  * cannot hold, and they are wired here.
  *
@@ -38,7 +38,7 @@ import { LostTowerSkullObject } from './skullObject';
  *    the body redrawn with `BITMAP_CHROME` and `BodyLight` forced to
  *    (1.0, 0.2, 0.1), then the normal textured pass over the top. The clone
  *    has no per-object chrome pass - materials work. Its `StreamMesh`
- *    half (unlit + scrolling) is already in controllers/render/meshAnimation.ts, which is
+ *    half (unlit + scrolling) is already in the render.meshAnimations rows, which is
  *    the part that actually reads as movement.
  */
 export async function createLostTower(world: World) {

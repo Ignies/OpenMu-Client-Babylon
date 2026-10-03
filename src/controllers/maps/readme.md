@@ -6,9 +6,9 @@ world, and the room helpers. The maps themselves are content in `versions/shared
 
 ## Public API
 - `MapLayer`, `Room`, `Spawn`, `PerWorld`, `ByWorld` (`layer.ts`): the contract one map entry
-  implements. `sound`, `lighting`, `weather`, `terrain` are the map's own rows, one field per
-  controller; each controller owns its field's type (`MapSound`, `MapLighting`, `MapWeather`,
-  `MapTerrain`, exported from that controller's `index.ts`).
+  implements. `sound`, `lighting`, `weather`, `terrain`, `render` are the map's own rows, one field
+  per controller; each controller owns its field's type (`MapSound`, `MapLighting`, `MapWeather`,
+  `MapTerrain`, `MapRender`, exported from that controller's `index.ts`).
 - `maps` (`index.ts`, a `Controller`):
   - lifecycle: `create(world)` once per warp, `reset()` on map change, `register(layer)` at
     runtime (returns the unregister).
