@@ -1,6 +1,6 @@
 import type { Entity, World } from '@/ecs/world';
 import { PlayerAction } from '../../objects/enum';
-import { loadGLTF } from '@/controllers/assets';
+import { loadGLTF, settle } from '@/controllers/assets';
 import { PlayerObject, registerModelClass } from '@/controllers/actors';
 import { CharacterClassNumber } from '@/core/types';
 
@@ -11,14 +11,17 @@ export class GoldenArcher extends PlayerObject {
   async init(world: World, entity: Entity) {
     this.load(await loadGLTF('Player/player.glb', world));
 
-    this.setBodyPartsAsync(
-      'Player/',
-      'HelmMale',
-      'ArmorMale',
-      'PantMale',
-      'GloveMale',
-      'BootMale',
-      22
+    void settle(
+      this.setBodyPartsAsync(
+        'Player/',
+        'HelmMale',
+        'ArmorMale',
+        'PantMale',
+        'GloveMale',
+        'BootMale',
+        22
+      ),
+      'Player/Male22 parts'
     );
 
     // Weapon1.Type = (int)ModelType.Bow + 5 + MODEL_ITEM; // Silver Bow as a golden-looking bow

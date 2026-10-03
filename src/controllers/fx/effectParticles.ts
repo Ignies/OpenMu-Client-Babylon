@@ -11,6 +11,7 @@ import { maps } from '../maps';
 import { EFFECT_RENDERING_GROUP, darkCardGain, keepDepthForEffects, spriteLevel } from './core';
 import { devQuery, devQueryNumber } from '../../core/devSeams';
 import { viewDepth } from '../render/viewPlanes';
+import { reportLoadFailure } from '../assets';
 
 const TICKS_PER_SECOND = 25;
 
@@ -980,7 +981,7 @@ export class ParticleEmitter {
             this.scale * (emission.scale ?? 1),
             light,
             emission.jitter
-          );
+          ).catch(reportLoadFailure(`particle ${kind}`));
         }
       }
     }
@@ -1052,7 +1053,9 @@ export class BonedParticleEmitter {
           const kind =
             point.kinds[Math.floor(Math.random() * point.kinds.length)];
 
-          void spawnParticle(this.target, kind, position, 0, scale, light);
+          void spawnParticle(this.target, kind, position, 0, scale, light).catch(
+            reportLoadFailure(`particle ${kind}`)
+          );
         }
       }
     }
@@ -1117,7 +1120,7 @@ export class HeldSprites {
       }
 
       if (!pool) {
-        if (visible) void getPool(this.target, point.texture, blend);
+        if (visible) void getPool(this.target, point.texture, blend).catch(reportLoadFailure(`particle sheet ${point.texture}`));
         continue;
       }
 

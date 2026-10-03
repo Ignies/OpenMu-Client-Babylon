@@ -28,6 +28,7 @@ import { releaseGreasedLineMaterial } from './greasedLineRelease';
 import type { TaperShape } from './joint';
 import { reseat, subtractMaterial } from './model';
 import type { EffectHandle, EffectLayer } from './layer';
+import { reportLoadFailure } from '../assets';
 
 // ---- 1. tuning -------------------------------------------------------------
 
@@ -182,7 +183,7 @@ function darkRibbon(scene: Scene, at: Vector3, count: number, n: number, widths:
     if (mesh.isDisposed()) return;
     std.opacityTexture = tex;
     if (glMat) glMat.visibility = 1;
-  });
+  }).catch(reportLoadFailure(r.texture));
   (scene as TestScene).look?.glow.addExcludedMesh(mesh);
   return { mesh, lines: inPlaceLines(mesh, n, count), std, spec: r, gain };
 }

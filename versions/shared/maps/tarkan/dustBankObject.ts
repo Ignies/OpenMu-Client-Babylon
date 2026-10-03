@@ -2,6 +2,7 @@ import { MapTileObject } from '@/controllers/terrain/mapTileObject';
 import { spawnParticle } from '@/controllers/fx/effectParticles';
 import type { Scene } from '@/controllers/render/babylon/exports';
 import type { Entity, World } from '@/ecs/world';
+import { reportLoadFailure } from '@/controllers/assets';
 
 /** `for (int i = 0; i < 20; ++i) CreateParticleFpsChecked(...)` (ZzzObject.cpp:2962). */
 const BURST_COUNT = 20;
@@ -123,7 +124,7 @@ export class TarkanDustBankObject extends MapTileObject {
         this.node.rotation.y,
         scale,
         DUST_LIGHT
-      );
+      ).catch(reportLoadFailure('particle cloud21'));
     }
   }
 }

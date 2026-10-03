@@ -10,6 +10,7 @@ import {
 } from './mapObjectLights';
 import type { LightSource } from './lightSource';
 import { ParticleEmitter, type Emission } from '../fx/effectParticles';
+import { reportLoadFailure } from '../assets';
 
 /**
  * The adapter between a `ModelObject` and its rows in the lighting layer's
@@ -82,7 +83,7 @@ export class MapObjectLights {
 
         if (this.#disposed) light.dispose();
         else this.#sprites.push(light);
-      });
+      }).catch(reportLoadFailure('effect light flare'));
     }
 
     const emissions =

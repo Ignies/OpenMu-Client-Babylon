@@ -1,5 +1,5 @@
 import type { World } from '@/ecs/world';
-import { loadGLTF } from '@/controllers/assets';
+import { loadGLTF, settle } from '@/controllers/assets';
 import { PlayerObject, registerModelClass } from '@/controllers/actors';
 
 // Man01.glb is a rig-only BMD conversion (0 meshes): the geometry ships as
@@ -30,14 +30,17 @@ abstract class MerchantMan extends PlayerObject {
     // setBodyPartsAsync applies one skin index to every named part, so the
     // mixed-skin outfits load in one pass per distinct index.
     for (const skin of new Set([head, upper, gloves, boots])) {
-      this.setBodyPartsAsync(
-        'NPC/',
-        head === skin ? 'ManHead' : '',
-        upper === skin ? 'ManUpper' : '',
-        '',
-        gloves === skin ? 'ManGloves' : '',
-        boots === skin ? 'ManBoots' : '',
-        skin
+      void settle(
+        this.setBodyPartsAsync(
+          'NPC/',
+          head === skin ? 'ManHead' : '',
+          upper === skin ? 'ManUpper' : '',
+          '',
+          gloves === skin ? 'ManGloves' : '',
+          boots === skin ? 'ManBoots' : '',
+          skin
+        ),
+        'NPC/Man parts'
       );
     }
   }

@@ -6,6 +6,7 @@ import { Store } from '@/app/store';
 import type { Entity, World } from '@/ecs/world';
 import { findBone, type BoneNode } from './bones';
 import { EMPIRE_GUARDIAN_4_WALL_TORCH } from './spec';
+import { reportLoadFailure } from '@/controllers/assets';
 
 /** `b->TransformPosition(BoneTransform[1], p, Position)` (GMEmpireGuardian4.cpp:867). */
 const FLAME_BONE = 1;
@@ -84,7 +85,7 @@ export class EmpireGuardian4WallTorchObject extends MapTileObject {
 
       if (this.#disposed) flare.dispose();
       else this.#flare = flare;
-    });
+    }).catch(reportLoadFailure('effect light flare'));
   }
 
   dispose(): void {

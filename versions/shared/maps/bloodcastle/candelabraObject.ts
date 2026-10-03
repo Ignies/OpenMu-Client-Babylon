@@ -8,6 +8,7 @@ import { PRIORITY_TORCH, type LightSource } from '@/controllers/lighting/lightSo
 import { Store } from '@/app/store';
 import type { Entity, World } from '@/ecs/world';
 import { findBone, bonePosed, type BoneNode } from './bones';
+import { reportLoadFailure } from '@/controllers/assets';
 
 /**
  * `wchar_t indexLight[7] = { 1, 2, 4, 6, 9, 10, 11 }` (ZzzObject.cpp:3169):
@@ -92,7 +93,7 @@ export class BloodCastleCandelabraObject extends MapTileObject {
         const p = bone.getAbsolutePosition();
         flare.moveTo(p.x, p.y, p.z);
         this.#flares.push(flare);
-      });
+      }).catch(reportLoadFailure('effect light flare'));
     }
 
     const phaseMs = (this.#yawDegrees() * YAW_PHASE_MS) | 0;

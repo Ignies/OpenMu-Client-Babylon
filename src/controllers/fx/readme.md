@@ -46,6 +46,9 @@ shared pools, textures and particle recipes other folders reuse.
   `reset`, then `disposePools` (materials, cards, particle systems, the effect glow layer).
 - An entry keeps its live effects in a `LiveList` (`core.ts`). A throwing update or release is
   logged and dropped, never rethrown into the render loop.
+- Textures, models and sprite sheets load in the background (`void load(x).then(...)`). Every such
+  call ends in `.catch(reportLoadFailure(file))` from `assets`: a missing file is warned once and
+  the effect just does not appear.
 - Shared pools (`core.ts`): additive materials cached per (texture, colour, blend), billboard
   cards from a free list, one `ParticleSystem` per recipe so a burst is a counter bump.
 - Units follow the original: lifetimes in 25 Hz ticks (`TICK`), distances in cm / 100 (`CM`).

@@ -2,6 +2,7 @@ import { inBloodCastle } from '../../controllers/actors/locomotion';
 import type { PlayerObject } from '../../controllers/actors/playerObject';
 import { bloodCastleQuestItem } from '../../modules/events/bloodCastle';
 import type { Entity, ISystemFactory } from '../world';
+import { settle } from '../../controllers/assets';
 
 /**
  * The Blood Castle quest weapon on its carrier's back.
@@ -56,7 +57,7 @@ export const QuestItemSystem: ISystemFactory = world => {
 
       carrier = owner;
       carriedLevel = held.level;
-      void (owner.modelObject as PlayerObject).setQuestItemAsync(held.level);
+      void settle((owner.modelObject as PlayerObject).setQuestItemAsync(held.level), 'quest item');
     },
   };
 };

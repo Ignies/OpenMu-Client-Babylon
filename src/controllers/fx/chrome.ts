@@ -21,6 +21,7 @@ import {
 } from '../render/babylon/exports';
 import { linearBufferActive } from '../lighting/lightModel';
 import { effectTexture, fxNow, lightCardGain, type RGB } from './core';
+import { reportLoadFailure } from '../assets';
 
 const SHADER = 'fxChrome';
 
@@ -55,7 +56,7 @@ export function chromeMaterial(scene: Scene, tint: RGB): ShaderMaterial {
   mat.setVector3('tint', colour);
   void effectTexture(scene, CHROME_TEXTURE).then(tex => {
     if (materials.get(scene)?.get(key) === mat) mat.setTexture('chromeSampler', tex);
-  });
+  }).catch(reportLoadFailure(CHROME_TEXTURE));
   mat.onBindObservable.add((mesh: AbstractMesh) => {
     const effect = mat.getEffect();
     if (!effect) return;

@@ -43,6 +43,7 @@ import { addEffectGlow, releaseEffectGlow } from './glow';
 import { releaseGreasedLineMaterial } from './greasedLineRelease';
 import { RGBS } from './recipes';
 import type { EffectHandle, EffectLayer } from './layer';
+import { reportLoadFailure } from '../assets';
 
 // ---- 1. tuning -------------------------------------------------------------
 
@@ -434,7 +435,7 @@ export function makeLine(scene: Scene, lines: number[][], colour: RGB, width: nu
         std.diffuseTexture = tex;
       }
       if (glMat) glMat.visibility = 1;
-    });
+    }).catch(reportLoadFailure(sheetFile));
     // A real brightness fade: the emissive tint toward black fades a bright
     // ribbon out, the coverage toward zero a dark one.
     fade = dark

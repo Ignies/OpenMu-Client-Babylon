@@ -1,5 +1,5 @@
 import type { World } from '@/ecs/world';
-import { loadGLTF } from '@/controllers/assets';
+import { loadGLTF, settle } from '@/controllers/assets';
 import { PlayerObject, registerModelClass } from '@/controllers/actors';
 
 // [NpcInfo(253, "Potion Girl Amy")]
@@ -16,14 +16,17 @@ export class Girl extends PlayerObject {
 
     this.load(bmd);
 
-    this.setBodyPartsAsync(
-      'NPC/',
-      'GirlHead',
-      'GirlUpper',
-      'GirlLower',
-      '',
-      '',
-      1
+    void settle(
+      this.setBodyPartsAsync(
+        'NPC/',
+        'GirlHead',
+        'GirlUpper',
+        'GirlLower',
+        '',
+        '',
+        1
+      ),
+      'NPC/Girl parts'
     );
   }
   // protected override void HandleClick() { }

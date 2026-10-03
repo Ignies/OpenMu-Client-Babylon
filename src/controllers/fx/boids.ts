@@ -8,6 +8,7 @@ import { TILE_CM } from '../terrain/consts';
 import { Store } from '../../app/store';
 import type { Sounds } from '../sound/soundsManager';
 import type { Entity, World } from '../../ecs/world';
+import { reportLoadFailure } from '../assets';
 
 const eyeLocal = new Vector3();
 const eyeWorld = new Vector3();
@@ -354,7 +355,7 @@ export function boidFactoryFor(spec: BoidSpec, model: string): typeof ModelObjec
             return;
           }
           this.#eyes[i] = flare;
-        });
+        }).catch(reportLoadFailure('effect light flare'));
       }
     }
   }
