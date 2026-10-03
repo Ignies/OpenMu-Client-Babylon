@@ -20,4 +20,13 @@ describe('NPC looks from the original client', () => {
   it('Hanzo the Blacksmith draws Smith01 at 0.95 (ZzzCharacter.cpp:14517-14522)', () => {
     expect(m.resolveModelFactory(251)).toBe(m.npcFactoryFor('Smith01', 0.95));
   });
+
+  // OpenNpc + CreateCharacter and nothing else (ZzzCharacter.cpp:14295-14299, :14415-14418, :14531-14535).
+  it.each([
+    [226, 'Breeder'],
+    [240, 'Storage01'],
+    [254, 'Wizard01'],
+  ])('%i is a plain NPC model (%s) with no class of its own', (type, file) => {
+    expect(m.resolveModelFactory(type)).toBe(m.npcFactoryFor(file, 1));
+  });
 });

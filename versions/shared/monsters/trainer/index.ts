@@ -4,7 +4,7 @@ export default defineMonster({
   Numb: 226,
   Name: 'Trainer',
   maxHealth: 50,
-  // model.ts draws it; this row is what the tables list.
+  // MODEL_NPC_BREEDER (ZzzCharacter.cpp:14295-14299).
   npcModel: { file: 'Breeder', scale: 1 },
   stats: {
     Rate: 1,
