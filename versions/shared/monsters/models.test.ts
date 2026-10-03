@@ -9,7 +9,7 @@ import { join } from 'node:path';
  */
 const DIR = 'versions/shared/monsters';
 const MONSTERS = [1, 2, 3, 14, 15, 16, 35, 43, 53, 54, 55, 56, 78, 79, 80, 81, 82, 83, 131, 132, 133, 134, 275, 349, 459, 493, 494, 495, 496, 497, 498, 499, 500, 501, 502];
-const NPCS = [34, 226, 230, 232, 233, 236, 240, 248, 250, 251, 253, 254, 255, 257, 258, 371, 414, 568];
+const NPCS = [34, 226, 230, 232, 233, 236, 240, 248, 250, 253, 254, 255, 257, 258, 371, 414, 568];
 
 const files = readdirSync(DIR)
   .filter(d => existsSync(join(DIR, d, 'model.ts')))

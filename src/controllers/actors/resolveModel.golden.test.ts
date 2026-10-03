@@ -10,7 +10,7 @@ vi.mock('@/app/store', () => ({ Store: {}, UIState: {} }));
  * `isKnownObjectType` knows it, and the NPC tables the generic factories read (file and scale).
  * Moving NPC content must leave these hashes alone; update them on purpose.
  */
-const RESOLVE_HASH = '709a7f80d67c32fb865822572997b8a1309e3778686981bd1691274ad8400efd';
+const RESOLVE_HASH = '06354b1998f820858c8587b0d696f7101589946f88b214eb667aba93c69213fa';
 const TABLES_HASH = 'c27e1d9bcaf72d4be16330a37da6651dfd22e21b1e65e636c4be469c98855b65';
 
 const hash = (v: unknown) => createHash('sha256').update(JSON.stringify(v)).digest('hex');

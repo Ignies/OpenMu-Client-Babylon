@@ -65,14 +65,14 @@ row are named from `NpcName_Eng.txt`.
 | `_blood_castle/` | Castle Gate (131) and Statue of Saint (132-134) |
 | `_golden_line/` | the golden invasion line, with extra additive body passes |
 | `_skeleton_line/` | Skeleton Warrior, Archer, Elite, Death King, Death Bone: player-rig monsters |
-| `trainer/`, `baz_storage_guard/`, `hanzo_blacksmith/`, `pasi_wizard/`, `wandering_merchant_zyro/` | single-model NPCs (226, 240, 251, 254, 568) |
+| `trainer/`, `baz_storage_guard/`, `pasi_wizard/`, `wandering_merchant_zyro/` | single-model NPCs (226, 240, 254, 568) |
 | `amy_potion_girl/`, `liaman_barmaid/`, `_merchant_men/` | rig-only models with head / upper / lower parts (253, 255; Alex 230, Martin 248, Harold 250) |
 | `elf_soldier/` | Elf Soldier (257): an always-flying Fairy Elf |
 | `golden_archer/`, `leo_the_helper/`, `_plate_npc/` | player-rig NPCs in a fixed armour set (236, 371; 34, 258, 414) |
 | `_archangels/` | Archangel (232) and Messenger of Archangel (233): bright mesh, ground halo, feathers |
 
 A folder with both a `model.ts` and an `npcModel` draws with the class; the row is what the NPC
-tables list (Hanzo's 0.95 there is not applied: his class draws at 1).
+tables list. A plain NPC model at a fixed scale needs no class: `npcModel` is enough.
 
 ## Depends on / used by
 - uses: the monsters controller, `@/controllers/actors`, `@/controllers/assets`, `@/controllers/fx`,
