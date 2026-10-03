@@ -38,7 +38,9 @@ The summon's own arrival is played from the create flag of the summoned monster
 `_shared.ts` holds the elf summon cast: `elfSummon` (at the cast's release, `afterRelease`: the summon decal
 and its healing streaks at the caster) and `SUMMON_GRADED` (the graded look used by ids 30-36);
 `atBuffRelease`: Heal, Greater Defense and Greater Damage draw at the cast's release on the target as it
-stands then (ZzzCharacter.cpp:4910-4954), with their `strike` light there.
+stands then (ZzzCharacter.cpp:4910-4954), with their `strike` light there. The arrows leave at the release
+too (CreateArrows, ZzzCharacter.cpp:4811-4828, :4893-4909): Triple Shot's fan (`afterRelease`) and
+Starfall's shot (`travel.release`).
 
 ## Depends on / used by
 - uses: `../_shared.ts`, `@/controllers/{skills,fx,lighting,sound,combat}`
@@ -49,4 +51,5 @@ stands then (ZzzCharacter.cpp:4910-4954), with their `strike` light there.
 
 ## Tests
 - Covered by the golden tests in `../` (`skillVisuals.golden.test.ts`, `skillTables.golden.test.ts`);
-  `../releaseTiming.test.ts` times the buffs against the caster's magic speed.
+  `../releaseTiming.test.ts` times the buffs against the caster's magic speed and the arrows against
+  the bow clip's attack speed.

@@ -12,8 +12,8 @@ export default defineSkill({
   // ZzzCharacter.cpp:1316).
   swing: 'highBow',
   swordCount: true,
-  // 46 Deep Impact (Starfall): the arrow, then MODEL_ARROW_IMPACT at its position.
-  visual: { travel: arrow(MODEL.arrowLaser, RGBS.holy), impact: seq(model({ model: MODEL.arrowImpact, seconds: ticks(20), scale: 1, colour: RGBS.holy, grow: 1.4 }), steelHit) },
+  // 46 Deep Impact (Starfall): the arrow at the release (ZzzCharacter.cpp:4906-4909), then MODEL_ARROW_IMPACT at its position.
+  visual: { travel: { ...arrow(MODEL.arrowLaser, RGBS.holy), release: true }, impact: seq(model({ model: MODEL.arrowImpact, seconds: ticks(20), scale: 1, colour: RGBS.holy, grow: 1.4 }), steelHit) },
   sound: 'Sound/battlecastle/sCFireArrow', // Deep Impact
   // Starfall: MODEL_ARROW_IMPACT lights nothing in the original (:14596);
   // the holy wash riding the shot down is ours.

@@ -7,7 +7,7 @@ import { ENUM_WORLD } from '@/core/types';
 import { playerPlaySpeed } from '@/controllers/anim/playSpeed';
 import type { Entity } from '@/ecs/world';
 import { PlayerAction } from '../objects/enum';
-import { playTargetedSkillVisual } from './skillVisuals';
+import { playAreaSkillVisual, playTargetedSkillVisual } from './skillVisuals';
 
 vi.hoisted(() => {
   const g = globalThis as Record<string, unknown>;
@@ -38,10 +38,17 @@ afterAll(() => {
 });
 
 /**
- * Frames after the packet at which the caster's clip reaches `key`, and at which the skill first spawns.
- * `keysPerTick` is the clip's PlaySpeed; the game runs at `fps`.
+ * Frames after the packet at which the caster's clip reaches `key`, and at which the skill first spawns (an
+ * effect named `only`, if given). `keysPerTick` is the clip's PlaySpeed; the game runs at `fps`.
  */
-function timeline(skill: number, clip: PlayerAction, keysPerTick: number, key: number, fps = 25): { key: number; release: number } {
+function timeline(
+  skill: number,
+  clip: PlayerAction,
+  keysPerTick: number,
+  key: number,
+  fps = 25,
+  { area = false, only }: { area?: boolean; only?: string } = {}
+): { key: number; release: number } {
   let frame = 0;
   const model = { CurrentAction: clip, actionFrame: () => frame };
   const caster = {
@@ -55,14 +62,16 @@ function timeline(skill: number, clip: PlayerAction, keysPerTick: number, key: n
   effects.reset();
   const spawn = vi.spyOn(effects, 'spawn');
   spawn.mockClear();
-  playTargetedSkillVisual(scene, skill, caster, target);
+  const spawned = () => spawn.mock.calls.filter(c => !only || c[0] === only).length > 0;
+  if (area) playAreaSkillVisual(scene, skill, caster, { x: 103, y: 104 }, () => 0, target);
+  else playTargetedSkillVisual(scene, skill, caster, target);
   let keyAt = 0;
   let release = 0;
   for (let f = 1; f <= 100 && !(keyAt && release); f++) {
     frame += (keysPerTick * 25) / fps;
     if (!keyAt && frame >= key) keyAt = f;
     effects.update(ENUM_WORLD.WD_0LORENCIA, 1 / fps);
-    if (!release && spawn.mock.calls.length > 0) release = f;
+    if (!release && spawned()) release = f;
   }
   spawn.mockRestore();
   return { key: keyAt, release };
@@ -107,6 +116,20 @@ describe("the elf buffs land at the cast's release", () => {
     for (const skill of [26, 27, 28]) {
       expect(at(skill, 0)).toEqual({ key: 18, release: 14 });
       expect(at(skill, 1400)).toEqual({ key: 2, release: 2 });
+    }
+  });
+});
+
+describe('the elf arrows leave at the release', () => {
+  // CreateArrows runs in the release block (ZzzCharacter.cpp:4811-4828, :4893-4909); the bow clip's key 5 forces it.
+  const BOW = PlayerAction.PLAYER_ATTACK_BOW;
+  const shot = (skill: number, attackSpeed: number, area: boolean) =>
+    timeline(skill, BOW, playerPlaySpeed(BOW, attackSpeed), 5, 25, { area, only: 'projectile' });
+
+  it('Triple Shot (area) and Starfall (targeted) on key 5 of the bow clip, or 14 ticks after the packet', () => {
+    for (const [skill, area] of [[24, true], [46, false]] as const) {
+      expect(shot(skill, 0, area)).toEqual({ key: 17, release: 14 });
+      expect(shot(skill, 600, area)).toEqual({ key: 4, release: 4 });
     }
   });
 });

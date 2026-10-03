@@ -165,10 +165,14 @@ export function afterHeroRelease(fn: () => void): void {
   poll();
 }
 
-/** `step` at the cast's release (`onRelease`). */
+/** `step` at the cast's release (`onRelease`), with the skill being dispatched now as `currentSkill`. */
 export const afterRelease = (step: Step, rule?: ReleaseRule): Step => (at, c) => {
   const p = at.clone();
-  onRelease(c, () => step(p, c), rule);
+  const skill = currentSkill;
+  onRelease(c, () => {
+    currentSkill = skill;
+    step(p, c);
+  }, rule);
 };
 
 /** `step` `n` times, `every` seconds apart (a per-frame spawn over a few frames). */
@@ -316,6 +320,8 @@ export interface Travel extends Omit<ProjectileOptions, 'to' | 'onArrive' | 'fro
   fromSky?: boolean;
   /** Sky start: tiles up and tiles along +x / -z from the target (the original's Pos += (x, y, z)). */
   skyOffset?: readonly [number, number, number];
+  /** Leave at the cast's release (`onRelease`, `true` for the default rule) instead of at the packet. */
+  release?: true | ReleaseRule;
 }
 
 export interface SkillVisual {
@@ -545,7 +551,18 @@ export function contextFor(scene: Scene, caster: Entity, target: Entity | null):
 }
 
 function runTravel(row: SkillVisual, ctx: SkillContext, target: Entity): void {
-  const { fromSky, skyOffset, ...travel } = row.travel!;
+  const { release, ...rest } = row.travel!;
+  if (!release) return launch(row, rest, ctx, target);
+  const skill = currentSkill;
+  onRelease(ctx, () => {
+    if (entityGone(ctx.caster) || entityGone(target)) return;
+    currentSkill = skill;
+    launch(row, rest, ctx, target);
+  }, release === true ? {} : release);
+}
+
+function launch(row: SkillVisual, flight: Omit<Travel, 'release'>, ctx: SkillContext, target: Entity): void {
+  const { fromSky, skyOffset, ...travel } = flight;
   const from = fromSky ? entityPos(target, IMPACT_HEIGHT, new Vector3()) : entityPos(ctx.caster, CAST_HEIGHT, new Vector3());
   if (fromSky) {
     const [ox, up, oz] = skyOffset ?? [1.5, 8, 1];
