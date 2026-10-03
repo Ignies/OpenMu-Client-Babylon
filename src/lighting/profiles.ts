@@ -1,4 +1,5 @@
 import { ENUM_WORLD } from '../common/types';
+import { inChaosCastle } from '../common/locomotion';
 import { maps } from '../maps';
 
 export type Rgb = readonly [number, number, number];
@@ -224,6 +225,21 @@ const PREGAME_PROFILE: LookProfile = {
 /** An open map that takes the default level and haze and only names its sky. */
 const openMap = (sky: SkyLook): LookProfile => ({ ...DEFAULT_PROFILE, sky });
 
+/**
+ * Chaos Castle stands in the dark. The original has no sky over it and clears
+ * the frame to black (`InChaosCastle()`, SceneManager.cpp:572), so the void past
+ * its walls is black, the far end of the floor fades into it, and the outer
+ * walls fade out as they hang down into it.
+ *
+ * The floor is flat at 0, so the underworld starts just under it.
+ */
+const CHAOS_CASTLE_PROFILE: LookProfile = {
+  ...DEFAULT_PROFILE,
+  sky: null,
+  fog: { start: 15, density: 0.05, cap: 0.95, height: 0, color: [0, 0, 0] },
+  underworld: { top: -0.2, density: 0.1, falloff: 0.3, color: [0, 0, 0] },
+};
+
 const PROFILES: Partial<Record<ENUM_WORLD, LookProfile>> = {
   [ENUM_WORLD.WD_0LORENCIA]: {
     // Measured (wave 1, Standard mapper): 1.6 lands p50 0.424, 1.8 lands 0.451.
@@ -348,7 +364,6 @@ const PROFILES: Partial<Record<ENUM_WORLD, LookProfile>> = {
   }),
   [ENUM_WORLD.WD_31HUNTING_GROUND]: openMap(OPEN_SKY),
   [ENUM_WORLD.WD_9DEVILSQUARE]: openMap(OPEN_SKY),
-  [ENUM_WORLD.WD_18CHAOS_CASTLE]: openMap(OPEN_SKY),
   [ENUM_WORLD.WD_65DOPPLEGANGER1]: openMap(OPEN_SKY),
   [ENUM_WORLD.WD_69EMPIREGUARDIAN1]: openMap({ ...OPEN_SKY, clouds: 0.18 }),
   [ENUM_WORLD.WD_70EMPIREGUARDIAN2]: openMap({ ...OPEN_SKY, clouds: 0.18 }),
@@ -392,6 +407,8 @@ const PROFILES: Partial<Record<ENUM_WORLD, LookProfile>> = {
 export function profileFor(world: ENUM_WORLD): LookProfile {
   const own = PROFILES[world];
   if (own) return own;
+
+  if (inChaosCastle(world)) return CHAOS_CASTLE_PROFILE;
 
   return maps.isOutdoor(world) ? DEFAULT_PROFILE : ENCLOSED_PROFILE;
 }
