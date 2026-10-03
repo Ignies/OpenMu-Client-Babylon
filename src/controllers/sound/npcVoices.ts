@@ -153,6 +153,16 @@ export const GLOBAL_NPC_VOICES: Readonly<Record<number, GlobalVoice>> = {
 
 // ---- 2. state + readers ----------------------------------------------------
 
+/** The town noise an NPC type makes, if any. */
+export function npcVoiceOf(type: number): NpcVoice | undefined {
+  return NPC_VOICES[type];
+}
+
+/** The `PlayMonsterSoundGlobal` voice of the monster a character is drawn as, if any. */
+export function globalNpcVoiceOf(type: number): GlobalVoice | undefined {
+  return GLOBAL_NPC_VOICES[type];
+}
+
 function buildQuery(world: World) {
   return world.with('npcType', 'transform', 'modelObject');
 }
@@ -254,18 +264,18 @@ function update(_map: ENUM_WORLD, dt: number): void {
   if (ticks === 0) return;
 
   for (const e of skinned) {
-    const voice = GLOBAL_NPC_VOICES[e.skin];
+    const voice = globalNpcVoiceOf(e.skin);
     if (voice && e.npcType === undefined) stepGlobalVoice(e, voice);
   }
 
   for (const e of characters) {
-    const voice = GLOBAL_NPC_VOICES[e.npcType];
+    const voice = globalNpcVoiceOf(e.npcType);
     if (voice) {
       stepGlobalVoice(e, voice);
       continue;
     }
 
-    const row = NPC_VOICES[e.npcType];
+    const row = npcVoiceOf(e.npcType);
     if (!row) continue;
 
     const model = e.modelObject;
