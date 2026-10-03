@@ -65,7 +65,6 @@ row are named from `NpcName_Eng.txt`.
 | `_blood_castle/` | Castle Gate (131) and Statue of Saint (132-134) |
 | `_golden_line/` | the golden invasion line, with extra additive body passes |
 | `_skeleton_line/` | Skeleton Warrior, Archer, Elite, Death King, Death Bone: player-rig monsters |
-| `wandering_merchant_zyro/` | single-model NPC (568) |
 | `amy_potion_girl/`, `liaman_barmaid/`, `_merchant_men/` | rig-only models with head / upper / lower parts (253, 255; Alex 230, Martin 248, Harold 250) |
 | `elf_soldier/` | Elf Soldier (257): an always-flying Fairy Elf |
 | `golden_archer/`, `leo_the_helper/`, `_plate_npc/` | player-rig NPCs in a fixed armour set (236, 371; 34, 258, 414) |

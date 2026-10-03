@@ -29,4 +29,9 @@ describe('NPC looks from the original client', () => {
   ])('%i is a plain NPC model (%s) with no class of its own', (type, file) => {
     expect(m.resolveModelFactory(type)).toBe(m.npcFactoryFor(file, 1));
   });
+
+  it('Zyro wears the Moss model at 0.8, as Moss does (ZzzCharacter.cpp:14505-14516, :14846-14860)', () => {
+    expect(m.resolveModelFactory(568)).toBe(m.npcFactoryFor('gambler_moss', 0.8));
+    expect(m.resolveModelFactory(568)).toBe(m.resolveModelFactory(492));
+  });
 });

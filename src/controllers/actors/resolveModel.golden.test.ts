@@ -10,8 +10,8 @@ vi.mock('@/app/store', () => ({ Store: {}, UIState: {} }));
  * `isKnownObjectType` knows it, and the NPC tables the generic factories read (file and scale).
  * Moving NPC content must leave these hashes alone; update them on purpose.
  */
-const RESOLVE_HASH = '719ade9a1acbf741037bd01fbe0737085b40888ad7fffbd5d0ce8e8b60da6735';
-const TABLES_HASH = 'c27e1d9bcaf72d4be16330a37da6651dfd22e21b1e65e636c4be469c98855b65';
+const RESOLVE_HASH = '25cd9a546556ea9c0610c18d3a8c3066e0149849a98d4f8e6c2717fff6a8c757';
+const TABLES_HASH = '7f44446293b77e5e6a0bee5d50eae87ea8f689418c9e892eecc7d54a83dc0d2d';
 
 const hash = (v: unknown) => createHash('sha256').update(JSON.stringify(v)).digest('hex');
 
@@ -47,7 +47,7 @@ describe('model resolution', () => {
     const m = await load();
     const tables = [m.NPC_MODEL_TABLE, m.GEARED_NPC_TABLE, m.TRANSFORMED_NPC_TABLE, m.TRAP_MODEL_TABLE, m.CHARACTER_SKIN_PARTS];
 
-    expect(tables.map(t => Object.keys(t).length)).toEqual([88, 12, 8, 6, 9]);
+    expect(tables.map(t => Object.keys(t).length)).toEqual([89, 12, 8, 6, 9]);
     expect(hash(tables)).toBe(TABLES_HASH);
   }, 120_000);
 });
