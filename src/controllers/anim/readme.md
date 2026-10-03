@@ -21,7 +21,7 @@ clip is one file in `versions/shared/animations/` that says its own speed, flags
     speed-hack check accepts, with a 10% margin.
 - `playerActionMapper.ts`: `isPlayerAttackAction`, `isPlayerSkillAction` (ZzzInterface.cpp:7570-7580),
   `isStandingIdle`, `isOneShotPlayerAction`, `isRestAction`, `ServerToClientActionMap` (server action
-  -> clip), `resolveGenderedAction`.
+  -> clip), `resolveGenderedAction` (also exported from the door).
 - `monsterAttackClip.ts`: the attack / cast clip of a non-player body (`SetPlayerAttack`,
   `SetPlayerMagic`, ZzzCharacter.cpp:1222-1348) with the per-map hooks: `monsterAttackState`,
   `monsterSwing` (0x18), `monsterCast` (0x19 `ReceiveMagic`), `monsterAreaCast` (0x1E),

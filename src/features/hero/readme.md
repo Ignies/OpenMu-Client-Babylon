@@ -9,7 +9,7 @@ other folders share.
   `attackSpeedOf` / `magicSpeedOf(cls, agility)`, `deriveCharacterStats(input)` (damage, defense,
   rates and wizardry for the character info window).
 - `emotes.ts`: `EMOTES`, `EMOTE_RINGS`, `emoteById(id)`, `matchEmoteWord(text)` (the chat words that fire
-  an emote, `CheckChatText`), `isPlayerEmoteAction`, `genderedEmoteAction`, type `EmoteId`.
+  an emote, `CheckChatText`), `genderedEmoteAction`, type `EmoteId`.
 - `statAllocation.ts`: `StatAllocation.start(stat, amount)` / `cancel()`, `run`, `running`, `isRunning(stat)`.
 - `statAmounts.ts`: `clampAmount(amount, points)`, `needsConfirm(amount)`.
 - `lowVitals.ts`: `vitalWarning(fraction, percent)`, `heartbeatDue(life, lifeMax)`, `NO_WARNING`,

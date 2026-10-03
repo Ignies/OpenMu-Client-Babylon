@@ -1,5 +1,6 @@
 import type { TextKey } from '../../i18n';
 import { PlayerAction, ServerPlayerActionType } from '@versions/shared/objects/enum';
+import { animations, resolveGenderedAction } from '@/controllers/anim';
 
 /**
  * The social actions a player can trigger (ZzzInterface.cpp `CheckChatText`).
@@ -173,39 +174,7 @@ export function matchEmoteWord(text: string): EmoteId | null {
   return null;
 }
 
-/**
- * Every social clip, male and female variants included
- * (PLAYER_GREETING1 .. PLAYER_COME_UP in the action table). They play once and
- * hand control back to idle, like attacks.
- */
-export function isPlayerEmoteAction(action: PlayerAction): boolean {
-  return (
-    action >= PlayerAction.PLAYER_GREETING1 &&
-    action <= PlayerAction.PLAYER_COME_UP
-  );
-}
-
-/**
- * `SetActionClass`: a female character plays the clip right after the male
- * one, except for the block Respect..Rush which only has one variant.
- */
-export function genderedEmoteAction(
-  action: PlayerAction,
-  isFemale: boolean
-): PlayerAction {
-  if (!isFemale) return action;
-  if (
-    action >= PlayerAction.PLAYER_RESPECT1 &&
-    action <= PlayerAction.PLAYER_RUSH1
-  ) {
-    return action;
-  }
-  if (
-    action >= PlayerAction.PLAYER_GREETING1 &&
-    action <= PlayerAction.PLAYER_AGAIN1 &&
-    (action - PlayerAction.PLAYER_GREETING1) % 2 === 0 // male base clip
-  ) {
-    return action + 1;
-  }
-  return action;
+/** `SetActionClass` for a social clip: the female variant its animation file names, if any. */
+export function genderedEmoteAction(action: PlayerAction, isFemale: boolean): PlayerAction {
+  return animations.get(action)?.emote ? resolveGenderedAction(action, isFemale) : action;
 }
