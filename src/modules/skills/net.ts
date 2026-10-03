@@ -1,5 +1,5 @@
 import { AreaSkillAnimationPacket, ChainLightningHitInfoPacket, MagicEffectCancelledPacket, MagicEffectStatusPacket, SkillAddedPacket, SkillListUpdatePacket, SkillRemovedPacket } from '@versions/shared/packets/ServerToClientPackets';
-import { ENUM_WORLD } from '@/core/types';
+import { teleportCastSound } from '@/controllers/sound';
 import { Entity, World } from '@/ecs/world';
 import { EventBus } from '@/core/eventBus';
 import { SKILL_EFFECTS } from './recipes';
@@ -48,9 +48,10 @@ export function playTeleportAnimation(world: World, skill: number, caster: Entit
     // The hero's own Begin played at the click.
     if (caster.localPlayer) return;
     if (caster.monsterAnimation) {
-      // The Nightmare's own teleport in Kanturu (WSclient.cpp:4319-4327).
-      const nightmare = world.mapIndex === ENUM_WORLD.WD_39KANTURU_3RD;
-      beginTeleport(caster, skill, { clip: false, soundKey: nightmare ? 'Sound/w39/nightmare_tele' : undefined });
+      // A monster's own teleport on its map (the Nightmare in Kanturu 3rd, `so->Type ==
+      // MODEL_DARK_SKULL_SOLDIER_5`, WSclient.cpp:4319-4327); anyone else plays the plain one.
+      const own = teleportCastSound(world.mapIndex, caster.npcType ?? -1, skill);
+      beginTeleport(caster, skill, { clip: false, soundKey: own?.key });
       return;
     }
     beginTeleport(caster, skill);
