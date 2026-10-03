@@ -9,7 +9,12 @@ import type { CharacterClassNumber, PlayerClass } from '@/core/types';
  * An NPC model file (`OpenNpc`): relative to `Data/NPC/`, or to the asset root when it starts with `/`.
  * `scale` only when its case sets one; the default is CreateCharacterPointer's 0.9.
  */
-export type NpcModel = { readonly file: string; readonly scale?: number };
+export type NpcModel = {
+  readonly file: string;
+  readonly scale?: number;
+  /** Clip `PlaySpeed` by `MonsterActionType` its case writes into the model (`Models[].Actions[]`). */
+  readonly clipSpeeds?: Readonly<Partial<Record<number, number>>>;
+};
 
 /** An item an NPC wears or carries, by items.json (group, index). */
 export type NpcItem = { readonly group: number; readonly num: number; readonly lvl?: number };

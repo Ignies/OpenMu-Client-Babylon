@@ -18,7 +18,7 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 - Monster models from each monster's folder (through the monsters controller): `monsterModelFile`,
   `monsterModelTypeOfNpc`, `monsterScaleOf`, `monsterHiddenMesh`, `hasMonsterModel`;
   `monsterFactoryFor` (`genericMonster.ts`), the class every monster without its own uses.
-- NPC defaults: `npcFactoryFor(file, scale?)`, `trapFactoryFor`, `HiddenNpc`,
+- NPC defaults: `npcFactoryFor(file, scale?, clipSpeeds?)`, `trapFactoryFor`, `HiddenNpc`,
   `npcSpawnScale(factory, type, world)` (`modelFactoryPerId.ts`); `gearedNpcFactory(gear)`,
   `transformedNpcFactory(dir, part, scale?)` (`playerNpc.ts`); `CHARACTER_DEFAULT_SCALE`
   (`monsterModelTable.ts`).

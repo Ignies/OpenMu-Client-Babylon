@@ -1,6 +1,8 @@
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { monsterRegistry } from '@/controllers/monsters';
 import { CharacterClassNumber } from '@/core/types';
+import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
+import { Scene } from '@babylonjs/core/scene';
 
 // PlayerObject reaches the Store, which needs a browser; nothing here reads it.
 vi.mock('@/app/store', () => ({ Store: {}, UIState: {} }));
@@ -80,8 +82,19 @@ describe('NPC looks from the original client', () => {
   });
 
   it('Zyro wears the Moss model at 0.8, as Moss does (ZzzCharacter.cpp:14505-14516, :14846-14860)', () => {
-    expect(m.resolveModelFactory(568)).toBe(m.npcFactoryFor('gambler_moss', 0.8));
+    const speeds = { 0: 0.33, 1: 0.33, 2: 0.33, 3: 0.33, 4: 0.33, 5: 0.33 };
+    expect(m.resolveModelFactory(568)).toBe(m.npcFactoryFor('gambler_moss', 0.8, speeds));
     expect(m.resolveModelFactory(568)).toBe(m.resolveModelFactory(492));
+  });
+
+  // `Models[MODEL_GAMBLE_NPC_MOSS].Actions[0..5].PlaySpeed = 0.33f` (ZzzCharacter.cpp:14512-14515, :14855-14858).
+  it('Moss and Zyro play their six clips at 0.33', () => {
+    const scene = new Scene(new NullEngine());
+    for (const type of [492, 568]) {
+      const npc = new (m.resolveModelFactory(type))(scene);
+      expect([0, 1, 2, 3, 4, 5, 6].map(a => npc.actionPlaySpeed(a))).toEqual([...Array(6).fill(0.33), undefined]);
+    }
+    scene.getEngine().dispose();
   });
 
   // CreateCharacter(MODEL_PLAYER) leaves c->Class = CLASS_WIZARD (ZzzCharacter.cpp:11732-11735).
