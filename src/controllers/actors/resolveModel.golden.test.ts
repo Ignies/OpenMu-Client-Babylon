@@ -22,9 +22,9 @@ async function load() {
   const { MonsterObject } = await import('./monsterObject');
   const { NPC_MODEL_TABLE } = await import('./npcModelTable');
   const { GEARED_NPC_TABLE, TRANSFORMED_NPC_TABLE } = await import('./playerNpcTables');
-  const { CHARACTER_SKIN_PARTS } = await import('./transformedBody');
+  const { characterSkinParts } = await import('./transformedBody');
   const { TRAP_MODEL_TABLE } = await import('@/controllers/actors');
-  return { ...resolve, PlayerObject, MonsterObject, NPC_MODEL_TABLE, GEARED_NPC_TABLE, TRANSFORMED_NPC_TABLE, CHARACTER_SKIN_PARTS, TRAP_MODEL_TABLE };
+  return { ...resolve, PlayerObject, MonsterObject, NPC_MODEL_TABLE, GEARED_NPC_TABLE, TRANSFORMED_NPC_TABLE, CHARACTER_SKIN_PARTS: characterSkinParts(), TRAP_MODEL_TABLE };
 }
 
 describe('model resolution', () => {

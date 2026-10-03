@@ -106,16 +106,19 @@ export function transformedBodyFactory(
  *
  * `TRANSFORMED_NPC_TABLE` is the same set as seen from the NPC side; the
  * Skeleton Warrior is listed here as well because as a monster it is drawn
- * through its own factory (`monsters/skeletonWarrior.ts`), weapons and all.
+ * through its own factory (`_skeleton_line/model.ts`), weapons and all.
+ * Read when asked, not at load: the table is the monster folders'.
  */
-export const CHARACTER_SKIN_PARTS: Readonly<
+export function characterSkinParts(): Readonly<
   Record<number, readonly [dir: string, part: string, scale: number]>
-> = {
-  ...TRANSFORMED_NPC_TABLE,
-  // MONSTER_SKELETON_WARRIOR: MODEL_SKELETON1 at Scale 0.95
-  // (ZzzCharacter.cpp:14183-14192).
-  14: ['Skill/', 'Skeleton01.glb', 0.95],
-};
+> {
+  return {
+    ...TRANSFORMED_NPC_TABLE,
+    // MONSTER_SKELETON_WARRIOR: MODEL_SKELETON1 at Scale 0.95
+    // (ZzzCharacter.cpp:14183-14192).
+    14: ['Skill/', 'Skeleton01.glb', 0.95],
+  };
+}
 
 /**
  * `o->Scale` the transform packet overrides whatever the monster's own table
@@ -137,14 +140,14 @@ export type SkinBody = {
 
 /**
  * The body a transformation skin is drawn as. Half of them are part files
- * (`CHARACTER_SKIN_PARTS`); the rest - Budge Dragon, Giant, Poison Bull
+ * (`characterSkinParts`); the rest - Budge Dragon, Giant, Poison Bull
  * Fighter, Thunder Lich, Death Cow, Snowman - are the monster's own model,
  * which is how the original draws them too: `ReceiveCreateTransformViewport`
  * builds the transformed character with `CreateMonster` and lets it play the
  * monster's clips (WSclient.cpp:2760-2800).
  */
 export function characterSkinBody(skin: number): SkinBody | null {
-  const entry = CHARACTER_SKIN_PARTS[skin];
+  const entry = characterSkinParts()[skin];
   if (entry) {
     return {
       kind: 'part',
