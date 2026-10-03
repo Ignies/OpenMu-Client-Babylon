@@ -54,4 +54,9 @@ describe('skill cast rules', () => {
     const extra = Object.keys(SKILL_EFFECTS).map(Number).filter(id => !(id in MAGIC_FINISH));
     expect(extra).toEqual([]);
   });
+
+  it('each cancel effect is the buff ReceiveMagicFinish drops for that skill', () => {
+    const wrong = Object.entries(SKILL_EFFECTS).filter(([id, effect]) => MAGIC_FINISH[+id] !== effect);
+    expect(wrong).toEqual([]);
+  });
 });

@@ -218,8 +218,8 @@ export default defineSkill({
   name: "Strike of Destruction",
   // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
   lookAliases: [337, 340, 343],
-  // The old skill -> effect table's row, labelled Ignore Defense (129, Rage Fighter 266); kept as found.
-  effect: 129,
+  // ReceiveMagicFinish drops eDeBuff_BlowOfDestruction (WSclient.cpp:3895-3898).
+  effect: 86,
   // 232 Strike of Destruction (337/340/343 alias here, drawn at the target's feet): see `blowOfDestruction`.
   visual: { area: blowOfDestruction, enhanced: { area: blowOfDestructionPlus } },
   buffs: {
