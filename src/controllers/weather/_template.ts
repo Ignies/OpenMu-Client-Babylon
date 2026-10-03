@@ -2,7 +2,8 @@
  * TEMPLATE - copy me to `<name>.ts` and list the layer in `layers.ts`. Never imported.
  * The steps are in readme.md ("Change it").
  */
-import { ENUM_WORLD } from '../../core/types';
+import type { ENUM_WORLD } from '../../core/types';
+import { maps } from '../maps';
 import type { WeatherLayer } from './layer';
 
 // ---- 1. tuning -------------------------------------------------------------
@@ -13,8 +14,14 @@ const BUILD_SECONDS = 30;
 /** Seconds from full strength back to nothing once the cause stops. */
 const FADE_SECONDS = 60;
 
-/** Maps this exists on. */
-const MAPS: ReadonlySet<ENUM_WORLD> = new Set([ENUM_WORLD.WD_0LORENCIA]);
+/**
+ * Maps this exists on: the ones whose entry asks for it. Add your own field to
+ * `MapWeather` (`mapWeather.ts`) and set it in the map's folder; the set is
+ * live, so nothing reads the maps at load.
+ */
+const MAPS: ReadonlySet<ENUM_WORLD> = maps.worldSet(
+  layer => layer.weather?.wetGround === true
+);
 
 // ---- 2. state + readers ----------------------------------------------------
 

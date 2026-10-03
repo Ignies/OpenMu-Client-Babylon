@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import type { ENUM_WORLD } from '../../core/types';
+import { ENUM_WORLD } from '../../core/types';
 import { maps, type MapLayer } from '../maps';
 import { LEAN_CURSOR_OBJECTS, findRestObject, leanCursorObjects } from './restObjects';
 import { applyMapObjectFixups, mapObjectFixupsFor } from './mapObjectFixups';
@@ -25,6 +25,10 @@ afterEach(() => {
 });
 
 describe("a map's terrain rows", () => {
+  it('hide the ground of the sky map only', () => {
+    expect(maps.worldsWhere(l => l.terrain?.hidden === true)).toEqual([ENUM_WORLD.WD_10ICARUS]);
+  });
+
   it('give rest objects and lean boxes, live through the per-world record', () => {
     expect(LEAN_CURSOR_OBJECTS[W]).toBeUndefined();
     unregister = maps.register(entry);

@@ -55,5 +55,8 @@ export const icarusLayer: MapLayer = {
   // `MoveLeaves` overwrites `RainTarget` every frame: `MAX_LEAVES / 2` =
   // 100, full strength, whatever the packet says (ZzzEffectFireLeave.cpp:424-426).
   weather: { alwaysRain: true },
+  // `RenderTerrain` is skipped outright for the sky map (MainScene.cpp:402):
+  // the ground mesh exists for its height field only.
+  terrain: { hidden: true },
   create: world => import('./create').then(m => m.createIcarus(world)),
 };

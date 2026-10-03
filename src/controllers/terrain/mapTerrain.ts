@@ -28,4 +28,6 @@ export type MapTerrain = {
   readonly objectFixups?: readonly MapObjectFixup[];
   /** False where the original turns the grass pass off (`terrainGrass.ts`). */
   readonly grass?: boolean;
+  /** The ground mesh is not drawn, only kept for its heights (`loadMapIntoScene.ts`). */
+  readonly hidden?: boolean;
 };

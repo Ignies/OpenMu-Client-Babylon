@@ -7,7 +7,7 @@ water, ground picks, minimap data and the base class for map objects. There is n
 
 ## Public API
 - `index.ts`: the types only - `MapTerrain` (`mapTerrain.ts`, a map's `terrain` field:
-  `overlays`, `snowBed`, `water`, `rest`, `leanCursor`, `objectFixups`, `grass`),
+  `overlays`, `snowBed`, `water`, `rest`, `leanCursor`, `objectFixups`, `grass`, `hidden`),
   `TerrainOverlayName`, `RestObject`, `RestKind`, `MapObjectFixup`, `TerrainWaterSpec`.
 - `loadMapIntoScene(world, map, pos?)` (`loadMapIntoScene.ts`): queue a warp to `map`.
   `onMapChange(fn)` sets what resets on map change (set once by `app/boot.tsx`);
@@ -56,7 +56,7 @@ water, ground picks, minimap data and the base class for map objects. There is n
   ground and puddles on Noria) and snow on `SNOW_GROUND_MAPS`; their coverage reads the weather
   controller.
 - Per-map rows live with the map (`MapLayer.terrain` in `versions/shared/maps/<map>/`): overlays,
-  snow bed, water, rest objects, object fixups, grass off. The modules here read them through
+  snow bed, water, rest objects, object fixups, grass off, a ground never drawn (Icarus). The modules here read them through
   `maps.layerFor` when they need them, never at module load.
 
 ## Depends on / used by
@@ -85,7 +85,7 @@ water, ground picks, minimap data and the base class for map objects. There is n
 ## Tests
 - `versions/shared/maps/mapRows.golden.test.ts`: every world's overlays, snow bed, water, rest
   objects, lean boxes, fixups and grass, pinned across the move into the map folders.
-- `mapTerrain.test.ts`: rest objects and lean boxes (also through `LEAN_CURSOR_OBJECTS`) and the
+- `mapTerrain.test.ts`: only Icarus hides its ground; rest objects and lean boxes (also through `LEAN_CURSOR_OBJECTS`) and the
   nearest-object height fix from a registered entry.
 - `groundArrays.test.ts`: `refreshGroundTile` raises and drops a tile and leaves its neighbours;
   `groundTiles` copies tiles out with their own quads.
