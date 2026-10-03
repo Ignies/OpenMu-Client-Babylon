@@ -1,3 +1,4 @@
+import type { MonsterBodyFx } from './bodyFx';
 import type { NpcGear, NpcGlobalVoice, NpcModel, NpcTransform, NpcTrap, NpcVoice } from './npc';
 
 /** The original client's monster table row (`Monster.txt`), without the number and name. */
@@ -67,6 +68,8 @@ export type MonsterDef = {
   stormSkill?: number;
   /** The light it carries while in scope (the lighting controller's `characterLightFor`). */
   light?: MonsterLight;
+  /** What its body throws off or carries (`bodyFx.ts`; the fx controller's `monsterVisualFor`). */
+  bodyFx?: MonsterBodyFx;
   stats?: MonsterStats;
 };
 

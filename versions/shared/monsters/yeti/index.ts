@@ -1,8 +1,11 @@
 import { defineMonster } from '@/controllers/monsters';
+import { bone } from '../_shared/bodyFx';
 
 export default defineMonster({
   Numb: 19,
   Name: 'Yeti',
+  // MODEL_YETI: breath, `BITMAP_SMOKE` from bone 22, one tick in four (ZzzCharacter.cpp:6180).
+  bodyFx: [bone(4, 'bodySmoke', 22)],
   maxHealth: 900,
   model: { type: 12, scale: 1.1 },
   stats: {

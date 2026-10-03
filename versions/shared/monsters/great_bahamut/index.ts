@@ -1,8 +1,11 @@
 import { defineMonster } from '@/controllers/monsters';
+import { body } from '../_shared/bodyFx';
 
 export default defineMonster({
   Numb: 51,
   Name: 'Great Bahamut',
+  // MODEL_BAHAMUT, `c->Level == 1`: the haze, `SMOKE + 1` everywhere (ZzzCharacter.cpp:6168-6175).
+  bodyFx: [body(4, 'sandSmoke', [32, 32, 16], { gate: { alive: true } })],
   // Ours: the lure's glow.
   light: { kind: 'carried', range: 3, height: 0.5 },
   maxHealth: 7000,

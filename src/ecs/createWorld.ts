@@ -126,7 +126,7 @@ const factories: ISystemFactory[] = [
   CharacterLightSystem,
   // ...and the ones with a MONSTER_GLOWS row carry their own glow cards.
   MonsterGlowSystem,
-  // ...and the ones with a MONSTER_VISUALS row draw their dust, breath and fire.
+  // ...and the ones whose folder sets `bodyFx` draw their dust, breath and fire.
   MonsterVisualSystem,
   CameraFollowSystem,
   // Weather layer: the rain ramp, the settled snow, the wetness - stepped

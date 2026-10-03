@@ -1,8 +1,11 @@
 import { defineMonster } from '@/controllers/monsters';
+import { haze } from '../_shared/bodyFx';
 
 export default defineMonster({
   Numb: 2,
   Name: 'Budge Dragon',
+  // MODEL_BUDGE_DRAGON: its case has no `break` (ZzzCharacter.cpp:6138) and falls into the Dark Knight haze.
+  bodyFx: [haze()],
   maxHealth: 60,
   model: { type: 2, scale: 0.5 },
   stats: {

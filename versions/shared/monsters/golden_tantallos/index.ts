@@ -1,8 +1,11 @@
 import { defineMonster } from '@/controllers/monsters';
+import { dieSand, walkSand } from '../_shared/bodyFx';
 
 export default defineMonster({
   Numb: 82,
   Name: 'Golden Tantallos',
+  // MODEL_TANTALLOS `SubType 0`: sand walking and dying (ZzzCharacter.cpp:5975-5978).
+  bodyFx: [walkSand, dieSand],
   maxHealth: 32000,
   model: { type: 42, scale: 1.8 },
   stats: {

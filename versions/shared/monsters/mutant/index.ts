@@ -1,8 +1,11 @@
 import { defineMonster } from '@/controllers/monsters';
+import { walkSand } from '../_shared/bodyFx';
 
 export default defineMonster({
   Numb: 62,
   Name: 'Mutant',
+  // MODEL_MUTANT: sand walking (ZzzCharacter.cpp:5834-5838).
+  bodyFx: [walkSand],
   maxHealth: 10000,
   model: { type: 45, scale: 1.5 },
   stats: {

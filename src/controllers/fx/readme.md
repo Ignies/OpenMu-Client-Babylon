@@ -197,7 +197,10 @@ Lost Tower Shadow alone is 39 cards. The matching floor light is in `lighting/ch
 ### monsterVisuals.ts
 Each `MoveCharacterVisual` arm is a `CreateParticle` behind `rand_fps_check(n)`; a tick bank per
 monster rolls the same 1/n. Spawns go into other entries' pools (`emitBurst`, `spawnJoint`,
-`spawnRing`, `spawnDebris`, `spawnSprite`); this entry keeps only handles and banks.
+`spawnRing`, `spawnDebris`, `spawnSprite`); this entry keeps only handles and banks. The rows are
+each monster folder's `bodyFx` (types in `controllers/monsters/bodyFx.ts`, shared pieces in
+`versions/shared/monsters/_shared/bodyFx.ts`); particle and texture names resolve here (`PARTICLES`,
+`TEXTURES`), once per row.
 
 ### ping.ts
 The ring drapes the marker over the terrain and a straight joint draws the trail, near end on the

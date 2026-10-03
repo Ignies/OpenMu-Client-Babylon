@@ -1,8 +1,23 @@
 import { defineMonster } from '@/controllers/monsters';
+import { MonsterActionType } from '../../objects/enum';
 
 export default defineMonster({
   Numb: 251,
   Name: 'Hanzo, Blacksmith',
+  // MODEL_SMITH: on the idle clip's frames 5-6, four sparks off the anvil at bone 17,
+  // `Angle (150-210, 0, 0-30)`, each with a chip (ZzzCharacter.cpp:6096-6109).
+  bodyFx: [
+    {
+      kind: 'sparks',
+      every: 1,
+      tries: 4,
+      bone: 17,
+      pitch: [150, 210],
+      yaw: [0, 30],
+      chip: 1,
+      gate: { action: [MonsterActionType.Stop1], frames: [[5, 6.001]] },
+    },
+  ],
   // The forge (MODEL_SMITH): (L, 0.4L, 0), range 3 (ZzzCharacter.cpp:5970-5971).
   light: { kind: 'forge', color: [1, 0.4, 0], range: 3 },
   maxHealth: 1000,

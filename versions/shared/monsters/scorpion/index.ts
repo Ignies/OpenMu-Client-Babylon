@@ -1,8 +1,11 @@
 import { defineMonster } from '@/controllers/monsters';
+import { haze } from '../_shared/bodyFx';
 
 export default defineMonster({
   Numb: 27,
   Name: 'Scorpion',
+  // MODEL_CHAIN_SCORPION: the haze, in the tail lamp's `(L, 0.4L, 0.2L)`, `L` 0.2-0.9 at its mean (ZzzCharacter.cpp:6149-6166).
+  bodyFx: [haze([0.55, 0.22, 0.11])],
   // Ours: the tail lamp, Luminosity 0.8 (ZzzCharacter.cpp:6037).
   light: { kind: 'carried', range: 2, height: 0.25, color: [0.8, 0.32, 0.16] },
   maxHealth: 80,

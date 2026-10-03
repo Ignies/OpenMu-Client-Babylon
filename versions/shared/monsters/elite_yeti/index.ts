@@ -1,8 +1,11 @@
 import { defineMonster } from '@/controllers/monsters';
+import { bone } from '../_shared/bodyFx';
 
 export default defineMonster({
   Numb: 20,
   Name: 'Elite Yeti',
+  // MODEL_ELITE_YETI: the same breath (ZzzCharacter.cpp:6181).
+  bodyFx: [bone(4, 'bodySmoke', 22)],
   maxHealth: 1200,
   model: { type: 13, scale: 1.4 },
   stats: {

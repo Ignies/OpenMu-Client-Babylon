@@ -1,8 +1,11 @@
 import { defineMonster } from '@/controllers/monsters';
+import { APPEAR_TICKS } from '../_shared/bodyFx';
 
 export default defineMonster({
   Numb: 53,
   Name: 'Golden Titan',
+  // `c->Appear = 60` on arrival (WSclient.cpp:2856, ZzzCharacter.cpp:5639-5652).
+  bodyFx: [{ kind: 'appear', ticks: APPEAR_TICKS }],
   maxHealth: 6500,
   model: { type: 39, scale: 1.8 },
   stats: {

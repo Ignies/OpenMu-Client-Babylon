@@ -1,8 +1,11 @@
 import { defineMonster } from '@/controllers/monsters';
+import { dieSand } from '../_shared/bodyFx';
 
 export default defineMonster({
   Numb: 7,
   Name: 'Giant',
+  // MODEL_GIANT: the sand cloud when it falls (ZzzCharacter.cpp:6177).
+  bodyFx: [dieSand],
   maxHealth: 400,
   model: { type: 5, scale: 1.6 },
   stats: {

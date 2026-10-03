@@ -77,8 +77,11 @@ restyling the tooltip once restyles it everywhere.
 
 - `maps/<map>/`: the map's spec, its object classes (one file per object type) and `create.ts`.
 - `monsters/<name>/index.ts`: one folder per monster or npc type (`defineMonster`: number, name,
-  max health, the original table row), found by glob; plus model classes for the ones with their
-  own look.
+  max health, the original table row, and what the controllers do for this type alone: `light`,
+  `bodyFx`, `quietCasts`, `teleport`, `stormSkill`), found by glob; plus model classes for the ones
+  with their own look. A long row sits next to it (`<name>/bodyFx.ts`). A body file
+  (`monster_models/<body>.ts`) carries what follows the body: voices, clip speeds, `quietCasts`,
+  `shatter`.
 - `items/<group>/<item>.ts`: one file per item (`defineItem`), found by glob; plus item-driven looks
   (`launcher_arrows.ts`).
 - An area's master controller (`src/controllers/items`, `src/controllers/monsters`) owns the record

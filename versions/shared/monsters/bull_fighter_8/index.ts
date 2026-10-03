@@ -1,8 +1,11 @@
 import { defineMonster } from '@/controllers/monsters';
+import { BULL_SNORT } from '../_shared/bodyFx';
 
 export default defineMonster({
   Numb: 8,
   Name: 'Bull Fighter',
+  // MODEL_BULL_FIGHTER's snort (ZzzCharacter.cpp:6189-6205).
+  bodyFx: BULL_SNORT,
   maxHealth: 2500,
   model: { type: 0, scale: 1 },
   stats: {

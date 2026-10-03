@@ -3,6 +3,8 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 135,
   Name: 'White Wizard',
+  // MODEL_CURSED_KING: a blood pointer within ±14 cm, one tick in five (ZzzCharacter.cpp:5826-5833).
+  bodyFx: [{ kind: 'blood', every: 5, scatterCm: (10 * 100) / 70 }],
   maxHealth: 26000,
   model: { type: 48, scale: 1.7 },
   stats: {
