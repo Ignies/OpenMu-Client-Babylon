@@ -1,7 +1,7 @@
 import { defineSkill } from '@/controllers/skills/define';
 import { DW1_RELEASE, placeBodyLight, releaseSound } from '../_shared';
 import { type Entity } from '@/ecs/world';
-import { LANCE_PUFF, LANCE_SPARKS, LANCE_STRIKE, MODEL, TEX } from '@/controllers/fx/recipes';
+import { MODEL, TEX } from '@/controllers/fx/recipes';
 import { spawnModel, type ModelHandle } from '@/controllers/fx/model';
 import { delay, entityGone, entityPos, entityYaw, fxNow, type ParticleRecipe, type PointSource, type RGB } from '@/controllers/fx/core';
 import { type ParticlesOptions } from '@/controllers/fx/particles';
@@ -13,6 +13,67 @@ import { lighting } from '@/controllers/lighting';
 
 import { type LightRecipe } from '@/controllers/lighting/lightSource';
 import { effectLight } from '@/controllers/lighting/recipes';
+
+/**
+ * BITMAP_POUNDING_BALL sub1 off a Lance star (ZzzEffectParticle.cpp:3262-3269): PoundingBall x 1.28-2.55, a
+ * fixed random rotation, Light 0.5 held for its 14 drawn ticks, drifting 3-5 cm a tick. Its move branch is
+ * dead code (`SubType == 0 && SubType == 1`, :8163), so it neither shrinks nor fades.
+ */
+const LANCE_PUFF: ParticleRecipe = {
+  texture: TEX.powerWave,
+  colour: [0.5, 0.5, 0.5],
+  size: 1.23,
+  sizeJitter: 0.33,
+  life: 0.56,
+  lifeJitter: 0,
+  box: [0, 0, 0],
+  dir1: [-1, 0, -1],
+  dir2: [1, 0, 1],
+  power: 1.2,
+  powerJitter: 0.3,
+  gravity: 0,
+  spin: 0,
+  fade: [
+    [0, 1],
+    [1, 1],
+  ],
+  blend: 'add',
+  capacity: 256,
+  realSeconds: true,
+};
+
+/** Hot sparks a Lance star sheds on the graded tiers: the star's orange, going red, falling away from the spin. */
+const LANCE_SPARKS: ParticleRecipe = {
+  texture: TEX.spark2,
+  colour: [1, 0.72, 0.4],
+  colourEnd: [0.8, 0.25, 0.05],
+  size: 0.15,
+  sizeJitter: 0.4,
+  life: 0.4,
+  lifeJitter: 0.3,
+  box: [0.12, 0.12, 0.12],
+  dir1: [-1, -0.3, -1],
+  dir2: [1, 0.9, 1],
+  power: 1.4,
+  powerJitter: 0.4,
+  gravity: -2.5,
+  spin: 4,
+  capacity: 384,
+  realSeconds: true,
+};
+
+/** A Lance star striking home: a short spray of its sparks. */
+const LANCE_STRIKE: ParticleRecipe = {
+  ...LANCE_SPARKS,
+  size: 0.16,
+  life: 0.45,
+  box: [0.05, 0.05, 0.05],
+  dir1: [-1, -0.4, -1],
+  dir2: [1, 1, 1],
+  power: 3.4,
+  settle: 0.55,
+  gravity: -2,
+};
 
 const LANCE_TICKS = 35;
 const LANCE_TINT: RGB = [1, 0.6, 0.3];

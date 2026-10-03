@@ -1,5 +1,6 @@
 import { defineSkill } from '@/controllers/skills/define';
-import { ICE_MOTES, MODEL, RGBS, SMOKE, TEX } from '@/controllers/fx/recipes';
+import { MODEL, RGBS, SMOKE, TEX } from '@/controllers/fx/recipes';
+import { ICE_MOTES } from '../_shared';
 import { IMPACT_HEIGHT, arrow, cm, hitSparks, orbiting, ticks } from '@/controllers/skills/visuals';
 import { effects } from '@/controllers/fx';
 

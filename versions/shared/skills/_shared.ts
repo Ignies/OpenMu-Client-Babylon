@@ -6,7 +6,7 @@ import { type JointOptions } from '@/controllers/fx/joint';
 import { type LightRecipe } from '@/controllers/lighting/lightSource';
 import { MonsterActionType, PlayerAction } from '../objects/enum';
 import { delay, entityGone, entityPos, entityYaw, followEntity, fxNow, scaleRGB, type ParticleRecipe, type PointSource, type RGB } from '@/controllers/fx/core';
-import { SUMMON_ARRIVAL_LIGHT } from '@/controllers/lighting/skills';
+
 import { Vector3, type Scene } from '@/controllers/render/babylon/exports';
 import { type Sounds } from '@/controllers/sound/recipes';
 import { effectLight } from '@/controllers/lighting/recipes';
@@ -22,6 +22,17 @@ import { SkillLight } from '@/controllers/lighting/skills';
 
 /** Degrees → radians. */
 export const DEG = Math.PI / 180;
+
+/**
+ * A summon arriving (the 0x1F create flag): BITMAP_LIGHTNING+1 sub2 lights the ground
+ * (0.5, 1, 0.8) * LifeTime / 10 at range 3 for its 20 ticks (ZzzEffectParticle.cpp:4281-4296).
+ */
+const SUMMON_ARRIVAL_LIGHT: LightRecipe = {
+  color: [1, 2, 1.6],
+  range: 3,
+  seconds: 0.8,
+  release: 0.8,
+};
 /** MODEL_STONE1 / MODEL_STONE2 chips thrown up from a ground hit - either model, rolled per chip (ZzzEffect.cpp:280). */
 export const stones = (n: number, radius = 0.6): Step =>
   scatter(

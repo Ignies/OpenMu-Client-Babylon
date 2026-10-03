@@ -1,5 +1,6 @@
 import { defineSkill } from '@/controllers/skills/define';
-import { ICE_MOTES, RGBS, TEX } from '@/controllers/fx/recipes';
+import { RGBS, TEX } from '@/controllers/fx/recipes';
+import { ICE_MOTES } from '../_shared';
 import { flash, particles, seq } from '@/controllers/skills/visuals';
 
 import { A } from '@/controllers/combat/recipes';

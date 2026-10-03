@@ -1,13 +1,84 @@
 import { defineSkill } from '@/controllers/skills/define';
-import { MODEL, POISON_BUBBLES, POISON_MIST, POISON_SMOKE, RGBS } from '@/controllers/fx/recipes';
+import { MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
 import { Step, particles, seq, ticks } from '@/controllers/skills/visuals';
 import { atRelease, groundFlare, releaseSound } from '../_shared';
 import { effects } from '@/controllers/fx';
-import { entityYaw } from '@/controllers/fx/core';
+import { entityYaw, type ParticleRecipe } from '@/controllers/fx/core';
 import { lighting } from '@/controllers/lighting';
 
 import { type LightRecipe } from '@/controllers/lighting/lightSource';
 import { effectLight } from '@/controllers/lighting/recipes';
+
+/**
+ * BITMAP_SMOKE sub1, the Poison hit's cloud (ZzzEffectParticle.cpp:1274-1283 init, :5360-5365 move):
+ * LT 50, Scale 0.80-1.11 of the 64 px sheet, upright, thrown 40-47 cm a tick and slowed x0.4 a tick
+ * (about 0.7 m out in 3 ticks), Scale +0.05 a tick. The move overwrites the creation Light with
+ * `LT/50 x (0.5, 1, 0.8)`, so the (0.4, 0.6, 1) passed at creation never shows.
+ */
+const POISON_SMOKE: ParticleRecipe = {
+  texture: TEX.smoke,
+  colour: [0.5, 1, 0.8],
+  size: 0.61,
+  sizeJitter: 0.16,
+  life: 2,
+  lifeJitter: 0,
+  box: [0.32, 0.32, 0.32],
+  dir1: [-1, -0.7, -1],
+  dir2: [1, 0.7, 1],
+  power: 10,
+  powerJitter: 0.15,
+  settle: 0.07,
+  gravity: 0,
+  endScale: 3.6,
+  spin: 0,
+  upright: true,
+  fade: [
+    [0, 1],
+    [1, 0],
+  ],
+  blend: 'add',
+};
+
+/** Poison's low venom haze on the graded tiers: smoke01 in the cloud's green, hugging the ground and spreading. */
+const POISON_MIST: ParticleRecipe = {
+  texture: TEX.smoke,
+  colour: [0.18, 0.5, 0.32],
+  size: 0.9,
+  sizeJitter: 0.25,
+  life: 1.5,
+  lifeJitter: 0.2,
+  box: [0.35, 0.05, 0.35],
+  dir1: [-1, 0.05, -1],
+  dir2: [1, 0.2, 1],
+  power: 0.7,
+  settle: 0.5,
+  gravity: 0.05,
+  spin: 0.4,
+  endScale: 2.4,
+  fade: [
+    [0, 0],
+    [0.2, 1],
+    [1, 0],
+  ],
+  blend: 'add',
+};
+
+/** Poison's bubbles: small green flares rising through the cloud and popping. */
+const POISON_BUBBLES: ParticleRecipe = {
+  texture: TEX.flare,
+  colour: [0.4, 1, 0.55],
+  colourEnd: [0.2, 0.6, 0.3],
+  size: 0.18,
+  sizeJitter: 0.4,
+  life: 1,
+  lifeJitter: 0.4,
+  box: [0.45, 0.3, 0.45],
+  dir1: [-0.15, 0.6, -0.15],
+  dir2: [0.15, 1, 0.15],
+  power: 0.5,
+  gravity: 0.3,
+  endScale: 1.4,
+};
 
 /**
  * 1 Poison (ZzzCharacter.cpp:4992-5005): MODEL_POISON at the target's feet, facing as the caster does, only
