@@ -1,5 +1,5 @@
 import { defineSkill } from '@/controllers/skills/define';
-import { BUFF_VISUALS, BuffArrival, type BuffHit, Step, after, cm, keepLook, seq, ticks } from '@/controllers/skills/visuals';
+import { BUFF_VISUALS, BuffArrival, type BuffHit, Step, afterRelease, cm, keepLook, seq, ticks } from '@/controllers/skills/visuals';
 import { CLOAK_EFFECT } from '../_shared';
 import { type Entity } from '@/ecs/world';
 import { MODEL, RGBS, SOUL_MOTES, TEX } from '@/controllers/fx/recipes';
@@ -16,8 +16,6 @@ import { effectLight } from '@/controllers/lighting/recipes';
 
 /** eBuff_WizDefense and eBuff_Cloaking (_enum.h:3899, :3913); OpenMU's effect ids are the same. */
 const SOUL_BARRIER_EFFECT = 4;
-/** The 0x19 sets AttackTime 1 and the impact fires at 15 (WSclient.cpp:4273, ZzzCharacter.cpp:4135-4139). */
-const SOUL_BARRIER_IMPACT = ticks(14);
 /** The impact recreates the five joints at width 20 (ZzzCharacter.cpp:4985-4989); the buff packet's are 50. */
 const SOUL_KNOT_IMPACT_WIDTH = cm(20);
 /** A knot that the seen impact has rebuilt thin, until the buff next arrives or ends. */
@@ -32,11 +30,11 @@ function rebuildSoulKnot(scene: Scene, e: Entity, width: number | null): void {
 }
 
 /**
- * Soul Barrier's impact on the target, 14 ticks after the packet (ZzzCharacter.cpp:4972-4990): nothing on
- * a cloaked body, else SOUND_SOULBARRIER again and, with `thin`, the knot rebuilt at width 20.
+ * Soul Barrier's impact on the target at the release (`afterRelease`, WSclient.cpp:4273, ZzzCharacter.cpp:4972-4990):
+ * nothing on a cloaked body, else SOUND_SOULBARRIER again and, with `thin`, the knot rebuilt at width 20.
  */
 const soulBarrierImpact = (thin: boolean): Step =>
-  after(SOUL_BARRIER_IMPACT, (_at, c) => {
+  afterRelease((_at, c) => {
     const to = c.target ?? c.caster;
     if (!to.transform || entityGone(to) || to.buffs?.has(CLOAK_EFFECT)) return;
     playCombat('Sound/eSoulBarrier', to.transform.pos);
@@ -95,7 +93,7 @@ const SOUL_SEAL_MOTES: ParticleRecipe = { ...SOUL_MOTES, colour: SOUL_SEAL, size
  * Enhanced: the impact's width-20 rebuild read as the barrier sealing - a blue flare at the chest, the
  * hit shell's Protect02 closing round the body from three sides, a blue pool on the ground and motes lifting off.
  */
-const soulBarrierSeal: Step = after(SOUL_BARRIER_IMPACT, (_at, c) => {
+const soulBarrierSeal: Step = afterRelease((_at, c) => {
   const to = c.target ?? c.caster;
   if (!to.transform || entityGone(to) || to.buffs?.has(CLOAK_EFFECT)) return;
   const chest = followEntity(to, SOUL_KNOT.base);

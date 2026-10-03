@@ -2,7 +2,7 @@
  * The hero's `AttackTime` latch (w_CharacterInfo.h:247, ZzzCharacter.cpp:4018-4025,
  * :2755; ZzzInterface.cpp:3355). The hit request fires on the hit key. See controllers/combat/readme.md.
  */
-import type { PlayerAction } from '@versions/shared/objects/enum';
+import { MonsterActionType, PlayerAction } from '@versions/shared/objects/enum';
 import { REFERENCE_FPS } from '../anim/playSpeed';
 import type { ENUM_WORLD } from '../../core/types';
 import type { CombatLayer } from './layer';
@@ -61,6 +61,23 @@ export function hitTickFor(
 /** Seconds from the swing start to its blow at the given clip speed. */
 export function hitDelaySeconds(action: PlayerAction, playSpeed: number): number {
   return (hitTickFor(action, playSpeed) - FIRST_TICK) / REFERENCE_FPS;
+}
+
+/** A cast's release at the latest: AttackTime runs from 1 at its packet to the limit 15 (ZzzCharacter.cpp:4132-4140). */
+export const RELEASE_TICKS = LIMIT_ATTACK_TICKS - FIRST_TICK;
+
+/** `ATTACK_IMPACT_FRAME`: AttackStage's default key (ZzzCharacter.cpp:2587). */
+export const RELEASE_KEY = 5;
+
+/**
+ * The clips AttackStage's default case watches for the key: `IsAttackAction`, PLAYER_ATTACK_FIST ..
+ * PLAYER_RIDE_SKILL, on a player rig, MONSTER01_ATTACK1 .. 2 on a monster's (PlayerActionState.h:13,
+ * ZzzCharacter.cpp:2589-2604). Any other clip waits the 14 ticks out.
+ */
+export function releasesOnKey(action: number, monsterRig: boolean): boolean {
+  return monsterRig
+    ? action >= MonsterActionType.Attack1 && action <= MonsterActionType.Attack2
+    : action >= PlayerAction.PLAYER_ATTACK_FIST && action <= PlayerAction.PLAYER_RIDE_SKILL;
 }
 
 /** `AttackTime`, whole ticks. 0 while no swing is in flight. */

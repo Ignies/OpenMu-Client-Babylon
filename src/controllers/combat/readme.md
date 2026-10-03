@@ -8,7 +8,9 @@ It never sends packets or touches the scene; the ECS systems that fight read it 
 - `combat` (`index.ts`): the facade (`implements Controller`). Groups:
   - input gate: `inputGateOpen`, `inputGateRemaining`, `consumeInputGate`.
   - swing latch: `attackTime`, `attackInFlight`, `checkAttackTime(n)`, `startAttack`,
-    `hitDelaySeconds`, `cancelAttack`, `setLastAttackEffectTime`.
+    `hitDelaySeconds`, `cancelAttack`, `setLastAttackEffectTime`; the cast release rule:
+    `releasesOnKey(action, monsterRig)`, `RELEASE_TICKS` (14), `RELEASE_KEY` (5), used by the skill
+    controller's `onRelease`.
   - weapon: `attackRange(hands)`, `hasAmmo`, `equippedLauncher`.
   - skills: `skillClip(skill, ctx)`, `magicClip`, `othersSeeClip`, `castQuietOn`,
     `clipIgnoresHit`, `skillKill`, `skillStepIn`, `stepInSquare`, `clipHoldsFacing`,

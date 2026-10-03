@@ -13,6 +13,7 @@ import {
   cancelAttack,
   checkAttackTime,
   hitDelaySeconds,
+  releasesOnKey,
   setLastAttackEffectTime,
   startAttack,
 } from './attackTiming';
@@ -39,6 +40,7 @@ export type { SkillCombatRules } from './skillRules';
 export type { ClipPick, SkillClipSet } from './recipes';
 export type { CastPose, PoseClip } from './skillClips';
 export { RIDER_FLY_WORLDS } from './recipes';
+export { RELEASE_KEY, RELEASE_TICKS } from './attackTiming';
 
 /**
  * The combat-timing layer: when a swing lands, when the next click counts,
@@ -143,6 +145,11 @@ class Combat implements Controller {
    */
   hitDelaySeconds(action: PlayerAction, playSpeed: number): number {
     return hitDelaySeconds(action, playSpeed);
+  }
+
+  /** AttackStage's default case lets this clip release a cast on its key (`attackTiming.ts`). */
+  releasesOnKey(action: number, monsterRig: boolean): boolean {
+    return releasesOnKey(action, monsterRig);
   }
 
   /** Drop the swing in flight without landing it. */

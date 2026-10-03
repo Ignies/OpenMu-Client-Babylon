@@ -2,8 +2,8 @@ import { defineSkill } from '@/controllers/skills/define';
 import { type Entity } from '@/ecs/world';
 import { MODEL, TEX } from '@/controllers/fx/recipes';
 import { delay, entityGone, entityPos, fxNow, type ParticleRecipe, type PointSource, type RGB } from '@/controllers/fx/core';
-import { SPLIT_EMBERS, STRIKE_MAX_TICKS, forceHeads, forwardOfDeg, movesAt, sideOf, yawDegrees } from '../_shared';
-import { SkillContext, Step, TICK, after, baseSkill, cm, currentSkill, ticks } from '@/controllers/skills/visuals';
+import { SPLIT_EMBERS, forceHeads, forwardOfDeg, movesAt, sideOf, yawDegrees } from '../_shared';
+import { SkillContext, Step, TICK, afterRelease, baseSkill, cm, currentSkill, ticks } from '@/controllers/skills/visuals';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
 import { groundAt, randInt } from '../../_shared';
@@ -247,12 +247,12 @@ export default defineSkill({
   // The cast (ClassAttack.cpp:866-901) and the caster's own echo (WSclient.cpp:5180, `sc != Hero`) are silent;
   // it screams when the effect spawns.
   silentHeroCast: true,
-  // 78 Fire Scream (DL): 14 ticks after the packet, 3 pairs MODEL_DARK_SCREAM + _FIRE at yaw and yaw ±10 moved ±80 cm
+  // 78 Fire Scream (DL): at the release (AttackTime 15 or the strike clip's key 5), 3 pairs MODEL_DARK_SCREAM + _FIRE at yaw and yaw ±10 moved ±80 cm
   // sideways, each with a ground streak, a puff and a flame card a tick (fireScream). Caster-anchored: 518 / 520 may
   // arrive as a targeted packet.
   visual: {
-    area: after(ticks(STRIKE_MAX_TICKS), fireScream),
-    enhanced: { area: (at, c) => after(ticks(STRIKE_MAX_TICKS), fireScreamGraded(baseSkill(currentSkill)))(at, c) },
+    area: afterRelease(fireScream),
+    enhanced: { area: (at, c) => afterRelease(fireScreamGraded(baseSkill(currentSkill)))(at, c) },
   },
   sound: 'Sound/Darklord_firescream', // Fire Scream
   clip: { ground: A.PLAYER_ATTACK_STRIKE, ...MOUNTED_STRIKE }, // Fire Scream

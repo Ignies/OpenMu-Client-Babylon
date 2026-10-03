@@ -7,7 +7,7 @@ import { MonsterActionType, PlayerAction } from '@versions/shared/objects/enum';
 import type { PoseClip } from '@/controllers/combat';
 import { BaseClass } from '@/modules/hero/characterStats';
 import { delay, entityGone, entityPos, entityYaw, followEntity, scaleRGB, type ParticleRecipe, type RGB } from '@/controllers/fx/core';
-import { SkillContext, Step, TICK, after, cm, forwardOf, ticks } from '@/controllers/skills/visuals';
+import { SkillContext, Step, TICK, afterRelease, cm, forwardOf, ticks } from '@/controllers/skills/visuals';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { createAngleDeg, turnAngle } from '@/core/turnAngle';
 import { effectLight } from '@/controllers/lighting/recipes';
@@ -18,8 +18,6 @@ import { storeRef } from '@/app/storeRef';
 
 // Plasma Storm (76).
 
-/** It fires when AttackTime reaches 15, 14 ticks after the 0x1E set it to 1 (WSclient.cpp:5565, ZzzCharacter.cpp:4606-4681). */
-const PLASMA_DELAY = ticks(14);
 /** GetSkillDistance(AT_SKILL_PLASMA_STORM_FENRIR), and the ten-body cap. */
 const PLASMA_REACH = 6;
 const PLASMA_TARGETS = 10;
@@ -187,11 +185,12 @@ function plasmaTargets(caster: Entity): Entity[] {
 }
 
 /**
- * Plasma Storm, 14 ticks after the packet: SOUND_FENRIR_SKILL, then from 1.4 m ahead and 1.3 m up two pairs back
+ * Plasma Storm at the release (AttackTime 15 from the 0x1E, WSclient.cpp:5565, or the clip's key 5):
+ * SOUND_FENRIR_SKILL, then from 1.4 m ahead and 1.3 m up two pairs back
  * into the caster itself (sub T + sub 3+T, the original's 3+T giving the next variant's second colour), two pairs
  * (sub T + sub 4+T) into each body in reach, and six coils over the rider. The cast point is not used.
  */
-const plasmaStormFor = (graded: boolean): Step => after(PLASMA_DELAY, (_at, c) => {
+const plasmaStormFor = (graded: boolean): Step => afterRelease((_at, c) => {
   const caster = c.caster;
   if (entityGone(caster)) return;
   playCombat('Sound/pWskill', caster.transform!.pos);
