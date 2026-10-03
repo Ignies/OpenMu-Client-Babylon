@@ -21,11 +21,13 @@ MU 0.97d, the second version the client carries. OpenMU has no 0.97d data initia
   at `./game-assets-v097d/`, empty locale. `data/inventory.ts` lists every file in that tree so
   `hasDataFile` answers "absent" instead of a load error.
 - `ui/pregame/`: `shipScene.ts` (ship, sea, sky, wordmark and sun, ported from the login set
-  piece), `loginPage.tsx` (the `0Account.OZT` plate) and `charactersPage.tsx` (the roster list).
+  piece), `loginPage.tsx` (the `0Account.OZT` plate) and `charactersPage.tsx` (the shared
+  `character_list` drawn as rows on the `0New_Account01.OZT` plate).
 - `ui/preload.ts`: cursor sprites and progress bars only; `worldSprites` is empty.
 
 ## Depends on / used by
-- uses: `versions/shared/packets`, `versions/season6/packets`, `versions/shared/{items,skills,monsters}`
+- uses: `versions/shared/packets`, `versions/season6/packets`, `versions/shared/{items,skills,monsters}`,
+  `versions/shared/ui/pages/character_select/character_list`
 - used by: `versions/registry.ts`
 
 ## Change it

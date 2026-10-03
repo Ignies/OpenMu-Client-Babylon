@@ -1,25 +1,26 @@
 import { MuWindows } from '@/controllers/interface/windowManager';
 import { t } from '@/i18n';
 import './style.less';
-import { runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useRef, useState } from 'react';
 import { Store } from '@/app/store';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { playUiSound } from '@/controllers/sound/sfx';
 import { isTypingInField } from '@/ecs/systems/keyboardInputSystem';
-import {
-  CharacterFocusedPacket,
-  CharacterListPacket,
-  GuildMemberRoleEnum,
-} from '@versions/shared/packets/ServerToClientPackets';
+import { GuildMemberRoleEnum } from '@versions/shared/packets/ServerToClientPackets';
 import { MsgWinCode } from '@/controllers/interface/msgWin';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MsgWindow } from '@/controllers/interface/components/msg_window';
 
 import { CharMakeWin } from './CharMakeWin';
-import { CharacterSelectionPlate } from './CharacterSelectionPlate';
+import {
+  CharacterList,
+  hasFreeSlot,
+  listStatus,
+  selectedCharacter,
+  type ListedCharacter,
+} from './character_list';
 
 const BTN_WIDTH = 54;
 const BTN_HEIGHT = 30;
@@ -39,9 +40,7 @@ const CREATE_FRAMES = { up: 0, active: 1, down: 2 } as const;
 
 const CTLCODE_02BLOCKITEM = 0x02;
 
-function isDeleteBlocked(
-  character: ReturnType<CharacterListPacket['getCharacters']>[number]
-): boolean {
+function isDeleteBlocked(character: ListedCharacter): boolean {
   return (
     !!character.IsItemBlockActive ||
     (character.Status & CTLCODE_02BLOCKITEM) !== 0
@@ -56,32 +55,17 @@ export const CharactersPage = observer(() => {
   // loading scene at once (CharacterScene.cpp:80).
   const [selecting, setSelecting] = useState(false);
 
-  useEffect(() => {
-    Store.refreshCharactersListRequest();
-  }, [Store]);
-
-  useEventBus('CharacterList', bytes => {
-    const p = new CharacterListPacket(bytes);
-    const characters = p.getCharacters();
-    setSelecting(false);
-    runInAction(() => {
-      Store.loadingCharactersList = false;
-      Store.charactersList = characters;
-      Store.creationUnlockFlags = p.UnlockFlags;
-    });
-  });
-
   useEventBus('CharacterCreationSuccessful', () => setCreating(false));
 
-  useEventBus('CharacterFocused', bytes => {
-    const p = new CharacterFocusedPacket(bytes);
-
-    Store.focusedChar = p.CharacterName;
-  });
-
-  const selected = Store.charactersList.find(c => c.Name === Store.focusedChar);
-
-  const hasFreeSlot = Store.charactersList.length < 5;
+  const selected = selectedCharacter(Store.charactersList, Store.focusedChar);
+  const status = listStatus(
+    {
+      loading: Store.loadingCharactersList,
+      count: Store.charactersList.length,
+      selected: !!selected,
+    },
+    'pick'
+  );
 
   const onConnect = () => {
     if (!selected || selecting) return;
@@ -142,7 +126,7 @@ export const CharactersPage = observer(() => {
 
   return (
     <div className="characters-page">
-      <CharacterSelectionPlate />
+      <CharacterList source={Store} look="lineup" onList={() => setSelecting(false)} />
 
       <div className="char-sel-bar" style={{ height: BTN_HEIGHT }}>
         {}
@@ -163,7 +147,7 @@ export const CharactersPage = observer(() => {
           width={BTN_WIDTH}
           height={BTN_HEIGHT}
           frames={{ ...CREATE_FRAMES, check: 3 }}
-          disabled={!hasFreeSlot}
+          disabled={!hasFreeSlot(Store.charactersList)}
           onClick={() => setCreating(v => !v)}
           style={{ position: 'absolute', left: 0, top: 0 }}
         />
@@ -190,9 +174,9 @@ export const CharactersPage = observer(() => {
               height: STATUS_HEIGHT,
             }}
           >
-            {Store.loadingCharactersList
+            {status === 'loading'
               ? t('characters.loading')
-              : Store.charactersList.length > 0
+              : status === 'select'
                 ? t('characters.select')
                 : null}
           </div>
