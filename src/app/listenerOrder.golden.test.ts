@@ -1,0 +1,23 @@
+import { describe, expect, it, vi } from 'vitest';
+
+vi.hoisted(() => {
+  const g = globalThis as Record<string, unknown>;
+  g.location ??= { href: 'http://localhost/', search: '', hostname: 'localhost', protocol: 'http:' };
+});
+import { createHash } from 'node:crypto';
+import { EventBus } from '@/core/eventBus';
+import '@/app/store';
+
+// Pins every packet's listeners and their order once the app has loaded (the order modules
+// install in is the order listeners run for a packet several modules handle).
+const LISTENERS_HASH = '51d0dc2a543f19abd380aed5f1e74792701c89f2';
+
+describe('packet listeners', () => {
+  it('are the same functions in the same order', () => {
+    const rows = [...EventBus.all.entries()]
+      .map(([event, handlers]) => [String(event), (handlers as unknown[]).map(h => createHash('sha1').update(String(h)).digest('hex').slice(0, 10))] as const)
+      .sort(([a], [b]) => a.localeCompare(b));
+    const hash = createHash('sha1').update(JSON.stringify(rows)).digest('hex');
+    expect(hash).toBe(LISTENERS_HASH);
+  });
+});
