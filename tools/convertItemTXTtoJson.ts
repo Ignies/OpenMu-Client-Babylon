@@ -1,12 +1,13 @@
-// Item.txt -> src/common/items.json.
+// Item.txt -> the item files (versions/shared/items/<group>/<item>.ts).
 //
-// This rewrites items.json from scratch, so the `RF` class column goes with
+// This rewrites the item files from scratch, so the `RF` class column goes with
 // it: Item.txt names only six classes and has no Rage Fighter one. Follow
 // every run with `bun run tools/addRageFighterColumn.ts`, which puts it back
 // from the server's item definitions, then `bun run
 // tools/syncItemRequirements.ts`, which does the same for the requirements.
 import { ItemsDatabase } from '../versions/shared/items/itemsDatabase';
 import { ItemGroups } from '../versions/shared/objects/enum';
+import { writeItemFiles } from './itemFiles';
 
 const itemFile = await Bun.file('Item.txt').text();
 
@@ -127,12 +128,5 @@ while (lineIndex < lines.length) {
   lineIndex++;
 }
 
-// Write result to JSON file
-await Bun.write(
-  'items.json',
-  JSON.stringify(
-    result.flatMap(g => g.items),
-    null,
-    2
-  )
-);
+// Write the result as item files
+writeItemFiles(result.flatMap(g => g.items));

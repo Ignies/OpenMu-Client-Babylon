@@ -1,29 +1,43 @@
 # items
 
-The item table and the item-driven looks that are content, not controller code.
+Every item, one file each, plus the item-driven looks that are content, not controller code.
+
+```
+<group>/<item>.ts     one item: export default defineItem({ Group, Index, ItemName, X, Y, ... })
+  swords axes maces spears bows staffs shields helms armors pants gloves boots
+  wings helpers potions misc        (item groups 0-15, in order)
+all.ts                finds every item file (glob in the client and tests, from disk in the Bun servers)
+itemsDatabase.ts      ItemsDatabase.getItem / all, itemBaseName
+launcher_arrows.ts    arrow model and colour per bow or crossbow index
+```
 
 ## Public API
-- `ItemsDatabase.getItem(group, index)`: the `items.json` row for an item, or `null`.
+- `ItemsDatabase.getItem(group, index)`: the item's record, or `null`. `ItemsDatabase.all()`: every
+  item in (group, index) order.
 - `itemBaseName(group, index)`: the name to print. The active language pack's name
   (`Local/<lang>/item_<lang>.bmd`) when it has one, else the English `ItemName`.
+- `items` (`all.ts`): the registry itself, for server code (`items.all()`, `items.get(g, i)`).
 - `LAUNCHER_ARROWS`: arrow model and colour per bow or crossbow index (group 4).
 
 ## How it works
-- `items.json` is the Season 6 `Item.txt` converted by `tools/convertItemTXTtoJson.ts`.
-  `tools/addRageFighterColumn.ts` and `tools/syncItemRequirements.ts` run after it, since the
-  converter rewrites the file from scratch.
-- `itemsDatabase.ts` indexes the rows by `Group` then `Index` once, at import.
+- The items controller (`src/controllers/items`) owns the record type (`ItemRecord`), `defineItem`
+  and the registry. Field names are the original table's, so every reader keeps working.
+- The files came from the Season 6 `Item.txt`: `tools/convertItemTXTtoJson.ts` writes them,
+  `tools/addRageFighterColumn.ts` and `tools/syncItemRequirements.ts` run after it (all three go
+  through `tools/itemFiles.ts`). A file's name is the item's name in snake_case, plus `_<index>`
+  when two items of a group share a name.
 - `launcher_arrows.ts` is handed to the skills controller by `versions/shared/skills/index.ts`
   (`registerLauncherArrows`). A launcher with no row shoots the plain steel arrow.
 
 ## Depends on / used by
-- uses: `@/controllers/assets/mu/itemNameFile`, `@/controllers/fx/recipes`
-- used by: the Store, item grid / tooltip widgets, actors, drops, inventory, items, marketplace
-  and quest features; `versions/<id>/tables` re-export `ItemsDatabase`
+- uses: the items controller, `@/controllers/assets/mu/itemNameFile`, `@/controllers/fx/recipes`
+- used by: the Store, item grid / tooltip widgets, actors, drops, inventory, items, marketplace,
+  quest and gm features; the cash shop, marketplace audit and proxy tracker read `all.ts`
 
 ## Change it
-- new item data: rerun `tools/convertItemTXTtoJson.ts`, then the two follow-up tools above.
+- change an item: edit its file. Add one: add a file in its group folder.
+- regenerate from a new `Item.txt`: `tools/convertItemTXTtoJson.ts`, then the two follow-up tools.
 - new launcher arrow: add a row to `LAUNCHER_ARROWS` keyed by the launcher's item index.
 
 ## Tests
-- None in this folder.
+- `items.golden.test.ts`: every item, unchanged (a hash of the whole list); update it on purpose.

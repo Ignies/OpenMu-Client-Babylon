@@ -101,11 +101,9 @@ let weaponSkills: Set<number> | null = null;
 function weaponSkillNumbers(): Set<number> {
   if (weaponSkills) return weaponSkills;
   weaponSkills = new Set();
-  for (const byIndex of Object.values(ItemsDatabase.cache)) {
-    for (const item of Object.values(byIndex)) {
-      if (item.Skill > 0 && item.Group <= LAST_WEAPON_GROUP) {
-        weaponSkills.add(item.Skill);
-      }
+  for (const item of ItemsDatabase.all()) {
+    if (item.Skill > 0 && item.Group <= LAST_WEAPON_GROUP) {
+      weaponSkills.add(item.Skill);
     }
   }
   return weaponSkills;

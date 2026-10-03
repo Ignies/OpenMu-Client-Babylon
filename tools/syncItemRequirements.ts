@@ -1,4 +1,4 @@
-// Brings the requirement columns of `src/common/items.json` in line with the
+// Brings the requirement columns of the item files (versions/shared/items/) in line with the
 // server this client talks to.
 //
 // The tooltip works an item's requirements out of this table, and OpenMU
@@ -22,10 +22,11 @@
 // server has commented out is read like any other: the client keeps the row
 // ready for when the server turns it on (Mace of The king).
 //
-// Run after `convertItemTXTtoJson.ts`, which rewrites items.json from scratch,
+// Run after `convertItemTXTtoJson.ts`, which rewrites the item files from scratch,
 // and `addRageFighterColumn.ts`:
 //
 //   bun run tools/syncItemRequirements.ts [--openmu <path>] [--dry]
+import { readItemFiles, writeItemFiles } from './itemFiles';
 
 const args = process.argv.slice(2);
 const flag = (name: string, fallback: string) => {
@@ -37,7 +38,6 @@ const openmuRoot = flag(
   '--openmu',
   '../OpenMU/OpenMU-master/src/Persistence/Initialization'
 );
-const itemsPath = 'src/common/items.json';
 
 const SOURCES = [
   'VersionSeasonSix/Items/Weapons.cs',
@@ -189,7 +189,7 @@ function regroupsIn(text: string): Map<string, number> {
   return out;
 }
 
-const items: Record<string, number | string>[] = await Bun.file(itemsPath).json();
+const items: Record<string, number | string>[] = readItemFiles();
 const rowOf = (g: number, i: number) =>
   items.find(r => r.Group === g && r.Index === i);
 
@@ -220,7 +220,7 @@ for (const rel of SOURCES) {
     const regrouped = call.variable ? regroups.get(call.variable) : undefined;
     const group = regrouped ?? spec.group(call.args);
     const row = rowOf(group, +call.args[spec.index]);
-    if (!row) { skipped.push({ name, why: 'no items.json row' }); continue; }
+    if (!row) { skipped.push({ name, why: 'no item file' }); continue; }
 
     if (spec.size) {
       const [w, h] = spec.size.map(i => +call.args[i]);
@@ -252,18 +252,9 @@ for (const c of changes) console.log(`  ${c}`);
 console.log(`not taken: ${skipped.length}`);
 for (const s of skipped) console.log(`  ${s.name} - ${s.why}`);
 
-// Keep the file's own shape (the same renderer as addRageFighterColumn.ts).
-const eol = (await Bun.file(itemsPath).text()).includes('\r\n') ? '\r\n' : '\n';
-const rendered = items.map(row => {
-  const body = Object.entries(row)
-    .map(([k, v]) => `    ${JSON.stringify(k)}: ${JSON.stringify(v)}`)
-    .join(`,${eol}`);
-  return `  {${eol}${body}${eol}  }`;
-});
-
 if (dry) {
-  console.log('--dry: items.json not written');
+  console.log('--dry: item files not written');
 } else {
-  await Bun.write(itemsPath, `[${eol}${rendered.join(`,${eol}`)}${eol}]${eol}`);
-  console.log(`wrote ${itemsPath}`);
+  writeItemFiles(items);
+  console.log('wrote the item files');
 }

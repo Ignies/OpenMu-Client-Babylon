@@ -1,11 +1,13 @@
-import items from '../../versions/shared/items/items.json';
+import { items as itemFiles } from '../../versions/shared/items/all';
+
+const items = itemFiles.all();
 
 /**
  * What the shop sells, and for how many Jewels of Chaos.
  *
  * Data, not code: prices and caps are meant to be tuned without touching
  * anything else. Names and grid footprints are looked up in the client's own
- * `items.json` rather than restated here, so the shop and the game can never
+ * the item files rather than restated here, so the shop and the game can never
  * disagree about what an entry actually is.
  *
  * The one currency is the Jewel of Chaos (12/15). It is the right sink for
@@ -74,7 +76,7 @@ interface Spec {
   level?: number;
   chaos: number;
   dailyCap: number;
-  /** Overrides the name from `items.json`, for entries whose level renames them. */
+  /** Overrides the name from the item file, for entries whose level renames them. */
   name?: string;
   note?: string;
 }
@@ -114,7 +116,7 @@ function build(spec: Spec): Product {
   const key = `${spec.group}/${spec.number}`;
   const row = byKey.get(key);
 
-  if (!row) throw new Error(`catalog: no item ${key} in items.json`);
+  if (!row) throw new Error(`catalog: no item file for ${key}`);
 
   const level = spec.level ?? 0;
 

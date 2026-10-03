@@ -576,7 +576,7 @@ export function playAreaSkillVisual(
 
 /**
  * `CreateArrow` (ZzzEffectMagicSkill.cpp:174-251): the launcher picks the
- * arrow, keyed here by its item index in group 4 (`versions/shared/items/items.json`).
+ * arrow, keyed here by its item index in group 4 (`versions/shared/items/bows/`).
  * Anything not listed throws the plain MODEL_ARROW - the five wooden bows do,
  * and so do the few late launchers whose own model this client has no sheet
  * for (the Celestial Bow's MODEL_ARROW_HOLY).

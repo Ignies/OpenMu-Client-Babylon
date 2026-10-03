@@ -1309,7 +1309,7 @@ export const Store = new (class _Store {
       isExcellent: false,
     };
 
-    const weapon = ItemsDatabase.getItem(3, 9);
+    const weapon = { Group: 3, Index: 9 };
 
     Store.playerData.items[InventoryConstants.LeftHandSlot] = {
       group: weapon.Group,

@@ -30,7 +30,7 @@ server decides whether to run them.
   open and mirrors its players, moves and journal lines; a refusal stops reconnects.
   `gmLibrary.ts` keeps macros, favourites and item presets in localStorage (`mu_gm_*` keys) and
   drops a list that does not validate. `catalogues.ts` builds the skin, spawn and item lists from
-  `monsters.json` and `items.json`; `skins.ts` plugs in the model tables.
+  `monsters.json` and the item files; `skins.ts` plugs in the model tables.
 - `debugMenu.ts` is a registry only; the window draws the modules and opens only offline.
 
 ## Depends on / used by

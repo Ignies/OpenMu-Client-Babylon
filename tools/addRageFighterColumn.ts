@@ -1,4 +1,4 @@
-// Adds the `RF` class column to `src/common/items.json`.
+// Adds the `RF` class column to the item files (versions/shared/items/).
 //
 // `Item.txt` carries six class columns - DW/SM, DK/BK, Elf/ME, MG, DL, SUM -
 // and no Rage Fighter one; its header and every data row line up at 29 fields,
@@ -31,10 +31,11 @@
 // this moves exactly four rows and goes away on its own if the server ever
 // grows the parameter.
 //
-// Run after `convertItemTXTtoJson.ts`, which rewrites items.json from scratch
+// Run after `convertItemTXTtoJson.ts`, which rewrites the item files from scratch
 // and would drop the column:
 //
 //   bun run tools/addRageFighterColumn.ts [--openmu <path>] [--dry]
+import { readItemFiles, writeItemFiles } from './itemFiles';
 
 const args = process.argv.slice(2);
 const flag = (name: string, fallback: string) => {
@@ -46,7 +47,6 @@ const openmuRoot = flag(
   '--openmu',
   '../OpenMU/OpenMU-master/src/Persistence/Initialization'
 );
-const itemsPath = 'src/common/items.json';
 
 const SOURCES = [
   'VersionSeasonSix/Items/Weapons.cs',
@@ -133,7 +133,7 @@ function callsIn(text: string): Call[] {
   return out;
 }
 
-const items: Record<string, number | string>[] = await Bun.file(itemsPath).json();
+const items: Record<string, number | string>[] = readItemFiles();
 const rowOf = (g: number, i: number) =>
   items.find(r => r.Group === g && r.Index === i);
 
@@ -154,7 +154,7 @@ for (const rel of SOURCES) {
 
     const name = (call.args.find(a => a.startsWith('"')) ?? '""').slice(1, -1);
     const row = rowOf(spec.group(call.args), spec.index(call.args));
-    if (!row) { skipped.push({ name, why: 'no items.json row' }); continue; }
+    if (!row) { skipped.push({ name, why: 'no item file' }); continue; }
 
     const block = call.args.slice(spec.classAt, spec.classAt + (spec.hasRf ? 7 : 6));
     if (!block.every(isInt)) { skipped.push({ name, why: 'class block not numeric' }); continue; }
@@ -187,19 +187,15 @@ for (const row of items) {
 
 const carriesClassBlock = (row: Record<string, unknown>) => 'SUM' in row;
 
-// Rebuild with RF straight after SUM, keeping the file's own shape.
-const eol = (await Bun.file(itemsPath).text()).includes('\r\n') ? '\r\n' : '\n';
-const rendered = items.map(row => {
-  const entries: [string, unknown][] = [];
+// Rebuild with RF straight after SUM, keeping each item's field order.
+const rebuilt = items.map(row => {
+  const entries: [string, number | string][] = [];
   for (const [k, v] of Object.entries(row)) {
     if (k === 'RF') continue; // rerunnable
     entries.push([k, v]);
     if (k === 'SUM') entries.push(['RF', rf.get(`${row.Group}:${row.Index}`) ?? 0]);
   }
-  const body = entries
-    .map(([k, v]) => `    ${JSON.stringify(k)}: ${JSON.stringify(v)}`)
-    .join(`,${eol}`);
-  return `  {${eol}${body}${eol}  }`;
+  return Object.fromEntries(entries);
 });
 
 const withColumn = items.filter(carriesClassBlock).length;
@@ -217,8 +213,8 @@ for (const s of skipped.slice(0, 5)) console.log(`  ${s.name} - ${s.why}`);
 if (skipped.length > 5) console.log(`  ... and ${skipped.length - 5} more`);
 
 if (dry) {
-  console.log('--dry: items.json not written');
+  console.log('--dry: item files not written');
 } else {
-  await Bun.write(itemsPath, `[${eol}${rendered.join(`,${eol}`)}${eol}]${eol}`);
-  console.log(`wrote ${itemsPath}`);
+  writeItemFiles(rebuilt);
+  console.log('wrote the item files');
 }

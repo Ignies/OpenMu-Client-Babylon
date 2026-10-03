@@ -1,0 +1,27 @@
+import { defineItem } from '@/controllers/items';
+
+export default defineItem({
+  Group: 15,
+  Index: 15,
+  ItemSlot: -1,
+  Skill: 0,
+  X: 1,
+  Y: 2,
+  Serial: 1,
+  Opt: 1,
+  Drop: 1,
+  ItemName: 'Scroll of Mana Shield',
+  Lvl: 77,
+  ReqLvl: 0,
+  Energy: 126,
+  Zen: 135000,
+  'DW/SM': 1,
+  'DK/BK': 0,
+  'Elf/ME': 0,
+  MG: 0,
+  DL: 0,
+  SUM: 0,
+  RF: 0,
+  szModelFolder: 'Item/',
+  szModelName: 'Book16.glb',
+});

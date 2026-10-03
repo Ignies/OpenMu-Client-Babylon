@@ -1,4 +1,4 @@
-import items from '../../versions/shared/items/items.json';
+import { items as itemFiles } from '../../versions/shared/items/all';
 import { hasItemIconFile } from '../../src/controllers/assets/itemIconFiles';
 
 /**
@@ -63,7 +63,7 @@ export interface PoolEntry {
  * (`Orders.grantableRoll`), rolling again on a miss - so a paid roll is never
  * one the game cannot hand over.
  */
-export const GACHA_POOL: PoolEntry[] = (items as unknown as ItemRow[])
+export const GACHA_POOL: PoolEntry[] = (itemFiles.all() as unknown as ItemRow[])
   .filter(row => ARMOUR_GROUPS.includes(row.Group))
   .filter(row => typeof row.ItemName === 'string' && row.ItemName.length > 0)
   .filter(row => hasItemIconFile(row.Group, row.Index, 15, '_e'))
@@ -188,7 +188,7 @@ export function newSeed(): number {
  * The draw order is the replay contract, and every draw consumes exactly one
  * number from the generator whether or not its result is used:
  *
- *   1. the pool entry, uniform over GACHA_POOL in items.json order;
+ *   1. the pool entry, uniform over GACHA_POOL in (group, index) order;
  *   2. the tier, weighted by TIERS;
  *   3. the level, uniform over the tier's range;
  *   4. the option count, uniform over the tier's range - a plain tier's range

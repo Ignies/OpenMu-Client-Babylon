@@ -28,6 +28,7 @@ function spawnMoneyDrop(
   const maskedId = id & 0x7fff;
   removeNetObject(world, maskedId);
   const itemConfig = ItemsDatabase.getItem(ZEN_GROUP, ZEN_NUM);
+  if (!itemConfig) return;
   const rot = itemRestRotation(ZEN_GROUP, ZEN_NUM);
   world.add({
     netId: maskedId,
@@ -95,6 +96,8 @@ function applyItemsDropped(p: ItemsDroppedPacket) {
     const isMoney = data.byteLength >= 6 && id === 15 && group === 14;
 
     const itemConfig = ItemsDatabase.getItem(group, id);
+    // An item this client has no file for: skip it, not the rest of the packet.
+    if (!itemConfig) return;
 
     let amount = 0;
 

@@ -1,4 +1,4 @@
-import items from '../../versions/shared/items/items.json';
+import { items as itemFiles } from '../../versions/shared/items/all';
 import { postgresBoxes } from './boxes';
 import { db, type ListingRow } from './db';
 import { verdict } from './reconcile';
@@ -16,7 +16,7 @@ import { verdict } from './reconcile';
  */
 
 const names = new Map<string, string>();
-for (const entry of items as { Group: number; Index: number; ItemName: string }[]) {
+for (const entry of itemFiles.all()) {
   names.set(`${entry.Group}/${entry.Index}`, entry.ItemName);
 }
 

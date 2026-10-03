@@ -66,7 +66,7 @@ Dark Horse info packets. Pet info and raven mode state, and the pet requests, li
     up on a Dinorant (`MoveCharacterPosition`, `ZzzCharacter.cpp:6263-6273`).
 - Models: `Data/Player/Helper0n.bmd` is `MODEL_HELPER + n` (`ZzzOpenData.cpp:705`) and
   `Data/Skill/Rider0n.bmd` the two mounts (`:3969-3970`), not the `Item/helper0n` icon models in
-  items.json.
+  the item files.
 - Demon, Spirit of Guardian, Rudolph, Panda, Pet Unicorn and Pet Skeleton go through `CreatePet`
   instead of `CreateMount` (`ZzzCharacter.cpp:12992-12999`): one world object per pet that keeps
   station on its owner and is never ridden. See `PetFollow`.

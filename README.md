@@ -147,7 +147,7 @@ single-player offline demo.
      [ Schedule ]: Ambient weather squalls on a timed schedule per map.
 
 [▓▓▓▓▓▓▓▓░░] Items & Inventory (8/10):
-     [ Data ]: items.json database, wire serializer, group/index lookup.
+     [ Data ]: one file per item, wire serializer, group/index lookup.
      [ Display ]: Icon pack + manifest, tooltips, stat rolls, computed value, visual
                   tier, legacy effect flags, rest pose/angle/height on the ground.
      [ Systems ]: Jewel upgrade, durability, hotkeys, drop tiers, glow/aura/crackle/

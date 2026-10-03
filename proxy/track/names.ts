@@ -1,5 +1,5 @@
 import monsters from '../../versions/shared/monsters/monsters.json';
-import items from '../../versions/shared/items/items.json';
+import { items as itemFiles } from '../../versions/shared/items/all';
 import { mapName as gmMapName } from '../../src/features/gm/gmMaps';
 
 /**
@@ -13,7 +13,7 @@ const MONSTER_NAMES = new Map<number, string>();
 for (const monster of monsters) MONSTER_NAMES.set(monster.Numb, monster.Name);
 
 const ITEM_NAMES = new Map<number, string>();
-for (const item of items) ITEM_NAMES.set(item.Group * 512 + item.Index, item.ItemName);
+for (const item of itemFiles.all()) ITEM_NAMES.set(item.Group * 512 + item.Index, item.ItemName);
 
 export function monsterName(type: number): string {
   return MONSTER_NAMES.get(type) ?? `Monster ${type}`;

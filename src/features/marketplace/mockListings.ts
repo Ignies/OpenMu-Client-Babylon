@@ -1,6 +1,8 @@
 import type { Item } from '../../ecs/world';
 import type { ListingState } from './api';
-import items from '@versions/shared/items/items.json';
+import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
+
+const items = ItemsDatabase.all();
 import { itemIconUrl } from '../../controllers/assets/itemIconPack';
 import { categoryOf, type CategoryId } from './categories';
 

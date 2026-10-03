@@ -1,5 +1,7 @@
 import monsters from '@versions/shared/monsters/monsters.json';
-import items from '@versions/shared/items/items.json';
+import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
+
+const items = ItemsDatabase.all();
 
 /**
  * What the Skins and Spawn tabs list, as searchable data.

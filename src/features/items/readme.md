@@ -1,12 +1,12 @@
 # items
 
 Item rules as the original client computes them: the 12-byte wire format, the normalised
-`items.json` row, stats, requirements, zen values, level names and the tooltip compare. Pure
+item record, stats, requirements, zen values, level names and the tooltip compare. Pure
 functions with no state and no packets.
 
 ## Public API
 - `ItemSerializer.DeserializeItem(bytes)` / `SerializeItem(target, item)`, `NeededSpace`: the 12-byte item.
-- `itemDef(group, num)`: the normalised `items.json` row (cached), or null.
+- `itemDef(group, num)`: the normalised item record (cached), or null.
 - `ItemGroup`, `isWeapon`, `isShield`, `isWing`, `isJewel`, `isRing`, `isPendant`, `isStaff`, ... : item kinds.
 - `itemStats(item)`: damage, defence, durability and requirements for one item. `calcMaxDurability`.
 - `HeroStats`, `classOf(charClass)`, `classCanUse(def, hero)`, `classUnrestricted(def)`: who may use an item.
@@ -22,7 +22,7 @@ functions with no state and no packets.
   and Dark Raven keep their level in byte 2, not in the level bits. `raw` keeps the original bytes.
 - `itemStats.ts` ports `CalcDamageMin/Max`, `CalcMagicPower`, `CalcDefense`, `CalcRequirements`
   (`ZzzInfomation.cpp`) and `CalcMaxDurability` (ZzzInventory.cpp:1549) over `itemDef`, which hides the
-  per-group column names of `items.json` (`Strength`/`Str`, `Durability`/`Dur`, ...).
+  per-group column names of the item files (`Strength`/`Str`, `Durability`/`Dur`, ...).
 - `itemValue.ts` ports `ItemValue` (ZzzInfomation.cpp:1457), `CalcRepairCost` (ZzzInventory.cpp:1201) and
   `IsSellingBan` / `IsRepairBan` (ZzzInventory.cpp:7812/7887). The server has the final say on prices.
 - Strength requirements follow OpenMU (four per option level), not the original's `Option3 * 5`.

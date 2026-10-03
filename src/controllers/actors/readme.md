@@ -72,7 +72,7 @@ type loads. There is no `index.ts`; other folders import the modules below direc
   the test checks the file exists. A player-rig NPC goes in `GEARED_NPC_TABLE` or
   `TRANSFORMED_NPC_TABLE`.
 - add a wing or cape: a constant and a `WINGS` / `CAPES` row in `wings.ts`; the model file comes
-  from the item's `szModelFolder` / `szModelName` in `items.json`.
+  from the item's `szModelFolder` / `szModelName` in its item file.
 - change where a weapon sits: `weaponAttachment.ts`. How a drop lies: `itemAngle.ts`. An item's
   additive or hidden mesh: `RULES` in `itemObjectAttribute.ts`.
 

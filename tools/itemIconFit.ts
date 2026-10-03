@@ -27,7 +27,9 @@ import { readdirSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { PNG } from 'pngjs';
 import { ITEM_ICON_SCALE, ITEM_ICON_SCALE_DEFAULT } from '../src/controllers/interface/item_icons/itemIconScale';
-import items from '../versions/shared/items/items.json';
+import { readItemFiles } from './itemFiles';
+
+const items = readItemFiles();
 
 const ROOT = join(import.meta.dir, '..');
 const ITEMS_DIR = join(ROOT, 'public', 'items');
@@ -88,7 +90,7 @@ function fitOf(group: number, num: number, file: string, scaleOverride?: number)
   const h = y1 - y0 + 1;
 
   // What `max-width/height: 100%` does to the canvas inside the item's squares.
-  const contain = Math.min((item.X * SQUARE) / width, (item.Y * SQUARE) / height);
+  const contain = Math.min((Number(item.X) * SQUARE) / width, (Number(item.Y) * SQUARE) / height);
   const scale = scaleOverride ?? ITEM_ICON_SCALE[`${group}_${num}`] ?? ITEM_ICON_SCALE_DEFAULT;
   const cap = Math.min(width / w, height / h) * MARGIN;
 
