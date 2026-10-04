@@ -217,3 +217,31 @@ describe('Killing Blow (260): BITMAP_SBUMB on its LifeTime (MoveHandlers.cpp:919
     expect(soundTicks(r, ATT)).toEqual([]);
   });
 });
+
+describe('Charge (269): AttackStage\'s AT_SKILL_OCCUPY case (ZzzCharacter.cpp:2934-2959, :4690-4695)', () => {
+  const RUSH = PlayerAction.PLAYER_ATTACK_RUSH;
+  const sprays = (r: Run) => [...new Set(r.spawns.filter(s => s.name === 'joint').map(s => s.tick))];
+  const force = (r: Run) => r.spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.swordForce).map(s => s.tick);
+  const volley = (r: Run) => r.spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.multishot).map(s => s.tick);
+
+  it('sprays every tick until AttackTime runs out on tick 14 at 0.3 keys a tick, then the sword force', () => {
+    const r = run(269, RUSH, { keysPerTick: 0.3 });
+    expect(sprays(r)).toEqual(range(1, 14));
+    expect(force(r)).toEqual([14]);
+  });
+
+  it('releases on the tick RUSH passes key 5 at a faster clip', () => {
+    const r = run(269, RUSH, { keysPerTick: 0.5 });
+    expect(sprays(r)).toEqual(range(1, 11));
+    expect(force(r)).toEqual([11]);
+  });
+
+  it('SOUND_SKILL_SWORD2 at the packet (WSclient.cpp:5123-5129)', () => {
+    expect(skillSound(269)).toBe('Sound/sKnightSkill2');
+  });
+
+  it('the MULTI_SHOT volley only on the hero\'s own cast (MonkSystem.cpp:1305-1333)', () => {
+    expect(volley(run(269, RUSH, { hero: true }))).toEqual([0, 0, 0]);
+    expect(volley(run(269, RUSH))).toEqual([]);
+  });
+});

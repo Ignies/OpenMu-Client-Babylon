@@ -177,6 +177,8 @@ export const lightFollow = (src: PointSource): ((out: { x: number; y: number; z:
 };
 
 export const groundY = (x: number, z: number): number => storeRef().world?.getTerrainHeight(x, z) ?? 0;
+/** The map the hero is on (`gMapManager.WorldActive`), for a sound only one map loads. */
+export const currentMap = (): number | undefined => storeRef().world?.mapIndex;
 
 /** `src` dropped onto the terrain, a hair above it. */
 export const onGround = (src: PointSource): PointSource => out => {

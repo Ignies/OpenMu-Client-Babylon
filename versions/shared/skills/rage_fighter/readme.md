@@ -21,7 +21,7 @@ folders: [../readme.md](../readme.md).
 | `ignore_defense` | 266 | a red flash; the Ourforces bone glow as a buff look |
 | `increase_health` | 267, 573 str | a holy flash; the Ourforces bone glow |
 | `increase_block` | 268, 569 power up, 572 mastery | a steel flash; the Ourforces bone glow |
-| `charge` | 269 | Rush's charge with fire; a sword force on impact |
+| `charge` | 269 | Rush's charge: sparks and fire each tick until RUSH key 5 or tick 14, then the sword force at the caster |
 | `phoenix_shot` | 270 | a phoenix arrow, a fire hit and the phoenix model |
 
 Timing follows the original's effects, not the packet: most of them read the caster's clip key
