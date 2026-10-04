@@ -1,6 +1,6 @@
 import { GameOptions } from '@/controllers/settings';
-import { HIGH_DROP_LEVEL } from '../../modules/drops/dropTier';
-import { isJewel, itemDef } from '../../modules/items/itemStats';
+import { HIGH_DROP_LEVEL } from '@/controllers/item_rules';
+import { isJewel, itemDef } from '@/controllers/item_rules';
 import type { Item } from '../../ecs/world';
 import { UI_SOUND_KEYS } from './ui';
 import { pickupSound } from './combat';

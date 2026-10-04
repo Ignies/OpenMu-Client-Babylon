@@ -35,7 +35,7 @@ plugin ([../../../openmu/readme.md](../../../openmu/readme.md)).
 ## Depends on / used by
 - uses: `src/app/store.ts` (`playerData`, `gsSocket`, `sendToGS`, `isOffline`, in `gameBridge.ts`
   only), `controllers/net/protocols/escrowWire.ts`, `controllers/net/sessionNonce.ts`,
-  `servers/serverServices.ts` (`marketApiUrl`), `inventory/inventoryConstants.ts`, `src/i18n`.
+  `servers/serverServices.ts` (`marketApiUrl`), `core/inventoryConstants.ts`, `src/i18n`.
 - used by: `src/app/logic.ts` (`net.ts`), `versions/shared/ui/windows/marketplace/` (the window),
   `versions/shared/ui/hud/bottom_bar/mainFrameButtons.ts` (`toggleMarketplace`),
   `marketplace.html` (`dev.tsx`).

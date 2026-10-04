@@ -16,7 +16,7 @@ import {
   usedMask,
 } from '@/controllers/interface/components/item_grid';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
-import { goldColor } from '@/modules/items/goldColor';
+import { goldColor } from '@/controllers/item_rules';
 import {
   ITEM_HOTKEY_CODES,
   canRegisterItemHotkey,
@@ -25,7 +25,7 @@ import { isUpgradeJewel } from '@/modules/inventory/jewelUpgrade';
 import {
   equipDestination,
   isEquipable,
-} from '@/modules/inventory/equipSlots';
+} from '@/controllers/item_rules';
 import { InventorySort } from '@/modules/inventory/inventorySort';
 import { QuickItemActions } from '@/modules/inventory/quickItemActions';
 import { StorageKind } from '@/modules/inventory/itemStorage';

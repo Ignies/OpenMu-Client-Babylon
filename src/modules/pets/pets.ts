@@ -13,23 +13,7 @@ import {
  * GOBoid.cpp:66-660, 494-556; ZzzCharacter.cpp:6263-6273, 12992-12999, 15144-15180;
  * ZzzOpenData.cpp:705, 3969-3970. */
 
-export * from './petConstants';
-import {
-  PET_GROUP,
-  GUARDIAN_ANGEL,
-  IMP,
-  HORN_OF_UNIRIA,
-  HORN_OF_DINORANT,
-  DARK_HORSE,
-  DARK_RAVEN,
-  HORN_OF_FENRIR,
-  DEMON,
-  SPIRIT_OF_GUARDIAN,
-  PET_RUDOLF,
-  PET_PANDA,
-  PET_UNICORN,
-  PET_SKELETON,
-} from './petConstants';
+import { PET_GROUP, GUARDIAN_ANGEL, IMP, HORN_OF_UNIRIA, HORN_OF_DINORANT, DARK_HORSE, DARK_RAVEN, HORN_OF_FENRIR, DEMON, SPIRIT_OF_GUARDIAN, PET_RUDOLF, PET_PANDA, PET_UNICORN, PET_SKELETON } from '@versions/shared/items/petItems';
 
 /** `w->LinkBone = 34` for the Imp (ZzzCharacter.cpp:15148). */
 export const IMP_BONE = 34;

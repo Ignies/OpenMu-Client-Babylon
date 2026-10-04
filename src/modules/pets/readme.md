@@ -6,7 +6,7 @@ Dark Horse info packets. Pet info and raven mode state, and the pet requests, li
 `Store` (`src/app/store.ts`).
 
 ## Public API
-- item numbers (`petConstants.ts`, re-exported by `pets.ts`): `PET_GROUP`, `GUARDIAN_ANGEL`, `IMP`,
+- item numbers (`versions/shared/items/petItems.ts`, pure data the item rules and actors read too): `PET_GROUP`, `GUARDIAN_ANGEL`, `IMP`,
   `HORN_OF_UNIRIA`, `HORN_OF_DINORANT`, `DARK_HORSE`, `DARK_RAVEN`, `HORN_OF_FENRIR`, and the follower
   pets (`DEMON`, `SPIRIT_OF_GUARDIAN`, `PET_RUDOLF`, `PET_PANDA`, `PET_UNICORN`, `PET_SKELETON`).
 - `petSpec(item)`: the `PetSpec` (kind, model, scale, follow motion, light, Fenrir look) or null.
@@ -39,13 +39,13 @@ Dark Horse info packets. Pet info and raven mode state, and the pet requests, li
 - used by: `src/app/logic.ts`, `ecs/systems/petSystem.ts`, `animationSystem.ts`, `attackSystem.ts`,
   `moveAlongPathSystem.ts`, `skillCastSystem.ts`, `characterSelectSystem.ts`, `combatSfxSystem.ts`,
   `ecs/world.ts`, `controllers/actors` (`playerObject`, `weaponClass`, `deserializeAppearance`),
-  `controllers/combat/skillClips.ts`, `item_tooltip`, `items/itemSerializer.ts`, `combat/net.ts`,
+  `controllers/combat/skillClips.ts`, `item_tooltip`, `controllers/item_rules/itemSerializer.ts`, `combat/net.ts`,
   `_shared/net_helpers.ts`, `versions/shared/maps/kanturu2/gateway.ts`,
   `versions/shared/skills/common/plasma_storm`, `versions/shared/ui/hud/bottom_bar/petCommands.tsx`,
   `versions/shared/ui/windows/pet_info/`.
 
 ## Change it
-- add a pet: its number in `petConstants.ts`, a `PetSpec` in `PETS` (`pets.ts`).
+- add a pet: its number in `versions/shared/items/petItems.ts`, a `PetSpec` in `PETS` (`pets.ts`).
 - change how a follower moves: its `follow` block in `PETS`; the motion code is `petSystem.ts`.
 - change the Fenrir look: `FENRIRS` and `fenrirShine` in `pets.ts`.
 - handle a new pet packet: `net.ts`, state in the Store.

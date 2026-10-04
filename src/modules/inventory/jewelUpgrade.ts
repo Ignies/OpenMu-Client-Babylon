@@ -1,5 +1,5 @@
 import type { Item } from '../../ecs/world';
-import { InventoryConstants } from './inventoryConstants';
+import { InventoryConstants } from '@/core/inventoryConstants';
 import { t } from '../../i18n';
 
 /**

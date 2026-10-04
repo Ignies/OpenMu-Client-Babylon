@@ -1,6 +1,6 @@
 import { autorun } from 'mobx';
 import { Store } from '../../app/store';
-import { InventoryConstants } from '../inventory/inventoryConstants';
+import { InventoryConstants } from '@/core/inventoryConstants';
 import { buildEscrowRequest, parseEscrowResult, type EscrowResult } from '../../controllers/net/protocols/escrowWire';
 import { t } from '../../i18n';
 import { Marketplace, type BagEntry } from './state';

@@ -1,4 +1,4 @@
-/** Polish text of the `items` module. */
+/** Polish text of the `item_rules` controller. */
 
 import type en from './en';
 

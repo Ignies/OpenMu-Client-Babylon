@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Item } from '../../ecs/world';
 import { ItemSerializer } from './itemSerializer';
-import { DARK_HORSE, PET_GROUP } from '../pets/petConstants';
+import { DARK_HORSE, PET_GROUP } from '@versions/shared/items/petItems';
 
 function serialize(item: Item): Uint8Array {
   const bytes = new Uint8Array(ItemSerializer.NeededSpace);

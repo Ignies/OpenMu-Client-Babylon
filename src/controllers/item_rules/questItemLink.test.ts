@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { Matrix } from '../../controllers/render/babylon/exports';
-import { applyWeaponAttachments, BACK_BONE, questItemLink } from '../../controllers/actors/weaponAttachment';
-import type { PlayerObject } from '../../controllers/actors/playerObject';
+import { Matrix } from '../render/babylon/exports';
+import { applyWeaponAttachments, BACK_BONE, questItemLink } from '../actors/weaponAttachment';
+import type { PlayerObject } from '../actors/playerObject';
 import type { Item } from '../../ecs/world';
 
 /** The link a weapon gets when it is stowed from the second weapon slot. */

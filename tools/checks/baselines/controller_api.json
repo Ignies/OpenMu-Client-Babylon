@@ -645,7 +645,6 @@
  "src/modules/inventory/net.ts -> src/controllers/sound/sfx.ts",
  "src/modules/inventory/quickItemActions.ts -> src/controllers/interface/itemTooltip.ts",
  "src/modules/inventory/quickItemActions.ts -> src/controllers/interface/msgWin.ts",
- "src/modules/items/itemSerializer.ts -> src/controllers/assets/download.ts",
  "src/modules/marketplace/api.ts -> src/controllers/net/sessionNonce.ts",
  "src/modules/marketplace/dev.tsx -> src/controllers/interface/windowManager.ts",
  "src/modules/marketplace/gameBridge.ts -> src/controllers/net/protocols/escrowWire.ts",

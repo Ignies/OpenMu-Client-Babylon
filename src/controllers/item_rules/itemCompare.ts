@@ -1,6 +1,6 @@
 import type { Item } from '../../ecs/world';
 import type { TextKey } from '../../i18n';
-import { equipSlots } from '../inventory/equipSlots';
+import { equipSlots } from './equipSlots';
 import { GameOptions } from '@/controllers/settings';
 import { classCanUse, itemDef, type HeroStats } from './itemStats';
 

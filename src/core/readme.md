@@ -16,6 +16,8 @@ pathfinding. Nothing here knows about a skill, a window or a map.
 - `turnAngle.ts`: `normalizeAngle`, `signedAngleDelta`, `turnAngle`, `approachAngle`,
   `createAngleDeg`, `rotationByteOf`, from `ZzzAI.cpp` (`TurnAngle2`, `CreateAngle`, ...).
 - `binaryUtils.ts`: byte helpers (`castToByte`, `ArrayCopy`, `GetByteValue`, ...).
+- `InventoryConstants` (`inventoryConstants.ts`): OpenMU's inventory slot numbers and grid sizes. Pure, so
+  the item rules controller, every module and the cash shop server share it.
 - `devQuery`, `devQueryNumber`, `devVitalPercent` (`devSeams.ts`): URL seams, `null` outside dev.
 - `LocalStorage` (`localStorage.ts`): `localStorage` access that never throws.
 - `Rand` (`rand.ts`), `MathUtils.AngleQuaternion` (`mathUtils.ts`), `wait` (`utils.ts`).

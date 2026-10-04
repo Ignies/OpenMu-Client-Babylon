@@ -5,8 +5,8 @@ import { t, type TextKey } from '../../i18n';
 import { observable, reaction, runInAction } from 'mobx';
 import { getBaseClass, BaseClass } from '../hero/characterStats';
 import { itemBaseName } from '@versions/shared/items/itemsDatabase';
-import { itemLevelName } from '../items/itemLevelLook';
-import { classOf } from '../items/itemStats';
+import { itemLevelName } from '@/controllers/item_rules';
+import { classOf } from '@/controllers/item_rules';
 import { monsterDisplayName } from '@versions/shared/monsters/monstersDatabase';
 import {
   CloseNpcRequestPacket,

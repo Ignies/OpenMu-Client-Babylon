@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { i18n } from '../../i18n';
 import type { Item } from '../../ecs/world';
 import { comparedItem } from './itemCompare';
-import { buildItemTooltip, type TooltipLine } from '../../controllers/interface/itemTooltip';
+import { buildItemTooltip, type TooltipLine } from '../interface/itemTooltip';
 import type { HeroStats } from './itemStats';
 
 /**

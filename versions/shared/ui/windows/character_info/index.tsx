@@ -23,7 +23,7 @@ import {
   MuTableFrame,
   MuTableRule,
 } from '@/controllers/interface/components/mu_window';
-import { InventoryConstants } from '@/modules/inventory/inventoryConstants';
+import { InventoryConstants } from '@/core/inventoryConstants';
 import { pkTextColour, PVP_NEUTRAL } from '@/controllers/interface/nameTags';
 import {
   BaseClass,

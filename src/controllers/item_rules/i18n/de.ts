@@ -1,4 +1,4 @@
-/** German text of the `items` module. */
+/** German text of the `item_rules` controller. */
 
 import type en from './en';
 

@@ -4,9 +4,9 @@ import { Store } from '../../app/store';
 import { skills } from '../../modules/skills';
 import { GameOptions } from '@/controllers/settings';
 import { Notices } from '../../modules/chat/notices';
-import { InventoryConstants } from '../../modules/inventory/inventoryConstants';
+import { InventoryConstants } from '@/core/inventoryConstants';
 import { itemSquares, squareFits, stampSquares } from '../../modules/inventory/inventoryLayout';
-import { calcMaxDurability, itemDef } from '../../modules/items/itemStats';
+import { calcMaxDurability, itemDef } from '@/controllers/item_rules';
 import { findHotkeyItem } from '../../modules/inventory/itemHotkeys';
 import type { Item } from '../../ecs/world';
 

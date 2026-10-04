@@ -1,4 +1,4 @@
-/** Thai text of the `items` module. */
+/** Thai text of the `item_rules` controller. */
 
 import type en from './en';
 

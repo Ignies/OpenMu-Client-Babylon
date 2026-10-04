@@ -4,7 +4,7 @@ import { ENUM_WORLD } from '@/core/types';
 import { Economy } from '../economy/economy';
 import { Entity, World } from '@/ecs/world';
 import { EventBus } from '@/core/eventBus';
-import { InventoryConstants } from '../inventory/inventoryConstants';
+import { InventoryConstants } from '@/core/inventoryConstants';
 import { MapChangedPacket } from '@versions/shared/packets/ServerToClientPackets';
 import { NetStats } from '@/controllers/net/roundTrip';
 import { Notices } from '../chat/notices';

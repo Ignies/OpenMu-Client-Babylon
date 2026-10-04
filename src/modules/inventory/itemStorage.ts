@@ -1,7 +1,7 @@
 import type { Item } from '../../ecs/world';
 import type { TextKey } from '../../i18n';
-import { ItemGroup } from '../items/itemStats';
-import { InventoryConstants } from './inventoryConstants';
+import { ItemGroup } from '@/controllers/item_rules';
+import { InventoryConstants } from '@/core/inventoryConstants';
 import { StorageKind, TRADE_COLUMNS, TRADE_ROWS, TRADE_SLOTS } from './storageKind';
 
 /**

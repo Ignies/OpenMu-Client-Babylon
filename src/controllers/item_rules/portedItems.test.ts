@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { itemDef } from './itemStats';
-import { emptyAppearance, deserializeAppearance } from '../../controllers/actors/deserializeAppearance';
-import { CAPE_BONE, WING_BONE, wingBone, wingSpec } from '../../controllers/actors/wings';
+import { emptyAppearance, deserializeAppearance } from '../actors/deserializeAppearance';
+import { CAPE_BONE, WING_BONE, wingBone, wingSpec } from '../actors/wings';
 import { CharacterClassNumber } from '../../core/types';
 
 function defOf(group: number, num: number) {

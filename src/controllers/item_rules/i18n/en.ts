@@ -1,4 +1,4 @@
-/** English text of the `items` module. See src/i18n/readme.md. */
+/** English text of the `item_rules` controller. See src/i18n/readme.md. */
 
 const en = {
   'options.compare.shift': 'Hold Shift',
@@ -24,6 +24,6 @@ export default en;
 
 declare module '@/i18n' {
   interface TextOwners {
-    'src/modules/items': typeof en;
+    'src/controllers/item_rules': typeof en;
   }
 }

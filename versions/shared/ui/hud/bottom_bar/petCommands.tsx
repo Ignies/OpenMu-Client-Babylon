@@ -1,8 +1,8 @@
 import { observer } from 'mobx-react-lite';
 import { t, type TextKey } from '@/i18n';
 import { Store } from '@/app/store';
-import { InventoryConstants } from '@/modules/inventory/inventoryConstants';
-import { PET_GROUP } from '@/modules/pets/pets';
+import { PET_GROUP } from '@versions/shared/items/petItems';
+import { InventoryConstants } from '@/core/inventoryConstants';
 import { PetCommandModeEnum } from '@versions/shared/packets/ClientToServerPackets';
 import { uiClick } from '@/controllers/sound/sfx';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';

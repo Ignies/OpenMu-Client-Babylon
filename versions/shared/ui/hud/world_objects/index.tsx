@@ -9,7 +9,7 @@ import { EmojiBubbles } from '../emoji_bubbles';
 import { useRenderId } from '@/controllers/interface/hooks';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { onScreenPosition } from '@/controllers/interface/screenPositionBus';
-import { DROP_TIER_COLOURS, dropTier } from '@/modules/drops/dropTier';
+import { DROP_TIER_COLOURS, dropTier } from '@/controllers/item_rules';
 import { dropPassesLootFilter } from '@/modules/drops/lootFilter';
 import { GameOptions } from '@/controllers/settings';
 import { ItemTooltip } from '@/controllers/interface/components/item_tooltip';

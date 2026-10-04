@@ -11,7 +11,7 @@ import {
 import { Store } from '@/app/store';
 import { Economy, type EconomyPrompt } from '@/modules/economy/economy';
 import { itemDisplayName } from '@/controllers/interface/itemTooltip';
-import { itemValue } from '@/modules/items/itemValue';
+import { itemValue } from '@/controllers/item_rules';
 import { QuickItemActions } from '@/modules/inventory/quickItemActions';
 import { MAX_BULK_BUY } from '@/modules/inventory/quickItemRules';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';

@@ -1,5 +1,5 @@
 import type { Sql, TransactionSql } from 'postgres';
-import { InventoryConstants } from '../../src/modules/inventory/inventoryConstants';
+import { InventoryConstants } from '../../src/core/inventoryConstants';
 import { findFreeSlot, type Footprint } from '../../src/modules/inventory/inventoryFit';
 import { JEWEL_OF_CHAOS } from '../../src/modules/inventory/jewelUpgrade';
 import { productById, type Product } from './catalog';

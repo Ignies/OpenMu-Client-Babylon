@@ -5,11 +5,13 @@ sizes, slot spaces, bans) and the item runs built on it (auto-arrange, bulk move
 jewels, Q/W/E/R hotkeys). The bag itself and the item-move code live in `Store` (`src/app/store.ts`).
 
 ## Public API
-- `InventoryConstants`: equipment slot indices, `RowSize`, `InventoryRows`, `FirstStoreItemSlotIndex`, `WarehouseRows`.
+- `InventoryConstants` (now `src/core/inventoryConstants.ts`, pure, also read by the cash shop server):
+  equipment slot indices, `RowSize`, `InventoryRows`, `FirstStoreItemSlotIndex`, `WarehouseRows`.
 - `StorageKind`, `VAULT_*` / `TRADE_*` / `MIX_*` / `PERSONAL_SHOP_*` sizes, `CHAOS_CARD_WIRE_STORAGE` (`itemStorage.ts`).
 - `gridFirstIndex`, `wireSlotOf`, `localIndexOf`, `storageColumns`, `storageRows`: local index vs wire slot per storage.
 - `isVaultBanned`, `isTradeBanned`, `isPersonalShopBanned`, `storageBan(storage, item)`: what a grid refuses.
-- `equipSlots(item)`, `isEquipable(slot, item)`, `equipDestination(item, worn)`: where an item can be worn.
+- `isEquipable(slot, item)`, `equipDestination(item, worn)` (`controllers/item_rules/equipSlots.ts`): where an
+  item can be worn; there because the compare tooltip reads them.
 - `findFreeSlot(occupied, rows, w, h)`: first-fit free square (`FindEmptySlot`).
 - `itemSquares`, `stampSquares`, `squareFits`: grid footprint helpers (`inventoryLayout.ts`).
 - `InventorySort.start()`: auto-arrange. `BulkMove.start(from, to, wanted)`: move every matching item.
@@ -45,9 +47,9 @@ jewels, Q/W/E/R hotkeys). The bag itself and the item-move code live in `Store` 
 - `ItemDurabilityChanged`, `InventoryMoneyUpdate`: durability of one slot, zen in the bag.
 
 ## Depends on / used by
-- uses: `items` (`ItemSerializer`, `itemDef`), `economy` (`Economy`), `drops/dropTier.ts`, `options` (`GameOptions`),
+- uses: `controllers/item_rules` (`ItemSerializer`, `itemDef`, `dropTier`), `economy` (`Economy`), `controllers/settings`,
   `controllers/sound`, `controllers/net/roundTrip`, `controllers/assets/itemIconPack`, `src/i18n`.
-- used by: `src/app/logic.ts` (net), `Store`, `economy`, `personal_shop`, `items/itemCompare.ts`, `hero`, `mu_helper`,
+- used by: `src/app/logic.ts` (net), `Store`, `economy`, `personal_shop`, `controllers/item_rules/itemCompare.ts`, `hero`, `mu_helper`,
   `warp`, `scope`, `marketplace`, `cashshop/server/fulfilment.ts`, ecs systems (attack, pickup, keyboard).
 - windows: `inventory`, `vault`, `trade`, `chaos_machine`, `personal_shop`, `npc_shop`, `economy_prompts`,
   `character_info`, `pet_info`; HUD `bottom_bar`.

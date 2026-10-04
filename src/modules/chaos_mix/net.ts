@@ -1,7 +1,7 @@
 import { Economy } from '../economy/economy';
 import { EventBus } from '@/core/eventBus';
 import { ItemCraftingResultPacket } from '@versions/shared/packets/ServerToClientPackets';
-import { ItemSerializer } from '../items/itemSerializer';
+import { ItemSerializer } from '@/controllers/item_rules';
 
 /** Registers this module's packet listeners (see ../module.ts). */
 export function installNet(): void {

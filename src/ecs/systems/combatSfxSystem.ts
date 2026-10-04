@@ -6,7 +6,7 @@ import {
 } from '../../controllers/anim/playerActionMapper';
 import { monsterModelTypeOf } from '../../controllers/anim/playSpeed';
 import { isPlayerBody } from '../../controllers/actors/playerObject';
-import { HORN_OF_FENRIR, PET_GROUP } from '../../modules/pets/petConstants';
+import { HORN_OF_FENRIR, PET_GROUP } from '@versions/shared/items/petItems';
 import type { CharacterClassNumber } from '../../core/types';
 import {
   COMBAT_BUS,

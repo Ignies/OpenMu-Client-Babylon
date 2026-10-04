@@ -1,6 +1,6 @@
 import type { Item } from '../../ecs/world';
-import { InventoryConstants } from './inventoryConstants';
-import { itemDef } from '../items/itemStats';
+import { InventoryConstants } from '../../core/inventoryConstants';
+import { itemDef } from './itemStats';
 
 /**
  * Which worn slot an item belongs to. `ItemSlot` in `items.json` names one

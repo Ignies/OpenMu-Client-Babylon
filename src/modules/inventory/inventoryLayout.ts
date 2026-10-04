@@ -8,7 +8,7 @@ import {
   isWeapon,
   isWing,
   itemDef,
-} from '../items/itemStats';
+} from '@/controllers/item_rules';
 import type { Item } from '../../ecs/world';
 
 /**

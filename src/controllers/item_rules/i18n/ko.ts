@@ -1,4 +1,4 @@
-/** Korean text of the `items` module. */
+/** Korean text of the `item_rules` controller. */
 
 import type en from './en';
 

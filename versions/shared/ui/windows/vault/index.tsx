@@ -13,9 +13,9 @@ import { ItemGrid } from '@/controllers/interface/components/item_grid';
 import { ItemSearchBox, useItemSearch } from '@/controllers/interface/components/item_search';
 import { BulkMove } from '@/modules/inventory/bulkMove';
 import { QuickItemActions } from '@/modules/inventory/quickItemActions';
-import { isJewel, itemDef } from '@/modules/items/itemStats';
+import { isJewel, itemDef } from '@/controllers/item_rules';
 
-import { goldColor } from '@/modules/items/goldColor';
+import { goldColor } from '@/controllers/item_rules';
 import {
   BUTTON_FRAMES,
   BUTTON_HEIGHT,

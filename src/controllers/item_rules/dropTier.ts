@@ -1,5 +1,5 @@
 import type { Entity } from '../../ecs/world';
-import { isDivineArchangelWeapon, isWeaponOfArchangel, itemDef } from '../items/itemStats';
+import { isDivineArchangelWeapon, isWeaponOfArchangel, itemDef } from './itemStats';
 
 export type DropTier = 'normal' | 'high' | 'excellent' | 'money' | 'archangel';
 

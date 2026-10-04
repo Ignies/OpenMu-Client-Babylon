@@ -1,6 +1,6 @@
 import type { Item } from '../../ecs/world';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
-import { learnableSkillNumber } from '../skills/skillItems';
+import { learnableSkillNumber } from './skillItems';
 import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
 
 /**

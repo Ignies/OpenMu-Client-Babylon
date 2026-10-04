@@ -14,7 +14,8 @@ hotbar share.
 - `cooldowns.ts`: `skillCooldowns`, `onCooldownTick(listener)`, `skillDelaySeconds(num)`.
   `recipes.ts`: `buffRecipe(effectId)`, `buffIconCell(effectId)`. `masterTree.ts`: `MASTER_TEXT`,
   `formatMasterText`, `masterSkillIconCell`. `masterLevel.ts`: `MASTER_EXP_SUB_BARS`.
-- `learnableSkill(item)` / `learnSkillError(...)` (`skillItems.ts`), `playTeleportAnimation(...)` (`net.ts`).
+- `learnSkillError(...)` (`skillItems.ts`: why the hero cannot learn from an orb or scroll; the item ->
+  skill table, `learnableSkill`, is in `controllers/item_rules`), `playTeleportAnimation(...)` (`net.ts`).
 - Moved down (a controller may not import a module): `masterBase` / `MASTER_BASES` and
   `SKILL_DELAY_MS` to `controllers/combat`, `SKILL_EFFECTS` to `controllers/skills/tables.ts`,
   `skillDisplayName` to `controllers/assets`; the skill icon and tooltip widgets up to
@@ -46,7 +47,7 @@ hotbar share.
 - `MasterSkillList`, `MasterSkillLevelUpdate`: learned master levels (`masterTree.ts`). Out: `AddMasterSkillPoint`.
 
 ## Depends on / used by
-- uses: `src/app/store.ts`, `_shared/net_helpers.ts`, `hero/characterStats.ts`, `items/itemStats.ts`,
+- uses: `src/app/store.ts`, `_shared/net_helpers.ts`, `hero/characterStats.ts`, `controllers/item_rules/itemStats.ts`,
   `@versions/shared/skills/skillsDatabase` and `skillVisuals`, `ecs/systems/teleportSystem.ts`,
   controllers `combat`, `actors`, `assets/mu`, `terrain`, `src/i18n`.
 - used by: `src/app` (logic, lifecycle, store), ECS `skillSystem`, `skillCastSystem`, `pointerInputSystem`;
@@ -61,7 +62,8 @@ hotbar share.
   facade readers in `index.ts`. `update` must not allocate. Drawing goes in `versions/shared/ui/`.
 - a skill's re-use delay: `delayMs` in `versions/shared/skills/<class>/<skill>/index.ts`.
 - buff names, kinds, durations: `NAMES`, `DEBUFF_IDS`, `DURATIONS` in `recipes.ts`.
-- castability: `usability.ts`. Cast clip: `chooseSkillAction`. Orb / scroll skills: `skillItems.ts`.
+- castability: `usability.ts`. Cast clip: `chooseSkillAction`. Orb / scroll skills: `controllers/item_rules/skillItems.ts`
+  (which item teaches what) and `skillItems.ts` here (the refusal text).
 
 ## Tests
 - `teleportSound.test.ts`: a monster teleporting plays its own sound only on its map (the

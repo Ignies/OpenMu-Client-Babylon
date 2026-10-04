@@ -1,7 +1,7 @@
 import { t, type TextKey } from '../../i18n';
 import { BaseClass, CharacterClassNumber, getBaseClass } from '../../core/types';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
-import { InventoryConstants } from '../inventory/inventoryConstants';
+import { InventoryConstants } from '@/core/inventoryConstants';
 import type { Item } from '../../ecs/world';
 
 export enum StatType {

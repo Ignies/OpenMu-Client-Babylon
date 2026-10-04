@@ -2,7 +2,7 @@ import { CloseNpcRequestPacket } from '@versions/shared/packets/ClientToServerPa
 import { Economy } from '../economy/economy';
 import { EventBus } from '@/core/eventBus';
 import { ItemBoughtPacket, NpcItemSellResultPacket, NpcWindowResponseNpcWindowEnum, NpcWindowResponsePacket, StoreItemListItemWindowEnum, StoreItemListPacket } from '@versions/shared/packets/ServerToClientPackets';
-import { ItemSerializer } from '../items/itemSerializer';
+import { ItemSerializer } from '@/controllers/item_rules';
 import { Store } from '@/app/store';
 import { events } from '../events';
 import { playUiSound } from '@/controllers/sound/sfx';

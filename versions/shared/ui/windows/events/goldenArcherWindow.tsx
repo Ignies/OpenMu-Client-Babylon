@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite';
 import { t } from '@/i18n';
-import { ItemGroup } from '@/modules/items/itemStats';
+import { ItemGroup } from '@/controllers/item_rules';
 import {
   closeGoldenArcher,
   goldenArcherWindow,

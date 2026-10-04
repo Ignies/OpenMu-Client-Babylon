@@ -1,4 +1,4 @@
-/** Bulgarian text of the `items` module. */
+/** Bulgarian text of the `item_rules` controller. */
 
 import type en from './en';
 

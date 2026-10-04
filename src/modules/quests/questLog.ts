@@ -5,8 +5,8 @@ import { t, type TextKey } from '../../i18n';
 import { observable, reaction, runInAction } from 'mobx';
 import { GameOptions } from '@/controllers/settings';
 import { itemBaseName } from '@versions/shared/items/itemsDatabase';
-import { itemLevelName } from '../items/itemLevelLook';
-import { ItemSerializer } from '../items/itemSerializer';
+import { itemLevelName } from '@/controllers/item_rules';
+import { ItemSerializer } from '@/controllers/item_rules';
 import { monsterDisplayName } from '@versions/shared/monsters/monstersDatabase';
 import {
   ActiveQuestListRequestPacket,

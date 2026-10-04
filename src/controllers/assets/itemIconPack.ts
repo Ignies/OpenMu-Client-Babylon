@@ -1,6 +1,6 @@
 import type { Item } from '../../ecs/world';
 import { hasItemIconFile, type Variant } from './itemIconFiles';
-import { itemLevelLook } from '../../modules/items/itemLevelLook';
+import { itemLevelLook } from '@/controllers/item_rules';
 
 /**
  * The pre-rendered item icon pack (`public/items/item_<group>_<num>_<tint>[_e|_a].png`),

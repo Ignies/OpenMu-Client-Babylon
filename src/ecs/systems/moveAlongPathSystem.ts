@@ -1,6 +1,6 @@
 import { TILE_CM, TWFlags } from '../../controllers/terrain/consts';
 import { isFlagInBinaryMask } from '../../controllers/assets/download';
-import { InventoryConstants } from '../../modules/inventory/inventoryConstants';
+import { InventoryConstants } from '@/core/inventoryConstants';
 import { Store } from '../../app/store';
 import { BaseClass, getBaseClass } from '../../modules/hero/characterStats';
 import { isSwimWorld } from '../../controllers/actors/locomotion';

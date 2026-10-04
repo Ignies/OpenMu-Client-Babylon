@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import type { Item } from '@/ecs/world';
 import { itemIconKey, itemIconPackChain } from '@/controllers/assets/itemIconPack';
 import { ITEM_ICON_FIT } from '@/controllers/interface/item_icons/itemIconFit';
-import { itemLevelLook } from '@/modules/items/itemLevelLook';
+import { itemLevelLook } from '@/controllers/item_rules';
 
 /**
  * `<img fetchpriority>` is not a React 18 prop (it arrives with React 19), so

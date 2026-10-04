@@ -1,4 +1,4 @@
-/** Vietnamese text of the `items` module. */
+/** Vietnamese text of the `item_rules` controller. */
 
 import type en from './en';
 

@@ -1,6 +1,6 @@
 import { Economy } from '../economy/economy';
 import { EventBus } from '@/core/eventBus';
-import { ItemSerializer } from '../items/itemSerializer';
+import { ItemSerializer } from '@/controllers/item_rules';
 import { Social } from '../social/social';
 import { TradeButtonStateChangedPacket, TradeFinishedPacket, TradeItemAddedPacket, TradeItemRemovedPacket, TradeMoneyUpdatePacket, TradeRequestAnswerPacket, TradeRequestPacket as TradeRequestS2CPacket } from '@versions/shared/packets/ServerToClientPackets';
 import { cleanName } from '../chat/chat';

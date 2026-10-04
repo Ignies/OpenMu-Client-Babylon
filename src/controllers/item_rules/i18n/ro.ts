@@ -1,4 +1,4 @@
-/** Romanian text of the `items` module. */
+/** Romanian text of the `item_rules` controller. */
 
 import type en from './en';
 

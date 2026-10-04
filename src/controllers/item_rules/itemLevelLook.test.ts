@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { itemLevelName } from './itemLevelLook';
-import { itemIconUrl } from '../../controllers/assets/itemIconPack';
+import { itemIconUrl } from '../assets/itemIconPack';
 
 const POTION = 14;
 const BOX_OF_LUCK = 11;

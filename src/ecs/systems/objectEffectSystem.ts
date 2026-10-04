@@ -3,7 +3,7 @@ import { EventBus } from '../../core/eventBus';
 import { playBurst, type BurstKind } from '../../controllers/fx/bursts';
 import { playUiSound } from '../../controllers/sound/ui';
 import { TerrainDecal } from '../../controllers/fx/moveTargetEffect';
-import { dropTier, type DropTier } from '../../modules/drops/dropTier';
+import { dropTier, type DropTier } from '@/controllers/item_rules';
 import { lighting } from '../../controllers/lighting';
 import type { Entity, ISystemFactory } from '../world';
 

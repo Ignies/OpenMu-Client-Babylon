@@ -1,4 +1,4 @@
-/** Chinese text of the `items` module. */
+/** Chinese text of the `item_rules` controller. */
 
 import type en from './en';
 

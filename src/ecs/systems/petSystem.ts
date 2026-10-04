@@ -1,13 +1,11 @@
 import { Vector3 } from '../../controllers/render/babylon/exports';
+import { DARK_HORSE, DARK_RAVEN, PET_GROUP } from '@versions/shared/items/petItems';
 import {
-  DARK_HORSE,
-  DARK_RAVEN,
   FENRIR_ACTION_RUN,
   FENRIR_ACTION_SKILL,
   FENRIR_ACTION_WALK,
   MOUNT_ACTION_MOVE,
   MOUNT_ACTION_STAND,
-  PET_GROUP,
   fenrirMountAction,
   fenrirShine,
   petFactoryFor,

@@ -1,6 +1,6 @@
 import { Item } from '../../ecs/world';
-import { castToByte } from '../../controllers/assets/download';
-import { PET_GROUP, DARK_HORSE, DARK_RAVEN } from '../pets/petConstants';
+import { castToByte } from '../../core/binaryUtils';
+import { PET_GROUP, DARK_HORSE, DARK_RAVEN } from '@versions/shared/items/petItems';
 
 const LuckFlag = 4;
 const SkillFlag = 128;

@@ -12,6 +12,9 @@ The items controller: what an item is and where items are kept. Each item is its
 
 ## How it works
 - Pure data, no engine imports, so the Bun servers use it too.
+- The client's item rules (stats, values, the wire format, compare) are `controllers/item_rules`:
+  every item file imports this door, so rules behind it would load into the servers and make the
+  item table import itself.
 - The content side (`versions/shared/items/all.ts`) finds the files and fills one registry.
 
 ## Change it

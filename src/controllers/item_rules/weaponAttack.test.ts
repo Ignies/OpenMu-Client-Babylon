@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BaseClass } from '../hero/characterStats';
+import { BaseClass } from '../../modules/hero/characterStats';
 import { PlayerAction as A } from '@versions/shared/objects/enum';
 import {
   chooseAttackAction,
@@ -8,9 +8,9 @@ import {
   isSwordformGloves,
   swordformGlovesModel,
   type AttackPose,
-} from '../../controllers/actors/weaponClass';
-import { playerPlaySpeed, RAGEFIGHTER_STOP_SPEED } from '../../controllers/anim/playSpeed';
-import { PHOENIX_POSE } from '../../controllers/actors/weaponAttachment';
+} from '../actors/weaponClass';
+import { playerPlaySpeed, RAGEFIGHTER_STOP_SPEED } from '../anim/playSpeed';
+import { PHOENIX_POSE } from '../actors/weaponAttachment';
 import type { Item } from '../../ecs/world';
 
 const item = (group: number, num: number): Item => ({ group, num, lvl: 0 }) as Item;

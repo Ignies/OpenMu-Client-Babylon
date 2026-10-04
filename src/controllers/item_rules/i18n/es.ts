@@ -1,4 +1,4 @@
-/** Spanish text of the `items` module. */
+/** Spanish text of the `item_rules` controller. */
 
 import type en from './en';
 

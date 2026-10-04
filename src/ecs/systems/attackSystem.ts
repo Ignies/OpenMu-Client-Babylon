@@ -20,7 +20,7 @@ import { truncatePathWithinRange } from '../../controllers/actors/approachPath';
 import { isHostilePlayer } from '../../controllers/combat/playerTarget';
 import { duelEnemyId } from '../../modules/events/duel';
 import { ammoReload, type Hands } from '../../controllers/combat/weaponRange';
-import { InventoryConstants } from '../../modules/inventory/inventoryConstants';
+import { InventoryConstants } from '@/core/inventoryConstants';
 import { StorageKind } from '../../modules/inventory/itemStorage';
 import { t } from '../../i18n';
 import { heldWeapons } from '../../controllers/actors';

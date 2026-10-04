@@ -1,6 +1,6 @@
-import { HIGH_DROP_LEVEL } from '../drops/dropTier';
+import { HIGH_DROP_LEVEL } from '@/controllers/item_rules';
 import { StorageKind } from './itemStorage';
-import { isJewel, itemDef } from '../items/itemStats';
+import { isJewel, itemDef } from '@/controllers/item_rules';
 import type { Item } from '../../ecs/world';
 
 /**

@@ -116,7 +116,7 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 - `npcLooks.test.ts`: NPCs drawn as the original builds them (Hanzo's scale, the 0.9 default and who sets its own, the plain-model NPCs,
   Zyro, the Cursed Wizard's kit, the plate helpers), each with its ZzzCharacter.cpp lines.
 - `skinTexture.test.ts`: skin / hair / level and hide texture names.
-- Also from `modules/items/`: `portedItems`, `questItemLink`, `weaponAttack` tests.
+- Also from `controllers/item_rules/`: `portedItems`, `questItemLink`, `weaponAttack` tests.
 
 ## Notes
 

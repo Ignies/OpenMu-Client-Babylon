@@ -1,8 +1,14 @@
-# items
+# item_rules
 
-Item rules as the original client computes them: the 12-byte wire format, the normalised
-item record, stats, requirements, zen values, level names and the tooltip compare. Pure
-functions with no state and no packets.
+Item rules as the original client computes them: the 12-byte wire format, the normalised item
+record, stats, requirements, zen values, level names, the compare tooltip, worn slots, the drop
+name tier and the skill an orb or scroll teaches. Pure functions with no state and no packets.
+
+The items controller (`controllers/items`) is the item table itself (`ItemRecord`, `defineItem`,
+`ItemRegistry`): pure data the Bun servers load too, imported by every item file. These rules read
+that table through `@versions/shared/items/itemsDatabase` and pull in the client (i18n, the
+settings), so they cannot sit behind that door: the item files and the servers would load them and
+the table would import itself.
 
 ## Public API
 - `ItemSerializer.DeserializeItem(bytes)` / `SerializeItem(target, item)`, `NeededSpace`: the 12-byte item.
@@ -15,6 +21,10 @@ functions with no state and no packets.
 - `itemLevelLook(group, num, lvl)`, `itemLevelName(...)`: items shown as another item at one level.
 - `comparedItem(item, worn, hero)`, `compareTooltipsOn(shift)`, `CompareTooltips`,
   `COMPARE_TOOLTIP_LABEL_KEYS`, `COMPARE_TOOLTIP_MAX`: the second tooltip.
+- `equipSlots(item)` (inner), `isEquipable(slot, item)`, `equipDestination(item, worn)`: worn slots.
+- `dropTier(drop)`, `DROP_TIER_COLOURS`, `HIGH_DROP_LEVEL`: a drop's name colour and glow tier.
+- `learnableSkill(item)` (`skillItems.ts`, with `learnableSkillNumber`): the skill an orb, scroll or
+  crystal teaches.
 - `goldColor(amount)`: the colour of a zen amount (`getGoldColor`, ZzzInventory.cpp:1094-1110).
 
 ## How it works
@@ -28,13 +38,20 @@ functions with no state and no packets.
 - Strength requirements follow OpenMU (four per option level), not the original's `Option3 * 5`.
 - `itemLevelLook.ts`: Box of Luck by level, Box of Kundun, Weapon of Archangel, Scroll of the Emperor +1 and
   Broken Sword +1 get their own name and icon (`GetItemName`, ZzzInventory.cpp:1418-1445, 1593-1609).
-  The ground model for the same items is `drops/dropModelProxy.ts`.
+  The ground model for the same items is `actors/dropModelProxy.ts`.
 - `itemCompare.ts`: the worn item of the same item group in a slot the hovered item could take
-  (`inventory/equipSlots.ts`), gated by `GameOptions.compareTooltips`.
+  (`equipSlots.ts`), gated by `GameOptions.compareTooltips`.
+- `skillItems.ts`: the item -> skill table (OpenMU `Orbs.cs` / `Scrolls.cs`). Why the hero cannot learn
+  it (`learnSkillError`) is gameplay text and stays in `modules/skills/skillItems.ts`.
+- Dependency direction: these files were `modules/items` (plus `skills/skillItems.ts`,
+  `inventory/equipSlots.ts`, `drops/dropTier.ts`); the tooltip, icon, sound and asset controllers
+  read them, and a controller may not import a module. The pure constants they share with the
+  servers went lower still: `InventoryConstants` to `core/inventoryConstants.ts`, the pet item
+  numbers to `versions/shared/items/petItems.ts`.
 
 ## Depends on / used by
-- uses: `@versions/shared/items/itemsDatabase`, `inventory/equipSlots.ts`, `options` (`GameOptions`),
-  `skills/skillItems.ts`, `pets/petConstants.ts`, `src/i18n`.
+- uses: `@versions/shared/items/itemsDatabase` and `petItems.ts`, `@versions/shared/skills/skillsDatabase`,
+  `core` (`binaryUtils`, `inventoryConstants`), `settings` (`GameOptions`), `src/i18n`.
 - used by: every net that reads item bytes (`inventory`, `drops`, `npc_shop`, `trade`, `chaos_mix`,
   `personal_shop`, `scope`, `quests`, `chat/chatItemLinks.ts`), `Store` (prices, repair, requirements),
   `inventory`, `drops`, `mu_helper`, `events`, `skills`, controllers (`interface/itemTooltip.ts`,
@@ -46,7 +63,7 @@ functions with no state and no packets.
 - a new item flag on the wire: `itemSerializer.ts` (both directions) and the `Item` type in `src/ecs/world.ts`.
 - a stat or requirement formula: `itemStats.ts`. A price or repair cost: `itemValue.ts`.
 - an item that looks like another at some level: `LEVEL_LOOKS` in `itemLevelLook.ts`, and
-  `drops/dropModelProxy.ts` for the ground model.
+  `actors/dropModelProxy.ts` for the ground model.
 - what the compare tooltip measures against: `comparedItem` in `itemCompare.ts`.
 
 ## Tests
@@ -59,3 +76,4 @@ functions with no state and no packets.
 - `portedItems.test.ts`: MuMain items and capes (tests `controllers/actors/wings.ts`, appearance).
 - `questItemLink.test.ts`: the Blood Castle weapon on the back (tests `controllers/actors/weaponAttachment.ts`).
 - `weaponAttack.test.ts`: attack clip choice per weapon (tests `controllers/actors/weaponClass.ts`).
+- `versions/shared/items/items.golden.test.ts` covers the item table these rules read.
