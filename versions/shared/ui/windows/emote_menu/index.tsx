@@ -7,8 +7,8 @@ import { observer } from 'mobx-react-lite';
 import { Session } from '@/modules/session';
 import { Ecs } from '@/ecs/current';
 import { Social } from '@/modules/social/social';
-import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
-import { useWindowStackEntry } from '@/controllers/interface/components/mu_window/useWindowChrome';
+import { useEventBus } from '@/controllers/interface/hooks';
+import { useWindowStackEntry } from '@/controllers/interface/components/mu_window';
 import { playUiSound } from '@/controllers/sound/sfx';
 import {
   EMOTE_RINGS,

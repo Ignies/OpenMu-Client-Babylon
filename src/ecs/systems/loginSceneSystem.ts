@@ -15,8 +15,8 @@ import {
   characterSelectView,
   characterSlotPosition,
 } from '../../modules/character_select/characterSelect';
-import { prefetchWorldTerrain } from '../../controllers/assets/mu/prefetchWorld';
-import { warmWorldObjects } from '../../controllers/assets/mu/warmWorld';
+import { prefetchWorldTerrain } from '../../controllers/assets/prefetchWorld';
+import { warmWorldObjects } from '../../controllers/assets/warmWorld';
 import { LOGIN_SCENE_ABSENT_MODELS } from '@versions/shared/maps/loginscene/spec';
 import { pregameLoad } from '../../controllers/loading/pregameLoad';
 import { loadVersionUi, versionUi } from '../../version';

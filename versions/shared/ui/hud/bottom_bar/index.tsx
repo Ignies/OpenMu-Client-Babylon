@@ -14,7 +14,8 @@ import { Item } from '@/ecs/world';
 import {
   MuResizeGrip,
   useWindowStackEntry,
-} from '@/controllers/interface/components/mu_window/useWindowChrome';
+  BOTTOM_BAR_ID,
+} from '@/controllers/interface/components/mu_window';
 import { MuWindows } from '@/controllers/interface/windowManager';
 import { SkillIcon } from '../../components/skill_icon';
 import { MasterExpBar } from '../../windows/master_skills/masterExpBar';
@@ -26,14 +27,13 @@ import {
   MAIN_FRAME_BUTTON_WIDTH,
 } from './mainFrameButtons';
 import { isKey } from '@/controllers/interface/keyBindings';
-import { BOTTOM_BAR_ID } from '@/controllers/interface/components/mu_window';
 import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
 import {
   isHotbarSkill,
   SKILL_ICON_HEIGHT,
   SKILL_ICON_WIDTH,
 } from '@/modules/skills/skillCasting';
-import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { useEventBus } from '@/controllers/interface/hooks';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { skills, HeroSkills } from '@/modules/skills';

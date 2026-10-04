@@ -15,7 +15,7 @@ import {
   OK_SPRITE,
   WIN_HEIGHT,
   WIN_WIDTH,
-} from '@/controllers/interface/components/msg_window/layout';
+} from '@/controllers/interface/components/msg_window';
 
 /**
  * Enter and Escape answer the box, in the capture phase so the window stack

@@ -8,7 +8,7 @@ import {
 } from '../render/babylon/exports';
 import type { ModelObject } from '../render/modelObject';
 import { tierIndex } from '../lighting/lightingQuality';
-import { requestGlowProbe } from '../render/scenes/sceneLook';
+import { requestGlowProbe } from '../render/sceneLook';
 
 /**
  * Ultra's outlaw: in place of the original's flat red body light, the art

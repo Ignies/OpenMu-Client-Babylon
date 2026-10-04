@@ -62,7 +62,7 @@ import {
   TEXT_TOP as MSG_TEXT_TOP,
   WIN_HEIGHT as MSG_HEIGHT,
   WIN_WIDTH as MSG_WIDTH,
-} from '@/controllers/interface/components/msg_window/layout';
+} from '@/controllers/interface/components/msg_window';
 import {
   BLOOD_BUTTON_Y,
   BLOOD_INTRO_STEP,

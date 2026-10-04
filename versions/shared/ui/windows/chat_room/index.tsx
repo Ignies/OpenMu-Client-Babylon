@@ -7,7 +7,7 @@ import { Messenger } from '@/modules/friends/messenger';
 import { isFriendOnline } from '@/modules/friends/friendList';
 import { Hero } from '@/modules/hero';
 import { uiClick } from '@/controllers/sound/sfx';
-import { useWindowChrome } from '@/controllers/interface/components/mu_window/useWindowChrome';
+import { useWindowChrome } from '@/controllers/interface/components/mu_window';
 import { EmojiText } from '../../components/emoji_text';
 
 /**

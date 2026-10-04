@@ -22,7 +22,7 @@ import { meshAnimationFor, type MeshAnimation } from './meshAnimation';
 import { BlendState } from '@versions/shared/objects/enum';
 import { Ecs } from '../../ecs/current';
 import { settleStillAnimations } from './staticClips';
-import { requestGlowProbe } from './scenes/sceneLook';
+import { requestGlowProbe } from './sceneLook';
 import {
   shadowReceiverChanged,
   shadowReceiversChanged,
@@ -1140,7 +1140,7 @@ export class ModelObject {
         this.CastsShadow && !this.Lights?.emitsLight;
 
       // A map object's shadow is already in the lightmap; the cascades read
-      // this to keep it out of the shadow map (controllers/render/scenes/shadows.ts).
+      // this to keep it out of the shadow map (controllers/render/shadows.ts).
       mesh.metadata.mapObject = this.IsMapObject;
 
       // Lets the cascades keep this object's blend mesh as a caster, the same

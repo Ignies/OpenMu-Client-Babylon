@@ -8,7 +8,7 @@ import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
 import { MAX_PARTY_MEMBERS, Social } from '@/modules/social/social';
 import { Economy } from '@/modules/economy/economy';
-import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { useEventBus } from '@/controllers/interface/hooks';
 import { uiClick } from '@/controllers/sound/sfx';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';

@@ -103,7 +103,7 @@ import { Ecs } from '../ecs/current';
 import { installModules } from '../modules/module';
 import { MODULES } from '../modules/modules';
 import { installPingNet } from '../controllers/net/pingNet';
-import { loadNpcNames, onNpcNamesChanged } from '../controllers/assets/mu/npcNameFile';
+import { loadNpcNames, onNpcNamesChanged } from '@/controllers/assets/mu';
 import { monsterDisplayName } from '@versions/shared/monsters/monstersDatabase';
 
 

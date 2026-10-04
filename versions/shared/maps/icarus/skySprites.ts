@@ -5,7 +5,7 @@ import {
   SpriteManager,
   type Scene,
 } from '@/controllers/render/babylon/exports';
-import { downloadDataFile } from '@/controllers/assets/mu/dataFolder';
+import { downloadDataFile } from '@/controllers/assets/mu';
 
 /** OZJ is a 24-byte header in front of a plain JPEG (see `effectLights.ts`). */
 const OZJ_HEADER_SIZE = 24;

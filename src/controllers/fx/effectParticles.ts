@@ -6,7 +6,7 @@ import {
   SpriteManager,
   type Scene,
 } from '../render/babylon/exports';
-import { downloadDataFile, hasDataFile } from '../assets/mu/dataFolder';
+import { downloadDataFile, hasDataFile } from '@/controllers/assets/mu';
 import { maps } from '../maps';
 import { EFFECT_RENDERING_GROUP, darkCardGain, keepDepthForEffects, spriteLevel } from './core';
 import { devQuery, devQueryNumber } from '../../core/devSeams';

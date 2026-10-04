@@ -1,4 +1,4 @@
-import { ITEM_ICON_MANIFEST } from '../interface/item_icons/itemIconManifest';
+import { ITEM_ICON_MANIFEST } from './itemIconManifest';
 
 /**
  * Which pre-rendered icon files exist, from the generated manifest alone: no item tables, no

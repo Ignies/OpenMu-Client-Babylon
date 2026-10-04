@@ -126,7 +126,7 @@ export const csmState = { active: false };
 
 /**
  * Set by `objectShadow` so the shadow owner can re-park the blob shadows
- * without importing it (objectShadow -> controllers/render/scenes/shadows cycle).
+ * without importing it (objectShadow -> controllers/render/shadows cycle).
  */
 export const blobShadowRefresh: { fn: ((scene: Scene) => void) | null } = {
   fn: null,

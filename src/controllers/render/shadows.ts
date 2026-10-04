@@ -10,18 +10,18 @@ import {
   type RenderTargetTexture,
   type Scene,
   type ShaderMaterial,
-} from '../babylon/exports';
+} from './babylon/exports';
 import { GameOptions } from '@/controllers/settings';
 import { devQueryNumber } from '@/core/devSeams';
-import { toonTerrainDefines } from '../renderingStyle';
-import { sunLightOf } from '../../lighting/keyRig';
+import { toonTerrainDefines } from './renderingStyle';
+import { sunLightOf } from '../lighting/keyRig';
 import {
   blobShadowRefresh,
   csmState,
   type LightingTier,
-} from '../../lighting/lightingQuality';
-import type { ShadowCasters, ShadowPolicy } from '../../lighting/shadowPolicy';
-import { driveRenderList } from './renderList';
+} from '../lighting/lightingQuality';
+import type { ShadowCasters, ShadowPolicy } from '../lighting/shadowPolicy';
+import { driveRenderList } from './scenes/renderList';
 import {
   CsmCache,
   csmCacheActive,
@@ -29,8 +29,8 @@ import {
   csmWindowMargin,
   marginOf,
   type CsmCacheStats,
-} from './csmCache';
-import { CsmBounds, csmBoundsMode } from './csmBounds';
+} from './scenes/csmCache';
+import { CsmBounds, csmBoundsMode } from './scenes/csmBounds';
 
 /**
  * The cascaded shadow map on the sun: sole owner of the

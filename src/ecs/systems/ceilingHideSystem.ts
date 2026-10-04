@@ -1,5 +1,5 @@
 import type { AbstractMesh } from '../../controllers/render/babylon/exports';
-import { shadowReceiverChanged } from '../../controllers/render/scenes/csmBounds';
+import { shadowReceiverChanged } from '@/controllers/render/scenes';
 import { isOn } from '../../controllers/fidelity';
 import type { ISystemFactory } from '../world';
 import { createRoofDetector } from './roofDetection';

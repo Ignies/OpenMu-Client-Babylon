@@ -42,7 +42,7 @@ import {
   TEXT_TOP,
   WIN_HEIGHT,
   WIN_WIDTH,
-} from '@/controllers/interface/components/msg_window/layout';
+} from '@/controllers/interface/components/msg_window';
 import {
   TALL_BTN_CANCEL_X,
   TALL_BTN_OK_X,

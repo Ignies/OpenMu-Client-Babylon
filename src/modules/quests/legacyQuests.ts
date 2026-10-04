@@ -5,8 +5,7 @@ import { t, type TextKey } from '../../i18n';
 import { observable, reaction, runInAction } from 'mobx';
 import { getBaseClass, BaseClass } from '../hero/characterStats';
 import { itemBaseName } from '@versions/shared/items/itemsDatabase';
-import { itemLevelName } from '@/controllers/item_rules';
-import { classOf } from '@/controllers/item_rules';
+import { itemLevelName, classOf } from '@/controllers/item_rules';
 import { monsterDisplayName } from '@versions/shared/monsters/monstersDatabase';
 import {
   CloseNpcRequestPacket,
@@ -25,7 +24,7 @@ import type { CharacterClassNumber } from '../../core/types';
 import { EventBus } from '../../core/eventBus';
 import { playUiSound } from '../../controllers/sound/sfx';
 import { showObjectEffect } from '../../ecs/systems/objectEffectSystem';
-import { MAX_QUESTS, QuestActKind, type QuestDefinition } from '../../controllers/assets/mu/questFiles';
+import { MAX_QUESTS, QuestActKind, type QuestDefinition } from '@/controllers/assets/mu';
 import { Merchant } from '../npc_shop';
 import { Hero } from '../hero';
 import { Session } from '../session';

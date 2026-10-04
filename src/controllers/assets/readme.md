@@ -29,11 +29,13 @@ imports the modules below directly (baselined in `tools/checks`).
 - `worldAssets.ts`: `assetWorldNum`, `*_WORLDS` lists (readers over `maps`).
 - `ktx2Pixels.ts`: `isKtx2`, `loadTranscoder`, `decodeKtx2`, `TranscoderUrls`.
 - `bmd/`: `BMD`, `BMDReader`, `BMDTextureBone` (used by `tools/bmdToGlb.ts`).
-- `mu/`: `loadMuSprite`, `loadInterfaceSprite`, `peekMuSprite`, `peekInterfaceSprite`,
-  `clearSpriteCache`, `MuSprite`; `decodeTGA`; `loadGates`, `findEntranceGateAt`; preload
-  (`preloadPregameSprites`, `preloadWorldSprites`, `clearWorldSprites`); terrain prefetch
-  (`prefetchWorldTerrain`, `fetchTerrainFile`, `consumeTerrainFile`, `terrainFilesFor`);
-  `warmWorldObjects`; `SNOW_ART`, `ArtMatch`; `loadQuestTables` and its types; `loadMoveReqList`;
+- `preloadSprites.ts`: `preloadPregameSprites`, `preloadWorldSprites`, `clearWorldSprites`.
+  `prefetchWorld.ts`: `prefetchWorldTerrain`, `fetchTerrainFile`, `consumeTerrainFile`,
+  `terrainFilesFor`. `warmWorld.ts`: `warmWorldObjects`. `itemIconManifest.ts`: generated.
+- `mu/` (readers of the original `Data/` files; outside code goes through `mu/index.ts`):
+  `loadMuSprite`, `loadInterfaceSprite`, `peekMuSprite`, `peekInterfaceSprite`,
+  `clearSpriteCache`, `MuSprite`; `decodeTGA`; `loadGates`, `findEntranceGateAt`;
+  `loadQuestTables` and its types; `loadMoveReqList`;
   `localisedItemName`, `localisedSkillName`, `localisedBuffName`, `localisedNpcName`,
   `skillDisplayName(number)` (`mu/skillNames.ts`: the pack's name, else `skillsDatabase`'s; on the door),
   `loadNpcNames`, `onNpcNamesChanged`; `decodeLocalText`, `downloadLocalDataFile`.
@@ -90,7 +92,6 @@ imports the modules below directly (baselined in `tools/checks`).
 - `texturePacks.test.ts`: `packsBase`, the index, swap and restore, label re-stamp, `textureLabel`
   mid-swap, same-name and same-size pairs, alpha kept, broken manifest, `setActivePack` listeners.
 - `mu/localNames.test.ts`: item, skill and buff name record layouts.
-- `mu/snowArtMatch.test.ts`: `SNOW_ART` against measured tile colours.
 
 ## Notes
 

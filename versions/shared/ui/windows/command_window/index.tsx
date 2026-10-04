@@ -6,7 +6,7 @@ import { Ecs } from '@/ecs/current';
 import { Commands } from '@/modules/chat/commands';
 import { isKey } from '@/controllers/interface/keyBindings';
 import type { CommandKind } from '@/modules/chat/chatCommands';
-import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { useEventBus } from '@/controllers/interface/hooks';
 import { uiClick } from '@/controllers/sound/sfx';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';

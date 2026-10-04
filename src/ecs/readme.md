@@ -147,7 +147,7 @@ bone override runs in `onAfterAnimationsObservable`, after Babylon writes the he
 ### itemGlowSystem.ts
 Stamps `metadata.itemTier` on item meshes (`PlayerObject.loadPartAsync` does the first stamp) and
 re-stamps when the item-effects option or level cap changes; `item_fx/itemMaterial.ts` and
-`render/scenes/sceneLook.ts` read it. Improved look only: +9..+15 gear and drops get a lamp
+`render/sceneLook.ts` read it. Improved look only: +9..+15 gear and drops get a lamp
 (`controllers/lighting/items.ts`), an aura and a crackle. Both looks: excellent items throw the
 `CreateShiny` glints (`controllers/fx/itemSparkle.ts`). This system picks which entity is lit and
 moves the lamp with the wearer.

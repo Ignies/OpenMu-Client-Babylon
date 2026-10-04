@@ -3,7 +3,7 @@
  */
 
 import { MAGIC_EFFECTS } from './magicEffects';
-import { localisedBuffName } from '../../controllers/assets/mu/buffNameFile';
+import { localisedBuffName } from '@/controllers/assets/mu';
 import { t } from '../../i18n';
 
 export type BuffKind = 'buff' | 'debuff';

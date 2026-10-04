@@ -6,7 +6,7 @@ import { formatRoundTrip } from '@/controllers/interface/hudFormat';
 import { isKey } from '@/controllers/interface/keyBindings';
 import { NetStats } from '@/controllers/net/roundTrip';
 import { Ecs } from '@/ecs/current';
-import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { useEventBus } from '@/controllers/interface/hooks';
 import { MuText } from '@/controllers/interface/components/mu_text';
 import { useUiStageScale } from '@/controllers/interface/components/ui_stage';
 import { t } from '@/i18n';

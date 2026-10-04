@@ -154,7 +154,7 @@ fall and a longer life (the `archangelFeathers` improvement: none on Classic). E
 Spawned from `versions/shared/monsters/_archangels/model.ts`.
 
 ### glow.ts
-The item halo (`render/scenes/sceneLook.ts`) has no render list; effect art is excluded from it.
+The item halo (`render/sceneLook.ts`) has no render list; effect art is excluded from it.
 This layer draws only meshes added with `addEffectGlow` (cards in `core.ts`, joints, models, paths,
 pillars, tails, ticked strips, summons, homing, linked models) with their own material. Strength
 follows the Glow slider up to `FX_GLOW_MAX_INTENSITY`; intensity is 0 without post processing.

@@ -29,7 +29,7 @@ import {
 import { devQuery, devQueryNumber, devQueryNumbers } from '@/core/devSeams';
 import { GameOptions } from '@/controllers/settings';
 import { renderDistanceRanges } from '../renderDistance';
-import { CSM_CASTER_REACH, drawsSolidGeometry } from './shadows';
+import { CSM_CASTER_REACH, drawsSolidGeometry } from '../shadows';
 import { driveRenderList } from './renderList';
 import { EFFECT_MASK_SAMPLER, effectMask } from './effectMask';
 import { gbufferFormats } from './gbufferFormats';

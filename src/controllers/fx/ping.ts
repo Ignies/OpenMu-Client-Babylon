@@ -3,7 +3,7 @@
  * a `joint`; one per owner. Driven and read (`pingLiveFor`) by net/pingNet.ts. See fx/readme.md.
  */
 import { Vector3, type Scene } from '../render/babylon/exports';
-import { PING_LIMITS } from '../net/protocols/pingProtocol';
+import { PING_LIMITS } from '@/controllers/net/protocols';
 import { LiveList, fixedPoint, type PointSource, type RGB } from './core';
 import { RGBS, TEX } from './recipes';
 import { spawnJoint } from './joint';

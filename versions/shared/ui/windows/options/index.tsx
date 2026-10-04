@@ -2,9 +2,12 @@ import { playUiSound } from '@/controllers/sound/sfx';
 import './style.less';
 import { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
-import { MuTableFrame } from '@/controllers/interface/components/mu_window';
-import { MuResizeGrip, useWindowChrome } from '@/controllers/interface/components/mu_window/useWindowChrome';
+import { useEventBus } from '@/controllers/interface/hooks';
+import {
+  MuTableFrame,
+  MuResizeGrip,
+  useWindowChrome,
+} from '@/controllers/interface/components/mu_window';
 import { MuWindows } from '@/controllers/interface/windowManager';
 import {
   defaultGameOption,

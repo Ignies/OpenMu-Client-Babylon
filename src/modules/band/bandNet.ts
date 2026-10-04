@@ -15,7 +15,7 @@ import {
   encodeLeave,
   encodeStart,
   encodeStop,
-} from '../../controllers/net/protocols/bandProtocol';
+} from '@/controllers/net/protocols';
 import { instrumentById, instrumentByIndex, instrumentIndex } from './instruments';
 import {
   Band,

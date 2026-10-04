@@ -28,7 +28,7 @@ import {
   renderScaleForStep,
   renderScaleSeam,
 } from '../controllers/render/renderScale';
-import { upscaleLive } from '../controllers/render/scenes/upscale';
+import { upscaleLive } from '@/controllers/render/scenes';
 import { TestScene } from '../controllers/render/scenes/testScene';
 import { loadMapIntoScene, onHeroPlaced, onMapChange } from '../controllers/terrain/loadMapIntoScene';
 import { setRepairCursor } from '../controllers/interface/components/game_cursor';
@@ -36,7 +36,7 @@ import { Merchant } from '../modules/npc_shop';
 import { Bag } from '../modules/inventory';
 import { initControllers } from '../controllers/controllers';
 import { resetForMapChange } from './lifecycle';
-import { prefetchWorldTerrain } from '../controllers/assets/mu/prefetchWorld';
+import { prefetchWorldTerrain } from '../controllers/assets/prefetchWorld';
 import { createWorld } from '../ecs/createWorld';
 import { EventBus } from '../core/eventBus';
 import { installLoginMusic } from '../controllers/sound/loginMusic';
@@ -49,9 +49,9 @@ import { watchPageTitle } from '../modules/servers/pageTitle';
 import {
   preloadPregameSprites,
   preloadWorldSprites,
-} from '../controllers/assets/mu/preloadSprites';
+} from '../controllers/assets/preloadSprites';
 import { installPerfOverlay, recordFrame } from '../controllers/render/perfOverlay';
-import { csmCacheStats } from '../controllers/render/scenes/shadows';
+import { csmCacheStats } from '@/controllers/render/shadows';
 import { refreshServerList } from '../modules/servers/serverList';
 import { ensureCacheWorker } from '../controllers/assets/assetDownload';
 import { sceneCovered } from '../controllers/render/sceneCover';

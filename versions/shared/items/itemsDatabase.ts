@@ -1,4 +1,4 @@
-import { localisedItemName } from '@/controllers/assets/mu/itemNameFile';
+import { localisedItemName } from '@/controllers/assets/mu';
 import type { ItemRecord } from '@/controllers/items';
 import { items } from './all';
 

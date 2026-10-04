@@ -10,7 +10,7 @@ import {
   MonsterActionType,
 } from '../../objects/enum';
 import { World } from '@/ecs/world';
-import { setAreaMood } from '@/controllers/render/scenes/sceneLook';
+import { setAreaMood } from '@/controllers/render/sceneLook';
 import type { Room } from '@/controllers/maps/layer';
 import {
   enumerateRooms,

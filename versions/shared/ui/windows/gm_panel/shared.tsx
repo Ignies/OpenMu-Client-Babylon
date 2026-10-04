@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react-lite';
 import { t, type TextKey } from '@/i18n';
 import { AdminFeed } from '@/modules/gm/admin/feed';
-import type { TrackedPlayer } from '@/controllers/net/protocols/adminProtocol';
+import type { TrackedPlayer } from '@/controllers/net/protocols';
 
 /** Pieces more than one tab uses. */
 

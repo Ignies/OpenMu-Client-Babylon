@@ -11,7 +11,7 @@ import { Economy } from '@/modules/economy/economy';
 import { events } from '@/modules/events';
 import { ItemIcon } from '@/controllers/interface/components/item_icon';
 import { ItemTooltip } from '../../components/item_tooltip';
-import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { useEventBus } from '@/controllers/interface/hooks';
 import { Item } from '@/ecs/world';
 import {
   GridSquares,
@@ -19,16 +19,16 @@ import {
   usedMask,
 } from '../../components/item_grid';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
-import { goldColor } from '@/controllers/item_rules';
+import {
+  goldColor,
+  equipDestination,
+  isEquipable,
+} from '@/controllers/item_rules';
 import {
   ITEM_HOTKEY_CODES,
   canRegisterItemHotkey,
 } from '@/modules/inventory/itemHotkeys';
 import { isUpgradeJewel } from '@/modules/inventory/jewelUpgrade';
-import {
-  equipDestination,
-  isEquipable,
-} from '@/controllers/item_rules';
 import { InventorySort } from '@/modules/inventory/inventorySort';
 import { QuickItemActions } from '@/modules/inventory/quickItemActions';
 import { StorageKind } from '@/modules/inventory/itemStorage';

@@ -11,7 +11,7 @@ import {
   type Scene,
 } from '../render/babylon/exports';
 import { TILE_CM } from '../terrain/consts';
-import { downloadDataFile } from '../assets/mu/dataFolder';
+import { downloadDataFile } from '@/controllers/assets/mu';
 import type { Entity } from '../../ecs/world';
 import { boneLocalPos, entityGone, spriteLevel } from './core';
 import { TEX } from './recipes';

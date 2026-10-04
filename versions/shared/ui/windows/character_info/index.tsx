@@ -6,7 +6,7 @@ import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
 import { useEffect, useRef, useState } from 'react';
 import { EventBus } from '@/core/eventBus';
-import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { useEventBus } from '@/controllers/interface/hooks';
 import { Hero } from '@/modules/hero';
 import { MsgBox } from '@/controllers/interface';
 import { GameOptions } from '@/controllers/settings';

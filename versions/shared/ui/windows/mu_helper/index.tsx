@@ -15,7 +15,7 @@ import {
 } from '@versions/shared/skills/skillsDatabase';
 import { skillDisplayName } from '@/controllers/assets';
 import { uiClick } from '@/controllers/sound/sfx';
-import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { useEventBus } from '@/controllers/interface/hooks';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuItemWindow } from '@/controllers/interface/components/mu_window';

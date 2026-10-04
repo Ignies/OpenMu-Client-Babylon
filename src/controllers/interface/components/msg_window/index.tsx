@@ -184,3 +184,30 @@ export const MsgWindow = observer(() => {
     </div>
   );
 });
+
+export {
+  BACK_SPRITE,
+  BTN_BOTH_CANCEL_X,
+  BTN_BOTH_OK_X,
+  BTN_HEIGHT,
+  BTN_INPUT_CANCEL_X,
+  BTN_INPUT_OK_X,
+  BTN_SINGLE_X,
+  BTN_WIDTH,
+  BTN_Y,
+  CANCEL_SPRITE,
+  INPUT_HEIGHT,
+  INPUT_SPRITE,
+  INPUT_TEXT_INSET_X,
+  INPUT_TEXT_INSET_Y,
+  INPUT_WIDTH,
+  INPUT_X,
+  INPUT_Y,
+  OK_SPRITE,
+  TEXT_INSET_X,
+  TEXT_LINES,
+  TEXT_LINE_HEIGHT,
+  TEXT_TOP,
+  WIN_HEIGHT,
+  WIN_WIDTH,
+} from './layout';

@@ -4,7 +4,7 @@ import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
 import { Ecs } from '@/ecs/current';
 import { GameOptions } from '@/controllers/settings';
-import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { useEventBus } from '@/controllers/interface/hooks';
 import { playUiSound } from '@/controllers/sound/sfx';
 import { MinimapSheet } from './sheet';
 import { MinimapCorner } from './corner';

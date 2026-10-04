@@ -55,7 +55,7 @@ import { SNOW_GROUND_MAPS } from '../weather/snowCover';
 import { setSceneHold } from '../loading/sceneGate';
 import { devQuery } from '../../core/devSeams';
 import { isStillAnimation } from './staticClips';
-import { CSM_CASTER_REACH } from './scenes/shadows';
+import { CSM_CASTER_REACH } from './shadows';
 import { renderDistanceRanges } from './renderDistance';
 import { ENUM_WORLD } from '../../core/types';
 import {

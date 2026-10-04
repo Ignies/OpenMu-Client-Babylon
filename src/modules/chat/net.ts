@@ -12,7 +12,7 @@ import { Social } from '../social/social';
 import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
 
-import { fromChatWire } from '@/controllers/net/protocols/chatWire';
+import { fromChatWire } from '@/controllers/net/protocols';
 import { playUiSound } from '@/controllers/sound/sfx';
 import { runInAction } from 'mobx';
 import { startEmojiBubble } from '@/ecs/systems/emojiBubbleSystem';

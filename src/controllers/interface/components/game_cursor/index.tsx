@@ -3,7 +3,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Ecs } from '@/ecs/current';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { aimX, aimY } from '@/controllers/camera';
-import { loadInterfaceSprite, type MuSprite } from '@/controllers/assets/mu/sprites';
+import { loadInterfaceSprite, type MuSprite } from '@/controllers/assets/mu';
 import {
   CURSOR_FILES,
   CURSOR_FRAME_SIZE,
@@ -203,3 +203,6 @@ export const GameCursor = () => {
     />
   );
 };
+
+export { CURSOR_SPRITES } from './cursors';
+export type { CursorHover } from './cursors';

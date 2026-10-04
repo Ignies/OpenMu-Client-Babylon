@@ -1,5 +1,5 @@
 /**
- * Builds `src/common/itemIconManifest.ts` from what is actually in
+ * Builds `src/controllers/assets/itemIconManifest.ts` from what is actually in
  * `public/items`: one bitmask per `group_num` saying which tint / excellent
  * variants exist, so `itemIconPackChain` never asks the server for a file
  * that is not there (the pack is uneven - see itemIconPack.ts).
@@ -13,7 +13,7 @@ import { join } from 'path';
 
 const ROOT = join(import.meta.dir, '..');
 const ITEMS_DIR = join(ROOT, 'public', 'items');
-const OUT = join(ROOT, 'src', 'common', 'itemIconManifest.ts');
+const OUT = join(ROOT, 'src', 'controllers', 'assets', 'itemIconManifest.ts');
 
 /** Same order as `ITEM_ICON_TINTS` in itemIconPack.ts. */
 const TINTS = [0, 3, 5, 7, 9, 11, 13, 15];

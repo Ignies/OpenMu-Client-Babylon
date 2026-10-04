@@ -4,7 +4,7 @@ import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
 import { AppState } from '@/app/uiState';
 import { isKey } from '@/controllers/interface/keyBindings';
-import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { useEventBus } from '@/controllers/interface/hooks';
 import { windowsIn } from '@/controllers/interface/windows';
 
 /** Every registered window and HUD element, in stacking order. Each one hides itself when closed. */

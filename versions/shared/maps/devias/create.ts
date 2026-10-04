@@ -3,7 +3,7 @@ import { prefetchSignPlates } from '../../objects/signs/signPlates';
 import { SignObject } from '../../objects/signs/signObject';
 import { signTypes } from '../../objects/signs/signLabels';
 import type { World } from '@/ecs/world';
-import { setAreaMood } from '@/controllers/render/scenes/sceneLook';
+import { setAreaMood } from '@/controllers/render/sceneLook';
 import type { AreaLookName } from '@/controllers/lighting/profiles';
 import { LeanBoxObject } from '@/controllers/actors/operateBoxObject';
 import { DeviasCandleObject } from './candleObject';

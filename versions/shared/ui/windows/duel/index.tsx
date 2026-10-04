@@ -33,7 +33,7 @@ import {
   OK_SPRITE,
   WIN_HEIGHT as MSG_HEIGHT,
   WIN_WIDTH as MSG_WIDTH,
-} from '@/controllers/interface/components/msg_window/layout';
+} from '@/controllers/interface/components/msg_window';
 import {
   BAR_BACK,
   BAR_EXIT,

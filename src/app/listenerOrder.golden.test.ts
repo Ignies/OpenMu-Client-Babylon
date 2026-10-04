@@ -10,7 +10,7 @@ import '@/app/logic';
 
 // Pins every packet's listeners and their order once the app has loaded (the order modules
 // install in is the order listeners run for a packet several modules handle). Whitespace is ignored.
-const LISTENERS_HASH = '916cd5c0f76e7963419ca421ade0ed4a0721fc41';
+const LISTENERS_HASH = '03923b06f984299aa51b08c477e329c967842dcd';
 
 describe('packet listeners', () => {
   it('are the same functions in the same order', () => {

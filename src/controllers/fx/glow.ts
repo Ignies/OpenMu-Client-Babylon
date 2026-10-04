@@ -8,11 +8,11 @@ import {
 } from '../render/babylon/exports';
 import { GameOptions, onGameOptionsChanged } from '@/controllers/settings';
 import { devQuery, devQueryNumber } from '../../core/devSeams';
-import { driveRenderList } from '../render/scenes/renderList';
+import { driveRenderList } from '@/controllers/render/scenes';
 
 /**
  * The halo around effect art: its own `GlowLayer` that draws only the meshes entries hand it,
- * apart from the item halo (`controllers/render/scenes/sceneLook.ts`). Off without post processing. See fx/readme.md.
+ * apart from the item halo (`controllers/render/sceneLook.ts`). Off without post processing. See fx/readme.md.
  */
 
 const SLIDER_MAX = 9;

@@ -6,7 +6,7 @@ import { Social } from '@/modules/social/social';
 import { GM_SECTIONS, GmPanel, type GmSection } from '@/modules/gm/gmPanel';
 import { worldView, type WorldView } from '@/modules/gm/gmWorld';
 import { AdminFeed } from '@/modules/gm/admin/feed';
-import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { useEventBus } from '@/controllers/interface/hooks';
 import { uiClick } from '@/controllers/sound/sfx';
 import { MuWindows } from '@/controllers/interface/windowManager';
 import { ChatLineType } from '@/modules/chat/chat';

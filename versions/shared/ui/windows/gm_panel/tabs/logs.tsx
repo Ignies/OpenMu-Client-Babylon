@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { t, type TextKey } from '@/i18n';
 import { GmPanel } from '@/modules/gm/gmPanel';
 import { AdminFeed } from '@/modules/gm/admin/feed';
-import { EVENT_KINDS, type EventKind, type TrackEvent } from '@/controllers/net/protocols/adminProtocol';
+import { EVENT_KINDS, type EventKind, type TrackEvent } from '@/controllers/net/protocols';
 import { uiClick } from '@/controllers/sound/sfx';
 import { FeedNotice, clockText } from '../shared';
 

@@ -567,7 +567,7 @@ export const SHADE_MOTES: ParticleRecipe = {
  * **Alpha, never additive.** Additive light can only brighten what is behind
  * it, so a red-tinted `flare` over a bright ground - Devias snow, Tarkan sand
  * - adds into all three channels at once, clips to white, and the bloom in
- * `controllers/render/scenes/sceneLook.ts` then spreads that clipped white into a pink haze:
+ * `controllers/render/sceneLook.ts` then spreads that clipped white into a pink haze:
  * blood came out looking like steam. The blood sheet drawn straight-alpha
  * *darkens* the ground the way fluid does, and its deep red sits well under
  * every mood's bloom threshold (0.66 at the lowest), so the pipeline leaves

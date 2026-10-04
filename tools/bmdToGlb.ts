@@ -879,7 +879,7 @@ async function processFile(rawRelInputFilePath: string) {
     // in the header): Player/player.bmd
     // and the NPC/Girl01|Man01|Female01 rigs, whose geometry ships in the
     // *Head/*Upper/*Lower part files and is composed at runtime (see
-    // src/common/npcs/lumen.ts), plus animation-only companions such as
+    // versions/shared/monsters/lumen_the_barmaid/model.ts), plus animation-only companions such as
     // NPC/songkoani.bmd (for songko.bmd) or Monster/condra_7_cone_left.bmd.
     // Logged so a 0-mesh GLB is never again mistaken for a converter bug -
     // but a *new* name appearing in this list is worth a look.

@@ -3,7 +3,7 @@ import { t } from '@/i18n';
 import { GmPanel } from '@/modules/gm/gmPanel';
 import { mapName } from '@/modules/gm/gmMaps';
 import { gmCommand, type GmCommand } from '@/modules/gm/gmCommands';
-import { className, type TrackedPlayer } from '@/controllers/net/protocols/adminProtocol';
+import { className, type TrackedPlayer } from '@/controllers/net/protocols';
 import { uiClick } from '@/controllers/sound/sfx';
 import { ContextMenu, type MenuPoint } from './contextMenu';
 

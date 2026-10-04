@@ -1,4 +1,4 @@
-import { clearSpriteCache, loadInterfaceSprite } from './sprites';
+import { clearSpriteCache, loadInterfaceSprite } from './mu/sprites';
 import { loadVersionUi } from '@/version';
 
 /**

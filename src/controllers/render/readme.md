@@ -14,9 +14,10 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `modelObject.ts`: `ModelObject`, the base class of every drawn model (actors, map objects, npcs,
   drops, pets); `PartPose`, `BodyShine`, `HIDDEN_MESH_ALL`.
 - `scenes/testScene.ts`: `TestScene`, the game's `Scene` with its camera, highlight layer and look.
-- `scenes/sceneLook.ts`: `setAreaMood`, `requestGlowProbe`, `updateSceneLook` (glow layer, areas).
+- `sceneLook.ts`: `setAreaMood`, `requestGlowProbe`, `updateSceneLook` (glow layer, areas).
 - `scenes/<pass>.ts`: `sync<Pass>` / `dispose<Pass>` and `createPostChain`, called by
-  `lighting/director.ts` only. `scenes/shadows.ts` also hands the terrain its CSM hook
+  `lighting/director.ts` through `scenes/index.ts`.
+- `shadows.ts`: `syncShadows`, `syncTerrainDefines` (the director) and the terrain's CSM hook
   (`registerTerrainMaterial`, `terrainCsmDefines`, `terrainCsmGlsl`, `bindTerrainCsm`).
 - `propBatches.ts`: `propBatchingActive`, `propBatchExclusion`, `addPropToBatch`,
   `flushPropBatches`, `updatePropBatches`, `disposePropBatches`.

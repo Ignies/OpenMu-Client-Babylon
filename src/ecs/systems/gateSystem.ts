@@ -2,9 +2,9 @@ import type { ISystemFactory } from '../world';
 import { enterGateRequest } from '../../modules/warp';
 import { Session } from '../../modules/session';
 import { Loading } from '../../controllers/loading';
-import { findEntranceGateAt, loadGates, type Gate } from '../../controllers/assets/mu/gates';
+import { findEntranceGateAt, loadGates, type Gate } from '@/controllers/assets/mu';
 import { EventBus } from '../../core/eventBus';
-import { prefetchWorldTerrain } from '../../controllers/assets/mu/prefetchWorld';
+import { prefetchWorldTerrain } from '../../controllers/assets/prefetchWorld';
 
 export const GateSystem: ISystemFactory = world => {
   let allGates: readonly Gate[] | null = null;

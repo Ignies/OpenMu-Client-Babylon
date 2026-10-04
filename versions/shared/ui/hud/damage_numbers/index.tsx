@@ -3,9 +3,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { With } from 'miniplex';
 import type { Entity } from '@/ecs/world';
 import type { Events } from '@/core/eventBus/events';
-import type { MuSprite } from '@/controllers/assets/mu/sprites';
-import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
-import { usePositionOnScreen } from '@/controllers/interface/hooks';
+import type { MuSprite } from '@/controllers/assets/mu';
+import {
+  useEventBus,
+  usePositionOnScreen,
+} from '@/controllers/interface/hooks';
 import { useMuSprite } from '@/controllers/interface/components/mu_sprite';
 
 const FONT_FILE = 'FontTest.OZT';

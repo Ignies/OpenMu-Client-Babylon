@@ -6,7 +6,7 @@ import { observer } from 'mobx-react-lite';
 import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
 import { isKey } from '@/controllers/interface/keyBindings';
-import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { useEventBus } from '@/controllers/interface/hooks';
 import { playUiSound, uiClick } from '@/controllers/sound/sfx';
 import { monsterDisplayName } from '@versions/shared/monsters/monstersDatabase';
 import { ConditionTypeEnum } from '@versions/shared/packets/ServerToClientPackets';

@@ -1,8 +1,8 @@
-// Points every import of a controller's inner file (from outside that controller) at the controller's
-// public door, `@/controllers/<name>`, and adds the imported names to that index.ts.
-// An interface widget folder (`interface/components/<widget>/`) is its own door.
+// Points every import of a file in one of a controller's subfolders (from outside that controller) at that
+// folder's index.ts, and adds the imported names to it. Files at the controller's root are public as they are.
+// An interface widget folder (`interface/components/<widget>/`) is the door for everything under it.
 // Usage: bun tools/restructure/facadeImports.ts <controller> [--from <path prefix>] [--dry-run]
-// `--from` limits the rewrite to importers under one folder (one area at a time keeps the door small).
+// `--from` limits the rewrite to importers under one folder.
 import ts from 'typescript';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { posix } from 'path';
@@ -22,14 +22,12 @@ const config = ts.parseJsonConfigFileContent(ts.readConfigFile('tsconfig.json', 
 const program = ts.createProgram(trackedFiles(['src', 'versions']).filter(f => /\.tsx?$/.test(f)), config.options);
 const checker = program.getTypeChecker();
 
-/** The door for a file inside the controller: its widget folder's index, or the controller's index. */
-function doorOf(file: string): { index: string; spec: string } {
-  const w = file.match(new RegExp(`^(${ROOT}/components/[^/]+)/`));
-  if (w) {
-    const index = ['index.tsx', 'index.ts'].map(n => `${w[1]}/${n}`).find(existsSync) ?? `${w[1]}/index.ts`;
-    return { index, spec: '@/' + w[1].slice(4) };
-  }
-  return { index: existsSync(`${ROOT}/index.tsx`) ? `${ROOT}/index.tsx` : `${ROOT}/index.ts`, spec: `@/controllers/${controller}` };
+/** The door for a file in a subfolder: its widget folder's index, or its own folder's. Root files: none. */
+function doorOf(file: string): { index: string; spec: string } | null {
+  if (!file.slice(ROOT.length + 1).includes('/')) return null;
+  const dir = file.match(new RegExp(`^(${ROOT}/components/[^/]+)/`))?.[1] ?? posix.dirname(file);
+  const index = ['index.tsx', 'index.ts'].map(n => `${dir}/${n}`).find(existsSync) ?? `${dir}/index.ts`;
+  return { index, spec: '@/' + dir.slice(4) };
 }
 
 const original = (s: ts.Symbol) => (s.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(s) : s);
@@ -63,7 +61,7 @@ for (const sf of program.getSourceFiles()) {
     const to = norm(resolved.resolvedFileName);
     if (!to.startsWith(ROOT + '/') || EXEMPT.test(to)) continue;
     const door = doorOf(to);
-    if (to === door.index) continue;
+    if (!door || to === door.index) continue;
 
     const clause = isImport ? (st as ts.ImportDeclaration).importClause : undefined;
     const named = isImport ? clause?.namedBindings : (st as ts.ExportDeclaration).exportClause;
@@ -125,7 +123,7 @@ for (const [index, list] of additions) {
     if (values.length) lines.push(`export { ${values.join(', ')} } from '${rel}';`);
     if (types.length) lines.push(`export type { ${types.join(', ')} } from '${rel}';`);
   }
-  const header = `// Public API of the ${controller} controller: code outside this folder imports from here.\n`;
+  const header = `// Door of ${posix.dirname(index).slice(4)}: what code outside the ${controller} controller uses from this folder.\n`;
   const before = existsSync(index) ? readFileSync(index, 'utf8') : header;
   const crlf = before.includes('\r\n');
   const text = before.replace(/\r\n/g, '\n').trimEnd() + '\n\n' + lines.join('\n') + '\n';

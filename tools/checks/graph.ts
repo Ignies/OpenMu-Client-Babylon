@@ -42,6 +42,57 @@ export function runtimeSpecifiers(path: string, text: string): string[] {
   return out;
 }
 
+/** Import cycles: the strongly connected groups of two or more files (Tarjan, iterative). */
+export function cycles(edges: { from: string; to: string }[]): string[][] {
+  const files = [...new Set(edges.flatMap(e => [e.from, e.to]))];
+  const id = new Map(files.map((f, i) => [f, i]));
+  const next: number[][] = files.map(() => []);
+  for (const e of edges) next[id.get(e.from) ?? 0].push(id.get(e.to) ?? 0);
+  const index = new Array<number>(files.length).fill(-1);
+  const low = new Array<number>(files.length).fill(0);
+  const onStack = new Array<boolean>(files.length).fill(false);
+  const stack: number[] = [];
+  const groups: string[][] = [];
+  let count = 0;
+  const visit = (n: number) => {
+    index[n] = low[n] = count++;
+    stack.push(n);
+    onStack[n] = true;
+  };
+  for (let root = 0; root < files.length; root++) {
+    if (index[root] >= 0) continue;
+    visit(root);
+    const work: [number, number][] = [[root, 0]];
+    while (work.length) {
+      const top = work[work.length - 1];
+      const [n, i] = top;
+      if (i < next[n].length) {
+        top[1]++;
+        const w = next[n][i];
+        if (index[w] < 0) {
+          visit(w);
+          work.push([w, 0]);
+        } else if (onStack[w]) low[n] = Math.min(low[n], index[w]);
+        continue;
+      }
+      work.pop();
+      if (work.length) {
+        const parent = work[work.length - 1][0];
+        low[parent] = Math.min(low[parent], low[n]);
+      }
+      if (low[n] !== index[n]) continue;
+      const group: string[] = [];
+      for (let w = -1; w !== n; ) {
+        w = stack.pop() ?? n;
+        onStack[w] = false;
+        group.push(files[w]);
+      }
+      if (group.length > 1) groups.push(group.sort());
+    }
+  }
+  return groups.sort((a, b) => b.length - a.length || a[0].localeCompare(b[0]));
+}
+
 export function importGraph(roots = ['src', 'versions'], read: (path: string, text: string) => string[] = (p, t) => specifiers(p, t).map(s => s.spec)): Edge[] {
   const files = trackedFiles(roots);
   const known = new Set(files);

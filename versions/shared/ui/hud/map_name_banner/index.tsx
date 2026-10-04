@@ -2,7 +2,7 @@ import './style.less';
 import { useEffect, useRef, useState } from 'react';
 import { i18n } from '@/i18n';
 import { Loading } from '@/controllers/loading';
-import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { useEventBus } from '@/controllers/interface/hooks';
 import { useMuSprite } from '@/controllers/interface/components/mu_sprite';
 import { useUiStageScale } from '@/controllers/interface/components/ui_stage';
 

@@ -6,7 +6,7 @@ import {
   type BaseTexture,
   type Scene,
 } from './babylon/exports';
-import { resolveDataUrl } from '../assets/mu/dataFolder';
+import { resolveDataUrl } from '@/controllers/assets/mu';
 import { onGameOptionsChanged } from '@/controllers/settings';
 import { filterAnisotropy } from './materialQuality';
 import { derivePbrMaps, flipRows, ROUGH_MAX, type DerivedMaps } from './pbrDerive';
