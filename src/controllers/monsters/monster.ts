@@ -83,7 +83,8 @@ export type MonsterDef = {
  * `MonsterDef.light` (`MoveCharacterVisual`, ZzzCharacter.cpp:5790-6005): a flickering forge or
  * brazier light at waist height; fire that takes light off the floor (-1.3, range 3); or a glow it
  * carries (ours, Enhanced/Ultra only: `height` over the feet, waist when omitted; `color` the
- * amber card when omitted, or the cyan of a hand holding `lightning2`).
+ * amber card when omitted, or the cyan of a hand holding `lightning2`); or that glow at the frame's
+ * Luminosity roll (`flicker`, the Scorpion's tail lamp).
  */
 export type MonsterLight =
   | { readonly kind: 'forge'; readonly color: readonly [number, number, number]; readonly range: number }
@@ -95,6 +96,13 @@ export type MonsterLight =
       readonly color?: readonly [number, number, number] | 'lightning';
       /** The card it carries keeps one Luminosity, so the glow does not breathe. */
       readonly steady?: true;
+    }
+  /** A carried glow at MoveCharacterVisual's own roll, `(rand() % 8 + 2) * 0.1` every frame (ZzzCharacter.cpp:5698). */
+  | {
+      readonly kind: 'flicker';
+      readonly range: number;
+      readonly height?: number;
+      readonly color: readonly [number, number, number];
     };
 
 /** A one-shot a type plays: `channels` is the wave's `LoadWaveFile` count. */

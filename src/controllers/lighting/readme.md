@@ -82,8 +82,8 @@ policy. It knows how to light something, never which skill or item asks for it.
 - change one skill's light: its `light` field in `versions/shared/skills/<class>/<skill>/index.ts`.
 - add a map's torches: rows keyed by object type in the map's `*_LIGHTS` table (its `spec.ts`),
   set as `objectLights` in its `lighting.ts`.
-- add an NPC or monster light: `light` in its monster folder (`MonsterLight`: forge, dark or
-  carried); `characters.ts` turns it into a recipe.
+- add an NPC or monster light: `light` in its monster folder (`MonsterLight`: forge, dark,
+  carried or flicker); `characters.ts` turns it into a recipe.
 - change a map's look: `look` in its `lighting.ts` (only what differs from the open or
   enclosed default; the shared skies are `versions/shared/maps/shared/looks.ts`). A room look:
   `areas` there. Change every map's default: `DEFAULT_PROFILE` / `ENCLOSED_PROFILE` here.
@@ -92,7 +92,7 @@ policy. It knows how to light something, never which skill or item asks for it.
 - `clouds.test.ts`: cloud uniform values for a clock, scroll wrapping, the sun step, binding.
 - `lightingQuality.test.ts`: `sceneTargetSamples` (MSAA per pass, Classic at one sample).
 - `recipes.test.ts`: `effectLight` hue, reach and gain ceiling, minimum range.
-- `characters.test.ts`: a steady carried glow (Poison Shadow) and one that breathes.
+- `characters.test.ts`: a steady carried glow (Poison Shadow), one that breathes, and the Scorpion's per-frame flicker.
 - `versions/shared/maps/mapRows.golden.test.ts`: every world's look, room looks, thunder and
   map-object lights, pinned across the move into the map folders.
 - `mapLighting.test.ts`: a look over the open or enclosed default, the sky's default for a map
@@ -113,7 +113,8 @@ policy. It knows how to light something, never which skill or item asks for it.
   cached per row. Player gear is `items.ts`, not this. Rows marked `improvedOnly` are ours: the floor light
   under a monster that carries a glow (Bahamut's lure, the Lost Tower Shadow); they pulse with
   the glow card (not a `steady` one: the Poison Shadow's card is drawn at Luminosity 1,
-  ZzzCharacter.cpp:11308-11318) and are withheld on Classic. A negative row (Tantallos, Death Beam Knight:
+  ZzzCharacter.cpp:11308-11318) and are withheld on Classic. A `flicker` row is a carried glow at
+  MoveCharacterVisual's per-frame `(rand() % 8 + 2) * 0.1` roll, taken unsmoothed (the Scorpion's tail lamp). A negative row (Tantallos, Death Beam Knight:
   `Vector(-1.3, -1.3, -1.3)`, range 3) darkens the floor: the terrain delta byte has no sign, so
   Classic shows nothing, and the pool on higher tiers carries it as a negative point light.
 - `skills.ts` (`ARROW_LIGHTS`): the original lights the arrow body every frame it flies, range 2,
