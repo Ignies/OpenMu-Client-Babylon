@@ -1,7 +1,8 @@
 # modules
 
 Gameplay, one folder per module. A module owns its packets, its state and its actions; windows in
-`versions/shared/ui/` read the state and call the actions.
+`versions/shared/ui/` read the state and call the actions. Modules a server ships to the client
+(not built yet): [docs/module_streaming.md](../../docs/module_streaming.md).
 
 ## What a module is
 - `module.ts`: `defineModule({ id, core?, requires?, install })`. `id` is the folder name; `core`
