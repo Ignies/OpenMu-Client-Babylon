@@ -10,7 +10,7 @@ import { InventoryConstants } from '@/core/inventoryConstants';
 import { PetCommandModeEnum } from '@versions/shared/packets/ClientToServerPackets';
 import { isAttackableEntity } from '../../ecs/systems/attackSystem';
 import type { Entity, World } from '../../ecs/world';
-import { ensureMuHelperWatching, MuHelperState } from './state';
+import { ensureMuHelperWatching, MuHelperState, MuHelper } from './state';
 import type { MuHelperConfig } from './config';
 
 /**
@@ -18,7 +18,7 @@ import type { MuHelperConfig } from './config';
  * drives only the seams the player's own clicks use: `world.castRequest`,
  * `world.pickupTarget`, `hero.playerMoveTo` and the store commands. It never
  * builds packets of its own, so controllers/combat/pickup behavior stays byte-identical
- * to manual play. Active only while `Store.muHelper.active` - the
+ * to manual play. Active only while `MuHelper.active` - the
  * server-driven status that `MuHelperStatusUpdate` pauses when the zen runs
  * out; inactive, the whole body is a single boolean check.
  */
@@ -500,7 +500,7 @@ export function updateMuHelperLoop(world: World, dt: number): void {
   if (!gameVersion.features.muHelper) return;
   ensureMuHelperWatching();
 
-  if (!Store.muHelper.active) {
+  if (!MuHelper.active) {
     if (wasActive) {
       resetRuntime();
       wasActive = false;
@@ -543,7 +543,7 @@ export function updateMuHelperLoop(world: World, dt: number): void {
   if (hero.attributeSystem?.isAboveZero('inSafeZone')) {
     if (stopRequestCooldown <= 0) {
       stopRequestCooldown = STOP_REQUEST_INTERVAL;
-      Store.toggleMuHelper();
+      MuHelper.toggleMuHelper();
     }
     return;
   }

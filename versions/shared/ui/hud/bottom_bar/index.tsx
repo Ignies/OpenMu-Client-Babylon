@@ -3,6 +3,7 @@ import { t } from '@/i18n';
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { Store } from '@/app/store';
+import { MuHelper } from '@/modules/mu_helper';
 import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
 import { ItemIcon } from '@/controllers/interface/components/item_icon';
@@ -784,7 +785,7 @@ export const BottomBar = observer(() => {
 
   // `CMuHelper::Toggle`: the Start / Stop button of the position panel, on its key.
   useEventBus('keyPressed', code => {
-    if (isKey('muHelper', code) && Ecs.world?.playerEntity) Store.toggleMuHelper();
+    if (isKey('muHelper', code) && Ecs.world?.playerEntity) MuHelper.toggleMuHelper();
   });
 
   return (

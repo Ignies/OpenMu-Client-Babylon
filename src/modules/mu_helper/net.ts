@@ -1,6 +1,6 @@
 import { EventBus } from '@/core/eventBus';
 import { MuHelperConfigurationDataPacket, MuHelperStatusUpdatePacket } from '@versions/shared/packets/ServerToClientPackets';
-import { Store } from '@/app/store';
+import { MuHelper } from './state';
 
 /** Registers this module's packet listeners (see ../module.ts). */
 export function installNet(): void {
@@ -12,7 +12,7 @@ export function installNet(): void {
   EventBus.on('MuHelperStatusUpdate', packet => {
     if (packet.byteLength < MuHelperStatusUpdatePacket.Length!) return;
     const p = new MuHelperStatusUpdatePacket(packet);
-    Store.setMuHelperStatus(!p.PauseStatus, p.ConsumeMoney ? p.Money : 0);
+    MuHelper.setMuHelperStatus(!p.PauseStatus, p.ConsumeMoney ? p.Money : 0);
   });
 
   /** C2 AE - `ReceiveMuHelperConfigurationData`: the saved config blob, kept as is. */
@@ -20,7 +20,7 @@ export function installNet(): void {
     if (packet.byteLength < MuHelperConfigurationDataPacket.Length!) return;
     const p = new MuHelperConfigurationDataPacket(packet);
     const data = p.HelperData;
-    Store.setMuHelperConfig(
+    MuHelper.setMuHelperConfig(
       new Uint8Array(data.buffer, data.byteOffset, data.byteLength).slice()
     );
   });

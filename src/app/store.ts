@@ -5,7 +5,7 @@ import type { PlayerObject } from '../controllers/actors/playerObject';
 import { playUiSound } from '../controllers/sound/sfx';
 import { consumeSound, upgradedItemSound } from '../controllers/sound/ui';
 import { CharacterClassNumber, ENUM_WORLD } from '@/core/types';
-import { ConsumeItemRequestPacket, DropItemRequestPacket, EnterGateRequestPacket, ItemMoveRequestPacket, PickupItemRequestPacket, WarpCommandRequestPacket, TalkToNpcRequestPacket, CloseNpcRequestPacket, MuHelperStatusChangeRequestPacket, PetTypeEnum, BuyItemFromNpcRequestPacket, SellItemToNpcRequestPacket, RepairItemRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
+import { ConsumeItemRequestPacket, DropItemRequestPacket, EnterGateRequestPacket, ItemMoveRequestPacket, PickupItemRequestPacket, WarpCommandRequestPacket, TalkToNpcRequestPacket, CloseNpcRequestPacket, PetTypeEnum, BuyItemFromNpcRequestPacket, SellItemToNpcRequestPacket, RepairItemRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
 import { NetStats } from '../controllers/net/roundTrip';
 import {
   makeObservable,
@@ -336,75 +336,6 @@ export const Store = new (class _Store {
   /** WeatherStatusUpdate (0x0F): weather kind + variation of the current map. */
   weather = { weather: 0, variation: 0 };
 
-  // ---- MU Helper (`MUHelper::g_MuHelper`) ----
-
-  muHelper = {
-    /** Running (`Start`) vs paused (`Stop`). */
-    active: false,
-    /** The last zen the server charged for it (`ConsumeMoney`). */
-    lastMoneyConsumed: 0,
-    /** Zen charged since the helper last started (`m_iTotalCost`). */
-    totalMoneyConsumed: 0,
-    /** The saved config blob (`MuHelperConfigurationData`, 257 bytes). */
-    config: null as Uint8Array | null,
-  };
-
-  setMuHelperStatus(active: boolean, moneyConsumed: number) {
-    const changed = this.muHelper.active !== active;
-    this.muHelper.active = active;
-    if (changed && active) this.muHelper.totalMoneyConsumed = 0;
-    if (moneyConsumed > 0) {
-      this.muHelper.lastMoneyConsumed = moneyConsumed;
-      // The running-total line of `ReceiveMuHelperStatusUpdate`
-      // (WSclient.cpp:1199-1207, GlobalText 3586).
-      this.muHelper.totalMoneyConsumed += moneyConsumed;
-      addNotification(
-        t('notify.helperCost', {
-          total: this.muHelper.totalMoneyConsumed.toLocaleString('en-US'),
-        }),
-        'info'
-      );
-    }
-    // `[MU Helper] Started` / `Stopped` (MuHelper.cpp:116/122) go to the console log.
-    if (changed) {
-      addNotification(
-        t(active ? 'notify.helperStarted' : 'notify.helperStopped'),
-        'info'
-      );
-    }
-  }
-
-  /**
-   * `CMuHelper::Toggle` (the Start / Stop button of `CNewUIHeroPositionInfo`,
-   * the Home key of the retail client): `MuHelperStatusChangeRequest` with
-   * `PauseStatus` = running. `TriggerStart` refuses in a safe zone; the
-   * server answers with `MuHelperStatusUpdate`, which flips `muHelper.active`.
-   */
-  toggleMuHelper() {
-    const active = this.muHelper.active;
-    if (Session.isOffline) {
-      // No server to answer: flip locally so the loop can be exercised
-      // against the test scene.
-      if (!active && Ecs.world?.playerEntity?.attributeSystem?.isAboveZero('inSafeZone')) {
-        addNotification(t('notify.helperSafeZone'), 'error');
-        return;
-      }
-      this.setMuHelperStatus(!active, 0);
-      return;
-    }
-    if (!active && Ecs.world?.playerEntity?.attributeSystem?.isAboveZero('inSafeZone')) {
-      addNotification(t('notify.helperSafeZone'), 'error');
-      return;
-    }
-    const packet = MuHelperStatusChangeRequestPacket.createPacket();
-    packet.PauseStatus = active;
-    Session.sendToGS(packet.buffer);
-  }
-
-  setMuHelperConfig(config: Uint8Array) {
-    this.muHelper.config = config;
-  }
-
   /**
    * GuildInformation by guild id (the original's `GuildMark[]` table): what
    * `AssignCharacterToGuild` members print over their heads. Plain (not
@@ -459,9 +390,6 @@ export const Store = new (class _Store {
   constructor() {
     makeObservable(this, {
       weather: observable,
-      muHelper: observable,
-      setMuHelperStatus: action,
-      setMuHelperConfig: action,
       pickedItem: observable,
       itemHotkeys: observable,
       pendingItemMove: observable,
