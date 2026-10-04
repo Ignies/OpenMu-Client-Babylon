@@ -23,7 +23,7 @@ server decides whether to run them.
   `Social.sendChat`. Sends are queued and retried every 600 ms because `sendChat` refuses a line
   inside `CHAT_COOLDOWN_MS`. A `confirm: true` command arms on the first press and sends on the
   second; editing a field disarms it. The last 12 sent lines are kept.
-- `available` reads `Store.playerData.isGameMaster` (set by `hero/net.ts`) or `Store.isOffline`.
+- `available` reads `Hero.isGameMaster` (set by `hero/net.ts`) or `Store.isOffline`.
 - `gmWorld.ts` reads the ECS on every call (not observable); the window polls it while open.
   `gmNearby.ts` holds the sorting and distance math (players first, then Chebyshev distance).
 - `admin/`: `feed.ts` opens a WebSocket to the proxy (`adminStreamUrl`) only while the panel is

@@ -1,6 +1,7 @@
 import { t } from '../../i18n';
 import { action, computed, makeObservable, observable, runInAction } from 'mobx';
 import { Store } from '../../app/store';
+import { Hero } from '../hero';
 import { Session } from '../session';
 import { Ecs } from '../../ecs/current';
 import {
@@ -343,7 +344,7 @@ export const Social = new (class _Social {
    * track the pairs where the hero is the defender. */
   trackSelfDefense(text: string): void {
     const parsed = parseSelfDefense(text);
-    if (!parsed || parsed.defender !== Store.playerData.name) return;
+    if (!parsed || parsed.defender !== Hero.name) return;
     if (parsed.active) {
       this.selfDefense.set(parsed.attacker, Date.now() + SELF_DEFENSE_MS);
     } else {
@@ -388,12 +389,12 @@ export const Social = new (class _Social {
     const guild = entity.guild ? Store.guilds.get(entity.guild.id) : undefined;
     // For ourselves the server answered both outright (CharacterInformation);
     // for anyone else `isGm` is the `#` shout guess and all there is.
-    const own = sender === Store.playerData.name;
+    const own = sender === Hero.name;
 
     return {
       senderGuild: guild?.name || undefined,
-      senderPk: own ? Store.playerData.heroState : entity.heroState,
-      senderGm: own ? Store.playerData.isGameMaster : entity.isGm,
+      senderPk: own ? Hero.heroState : entity.heroState,
+      senderGm: own ? Hero.isGameMaster : entity.isGm,
     };
   }
 
@@ -636,7 +637,7 @@ export const Social = new (class _Social {
     if (now - this.lastChatTime < CHAT_COOLDOWN_MS) return false;
     this.lastChatTime = now;
 
-    const heroName = Store.playerData.name;
+    const heroName = Hero.name;
     // A `/command` is never a whisper, whatever the whisper field holds
     // (the original checks the slash before the whisper id).
     const whisperTo =
@@ -734,7 +735,7 @@ export const Social = new (class _Social {
     const packet = PublicChatMessagePacket.createPacket(
       PublicChatMessagePacket.getRequiredSize(10 + token.length)
     );
-    packet.setCharacter(Store.playerData.name);
+    packet.setCharacter(Hero.name);
     packet.setMessage(token);
     Session.sendToGS(packet.buffer);
 
@@ -771,7 +772,7 @@ export const Social = new (class _Social {
   get isPartyLeader(): boolean {
     return (
       this.partyMembers.length > 0 &&
-      this.partyMembers[0].name === Store.playerData.name
+      this.partyMembers[0].name === Hero.name
     );
   }
 
@@ -785,7 +786,7 @@ export const Social = new (class _Social {
 
   /** RemovePartyMember: the hero's own index dissolves the whole list. */
   removePartyMember(index: number): void {
-    const me = this.partyMembers.find(m => m.name === Store.playerData.name);
+    const me = this.partyMembers.find(m => m.name === Hero.name);
     if (!me || me.index === index) {
       this.partyMembers = [];
       this.errorMessage(t('party.left'));
@@ -843,7 +844,7 @@ export const Social = new (class _Social {
   }
 
   partyLeave(): void {
-    const me = this.partyMembers.find(m => m.name === Store.playerData.name);
+    const me = this.partyMembers.find(m => m.name === Hero.name);
     if (me) this.partyKick(me.index);
   }
 
@@ -899,7 +900,7 @@ export const Social = new (class _Social {
    */
   promptGuildKick(name: string): void {
     runInAction(() => {
-      this.guildKickPrompt = { name, self: name === Store.playerData.name };
+      this.guildKickPrompt = { name, self: name === Hero.name };
     });
   }
 
@@ -932,7 +933,7 @@ export const Social = new (class _Social {
   }
 
   guildLeave(securityCode = ''): void {
-    this.guildKick(Store.playerData.name, securityCode);
+    this.guildKick(Hero.name, securityCode);
   }
 
   /**

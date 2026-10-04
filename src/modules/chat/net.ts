@@ -9,7 +9,7 @@ import { NetStats } from '@/controllers/net/roundTrip';
 import { Notices } from './notices';
 import { SlideHelp } from '@/controllers/interface/slideHelp';
 import { Social } from '../social/social';
-import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
 
 import { fromChatWire } from '@/controllers/net/protocols/chatWire';
@@ -64,7 +64,7 @@ export function installNet(): void {
     // what the round-trip figure is measured on (controllers/net/roundTrip.ts).
     if (
       p.Type !== ChatMessageChatMessageTypeEnum.Whisper &&
-      sender === Store.playerData.name
+      sender === Hero.name
     ) {
       NetStats.markAnswered('chat');
     }

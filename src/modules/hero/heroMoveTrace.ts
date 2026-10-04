@@ -1,4 +1,5 @@
 import { Store } from '../../app/store';
+import { Hero } from './state';
 import type { Entity } from '../../ecs/world';
 
 /**
@@ -21,7 +22,7 @@ export function traceHeroInstantMove(
   const tiles = Math.hypot(to.x - from.x, to.y - from.y);
   if (tiles < NOTABLE_TILES) return;
 
-  const walk = Store.lastWalkRequest;
+  const walk = Hero.lastWalkRequest;
   const path = hero.pathfinding?.path;
   const attack = approach.attack?.transform?.pos;
 

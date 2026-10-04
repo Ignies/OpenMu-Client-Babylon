@@ -2,7 +2,7 @@ import { observable, runInAction } from 'mobx';
 import type { TextKey } from '@/i18n';
 import type { Entity, NetEntity } from '@/ecs/world';
 import { EventBus } from '@/core/eventBus';
-import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
 import { NetStats } from '@/controllers/net/roundTrip';
 import {
@@ -385,7 +385,7 @@ export function joinBand(masterId: number, channelMask = ALL_CHANNELS): void {
   membership = { masterId, instrument, channelMask };
   runInAction(() => {
     Band.role = 'member';
-    Band.band = { masterId, members: [{ netId: Store.playerId ?? 0, instrument, channelMask }] };
+    Band.band = { masterId, members: [{ netId: Hero.playerId ?? 0, instrument, channelMask }] };
   });
   refreshLocalMask();
 }
@@ -402,7 +402,7 @@ export function leaveBand(): void {
 
 /** A member joined or left the hero's band (from the wire); the hero becomes / stays the master. */
 export function memberChanged(member: BandMember | null, netId: number): void {
-  const me = Store.playerId ?? 0;
+  const me = Hero.playerId ?? 0;
   const current = Band.band ?? { masterId: me, members: [] };
   const next = member ? withMember(current, member) : withoutMember(current, netId);
   runInAction(() => {

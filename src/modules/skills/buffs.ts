@@ -15,6 +15,7 @@ import type { ENUM_WORLD } from '../../core/types';
 import type { SkillLayer } from './layer';
 import { buffRecipe, type BuffKind } from './recipes';
 import { Store } from '../../app/store';
+import { Hero } from '../hero';
 
 // ---- 1. tuning -------------------------------------------------------------
 
@@ -96,7 +97,7 @@ export function buffRemaining(effectId: number): number | null {
   const started = startedAt.get(effectId);
   const duration = buffRecipe(effectId).durationSeconds;
   if (started === undefined || !duration) return null;
-  const total = duration(Store.playerData.eng);
+  const total = duration(Hero.eng);
   return Math.max(0, total - (clock - started));
 }
 

@@ -1,5 +1,5 @@
 import { autorun } from 'mobx';
-import { Store } from '../../app/store';
+import { Hero } from '../hero';
 import { Session } from '../session';
 import { InventoryConstants } from '@/core/inventoryConstants';
 import { buildEscrowRequest, parseEscrowResult, type EscrowResult } from '../../controllers/net/protocols/escrowWire';
@@ -16,7 +16,7 @@ import { Marketplace, type BagEntry } from './state';
  * the game server and the result packets back.
  */
 function bagEntries(): BagEntry[] {
-  const items = Store.playerData.items;
+  const items = Hero.items;
   const start = InventoryConstants.EquippableSlotsCount;
   const out: BagEntry[] = [];
   for (let slot = start; slot < items.length; slot++) {
@@ -27,7 +27,7 @@ function bagEntries(): BagEntry[] {
 }
 
 function syncMarketplaceFromGame(): void {
-  Marketplace.syncFromGame(Store.playerData.money, bagEntries(), Store.playerData.name);
+  Marketplace.syncFromGame(Hero.money, bagEntries(), Hero.name);
 }
 
 export function toggleMarketplace(): void {

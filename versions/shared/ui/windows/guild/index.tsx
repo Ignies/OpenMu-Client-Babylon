@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
 import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
 import {
   GUILD_SECURITY_CODE_MAX,
@@ -217,8 +218,8 @@ const InfoTab = observer(() => {
     Social.isGuildMaster
       ? t('guild.stat.membersMaster', {
           count: Social.guildMembers.length,
-          max: Store.playerData.level
-            ? Math.min(80, Math.trunc(Store.playerData.level / 10))
+          max: Hero.level
+            ? Math.min(80, Math.trunc(Hero.level / 10))
             : 0,
         })
       : t('guild.stat.members', { count: Social.guildMembers.length }),
@@ -290,7 +291,7 @@ const InfoTab = observer(() => {
         x={100}
         y={350}
         label={Social.isGuildMaster ? t('guild.disband') : t('guild.leave')}
-        onClick={() => Social.promptGuildKick(Store.playerData.name)}
+        onClick={() => Social.promptGuildKick(Hero.name)}
       />
     </>
   );
@@ -299,7 +300,7 @@ const InfoTab = observer(() => {
 /** `Render_Guild_Enum`: name / position / server, with the master's buttons. */
 const MembersTab = observer(() => {
   const master = Social.isGuildMaster;
-  const me = Store.playerData.name;
+  const me = Hero.name;
   const [selected, setSelected] = useState('');
   const row = Social.guildMembers.find(m => m.name === selected);
   const canAct = master && !!row && row.name !== me;

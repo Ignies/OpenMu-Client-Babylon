@@ -1,6 +1,7 @@
 import { observer } from 'mobx-react-lite';
 import { t, type TextKey } from '@/i18n';
 import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
 import { addNotification } from '@/modules/chat';
 import { Ecs } from '@/ecs/current';
 import { PET_GROUP } from '@versions/shared/items/petItems';
@@ -47,7 +48,7 @@ const COMMANDS: readonly {
 const BAR_TOP = 480 - 51;
 
 function ravenEquipped(): boolean {
-  const item = Store.playerData.items[InventoryConstants.LeftHandSlot];
+  const item = Hero.items[InventoryConstants.LeftHandSlot];
   return !!item && item.group === PET_GROUP && item.num === DARK_RAVEN_INDEX;
 }
 

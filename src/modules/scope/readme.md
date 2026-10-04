@@ -24,7 +24,7 @@ players, plus their moves and equipment changes. The entities live in the ECS wo
 - Leaving scope sets `objOutOfScope`; a player fading out after a teleport is deferred
   (`deferLeave` in `ecs/systems/teleportSystem.ts`). The personal shop title goes with him.
 - Appearance changes (0x25, `ReceiveChangePlayer`) only touch other players; the hero's look comes
-  from the inventory (`Store.syncPlayerAppearance`).
+  from the inventory (`Hero.syncPlayerAppearance`).
 
 ## Packets
 - `AddNpcsToScope`: NPCs and monsters enter view.

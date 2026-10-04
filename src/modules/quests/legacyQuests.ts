@@ -27,6 +27,7 @@ import { playUiSound } from '../../controllers/sound/sfx';
 import { showObjectEffect } from '../../ecs/systems/objectEffectSystem';
 import { MAX_QUESTS, QuestActKind, type QuestDefinition } from '../../controllers/assets/mu/questFiles';
 import { Store } from '../../app/store';
+import { Hero } from '../hero';
 import { Session } from '../session';
 import { addNotification } from '../chat';
 import { Ecs } from '../../ecs/current';
@@ -177,7 +178,7 @@ export function legacyQuestListReceived(): boolean {
 
 /** `GetBaseClass(Hero->Class)` as the act's class column. */
 function heroClass(): BaseClass {
-  return getBaseClass(Store.playerData.charClass);
+  return getBaseClass(Hero.charClass);
 }
 
 /**
@@ -254,7 +255,7 @@ function ownState(index: number, packed: number): number {
 /** `FindQuestItemsInInven`: how many of `count` items are still missing. */
 function missingItems(itemType: number, count: number, level: number): number {
   let found = 0;
-  for (const item of Store.playerData.items) {
+  for (const item of Hero.items) {
     if (!item) continue;
     if (item.group * MAX_ITEM_INDEX + item.num !== itemType) continue;
     if (level !== -1 && (item.lvl ?? 0) !== level) continue;
@@ -289,7 +290,7 @@ function requestCheck(quest: QuestDefinition, lastCheck: boolean): { errorPage: 
           break outer;
         }
       }
-      const level = Store.playerData.level;
+      const level = Hero.level;
       if (req.levelMin > 0 && req.levelMin > level) {
         errorPage = req.errorText;
         break outer;
@@ -300,7 +301,7 @@ function requestCheck(quest: QuestDefinition, lastCheck: boolean): { errorPage: 
       }
       if (req.zen > 0) {
         needZen = req.zen;
-        if (lastCheck && needZen > Store.playerData.money) {
+        if (lastCheck && needZen > Hero.money) {
           errorPage = req.errorText;
           break outer;
         }
@@ -710,7 +711,7 @@ EventBus.on('LegacySetQuestStateResponse', packet => {
 function evolveHero(cls: number, step: number): void {
   if (classOf(cls).step !== step) return;
   runInAction(() => {
-    Store.playerData.charClass = cls as CharacterClassNumber;
+    Hero.charClass = cls as CharacterClassNumber;
   });
   const hero = Ecs.world?.playerEntity;
   if (hero?.charAppearance) {
@@ -732,7 +733,7 @@ EventBus.on('LegacyQuestReward', packet => {
       // Gain Hero Status done at exactly level 220 sends 202 with 0 points.
       if (isHero && p.Count > 0) {
         runInAction(() => {
-          Store.playerData.points += p.Count;
+          Hero.points += p.Count;
         });
         addNotification(t('quest.rewardPoints', { count: p.Count }), 'info');
       }
@@ -764,8 +765,8 @@ EventBus.on('heroWalked', () => closeLegacyQuestWindow());
 // stat add or a reset, so only a different hero starts from a blank chain.
 let heroName: string | null = null;
 EventBus.on('CharacterInformation', () => {
-  if (Store.playerData.name !== heroName) {
-    heroName = Store.playerData.name;
+  if (Hero.name !== heroName) {
+    heroName = Hero.name;
     runInAction(() => {
       state.states.fill(LegacyQuestState.None);
       state.currentIndex = 0;

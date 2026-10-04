@@ -17,7 +17,7 @@ import {
 } from '../../controllers/terrain/restObjects';
 import { aimX, aimY } from '../../controllers/camera';
 import { sound } from '../../controllers/sound';
-import { Store } from '../../app/store';
+import { Hero } from '../../modules/hero';
 import { Session } from '../../modules/session';
 import type { ISystemFactory } from '../world';
 
@@ -213,7 +213,7 @@ if (done.useObjectAngle) {
       );
 
       if (!Session.isOffline) {
-        Store.sendAnimationRequest(
+        Hero.sendAnimationRequest(
           rotationByte(playerEntity.transform.rot.y),
           SERVER_ACTION[done.kind]
         );

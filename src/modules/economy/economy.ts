@@ -3,6 +3,7 @@ import { t, type TextKey } from '../../i18n';
 import { makeObservable, observable, action, runInAction } from 'mobx';
 import { prefetchItemIcons } from '../../controllers/assets/itemIconPack';
 import { Store } from '../../app/store';
+import { Hero } from '../hero';
 import { Session } from '../session';
 import { addNotification } from '../chat';
 import { Social } from '../social/social';
@@ -589,7 +590,7 @@ export const Economy = new (class _Economy {
       return;
     }
 
-    const available = toVault ? Store.playerData.money : this.vaultMoney;
+    const available = toVault ? Hero.money : this.vaultMoney;
     if (amount > available) {
       addNotification(t('common.notEnoughZen'), 'error');
       return;
@@ -598,11 +599,11 @@ export const Economy = new (class _Economy {
     if (Session.isOffline) {
       runInAction(() => {
         if (toVault) {
-          Store.playerData.money -= amount;
+          Hero.money -= amount;
           this.vaultMoney += amount;
         } else {
           this.vaultMoney -= amount;
-          Store.playerData.money += amount;
+          Hero.money += amount;
         }
       });
       return;
@@ -625,7 +626,7 @@ export const Economy = new (class _Economy {
 
     runInAction(() => {
       this.vaultMoney = vaultMoney;
-      Store.playerData.money = inventoryMoney;
+      Hero.money = inventoryMoney;
     });
   }
 
@@ -906,7 +907,7 @@ export const Economy = new (class _Economy {
   setTradeMoney(amount: number): void {
     if (!this.tradeOpen) return;
 
-    if (amount > Store.playerData.money + this.myTradeMoney) {
+    if (amount > Hero.money + this.myTradeMoney) {
       addNotification(t('notify.notThatMuchZen'), 'error');
       return;
     }
@@ -1027,7 +1028,7 @@ export const Economy = new (class _Economy {
       return;
     }
 
-    if (Store.playerData.level < 6) {
+    if (Hero.level < 6) {
       Social.errorMessage(t('personalShop.needLevel'));
       return;
     }
@@ -1164,14 +1165,14 @@ export const Economy = new (class _Economy {
    * without this the one person who cannot see the stall is its owner.
    */
   private showHeroShopTitle(): void {
-    if (Store.playerId === undefined) return;
-    this.setShopTitle(Store.playerId, this.myShopName);
+    if (Hero.playerId === undefined) return;
+    this.setShopTitle(Hero.playerId, this.myShopName);
   }
 
   /** `RemoveShopTitle(Hero)`: the stall is down. */
   private hideHeroShopTitle(): void {
-    if (Store.playerId === undefined) return;
-    this.setShopTitle(Store.playerId, null);
+    if (Hero.playerId === undefined) return;
+    this.setShopTitle(Hero.playerId, null);
   }
 
   /** `SendPlayerShopClose`. */
@@ -1284,7 +1285,7 @@ export const Economy = new (class _Economy {
     const entry = browse.items[square];
     if (!entry) return;
 
-    if (entry.price > Store.playerData.money) {
+    if (entry.price > Hero.money) {
       Social.errorMessage(t('personalShop.notEnoughZen'));
       return;
     }

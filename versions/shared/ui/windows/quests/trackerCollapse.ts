@@ -8,7 +8,7 @@
  */
 import { observable, reaction, runInAction } from 'mobx';
 import { LocalStorage } from '@/core/localStorage';
-import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
 
 const STORAGE_KEY = 'mu_quest_tracker';
 
@@ -39,7 +39,7 @@ function loadProfile(name: string): void {
 }
 
 reaction(
-  () => Store.playerData.name,
+  () => Hero.name,
   name => loadProfile(name),
   { fireImmediately: true }
 );

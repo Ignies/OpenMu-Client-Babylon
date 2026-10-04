@@ -1,7 +1,7 @@
 import { TILE_CM, TWFlags } from '../../controllers/terrain/consts';
 import { isFlagInBinaryMask } from '../../controllers/assets/download';
 import { InventoryConstants } from '@/core/inventoryConstants';
-import { Store } from '../../app/store';
+import { Hero } from '../../modules/hero';
 import { BaseClass, getBaseClass } from '../../modules/hero/characterStats';
 import { isSwimWorld } from '../../controllers/actors/locomotion';
 import { isFastWing } from '../../controllers/actors/wings';
@@ -51,14 +51,14 @@ const HORN_OF_FENRIR = 37;
  * run clip - OpenMU has no free run for the Dark Knight.
  */
 function runningMovementSpeed(entity: Entity, world: number): number {
-  const items = Store.playerData.items;
+  const items = Hero.items;
   const app = entity.charAppearance;
   const local = !!entity.localPlayer;
   const boots = local ? items[InventoryConstants.BootsSlot] : app?.boots;
   const gloves = local ? items[InventoryConstants.GlovesSlot] : app?.gloves;
   const wings = local ? items[InventoryConstants.WingsSlot] : app?.wings;
   const pet = local ? items[InventoryConstants.PetSlot] : app?.pet;
-  const cls = local ? Store.playerData.charClass : app?.charClass;
+  const cls = local ? Hero.charClass : app?.charClass;
 
   let speed = 0;
   if (cls !== undefined) {
@@ -126,7 +126,7 @@ export const MoveAlongPathSystem: ISystemFactory = world => {
           // and only when it moved.
           const tileX = ~~transform.pos.x;
           const tileY = ~~transform.pos.z;
-          const playerData = Store.playerData;
+          const playerData = Hero;
           if (playerData.x !== tileX || playerData.y !== tileY) {
             playerData.setPosition(tileX, tileY);
           }

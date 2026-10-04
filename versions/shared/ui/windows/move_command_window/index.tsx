@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, type WheelEvent } from 'react';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
 import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
 import { Session } from '@/modules/session';
 import { Ecs } from '@/ecs/current';
 import { isKey } from '@/controllers/interface/keyBindings';
@@ -258,7 +259,7 @@ export const MoveCommandWindow = observer(() => {
 
   if (!open) return null;
 
-  const { level, money, charClass } = Store.playerData;
+  const { level, money, charClass } = Hero;
   const cls = getBaseClass(charClass);
   const pk = Ecs.world?.playerEntity?.heroState ?? 3;
 

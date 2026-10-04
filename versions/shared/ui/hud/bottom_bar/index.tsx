@@ -3,6 +3,7 @@ import { t } from '@/i18n';
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
 import { ItemIcon } from '@/controllers/interface/components/item_icon';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
@@ -131,7 +132,7 @@ const Gauge = ({
  * kind, the way Ctrl+key over the inventory does.
  */
 const ConsumableItem = observer(({ index, hotKey }: { index: number; hotKey: string }) => {
-  const items = Store.playerData.items;
+  const items = Hero.items;
   const hotkey = Store.itemHotkeys[index];
   const slot = findHotkeyItem(items, index, hotkey);
   const icon: Item | null = slot >= 0 ? items[slot] : null;
@@ -234,7 +235,7 @@ const EXP_HOVER_PAD = 4;
 const EXP_HOVER_WIDTH = EXP_WIDTH - 14;
 
 const ExpBar = observer(() => {
-  const progress = Store.playerData.expPercent;
+  const progress = Hero.expPercent;
   const hover = useRef<HTMLDivElement>(null);
   const [tip, setTip] = useState<{ x: number; y: number } | null>(null);
 
@@ -724,7 +725,7 @@ const SkillSlots = observer(() => {
  * re-renders on a tick of them.
  */
 const Orbs = observer(() => {
-  const playerData = Store.playerData;
+  const playerData = Hero;
   return (
     <>
       <Gauge

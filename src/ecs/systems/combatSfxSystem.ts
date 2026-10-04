@@ -38,7 +38,7 @@ import {
   type CueState,
 } from '../../controllers/sound/mapMonsters';
 import { MonsterAttackEffects } from '../../controllers/sound/monsterEffects';
-import { Store } from '../../app/store';
+import { Hero } from '../../modules/hero';
 import { heldWeapons } from '../../controllers/actors';
 
 /**
@@ -165,7 +165,7 @@ export const CombatSfxSystem: ISystemFactory = world => {
   function classOf(e: (typeof query.entities)[number]): CharacterClassNumber {
     return (
       e.charAppearance?.charClass ??
-      (e.localPlayer ? Store.playerData.charClass : undefined) ??
+      (e.localPlayer ? Hero.charClass : undefined) ??
       (e.attributeSystem?.getValue('playerNetClass') as CharacterClassNumber)
     );
   }

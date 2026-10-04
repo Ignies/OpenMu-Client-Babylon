@@ -4,7 +4,7 @@ import { EventBus } from '@/core/eventBus';
 import { ItemSerializer } from '@/controllers/item_rules';
 import { PERSONAL_SHOP_SLOTS, StorageKind, localIndexOf } from '../inventory/itemStorage';
 import { Social } from '../social/social';
-import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
 import { t, type TextKey } from '@/i18n';
 import { cleanName } from '../chat/chat';
 import { runInAction } from 'mobx';
@@ -75,7 +75,7 @@ export function installNet(): void {
     // only. `stopSelling()` would send PlayerShopClose again, which OpenMU
     // answers with another PlayerShopClosed - 600 round trips in one second
     // (verified live).
-    if (Store.playerId === maskedId) Economy.sellingStopped();
+    if (Hero.playerId === maskedId) Economy.sellingStopped();
   });
 
   EventBus.on('ClosePlayerShopDialog', packet => {
@@ -130,9 +130,9 @@ export function installNet(): void {
     const item = ItemSerializer.DeserializeItem(new Uint8Array(p.ItemData.buffer));
 
     runInAction(() => {
-      Store.playerData.items[p.ItemSlot] = item;
+      Hero.items[p.ItemSlot] = item;
     });
 
-    Store.syncPlayerAppearance();
+    Hero.syncPlayerAppearance();
   });
 }

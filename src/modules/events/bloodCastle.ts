@@ -3,7 +3,7 @@ import { ENUM_WORLD } from '../../core/types';
 import { BaseClass, getBaseClass } from '../hero/characterStats';
 import type { Item } from '../../ecs/world';
 import { EventBus } from '../../core/eventBus';
-import { Store } from '../../app/store';
+import { Hero } from '../hero';
 import { Session } from '../session';
 import { addNotification } from '../chat';
 import { Ecs } from '../../ecs/current';
@@ -225,7 +225,7 @@ export function inBloodCastle(map: ENUM_WORLD): boolean {
 
 /** `OpenningProcess` + `Render`: build the buttons and show the window. */
 export function openBloodCastle(): void {
-  const pd = Store.playerData;
+  const pd = Hero;
   const row = LOWER_LIMIT_CLASSES.has(getBaseClass(pd.charClass)) ? 1 : 0;
   const { buttons, active } = entryButtons(
     BLOOD_CASTLE_LEVELS,
@@ -352,7 +352,7 @@ export function archangelDialog(dialog: number): boolean {
  */
 function archangelAnswer(): number {
   if (weaponReturned) return ARCHANGEL_DIALOG.weaponFound;
-  const carrying = Store.playerData.items.some(
+  const carrying = Hero.items.some(
     item => item?.group === WEAPON_OF_ARCHANGEL.group && item.num === WEAPON_OF_ARCHANGEL.num
   );
   if (state.timer.running && carrying) {

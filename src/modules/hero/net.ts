@@ -8,7 +8,7 @@ import { PlayerAction } from '@versions/shared/objects/enum';
 import { SessionResume } from '../session/sessionResume';
 import { Social } from '../social/social';
 import { StatType, masterExperienceActive } from './characterStats';
-import { Store } from '@/app/store';
+import { Hero } from './state';
 import { addNotification } from '@/modules/chat';
 import { AppState, UIState } from '@/app/uiState';
 import { Ecs } from '@/ecs/current';
@@ -56,7 +56,7 @@ type CharacterInformationView = Pick<
 const GAME_MASTER_STATUS = 0x20;
 
 function applyCharacterInformation(p: CharacterInformationView) {
-  const playerData = Store.playerData;
+  const playerData = Hero;
 
   // Chat, party, guild and messenger state belong to the character: clear on
   // select, before the new values land. MessengerInitialization arrives
@@ -138,15 +138,15 @@ function handleRespawnAfterDeath(packet: DataView) {
   const pos = { x: p.PositionX, y: p.PositionY };
 
   runInAction(() => {
-    Store.playerData.currentHP = p.CurrentHealth;
-    Store.playerData.currentMP = p.CurrentMana;
+    Hero.currentHP = p.CurrentHealth;
+    Hero.currentMP = p.CurrentMana;
     if (!(p instanceof RespawnAfterDeath075Packet)) {
-      Store.playerData.currentAG = p.CurrentAbility;
+      Hero.currentAG = p.CurrentAbility;
     }
     if (!(p instanceof RespawnAfterDeath075Packet) && !(p instanceof RespawnAfterDeath095Packet)) {
-      Store.playerData.currentSD = p.CurrentShield;
+      Hero.currentSD = p.CurrentShield;
     }
-    Store.playerData.money = p.Money;
+    Hero.money = p.Money;
     // The generated reader hands back a BigInt (S6 / Extended: 8 bytes big-endian at offset 16,
     // matching OpenMU's `RespawnAfterDeath` struct) or a uint32 (0.75 / 0.95); the store (and
     // `expPercent`) work in Number. OpenMU fills the field from `Character.Experience`, which is
@@ -154,7 +154,7 @@ function handleRespawnAfterDeath(packet: DataView) {
     // hero on `MasterExperience`; a zero here never means "you lost everything", so the last
     // known value is kept - `CharacterInformation` / `ExperienceGained` remain the source of truth.
     const exp = Number(p.Experience ?? 0);
-    if (exp > 0) Store.playerData.exp = exp;
+    if (exp > 0) Hero.exp = exp;
   });
 
   // g_iFollowCharacter = -1: a follow does not survive the hero dying.
@@ -219,7 +219,7 @@ type LevelUpdateView = Pick<
 >;
 
 function applyLevelUpdate(p: LevelUpdateView) {
-  const playerData = Store.playerData;
+  const playerData = Hero;
 
   runInAction(() => {
     playerData.level = p.Level;
@@ -250,7 +250,7 @@ function applyExperienceGained(p: { AddedExperience: number; KilledObjectId: num
   if (added <= 0) return;
 
   // ReceiveDieExp (WSclient.cpp:5719-5743): a master gains master experience instead (modules/skills/masterLevel.ts).
-  const pd = Store.playerData;
+  const pd = Hero;
   if (!masterExperienceActive(pd.charClass, pd.level)) runInAction(() => (pd.exp += added));
 
   EventBus.emit('experienceGained', {
@@ -286,8 +286,8 @@ export function installNet(): void {
     if (!playerEntity) return;
     playerEntity.attributeSystem.setValue('currentHealth', p.Health);
     runInAction(() => {
-      Store.playerData.currentHP = Math.floor(p.Health);
-      Store.playerData.currentSD = Math.floor(p.Shield);
+      Hero.currentHP = Math.floor(p.Health);
+      Hero.currentSD = Math.floor(p.Shield);
     });
   });
 
@@ -297,7 +297,7 @@ export function installNet(): void {
     playerEntity?.attributeSystem.setValue('currentHealth', p.Health);
     playerEntity?.attributeSystem.setValue('currentMana', p.Mana);
     runInAction(() => {
-      const pd = Store.playerData;
+      const pd = Hero;
       pd.currentHP = Math.floor(p.Health);
       pd.currentSD = Math.floor(p.Shield);
       pd.currentMP = Math.floor(p.Mana);
@@ -310,7 +310,7 @@ export function installNet(): void {
   EventBus.on('MaximumStatsExtended', packet => {
     const p = new MaximumStatsExtendedPacket(packet);
     runInAction(() => {
-      const pd = Store.playerData;
+      const pd = Hero;
       pd.maxHP = p.Health;
       pd.maxSD = p.Shield;
       pd.maxMP = p.Mana;
@@ -321,16 +321,16 @@ export function installNet(): void {
   EventBus.on('MaximumHealthAndShield', packet => {
     const p = new MaximumHealthAndShieldPacket(packet);
     runInAction(() => {
-      Store.playerData.maxHP = p.Health;
-      Store.playerData.maxSD = p.Shield;
+      Hero.maxHP = p.Health;
+      Hero.maxSD = p.Shield;
     });
   });
 
   EventBus.on('MaximumManaAndAbility', packet => {
     const p = new MaximumManaAndAbilityPacket(packet);
     runInAction(() => {
-      Store.playerData.maxMP = p.Mana;
-      Store.playerData.maxAG = p.Ability;
+      Hero.maxMP = p.Mana;
+      Hero.maxAG = p.Ability;
     });
   });
 
@@ -342,8 +342,8 @@ export function installNet(): void {
 
     playerEntity.attributeSystem.setValue('currentMana', p.Mana);
     runInAction(() => {
-      Store.playerData.currentMP = Math.floor(p.Mana);
-      Store.playerData.currentAG = Math.floor(p.Ability);
+      Hero.currentMP = Math.floor(p.Mana);
+      Hero.currentAG = Math.floor(p.Ability);
     });
   });
 
@@ -355,7 +355,7 @@ export function installNet(): void {
     const obj = world.getByNetId(maskedId);
     if (!obj) return;
     obj.heroState = p.NewState;
-    if (obj.localPlayer) Store.playerData.heroState = p.NewState;
+    if (obj.localPlayer) Hero.heroState = p.NewState;
     // `ReceivePK` (WSclient.cpp:6609): the change is announced in the log.
     const msg = obj.objectNameInWorld
       ? heroStateMessage(obj.objectNameInWorld, p.NewState)
@@ -381,18 +381,18 @@ export function installNet(): void {
     const p = new PoisonDamagePacket(packet);
 
     runInAction(() => {
-      Store.playerData.currentHP = Math.max(
+      Hero.currentHP = Math.max(
         0,
-        Store.playerData.currentHP - p.HealthDamage
+        Hero.currentHP - p.HealthDamage
       );
-      Store.playerData.currentSD = p.CurrentShield;
+      Hero.currentSD = p.CurrentShield;
     });
 
     const playerEntity = Ecs.world?.playerEntity;
     if (playerEntity) {
       playerEntity.attributeSystem.setValue(
         'currentHealth',
-        Store.playerData.currentHP
+        Hero.currentHP
       );
     }
   });
@@ -406,7 +406,7 @@ export function installNet(): void {
       return;
     }
 
-    const playerData = Store.playerData;
+    const playerData = Hero;
 
     runInAction(() => {
       switch (p.Attribute) {
@@ -476,7 +476,7 @@ export function installNet(): void {
       return;
     }
 
-    const playerData = Store.playerData;
+    const playerData = Hero;
 
     runInAction(() => {
       switch (p.Attribute) {
@@ -517,10 +517,10 @@ export function installNet(): void {
     if (packet.byteLength < MasterCharacterLevelUpdateExtendedPacket.Length!) return;
     const p = new MasterCharacterLevelUpdateExtendedPacket(packet);
     runInAction(() => {
-      Store.playerData.maxHP = p.MaximumHealth;
-      Store.playerData.maxMP = p.MaximumMana;
-      Store.playerData.maxSD = p.MaximumShield;
-      Store.playerData.maxAG = p.MaximumAbility;
+      Hero.maxHP = p.MaximumHealth;
+      Hero.maxMP = p.MaximumMana;
+      Hero.maxSD = p.MaximumShield;
+      Hero.maxAG = p.MaximumAbility;
     });
     addNotification(t('notify.masterLevelUp', { level: p.MasterLevel }));
   });
@@ -539,7 +539,7 @@ export function installNet(): void {
     const R = FruitConsumptionResponseFruitConsumptionResultEnum;
 
     const move = (sign: 1 | -1) => {
-      const d = Store.playerData;
+      const d = Hero;
       runInAction(() => {
         switch (p.StatType) {
           case FruitConsumptionResponseFruitStatTypeEnum.Energy:
@@ -606,7 +606,7 @@ export function installNet(): void {
     if (packet.byteLength < BaseStatsExtendedPacket.Length!) return;
     const p = new BaseStatsExtendedPacket(packet);
     runInAction(() => {
-      const pd = Store.playerData;
+      const pd = Hero;
       pd.str = p.Strength;
       pd.agi = p.Agility;
       pd.sta = p.Vitality;

@@ -3,7 +3,7 @@ import { Vector3 } from '../../controllers/render/babylon/exports';
 import { ENUM_WORLD } from '../../core/types';
 import { EventBus } from '../../core/eventBus';
 import { playSfx } from '../../controllers/sound/sfx';
-import { Store } from '../../app/store';
+import { Hero } from '../hero';
 import { Session } from '../session';
 import { addNotification } from '../chat';
 import { Ecs } from '../../ecs/current';
@@ -344,7 +344,7 @@ export function refreshKanturu(): void {
  */
 export function enterKanturu(): void {
   if (!state.canEnter || Session.isOffline) return;
-  const p = Store.playerData;
+  const p = Hero;
   startGatewayTurn({
     tower: state.state === KanturuState.Tower,
     helper: p.petSlot,

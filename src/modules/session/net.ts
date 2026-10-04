@@ -5,6 +5,7 @@ import { GameServerEnteredPacket, LoginResponseLoginResultEnum, LoginResponsePac
 import { SessionExit } from './sessionExit';
 import { SessionResume } from './sessionResume';
 import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
 import { Servers } from '@/modules/servers';
 import { Session } from './state';
 import { AppState, UIState } from '@/app/uiState';
@@ -31,14 +32,14 @@ export function installNet(): void {
 
     const id = p.PlayerId & 0x7fff;
     runInAction(() => {
-      Store.playerId = id;
+      Hero.playerId = id;
     });
-    console.log(`PlayerID: ${Store.playerId}`);
+    console.log(`PlayerID: ${Hero.playerId}`);
 
     // A map-server switch re-authenticates on the new server instead of
     // showing the login form (CSMServer::SendChangeMapServer); the server
     // answers with the character state and the world carries on.
-    if (Session.sendServerChangeAuthentication(Store.playerData.name)) return;
+    if (Session.sendServerChangeAuthentication(Hero.name)) return;
 
     // A resume sends the login itself instead of showing the form.
     if (SessionResume.onGameServerEntered()) return;

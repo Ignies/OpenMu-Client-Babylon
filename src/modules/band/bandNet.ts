@@ -1,5 +1,5 @@
 import { EventBus } from '../../core/eventBus';
-import { Store } from '../../app/store';
+import { Hero } from '../hero';
 import { Session } from '../session';
 import { Ecs } from '../../ecs/current';
 import { Social } from '../social/social';
@@ -132,7 +132,7 @@ export function installBandNet(): void {
       return;
     }
 
-    const self = Store.playerId ?? -1;
+    const self = Hero.playerId ?? -1;
 
     if (msg.performerId === self) {
       // A notice about this client's own performance.

@@ -7,7 +7,7 @@ import { type MUAttributeSystem } from '@/core/attributeSystem';
 import { MonsterActionType, PlayerAction, ServerPlayerActionType } from '@versions/shared/objects/enum';
 import { ObjectAnimationPacket, ObjectGotKilledPacket, ObjectHitExtendedPacket, ObjectHitPacket, RageAttackPacket, RageAttackRangeResponsePacket, SkillAnimationPacket } from '@versions/shared/packets/ServerToClientPackets';
 import { ServerToClientActionMap, resolveGenderedAction } from '@/controllers/anim/playerActionMapper';
-import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
 import { attackInputOf, attackPoseOf, convertDirectionToAngle, isDeadMonster, monsterNumberOf, playCastAnimation, playTrapSounds, setMonsterClip } from '../_shared/net_helpers';
 import { chooseAttackAction, isWeaponItem } from '@/controllers/actors/weaponClass';
@@ -32,7 +32,7 @@ function fenrirDamageAction(obj: Entity): PlayerAction {
   const main = isWeaponItem(hands?.leftHand ?? null);
   const off = isWeaponItem(hands?.rightHand ?? null);
   const A = PlayerAction;
-  if (getBaseClass(hands?.charClass ?? Store.playerData.charClass) === BaseClass.RageFighter) {
+  if (getBaseClass(hands?.charClass ?? Hero.charClass) === BaseClass.RageFighter) {
     if (main && off) return A.PLAYER_RAGE_FENRIR_DAMAGE_TWO_SWORD;
     if (main) return A.PLAYER_RAGE_FENRIR_DAMAGE_ONE_RIGHT;
     if (off) return A.PLAYER_RAGE_FENRIR_DAMAGE_ONE_LEFT;
@@ -415,9 +415,9 @@ export function installNet(): void {
     const obj = world.getByNetId(killedId);
 
     if (!obj) {
-      if (killedId === Store.playerId) {
+      if (killedId === Hero.playerId) {
         runInAction(() => {
-          Store.playerData.currentHP = 0;
+          Hero.currentHP = 0;
         });
         const playerEntity = world.playerEntity;
         if (playerEntity) {
@@ -440,7 +440,7 @@ export function installNet(): void {
 
     if (obj.localPlayer) {
       runInAction(() => {
-        Store.playerData.currentHP = 0;
+        Hero.currentHP = 0;
       });
     }
     if (world.currentPointerTarget === obj) {
@@ -450,7 +450,7 @@ export function installNet(): void {
     // Dead = 1; the Die clip itself starts in DeathSystem (at once, or when
     // the hero's killing swing connects - WSclient.cpp:5362-5384).
     const killerId = p.KillerId & 0x7fff;
-    const heroKill = killerId === Store.playerId;
+    const heroKill = killerId === Hero.playerId;
     markKilled(world, obj, heroKill, p.SkillId, killerId);
     if (heroKill && obj.npcType !== undefined) playKillEnergy(world, obj, p.SkillId);
   });

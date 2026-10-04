@@ -7,6 +7,7 @@ vi.mock('@/ecs/systems/teleportSystem', () => ({
   justArrived: vi.fn(() => false),
 }));
 vi.mock('@/app/store', () => ({ Store: {} }));
+vi.mock('@/modules/hero', () => ({ Hero: {} }));
 vi.mock('../_shared/net_helpers', () => ({ applyObjectEffect: vi.fn(), playCastAnimation: vi.fn() }));
 vi.mock('@versions/shared/skills/skillVisuals', () => ({
   playAreaSkillVisual: vi.fn(),

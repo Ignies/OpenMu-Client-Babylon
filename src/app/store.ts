@@ -5,7 +5,7 @@ import type { PlayerObject } from '../controllers/actors/playerObject';
 import { playUiSound } from '../controllers/sound/sfx';
 import { consumeSound, upgradedItemSound } from '../controllers/sound/ui';
 import { CharacterClassNumber, ENUM_WORLD } from '@/core/types';
-import { AnimationRequestPacket, ConsumeItemRequestPacket, SaveKeyConfigurationPacket, CreateCharacterPacket, DeleteCharacterPacket, DropItemRequestPacket, EnterGateRequestPacket, FocusCharacterPacket, IncreaseCharacterStatPointPacket, ItemMoveRequestPacket, PickupItemRequestPacket, RequestCharacterListPacket, SelectCharacterPacket, WarpCommandRequestPacket, WalkRequestPacket, TalkToNpcRequestPacket, CloseNpcRequestPacket, MuHelperStatusChangeRequestPacket, PetCommandModeEnum, PetCommandRequestPacket, PetInfoRequestPacket, PetTypeEnum, StorageTypeEnum, BuyItemFromNpcRequestPacket, SellItemToNpcRequestPacket, RepairItemRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
+import { ConsumeItemRequestPacket, SaveKeyConfigurationPacket, CreateCharacterPacket, DeleteCharacterPacket, DropItemRequestPacket, EnterGateRequestPacket, FocusCharacterPacket, ItemMoveRequestPacket, PickupItemRequestPacket, RequestCharacterListPacket, SelectCharacterPacket, WarpCommandRequestPacket, TalkToNpcRequestPacket, CloseNpcRequestPacket, MuHelperStatusChangeRequestPacket, PetCommandModeEnum, PetCommandRequestPacket, PetInfoRequestPacket, PetTypeEnum, StorageTypeEnum, BuyItemFromNpcRequestPacket, SellItemToNpcRequestPacket, RepairItemRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
 import {
   CharacterCreationUnlockFlagsEnum,
   CharacterListPacket,
@@ -23,9 +23,7 @@ import {
 } from 'mobx';
 import { Item } from '../ecs/world';
 import { EventBus } from '../core/eventBus';
-import { Scalar } from '../controllers/render/babylon/exports';
 import { InventoryConstants } from '@/core/inventoryConstants';
-import { StatType } from '../modules/hero/characterStats';
 import { findFreeSlot, type Footprint } from '../modules/inventory/inventoryFit';
 import { jewelTargetError } from '../modules/inventory/jewelUpgrade';
 import { ItemGroups } from '@versions/shared/objects/enum';
@@ -40,13 +38,7 @@ import {
   repairAllCost,
   repairCost,
 } from '@/controllers/item_rules';
-import {
-  calcMaxDurability,
-  classOf,
-  itemDef,
-  itemStats,
-  type HeroStats,
-} from '@/controllers/item_rules';
+import { calcMaxDurability, itemDef, itemStats, type HeroStats } from '@/controllers/item_rules';
 import { learnableSkill } from '@/controllers/item_rules';
 import { learnSkillError } from '@/modules/skills/skillItems';
 import { isHotbarSkill } from '../modules/skills/skillCasting';
@@ -73,11 +65,9 @@ import { Ecs } from '../ecs/current';
 import { AppState, UIState } from './uiState';
 import { addNotification } from '../modules/chat';
 import { Session } from '../modules/session';
+import { Hero } from '../modules/hero';
 
 const ITEM_MOVE_TIMEOUT = 5000;
-
-/** How long the offline demo takes to "answer" a stat point request. */
-const OFFLINE_ANSWER_DELAY = 30;
 
 /** `CNewUINPCShop`'s item control: 8 columns × 15 rows. */
 export const SHOP_COLUMNS = 8;
@@ -121,15 +111,6 @@ type PickedItem = {
 function itemSize(item: Item): { w: number; h: number } {
   const config = ItemsDatabase.getItem(item.group, item.num);
   return { w: config?.X ?? 1, h: config?.Y ?? 1 };
-}
-
-/**
- * A yaw as the 0-7 direction the wire carries - the inverse of the
- * `direction * 45 - 45` degrees `logic` reads incoming rotations with, and
- * what `SendCharacterMove` derives from `Object.Angle[2]` for a stop.
- */
-function walkDirection(rotYRadians: number): number {
-  return ((Math.round((rotYRadians * 4) / Math.PI) + 1) % 8 + 8) % 8;
 }
 
 /**
@@ -221,256 +202,6 @@ function serializeItemBytes(item: Item): number[] {
   const bytes = new Uint8Array(ItemSerializer.NeededSpace);
   ItemSerializer.SerializeItem(bytes, item);
   return Array.from(bytes);
-}
-
-class ActionBarSlot {
-  itemId = 0;
-  count = 0;
-}
-
-class ActionBar {
-  q: ActionBarSlot | null = null;
-  w: ActionBarSlot | null = null;
-  e: ActionBarSlot | null = null;
-  r: ActionBarSlot | null = null;
-
-  num6: ActionBarSlot | null = null;
-  num7: ActionBarSlot | null = null;
-  num8: ActionBarSlot | null = null;
-  num9: ActionBarSlot | null = null;
-  num0: ActionBarSlot | null = null;
-
-  selectedSkill = -1;
-
-  constructor() {
-    makeObservable(this, {
-      q: observable,
-      w: observable,
-      e: observable,
-      r: observable,
-      num6: observable,
-      num7: observable,
-      num8: observable,
-      num9: observable,
-      num0: observable,
-      selectedSkill: observable,
-    });
-  }
-}
-
-class PlayerData {
-  money = 0;
-  x = 0;
-  y = 0;
-
-  name = '';
-  charClass: CharacterClassNumber = CharacterClassNumber.DarkKnight;
-
-  leadership = 0;
-
-  usedFruitPoints = 0;
-  maxFruitPoints = 0;
-  usedNegativeFruitPoints = 0;
-  maxNegativeFruitPoints = 0;
-
-  tileFlag = 0;
-
-  actionBar = new ActionBar();
-
-  currentHP = 25;
-  maxHP = 40;
-  currentMP = 80;
-  maxMP = 100;
-  currentSD = 10;
-  maxSD = 12;
-  currentAG = 10;
-  maxAG = 12;
-
-  level = 1;
-  points = 5;
-  /**
-   * Attack / magic speed as the server computed them (CurrentStatsExtended /
-   * CharacterInformationExtended); null until received, then authoritative
-   * over the client-side agility formula.
-   */
-  attackSpeed: number | null = null;
-  magicSpeed: number | null = null;
-
-  /** CharacterHeroState byte (the original's `Hero->PK`); 3 is Normal. */
-  heroState = 3;
-
-  /**
-   * `CharacterStatus.GameMaster` off CharacterInformation, which is the
-   * server's own answer rather than the `#` shout guess `isGm` makes for other
-   * players. Belongs to the selected character, so it is cleared on select.
-   *
-   * Drawing only: the server re-checks the status on every command it receives
-   * (`ChatMessageCommandProcessor`), so nothing here grants anything.
-   */
-  isGameMaster = false;
-
-  exp = 50;
-  currentLvlExp = 0;
-  expToNextLvl = 100;
-
-  str = 10;
-  agi = 10;
-  sta = 10;
-  eng = 10;
-
-  items: (Item | null)[] = new Array(
-    InventoryConstants.InventoryRows * InventoryConstants.RowSize +
-      InventoryConstants.EquippableSlotsCount
-  ).fill(null);
-
-  get leftHandSlot() {
-    return this.items[InventoryConstants.LeftHandSlot];
-  }
-
-  get rightHandSlot() {
-    return this.items[InventoryConstants.RightHandSlot];
-  }
-
-  get helmetSlot() {
-    return this.items[InventoryConstants.HelmSlot];
-  }
-
-  get glovesSlot() {
-    return this.items[InventoryConstants.GlovesSlot];
-  }
-
-  get bootsSlot() {
-    return this.items[InventoryConstants.BootsSlot];
-  }
-
-  get pantsSlot() {
-    return this.items[InventoryConstants.PantsSlot];
-  }
-
-  get armorSlot() {
-    return this.items[InventoryConstants.ArmorSlot];
-  }
-
-  get wingsSlot() {
-    return this.items[InventoryConstants.WingsSlot];
-  }
-
-  get pendantSlot() {
-    return this.items[InventoryConstants.PendantSlot];
-  }
-
-  get ring1Slot() {
-    return this.items[InventoryConstants.Ring1Slot];
-  }
-
-  get ring2Slot() {
-    return this.items[InventoryConstants.Ring2Slot];
-  }
-
-  get petSlot() {
-    return this.items[InventoryConstants.PetSlot];
-  }
-
-  get inventoryItems() {
-    return this.items.slice(
-      InventoryConstants.LastEquippableItemSlotIndex + 1,
-      InventoryConstants.LastEquippableItemSlotIndex +
-        1 +
-        InventoryConstants.InventoryRows * InventoryConstants.RowSize
-    );
-  }
-
-  get hpPercent() {
-    return Scalar.Clamp(this.currentHP / Math.max(this.maxHP, 1), 0, 1);
-  }
-
-  get mpPercent() {
-    return Scalar.Clamp(this.currentMP / Math.max(this.maxMP, 1), 0, 1);
-  }
-
-  get sdPercent() {
-    return Scalar.Clamp(this.currentSD / Math.max(this.maxSD, 1), 0, 1);
-  }
-
-  get agPercent() {
-    return Scalar.Clamp(this.currentAG / Math.max(this.maxAG, 1), 0, 1);
-  }
-
-  get expPercent() {
-    return Scalar.Clamp(
-      (this.exp - this.currentLvlExp) /
-        Math.max(this.expToNextLvl - this.currentLvlExp, 1),
-      0,
-      1
-    );
-  }
-
-  constructor() {
-    makeObservable(this, {
-      money: observable,
-      x: observable,
-      y: observable,
-      tileFlag: observable,
-      actionBar: observable,
-      currentHP: observable,
-      maxHP: observable,
-      currentMP: observable,
-      maxMP: observable,
-      currentSD: observable,
-      maxSD: observable,
-      currentAG: observable,
-      maxAG: observable,
-      exp: observable,
-      currentLvlExp: observable,
-      expToNextLvl: observable,
-      expPercent: computed,
-      hpPercent: computed,
-      mpPercent: computed,
-      sdPercent: computed,
-      agPercent: computed,
-      str: observable,
-      agi: observable,
-      sta: observable,
-      eng: observable,
-      leadership: observable,
-      name: observable,
-      charClass: observable,
-      usedFruitPoints: observable,
-      maxFruitPoints: observable,
-      usedNegativeFruitPoints: observable,
-      maxNegativeFruitPoints: observable,
-      level: observable,
-      points: observable,
-      isGameMaster: observable,
-      items: observable,
-      leftHandSlot: computed,
-      rightHandSlot: computed,
-      helmetSlot: computed,
-      glovesSlot: computed,
-      bootsSlot: computed,
-      pantsSlot: computed,
-      armorSlot: computed,
-      wingsSlot: computed,
-      pendantSlot: computed,
-      ring1Slot: computed,
-      ring2Slot: computed,
-      petSlot: computed,
-      inventoryItems: computed,
-    });
-  }
-
-  setPosition(x: number, y: number) {
-    runInAction(() => {
-      this.x = x;
-      this.y = y;
-    });
-  }
-
-  setTileFlag(flag: number) {
-    runInAction(() => {
-      this.tileFlag = flag;
-    });
-  }
 }
 
 /** `PET_INFO` (`giPetManager::SetPetInfo`): what `PetInfoResponse` carries. */
@@ -604,8 +335,16 @@ function applyOfflineHandOverrides(items: (Item | null)[]): void {
 }
 
 export const Store = new (class _Store {
+  // Read by `interface/components/item_tooltip` until it moves up to the ui; the hero is `Hero`.
+  get playerData() {
+    return Hero;
+  }
+
+  heroStats(): HeroStats {
+    return Hero.heroStats();
+  }
+
   charactersList: ReturnType<CharacterListPacket['getCharacters']> = [];
-  playerId?: number;
 
   /** Learned skills from SkillListUpdate / SkillAdded / SkillRemoved (F3 11). */
   skills: { index: number; number: number; level: number }[] = [];
@@ -858,8 +597,6 @@ export const Store = new (class _Store {
 
   deletingChar: string | null = null;
 
-  playerData = new PlayerData();
-
   /**
    * GuildInformation by guild id (the original's `GuildMark[]` table): what
    * `AssignCharacterToGuild` members print over their heads. Plain (not
@@ -913,7 +650,6 @@ export const Store = new (class _Store {
 
   constructor() {
     makeObservable(this, {
-      playerId: observable,
       skills: observable,
       buffs: observable,
       weather: observable,
@@ -936,7 +672,6 @@ export const Store = new (class _Store {
       creationUnlockFlags: observable,
       charCreationPending: observable,
       focusedChar: observable,
-      playerData: observable,
       pickedItem: observable,
       itemHotkeys: observable,
       pendingItemMove: observable,
@@ -992,7 +727,7 @@ export const Store = new (class _Store {
       bare = false;
     }
     if (!bare) this.setTestItems();
-    applyOfflineHandOverrides(this.playerData.items);
+    applyOfflineHandOverrides(Hero.items);
 
     const testPlayer = spawnPlayer(Ecs.world, { cls });
 
@@ -1010,9 +745,9 @@ export const Store = new (class _Store {
     Ecs.world.addComponent(testPlayer, 'worldIndex', map);
     testPlayer.objectNameInWorld = 'TestPlayer';
 
-    this.playerData.name = 'TestPlayer';
-    this.playerData.charClass = cls;
-    this.syncPlayerAppearance();
+    Hero.name = 'TestPlayer';
+    Hero.charClass = cls;
+    Hero.syncPlayerAppearance();
     this.applyOfflineVitals();
     EventBus.emit('requestWarp', { map });
   }
@@ -1024,10 +759,10 @@ export const Store = new (class _Store {
 
     runInAction(() => {
       if (hp !== null) {
-        this.playerData.currentHP = Math.round((this.playerData.maxHP * hp) / 100);
+        Hero.currentHP = Math.round((Hero.maxHP * hp) / 100);
       }
       if (mp !== null) {
-        this.playerData.currentMP = Math.round((this.playerData.maxMP * mp) / 100);
+        Hero.currentMP = Math.round((Hero.maxMP * mp) / 100);
       }
     });
   }
@@ -1035,35 +770,35 @@ export const Store = new (class _Store {
   setTestItems() {
     const DragonSetIndex = 1;
 
-    Store.playerData.items[InventoryConstants.HelmSlot] = {
+    Hero.items[InventoryConstants.HelmSlot] = {
       num: DragonSetIndex,
       group: ItemGroups.Helm,
       lvl: 9,
       isExcellent: false,
     };
 
-    Store.playerData.items[InventoryConstants.ArmorSlot] = {
+    Hero.items[InventoryConstants.ArmorSlot] = {
       num: DragonSetIndex,
       group: ItemGroups.Armor,
       lvl: 7,
       isExcellent: false,
     };
 
-    Store.playerData.items[InventoryConstants.PantsSlot] = {
+    Hero.items[InventoryConstants.PantsSlot] = {
       num: DragonSetIndex,
       group: ItemGroups.Pants,
       lvl: 9,
       isExcellent: false,
     };
 
-    Store.playerData.items[InventoryConstants.GlovesSlot] = {
+    Hero.items[InventoryConstants.GlovesSlot] = {
       num: DragonSetIndex,
       group: ItemGroups.Gloves,
       lvl: 5,
       isExcellent: false,
     };
 
-    Store.playerData.items[InventoryConstants.BootsSlot] = {
+    Hero.items[InventoryConstants.BootsSlot] = {
       num: DragonSetIndex,
       group: ItemGroups.Boots,
       lvl: 1,
@@ -1072,14 +807,14 @@ export const Store = new (class _Store {
 
     const weapon = { Group: 3, Index: 9 };
 
-    Store.playerData.items[InventoryConstants.LeftHandSlot] = {
+    Hero.items[InventoryConstants.LeftHandSlot] = {
       group: weapon.Group,
       num: weapon.Index,
       lvl: 9,
       isExcellent: false,
     };
 
-    Store.playerData.items[InventoryConstants.LastEquippableItemSlotIndex + 1] =
+    Hero.items[InventoryConstants.LastEquippableItemSlotIndex + 1] =
       {
         group: weapon.Group,
         num: weapon.Index,
@@ -1093,8 +828,8 @@ export const Store = new (class _Store {
     const grid = InventoryConstants.LastEquippableItemSlotIndex + 1;
     const row = InventoryConstants.RowSize;
 
-    Store.playerData.items[grid + 2] = { group: 0, num: 0, lvl: 4, optionLevel: 1 };
-    Store.playerData.items[grid + 3] = {
+    Hero.items[grid + 2] = { group: 0, num: 0, lvl: 4, optionLevel: 1 };
+    Hero.items[grid + 3] = {
       group: 6,
       num: 0,
       lvl: 7,
@@ -1102,19 +837,19 @@ export const Store = new (class _Store {
       excellentFlags: 0x21,
       luck: true,
     };
-    Store.playerData.items[grid + 5] = {
+    Hero.items[grid + 5] = {
       group: 5,
       num: 0,
       lvl: 11,
       optionLevel: 2,
       hasSkill: false,
     };
-    Store.playerData.items[grid + 6] = { group: 14, num: 0, durability: 3 };
-    Store.playerData.items[grid + 7] = { group: 14, num: 13, durability: 1 };
+    Hero.items[grid + 6] = { group: 14, num: 0, durability: 3 };
+    Hero.items[grid + 7] = { group: 14, num: 13, durability: 1 };
     // Mana and shield stacks so the W / R bar slots have something to find.
-    Store.playerData.items[grid + row + 6] = { group: 14, num: 5, durability: 5 };
-    Store.playerData.items[grid + row + 7] = { group: 14, num: 35, durability: 2 };
-    Store.playerData.items[grid + row * 4 + 2] = {
+    Hero.items[grid + row + 6] = { group: 14, num: 5, durability: 5 };
+    Hero.items[grid + row + 7] = { group: 14, num: 35, durability: 2 };
+    Hero.items[grid + row * 4 + 2] = {
       group: 10,
       num: 5,
       lvl: 13,
@@ -1123,28 +858,7 @@ export const Store = new (class _Store {
       ancientDiscriminator: 1,
     };
 
-    this.syncPlayerAppearance();
-  }
-
-  syncPlayerAppearance() {
-    const playerData = this.playerData;
-    const playerEntity = Ecs.world?.playerEntity;
-
-    if (!playerEntity || !playerEntity.charAppearance) return;
-
-    playerEntity.charAppearance.helm = playerData.helmetSlot || null;
-    playerEntity.charAppearance.armor = playerData.armorSlot || null;
-    playerEntity.charAppearance.pants = playerData.pantsSlot || null;
-    playerEntity.charAppearance.gloves = playerData.glovesSlot || null;
-    playerEntity.charAppearance.boots = playerData.bootsSlot || null;
-    playerEntity.charAppearance.leftHand = playerData.leftHandSlot || null;
-    playerEntity.charAppearance.rightHand = playerData.rightHandSlot || null;
-    playerEntity.charAppearance.wings = playerData.wingsSlot || null;
-    // `c->Helper` (equipment slot 8): the Guardian Angel, the Imp and the two
-    // horns. PetSystem spawns the world objects, PlayerObject.Pet carries the
-    // body-linked Imp, and AnimationSystem reads it for the ride clips.
-    playerEntity.charAppearance.pet = playerData.petSlot || null;
-    playerEntity.charAppearance.changed = true;
+    Hero.syncPlayerAppearance();
   }
 
   refreshCharactersListRequest(): void {
@@ -1169,66 +883,17 @@ export const Store = new (class _Store {
     const character = this.charactersList.find(c => c.Name === name);
 
     runInAction(() => {
-      this.playerData.name = name;
+      Hero.name = name;
       if (character) {
-        this.playerData.charClass = classFromAppearance(character.Appearance);
+        Hero.charClass = classFromAppearance(character.Appearance);
         // CharacterInformation carries no level - the list entry is the only source
         // until the first CharacterLevelUpdate.
-        this.playerData.level = character.Level;
+        Hero.level = character.Level;
       }
     });
 
     console.log(`select character [${name}]`);
     Session.sendToGS(selectCharacterPacket.buffer);
-  }
-
-  increaseStatRequest(stat: number): void {
-    if (Session.isOffline) {
-      this.answerStatOffline(stat);
-      return;
-    }
-
-    const packet = IncreaseCharacterStatPointPacket.createPacket();
-    packet.StatType = stat;
-    Session.sendToGS(packet.buffer);
-  }
-
-  /**
-   * No server offline: the point is applied here, one answer per request and
-   * after a beat, so the window and the bulk run behave as they do in game.
-   */
-  private answerStatOffline(stat: number): void {
-    setTimeout(() => {
-      const playerData = this.playerData;
-
-      if (playerData.points <= 0) {
-        EventBus.emit('statPointAnswered', { stat, added: 0 });
-        return;
-      }
-
-      runInAction(() => {
-        switch (stat) {
-          case StatType.Strength:
-            playerData.str++;
-            break;
-          case StatType.Agility:
-            playerData.agi++;
-            break;
-          case StatType.Vitality:
-            playerData.sta++;
-            break;
-          case StatType.Energy:
-            playerData.eng++;
-            break;
-          case StatType.Leadership:
-            playerData.leadership++;
-            break;
-        }
-        playerData.points--;
-      });
-
-      EventBus.emit('statPointAnswered', { stat, added: 1 });
-    }, OFFLINE_ANSWER_DELAY);
   }
 
   deleteCharacterRequest(name: string, securityCode: string): void {
@@ -1284,14 +949,6 @@ export const Store = new (class _Store {
     });
   }
 
-  sendAnimationRequest(rotation: number, animationNumber: number): void {
-    const packet = AnimationRequestPacket.createPacket();
-    packet.Rotation = rotation;
-    packet.AnimationNumber = animationNumber;
-
-    Session.sendToGS(packet.buffer);
-  }
-
   enterGateRequest(gateNumber: number): void {
     const packet = EnterGateRequestPacket.createPacket();
     packet.GateNumber = gateNumber;
@@ -1316,75 +973,6 @@ export const Store = new (class _Store {
     packet.WarpInfoIndex = index;
 
     NetStats.markSent('warp');
-    Session.sendToGS(packet.buffer);
-  }
-
-  /**
-   * WalkRequest (0xD4). `x`/`y` is the tile the walk starts from - the one
-   * the hero is logically standing on when the first step is taken, which
-   * the server compares against its own position (PlayerMovement.
-   * IsWalkRequestValidAsync, tolerance 5 tiles). At most 15 steps fit the
-   * 4-bit count (MAX_PATH_FIND in the original client); longer paths are
-   * sent in segments by NetworkSystem.
-   */
-  sendWalkPath(x: number, y: number, dirs: number[]): void {
-    if (dirs.length === 0) return;
-    // Walking away ends the NPC talk: OpenMU refuses potions, trades and even
-    // death while it thinks a dialog is open.
-    EventBus.emit('heroWalked', {});
-    if (dirs.length > 15) dirs = dirs.slice(0, 15);
-    x = Math.round(x);
-    y = Math.round(y);
-
-    // Two steps per byte, first step in the high nibble (see WalkRequest in
-    // the OpenMU packet docs); byte 5 carries rotation (high) + count (low).
-    const packed = new Array<number>(Math.ceil(dirs.length / 2)).fill(0);
-    for (let i = 0; i < dirs.length; i++) {
-      const shift = i % 2 === 0 ? 4 : 0;
-      packed[i >> 1] |= (dirs[i] & 0x0f) << shift;
-    }
-
-    const packet = WalkRequestPacket.createPacket(6 + packed.length);
-    packet.SourceX = x;
-    packet.SourceY = y;
-    packet.StepCount = dirs.length;
-    packet.TargetRotation = dirs[dirs.length - 1];
-    packet.setDirections(packed, packed.length);
-
-    this.lastWalkRequest = { x, y, steps: dirs.length, at: performance.now() };
-    Session.sendToGS(packet.buffer);
-  }
-
-  /**
-   * The last walk the server was told about. Read only by `heroMoveTrace`, to
-   * say whether a jump it just made was the end of a walk we thought we had
-   * stopped. Deliberately not observable: nothing renders it.
-   */
-  lastWalkRequest: { x: number; y: number; steps: number; at: number } | null =
-    null;
-
-  /**
-   * `LetHeroStop()` (ZzzInterface.cpp:1935-1948): the walk a cast opens with.
-   * `SendCharacterMove` with a single path point sends the hero's own tile,
-   * no steps and just the facing (:1925-1932), which parks the server's
-   * walker where the client stopped. Without it the server keeps walking the
-   * path it was already handed while the client stands still casting, and
-   * rubber-bands the hero onto its own position once the two drift past the
-   * 5-tile tolerance.
-   */
-  sendWalkStop(x: number, y: number, rotYRadians: number): void {
-    const packet = WalkRequestPacket.createPacket(6);
-    packet.SourceX = Math.round(x);
-    packet.SourceY = Math.round(y);
-    packet.StepCount = 0;
-    packet.TargetRotation = walkDirection(rotYRadians);
-
-    this.lastWalkRequest = {
-      x: packet.SourceX,
-      y: packet.SourceY,
-      steps: 0,
-      at: performance.now(),
-    };
     Session.sendToGS(packet.buffer);
   }
 
@@ -1557,7 +1145,7 @@ export const Store = new (class _Store {
 
     const price = itemValue(picked.item, 1);
 
-    if (this.playerData.money + price > 2000000000) {
+    if (Hero.money + price > 2000000000) {
       addNotification(t('notify.zenCap'), 'error');
       return;
     }
@@ -1570,9 +1158,9 @@ export const Store = new (class _Store {
 
     if (Session.isOffline) {
       runInAction(() => {
-        this.playerData.money += price;
+        Hero.money += price;
         this.pickedItem = null;
-        this.syncPlayerAppearance();
+        Hero.syncPlayerAppearance();
       });
       playUiSound('getItem');
       return;
@@ -1597,7 +1185,7 @@ export const Store = new (class _Store {
     if (success) {
       this.confirmItemMove(-1, null);
       runInAction(() => {
-        this.playerData.money = money;
+        Hero.money = money;
       });
       // ReceiveSell (WSclient.cpp:6861).
       playUiSound('getItem');
@@ -1611,7 +1199,7 @@ export const Store = new (class _Store {
   /** Whether a repair can be asked for here: a smith, or self-repair from 50. */
   get canRepair(): boolean {
     if (this.npcShop) return this.npcShop.repairShop;
-    return this.playerData.level >= SELF_REPAIR_LEVEL;
+    return Hero.level >= SELF_REPAIR_LEVEL;
   }
 
   /** Repairs through the inventory button cost 2.5× the smith's price. */
@@ -1633,7 +1221,7 @@ export const Store = new (class _Store {
     const selfRepair = this.isSelfRepair;
 
     if (slot !== REPAIR_ALL_SLOT) {
-      const item = this.playerData.items[slot];
+      const item = Hero.items[slot];
       if (!item || isRepairBanned(item)) return;
       if (!needsRepair(item)) return;
     }
@@ -1656,25 +1244,25 @@ export const Store = new (class _Store {
 
   /** The price of a full repair, as the repair bar of the shop shows it. */
   get repairAllPrice(): number {
-    return repairAllCost(this.playerData.items, this.isSelfRepair);
+    return repairAllCost(Hero.items, this.isSelfRepair);
   }
 
   private buyOffline(item: Item): void {
     const price = itemValue(item, 0);
-    if (this.playerData.money < price) {
+    if (Hero.money < price) {
       addNotification(t('common.notEnoughZen'), 'error');
       return;
     }
 
-    const slot = findFreeInventorySlot(this.playerData.items, item);
+    const slot = findFreeInventorySlot(Hero.items, item);
     if (slot < 0) {
       addNotification(t('notify.noInventoryRoom'), 'error');
       return;
     }
 
     runInAction(() => {
-      this.playerData.money -= price;
-      this.playerData.items[slot] = { ...item };
+      Hero.money -= price;
+      Hero.items[slot] = { ...item };
     });
     playUiSound('getItem');
   }
@@ -1682,26 +1270,26 @@ export const Store = new (class _Store {
   private repairOffline(slot: number, selfRepair: boolean): void {
     const slots =
       slot === REPAIR_ALL_SLOT
-        ? this.playerData.items.map((_, i) => i)
+        ? Hero.items.map((_, i) => i)
         : [slot];
 
     let cost = 0;
     const repaired: Item[] = [];
     for (const i of slots) {
-      const item = this.playerData.items[i];
+      const item = Hero.items[i];
       if (!item || !needsRepair(item)) continue;
       cost += repairCost(item, selfRepair);
       repaired.push(item);
     }
 
     if (repaired.length === 0) return;
-    if (this.playerData.money < cost) {
+    if (Hero.money < cost) {
       addNotification(t('common.notEnoughZen'), 'error');
       return;
     }
 
     runInAction(() => {
-      this.playerData.money -= cost;
+      Hero.money -= cost;
       for (const item of repaired) {
         const def = itemDef(item.group, item.num);
         if (!def) continue;
@@ -1734,7 +1322,7 @@ export const Store = new (class _Store {
   itemsOfStorage(storage: StorageKind): (Item | null)[] {
     switch (storage) {
       case StorageKind.Inventory:
-        return this.playerData.items;
+        return Hero.items;
       case StorageKind.Vault:
         return Economy.vaultItems;
       case StorageKind.Trade:
@@ -1764,7 +1352,7 @@ export const Store = new (class _Store {
     runInAction(() => {
       items[slot] = null;
       this.pickedItem = { item, fromSlot: slot, fromStorage: storage };
-      if (storage === StorageKind.Inventory) this.syncPlayerAppearance();
+      if (storage === StorageKind.Inventory) Hero.syncPlayerAppearance();
     });
   }
 
@@ -1775,7 +1363,7 @@ export const Store = new (class _Store {
     runInAction(() => {
       this.itemsOfStorage(picked.fromStorage)[picked.fromSlot] = picked.item;
       this.pickedItem = null;
-      if (picked.fromStorage === StorageKind.Inventory) this.syncPlayerAppearance();
+      if (picked.fromStorage === StorageKind.Inventory) Hero.syncPlayerAppearance();
     });
   }
 
@@ -1807,7 +1395,7 @@ export const Store = new (class _Store {
       runInAction(() => {
         this.itemsOfStorage(toStorage)[toSlot] = picked.item;
         this.pickedItem = null;
-        this.syncPlayerAppearance();
+        Hero.syncPlayerAppearance();
       });
       return;
     }
@@ -1837,7 +1425,7 @@ export const Store = new (class _Store {
       runInAction(() => {
         items[fromSlot] = null;
         items[toSlot] = item;
-        this.syncPlayerAppearance();
+        Hero.syncPlayerAppearance();
       });
       return true;
     }
@@ -1845,7 +1433,7 @@ export const Store = new (class _Store {
     runInAction(() => {
       items[fromSlot] = null;
       this.pickedItem = { item, fromSlot, fromStorage: storage };
-      if (storage === StorageKind.Inventory) this.syncPlayerAppearance();
+      if (storage === StorageKind.Inventory) Hero.syncPlayerAppearance();
     });
 
     this.moveItemRequest(storage, fromSlot, storage, toSlot, item);
@@ -1952,7 +1540,7 @@ export const Store = new (class _Store {
       runInAction(() => {
         this.itemsOfStorage(fromStorage)[fromSlot] = null;
         this.itemsOfStorage(toStorage)[toSlot] = item;
-        this.syncPlayerAppearance();
+        Hero.syncPlayerAppearance();
       });
       playUiSound('getItem');
       return;
@@ -1961,7 +1549,7 @@ export const Store = new (class _Store {
     runInAction(() => {
       this.itemsOfStorage(fromStorage)[fromSlot] = null;
       this.pickedItem = { item, fromSlot, fromStorage };
-      if (fromStorage === StorageKind.Inventory) this.syncPlayerAppearance();
+      if (fromStorage === StorageKind.Inventory) Hero.syncPlayerAppearance();
     });
 
     this.moveItemRequest(fromStorage, fromSlot, toStorage, toSlot, item);
@@ -1980,7 +1568,7 @@ export const Store = new (class _Store {
 
   /** The inventory slot the Q/W/E/R key would consume right now, or -1. */
   hotkeyItemSlot(hotkey: number): number {
-    return findHotkeyItem(this.playerData.items, hotkey, this.itemHotkeys[hotkey]);
+    return findHotkeyItem(Hero.items, hotkey, this.itemHotkeys[hotkey]);
   }
 
   /** Q/W/E/R pressed or the bar slot right-clicked (`CNewUIItemHotKey::UpdateKeyEvent`). */
@@ -1994,7 +1582,7 @@ export const Store = new (class _Store {
    * and inventory behave (apple 10% .. large 100%, the original's tables).
    */
   private consumeItemOffline(slot: number): void {
-    const item = this.playerData.items[slot];
+    const item = Hero.items[slot];
     if (!item || item.group !== 14) return;
 
     const now = Date.now();
@@ -2002,7 +1590,7 @@ export const Store = new (class _Store {
     this.consumeBlockedUntil = now + 300;
 
     const n = item.num;
-    const pd = this.playerData;
+    const pd = Hero;
     const isHp = n <= 3;
     const isMp = n >= 4 && n <= 6;
     const isSd = n >= 35 && n <= 37;
@@ -2025,23 +1613,6 @@ export const Store = new (class _Store {
     if (used) playUiSound(used);
   }
 
-  /** The hero as `RenderItemInfo` compares against (`CharacterAttribute`). */
-  heroStats(): HeroStats {
-    const data = this.playerData;
-    const { base, step } = classOf(data.charClass);
-
-    return {
-      level: data.level,
-      str: data.str,
-      agi: data.agi,
-      vit: data.sta,
-      ene: data.eng,
-      cmd: data.leadership,
-      baseClass: base,
-      stepClass: step,
-    };
-  }
-
   /**
    * Right click on an orb / scroll / crystal (`CNewUIMyInventory::UseItem`,
    * NewUIMyInventory.cpp:1865): learn the skill it teaches. Returns false
@@ -2052,7 +1623,7 @@ export const Store = new (class _Store {
    * with `ItemConsumptionFailed`.
    */
   learnSkillItem(slot: number): boolean {
-    const item = this.playerData.items[slot];
+    const item = Hero.items[slot];
     if (!item) return false;
 
     const number = learnableSkill(item);
@@ -2064,7 +1635,7 @@ export const Store = new (class _Store {
     const error = learnSkillError(
       item,
       stats,
-      this.heroStats(),
+      Hero.heroStats(),
       this.skills.map(s => s.number)
     );
     if (error) {
@@ -2077,7 +1648,7 @@ export const Store = new (class _Store {
       // and the hot keys behave.
       const index = this.skills.reduce((max, s) => Math.max(max, s.index), -1) + 1;
       runInAction(() => {
-        this.playerData.items[slot] = null;
+        Hero.items[slot] = null;
         this.addSkill({ index, number, level: 0 });
       });
       const name = skillDefinition(number)?.name ?? 'the skill';
@@ -2104,7 +1675,7 @@ export const Store = new (class _Store {
     if (now < this.consumeBlockedUntil) return;
     this.consumeBlockedUntil = now + 300;
 
-    const consumed = this.playerData.items[slot];
+    const consumed = Hero.items[slot];
     const used = consumed ? consumeSound(consumed.group, consumed.num) : null;
     if (used) playUiSound(used);
 
@@ -2129,7 +1700,7 @@ export const Store = new (class _Store {
     if (!picked?.item || this.pendingItemMove) return false;
     if (picked.fromStorage !== StorageKind.Inventory) return false;
 
-    const target = this.playerData.items[targetSlot];
+    const target = Hero.items[targetSlot];
     if (!target || targetSlot === picked.fromSlot) return false;
 
     // `ApplyJewels` on worn gear: said, not swallowed - the equipment slot's
@@ -2173,9 +1744,9 @@ export const Store = new (class _Store {
   /** `InventoryItemUpgraded` (0xF3 0x14): the item at `slot` is what the server says now. */
   upgradeInventoryItem(slot: number, item: Item): void {
     runInAction(() => {
-      this.playerData.items[slot] = item;
+      Hero.items[slot] = item;
       this.consumeBlockedUntil = 0;
-      this.syncPlayerAppearance();
+      Hero.syncPlayerAppearance();
     });
     playUiSound(upgradedItemSound(item.group, item.num));
   }
@@ -2270,7 +1841,7 @@ export const Store = new (class _Store {
 
       this.pickedItem = null;
       this.pendingItemMove = null;
-      this.syncPlayerAppearance();
+      Hero.syncPlayerAppearance();
     });
   }
 
@@ -2292,7 +1863,7 @@ export const Store = new (class _Store {
 
       this.pickedItem = null;
       this.pendingItemMove = null;
-      this.syncPlayerAppearance();
+      Hero.syncPlayerAppearance();
     });
   }
 

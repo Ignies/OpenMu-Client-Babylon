@@ -11,7 +11,8 @@ water, ground picks, minimap data and the base class for map objects. There is n
   `overlays`, `snowBed`, `water`, `rest`, `leanCursor`, `objectFixups`, `grass`, `hidden`),
   `TerrainOverlayName`, `RestObject`, `RestKind`, `MapObjectFixup`, `TerrainWaterSpec`; `TILE_CM`.
 - `loadMapIntoScene(world, map, pos?)` (`loadMapIntoScene.ts`): queue a warp to `map`.
-  `onMapChange(fn)` sets what resets on map change (set once by `app/boot.tsx`);
+  `onMapChange(fn)` sets what resets on map change and `onHeroPlaced(fn)` what runs once the hero
+  stands on the new map (both set once by `app/boot.tsx`; the hero puts its gear back on);
   `reloadMapObjects()` rebuilds the map's objects after the batching option changes.
 - World accessors set on each load (`getTerrainData.ts`): `world.getTerrainHeight`, `isWalkable`,
   `getTerrainFlag`, `setTerrainFlags`, `detachGround`, `getTerrainTile`, `getTerrainLayers`,
@@ -63,8 +64,7 @@ water, ground picks, minimap data and the base class for map objects. There is n
 
 ## Depends on / used by
 - uses: `assets`, `maps` (tiles, cutout, spawn, `create`), `weather` (coverage, trail, melt,
-  burn), `lighting`, `render`, `fx`, `core`. Old exceptions to the dependency rule
-  (`tools/checks/baselines/deps.json`): `app/store`. Reads `settings`.
+  burn), `lighting`, `render`, `fx`, `loading` (the scene flag), `core`. Reads `settings`.
 - used by: `app/boot.tsx`, `ecs/world.ts`, ECS systems (`terrainLightSystem`, `terrainMaskSystem`,
   `terrainGrassSystem`, the cursor and pointer systems), the fx, lighting, render, sound, assets,
   maps and weather controllers, `modules` (skills, warp), the options window, the minimap HUD,

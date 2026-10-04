@@ -2,7 +2,7 @@ import './style.less';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { With } from 'miniplex';
-import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
 import { Social } from '@/modules/social/social';
 import { useRenderId } from '@/controllers/interface/hooks';
@@ -119,7 +119,7 @@ export const PartyBars = observer(() => {
 
   // `Party[j].index`: the party list is matched to the objects in scope by
   // name, the hero included (the original skips it, `index == -3`).
-  const heroName = Store.playerData.name;
+  const heroName = Hero.name;
   const steps = new Map(
     Social.partyMembers
       .filter(m => m.name !== heroName)

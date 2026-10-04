@@ -5,7 +5,7 @@ import { t } from '@/i18n';
 import { ChatRooms, type ChatRoom } from '@/modules/chat/chatRooms';
 import { Messenger } from '@/modules/friends/messenger';
 import { isFriendOnline } from '@/modules/friends/friendList';
-import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
 import { uiClick } from '@/controllers/sound/sfx';
 import { useWindowChrome } from '@/controllers/interface/components/mu_window/useWindowChrome';
 import { EmojiText } from '../../components/emoji_text';
@@ -42,7 +42,7 @@ const RoomBody = observer(({ room }: { room: ChatRoom }) => {
     if (ChatRooms.sendMessage(draft)) setDraft('');
   };
 
-  const others = room.clients.filter(c => c.name !== Store.playerData.name);
+  const others = room.clients.filter(c => c.name !== Hero.name);
   const invitable = Messenger.friends.filter(
     f => isFriendOnline(f) && !room.clients.some(c => c.name === f.name)
   );

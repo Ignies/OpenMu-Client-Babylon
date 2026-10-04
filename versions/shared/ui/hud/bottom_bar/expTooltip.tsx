@@ -5,7 +5,7 @@ import {
   formatExpProgress,
   formatTimeToLevel,
 } from '@/controllers/interface/hudFormat';
-import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
 import { MuTipList, type TipLine } from '../../components/skill_tooltip';
 import { t } from '@/i18n';
 
@@ -38,7 +38,7 @@ function buildExpTooltip(
 }
 
 export const ExpTooltip = observer(({ x, y }: { x: number; y: number }) => {
-  const { expPercent, exp, expToNextLvl } = Store.playerData;
+  const { expPercent, exp, expToNextLvl } = Hero;
 
   return (
     <MuTipList

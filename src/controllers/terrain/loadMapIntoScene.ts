@@ -1,7 +1,6 @@
 import { disposeGrassField } from './terrainGrass';
 import { ENUM_WORLD } from '@/core/types';
 import type { World } from '../../ecs/world';
-import { Store } from '../../app/store';
 import { Loading } from '../loading';
 import { maps } from '../maps';
 // Side effect: the `ChangeTerrainAttributes` packet → `world.setTerrainFlags`.
@@ -70,6 +69,13 @@ let mapChangeHook: () => void = () => {};
 /** Registers what runs when the map changes, before the new terrain loads. Set once at boot. */
 export function onMapChange(fn: () => void): void {
   mapChangeHook = fn;
+}
+
+let heroPlacedHook: () => void = () => {};
+
+/** Registers what runs once the hero stands on the new map (its gear is put on again). Set once at boot. */
+export function onHeroPlaced(fn: () => void): void {
+  heroPlacedHook = fn;
 }
 let sceneWorld: World | null = null;
 
@@ -451,7 +457,7 @@ async function runLoad(
     pathfinding.from = { x: playerPos.x, y: playerPos.z };
     pathfinding.to = { x: playerPos.x, y: playerPos.z };
 
-    Store.syncPlayerAppearance();
+    heroPlacedHook();
   }
 
   EventBus.emit('warpCompleted', { map });

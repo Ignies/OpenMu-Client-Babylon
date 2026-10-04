@@ -1,6 +1,6 @@
 import { t } from '../../i18n';
 import { action, makeObservable, observable, runInAction } from 'mobx';
-import { Store } from '../../app/store';
+import { Hero } from '../hero';
 import { Session } from '../session';
 import { Ecs } from '../../ecs/current';
 import { Social, INVITE_RANGE_TILES } from '../social/social';
@@ -223,7 +223,7 @@ export const Commands = new (class _Commands {
     }
     switch (kind) {
       case 'trade':
-        if (Store.playerData.level < TRADE_LIMIT_LEVEL) {
+        if (Hero.level < TRADE_LIMIT_LEVEL) {
           Social.systemMessage(
             t('command.tradeLevel', { level: TRADE_LIMIT_LEVEL })
           );
@@ -301,7 +301,7 @@ export const Commands = new (class _Commands {
 
   /** `CommandDual`: start a duel, or stop the one running. */
   private duel(target: CommandTarget): void {
-    if (Store.playerData.level < DUEL_LIMIT_LEVEL) {
+    if (Hero.level < DUEL_LIMIT_LEVEL) {
       Social.errorMessage(t('command.duelLevel', { level: DUEL_LIMIT_LEVEL }));
       return;
     }

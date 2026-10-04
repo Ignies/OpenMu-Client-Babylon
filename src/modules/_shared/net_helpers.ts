@@ -7,7 +7,7 @@ import { KEEP_CLIP, isMonsterSwingClip, monsterAreaCast, monsterAttackState, mon
 import { METEORITE_STORM, appearSound, meteoriteStormRunning, monsterCastQuiet, trapAttackSound } from '@/controllers/sound/packetSounds';
 import { MonsterActionType, PlayerAction } from '@versions/shared/objects/enum';
 
-import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
 import { TRAP_MODEL_TABLE, heldWeapons } from '@/controllers/actors';
 import { Vector3 } from '@/controllers/render/babylon/exports';
@@ -215,7 +215,7 @@ export function attackPoseOf(obj: Entity): AttackPose {
   const inSafeZone = !!obj.attributeSystem?.isAboveZero('inSafeZone');
   return {
     hands: heldWeapons(obj, Ecs.world?.mapIndex ?? -1),
-    baseClass: getBaseClass(hands?.charClass ?? Store.playerData.charClass),
+    baseClass: getBaseClass(hands?.charClass ?? Hero.charClass),
     swordCount: obj.playerAnimation?.swordCount ?? 0,
     wings: isWingItem(hands?.wings),
     mount: mountKind(hands?.pet, inSafeZone),

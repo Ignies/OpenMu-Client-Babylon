@@ -4,6 +4,7 @@ import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
 import { t, type TextKey } from '@/i18n';
 import { Store, type PetInfo } from '@/app/store';
+import { Hero } from '@/modules/hero';
 import { DARK_HORSE, DARK_RAVEN, PET_GROUP } from '@versions/shared/items/petItems';
 import { InventoryConstants } from '@/core/inventoryConstants';
 import {
@@ -97,7 +98,7 @@ function equippedSlotOf(pet: PetTypeEnum): number | null {
       ? InventoryConstants.PetSlot
       : InventoryConstants.LeftHandSlot;
   const num = pet === PetTypeEnum.DarkHorse ? DARK_HORSE : DARK_RAVEN;
-  const item = Store.playerData.items[slot];
+  const item = Hero.items[slot];
   return item && item.group === PET_GROUP && item.num === num ? slot : null;
 }
 
@@ -109,8 +110,8 @@ function equippedSlotOf(pet: PetTypeEnum): number | null {
  * are left out here.
  */
 function derived(pet: PetTypeEnum, info: PetInfo) {
-  const charisma = Store.playerData.leadership;
-  const strength = Store.playerData.str;
+  const charisma = Hero.leadership;
+  const strength = Hero.str;
   const level = info.level;
   const next = level + 1;
 

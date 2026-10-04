@@ -15,7 +15,7 @@ plugin ([../../../openmu/readme.md](../../../openmu/readme.md)).
 
 ## How it works
 - `state.ts` imports no `Store`, so the window can run alone. `gameBridge.ts` is the only adapter:
-  it pushes `Store.playerData` money, bag (slots after the equipment) and name into
+  it pushes `Hero` money, bag (slots after the equipment) and name into
   `Marketplace.syncFromGame` (an `autorun` while open) and installs `sendEscrow` as the bridge.
 - Every commit (list, buy, cancel, collect) is three steps: `api.ts` asks the service for a signed
   token, `sendEscrow` sends it to the game server (`C1 E7 01`, `escrowWire.ts`) and waits up to

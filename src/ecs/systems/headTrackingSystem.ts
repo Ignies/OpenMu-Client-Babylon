@@ -11,7 +11,7 @@ import {
   rotationByteOf,
   signedAngleDelta,
 } from '../../core/turnAngle';
-import { Store } from '../../app/store';
+import { Hero } from '../../modules/hero';
 import { Session } from '../../modules/session';
 import type { Entity, ISystemFactory } from '../world';
 
@@ -201,7 +201,7 @@ export const HeadTrackingSystem: ISystemFactory = world => {
               if (rotationByteOf(e.transform.rot.y) !== rotationByteOf(wanted)) {
                 e.transform.rot.y = wanted;
                 if (!Session.isOffline) {
-                  Store.sendAnimationRequest(
+                  Hero.sendAnimationRequest(
                     rotationByteOf(wanted),
                     ServerPlayerActionType.Stand1
                   );

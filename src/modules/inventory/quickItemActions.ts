@@ -1,6 +1,7 @@
 import { reaction } from 'mobx';
 import { t } from '../../i18n';
 import { Store } from '../../app/store';
+import { Hero } from '../hero';
 import { Session } from '../session';
 import { addNotification } from '../chat';
 import { MsgBox } from '../../controllers/interface';
@@ -46,7 +47,7 @@ export const QuickItemActions = new (class _QuickItemActions {
     if (!GameOptions.quickItemActions) return;
     if (Store.pickedItem || Store.pendingItemMove) return;
 
-    const item = Store.playerData.items[slot];
+    const item = Hero.items[slot];
     if (!item) return;
 
     const target = inventoryTarget({
@@ -174,7 +175,7 @@ export const QuickItemActions = new (class _QuickItemActions {
       wanted: run.wanted,
       item,
       price: item ? itemValue(item, 0) : 0,
-      money: Store.playerData.money,
+      money: Hero.money,
       freeSquare: item ? Store.findFreeSquare(StorageKind.Inventory, item) : -1,
       refused: Store.shopBuyRefused,
     });

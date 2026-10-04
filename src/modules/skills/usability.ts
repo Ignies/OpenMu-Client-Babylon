@@ -9,6 +9,7 @@ import type { Item } from '../../ecs/world';
 import type { SkillLayer } from './layer';
 import { skillCooldownRemaining } from './cooldowns';
 import { Store } from '../../app/store';
+import { Hero } from '../hero';
 
 // ---- 1. tuning -------------------------------------------------------------
 
@@ -136,7 +137,7 @@ export function skillUsability(num: number): SkillUsability {
   const def = skillDefinition(num);
   if (!def) return { usable: false, requirementsMet: false, blocks: ['unknown'] };
 
-  const pd = Store.playerData;
+  const pd = Hero;
   const blocks: SkillBlock[] = [];
 
   // The server only teaches a class its own skills, so a learned skill has

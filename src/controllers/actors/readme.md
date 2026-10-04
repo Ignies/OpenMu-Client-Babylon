@@ -83,14 +83,13 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 ## Depends on / used by
 - uses: `render` (`ModelObject`, bone links), `assets`, `anim`, `fx`, `item_fx`, `lighting`,
   `monsters` (the folders' data), `core/types`, `core/guildMark`, `ecs/world`, `pets` (pet specs),
-  `item_rules` (`archangelWeapon`), `@versions/shared/items/petItems`. Baselined exceptions
-  (`tools/checks/baselines/deps.json`): `app/store`.
+  `item_rules` (`archangelWeapon`), `@versions/shared/items/petItems`, `ecs/current` (the live world).
 - Dependency direction: `BaseClass` / `getBaseClass` come from `core/types` (characterStats only
   re-exports them); the pet specs became `controllers/pets`, the drop model proxy
   `item_rules/dropModelProxy.ts`, the guild mark `core/guildMark.ts`, the pet numbers
   `versions/shared/items/petItems.ts`. Each new door is light, so module load order is unchanged.
 - used by: `ecs/systems`, `modules/_shared/net_helpers.ts`, `modules/scope`,
-  `modules/character_select`, `modules/drops`, `modules/gm/admin/skins.ts`, `app/store.ts`,
+  `modules/character_select`, `modules/drops`, `modules/gm/admin/skins.ts`, `app/store.ts` (offline),
   `sound`, `item_fx/weaponBlur.ts`, `anim`, `assets/modelLoader.ts`, monster, npc, map and skill
   content in `versions/shared/`, `tools/assetCase.ts`.
 
@@ -129,13 +128,6 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 The 18-byte preview carries everything a remote player's gear can show: level glow, excellent and
 ancient passes, wings and the pet. Reading only the item numbers is what once left other players'
 effects and wings off. Hands carry no excellent or ancient bit in this layout.
-
-### heroMoveTrace.ts
-`ObjectMoved` (C1 15) is the only packet that moves the hero without a walk: a gate, a teleport, an
-`InstantMoveRequest`, or a resync when the server thinks the client drifted. These look the same
-from outside, so each jump of 1.5 tiles or more logs what the client believed: its position, the
-last walk sent (`sentWalk`) and the approach in progress. A `sentWalk` ending where the server put
-the hero is a walk the client failed to stop; no walk at all means the server moved him itself.
 
 ### monsterBlendMesh.ts
 Keyed by monster model type. `MonsterObject.load` sets `BlendMesh` / `BlendMeshLight` unless the

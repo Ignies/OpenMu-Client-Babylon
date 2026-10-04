@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { t } from '@/i18n';
 import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
 import { Social } from '@/modules/social/social';
 import { skills } from '@/modules/skills';
@@ -231,7 +232,7 @@ const SkillPicker = observer(({ slot, onClose }: { slot: number; onClose: () => 
  */
 export const SkillPad = observer(() => {
   const [picking, setPicking] = useState(-1);
-  const character = Store.playerData.name;
+  const character = Hero.name;
   const learned = Store.skills;
 
   useEffect(() => {

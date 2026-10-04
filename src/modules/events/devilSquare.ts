@@ -3,7 +3,7 @@ import { ENUM_WORLD } from '../../core/types';
 import { BaseClass, getBaseClass } from '../hero/characterStats';
 import type { Item } from '../../ecs/world';
 import { EventBus } from '../../core/eventBus';
-import { Store } from '../../app/store';
+import { Hero } from '../hero';
 import { Session } from '../session';
 import { addNotification } from '../chat';
 import { Ecs } from '../../ecs/current';
@@ -118,7 +118,7 @@ export function inDevilSquare(map: ENUM_WORLD): boolean {
 
 /** `OpenningProcess`: build the buttons and show the window. */
 export function openDevilSquare(): void {
-  const pd = Store.playerData;
+  const pd = Hero;
   const master = isMasterClass(pd.charClass);
   const row = LOWER_LIMIT_CLASSES.has(getBaseClass(pd.charClass)) ? 1 : 0;
   const { buttons, active } = entryButtons(

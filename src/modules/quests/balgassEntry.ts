@@ -20,6 +20,7 @@ import {
 } from '@versions/shared/packets/ClientToServerPackets';
 import { EventBus } from '../../core/eventBus';
 import { Store } from '../../app/store';
+import { Hero } from '../hero';
 import { Session } from '../session';
 import { addNotification } from '../chat';
 import { Ecs } from '../../ecs/current';
@@ -129,7 +130,7 @@ export function enterBalgass(): void {
   if (!kind || !canEnter(kind)) return;
   hide();
 
-  if (kind === 'werewolf' && Store.playerData.money < BARRACKS_PRICE) {
+  if (kind === 'werewolf' && Hero.money < BARRACKS_PRICE) {
     addNotification(t('event.shortOfZen'), 'error');
     return;
   }

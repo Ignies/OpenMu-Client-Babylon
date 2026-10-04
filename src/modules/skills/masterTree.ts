@@ -15,6 +15,7 @@ import { decodeLocalText, downloadLocalDataFile } from '../../controllers/assets
 import { convertBux } from '../../controllers/terrain/mapFileEncryption';
 import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
 import { Store } from '../../app/store';
+import { Hero } from '../hero';
 import { Session } from '../session';
 import type { SkillLayer } from './layer';
 import { isWeaponSkill, skillRequirementsMet } from './usability';
@@ -342,7 +343,7 @@ export function masterTreeDataLoaded(): boolean {
 }
 
 /** The tree the hero's class line uses, `None` for an unknown class. */
-function masterTreeClass(charClass = Store.playerData.charClass): MasterTreeClass {
+function masterTreeClass(charClass = Hero.charClass): MasterTreeClass {
   return TREE_CLASS[charClass] ?? MasterTreeClass.None;
 }
 

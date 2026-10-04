@@ -1,4 +1,5 @@
 import { Store } from '../../app/store';
+import { Hero } from '../hero';
 import { Social } from '../social/social';
 import { gameVersion } from '../../version';
 import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
@@ -133,7 +134,7 @@ function isLearned(num: number): boolean {
 
 /** `(life * 100 + max - 1) / max` - the original's ceiling percent. */
 function heroHpPercent(): number {
-  const { currentHP, maxHP } = Store.playerData;
+  const { currentHP, maxHP } = Hero;
   if (maxHP <= 0 || currentHP <= 0) return 100;
   return Math.trunc((currentHP * 100 + maxHP - 1) / maxHP);
 }
@@ -157,7 +158,7 @@ function walkTo(hero: Entity, point: Point): void {
 }
 
 function findPartyEntity(world: World, name: string): Entity | null {
-  if (name === Store.playerData.name) return world.playerEntity ?? null;
+  if (name === Hero.name) return world.playerEntity ?? null;
   for (const e of world.playersQuery.entities) {
     if (e.objectNameInWorld === name && !e.dying) return e;
   }
@@ -252,7 +253,7 @@ function buff(world: World, hero: Entity, config: MuHelperConfig): boolean {
 
 /** `FindHealingItemIndex`: the first HP or complex potion in the bag. */
 function findHealingPotionSlot(): number {
-  const items = Store.playerData.items;
+  const items = Hero.items;
   for (let slot = InventoryConstants.EquippableSlotsCount; slot < items.length; slot++) {
     const item = items[slot];
     if (!item || item.group !== 14) continue;
@@ -296,7 +297,7 @@ function recoverHealth(world: World, hero: Entity, config: MuHelperConfig): bool
       const member = members[healPartyIndex % members.length];
       healPartyIndex = (healPartyIndex + 1) % members.length;
       if (member) {
-        if (member.name === Store.playerData.name) {
+        if (member.name === Hero.name) {
           if (hpPercent <= config.healThreshold && castSkill(world, HEAL_SKILL, hero)) {
             return false;
           }
@@ -464,7 +465,7 @@ function repairEquipment(config: MuHelperConfig): void {
   if (!config.repairItem || repairCooldown > 0) return;
   repairCooldown = REPAIR_INTERVAL_SECONDS;
 
-  const items = Store.playerData.items;
+  const items = Hero.items;
   for (let slot = 0; slot < InventoryConstants.EquippableSlotsCount; slot++) {
     const item = items[slot];
     if (!item || item.durability === undefined) continue;

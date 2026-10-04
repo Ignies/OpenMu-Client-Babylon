@@ -3,7 +3,7 @@ import { t } from '@/i18n';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { observable, runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
 import { isKey } from '@/controllers/interface/keyBindings';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
@@ -503,7 +503,7 @@ const QuestProgressWindow = observer(() => {
       <Separator y={QP_LINE_Y} />
 
       {mode !== 'requestReward' && (
-        <Line y={QP_PLAYER_NAME_Y} left={QP_TEXT_X} text={Store.playerData.name} bold color={COLOR.heroName} />
+        <Line y={QP_PLAYER_NAME_Y} left={QP_TEXT_X} text={Hero.name} bold color={COLOR.heroName} />
       )}
 
       {mode === 'playerWords' && (

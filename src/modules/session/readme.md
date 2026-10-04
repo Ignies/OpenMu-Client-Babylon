@@ -24,7 +24,7 @@ the client-to-server encryption, the login fields and the offline flag.
 ## How it works
 - `net.ts` walks the login flow: `Hello` asks for the server list once, `ConnectionInfo` dials the
   game server (`gameServerTarget` from `servers/serverConfig.ts` picks host and fallback),
-  `GameServerEntered` sets `Store.playerId` and shows the login form, `LoginResponse` moves to the
+  `GameServerEntered` sets `Hero.playerId` and shows the login form, `LoginResponse` moves to the
   character list.
 - `sessionExit.ts` ports `CSystemMenuMsgBox` (`NewUICustomMessageBox.cpp:2386-2470`): it sends
   `LogOut` with type 0/2/1 and only changes screen when `LogoutResponse` arrives (or after a 5 s
@@ -38,9 +38,10 @@ the client-to-server encryption, the login fields and the offline flag.
   again on the fallback host. A socket we did not close sends the player back to the server list
   (`onSocketLost`), unless the resume takes the loss over. It reads the page and the message box
   from the app and the interface, never a module above it.
-- `sessionStats.ts` listens to `experienceGained` and watches `Store.playerData.money`; it starts
+- `sessionStats.ts` listens to `experienceGained` and watches `Hero.money`; it starts
   only when a panel calls `watch()`. A new character name resets it.
-- Store members still used: `playerId`, `playerData.name`, `selectCharacterRequest`, `closeNpcShop`.
+- Store members still used: `selectCharacterRequest`, `closeNpcShop`. The hero's id and name come
+  from `Hero`.
 
 ## Packets
 - `Hello`: requests the server list (once).

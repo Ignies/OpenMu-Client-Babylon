@@ -2,7 +2,7 @@ import { PlayerAction, ServerPlayerActionType } from '@versions/shared/objects/e
 import { emoteById, genderedEmoteAction } from '../../modules/hero/emotes';
 import { isStandingIdle } from '../../controllers/anim/playerActionMapper';
 import { rotationByteOf } from '../../core/turnAngle';
-import { Store } from '../../app/store';
+import { Hero } from '../../modules/hero';
 import { Session } from '../../modules/session';
 import type { ISystemFactory } from '../world';
 
@@ -76,7 +76,7 @@ export const EmoteSystem: ISystemFactory = world => {
           if (active.restore !== null) {
             anim.action = active.restore;
             if (!Session.isOffline) {
-              Store.sendAnimationRequest(
+              Hero.sendAnimationRequest(
                 rotationByteOf(hero.transform.rot.y),
                 restServerAction(active.restore)
               );
@@ -105,7 +105,7 @@ export const EmoteSystem: ISystemFactory = world => {
       active = { action, restore: resting ? current : null };
 
       if (!Session.isOffline) {
-        Store.sendAnimationRequest(
+        Hero.sendAnimationRequest(
           rotationByteOf(hero.transform.rot.y),
           emote.serverAction
         );

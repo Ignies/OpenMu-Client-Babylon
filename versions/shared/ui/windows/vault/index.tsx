@@ -4,6 +4,7 @@ import { masterLevel } from '@/modules/skills/masterLevel';
 import { t } from '@/i18n';
 import { observer } from 'mobx-react-lite';
 import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
 import { Economy, vaultOpenCost } from '@/modules/economy/economy';
 import { StorageKind, isVaultBanned } from '@/modules/inventory/itemStorage';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
@@ -76,7 +77,7 @@ export const Vault = observer(() => {
   const locked = Economy.vaultLocked;
 
   const fee = vaultOpenCost(
-    Store.playerData.level,
+    Hero.level,
     masterLevel(),
     locked
   );

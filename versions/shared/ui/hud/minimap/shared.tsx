@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { t } from '@/i18n';
-import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
 import { Social } from '@/modules/social/social';
 import { loadWorldMinimap, type WorldMinimap } from '@/controllers/terrain/minimap';
@@ -100,7 +100,7 @@ export function usePartyMarkers(active: boolean, map: number | undefined): Minim
 
     const sample = () => {
       const world = Ecs.world;
-      const heroName = Store.playerData.name;
+      const heroName = Hero.name;
       if (!world) return;
 
       const next: MinimapMarker[] = [];

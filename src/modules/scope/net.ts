@@ -9,6 +9,7 @@ import { ItemSerializer } from '@/controllers/item_rules';
 import { MonsterActionType, PlayerAction } from '@versions/shared/objects/enum';
 import { PlayerObject, npcClassOf } from '@/controllers/actors/playerObject';
 import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { addNpcToScope, convertDirectionToAngle, isDeadMonster, removeNetObject, resumeWalkIntoScope } from '../_shared/net_helpers';
@@ -19,7 +20,7 @@ import { deferLeave, noteScopeEntry } from '@/ecs/systems/teleportSystem';
 import { isFemaleClass } from '@/controllers/actors/mapPlayerNetClassToModelClass';
 import { isKnownObjectType, resolveModelFactory } from '@/controllers/actors/modelFactoryPerId';
 import { playSummonArrival } from '@versions/shared/skills/skillVisuals';
-import { traceHeroInstantMove } from '@/controllers/actors/heroMoveTrace';
+import { traceHeroInstantMove } from '@/modules/hero/heroMoveTrace';
 
 export function spawnPlayer(
   world: World,
@@ -219,7 +220,7 @@ function addCharacterToScope(
   {
     const maskedId = char.Id & 0x7fff;
     console.log(
-      `[scope] character "${char.Name}" id=${maskedId} at (${char.CurrentPositionX},${char.CurrentPositionY}) map=${worldIndex} class=${char.appearance.cls} local=${Store.playerId === maskedId}`
+      `[scope] character "${char.Name}" id=${maskedId} at (${char.CurrentPositionX},${char.CurrentPositionY}) map=${worldIndex} class=${char.appearance.cls} local=${Hero.playerId === maskedId}`
     );
 
     removeNetObject(world, maskedId);
@@ -257,17 +258,17 @@ function addCharacterToScope(
     // `c->PK = Data->PK` (WSclient.cpp:804): tints the name balloon.
     if (char.HeroState != null) playerEntity.heroState = char.HeroState;
 
-    if (Store.playerId === maskedId) {
+    if (Hero.playerId === maskedId) {
       world.addComponent(playerEntity, 'localPlayer', true);
       console.log(`Local player spawned: ${maskedId} - ${char.Name}`);
       // The hero's own GM tag comes from CharacterInformation, not from the
       // `#` shout `markAsGm` watches for - the hero never sees its own shout
       // as an inbound chat line. Re-applied here because the body is respawned
       // on every scope add.
-      if (Store.playerData.isGameMaster) world.addComponent(playerEntity, 'isGm', true);
-      if (char.attackSpeed != null) Store.playerData.attackSpeed = char.attackSpeed;
-      if (char.magicSpeed != null) Store.playerData.magicSpeed = char.magicSpeed;
-      if (char.HeroState != null) Store.playerData.heroState = char.HeroState;
+      if (Hero.isGameMaster) world.addComponent(playerEntity, 'isGm', true);
+      if (char.attackSpeed != null) Hero.attackSpeed = char.attackSpeed;
+      if (char.magicSpeed != null) Hero.magicSpeed = char.magicSpeed;
+      if (char.HeroState != null) Hero.heroState = char.HeroState;
     } else {
       // `SelectCharacter(CKind_1)` (ZzzInterface.cpp:8110) tests the other
       // players before the monsters, so another player is a pick target: the
@@ -283,7 +284,7 @@ function addCharacterToScope(
 
     if (char.effects?.length) {
       world.addComponent(playerEntity, 'buffs', new Set(char.effects));
-      if (Store.playerId === maskedId) {
+      if (Hero.playerId === maskedId) {
         char.effects.forEach(id => Store.setBuff(id, true));
       }
     }
@@ -318,7 +319,7 @@ function addCharacterToScope(
  * 0x25 - `ReceiveChangePlayer`: one equipment slot of a player in scope
  * changed. Slot numbers are the inventory's (`InventoryConstants`); a group
  * of 0xFF means the slot was emptied. The hero's own appearance is driven by
- * the inventory (`Store.syncPlayerAppearance`), so it is left alone here.
+ * the inventory (`Hero.syncPlayerAppearance`), so it is left alone here.
  */
 function applyAppearanceChange(
   playerId: number,
@@ -328,7 +329,7 @@ function applyAppearanceChange(
   const world = Ecs.world;
   if (!world) return;
   const netId = playerId & 0x7fff;
-  if (netId === Store.playerId) return;
+  if (netId === Hero.playerId) return;
 
   const entity = world.getByNetId(netId);
   const cApp = entity?.charAppearance;
@@ -404,7 +405,7 @@ export function installNet(): void {
     const world = Ecs.world;
     if (!world) return;
 
-    const owner = Store.playerData.name;
+    const owner = Hero.name;
     for (const e of world.with('summonedBy', 'attributeSystem')) {
       if (e.summonedBy !== owner || e.objOutOfScope) continue;
       const max = e.attributeSystem.getValue('maxHealth');
@@ -493,7 +494,7 @@ export function installNet(): void {
       // monster instead have no body to lend, so the hero keeps its own.
       if (char.Skin === 0) {
         addCharacterToScope(world, scoped);
-      } else if (Store.playerId === (char.Id & 0x7fff)) {
+      } else if (Hero.playerId === (char.Id & 0x7fff)) {
         addCharacterToScope(world, scoped, char.Skin);
       } else {
         addTransformedCharacterToScope(world, scoped, char.Skin);

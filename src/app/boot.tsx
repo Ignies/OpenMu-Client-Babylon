@@ -8,6 +8,7 @@ import './logic';
 // Content model classes register here, at boot, where no controller can reach (controllers import the Store, which imports logic.ts).
 import '@versions/shared/monsters/models';
 import { Store } from './store';
+import { Hero } from '../modules/hero';
 import { Session } from '../modules/session';
 import { AppState, UIState } from './uiState';
 import { Loading } from '../controllers/loading';
@@ -29,7 +30,7 @@ import {
 } from '../controllers/render/renderScale';
 import { upscaleLive } from '../controllers/render/scenes/upscale';
 import { TestScene } from '../controllers/render/scenes/testScene';
-import { loadMapIntoScene, onMapChange } from '../controllers/terrain/loadMapIntoScene';
+import { loadMapIntoScene, onHeroPlaced, onMapChange } from '../controllers/terrain/loadMapIntoScene';
 import { initControllers } from '../controllers/controllers';
 import { resetForMapChange } from './lifecycle';
 import { prefetchWorldTerrain } from '../controllers/assets/mu/prefetchWorld';
@@ -74,7 +75,7 @@ Session.resumeHook = () => SessionResume.retry() || SessionResume.begin();
 
 // Hot keys are per character: the shared set is what a new one starts from.
 reaction(
-  () => Store.playerData.name,
+  () => Hero.name,
   name => setKeyProfile(name)
 );
 
@@ -200,6 +201,7 @@ const scene = new TestScene(engine);
 
 initControllers({ scene });
 onMapChange(resetForMapChange);
+onHeroPlaced(() => Hero.syncPlayerAppearance());
 // `MUSIC_LOGIN_THEME` over the server / login / character pages.
 const MENU_PAGES = new Set([UIState.Servers, UIState.Login, UIState.Characters]);
 installLoginMusic(

@@ -1,6 +1,6 @@
 // Rewrites `Store.<member>` (and `storeRef().<member>`) to the member's new home, and moves named
 // imports of `src/app/store.ts` (types, enums, constants) to the file that exports them now.
-// Usage: bun tools/restructure/storeSplit.ts <map.json> [--dry-run]
+// Usage: bun tools/restructure/storeSplit.ts <map.json> [--dry-run] [--skip <path prefix>]...
 // map.json: { "members": { "<member>": { "expr": "Hero", "name": "Hero", "door": "src/modules/hero/index.ts",
 //   "home": "src/modules/hero/state.ts" } }, "exports": { "UIState": { "door": "src/app/uiState.ts" } } }
 // `expr` replaces the whole `Store.<member>` (default `<name>.<member>`); files inside `home`'s folder import
@@ -17,6 +17,8 @@ type Map_ = { members?: Record<string, Member>; exports?: Record<string, Moved> 
 const [mapFile, ...flags] = process.argv.slice(2);
 if (!mapFile) throw new Error('usage: storeSplit.ts <map.json> [--dry-run]');
 const dry = flags.includes('--dry-run');
+// Files left on the store for now (a later move takes them).
+const skips = flags.flatMap((f, i) => (f === '--skip' && flags[i + 1] ? [flags[i + 1]] : []));
 const map: Map_ = JSON.parse(readFileSync(mapFile, 'utf8'));
 const members = map.members ?? {};
 const exportsMoved = map.exports ?? {};
@@ -61,7 +63,7 @@ let changed = 0;
 const problems: string[] = [];
 
 for (const file of files) {
-  if (file === STORE_REF || file === mapFile) continue;
+  if (file === STORE_REF || file === mapFile || skips.some(s => file.startsWith(s))) continue;
   const raw = readFileSync(file, 'utf8');
   const crlf = raw.includes('\r\n');
   const text = crlf ? raw.replace(/\r\n/g, '\n') : raw;

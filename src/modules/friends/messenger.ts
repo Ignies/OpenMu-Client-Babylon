@@ -1,6 +1,6 @@
 import { t } from '../../i18n';
 import { action, makeObservable, observable, runInAction } from 'mobx';
-import { Store } from '../../app/store';
+import { Hero } from '../hero';
 import { Session } from '../session';
 import { Social } from '../social/social';
 import {
@@ -176,7 +176,7 @@ export const Messenger = new (class _Messenger {
   requestAddFriend(name: string): boolean {
     const target = name.trim();
     if (!target) return false;
-    if (target === Store.playerData.name) {
+    if (target === Hero.name) {
       Social.errorMessage(t('friends.cannotAddSelf'));
       return false;
     }
@@ -317,7 +317,7 @@ export const Messenger = new (class _Messenger {
       playUiSound('error');
       return false;
     }
-    if (to === Store.playerData.name) {
+    if (to === Hero.name) {
       Social.errorMessage(t('friends.cannotLetterSelf'));
       return false;
     }

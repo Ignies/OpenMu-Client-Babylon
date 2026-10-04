@@ -5,6 +5,10 @@ and fruits. Also the class and stat math, the emote table and the low-vitals war
 other folders share.
 
 ## Public API
+- `Hero` (`state.ts`, through `index.ts`, the door): the hero's data (see How it works) and
+  `heroStats()`, `increaseStatRequest(stat)`, `syncPlayerAppearance()`, `sendWalkPath(x, y, dirs)`,
+  `sendWalkStop(x, y, rot)`, `sendAnimationRequest(rot, anim)`, `setPosition`, `setTileFlag`.
+- `traceHeroInstantMove(hero, to, approach)` (`heroMoveTrace.ts`): the `ObjectMoved` log (scope).
 - `characterStats.ts`: `BaseClass`, `getBaseClass(cls)`, `StatType`, `getClassName(cls)`, `getStatName(stat)`,
   `attackSpeedOf` / `magicSpeedOf(cls, agility)`, `deriveCharacterStats(input)` (damage, defense,
   rates and wizardry for the character info window).
@@ -19,17 +23,30 @@ other folders share.
   (option `stateWarnings`); `boot.tsx` starts it. Its `warn.*` text is in `i18n/` here.
 
 ## How it works
-- The hero's state lives in the Store: `Store.playerData` (`PlayerData` in `src/app/store.ts`: level,
-  exp, points, str/agi/sta/eng/leadership, fruit points, current and max HP/MP/SD/AG, speeds,
-  `heroState`, `isGameMaster`, `masterLevel`). `net.ts` writes it and the hero entity's `attributeSystem`.
-- Adding a point is `Store.increaseStatRequest(stat)` (`IncreaseCharacterStatPoint`, one point per
-  packet; offline the Store answers itself). The answer emits `statPointAnswered`.
+- The hero's state is `Hero` (`state.ts`: name, class, level, exp, points,
+  str/agi/sta/eng/leadership, fruit points, current and max HP/MP/SD/AG, speeds, `heroState`,
+  `isGameMaster`, money, the inventory `items` and the worn-slot getters, `playerId`). `net.ts` writes
+  it and the hero entity's `attributeSystem`. `syncPlayerAppearance()` puts the worn items on the hero
+  entity; the terrain calls it through `onHeroPlaced` (wired in `boot.tsx`) once the hero stands on a
+  new map.
+- Adding a point is `Hero.increaseStatRequest(stat)` (`IncreaseCharacterStatPoint`, one point per
+  packet; offline it answers itself after 30 ms). The answer emits `statPointAnswered`.
 - `StatAllocation` runs "add N points": one request in flight, the next sent when the server answers
   (`statPointAnswered`), stopped on a refusal, a 5 s timeout, `warpCompleted` or `wsClosed`.
   `statAmounts.ts` is its pure arithmetic (cap 9999, confirm from 100).
 - `experience.ts` is OpenMU's default experience table; the server sends no next-level value after a
   level-up, so `net.ts` derives the bar's bracket from it.
-- Emotes are sent by `src/ecs/systems/emoteSystem.ts` (`Store.sendAnimationRequest`).
+- Emotes are sent by `src/ecs/systems/emoteSystem.ts` (`Hero.sendAnimationRequest`). Walking goes out
+  as `Hero.sendWalkPath` / `sendWalkStop` (WalkRequest 0xD4); `lastWalkRequest` is what
+  `heroMoveTrace.ts` logs when the server moves the hero by itself (`ObjectMoved`).
+
+### Notes: heroMoveTrace.ts
+`ObjectMoved` (C1 15) is the only packet that moves the hero without a walk: a gate, a teleport, an
+`InstantMoveRequest`, or a resync when the server thinks the client drifted. These look the same
+from outside, so each jump of 1.5 tiles or more logs what the client believed: its position, the
+last walk sent (`sentWalk`) and the approach in progress. A `sentWalk` ending where the server put
+the hero is a walk the client failed to stop; no walk at all means the server moved him itself.
+(Was `controllers/actors/heroMoveTrace.ts`; it reads the hero and the selected skill.)
 
 ## Packets
 - `CharacterInformation(Extended)`: on select; resets `Social`, `Messenger`, `Economy`, `GmPanel`, fills
@@ -47,7 +64,8 @@ other folders share.
 - `FruitConsumptionResponse`: the fruit result (`ReceiveUseStateItem`). `BaseStatsExtended`: base stats.
 
 ## Depends on / used by
-- uses: `src/app/store.ts`, `social/social.ts`, `friends/messenger.ts`, `economy/economy.ts`, `gm/gmPanel.ts`,
+- uses: `session` (sending), `src/app/store.ts` (the selected skill, the item hot keys),
+  `social/social.ts`, `friends/messenger.ts`, `economy/economy.ts`, `gm/gmPanel.ts`,
   `session/sessionResume.ts`, `chat/commands.ts`, `_shared/net_helpers.ts`, `items`, `inventory`, `src/i18n`.
 - used by: `src/app/logic.ts`, `src/app/store.ts`, many controllers and ECS systems (`getBaseClass`),
   `social/social.ts` (`matchEmoteWord`), `session/sessionStats.ts` (`experienceGained`),
@@ -55,7 +73,7 @@ other folders share.
   `emote_menu/`, `move_command_window/`, `mu_helper/`, `options/`; HUD `low_health_overlay/`; page `character_select/`.
 
 ## Change it
-- handle a new hero packet: `net.ts`, state in `Store.playerData`.
+- handle a new hero packet: `net.ts`, state in `Hero` (`state.ts`).
 - the stat sheet numbers: `deriveCharacterStats` in `characterStats.ts`.
 - add or reorder an emote: `EMOTES` and `EMOTE_WORD_CHAIN` in `emotes.ts`.
 - the bulk stat run: `statAllocation.ts`; its limits: `statAmounts.ts`.

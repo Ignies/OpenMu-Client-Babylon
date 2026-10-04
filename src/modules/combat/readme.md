@@ -8,7 +8,7 @@ the Rage Fighter's Dark Side blows. This folder has only the handlers; it keeps 
 
 ## How it works
 - Handlers read `Store.world` and write straight onto the entities (animation components,
-  `attributeSystem`, `dying`). The hero's own HP on a kill goes to `Store.playerData.currentHP`.
+  `attributeSystem`, `dying`). The hero's own HP on a kill goes to `Hero.currentHP`.
 - The hero is driven locally: `ObjectAnimation` for the hero is ignored, as in the original.
 - `lastAttacker` is the original's `AttackPlayer` (`WSclient.cpp:3596-3608`, `:4161`): who last sent an
   attack or skill animation, used for Soul Barrier's hit shell on the hero.

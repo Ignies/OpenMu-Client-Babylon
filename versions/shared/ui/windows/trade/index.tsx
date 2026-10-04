@@ -3,6 +3,7 @@ import './style.less';
 import { t } from '@/i18n';
 import { observer } from 'mobx-react-lite';
 import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
 import { Economy } from '@/modules/economy/economy';
 import { StorageKind, isTradeBanned } from '@/modules/inventory/itemStorage';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
@@ -207,7 +208,7 @@ export const TradeWindow = observer(() => {
         className="trade-my-name"
         style={{ left: MY_NAME_TEXT_X, top: MY_NAME_TEXT_Y }}
       >
-        {Store.playerData.name}
+        {Hero.name}
       </div>
 
       <ItemGrid

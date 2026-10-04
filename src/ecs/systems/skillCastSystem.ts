@@ -1,5 +1,6 @@
 import type { Entity, ISystemFactory } from '../world';
 import { Store } from '../../app/store';
+import { Hero } from '../../modules/hero';
 import { Session } from '../../modules/session';
 import { applyPlayerActionSpeed, serverMinAttackInterval } from '../../controllers/anim/playSpeed';
 import {
@@ -129,7 +130,7 @@ export const SkillCastSystem: ISystemFactory = world => {
    * active world, for Rider's flying variant.
    */
   function castContext(hero: Entity): CastContext {
-    const cls = hero.charAppearance?.charClass ?? Store.playerData.charClass;
+    const cls = hero.charAppearance?.charClass ?? Hero.charClass;
     const inSafeZone = !!hero.attributeSystem?.isAboveZero('inSafeZone');
     return {
       mount: mountKind(hero.charAppearance?.pet, inSafeZone),
@@ -145,7 +146,7 @@ export const SkillCastSystem: ISystemFactory = world => {
     const inSafeZone = !!hero.attributeSystem?.isAboveZero('inSafeZone');
     return {
       hands: heldWeapons(hero, world.mapIndex),
-      baseClass: getBaseClass(hands?.charClass ?? Store.playerData.charClass),
+      baseClass: getBaseClass(hands?.charClass ?? Hero.charClass),
       swordCount: hero.playerAnimation?.swordCount ?? 0,
       wings: isWingItem(hands?.wings),
       mount: mountKind(hands?.pet, inSafeZone),
@@ -285,7 +286,7 @@ export const SkillCastSystem: ISystemFactory = world => {
       pathfinding.path = null;
       pathfinding.from = { x: from.x, y: from.y };
       pathfinding.to = { x: from.x, y: from.y };
-      Store.sendWalkStop(heroPos.x, heroPos.z, hero.transform!.rot.y);
+      Hero.sendWalkStop(heroPos.x, heroPos.z, hero.transform!.rot.y);
     }
 
     if (ally) {
@@ -463,7 +464,7 @@ export const SkillCastSystem: ISystemFactory = world => {
         const targetId =
           target && isAttackableEntity(world, target) && target.netId !== undefined
             ? target.netId
-            : (Store.playerId ?? 0);
+            : (Hero.playerId ?? 0);
         sendTargeted(nova, targetId);
         if (def) {
           const duration = playClip(hero, clipFor(hero, def));
@@ -599,7 +600,7 @@ export const SkillCastSystem: ISystemFactory = world => {
           return;
         }
         skills.startCooldown(def.num);
-        sendTargeted(combat.novaBeginSkill, Store.playerId ?? 0);
+        sendTargeted(combat.novaBeginSkill, Hero.playerId ?? 0);
         playClip(hero, clipFor(hero, beginDef));
         return;
       }
@@ -657,7 +658,7 @@ export const SkillCastSystem: ISystemFactory = world => {
       // onto the target's tile - while the hero stands here casting, and once
       // the two are more than 5 tiles apart it resynchronises us onto its own
       // position with an ObjectMoved.
-      if (wasWalking) Store.sendWalkStop(heroPos.x, heroPos.z, hero.transform.rot.y);
+      if (wasWalking) Hero.sendWalkStop(heroPos.x, heroPos.z, hero.transform.rot.y);
 
       // Mana / AG / re-use delay / requirements are gated client-side first
       // (the skill layer's verdict; the server re-checks everything).
@@ -676,7 +677,7 @@ export const SkillCastSystem: ISystemFactory = world => {
         } else if (combat.isDarkSide(def.num)) {
           // Dark Side: 0x4B asks the server for the targets, 0x4A lands the
           // first blow (ZzzInterface.cpp:2841-2842).
-          const targetId = target?.netId ?? Store.playerId ?? 0;
+          const targetId = target?.netId ?? Hero.playerId ?? 0;
           const range = RageAttackRangeRequestPacket.createPacket();
           range.SkillId = def.num;
           range.TargetId = targetId;
@@ -693,7 +694,7 @@ export const SkillCastSystem: ISystemFactory = world => {
           Session.sendToGS(packet.buffer);
           sendAreaHit(def, ~~tx, ~~ty);
         } else {
-          sendTargeted(def.num, target!.netId ?? Store.playerId ?? 0);
+          sendTargeted(def.num, target!.netId ?? Hero.playerId ?? 0);
         }
       }
 

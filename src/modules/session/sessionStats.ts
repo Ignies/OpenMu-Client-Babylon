@@ -1,6 +1,6 @@
 import { makeAutoObservable, reaction, runInAction } from 'mobx';
 import { EventBus } from '../../core/eventBus';
-import { Store } from '../../app/store';
+import { Hero } from '../hero';
 
 /**
  * What this sitting has been worth: experience, kills and zen since the
@@ -61,7 +61,7 @@ export const SessionStats = new (class _SessionStats {
     const rate = this.experiencePerHour;
     if (rate <= 0) return null;
 
-    const { exp, expToNextLvl } = Store.playerData;
+    const { exp, expToNextLvl } = Hero;
     const remaining = expToNextLvl - exp;
     if (remaining <= 0) return null;
 
@@ -75,7 +75,7 @@ export const SessionStats = new (class _SessionStats {
       this.experience = 0;
       this.kills = 0;
       this.zen = 0;
-      this.money = Store.playerData.money;
+      this.money = Hero.money;
     });
   }
 
@@ -93,7 +93,7 @@ export const SessionStats = new (class _SessionStats {
   watch(): void {
     if (this.watching) return;
     this.watching = true;
-    this.money = Store.playerData.money;
+    this.money = Hero.money;
 
     EventBus.on('experienceGained', ({ added, killedNetId }) => {
       runInAction(() => {
@@ -108,7 +108,7 @@ export const SessionStats = new (class _SessionStats {
     // so income is the rises of it. Spending is not counted: this is a
     // "what did the hunt bring in" line, not a balance sheet.
     reaction(
-      () => Store.playerData.money,
+      () => Hero.money,
       money => {
         const gained = money - this.money;
         this.money = money;
@@ -118,7 +118,7 @@ export const SessionStats = new (class _SessionStats {
 
     // A different character is a different session.
     reaction(
-      () => Store.playerData.name,
+      () => Hero.name,
       () => this.reset()
     );
   }

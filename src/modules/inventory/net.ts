@@ -6,6 +6,7 @@ import { InventoryConstants } from '@/core/inventoryConstants';
 import { ItemSerializer } from '@/controllers/item_rules';
 import { NetStats } from '@/controllers/net/roundTrip';
 import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
 import { addNotification } from '@/modules/chat';
 import { pickupSound } from '@/controllers/sound/combatSounds';
 import { playUiSound } from '@/controllers/sound/sfx';
@@ -47,7 +48,7 @@ export function installNet(): void {
     }));
 
     runInAction(() => {
-      const items = Store.playerData.items;
+      const items = Hero.items;
       for (const { slot, item } of entries) {
         // The personal store lives behind `FirstStoreItemSlotIndex` in the
         // same storage (OpenMU) - those squares belong to the stall grid.
@@ -59,7 +60,7 @@ export function installNet(): void {
       }
     });
 
-    Store.syncPlayerAppearance();
+    Hero.syncPlayerAppearance();
     // Inventory icons start loading now, before the window is ever opened.
     prefetchItemIcons(entries.map(entry => entry.item));
   });
@@ -121,20 +122,20 @@ export function installNet(): void {
     playUiSound(pickupSound(item));
 
     runInAction(() => {
-      Store.playerData.items[p.InventorySlot] = item;
+      Hero.items[p.InventorySlot] = item;
     });
 
-    Store.syncPlayerAppearance();
+    Hero.syncPlayerAppearance();
   });
 
   EventBus.on('ItemRemoved', packet => {
     const p = new ItemRemovedPacket(packet);
 
     runInAction(() => {
-      Store.playerData.items[p.InventorySlot] = null;
+      Hero.items[p.InventorySlot] = null;
     });
 
-    Store.syncPlayerAppearance();
+    Hero.syncPlayerAppearance();
   });
 
   /**
@@ -165,7 +166,7 @@ export function installNet(): void {
     const p = new ItemDurabilityChangedPacket(packet);
 
     runInAction(() => {
-      const item = Store.playerData.items[p.InventorySlot];
+      const item = Hero.items[p.InventorySlot];
       if (!item) return;
 
       item.durability = p.Durability;
@@ -178,7 +179,7 @@ export function installNet(): void {
     const p = new InventoryMoneyUpdatePacket(packet);
 
     runInAction(() => {
-      Store.playerData.money = p.Money;
+      Hero.money = p.Money;
     });
   });
 }

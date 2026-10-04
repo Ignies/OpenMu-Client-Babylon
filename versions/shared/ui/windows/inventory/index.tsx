@@ -4,6 +4,7 @@ import { t } from '@/i18n';
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
 import { Economy } from '@/modules/economy/economy';
 import { events } from '@/modules/events';
@@ -258,7 +259,7 @@ const ALT_HOT_KEY = 'KeyV';
 const ITEM_HOT_KEYS = ITEM_HOTKEY_CODES;
 
 export const Inventory = observer(() => {
-  const playerData = Store.playerData;
+  const playerData = Hero;
   const gridRef = useRef<HTMLDivElement>(null);
 
   const [target, setTarget] = useState<{ column: number; row: number } | null>(null);

@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
 import { Economy, type EconomyPrompt } from '@/modules/economy/economy';
 import { itemDisplayName } from '@/controllers/interface/itemTooltip';
 import { itemValue } from '@/controllers/item_rules';
@@ -83,9 +84,9 @@ function specOf(prompt: EconomyPrompt): Spec {
     case 'vault-deposit':
       return {
         title: t('prompt.storeZen'),
-        hint: t('prompt.carrying', { amount: zen(Store.playerData.money) }),
+        hint: t('prompt.carrying', { amount: zen(Hero.money) }),
         field: 'amount',
-        max: Store.playerData.money,
+        max: Hero.money,
       };
     case 'vault-withdraw':
       return {
@@ -116,10 +117,10 @@ function specOf(prompt: EconomyPrompt): Spec {
       return {
         title: t('prompt.offerZen'),
         hint: t('prompt.carrying', {
-          amount: zen(Store.playerData.money + Economy.myTradeMoney),
+          amount: zen(Hero.money + Economy.myTradeMoney),
         }),
         field: 'amount',
-        max: Store.playerData.money + Economy.myTradeMoney,
+        max: Hero.money + Economy.myTradeMoney,
       };
     case 'shop-price': {
       const item = Economy.myShopItems[prompt.slot];

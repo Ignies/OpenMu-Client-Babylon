@@ -1,4 +1,4 @@
-import { Store } from '../../app/store';
+import { Hero } from '../hero';
 import { Ecs } from '../../ecs/current';
 import { nearbyOf } from './gmNearby';
 
@@ -52,12 +52,12 @@ export function worldView(): WorldView {
 
   return {
     hero: {
-      name: Store.playerData.name,
+      name: Hero.name,
       x: hx,
       y: hy,
       map: world.mapIndex,
-      level: Store.playerData.level,
-      heroState: Store.playerData.heroState,
+      level: Hero.level,
+      heroState: Hero.heroState,
     },
     nearby: nearbyOf(world.netObjsQuery.entities, hx, hy),
     targetNetId: world.currentPointerTarget?.netId ?? null,

@@ -8,8 +8,8 @@ vi.hoisted(() => {
 });
 
 // The hero's server speeds (CharacterInformation / CurrentStatsExtended).
-vi.mock('../../app/store', () => ({
-  Store: { playerData: { attackSpeed: 600, magicSpeed: 900, charClass: 0, agi: 0 } },
+vi.mock('../../modules/hero', () => ({
+  Hero: { attackSpeed: 600, magicSpeed: 900, charClass: 0, agi: 0 },
 }));
 
 const { AnimationSystem } = await import('./animationSystem');

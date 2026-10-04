@@ -1,6 +1,6 @@
 import './style.less';
 import { observer } from 'mobx-react-lite';
-import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
 import { events } from '@/modules/events';
 import {
@@ -685,7 +685,7 @@ const RankTable = observer(
       <div className="event-result" style={{ ...at, width: RESULT.width, paddingTop: RESULT_TOP }}>
         <div className="event-result-line">{cell(0, EVENT_TEXT.congratulations)}</div>
         <div className="event-result-line">
-          {cell(0, formatText(EVENT_TEXT.braveryProven, Store.playerData.name))}
+          {cell(0, formatText(EVENT_TEXT.braveryProven, Hero.name))}
         </div>
         <div className="event-result-line" style={{ height: RESULT_HEAD_GAP }} />
         <div className="event-result-line" style={{ color: RESULT_HEAD_COLOR }}>

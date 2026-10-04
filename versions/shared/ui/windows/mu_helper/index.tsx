@@ -4,6 +4,7 @@ import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
 import { t } from '@/i18n';
 import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
 import { gameVersion } from '@/version';
 import { isKey } from '@/controllers/interface/keyBindings';
@@ -317,7 +318,7 @@ const ActivationSkill = observer(
 const HuntTab = observer(
   ({ onPick }: { onPick: (target: PickerTarget) => void }) => {
     const draft = MuHelperState.draft;
-    const baseClass = getBaseClass(Store.playerData.charClass);
+    const baseClass = getBaseClass(Hero.charClass);
     const knight = baseClass === BaseClass.Knight;
     const elf = baseClass === BaseClass.Elf;
     const summoner = baseClass === BaseClass.Summoner;

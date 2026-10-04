@@ -35,6 +35,7 @@ import type { ENUM_WORLD } from '../../core/types';
 import { EventBus } from '../../core/eventBus';
 import { playUiSound } from '../../controllers/sound/sfx';
 import { Store } from '../../app/store';
+import { Hero } from '../hero';
 import { Session } from '../session';
 import { addNotification } from '../chat';
 import { Ecs } from '../../ecs/current';
@@ -840,8 +841,8 @@ EventBus.on('heroWalked', () => {
 // only a different hero starts from an empty log.
 let heroName: string | null = null;
 EventBus.on('CharacterInformation', () => {
-  if (Store.playerData.name !== heroName) {
-    heroName = Store.playerData.name;
+  if (Hero.name !== heroName) {
+    heroName = Hero.name;
     requestedStates.clear();
     cancelKillRefreshes();
     runInAction(() => {

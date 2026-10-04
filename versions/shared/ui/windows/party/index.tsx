@@ -4,6 +4,7 @@ import './style.less';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
 import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
 import { MAX_PARTY_MEMBERS, Social } from '@/modules/social/social';
 import { Economy } from '@/modules/economy/economy';
@@ -76,7 +77,7 @@ const MemberRow = observer(({ index }: { index: number }) => {
   const member = Social.partyMembers[index];
   if (!member) return null;
 
-  const isMe = member.name === Store.playerData.name;
+  const isMe = member.name === Hero.name;
   const ratio =
     member.healthStep >= 0
       ? member.healthStep / 10

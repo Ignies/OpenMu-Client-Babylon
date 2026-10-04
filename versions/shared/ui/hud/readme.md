@@ -16,7 +16,7 @@ Always-on interface elements, one folder per element, same shape as a window. Re
 
 | Folder | id (slot, order) | Shows | Reads |
 |---|---|---|---|
-| `low_health_overlay` | low_health_overlay (world, 10) | red or blue screen-edge pulse at low health or mana | Store.playerData, options |
+| `low_health_overlay` | low_health_overlay (world, 10) | red or blue screen-edge pulse at low health or mana | Hero, options |
 | `world_objects` | world_objects (world, 20) | drop names and tooltips (ALT), and hosts name tags, party bars, emoji bubbles | Store.world, drops, options |
 | `damage_numbers` | damage_numbers (world, 30) | floating damage, miss and shield numbers | `objectDamaged` events |
 | `target_health_bar` | target_health_bar (hud, 10) | the target's name and health bar | Store.world |
@@ -25,7 +25,7 @@ Always-on interface elements, one folder per element, same shape as a window. Re
 | `notices` | notices (hud, 40) | the centred notice stack | chat |
 | `slide_help` | slide_help (hud, 50) | the scrolling help band at the top | options |
 | `buff_bar` | buff_bar (hud, 60) | the hero's buffs and debuffs with tooltips | skills |
-| `bottom_bar` | bottom_bar (hud, 70) | main frame: orbs, potion slots, skill hotkeys and fan, exp bar | Store.playerData, skills, inventory |
+| `bottom_bar` | bottom_bar (hud, 70) | main frame: orbs, potion slots, skill hotkeys and fan, exp bar | Hero, skills, inventory |
 | `chat` | chat (hud, 230) | chat input box and chat log | chat, social, options |
 | `soccer_score` | soccer_score (hud, 420) | Battle Soccer scoreboard and clock | Store.guilds, social |
 | `minimap` | minimap (hud, 450) | full world map on TAB and the corner minimap | Store.world, options, social |

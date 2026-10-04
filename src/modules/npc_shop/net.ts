@@ -4,6 +4,7 @@ import { EventBus } from '@/core/eventBus';
 import { ItemBoughtPacket, NpcItemSellResultPacket, NpcWindowResponseNpcWindowEnum, NpcWindowResponsePacket, StoreItemListItemWindowEnum, StoreItemListPacket } from '@versions/shared/packets/ServerToClientPackets';
 import { ItemSerializer } from '@/controllers/item_rules';
 import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
 import { Session } from '@/modules/session';
 import { addNotification } from '@/modules/chat';
 import { events } from '../events';
@@ -109,11 +110,11 @@ export function installNet(): void {
     playUiSound('getItem');
 
     runInAction(() => {
-      Store.playerData.items[p.InventorySlot] = item;
+      Hero.items[p.InventorySlot] = item;
     });
 
     Store.finishShopBuy();
-    Store.syncPlayerAppearance();
+    Hero.syncPlayerAppearance();
   });
 
   EventBus.on('NpcItemBuyFailed', () => {

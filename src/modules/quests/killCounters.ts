@@ -17,7 +17,7 @@ import {
   ObjectGotKilledPacket,
 } from '@versions/shared/packets/ServerToClientPackets';
 import { EventBus } from '../../core/eventBus';
-import { Store } from '../../app/store';
+import { Hero } from '../hero';
 import { Ecs } from '../../ecs/current';
 import type { QuestLayer } from './layer';
 
@@ -95,8 +95,8 @@ EventBus.on('ObjectGotKilled', packet => {
 // only a different hero starts from empty slots (`clearQuest` in InitGame).
 let heroName: string | null = null;
 EventBus.on('CharacterInformation', () => {
-  if (Store.playerData.name === heroName) return;
-  heroName = Store.playerData.name;
+  if (Hero.name === heroName) return;
+  heroName = Hero.name;
   setKillInfo(null);
 });
 

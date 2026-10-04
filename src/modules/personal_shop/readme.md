@@ -17,8 +17,8 @@ only has the handlers.
   `PlayerShopClose` again and OpenMU answers with another `PlayerShopClosed` (a loop).
 - `PlayerShopItemList` slots are mapped to the 8x4 grid with `localIndexOf(StorageKind.PersonalShop)`;
   a slot already inside the grid is used as is.
-- A successful buy puts the item straight into `Store.playerData.items` and calls
-  `Store.syncPlayerAppearance()`: OpenMU's `BuyRequestAction` sends no `ItemAddedToInventory`.
+- A successful buy puts the item straight into `Hero.items` and calls
+  `Hero.syncPlayerAppearance()`: OpenMU's `BuyRequestAction` sends no `ItemAddedToInventory`.
   `ReceivePurchaseItem` (`WSclient.cpp:9526-9597`) plays no sound, so neither does this.
 - Outgoing packets are `Economy` actions: `startSelling` (`PlayerShopOpen`), `stopSelling`
   (`PlayerShopClose`), `setItemPrice`, `browseShop` (`PlayerShopItemListRequest`), `buyFromShop`

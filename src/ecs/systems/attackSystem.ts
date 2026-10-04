@@ -1,5 +1,6 @@
 import type { Entity, ISystemFactory } from '../world';
 import { Store } from '../../app/store';
+import { Hero } from '../../modules/hero';
 import { Session } from '../../modules/session';
 import { addNotification } from '../../modules/chat';
 import { Ecs } from '../current';
@@ -290,7 +291,7 @@ export const AttackSystem: ISystemFactory = world => {
       const swordCount = anim.swordCount ?? 0;
       const action = chooseAttackAction({
         hands: heldWeapons(playerEntity, world.mapIndex),
-        baseClass: getBaseClass(hands?.charClass ?? Store.playerData.charClass),
+        baseClass: getBaseClass(hands?.charClass ?? Hero.charClass),
         swordCount,
         wings: isWingItem(hands?.wings),
         mount: mountKind(

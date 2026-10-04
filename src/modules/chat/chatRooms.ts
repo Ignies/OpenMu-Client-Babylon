@@ -1,6 +1,6 @@
 import { t } from '../../i18n';
 import { action, makeObservable, observable, reaction, runInAction } from 'mobx';
-import { Store } from '../../app/store';
+import { Hero } from '../hero';
 import { Session } from '../session';
 import { AppState, UIState } from '../../app/uiState';
 import { Social } from '../social/social';
@@ -290,7 +290,7 @@ export const ChatRooms = new (class _ChatRooms {
               const sender =
                 room.clients.find(c => c.index === event.senderIndex)?.name ?? '?';
               this.addLine(room, { sender, text: event.text });
-              if (sender !== Store.playerData.name) {
+              if (sender !== Hero.name) {
                 const visible =
                   this.windowEnabled && this.activeKey === room.key;
                 if (!visible) {

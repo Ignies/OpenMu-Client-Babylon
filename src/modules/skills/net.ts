@@ -4,6 +4,7 @@ import { Entity, World } from '@/ecs/world';
 import { EventBus } from '@/core/eventBus';
 import { cancelledEffects } from '@/controllers/skills';
 import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
 import { TELEPORT } from './skillCasting';
 import { applyObjectEffect, playCastAnimation } from '../_shared/net_helpers';
@@ -96,7 +97,7 @@ function setObjectEffect(objectId: number, effectId: number, active: boolean) {
   const world = Ecs.world;
   if (!world) return;
   const maskedId = objectId & 0x7fff;
-  if (maskedId === Store.playerId) Store.setBuff(effectId, active);
+  if (maskedId === Hero.playerId) Store.setBuff(effectId, active);
   const obj = world.getByNetId(maskedId);
   if (obj) applyObjectEffect(obj, effectId, active);
 }

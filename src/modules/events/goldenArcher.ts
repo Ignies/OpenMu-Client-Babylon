@@ -1,6 +1,7 @@
 import { observable, runInAction } from 'mobx';
 import { EventBus } from '../../core/eventBus';
 import { Store } from '../../app/store';
+import { Hero } from '../hero';
 import { Session } from '../session';
 import { addNotification } from '../chat';
 import { t } from '../../i18n';
@@ -62,7 +63,7 @@ export function goldenArcherWindow(): {
 export function registerRena(): void {
   if (!state.open || Session.isOffline) return;
 
-  const slot = Store.playerData.items.findIndex(
+  const slot = Hero.items.findIndex(
     item => item?.group === RENA.group && item?.num === RENA.num
   );
   if (slot < 0) {

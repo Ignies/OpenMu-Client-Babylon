@@ -3,6 +3,7 @@ import { EventBus } from '@/core/eventBus';
 import { GuildInfoRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
 import { Social } from '../social/social';
 import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
 import { Session } from '@/modules/session';
 import { Ecs } from '@/ecs/current';
 import { t, type TextKey } from '@/i18n';
@@ -19,7 +20,7 @@ function leaveGuild(guildId: number, disbanded: boolean): void {
   const world = Ecs.world;
   if (world) {
     const gone = world.netObjsQuery.entities.filter(
-      e => e.guild && (disbanded ? e.guild.id === guildId : e.netId === Store.playerId)
+      e => e.guild && (disbanded ? e.guild.id === guildId : e.netId === Hero.playerId)
     );
     for (const obj of gone) world.removeComponent(obj, 'guild');
   }
@@ -79,7 +80,7 @@ export function installNet(): void {
         if (obj.guild) obj.guild = guild;
         else world.addComponent(obj, 'guild', guild);
       }
-      if (maskedId === Store.playerId) {
+      if (maskedId === Hero.playerId) {
         runInAction(() => {
           Social.myGuild = { id: member.GuildId, role: member.Role };
         });
@@ -101,7 +102,7 @@ export function installNet(): void {
     const maskedId = p.PlayerId & 0x7fff;
     const obj = world.getByNetId(maskedId);
     if (obj?.guild) world.removeComponent(obj, 'guild');
-    if (maskedId === Store.playerId) {
+    if (maskedId === Hero.playerId) {
       // `ReceiveGuildLeave` 1 / 4: no guild, window closed. The disband
       // response may have cleared it already - then there is nothing to say.
       const mine = Social.myGuild;

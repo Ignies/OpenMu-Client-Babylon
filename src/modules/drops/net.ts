@@ -6,6 +6,7 @@ import { ItemGroup, angleRotation, itemRestHeight, itemRestPose, itemRestRotatio
 import { ItemSerializer } from '@/controllers/item_rules';
 import { ItemsDatabase, itemBaseName } from '@versions/shared/items/itemsDatabase';
 import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
 import { addNotification } from '@/modules/chat';
 import { Ecs } from '@/ecs/current';
 import { Vector3 } from '@/controllers/render/babylon/exports';
@@ -235,7 +236,7 @@ export function installNet(): void {
     // ReceiveDropItem (WSclient.cpp:6197-6219) is silent: the thud is the item
     // landing, when it appears on the ground.
     runInAction(() => {
-      Store.playerData.items[p.InventorySlot] = null;
+      Hero.items[p.InventorySlot] = null;
     });
 
     Store.confirmItemMove(-1, null);
