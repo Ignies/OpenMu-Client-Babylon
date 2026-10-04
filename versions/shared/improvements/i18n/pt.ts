@@ -15,13 +15,19 @@ export default {
   'fidelity.loginChandeliers': 'Lustres acesos no login',
   'fidelity.loginChandeliers.hint':
     'Os lustres da tela de login ficam acesos. Clássica: ficam apagados, como no original.',
-  'fidelity.heldHitRequest': 'Golpes no ritmo do ataque',
-  'fidelity.heldHitRequest.hint':
-    'Seu ataque chega ao servidor quando o golpe acerta, então o dano aparece junto com o movimento. Clássica: é enviado no clique.',
   'fidelity.wingShadows': 'Sombras das asas',
   'fidelity.wingShadows.hint':
     'As asas projetam sombra. Clássica: sem sombra, como no original.',
   'fidelity.torchCrackle': 'Som das tochas',
   'fidelity.torchCrackle.hint':
     'As tochas acesas estalam quando você está perto. Clássica: as tochas são silenciosas.',
+  'fidelity.loginWallTorches': 'Tochas de parede acesas no login',
+  'fidelity.loginWallTorches.hint':
+    'As tochas de parede da tela de login queimam com fogo e iluminam o chão. Clássica: só o brilho delas, como no original.',
+  'fidelity.fortressLights': 'Luzes da Fortaleza Imperial',
+  'fidelity.fortressLights.hint':
+    'As tochas e lustres da Fortaleza Imperial iluminam o chão ao redor. Clássica: sem luz, como no original.',
+  'fidelity.roofFade': 'Telhados transparentes',
+  'fidelity.roofFade.hint':
+    'Os telhados somem enquanto você está embaixo deles, para ver o interior. Clássica: os telhados sempre aparecem.',
 } satisfies Partial<Record<keyof typeof en, string>>;

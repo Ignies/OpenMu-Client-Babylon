@@ -15,13 +15,19 @@ export default {
   'fidelity.loginChandeliers': 'ログイン画面のシャンデリア点灯',
   'fidelity.loginChandeliers.hint':
     'ログイン画面のシャンデリアに火がともります。クラシック: オリジナル通り消えたままです。',
-  'fidelity.heldHitRequest': '攻撃は振りに合わせて届く',
-  'fidelity.heldHitRequest.hint':
-    '攻撃は打撃が当たった瞬間にサーバーへ送られ、ダメージ表示が動きと合います。クラシック: クリック時に送られます。',
   'fidelity.wingShadows': '翼の影',
   'fidelity.wingShadows.hint':
     '翼が影を落とします。クラシック: オリジナル通り影はありません。',
   'fidelity.torchCrackle': 'たいまつの音',
   'fidelity.torchCrackle.hint':
     '近くの燃えるたいまつがパチパチと鳴ります。クラシック: たいまつは無音です。',
+  'fidelity.loginWallTorches': 'ログイン画面の壁たいまつ点灯',
+  'fidelity.loginWallTorches.hint':
+    'ログイン画面の壁たいまつが炎を上げ、床を照らします。クラシック: オリジナル通り光の輝きだけです。',
+  'fidelity.fortressLights': '帝国要塞の明かり',
+  'fidelity.fortressLights.hint':
+    '帝国要塞の壁たいまつとシャンデリアが周りの床を照らします。クラシック: オリジナル通り明かりはありません。',
+  'fidelity.roofFade': '透ける屋根',
+  'fidelity.roofFade.hint':
+    '屋根の下に立つと屋根が消え、中が見えます。クラシック: 屋根は常に表示されます。',
 } satisfies Partial<Record<keyof typeof en, string>>;

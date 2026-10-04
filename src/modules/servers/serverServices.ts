@@ -1,6 +1,7 @@
-import { ServerConfig, type ServerProfile } from './serverConfig';
+import { ServerConfig, effective, type ServerProfile } from './serverConfig';
 
-/** The rest of a world, worked out from its domain: `ws.`, `register.` and `api.<domain>`.
+/** The rest of a world, worked out from its domain: `ws.`, `register.` and `api.<domain>`, and the
+ * `server.json` next to its proxy.
  * The convention: readme.md. */
 
 const env = import.meta.env;
@@ -91,4 +92,23 @@ export function marketApiUrl(profile: ServerProfile = ServerConfig.active): stri
   }
 
   return (env.VITE_MARKETPLACE_API as string) || '/api/market';
+}
+
+/**
+ * Where a world publishes its `server.json` (serverManifest.ts): the root of
+ * its proxy's host, over http(s). Every profile has a proxy, so this works for
+ * a domain world (`https://ws.<domain>/server.json`) and for one published as
+ * an address. Empty when the proxy address does not parse.
+ */
+export function serverManifestUrl(profile: ServerProfile = ServerConfig.active): string {
+  const ws = effective(profile).wsUrl;
+
+  try {
+    const url = new URL(ws);
+    const scheme = url.protocol === 'wss:' ? 'https' : url.protocol === 'ws:' ? 'http' : '';
+
+    return scheme && url.host ? `${scheme}://${url.host}/server.json` : '';
+  } catch {
+    return '';
+  }
 }

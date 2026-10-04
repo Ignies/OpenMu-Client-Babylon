@@ -24,14 +24,15 @@ import { InventoryConstants } from '../../modules/inventory/inventoryConstants';
 import { StorageKind } from '../../modules/inventory/itemStorage';
 import { t } from '../../i18n';
 import { heldWeapons } from '../../controllers/actors';
-import { isOn } from '../../controllers/fidelity';
+import { serverSetting } from '../../modules/servers/serverManifest';
 
 /**
  * Left-click basic attack (`Action()` MOVEMENT_ATTACK, ZzzInterface.cpp:3283-3356):
  * walk into the weapon's reach, face the target, restart the swing clip and
  * latch the hit. Timing comes from the `combat` layer - the 0.24 s input
- * gate, the `AttackTime` latch that sends `HitRequest` at the clip's hit
- * key, the reach per weapon and the archer's ammunition check. This is
+ * gate, the `AttackTime` latch at the clip's hit key (where `HitRequest`
+ * goes when the server's `heldHitRequest` asks; else on the click), the
+ * reach per weapon and the archer's ammunition check. This is
  * also the one place `combat.update` is stepped: it runs before
  * SkillCastSystem, so both read a fresh frame.
  */
@@ -311,8 +312,8 @@ export const AttackSystem: ISystemFactory = world => {
       }
       anim.action = action;
 
-      // The blow lands at the clip's hit key: latch the HitRequest there. The
-      // clip length is the fallback - the request never outlives the clip.
+      // The blow lands at the clip's hit key (a held HitRequest goes there).
+      // The clip length is the fallback - the request never outlives the clip.
       const playSpeed = model?.AnimationSpeed ?? 0;
       const clipSeconds = model?.getActionDuration(action) || undefined;
       const sendHit = () => {
@@ -323,8 +324,9 @@ export const AttackSystem: ISystemFactory = world => {
         packet.LookingDirection = lookingDirection;
         Store.sendToGS(packet.buffer);
       };
-      // Classic: SendHitRequest on the click (ZzzInterface.cpp:3355).
-      const held = isOn('heldHitRequest');
+      // The original sends on the click (ZzzInterface.cpp:3355); a server may ask for the
+      // request at the hit key instead (its server.json, modules/servers/serverManifest.ts).
+      const held = serverSetting('heldHitRequest');
       if (!held) sendHit();
       const hitDelay = combat.startAttack(action, playSpeed, () => {
         // CreateArrows() at AttackStage's hit key: the bow lets go here.

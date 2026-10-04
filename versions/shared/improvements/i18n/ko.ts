@@ -15,13 +15,19 @@ export default {
   'fidelity.loginChandeliers': '로그인 화면 샹들리에 점등',
   'fidelity.loginChandeliers.hint':
     '로그인 화면의 샹들리에에 불이 켜집니다. 클래식: 원작처럼 꺼져 있습니다.',
-  'fidelity.heldHitRequest': '타격과 함께 들어가는 공격',
-  'fidelity.heldHitRequest.hint':
-    '공격이 타격 순간에 서버로 전송되어 대미지가 동작과 맞게 표시됩니다. 클래식: 클릭할 때 전송됩니다.',
   'fidelity.wingShadows': '날개 그림자',
   'fidelity.wingShadows.hint':
     '날개가 그림자를 드리웁니다. 클래식: 원작처럼 그림자가 없습니다.',
   'fidelity.torchCrackle': '횃불 소리',
   'fidelity.torchCrackle.hint':
     '가까이 있는 횃불이 타닥거립니다. 클래식: 횃불은 소리가 없습니다.',
+  'fidelity.loginWallTorches': '로그인 화면 벽 횃불 점등',
+  'fidelity.loginWallTorches.hint':
+    '로그인 화면의 벽 횃불이 불타며 바닥을 비춥니다. 클래식: 원작처럼 빛 번짐만 있습니다.',
+  'fidelity.fortressLights': '제국 요새의 불빛',
+  'fidelity.fortressLights.hint':
+    '제국 요새의 벽 횃불과 샹들리에가 주변 바닥을 비춥니다. 클래식: 원작처럼 불빛이 없습니다.',
+  'fidelity.roofFade': '투명해지는 지붕',
+  'fidelity.roofFade.hint':
+    '지붕 아래에 서 있으면 지붕이 사라져 안이 보입니다. 클래식: 지붕은 항상 보입니다.',
 } satisfies Partial<Record<keyof typeof en, string>>;

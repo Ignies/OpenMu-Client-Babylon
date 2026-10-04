@@ -13,13 +13,19 @@ const en = {
   'fidelity.loginChandeliers': 'Lit login chandeliers',
   'fidelity.loginChandeliers.hint':
     'The chandeliers on the login screen burn. Classic: they are cold, as in the original.',
-  'fidelity.heldHitRequest': 'Hits land with the swing',
-  'fidelity.heldHitRequest.hint':
-    'Your attack reaches the server when the blow lands, so the damage shows in time with the swing. Classic: it is sent on the click.',
   'fidelity.wingShadows': 'Wing shadows',
   'fidelity.wingShadows.hint': 'Wings cast a shadow. Classic: no shadow, as in the original.',
   'fidelity.torchCrackle': 'Torch sounds',
   'fidelity.torchCrackle.hint': 'Burning torches crackle when you are near. Classic: torches are silent.',
+  'fidelity.loginWallTorches': 'Burning login wall torches',
+  'fidelity.loginWallTorches.hint':
+    'The wall torches on the login screen burn with fire and light the floor. Classic: only their flare, as in the original.',
+  'fidelity.fortressLights': 'Imperial Fortress lights',
+  'fidelity.fortressLights.hint':
+    'Wall torches and chandeliers in the Imperial Fortress light the floor around them. Classic: no light, as in the original.',
+  'fidelity.roofFade': 'See-through roofs',
+  'fidelity.roofFade.hint':
+    'Roofs fade away while you stand under them, so you can see inside. Classic: roofs always stay drawn.',
 };
 
 export default en;

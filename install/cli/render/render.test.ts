@@ -4,6 +4,8 @@ import { parseAllowTargets } from '../../../proxy/allowTargets';
 import { caddyfile, publicPorts } from './caddy';
 import { allowTargets, clientBuildArgs, databaseUrl, openmuImage, serviceEnv, stackEnv } from './env';
 import { serverList } from './serverList';
+import { serverManifest } from './manifest';
+import { parseServerManifest } from '../../../src/modules/servers/serverManifest';
 import { WEB_IP } from '../stack';
 
 const domain: Config = {
@@ -84,6 +86,40 @@ describe('client build', () => {
   it('lists this server as the only world', () => {
     expect(serverList(domain)).toContain('[S6EP3:My MU:Season 6 Episode 3, played in the browser:en](example.com)');
     expect(serverList(ip)).toContain('](127.0.0.1:44405@ws://203.0.113.7:3000)');
+  });
+});
+
+describe('server.json', () => {
+  it('holds the original behaviour by default', () => {
+    expect(JSON.parse(serverManifest(domain))).toEqual({ version: 1, settings: { heldHitRequest: false } });
+  });
+
+  it('follows the config', () => {
+    expect(JSON.parse(serverManifest({ ...domain, heldHitRequest: true })).settings.heldHitRequest).toBe(true);
+  });
+
+  // The client is the reader: what the installer writes must pass its strict check.
+  it('is what the client accepts', () => {
+    for (const heldHitRequest of [false, true]) {
+      expect(parseServerManifest(JSON.parse(serverManifest({ ...domain, heldHitRequest })))?.settings).toEqual({ heldHitRequest });
+    }
+  });
+
+  it('is served next to the client and the proxy, to any origin', () => {
+    const route = 'handle /server.json {\n\t\troot * /srv/client\n\t\theader Access-Control-Allow-Origin *';
+    for (const [c, sites] of [[domain, ['play.example.com {', 'ws.example.com {']], [ip, [':80 {', ':3000 {']]] as const) {
+      const text = caddyfile(c);
+      for (const site of sites) {
+        const start = text.indexOf(site);
+        expect(text.slice(start, text.indexOf('\n}\n', start)), site).toContain(route);
+      }
+    }
+  });
+
+  it('still sends everything else on the proxy host to the proxy', () => {
+    const text = caddyfile(domain);
+    const start = text.indexOf('ws.example.com {');
+    expect(text.slice(start, text.indexOf('\n}\n', start))).toMatch(/\thandle \{\n\t\treverse_proxy openmu-startup:\d+\n\t\}$/);
   });
 });
 

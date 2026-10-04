@@ -15,13 +15,19 @@ export default {
   'fidelity.loginChandeliers': '登录画面吊灯点亮',
   'fidelity.loginChandeliers.hint':
     '登录画面的吊灯会燃烧。经典：与原版一样是熄灭的。',
-  'fidelity.heldHitRequest': '攻击随挥击命中',
-  'fidelity.heldHitRequest.hint':
-    '攻击在击中瞬间发送到服务器，伤害显示与动作同步。经典：点击时即发送。',
   'fidelity.wingShadows': '翅膀阴影',
   'fidelity.wingShadows.hint':
     '翅膀会投下阴影。经典：与原版一样没有阴影。',
   'fidelity.torchCrackle': '火把声音',
   'fidelity.torchCrackle.hint':
     '靠近燃烧的火把时会听到噼啪声。经典：火把没有声音。',
+  'fidelity.loginWallTorches': '登录画面壁挂火把点亮',
+  'fidelity.loginWallTorches.hint':
+    '登录画面的壁挂火把会燃烧并照亮地面。经典：与原版一样只有光晕。',
+  'fidelity.fortressLights': '帝国要塞的灯光',
+  'fidelity.fortressLights.hint':
+    '帝国要塞的壁挂火把和吊灯会照亮周围的地面。经典：与原版一样没有灯光。',
+  'fidelity.roofFade': '透明屋顶',
+  'fidelity.roofFade.hint':
+    '站在屋顶下时屋顶会淡出，让你看到室内。经典：屋顶始终显示。',
 } satisfies Partial<Record<keyof typeof en, string>>;

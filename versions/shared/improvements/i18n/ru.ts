@@ -15,13 +15,19 @@ export default {
   'fidelity.loginChandeliers': 'Горящие люстры при входе',
   'fidelity.loginChandeliers.hint':
     'Люстры на экране входа горят. Классика: они потушены, как в оригинале.',
-  'fidelity.heldHitRequest': 'Удар в такт атаке',
-  'fidelity.heldHitRequest.hint':
-    'Ваша атака уходит на сервер в момент удара, и урон появляется вовремя. Классика: отправляется по клику.',
   'fidelity.wingShadows': 'Тени крыльев',
   'fidelity.wingShadows.hint':
     'Крылья отбрасывают тень. Классика: без тени, как в оригинале.',
   'fidelity.torchCrackle': 'Звук факелов',
   'fidelity.torchCrackle.hint':
     'Горящие факелы потрескивают, когда вы рядом. Классика: факелы беззвучны.',
+  'fidelity.loginWallTorches': 'Горящие настенные факелы при входе',
+  'fidelity.loginWallTorches.hint':
+    'Настенные факелы на экране входа горят огнём и освещают пол. Классика: только их отблеск, как в оригинале.',
+  'fidelity.fortressLights': 'Огни Имперской крепости',
+  'fidelity.fortressLights.hint':
+    'Факелы и люстры Имперской крепости освещают пол вокруг себя. Классика: без света, как в оригинале.',
+  'fidelity.roofFade': 'Прозрачные крыши',
+  'fidelity.roofFade.hint':
+    'Крыши исчезают, пока вы стоите под ними, чтобы было видно внутри. Классика: крыши видны всегда.',
 } satisfies Partial<Record<keyof typeof en, string>>;

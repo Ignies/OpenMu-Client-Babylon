@@ -112,6 +112,7 @@ services:
       - caddy-config:/config
       - ${MU_STATE}/Caddyfile:/etc/caddy/Caddyfile:ro
       - ${MU_STATE}/serverlist.md:/srv/client/serverlist.md:ro
+      - ${MU_STATE}/server.json:/srv/client/server.json:ro
     depends_on: [proxy, register, cashshop, marketplace]
     networks:
       default:

@@ -15,13 +15,19 @@ export default {
   'fidelity.loginChandeliers': 'Đèn chùm sáng ở màn hình đăng nhập',
   'fidelity.loginChandeliers.hint':
     'Các đèn chùm ở màn hình đăng nhập được thắp sáng. Cổ điển: chúng tắt, như bản gốc.',
-  'fidelity.heldHitRequest': 'Đòn đánh khớp với cú vung',
-  'fidelity.heldHitRequest.hint':
-    'Đòn tấn công gửi đến máy chủ khi cú đánh trúng, nên sát thương hiện đúng lúc. Cổ điển: gửi ngay khi nhấp chuột.',
   'fidelity.wingShadows': 'Bóng của cánh',
   'fidelity.wingShadows.hint':
     'Cánh đổ bóng. Cổ điển: không có bóng, như bản gốc.',
   'fidelity.torchCrackle': 'Tiếng đuốc',
   'fidelity.torchCrackle.hint':
     'Đuốc đang cháy kêu lách tách khi bạn ở gần. Cổ điển: đuốc im lặng.',
+  'fidelity.loginWallTorches': 'Đuốc tường cháy ở màn hình đăng nhập',
+  'fidelity.loginWallTorches.hint':
+    'Đuốc trên tường ở màn hình đăng nhập cháy lửa và chiếu sáng mặt sàn. Cổ điển: chỉ có ánh lóe, như bản gốc.',
+  'fidelity.fortressLights': 'Ánh sáng Pháo đài Hoàng gia',
+  'fidelity.fortressLights.hint':
+    'Đuốc tường và đèn chùm trong Pháo đài Hoàng gia chiếu sáng mặt sàn xung quanh. Cổ điển: không có ánh sáng, như bản gốc.',
+  'fidelity.roofFade': 'Mái nhà trong suốt',
+  'fidelity.roofFade.hint':
+    'Mái nhà mờ dần khi bạn đứng bên dưới để bạn nhìn thấy bên trong. Cổ điển: mái nhà luôn hiển thị.',
 } satisfies Partial<Record<keyof typeof en, string>>;

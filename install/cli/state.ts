@@ -5,6 +5,7 @@ import { configToEnv, envToConfig, parseEnvFile, toEnvFile, type Config } from '
 import { files, isWindows, type Paths } from './paths';
 import { caddyfile } from './render/caddy';
 import { serviceEnv, stackEnv } from './render/env';
+import { serverManifest } from './render/manifest';
 import { serverList } from './render/serverList';
 
 export function loadConfig(p: Paths): Config | null {
@@ -18,7 +19,7 @@ function write(file: string, text: string, secret = false): void {
   if (secret && !isWindows) chmodSync(file, 0o600);
 }
 
-/** Saves the config and renders the service env files, the Caddyfile and the server list from it. */
+/** Saves the config and renders the service env files, the Caddyfile, the server list and server.json from it. */
 export function saveState(c: Config, p: Paths): void {
   const f = files(p);
   write(f.config, toEnvFile(configToEnv(c)), true);
@@ -26,4 +27,5 @@ export function saveState(c: Config, p: Paths): void {
   for (const [service, env] of Object.entries(serviceEnv(c))) write(f.serviceEnv(service), toEnvFile(env), true);
   write(f.caddyfile, caddyfile(c));
   write(f.serverList, serverList(c));
+  write(f.serverManifest, serverManifest(c));
 }

@@ -25,6 +25,8 @@ export type Config = {
   shopDelivery: boolean;
   marketFee: number;
   marketCommission: number;
+  /** The world's `server.json` setting: hold the hit request until the blow lands (off = the original). */
+  heldHitRequest: boolean;
 };
 
 const KEYS: Record<keyof Config, string> = {
@@ -50,6 +52,7 @@ const KEYS: Record<keyof Config, string> = {
   shopDelivery: 'MU_SHOP_DELIVERY',
   marketFee: 'MU_MARKET_FEE',
   marketCommission: 'MU_MARKET_COMMISSION',
+  heldHitRequest: 'MU_HELD_HIT_REQUEST',
 };
 
 export const DEFAULTS: Config = {
@@ -75,6 +78,7 @@ export const DEFAULTS: Config = {
   shopDelivery: false,
   marketFee: 0,
   marketCommission: 0,
+  heldHitRequest: false,
 };
 
 /** Where players open the client. */

@@ -7,12 +7,14 @@ import {
 } from '@/controllers/lighting';
 import { MapTileObject } from '@/controllers/terrain';
 import { reportLoadFailure } from '@/controllers/assets';
+import { isOn } from '@/controllers/fidelity';
 import type { Entity, World } from '@/ecs/world';
 
 /**
- * The login scene's wall torch, type 37 on `WD_73NEW_LOGIN_SCENE`: a flare card and the
- * `LOGIN_WALL_TORCH` light at bone 1 (the object origin without one), and the cycling
- * `FIRE_HIK1` / `CURSEDLICH` / `HIK3` flame on it.
+ * The login scene's wall torch, type 37 on `WD_73NEW_LOGIN_SCENE`: a flare card at bone 1 (the
+ * object origin without one), as `RenderObjectVisual` case 37 draws it (GMEmpireGuardian4.cpp:864-875).
+ * The `loginWallTorches` improvement adds the `LOGIN_WALL_TORCH` ground light and the cycling
+ * `FIRE_HIK1` / `CURSEDLICH` / `HIK3` flame; the original has neither.
  */
 export class LoginWallTorchObject extends MapTileObject {
   // Its flame and light are per object: never a batched prop.
@@ -54,6 +56,9 @@ export class LoginWallTorchObject extends MapTileObject {
         this.#light = null;
       }
     }).catch(reportLoadFailure('effect light flare'));
+
+    // Classic: the flare alone.
+    if (!isOn('loginWallTorches')) return;
 
     this.#source = lightMapObject(world.scene, LOGIN_WALL_TORCH, spritePosition);
 

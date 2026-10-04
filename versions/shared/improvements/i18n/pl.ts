@@ -15,13 +15,19 @@ export default {
   'fidelity.loginChandeliers': 'Zapalone żyrandole przy logowaniu',
   'fidelity.loginChandeliers.hint':
     'Żyrandole na ekranie logowania płoną. Klasyczne: są zgaszone, jak w oryginale.',
-  'fidelity.heldHitRequest': 'Trafienia razem z ciosem',
-  'fidelity.heldHitRequest.hint':
-    'Twój atak trafia do serwera, gdy cios dosięga celu, więc obrażenia pojawiają się w rytm ruchu. Klasyczne: wysyłany jest przy kliknięciu.',
   'fidelity.wingShadows': 'Cienie skrzydeł',
   'fidelity.wingShadows.hint':
     'Skrzydła rzucają cień. Klasyczne: bez cienia, jak w oryginale.',
   'fidelity.torchCrackle': 'Odgłos pochodni',
   'fidelity.torchCrackle.hint':
     'Płonące pochodnie trzaskają, gdy jesteś blisko. Klasyczne: pochodnie są ciche.',
+  'fidelity.loginWallTorches': 'Płonące pochodnie przy logowaniu',
+  'fidelity.loginWallTorches.hint':
+    'Pochodnie na ścianach ekranu logowania płoną ogniem i oświetlają podłogę. Klasyczne: tylko ich blask, jak w oryginale.',
+  'fidelity.fortressLights': 'Światła Cesarskiej Twierdzy',
+  'fidelity.fortressLights.hint':
+    'Pochodnie i żyrandole w Cesarskiej Twierdzy oświetlają podłogę wokół. Klasyczne: brak światła, jak w oryginale.',
+  'fidelity.roofFade': 'Przezroczyste dachy',
+  'fidelity.roofFade.hint':
+    'Dachy znikają, gdy stoisz pod nimi, więc widzisz wnętrze. Klasyczne: dachy są zawsze widoczne.',
 } satisfies Partial<Record<keyof typeof en, string>>;

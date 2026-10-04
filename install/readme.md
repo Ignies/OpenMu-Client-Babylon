@@ -44,7 +44,7 @@ relies on that.
   mu.env            the config: every answer, secrets, the admin password's bcrypt hash (mode 600)
   stack.env         what Compose interpolates (paths, OpenMU image, database password, client build args)
   env/<service>.env each service's environment, rendered from mu.env
-  Caddyfile, serverlist.md
+  Caddyfile, serverlist.md, server.json
   openmu/           OpenMU's repository at the release we run
   backups/<time>/   openmu.dump, roles.sql, data/ (every SQLite file), mu.env; the last 10 are kept
   logs/             build and update logs
@@ -61,7 +61,7 @@ install.sh / install.ps1  Docker, Bun, then the CLI
 cli/main.ts               commands and the menu
 cli/commands/             install, adopt, manage (config, update, status, logs, backup, restore, uninstall), questions
 cli/config.ts             the config and its env-file form       cli/validate.ts   answer checks, secrets
-cli/render/               env files, Caddyfile, server list: pure functions, tested
+cli/render/               env files, Caddyfile, server list, server.json: pure functions, tested
 cli/stack.ts              names, ports, subnet (mirrors stack/compose.yml)
 cli/state.ts              writes everything in the state folder   cli/paths.ts      where things live
 cli/docker.ts             every docker call                       cli/compose.ts    the compose command line
@@ -86,6 +86,19 @@ everything the stack reads is rendered from `mu.env`, so `mu config` can change 
   chosen OpenMU knows the database's last migration (else asks for a newer release or a source ref),
   stops (never deletes) the old containers and `mu-*`/caddy/nginx units, then restores into the stack.
 - Changing the database password runs `ALTER USER` first; changing the address rebuilds the client.
+- `server.json` is this server's settings for every player, read by the client when it enters the
+  world (`src/modules/servers/serverManifest.ts`). Caddy serves it at `/server.json` on the client
+  and on the proxy host (`https://ws.<domain>/server.json`, `http://<ip>:3000/server.json`), to any
+  origin, so a client loaded from another site reads it too:
+
+  ```json
+  { "version": 1, "settings": { "heldHitRequest": false } }
+  ```
+
+  `heldHitRequest` (`mu config` > Features, `MU_HELD_HIT_REQUEST` in `mu.env`, default off) sends a
+  plain attack's hit when the swing lands instead of on the click, as the original does. The
+  intervals then follow the swing, not the clicks, and can trip OpenMU's attack-speed check; leave it
+  off unless you have tested it. A missing or broken file means the original behaviour.
 
 ## Change it
 
@@ -93,12 +106,15 @@ everything the stack reads is rendered from `mu.env`, so `mu config` can change 
 - a new service: a block in `stack/compose.yml`, its env in `cli/render/env.ts`, a health check in
   `cli/health.ts`, and its SQLite path under `/data` (backups pick up every `*.sqlite`).
 - a new route: `cli/render/caddy.ts`.
+- a new server setting: a field in `cli/config.ts`, a question, `cli/render/manifest.ts`, and the
+  client's reader (`src/modules/servers/serverManifest.ts`, which ignores keys it does not know).
 
 ## Tests
 
 - `cli/config.test.ts`: config round trip, answer checks, secrets.
 - `cli/render/render.test.ts`: service env (secrets only where used, proxy pinned, trusted proxy),
-  Caddyfile (both modes, admin login, route order), server list, compose interpolation.
+  Caddyfile (both modes, admin login, route order), server list, compose interpolation,
+  `server.json` (default, the setting, accepted by the client's parser, served on both hosts).
 - `cli/backup.test.ts`: role filtering, backup names.
 - End to end, with Docker: `MU_STATE=<scratch folder> bun install/cli/e2e.ts` (build, start, check;
   then `backup`, `down`). It refuses to run without `MU_STATE`, so it never touches a real install.

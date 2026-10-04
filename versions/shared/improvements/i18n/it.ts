@@ -15,13 +15,19 @@ export default {
   'fidelity.loginChandeliers': 'Lampadari accesi al login',
   'fidelity.loginChandeliers.hint':
     'I lampadari della schermata di accesso sono accesi. Classica: sono spenti, come nell\'originale.',
-  'fidelity.heldHitRequest': 'Colpi a tempo con l\'attacco',
-  'fidelity.heldHitRequest.hint':
-    'Il tuo attacco arriva al server quando il colpo va a segno, così il danno appare in tempo con il gesto. Classica: viene inviato al clic.',
   'fidelity.wingShadows': 'Ombre delle ali',
   'fidelity.wingShadows.hint':
     'Le ali proiettano un\'ombra. Classica: nessuna ombra, come nell\'originale.',
   'fidelity.torchCrackle': 'Suono delle torce',
   'fidelity.torchCrackle.hint':
     'Le torce accese crepitano quando sei vicino. Classica: le torce sono silenziose.',
+  'fidelity.loginWallTorches': 'Torce a muro accese al login',
+  'fidelity.loginWallTorches.hint':
+    'Le torce a muro della schermata di accesso bruciano e illuminano il pavimento. Classica: solo il loro bagliore, come nell\'originale.',
+  'fidelity.fortressLights': 'Luci della Fortezza Imperiale',
+  'fidelity.fortressLights.hint':
+    'Torce e lampadari della Fortezza Imperiale illuminano il pavimento intorno. Classica: nessuna luce, come nell\'originale.',
+  'fidelity.roofFade': 'Tetti trasparenti',
+  'fidelity.roofFade.hint':
+    'I tetti svaniscono mentre ci sei sotto, così vedi l\'interno. Classica: i tetti restano sempre visibili.',
 } satisfies Partial<Record<keyof typeof en, string>>;

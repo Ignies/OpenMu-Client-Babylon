@@ -15,13 +15,19 @@ export default {
   'fidelity.loginChandeliers': 'Brennende Kronleuchter beim Login',
   'fidelity.loginChandeliers.hint':
     'Die Kronleuchter im Login-Bildschirm brennen. Klassisch: sie sind kalt, wie im Original.',
-  'fidelity.heldHitRequest': 'Treffer kommen mit dem Schlag',
-  'fidelity.heldHitRequest.hint':
-    'Dein Angriff erreicht den Server, wenn der Schlag trifft, sodass der Schaden zum Schwung passt. Klassisch: er wird beim Klick gesendet.',
   'fidelity.wingShadows': 'Flügelschatten',
   'fidelity.wingShadows.hint':
     'Flügel werfen einen Schatten. Klassisch: kein Schatten, wie im Original.',
   'fidelity.torchCrackle': 'Fackelgeräusche',
   'fidelity.torchCrackle.hint':
     'Brennende Fackeln knistern, wenn du in der Nähe bist. Klassisch: Fackeln sind stumm.',
+  'fidelity.loginWallTorches': 'Brennende Wandfackeln beim Login',
+  'fidelity.loginWallTorches.hint':
+    'Die Wandfackeln im Login-Bildschirm brennen mit Feuer und erhellen den Boden. Klassisch: nur ihr Schein, wie im Original.',
+  'fidelity.fortressLights': 'Lichter der Kaiserfestung',
+  'fidelity.fortressLights.hint':
+    'Wandfackeln und Kronleuchter in der Kaiserfestung erhellen den Boden um sich. Klassisch: kein Licht, wie im Original.',
+  'fidelity.roofFade': 'Durchsichtige Dächer',
+  'fidelity.roofFade.hint':
+    'Dächer blenden aus, solange du darunter stehst, damit du hineinsiehst. Klassisch: Dächer bleiben immer sichtbar.',
 } satisfies Partial<Record<keyof typeof en, string>>;

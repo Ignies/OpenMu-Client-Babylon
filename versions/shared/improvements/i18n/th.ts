@@ -15,13 +15,19 @@ export default {
   'fidelity.loginChandeliers': 'โคมระย้าหน้าล็อกอินติดไฟ',
   'fidelity.loginChandeliers.hint':
     'โคมระย้าในหน้าล็อกอินมีไฟลุก คลาสสิก: ดับอยู่ เหมือนต้นฉบับ',
-  'fidelity.heldHitRequest': 'การโจมตีตรงจังหวะฟัน',
-  'fidelity.heldHitRequest.hint':
-    'การโจมตีของคุณถูกส่งถึงเซิร์ฟเวอร์ตอนที่ฟันโดน ความเสียหายจึงขึ้นตรงกับท่า คลาสสิก: ส่งตอนคลิก',
   'fidelity.wingShadows': 'เงาปีก',
   'fidelity.wingShadows.hint':
     'ปีกมีเงา คลาสสิก: ไม่มีเงา เหมือนต้นฉบับ',
   'fidelity.torchCrackle': 'เสียงคบเพลิง',
   'fidelity.torchCrackle.hint':
     'คบเพลิงที่ลุกไหม้ส่งเสียงปะทุเมื่อคุณอยู่ใกล้ คลาสสิก: คบเพลิงไม่มีเสียง',
+  'fidelity.loginWallTorches': 'คบเพลิงบนผนังหน้าล็อกอินติดไฟ',
+  'fidelity.loginWallTorches.hint':
+    'คบเพลิงบนผนังในหน้าล็อกอินลุกเป็นไฟและส่องสว่างพื้น คลาสสิก: มีแค่แสงเรือง เหมือนต้นฉบับ',
+  'fidelity.fortressLights': 'แสงไฟในป้อมปราการจักรวรรดิ',
+  'fidelity.fortressLights.hint':
+    'คบเพลิงบนผนังและโคมระย้าในป้อมปราการจักรวรรดิส่องสว่างพื้นรอบ ๆ คลาสสิก: ไม่มีแสง เหมือนต้นฉบับ',
+  'fidelity.roofFade': 'หลังคาโปร่งใส',
+  'fidelity.roofFade.hint':
+    'หลังคาจะจางหายไปเมื่อคุณยืนอยู่ใต้มัน เพื่อให้มองเห็นข้างใน คลาสสิก: หลังคาแสดงอยู่เสมอ',
 } satisfies Partial<Record<keyof typeof en, string>>;

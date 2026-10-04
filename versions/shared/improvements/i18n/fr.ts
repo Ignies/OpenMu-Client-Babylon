@@ -15,13 +15,19 @@ export default {
   'fidelity.loginChandeliers': 'Lustres allumés à la connexion',
   'fidelity.loginChandeliers.hint':
     'Les lustres de l\'écran de connexion brûlent. Classique : ils sont éteints, comme dans l\'original.',
-  'fidelity.heldHitRequest': 'Coups synchronisés avec l\'attaque',
-  'fidelity.heldHitRequest.hint':
-    'Votre attaque part vers le serveur quand le coup porte, les dégâts s\'affichent donc avec le geste. Classique : elle part au clic.',
   'fidelity.wingShadows': 'Ombres des ailes',
   'fidelity.wingShadows.hint':
     'Les ailes projettent une ombre. Classique : pas d\'ombre, comme dans l\'original.',
   'fidelity.torchCrackle': 'Bruit des torches',
   'fidelity.torchCrackle.hint':
     'Les torches crépitent quand vous êtes proche. Classique : les torches sont muettes.',
+  'fidelity.loginWallTorches': 'Torches murales allumées à la connexion',
+  'fidelity.loginWallTorches.hint':
+    'Les torches murales de l\'écran de connexion brûlent et éclairent le sol. Classique : seulement leur halo, comme dans l\'original.',
+  'fidelity.fortressLights': 'Lumières de la Forteresse impériale',
+  'fidelity.fortressLights.hint':
+    'Les torches et lustres de la Forteresse impériale éclairent le sol autour d\'eux. Classique : aucune lumière, comme dans l\'original.',
+  'fidelity.roofFade': 'Toits transparents',
+  'fidelity.roofFade.hint':
+    'Les toits s\'effacent quand vous êtes dessous, pour voir l\'intérieur. Classique : les toits restent toujours affichés.',
 } satisfies Partial<Record<keyof typeof en, string>>;

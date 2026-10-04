@@ -15,13 +15,19 @@ export default {
   'fidelity.loginChandeliers': 'Candelabre aprinse la autentificare',
   'fidelity.loginChandeliers.hint':
     'Candelabrele din ecranul de autentificare ard. Clasică: sunt stinse, ca în original.',
-  'fidelity.heldHitRequest': 'Lovituri în ritmul atacului',
-  'fidelity.heldHitRequest.hint':
-    'Atacul tău ajunge la server când lovitura nimerește, așa că daunele apar odată cu mișcarea. Clasică: se trimite la clic.',
   'fidelity.wingShadows': 'Umbre de aripi',
   'fidelity.wingShadows.hint':
     'Aripile aruncă umbră. Clasică: fără umbră, ca în original.',
   'fidelity.torchCrackle': 'Sunetul torțelor',
   'fidelity.torchCrackle.hint':
     'Torțele aprinse trosnesc când ești aproape. Clasică: torțele sunt tăcute.',
+  'fidelity.loginWallTorches': 'Torțe de perete aprinse la autentificare',
+  'fidelity.loginWallTorches.hint':
+    'Torțele de pe pereții ecranului de autentificare ard și luminează podeaua. Clasică: doar strălucirea lor, ca în original.',
+  'fidelity.fortressLights': 'Luminile Fortăreței Imperiale',
+  'fidelity.fortressLights.hint':
+    'Torțele și candelabrele din Fortăreața Imperială luminează podeaua din jur. Clasică: fără lumină, ca în original.',
+  'fidelity.roofFade': 'Acoperișuri transparente',
+  'fidelity.roofFade.hint':
+    'Acoperișurile dispar cât stai sub ele, ca să vezi înăuntru. Clasică: acoperișurile rămân mereu vizibile.',
 } satisfies Partial<Record<keyof typeof en, string>>;

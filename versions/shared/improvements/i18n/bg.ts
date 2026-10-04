@@ -15,13 +15,19 @@ export default {
   'fidelity.loginChandeliers': 'Запалени полилеи при вход',
   'fidelity.loginChandeliers.hint':
     'Полилеите на екрана за вход горят. Класическо: угаснали са, както в оригинала.',
-  'fidelity.heldHitRequest': 'Ударите съвпадат със замаха',
-  'fidelity.heldHitRequest.hint':
-    'Атаката ви стига до сървъра, когато ударът попадне, и щетите се виждат навреме. Класическо: изпраща се при клика.',
   'fidelity.wingShadows': 'Сенки на крилете',
   'fidelity.wingShadows.hint':
     'Крилете хвърлят сянка. Класическо: без сянка, както в оригинала.',
   'fidelity.torchCrackle': 'Звук на факлите',
   'fidelity.torchCrackle.hint':
     'Горящите факли пращят, когато сте наблизо. Класическо: факлите са беззвучни.',
+  'fidelity.loginWallTorches': 'Горящи стенни факли при вход',
+  'fidelity.loginWallTorches.hint':
+    'Стенните факли на екрана за вход горят с огън и осветяват пода. Класическо: само отблясъкът им, както в оригинала.',
+  'fidelity.fortressLights': 'Светлините на Имперската крепост',
+  'fidelity.fortressLights.hint':
+    'Факлите и полилеите в Имперската крепост осветяват пода около себе си. Класическо: без светлина, както в оригинала.',
+  'fidelity.roofFade': 'Прозрачни покриви',
+  'fidelity.roofFade.hint':
+    'Покривите изчезват, докато стоите под тях, за да виждате вътре. Класическо: покривите винаги се виждат.',
 } satisfies Partial<Record<keyof typeof en, string>>;

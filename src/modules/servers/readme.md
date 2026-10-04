@@ -2,7 +2,8 @@
 
 Which world the client plays on: the server profiles and their addresses, the published server
 list, the saved accounts per world, the "is it up" probe, the service URLs a world's domain
-implies, and the signup / name rules shared with the register service. No packets here; the
+implies, the world's own settings (`server.json`), and the signup / name rules shared with the
+register service. No packets here; the
 connect server's own list (`Store.serverList`) is filled by `session/net.ts`.
 
 ## Public API
@@ -13,7 +14,10 @@ connect server's own list (`Store.serverList`) is filled by `session/net.ts`.
 - `ServerList`, `refreshServerList()`, `parseServerList(text)`: the published list.
 - `ServerAccounts`: `list`, `of`, `select`, `add`, `update`, `forget`, `record(worldId, login)`.
 - `ServerProbe`: `check(profiles)`, `of(id)` -> `Reach` (`unknown`, `checking`, `up`, `down`).
-- `registerUrl()`, `registerApiUrl()`, `marketApiUrl()`.
+- `registerUrl()`, `registerApiUrl()`, `marketApiUrl()`, `serverManifestUrl()`.
+- `serverSetting(key)`: one setting of the world being played (`ServerSettings`, defaults
+  `ORIGINAL_SETTINGS`); `loadServerManifest(profile)`, `parseServerManifest(raw)`.
+  `onWorldEntered(fn)`: runs on `markPlayed`.
 - `validateSignup(signup)` and the length limits (`registerRules.ts`); `isReservedName(name)`.
 
 ## How it works
@@ -24,6 +28,9 @@ connect server's own list (`Store.serverList`) is filled by `session/net.ts`.
   is believed only when the connect server we reached was public too; the loser is the fallback.
 - `refreshServerList` (called from `boot.tsx`) shows the cached copy first, then fetches
   `serverlist.md` and hands the worlds to `ServerConfig.setListed`.
+- Entering a world (`markPlayed`) fetches its `server.json` (`serverManifest.ts`); `serverSetting`
+  reads the answer. The two `heldHitRequest` sites are `ecs/systems/attackSystem.ts` and
+  `combat/net.ts`.
 - `ServerProbe` checks two worlds at a time, only those on screen, and reuses a verdict for 60 s.
 - `registerRules.ts` and `reservedNames.ts` are engine-free: `register/server/main.ts` and
   `register/src/registerPage.tsx` import them too.
@@ -40,6 +47,8 @@ connect server's own list (`Store.serverList`) is filled by `session/net.ts`.
 - add a profile field: `ServerProfile` and `sanitizeProfile` in `serverConfig.ts`.
 - change the list line format: the regexes and `parseServerLine` in `serverList.ts` (add a test).
 - add a world service: a function beside `marketApiUrl` in `serverServices.ts`.
+- add a server setting: a key in `ServerSettings`, `ORIGINAL_SETTINGS` and `SETTING_TYPES`
+  (`serverManifest.ts`), a test, and the installer's side (`install/cli/render/manifest.ts`).
 - change a signup rule: `registerRules.ts`; it applies to the client form, the page and the service.
 
 ## Tests
@@ -47,6 +56,8 @@ connect server's own list (`Store.serverList`) is filled by `session/net.ts`.
 - `serverList.test.ts`: line parsing, game server and channel names, the committed `serverlist.md`.
 - `serverAccounts.test.ts`: several accounts per world, remember off, clamping, URL profile, `record`.
 - `serverServices.test.ts`: register, shop and market URLs for domain and address worlds.
+- `serverManifest.test.ts`: parsing (valid, unknown keys, wrong version, wrong types), the URL, the
+  fallback on missing / unreachable / invalid, the per-server cache, the fetch on enter.
 - `registerRules.test.ts`: `validateSignup` order and the password charset.
 
 ## Notes
@@ -91,3 +102,19 @@ connect server's own list (`Store.serverList`) is filled by `session/net.ts`.
 - That lets one published build play any world. A world played from its own site keeps relative
   shop and market paths. A world that does not follow the convention publishes full addresses and
   gets no services; build variables (`VITE_REGISTER_URL`, `VITE_MARKETPLACE_API`, ...) are the other way.
+
+### serverManifest.ts
+- `server.json`, served by the world's stack (the installer writes it, `install/readme.md`):
+  `{ "version": 1, "settings": { "heldHitRequest": false } }`. Later it will also list the
+  world's modules.
+- Fetched from the root of the world's proxy host (`https://ws.<domain>/server.json`, or
+  `http://<ip>:3000/server.json`), the one address every profile has, with a 5 s timeout and no
+  cookies. The text is untrusted: version 1 only, `settings` an object, each known key of its type
+  or the whole document is refused; unknown keys are skipped (a newer server may know more).
+- Missing, unreachable or invalid: the original behaviour (`ORIGINAL_SETTINGS`). The last good
+  copy is cached in localStorage per manifest URL and applies until the fetch answers; a failed
+  fetch drops it.
+- Settings are the server's because they change what the server sees. `heldHitRequest` holds the
+  plain attack's HitRequest until the swing's hit key: the original sends it on the click
+  (ZzzInterface.cpp:3355), and the uneven intervals a held request makes can brush OpenMU's
+  attack-speed check, so only a server that allows it turns it on.

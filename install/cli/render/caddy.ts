@@ -13,9 +13,20 @@ function apiRoutes(): string {
   ].join('\n');
 }
 
+/** server.json, readable from any page: a client served elsewhere fetches it next to the proxy. */
+function manifestRoute(): string {
+  return `\thandle /server.json {\n\t\troot * ${CLIENT_ROOT}\n\t\theader Access-Control-Allow-Origin *\n\t\theader Cache-Control no-cache\n\t\tfile_server\n\t}`;
+}
+
+/** The proxy's host: server.json, then the websocket for everything else. */
+function proxySite(): string {
+  return [manifestRoute(), `\thandle {\n\t${proxyTo(PORTS.proxy)}\n\t}`].join('\n');
+}
+
 /** A missing `.gz` sidecar must 404, never fall back to index.html (see compressedAssets.ts). */
 function clientSite(registerOrigin: string): string {
   return [
+    manifestRoute(),
     apiRoutes(),
     `\thandle {\n\t\troot * ${CLIENT_ROOT}\n\t\theader /Data/* Access-Control-Allow-Origin ${registerOrigin}\n\t\tfile_server\n\t}`,
   ].join('\n');
@@ -42,7 +53,7 @@ export function caddyfile(c: Config): string {
       block(d, `\tredir https://play.${d}{uri}`),
       block(`play.${d}`, clientSite(`https://register.${d}`)),
       block(`api.${d}`, apiRoutes()),
-      block(`ws.${d}`, proxyTo(PORTS.proxy)),
+      block(`ws.${d}`, proxySite()),
       block(`register.${d}`, registerSite()),
       block(`admin.${d}`, adminSite(c)),
     ].join('\n');
@@ -50,7 +61,7 @@ export function caddyfile(c: Config): string {
   return [
     `{\n\tauto_https off\n}\n`,
     block(':80', clientSite(`http://${c.publicIp}:${PORTS.registerSite}`)),
-    block(`:${PORTS.proxy}`, proxyTo(PORTS.proxy)),
+    block(`:${PORTS.proxy}`, proxySite()),
     block(`:${PORTS.registerSite}`, registerSite()),
     block(`:${PORTS.admin}`, adminSite(c)),
   ].join('\n');
