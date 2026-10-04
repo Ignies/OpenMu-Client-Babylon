@@ -95,8 +95,9 @@ and `masterTree.ts` through the `skills` facade, and `band` through `installBand
   `warp/warpScopeHold.ts` on `wsClosed`, `maps/kanturu2/gateway.ts` before `events/kanturu.ts` on
   `KanturuEnterResult`, and `masterLevel` before `hero/net.ts` on the experience and master level
   packets. Such a module goes first in `modules.ts`.
-- `economy`, `social` and `gm` have no `module.ts` and are always on. Windows do not yet hide when
-  their module is off.
+- `social` (core), `economy` and `gm` have a `module.ts` with nothing to install: their state is
+  loaded by whoever imports it. Turning `economy` off turns off `vault`, `chaos_mix`, `trade` and
+  `personal_shop` (they require it). Windows do not yet hide when their module is off.
 
 ## Tests
 - `module.test.ts`: install order, disabled and core modules, requirements.

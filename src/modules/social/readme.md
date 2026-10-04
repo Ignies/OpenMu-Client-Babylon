@@ -5,6 +5,7 @@ Also the guild mark (emblem) codec. It has no packet handlers of its own; the ne
 `party`, `guild`, `guild_war` and others write into it.
 
 ## Public API
+- `module.ts`: core, nothing to install (the chat, party, guild and guild_war nets write here).
 - `Social.systemMessage(text)` / `Social.errorMessage(text)`: a blue / red line in the chat log.
   `addNotification` (`chat/notify.ts`) forwards to them; `social.ts` registers itself as its sink.
 - `Social.addChatLine(sender, text, type)`, `Social.sendChat(text)`, `Social.broadcastEmojiBubble(id)`,

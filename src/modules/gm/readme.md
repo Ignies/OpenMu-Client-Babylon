@@ -5,6 +5,7 @@ offline debug menu registry. There is no `net.ts`: the panel sends ordinary chat
 server decides whether to run them.
 
 ## Public API
+- `module.ts`: nothing to install (windows and state only).
 - `GmPanel` (`gmPanel.ts`): the panel store. `available` (game master or offline), `toggle()`,
   `run(command)`, `sendRaw(line)`, `runLine(line, vars)`, `runMacro(macro, vars)`, `reset()`, plus
   the tab, target, search and form setters the window calls. `GM_SECTIONS`, `GmSection`: the tabs.

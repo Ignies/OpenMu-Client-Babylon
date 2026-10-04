@@ -6,6 +6,7 @@ vault, chaos machine, trade and personal shop. The packet handlers that feed it 
 [../personal_shop/](../personal_shop/readme.md) and [../npc_shop/](../npc_shop/readme.md).
 
 ## Public API
+- `module.ts`: nothing to install; `vault`, `chaos_mix`, `trade` and `personal_shop` require it.
 - `Economy`: the mobx store (below).
 - `vaultOpenCost(level, masterLevel, locked)`: the vault fee (NewUIStorageInventory.cpp:227).
 - `MIX_MENU`, `MixMenuEntry`: the crafting list the chaos machine window offers.
