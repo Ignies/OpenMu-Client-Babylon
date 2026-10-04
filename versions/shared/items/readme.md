@@ -9,6 +9,7 @@ Every item, one file each, plus the item-driven looks that are content, not cont
 all.ts                finds every item file (glob in the client and tests, from disk in the Bun servers)
 itemsDatabase.ts      ItemsDatabase.getItem / all, itemBaseName
 launcher_arrows.ts    arrow model and colour per bow or crossbow index
+petItems.ts           pet and mount item numbers in group 13 (PET_GROUP, DARK_HORSE, ...)
 ```
 
 ## Public API
@@ -18,6 +19,8 @@ launcher_arrows.ts    arrow model and colour per bow or crossbow index
   (`Local/<lang>/item_<lang>.bmd`) when it has one, else the English `ItemName`.
 - `items` (`all.ts`): the registry itself, for server code (`items.all()`, `items.get(g, i)`).
 - `LAUNCHER_ARROWS`: arrow model and colour per bow or crossbow index (group 4).
+- `petItems.ts`: `PET_GROUP` and the pet, mount and follower item numbers. Pure data, read by the item
+  rules, the actors controller, the pets module and maps (it was `modules/pets/petConstants.ts`).
 
 ## How it works
 - The items controller (`src/controllers/items`) owns the record type (`ItemRecord`), `defineItem`

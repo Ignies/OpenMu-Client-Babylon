@@ -12,7 +12,6 @@ still live in the central `Store` (`src/app/store.ts`).
   `remember(name)`, `finish()`, plus `attempt`, `step`, `active` for the overlay.
 - `SessionStats`: exp, kills and zen since the last reset, with per-hour rates and `msToLevel`.
   `watch()`, `tick()`, `reset()`.
-- `configFingerprintLines()`: every game option packed into a hex string, split for the perf overlay.
 
 ## How it works
 - `net.ts` walks the login flow: `Hello` asks for the server list once, `ConnectionInfo` dials the
@@ -28,9 +27,6 @@ still live in the central `Store` (`src/app/store.ts`).
   the same character, with backoff 1, 2, 4, 8, 15 s. `boot.tsx` wires it as `Store.resumeHook`.
 - `sessionStats.ts` listens to `experienceGained` and watches `Store.playerData.money`; it starts
   only when a panel calls `watch()`. A new character name resets it.
-- `configFingerprint.ts`: version byte, packed boolean options, biased number options, language and
-  a texture pack digest. `docs/configuration_hex.md` (made by `tools/configHexTable.ts`) is
-  the decoder table.
 - Store members used: `uiState`, `playerId`, `serverList`, `loginProcessing`, `loginError`,
   `lastGameServer`, `connectToGameServer`, `onGameServerReached`, `sendServerChangeAuthentication`,
   `switchToMapServer`, `onSocketLost`, `loginRequest`, `selectCharacterRequest`,
@@ -49,10 +45,9 @@ still live in the central `Store` (`src/app/store.ts`).
 
 ## Depends on / used by
 - uses: `app/store.ts`, `servers/serverConfig.ts`, `quests`, `economy`, `social`, `friends/messenger`,
-  `options/gameOptions`, `controllers/sound`, `controllers/interface/browserHotkeys`.
+  `controllers/settings`, `controllers/sound`, `controllers/interface/browserHotkeys`.
 - used by: `src/app/logic.ts`, `src/app/boot.tsx`, `hero/net.ts` (`remember`, `finish`),
-  `ecs/systems/keyboardInputSystem.ts`, `controllers/render/perfOverlay.ts`,
-  `controllers/interface/components/reconnect_overlay`, `tools/configHexTable.ts`.
+  `ecs/systems/keyboardInputSystem.ts`, `versions/shared/ui/components/reconnect_overlay`.
 - windows: `versions/shared/ui/windows/options/` (exit buttons), `windows/session_stats/`,
   `hud/bottom_bar/` (`expTooltip.tsx`, `index.tsx`).
 
@@ -60,12 +55,9 @@ still live in the central `Store` (`src/app/store.ts`).
 - change a login step: `net.ts`, and the matching `Store` action.
 - change the exit flow or the Escape rules: `sessionExit.ts`.
 - change retry count or backoff: `BACKOFF` in `sessionResume.ts`.
-- add a game option: nothing here; run `bun run tools/configHexTable.ts` to rewrite the table.
-  Bump `CONFIG_FINGERPRINT_VERSION` if the byte layout itself changes.
 
 ## Tests
-- `configFingerprint.test.ts`: `configuration_hex.md` matches the options, the layout and lengths,
-  the number bias round trip, and the pack digest.
+- none here; the login flow is covered by the listener order golden (`src/app/listenerOrder.golden.test.ts`).
 
 ## Notes
 

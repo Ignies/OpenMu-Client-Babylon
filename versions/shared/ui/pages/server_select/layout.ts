@@ -68,12 +68,3 @@ export function serverListTop(serverCount: number): number {
     ? GROUP_BASE_Y
     : GROUP_BASE_Y - (listHeight - columnHeight);
 }
-
-export const TEXT_COLOR = {
-  white: '#ffffff',
-  brightGray: '#e2e2e2',
-  yellow: '#ffff79',
-  brightYellow: '#ffeec1',
-  orange: '#ffb400',
-  brightOrange: '#ffd927',
-} as const;

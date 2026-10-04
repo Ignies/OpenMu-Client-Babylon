@@ -6,7 +6,7 @@ import {
   formatTimeToLevel,
 } from '@/controllers/interface/hudFormat';
 import { Store } from '@/app/store';
-import { MuTipList, type TipLine } from '@/controllers/interface/components/skill_tooltip';
+import { MuTipList, type TipLine } from '../../components/skill_tooltip';
 import { t } from '@/i18n';
 
 /**

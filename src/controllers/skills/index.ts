@@ -1,9 +1,9 @@
 import type { RGB } from '../fx/core';
 import type { Sounds } from '../sound/recipes';
-import { combat } from '../combat';
+import { combat, MASTER_BASES, SKILL_DELAY_MS } from '../combat';
 import { SKILL_LIGHTS } from '../lighting/skills';
 import { LANDING_SOUNDS, SILENT_HERO_CASTS, SKILL_CLIP_SOUNDS, SKILL_SOUNDS } from '../sound/combat';
-import { MASTER_BASES, SKILL_DELAY_MS, SKILL_EFFECTS } from '@/modules/skills/recipes';
+import { SKILL_EFFECTS } from './tables';
 import type { SkillCancel, SkillDef } from './define';
 import type { Entity } from '@/ecs/world';
 import type { Scene } from '../render/babylon/exports';

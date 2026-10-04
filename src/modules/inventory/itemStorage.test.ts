@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { storageBan, StorageKind } from './itemStorage';
-import { ItemGroup } from '../items/itemStats';
+import { ItemGroup } from '../../controllers/item_rules/itemStats';
 import { EN_TEXT } from '../../i18n';
 import type { Item } from '../../ecs/world';
 

@@ -3,7 +3,7 @@ import type { ENUM_WORLD } from '../../core/types';
 import type { World } from '../../ecs/world';
 import { SoundsManager } from './soundsManager';
 import { EventBus } from '../../core/eventBus';
-import { GameOptions, onGameOptionsChanged } from '../../modules/options/gameOptions';
+import { GameOptions, onGameOptionsChanged } from '@/controllers/settings';
 import { busGain, trackGains, type SoundBus } from './buses';
 import type { SoundLayer } from './layer';
 import { SOUND_LAYERS } from './layers';
@@ -295,6 +295,7 @@ if (hot) hot.decline();
 // ---- a map's own sound (MapLayer.sound), the row types its folder writes ----
 export type { MapSound } from './mapSound';
 export { mapDeathBurst } from './mapSound';
+export { registerAmbientGate } from './ambientBeds';
 export { teleportCastSound } from './packetSounds';
 export type { StepRule } from './footsteps';
 export type {

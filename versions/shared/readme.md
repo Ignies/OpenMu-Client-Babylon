@@ -10,7 +10,7 @@ Each subfolder has its own readme:
 |---|---|
 | `skills/` | one folder per skill (`defineSkill`), found by glob; the server skill table |
 | `ui/` | windows, HUD elements and pages, found by glob from each `window.ts` |
-| `maps/` | one folder per map (`MapLayer`), listed in `maps/layers.ts` |
+| `maps/` | one folder per map (`MapLayer`), listed in `maps/layers.ts`, registered by `maps/all.ts` |
 | `monsters/` | one folder per monster or npc type (`defineMonster`), its `model.ts` when it has its own look |
 | `monster_models/` | one file per monster body (`defineMonsterModel`) |
 | `animations/` | one file per player clip (`defineAnimation`); monster swing and cast rules |

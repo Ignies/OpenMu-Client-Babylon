@@ -1,4 +1,4 @@
-import { GameOptions } from '../../modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import type { TextKey } from '../../i18n';
 
 /**

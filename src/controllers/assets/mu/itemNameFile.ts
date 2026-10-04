@@ -5,7 +5,7 @@
 
 import { observable, runInAction } from 'mobx';
 import { convertBux } from '../../terrain/mapFileEncryption';
-import { GameOptions } from '@/modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import { i18n, onLanguageChanged } from '@/i18n';
 import {
   checkPackText,

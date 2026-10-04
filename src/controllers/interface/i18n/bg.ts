@@ -27,10 +27,6 @@ export default {
   'stat.vitality': 'Издръжливост',
   'stat.energy': 'Енергия',
   'stat.command': 'Командване',
-  'warn.durability': 'Издръжливост на екипировката: {percent}%',
-  'warn.inventoryFull': 'Инвентарът е пълен',
-  'warn.noPotions': 'Няма лечебни отвари',
-  'warn.buffEnding': '{name} скоро свършва',
 
   'keys.minimap': 'Мини-карта',
   'keys.sessionStats': 'Панел на сесията',

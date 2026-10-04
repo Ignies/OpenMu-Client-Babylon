@@ -27,7 +27,7 @@ import { lookDirector } from '../../controllers/lighting/director';
 import { roomMaskActive } from '../../controllers/render/scenes/roomMask';
 import { roomClipAvailable, setRoomWeatherClip } from '../../controllers/weather/roomClip';
 import { Vector3 } from '../../controllers/render/babylon/exports';
-import { GameOptions } from '../../modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import { rainStrength, rainTarget } from '../../controllers/weather/rainState';
 import type { ISystemFactory } from '../world';
 

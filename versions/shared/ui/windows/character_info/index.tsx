@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 import { EventBus } from '@/core/eventBus';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { Store } from '@/app/store';
-import { GameOptions } from '@/modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import { StatAllocation } from '@/modules/hero/statAllocation';
 import { clampAmount, needsConfirm } from '@/modules/hero/statAmounts';
 import { MsgWinCode } from '@/controllers/interface/msgWin';
@@ -23,7 +23,7 @@ import {
   MuTableFrame,
   MuTableRule,
 } from '@/controllers/interface/components/mu_window';
-import { InventoryConstants } from '@/modules/inventory/inventoryConstants';
+import { InventoryConstants } from '@/core/inventoryConstants';
 import { pkTextColour, PVP_NEUTRAL } from '@/controllers/interface/nameTags';
 import {
   BaseClass,

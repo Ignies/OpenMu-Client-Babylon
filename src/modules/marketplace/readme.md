@@ -35,10 +35,10 @@ plugin ([../../../openmu/readme.md](../../../openmu/readme.md)).
 ## Depends on / used by
 - uses: `src/app/store.ts` (`playerData`, `gsSocket`, `sendToGS`, `isOffline`, in `gameBridge.ts`
   only), `controllers/net/protocols/escrowWire.ts`, `controllers/net/sessionNonce.ts`,
-  `servers/serverServices.ts` (`marketApiUrl`), `inventory/inventoryConstants.ts`, `src/i18n`.
+  `servers/serverServices.ts` (`marketApiUrl`), `core/inventoryConstants.ts`, `src/i18n`.
 - used by: `src/app/logic.ts` (`net.ts`), `versions/shared/ui/windows/marketplace/` (the window),
   `versions/shared/ui/hud/bottom_bar/mainFrameButtons.ts` (`toggleMarketplace`),
-  `marketplace.html` (`dev.tsx`).
+  `versions/shared/ui/windows/marketplace/dev.tsx` (the harness behind `marketplace.html`).
 
 ## Change it
 - a new service call: add it to `api.ts`, add it to `MarketApi` in `state.ts` and to
@@ -54,8 +54,8 @@ plugin ([../../../openmu/readme.md](../../../openmu/readme.md)).
 - `tiers.test.ts`: `tierOf` steps and `lookClasses`.
 
 ## Notes
-### dev.tsx
-- The harness behind `marketplace.html`. It mounts the window alone against fixtures, with
+### dev.tsx (`versions/shared/ui/windows/marketplace/dev.tsx`)
+- The harness behind `marketplace.html`; it draws, so it lives with the window, not here. It mounts the window alone against fixtures, with
   `mockService.ts` playing both the service and the game server, so list, buy, cancel and collect
   can be walked through with fake tokens.
 - It loads the game version first (same as `src/app/main.tsx`), because the item tooltips read the packet

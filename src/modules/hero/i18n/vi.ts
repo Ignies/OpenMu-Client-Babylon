@@ -39,4 +39,8 @@ export default {
   'notify.fruitFloor': '{stat} không thể giảm thêm',
   'notify.fruitEquipped': 'Hãy tháo các vật phẩm cần chỉ số này trước',
   'notify.fruitNotNow': 'Bạn không thể dùng quả này lúc này',
+  'warn.durability': 'Độ bền trang bị còn {percent}%',
+  'warn.inventoryFull': 'Hành trang đã đầy',
+  'warn.noPotions': 'Đã hết bình máu',
+  'warn.buffEnding': '{name} sắp hết hiệu lực',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -1,5 +1,5 @@
 import { observable, runInAction } from 'mobx';
-import { GameOptions } from '../options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import { devQueryNumbers } from '../../core/devSeams';
 import { serverNow } from '../../controllers/net/serverTime';
 import { MiniGameOpeningStateRequestPacket } from '@versions/shared/packets/ClientToServerPackets';

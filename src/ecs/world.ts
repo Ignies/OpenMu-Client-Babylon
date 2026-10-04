@@ -8,7 +8,7 @@ import { type Bucket, type With, World as ECSWorld } from 'miniplex';
 import type { IVector2Like, IVector3Like, Mesh } from '../controllers/render/babylon/exports';
 import type { ModelObject } from '../controllers/render/modelObject';
 import type { MonsterActionType, PlayerAction } from '@versions/shared/objects/enum';
-import type { PetFollow, PetSpec } from '../modules/pets/pets';
+import type { PetFollow, PetSpec } from '@/controllers/pets';
 import type { MUAttributeSystem } from '../core/attributeSystem';
 import type { TerrainPicker } from '../controllers/terrain/terrainPick';
 import { TransformNode } from '../controllers/render/babylon/exports';
@@ -382,7 +382,7 @@ export type Entity = Partial<{
     /**
      * A follower pet (`PetObject`): how it holds station on its owner, the
      * `PlaySpeed` of its one clip, and the seconds its body light pulses
-     * over when it has one. See `PetFollow` in modules/pets/pets.ts.
+     * over when it has one. See `PetFollow` in controllers/pets/pets.ts.
      */
     follow?: PetFollow;
     followSpeed?: number;
@@ -702,3 +702,22 @@ export class World extends ECSWorld<Entity> {
 // type identity for instanceof-free checks), forking the ECS.
 const hot = (import.meta as { hot?: { decline(): void } }).hot;
 if (hot) hot.decline();
+
+// The bus events that carry an entity (core/eventBus/events.ts).
+declare module '@/core/eventBus/events' {
+  interface EventMap {
+    objectDamaged: {
+      entity: With<Entity, 'transform' | 'screenPosition'>;
+      healthDamage: number;
+      shieldDamage: number;
+      kind: number;
+      isDouble: boolean;
+      isTriple: boolean;
+    };
+    /** Server asked to show an effect on an object (level-up beam, shield potion/lost). */
+    objectEffect: {
+      entity: With<Entity, 'transform'>;
+      effect: 'levelUp' | 'shieldPotion' | 'shieldLost' | 'swirl';
+    };
+  }
+}

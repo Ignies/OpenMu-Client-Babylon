@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { InventoryConstants } from './inventoryConstants';
+import { InventoryConstants } from '../../core/inventoryConstants';
 import { findFreeSlot } from './inventoryFit';
 
 const first = InventoryConstants.LastEquippableItemSlotIndex + 1;

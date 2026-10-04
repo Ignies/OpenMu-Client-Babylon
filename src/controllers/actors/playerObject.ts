@@ -5,7 +5,7 @@ import {
   type TransformNode,
 } from '../render/babylon/exports';
 import { ModelObject } from '../render/modelObject';
-import { CharacterClassNumber, PlayerClass } from '../../core/types';
+import { CharacterClassNumber, PlayerClass, getBaseClass } from '../../core/types';
 import { Entity, World, type Item } from '../../ecs/world';
 import { PlayerAction } from '@versions/shared/objects/enum';
 import { loadGLTF } from '../assets/modelLoader';
@@ -23,11 +23,10 @@ import { requestGlowProbe } from '../render/scenes/sceneLook';
 import { WingObject } from './wingObject';
 import { WING_BONE, wingSpec } from './wings';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
-import { archangelWeapon } from '../../modules/drops/dropModelProxy';
-import { IMP_BONE, petSpec, type PetSpec } from '../../modules/pets/pets';
+import { archangelWeapon } from '../item_rules';
+import { IMP_BONE, petSpec, type PetSpec } from '@/controllers/pets';
 import { angleLinkMatrix } from '../render/boneLink';
 import { chooseIdleAction, isPhoenixSoulStar } from './weaponClass';
-import { getBaseClass } from '../../modules/hero/characterStats';
 import { isFemaleClass } from './mapPlayerNetClassToModelClass';
 import { playerPlaySpeed } from '../anim/playSpeed';
 import type { ShatterDeath } from '../fx/deathVisuals';

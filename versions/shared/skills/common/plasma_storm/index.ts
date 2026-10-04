@@ -12,7 +12,7 @@ import { Vector3 } from '@/controllers/render/babylon/exports';
 import { createAngleDeg, turnAngle } from '@/core/turnAngle';
 import { effectLight } from '@/controllers/lighting/recipes';
 import { effects } from '@/controllers/fx';
-import { fenrirVariant } from '@/modules/pets/pets';
+import { fenrirVariant } from '@/controllers/pets';
 import { playCombat } from '@/controllers/sound/combat';
 import { storeRef } from '@/app/storeRef';
 

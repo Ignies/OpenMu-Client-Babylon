@@ -1,5 +1,4 @@
-import { CharacterClassNumber } from '../../core/types';
-import { BaseClass, getBaseClass } from '../../modules/hero/characterStats';
+import { BaseClass, CharacterClassNumber, getBaseClass } from '../../core/types';
 
 /**
  * Object.Scale per base class in the world (ZzzCharacter.cpp:11925-11933,

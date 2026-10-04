@@ -6,7 +6,7 @@ import {
   type BuyRunState,
 } from './quickItemRules';
 import { StorageKind } from './itemStorage';
-import { ItemGroup } from '../items/itemStats';
+import { ItemGroup } from '../../controllers/item_rules/itemStats';
 import type { Item } from '../../ecs/world';
 
 const item = (over: Partial<Item> = {}): Item => ({

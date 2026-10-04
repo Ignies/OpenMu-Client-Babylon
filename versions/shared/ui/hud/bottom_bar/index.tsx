@@ -13,7 +13,7 @@ import {
   useWindowStackEntry,
 } from '@/controllers/interface/components/mu_window/useWindowChrome';
 import { MuWindows } from '@/controllers/interface/windowManager';
-import { SkillIcon } from '@/controllers/interface/components/skill_icon';
+import { SkillIcon } from '../../components/skill_icon';
 import { MasterExpBar } from '../../windows/master_skills/masterExpBar';
 import { PetCommandBar } from './petCommands';
 import {
@@ -35,7 +35,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { skills } from '@/modules/skills';
 import { onCooldownTick, skillCooldowns } from '@/modules/skills/cooldowns';
-import { SkillTooltip } from '@/controllers/interface/components/skill_tooltip';
+import { SkillTooltip } from '../../components/skill_tooltip';
 import { ExpTooltip } from './expTooltip';
 import { SessionStats } from '@/modules/session/sessionStats';
 import { devQuery } from '@/core/devSeams';

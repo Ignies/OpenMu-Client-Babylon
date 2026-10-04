@@ -1,4 +1,4 @@
-import { GameOptions } from '../../modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 
 /**
  * The mixer's categories: pure data over `GameOptions` (master, the music / effects

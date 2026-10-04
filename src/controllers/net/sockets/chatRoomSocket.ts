@@ -1,4 +1,3 @@
-import { wsAddress } from '@/modules/servers/serverConfig';
 import { Xor32Encryptor } from '../encryption/xor32';
 import {
   ChatFrameSplitter,
@@ -23,6 +22,8 @@ import {
 const KEEP_ALIVE_MS = 15_000;
 
 type ChatRoomSocketOptions = {
+  /** The ws proxy origin (`servers/serverConfig.ts` `wsAddress()`), handed in by the chat module. */
+  wsAddress: string;
   host: string;
   port: number;
   roomId: number;
@@ -40,7 +41,7 @@ export type ChatRoomSocket = {
 };
 
 export function openChatRoomSocket(options: ChatRoomSocketOptions): ChatRoomSocket {
-  const { host, port, roomId, token } = options;
+  const { wsAddress, host, port, roomId, token } = options;
   // The chat server always uses OpenMU's default Xor32 key, whatever game
   // version the login went through.
   const xor32 = new Xor32Encryptor();
@@ -50,7 +51,7 @@ export function openChatRoomSocket(options: ChatRoomSocketOptions): ChatRoomSock
   let finished = false;
   let keepAlive: ReturnType<typeof setInterval> | null = null;
 
-  const socket = new WebSocket(`${wsAddress()}?host=${host}&port=${port}`);
+  const socket = new WebSocket(`${wsAddress}?host=${host}&port=${port}`);
   socket.binaryType = 'arraybuffer';
 
   function send(frame: Uint8Array): void {

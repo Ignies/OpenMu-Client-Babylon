@@ -1,7 +1,7 @@
 import { ClosePlayerShopDialogPacket, PlayerShopBuyResultPacket, PlayerShopBuyResultResultKindEnum, PlayerShopClosedPacket, PlayerShopItemListPacket, PlayerShopItemSoldToPlayerPacket, PlayerShopOpenSuccessfulPacket, PlayerShopSetItemPriceResponseItemPriceSetResultEnum, PlayerShopSetItemPriceResponsePacket, PlayerShopsPacket } from '@versions/shared/packets/ServerToClientPackets';
 import { Economy, type ShopStock } from '../economy/economy';
 import { EventBus } from '@/core/eventBus';
-import { ItemSerializer } from '../items/itemSerializer';
+import { ItemSerializer } from '@/controllers/item_rules';
 import { PERSONAL_SHOP_SLOTS, StorageKind, localIndexOf } from '../inventory/itemStorage';
 import { Social } from '../social/social';
 import { Store } from '@/app/store';

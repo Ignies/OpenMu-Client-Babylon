@@ -10,7 +10,7 @@ import {
   boidsFor,
   type BoidSpec,
 } from '../../controllers/fx/boids';
-import { GameOptions } from '../../modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import { effects } from '../../controllers/fx';
 import { FIRE_PUFF, TEX } from '../../controllers/fx/recipes';
 import { invasionEvent } from '../../modules/events/invasion';

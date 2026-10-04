@@ -11,7 +11,7 @@ import { MuItemWindow } from '@/controllers/interface/components/mu_window';
 import { ItemGrid } from '@/controllers/interface/components/item_grid';
 import { QuickItemActions } from '@/modules/inventory/quickItemActions';
 
-import { goldColor } from '@/modules/items/goldColor';
+import { goldColor } from '@/controllers/item_rules';
 import {
   ACCEPT_FRAMES,
   ACCEPT_HEIGHT,

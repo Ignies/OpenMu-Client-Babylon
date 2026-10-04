@@ -22,8 +22,8 @@ import {
   GUILD_MARK_SIZE,
   guildMarkDataUrl,
   packGuildMark,
-} from '@/modules/social/guildMark';
-import { TEXT_COLOR } from '../../pages/server_select/layout';
+} from '@/core/guildMark';
+import { TEXT_COLOR } from '@/controllers/interface/components/mu_text';
 import {
   BACK_SPRITE,
   BTN_BOTH_CANCEL_X,

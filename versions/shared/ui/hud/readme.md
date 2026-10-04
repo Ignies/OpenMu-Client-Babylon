@@ -5,7 +5,7 @@ Always-on interface elements, one folder per element, same shape as a window. Re
 
 ## Public API
 - Each `window.ts` default-exports a `defineWindow({ id, slot, order, component })`.
-- `party_bars/stableKey.ts`: `stableKeyOf`, also used by `notices` and the item grid widget.
+- `stableKeyOf` (stable React keys) is `src/core/stableKey.ts`, shared with the item grid widget.
 
 ## How it works
 - Registered by the same glob as the windows (`versions/shared/ui/index.ts`).

@@ -1,7 +1,7 @@
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useState } from 'react';
-import { GameOptions, setGameOption } from '@/modules/options/gameOptions';
+import { GameOptions, setGameOption } from '@/controllers/settings';
 import { formatRoundTrip } from '@/controllers/interface/hudFormat';
 import { isKey } from '@/controllers/interface/keyBindings';
 import { NetStats } from '@/controllers/net/roundTrip';

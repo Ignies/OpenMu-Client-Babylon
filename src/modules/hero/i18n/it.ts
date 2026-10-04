@@ -41,4 +41,8 @@ export default {
   'notify.fruitEquipped':
     'Togli prima gli oggetti che richiedono questa caratteristica',
   'notify.fruitNotNow': 'Non puoi usare questo frutto adesso',
+  'warn.durability': 'Durabilità dell’equipaggiamento al {percent}%',
+  'warn.inventoryFull': 'L’inventario è pieno',
+  'warn.noPotions': 'Non ci sono più pozioni curative',
+  'warn.buffEnding': '{name} sta per finire',
 } satisfies Partial<Record<keyof typeof en, string>>;

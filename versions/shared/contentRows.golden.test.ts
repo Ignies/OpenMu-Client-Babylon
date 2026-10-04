@@ -16,7 +16,7 @@ import { hasWarriorGlint } from '@/controllers/skills';
 import { characterLightFor } from '@/controllers/lighting/characters';
 import { monsterVisualFor } from '@/controllers/fx/monsterVisuals';
 import { shatterDeathFor } from '@/controllers/fx/deathVisuals';
-import { GameOptions } from '@/modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings/gameOptions';
 
 /**
  * The per-map, per-monster and per-skill rows that used to sit in controllers and systems, as

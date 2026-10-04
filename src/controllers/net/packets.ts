@@ -10,3 +10,11 @@ export const {
   ConnectServerPackets,
   ChangeMapServerInfoPacket,
 } = versionPackets;
+
+type CSPacketKeys = (typeof ConnectServerPackets)[number]['Name'];
+type GSPacketKeys = (typeof ServerToClientPackets)[number]['Name'];
+
+// Every packet name is a bus event carrying its bytes (core/eventBus/events.ts).
+declare module '@/core/eventBus/events' {
+  interface EventMap extends Record<CSPacketKeys, DataView>, Record<GSPacketKeys, DataView> {}
+}

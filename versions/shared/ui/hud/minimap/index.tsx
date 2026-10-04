@@ -3,7 +3,7 @@ import { isKey } from '@/controllers/interface/keyBindings';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
 import { Store } from '@/app/store';
-import { GameOptions } from '@/modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { playUiSound } from '@/controllers/sound/sfx';
 import { MinimapSheet } from './sheet';

@@ -1,12 +1,11 @@
-import { GameOptions } from '@/modules/options/gameOptions';
-import type { InstrumentId } from '@/modules/band/instruments';
+import { GameOptions } from '@/controllers/settings';
 import type { ENUM_WORLD } from '@/core/types';
 import { Engine, Vector3 } from '../../render/babylon/exports';
 import { SoundsManager } from '../soundsManager';
 import { busGain, masterGain } from '../buses';
 import type { SoundLayer } from '../layer';
 import { listenerHero, listenerWorld } from '../listener';
-import { loadBank, type DecodedBank } from './bank';
+import { loadBank, type BankId, type DecodedBank } from './bank';
 import { Sampler, type PerformerKey } from './sampler';
 import { instrumentGain, instrumentPan } from './space';
 
@@ -63,8 +62,8 @@ let busLevel = -1;
 /** Audio time of the last audible note, for the music duck's release. */
 let lastAudible = 0;
 
-const banks = new Map<InstrumentId, DecodedBank>();
-const loading = new Map<InstrumentId, Promise<boolean>>();
+const banks = new Map<BankId, DecodedBank>();
+const loading = new Map<BankId, Promise<boolean>>();
 const performers = new Map<PerformerKey, PerformerState>();
 
 /** Causes already written to the console, as `key:cause`. */
@@ -123,7 +122,7 @@ export function audioNow(): number {
   return context()?.currentTime ?? 0;
 }
 
-export function bankReady(id: InstrumentId): boolean {
+export function bankReady(id: BankId): boolean {
   return banks.has(id);
 }
 
@@ -132,7 +131,7 @@ export function bankReady(id: InstrumentId): boolean {
  * the bank is playable; a failed load resolves false and is retried on the
  * next call.
  */
-export function ensureBank(id: InstrumentId): Promise<boolean> {
+export function ensureBank(id: BankId): Promise<boolean> {
   if (banks.has(id)) return Promise.resolve(true);
   const pending = loading.get(id);
   if (pending) return pending;
@@ -179,7 +178,7 @@ export function setPerformerPosition(key: PerformerKey, x: number, z: number, lo
  */
 export function noteOn(
   key: PerformerKey,
-  instrument: InstrumentId,
+  instrument: BankId,
   channel: number,
   note: number,
   velocity: number,

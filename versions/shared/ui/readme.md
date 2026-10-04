@@ -10,6 +10,9 @@ Shared by every game version; a version replaces a window by id.
   See [hud/readme.md](hud/readme.md).
 - `pages/<page>/`: login, server_select, character_select, preloader and world.
   See [pages/readme.md](pages/readme.md).
+- `components/<piece>/`: shared pieces that read a module's state (skill icon and tooltip, emoji
+  text, reconnect overlay), so
+  they cannot be interface controller widgets. See [components/readme.md](components/readme.md).
 - `<folder>/i18n/<code>.ts`: each window's, element's and page's own text. `i18n/` here holds the
   few keys several of them share (see [i18n/readme.md](i18n/readme.md)).
 - `index.ts`: finds every `window.ts` by glob, registers them, adds the interface controller's message

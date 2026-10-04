@@ -9,7 +9,8 @@ reset. This is the top of the graph: it wires modules, controllers and versions 
 - `storeRef()` (`storeRef.ts`): a late-bound handle on `Store` for modules inside the store's own
   import cycle (`render/modelObject.ts`, `skills/visuals.ts`).
 - `consts.ts`: default connect-server / ws-proxy endpoints (`VITE_CS_HOST`, `VITE_WS_HOST`, ...)
-  and debug flags.
+  and the ECS debug flags. The login field limits are `modules/servers/serverAccounts.ts`; the
+  terrain and music dev switches live in `terrain/consts.ts` and `sound/soundsManager.ts`.
 - `spawnPlayer`, `summonDisplayName`, `emitObjectEffect` (`logic.ts`).
 - `PwaInstall`, `installApp()` (`pwaInstall.ts`): install the client as an app (options window).
 
@@ -17,7 +18,9 @@ reset. This is the top of the graph: it wires modules, controllers and versions 
 - `main.tsx` loads the game version from the active server profile (`versionIdForTag`), then
   imports `boot.tsx`. Everything behind `boot.tsx` reads `gameVersion` at module scope, so it must
   load after the version is set.
-- `boot.tsx` creates the Babylon engine and scene, calls `initControllers({ scene })`
+- `boot.tsx` first hands the shared maps to the maps controller (`versions/shared/maps/all.ts`;
+  client-only, so not in the version modules the servers load), then creates the Babylon engine and
+  scene, calls `initControllers({ scene })`
   ([../controllers/controllers.ts](../controllers/controllers.ts)), registers
   `resetForMapChange` with `onMapChange`, builds the ECS world (`createWorld`) and runs the render
   loop. The loop clamps `dt` to 0.1 s, catches a frame that throws (logged at most every 5 s) and

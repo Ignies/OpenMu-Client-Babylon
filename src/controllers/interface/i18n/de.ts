@@ -27,10 +27,6 @@ export default {
   'stat.vitality': 'Vitalität',
   'stat.energy': 'Energie',
   'stat.command': 'Führung',
-  'warn.durability': 'Haltbarkeit der Ausrüstung bei {percent}%',
-  'warn.inventoryFull': 'Das Inventar ist voll',
-  'warn.noPotions': 'Keine Heiltränke mehr',
-  'warn.buffEnding': '{name} läuft gleich ab',
 
   'keys.minimap': 'Übersichtskarte',
   'keys.sessionStats': 'Sitzungsfenster',

@@ -4,7 +4,7 @@ import { ChatMessageChatMessageTypeEnum, ChatMessagePacket, ObjectMessagePacket,
 import { EMOJI_CATALOG } from './emojis';
 import { matchEmojiBubbleWord, type EmojiBubbleId } from './emojiBubbles';
 import { EventBus } from '@/core/eventBus';
-import { GameOptions } from '../options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import { NetStats } from '@/controllers/net/roundTrip';
 import { Notices } from './notices';
 import { SlideHelp } from '@/controllers/interface/slideHelp';

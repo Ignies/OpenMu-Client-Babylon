@@ -19,7 +19,7 @@ import {
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { useUiStageScale } from '@/controllers/interface/components/ui_stage';
-import { TEXT_COLOR } from '../../pages/server_select/layout';
+import { TEXT_COLOR } from '@/controllers/interface/components/mu_text';
 import {
   BACK_SPRITE,
   BTN_BOTH_CANCEL_X,

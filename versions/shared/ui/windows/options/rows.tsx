@@ -6,7 +6,7 @@ import { t } from '@/i18n';
 import {
   GameOptions,
   type GameOptions as GameOptionsType,
-} from '@/modules/options/gameOptions';
+} from '@/controllers/settings';
 import {
   KeyBindings,
   keyLabel,

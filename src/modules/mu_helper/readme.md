@@ -37,7 +37,7 @@ the two server packets. Running state and the raw config blob still live in the 
 
 ## Depends on / used by
 - uses: `src/app/store.ts`, `social/social.ts` (`partyMembers` for party buffs and heals),
-  `items/itemStats.ts`, `inventory/inventoryConstants.ts`, `ecs/systems/attackSystem.ts`
+  `controllers/item_rules/itemStats.ts`, `core/inventoryConstants.ts`, `ecs/systems/attackSystem.ts`
   (`isAttackableEntity`), `versions/shared/skills/skillsDatabase`.
 - used by: `src/app/logic.ts` (`net.ts`), `src/ecs/systems/muHelperSystem.ts` (`loop.ts`),
   `versions/shared/ui/windows/mu_helper/` (`config.ts`, `state.ts`). The Home key in

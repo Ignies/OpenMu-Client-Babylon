@@ -6,12 +6,11 @@ import {
   toBabylon,
   type BmdLink,
 } from '../render/boneLink';
-import { BaseClass, getBaseClass } from '../../modules/hero/characterStats';
+import { BaseClass, getBaseClass, type CharacterClassNumber } from '../../core/types';
 import { PlayerAction } from '@versions/shared/objects/enum';
 import { RAGEFIGHTER_STOP_SPEED } from '../anim/playSpeed';
 import type { PartPose } from '../render/modelObject';
 import type { PlayerObject } from './playerObject';
-import type { CharacterClassNumber } from '../../core/types';
 import type { Item } from '../../ecs/world';
 import { devQuery, devQueryNumbers } from '../../core/devSeams';
 import {

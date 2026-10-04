@@ -35,7 +35,7 @@ only has the handlers.
 - `PlayerShopBuyResult`: the bought item and its slot, or the failure kind.
 
 ## Depends on / used by
-- uses: `economy/economy.ts`, `items/itemSerializer.ts`, `inventory/itemStorage.ts`,
+- uses: `economy/economy.ts`, `controllers/item_rules/itemSerializer.ts`, `inventory/itemStorage.ts`,
   `social/social.ts` (`errorMessage`), `chat/chat.ts` (`cleanName`), `src/app/store.ts`
   (`playerId`, `playerData.items`, `syncPlayerAppearance`), `src/i18n`.
 - used by: `src/app/logic.ts`. The windows are `versions/shared/ui/windows/personal_shop/` and

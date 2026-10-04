@@ -55,8 +55,11 @@ never which skill or item asks for it.
 ## Depends on / used by
 - uses: lighting (`crackle.ts` reads `lighting.emitters`), assets (data folder URLs, world sets),
   render (Babylon exports), terrain (`TW_SAFEZONE`), anim, actors, `core`, `ecs` types. Old exceptions to the dependency
-  rule are listed in `tools/checks/baselines/deps.json` (options, events, hero, items, drops,
-  band, skill aliases, `app/store`, `app/consts`).
+  rule are listed in `tools/checks/baselines/deps.json` (`app/store`).
+- Dependency direction: the event gates are handed in (`registerAmbientGate`, below); the instrument
+  sampler keys its banks by a plain `BankId` string (the band module's `InstrumentId`); the music
+  dev switch `ENABLE_BG_MUSIC` lives in `soundsManager.ts`; `settings`, `combat` (`masterBase`) and
+  `item_rules` (`HIGH_DROP_LEVEL`, `itemDef`, `isJewel`) are controllers.
 - used by: `controllers.ts`, `app/boot.tsx`, `app/logic.ts`, `app/lifecycle.ts`, ECS systems
   (sound, combat sfx, skill cast, death, teleport, pets, band, boids, doors), most module nets,
   `skills/index.ts` (`SKILL_SOUNDS`), fx (`playSfx`), interface components, skill files, map
@@ -176,7 +179,9 @@ folder or its body file), `teleport` (the Nightmare), `stormSkill` (the meteorit
   `MapTown`, `MapObjectLoop`, `HeroContext`, `MonsterCue`, `VoiceSet`) are exported from
   `index.ts`. A row names its event or option gate (`AmbientGate`: `bloodCastleRunning`,
   `chaosCastleWaiting`, `chaosCastleRunning`, `ambientParticles`) and `ambientBeds.ts` answers it,
-  so map data stays plain. An object loop names its reach (`small`, `large` or tiles) and
+  so map data stays plain. The event gates are registered by the events module when it loads
+  (`registerAmbientGate(gate, answer)`, on the door, from `modules/events/bloodCastle.ts` and
+  `chaosCastle.ts`); until then a gate reads its timer's idle state (not running). An object loop names its reach (`small`, `large` or tiles) and
   `objectLoops.ts` turns it into tiles.
 - Left in the engines: the global monster voices (`GLOBAL_VOICES`), the Kanturu tower's event
   music (`kanturuMusic`) and `WD_5UNKNOWN`'s Dungeon track (no map entry claims that world).

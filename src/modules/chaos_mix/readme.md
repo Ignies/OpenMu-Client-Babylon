@@ -20,7 +20,7 @@ Chaos machine packets (`CNewUIMixInventory`). The mix state and actions live in 
 - `CraftingDialogClosed075`: the server closed the window; closes it without sending a close back.
 
 ## Depends on / used by
-- uses: `economy/economy.ts`, `items/itemSerializer.ts`.
+- uses: `economy/economy.ts`, `controllers/item_rules/itemSerializer.ts`.
 - used by: `src/app/logic.ts`. The window is `versions/shared/ui/windows/chaos_machine/`.
 
 ## Change it

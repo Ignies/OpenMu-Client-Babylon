@@ -17,7 +17,8 @@ water, ground picks, minimap data and the base class for map objects. There is n
   `getTerrainFlag`, `setTerrainFlags`, `detachGround`, `getTerrainTile`, `getTerrainLayers`,
   `getTerrainLight`. Picks: `pickGround(world, x, y)` and `TerrainPicker` (`terrainPick.ts`).
 - `MapTileObject` (`mapTileObject.ts`): the `ModelObject` every map object extends.
-- `consts.ts`: `TERRAIN_SIZE`, `TILE_CM`, `cmToTiles`, the `TW_*` / `TWFlags` attribute bits.
+- `consts.ts`: `TERRAIN_SIZE`, `TILE_CM`, `cmToTiles`, the `TW_*` / `TWFlags` attribute bits, and the
+  dev switches `DEBUG_SHOW_TERRAIN_ATTRIBUTES`, `DISABLE_OBJECTS_LOADING` (were `app/consts.ts`).
 - `terrainDynamicLight.ts`: `registerTerrainLight(emitter)` (returns the unregister),
   `updateTerrainDynamicLight`, `uploadTerrainLightDelta`, `requestTerrainLight`,
   `requestBodyTerrainLight`, `terrainLightReaches`, `terrainLightTouchesSample`.
@@ -63,7 +64,7 @@ water, ground picks, minimap data and the base class for map objects. There is n
 ## Depends on / used by
 - uses: `assets`, `maps` (tiles, cutout, spawn, `create`), `weather` (coverage, trail, melt,
   burn), `lighting`, `render`, `fx`, `core`. Old exceptions to the dependency rule
-  (`tools/checks/baselines/deps.json`): `app/store`, `app/consts`, `modules/options/gameOptions`.
+  (`tools/checks/baselines/deps.json`): `app/store`. Reads `settings`.
 - used by: `app/boot.tsx`, `ecs/world.ts`, ECS systems (`terrainLightSystem`, `terrainMaskSystem`,
   `terrainGrassSystem`, the cursor and pointer systems), the fx, lighting, render, sound, assets,
   maps and weather controllers, `modules` (skills, warp), the options window, the minimap HUD,

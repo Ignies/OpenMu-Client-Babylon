@@ -9,8 +9,8 @@
  */
 
 import type { Item } from '../../ecs/world';
-import { ItemSerializer } from '../items/itemSerializer';
-import { itemDef, itemStats } from '../items/itemStats';
+import { ItemSerializer } from '@/controllers/item_rules';
+import { itemDef, itemStats } from '@/controllers/item_rules';
 import { itemDisplayName } from '../../controllers/interface/itemTooltip';
 
 /** `{` + 16 characters + `}`. */

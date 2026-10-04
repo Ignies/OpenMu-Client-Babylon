@@ -3,13 +3,13 @@ import { EventBus } from '@/core/eventBus';
 import { type Item } from '@/ecs/world';
 import { ItemDropRemovedPacket, ItemDropResponsePacket, ItemPickUpRequestFailedItemPickUpFailReasonEnum, ItemPickUpRequestFailedPacket, ItemsDroppedPacket, MoneyDroppedExtendedPacket } from '@versions/shared/packets/ServerToClientPackets';
 import { ItemGroup, angleRotation, itemRestHeight, itemRestPose, itemRestRotation } from '@/controllers/actors/itemAngle';
-import { ItemSerializer } from '../items/itemSerializer';
+import { ItemSerializer } from '@/controllers/item_rules';
 import { ItemsDatabase, itemBaseName } from '@versions/shared/items/itemsDatabase';
 import { Store } from '@/app/store';
 import { Vector3 } from '@/controllers/render/babylon/exports';
-import { archangelWeapon, dropModelProxy } from './dropModelProxy';
+import { archangelWeapon, dropModelProxy } from '@/controllers/item_rules';
 import { createAttributeSystem } from '@/core/attributeSystem';
-import { itemLevelName } from '../items/itemLevelLook';
+import { itemLevelName } from '@/controllers/item_rules';
 import { playDrop } from '@/controllers/sound';
 import { removeNetObject } from '../_shared/net_helpers';
 import { runInAction } from 'mobx';
@@ -107,7 +107,7 @@ function applyItemsDropped(p: ItemsDroppedPacket) {
     }
 
     removeNetObject(world, maskedId);
-    // CreateItem's per-level model swap (modules/drops/dropModelProxy.ts): the
+    // CreateItem's per-level model swap (item_rules/dropModelProxy.ts): the
     // shown model and its pose may come from another item's row.
     const proxy = parsed ? dropModelProxy(group, id, parsed.lvl ?? 0) : null;
     const poseGroup = proxy?.group ?? group;

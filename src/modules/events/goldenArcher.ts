@@ -2,7 +2,7 @@ import { observable, runInAction } from 'mobx';
 import { EventBus } from '../../core/eventBus';
 import { Store } from '../../app/store';
 import { t } from '../../i18n';
-import { ItemGroup } from '../items/itemStats';
+import { ItemGroup } from '@/controllers/item_rules';
 import {
   EventChipExitDialogPacket,
   EventChipRegistrationRequestPacket,

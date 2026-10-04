@@ -40,4 +40,8 @@ export default {
   'notify.fruitFloor': '{stat} no puede bajar más',
   'notify.fruitEquipped': 'Quítate antes los objetos que piden esta característica',
   'notify.fruitNotNow': 'Ahora no puedes usar esta fruta',
+  'warn.durability': 'Durabilidad del equipo al {percent}%',
+  'warn.inventoryFull': 'El inventario está lleno',
+  'warn.noPotions': 'No quedan pociones de vida',
+  'warn.buffEnding': '{name} está a punto de acabar',
 } satisfies Partial<Record<keyof typeof en, string>>;

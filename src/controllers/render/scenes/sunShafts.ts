@@ -8,7 +8,7 @@ import {
   type ArcRotateCamera,
   type Scene,
 } from '../babylon/exports';
-import { GameOptions } from '@/modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import { devQuery, devQueryNumber } from '@/core/devSeams';
 import type { LightingTier } from '../../lighting/lightingQuality';
 import type { Rgb } from '../../lighting/profiles';

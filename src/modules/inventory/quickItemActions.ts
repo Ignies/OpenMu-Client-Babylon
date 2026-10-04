@@ -2,9 +2,9 @@ import { reaction } from 'mobx';
 import { t } from '../../i18n';
 import { Store } from '../../app/store';
 import { Economy } from '../economy/economy';
-import { GameOptions } from '../options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import { StorageKind } from './itemStorage';
-import { itemValue } from '../items/itemValue';
+import { itemValue } from '@/controllers/item_rules';
 import { itemDisplayName } from '../../controllers/interface/itemTooltip';
 import { MsgWinCode } from '../../controllers/interface/msgWin';
 import {

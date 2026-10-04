@@ -6,7 +6,7 @@ import {
   type Scene,
 } from '../render/babylon/exports';
 import { loadEffectTexture } from '../fx/moveTargetEffect';
-import { GameOptions } from '../../modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import { reportLoadFailure } from '../assets';
 
 /**

@@ -29,7 +29,7 @@ versions/shared/skills/<class>/<skill>/
 | `light` | lighting | the light it throws |
 | `sound` | sound | cast sound |
 | `clip` | combat / anim | cast animation, on foot and per mount |
-| `delayMs` | modules/skills | re-use delay |
+| `delayMs` | combat (read by modules/skills) | re-use delay |
 | `target` | combat | who the cast goes to when its type would say otherwise |
 | `stepIn` | combat | walk one square in toward the target |
 | `buffs`, `buffArrivals` | skills | persistent buff looks and their landing work |

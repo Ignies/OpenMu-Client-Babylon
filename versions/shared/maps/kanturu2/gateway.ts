@@ -3,12 +3,7 @@ import type { Item } from '@/ecs/world';
 import { EventBus } from '@/core/eventBus';
 import { SoundsManager } from '@/controllers/sound/soundsManager';
 import type { Sounds } from '@/controllers/sound/recipes';
-import {
-  DARK_HORSE,
-  HORN_OF_DINORANT,
-  HORN_OF_FENRIR,
-  HORN_OF_UNIRIA,
-} from '@/modules/pets/petConstants';
+import { DARK_HORSE, HORN_OF_DINORANT, HORN_OF_FENRIR, HORN_OF_UNIRIA } from '@versions/shared/items/petItems';
 import {
   CAPE_OF_LORD,
   HELPER_GROUP,

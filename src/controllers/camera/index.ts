@@ -5,7 +5,7 @@
 
 import type { ENUM_WORLD } from '../../core/types';
 import type { ArcRotateCamera, TransformNode } from '../render/babylon/exports';
-import { GameOptions } from '../../modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import { EventBus } from '../../core/eventBus';
 import type { CameraLayer } from './layer';
 import { CAMERA_LAYERS } from './layers';

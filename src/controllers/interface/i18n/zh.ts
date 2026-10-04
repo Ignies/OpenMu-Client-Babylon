@@ -27,10 +27,6 @@ export default {
   'stat.vitality': '体力',
   'stat.energy': '能量',
   'stat.command': '统率',
-  'warn.durability': '装备耐久度剩余 {percent}%',
-  'warn.inventoryFull': '背包已满',
-  'warn.noPotions': '没有治疗药水了',
-  'warn.buffEnding': '{name} 即将结束',
 
   'keys.minimap': '小地图',
   'keys.sessionStats': '战绩面板',

@@ -1,4 +1,4 @@
-import { InventoryConstants } from './inventoryConstants';
+import { InventoryConstants } from '@/core/inventoryConstants';
 
 /**
  * The free-rectangle search over an inventory grid, shared by the client

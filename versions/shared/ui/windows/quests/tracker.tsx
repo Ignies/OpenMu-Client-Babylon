@@ -13,7 +13,7 @@
  */
 import { observer } from 'mobx-react-lite';
 import { t } from '@/i18n';
-import { GameOptions, uiScaleFactor } from '@/modules/options/gameOptions';
+import { GameOptions, uiScaleFactor } from '@/controllers/settings';
 import { devQueryNumber } from '@/core/devSeams';
 import { uiClick } from '@/controllers/sound/sfx';
 import { MuText } from '@/controllers/interface/components/mu_text';

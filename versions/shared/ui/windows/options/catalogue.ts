@@ -9,7 +9,7 @@ import {
   UI_SCALE_MAX,
   uiScaleFactor,
   type GameOptions as GameOptionsType,
-} from '@/modules/options/gameOptions';
+} from '@/controllers/settings';
 import {
   KEY_ACTION_LABEL_KEYS,
   type KeyAction,
@@ -21,7 +21,7 @@ import {
 import {
   COMPARE_TOOLTIP_LABEL_KEYS,
   COMPARE_TOOLTIP_MAX,
-} from '@/modules/items/itemCompare';
+} from '@/controllers/item_rules';
 import {
   LIGHTING_QUALITY_LABEL_KEYS,
   LIGHTING_QUALITY_MAX,

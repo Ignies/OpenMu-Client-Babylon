@@ -1,5 +1,5 @@
 import type { ENUM_WORLD } from '../../core/types';
-import { GameOptions } from '../../modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import { SoundsManager } from './soundsManager';
 import { busGain, type SoundBus } from './buses';
 import type { Sounds } from './recipes';
@@ -10,8 +10,6 @@ import {
   playSfx,
   type SfxPosition,
 } from './listener';
-import { bloodCastleTimer } from '../../modules/events/bloodCastle';
-import { chaosCastleTimer } from '../../modules/events/chaosCastle';
 import { maps, type MapLayer } from '../maps';
 
 /**
@@ -39,10 +37,20 @@ export type AmbientGate =
   | 'chaosCastleRunning'
   | 'ambientParticles';
 
+/** The gates the events module answers (its timers); it registers them when it loads. */
+type EventGate = Exclude<AmbientGate, 'ambientParticles'>;
+const eventGates: Partial<Record<EventGate, () => boolean>> = {};
+
+/** The events module hands in a timer reader (`registerAmbientGate('bloodCastleRunning', ...)`). */
+export function registerAmbientGate(gate: EventGate, answer: () => boolean): void {
+  eventGates[gate] = answer;
+}
+
+// Until an event registers, its timer is idle, as it starts: not running.
 const GATES: Readonly<Record<AmbientGate, () => boolean>> = {
-  bloodCastleRunning: () => bloodCastleTimer().running,
-  chaosCastleWaiting: () => !chaosCastleTimer().running,
-  chaosCastleRunning: () => chaosCastleTimer().running,
+  bloodCastleRunning: () => eventGates.bloodCastleRunning?.() ?? false,
+  chaosCastleWaiting: () => eventGates.chaosCastleWaiting?.() ?? true,
+  chaosCastleRunning: () => eventGates.chaosCastleRunning?.() ?? false,
   ambientParticles: () => GameOptions.ambientParticles,
 };
 

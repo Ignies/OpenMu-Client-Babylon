@@ -27,10 +27,6 @@ export default {
   'stat.vitality': 'Vitalitate',
   'stat.energy': 'Energie',
   'stat.command': 'Comandă',
-  'warn.durability': 'Durabilitatea echipamentului la {percent}%',
-  'warn.inventoryFull': 'Inventarul este plin',
-  'warn.noPotions': 'Nu mai sunt poțiuni de viață',
-  'warn.buffEnding': '{name} este pe cale să se termine',
 
   'keys.minimap': 'Minihartă',
   'keys.sessionStats': 'Panou de sesiune',

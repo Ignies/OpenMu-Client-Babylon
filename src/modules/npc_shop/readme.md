@@ -17,7 +17,7 @@ state and actions live in `Store` (`src/app/store.ts`); this folder only has the
 - Merchant state in `Store`: `npcShop` (stock, tax, repair flag), `repairMode`, `shopBuyPending`,
   `shopBuyRefused`, `pendingNpcType`. Actions: `openNpcShop`, `dropNpcTalk`, `setNpcShopItems`,
   `closeNpcShop`, `buyItemFromNpc`, `finishShopBuy`, `shopBuyFailed`, `sellPickedItemToNpc`, `itemSoldToNpc`,
-  `toggleRepairMode`, `repairItemRequest`, `repairAllRequest`. Prices come from `items/itemValue.ts`.
+  `toggleRepairMode`, `repairItemRequest`, `repairAllRequest`. Prices come from `controllers/item_rules/itemValue.ts`.
 - Bulk buy and the sell confirmation are `QuickItemActions` ([../inventory/readme.md](../inventory/readme.md)).
 
 ## Packets
@@ -28,14 +28,14 @@ state and actions live in `Store` (`src/app/store.ts`); this folder only has the
 - `NpcItemSellResult`: sale confirmed with the new zen, or rolled back.
 
 ## Depends on / used by
-- uses: `Store`, `economy/economy.ts`, `events`, `quests`, `items/itemSerializer.ts`, `controllers/sound/sfx.ts`,
+- uses: `Store`, `economy/economy.ts`, `events`, `quests`, `controllers/item_rules/itemSerializer.ts`, `controllers/sound/sfx.ts`,
   `src/i18n`.
 - used by: `src/app/logic.ts`. The window is `versions/shared/ui/windows/npc_shop/`; the buy quantity box is in
   `versions/shared/ui/windows/economy_prompts/`.
 
 ## Change it
 - open a new NPC window: add a `case` to the `NpcWindowResponse` switch and call `Store.dropNpcTalk()` first.
-- merchant buy / sell / repair rules: the matching `Store` methods; prices in `items/itemValue.ts`.
+- merchant buy / sell / repair rules: the matching `Store` methods; prices in `controllers/item_rules/itemValue.ts`.
 
 ## Tests
 - none yet.

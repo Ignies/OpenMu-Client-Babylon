@@ -2,8 +2,8 @@ import { CHAOS_CARD_WIRE_STORAGE, StorageKind, localIndexOf } from './itemStorag
 import { CharacterInventoryPacket, InventoryItemUpgradedPacket, InventoryMoneyUpdatePacket, ItemAddedToInventoryPacket, ItemDurabilityChangedPacket, ItemMovedPacket, ItemRemovedPacket } from '@versions/shared/packets/ServerToClientPackets';
 import { Economy } from '../economy/economy';
 import { EventBus } from '@/core/eventBus';
-import { InventoryConstants } from './inventoryConstants';
-import { ItemSerializer } from '../items/itemSerializer';
+import { InventoryConstants } from '@/core/inventoryConstants';
+import { ItemSerializer } from '@/controllers/item_rules';
 import { NetStats } from '@/controllers/net/roundTrip';
 import { Store } from '@/app/store';
 import { pickupSound } from '@/controllers/sound/combatSounds';

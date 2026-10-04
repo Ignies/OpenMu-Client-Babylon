@@ -1,11 +1,11 @@
 import { TILE_CM, TWFlags } from '../../controllers/terrain/consts';
 import { isFlagInBinaryMask } from '../../controllers/assets/download';
-import { InventoryConstants } from '../../modules/inventory/inventoryConstants';
+import { InventoryConstants } from '@/core/inventoryConstants';
 import { Store } from '../../app/store';
 import { BaseClass, getBaseClass } from '../../modules/hero/characterStats';
 import { isSwimWorld } from '../../controllers/actors/locomotion';
 import { isFastWing } from '../../controllers/actors/wings';
-import { isRidingMount } from '../../modules/pets/pets';
+import { isRidingMount } from '@/controllers/pets';
 import type { Entity, ISystemFactory } from '../world';
 import { distanceAlongPath } from '../../controllers/actors/approachPath';
 import { debuffSlow } from '../../controllers/actors/debuffBody';

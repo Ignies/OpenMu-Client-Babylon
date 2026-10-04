@@ -39,8 +39,8 @@ players, plus their moves and equipment changes. The entities live in the ECS wo
 - `AppearanceChanged` / `AppearanceChangedExtended`: one equipment slot of a player changed.
 
 ## Depends on / used by
-- uses: `_shared/net_helpers.ts`, `economy` (shop titles), `items/itemSerializer`,
-  `inventory/inventoryConstants`, `controllers/actors`, `ecs/systems/teleportSystem`,
+- uses: `_shared/net_helpers.ts`, `economy` (shop titles), `controllers/item_rules/itemSerializer`,
+  `core/inventoryConstants`, `controllers/actors`, `ecs/systems/teleportSystem`,
   `versions/shared/skills/skillVisuals` (`playSummonArrival`).
 - used by: `src/app/logic.ts` (import and `spawnPlayer` re-export), `src/app/store.ts`,
   `ecs/systems/characterSelectSystem.ts`. `warp/warpScopeHold.ts` holds these packets back while

@@ -27,10 +27,6 @@ export default {
   'stat.vitality': '체력',
   'stat.energy': '에너지',
   'stat.command': '통솔',
-  'warn.durability': '장비 내구도 {percent}%',
-  'warn.inventoryFull': '인벤토리가 가득 찼습니다',
-  'warn.noPotions': '회복 물약이 없습니다',
-  'warn.buffEnding': '{name}이(가) 곧 끝납니다',
 
   'keys.minimap': '미니맵',
   'keys.sessionStats': '세션 창',

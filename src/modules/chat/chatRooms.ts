@@ -9,6 +9,7 @@ import {
 import { CHAT_SERVER_PORT, type ChatClient } from '../../controllers/net/protocols/chatRoomProtocol';
 import { openChatRoomSocket, type ChatRoomSocket } from '../../controllers/net/sockets/chatRoomSocket';
 import { playUiSound } from '../../controllers/sound/sfx';
+import { wsAddress } from '../servers/serverConfig';
 
 type ChatRoomLine = {
   sender: string;
@@ -249,6 +250,7 @@ export const ChatRooms = new (class _ChatRooms {
 
   private connect(key: number, host: string, roomId: number, token: number): void {
     const socket = openChatRoomSocket({
+      wsAddress: wsAddress(),
       host,
       port: CHAT_SERVER_PORT,
       roomId,

@@ -4,8 +4,8 @@ import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
 import { t, type TextKey } from '@/i18n';
 import { Store, type PetInfo } from '@/app/store';
-import { InventoryConstants } from '@/modules/inventory/inventoryConstants';
-import { PET_GROUP, DARK_HORSE, DARK_RAVEN } from '@/modules/pets/pets';
+import { DARK_HORSE, DARK_RAVEN, PET_GROUP } from '@versions/shared/items/petItems';
+import { InventoryConstants } from '@/core/inventoryConstants';
 import {
   PetCommandModeEnum,
   PetTypeEnum,

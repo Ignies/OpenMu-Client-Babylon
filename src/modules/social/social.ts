@@ -49,7 +49,7 @@ import { itemLinkLabel, scanItemLinks, stripItemLinks } from '../chat/chatItemLi
 import { EMOJI_CATALOG } from '../chat/emojis';
 import { clipChatText, toChatWire } from '../../controllers/net/protocols/chatWire';
 import { chatTextWidth } from '../chat/chatTextWidth';
-import { GameOptions } from '../options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import { Commands } from '../chat/commands';
 import {
   CancelGuildCreationPacket,

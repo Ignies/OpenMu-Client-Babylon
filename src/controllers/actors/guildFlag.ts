@@ -13,7 +13,7 @@ import {
   GUILD_MARK_PALETTE,
   GUILD_MARK_SIZE,
   unpackGuildMark,
-} from '../../modules/social/guildMark';
+} from '../../core/guildMark';
 
 /**
  * `RenderGuild` (ZzzCharacter.cpp:6388) - the guild flag every guild member

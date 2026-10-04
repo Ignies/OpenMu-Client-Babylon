@@ -6,15 +6,16 @@ and the loot filter for the ALT name overlay.
 ## Public API
 - none for packets. `installNet()` in `net.ts` registers its handlers (`module.ts`, installed by `src/app/logic.ts`).
 - `DropObject`: the model class of a drop (frozen pose, zen coin pile, the fall). `setPileFall(height)`.
-- `dropTier(drop)`, `DROP_TIER_COLOURS`, `HIGH_DROP_LEVEL` (7): name colour and ground glow tier.
+- `dropTier(drop)`, `DROP_TIER_COLOURS`, `HIGH_DROP_LEVEL` (7) moved to `controllers/item_rules`
+  (`dropTier.ts`): the drop sound controller reads them, and a controller may not import a module.
 - `dropPassesLootFilter(drop)`, `lootZenThreshold(step)`, `LOOT_ZEN_MAX`: which names the latched overlay keeps.
-- `archangelWeapon(level)`: the Divine weapon a Weapon of Archangel stands for (group, num).
 
 ## How it works
 - `ItemsDropped` adds one entity per item with `droppedItem`, `modelFactory: DropObject` and a name
   (`RenderItemName`, ZzzInventory.cpp:6714). A fresh drop plays its sound (ZzzObject.cpp:5997-6002 / :6198).
-- `dropModelProxy.ts` ports `CreateItem`'s per-level model swap (ZzzObject.cpp:6056-6116): Box of Luck by level,
-  candy boxes, Rena +1/+2, quest items, Weapon of Archangel, Wizards Ring. The pose follows the shown model.
+- `controllers/item_rules/dropModelProxy.ts` ports `CreateItem`'s per-level model swap (ZzzObject.cpp:6056-6116):
+  Box of Luck by level, candy boxes, Rena +1/+2, quest items, Weapon of Archangel, Wizards Ring. The pose
+  follows the shown model. It moved there because `actors/playerObject.ts` reads it too.
 - The resting pose and height come from `controllers/actors/itemAngle.ts`.
 - Zen: `zenPile.ts` ports `RenderZen` (ZzzObject.cpp:6327): coin count from the amount (3 to 12), scattered
   from a 100-value `RandomTable`. Two departures: the pile is 1.5x wider, and the radius uses a square root
@@ -41,10 +42,9 @@ and the loot filter for the ALT name overlay.
 - HUD `world_objects` (names, tier colours, loot filter); window `options` (loot zen slider).
 
 ## Change it
-- a drop that shows another model at some level: `dropModelProxy.ts` (and `items/itemLevelLook.ts` for its name).
+- a drop that shows another model at some level: `controllers/item_rules/dropModelProxy.ts` (and `controllers/item_rules/itemLevelLook.ts` for its name).
 - how a zen pile looks: `zenPile.ts` (count, spread) and `DropObject` (coin height, fall).
-- name colours or the "high" level: `dropTier.ts`. Loot filter rules: `lootFilter.ts`.
+- name colours or the "high" level: `controllers/item_rules/dropTier.ts`. Loot filter rules: `lootFilter.ts`.
 
 ## Tests
-- `dropModelProxy.test.ts`: Box of Kundun / Box of Luck models, medals, chocolate boxes, Rena, quest items.
 - `zenPile.test.ts`: coin count by amount, scatter inside the radius and over the disc, same pile per seed.

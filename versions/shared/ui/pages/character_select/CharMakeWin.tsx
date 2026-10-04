@@ -8,7 +8,7 @@ import { isReservedName } from '@/modules/servers/reservedNames';
 import { playUiSound } from '@/controllers/sound/sfx';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
-import { TEXT_COLOR } from '../server_select/layout';
+import { TEXT_COLOR } from '@/controllers/interface/components/mu_text';
 import { createClassPreview, type ClassPreview } from './classPreview';
 import {
   ACTION_BTN_FRAMES,

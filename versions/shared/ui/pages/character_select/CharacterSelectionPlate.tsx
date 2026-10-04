@@ -6,7 +6,7 @@ import { classFromAppearance } from '@/controllers/actors/deserializeAppearance'
 import { getClassName } from '@/modules/hero/characterStats';
 import { characterSelectView } from '@/modules/character_select/characterSelect';
 import { t } from '@/i18n';
-import { TEXT_COLOR } from '../server_select/layout';
+import { TEXT_COLOR } from '@/controllers/interface/components/mu_text';
 
 /** How far above the model's root the plate hangs, in tiles (world units). */
 const HEAD_HEIGHT = 2.3;

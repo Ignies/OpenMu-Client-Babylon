@@ -40,4 +40,8 @@ export default {
   'notify.fruitFloor': '{stat} ลดลงไปกว่านี้ไม่ได้',
   'notify.fruitEquipped': 'ถอดไอเทมที่ต้องใช้ค่าสถานะนี้ออกก่อน',
   'notify.fruitNotNow': 'ตอนนี้ใช้ผลไม้นี้ไม่ได้',
+  'warn.durability': 'ความทนทานของอุปกรณ์ {percent}%',
+  'warn.inventoryFull': 'กระเป๋าเต็ม',
+  'warn.noPotions': 'ไม่มียาฟื้นพลังชีวิตแล้ว',
+  'warn.buffEnding': '{name} กำลังจะหมด',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -14,6 +14,9 @@ other folders share.
 - `statAmounts.ts`: `clampAmount(amount, points)`, `needsConfirm(amount)`.
 - `lowVitals.ts`: `vitalWarning(fraction, percent)`, `heartbeatDue(life, lifeMax)`, `NO_WARNING`,
   `LOW_VITAL_MIN_PERCENT` / `MAX` / `DEFAULT`.
+- `watchStateWarnings()` (`stateWarnings.ts`, was `controllers/interface/`): watches the store for low
+  durability, a full grid, the last potion and a buff running out, and posts one notice per crossing
+  (option `stateWarnings`); `boot.tsx` starts it. Its `warn.*` text is in `i18n/` here.
 
 ## How it works
 - The hero's state lives in the Store: `Store.playerData` (`PlayerData` in `src/app/store.ts`: level,
@@ -48,7 +51,7 @@ other folders share.
   `session/sessionResume.ts`, `chat/commands.ts`, `_shared/net_helpers.ts`, `items`, `inventory`, `src/i18n`.
 - used by: `src/app/logic.ts`, `src/app/store.ts`, many controllers and ECS systems (`getBaseClass`),
   `social/social.ts` (`matchEmoteWord`), `session/sessionStats.ts` (`experienceGained`),
-  `options/gameOptions.ts`, `skills`, `combat`, `events`, `quests`. Windows: `versions/shared/ui/windows/character_info/`,
+  `controllers/settings`, `skills`, `combat`, `events`, `quests`. Windows: `versions/shared/ui/windows/character_info/`,
   `emote_menu/`, `move_command_window/`, `mu_helper/`, `options/`; HUD `low_health_overlay/`; page `character_select/`.
 
 ## Change it

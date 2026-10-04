@@ -45,7 +45,7 @@ Not in the original client: the notes travel through our proxy (`proxy/band/`), 
 - uses: `social/social.ts` (system lines), `Store`, `controllers/net/protocols/bandProtocol.ts`,
   `controllers/sound/instruments`, `controllers/render/boneLink`, `src/i18n`.
 - used by: `src/app/logic.ts`, `ecs/systems/bandSystem.ts`, `ecs/world.ts` (types),
-  `controllers/sound/instruments` (`InstrumentId`), `tools/instrumentSamples.ts`. UI:
+  `tools/instrumentSamples.ts`; the sound sampler takes an `InstrumentId` as its plain `BankId`. UI:
   `windows/instrument_window`, `windows/emote_menu`.
 
 ## Change it

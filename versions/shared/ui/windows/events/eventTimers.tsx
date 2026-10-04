@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite';
 import { Store } from '@/app/store';
-import { GameOptions, uiScaleFactor } from '@/modules/options/gameOptions';
+import { GameOptions, uiScaleFactor } from '@/controllers/settings';
 import { events } from '@/modules/events';
 import {
   eventSchedule,

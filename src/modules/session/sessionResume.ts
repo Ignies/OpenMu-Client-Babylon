@@ -1,7 +1,7 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { t } from '../../i18n';
 import { Store } from '../../app/store';
-import { GameOptions } from '../options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 
 /** Getting back in after the connection drops: redial, send the same login, select the same
  * character. Guard rails: readme.md. */

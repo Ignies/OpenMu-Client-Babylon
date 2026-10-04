@@ -16,7 +16,7 @@ import { isMonsterSwingClip, monsterAttackState, monsterFlinches, monsterSwing }
 import { isPlayerBody } from '@/controllers/actors/playerObject';
 import { isTeleportSkill } from '../skills/skillCasting';
 import { meteoriteStormRunning, santaActionSound } from '@/controllers/sound/packetSounds';
-import { mountKind } from '../pets/pets';
+import { mountKind } from '@/controllers/pets';
 import { afterHeroRelease, playBowShotVisual, playBuffHits, playTargetedSkillVisual } from '@versions/shared/skills/skillVisuals';
 import { playSfx } from '@/controllers/sound/sfx';
 import { playTeleportAnimation } from '../skills/net';

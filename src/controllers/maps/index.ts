@@ -3,7 +3,6 @@ import { ENUM_WORLD } from '../../core/types';
 import type { World } from '../../ecs/world';
 import type { Emission } from '../fx/effectParticles';
 import type { ByWorld, MapLayer, PerWorld, Room, Spawn } from './layer';
-import { MAP_LAYERS } from '@versions/shared/maps/layers';
 
 export type { ByWorld, MapLayer, PerWorld, Room, Spawn } from './layer';
 
@@ -20,7 +19,7 @@ export type { ByWorld, MapLayer, PerWorld, Room, Spawn } from './layer';
  */
 class Maps implements Controller {
   readonly id = 'maps';
-  private readonly layers: MapLayer[] = [...MAP_LAYERS];
+  private readonly layers: MapLayer[] = [];
   private readonly byWorld = new Map<ENUM_WORLD, MapLayer>();
   private readonly effectOnlySets = new Map<MapLayer, ReadonlySet<number>>();
 
@@ -41,6 +40,12 @@ class Maps implements Controller {
         this.byWorld.set(world, layer);
       }
     }
+  }
+
+  /** The content's map list (`versions/shared/maps/all.ts`), in order, at boot. */
+  registerAll(layers: readonly MapLayer[]): void {
+    this.layers.push(...layers);
+    this.reindex();
   }
 
   /** Add a map at runtime (tools, experiments). Returns the unregister. */
@@ -389,6 +394,11 @@ class WorldMap<T> implements ReadonlyMap<ENUM_WORLD, T> {
 }
 
 export const maps = new Maps();
+
+/** Called by `versions/shared/maps/all.ts` at boot: every map entry, list order. */
+export function registerMaps(layers: readonly MapLayer[]): void {
+  maps.registerAll(layers);
+}
 
 // A hot update that reaches this module must reload the page: Vite would
 // otherwise re-execute it and hand later-loaded importers a second instance

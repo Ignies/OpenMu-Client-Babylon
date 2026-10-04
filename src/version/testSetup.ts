@@ -9,3 +9,5 @@ Object.defineProperty(globalThis.navigator, 'language', { value: 'en-US', config
 Object.defineProperty(globalThis.navigator, 'languages', { value: ['en-US'], configurable: true });
 
 await loadGameVersion(DEFAULT_VERSION_ID);
+// The shared maps, as boot.tsx hands them to the maps controller in the app.
+await import('@versions/shared/maps/all');

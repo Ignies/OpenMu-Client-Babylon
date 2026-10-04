@@ -5,7 +5,7 @@ import {
   isKey,
   WALK_KEY_CODES,
 } from '../../controllers/interface/keyBindings';
-import { GameOptions } from '../../modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import { ITEM_HOTKEY_CODES } from '../../modules/inventory/itemHotkeys';
 import { MuWindows } from '../../controllers/interface/windowManager';
 import { openSystemMenu } from '../../modules/session/sessionExit';

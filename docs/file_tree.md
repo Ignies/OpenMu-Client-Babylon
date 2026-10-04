@@ -41,18 +41,21 @@ controllers/       generic services; controllers.ts starts them, controller.ts i
   fx/              effects.spawn and every effect layer (sprites, particles, models, joints...)
   interface/       window registry (windows.ts), shared widgets (components/), hotkeys, cursor
   item_fx/         item materials, glow tiers, weapon trails
+  item_rules/      item stats, values, wire format, level looks, compare, worn slots, drop tier
+  pets/            what each pet and mount looks like and how it is drawn (PetSpec, mountKind)
   lighting/        light sources, sky, the skill light engine (skills.ts)
   loading/         loading gates; classic/ is the original loading screen
   maps/            map registry contract (the maps themselves are content)
   net/             sockets, encryption, packet facade, protocols, ping
   render/          model objects, prop batches, shadows, PBR, post passes (scenes/)
+  settings/        the player's settings (GameOptions): state, browser storage, the observable
   skills/          defineSkill, registerSkills and the skill visual engine (visuals.ts)
   sound/           buses, music, combat sounds, sound manager
   terrain/         terrain loading, grass, water, masks, minimap data
   weather/         rain and snow
 modules/           gameplay modules; each has net.ts (packets in) and its state and actions
   band chaos_mix character_select chat combat drops economy events friends gm guild guild_war
-  hero inventory items marketplace mu_helper npc_shop options party personal_shop pets quests
+  hero inventory marketplace mu_helper npc_shop options party personal_shop pets quests
   scope (objects in view) servers session skills social trade vault warp world (weather, fireworks)
   _shared/         helpers more than one module net uses
 ```
@@ -68,6 +71,7 @@ shared/            content any version can load
   ui/windows/<window>/      one folder per window: index.tsx draws, window.ts registers it
   ui/hud/<element>/         bottom bar, minimap, chat, buff bar, name tags...
   ui/pages/<page>/          login, server_select, character_select, preloader, world
+  ui/components/<piece>/    shared pieces that read a module (skill icon, skill tooltip, emoji text)
   maps/<map>/               one folder per map: spec, create, object classes
   monsters/<name>/          one folder per monster or npc: data (index.ts), model.ts when it has a look of its own
   items/                    item table, launcher arrows

@@ -29,8 +29,9 @@ One folder per map. Each folder exports one `MapLayer` (the contract in
   entities the map owns. It runs once per warp. It is always written as
   `world => import('./create').then(m => m.createX(world))`; a static import is an import cycle.
 - `reset()` drops what belonged to the map on a map change.
-- The `maps` controller (`src/controllers/maps/index.ts`) indexes `MAP_LAYERS` by world and
-  answers the renderer, terrain loader, weather and sound.
+- `all.ts` hands `MAP_LAYERS` to the `maps` controller (`registerMaps`); `src/app/boot.tsx` imports
+  it first (tests: `src/version/testSetup.ts`); the controller indexes it by world and answers the renderer,
+  terrain loader, weather and sound.
 
 A map folder:
 ```
@@ -64,10 +65,11 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
 ## Depends on / used by
 - uses: `@/controllers/maps` (contract, rooms), `@/controllers/terrain`, `@/controllers/render`,
   `@/controllers/fx`, `versions/shared/objects`, `versions/shared/monsters` (the Elf Soldier class)
-- used by: `src/controllers/maps/index.ts` (`MAP_LAYERS`), `src/controllers/maps/_template.ts`
+- used by: `all.ts` (registers `MAP_LAYERS` with `src/controllers/maps`), `_template.ts` (the copy-me
+  entry, moved here from the controller so it imports no content from there)
 
 ## Change it
-- add a map: copy `src/controllers/maps/_template.ts` to `<name>/index.ts`, add `spec.ts` and
+- add a map: copy `_template.ts` to `<name>/index.ts`, add `spec.ts` and
   `create.ts` as needed, then add `<name>Layer` to `layers.ts`. Each `ENUM_WORLD` may appear in
   one entry only.
 - a tile file is missing in the world folder: name a tile the folder has in that slot, so the

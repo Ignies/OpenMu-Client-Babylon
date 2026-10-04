@@ -12,7 +12,7 @@ import { heroCastSound, skillSound } from '@/controllers/sound/combat';
 import { hasSkillClip, skillClip, type CastContext } from '@/controllers/combat/skillClips';
 import { castTarget } from '@/controllers/combat/castTargets';
 import { skillStepIn } from '@/controllers/combat/skillMovement';
-import { SKILL_DELAY_MS } from '@/modules/skills/recipes';
+import { SKILL_DELAY_MS } from '@/controllers/combat';
 import { skillDefinition } from './skillsDatabase';
 import './skillVisuals';
 

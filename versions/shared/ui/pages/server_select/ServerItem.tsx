@@ -1,15 +1,7 @@
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
-import {
-  GAUGE_HEIGHT,
-  GAUGE_OFFSET_X,
-  GAUGE_OFFSET_Y,
-  GAUGE_WIDTH,
-  SERVER_BTN_HEIGHT,
-  SERVER_BTN_WIDTH,
-  SPRITE,
-  TEXT_COLOR,
-} from './layout';
+import { GAUGE_HEIGHT, GAUGE_OFFSET_X, GAUGE_OFFSET_Y, GAUGE_WIDTH, SERVER_BTN_HEIGHT, SERVER_BTN_WIDTH, SPRITE } from './layout';
+import { TEXT_COLOR } from '@/controllers/interface/components/mu_text';
 
 interface ServerItemProps {
   name: string;

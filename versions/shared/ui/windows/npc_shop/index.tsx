@@ -15,12 +15,12 @@ import {
   usedMask,
 } from '@/controllers/interface/components/item_grid';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
-import { isSellingBanned } from '@/modules/items/itemValue';
+import { isSellingBanned } from '@/controllers/item_rules';
 import { QuickItemActions } from '@/modules/inventory/quickItemActions';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuItemWindow, MuTableFrame } from '@/controllers/interface/components/mu_window';
-import { goldColor } from '@/modules/items/goldColor';
+import { goldColor } from '@/controllers/item_rules';
 import {
   BUTTON_FRAMES,
   BUTTON_HEIGHT,

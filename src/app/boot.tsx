@@ -1,3 +1,5 @@
+// The shared maps, handed to the maps controller before anything reads them (controllers import no content).
+import '@versions/shared/maps/all';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { App } from './App';
@@ -6,7 +8,7 @@ import './logic';
 // Content model classes register here, at boot, where no controller can reach (controllers import the Store, which imports logic.ts).
 import '@versions/shared/monsters/models';
 import { Store, UIState } from './store';
-import { GameOptions } from '../modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import { Social } from '../modules/social/social';
 import { Commands } from '../modules/chat/commands';
 import { GmPanel } from '../modules/gm/gmPanel';
@@ -34,8 +36,8 @@ import { setKeyProfile } from '../controllers/interface/keyBindings';
 import { installBrowserHotkeyGuard } from '../controllers/interface/browserHotkeys';
 import { SessionResume } from '../modules/session/sessionResume';
 import { reaction } from 'mobx';
-import { watchStateWarnings } from '../controllers/interface/stateWarnings';
-import { watchPageTitle } from '../controllers/interface/pageTitle';
+import { watchStateWarnings } from '../modules/hero/stateWarnings';
+import { watchPageTitle } from '../modules/servers/pageTitle';
 import {
   preloadPregameSprites,
   preloadWorldSprites,

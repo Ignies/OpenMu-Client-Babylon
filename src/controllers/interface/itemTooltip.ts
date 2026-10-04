@@ -25,11 +25,11 @@ import {
   type HeroStats,
   type ItemDef,
   type ItemStats,
-} from '../../modules/items/itemStats';
+} from '@/controllers/item_rules';
 import { itemBaseName } from '@versions/shared/items/itemsDatabase';
-import { itemLevelName } from '../../modules/items/itemLevelLook';
-import { learnableSkill } from '../../modules/skills/skillItems';
-import { skillDisplayName } from '../../modules/skills/skillNames';
+import { itemLevelName } from '@/controllers/item_rules';
+import { learnableSkill } from '@/controllers/item_rules';
+import { skillDisplayName } from '@/controllers/assets';
 
 /**
  * `RenderItemInfo` (ZzzInventory.cpp:2091) as data: the tooltip is a list

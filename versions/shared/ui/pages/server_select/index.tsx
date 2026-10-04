@@ -12,7 +12,8 @@ import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { ServerItem } from './ServerItem';
 import { DescriptionBar } from './DescriptionBar';
-import { DECO, GROUP_BASE_Y, GROUP_BTN_HEIGHT, GROUP_BTN_WIDTH, LEFT_GROUP_MAX, LEFT_GROUP_X, RIGHT_GROUP_MAX, RIGHT_GROUP_X, SERVER_BTN_HEIGHT, SERVER_BTN_X, SERVER_MAX, SPRITE, TEXT_COLOR, WIN_HEIGHT, WIN_WIDTH, serverListTop } from './layout';
+import { DECO, GROUP_BASE_Y, GROUP_BTN_HEIGHT, GROUP_BTN_WIDTH, LEFT_GROUP_MAX, LEFT_GROUP_X, RIGHT_GROUP_MAX, RIGHT_GROUP_X, SERVER_BTN_HEIGHT, SERVER_BTN_X, SERVER_MAX, SPRITE, WIN_HEIGHT, WIN_WIDTH, serverListTop } from './layout';
+import { TEXT_COLOR } from '@/controllers/interface/components/mu_text';
 
 type Server = { ServerId: number; LoadPercentage: number };
 

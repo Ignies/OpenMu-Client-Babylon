@@ -54,7 +54,7 @@ import {
 import { classFromAppearance } from '../controllers/actors/deserializeAppearance';
 import { formatMsgWinText, MsgWinCode, type MsgWinArg } from '../controllers/interface/msgWin';
 import { stringToBytes } from '../controllers/assets/download';
-import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH } from './consts';
+import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH } from '../modules/servers/serverAccounts';
 import {
   connectServerAddress,
   ServerConfig,
@@ -75,14 +75,14 @@ import {
 import { Item, World } from '../ecs/world';
 import { EventBus } from '../core/eventBus';
 import { Scalar } from '../controllers/render/babylon/exports';
-import { InventoryConstants } from '../modules/inventory/inventoryConstants';
+import { InventoryConstants } from '@/core/inventoryConstants';
 import { StatType } from '../modules/hero/characterStats';
 import { findFreeSlot, type Footprint } from '../modules/inventory/inventoryFit';
 import { jewelTargetError } from '../modules/inventory/jewelUpgrade';
 import { ItemGroups } from '@versions/shared/objects/enum';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { prefetchItemIcons } from '../controllers/assets/itemIconPack';
-import { ItemSerializer } from '../modules/items/itemSerializer';
+import { ItemSerializer } from '@/controllers/item_rules';
 import {
   isRepairBanned,
   isSellingBanned,
@@ -90,15 +90,16 @@ import {
   needsRepair,
   repairAllCost,
   repairCost,
-} from '../modules/items/itemValue';
+} from '@/controllers/item_rules';
 import {
   calcMaxDurability,
   classOf,
   itemDef,
   itemStats,
   type HeroStats,
-} from '../modules/items/itemStats';
-import { learnSkillError, learnableSkill } from '../modules/skills/skillItems';
+} from '@/controllers/item_rules';
+import { learnableSkill } from '@/controllers/item_rules';
+import { learnSkillError } from '@/modules/skills/skillItems';
 import { isHotbarSkill } from '../modules/skills/skillCasting';
 import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
 import {

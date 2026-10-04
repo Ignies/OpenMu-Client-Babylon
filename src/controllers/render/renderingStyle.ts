@@ -1,5 +1,5 @@
 import type { Effect } from './babylon/exports';
-import { GameOptions } from '../../modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import { lightingTier, tierIndex } from '../lighting/lightingQuality';
 import { devQueryNumber, devQueryNumbers } from '../../core/devSeams';
 import type { TextKey } from '../../i18n';

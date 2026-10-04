@@ -21,7 +21,7 @@ import {
   UI_STAGE_HEIGHT,
   UI_STAGE_WIDTH,
 } from '@/controllers/interface/components/ui_stage';
-import { TEXT_COLOR } from '../../pages/server_select/layout';
+import { TEXT_COLOR } from '@/controllers/interface/components/mu_text';
 import {
   BACK_SPRITE as MSG_BACK_SPRITE,
   BTN_BOTH_CANCEL_X,

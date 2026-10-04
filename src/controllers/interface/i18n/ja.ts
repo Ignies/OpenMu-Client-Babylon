@@ -27,10 +27,6 @@ export default {
   'stat.vitality': '体力',
   'stat.energy': 'エネルギー',
   'stat.command': '統率',
-  'warn.durability': '装備の耐久度が {percent}%',
-  'warn.inventoryFull': '所持品がいっぱいです',
-  'warn.noPotions': '回復ポーションがありません',
-  'warn.buffEnding': '{name} がまもなく切れます',
 
   'keys.minimap': 'ミニマップ',
   'keys.sessionStats': 'セッションパネル',

@@ -8,7 +8,7 @@ import { isFriendOnline } from '@/modules/friends/friendList';
 import { Store } from '@/app/store';
 import { uiClick } from '@/controllers/sound/sfx';
 import { useWindowChrome } from '@/controllers/interface/components/mu_window/useWindowChrome';
-import { EmojiText } from '@/controllers/interface/components/emoji_text';
+import { EmojiText } from '../../components/emoji_text';
 
 /**
  * `CUIChatWindow`, folded into one window with a tab per room the way the

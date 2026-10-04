@@ -5,7 +5,7 @@ import {
   type Camera,
   type Scene,
 } from '../render/babylon/exports';
-import { GameOptions } from '../../modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import {
   directLightGain,
   pbrMaterialsOn,

@@ -19,8 +19,7 @@ Also the guild mark (emblem) codec. It has no packet handlers of its own; the ne
 - `Social.trackSelfDefense(text)`, `Social.isSelfDefenseActive(name)`.
 - `Social.reset()`: clears everything per character.
 - `MAX_PARTY_MEMBERS`, `INVITE_RANGE_TILES`, `GUILD_SECURITY_CODE_MAX`, `GuildTab`.
-- `guildMark.ts`: `GUILD_MARK_SIZE`, `GUILD_MARK_PALETTE`, `unpackGuildMark`, `packGuildMark`,
-  `isEmptyGuildMark`, `guildMarkDataUrl(packed)`.
+- The guild mark bitmap helpers are `src/core/guildMark.ts` (pure; the actors' guild flag reads them).
 
 ## How it works
 - `Social` is a mobx singleton covering `CNewUIChatLogWindow` / `CNewUIChatInputBox`,
@@ -41,7 +40,7 @@ Also the guild mark (emblem) codec. It has no packet handlers of its own; the ne
   `RequestAllianceList`, `RemoveAllianceGuildRequest`, `GuildWarResponse`.
 
 ## Depends on / used by
-- uses: `chat/` (log helpers, emojis, item links, `Commands`), `hero/emotes.ts`, `options/gameOptions.ts`,
+- uses: `chat/` (log helpers, emojis, item links, `Commands`), `hero/emotes.ts`, `controllers/settings`,
   `Store`, `controllers/net` (chat wire, round trip), `controllers/interface/nameTags`, `controllers/sound`.
 - used by: nearly every module (system lines), `party`, `guild`, `guild_war`, `chat`, `friends`, `band`,
   `hero/net.ts` (`reset`), `ecs/systems/skillCastSystem.ts`, `controllers/actors/guildFlag.ts` and
@@ -54,7 +53,7 @@ Also the guild mark (emblem) codec. It has no packet handlers of its own; the ne
 - add a party or guild action: a method in `social.ts` that builds the packet and calls `Store.sendToGS`.
 - add party or guild state: a field here (register it in `makeObservable` and clear it in `reset`);
   the handler that fills it goes in `party/net.ts` or `guild/net.ts`.
-- change the mark palette or format: `guildMark.ts`.
+- change the mark palette or format: `src/core/guildMark.ts`.
 
 ## Tests
 - none yet.

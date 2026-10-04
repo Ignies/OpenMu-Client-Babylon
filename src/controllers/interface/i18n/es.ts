@@ -27,10 +27,6 @@ export default {
   'stat.vitality': 'Vitalidad',
   'stat.energy': 'Energía',
   'stat.command': 'Mando',
-  'warn.durability': 'Durabilidad del equipo al {percent}%',
-  'warn.inventoryFull': 'El inventario está lleno',
-  'warn.noPotions': 'No quedan pociones de vida',
-  'warn.buffEnding': '{name} está a punto de acabar',
 
   'keys.minimap': 'Minimapa',
   'keys.sessionStats': 'Panel de sesión',

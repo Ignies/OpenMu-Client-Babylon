@@ -6,6 +6,7 @@ windows themselves are content in `versions/shared/ui/` (see
 [docs/content.md](../../../docs/content.md)).
 
 ## Public API
+- `index.ts`: a small door (`MuWindows`); most readers still import their file directly (baselined).
 - `windows.ts`: `defineWindow({ id, slot, order, component })`, `registerWindows(defs)` (a later
   def with the same id replaces the earlier one), `windowsIn(slot)` (stacking order). Slots:
   `world` (on the 3D view, stays up when the interface is hidden) and `hud`.
@@ -14,8 +15,8 @@ windows themselves are content in `versions/shared/ui/` (see
 - `components/`: shared widgets. Frames and text: `mu_window` (item window, table frame),
   `mu_frame`, `msg_box_frame`, `mu_text`, `mu_number`,
   `mu_button`, `mu_sprite`, `mu_logo`, `mu_flag`. Items: `item_grid`, `item_icon`, `item_search`,
-  `item_tooltip`, `picked_item`, `chat_item_link`. Skills: `skill_icon`, `skill_tooltip`. Other:
-  `msg_window`, `game_cursor`, `world_label`, `emoji_text`, `reconnect_overlay`,
+  `item_tooltip`, `picked_item`, `chat_item_link` (the caller hands in the label). Text: `mu_text`
+  also holds `TEXT_COLOR`, the pre-game and dialog colours. Other: `msg_window`, `game_cursor`, `world_label`,
   `ui_stage` (the 640x480 stage scale).
 - `keyBindings.ts`: `KeyBindings`, `keyFor`, `isKey`, `actionOfKey`, `setKeyBinding`,
   `setKeyProfile`, `WALK_KEYS`; `browserHotkeys.ts`: `installBrowserHotkeyGuard`,
@@ -24,8 +25,7 @@ windows themselves are content in `versions/shared/ui/` (see
 - `nameTags.ts`: name balloon lifetimes and colours; `screenPositionBus.ts`: per-entity screen
   positions; `slideHelp.ts`: `SlideHelp`; `msgWin.ts`: message box codes and text.
 - `hooks/`: `useEventBus`, `usePositionOnScreen`, `useRenderId`, `useVersionUi`.
-- `mobile.ts` (`isMobileDevice`, `useIsMobile`), `hudFormat.ts`, `pageTitle.ts`
-  (`watchPageTitle`), `stateWarnings.ts` (`watchStateWarnings`), `tokens.less` (web tokens).
+- `mobile.ts` (`isMobileDevice`, `useIsMobile`), `hudFormat.ts`, `tokens.less` (web tokens).
 
 ## How it works
 - `versions/shared/ui/index.ts` registers every `window.ts` under `windows/` and `hud/` by glob,
@@ -45,8 +45,11 @@ windows themselves are content in `versions/shared/ui/` (see
   per-item inventory scale from `RenderObjectScreen` (ZzzInventory.cpp:9308-10090). Do not edit.
 - `keyBindings.ts`: each action maps to a `KeyboardEvent.code`, stored in localStorage per
   character (`setKeyProfile`), rebound from the Options Keys tab.
-- `stateWarnings.ts`: watches the store for low durability, a full grid, the last potion and a
-  buff running out, and posts one notice per crossing (option `stateWarnings`).
+- Dependency direction (a controller never imports a module): what read module state left. The
+  skill icon and tooltip, `emoji_text` and `reconnect_overlay` went up to
+  `versions/shared/ui/components/`; `stateWarnings.ts` to `modules/hero/`, `pageTitle.ts` to
+  `modules/servers/`; `chat_item_link` takes its label as a prop; `TEXT_COLOR` came down from
+  `pages/server_select/layout.ts` into `mu_text`; `stableKeyOf` (item grid) is `core/stableKey.ts`.
 
 ### Notes
 - `browserHotkeys.ts`: Ctrl plus a game key is a browser command (Ctrl+W closed the tab mid
@@ -68,9 +71,9 @@ windows themselves are content in `versions/shared/ui/` (see
   (`OpenSlideTextFile`) is not shipped, so the help lane is packet-only.
 
 ## Depends on / used by
-- uses: `app/store`, `core` (event bus, storage), `assets` (sprites, item icon pack), `i18n`,
-  `version`, many modules (items, skills, options, inventory). The module imports are old
-  exceptions listed in `tools/checks/baselines/deps.json`.
+- uses: `app/store` (old exceptions listed in `tools/checks/baselines/deps.json`), `core` (event bus,
+  storage, `stableKey`), `assets` (sprites, item icon pack), `item_rules`, `settings`, `pets`, `i18n`,
+  `version`.
 - used by: `versions/shared/ui` (every window), `versions/<id>/ui`, `app` (boot, App, store),
   ECS systems (name tags, screen positions, input), several modules, `loading/classic`.
 

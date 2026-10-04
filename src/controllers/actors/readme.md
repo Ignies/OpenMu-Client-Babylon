@@ -13,7 +13,7 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 - `resolveModelFactory(type)`, `isKnownObjectType(type)` (`modelFactoryPerId.ts`): registered
   classes first, then the engine default the type's monster folder asks for.
 - `registerModelClass(types, Class)` (`modelClasses.ts`): content's own model classes.
-- `ModelObject` (forwarded from render, whose door exports it as a type only): the base of the
+- `ModelObject` (forwarded from render): the base of the
   plain-model NPC classes in content.
 - Monster models from each monster's folder (through the monsters controller): `monsterModelFile`,
   `monsterModelTypeOfNpc`, `monsterScaleOf`, `monsterHiddenMesh`, `hasMonsterModel`;
@@ -82,8 +82,13 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 
 ## Depends on / used by
 - uses: `render` (`ModelObject`, bone links), `assets`, `anim`, `fx`, `item_fx`, `lighting`,
-  `monsters` (the folders' data), `core/types`, `ecs/world`. Baselined exceptions
-  (`tools/checks/baselines/deps.json`): `modules/hero|pets|social|drops`, `app/store`.
+  `monsters` (the folders' data), `core/types`, `core/guildMark`, `ecs/world`, `pets` (pet specs),
+  `item_rules` (`archangelWeapon`), `@versions/shared/items/petItems`. Baselined exceptions
+  (`tools/checks/baselines/deps.json`): `app/store`.
+- Dependency direction: `BaseClass` / `getBaseClass` come from `core/types` (characterStats only
+  re-exports them); the pet specs became `controllers/pets`, the drop model proxy
+  `item_rules/dropModelProxy.ts`, the guild mark `core/guildMark.ts`, the pet numbers
+  `versions/shared/items/petItems.ts`. Each new door is light, so module load order is unchanged.
 - used by: `ecs/systems`, `modules/_shared/net_helpers.ts`, `modules/scope`,
   `modules/character_select`, `modules/drops`, `modules/gm/admin/skins.ts`, `app/store.ts`,
   `sound`, `item_fx/weaponBlur.ts`, `anim`, `assets/modelLoader.ts`, monster, npc, map and skill
@@ -116,7 +121,7 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 - `npcLooks.test.ts`: NPCs drawn as the original builds them (Hanzo's scale, the 0.9 default and who sets its own, the plain-model NPCs,
   Zyro, the Cursed Wizard's kit, the plate helpers), each with its ZzzCharacter.cpp lines.
 - `skinTexture.test.ts`: skin / hair / level and hide texture names.
-- Also from `modules/items/`: `portedItems`, `questItemLink`, `weaponAttack` tests.
+- Also from `controllers/item_rules/`: `portedItems`, `questItemLink`, `weaponAttack` tests.
 
 ## Notes
 

@@ -23,7 +23,7 @@ store ([../economy/readme.md](../economy/readme.md)); this folder only has the h
 - `TradeFinished`: the window closes; success, cancel, full bag, timeout or untradable item line.
 
 ## Depends on / used by
-- uses: `economy/economy.ts`, `items/itemSerializer.ts`, `social/social.ts` (`errorMessage`), `chat/chat.ts`
+- uses: `economy/economy.ts`, `controllers/item_rules/itemSerializer.ts`, `social/social.ts` (`errorMessage`), `chat/chat.ts`
   (`cleanName`), `src/i18n`.
 - used by: `src/app/logic.ts`. The window is `versions/shared/ui/windows/trade/`; the request box and the
   zen box are in `versions/shared/ui/windows/economy_prompts/`.

@@ -4,6 +4,7 @@ How items look on a model: the shared item materials (Classic Standard and Enhan
 original client's item passes, the item glow tiers and the weapon swing trails.
 
 ## Public API
+- `index.ts` (the door, small on purpose): `legacyItemEffectsOn`, `improvedItemEffectsOn` for the pets controller.
 - `itemEffectMode.ts`: `ItemEffectMode` (Off, Legacy, Both, Improved), `itemEffectMode()`,
   `legacyItemEffectsOn()`, `improvedItemEffectsOn()`, `legacyRenderLevel()`, `capItemLevel(level)`,
   `itemEffectSignature()`, `ITEM_EFFECT_MODE_LABEL_KEYS` / `_MAX` (the options slider).
@@ -79,11 +80,11 @@ original client's item passes, the item glow tiers and the weapon swing trails.
 - uses: `render` (Babylon exports, `pbrMaps`, `materialQuality`, `renderingStyle`,
   `frameSnapshot`), `lighting` (light model, tiers, key rig, clouds, tint, point light pool),
   `weather/snowCaps`, `assets/mu/sprites`, `actors` (hand bones, weapon class), `fx` (types),
-  `modules/options/gameOptions`, `version`.
+  `settings`, `version`.
 - used by: `assets/modelLoader.ts` (materials), `render/propBatches.ts` (`packBodyLight`),
   `render/scenes` (sceneLook, materialDebug), `actors`, `fx/itemAura.ts`, `fx/itemCrackle.ts`,
   `lighting/items.ts`, the appearance, item glow, skill cast and weapon trail ECS systems,
-  `modules/pets`, the options window.
+  `controllers/pets`, the options window.
 
 ## Change it
 - change a legacy colour: the tables in `itemLegacyEffects.ts`.

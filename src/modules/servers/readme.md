@@ -13,12 +13,16 @@ connect server's own list (`Store.serverList`) is filled by `session/net.ts`.
   `gameServerTarget(returnedIp)`, types `ServerProfile`, `PublishedGameServer`.
 - `ServerList`, `refreshServerList()`, `parseServerList(text)`: the published list.
 - `ServerAccounts`: `list`, `of`, `select`, `add`, `update`, `forget`, `record(worldId, login)`.
+  `MAX_USERNAME_LENGTH` / `MAX_PASSWORD_LENGTH` (`serverAccounts.ts`, were `app/consts.ts`): the login
+  fields, read by the Store and the login pages.
 - `ServerProbe`: `check(profiles)`, `of(id)` -> `Reach` (`unknown`, `checking`, `up`, `down`).
 - `registerUrl()`, `registerApiUrl()`, `marketApiUrl()`, `serverManifestUrl()`.
 - `serverSetting(key)`: one setting of the world being played (`ServerSettings`, defaults
   `ORIGINAL_SETTINGS`); `loadServerManifest(profile)`, `parseServerManifest(raw)`.
   `onWorldEntered(fn)`: runs on `markPlayed`.
 - `validateSignup(signup)` and the length limits (`registerRules.ts`); `isReservedName(name)`.
+- `watchPageTitle()` (`pageTitle.ts`, was `controllers/interface/`): the one writer of `document.title`,
+  the world's name from the character list on; `boot.tsx` starts it.
 
 ## How it works
 - A profile is a proxy address (`wsUrl`) plus the connect server as the proxy reaches it
@@ -39,7 +43,7 @@ connect server's own list (`Store.serverList`) is filled by `session/net.ts`.
 - uses: `core/localStorage`, `app/consts`, `src/version` (`versionByTag`).
 - used by: `src/app/store.ts`, `src/app/boot.tsx`, `src/app/main.tsx`, `session/net.ts`,
   `marketplace/api.ts`, `gm/admin/feed.ts`,
-  `controllers/interface/pageTitle.ts`, `controllers/net/sockets/chatRoomSocket.ts`, the pages
+  `pageTitle.ts`, `chat/chatRooms.ts` (the chat socket's address), the pages
   `versions/shared/ui/pages/preloader/`, `pages/server_select/`, `pages/login/` and
   `pages/character_select/CharMakeWin.tsx`, and `register/`.
 

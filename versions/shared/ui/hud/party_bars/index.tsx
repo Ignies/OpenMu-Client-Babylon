@@ -7,7 +7,7 @@ import { Social } from '@/modules/social/social';
 import { useRenderId } from '@/controllers/interface/hooks';
 import { onScreenPosition } from '@/controllers/interface/screenPositionBus';
 import type { Entity } from '@/ecs/world';
-import { stableKeyOf } from './stableKey';
+import { stableKeyOf } from '@/core/stableKey';
 
 type PartyEntity = With<Entity, 'objectNameInWorld' | 'screenPosition'>;
 

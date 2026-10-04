@@ -5,7 +5,7 @@ import {
   type AttackPose,
 } from '../../controllers/actors/weaponClass';
 import { skillDefinition, type SkillDefinition } from '@versions/shared/skills/skillsDatabase';
-import { masterBase } from './skillAliases';
+import { masterBase } from '@/controllers/combat';
 import {
   castSwing,
   castsAsSpell,
@@ -14,8 +14,8 @@ import {
   skillClip,
   swordCountRule,
   type CastContext,
-} from '../../controllers/combat/skillClips';
-import { castsOnSelf } from '../../controllers/combat/castTargets';
+} from '@/controllers/combat';
+import { castsOnSelf } from '@/controllers/combat';
 
 /**
  * Client-side casting rules. The wire format is decided by the OpenMU skill

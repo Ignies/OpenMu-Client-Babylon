@@ -1,13 +1,6 @@
 import { CharacterClassNumber } from '../../core/types';
 import { GetByteValue } from '../assets/download';
-import {
-  DEMON,
-  PET_PANDA,
-  PET_RUDOLF,
-  PET_SKELETON,
-  PET_UNICORN,
-  SPIRIT_OF_GUARDIAN,
-} from '../../modules/pets/petConstants';
+import { DEMON, PET_PANDA, PET_RUDOLF, PET_SKELETON, PET_UNICORN, SPIRIT_OF_GUARDIAN } from '@versions/shared/items/petItems';
 
 type Item = {
   num: number;

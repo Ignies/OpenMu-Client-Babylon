@@ -12,7 +12,7 @@ import {
 import { MuText } from '@/controllers/interface/components/mu_text';
 import { DEFAULT_SCALE } from '@/controllers/interface/windowManager';
 import { UI_STAGE_HEIGHT } from '@/controllers/interface/components/ui_stage';
-import { stableKeyOf } from '../party_bars/stableKey';
+import { stableKeyOf } from '@/core/stableKey';
 
 /**
  * `RenderNotices`: the notice stack, centred, at y = 300 + 13·i of the

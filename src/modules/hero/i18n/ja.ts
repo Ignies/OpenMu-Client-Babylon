@@ -40,4 +40,8 @@ export default {
   'notify.fruitFloor': '{stat} はこれ以上下げられません',
   'notify.fruitEquipped': 'そのステータスを必要とする装備を先に外してください',
   'notify.fruitNotNow': '今はこの果実を使えません',
+  'warn.durability': '装備の耐久度が {percent}%',
+  'warn.inventoryFull': '所持品がいっぱいです',
+  'warn.noPotions': '回復ポーションがありません',
+  'warn.buffEnding': '{name} がまもなく切れます',
 } satisfies Partial<Record<keyof typeof en, string>>;

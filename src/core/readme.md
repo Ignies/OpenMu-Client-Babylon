@@ -6,9 +6,11 @@ pathfinding. Nothing here knows about a skill, a window or a map.
 ## Public API
 - `types.ts`: `ENUM_WORLD` (map ids), `PlayerClass`, `CharacterClassNumber`, `IsCharacterFemale`, `BaseClass` and
   `getBaseClass` (a class number's first-tier class; `modules/hero/characterStats.ts` re-exports them).
-- `EventBus` (`eventBus/index.ts`): the global `mitt` bus. `eventBus/events.ts` types every event:
-  one per connect-server and game-server packet name (payload `DataView`) plus client events
-  (`wsOpened`, `requestWarp`, `objectEffect`, ...).
+- `EventBus` (`eventBus/index.ts`): the global `mitt` bus. `eventBus/events.ts` types every event as
+  the `EventMap` interface: core's own client events (`wsOpened`, `requestWarp`, ...); the packet
+  events (one per connect-server and game-server packet name, payload `DataView`) are added by
+  declaration merging in `controllers/net/packets.ts`, the entity events (`objectDamaged`,
+  `objectEffect`) in `ecs/world.ts`. `Events` is the mapped form mitt takes.
 - `createPathfinding({ width, height })` (`pathfinding.ts`): a tile grid over `astar.ts` with
   `search`, `posToIndex`, `applyClosedPatch` and string save / load. Used by `ecs/world.ts`.
 - `createAttributeSystem()` (`attributeSystem.ts`): the per-entity stat bag (health, mana, speeds,
@@ -16,6 +18,13 @@ pathfinding. Nothing here knows about a skill, a window or a map.
 - `turnAngle.ts`: `normalizeAngle`, `signedAngleDelta`, `turnAngle`, `approachAngle`,
   `createAngleDeg`, `rotationByteOf`, from `ZzzAI.cpp` (`TurnAngle2`, `CreateAngle`, ...).
 - `binaryUtils.ts`: byte helpers (`castToByte`, `ArrayCopy`, `GetByteValue`, ...).
+- `stableKeyOf(object)` (`stableKey.ts`): a stable React key for an object with no id (entities,
+  notice lines, items); the item grid widget and the HUD share it.
+- `guildMark.ts`: `GUILD_MARK_SIZE`, `GUILD_MARK_PALETTE`, `unpackGuildMark`, `packGuildMark`,
+  `isEmptyGuildMark`, `guildMarkDataUrl(packed)`: the 8x8 guild mark (`CreateGuildMark`,
+  ZzzInventory.cpp:11204). Pure, so the guild flag (actors), the guild window and the module share it.
+- `InventoryConstants` (`inventoryConstants.ts`): OpenMU's inventory slot numbers and grid sizes. Pure, so
+  the item rules controller, every module and the cash shop server share it.
 - `devQuery`, `devQueryNumber`, `devVitalPercent` (`devSeams.ts`): URL seams, `null` outside dev.
 - `LocalStorage` (`localStorage.ts`): `localStorage` access that never throws.
 - `Rand` (`rand.ts`), `MathUtils.AngleQuaternion` (`mathUtils.ts`), `wait` (`utils.ts`).
@@ -43,13 +52,14 @@ pathfinding. Nothing here knows about a skill, a window or a map.
 - `eventBus/index.ts` declines hot updates so Vite never makes a second bus.
 
 ## Depends on / used by
-- uses: `mitt`, `nanoid`. Type-only or Babylon imports in `eventBus/events.ts`, `mathUtils.ts`
-  and `pathfinding.ts` break the `core-is-standalone` rule; they are listed in
-  `tools/checks/baselines/deps.json` and may only shrink.
+- uses: `mitt`, `nanoid`, `miniplex` and `@babylonjs/core` maths (`mathUtils.ts`, `pathfinding.ts`,
+  `eventBus/events.ts`, straight from the package rather than `render/babylon/exports.ts`). Nothing
+  of the game: the events that name a packet or an entity are merged in from their owners.
 - used by: everything (`types.ts` and `EventBus` most).
 
 ## Change it
-- add a client event: add its name and payload type to `Events` in `eventBus/events.ts`.
+- add a client event: add its name and payload type to `EventMap` in `eventBus/events.ts` (or, if its
+  payload is an owner's type, in that owner's `declare module '@/core/eventBus/events'` block).
 - add a map id: `ENUM_WORLD` in `types.ts` (the map itself is content, see
   [../../docs/content.md](../../docs/content.md)).
 - change how the hero paths: `astar.ts` (search) or `pathfinding.ts` (grid); keep

@@ -33,7 +33,7 @@ import {
   KALIMA_WORLDS,
   assetWorldNum,
 } from '@/controllers/assets/worldAssets';
-import { GameOptions } from '@/modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings/gameOptions';
 import { bloodCastleTimer } from '@/modules/events/bloodCastle';
 import { chaosCastleTimer } from '@/modules/events/chaosCastle';
 import type { ENUM_WORLD } from '@/core/types';

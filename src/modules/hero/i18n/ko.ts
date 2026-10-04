@@ -40,4 +40,8 @@ export default {
   'notify.fruitFloor': '{stat}은(는) 더 내릴 수 없습니다',
   'notify.fruitEquipped': '이 스탯이 필요한 장비를 먼저 벗으세요',
   'notify.fruitNotNow': '지금은 이 열매를 쓸 수 없습니다',
+  'warn.durability': '장비 내구도 {percent}%',
+  'warn.inventoryFull': '인벤토리가 가득 찼습니다',
+  'warn.noPotions': '회복 물약이 없습니다',
+  'warn.buffEnding': '{name}이(가) 곧 끝납니다',
 } satisfies Partial<Record<keyof typeof en, string>>;

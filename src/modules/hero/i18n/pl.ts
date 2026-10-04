@@ -39,4 +39,8 @@ export default {
   'notify.fruitFloor': '{stat} nie może już spaść niżej',
   'notify.fruitEquipped': 'Najpierw zdejmij przedmioty wymagające tej statystyki',
   'notify.fruitNotNow': 'Nie możesz teraz użyć tego owocu',
+  'warn.durability': 'Wytrzymałość ekwipunku: {percent}%',
+  'warn.inventoryFull': 'Ekwipunek jest pełny',
+  'warn.noPotions': 'Brak mikstur leczących',
+  'warn.buffEnding': 'Zaraz wygasa: {name}',
 } satisfies Partial<Record<keyof typeof en, string>>;

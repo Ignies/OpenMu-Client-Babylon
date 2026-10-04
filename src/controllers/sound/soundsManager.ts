@@ -3,7 +3,9 @@ import { Sound } from '@babylonjs/core/Audio/sound';
 import { SoundTrack } from '@babylonjs/core/Audio/soundTrack';
 import { Engine, PointerEventTypes, type Scene } from '../render/babylon/exports';
 import { isMusicKey, soundUrl, type Sounds } from './recipes';
-import { ENABLE_BG_MUSIC } from '../../app/consts';
+
+/** Dev switch: false keeps the background music silent (was `app/consts.ts`). */
+const ENABLE_BG_MUSIC = true;
 
 /**
  * The mixer: two Babylon `SoundTrack`s (music / effects) and one `Sound` per catalogue key,

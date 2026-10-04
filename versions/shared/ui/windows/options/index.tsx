@@ -10,7 +10,7 @@ import {
   defaultGameOption,
   setGameOption,
   type GameOptions as GameOptionsType,
-} from '@/modules/options/gameOptions';
+} from '@/controllers/settings';
 import { invalidateShadowState } from '@/controllers/render/objectShadow';
 import { installApp } from '@/app/pwaInstall';
 import { reloadMapObjects } from '@/controllers/terrain/loadMapIntoScene';

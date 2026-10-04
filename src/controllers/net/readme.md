@@ -8,11 +8,13 @@ readouts. Handlers for packets live in `src/modules/<module>/net.ts`, not here.
 - `sockets/createSocket.ts`: `createSocket({ wsAddress, tcpIP, tcpPort })` opens a game or
   connect-server socket and emits each parsed packet on `EventBus` by packet name, plus
   `wsOpened` / `wsClosed` / `wsError`.
-- `sockets/chatRoomSocket.ts`: `openChatRoomSocket(options)`, one ChatServer room connection.
+- `sockets/chatRoomSocket.ts`: `openChatRoomSocket(options)`, one ChatServer room connection; the
+  caller hands in the ws proxy origin (`wsAddress`), as for `createSocket`.
 - `encryption/`: `SimpleModulusEncryptor` / `Decryptor` / `Keys`, `Xor32Encryptor` /
   `Decryptor`, `Xor3Byte`, `DefaultKeys`.
 - `packets.ts`: `ServerToClientPackets`, `ClientToServerPackets`, `ConnectServerPackets`,
-  `ChangeMapServerInfoPacket` of the running version.
+  `ChangeMapServerInfoPacket` of the running version. It also merges one bus event per connect-server
+  and game-server packet name (payload `DataView`) into `EventMap` (`core/eventBus/events.ts`).
 - `wireUtils.ts`: packet framing (`getPacketSize`, `getPacketHeaderSize`, `setPacketSize`, ...)
   and numeric casts, with no Babylon or DOM.
 - `protocols/`: `bandProtocol`, `pingProtocol`, `adminProtocol`, `escrowWire`, `chatRoomProtocol`,
@@ -60,10 +62,9 @@ readouts. Handlers for packets live in `src/modules/<module>/net.ts`, not here.
 
 ## Depends on / used by
 - uses: `core` (event bus, binary utils), `version` (packet set, encryption keys, variant rank),
-  `assets/download` (framing re-exports), `fx` (ping marker), `app/store` (`pingNet` only),
-  `modules/servers/serverConfig` (`chatRoomSocket` only).
+  `assets/download` (framing re-exports), `fx` (ping marker), `app/store` (`pingNet` only).
 - used by: `app/store.ts`, `app/logic.ts`, module nets (session, band, chat, social,
-  marketplace, gm, events), `core/eventBus/events.ts`, `lighting/clouds.ts`,
+  marketplace, gm, events), `lighting/clouds.ts`,
   `weather/snowCover.ts`, `render/perfOverlay.ts`, `fx/ping.ts`, the pointer input and ambient
   particle systems, the gm panel window, and outside `src/`: `proxy/`, `marketplace/`,
   `cashshop/`.

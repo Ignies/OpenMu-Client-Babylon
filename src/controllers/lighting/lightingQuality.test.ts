@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import type { Camera, PostProcess } from '../render/babylon/exports';
-import { GameOptions, setGameOption } from '../../modules/options/gameOptions';
+import { GameOptions, setGameOption } from '../settings/gameOptions';
 import { MSAA_HEAD_ONLY, sceneTargetSamples } from './lightingQuality';
 
 const pass = (): PostProcess => ({}) as PostProcess;
