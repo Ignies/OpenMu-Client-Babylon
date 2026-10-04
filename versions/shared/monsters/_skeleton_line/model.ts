@@ -11,7 +11,7 @@ import {
 import { loadGLTF } from '@/controllers/assets';
 import { PlayerObject } from '@/controllers/actors';
 import { CharacterClassNumber } from '@/core/types';
-import { skeletonShatter } from '@/controllers/fx';
+import { skeletonShatter } from '@/controllers/fx/deathVisuals';
 import { registerModelClass } from '@/controllers/actors';
 
 /**

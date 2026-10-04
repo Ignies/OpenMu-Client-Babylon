@@ -5,7 +5,7 @@ import {
   Vector3,
   type Scene,
 } from '../render/babylon/exports';
-import { loadEffectTexture } from './moveTargetEffect';
+import { loadEffectTexture } from './effectTexture';
 import type { ItemVisualTier } from '../item_fx/itemVisualTier';
 import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
 import { reportLoadFailure } from '../assets';

@@ -11,7 +11,7 @@ import {
 } from '../render/babylon/exports';
 import type { AmbientSchedule } from '../weather/ambientSchedule';
 import { clipToRoom } from '../weather/roomClip';
-import { loadEffectTexture } from './moveTargetEffect';
+import { loadEffectTexture } from './effectTexture';
 import { reportLoadFailure } from '../assets';
 
 /**

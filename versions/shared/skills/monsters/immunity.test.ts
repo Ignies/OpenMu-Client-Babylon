@@ -13,7 +13,7 @@ vi.mock('@/controllers/sound', async orig => ({
   ...(await orig<object>()),
   playSfx: (key: string) => seen.sounds.push(key),
 }));
-vi.mock('@/controllers/fx', async orig => ({
+vi.mock('@/controllers/fx/deathVisuals', async orig => ({
   ...(await orig<object>()),
   spawnCrystalShards: () => void seen.shards++,
 }));

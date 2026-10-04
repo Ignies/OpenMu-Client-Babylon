@@ -1,5 +1,5 @@
 // Usage: bun tools/restructure/move.ts <moves.json> [--dry-run]
-// See tools/restructure/readme.md.
+// See docs/how_to/move_files.md.
 import { execSync } from 'child_process';
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'fs';
 import { dirname } from 'path';

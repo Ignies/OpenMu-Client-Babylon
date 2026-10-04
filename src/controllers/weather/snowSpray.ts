@@ -5,7 +5,7 @@ import {
   Vector3,
   type Scene,
 } from '../render/babylon/exports';
-import { loadEffectTexture } from '../fx/moveTargetEffect';
+import { loadEffectTexture } from '../fx/effectTexture';
 import { GameOptions } from '@/controllers/settings';
 import { reportLoadFailure } from '../assets';
 

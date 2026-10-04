@@ -26,7 +26,8 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 - NPC tables, live views of the monster folders kept for the readers that list them:
   `NPC_MODEL_TABLE`, `TRAP_MODEL_TABLE`, `npcModelFile` (`npcModelTable.ts`, with `folderTable`),
   `GEARED_NPC_TABLE`, `TRANSFORMED_NPC_TABLE` (`playerNpcTables.ts`).
-- `transformedBody.ts`: `transformedBodyFactory`, `characterSkinBody(skin)`, `monsterClipFor`.
+- `transformedBody.ts`: `transformedBodyFactory`, `characterSkinParts`, `monsterClipFor`.
+  `skinBody.ts`: `characterSkinBody(skin)` (its own file: it resolves monster models).
 - `deserializeAppearance.ts`: `deserializeAppearance`, `deserializeAppearanceExtended`,
   `APPEARANCE_EXTENDED_LENGTH`, `classFromAppearance`, `emptyAppearance`, `withAppearanceClass`,
   `isAppearanceBlank`, `itemLevelFromGlow`.

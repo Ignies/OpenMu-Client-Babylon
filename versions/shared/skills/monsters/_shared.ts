@@ -1,5 +1,6 @@
 import { Vector3 } from '@/controllers/render/babylon/exports';
-import { entityPos, spawnCrystalShards, type RGB } from '@/controllers/fx';
+import { entityPos, type RGB } from '@/controllers/fx';
+import { spawnCrystalShards } from '@/controllers/fx/deathVisuals';
 import { COMBAT_BUS, playSfx } from '@/controllers/sound';
 import { monsterRegistry } from '@/controllers/monsters';
 import type { SkillCancel } from '@/controllers/skills';

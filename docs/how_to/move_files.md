@@ -16,16 +16,10 @@
 6. Restart the dev server after a big move: a running Vite can keep two copies of a controller
    singleton, which shows up as unlit, black models until the page is reloaded from a fresh server.
 
-## Move Store members to a module
+## After a codemod
 
-`bun tools/restructure/storeSplit.ts map.json [--dry-run]` rewrites `Store.<member>` to its new home
-and moves named imports of `app/store.ts` (types, enums) to the file that exports them now:
-
-```json
-{ "members": { "playerData": { "expr": "Hero", "name": "Hero", "door": "src/modules/hero/index.ts",
-  "home": "src/modules/hero/state.ts" } },
-  "exports": { "UIState": { "door": "src/controllers/interface/uiState.ts" } } }
-```
-
-Files inside the home's folder import the home file, the rest the door. Move the member's code by
-hand first; the tool also rewrites `this.<member>` left in the store class.
+- A file that moved into a controller's subfolder is private there: route outside imports through
+  the folder's `index.ts` with `bun tools/restructure/facadeImports.ts <controller>`.
+- `bun tools/restructure/mergeImports.ts` merges the duplicate imports a rewrite leaves behind.
+- `bun run check` also fails on a new import cycle; see
+  [code_style.md](../guidelines/code_style.md) for how to break one.

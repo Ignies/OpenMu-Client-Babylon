@@ -13,7 +13,7 @@ import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { addNpcToScope, convertDirectionToAngle, isDeadMonster, removeNetObject, resumeWalkIntoScope } from '../_shared/net_helpers';
-import { characterSkinBody } from '@/controllers/actors/transformedBody';
+import { characterSkinBody } from '@/controllers/actors/skinBody';
 import { classWorldScale } from '@/controllers/actors/characterScale';
 import { createAttributeSystem } from '@/core/attributeSystem';
 import { deferLeave, noteScopeEntry } from '@/ecs/systems/teleportSystem';
