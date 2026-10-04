@@ -630,7 +630,10 @@ export function resetBand(): void {
   }
 }
 
-EventBus.on('requestWarp', () => resetBand());
+/** A map change puts every instrument away; the band module installs this (module.ts). */
+export function installBandMusic(): void {
+  EventBus.on('requestWarp', () => resetBand());
+}
 
 // Dev hook for the harness and the console: `window.__band.play('/dev/band/scale.mid')`.
 if (import.meta.env.DEV && typeof window !== 'undefined') {

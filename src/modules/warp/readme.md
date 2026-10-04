@@ -25,7 +25,9 @@ in `requests.ts`, through `index.ts` (the door).
   parks the hero until it gets it, so no NPC or monster would enter scope otherwise. It also snaps
   every net object of the new map to the terrain height.
 - `warpScopeHold.ts` holds the loading screen (`setSceneHold('warpScope')`) from the ready packet
-  until the first scope packet lands plus 250 ms, or 2 s on an empty map.
+  until the first scope packet lands plus 250 ms, or 2 s on an empty map. `module.ts` installs it
+  (`installScopeHold`) before the net; warp installs before `session`, so its `wsClosed` release
+  runs before the session's.
 - Same-map `MapChanged`: `teleportGate.onMapChanged` returns `confirm` (the answer to the hero's
   own teleport, about 1.8 s late; nothing moves unless he was knocked off) or `refused` / `unasked`
   (put back on the square and stopped, `ReceiveTeleport` Flag 0, `WSclient.cpp:2193-2197`).

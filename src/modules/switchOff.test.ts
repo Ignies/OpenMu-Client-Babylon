@@ -23,14 +23,19 @@ function onEmptyBus(run: () => void): Bus {
 const installedAlone = (id: string) => onEmptyBus(() => MODULES.filter(m => m.id === id).forEach(m => m.install()));
 
 describe.each([
-  ['events', ['DuelStartRequest', 'MiniGameOpeningState', 'BloodCastleState', 'KanturuEnterResult', 'warpCompleted']],
+  ['events', ['DuelStartRequest', 'MiniGameOpeningState', 'BloodCastleState', 'KanturuEnterResult', 'warpCompleted', 'wsClosed']],
   ['quests', ['LegacyQuestStateList', 'QuestStateList', 'AvailableQuests', 'OpenNpcDialog', 'CharacterInformation']],
   ['skills', ['MasterStatsUpdate', 'MasterCharacterLevelUpdate', 'ExperienceGained', 'MasterSkillList']],
+  ['warp', ['AddNpcsToScope', 'requestWarp', 'wsClosed']],
 ])('the %s module', (id, packets) => {
+  it('registers these listeners when installed', () => {
+    expect([...installedAlone(id).keys()]).toEqual(expect.arrayContaining(packets));
+  });
+});
+
+describe.each(MODULES.map(m => m.id))('the %s module', id => {
   it('registers its listeners when installed, not when loaded', () => {
-    const mine = installedAlone(id);
-    expect([...mine.keys()]).toEqual(expect.arrayContaining(packets));
-    for (const [event, handlers] of mine) {
+    for (const [event, handlers] of installedAlone(id)) {
       for (const h of handlers) expect(loaded.get(event) ?? []).not.toContain(h);
     }
   });

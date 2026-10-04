@@ -1,6 +1,6 @@
 // Every packet handler is registered by installModules below, in the order of modules/modules.ts
-// (listener order per packet is kept). What this file imported before its handlers moved out, in
-// the same order: the few listeners still registered at import (modules/readme.md) keep their order.
+// (listener order per packet is kept). The imports first are what this file imported before its
+// handlers moved out, in the same order, so files still load in the order they always did.
 import '../modules/band/bandNet';
 import '../controllers/net/pingNet';
 import '../i18n';
@@ -87,15 +87,12 @@ import '../controllers/interface/msgWin';
 import '../modules/character_select/messages';
 import { summonDisplayName } from '../modules/_shared/net_helpers';
 
-
 import { PingPacket } from '@versions/shared/packets/ClientToServerPackets';
 
 import { Hero } from '../modules/hero';
 import { Session } from '../modules/session';
 import { AppState, UIState } from '../controllers/interface/uiState';
 import { Ecs } from '../ecs/current';
-
-
 
 import { installModules } from '../modules/module';
 import { MODULES } from '../modules/modules';
@@ -126,8 +123,6 @@ onNpcNamesChanged(() => {
 // The names are wanted from the first monster on screen, not from the first
 // time a quest window or a language change asks for them.
 void loadNpcNames();
-
-
 
 /**
  * C3 0E - `Ping`: the keep-alive the original client sends every few seconds

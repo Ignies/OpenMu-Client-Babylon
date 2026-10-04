@@ -28,12 +28,9 @@ event is one entry file with its own MobX state and packet handlers, behind the 
   (`module.ts`) calls them in a fixed order: duel, the notices, invasion, Blood Castle, Chaos
   Castle, Devil Square, Crywolf, Golden Archer, Kanturu. A packet several entries handle runs them
   in that order (`MiniGameOpeningState`, `BloodCastleState`, `MiniGameScoreTable`, `MapEventState`;
-  pinned by `src/app/listenerOrder.golden.test.ts`). Importing a file registers nothing, with one
-  exception below. The module installs before `warp` (`../modules.ts`): Crywolf's `warpCompleted`
-  runs first, as when it registered at import.
-- Duel's `wsClosed` reset still registers at import: it runs before `warp/warpScopeHold.ts`'s,
-  which registers at import too, and an install would put it after. It moves into `installDuel`
-  once warp registers its scope hold in its install (and installs after this module).
+  pinned by `src/app/listenerOrder.golden.test.ts`). Importing a file registers nothing. The
+  module installs before `warp` (`../modules.ts`): Crywolf's `warpCompleted` and the duel's
+  `wsClosed` reset run first, as when they registered at import.
 - Timers count down in `update`; packets only resync them. `reset` drops the tracked match
   (`CreateEventMatch` recreates it on every warp) and closes entry windows. Duel state survives a
   warp; `wsClosed` clears it (`WSclient.cpp:646`).
@@ -70,8 +67,7 @@ result shows, and Crywolf sends no `CrywolfInfoRequest` on arrival. The other mo
 `warpCompleted` and `KanturuEnterResult` run as before. What stays: the facade, the frame update and
 the windows; the windows `npc_shop` opens on `NpcWindowResponse`, tickets, the Crywolf statue and the
 HUD schedule rows still send their requests (unanswered; the rows give up after a few polls), the
-castle beds' sound gates read idle timers (no match bed plays), and duel's `wsClosed` reset still
-runs (see How it works).
+castle beds' sound gates read idle timers (no match bed plays).
 
 ## Depends on / used by
 - uses: `session` (`sendToGS`, `isOffline`), chat's `addNotification`, `Ecs.world`, `Hero`,
