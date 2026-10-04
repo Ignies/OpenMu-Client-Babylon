@@ -8,8 +8,8 @@ import {
   ChatRoomCreateRequestPacket,
   ChatRoomInvitationRequestPacket,
 } from '@versions/shared/packets/ClientToServerPackets';
-import { CHAT_SERVER_PORT, type ChatClient } from '../../controllers/net/protocols/chatRoomProtocol';
-import { openChatRoomSocket, type ChatRoomSocket } from '../../controllers/net/sockets/chatRoomSocket';
+import { CHAT_SERVER_PORT, type ChatClient } from '@/controllers/net/protocols';
+import { openChatRoomSocket, type ChatRoomSocket } from '@/controllers/net/sockets';
 import { playUiSound } from '../../controllers/sound/sfx';
 import { wsAddress } from '../servers/serverConfig';
 

@@ -1,6 +1,6 @@
 import { RawTexture, Texture, type Scene } from '../render/babylon/exports';
-import { decodeTGA } from '../assets/mu/tga';
-import { fetchTerrainFile } from '../assets/mu/prefetchWorld';
+import { decodeTGA } from '@/controllers/assets/mu';
+import { fetchTerrainFile } from '../assets/prefetchWorld';
 
 /**
  * The map's grass cards (`TileGrass01/02/03.OZT`, `BITMAP_MAPGRASS + layer1`, ZzzLodTerrain.cpp:1620):

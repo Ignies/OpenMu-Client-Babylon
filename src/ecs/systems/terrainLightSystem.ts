@@ -10,7 +10,7 @@ import {
 import { lightingTier } from '../../controllers/lighting/lightingQuality';
 import { lighting } from '../../controllers/lighting';
 import { GameOptions } from '@/controllers/settings';
-import { updateSceneLook } from '../../controllers/render/scenes/sceneLook';
+import { updateSceneLook } from '../../controllers/render/sceneLook';
 import { lookDirector } from '../../controllers/lighting/director';
 
 /**

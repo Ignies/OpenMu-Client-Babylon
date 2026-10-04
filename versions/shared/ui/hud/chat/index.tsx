@@ -14,18 +14,18 @@ import { Social } from '@/modules/social/social';
 import { Hero } from '@/modules/hero';
 import { MsgBox } from '@/controllers/interface';
 import { Ecs } from '@/ecs/current';
-import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { useEventBus } from '@/controllers/interface/hooks';
 import { playUiSound, uiClick } from '@/controllers/sound/sfx';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuWindows } from '@/controllers/interface/windowManager';
-import { bottomBarScreenHeight } from '@/controllers/interface/components/mu_window';
-import { useUiViewport } from '@/controllers/interface/components/ui_stage';
-import { useIsMobile } from '@/controllers/interface/mobile';
 import {
+  bottomBarScreenHeight,
   MuResizeGrip,
   useWindowStackEntry,
-} from '@/controllers/interface/components/mu_window/useWindowChrome';
+} from '@/controllers/interface/components/mu_window';
+import { useUiViewport } from '@/controllers/interface/components/ui_stage';
+import { useIsMobile } from '@/controllers/interface/mobile';
 import { isTypingInField } from '@/ecs/systems/keyboardInputSystem';
 import { GameOptions } from '@/controllers/settings';
 import { isKey } from '@/controllers/interface/keyBindings';

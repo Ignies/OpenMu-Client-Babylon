@@ -148,13 +148,13 @@ export const SessionExit = new (class _SessionExit {
         AppState.uiState = UIState.Characters;
       });
       // The window sheets go with the world; decoded again on the next entry.
-      void import('../../controllers/assets/mu/preloadSprites').then(m => m.clearWorldSprites());
+      void import('../../controllers/assets/preloadSprites').then(m => m.clearWorldSprites());
       return;
     }
 
     if (kind === 'servers') {
       Session.disconnectFromGameServer();
-      void import('../../controllers/assets/mu/preloadSprites').then(m => m.clearWorldSprites());
+      void import('../../controllers/assets/preloadSprites').then(m => m.clearWorldSprites());
       Session.playOnline();
       return;
     }
@@ -170,7 +170,7 @@ export const SessionExit = new (class _SessionExit {
 
     Session.disconnectFromGameServer();
     Session.disconnectFromConnectServer();
-    void import('../../controllers/assets/mu/preloadSprites').then(m => m.clearWorldSprites());
+    void import('../../controllers/assets/preloadSprites').then(m => m.clearWorldSprites());
     runInAction(() => {
       AppState.uiState = UIState.Preloader;
     });

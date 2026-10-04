@@ -51,34 +51,33 @@ import {
 } from './shadowPolicy';
 import { syncSkyDome } from './skyDome';
 import { syncSkyline } from './horizon';
-import { syncShadows, syncTerrainDefines } from '../render/scenes/shadows';
+import { syncShadows, syncTerrainDefines } from '@/controllers/render/shadows';
 import {
   syncAmbientOcclusion,
   syncAmbientOcclusionSamples,
-} from '../render/scenes/ambientOcclusion';
-import { syncEffectMask } from '../render/scenes/effectMask';
-import { syncInkOutline, inkOutlineLive } from '../render/scenes/inkOutline';
-import { syncHullOutline } from '../render/scenes/hullOutline';
-import { syncSpeedLines, speedLinesLive } from '../render/scenes/speedLines';
-import { syncHeightFog, updateHeightFog } from '../render/scenes/heightFog';
-import { syncRoomMask } from '../render/scenes/roomMask';
-import { syncToneMap, toneMapLive } from '../render/scenes/toneMap';
-import {
+  syncEffectMask,
+  syncInkOutline,
+  inkOutlineLive,
+  syncHullOutline,
+  syncSpeedLines,
+  speedLinesLive,
+  syncHeightFog,
+  updateHeightFog,
+  syncRoomMask,
+  syncToneMap,
+  toneMapLive,
   syncFireflyGuard,
   syncFireflyGuardSamples,
-} from '../render/scenes/fireflyGuard';
-import { syncSunShafts, sunShaftsLive } from '../render/scenes/sunShafts';
-import {
+  syncSunShafts,
+  sunShaftsLive,
   syncUpscale,
   syncUpscaleSamples,
   upscaleScale,
-} from '../render/scenes/upscale';
-import {
   createPostChain,
   TONE_MAPPER_NAMES,
   type PostChain,
   type ToneMapperName,
-} from '../render/scenes/postChain';
+} from '@/controllers/render/scenes';
 
 /**
  * The look director: the one composer. Reads the map's

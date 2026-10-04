@@ -257,3 +257,9 @@ export const MU_WINDOW_SPRITES = [
   TABLE_LEFT_PIXEL,
   TABLE_RIGHT_PIXEL,
 ];
+
+export {
+  MuResizeGrip,
+  useWindowChrome,
+  useWindowStackEntry,
+} from './useWindowChrome';

@@ -3,11 +3,11 @@ import './modules';
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Session } from '@/modules/session';
-import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { useEventBus } from '@/controllers/interface/hooks';
 import { uiClick } from '@/controllers/sound/sfx';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuButton } from '@/controllers/interface/components/mu_button';
-import { MuResizeGrip, useWindowChrome } from '@/controllers/interface/components/mu_window/useWindowChrome';
+import { MuResizeGrip, useWindowChrome } from '@/controllers/interface/components/mu_window';
 import { TEXT_COLOR } from '@/controllers/interface/components/mu_text';
 import {
   DebugMenu,

@@ -19,7 +19,7 @@ import { puddleCover, wetness } from '../weather/wetness';
 import { rainStrength } from '../weather/rainState';
 import { pointLightPoolLights } from '../lighting/pointLightPool';
 import { linearBufferActive } from '../lighting/lightModel';
-import { SNOW_ART, type ArtMatch } from '../assets/mu/artMatch';
+import { SNOW_ART, type ArtMatch } from './artMatch';
 import { lookDirector } from '../lighting/director';
 import { TERRAIN_BRANCH } from './terrainLighting';
 import { devQuery } from '../../core/devSeams';

@@ -2,7 +2,7 @@ import type { ApiListing, HistoryEntry, Payout, Token } from './api';
 import { MarketError } from './api';
 import type { Listing } from './mockListings';
 import type { MarketDeps, MarketplaceStore } from './state';
-import type { EscrowOperationName, EscrowResult } from '../../controllers/net/protocols/escrowWire';
+import type { EscrowOperationName, EscrowResult } from '@/controllers/net/protocols';
 
 /**
  * A marketplace service and a game server in one object, for the standalone

@@ -13,8 +13,11 @@ import {
   type AbstractMesh,
   type Scene,
 } from '../render/babylon/exports';
-import { downloadDataFile, hasDataFile } from '../assets/mu/dataFolder';
-import { loadMuSprite } from '../assets/mu/sprites';
+import {
+  downloadDataFile,
+  hasDataFile,
+  loadMuSprite,
+} from '@/controllers/assets/mu';
 import { getMaterial, loadGLTF } from '../assets/modelLoader';
 import { reportLoadFailure } from '../assets';
 import { BlendState } from '@versions/shared/objects/enum';

@@ -1,12 +1,12 @@
 /**
  * Season 6 sprite preloads: the sheets to decode up front, in two waves.
  *
- * The lists moved here from `controllers/assets/mu/preloadSprites.ts` unchanged - the
+ * The lists moved here from `controllers/assets/preloadSprites.ts` unchanged - the
  * loader still owns when and how, the version owns which files. A period
  * tree shares almost no interface file names with this one, which is why
  * this is version property (versions/v097d/ui/preload.ts).
  */
-import { CURSOR_SPRITES } from '@/controllers/interface/components/game_cursor/cursors';
+import { CURSOR_SPRITES } from '@/controllers/interface/components/game_cursor';
 import { MU_WINDOW_SPRITES } from '@/controllers/interface/components/mu_window';
 import { INVENTORY_SPRITES } from '../../shared/ui/windows/inventory/layout';
 import { NPC_SHOP_SPRITES } from '../../shared/ui/windows/npc_shop/layout';

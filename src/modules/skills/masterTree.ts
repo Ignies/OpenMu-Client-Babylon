@@ -10,8 +10,11 @@ import {
   MasterSkillListPacket,
 } from '@versions/shared/packets/ServerToClientPackets';
 import { AddMasterSkillPointPacket } from '@versions/shared/packets/ClientToServerPackets';
-import { downloadDataFile } from '../../controllers/assets/mu/dataFolder';
-import { decodeLocalText, downloadLocalDataFile } from '../../controllers/assets/mu/localData';
+import {
+  downloadDataFile,
+  decodeLocalText,
+  downloadLocalDataFile,
+} from '@/controllers/assets/mu';
 import { convertBux } from '../../controllers/terrain/mapFileEncryption';
 import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
 import { HeroSkills } from './state';

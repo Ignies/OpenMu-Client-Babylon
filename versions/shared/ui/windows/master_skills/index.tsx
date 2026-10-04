@@ -3,8 +3,8 @@ import { Component, useEffect, useState, type ReactNode } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Ecs } from '@/ecs/current';
 import { isKey } from '@/controllers/interface/keyBindings';
-import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
-import { useWindowStackEntry } from '@/controllers/interface/components/mu_window/useWindowChrome';
+import { useEventBus } from '@/controllers/interface/hooks';
+import { useWindowStackEntry } from '@/controllers/interface/components/mu_window';
 import { playUiSound } from '@/controllers/sound/sfx';
 import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
 import { t } from '@/i18n';
@@ -32,7 +32,7 @@ import {
   OK_SPRITE,
   WIN_HEIGHT,
   WIN_WIDTH,
-} from '@/controllers/interface/components/msg_window/layout';
+} from '@/controllers/interface/components/msg_window';
 import { MasterSkillsWindowState, toggleMasterSkillsWindow } from './windowState';
 import {
   ARROWS,

@@ -5,7 +5,7 @@ import { observer } from 'mobx-react-lite';
 import { useEffect, useRef, useState } from 'react';
 import { MsgBox, MsgWinCode } from '@/controllers/interface';
 import { confirmDeleteCharacter, CharSelect } from '@/modules/character_select';
-import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { useEventBus } from '@/controllers/interface/hooks';
 import { playUiSound } from '@/controllers/sound/sfx';
 import { isTypingInField } from '@/ecs/systems/keyboardInputSystem';
 import { GuildMemberRoleEnum } from '@versions/shared/packets/ServerToClientPackets';

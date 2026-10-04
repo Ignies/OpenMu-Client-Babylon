@@ -27,6 +27,8 @@ water, ground picks, minimap data and the base class for map objects. There is n
   `resetTerrainMask`, `terrainMaskVersion`.
 - `terrainOverlay.ts`: `PUDDLES`, `WET_GROUND`, `overlayAmountAt`, `overlayBedShare`,
   `snowCoverFor`, `needsTerrainMask`. `terrainGrass.ts`: `grassFieldForFrame`, `GrassActor`.
+- `artMatch.ts`: `SNOW_ART`, `ArtMatch`, `artMatch`: how much a map's own tile art already is
+  the substance an overlay draws (a leaf, so its test needs no scene).
 - Smaller readers: `loadWorldMinimap`, `parseMinimapData`, `findRestObject` /
   `leanCursorObjects`, `mapObjectFixupsFor`,
   `grassAllowed`, `parseTerrainObjects`, `decryptMapFile` / `convertBux`, `getTilesList`,
@@ -40,7 +42,7 @@ water, ground picks, minimap data and the base class for map objects. There is n
   `getTerrainData`, the map entry's `maps.create(world)`, the objects (the 16x16 block test of
   `CreateObject`, ZzzObject.cpp:4433-4435), the hero placed, `warpCompleted` emitted.
 - `prepareTerrain` (`getTerrainData.ts`): the five terrain files and tiles come from
-  `assets/mu/prefetchWorld`. Height, attributes, mapping and objects parse in the worker
+  `assets/prefetchWorld`. Height, attributes, mapping and objects parse in the worker
   (`terrainParseClient.ts` -> `terrainParse.worker.ts`, inline fallback). By default the light
   map decodes and bakes there too: the lightmap times normal dot `(0.5, -0.5, 0.5)` + 0.5. The
   ground arrays build there (`groundArrays.ts`) while the tiles pack into a texture array and the
@@ -96,6 +98,7 @@ water, ground picks, minimap data and the base class for map objects. There is n
 - `terrainLighting.test.ts`: the GLSL branches on the tier uniforms, `?terrainBranch=0`, range 0
   for unfilled pool slots.
 - `terrainOverlay.test.ts`: the snow melt loop and upload, with and without `?snowGate=0`.
+- `snowArtMatch.test.ts`: `SNOW_ART` against measured tile colours.
 - `terrainPick.test.ts`: `TerrainPicker` finds the same hit as Babylon's mesh pick.
 - `terrainWater.test.ts`: the surface is a pure function of time and position, carries the
   `CSWaterTerrain` wave constants, stays in the amplitude bound; the ambient ring spreads and damps.

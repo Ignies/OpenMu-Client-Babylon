@@ -43,7 +43,7 @@ import {
 } from './itemEffectMode';
 
 const glowScratch = { r: 0, g: 0, b: 0, a: 1 };
-import { loadMuSprite } from '../assets/mu/sprites';
+import { loadMuSprite } from '@/controllers/assets/mu';
 import { skyLightOf, sunLightOf } from '../lighting/keyRig';
 import {
   bindCloudTexture,

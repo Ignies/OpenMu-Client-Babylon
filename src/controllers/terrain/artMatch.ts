@@ -4,8 +4,8 @@
  *
  * A leaf module on purpose. The numbers below were set against the textures
  * the maps ship, and `snowArtMatch.test.ts` pins them to those measurements -
- * which only works if the test can import this without dragging the store,
- * the scene and the weather clock in behind it.
+ * which only works if the test can import this without dragging the scene
+ * and the weather clock in behind it.
  */
 
 /**

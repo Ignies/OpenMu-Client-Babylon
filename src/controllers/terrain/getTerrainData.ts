@@ -34,7 +34,7 @@ import {
   isFlagInBinaryMask,
   readOJZBufferAsJPEGBuffer,
 } from '../assets/download';
-import { consumeTerrainFile, terrainFilesFor } from '../assets/mu/prefetchWorld';
+import { consumeTerrainFile, terrainFilesFor } from '../assets/prefetchWorld';
 import { reportLoadFailure } from '../assets';
 import { unpackTerrainLight } from './unpackTerrainLight';
 import {
@@ -48,7 +48,12 @@ import {
   groundTiles,
   refreshGroundTile,
 } from './groundArrays';
-import { TERRAIN_SIZE, TERRAIN_SIZE_MASK, TWFlags } from './consts';
+import {
+  TERRAIN_SIZE,
+  TERRAIN_SIZE_MASK,
+  TWFlags,
+  DEBUG_SHOW_TERRAIN_ATTRIBUTES,
+} from './consts';
 import {
   initTerrainDynamicLight,
   packBakedTerrainLight,
@@ -57,7 +62,6 @@ import {
 } from './terrainDynamicLight';
 import { lightingTier } from '../lighting/lightingQuality';
 import { World, type TerrainLayers } from '../../ecs/world';
-import { DEBUG_SHOW_TERRAIN_ATTRIBUTES } from './consts';
 import { assetWorldNum } from '../assets/worldAssets';
 import { devQuery } from '../../core/devSeams';
 import { maps } from '../maps';

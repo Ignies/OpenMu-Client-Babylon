@@ -64,7 +64,7 @@ world, and the room helpers. The maps themselves are content in `versions/shared
 
 ## Depends on / used by
 - uses: `core/types`, `assets` (download, world folder), `terrain/parseTerrainObjects`,
-  `lighting/profiles`, `render/scenes/sceneLook`. The list comes in through `registerMaps`.
+  `lighting/profiles`, `render/sceneLook`. The list comes in through `registerMaps`.
 - used by: `controllers.ts`, `app/lifecycle.ts`, `terrain` (load, tiles, grass), `weather`
   (rain, snow), `lighting` (profiles, director), `render` (blend meshes, effect-only objects,
   prop batches), `fx/effectParticles.ts`, `assets/worldAssets.ts`,

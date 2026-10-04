@@ -6,7 +6,7 @@ import { addNotification } from '../modules/chat';
 import { AppState, UIState } from './uiState';
 import { loadVersionUi } from '../version';
 import { WorldPage } from '@versions/shared/ui/pages/world';
-import { useEventBus } from '../controllers/interface/hooks/useEventBus';
+import { useEventBus } from '@/controllers/interface/hooks';
 import { PreloaderPage } from '@versions/shared/ui/pages/preloader';
 import { playOffline } from './offline';
 import { LoadingScreen } from '../controllers/loading/classic';

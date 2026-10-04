@@ -12,7 +12,7 @@ import {
   MAX_LETTER_TITLE,
   isFriendOnline,
 } from '@/modules/friends/friendList';
-import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { useEventBus } from '@/controllers/interface/hooks';
 import { uiClick } from '@/controllers/sound/sfx';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';

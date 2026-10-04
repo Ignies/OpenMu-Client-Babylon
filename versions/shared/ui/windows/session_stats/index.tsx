@@ -7,10 +7,10 @@ import { Ecs } from '@/ecs/current';
 import { SessionStats } from '@/modules/session/sessionStats';
 import { formatDuration } from '@/controllers/interface/hudFormat';
 import { isKey } from '@/controllers/interface/keyBindings';
-import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { useEventBus } from '@/controllers/interface/hooks';
 import { uiClick } from '@/controllers/sound/sfx';
 import { MuText } from '@/controllers/interface/components/mu_text';
-import { useWindowChrome } from '@/controllers/interface/components/mu_window/useWindowChrome';
+import { useWindowChrome } from '@/controllers/interface/components/mu_window';
 import { t } from '@/i18n';
 
 /**

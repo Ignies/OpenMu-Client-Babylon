@@ -179,7 +179,7 @@ export interface ModelOptions {
   alongPath?: boolean;
   /**
    * Let the mesh into the sun cascades. Off by default: an effect mesh is
-   * light, not matter, and `controllers/render/scenes/shadows.ts castsSunShadow` drops every
+   * light, not matter, and `controllers/render/shadows.ts castsSunShadow` drops every
    * bright mesh for that reason. A spirit is the exception the wings already
    * are (`shadowBlendCaster`) - the card *is* the body, so it should throw a
    * shadow as it goes over the ground. The shadow layer still decides whether

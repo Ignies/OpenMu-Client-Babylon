@@ -10,7 +10,7 @@ import type { World } from '../../ecs/world';
 import { ModelObject } from '../render/modelObject';
 import { getMaterial, getScrollVariant } from '../assets/modelLoader';
 import { BlendState } from '@versions/shared/objects/enum';
-import { loadMuSprite } from '../assets/mu/sprites';
+import { loadMuSprite } from '@/controllers/assets/mu';
 import {
   BonedParticleEmitter,
   HeldSprites,

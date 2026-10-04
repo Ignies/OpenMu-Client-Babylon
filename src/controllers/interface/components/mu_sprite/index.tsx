@@ -5,7 +5,7 @@ import {
   peekInterfaceSprite,
   peekMuSprite,
   type MuSprite as Sprite,
-} from '@/controllers/assets/mu/sprites';
+} from '@/controllers/assets/mu';
 
 // A `Data/`-rooted name (`Data/Logo/MU-logo.OZT`) is loaded from Data as-is; anything
 // else (bare or with a subfolder, `partCharge1/newui_menu03.OZJ`) is an Interface sprite.

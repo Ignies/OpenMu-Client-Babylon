@@ -2,7 +2,7 @@ import type { ENUM_WORLD } from '../../core/types';
 import { parseTerrainObjects } from '../terrain/parseTerrainObjects';
 import { downloadDataBytesBuffer } from '../assets/download';
 import { assetWorldNum } from '../assets/worldAssets';
-import { setAreaMood } from '../render/scenes/sceneLook';
+import { setAreaMood } from '../render/sceneLook';
 import { roomVolumeOf, type AreaLookName } from '../lighting/profiles';
 import type { World } from '../../ecs/world';
 import type { RoomFrame, RoomRecord, RoomSpec } from './roomEnumeration';

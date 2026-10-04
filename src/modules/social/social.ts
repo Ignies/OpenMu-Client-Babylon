@@ -50,7 +50,7 @@ import {
 } from '../chat/chatEmojis';
 import { itemLinkLabel, scanItemLinks, stripItemLinks } from '../chat/chatItemLinks';
 import { EMOJI_CATALOG } from '../chat/emojis';
-import { clipChatText, toChatWire } from '../../controllers/net/protocols/chatWire';
+import { clipChatText, toChatWire } from '@/controllers/net/protocols';
 import { chatTextWidth } from '../chat/chatTextWidth';
 import { GameOptions } from '@/controllers/settings';
 import { Commands } from '../chat/commands';

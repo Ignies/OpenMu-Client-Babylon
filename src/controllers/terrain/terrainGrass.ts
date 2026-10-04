@@ -10,7 +10,7 @@ import {
 import { TERRAIN_SIZE, TWFlags } from './consts';
 import { isFlagInBinaryMask } from '../assets/download';
 import { TERRAIN_INDEX } from './utils';
-import { registerTerrainMaterial } from '../render/scenes/shadows';
+import { registerTerrainMaterial } from '@/controllers/render/shadows';
 import { CLOUD_UNIFORMS } from '../lighting/clouds';
 import { ENUM_WORLD } from '../../core/types';
 import { GameOptions } from '@/controllers/settings';

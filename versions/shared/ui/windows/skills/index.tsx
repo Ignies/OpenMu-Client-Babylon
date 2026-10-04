@@ -5,7 +5,7 @@ import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
 import { Ecs } from '@/ecs/current';
 import { isKey } from '@/controllers/interface/keyBindings';
-import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { useEventBus } from '@/controllers/interface/hooks';
 import { playUiSound } from '@/controllers/sound/sfx';
 import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
 import { skills, HeroSkills } from '@/modules/skills';
@@ -17,7 +17,7 @@ import {
 import { MuItemWindow, MuTableFrame } from '@/controllers/interface/components/mu_window';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { toggleMasterSkillsWindow } from '../master_skills/windowState';
-import { OK_SPRITE, BTN_HEIGHT, BTN_WIDTH } from '@/controllers/interface/components/msg_window/layout';
+import { OK_SPRITE, BTN_HEIGHT, BTN_WIDTH } from '@/controllers/interface/components/msg_window';
 
 /**
  * The learned-skill list: every skill the server taught (`HeroSkills.skills`),

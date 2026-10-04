@@ -22,7 +22,7 @@ import type { ItemSparkleKind } from '../../controllers/fx/itemSparkle';
 import { effects, type EffectHandle } from '../../controllers/fx';
 import { bonePos, entityGone, entityPos, entityYaw, followEntity, tmpA } from '../../controllers/fx/core';
 import type { Vector3 } from '../../controllers/render/babylon/exports';
-import { requestGlowProbe } from '../../controllers/render/scenes/sceneLook';
+import { requestGlowProbe } from '../../controllers/render/sceneLook';
 import { EventBus } from '../../core/eventBus';
 import { itemSelfLight, lightItem, type ItemLampKind } from '../../controllers/lighting/items';
 import type { LightSource } from '../../controllers/lighting/lightSource';

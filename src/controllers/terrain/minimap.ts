@@ -6,8 +6,12 @@ import {
   type MinimapMarker,
 } from './minimapData';
 import { i18n, onLanguageChanged } from '../../i18n';
-import { resolveDataUrl } from '../assets/mu/dataFolder';
-import { clearSpriteCache, loadMuSprite, type MuSprite } from '../assets/mu/sprites';
+import {
+  resolveDataUrl,
+  clearSpriteCache,
+  loadMuSprite,
+  type MuSprite,
+} from '@/controllers/assets/mu';
 import { fetchAssetBytes, prefetchAsset } from '../assets/compressedAssets';
 
 /**

@@ -1,5 +1,6 @@
-import { ArcRotateCamera, HighlightLayer } from '../babylon/exports';
 import {
+  ArcRotateCamera,
+  HighlightLayer,
   Color3,
   Color4,
   Engine,
@@ -7,7 +8,7 @@ import {
   Vector3,
 } from '../babylon/exports';
 import { addInspectorForScene } from '../babylon/utils';
-import { applySceneLook, type SceneLook } from './sceneLook';
+import { applySceneLook, type SceneLook } from '../sceneLook';
 import { initPointLightPool } from '../../lighting/pointLightPool';
 import { createKeyRig } from '../../lighting/keyRig';
 import { createLookDirector, type LookDirector } from '../../lighting/director';

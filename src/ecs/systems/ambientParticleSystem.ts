@@ -24,7 +24,7 @@ import { ambientStrengthAt } from '../../controllers/weather/ambientSchedule';
 import type { Room } from '../../controllers/maps';
 import { serverNow } from '../../controllers/net/serverTime';
 import { lookDirector } from '../../controllers/lighting/director';
-import { roomMaskActive } from '../../controllers/render/scenes/roomMask';
+import { roomMaskActive } from '@/controllers/render/scenes';
 import { roomClipAvailable, setRoomWeatherClip } from '../../controllers/weather/roomClip';
 import { Vector3 } from '../../controllers/render/babylon/exports';
 import { GameOptions } from '@/controllers/settings';

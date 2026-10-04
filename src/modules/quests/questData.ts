@@ -11,15 +11,15 @@
 import { observable, runInAction } from 'mobx';
 import type { ENUM_WORLD } from '../../core/types';
 import { i18n, onLanguageChanged } from '../../i18n';
-import { loadNpcNames } from '../../controllers/assets/mu/npcNameFile';
 import {
+  loadNpcNames,
   loadQuestTables,
   type DialogScript,
   type NpcDialogueEntry,
   type QuestDefinition,
   type QuestProgressEntry,
   type QuestTables,
-} from '../../controllers/assets/mu/questFiles';
+} from '@/controllers/assets/mu';
 import type { QuestLayer } from './layer';
 
 // ---- 1. tuning -------------------------------------------------------------

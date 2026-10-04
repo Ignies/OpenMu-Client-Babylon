@@ -23,7 +23,7 @@ import {
   bindTerrainCsm,
   terrainCsmDefines,
   terrainCsmGlsl,
-} from '../render/scenes/shadows';
+} from '@/controllers/render/shadows';
 import {
   TOON_FILTER_UNIFORM,
   bindToonFilter,

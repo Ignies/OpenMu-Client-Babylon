@@ -1,9 +1,9 @@
 import type { World } from '@/ecs/world';
 import type { ENUM_WORLD } from '@/core/types';
-import { warmGLTF } from '../modelLoader';
-import { isEffectOnlyObject } from '../../render/effectOnlyObjects';
-import { decryptMapFile } from '../../terrain/mapFileEncryption';
-import { assetWorldNum } from '../worldAssets';
+import { warmGLTF } from './modelLoader';
+import { isEffectOnlyObject } from '../render/effectOnlyObjects';
+import { decryptMapFile } from '../terrain/mapFileEncryption';
+import { assetWorldNum } from './worldAssets';
 import { fetchTerrainFile, terrainFilesFor } from './prefetchWorld';
 
 /** Header of `EncTerrain<n>.obj` (version, map, count) and one record's size. */

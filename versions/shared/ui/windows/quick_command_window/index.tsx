@@ -8,7 +8,7 @@ import type { CommandKind } from '@/modules/chat/chatCommands';
 import { playUiSound, uiClick } from '@/controllers/sound/sfx';
 import { MuSpriteFrame, useMuSprite } from '@/controllers/interface/components/mu_sprite';
 import { MuText } from '@/controllers/interface/components/mu_text';
-import { useWindowStackEntry } from '@/controllers/interface/components/mu_window/useWindowChrome';
+import { useWindowStackEntry } from '@/controllers/interface/components/mu_window';
 
 /**
  * `CNewUIQuickCommandWindow` (NewUIQuickCommandWindow.cpp): the menu a right

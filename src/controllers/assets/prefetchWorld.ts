@@ -1,7 +1,7 @@
 import { ENUM_WORLD } from '@/core/types';
-import { downloadDataBytesBuffer } from '../download';
-import { getTilesList } from '../../terrain/getTilesList';
-import { assetWorldNum } from '../worldAssets';
+import { downloadDataBytesBuffer } from './download';
+import { getTilesList } from '../terrain/getTilesList';
+import { assetWorldNum } from './worldAssets';
 
 /**
  * One in-memory promise per terrain file URL, shared by `prefetchWorldTerrain`

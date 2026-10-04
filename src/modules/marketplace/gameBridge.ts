@@ -2,7 +2,7 @@ import { autorun } from 'mobx';
 import { Hero } from '../hero';
 import { Session } from '../session';
 import { InventoryConstants } from '@/core/inventoryConstants';
-import { buildEscrowRequest, parseEscrowResult, type EscrowResult } from '../../controllers/net/protocols/escrowWire';
+import { buildEscrowRequest, parseEscrowResult, type EscrowResult } from '@/controllers/net/protocols';
 import { t } from '../../i18n';
 import { Marketplace, type BagEntry } from './state';
 

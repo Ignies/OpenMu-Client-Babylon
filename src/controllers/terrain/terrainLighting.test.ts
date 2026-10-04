@@ -29,7 +29,7 @@ vi.mock('../lighting/lightTint', () => ({
   lightTintGlsl: () => '',
   lightTintStrength: () => 0,
 }));
-vi.mock('../render/scenes/shadows', () => ({
+vi.mock('../render/shadows', () => ({
   TERRAIN_CSM_UNIFORMS: [],
   bindTerrainCsm: () => {},
   terrainCsmDefines: () => [],

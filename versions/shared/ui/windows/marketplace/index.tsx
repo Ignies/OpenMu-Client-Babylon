@@ -1,7 +1,7 @@
 import './style.less';
 import { useEffect, type PointerEvent as ReactPointerEvent } from 'react';
 import { observer } from 'mobx-react-lite';
-import { useWindowChrome } from '@/controllers/interface/components/mu_window/useWindowChrome';
+import { useWindowChrome } from '@/controllers/interface/components/mu_window';
 import { ItemIcon } from '@/controllers/interface/components/item_icon';
 import { ItemTooltip } from '../../components/item_tooltip';
 import { t, type TextKey } from '@/i18n';

@@ -11,15 +11,15 @@ import { Ecs } from '@/ecs/current';
 import { isKey } from '@/controllers/interface/keyBindings';
 import { BaseClass, getBaseClass } from '@/modules/hero/characterStats';
 import { PVP_MURDERER1 } from '@/controllers/interface/nameTags';
-import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { useEventBus } from '@/controllers/interface/hooks';
 import { EventBus } from '@/core/eventBus';
 import { ENUM_WORLD } from '@/core/types';
 import { playUiSound, uiClick } from '@/controllers/sound/sfx';
-import { loadMoveReqList, type MoveReqEntry } from '@/controllers/assets/mu/moveReqFile';
+import { loadMoveReqList, type MoveReqEntry } from '@/controllers/assets/mu';
 import { WarpFavourites } from '@/modules/warp/warpFavourites';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuText } from '@/controllers/interface/components/mu_text';
-import { useWindowChrome } from '@/controllers/interface/components/mu_window/useWindowChrome';
+import { useWindowChrome } from '@/controllers/interface/components/mu_window';
 
 /**
  * `CNewUIMoveCommandWindow` (NewUIMoveCommandWindow.cpp): the "M" window -

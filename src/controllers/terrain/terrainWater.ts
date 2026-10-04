@@ -3,7 +3,7 @@ import type { ENUM_WORLD } from '../../core/types';
 import { maps } from '../maps';
 import { GameOptions } from '@/controllers/settings';
 import { createOZJTexture } from '../assets/download';
-import { downloadDataFile } from '../assets/mu/dataFolder';
+import { downloadDataFile } from '@/controllers/assets/mu';
 
 /**
  * Animated water terrain (gap 5.1): the CSWaterTerrain.cpp wave motion on the

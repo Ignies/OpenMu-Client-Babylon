@@ -19,7 +19,7 @@ import {
   RIGHT_HAND_BONE,
 } from './weaponAttachment';
 import { itemVisualTier, type ItemVisualTier } from '../item_fx/itemVisualTier';
-import { requestGlowProbe } from '../render/scenes/sceneLook';
+import { requestGlowProbe } from '../render/sceneLook';
 import { WingObject } from './wingObject';
 import { WING_BONE, wingSpec } from './wings';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';

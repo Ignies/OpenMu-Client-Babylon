@@ -6,7 +6,7 @@ import {
   Constants,
   type Scene,
 } from '../render/babylon/exports';
-import { downloadDataFile } from '../assets/mu/dataFolder';
+import { downloadDataFile } from '@/controllers/assets/mu';
 import { lookDirector, type LookDirector } from './director';
 import { EFFECT_RENDERING_GROUP, keepDepthForEffects } from '../fx/core';
 

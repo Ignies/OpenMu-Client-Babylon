@@ -363,7 +363,7 @@ export function setShadowWorld(world: ENUM_WORLD): void {
  * shadows read wrong, so the blob steps aside.
  *
  * `GameOptions.shadows` is the player's "Object shadows" toggle. It gates the
- * cascades too (`controllers/render/scenes/shadows.ts`), so unchecking it removes every shadow in
+ * cascades too (`controllers/render/shadows.ts`), so unchecking it removes every shadow in
  * the scene rather than only the tier that happens to be running.
  */
 export function blobShadowsActive(): boolean {

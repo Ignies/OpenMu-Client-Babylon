@@ -117,7 +117,7 @@ function applyCharacterInformation(p: CharacterInformationView) {
     SessionResume.remember(playerData.name);
     SessionResume.finish();
     // Lazy: preloadSprites pulls the window layouts in, and app/logic.ts sits under them.
-    void import('@/controllers/assets/mu/preloadSprites').then(m => m.preloadWorldSprites());
+    void import('@/controllers/assets/preloadSprites').then(m => m.preloadWorldSprites());
 
     EventBus.emit('requestWarp', { map: p.MapId, pos: { x: p.X, y: p.Y } });
   });

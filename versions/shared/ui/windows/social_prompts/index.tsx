@@ -19,7 +19,7 @@ import {
   OK_SPRITE,
   WIN_HEIGHT,
   WIN_WIDTH,
-} from '@/controllers/interface/components/msg_window/layout';
+} from '@/controllers/interface/components/msg_window';
 
 /** GlobalText 1295 / 1321 wording, by relationship and join/leave. */
 function relationText(request: {

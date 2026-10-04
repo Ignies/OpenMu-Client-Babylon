@@ -5,28 +5,27 @@ import {
   type RenderTargetTexture,
   type Scene,
   type Texture,
-} from '../babylon/exports';
-import { driveRenderList } from './renderList';
+} from './babylon/exports';
+import { driveRenderList } from './scenes/renderList';
 import { GameOptions, onGameOptionsChanged } from '@/controllers/settings';
-import { onTexturePackChanged } from '../../assets/texturePacks';
-import { syncTexturePack } from '../../assets/modelLoader';
+import { onTexturePackChanged } from '../assets/texturePacks';
+import { syncTexturePack, syncMaterialQuality } from '../assets/modelLoader';
 import {
   itemHaloAt,
   itemGlowClock,
   type ItemVisualTier,
-} from '../../item_fx/itemVisualTier';
-import { improvedItemEffectsOn } from '../../item_fx/itemEffectMode';
+} from '../item_fx/itemVisualTier';
+import { improvedItemEffectsOn } from '../item_fx/itemEffectMode';
 import {
   meshTakesPbrMaps,
   pbrDetailStrength,
   pbrMaterialsOn,
-} from '../materialQuality';
-import { pbrMapsIfReady } from '../pbrMaps';
-import { syncMaterialQuality } from '../../assets/modelLoader';
-import { syncPbrDetail } from '../../item_fx/itemMaterial';
-import { installMaterialDebug } from './materialDebug';
-import { lookDirector } from '../../lighting/director';
-import type { AreaLookName, AreaRect } from '../../lighting/profiles';
+} from './materialQuality';
+import { pbrMapsIfReady } from './pbrMaps';
+import { syncPbrDetail } from '../item_fx/itemMaterial';
+import { installMaterialDebug } from './scenes/materialDebug';
+import { lookDirector } from '../lighting/director';
+import type { AreaLookName, AreaRect } from '../lighting/profiles';
 
 /**
  * The glow layer and the item-tier emissive selectors, plus the area
