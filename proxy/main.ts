@@ -14,6 +14,7 @@ import { BandHub, type BandPeer } from "./band/hub";
 import { isBandFrame } from "../src/controllers/net/protocols/bandProtocol";
 import { PingHub, type PingPeer } from "./ping/hub";
 import { isPingFrame } from "../src/controllers/net/protocols/pingProtocol";
+import { SERVER_MANIFEST_PATH, serverManifestResponse } from "./serverManifest";
 
 const PORT = process.env.PORT || "3000";
 const HOSTNAME = process.env.HOSTNAME || '0.0.0.0';
@@ -317,6 +318,8 @@ Bun.serve<WebSocketData>({
   fetch(req, server) {
     const url = new URL(req.url);
     const searchParams = url.searchParams;
+
+    if (url.pathname === SERVER_MANIFEST_PATH && req.method === "GET") return serverManifestResponse();
 
     if (url.pathname === ADMIN_STREAM_PATH) {
       if (!hub) return new Response("tracking is off", { status: 404 });

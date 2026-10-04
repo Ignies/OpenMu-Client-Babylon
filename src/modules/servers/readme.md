@@ -108,7 +108,9 @@ connect server's own list (`Store.serverList`) is filled by `session/net.ts`.
   `{ "version": 1, "settings": { "heldHitRequest": false } }`. Later it will also list the
   world's modules.
 - Fetched from the root of the world's proxy host (`https://ws.<domain>/server.json`, or
-  `http://<ip>:3000/server.json`), the one address every profile has, with a 5 s timeout and no
+  `http://<ip>:3000/server.json`), the one address every profile has (Caddy answers it on an
+  installed server; the proxy itself answers it from `MU_HELD_HIT_REQUEST` when it runs alone,
+  `proxy/serverManifest.ts`), with a 5 s timeout and no
   cookies. The text is untrusted: version 1 only, `settings` an object, each known key of its type
   or the whole document is refused; unknown keys are skipped (a newer server may know more).
 - Missing, unreachable or invalid: the original behaviour (`ORIGINAL_SETTINGS`). The last good
