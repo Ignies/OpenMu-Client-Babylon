@@ -80,7 +80,7 @@ and `masterTree.ts` through the `skills` facade, and `band` through `installBand
 
 ## Not modules yet
 - `events`, `quests` entry files, `skills/masterLevel.ts` and `masterTree.ts` still register at
-  import; `economy`, `social`, `gm`, `items`, `servers` have no `module.ts`. They are always on
+  import; `economy`, `social`, `gm`, `items` have no `module.ts`. They are always on
   until their state leaves the Store. Windows do not yet hide when their module is off.
 
 ## Tests

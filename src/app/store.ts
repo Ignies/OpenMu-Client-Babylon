@@ -7,11 +7,6 @@ import { consumeSound, upgradedItemSound } from '../controllers/sound/ui';
 import { CharacterClassNumber, ENUM_WORLD } from '@/core/types';
 import { AnimationRequestPacket, ConsumeItemRequestPacket, SaveKeyConfigurationPacket, CreateCharacterPacket, DeleteCharacterPacket, DropItemRequestPacket, EnterGateRequestPacket, FocusCharacterPacket, IncreaseCharacterStatPointPacket, ItemMoveRequestPacket, PickupItemRequestPacket, RequestCharacterListPacket, SelectCharacterPacket, WarpCommandRequestPacket, WalkRequestPacket, TalkToNpcRequestPacket, CloseNpcRequestPacket, MuHelperStatusChangeRequestPacket, PetCommandModeEnum, PetCommandRequestPacket, PetInfoRequestPacket, PetTypeEnum, StorageTypeEnum, BuyItemFromNpcRequestPacket, SellItemToNpcRequestPacket, RepairItemRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
 import {
-  ConnectionInfoRequestPacket,
-  ServerListRequestPacket,
-  ServerListResponsePacket,
-} from '@versions/shared/packets/ConnectServerPackets';
-import {
   CharacterCreationUnlockFlagsEnum,
   CharacterListPacket,
   GuildMemberRoleEnum,
@@ -609,14 +604,6 @@ function applyOfflineHandOverrides(items: (Item | null)[]): void {
 }
 
 export const Store = new (class _Store {
-  serverList: ReturnType<ServerListResponsePacket['getServers']> = [];
-  /** `g_ServerListManager->GetSelectServerName()` / `Index`: the login window's server line. */
-  selectedServer: {
-    name: string;
-    channel: number;
-    /** Set when the world published a name for this channel, not a number. */
-    channelName?: string;
-  } | null = null;
   charactersList: ReturnType<CharacterListPacket['getCharacters']> = [];
   playerId?: number;
 
@@ -926,8 +913,6 @@ export const Store = new (class _Store {
 
   constructor() {
     makeObservable(this, {
-      serverList: observable,
-      selectedServer: observable,
       playerId: observable,
       skills: observable,
       buffs: observable,
@@ -1160,19 +1145,6 @@ export const Store = new (class _Store {
     // body-linked Imp, and AnimationSystem reads it for the ride clips.
     playerEntity.charAppearance.pet = playerData.petSlot || null;
     playerEntity.charAppearance.changed = true;
-  }
-
-  updateServerListRequest(): void {
-    const buffer = ServerListRequestPacket.createPacket().buffer;
-    Session.sendToCS(buffer);
-  }
-
-  getConnectionInfoRequest(serverId: number): void {
-    const connectionInfoRequestPacket =
-      ConnectionInfoRequestPacket.createPacket();
-    connectionInfoRequestPacket.ServerId = serverId;
-
-    Session.sendToCS(connectionInfoRequestPacket.buffer);
   }
 
   refreshCharactersListRequest(): void {

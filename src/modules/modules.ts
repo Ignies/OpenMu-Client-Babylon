@@ -1,6 +1,7 @@
 // Every module, in install order: for a packet several modules handle, this is the order their
 // listeners run in (it is the order the old logic.ts imported their nets). Keep it.
 import type { ModuleDef } from './module';
+import servers from './servers/module';
 import session from './session/module';
 import characterSelect from './character_select/module';
 import hero from './hero/module';
@@ -29,6 +30,7 @@ import muHelper from './mu_helper/module';
 import band from './band/module';
 
 export const MODULES: readonly ModuleDef[] = [
+  servers,
   session,
   characterSelect,
   hero,

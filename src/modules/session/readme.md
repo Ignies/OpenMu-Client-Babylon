@@ -40,12 +40,11 @@ the client-to-server encryption, the login fields and the offline flag.
   from the app and the interface, never a module above it.
 - `sessionStats.ts` listens to `experienceGained` and watches `Store.playerData.money`; it starts
   only when a panel calls `watch()`. A new character name resets it.
-- Store members still used: `playerId`, `playerData.name`, `serverList`, `selectCharacterRequest`,
-  `closeNpcShop`.
+- Store members still used: `playerId`, `playerData.name`, `selectCharacterRequest`, `closeNpcShop`.
 
 ## Packets
 - `Hello`: requests the server list (once).
-- `ServerListResponse`: fills `Store.serverList`.
+- `ServerListResponse`: fills `Servers.serverList`.
 - `ConnectionInfo`: connects to the game server it names.
 - `GameServerEntered`: sets the player id; map-server switch and resume take over here.
 - `LoginResponse`: character list on success, error on the form otherwise.

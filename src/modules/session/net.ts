@@ -5,6 +5,7 @@ import { GameServerEnteredPacket, LoginResponseLoginResultEnum, LoginResponsePac
 import { SessionExit } from './sessionExit';
 import { SessionResume } from './sessionResume';
 import { Store } from '@/app/store';
+import { Servers } from '@/modules/servers';
 import { Session } from './state';
 import { AppState, UIState } from '@/app/uiState';
 import { gameServerTarget } from '../servers/serverConfig';
@@ -18,7 +19,7 @@ export function installNet(): void {
   EventBus.on('Hello', () => {
     if (serverListRequested) return;
     serverListRequested = true;
-    Store.updateServerListRequest();
+    Servers.updateServerListRequest();
   });
 
   EventBus.on('GameServerEntered', bytes => {
@@ -51,7 +52,7 @@ export function installNet(): void {
     const p = new ServerListResponsePacket(bytes);
     const servers = p.getServers(p.ServerCount);
     runInAction(() => {
-      Store.serverList = servers;
+      Servers.serverList = servers;
     });
   });
 

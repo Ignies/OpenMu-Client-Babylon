@@ -12,7 +12,7 @@ import { MuWindows } from '@/controllers/interface/windowManager';
  */
 import { observer } from 'mobx-react-lite';
 import { t } from '@/i18n';
-import { Store } from '@/app/store';
+import { Servers } from '@/modules/servers';
 import { Session } from '@/modules/session';
 import {
   MAX_PASSWORD_LENGTH,
@@ -199,7 +199,7 @@ export const V097dLoginPage = observer(() => {
           <button type="submit" className="v097d-login-submit" tabIndex={-1} />
         </form>
 
-        {Store.selectedServer && (
+        {Servers.selectedServer && (
           <span
             className="v097d-login-server"
             style={{
@@ -209,7 +209,7 @@ export const V097dLoginPage = observer(() => {
               height: SERVER_TAB.height,
             }}
           >
-            {`${Store.selectedServer.name} ${Store.selectedServer.channel}`}
+            {`${Servers.selectedServer.name} ${Servers.selectedServer.channel}`}
           </span>
         )}
 

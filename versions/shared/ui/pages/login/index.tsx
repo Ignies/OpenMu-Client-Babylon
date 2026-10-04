@@ -4,7 +4,7 @@ import { t } from '@/i18n';
 import { playUiSound, uiClick } from '@/controllers/sound/sfx';
 import './style.less';
 import { observer } from 'mobx-react-lite';
-import { Store } from '@/app/store';
+import { Servers } from '@/modules/servers';
 import { Session } from '@/modules/session';
 import { MsgBox } from '@/controllers/interface';
 import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH } from '@/modules/servers/serverAccounts';
@@ -159,15 +159,15 @@ export const LoginPage = observer(() => {
         className="login-win"
       >
         {/* GlobalText 460: "%s Server %d" - the server picked on the list. */}
-        {Store.selectedServer && (
+        {Servers.selectedServer && (
           <MuText
             face="fix"
             className="login-server-line"
             style={{ left: SERVER_LINE.x, top: SERVER_LINE.y }}
             text={
-              Store.selectedServer.channelName
-                ? `${Store.selectedServer.name} - ${Store.selectedServer.channelName}`
-                : `${Store.selectedServer.name} Ch. ${Store.selectedServer.channel}`
+              Servers.selectedServer.channelName
+                ? `${Servers.selectedServer.name} - ${Servers.selectedServer.channelName}`
+                : `${Servers.selectedServer.name} Ch. ${Servers.selectedServer.channel}`
             }
           />
         )}

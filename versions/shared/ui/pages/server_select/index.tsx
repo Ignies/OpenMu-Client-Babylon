@@ -2,7 +2,7 @@ import { t } from '@/i18n';
 import './style.less';
 import { useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Store } from '@/app/store';
+import { Servers } from '@/modules/servers';
 import { Session } from '@/modules/session';
 import { ConnectionInfoRequestPacket } from '@versions/shared/packets/ConnectServerPackets';
 import {
@@ -73,8 +73,8 @@ export const ServersPage = observer(() => {
   const published = ServerConfig.active.servers;
 
   const groups = useMemo(
-    () => groupServers(Store.serverList, published ?? []),
-    [Store.serverList, published]
+    () => groupServers(Servers.serverList, published ?? []),
+    [Servers.serverList, published]
   );
 
   const activeGroup =
@@ -84,7 +84,7 @@ export const ServersPage = observer(() => {
     // `SetSelectServer`: what the login window prints under its title.
     const group = groups.find(g => g.servers.some(s => s.ServerId === serverId));
     const channel = group?.servers.find(s => s.ServerId === serverId);
-    Store.selectedServer = {
+    Servers.selectedServer = {
       name:
         group?.name ??
         t('servers.serverName', { number: (serverId >> 8) + 1 }),
