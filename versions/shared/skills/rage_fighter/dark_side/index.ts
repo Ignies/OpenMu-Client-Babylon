@@ -3,23 +3,38 @@ import { beginDarkSide, darkSidePendingSkill, isDarkSide, nextDarkSideHit, obser
 import { MODEL, RGBS, SHADE_MOTES, TEX } from '@/controllers/fx/recipes';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
-import { entityPos, entityYaw } from '@/controllers/fx/core';
-import { flash, flying, particles, perTick, seq, slash, ticks } from '@/controllers/skills/visuals';
+import { entityGone, entityPos, entityYaw } from '@/controllers/fx/core';
+import { IMPACT_HEIGHT, after, flash, flying, particles, perTick, seq, slash, ticks, type Step } from '@/controllers/skills/visuals';
 
 import { A } from '@/controllers/combat/recipes';
+
+/**
+ * The afterimage (CDummyUnit, MonkSystem.cpp:1479-1498) advances its frame 0.05 a call; DarksideRendering bursts
+ * BITMAP_DAMAGE2 on the target while `(int)(frame * 10)` is 10 and sends the dark MODEL_SHOCKWAVE01 (Light 0.2) while
+ * it is 15 (:811-826). The original calls it per rendered frame; here a call is a 25 Hz tick: ticks 20-21 and 30-31.
+ */
+const BURST_TICKS = [20, 21];
+const WAVE_TICKS = [30, 31];
+
+const wave: Step = (_at, c) => {
+  if (entityGone(c.caster)) return;
+  effects.spawn('model', c.scene, entityPos(c.caster, 0.05, new Vector3()), { model: MODEL.shockwave, seconds: ticks(12), scale: 0.8, colour: [0.25, 0.2, 0.3], follow: flying(c, 0.05, perTick(60)), yaw: entityYaw(c.caster) });
+};
+const burst: Step = (_at, c) => {
+  const target = c.target;
+  if (!target || entityGone(target) || entityGone(c.caster)) return;
+  seq(flash(TEX.damage2, RGBS.shade, 1.3, 0.4), particles({ recipe: SHADE_MOTES, count: 20 }))(entityPos(target, IMPACT_HEIGHT, new Vector3()), c);
+};
 
 export default defineSkill({
   id: 263,
   name: "Dark Side",
   // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
   lookAliases: [559],
-  // 263 Dark Side: MODEL_SHOCKWAVE01 sub3 dark wave (Light 0.2) chasing the target + BITMAP_DAMAGE2 bursts.
+  // 263 Dark Side: each blow, the dark wave and the BITMAP_DAMAGE2 bursts on the afterimage's frame (see above).
   visual: {
-    cast: seq(
-      slash(RGBS.shade, TEX.motionBlur, 0.8),
-      (_at, c) => effects.spawn('model', c.scene, entityPos(c.caster, 0.05, new Vector3()), { model: MODEL.shockwave, seconds: ticks(12), scale: 0.8, colour: [0.25, 0.2, 0.3], follow: flying(c, 0.05, perTick(60)), yaw: entityYaw(c.caster) })
-    ),
-    impact: seq(flash(TEX.damage2, RGBS.shade, 1.3, 0.4), particles({ recipe: SHADE_MOTES, count: 20 })),
+    cast: seq(slash(RGBS.shade, TEX.motionBlur, 0.8), ...WAVE_TICKS.map(t => after(ticks(t), wave))),
+    impact: seq(...BURST_TICKS.map(t => after(ticks(t), burst))),
   },
   sound: 'Sound/Ragefighter/Rage_Darkside', // Dark Side
   clip: { ground: A.PLAYER_SKILL_DARKSIDE_READY }, // Dark Side

@@ -3331,9 +3331,9 @@ exports[`skill tables golden > skill 261 1`] = `
     248,
   ],
   "delay": null,
-  "heroSound": "Sound/Ragefighter/Rage_Stamp",
+  "heroSound": null,
   "light": "0/0 12438107cd988e1a",
-  "sound": "Sound/Ragefighter/Rage_Stamp",
+  "sound": null,
   "stepIn": "midClip",
   "target": "enemy",
 }
@@ -3443,9 +3443,9 @@ exports[`skill tables golden > skill 269 1`] = `
     137,
   ],
   "delay": null,
-  "heroSound": "Sound/battlecastle/sCHaveyBlow",
+  "heroSound": "Sound/sKnightSkill2",
   "light": "0/0 12438107cd988e1a",
-  "sound": "Sound/battlecastle/sCHaveyBlow",
+  "sound": "Sound/sKnightSkill2",
   "stepIn": "cast",
   "target": "enemy",
 }

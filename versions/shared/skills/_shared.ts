@@ -177,6 +177,10 @@ export const lightFollow = (src: PointSource): ((out: { x: number; y: number; z:
 };
 
 export const groundY = (x: number, z: number): number => storeRef().world?.getTerrainHeight(x, z) ?? 0;
+/** The hero's entity, for a rule that reads his own clip (the Dark Side follow-ups). */
+export const heroEntity = (): Entity | undefined => storeRef().world?.playerEntity ?? undefined;
+/** The map the hero is on (`gMapManager.WorldActive`), for a sound only one map loads. */
+export const currentMap = (): number | undefined => storeRef().world?.mapIndex;
 
 /** `src` dropped onto the terrain, a hair above it. */
 export const onGround = (src: PointSource): PointSource => out => {
@@ -196,8 +200,10 @@ export const lit = (body: number, blendMeshLight: (tick: number) => number) => (
  * `AnimationFrame >= 1`), or `maxTicks` after the packet, when `AttackTime` reaches 15 by itself
  * (ZzzCharacter.cpp:3044-3063, :4132-4141). A caster that has left the clip fires at once. `onTimeout: false` for a
  * step the original draws in AttackStage on the key only (Fire Slash, Spiral Slash): at `maxTicks` it is dropped.
+ * `onLeave: 'drop'` for a step an effect draws while its owner plays the clip, dropped when the owner leaves it
+ * first (the Rage Fighter effects, MoveHandlers.cpp:9312-9380).
  */
-export const whenClipKey = (action: PlayerAction, key: number, maxTicks: number, step: Step, onTimeout = true): Step => (at, c) => {
+export const whenClipKey = (action: PlayerAction, key: number, maxTicks: number, step: Step, onTimeout = true, onLeave: 'fire' | 'drop' = 'fire'): Step => (at, c) => {
   const p = at.clone();
   const t0 = fxNow();
   let n = 0;
@@ -208,7 +214,11 @@ export const whenClipKey = (action: PlayerAction, key: number, maxTicks: number,
     const m = c.caster.modelObject;
     const inClip = !!m && m.CurrentAction === action;
     seen ||= inClip;
-    if ((inClip && m!.actionFrame() >= key) || (seen && !inClip)) {
+    if (seen && !inClip) {
+      if (onLeave === 'fire') step(p, c);
+      return;
+    }
+    if (inClip && m!.actionFrame() >= key) {
       step(p, c);
       return;
     }
@@ -222,6 +232,33 @@ export const whenClipKey = (action: PlayerAction, key: number, maxTicks: number,
   };
   check();
 };
+/**
+ * `fn(frame, tick)` on each tick after the packet (1, 2, ...) while the caster plays `action`: an effect whose Move
+ * reads its owner's clip and dies once the owner leaves it (MODEL_DRAGON_KICK_DUMMY, MoveHandlers.cpp:9828-9834).
+ * It waits for the clip as `whenClipKey` does, and ends after `maxTicks`. `onEnd` runs once when it ends.
+ */
+export function eachClipTick(c: SkillContext, action: PlayerAction, maxTicks: number, fn: (frame: number, tick: number) => void, onEnd?: () => void): void {
+  const t0 = fxNow();
+  let n = 0;
+  let seen = false;
+  const tick = (): void => {
+    n++;
+    const m = c.caster.modelObject;
+    const inClip = !entityGone(c.caster) && m?.CurrentAction === action;
+    seen ||= inClip;
+    if (entityGone(c.caster) || (seen && !inClip)) {
+      onEnd?.();
+      return;
+    }
+    if (inClip && m) fn(m.actionFrame(), n);
+    if (n >= maxTicks) {
+      onEnd?.();
+      return;
+    }
+    delay(t0 + ticks(n + 1) - fxNow(), tick);
+  };
+  delay(ticks(1), tick);
+}
 /** Player `Weapon[0].LinkBone` (ZzzCharacter.cpp:12067-12071). */
 export const WEAPON_LINK_BONE = 33;
 
