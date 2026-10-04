@@ -1,9 +1,8 @@
-import type { BunFile, FileSink } from 'bun';
+import type { FileSink } from 'bun';
 
 const PREDEFINED_ENUMS = new Set<string>(['CharacterClassNumber']);
 
 let rewriter = new HTMLRewriter();
-let file: BunFile = null as any;
 let writer: FileSink = null as any;
 
 // LeftShifted ?
@@ -229,7 +228,6 @@ function getSizeOfStructure(p: Packet, s: Structure): string | number {
 
 function generateArrayOfStructuresReaderCode(p: Packet, fieldName: string, index: number, s: Structure, fieldIndexerName: string, countField?: string): string {
   const structureSize = s.length;
-  const hasSize = structureSize != null;
 
   const estSize = getSizeOfStructure(p, s);
 
@@ -238,7 +236,7 @@ function generateArrayOfStructuresReaderCode(p: Packet, fieldName: string, index
     
     let ${fieldName}_StartOffset = ${fieldIndexerName} + ${index};
     for (let i = 0; i < ${fieldName}_count; i++) {
-${s.fields.map(({ type, name, typeName, length, itemCountField, index, leftShifted }, fieldIndex, fields) => {
+${s.fields.map(({ type, name, typeName, length, itemCountField, index, leftShifted }) => {
     if (type === 'Structure[]') {
       const struct = p.structures.find(s => s.name === typeName) ?? globalStructures.find(s => s.name === typeName);
 
@@ -300,6 +298,18 @@ function generateStructureDefinition(p: Packet, s: Structure): string {
   });
 
   return structureFields + "\n}";
+}
+
+// Removes the private `_readString` / `_readDataView` methods from a class body that never calls them.
+function dropUnusedHelpers(body: string): string {
+  for (const name of ['_readString', '_readDataView']) {
+    if (body.includes(`this.${name}(`)) continue;
+    const start = body.indexOf(`\n  private ${name} (`);
+    if (start < 0) continue;
+    const end = body.indexOf('\n  }\n', start) + '\n  }\n'.length;
+    body = body.slice(0, start) + body.slice(end);
+  }
+  return body;
 }
 
 rewriter.on("packetDefinitions", {
@@ -367,6 +377,11 @@ ${packetEnum.values.map(v => {
         });
 
         writer.flush();
+
+        // Buffer the class so the read helpers no getter calls can be dropped (noUnusedLocals).
+        const fileWriter = writer;
+        const parts: string[] = [];
+        writer = { write: (s: string) => (parts.push(s), 0) } as unknown as FileSink;
 
         writer.write(
           `export class ${packet.name}Packet {
@@ -632,7 +647,6 @@ ${packetEnum.values.map(v => {
             default: {
               // Handle Arrays
               if (type.endsWith("[]")) {
-                const arrayStartIndex = index;
 
                 const s = packet.structures.find((s) => s.name === typeName) ?? globalStructures.find(s => s.name === typeName);
                 if (!s) {
@@ -645,13 +659,15 @@ ${packetEnum.values.map(v => {
                 // console.log(`generate get ${name}`, structureType);
 
                 //array getter
+                const readerCode = generateArrayOfStructuresReaderCode(packet, name, index, s, 'bi');
+                // `b` only when a field reads the buffer directly (strings go through `_readString`).
+                const bufferLine = /\bb\./.test(readerCode) ? `\n    const b = this.buffer;` : '';
                 writer.write(
                   `
-  get${name}(count: number${itemCountField != null ? ` = this.${itemCountField}` : ''}): ${structureType}[]{
-    const b = this.buffer;
+  get${name}(count: number${itemCountField != null ? ` = this.${itemCountField}` : ''}): ${structureType}[]{${bufferLine}
     let bi = 0;
 
-    ${generateArrayOfStructuresReaderCode(packet, name, index, s, 'bi')}
+    ${readerCode}
     
     return ${name};
   }`);
@@ -670,6 +686,8 @@ ${packetEnum.values.map(v => {
 
         writer.write(`}
 `);
+        writer = fileWriter;
+        writer.write(dropUnusedHelpers(parts.join('')));
       });
 
       writer.write(`
@@ -788,19 +806,19 @@ rewriter.on("packet > fields field", {
 registerFieldHandler('packet', getLastField);
 
 rewriter.on("packet structures structure", {
-  element(el) {
+  element() {
     packet.structures.push({} as any);
   },
 });
 
 rewriter.on("packet structures structure fields", {
-  element(el) {
+  element() {
     getLastStructure().fields = [];
   },
 });
 
 rewriter.on("packet structures structure > fields field", {
-  element(el) {
+  element() {
     getLastStructure().fields.push({} as any);
   },
 });
@@ -832,19 +850,19 @@ registerFieldHandler('packet structure', getLastFieldOfStructure);
 //
 
 rewriter.on("packet > enums enum", {
-  element(el) {
+  element() {
     packet.enums.push({} as any);
   },
 });
 
 rewriter.on("packet > enums enum > values", {
-  element(el) {
+  element() {
     getLastEnum().values = [];
   },
 });
 
 rewriter.on("packet > enums enum > values enumValue", {
-  element(el) {
+  element() {
     getLastEnum().values.push({} as any);
   },
 });
@@ -911,7 +929,7 @@ rewriter.on("packetDefinitions > structures structure fields", {
 });
 
 rewriter.on("packetDefinitions > structures structure > fields field", {
-  element(el) {
+  element() {
     getLastGlobalStructure().fields.push({} as any);
   },
 });
@@ -962,13 +980,13 @@ rewriter.on("packetDefinitions > enums > enum", {
 });
 
 rewriter.on("packetDefinitions > enums > enum > values", {
-  element(el) {
+  element() {
     getLastGlobalEnum().values = [];
   },
 });
 
 rewriter.on("packetDefinitions > enums > enum > values enumValue", {
-  element(el) {
+  element() {
     getLastGlobalEnum().values.push({} as any);
   },
 });
@@ -1014,32 +1032,37 @@ const files = [
   "ClientToServerPackets.xml",
 ];
 
-import { unlinkSync } from "node:fs";
+import { writeFileSync } from "node:fs";
 import { byteToString } from '@/controllers/assets/download';
 
+// Imports a generated file may need; each file keeps only the ones its code uses (noUnusedLocals).
+const HEADER_IMPORTS: [string, string[]][] = [
+  ['../../../src/core/types', ['CharacterClassNumber']],
+  ['../../../src/core/binaryUtils', ['SetByteValue', 'GetByteValue', 'GetBoolean', 'SetBoolean']],
+];
 
 for (const name of files) {
   packetsVarName = name.split('.')[0];
   const csFile = Bun.file(__dirname + "/packetsDefinitions/" + name);
   const tsFile = __dirname + '/' + packetsVarName + '.ts';
-  try {
-    unlinkSync(tsFile);
-  } catch (e) { }
   const csPacketsString = await csFile.text(); // contents as a string
 
-  file = Bun.file(tsFile);
-  writer = file.writer();
-
-  writer.write(`
-import { CharacterClassNumber } from '../../../src/core/types';
-import { SetByteValue, GetByteValue, GetBoolean, SetBoolean } from '../../../src/core/binaryUtils';
-
-`);
+  // The whole file is built in memory, then its header gets the imports the body uses.
+  const parts: string[] = [];
+  writer = { write: (s: string) => (parts.push(s), 0), flush: () => 0 } as unknown as FileSink;
 
   packet = null as any;
   packets.length = 0;
 
   rewriter.transform(new Response(csPacketsString));
+
+  const body = parts.join('');
+  const header = HEADER_IMPORTS
+    .map(([from, names]) => [from, names.filter(n => new RegExp(`\\b${n}\\b`).test(body))] as const)
+    .filter(([, names]) => names.length)
+    .map(([from, names]) => `import { ${names.join(', ')} } from '${from}';\n`)
+    .join('');
+  writeFileSync(tsFile, `\n${header}\n${body}`);
 }
 
 // No index here: the active version's packet set is picked by src/controllers/net/packets.ts.
