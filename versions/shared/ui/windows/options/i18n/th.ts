@@ -331,4 +331,10 @@ export default {
   'exit.confirmServers': 'ออกจากเกมและกลับไปที่การเลือกเซิร์ฟเวอร์หรือไม่',
   'exit.confirmCharacters': 'ออกจากเกมและกลับไปที่การเลือกตัวละครหรือไม่',
   'options.performanceReadout': 'ข้อมูลประสิทธิภาพ',
+  'options.page.fidelity': 'ความเที่ยงตรง',
+  'options.fidelity': 'ความเที่ยงตรง',
+  'options.fidelityCustom': 'ความเที่ยงตรง (กำหนดเอง)',
+  'options.help.fidelity':
+    'คลาสสิกคือไคลเอนต์ต้นฉบับทุกอย่าง ปรับปรุงและอัลตราเปิดการปรับปรุงด้านล่าง เปลี่ยนรายการใดก็จะเป็นแบบกำหนดเอง',
+  'options.section.improvements': 'การปรับปรุง',
 } satisfies Partial<Record<keyof typeof en, string>>;

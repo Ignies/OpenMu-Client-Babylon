@@ -4,6 +4,7 @@ import {
   bindAbsentModels,
 } from '../shared/objectVariants';
 import { ENUM_WORLD } from '@/core/types';
+import { isOn } from '@/controllers/fidelity';
 import { LOGIN_SCENE_ABSENT_MODELS, LOGIN_SCENE_PLAY_SPEEDS } from './spec';
 import { LoginChandelierObject } from './chandelierObject';
 import { LoginWallTorchObject } from './wallTorchObject';
@@ -64,7 +65,8 @@ export async function createLoginScene(world: World) {
 
   // World74's lit chandeliers and wall torches (ours on this world; see the classes).
   if (world.mapIndex === ENUM_WORLD.WD_73NEW_LOGIN_SCENE) {
-    tiles[157] = LoginChandelierObject;
+    // Classic: cold, case 157 returns early here (GMEmpireGuardian4.cpp:1050-1053).
+    if (isOn('loginChandeliers')) tiles[157] = LoginChandelierObject;
     tiles[37] = LoginWallTorchObject;
   }
 }

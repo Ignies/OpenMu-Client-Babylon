@@ -355,4 +355,10 @@ export default {
   'exit.confirmServers': 'Opuścić grę i wrócić do wyboru serwera?',
   'exit.confirmCharacters': 'Opuścić grę i wrócić do wyboru postaci?',
   'options.performanceReadout': 'Wskaźnik wydajności',
+  'options.page.fidelity': 'Wierność',
+  'options.fidelity': 'Wierność',
+  'options.fidelityCustom': 'Wierność (Własna)',
+  'options.help.fidelity':
+    'Klasyczne to dokładnie oryginalny klient. Ulepszone i Ultra włączają ulepszenia poniżej; zmień jedno, a ustawienie stanie się Własne.',
+  'options.section.improvements': 'Ulepszenia',
 } satisfies Partial<Record<keyof typeof en, string>>;

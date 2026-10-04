@@ -18,6 +18,7 @@ spawn an effect, time a swing), never which skill, item or window does it. The f
 | [assets](assets/readme.md) | data folder, downloads, BMD, texture packs | modules |
 | [camera](camera/readme.md) | camera layers (mouse look, Battle Castle, PK field) | `index.ts` functions |
 | [combat](combat/readme.md) | attack timing, ranges, cast targets, skill hook slots | `combat` |
+| [fidelity](fidelity/readme.md) | Classic / Enhanced / Ultra, the improvement registry, `isOn(id)` | `index.ts` functions |
 | [fx](fx/readme.md) | `effects.spawn` and every effect layer | `effects` |
 | [interface](interface/readme.md) | window registry, shared widgets, hotkeys, cursor | `windows.ts` |
 | [item_fx](item_fx/readme.md) | item materials, glow tiers, weapon trails | modules |

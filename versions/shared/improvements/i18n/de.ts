@@ -1,0 +1,27 @@
+/** German text of the improvements. */
+
+import type en from './en';
+
+export default {
+  'fidelity.otherPlayersOwnSpeed': 'Andere Spieler mit eigenem Tempo',
+  'fidelity.otherPlayersOwnSpeed.hint':
+    'Andere Spieler schlagen und zaubern mit ihrem eigenen Angriffs- und Magietempo. Klassisch: alle bewegen sich in deinem Tempo, wie im Original.',
+  'fidelity.masterBuffCancel': 'Meister-Buffs enden beim Aufheben',
+  'fidelity.masterBuffCancel.hint':
+    'Ein Meister- oder Rage-Fighter-Buff verschwindet, sobald der Server ihn aufhebt. Klassisch: er bleibt, bis sein Timer abläuft.',
+  'fidelity.archangelFeathers': 'Erzengel-Federn',
+  'fidelity.archangelFeathers.hint':
+    'Die Erzengel in Blood Castle verlieren Federn und ihr Leuchten am Boden ist größer. Klassisch: das kleine Original-Leuchten, keine Federn.',
+  'fidelity.loginChandeliers': 'Brennende Kronleuchter beim Login',
+  'fidelity.loginChandeliers.hint':
+    'Die Kronleuchter im Login-Bildschirm brennen. Klassisch: sie sind kalt, wie im Original.',
+  'fidelity.heldHitRequest': 'Treffer kommen mit dem Schlag',
+  'fidelity.heldHitRequest.hint':
+    'Dein Angriff erreicht den Server, wenn der Schlag trifft, sodass der Schaden zum Schwung passt. Klassisch: er wird beim Klick gesendet.',
+  'fidelity.wingShadows': 'Flügelschatten',
+  'fidelity.wingShadows.hint':
+    'Flügel werfen einen Schatten. Klassisch: kein Schatten, wie im Original.',
+  'fidelity.torchCrackle': 'Fackelgeräusche',
+  'fidelity.torchCrackle.hint':
+    'Brennende Fackeln knistern, wenn du in der Nähe bist. Klassisch: Fackeln sind stumm.',
+} satisfies Partial<Record<keyof typeof en, string>>;

@@ -23,6 +23,7 @@ import { playTeleportAnimation } from '../skills/net';
 import { playerPlaySpeed } from '@/controllers/anim/playSpeed';
 import { runInAction } from 'mobx';
 import { heldWeapons } from '@/controllers/actors';
+import { isOn } from '@/controllers/fidelity';
 
 /** `SetAction_Fenrir_Damage` (ZzzAI.cpp:283-311): the rider's flinch, by what is in hand. */
 function fenrirDamageAction(obj: Entity): PlayerAction {
@@ -58,7 +59,7 @@ function markKilled(
     sink: 0,
     killedByHero,
     // A plain blow's request went out on the blow, not on the click (combat attackTiming).
-    held: killedByHero && skill === 0 ? combat.blowHeldTicks : 0,
+    held: killedByHero && skill === 0 && isOn('heldHitRequest') ? combat.blowHeldTicks : 0,
     skill,
     killerNetId,
     shattered: false,

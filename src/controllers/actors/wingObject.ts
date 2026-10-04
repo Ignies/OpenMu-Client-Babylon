@@ -18,6 +18,7 @@ import {
   type HeldLook,
   type HeldPoint,
 } from '../fx/effectParticles';
+import { isOn } from '../fidelity';
 import { effects } from '../fx';
 import { TICK, darkCardGain, lightCardGain } from '../fx/core';
 import { spawnModel } from '../fx/model';
@@ -110,8 +111,10 @@ export class WingObject extends ModelObject {
    * Wings of Spirits (`o->BlendMesh = 0`, ZzzObject.cpp:5276-5284) the
    * additive card is the only mesh in the model, so the ordinary rule would
    * leave those two wings shadowless while every other pair cast.
+   * Classic (`wingShadows` off): no shadow, read when the wing is built.
    */
   ShadowBlendMeshCasts = true;
+  CastsShadow = isOn('wingShadows');
 
   #wake: BonedParticleEmitter | null = null;
   #passes: LivePass[] = [];

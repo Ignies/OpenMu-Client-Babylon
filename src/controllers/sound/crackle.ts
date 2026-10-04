@@ -6,6 +6,7 @@ import { busGain, type SoundBus } from './buses';
 import type { Sounds } from './recipes';
 import type { SoundLayer } from './layer';
 import { listenerHero } from './listener';
+import { isOn } from '../fidelity';
 
 /**
  * Torch crackle: a looping fire sound under the nearest flickering lights the lighting
@@ -129,9 +130,9 @@ function update(map: ENUM_WORLD, dt: number): void {
   const hz = hero.transform.pos.z;
   const silent2 = SILENT_TILES * SILENT_TILES;
 
-  // The ambience slider at 0 leaves nothing sounding, so the pass below
-  // stops every slot rather than looping them at silence.
-  const gain = busGain(BUS);
+  // The ambience slider at 0 (or Classic, no torch sound) leaves nothing
+  // sounding, so the pass below stops every slot rather than looping them at silence.
+  const gain = isOn('torchCrackle') ? busGain(BUS) : 0;
 
   sounding = 0;
   for (const flame of gain > 0 ? flames : []) {

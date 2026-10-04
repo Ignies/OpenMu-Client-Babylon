@@ -39,7 +39,8 @@ _shared.ts                      helpers for several classes
 - Deliberate deviation: `effectAliases` (on the base skill) and the Rage Fighter `effect`s 129-131
   let a master or Rage Fighter `MagicEffectCancelled` drop its buff. The original's
   ReceiveMagicFinish has those cases but reads the skill as a BYTE (WSclient.cpp:3884), so ids 256+
-  never match there and the buff stayed on until its timer ran out.
+  never match there and the buff stayed on until its timer ran out. It is the `masterBuffCancel`
+  improvement (`versions/shared/improvements/`): on Classic `cancelledEffects` drops nothing for 256+.
 - Classes: `dark_wizard`, `dark_knight`, `fairy_elf`, `magic_gladiator`, `dark_lord`, `summoner`,
   `rage_fighter`, plus `monsters` (monster-only skills) and `common` (every class or none).
 - `defineSkill` fields are listed in [docs/content.md](../../../docs/content.md).

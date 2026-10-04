@@ -103,7 +103,8 @@ never which skill or item asks for it.
   category is chosen per play and folded into that play's volume.
 - `crackle.ts`: the original has no torch sound (no `SOUND_FIRE`, `CreateFire` plays nothing).
   This loops the Flame skill's `sFlame` under every lit source whose recipe flickers, rescanned
-  every 0.5 s, capped to the nearest 4 and silent past 12 tiles.
+  every 0.5 s, capped to the nearest 4 and silent past 12 tiles. It is the `torchCrackle`
+  improvement (`controllers/fidelity`): silent on Classic.
 - `drops.ts`: a jewel rings (SOUND_JEWEL01), a Gemstone rings differently (SOUND_JEWEL02), zen
   jingles (SOUND_DROP_GOLD01), everything else thuds (SOUND_DROP_ITEM01). The original sounds
   every fresh drop; the `dropSound*` options narrow that. Picking an item up keeps its interface

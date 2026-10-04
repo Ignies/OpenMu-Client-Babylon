@@ -65,6 +65,8 @@ controller, and the HUD elements in `../hud`.
 - add a window: new folder with `index.tsx` and `window.ts`; pick an unused `order`.
 - change or add a window's words: its `i18n/en.ts` and every other `<code>.ts` there
   ([docs/how_to/add_text.md](../../../../docs/how_to/add_text.md)).
+- the Options window's Fidelity page builds its checks from the improvement registry
+  (`options/fidelity.tsx`); a new improvement needs no row there.
 - one version draws it differently: export it in `windows` from `versions/<id>/ui` with the same id.
 
 ## Tests

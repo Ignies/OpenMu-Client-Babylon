@@ -69,7 +69,8 @@ gusts from `ambientSchedule.ts`, rolled from `serverNow()` so every client sees 
 Clip speeds come from `controllers/anim`. The attack and magic speeds that scale them are another
 player's own when the extended scope packet sent them (its `speeds` component), else the hero's: the
 original's `SetAttackSpeed` writes `CharacterAttribute` into the one `MODEL_PLAYER` action table
-(ZzzCharacter.cpp:812-1028), so there everyone swings at the hero's rate. That deviation is described
+(ZzzCharacter.cpp:812-1028), so there everyone swings at the hero's rate (and here on Classic Fidelity:
+`isOn('otherPlayersOwnSpeed')`). That deviation is described
 in `controllers/anim/readme.md`.
 
 ### ceilingHideSystem.ts

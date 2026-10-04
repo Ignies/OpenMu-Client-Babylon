@@ -150,7 +150,7 @@ here, so `debris` comes before `model` in the list. Spawned from `deathVisuals.t
 ### feathers.ts
 Jitter up to 40 cm per axis, random tumble 0..5° a tick, `Alpha` 0.6..0.8. The original drops these
 from dark wings and Desair, never an NPC; the archangel release is a client addition with a slower
-fall and a longer life. Each feather is a `spawnModel`, so `feathers` comes before `model`.
+fall and a longer life (the `archangelFeathers` improvement: none on Classic). Each feather is a `spawnModel`, so `feathers` comes before `model`.
 Spawned from `versions/shared/monsters/_archangels/model.ts`.
 
 ### glow.ts

@@ -1,0 +1,27 @@
+/** Korean text of the improvements. */
+
+import type en from './en';
+
+export default {
+  'fidelity.otherPlayersOwnSpeed': '다른 플레이어는 자기 속도로',
+  'fidelity.otherPlayersOwnSpeed.hint':
+    '다른 플레이어가 자신의 공격 속도와 마법 속도로 공격하고 시전합니다. 클래식: 원작처럼 모두가 내 속도로 움직입니다.',
+  'fidelity.masterBuffCancel': '마스터 버프는 취소 시 사라짐',
+  'fidelity.masterBuffCancel.hint':
+    '마스터나 레이지파이터 버프가 서버에서 취소되는 즉시 사라집니다. 클래식: 시간이 다 될 때까지 남아 있습니다.',
+  'fidelity.archangelFeathers': '대천사의 깃털',
+  'fidelity.archangelFeathers.hint':
+    '블러드 캐슬의 대천사가 깃털을 흩날리고 바닥의 빛이 더 넓어집니다. 클래식: 원작의 작은 빛만 있고 깃털은 없습니다.',
+  'fidelity.loginChandeliers': '로그인 화면 샹들리에 점등',
+  'fidelity.loginChandeliers.hint':
+    '로그인 화면의 샹들리에에 불이 켜집니다. 클래식: 원작처럼 꺼져 있습니다.',
+  'fidelity.heldHitRequest': '타격과 함께 들어가는 공격',
+  'fidelity.heldHitRequest.hint':
+    '공격이 타격 순간에 서버로 전송되어 대미지가 동작과 맞게 표시됩니다. 클래식: 클릭할 때 전송됩니다.',
+  'fidelity.wingShadows': '날개 그림자',
+  'fidelity.wingShadows.hint':
+    '날개가 그림자를 드리웁니다. 클래식: 원작처럼 그림자가 없습니다.',
+  'fidelity.torchCrackle': '횃불 소리',
+  'fidelity.torchCrackle.hint':
+    '가까이 있는 횃불이 타닥거립니다. 클래식: 횃불은 소리가 없습니다.',
+} satisfies Partial<Record<keyof typeof en, string>>;

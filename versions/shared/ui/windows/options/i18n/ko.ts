@@ -296,4 +296,10 @@ export default {
   'exit.confirmServers': '게임을 끝내고 서버 선택으로 돌아갈까요?',
   'exit.confirmCharacters': '게임을 끝내고 캐릭터 선택으로 돌아갈까요?',
   'options.performanceReadout': '성능 표시',
+  'options.page.fidelity': '충실도',
+  'options.fidelity': '충실도',
+  'options.fidelityCustom': '충실도 (사용자 지정)',
+  'options.help.fidelity':
+    '클래식은 원작 클라이언트 그대로입니다. 향상과 울트라는 아래 개선 사항을 켭니다. 하나라도 바꾸면 사용자 지정이 됩니다.',
+  'options.section.improvements': '개선 사항',
 } satisfies Partial<Record<keyof typeof en, string>>;

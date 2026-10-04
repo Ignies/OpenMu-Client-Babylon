@@ -1,0 +1,27 @@
+/** Russian text of the improvements. */
+
+import type en from './en';
+
+export default {
+  'fidelity.otherPlayersOwnSpeed': 'Другие игроки в своём темпе',
+  'fidelity.otherPlayersOwnSpeed.hint':
+    'Другие игроки бьют и колдуют со своей скоростью атаки и магии. Классика: все двигаются в вашем темпе, как в оригинале.',
+  'fidelity.masterBuffCancel': 'Мастер-баффы снимаются при отмене',
+  'fidelity.masterBuffCancel.hint':
+    'Мастер-бафф или бафф Rage Fighter исчезает, как только сервер его отменяет. Классика: он держится до конца таймера.',
+  'fidelity.archangelFeathers': 'Перья архангелов',
+  'fidelity.archangelFeathers.hint':
+    'Архангелы в Blood Castle роняют перья, а их свечение на земле шире. Классика: небольшое оригинальное свечение, без перьев.',
+  'fidelity.loginChandeliers': 'Горящие люстры при входе',
+  'fidelity.loginChandeliers.hint':
+    'Люстры на экране входа горят. Классика: они потушены, как в оригинале.',
+  'fidelity.heldHitRequest': 'Удар в такт атаке',
+  'fidelity.heldHitRequest.hint':
+    'Ваша атака уходит на сервер в момент удара, и урон появляется вовремя. Классика: отправляется по клику.',
+  'fidelity.wingShadows': 'Тени крыльев',
+  'fidelity.wingShadows.hint':
+    'Крылья отбрасывают тень. Классика: без тени, как в оригинале.',
+  'fidelity.torchCrackle': 'Звук факелов',
+  'fidelity.torchCrackle.hint':
+    'Горящие факелы потрескивают, когда вы рядом. Классика: факелы беззвучны.',
+} satisfies Partial<Record<keyof typeof en, string>>;

@@ -362,4 +362,10 @@ export default {
   'exit.confirmServers': 'Vuoi uscire dal gioco e tornare alla scelta del server?',
   'exit.confirmCharacters': 'Vuoi uscire dal gioco e tornare alla scelta del personaggio?',
   'options.performanceReadout': 'Dati prestazioni',
+  'options.page.fidelity': 'Fedeltà',
+  'options.fidelity': 'Fedeltà',
+  'options.fidelityCustom': 'Fedeltà (Personalizzata)',
+  'options.help.fidelity':
+    'Classica è il client originale, identico. Migliorata e Ultra attivano i miglioramenti qui sotto; cambiane uno e il preset diventa Personalizzata.',
+  'options.section.improvements': 'Miglioramenti',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -389,4 +389,10 @@ export default {
   'exit.confirmServers': 'Выйти из игры и вернуться к выбору сервера?',
   'exit.confirmCharacters': 'Выйти из игры и вернуться к выбору персонажа?',
   'options.performanceReadout': 'Показатели работы',
+  'options.page.fidelity': 'Точность',
+  'options.fidelity': 'Точность',
+  'options.fidelityCustom': 'Точность (Своя)',
+  'options.help.fidelity':
+    'Классика - это в точности оригинальный клиент. Улучшенное и Ультра включают улучшения ниже; измените любое, и набор станет Своим.',
+  'options.section.improvements': 'Улучшения',
 } satisfies Partial<Record<keyof typeof en, string>>;

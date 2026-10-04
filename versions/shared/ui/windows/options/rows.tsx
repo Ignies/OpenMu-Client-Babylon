@@ -25,6 +25,7 @@ import { TexturePackSelect } from './texturePackSelect';
 import { blockerOf, type Blocker } from './gating';
 import { rowId, type ButtonRow, type Row } from './catalogue';
 import { Checkbox, FitText, OptionsButton, Slider, Stepper } from './controls';
+import { FidelityPresets, ImprovementCheck, fidelityCustom, toggleImprovement } from './fidelity';
 
 /** The control column: every control starts on the same x. */
 export const CONTROL_WIDTH = 176;
@@ -171,6 +172,12 @@ const Control = observer(
       case 'presets':
         return <Presets actions={actions} />;
 
+      case 'fidelity':
+        return <FidelityPresets width={CONTROL_WIDTH} />;
+
+      case 'improvement':
+        return <ImprovementCheck id={row.id} />;
+
       case 'language':
         return (
           <LanguageSelect
@@ -222,11 +229,16 @@ export const OptionRow = observer(
       }
       if (row.kind === 'toggle') actions.set(row.key, !GameOptions[row.key]);
       if (row.kind === 'fullscreen') toggleFullscreen();
+      if (row.kind === 'improvement') toggleImprovement(row.id);
     };
 
     const clickable =
       (blocker !== null && blocker.target !== null) ||
-      (!inert && (row.kind === 'toggle' || row.kind === 'fullscreen'));
+      (!inert &&
+        (row.kind === 'toggle' || row.kind === 'fullscreen' || row.kind === 'improvement'));
+    // Any improvement set apart from the preset makes it "Custom".
+    const label =
+      row.kind === 'fidelity' && fidelityCustom() ? 'options.fidelityCustom' : row.labelKey;
 
     return (
       <div
@@ -250,7 +262,7 @@ export const OptionRow = observer(
           height={10}
           className="options-row-bullet"
         />
-        <span className="options-row-label">{t(row.labelKey)}</span>
+        <span className="options-row-label">{t(label)}</span>
         <div className="options-row-control" style={{ width: CONTROL_WIDTH }}>
           <Control row={row} inert={inert} actions={actions} />
         </div>
