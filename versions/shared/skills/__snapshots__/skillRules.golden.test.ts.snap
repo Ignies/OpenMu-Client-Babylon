@@ -2172,11 +2172,23 @@ exports[`skill rules golden > sound played when the effect lands 1`] = `
   "459": [
     "Sound/SE_Ch_summoner_weakness",
   ],
+  "46": [
+    "Sound/battlecastle/sCFireArrow",
+  ],
   "460": [
     "Sound/SE_Ch_summoner_innovation",
   ],
   "462": [
     "Sound/SE_Ch_summoner_skill07_lifedrain",
+  ],
+  "53": [
+    "Sound/eSwellLife",
+  ],
+  "67": [
+    "Sound/battlecastle/sDStun",
+  ],
+  "69": [
+    "Sound/battlecastle/sDSwellMana",
   ],
 }
 `;

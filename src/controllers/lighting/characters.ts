@@ -22,6 +22,9 @@ const PRIORITY_CHARACTER = 0;
 /** The blacksmith's forge roll, `Luminosity` 0.6…1.0 in five steps. */
 const FORGE_FLICKER = { min: 0.6, max: 1, steps: 5 };
 
+/** MoveCharacterVisual's roll, `(rand() % 8 + 2) * 0.1`: 0.2…0.9 in eight steps, new every frame (ZzzCharacter.cpp:5698). */
+const FRAME_FLICKER = { min: 0.2, max: 0.9, steps: 8 };
+
 /**
  * `RenderLight`'s breath (ZzzCharacter.cpp:8249) as a `LightPulse`:
  * `sinf(WorldTime * 0.002f) * 0.3f + 0.7f` is `(sin + 1) * 0.3 + 0.1`, so the
@@ -110,6 +113,13 @@ function recipeOf(light: MonsterLight): CharacterLight {
         light.color === 'lightning' ? LIGHTNING_GLOW_RGB : light.color,
         light.steady
       );
+    case 'flicker':
+      // Rerolled every frame, not chased: smoothing 1 takes each roll as it comes.
+      return {
+        ...carried(light.range, light.height ?? BODY_HEIGHT, light.color, true),
+        flicker: FRAME_FLICKER,
+        flickerSmoothing: 1,
+      };
   }
 }
 

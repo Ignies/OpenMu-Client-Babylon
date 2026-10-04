@@ -33,7 +33,7 @@ const HASHES = {
   boids: '97656f6281a53a6923d537a8a2eb80fdf3b362f8aa90f3c6de64bbab9beedf28',
   packetSounds: 'b2ba044b23b516f77ad3d7dd87882521c6105384468e8f6e92798dfc45f26d30',
   warriorGlint: '1389fbfce19304f55df3cdc1db7fb6e86d7c4702b4625de504f1f43bd66dacfe',
-  characterLights: '2d644cdf678f6a41df5d49cfe17f80248bfcb9d22ca18e5b5573efd82c34f983',
+  characterLights: 'b902ca420087248e66c327a109ca93da5c7ecdee74bde201beb512b28ab8b738',
   monsterVisuals: '8da7bfdf16d4841ab28552bc8b72ec7f5d4b453959fc1c4dc1b48ce8a920a639',
   shatterDeaths: '9ef072504d008f0ed2dda2bcc09725dac989e61bae8d6ff73b2f20b5ee6e72e1',
 };

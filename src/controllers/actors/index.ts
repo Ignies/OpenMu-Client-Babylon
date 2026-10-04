@@ -5,6 +5,7 @@ export { registerModelClass } from './modelClasses';
 export { monsterHiddenMesh, monsterModelFile, monsterModelTypeOfNpc, monsterScaleOf } from './monsterModelTable';
 export { MonsterObject } from './monsterObject';
 export { PlayerObject } from './playerObject';
+export type { MapActors } from './mapActors';
 export { GROUP_AXE, GROUP_BOW, GROUP_SHIELD, GROUP_SPEAR, GROUP_SWORD } from './weaponClass';
 
 // ---- NPCs: model resolution, the NPC tables (views of the monster folders), and what NPC classes extend ----

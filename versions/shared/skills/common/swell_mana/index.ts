@@ -5,7 +5,7 @@ import { NO_KEY, Step, afterRelease, atCaster, magicGround, perTick, seq, ticks 
 import { streamerFan } from '../../_shared';
 
 import { A } from '@/controllers/combat/recipes';
-import { MOUNTED_COMMAND } from '../../_shared';
+import { MOUNTED_COMMAND, landingSound } from '../../_shared';
 
 /**
  * Swell Life / Add Mana: 36× CreateJoint(JOINT_SPIRIT sub2, Angle(−10,0,i*10),
@@ -18,7 +18,7 @@ const spiritBurst = (colour: RGB): Step =>
     magicGround(colour, ticks(40), 3)
   );
 
-const manaBurst: Step = afterRelease(atCaster(spiritBurst(RGBS.soul), 1), { clips: NO_KEY });
+const manaBurst: Step = afterRelease(seq(landingSound, atCaster(spiritBurst(RGBS.soul), 1)), { clips: NO_KEY });
 
 export default defineSkill({
   id: 69,
@@ -28,5 +28,8 @@ export default defineSkill({
   // 69 Add Mana (Swell Mana): 36× JOINT_SPIRIT sub21 (= sub2) fan + BITMAP_MAGIC+1 sub10, at the release; no key
   // forces it (ZzzCharacter.cpp:2918, :4239-4258).
   visual: { impact: manaBurst, area: manaBurst },
+  // SOUND_BMS_MANA after the burst (:4257); loaded only in Battle Castle (MapManager.cpp:273), heard on every map here.
+  sound: 'Sound/battlecastle/sDSwellMana',
+  soundOnLanding: true,
   clip: { ground: A.PLAYER_SKILL_VITALITY, ...MOUNTED_COMMAND }, // Mana
 });

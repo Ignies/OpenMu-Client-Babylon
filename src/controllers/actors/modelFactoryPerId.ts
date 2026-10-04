@@ -1,6 +1,7 @@
 import type { Entity, World } from '@/ecs/world';
 import { monsterRegistry, type NpcModel } from '@/controllers/monsters';
 import { loadGLTF } from '@/controllers/assets';
+import { maps } from '@/controllers/maps';
 import { monsterFactoryFor } from './genericMonster';
 import {
   CHARACTER_DEFAULT_SCALE,
@@ -52,12 +53,13 @@ export function resolveModelFactory(typeNumber: number): typeof ModelObject {
 
 /**
  * The `Object.Scale` an NPC spawns with: its folder's `worldScale` on that world, else its class's
- * own, else CreateCharacterPointer's 0.9.
+ * own, else CreateCharacterPointer's 0.9; plus what the map adds (`MapLayer.actors.monsterScale`,
+ * Setting_Monster's `Scale +=` after the case, ZzzCharacter.cpp:13150-13159).
  */
 export function npcSpawnScale(factory: typeof ModelObject, type = -1, world = -1): number {
-  const onWorld = monsterRegistry.def(type)?.worldScale?.[world];
-  if (onWorld !== undefined) return onWorld;
-  return factory.OverrideScale >= 0 ? factory.OverrideScale : CHARACTER_DEFAULT_SCALE;
+  const own = monsterRegistry.def(type)?.worldScale?.[world] ?? (factory.OverrideScale >= 0 ? factory.OverrideScale : CHARACTER_DEFAULT_SCALE);
+  const grow = maps.rowFor(world, l => l.actors?.monsterScale);
+  return grow && type >= grow.from && type <= grow.to ? own + grow.add : own;
 }
 
 export function isKnownObjectType(typeNumber: number): boolean {

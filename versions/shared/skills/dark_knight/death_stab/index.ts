@@ -209,18 +209,26 @@ const GATHER_MOTES: ParticleRecipe = {
 };
 
 /**
- * Death Stab's AttackStage (ZzzCharacter.cpp:2618-2701), `t` = AttackTime (1 at the packet, +1 a tick):
+ * Death Stab's AttackStage (ZzzCharacter.cpp:2618-2701), `t` = AttackTime, seen on tick `t` after the packet:
  * t2-8 three red streaks a tick from a +-300 cm cube 1400 cm behind the knight onto the gathering point;
  * t8 SOUND_SKILL_SWORD2; t6-12 on half the ticks two MODEL_SPEAR emitters in front of the sword, each
  * leaving a blue drill flare a tick for 10 ticks; t10 the victim's electrified skeleton for its 35-tick
  * countdown, re-armed to t12.
  */
-const deathStabOf = (hd: boolean): Step => (at, c) => {
+const deathStabOf = (hd: boolean): Step => (_at, c) => {
+  const skill = baseSkill(currentSkill);
+  // AttackStage first sees AttackTime 1 a tick after the packet; from there `t` lands on tick `t` (ZzzCharacter.cpp:4132-4136).
+  delay(TICK, () => {
+    if (!entityGone(c.caster)) deathStabStages(c, skill, hd);
+  });
+};
+
+/** The stages from AttackTime 1 (`t0`): AttackTime `t` at `t0 + ticks(t - 1)`. */
+function deathStabStages(c: SkillContext, skill: number, hd: boolean): void {
   const caster = c.caster;
   const target = c.target;
   const t0 = fxNow();
   const tickOf = (): number => Math.floor((fxNow() - t0) / TICK + 1e-3);
-  const skill = baseSkill(currentSkill);
 
   const gathers = [swordPoint(caster, 3, new Vector3())];
   const streaks: GatherStreak[] = [];
@@ -298,7 +306,7 @@ const deathStabOf = (hd: boolean): Step => (at, c) => {
       }
     });
   }
-};
+}
 const deathStab = deathStabOf(false);
 
 export default defineSkill({

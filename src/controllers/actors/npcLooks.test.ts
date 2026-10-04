@@ -56,6 +56,21 @@ describe('NPC looks from the original client', () => {
     expect([9, 32, 0, 2].map(world => m.npcSpawnScale(f, 34, world))).toEqual([1, 1, 0.9, 0.9]);
   });
 
+  // Setting_Monster: types 84-143 grow `int(nCastle / 3) * 0.05` in Blood Castle, nCastle = 8 + world - 17
+  // (ZzzCharacter.cpp:13150-13159): 0 on floor 1, 0.05 on 2-4, 0.1 on 5-7; nothing on the master castle (52).
+  it('the Blood Castle line grows with the castle floor', () => {
+    const at = (type: number, world: number) => m.npcSpawnScale(m.resolveModelFactory(type), type, world);
+    const worlds = [11, 12, 13, 14, 15, 16, 17, 52, 0];
+    const grow = [0, 0.05, 0.05, 0.05, 0.1, 0.1, 0.1, 0, 0];
+    for (const type of [84, 89, 143]) {
+      const base = at(type, 0);
+      worlds.forEach((w, i) => expect(at(type, w)).toBeCloseTo(base + grow[i], 6));
+    }
+    // Outside 84-143 nothing changes.
+    expect(at(83, 17)).toBe(at(83, 0));
+    expect(at(144, 17)).toBe(at(144, 0));
+  });
+
   it.each([
     [11, 0.9], // Ghost: no Scale in its case (ZzzCharacter.cpp:14098-14105)
     [17, 0.9], // Cyclops (:14060-14067)

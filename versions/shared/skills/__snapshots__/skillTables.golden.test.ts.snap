@@ -586,9 +586,9 @@ exports[`skill tables golden > skill 46 1`] = `
 {
   "clip": null,
   "delay": null,
-  "heroSound": "Sound/battlecastle/sCFireArrow",
+  "heroSound": null,
   "light": "0/0 20f1ad84e8adcec8",
-  "sound": "Sound/battlecastle/sCFireArrow",
+  "sound": null,
   "stepIn": null,
   "target": "enemy",
 }

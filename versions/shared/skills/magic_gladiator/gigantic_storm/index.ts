@@ -123,7 +123,7 @@ interface MgStone {
  * `enh` (graded tiers) adds a flash and a spark spray where each bolt lands, and a flickering light on each site.
  */
 const mgGiganticStorm = (enh: boolean): Step => (at, c) =>
-  whenClipKey(PlayerAction.PLAYER_SKILL_GIGANTICSTORM, 7.001, 15, (_p, cc) => {
+  whenClipKey(PlayerAction.PLAYER_SKILL_GIGANTICSTORM, 7.001, 14, (_p, cc) => {
     mgSay('Sound/gigantic_storm');
     const feet = entityPos(cc.caster, 0, new Vector3());
     const yaw = entityYaw(cc.caster);

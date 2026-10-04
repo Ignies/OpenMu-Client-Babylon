@@ -14,7 +14,8 @@ class. Recipe: [docs/how_to/add_skill.md](../../../docs/how_to/add_skill.md).
   `playAreaSkillVisual`, `playBowShotVisual`, `setBuffVisual`, `playBuffHits`, ...) and three
   skill helpers (`playChainLightningHop`, `playTeleportFlash`, `playSummonArrival`).
 - `_shared.ts`: steps and helpers several classes use (stones, comets, decay smoke, Iron Defense,
-  summon arrival and light, clip-key timing, light anchors, mounted clip sets).
+  summon arrival and light, clip-key timing, light anchors, mounted clip sets, `landingSound`: a
+  `soundOnLanding` skill's sound from the caster, put inside `afterRelease` for a release-block `PlayBuffer`).
 
 ## How it works
 ```

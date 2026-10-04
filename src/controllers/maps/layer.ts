@@ -7,6 +7,7 @@ import type { MapWeather } from '../weather';
 import type { MapTerrain } from '../terrain';
 import type { MapRender } from '../render';
 import type { MapFx } from '../fx';
+import type { MapActors } from '../actors';
 
 /**
  * The contract every map entry implements. One folder per map,
@@ -164,6 +165,9 @@ export interface MapLayer {
 
   /** Ambient wildlife (boids). The fx controller's. */
   readonly fx?: MapFx;
+
+  /** What the map does to characters at spawn (Blood Castle's bigger line). The actors controller's. */
+  readonly actors?: MapActors;
 
   /**
    * Bind this map's object classes into `world.terrain.MapTileObjects` and
