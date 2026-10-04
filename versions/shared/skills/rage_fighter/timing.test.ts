@@ -9,6 +9,7 @@ import type { Entity } from '@/ecs/world';
 import { PlayerAction } from '../../objects/enum';
 import { playAreaSkillVisual, playTargetedSkillVisual } from '../skillVisuals';
 import { skillSound } from '@/controllers/sound/combat';
+import { beginDarkSide, darkSideHitTicks, nextDarkSideHit, observeDarkSideTargets, rageLayer } from './dark_side/rage';
 
 vi.hoisted(() => {
   const g = globalThis as Record<string, unknown>;
@@ -243,5 +244,41 @@ describe('Charge (269): AttackStage\'s AT_SKILL_OCCUPY case (ZzzCharacter.cpp:29
   it('the MULTI_SHOT volley only on the hero\'s own cast (MonkSystem.cpp:1305-1333)', () => {
     expect(volley(run(269, RUSH, { hero: true }))).toEqual([0, 0, 0]);
     expect(volley(run(269, RUSH))).toEqual([]);
+  });
+});
+
+describe('Dark Side (263)', () => {
+  const READY = PlayerAction.PLAYER_SKILL_DARKSIDE_READY;
+
+  it('per blow: the bursts on ticks 20-21 and the dark wave on 30-31, a 25 Hz tick standing for a rendered frame (MonkSystem.cpp:811-826)', () => {
+    for (const skill of [263, 559]) {
+      const r = run(skill, READY, { keysPerTick: 0.3 });
+      expect(spriteTicks(r, TEX.damage2)).toEqual([20, 21]);
+      expect(r.spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.shockwave).map(s => s.tick)).toEqual([30, 31]);
+    }
+  });
+
+  it('Rage_Darkside_Att when the server names targets (MonkSystem.cpp:551-558)', () => {
+    played.length = 0;
+    beginDarkSide(263, 5);
+    observeDarkSideTargets(263, []);
+    expect(played).toEqual([]);
+    observeDarkSideTargets(263, [6, 7, 8]);
+    expect(played).toEqual(['Sound/Ragefighter/Rage_Darkside_Att']);
+    rageLayer.reset?.();
+  });
+
+  it('follow-ups on (int)(2.5 / PlaySpeed): 8 ticks after the cast at 0.3, then every 7 (SkillCast.cpp:1117-1129)', () => {
+    expect(darkSideHitTicks(0.3)).toBe(8);
+    expect(darkSideHitTicks(0.5)).toBe(5);
+    beginDarkSide(263, 5);
+    observeDarkSideTargets(263, [6, 7, 8]);
+    const sent: number[] = [];
+    for (let t = 1; t <= 40; t++) {
+      rageLayer.update?.(ENUM_WORLD.WD_0LORENCIA, 1 / 25);
+      if (nextDarkSideHit() >= 0) sent.push(t);
+    }
+    expect(sent).toEqual([8, 15, 22]);
+    rageLayer.reset?.();
   });
 });

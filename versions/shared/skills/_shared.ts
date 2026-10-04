@@ -177,6 +177,8 @@ export const lightFollow = (src: PointSource): ((out: { x: number; y: number; z:
 };
 
 export const groundY = (x: number, z: number): number => storeRef().world?.getTerrainHeight(x, z) ?? 0;
+/** The hero's entity, for a rule that reads his own clip (the Dark Side follow-ups). */
+export const heroEntity = (): Entity | undefined => storeRef().world?.playerEntity ?? undefined;
 /** The map the hero is on (`gMapManager.WorldActive`), for a sound only one map loads. */
 export const currentMap = (): number | undefined => storeRef().world?.mapIndex;
 
