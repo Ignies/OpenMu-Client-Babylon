@@ -2,9 +2,9 @@
  * TEMPLATE - copy me for a new map entry; never imported. Steps in readme.md.
  * `create` MUST stay a dynamic import (see `layer.ts`).
  */
-import { ENUM_WORLD } from '../../core/types';
-import type { MapLayer } from './layer';
-import { FULL_TILES } from '@versions/shared/maps/recipes';
+import { ENUM_WORLD } from '@/core/types';
+import type { MapLayer } from '@/controllers/maps';
+import { FULL_TILES } from './recipes';
 
 // ---- 1. data ---------------------------------------------------------------
 

@@ -1,3 +1,5 @@
+// The shared maps, handed to the maps controller before anything reads them (controllers import no content).
+import '@versions/shared/maps/all';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { App } from './App';

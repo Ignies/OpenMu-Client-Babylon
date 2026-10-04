@@ -8,7 +8,8 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
   targets (`attackTarget`, `castRequest`, `pickupTarget`, `talkTarget`, ...) and the terrain
   readers (`getTerrainHeight`, `isWalkable`, `getTerrainFlag`, `getTerrainLayers`, ...).
 - `Entity` (`world.ts`): one `Partial<{...}>` type with every component. Also `NetEntity`,
-  `Item`, `DeathMotion`, `TerrainLayers`, `ISystemFactory`.
+  `Item`, `DeathMotion`, `TerrainLayers`, `ISystemFactory`. `world.ts` also merges the bus events
+  that carry an entity (`objectDamaged`, `objectEffect`) into `EventMap` (`core/eventBus/events.ts`).
 - `createWorld(scene)` (`createWorld.ts`): builds the world and returns `updateSystems(dt)`.
   Called once from `app/boot.tsx`.
 - A few systems export helpers other code reads (`isHeroUnderRoof`, `mayBeCeilingPiece` in `roofDetection.ts`,

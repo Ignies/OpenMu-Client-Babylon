@@ -34,7 +34,8 @@ spawn an effect, time a swing), never which skill, item or window does it. The f
 
 ## How it works
 - The six facades in `CONTROLLERS` are classes that `implements Controller`. Each keeps a list of
-  layers (its `layers.ts`; maps reads `versions/shared/maps/layers.ts`) and steps or resets them.
+  layers (its `layers.ts`; maps is handed `versions/shared/maps/layers.ts` at boot) and steps
+  or resets them.
 - `init` runs once from `initControllers` at boot, before the ECS world exists. Today only
   `sound` has one.
 - `update` is not called from here: each controller's own ECS system steps it

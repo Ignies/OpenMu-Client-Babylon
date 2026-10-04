@@ -30,7 +30,7 @@ Controllers expose registries and slots; content fills them when it loads:
 | skills, fx, lighting, sound, combat | `defineSkill({...})` in each skill file | visual, light, sound, clip, delay, target, step-in, buff looks |
 | combat | a skill's `combat: { layer, hooks }` | skill-owned state (Nova charge, Combo, Dark Side) via `combat/skillHooks.ts` |
 | interface | `defineWindow({...})` in each `window.ts` | windows and HUD elements, in stacking order |
-| maps | `versions/shared/maps/layers.ts` | one entry per map |
+| maps | `versions/shared/maps/all.ts` (`registerMaps(MAP_LAYERS)`, first import of `app/boot.tsx`) | one entry per map |
 
 `registerSkills` (`src/controllers/skills/index.ts`) and `registerWindows`
 (`src/controllers/interface/windows.ts`) are the only places that write into those tables.

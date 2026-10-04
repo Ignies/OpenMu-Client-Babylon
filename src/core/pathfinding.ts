@@ -1,4 +1,4 @@
-import type { IVector2Like } from '../controllers/render/babylon/exports';
+import type { IVector2Like } from '@babylonjs/core/Maths/math.like';
 import { Graph, type GridNode, astar } from './astar';
 
 type Grid = number[][];

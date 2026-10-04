@@ -6,6 +6,7 @@ windows themselves are content in `versions/shared/ui/` (see
 [docs/content.md](../../../docs/content.md)).
 
 ## Public API
+- `index.ts`: a small door (`MuWindows`); most readers still import their file directly (baselined).
 - `windows.ts`: `defineWindow({ id, slot, order, component })`, `registerWindows(defs)` (a later
   def with the same id replaces the earlier one), `windowsIn(slot)` (stacking order). Slots:
   `world` (on the 3D view, stays up when the interface is hidden) and `hud`.

@@ -702,3 +702,22 @@ export class World extends ECSWorld<Entity> {
 // type identity for instanceof-free checks), forking the ECS.
 const hot = (import.meta as { hot?: { decline(): void } }).hot;
 if (hot) hot.decline();
+
+// The bus events that carry an entity (core/eventBus/events.ts).
+declare module '@/core/eventBus/events' {
+  interface EventMap {
+    objectDamaged: {
+      entity: With<Entity, 'transform' | 'screenPosition'>;
+      healthDamage: number;
+      shieldDamage: number;
+      kind: number;
+      isDouble: boolean;
+      isTriple: boolean;
+    };
+    /** Server asked to show an effect on an object (level-up beam, shield potion/lost). */
+    objectEffect: {
+      entity: With<Entity, 'transform'>;
+      effect: 'levelUp' | 'shieldPotion' | 'shieldLost' | 'swirl';
+    };
+  }
+}

@@ -22,8 +22,13 @@ world, and the room helpers. The maps themselves are content in `versions/shared
   rooms, spec, hooksFor)`, `roomStructureTypes(map)`, `sameRoom(a, b)`.
 
 ## How it works
-- `MAP_LAYERS` (`versions/shared/maps/layers.ts`) is the only list of maps. The facade indexes
-  it by world and logs an error when two entries claim the same world. Every reader is a lookup
+- `MAP_LAYERS` (`versions/shared/maps/layers.ts`) is the only list of maps. Content hands it in
+  at boot (`registerMaps`, from `versions/shared/maps/all.ts`, the first import of
+  `src/app/boot.tsx` and of `src/version/testSetup.ts`), so this controller imports no content. Not
+  from the version modules: the Bun servers load those. The listener order of the map files
+  (`kanturu2/gateway.ts`) is the same as when this controller imported the list. The facade
+  indexes it by world and logs an error when two entries claim the same world. Readers ask at run
+  time (`worldSet`, `worldMap` are live), never at module load, so the late fill is safe. Every reader is a lookup
   over the entry's declared data.
 - An entry is mostly data: the worlds it serves (event maps serve a range of instances on one
   art set), `assetWorld` when the `Data/World<n>` folder is not `world + 1`
@@ -59,14 +64,14 @@ world, and the room helpers. The maps themselves are content in `versions/shared
 
 ## Depends on / used by
 - uses: `core/types`, `assets` (download, world folder), `terrain/parseTerrainObjects`,
-  `lighting/profiles`, `render/scenes/sceneLook`, `versions/shared/maps/layers.ts` (the list).
+  `lighting/profiles`, `render/scenes/sceneLook`. The list comes in through `registerMaps`.
 - used by: `controllers.ts`, `app/lifecycle.ts`, `terrain` (load, tiles, grass), `weather`
   (rain, snow), `lighting` (profiles, director), `render` (blend meshes, effect-only objects,
   prop batches), `fx/effectParticles.ts`, `assets/worldAssets.ts`,
   `ecs/systems/ambientParticleSystem.ts`, every map in `versions/shared/maps/`.
 
 ## Change it
-- add a map: copy `_template.ts` to `versions/shared/maps/<name>/index.ts` with its data
+- add a map: copy `versions/shared/maps/_template.ts` to `versions/shared/maps/<name>/index.ts` with its data
   (worlds, tiles, spawn, climate, each citing the original), put per-type tables in `spec.ts` and
   object classes plus the setup function in `create.ts`, then add `<name>Layer` to
   `versions/shared/maps/layers.ts`. Runtime state lives in the objects `create` binds, not in the

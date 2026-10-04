@@ -1,7 +1,7 @@
 // Dev-only standalone harness for the marketplace window, against fixtures and a mock
 // service: `bun run dev`, then open `/marketplace.html`. See readme.md.
-import '../../app/style.less';
-import { loadGameVersion, versionIdForTag } from '../../version';
+import '@/app/style.less';
+import { loadGameVersion, versionIdForTag } from '@/version';
 
 async function bootstrap() {
   await loadGameVersion(versionIdForTag('season6'));
@@ -9,8 +9,8 @@ async function bootstrap() {
   const [React, ReactDOM, state, mock, window_] = await Promise.all([
     import('react'),
     import('react-dom/client'),
-    import('./state'),
-    import('./mockService'),
+    import('@/modules/marketplace/state'),
+    import('@/modules/marketplace/mockService'),
     import('@versions/shared/ui/windows/marketplace'),
   ]);
   const { Marketplace } = state;
@@ -44,7 +44,7 @@ async function bootstrap() {
 
   // In game the window anchors above the bottom bar. Here there is no bar, so
   // it is centred instead: the harness exists to look at the panel.
-  const { MuWindows } = await import('../../controllers/interface/windowManager');
+  const { MuWindows } = await import('@/controllers/interface');
   requestAnimationFrame(() =>
     MuWindows.moveTo(
       window_.MARKETPLACE_ID,
