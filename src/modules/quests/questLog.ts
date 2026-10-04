@@ -59,7 +59,6 @@ const KILL_REFRESH_DELAY_MS = 1000;
 const MSG_UNAVAILABLE: TextKey = 'quest.unavailable';
 const MSG_NOT_FULFILLED: TextKey = 'quest.notFulfilled';
 const MSG_NO_QUESTS: TextKey = 'quest.noneInProgress';
-const MSG_INVENTORY_FULL: TextKey = 'quest.inventoryFull';
 
 /** `RewardTypeEnum.Random`: the "one of these" reward group. */
 

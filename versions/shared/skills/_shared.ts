@@ -1,6 +1,6 @@
-import { BLOOD_CHIPS, BLOOD_MIST, DUST, MODEL, RGBS, STEEL_GLINTS, TEX } from '@/controllers/fx/recipes';
+import { DUST, MODEL, RGBS, STEEL_GLINTS, TEX } from '@/controllers/fx/recipes';
 import { COMBAT_BUS, playSfx } from '@/controllers/sound';
-import { ENHANCED_TIER, SkillContext, SkillVisual, Step, TICK, cm, currentSkill, explosion, flash, flying, forwardOf, hitSparks, model, particles, perTick, ring, scatter, seq, sprite, ticks } from '@/controllers/skills/visuals';
+import { ENHANCED_TIER, SkillContext, SkillVisual, Step, TICK, cm, currentSkill, explosion, flash, flying, forwardOf, model, particles, perTick, ring, scatter, seq, sprite, ticks } from '@/controllers/skills/visuals';
 import { type Entity } from '@/ecs/world';
 import { type JointOptions } from '@/controllers/fx/joint';
 import { type LightRecipe } from '@/controllers/lighting/lightSource';
@@ -48,20 +48,6 @@ export const stones = (n: number, radius = 0.6): Step =>
   );
 /** MODEL_FIRE's `o->BlendMesh = 1`: the fire01 tail is additive, the fire02 lava core is drawn opaque. */
 export const FIRE_BLEND_MESH = 1;
-/**
- * A bleed skill landing. No `flash`: a card is additive whatever it is
- * tinted, and a red `flare` over a bright map clipped to white and bloomed
- * into a pink cloud - BLOOD_MIST is the same spray drawn straight-alpha.
- */
-const bloodHit: Step = seq(hitSparks(BLOOD_CHIPS, 18), particles({ recipe: BLOOD_MIST, count: 5 }));
-/** A JOINT_THUNDER bolt from the sky onto `at` (GiganticStorm, Twister's strikes). */
-const skyBolt = (height: number, width = 0.3, seconds = ticks(20)): Step => (at, c) => {
-  const top = at.clone();
-  top.y += height;
-  top.x += (Math.random() - 0.5) * 2;
-  top.z += (Math.random() - 0.5) * 2;
-  effects.spawn('joint', c.scene, top, { to: at, colour: RGBS.arc, seconds, width, forks: 2, jitter: 0.1, texture: TEX.jointThunder, textureRepeats: 2, textureScroll: 1 });
-};
 /** `n` streamers fanning around the up axis, `i*step` radians apart, from `at`. */
 export const streamerFan = (
   n: number,

@@ -14,7 +14,7 @@ import {
   type Node,
 } from '../render/babylon/exports';
 import type { World } from '../../ecs/world';
-import { BMD, BMDReader } from './bmd';
+import { BMD } from './bmd';
 
 import {
   fetchAsset,
@@ -42,7 +42,6 @@ import { parseTextureScriptFromPath } from '../render/textureScript';
 // Texture names are read through the pack, so a swap in flight still reads the converter's name.
 readPackLabelsWith(textureLabel);
 
-const reader = new BMDReader();
 const Models: Partial<Record<number, Promise<BMD>>> = {};
 const ModelsFactory: Record<number, () => Promise<BMD>> = {};
 
@@ -55,8 +54,6 @@ export async function getModel(modelId: number) {
   Models[modelId] = ModelsFactory[modelId]();
   return Models[modelId];
 }
-
-const cache: Partial<Record<string, Promise<BMD>>> = {};
 
 let skelId = 100;
 

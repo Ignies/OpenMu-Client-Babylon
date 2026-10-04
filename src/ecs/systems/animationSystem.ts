@@ -272,7 +272,7 @@ export const AnimationSystem: ISystemFactory = world => {
   let lastRunTick = performance.now();
 
   return {
-    update: dt => {
+    update: () => {
       // c->Run is a wall-clock walk-up (the original counts real frames at
       // its own FPS). The render dt is clamped to 0.1 s in app/main.tsx, so under
       // 10 fps the walker (already on wall-clock time) runs while this

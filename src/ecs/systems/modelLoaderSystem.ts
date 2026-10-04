@@ -77,7 +77,6 @@ function createModelObject(
   world: World,
   entity: With<Entity, 'modelFactory' | 'worldIndex' | 'transform'>
 ) {
-  const terrainScale = world.terrainScale;
   const transform = entity.transform;
   const modelId = entity.modelId;
 

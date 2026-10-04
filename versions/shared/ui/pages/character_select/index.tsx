@@ -34,8 +34,6 @@ const DECO_HEIGHT = 103;
 const DECO_OFFSET_X = 22;
 const DECO_OFFSET_Y = 59;
 
-const WIN_MARGIN_X = 22;
-
 const CREATE_FRAMES = { up: 0, active: 1, down: 2 } as const;
 
 const CTLCODE_02BLOCKITEM = 0x02;

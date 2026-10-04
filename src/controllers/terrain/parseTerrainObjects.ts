@@ -9,11 +9,8 @@ export function parseTerrainObjects(encodedData: Uint8Array) {
   const dv = new DataView(decodedData.buffer);
 
   let DataPtr = 0;
-  const version = dv.getUint8(DataPtr);
-  DataPtr += 1;
-
-  const MapNum = dv.getUint8(DataPtr);
-  DataPtr += 1;
+  DataPtr += 1; // version
+  DataPtr += 1; // map number
 
   const Count = dv.getInt16(DataPtr, true);
   DataPtr += 2;

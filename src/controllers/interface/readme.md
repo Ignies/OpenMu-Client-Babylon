@@ -15,7 +15,7 @@ windows themselves are content in `versions/shared/ui/` (see
   `mu_frame`, `msg_box_frame`, `mu_text`, `mu_number`,
   `mu_button`, `mu_sprite`, `mu_logo`, `mu_flag`. Items: `item_grid`, `item_icon`, `item_search`,
   `item_tooltip`, `picked_item`, `chat_item_link`. Skills: `skill_icon`, `skill_tooltip`. Other:
-  `msg_window`, `game_cursor`, `guild_marks`, `world_label`, `emoji_text`, `reconnect_overlay`,
+  `msg_window`, `game_cursor`, `world_label`, `emoji_text`, `reconnect_overlay`,
   `ui_stage` (the 640x480 stage scale).
 - `keyBindings.ts`: `KeyBindings`, `keyFor`, `isKey`, `actionOfKey`, `setKeyBinding`,
   `setKeyProfile`, `WALK_KEYS`; `browserHotkeys.ts`: `installBrowserHotkeyGuard`,

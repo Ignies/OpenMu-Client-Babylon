@@ -214,5 +214,3 @@ export const transformCoordinatesWithClippingToRef = (
 
   return ref;
 };
-
-const TmpMatrix = Matrix.Identity();

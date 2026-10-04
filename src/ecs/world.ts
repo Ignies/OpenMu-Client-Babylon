@@ -637,15 +637,15 @@ export class World extends ECSWorld<Entity> {
     this.mapParent = new TransformNode('mapParent', scene);
   }
 
-  getTerrainHeight(x: number, y: number): number {
+  getTerrainHeight(_x: number, _y: number): number {
     return -9999;
   }
 
-  isWalkable(x: number, y: number): boolean {
+  isWalkable(_x: number, _y: number): boolean {
     return true;
   }
 
-  getTerrainFlag(x: number, y: number): number {
+  getTerrainFlag(_x: number, _y: number): number {
     return 0;
   }
 
@@ -655,12 +655,12 @@ export class World extends ECSWorld<Entity> {
    * current terrain's attribute array; a no-op until a map is loaded.
    */
   setTerrainFlags(
-    x: number,
-    y: number,
-    w: number,
-    h: number,
-    flag: number,
-    set: boolean
+    _x: number,
+    _y: number,
+    _w: number,
+    _h: number,
+    _flag: number,
+    _set: boolean
   ): void {}
 
   /**
@@ -670,12 +670,12 @@ export class World extends ECSWorld<Entity> {
    * a map is loaded.
    */
   detachGround(
-    rects: readonly (readonly [x: number, y: number, w: number, h: number])[]
+    _rects: readonly (readonly [x: number, y: number, w: number, h: number])[]
   ): Mesh | null {
     return null;
   }
 
-  getTerrainTile(x: number, y: number): number {
+  getTerrainTile(_x: number, _y: number): number {
     return 0;
   }
 
@@ -692,7 +692,7 @@ export class World extends ECSWorld<Entity> {
     out.alpha = 0;
   }
 
-  getTerrainLight(x: number, y: number): IVector3Like {
+  getTerrainLight(_x: number, _y: number): IVector3Like {
     return Vector3.OneReadOnly;
   }
 }

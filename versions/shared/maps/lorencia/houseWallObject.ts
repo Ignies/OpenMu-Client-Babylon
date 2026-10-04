@@ -12,7 +12,7 @@ export class HouseWallObject extends ModelObject {
   _flickerDur = 0;
   _flickerElapsed = 0;
 
-  async init(world: World) {
+  async init() {
     await this.loadSpecificModelWithDynamicID(MODEL_HOUSE_WALL01, 'HouseWall');
 
     const idx = this.Type - MODEL_HOUSE_WALL01 + 1;

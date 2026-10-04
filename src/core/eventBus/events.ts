@@ -1,4 +1,4 @@
-import type { IVector2Like, IVector3Like } from '../../controllers/render/babylon/exports';
+import type { IVector3Like } from '../../controllers/render/babylon/exports';
 import type { ENUM_WORLD } from '../types';
 import type {
   ConnectServerPackets,

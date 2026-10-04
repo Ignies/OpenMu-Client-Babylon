@@ -1,5 +1,5 @@
 import { ChangeMapServerInfoPacket } from '@/controllers/net/packets';
-import { ConnectionInfoPacket, HelloPacket, ServerListResponsePacket } from '@versions/shared/packets/ConnectServerPackets';
+import { ConnectionInfoPacket, ServerListResponsePacket } from '@versions/shared/packets/ConnectServerPackets';
 import { EventBus } from '@/core/eventBus';
 import { GameServerEnteredPacket, LoginResponseLoginResultEnum, LoginResponsePacket, LogoutResponsePacket } from '@versions/shared/packets/ServerToClientPackets';
 import { SessionExit } from './sessionExit';
@@ -13,8 +13,7 @@ let serverListRequested = false;
 
 /** Registers this module's packet listeners (see ../module.ts). */
 export function installNet(): void {
-  EventBus.on('Hello', packet => {
-    const p = new HelloPacket(packet);
+  EventBus.on('Hello', () => {
     if (serverListRequested) return;
     serverListRequested = true;
     Store.updateServerListRequest();

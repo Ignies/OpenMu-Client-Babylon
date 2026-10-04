@@ -362,10 +362,6 @@ export function masterTreeEntries(): MasterTreeEntry[] {
   return treeRecords.filter(e => (e.classCode & code) !== 0);
 }
 
-function entryByIndex(index: number): MasterTreeEntry | undefined {
-  return masterTreeEntries().find(e => e.index === index);
-}
-
 function entryBySkill(skill: number): MasterTreeEntry | undefined {
   return masterTreeEntries().find(e => e.skill === skill);
 }

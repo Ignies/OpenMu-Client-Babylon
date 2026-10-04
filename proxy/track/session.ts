@@ -190,7 +190,6 @@ export class TrackedSession {
   private selectAmbiguous = false;
   private pendingPickupAt = 0;
   private pendingDrop: { at: number; x: number; y: number } | null = null;
-  private pendingBuyAt = 0;
   private pendingSell: { at: number; slot: number } | null = null;
   private lastWalkEventAt = 0;
   private lastAttack = { target: -1, at: 0 };
@@ -684,7 +683,6 @@ export class TrackedSession {
 
   private onItemBought(p: ItemBoughtPacket): void {
     const name = itemName(bytesOf(p.ItemData as DataView));
-    this.pendingBuyAt = 0;
     this.emit('buy', `bought ${name}`, { item: name, slot: p.InventorySlot });
   }
 
@@ -821,9 +819,6 @@ export class TrackedSession {
         this.emit('npc', `talked to ${npc?.name ?? 'an NPC'}`, { npc: npc?.name ?? null });
         return;
       }
-      case 0x32:
-        this.pendingBuyAt = this.now();
-        return;
       case 0x33:
         this.pendingSell = { at: this.now(), slot: new SellItemToNpcRequestPacket(view).ItemSlot };
         return;

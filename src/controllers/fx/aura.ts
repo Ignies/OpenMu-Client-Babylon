@@ -59,7 +59,6 @@ const SHINY_H = px(64, 1.5);
  * Scale 2 on the 64 px flare shrinking `0.04..0.08` a tick, `Gravity +=
  * (0.6..1.0) * 9.5` cm a tick, colour × 1/1.35 a tick (ZzzEffectParticle.cpp:3197, :8058).
  */
-const MOTE_PER_TICK = 2;
 const MOTE_TICKS = 10;
 const MOTE_SIZE = px(64, 2);
 const MOTE_SHRINK: readonly [number, number] = [px(64, 0.04), px(64, 0.08)];

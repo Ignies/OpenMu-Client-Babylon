@@ -136,8 +136,6 @@ const SERVER_CHANGE_NAME_LENGTH = 12;
 const xor32 = new Xor32Encryptor();
 xor32.xor32Key = gameVersion.protocol.encryption.xor32Key;
 
-const INVENTORY_STORAGE = StorageKind.Inventory;
-
 const ITEM_MOVE_TIMEOUT = 5000;
 
 /** How long the offline demo takes to "answer" a stat point request. */

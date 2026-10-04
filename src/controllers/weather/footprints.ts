@@ -1722,13 +1722,6 @@ export function addFootprint(scene: Scene, spec: FootprintSpec): void {
   );
 }
 
-/**
- * Default trough width in tiles, for callers that do not say. The walk gait
- * in footprintSystem.ts passes its own: a trench wide enough to hold both
- * feet and the snow shouldered out of it.
- */
-const DRAG_WIDTH = 0.3;
-
 /** Ages every print and pushes the instance buffers. Call once a frame. */
 export function updateFootprints(dt: number): void {
   // The post-processing toggle moves the buffer between linear and display
