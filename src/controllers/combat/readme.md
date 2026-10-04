@@ -96,8 +96,7 @@ the server sends the new square.
 
 ## Depends on / used by
 - uses: `anim/playSpeed.ts`, `interface/nameTags.ts`, skill and packet tables in
-  `versions/shared`, `modules/pets` (a baselined rule exception in
-  `tools/checks/baselines/deps.json`).
+  `versions/shared`, `pets` (the `MountKind` type).
 - used by: `ecs/systems` (attack, skill cast, death, pet), `controllers/skills`, `lighting/skills.ts`,
   `sound/combat.ts`, `modules/skills/cooldowns.ts`,
   `modules/combat/net.ts`, `modules/skills/skillCasting.ts`, `app/lifecycle.ts`, skill files.

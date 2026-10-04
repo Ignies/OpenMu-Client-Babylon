@@ -107,7 +107,7 @@ function applyItemsDropped(p: ItemsDroppedPacket) {
     }
 
     removeNetObject(world, maskedId);
-    // CreateItem's per-level model swap (modules/drops/dropModelProxy.ts): the
+    // CreateItem's per-level model swap (item_rules/dropModelProxy.ts): the
     // shown model and its pose may come from another item's row.
     const proxy = parsed ? dropModelProxy(group, id, parsed.lvl ?? 0) : null;
     const poseGroup = proxy?.group ?? group;

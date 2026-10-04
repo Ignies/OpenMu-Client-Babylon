@@ -382,7 +382,7 @@ export type Entity = Partial<{
     /**
      * A follower pet (`PetObject`): how it holds station on its owner, the
      * `PlaySpeed` of its one clip, and the seconds its body light pulses
-     * over when it has one. See `PetFollow` in modules/pets/pets.ts.
+     * over when it has one. See `PetFollow` in controllers/pets/pets.ts.
      */
     follow?: PetFollow;
     followSpeed?: number;
