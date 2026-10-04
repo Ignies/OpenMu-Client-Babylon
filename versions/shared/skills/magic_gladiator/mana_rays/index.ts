@@ -122,7 +122,7 @@ function mgCannonBeam(c: SkillContext, enh = false): void {
 /** Death Cannon (73): the beam and SOUND_BCS_DEATH_CANON once DEATH_CANNON reaches frame 3, with a target (ZzzCharacter.cpp:2990-2995, :4811). */
 const mgDeathCannon = (enh: boolean): Step => (at, c) => {
   if (!c.target) return;
-  whenClipKey(PlayerAction.PLAYER_ATTACK_DEATH_CANNON, 3, 20, (_p, cc) => {
+  whenClipKey(PlayerAction.PLAYER_ATTACK_DEATH_CANNON, 3, 14, (_p, cc) => {
     mgSayOnBattleCastle('Sound/battlecastle/sCMW');
     mgCannonBeam(cc, enh);
   })(at, c);

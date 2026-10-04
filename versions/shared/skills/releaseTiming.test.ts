@@ -212,3 +212,13 @@ describe('AttackStage sees AttackTime t on tick t after the packet', () => {
     expect(timeline(47, SPEAR, 0.25, 99, 25, { sound: 'Sound/eRidingSpear' }).release).toBe(10);
   });
 });
+
+describe('a clip-key cast whose clip never gets there', () => {
+  // AttackTime reaches 15 by itself on tick 14 (ZzzCharacter.cpp:4132-4140).
+  const IDLE = PlayerAction.PLAYER_STOP_MALE;
+
+  it('Gigantic Storm and Mana Rays release 14 ticks after the packet (:3001-3006, :2990-2995)', () => {
+    expect(timeline(237, IDLE, 0.25, 99, 25, { area: true }).release).toBe(14);
+    expect(timeline(73, IDLE, 0.25, 99, 25, { only: 'ticked' }).release).toBe(14);
+  });
+});

@@ -110,8 +110,8 @@ const mgSpiralSlash = (enh: boolean): Step => (at, c) => {
     mgGlint(c);
     mgSay(randInt(2) ? 'Sound/eSwingWeapon2' : 'Sound/eSwingWeapon1');
   }
-  whenClipKey(PlayerAction.PLAYER_ATTACK_ONE_FLASH, 2.3, 15, mgSpiralWave([2, 3], enh))(at, c);
-  whenClipKey(PlayerAction.PLAYER_ATTACK_ONE_FLASH, 5.001, 15, mgSpiralWave([0, 1, 4], enh))(at, c);
+  whenClipKey(PlayerAction.PLAYER_ATTACK_ONE_FLASH, 2.3, 14, mgSpiralWave([2, 3], enh))(at, c);
+  whenClipKey(PlayerAction.PLAYER_ATTACK_ONE_FLASH, 5.001, 14, mgSpiralWave([0, 1, 4], enh))(at, c);
 };
 const spiralSlash = mgSpiralSlash(false);
 const spiralSlashEnhanced = mgSpiralSlash(true);

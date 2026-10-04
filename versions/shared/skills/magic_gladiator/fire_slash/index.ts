@@ -276,7 +276,7 @@ const mgFireSlash = (enh: boolean): Step => (at, c) => {
   mgGathering(enh)(at, c);
   after(ticks(1), mgGathering())(at, c);
   mgGlint(c);
-  whenClipKey(PlayerAction.PLAYER_ATTACK_SKILL_WHEEL, 3, 15, (_p, cc) => {
+  whenClipKey(PlayerAction.PLAYER_ATTACK_SKILL_WHEEL, 3, 14, (_p, cc) => {
     mgSay('Sound/sKnightSkill3');
     if (cc.caster.playerAnimation) {
       const speed = cc.caster.attributeSystem?.getValue('attackSpeed') ?? 0;
