@@ -40,7 +40,7 @@ import { CsmBounds, csmBoundsMode } from './csmBounds';
  * `1 - strength`, the sky share, applied in linear by the terrain shader.
  */
 
-export const CSM_MAX_CASCADES = 3;
+const CSM_MAX_CASCADES = 3;
 
 /**
  * How far from the camera the cascades reach, in tiles. The camera sits
@@ -638,7 +638,7 @@ function invalidate(scene: Scene): void {
   blobShadowRefresh.fn?.(scene);
 }
 
-export function disposeShadows(): void {
+function disposeShadows(): void {
   if (!runtime) return;
 
   const { scene } = runtime;

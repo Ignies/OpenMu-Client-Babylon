@@ -69,14 +69,14 @@ const MESSAGE_MS = 5000;
 
 // ---- 2. state + readers ----------------------------------------------------
 
-export type DevilSquareRank = {
+type DevilSquareRank = {
   name: string;
   score: number;
   exp: number;
   zen: number;
 };
 
-export type DevilSquareResult = {
+type DevilSquareResult = {
   /** 1-based rank of the hero, 0 when unplaced. */
   myRank: number;
   rows: DevilSquareRank[];

@@ -222,7 +222,7 @@ export const RANK_HEADERS = textTable({
 // ---- Entry windows (NewUIEnterDevilSquare.cpp / NewUIBloodCastleEnter.cpp) -
 
 /** One row of `m_i*LimitLevel`: inclusive level range of a grade. */
-export type LevelRange = readonly [min: number, max: number];
+type LevelRange = readonly [min: number, max: number];
 
 /**
  * The two rows of `m_iDevilSquareLimitLevel`: row 0 for every class, row 1

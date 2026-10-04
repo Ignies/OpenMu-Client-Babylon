@@ -48,7 +48,7 @@ const FADE_TAIL = 0.08;
 
 // ---- 2. state + readers ----------------------------------------------------
 
-export interface DebrisOptions {
+interface DebrisOptions {
   /** `Skill/…glb` (recipes.ts `MODEL`). */
   model: string;
   /** How many pieces. */

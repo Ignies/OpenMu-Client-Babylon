@@ -121,7 +121,7 @@ export type ItemAura = EffectHandle & {
 
 // ---- 2. state + readers ----------------------------------------------------
 
-export interface ItemAuraOptions {
+interface ItemAuraOptions {
   tier: ItemVisualTier;
   slot: ItemAuraSlot;
 }

@@ -12,7 +12,7 @@ export type EmojiBubbleId =
   | 'interrobang'
   | 'dizzy';
 
-export type EmojiBubblePlacement = 'head' | 'side';
+type EmojiBubblePlacement = 'head' | 'side';
 
 export type EmojiBubbleDefinition = {
   id: EmojiBubbleId;

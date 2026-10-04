@@ -180,7 +180,7 @@ function arrowLight(color: readonly [number, number, number]): LightRecipe {
  * What an arrow throws on the ground while it flies, by arrow model: `AddTerrainLight` range 2 from
  * MoveEffect's arrow cases (ZzzEffect.cpp, line per row; `Luminosity` roll :6764). Metal bolts fly dark.
  */
-export const ARROW_LIGHTS: Partial<Record<string, LightRecipe>> = {
+const ARROW_LIGHTS: Partial<Record<string, LightRecipe>> = {
   // MODEL_ARROW (:11776) - the plain wooden arrow every bow but the Elven,
   // Chaos Nature and Celestial fires, and what Triple Shot, Multi-Shot and
   // Ice Arrow draw here.
@@ -210,7 +210,7 @@ export const ARROW_LIGHTS: Partial<Record<string, LightRecipe>> = {
  * hands - the MODEL_MAGIC2 cast glow (range 3, :10437), kept to 2 tiles so it
  * never out-lights a skill that has a real recipe.
  */
-export const DEFAULT_WIZARDRY_CAST: LightRecipe = {
+const DEFAULT_WIZARDRY_CAST: LightRecipe = {
   color: [0.8, 0.85, 1],
   range: 2,
   seconds: 0.4,

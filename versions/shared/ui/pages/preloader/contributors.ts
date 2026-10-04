@@ -42,7 +42,7 @@ const FRESH_MS = 24 * 60 * 60 * 1000;
  * wrote code or reported bugs. `playtest`: a playtester by name. `everyone`:
  * everyone else who playtested, named by the page in the player's language.
  */
-export type CreditKind = 'thanks' | 'person' | 'playtest' | 'everyone';
+type CreditKind = 'thanks' | 'person' | 'playtest' | 'everyone';
 
 export type Credit = {
   kind: CreditKind;
@@ -134,7 +134,7 @@ function names(contributors: GithubContributor[]): string[] {
  * person - the same name in two cases is one person - writers by commits, the
  * playtesters, then those who only reported bugs, by reports.
  */
-export function tidy(
+function tidy(
   contributors: GithubContributor[],
   issues: GithubIssue[],
   openmu: GithubContributor[] = []

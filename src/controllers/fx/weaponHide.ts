@@ -24,7 +24,7 @@ const RESCAN_SECONDS = 0.1;
 
 // ---- 2. state + readers ----------------------------------------------------
 
-export interface WeaponHideOptions {
+interface WeaponHideOptions {
   /** The character whose slot-0 weapon (`Weapon1`, the right hand) is hidden. */
   entity: Entity;
   /** The longest the hide lasts. */

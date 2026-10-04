@@ -17,10 +17,10 @@ export const MAX_EXTRA_ITEMS = 12;
 /** 15-byte ANSI slots, NUL-terminated: 14 usable characters. */
 export const MAX_EXTRA_ITEM_CHARS = 14;
 
-export type SkillConditionBasis = 'nearby' | 'attacking';
+type SkillConditionBasis = 'nearby' | 'attacking';
 
 /** Activation rule of skill slot 2 / 3 (`ESkillActivation*`, MuHelperData.h). */
-export interface ActivationCondition {
+interface ActivationCondition {
   /** `ON_TIMER`: cast every `interval` seconds. */
   onTimer: boolean;
   /** `ON_CONDITION`: cast by mob count. */
@@ -79,7 +79,7 @@ export interface MuHelperConfig {
   extraItems: string[];
 }
 
-export function defaultActivationCondition(): ActivationCondition {
+function defaultActivationCondition(): ActivationCondition {
   return { onTimer: false, onCondition: false, basis: 'nearby', minMobs: 2 };
 }
 

@@ -11,7 +11,7 @@ import { MuWindows, type WindowCloser } from '../../windowManager';
 import { GameOptions } from '@/modules/options/gameOptions';
 import { t } from '@/i18n';
 
-export type WindowChrome = {
+type WindowChrome = {
   style: CSSProperties;
   onPointerDown: (event: PointerEvent) => void;
   /** Put on the window's root: joins the stack while the element is mounted. */
@@ -20,7 +20,7 @@ export type WindowChrome = {
   anchored: boolean;
 };
 
-export type WindowChromeOptions = {
+type WindowChromeOptions = {
   width: number;
   height: number;
   /** What Escape does while this is the top window. */

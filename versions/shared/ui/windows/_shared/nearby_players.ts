@@ -3,7 +3,7 @@ import { Store } from '@/app/store';
 import { INVITE_RANGE_TILES } from '@/modules/social/social';
 import type { GuildMemberRoleEnum } from '@versions/shared/packets/ServerToClientPackets';
 
-export type NearbyPlayer = {
+type NearbyPlayer = {
   netId: number;
   name: string;
   guildId: number | undefined;
@@ -16,7 +16,7 @@ export type NearbyPlayer = {
  * than one tile (`abs(dx) <= 1 && abs(dy) <= 1`, ZzzInterface.cpp:4410).
  * Without a command window we offer the same set as a list.
  */
-export function nearbyPlayers(range = INVITE_RANGE_TILES): NearbyPlayer[] {
+function nearbyPlayers(range = INVITE_RANGE_TILES): NearbyPlayer[] {
   const world = Store.world;
   const hero = world?.playerEntity;
   if (!world || !hero) return [];

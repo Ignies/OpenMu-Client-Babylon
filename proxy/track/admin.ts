@@ -25,7 +25,7 @@ export interface AdminSocket {
   close(): void;
 }
 
-export type AdminAuth = 'ok' | RefusalReason;
+type AdminAuth = 'ok' | RefusalReason;
 
 const KNOWN_KINDS = new Set<string>(EVENT_KINDS);
 const MAX_NAME = 32;

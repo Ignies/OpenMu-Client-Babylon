@@ -20,7 +20,7 @@ import { effectLight } from '@/controllers/lighting/recipes';
  * :4555-4563): LT 24, 64 px x 1.28-1.91, shrinking 0.04 a tick, rising 12 cm, turning 5 deg a tick, and
  * kept at its creation Light `(Lum, 0.1 Lum, 0)` until it dies. Deep red, not FIRE_TRAIL's orange.
  */
-export const FIRE_BALL_TRAIL: ParticleRecipe = {
+const FIRE_BALL_TRAIL: ParticleRecipe = {
   texture: TEX.fire,
   cells: { w: 64, h: 64, count: 4 },
   colour: [1, 0.1, 0],

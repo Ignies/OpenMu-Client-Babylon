@@ -1,9 +1,6 @@
 import { resolve } from 'path';
 
 export const BMD_EXT = '.bmd';
-export const MP3_EXT = '.mp3';
-export const WAV_EXT = '.wav';
-export const OGG_EXT = '.ogg';
 export const OZJ_EXT = '.ozj';
 export const JPG_EXT = '.jpg';
 export const OZT_EXT = '.ozt';

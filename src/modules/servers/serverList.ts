@@ -106,7 +106,7 @@ const MAX_ID = 255;
 const MAX_GAME_SERVERS = 20;
 const MAX_CHANNELS = 16;
 
-export type ServerListState = 'idle' | 'loading' | 'ok' | 'error';
+type ServerListState = 'idle' | 'loading' | 'ok' | 'error';
 
 /** `?list=<url>` points the client at another list; `?list=off` skips it. */
 function listUrl(): string | null {

@@ -10,13 +10,13 @@ import { CHAT_SERVER_PORT, type ChatClient } from '../../controllers/net/protoco
 import { openChatRoomSocket, type ChatRoomSocket } from '../../controllers/net/sockets/chatRoomSocket';
 import { playUiSound } from '../../controllers/sound/sfx';
 
-export type ChatRoomLine = {
+type ChatRoomLine = {
   sender: string;
   text: string;
   system?: boolean;
 };
 
-export type ChatRoomState = 'connecting' | 'open' | 'closed';
+type ChatRoomState = 'connecting' | 'open' | 'closed';
 
 export type ChatRoom = {
   /** Stable UI key; the server room id can change when a room is reused. */

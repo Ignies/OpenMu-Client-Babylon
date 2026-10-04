@@ -2,7 +2,6 @@ import { DEBUG_SHOW_BOUNDING_BOXES } from '../../app/consts';
 import {
   CreateBox,
   Matrix,
-  PointerEventTypes,
   Quaternion,
   StandardMaterial,
   Vector3,
@@ -38,50 +37,6 @@ export const DrawDebugSystem: ISystemFactory = world => {
   // world.scene.constantlyUpdateMeshUnderPointer = true;
 
   const cache = new Map<any, number>();
-  let time = 0;
-  world.scene.onPointerObservable.add(ev => {
-    if (ev.type === PointerEventTypes.POINTERDOWN) {
-      time = Date.now();
-    } else if (ev.type === PointerEventTypes.POINTERUP) {
-      const diff = Date.now() - time;
-
-      if (ev.pickInfo) {
-        const point = ev.pickInfo.pickedPoint;
-
-        // if (
-        //   point &&
-        //   ev.pickInfo.pickedMesh?.metadata?.terrain &&
-        //   diff < CLICK_TO_MOVE_MAX_TIME_DELTA
-        // ) {
-        // const mouseInput = world.with('mouseInput').entities[0];
-        // if (mouseInput) {
-        //   const delta = mouseInput.mouseInput.delta;
-
-        //   if (delta) {
-        //     const magnitude = Math.abs(delta.x) + Math.abs(delta.y);
-
-        //     if (magnitude > 3) {
-        //       return;
-        //     }
-        //   }
-        // }
-        // point.y = 256 - point.y;
-
-        // EventBus.emit('groundPointClicked', { point });
-        // }
-      }
-    } else if (ev.type === PointerEventTypes.POINTERMOVE) {
-      //         const p =ev.pickInfo?.pickedPoint;
-      //         if(!p)return;
-      //         p.y = 256 - p.y;
-      // console.log('pointer move', p.toString());
-      // const e = ev.event;
-      // const x = e.clientX;
-      // const y = e.clientY;
-      // const pickInfo = world.scene.pick(x, y, mesh =>true);
-      // console.log(pickInfo?.pickedPoint?.toString())
-    }
-  });
 
   return {
     update: dt => {

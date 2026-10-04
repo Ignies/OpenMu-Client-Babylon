@@ -11,7 +11,7 @@ import { TrackedSession, type SessionOptions } from './session';
  * events go out as they happen, since each one is a line somebody reads.
  */
 
-export type TrackerListener = {
+type TrackerListener = {
   player?(player: TrackedPlayer): void;
   move?(id: string, map: number | null, x: number, y: number): void;
   leave?(id: string): void;

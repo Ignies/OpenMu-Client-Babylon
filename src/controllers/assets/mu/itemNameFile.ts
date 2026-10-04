@@ -50,7 +50,7 @@ export function parseItemNames(bytes: Uint8Array): Map<number, string> {
  * Load the overlay for the active language. A no-op for a language with no
  * pack, and for English - `items.json` already holds those names.
  */
-export function loadItemNames(): Promise<void> {
+function loadItemNames(): Promise<void> {
   if (pending) return pending;
 
   const pack = i18n.dataPack;

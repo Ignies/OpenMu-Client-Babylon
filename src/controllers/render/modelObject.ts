@@ -38,8 +38,6 @@ const DEFAULT_BONE_LINK_ROTATION = Quaternion.FromEulerAngles(
   0
 );
 
-const BoundingUpdateInterval = 5;
-
 /** The original's default `PlaySpeed` for an idle clip (playSpeed.ts tables). */
 const DEFAULT_ANIMATION_SPEED = 0.28;
 
@@ -56,15 +54,8 @@ export type PartPose = {
 
 type Int = number;
 
-const EmptyBone = Matrix.Identity();
-const EmptyMatrix = Matrix.Identity();
 const tmpMatrix = Matrix.Identity();
-const tmpQ = Quaternion.Identity();
 const tmpVec3 = Vector3.Zero();
-const tmpVec32 = Vector3.Zero();
-
-const minTmp = new Vector3(Number.MAX_VALUE);
-const maxTmp = new Vector3(Number.MIN_VALUE);
 
 const boneWorldTmp = Matrix.Identity();
 
@@ -819,7 +810,7 @@ export class ModelObject {
 
   constructor(
     private readonly scene: Scene,
-    private readonly parent?: TransformNode
+    parent?: TransformNode
   ) {
     this._node = new TransformNode('modelObject', this.scene);
     this._node.rotationQuaternion = null;

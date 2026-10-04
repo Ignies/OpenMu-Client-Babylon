@@ -44,7 +44,7 @@ const COMMANDS: readonly {
 /** The bottom bar's local Y of a 640×480 screen Y. */
 const BAR_TOP = 480 - 51;
 
-export function ravenEquipped(): boolean {
+function ravenEquipped(): boolean {
   const item = Store.playerData.items[InventoryConstants.LeftHandSlot];
   return !!item && item.group === PET_GROUP && item.num === DARK_RAVEN_INDEX;
 }

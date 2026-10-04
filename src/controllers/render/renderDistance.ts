@@ -2,7 +2,7 @@
  * How far from the hero map objects are kept loaded, in tiles. Step 0 is the old
  * 32/40; the original draws every block the frustum touches (ZzzObject.cpp:3272).
  */
-export type RenderDistanceRanges = {
+type RenderDistanceRanges = {
   readonly visible: number;
   readonly nearby: number;
 };

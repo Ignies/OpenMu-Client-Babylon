@@ -105,7 +105,7 @@ export const CommandFields = observer(
 );
 
 /** The line as it will be sent, so nothing is a surprise. */
-export const CommandPreview = observer(
+const CommandPreview = observer(
   ({ command, overrides }: { command: GmCommand; overrides?: Overrides }) => (
     <output className="gm-preview">{GmPanel.preview(command, overrides)}</output>
   )

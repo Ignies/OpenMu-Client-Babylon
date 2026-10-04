@@ -242,7 +242,7 @@ const TRACKS = {
   },
 } as const satisfies Record<string, TrackRecipe>;
 
-export type TrackName = keyof typeof TRACKS;
+type TrackName = keyof typeof TRACKS;
 
 /**
  * Monster model type -> track, in monster model order; absent takes `boot`. `none` only

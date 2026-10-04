@@ -19,7 +19,7 @@ export {
 } from './roster';
 
 /** Where the list lives and how it is asked for. The Store satisfies it. */
-export interface CharacterListSource {
+interface CharacterListSource {
   charactersList: ListedCharacter[];
   loadingCharactersList: boolean;
   focusedChar: string;
@@ -28,7 +28,7 @@ export interface CharacterListSource {
   focusCharacterRequest(name: string): void;
 }
 
-export type CharacterListProps = {
+type CharacterListProps = {
   source: CharacterListSource;
   /** Called when a new list arrives, before it is stored. */
   onList?: () => void;

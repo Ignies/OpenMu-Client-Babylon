@@ -46,7 +46,7 @@ export const WHITE: RGB = [1, 1, 1];
 
 /* ------------------------------------------------------------- live list */
 
-export interface LiveEffect {
+interface LiveEffect {
   /** Return false to finish; `release` is then called once. */
   update(dt: number): boolean;
   release(): void;

@@ -40,7 +40,7 @@
  */
 
 /** Weather kinds the packet's high nibble can carry (`ReceiveWeather`). */
-export const WEATHER_CLEAR = 0;
+const WEATHER_CLEAR = 0;
 export const WEATHER_RAIN = 1;
 
 /** The low nibble is 4 bits: `RainTarget = variation * 6`, so 15 is the cap. */

@@ -5,7 +5,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 
 import { join, resolve } from 'path';
 import type { MonsterDef } from '../src/controllers/monsters';
 
-export const MONSTERS_DIR = resolve(import.meta.dir, '../versions/shared/monsters');
+const MONSTERS_DIR = resolve(import.meta.dir, '../versions/shared/monsters');
 
 /** Every monster file, with the folder it lives in. */
 export function readMonsterFiles(): { folder: string; def: MonsterDef }[] {
@@ -19,7 +19,7 @@ const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(
 const key = (k: string) => (/^[A-Za-z_]\w*$/.test(k) ? k : `'${k}'`);
 const value = (v: unknown) => (typeof v === 'string' ? `'${v.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'` : String(v));
 
-export function renderMonster(d: MonsterDef): string {
+function renderMonster(d: MonsterDef): string {
   const lines = [`  Numb: ${d.Numb},`, `  Name: ${value(d.Name)},`];
   if (d.maxHealth !== undefined) lines.push(`  maxHealth: ${d.maxHealth},`);
   if (d.subType !== undefined) lines.push(`  subType: ${d.subType},`);

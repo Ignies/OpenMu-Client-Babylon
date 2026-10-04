@@ -42,7 +42,7 @@ const GROUP_LABEL: Record<number, string> = {
   11: 'Boots',
 };
 
-export interface PoolEntry {
+interface PoolEntry {
   group: number;
   num: number;
   name: string;
@@ -82,7 +82,7 @@ export const GACHA_POOL: PoolEntry[] = (itemFiles.all() as unknown as ItemRow[])
  * them a given definition actually offers comes from its own
  * `PossibleItemOptions` at fulfilment; these are the labels the reveal shows.
  */
-export const EXCELLENT_OPTIONS = [
+const EXCELLENT_OPTIONS = [
   'Increase Zen after hunt +40%',
   'Defense success rate +10%',
   'Reflect damage +5%',
@@ -93,7 +93,7 @@ export const EXCELLENT_OPTIONS = [
 
 export type Tier = 'common' | 'rare' | 'epic' | 'legendary';
 
-export interface TierSpec {
+interface TierSpec {
   tier: Tier;
   /** Per 1000 pulls. */
   weight: number;
@@ -118,7 +118,7 @@ export interface TierSpec {
  * nowhere else - and only with the replay contract in mind, because every
  * committed seed replays through whatever is written here.
  */
-export const TIERS: TierSpec[] = [
+const TIERS: TierSpec[] = [
   { tier: 'common', weight: 700, levels: [0, 4], excellent: false, options: [0, 0] },
   { tier: 'rare', weight: 235, levels: [5, 9], excellent: false, options: [0, 0] },
   { tier: 'epic', weight: 60, levels: [3, 9], excellent: true, options: [1, 2] },

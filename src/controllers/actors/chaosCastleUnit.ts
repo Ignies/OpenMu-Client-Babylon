@@ -34,7 +34,7 @@ export function wearsChaosCastleSkin(e: Character, mapIndex: number): boolean {
  * Great Reign Crossbow for elves, the Legendary Staff for wizards and
  * summoners. All +0, nothing excellent.
  */
-export function chaosCastleHands(baseClass: BaseClass): Hands {
+function chaosCastleHands(baseClass: BaseClass): Hands {
   switch (baseClass) {
     case BaseClass.Elf:
       return { leftHand: GREAT_REIGN_CROSSBOW, rightHand: null };

@@ -11,8 +11,10 @@ connect server.
 ## How it works
 - `packetsDefinitions/*.xml` is a copy of OpenMU's
   `src/Network/Packets/{ServerToClient,ClientToServer,ConnectServer}/*.xml`.
-- `bun run generate` runs `generate.ts`. It reads each XML with `HTMLRewriter`, deletes the
-  matching `.ts` file and writes it again, then writes an `index.ts` that re-exports the three lists.
+- `bun run generate` runs `generate.ts`. It reads each XML with `HTMLRewriter`, builds the matching
+  `.ts` file in memory and writes it over the old one (no index: `src/controllers/net/packets.ts`
+  picks the active version's set). A class keeps only the read helpers (`_readString`, `_readDataView`) its getters call and a file only
+  the imports its code uses, so the output passes `noUnusedLocals`.
 - The XML holds every version's variants, so the output also has the `...075`, `...095`, `...097`
   and `...Extended` classes. A version's `variantRank` picks which one wins for a shared code.
 - Packets OpenMU does not define (map-server move, band and ping relays) are hand-written in

@@ -26,7 +26,7 @@ function bareAddress(address: string): string {
  * counting per-address counts nobody. The /64 is the unit actually handed to a
  * subscriber, so that is the unit that gets counted.
  */
-export function ipv6Prefix(address: string): string {
+function ipv6Prefix(address: string): string {
   const [head, tail = ''] = address.split('::');
   const headGroups = head ? head.split(':') : [];
   const tailGroups = tail ? tail.split(':') : [];

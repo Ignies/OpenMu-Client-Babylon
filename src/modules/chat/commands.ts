@@ -50,7 +50,7 @@ const QUICK_RANGE_TILES = 3;
 /** `OpenQuickCommand(..., MouseX + 10, MouseY - 50)`. */
 const QUICK_OFFSET = { x: 10, y: -50 };
 
-export type CommandTarget = {
+type CommandTarget = {
   netId: number;
   name: string;
   guildRole: GuildMemberRoleEnum | undefined;

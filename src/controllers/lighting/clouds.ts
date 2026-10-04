@@ -253,7 +253,7 @@ function cloudNoise(scene: Scene): RawTexture {
  * Ultra marches the deck; every other tier draws the flat slab it always has.
  * The tier picks which sky, not how much of one.
  */
-export function volumetricClouds(): boolean {
+function volumetricClouds(): boolean {
   if (tierIndex() < 2 || !GameOptions.clouds) return false;
 
   // Held back until the field under the march is a volume.
@@ -277,7 +277,7 @@ export function volumetricClouds(): boolean {
   return volumeDev !== null && volumeDev > 0;
 }
 
-export function cloudsActive(base: number | null): boolean {
+function cloudsActive(base: number | null): boolean {
   if (base === null || base <= 0 || !lightingTier() || !GameOptions.clouds) {
     return false;
   }

@@ -57,7 +57,7 @@ export function isSelfCastable(def: SkillDefinition): boolean {
   return castsOnSelf(def);
 }
 
-export function isSpell(def: SkillDefinition): boolean {
+function isSpell(def: SkillDefinition): boolean {
   return (
     def.damageType === 'Wizardry' ||
     def.damageType === 'Curse' ||

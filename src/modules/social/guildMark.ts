@@ -8,7 +8,7 @@
  */
 
 export const GUILD_MARK_SIZE = 8;
-export const GUILD_MARK_BYTES = 32;
+const GUILD_MARK_BYTES = 32;
 
 /** `MarkColor[i]` as CSS. Entry 0 is the transparent one. */
 export const GUILD_MARK_PALETTE: string[] = [

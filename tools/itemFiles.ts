@@ -5,7 +5,7 @@ import { join, resolve } from 'path';
 import type { ItemRecord } from '../src/controllers/items';
 
 export const ITEMS_DIR = resolve(import.meta.dir, '../versions/shared/items');
-export const GROUP_FOLDERS = ['swords', 'axes', 'maces', 'spears', 'bows', 'staffs', 'shields', 'helms', 'armors', 'pants', 'gloves', 'boots', 'wings', 'helpers', 'potions', 'misc'];
+const GROUP_FOLDERS = ['swords', 'axes', 'maces', 'spears', 'bows', 'staffs', 'shields', 'helms', 'armors', 'pants', 'gloves', 'boots', 'wings', 'helpers', 'potions', 'misc'];
 
 type Row = Record<string, number | string>;
 

@@ -11,7 +11,7 @@ const RAIL_WIDTH = 5;
  * meets in the middle. `op2_back1` and `op1_back2` are complete bands with a
  * corner figure at each end; the options window is wider than one of them.
  */
-export const SlicedBand = ({
+const SlicedBand = ({
   file,
   width,
   height,

@@ -23,7 +23,7 @@ export enum MsgWinCode {
   ConfirmAddPoints = 'MESSAGE_CONFIRM_ADD_POINTS',
 }
 
-export type MsgWinMessage = {
+type MsgWinMessage = {
   type: MsgWinType;
   textId: number;
   /** Resolved by `formatMsgWinText`, so the box follows the language. */

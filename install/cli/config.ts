@@ -1,5 +1,5 @@
 // The installer's single source of truth, persisted as KEY=VALUE in the state folder (see readme.md).
-export type Mode = 'domain' | 'ip';
+type Mode = 'domain' | 'ip';
 
 export type Config = {
   mode: Mode;

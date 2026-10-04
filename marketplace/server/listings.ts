@@ -232,11 +232,11 @@ export function byId(id: string): Listing | null {
   return row ? toListing(row) : null;
 }
 
-export function byRow(id: string): ListingRow | null {
+function byRow(id: string): ListingRow | null {
   return (db.query('SELECT * FROM listings WHERE id = ?').get(id) as ListingRow) ?? null;
 }
 
-export type BrowseQuery = {
+type BrowseQuery = {
   category?: string;
   limit?: number;
   offset?: number;
@@ -305,7 +305,7 @@ export function inState(state: ListingState, before = Number.MAX_SAFE_INTEGER): 
 
 // ---- history ---------------------------------------------------------------
 
-export type HistoryStatus = 'success' | 'failed' | 'pending';
+type HistoryStatus = 'success' | 'failed' | 'pending';
 
 export type HistoryEntry = {
   id: string;

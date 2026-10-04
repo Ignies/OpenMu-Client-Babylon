@@ -27,12 +27,12 @@ export function fidelityCustom(): boolean {
   return isCustom(GameOptions.fidelity, GameOptions.fidelityOverrides);
 }
 
-export function improvementChecked(id: string): boolean {
+function improvementChecked(id: string): boolean {
   return improvementOn(id, GameOptions.fidelity, GameOptions.fidelityOverrides);
 }
 
 /** A preset clears the per-improvement choices. */
-export function applyFidelity(level: number): void {
+function applyFidelity(level: number): void {
   setGameOption('fidelity', level);
   setGameOption('fidelityOverrides', {});
 }

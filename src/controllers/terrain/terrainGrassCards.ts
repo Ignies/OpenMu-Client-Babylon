@@ -31,7 +31,7 @@ export type GrassCards = {
   readonly ramp: Texture | null;
 };
 
-export const NO_GRASS_CARDS: GrassCards = { slots: new Set(), ramp: null };
+const NO_GRASS_CARDS: GrassCards = { slots: new Set(), ramp: null };
 
 /**
  * The card reduced to one colour per row.

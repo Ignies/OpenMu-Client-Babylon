@@ -31,7 +31,7 @@ export const MASTER_EXP_SUB_BARS = 10;
 
 // ---- 2. state + readers ----------------------------------------------------
 
-export interface MasterLevelState {
+interface MasterLevelState {
   /** `nMLevel`, 0 until `MasterStatsUpdate` arrives. */
   level: number;
   /** `lMasterLevel_Experince`: total master experience. */
@@ -79,7 +79,7 @@ export function inMasterProgression(): boolean {
  * `iBaseExperience`: the total experience at which the current master level
  * began, from the original's two-term cubic (`RenderExperience`).
  */
-export function masterLevelBaseExperience(level: number): number {
+function masterLevelBaseExperience(level: number): number {
   const total = level + REGULAR_LEVEL_CAP;
   const over = total - CURVE_BREAK_LEVEL;
   const a = (9 + total) * total * total * 10 + (9 + over) * over * over * 1000;

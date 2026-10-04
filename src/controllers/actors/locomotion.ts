@@ -121,9 +121,9 @@ const SPEED_FAST_WINGS = 16;
  * `MoveSpeed` units are per 25 Hz frame at `TERRAIN_SCALE` 100, so one tile
  * per second is 4 units (ZzzCharacter.cpp:11530, MoveCharacterPosition:6259).
  */
-export const MOVE_SPEED_UNITS_PER_TILE_PER_SECOND = 4;
+const MOVE_SPEED_UNITS_PER_TILE_PER_SECOND = 4;
 
-export type MoveSpeedInput = {
+type MoveSpeedInput = {
   /** `c->Run`, in the original's 0…40 units. */
   run: number;
   inSafeZone: boolean;

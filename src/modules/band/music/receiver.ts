@@ -14,16 +14,16 @@ import type { BatchEvent } from './sequencer';
  * Pure: clock and sink injected.
  */
 
-export type ReceiverClock = { now(): number };
+type ReceiverClock = { now(): number };
 
-export type ReceiverSink = {
+type ReceiverSink = {
   /** A note at audio time `when`. */
   schedule(ev: BatchEvent, when: number): void;
   /** Every voice of this performer off, now. */
   allOff(): void;
 };
 
-export type ReceiverOptions = {
+type ReceiverOptions = {
   /** Seconds of slack behind the performer. */
   delaySec?: number;
   /** A batch this late re-fixes the offset. */

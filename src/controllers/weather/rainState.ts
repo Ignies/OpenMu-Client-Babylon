@@ -59,7 +59,7 @@ export function rainTarget(map: ENUM_WORLD): number {
 }
 
 /** Advances `RainCurrent` toward the target; call once a frame. */
-export function updateRain(map: ENUM_WORLD, dt: number): number {
+function updateRain(map: ENUM_WORLD, dt: number): number {
   const target = rainTarget(map);
 
   // First frame on a new map: the shower on the other side of the gate is
@@ -89,7 +89,7 @@ export function rainStrength(): number {
  * A map change re-seeds the rain instead of re-ramping it: `Store.weather` is kept (the sky is
  * global) and the next `updateRain` takes the target whole. Dry maps get a zero `rainTarget`.
  */
-export function resetRain(): void {
+function resetRain(): void {
   current = 0;
   seeded = false;
 }

@@ -21,12 +21,12 @@ import type { MidiEvent, ParsedMidi } from './midiFile';
 
 export type BatchEvent = { dt: number; status: number; d1: number; d2: number };
 
-export type SequencerClock = {
+type SequencerClock = {
   /** Audio time, seconds. */
   now(): number;
 };
 
-export type SequencerSink = {
+type SequencerSink = {
   /** A note for the performer's own sampler, at audio time `when`. */
   schedule(ev: MidiEvent, when: number): void;
   /** One send window's events for the transport. */
@@ -35,7 +35,7 @@ export type SequencerSink = {
   ended?(): void;
 };
 
-export type SequencerOptions = {
+type SequencerOptions = {
   tickMs?: number;
   leadMs?: number;
   localDelayMs?: number;

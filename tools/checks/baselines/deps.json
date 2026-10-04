@@ -40,8 +40,6 @@
  "controllers-are-generic: src/controllers/interface/components/emoji_text/index.tsx -> src/modules/chat/emojis/index.ts",
  "controllers-are-generic: src/controllers/interface/components/emoji_text/index.tsx -> src/modules/options/gameOptions.ts",
  "controllers-are-generic: src/controllers/interface/components/game_cursor/index.tsx -> src/app/store.ts",
- "controllers-are-generic: src/controllers/interface/components/guild_marks/index.tsx -> src/app/store.ts",
- "controllers-are-generic: src/controllers/interface/components/guild_marks/index.tsx -> src/modules/social/guildMark.ts",
  "controllers-are-generic: src/controllers/interface/components/item_grid/index.tsx -> src/app/store.ts",
  "controllers-are-generic: src/controllers/interface/components/item_grid/index.tsx -> versions/shared/ui/hud/party_bars/stableKey.ts",
  "controllers-are-generic: src/controllers/interface/components/item_icon/index.tsx -> src/modules/items/itemLevelLook.ts",

@@ -19,8 +19,8 @@ export const SORTS: { id: Sort; labelKey: TextKey }[] = [
   { id: 'deal', labelKey: 'marketplace.sort.deal' },
 ];
 
-export const PAGE_SIZE_GRID = 12;
-export const PAGE_SIZE_LIST = 10;
+const PAGE_SIZE_GRID = 12;
+const PAGE_SIZE_LIST = 10;
 
 /** An item in the bag with the slot it sits in, which is what a listing names. */
 export type BagEntry = { item: Item; slot: number };
@@ -32,7 +32,7 @@ export type MarketApi = Pick<
 >;
 
 /** The game, as the store needs it: a token in, the server's answer out. */
-export type EscrowBridge = {
+type EscrowBridge = {
   send(tokenHex: string, listingId: string): Promise<EscrowResult>;
 };
 

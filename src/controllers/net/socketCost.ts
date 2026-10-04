@@ -29,7 +29,7 @@ type Window = {
   bursts: number;
 };
 
-export type SocketCost = {
+type SocketCost = {
   /** Messages a second. */
   rate: number;
   /** Kilobytes a second. */

@@ -58,9 +58,9 @@ const MESSAGE_MS = 5000;
 
 // ---- 2. state + readers ----------------------------------------------------
 
-export type DuelSide = { id: number; name: string };
+type DuelSide = { id: number; name: string };
 
-export type DuelScoreboard = {
+type DuelScoreboard = {
   /** The hero for a duelist (`InitializeDuelPlugIn` puts the receiver first). */
   side1: DuelSide;
   side2: DuelSide;
@@ -70,9 +70,9 @@ export type DuelScoreboard = {
   watching: boolean;
 };
 
-export type DuelBars = { hp1: number; sd1: number; hp2: number; sd2: number };
+type DuelBars = { hp1: number; sd1: number; hp2: number; sd2: number };
 
-export type DuelChannel = {
+type DuelChannel = {
   name1: string;
   name2: string;
   running: boolean;

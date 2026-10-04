@@ -5,7 +5,7 @@ import { makeAutoObservable } from 'mobx';
  * a help lane and a notice lane fed by `ServerMessage` types 10..15. See readme.md.
  */
 
-export const SLIDE_STAGE_WIDTH = 640;
+const SLIDE_STAGE_WIDTH = 640;
 const TICKS_PER_SECOND = 25;
 const MAX_LOOPS = 30;
 const STALE_SECONDS = 60;
@@ -15,9 +15,9 @@ const ACCEL = 1;
 const DEFAULT_SPEED = 2.5;
 
 /** `(255 << 24) + (200 << 16) + (220 << 8) + 230`: R 230, G 220, B 200. */
-export const DEFAULT_SLIDE_COLOR = 0xffc8dce6;
+const DEFAULT_SLIDE_COLOR = 0xffc8dce6;
 
-export type SlideLaneKind = 'help' | 'notice';
+type SlideLaneKind = 'help' | 'notice';
 
 type QueuedSlide = {
   due: number;
@@ -27,7 +27,7 @@ type QueuedSlide = {
   speed: number;
 };
 
-export type SlideColor = { r: number; g: number; b: number; a: number };
+type SlideColor = { r: number; g: number; b: number; a: number };
 
 /** `SetTextColor(DWORD)`: R + (G << 8) + (B << 16) + (A << 24). */
 export function unpackSlideColor(color: number): SlideColor {

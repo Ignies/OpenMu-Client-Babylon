@@ -124,7 +124,7 @@ const DIRECTION_FRAMES = 3;
 
 // ---- 2. state + readers ----------------------------------------------------
 
-export type KanturuDialog = {
+type KanturuDialog = {
   open: boolean;
   /** The blue heading, then the green body lines under it. */
   subject: string;
@@ -132,7 +132,7 @@ export type KanturuDialog = {
   canEnter: boolean;
 };
 
-export type KanturuHud = {
+type KanturuHud = {
   /** The 99x78 figure is up only during a wave or the Nightmare fight. */
   open: boolean;
   userCount: number;

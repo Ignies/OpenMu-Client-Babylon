@@ -17,25 +17,25 @@ export const MAP_ROTATION = 45;
 export const TERRAIN_SIZE = 256;
 
 export const NPC_SIZE = 15;
-export const PORTAL_SIZE = 30;
+const PORTAL_SIZE = 30;
 export const HERO_SIZE = 12;
-export const PARTY_SIZE = 15;
+const PARTY_SIZE = 15;
 
-export const EDGE_WIDTH = 35;
-export const EDGE_HEIGHT = 6;
+const EDGE_WIDTH = 35;
+const EDGE_HEIGHT = 6;
 
-export const CORNER_SPRITE = 'mini_map_ui_corner.OZT';
+const CORNER_SPRITE = 'mini_map_ui_corner.OZT';
 export const LINE_SPRITE = 'mini_map_ui_line.OZJ';
 export const HERO_SPRITE = 'mini_map_ui_cha.OZT';
 export const PORTAL_SPRITE = 'mini_map_ui_portal.OZT';
 export const NPC_SPRITE = 'mini_map_ui_npc.OZT';
-export const PARTY_SPRITE = 'mini_map_ui_party.OZT';
+const PARTY_SPRITE = 'mini_map_ui_party.OZT';
 export const CLOSE_SPRITE = 'mini_map_ui_cancel.OZT';
 
 export type MapPoint = { x: number; y: number };
 
 /** Our own marker kind for party members; not in the file format. */
-export const PARTY_KIND = 3;
+const PARTY_KIND = 3;
 
 export const MARKER_SIZE: Record<number, number> = {
   [MinimapMarkerKind.Npc]: NPC_SIZE,
@@ -247,7 +247,7 @@ export const isPanned = (pan: MapPan): boolean => pan.u !== 0 || pan.v !== 0;
  * view's CSS scale, then the 45° spin, and the tile under the fixed centre
  * went the other way.
  */
-export function dragToPan(sx: number, sy: number, mapSize: number, scale: number): MapPan {
+function dragToPan(sx: number, sy: number, mapSize: number, scale: number): MapPan {
   const rad = (MAP_ROTATION * Math.PI) / 180;
   const px = sx / scale;
   const py = sy / scale;

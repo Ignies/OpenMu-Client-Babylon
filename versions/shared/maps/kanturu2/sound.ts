@@ -9,7 +9,7 @@ const A = MonsterActionType;
  * no world guard. Stop and Walk both clear its latch, so a per-clip play
  * stands in for it; the deaths are re-issued every frame.
  */
-export const KANTURU_2ND: VoiceSet = {
+const KANTURU_2ND: VoiceSet = {
   // PERSONA
   114: [
     hookWalk(['Sound/w38/perso_idle-01', 'Sound/w38/perso_idle-02'], 15, WALK),

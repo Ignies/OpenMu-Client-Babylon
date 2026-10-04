@@ -18,7 +18,7 @@
  * `127.0.0.1:44405`, not `127.0.0.1` - and a `*.` wildcard never matches them.
  */
 
-export interface AllowRule {
+interface AllowRule {
   host: string;
   /** null when the rule names a host with no port (matches any port). */
   port: number | null;

@@ -143,7 +143,7 @@ export function mine() {
   );
 }
 
-export type ListInput = {
+type ListInput = {
   character: string;
   /** The bag slot the item sits in; the game server takes it from there. */
   slot: number;

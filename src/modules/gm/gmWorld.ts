@@ -22,7 +22,7 @@ export { RADAR_RANGE, type Nearby, type NearbyKind } from './gmNearby';
  * therefore testable.
  */
 
-export type HeroView = {
+type HeroView = {
   name: string;
   x: number;
   y: number;

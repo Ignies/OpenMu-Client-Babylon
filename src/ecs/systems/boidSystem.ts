@@ -30,8 +30,6 @@ import type { Entity, ISystemFactory } from '../world';
  * The species and where each one flies are in `controllers/fx/boids.ts`.
  */
 
-/** Spawn box around the hero: `rand()%1024 - 512` in x and y. */
-const SPAWN_SPREAD = 512 * MU_UNIT;
 /** `RequestTerrainHeight(...) + rand()%200 + 150`. */
 const SPAWN_RISE_MIN = 150 * MU_UNIT;
 const SPAWN_RISE_SPAN = 200 * MU_UNIT;

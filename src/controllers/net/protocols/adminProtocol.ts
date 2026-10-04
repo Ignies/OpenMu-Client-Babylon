@@ -157,7 +157,7 @@ export type AdminClientMessage =
   | { t: 'ping' };
 
 /** OpenMU `CharacterClassNumber` -> the class's name. */
-export const CLASS_NAMES: Readonly<Record<number, string>> = {
+const CLASS_NAMES: Readonly<Record<number, string>> = {
   0: 'Dark Wizard',
   2: 'Soul Master',
   3: 'Grand Master',
@@ -184,7 +184,7 @@ export function className(cls: number | null): string {
 }
 
 /** `CharacterHeroState` names, the way the score panel and the log say them. */
-export const HERO_STATE_NAMES: Readonly<Record<number, string>> = {
+const HERO_STATE_NAMES: Readonly<Record<number, string>> = {
   0: 'New',
   1: 'Hero',
   2: 'Hero',

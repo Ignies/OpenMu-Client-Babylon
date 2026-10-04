@@ -5,7 +5,7 @@ import { GameOptions, uiScaleFactor } from '@/modules/options/gameOptions';
 
 const STORAGE_KEY = 'mu-windows';
 
-export type WindowPlacement = {
+type WindowPlacement = {
   x: number | null;
   y: number | null;
   scale: number;
@@ -22,14 +22,14 @@ const DEFAULT_SCALES: Record<string, number> = {
   marketplace: 1,
 };
 
-export const defaultScaleOf = (id: string): number =>
+const defaultScaleOf = (id: string): number =>
   DEFAULT_SCALES[id] ?? DEFAULT_SCALE;
 
 /** At least this many screen pixels of a window stay reachable on every side. */
-export const EDGE_MARGIN = 32;
+const EDGE_MARGIN = 32;
 
 /** Screen pixels kept free around a window when fitting its scale to the viewport. */
-export const FIT_MARGIN = 12;
+const FIT_MARGIN = 12;
 
 /**
  * z-index of the bottom window. Every stacked window sits at base + its

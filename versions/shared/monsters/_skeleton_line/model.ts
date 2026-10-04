@@ -33,7 +33,7 @@ import { registerModelClass } from '@/controllers/actors';
  * walk / attack clips the way `SetPlayerStop` / `SetPlayerAttack` do for the
  * original's MODEL_PLAYER monsters.
  */
-export abstract class SkeletonMonster extends PlayerObject {
+abstract class SkeletonMonster extends PlayerObject {
   /** Skeleton monsters pose as a male knight (`c->Class` is never set). */
   static NpcClass = CharacterClassNumber.DarkKnight;
 

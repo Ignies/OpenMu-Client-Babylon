@@ -11,7 +11,7 @@ import { toggleMarketplace } from '@/modules/marketplace/gameBridge';
  * same five at a touchable size - on a phone the bar's own copies sit past
  * the right edge of the screen - and the two must not drift apart.
  */
-export type MainFrameButton = {
+type MainFrameButton = {
   file: string;
   titleKey: TextKey;
   toggle: () => void;

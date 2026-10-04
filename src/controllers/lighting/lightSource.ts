@@ -11,7 +11,7 @@ import {
  * ZzzCharacter.cpp) plus a pooled point light, driven by a `LightRecipe` and an anchor. Notes in readme.md.
  */
 
-export type LightFlicker = { min: number; max: number; steps: number };
+type LightFlicker = { min: number; max: number; steps: number };
 
 export type LightPulse = {
   speed: number;
@@ -26,7 +26,7 @@ export type LightPulse = {
  * RGB into `out` every tick. For hosts whose colour is animated elsewhere
  * (item tiers breathe on the item-glow clock). The envelope still scales it.
  */
-export type LightColorFn = (out: TerrainLightColor) => TerrainLightColor;
+type LightColorFn = (out: TerrainLightColor) => TerrainLightColor;
 
 /**
  * A light, as data. Every field but `color` and `range` has a default, so a

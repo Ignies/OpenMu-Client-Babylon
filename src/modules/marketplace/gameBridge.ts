@@ -25,7 +25,7 @@ function bagEntries(): BagEntry[] {
   return out;
 }
 
-export function syncMarketplaceFromGame(): void {
+function syncMarketplaceFromGame(): void {
   Marketplace.syncFromGame(Store.playerData.money, bagEntries(), Store.playerData.name);
 }
 
@@ -46,7 +46,7 @@ autorun(() => {
 // ---- escrow ----------------------------------------------------------------
 
 /** The game server has this long to answer a token before the window gives up. */
-export const ESCROW_TIMEOUT_MS = 15_000;
+const ESCROW_TIMEOUT_MS = 15_000;
 
 type Waiter = {
   resolve: (result: EscrowResult) => void;

@@ -4,7 +4,7 @@ import type { Config } from './config';
 import { attach, must, run, runLogged, type Result } from './exec';
 import type { Paths } from './paths';
 
-export type ServiceState = { service: string; state: string; health: string };
+type ServiceState = { service: string; state: string; health: string };
 
 export class Stack {
   constructor(

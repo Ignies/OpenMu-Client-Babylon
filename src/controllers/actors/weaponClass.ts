@@ -139,7 +139,7 @@ export function equippedBowType(
  * always two-handed, and staffs switch at Legendary Staff (index 5) - the
  * summoner sticks/books are one-handed.
  */
-export function isTwoHanded(item: Item): boolean {
+function isTwoHanded(item: Item): boolean {
   switch (item.group) {
     case GROUP_SWORD:
     case GROUP_AXE:

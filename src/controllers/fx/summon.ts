@@ -37,9 +37,9 @@ const UPRIGHT = Quaternion.FromEulerAngles(-Math.PI / 2, 0, 0);
  * lit by `colour`, blended at `Alpha`, opaque at 1); `both` is RENDER_TEXTURE with a RENDER_BRIGHT pass
  * over it (Sahamutt's CHROME7 pass, drawn with the mesh's own UVs); `hide` is a mesh no call draws.
  */
-export type SummonDraw = 'add' | 'alpha' | 'both' | 'hide';
+type SummonDraw = 'add' | 'alpha' | 'both' | 'hide';
 
-export interface SummonMesh {
+interface SummonMesh {
   draw?: SummonDraw;
   /** The mesh's light: `BodyLight`, clamped. Default white. */
   colour?: RGB;
@@ -47,7 +47,7 @@ export interface SummonMesh {
   scrollU?: number;
 }
 
-export interface SummonOptions {
+interface SummonOptions {
   /** `Skill/...glb` (recipes.ts `MODEL`). */
   model: string;
   /** Hard end of life, seconds (the original's LifeTime). */

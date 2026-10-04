@@ -46,8 +46,8 @@ disband and guild creation. The guild state and the guild actions live in the `S
   (`playerNameById`), `app/store.ts`, `src/i18n`.
 - used by: `src/app/logic.ts`. The window is `versions/shared/ui/windows/guild/`; the join prompt is
   `windows/social_prompts/`. `Store.guilds` is read by `hud/name_tags/`,
-  `ecs/systems/guildFlagSystem.ts`, `ecs/world.ts` and
-  `controllers/interface/components/guild_marks/`. `chat/commands.ts` calls `Social.guildJoin`.
+  `ecs/systems/guildFlagSystem.ts` and `ecs/world.ts`.
+  `chat/commands.ts` calls `Social.guildJoin`.
 
 ## Change it
 - handle a new guild packet: add an `EventBus.on(...)` in `net.ts`, keep state in `Social`.

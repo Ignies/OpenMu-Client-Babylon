@@ -23,7 +23,7 @@ export type MidiEvent = {
   d2: number;
 };
 
-export type MidiChannel = {
+type MidiChannel = {
   /** Whether any note is played on this channel. */
   used: boolean;
   /** The name of the first track that plays notes on it, or "Ch N". */

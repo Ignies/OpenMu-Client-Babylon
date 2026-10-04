@@ -26,7 +26,7 @@ imports the modules below directly (baselined in `tools/checks`).
 - `assetDownload.ts`: `assetDownload` (store), `AssetGroup`, `loadAssetsIndex`, `startDownload`,
   `cancelDownload`, `clearDownloaded`, `storageUsed`, `ensureCacheWorker`.
 - `itemIconPack.ts`: `prefetchItemIcons`, `itemIconPackChain`, `itemIconUrl`, `itemIconKey`.
-- `worldAssets.ts`: `assetWorldNum`, `onWorlds`, `*_WORLDS` lists (readers over `maps`).
+- `worldAssets.ts`: `assetWorldNum`, `*_WORLDS` lists (readers over `maps`).
 - `ktx2Pixels.ts`: `isKtx2`, `loadTranscoder`, `decodeKtx2`, `TranscoderUrls`.
 - `bmd/`: `BMD`, `BMDReader`, `BMDTextureBone` (used by `tools/bmdToGlb.ts`).
 - `mu/`: `loadMuSprite`, `loadInterfaceSprite`, `peekMuSprite`, `peekInterfaceSprite`,

@@ -1,18 +1,5 @@
 import { TERRAIN_SIZE } from './consts';
 
-function _readString(buffer: DataView, from: number, to: number): string {
-  let val = '';
-  for (let i = from; i < to; i++) {
-    const ch = String.fromCharCode(buffer.getUint8(i));
-
-    if (ch === '\0') break;
-
-    val += ch;
-  }
-
-  return val;
-}
-
 /**
  * `OpenTerrainHeightNew` (ZzzLodTerrain.cpp:737-790), the 24-bit variant
  * three worlds use - `IsTerrainHeightExtMap` (:599): Balgas Refuge (42),

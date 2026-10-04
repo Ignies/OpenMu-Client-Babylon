@@ -70,7 +70,7 @@ export function itemFromLink(payload: string): Item | null {
   return item;
 }
 
-export type ItemLinkHit = { start: number; end: number; item: Item };
+type ItemLinkHit = { start: number; end: number; item: Item };
 
 /** Every readable link in the line, in order. */
 export function scanItemLinks(text: string): ItemLinkHit[] {

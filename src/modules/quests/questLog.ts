@@ -59,14 +59,13 @@ const KILL_REFRESH_DELAY_MS = 1000;
 const MSG_UNAVAILABLE: TextKey = 'quest.unavailable';
 const MSG_NOT_FULFILLED: TextKey = 'quest.notFulfilled';
 const MSG_NO_QUESTS: TextKey = 'quest.noneInProgress';
-const MSG_INVENTORY_FULL: TextKey = 'quest.inventoryFull';
 
 /** `RewardTypeEnum.Random`: the "one of these" reward group. */
 
 // ---- 2. state + readers ----------------------------------------------------
 
 /** `(group << 16) | number`, the original's `dwQuestIndex` (WSclient.cpp:10577), unsigned like the file's keys. */
-export function questKey(number: number, group: number): number {
+function questKey(number: number, group: number): number {
   return (((group & 0xffff) << 16) | (number & 0xffff)) >>> 0;
 }
 
@@ -94,7 +93,7 @@ export type QuestRequirementLine = {
  * `QuestWords_<lang>.bmd`, which is swapped under us when the player changes
  * language, and the list is often still open when they do.
  */
-export type AvailableQuest = { number: number; group: number; key: number; subject: string };
+type AvailableQuest = { number: number; group: number; key: number; subject: string };
 
 /** What a `QuestProgress` / `QuestState` carried, kept so the lines it draws
  *  can be built again after a language change. The packet's own accessors hand
@@ -105,7 +104,7 @@ type RawReward = Parameters<typeof describeReward>[0];
 
 /** The cached `QuestProgress` / `QuestState` of one quest. `objectives` and
  *  `lines` are derived for the same reason `subject` is. */
-export type QuestProgressState = {
+type QuestProgressState = {
   key: number;
   /** The conditions the packet carried, counts and all (`objectives.ts`). */
   objectives: QuestObjective[];
@@ -114,7 +113,7 @@ export type QuestProgressState = {
   complete: boolean;
 };
 
-export type QuestProgressMode = 'npcWords' | 'playerWords' | 'requestReward';
+type QuestProgressMode = 'npcWords' | 'playerWords' | 'requestReward';
 
 export type MyQuestTab = 'quest' | 'jobChange' | 'castleTemple';
 
@@ -305,7 +304,7 @@ export function cancelQuest(key = state.selectedKey): void {
 }
 
 /** `SendQuestStateRequest`: fetch conditions + rewards for the log. */
-export function requestQuestState(key: number): void {
+function requestQuestState(key: number): void {
   const packet = QuestStateRequestPacket.createPacket();
   packet.QuestNumber = questKeyNumber(key);
   packet.QuestGroup = questKeyGroup(key);

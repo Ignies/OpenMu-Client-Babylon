@@ -56,7 +56,7 @@ type Runtime = {
 let runtime: Runtime | null = null;
 
 /** What the director hands the pass each tick. */
-export type ToneLook = {
+type ToneLook = {
   /** A graded tier with post processing on. */
   readonly live: boolean;
   /** Index into `GameOptions.toneMapper`'s values. */
@@ -240,7 +240,7 @@ function createPass(scene: Scene, camera: ArcRotateCamera, mapper: number): Post
   return pass;
 }
 
-export function disposeToneMap(): void {
+function disposeToneMap(): void {
   if (!runtime) return;
 
   runtime.camera.detachPostProcess(runtime.pass);

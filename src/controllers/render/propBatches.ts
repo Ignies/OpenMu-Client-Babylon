@@ -1321,7 +1321,7 @@ class PropBatches {
   }
 }
 
-export type PropBatchStats = {
+type PropBatchStats = {
   types: number;
   meshes: number;
   /** Chunk meshes in a cell that is on this frame (plus the sparse ones). */

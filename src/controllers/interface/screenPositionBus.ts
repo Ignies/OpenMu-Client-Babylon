@@ -15,7 +15,7 @@ import type { Entity } from '../../ecs/world';
  * that entity.
  */
 
-export type ScreenPositionListener = (screenPosition: IVector2Like) => void;
+type ScreenPositionListener = (screenPosition: IVector2Like) => void;
 
 const listeners = new Map<Entity, Set<ScreenPositionListener>>();
 
@@ -41,7 +41,7 @@ export function onScreenPosition(
   };
 }
 
-export type AnyScreenPositionListener = (
+type AnyScreenPositionListener = (
   entity: Entity,
   screenPosition: IVector2Like
 ) => void;

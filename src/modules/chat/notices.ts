@@ -18,22 +18,22 @@ import { t, type TextKey } from '../../i18n';
  * black(128).
  */
 
-export const MAX_NOTICE = 6;
+const MAX_NOTICE = 6;
 export const NOTICE_LINE_HEIGHT = 13;
 export const NOTICE_Y = 300;
-export const NOTICE_MAX_WIDTH = 256;
+const NOTICE_MAX_WIDTH = 256;
 
 const TICKS_PER_SECOND = 25;
 const NOTICE_TIME_TICKS = 300;
 export const NOTICE_BLINK_MS = (5 / TICKS_PER_SECOND) * 1000;
 const NOTICE_TIME_MS = (NOTICE_TIME_TICKS / TICKS_PER_SECOND) * 1000;
 
-export const NoticeColor = {
+const NoticeColor = {
   Gold: 0,
   Guild: 1,
 } as const;
 
-export type NoticeLine = {
+type NoticeLine = {
   text: string;
   color: number;
 };
@@ -46,7 +46,7 @@ export const NOTICE_STYLE: Record<number, { color: string; blink: boolean }> = {
 export const NOTICE_BACKGROUND = 'rgba(0,0,0,0.5)';
 
 /** `GlobalText[483]`. */
-export const GUILD_NOTICE_FORMAT: TextKey = 'guild.notice.prefix';
+const GUILD_NOTICE_FORMAT: TextKey = 'guild.notice.prefix';
 
 let measureContext: CanvasRenderingContext2D | null | undefined;
 
@@ -61,7 +61,7 @@ function measureNoticeWidth(text: string): number {
 }
 
 /** `CutText`: split at the last space before the middle, else the first after. */
-export function cutNoticeText(text: string): [string, string] {
+function cutNoticeText(text: string): [string, string] {
   const half = Math.floor(text.length / 2);
   let split = text.lastIndexOf(' ', half);
   if (split === -1) split = text.indexOf(' ', half);

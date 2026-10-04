@@ -5,7 +5,7 @@ import { convertBux } from './mapFileEncryption';
  * records (Kind, Location[2], Rotation, Name[100]). Layout in readme.md.
  */
 
-export const MAX_MINI_MAP_DATA = 100;
+const MAX_MINI_MAP_DATA = 100;
 const RECORD_SIZE = 116;
 const NAME_OFFSET = 16;
 const NAME_SIZE = 100;

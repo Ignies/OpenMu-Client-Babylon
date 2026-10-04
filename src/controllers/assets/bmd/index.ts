@@ -3,8 +3,6 @@ import { MathUtils } from '@/core/mathUtils';
 import { decryptMapFile } from '../../terrain/mapFileEncryption';
 import { ArrayCopy } from '../download';
 
-const log = (...args: any[]) => console.log(`[BMD]`, ...args);
-
 const SIZE_OF_Normal_t = 20;
 // [StructLayout(LayoutKind.Sequential, Pack = 4)]
 class BMDTextureNormal {
@@ -119,7 +117,6 @@ function _readString(buffer: DataView, from: number, to: number): string {
 
 const EXPECTED_FILE_TYPE = 'BMD';
 const MINIMAL_BUFFER_SIZE = 8;
-const STRING_LENGTH = 32;
 
 function ValidateBuffer(buffer: Uint8Array) {
   if (buffer.byteLength < MINIMAL_BUFFER_SIZE) throw new Error('Invalid size.');
@@ -136,8 +133,6 @@ function ValidateBuffer(buffer: Uint8Array) {
 function DecryptBufferIfNeeded(buffer: Uint8Array, version: number) {
   if (version !== 12 && version !== 15) return buffer;
 
-  const dv = new DataView(buffer.buffer);
-  const size = dv.getInt32(0, true);
   const enc = buffer.slice(8); // Extract the encrypted data starting from index 8
 
   // var size = BitConverter.ToInt32(buffer, 4);

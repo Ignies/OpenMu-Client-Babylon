@@ -43,7 +43,7 @@ import { skillDisplayName } from '../../modules/skills/skillNames';
  */
 
 /** `TEXT_COLOR_*` (_define.h:219) as the tooltip renders them. */
-export type TooltipColor =
+type TooltipColor =
   | 'white'
   | 'blue'
   | 'red'
@@ -64,7 +64,7 @@ export type TooltipColor =
  * the worn one. Green is the better number, red the worse, which for a
  * requirement means the smaller one.
  */
-export type TooltipDelta = {
+type TooltipDelta = {
   text: string;
   color: 'green' | 'red';
 };
@@ -78,7 +78,7 @@ export type TooltipLine = {
   delta?: TooltipDelta;
 };
 
-export type ItemTooltipData = {
+type ItemTooltipData = {
   lines: TooltipLine[];
   /** Every requirement and the class gate pass for the hero. */
   usable: boolean;
@@ -204,7 +204,7 @@ const signed = (value: number) => (value > 0 ? `+${value}` : `${value}`);
  * The tail for one number against the worn item's. `lowerIsBetter` for the
  * requirement lines, where needing less is the upgrade.
  */
-export function statDelta(
+function statDelta(
   now: number,
   before: number | undefined,
   lowerIsBetter = false
@@ -217,7 +217,7 @@ export function statDelta(
 }
 
 /** Both ends of the damage range in one tail: `(+3 / +5)`. */
-export function damageDelta(
+function damageDelta(
   min: number,
   max: number,
   before: { damageMin: number; damageMax: number } | undefined

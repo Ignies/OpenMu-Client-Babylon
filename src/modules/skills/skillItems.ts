@@ -20,9 +20,9 @@ import { t } from '../../i18n';
  */
 
 /** Orbs / crystals / Dark Lord scrolls share the wing group. */
-export const ORB_GROUP = 12;
+const ORB_GROUP = 12;
 /** Wizard and Summoner scrolls (`ITEM_SCROLL_OF_POISON` = ITEM_ETC + 0). */
-export const SCROLL_GROUP = 15;
+const SCROLL_GROUP = 15;
 
 /**
  * `ITEM_ORB_OF_SUMMONING` teaches Summon Goblin .. Summon Soldier by item

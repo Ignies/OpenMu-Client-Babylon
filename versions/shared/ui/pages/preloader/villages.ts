@@ -25,7 +25,7 @@ export type Village = {
   road: Point[];
 };
 
-export type Founding = {
+type Founding = {
   /** Map pixels to screen px, through the camera as it rests on the mark. */
   toScreen: (x: number, y: number) => Point;
   /** Whether a label's box is on screen and clear of what stands in front of the map. */
@@ -70,7 +70,7 @@ function road(n: number, from: Point, to: Point, stray: number): Point[] {
 }
 
 /** Where a village's marker sits in its label box, and the box, around screen point `p`. */
-export function labelBox(
+function labelBox(
   p: Point,
   width: number,
   label: number,

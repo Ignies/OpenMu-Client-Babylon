@@ -113,7 +113,7 @@ recipes. One `weather` facade steps every effect (see [docs/controllers.md](../.
   axes, so every print is lit by the same sun, plus a parallax march by depth. `ALPHA_MULTIPLY`
   (`DST_COLOR, ZERO`) only darkens, which is all sunlit snow can show. `FOOTPRINT_TUNING` sizes
   are the print outline; `muFootprints.get/set/reset` rebuild soles and materials. Atlas rows bake
-  per shape on first use (`ensureShape`); `buildSole` builds all of them for tests.
+  per shape on first use (`ensureShape`).
 - `grassBurn.ts`: 4 texels a tile (1024x1024, 1 MB), stamped as an annulus per front with three
   lobe harmonics, uploaded over a dirty rectangle, regrowing over `REGROW_SECONDS` (300). Vigour
   falls with radius (`VIGOUR_SPAN`) and with no fuel (`STARVE_RATE`). The texture is created with

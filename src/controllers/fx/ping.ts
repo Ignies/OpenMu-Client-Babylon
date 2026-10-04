@@ -65,7 +65,7 @@ const COLOUR: RGB = RGBS.tide;
 
 // ---- 2. state + readers ----------------------------------------------------
 
-export interface PingOptions {
+interface PingOptions {
   /** Net id of the player who pinged; the key the one-per-owner rule uses. */
   ownerId: number;
   /** The owner's body, for the near end of the trail. Omitted = marker only. */

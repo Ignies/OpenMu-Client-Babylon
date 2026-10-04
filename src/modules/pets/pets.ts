@@ -37,7 +37,7 @@ export const IMP_BONE = 34;
 /** MU units → world units. */
 const MU_UNIT = 1 / 100;
 
-export type PetKind = 'angel' | 'imp' | 'mount' | 'raven' | 'follower';
+type PetKind = 'angel' | 'imp' | 'mount' | 'raven' | 'follower';
 
 /**
  * How a follower pet holds station on its owner. All six run their model's
@@ -312,7 +312,7 @@ const PETS: Readonly<Record<number, PetSpec>> = {
   },
 };
 
-export type FenrirVariant = 'red' | 'blue' | 'black' | 'gold';
+type FenrirVariant = 'red' | 'blue' | 'black' | 'gold';
 
 /**
  * `GetFenrirType` (ZzzCharacter.cpp:98-108): the horn's option bits, carried
@@ -458,12 +458,12 @@ export const MOUNT_ACTION_STAND = 0;
 export const MOUNT_ACTION_MOVE = 2;
 
 /** fenril_*.bmd clips (_define.h:508-513). */
-export const FENRIR_ACTION_STAND = 0;
+const FENRIR_ACTION_STAND = 0;
 export const FENRIR_ACTION_WALK = 1;
 export const FENRIR_ACTION_RUN = 2;
-export const FENRIR_ACTION_ATTACK = 3;
+const FENRIR_ACTION_ATTACK = 3;
 export const FENRIR_ACTION_SKILL = 4;
-export const FENRIR_ACTION_DAMAGE = 5;
+const FENRIR_ACTION_DAMAGE = 5;
 
 /**
  * The Fenrir half of `MoveMount` (GOBoid.cpp:200-266): which of its own six

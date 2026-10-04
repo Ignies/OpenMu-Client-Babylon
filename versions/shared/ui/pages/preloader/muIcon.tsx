@@ -24,7 +24,7 @@ const MU_ICONS = {
   },
 } as const;
 
-export type MuIconName = keyof typeof MU_ICONS;
+type MuIconName = keyof typeof MU_ICONS;
 
 export const MuIcon = ({
   name,

@@ -10,7 +10,7 @@ import { writeTerrainOpenness } from './terrainDynamicLight';
 /** Byte value for a tile with open sky above it. */
 const OPEN = 255;
 
-export type MaskBox = {
+type MaskBox = {
   readonly minX: number;
   readonly maxX: number;
   readonly minZ: number;

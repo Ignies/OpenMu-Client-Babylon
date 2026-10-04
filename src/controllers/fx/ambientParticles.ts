@@ -19,7 +19,7 @@ import { reportLoadFailure } from '../assets';
  * owner moves, as ZzzEffectFireLeave.cpp ran around `Hero->Object.Position`. See fx/readme.md.
  */
 
-export type AmbientBlend = 'alpha' | 'add';
+type AmbientBlend = 'alpha' | 'add';
 
 /**
  * Generated sprites, for recipes whose data-file texture cannot do the job.
@@ -324,7 +324,7 @@ const DEFAULT_RAMP = 2.5;
 let supported: boolean | null = null;
 
 /** Whether this engine can run the GPU path (cached after the first ask). */
-export function ambientGpuSupported(): boolean {
+function ambientGpuSupported(): boolean {
   if (supported === null) {
     try {
       supported = GPUParticleSystem.IsSupported;

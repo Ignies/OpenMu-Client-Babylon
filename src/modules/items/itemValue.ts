@@ -20,7 +20,7 @@ import {
  */
 
 /** `goldType` of `ItemValue`: 0 = NPC buy price, 1 = sell price, 2 = repair base. */
-export type GoldType = 0 | 1 | 2;
+type GoldType = 0 | 1 | 2;
 
 const idiv = (a: number, b: number) => Math.trunc(a / b);
 

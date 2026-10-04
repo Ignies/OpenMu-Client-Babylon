@@ -61,7 +61,7 @@ export const KEY_ACTION_LABEL_KEYS: Record<KeyAction, TextKey> = {
   performanceReadout: 'keys.performanceReadout',
 };
 
-export const KEY_ACTIONS = Object.keys(KEY_ACTION_LABEL_KEYS) as KeyAction[];
+const KEY_ACTIONS = Object.keys(KEY_ACTION_LABEL_KEYS) as KeyAction[];
 
 const DEFAULTS: KeyBindings = {
   minimap: 'Tab',

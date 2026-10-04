@@ -124,7 +124,7 @@ function registerShaders(): boolean {
   return true;
 }
 
-export type RoomClip = {
+type RoomClip = {
   /** Rebuilds the effect when the system's defines move under it (post on/off). */
   refresh(): void;
   dispose(): void;

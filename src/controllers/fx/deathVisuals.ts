@@ -24,7 +24,7 @@ const BONE_SOUND: Sounds = 'Sound/mBone2';
 const GATE_BREAK_SOUND: Sounds = 'Sound/eHitGate2';
 
 /** Death Cow (:1397-1405): one MODEL_BONE1 skull from 150 cm up, ten MODEL_BONE2 from 100 cm. */
-export const boneShatter: ShatterDeath = {
+const boneShatter: ShatterDeath = {
   spawn(scene, at, light) {
     effects.spawn('debris', scene, at, { model: MODEL.bone, count: 1, colour: light, liftCm: 150 });
     effects.spawn('debris', scene, at, { model: MODEL.bone2, count: 10, colour: light, liftCm: 100 });

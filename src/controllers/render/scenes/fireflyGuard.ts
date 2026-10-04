@@ -135,7 +135,7 @@ function createPass(scene: Scene, camera: ArcRotateCamera): PostProcess {
   return pass;
 }
 
-export function disposeFireflyGuard(): void {
+function disposeFireflyGuard(): void {
   if (!runtime) return;
 
   runtime.camera.detachPostProcess(runtime.pass);

@@ -64,7 +64,7 @@ const RESULT = {
 // ---- 2. state + readers ----------------------------------------------------
 
 /** One clickable line of the lower half (`m_aszSelTexts` + its result). */
-export type NpcDialogueAnswer = {
+type NpcDialogueAnswer = {
   text: string;
   /** Page or request code; in list mode the quest key, or -1 for "Go back". */
   result: number;

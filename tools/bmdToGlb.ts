@@ -284,22 +284,6 @@ const convertVec3 = (v: { x: number; y: number; z: number }) => v;
 
 type Quaternion = { x: number; y: number; z: number; w: number };
 
-function quatMultiply(a: Quaternion, b: Quaternion): Quaternion {
-  return {
-    w: a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z,
-    x: a.w * b.x + a.x * b.w + a.y * b.z - a.z * b.y,
-    y: a.w * b.y - a.x * b.z + a.y * b.w + a.z * b.x,
-    z: a.w * b.z + a.x * b.y - a.y * b.x + a.z * b.w,
-  };
-}
-
-function quatInvert(q: Quaternion): Quaternion {
-  return { x: -q.x, y: -q.y, z: -q.z, w: q.w };
-}
-
-const TRANSFORM_Q: Quaternion = { x: 0.5, y: -0.5, z: 0.5, w: -0.5 };
-const TRANSFORM_Q_INV: Quaternion = quatInvert(TRANSFORM_Q);
-
 function convertQuaternion(q: Quaternion): Quaternion {
   return q;
 }
@@ -441,9 +425,7 @@ async function convertBMDToGLTF(bmd: BMD, outputFilename: string) {
   const fileName = outputFilename.split('/').at(-1)!.split('.')[0];
 
   const doc = new Document();
-  const webpExtension = doc
-    .createExtension(EXTTextureWebP as any)
-    .setRequired(true);
+  doc.createExtension(EXTTextureWebP as any).setRequired(true);
 
   const buffer = doc.createBuffer();
   const scene = doc.createScene('mainScene');

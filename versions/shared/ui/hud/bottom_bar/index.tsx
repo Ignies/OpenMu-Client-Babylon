@@ -232,7 +232,7 @@ const EXP_HOVER_PAD = 4;
 /** Stopping short of the corner leaves the resize grip its own 12 px. */
 const EXP_HOVER_WIDTH = EXP_WIDTH - 14;
 
-export const ExpBar = observer(() => {
+const ExpBar = observer(() => {
   const progress = Store.playerData.expPercent;
   const hover = useRef<HTMLDivElement>(null);
   const [tip, setTip] = useState<{ x: number; y: number } | null>(null);

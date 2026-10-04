@@ -29,7 +29,7 @@ export function clampAmount(amount: number, points: number): number {
   return Math.min(Math.max(Math.trunc(amount), 1), available);
 }
 
-export type StepDecision = 'send' | 'done' | 'spent';
+type StepDecision = 'send' | 'done' | 'spent';
 
 /**
  * What the run does next, given what the server has confirmed and how many

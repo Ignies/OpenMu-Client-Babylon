@@ -14,7 +14,7 @@ import type { CombatLayer } from './layer';
 // ---- 1. tuning -------------------------------------------------------------
 
 /** `float Range = 1.8f`: melee reach in tiles, the flat default. */
-export const MELEE_RANGE = 1.8;
+const MELEE_RANGE = 1.8;
 
 /** Spears (`ITEM_SPEAR` group): 2.2 tiles. */
 const SPEAR_RANGE = 2.2;
@@ -87,7 +87,7 @@ export function hasAmmo(hands: Hands): boolean {
   return other!.durability === undefined || other!.durability > 0;
 }
 
-export type AmmoReload = { from: number; to: number };
+type AmmoReload = { from: number; to: number };
 
 /**
  * `ReloadArrow()` (ZzzInterface.cpp:1152-1204): the hand the ammunition goes

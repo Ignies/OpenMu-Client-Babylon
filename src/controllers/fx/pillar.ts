@@ -99,7 +99,7 @@ const SHADER = 'fxPillar';
 
 // ---- 2. state + readers ----------------------------------------------------
 
-export interface PillarOptions {
+interface PillarOptions {
   /** Seconds it stands, eruption and die-down included. */
   seconds?: number;
   /** Sheet height in tiles. */

@@ -8,7 +8,7 @@ import { itemBaseName } from '@versions/shared/items/itemsDatabase';
  * (`GetItemName`, ZzzInventory.cpp:1593-1609) and their own model in the bag
  * (ZzzInventory.cpp:10186-10209); the ground model is `dropModelProxy.ts`.
  */
-export type ItemLevelLook = {
+type ItemLevelLook = {
   /** Its own name, shown without the item's level. Absent: the item's own name and level. */
   nameKey?: TextKey;
   /** A level of its own after that name - the Box of Kundun +1 is a Box of Luck +8. */

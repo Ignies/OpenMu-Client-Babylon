@@ -27,7 +27,7 @@ import { playUiSound } from '../../controllers/sound/sfx';
 export type MessengerTab = 'friends' | 'letters' | 'rooms';
 
 /** The window the letter box opens on top of itself: read or write. */
-export type LetterView =
+type LetterView =
   | { kind: 'read'; index: number }
   | { kind: 'write'; to: string; subject: string; body: string };
 

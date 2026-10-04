@@ -128,7 +128,7 @@ export type ItemCrackle = EffectHandle & {
   dispose(): void;
 };
 
-export interface ItemCrackleOptions {
+interface ItemCrackleOptions {
   tier: ItemVisualTier;
   kind: ItemAuraKind;
 }

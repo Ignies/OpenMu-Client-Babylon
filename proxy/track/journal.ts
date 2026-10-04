@@ -12,8 +12,8 @@ export interface Journal {
   close(): void;
 }
 
-export const DEFAULT_LOG_LIMIT = 100;
-export const MAX_LOG_LIMIT = 500;
+const DEFAULT_LOG_LIMIT = 100;
+const MAX_LOG_LIMIT = 500;
 
 export function clampLimit(limit: number | undefined): number {
   if (!limit || !Number.isFinite(limit)) return DEFAULT_LOG_LIMIT;

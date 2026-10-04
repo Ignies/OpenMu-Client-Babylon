@@ -13,13 +13,13 @@ import { ENABLE_BG_MUSIC } from '../../app/consts';
 const getSoundUrls = (key: Sounds) => soundUrl(key);
 
 /** Seconds a track fades out under the next one (and the next fades in). */
-export const MUSIC_CROSSFADE_SECONDS = 0.5;
+const MUSIC_CROSSFADE_SECONDS = 0.5;
 
 /** Decoded effects unused for this many map changes are dropped. */
 const EVICT_AFTER_MAPS = 2;
 
 /** Seconds the tracks take to ramp away and back when the page is hidden. */
-export const BACKGROUND_FADE_SECONDS = 0.3;
+const BACKGROUND_FADE_SECONDS = 0.3;
 
 const sounds = new Map<Sounds, Sound>();
 

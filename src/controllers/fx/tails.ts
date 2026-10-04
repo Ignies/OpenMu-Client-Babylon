@@ -15,7 +15,7 @@ const TAIL_VERTS = 4;
 
 // ---- 2. state + readers ----------------------------------------------------
 
-export interface TailsOptions {
+interface TailsOptions {
   /** Tail centres, oldest first, in tiles. Read when a tail is laid, so the caller may fill them late. */
   points: readonly Vector3[];
   /** How many of `points` are laid `t` seconds after the spawn (the original lays one a tick). */

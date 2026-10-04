@@ -28,7 +28,7 @@ import { Checkbox, FitText, OptionsButton, Slider, Stepper } from './controls';
 import { FidelityPresets, ImprovementCheck, fidelityCustom, toggleImprovement } from './fidelity';
 
 /** The control column: every control starts on the same x. */
-export const CONTROL_WIDTH = 176;
+const CONTROL_WIDTH = 176;
 const VALUE_GAP = 10;
 const PRESET_GAP = 4;
 const SELECT_ROWS = 7;

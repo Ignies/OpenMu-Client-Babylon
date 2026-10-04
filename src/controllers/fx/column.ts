@@ -39,7 +39,7 @@ const DEFAULT_RADIUS = 0.35;
 
 // ---- 2. state + readers ----------------------------------------------------
 
-export interface ColumnOptions {
+interface ColumnOptions {
   /** Tongue sheet, 4-cell strip (default BITMAP_FIRE). */
   texture?: string;
   colour?: RGB;

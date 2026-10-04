@@ -115,7 +115,7 @@ const MIX_NUMBER = {
 } as const;
 
 /** `CChaosMixMenuMsgBox`: what the goblin will attempt with what is inside. */
-export type MixMenuEntry = {
+type MixMenuEntry = {
   type: ChaosMachineMixRequestChaosMachineMixTypeEnum;
   labelKey: TextKey;
   hintKey: TextKey;
@@ -288,11 +288,11 @@ export const MIX_MENU: MixMenuEntry[] = [
   },
 ];
 
-export type TradePartner = { name: string; level: number; guildId: number };
+type TradePartner = { name: string; level: number; guildId: number };
 
 export type ShopStock = { slot: number; item: Item; price: number };
 
-export type ShopBrowse = {
+type ShopBrowse = {
   playerId: number;
   playerName: string;
   shopName: string;

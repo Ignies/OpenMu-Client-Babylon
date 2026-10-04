@@ -18,7 +18,7 @@ export type BmdLink = {
 };
 
 /** MU's `float[3][4]`: rows, column-vector convention, translation in column 3. */
-export type Mat34 = [number[], number[], number[]];
+type Mat34 = [number[], number[], number[]];
 
 /** AngleMatrix (ZzzMathLib.cpp:194): `(Z * Y) * X`, angles[0] about X. */
 export function angleMatrix(link: BmdLink): Mat34 {

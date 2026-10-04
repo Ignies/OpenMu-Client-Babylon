@@ -4,7 +4,7 @@ export class LocalStorage {
       const val = localStorage.getItem(key);
 
       return val;
-    } catch (e) {
+    } catch {
       return null;
     }
   }
@@ -12,14 +12,14 @@ export class LocalStorage {
   static save(key: string, str: string): void {
     try {
       localStorage.setItem(key, str);
-    } catch (e) {
+    } catch {
     }
   }
 
   static delete(key: string): void {
     try {
       localStorage.removeItem(key);
-    } catch (e) {
+    } catch {
     }
   }
 }

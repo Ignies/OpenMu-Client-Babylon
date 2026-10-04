@@ -34,7 +34,7 @@ import {
  * Classic and skyless maps keep the clear colour alone.
  */
 
-export type ClearLook = {
+type ClearLook = {
   /**
    * The profile's horizon, display sRGB, or null to keep the map's authored
    * bytes. Nothing lights the sky and no exposure follows it (the level lives
@@ -321,7 +321,7 @@ function bindDomeClouds(scene: Scene, state: Readonly<LookState> | null): void {
   });
 }
 
-export function disposeSkyDome(): void {
+function disposeSkyDome(): void {
   disposeSkyFloor();
 
   if (!dome) return;

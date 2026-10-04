@@ -1,4 +1,4 @@
-import type { IVector2Like, IVector3Like } from '../../controllers/render/babylon/exports';
+import type { IVector3Like } from '../../controllers/render/babylon/exports';
 import type { ENUM_WORLD } from '../types';
 import type {
   ConnectServerPackets,
@@ -10,8 +10,8 @@ import type { With } from 'miniplex';
 type CSPacketKeys = (typeof ConnectServerPackets)[number]['Name'];
 type GSPacketKeys = (typeof ServerToClientPackets)[number]['Name'];
 
-export type CSEvents = Record<CSPacketKeys, DataView>;
-export type GSEvents = Record<GSPacketKeys, DataView>;
+type CSEvents = Record<CSPacketKeys, DataView>;
+type GSEvents = Record<GSPacketKeys, DataView>;
 
 export type Events = CSEvents &
   GSEvents & {

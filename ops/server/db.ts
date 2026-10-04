@@ -28,7 +28,7 @@ if (applied.length > 0) {
 
 /* ---------------------------------------------------------- cheat warnings */
 
-export type CheatWarningRow = CheatEvent & { id: number };
+type CheatWarningRow = CheatEvent & { id: number };
 
 const insertWarning = db.query<
   unknown,

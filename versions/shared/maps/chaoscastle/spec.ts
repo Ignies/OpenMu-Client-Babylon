@@ -74,7 +74,7 @@ export type TileRect = readonly [x: number, y: number, w: number, h: number];
  * three cases (CSChaosCastle.cpp:226-338), `shows` the `HiddenMesh` cases of
  * `RenderChaosCastleVisual` (:474-516).
  */
-export type ArenaStage = {
+type ArenaStage = {
   readonly falls: readonly number[];
   readonly shows: readonly number[];
   readonly noGround: readonly TileRect[];

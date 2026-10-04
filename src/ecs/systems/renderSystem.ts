@@ -67,13 +67,11 @@ export const RenderSystem: ISystemFactory = world => {
   }
 
   return {
-    update: dt => {
+    update: () => {
       const map = world.mapIndex;
 
       const terrain = world.terrain;
       if (!terrain) return;
-
-      const extraHeight = terrain.extraHeight;
 
       // Built from the previous `scene.render()`. One frame of lag is fine:
       // this only pauses looping clips, hides blob shadows and gates the map

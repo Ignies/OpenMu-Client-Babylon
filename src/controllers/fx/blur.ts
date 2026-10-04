@@ -39,7 +39,7 @@ const FADE_SECONDS = 0.15;
 
 // ---- 2. state + readers ----------------------------------------------------
 
-export interface BlurOptions {
+interface BlurOptions {
   /** The moving tip (weapon end). */
   follow: PointSource;
   /** The moving base (hilt / hand). Default: 0.6 tiles below the tip. */

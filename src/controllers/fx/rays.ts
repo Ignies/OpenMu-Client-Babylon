@@ -30,7 +30,7 @@ export interface Ray {
   life?: number;
 }
 
-export interface RaysOptions {
+interface RaysOptions {
   rays: readonly Ray[];
   /** `Effect/Joint*` or card sheet run along each ray, head to tail (recipes.ts `TEX`). */
   texture: string;

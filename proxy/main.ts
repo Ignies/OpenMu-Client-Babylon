@@ -461,8 +461,8 @@ Bun.serve<WebSocketData>({
           open(socket) {
             relay.data.tcpSocket = socket;
           },
-          close(socket) { },
-          drain(socket) { },
+          close() { },
+          drain() { },
           error(socket, error) {
             console.log(`tcp error:`, error);
             relay.data.tcpSocket = undefined;
@@ -480,11 +480,11 @@ Bun.serve<WebSocketData>({
             // also what the client's address fallback keys off.
             relay.close();
           }, // connection failed
-          end(socket) {
+          end() {
             relay.data.tcpSocket = undefined;
             relay.close();
           }, // connection closed by server
-          timeout(socket) { }, // connection timed out
+          timeout() { }, // connection timed out
         },
       });
     },
@@ -529,7 +529,7 @@ Bun.serve<WebSocketData>({
         }
       }
     },
-    close(ws, code, message) {
+    close(ws) {
       if (ws.data.kind === "admin") {
         if (ws.data.socket && hub) hub.detach(ws.data.socket);
         return;

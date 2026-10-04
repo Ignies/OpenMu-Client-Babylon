@@ -22,7 +22,7 @@ import type { Sounds } from './recipes';
 
 // ---- 1. tuning -------------------------------------------------------------
 
-export type PacketSound = {
+type PacketSound = {
   readonly key: Sounds;
   /** Built once per row, so a play allocates nothing. */
   readonly opts: SfxOptions;

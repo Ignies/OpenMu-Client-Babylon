@@ -59,7 +59,6 @@ const SHINY_H = px(64, 1.5);
  * Scale 2 on the 64 px flare shrinking `0.04..0.08` a tick, `Gravity +=
  * (0.6..1.0) * 9.5` cm a tick, colour × 1/1.35 a tick (ZzzEffectParticle.cpp:3197, :8058).
  */
-const MOTE_PER_TICK = 2;
 const MOTE_TICKS = 10;
 const MOTE_SIZE = px(64, 2);
 const MOTE_SHRINK: readonly [number, number] = [px(64, 0.04), px(64, 0.08)];
@@ -328,13 +327,13 @@ export interface SpearJoints {
 }
 
 /** Shiny cards on bones, each rolling its brightness a tick. */
-export interface HandShiny {
+interface HandShiny {
   bones: readonly number[];
   colour: RGB;
 }
 
 /** Short-lived rising cards born on random bones a tick (Swell Life). */
-export interface BoneMotes {
+interface BoneMotes {
   bones: readonly number[];
   colour: RGB;
 }
@@ -352,7 +351,7 @@ export interface BoneGlow {
 }
 
 /** Something fired on a timer (the crit flare, the Swell of Magic hand rune). */
-export interface Pulse {
+interface Pulse {
   every: number;
   fire: () => void;
   /** Seconds before the first fire (default 0: at once). */

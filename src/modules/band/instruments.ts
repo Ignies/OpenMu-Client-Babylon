@@ -25,7 +25,7 @@ export type InstrumentId = 'guitar' | 'flute' | 'ocarina' | 'harp' | 'drums';
  * instrument animations and its clip table is full, but the end of Again is
  * hands at the mouth and the start of Hustle is arms out in front.
  */
-export type InstrumentPose = {
+type InstrumentPose = {
   /** The male clip; `genderedEmoteAction` picks the female one. */
   clip: PlayerAction;
   /** The frames copied, as fractions of the clip: 0 = first key, 1 = last. */

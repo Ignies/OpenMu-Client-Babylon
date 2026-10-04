@@ -5,7 +5,7 @@
  */
 import type { TextKey } from '../../i18n';
 
-export interface MagicEffectInfo {
+interface MagicEffectInfo {
   nameKey: TextKey;
   short: string;
   kind: 'buff' | 'debuff';

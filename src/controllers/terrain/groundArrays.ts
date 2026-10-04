@@ -230,7 +230,7 @@ export function groundTiles(
 }
 
 /** Babylon's `VertexData.ComputeNormals` with no options, without the engine. */
-export function computeNormals(
+function computeNormals(
   positions: Float32Array,
   indices: Uint32Array,
   normals: Float32Array

@@ -13,7 +13,7 @@ const TILE_WIDTH = '50%';
 const TALL_HEIGHT = `${(512 / 600) * 100}%`;
 const SHORT_HEIGHT = `${(88 / 600) * 100}%`;
 
-export type ArtSize = { width: number; height: number };
+type ArtSize = { width: number; height: number };
 
 /**
  * The sheet sized two ways for the current window: `contain` is the whole

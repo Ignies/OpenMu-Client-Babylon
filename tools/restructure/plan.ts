@@ -2,7 +2,7 @@ import ts from 'typescript';
 import { posix } from 'path';
 
 export type Move = { from: string; to: string };
-export type Plan = {
+type Plan = {
   renames: [string, string][];
   writes: Map<string, string>;
   unresolved: string[];

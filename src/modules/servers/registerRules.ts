@@ -42,7 +42,7 @@ export type SignupProblem =
   | 'passwordChars'
   | 'mismatch';
 
-export type Signup = {
+type Signup = {
   username: string;
   password: string;
   confirm: string;

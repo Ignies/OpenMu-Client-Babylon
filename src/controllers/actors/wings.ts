@@ -19,19 +19,19 @@ export const CAPE_BONE = 19;
 
 /** Wing indices in group 12 the code below refers to by name. */
 export const WING_OF_ELF = 0;
-export const WINGS_OF_HEAVEN = 1;
-export const WINGS_OF_SATAN = 2;
+const WINGS_OF_HEAVEN = 1;
+const WINGS_OF_SATAN = 2;
 export const WINGS_OF_SPIRITS = 3;
-export const WINGS_OF_SOUL = 4;
-export const WINGS_OF_DRAGON = 5;
+const WINGS_OF_SOUL = 4;
+const WINGS_OF_DRAGON = 5;
 export const WINGS_OF_DARKNESS = 6;
 export const WING_OF_STORM = 36;
-export const WING_OF_ETERNAL = 37;
-export const WING_OF_ILLUSION = 38;
-export const WING_OF_RUIN = 39;
-export const CAPE_OF_EMPEROR = 40;
-export const WING_OF_CURSE = 41;
-export const WINGS_OF_DESPAIR = 42;
+const WING_OF_ETERNAL = 37;
+const WING_OF_ILLUSION = 38;
+const WING_OF_RUIN = 39;
+const CAPE_OF_EMPEROR = 40;
+const WING_OF_CURSE = 41;
+const WINGS_OF_DESPAIR = 42;
 export const WING_OF_DIMENSION = 43;
 /** The Rage Fighter's capes. */
 export const CAPE_OF_FIGHTER = 49;
@@ -41,7 +41,7 @@ export const CAPE_OF_OVERRULE = 50;
 export const CAPE_OF_LORD = 30;
 
 /** A bone-anchored particle aura the wing emits (`RenderPartObjectEffect`). */
-export type WingWake = {
+type WingWake = {
   readonly kind: 'wingFlareBlue' | 'wingCloud';
   /** Bone indices the sprites are placed on. */
   readonly bones: readonly number[];

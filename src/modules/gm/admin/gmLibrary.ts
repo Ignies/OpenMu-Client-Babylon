@@ -21,7 +21,7 @@ export type Macro = { id: string; name: string; steps: MacroStep[] };
 
 export type Favourite = { kind: 'line'; line: string } | { kind: 'macro'; id: string };
 
-export type ItemPreset = { id: string; name: string; spec: ItemSpec };
+type ItemPreset = { id: string; name: string; spec: ItemSpec };
 
 /** Where a macro or a pinned line runs, and who it runs for. */
 export type MacroVars = { x: number; y: number; map: number; me: string; target: string };

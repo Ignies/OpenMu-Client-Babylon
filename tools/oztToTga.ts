@@ -23,7 +23,7 @@ for (const oztFileName of glob.scanSync({
   try {
     //remove old file
     unlinkSync(tgaFilePath);
-  } catch (e) {}
+  } catch {}
 
   const tgaFile = Bun.file(tgaFilePath);
   const writer = tgaFile.writer();

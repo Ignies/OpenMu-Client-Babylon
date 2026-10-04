@@ -30,8 +30,7 @@ export async function parseTerrainMapping(encodedData: Uint8Array) {
   let DataPtr = 0;
   DataPtr += 1;
 
-  const iMapNumber = decodedData[DataPtr];
-  DataPtr += 1;
+  DataPtr += 1; // map number
 
   ArrayCopy(
     decodedData,

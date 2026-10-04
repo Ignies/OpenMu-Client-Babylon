@@ -51,7 +51,7 @@ export type DebugRow =
   | { kind: 'info'; id: string; label: string; value: () => string }
   | { kind: 'section'; id: string; label: string };
 
-export type DebugModule = {
+type DebugModule = {
   /** Unique kebab-case; also the tab's key. */
   id: string;
   /** The tab label. */

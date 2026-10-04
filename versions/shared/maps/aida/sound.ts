@@ -43,7 +43,7 @@ const FOREST_ORC = aidaLine(
 );
 
 /** `M33Aida::RenderAidaMonsterVisual` (GMAida.cpp:723-1390), no world guard. */
-export const AIDA: VoiceSet = {
+const AIDA: VoiceSet = {
   100: WITCH_QUEEN,
   // GOLDEN_STONE_GOLEM
   101: STONE_GOLEM,

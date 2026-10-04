@@ -32,7 +32,7 @@ const BLOOD_ASSASSIN = PK_FIELD_LINE(
   'Sound/w64/BloodAssassin_death'
 );
 
-export const PK_FIELD: VoiceSet = {
+const PK_FIELD: VoiceSet = {
   // ZOMBIE_FIGHTER
   157: PK_FIELD_LINE(
     'Sound/w64/ZombieWarrior_attack',

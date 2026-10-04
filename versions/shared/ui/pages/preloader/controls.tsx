@@ -226,7 +226,7 @@ export const Toggle = ({
   </button>
 );
 
-export type SelectOption = { value: string; label: string; lead?: ReactNode; hint?: string };
+type SelectOption = { value: string; label: string; lead?: ReactNode; hint?: string };
 
 /**
  * A dropdown in the page's own grey, since a native `<select>` opens the

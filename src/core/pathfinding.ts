@@ -8,7 +8,7 @@ type MapInfo = {
   height: number;
 };
 
-export type Pathfinding<TValue> = {
+type Pathfinding<TValue> = {
   graph: Graph;
   mapInfo: MapInfo;
   posToIndex: (pos: IVector2Like) => [number, number];

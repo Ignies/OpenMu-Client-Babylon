@@ -26,7 +26,7 @@ export const CURSOR_SPRITES: readonly string[] = Object.values(CURSOR_FILES);
 
 export const CURSOR_FRAME_SIZE = 32;
 
-export const CURSOR_SCALE = 1.5;
+const CURSOR_SCALE = 1.5;
 
 export const CURSOR_SIZE = 24 * CURSOR_SCALE;
 

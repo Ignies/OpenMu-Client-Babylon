@@ -1,5 +1,5 @@
 
-export type TextureScript = {
+type TextureScript = {
   bright: boolean;
   hiddenMesh: boolean;
   streamMesh: boolean;

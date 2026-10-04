@@ -13,7 +13,7 @@
  * Engine-free: the proxy, the client and the tests all import this.
  */
 
-export const PING_CODE = 0xfb;
+const PING_CODE = 0xfb;
 export const PING_VERSION = 1;
 
 export const PingSub = {

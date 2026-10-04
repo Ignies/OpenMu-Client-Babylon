@@ -45,7 +45,7 @@ export type SceneLook = {
   glow: GlowLayer;
 };
 
-export type AreaMoodName = AreaLookName;
+type AreaMoodName = AreaLookName;
 
 /** GlowLayer gain on the trim emissive map (the surface adds its own share). */
 const TRIM_GLOW = 0.6;

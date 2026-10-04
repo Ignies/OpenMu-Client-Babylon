@@ -119,7 +119,7 @@ export function legPoint(i: number, t: number): [number, number] {
 const ease = (t: number) =>
   t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
-export type TourFrame = {
+type TourFrame = {
   /** Where the camera looks, 0..1 on the map. */
   u: number;
   v: number;

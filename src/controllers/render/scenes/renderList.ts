@@ -9,7 +9,7 @@ import type {
  * Fills a render list in place from a predicate and dirties the lights only when
  * it goes empty or non-empty. `scene`: every mesh; `active`: the camera's meshes.
  */
-export type RenderListScope = 'scene' | 'active';
+type RenderListScope = 'scene' | 'active';
 
 type Driven = {
   readonly rt: RenderTargetTexture;

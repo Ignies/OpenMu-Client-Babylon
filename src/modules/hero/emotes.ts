@@ -129,7 +129,7 @@ export function emoteById(id: EmoteId): EmoteDefinition {
  * English player types "hi", not "Hi" - so the one collision that
  * case-sensitivity used to resolve is resolved by the order instead.
  */
-export const EMOTE_WORD_CHAIN: readonly EmoteId[] = [
+const EMOTE_WORD_CHAIN: readonly EmoteId[] = [
   'provocation',
   'greeting',
   'goodbye',

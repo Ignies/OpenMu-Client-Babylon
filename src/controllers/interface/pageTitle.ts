@@ -12,7 +12,7 @@ import { ServerConfig } from '../../modules/servers/serverConfig';
  */
 
 /** Also the installed app's name, in `public/manifest.webmanifest`. */
-export const CLIENT_NAME = 'OpenMUCB';
+const CLIENT_NAME = 'OpenMUCB';
 
 /** A published name is capped at 60 chars; a typed one is not. */
 const MAX_SERVER_NAME = 60;
@@ -24,7 +24,7 @@ const LOGGED_IN = new Set([
   UIState.World,
 ]);
 
-export function titleFor(state: UIState, serverName: string): string {
+function titleFor(state: UIState, serverName: string): string {
   if (!LOGGED_IN.has(state)) return CLIENT_NAME;
 
   return serverName.trim().slice(0, MAX_SERVER_NAME) || CLIENT_NAME;

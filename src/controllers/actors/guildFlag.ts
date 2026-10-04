@@ -68,7 +68,7 @@ export function isThunderHawkArmor(
  * `CreateGuildMark` (ZzzInventory.cpp:11204) writes the 8x8 mark into
  * `BITMAP_GUILD`; palette entry 0 is the transparent one.
  */
-export function guildMarkTexture(
+function guildMarkTexture(
   scene: Scene,
   packed: ArrayLike<number>,
   name: string

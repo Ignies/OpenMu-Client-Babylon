@@ -9,7 +9,7 @@ import { checks } from '../health';
 import { isWindows, type Paths } from '../paths';
 import { saveState } from '../state';
 import { ui, pc } from '../ui';
-import { buildAll, finish, logFile, preflight } from './install';
+import { buildAll, logFile, preflight } from './install';
 import { GROUPS, ask } from './questions';
 
 /** Changes that are baked into the client or OpenMU image need a rebuild; the rest only a restart. */

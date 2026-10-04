@@ -364,22 +364,6 @@ export const arrow = (m: string = MODEL.arrow, colour: RGB = RGBS.steel): Travel
   model: { model: m, colour, scale: 1 },
 });
 
-/**
- * A projectile that falls from the sky onto a ground point and fires `hit`
- * on landing (MODEL_FIRE sub0 / MODEL_SKILL_BLAST / MODEL_FIRE sub6 with
- * Pos += (…, +z) and Dir(0,0,−50)). `from` is tiles (+x, up, −z) off `at`.
- */
-const skyfall = (m: string, colour: RGB, trail: ParticlesOptions['recipe'] | null, from: readonly [number, number, number], speed: number, scale: number, hit: Step, alongPath?: boolean): Step => (at, c) => {
-  const start = new Vector3(at.x + from[0], at.y + from[1], at.z - from[2]);
-  effects.spawn('projectile', c.scene, start, {
-    to: at,
-    speed,
-    model: { model: m, colour, scale, alongPath },
-    ...(trail ? { trail: { recipe: trail, rate: 40 } } : {}),
-    onArrive: p => hit(p, c),
-  });
-};
-
 // ---- shared rows ---------------------------------------------------------------
 
 /** Summons: BITMAP_MAGIC+1 sub3 at the caster's feet + smoke at the point. */

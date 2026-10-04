@@ -16,7 +16,7 @@ const NAPIN_ATTACK_DIE: readonly MonsterCue[] = [
 const SHADOW_DIE: MonsterCue = { on: [A.Die], play: 'Sound/w57/Shadow-Death' };
 
 // One channel each (ZzzOpenData.cpp:3955-3992).
-export const SWAMP_OF_QUIET: VoiceSet = oneChannel({
+const SWAMP_OF_QUIET: VoiceSet = oneChannel({
   // SAPIUNUS / SAPIDUO
   136: SAPI,
   137: SAPI,

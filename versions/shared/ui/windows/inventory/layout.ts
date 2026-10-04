@@ -59,7 +59,7 @@ export const REPAIR_TOOLTIP: TextKey = 'inventory.repair';
 export const SHOP_TOOLTIP: TextKey = 'inventory.personalShop';
 export const EXPAND_TOOLTIP: TextKey = 'inventory.expand';
 
-export type EquipmentSlotInfo = {
+type EquipmentSlotInfo = {
   slot: number;
   x: number;
   y: number;

@@ -57,7 +57,7 @@ export interface PregameScene {
  * prefix). At least one of the two layers must be given: Season 6 ships a
  * TGA mark over a JPEG glow, the 0.97d tree only the JPEG.
  */
-export type PregameLogo = {
+type PregameLogo = {
   /** Sprite with alpha, drawn on top. */
   readonly mark?: string;
   /** JPEG under it, or alone: keyed by luminance so its black is transparent. */

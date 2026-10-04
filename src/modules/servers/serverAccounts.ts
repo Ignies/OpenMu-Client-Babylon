@@ -14,7 +14,7 @@ const LEGACY_KEY = '_mu_key';
 /** What the tab has room for, and more mules than anyone runs from one browser. */
 const MAX_PER_WORLD = 10;
 
-export type ServerAccount = {
+type ServerAccount = {
   /** Stable key within its world; `ServerConfig` ids are the world's key. */
   id: string;
   username: string;
@@ -31,7 +31,7 @@ type WorldAccounts = {
   activeId: string;
 };
 
-export const EMPTY_ACCOUNT: ServerAccount = {
+const EMPTY_ACCOUNT: ServerAccount = {
   id: '',
   username: '',
   password: '',

@@ -541,8 +541,6 @@ export async function getTerrainData(
 const xi = ~~xf;
     const yi = ~~yf;
 
-    const index = GetTerrainIndex(xi, yi);
-
 const xd = xf - xi;
     const yd = yf - yi;
 

@@ -1,4 +1,4 @@
-import { monsterModelRegistry, registerMonsterModels, type MonsterModelDef } from '@/controllers/monsters';
+import { registerMonsterModels, type MonsterModelDef } from '@/controllers/monsters';
 
 /**
  * Every monster body file (`<body>.ts`), found by glob in the client build and in tests, and read
@@ -18,5 +18,3 @@ function modelFiles(): MonsterModelDef[] {
 }
 
 registerMonsterModels(modelFiles());
-
-export const monsterModels = monsterModelRegistry;

@@ -6,7 +6,7 @@ import type { Config } from './config';
 import { must, runLogged } from './exec';
 import type { Paths } from './paths';
 
-export const OPENMU_REPO = 'https://github.com/MUnique/OpenMU.git';
+const OPENMU_REPO = 'https://github.com/MUnique/OpenMU.git';
 
 const git = (p: Paths, ...args: string[]) => must('git', ['-C', p.openmu, ...args]);
 

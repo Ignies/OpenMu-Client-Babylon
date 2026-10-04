@@ -106,7 +106,7 @@ const REDUCED_CLASSES: ReadonlySet<BaseClass> = new Set([
   BaseClass.RageFighter,
 ]);
 
-export function effectiveMoveLevel(reqLevel: number, cls: BaseClass): number {
+function effectiveMoveLevel(reqLevel: number, cls: BaseClass): number {
   if (reqLevel === 400 || !REDUCED_CLASSES.has(cls)) return reqLevel;
   return Math.trunc((reqLevel * (100 - LEVEL_REDUCTION_PERCENT)) / 100);
 }
@@ -151,13 +151,13 @@ function rowState(entry: MoveReqEntry, level: number, zen: number, cls: BaseClas
   return { entry, reqLevel, levelOk, zenOk, canMove: levelOk && zenOk && pk < PVP_MURDERER1 };
 }
 
-export function openMoveWindow(): void {
+function openMoveWindow(): void {
   runInAction(() => {
     MuWindows.setOpen('move_command', true);
   });
 }
 
-export function closeMoveWindow(): void {
+function closeMoveWindow(): void {
   runInAction(() => {
     MuWindows.setOpen('move_command', false);
   });

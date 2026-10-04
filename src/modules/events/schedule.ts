@@ -34,7 +34,7 @@ export type { EventScheduleEntry } from './scheduleClock';
 // ---- 1. tuning -------------------------------------------------------------
 
 /** Display order of the rows, and the only three events OpenMU runs. */
-export const EVENT_SCHEDULE_KEYS = ['bloodCastle', 'devilSquare', 'chaosCastle'] as const;
+const EVENT_SCHEDULE_KEYS = ['bloodCastle', 'devilSquare', 'chaosCastle'] as const;
 
 export type EventScheduleKey = (typeof EVENT_SCHEDULE_KEYS)[number];
 

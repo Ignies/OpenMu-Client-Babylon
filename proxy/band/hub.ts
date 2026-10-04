@@ -42,7 +42,7 @@ export interface BandPeer {
   send(frame: Uint8Array): number;
 }
 
-export type BandHubOptions = {
+type BandHubOptions = {
   now?: () => number;
   maxPerformers?: number;
   maxPerformersPerMap?: number;
@@ -50,7 +50,7 @@ export type BandHubOptions = {
   log?: (line: string) => void;
 };
 
-export type BandStats = {
+type BandStats = {
   performers: number;
   members: number;
   batchesIn: number;

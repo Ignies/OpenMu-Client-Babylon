@@ -21,7 +21,7 @@ export const MAX_QUESTS = 200;
 const MAX_QUEST_CONDITION = 16;
 const MAX_QUEST_REQUEST = 16;
 /** `MAX_CLASS` (_define.h:394): one byte per base class in every act. */
-export const QUEST_CLASS_COUNT = 7;
+const QUEST_CLASS_COUNT = 7;
 
 const QUEST_RECORD_SIZE = 744;
 const QUEST_ACT_OFFSET = 38;
@@ -39,7 +39,7 @@ export const QuestActKind = {
 } as const;
 
 /** `QUEST_CLASS_ACT` - one thing a class has to do for this quest. */
-export type QuestAct = {
+type QuestAct = {
   live: number;
   kind: number;
   /** Item group (or monster type for a `Monster` act). */
@@ -59,7 +59,7 @@ export type QuestAct = {
 };
 
 /** `QUEST_CLASS_REQUEST` - a precondition the server also checks. */
-export type QuestRequest = {
+type QuestRequest = {
   live: number;
   /** Matches `QuestAct.requestType`; 255 = applies to every act. */
   type: number;
@@ -88,7 +88,7 @@ export type QuestDefinition = {
 // ---- Dialog.bmd ------------------------------------------------------------
 
 /** `MAX_DIALOG` (_define.h:318). */
-export const MAX_DIALOG = 200;
+const MAX_DIALOG = 200;
 const DIALOG_RECORD_SIZE = 1024;
 const DIALOG_TEXT_LENGTH = 300;
 const DIALOG_MAX_ANSWERS = 10;

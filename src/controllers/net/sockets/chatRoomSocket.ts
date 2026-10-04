@@ -22,7 +22,7 @@ import {
 /** `CHATCONNECT_TIMER`: the original pings every open room each 15 s. */
 const KEEP_ALIVE_MS = 15_000;
 
-export type ChatRoomSocketOptions = {
+type ChatRoomSocketOptions = {
   host: string;
   port: number;
   roomId: number;

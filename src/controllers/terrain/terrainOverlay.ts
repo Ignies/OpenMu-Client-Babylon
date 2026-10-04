@@ -30,7 +30,7 @@ import { devQuery } from '../../core/devSeams';
  */
 
 /** How a layer's colour meets the ground under it. */
-export type OverlayBlend =
+type OverlayBlend =
   /** Lerp toward the colour: something lying *on* the ground (snow). */
   | 'mix'
   /** Multiply the ground by the colour: the ground itself changed (wet). */
@@ -192,7 +192,7 @@ export type TerrainOverlay = {
  * 0.6–0.8, and 1.3 puts open ground at white while the authored shadows
  * under walls and trees keep their shape.
  */
-export const OVERLAY_LIGHT = {
+const OVERLAY_LIGHT = {
   // Near-neutral: the original bakes Devias neutral and puts no grade on the
   // ground, so its snow shadows are grey with only a hint of sky. The first
   // cut here was a saturated blue-grey and the field read as blue ice.
@@ -356,7 +356,7 @@ export const PUDDLES: TerrainOverlay = {
  * How a relief layer is shaded, live: uniforms, since zero here only means "no contribution".
  * Tuning, not a switch (`advancedEffects` is). `window.muSnow` sets them from the console.
  */
-export const SNOW_SHADE = {
+const SNOW_SHADE = {
   /**
    * Slope gain of the drift field (the shader divides it by `RELIEF_STEP`); the shading follows
    * from the normal. Kept low: higher bands the field into blurred stripes (the trench has `TRAIL_GAIN`).
@@ -520,7 +520,7 @@ export function hasTrail(overlays: readonly TerrainOverlay[]): boolean {
 }
 
 /** Whether any layer can be melted off the ground by fire. */
-export function hasMelt(overlays: readonly TerrainOverlay[]): boolean {
+function hasMelt(overlays: readonly TerrainOverlay[]): boolean {
   for (let i = 0; i < overlays.length; i++) {
     if (overlays[i].melt) return true;
   }

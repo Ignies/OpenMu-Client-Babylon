@@ -1,18 +1,6 @@
-import { Engine, Scene, type Node, Vector3, Matrix } from './exports';
+import { Engine, Scene } from './exports';
 import { devQuery } from '@/core/devSeams';
 import { installBitmapDecode } from './bitmapDecode';
-
-export function findInChildren(children: Node[], name: string): Node | null {
-  for (const child of children) {
-    if (child.name === name) return child;
-
-    const res = findInChildren(child.getChildren(), name);
-
-    if (res) return res;
-  }
-
-  return null;
-}
 
 export async function addInspectorForScene(scene: Scene) {
   const switchDebugLayer = () => {
@@ -186,33 +174,3 @@ export function createEngine(
 
   return { engine, canvas };
 }
-
-export const transformCoordinatesWithClippingToRef = (
-  v: Vector3,
-  transformation: Matrix,
-  ref: Vector3
-) => {
-  const m = transformation.m;
-  let rx = v.x * m[0] + v.y * m[4] + v.z * m[8] + m[12];
-  let ry = v.x * m[1] + v.y * m[5] + v.z * m[9] + m[13];
-  let rz = v.x * m[2] + v.y * m[6] + v.z * m[10] + m[14];
-  let rw = v.x * m[3] + v.y * m[7] + v.z * m[11] + m[15];
-
-  if (rx < -rw) rx = -rw;
-  if (rx > rw) rx = rw;
-  if (ry < -rw) ry = -rw;
-  if (ry > rw) ry = rw;
-  if (rz < -rw) rz = -rw;
-  if (rz > rw) rz = rw;
-  if (rw < 0) {
-    rw = 0;
-  }
-
-  ref.x = rx / rw;
-  ref.y = ry / rw;
-  ref.z = rz / rw;
-
-  return ref;
-};
-
-const TmpMatrix = Matrix.Identity();

@@ -127,7 +127,7 @@ const ARCHANGEL_ECHO_MS = 3000;
 
 // ---- 2. state + readers ----------------------------------------------------
 
-export type BloodCastleTimer = {
+type BloodCastleTimer = {
   /** Seconds left in the match; counted down between `BloodCastleState` resyncs. */
   seconds: number;
   killed: number;
@@ -143,7 +143,7 @@ export type BloodCastleTimer = {
  * (`c->EtcPart`, NewBloodCastleSystem.cpp:48-58). `level` is 1 staff, 2
  * sword, 3 crossbow - the server sends the item's level plus one.
  */
-export type BloodCastleQuestItem = {
+type BloodCastleQuestItem = {
   /** The carrier's object id, masked the way `HangerBloodCastleQuestItem` does. */
   ownerId: number;
   level: 1 | 2 | 3;

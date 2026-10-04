@@ -390,7 +390,7 @@ export function invalidateShadowState(): void {
 blobShadowRefresh.fn = invalidateShadowState;
 
 /** Which of a caster's meshes are in its silhouette. */
-export type ShadowMeshRules = {
+type ShadowMeshRules = {
   /**
    * `o->BlendMesh` casts with the rest of the body. Off everywhere the
    * original has it off, which is everywhere - see `WingObject`.

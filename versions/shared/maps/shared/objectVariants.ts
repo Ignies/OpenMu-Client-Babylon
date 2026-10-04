@@ -89,7 +89,7 @@ export class PlaySpeedObject extends MapTileObject {
  * type 247, which three worlds carry 75 stacked records of - can never have
  * had a model on this path.
  */
-export class AbsentModelObject extends ModelObject {
+class AbsentModelObject extends ModelObject {
   async init() {
     this.CastsShadow = false;
     this.Visible = false;

@@ -14,8 +14,8 @@ export const GROUP_BTN_HEIGHT = 26;
 export const SERVER_BTN_WIDTH = 193;
 export const SERVER_BTN_HEIGHT = 26;
 
-export const GAP_WIDTH = 28;
-export const GAP_HEIGHT = 5;
+const GAP_WIDTH = 28;
+const GAP_HEIGHT = 5;
 
 export const LEFT_GROUP_MAX = 10;
 export const RIGHT_GROUP_MAX = 10;
@@ -29,7 +29,7 @@ export const GAUGE_HEIGHT = 4;
 export const DESC_WIDTH = 512;
 export const DESC_EDGE_HEIGHT = 6;
 export const DESC_SIDE_HEIGHT = 4;
-export const DESC_LINES = 10;
+const DESC_LINES = 10;
 export const DESC_HEIGHT =
   DESC_EDGE_HEIGHT * 2 + DESC_SIDE_HEIGHT * DESC_LINES;
 
@@ -47,10 +47,6 @@ export const GROUP_BASE_Y =
 export const LEFT_GROUP_X = 0;
 export const RIGHT_GROUP_X =
   GROUP_BTN_WIDTH + SERVER_BTN_WIDTH + GAP_WIDTH * 2;
-
-export const CENTER_GROUP_X = Math.floor((WIN_WIDTH - GROUP_BTN_WIDTH) / 2);
-export const CENTER_GROUP_Y =
-  WIN_HEIGHT - GROUP_BTN_HEIGHT - GAP_HEIGHT - DESC_HEIGHT;
 
 export const SERVER_BTN_X = LEFT_GROUP_X + GROUP_BTN_WIDTH + GAP_WIDTH;
 

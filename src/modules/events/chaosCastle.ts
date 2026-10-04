@@ -97,7 +97,7 @@ const PILLAR_VIEW_TILES = 15;
 
 // ---- 2. state + readers ----------------------------------------------------
 
-export type ChaosCastleTimer = {
+type ChaosCastleTimer = {
   seconds: number;
   /** Characters still standing (`GlobalText[1161]`). */
   alive: number;
@@ -111,7 +111,7 @@ export type ChaosCastlePrompt = {
   canEnter: boolean;
 };
 
-export type ChaosCastleResult = {
+type ChaosCastleResult = {
   myRank: number;
   rows: { name: string; score: number; exp: number; zen: number }[];
 };

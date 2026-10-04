@@ -40,7 +40,7 @@ const MAX_STREAKS = 96;
 
 // ---- 2. state + readers ----------------------------------------------------
 
-export interface HomingOptions {
+interface HomingOptions {
   /** The point the streaks home on and the stamps sit on. */
   centre: PointSource;
   /** Seconds new streaks keep starting. */
