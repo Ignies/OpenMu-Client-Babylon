@@ -4,6 +4,7 @@ import { CREATE_MESSAGES } from '@/modules/character_select/messages';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useRef } from 'react';
 import { Store } from '@/app/store';
+import { MsgBox } from '@/controllers/interface';
 import { Ecs } from '@/ecs/current';
 import { isReservedName } from '@/modules/servers/reservedNames';
 import { playUiSound } from '@/controllers/sound/sfx';
@@ -164,7 +165,7 @@ export const CharMakeWin = observer(({ onClose }: CharMakeWinProps) => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Enter' && e.key !== 'Escape') return;
       if (e.isComposing || e.keyCode === 229) return;
-      if (Store.msgWin || MuWindows.isOpen('options')) return;
+      if (MsgBox.msgWin || MuWindows.isOpen('options')) return;
 
       e.preventDefault();
       e.stopPropagation();

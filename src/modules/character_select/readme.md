@@ -10,6 +10,8 @@ create and delete actions still live in the central `Store` (`src/app/store.ts`)
 - `CHARACTER_CAMERA_POSITION`, `characterCameraTarget()`: the line-up camera.
 - `characterSelectView`: observable `{ zoomedOn }`, the name the right-click close-up is on.
 - `createCharacterSelectBackdrop(scene)`: the backdrop card; returns `{ dispose() }`.
+- `confirmDeleteCharacter(name)` (`index.ts`, the door): the delete button's two boxes (confirm, then
+  the resident number) and the delete request with the typed number.
 - `CREATE_MESSAGES`: localized create notices (`minLength`, `specialName`, `reservedName`, `failed`).
 
 ## How it works

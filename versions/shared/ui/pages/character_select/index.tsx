@@ -4,11 +4,12 @@ import './style.less';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useRef, useState } from 'react';
 import { Store } from '@/app/store';
+import { MsgBox, MsgWinCode } from '@/controllers/interface';
+import { confirmDeleteCharacter } from '@/modules/character_select';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { playUiSound } from '@/controllers/sound/sfx';
 import { isTypingInField } from '@/ecs/systems/keyboardInputSystem';
 import { GuildMemberRoleEnum } from '@versions/shared/packets/ServerToClientPackets';
-import { MsgWinCode } from '@/controllers/interface/msgWin';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MsgWindow } from '@/controllers/interface/components/msg_window';
@@ -91,7 +92,7 @@ export const CharactersPage = observer(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Enter' || e.repeat) return;
       if (e.isComposing || e.keyCode === 229) return;
-      if (Store.msgWin) return;
+      if (MsgBox.msgWin) return;
       if (
         e.target instanceof HTMLInputElement ||
         e.target instanceof HTMLTextAreaElement ||
@@ -110,16 +111,16 @@ export const CharactersPage = observer(() => {
     if (!selected) return;
 
     if (selected.GuildPosition !== GuildMemberRoleEnum.Undefined) {
-      Store.popUpMsgWin(MsgWinCode.DeleteCharacterGuildWarning);
+      MsgBox.popUpMsgWin(MsgWinCode.DeleteCharacterGuildWarning);
       return;
     }
 
     if (isDeleteBlocked(selected)) {
-      Store.popUpMsgWin(MsgWinCode.DeleteCharacterIdBlock);
+      MsgBox.popUpMsgWin(MsgWinCode.DeleteCharacterIdBlock);
       return;
     }
 
-    Store.popUpMsgWin(MsgWinCode.DeleteCharacterConfirm, selected.Name);
+    confirmDeleteCharacter(selected.Name);
   };
 
   return (

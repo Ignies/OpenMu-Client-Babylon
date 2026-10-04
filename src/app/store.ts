@@ -52,7 +52,6 @@ import {
   GuildMemberRoleEnum,
 } from '@versions/shared/packets/ServerToClientPackets';
 import { classFromAppearance } from '../controllers/actors/deserializeAppearance';
-import { formatMsgWinText, MsgWinCode, type MsgWinArg } from '../controllers/interface/msgWin';
 import { stringToBytes } from '../controllers/assets/download';
 import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH } from '../modules/servers/serverAccounts';
 import {
@@ -123,6 +122,7 @@ import { Social } from '../modules/social/social';
 import { Economy } from '../modules/economy/economy';
 import { Ecs } from '../ecs/current';
 import { AppState, UIState } from './uiState';
+import { MsgBox } from '../controllers/interface';
 
 /**
  * How long the game server named by `ConnectionInfo` has to say `GameServerEntered`
@@ -969,15 +969,6 @@ export const Store = new (class _Store {
 
   charCreationPending = false;
 
-  msgWin: { code: MsgWinCode; text: string } | null = null;
-
-  /**
-   * What the Yes of the box currently up does, when it was raised with one
-   * (the valuable-item confirmations). Kept off `msgWin` so the observable
-   * state stays plain data.
-   */
-  private msgWinOk: (() => void) | null = null;
-
   deletingChar: string | null = null;
 
   playerData = new PlayerData();
@@ -1083,7 +1074,6 @@ export const Store = new (class _Store {
       creationUnlockFlags: observable,
       charCreationPending: observable,
       focusedChar: observable,
-      msgWin: observable,
       playerData: observable,
       pickedItem: observable,
       itemHotkeys: observable,
@@ -1194,7 +1184,7 @@ export const Store = new (class _Store {
     Ecs.world?.removeHero();
     // The server list and login window draw no message box; one left up
     // from the world would only swallow Enter and Escape there.
-    this.closeMsgWin();
+    MsgBox.closeMsgWin();
 
     this.connectToConnectServer();
   }
@@ -1708,23 +1698,6 @@ export const Store = new (class _Store {
     this.sendToGS(packet.buffer);
     // DeleteCharacter (LoginScene.cpp:124): SOUND_MENU01.
     playUiSound('menuMove');
-  }
-
-  popUpMsgWin(code: MsgWinCode, arg?: MsgWinArg, onOk?: () => void): void {
-    this.msgWin = { code, text: formatMsgWinText(code, arg) };
-    this.msgWinOk = onOk ?? null;
-  }
-
-  /** The Yes handler of the box that is up, cleared as it is handed over. */
-  takeMsgWinOk(): (() => void) | null {
-    const onOk = this.msgWinOk;
-    this.msgWinOk = null;
-    return onOk;
-  }
-
-  closeMsgWin(): void {
-    this.msgWin = null;
-    this.msgWinOk = null;
   }
 
   createCharacterRequest(name: string, charClass: CharacterClassNumber): void {

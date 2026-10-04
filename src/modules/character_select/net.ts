@@ -3,6 +3,7 @@ import { CharacterClassCreationUnlockPacket, CharacterCreationSuccessfulPacket, 
 import { EventBus } from '@/core/eventBus';
 import { MsgWinCode } from '@/controllers/interface/msgWin';
 import { Store } from '@/app/store';
+import { MsgBox } from '@/controllers/interface';
 import { emptyAppearance, isAppearanceBlank, withAppearanceClass } from '@/controllers/actors/deserializeAppearance';
 import { runInAction } from 'mobx';
 
@@ -21,25 +22,25 @@ export function installNet(): void {
           if (Store.focusedChar === name) Store.focusedChar = '';
         });
 
-        Store.popUpMsgWin(MsgWinCode.DeleteCharacterSuccess);
+        MsgBox.popUpMsgWin(MsgWinCode.DeleteCharacterSuccess);
         break;
 
       case CharacterDeleteResponseCharacterDeleteResultEnum.Unsuccessful:
-        Store.popUpMsgWin(MsgWinCode.DeleteCharacterGuildWarning);
+        MsgBox.popUpMsgWin(MsgWinCode.DeleteCharacterGuildWarning);
         break;
 
       case CharacterDeleteResponseCharacterDeleteResultEnum.WrongSecurityCode:
-        Store.popUpMsgWin(MsgWinCode.StorageResidentWrong);
+        MsgBox.popUpMsgWin(MsgWinCode.StorageResidentWrong);
         break;
 
       default:
         if (p.Result === 3) {
-          Store.popUpMsgWin(MsgWinCode.DeleteCharacterItemBlock);
+          MsgBox.popUpMsgWin(MsgWinCode.DeleteCharacterItemBlock);
           break;
         }
 
         console.warn(`unknown CharacterDeleteResponse result ${p.Result}`);
-        Store.popUpMsgWin(MsgWinCode.StorageResidentWrong);
+        MsgBox.popUpMsgWin(MsgWinCode.StorageResidentWrong);
         break;
     }
   });

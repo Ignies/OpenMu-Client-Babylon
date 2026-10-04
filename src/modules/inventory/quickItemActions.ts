@@ -1,6 +1,7 @@
 import { reaction } from 'mobx';
 import { t } from '../../i18n';
 import { Store } from '../../app/store';
+import { MsgBox } from '../../controllers/interface';
 import { Economy } from '../economy/economy';
 import { GameOptions } from '@/controllers/settings';
 import { StorageKind } from './itemStorage';
@@ -107,7 +108,7 @@ export const QuickItemActions = new (class _QuickItemActions {
       return;
     }
 
-    Store.popUpMsgWin(code, itemDisplayName(item), go);
+    MsgBox.popUpMsgWin(code, itemDisplayName(item), go);
   }
 
   // --- bulk buy ------------------------------------------------------------

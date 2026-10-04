@@ -12,6 +12,7 @@ import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
 import { Social } from '@/modules/social/social';
 import { Store } from '@/app/store';
+import { MsgBox } from '@/controllers/interface';
 import { Ecs } from '@/ecs/current';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { playUiSound, uiClick } from '@/controllers/sound/sfx';
@@ -1125,7 +1126,7 @@ export const ChatWindow = observer(() => {
   useEventBus('keyPressed', key => {
     if (isTypingInField()) return;
     if (!Ecs.world?.playerEntity) return;
-    if (Store.msgWin) return;
+    if (MsgBox.msgWin) return;
 
     // The reply key: the box opens already addressed to whoever whispered
     // last, which is otherwise a right click on their line in the log.

@@ -5,6 +5,7 @@ import { playUiSound, uiClick } from '@/controllers/sound/sfx';
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { Store } from '@/app/store';
+import { MsgBox } from '@/controllers/interface';
 import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH } from '@/modules/servers/serverAccounts';
 import { registerApiUrl, registerUrl } from '@/modules/servers/serverServices';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
@@ -102,7 +103,7 @@ export const LoginPage = observer(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Enter' && e.key !== 'Escape') return;
       if (e.isComposing || e.keyCode === 229) return;
-      if (Store.msgWin || MuWindows.isOpen('options')) return;
+      if (MsgBox.msgWin || MuWindows.isOpen('options')) return;
       // A focused link keeps its own Enter.
       if (e.target instanceof HTMLAnchorElement) return;
 

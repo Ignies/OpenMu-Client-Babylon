@@ -6,7 +6,8 @@ windows themselves are content in `versions/shared/ui/` (see
 [docs/content.md](../../../docs/content.md)).
 
 ## Public API
-- `index.ts`: a small door (`MuWindows`); most readers still import their file directly (baselined).
+- `index.ts`: a small door (`MuWindows`, `MsgBox`, `MsgWinCode`); most readers still import their
+  file directly (baselined).
 - `windows.ts`: `defineWindow({ id, slot, order, component })`, `registerWindows(defs)` (a later
   def with the same id replaces the earlier one), `windowsIn(slot)` (stacking order). Slots:
   `world` (on the 3D view, stays up when the interface is hidden) and `hud`.
@@ -23,7 +24,10 @@ windows themselves are content in `versions/shared/ui/` (see
   `toggleFullscreen`, `isBrowserChord`.
 - `itemTooltip.ts`: `buildItemTooltip`, `itemDisplayName`, `itemNameColor`; `itemLinkHover.ts`.
 - `nameTags.ts`: name balloon lifetimes and colours; `screenPositionBus.ts`: per-entity screen
-  positions; `slideHelp.ts`: `SlideHelp`; `msgWin.ts`: message box codes and text.
+  positions; `slideHelp.ts`: `SlideHelp`; `msgWin.ts`: message box codes and text, and `MsgBox`: the box
+  that is up (`msgWin`), `popUpMsgWin(code, arg?, onOk?)`, `takeMsgWinOk()`, `closeMsgWin()`. `onOk`
+  is the box's Yes and gets the typed text (`msg_window` hands it over), so a chain of boxes, like
+  the delete-character one, lives with whoever raises it.
 - `hooks/`: `useEventBus`, `usePositionOnScreen`, `useRenderId`, `useVersionUi`.
 - `mobile.ts` (`isMobileDevice`, `useIsMobile`), `hudFormat.ts`, `tokens.less` (web tokens).
 

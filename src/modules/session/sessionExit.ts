@@ -2,6 +2,7 @@ import { MuWindows } from '@/controllers/interface/windowManager';
 import { makeAutoObservable, runInAction } from 'mobx';
 import { t } from '../../i18n';
 import { Store } from '../../app/store';
+import { MsgBox } from '../../controllers/interface';
 import { AppState, UIState } from '../../app/uiState';
 import { Ecs } from '../../ecs/current';
 import { Economy } from '../economy/economy';
@@ -196,7 +197,7 @@ export function openSystemMenu(): boolean {
   ) {
     return false;
   }
-  if (MuWindows.isOpen('options') || Store.msgWin) return false;
+  if (MuWindows.isOpen('options') || MsgBox.msgWin) return false;
   // The world's overlays only gate it in the world, as UIMng.cpp:698 checks
   // none of them: a request still up when the character left is reset only on
   // the next select, and would hold Escape dead on these screens until then.

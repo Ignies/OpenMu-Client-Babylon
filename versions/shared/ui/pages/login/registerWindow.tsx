@@ -2,7 +2,7 @@ import { MuWindows } from '@/controllers/interface/windowManager';
 import { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { t } from '@/i18n';
-import { Store } from '@/app/store';
+import { MsgBox } from '@/controllers/interface';
 import { playUiSound } from '@/controllers/sound/sfx';
 import { registerApiUrl } from '@/modules/servers/serverServices';
 import {
@@ -176,7 +176,7 @@ export const RegisterWindow = observer(({ onCreated, onCancel }: RegisterWindowP
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Enter' && e.key !== 'Escape') return;
       if (e.isComposing || e.keyCode === 229) return;
-      if (Store.msgWin || MuWindows.isOpen('options')) return;
+      if (MsgBox.msgWin || MuWindows.isOpen('options')) return;
 
       e.preventDefault();
       if (e.repeat) return;

@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 import { EventBus } from '@/core/eventBus';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { Store } from '@/app/store';
+import { MsgBox } from '@/controllers/interface';
 import { GameOptions } from '@/controllers/settings';
 import { StatAllocation } from '@/modules/hero/statAllocation';
 import { clampAmount, needsConfirm } from '@/modules/hero/statAmounts';
@@ -128,12 +129,12 @@ const SHIFT_AMOUNT = 10;
 
 /** True while the confirmation raised by a `+` is on screen. */
 function asking(): boolean {
-  return Store.msgWin?.code === MsgWinCode.ConfirmAddPoints;
+  return MsgBox.msgWin?.code === MsgWinCode.ConfirmAddPoints;
 }
 
 /** The question in front of a big run: Yes starts it, No changes nothing. */
 function askToAdd(stat: StatType, wanted: number): void {
-  Store.popUpMsgWin(
+  MsgBox.popUpMsgWin(
     MsgWinCode.ConfirmAddPoints,
     { count: wanted, stat: getStatName(stat) },
     () => StatAllocation.start(stat, wanted)
@@ -392,7 +393,7 @@ export const CharacterInfo = observer(() => {
   useEffect(() => {
     if (open) return;
     StatAllocation.cancel();
-    if (asking()) Store.closeMsgWin();
+    if (asking()) MsgBox.closeMsgWin();
   }, [open]);
 
   useEffect(() => stageStatPoints(), []);

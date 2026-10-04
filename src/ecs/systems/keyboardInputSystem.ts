@@ -1,5 +1,5 @@
 import { EventBus } from '../../core/eventBus';
-import { Store } from '../../app/store';
+import { MsgBox } from '../../controllers/interface';
 import {
   isCapturingKey,
   isKey,
@@ -83,7 +83,7 @@ export const KeyboardInputSystem: ISystemFactory = world => {
     // field closes itself (chat, prompts) rather than the windows behind it.
     if (typing) return;
     // `CMsgWin` is modal: while it is up it owns Enter and Escape.
-    if (Store.msgWin) return;
+    if (MsgBox.msgWin) return;
     // Ctrl+C over text selected in the chat log is the browser's copy, not
     // the Character window's C.
     if ((e.ctrlKey || e.metaKey) && e.code === 'KeyC' && hasPageSelection()) return;
