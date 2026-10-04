@@ -1,6 +1,6 @@
 import { BLOOD_CHIPS, BLOOD_MIST, DUST, MODEL, RGBS, STEEL_GLINTS, TEX } from '@/controllers/fx/recipes';
 import { COMBAT_BUS, playSfx } from '@/controllers/sound';
-import { ENHANCED_TIER, SkillContext, SkillVisual, Step, TICK, cm, explosion, flash, flying, forwardOf, hitSparks, model, particles, perTick, ring, scatter, seq, sprite, ticks } from '@/controllers/skills/visuals';
+import { ENHANCED_TIER, SkillContext, SkillVisual, Step, TICK, cm, currentSkill, explosion, flash, flying, forwardOf, hitSparks, model, particles, perTick, ring, scatter, seq, sprite, ticks } from '@/controllers/skills/visuals';
 import { type Entity } from '@/ecs/world';
 import { type JointOptions } from '@/controllers/fx/joint';
 import { type LightRecipe } from '@/controllers/lighting/lightSource';
@@ -12,7 +12,7 @@ import { type Sounds } from '@/controllers/sound/recipes';
 import { effectLight } from '@/controllers/lighting/recipes';
 import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
-import { playCombat } from '@/controllers/sound/combat';
+import { playCombat, playLandingSound } from '@/controllers/sound/combat';
 import { storeRef } from '@/app/storeRef';
 import { tierIndex } from '@/controllers/lighting/lightingQuality';
 
@@ -22,6 +22,12 @@ import { SkillLight } from '@/controllers/lighting/skills';
 
 /** Degrees → radians. */
 export const DEG = Math.PI / 180;
+
+/** A `soundOnLanding` skill's `sound`, heard from the caster: the release block's `PlayBuffer` (use with `afterRelease`). */
+export const landingSound: Step = (_at, c) => {
+  const t = c.caster.transform;
+  if (t) playLandingSound(currentSkill, { x: t.pos.x, z: t.pos.z });
+};
 
 /**
  * A summon arriving (the 0x1F create flag): BITMAP_LIGHTNING+1 sub2 lights the ground

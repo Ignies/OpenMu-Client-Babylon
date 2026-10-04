@@ -8,11 +8,21 @@ import { playerPlaySpeed } from '@/controllers/anim/playSpeed';
 import type { Entity } from '@/ecs/world';
 import { PlayerAction } from '../objects/enum';
 import { playAreaSkillVisual, playTargetedSkillVisual } from './skillVisuals';
+import { skillSound } from '@/controllers/sound/combat';
 
 vi.hoisted(() => {
   const g = globalThis as Record<string, unknown>;
   g.location ??= { href: 'http://localhost/', search: '', hostname: 'localhost', protocol: 'http:' };
 });
+
+const played: string[] = [];
+vi.mock('@/controllers/sound/listener', async importOriginal => ({
+  ...(await importOriginal<object>()),
+  playSfx: (key: string) => {
+    played.push(key);
+    return 0;
+  },
+}));
 
 /**
  * When a cast lands, against the caster's magic speed: AttackTime runs 14 ticks from the packet, but
@@ -47,7 +57,7 @@ function timeline(
   keysPerTick: number,
   key: number,
   fps = 25,
-  { area = false, only }: { area?: boolean; only?: string } = {}
+  { area = false, only, sound }: { area?: boolean; only?: string; sound?: string } = {}
 ): { key: number; release: number } {
   let frame = 0;
   const model = { CurrentAction: clip, actionFrame: () => frame };
@@ -62,7 +72,8 @@ function timeline(
   effects.reset();
   const spawn = vi.spyOn(effects, 'spawn');
   spawn.mockClear();
-  const spawned = () => spawn.mock.calls.filter(c => !only || c[0] === only).length > 0;
+  played.length = 0;
+  const spawned = () => (sound ? played.includes(sound) : spawn.mock.calls.filter(c => !only || c[0] === only).length > 0);
   if (area) playAreaSkillVisual(scene, skill, caster, { x: 103, y: 104 }, () => 0, target);
   else playTargetedSkillVisual(scene, skill, caster, target);
   let keyAt = 0;
@@ -162,5 +173,28 @@ describe('the release-block common skills', () => {
     const vitality = PlayerAction.PLAYER_SKILL_VITALITY;
     expect(timeline(67, vitality, 1, 5, 25, { area: true })).toEqual({ key: 5, release: 14 });
     expect(timeline(69, vitality, 1, 5)).toEqual({ key: 5, release: 14 });
+  });
+});
+
+describe('the release-block sounds play at the release, not at the packet', () => {
+  // PlayBuffer in the release block: Deep Impact (ZzzCharacter.cpp:4908), Stun (:4217), Swell Mana (:4257), Improve AG (:4364).
+  const BOW = PlayerAction.PLAYER_ATTACK_BOW;
+  const vitality = PlayerAction.PLAYER_SKILL_VITALITY;
+
+  it('none of them sounds at the cast', () => {
+    for (const skill of [46, 67, 69, 53]) expect(skillSound(skill)).toBeNull();
+  });
+
+  it('Starfall on key 5 of the bow clip, or 14 ticks after the packet', () => {
+    const at = (attackSpeed: number) => timeline(46, BOW, playerPlaySpeed(BOW, attackSpeed), 5, 25, { sound: 'Sound/battlecastle/sCFireArrow' });
+    expect(at(0)).toEqual({ key: 17, release: 14 });
+    expect(at(600)).toEqual({ key: 4, release: 4 });
+  });
+
+  it('Stun and Swell Mana 14 ticks after the packet, Improve AG on key 5 or at 14', () => {
+    expect(timeline(67, vitality, 1, 5, 25, { area: true, sound: 'Sound/battlecastle/sDStun' }).release).toBe(14);
+    expect(timeline(69, vitality, 1, 5, 25, { sound: 'Sound/battlecastle/sDSwellMana' }).release).toBe(14);
+    expect(timeline(53, CLIP, playerPlaySpeed(CLIP, 0, 0), 5, 25, { sound: 'Sound/eSwellLife' })).toEqual({ key: 18, release: 14 });
+    expect(timeline(53, CLIP, playerPlaySpeed(CLIP, 0, 1400), 5, 25, { sound: 'Sound/eSwellLife' })).toEqual({ key: 2, release: 2 });
   });
 });
