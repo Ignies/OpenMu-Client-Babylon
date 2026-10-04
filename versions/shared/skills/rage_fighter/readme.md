@@ -13,7 +13,7 @@ folders: [../readme.md](../readme.md).
 | Folder | Ids | Look |
 |---|---|---|
 | `killing_blow` | 260, 551 str, 554 mastery | a wolf head aimed at the target, a burst there |
-| `beast_uppercut` | 261, 552 str, 555 mastery | a rising gold burst (the original model is not converted) |
+| `beast_uppercut` | 261, 552 str, 555 mastery | two blows on the dummies' keys, a rising gold burst each (the model is not converted); the hero's waits for STAMP key 2 |
 | `chain_drive` | 262, 558 str | sword effect at the caster; past GIANTSWING keys 6 and 11 a blow on the target, the first with a shock wave |
 | `dark_side` | 263, 559 str | a dark shock wave chasing the target, damage bursts |
 | `dragon_roar` | 264, 560 str | a dragon head on tick 21; a fire shock ring and scattered fire hits past DRAGONLORE key 5 |

@@ -8,6 +8,7 @@ import { ENUM_WORLD } from '@/core/types';
 import type { Entity } from '@/ecs/world';
 import { PlayerAction } from '../../objects/enum';
 import { playAreaSkillVisual, playTargetedSkillVisual } from '../skillVisuals';
+import { skillSound } from '@/controllers/sound/combat';
 
 vi.hoisted(() => {
   const g = globalThis as Record<string, unknown>;
@@ -159,5 +160,41 @@ describe('Dragon Roar (264): the dragon on BLOW_OF_DESTRUCTION\'s LifeTime, the 
     const r = run(264, LORE, { keysPerTick: 0.3, area: true, leaveAt: 15 });
     expect(dragon(r)).toEqual([21]);
     expect(ring(r)).toEqual([]);
+  });
+});
+
+describe('Beast Uppercut (261): MODEL_DOWN_ATTACK_DUMMY_R then _L, on their own keys (MoveHandlers.cpp:9221-9309)', () => {
+  const STAMP = PlayerAction.PLAYER_SKILL_STAMP;
+  const ATT = 'Sound/Ragefighter/Rage_Stamp_Att';
+  const CAST = 'Sound/Ragefighter/Rage_Stamp';
+
+  it('another caster: Rage_Stamp at the packet, the two blows 5 and 17 ticks later at 0.4 a tick', () => {
+    for (const skill of [261, 552, 555]) {
+      const r = run(skill, STAMP);
+      expect(soundTicks(r, CAST)).toEqual([0]);
+      expect(spriteTicks(r, TEX.spark2)).toEqual([5, 17]);
+      expect(soundTicks(r, ATT)).toEqual([5, 17]);
+    }
+  });
+
+  it('follows the STAMP PlaySpeed: 0.45 a tick hits 5 and 15 ticks later', () => {
+    // v = 0.9: R reaches key 3 on move 5 and key 6 on move 8; L reaches key 5 on its move 7.
+    expect(spriteTicks(run(261, STAMP, { keysPerTick: 0.45 }), TEX.spark2)).toEqual([5, 15]);
+  });
+
+  it('the hero: the effect waits for STAMP key 2 (SkillCast.cpp:1111-1115), tick 5 at 0.45 a tick', () => {
+    const r = run(261, STAMP, { hero: true, keysPerTick: 0.45 });
+    expect(soundTicks(r, CAST)).toEqual([5]);
+    expect(spriteTicks(r, TEX.spark2)).toEqual([10, 20]);
+  });
+
+  it('the hero: nothing if the clip is left before key 2', () => {
+    const r = run(261, STAMP, { hero: true, leaveAt: 3 });
+    expect(soundTicks(r, CAST)).toEqual([]);
+    expect(spriteTicks(r, TEX.spark2)).toEqual([]);
+  });
+
+  it('the cast sound left the click: the effect plays it', () => {
+    expect(skillSound(261)).toBeNull();
   });
 });
