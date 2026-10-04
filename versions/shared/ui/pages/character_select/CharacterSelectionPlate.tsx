@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react-lite';
 import { useEffect, useRef, useState } from 'react';
 import { Matrix, Vector3, Viewport } from '@/controllers/render/babylon/exports';
-import { Store } from '@/app/store';
+import { CharSelect } from '@/modules/character_select';
 import { Ecs } from '@/ecs/current';
 import { classFromAppearance } from '@/controllers/actors/deserializeAppearance';
 import { getClassName } from '@/modules/hero/characterStats';
@@ -47,7 +47,7 @@ export const CharacterSelectionPlate = observer(() => {
       const hovered = world.currentPointerTarget;
       const target =
         (hovered && named.has(hovered) ? hovered : null) ??
-        named.entities.find(e => e.objectNameInWorld === Store.focusedChar) ??
+        named.entities.find(e => e.objectNameInWorld === CharSelect.focusedChar) ??
         null;
 
       const targetName = target?.objectNameInWorld ?? null;
@@ -83,7 +83,7 @@ export const CharacterSelectionPlate = observer(() => {
     };
   }, [world]);
 
-  const character = name ? Store.charactersList.find(c => c.Name === name) : undefined;
+  const character = name ? CharSelect.charactersList.find(c => c.Name === name) : undefined;
 
   return (
     <div ref={ref} className="char-sel-plate" hidden={!character}>
@@ -97,7 +97,7 @@ export const CharacterSelectionPlate = observer(() => {
             {character.Level}
           </div>
           <div className="char-sel-plate-hint">
-            {character.Name !== Store.focusedChar && (
+            {character.Name !== CharSelect.focusedChar && (
               <span>
                 <img src="/icons/mouse-left.svg" alt="" style={HINT_ICON} />
                 {t('characters.hint.select')}

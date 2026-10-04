@@ -1,6 +1,6 @@
 import { runInAction } from 'mobx';
 import type { ISystemFactory } from '../world';
-import { Store } from '../../app/store';
+import { CharSelect } from '../../modules/character_select';
 import { AppState, UIState } from '../../app/uiState';
 import { ENUM_WORLD } from '@/core/types';
 import { EventBus } from '../../core/eventBus';
@@ -417,7 +417,7 @@ export const LoginSceneSystem: ISystemFactory = world => {
 
       camera.fov = CHARACTER_FOV;
 
-      const zoomedOn = Store.charactersList.find(
+      const zoomedOn = CharSelect.charactersList.find(
         c => c.Name === characterSelectView.zoomedOn
       );
       const slot = zoomedOn ? characterSlotPosition(zoomedOn.SlotIndex) : null;

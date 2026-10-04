@@ -1,6 +1,6 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { t } from '../../i18n';
-import { Store } from '../../app/store';
+import { CharSelect } from '../character_select';
 import { Session } from './state';
 import { addNotification } from '../chat';
 import { GameOptions } from '@/controllers/settings';
@@ -129,7 +129,7 @@ export const SessionResume = new (class _SessionResume {
       this.step = 'selecting';
     });
     Session.disconnectFromConnectServer();
-    Store.selectCharacterRequest(this.character);
+    CharSelect.selectCharacterRequest(this.character);
     return true;
   }
 

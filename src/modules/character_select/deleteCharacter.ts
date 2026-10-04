@@ -1,5 +1,5 @@
 import { MsgBox, MsgWinCode } from '@/controllers/interface';
-import { Store } from '@/app/store';
+import { CharSelect } from './state';
 
 /**
  * The delete button's boxes: `MESSAGE_DELETE_CHARACTER_CONFIRM`, then `..._RESIDENT`, whose
@@ -8,10 +8,10 @@ import { Store } from '@/app/store';
 export function confirmDeleteCharacter(name: string): void {
   MsgBox.popUpMsgWin(MsgWinCode.DeleteCharacterConfirm, name, () =>
     MsgBox.popUpMsgWin(MsgWinCode.DeleteCharacterResident, undefined, securityCode => {
-      const focused = Store.focusedChar;
+      const focused = CharSelect.focusedChar;
       if (!focused) return;
 
-      Store.deleteCharacterRequest(focused, securityCode);
+      CharSelect.deleteCharacterRequest(focused, securityCode);
 
       MsgBox.popUpMsgWin(MsgWinCode.Wait);
     })

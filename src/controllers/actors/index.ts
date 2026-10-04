@@ -2,6 +2,7 @@
 export { BUDGE_DRAGON_MODEL } from './genericMonster';
 export { heldWeapons, shownGear, wearsChaosCastleSkin, type Gear } from './chaosCastleUnit';
 export { registerModelClass } from './modelClasses';
+export { classFromAppearance } from './deserializeAppearance';
 export { monsterHiddenMesh, monsterModelFile, monsterModelTypeOfNpc, monsterScaleOf } from './monsterModelTable';
 export { MonsterObject } from './monsterObject';
 export { PlayerObject } from './playerObject';

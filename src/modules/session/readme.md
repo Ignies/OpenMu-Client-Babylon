@@ -40,8 +40,8 @@ the client-to-server encryption, the login fields and the offline flag.
   from the app and the interface, never a module above it.
 - `sessionStats.ts` listens to `experienceGained` and watches `Hero.money`; it starts
   only when a panel calls `watch()`. A new character name resets it.
-- Store members still used: `selectCharacterRequest`, `closeNpcShop`. The hero's id and name come
-  from `Hero`.
+- Store members still used: `closeNpcShop`. The hero's id and name come from `Hero`, the character
+  select from `CharSelect`.
 
 ## Packets
 - `Hello`: requests the server list (once).

@@ -12,7 +12,7 @@
 import { observer } from 'mobx-react-lite';
 import { useState } from 'react';
 import { t } from '@/i18n';
-import { Store } from '@/app/store';
+import { CharSelect } from '@/modules/character_select';
 import {
   CharacterList,
   listStatus,
@@ -48,11 +48,11 @@ export const V097dCharactersPage = observer(() => {
   const [deleting, setDeleting] = useState(false);
   const [code, setCode] = useState('');
 
-  const selected = selectedCharacter(Store.charactersList, Store.focusedChar);
+  const selected = selectedCharacter(CharSelect.charactersList, CharSelect.focusedChar);
   const status = listStatus(
     {
-      loading: Store.loadingCharactersList,
-      count: Store.charactersList.length,
+      loading: CharSelect.loadingCharactersList,
+      count: CharSelect.charactersList.length,
       selected: !!selected,
     },
     'empty'
@@ -74,7 +74,7 @@ export const V097dCharactersPage = observer(() => {
             <p className="v097d-characters-note">{t('characters.select')}</p>
           )}
 
-          <CharacterList source={Store} look="rows" row={ROW} />
+          <CharacterList source={CharSelect} look="rows" row={ROW} />
 
           {deleting && (
             <MuSpriteFrame
@@ -111,7 +111,7 @@ export const V097dCharactersPage = observer(() => {
           activeColor={ACTIVE_COLOR}
           disabled={!selected}
           onClick={() => {
-            if (selected) Store.selectCharacterRequest(selected.Name);
+            if (selected) CharSelect.selectCharacterRequest(selected.Name);
           }}
           style={{ position: 'absolute', left: CONNECT.x, top: CONNECT.y }}
         />
@@ -133,7 +133,7 @@ export const V097dCharactersPage = observer(() => {
               return;
             }
 
-            Store.deleteCharacterRequest(selected.Name, code);
+            CharSelect.deleteCharacterRequest(selected.Name, code);
             setDeleting(false);
             setCode('');
           }}
