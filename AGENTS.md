@@ -37,9 +37,10 @@ How agents work here (workflow, roles, tools, where things are): [docs/agents/](
 2. **Content owns its data.** A skill, item, monster or map object is one file (or folder) under
    `versions/shared/` that calls the controllers. Nothing about Nova lives outside
    `versions/shared/skills/dark_wizard/nova/`. See [docs/content.md](docs/content.md).
-3. **Dependencies point down.** `versions/*` content -> `src/modules` -> `src/controllers` ->
-   `src/core`. A controller never imports content or a module; it exposes a registry or a hook
-   slot that content fills (`registerSkills`, `combat/skillHooks.ts`).
+3. **Dependencies point down.** `src/app` -> `versions/*` content -> `src/modules` ->
+   `src/controllers` -> `src/core`. A controller never imports content or a module; it exposes a
+   registry or a hook slot that content fills (`registerSkills`, `combat/skillHooks.ts`). Nothing
+   imports `src/app`: it only wires the rest together at boot.
 
 ## Where a change goes
 

@@ -33,7 +33,7 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
 
 ## Depends on / used by
 - uses: most controllers, the modules' state through their doors (`Hero`, `Session`, `Bag`,
-  `HeroSkills`, `Merchant`, ...), `app/uiState.ts`, `app/logic.ts` (`spawnPlayer`), `src/core`.
+  `HeroSkills`, `Merchant`, ...), `controllers/interface/uiState.ts`, `modules/scope/net.ts` (`spawnPlayer`), `src/core`.
 - used by: `app/boot.tsx` (`createWorld`); `Entity` / `World` types everywhere an entity is
   touched (controllers, modules, `versions/shared` maps, skills, npcs, monsters, ui).
 

@@ -12,7 +12,7 @@ import { makeAutoObservable, runInAction } from 'mobx';
  * register a panel without pulling UI code.
  *
  * The menu is an offline-only tool: it is mounted by `WorldPage` behind
- * `Store.isOffline` and every mutation a module performs must go through a
+ * `Session.isOffline` and every mutation a module performs must go through a
  * seam that already has a public owner (a `requestWarp` event, a
  * `setGameOption`, a `/time` command) - the menu itself owns no game state.
  */

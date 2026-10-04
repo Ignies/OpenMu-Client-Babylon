@@ -1,22 +1,22 @@
 # app
 
-Boot, the root React component, the page the app shows, the offline test scene, the list of
-packet handlers and the map-change reset. This is the top of the graph: it wires modules,
-controllers and versions together. Gameplay state lives in the modules (see
-[../modules/readme.md](../modules/readme.md)), not here.
+Boot, the root React component, the offline test scene, the module install and the map-change
+reset. This is the top of the graph: it wires modules, controllers and versions together, and
+nothing imports it (`only-the-app-imports-the-app` in `tools/checks/rules.ts`). Gameplay state
+lives in the modules (see [../modules/readme.md](../modules/readme.md)); the page the app shows is
+the interface controller's (`AppState`, `controllers/interface/uiState.ts`).
 
-## Public API
-- `AppState`, `UIState` (`uiState.ts`): the page the app shows (`uiState`) and the hide-interface
-  key (`hudHidden`). Session and hero packets move the page; it imports only mobx.
-- `playOffline()` (`offline.ts`): the offline test scene (`/offline`, the preloader's Play Offline):
+## What is here
+- `main.tsx`, `boot.tsx`: start the version, the engine, the controllers and the ECS world.
+- `App.tsx`: the root component; picks the page from `AppState.uiState`.
+- `logic.ts`: installs the modules, sends `Ping`, refreshes NPC names, hands the map ping its link.
+- `lifecycle.ts`: `resetForMapChange()`, what resets on a map change.
+- `offline.ts`: `playOffline()`, the offline test scene (`/offline`, the preloader's Play Offline):
   no server, a test hero on `?map=`, with `?class=`, `?skin=`, `?hand1=` / `?hand2=` / `?pet=`,
   `?bare`, `?hp=` / `?mp=` as screenshot seams. `App.tsx` hands it to the preloader page.
-- The live ECS world is `Ecs.world` (`src/ecs/current.ts`), which any layer may read.
-- `consts.ts`: default connect-server / ws-proxy endpoints (`VITE_CS_HOST`, `VITE_WS_HOST`, ...)
-  and the ECS debug flags. The login field limits are `modules/servers/serverAccounts.ts`; the
-  terrain and music dev switches live in `terrain/consts.ts` and `sound/soundsManager.ts`.
-- `spawnPlayer`, `summonDisplayName`, `emitObjectEffect` (`logic.ts`).
-- `PwaInstall`, `installApp()` (`pwaInstall.ts`): install the client as an app (options window).
+- The live ECS world is `Ecs.world` (`src/ecs/current.ts`), which any layer may read. The default
+  server endpoints are `modules/servers/defaults.ts`; the install-as-app button is
+  `modules/options/pwaInstall.ts`.
 
 ## How it works
 - `main.tsx` loads the game version from the active server profile (`versionIdForTag`), then
@@ -57,18 +57,9 @@ whole app graph. Each piece moved to the module that owns it (`Hero`, `Session`,
 requests, chat's `addNotification`) or down to a controller (`Loading`, `MsgBox`, `WeatherStatus`)
 or `src/ecs` (`Ecs.world`); `tools/restructure/storeSplit.ts` did the `Store.x` rewrites.
 
-### Notes: pwaInstall.ts
-The browser fires `beforeinstallprompt` once, early. `main.tsx` calls `watchInstallState()` so the
-event is held from the start, and the options window spends it whenever the player presses the
-button. Installing does not change rendering; it gives a taskbar icon and persistent storage for
-downloaded assets. The module imports nothing from the app so `main.tsx` can load it before the
-version resolves.
-
 ## Depends on / used by
 - uses: every module (`net.ts`, state), most controllers, `src/ecs`, `src/version`, `versions/`.
-- used by: modules that move the page (`uiState.ts`: session, hero, servers), pages and HUD that
-  read it, and ECS systems (`spawnPlayer` from `logic.ts`). Controllers and content may not import
-  it (`tools/checks/rules.ts`).
+- used by: nothing but tests, which import `logic.ts` to load the app the way the browser does.
 
 ## Change it
 - handle a new packet: add it to `installNet` in `src/modules/<module>/net.ts`; add a new module's
@@ -77,11 +68,9 @@ version resolves.
   never here.
 - reset something on map change: give it a `reset()` and add it to `MAP_RESET` in `lifecycle.ts`.
 - start a new controller: list it in [../controllers/controllers.ts](../controllers/controllers.ts).
-- change default server endpoints: the `VITE_*` env vars read in `consts.ts`.
+- change default server endpoints: the `VITE_*` env vars read in `modules/servers/defaults.ts`.
 
 ## Tests
 - `listenerOrder.golden.test.ts`: every packet's listeners and their order once the app has loaded.
 - `observableStores.test.ts`: no observable store member is named after an `Object.prototype`
   member (mobx would throw while building the store).
-- `pwaInstall.test.ts`: install flow (no prompt yet, accepted, refused, already installed, second
-  press while the dialog is up).

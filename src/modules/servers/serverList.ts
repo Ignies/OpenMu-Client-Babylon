@@ -1,6 +1,6 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { LocalStorage } from '../../core/localStorage';
-import { WS_HOST, WS_PORT } from '../../app/consts';
+import { WS_HOST, WS_PORT } from './defaults';
 import {
   isUsableHost,
   normalizeHost,

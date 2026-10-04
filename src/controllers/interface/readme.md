@@ -6,8 +6,11 @@ windows themselves are content in `versions/shared/ui/` (see
 [docs/content.md](../../../docs/content.md)).
 
 ## Public API
-- `index.ts`: a small door (`MuWindows`, `MsgBox`, `MsgWinCode`, `buildItemTooltip`, `itemNameColor`,
-  `TooltipLine`, `ItemLinkHover`); most readers still import their file directly (baselined).
+- `index.ts`: the facade (`MuWindows`, `MsgBox`, `MsgWinCode`, `buildItemTooltip`, `itemNameColor`,
+  `TooltipLine`, `ItemLinkHover`). The other root files are public too; `hooks/index.ts` and each
+  `components/<widget>/index.tsx` are the doors into those folders.
+- `uiState.ts`: `AppState` (the page the app shows, `uiState`, and the hide-interface key,
+  `hudHidden`) and `UIState`. Session and hero packets move the page; it imports only mobx.
 - `windows.ts`: `defineWindow({ id, slot, order, component })`, `registerWindows(defs)` (a later
   def with the same id replaces the earlier one), `windowsIn(slot)` (stacking order). Slots:
   `world` (on the 3D view, stays up when the interface is hidden) and `hud`.
@@ -31,7 +34,8 @@ windows themselves are content in `versions/shared/ui/` (see
   is the box's Yes and gets the typed text (`msg_window` hands it over), so a chain of boxes, like
   the delete-character one, lives with whoever raises it.
 - `hooks/`: `useEventBus`, `usePositionOnScreen`, `useRenderId`, `useVersionUi`.
-- `mobile.ts` (`isMobileDevice`, `useIsMobile`), `hudFormat.ts`, `tokens.less` (web tokens).
+- `mobile.ts` (`isMobileDevice`, `useIsMobile`), `hudFormat.ts`, `tokens.less` (web tokens),
+  `root.less` (the root layer pages and windows are drawn in; `boot.tsx` imports it).
 
 ## How it works
 - `versions/shared/ui/index.ts` registers every `window.ts` under `windows/` and `hud/` by glob,
@@ -47,8 +51,9 @@ windows themselves are content in `versions/shared/ui/` (see
   filtering one global event (n squared calls a frame).
 - `ui_stage`: one observer on the canvas rect scales the 640x480 stage (`ConvertX` /
   `ConvertY`); `mu_text` maps the original's four GDI Tahoma faces (Winmain.cpp:1251-1254).
-- `item_icons/`: generated tables (`tools/itemIconFit.ts`, `tools/itemIconManifest.ts`) and the
-  per-item inventory scale from `RenderObjectScreen` (ZzzInventory.cpp:9308-10090). Do not edit.
+- `item_icons/`: the generated fit table (`tools/itemIconFit.ts`) and the per-item inventory scale
+  from `RenderObjectScreen` (ZzzInventory.cpp:9308-10090). Do not edit. Which icon files exist is
+  `assets/itemIconManifest.ts` (`tools/itemIconManifest.ts`).
 - `keyBindings.ts`: each action maps to a `KeyboardEvent.code`, stored in localStorage per
   character (`setKeyProfile`), rebound from the Options Keys tab.
 - Dependency direction (a controller never imports a module): what read module state left. The

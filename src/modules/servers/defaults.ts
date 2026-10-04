@@ -1,5 +1,5 @@
 // Connect-server and ws-proxy endpoints - the DEFAULTS only. They seed the
-// first server profile on a fresh install; from then on `modules/servers/serverConfig.ts`
+// first server profile on a fresh install; from then on `serverConfig.ts`
 // owns where the client connects (saved profiles, edited in the start screen's
 // server picker, with `?cs=` / `?ws=` in the URL above them). A build sets its
 // own defaults with `VITE_CS_HOST`, `VITE_CS_PORT`, `VITE_WS_HOST` (scheme
@@ -11,6 +11,3 @@ export const CS_PORT = Number(env.VITE_CS_PORT) || 44405;
 
 export const WS_HOST = env.VITE_WS_HOST || 'ws://localhost';
 export const WS_PORT = Number(env.VITE_WS_PORT) || 3000;
-
-export const DEBUG_PATHFINDING = false;
-export const DEBUG_SHOW_BOUNDING_BOXES = false;

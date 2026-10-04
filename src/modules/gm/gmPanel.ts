@@ -143,7 +143,7 @@ export const GmPanel = new (class _GmPanel {
    * mode, which has no server to ask and no account to be one on.
    *
    * Offline is the seam the debug menu already uses (`?offline`, see
-   * `Store.playOffline`): it is a local scene with nobody else in it, so
+   * `playOffline` in `app/offline.ts`): it is a local scene with nobody else in it, so
    * showing the panel there gives away nothing and is the only way to work on
    * its layout without a game master account on a live server. The commands it
    * sends go nowhere, because there is no socket.

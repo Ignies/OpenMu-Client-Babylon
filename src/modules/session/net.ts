@@ -8,7 +8,7 @@ import { Merchant } from '@/modules/npc_shop';
 import { Hero } from '@/modules/hero';
 import { Servers } from '@/modules/servers';
 import { Session } from './state';
-import { AppState, UIState } from '@/app/uiState';
+import { AppState, UIState } from '@/controllers/interface/uiState';
 import { gameServerTarget } from '../servers/serverConfig';
 import { quests } from '../quests';
 import { runInAction } from 'mobx';
@@ -57,7 +57,7 @@ export function installNet(): void {
     });
   });
 
-  // A socket we did not close ourselves went away: `Store.onSocketLost` ignores
+  // A socket we did not close ourselves went away: `Session.onSocketLost` ignores
   // sockets that were already handed off (deliberate closes clear the field
   // first) and otherwise starts over at the server list with a notice. Errors
   // are always followed by a close, so only the close is acted on (app/App.tsx

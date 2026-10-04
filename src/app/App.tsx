@@ -3,7 +3,7 @@ import { ServersPage } from '@versions/shared/ui/pages/server_select';
 import { observer } from 'mobx-react-lite';
 import { lazy, Suspense } from 'react';
 import { addNotification } from '../modules/chat';
-import { AppState, UIState } from './uiState';
+import { AppState, UIState } from '../controllers/interface/uiState';
 import { loadVersionUi } from '../version';
 import { WorldPage } from '@versions/shared/ui/pages/world';
 import { useEventBus } from '@/controllers/interface/hooks';

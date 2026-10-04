@@ -28,7 +28,7 @@ There is no central store any more. What used to be `Store` lives here: `Hero` (
 (session: sockets, sending, login fields, offline), `Servers` (servers), `CharSelect`
 (character_select), `HeroSkills` (skills), `Pets` (pets), `MuHelper` (mu_helper), `GuildMarks`
 (guild), `Drops` (drops), `Bag` (inventory), `Merchant` (npc_shop), the warp requests (warp) and
-`addNotification` (chat). The page is the app's (`app/uiState.ts`), the world `Ecs.world`
+`addNotification` (chat). The page is the app's (`controllers/interface/uiState.ts`), the world `Ecs.world`
 (`src/ecs/current.ts`), the loading flags, the message box and the weather status their
 controllers'. When two modules would import each other, one hands the other a port instead
 (`Bag.grids` from economy, `Bag.beforeConsume` from npc_shop, chat's notification sink from social).
@@ -73,7 +73,7 @@ and `masterTree.ts` through the `skills` facade, and `band` through `installBand
   `_shared/i18n/`: text more than one module uses.
 
 ## Depends on / used by
-- uses: `src/controllers` (through their doors), `src/core`, `src/ecs`, `src/app/uiState.ts` (the
+- uses: `src/controllers` (through their doors), `src/core`, `src/ecs`, `controllers/interface/uiState.ts` (the
   page), each other's doors, packet codecs in `versions/shared/packets/`.
 - used by: `src/app/logic.ts` (nets), windows and HUD in `versions/shared/ui/`, ECS systems.
 - a module never imports a window (`modules-do-not-draw` in `tools/checks/rules.ts`).

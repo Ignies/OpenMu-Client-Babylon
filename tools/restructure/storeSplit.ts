@@ -2,7 +2,7 @@
 // imports of `src/app/store.ts` (types, enums, constants) to the file that exports them now.
 // Usage: bun tools/restructure/storeSplit.ts <map.json> [--dry-run] [--skip <path prefix>]...
 // map.json: { "members": { "<member>": { "expr": "Hero", "name": "Hero", "door": "src/modules/hero/index.ts",
-//   "home": "src/modules/hero/state.ts" } }, "exports": { "UIState": { "door": "src/app/uiState.ts" } } }
+//   "home": "src/modules/hero/state.ts" } }, "exports": { "UIState": { "door": "src/controllers/interface/uiState.ts" } } }
 // `expr` replaces the whole `Store.<member>` (default `<name>.<member>`); files inside `home`'s folder import
 // `home`, everyone else `door`. Inside store.ts `this.<member>` of the store class is rewritten too.
 import ts from 'typescript';

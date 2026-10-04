@@ -4,7 +4,7 @@ import {
 } from '../../controllers/render/babylon/exports';
 import type { ISystemFactory, World } from '../world';
 import { Bag } from '../../modules/inventory';
-import { AppState, UIState } from '../../app/uiState';
+import { AppState, UIState } from '../../controllers/interface/uiState';
 import { isMobileDevice } from '../../controllers/interface/mobile';
 import { MoveTargetEffect } from '../../controllers/fx/moveTargetEffect';
 import { GameOptions } from '@/controllers/settings';

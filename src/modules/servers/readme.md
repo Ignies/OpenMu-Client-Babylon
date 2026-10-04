@@ -16,7 +16,7 @@ connect server's own list (`Servers.serverList`) is filled by `session/net.ts`.
   `gameServerTarget(returnedIp)`, types `ServerProfile`, `PublishedGameServer`.
 - `ServerList`, `refreshServerList()`, `parseServerList(text)`: the published list.
 - `ServerAccounts`: `list`, `of`, `select`, `add`, `update`, `forget`, `record(worldId, login)`.
-  `MAX_USERNAME_LENGTH` / `MAX_PASSWORD_LENGTH` (`serverAccounts.ts`, were `app/consts.ts`): the login
+  `MAX_USERNAME_LENGTH` / `MAX_PASSWORD_LENGTH` (`serverAccounts.ts`): the login
   fields, read by `Session.loginRequest` and the login pages.
 - `ServerProbe`: `check(profiles)`, `of(id)` -> `Reach` (`unknown`, `checking`, `up`, `down`).
 - `registerUrl()`, `registerApiUrl()`, `marketApiUrl()`, `serverManifestUrl()`.
@@ -43,7 +43,7 @@ connect server's own list (`Servers.serverList`) is filled by `session/net.ts`.
   `register/src/registerPage.tsx` import them too.
 
 ## Depends on / used by
-- uses: `core/localStorage`, `app/consts`, `src/version` (`versionByTag`).
+- uses: `core/localStorage`, `src/version` (`versionByTag`).
 - used by: `session` (`state.ts`, `net.ts`), `src/app/boot.tsx`, `src/app/main.tsx`,
   `marketplace/api.ts`, `gm/admin/feed.ts`,
   `pageTitle.ts`, `chat/chatRooms.ts` (the chat socket's address), the pages
@@ -72,7 +72,7 @@ connect server's own list (`Servers.serverList`) is filled by `session/net.ts`.
 ### serverConfig.ts
 - Three layers, highest first: the URL (`?cs=host:port`, `?ws=wss://host:port`, `?server=<name>`;
   an ephemeral profile, never saved), the saved profiles (localStorage, edited by the picker), and
-  the build defaults (`VITE_CS_HOST/PORT`, `VITE_WS_HOST/PORT` via `consts.ts`).
+  the build defaults (`VITE_CS_HOST/PORT`, `VITE_WS_HOST/PORT` via `defaults.ts`).
 - `wsUrl` is the proxy's own address; `csHost:csPort` is the connect server as seen from the
   proxy's network. They need not be the same machine.
 

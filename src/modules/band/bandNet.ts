@@ -38,7 +38,7 @@ import { BandSender } from './bandSender';
  * facade. Inbound: the proxy's `BandRelay` frames (C1 FA) - a performer in
  * scope starting, stopping, sending notes, a band changing, or a notice
  * meant for this client. Outbound: the facade's start / stop / batch / join
- * / leave / state, as frames through `Store.sendBandFrame`, only once the
+ * / leave / state, as frames through `Session.sendBandFrame`, only once the
  * proxy has said hello - a proxy without the relay would forward the code
  * to the game server, which is nobody's business.
  *
