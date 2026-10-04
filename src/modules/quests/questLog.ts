@@ -34,7 +34,7 @@ import {
 import type { ENUM_WORLD } from '../../core/types';
 import { EventBus } from '../../core/eventBus';
 import { playUiSound } from '../../controllers/sound/sfx';
-import { Store } from '../../app/store';
+import { Merchant } from '../npc_shop';
 import { Hero } from '../hero';
 import { Session } from '../session';
 import { addNotification } from '../chat';
@@ -330,12 +330,12 @@ export function advanceQuestWords(): void {
  * visible, as `Hide` does, so it never ends another window's NPC session.
  */
 function closeNpcTalk(): void {
-  if (Store.npcShop) {
-    Store.closeNpcShop();
+  if (Merchant.npcShop) {
+    Merchant.closeNpcShop();
     return;
   }
   send(CloseNpcRequestPacket.createPacket().buffer);
-  Store.dropNpcTalk();
+  Merchant.dropNpcTalk();
 }
 
 export function closeQuestList(): void {
@@ -726,7 +726,7 @@ EventBus.on('AvailableQuests', packet => {
   if (inDialogue) return;
   if (available.length === 0) {
     addNotification(t('quest.npcHasNone'), 'info');
-    Store.dropNpcTalk();
+    Merchant.dropNpcTalk();
   } else {
     playUiSound('window');
   }

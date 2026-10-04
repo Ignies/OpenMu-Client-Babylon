@@ -19,7 +19,7 @@ import {
   EnterOnWerewolfRequestPacket,
 } from '@versions/shared/packets/ClientToServerPackets';
 import { EventBus } from '../../core/eventBus';
-import { Store } from '../../app/store';
+import { Merchant } from '../npc_shop';
 import { Bag } from '../inventory';
 import { Hero } from '../hero';
 import { Session } from '../session';
@@ -116,11 +116,11 @@ function entryFor(npcType: number): BalgassEntryKind | null {
 export function talkToBalgassNpc(npc: NpcTarget): boolean {
   const kind = entryFor(npc.npcType);
   // `talkToNpc` ignores a click behind a shop or a held item; so does the box.
-  if (!kind || Bag.pendingItemMove || Store.npcShop) return false;
+  if (!kind || Bag.pendingItemMove || Merchant.npcShop) return false;
 
   // Offline, a talk opens the test merchant; only the `HideAll` half applies.
   if (Session.isOffline) EventBus.emit('npcTalkStarted', { npcType: npc.npcType });
-  else Store.talkToNpc(npc);
+  else Merchant.talkToNpc(npc);
   show(kind);
   return true;
 }
@@ -152,7 +152,7 @@ export function cancelBalgassEntry(): void {
   if (!state.kind) return;
   hide();
   if (!Session.isOffline) Session.sendToGS(CloseNpcRequestPacket.createPacket().buffer);
-  Store.dropNpcTalk();
+  Merchant.dropNpcTalk();
 }
 
 // Another talk started: that talk already sends the close for this one.

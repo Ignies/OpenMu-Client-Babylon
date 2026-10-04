@@ -31,6 +31,8 @@ import {
 import { upscaleLive } from '../controllers/render/scenes/upscale';
 import { TestScene } from '../controllers/render/scenes/testScene';
 import { loadMapIntoScene, onHeroPlaced, onMapChange } from '../controllers/terrain/loadMapIntoScene';
+import { setRepairCursor } from '../controllers/interface/components/game_cursor';
+import { Merchant } from '../modules/npc_shop';
 import { initControllers } from '../controllers/controllers';
 import { resetForMapChange } from './lifecycle';
 import { prefetchWorldTerrain } from '../controllers/assets/mu/prefetchWorld';
@@ -202,6 +204,8 @@ const scene = new TestScene(engine);
 initControllers({ scene });
 onMapChange(resetForMapChange);
 onHeroPlaced(() => Hero.syncPlayerAppearance());
+// The hammer cursor follows the merchant's repair mode.
+setRepairCursor(() => Merchant.repairMode);
 // `MUSIC_LOGIN_THEME` over the server / login / character pages.
 const MENU_PAGES = new Set([UIState.Servers, UIState.Login, UIState.Characters]);
 installLoginMusic(

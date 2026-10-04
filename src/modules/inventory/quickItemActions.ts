@@ -1,6 +1,6 @@
 import { reaction } from 'mobx';
 import { t } from '../../i18n';
-import { Store } from '../../app/store';
+import { Merchant } from '../npc_shop';
 import { Bag } from './state';
 import { Hero } from '../hero';
 import { Session } from '../session';
@@ -53,7 +53,7 @@ export const QuickItemActions = new (class _QuickItemActions {
 
     const target = inventoryTarget({
       storage: Economy.autoMoveTarget,
-      shop: !!Store.npcShop,
+      shop: !!Merchant.npcShop,
     });
     if (!target) return;
 
@@ -80,7 +80,7 @@ export const QuickItemActions = new (class _QuickItemActions {
     if (!item) return;
 
     this.confirm(item, MsgWinCode.ConfirmSellItem, () =>
-      Store.sellPickedItemToNpc()
+      Merchant.sellPickedItemToNpc()
     );
   }
 
@@ -95,12 +95,12 @@ export const QuickItemActions = new (class _QuickItemActions {
   }
 
   private sellSlot(slot: number): void {
-    if (!Store.npcShop || Bag.pickedItem || Bag.pendingItemMove) return;
+    if (!Merchant.npcShop || Bag.pickedItem || Bag.pendingItemMove) return;
 
     Bag.pickInventoryItem(slot);
     if (!Bag.pickedItem) return;
 
-    Store.sellPickedItemToNpc();
+    Merchant.sellPickedItemToNpc();
 
     // A refusal leaves the item hanging off the cursor: put it back.
     if (Bag.pickedItem && !Bag.pendingItemMove) Bag.cancelPickedItem();
@@ -120,7 +120,7 @@ export const QuickItemActions = new (class _QuickItemActions {
   /** Ctrl-click on a shop entry: ask how many. */
   promptBuy(slot: number): void {
     if (!GameOptions.quickItemActions) return;
-    if (!Store.npcShop?.items[slot]) return;
+    if (!Merchant.npcShop?.items[slot]) return;
 
     Economy.openPrompt({ kind: 'npc-buy-many', slot });
   }
@@ -129,14 +129,14 @@ export const QuickItemActions = new (class _QuickItemActions {
   startBuyRun(slot: number, count: number): void {
     this.cancel();
 
-    if (!Store.npcShop?.items[slot]) return;
+    if (!Merchant.npcShop?.items[slot]) return;
 
     const wanted = Math.max(1, Math.min(MAX_BULK_BUY, Math.trunc(count) || 0));
     this.run = { slot, wanted, bought: 0 };
 
     this.disposers.push(
       reaction(
-        () => Store.shopBuyPending || !!Bag.pendingItemMove,
+        () => Merchant.shopBuyPending || !!Bag.pendingItemMove,
         busy => {
           if (!busy) this.step();
         }
@@ -163,13 +163,13 @@ export const QuickItemActions = new (class _QuickItemActions {
   private step(): void {
     const run = this.run;
     if (!run) return;
-    if (Store.shopBuyPending || Bag.pendingItemMove) return;
+    if (Merchant.shopBuyPending || Bag.pendingItemMove) return;
     if (Bag.pickedItem) {
       this.cancel();
       return;
     }
 
-    const item = Store.npcShop?.items[run.slot] ?? null;
+    const item = Merchant.npcShop?.items[run.slot] ?? null;
 
     const stop = buyRunStop({
       bought: run.bought,
@@ -178,7 +178,7 @@ export const QuickItemActions = new (class _QuickItemActions {
       price: item ? itemValue(item, 0) : 0,
       money: Hero.money,
       freeSquare: item ? Bag.findFreeSquare(StorageKind.Inventory, item) : -1,
-      refused: Store.shopBuyRefused,
+      refused: Merchant.shopBuyRefused,
     });
 
     if (stop) {
@@ -187,7 +187,7 @@ export const QuickItemActions = new (class _QuickItemActions {
     }
 
     run.bought++;
-    Store.buyItemFromNpc(run.slot);
+    Merchant.buyItemFromNpc(run.slot);
 
     // Offline there is no answer to wait for, so the loop runs itself.
     if (Session.isOffline) this.step();

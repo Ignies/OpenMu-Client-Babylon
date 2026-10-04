@@ -3,7 +3,7 @@ import { Economy } from '../economy/economy';
 import { EventBus } from '@/core/eventBus';
 import { ItemBoughtPacket, NpcItemSellResultPacket, NpcWindowResponseNpcWindowEnum, NpcWindowResponsePacket, StoreItemListItemWindowEnum, StoreItemListPacket } from '@versions/shared/packets/ServerToClientPackets';
 import { ItemSerializer } from '@/controllers/item_rules';
-import { Store } from '@/app/store';
+import { Merchant } from './state';
 import { Hero } from '@/modules/hero';
 import { Session } from '@/modules/session';
 import { addNotification } from '@/modules/chat';
@@ -26,43 +26,43 @@ export function installNet(): void {
     switch (p.Window) {
       case NpcWindowResponseNpcWindowEnum.Merchant:
       case NpcWindowResponseNpcWindowEnum.Merchant1:
-        Store.openNpcShop();
+        Merchant.openNpcShop();
         break;
       case NpcWindowResponseNpcWindowEnum.VaultStorage:
-        Store.dropNpcTalk();
+        Merchant.dropNpcTalk();
         Economy.openVault();
         break;
       case NpcWindowResponseNpcWindowEnum.ChaosMachine:
-        Store.dropNpcTalk();
+        Merchant.dropNpcTalk();
         Economy.openMix();
         break;
       case NpcWindowResponseNpcWindowEnum.ChaosCardCombination:
-        Store.dropNpcTalk();
+        Merchant.dropNpcTalk();
         Economy.openMix('chaosCard');
         break;
       case NpcWindowResponseNpcWindowEnum.DevilSquare:
-        Store.dropNpcTalk();
+        Merchant.dropNpcTalk();
         events.openDevilSquare();
         break;
       case NpcWindowResponseNpcWindowEnum.BloodCastle:
-        Store.dropNpcTalk();
+        Merchant.dropNpcTalk();
         events.openBloodCastle();
         break;
       case NpcWindowResponseNpcWindowEnum.DoorkeeperTitusDuelWatch:
-        Store.dropNpcTalk();
+        Merchant.dropNpcTalk();
         events.openDuelWatch();
         break;
       case NpcWindowResponseNpcWindowEnum.LugardDoppelgangerEntry:
-        Store.dropNpcTalk();
+        Merchant.dropNpcTalk();
         events.openDoppelganger();
         break;
       default:
         // A legacy quest NPC (Sebina, Marlon, Apostle Devin…): the dialog is
         // client-side, from Quest_eng.bmd (modules/quests/legacyQuests.ts).
-        if (quests.openNpcWindow(p.Window, Store.pendingNpcType)) return;
+        if (quests.openNpcWindow(p.Window, Merchant.pendingNpcType)) return;
         // Lahap, the refineries…: not ported yet.
         console.warn(`NpcWindowResponse: window ${p.Window} is not supported yet`);
-        Store.dropNpcTalk();
+        Merchant.dropNpcTalk();
         addNotification(t('notify.npcNothingYet'), 'info');
         // OpenMU keeps the player in NpcDialogOpened after opening ANY window
         // (TalkNpcAction.cs) - without this reset it ignores every later
@@ -98,7 +98,7 @@ export function installNet(): void {
       return;
     }
 
-    Store.setNpcShopItems(entries);
+    Merchant.setNpcShopItems(entries);
   });
 
   EventBus.on('ItemBought', packet => {
@@ -113,16 +113,16 @@ export function installNet(): void {
       Hero.items[p.InventorySlot] = item;
     });
 
-    Store.finishShopBuy();
+    Merchant.finishShopBuy();
     Hero.syncPlayerAppearance();
   });
 
   EventBus.on('NpcItemBuyFailed', () => {
-    Store.shopBuyFailed();
+    Merchant.shopBuyFailed();
   });
 
   EventBus.on('NpcItemSellResult', packet => {
     const p = new NpcItemSellResultPacket(packet);
-    Store.itemSoldToNpc(p.Success, p.Money);
+    Merchant.itemSoldToNpc(p.Success, p.Money);
   });
 }

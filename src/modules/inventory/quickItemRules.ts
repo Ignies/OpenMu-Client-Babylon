@@ -23,7 +23,7 @@ type QuickTarget =
 type OpenWindows = {
   /** `Economy.autoMoveTarget`: the storage grid a right click already feeds. */
   storage: StorageKind | null;
-  /** `Store.npcShop`: the merchant's stall is open. */
+  /** `Merchant.npcShop`: the merchant's stall is open. */
   shop: boolean;
 };
 

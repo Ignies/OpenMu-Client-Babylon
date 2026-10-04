@@ -3,7 +3,7 @@ import { isKey, actionOfKey } from '@/controllers/interface/keyBindings';
 import { t } from '@/i18n';
 import './style.less';
 import { observer } from 'mobx-react-lite';
-import { Store } from '@/app/store';
+import { Merchant } from '@/modules/npc_shop';
 import { Bag } from '@/modules/inventory';
 import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
@@ -215,8 +215,8 @@ const EquipmentSlot = observer(
 
           if (!picked) {
             // REPAIR_MODE_ON (NewUIMyInventory.cpp:1415): the click repairs.
-            if (Store.repairMode) {
-              if (item) Store.repairItemRequest(slot);
+            if (Merchant.repairMode) {
+              if (item) Merchant.repairItemRequest(slot);
               return;
             }
             if (item) Bag.pickInventoryItem(slot);
@@ -299,8 +299,8 @@ export const Inventory = observer(() => {
 
     // NewUIMyInventory.cpp:578: L toggles self-repair (level 50+), only
     // while no shop is open.
-    if (isKey('repair', key) && MuWindows.isOpen('inventory') && !Store.npcShop) {
-      Store.toggleRepairMode();
+    if (isKey('repair', key) && MuWindows.isOpen('inventory') && !Merchant.npcShop) {
+      Merchant.toggleRepairMode();
     }
 
     // NewUIMyInventory.cpp:622: Ctrl+Q/W/E/R over a potion binds that bar slot.
@@ -447,8 +447,8 @@ export const Inventory = observer(() => {
     if (!entry) return;
 
     // REPAIR_MODE_ON (NewUIMyInventory.cpp:1520): the click repairs instead.
-    if (Store.repairMode) {
-      Store.repairItemRequest(entry.slot);
+    if (Merchant.repairMode) {
+      Merchant.repairItemRequest(entry.slot);
       return;
     }
 
@@ -464,8 +464,8 @@ export const Inventory = observer(() => {
     event.preventDefault();
 
     // Right button puts the hammer down.
-    if (Store.repairMode) {
-      Store.toggleRepairMode();
+    if (Merchant.repairMode) {
+      Merchant.toggleRepairMode();
       return;
     }
 
@@ -513,7 +513,7 @@ export const Inventory = observer(() => {
   return (
     <MuItemWindow
       id={WINDOW_ID}
-      className={`inventory${Store.repairMode ? ' repair-mode' : ''}`}
+      className={`inventory${Merchant.repairMode ? ' repair-mode' : ''}`}
       column={MuWindows.isOpen('character_info') ? 1 : 0}
       onClose={() => {
         MuWindows.setOpen('inventory', false);
@@ -670,9 +670,9 @@ export const Inventory = observer(() => {
           width={BUTTON_WIDTH}
           height={BUTTON_HEIGHT}
           frames={BUTTON_FRAMES}
-          disabled={!Store.canRepair}
-          checked={Store.repairMode}
-          onClick={() => Store.toggleRepairMode()}
+          disabled={!Merchant.canRepair}
+          checked={Merchant.repairMode}
+          onClick={() => Merchant.toggleRepairMode()}
         >
           <span className="button-tooltip">{t(REPAIR_TOOLTIP)}</span>
         </MuButton>

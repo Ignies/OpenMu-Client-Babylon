@@ -1,6 +1,5 @@
 import './style.less';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Store } from '@/app/store';
 import { Ecs } from '@/ecs/current';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { aimX, aimY } from '@/controllers/camera';
@@ -15,6 +14,13 @@ import {
 } from './cursors';
 
 type Sprites = Record<CursorKind, MuSprite>;
+
+/** Whether the repair hammer is up (the merchant's repair mode); the app hands the reader in. */
+let repairCursor: () => boolean = () => false;
+
+export function setRepairCursor(read: () => boolean): void {
+  repairCursor = read;
+}
 
 function isOverUI(target: EventTarget | null): boolean {
   return !(target instanceof HTMLCanvasElement);
@@ -140,7 +146,7 @@ export const GameCursor = () => {
 
       let next: CursorKind;
 
-      if (Store.repairMode) {
+      if (repairCursor()) {
         // CURSOR_REPAIR: the hammer stays up, over the UI too, until the
         // repair mode is left.
         next = 'repair';

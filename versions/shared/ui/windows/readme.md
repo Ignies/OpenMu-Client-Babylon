@@ -20,7 +20,7 @@ One folder per in-game window. A window draws; its state and actions belong to i
 | Folder | id (order) | Shows | Reads |
 |---|---|---|---|
 | `inventory` | inventory (80) | the hero's bag and equipment, repair mode | Store, inventory, items, economy, events |
-| `npc_shop` | npc_shop (90) | the merchant's stock; buy, sell, repair | Store.npcShop, items, inventory |
+| `npc_shop` | npc_shop (90) | the merchant's stock; buy, sell, repair | Merchant, items, inventory |
 | `vault` | vault (100) | the warehouse, zen buttons, pin lock | Store, economy, inventory |
 | `chaos_machine` | chaos_machine (110) | the goblin's mix tray and recipe menu | Store, economy, inventory |
 | `trade` | trade (120) | partner's half on top, the hero's below | Store, economy, inventory |

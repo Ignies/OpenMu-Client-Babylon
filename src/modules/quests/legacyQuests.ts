@@ -26,7 +26,7 @@ import { EventBus } from '../../core/eventBus';
 import { playUiSound } from '../../controllers/sound/sfx';
 import { showObjectEffect } from '../../ecs/systems/objectEffectSystem';
 import { MAX_QUESTS, QuestActKind, type QuestDefinition } from '../../controllers/assets/mu/questFiles';
-import { Store } from '../../app/store';
+import { Merchant } from '../npc_shop';
 import { Hero } from '../hero';
 import { Session } from '../session';
 import { addNotification } from '../chat';
@@ -564,9 +564,9 @@ function showLegacyQuestWindow(index: number): void {
  * told, and refuses potions, trades and parties meanwhile.
  */
 function endNpcTalk(): void {
-  if (Store.npcShop) Store.closeNpcShop();
+  if (Merchant.npcShop) Merchant.closeNpcShop();
   else if (!Session.isOffline) Session.sendToGS(CloseNpcRequestPacket.createPacket().buffer);
-  Store.dropNpcTalk();
+  Merchant.dropNpcTalk();
 }
 
 /** `Hide(INTERFACE_NPCQUEST)`: `ProcessClosing` always ends the NPC talk. */
@@ -674,7 +674,7 @@ EventBus.on('LegacyQuestStateDialog', packet => {
   // With the talked NPC's next quest still level-locked, OpenMU sends index 0
   // and the byte of the quest last finished, another group: open that NPC's
   // own quest instead and keep the states. A running quest opens anywhere.
-  const npc = Store.pendingNpcType;
+  const npc = Merchant.pendingNpcType;
   const quest = questDefinition(index);
   if (npc && quest && quest.npcType !== npc && ownState(index, p.State) !== LegacyQuestState.InProgress) {
     const mine = legacyQuestForNpc(npc);

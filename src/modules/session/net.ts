@@ -4,7 +4,7 @@ import { EventBus } from '@/core/eventBus';
 import { GameServerEnteredPacket, LoginResponseLoginResultEnum, LoginResponsePacket, LogoutResponsePacket } from '@versions/shared/packets/ServerToClientPackets';
 import { SessionExit } from './sessionExit';
 import { SessionResume } from './sessionResume';
-import { Store } from '@/app/store';
+import { Merchant } from '@/modules/npc_shop';
 import { Hero } from '@/modules/hero';
 import { Servers } from '@/modules/servers';
 import { Session } from './state';
@@ -63,7 +63,7 @@ export function installNet(): void {
   // are always followed by a close, so only the close is acted on (app/App.tsx
   // already logs the error line).
   EventBus.on('wsClosed', ({ socket }) => {
-    Store.closeNpcShop();
+    Merchant.closeNpcShop();
     quests.closeAll();
     Session.onSocketLost(socket);
   });

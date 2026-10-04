@@ -1,6 +1,6 @@
 import { observable, runInAction } from 'mobx';
 import { EventBus } from '../../core/eventBus';
-import { Store } from '../../app/store';
+import { Merchant } from '../npc_shop';
 import { Hero } from '../hero';
 import { Session } from '../session';
 import { addNotification } from '../chat';
@@ -106,7 +106,7 @@ EventBus.on('EventChipRegistrationResult', packet => {
     return;
   }
 
-  Store.dropNpcTalk();
+  Merchant.dropNpcTalk();
   runInAction(() => {
     state.registered = p.RegisteredCount;
     state.remaining = p.RemainingInventoryCount;

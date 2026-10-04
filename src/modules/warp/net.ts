@@ -11,7 +11,7 @@ import { Notices } from '../chat/notices';
 import { QuickItemActions } from '../inventory/quickItemActions';
 import { SlideHelp } from '@/controllers/interface/slideHelp';
 import { Social } from '../social/social';
-import { Store } from '@/app/store';
+import { Merchant } from '@/modules/npc_shop';
 import { HeroSkills } from '@/modules/skills';
 import { Session } from '@/modules/session';
 import { AppState, UIState } from '@/app/uiState';
@@ -77,7 +77,7 @@ export function installNet(): void {
 
     if (p.IsMapChange) {
       // HideAll on warp: the merchant stays behind.
-      Store.closeNpcShop();
+      Merchant.closeNpcShop();
       // `ReceiveMapChange` (WSclient.cpp:622): the notice stack and the minimap
       // sheet do not survive a warp.
       Notices.clear();
@@ -226,10 +226,10 @@ export function installNet(): void {
       return;
     }
 
-    Store.talkToNpc({ netId: 0, name: 'Merchant', npcType: 0 });
+    Merchant.talkToNpc({ netId: 0, name: 'Merchant', npcType: 0 });
 
     if (demo === 'buy') {
-      const slot = Store.npcShop?.items.findIndex(entry => !!entry) ?? -1;
+      const slot = Merchant.npcShop?.items.findIndex(entry => !!entry) ?? -1;
       if (slot >= 0) QuickItemActions.promptBuy(slot);
       return;
     }

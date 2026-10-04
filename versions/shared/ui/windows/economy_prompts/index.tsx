@@ -8,7 +8,7 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   type ReactNode,
 } from 'react';
-import { Store } from '@/app/store';
+import { Merchant } from '@/modules/npc_shop';
 import { Hero } from '@/modules/hero';
 import { Economy, type EconomyPrompt } from '@/modules/economy/economy';
 import { itemDisplayName } from '@/controllers/interface/itemTooltip';
@@ -149,7 +149,7 @@ function specOf(prompt: EconomyPrompt): Spec {
       };
     }
     case 'npc-buy-many': {
-      const item = Store.npcShop?.items[prompt.slot] ?? null;
+      const item = Merchant.npcShop?.items[prompt.slot] ?? null;
       return {
         title: t('prompt.buy'),
         hint: item

@@ -1,7 +1,7 @@
 import { MuWindows } from '@/controllers/interface/windowManager';
 import { makeAutoObservable, runInAction } from 'mobx';
 import { t } from '../../i18n';
-import { Store } from '../../app/store';
+import { Merchant } from '../npc_shop';
 import { Session } from './state';
 import { addNotification } from '../chat';
 import { MsgBox } from '../../controllers/interface';
@@ -131,7 +131,7 @@ export const SessionExit = new (class _SessionExit {
 
   private leave(kind: ExitKind): void {
     SessionResume.forget();
-    Store.closeNpcShop();
+    Merchant.closeNpcShop();
     quests.closeAll();
     // The character is out of the world on all three of these; the backdrop
     // behind the pre-game screens is not a map it stands on.

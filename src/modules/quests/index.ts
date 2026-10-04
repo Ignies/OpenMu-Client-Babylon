@@ -26,7 +26,7 @@ import { answerNpcDialogue, closeNpcDialogue, npcDialogueOpen, openNpcDialogue }
 import { balgassEntryOpen, cancelBalgassEntry, talkToBalgassNpc } from './balgassEntry';
 import { questBubbleFor } from './questBubbles';
 import { legacyKillCount } from './killCounters';
-import { Store } from '../../app/store';
+import { Merchant } from '../npc_shop';
 
 export type { QuestLayer } from './layer';
 
@@ -138,7 +138,7 @@ class Quests {
   openNpcWindow(_window: NpcWindowResponseNpcWindowEnum, npcType: number): boolean {
     const quest = legacyQuestForNpc(npcType);
     if (!quest) return false;
-    Store.dropNpcTalk();
+    Merchant.dropNpcTalk();
     openLegacyQuestWindow(quest.index);
     return true;
   }
@@ -153,7 +153,7 @@ class Quests {
    */
   openNpcDialog(npcNumber: number, contribution = 0): boolean {
     const quest = legacyQuestForNpc(npcNumber);
-    Store.dropNpcTalk();
+    Merchant.dropNpcTalk();
     if (quest && !npcDialogueEntry(npcNumber, 0)) {
       openLegacyQuestWindow(quest.index);
       return true;
@@ -163,7 +163,7 @@ class Quests {
   }
 
   /**
-   * An NPC click on its way to `Store.talkToNpc`: the Werewolf Guardsman and
+   * An NPC click on its way to `Merchant.talkToNpc`: the Werewolf Guardsman and
    * the Gatekeeper talk and open their entry box themselves
    * (`balgassEntry.ts`). Returns true when the click was taken.
    */

@@ -1,4 +1,4 @@
-import { Store } from '../../app/store';
+import { Merchant } from '../npc_shop';
 import { Bag } from '../inventory';
 import { Pets } from '../pets';
 import { HeroSkills } from '../skills';
@@ -482,7 +482,7 @@ function repairEquipment(config: MuHelperConfig): void {
     );
     if (max <= 0) continue;
     const percent = Math.trunc((item.durability * 100 + max - 1) / max);
-    if (percent <= REPAIR_THRESHOLD) Store.repairItemRequest(slot);
+    if (percent <= REPAIR_THRESHOLD) Merchant.repairItemRequest(slot);
   }
 }
 

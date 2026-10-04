@@ -1,5 +1,5 @@
 import type { ENUM_WORLD } from '../../core/types';
-import { Store } from '../../app/store';
+import { Merchant } from '../npc_shop';
 import { Session } from '../session';
 import { CloseNpcRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
 import type { Item } from '../../ecs/world';
@@ -222,7 +222,7 @@ class Events {
     if (!Session.isOffline) {
       Session.sendToGS(CloseNpcRequestPacket.createPacket().buffer);
     }
-    Store.dropNpcTalk();
+    Merchant.dropNpcTalk();
   }
 }
 

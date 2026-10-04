@@ -17,7 +17,8 @@ windows themselves are content in `versions/shared/ui/` (see
   `mu_frame`, `msg_box_frame`, `mu_text`, `mu_number`,
   `mu_button`, `mu_sprite`, `mu_logo`, `mu_flag`. Items: `item_grid`, `item_icon`, `item_search`,
   `item_tooltip`, `picked_item`, `chat_item_link` (the caller hands in the label). Text: `mu_text`
-  also holds `TEXT_COLOR`, the pre-game and dialog colours. Other: `msg_window`, `game_cursor`, `world_label`,
+  also holds `TEXT_COLOR`, the pre-game and dialog colours. Other: `msg_window`, `game_cursor`
+  (`setRepairCursor(read)`: the app hands it the merchant's repair mode), `world_label`,
   `ui_stage` (the 640x480 stage scale).
 - `keyBindings.ts`: `KeyBindings`, `keyFor`, `isKey`, `actionOfKey`, `setKeyBinding`,
   `setKeyProfile`, `WALK_KEYS`; `browserHotkeys.ts`: `installBrowserHotkeyGuard`,
