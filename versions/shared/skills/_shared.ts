@@ -196,8 +196,10 @@ export const lit = (body: number, blendMeshLight: (tick: number) => number) => (
  * `AnimationFrame >= 1`), or `maxTicks` after the packet, when `AttackTime` reaches 15 by itself
  * (ZzzCharacter.cpp:3044-3063, :4132-4141). A caster that has left the clip fires at once. `onTimeout: false` for a
  * step the original draws in AttackStage on the key only (Fire Slash, Spiral Slash): at `maxTicks` it is dropped.
+ * `onLeave: 'drop'` for a step an effect draws while its owner plays the clip, dropped when the owner leaves it
+ * first (the Rage Fighter effects, MoveHandlers.cpp:9312-9380).
  */
-export const whenClipKey = (action: PlayerAction, key: number, maxTicks: number, step: Step, onTimeout = true): Step => (at, c) => {
+export const whenClipKey = (action: PlayerAction, key: number, maxTicks: number, step: Step, onTimeout = true, onLeave: 'fire' | 'drop' = 'fire'): Step => (at, c) => {
   const p = at.clone();
   const t0 = fxNow();
   let n = 0;
@@ -208,7 +210,11 @@ export const whenClipKey = (action: PlayerAction, key: number, maxTicks: number,
     const m = c.caster.modelObject;
     const inClip = !!m && m.CurrentAction === action;
     seen ||= inClip;
-    if ((inClip && m!.actionFrame() >= key) || (seen && !inClip)) {
+    if (seen && !inClip) {
+      if (onLeave === 'fire') step(p, c);
+      return;
+    }
+    if (inClip && m!.actionFrame() >= key) {
       step(p, c);
       return;
     }

@@ -14,7 +14,7 @@ folders: [../readme.md](../readme.md).
 |---|---|---|
 | `killing_blow` | 260, 551 str, 554 mastery | a wolf head aimed at the target, a burst there |
 | `beast_uppercut` | 261, 552 str, 555 mastery | a rising gold burst (the original model is not converted) |
-| `chain_drive` | 262, 558 str | sword effect at the caster, a shock wave runs at the target |
+| `chain_drive` | 262, 558 str | sword effect at the caster; past GIANTSWING keys 6 and 11 a blow on the target, the first with a shock wave |
 | `dark_side` | 263, 559 str | a dark shock wave chasing the target, damage bursts |
 | `dragon_roar` | 264, 560 str | a dragon head, a fire shock ring and scattered fire hits |
 | `dragon_slasher` | 265 | the dragon kick model and the multi-shot volley fired forward; a burst on the target each tick past DRAGONKICK key 5 |

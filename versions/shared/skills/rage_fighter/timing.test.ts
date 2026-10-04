@@ -3,7 +3,7 @@ import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
 import { Scene } from '@babylonjs/core/scene';
 import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 import { effects } from '@/controllers/fx';
-import { TEX } from '@/controllers/fx/recipes';
+import { MODEL, TEX } from '@/controllers/fx/recipes';
 import { ENUM_WORLD } from '@/core/types';
 import type { Entity } from '@/ecs/world';
 import { PlayerAction } from '../../objects/enum';
@@ -118,5 +118,26 @@ describe('Dragon Slasher (265): MODEL_DRAGON_KICK_DUMMY reads the caster\'s DRAG
     const r = run(265, KICK, { leaveAt: 26, ticks: 40, target: false });
     expect(spriteTicks(r, TEX.spark2)).toEqual([]);
     expect(soundTicks(r, ATT)).toEqual([]);
+  });
+});
+
+describe('Chain Drive (262): BITMAP_SWORDEFF reads the caster\'s GIANTSWING key (MoveHandlers.cpp:9312-9380)', () => {
+  const SWING = PlayerAction.PLAYER_SKILL_GIANTSWING;
+  const ATT = 'Sound/Ragefighter/Rage_Giantswing_Att';
+
+  it('two blows with Rage_Giantswing_Att: past key 6 (tick 16) and past key 11 (tick 28)', () => {
+    for (const skill of [262, 558]) {
+      const r = run(skill, SWING);
+      expect(spriteTicks(r, TEX.thunder)).toEqual([16, 28]);
+      expect(soundTicks(r, ATT)).toEqual([16, 28]);
+      // The giant-swing wave goes out with the first blow.
+      expect(r.spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.shockwave).map(s => s.tick)).toEqual([16]);
+    }
+  });
+
+  it('drops a blow whose key the clip never reaches', () => {
+    const r = run(262, SWING, { leaveAt: 20 });
+    expect(spriteTicks(r, TEX.thunder)).toEqual([16]);
+    expect(soundTicks(r, ATT)).toEqual([16]);
   });
 });
