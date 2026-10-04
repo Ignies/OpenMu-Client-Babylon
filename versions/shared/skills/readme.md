@@ -14,7 +14,8 @@ class. Recipe: [docs/how_to/add_skill.md](../../../docs/how_to/add_skill.md).
   `playAreaSkillVisual`, `playBowShotVisual`, `setBuffVisual`, `playBuffHits`, ...) and three
   skill helpers (`playChainLightningHop`, `playTeleportFlash`, `playSummonArrival`).
 - `_shared.ts`: steps and helpers several classes use (stones, comets, decay smoke, Iron Defense,
-  summon arrival and light, clip-key timing, light anchors, mounted clip sets, `landingSound`: a
+  summon arrival and light, clip-key timing (`whenClipKey`, `eachClipTick`: a step each tick while the
+  caster plays a clip), light anchors, mounted clip sets, `landingSound`: a
   `soundOnLanding` skill's sound from the caster, put inside `afterRelease` for a release-block `PlayBuffer`).
 
 ## How it works
@@ -70,7 +71,8 @@ _shared.ts                      helpers for several classes
 - `castRules.test.ts`: the quiet mount (Defense), what others see (Electric Spike), the kill
   rules (Nova, Combo), Nova's hook numbers, the cancel effects (masters included) against `ReceiveMagicFinish`
   (WSclient.cpp:3878). `rage_fighter/party_buffs.test.ts`: the party buffs'
-  coin toss and its paired sound.
+  coin toss and its paired sound. `rage_fighter/timing.test.ts`: when each Rage Fighter skill
+  draws and sounds against the 25 Hz tick and the caster's clip.
 - `releaseTiming.test.ts`: when Fire Ball leaves against the caster's magic speed: 14 ticks at a
   slow clip, on the clip's key 5 at a fast one; Force on its strike clip's key 3 at a low and a
   high attack speed, at 25 and 60 fps, and 0.56 s after the packet when the key never comes.

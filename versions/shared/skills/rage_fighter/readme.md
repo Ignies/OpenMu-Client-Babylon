@@ -17,12 +17,17 @@ folders: [../readme.md](../readme.md).
 | `chain_drive` | 262, 558 str | sword effect at the caster, a shock wave runs at the target |
 | `dark_side` | 263, 559 str | a dark shock wave chasing the target, damage bursts |
 | `dragon_roar` | 264, 560 str | a dragon head, a fire shock ring and scattered fire hits |
-| `dragon_slasher` | 265 | the dragon kick model and the multi-shot volley fired forward |
+| `dragon_slasher` | 265 | the dragon kick model and the multi-shot volley fired forward; a burst on the target each tick past DRAGONKICK key 5 |
 | `ignore_defense` | 266 | a red flash; the Ourforces bone glow as a buff look |
 | `increase_health` | 267, 573 str | a holy flash; the Ourforces bone glow |
 | `increase_block` | 268, 569 power up, 572 mastery | a steel flash; the Ourforces bone glow |
 | `charge` | 269 | Rush's charge with fire; a sword force on impact |
 | `phoenix_shot` | 270 | a phoenix arrow, a fire hit and the phoenix model |
+
+Timing follows the original's effects, not the packet: most of them read the caster's clip key
+or their own LifeTime each 25 Hz tick (`MoveHandlers.cpp`), and drop what is left when the caster
+leaves the clip (`eachClipTick`, `whenClipKey(..., 'drop')` in `../_shared.ts`). Ticks count from
+the packet; an effect it creates first moves on tick 1.
 
 Dark Side is the one skill on its own wire: the cast sends 0x4B and 0x4A, the server answers with
 up to five targets, and the client lands one 0x4A per extra target as the clip's blows come round
@@ -39,4 +44,5 @@ the buff looks of 266-268.
 - see [docs/how_to/add_skill.md](../../../../docs/how_to/add_skill.md).
 
 ## Tests
+- `timing.test.ts`: per skill, the tick each part draws or sounds at, against the clip.
 - Covered by the golden tests in `../` (`skillVisuals.golden.test.ts`, `skillTables.golden.test.ts`).

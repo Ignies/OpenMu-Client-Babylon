@@ -222,6 +222,33 @@ export const whenClipKey = (action: PlayerAction, key: number, maxTicks: number,
   };
   check();
 };
+/**
+ * `fn(frame, tick)` on each tick after the packet (1, 2, ...) while the caster plays `action`: an effect whose Move
+ * reads its owner's clip and dies once the owner leaves it (MODEL_DRAGON_KICK_DUMMY, MoveHandlers.cpp:9828-9834).
+ * It waits for the clip as `whenClipKey` does, and ends after `maxTicks`. `onEnd` runs once when it ends.
+ */
+export function eachClipTick(c: SkillContext, action: PlayerAction, maxTicks: number, fn: (frame: number, tick: number) => void, onEnd?: () => void): void {
+  const t0 = fxNow();
+  let n = 0;
+  let seen = false;
+  const tick = (): void => {
+    n++;
+    const m = c.caster.modelObject;
+    const inClip = !entityGone(c.caster) && m?.CurrentAction === action;
+    seen ||= inClip;
+    if (entityGone(c.caster) || (seen && !inClip)) {
+      onEnd?.();
+      return;
+    }
+    if (inClip && m) fn(m.actionFrame(), n);
+    if (n >= maxTicks) {
+      onEnd?.();
+      return;
+    }
+    delay(t0 + ticks(n + 1) - fxNow(), tick);
+  };
+  delay(ticks(1), tick);
+}
 /** Player `Weapon[0].LinkBone` (ZzzCharacter.cpp:12067-12071). */
 export const WEAPON_LINK_BONE = 33;
 
