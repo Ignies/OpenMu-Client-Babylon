@@ -27,4 +27,7 @@ export default {
   'fidelity.fortressLights': '帝国要塞の明かり',
   'fidelity.fortressLights.hint':
     '帝国要塞の壁たいまつとシャンデリアが周りの床を照らします。クラシック: オリジナル通り明かりはありません。',
+  'fidelity.roofFade': '透ける屋根',
+  'fidelity.roofFade.hint':
+    '屋根の下に立つと屋根が消え、中が見えます。クラシック: 屋根は常に表示されます。',
 } satisfies Partial<Record<keyof typeof en, string>>;

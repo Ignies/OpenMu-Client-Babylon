@@ -11,7 +11,7 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
   `Item`, `DeathMotion`, `TerrainLayers`, `ISystemFactory`.
 - `createWorld(scene)` (`createWorld.ts`): builds the world and returns `updateSystems(dt)`.
   Called once from `app/boot.tsx`.
-- A few systems export helpers other code reads (`isHeroUnderRoof` in `ceilingHideSystem.ts`,
+- A few systems export helpers other code reads (`isHeroUnderRoof`, `mayBeCeilingPiece` in `roofDetection.ts`,
   `isTeleporting` / `teleportMountAlpha` in `teleportSystem.ts`).
 
 ## How it works
@@ -51,6 +51,8 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
 - `systems/mapDoorSystem.test.ts`: Devias door creaks (repeat while the hero stays, stop out of
   range, one per wave, retry when a creak did not start).
 - `systems/restObjectRay.test.ts`: the rest-object picking ray matches `scene.pick`.
+- `systems/ceilingHideSystem.test.ts`: the roof over the hero fades on Enhanced, stays drawn but
+  detected on Classic, and comes back when `roofFade` is turned off.
 
 ## Notes
 Long file comments from `systems/`, condensed.
@@ -73,11 +75,14 @@ original's `SetAttackSpeed` writes `CharacterAttribute` into the one `MODEL_PLAY
 `isOn('otherPlayersOwnSpeed')`). That deviation is described
 in `controllers/anim/readme.md`.
 
-### ceilingHideSystem.ts
-Fades the roof of the building the hero is in, so the fixed camera still sees inside (Devias; the
-Lorencia pub uses a hack in `loadMapIntoScene`). A mesh is a ceiling piece when its world AABB is
-a thin slab above head height; the piece over the hero seeds a flood fill through touching pieces
-at the same height. While a room is the active area, every slab inside the room seeds the set.
+### ceilingHideSystem.ts, roofDetection.ts
+`roofDetection.ts` finds the roof of the building the hero is in (Lorencia, Devias): a mesh is a
+ceiling piece when its world AABB is a thin slab above head height; the piece over the hero seeds a
+flood fill through touching pieces at the same height. While a room is the active area, every slab
+inside the room seeds the set. It runs on every Fidelity preset: `isHeroUnderRoof` keeps the
+weather and the indoor ambience out. `ceilingHideSystem.ts` steps it each frame and fades those
+meshes so the fixed camera still sees inside (the Lorencia pub uses a hack in `loadMapIntoScene`);
+the fade is the `roofFade` improvement, not in the original.
 
 ### deathSystem.ts
 1. Kill packet: Dead = 1, movement stops. `dying.time` counts 25 Hz ticks (`dt * 25` a frame, like
@@ -158,7 +163,7 @@ Pets that live in the world, not on the wearer's skeleton (GOBoid.cpp:66-680):
 The Imp is not here: it is linked to the owner's bone 34 (`PlayerObject.Pet`).
 
 ### terrainMaskSystem.ts
-The map data has no interior flag, so a roof is found by shape: the `CeilingHideSystem` slab test
+The map data has no interior flag, so a roof is found by shape: the `roofDetection.ts` slab test
 run on every loaded map object. It scans every 0.5 s because objects stream in with the player;
 painting is additive and each entity is measured once. Only entities with `modelId` (set by
 `loadMapIntoScene.createObjects`) are measured: a falling drop or a living body would otherwise

@@ -27,4 +27,7 @@ export default {
   'fidelity.fortressLights': 'Lichter der Kaiserfestung',
   'fidelity.fortressLights.hint':
     'Wandfackeln und Kronleuchter in der Kaiserfestung erhellen den Boden um sich. Klassisch: kein Licht, wie im Original.',
+  'fidelity.roofFade': 'Durchsichtige Dächer',
+  'fidelity.roofFade.hint':
+    'Dächer blenden aus, solange du darunter stehst, damit du hineinsiehst. Klassisch: Dächer bleiben immer sichtbar.',
 } satisfies Partial<Record<keyof typeof en, string>>;

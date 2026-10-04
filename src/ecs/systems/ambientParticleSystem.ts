@@ -1,4 +1,4 @@
-import { isHeroUnderRoof } from './ceilingHideSystem';
+import { isHeroUnderRoof } from './roofDetection';
 import { inBloodCastle } from '../../controllers/actors/locomotion';
 import type { ENUM_WORLD } from '@/core/types';
 import {
@@ -205,7 +205,7 @@ export const AmbientParticleSystem: ISystemFactory = world => {
       const camera = scene.activeCamera?.globalPosition;
       setRoomWeatherClip(room, camera ?? ORIGIN);
 
-      // A ceiling hidden by CeilingHideSystem still keeps the weather out.
+      // A roof over the hero keeps the weather out (roofDetection.ts), faded or not.
       const indoors = (tavern || isHeroUnderRoof()) && room === null;
 
       heroPos.copyFrom(hero.transform.pos as Vector3);

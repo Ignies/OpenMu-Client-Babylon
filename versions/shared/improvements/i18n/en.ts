@@ -23,6 +23,9 @@ const en = {
   'fidelity.fortressLights': 'Imperial Fortress lights',
   'fidelity.fortressLights.hint':
     'Wall torches and chandeliers in the Imperial Fortress light the floor around them. Classic: no light, as in the original.',
+  'fidelity.roofFade': 'See-through roofs',
+  'fidelity.roofFade.hint':
+    'Roofs fade away while you stand under them, so you can see inside. Classic: roofs always stay drawn.',
 };
 
 export default en;

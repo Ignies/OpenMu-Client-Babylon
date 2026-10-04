@@ -27,4 +27,7 @@ export default {
   'fidelity.fortressLights': 'Luminile Fortăreței Imperiale',
   'fidelity.fortressLights.hint':
     'Torțele și candelabrele din Fortăreața Imperială luminează podeaua din jur. Clasică: fără lumină, ca în original.',
+  'fidelity.roofFade': 'Acoperișuri transparente',
+  'fidelity.roofFade.hint':
+    'Acoperișurile dispar cât stai sub ele, ca să vezi înăuntru. Clasică: acoperișurile rămân mereu vizibile.',
 } satisfies Partial<Record<keyof typeof en, string>>;

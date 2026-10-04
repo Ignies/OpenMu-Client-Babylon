@@ -27,4 +27,7 @@ export default {
   'fidelity.fortressLights': 'Luces de la Fortaleza Imperial',
   'fidelity.fortressLights.hint':
     'Las antorchas y candelabros de la Fortaleza Imperial iluminan el suelo a su alrededor. Clásica: sin luz, como en el original.',
+  'fidelity.roofFade': 'Techos transparentes',
+  'fidelity.roofFade.hint':
+    'Los techos se desvanecen cuando estás debajo, para que veas el interior. Clásica: los techos siempre se ven.',
 } satisfies Partial<Record<keyof typeof en, string>>;

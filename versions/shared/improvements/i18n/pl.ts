@@ -27,4 +27,7 @@ export default {
   'fidelity.fortressLights': 'Światła Cesarskiej Twierdzy',
   'fidelity.fortressLights.hint':
     'Pochodnie i żyrandole w Cesarskiej Twierdzy oświetlają podłogę wokół. Klasyczne: brak światła, jak w oryginale.',
+  'fidelity.roofFade': 'Przezroczyste dachy',
+  'fidelity.roofFade.hint':
+    'Dachy znikają, gdy stoisz pod nimi, więc widzisz wnętrze. Klasyczne: dachy są zawsze widoczne.',
 } satisfies Partial<Record<keyof typeof en, string>>;

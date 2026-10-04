@@ -27,4 +27,7 @@ export default {
   'fidelity.fortressLights': 'Ánh sáng Pháo đài Hoàng gia',
   'fidelity.fortressLights.hint':
     'Đuốc tường và đèn chùm trong Pháo đài Hoàng gia chiếu sáng mặt sàn xung quanh. Cổ điển: không có ánh sáng, như bản gốc.',
+  'fidelity.roofFade': 'Mái nhà trong suốt',
+  'fidelity.roofFade.hint':
+    'Mái nhà mờ dần khi bạn đứng bên dưới để bạn nhìn thấy bên trong. Cổ điển: mái nhà luôn hiển thị.',
 } satisfies Partial<Record<keyof typeof en, string>>;

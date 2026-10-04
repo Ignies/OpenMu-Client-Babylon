@@ -27,4 +27,7 @@ export default {
   'fidelity.fortressLights': 'Lumières de la Forteresse impériale',
   'fidelity.fortressLights.hint':
     'Les torches et lustres de la Forteresse impériale éclairent le sol autour d\'eux. Classique : aucune lumière, comme dans l\'original.',
+  'fidelity.roofFade': 'Toits transparents',
+  'fidelity.roofFade.hint':
+    'Les toits s\'effacent quand vous êtes dessous, pour voir l\'intérieur. Classique : les toits restent toujours affichés.',
 } satisfies Partial<Record<keyof typeof en, string>>;

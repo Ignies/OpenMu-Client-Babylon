@@ -432,8 +432,6 @@
  "src/ecs/systems/boidSystem.ts -> src/controllers/terrain/consts.ts",
  "src/ecs/systems/calculateScreenPositionSystem.ts -> src/controllers/interface/screenPositionBus.ts",
  "src/ecs/systems/calculateVisibilitySystem.ts -> src/controllers/render/renderDistance.ts",
- "src/ecs/systems/ceilingHideSystem.ts -> src/controllers/lighting/director.ts",
- "src/ecs/systems/ceilingHideSystem.ts -> src/controllers/lighting/profiles.ts",
  "src/ecs/systems/ceilingHideSystem.ts -> src/controllers/render/scenes/csmBounds.ts",
  "src/ecs/systems/characterLightSystem.ts -> src/controllers/lighting/characters.ts",
  "src/ecs/systems/characterSelectSystem.ts -> src/controllers/actors/deserializeAppearance.ts",

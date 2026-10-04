@@ -27,4 +27,7 @@ export default {
   'fidelity.fortressLights': 'แสงไฟในป้อมปราการจักรวรรดิ',
   'fidelity.fortressLights.hint':
     'คบเพลิงบนผนังและโคมระย้าในป้อมปราการจักรวรรดิส่องสว่างพื้นรอบ ๆ คลาสสิก: ไม่มีแสง เหมือนต้นฉบับ',
+  'fidelity.roofFade': 'หลังคาโปร่งใส',
+  'fidelity.roofFade.hint':
+    'หลังคาจะจางหายไปเมื่อคุณยืนอยู่ใต้มัน เพื่อให้มองเห็นข้างใน คลาสสิก: หลังคาแสดงอยู่เสมอ',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -27,4 +27,7 @@ export default {
   'fidelity.fortressLights': 'Светлините на Имперската крепост',
   'fidelity.fortressLights.hint':
     'Факлите и полилеите в Имперската крепост осветяват пода около себе си. Класическо: без светлина, както в оригинала.',
+  'fidelity.roofFade': 'Прозрачни покриви',
+  'fidelity.roofFade.hint':
+    'Покривите изчезват, докато стоите под тях, за да виждате вътре. Класическо: покривите винаги се виждат.',
 } satisfies Partial<Record<keyof typeof en, string>>;

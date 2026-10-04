@@ -24,7 +24,7 @@ import {
 import { leanCursorObjects, findRestObject } from '../terrain/restObjects';
 import { isMapDoorType } from '../../ecs/systems/mapDoorSystem';
 import { roomStructureTypes } from '../maps/rooms';
-import { mayBeCeilingPiece } from '../../ecs/systems/ceilingHideSystem';
+import { mayBeCeilingPiece } from '../../ecs/systems/roofDetection';
 import {
   blobShadowsActive,
   getShadowMaterial,

@@ -27,4 +27,7 @@ export default {
   'fidelity.fortressLights': '帝国要塞的灯光',
   'fidelity.fortressLights.hint':
     '帝国要塞的壁挂火把和吊灯会照亮周围的地面。经典：与原版一样没有灯光。',
+  'fidelity.roofFade': '透明屋顶',
+  'fidelity.roofFade.hint':
+    '站在屋顶下时屋顶会淡出，让你看到室内。经典：屋顶始终显示。',
 } satisfies Partial<Record<keyof typeof en, string>>;
