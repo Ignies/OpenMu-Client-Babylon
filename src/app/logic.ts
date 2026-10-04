@@ -1,7 +1,6 @@
-// Every packet handler lives in its module's net.ts and is registered by installModules below,
-// in the order of modules/modules.ts (listener order per packet is kept).
-// What this file imported before its handlers moved out, in the same order: loading these
-// first keeps every import-time registration (events...) ahead of the nets.
+// Every packet handler is registered by installModules below, in the order of modules/modules.ts
+// (listener order per packet is kept). What this file imported before its handlers moved out, in
+// the same order: the few listeners still registered at import (modules/readme.md) keep their order.
 import '../modules/band/bandNet';
 import '../controllers/net/pingNet';
 import '../i18n';
@@ -31,7 +30,6 @@ import '../modules/social/social';
 import '../modules/chat/commands';
 import '../controllers/interface/nameTags';
 import '../modules/warp/warpScopeHold';
-import '../modules/events';
 import '../modules/economy/economy';
 import '../modules/gm/gmPanel';
 import '../modules/friends/messenger';

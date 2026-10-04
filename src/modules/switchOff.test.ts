@@ -23,6 +23,7 @@ function onEmptyBus(run: () => void): Bus {
 const installedAlone = (id: string) => onEmptyBus(() => MODULES.filter(m => m.id === id).forEach(m => m.install()));
 
 describe.each([
+  ['events', ['DuelStartRequest', 'MiniGameOpeningState', 'BloodCastleState', 'KanturuEnterResult', 'warpCompleted']],
   ['quests', ['LegacyQuestStateList', 'QuestStateList', 'AvailableQuests', 'OpenNpcDialog', 'CharacterInformation']],
   ['skills', ['MasterStatsUpdate', 'MasterCharacterLevelUpdate', 'ExperienceGained', 'MasterSkillList']],
 ])('the %s module', (id, packets) => {
@@ -35,7 +36,7 @@ describe.each([
   });
 });
 
-describe.each(['quests'])('with %s off', id => {
+describe.each(['events', 'quests'])('with %s off', id => {
   it('its packets keep the other modules\' listeners only', () => {
     const mine = installedAlone(id);
     const all = onEmptyBus(() => installModules(MODULES));

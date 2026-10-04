@@ -242,146 +242,152 @@ function heroNetId(): number | null {
   return Ecs.world?.playerEntity?.netId ?? null;
 }
 
-/** `ReceiveDuelRequest`: the challenge prompt. */
-EventBus.on('DuelStartRequest', packet => {
-  const p = new DuelStartRequestS2CPacket(packet);
-  playUiSound('duelWindow');
-  runInAction(() => {
-    state.request = {
-      requesterId: p.RequesterId & ID_MASK,
-      requesterName: cleanName(p.RequesterName),
-    };
+/** Registers the duel's packet listeners; the events module installs it (module.ts). */
+export function installDuel(): void {
+  /** `ReceiveDuelRequest`: the challenge prompt. */
+  EventBus.on('DuelStartRequest', packet => {
+    const p = new DuelStartRequestS2CPacket(packet);
+    playUiSound('duelWindow');
+    runInAction(() => {
+      state.request = {
+        requesterId: p.RequesterId & ID_MASK,
+        requesterName: cleanName(p.RequesterName),
+      };
+    });
   });
-});
 
-/** `ReceiveDuelStart`: our own request was answered (or failed early). */
-EventBus.on('DuelStartResult', packet => {
-  const p = new DuelStartResultPacket(packet);
-  const name = cleanName(p.OpponentName);
-  const failure = duelStartFailureKey(p.Result);
-  if (failure === null) {
-    playUiSound('duelStart');
-    addNotification(t('duel.started', { name }), 'info', MESSAGE_MS);
-    return;
-  }
-  const text =
-    failure === 'duel.refused' ? t(failure, { name }) : t(failure);
-  addNotification(text, 'error', MESSAGE_MS);
-});
-
-/** `ReceiveDuelWatchRequestReply` + duel start: sides, ids, perspective. */
-EventBus.on('DuelInit', packet => {
-  const p = new DuelInitPacket(packet);
-  if (p.Result !== 0) return;
-  const side1: DuelSide = { id: p.Player1Id & ID_MASK, name: cleanName(p.Player1Name) };
-  const side2: DuelSide = { id: p.Player2Id & ID_MASK, name: cleanName(p.Player2Name) };
-  const hero = heroNetId();
-  const watching = hero !== side1.id && hero !== side2.id;
-  finished = false;
-  runInAction(() => {
-    state.duel = { side1, side2, score1: 0, score2: 0, watching };
-    state.bars = watching ? FULL_BARS : null;
-    if (watching) state.watchOpen = false;
+  /** `ReceiveDuelStart`: our own request was answered (or failed early). */
+  EventBus.on('DuelStartResult', packet => {
+    const p = new DuelStartResultPacket(packet);
+    const name = cleanName(p.OpponentName);
+    const failure = duelStartFailureKey(p.Result);
+    if (failure === null) {
+      playUiSound('duelStart');
+      addNotification(t('duel.started', { name }), 'info', MESSAGE_MS);
+      return;
+    }
+    const text =
+      failure === 'duel.refused' ? t(failure, { name }) : t(failure);
+    addNotification(text, 'error', MESSAGE_MS);
   });
-});
 
-/** Spectators only, right after `DuelInit`: bars back to full. */
-EventBus.on('DuelHealthBarInit', () => {
-  if (!state.duel?.watching) return;
-  runInAction(() => {
-    state.bars = FULL_BARS;
+  /** `ReceiveDuelWatchRequestReply` + duel start: sides, ids, perspective. */
+  EventBus.on('DuelInit', packet => {
+    const p = new DuelInitPacket(packet);
+    if (p.Result !== 0) return;
+    const side1: DuelSide = { id: p.Player1Id & ID_MASK, name: cleanName(p.Player1Name) };
+    const side2: DuelSide = { id: p.Player2Id & ID_MASK, name: cleanName(p.Player2Name) };
+    const hero = heroNetId();
+    const watching = hero !== side1.id && hero !== side2.id;
+    finished = false;
+    runInAction(() => {
+      state.duel = { side1, side2, score1: 0, score2: 0, watching };
+      state.bars = watching ? FULL_BARS : null;
+      if (watching) state.watchOpen = false;
+    });
   });
-});
 
-/** `ReceiveDuelScore` (WSclient.cpp:8465): scores by id, not by order. */
-EventBus.on('DuelScore', packet => {
-  const duel = state.duel;
-  if (!duel) return;
-  const p = new DuelScorePacket(packet);
-  const way = orientPair(duel.side1.id, duel.side2.id, p.Player1Id, p.Player2Id);
-  if (!way) return;
-  const [score1, score2] = orientValues(way, p.Player1Score, p.Player2Score);
-  runInAction(() => {
-    state.duel = { ...duel, score1, score2 };
+  /** Spectators only, right after `DuelInit`: bars back to full. */
+  EventBus.on('DuelHealthBarInit', () => {
+    if (!state.duel?.watching) return;
+    runInAction(() => {
+      state.bars = FULL_BARS;
+    });
   });
-});
 
-/** `ReceiveDuelHP`: the spectator gauges. */
-EventBus.on('DuelHealthUpdate', packet => {
-  const duel = state.duel;
-  if (!duel) return;
-  const p = new DuelHealthUpdatePacket(packet);
-  const way = orientPair(duel.side1.id, duel.side2.id, p.Player1Id, p.Player2Id);
-  if (!way) return;
-  const [hp1, hp2] = orientValues(way, p.Player1HealthPercentage, p.Player2HealthPercentage);
-  const [sd1, sd2] = orientValues(way, p.Player1ShieldPercentage, p.Player2ShieldPercentage);
-  runInAction(() => {
-    state.bars = { hp1, sd1, hp2, sd2 };
+  /** `ReceiveDuelScore` (WSclient.cpp:8465): scores by id, not by order. */
+  EventBus.on('DuelScore', packet => {
+    const duel = state.duel;
+    if (!duel) return;
+    const p = new DuelScorePacket(packet);
+    const way = orientPair(duel.side1.id, duel.side2.id, p.Player1Id, p.Player2Id);
+    if (!way) return;
+    const [score1, score2] = orientValues(way, p.Player1Score, p.Player2Score);
+    runInAction(() => {
+      state.duel = { ...duel, score1, score2 };
+    });
   });
-});
 
-/** `ReceiveDuelEnd`: OpenMU always sends Result 0 and no name - just clear. */
-EventBus.on('DuelEnd', () => {
-  if (state.duel && !state.duel.watching) {
-    addNotification(t('duel.ended'), 'info', MESSAGE_MS);
-  }
-  clearDuel();
-});
-
-/** `ReceiveDuelResult`: the winner/loser box. */
-EventBus.on('DuelFinished', packet => {
-  const p = new DuelFinishedPacket(packet);
-  playUiSound('duelWindow');
-  resultLeft = RESULT_SECONDS;
-  finished = state.duel !== null;
-  finishedLeft = FINISHED_SECONDS;
-  runInAction(() => {
-    state.result = { winner: cleanName(p.Winner), loser: cleanName(p.Loser) };
+  /** `ReceiveDuelHP`: the spectator gauges. */
+  EventBus.on('DuelHealthUpdate', packet => {
+    const duel = state.duel;
+    if (!duel) return;
+    const p = new DuelHealthUpdatePacket(packet);
+    const way = orientPair(duel.side1.id, duel.side2.id, p.Player1Id, p.Player2Id);
+    if (!way) return;
+    const [hp1, hp2] = orientValues(way, p.Player1HealthPercentage, p.Player2HealthPercentage);
+    const [sd1, sd2] = orientValues(way, p.Player1ShieldPercentage, p.Player2ShieldPercentage);
+    runInAction(() => {
+      state.bars = { hp1, sd1, hp2, sd2 };
+    });
   });
-});
 
-/** `ReceiveDuelChannelList`: pushed every 5 s while the Titus window is open. */
-EventBus.on('DuelStatus', packet => {
-  const p = new DuelStatusPacket(packet);
-  const rooms = p.getRooms(roomCountOf(packet.byteLength));
-  runInAction(() => {
-    state.channels = rooms.map(room => ({
-      name1: cleanName(room.Player1Name),
-      name2: cleanName(room.Player2Name),
-      running: Boolean(room.DuelRunning),
-      open: Boolean(room.DuelOpen),
-    }));
+  /** `ReceiveDuelEnd`: OpenMU always sends Result 0 and no name - just clear. */
+  EventBus.on('DuelEnd', () => {
+    if (state.duel && !state.duel.watching) {
+      addNotification(t('duel.ended'), 'info', MESSAGE_MS);
+    }
+    clearDuel();
   });
-});
 
-/** `ReceiveDuelWatcherJoin` / `Quit` / `List`. */
-EventBus.on('DuelSpectatorAdded', packet => {
-  const p = new DuelSpectatorAddedPacket(packet);
-  const name = cleanName(p.Name);
-  if (!name || state.spectators.includes(name)) return;
-  runInAction(() => {
-    state.spectators = [...state.spectators, name];
+  /** `ReceiveDuelResult`: the winner/loser box. */
+  EventBus.on('DuelFinished', packet => {
+    const p = new DuelFinishedPacket(packet);
+    playUiSound('duelWindow');
+    resultLeft = RESULT_SECONDS;
+    finished = state.duel !== null;
+    finishedLeft = FINISHED_SECONDS;
+    runInAction(() => {
+      state.result = { winner: cleanName(p.Winner), loser: cleanName(p.Loser) };
+    });
   });
-});
 
-EventBus.on('DuelSpectatorRemoved', packet => {
-  const p = new DuelSpectatorRemovedPacket(packet);
-  const name = cleanName(p.Name);
-  runInAction(() => {
-    state.spectators = state.spectators.filter(n => n !== name);
+  /** `ReceiveDuelChannelList`: pushed every 5 s while the Titus window is open. */
+  EventBus.on('DuelStatus', packet => {
+    const p = new DuelStatusPacket(packet);
+    const rooms = p.getRooms(roomCountOf(packet.byteLength));
+    runInAction(() => {
+      state.channels = rooms.map(room => ({
+        name1: cleanName(room.Player1Name),
+        name2: cleanName(room.Player2Name),
+        running: Boolean(room.DuelRunning),
+        open: Boolean(room.DuelOpen),
+      }));
+    });
   });
-});
 
-EventBus.on('DuelSpectatorList', packet => {
-  const p = new DuelSpectatorListPacket(packet);
-  // OpenMU never fills Count: read every slot, keep the real names.
-  const names = presentSpectators(p.getSpectators(10).map(s => s.Name));
-  runInAction(() => {
-    state.spectators = names;
+  /** `ReceiveDuelWatcherJoin` / `Quit` / `List`. */
+  EventBus.on('DuelSpectatorAdded', packet => {
+    const p = new DuelSpectatorAddedPacket(packet);
+    const name = cleanName(p.Name);
+    if (!name || state.spectators.includes(name)) return;
+    runInAction(() => {
+      state.spectators = [...state.spectators, name];
+    });
   });
-});
 
-/** `DuelMgr.Reset()` on connection close (WSclient.cpp:646). */
+  EventBus.on('DuelSpectatorRemoved', packet => {
+    const p = new DuelSpectatorRemovedPacket(packet);
+    const name = cleanName(p.Name);
+    runInAction(() => {
+      state.spectators = state.spectators.filter(n => n !== name);
+    });
+  });
+
+  EventBus.on('DuelSpectatorList', packet => {
+    const p = new DuelSpectatorListPacket(packet);
+    // OpenMU never fills Count: read every slot, keep the real names.
+    const names = presentSpectators(p.getSpectators(10).map(s => s.Name));
+    runInAction(() => {
+      state.spectators = names;
+    });
+  });
+}
+
+/**
+ * `DuelMgr.Reset()` on connection close (WSclient.cpp:646). Still registered at import: it must run
+ * before `warp/warpScopeHold.ts`'s, which registers at import too (readme.md).
+ */
 EventBus.on('wsClosed', () => {
   clearDuel();
   reset();

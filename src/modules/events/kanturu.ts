@@ -355,34 +355,6 @@ export function enterKanturu(): void {
   Session.sendToGS(KanturuEnterRequestPacket.createPacket().buffer);
 }
 
-// ---- packets ---------------------------------------------------------------
-
-/** `ReceiveKanturu3rdInfo`: the answer to a talk, and to Refresh. */
-EventBus.on('KanturuStateInfo', packet => {
-  const p = new KanturuStateInfoPacket(packet);
-  runInAction(() => {
-    state.state = p.State;
-    state.detail = p.DetailState;
-    state.canEnter = p.CanEnter;
-    state.userCount = p.UserCount;
-    state.remainSeconds = p.RemainSeconds;
-    state.open = true;
-  });
-});
-
-/**
- * `ReceiveKanturu3rdEnter`: success needs no window - the warp follows and
- * closes it. A refusal is the original's `CreateMessageBox`, as a notice.
- */
-EventBus.on('KanturuEnterResult', packet => {
-  const p = new KanturuEnterResultPacket(packet);
-  if (p.Result === EnterResult.Success) {
-    closeKanturu();
-    return;
-  }
-  addNotification(EVENT_TEXT.ktFailedToEnter, 'error', MESSAGE_MS);
-});
-
 /** The cutscene `GetKanturuMayaState` / `GetKanturuNightmareState` start. */
 function directionCue(
   next: KanturuState,
@@ -398,104 +370,135 @@ function directionCue(
   return null;
 }
 
-/**
- * `ReceiveKanturu3rdState`: the figure is up during a monster wave, a Maya
- * hand or the Nightmare fight, and hidden for every standby and cutscene
- * in between.
- */
-EventBus.on('KanturuStateChange', packet => {
-  const p = new KanturuStateChangePacket(packet);
-  // The generator gives each packet its own copy of the enum; this one is
-  // the same `KANTURU_STATE_TYPE` by definition.
-  const next = p.State as number as KanturuState;
-  const detail = p.DetailState;
+// ---- packets ---------------------------------------------------------------
 
-  const inWave =
-    (next === KanturuState.MayaBattle &&
-      (detail === MAYA.monster1 ||
-        detail === MAYA.maya1 ||
-        detail === MAYA.monster2 ||
-        detail === MAYA.maya2 ||
-        detail === MAYA.monster3 ||
-        detail === MAYA.maya3)) ||
-    (next === KanturuState.NightmareBattle && detail === NIGHTMARE.battle);
+/** Registers Kanturu's listeners; the events module installs it (module.ts). */
+export function installKanturu(): void {
+  /** `ReceiveKanturu3rdInfo`: the answer to a talk, and to Refresh. */
+  EventBus.on('KanturuStateInfo', packet => {
+    const p = new KanturuStateInfoPacket(packet);
+    runInAction(() => {
+      state.state = p.State;
+      state.detail = p.DetailState;
+      state.canEnter = p.CanEnter;
+      state.userCount = p.UserCount;
+      state.remainSeconds = p.RemainSeconds;
+      state.open = true;
+    });
+  });
 
-  // `CheckSuccessBattle` (GM_Kanturu_3rd.cpp:59-89): the barrier coming down
-  // is heard once, inside the tower.
-  if (Ecs.world?.mapIndex === EVENT_MAP) {
-    const open =
-      next === KanturuState.Tower &&
-      (detail === TOWER.revitalization || detail === TOWER.notify);
-    if (open && !towerOpen) {
-      playSfx('Sound/w39/kan_boss_disfield', null, { channels: 1 });
+  /**
+   * `ReceiveKanturu3rdEnter`: success needs no window - the warp follows and
+   * closes it. A refusal is the original's `CreateMessageBox`, as a notice.
+   */
+  EventBus.on('KanturuEnterResult', packet => {
+    const p = new KanturuEnterResultPacket(packet);
+    if (p.Result === EnterResult.Success) {
+      closeKanturu();
+      return;
     }
-    towerOpen = open;
+    addNotification(EVENT_TEXT.ktFailedToEnter, 'error', MESSAGE_MS);
+  });
 
-    // Any other pair cuts a cutscene short, as `ResetDirectionState` does.
-    const phase = next * 256 + detail;
-    if (phase !== lastPhase) {
-      lastPhase = phase;
-      cue = directionCue(next, detail);
-      const pos = Ecs.world?.playerEntity?.transform?.pos;
-      if (cue) {
-        const tiles = pos ? Math.hypot(pos.x - cue.x, pos.z - cue.y) : 0;
-        const frames = Math.ceil(tiles) + DIRECTION_FRAMES;
-        cueDelay = frames / ORIGINAL_FPS + cue.wait;
+  /**
+   * `ReceiveKanturu3rdState`: the figure is up during a monster wave, a Maya
+   * hand or the Nightmare fight, and hidden for every standby and cutscene
+   * in between.
+   */
+  EventBus.on('KanturuStateChange', packet => {
+    const p = new KanturuStateChangePacket(packet);
+    // The generator gives each packet its own copy of the enum; this one is
+    // the same `KANTURU_STATE_TYPE` by definition.
+    const next = p.State as number as KanturuState;
+    const detail = p.DetailState;
+
+    const inWave =
+      (next === KanturuState.MayaBattle &&
+        (detail === MAYA.monster1 ||
+          detail === MAYA.maya1 ||
+          detail === MAYA.monster2 ||
+          detail === MAYA.maya2 ||
+          detail === MAYA.monster3 ||
+          detail === MAYA.maya3)) ||
+      (next === KanturuState.NightmareBattle && detail === NIGHTMARE.battle);
+
+    // `CheckSuccessBattle` (GM_Kanturu_3rd.cpp:59-89): the barrier coming down
+    // is heard once, inside the tower.
+    if (Ecs.world?.mapIndex === EVENT_MAP) {
+      const open =
+        next === KanturuState.Tower &&
+        (detail === TOWER.revitalization || detail === TOWER.notify);
+      if (open && !towerOpen) {
+        playSfx('Sound/w39/kan_boss_disfield', null, { channels: 1 });
+      }
+      towerOpen = open;
+
+      // Any other pair cuts a cutscene short, as `ResetDirectionState` does.
+      const phase = next * 256 + detail;
+      if (phase !== lastPhase) {
+        lastPhase = phase;
+        cue = directionCue(next, detail);
+        const pos = Ecs.world?.playerEntity?.transform?.pos;
+        if (cue) {
+          const tiles = pos ? Math.hypot(pos.x - cue.x, pos.z - cue.y) : 0;
+          const frames = Math.ceil(tiles) + DIRECTION_FRAMES;
+          cueDelay = frames / ORIGINAL_FPS + cue.wait;
+        }
       }
     }
-  }
 
-  runInAction(() => {
-    state.hudState = next;
-    state.hudDetail = detail;
-    state.hudOpen = inWave;
-    // A refused entry leaves the dialog up; a phase change makes its text
-    // stale, so keep the pair the dialog reads in step as well.
-    state.state = next;
-    state.detail = detail;
+    runInAction(() => {
+      state.hudState = next;
+      state.hudDetail = detail;
+      state.hudOpen = inWave;
+      // A refused entry leaves the dialog up; a phase change makes its text
+      // stale, so keep the pair the dialog reads in step as well.
+      state.state = next;
+      state.detail = detail;
+    });
   });
-});
 
-/** `Kanturu3rdUserandMonsterCount`. */
-EventBus.on('KanturuMonsterUserCount', packet => {
-  const p = new KanturuMonsterUserCountPacket(packet);
-  runInAction(() => {
-    state.monsterCount = p.MonsterCount;
-    state.userCount = p.UserCount;
+  /** `Kanturu3rdUserandMonsterCount`. */
+  EventBus.on('KanturuMonsterUserCount', packet => {
+    const p = new KanturuMonsterUserCountPacket(packet);
+    runInAction(() => {
+      state.monsterCount = p.MonsterCount;
+      state.userCount = p.UserCount;
+    });
   });
-});
 
-/** `CNewUIKanturuInfoWindow::SetTime`: the phase clock, in milliseconds. */
-EventBus.on('KanturuTimeLimit', packet => {
-  const p = new KanturuTimeLimitPacket(packet);
-  runInAction(() => {
-    state.seconds = p.TimeLimitMilliseconds / 1000;
+  /** `CNewUIKanturuInfoWindow::SetTime`: the phase clock, in milliseconds. */
+  EventBus.on('KanturuTimeLimit', packet => {
+    const p = new KanturuTimeLimitPacket(packet);
+    runInAction(() => {
+      state.seconds = p.TimeLimitMilliseconds / 1000;
+    });
   });
-});
 
-/** `Kanturu3rdResult`: the 372x99 banner over the middle of the screen. */
-EventBus.on('KanturuBattleResult', packet => {
-  const p = new KanturuBattleResultPacket(packet);
-  resultHeld = 0;
-  runInAction(() => {
-    state.result = p.Result === BattleResult.Victory;
-    state.resultAlpha = 0;
+  /** `Kanturu3rdResult`: the 372x99 banner over the middle of the screen. */
+  EventBus.on('KanturuBattleResult', packet => {
+    const p = new KanturuBattleResultPacket(packet);
+    resultHeld = 0;
+    runInAction(() => {
+      state.result = p.Result === BattleResult.Victory;
+      state.resultAlpha = 0;
+    });
   });
-});
 
-/**
- * `MayaSceneMayaAction`: cosmetic. Storm is a single burst of debris thrown
- * up around the hero, Rain is four falls of stones a second apart.
- */
-EventBus.on('KanturuMayaWideAreaAttack', packet => {
-  const p = new KanturuMayaWideAreaAttackPacket(packet);
-  if (p.Type === MayaAttack.Rain) {
-    rainLeft = RAIN_BURSTS;
-    rainDelay = 0;
-    return;
-  }
-  mayaStorm();
-});
+  /**
+   * `MayaSceneMayaAction`: cosmetic. Storm is a single burst of debris thrown
+   * up around the hero, Rain is four falls of stones a second apart.
+   */
+  EventBus.on('KanturuMayaWideAreaAttack', packet => {
+    const p = new KanturuMayaWideAreaAttackPacket(packet);
+    if (p.Type === MayaAttack.Rain) {
+      rainLeft = RAIN_BURSTS;
+      rainDelay = 0;
+      return;
+    }
+    mayaStorm();
+  });
+}
 
 // ---- the Maya attack visuals -----------------------------------------------
 

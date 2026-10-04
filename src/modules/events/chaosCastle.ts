@@ -278,145 +278,148 @@ function reset(): void {
 
 // ---- packets ---------------------------------------------------------------
 
-/**
- * `ReceiveEventZoneOpenTime`, Value 4: `MAKEWORD(KeyL, KeyH)` minutes until
- * the gate opens; 0 means open now, with the head count on a second line.
- */
-EventBus.on('MiniGameOpeningState', packet => {
-  const p = new MiniGameOpeningStatePacket(packet);
-  if (p.GameType !== OPENING_STATE_GAME.chaosCastle) return;
+/** Registers Chaos Castle's listeners; the events module installs it (module.ts). */
+export function installChaosCastle(): void {
+  /**
+   * `ReceiveEventZoneOpenTime`, Value 4: `MAKEWORD(KeyL, KeyH)` minutes until
+   * the gate opens; 0 means open now, with the head count on a second line.
+   */
+  EventBus.on('MiniGameOpeningState', packet => {
+    const p = new MiniGameOpeningStatePacket(packet);
+    if (p.GameType !== OPENING_STATE_GAME.chaosCastle) return;
 
-  const zone = EVENT_TEXT.chaosCastleZone;
-  const minutes =
-    (p.RemainingEnteringTimeMinutes << 8) | p.RemainingEnteringTimeMinutesLow;
-  // The HUD rows ask the same question on their own timer; those answers
-  // feed the schedule and raise no prompt.
-  if (takeOpeningState(OPENING_STATE_GAME.chaosCastle, minutes)) return;
+    const zone = EVENT_TEXT.chaosCastleZone;
+    const minutes =
+      (p.RemainingEnteringTimeMinutes << 8) | p.RemainingEnteringTimeMinutesLow;
+    // The HUD rows ask the same question on their own timer; those answers
+    // feed the schedule and raise no prompt.
+    if (takeOpeningState(OPENING_STATE_GAME.chaosCastle, minutes)) return;
 
-  let prompt: ChaosCastlePrompt;
-  if (minutes === 0) {
-    prompt = {
-      lines: [
-        formatText(EVENT_TEXT.enterNow, zone),
-        formatText(EVENT_TEXT.ccEntered, zone, p.UserCount, PROMPT_CAPACITY),
-      ],
-      canEnter: true,
-    };
-  } else {
-    const hours = Math.trunc(minutes / 60);
-    // GlobalText[1164] + [851] as `WSclient.cpp:8234` concatenates them; the
-    // "when %d " hour prefix only once there is an hour to name.
-    const afterMinutes = formatText(
-      EVENT_TEXT.enterAfterMinutes,
-      minutes - hours * 60,
-      zone
-    );
-    prompt = {
-      lines: [
-        hours > 0
-          ? formatText(EVENT_TEXT.whenHour, hours) + afterMinutes
-          : afterMinutes,
-      ],
-      canEnter: false,
-    };
-  }
-  runInAction(() => {
-    state.prompt = prompt;
+    let prompt: ChaosCastlePrompt;
+    if (minutes === 0) {
+      prompt = {
+        lines: [
+          formatText(EVENT_TEXT.enterNow, zone),
+          formatText(EVENT_TEXT.ccEntered, zone, p.UserCount, PROMPT_CAPACITY),
+        ],
+        canEnter: true,
+      };
+    } else {
+      const hours = Math.trunc(minutes / 60);
+      // GlobalText[1164] + [851] as `WSclient.cpp:8234` concatenates them; the
+      // "when %d " hour prefix only once there is an hour to name.
+      const afterMinutes = formatText(
+        EVENT_TEXT.enterAfterMinutes,
+        minutes - hours * 60,
+        zone
+      );
+      prompt = {
+        lines: [
+          hours > 0
+            ? formatText(EVENT_TEXT.whenHour, hours) + afterMinutes
+            : afterMinutes,
+        ],
+        canEnter: false,
+      };
+    }
+    runInAction(() => {
+      state.prompt = prompt;
+    });
   });
-});
 
-/** `ReceiveMoveToEventMatchResult2`. */
-EventBus.on('ChaosCastleEnterResult', packet => {
-  const p = new ChaosCastleEnterResultPacket(packet);
-  closeChaosCastlePrompt();
+  /** `ReceiveMoveToEventMatchResult2`. */
+  EventBus.on('ChaosCastleEnterResult', packet => {
+    const p = new ChaosCastleEnterResultPacket(packet);
+    closeChaosCastlePrompt();
 
-  const zone = EVENT_TEXT.chaosCastleZone;
-  let text: string | null = null;
-  switch (p.Result) {
-    case ChaosCastleEnterResultEnterResultEnum.Success:
-      break;
-    case ChaosCastleEnterResultEnterResultEnum.Failed:
-      text = EVENT_TEXT.cloakLevelWrong;
-      break;
-    case ChaosCastleEnterResultEnterResultEnum.NotOpen:
-      text = formatText(EVENT_TEXT.timePassed, zone);
-      break;
-    case ChaosCastleEnterResultEnterResultEnum.Full:
-      text = formatText(EVENT_TEXT.capacityReached, zone, MAX_MEN);
-      break;
-    case ChaosCastleEnterResultEnterResultEnum.NotEnoughMoney:
-      text = EVENT_TEXT.shortOfZen;
-      break;
-    case ChaosCastleEnterResultEnterResultEnum.PlayerKillerCantEnter:
-      text = formatText(EVENT_TEXT.killersRestricted, EVENT_TEXT.chaosCastle);
-      break;
-    default:
-      // 3 / 4 of the original's switch: level out of range.
-      text =
-        (p.Result as number) === 3 ? EVENT_TEXT.levelTooHigh : EVENT_TEXT.levelTooLow;
-      break;
-  }
-  if (text) addNotification(text, 'error', MESSAGE_MS);
-});
-
-/** `CNewChaosCastleSystem::SetMatchGameCommand`: states 5..10. */
-EventBus.on('BloodCastleState', packet => {
-  const p = new BloodCastleStatePacket(packet);
-
-  switch (p.State) {
-    case BloodCastleStateStatusEnum.ChaosCastleStarted:
-      // The match is on, and `iChaosCastle` takes over from `aChaos`, before
-      // the first clock arrives (NewChaosCastleSystem.cpp:62-70).
-      runInAction(() => {
-        state.timer = { ...state.timer, running: true };
-      });
-      break;
-    case BloodCastleStateStatusEnum.ChaosCastleRunning:
-      runInAction(() => {
-        state.timer = {
-          seconds: p.RemainSecond,
-          alive: p.CurMonster,
-          maxAlive: p.MaxMonster,
-          running: true,
-        };
-      });
-      break;
-    case BloodCastleStateStatusEnum.ChaosCastleEnded:
-      clearTimer();
-      // `aChaosEnd` over the returning `aChaos` bed, on the castle maps
-      // only (NewChaosCastleSystem.cpp:74-80).
-      if (MAPS.has(Ecs.world?.mapIndex ?? ENUM_WORLD.WD_0LORENCIA)) {
-        playSfx('Sound/aChaosEnd', null, { channels: 1 });
-      }
-      break;
-    default:
-      // 8..10 = arena stages (`versions/shared/maps/chaoscastle/arena.ts`); 0..4 = Blood
-      // Castle.
-      break;
-  }
-});
-
-/** The shared 0x93 rank table, taken only on the castle maps. */
-EventBus.on('MiniGameScoreTable', packet => {
-  if (!MAPS.has(Ecs.world?.mapIndex ?? ENUM_WORLD.WD_0LORENCIA)) return;
-
-  const p = new MiniGameScoreTablePacket(packet);
-  if (p.ResultCount >= MAX_RANK_ROWS) return;
-
-  resultLeft = RESULT_SECONDS;
-  runInAction(() => {
-    state.result = {
-      myRank: p.PlayerRank,
-      rows: p.getResults().map(r => ({
-        name: r.PlayerName,
-        // Signed on the wire, read as uint32 by the generated packet (B12).
-        score: r.TotalScore | 0,
-        exp: r.BonusExperience,
-        zen: r.BonusMoney,
-      })),
-    };
+    const zone = EVENT_TEXT.chaosCastleZone;
+    let text: string | null = null;
+    switch (p.Result) {
+      case ChaosCastleEnterResultEnterResultEnum.Success:
+        break;
+      case ChaosCastleEnterResultEnterResultEnum.Failed:
+        text = EVENT_TEXT.cloakLevelWrong;
+        break;
+      case ChaosCastleEnterResultEnterResultEnum.NotOpen:
+        text = formatText(EVENT_TEXT.timePassed, zone);
+        break;
+      case ChaosCastleEnterResultEnterResultEnum.Full:
+        text = formatText(EVENT_TEXT.capacityReached, zone, MAX_MEN);
+        break;
+      case ChaosCastleEnterResultEnterResultEnum.NotEnoughMoney:
+        text = EVENT_TEXT.shortOfZen;
+        break;
+      case ChaosCastleEnterResultEnterResultEnum.PlayerKillerCantEnter:
+        text = formatText(EVENT_TEXT.killersRestricted, EVENT_TEXT.chaosCastle);
+        break;
+      default:
+        // 3 / 4 of the original's switch: level out of range.
+        text =
+          (p.Result as number) === 3 ? EVENT_TEXT.levelTooHigh : EVENT_TEXT.levelTooLow;
+        break;
+    }
+    if (text) addNotification(text, 'error', MESSAGE_MS);
   });
-});
+
+  /** `CNewChaosCastleSystem::SetMatchGameCommand`: states 5..10. */
+  EventBus.on('BloodCastleState', packet => {
+    const p = new BloodCastleStatePacket(packet);
+
+    switch (p.State) {
+      case BloodCastleStateStatusEnum.ChaosCastleStarted:
+        // The match is on, and `iChaosCastle` takes over from `aChaos`, before
+        // the first clock arrives (NewChaosCastleSystem.cpp:62-70).
+        runInAction(() => {
+          state.timer = { ...state.timer, running: true };
+        });
+        break;
+      case BloodCastleStateStatusEnum.ChaosCastleRunning:
+        runInAction(() => {
+          state.timer = {
+            seconds: p.RemainSecond,
+            alive: p.CurMonster,
+            maxAlive: p.MaxMonster,
+            running: true,
+          };
+        });
+        break;
+      case BloodCastleStateStatusEnum.ChaosCastleEnded:
+        clearTimer();
+        // `aChaosEnd` over the returning `aChaos` bed, on the castle maps
+        // only (NewChaosCastleSystem.cpp:74-80).
+        if (MAPS.has(Ecs.world?.mapIndex ?? ENUM_WORLD.WD_0LORENCIA)) {
+          playSfx('Sound/aChaosEnd', null, { channels: 1 });
+        }
+        break;
+      default:
+        // 8..10 = arena stages (`versions/shared/maps/chaoscastle/arena.ts`); 0..4 = Blood
+        // Castle.
+        break;
+    }
+  });
+
+  /** The shared 0x93 rank table, taken only on the castle maps. */
+  EventBus.on('MiniGameScoreTable', packet => {
+    if (!MAPS.has(Ecs.world?.mapIndex ?? ENUM_WORLD.WD_0LORENCIA)) return;
+
+    const p = new MiniGameScoreTablePacket(packet);
+    if (p.ResultCount >= MAX_RANK_ROWS) return;
+
+    resultLeft = RESULT_SECONDS;
+    runInAction(() => {
+      state.result = {
+        myRank: p.PlayerRank,
+        rows: p.getResults().map(r => ({
+          name: r.PlayerName,
+          // Signed on the wire, read as uint32 by the generated packet (B12).
+          score: r.TotalScore | 0,
+          exp: r.BonusExperience,
+          zen: r.BonusMoney,
+        })),
+      };
+    });
+  });
+}
 
 // ---- 3. the layer ----------------------------------------------------------
 

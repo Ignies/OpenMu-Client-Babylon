@@ -1,8 +1,6 @@
 import type { EventLayer } from './layer';
 import { matchNoticesLayer } from './matchNotices';
 import { invasionLayer } from './invasion';
-// Blood Castle, then Chaos Castle, then Devil Square: their packet listeners (MiniGameOpeningState,
-// BloodCastleState) run in load order, kept from when sound/ambientBeds imported the first two.
 import { bloodCastleLayer } from './bloodCastle';
 import { chaosCastleLayer } from './chaosCastle';
 import { devilSquareLayer } from './devilSquare';

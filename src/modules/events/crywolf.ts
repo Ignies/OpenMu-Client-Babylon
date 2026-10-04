@@ -183,88 +183,91 @@ function reset(): void {
 
 // ---- packets ---------------------------------------------------------------
 
-/** WSclient.cpp:789: entering the map asks for the event state. */
-EventBus.on('warpCompleted', ({ map }) => {
-  if (!MAPS.has(map) || Session.isOffline) return;
-  Session.sendToGS(CrywolfInfoRequestPacket.createPacket().buffer);
-});
+/** Registers Crywolf's listeners; the events module installs it (module.ts). */
+export function installCrywolf(): void {
+  /** WSclient.cpp:789: entering the map asks for the event state. */
+  EventBus.on('warpCompleted', ({ map }) => {
+    if (!MAPS.has(map) || Session.isOffline) return;
+    Session.sendToGS(CrywolfInfoRequestPacket.createPacket().buffer);
+  });
 
-/** `CheckCryWolf1stMVP`: the state pair, and the end-of-war banner. */
-EventBus.on('CrywolfStateInfo', packet => {
-  const p = new CrywolfStateInfoPacket(packet);
-  const occupation = p.Occupation;
-  const next = p.State;
-  if (occupation === state.occupation && next === state.state) return;
+  /** `CheckCryWolf1stMVP`: the state pair, and the end-of-war banner. */
+  EventBus.on('CrywolfStateInfo', packet => {
+    const p = new CrywolfStateInfoPacket(packet);
+    const occupation = p.Occupation;
+    const next = p.State;
+    if (occupation === state.occupation && next === state.state) return;
 
-  runInAction(() => {
-    // `if (m_CrywolfState == CRYWOLF_STATE_END)`: outside the war the banner
-    // says whether the defence held (peace) or the fortress fell (occupied).
-    if (next === CrywolfState.Ended && occupation !== Occupation.War) {
-      state.result = occupation === Occupation.Peace;
-      resultLeft = RESULT_SECONDS;
+    runInAction(() => {
+      // `if (m_CrywolfState == CRYWOLF_STATE_END)`: outside the war the banner
+      // says whether the defence held (peace) or the fortress fell (occupied).
+      if (next === CrywolfState.Ended && occupation !== Occupation.War) {
+        state.result = occupation === Occupation.Peace;
+        resultLeft = RESULT_SECONDS;
+      }
+      if (next !== CrywolfState.Started) state.balgassHp = 0;
+      state.occupation = occupation;
+      state.state = next;
+    });
+  });
+
+  /** `CheckCryWolf1stMVPAltarfInfo`: statue shield plus the five altars. */
+  EventBus.on('CrywolfAltarInfo', packet => {
+    const p = new CrywolfAltarInfoPacket(packet);
+    runInAction(() => {
+      state.statueHp = p.StatueHp;
+      state.altars = [
+        p.AltarState1,
+        p.AltarState2,
+        p.AltarState3,
+        p.AltarState4,
+        p.AltarState5,
+      ];
+    });
+  });
+
+  /** `ReceiveCrywolfAltarContract` (WSclient.cpp:11431). */
+  EventBus.on('CrywolfContractResult', packet => {
+    const p = new CrywolfContractResultPacket(packet);
+    if (p.Result === 1) {
+      addNotification(EVENT_TEXT.cwContractMade, 'info', MESSAGE_MS);
+    } else {
+      addNotification(EVENT_TEXT.cwContractRefused, 'error', MESSAGE_MS);
     }
-    if (next !== CrywolfState.Started) state.balgassHp = 0;
-    state.occupation = occupation;
-    state.state = next;
   });
-});
 
-/** `CheckCryWolf1stMVPAltarfInfo`: statue shield plus the five altars. */
-EventBus.on('CrywolfAltarInfo', packet => {
-  const p = new CrywolfAltarInfoPacket(packet);
-  runInAction(() => {
-    state.statueHp = p.StatueHp;
-    state.altars = [
-      p.AltarState1,
-      p.AltarState2,
-      p.AltarState3,
-      p.AltarState4,
-      p.AltarState5,
-    ];
+  /** `M34CryWolf1st::SetTime`: only meaningful while the war runs. */
+  EventBus.on('CrywolfLeftTime', packet => {
+    const p = new CrywolfLeftTimePacket(packet);
+    if (state.state !== CrywolfState.Started) return;
+    runInAction(() => {
+      state.seconds = p.Hour * 3600 + p.Minute * 60;
+      state.timeRunning = true;
+    });
   });
-});
 
-/** `ReceiveCrywolfAltarContract` (WSclient.cpp:11431). */
-EventBus.on('CrywolfContractResult', packet => {
-  const p = new CrywolfContractResultPacket(packet);
-  if (p.Result === 1) {
-    addNotification(EVENT_TEXT.cwContractMade, 'info', MESSAGE_MS);
-  } else {
-    addNotification(EVENT_TEXT.cwContractRefused, 'error', MESSAGE_MS);
-  }
-});
-
-/** `M34CryWolf1st::SetTime`: only meaningful while the war runs. */
-EventBus.on('CrywolfLeftTime', packet => {
-  const p = new CrywolfLeftTimePacket(packet);
-  if (state.state !== CrywolfState.Started) return;
-  runInAction(() => {
-    state.seconds = p.Hour * 3600 + p.Minute * 60;
-    state.timeRunning = true;
+  /** `Set_BossMonster`: the Balgass strip and the dark elf count. */
+  EventBus.on('CrywolfBossMonsterInfo', packet => {
+    const p = new CrywolfBossMonsterInfoPacket(packet);
+    if (state.state < CrywolfState.Ready || state.state >= CrywolfState.EndCycle) return;
+    runInAction(() => {
+      state.darkElves = p.DarkElfCount;
+      state.balgassHp = Math.max(0, p.BossHp | 0);
+    });
   });
-});
 
-/** `Set_BossMonster`: the Balgass strip and the dark elf count. */
-EventBus.on('CrywolfBossMonsterInfo', packet => {
-  const p = new CrywolfBossMonsterInfoPacket(packet);
-  if (state.state < CrywolfState.Ready || state.state >= CrywolfState.EndCycle) return;
-  runInAction(() => {
-    state.darkElves = p.DarkElfCount;
-    state.balgassHp = Math.max(0, p.BossHp | 0);
+  /** `SetPlusChaosRate`: a won event raises mix rates; surface it as a line. */
+  EventBus.on('CrywolfBenefit', packet => {
+    const p = new CrywolfBenefitPacket(packet);
+    if (p.ChaosRatePlus > 0) {
+      addNotification(
+        formatText(EVENT_TEXT.cwBenefit, p.ChaosRatePlus),
+        'info',
+        MESSAGE_MS
+      );
+    }
   });
-});
-
-/** `SetPlusChaosRate`: a won event raises mix rates; surface it as a line. */
-EventBus.on('CrywolfBenefit', packet => {
-  const p = new CrywolfBenefitPacket(packet);
-  if (p.ChaosRatePlus > 0) {
-    addNotification(
-      formatText(EVENT_TEXT.cwBenefit, p.ChaosRatePlus),
-      'info',
-      MESSAGE_MS
-    );
-  }
-});
+}
 
 // ---- 3. the layer ----------------------------------------------------------
 

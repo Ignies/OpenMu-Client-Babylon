@@ -1,5 +1,5 @@
 // Every module, in install order: for a packet several modules handle, this is the order their
-// listeners run in (it is the order the old logic.ts imported their nets). Keep it.
+// listeners run in. Keep it; the constraints are noted next to the entries (readme.md).
 import type { ModuleDef } from './module';
 import servers from './servers/module';
 import session from './session/module';
@@ -7,6 +7,7 @@ import characterSelect from './character_select/module';
 import quests from './quests/module';
 import skills from './skills/module';
 import hero from './hero/module';
+import events from './events/module';
 import warp from './warp/module';
 import inventory from './inventory/module';
 import scope from './scope/module';
@@ -39,6 +40,7 @@ export const MODULES: readonly ModuleDef[] = [
   quests, // before hero and combat: its CharacterInformation and ObjectGotKilled listeners run first
   skills, // before hero: the master level (masterLevel.ts) reads the experience packets first
   hero,
+  events, // before warp: Crywolf's warpCompleted listener runs first
   warp,
   inventory,
   scope,
