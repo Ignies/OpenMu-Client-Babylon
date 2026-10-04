@@ -349,7 +349,7 @@ class Combat implements Controller {
 
   /** Next follow-up target whose 0x4A is due, or -1. */
   nextDarkSideHit(): number {
-    return skillHooks.darkSide?.nextHit() ?? 0;
+    return skillHooks.darkSide?.nextHit() ?? -1;
   }
 
   /** Skill id for the follow-up 0x4A. */
