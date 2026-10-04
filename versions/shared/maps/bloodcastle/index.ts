@@ -6,6 +6,7 @@ import {
   BLOOD_CASTLE_EMISSIONS,
 } from './spec';
 import { BLOOD_CASTLE_SOUND } from './sound';
+import { BLOOD_CASTLE_ACTORS } from './actors';
 
 /**
  * Blood Castle (World12 / Object12) - the map entry: identity and the per-world data the
@@ -66,6 +67,8 @@ export const bloodcastleLayer: MapLayer = {
   // What flies here (`MoveBoids`, GOBoid.cpp:1304-1346).
   fx: { boids: 'crow' },
   sound: BLOOD_CASTLE_SOUND,
+  // The skeleton line grows with the floor (Setting_Monster, ZzzCharacter.cpp:13150-13159).
+  actors: BLOOD_CASTLE_ACTORS,
   // `TerrainGrassEnable = false` (ZzzLodTerrain.cpp:326-329).
   terrain: { grass: false },
   create: world => import('./create').then(m => m.createBloodCastle(world)),

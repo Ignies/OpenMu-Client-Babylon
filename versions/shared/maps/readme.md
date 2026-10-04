@@ -22,7 +22,7 @@ One folder per map. Each folder exports one `MapLayer` (the contract in
 - The map's own rows for the other controllers: `sound` (beds, one-shots, music, town tracks,
   object loops, monster cues), `lighting` (look, room looks, object lights, thunder), `weather`
   (always rains, wet ground, leaves) and `terrain` (overlays, snow bed, water, rest objects,
-  object fixups, grass, a hidden ground). Reworking a controller never touches these; changing what a map sounds
+  object fixups, grass, a hidden ground) and `actors` (what spawns bigger: Blood Castle's `actors.ts`). Reworking a controller never touches these; changing what a map sounds
   or looks like is an edit here only. A row that differs between the entry's worlds is written
   `{ byWorld: { [world]: row } }`.
 - `create(world)` binds the map's object classes into `world.terrain.MapTileObjects[type]` and adds

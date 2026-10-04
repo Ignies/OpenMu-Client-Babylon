@@ -19,7 +19,8 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   `monsterModelTypeOfNpc`, `monsterScaleOf`, `monsterHiddenMesh`, `hasMonsterModel`;
   `monsterFactoryFor` (`genericMonster.ts`), the class every monster without its own uses.
 - NPC defaults: `npcFactoryFor(file, scale?, clipSpeeds?)`, `trapFactoryFor`, `HiddenNpc`,
-  `npcSpawnScale(factory, type, world)` (`modelFactoryPerId.ts`); `gearedNpcFactory(gear)`,
+  `npcSpawnScale(factory, type, world)` (`modelFactoryPerId.ts`), `MapActors` (`mapActors.ts`, the
+  map's `actors` row); `gearedNpcFactory(gear)`,
   `transformedNpcFactory(dir, part, scale?)` (`playerNpc.ts`); `CHARACTER_DEFAULT_SCALE`
   (`monsterModelTable.ts`).
 - NPC tables, live views of the monster folders kept for the readers that list them:
@@ -62,7 +63,9 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 - An NPC spawns at `npcSpawnScale`: its folder's `worldScale` on that world, else its class's
   `OverrideScale`, else 0.9, the `o->Scale` CreateCharacterPointer gives every character
   (ZzzCharacter.cpp:11699). A folder names a scale only when its CreateMonster case sets one;
-  geared NPCs get SetCharacterScale's 0.9 on the CLASS_WIZARD rig.
+  geared NPCs get SetCharacterScale's 0.9 on the CLASS_WIZARD rig. The map then adds its
+  `actors.monsterScale` row (`MapActors`, `mapActors.ts`): Blood Castle's skeleton line, 84-143,
+  grows 0.05 a third of the castle (Setting_Monster, ZzzCharacter.cpp:13150-13159).
 - `PlayerObject` loads `Player/player.glb` (a rig with no meshes) and hangs every part on it as a
   child `ModelObject`: helm, mask, armor, pants, gloves, boots, two weapons, two Phoenix wings,
   wings, quest item and pet. Weapons link to bones 33 / 42 (ZzzCharacter.cpp:11849-11850), wings
