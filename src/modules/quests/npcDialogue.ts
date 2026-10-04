@@ -266,62 +266,65 @@ export function answerNpcDialogue(index: number): void {
 
 // ---- packet → state ----------------------------------------------------------
 
-/**
- * `ProcessQuestListReceive`: while the dialogue is up the NPC's list goes
- * into it - words 1501 / 1502 above, "[Q]subject" lines and "Go back." below.
- */
-EventBus.on('AvailableQuests', packet => {
-  if (!state.open) return;
-  const quests = offeredQuests(new AvailableQuestsPacket(packet));
-  const answers: NpcDialogueAnswer[] = quests.map((q, i) => ({
-    text: `${i + 1}. [Q]${q.subject}`,
-    result: q.key,
-  }));
-  answers.push({
-    text: `${answers.length + 1}. ${questWords(WORDS_GO_BACK) ?? t(TEXT_GO_BACK)}`,
-    result: -1,
-  });
-  const words =
-    quests.length > 0
-      ? (questWords(WORDS_SELECT_QUEST) ?? t(TEXT_SELECT_QUEST))
-      : (questWords(WORDS_NO_QUEST) ?? t(TEXT_NO_QUEST));
+/** Registers the NPC dialogue's listeners; the quests module installs it (module.ts). */
+export function installNpcDialogue(): void {
+  /**
+   * `ProcessQuestListReceive`: while the dialogue is up the NPC's list goes
+   * into it - words 1501 / 1502 above, "[Q]subject" lines and "Go back." below.
+   */
+  EventBus.on('AvailableQuests', packet => {
+    if (!state.open) return;
+    const quests = offeredQuests(new AvailableQuestsPacket(packet));
+    const answers: NpcDialogueAnswer[] = quests.map((q, i) => ({
+      text: `${i + 1}. [Q]${q.subject}`,
+      result: q.key,
+    }));
+    answers.push({
+      text: `${answers.length + 1}. ${questWords(WORDS_GO_BACK) ?? t(TEXT_GO_BACK)}`,
+      result: -1,
+    });
+    const words =
+      quests.length > 0
+        ? (questWords(WORDS_SELECT_QUEST) ?? t(TEXT_SELECT_QUEST))
+        : (questWords(WORDS_NO_QUEST) ?? t(TEXT_NO_QUEST));
 
-  runInAction(() => {
-    state.questListMode = true;
-    state.npcLines = [words];
-    state.answers = answers;
-    state.busy = false;
-  });
-});
-
-// The step / progress windows replace the dialogue (`CNewUISystem` shows one
-// NPC interface at a time); a refused step (step 0xFF) just re-enables the list.
-EventBus.on('QuestStepInfo', packet => {
-  const p = new QuestStepInfoPacket(packet);
-  if (p.QuestStepNumber === STEP_NUMBER_UNAVAILABLE) {
     runInAction(() => {
+      state.questListMode = true;
+      state.npcLines = [words];
+      state.answers = answers;
       state.busy = false;
     });
-    return;
-  }
-  hideNpcDialogue();
-});
-EventBus.on('QuestProgress', hideNpcDialogue);
+  });
 
-// `HideAll` at the start of a talk; the talk already sent the close request.
-EventBus.on('npcTalkStarted', hideNpcDialogue);
-EventBus.on('heroWalked', () => {
-  if (state.open) endNpcDialogue();
-});
+  // The step / progress windows replace the dialogue (`CNewUISystem` shows one
+  // NPC interface at a time); a refused step (step 0xFF) just re-enables the list.
+  EventBus.on('QuestStepInfo', packet => {
+    const p = new QuestStepInfoPacket(packet);
+    if (p.QuestStepNumber === STEP_NUMBER_UNAVAILABLE) {
+      runInAction(() => {
+        state.busy = false;
+      });
+      return;
+    }
+    hideNpcDialogue();
+  });
+  EventBus.on('QuestProgress', hideNpcDialogue);
 
-// OpenMU resends the character information on a bulk stat add or a reset;
-// only a different hero closes the dialogue.
-let heroName: string | null = null;
-EventBus.on('CharacterInformation', () => {
-  if (Hero.name === heroName) return;
-  heroName = Hero.name;
-  hideNpcDialogue();
-});
+  // `HideAll` at the start of a talk; the talk already sent the close request.
+  EventBus.on('npcTalkStarted', hideNpcDialogue);
+  EventBus.on('heroWalked', () => {
+    if (state.open) endNpcDialogue();
+  });
+
+  // OpenMU resends the character information on a bulk stat add or a reset;
+  // only a different hero closes the dialogue.
+  let heroName: string | null = null;
+  EventBus.on('CharacterInformation', () => {
+    if (Hero.name === heroName) return;
+    heroName = Hero.name;
+    hideNpcDialogue();
+  });
+}
 
 function reset(): void {
   hideNpcDialogue();

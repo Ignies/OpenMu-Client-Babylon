@@ -155,10 +155,13 @@ export function cancelBalgassEntry(): void {
   Merchant.dropNpcTalk();
 }
 
-// Another talk started: that talk already sends the close for this one.
-EventBus.on('npcTalkStarted', () => hide());
-// `UpdateSendMoveInterface`: walking off is a cancel.
-EventBus.on('heroWalked', () => cancelBalgassEntry());
+/** Registers the entry boxes' listeners; the quests module installs it (module.ts). */
+export function installBalgassEntry(): void {
+  // Another talk started: that talk already sends the close for this one.
+  EventBus.on('npcTalkStarted', () => hide());
+  // `UpdateSendMoveInterface`: walking off is a cancel.
+  EventBus.on('heroWalked', () => cancelBalgassEntry());
+}
 
 // ---- the offline dev seam --------------------------------------------------
 

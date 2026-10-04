@@ -651,57 +651,6 @@ export function legacyQuestForNpc(npcType: number): QuestDefinition | undefined 
   );
 }
 
-// ---- packet handlers (ReceiveQuestHistory / State / Result / Prize) -------
-
-EventBus.on('LegacyQuestStateList', packet => {
-  const p = new LegacyQuestStateListPacket(packet);
-  const count = p.QuestCount;
-  const bytes = Math.ceil(count / STATES_PER_BYTE);
-  const packed = new Uint8Array(bytes);
-  for (let i = 0; i < bytes; i++) {
-    packed[i] = packet.byteLength > LegacyQuestStateListPacket.DataOffset + 2 + i
-      ? packet.getUint8(LegacyQuestStateListPacket.DataOffset + 2 + i)
-      : 0;
-  }
-  setQuestList(packed, count);
-});
-
-EventBus.on('LegacyQuestStateDialog', packet => {
-  const p = new LegacyQuestStateDialogPacket(packet);
-  const index = p.QuestIndex;
-
-  // With the talked NPC's next quest still level-locked, OpenMU sends index 0
-  // and the byte of the quest last finished, another group: open that NPC's
-  // own quest instead and keep the states. A running quest opens anywhere.
-  const npc = Merchant.pendingNpcType;
-  const quest = questDefinition(index);
-  if (npc && quest && quest.npcType !== npc && ownState(index, p.State) !== LegacyQuestState.InProgress) {
-    const mine = legacyQuestForNpc(npc);
-    if (mine) showLegacyQuestWindow(mine.index);
-    // Otherwise it answers an earlier talk, which the pending one's close already ended.
-    else if (isLegacyQuestNpc(npc)) endNpcTalk();
-    return;
-  }
-
-  setQuestState(index, p.State);
-  showLegacyQuestWindow(index < MAX_QUESTS ? index : -1);
-});
-
-EventBus.on('LegacySetQuestStateResponse', packet => {
-  const p = new LegacySetQuestStateResponsePacket(packet);
-  // `ReceiveQuestResult`: Result 0 = accepted; anything else leaves the dialog where it is.
-  if (p.Result !== 0) {
-    addNotification(t('quest.stateFailed'), 'error');
-    return;
-  }
-  // `HideAll` before `Show`: the visible window closes, and the NPC talk with it.
-  const wasOpen = state.npcWindowOpen;
-  setQuestState(p.QuestIndex, p.NewState);
-  clearLocalKills();
-  if (wasOpen) endNpcTalk();
-  showLegacyQuestWindow(p.QuestIndex < MAX_QUESTS ? p.QuestIndex : -1);
-});
-
 /**
  * `ReceiveQuestPrize` 201 / 204: the hero's new class. OpenMU fills the byte
  * with the class of whoever receives the packet, so only the hero's own copy
@@ -720,63 +669,117 @@ function evolveHero(cls: number, step: number): void {
   addNotification(t(step === 3 ? 'quest.evolvedThird' : 'quest.evolved'), 'info');
 }
 
-EventBus.on('LegacyQuestReward', packet => {
-  const p = new LegacyQuestRewardPacket(packet);
-  const world = Ecs.world;
-  const hero = world?.playerEntity;
-  const isHero = !!hero && (p.PlayerId & 0x7fff) === hero.netId;
+// ---- packet handlers (ReceiveQuestHistory / State / Result / Prize) -------
 
-  switch (p.Reward as number) {
-    case Reward.LevelUpPoints:
-    case Reward.LevelUpPointsPerLevelIncrease:
-      // Gain Hero Status done at exactly level 220 sends 202 with 0 points.
-      if (isHero && p.Count > 0) {
-        runInAction(() => {
-          Hero.points += p.Count;
-        });
-        addNotification(t('quest.rewardPoints', { count: p.Count }), 'info');
-      }
-      break;
-    case Reward.CharacterEvolutionFirstToSecond:
-      if (isHero) evolveHero(p.Count >> 3, 2);
-      break;
-    case Reward.CharacterEvolutionSecondToThird:
-      if (isHero) evolveHero(p.Count >> 3, 3);
-      break;
-    case Reward.ComboSkill:
-      if (isHero) addNotification(t('quest.comboLearned'), 'info');
-      break;
-  }
+/** Registers the legacy quest chain's listeners; the quests module installs it (module.ts). */
+export function installLegacyQuests(): void {
+  EventBus.on('LegacyQuestStateList', packet => {
+    const p = new LegacyQuestStateListPacket(packet);
+    const count = p.QuestCount;
+    const bytes = Math.ceil(count / STATES_PER_BYTE);
+    const packed = new Uint8Array(bytes);
+    for (let i = 0; i < bytes; i++) {
+      packed[i] = packet.byteLength > LegacyQuestStateListPacket.DataOffset + 2 + i
+        ? packet.getUint8(LegacyQuestStateListPacket.DataOffset + 2 + i)
+        : 0;
+    }
+    setQuestList(packed, count);
+  });
 
-  // Every reward case ends in the flare burst and SOUND_CHANGE_UP, 2D, for
-  // whoever got it (WSclient.cpp:10408-10521); not SOUND_LEVEL_UP, so the
-  // burst is shown directly rather than through the level-up event.
-  const target = isHero ? hero : world?.getByNetId(p.PlayerId & 0x7fff);
-  if (world && target?.transform) showObjectEffect(world.scene, target, 'levelUp');
-  playUiSound('changeUp');
-});
+  EventBus.on('LegacyQuestStateDialog', packet => {
+    const p = new LegacyQuestStateDialogPacket(packet);
+    const index = p.QuestIndex;
 
-EventBus.on('npcTalkStarted', () => hideLegacyQuestWindow());
-EventBus.on('heroWalked', () => closeLegacyQuestWindow());
+    // With the talked NPC's next quest still level-locked, OpenMU sends index 0
+    // and the byte of the quest last finished, another group: open that NPC's
+    // own quest instead and keep the states. A running quest opens anywhere.
+    const npc = Merchant.pendingNpcType;
+    const quest = questDefinition(index);
+    if (npc && quest && quest.npcType !== npc && ownState(index, p.State) !== LegacyQuestState.InProgress) {
+      const mine = legacyQuestForNpc(npc);
+      if (mine) showLegacyQuestWindow(mine.index);
+      // Otherwise it answers an earlier talk, which the pending one's close already ended.
+      else if (isLegacyQuestNpc(npc)) endNpcTalk();
+      return;
+    }
 
-// `ReceiveQuestHistory` is only answered when asked: the original sends 0xA0
-// right after the character information. OpenMU also resends that on a bulk
-// stat add or a reset, so only a different hero starts from a blank chain.
-let heroName: string | null = null;
-EventBus.on('CharacterInformation', () => {
-  if (Hero.name !== heroName) {
-    heroName = Hero.name;
-    runInAction(() => {
-      state.states.fill(LegacyQuestState.None);
-      state.currentIndex = 0;
-      state.windowIndex = 0;
-      state.count = 0;
-      state.received = false;
-      state.npcWindowOpen = false;
-    });
-  }
-  requestLegacyQuestStates();
-});
+    setQuestState(index, p.State);
+    showLegacyQuestWindow(index < MAX_QUESTS ? index : -1);
+  });
+
+  EventBus.on('LegacySetQuestStateResponse', packet => {
+    const p = new LegacySetQuestStateResponsePacket(packet);
+    // `ReceiveQuestResult`: Result 0 = accepted; anything else leaves the dialog where it is.
+    if (p.Result !== 0) {
+      addNotification(t('quest.stateFailed'), 'error');
+      return;
+    }
+    // `HideAll` before `Show`: the visible window closes, and the NPC talk with it.
+    const wasOpen = state.npcWindowOpen;
+    setQuestState(p.QuestIndex, p.NewState);
+    clearLocalKills();
+    if (wasOpen) endNpcTalk();
+    showLegacyQuestWindow(p.QuestIndex < MAX_QUESTS ? p.QuestIndex : -1);
+  });
+
+  EventBus.on('LegacyQuestReward', packet => {
+    const p = new LegacyQuestRewardPacket(packet);
+    const world = Ecs.world;
+    const hero = world?.playerEntity;
+    const isHero = !!hero && (p.PlayerId & 0x7fff) === hero.netId;
+
+    switch (p.Reward as number) {
+      case Reward.LevelUpPoints:
+      case Reward.LevelUpPointsPerLevelIncrease:
+        // Gain Hero Status done at exactly level 220 sends 202 with 0 points.
+        if (isHero && p.Count > 0) {
+          runInAction(() => {
+            Hero.points += p.Count;
+          });
+          addNotification(t('quest.rewardPoints', { count: p.Count }), 'info');
+        }
+        break;
+      case Reward.CharacterEvolutionFirstToSecond:
+        if (isHero) evolveHero(p.Count >> 3, 2);
+        break;
+      case Reward.CharacterEvolutionSecondToThird:
+        if (isHero) evolveHero(p.Count >> 3, 3);
+        break;
+      case Reward.ComboSkill:
+        if (isHero) addNotification(t('quest.comboLearned'), 'info');
+        break;
+    }
+
+    // Every reward case ends in the flare burst and SOUND_CHANGE_UP, 2D, for
+    // whoever got it (WSclient.cpp:10408-10521); not SOUND_LEVEL_UP, so the
+    // burst is shown directly rather than through the level-up event.
+    const target = isHero ? hero : world?.getByNetId(p.PlayerId & 0x7fff);
+    if (world && target?.transform) showObjectEffect(world.scene, target, 'levelUp');
+    playUiSound('changeUp');
+  });
+
+  EventBus.on('npcTalkStarted', () => hideLegacyQuestWindow());
+  EventBus.on('heroWalked', () => closeLegacyQuestWindow());
+
+  // `ReceiveQuestHistory` is only answered when asked: the original sends 0xA0
+  // right after the character information. OpenMU also resends that on a bulk
+  // stat add or a reset, so only a different hero starts from a blank chain.
+  let heroName: string | null = null;
+  EventBus.on('CharacterInformation', () => {
+    if (Hero.name !== heroName) {
+      heroName = Hero.name;
+      runInAction(() => {
+        state.states.fill(LegacyQuestState.None);
+        state.currentIndex = 0;
+        state.windowIndex = 0;
+        state.count = 0;
+        state.received = false;
+        state.npcWindowOpen = false;
+      });
+    }
+    requestLegacyQuestStates();
+  });
+}
 
 function reset(): void {
   runInAction(() => {

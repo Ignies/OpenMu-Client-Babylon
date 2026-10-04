@@ -128,16 +128,19 @@ function update(_map: ENUM_WORLD, dt: number): void {
 
 // ---- packets ---------------------------------------------------------------
 
-EventBus.on('MapEventState', packet => {
-  const p = new MapEventStatePacket(packet);
-  runInAction(() => {
-    state.event = p.Enable ? p.Event : 0;
-    // `ReceiveTeleport` clears `EnableEvent` on every warp (WSclient.cpp:1919)
-    // and the server announces it again on arrival; the map it was announced
-    // for is the same rule without the round trip.
-    state.map = Ecs.world?.mapIndex ?? -1;
+/** Registers the invasion's listener; the events module installs it (module.ts). */
+export function installInvasion(): void {
+  EventBus.on('MapEventState', packet => {
+    const p = new MapEventStatePacket(packet);
+    runInAction(() => {
+      state.event = p.Enable ? p.Event : 0;
+      // `ReceiveTeleport` clears `EnableEvent` on every warp (WSclient.cpp:1919)
+      // and the server announces it again on arrival; the map it was announced
+      // for is the same rule without the round trip.
+      state.map = Ecs.world?.mapIndex ?? -1;
+    });
   });
-});
+}
 
 // ---- 3. the layer ----------------------------------------------------------
 

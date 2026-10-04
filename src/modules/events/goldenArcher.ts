@@ -94,25 +94,28 @@ export function closeGoldenArcher(notify = true): void {
 
 // ---- packets ------------------------------------------------------------------
 
-/** `ReceiveEventChipInfomation` (0x94): open or refresh the dialog. */
-EventBus.on('EventChipRegistrationResult', packet => {
-  const p = new EventChipRegistrationResultPacket(packet);
+/** Registers the Golden Archer's listener; the events module installs it (module.ts). */
+export function installGoldenArcher(): void {
+  /** `ReceiveEventChipInfomation` (0x94): open or refresh the dialog. */
+  EventBus.on('EventChipRegistrationResult', packet => {
+    const p = new EventChipRegistrationResultPacket(packet);
 
-  if (p.Result === RESULT_MISSING_ITEM) {
+    if (p.Result === RESULT_MISSING_ITEM) {
+      runInAction(() => {
+        state.remaining = p.RemainingInventoryCount;
+      });
+      addNotification(t('goldenArcher.noRena'), 'error', MESSAGE_MS);
+      return;
+    }
+
+    Merchant.dropNpcTalk();
     runInAction(() => {
+      state.registered = p.RegisteredCount;
       state.remaining = p.RemainingInventoryCount;
+      state.open = true;
     });
-    addNotification(t('goldenArcher.noRena'), 'error', MESSAGE_MS);
-    return;
-  }
-
-  Merchant.dropNpcTalk();
-  runInAction(() => {
-    state.registered = p.RegisteredCount;
-    state.remaining = p.RemainingInventoryCount;
-    state.open = true;
   });
-});
+}
 
 // ---- the layer ------------------------------------------------------------------
 

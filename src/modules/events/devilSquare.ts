@@ -185,82 +185,85 @@ function reset(): void {
 
 // ---- packets ---------------------------------------------------------------
 
-/** `ReceiveMoveToDevilSquareResult`. */
-EventBus.on('DevilSquareEnterResult', packet => {
-  const p = new DevilSquareEnterResultPacket(packet);
-  closeDevilSquare();
+/** Registers Devil Square's listeners; the events module installs it (module.ts). */
+export function installDevilSquare(): void {
+  /** `ReceiveMoveToDevilSquareResult`. */
+  EventBus.on('DevilSquareEnterResult', packet => {
+    const p = new DevilSquareEnterResultPacket(packet);
+    closeDevilSquare();
 
-  let text: string | null = null;
-  switch (p.Result) {
-    case DevilSquareEnterResultEnterResultEnum.Success:
-      break;
-    case DevilSquareEnterResultEnterResultEnum.Failed:
-      text = EVENT_TEXT.devilBringInvitation;
-      break;
-    case DevilSquareEnterResultEnterResultEnum.NotOpen:
-      text = EVENT_TEXT.devilTooLate;
-      break;
-    case DevilSquareEnterResultEnterResultEnum.CharacterLevelTooHigh:
-      text = EVENT_TEXT.levelTooHigh;
-      break;
-    case DevilSquareEnterResultEnterResultEnum.CharacterLevelTooLow:
-      text = EVENT_TEXT.levelTooLow;
-      break;
-    case DevilSquareEnterResultEnterResultEnum.Full:
-      text = EVENT_TEXT.devilFull;
-      break;
-    default:
-      // 6 in the original's switch: killers.
-      text = formatText(EVENT_TEXT.killersRestricted, EVENT_TEXT.devilSquare);
-      break;
-  }
-  if (text) addNotification(text, 'error', MESSAGE_MS);
-});
-
-/** `ReceiveEventZoneOpenTime`, Value 1: the invitation's answer. */
-EventBus.on('MiniGameOpeningState', packet => {
-  const p = new MiniGameOpeningStatePacket(packet);
-  if (p.GameType !== OPENING_STATE_GAME.devilSquare) return;
-
-  const minutes = p.RemainingEnteringTimeMinutes;
-  // The HUD rows ask the same question on their own timer; those answers
-  // feed the schedule and say nothing.
-  if (takeOpeningState(OPENING_STATE_GAME.devilSquare, minutes)) return;
-
-  addNotification(
-    minutes === 0
-      ? EVENT_TEXT.devilOpenNow
-      : formatText(EVENT_TEXT.devilOpensIn, minutes),
-    'info',
-    MESSAGE_MS
-  );
-});
-
-/**
- * `ReceiveDevilSquareRank`: the same 0x93 code as the Blood Castle score;
- * the socket tells them apart by length. Chaos Castle shares this table
- * (chaosCastle.ts), so it is taken only on the square.
- */
-EventBus.on('MiniGameScoreTable', packet => {
-  if (!MAPS.has(Ecs.world?.mapIndex ?? ENUM_WORLD.WD_0LORENCIA)) return;
-
-  const p = new MiniGameScoreTablePacket(packet);
-  if (p.ResultCount >= MAX_RANK_ROWS) return;
-
-  resultLeft = RESULT_SECONDS;
-  runInAction(() => {
-    state.result = {
-      myRank: p.PlayerRank,
-      rows: p.getResults().map(r => ({
-        name: r.PlayerName,
-        // Signed on the wire, read as uint32 by the generated packet (B12).
-        score: r.TotalScore | 0,
-        exp: r.BonusExperience,
-        zen: r.BonusMoney,
-      })),
-    };
+    let text: string | null = null;
+    switch (p.Result) {
+      case DevilSquareEnterResultEnterResultEnum.Success:
+        break;
+      case DevilSquareEnterResultEnterResultEnum.Failed:
+        text = EVENT_TEXT.devilBringInvitation;
+        break;
+      case DevilSquareEnterResultEnterResultEnum.NotOpen:
+        text = EVENT_TEXT.devilTooLate;
+        break;
+      case DevilSquareEnterResultEnterResultEnum.CharacterLevelTooHigh:
+        text = EVENT_TEXT.levelTooHigh;
+        break;
+      case DevilSquareEnterResultEnterResultEnum.CharacterLevelTooLow:
+        text = EVENT_TEXT.levelTooLow;
+        break;
+      case DevilSquareEnterResultEnterResultEnum.Full:
+        text = EVENT_TEXT.devilFull;
+        break;
+      default:
+        // 6 in the original's switch: killers.
+        text = formatText(EVENT_TEXT.killersRestricted, EVENT_TEXT.devilSquare);
+        break;
+    }
+    if (text) addNotification(text, 'error', MESSAGE_MS);
   });
-});
+
+  /** `ReceiveEventZoneOpenTime`, Value 1: the invitation's answer. */
+  EventBus.on('MiniGameOpeningState', packet => {
+    const p = new MiniGameOpeningStatePacket(packet);
+    if (p.GameType !== OPENING_STATE_GAME.devilSquare) return;
+
+    const minutes = p.RemainingEnteringTimeMinutes;
+    // The HUD rows ask the same question on their own timer; those answers
+    // feed the schedule and say nothing.
+    if (takeOpeningState(OPENING_STATE_GAME.devilSquare, minutes)) return;
+
+    addNotification(
+      minutes === 0
+        ? EVENT_TEXT.devilOpenNow
+        : formatText(EVENT_TEXT.devilOpensIn, minutes),
+      'info',
+      MESSAGE_MS
+    );
+  });
+
+  /**
+   * `ReceiveDevilSquareRank`: the same 0x93 code as the Blood Castle score;
+   * the socket tells them apart by length. Chaos Castle shares this table
+   * (chaosCastle.ts), so it is taken only on the square.
+   */
+  EventBus.on('MiniGameScoreTable', packet => {
+    if (!MAPS.has(Ecs.world?.mapIndex ?? ENUM_WORLD.WD_0LORENCIA)) return;
+
+    const p = new MiniGameScoreTablePacket(packet);
+    if (p.ResultCount >= MAX_RANK_ROWS) return;
+
+    resultLeft = RESULT_SECONDS;
+    runInAction(() => {
+      state.result = {
+        myRank: p.PlayerRank,
+        rows: p.getResults().map(r => ({
+          name: r.PlayerName,
+          // Signed on the wire, read as uint32 by the generated packet (B12).
+          score: r.TotalScore | 0,
+          exp: r.BonusExperience,
+          zen: r.BonusMoney,
+        })),
+      };
+    });
+  });
+}
 
 // ---- 3. the layer ----------------------------------------------------------
 

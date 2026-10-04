@@ -6,12 +6,20 @@ Gameplay, one folder per module. A module owns its packets, its state and its ac
 ## What a module is
 - `module.ts`: `defineModule({ id, core?, requires?, install })`. `id` is the folder name; `core`
   modules are always on; `requires` turns a module off when one it needs is off (`guild_war` needs
-  `guild`). `install` runs once at boot.
+  `guild`). `install` runs once at boot. When the module's handlers live in several files, it
+  calls each file's `install<Name>()` in the order their listeners should run (`events`,
+  `quests`, `skills`).
 - `net.ts`: the packet handlers, registered by `installNet()` (its `install`). Importing the file
   registers nothing.
 - `modules.ts` lists every module in install order, and `src/app/logic.ts` calls
   `installModules(MODULES)`. That order is the listener order for a packet several modules
-  handle (pinned by `src/app/listenerOrder.golden.test.ts`). Keep it.
+  handle (pinned by `src/app/listenerOrder.golden.test.ts`). Keep it. The constraints today, each
+  also noted next to its entry (these three registered at import before, ahead of every module):
+  - `quests` before `hero` and `combat`: its `CharacterInformation` and `ObjectGotKilled`
+    listeners run first.
+  - `skills` before `hero`: the master level reads `ExperienceGained` and
+    `MasterCharacterLevelUpdate` (and their `Extended` forms) first.
+  - `events` before `warp`: Crywolf's `warpCompleted` runs first.
 - state: a mobx store in `state.ts` (`Hero`, `Session`, `Bag`, `Merchant`, ...; older ones keep their
   own file: `Social`, `Economy`, `Messenger`, `GmPanel`) or plain module state.
 - `index.ts`: the module's door, a small list of what windows and other modules may use (its state
@@ -33,9 +41,11 @@ There is no central store any more. What used to be `Store` lives here: `Hero` (
 controllers'. When two modules would import each other, one hands the other a port instead
 (`Bag.grids` from economy, `Bag.beforeConsume` from npc_shop, chat's notification sink from social).
 
-Some handlers register outside `logic.ts` order: the `quests` and `events` entry files register
-when their facade is first imported (`session/net.ts`, `npc_shop/net.ts`), `skills/masterLevel.ts`
-and `masterTree.ts` through the `skills` facade, and `band` through `installBandNet()`.
+A few listeners still register at import, so ahead of every module's: `warp/warpScopeHold.ts`,
+`band/music/index.ts` (`requestWarp`), `events/duel.ts`'s `wsClosed` reset (see Known gaps),
+`versions/shared/maps/kanturu2/gateway.ts` (`KanturuEnterResult`, before `events/kanturu.ts`) and
+`controllers/terrain/terrainAttributeUpdates.ts`. Controllers, ECS systems and `app/boot.tsx` add
+theirs at runtime, after the modules.
 
 ## The modules
 - [band](band/readme.md): instruments and band play from MIDI files, relayed by the proxy.
@@ -75,7 +85,8 @@ and `masterTree.ts` through the `skills` facade, and `band` through `installBand
 ## Depends on / used by
 - uses: `src/controllers` (through their doors), `src/core`, `src/ecs`, `controllers/interface/uiState.ts` (the
   page), each other's doors, packet codecs in `versions/shared/packets/`.
-- used by: `src/app/logic.ts` (nets), windows and HUD in `versions/shared/ui/`, ECS systems.
+- used by: `src/app/logic.ts` (`installModules(MODULES)`), windows and HUD in
+  `versions/shared/ui/`, ECS systems.
 - a module never imports a window (`modules-do-not-draw` in `tools/checks/rules.ts`).
 
 ## Change it
@@ -87,19 +98,20 @@ and `masterTree.ts` through the `skills` facade, and `band` through `installBand
 - add state: a field on the module's state (`state.ts`), exported through `index.ts`; windows read
   it there. A controller that needs it gets a reader through a hook the app or the module sets.
 
-## Not modules yet
-- `events`, the `quests` entry files (`killCounters`, `legacyQuests`, `npcDialogue`, `questLog`,
-  `balgassEntry`), `skills/masterLevel.ts` and `masterTree.ts` still register their listeners at
-  import, so they cannot be switched off. Moving them into an `install` must keep each packet's
-  order with the listeners that stay at import: `events/duel.ts` runs before
-  `warp/warpScopeHold.ts` on `wsClosed`, `maps/kanturu2/gateway.ts` before `events/kanturu.ts` on
-  `KanturuEnterResult`, and `masterLevel` before `hero/net.ts` on the experience and master level
-  packets. Such a module goes first in `modules.ts`.
+## Known gaps
+- `events/duel.ts` registers its `wsClosed` reset at import: it runs before
+  `warp/warpScopeHold.ts`'s, which registers at import too, and an install would put it after.
+  Once warp registers the scope hold in its install (after `events`, before `session`, whose
+  `wsClosed` runs after it), the reset moves into `installDuel`.
 - `social` (core), `economy` and `gm` have a `module.ts` with nothing to install: their state is
   loaded by whoever imports it. Turning `economy` off turns off `vault`, `chaos_mix`, `trade` and
-  `personal_shop` (they require it). Windows do not yet hide when their module is off.
+  `personal_shop` (they require it).
+- Windows do not yet hide when their module is off, and the `events` and `quests` facades keep
+  their frame update and client-side entry points (their readmes, "When it is off").
 
 ## Tests
 - `module.test.ts`: install order, disabled and core modules, requirements.
 - `modules.test.ts`: every `module.ts` is listed once and named after its folder.
+- `switchOff.test.ts`: events, quests and skills register their listeners when installed, not
+  when loaded; with events or quests off, their packets keep only the other modules' listeners.
 - each module lists its own `*.test.ts`.

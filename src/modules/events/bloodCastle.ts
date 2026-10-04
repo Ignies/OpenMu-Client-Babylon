@@ -375,64 +375,6 @@ function useNpc(npc: { npcType: number }): boolean {
   return false;
 }
 
-// ---- packets ---------------------------------------------------------------
-
-/** `ReceiveMoveToEventMatchResult`: close the window, explain a refusal. */
-EventBus.on('BloodCastleEnterResult', packet => {
-  const p = new BloodCastleEnterResultPacket(packet);
-  closeBloodCastle();
-
-  const zone = EVENT_TEXT.bloodCastleZone;
-  let text: string | null = null;
-  switch (p.Result) {
-    case BloodCastleEnterResultEnterResultEnum.Success:
-      break;
-    case BloodCastleEnterResultEnterResultEnum.Failed:
-      text = EVENT_TEXT.cloakLevelWrong;
-      break;
-    case BloodCastleEnterResultEnterResultEnum.NotOpen:
-      text = formatText(EVENT_TEXT.timePassed, zone);
-      break;
-    case BloodCastleEnterResultEnterResultEnum.CharacterLevelTooHigh:
-      text = EVENT_TEXT.levelTooHigh;
-      break;
-    case BloodCastleEnterResultEnterResultEnum.CharacterLevelTooLow:
-      text = EVENT_TEXT.levelTooLow;
-      break;
-    case BloodCastleEnterResultEnterResultEnum.Full:
-      text = formatText(EVENT_TEXT.capacityReached, zone, MAX_MEN);
-      break;
-    default:
-      // 6 / 7 of the original's switch: per-day limit, killers.
-      text =
-        (p.Result as number) === 6
-          ? formatText(EVENT_TEXT.timesPerDay, TIMES_PER_DAY)
-          : formatText(EVENT_TEXT.killersRestricted, EVENT_TEXT.bloodCastle);
-      break;
-  }
-  if (text) addNotification(text, 'error', MESSAGE_MS);
-});
-
-/** `ReceiveEventZoneOpenTime`, Value 2: the cloak's answer. */
-EventBus.on('MiniGameOpeningState', packet => {
-  const p = new MiniGameOpeningStatePacket(packet);
-  if (p.GameType !== OPENING_STATE_GAME.bloodCastle) return;
-
-  const minutes = p.RemainingEnteringTimeMinutes;
-  // The HUD rows ask the same question on their own timer; those answers
-  // feed the schedule and say nothing.
-  if (takeOpeningState(OPENING_STATE_GAME.bloodCastle, minutes)) return;
-
-  const zone = EVENT_TEXT.bloodCastleZone;
-  addNotification(
-    minutes === 0
-      ? formatText(EVENT_TEXT.enterNow, zone)
-      : formatText(EVENT_TEXT.enterAfterMinutes, minutes, zone),
-    'info',
-    MESSAGE_MS
-  );
-});
-
 /**
  * `HangerBloodCastleQuestItem(data->m_wIndex)` then
  * `c->EtcPart = data->m_byItemType` (NewBloodCastleSystem.cpp:48-58): the
@@ -458,54 +400,115 @@ function readQuestItem(p: BloodCastleStatePacket): void {
   });
 }
 
-/** `SetMatchGameCommand` (NewBloodCastleSystem.cpp): states 0..4. */
-EventBus.on('BloodCastleState', packet => {
-  const p = new BloodCastleStatePacket(packet);
-  if (p.State === BloodCastleStateStatusEnum.BloodCastleStarted) weaponReturned = false;
+// ---- packets ---------------------------------------------------------------
 
-  switch (p.State) {
-    case BloodCastleStateStatusEnum.BloodCastleStarted:
-    case BloodCastleStateStatusEnum.BloodCastleGateNotDestroyed:
-    case BloodCastleStateStatusEnum.BloodCastleGateDestroyed:
-      runInAction(() => {
-        state.timer = {
-          seconds: p.RemainSecond,
-          killed: p.CurMonster,
-          maxKill: p.MaxMonster,
-          gateDestroyed:
-            p.State === BloodCastleStateStatusEnum.BloodCastleGateDestroyed,
-          running: true,
-        };
-      });
-      readQuestItem(p);
-      break;
-    case BloodCastleStateStatusEnum.BloodCastleEnded:
-      clearTimer();
-      break;
-    default:
-      // 5..10 belong to Chaos Castle (chaosCastle.ts).
-      break;
-  }
-});
+/** Registers Blood Castle's listeners; the events module installs it (module.ts). */
+export function installBloodCastle(): void {
+  /** `ReceiveMoveToEventMatchResult`: close the window, explain a refusal. */
+  EventBus.on('BloodCastleEnterResult', packet => {
+    const p = new BloodCastleEnterResultPacket(packet);
+    closeBloodCastle();
 
-/** `ReceiveDevilSquareRank` with the 29-byte Blood Castle body. */
-EventBus.on('BloodCastleScore', packet => {
-  const p = new BloodCastleScorePacket(packet);
-  if (p.Success) weaponReturned = true;
-  scoreLeft = RESULT_SECONDS;
-  runInAction(() => {
-    state.score = {
-      success: p.Success,
-      name: p.PlayerName,
-      // The generated reader is `getUint32`; the server sends a signed score
-      // (a failed castle is -300 -> 4294966996 otherwise, B12). `| 0` is the
-      // int32 reinterpretation without touching the generated file.
-      score: p.TotalScore | 0,
-      exp: p.BonusExperience,
-      zen: p.BonusMoney,
-    };
+    const zone = EVENT_TEXT.bloodCastleZone;
+    let text: string | null = null;
+    switch (p.Result) {
+      case BloodCastleEnterResultEnterResultEnum.Success:
+        break;
+      case BloodCastleEnterResultEnterResultEnum.Failed:
+        text = EVENT_TEXT.cloakLevelWrong;
+        break;
+      case BloodCastleEnterResultEnterResultEnum.NotOpen:
+        text = formatText(EVENT_TEXT.timePassed, zone);
+        break;
+      case BloodCastleEnterResultEnterResultEnum.CharacterLevelTooHigh:
+        text = EVENT_TEXT.levelTooHigh;
+        break;
+      case BloodCastleEnterResultEnterResultEnum.CharacterLevelTooLow:
+        text = EVENT_TEXT.levelTooLow;
+        break;
+      case BloodCastleEnterResultEnterResultEnum.Full:
+        text = formatText(EVENT_TEXT.capacityReached, zone, MAX_MEN);
+        break;
+      default:
+        // 6 / 7 of the original's switch: per-day limit, killers.
+        text =
+          (p.Result as number) === 6
+            ? formatText(EVENT_TEXT.timesPerDay, TIMES_PER_DAY)
+            : formatText(EVENT_TEXT.killersRestricted, EVENT_TEXT.bloodCastle);
+        break;
+    }
+    if (text) addNotification(text, 'error', MESSAGE_MS);
   });
-});
+
+  /** `ReceiveEventZoneOpenTime`, Value 2: the cloak's answer. */
+  EventBus.on('MiniGameOpeningState', packet => {
+    const p = new MiniGameOpeningStatePacket(packet);
+    if (p.GameType !== OPENING_STATE_GAME.bloodCastle) return;
+
+    const minutes = p.RemainingEnteringTimeMinutes;
+    // The HUD rows ask the same question on their own timer; those answers
+    // feed the schedule and say nothing.
+    if (takeOpeningState(OPENING_STATE_GAME.bloodCastle, minutes)) return;
+
+    const zone = EVENT_TEXT.bloodCastleZone;
+    addNotification(
+      minutes === 0
+        ? formatText(EVENT_TEXT.enterNow, zone)
+        : formatText(EVENT_TEXT.enterAfterMinutes, minutes, zone),
+      'info',
+      MESSAGE_MS
+    );
+  });
+
+  /** `SetMatchGameCommand` (NewBloodCastleSystem.cpp): states 0..4. */
+  EventBus.on('BloodCastleState', packet => {
+    const p = new BloodCastleStatePacket(packet);
+    if (p.State === BloodCastleStateStatusEnum.BloodCastleStarted) weaponReturned = false;
+
+    switch (p.State) {
+      case BloodCastleStateStatusEnum.BloodCastleStarted:
+      case BloodCastleStateStatusEnum.BloodCastleGateNotDestroyed:
+      case BloodCastleStateStatusEnum.BloodCastleGateDestroyed:
+        runInAction(() => {
+          state.timer = {
+            seconds: p.RemainSecond,
+            killed: p.CurMonster,
+            maxKill: p.MaxMonster,
+            gateDestroyed:
+              p.State === BloodCastleStateStatusEnum.BloodCastleGateDestroyed,
+            running: true,
+          };
+        });
+        readQuestItem(p);
+        break;
+      case BloodCastleStateStatusEnum.BloodCastleEnded:
+        clearTimer();
+        break;
+      default:
+        // 5..10 belong to Chaos Castle (chaosCastle.ts).
+        break;
+    }
+  });
+
+  /** `ReceiveDevilSquareRank` with the 29-byte Blood Castle body. */
+  EventBus.on('BloodCastleScore', packet => {
+    const p = new BloodCastleScorePacket(packet);
+    if (p.Success) weaponReturned = true;
+    scoreLeft = RESULT_SECONDS;
+    runInAction(() => {
+      state.score = {
+        success: p.Success,
+        name: p.PlayerName,
+        // The generated reader is `getUint32`; the server sends a signed score
+        // (a failed castle is -300 -> 4294966996 otherwise, B12). `| 0` is the
+        // int32 reinterpretation without touching the generated file.
+        score: p.TotalScore | 0,
+        exp: p.BonusExperience,
+        zen: p.BonusMoney,
+      };
+    });
+  });
+}
 
 // ---- 3. the layer ----------------------------------------------------------
 

@@ -690,174 +690,177 @@ reaction(
   }
 );
 
-/**
- * `QuestMonsterKillCountPlugIn` counts the killer's kills and never sends the
- * new counts, so a hero kill that a running quest counts asks for its state.
- */
-EventBus.on('ObjectGotKilled', packet => {
-  if (!GameOptions.questTracker && !state.myQuestOpen) return;
-  const p = new ObjectGotKilledPacket(packet);
-  const world = Ecs.world;
-  const hero = world?.playerEntity;
-  if (!world || !hero || (p.KillerId & 0x7fff) !== hero.netId) return;
+/** Registers the quest log's listeners; the quests module installs it (module.ts). */
+export function installQuestLog(): void {
+  /**
+   * `QuestMonsterKillCountPlugIn` counts the killer's kills and never sends the
+   * new counts, so a hero kill that a running quest counts asks for its state.
+   */
+  EventBus.on('ObjectGotKilled', packet => {
+    if (!GameOptions.questTracker && !state.myQuestOpen) return;
+    const p = new ObjectGotKilledPacket(packet);
+    const world = Ecs.world;
+    const hero = world?.playerEntity;
+    if (!world || !hero || (p.KillerId & 0x7fff) !== hero.netId) return;
 
-  const type = world.getByNetId(p.KilledId & 0x7fff)?.npcType;
-  if (type === undefined) return;
-  for (const key of state.active) {
-    if (countsKillsOf(key, type)) scheduleKillRefresh(key);
-  }
-});
-
-EventBus.on('AvailableQuests', packet => {
-  const p = new AvailableQuestsPacket(packet);
-  const available = offeredQuests(p);
-
-  // `ProcessQuestListReceive`: while the S6 dialogue is up the list is drawn
-  // inside it (npcDialogue.ts); the stand-alone list window is the fallback.
-  const inDialogue = npcDialogueOpen();
-
-  runInAction(() => {
-    state.npcNumber = p.QuestNpcNumber;
-    state.available = available;
-    state.listOpen = !inDialogue && available.length > 0;
-    state.busy = false;
+    const type = world.getByNetId(p.KilledId & 0x7fff)?.npcType;
+    if (type === undefined) return;
+    for (const key of state.active) {
+      if (countsKillsOf(key, type)) scheduleKillRefresh(key);
+    }
   });
 
-  if (inDialogue) return;
-  if (available.length === 0) {
-    addNotification(t('quest.npcHasNone'), 'info');
-    Merchant.dropNpcTalk();
-  } else {
-    playUiSound('window');
-  }
-});
+  EventBus.on('AvailableQuests', packet => {
+    const p = new AvailableQuestsPacket(packet);
+    const available = offeredQuests(p);
 
-// F6 03 - the answer to `EventQuestStateListRequest`; the original's
-// handler is unknown / a no-op, so this only records that it came.
-EventBus.on('QuestEventResponse', packet => {
-  if (packet.byteLength < QuestEventResponsePacket.Length!) return;
-  runInAction(() => {
-    state.eventQuestsReceived = true;
-  });
-});
+    // `ProcessQuestListReceive`: while the S6 dialogue is up the list is drawn
+    // inside it (npcDialogue.ts); the stand-alone list window is the fallback.
+    const inDialogue = npcDialogueOpen();
 
-EventBus.on('QuestStepInfo', packet => {
-  const p = new QuestStepInfoPacket(packet);
+    runInAction(() => {
+      state.npcNumber = p.QuestNpcNumber;
+      state.available = available;
+      state.listOpen = !inDialogue && available.length > 0;
+      state.busy = false;
+    });
 
-  // `SetCurQuestProgress` hides only a visible progress window; the dialogue's list may still be up.
-  if (p.QuestStepNumber === STEP_NUMBER_UNAVAILABLE) {
-    if (state.progressOpen) {
-      closeQuestProgress();
+    if (inDialogue) return;
+    if (available.length === 0) {
+      addNotification(t('quest.npcHasNone'), 'info');
+      Merchant.dropNpcTalk();
     } else {
+      playUiSound('window');
+    }
+  });
+
+  // F6 03 - the answer to `EventQuestStateListRequest`; the original's
+  // handler is unknown / a no-op, so this only records that it came.
+  EventBus.on('QuestEventResponse', packet => {
+    if (packet.byteLength < QuestEventResponsePacket.Length!) return;
+    runInAction(() => {
+      state.eventQuestsReceived = true;
+    });
+  });
+
+  EventBus.on('QuestStepInfo', packet => {
+    const p = new QuestStepInfoPacket(packet);
+
+    // `SetCurQuestProgress` hides only a visible progress window; the dialogue's list may still be up.
+    if (p.QuestStepNumber === STEP_NUMBER_UNAVAILABLE) {
+      if (state.progressOpen) {
+        closeQuestProgress();
+      } else {
+        runInAction(() => {
+          state.busy = false;
+        });
+      }
+      addNotification(t(MSG_UNAVAILABLE), 'error');
+      return;
+    }
+
+    const key = questKey(p.QuestStepNumber, p.QuestGroup);
+    setProgressContents(key);
+    progressFromNpc = true;
+    runInAction(() => {
+      state.listOpen = false;
+      state.progressOpen = true;
+    });
+    playUiSound('window');
+  });
+
+  EventBus.on('QuestProgress', packet => {
+    const p = new QuestProgressPacket(packet);
+    const key = storeProgress(p);
+    setProgressContents(key);
+    progressFromNpc = true;
+    runInAction(() => {
+      state.mode = 'requestReward';
+      state.listOpen = false;
+      state.progressOpen = true;
+    });
+  });
+
+  EventBus.on('QuestState', packet => {
+    const p = new QuestStatePacket(packet);
+    storeProgress(p);
+  });
+
+  EventBus.on('QuestCompletionResponse', packet => {
+    const p = new QuestCompletionResponsePacket(packet);
+    const key = questKey(p.QuestNumber, p.QuestGroup);
+
+    runInAction(() => {
+      state.busy = false;
+    });
+
+    if (p.IsQuestCompleted) {
+      // `ReceiveQuestCompleteResult`: Hide of a visible progress window runs its `ProcessClosing`.
+      const wasOpen = state.progressOpen;
+      removeActive(key);
+      if (wasOpen) closeQuestProgress();
+      addNotification(
+        t('quest.completedNamed', { subject: questSubject(key) }),
+        'info'
+      );
+    } else {
+      addNotification(t(MSG_NOT_FULFILLED), 'error');
+    }
+  });
+
+  EventBus.on('QuestCancelled', packet => {
+    const p = new QuestCancelledPacket(packet);
+    removeActive(questKey(p.QuestNumber, p.QuestGroup));
+  });
+
+  EventBus.on('QuestStateList', packet => {
+    const p = new QuestStateListPacket(packet);
+    const keys = p.getQuests().map(q => questKey(q.Number, q.Group));
+    runInAction(() => {
+      state.active = keys;
+      for (const key of [...state.progress.keys()]) if (!keys.includes(key)) state.progress.delete(key);
+      if (!keys.includes(state.selectedKey)) state.selectedKey = 0;
+    });
+  });
+
+  // `ReceiveTalk` / `ReceiveQuestState` start with `HideAll`; the talk already
+  // sent the close request, so the windows only hide.
+  EventBus.on('npcTalkStarted', () => {
+    runInAction(() => {
+      state.listOpen = false;
+      state.progressOpen = false;
+      state.busy = false;
+    });
+  });
+
+  // `UpdateSendMoveInterface`: a walk closes the NPC's list and progress windows.
+  EventBus.on('heroWalked', () => {
+    closeQuestList();
+    closeQuestProgress();
+  });
+
+  // OpenMU resends the character information on a bulk stat add or a reset;
+  // only a different hero starts from an empty log.
+  let heroName: string | null = null;
+  EventBus.on('CharacterInformation', () => {
+    if (Hero.name !== heroName) {
+      heroName = Hero.name;
+      requestedStates.clear();
+      cancelKillRefreshes();
       runInAction(() => {
+        state.active = [];
+        state.progress.clear();
+        state.available = [];
+        state.listOpen = false;
+        state.progressOpen = false;
+        state.myQuestOpen = false;
+        state.selectedKey = 0;
         state.busy = false;
       });
     }
-    addNotification(t(MSG_UNAVAILABLE), 'error');
-    return;
-  }
-
-  const key = questKey(p.QuestStepNumber, p.QuestGroup);
-  setProgressContents(key);
-  progressFromNpc = true;
-  runInAction(() => {
-    state.listOpen = false;
-    state.progressOpen = true;
+    requestActiveQuests();
   });
-  playUiSound('window');
-});
-
-EventBus.on('QuestProgress', packet => {
-  const p = new QuestProgressPacket(packet);
-  const key = storeProgress(p);
-  setProgressContents(key);
-  progressFromNpc = true;
-  runInAction(() => {
-    state.mode = 'requestReward';
-    state.listOpen = false;
-    state.progressOpen = true;
-  });
-});
-
-EventBus.on('QuestState', packet => {
-  const p = new QuestStatePacket(packet);
-  storeProgress(p);
-});
-
-EventBus.on('QuestCompletionResponse', packet => {
-  const p = new QuestCompletionResponsePacket(packet);
-  const key = questKey(p.QuestNumber, p.QuestGroup);
-
-  runInAction(() => {
-    state.busy = false;
-  });
-
-  if (p.IsQuestCompleted) {
-    // `ReceiveQuestCompleteResult`: Hide of a visible progress window runs its `ProcessClosing`.
-    const wasOpen = state.progressOpen;
-    removeActive(key);
-    if (wasOpen) closeQuestProgress();
-    addNotification(
-      t('quest.completedNamed', { subject: questSubject(key) }),
-      'info'
-    );
-  } else {
-    addNotification(t(MSG_NOT_FULFILLED), 'error');
-  }
-});
-
-EventBus.on('QuestCancelled', packet => {
-  const p = new QuestCancelledPacket(packet);
-  removeActive(questKey(p.QuestNumber, p.QuestGroup));
-});
-
-EventBus.on('QuestStateList', packet => {
-  const p = new QuestStateListPacket(packet);
-  const keys = p.getQuests().map(q => questKey(q.Number, q.Group));
-  runInAction(() => {
-    state.active = keys;
-    for (const key of [...state.progress.keys()]) if (!keys.includes(key)) state.progress.delete(key);
-    if (!keys.includes(state.selectedKey)) state.selectedKey = 0;
-  });
-});
-
-// `ReceiveTalk` / `ReceiveQuestState` start with `HideAll`; the talk already
-// sent the close request, so the windows only hide.
-EventBus.on('npcTalkStarted', () => {
-  runInAction(() => {
-    state.listOpen = false;
-    state.progressOpen = false;
-    state.busy = false;
-  });
-});
-
-// `UpdateSendMoveInterface`: a walk closes the NPC's list and progress windows.
-EventBus.on('heroWalked', () => {
-  closeQuestList();
-  closeQuestProgress();
-});
-
-// OpenMU resends the character information on a bulk stat add or a reset;
-// only a different hero starts from an empty log.
-let heroName: string | null = null;
-EventBus.on('CharacterInformation', () => {
-  if (Hero.name !== heroName) {
-    heroName = Hero.name;
-    requestedStates.clear();
-    cancelKillRefreshes();
-    runInAction(() => {
-      state.active = [];
-      state.progress.clear();
-      state.available = [];
-      state.listOpen = false;
-      state.progressOpen = false;
-      state.myQuestOpen = false;
-      state.selectedKey = 0;
-      state.busy = false;
-    });
-  }
-  requestActiveQuests();
-});
+}
 
 function reset(): void {
   runInAction(() => {

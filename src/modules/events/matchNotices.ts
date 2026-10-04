@@ -146,21 +146,24 @@ function reset(): void {
 
 // ---- packets ---------------------------------------------------------------
 
-EventBus.on('UpdateMiniGameState', packet => {
-  const p = new UpdateMiniGameStatePacket(packet);
-  const text = COUNTDOWN_TEXT[p.State];
-  if (!text) return;
-  runInAction(() => {
-    state.template = text;
-    state.left = COUNTDOWN_SECONDS;
+/** Registers the notices' listeners; the events module installs it (module.ts). */
+export function installMatchNotices(): void {
+  EventBus.on('UpdateMiniGameState', packet => {
+    const p = new UpdateMiniGameStatePacket(packet);
+    const text = COUNTDOWN_TEXT[p.State];
+    if (!text) return;
+    runInAction(() => {
+      state.template = text;
+      state.left = COUNTDOWN_SECONDS;
+    });
   });
-});
 
-EventBus.on('MapEventState', packet => {
-  const p = new MapEventStatePacket(packet);
-  const key = MAP_EVENT_TEXT[p.Event];
-  if (p.Enable && key) Notices.create(t(key));
-});
+  EventBus.on('MapEventState', packet => {
+    const p = new MapEventStatePacket(packet);
+    const key = MAP_EVENT_TEXT[p.Event];
+    if (p.Enable && key) Notices.create(t(key));
+  });
+}
 
 // ---- 3. the layer ----------------------------------------------------------
 
