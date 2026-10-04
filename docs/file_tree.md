@@ -18,7 +18,7 @@ install/           the server installer and manager (`mu`): see install/readme.m
 openmu/            our OpenMU plugins, one DLL layered on the official OpenMU image
 servers/           one folder per listed world: its start-screen image (servers/readme.md)
 serverlist.md      the worlds the start screen offers (format inside)
-docker/            local OpenMU stack
+docker/            development container: dev server + proxy from this checkout (docker/readme.md)
 .github/           CI workflow, PR and issue templates
 ```
 

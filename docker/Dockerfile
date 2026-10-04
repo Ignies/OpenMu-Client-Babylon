@@ -1,4 +1,4 @@
-FROM oven/bun:1.2-slim
+FROM oven/bun:1.4.2-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 
