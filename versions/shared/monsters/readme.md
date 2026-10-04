@@ -20,7 +20,13 @@ row are named from `NpcName_Eng.txt`, and so are the ones whose row names someon
 Caren, not Lumen; 255 is Lumen; 258 is Luke, not Silvia; 229 is Marlon): the folder follows the
 original client's name, the row keeps its own. The same goes for rows that name another monster
 (290-294, the Chief Skeleton Warriors, Giant Ogres and Magic Skeletons, 151, 318, 400, 401, 430,
-69): the folder follows `NpcName_Eng.txt` and `_enum.h`.
+69): the folder follows `NpcName_Eng.txt` and `_enum.h`. So do the rows with a wrong or misspelt name:
+80 is the Golden Lizard King and 81 the Golden Vepar, 79 the Golden Derkon, the Blood Castle "Orc
+Warrior / Orc Archer / Spirit Soldier / Spirit Knight" rows are the Chief Skeleton Warriors and
+Archers, Dark Skull Soldiers and Red Skeleton Knights, and 54, 61, 63, 67, 75 are the Golden
+Soldier, (Death) Beam Knight, Metal Balrog and Great Drakan. 421 stays `werewolf_421`: `_enum.h`
+calls it WEREWOLF2 and the client draws it with MODEL_WEREWOLF2 (GMNewTown.cpp:910); the
+`NpcName_Eng.txt` lines 419-421 are shifted by one.
 
 ## Public API
 - `MonstersDatabase.get(id)`: the original table's row for a type (`stats` with `Numb` and `Name`),
