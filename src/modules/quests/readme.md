@@ -15,9 +15,11 @@ with its own MobX state, behind the `quests` facade (`index.ts`).
 ## How it works
 - `layers.ts` is the only list of entries (`QuestLayer`, `layer.ts`); `update` and `reset` run over
   it in order, so an entry that reads another comes after it.
-- Each entry registers its `EventBus.on` handlers in its `install<Entry>()`. `net.ts` (`installNet`,
-  the module's install) calls them in a fixed order, which is the order a packet several entries
-  handle runs them in (`AvailableQuests`: the dialogue, then the log). Importing a file registers nothing.
+- Each entry registers its `EventBus.on` handlers in its `install<Entry>()`. The module's install
+  (`module.ts`) calls them in a fixed order, then `installNet` (`net.ts`); a packet several entries
+  handle runs them in that order (`AvailableQuests`: the dialogue, then the log). Importing a file
+  registers nothing. The module installs before `hero` and `combat` (`../modules.ts`): its
+  `CharacterInformation` and `ObjectGotKilled` listeners run first, as when they registered at import.
 - Quest state belongs to the character: `reset` only closes NPC windows. A `CharacterInformation`
   with a new hero name clears the state; every one asks for the legacy and Season 6 states again.
 - `questData.ts` loads `Quest_<lang>.bmd`, `Dialog_<lang>.bmd`, `QuestProgress.bmd` and
@@ -66,7 +68,7 @@ requests go unanswered). No bubbles show: they wait for the quest list.
   plain reader functions (MobX `observable` for what a window renders) and handlers, then the
   exported `QuestLayer` with `update` / `reset`. Add it to `layers.ts` after any entry it reads.
 - handle a quest packet: `EventBus.on(...)` in the `install<Entry>()` of the entry that owns the
-  state. A new entry's install goes in `net.ts`, where its listeners should run.
+  state. A new entry's install goes in `module.ts`, where its listeners should run.
 - change a window: `versions/shared/ui/windows/quests/index.tsx` (tracker: `tracker.tsx`).
 - change an objective line: `objectives.ts` (shared by the log and the tracker).
 

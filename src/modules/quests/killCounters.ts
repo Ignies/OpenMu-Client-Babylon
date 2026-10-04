@@ -68,7 +68,7 @@ function setKillInfo(pairs: { monsterType: number; count: number }[] | null): vo
   });
 }
 
-/** Registers the kill counters' listeners; the quests module installs it (net.ts). */
+/** Registers the kill counters' listeners; the quests module installs it (module.ts). */
 export function installKillCounters(): void {
   // `ReceiveQuestMonKillInfo` never reads the result byte, and OpenMU leaves it at 1.
   EventBus.on('LegacyQuestMonsterKillInfo', packet => {

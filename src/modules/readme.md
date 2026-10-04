@@ -7,7 +7,7 @@ Gameplay, one folder per module. A module owns its packets, its state and its ac
 - `module.ts`: `defineModule({ id, core?, requires?, install })`. `id` is the folder name; `core`
   modules are always on; `requires` turns a module off when one it needs is off (`guild_war` needs
   `guild`). `install` runs once at boot. When the module's handlers live in several files, it
-  calls each file's `install<Name>()` in the order their listeners should run (`skills`).
+  calls each file's `install<Name>()` in the order their listeners should run (`quests`, `skills`).
 - `net.ts`: the packet handlers, registered by `installNet()` (its `install`). Importing the file
   registers nothing.
 - `modules.ts` lists every module in install order, and `src/app/logic.ts` calls

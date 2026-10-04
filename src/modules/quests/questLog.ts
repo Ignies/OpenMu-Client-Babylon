@@ -690,7 +690,7 @@ reaction(
   }
 );
 
-/** Registers the quest log's listeners; the quests module installs it (net.ts). */
+/** Registers the quest log's listeners; the quests module installs it (module.ts). */
 export function installQuestLog(): void {
   /**
    * `QuestMonsterKillCountPlugIn` counts the killer's kills and never sends the

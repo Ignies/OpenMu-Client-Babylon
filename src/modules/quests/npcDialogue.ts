@@ -266,7 +266,7 @@ export function answerNpcDialogue(index: number): void {
 
 // ---- packet → state ----------------------------------------------------------
 
-/** Registers the NPC dialogue's listeners; the quests module installs it (net.ts). */
+/** Registers the NPC dialogue's listeners; the quests module installs it (module.ts). */
 export function installNpcDialogue(): void {
   /**
    * `ProcessQuestListReceive`: while the dialogue is up the NPC's list goes

@@ -672,7 +672,7 @@ function evolveHero(cls: number, step: number): void {
 
 // ---- packet handlers (ReceiveQuestHistory / State / Result / Prize) -------
 
-/** Registers the legacy quest chain's listeners; the quests module installs it (net.ts). */
+/** Registers the legacy quest chain's listeners; the quests module installs it (module.ts). */
 export function installLegacyQuests(): void {
   EventBus.on('LegacyQuestStateList', packet => {
     const p = new LegacyQuestStateListPacket(packet);

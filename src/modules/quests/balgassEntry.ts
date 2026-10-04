@@ -155,7 +155,7 @@ export function cancelBalgassEntry(): void {
   Merchant.dropNpcTalk();
 }
 
-/** Registers the entry boxes' listeners; the quests module installs it (net.ts). */
+/** Registers the entry boxes' listeners; the quests module installs it (module.ts). */
 export function installBalgassEntry(): void {
   // Another talk started: that talk already sends the close for this one.
   EventBus.on('npcTalkStarted', () => hide());
