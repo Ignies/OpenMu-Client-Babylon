@@ -27,6 +27,8 @@ export type Config = {
   marketCommission: number;
   /** The world's `server.json` setting: hold the hit request until the blow lands (off = the original). */
   heldHitRequest: boolean;
+  /** Optional client modules this world turns off, comma separated (`server.json` `modulesOff`). */
+  modulesOff: string;
 };
 
 const KEYS: Record<keyof Config, string> = {
@@ -53,6 +55,7 @@ const KEYS: Record<keyof Config, string> = {
   marketFee: 'MU_MARKET_FEE',
   marketCommission: 'MU_MARKET_COMMISSION',
   heldHitRequest: 'MU_HELD_HIT_REQUEST',
+  modulesOff: 'MU_MODULES_OFF',
 };
 
 export const DEFAULTS: Config = {
@@ -79,6 +82,7 @@ export const DEFAULTS: Config = {
   marketFee: 0,
   marketCommission: 0,
   heldHitRequest: false,
+  modulesOff: '',
 };
 
 /** Where players open the client. */

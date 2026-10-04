@@ -112,14 +112,17 @@ connect server's own list (`Servers.serverList`) is filled by `session/net.ts`.
 
 ### serverManifest.ts
 - `server.json`, served by the world's stack (the installer writes it, `install/readme.md`):
-  `{ "version": 1, "settings": { "heldHitRequest": false } }`. Later it will also list the
-  world's modules.
+  `{ "version": 1, "settings": { "heldHitRequest": false }, "modulesOff": [] }`.
+- `modulesOff` names the optional client modules the world turns off (ids from
+  `src/modules/modules.ts`): `moduleOn` answers false for them and their windows hide
+  (`../readme.md`). `modules` stays free for the streamed module list (phase 5).
 - Fetched from the root of the world's proxy host (`https://ws.<domain>/server.json`, or
   `http://<ip>:3000/server.json`), the one address every profile has (Caddy answers it on an
-  installed server; the proxy itself answers it from `MU_HELD_HIT_REQUEST` when it runs alone,
-  `proxy/serverManifest.ts`), with a 5 s timeout and no
-  cookies. The text is untrusted: version 1 only, `settings` an object, each known key of its type
-  or the whole document is refused; unknown keys are skipped (a newer server may know more).
+  installed server; the proxy itself answers it from `MU_HELD_HIT_REQUEST`, `MU_MODULES_OFF` and
+  `BAND` when it runs alone, `proxy/serverManifest.ts`), with a 5 s timeout and no
+  cookies. The text is untrusted: version 1 only, `settings` an object, each known key of its type,
+  `modulesOff` a list of at most 64 lowercase ids, or the whole document is refused; unknown keys
+  are skipped (a newer server may know more).
 - Missing, unreachable or invalid: the original behaviour (`ORIGINAL_SETTINGS`). The last good
   copy is cached in localStorage per manifest URL and applies until the fetch answers; a failed
   fetch drops it.

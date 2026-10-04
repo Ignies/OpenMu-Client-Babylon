@@ -24,7 +24,9 @@ component in the inventory, vault, trade and shops.
    export default defineWindow({ id: 'my_window', slot: 'hud', order: 305, component: MyWindow });
    ```
 
-   `order` is the stacking order (higher draws on top); see the other `window.ts` files.
+   `order` is the stacking order (higher draws on top); see the other `window.ts` files. A window
+   that belongs to an optional module also names it (`module: 'vault'`), so it hides on a world
+   that turns that module off.
 3. It is found by glob (`versions/shared/ui/index.ts`). Always-on elements go in `ui/hud/` the same
    way; `slot: 'world'` draws under the HUD and stays up when the interface is hidden.
 4. Open and close it with `MuWindows.setOpen('my_window', open)` and read `MuWindows.isOpen(...)`

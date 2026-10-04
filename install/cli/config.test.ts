@@ -32,6 +32,11 @@ describe('config file', () => {
     expect(envToConfig({}).heldHitRequest).toBe(false);
   });
 
+  it('stores the modules turned off as MU_MODULES_OFF, none unless set', () => {
+    expect(configToEnv({ ...config, modulesOff: 'events,band' }).MU_MODULES_OFF).toBe('events,band');
+    expect(envToConfig({}).modulesOff).toBe('');
+  });
+
   it('fills what an older file does not have from the defaults', () => {
     expect(envToConfig({ MU_DOMAIN: 'old.net' })).toEqual({ ...DEFAULTS, domain: 'old.net' });
   });

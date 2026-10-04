@@ -55,6 +55,7 @@ export async function ask(c: Config, group: Group): Promise<Config> {
       next.marketFee = Number(await ui.text('Marketplace listing fee (Zen)', { initial: String(c.marketFee), validate: v => (/^\d+$/.test(v) ? undefined : 'A whole number.') }));
       next.marketCommission = Number(await ui.text('Marketplace commission (%)', { initial: String(c.marketCommission), validate: v => (/^\d+$/.test(v) && Number(v) <= 100 ? undefined : '0 to 100.') }));
       next.heldHitRequest = await ui.confirm('Send a hit when the swing lands instead of on the click? (off = the original; the uneven timing can trip the OpenMU speed check)', c.heldHitRequest);
+      next.modulesOff = await ui.text('Client modules to turn off (comma separated, like events,marketplace; blank for none)', { initial: c.modulesOff, validate: v => (/^\s*([a-z_]+\s*(,\s*[a-z_]+\s*)*)?$/.test(v) ? undefined : 'Module names separated by commas.') });
       break;
     case 'openmu': {
       const source = await ui.select('Which OpenMU?', [

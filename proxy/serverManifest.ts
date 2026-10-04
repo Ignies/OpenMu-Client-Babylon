@@ -4,12 +4,25 @@
 
 export const SERVER_MANIFEST_PATH = '/server.json';
 
-/** The manifest from the proxy's environment; `MU_HELD_HIT_REQUEST=on` is the installer's own key. */
-export function serverManifest(env: Record<string, string | undefined> = process.env) {
-  return { version: 1, settings: { heldHitRequest: env.MU_HELD_HIT_REQUEST === 'on' } };
+type Env = Record<string, string | undefined>;
+
+/** `MU_MODULES_OFF` (comma separated), plus `band` when the band relay is off (`BAND=off`). */
+function modulesOff(env: Env): string[] {
+  const listed = (env.MU_MODULES_OFF ?? '').split(',').map(s => s.trim()).filter(Boolean);
+  if (env.BAND === 'off') listed.push('band');
+  return [...new Set(listed)].sort();
 }
 
-export function serverManifestResponse(env?: Record<string, string | undefined>): Response {
+/** The manifest from the proxy's environment; `MU_HELD_HIT_REQUEST=on` is the installer's own key. */
+export function serverManifest(env: Env = process.env) {
+  return {
+    version: 1,
+    settings: { heldHitRequest: env.MU_HELD_HIT_REQUEST === 'on' },
+    modulesOff: modulesOff(env),
+  };
+}
+
+export function serverManifestResponse(env?: Env): Response {
   return new Response(JSON.stringify(serverManifest(env)), {
     headers: {
       'Content-Type': 'application/json',

@@ -52,7 +52,7 @@ How agents work here (workflow, roles, tools, where things are): [docs/agents/](
 | add a skill | add `<class>/<skill>/index.ts` with `export default defineSkill({...})`; it is found by glob |
 | change how all effects / sounds / lights work | the controller folder in `src/controllers/` |
 | handle a new packet | `src/modules/<module>/net.ts` (listener order: `src/modules/modules.ts`) |
-| add a module a server can switch off | `src/modules/<module>/module.ts` and one line in `modules.ts`; it registers listeners in `install`, never at load |
+| add a module a server can switch off | `src/modules/<module>/module.ts` and one line in `modules.ts`; it registers listeners in `install`, never at load; its windows name it (`module:` in `window.ts`); a world turns it off in `server.json` `modulesOff` |
 | add gameplay state or read it from a window | `src/modules/<module>/state.ts`, through the module's `index.ts` |
 | add an Enhanced / Ultra improvement (an Options toggle) | `versions/shared/improvements/<name>.ts` ([docs/how_to/add_improvement.md](docs/how_to/add_improvement.md)) |
 | add or change text | the owner's `i18n/en.ts` (and every other language file) ([docs/how_to/add_text.md](docs/how_to/add_text.md)) |
