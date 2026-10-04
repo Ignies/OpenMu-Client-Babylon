@@ -15,7 +15,8 @@ import { isOn } from '@/controllers/fidelity';
  * - The shadow silhouette leaves mesh 2 out (ZzzCharacter.cpp:8473) -
  *   `ShadowHiddenMesh`.
  * - A breathing, bluish-white `Magic_Ground2` circle 2.7 tiles wide on the
- *   ground under the NPC, additive (ZzzCharacter.cpp:8486-8498): the halo.
+ *   ground under the NPC, additive, turned by `-o->Angle[2]`
+ *   (ZzzCharacter.cpp:8695-8708): the halo.
  * - Feathers, the reviewer's ask: the original has none here. Both looks are the
  *   `archangelFeathers` improvement; Classic draws the original halo only.
  */
@@ -30,6 +31,8 @@ const HALO_TEXTURE = TEX.magicGround2;
 const HALO_SIZE = 4.5;
 const HALO_AHEAD = 1;
 const CLASSIC_HALO_SIZE = 2.7;
+
+const DEGREES_PER_RADIAN = 180 / Math.PI;
 
 /** `Luminosity = sinf(WorldTime * 0.0015f) * 0.3f + 0.8f`. */
 const HALO_BREATHE_PER_MS = 0.0015;
@@ -129,6 +132,10 @@ function archangelFactory(file: string): typeof ModelObject {
       const improved = isOn('archangelFeathers');
       const haloAhead = improved ? HALO_AHEAD : 0;
 
+      // `-o->Angle[2]` (ZzzCharacter.cpp:8707): the halo turns with the angel.
+      // `visualRotY` is the yaw being drawn, `rot.y` the one it turns towards.
+      const yaw = entity.transform?.visualRotY ?? entity.transform?.rot.y ?? 0;
+
       // `Vector(Luminosity * 0.5f, Luminosity * 0.5f, Luminosity, Light)`.
       // Improved, the halo stops at a wall's tiles so it does not run on into
       // the building the angel stands beside.
@@ -137,7 +144,7 @@ function archangelFactory(file: string): typeof ModelObject {
         pos.x + forward.x * haloAhead,
         pos.z + forward.z * haloAhead,
         improved ? HALO_SIZE : CLASSIC_HALO_SIZE,
-        0,
+        -yaw * DEGREES_PER_RADIAN,
         [luminosity * 0.5, luminosity * 0.5, luminosity],
         improved ? open : undefined
       );
