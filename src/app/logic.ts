@@ -1,7 +1,7 @@
 // Every packet handler lives in its module's net.ts and is registered by installModules below,
 // in the order of modules/modules.ts (listener order per packet is kept).
 // What this file imported before its handlers moved out, in the same order: loading these
-// first keeps every import-time registration (quests, events, skills...) ahead of the nets.
+// first keeps every import-time registration (events, skills...) ahead of the nets.
 import '../modules/band/bandNet';
 import '../controllers/net/pingNet';
 import '../i18n';
@@ -81,7 +81,6 @@ import '../controllers/combat/recipes';
 import '../controllers/pets';
 import '../controllers/actors/locomotion';
 import '../controllers/actors/transformedBody';
-import '../modules/quests';
 import '../modules/session/sessionExit';
 import '../core/devSeams';
 import '../modules/inventory/quickItemActions';

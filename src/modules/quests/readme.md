@@ -15,7 +15,9 @@ with its own MobX state, behind the `quests` facade (`index.ts`).
 ## How it works
 - `layers.ts` is the only list of entries (`QuestLayer`, `layer.ts`); `update` and `reset` run over
   it in order, so an entry that reads another comes after it.
-- Each entry registers its `EventBus.on` handlers at module load; importing the facade loads them all.
+- Each entry registers its `EventBus.on` handlers in its `install<Entry>()`. `net.ts` (`installNet`,
+  the module's install) calls them in a fixed order, which is the order a packet several entries
+  handle runs them in (`AvailableQuests`: the dialogue, then the log). Importing a file registers nothing.
 - Quest state belongs to the character: `reset` only closes NPC windows. A `CharacterInformation`
   with a new hero name clears the state; every one asks for the legacy and Season 6 states again.
 - `questData.ts` loads `Quest_<lang>.bmd`, `Dialog_<lang>.bmd`, `QuestProgress.bmd` and
@@ -42,11 +44,19 @@ with its own MobX state, behind the `quests` facade (`index.ts`).
   `ActiveQuestListRequest`, `EventQuestStateListRequest`, `AvailableQuestsRequest`, `NpcBuffRequest`,
   `Gens*Request`, `EnterOnWerewolfRequest`, `EnterOnGatekeeperRequest`, `CloseNpcRequest`.
 
+## When it is off
+`quests` is optional (`module.ts`): a server may run without it. Off, none of the listeners above
+is registered and the quest state stays empty; the other modules' listeners on `CharacterInformation`
+and `ObjectGotKilled` run as before. The facade and the windows stay: the tables still load on the
+first frame, the quest log key opens an empty log, the Werewolf Guardsman and the Gatekeeper still
+open the Balgass box and a quest NPC's `NpcWindowResponse` still opens the legacy dialog (their
+requests go unanswered). No bubbles show: they wait for the quest list.
+
 ## Depends on / used by
 - uses: `session` (`sendToGS`, `isOffline`), `hero`, chat's `addNotification`, `npc_shop` (`dropNpcTalk`,
   `talkToNpc`, `pendingNpcType`, `npcShop`), `inventory` (`pendingItemMove`), `Ecs.world`, `controllers/assets/mu`,
   `ecs/systems` (emoji bubbles, object effects), `hero/`, `items/`, `options/`, `src/i18n`.
-- used by: `src/app/logic.ts` (`net.ts`), `app/lifecycle.ts`, `ecs/systems/questSystem.ts`,
+- used by: `../modules.ts` (`module.ts`), `app/lifecycle.ts`, `ecs/systems/questSystem.ts`,
   `npcTalkSystem.ts`, `npc_shop/net.ts`, `session/net.ts`, `session/sessionExit.ts`. Windows:
   `versions/shared/ui/windows/quests/` (`index.tsx`, `tracker.tsx`) and `.../windows/balgass_entry/`.
 
@@ -55,12 +65,15 @@ with its own MobX state, behind the `quests` facade (`index.ts`).
   file name. Keep its three parts in order: tuning constants (real units, why that value), state +
   plain reader functions (MobX `observable` for what a window renders) and handlers, then the
   exported `QuestLayer` with `update` / `reset`. Add it to `layers.ts` after any entry it reads.
-- handle a quest packet: `EventBus.on(...)` in the entry file that owns the state, not in `logic.ts`.
+- handle a quest packet: `EventBus.on(...)` in the `install<Entry>()` of the entry that owns the
+  state. A new entry's install goes in `net.ts`, where its listeners should run.
 - change a window: `versions/shared/ui/windows/quests/index.tsx` (tracker: `tracker.tsx`).
 - change an objective line: `objectives.ts` (shared by the log and the tracker).
 
 ## Tests
 - `objectives.test.ts`: objective text, counts capped at the target, done check, empty and unknown conditions.
+- `../switchOff.test.ts`: installing registers the listeners and loading does not; off, its packets
+  keep only the other modules' listeners.
 
 ## Notes
 ### legacyQuests.ts

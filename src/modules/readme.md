@@ -33,9 +33,9 @@ There is no central store any more. What used to be `Store` lives here: `Hero` (
 controllers'. When two modules would import each other, one hands the other a port instead
 (`Bag.grids` from economy, `Bag.beforeConsume` from npc_shop, chat's notification sink from social).
 
-Some handlers register outside `logic.ts` order: the `quests` and `events` entry files register
-when their facade is first imported (`session/net.ts`, `npc_shop/net.ts`), `skills/masterLevel.ts`
-and `masterTree.ts` through the `skills` facade, and `band` through `installBandNet()`.
+Some handlers register outside `logic.ts` order: the `events` entry files register when their
+facade is first imported (`npc_shop/net.ts`), `skills/masterLevel.ts` and `masterTree.ts` through
+the `skills` facade, and `band` through `installBandNet()`.
 
 ## The modules
 - [band](band/readme.md): instruments and band play from MIDI files, relayed by the proxy.
@@ -88,8 +88,7 @@ and `masterTree.ts` through the `skills` facade, and `band` through `installBand
   it there. A controller that needs it gets a reader through a hook the app or the module sets.
 
 ## Not modules yet
-- `events`, the `quests` entry files (`killCounters`, `legacyQuests`, `npcDialogue`, `questLog`,
-  `balgassEntry`), `skills/masterLevel.ts` and `masterTree.ts` still register their listeners at
+- `events`, `skills/masterLevel.ts` and `masterTree.ts` still register their listeners at
   import, so they cannot be switched off. Moving them into an `install` must keep each packet's
   order with the listeners that stay at import: `events/duel.ts` runs before
   `warp/warpScopeHold.ts` on `wsClosed`, `maps/kanturu2/gateway.ts` before `events/kanturu.ts` on
@@ -102,4 +101,6 @@ and `masterTree.ts` through the `skills` facade, and `band` through `installBand
 ## Tests
 - `module.test.ts`: install order, disabled and core modules, requirements.
 - `modules.test.ts`: every `module.ts` is listed once and named after its folder.
+- `switchOff.test.ts`: an optional module registers its listeners when installed, not when
+  loaded; switched off, its packets keep only the other modules' listeners.
 - each module lists its own `*.test.ts`.

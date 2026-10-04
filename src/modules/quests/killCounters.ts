@@ -68,37 +68,40 @@ function setKillInfo(pairs: { monsterType: number; count: number }[] | null): vo
   });
 }
 
-// `ReceiveQuestMonKillInfo` never reads the result byte, and OpenMU leaves it at 1.
-EventBus.on('LegacyQuestMonsterKillInfo', packet => {
-  const p = new LegacyQuestMonsterKillInfoPacket(packet);
-  const kills = p.getKills(KILL_SLOTS).map(k => ({
-    monsterType: k.MonsterNumber,
-    count: k.KillCount,
-  }));
-  setKillInfo(kills);
-});
-
-EventBus.on('ObjectGotKilled', packet => {
-  const p = new ObjectGotKilledPacket(packet);
-  const world = Ecs.world;
-  const hero = world?.playerEntity;
-  if (!world || !hero || (p.KillerId & 0x7fff) !== hero.netId) return;
-
-  const type = world.getByNetId(p.KilledId & 0x7fff)?.npcType;
-  if (type === undefined) return;
-  runInAction(() => {
-    state.local.set(type, (state.local.get(type) ?? 0) + 1);
+/** Registers the kill counters' listeners; the quests module installs it (net.ts). */
+export function installKillCounters(): void {
+  // `ReceiveQuestMonKillInfo` never reads the result byte, and OpenMU leaves it at 1.
+  EventBus.on('LegacyQuestMonsterKillInfo', packet => {
+    const p = new LegacyQuestMonsterKillInfoPacket(packet);
+    const kills = p.getKills(KILL_SLOTS).map(k => ({
+      monsterType: k.MonsterNumber,
+      count: k.KillCount,
+    }));
+    setKillInfo(kills);
   });
-});
 
-// OpenMU resends the character information on a bulk stat add or a reset;
-// only a different hero starts from empty slots (`clearQuest` in InitGame).
-let heroName: string | null = null;
-EventBus.on('CharacterInformation', () => {
-  if (Hero.name === heroName) return;
-  heroName = Hero.name;
-  setKillInfo(null);
-});
+  EventBus.on('ObjectGotKilled', packet => {
+    const p = new ObjectGotKilledPacket(packet);
+    const world = Ecs.world;
+    const hero = world?.playerEntity;
+    if (!world || !hero || (p.KillerId & 0x7fff) !== hero.netId) return;
+
+    const type = world.getByNetId(p.KilledId & 0x7fff)?.npcType;
+    if (type === undefined) return;
+    runInAction(() => {
+      state.local.set(type, (state.local.get(type) ?? 0) + 1);
+    });
+  });
+
+  // OpenMU resends the character information on a bulk stat add or a reset;
+  // only a different hero starts from empty slots (`clearQuest` in InitGame).
+  let heroName: string | null = null;
+  EventBus.on('CharacterInformation', () => {
+    if (Hero.name === heroName) return;
+    heroName = Hero.name;
+    setKillInfo(null);
+  });
+}
 
 // ---- 3. the layer ----------------------------------------------------------
 
