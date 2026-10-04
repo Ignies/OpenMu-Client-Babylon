@@ -5,6 +5,8 @@ small side protocols the proxy speaks (band, ping, admin, escrow, chat server) a
 readouts. Handlers for packets live in `src/modules/<module>/net.ts`, not here.
 
 ## Public API
+- `index.ts`: a small door (`createSocket`, `NetStats`, the encryption classes, `stringToBytes`);
+  most readers still import their file directly (baselined).
 - `sockets/createSocket.ts`: `createSocket({ wsAddress, tcpIP, tcpPort })` opens a game or
   connect-server socket and emits each parsed packet on `EventBus` by packet name, plus
   `wsOpened` / `wsClosed` / `wsError`.
@@ -19,7 +21,7 @@ readouts. Handlers for packets live in `src/modules/<module>/net.ts`, not here.
   and numeric casts, with no Babylon or DOM.
 - `protocols/`: `bandProtocol`, `pingProtocol`, `adminProtocol`, `escrowWire`, `chatRoomProtocol`,
   `chatWire` (`toChatWire`, `fromChatWire`, `clipChatText`).
-- `pingNet.ts`: `installPingNet()`, `requestPing(x, z)`, `pingAvailable()`.
+- `pingNet.ts`: `installPingNet(link)`, `requestPing(x, z)`, `pingAvailable()`, type `PingLink`.
 - `roundTrip.ts`: `NetStats` (`markSent`, `markAnswered`, `roundTripMs`, `reset`).
 - `socketCost.ts`: `recordSocketDrain(bytes, ms)`, `netStats()`, `NET_BURST_MS`.
 - `serverTime.ts`: `serverNow()`.
@@ -31,15 +33,17 @@ readouts. Handlers for packets live in `src/modules/<module>/net.ts`, not here.
   definition by code, sub-code and length. Packets that share a code are ordered by
   `gameVersion.protocol.variantRank`; an inbound whisper (code 0x02) is routed to the
   `ChatMessage` parser. A throwing handler is logged and the queue moves on. Sending and the
-  client-to-server encryption live in `app/store.ts`.
+  client-to-server encryption live in the session module (`Session.sendToGS`, `modules/session`).
 - The chat server socket is separate: plain C1/C2 in, Xor32 on every frame out, no SimpleModulus
   (UIWindows.cpp `ConnectToChatServer`); it keeps rooms alive every 15 s (`CHATCONNECT_TIMER`).
-- Band (`C1 FA`) and ping (`C1 FB`) frames go out through `Store.sendToGS` like any C1; the proxy
+- Band (`C1 FA`) and ping (`C1 FB`) frames go out through `Session.sendToGS` like any C1; the proxy
   relays them plain with the sender's object id stamped at bytes 4-5, so a client cannot claim
   to be someone else. The protocol files are engine-free: the proxy, the marketplace and the
   tests import them too.
 - `pingNet` is the ping's one wire listener; it decides whether a ping happens and `fx/ping.ts`
-  draws it. It draws the hero's own pointer at once, without waiting for the relay.
+  draws it. It draws the hero's own pointer at once, without waiting for the relay. What it needs
+  from the session and the hero (object id, offline, socket, send) comes in as a `PingLink` that
+  `app/logic.ts` hands to `installPingNet`; until then it acts offline.
 - `roundTrip`: OpenMU never answers the keep-alive ping, so round trip is timed on pairs the
   client already sends (chat line and echo, item move and `ItemMoved`, warp and `MapChanged`).
   The figure is the median of the last 7 samples; it is not observable, the readout polls it.
@@ -62,8 +66,8 @@ readouts. Handlers for packets live in `src/modules/<module>/net.ts`, not here.
 
 ## Depends on / used by
 - uses: `core` (event bus, binary utils), `version` (packet set, encryption keys, variant rank),
-  `assets/download` (framing re-exports), `fx` (ping marker), `app/store` (`pingNet` only).
-- used by: `app/store.ts`, `app/logic.ts`, module nets (session, band, chat, social,
+  `assets/download` (framing re-exports), `fx` (ping marker).
+- used by: `modules/session` (sockets, encryption), `app/logic.ts`, module nets (session, band, chat, social,
   marketplace, gm, events), `lighting/clouds.ts`,
   `weather/snowCover.ts`, `render/perfOverlay.ts`, `fx/ping.ts`, the pointer input and ambient
   particle systems, the gm panel window, and outside `src/`: `proxy/`, `marketplace/`,

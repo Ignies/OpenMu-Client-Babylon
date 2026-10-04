@@ -1,6 +1,8 @@
 import { t } from '../../i18n';
 import { action, makeObservable, observable, runInAction } from 'mobx';
-import { Store } from '../../app/store';
+import { Hero } from '../hero';
+import { Session } from '../session';
+import { Ecs } from '../../ecs/current';
 import { Social, INVITE_RANGE_TILES } from '../social/social';
 import { Economy } from '../economy/economy';
 import { Messenger } from '../friends/messenger';
@@ -145,7 +147,7 @@ export const Commands = new (class _Commands {
    * has to stay a skill cast.
    */
   isQuickTarget(entity: Entity | null | undefined): boolean {
-    const hero = Store.world?.playerEntity;
+    const hero = Ecs.world?.playerEntity;
     if (!entity || !hero) return false;
     if (entity.localPlayer || entity.netId === undefined) return false;
     const isPlayer = !!entity.playerAnimation || entity.skin !== undefined;
@@ -166,7 +168,7 @@ export const Commands = new (class _Commands {
    * `MAX_DISTANCE_TILE`. Returns the target or a reason it is refused.
    */
   targetOf(entity: Entity | null | undefined): CommandTarget | string {
-    const hero = Store.world?.playerEntity;
+    const hero = Ecs.world?.playerEntity;
     if (!entity || !hero) return t('command.noPlayerUnderCursor');
     // A skinned player wears a monster rig, so the animation component alone
     // would not know it for a player.
@@ -221,7 +223,7 @@ export const Commands = new (class _Commands {
     }
     switch (kind) {
       case 'trade':
-        if (Store.playerData.level < TRADE_LIMIT_LEVEL) {
+        if (Hero.level < TRADE_LIMIT_LEVEL) {
           Social.systemMessage(
             t('command.tradeLevel', { level: TRADE_LIMIT_LEVEL })
           );
@@ -275,7 +277,7 @@ export const Commands = new (class _Commands {
    * is deliberate, so it gets the player-only test instead.
    */
   private attack(entity: Entity | null | undefined): void {
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world || !entity || !isAttackablePlayer(world, entity)) {
       Social.errorMessage(t('command.cannotAttack'));
       playUiSound('error');
@@ -299,20 +301,20 @@ export const Commands = new (class _Commands {
 
   /** `CommandDual`: start a duel, or stop the one running. */
   private duel(target: CommandTarget): void {
-    if (Store.playerData.level < DUEL_LIMIT_LEVEL) {
+    if (Hero.level < DUEL_LIMIT_LEVEL) {
       Social.errorMessage(t('command.duelLevel', { level: DUEL_LIMIT_LEVEL }));
       return;
     }
     const packet = DuelStartRequestPacket.createPacket();
     packet.PlayerId = target.netId;
     packet.setPlayerName(target.name);
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
     Social.systemMessage(t('command.duelRequestSent', { name: target.name }));
   }
 
   /** `/duelend`: `SendDuelStopRequest`. */
   duelStop(): void {
-    Store.sendToGS(DuelStopRequestPacket.createPacket().buffer);
+    Session.sendToGS(DuelStopRequestPacket.createPacket().buffer);
   }
 
   /**
@@ -322,7 +324,7 @@ export const Commands = new (class _Commands {
    */
   followTick(): void {
     const target = this.following;
-    const world = Store.world;
+    const world = Ecs.world;
     const hero = world?.playerEntity;
     if (!target || !world || !hero) return;
     // The hero dying ends the follow (MoveHero returns on c->Dead > 0):

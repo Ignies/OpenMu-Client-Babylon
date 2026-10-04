@@ -49,7 +49,7 @@ import {
 } from '../../controllers/actors/locomotion';
 import { isWingItem } from '../../controllers/actors/wings';
 import { isRidingMount, petSpec } from '@/controllers/pets';
-import { Store } from '../../app/store';
+import { Hero } from '../../modules/hero';
 import { heldWeapons } from '../../controllers/actors';
 import { isOn } from '../../controllers/fidelity';
 
@@ -286,7 +286,7 @@ export const AnimationSystem: ISystemFactory = world => {
       const chaosCastle = inChaosCastle(mapIndex);
       const bloodCastle = inBloodCastle(mapIndex);
       // Server-computed speeds (CurrentStatsExtended) win over the client-side agility formula.
-      const pd = Store.playerData;
+      const pd = Hero;
       const heroAttackSpeed = pd.attackSpeed ?? attackSpeedOf(pd.charClass, pd.agi);
       const heroMagicSpeed = pd.magicSpeed ?? magicSpeedOf(pd.charClass, pd.agi);
       const ownSpeeds = isOn('otherPlayersOwnSpeed');
@@ -360,7 +360,7 @@ export const AnimationSystem: ISystemFactory = world => {
           // whose Run stays 0, so a patrol is always PLAYER_WALK_*.
           entity.npcType === undefined &&
           canAccumulateRun(
-            hands?.charClass ?? Store.playerData.charClass,
+            hands?.charClass ?? Hero.charClass,
             hands?.boots,
             hands?.gloves,
             mapIndex,
@@ -440,7 +440,7 @@ export const AnimationSystem: ISystemFactory = world => {
             ? ((modelObject.constructor as typeof PlayerObject).NpcClass ?? undefined)
             : undefined;
         const charClass =
-          npcClass ?? hands?.charClass ?? Store.playerData.charClass;
+          npcClass ?? hands?.charClass ?? Hero.charClass;
 
         playerAnimation.action = calculateAnimation({
           pose: {
@@ -490,7 +490,7 @@ export const AnimationSystem: ISystemFactory = world => {
         const action = playerAnimation.action;
         const attrs = entity.attributeSystem;
         const baseClass = getBaseClass(
-          entity.charAppearance?.charClass ?? Store.playerData.charClass
+          entity.charAppearance?.charClass ?? Hero.charClass
         );
         const isRageFighter = baseClass === BaseClass.RageFighter;
 

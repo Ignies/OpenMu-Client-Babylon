@@ -3,7 +3,10 @@ import { ENUM_WORLD } from '../../core/types';
 import { BaseClass, getBaseClass } from '../hero/characterStats';
 import type { Item } from '../../ecs/world';
 import { EventBus } from '../../core/eventBus';
-import { Store } from '../../app/store';
+import { Hero } from '../hero';
+import { Session } from '../session';
+import { addNotification } from '../chat';
+import { Ecs } from '../../ecs/current';
 import { skills } from '../skills';
 import {
   DevilSquareEnterRequestPacket,
@@ -115,7 +118,7 @@ export function inDevilSquare(map: ENUM_WORLD): boolean {
 
 /** `OpenningProcess`: build the buttons and show the window. */
 export function openDevilSquare(): void {
-  const pd = Store.playerData;
+  const pd = Hero;
   const master = isMasterClass(pd.charClass);
   const row = LOWER_LIMIT_CLASSES.has(getBaseClass(pd.charClass)) ? 1 : 0;
   const { buttons, active } = entryButtons(
@@ -146,7 +149,7 @@ export function enterDevilSquare(grade: number): void {
   const packet = DevilSquareEnterRequestPacket.createPacket();
   packet.SquareLevel = grade;
   packet.TicketItemInventoryIndex = NO_TICKET_SLOT;
-  Store.sendToGS(packet.buffer);
+  Session.sendToGS(packet.buffer);
 }
 
 /** Double-clicked Devil's Invitation: `SendMiniGameOpeningStateRequest(1, Level)`. */
@@ -158,7 +161,7 @@ function useTicket(_slot: number, item: Item): boolean {
   const packet = MiniGameOpeningStateRequestPacket.createPacket();
   packet.EventType = OPENING_STATE_GAME.devilSquare;
   packet.EventLevel = item.lvl ?? 0;
-  Store.sendToGS(packet.buffer);
+  Session.sendToGS(packet.buffer);
   return true;
 }
 
@@ -211,7 +214,7 @@ EventBus.on('DevilSquareEnterResult', packet => {
       text = formatText(EVENT_TEXT.killersRestricted, EVENT_TEXT.devilSquare);
       break;
   }
-  if (text) Store.addNotification(text, 'error', MESSAGE_MS);
+  if (text) addNotification(text, 'error', MESSAGE_MS);
 });
 
 /** `ReceiveEventZoneOpenTime`, Value 1: the invitation's answer. */
@@ -224,7 +227,7 @@ EventBus.on('MiniGameOpeningState', packet => {
   // feed the schedule and say nothing.
   if (takeOpeningState(OPENING_STATE_GAME.devilSquare, minutes)) return;
 
-  Store.addNotification(
+  addNotification(
     minutes === 0
       ? EVENT_TEXT.devilOpenNow
       : formatText(EVENT_TEXT.devilOpensIn, minutes),
@@ -239,7 +242,7 @@ EventBus.on('MiniGameOpeningState', packet => {
  * (chaosCastle.ts), so it is taken only on the square.
  */
 EventBus.on('MiniGameScoreTable', packet => {
-  if (!MAPS.has(Store.world?.mapIndex ?? ENUM_WORLD.WD_0LORENCIA)) return;
+  if (!MAPS.has(Ecs.world?.mapIndex ?? ENUM_WORLD.WD_0LORENCIA)) return;
 
   const p = new MiniGameScoreTablePacket(packet);
   if (p.ResultCount >= MAX_RANK_ROWS) return;

@@ -4,7 +4,11 @@ import { EventBus } from '@/core/eventBus';
 import { GameServerEnteredPacket, LoginResponseLoginResultEnum, LoginResponsePacket, LogoutResponsePacket } from '@versions/shared/packets/ServerToClientPackets';
 import { SessionExit } from './sessionExit';
 import { SessionResume } from './sessionResume';
-import { Store, UIState } from '@/app/store';
+import { Merchant } from '@/modules/npc_shop';
+import { Hero } from '@/modules/hero';
+import { Servers } from '@/modules/servers';
+import { Session } from './state';
+import { AppState, UIState } from '@/app/uiState';
 import { gameServerTarget } from '../servers/serverConfig';
 import { quests } from '../quests';
 import { runInAction } from 'mobx';
@@ -16,7 +20,7 @@ export function installNet(): void {
   EventBus.on('Hello', () => {
     if (serverListRequested) return;
     serverListRequested = true;
-    Store.updateServerListRequest();
+    Servers.updateServerListRequest();
   });
 
   EventBus.on('GameServerEntered', bytes => {
@@ -24,24 +28,24 @@ export function installNet(): void {
 
     // The game server answered, so the address we dialled is the right one: no
     // fallback attempt is pending any more.
-    Store.onGameServerReached();
+    Session.onGameServerReached();
 
     const id = p.PlayerId & 0x7fff;
     runInAction(() => {
-      Store.playerId = id;
+      Hero.playerId = id;
     });
-    console.log(`PlayerID: ${Store.playerId}`);
+    console.log(`PlayerID: ${Hero.playerId}`);
 
     // A map-server switch re-authenticates on the new server instead of
     // showing the login form (CSMServer::SendChangeMapServer); the server
     // answers with the character state and the world carries on.
-    if (Store.sendServerChangeAuthentication()) return;
+    if (Session.sendServerChangeAuthentication(Hero.name)) return;
 
     // A resume sends the login itself instead of showing the form.
     if (SessionResume.onGameServerEntered()) return;
 
     runInAction(() => {
-      Store.uiState = UIState.Login;
+      AppState.uiState = UIState.Login;
     });
   });
 
@@ -49,7 +53,7 @@ export function installNet(): void {
     const p = new ServerListResponsePacket(bytes);
     const servers = p.getServers(p.ServerCount);
     runInAction(() => {
-      Store.serverList = servers;
+      Servers.serverList = servers;
     });
   });
 
@@ -59,9 +63,9 @@ export function installNet(): void {
   // are always followed by a close, so only the close is acted on (app/App.tsx
   // already logs the error line).
   EventBus.on('wsClosed', ({ socket }) => {
-    Store.closeNpcShop();
+    Merchant.closeNpcShop();
     quests.closeAll();
-    Store.onSocketLost(socket);
+    Session.onSocketLost(socket);
   });
 
   // Packet handlers are synchronous on purpose: `createSocket` emits packets in
@@ -82,26 +86,26 @@ export function installNet(): void {
       `connection info: ${host}:${p.Port} (server said "${p.IpAddress}")`
     );
 
-    Store.connectToGameServer(host, p.Port, fallback);
+    Session.connectToGameServer(host, p.Port, fallback);
   });
 
   EventBus.on('LoginResponse', bytes => {
     const p = new LoginResponsePacket(bytes);
 
     runInAction(() => {
-      Store.loginProcessing = false;
+      Session.loginProcessing = false;
     });
 
     if (p.Success === LoginResponseLoginResultEnum.Okay) {
       runInAction(() => {
-        Store.loginError = undefined;
+        Session.loginError = undefined;
       });
-      Store.saveLoginData();
+      Session.saveLoginData();
       // A resume picks the character back up instead of opening the list.
       if (SessionResume.onLoginOk()) return;
-      Store.disconnectFromConnectServer();
+      Session.disconnectFromConnectServer();
       runInAction(() => {
-        Store.uiState = UIState.Characters;
+        AppState.uiState = UIState.Characters;
       });
       return;
     }
@@ -110,8 +114,8 @@ export function installNet(): void {
     SessionResume.onLoginFailed();
 
     runInAction(() => {
-      Store.loginError = `Error: ${LoginResponseLoginResultEnum[p.Success]}`;
-      Store.uiState = UIState.Login;
+      Session.loginError = `Error: ${LoginResponseLoginResultEnum[p.Success]}`;
+      AppState.uiState = UIState.Login;
     });
   });
 
@@ -139,7 +143,7 @@ export function installNet(): void {
     const p = new ChangeMapServerInfoPacket(packet);
     if (!p.Port) return;
     console.log(`map server move: ${p.IpAddress}:${p.Port}`);
-    Store.switchToMapServer(p.IpAddress, p.Port, {
+    Session.switchToMapServer(p.IpAddress, p.Port, {
       authCode1: p.AuthCode1,
       authCode2: p.AuthCode2,
       authCode3: p.AuthCode3,

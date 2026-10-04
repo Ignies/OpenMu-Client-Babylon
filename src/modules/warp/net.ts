@@ -11,7 +11,11 @@ import { Notices } from '../chat/notices';
 import { QuickItemActions } from '../inventory/quickItemActions';
 import { SlideHelp } from '@/controllers/interface/slideHelp';
 import { Social } from '../social/social';
-import { Store, UIState } from '@/app/store';
+import { Merchant } from '@/modules/npc_shop';
+import { HeroSkills } from '@/modules/skills';
+import { Session } from '@/modules/session';
+import { AppState, UIState } from '@/app/uiState';
+import { Ecs } from '@/ecs/current';
 import { TELEPORT } from '../skills/skillCasting';
 import { addNpcToScope, applyObjectEffect, convertDirectionToAngle } from '../_shared/net_helpers';
 import { cancelTeleport, endTeleport } from '@/ecs/systems/teleportSystem';
@@ -65,7 +69,7 @@ export function installNet(): void {
     const p = new MapChangedPacket(packet);
     const pos = { x: p.PositionX, y: p.PositionY };
     const verdict = teleportGate.onMapChanged(p.IsMapChange, pos.x, pos.y, performance.now() / 1000);
-    const playerEntity = Store.world?.playerEntity;
+    const playerEntity = Ecs.world?.playerEntity;
 
     // The packet's byte 9 is the arrival facing (`gate.angle`, the exit gate's
     // `Rotation` column, 0-7 × 45°); the generated class has no accessor for it.
@@ -73,7 +77,7 @@ export function installNet(): void {
 
     if (p.IsMapChange) {
       // HideAll on warp: the merchant stays behind.
-      Store.closeNpcShop();
+      Merchant.closeNpcShop();
       // `ReceiveMapChange` (WSclient.cpp:622): the notice stack and the minimap
       // sheet do not survive a warp.
       Notices.clear();
@@ -99,7 +103,7 @@ export function installNet(): void {
 
     if (!playerEntity) return;
 
-    const world = Store.world!;
+    const world = Ecs.world!;
     const playerPos = playerEntity.transform.pos;
     const onSquare = Math.floor(playerPos.x) === pos.x && Math.floor(playerPos.z) === pos.y;
 
@@ -129,13 +133,13 @@ export function installNet(): void {
     // objects are in (`ClientReadyAfterMapChange`, C1 04 F3 12).
     // Only after a server-initiated MapChanged: on the first world entry OpenMU
     // already placed us and logs "Ignoring client-ready packet" otherwise.
-    if (awaitingClientReady && !Store.isOffline && Store.uiState === UIState.World) {
+    if (awaitingClientReady && !Session.isOffline && AppState.uiState === UIState.World) {
       awaitingClientReady = false;
-      Store.sendToGS(ClientReadyAfterMapChangePacket.createPacket().buffer);
+      Session.sendToGS(ClientReadyAfterMapChangePacket.createPacket().buffer);
       holdForWarpScope();
     }
 
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
 
     for (const e of world.netObjsQuery.entities) {
@@ -154,10 +158,10 @@ export function installNet(): void {
    * tile y, and an optional direction (0-7), `;`-separated.
    */
   EventBus.on('warpCompleted', () => {
-    if (!Store.isOffline) return;
+    if (!Session.isOffline) return;
 
     const spec = devQuery('npcs');
-    const world = Store.world;
+    const world = Ecs.world;
 
     if (!spec || !world) return;
 
@@ -189,17 +193,17 @@ export function installNet(): void {
    * without a server granting it.
    */
   EventBus.on('warpCompleted', () => {
-    if (!Store.isOffline) return;
+    if (!Session.isOffline) return;
 
     const spec = devQuery('buffs');
-    const hero = Store.world?.playerEntity;
+    const hero = Ecs.world?.playerEntity;
 
     if (!spec || !hero) return;
 
     for (const raw of spec.split(',')) {
       const id = Number(raw.trim());
       if (!Number.isInteger(id) || id <= 0) continue;
-      Store.setBuff(id, true);
+      HeroSkills.setBuff(id, true);
       applyObjectEffect(hero, id, true);
     }
   });
@@ -211,7 +215,7 @@ export function installNet(): void {
    * server offline, so this is the only way to look at any of them without one.
    */
   EventBus.on('warpCompleted', () => {
-    if (!Store.isOffline) return;
+    if (!Session.isOffline) return;
 
     const demo = devQuery('quickItems');
     if (!demo) return;
@@ -222,10 +226,10 @@ export function installNet(): void {
       return;
     }
 
-    Store.talkToNpc({ netId: 0, name: 'Merchant', npcType: 0 });
+    Merchant.talkToNpc({ netId: 0, name: 'Merchant', npcType: 0 });
 
     if (demo === 'buy') {
-      const slot = Store.npcShop?.items.findIndex(entry => !!entry) ?? -1;
+      const slot = Merchant.npcShop?.items.findIndex(entry => !!entry) ?? -1;
       if (slot >= 0) QuickItemActions.promptBuy(slot);
       return;
     }

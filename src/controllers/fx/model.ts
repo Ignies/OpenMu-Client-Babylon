@@ -31,7 +31,7 @@ import { clampAlpha } from './clampAlpha';
 import { chromeMaterial, disposeChromeMaterials } from './chrome';
 import { getMaterial, loadGLTF } from '../assets/modelLoader';
 import { BlendState } from '@versions/shared/objects/enum';
-import { Store } from '../../app/store';
+import { Ecs } from '../../ecs/current';
 import type { TestScene } from '../render/scenes/testScene';
 import {
   EFFECT_RENDERING_GROUP,
@@ -383,7 +383,7 @@ function playKeys(clip: AnimationGroup, keysPerTick: number, playTo: number | un
 
 /** Spawn helper other entries call directly (projectile heads). */
 export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): ModelHandle {
-  const world = Store.world;
+  const world = Ecs.world;
   const seconds = opts.seconds ?? DEFAULT_SECONDS;
   const scale = (opts.scale ?? 1) * DEFAULT_SCALE;
   const grow = opts.grow ?? 1;

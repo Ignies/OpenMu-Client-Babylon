@@ -3,7 +3,9 @@ import { GameOptions } from '@/controllers/settings';
 import { devQueryNumbers } from '../../core/devSeams';
 import { serverNow } from '../../controllers/net/serverTime';
 import { MiniGameOpeningStateRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
-import { Store, UIState } from '../../app/store';
+import { Session } from '../session';
+import { AppState, UIState } from '../../app/uiState';
+import { Ecs } from '../../ecs/current';
 import type { EventLayer } from './layer';
 import { OPENING_STATE_GAME } from './recipes';
 import {
@@ -203,7 +205,7 @@ function send(key: EventScheduleKey, nowMs: number): void {
   const packet = MiniGameOpeningStateRequestPacket.createPacket();
   packet.EventType = GAME_OF[key];
   packet.EventLevel = POLL_EVENT_LEVEL;
-  Store.sendToGS(packet.buffer);
+  Session.sendToGS(packet.buffer);
 
   const poll = polls[key];
   poll.lastRequestMs = nowMs;
@@ -216,9 +218,9 @@ function send(key: EventScheduleKey, nowMs: number): void {
 function pollable(): boolean {
   return (
     GameOptions.eventTimers &&
-    !Store.isOffline &&
-    Store.uiState === UIState.World &&
-    Store.world !== null
+    !Session.isOffline &&
+    AppState.uiState === UIState.World &&
+    Ecs.world !== null
   );
 }
 

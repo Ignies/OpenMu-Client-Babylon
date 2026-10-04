@@ -1,6 +1,7 @@
 import './style.less';
 import { observer } from 'mobx-react-lite';
-import { Store } from '@/app/store';
+import { GuildMarks } from '@/modules/guild';
+import { Ecs } from '@/ecs/current';
 import { Social } from '@/modules/social/social';
 import { ENUM_WORLD } from '@/core/types';
 import { guildMarkDataUrl } from '@/core/guildMark';
@@ -38,7 +39,7 @@ const SPRITE = 'newui_Figure_ground.OZT';
 
 /** `FindGuildMark`: the mark table by name; the viewport may not have it yet. */
 function logoOf(name: string): number[] | null {
-  for (const guild of Store.guilds.values()) {
+  for (const guild of GuildMarks.values()) {
     if (guild.name === name) return guild.logo;
   }
   return null;
@@ -97,7 +98,7 @@ export const SoccerScoreHud = observer(() => {
   // Read the observable before the map check so the mount reacts to it.
   const match = Social.battleSoccer;
   const scale = useUiStageScale();
-  if (!match || Store.world?.mapIndex !== ENUM_WORLD.WD_6STADIUM) return null;
+  if (!match || Ecs.world?.mapIndex !== ENUM_WORLD.WD_6STADIUM) return null;
 
   const offsetX = (window.innerWidth - UI_STAGE_WIDTH * scale) / 2;
   const offsetY = (window.innerHeight - UI_STAGE_HEIGHT * scale) / 2;

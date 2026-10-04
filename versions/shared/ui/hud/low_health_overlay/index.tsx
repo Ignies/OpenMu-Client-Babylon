@@ -2,7 +2,7 @@ import './style.less';
 import { useEffect } from 'react';
 import { reaction } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
 import { GameOptions } from '@/controllers/settings';
 import {
   heartbeatDue,
@@ -57,11 +57,11 @@ const Edge = ({
 
 export const LowHealthOverlay = observer(() => {
   const health = GameOptions.lowHealthWarning
-    ? vitalWarning(Store.playerData.hpPercent, GameOptions.lowHealthPercent)
+    ? vitalWarning(Hero.hpPercent, GameOptions.lowHealthPercent)
     : NO_WARNING;
 
   const mana = GameOptions.lowManaWarning
-    ? vitalWarning(Store.playerData.mpPercent, GameOptions.lowManaPercent)
+    ? vitalWarning(Hero.mpPercent, GameOptions.lowManaPercent)
     : NO_WARNING;
 
   // The heart is the original's and ignores the edge options: it follows the
@@ -71,7 +71,7 @@ export const LowHealthOverlay = observer(() => {
       playSfx(HEARTBEAT, null, { channels: HEARTBEAT_CHANNELS })
     );
     const stop = reaction(
-      () => heartbeatDue(Store.playerData.currentHP, Store.playerData.maxHP),
+      () => heartbeatDue(Hero.currentHP, Hero.maxHP),
       due => heart.set(due),
       { fireImmediately: true }
     );

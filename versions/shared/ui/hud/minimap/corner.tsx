@@ -2,7 +2,7 @@ import { MuWindows } from '@/controllers/interface/windowManager';
 import './style.less';
 import { useLayoutEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { GameOptions, uiScaleFactor } from '@/controllers/settings';
 import type { MinimapMarker } from '@/controllers/terrain/minimapData';
 import { MuTipText } from '@/controllers/interface/components/mu_text';
@@ -91,7 +91,7 @@ const MapMarker = ({ marker, mapSize }: { marker: MinimapMarker; mapSize: number
 };
 
 export const MinimapCorner = observer(() => {
-  const world = Store.world;
+  const world = Ecs.world;
   // Under the sheet it would only be a dimmed ghost of the same map.
   const shown = !!world && !MuWindows.isOpen('minimap');
   // `mapIndex` is a plain field: the frame loop below carries a warp over.
@@ -119,7 +119,7 @@ export const MinimapCorner = observer(() => {
     const tick = () => {
       frame = requestAnimationFrame(tick);
 
-      const current = Store.world;
+      const current = Ecs.world;
       if (!current) return;
       if (current.mapIndex !== lastMap) {
         lastMap = current.mapIndex;

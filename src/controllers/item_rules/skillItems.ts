@@ -4,7 +4,7 @@ import type { Item } from '../../ecs/world';
  * Learning skills from orbs, scrolls and crystals: right-click the item in
  * the inventory (`CNewUIMyInventory::UseItem`, NewUIMyInventory.cpp:1865).
  * Pure rules only - the packet (0x26 ConsumeItemRequest, ItemSlot = the
- * orb / scroll) is sent by `Store.learnSkillItem`, the answer (`SkillAdded`
+ * orb / scroll) is sent by `Bag.learnSkillItem`, the answer (`SkillAdded`
  * F3 11 / `ItemConsumptionFailed`) lands in app/logic.ts.
  *
  * Server truth (OpenMU `LearnablesConsumeHandlerPlugIn`): the item's

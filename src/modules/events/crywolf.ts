@@ -1,7 +1,9 @@
 import { observable, runInAction } from 'mobx';
 import { ENUM_WORLD } from '../../core/types';
 import { EventBus } from '../../core/eventBus';
-import { Store } from '../../app/store';
+import { Session } from '../session';
+import { addNotification } from '../chat';
+import { Ecs } from '../../ecs/current';
 import {
   CrywolfContractRequestPacket,
   CrywolfInfoRequestPacket,
@@ -122,12 +124,12 @@ export function crywolfNoticePage(): number {
 /** `SendCrywolfContractRequest`: talk to the wolf statue during READY. */
 function useNpc(npc: { netId: number; npcType: number }): boolean {
   if (npc.npcType !== STATUE_NPC) return false;
-  if (Store.world === null || !MAPS.has(Store.world.mapIndex)) return false;
+  if (Ecs.world === null || !MAPS.has(Ecs.world.mapIndex)) return false;
 
-  if (state.state === CrywolfState.Ready && !Store.isOffline) {
+  if (state.state === CrywolfState.Ready && !Session.isOffline) {
     const packet = CrywolfContractRequestPacket.createPacket();
     packet.StatueId = npc.netId;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
   // The statue never opens a server window; consume the talk either way.
   return true;
@@ -183,8 +185,8 @@ function reset(): void {
 
 /** WSclient.cpp:789: entering the map asks for the event state. */
 EventBus.on('warpCompleted', ({ map }) => {
-  if (!MAPS.has(map) || Store.isOffline) return;
-  Store.sendToGS(CrywolfInfoRequestPacket.createPacket().buffer);
+  if (!MAPS.has(map) || Session.isOffline) return;
+  Session.sendToGS(CrywolfInfoRequestPacket.createPacket().buffer);
 });
 
 /** `CheckCryWolf1stMVP`: the state pair, and the end-of-war banner. */
@@ -226,9 +228,9 @@ EventBus.on('CrywolfAltarInfo', packet => {
 EventBus.on('CrywolfContractResult', packet => {
   const p = new CrywolfContractResultPacket(packet);
   if (p.Result === 1) {
-    Store.addNotification(EVENT_TEXT.cwContractMade, 'info', MESSAGE_MS);
+    addNotification(EVENT_TEXT.cwContractMade, 'info', MESSAGE_MS);
   } else {
-    Store.addNotification(EVENT_TEXT.cwContractRefused, 'error', MESSAGE_MS);
+    addNotification(EVENT_TEXT.cwContractRefused, 'error', MESSAGE_MS);
   }
 });
 
@@ -256,7 +258,7 @@ EventBus.on('CrywolfBossMonsterInfo', packet => {
 EventBus.on('CrywolfBenefit', packet => {
   const p = new CrywolfBenefitPacket(packet);
   if (p.ChaosRatePlus > 0) {
-    Store.addNotification(
+    addNotification(
       formatText(EVENT_TEXT.cwBenefit, p.ChaosRatePlus),
       'info',
       MESSAGE_MS

@@ -5,7 +5,7 @@ import {
 import { MapTileObject } from '@/controllers/terrain/mapTileObject';
 import { lightMapObjectWith } from '@/controllers/lighting/mapObjectLights';
 import { PRIORITY_TORCH, type LightSource } from '@/controllers/lighting/lightSource';
-import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import type { Entity, World } from '@/ecs/world';
 import { findBone, bonePosed, type BoneNode } from './bones';
 import { reportLoadFailure } from '@/controllers/assets';
@@ -126,7 +126,7 @@ export class BloodCastleCandelabraObject extends MapTileObject {
 
     if (!this.Ready || this.#bones.length === 0) return;
 
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
 
     if (!this.#lit) {

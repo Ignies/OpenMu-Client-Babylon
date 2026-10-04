@@ -13,7 +13,7 @@ import { skillDefinition, type SkillDefinition } from '@versions/shared/skills/s
 import { type SpriteOptions } from '@/controllers/fx/sprite';
 import { combat, RELEASE_KEY, RELEASE_TICKS } from '@/controllers/combat';
 import { lighting } from '@/controllers/lighting';
-import { storeRef } from '@/app/storeRef';
+import { Ecs } from '../../ecs/current';
 import { heldWeapons } from '@/controllers/actors';
 import { tierIndex } from '@/controllers/lighting/lightingQuality';
 import { weather } from '@/controllers/weather';
@@ -249,7 +249,7 @@ export const orbiting = (caster: Entity, radius: number, height: number, rate: n
 /** The caster's weapon bone. */
 export const weaponBone = (caster: Entity): PointSource => out => bonePos(caster, WEAPON_BONE, out, CAST_HEIGHT);
 /** `c->Weapon`: the weapons a character holds, the castle's inside Chaos Castle. */
-export const weaponsOf = (e: Entity) => heldWeapons(e, storeRef().world?.mapIndex ?? -1);
+export const weaponsOf = (e: Entity) => heldWeapons(e, Ecs.world?.mapIndex ?? -1);
 /** A blur trail swept in front of the caster (CreateWeaponBlur on the weapon bone). */
 export const slash = (colour: RGB = RGBS.steel, texture: string = TEX.swordBlur, reach = SLASH_REACH): Step => (_at, c) => {
   const t0 = fxNow();
@@ -798,7 +798,7 @@ export function clearBuffVisuals(entity: Entity): void {
 // rows that draw at a target (a bolt, a siphon) can be shot at all.
 if (import.meta.env.DEV && typeof window !== 'undefined') {
   const victim = (): Entity | null => {
-    const world = storeRef().world;
+    const world = Ecs.world;
     const caster = world?.playerEntity;
     if (!world || !caster) return null;
     const alive = (e: Entity): boolean => e !== caster && !!e.transform && !e.dying;
@@ -806,14 +806,14 @@ if (import.meta.env.DEV && typeof window !== 'undefined') {
   };
   (window as unknown as { __skillVisuals: unknown }).__skillVisuals = {
     area: (skill: number) => {
-      const world = storeRef().world;
+      const world = Ecs.world;
       const caster = world?.playerEntity;
       if (!world || !caster?.transform) return false;
       playAreaSkillVisual(world.scene, skill, caster, null, (x, y) => world.getTerrainHeight(x, y), victim());
       return true;
     },
     targeted: (skill: number) => {
-      const world = storeRef().world;
+      const world = Ecs.world;
       const caster = world?.playerEntity;
       if (!world || !caster?.transform) return false;
       playTargetedSkillVisual(world.scene, skill, caster, victim());
@@ -821,7 +821,7 @@ if (import.meta.env.DEV && typeof window !== 'undefined') {
     },
     // A buff's persistent look on the test character, on or off (`?buffs=` does the same at load).
     buff: (effectId: number, active = true) => {
-      const world = storeRef().world;
+      const world = Ecs.world;
       const hero = world?.playerEntity;
       if (!world || !hero?.transform) return false;
       if (!hero.buffs) world.addComponent(hero, 'buffs', new Set<number>());

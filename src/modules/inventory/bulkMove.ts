@@ -1,6 +1,8 @@
 import { reaction } from 'mobx';
 import { t } from '../../i18n';
-import { Store } from '../../app/store';
+import { Bag } from './state';
+import { Session } from '../session';
+import { addNotification } from '../chat';
 import { gridFirstIndex, StorageKind, storageColumns, storageRows } from './itemStorage';
 import type { Item } from '../../ecs/world';
 
@@ -9,7 +11,7 @@ import type { Item } from '../../ecs/world';
  *
  * Same shape as the auto-arrange run (`inventorySort.ts`) and for the same
  * reason - the server owns both grids and answers one move at a time - so
- * this walks the source grid, hands one item to `Store.autoMoveItem` per
+ * this walks the source grid, hands one item to `Bag.autoMoveItem` per
  * answered move, and stops when the far grid is full or nothing matches.
  */
 
@@ -31,7 +33,7 @@ export const BulkMove = new (class _BulkMove {
       this.cancel();
       return;
     }
-    if (Store.pickedItem || Store.pendingItemMove) return;
+    if (Bag.pickedItem || Bag.pendingItemMove) return;
 
     this.from = from;
     this.to = to;
@@ -39,7 +41,7 @@ export const BulkMove = new (class _BulkMove {
     this.moves = 0;
 
     this.stop = reaction(
-      () => Store.pendingItemMove === null,
+      () => Bag.pendingItemMove === null,
       idle => {
         if (idle) this.step();
       }
@@ -57,7 +59,7 @@ export const BulkMove = new (class _BulkMove {
   private step(): void {
     const wanted = this.wanted;
     if (!wanted) return;
-    if (Store.pickedItem || Store.pendingItemMove) return;
+    if (Bag.pickedItem || Bag.pendingItemMove) return;
 
     if (this.moves >= MAX_MOVES) {
       this.cancel();
@@ -68,24 +70,24 @@ export const BulkMove = new (class _BulkMove {
     if (slot < 0) {
       const moved = this.moves;
       this.cancel();
-      if (moved > 0) Store.addNotification(t('notify.itemsMoved', { count: moved }));
+      if (moved > 0) addNotification(t('notify.itemsMoved', { count: moved }));
       return;
     }
 
-    const item = Store.itemsOfStorage(this.from)[slot];
-    if (!item || Store.findFreeSquare(this.to, item) < 0) {
+    const item = Bag.itemsOfStorage(this.from)[slot];
+    if (!item || Bag.findFreeSquare(this.to, item) < 0) {
       this.cancel();
-      Store.addNotification(t('notify.noRoomForItem'), 'error');
+      addNotification(t('notify.noRoomForItem'), 'error');
       return;
     }
 
     this.moves++;
-    Store.autoMoveItem(this.from, slot, this.to);
-    if (Store.isOffline) this.step();
+    Bag.autoMoveItem(this.from, slot, this.to);
+    if (Session.isOffline) this.step();
   }
 
   private nextSlot(wanted: (item: Item) => boolean): number {
-    const items = Store.itemsOfStorage(this.from);
+    const items = Bag.itemsOfStorage(this.from);
     const first = gridFirstIndex(this.from);
     const count = storageColumns(this.from) * storageRows(this.from);
 

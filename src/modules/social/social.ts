@@ -1,6 +1,9 @@
 import { t } from '../../i18n';
 import { action, computed, makeObservable, observable, runInAction } from 'mobx';
-import { Store } from '../../app/store';
+import { GuildMarks } from '../guild';
+import { Hero } from '../hero';
+import { Session } from '../session';
+import { Ecs } from '../../ecs/current';
 import {
   CHAT_COOLDOWN_MS,
   CHAT_FILTERS,
@@ -82,6 +85,7 @@ import {
 } from '../../controllers/interface/nameTags';
 import { NetStats } from '../../controllers/net/roundTrip';
 import { playUiSound } from '../../controllers/sound/sfx';
+import { setNotificationSink } from '../chat/notify';
 
 type PartyMember = {
   name: string;
@@ -340,7 +344,7 @@ export const Social = new (class _Social {
    * track the pairs where the hero is the defender. */
   trackSelfDefense(text: string): void {
     const parsed = parseSelfDefense(text);
-    if (!parsed || parsed.defender !== Store.playerData.name) return;
+    if (!parsed || parsed.defender !== Hero.name) return;
     if (parsed.active) {
       this.selfDefense.set(parsed.attacker, Date.now() + SELF_DEFENSE_MS);
     } else {
@@ -372,7 +376,7 @@ export const Social = new (class _Social {
     senderPk?: number;
     senderGm?: boolean;
   } {
-    const world = Store.world;
+    const world = Ecs.world;
     if (!sender || !world) return {};
 
     // `AssignChat`: players first, then anything else wearing the name.
@@ -382,15 +386,15 @@ export const Social = new (class _Social {
       (world.playerEntity?.objectNameInWorld === sender ? world.playerEntity : undefined);
     if (!entity) return {};
 
-    const guild = entity.guild ? Store.guilds.get(entity.guild.id) : undefined;
+    const guild = entity.guild ? GuildMarks.get(entity.guild.id) : undefined;
     // For ourselves the server answered both outright (CharacterInformation);
     // for anyone else `isGm` is the `#` shout guess and all there is.
-    const own = sender === Store.playerData.name;
+    const own = sender === Hero.name;
 
     return {
       senderGuild: guild?.name || undefined,
-      senderPk: own ? Store.playerData.heroState : entity.heroState,
-      senderGm: own ? Store.playerData.isGameMaster : entity.isGm,
+      senderPk: own ? Hero.heroState : entity.heroState,
+      senderGm: own ? Hero.isGameMaster : entity.isGm,
     };
   }
 
@@ -633,7 +637,7 @@ export const Social = new (class _Social {
     if (now - this.lastChatTime < CHAT_COOLDOWN_MS) return false;
     this.lastChatTime = now;
 
-    const heroName = Store.playerData.name;
+    const heroName = Hero.name;
     // A `/command` is never a whisper, whatever the whisper field holds
     // (the original checks the slash before the whisper id).
     const whisperTo =
@@ -647,7 +651,7 @@ export const Social = new (class _Social {
       );
       packet.setReceiverName(whisperTo);
       packet.setMessage(wire);
-      Store.sendToGS(packet.buffer);
+      Session.sendToGS(packet.buffer);
       // The original logs an outgoing whisper under the hero's name.
       this.addChatLine(heroName, text, ChatLineType.Whisper);
       this.remember(this.whisperHistory, whisperTo);
@@ -659,7 +663,7 @@ export const Social = new (class _Social {
     const local = localCommandOf(text);
     if (local?.local) {
       if (local.name === '/duelend') Commands.duelStop();
-      else Commands.run(local.local, Store.world?.currentPointerTarget);
+      else Commands.run(local.local, Ecs.world?.currentPointerTarget);
       this.remember(this.chatHistory, text);
       return true;
     }
@@ -675,7 +679,7 @@ export const Social = new (class _Social {
       // Emoji codes and item links are not words: `:dk_cry:` would play the
       // cry emote, and a link's bytes can spell anything.
       const emote = matchEmoteWord(stripItemLinks(stripEmojiCodes(text, EMOJI_CATALOG)));
-      if (emote && Store.world) Store.world.emoteRequest = emote;
+      if (emote && Ecs.world) Ecs.world.emoteRequest = emote;
 
       // A line that is nothing but an emoji token pops the bubble here too.
       // Everyone else gets it from this very message (the ChatMessage handler
@@ -684,12 +688,12 @@ export const Social = new (class _Social {
       // party line reaches members three maps away, where a bubble would hang
       // over nobody.
       const bubble = prefix ? null : matchEmojiBubbleWord(text);
-      if (bubble && Store.world) Store.world.emojiRequest = bubble;
+      if (bubble && Ecs.world) Ecs.world.emojiRequest = bubble;
 
       // A line of only chat emojis pops over the sender at once, for the same reason.
-      if (!bubble && !prefix && GameOptions.chatEmojis && Store.world) {
+      if (!bubble && !prefix && GameOptions.chatEmojis && Ecs.world) {
         const shown = chatEmojiBubbleOf(text, EMOJI_CATALOG).bubble;
-        if (shown) Store.world.emojiRequest = shown;
+        if (shown) Ecs.world.emojiRequest = shown;
       }
     }
 
@@ -701,7 +705,7 @@ export const Social = new (class _Social {
     // The server echoes our own line back, which is the one request/answer
     // pair a player can trigger on demand (controllers/net/roundTrip.ts).
     NetStats.markSent('chat');
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
 
     this.remember(this.chatHistory, text);
     return true;
@@ -721,7 +725,7 @@ export const Social = new (class _Social {
    */
   broadcastEmojiBubble(id: EmojiBubbleId): boolean {
     // Offline there is nothing to send to, and the local bubble is the point.
-    if (Store.isOffline) return true;
+    if (Session.isOffline) return true;
 
     const now = performance.now();
     if (now - this.lastChatTime < CHAT_COOLDOWN_MS) return false;
@@ -731,9 +735,9 @@ export const Social = new (class _Social {
     const packet = PublicChatMessagePacket.createPacket(
       PublicChatMessagePacket.getRequiredSize(10 + token.length)
     );
-    packet.setCharacter(Store.playerData.name);
+    packet.setCharacter(Hero.name);
     packet.setMessage(token);
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
 
     return true;
   }
@@ -768,7 +772,7 @@ export const Social = new (class _Social {
   get isPartyLeader(): boolean {
     return (
       this.partyMembers.length > 0 &&
-      this.partyMembers[0].name === Store.playerData.name
+      this.partyMembers[0].name === Hero.name
     );
   }
 
@@ -782,7 +786,7 @@ export const Social = new (class _Social {
 
   /** RemovePartyMember: the hero's own index dissolves the whole list. */
   removePartyMember(index: number): void {
-    const me = this.partyMembers.find(m => m.name === Store.playerData.name);
+    const me = this.partyMembers.find(m => m.name === Hero.name);
     if (!me || me.index === index) {
       this.partyMembers = [];
       this.errorMessage(t('party.left'));
@@ -811,7 +815,7 @@ export const Social = new (class _Social {
     }
     const packet = PartyInviteRequestPacket.createPacket();
     packet.TargetPlayerId = target.netId;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
     this.systemMessage(t('party.invitationSent', { name: target.name }));
   }
 
@@ -822,25 +826,25 @@ export const Social = new (class _Social {
     const packet = PartyInviteResponsePacket.createPacket();
     packet.Accepted = accepted;
     packet.RequesterId = request.requesterId;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
     runInAction(() => {
       this.partyRequest = null;
     });
   }
 
   requestPartyList(): void {
-    Store.sendToGS(PartyListRequestPacket.createPacket().buffer);
+    Session.sendToGS(PartyListRequestPacket.createPacket().buffer);
   }
 
   /** The leader's X on a row, or the hero's own row to leave. */
   partyKick(index: number): void {
     const packet = PartyPlayerKickRequestPacket.createPacket();
     packet.PlayerIndex = index;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   partyLeave(): void {
-    const me = this.partyMembers.find(m => m.name === Store.playerData.name);
+    const me = this.partyMembers.find(m => m.name === Hero.name);
     if (me) this.partyKick(me.index);
   }
 
@@ -851,7 +855,7 @@ export const Social = new (class _Social {
   }
 
   requestGuildList(): void {
-    Store.sendToGS(GuildListRequestPacket.createPacket().buffer);
+    Session.sendToGS(GuildListRequestPacket.createPacket().buffer);
   }
 
   /** `CommandGuild`: ask a guild master standing next to the hero. */
@@ -870,7 +874,7 @@ export const Social = new (class _Social {
     }
     const packet = GuildJoinRequestPacket.createPacket();
     packet.GuildMasterPlayerId = master.netId;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
     this.systemMessage(t('guild.joinRequestSent', { name: master.name }));
   }
 
@@ -880,7 +884,7 @@ export const Social = new (class _Social {
     const packet = GuildJoinResponsePacket.createPacket();
     packet.Accepted = accepted;
     packet.RequesterId = request.requesterId;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
     runInAction(() => {
       this.guildJoinRequest = null;
     });
@@ -896,7 +900,7 @@ export const Social = new (class _Social {
    */
   promptGuildKick(name: string): void {
     runInAction(() => {
-      this.guildKickPrompt = { name, self: name === Store.playerData.name };
+      this.guildKickPrompt = { name, self: name === Hero.name };
     });
   }
 
@@ -925,11 +929,11 @@ export const Social = new (class _Social {
     );
     packet.setPlayerName(name);
     packet.setSecurityCode(code);
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   guildLeave(securityCode = ''): void {
-    this.guildKick(Store.playerData.name, securityCode);
+    this.guildKick(Hero.name, securityCode);
   }
 
   /**
@@ -945,7 +949,7 @@ export const Social = new (class _Social {
   guildMasterAnswer(create: boolean): void {
     const packet = GuildMasterAnswerPacket.createPacket();
     packet.ShowCreationDialog = create;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
     runInAction(() => {
       this.guildMasterDialog = false;
       if (create && !this.myGuild) {
@@ -964,7 +968,7 @@ export const Social = new (class _Social {
     const packet = GuildCreateRequestPacket.createPacket();
     packet.setGuildName(guildName);
     packet.setGuildEmblem(emblem);
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
     runInAction(() => {
       this.guildCreationPending = true;
     });
@@ -972,7 +976,7 @@ export const Social = new (class _Social {
   }
 
   cancelGuildCreation(): void {
-    Store.sendToGS(CancelGuildCreationPacket.createPacket().buffer);
+    Session.sendToGS(CancelGuildCreationPacket.createPacket().buffer);
     runInAction(() => {
       this.guildCreationDialog = false;
       this.guildCreationPending = false;
@@ -998,7 +1002,7 @@ export const Social = new (class _Social {
     packet.Type = role === GuildMemberRoleEnum.NormalMember ? 3 : 2;
     packet.Role = role;
     packet.setPlayerName(name);
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
     this.requestGuildList();
   }
 
@@ -1006,7 +1010,7 @@ export const Social = new (class _Social {
 
   /** `SendRequestAllianceList` (WSclient.cpp:7479). */
   requestAllianceList(): void {
-    Store.sendToGS(RequestAllianceListPacket.createPacket().buffer);
+    Session.sendToGS(RequestAllianceListPacket.createPacket().buffer);
   }
 
   /**
@@ -1027,7 +1031,7 @@ export const Social = new (class _Social {
     packet.RelationshipType = relationship;
     packet.RequestType = join ? GuildRequestTypeEnum.Join : GuildRequestTypeEnum.Leave;
     packet.TargetPlayerId = target.netId;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
     this.systemMessage(
       relationship === GuildRelationshipTypeEnum.Alliance
         ? t('guild.allianceRequestSent', { name: target.name })
@@ -1046,7 +1050,7 @@ export const Social = new (class _Social {
       : GuildRequestTypeEnum.Leave;
     packet.Response = accepted;
     packet.TargetPlayerId = request.senderId;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
     runInAction(() => {
       this.guildRelationRequest = null;
     });
@@ -1056,7 +1060,7 @@ export const Social = new (class _Social {
   removeAllianceGuild(guildName: string): void {
     const packet = RemoveAllianceGuildRequestPacket.createPacket();
     packet.setGuildName(guildName.slice(0, 8));
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   // ---- guild war ----------------------------------------------------------
@@ -1066,7 +1070,7 @@ export const Social = new (class _Social {
     if (!this.guildWarRequest) return;
     const packet = GuildWarResponsePacket.createPacket();
     packet.Accepted = accepted;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
     runInAction(() => {
       this.guildWarRequest = null;
     });
@@ -1081,7 +1085,7 @@ export const Social = new (class _Social {
     if (guildId === undefined) return 0;
     if (this.myGuild && guildId === this.myGuild.id) return 1;
     const war = this.guildWar;
-    if (war && Store.guilds.get(guildId)?.name === war.enemyGuild) return 2;
+    if (war && GuildMarks.get(guildId)?.name === war.enemyGuild) return 2;
     return 0;
   }
 
@@ -1096,7 +1100,7 @@ export const Social = new (class _Social {
     const mine = this.myGuild;
     if (mine && guildId === mine.id) return GuildRelation.Union;
 
-    const guild = Store.guilds.get(guildId);
+    const guild = GuildMarks.get(guildId);
     if (!guild) return GuildRelation.None;
 
     if (this.guildRivalName && guild.name === this.guildRivalName) {
@@ -1109,7 +1113,7 @@ export const Social = new (class _Social {
       return GuildRelation.Union;
     }
 
-    const myAlliance = mine ? Store.guilds.get(mine.id)?.alliance : '';
+    const myAlliance = mine ? GuildMarks.get(mine.id)?.alliance : '';
     if (myAlliance && guild.alliance && guild.alliance === myAlliance) {
       return GuildRelation.Union;
     }
@@ -1117,6 +1121,12 @@ export const Social = new (class _Social {
     return GuildRelation.None;
   }
 })();
+
+// The system log `addNotification` writes to (`chat/notify.ts`).
+setNotificationSink((text, type) => {
+  if (type === 'error') Social.errorMessage(text);
+  else Social.systemMessage(text);
+});
 
 // A hot update that reaches this module must reload the page: Vite would
 // otherwise re-execute it and hand later-loaded importers a second instance

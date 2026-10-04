@@ -22,7 +22,7 @@ import {
 } from '../render/babylon/exports';
 import { getMaterial, loadGLTF } from '../assets/modelLoader';
 import { BlendState } from '@versions/shared/objects/enum';
-import { Store } from '../../app/store';
+import { Ecs } from '../../ecs/current';
 import type { TestScene } from '../render/scenes/testScene';
 import { LiveList, WHITE, type RGB } from './core';
 import { muAngle } from './model';
@@ -78,7 +78,7 @@ function bake(scene: Scene, file: string, index: number): Promise<Baked | null> 
   const key = `${file}#${index}`;
   let pending = perScene.get(key);
   if (pending) return pending;
-  const world = Store.world;
+  const world = Ecs.world;
   if (!world) return Promise.resolve(null);
   pending = loadGLTF(file, world)
     .then(gltf => {
@@ -144,7 +144,7 @@ interface Layer {
 }
 
 function spawn(scene: Scene, _at: Vector3, opts: StampsOptions): StampsHandle {
-  const world = Store.world;
+  const world = Ecs.world;
   const scale = opts.scale ?? 1;
   const colour = opts.colour ?? WHITE;
   const bodyLight = new Vector3(colour[0], colour[1], colour[2]);

@@ -1,7 +1,7 @@
 import { AllianceListPacket, GuildRelationshipChangeResultGuildRelationshipChangeResultTypeEnum, GuildRelationshipChangeResultPacket, GuildRelationshipRequestPacket, GuildRelationshipRequestTypeEnum, GuildRelationshipTypeEnum, GuildSoccerScoreUpdatePacket, GuildSoccerTimeUpdatePacket, GuildWarDeclaredPacket, GuildWarEndedGuildWarResultEnum, GuildWarEndedPacket, GuildWarRequestPacket, GuildWarRequestResultPacket, GuildWarRequestResultRequestResultEnum, GuildWarScoreUpdatePacket, GuildWarTypeEnum, RemoveAllianceGuildResultPacket } from '@versions/shared/packets/ServerToClientPackets';
 import { EventBus } from '@/core/eventBus';
 import { Social } from '../social/social';
-import { Store } from '@/app/store';
+import { GuildMarks } from '@/modules/guild';
 import { t, type TextKey } from '@/i18n';
 import { cleanName } from '../chat/chat';
 import { playerNameById } from '../_shared/net_helpers';
@@ -190,7 +190,7 @@ export function installNet(): void {
       );
       // The `<Alliance>` line over every head comes out of GuildInformation,
       // and the alliance name in it has just changed for both guilds.
-      Store.guilds.clear();
+      GuildMarks.clear();
       Social.requestGuildList();
       if (Social.guildTab === 'alliance') Social.requestAllianceList();
       return;
@@ -217,7 +217,7 @@ export function installNet(): void {
     const p = new RemoveAllianceGuildResultPacket(packet);
     if (p.Result) {
       Social.systemMessage(t('guild.allianceRemoved'));
-      Store.guilds.clear();
+      GuildMarks.clear();
       Social.requestAllianceList();
     } else {
       Social.errorMessage(t('guild.allianceRemoveFailed'));

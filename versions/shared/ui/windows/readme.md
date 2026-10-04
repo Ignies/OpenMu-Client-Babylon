@@ -1,7 +1,7 @@
 # windows
 
 One folder per in-game window. A window draws; its state and actions belong to its module
-(`src/modules/<module>`) or the Store. Recipe: [docs/how_to/change_a_window.md](../../../../docs/how_to/change_a_window.md).
+(`src/modules/<module>`, through its door). Recipe: [docs/how_to/change_a_window.md](../../../../docs/how_to/change_a_window.md).
 
 ## Public API
 - Each `window.ts` default-exports one `defineWindow({ id, slot, order, component })` or an array
@@ -11,7 +11,7 @@ One folder per in-game window. A window draws; its state and actions belong to i
 - `versions/shared/ui/index.ts` globs `./{windows,hud}/*/window.{ts,tsx}` and registers every
   definition, then registers the running version's `ui.windows` (same `id` replaces).
 - The world page (`../pages/world`) draws every `hud` window in order. Each window hides itself
-  when its Store flag or feature state says it is closed.
+  when its module's flag says it is closed.
 - Folder shape: `index.tsx` (drawing), `window.ts`, `layout.ts` (geometry, sprite lists),
   `style.less`, `i18n/<code>.ts` (the window's text: `en.ts` plus one file per language, found by
   `src/i18n`'s glob; see [src/i18n/readme.md](../../../../src/i18n/readme.md)). Shared widgets (item grid, tooltip, frames, buttons) are in
@@ -19,24 +19,24 @@ One folder per in-game window. A window draws; its state and actions belong to i
 
 | Folder | id (order) | Shows | Reads |
 |---|---|---|---|
-| `inventory` | inventory (80) | the hero's bag and equipment, repair mode | Store, inventory, items, economy, events |
-| `npc_shop` | npc_shop (90) | the merchant's stock; buy, sell, repair | Store.npcShop, items, inventory |
-| `vault` | vault (100) | the warehouse, zen buttons, pin lock | Store, economy, inventory |
-| `chaos_machine` | chaos_machine (110) | the goblin's mix tray and recipe menu | Store, economy, inventory |
-| `trade` | trade (120) | partner's half on top, the hero's below | Store, economy, inventory |
-| `personal_shop` | my_shop (130), shop_browser (140) | the hero's stall; another player's stall | Store, economy, inventory |
-| `character_info` | character_info (150) | stats and stat point buttons | Store.playerData, hero, options |
-| `pet_info` | pet_info (160) | Dark Horse / Dark Raven sheet and raven commands | Store pet state, pets |
+| `inventory` | inventory (80) | the hero's bag and equipment, repair mode | hero, inventory, npc_shop, items, economy, events |
+| `npc_shop` | npc_shop (90) | the merchant's stock; buy, sell, repair | Merchant, items, inventory |
+| `vault` | vault (100) | the warehouse, zen buttons, pin lock | hero, economy, inventory |
+| `chaos_machine` | chaos_machine (110) | the goblin's mix tray and recipe menu | economy, inventory |
+| `trade` | trade (120) | partner's half on top, the hero's below | hero, economy, inventory |
+| `personal_shop` | my_shop (130), shop_browser (140) | the hero's stall; another player's stall | economy, inventory |
+| `character_info` | character_info (150) | stats and stat point buttons | Hero, hero, options |
+| `pet_info` | pet_info (160) | Dark Horse / Dark Raven sheet and raven commands | pets (`Pets`), hero |
 | `mu_helper` | mu_helper (170) | MU Helper settings, hunt and obtain tabs | mu_helper, skills, hero |
 | `marketplace` | marketplace (190) | listings from the marketplace service | marketplace |
-| `move_command_window` | move_command (200) | the "M" map list with level and zen | Store, warp, hero |
+| `move_command_window` | move_command (200) | the "M" map list with level and zen | session, warp, hero |
 | `emote_menu` | emote_menu (210) | radial emote menu | social, hero, chat, band |
 | `instrument_window` | instrument (220) | song, channels and band for the instrument in hand | band |
 | `command_window` | command (240) | the "D" player command buttons | chat (commands) |
 | `quick_command_window` | quick_command (250) | right-click menu on another player | chat, options |
 | `party` | party (260) | members with HP, invite list of nearby players | social, economy, skills |
-| `guild` | guild (270), guild_master_dialog (370), guild_creation_dialog (380), guild_kick_password_dialog (390) | guild tabs and its dialogs | social, Store.guilds |
-| `skills` | skills (280) | the learned-skill list | Store.skills, skills |
+| `guild` | guild (270), guild_master_dialog (370), guild_creation_dialog (380), guild_kick_password_dialog (390) | guild tabs and its dialogs | social, GuildMarks |
+| `skills` | skills (280) | the learned-skill list | HeroSkills, skills |
 | `master_skills` | master_skills (290) | the version's master tree (`loadVersionUi().MasterSkillsWindow`), lazy | skills |
 | `quests` | quests (300), quest_tracker (460) | quest NPC pages and the on-screen tracker | quests, options |
 | `friends` | friends (310) | friend list, letters, chat room list | friends, chat |
@@ -47,7 +47,7 @@ One folder per in-game window. A window draws; its state and actions belong to i
 | `balgass_entry` | balgass_entry (410) | third class quest entry boxes | quests |
 | `duel` | duel (430) | challenge prompt, score, channels, spectators, winner | events (duel), chat |
 | `session_stats` | session_stats (440) | what this sitting earned, time to next level | session |
-| `debug_menu` | debug_menu (470) | offline debug window, tabs from `modules/` | gm, Store.isOffline |
+| `debug_menu` | debug_menu (470) | offline debug window, tabs from `modules/` | gm, Session.isOffline |
 | `gm_panel` | gm_panel (480) | game master panel; sends chat commands | gm, social, chat |
 | `options` | - | options window; no `window.ts`, drawn by `src/app/App.tsx` | options and more |
 | `_shared` | - | `nearby_players.ts`: `useNearbyPlayers` for party and guild | social |
@@ -56,7 +56,7 @@ Other ids in the same stack: msg_window (360) and picked_item (500) from the int
 controller, and the HUD elements in `../hud`.
 
 ## Depends on / used by
-- uses: `src/modules/*`, the Store, `src/controllers/interface` (registry, widgets, hooks)
+- uses: `src/modules/*` (through their doors), `Ecs.world`, `src/controllers/interface` (registry, widgets, hooks)
 - used by: `../index.ts` (glob); `versions/season6/ui` (sprite lists from `layout.ts`,
   `MasterSkillsWindow`); `src/app/App.tsx` (options)
 

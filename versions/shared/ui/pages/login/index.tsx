@@ -4,7 +4,9 @@ import { t } from '@/i18n';
 import { playUiSound, uiClick } from '@/controllers/sound/sfx';
 import './style.less';
 import { observer } from 'mobx-react-lite';
-import { Store } from '@/app/store';
+import { Servers } from '@/modules/servers';
+import { Session } from '@/modules/session';
+import { MsgBox } from '@/controllers/interface';
 import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH } from '@/modules/servers/serverAccounts';
 import { registerApiUrl, registerUrl } from '@/modules/servers/serverServices';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
@@ -53,8 +55,8 @@ const REGISTER = { x: 22, y: CHECK_Y + 3 };
 const SERVER_LINE = { x: 111, y: 80 };
 
 const onCancelClicked = () => {
-  Store.username = '';
-  Store.password = '';
+  Session.username = '';
+  Session.password = '';
 };
 
 export const LoginPage = observer(() => {
@@ -71,24 +73,24 @@ export const LoginPage = observer(() => {
 
   const openRegister = () => {
     setNotice('');
-    Store.loginError = undefined;
+    Session.loginError = undefined;
     setRegistering(true);
   };
 
   const onLoginClicked = () => {
-    if (Store.loginProcessing) return;
+    if (Session.loginProcessing) return;
 
     setNotice('');
 
-    if (!Store.username || !Store.password) {
-      Store.loginError = t('login.enterCredentials');
+    if (!Session.username || !Session.password) {
+      Session.loginError = t('login.enterCredentials');
       return;
     }
 
-    Store.loginError = undefined;
-    Store.loginProcessing = true;
+    Session.loginError = undefined;
+    Session.loginProcessing = true;
 
-    Store.loginRequest(Store.username, Store.password);
+    Session.loginRequest(Session.username, Session.password);
   };
 
   const form = useRef<HTMLFormElement>(null);
@@ -102,7 +104,7 @@ export const LoginPage = observer(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Enter' && e.key !== 'Escape') return;
       if (e.isComposing || e.keyCode === 229) return;
-      if (Store.msgWin || MuWindows.isOpen('options')) return;
+      if (MsgBox.msgWin || MuWindows.isOpen('options')) return;
       // A focused link keeps its own Enter.
       if (e.target instanceof HTMLAnchorElement) return;
 
@@ -114,7 +116,7 @@ export const LoginPage = observer(() => {
       if (e.key === 'Escape') {
         playUiSound('click');
         onCancelClicked();
-      } else if (!Store.loginProcessing) {
+      } else if (!Session.loginProcessing) {
         playUiSound('click');
         // Through the form, so a password manager still sees a login submitted.
         form.current?.requestSubmit();
@@ -134,9 +136,9 @@ export const LoginPage = observer(() => {
 
         <RegisterWindow
           onCreated={username => {
-            Store.username = username;
-            Store.password = '';
-            Store.loginError = undefined;
+            Session.username = username;
+            Session.password = '';
+            Session.loginError = undefined;
             setNotice(t('register.created'));
             setRegistering(false);
           }}
@@ -157,15 +159,15 @@ export const LoginPage = observer(() => {
         className="login-win"
       >
         {/* GlobalText 460: "%s Server %d" - the server picked on the list. */}
-        {Store.selectedServer && (
+        {Servers.selectedServer && (
           <MuText
             face="fix"
             className="login-server-line"
             style={{ left: SERVER_LINE.x, top: SERVER_LINE.y }}
             text={
-              Store.selectedServer.channelName
-                ? `${Store.selectedServer.name} - ${Store.selectedServer.channelName}`
-                : `${Store.selectedServer.name} Ch. ${Store.selectedServer.channel}`
+              Servers.selectedServer.channelName
+                ? `${Servers.selectedServer.name} - ${Servers.selectedServer.channelName}`
+                : `${Servers.selectedServer.name} Ch. ${Servers.selectedServer.channel}`
             }
           />
         )}
@@ -194,10 +196,10 @@ export const LoginPage = observer(() => {
             <input
               className="login-input"
               type="text"
-              autoFocus={!Store.username}
-              value={Store.username}
+              autoFocus={!Session.username}
+              value={Session.username}
               onChange={e => {
-                Store.username = e.target.value;
+                Session.username = e.target.value;
               }}
               maxLength={MAX_USERNAME_LENGTH}
               style={{ paddingLeft: TEXT_INSET_X, paddingTop: TEXT_INSET_Y }}
@@ -213,10 +215,10 @@ export const LoginPage = observer(() => {
             <input
               className="login-input"
               type="password"
-              autoFocus={!!Store.username}
-              value={Store.password}
+              autoFocus={!!Session.username}
+              value={Session.password}
               onChange={e => {
-                Store.password = e.target.value;
+                Session.password = e.target.value;
               }}
               maxLength={MAX_PASSWORD_LENGTH}
               style={{ paddingLeft: TEXT_INSET_X, paddingTop: TEXT_INSET_Y }}
@@ -226,7 +228,7 @@ export const LoginPage = observer(() => {
           {}
           <MuSpriteFrame
             file="op2_ch.OZT"
-            y={Store.rememberLogin ? CHECK_SIZE : 0}
+            y={Session.rememberLogin ? CHECK_SIZE : 0}
             width={CHECK_SIZE}
             height={CHECK_SIZE}
             style={{
@@ -236,12 +238,12 @@ export const LoginPage = observer(() => {
               cursor: 'pointer',
               pointerEvents: 'auto',
             }}
-            onClick={uiClick(() => (Store.rememberLogin = !Store.rememberLogin))}
+            onClick={uiClick(() => (Session.rememberLogin = !Session.rememberLogin))}
           />
           <span
             className="login-label login-remember"
             style={{ left: 130, top: 159 }}
-            onClick={uiClick(() => (Store.rememberLogin = !Store.rememberLogin))}
+            onClick={uiClick(() => (Session.rememberLogin = !Session.rememberLogin))}
           >
             {t('login.rememberMe')}
           </span>
@@ -253,7 +255,7 @@ export const LoginPage = observer(() => {
             frames={{ up: 0, active: 1, down: 2 }}
             color={TEXT_COLOR.brightGray}
             activeColor={TEXT_COLOR.white}
-            disabled={Store.loginProcessing}
+            disabled={Session.loginProcessing}
             onClick={onLoginClicked}
             style={{ position: 'absolute', left: OK_X, top: BUTTON_Y }}
           />
@@ -299,11 +301,11 @@ export const LoginPage = observer(() => {
           <button type="submit" className="login-submit" tabIndex={-1} />
         </form>
 
-        {!!Store.loginError && (
-          <p className="login-error">{Store.loginError}</p>
+        {!!Session.loginError && (
+          <p className="login-error">{Session.loginError}</p>
         )}
 
-        {!Store.loginError && !!notice && <p className="login-notice">{notice}</p>}
+        {!Session.loginError && !!notice && <p className="login-notice">{notice}</p>}
       </MuSpriteFrame>
     </div>
   );

@@ -2,11 +2,13 @@ import { t } from '../i18n';
 import { ServersPage } from '@versions/shared/ui/pages/server_select';
 import { observer } from 'mobx-react-lite';
 import { lazy, Suspense } from 'react';
-import { Store, UIState } from './store';
+import { addNotification } from '../modules/chat';
+import { AppState, UIState } from './uiState';
 import { loadVersionUi } from '../version';
 import { WorldPage } from '@versions/shared/ui/pages/world';
 import { useEventBus } from '../controllers/interface/hooks/useEventBus';
 import { PreloaderPage } from '@versions/shared/ui/pages/preloader';
+import { playOffline } from './offline';
 import { LoadingScreen } from '../controllers/loading/classic';
 import { OptionsWindow } from '@versions/shared/ui/windows/options';
 import { GameCursor } from '../controllers/interface/components/game_cursor';
@@ -25,11 +27,11 @@ const CharactersPage = lazy(() =>
 );
 
 const CurrentPage = observer(() => {
-  const state = Store.uiState;
+  const state = AppState.uiState;
 
   switch (state) {
     case UIState.Preloader:
-      return <PreloaderPage />;
+      return <PreloaderPage onPlayOffline={playOffline} />;
     case UIState.Servers:
       return <ServersPage />;
     case UIState.Login:
@@ -52,9 +54,11 @@ const CurrentPage = observer(() => {
   }
 });
 
+const onPreloader = () => AppState.uiState === UIState.Preloader;
+
 export const App = observer(() => {
   useEventBus('wsError', () => {
-    Store.addNotification(t('notify.wsError'), 'error');
+    addNotification(t('notify.wsError'), 'error');
   });
 
   return (
@@ -62,7 +66,7 @@ export const App = observer(() => {
       <CurrentPage />
       <OptionsWindow />
       {}
-      <LoadingScreen />
+      <LoadingScreen hidden={onPreloader} />
       {}
       <ReconnectOverlay />
       {}

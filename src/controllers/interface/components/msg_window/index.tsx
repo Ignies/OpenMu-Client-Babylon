@@ -1,12 +1,11 @@
 import './style.less';
 import { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Store } from '@/app/store';
 import { MuSpriteFrame } from '../mu_sprite';
 import { MuButton } from '../mu_button';
 import { playUiSound } from '@/controllers/sound/sfx';
 import { TEXT_COLOR } from '@/controllers/interface/components/mu_text';
-import { MSG_WIN_MESSAGES, MsgWinCode, MsgWinType } from '@/controllers/interface/msgWin';
+import { MSG_WIN_MESSAGES, MsgWinCode, MsgWinType, MsgBox } from '@/controllers/interface/msgWin';
 import {
   BACK_SPRITE,
   BTN_BOTH_CANCEL_X,
@@ -37,7 +36,7 @@ import {
 } from './layout';
 
 export const MsgWindow = observer(() => {
-  const state = Store.msgWin;
+  const state = MsgBox.msgWin;
   const code = state?.code;
   const type = code === undefined ? null : MSG_WIN_MESSAGES[code].type;
 
@@ -50,34 +49,16 @@ export const MsgWindow = observer(() => {
   const onOk = () => {
     if (!code) return;
 
-    // Boxes raised with a Yes handler (the valuable-item confirmations) carry
-    // it here; the rest answer by their code.
-    const confirmed = Store.takeMsgWinOk();
+    // The Yes handler the box was raised with (the valuable-item confirmations,
+    // the delete-character chain), given what was typed in the box.
+    const confirmed = MsgBox.takeMsgWinOk();
 
-    Store.closeMsgWin();
+    MsgBox.closeMsgWin();
 
-    switch (code) {
-      case MsgWinCode.DeleteCharacterConfirm:
-        Store.popUpMsgWin(MsgWinCode.DeleteCharacterResident);
-        break;
-
-      case MsgWinCode.DeleteCharacterResident: {
-        const name = Store.focusedChar;
-        if (!name) break;
-
-        Store.deleteCharacterRequest(name, securityCode);
-
-        Store.popUpMsgWin(MsgWinCode.Wait);
-        break;
-      }
-
-      default:
-        confirmed?.();
-        break;
-    }
+    confirmed?.(securityCode);
   };
 
-  const onCancel = () => Store.closeMsgWin();
+  const onCancel = () => MsgBox.closeMsgWin();
 
   // The handlers close over `securityCode`; the ref keeps the one listener
   // (registered once per window type) calling the current pair.

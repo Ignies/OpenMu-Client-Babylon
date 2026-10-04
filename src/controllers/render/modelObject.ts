@@ -20,9 +20,7 @@ import {
 import { NO_BLEND_MESH } from './blendMeshes';
 import { meshAnimationFor, type MeshAnimation } from './meshAnimation';
 import { BlendState } from '@versions/shared/objects/enum';
-// Late-bound: a value import of `../store` closed an import cycle back to
-// the monster classes that extend this one (B14, see `storeRef.ts`).
-import { storeRef } from '../../app/storeRef';
+import { Ecs } from '../../ecs/current';
 import { settleStillAnimations } from './staticClips';
 import { requestGlowProbe } from './scenes/sceneLook';
 import {
@@ -1496,7 +1494,7 @@ export class ModelObject {
     mesh.metadata.lightCard = this.Lights?.emitsLight === true;
 
     if (this.GlowBlendMesh) {
-      storeRef().world?.scene.look?.glow.referenceMeshToUseItsOwnMaterial(
+      Ecs.world?.scene.look?.glow.referenceMeshToUseItsOwnMaterial(
         mesh as Mesh
       );
       // Marks the mesh as a live glow source for sceneLook's layer gate.
@@ -1937,7 +1935,7 @@ export class ModelObject {
   }
 
   protected async loadSpecificModel(modelName: string) {
-    this.load(await loadGLTF(`${this.objectDir}${modelName}`, storeRef().world!));
+    this.load(await loadGLTF(`${this.objectDir}${modelName}`, Ecs.world!));
   }
 
   protected async loadSpecificModelWithDynamicID(

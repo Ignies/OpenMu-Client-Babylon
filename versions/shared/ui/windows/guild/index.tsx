@@ -4,7 +4,9 @@ import './style.less';
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
-import { Store } from '@/app/store';
+import { GuildMarks } from '@/modules/guild';
+import { Hero } from '@/modules/hero';
+import { Ecs } from '@/ecs/current';
 import {
   GUILD_SECURITY_CODE_MAX,
   Social,
@@ -204,7 +206,7 @@ function selectTab(tab: GuildTab): void {
 /** `Render_Guild_History` + the stats block of `Render_Text`. */
 const InfoTab = observer(() => {
   const mine = Social.myGuild!;
-  const guild = Store.guilds.get(mine.id);
+  const guild = GuildMarks.get(mine.id);
   const logo = guild?.logo ?? [];
   const war = Social.guildWar;
 
@@ -216,8 +218,8 @@ const InfoTab = observer(() => {
     Social.isGuildMaster
       ? t('guild.stat.membersMaster', {
           count: Social.guildMembers.length,
-          max: Store.playerData.level
-            ? Math.min(80, Math.trunc(Store.playerData.level / 10))
+          max: Hero.level
+            ? Math.min(80, Math.trunc(Hero.level / 10))
             : 0,
         })
       : t('guild.stat.members', { count: Social.guildMembers.length }),
@@ -289,7 +291,7 @@ const InfoTab = observer(() => {
         x={100}
         y={350}
         label={Social.isGuildMaster ? t('guild.disband') : t('guild.leave')}
-        onClick={() => Social.promptGuildKick(Store.playerData.name)}
+        onClick={() => Social.promptGuildKick(Hero.name)}
       />
     </>
   );
@@ -298,7 +300,7 @@ const InfoTab = observer(() => {
 /** `Render_Guild_Enum`: name / position / server, with the master's buttons. */
 const MembersTab = observer(() => {
   const master = Social.isGuildMaster;
-  const me = Store.playerData.name;
+  const me = Hero.name;
   const [selected, setSelected] = useState('');
   const row = Social.guildMembers.find(m => m.name === selected);
   const canAct = master && !!row && row.name !== me;
@@ -545,7 +547,7 @@ const NoGuild = observer(() => {
           <div key={p.netId} className="guild-row">
             <span className="guild-row-name">{p.name}</span>
             <span className="guild-row-role">
-              {Store.guilds.get(p.guildId!)?.name ?? ''}
+              {GuildMarks.get(p.guildId!)?.name ?? ''}
             </span>
             <button
               type="button"
@@ -575,13 +577,13 @@ export const GuildWindow = observer(() => {
     });
 
   useEventBus('keyPressed', key => {
-    if (isKey(HOT_KEY, key) && Store.world?.playerEntity) toggle();
+    if (isKey(HOT_KEY, key) && Ecs.world?.playerEntity) toggle();
   });
 
   if (!Social.guildWindowEnabled) return null;
 
   const mine = Social.myGuild;
-  const guild = mine ? Store.guilds.get(mine.id) : undefined;
+  const guild = mine ? GuildMarks.get(mine.id) : undefined;
   const tab = Social.guildTab;
 
   return (

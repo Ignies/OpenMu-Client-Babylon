@@ -3,7 +3,7 @@ import './style.less';
 import { t } from '@/i18n';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useState } from 'react';
-import { Store } from '@/app/store';
+import { Bag } from '@/modules/inventory';
 import { Economy, MAX_SHOP_TITLE } from '@/modules/economy/economy';
 import {
   StorageKind,
@@ -12,7 +12,7 @@ import {
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuItemWindow } from '@/controllers/interface/components/mu_window';
-import { ItemGrid } from '@/controllers/interface/components/item_grid';
+import { ItemGrid } from '../../components/item_grid';
 
 import {
   BROWSE_TITLE_Y,
@@ -97,7 +97,7 @@ export const MyShop = observer(() => {
 
   if (!Economy.myShopOpen) return null;
 
-  const picked = Store.pickedItem;
+  const picked = Bag.pickedItem;
   const banned = !!picked && isPersonalShopBanned(picked.item);
 
   const column = 1 + (MuWindows.isOpen('inventory') ? 1 : 0) + (MuWindows.isOpen('character_info') ? 1 : 0);
@@ -158,17 +158,17 @@ export const MyShop = observer(() => {
         rows={ROWS}
         left={GRID_X}
         top={GRID_Y}
-        disabled={!!Store.pendingItemMove}
+        disabled={!!Bag.pendingItemMove}
         dropTint={picked ? (banned ? 'ban' : 'ok') : 'none'}
         tooltipContext="playerShop"
         priceOf={square => Economy.myShopPrices[square]}
         onPick={square => {
           // A priced item may be lifted back out only while the stall is down.
           if (Economy.myShopSelling) Economy.stopSelling();
-          Store.pickItem(StorageKind.PersonalShop, square);
+          Bag.pickItem(StorageKind.PersonalShop, square);
         }}
         onPlace={square =>
-          Store.placePickedItem(square, StorageKind.PersonalShop)
+          Bag.placePickedItem(square, StorageKind.PersonalShop)
         }
         onUse={square => Economy.openPrompt({ kind: 'shop-price', slot: square })}
       />

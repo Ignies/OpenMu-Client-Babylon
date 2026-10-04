@@ -17,6 +17,8 @@ import { characterLightFor } from '@/controllers/lighting/characters';
 import { monsterVisualFor } from '@/controllers/fx/monsterVisuals';
 import { shatterDeathFor } from '@/controllers/fx/deathVisuals';
 import { GameOptions } from '@/controllers/settings/gameOptions';
+// The skill files fill the warrior-glint rows (`registerSkills`); this used to come in through the Store.
+import './skills';
 
 /**
  * The per-map, per-monster and per-skill rows that used to sit in controllers and systems, as

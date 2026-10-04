@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { t } from '@/i18n';
-import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
+import { Ecs } from '@/ecs/current';
 import { Social } from '@/modules/social/social';
 import { loadWorldMinimap, type WorldMinimap } from '@/controllers/terrain/minimap';
 import { MinimapMarkerKind, type MinimapMarker } from '@/controllers/terrain/minimapData';
@@ -98,8 +99,8 @@ export function usePartyMarkers(active: boolean, map: number | undefined): Minim
     if (!active || map === undefined) return;
 
     const sample = () => {
-      const world = Store.world;
-      const heroName = Store.playerData.name;
+      const world = Ecs.world;
+      const heroName = Hero.name;
       if (!world) return;
 
       const next: MinimapMarker[] = [];
@@ -143,7 +144,7 @@ export function useHeroTile(active: boolean): MapPoint {
     let last = { x: NaN, y: NaN };
 
     const tick = () => {
-      const pos = Store.world?.playerEntity?.transform?.pos;
+      const pos = Ecs.world?.playerEntity?.transform?.pos;
       if (pos) {
         const next = { x: pos.x, y: pos.z };
         if (next.x !== last.x || next.y !== last.y) {

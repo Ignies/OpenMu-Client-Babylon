@@ -15,6 +15,7 @@ import { inPuddles, puddleCover, wetness } from './wetness';
 import { puddleUnderfoot } from './puddleUnderfoot';
 
 export type { WeatherLayer } from './layer';
+export { WeatherStatus } from './status';
 
 /**
  * The weather layer: everything that falls from the sky or is left behind on

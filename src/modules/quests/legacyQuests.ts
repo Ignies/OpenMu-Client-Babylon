@@ -26,7 +26,11 @@ import { EventBus } from '../../core/eventBus';
 import { playUiSound } from '../../controllers/sound/sfx';
 import { showObjectEffect } from '../../ecs/systems/objectEffectSystem';
 import { MAX_QUESTS, QuestActKind, type QuestDefinition } from '../../controllers/assets/mu/questFiles';
-import { Store } from '../../app/store';
+import { Merchant } from '../npc_shop';
+import { Hero } from '../hero';
+import { Session } from '../session';
+import { addNotification } from '../chat';
+import { Ecs } from '../../ecs/current';
 import type { QuestLayer } from './layer';
 import {
   dialogScript,
@@ -174,7 +178,7 @@ export function legacyQuestListReceived(): boolean {
 
 /** `GetBaseClass(Hero->Class)` as the act's class column. */
 function heroClass(): BaseClass {
-  return getBaseClass(Store.playerData.charClass);
+  return getBaseClass(Hero.charClass);
 }
 
 /**
@@ -251,7 +255,7 @@ function ownState(index: number, packed: number): number {
 /** `FindQuestItemsInInven`: how many of `count` items are still missing. */
 function missingItems(itemType: number, count: number, level: number): number {
   let found = 0;
-  for (const item of Store.playerData.items) {
+  for (const item of Hero.items) {
     if (!item) continue;
     if (item.group * MAX_ITEM_INDEX + item.num !== itemType) continue;
     if (level !== -1 && (item.lvl ?? 0) !== level) continue;
@@ -286,7 +290,7 @@ function requestCheck(quest: QuestDefinition, lastCheck: boolean): { errorPage: 
           break outer;
         }
       }
-      const level = Store.playerData.level;
+      const level = Hero.level;
       if (req.levelMin > 0 && req.levelMin > level) {
         errorPage = req.errorText;
         break outer;
@@ -297,7 +301,7 @@ function requestCheck(quest: QuestDefinition, lastCheck: boolean): { errorPage: 
       }
       if (req.zen > 0) {
         needZen = req.zen;
-        if (lastCheck && needZen > Store.playerData.money) {
+        if (lastCheck && needZen > Hero.money) {
           errorPage = req.errorText;
           break outer;
         }
@@ -560,9 +564,9 @@ function showLegacyQuestWindow(index: number): void {
  * told, and refuses potions, trades and parties meanwhile.
  */
 function endNpcTalk(): void {
-  if (Store.npcShop) Store.closeNpcShop();
-  else if (!Store.isOffline) Store.sendToGS(CloseNpcRequestPacket.createPacket().buffer);
-  Store.dropNpcTalk();
+  if (Merchant.npcShop) Merchant.closeNpcShop();
+  else if (!Session.isOffline) Session.sendToGS(CloseNpcRequestPacket.createPacket().buffer);
+  Merchant.dropNpcTalk();
 }
 
 /** `Hide(INTERFACE_NPCQUEST)`: `ProcessClosing` always ends the NPC talk. */
@@ -586,7 +590,7 @@ function sendSetState(index: number): void {
   const packet = LegacyQuestStateSetRequestPacket.createPacket();
   packet.QuestNumber = index;
   packet.NewState = SET_STATE_ADVANCE;
-  Store.sendToGS(packet.buffer);
+  Session.sendToGS(packet.buffer);
 }
 
 /** `ProcessNextProgress`: re-check with zen enforced, then ask the server. Returns true on error. */
@@ -620,8 +624,8 @@ export function answerLegacyQuest(i: number): void {
 
 /** `SendLegacyQuestStateRequest` (0xA0): ask for every state after entering. */
 export function requestLegacyQuestStates(): void {
-  if (Store.isOffline) return;
-  Store.sendToGS(LegacyQuestStateRequestPacket.createPacket().buffer);
+  if (Session.isOffline) return;
+  Session.sendToGS(LegacyQuestStateRequestPacket.createPacket().buffer);
 }
 
 /**
@@ -670,7 +674,7 @@ EventBus.on('LegacyQuestStateDialog', packet => {
   // With the talked NPC's next quest still level-locked, OpenMU sends index 0
   // and the byte of the quest last finished, another group: open that NPC's
   // own quest instead and keep the states. A running quest opens anywhere.
-  const npc = Store.pendingNpcType;
+  const npc = Merchant.pendingNpcType;
   const quest = questDefinition(index);
   if (npc && quest && quest.npcType !== npc && ownState(index, p.State) !== LegacyQuestState.InProgress) {
     const mine = legacyQuestForNpc(npc);
@@ -688,7 +692,7 @@ EventBus.on('LegacySetQuestStateResponse', packet => {
   const p = new LegacySetQuestStateResponsePacket(packet);
   // `ReceiveQuestResult`: Result 0 = accepted; anything else leaves the dialog where it is.
   if (p.Result !== 0) {
-    Store.addNotification(t('quest.stateFailed'), 'error');
+    addNotification(t('quest.stateFailed'), 'error');
     return;
   }
   // `HideAll` before `Show`: the visible window closes, and the NPC talk with it.
@@ -707,19 +711,19 @@ EventBus.on('LegacySetQuestStateResponse', packet => {
 function evolveHero(cls: number, step: number): void {
   if (classOf(cls).step !== step) return;
   runInAction(() => {
-    Store.playerData.charClass = cls as CharacterClassNumber;
+    Hero.charClass = cls as CharacterClassNumber;
   });
-  const hero = Store.world?.playerEntity;
+  const hero = Ecs.world?.playerEntity;
   if (hero?.charAppearance) {
     hero.charAppearance.charClass = cls as CharacterClassNumber;
     hero.charAppearance.changed = true;
   }
-  Store.addNotification(t(step === 3 ? 'quest.evolvedThird' : 'quest.evolved'), 'info');
+  addNotification(t(step === 3 ? 'quest.evolvedThird' : 'quest.evolved'), 'info');
 }
 
 EventBus.on('LegacyQuestReward', packet => {
   const p = new LegacyQuestRewardPacket(packet);
-  const world = Store.world;
+  const world = Ecs.world;
   const hero = world?.playerEntity;
   const isHero = !!hero && (p.PlayerId & 0x7fff) === hero.netId;
 
@@ -729,9 +733,9 @@ EventBus.on('LegacyQuestReward', packet => {
       // Gain Hero Status done at exactly level 220 sends 202 with 0 points.
       if (isHero && p.Count > 0) {
         runInAction(() => {
-          Store.playerData.points += p.Count;
+          Hero.points += p.Count;
         });
-        Store.addNotification(t('quest.rewardPoints', { count: p.Count }), 'info');
+        addNotification(t('quest.rewardPoints', { count: p.Count }), 'info');
       }
       break;
     case Reward.CharacterEvolutionFirstToSecond:
@@ -741,7 +745,7 @@ EventBus.on('LegacyQuestReward', packet => {
       if (isHero) evolveHero(p.Count >> 3, 3);
       break;
     case Reward.ComboSkill:
-      if (isHero) Store.addNotification(t('quest.comboLearned'), 'info');
+      if (isHero) addNotification(t('quest.comboLearned'), 'info');
       break;
   }
 
@@ -761,8 +765,8 @@ EventBus.on('heroWalked', () => closeLegacyQuestWindow());
 // stat add or a reset, so only a different hero starts from a blank chain.
 let heroName: string | null = null;
 EventBus.on('CharacterInformation', () => {
-  if (Store.playerData.name !== heroName) {
-    heroName = Store.playerData.name;
+  if (Hero.name !== heroName) {
+    heroName = Hero.name;
     runInAction(() => {
       state.states.fill(LegacyQuestState.None);
       state.currentIndex = 0;

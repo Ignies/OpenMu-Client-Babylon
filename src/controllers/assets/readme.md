@@ -63,7 +63,7 @@ imports the modules below directly (baselined in `tools/checks`).
   `terrain` (`mapFileEncryption`, tile lists), `maps`, `net/wireUtils`, `interface/item_icons`,
   `actors/skinTexture`, `version`, `i18n`, `core`, `settings`, `item_rules`.
 - used by: nearly every controller (`render`, `fx`, `terrain`, `sound`, `lighting`, `interface`,
-  `actors`, `maps`, `weather`), `ecs/systems`, `app/boot.tsx`, `app/store.ts`, `modules`
+  `actors`, `maps`, `weather`), `ecs/systems`, `app/boot.tsx`, `modules`
   (quests, skills, inventory, economy, character select), `versions/shared` (items, monsters, ui),
   and `tools/` (`bmdToGlb.ts`, `assetsIndex.ts`, `compressAssets.ts`).
 

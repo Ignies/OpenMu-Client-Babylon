@@ -1,7 +1,7 @@
 import './style.less';
 import { Component, useEffect, useState, type ReactNode } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { isKey } from '@/controllers/interface/keyBindings';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { useWindowStackEntry } from '@/controllers/interface/components/mu_window/useWindowChrome';
@@ -324,7 +324,7 @@ export const MasterSkillsWindow = observer(() => {
 
   useEventBus('keyPressed', key => {
     if (isKey(HOT_KEY, key)) {
-      if (!Store.world?.playerEntity) return;
+      if (!Ecs.world?.playerEntity) return;
       toggleMasterSkillsWindow();
       playUiSound('click');
     }

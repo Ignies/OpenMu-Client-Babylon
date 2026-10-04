@@ -2,7 +2,10 @@ import { uiClick } from '@/controllers/sound/sfx';
 import { t } from '@/i18n';
 import './style.less';
 import { observer } from 'mobx-react-lite';
-import { Store } from '@/app/store';
+import { Bag } from '@/modules/inventory';
+import { MuHelper } from '@/modules/mu_helper';
+import { Hero } from '@/modules/hero';
+import { Ecs } from '@/ecs/current';
 import { ItemIcon } from '@/controllers/interface/components/item_icon';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuButton } from '@/controllers/interface/components/mu_button';
@@ -33,7 +36,7 @@ import {
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { skills } from '@/modules/skills';
+import { skills, HeroSkills } from '@/modules/skills';
 import { onCooldownTick, skillCooldowns } from '@/modules/skills/cooldowns';
 import { SkillTooltip } from '../../components/skill_tooltip';
 import { ExpTooltip } from './expTooltip';
@@ -130,12 +133,12 @@ const Gauge = ({
  * kind, the way Ctrl+key over the inventory does.
  */
 const ConsumableItem = observer(({ index, hotKey }: { index: number; hotKey: string }) => {
-  const items = Store.playerData.items;
-  const hotkey = Store.itemHotkeys[index];
+  const items = Hero.items;
+  const hotkey = Bag.itemHotkeys[index];
   const slot = findHotkeyItem(items, index, hotkey);
   const icon: Item | null = slot >= 0 ? items[slot] : null;
   const count = slot >= 0 ? countHotkeyItems(items, index, hotkey) : 0;
-  const picked = Store.pickedItem;
+  const picked = Bag.pickedItem;
   const canBind = !!picked && canRegisterItemHotkey(picked.item);
   const name = icon ? itemBaseName(icon.group, icon.num) : undefined;
 
@@ -158,13 +161,13 @@ const ConsumableItem = observer(({ index, hotKey }: { index: number; hotKey: str
           if (event.button !== 0 || !picked) return;
           event.stopPropagation();
           if (!canBind) return;
-          Store.setItemHotkey(index, picked.item);
-          Store.cancelPickedItem();
+          Bag.setItemHotkey(index, picked.item);
+          Bag.cancelPickedItem();
         }}
         onContextMenu={event => {
           event.preventDefault();
           event.stopPropagation();
-          Store.useItemHotkey(index);
+          Bag.useItemHotkey(index);
         }}
       >
         {!!icon && <ItemIcon item={icon} />}
@@ -187,9 +190,9 @@ const ConsumableItems = () => {
     const i = HOTKEY_CODES.indexOf(code);
     if (i < 0) return;
     // Ctrl+key over the inventory binds; that is the inventory's job.
-    const keys = Store.world?.keyboardInput.pressedKeys;
+    const keys = Ecs.world?.keyboardInput.pressedKeys;
     if (keys && (keys.has('ControlLeft') || keys.has('ControlRight'))) return;
-    Store.useItemHotkey(i);
+    Bag.useItemHotkey(i);
   });
 
   return (
@@ -233,7 +236,7 @@ const EXP_HOVER_PAD = 4;
 const EXP_HOVER_WIDTH = EXP_WIDTH - 14;
 
 const ExpBar = observer(() => {
-  const progress = Store.playerData.expPercent;
+  const progress = Hero.expPercent;
   const hover = useRef<HTMLDivElement>(null);
   const [tip, setTip] = useState<{ x: number; y: number } | null>(null);
 
@@ -384,7 +387,7 @@ const SkillSlots = observer(() => {
   const [tip, setTip] = useState<{ number: number; x: number; y: number } | null>(null);
   const [drag, setDrag] = useState<SkillDrag | null>(null);
   const [dropSlot, setDropSlot] = useState(DROP_NONE);
-  const skillList = Store.skills;
+  const skillList = HeroSkills.skills;
 
   const closeList = () => {
     setListOpen(false);
@@ -433,7 +436,7 @@ const SkillSlots = observer(() => {
   // Which slot holds the current skill, or -1 - guarded, because with no
   // current skill `indexOf(-1)` would answer with the first *empty* slot.
   const currentIdx =
-    Store.currentSkill >= 0 ? Store.skillHotkeys.indexOf(Store.currentSkill) : -1;
+    HeroSkills.currentSkill >= 0 ? HeroSkills.skillHotkeys.indexOf(HeroSkills.currentSkill) : -1;
   useEffect(() => setPageOverride(null), [currentIdx]);
   const pageUp = pageOverride ?? BAR_PAGES[1].includes(currentIdx);
   const page = BAR_PAGES[pageUp ? 1 : 0];
@@ -443,16 +446,16 @@ const SkillSlots = observer(() => {
     const m = /^(?:Digit|Numpad)(\d)$/.exec(code);
     if (!m) return;
     const slot = +m[1];
-    const keys = Store.world?.keyboardInput.pressedKeys;
+    const keys = Ecs.world?.keyboardInput.pressedKeys;
     const ctrl = !!keys && (keys.has('ControlLeft') || keys.has('ControlRight'));
     // Ctrl+digit over a slot, or a digit while dragging, binds the key.
     const bind = drag?.number ?? (ctrl ? hovered : -1);
     if (bind >= 0) {
-      Store.assignSkillHotkey(slot, bind);
+      HeroSkills.assignSkillHotkey(slot, bind);
       return;
     }
-    const number = Store.skillHotkeys[slot];
-    if (number >= 0) Store.selectSkill(number);
+    const number = HeroSkills.skillHotkeys[slot];
+    if (number >= 0) HeroSkills.selectSkill(number);
   });
 
   // The drag lives on the window: the pointer leaves the bar at once.
@@ -468,16 +471,16 @@ const SkillSlots = observer(() => {
       if (!drag.moved) {
         // A click in the fan binds while the fan is a picker and otherwise
         // selects; either way it closes (NewUIMainFrameWindow.cpp:1636).
-        if (drag.fromFan && assignSlot >= 0) Store.assignSkillHotkey(assignSlot, drag.number);
-        else Store.selectSkill(drag.number);
+        if (drag.fromFan && assignSlot >= 0) HeroSkills.assignSkillHotkey(assignSlot, drag.number);
+        else HeroSkills.selectSkill(drag.number);
         if (drag.fromFan) {
           setListOpen(false);
           setAssignSlot(-1);
         }
       } else if (dropSlot >= 0) {
-        Store.assignSkillHotkey(dropSlot, drag.number);
+        HeroSkills.assignSkillHotkey(dropSlot, drag.number);
       } else if (dropSlot === DROP_CURRENT) {
-        Store.selectSkill(drag.number);
+        HeroSkills.selectSkill(drag.number);
       }
       setDrag(null);
       setDropSlot(DROP_NONE);
@@ -491,7 +494,7 @@ const SkillSlots = observer(() => {
   }, [drag, dropSlot, assignSlot]);
 
   const hotkeyOf = (number: number) => {
-    const i = Store.skillHotkeys.indexOf(number);
+    const i = HeroSkills.skillHotkeys.indexOf(number);
     return i < 0 ? '' : String(i);
   };
 
@@ -530,7 +533,7 @@ const SkillSlots = observer(() => {
   return (
     <>
       {page.map((slot, i) => {
-        const number = Store.skillHotkeys[slot] ?? -1;
+        const number = HeroSkills.skillHotkeys[slot] ?? -1;
         const state = number >= 0 ? skills.usability(number) : null;
         const usable = !!state?.requirementsMet;
         const shortOn =
@@ -539,7 +542,7 @@ const SkillSlots = observer(() => {
             : undefined;
         // Tracked: a delay starting or ending re-renders the slot (the sweep itself is not React).
         const cooling = number >= 0 && skillCooldowns.has(number);
-        const selected = number >= 0 && number === Store.currentSkill;
+        const selected = number >= 0 && number === HeroSkills.currentSkill;
         const picking = listOpen && assignSlot === slot;
         const name = skillDefinition(number)?.name ?? `#${number}`;
         slotNumbers.current[i] = number;
@@ -605,7 +608,7 @@ const SkillSlots = observer(() => {
       <div
         className={[
           'skill-slot current',
-          Store.currentSkill >= 0 ? 'selected' : '',
+          HeroSkills.currentSkill >= 0 ? 'selected' : '',
           dragging && dropSlot === DROP_CURRENT ? 'drop-target' : '',
         ]
           .filter(Boolean)
@@ -613,7 +616,7 @@ const SkillSlots = observer(() => {
         title={
           dragging
             ? undefined
-            : (skillDefinition(Store.currentSkill)?.name ??
+            : (skillDefinition(HeroSkills.currentSkill)?.name ??
                 t('bottomBar.noSkill')) + t('bottomBar.skillHint')
         }
         style={{
@@ -631,16 +634,16 @@ const SkillSlots = observer(() => {
         })}
         onContextMenu={e => {
           e.preventDefault();
-          uiClick(() => Store.selectSkill(-1))();
+          uiClick(() => HeroSkills.selectSkill(-1))();
         }}
         onPointerEnter={() => dragging && setDropSlot(DROP_CURRENT)}
         onPointerLeave={() => leaveDrop(DROP_CURRENT)}
       >
-        {Store.currentSkill >= 0 && (
+        {HeroSkills.currentSkill >= 0 && (
           <div className="skill-icon" style={{ left: SKILL_ICON_INSET_X, top: SKILL_ICON_INSET_Y }}>
             <SkillIcon
-              number={Store.currentSkill}
-              disabled={!skills.requirementsMet(Store.currentSkill)}
+              number={HeroSkills.currentSkill}
+              disabled={!skills.requirementsMet(HeroSkills.currentSkill)}
             />
           </div>
         )}
@@ -650,7 +653,7 @@ const SkillSlots = observer(() => {
           const { left, top } = fanPosition(count);
           const usable = skills.requirementsMet(number);
           const key = hotkeyOf(number);
-          const selected = number === Store.currentSkill;
+          const selected = number === HeroSkills.currentSkill;
           const classes = ['skill-slot', 'fan'];
           if (selected) classes.push('selected');
           if (!usable) classes.push('unusable');
@@ -679,7 +682,7 @@ const SkillSlots = observer(() => {
             height: SKILL_SLOT_HEIGHT,
           }}
           onClick={uiClick(() => {
-            Store.assignSkillHotkey(assignSlot, -1);
+            HeroSkills.assignSkillHotkey(assignSlot, -1);
             closeList();
           })}
         >
@@ -723,7 +726,7 @@ const SkillSlots = observer(() => {
  * re-renders on a tick of them.
  */
 const Orbs = observer(() => {
-  const playerData = Store.playerData;
+  const playerData = Hero;
   return (
     <>
       <Gauge
@@ -782,7 +785,7 @@ export const BottomBar = observer(() => {
 
   // `CMuHelper::Toggle`: the Start / Stop button of the position panel, on its key.
   useEventBus('keyPressed', code => {
-    if (isKey('muHelper', code) && Store.world?.playerEntity) Store.toggleMuHelper();
+    if (isKey('muHelper', code) && Ecs.world?.playerEntity) MuHelper.toggleMuHelper();
   });
 
   return (

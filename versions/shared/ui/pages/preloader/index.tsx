@@ -2,7 +2,9 @@ import { MuWindows } from '@/controllers/interface/windowManager';
 import './style.less';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Store } from '@/app/store';
+import { Session } from '@/modules/session';
+import { Loading } from '@/controllers/loading';
+import { Ecs } from '@/ecs/current';
 import { i18n, t, type TextKey } from '@/i18n';
 import {
   displayAddress,
@@ -126,15 +128,15 @@ function backgroundLoad(backdrop: PregameBackdrop | null): {
   done: boolean;
 } {
   // Read before anything can return: an observer only redraws for what it read.
-  const loading = Store.sceneLoading;
-  const loaded = Store.loadingProgress;
+  const loading = Loading.sceneLoading;
+  const loaded = Loading.loadingProgress;
   const warmed = pregameLoad.characters;
 
   if (!backdrop) return { progress: 0, done: false };
 
   const loginReady =
     !loading &&
-    (backdrop.kind !== 'world' || Store.world?.mapIndex === backdrop.login);
+    (backdrop.kind !== 'world' || Ecs.world?.mapIndex === backdrop.login);
   const login = loginReady ? 1 : loading ? loaded : 0;
 
   // A set-piece backdrop has no second world to warm.
@@ -157,7 +159,8 @@ function backgroundLoad(backdrop: PregameBackdrop | null): {
  * The filters live here rather than in the worlds view because they outlive
  * it: search, look at the setup tab, come back, and the search is still there.
  */
-export const PreloaderPage = observer(() => {
+/** `onPlayOffline`: the app's offline test scene (`app/offline.ts`), handed in by `App.tsx`. */
+export const PreloaderPage = observer(({ onPlayOffline }: { onPlayOffline: () => void }) => {
   const [section, setSection] = useState<Section>('worlds');
   const [language, setLanguage] = useState(ALL);
   const [search, setSearch] = useState('');
@@ -282,11 +285,11 @@ export const PreloaderPage = observer(() => {
 
     ServerConfig.select(id);
     ServerConfig.markPlayed(id);
-    leave(() => Store.playOnline());
+    leave(() => Session.playOnline());
   };
 
   const offline = () => {
-    if (!leaving) leave(() => Store.playOffline());
+    if (!leaving) leave(() => onPlayOffline());
   };
 
   // Enter enters from the grid or the search box. Anywhere else it belongs to

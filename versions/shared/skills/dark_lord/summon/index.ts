@@ -8,7 +8,7 @@ import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
 import { everyTick, muRotated, sfx, ticksLeft } from '../_shared';
 import { lighting } from '@/controllers/lighting';
-import { storeRef } from '@/app/storeRef';
+import { Ecs } from '@/ecs/current';
 import { warmGLTF } from '@/controllers/assets/modelLoader';
 import { reportLoadFailure } from '@/controllers/assets';
 
@@ -175,7 +175,7 @@ const partyCircle = partyCircleOf(false);
 /** Party Teleport's sheets and meshes, fetched at the packet so the circle is not late on a first cast. */
 const partyCircleWarm: Step = (_at, c) => {
   for (const t of [TEX.magicEmblem, TEX.flareBlue, TEX.flare]) void effectTexture(c.scene, t).catch(reportLoadFailure(t));
-  const world = storeRef().world;
+  const world = Ecs.world;
   if (world) for (const m of [MODEL.circle, MODEL.circle2]) void warmGLTF(m, world);
 };
 

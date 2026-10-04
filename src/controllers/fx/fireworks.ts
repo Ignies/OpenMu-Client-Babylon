@@ -6,7 +6,7 @@ import { EXPLOSION_CELLS, TEX } from './recipes';
 import { playSfx } from '../sound/sfx';
 import { lighting } from '../lighting';
 import type { LightRecipe } from '../lighting/lightSource';
-import { Store } from '../../app/store';
+import { Ecs } from '../../ecs/current';
 
 /**
  * The GM fireworks and the Box of Luck drop burst: `ReceiveServerCommand`
@@ -285,7 +285,7 @@ function throwTumbler(
   gravity: number,
   floorCm: number
 ): void {
-  const world = Store.world;
+  const world = Ecs.world;
   const angle: [number, number, number] = [rand(0, 360), rand(0, 360), rand(0, 360)];
   const axis = (Math.random() * 3) | 0;
   // `((rand() % 60 - 30) * 0.1, same, -1) * 1.5` turned by that random angle: a random heading.

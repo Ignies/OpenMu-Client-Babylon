@@ -18,7 +18,7 @@ import {
   type Scene,
 } from '../render/babylon/exports';
 import { clampAlpha } from './clampAlpha';
-import { Store } from '../../app/store';
+import { Ecs } from '../../ecs/current';
 import type { TestScene } from '../render/scenes/testScene';
 import {
   LiveList,
@@ -815,7 +815,7 @@ function spawnTrail(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle
           const band = steer.band;
           if (band) {
             // -9999 until the map's height data is in; skip the clamp then.
-            const ground = Store.world?.getTerrainHeight(head.x, head.z) ?? -9999;
+            const ground = Ecs.world?.getTerrainHeight(head.x, head.z) ?? -9999;
             if (ground > -9000) {
               if (head.y < ground + band.floor) {
                 wanderPitch = 0;

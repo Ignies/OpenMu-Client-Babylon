@@ -1,4 +1,8 @@
-import { Store } from '../../app/store';
+import { Merchant } from '../npc_shop';
+import { Bag } from '../inventory';
+import { Pets } from '../pets';
+import { HeroSkills } from '../skills';
+import { Hero } from '../hero';
 import { Social } from '../social/social';
 import { gameVersion } from '../../version';
 import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
@@ -7,7 +11,7 @@ import { InventoryConstants } from '@/core/inventoryConstants';
 import { PetCommandModeEnum } from '@versions/shared/packets/ClientToServerPackets';
 import { isAttackableEntity } from '../../ecs/systems/attackSystem';
 import type { Entity, World } from '../../ecs/world';
-import { ensureMuHelperWatching, MuHelperState } from './state';
+import { ensureMuHelperWatching, MuHelperState, MuHelper } from './state';
 import type { MuHelperConfig } from './config';
 
 /**
@@ -15,7 +19,7 @@ import type { MuHelperConfig } from './config';
  * drives only the seams the player's own clicks use: `world.castRequest`,
  * `world.pickupTarget`, `hero.playerMoveTo` and the store commands. It never
  * builds packets of its own, so controllers/combat/pickup behavior stays byte-identical
- * to manual play. Active only while `Store.muHelper.active` - the
+ * to manual play. Active only while `MuHelper.active` - the
  * server-driven status that `MuHelperStatusUpdate` pauses when the zen runs
  * out; inactive, the whole body is a single boolean check.
  */
@@ -128,12 +132,12 @@ function entityTile(e: Entity): Point {
 }
 
 function isLearned(num: number): boolean {
-  return num > 0 && Store.skills.some(s => s.number === num);
+  return num > 0 && HeroSkills.skills.some(s => s.number === num);
 }
 
 /** `(life * 100 + max - 1) / max` - the original's ceiling percent. */
 function heroHpPercent(): number {
-  const { currentHP, maxHP } = Store.playerData;
+  const { currentHP, maxHP } = Hero;
   if (maxHP <= 0 || currentHP <= 0) return 100;
   return Math.trunc((currentHP * 100 + maxHP - 1) / maxHP);
 }
@@ -141,8 +145,8 @@ function heroHpPercent(): number {
 /** Issue a cast through the same seam a right-click uses. Returns busy. */
 function castSkill(world: World, num: number, target: Entity): boolean {
   if (world.castRequest) return true; // the player's own cast wins
-  if (Store.currentSkill !== num) Store.selectSkill(num);
-  if (Store.currentSkill !== num) return false;
+  if (HeroSkills.currentSkill !== num) HeroSkills.selectSkill(num);
+  if (HeroSkills.currentSkill !== num) return false;
   const pos = target.transform!.pos;
   world.castRequest = { target, point: { x: pos.x, y: pos.z } };
   return true;
@@ -157,7 +161,7 @@ function walkTo(hero: Entity, point: Point): void {
 }
 
 function findPartyEntity(world: World, name: string): Entity | null {
-  if (name === Store.playerData.name) return world.playerEntity ?? null;
+  if (name === Hero.name) return world.playerEntity ?? null;
   for (const e of world.playersQuery.entities) {
     if (e.objectNameInWorld === name && !e.dying) return e;
   }
@@ -173,7 +177,7 @@ function activatePet(config: MuHelperConfig): void {
       : config.darkRavenMode === 2
         ? PetCommandModeEnum.AttackWithOwner
         : PetCommandModeEnum.Normal;
-  Store.sendPetCommand(mode);
+  Pets.sendPetCommand(mode);
   petActivated = true;
 }
 
@@ -252,7 +256,7 @@ function buff(world: World, hero: Entity, config: MuHelperConfig): boolean {
 
 /** `FindHealingItemIndex`: the first HP or complex potion in the bag. */
 function findHealingPotionSlot(): number {
-  const items = Store.playerData.items;
+  const items = Hero.items;
   for (let slot = InventoryConstants.EquippableSlotsCount; slot < items.length; slot++) {
     const item = items[slot];
     if (!item || item.group !== 14) continue;
@@ -296,7 +300,7 @@ function recoverHealth(world: World, hero: Entity, config: MuHelperConfig): bool
       const member = members[healPartyIndex % members.length];
       healPartyIndex = (healPartyIndex + 1) % members.length;
       if (member) {
-        if (member.name === Store.playerData.name) {
+        if (member.name === Hero.name) {
           if (hpPercent <= config.healThreshold && castSkill(world, HEAL_SKILL, hero)) {
             return false;
           }
@@ -331,7 +335,7 @@ function recoverHealth(world: World, hero: Entity, config: MuHelperConfig): bool
 
   if (config.useHealPotion && hpPercent <= config.potionThreshold) {
     const slot = findHealingPotionSlot();
-    if (slot >= 0) Store.consumeItemRequest(slot);
+    if (slot >= 0) Bag.consumeItemRequest(slot);
   }
 
   return true;
@@ -464,7 +468,7 @@ function repairEquipment(config: MuHelperConfig): void {
   if (!config.repairItem || repairCooldown > 0) return;
   repairCooldown = REPAIR_INTERVAL_SECONDS;
 
-  const items = Store.playerData.items;
+  const items = Hero.items;
   for (let slot = 0; slot < InventoryConstants.EquippableSlotsCount; slot++) {
     const item = items[slot];
     if (!item || item.durability === undefined) continue;
@@ -478,7 +482,7 @@ function repairEquipment(config: MuHelperConfig): void {
     );
     if (max <= 0) continue;
     const percent = Math.trunc((item.durability * 100 + max - 1) / max);
-    if (percent <= REPAIR_THRESHOLD) Store.repairItemRequest(slot);
+    if (percent <= REPAIR_THRESHOLD) Merchant.repairItemRequest(slot);
   }
 }
 
@@ -497,7 +501,7 @@ export function updateMuHelperLoop(world: World, dt: number): void {
   if (!gameVersion.features.muHelper) return;
   ensureMuHelperWatching();
 
-  if (!Store.muHelper.active) {
+  if (!MuHelper.active) {
     if (wasActive) {
       resetRuntime();
       wasActive = false;
@@ -540,7 +544,7 @@ export function updateMuHelperLoop(world: World, dt: number): void {
   if (hero.attributeSystem?.isAboveZero('inSafeZone')) {
     if (stopRequestCooldown <= 0) {
       stopRequestCooldown = STOP_REQUEST_INTERVAL;
-      Store.toggleMuHelper();
+      MuHelper.toggleMuHelper();
     }
     return;
   }

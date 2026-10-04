@@ -3,7 +3,10 @@ import { Vector3 } from '../../controllers/render/babylon/exports';
 import { ENUM_WORLD } from '../../core/types';
 import { EventBus } from '../../core/eventBus';
 import { playSfx } from '../../controllers/sound/sfx';
-import { Store } from '../../app/store';
+import { Hero } from '../hero';
+import { Session } from '../session';
+import { addNotification } from '../chat';
+import { Ecs } from '../../ecs/current';
 import { effects } from '../../controllers/fx';
 import { MODEL } from '../../controllers/fx/recipes';
 import {
@@ -331,8 +334,8 @@ export function closeKanturu(): void {
 
 /** The Refresh button (`SendRequestKanturu3rdInfo`). */
 export function refreshKanturu(): void {
-  if (Store.isOffline) return;
-  Store.sendToGS(KanturuInfoRequestPacket.createPacket().buffer);
+  if (Session.isOffline) return;
+  Session.sendToGS(KanturuInfoRequestPacket.createPacket().buffer);
 }
 
 /**
@@ -340,8 +343,8 @@ export function refreshKanturu(): void {
  * sends at frame 42 (`IsNpcAnimation`); the request itself is the same.
  */
 export function enterKanturu(): void {
-  if (!state.canEnter || Store.isOffline) return;
-  const p = Store.playerData;
+  if (!state.canEnter || Session.isOffline) return;
+  const p = Hero;
   startGatewayTurn({
     tower: state.state === KanturuState.Tower,
     helper: p.petSlot,
@@ -349,7 +352,7 @@ export function enterKanturu(): void {
     ring1: p.ring1Slot,
     ring2: p.ring2Slot,
   });
-  Store.sendToGS(KanturuEnterRequestPacket.createPacket().buffer);
+  Session.sendToGS(KanturuEnterRequestPacket.createPacket().buffer);
 }
 
 // ---- packets ---------------------------------------------------------------
@@ -377,7 +380,7 @@ EventBus.on('KanturuEnterResult', packet => {
     closeKanturu();
     return;
   }
-  Store.addNotification(EVENT_TEXT.ktFailedToEnter, 'error', MESSAGE_MS);
+  addNotification(EVENT_TEXT.ktFailedToEnter, 'error', MESSAGE_MS);
 });
 
 /** The cutscene `GetKanturuMayaState` / `GetKanturuNightmareState` start. */
@@ -419,7 +422,7 @@ EventBus.on('KanturuStateChange', packet => {
 
   // `CheckSuccessBattle` (GM_Kanturu_3rd.cpp:59-89): the barrier coming down
   // is heard once, inside the tower.
-  if (Store.world?.mapIndex === EVENT_MAP) {
+  if (Ecs.world?.mapIndex === EVENT_MAP) {
     const open =
       next === KanturuState.Tower &&
       (detail === TOWER.revitalization || detail === TOWER.notify);
@@ -433,7 +436,7 @@ EventBus.on('KanturuStateChange', packet => {
     if (phase !== lastPhase) {
       lastPhase = phase;
       cue = directionCue(next, detail);
-      const pos = Store.world?.playerEntity?.transform?.pos;
+      const pos = Ecs.world?.playerEntity?.transform?.pos;
       if (cue) {
         const tiles = pos ? Math.hypot(pos.x - cue.x, pos.z - cue.y) : 0;
         const frames = Math.ceil(tiles) + DIRECTION_FRAMES;
@@ -528,7 +531,7 @@ function pick<T>(list: readonly T[]): T {
 
 /** The chips thrown up around the hero. */
 function mayaStorm(): void {
-  const world = Store.world;
+  const world = Ecs.world;
   const pos = world?.playerEntity?.transform?.pos;
   if (!world || !pos) return;
   // `SOUND_KANTURU_3RD_MAYA_STORM` (GM_Kanturu_3rd.cpp:1541), unpositioned.
@@ -550,7 +553,7 @@ function mayaStorm(): void {
 
 /** One fall of the stone rain. */
 function mayaRain(): void {
-  const world = Store.world;
+  const world = Ecs.world;
   const pos = world?.playerEntity?.transform?.pos;
   if (!world || !pos) return;
   for (let i = 0; i < RAIN_COUNT; i++) {

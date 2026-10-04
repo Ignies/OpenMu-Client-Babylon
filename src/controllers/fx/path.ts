@@ -14,7 +14,7 @@
  * Driven by: `effects.spawn('path', …)`. Read by: nobody.
  */
 import { Constants, Mesh, Vector3, VertexBuffer, VertexData, type Scene, type Texture } from '../render/babylon/exports';
-import { Store } from '../../app/store';
+import { Ecs } from '../../ecs/current';
 import type { TestScene } from '../render/scenes/testScene';
 import { EFFECT_RENDERING_GROUP, LiveList, TICK, WHITE, additiveMaterial, fxNow, keepDepthForEffects, type RGB } from './core';
 import { addEffectGlow, releaseEffectGlow } from './glow';
@@ -108,7 +108,7 @@ function writeUvs(out: Float32Array, n: number, du: number): void {
 }
 
 function spawn(scene: Scene, _at: Vector3, opts: PathOptions): EffectHandle {
-  const world = Store.world;
+  const world = Ecs.world;
   const points = opts.points;
   const n = points.length;
   const seconds = opts.seconds ?? DEFAULT_SECONDS;

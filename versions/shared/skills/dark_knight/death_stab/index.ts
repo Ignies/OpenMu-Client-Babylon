@@ -9,7 +9,7 @@ import { Vector3 } from '@/controllers/render/babylon/exports';
 import { WEAPON_LINK_BONE, magicScrew } from '../../_shared';
 import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
-import { storeRef } from '@/app/storeRef';
+import { Ecs } from '@/ecs/current';
 
 import { A } from '@/controllers/combat/recipes';
 
@@ -145,7 +145,7 @@ function jitteredBone(e: Entity, bone: number, range: number): PointSource {
  * three jittered segments here. Not in Battle Castle.
  */
 function electrifiedSkeleton(c: SkillContext, target: Entity, seconds: number): void {
-  if (storeRef().world?.mapIndex === ENUM_WORLD.WD_30BATTLECASTLE) return;
+  if (Ecs.world?.mapIndex === ENUM_WORLD.WD_30BATTLECASTLE) return;
   const bones = target.modelObject?.gltf?.skeleton?.bones;
   if (!bones) return;
   const pairs: { from: PointSource; to: PointSource }[] = [];

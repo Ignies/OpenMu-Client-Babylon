@@ -9,7 +9,7 @@ import { effects } from '@/controllers/fx';
 import { groundAt, randInt } from '../../_shared';
 import { lighting } from '@/controllers/lighting';
 import { playCombat } from '@/controllers/sound/combat';
-import { storeRef } from '@/app/storeRef';
+import { Ecs } from '@/ecs/current';
 
 import { A } from '@/controllers/combat/recipes';
 import { MOUNTED_STRIKE } from '../_shared';
@@ -72,7 +72,7 @@ function screamFlame(c: SkillContext, at: Vector3, fwd: Vector3, scale: number, 
 
 /** Any character but the caster and the hero within 1 m of `p`: CheckClientArrow's contact (ZzzEffect.cpp:6500-6503, :38-58). */
 function screamContact(caster: Entity, p: Vector3): boolean {
-  const world = storeRef().world;
+  const world = Ecs.world;
   if (!world) return false;
   for (const e of world.netObjsQuery.entities) {
     if (e === caster || e.localPlayer || e.dying || !e.transform) continue;

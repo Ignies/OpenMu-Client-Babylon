@@ -1,6 +1,7 @@
 import './style.less';
 import { observer } from 'mobx-react-lite';
-import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
+import { Ecs } from '@/ecs/current';
 import { events } from '@/modules/events';
 import {
   bloodCastleImminent,
@@ -564,7 +565,7 @@ const EventTimer = observer(() => {
   // on the castle map (B11 - the figure never mounted live).
   const bc = bloodCastleTimer();
   const cc = chaosCastleTimer();
-  const map = Store.world?.mapIndex;
+  const map = Ecs.world?.mapIndex;
   const stage = useStage();
   if (map === undefined) return null;
 
@@ -641,7 +642,7 @@ const BloodCastleResult = observer(() => {
   if (!score) return null;
 
   // OpenMU ends a Chaos Castle with this same packet (B16): word it for the map.
-  const cc = Store.world !== null && inChaosCastle(Store.world.mapIndex);
+  const cc = Ecs.world !== null && inChaosCastle(Ecs.world.mapIndex);
   const lines: string[] = score.success
     ? [EVENT_TEXT.bcCongrats, cc ? EVENT_TEXT.ccQuestDone : EVENT_TEXT.bcQuestDone]
     : [EVENT_TEXT.bcUnfortunately, cc ? EVENT_TEXT.ccQuestFailed : EVENT_TEXT.bcQuestFailed];
@@ -684,7 +685,7 @@ const RankTable = observer(
       <div className="event-result" style={{ ...at, width: RESULT.width, paddingTop: RESULT_TOP }}>
         <div className="event-result-line">{cell(0, EVENT_TEXT.congratulations)}</div>
         <div className="event-result-line">
-          {cell(0, formatText(EVENT_TEXT.braveryProven, Store.playerData.name))}
+          {cell(0, formatText(EVENT_TEXT.braveryProven, Hero.name))}
         </div>
         <div className="event-result-line" style={{ height: RESULT_HEAD_GAP }} />
         <div className="event-result-line" style={{ color: RESULT_HEAD_COLOR }}>
@@ -742,7 +743,7 @@ const CrywolfBar = observer(() => {
   const hud = crywolfHud();
   const result = crywolfResult();
   const page = crywolfNoticePage();
-  const map = Store.world?.mapIndex;
+  const map = Ecs.world?.mapIndex;
   const stage = useStage();
   if (map === undefined || !crywolfBarVisible(map)) return null;
 

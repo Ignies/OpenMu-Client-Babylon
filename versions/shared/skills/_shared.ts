@@ -13,7 +13,7 @@ import { effectLight } from '@/controllers/lighting/recipes';
 import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
 import { playCombat, playLandingSound } from '@/controllers/sound/combat';
-import { storeRef } from '@/app/storeRef';
+import { Ecs } from '@/ecs/current';
 import { tierIndex } from '@/controllers/lighting/lightingQuality';
 
 import { A } from '@/controllers/combat/recipes';
@@ -104,7 +104,7 @@ export const randInt = (n: number): number => Math.floor(Math.random() * n);
 
 /** Terrain height under (x, z), or `fallback` before the map's heights are in. */
 export function groundAt(x: number, z: number, fallback: number): number {
-  const h = storeRef().world?.getTerrainHeight(x, z);
+  const h = Ecs.world?.getTerrainHeight(x, z);
   return h === undefined || h < -9000 ? fallback : h;
 }
 /** `BlendMeshTexCoordU = -LifeTime * 0.01`: a quarter of the sheet a second. */
@@ -162,11 +162,11 @@ export const lightFollow = (src: PointSource): ((out: { x: number; y: number; z:
   };
 };
 
-export const groundY = (x: number, z: number): number => storeRef().world?.getTerrainHeight(x, z) ?? 0;
+export const groundY = (x: number, z: number): number => Ecs.world?.getTerrainHeight(x, z) ?? 0;
 /** The hero's entity, for a rule that reads his own clip (the Dark Side follow-ups). */
-export const heroEntity = (): Entity | undefined => storeRef().world?.playerEntity ?? undefined;
+export const heroEntity = (): Entity | undefined => Ecs.world?.playerEntity ?? undefined;
 /** The map the hero is on (`gMapManager.WorldActive`), for a sound only one map loads. */
-export const currentMap = (): number | undefined => storeRef().world?.mapIndex;
+export const currentMap = (): number | undefined => Ecs.world?.mapIndex;
 
 /** `src` dropped onto the terrain, a hair above it. */
 export const onGround = (src: PointSource): PointSource => out => {

@@ -6,7 +6,8 @@ windows themselves are content in `versions/shared/ui/` (see
 [docs/content.md](../../../docs/content.md)).
 
 ## Public API
-- `index.ts`: a small door (`MuWindows`); most readers still import their file directly (baselined).
+- `index.ts`: a small door (`MuWindows`, `MsgBox`, `MsgWinCode`, `buildItemTooltip`, `itemNameColor`,
+  `TooltipLine`, `ItemLinkHover`); most readers still import their file directly (baselined).
 - `windows.ts`: `defineWindow({ id, slot, order, component })`, `registerWindows(defs)` (a later
   def with the same id replaces the earlier one), `windowsIn(slot)` (stacking order). Slots:
   `world` (on the 3D view, stays up when the interface is hidden) and `hud`.
@@ -14,26 +15,31 @@ windows themselves are content in `versions/shared/ui/` (see
   scale and z-order, Escape closes the top window.
 - `components/`: shared widgets. Frames and text: `mu_window` (item window, table frame),
   `mu_frame`, `msg_box_frame`, `mu_text`, `mu_number`,
-  `mu_button`, `mu_sprite`, `mu_logo`, `mu_flag`. Items: `item_grid`, `item_icon`, `item_search`,
-  `item_tooltip`, `picked_item`, `chat_item_link` (the caller hands in the label). Text: `mu_text`
-  also holds `TEXT_COLOR`, the pre-game and dialog colours. Other: `msg_window`, `game_cursor`, `world_label`,
+  `mu_button`, `mu_sprite`, `mu_logo`, `mu_flag`. Items: `item_icon`, `item_search` (the grid, the
+  tooltip, the carried item and the chat item link read the inventory, hero, pets and merchant, so
+  they live in `versions/shared/ui/components/`). Text: `mu_text`
+  also holds `TEXT_COLOR`, the pre-game and dialog colours. Other: `msg_window`, `game_cursor`
+  (`setRepairCursor(read)`: the app hands it the merchant's repair mode), `world_label`,
   `ui_stage` (the 640x480 stage scale).
 - `keyBindings.ts`: `KeyBindings`, `keyFor`, `isKey`, `actionOfKey`, `setKeyBinding`,
   `setKeyProfile`, `WALK_KEYS`; `browserHotkeys.ts`: `installBrowserHotkeyGuard`,
   `toggleFullscreen`, `isBrowserChord`.
 - `itemTooltip.ts`: `buildItemTooltip`, `itemDisplayName`, `itemNameColor`; `itemLinkHover.ts`.
 - `nameTags.ts`: name balloon lifetimes and colours; `screenPositionBus.ts`: per-entity screen
-  positions; `slideHelp.ts`: `SlideHelp`; `msgWin.ts`: message box codes and text.
+  positions; `slideHelp.ts`: `SlideHelp`; `msgWin.ts`: message box codes and text, and `MsgBox`: the box
+  that is up (`msgWin`), `popUpMsgWin(code, arg?, onOk?)`, `takeMsgWinOk()`, `closeMsgWin()`. `onOk`
+  is the box's Yes and gets the typed text (`msg_window` hands it over), so a chain of boxes, like
+  the delete-character one, lives with whoever raises it.
 - `hooks/`: `useEventBus`, `usePositionOnScreen`, `useRenderId`, `useVersionUi`.
 - `mobile.ts` (`isMobileDevice`, `useIsMobile`), `hudFormat.ts`, `tokens.less` (web tokens).
 
 ## How it works
 - `versions/shared/ui/index.ts` registers every `window.ts` under `windows/` and `hud/` by glob,
-  then the controller's own `msg_window` and `picked_item`, then the version's windows (same id
+  then the controller's `msg_window` and the ui's `picked_item`, then the version's windows (same id
   replaces). `versions/shared/ui/pages/world` draws `windowsIn('hud')` and `windowsIn('world')`.
 - `itemTooltip.ts` is `RenderItemInfo` (ZzzInventory.cpp:2091) as data: a list of coloured lines
-  drawn by `components/item_tooltip`. `item_tooltip/placement.ts` places it like the original:
-  centred on the cursor, below the cursor art, flipped above, inside the viewport.
+  drawn by `versions/shared/ui/components/item_tooltip` (its `placement.ts` places it like the original:
+  centred on the cursor, below the cursor art, flipped above, inside the viewport).
 - `nameTags.ts`: the original's name balloons (`CHAT`, ZzzInterface.cpp:703): a name shows while
   hovered, 100 ticks on creation, refreshed to 10 per hovered frame; chat lines keep it up for
   their own lifetime; lines of 20+ characters split (`CutText`, ZzzInterface.cpp:605).
@@ -71,17 +77,18 @@ windows themselves are content in `versions/shared/ui/` (see
   (`OpenSlideTextFile`) is not shipped, so the help lane is packet-only.
 
 ## Depends on / used by
-- uses: `app/store` (old exceptions listed in `tools/checks/baselines/deps.json`), `core` (event bus,
+- uses: `core` (event bus,
   storage, `stableKey`), `assets` (sprites, item icon pack), `item_rules`, `settings`, `pets`, `i18n`,
   `version`.
-- used by: `versions/shared/ui` (every window), `versions/<id>/ui`, `app` (boot, App, store),
+- used by: `versions/shared/ui` (every window), `versions/<id>/ui`, `app` (boot, App),
   ECS systems (name tags, screen positions, input), several modules, `loading/classic`.
 
 ## Change it
 - add a window or HUD element: add `versions/shared/ui/{windows,hud}/<name>/window.ts` with
   `export default defineWindow({...})` (see
   [docs/how_to/change_a_window.md](../../../docs/how_to/change_a_window.md)).
-- restyle a shared widget (tooltip, grid, frame): edit it in `components/`; every window follows.
+- restyle a shared widget (frame, button, text): edit it in `components/`; every window follows.
+  The tooltip and the grid are in `versions/shared/ui/components/`.
 - add a hot key: a `KeyAction`, its label key and default in `keyBindings.ts`.
 
 ## Tests

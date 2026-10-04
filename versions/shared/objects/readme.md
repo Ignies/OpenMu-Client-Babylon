@@ -22,7 +22,7 @@ World object model numbers and the signposts that carry real names.
 
 ## Depends on / used by
 - uses: `@/controllers/terrain/mapTileObject`, `@/controllers/render`, `@/controllers/assets`, `@/i18n`
-- used by: map `create.ts` files, actors, the Store and many controllers (`MODEL_*` numbers)
+- used by: map `create.ts` files, actors, `app/offline.ts` and many controllers (`MODEL_*` numbers)
 
 ## Change it
 - name a new sign: add its placement to `signLabels.ts`, bind its type in the map's `create.ts`.

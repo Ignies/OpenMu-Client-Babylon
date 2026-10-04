@@ -1,8 +1,5 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { createHash } from 'node:crypto';
-
-// PlayerObject reaches the Store, which needs a browser; nothing here reads it.
-vi.mock('@/app/store', () => ({ Store: {}, UIState: {} }));
 
 /**
  * What every object type 0..600 is drawn with: the class `resolveModelFactory` hands out (its name,

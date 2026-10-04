@@ -11,7 +11,9 @@ import {
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
 import { Social } from '@/modules/social/social';
-import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
+import { MsgBox } from '@/controllers/interface';
+import { Ecs } from '@/ecs/current';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { playUiSound, uiClick } from '@/controllers/sound/sfx';
 import { MuButton } from '@/controllers/interface/components/mu_button';
@@ -646,7 +648,7 @@ const ChatInput = observer(() => {
 
   // The `/` help: every command the typed word could become, GM ones only
   // for a GM. A whisper line is never a command, so no list while whispering.
-  const isGm = Store.playerData.isGameMaster;
+  const isGm = Hero.isGameMaster;
   const completions =
     !emojiMatches.length && text.startsWith('/') && !whisperLine
       ? matchChatCommands(text, isGm).slice(0, CHAT_COMPLETION_ROWS)
@@ -1123,8 +1125,8 @@ export const ChatWindow = observer(() => {
   // bare Enter.
   useEventBus('keyPressed', key => {
     if (isTypingInField()) return;
-    if (!Store.world?.playerEntity) return;
-    if (Store.msgWin) return;
+    if (!Ecs.world?.playerEntity) return;
+    if (MsgBox.msgWin) return;
 
     // The reply key: the box opens already addressed to whoever whispered
     // last, which is otherwise a right click on their line in the log.

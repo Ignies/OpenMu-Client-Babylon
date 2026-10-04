@@ -5,7 +5,10 @@ import { ItemDropRemovedPacket, ItemDropResponsePacket, ItemPickUpRequestFailedI
 import { ItemGroup, angleRotation, itemRestHeight, itemRestPose, itemRestRotation } from '@/controllers/actors/itemAngle';
 import { ItemSerializer } from '@/controllers/item_rules';
 import { ItemsDatabase, itemBaseName } from '@versions/shared/items/itemsDatabase';
-import { Store } from '@/app/store';
+import { Bag } from '@/modules/inventory';
+import { Hero } from '@/modules/hero';
+import { addNotification } from '@/modules/chat';
+import { Ecs } from '@/ecs/current';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { archangelWeapon, dropModelProxy } from '@/controllers/item_rules';
 import { createAttributeSystem } from '@/core/attributeSystem';
@@ -23,7 +26,7 @@ function spawnMoneyDrop(
   amount: number,
   fresh: boolean
 ) {
-  const world = Store.world;
+  const world = Ecs.world;
   if (!world) return;
   const maskedId = id & 0x7fff;
   removeNetObject(world, maskedId);
@@ -66,7 +69,7 @@ function spawnMoneyDrop(
  * up here.
  */
 function applyItemsDropped(p: ItemsDroppedPacket) {
-  const world = Store.world;
+  const world = Ecs.world;
 
   if (!world) return;
 
@@ -205,7 +208,7 @@ export function installNet(): void {
   });
 
   EventBus.on('ItemDropRemoved', packet => {
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
 
     const p = new ItemDropRemovedPacket(packet);
@@ -225,18 +228,18 @@ export function installNet(): void {
 
     if (!p.Success) {
       console.warn(`Drop of slot ${p.InventorySlot} refused`);
-      Store.rollbackItemMove();
-      Store.addNotification(t('notify.cannotDropItem'), 'error');
+      Bag.rollbackItemMove();
+      addNotification(t('notify.cannotDropItem'), 'error');
       return;
     }
 
     // ReceiveDropItem (WSclient.cpp:6197-6219) is silent: the thud is the item
     // landing, when it appears on the ground.
     runInAction(() => {
-      Store.playerData.items[p.InventorySlot] = null;
+      Hero.items[p.InventorySlot] = null;
     });
 
-    Store.confirmItemMove(-1, null);
+    Bag.confirmItemMove(-1, null);
   });
 
   EventBus.on('ItemPickUpRequestFailed', packet => {
@@ -248,7 +251,7 @@ export function installNet(): void {
       return;
     }
 
-    Store.addNotification(
+    addNotification(
       reason ===
         ItemPickUpRequestFailedItemPickUpFailReasonEnum.__MaximumInventoryMoneyReached
         ? t('notify.carryingTooMuchZen')

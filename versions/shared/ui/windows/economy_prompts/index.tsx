@@ -8,7 +8,8 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   type ReactNode,
 } from 'react';
-import { Store } from '@/app/store';
+import { Merchant } from '@/modules/npc_shop';
+import { Hero } from '@/modules/hero';
 import { Economy, type EconomyPrompt } from '@/modules/economy/economy';
 import { itemDisplayName } from '@/controllers/interface/itemTooltip';
 import { itemValue } from '@/controllers/item_rules';
@@ -83,9 +84,9 @@ function specOf(prompt: EconomyPrompt): Spec {
     case 'vault-deposit':
       return {
         title: t('prompt.storeZen'),
-        hint: t('prompt.carrying', { amount: zen(Store.playerData.money) }),
+        hint: t('prompt.carrying', { amount: zen(Hero.money) }),
         field: 'amount',
-        max: Store.playerData.money,
+        max: Hero.money,
       };
     case 'vault-withdraw':
       return {
@@ -116,10 +117,10 @@ function specOf(prompt: EconomyPrompt): Spec {
       return {
         title: t('prompt.offerZen'),
         hint: t('prompt.carrying', {
-          amount: zen(Store.playerData.money + Economy.myTradeMoney),
+          amount: zen(Hero.money + Economy.myTradeMoney),
         }),
         field: 'amount',
-        max: Store.playerData.money + Economy.myTradeMoney,
+        max: Hero.money + Economy.myTradeMoney,
       };
     case 'shop-price': {
       const item = Economy.myShopItems[prompt.slot];
@@ -148,7 +149,7 @@ function specOf(prompt: EconomyPrompt): Spec {
       };
     }
     case 'npc-buy-many': {
-      const item = Store.npcShop?.items[prompt.slot] ?? null;
+      const item = Merchant.npcShop?.items[prompt.slot] ?? null;
       return {
         title: t('prompt.buy'),
         hint: item

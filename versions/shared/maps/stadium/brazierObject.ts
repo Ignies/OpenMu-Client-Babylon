@@ -7,7 +7,7 @@ import {
   type BonedEmission,
 } from '@/controllers/fx/effectParticles';
 import { MapTileObject } from '@/controllers/terrain/mapTileObject';
-import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import type { Entity, World } from '@/ecs/world';
 import { reportLoadFailure } from '@/controllers/assets';
 
@@ -205,7 +205,7 @@ export class StadiumBrazierObject extends MapTileObject {
 
     if (!this.Ready || !this.#bone) return;
 
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
 
     if (!this.#lit) {

@@ -2,10 +2,13 @@
 
 Map changes and teleports: the `MapChanged` packet, the client-ready reply after a warp, the
 Teleport / Teleport Ally rules, the loading-screen hold until the new map's objects arrive, and the
-starred rows of the Move window. The Move window's request is a Store action
-(`Store.warpCommandRequest`, `SendWarpCommandRequest` C1 8E 02).
+starred rows of the Move window, and the two requests that ask for a warp: `warpCommandRequest(index)`
+(the Move window, `SendWarpCommandRequest` C1 8E 02) and `enterGateRequest(gate)` (a gate stepped on),
+in `requests.ts`, through `index.ts` (the door).
 
 ## Public API
+- `warpCommandRequest(index)`, `enterGateRequest(gate)` (`requests.ts`, through `index.ts`, the door):
+  the two warp requests (both mark the round-trip timer).
 - `teleportGate`: the hero's `TeleportGate` (`begin`, `isPending`, `sinceMapChange`,
   `onMapChanged`, `reset`). Tells the server's late same-map answer apart from a refusal.
 - `teleportRefusal(check)`: why the server would refuse a Teleport, or null.
@@ -40,7 +43,7 @@ starred rows of the Move window. The Move window's request is a Store action
 - Scope packets (`AddNpcsToScope` and the character / summon adds): end the scope hold.
 
 ## Depends on / used by
-- uses: `app/store.ts`, `ecs/systems/teleportSystem` (`cancelTeleport`, `endTeleport`),
+- uses: `session`, `hero`, `npc_shop`, `ecs/systems/teleportSystem` (`cancelTeleport`, `endTeleport`),
   `_shared/net_helpers.ts`, `skills/skillCasting` (`TELEPORT`), `chat/notices`, `social`
   (`battleSoccer`), `economy`, `inventory/quickItemActions`, `controllers/loading/sceneGate`.
 - used by: `src/app/logic.ts`, `ecs/systems/skillCastSystem.ts`, `playerControllerSystem.ts`,

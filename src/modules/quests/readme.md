@@ -43,8 +43,8 @@ with its own MobX state, behind the `quests` facade (`index.ts`).
   `Gens*Request`, `EnterOnWerewolfRequest`, `EnterOnGatekeeperRequest`, `CloseNpcRequest`.
 
 ## Depends on / used by
-- uses: `app/store` (`sendToGS`, `playerData`, `addNotification`, `dropNpcTalk`, `talkToNpc`,
-  `pendingNpcType`, `pendingItemMove`, `npcShop`, `isOffline`, `world`), `controllers/assets/mu`,
+- uses: `session` (`sendToGS`, `isOffline`), `hero`, chat's `addNotification`, `npc_shop` (`dropNpcTalk`,
+  `talkToNpc`, `pendingNpcType`, `npcShop`), `inventory` (`pendingItemMove`), `Ecs.world`, `controllers/assets/mu`,
   `ecs/systems` (emoji bubbles, object effects), `hero/`, `items/`, `options/`, `src/i18n`.
 - used by: `src/app/logic.ts` (`net.ts`), `app/lifecycle.ts`, `ecs/systems/questSystem.ts`,
   `npcTalkSystem.ts`, `npc_shop/net.ts`, `session/net.ts`, `session/sessionExit.ts`. Windows:

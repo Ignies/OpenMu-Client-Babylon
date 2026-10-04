@@ -19,7 +19,7 @@ import {
   type Texture,
 } from '../render/babylon/exports';
 import { loadGLTF } from '../assets/modelLoader';
-import { Store } from '../../app/store';
+import { Ecs } from '../../ecs/current';
 import type { TestScene } from '../render/scenes/testScene';
 import { clampAlpha } from './clampAlpha';
 import { LiveList, darkCardGain, darkRibbonSheet, fadeOut, luma, type PointSource, type RGB } from './core';
@@ -364,7 +364,7 @@ function buildRig(scene: Scene, at: Vector3, opts: SpiritSwarmOptions, count: nu
   // The skulls: thin instances of one silhouette mesh and one sheet mesh, each instance a
   // spirit's model.ts node (scale, aim yaw, position) over the mesh's own seated frame.
   const sk = opts.skull;
-  const world = Store.world;
+  const world = Ecs.world;
   const loadSkull = (sheet: boolean): void => {
     if (!world) return;
     void loadGLTF(sk.model, world)
@@ -551,7 +551,7 @@ function spawn(scene: Scene, at: Vector3, opts: SpiritSwarmOptions): EffectHandl
     f.yaw += f.wanderYaw;
     f.wanderPitch *= WANDER_DAMP_PITCH;
     f.wanderYaw *= WANDER_DAMP_YAW;
-    const ground = Store.world?.getTerrainHeight(h.x, h.z) ?? -9999;
+    const ground = Ecs.world?.getTerrainHeight(h.x, h.z) ?? -9999;
     if (ground > -9000) {
       if (h.y < ground + opts.band.floor) {
         f.wanderPitch = 0;

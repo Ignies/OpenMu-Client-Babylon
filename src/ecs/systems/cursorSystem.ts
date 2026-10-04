@@ -9,7 +9,7 @@ import { isFlagInBinaryMask } from '../../controllers/assets/download';
 import { aimX, aimY } from '../../controllers/camera';
 import { leanCursorObjects, findRestObject } from '../../controllers/terrain/restObjects';
 import { pickGround } from '../../controllers/terrain/terrainPick';
-import { Store } from '../../app/store';
+import { Bag } from '../../modules/inventory';
 import type { CursorHover } from '../../controllers/interface/components/game_cursor/cursors';
 import type { Entity, ISystemFactory, World } from '../world';
 import { isAttackableEntity, isNpcOrTrapType } from './attackSystem';
@@ -94,7 +94,7 @@ export const CursorSystem: ISystemFactory = world => {
     const target = world.currentPointerTarget;
 
     if (target) {
-      if (target.droppedItem) return Store.pickedItem ? null : 'get';
+      if (target.droppedItem) return Bag.pickedItem ? null : 'get';
       if (isNpcEntity(target)) return 'talk';
       if (isAttackableEntity(world, target)) return 'attack';
 

@@ -11,7 +11,7 @@ import { earthQuake } from '@/controllers/camera';
 import { effects } from '@/controllers/fx';
 import { itemObjectAttribute } from '@/controllers/actors/itemObjectAttribute';
 import { lighting } from '@/controllers/lighting';
-import { storeRef } from '@/app/storeRef';
+import { Ecs } from '@/ecs/current';
 
 import { A } from '@/controllers/combat/recipes';
 
@@ -317,7 +317,7 @@ const furyStrikeOf = (hd: boolean): Step => (_at, c) => {
     });
 
     // Five satellites at SubType + 72°·i, 100-249 cm out, on ground that is walkable, dry and there.
-    const world = storeRef().world;
+    const world = Ecs.world;
     const a0 = rand(0, 100) * DEG;
     const satellites: QuakePlace[] = [];
     for (let i = 0; i < 5; i++) {

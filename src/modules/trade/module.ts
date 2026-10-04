@@ -3,5 +3,6 @@ import { installNet } from './net';
 
 export default defineModule({
   id: 'trade',
+  requires: ['economy'],
   install: installNet,
 });

@@ -3,7 +3,8 @@ import {
   type ArcRotateCamera,
 } from '../../controllers/render/babylon/exports';
 import type { ISystemFactory, World } from '../world';
-import { Store, UIState } from '../../app/store';
+import { Bag } from '../../modules/inventory';
+import { AppState, UIState } from '../../app/uiState';
 import { isMobileDevice } from '../../controllers/interface/mobile';
 import { MoveTargetEffect } from '../../controllers/fx/moveTargetEffect';
 import { GameOptions } from '@/controllers/settings';
@@ -82,7 +83,7 @@ export const PlayerControllerSystem: ISystemFactory = world => {
 
     if (world.currentPointerTarget) return;
 
-    if (Store.pickedItem) return;
+    if (Bag.pickedItem) return;
 
     const point = pickGround(world, aimX(lastClientX), aimY(lastClientY));
 
@@ -180,7 +181,7 @@ export const PlayerControllerSystem: ISystemFactory = world => {
       camera &&
       // Dead until the server respawns us, the same gate the click walk has.
       !playerEntity.dying &&
-      Store.uiState === UIState.World
+      AppState.uiState === UIState.World
     ) {
       const keys = world.keyboardInput.pressedKeys;
 

@@ -3,8 +3,10 @@ import { observer } from 'mobx-react-lite';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { Item } from '@/ecs/world';
-import { Store } from '@/app/store';
-import { buildItemTooltip, type TooltipLine } from '@/controllers/interface/itemTooltip';
+import { Hero } from '@/modules/hero';
+import { Merchant } from '@/modules/npc_shop';
+import { Pets } from '@/modules/pets';
+import { buildItemTooltip, ItemLinkHover, type TooltipLine } from '@/controllers/interface';
 import {
   comparedItem,
   compareTooltipsOn,
@@ -24,9 +26,8 @@ import {
   withTax,
 } from '@/controllers/item_rules';
 import { placePair } from './placement';
-import { ItemLinkHover } from '@/controllers/interface/itemLinkHover';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
-import { ItemIcon } from '../item_icon';
+import { ItemIcon } from '@/controllers/interface/components/item_icon';
 
 /** One inventory square of the picture, as the grids draw it. */
 const PICTURE_SQUARE = 20;
@@ -51,7 +52,7 @@ function TooltipPicture({ item }: { item: Item }) {
 
 /** The hero as `RenderItemInfo` compares against (`CharacterAttribute`). */
 export function heroStats(): HeroStats {
-  return Store.heroStats();
+  return Hero.heroStats();
 }
 
 /**
@@ -75,7 +76,7 @@ function priceLines(
   color: TooltipLine['color'],
   price?: number
 ): TooltipLine[] {
-  const shop = Store.npcShop;
+  const shop = Merchant.npcShop;
   const lines: TooltipLine[] = [];
 
   // `CNewUIPurchaseShopInventory`: the seller's asking price, in gold.
@@ -111,8 +112,8 @@ function priceLines(
     });
   }
 
-  if (context === 'inventory' && Store.repairMode && !isRepairBanned(item)) {
-    const cost = needsRepair(item) ? repairCost(item, Store.isSelfRepair) : 0;
+  if (context === 'inventory' && Merchant.repairMode && !isRepairBanned(item)) {
+    const cost = needsRepair(item) ? repairCost(item, Merchant.isSelfRepair) : 0;
     lines.push({ text: t('shop.repairCost', { amount: zen(cost) }), color, bold: true });
   }
 
@@ -140,7 +141,7 @@ function petTypeOf(item: Item): PetTypeEnum | undefined {
 
 /** The pet's level / experience / life once `PetInfoResponse` answered for this slot. */
 function petLines(pet: PetTypeEnum, slot: number): TooltipLine[] {
-  const info = Store.petInfo;
+  const info = Pets.petInfo;
   if (!info || info.pet !== pet || info.slot !== slot) return [];
   return [
     { text: '\n', color: 'white', bold: false, blank: true },
@@ -259,7 +260,7 @@ export const ItemTooltip = observer(
       Math.round(GameOptions.compareTooltips) === CompareTooltips.HoldShift
     );
     const worn = compareTooltipsOn(shiftHeld)
-      ? comparedItem(item, Store.playerData.items, Store.heroStats())
+      ? comparedItem(item, Hero.items, Hero.heroStats())
       : null;
 
     // Every field an item can change is part of the stamp, so a +1 or a
@@ -293,7 +294,7 @@ export const ItemTooltip = observer(
 
     const pet = context === 'inventory' ? petTypeOf(item) : undefined;
     const petSlot =
-      pet === undefined ? -1 : slot ?? Store.playerData.items.indexOf(item);
+      pet === undefined ? -1 : slot ?? Hero.items.indexOf(item);
 
     // ZzzInventory.cpp:2116: hovering a Dark Horse / Raven asks the server for its stats.
     useEffect(() => {
@@ -301,7 +302,7 @@ export const ItemTooltip = observer(
       const now = performance.now();
       if (now - (lastPetInfoRequest.get(petSlot) ?? -Infinity) < PET_INFO_REQUEST_INTERVAL_MS) return;
       lastPetInfoRequest.set(petSlot, now);
-      Store.requestPetInfo(pet, petSlot);
+      Pets.requestPetInfo(pet, petSlot);
     }, [pet, petSlot]);
 
     const lines = useMemo(() => {
@@ -315,7 +316,7 @@ export const ItemTooltip = observer(
       // Tracked observables (shop, repair mode, pet info) re-run the observer,
       // and the stamps cover the item itself.
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [data, context, price, pet, petSlot, Store.npcShop, Store.repairMode, Store.petInfo]);
+    }, [data, context, price, pet, petSlot, Merchant.npcShop, Merchant.repairMode, Pets.petInfo]);
 
     const move = (clientX: number, clientY: number) => {
       cursor.current = { x: clientX, y: clientY };

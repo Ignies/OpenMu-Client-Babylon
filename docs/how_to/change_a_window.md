@@ -28,7 +28,7 @@ component in the inventory, vault, trade and shops.
 3. It is found by glob (`versions/shared/ui/index.ts`). Always-on elements go in `ui/hud/` the same
    way; `slot: 'world'` draws under the HUD and stays up when the interface is hidden.
 4. Open and close it with `MuWindows.setOpen('my_window', open)` and read `MuWindows.isOpen(...)`
-   (`@/controllers/interface/windowManager`), not a new `Store` flag.
+   (`@/controllers/interface`), not a new flag in a module's state.
 
 ## One version draws it differently
 

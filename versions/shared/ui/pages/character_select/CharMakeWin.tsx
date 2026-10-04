@@ -3,7 +3,10 @@ import { t } from '@/i18n';
 import { CREATE_MESSAGES } from '@/modules/character_select/messages';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useRef } from 'react';
-import { Store } from '@/app/store';
+import { CharSelect } from '@/modules/character_select';
+import { addNotification } from '@/modules/chat';
+import { MsgBox } from '@/controllers/interface';
+import { Ecs } from '@/ecs/current';
 import { isReservedName } from '@/modules/servers/reservedNames';
 import { playUiSound } from '@/controllers/sound/sfx';
 import { MuButton } from '@/controllers/interface/components/mu_button';
@@ -95,7 +98,7 @@ function holdUntilReleased(code: string): void {
 
 export const CharMakeWin = observer(({ onClose }: CharMakeWinProps) => {
   const selected =
-    CREATABLE_CLASSES.find(c => c.netClass === Store.newCharClass) ??
+    CREATABLE_CLASSES.find(c => c.netClass === CharSelect.newCharClass) ??
     CREATABLE_CLASSES[0];
 
   const isDarkLord = selected.classType === CLASS_TYPE.DARK_LORD;
@@ -104,7 +107,7 @@ export const CharMakeWin = observer(({ onClose }: CharMakeWinProps) => {
   const preview = useRef<ClassPreview | null>(null);
 
   useEffect(() => {
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
 
     const instance = createClassPreview(world, () =>
@@ -124,29 +127,29 @@ export const CharMakeWin = observer(({ onClose }: CharMakeWinProps) => {
   }, [selected.classType]);
 
   const isUnlocked = (unlock: number | null) =>
-    unlock === null || (Store.creationUnlockFlags & unlock) !== 0;
+    unlock === null || (CharSelect.creationUnlockFlags & unlock) !== 0;
 
   const onCreate = () => {
-    if (Store.charCreationPending) return;
+    if (CharSelect.charCreationPending) return;
 
-    const name = Store.newCharName;
+    const name = CharSelect.newCharName;
 
     if (name.length < NAME_MIN_LENGTH) {
-      Store.addNotification(CREATE_MESSAGES.minLength, 'error');
+      addNotification(CREATE_MESSAGES.minLength, 'error');
       return;
     }
 
     if (hasSpecialCharacters(name)) {
-      Store.addNotification(CREATE_MESSAGES.specialName, 'error');
+      addNotification(CREATE_MESSAGES.specialName, 'error');
       return;
     }
 
     if (isReservedName(name)) {
-      Store.addNotification(CREATE_MESSAGES.reservedName, 'error');
+      addNotification(CREATE_MESSAGES.reservedName, 'error');
       return;
     }
 
-    Store.createCharacterRequest(name, selected.netClass);
+    CharSelect.createCharacterRequest(name, selected.netClass);
   };
 
   // The listener is registered once; the ref hands it the current pair.
@@ -163,7 +166,7 @@ export const CharMakeWin = observer(({ onClose }: CharMakeWinProps) => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Enter' && e.key !== 'Escape') return;
       if (e.isComposing || e.keyCode === 229) return;
-      if (Store.msgWin || MuWindows.isOpen('options')) return;
+      if (MsgBox.msgWin || MuWindows.isOpen('options')) return;
 
       e.preventDefault();
       e.stopPropagation();
@@ -175,7 +178,7 @@ export const CharMakeWin = observer(({ onClose }: CharMakeWinProps) => {
       if (e.key === 'Escape') {
         playUiSound('click'); // CharMakeWin.cpp:353
         onClose();
-      } else if (!Store.charCreationPending) {
+      } else if (!CharSelect.charCreationPending) {
         playUiSound('click'); // CharMakeWin.cpp:348
         onCreate();
       }
@@ -277,7 +280,7 @@ export const CharMakeWin = observer(({ onClose }: CharMakeWinProps) => {
             checked={cls.classType === selected.classType}
             disabled={!enabled}
             onClick={() => {
-              Store.newCharClass = cls.netClass;
+              CharSelect.newCharClass = cls.netClass;
             }}
             style={{ position: 'absolute', left: COLUMN_X, top: cls.y }}
             labelStyle={{ fontSize: 11, textShadow: '1px 1px 0 rgba(0,0,0,.85)' }}
@@ -297,9 +300,9 @@ export const CharMakeWin = observer(({ onClose }: CharMakeWinProps) => {
           type="text"
           autoFocus
           spellCheck={false}
-          value={Store.newCharName}
+          value={CharSelect.newCharName}
           maxLength={NAME_MAX_LENGTH}
-          onChange={e => (Store.newCharName = e.target.value)}
+          onChange={e => (CharSelect.newCharName = e.target.value)}
           style={{
             left: INPUT_TEXT_X,
             top: INPUT_TEXT_Y,
@@ -316,7 +319,7 @@ export const CharMakeWin = observer(({ onClose }: CharMakeWinProps) => {
         frames={ACTION_BTN_FRAMES}
         color={TEXT_COLOR.brightGray}
         activeColor={TEXT_COLOR.white}
-        disabled={Store.charCreationPending}
+        disabled={CharSelect.charCreationPending}
         onClick={onCreate}
         style={{ position: 'absolute', left: OK_BTN_X, top: ACTION_BTN_Y }}
       />

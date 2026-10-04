@@ -26,7 +26,7 @@ import {
   inWindow,
 } from '../../controllers/fx/core';
 import { FOOT_THUNDER_FRAMES, MODEL, RGBS, TEX } from '../../controllers/fx/recipes';
-import { Store } from '../../app/store';
+import { Drops } from '../../modules/drops';
 import { PlayerAction } from '@versions/shared/objects/enum';
 import { RIDER_FLY_WORLDS } from '../../controllers/combat/recipes';
 import { playUiSound } from '../../controllers/sound/ui';
@@ -651,7 +651,7 @@ export const PetSystem: ISystemFactory = world => {
         if (owner.localPlayer && collect.sent >= PICKUP_GAP) {
           collect.sent = 0;
           if (!world.pickupTarget) {
-            Store.pickupItemRequest(collect.target!.netId!);
+            Drops.pickupItemRequest(collect.target!.netId!);
           }
         }
 

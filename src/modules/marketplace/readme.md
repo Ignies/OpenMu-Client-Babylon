@@ -14,8 +14,8 @@ plugin ([../../../openmu/readme.md](../../../openmu/readme.md)).
 - `Listing` (`mockListings.ts`), `HistoryEntry` (`api.ts`): row types.
 
 ## How it works
-- `state.ts` imports no `Store`, so the window can run alone. `gameBridge.ts` is the only adapter:
-  it pushes `Store.playerData` money, bag (slots after the equipment) and name into
+- `state.ts` imports no other module's state, so the window can run alone. `gameBridge.ts` is the only adapter:
+  it pushes `Hero` money, bag (slots after the equipment) and name into
   `Marketplace.syncFromGame` (an `autorun` while open) and installs `sendEscrow` as the bridge.
 - Every commit (list, buy, cancel, collect) is three steps: `api.ts` asks the service for a signed
   token, `sendEscrow` sends it to the game server (`C1 E7 01`, `escrowWire.ts`) and waits up to
@@ -33,8 +33,7 @@ plugin ([../../../openmu/readme.md](../../../openmu/readme.md)).
 - outgoing: the escrow request (`C1 E7 01 <token>`), built by `buildEscrowRequest`.
 
 ## Depends on / used by
-- uses: `src/app/store.ts` (`playerData`, `gsSocket`, `sendToGS`, `isOffline`, in `gameBridge.ts`
-  only), `controllers/net/protocols/escrowWire.ts`, `controllers/net/sessionNonce.ts`,
+- uses: `hero`, `session` (`gsSocket`, `sendToGS`, `isOffline`; in `gameBridge.ts` only), `controllers/net/protocols/escrowWire.ts`, `controllers/net/sessionNonce.ts`,
   `servers/serverServices.ts` (`marketApiUrl`), `core/inventoryConstants.ts`, `src/i18n`.
 - used by: `src/app/logic.ts` (`net.ts`), `versions/shared/ui/windows/marketplace/` (the window),
   `versions/shared/ui/hud/bottom_bar/mainFrameButtons.ts` (`toggleMarketplace`),

@@ -73,8 +73,7 @@ themselves are content in `versions/shared/skills/` (see [docs/content.md](../..
 
 ## Depends on / used by
 - uses: fx (`effects.spawn`), lighting, combat, sound and weather (`scorch`, `burn`) controllers,
-  `versions/shared/skills/skillsDatabase`. Old exceptions to the dependency rule (listed in
-  `tools/checks/baselines/deps.json`): `app/storeRef.ts` (dev hook only).
+  `versions/shared/skills/skillsDatabase`, `ecs/current` (the live world, dev hook only).
 - Dependency direction: the tables the skills module and the lighting, sound and combat controllers
   read (`MASTER_BASES`, `SKILL_DELAY_MS`) live in `combat`, not here: this door imports combat,
   lighting, sound and the visual engine, so a reader importing it would close a cycle.

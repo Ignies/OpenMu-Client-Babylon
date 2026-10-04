@@ -5,7 +5,11 @@ loading screen; a new look is a sibling implementation (`loading/<name>/`), neve
 `classic/` (see [docs/controllers.md](../../../docs/controllers.md)).
 
 ## Public API
-- `LoadingScreen` (`classic/index.tsx`): the React overlay shown while `Store.isLoading`.
+- `Loading` (`index.ts`, `loadingState.ts`): observable `sceneLoading`, `loadingProgress`,
+  `spritesLoading`, `isLoading` and their setters. The terrain sets the scene flag and progress,
+  boot clears `spritesLoading` once the screen art is in.
+- `LoadingScreen` (`classic/index.tsx`): the React overlay shown while `Loading.isLoading`;
+  `hidden` (read in render) is the app saying a page with its own progress is up (the preloader).
 - `setSceneHold(name, held)`, `sceneHeld()` (`sceneGate.ts`): named holds that keep the screen up
   for content staged after the map lands.
 - `isStaged(entity)` (`sceneGate.ts`): true when an entity's model, its body and equipment parts
@@ -19,7 +23,7 @@ loading screen; a new look is a sibling implementation (`loading/<name>/`), neve
   holds the gate by name with `setSceneHold` until it arrives; `sceneHeld` is read only by
   `sceneReadySystem`.
 - `classic/index.tsx` draws the art twice (a blurred `cover` copy behind a `contain` copy) and
-  the progress bar from `Store.loadingProgress`. It shows nothing on the preloader page.
+  the progress bar from `Loading.loadingProgress`. It shows nothing while `hidden()` is true.
 - `classic/art.tsx`: the original load art, `LSBg01..04.OZJ`, laid out as four tiles of the
   800x600 sheet (two tall top tiles, two short bottom tiles); `useSheetSizes` sizes it to the
   window.
@@ -30,7 +34,7 @@ loading screen; a new look is a sibling implementation (`loading/<name>/`), neve
   (worldsOpen); `sound/loginMusic.ts` starts the menu music once `worldsOpen` is set.
 
 ## Depends on / used by
-- uses: `app/store` (`Store`, `UIState`), `interface/components/mu_sprite`, `ecs/world` (types).
+- uses: `interface/components/mu_sprite`, `ecs/world` (types).
 - used by: `app/App.tsx` (`LoadingScreen`); `sceneReadySystem`, `characterSelectSystem`,
   `modules/warp/warpScopeHold.ts` (scene gate); `loginSceneSystem`,
   `versions/shared/ui/pages/preloader`, `sound/loginMusic.ts` (`pregameLoad`).

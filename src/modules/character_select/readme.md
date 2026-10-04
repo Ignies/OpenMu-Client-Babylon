@@ -1,8 +1,8 @@
 # character_select
 
 The character select screen: create and delete answers from the server, the line-up layout
-(slot positions, camera) and the painted backdrop behind it. The character list and the select,
-create and delete actions still live in the central `Store` (`src/app/store.ts`).
+(slot positions, camera) and the painted backdrop behind it, and the account's characters with the
+select, create and delete actions (`CharSelect`).
 
 ## Public API
 - `characterSlotPosition(slot)` / `characterSlotAngle(slot)`: where each of the five slots stands
@@ -10,6 +10,13 @@ create and delete actions still live in the central `Store` (`src/app/store.ts`)
 - `CHARACTER_CAMERA_POSITION`, `characterCameraTarget()`: the line-up camera.
 - `characterSelectView`: observable `{ zoomedOn }`, the name the right-click close-up is on.
 - `createCharacterSelectBackdrop(scene)`: the backdrop card; returns `{ dispose() }`.
+- `CharSelect` (`state.ts`, through `index.ts`, the door): `charactersList`, `loadingCharactersList`,
+  `focusedChar`, `creationUnlockFlags`, the create form (`newCharName`, `newCharClass`,
+  `charCreationPending`), `deletingChar`; `refreshCharactersListRequest()`, `focusCharacterRequest`,
+  `selectCharacterRequest` (also sets the hero's name, class and level), `createCharacterRequest`,
+  `deleteCharacterRequest`, `addCreatedCharacter`. The character list component takes it as `source`.
+- `confirmDeleteCharacter(name)` (`index.ts`, the door): the delete button's two boxes (confirm, then
+  the resident number) and the delete request with the typed number.
 - `CREATE_MESSAGES`: localized create notices (`minLength`, `specialName`, `reservedName`, `failed`).
 
 ## How it works
@@ -20,25 +27,26 @@ create and delete actions still live in the central `Store` (`src/app/store.ts`)
   tiles down the camera's view. It is sized like CSS `background-size: cover`, top anchored, 15%
   oversize so the close-up never shows its edges, refit on resize, and hidden until the texture
   loads.
-- `net.ts` writes the server's answers into the Store: `charactersList`, `focusedChar`,
+- `net.ts` writes the server's answers into `CharSelect`: `charactersList`, `focusedChar`,
   `deletingChar`, `creationUnlockFlags`, `charCreationPending`, `addCreatedCharacter(...)`, and pops
-  message boxes with `Store.popUpMsgWin`.
+  message boxes with `MsgBox.popUpMsgWin`.
 - `CharacterList` and `CharacterFocused` are not handled here: the shared
   `versions/shared/ui/pages/character_select/character_list` component (`CharacterList`) handles
   them for both pages.
-- Outgoing packets are Store actions: `refreshCharactersListRequest`, `focusCharacterRequest`,
+- Outgoing packets are `CharSelect` actions: `refreshCharactersListRequest`, `focusCharacterRequest`,
   `selectCharacterRequest`, `createCharacterRequest`, `deleteCharacterRequest`.
 
 ## Packets
 - `CharacterDeleteResponse`: removes the character from the list, or shows the matching error box
   (guild member, wrong security code, item block).
-- `CharacterClassCreationUnlock`: sets `Store.creationUnlockFlags`.
+- `CharacterClassCreationUnlock`: sets `CharSelect.creationUnlockFlags`.
 - `CharacterCreationSuccessful`: adds the new character (blank preview gets a default appearance);
   a false `Success` shows the failed notice.
 - `CharacterCreationFailed`: clears the pending flag and shows the failed notice.
 
 ## Depends on / used by
-- uses: `app/store.ts`, `controllers/actors/deserializeAppearance`, `controllers/interface/msgWin`,
+- uses: `session` (sending), `hero` (a select names the hero), `controllers/actors`,
+  `controllers/interface` (`MsgBox`),
   `controllers/render/babylon`, `src/i18n`.
 - used by: `src/app/logic.ts` (`net.ts`), `ecs/systems/characterSelectSystem.ts`,
   `ecs/systems/loginSceneSystem.ts`, `versions/shared/ui/pages/character_select/`

@@ -12,7 +12,7 @@
  */
 import { Vector3, type Scene } from '../render/babylon/exports';
 import { TerrainDecal } from './moveTargetEffect';
-import { Store } from '../../app/store';
+import { Ecs } from '../../ecs/current';
 import { LiveList, TICK, darkCardGain, fadeOut, lerp, luma, type PointSource, type RGB } from './core';
 import { RGBS, TEX } from './recipes';
 import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
@@ -90,7 +90,7 @@ const pools = new Map<string, TerrainDecal[]>();
 let seq = 0;
 
 function acquire(texture: string, blend: 'additive' | 'alpha' | 'subtract', maxScale = MAX_SCALE): TerrainDecal | null {
-  const world = Store.world;
+  const world = Ecs.world;
   if (!world) return null;
   const key = poolKey(texture, blend, maxScale);
   let pool = pools.get(key);
@@ -111,7 +111,7 @@ export function spawnRing(_scene: Scene, at: Vector3, opts: RingOptions): Effect
   const blend = opts.blend ?? 'additive';
   const maxScale = opts.maxScale ?? ((opts.scale ?? DEFAULT_SCALE) > MAX_SCALE ? BIG_SCALE : MAX_SCALE);
   const decal = acquire(texture, blend, maxScale);
-  const world = Store.world;
+  const world = Ecs.world;
   if (!decal || !world) return DEAD_HANDLE;
 
   const colour = opts.colour ?? RGBS.holy;

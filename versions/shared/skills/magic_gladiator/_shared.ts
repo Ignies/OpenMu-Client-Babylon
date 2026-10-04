@@ -7,7 +7,7 @@ import { type Sounds } from '@/controllers/sound/recipes';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
 import { playCombat } from '@/controllers/sound/combat';
-import { storeRef } from '@/app/storeRef';
+import { Ecs } from '@/ecs/current';
 
 /** Embers shed off Fire Slash's crescent, rising as the BITMAP_FIRE cards do. Round flares: Spark01 reads as squares this small. */
 export const MG_EMBERS: ParticleRecipe = {
@@ -32,7 +32,7 @@ export const MG_EMBERS: ParticleRecipe = {
 export const mgSay = (key: Sounds): void => playCombat(key);
 /** sCMW and sCColdAttack are loaded on Battle Castle only (MapManager.cpp:280-281); anywhere else the original plays nothing. */
 export const mgSayOnBattleCastle = (key: Sounds): void => {
-  if (storeRef().world?.mapIndex === ENUM_WORLD.WD_30BATTLECASTLE) playCombat(key);
+  if (Ecs.world?.mapIndex === ENUM_WORLD.WD_30BATTLECASTLE) playCombat(key);
 };
 
 /** Turn `a` toward `to` by at most `max` radians (TurnAngle2). */

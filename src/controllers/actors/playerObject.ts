@@ -9,7 +9,7 @@ import { CharacterClassNumber, PlayerClass, getBaseClass } from '../../core/type
 import { Entity, World, type Item } from '../../ecs/world';
 import { PlayerAction } from '@versions/shared/objects/enum';
 import { loadGLTF } from '../assets/modelLoader';
-import { Store } from '../../app/store';
+import { Ecs } from '../../ecs/current';
 import {
   BACK_BONE,
   LEFT_HAND_BONE,
@@ -291,7 +291,7 @@ export class PlayerObject extends ModelObject {
     this.Pet.CurrentAction = -1;
 
     const seq = ++this.Pet.loadSeq;
-    const gltf = await loadGLTF(spec.model, Store.world!);
+    const gltf = await loadGLTF(spec.model, Ecs.world!);
     if (seq !== this.Pet.loadSeq) return;
     this.Pet.load(gltf);
 
@@ -455,7 +455,7 @@ export class PlayerObject extends ModelObject {
     // character comes through here (`sceneGate.isStaged`).
     this.PartsPending++;
     try {
-      const gltf = await loadGLTF(dir + modelPath, Store.world!);
+      const gltf = await loadGLTF(dir + modelPath, Ecs.world!);
       if (seq !== part.loadSeq) return;
       part.load(gltf);
 

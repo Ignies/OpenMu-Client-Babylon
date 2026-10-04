@@ -4,13 +4,13 @@ The account's character list, used by every character page: the shared `Characte
 (Season 6, `_template`) and the 0.97d `V097dCharactersPage`.
 
 ## Public API
-- `CharacterList` (`index.tsx`): props `source` (the Store), `look`, optional `onList`.
+- `CharacterList` (`index.tsx`): props `source` (`CharSelect`), `look`, optional `onList`.
   - `look="lineup"`: the name plate over the 3D line-up (`../CharacterSelectionPlate.tsx`); the
     actors themselves are drawn by `src/ecs/systems/characterSelectSystem.ts`.
   - `look="rows"` with `row={ x, y, width, height }`: one button per character (name, `Lv N`),
     classes `char-list-row`, `is-selected`, `char-list-level`; the page styles them.
   - `onList`: called when a new list arrives (Season 6 clears its "connecting" guard).
-- `CharacterListSource`: what `source` must have; the Store satisfies it.
+- `CharacterListSource`: what `source` must have; `CharSelect` (`modules/character_select`) satisfies it.
 - `selectedCharacter(list, focused)`, `hasFreeSlot(list)`, `listStatus(state, prompt)`
   (`roster.ts`, re-exported).
 

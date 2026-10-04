@@ -2,7 +2,8 @@
 
 The hero's bag: the inventory packets, the grid model every item window shares (storage numbers,
 sizes, slot spaces, bans) and the item runs built on it (auto-arrange, bulk move, Ctrl-click,
-jewels, Q/W/E/R hotkeys). The bag itself and the item-move code live in `Store` (`src/app/store.ts`).
+jewels, Q/W/E/R hotkeys), and `Bag`: the carried item, the move in flight and the item actions. The
+items themselves are the hero's (`Hero.items`, `Hero.money`).
 
 ## Public API
 - `InventoryConstants` (now `src/core/inventoryConstants.ts`, pure, also read by the cash shop server):
@@ -20,13 +21,16 @@ jewels, Q/W/E/R hotkeys). The bag itself and the item-move code live in `Store` 
 - `ITEM_HOTKEY_CODES`, `canRegisterItemHotkey`, `findHotkeyItem`, `countHotkeyItems`, `HOTKEY_COUNT`, `UNBOUND_HOTKEY`.
 
 ## How it works
-- State is in `Store`: `playerData.items` / `playerData.money`, `pickedItem`, `pendingItemMove`, `itemHotkeys`
-  (open state: `MuWindows.isOpen('inventory')`). Actions are `Store` methods: `pickItem`, `placePickedItem`, `cancelPickedItem`,
+- State is `Bag` (`state.ts`, through `index.ts`, the door): `pickedItem`, `pendingItemMove`, `itemHotkeys`
+  (open state: `MuWindows.isOpen('inventory')`; the items are `Hero.items`). Actions: `pickItem`, `placePickedItem`, `cancelPickedItem`,
   `moveItemToSquare`, `autoMoveItem`, `findFreeSquare`, `itemsOfStorage`, `confirmItemMove`, `rollbackItemMove`,
-  `applyPickedJewel`, `consumeItemRequest`, `upgradeInventoryItem`, `setItemHotkey`, `useItemHotkey`.
-- The server owns every grid. A move is one `ItemMoveRequest`; only one is in flight (`Store.pendingItemMove`).
-  `ItemMoved` paints it, `ItemMoveRequestFailed` rolls it back. `Store.itemsOfStorage` maps a `StorageKind`
-  to the bag or to an `Economy` grid, so pick / place code is written once.
+  `applyPickedJewel`, `consumeItemRequest`, `upgradeInventoryItem`, `setItemHotkey`, `useItemHotkey`,
+  `learnSkillItem`, `dropPickedItem`, `beginItemMove`. `beforeConsume` is the npc_shop's hook: a use
+  closes the merchant window first. The door also exports `itemSize`, `ITEM_MOVE_TIMEOUT`, `PickedItem`.
+- The server owns every grid. A move is one `ItemMoveRequest`; only one is in flight (`Bag.pendingItemMove`).
+  `ItemMoved` paints it, `ItemMoveRequestFailed` rolls it back. `Bag.itemsOfStorage` maps a `StorageKind`
+  to the bag or to an `Economy` grid, so pick / place code is written once. The economy hands its
+  grids in (`Bag.grids`, type `EconomyGrids`) when it loads, so the bag never imports it back.
 - Local index vs wire slot: the bag array starts with the 12 worn slots; the personal shop sits inside the
   inventory storage at `FirstStoreItemSlotIndex` on OpenMU, so only its slots are shifted.
 - `InventorySort` and `BulkMove` are small state machines: send one move, wait for the answer (a mobx
@@ -47,16 +51,18 @@ jewels, Q/W/E/R hotkeys). The bag itself and the item-move code live in `Store` 
 - `ItemDurabilityChanged`, `InventoryMoneyUpdate`: durability of one slot, zen in the bag.
 
 ## Depends on / used by
-- uses: `controllers/item_rules` (`ItemSerializer`, `itemDef`, `dropTier`), `economy` (`Economy`), `controllers/settings`,
+- uses: `session` (sending), `hero` (the items), `skills` (`HeroSkills`, learning from a scroll),
+  `controllers/item_rules` (`ItemSerializer`, `itemDef`, `dropTier`), `economy` (`Economy`, which reads
+  `Bag` back), `controllers/settings`,
   `controllers/sound`, `controllers/net/roundTrip`, `controllers/assets/itemIconPack`, `src/i18n`.
-- used by: `src/app/logic.ts` (net), `Store`, `economy`, `personal_shop`, `controllers/item_rules/itemCompare.ts`, `hero`, `mu_helper`,
+- used by: `src/app/logic.ts` (net), `npc_shop`, `economy`, `personal_shop`, `controllers/item_rules/itemCompare.ts`, `hero`, `mu_helper`,
   `warp`, `scope`, `marketplace`, `cashshop/server/fulfilment.ts`, ecs systems (attack, pickup, keyboard).
 - windows: `inventory`, `vault`, `trade`, `chaos_machine`, `personal_shop`, `npc_shop`, `economy_prompts`,
   `character_info`, `pet_info`; HUD `bottom_bar`.
 
 ## Change it
-- a new inventory packet: add an `EventBus.on(...)` in `net.ts`, keep state in `Store`.
-- a new storage grid: add it to `storageKind.ts` / `itemStorage.ts` (size, columns, rows), `Store.itemsOfStorage`
+- a new inventory packet: add an `EventBus.on(...)` in `net.ts`, keep state in `Bag` (`state.ts`).
+- a new storage grid: add it to `storageKind.ts` / `itemStorage.ts` (size, columns, rows), `Bag.itemsOfStorage`
   and `KNOWN_STORAGES` in `net.ts`.
 - what a grid refuses: the ban lists in `itemStorage.ts`.
 - arrange order: `itemCategory` / `compareSquares` in `inventoryLayout.ts`.

@@ -1,6 +1,9 @@
 import { observable, runInAction } from 'mobx';
 import { EventBus } from '../../core/eventBus';
-import { Store } from '../../app/store';
+import { Merchant } from '../npc_shop';
+import { Hero } from '../hero';
+import { Session } from '../session';
+import { addNotification } from '../chat';
 import { t } from '../../i18n';
 import { ItemGroup } from '@/controllers/item_rules';
 import {
@@ -58,20 +61,20 @@ export function goldenArcherWindow(): {
 
 /** The Register button: point the server at the first Rena in the bag. */
 export function registerRena(): void {
-  if (!state.open || Store.isOffline) return;
+  if (!state.open || Session.isOffline) return;
 
-  const slot = Store.playerData.items.findIndex(
+  const slot = Hero.items.findIndex(
     item => item?.group === RENA.group && item?.num === RENA.num
   );
   if (slot < 0) {
-    Store.addNotification(t('goldenArcher.noRena'), 'error', MESSAGE_MS);
+    addNotification(t('goldenArcher.noRena'), 'error', MESSAGE_MS);
     return;
   }
 
   const packet = EventChipRegistrationRequestPacket.createPacket();
   packet.Type = REGISTRATION_TYPE_RENA;
   packet.ItemIndex = slot;
-  Store.sendToGS(packet.buffer);
+  Session.sendToGS(packet.buffer);
 }
 
 /**
@@ -81,8 +84,8 @@ export function registerRena(): void {
  */
 export function closeGoldenArcher(notify = true): void {
   if (!state.open) return;
-  if (notify && !Store.isOffline) {
-    Store.sendToGS(EventChipExitDialogPacket.createPacket().buffer);
+  if (notify && !Session.isOffline) {
+    Session.sendToGS(EventChipExitDialogPacket.createPacket().buffer);
   }
   runInAction(() => {
     state.open = false;
@@ -99,11 +102,11 @@ EventBus.on('EventChipRegistrationResult', packet => {
     runInAction(() => {
       state.remaining = p.RemainingInventoryCount;
     });
-    Store.addNotification(t('goldenArcher.noRena'), 'error', MESSAGE_MS);
+    addNotification(t('goldenArcher.noRena'), 'error', MESSAGE_MS);
     return;
   }
 
-  Store.dropNpcTalk();
+  Merchant.dropNpcTalk();
   runInAction(() => {
     state.registered = p.RegisteredCount;
     state.remaining = p.RemainingInventoryCount;

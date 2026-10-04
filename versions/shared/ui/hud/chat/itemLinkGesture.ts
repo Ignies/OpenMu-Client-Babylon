@@ -1,4 +1,5 @@
-import { Store } from '@/app/store';
+import { Bag } from '@/modules/inventory';
+import { MsgBox } from '@/controllers/interface';
 import { Social } from '@/modules/social/social';
 import { ItemLinkHover } from '@/controllers/interface/itemLinkHover';
 import { itemLinkLabel, itemLinkToken } from '@/modules/chat/chatItemLinks';
@@ -17,7 +18,7 @@ export function installItemLinkGesture(): () => void {
     armed = false;
     if (e.button !== 0 || !e.altKey) return;
     const item = ItemLinkHover.item;
-    if (!item || Store.pickedItem || Store.msgWin) return;
+    if (!item || Bag.pickedItem || MsgBox.msgWin) return;
     e.stopPropagation();
     armed = true;
     ItemLinkHover.linkedDuringAlt = true;

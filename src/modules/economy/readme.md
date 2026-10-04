@@ -6,16 +6,18 @@ vault, chaos machine, trade and personal shop. The packet handlers that feed it 
 [../personal_shop/](../personal_shop/readme.md) and [../npc_shop/](../npc_shop/readme.md).
 
 ## Public API
+- `module.ts`: nothing to install; `vault`, `chaos_mix`, `trade` and `personal_shop` require it.
 - `Economy`: the mobx store (below).
 - `vaultOpenCost(level, masterLevel, locked)`: the vault fee (NewUIStorageInventory.cpp:227).
 - `MIX_MENU`, `MixMenuEntry`: the crafting list the chaos machine window offers.
 - `MAX_SHOP_TITLE` (26): the stall title limit. `ShopStock`, `ShopBrowse`, `TradePartner`, `EconomyPrompt`: types.
 
 ## How it works
-- `Economy` lives beside `Store` the way `Social` does. `Store` owns the bag and the picked item; `Economy`
-  owns the grids that exist only while a window is open: `vaultItems`, `mixItems`, `myTradeItems` /
-  `yourTradeItems`, `myShopItems`. `Store.itemsOfStorage` maps a `StorageKind` to them, so item moves are
-  the same code for every window.
+- `Economy` is a store of its own, like `Social`. The inventory's `Bag` owns the picked item and the
+  move in flight (the items are `Hero.items`); `Economy` owns the grids that exist only while a window
+  is open: `vaultItems`, `mixItems`, `myTradeItems` / `yourTradeItems`, `myShopItems`. `economy.ts`
+  hands them to the bag as `Bag.grids` when it loads, and `Bag.itemsOfStorage` maps a `StorageKind`
+  to them, so item moves are the same code for every window.
 - Vault: `openVault`, `setVaultItems`, `closeVault`, `moveVaultMoney`, `unlockVault`, `setVaultPin`,
   `removeVaultPin`, `vaultProtectionState`; `vaultLocked` / `vaultUnlocked` / `vaultUsable` are the pin state.
 - Chaos machine: `openMix(kind)`, `setMixType`, `mix`, `craftingResult`, `closeMix` (refuses while items are
@@ -32,13 +34,13 @@ vault, chaos machine, trade and personal shop. The packet handlers that feed it 
   `closeBrowsedShop`, `shopBuyResult`.
 - `prompt` is the one open yes/no or amount box (`openPrompt`, `closePrompt`). `autoMoveTarget` is where a
   right click in the bag sends an item. `reset()` clears everything on character select.
-- Offline (`Store.isOffline`) most actions change state locally, or do nothing, instead of sending.
+- Offline (`Session.isOffline`) most actions change state locally, or do nothing, instead of sending.
 
 ## Depends on / used by
-- uses: `Store`, `Social` (system and error lines), `chat/notices.ts`, `inventory/itemStorage.ts`,
+- uses: `session`, `hero`, `inventory` (`Bag`), `Social` (system and error lines), `chat/notices.ts`, `inventory/itemStorage.ts`,
   `controllers/sound/sfx.ts`, `controllers/assets/itemIconPack.ts`, `src/i18n`.
 - used by: the nets of `vault`, `chaos_mix`, `trade`, `npc_shop`, `personal_shop`, `inventory`, `scope`, `hero`
-  (`reset`), `warp`; `Store`, `chat/commands.ts`, `session/sessionExit.ts`, `src/app/boot.tsx`,
+  (`reset`), `warp`; `inventory` (`Bag.grids`), `chat/commands.ts`, `session/sessionExit.ts`, `src/app/boot.tsx`,
   ecs `nameTagSystem`.
 - windows: `vault`, `chaos_machine`, `trade`, `personal_shop`, `economy_prompts`, `inventory`, `party`;
   HUD `name_tags` (shop titles).

@@ -55,7 +55,7 @@ import '../ecs/world';
 import '../core/attributeSystem';
 import '../controllers/actors/characterScale';
 import '@versions/shared/skills/skillsDatabase';
-import '../controllers/actors/heroMoveTrace';
+import '../modules/hero/heroMoveTrace';
 import '../modules/skills/skillCasting';
 import '../controllers/combat/skillClips';
 import '../modules/warp/teleportRules';
@@ -83,7 +83,6 @@ import '../controllers/actors/locomotion';
 import '../controllers/actors/transformedBody';
 import '../modules/quests';
 import '../modules/session/sessionExit';
-import './store';
 import '../core/devSeams';
 import '../modules/inventory/quickItemActions';
 import '../modules/servers/serverConfig';
@@ -94,7 +93,10 @@ import { summonDisplayName } from '../modules/_shared/net_helpers';
 
 import { PingPacket } from '@versions/shared/packets/ClientToServerPackets';
 
-import { Store, UIState } from './store';
+import { Hero } from '../modules/hero';
+import { Session } from '../modules/session';
+import { AppState, UIState } from './uiState';
+import { Ecs } from '../ecs/current';
 
 
 
@@ -116,8 +118,8 @@ export { spawnPlayer } from '../modules/scope/net';
  * change - has to walk them again.
  */
 onNpcNamesChanged(() => {
-  // The table can land while store.ts is still loading (a test importing this first): no world yet.
-  const world = Store?.world;
+  // The table can land before boot builds the world: nothing to rename yet.
+  const world = Ecs.world;
   if (!world) return;
 
   for (const e of world.with('npcType', 'objectNameInWorld')) {
@@ -142,11 +144,11 @@ void loadNpcNames();
  */
 const PING_INTERVAL_MS = 5000;
 setInterval(() => {
-  if (Store.uiState !== UIState.World || !Store.gsSocket) return;
+  if (AppState.uiState !== UIState.World || !Session.gsSocket) return;
   const p = PingPacket.createPacket();
   p.TickCount = Math.floor(performance.now()) >>> 0;
-  p.AttackSpeed = Store.playerData.attackSpeed ?? 0;
-  Store.sendToGS(p.buffer);
+  p.AttackSpeed = Hero.attackSpeed ?? 0;
+  Session.sendToGS(p.buffer);
 }, PING_INTERVAL_MS);
 
 // A hot update that reaches this module must reload the page: Vite would
@@ -159,4 +161,9 @@ if (hot) hot.decline();
 installModules(MODULES);
 
 // The map ping: the proxy relay listener behind Shift + middle click.
-installPingNet();
+installPingNet({
+  selfId: () => Hero.playerId,
+  offline: () => Session.isOffline,
+  socket: () => Session.gsSocket,
+  send: frame => Session.sendPingFrame(frame),
+});

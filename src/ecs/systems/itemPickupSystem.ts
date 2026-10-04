@@ -1,5 +1,6 @@
 import { PointerEventTypes } from '../../controllers/render/babylon/exports';
-import { Store } from '../../app/store';
+import { Bag } from '../../modules/inventory';
+import { Drops } from '../../modules/drops';
 import { QuickItemActions } from '../../modules/inventory/quickItemActions';
 import { pickGround } from '../../controllers/terrain/terrainPick';
 import type { Entity, ISystemFactory } from '../world';
@@ -20,9 +21,9 @@ export const ItemPickupSystem: ISystemFactory = world => {
     if (event.type !== PointerEventTypes.POINTERDOWN) return;
     if (event.event.button !== 0) return;
 
-    if (Store.pendingItemMove) return;
+    if (Bag.pendingItemMove) return;
 
-    const picked = Store.pickedItem;
+    const picked = Bag.pickedItem;
 
     if (picked) {
       const point = pickGround(world, event.event.clientX, event.event.clientY);
@@ -95,7 +96,7 @@ export const ItemPickupSystem: ISystemFactory = world => {
       }
 
       world.pickupTarget = null;
-      Store.pickupItemRequest(target.netId!);
+      Drops.pickupItemRequest(target.netId!);
     },
   };
 };

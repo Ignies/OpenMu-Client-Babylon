@@ -1,5 +1,6 @@
 import { autorun } from 'mobx';
-import { Store } from '../../app/store';
+import { Hero } from '../hero';
+import { Session } from '../session';
 import { InventoryConstants } from '@/core/inventoryConstants';
 import { buildEscrowRequest, parseEscrowResult, type EscrowResult } from '../../controllers/net/protocols/escrowWire';
 import { t } from '../../i18n';
@@ -15,7 +16,7 @@ import { Marketplace, type BagEntry } from './state';
  * the game server and the result packets back.
  */
 function bagEntries(): BagEntry[] {
-  const items = Store.playerData.items;
+  const items = Hero.items;
   const start = InventoryConstants.EquippableSlotsCount;
   const out: BagEntry[] = [];
   for (let slot = start; slot < items.length; slot++) {
@@ -26,7 +27,7 @@ function bagEntries(): BagEntry[] {
 }
 
 function syncMarketplaceFromGame(): void {
-  Marketplace.syncFromGame(Store.playerData.money, bagEntries(), Store.playerData.name);
+  Marketplace.syncFromGame(Hero.money, bagEntries(), Hero.name);
 }
 
 export function toggleMarketplace(): void {
@@ -81,7 +82,7 @@ function settle(listingId: string): Waiter | undefined {
  * the box later, so nothing is lost, only unreported.
  */
 export function sendEscrow(tokenHex: string, listingId: string): Promise<EscrowResult> {
-  if (Store.isOffline || Store.gsSocket?.readyState !== WebSocket.OPEN) {
+  if (Session.isOffline || Session.gsSocket?.readyState !== WebSocket.OPEN) {
     return Promise.reject(new Error(t('marketplace.notConnected')));
   }
 
@@ -98,7 +99,7 @@ export function sendEscrow(tokenHex: string, listingId: string): Promise<EscrowR
     }, ESCROW_TIMEOUT_MS);
 
     waiting.set(listingId.toLowerCase(), { resolve, reject, timer });
-    Store.sendToGS(new DataView(packet.buffer, packet.byteOffset, packet.byteLength));
+    Session.sendToGS(new DataView(packet.buffer, packet.byteOffset, packet.byteLength));
   });
 }
 

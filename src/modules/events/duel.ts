@@ -3,7 +3,9 @@ import type { ENUM_WORLD } from '../../core/types';
 import { cleanName } from '../chat/chat';
 import { EventBus } from '../../core/eventBus';
 import { playUiSound } from '../../controllers/sound/sfx';
-import { Store } from '../../app/store';
+import { Session } from '../session';
+import { addNotification } from '../chat';
+import { Ecs } from '../../ecs/current';
 import { t } from '../../i18n';
 import {
   DuelChannelJoinRequestPacket,
@@ -170,20 +172,20 @@ export function answerDuelRequest(accepted: boolean): void {
   runInAction(() => {
     state.request = null;
   });
-  if (Store.isOffline) return;
+  if (Session.isOffline) return;
   const packet = DuelStartResponsePacket.createPacket();
   packet.Response = accepted;
   packet.PlayerId = request.requesterId;
   packet.setPlayerName(request.requesterName);
-  Store.sendToGS(packet.buffer);
+  Session.sendToGS(packet.buffer);
 }
 
 /** `SendDuelChannelJoinRequest(i)`: a watch-window join button. */
 export function joinDuelChannel(channel: number): void {
-  if (Store.isOffline) return;
+  if (Session.isOffline) return;
   const packet = DuelChannelJoinRequestPacket.createPacket();
   packet.ChannelId = channel;
-  Store.sendToGS(packet.buffer);
+  Session.sendToGS(packet.buffer);
 }
 
 /**
@@ -191,8 +193,8 @@ export function joinDuelChannel(channel: number): void {
  * with a warp only, so the watching state clears here.
  */
 export function quitDuelChannel(): void {
-  if (!Store.isOffline) {
-    Store.sendToGS(DuelChannelQuitRequestPacket.createPacket().buffer);
+  if (!Session.isOffline) {
+    Session.sendToGS(DuelChannelQuitRequestPacket.createPacket().buffer);
   }
   clearDuel();
 }
@@ -237,7 +239,7 @@ function reset(): void {
 const ID_MASK = 0x7fff;
 
 function heroNetId(): number | null {
-  return Store.world?.playerEntity?.netId ?? null;
+  return Ecs.world?.playerEntity?.netId ?? null;
 }
 
 /** `ReceiveDuelRequest`: the challenge prompt. */
@@ -259,12 +261,12 @@ EventBus.on('DuelStartResult', packet => {
   const failure = duelStartFailureKey(p.Result);
   if (failure === null) {
     playUiSound('duelStart');
-    Store.addNotification(t('duel.started', { name }), 'info', MESSAGE_MS);
+    addNotification(t('duel.started', { name }), 'info', MESSAGE_MS);
     return;
   }
   const text =
     failure === 'duel.refused' ? t(failure, { name }) : t(failure);
-  Store.addNotification(text, 'error', MESSAGE_MS);
+  addNotification(text, 'error', MESSAGE_MS);
 });
 
 /** `ReceiveDuelWatchRequestReply` + duel start: sides, ids, perspective. */
@@ -321,7 +323,7 @@ EventBus.on('DuelHealthUpdate', packet => {
 /** `ReceiveDuelEnd`: OpenMU always sends Result 0 and no name - just clear. */
 EventBus.on('DuelEnd', () => {
   if (state.duel && !state.duel.watching) {
-    Store.addNotification(t('duel.ended'), 'info', MESSAGE_MS);
+    addNotification(t('duel.ended'), 'info', MESSAGE_MS);
   }
   clearDuel();
 });

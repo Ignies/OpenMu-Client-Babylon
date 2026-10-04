@@ -17,7 +17,8 @@ import {
   ObjectGotKilledPacket,
 } from '@versions/shared/packets/ServerToClientPackets';
 import { EventBus } from '../../core/eventBus';
-import { Store } from '../../app/store';
+import { Hero } from '../hero';
+import { Ecs } from '../../ecs/current';
 import type { QuestLayer } from './layer';
 
 // ---- 1. tuning -------------------------------------------------------------
@@ -79,7 +80,7 @@ EventBus.on('LegacyQuestMonsterKillInfo', packet => {
 
 EventBus.on('ObjectGotKilled', packet => {
   const p = new ObjectGotKilledPacket(packet);
-  const world = Store.world;
+  const world = Ecs.world;
   const hero = world?.playerEntity;
   if (!world || !hero || (p.KillerId & 0x7fff) !== hero.netId) return;
 
@@ -94,8 +95,8 @@ EventBus.on('ObjectGotKilled', packet => {
 // only a different hero starts from empty slots (`clearQuest` in InitGame).
 let heroName: string | null = null;
 EventBus.on('CharacterInformation', () => {
-  if (Store.playerData.name === heroName) return;
-  heroName = Store.playerData.name;
+  if (Hero.name === heroName) return;
+  heroName = Hero.name;
   setKillInfo(null);
 });
 

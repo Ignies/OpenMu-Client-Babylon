@@ -3,17 +3,18 @@ import './style.less';
 import { t } from '@/i18n';
 import { observer } from 'mobx-react-lite';
 import { useMemo, useRef, useState } from 'react';
-import { Store } from '@/app/store';
+import { Merchant } from '@/modules/npc_shop';
+import { Bag } from '@/modules/inventory';
 import { ItemIcon } from '@/controllers/interface/components/item_icon';
 import { ItemSearchBox, useItemSearch } from '@/controllers/interface/components/item_search';
-import { ItemTooltip } from '@/controllers/interface/components/item_tooltip';
+import { ItemTooltip } from '../../components/item_tooltip';
 import { Item } from '@/ecs/world';
 import {
   GridSquares,
   hoveredMask,
   occupancyStamp,
   usedMask,
-} from '@/controllers/interface/components/item_grid';
+} from '../../components/item_grid';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { isSellingBanned } from '@/controllers/item_rules';
 import { QuickItemActions } from '@/modules/inventory/quickItemActions';
@@ -114,12 +115,12 @@ type HoverInfo = { entry: Placed; x: number; y: number };
  * sold; at a smith the two bottom buttons toggle repair mode / repair all.
  */
 export const NpcShop = observer(() => {
-  const shop = Store.npcShop;
+  const shop = Merchant.npcShop;
   const search = useItemSearch();
   const gridRef = useRef<HTMLDivElement>(null);
   const [hover, setHover] = useState<HoverInfo | null>(null);
 
-  const picked = Store.pickedItem;
+  const picked = Bag.pickedItem;
   const items = shop?.items ?? null;
   const stamp = items ? occupancyStamp(items, 0, SQUARES) : '';
   const { squares, placed } = useMemo(
@@ -172,14 +173,14 @@ export const NpcShop = observer(() => {
       return;
     }
 
-    Store.buyItemFromNpc(entry.slot);
+    Merchant.buyItemFromNpc(entry.slot);
   };
 
   const sellingBanned = !!picked && isSellingBanned(picked.item);
 
   const gridClass = [
     'shop-items',
-    Store.shopBuyPending || Store.pendingItemMove ? 'busy' : '',
+    Merchant.shopBuyPending || Bag.pendingItemMove ? 'busy' : '',
     picked ? 'selling' : '',
     sellingBanned ? 'selling-banned' : '',
   ]
@@ -195,7 +196,7 @@ export const NpcShop = observer(() => {
       id={WINDOW_ID}
       className="npc-shop"
       column={column}
-      onClose={() => Store.closeNpcShop()}
+      onClose={() => Merchant.closeNpcShop()}
     >
       <div className="window-title" style={{ top: TITLE_Y }}>
         {t(TITLE)}
@@ -215,7 +216,7 @@ export const NpcShop = observer(() => {
           width: HEAD_CLOSE_WIDTH,
           height: HEAD_CLOSE_HEIGHT,
         }}
-        onClick={() => Store.closeNpcShop()}
+        onClick={() => Merchant.closeNpcShop()}
       />
 
       <ItemSearchBox search={search} left={SEARCH_X} top={SEARCH_Y} width={SEARCH_WIDTH} />
@@ -306,10 +307,10 @@ export const NpcShop = observer(() => {
             style={{
               left: REPAIR_TEXT_X,
               top: REPAIR_TEXT_Y,
-              color: goldColor(Store.repairAllPrice),
+              color: goldColor(Merchant.repairAllPrice),
             }}
           >
-            {Store.repairAllPrice.toLocaleString('en-US')}
+            {Merchant.repairAllPrice.toLocaleString('en-US')}
           </div>
 
           <div
@@ -322,8 +323,8 @@ export const NpcShop = observer(() => {
               width={BUTTON_WIDTH}
               height={BUTTON_HEIGHT}
               frames={BUTTON_FRAMES}
-              checked={Store.repairMode}
-              onClick={() => Store.toggleRepairMode()}
+              checked={Merchant.repairMode}
+              onClick={() => Merchant.toggleRepairMode()}
             >
               <span className="button-tooltip">{t(REPAIR_TOOLTIP)}</span>
             </MuButton>
@@ -338,8 +339,8 @@ export const NpcShop = observer(() => {
               width={BUTTON_WIDTH}
               height={BUTTON_HEIGHT}
               frames={BUTTON_FRAMES}
-              disabled={Store.repairAllPrice <= 0}
-              onClick={() => Store.repairAllRequest()}
+              disabled={Merchant.repairAllPrice <= 0}
+              onClick={() => Merchant.repairAllRequest()}
             >
               <span className="button-tooltip">{t(REPAIR_ALL_TOOLTIP)}</span>
             </MuButton>

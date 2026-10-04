@@ -6,7 +6,7 @@ import { t } from '../../i18n';
  * Item upgrading with jewels: pick a jewel, click it onto an item
  * (`CNewUIMyInventory::ApplyJewels`, NewUIMyInventory.cpp:1546). Pure rules
  * only - the packet (0x26 ConsumeItemRequest, ItemSlot = jewel, TargetSlot =
- * item) is sent by `Store.applyPickedJewel`, the answer
+ * item) is sent by `Bag.applyPickedJewel`, the answer
  * (`InventoryItemUpgraded` / `ItemConsumptionFailed`) lands in app/logic.ts.
  *
  * Server truth (OpenMU `ItemModifyConsumeHandlerPlugIn`): the target must sit

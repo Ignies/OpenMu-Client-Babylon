@@ -16,7 +16,7 @@ import {
 } from '../render/babylon/exports';
 import { getMaterial, loadGLTF } from '../assets/modelLoader';
 import { BlendState } from '@versions/shared/objects/enum';
-import { Store } from '../../app/store';
+import { Ecs } from '../../ecs/current';
 import type { TestScene } from '../render/scenes/testScene';
 import { LiveList, TICK, additiveMaterial, fxNow, pointSource, type RGB } from './core';
 import { addEffectGlow, releaseEffectGlow } from './glow';
@@ -133,7 +133,7 @@ function startClip(groups: AnimationGroup[], r: ClipRequest): void {
 }
 
 function spawn(scene: Scene, at: Vector3, opts: SummonOptions): EffectHandle {
-  const world = Store.world;
+  const world = Ecs.world;
   const node = new TransformNode('fxSummon', scene);
   node.rotationQuaternion = null;
   node.scaling.setAll(opts.scale ?? 1);

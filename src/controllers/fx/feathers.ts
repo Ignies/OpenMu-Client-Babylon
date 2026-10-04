@@ -3,7 +3,7 @@
  * (`MODEL_FEATHER`, ZzzEffect.cpp:4806-4848 init, :15454-15500 per tick). See fx/readme.md.
  */
 import { Vector3, type Scene } from '../render/babylon/exports';
-import { Store } from '../../app/store';
+import { Ecs } from '../../ecs/current';
 import { CM, LiveList, TICK, WHITE, type RGB } from './core';
 import { spawnModel, type ModelHandle } from './model';
 import { MODEL } from './recipes';
@@ -91,7 +91,7 @@ type Feather = {
 const live = new LiveList();
 
 function spawn(scene: Scene, at: Vector3, opts: FeathersOptions): EffectHandle {
-  const world = Store.world;
+  const world = Ecs.world;
   const count = opts.count ?? 1;
   const colour = opts.colour ?? WHITE;
   const extra = opts.scale ?? 1;

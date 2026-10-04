@@ -3,7 +3,7 @@
  * `MoveParticles` rules (ZzzEffectParticle.cpp). See fx/readme.md.
  */
 import { Vector3, type Scene, type StandardMaterial } from '../render/babylon/exports';
-import { Store } from '../../app/store';
+import { Ecs } from '../../ecs/current';
 import { TICK, acquireCard, additiveMaterial, clamp01, lerp, lightCardGain, releaseCard, type Card, type PointSource, type RGB } from './core';
 import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
 
@@ -225,7 +225,7 @@ function update(_map: number, dt: number): void {
     if (s.dragY !== 1) s.vy *= s.dragY ** k;
     s.vy -= s.gravity * k;
     if (s.bounce && !s.follow) {
-      const ground = (Store.world?.getTerrainHeight(s.x, s.z) ?? -9999) + s.bounce[0];
+      const ground = (Ecs.world?.getTerrainHeight(s.x, s.z) ?? -9999) + s.bounce[0];
       if (ground > -9000 && s.y < ground) {
         s.y = ground;
         s.vy = -s.vy * s.bounce[1];

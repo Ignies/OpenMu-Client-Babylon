@@ -1,6 +1,7 @@
 import { reaction } from 'mobx';
 import { t } from '../../i18n';
-import { Store } from '../../app/store';
+import { Bag } from '../inventory';
+import { Hero } from './state';
 import { skills } from '../skills';
 import { GameOptions } from '@/controllers/settings';
 import { Notices } from '../chat/notices';
@@ -70,8 +71,8 @@ function gridHasRoom(items: (Item | null)[]): boolean {
 /** The healing potions the Q/W/E/R keys would reach for, summed. */
 function healingPotions(items: (Item | null)[]): number {
   let total = 0;
-  for (let hotkey = 0; hotkey < Store.itemHotkeys.length; hotkey++) {
-    const slot = findHotkeyItem(items, hotkey, Store.itemHotkeys[hotkey]);
+  for (let hotkey = 0; hotkey < Bag.itemHotkeys.length; hotkey++) {
+    const slot = findHotkeyItem(items, hotkey, Bag.itemHotkeys[hotkey]);
     if (slot < 0) continue;
     total += items[slot]?.durability ?? 1;
   }
@@ -92,7 +93,7 @@ export function watchStateWarnings(): void {
   reaction(
     () =>
       WORN_SLOTS.map(slot => {
-        const item = Store.playerData.items[slot];
+        const item = Hero.items[slot];
         return item ? durabilityPercent(item) : null;
       }),
     percents => {
@@ -120,7 +121,7 @@ export function watchStateWarnings(): void {
   );
 
   reaction(
-    () => gridHasRoom(Store.playerData.items),
+    () => gridHasRoom(Hero.items),
     room => {
       if (room) {
         warnedFull = false;
@@ -133,7 +134,7 @@ export function watchStateWarnings(): void {
   );
 
   reaction(
-    () => healingPotions(Store.playerData.items),
+    () => healingPotions(Hero.items),
     left => {
       if (left > 0) {
         warnedPotions = false;

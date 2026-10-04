@@ -2,7 +2,7 @@ import './style.less';
 import { t, type TextKey } from '@/i18n';
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { Commands } from '@/modules/chat/commands';
 import { isKey } from '@/controllers/interface/keyBindings';
 import type { CommandKind } from '@/modules/chat/chatCommands';
@@ -98,7 +98,7 @@ const CursorIdTag = observer(() => {
     const onMove = (e: PointerEvent) => setMouse({ x: e.clientX, y: e.clientY });
     window.addEventListener('pointermove', onMove);
     const id = window.setInterval(() => {
-      const hovered = Store.world?.currentPointerTarget;
+      const hovered = Ecs.world?.currentPointerTarget;
       if (!hovered || !hovered.playerAnimation || hovered.localPlayer) {
         setTarget(null);
         return;
@@ -137,7 +137,7 @@ const CursorIdTag = observer(() => {
 
 export const CommandWindow = observer(() => {
   useEventBus('keyPressed', key => {
-    if (!Store.world?.playerEntity) return;
+    if (!Ecs.world?.playerEntity) return;
     if (isKey(HOT_KEY, key)) Commands.toggleWindow();
   });
 

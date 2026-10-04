@@ -1,11 +1,8 @@
-import { beforeAll, describe, expect, it, vi } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { monsterRegistry } from '@/controllers/monsters';
 import { CharacterClassNumber } from '@/core/types';
 import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
 import { Scene } from '@babylonjs/core/scene';
-
-// PlayerObject reaches the Store, which needs a browser; nothing here reads it.
-vi.mock('@/app/store', () => ({ Store: {}, UIState: {} }));
 
 /** NPCs drawn as the original client draws them, checked on the class `resolveModelFactory` hands out. */
 async function load() {

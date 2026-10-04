@@ -19,7 +19,12 @@ import {
   EnterOnWerewolfRequestPacket,
 } from '@versions/shared/packets/ClientToServerPackets';
 import { EventBus } from '../../core/eventBus';
-import { Store } from '../../app/store';
+import { Merchant } from '../npc_shop';
+import { Bag } from '../inventory';
+import { Hero } from '../hero';
+import { Session } from '../session';
+import { addNotification } from '../chat';
+import { Ecs } from '../../ecs/current';
 import type { QuestLayer } from './layer';
 import { LegacyQuestState, legacyQuestState } from './legacyQuests';
 
@@ -95,7 +100,7 @@ function hide(): void {
 }
 
 function entryFor(npcType: number): BalgassEntryKind | null {
-  const map = Store.world?.mapIndex;
+  const map = Ecs.world?.mapIndex;
   if (npcType === WEREWOLF_NPC && map === WEREWOLF_MAP) return 'werewolf';
   if (npcType === GATEKEEPER_NPC && map === GATEKEEPER_MAP) return 'gatekeeper';
   return null;
@@ -111,11 +116,11 @@ function entryFor(npcType: number): BalgassEntryKind | null {
 export function talkToBalgassNpc(npc: NpcTarget): boolean {
   const kind = entryFor(npc.npcType);
   // `talkToNpc` ignores a click behind a shop or a held item; so does the box.
-  if (!kind || Store.pendingItemMove || Store.npcShop) return false;
+  if (!kind || Bag.pendingItemMove || Merchant.npcShop) return false;
 
   // Offline, a talk opens the test merchant; only the `HideAll` half applies.
-  if (Store.isOffline) EventBus.emit('npcTalkStarted', { npcType: npc.npcType });
-  else Store.talkToNpc(npc);
+  if (Session.isOffline) EventBus.emit('npcTalkStarted', { npcType: npc.npcType });
+  else Merchant.talkToNpc(npc);
   show(kind);
   return true;
 }
@@ -126,17 +131,17 @@ export function enterBalgass(): void {
   if (!kind || !canEnter(kind)) return;
   hide();
 
-  if (kind === 'werewolf' && Store.playerData.money < BARRACKS_PRICE) {
-    Store.addNotification(t('event.shortOfZen'), 'error');
+  if (kind === 'werewolf' && Hero.money < BARRACKS_PRICE) {
+    addNotification(t('event.shortOfZen'), 'error');
     return;
   }
-  if (Store.isOffline) return;
+  if (Session.isOffline) return;
 
   const packet =
     kind === 'werewolf'
       ? EnterOnWerewolfRequestPacket.createPacket()
       : EnterOnGatekeeperRequestPacket.createPacket();
-  Store.sendToGS(packet.buffer);
+  Session.sendToGS(packet.buffer);
 }
 
 /**
@@ -146,8 +151,8 @@ export function enterBalgass(): void {
 export function cancelBalgassEntry(): void {
   if (!state.kind) return;
   hide();
-  if (!Store.isOffline) Store.sendToGS(CloseNpcRequestPacket.createPacket().buffer);
-  Store.dropNpcTalk();
+  if (!Session.isOffline) Session.sendToGS(CloseNpcRequestPacket.createPacket().buffer);
+  Merchant.dropNpcTalk();
 }
 
 // Another talk started: that talk already sends the close for this one.
@@ -166,12 +171,12 @@ function stageDevBox(): void {
   if (!devRead) {
     devRead = true;
     const [kind, unlock] = (devQuery('balgass') ?? '').split(',');
-    if (Store.isOffline && (kind === 'werewolf' || kind === 'gatekeeper')) {
+    if (Session.isOffline && (kind === 'werewolf' || kind === 'gatekeeper')) {
       devKind = kind;
       devUnlocked = unlock === '1';
     }
   }
-  if (devKind && !state.kind && Store.world?.playerEntity) show(devKind);
+  if (devKind && !state.kind && Ecs.world?.playerEntity) show(devKind);
 }
 
 function update(_map: ENUM_WORLD, _dt: number): void {

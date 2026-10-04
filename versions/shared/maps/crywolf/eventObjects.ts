@@ -1,6 +1,6 @@
 import { MapTileObject } from '@/controllers/terrain/mapTileObject';
 import { ParticleEmitter } from '@/controllers/fx/effectParticles';
-import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import {
   CrywolfOccupation,
   crywolfHud,
@@ -82,7 +82,7 @@ export class CrywolfVentObject extends MapTileObject {
 
   Update(gameTime: World['gameTime']): void {
     super.Update(gameTime);
-    if (!this.Ready || Store.world === null) return;
+    if (!this.Ready || Ecs.world === null) return;
     if (crywolfHud().occupation !== CrywolfOccupation.Occupied) return;
     this.#smoke?.update();
   }

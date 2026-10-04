@@ -9,7 +9,8 @@ import { NetStats } from '@/controllers/net/roundTrip';
 import { Notices } from './notices';
 import { SlideHelp } from '@/controllers/interface/slideHelp';
 import { Social } from '../social/social';
-import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
+import { Ecs } from '@/ecs/current';
 
 import { fromChatWire } from '@/controllers/net/protocols/chatWire';
 import { playUiSound } from '@/controllers/sound/sfx';
@@ -26,7 +27,7 @@ import { translateServerText } from '@/i18n/serverText';
  * ignores its own echo.
  */
 function popEmojiBubble(name: string, id: EmojiBubbleId | ChatEmojiBubble): void {
-  const world = Store.world;
+  const world = Ecs.world;
   if (!world) return;
   const obj = world.netObjsQuery.entities.find(
     e => e.playerAnimation && e.objectNameInWorld === name
@@ -37,7 +38,7 @@ function popEmojiBubble(name: string, id: EmojiBubbleId | ChatEmojiBubble): void
 
 /** Raise the GM flag on the player in scope with this name, if any. */
 function markAsGm(name: string): void {
-  const world = Store.world;
+  const world = Ecs.world;
   if (!world) return;
   const obj = world.netObjsQuery.entities.find(
     e => e.playerAnimation && e.objectNameInWorld === name
@@ -63,7 +64,7 @@ export function installNet(): void {
     // what the round-trip figure is measured on (controllers/net/roundTrip.ts).
     if (
       p.Type !== ChatMessageChatMessageTypeEnum.Whisper &&
-      sender === Store.playerData.name
+      sender === Hero.name
     ) {
       NetStats.markAnswered('chat');
     }

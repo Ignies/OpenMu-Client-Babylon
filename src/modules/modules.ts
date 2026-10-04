@@ -1,12 +1,14 @@
 // Every module, in install order: for a packet several modules handle, this is the order their
 // listeners run in (it is the order the old logic.ts imported their nets). Keep it.
 import type { ModuleDef } from './module';
+import servers from './servers/module';
 import session from './session/module';
 import characterSelect from './character_select/module';
 import hero from './hero/module';
 import warp from './warp/module';
 import inventory from './inventory/module';
 import scope from './scope/module';
+import social from './social/module';
 import chat from './chat/module';
 import guild from './guild/module';
 import party from './party/module';
@@ -18,6 +20,7 @@ import drops from './drops/module';
 import world from './world/module';
 import marketplace from './marketplace/module';
 import npcShop from './npc_shop/module';
+import economy from './economy/module';
 import vault from './vault/module';
 import chaosMix from './chaos_mix/module';
 import trade from './trade/module';
@@ -27,14 +30,17 @@ import quests from './quests/module';
 import pets from './pets/module';
 import muHelper from './mu_helper/module';
 import band from './band/module';
+import gm from './gm/module';
 
 export const MODULES: readonly ModuleDef[] = [
+  servers,
   session,
   characterSelect,
   hero,
   warp,
   inventory,
   scope,
+  social,
   chat,
   guild,
   party,
@@ -46,6 +52,7 @@ export const MODULES: readonly ModuleDef[] = [
   world,
   marketplace,
   npcShop,
+  economy,
   vault,
   chaosMix,
   trade,
@@ -55,4 +62,5 @@ export const MODULES: readonly ModuleDef[] = [
   pets,
   muHelper,
   band,
+  gm,
 ];

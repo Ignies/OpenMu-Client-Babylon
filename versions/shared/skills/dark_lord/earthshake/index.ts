@@ -9,7 +9,7 @@ import { earthQuake } from '@/controllers/camera';
 import { effects } from '@/controllers/fx';
 import { everyTick, muRotated, muYaw, sfx, ticksLeft } from '../_shared';
 import { lighting } from '@/controllers/lighting';
-import { storeRef } from '@/app/storeRef';
+import { Ecs } from '@/ecs/current';
 
 import { A } from '@/controllers/combat/recipes';
 
@@ -19,7 +19,7 @@ import { effectLight } from '@/controllers/lighting/recipes';
 
 /** Not a NOMOVE, NOGROUND or WATER tile: where the original lets a ground effect stand. */
 function openGround(x: number, z: number): boolean {
-  const flag = storeRef().world?.getTerrainFlag(Math.floor(x), Math.floor(z)) ?? 0;
+  const flag = Ecs.world?.getTerrainFlag(Math.floor(x), Math.floor(z)) ?? 0;
   return (flag & (TWFlags.NoMove | TWFlags.NoGround | TWFlags.Water)) === 0;
 }
 

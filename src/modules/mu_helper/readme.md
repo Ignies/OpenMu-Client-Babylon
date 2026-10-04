@@ -1,7 +1,7 @@
 # mu_helper
 
 The MU Helper (auto hunt): its config codec, the settings window's state, the automation loop and
-the two server packets. Running state and the raw config blob still live in the central Store.
+the two server packets, with its running state and the raw config blob (`MuHelper`).
 
 ## Public API
 - `updateMuHelperLoop(world, dt)` (`loop.ts`): one frame of the loop, called by
@@ -12,36 +12,37 @@ the two server packets. Running state and the raw config blob still live in the 
   `MAX_EXTRA_ITEM_CHARS` (`config.ts`): what the window edits.
 
 ## How it works
-- State in `src/app/store.ts`: `Store.muHelper` (`active`, `lastMoneyConsumed`,
+- `MuHelper` (`state.ts`, through `index.ts`, the door): `active`, `lastMoneyConsumed`,
   `totalMoneyConsumed`, `config` blob), `setMuHelperStatus`, `setMuHelperConfig` and
   `toggleMuHelper()` (sends `MuHelperStatusChangeRequest`; refused in a safe zone; local flip offline).
 - `config.ts` encodes and decodes the 257-byte blob. The layout is `PRECEIVE_MUHELPER_DATA`
   (`WSclient.h:3592-3642`) as `ConfigDataSerDe` (`MuHelperData.cpp`) writes it, so configs move
   between this client and the reference client.
-- `state.ts` decodes `Store.muHelper.config` with a `reaction` into `MuHelperState.config`, and
+- `state.ts` decodes `MuHelper.config` with a `reaction` into `MuHelperState.config`, and
   into `draft` while the window is closed. `saveMuHelperConfig` (`NewUIMuHelper.cpp:1095-1116`)
   applies the draft and sends `MuHelperSaveDataRequest`; the server echoes the config back.
-- `loop.ts` ports `CMuHelper` (`MuHelper.cpp`). It runs only while `Store.muHelper.active` and the
+- `loop.ts` ports `CMuHelper` (`MuHelper.cpp`). It runs only while `MuHelper.active` and the
   version has `features.muHelper`. Every 250 ms (`Winmain.cpp:1282`) `work` does at most one of:
   pet command, buff, heal / drain life / potion, pick up, regroup, attack, then repair.
 - It never builds packets. It writes the same seams as the player's clicks: `world.castRequest`,
-  `world.pickupTarget`, `hero.playerMoveTo` and Store commands (`selectSkill`, `consumeItemRequest`,
-  `repairItemRequest`, `sendPetCommand`).
-- Entering a safe zone calls `Store.toggleMuHelper()` (stop). A warp, or a jump of more than 3
+  `world.pickupTarget`, `hero.playerMoveTo` and the commands a click calls (`HeroSkills.selectSkill`,
+  `consumeItemRequest`, `repairItemRequest`, `Pets.sendPetCommand`).
+- Entering a safe zone calls `MuHelper.toggleMuHelper()` (stop). A warp, or a jump of more than 3
   tiles, re-anchors the regroup point.
 
 ## Packets
 - `MuHelperStatusUpdate` (BF 51): starts or pauses the helper; reports the zen it cost.
 - `MuHelperConfigurationData` (C2 AE): the saved config blob, stored as is.
-- outgoing: `MuHelperSaveDataRequest` (`state.ts`), `MuHelperStatusChangeRequest` (Store).
+- outgoing: `MuHelperSaveDataRequest` (`state.ts`), `MuHelperStatusChangeRequest` (`MuHelper.toggleMuHelper`).
 
 ## Depends on / used by
-- uses: `src/app/store.ts`, `social/social.ts` (`partyMembers` for party buffs and heals),
+- uses: `session`, `hero`, `skills`, `pets`, `inventory` (item use), `npc_shop` (repair),
+  `social/social.ts` (`partyMembers` for party buffs and heals),
   `controllers/item_rules/itemStats.ts`, `core/inventoryConstants.ts`, `ecs/systems/attackSystem.ts`
   (`isAttackableEntity`), `versions/shared/skills/skillsDatabase`.
 - used by: `src/app/logic.ts` (`net.ts`), `src/ecs/systems/muHelperSystem.ts` (`loop.ts`),
   `versions/shared/ui/windows/mu_helper/` (`config.ts`, `state.ts`). The Home key in
-  `versions/shared/ui/hud/bottom_bar/` calls `Store.toggleMuHelper()`.
+  `versions/shared/ui/hud/bottom_bar/` calls `MuHelper.toggleMuHelper()`.
 
 ## Change it
 - a new config field: `MuHelperConfig`, `defaultMuHelperConfig`, `encodeMuHelperConfig` and

@@ -16,7 +16,9 @@ import type { ENUM_WORLD } from '../../core/types';
 import { monsterDisplayName } from '@versions/shared/monsters/monstersDatabase';
 import { EventBus } from '../../core/eventBus';
 import { playUiSound } from '../../controllers/sound/sfx';
-import { Store } from '../../app/store';
+import { Merchant } from '../npc_shop';
+import { Hero } from '../hero';
+import { Session } from '../session';
 import type { QuestLayer } from './layer';
 import {
   npcDialogueEntry,
@@ -116,8 +118,8 @@ export function npcDialogueContribution(): number | null {
 // ---- commands ----------------------------------------------------------------
 
 function send(buffer: DataView): boolean {
-  if (Store.isOffline) return false;
-  Store.sendToGS(buffer);
+  if (Session.isOffline) return false;
+  Session.sendToGS(buffer);
   return true;
 }
 
@@ -181,7 +183,7 @@ function endNpcDialogue(): void {
     state.contribution = 0;
   });
   send(CloseNpcRequestPacket.createPacket().buffer);
-  Store.dropNpcTalk();
+  Merchant.dropNpcTalk();
 }
 
 export function closeNpcDialogue(): void {
@@ -316,8 +318,8 @@ EventBus.on('heroWalked', () => {
 // only a different hero closes the dialogue.
 let heroName: string | null = null;
 EventBus.on('CharacterInformation', () => {
-  if (Store.playerData.name === heroName) return;
-  heroName = Store.playerData.name;
+  if (Hero.name === heroName) return;
+  heroName = Hero.name;
   hideNpcDialogue();
 });
 

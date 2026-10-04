@@ -1,6 +1,6 @@
 import type { IVector2Like } from '../../controllers/render/babylon/exports';
 import type { ISystemFactory } from '../world';
-import { Store } from '../../app/store';
+import { Hero } from '../../modules/hero';
 import { truncatePathForAttack } from './attackSystem';
 import { truncatePathWithinRange } from '../../controllers/actors/approachPath';
 
@@ -85,7 +85,7 @@ function sendWalkPathToServer(path: IVector2Like[], startIndex: number): number 
     serverDirs[i] = mapToServerDirectionCode(cd);
   }
 
-  Store.sendWalkPath(startX, startY, serverDirs);
+  Hero.sendWalkPath(startX, startY, serverDirs);
   return lastIndex;
 }
 

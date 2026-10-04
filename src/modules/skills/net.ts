@@ -3,7 +3,9 @@ import { teleportCastSound } from '@/controllers/sound';
 import { Entity, World } from '@/ecs/world';
 import { EventBus } from '@/core/eventBus';
 import { cancelledEffects } from '@/controllers/skills';
-import { Store } from '@/app/store';
+import { HeroSkills } from './state';
+import { Hero } from '@/modules/hero';
+import { Ecs } from '@/ecs/current';
 import { TELEPORT } from './skillCasting';
 import { applyObjectEffect, playCastAnimation } from '../_shared/net_helpers';
 import { beginTeleport, endTeleport, justArrived } from '@/ecs/systems/teleportSystem';
@@ -19,13 +21,13 @@ function applySkillListPacket(packet: DataView) {
   const flag = packet.getUint8(4);
   if (flag === 0xfe) {
     const p = new SkillAddedPacket(packet);
-    Store.addSkill({ index: p.SkillIndex, number: p.SkillNumber, level: p.SkillLevel });
+    HeroSkills.addSkill({ index: p.SkillIndex, number: p.SkillNumber, level: p.SkillLevel });
   } else if (flag === 0xff) {
     const p = new SkillRemovedPacket(packet);
-    Store.removeSkill(p.SkillNumber);
+    HeroSkills.removeSkill(p.SkillNumber);
   } else {
     const p = new SkillListUpdatePacket(packet);
-    Store.setSkillList(
+    HeroSkills.setSkillList(
       p.getSkills().map(s => ({
         index: s.SkillIndex,
         number: s.SkillNumber,
@@ -92,10 +94,10 @@ function objectOnTile(world: World, except: Entity, x: number, y: number): Entit
 }
 
 function setObjectEffect(objectId: number, effectId: number, active: boolean) {
-  const world = Store.world;
+  const world = Ecs.world;
   if (!world) return;
   const maskedId = objectId & 0x7fff;
-  if (maskedId === Store.playerId) Store.setBuff(effectId, active);
+  if (maskedId === Hero.playerId) HeroSkills.setBuff(effectId, active);
   const obj = world.getByNetId(maskedId);
   if (obj) applyObjectEffect(obj, effectId, active);
 }
@@ -104,7 +106,7 @@ function setObjectEffect(objectId: number, effectId: number, active: boolean) {
 export function installNet(): void {
   EventBus.on('AreaSkillAnimation', packet => {
     const p = new AreaSkillAnimationPacket(packet);
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
     const casterId = p.PlayerId & 0x7fff;
     const caster = world.getByNetId(casterId);
@@ -132,7 +134,7 @@ export function installNet(): void {
 
   EventBus.on('MagicEffectCancelled', packet => {
     const p = new MagicEffectCancelledPacket(packet);
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
     // The skill's cancel hook (201/202 break a monster's barrier) runs first, then its effect drops.
     const target = world.getByNetId(p.TargetId & 0x7fff) ?? null;
@@ -153,7 +155,7 @@ export function installNet(): void {
    */
   EventBus.on('ChainLightningHitInfo', packet => {
     const p = new ChainLightningHitInfoPacket(packet);
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
     let from = world.getByNetId(p.PlayerId & 0x7fff);
     if (!from) return;

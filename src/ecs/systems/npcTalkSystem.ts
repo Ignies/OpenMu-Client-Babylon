@@ -1,5 +1,6 @@
 import { PointerEventTypes } from '../../controllers/render/babylon/exports';
-import { Store } from '../../app/store';
+import { Merchant } from '../../modules/npc_shop';
+import { Bag } from '../../modules/inventory';
 import { events } from '../../modules/events';
 import { quests } from '../../modules/quests';
 import type { Entity, ISystemFactory } from '../world';
@@ -69,10 +70,10 @@ export const NpcTalkSystem: ISystemFactory = world => {
     if (event.type !== PointerEventTypes.POINTERDOWN) return;
     if (event.event.button !== 0) return;
 
-    if (Store.pendingItemMove || Store.pickedItem) return;
+    if (Bag.pendingItemMove || Bag.pickedItem) return;
 
     const target = world.currentPointerTarget;
-    if (!target || !isTalkableNpc(target) || Store.npcShop) {
+    if (!target || !isTalkableNpc(target) || Merchant.npcShop) {
       // Clicking anything else (monster, drop, ground) gives up the talk.
       world.talkTarget = null;
       return;
@@ -202,7 +203,7 @@ export const NpcTalkSystem: ISystemFactory = world => {
       // An event NPC (the Crywolf statue) never opens a server window.
       if (events.useNpc(npc)) return;
       if (quests.useNpc(npc)) return;
-      Store.talkToNpc(npc);
+      Merchant.talkToNpc(npc);
     },
   };
 };

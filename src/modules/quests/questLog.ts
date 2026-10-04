@@ -34,7 +34,11 @@ import {
 import type { ENUM_WORLD } from '../../core/types';
 import { EventBus } from '../../core/eventBus';
 import { playUiSound } from '../../controllers/sound/sfx';
-import { Store } from '../../app/store';
+import { Merchant } from '../npc_shop';
+import { Hero } from '../hero';
+import { Session } from '../session';
+import { addNotification } from '../chat';
+import { Ecs } from '../../ecs/current';
 import type { QuestLayer } from './layer';
 import { questDataReady, questProgressEntry, questProgressKeys, questWordLines, questWords } from './questData';
 import { npcDialogueOpen } from './npcDialogue';
@@ -242,8 +246,8 @@ export function myQuestEmptyMessage(): string {
 // ---- commands ----------------------------------------------------------------
 
 function send(buffer: DataView): boolean {
-  if (Store.isOffline) return false;
-  Store.sendToGS(buffer);
+  if (Session.isOffline) return false;
+  Session.sendToGS(buffer);
   return true;
 }
 
@@ -326,12 +330,12 @@ export function advanceQuestWords(): void {
  * visible, as `Hide` does, so it never ends another window's NPC session.
  */
 function closeNpcTalk(): void {
-  if (Store.npcShop) {
-    Store.closeNpcShop();
+  if (Merchant.npcShop) {
+    Merchant.closeNpcShop();
     return;
   }
   send(CloseNpcRequestPacket.createPacket().buffer);
-  Store.dropNpcTalk();
+  Merchant.dropNpcTalk();
 }
 
 export function closeQuestList(): void {
@@ -693,7 +697,7 @@ reaction(
 EventBus.on('ObjectGotKilled', packet => {
   if (!GameOptions.questTracker && !state.myQuestOpen) return;
   const p = new ObjectGotKilledPacket(packet);
-  const world = Store.world;
+  const world = Ecs.world;
   const hero = world?.playerEntity;
   if (!world || !hero || (p.KillerId & 0x7fff) !== hero.netId) return;
 
@@ -721,8 +725,8 @@ EventBus.on('AvailableQuests', packet => {
 
   if (inDialogue) return;
   if (available.length === 0) {
-    Store.addNotification(t('quest.npcHasNone'), 'info');
-    Store.dropNpcTalk();
+    addNotification(t('quest.npcHasNone'), 'info');
+    Merchant.dropNpcTalk();
   } else {
     playUiSound('window');
   }
@@ -749,7 +753,7 @@ EventBus.on('QuestStepInfo', packet => {
         state.busy = false;
       });
     }
-    Store.addNotification(t(MSG_UNAVAILABLE), 'error');
+    addNotification(t(MSG_UNAVAILABLE), 'error');
     return;
   }
 
@@ -793,12 +797,12 @@ EventBus.on('QuestCompletionResponse', packet => {
     const wasOpen = state.progressOpen;
     removeActive(key);
     if (wasOpen) closeQuestProgress();
-    Store.addNotification(
+    addNotification(
       t('quest.completedNamed', { subject: questSubject(key) }),
       'info'
     );
   } else {
-    Store.addNotification(t(MSG_NOT_FULFILLED), 'error');
+    addNotification(t(MSG_NOT_FULFILLED), 'error');
   }
 });
 
@@ -837,8 +841,8 @@ EventBus.on('heroWalked', () => {
 // only a different hero starts from an empty log.
 let heroName: string | null = null;
 EventBus.on('CharacterInformation', () => {
-  if (Store.playerData.name !== heroName) {
-    heroName = Store.playerData.name;
+  if (Hero.name !== heroName) {
+    heroName = Hero.name;
     requestedStates.clear();
     cancelKillRefreshes();
     runInAction(() => {

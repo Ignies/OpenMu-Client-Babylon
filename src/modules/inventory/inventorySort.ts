@@ -1,6 +1,8 @@
 import { reaction } from 'mobx';
 import { t } from '../../i18n';
-import { Store } from '../../app/store';
+import { Bag } from './state';
+import { Session } from '../session';
+import { addNotification } from '../chat';
 import {
   itemSquares,
   planLayout,
@@ -22,7 +24,7 @@ import {
  *
  * The server owns the grid, so this cannot be a local reshuffle: every step
  * is the same `ItemMoveRequest` a drag would send, and only one may be in
- * flight (`Store.pendingItemMove`). So the run is a small state machine -
+ * flight (`Bag.pendingItemMove`). So the run is a small state machine -
  * plan the layout, move one item per answered move, re-plan from what is
  * actually on the grid - and it stops the moment the player picks something
  * up, a move is rolled back, or the grid is packed.
@@ -47,7 +49,7 @@ type Grid = {
 };
 
 function read(storage: StorageKind): Grid {
-  const items = Store.itemsOfStorage(storage);
+  const items = Bag.itemsOfStorage(storage);
   const columns = storageColumns(storage);
   const rows = storageRows(storage);
   const first = gridFirstIndex(storage);
@@ -92,7 +94,7 @@ export const InventorySort = new (class _InventorySort {
       this.cancel();
       return;
     }
-    if (Store.pickedItem || Store.pendingItemMove) return;
+    if (Bag.pickedItem || Bag.pendingItemMove) return;
 
     this.storage = storage;
     this.running = true;
@@ -102,7 +104,7 @@ export const InventorySort = new (class _InventorySort {
     // Each answered move (`confirmItemMove` / `rollbackItemMove` clear the
     // pending record) releases the next one.
     this.stop = reaction(
-      () => Store.pendingItemMove === null,
+      () => Bag.pendingItemMove === null,
       idle => {
         if (idle) this.step();
       }
@@ -119,14 +121,14 @@ export const InventorySort = new (class _InventorySort {
     this.stop?.();
     this.stop = null;
     this.running = false;
-    if (done && this.moves > 0) Store.addNotification(t('notify.inventorySorted'));
+    if (done && this.moves > 0) addNotification(t('notify.inventorySorted'));
   }
 
   private step(): void {
     if (!this.running) return;
 
     // The player took over: their drag owns the grid, not this run.
-    if (Store.pickedItem || Store.pendingItemMove) return;
+    if (Bag.pickedItem || Bag.pendingItemMove) return;
     if (this.moves >= MAX_MOVES) {
       this.finish(true);
       return;
@@ -144,12 +146,12 @@ export const InventorySort = new (class _InventorySort {
     }
 
     this.moves++;
-    if (!Store.moveItemToSquare(this.storage, move.from, move.to)) {
+    if (!Bag.moveItemToSquare(this.storage, move.from, move.to)) {
       this.finish(true);
       return;
     }
     // Offline there is no answer to wait for, so drive the next step here.
-    if (Store.isOffline) this.step();
+    if (Session.isOffline) this.step();
   }
 
   /** The next item that can go straight to its planned square. */

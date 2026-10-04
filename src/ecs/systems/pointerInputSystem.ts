@@ -9,7 +9,7 @@ import type { EntityTypeFromQuery, ISystemFactory } from '../world';
 import { canAttackPlayer, isAttackableEntity } from './attackSystem';
 import { isMobileDevice } from '../../controllers/interface/mobile';
 import { Commands } from '../../modules/chat/commands';
-import { Store } from '../../app/store';
+import { HeroSkills } from '../../modules/skills';
 import { TELEPORT_ALLY } from '../../modules/skills/skillCasting';
 import { aimX, aimY } from '../../controllers/camera';
 import { requestPing } from '../../controllers/net/pingNet';
@@ -213,7 +213,7 @@ export const PointerInputSystem: ISystemFactory = world => {
         ev.type === PointerEventTypes.POINTERDOWN &&
         !ev.event.ctrlKey &&
         !pvp &&
-        Store.currentSkill !== TELEPORT_ALLY &&
+        HeroSkills.currentSkill !== TELEPORT_ALLY &&
         Commands.openQuickOn(hovered, ev.event.clientX, ev.event.clientY)
       ) {
         return;

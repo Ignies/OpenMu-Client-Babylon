@@ -7,7 +7,8 @@ import { KEEP_CLIP, isMonsterSwingClip, monsterAreaCast, monsterAttackState, mon
 import { METEORITE_STORM, appearSound, meteoriteStormRunning, monsterCastQuiet, trapAttackSound } from '@/controllers/sound/packetSounds';
 import { MonsterActionType, PlayerAction } from '@versions/shared/objects/enum';
 
-import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
+import { Ecs } from '@/ecs/current';
 import { TRAP_MODEL_TABLE, heldWeapons } from '@/controllers/actors';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { advancesSwordCount, chooseSkillAction } from '../skills/skillCasting';
@@ -194,7 +195,7 @@ export function removeNetObject(world: World, netId: number) {
 
 /** Name of a player in scope by net id, for the invite prompts. */
 export function playerNameById(netId: number): string {
-  const obj = Store.world?.getByNetId(netId);
+  const obj = Ecs.world?.getByNetId(netId);
   return obj?.objectNameInWorld ?? `#${netId}`;
 }
 
@@ -213,8 +214,8 @@ export function attackPoseOf(obj: Entity): AttackPose {
   const hands = obj.charAppearance;
   const inSafeZone = !!obj.attributeSystem?.isAboveZero('inSafeZone');
   return {
-    hands: heldWeapons(obj, Store.world?.mapIndex ?? -1),
-    baseClass: getBaseClass(hands?.charClass ?? Store.playerData.charClass),
+    hands: heldWeapons(obj, Ecs.world?.mapIndex ?? -1),
+    baseClass: getBaseClass(hands?.charClass ?? Hero.charClass),
     swordCount: obj.playerAnimation?.swordCount ?? 0,
     wings: isWingItem(hands?.wings),
     mount: mountKind(hands?.pet, inSafeZone),
@@ -238,7 +239,7 @@ const monsterAttackInput: MonsterAttackInput = {
 /** What the monster attack hooks read off a character, in one reused record. */
 export function attackInputOf(obj: Entity): MonsterAttackInput {
   const monster = monsterNumberOf(obj);
-  monsterAttackInput.world = Store.world?.mapIndex ?? -1;
+  monsterAttackInput.world = Ecs.world?.mapIndex ?? -1;
   monsterAttackInput.monster = monster;
   monsterAttackInput.model = monsterModelTypeOf(monster);
   monsterAttackInput.trapObject =
@@ -315,7 +316,7 @@ export function playCastAnimation(caster: Entity, skill: number, area: boolean) 
         !!caster.attributeSystem?.isAboveZero('inSafeZone')
       ),
       isFemale: isFemaleClass(cls),
-      world: Store.world?.mapIndex,
+      world: Ecs.world?.mapIndex,
       alternate: Math.random() < 0.5,
     };
     // A skill the server has no definition for still plays its own clip (Lightning Orb, 216).
@@ -353,7 +354,7 @@ export function playCastAnimation(caster: Entity, skill: number, area: boolean) 
 
 /** Record an effect on an object and keep its look up (or drop it). */
 export function applyObjectEffect(obj: Parameters<typeof setBuffVisual>[1], effectId: number, active: boolean) {
-  const world = Store.world;
+  const world = Ecs.world;
   if (!world) return;
   if (!obj.buffs) world.addComponent(obj, 'buffs', new Set<number>());
   if (active) obj.buffs!.add(effectId);
@@ -377,7 +378,7 @@ export function emitObjectEffect(
   netId: number,
   effect: Events['objectEffect']['effect']
 ) {
-  const world = Store.world;
+  const world = Ecs.world;
   if (!world) return;
   const entity = world.getByNetId(netId);
   if (!entity) return;

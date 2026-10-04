@@ -6,7 +6,7 @@ import { GameOptions } from '@/controllers/settings';
 import { emojiSegments, type ChatEmoji } from '@/modules/chat/chatEmojis';
 import { itemLinkLabel, scanItemLinks } from '@/modules/chat/chatItemLinks';
 import { EMOJI_CATALOG } from '@/modules/chat/emojis';
-import { ChatItemLink } from '@/controllers/interface/components/chat_item_link';
+import { ChatItemLink } from '../chat_item_link';
 
 type Piece = string | ChatEmoji | { link: Item };
 

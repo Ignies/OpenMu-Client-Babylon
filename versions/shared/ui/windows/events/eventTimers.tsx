@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite';
-import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { GameOptions, uiScaleFactor } from '@/controllers/settings';
 import { events } from '@/modules/events';
 import {
@@ -87,7 +87,7 @@ const Row = observer(({ row }: { row: EventScheduleRow }) => {
 
 export const EventTimers = observer(() => {
   const rows = eventSchedule();
-  if (!GameOptions.eventTimers || !Store.world) return null;
+  if (!GameOptions.eventTimers || !Ecs.world) return null;
 
   const scale = uiScaleFactor(GameOptions.uiScale);
 

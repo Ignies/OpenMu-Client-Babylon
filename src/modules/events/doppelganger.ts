@@ -1,6 +1,6 @@
 import { observable, runInAction } from 'mobx';
 import { ENUM_WORLD } from '../../core/types';
-import { Store } from '../../app/store';
+import { Session } from '../session';
 import { DoppelgangerEnterRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
 import type { EventLayer } from './layer';
 
@@ -69,7 +69,7 @@ export function enterDoppelganger(): void {
   if (state.remainMinutes !== 0) return;
   const packet = DoppelgangerEnterRequestPacket.createPacket();
   packet.TicketItemSlot = NO_TICKET_SLOT;
-  Store.sendToGS(packet.buffer);
+  Session.sendToGS(packet.buffer);
 }
 
 function reset(): void {

@@ -1,5 +1,5 @@
 import { reaction } from 'mobx';
-import { Store, UIState } from '../../app/store';
+import { AppState, UIState } from '../../app/uiState';
 import { ServerConfig } from './serverConfig';
 
 /**
@@ -35,7 +35,7 @@ export function watchPageTitle(): void {
   reaction(
     () =>
       titleFor(
-        Store.uiState,
+        AppState.uiState,
         // The placeholder `active` hands out when there is no world at all is
         // not a name anybody chose.
         ServerConfig.isEmpty ? '' : ServerConfig.active.name

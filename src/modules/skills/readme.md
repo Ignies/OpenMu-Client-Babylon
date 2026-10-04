@@ -5,6 +5,8 @@ master level and tree), the skill packet handlers, and the casting rules the cas
 hotbar share.
 
 ## Public API
+- `HeroSkills` (`state.ts`, through the facade): the learned skills, the selected skill, the buffs
+  and the digit hot keys (see How it works).
 - `skills` (`index.ts`): the facade. `update(map, dt)` / `reset()` step every layer. Readers `activeBuffs`,
   `hasBuff`, `buffRemaining`, `cooldown`, `usability`, `requirementsMet`, `canUse`, master ones
   (`masterLevel`, `masterExpPercent`, `masterTree`, `masterLearnBlock`, ...). Commands
@@ -27,8 +29,10 @@ hotbar share.
   cooldowns), masterLevel, masterTree (reads both). `index.ts` wraps them in `skills`:
   `src/ecs/systems/skillSystem.ts` calls `update` once a frame, `src/app/lifecycle.ts` calls `reset`
   on a map change. `_template.ts` is a copy-me file, never imported.
-- The skill list, buffs and hot keys live in the Store: `Store.skills`, `setSkillList`, `addSkill`,
-  `removeSkill`, `currentSkill`, `buffs`, `setBuff`, `skillHotkeys`, `assignSkillHotkey`, `learnSkillItem`.
+- The skill list, buffs and hot keys are `HeroSkills` (`state.ts`, exported by the facade): `skills`,
+  `setSkillList`, `addSkill`, `removeSkill`, `currentSkill`, `selectSkill`, `buffs`, `setBuff`,
+  `skillHotkeys`, `savedSkillHotkeys`, `assignSkillHotkey` (sends `SaveKeyConfiguration`),
+  `applyKeyConfiguration`. Learning from a scroll is the inventory's `learnSkillItem`.
 - Casts go out from `src/ecs/systems/skillCastSystem.ts` (TargetedSkill / AreaSkill), which asks
   `skills.canUse` and calls `skills.startCooldown`.
 - `masterLevel.ts` and `masterTree.ts` register their own `EventBus.on` handlers when the facade is
@@ -36,8 +40,8 @@ hotbar share.
 
 ## Packets
 - `SkillListUpdate`, `SkillAdded`, `SkillRemoved` (F3 11): one handler; the count byte (0xFE add,
-  0xFF remove) picks the shape, then `Store.setSkillList` / `addSkill` / `removeSkill`.
-- `MagicEffectStatus`: sets an effect on the object; the hero's also goes to `Store.setBuff`.
+  0xFF remove) picks the shape, then `HeroSkills.setSkillList` / `addSkill` / `removeSkill`.
+- `MagicEffectStatus`: sets an effect on the object; the hero's also goes to `HeroSkills.setBuff`.
 - `MagicEffectCancelled`: `cancelledEffects` (skills controller): the skill's `cancel` hook, then its effect (`SKILL_EFFECTS`, `controllers/skills/tables.ts`, filled from
   each skill's `effect`) and clears it.
 - `AreaSkillAnimation`: turns the caster, plays the cast clip and the area visual.
@@ -47,7 +51,7 @@ hotbar share.
 - `MasterSkillList`, `MasterSkillLevelUpdate`: learned master levels (`masterTree.ts`). Out: `AddMasterSkillPoint`.
 
 ## Depends on / used by
-- uses: `src/app/store.ts`, `_shared/net_helpers.ts`, `hero/characterStats.ts`, `controllers/item_rules/itemStats.ts`,
+- uses: `session`, `hero`, `_shared/net_helpers.ts`, `hero/characterStats.ts`, `controllers/item_rules/itemStats.ts`,
   `@versions/shared/skills/skillsDatabase` and `skillVisuals`, `ecs/systems/teleportSystem.ts`,
   controllers `combat`, `actors`, `assets/mu`, `terrain`, `src/i18n`.
 - used by: `src/app` (logic, lifecycle, store), ECS `skillSystem`, `skillCastSystem`, `pointerInputSystem`;

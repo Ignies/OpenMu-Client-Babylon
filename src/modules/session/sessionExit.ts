@@ -1,7 +1,12 @@
 import { MuWindows } from '@/controllers/interface/windowManager';
 import { makeAutoObservable, runInAction } from 'mobx';
 import { t } from '../../i18n';
-import { Store, UIState } from '../../app/store';
+import { Merchant } from '../npc_shop';
+import { Session } from './state';
+import { addNotification } from '../chat';
+import { MsgBox } from '../../controllers/interface';
+import { AppState, UIState } from '../../app/uiState';
+import { Ecs } from '../../ecs/current';
 import { Economy } from '../economy/economy';
 import { Social } from '../social/social';
 import { Messenger } from '../friends/messenger';
@@ -45,7 +50,7 @@ const ANSWER_TIMEOUT = 5000;
 
 function inWorld(): boolean {
   return (
-    Store.uiState === UIState.World || Store.uiState === UIState.LoadingWorld
+    AppState.uiState === UIState.World || AppState.uiState === UIState.LoadingWorld
   );
 }
 
@@ -62,15 +67,15 @@ export const SessionExit = new (class _SessionExit {
   /** Whether this way out leads anywhere from the screen we are on. */
   available(kind: ExitKind): boolean {
     // Offline has no account behind it: the only way out is back to the menu.
-    if (Store.isOffline) return kind === 'quit';
+    if (Session.isOffline) return kind === 'quit';
 
     switch (kind) {
       case 'characters':
         return inWorld();
       case 'servers':
-        return inWorld() || Store.uiState === UIState.Characters;
+        return inWorld() || AppState.uiState === UIState.Characters;
       case 'quit':
-        return Store.uiState !== UIState.Preloader;
+        return AppState.uiState !== UIState.Preloader;
     }
   }
 
@@ -86,7 +91,7 @@ export const SessionExit = new (class _SessionExit {
 
     // Nobody to ask: offline, or a screen the server does not think of us as
     // playing on. The transition is ours to make.
-    if (Store.isOffline || !inWorld()) {
+    if (Session.isOffline || !inWorld()) {
       this.leave(kind);
       return;
     }
@@ -100,13 +105,13 @@ export const SessionExit = new (class _SessionExit {
       runInAction(() => {
         this.pending = null;
       });
-      Store.addNotification(t('exit.noAnswer'), 'error');
+      addNotification(t('exit.noAnswer'), 'error');
       this.leave(kind);
     }, ANSWER_TIMEOUT);
 
     const p = LogOutPacket.createPacket();
     p.Type = LOGOUT_TYPE[kind];
-    Store.sendToGS(p.buffer);
+    Session.sendToGS(p.buffer);
   }
 
   /**
@@ -126,11 +131,11 @@ export const SessionExit = new (class _SessionExit {
 
   private leave(kind: ExitKind): void {
     SessionResume.forget();
-    Store.closeNpcShop();
+    Merchant.closeNpcShop();
     quests.closeAll();
     // The character is out of the world on all three of these; the backdrop
     // behind the pre-game screens is not a map it stands on.
-    Store.world?.removeHero();
+    Ecs.world?.removeHero();
     runInAction(() => {
       MuWindows.setOpen('options', false);
       // The sheet is the world's; left open, it holds Escape on the screens
@@ -140,7 +145,7 @@ export const SessionExit = new (class _SessionExit {
 
     if (kind === 'characters') {
       runInAction(() => {
-        Store.uiState = UIState.Characters;
+        AppState.uiState = UIState.Characters;
       });
       // The window sheets go with the world; decoded again on the next entry.
       void import('../../controllers/assets/mu/preloadSprites').then(m => m.clearWorldSprites());
@@ -148,26 +153,26 @@ export const SessionExit = new (class _SessionExit {
     }
 
     if (kind === 'servers') {
-      Store.disconnectFromGameServer();
+      Session.disconnectFromGameServer();
       void import('../../controllers/assets/mu/preloadSprites').then(m => m.clearWorldSprites());
-      Store.playOnline();
+      Session.playOnline();
       return;
     }
 
     // Exit Game. A browser tab cannot close itself, so the equivalent of the
     // original's `DestroyWindow` is the start menu it would boot back into.
     // Offline rewrote the URL to `/offline`, so that one restarts instead.
-    if (Store.isOffline) {
+    if (Session.isOffline) {
       allowUnload();
       location.href = '/';
       return;
     }
 
-    Store.disconnectFromGameServer();
-    Store.disconnectFromConnectServer();
+    Session.disconnectFromGameServer();
+    Session.disconnectFromConnectServer();
     void import('../../controllers/assets/mu/preloadSprites').then(m => m.clearWorldSprites());
     runInAction(() => {
-      Store.uiState = UIState.Preloader;
+      AppState.uiState = UIState.Preloader;
     });
   }
 })();
@@ -186,7 +191,7 @@ export const SessionExit = new (class _SessionExit {
  * the login window keeps Escape for its Cancel.
  */
 export function openSystemMenu(): boolean {
-  const screen = Store.uiState;
+  const screen = AppState.uiState;
   if (
     screen !== UIState.World &&
     screen !== UIState.Servers &&
@@ -194,7 +199,7 @@ export function openSystemMenu(): boolean {
   ) {
     return false;
   }
-  if (MuWindows.isOpen('options') || Store.msgWin) return false;
+  if (MuWindows.isOpen('options') || MsgBox.msgWin) return false;
   // The world's overlays only gate it in the world, as UIMng.cpp:698 checks
   // none of them: a request still up when the character left is reset only on
   // the next select, and would hold Escape dead on these screens until then.

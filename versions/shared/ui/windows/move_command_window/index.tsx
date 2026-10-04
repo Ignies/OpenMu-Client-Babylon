@@ -4,7 +4,10 @@ import { t } from '@/i18n';
 import { useEffect, useRef, useState, type WheelEvent } from 'react';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
-import { Store } from '@/app/store';
+import { warpCommandRequest } from '@/modules/warp';
+import { Hero } from '@/modules/hero';
+import { Session } from '@/modules/session';
+import { Ecs } from '@/ecs/current';
 import { isKey } from '@/controllers/interface/keyBindings';
 import { BaseClass, getBaseClass } from '@/modules/hero/characterStats';
 import { PVP_MURDERER1 } from '@/controllers/interface/nameTags';
@@ -231,7 +234,7 @@ export const MoveCommandWindow = observer(() => {
   const scale = chrome.scale;
 
   useEventBus('keyPressed', key => {
-    if (!Store.world?.playerEntity) return;
+    if (!Ecs.world?.playerEntity) return;
     if (isKey(HOT_KEY, key)) {
       if (MuWindows.isOpen('move_command')) closeMoveWindow();
       else openMoveWindow();
@@ -256,9 +259,9 @@ export const MoveCommandWindow = observer(() => {
 
   if (!open) return null;
 
-  const { level, money, charClass } = Store.playerData;
+  const { level, money, charClass } = Hero;
   const cls = getBaseClass(charClass);
-  const pk = Store.world?.playerEntity?.heroState ?? 3;
+  const pk = Ecs.world?.playerEntity?.heroState ?? 3;
 
   const ordered = entries.some(entry => WarpFavourites.has(entry.index))
     ? [
@@ -301,12 +304,12 @@ export const MoveCommandWindow = observer(() => {
 
   const warpTo = (entry: MoveReqEntry) => {
     closeMoveWindow();
-    if (Store.isOffline) {
+    if (Session.isOffline) {
       const map = OFFLINE_MAPS[entry.index];
       if (map !== undefined) EventBus.emit('requestWarp', { map });
       return;
     }
-    Store.warpCommandRequest(SERVER_INDEX[entry.index] ?? entry.index);
+    warpCommandRequest(SERVER_INDEX[entry.index] ?? entry.index);
   };
 
   return (

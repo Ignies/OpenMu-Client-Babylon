@@ -10,7 +10,7 @@ import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
 import { mgSay, mgTurn } from '../_shared';
-import { storeRef } from '@/app/storeRef';
+import { Ecs } from '@/ecs/current';
 
 import { A } from '@/controllers/combat/recipes';
 
@@ -128,7 +128,7 @@ const mgGiganticStorm = (enh: boolean): Step => (at, c) =>
     const feet = entityPos(cc.caster, 0, new Vector3());
     const yaw = entityYaw(cc.caster);
     const yawDeg = yaw / DEG;
-    const world = storeRef().world;
+    const world = Ecs.world;
     const sites = [0, 1, 2, 3, 4].map(i => {
       const f = forwardOf(yaw + i * 72 * DEG);
       return new Vector3(feet.x - f.x * 2, feet.y, feet.z - f.z * 2);

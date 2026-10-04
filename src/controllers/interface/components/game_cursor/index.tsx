@@ -1,6 +1,6 @@
 import './style.less';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { aimX, aimY } from '@/controllers/camera';
 import { loadInterfaceSprite, type MuSprite } from '@/controllers/assets/mu/sprites';
@@ -13,7 +13,16 @@ import {
   type CursorKind,
 } from './cursors';
 
+export { CURSOR_HOTSPOT, CURSOR_SIZE } from './cursors';
+
 type Sprites = Record<CursorKind, MuSprite>;
+
+/** Whether the repair hammer is up (the merchant's repair mode); the app hands the reader in. */
+let repairCursor: () => boolean = () => false;
+
+export function setRepairCursor(read: () => boolean): void {
+  repairCursor = read;
+}
 
 function isOverUI(target: EventTarget | null): boolean {
   return !(target instanceof HTMLCanvasElement);
@@ -135,11 +144,11 @@ export const GameCursor = () => {
     const tick = () => {
       const { pressed, overUI } = pointer.current;
 
-      const hover = overUI ? null : Store.world?.cursorHover ?? null;
+      const hover = overUI ? null : Ecs.world?.cursorHover ?? null;
 
       let next: CursorKind;
 
-      if (Store.repairMode) {
+      if (repairCursor()) {
         // CURSOR_REPAIR: the hammer stays up, over the UI too, until the
         // repair mode is left.
         next = 'repair';
@@ -147,7 +156,7 @@ export const GameCursor = () => {
         next = hover;
       } else if (!pressed) {
         next = 'normal';
-      } else if (!overUI && Store.world?.cursorBlocked) {
+      } else if (!overUI && Ecs.world?.cursorBlocked) {
         next = 'dontMove';
       } else {
         next = 'push';

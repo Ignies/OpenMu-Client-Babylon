@@ -3,11 +3,11 @@ import { observer } from 'mobx-react-lite';
 import { memo, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import type { Item } from '@/ecs/world';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
-import { Store } from '@/app/store';
-import { ItemIcon } from '../item_icon';
+import { Bag } from '@/modules/inventory';
+import { ItemIcon } from '@/controllers/interface/components/item_icon';
 import { ItemTooltip, type TooltipContext } from '../item_tooltip';
-import { MuSpriteFrame } from '../mu_sprite';
-import { MuTableFrame } from '../mu_window';
+import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
+import { MuTableFrame } from '@/controllers/interface/components/mu_window';
 import { stableKeyOf } from '@/core/stableKey';
 
 export const SQUARE = 20;
@@ -326,7 +326,7 @@ export const ItemGrid = observer(
     const [hover, setHover] = useState<HoverInfo | null>(null);
     const [target, setTarget] = useState<Target | null>(null);
 
-    const picked = Store.pickedItem;
+    const picked = Bag.pickedItem;
     const pickedSize = picked ? itemSize(picked.item) : null;
 
     const count = columns * rows;
@@ -460,7 +460,7 @@ export const ItemGrid = observer(
       if (disabled) return;
 
       if (picked) {
-        Store.cancelPickedItem();
+        Bag.cancelPickedItem();
         return;
       }
 

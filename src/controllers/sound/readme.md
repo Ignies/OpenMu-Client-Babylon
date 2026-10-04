@@ -28,7 +28,8 @@ never which skill or item asks for it.
 - `soundsManager.ts`: `SoundsManager`, the mixer (`loadSound`, `loopInstance`, `stopSoundEffect`).
 - `instruments/`: `ensureBank`, `bankReady`, `noteOn`, `noteOff`, `allNotesOff`,
   `setPerformerPosition`, `dropPerformer`, `audioNow`, `contextReady`, `instrumentVoices`.
-- `loginMusic.ts`: `installLoginMusic()`, called once from `app/boot.tsx`.
+- `loginMusic.ts`: `installLoginMusic(menus, preloader)`, called once from `app/boot.tsx`; the two
+  readers say which page the app shows (the app owns the pages).
 
 ## How it works
 - The facade holds no state. `soundSystem` calls `sound.attach(world)` once and `sound.update`
@@ -54,8 +55,7 @@ never which skill or item asks for it.
 
 ## Depends on / used by
 - uses: lighting (`crackle.ts` reads `lighting.emitters`), assets (data folder URLs, world sets),
-  render (Babylon exports), terrain (`TW_SAFEZONE`), anim, actors, `core`, `ecs` types. Old exceptions to the dependency
-  rule are listed in `tools/checks/baselines/deps.json` (`app/store`).
+  render (Babylon exports), terrain (`TW_SAFEZONE`), anim, actors, `core`, `ecs` types.
 - Dependency direction: the event gates are handed in (`registerAmbientGate`, below); the instrument
   sampler keys its banks by a plain `BankId` string (the band module's `InstrumentId`); the music
   dev switch `ENABLE_BG_MUSIC` lives in `soundsManager.ts`; `settings`, `combat` (`masterBase`) and

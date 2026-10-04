@@ -2,8 +2,8 @@ import './style.less';
 import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import type { Item } from '@/ecs/world';
-import { Store } from '@/app/store';
-import { itemNameColor } from '@/controllers/interface/itemTooltip';
+import { Bag } from '@/modules/inventory';
+import { itemNameColor } from '@/controllers/interface';
 import { ItemTooltip } from '../item_tooltip';
 
 /**
@@ -21,7 +21,7 @@ export const ChatItemLink = observer(({ item, label }: { item: Item; label: stri
       onMouseLeave={() => setAt(null)}
     >
       {label}
-      {at && !Store.pickedItem && (
+      {at && !Bag.pickedItem && (
         <ItemTooltip item={item} x={at.x} y={at.y} context="plain" picture />
       )}
     </span>

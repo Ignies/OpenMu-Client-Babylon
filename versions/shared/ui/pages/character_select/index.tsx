@@ -3,12 +3,12 @@ import { t } from '@/i18n';
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useRef, useState } from 'react';
-import { Store } from '@/app/store';
+import { MsgBox, MsgWinCode } from '@/controllers/interface';
+import { confirmDeleteCharacter, CharSelect } from '@/modules/character_select';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { playUiSound } from '@/controllers/sound/sfx';
 import { isTypingInField } from '@/ecs/systems/keyboardInputSystem';
 import { GuildMemberRoleEnum } from '@versions/shared/packets/ServerToClientPackets';
-import { MsgWinCode } from '@/controllers/interface/msgWin';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MsgWindow } from '@/controllers/interface/components/msg_window';
@@ -55,11 +55,11 @@ export const CharactersPage = observer(() => {
 
   useEventBus('CharacterCreationSuccessful', () => setCreating(false));
 
-  const selected = selectedCharacter(Store.charactersList, Store.focusedChar);
+  const selected = selectedCharacter(CharSelect.charactersList, CharSelect.focusedChar);
   const status = listStatus(
     {
-      loading: Store.loadingCharactersList,
-      count: Store.charactersList.length,
+      loading: CharSelect.loadingCharactersList,
+      count: CharSelect.charactersList.length,
       selected: !!selected,
     },
     'pick'
@@ -68,7 +68,7 @@ export const CharactersPage = observer(() => {
   const onConnect = () => {
     if (!selected || selecting) return;
     setSelecting(true);
-    Store.selectCharacterRequest(selected.Name);
+    CharSelect.selectCharacterRequest(selected.Name);
   };
 
   // Enter is the Connect button while nothing else is up
@@ -91,7 +91,7 @@ export const CharactersPage = observer(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Enter' || e.repeat) return;
       if (e.isComposing || e.keyCode === 229) return;
-      if (Store.msgWin) return;
+      if (MsgBox.msgWin) return;
       if (
         e.target instanceof HTMLInputElement ||
         e.target instanceof HTMLTextAreaElement ||
@@ -110,21 +110,21 @@ export const CharactersPage = observer(() => {
     if (!selected) return;
 
     if (selected.GuildPosition !== GuildMemberRoleEnum.Undefined) {
-      Store.popUpMsgWin(MsgWinCode.DeleteCharacterGuildWarning);
+      MsgBox.popUpMsgWin(MsgWinCode.DeleteCharacterGuildWarning);
       return;
     }
 
     if (isDeleteBlocked(selected)) {
-      Store.popUpMsgWin(MsgWinCode.DeleteCharacterIdBlock);
+      MsgBox.popUpMsgWin(MsgWinCode.DeleteCharacterIdBlock);
       return;
     }
 
-    Store.popUpMsgWin(MsgWinCode.DeleteCharacterConfirm, selected.Name);
+    confirmDeleteCharacter(selected.Name);
   };
 
   return (
     <div className="characters-page">
-      <CharacterList source={Store} look="lineup" onList={() => setSelecting(false)} />
+      <CharacterList source={CharSelect} look="lineup" onList={() => setSelecting(false)} />
 
       <div className="char-sel-bar" style={{ height: BTN_HEIGHT }}>
         {}
@@ -145,7 +145,7 @@ export const CharactersPage = observer(() => {
           width={BTN_WIDTH}
           height={BTN_HEIGHT}
           frames={{ ...CREATE_FRAMES, check: 3 }}
-          disabled={!hasFreeSlot(Store.charactersList)}
+          disabled={!hasFreeSlot(CharSelect.charactersList)}
           onClick={() => setCreating(v => !v)}
           style={{ position: 'absolute', left: 0, top: 0 }}
         />

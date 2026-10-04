@@ -23,11 +23,11 @@ export interface EventMap {
   'look.mapReady': { world: ENUM_WORLD };
   /** A lit interior (tavern) was entered or left. */
   'look.areaChanged': { name: string | null };
-  /** Local player gained experience (already applied to Store.playerData). */
+  /** Local player gained experience (already applied to `Hero`). */
   experienceGained: { added: number; killedNetId: number };
   /**
    * The server answered an `IncreaseCharacterStatPoint` (already applied to
-   * Store.playerData). `added` is 0 when the point was refused.
+   * `Hero`). `added` is 0 when the point was refused.
    */
   statPointAnswered: { stat: number; added: number };
   /** ObjectMessage (0x01): a speech bubble line from an object in scope. */

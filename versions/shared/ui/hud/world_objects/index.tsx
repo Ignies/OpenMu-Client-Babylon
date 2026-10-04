@@ -1,5 +1,7 @@
 import { observer } from 'mobx-react-lite';
-import { Store } from '@/app/store';
+import { Bag } from '@/modules/inventory';
+import { Drops } from '@/modules/drops';
+import { Ecs } from '@/ecs/current';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { With } from 'miniplex';
 import { WorldLabel } from '@/controllers/interface/components/world_label';
@@ -12,7 +14,7 @@ import { onScreenPosition } from '@/controllers/interface/screenPositionBus';
 import { DROP_TIER_COLOURS, dropTier } from '@/controllers/item_rules';
 import { dropPassesLootFilter } from '@/modules/drops/lootFilter';
 import { GameOptions } from '@/controllers/settings';
-import { ItemTooltip } from '@/controllers/interface/components/item_tooltip';
+import { ItemTooltip } from '../../components/item_tooltip';
 import { ItemLinkHover } from '@/controllers/interface/itemLinkHover';
 import type { Entity } from '@/ecs/world';
 import { stableKeyOf } from '@/core/stableKey';
@@ -36,19 +38,19 @@ function useDropNamesOverlay(): { overlay: boolean; showAll: boolean } {
     setHeld(true);
     ItemLinkHover.linkedDuringAlt = false;
     toggled.current = true;
-    Store.toggleDropNames();
+    Drops.toggleDropNames();
   });
   useEventBus('keyReleased', code => {
     if (!isAlt(code)) return;
     setHeld(false);
     // That Alt was for linking an item into chat, not for the names.
-    if (ItemLinkHover.linkedDuringAlt && toggled.current) Store.toggleDropNames();
+    if (ItemLinkHover.linkedDuringAlt && toggled.current) Drops.toggleDropNames();
     ItemLinkHover.linkedDuringAlt = false;
     toggled.current = false;
   });
 
   // Held ALT is the escape hatch: it names every drop, filter or not.
-  return { overlay: Store.showDropNames || held, showAll: held };
+  return { overlay: Drops.showDropNames || held, showAll: held };
 }
 
 type DropEntity = With<Entity, 'transform' | 'screenPosition' | 'droppedItem'>;
@@ -67,7 +69,7 @@ type Point = { x: number; y: number };
 function tooltipAnchor(entity: DropEntity, onLabel: Point | null): Point {
   if (onLabel) return onLabel;
 
-  const scene = Store.world?.scene;
+  const scene = Ecs.world?.scene;
 
   if (scene && (scene.pointerX !== 0 || scene.pointerY !== 0)) {
     return { x: scene.pointerX, y: scene.pointerY };
@@ -103,7 +105,7 @@ const DropLabel = observer(({
     () =>
       onScreenPosition(entity, pos => {
         const onScreen = pos.x * pos.x + pos.y * pos.y >= 0.1;
-        const now = onScreen && Store.world?.currentPointerTarget === entity;
+        const now = onScreen && Ecs.world?.currentPointerTarget === entity;
         if (now !== hoveredRef.current) {
           hoveredRef.current = now;
           setHovered(now);
@@ -154,8 +156,8 @@ const DropLabel = observer(({
         onPointerDown={ev => {
           if (ev.button !== 0) return;
           ev.stopPropagation();
-          const world = Store.world;
-          if (!world || Store.pickedItem || Store.pendingItemMove) return;
+          const world = Ecs.world;
+          if (!world || Bag.pickedItem || Bag.pendingItemMove) return;
           world.pickupTarget = entity;
         }}
         onPointerEnter={ev => {
@@ -180,7 +182,7 @@ const DropLabel = observer(({
  * the original never draws a character's name permanently.
  */
 export const WorldObjects = observer(() => {
-  const world = Store.world!;
+  const world = Ecs.world!;
 
   const { refresh } = useRenderId();
 

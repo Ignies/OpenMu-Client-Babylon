@@ -51,8 +51,7 @@ There is no `index.ts` facade; other folders import the modules directly.
 
 ## Depends on / used by
 - uses: `assets` (model loader, texture packs), `lighting`, `terrain`, `maps`, `item_fx`, `anim`,
-  `net`, `settings`, `ecs` (world types, two system helpers), `core`; old exceptions in
-  `tools/checks/baselines/deps.json`: `app/storeRef`.
+  `net`, `settings`, `ecs` (world types, `Ecs.world`, two system helpers), `core`.
 - used by: `app/boot.tsx`, `ecs` systems, `actors`, `fx`, `lighting`, `terrain`, `item_fx`,
   `assets`, `modules`, `versions/shared` maps, npcs and the Options window.
 

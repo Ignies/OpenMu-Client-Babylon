@@ -1,6 +1,8 @@
 import { t } from '../../i18n';
 import { action, makeObservable, observable, reaction, runInAction } from 'mobx';
-import { Store, UIState } from '../../app/store';
+import { Hero } from '../hero';
+import { Session } from '../session';
+import { AppState, UIState } from '../../app/uiState';
 import { Social } from '../social/social';
 import {
   ChatRoomCreateRequestPacket,
@@ -82,7 +84,7 @@ export const ChatRooms = new (class _ChatRooms {
   private ensureWatching(): void {
     if (this.stopWatching) return;
     this.stopWatching = reaction(
-      () => Store.uiState,
+      () => AppState.uiState,
       state => {
         if (state !== UIState.World) this.reset();
       }
@@ -154,7 +156,7 @@ export const ChatRooms = new (class _ChatRooms {
     );
     const packet = ChatRoomCreateRequestPacket.createPacket();
     packet.setFriendName(friendName);
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   /** The invite list of the room window: pull one more friend in. */
@@ -172,7 +174,7 @@ export const ChatRooms = new (class _ChatRooms {
     packet.setFriendName(friendName);
     packet.RoomId = room.roomId;
     packet.RequestId = requestId;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   /** FriendInvitationResult echoes our RequestId; true when it was ours. */
@@ -288,7 +290,7 @@ export const ChatRooms = new (class _ChatRooms {
               const sender =
                 room.clients.find(c => c.index === event.senderIndex)?.name ?? '?';
               this.addLine(room, { sender, text: event.text });
-              if (sender !== Store.playerData.name) {
+              if (sender !== Hero.name) {
                 const visible =
                   this.windowEnabled && this.activeKey === room.key;
                 if (!visible) {

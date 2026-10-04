@@ -9,7 +9,7 @@ import { type Sounds } from '@/controllers/sound/recipes';
 import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
 import { playCombat } from '@/controllers/sound/combat';
-import { storeRef } from '@/app/storeRef';
+import { Ecs } from '@/ecs/current';
 
 // ---- dk2 steps
 
@@ -23,7 +23,7 @@ export const sparkHeading = (pitch: number, yaw: number): Vector3 =>
 
 /** `RequestTerrainLight` at a point, as the grey level the original's BodyLight adds `o->Light` to. */
 export function terrainLevel(x: number, z: number): number {
-  const l = storeRef().world?.getTerrainLight(x, z);
+  const l = Ecs.world?.getTerrainLight(x, z);
   return l ? 0.2126 * l.x + 0.7152 * l.y + 0.0722 * l.z : 1;
 }
 

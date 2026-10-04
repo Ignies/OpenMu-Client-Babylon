@@ -1,6 +1,6 @@
 import { makeAutoObservable, observable } from 'mobx';
 import { EventBus } from '../../core/eventBus';
-import { Store } from '../../app/store';
+import { Hero } from './state';
 import { clampAmount, nextStep } from './statAmounts';
 import type { StatType } from './characterStats';
 
@@ -60,7 +60,7 @@ export const StatAllocation = new (class _StatAllocation {
       return;
     }
 
-    const wanted = clampAmount(amount, Store.playerData.points);
+    const wanted = clampAmount(amount, Hero.points);
     if (wanted <= 0) return;
 
     this.run = { stat, sent: 0, added: 0, wanted };
@@ -94,14 +94,14 @@ export const StatAllocation = new (class _StatAllocation {
     const run = this.run;
     if (!run) return;
 
-    if (nextStep(run, Store.playerData.points) !== 'send') {
+    if (nextStep(run, Hero.points) !== 'send') {
       this.cancel();
       return;
     }
 
     this.run = { ...run, sent: run.sent + 1 };
     this.armTimer();
-    Store.increaseStatRequest(run.stat);
+    Hero.increaseStatRequest(run.stat);
   }
 
   private onAnswer(answer: { stat: number; added: number }): void {

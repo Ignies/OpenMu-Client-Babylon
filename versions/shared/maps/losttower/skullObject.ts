@@ -2,7 +2,7 @@ import { MapTileObject } from '@/controllers/terrain/mapTileObject';
 import { PlayerAction } from '../../objects/enum';
 import { toRadians } from '@/controllers/assets/download';
 import { playSfx } from '@/controllers/sound/sfx';
-import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import type { Entity, World } from '@/ecs/world';
 
 /** MU world units per terrain tile. The original's `Position` is in these. */
@@ -124,7 +124,7 @@ export class LostTowerSkullObject extends MapTileObject {
 
     if (!transform) return;
 
-    const hero = Store.world?.playerEntity;
+    const hero = Ecs.world?.playerEntity;
 
     // `Hero->Object.CurrentAction` between PLAYER_WALK_MALE and
     // PLAYER_RUN_RIDE_WEAPON, or one of the two Rage-uniform runs

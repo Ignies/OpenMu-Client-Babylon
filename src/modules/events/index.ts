@@ -1,5 +1,6 @@
 import type { ENUM_WORLD } from '../../core/types';
-import { Store } from '../../app/store';
+import { Merchant } from '../npc_shop';
+import { Session } from '../session';
 import { CloseNpcRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
 import type { Item } from '../../ecs/world';
 import type { EventEntryState, EventLayer } from './layer';
@@ -218,10 +219,10 @@ class Events {
     closeGoldenArcher();
     closeKanturu();
     if (!npcWindowOpen) return;
-    if (!Store.isOffline) {
-      Store.sendToGS(CloseNpcRequestPacket.createPacket().buffer);
+    if (!Session.isOffline) {
+      Session.sendToGS(CloseNpcRequestPacket.createPacket().buffer);
     }
-    Store.dropNpcTalk();
+    Merchant.dropNpcTalk();
   }
 }
 

@@ -12,7 +12,8 @@ import { MuWindows } from '@/controllers/interface/windowManager';
  */
 import { observer } from 'mobx-react-lite';
 import { t } from '@/i18n';
-import { Store } from '@/app/store';
+import { Servers } from '@/modules/servers';
+import { Session } from '@/modules/session';
 import {
   MAX_PASSWORD_LENGTH,
   MAX_USERNAME_LENGTH,
@@ -51,17 +52,17 @@ const LABEL_STYLE = { fontSize: 9, whiteSpace: 'nowrap' } as const;
 
 export const V097dLoginPage = observer(() => {
   const onLoginClicked = () => {
-    if (Store.loginProcessing) return;
+    if (Session.loginProcessing) return;
 
-    if (!Store.username || !Store.password) {
-      Store.loginError = t('login.enterCredentials');
+    if (!Session.username || !Session.password) {
+      Session.loginError = t('login.enterCredentials');
       return;
     }
 
-    Store.loginError = undefined;
-    Store.loginProcessing = true;
+    Session.loginError = undefined;
+    Session.loginProcessing = true;
 
-    Store.loginRequest(Store.username, Store.password);
+    Session.loginRequest(Session.username, Session.password);
   };
 
   return (
@@ -98,9 +99,9 @@ export const V097dLoginPage = observer(() => {
               className="v097d-login-input"
               type="text"
               autoFocus
-              value={Store.username}
+              value={Session.username}
               onChange={e => {
-                Store.username = e.target.value;
+                Session.username = e.target.value;
               }}
               maxLength={MAX_USERNAME_LENGTH}
             />
@@ -115,9 +116,9 @@ export const V097dLoginPage = observer(() => {
             <input
               className="v097d-login-input"
               type="password"
-              value={Store.password}
+              value={Session.password}
               onChange={e => {
-                Store.password = e.target.value;
+                Session.password = e.target.value;
               }}
               maxLength={MAX_PASSWORD_LENGTH}
             />
@@ -132,7 +133,7 @@ export const V097dLoginPage = observer(() => {
             labelStyle={LABEL_STYLE}
             color={TEXT_COLOR}
             activeColor={ACTIVE_COLOR}
-            disabled={Store.loginProcessing}
+            disabled={Session.loginProcessing}
             onClick={onLoginClicked}
             style={{
               position: 'absolute',
@@ -151,8 +152,8 @@ export const V097dLoginPage = observer(() => {
             color={TEXT_COLOR}
             activeColor={ACTIVE_COLOR}
             onClick={() => {
-              Store.username = '';
-              Store.password = '';
+              Session.username = '';
+              Session.password = '';
             }}
             style={{
               position: 'absolute',
@@ -166,11 +167,11 @@ export const V097dLoginPage = observer(() => {
             width={BUTTON.width}
             height={BUTTON.height}
             frames={{ up: 0 }}
-            label={Store.rememberLogin ? 'Save ID' : 'No save'}
+            label={Session.rememberLogin ? 'Save ID' : 'No save'}
             labelStyle={LABEL_STYLE}
             color={TEXT_COLOR}
             activeColor={ACTIVE_COLOR}
-            onClick={() => (Store.rememberLogin = !Store.rememberLogin)}
+            onClick={() => (Session.rememberLogin = !Session.rememberLogin)}
             style={{
               position: 'absolute',
               left: BUTTONS.remember.x,
@@ -198,7 +199,7 @@ export const V097dLoginPage = observer(() => {
           <button type="submit" className="v097d-login-submit" tabIndex={-1} />
         </form>
 
-        {Store.selectedServer && (
+        {Servers.selectedServer && (
           <span
             className="v097d-login-server"
             style={{
@@ -208,12 +209,12 @@ export const V097dLoginPage = observer(() => {
               height: SERVER_TAB.height,
             }}
           >
-            {`${Store.selectedServer.name} ${Store.selectedServer.channel}`}
+            {`${Servers.selectedServer.name} ${Servers.selectedServer.channel}`}
           </span>
         )}
 
-        {!!Store.loginError && (
-          <p className="v097d-login-error">{Store.loginError}</p>
+        {!!Session.loginError && (
+          <p className="v097d-login-error">{Session.loginError}</p>
         )}
       </MuSpriteFrame>
     </div>

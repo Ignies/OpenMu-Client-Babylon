@@ -4,7 +4,7 @@ import { inChaosCastle } from '@/controllers/actors/locomotion';
 import { BloodCastleStatePacket } from '../../packets/ServerToClientPackets';
 import { EventBus } from '@/core/eventBus';
 import { sound } from '@/controllers/sound';
-import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import type { World } from '@/ecs/world';
 import type { Mesh } from '@/controllers/render/babylon/exports';
 import {
@@ -164,7 +164,7 @@ function crackEdges(world: World, rects: readonly TileRect[]): Crack[] {
 
 /** A puff of dust somewhere on `crack`. */
 function puffCrack(crack: Crack): void {
-  const world = Store.world;
+  const world = Ecs.world;
   if (!world) return;
 
   const along = Math.random();
@@ -268,7 +268,7 @@ export function updateChaosCastleArena(now: number, dt: number): void {
 // ---- 3. the trigger --------------------------------------------------------
 
 EventBus.on('BloodCastleState', packet => {
-  const world = Store.world;
+  const world = Ecs.world;
   if (!world || !inChaosCastle(world.mapIndex)) return;
 
   const p = new BloodCastleStatePacket(packet);

@@ -5,9 +5,14 @@ import ReactDOM from 'react-dom/client';
 import { App } from './App';
 import './style.less';
 import './logic';
-// Content model classes register here, at boot, where no controller can reach (controllers import the Store, which imports logic.ts).
+// Content model classes register here, at boot, where no controller can reach (controllers import no content).
 import '@versions/shared/monsters/models';
-import { Store, UIState } from './store';
+import { playOffline } from './offline';
+import { Hero } from '../modules/hero';
+import { Session } from '../modules/session';
+import { AppState, UIState } from './uiState';
+import { Loading } from '../controllers/loading';
+import { Ecs } from '../ecs/current';
 import { GameOptions } from '@/controllers/settings';
 import { Social } from '../modules/social/social';
 import { Commands } from '../modules/chat/commands';
@@ -25,7 +30,10 @@ import {
 } from '../controllers/render/renderScale';
 import { upscaleLive } from '../controllers/render/scenes/upscale';
 import { TestScene } from '../controllers/render/scenes/testScene';
-import { loadMapIntoScene, onMapChange } from '../controllers/terrain/loadMapIntoScene';
+import { loadMapIntoScene, onHeroPlaced, onMapChange } from '../controllers/terrain/loadMapIntoScene';
+import { setRepairCursor } from '../controllers/interface/components/game_cursor';
+import { Merchant } from '../modules/npc_shop';
+import { Bag } from '../modules/inventory';
 import { initControllers } from '../controllers/controllers';
 import { resetForMapChange } from './lifecycle';
 import { prefetchWorldTerrain } from '../controllers/assets/mu/prefetchWorld';
@@ -64,13 +72,12 @@ watchPageTitle();
 void ensureCacheWorker();
 
 // What a lost game server socket does before falling back to the server
-// list. Wired here rather than in app/logic.ts, which the store's own module
-// graph reaches before `Store` exists.
-Store.resumeHook = () => SessionResume.retry() || SessionResume.begin();
+// list; the session module stays unaware of the resume.
+Session.resumeHook = () => SessionResume.retry() || SessionResume.begin();
 
 // Hot keys are per character: the shared set is what a new one starts from.
 reaction(
-  () => Store.playerData.name,
+  () => Hero.name,
   name => setKeyProfile(name)
 );
 
@@ -117,9 +124,9 @@ reaction(
 // stack - live in `ecs/systems/keyboardInputSystem.ts`.
 installBrowserHotkeyGuard(
   () =>
-    Store.uiState === UIState.World ||
-    Store.uiState === UIState.LoadingWorld ||
-    Store.uiState === UIState.Characters
+    AppState.uiState === UIState.World ||
+    AppState.uiState === UIState.LoadingWorld ||
+    AppState.uiState === UIState.Characters
 );
 
 const ignoredIds = ['scene-explorer-host', 'inspector-host'];
@@ -196,11 +203,18 @@ const scene = new TestScene(engine);
 
 initControllers({ scene });
 onMapChange(resetForMapChange);
+onHeroPlaced(() => Hero.syncPlayerAppearance());
+// The hammer cursor follows the merchant's repair mode.
+setRepairCursor(() => Merchant.repairMode);
 // `MUSIC_LOGIN_THEME` over the server / login / character pages.
-installLoginMusic();
+const MENU_PAGES = new Set([UIState.Servers, UIState.Login, UIState.Characters]);
+installLoginMusic(
+  () => MENU_PAGES.has(AppState.uiState),
+  () => AppState.uiState === UIState.Preloader
+);
 
 const { world, updateSystems } = createWorld(scene);
-Store.world = world;
+Ecs.world = world;
 
 // Render-budget overlay: Shift+Ctrl+Alt+P. Dormant until toggled.
 installPerfOverlay(scene);
@@ -214,7 +228,8 @@ installPerfOverlay(scene);
 // gets a second module copy (vite serves the live graph as `?t=`-stamped URLs)
 // whose state never changes.
 (window as any).__eco = Economy;
-(window as any).__store = Store;
+// The module states the Store used to hold, for the same scripts (`__modules.Hero.money`).
+(window as any).__modules = { Hero, Session, Bag, Merchant };
 // The sound facade, for the headless verification scripts (`sound.unlocked`,
 // `sound.isPlaying(key)`, `sound.crackling`).
 (window as any).__sound = sound;
@@ -272,7 +287,7 @@ engine.runRenderLoop(() => {
     updateSystems(deltaTime);
     const updateEnded = performance.now();
 
-    const idle = sceneCovered() && !Store.sceneLoading;
+    const idle = sceneCovered() && !Loading.sceneLoading;
 
     if (!idle || ++coveredFrames % COVERED_RENDER_EVERY === 0) {
       scene.render();
@@ -308,7 +323,7 @@ EventBus.on('requestWarp', ({ map, pos }) => {
   // Every warp, the step from the login backdrop to the character one
   // included: that one is a full terrain swap plus the character line-up, and
   // skipping the screen for it meant watching both load on an open scene.
-  Store.setSceneLoading(true);
+  Loading.setSceneLoading(true);
 
   // The terrain files go out together, before the loader's first await; the
   // loader picks up the same promises (prefetchWorld.ts).
@@ -318,7 +333,7 @@ EventBus.on('requestWarp', ({ map, pos }) => {
 });
 
 preloadPregameSprites()
-  .finally(() => Store.setSpritesLoading(false))
+  .finally(() => Loading.setSpritesLoading(false))
   .then(() => preloadWorldSprites());
 
 // The published server list (`modules/servers/serverList.ts`), once per launch. Nothing
@@ -332,6 +347,6 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   </React.StrictMode>
 );
 
-if (Store.isOffline) {
-  Store.playOffline();
+if (Session.isOffline) {
+  playOffline();
 }

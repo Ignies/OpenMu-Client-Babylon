@@ -22,7 +22,7 @@ import {
   type Scene,
 } from '../render/babylon/exports';
 import { linearBufferActive } from '../lighting/lightModel';
-import { Store } from '../../app/store';
+import { Ecs } from '../../ecs/current';
 import type { TestScene } from '../render/scenes/testScene';
 import {
   EFFECT_RENDERING_GROUP,
@@ -140,7 +140,7 @@ function spawn(scene: Scene, at: Vector3, opts: PillarOptions): EffectHandle {
   const seed = hash(seq++) * 97;
   const look = (scene as TestScene).look;
   // On the ground under the point, whatever height the caller sampled.
-  const ground = Store.world?.getTerrainHeight(at.x, at.z) ?? at.y;
+  const ground = Ecs.world?.getTerrainHeight(at.x, at.z) ?? at.y;
 
   // The fire: a sheet standing on its foot, turned to the camera about the up axis.
   const sheet = CreatePlane(`fxPillar${seq}`, { width, height }, scene);

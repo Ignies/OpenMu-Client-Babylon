@@ -5,7 +5,9 @@ import { EventBus } from '@/core/eventBus';
 import { InventoryConstants } from '@/core/inventoryConstants';
 import { ItemSerializer } from '@/controllers/item_rules';
 import { NetStats } from '@/controllers/net/roundTrip';
-import { Store } from '@/app/store';
+import { Bag } from './state';
+import { Hero } from '@/modules/hero';
+import { addNotification } from '@/modules/chat';
 import { pickupSound } from '@/controllers/sound/combatSounds';
 import { playUiSound } from '@/controllers/sound/sfx';
 import { prefetchItemIcons } from '@/controllers/assets/itemIconPack';
@@ -46,7 +48,7 @@ export function installNet(): void {
     }));
 
     runInAction(() => {
-      const items = Store.playerData.items;
+      const items = Hero.items;
       for (const { slot, item } of entries) {
         // The personal store lives behind `FirstStoreItemSlotIndex` in the
         // same storage (OpenMU) - those squares belong to the stall grid.
@@ -58,7 +60,7 @@ export function installNet(): void {
       }
     });
 
-    Store.syncPlayerAppearance();
+    Hero.syncPlayerAppearance();
     // Inventory icons start loading now, before the window is ever opened.
     prefetchItemIcons(entries.map(entry => entry.item));
   });
@@ -83,7 +85,7 @@ export function installNet(): void {
 
     if (!KNOWN_STORAGES.includes(storage)) {
       console.warn(`ItemMoved into unknown storage ${storage}`);
-      Store.confirmItemMove(-1, null);
+      Bag.confirmItemMove(-1, null);
       return;
     }
 
@@ -97,7 +99,7 @@ export function installNet(): void {
     const shopStorage = storeStorageOf(storage, p.TargetSlot);
     const slot = localIndexOf(shopStorage, p.TargetSlot);
 
-    Store.confirmItemMove(slot, item, shopStorage);
+    Bag.confirmItemMove(slot, item, shopStorage);
 
     // A newly stocked shop square starts unpriced (`AddPersonalItemPrice`).
     if (shopStorage === StorageKind.PersonalShop) Economy.stockedShopSquare(slot);
@@ -107,8 +109,8 @@ export function installNet(): void {
     // A refusal is still an answer, so it times the same round trip.
     NetStats.markAnswered('itemMove');
     console.warn('ItemMoveRequestFailed - rolling the item back');
-    Store.rollbackItemMove();
-    Store.addNotification(t('notify.cannotMoveItem'), 'error');
+    Bag.rollbackItemMove();
+    addNotification(t('notify.cannotMoveItem'), 'error');
   });
 
   EventBus.on('ItemAddedToInventory', packet => {
@@ -120,20 +122,20 @@ export function installNet(): void {
     playUiSound(pickupSound(item));
 
     runInAction(() => {
-      Store.playerData.items[p.InventorySlot] = item;
+      Hero.items[p.InventorySlot] = item;
     });
 
-    Store.syncPlayerAppearance();
+    Hero.syncPlayerAppearance();
   });
 
   EventBus.on('ItemRemoved', packet => {
     const p = new ItemRemovedPacket(packet);
 
     runInAction(() => {
-      Store.playerData.items[p.InventorySlot] = null;
+      Hero.items[p.InventorySlot] = null;
     });
 
-    Store.syncPlayerAppearance();
+    Hero.syncPlayerAppearance();
   });
 
   /**
@@ -147,7 +149,7 @@ export function installNet(): void {
 
     const item = ItemSerializer.DeserializeItem(new Uint8Array(p.ItemData.buffer));
 
-    Store.upgradeInventoryItem(p.InventorySlot, item);
+    Bag.upgradeInventoryItem(p.InventorySlot, item);
   });
 
   /**
@@ -156,15 +158,15 @@ export function installNet(): void {
    * second, so a burst of clicks reads as one).
    */
   EventBus.on('ItemConsumptionFailed', () => {
-    Store.consumptionFailed();
-    Store.addNotification(t('notify.cannotUseItem'), 'error');
+    Bag.consumptionFailed();
+    addNotification(t('notify.cannotUseItem'), 'error');
   });
 
   EventBus.on('ItemDurabilityChanged', packet => {
     const p = new ItemDurabilityChangedPacket(packet);
 
     runInAction(() => {
-      const item = Store.playerData.items[p.InventorySlot];
+      const item = Hero.items[p.InventorySlot];
       if (!item) return;
 
       item.durability = p.Durability;
@@ -177,7 +179,7 @@ export function installNet(): void {
     const p = new InventoryMoneyUpdatePacket(packet);
 
     runInAction(() => {
-      Store.playerData.money = p.Money;
+      Hero.money = p.Money;
     });
   });
 }

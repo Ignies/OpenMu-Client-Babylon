@@ -2,7 +2,7 @@ import { ENUM_WORLD } from '@/core/types';
 import { registerDebugModule } from '@/modules/gm/debugMenu';
 import { maps } from '@/controllers/maps';
 import { EventBus } from '@/core/eventBus';
-import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 
 /**
  * Move: one row per map entry the client stages, current map highlighted.
@@ -37,7 +37,7 @@ registerDebugModule({
       id: 'current',
       label: 'Current map',
       value: () => {
-        const world = Store.world?.mapIndex;
+        const world = Ecs.world?.mapIndex;
         return world === undefined ? '-' : `${ENUM_WORLD[world]} (${world})`;
       },
     },
@@ -53,8 +53,8 @@ registerDebugModule({
               id: layer.name,
               label: `${layer.name.charAt(0).toUpperCase()}${layer.name.slice(1)} (${target})`,
               active: () =>
-                Store.world !== null &&
-                layer.worlds.includes(Store.world.mapIndex),
+                Ecs.world !== null &&
+                layer.worlds.includes(Ecs.world.mapIndex),
               onClick: () => warpTo(target),
             },
           ];

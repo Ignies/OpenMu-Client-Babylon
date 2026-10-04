@@ -4,9 +4,12 @@ Which world the client plays on: the server profiles and their addresses, the pu
 list, the saved accounts per world, the "is it up" probe, the service URLs a world's domain
 implies, the world's own settings (`server.json`), and the signup / name rules shared with the
 register service. No packets here; the
-connect server's own list (`Store.serverList`) is filled by `session/net.ts`.
+connect server's own list (`Servers.serverList`) is filled by `session/net.ts`.
 
 ## Public API
+- `Servers` (`state.ts`, through `index.ts`, the door): `serverList` (the connect server's
+  `ServerListResponse`), `selectedServer` (the login window's server line),
+  `updateServerListRequest()`, `getConnectionInfoRequest(id)`. `module.ts` installs nothing (core).
 - `ServerConfig`: profiles (`all`, `active`, `isEmpty`, `select`, `add`, `update`, `remove`,
   `setListed`, `markPlayed`). Helpers: `effective(profile)`, `wsAddress()`,
   `connectServerAddress()`, `displayAddress`, `playableHere`, `matchesSearch`, `isInsecureWsUrl`,
@@ -14,7 +17,7 @@ connect server's own list (`Store.serverList`) is filled by `session/net.ts`.
 - `ServerList`, `refreshServerList()`, `parseServerList(text)`: the published list.
 - `ServerAccounts`: `list`, `of`, `select`, `add`, `update`, `forget`, `record(worldId, login)`.
   `MAX_USERNAME_LENGTH` / `MAX_PASSWORD_LENGTH` (`serverAccounts.ts`, were `app/consts.ts`): the login
-  fields, read by the Store and the login pages.
+  fields, read by `Session.loginRequest` and the login pages.
 - `ServerProbe`: `check(profiles)`, `of(id)` -> `Reach` (`unknown`, `checking`, `up`, `down`).
 - `registerUrl()`, `registerApiUrl()`, `marketApiUrl()`, `serverManifestUrl()`.
 - `serverSetting(key)`: one setting of the world being played (`ServerSettings`, defaults
@@ -41,7 +44,7 @@ connect server's own list (`Store.serverList`) is filled by `session/net.ts`.
 
 ## Depends on / used by
 - uses: `core/localStorage`, `app/consts`, `src/version` (`versionByTag`).
-- used by: `src/app/store.ts`, `src/app/boot.tsx`, `src/app/main.tsx`, `session/net.ts`,
+- used by: `session` (`state.ts`, `net.ts`), `src/app/boot.tsx`, `src/app/main.tsx`,
   `marketplace/api.ts`, `gm/admin/feed.ts`,
   `pageTitle.ts`, `chat/chatRooms.ts` (the chat socket's address), the pages
   `versions/shared/ui/pages/preloader/`, `pages/server_select/`, `pages/login/` and

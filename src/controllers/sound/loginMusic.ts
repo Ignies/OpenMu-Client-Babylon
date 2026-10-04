@@ -1,5 +1,4 @@
 import { reaction } from 'mobx';
-import { Store, UIState } from '../../app/store';
 import { sound } from '.';
 import { pregameLoad } from '../loading/pregameLoad';
 
@@ -21,14 +20,13 @@ const LOGIN_THEME = 'Music/login_theme';
 /** How often to retry while the audio context is still locked. */
 const RETRY_MS = 500;
 
-const MENU_STATES = new Set([UIState.Servers, UIState.Login, UIState.Characters]);
+/** Which page is up, read through `installLoginMusic`'s port (the app owns the pages). */
+let inMenus = (): boolean => false;
+let onPreloader = (): boolean => false;
 
 /** The theme's screens: the three menus, and the worlds page once its card is open. */
 function wanted(): boolean {
-  return (
-    MENU_STATES.has(Store.uiState) ||
-    (Store.uiState === UIState.Preloader && pregameLoad.worldsOpen)
-  );
+  return inMenus() || (onPreloader() && pregameLoad.worldsOpen);
 }
 
 let retry: number | null = null;
@@ -48,8 +46,13 @@ function tryPlay(): void {
   stopRetry();
 }
 
-/** Call once from app/main.tsx after `sound.init`. */
-export function installLoginMusic(): void {
+/**
+ * Call once from app/boot.tsx after `sound.init`. `menus`: the server list, login or character
+ * page is up; `preloader`: the preloader page is.
+ */
+export function installLoginMusic(menus: () => boolean, preloader: () => boolean): void {
+  inMenus = menus;
+  onPreloader = preloader;
   reaction(
     wanted,
     on => {

@@ -17,8 +17,8 @@ only has the handlers.
   `PlayerShopClose` again and OpenMU answers with another `PlayerShopClosed` (a loop).
 - `PlayerShopItemList` slots are mapped to the 8x4 grid with `localIndexOf(StorageKind.PersonalShop)`;
   a slot already inside the grid is used as is.
-- A successful buy puts the item straight into `Store.playerData.items` and calls
-  `Store.syncPlayerAppearance()`: OpenMU's `BuyRequestAction` sends no `ItemAddedToInventory`.
+- A successful buy puts the item straight into `Hero.items` and calls
+  `Hero.syncPlayerAppearance()`: OpenMU's `BuyRequestAction` sends no `ItemAddedToInventory`.
   `ReceivePurchaseItem` (`WSclient.cpp:9526-9597`) plays no sound, so neither does this.
 - Outgoing packets are `Economy` actions: `startSelling` (`PlayerShopOpen`), `stopSelling`
   (`PlayerShopClose`), `setItemPrice`, `browseShop` (`PlayerShopItemListRequest`), `buyFromShop`
@@ -36,8 +36,8 @@ only has the handlers.
 
 ## Depends on / used by
 - uses: `economy/economy.ts`, `controllers/item_rules/itemSerializer.ts`, `inventory/itemStorage.ts`,
-  `social/social.ts` (`errorMessage`), `chat/chat.ts` (`cleanName`), `src/app/store.ts`
-  (`playerId`, `playerData.items`, `syncPlayerAppearance`), `src/i18n`.
+  `social/social.ts` (`errorMessage`), `chat/chat.ts` (`cleanName`), `hero`
+  (`playerId`, `items`, `syncPlayerAppearance`), `src/i18n`.
 - used by: `src/app/logic.ts`. The windows are `versions/shared/ui/windows/personal_shop/` and
   `economy_prompts/` (price and buy prompts); `inventory/` opens the stall, `party/` browses one,
   and the name tags (`versions/shared/ui/hud/name_tags/`) read `Economy.shopTitles`.

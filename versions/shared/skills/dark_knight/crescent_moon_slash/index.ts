@@ -9,7 +9,7 @@ import { PlayerAction } from '@versions/shared/objects/enum';
 import { Vector3, type Scene } from '@/controllers/render/babylon/exports';
 import { SkillContext, Step, TICK, baseSkill, cm, currentSkill, forwardOf, perTick, ticks } from '@/controllers/skills/visuals';
 import { lighting } from '@/controllers/lighting';
-import { storeRef } from '@/app/storeRef';
+import { Ecs } from '@/ecs/current';
 
 import { A } from '@/controllers/combat/recipes';
 
@@ -131,7 +131,7 @@ function swordForce(c: SkillContext, skill: number, hd = false): void {
     return out.set(origin.x + f.x * d, origin.y, origin.z + f.z * d);
   };
   const moves = (): number => 1 + (fxNow() - t0) / TICK;
-  if (storeRef().world?.mapIndex === ENUM_WORLD.WD_30BATTLECASTLE) sayAt(c, 'Sound/battlecastle/sCHaveyBlow');
+  if (Ecs.world?.mapIndex === ENUM_WORLD.WD_30BATTLECASTLE) sayAt(c, 'Sound/battlecastle/sCHaveyBlow');
   // BodyLight (terrain + Light) x BlendMeshLight, clamped: Light and BlendMeshLight are 1, then LT / 18.
   const level = (k: number): number => (k <= 3 ? 1 : (16 - k) / 18);
   effects.spawn('model', c.scene, blade(1, new Vector3()), {

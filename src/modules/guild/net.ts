@@ -2,7 +2,10 @@ import { AssignCharacterToGuildPacket, GuildCreationResultGuildCreationErrorType
 import { EventBus } from '@/core/eventBus';
 import { GuildInfoRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
 import { Social } from '../social/social';
-import { Store } from '@/app/store';
+import { GuildMarks } from './state';
+import { Hero } from '@/modules/hero';
+import { Session } from '@/modules/session';
+import { Ecs } from '@/ecs/current';
 import { t, type TextKey } from '@/i18n';
 import { cleanName } from '../chat/chat';
 import { playerNameById } from '../_shared/net_helpers';
@@ -14,14 +17,14 @@ import { runInAction } from 'mobx';
  * member in scope loses its mark too, not just the hero.
  */
 function leaveGuild(guildId: number, disbanded: boolean): void {
-  const world = Store.world;
+  const world = Ecs.world;
   if (world) {
     const gone = world.netObjsQuery.entities.filter(
-      e => e.guild && (disbanded ? e.guild.id === guildId : e.netId === Store.playerId)
+      e => e.guild && (disbanded ? e.guild.id === guildId : e.netId === Hero.playerId)
     );
     for (const obj of gone) world.removeComponent(obj, 'guild');
   }
-  if (disbanded) Store.guilds.delete(guildId);
+  if (disbanded) GuildMarks.delete(guildId);
   runInAction(() => {
     Social.myGuild = null;
     Social.guildMembers = [];
@@ -56,7 +59,7 @@ export function installNet(): void {
    */
   EventBus.on('GuildInformation', packet => {
     const p = new GuildInformationPacket(packet);
-    Store.guilds.set(p.GuildId, {
+    GuildMarks.set(p.GuildId, {
       name: cleanName(p.GuildName),
       alliance: cleanName(p.AllianceGuildName),
       logo: Array.from(new Uint8Array(p.Logo.buffer)),
@@ -65,7 +68,7 @@ export function installNet(): void {
 
   EventBus.on('AssignCharacterToGuild', packet => {
     const p = new AssignCharacterToGuildPacket(packet);
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
     const requested = new Set<number>();
     p.getMembers().forEach(member => {
@@ -77,29 +80,29 @@ export function installNet(): void {
         if (obj.guild) obj.guild = guild;
         else world.addComponent(obj, 'guild', guild);
       }
-      if (maskedId === Store.playerId) {
+      if (maskedId === Hero.playerId) {
         runInAction(() => {
           Social.myGuild = { id: member.GuildId, role: member.Role };
         });
       }
       // Unknown guild: ask for its name/mark, as the original does for a new GuildMarkIndex.
-      if (!Store.guilds.has(member.GuildId) && !requested.has(member.GuildId)) {
+      if (!GuildMarks.has(member.GuildId) && !requested.has(member.GuildId)) {
         requested.add(member.GuildId);
         const req = GuildInfoRequestPacket.createPacket();
         req.GuildId = member.GuildId;
-        Store.sendToGS(req.buffer);
+        Session.sendToGS(req.buffer);
       }
     });
   });
 
   EventBus.on('GuildMemberLeftGuild', packet => {
     const p = new GuildMemberLeftGuildPacket(packet);
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
     const maskedId = p.PlayerId & 0x7fff;
     const obj = world.getByNetId(maskedId);
     if (obj?.guild) world.removeComponent(obj, 'guild');
-    if (maskedId === Store.playerId) {
+    if (maskedId === Hero.playerId) {
       // `ReceiveGuildLeave` 1 / 4: no guild, window closed. The disband
       // response may have cleared it already - then there is nothing to say.
       const mine = Social.myGuild;

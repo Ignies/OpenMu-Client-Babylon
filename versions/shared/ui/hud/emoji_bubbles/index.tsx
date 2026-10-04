@@ -1,7 +1,7 @@
 import './style.less';
 import { useEffect, useMemo, useRef } from 'react';
 import type { With } from 'miniplex';
-import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { useRenderId } from '@/controllers/interface/hooks';
 import { onScreenPosition } from '@/controllers/interface/screenPositionBus';
 import {
@@ -93,7 +93,7 @@ function keyOf(entity: Entity): number {
 }
 
 export const EmojiBubbles = () => {
-  const world = Store.world!;
+  const world = Ecs.world!;
   const { refresh } = useRenderId();
 
   const query = useMemo(

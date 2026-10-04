@@ -1,5 +1,10 @@
 import type { Entity, ISystemFactory } from '../world';
-import { Store } from '../../app/store';
+import { Bag } from '../../modules/inventory';
+import { HeroSkills } from '../../modules/skills';
+import { Hero } from '../../modules/hero';
+import { Session } from '../../modules/session';
+import { addNotification } from '../../modules/chat';
+import { Ecs } from '../current';
 import { applyPlayerActionSpeed, serverMinAttackInterval } from '../../controllers/anim/playSpeed';
 import { HitRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
 import {
@@ -46,7 +51,7 @@ export function truncatePathForAttack(
     path,
     ~~target.transform!.pos.x,
     ~~target.transform!.pos.z,
-    combat.attackRange(Store.world?.playerEntity?.charAppearance)
+    combat.attackRange(Ecs.world?.playerEntity?.charAppearance)
   );
 }
 
@@ -61,27 +66,27 @@ let lastReload = { from: -1, at: 0 };
  * same move a drag sends. True while the swing should wait for it.
  */
 function reloadAmmo(hands: Hands): boolean {
-  if (Store.pendingItemMove) return true;
-  if (Store.pickedItem) return false;
+  if (Bag.pendingItemMove) return true;
+  if (Bag.pickedItem) return false;
 
   const reload = ammoReload(
     hands,
-    Store.itemsOfStorage(StorageKind.Inventory),
+    Bag.itemsOfStorage(StorageKind.Inventory),
     InventoryConstants.EquippableSlotsCount,
     InventoryConstants.LeftHandSlot,
     InventoryConstants.RightHandSlot
   );
   if (!reload) return false;
   if (reload.from < 0) {
-    Store.addNotification(t('notify.noMoreArrows'), 'error');
+    addNotification(t('notify.noMoreArrows'), 'error');
     return false;
   }
 
   const now = performance.now();
   if (reload.from === lastReload.from && now - lastReload.at < RELOAD_RETRY_MS) return false;
   lastReload = { from: reload.from, at: now };
-  if (!Store.moveItemToSquare(StorageKind.Inventory, reload.from, reload.to)) return false;
-  Store.addNotification(t('notify.arrowsReloaded'));
+  if (!Bag.moveItemToSquare(StorageKind.Inventory, reload.from, reload.to)) return false;
+  addNotification(t('notify.arrowsReloaded'));
   return true;
 }
 
@@ -220,7 +225,7 @@ export const AttackSystem: ISystemFactory = world => {
       // `playerMoveTo` every frame and drag the hero onto what he is casting
       // at. The target stays selected (the health bar, head tracking and the
       // mobile skill pad all read it); only the walk and the swing yield.
-      if (world.castRequest && skillDefinition(Store.currentSkill)) return;
+      if (world.castRequest && skillDefinition(HeroSkills.currentSkill)) return;
 
       const hands = playerEntity.charAppearance;
       const playerPos = playerEntity.transform.pos;
@@ -287,7 +292,7 @@ export const AttackSystem: ISystemFactory = world => {
       const swordCount = anim.swordCount ?? 0;
       const action = chooseAttackAction({
         hands: heldWeapons(playerEntity, world.mapIndex),
-        baseClass: getBaseClass(hands?.charClass ?? Store.playerData.charClass),
+        baseClass: getBaseClass(hands?.charClass ?? Hero.charClass),
         swordCount,
         wings: isWingItem(hands?.wings),
         mount: mountKind(
@@ -322,7 +327,7 @@ export const AttackSystem: ISystemFactory = world => {
         packet.TargetId = target.netId;
         packet.AttackAnimation = attackAnimation;
         packet.LookingDirection = lookingDirection;
-        Store.sendToGS(packet.buffer);
+        Session.sendToGS(packet.buffer);
       };
       // The original sends on the click (ZzzInterface.cpp:3355); a server may ask for the
       // request at the hit key instead (its server.json, modules/servers/serverManifest.ts).

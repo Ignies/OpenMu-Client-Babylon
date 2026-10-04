@@ -1,23 +1,29 @@
 # npc_shop
 
-NPC talk and merchant packets (`ReceiveTalk` / `ReceiveShopItemList`, WSclient.cpp). The merchant
-state and actions live in `Store` (`src/app/store.ts`); this folder only has the handlers.
+NPC talk and merchant packets (`ReceiveTalk` / `ReceiveShopItemList`, WSclient.cpp), and the NPC
+talk in flight with the merchant window's state and actions (`Merchant`).
 
 ## Public API
-- none. `installNet()` in `net.ts` registers its handlers (`module.ts`, installed by `src/app/logic.ts`).
+- `Merchant` (`state.ts`, through `index.ts`, the door): see How it works; `SHOP_COLUMNS`,
+  `SHOP_ROWS`, type `NpcShop`.
+- none for packets. `installNet()` in `net.ts` registers its handlers (`module.ts`, installed by `src/app/logic.ts`).
 
 ## How it works
-- `Store.talkToNpc` (called from ecs `npcTalkSystem`) sends `TalkToNpcRequest`; `NpcWindowResponse` says which
-  window to open. Merchants open the shop (`Store.openNpcShop`); vault, chaos machine and Chaos Card Master
+- `Merchant.talkToNpc` (called from ecs `npcTalkSystem`) sends `TalkToNpcRequest`; `NpcWindowResponse` says which
+  window to open. Merchants open the shop (`Merchant.openNpcShop`); vault, chaos machine and Chaos Card Master
   open `Economy` windows; Devil Square, Blood Castle, duel watch and Doppelganger open `events` windows;
   legacy quest NPCs open `quests.openNpcWindow`. Anything else gets a notice and a `CloseNpcRequest`, because
   OpenMU otherwise ignores every later talk (TalkNpcAction.cs).
 - `StoreItemList` carries the merchant's stock, the vault's items and the chaos machine's tray. `Normal`
   goes to the vault when it is open, the merchant otherwise.
-- Merchant state in `Store`: `npcShop` (stock, tax, repair flag), `repairMode`, `shopBuyPending`,
+- Merchant state in `Merchant`: `npcShop` (stock, tax, repair flag), `repairMode`, `shopBuyPending`,
   `shopBuyRefused`, `pendingNpcType`. Actions: `openNpcShop`, `dropNpcTalk`, `setNpcShopItems`,
   `closeNpcShop`, `buyItemFromNpc`, `finishShopBuy`, `shopBuyFailed`, `sellPickedItemToNpc`, `itemSoldToNpc`,
   `toggleRepairMode`, `repairItemRequest`, `repairAllRequest`. Prices come from `controllers/item_rules/itemValue.ts`.
+- Selling and the buy timeout go through the inventory's `Bag` (the move in flight). The merchant
+  sets `Bag.beforeConsume` (a use closes the shop: OpenMU refuses a consume while a dialog is open)
+  and closes itself when the inventory closes. The app hands the game cursor the repair mode
+  (`setRepairCursor`, `boot.tsx`).
 - Bulk buy and the sell confirmation are `QuickItemActions` ([../inventory/readme.md](../inventory/readme.md)).
 
 ## Packets
@@ -28,14 +34,14 @@ state and actions live in `Store` (`src/app/store.ts`); this folder only has the
 - `NpcItemSellResult`: sale confirmed with the new zen, or rolled back.
 
 ## Depends on / used by
-- uses: `Store`, `economy/economy.ts`, `events`, `quests`, `controllers/item_rules/itemSerializer.ts`, `controllers/sound/sfx.ts`,
+- uses: `inventory` (`Bag`), `hero`, `session`, `economy/economy.ts`, `events`, `quests`, `controllers/item_rules/itemSerializer.ts`, `controllers/sound/sfx.ts`,
   `src/i18n`.
 - used by: `src/app/logic.ts`. The window is `versions/shared/ui/windows/npc_shop/`; the buy quantity box is in
   `versions/shared/ui/windows/economy_prompts/`.
 
 ## Change it
-- open a new NPC window: add a `case` to the `NpcWindowResponse` switch and call `Store.dropNpcTalk()` first.
-- merchant buy / sell / repair rules: the matching `Store` methods; prices in `controllers/item_rules/itemValue.ts`.
+- open a new NPC window: add a `case` to the `NpcWindowResponse` switch and call `Merchant.dropNpcTalk()` first.
+- merchant buy / sell / repair rules: the matching `Merchant` methods (`state.ts`); prices in `controllers/item_rules/itemValue.ts`.
 
 ## Tests
 - none yet.

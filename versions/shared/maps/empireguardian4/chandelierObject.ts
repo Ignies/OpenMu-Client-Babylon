@@ -5,7 +5,7 @@ import {
 import { MapTileObject } from '@/controllers/terrain/mapTileObject';
 import { lightMapObject } from '@/controllers/lighting/mapObjectLights';
 import type { LightSource } from '@/controllers/lighting/lightSource';
-import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import type { Entity, World } from '@/ecs/world';
 import { findBone } from './bones';
 import { EMPIRE_GUARDIAN_4_CHANDELIER } from './spec';
@@ -137,7 +137,7 @@ export class EmpireGuardian4ChandelierObject extends MapTileObject {
     if (!this.Ready) return;
 
     if (!this.#lit) {
-      const world = Store.world;
+      const world = Ecs.world;
       if (!world) return;
 
       if (this.#posed() || ++this.#waited >= POSE_WAIT_LIMIT) {

@@ -11,7 +11,7 @@
 | rain, snow, footprints | `src/controllers/weather/` |
 | item glow, materials, weapon trails | `src/controllers/item_fx/` |
 | a packet's handling | `src/modules/<module>/net.ts` (listener order: `src/modules/modules.ts`) |
-| a module's state and actions | `src/modules/<module>/` (some still in `src/app/store.ts`) |
+| a module's state and actions | `src/modules/<module>/state.ts`, through its `index.ts` (the door) |
 | a window or panel | `versions/shared/ui/windows/<window>/` (drawing) + its module (state) |
 | a HUD element | `versions/shared/ui/hud/<element>/` |
 | shared widgets (tooltip, item grid, frame, button) | `src/controllers/interface/components/` |

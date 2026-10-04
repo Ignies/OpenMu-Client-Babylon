@@ -2,7 +2,8 @@ import { observable, runInAction } from 'mobx';
 import type { TextKey } from '@/i18n';
 import type { Entity, NetEntity } from '@/ecs/world';
 import { EventBus } from '@/core/eventBus';
-import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
+import { Ecs } from '@/ecs/current';
 import { NetStats } from '@/controllers/net/roundTrip';
 import {
   instrumentById,
@@ -157,7 +158,7 @@ function stopTimer(): void {
 }
 
 function heroEntity() {
-  return Store.world?.playerEntity ?? null;
+  return Ecs.world?.playerEntity ?? null;
 }
 
 type NoteEvent = { status: number; d1: number; d2: number };
@@ -219,7 +220,7 @@ function refreshLocalMask(): void {
 
 /** Asks BandSystem to take the instrument out; `takenOut` / `refused` come back next frame. */
 export function takeOutInstrument(id: InstrumentId): void {
-  const world = Store.world;
+  const world = Ecs.world;
   if (!world?.playerEntity) return;
   runInAction(() => {
     Band.error = null;
@@ -254,7 +255,7 @@ export function refused(reason: TextKey): void {
 }
 
 export function putAwayInstrument(): void {
-  const world = Store.world;
+  const world = Ecs.world;
   stopPlaying();
   if (Band.role !== 'solo') leaveBand();
   transport.stop();
@@ -272,7 +273,7 @@ export function putAwayInstrument(): void {
 /** The proxy stopped this client's performance (a limit, or its own stop echoed). */
 export function stoppedByProxy(): void {
   const hero = heroEntity();
-  const world = Store.world;
+  const world = Ecs.world;
   if (hero && world) stopPerforming(world, hero);
   performanceEnded();
 }
@@ -384,7 +385,7 @@ export function joinBand(masterId: number, channelMask = ALL_CHANNELS): void {
   membership = { masterId, instrument, channelMask };
   runInAction(() => {
     Band.role = 'member';
-    Band.band = { masterId, members: [{ netId: Store.playerId ?? 0, instrument, channelMask }] };
+    Band.band = { masterId, members: [{ netId: Hero.playerId ?? 0, instrument, channelMask }] };
   });
   refreshLocalMask();
 }
@@ -401,7 +402,7 @@ export function leaveBand(): void {
 
 /** A member joined or left the hero's band (from the wire); the hero becomes / stays the master. */
 export function memberChanged(member: BandMember | null, netId: number): void {
-  const me = Store.playerId ?? 0;
+  const me = Hero.playerId ?? 0;
   const current = Band.band ?? { masterId: me, members: [] };
   const next = member ? withMember(current, member) : withoutMember(current, netId);
   runInAction(() => {
@@ -468,7 +469,7 @@ function placeRemote(remote: Remote): void {
  * audio always plays by net id; only the pose and the exact position wait.
  */
 function resolveEntity(remote: Remote): void {
-  const world = Store.world;
+  const world = Ecs.world;
   let entity = remote.entity;
   if (!entity || entity.objOutOfScope) {
     entity = world?.getByNetId(remote.netId) ?? null;
@@ -487,7 +488,7 @@ function resolveEntity(remote: Remote): void {
 }
 
 export function remoteStart(netId: number, instrument: InstrumentId, entity: NetEntity | null): void {
-  const world = Store.world;
+  const world = Ecs.world;
   if (!world) return;
   const existing = remotes.get(netId);
   if (existing && existing.instrument === instrument) return;
@@ -551,7 +552,7 @@ export function remoteStop(netId: number): void {
   if (!remote) return;
   remotes.delete(netId);
   remote.receiver.stop();
-  const world = Store.world;
+  const world = Ecs.world;
   if (world && remote.entity) stopPerforming(world, remote.entity);
   // Members were doubling this master; they are performers of their own and
   // keep their keys, only their doubling stops.
@@ -623,7 +624,7 @@ export function resetBand(): void {
   for (const netId of Array.from(remotes.keys())) remoteStop(netId);
   if (Band.instrument) {
     const hero = heroEntity();
-    const world = Store.world;
+    const world = Ecs.world;
     if (hero && world) stopPerforming(world, hero);
     performanceEnded();
   }

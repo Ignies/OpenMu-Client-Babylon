@@ -6,11 +6,11 @@ vi.hoisted(() => {
 });
 import { createHash } from 'node:crypto';
 import { EventBus } from '@/core/eventBus';
-import '@/app/store';
+import '@/app/logic';
 
 // Pins every packet's listeners and their order once the app has loaded (the order modules
 // install in is the order listeners run for a packet several modules handle). Whitespace is ignored.
-const LISTENERS_HASH = 'e95307bfa9ecca3fe8b106387309892ef70e4c81';
+const LISTENERS_HASH = '916cd5c0f76e7963419ca421ade0ed4a0721fc41';
 
 describe('packet listeners', () => {
   it('are the same functions in the same order', () => {

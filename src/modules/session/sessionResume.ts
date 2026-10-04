@@ -1,6 +1,8 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { t } from '../../i18n';
-import { Store } from '../../app/store';
+import { CharSelect } from '../character_select';
+import { Session } from './state';
+import { addNotification } from '../chat';
 import { GameOptions } from '@/controllers/settings';
 
 /** Getting back in after the connection drops: redial, send the same login, select the same
@@ -35,9 +37,9 @@ export const SessionResume = new (class _SessionResume {
   /** Whether a lost socket is worth resuming, rather than starting over. */
   private get resumable(): boolean {
     if (!GameOptions.autoReconnect) return false;
-    if (Store.isOffline) return false;
-    if (!Store.username || !Store.password) return false;
-    if (!Store.lastGameServer) return false;
+    if (Session.isOffline) return false;
+    if (!Session.username || !Session.password) return false;
+    if (!Session.lastGameServer) return false;
     // Only a character that was in the world: anything earlier is a screen
     // the player is already looking at, and can act on themselves.
     return !!this.character;
@@ -79,12 +81,12 @@ export const SessionResume = new (class _SessionResume {
   /** Cancel plus the ordinary "start over at the server list" path. */
   giveUp(reason: 'cancelled' | 'failed'): void {
     this.stop();
-    Store.addNotification(
+    addNotification(
       t(reason === 'cancelled' ? 'resume.cancelled' : 'resume.failed'),
       'error'
     );
-    Store.disconnectFromGameServer();
-    Store.playOnline();
+    Session.disconnectFromGameServer();
+    Session.playOnline();
   }
 
   private schedule(): void {
@@ -98,12 +100,12 @@ export const SessionResume = new (class _SessionResume {
     if (this.timer) clearTimeout(this.timer);
     this.timer = setTimeout(() => {
       this.timer = null;
-      const server = Store.lastGameServer;
+      const server = Session.lastGameServer;
       if (!server) {
         this.giveUp('failed');
         return;
       }
-      Store.connectToGameServer(server.host, server.port, server.fallbackHost);
+      Session.connectToGameServer(server.host, server.port, server.fallbackHost);
     }, wait);
   }
 
@@ -116,7 +118,7 @@ export const SessionResume = new (class _SessionResume {
     runInAction(() => {
       this.step = 'logging-in';
     });
-    Store.loginRequest(Store.username, Store.password);
+    Session.loginRequest(Session.username, Session.password);
     return true;
   }
 
@@ -126,8 +128,8 @@ export const SessionResume = new (class _SessionResume {
     runInAction(() => {
       this.step = 'selecting';
     });
-    Store.disconnectFromConnectServer();
-    Store.selectCharacterRequest(this.character);
+    Session.disconnectFromConnectServer();
+    CharSelect.selectCharacterRequest(this.character);
     return true;
   }
 
@@ -145,7 +147,7 @@ export const SessionResume = new (class _SessionResume {
   finish(): void {
     if (!this.active) return;
     this.stop();
-    Store.addNotification(t('resume.done'));
+    addNotification(t('resume.done'));
   }
 
   /**

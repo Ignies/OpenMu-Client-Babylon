@@ -3,7 +3,7 @@ import { t, type TextKey } from '@/i18n';
 import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { isKey } from '@/controllers/interface/keyBindings';
-import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { Messenger, type MessengerTab } from '@/modules/friends/messenger';
 import { ChatRooms } from '@/modules/chat/chatRooms';
 import {
@@ -407,7 +407,7 @@ const LetterSheet = observer(() => {
 
 export const FriendWindow = observer(() => {
   useEventBus('keyPressed', key => {
-    if (isKey(HOT_KEY, key) && Store.world?.playerEntity) Messenger.toggleWindow();
+    if (isKey(HOT_KEY, key) && Ecs.world?.playerEntity) Messenger.toggleWindow();
   });
 
   // Escape closes the read/write sheet first, then the window.

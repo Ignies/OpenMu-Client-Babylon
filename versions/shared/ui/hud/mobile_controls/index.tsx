@@ -1,6 +1,6 @@
 import './style.less';
 import { observer } from 'mobx-react-lite';
-import { Store, UIState } from '@/app/store';
+import { AppState, UIState } from '@/app/uiState';
 import { useIsMobile } from '@/controllers/interface/mobile';
 import { MoveButton } from './moveButton';
 import { MenuCluster } from './menuCluster';
@@ -19,7 +19,7 @@ export const MobileControls = observer(() => {
   // Not over the loading screen: `playerEntity` is plain per-frame state and
   // would not re-render this when it arrives, so the observable state is what
   // gates the pad.
-  if (Store.uiState !== UIState.World) return null;
+  if (AppState.uiState !== UIState.World) return null;
 
   return (
     <div className="mobile-controls">

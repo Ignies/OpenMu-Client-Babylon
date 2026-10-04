@@ -3,7 +3,10 @@ import { ENUM_WORLD } from '../../core/types';
 import { BaseClass, getBaseClass } from '../hero/characterStats';
 import type { Item } from '../../ecs/world';
 import { EventBus } from '../../core/eventBus';
-import { Store } from '../../app/store';
+import { Hero } from '../hero';
+import { Session } from '../session';
+import { addNotification } from '../chat';
+import { Ecs } from '../../ecs/current';
 import {
   BloodCastleEnterRequestPacket,
   MiniGameOpeningStateRequestPacket,
@@ -222,7 +225,7 @@ export function inBloodCastle(map: ENUM_WORLD): boolean {
 
 /** `OpenningProcess` + `Render`: build the buttons and show the window. */
 export function openBloodCastle(): void {
-  const pd = Store.playerData;
+  const pd = Hero;
   const row = LOWER_LIMIT_CLASSES.has(getBaseClass(pd.charClass)) ? 1 : 0;
   const { buttons, active } = entryButtons(
     BLOOD_CASTLE_LEVELS,
@@ -252,7 +255,7 @@ export function enterBloodCastle(grade: number): void {
   const packet = BloodCastleEnterRequestPacket.createPacket();
   packet.CastleLevel = grade + 1;
   packet.TicketItemInventoryIndex = NO_TICKET_SLOT;
-  Store.sendToGS(packet.buffer);
+  Session.sendToGS(packet.buffer);
 }
 
 /**
@@ -265,7 +268,7 @@ function useTicket(_slot: number, item: Item): boolean {
 
   const level = item.lvl ?? 0;
   if (level === 0) {
-    Store.addNotification(EVENT_TEXT.cloakLevelWrong, 'error', MESSAGE_MS);
+    addNotification(EVENT_TEXT.cloakLevelWrong, 'error', MESSAGE_MS);
     return true;
   }
 
@@ -273,7 +276,7 @@ function useTicket(_slot: number, item: Item): boolean {
   const packet = MiniGameOpeningStateRequestPacket.createPacket();
   packet.EventType = OPENING_STATE_GAME.bloodCastle;
   packet.EventLevel = level - 1;
-  Store.sendToGS(packet.buffer);
+  Session.sendToGS(packet.buffer);
   return true;
 }
 
@@ -324,7 +327,7 @@ function sayArchangelLine(dialog: number): void {
   const key = ARCHANGEL_TEXT[dialog];
   if (!key) return;
   lastArchangelLine = { dialog, at: performance.now() };
-  Store.addNotification(EVENT_TEXT[key], 'info', ARCHANGEL_MESSAGE_MS);
+  addNotification(EVENT_TEXT[key], 'info', ARCHANGEL_MESSAGE_MS);
 }
 
 /**
@@ -349,7 +352,7 @@ export function archangelDialog(dialog: number): boolean {
  */
 function archangelAnswer(): number {
   if (weaponReturned) return ARCHANGEL_DIALOG.weaponFound;
-  const carrying = Store.playerData.items.some(
+  const carrying = Hero.items.some(
     item => item?.group === WEAPON_OF_ARCHANGEL.group && item.num === WEAPON_OF_ARCHANGEL.num
   );
   if (state.timer.running && carrying) {
@@ -366,7 +369,7 @@ function archangelAnswer(): number {
  */
 function useNpc(npc: { npcType: number }): boolean {
   if (npc.npcType !== ARCHANGEL_NPC) return false;
-  const map = Store.world?.mapIndex;
+  const map = Ecs.world?.mapIndex;
   if (map === undefined || !MAPS.has(map)) return false;
   sayArchangelLine(archangelAnswer());
   return false;
@@ -407,7 +410,7 @@ EventBus.on('BloodCastleEnterResult', packet => {
           : formatText(EVENT_TEXT.killersRestricted, EVENT_TEXT.bloodCastle);
       break;
   }
-  if (text) Store.addNotification(text, 'error', MESSAGE_MS);
+  if (text) addNotification(text, 'error', MESSAGE_MS);
 });
 
 /** `ReceiveEventZoneOpenTime`, Value 2: the cloak's answer. */
@@ -421,7 +424,7 @@ EventBus.on('MiniGameOpeningState', packet => {
   if (takeOpeningState(OPENING_STATE_GAME.bloodCastle, minutes)) return;
 
   const zone = EVENT_TEXT.bloodCastleZone;
-  Store.addNotification(
+  addNotification(
     minutes === 0
       ? formatText(EVENT_TEXT.enterNow, zone)
       : formatText(EVENT_TEXT.enterAfterMinutes, minutes, zone),

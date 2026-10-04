@@ -1,4 +1,4 @@
-import { CURSOR_HOTSPOT, CURSOR_SIZE } from '../game_cursor/cursors';
+import { CURSOR_HOTSPOT, CURSOR_SIZE } from '@/controllers/interface/components/game_cursor';
 
 const MARGIN = 2;
 /** Breathing room between the cursor art and the box. */

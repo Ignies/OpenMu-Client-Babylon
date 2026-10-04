@@ -2,11 +2,11 @@
 
 Objects entering and leaving the hero's view: players, NPCs and monsters, summons, transformed
 players, plus their moves and equipment changes. The entities live in the ECS world
-(`Store.world`); this folder has no state of its own.
+(`Ecs.world`); this folder has no state of its own.
 
 ## Public API
 - `spawnPlayer(world, { cls })`: adds a bare player entity (player rig, class scale, empty
-  appearance). Re-exported by `src/app/logic.ts`; used by `Store` and
+  appearance). Re-exported by `src/app/logic.ts`; used by `app/offline.ts` and
   `ecs/systems/characterSelectSystem.ts`.
 
 ## How it works
@@ -24,7 +24,7 @@ players, plus their moves and equipment changes. The entities live in the ECS wo
 - Leaving scope sets `objOutOfScope`; a player fading out after a teleport is deferred
   (`deferLeave` in `ecs/systems/teleportSystem.ts`). The personal shop title goes with him.
 - Appearance changes (0x25, `ReceiveChangePlayer`) only touch other players; the hero's look comes
-  from the inventory (`Store.syncPlayerAppearance`).
+  from the inventory (`Hero.syncPlayerAppearance`).
 
 ## Packets
 - `AddNpcsToScope`: NPCs and monsters enter view.
@@ -42,7 +42,7 @@ players, plus their moves and equipment changes. The entities live in the ECS wo
 - uses: `_shared/net_helpers.ts`, `economy` (shop titles), `controllers/item_rules/itemSerializer`,
   `core/inventoryConstants`, `controllers/actors`, `ecs/systems/teleportSystem`,
   `versions/shared/skills/skillVisuals` (`playSummonArrival`).
-- used by: `src/app/logic.ts` (import and `spawnPlayer` re-export), `src/app/store.ts`,
+- used by: `src/app/logic.ts` (import and `spawnPlayer` re-export), `src/app/offline.ts`,
   `ecs/systems/characterSelectSystem.ts`. `warp/warpScopeHold.ts` holds these packets back while
   a map loads.
 

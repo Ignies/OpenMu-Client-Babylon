@@ -2,7 +2,7 @@ import { createMovableFlare, type MovableFlare } from '@/controllers/lighting/ef
 import { lightMapObject } from '@/controllers/lighting/mapObjectLights';
 import { DEVIAS_CANDELABRA } from './spec';
 import type { LightSource } from '@/controllers/lighting/lightSource';
-import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import type { World } from '@/ecs/world';
 import type { BonedEmission } from '@/controllers/fx/effectParticles';
 import { CandleObject } from '../lorencia/candleObject';
@@ -153,7 +153,7 @@ export class DeviasCandleObject extends CandleObject {
 
     if (!this.Ready || this.wicks.length === 0) return;
 
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
 
     if (!this.#lit) {

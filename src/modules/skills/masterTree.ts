@@ -14,7 +14,9 @@ import { downloadDataFile } from '../../controllers/assets/mu/dataFolder';
 import { decodeLocalText, downloadLocalDataFile } from '../../controllers/assets/mu/localData';
 import { convertBux } from '../../controllers/terrain/mapFileEncryption';
 import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
-import { Store } from '../../app/store';
+import { HeroSkills } from './state';
+import { Hero } from '../hero';
+import { Session } from '../session';
 import type { SkillLayer } from './layer';
 import { isWeaponSkill, skillRequirementsMet } from './usability';
 import { masterLevelUpPoints, setMasterLevelUpPoints } from './masterLevel';
@@ -341,7 +343,7 @@ export function masterTreeDataLoaded(): boolean {
 }
 
 /** The tree the hero's class line uses, `None` for an unknown class. */
-function masterTreeClass(charClass = Store.playerData.charClass): MasterTreeClass {
+function masterTreeClass(charClass = Hero.charClass): MasterTreeClass {
   return TREE_CLASS[charClass] ?? MasterTreeClass.None;
 }
 
@@ -445,7 +447,7 @@ function masterBaseSkillMet(entry: MasterTreeEntry): boolean {
   const brand = skillAttributes[entry.skill]?.brand ?? 0;
   if (!brand) return true;
   if (skillAttributes[brand]?.useType === SKILL_USE_TYPE_INNATE) return true;
-  return Store.skills.some(s => s.number === brand);
+  return HeroSkills.skills.some(s => s.number === brand);
 }
 
 /**
@@ -567,7 +569,7 @@ export function masterSkillTooltipLines(entry: MasterTreeEntry): MasterTooltipLi
 export function learnMasterSkill(skill: number): void {
   const packet = AddMasterSkillPointPacket.createPacket();
   packet.SkillId = skill;
-  Store.sendToGS(packet.buffer);
+  Session.sendToGS(packet.buffer);
 }
 
 EventBus.on('MasterSkillList', packet => {

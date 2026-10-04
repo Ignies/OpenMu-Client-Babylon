@@ -7,7 +7,8 @@ import { runInAction } from 'mobx';
 import { useEffect, useRef, useState } from 'react';
 import { EventBus } from '@/core/eventBus';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
-import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
+import { MsgBox } from '@/controllers/interface';
 import { GameOptions } from '@/controllers/settings';
 import { StatAllocation } from '@/modules/hero/statAllocation';
 import { clampAmount, needsConfirm } from '@/modules/hero/statAmounts';
@@ -128,12 +129,12 @@ const SHIFT_AMOUNT = 10;
 
 /** True while the confirmation raised by a `+` is on screen. */
 function asking(): boolean {
-  return Store.msgWin?.code === MsgWinCode.ConfirmAddPoints;
+  return MsgBox.msgWin?.code === MsgWinCode.ConfirmAddPoints;
 }
 
 /** The question in front of a big run: Yes starts it, No changes nothing. */
 function askToAdd(stat: StatType, wanted: number): void {
-  Store.popUpMsgWin(
+  MsgBox.popUpMsgWin(
     MsgWinCode.ConfirmAddPoints,
     { count: wanted, stat: getStatName(stat) },
     () => StatAllocation.start(stat, wanted)
@@ -158,7 +159,7 @@ const StatRow = observer(
     detailX?: number;
     firstDy?: number;
   }) => {
-    const points = Store.playerData.points;
+    const points = Hero.points;
     const hasPoints = points > 0;
     const amounts = GameOptions.statPointAmounts;
 
@@ -173,7 +174,7 @@ const StatRow = observer(
 
     const press = () => {
       if (!amounts) {
-        Store.increaseStatRequest(stat);
+        Hero.increaseStatRequest(stat);
         return;
       }
       if (mine) {
@@ -348,7 +349,7 @@ function stageStatPoints(): (() => void) | undefined {
   if (points === null) return;
 
   runInAction(() => {
-    Store.playerData.points = points;
+    Hero.points = points;
     MuWindows.setOpen('character_info', true);
   });
 
@@ -362,7 +363,7 @@ function stageStatPoints(): (() => void) | undefined {
     EventBus.off('warpCompleted', begin);
 
     const amount = confirm ?? wanted ?? 0;
-    const clamped = clampAmount(amount, Store.playerData.points);
+    const clamped = clampAmount(amount, Hero.points);
     if (clamped <= 0) return;
 
     if (confirm !== null) askToAdd(StatType.Strength, clamped);
@@ -374,7 +375,7 @@ function stageStatPoints(): (() => void) | undefined {
 }
 
 export const CharacterInfo = observer(() => {
-  const playerData = Store.playerData;
+  const playerData = Hero;
   const run = StatAllocation.run;
 
   useEventBus('keyPressed', key => {
@@ -392,7 +393,7 @@ export const CharacterInfo = observer(() => {
   useEffect(() => {
     if (open) return;
     StatAllocation.cancel();
-    if (asking()) Store.closeMsgWin();
+    if (asking()) MsgBox.closeMsgWin();
   }, [open]);
 
   useEffect(() => stageStatPoints(), []);

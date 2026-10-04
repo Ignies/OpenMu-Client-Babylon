@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CURSOR_HOTSPOT, CURSOR_SIZE } from '../game_cursor/cursors';
+import { CURSOR_HOTSPOT, CURSOR_SIZE } from '@/controllers/interface/components/game_cursor/cursors';
 import { place, placePair } from './placement';
 
 const VIEWPORT = { width: 1280, height: 720 };

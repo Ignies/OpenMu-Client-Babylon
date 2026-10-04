@@ -14,7 +14,7 @@ import { effectLight } from '@/controllers/lighting/recipes';
 import { effects } from '@/controllers/fx';
 import { fenrirVariant } from '@/controllers/pets';
 import { playCombat } from '@/controllers/sound/combat';
-import { storeRef } from '@/app/storeRef';
+import { Ecs } from '@/ecs/current';
 
 // Plasma Storm (76).
 
@@ -159,7 +159,7 @@ function fenrirCoil(c: SkillContext, colour: RGB): void {
  * only while this client holds Left Ctrl, ten at most (ZzzCharacter.cpp:4610-4643).
  */
 function plasmaTargets(caster: Entity): Entity[] {
-  const world = storeRef().world;
+  const world = Ecs.world;
   if (!world || !caster.transform) return [];
   let ctrl = false;
   try {

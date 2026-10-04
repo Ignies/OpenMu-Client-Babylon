@@ -1,3 +1,4 @@
+import { makeObservable, observable } from 'mobx';
 import type { TextKey } from '../../i18n';
 import { t } from '../../i18n';
 
@@ -101,3 +102,39 @@ export function formatMsgWinText(code: MsgWinCode, arg?: MsgWinArg): string {
 
   return t(key, arg);
 }
+
+/**
+ * The message box that is up (`CMsgWin`), drawn by `components/msg_window`. `popUpMsgWin` raises one;
+ * `onOk` is what its Yes does (it gets the box's input text, the resident number of a delete).
+ */
+export const MsgBox = new (class {
+  msgWin: { code: MsgWinCode; text: string } | null = null;
+
+  /**
+   * What the Yes of the box currently up does, when it was raised with one
+   * (the valuable-item confirmations). Kept off `msgWin` so the observable
+   * state stays plain data.
+   */
+  private msgWinOk: ((input: string) => void) | null = null;
+
+  constructor() {
+    makeObservable(this, { msgWin: observable });
+  }
+
+  popUpMsgWin(code: MsgWinCode, arg?: MsgWinArg, onOk?: (input: string) => void): void {
+    this.msgWin = { code, text: formatMsgWinText(code, arg) };
+    this.msgWinOk = onOk ?? null;
+  }
+
+  /** The Yes handler of the box that is up, cleared as it is handed over. */
+  takeMsgWinOk(): ((input: string) => void) | null {
+    const onOk = this.msgWinOk;
+    this.msgWinOk = null;
+    return onOk;
+  }
+
+  closeMsgWin(): void {
+    this.msgWin = null;
+    this.msgWinOk = null;
+  }
+})();

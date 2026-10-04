@@ -3,7 +3,8 @@ import { t } from '@/i18n';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { observable, runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import { Store } from '@/app/store';
+import { Hero } from '@/modules/hero';
+import { Ecs } from '@/ecs/current';
 import { isKey } from '@/controllers/interface/keyBindings';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { playUiSound, uiClick } from '@/controllers/sound/sfx';
@@ -502,7 +503,7 @@ const QuestProgressWindow = observer(() => {
       <Separator y={QP_LINE_Y} />
 
       {mode !== 'requestReward' && (
-        <Line y={QP_PLAYER_NAME_Y} left={QP_TEXT_X} text={Store.playerData.name} bold color={COLOR.heroName} />
+        <Line y={QP_PLAYER_NAME_Y} left={QP_TEXT_X} text={Hero.name} bold color={COLOR.heroName} />
       )}
 
       {mode === 'playerWords' && (
@@ -858,7 +859,7 @@ const CastleTempleTab = () => (
 /** `CNewUIMyQuestInfoWindow` (T): the quest log with its three tabs. */
 const MyQuestInfoWindow = observer(() => {
   useEventBus('keyPressed', key => {
-    if (isKey(HOT_KEY, key) && Store.world?.playerEntity) quests.toggleLog();
+    if (isKey(HOT_KEY, key) && Ecs.world?.playerEntity) quests.toggleLog();
     if (key === 'Escape' && quests.anyWindowOpen) quests.closeAll();
   });
 
