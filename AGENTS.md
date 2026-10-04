@@ -8,10 +8,11 @@ Details live next to the code: every folder has a `readme.md`.
 
 ```
 src/            engine: the same for every game version
-  app/          boot, the page state, the list of packet handlers (logic.ts), map-change reset (lifecycle.ts)
+  app/          boot, the root component, module install (logic.ts), map-change reset (lifecycle.ts)
   core/         small pure helpers: types, math, event bus, storage
   controllers/  one folder per controller; the game starts them from controllers.ts
-  modules/      one folder per gameplay module: net.ts (packets in), state.ts, index.ts (its door)
+  modules/      one folder per gameplay module: module.ts (core or optional), net.ts (packets in),
+                state.ts, index.ts (its door)
   ecs/          the entity world and its per-frame systems
   version/      the version seam: which game version is running
 versions/       content, per game version
@@ -20,7 +21,7 @@ versions/       content, per game version
   season6/      Season 6 Episode 3: data paths, packet set, ui overrides
   v097d/        0.97d
   registry.ts   every version the client ships
-tools/          converters, codegen, restructure and check scripts
+tools/          converters, generators, checks and codemods (tools/readme.md)
 docs/           how things fit together and how to change them
 ```
 
@@ -51,7 +52,10 @@ How agents work here (workflow, roles, tools, where things are): [docs/agents/](
 | add a skill | add `<class>/<skill>/index.ts` with `export default defineSkill({...})`; it is found by glob |
 | change how all effects / sounds / lights work | the controller folder in `src/controllers/` |
 | handle a new packet | `src/modules/<module>/net.ts` (listener order: `src/modules/modules.ts`) |
+| add a module a server can switch off | `src/modules/<module>/module.ts` and one line in `modules.ts`; it registers listeners in `install`, never at load |
 | add gameplay state or read it from a window | `src/modules/<module>/state.ts`, through the module's `index.ts` |
+| add an Enhanced / Ultra improvement (an Options toggle) | `versions/shared/improvements/<name>.ts` ([docs/how_to/add_improvement.md](docs/how_to/add_improvement.md)) |
+| add or change text | the owner's `i18n/en.ts` (and every other language file) ([docs/how_to/add_text.md](docs/how_to/add_text.md)) |
 | add a texture pack | build it into `public/packs/<pack>/`, list it in `public/packs/index.json` |
 | redraw a window or panel | `versions/shared/ui/windows/<window>/index.tsx` |
 | change one version only | `versions/<id>/` (override), never an `if (version)` in `src/` |
@@ -79,7 +83,7 @@ bun install
 bun run tsc          # type check
 bun run test         # vitest (client + tools)
 bun run test:server  # bun test for the marketplace service
-bun run check        # dependency direction, readmes, doc names, no em-dash
+bun run check        # dependency direction, controller public files, import cycles, readmes, doc names, no em-dash
 bun run check:lint   # eslint; fails if any rule's count rises
 bunx vite build      # production build
 ```
