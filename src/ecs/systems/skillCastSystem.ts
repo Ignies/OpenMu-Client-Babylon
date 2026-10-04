@@ -1,5 +1,5 @@
 import type { Entity, ISystemFactory } from '../world';
-import { Store } from '../../app/store';
+import { Bag } from '../../modules/inventory';
 import { Hero } from '../../modules/hero';
 import { Session } from '../../modules/session';
 import { applyPlayerActionSpeed, serverMinAttackInterval } from '../../controllers/anim/playSpeed';
@@ -251,13 +251,13 @@ export const SkillCastSystem: ISystemFactory = world => {
         flag: world.getTerrainFlag(to.x, to.y),
         heroInSafeZone: inSafeZone,
         disabled,
-        holdingItem: !!Store.pickedItem,
+        holdingItem: !!Bag.pickedItem,
         busy: teleportGate.isPending(now) || teleportBusy(hero),
         sinceMapChange: teleportGate.sinceMapChange(now),
       });
       if (refusal) return false;
     } else {
-      if (inSafeZone || Store.pickedItem || !isPartyAlly(target, hero)) return false;
+      if (inSafeZone || Bag.pickedItem || !isPartyAlly(target, hero)) return false;
       const mate = target!;
       const allyPos = mate.transform!.pos;
       if (

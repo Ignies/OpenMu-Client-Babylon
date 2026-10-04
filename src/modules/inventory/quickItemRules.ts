@@ -56,7 +56,7 @@ export type BuyRunState = {
   item: Item | null;
   price: number;
   money: number;
-  /** `Store.findFreeSquare` on the inventory; -1 when nothing fits. */
+  /** `Bag.findFreeSquare` on the inventory; -1 when nothing fits. */
   freeSquare: number;
   /** The merchant said no to the last purchase. */
   refused: boolean;

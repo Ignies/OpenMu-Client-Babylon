@@ -2,7 +2,7 @@ import { MuWindows } from '@/controllers/interface/windowManager';
 import './style.less';
 import { t } from '@/i18n';
 import { observer } from 'mobx-react-lite';
-import { Store } from '@/app/store';
+import { Bag } from '@/modules/inventory';
 import { Economy, MIX_MENU } from '@/modules/economy/economy';
 import { StorageKind } from '@/modules/inventory/itemStorage';
 import { MuButton } from '@/controllers/interface/components/mu_button';
@@ -52,7 +52,7 @@ const WINDOW_ID = 'chaos-machine';
 export const ChaosMachine = observer(() => {
   if (!Economy.mixOpen) return null;
 
-  const picked = Store.pickedItem;
+  const picked = Bag.pickedItem;
   // The Chaos Card Master shares this window (`MIXTYPE_CHAOS_CARD` in the
   // original's CNewUIMixInventory): no recipe menu, its own title and hint.
   const cardMode = Economy.mixKind === 'chaosCard';
@@ -119,12 +119,12 @@ export const ChaosMachine = observer(() => {
         rows={ROWS}
         left={GRID_X}
         top={GRID_Y}
-        disabled={Economy.mixPending || !!Store.pendingItemMove}
+        disabled={Economy.mixPending || !!Bag.pendingItemMove}
         dropTint={picked ? 'ok' : 'none'}
-        onPick={square => Store.pickItem(StorageKind.ChaosMachine, square)}
-        onPlace={square => Store.placePickedItem(square, StorageKind.ChaosMachine)}
+        onPick={square => Bag.pickItem(StorageKind.ChaosMachine, square)}
+        onPlace={square => Bag.placePickedItem(square, StorageKind.ChaosMachine)}
         onUse={square =>
-          Store.autoMoveItem(
+          Bag.autoMoveItem(
             StorageKind.ChaosMachine,
             square,
             StorageKind.Inventory

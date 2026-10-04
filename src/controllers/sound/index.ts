@@ -46,8 +46,10 @@ export {
   UI_BUS,
   UI_SOUNDS,
   UI_SOUND_KEYS,
+  consumeSound,
   playUiSound,
   uiClick,
+  upgradedItemSound,
 } from './ui';
 export {
   COMBAT_BUS,

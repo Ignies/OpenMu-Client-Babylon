@@ -2,7 +2,7 @@ import { MuWindows } from '@/controllers/interface/windowManager';
 import { t, type TextKey } from '../../i18n';
 import { makeObservable, observable, action, runInAction } from 'mobx';
 import { prefetchItemIcons } from '../../controllers/assets/itemIconPack';
-import { Store } from '../../app/store';
+import { Bag } from '../inventory';
 import { Hero } from '../hero';
 import { Session } from '../session';
 import { addNotification } from '../chat';
@@ -324,7 +324,7 @@ const emptyGrid = (size: number) => new Array<Item | null>(size).fill(null);
  *
  * They live beside `Store` the way `Social` does: `Store` owns the hero's
  * inventory and the shared picked-item cursor, this owns the grids that only
- * exist while one of these windows is open. `Store.itemsOfStorage` resolves a
+ * exist while one of these windows is open. `Bag.itemsOfStorage` resolves a
  * `StorageKind` to one of them, so the pick / place / move code is written
  * once and knows nothing about which window is up.
  */
@@ -494,8 +494,8 @@ export const Economy = new (class _Economy {
    * leave an item from its grid hanging off the cursor.
    */
   private returnPickedFrom(storage: StorageKind): void {
-    if (Store.pickedItem?.fromStorage !== storage) return;
-    Store.cancelPickedItem();
+    if (Bag.pickedItem?.fromStorage !== storage) return;
+    Bag.cancelPickedItem();
   }
 
   // =========================================================================
@@ -722,7 +722,7 @@ export const Economy = new (class _Economy {
     // Only what is in - or was lifted out of - the tray blocks the close; a
     // jewel carried from the inventory (one a refused upgrade left on the
     // cursor, say) is not the goblin's business.
-    const pickedFromTray = Store.pickedItem?.fromStorage === StorageKind.ChaosMachine;
+    const pickedFromTray = Bag.pickedItem?.fromStorage === StorageKind.ChaosMachine;
     if (notify && (this.mixItems.some(Boolean) || pickedFromTray)) {
       Social.errorMessage(t('chaos.takeItemsOut'));
       return false;
@@ -958,7 +958,7 @@ export const Economy = new (class _Economy {
   }
 
   toggleMyConfirm(): void {
-    if (Store.pickedItem) return;
+    if (Bag.pickedItem) return;
     this.setMyConfirm(!this.myTradeConfirm);
   }
 
@@ -985,7 +985,7 @@ export const Economy = new (class _Economy {
   /** The X / Escape (`ProcessCloseBtn` → `SendTradeCancel`). */
   cancelTrade(): void {
     if (!this.tradeOpen) return;
-    if (Store.pickedItem) return;
+    if (Bag.pickedItem) return;
 
     Session.sendToGS(TradeCancelPacket.createPacket().buffer);
   }
@@ -1320,6 +1320,26 @@ export const Economy = new (class _Economy {
     Social.errorMessage(t(reason[result] ?? 'personalShop.purchaseFailed'));
   }
 })();
+
+// The grids the bag moves items through (`Bag.itemsOfStorage`); the bag does not import this module.
+Bag.grids = {
+  items: storage => {
+    switch (storage) {
+      case StorageKind.Vault:
+        return Economy.vaultItems;
+      case StorageKind.Trade:
+        return Economy.myTradeItems;
+      case StorageKind.ChaosMachine:
+        return Economy.mixItems;
+      case StorageKind.PersonalShop:
+        return Economy.myShopItems;
+      default:
+        return [];
+    }
+  },
+  mixWireStorage: () => Economy.mixWireStorage,
+  storageOpen: () => Economy.autoMoveTarget !== null,
+};
 
 // A hot update that reaches this module must reload the page: Vite would
 // otherwise re-execute it and hand later-loaded importers a second instance

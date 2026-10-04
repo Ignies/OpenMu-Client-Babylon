@@ -1,5 +1,6 @@
 import { PointerEventTypes } from '../../controllers/render/babylon/exports';
 import { Store } from '../../app/store';
+import { Bag } from '../../modules/inventory';
 import { events } from '../../modules/events';
 import { quests } from '../../modules/quests';
 import type { Entity, ISystemFactory } from '../world';
@@ -69,7 +70,7 @@ export const NpcTalkSystem: ISystemFactory = world => {
     if (event.type !== PointerEventTypes.POINTERDOWN) return;
     if (event.event.button !== 0) return;
 
-    if (Store.pendingItemMove || Store.pickedItem) return;
+    if (Bag.pendingItemMove || Bag.pickedItem) return;
 
     const target = world.currentPointerTarget;
     if (!target || !isTalkableNpc(target) || Store.npcShop) {

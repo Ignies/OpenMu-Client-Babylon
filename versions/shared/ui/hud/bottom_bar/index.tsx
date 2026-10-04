@@ -2,7 +2,7 @@ import { uiClick } from '@/controllers/sound/sfx';
 import { t } from '@/i18n';
 import './style.less';
 import { observer } from 'mobx-react-lite';
-import { Store } from '@/app/store';
+import { Bag } from '@/modules/inventory';
 import { MuHelper } from '@/modules/mu_helper';
 import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
@@ -134,11 +134,11 @@ const Gauge = ({
  */
 const ConsumableItem = observer(({ index, hotKey }: { index: number; hotKey: string }) => {
   const items = Hero.items;
-  const hotkey = Store.itemHotkeys[index];
+  const hotkey = Bag.itemHotkeys[index];
   const slot = findHotkeyItem(items, index, hotkey);
   const icon: Item | null = slot >= 0 ? items[slot] : null;
   const count = slot >= 0 ? countHotkeyItems(items, index, hotkey) : 0;
-  const picked = Store.pickedItem;
+  const picked = Bag.pickedItem;
   const canBind = !!picked && canRegisterItemHotkey(picked.item);
   const name = icon ? itemBaseName(icon.group, icon.num) : undefined;
 
@@ -161,13 +161,13 @@ const ConsumableItem = observer(({ index, hotKey }: { index: number; hotKey: str
           if (event.button !== 0 || !picked) return;
           event.stopPropagation();
           if (!canBind) return;
-          Store.setItemHotkey(index, picked.item);
-          Store.cancelPickedItem();
+          Bag.setItemHotkey(index, picked.item);
+          Bag.cancelPickedItem();
         }}
         onContextMenu={event => {
           event.preventDefault();
           event.stopPropagation();
-          Store.useItemHotkey(index);
+          Bag.useItemHotkey(index);
         }}
       >
         {!!icon && <ItemIcon item={icon} />}
@@ -192,7 +192,7 @@ const ConsumableItems = () => {
     // Ctrl+key over the inventory binds; that is the inventory's job.
     const keys = Ecs.world?.keyboardInput.pressedKeys;
     if (keys && (keys.has('ControlLeft') || keys.has('ControlRight'))) return;
-    Store.useItemHotkey(i);
+    Bag.useItemHotkey(i);
   });
 
   return (

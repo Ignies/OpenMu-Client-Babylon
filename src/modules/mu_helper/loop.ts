@@ -1,4 +1,5 @@
 import { Store } from '../../app/store';
+import { Bag } from '../inventory';
 import { Pets } from '../pets';
 import { HeroSkills } from '../skills';
 import { Hero } from '../hero';
@@ -334,7 +335,7 @@ function recoverHealth(world: World, hero: Entity, config: MuHelperConfig): bool
 
   if (config.useHealPotion && hpPercent <= config.potionThreshold) {
     const slot = findHealingPotionSlot();
-    if (slot >= 0) Store.consumeItemRequest(slot);
+    if (slot >= 0) Bag.consumeItemRequest(slot);
   }
 
   return true;

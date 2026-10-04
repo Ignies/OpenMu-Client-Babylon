@@ -20,6 +20,7 @@ import {
 } from '@versions/shared/packets/ClientToServerPackets';
 import { EventBus } from '../../core/eventBus';
 import { Store } from '../../app/store';
+import { Bag } from '../inventory';
 import { Hero } from '../hero';
 import { Session } from '../session';
 import { addNotification } from '../chat';
@@ -115,7 +116,7 @@ function entryFor(npcType: number): BalgassEntryKind | null {
 export function talkToBalgassNpc(npc: NpcTarget): boolean {
   const kind = entryFor(npc.npcType);
   // `talkToNpc` ignores a click behind a shop or a held item; so does the box.
-  if (!kind || Store.pendingItemMove || Store.npcShop) return false;
+  if (!kind || Bag.pendingItemMove || Store.npcShop) return false;
 
   // Offline, a talk opens the test merchant; only the `HideAll` half applies.
   if (Session.isOffline) EventBus.emit('npcTalkStarted', { npcType: npc.npcType });

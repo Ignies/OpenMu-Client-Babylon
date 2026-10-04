@@ -1,5 +1,5 @@
 import type { Entity, ISystemFactory } from '../world';
-import { Store } from '../../app/store';
+import { Bag } from '../../modules/inventory';
 import { HeroSkills } from '../../modules/skills';
 import { Hero } from '../../modules/hero';
 import { Session } from '../../modules/session';
@@ -66,12 +66,12 @@ let lastReload = { from: -1, at: 0 };
  * same move a drag sends. True while the swing should wait for it.
  */
 function reloadAmmo(hands: Hands): boolean {
-  if (Store.pendingItemMove) return true;
-  if (Store.pickedItem) return false;
+  if (Bag.pendingItemMove) return true;
+  if (Bag.pickedItem) return false;
 
   const reload = ammoReload(
     hands,
-    Store.itemsOfStorage(StorageKind.Inventory),
+    Bag.itemsOfStorage(StorageKind.Inventory),
     InventoryConstants.EquippableSlotsCount,
     InventoryConstants.LeftHandSlot,
     InventoryConstants.RightHandSlot
@@ -85,7 +85,7 @@ function reloadAmmo(hands: Hands): boolean {
   const now = performance.now();
   if (reload.from === lastReload.from && now - lastReload.at < RELOAD_RETRY_MS) return false;
   lastReload = { from: reload.from, at: now };
-  if (!Store.moveItemToSquare(StorageKind.Inventory, reload.from, reload.to)) return false;
+  if (!Bag.moveItemToSquare(StorageKind.Inventory, reload.from, reload.to)) return false;
   addNotification(t('notify.arrowsReloaded'));
   return true;
 }

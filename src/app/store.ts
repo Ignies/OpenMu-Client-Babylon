@@ -3,10 +3,8 @@ import { t } from '../i18n';
 import { characterSkinBody } from '../controllers/actors/transformedBody';
 import type { PlayerObject } from '../controllers/actors/playerObject';
 import { playUiSound } from '../controllers/sound/sfx';
-import { consumeSound, upgradedItemSound } from '../controllers/sound/ui';
 import { CharacterClassNumber, ENUM_WORLD } from '@/core/types';
-import { ConsumeItemRequestPacket, DropItemRequestPacket, ItemMoveRequestPacket, TalkToNpcRequestPacket, CloseNpcRequestPacket, PetTypeEnum, BuyItemFromNpcRequestPacket, SellItemToNpcRequestPacket, RepairItemRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
-import { NetStats } from '../controllers/net/roundTrip';
+import { TalkToNpcRequestPacket, CloseNpcRequestPacket, PetTypeEnum, BuyItemFromNpcRequestPacket, SellItemToNpcRequestPacket, RepairItemRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
 import {
   makeObservable,
   observable,
@@ -19,11 +17,8 @@ import { Item } from '../ecs/world';
 import { EventBus } from '../core/eventBus';
 import { InventoryConstants } from '@/core/inventoryConstants';
 import { findFreeSlot, type Footprint } from '../modules/inventory/inventoryFit';
-import { jewelTargetError } from '../modules/inventory/jewelUpgrade';
 import { ItemGroups } from '@versions/shared/objects/enum';
-import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { prefetchItemIcons } from '../controllers/assets/itemIconPack';
-import { ItemSerializer } from '@/controllers/item_rules';
 import {
   isRepairBanned,
   isSellingBanned,
@@ -32,25 +27,8 @@ import {
   repairAllCost,
   repairCost,
 } from '@/controllers/item_rules';
-import { calcMaxDurability, itemDef, itemStats, type HeroStats } from '@/controllers/item_rules';
-import { learnableSkill } from '@/controllers/item_rules';
-import { learnSkillError } from '@/modules/skills/skillItems';
-import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
-import {
-  StorageKind,
-  gridFirstIndex,
-  storageBan,
-  storageColumns,
-  storageRows,
-  wireSlotOf,
-} from '../modules/inventory/itemStorage';
-import {
-  HOTKEY_COUNT,
-  ItemHotkey,
-  UNBOUND_HOTKEY,
-  canRegisterItemHotkey,
-  findHotkeyItem,
-} from '../modules/inventory/itemHotkeys';
+import { calcMaxDurability, itemDef, type HeroStats } from '@/controllers/item_rules';
+import { StorageKind } from '../modules/inventory/itemStorage';
 import { spawnPlayer } from './logic';
 import { devVitalPercent } from '../core/devSeams';
 import { Economy } from '../modules/economy/economy';
@@ -60,9 +38,7 @@ import { addNotification } from '../modules/chat';
 import { Session } from '../modules/session';
 import { Hero } from '../modules/hero';
 import { Pets } from '../modules/pets';
-import { HeroSkills } from '../modules/skills';
-
-const ITEM_MOVE_TIMEOUT = 5000;
+import { ITEM_MOVE_TIMEOUT, itemSize, Bag } from '../modules/inventory';
 
 /** `CNewUINPCShop`'s item control: 8 columns × 15 rows. */
 export const SHOP_COLUMNS = 8;
@@ -90,23 +66,6 @@ export type NpcShop = {
 };
 
 type NpcTarget = { netId: number; name: string; npcType: number };
-
-/**
- * `CNewUIPickedItem`: the item hanging off the cursor, together with the
- * grid it was lifted out of. The storage matters because the move packet
- * carries both ends (`FromStorage` / `ToStorage`) and because a refusal has
- * to put the item back where it came from.
- */
-type PickedItem = {
-  item: Item;
-  fromSlot: number;
-  fromStorage: StorageKind;
-};
-
-function itemSize(item: Item): { w: number; h: number } {
-  const config = ItemsDatabase.getItem(item.group, item.num);
-  return { w: config?.X ?? 1, h: config?.Y ?? 1 };
-}
 
 /**
  * First slot of `items`'s grid part where `item` fits (the original's
@@ -187,16 +146,6 @@ function offlineShopStock(): { slot: number; item: Item }[] {
   }
 
   return entries;
-}
-
-function serializeItemBytes(item: Item): number[] {
-  if (item.raw && item.raw.length === ItemSerializer.NeededSpace) {
-    return item.raw;
-  }
-
-  const bytes = new Uint8Array(ItemSerializer.NeededSpace);
-  ItemSerializer.SerializeItem(bytes, item);
-  return Array.from(bytes);
 }
 
 /**
@@ -334,21 +283,14 @@ export const Store = new (class _Store {
     Pets.requestPetInfo(pet, slot);
   }
 
-  pickedItem: PickedItem | null = null;
+  // Read by the item grid, the carried item and the chat item link until they move up to the ui.
+  get pickedItem() {
+    return Bag.pickedItem;
+  }
 
-  /** Q/W/E/R consumable kinds (`CNewUIItemHotKey`); unbound = the key's default potion. */
-  itemHotkeys: ItemHotkey[] = Array.from({ length: HOTKEY_COUNT }, () => UNBOUND_HOTKEY);
-
-  pendingItemMove: {
-    fromStorage: StorageKind;
-    fromSlot: number;
-    toStorage: StorageKind;
-    toSlot: number;
-  } | null = null;
-
-  private pendingItemMoveTimer: ReturnType<typeof setTimeout> | null = null;
-
-  private consumeBlockedUntil = 0;
+  cancelPickedItem(): void {
+    Bag.cancelPickedItem();
+  }
 
   /** The merchant window (`CNewUINPCShop`); null while no NPC is talking. */
   npcShop: NpcShop | null = null;
@@ -374,9 +316,6 @@ export const Store = new (class _Store {
 
   constructor() {
     makeObservable(this, {
-      pickedItem: observable,
-      itemHotkeys: observable,
-      pendingItemMove: observable,
       npcShop: observable,
       repairMode: observable,
       shopBuyPending: observable,
@@ -400,6 +339,12 @@ export const Store = new (class _Store {
         });
       }
     );
+
+    // OpenMU refuses any consume unless PlayerState == EnteredWorld: a merchant
+    // window still open makes a scroll / potion fail. The original closes the shop on the use click.
+    Bag.beforeConsume = () => {
+      if (this.npcShop) this.closeNpcShop();
+    };
   }
 
   playOffline() {
@@ -567,7 +512,7 @@ export const Store = new (class _Store {
 
   /** MOVEMENT_TALK reached the NPC (ZzzInterface.cpp:3576): ask what it offers. */
   talkToNpc(npc: NpcTarget): void {
-    if (this.pendingItemMove || this.npcShop) return;
+    if (Bag.pendingItemMove || this.npcShop) return;
 
     this.pendingNpcTalk = npc;
     // `ReceiveTalk` / `ReceiveQuestState` open with `HideAll`.
@@ -664,7 +609,7 @@ export const Store = new (class _Store {
   /** Click on a shop item (`SendBuyItemFromNpcRequest`). */
   buyItemFromNpc(shopSlot: number): void {
     const shop = this.npcShop;
-    if (!shop || this.shopBuyPending || this.pickedItem || this.pendingItemMove) return;
+    if (!shop || this.shopBuyPending || Bag.pickedItem || Bag.pendingItemMove) return;
 
     const item = shop.items[shopSlot];
     if (!item) return;
@@ -718,8 +663,8 @@ export const Store = new (class _Store {
    * the original's two refusals - the money cap and the unsellable list.
    */
   sellPickedItemToNpc(): void {
-    const picked = this.pickedItem;
-    if (!picked || !this.npcShop || this.pendingItemMove) return;
+    const picked = Bag.pickedItem;
+    if (!picked || !this.npcShop || Bag.pendingItemMove) return;
     // `SendSellItemToNpcRequest` only knows inventory slots.
     if (picked.fromStorage !== StorageKind.Inventory) return;
 
@@ -732,14 +677,14 @@ export const Store = new (class _Store {
 
     if (isSellingBanned(picked.item)) {
       addNotification(t('notify.cannotSell'), 'error');
-      this.cancelPickedItem();
+      Bag.cancelPickedItem();
       return;
     }
 
     if (Session.isOffline) {
       runInAction(() => {
         Hero.money += price;
-        this.pickedItem = null;
+        Bag.pickedItem = null;
         Hero.syncPlayerAppearance();
       });
       playUiSound('getItem');
@@ -749,7 +694,7 @@ export const Store = new (class _Store {
     const packet = SellItemToNpcRequestPacket.createPacket();
     packet.ItemSlot = picked.fromSlot;
 
-    this.beginItemMove(
+    Bag.beginItemMove(
       picked.fromStorage,
       picked.fromSlot,
       StorageKind.Inventory,
@@ -760,10 +705,10 @@ export const Store = new (class _Store {
 
   /** NpcItemSellResult: the item is gone and the money is in - or neither. */
   itemSoldToNpc(success: boolean, money: number): void {
-    if (!this.pendingItemMove) return;
+    if (!Bag.pendingItemMove) return;
 
     if (success) {
-      this.confirmItemMove(-1, null);
+      Bag.confirmItemMove(-1, null);
       runInAction(() => {
         Hero.money = money;
       });
@@ -772,7 +717,7 @@ export const Store = new (class _Store {
       return;
     }
 
-    this.rollbackItemMove();
+    Bag.rollbackItemMove();
     addNotification(t('notify.merchantRefuses'), 'error');
   }
 
@@ -796,7 +741,7 @@ export const Store = new (class _Store {
 
   /** `SendRepairItemRequest(slot, self)`; `REPAIR_ALL_SLOT` for everything. */
   repairItemRequest(slot: number): void {
-    if (!this.canRepair || this.pendingItemMove) return;
+    if (!this.canRepair || Bag.pendingItemMove) return;
 
     const selfRepair = this.isSelfRepair;
 
@@ -890,553 +835,6 @@ export const Store = new (class _Store {
 
   private offlineMix(): void {
     Economy.openMix();
-  }
-
-  /**
-   * The grid behind a storage kind. The inventory is the hero's own array;
-   * vault, trade, chaos machine and the personal shop belong to `Economy`.
-   *
-   * `modules/economy/economy.ts` imports this module back, so `Economy` may only be read
-   * from inside a method - by then both modules have finished evaluating.
-   */
-  itemsOfStorage(storage: StorageKind): (Item | null)[] {
-    switch (storage) {
-      case StorageKind.Inventory:
-        return Hero.items;
-      case StorageKind.Vault:
-        return Economy.vaultItems;
-      case StorageKind.Trade:
-        return Economy.myTradeItems;
-      case StorageKind.ChaosMachine:
-        return Economy.mixItems;
-      case StorageKind.PersonalShop:
-        return Economy.myShopItems;
-    }
-  }
-
-  pickInventoryItem(slot: number): void {
-    this.pickItem(StorageKind.Inventory, slot);
-  }
-
-  /** `CNewUIInventoryCtrl::PickItem`: lift a square out of any open grid. */
-  pickItem(storage: StorageKind, slot: number): void {
-    if (this.pickedItem || this.pendingItemMove) return;
-
-    const items = this.itemsOfStorage(storage);
-    // An empty square (or one outside the grid) lifts nothing: never let a
-    // `null` / `undefined` become the carried item.
-    if (!Number.isInteger(slot) || slot < 0 || slot >= items.length) return;
-    const item = items[slot];
-    if (!item) return;
-
-    runInAction(() => {
-      items[slot] = null;
-      this.pickedItem = { item, fromSlot: slot, fromStorage: storage };
-      if (storage === StorageKind.Inventory) Hero.syncPlayerAppearance();
-    });
-  }
-
-  cancelPickedItem(): void {
-    const picked = this.pickedItem;
-    if (!picked || this.pendingItemMove) return;
-
-    runInAction(() => {
-      this.itemsOfStorage(picked.fromStorage)[picked.fromSlot] = picked.item;
-      this.pickedItem = null;
-      if (picked.fromStorage === StorageKind.Inventory) Hero.syncPlayerAppearance();
-    });
-  }
-
-  /**
-   * `SendRequestEquipmentItem`: drop the carried item on a square of
-   * `toStorage`. The client only paints the result once the server answers
-   * with `ItemMoved`, so the square stays empty in the meantime.
-   */
-  placePickedItem(toSlot: number, toStorage: StorageKind = StorageKind.Inventory): void {
-    const picked = this.pickedItem;
-    // Nothing carried (or a carried record without an item) places nothing.
-    if (!picked?.item || this.pendingItemMove) return;
-
-    if (toSlot === picked.fromSlot && toStorage === picked.fromStorage) {
-      this.cancelPickedItem();
-      return;
-    }
-
-    // `IsStoreBan` / `IsTradeBan` / `IsPersonalShopBan`: refuse before the
-    // packet goes out, the way the original logs it and puts the item back.
-    const ban = storageBan(toStorage, picked.item);
-    if (ban) {
-      addNotification(t(ban), 'error');
-      this.cancelPickedItem();
-      return;
-    }
-
-    if (Session.isOffline) {
-      runInAction(() => {
-        this.itemsOfStorage(toStorage)[toSlot] = picked.item;
-        this.pickedItem = null;
-        Hero.syncPlayerAppearance();
-      });
-      return;
-    }
-
-    this.moveItemRequest(
-      picked.fromStorage,
-      picked.fromSlot,
-      toStorage,
-      toSlot,
-      picked.item
-    );
-  }
-
-  /**
-   * Move an item to a named square of the same grid: the drag's lift and
-   * drop in one call, for the auto-arrange run (`modules/inventory/inventorySort.ts`).
-   * Returns false when the move cannot be started.
-   */
-  moveItemToSquare(storage: StorageKind, fromSlot: number, toSlot: number): boolean {
-    if (this.pickedItem || this.pendingItemMove) return false;
-
-    const items = this.itemsOfStorage(storage);
-    const item = items[fromSlot];
-    if (!item || items[toSlot]) return false;
-
-    if (Session.isOffline) {
-      runInAction(() => {
-        items[fromSlot] = null;
-        items[toSlot] = item;
-        Hero.syncPlayerAppearance();
-      });
-      return true;
-    }
-
-    runInAction(() => {
-      items[fromSlot] = null;
-      this.pickedItem = { item, fromSlot, fromStorage: storage };
-      if (storage === StorageKind.Inventory) Hero.syncPlayerAppearance();
-    });
-
-    this.moveItemRequest(storage, fromSlot, storage, toSlot, item);
-    return true;
-  }
-
-  /**
-   * The raw `ItemMoveRequest` (0x24), with the pending-move guard. Slots go
-   * in as local array indices; the packet carries the wire slots.
-   */
-  moveItemRequest(
-    fromStorage: StorageKind,
-    fromSlot: number,
-    toStorage: StorageKind,
-    toSlot: number,
-    item: Item
-  ): void {
-    // The mix tray's wire byte depends on the NPC that owns it: 3 for the
-    // goblin, 9 for the Chaos Card Master (modules/economy/economy.ts `mixWireStorage`).
-    const wireStorage = (storage: StorageKind): number =>
-      storage === StorageKind.ChaosMachine ? Economy.mixWireStorage : storage;
-
-    const packet = ItemMoveRequestPacket.createPacket();
-    packet.FromStorage = wireStorage(fromStorage);
-    packet.FromSlot = wireSlotOf(fromStorage, fromSlot);
-    packet.ToStorage = wireStorage(toStorage);
-    packet.ToSlot = wireSlotOf(toStorage, toSlot);
-    packet.setItemData(serializeItemBytes(item), 12);
-
-    this.beginItemMove(fromStorage, fromSlot, toStorage, toSlot);
-    NetStats.markSent('itemMove');
-    Session.sendToGS(packet.buffer);
-  }
-
-  /**
-   * `FindEmptySlot` on the far grid: the local index a right-click sends the
-   * item to (`ProcessStorageItemAutoMove`), or -1 when there is no room.
-   */
-  findFreeSquare(storage: StorageKind, item: Item): number {
-    const items = this.itemsOfStorage(storage);
-    const columns = storageColumns(storage);
-    const rows = storageRows(storage);
-    const offset = gridFirstIndex(storage);
-    const { w, h } = itemSize(item);
-
-    const used = new Uint8Array(columns * rows);
-    for (let square = 0; square < columns * rows; square++) {
-      const placed = items[offset + square];
-      if (!placed) continue;
-      const size = itemSize(placed);
-      const column = square % columns;
-      const row = (square - column) / columns;
-      for (let y = 0; y < size.h; y++) {
-        for (let x = 0; x < size.w; x++) {
-          if (column + x < columns && row + y < rows) {
-            used[(row + y) * columns + column + x] = 1;
-          }
-        }
-      }
-    }
-
-    for (let row = 0; row + h <= rows; row++) {
-      for (let column = 0; column + w <= columns; column++) {
-        let fits = true;
-        for (let y = 0; y < h && fits; y++) {
-          for (let x = 0; x < w; x++) {
-            if (used[(row + y) * columns + column + x]) {
-              fits = false;
-              break;
-            }
-          }
-        }
-        if (fits) return offset + row * columns + column;
-      }
-    }
-
-    return -1;
-  }
-
-  /**
-   * `ProcessStorageItemAutoMove` / `ProcessMyInvenItemAutoMove`: the right
-   * click that shuttles an item between the inventory and the open storage
-   * without picking it up first.
-   */
-  autoMoveItem(fromStorage: StorageKind, fromSlot: number, toStorage: StorageKind): void {
-    if (this.pickedItem || this.pendingItemMove) return;
-
-    const item = this.itemsOfStorage(fromStorage)[fromSlot];
-    if (!item) return;
-
-    const ban = storageBan(toStorage, item);
-    if (ban) {
-      addNotification(t(ban), 'error');
-      return;
-    }
-
-    const toSlot = this.findFreeSquare(toStorage, item);
-    if (toSlot < 0) {
-      addNotification(t('notify.noRoomForItem'), 'error');
-      return;
-    }
-
-    if (Session.isOffline) {
-      runInAction(() => {
-        this.itemsOfStorage(fromStorage)[fromSlot] = null;
-        this.itemsOfStorage(toStorage)[toSlot] = item;
-        Hero.syncPlayerAppearance();
-      });
-      playUiSound('getItem');
-      return;
-    }
-
-    runInAction(() => {
-      this.itemsOfStorage(fromStorage)[fromSlot] = null;
-      this.pickedItem = { item, fromSlot, fromStorage };
-      if (fromStorage === StorageKind.Inventory) Hero.syncPlayerAppearance();
-    });
-
-    this.moveItemRequest(fromStorage, fromSlot, toStorage, toSlot, item);
-  }
-
-  /** Ctrl+Q/W/E/R over an inventory item, or a carried potion dropped on the bar. */
-  setItemHotkey(hotkey: number, item: Item | null): void {
-    if (hotkey < 0 || hotkey >= HOTKEY_COUNT) return;
-    const next = this.itemHotkeys.slice();
-    next[hotkey] =
-      item && canRegisterItemHotkey(item)
-        ? { type: item.num, level: item.lvl ?? 0 }
-        : UNBOUND_HOTKEY;
-    this.itemHotkeys = next;
-  }
-
-  /** The inventory slot the Q/W/E/R key would consume right now, or -1. */
-  hotkeyItemSlot(hotkey: number): number {
-    return findHotkeyItem(Hero.items, hotkey, this.itemHotkeys[hotkey]);
-  }
-
-  /** Q/W/E/R pressed or the bar slot right-clicked (`CNewUIItemHotKey::UpdateKeyEvent`). */
-  useItemHotkey(hotkey: number): void {
-    const slot = this.hotkeyItemSlot(hotkey);
-    if (slot >= 0) this.consumeItemRequest(slot);
-  }
-
-  /**
-   * No server to answer in the offline scene: eat the potion here so the bar
-   * and inventory behave (apple 10% .. large 100%, the original's tables).
-   */
-  private consumeItemOffline(slot: number): void {
-    const item = Hero.items[slot];
-    if (!item || item.group !== 14) return;
-
-    const now = Date.now();
-    if (now < this.consumeBlockedUntil) return;
-    this.consumeBlockedUntil = now + 300;
-
-    const n = item.num;
-    const pd = Hero;
-    const isHp = n <= 3;
-    const isMp = n >= 4 && n <= 6;
-    const isSd = n >= 35 && n <= 37;
-    const isComplex = n >= 38 && n <= 40;
-    const size = isHp ? n : isMp ? n - 3 : isSd ? n - 34 : isComplex ? n - 37 : 0;
-    const ratio = [0.1, 0.3, 0.5, 1][size];
-    const heal = (cur: number, max: number) => Math.min(max, cur + Math.ceil(max * ratio));
-
-    runInAction(() => {
-      if (isHp || isComplex) pd.currentHP = heal(pd.currentHP, pd.maxHP);
-      if (isMp || isComplex) pd.currentMP = heal(pd.currentMP, pd.maxMP);
-      if (isSd || isComplex) pd.currentSD = heal(pd.currentSD, pd.maxSD);
-
-      const left = (item.durability ?? 1) - 1;
-      if (left > 0) item.durability = left;
-      else pd.items[slot] = null;
-    });
-
-    const used = consumeSound(item.group, n);
-    if (used) playUiSound(used);
-  }
-
-  /**
-   * Right click on an orb / scroll / crystal (`CNewUIMyInventory::UseItem`,
-   * NewUIMyInventory.cpp:1865): learn the skill it teaches. Returns false
-   * when the item at `slot` teaches nothing (the caller may drink or equip
-   * it instead); true when the click was handled - the request went out,
-   * the skill was learned offline, or the reason it cannot be was said.
-   * The server answers with `SkillAdded` (F3 11) and removes the item, or
-   * with `ItemConsumptionFailed`.
-   */
-  learnSkillItem(slot: number): boolean {
-    const item = Hero.items[slot];
-    if (!item) return false;
-
-    const number = learnableSkill(item);
-    if (number === undefined) return false;
-
-    const stats = itemStats(item);
-    if (!stats) return false;
-
-    const error = learnSkillError(
-      item,
-      stats,
-      Hero.heroStats(),
-      HeroSkills.skills.map(s => s.number)
-    );
-    if (error) {
-      addNotification(error, 'error');
-      return true;
-    }
-
-    if (Session.isOffline) {
-      // No server to answer: the scroll is read here so the skill list (K)
-      // and the hot keys behave.
-      const index = HeroSkills.skills.reduce((max, s) => Math.max(max, s.index), -1) + 1;
-      runInAction(() => {
-        Hero.items[slot] = null;
-        HeroSkills.addSkill({ index, number, level: 0 });
-      });
-      const name = skillDefinition(number)?.name ?? 'the skill';
-      addNotification(t('notify.learnedSkill', { name }), 'info');
-      return true;
-    }
-
-    this.consumeItemRequest(slot);
-    return true;
-  }
-
-  consumeItemRequest(slot: number, targetSlot = 0): void {
-    if (Session.isOffline) {
-      this.consumeItemOffline(slot);
-      return;
-    }
-
-    // OpenMU refuses any consume unless PlayerState == EnteredWorld: a merchant
-    // window still open makes a scroll / potion fail with a bare
-    // ItemConsumptionFailed. The original closes the shop on the use click.
-    if (this.npcShop) this.closeNpcShop();
-
-    const now = Date.now();
-    if (now < this.consumeBlockedUntil) return;
-    this.consumeBlockedUntil = now + 300;
-
-    const consumed = Hero.items[slot];
-    const used = consumed ? consumeSound(consumed.group, consumed.num) : null;
-    if (used) playUiSound(used);
-
-    const packet = ConsumeItemRequestPacket.createPacket();
-    packet.ItemSlot = slot;
-    packet.TargetSlot = targetSlot;
-    packet.FruitConsumption = 0;
-
-    Session.sendToGS(packet.buffer);
-  }
-
-  /**
-   * `CNewUIMyInventory::ApplyJewels` (NewUIMyInventory.cpp:1546): the carried
-   * jewel is clicked onto the item at `targetSlot`. The jewel goes back to
-   * its square and the 0x26 ConsumeItemRequest carries the target; the server
-   * answers with `InventoryItemUpgraded` for the item and a durability /
-   * removal packet for the jewel stack, or `ItemConsumptionFailed`.
-   * Returns false when the drop was not a jewel use at all (caller may move).
-   */
-  applyPickedJewel(targetSlot: number): boolean {
-    const picked = this.pickedItem;
-    if (!picked?.item || this.pendingItemMove) return false;
-    if (picked.fromStorage !== StorageKind.Inventory) return false;
-
-    const target = Hero.items[targetSlot];
-    if (!target || targetSlot === picked.fromSlot) return false;
-
-    // `ApplyJewels` on worn gear: said, not swallowed - the equipment slot's
-    // click handler returns right after this call, so the refusal text is
-    // the only feedback there is.
-    if (targetSlot < InventoryConstants.EquippableSlotsCount) {
-      addNotification(
-        jewelTargetError(picked.item, target, targetSlot) ?? t('item.takeItemOffFirst'),
-        'error'
-      );
-      return true;
-    }
-
-    // `IsCanUseItem` (ZzzInventory.cpp:510, GlobalText[474]): nothing is
-    // used while the vault or a trade is open.
-    if (Economy.autoMoveTarget !== null) {
-      addNotification(t('notify.storageOpen'), 'error');
-      return true;
-    }
-
-    const error = jewelTargetError(picked.item, target, targetSlot);
-    if (error) {
-      // The original keeps the jewel on the cursor; a wrong square is a no-op.
-      addNotification(error, 'error');
-      return true;
-    }
-
-    if (Session.isOffline) {
-      addNotification(t('notify.upgradeNeedsServer'), 'error');
-      return true;
-    }
-
-    // Jewel back on its square so the stack packet that follows finds it.
-    this.cancelPickedItem();
-    // ApplyJewels: SOUND_GET_ITEM01 on the click, the jewel sound on the answer.
-    playUiSound('getItem');
-    this.consumeItemRequest(picked.fromSlot, targetSlot);
-    return true;
-  }
-
-  /** `InventoryItemUpgraded` (0xF3 0x14): the item at `slot` is what the server says now. */
-  upgradeInventoryItem(slot: number, item: Item): void {
-    runInAction(() => {
-      Hero.items[slot] = item;
-      this.consumeBlockedUntil = 0;
-      Hero.syncPlayerAppearance();
-    });
-    playUiSound(upgradedItemSound(item.group, item.num));
-  }
-
-  /**
-   * `ItemConsumptionFailed` (0x26 0xFD): nothing happened. The 300 ms
-   * lock-out set by the request is left running: the refusal arrives within
-   * a few ms, and clearing it let every further click send a new request
-   * (and draw a new refusal) as fast as the mouse could go.
-   */
-  consumptionFailed(): void {}
-
-  dropPickedItem(x: number, y: number): void {
-    const picked = this.pickedItem;
-    if (!picked || this.pendingItemMove) return;
-
-    // `SendRequestDropItem` addresses the inventory only: an item lifted out
-    // of the vault or a trade goes back where it came from.
-    if (picked.fromStorage !== StorageKind.Inventory) {
-      this.cancelPickedItem();
-      return;
-    }
-
-    if (Session.isOffline) {
-      this.cancelPickedItem();
-      return;
-    }
-
-    const packet = DropItemRequestPacket.createPacket();
-    packet.TargetX = x;
-    packet.TargetY = y;
-    packet.ItemSlot = picked.fromSlot;
-
-    this.beginItemMove(
-      picked.fromStorage,
-      picked.fromSlot,
-      StorageKind.Inventory,
-      -1
-    );
-    Session.sendToGS(packet.buffer);
-  }
-
-  private beginItemMove(
-    fromStorage: StorageKind,
-    fromSlot: number,
-    toStorage: StorageKind,
-    toSlot: number
-  ): void {
-    runInAction(() => {
-      this.pendingItemMove = { fromStorage, fromSlot, toStorage, toSlot };
-    });
-
-    if (this.pendingItemMoveTimer) clearTimeout(this.pendingItemMoveTimer);
-
-    this.pendingItemMoveTimer = setTimeout(() => {
-      if (!this.pendingItemMove) return;
-
-      console.warn('Item move timed out with no answer - rolling it back');
-      this.rollbackItemMove();
-      addNotification(t('notify.noAnswerRestored'), 'error');
-    }, ITEM_MOVE_TIMEOUT);
-  }
-
-  confirmItemMove(
-    toSlot: number,
-    item?: Item | null,
-    toStorage: StorageKind = StorageKind.Inventory
-  ): void {
-    this.clearItemMoveTimer();
-
-    runInAction(() => {
-      const moved = item ?? this.pickedItem?.item ?? null;
-
-      if (moved && toSlot >= 0) this.itemsOfStorage(toStorage)[toSlot] = moved;
-      // ReceiveInventoryItemMove (WSclient.cpp:6133): SOUND_GET_ITEM01.
-      if (toSlot >= 0) playUiSound('getItem');
-
-      this.pickedItem = null;
-      this.pendingItemMove = null;
-      Hero.syncPlayerAppearance();
-    });
-  }
-
-  rollbackItemMove(): void {
-    this.clearItemMoveTimer();
-
-    runInAction(() => {
-      const picked = this.pickedItem;
-      const pending = this.pendingItemMove;
-
-      const fromSlot = pending?.fromSlot ?? picked?.fromSlot;
-      const fromStorage =
-        pending?.fromStorage ?? picked?.fromStorage ?? StorageKind.Inventory;
-      const source = this.itemsOfStorage(fromStorage);
-
-      if (picked && fromSlot != null && !source[fromSlot]) {
-        source[fromSlot] = picked.item;
-      }
-
-      this.pickedItem = null;
-      this.pendingItemMove = null;
-      Hero.syncPlayerAppearance();
-    });
-  }
-
-  private clearItemMoveTimer(): void {
-    if (!this.pendingItemMoveTimer) return;
-
-    clearTimeout(this.pendingItemMoveTimer);
-    this.pendingItemMoveTimer = null;
   }
 })();
 

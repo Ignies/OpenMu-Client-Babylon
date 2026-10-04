@@ -4,6 +4,7 @@ import { t } from '@/i18n';
 import { observer } from 'mobx-react-lite';
 import { useMemo, useRef, useState } from 'react';
 import { Store } from '@/app/store';
+import { Bag } from '@/modules/inventory';
 import { ItemIcon } from '@/controllers/interface/components/item_icon';
 import { ItemSearchBox, useItemSearch } from '@/controllers/interface/components/item_search';
 import { ItemTooltip } from '@/controllers/interface/components/item_tooltip';
@@ -119,7 +120,7 @@ export const NpcShop = observer(() => {
   const gridRef = useRef<HTMLDivElement>(null);
   const [hover, setHover] = useState<HoverInfo | null>(null);
 
-  const picked = Store.pickedItem;
+  const picked = Bag.pickedItem;
   const items = shop?.items ?? null;
   const stamp = items ? occupancyStamp(items, 0, SQUARES) : '';
   const { squares, placed } = useMemo(
@@ -179,7 +180,7 @@ export const NpcShop = observer(() => {
 
   const gridClass = [
     'shop-items',
-    Store.shopBuyPending || Store.pendingItemMove ? 'busy' : '',
+    Store.shopBuyPending || Bag.pendingItemMove ? 'busy' : '',
     picked ? 'selling' : '',
     sellingBanned ? 'selling-banned' : '',
   ]

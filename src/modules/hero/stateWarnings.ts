@@ -1,6 +1,6 @@
 import { reaction } from 'mobx';
 import { t } from '../../i18n';
-import { Store } from '../../app/store';
+import { Bag } from '../inventory';
 import { Hero } from './state';
 import { skills } from '../skills';
 import { GameOptions } from '@/controllers/settings';
@@ -71,8 +71,8 @@ function gridHasRoom(items: (Item | null)[]): boolean {
 /** The healing potions the Q/W/E/R keys would reach for, summed. */
 function healingPotions(items: (Item | null)[]): number {
   let total = 0;
-  for (let hotkey = 0; hotkey < Store.itemHotkeys.length; hotkey++) {
-    const slot = findHotkeyItem(items, hotkey, Store.itemHotkeys[hotkey]);
+  for (let hotkey = 0; hotkey < Bag.itemHotkeys.length; hotkey++) {
+    const slot = findHotkeyItem(items, hotkey, Bag.itemHotkeys[hotkey]);
     if (slot < 0) continue;
     total += items[slot]?.durability ?? 1;
   }

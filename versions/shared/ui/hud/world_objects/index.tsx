@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite';
-import { Store } from '@/app/store';
+import { Bag } from '@/modules/inventory';
 import { Drops } from '@/modules/drops';
 import { Ecs } from '@/ecs/current';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -157,7 +157,7 @@ const DropLabel = observer(({
           if (ev.button !== 0) return;
           ev.stopPropagation();
           const world = Ecs.world;
-          if (!world || Store.pickedItem || Store.pendingItemMove) return;
+          if (!world || Bag.pickedItem || Bag.pendingItemMove) return;
           world.pickupTarget = entity;
         }}
         onPointerEnter={ev => {

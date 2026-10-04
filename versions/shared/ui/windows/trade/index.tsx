@@ -2,7 +2,7 @@ import { MuWindows } from '@/controllers/interface/windowManager';
 import './style.less';
 import { t } from '@/i18n';
 import { observer } from 'mobx-react-lite';
-import { Store } from '@/app/store';
+import { Bag } from '@/modules/inventory';
 import { Hero } from '@/modules/hero';
 import { Economy } from '@/modules/economy/economy';
 import { StorageKind, isTradeBanned } from '@/modules/inventory/itemStorage';
@@ -89,7 +89,7 @@ const WINDOW_ID = 'trade';
 export const TradeWindow = observer(() => {
   if (!Economy.tradeOpen) return null;
 
-  const picked = Store.pickedItem;
+  const picked = Bag.pickedItem;
   const banned = !!picked && isTradeBanned(picked.item);
   const partner = Economy.tradePartner;
   const band = levelBand(partner?.level ?? 0);
@@ -217,17 +217,17 @@ export const TradeWindow = observer(() => {
         rows={ROWS}
         left={MY_GRID_X}
         top={MY_GRID_Y}
-        disabled={!!Store.pendingItemMove}
+        disabled={!!Bag.pendingItemMove}
         dropTint={picked ? (banned ? 'ban' : 'ok') : 'none'}
-        onPick={square => Store.pickItem(StorageKind.Trade, square)}
+        onPick={square => Bag.pickItem(StorageKind.Trade, square)}
         onPlace={square => {
           // `SendRequestItemToTrade`: putting anything in withdraws our accept.
           if (Economy.myTradeConfirm) Economy.setMyConfirm(false);
-          Store.placePickedItem(square, StorageKind.Trade);
+          Bag.placePickedItem(square, StorageKind.Trade);
         }}
         onUse={square => {
           if (Economy.myTradeConfirm) Economy.setMyConfirm(false);
-          Store.autoMoveItem(StorageKind.Trade, square, StorageKind.Inventory);
+          Bag.autoMoveItem(StorageKind.Trade, square, StorageKind.Inventory);
         }}
         onQuickAction={square => {
           if (Economy.myTradeConfirm) Economy.setMyConfirm(false);

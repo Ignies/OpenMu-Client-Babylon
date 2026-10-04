@@ -3,7 +3,7 @@ import './style.less';
 import { masterLevel } from '@/modules/skills/masterLevel';
 import { t } from '@/i18n';
 import { observer } from 'mobx-react-lite';
-import { Store } from '@/app/store';
+import { Bag } from '@/modules/inventory';
 import { Hero } from '@/modules/hero';
 import { Economy, vaultOpenCost } from '@/modules/economy/economy';
 import { StorageKind, isVaultBanned } from '@/modules/inventory/itemStorage';
@@ -72,7 +72,7 @@ export const Vault = observer(() => {
 
   if (!Economy.vaultOpen) return null;
 
-  const picked = Store.pickedItem;
+  const picked = Bag.pickedItem;
   const banned = !!picked && isVaultBanned(picked.item);
   const locked = Economy.vaultLocked;
 
@@ -148,17 +148,17 @@ export const Vault = observer(() => {
         rows={ROWS}
         left={GRID_X}
         top={GRID_Y}
-        disabled={!!Store.pendingItemMove}
+        disabled={!!Bag.pendingItemMove}
         dropTint={picked ? (banned ? 'ban' : 'ok') : 'none'}
         dimmed={search.active ? item => !search.matches(item) : undefined}
         onPick={square => {
           if (!unlock()) return;
-          Store.pickItem(StorageKind.Vault, square);
+          Bag.pickItem(StorageKind.Vault, square);
         }}
-        onPlace={square => Store.placePickedItem(square, StorageKind.Vault)}
+        onPlace={square => Bag.placePickedItem(square, StorageKind.Vault)}
         onUse={square => {
           if (!unlock()) return;
-          Store.autoMoveItem(StorageKind.Vault, square, StorageKind.Inventory);
+          Bag.autoMoveItem(StorageKind.Vault, square, StorageKind.Inventory);
         }}
         onQuickAction={square => {
           if (!unlock()) return;

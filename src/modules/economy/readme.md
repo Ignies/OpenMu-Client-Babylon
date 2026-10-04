@@ -12,10 +12,11 @@ vault, chaos machine, trade and personal shop. The packet handlers that feed it 
 - `MAX_SHOP_TITLE` (26): the stall title limit. `ShopStock`, `ShopBrowse`, `TradePartner`, `EconomyPrompt`: types.
 
 ## How it works
-- `Economy` lives beside `Store` the way `Social` does. `Store` owns the bag and the picked item; `Economy`
-  owns the grids that exist only while a window is open: `vaultItems`, `mixItems`, `myTradeItems` /
-  `yourTradeItems`, `myShopItems`. `Store.itemsOfStorage` maps a `StorageKind` to them, so item moves are
-  the same code for every window.
+- `Economy` is a store of its own, like `Social`. The inventory's `Bag` owns the picked item and the
+  move in flight (the items are `Hero.items`); `Economy` owns the grids that exist only while a window
+  is open: `vaultItems`, `mixItems`, `myTradeItems` / `yourTradeItems`, `myShopItems`. `economy.ts`
+  hands them to the bag as `Bag.grids` when it loads, and `Bag.itemsOfStorage` maps a `StorageKind`
+  to them, so item moves are the same code for every window.
 - Vault: `openVault`, `setVaultItems`, `closeVault`, `moveVaultMoney`, `unlockVault`, `setVaultPin`,
   `removeVaultPin`, `vaultProtectionState`; `vaultLocked` / `vaultUnlocked` / `vaultUsable` are the pin state.
 - Chaos machine: `openMix(kind)`, `setMixType`, `mix`, `craftingResult`, `closeMix` (refuses while items are

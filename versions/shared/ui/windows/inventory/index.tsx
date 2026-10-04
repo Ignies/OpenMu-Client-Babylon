@@ -4,6 +4,7 @@ import { t } from '@/i18n';
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { Store } from '@/app/store';
+import { Bag } from '@/modules/inventory';
 import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
 import { Economy } from '@/modules/economy/economy';
@@ -192,7 +193,7 @@ const EquipmentSlot = observer(
     item: Item | null;
     onHover: (info: HoverInfo | null) => void;
   }) => {
-    const picked = Store.pickedItem;
+    const picked = Bag.pickedItem;
 
     const fits = !!picked && isEquipable(slot, picked.item) && !item;
     const blocked = !!picked && !fits;
@@ -218,21 +219,21 @@ const EquipmentSlot = observer(
               if (item) Store.repairItemRequest(slot);
               return;
             }
-            if (item) Store.pickInventoryItem(slot);
+            if (item) Bag.pickInventoryItem(slot);
             return;
           }
 
           // A jewel dropped on worn gear: ApplyJewels explains why not
           // (OpenMU only upgrades items lying in the grid).
           if (item && isUpgradeJewel(picked.item)) {
-            Store.applyPickedJewel(slot);
+            Bag.applyPickedJewel(slot);
             return;
           }
 
           if (item) return;
           if (!isEquipable(slot, picked.item)) return;
 
-          Store.placePickedItem(slot);
+          Bag.placePickedItem(slot);
         }}
       >
         <MuSpriteFrame
@@ -265,7 +266,7 @@ export const Inventory = observer(() => {
   const [target, setTarget] = useState<{ column: number; row: number } | null>(null);
   const [hover, setHover] = useState<HoverInfo | null>(null);
 
-  const picked = Store.pickedItem;
+  const picked = Bag.pickedItem;
   const pickedSize = picked ? itemSize(picked.item) : null;
 
   const stamp = occupancyStamp(playerData.items, FIRST_SLOT, SQUARES);
@@ -308,7 +309,7 @@ export const Inventory = observer(() => {
       const keys = Ecs.world?.keyboardInput.pressedKeys;
       const ctrl = !!keys && (keys.has('ControlLeft') || keys.has('ControlRight'));
       if (ctrl && canRegisterItemHotkey(hover.item)) {
-        Store.setItemHotkey(bind, hover.item);
+        Bag.setItemHotkey(bind, hover.item);
       }
     }
   });
@@ -417,7 +418,7 @@ export const Inventory = observer(() => {
         const square = squareAt(event.clientX, event.clientY);
         const entry = square >= 0 ? squares[square] : null;
         if (entry && entry.slot !== picked.fromSlot) {
-          if (Store.applyPickedJewel(entry.slot)) return;
+          if (Bag.applyPickedJewel(entry.slot)) return;
         }
       }
 
@@ -429,12 +430,12 @@ export const Inventory = observer(() => {
       const toSlot = slotOf(at.column, at.row);
 
       if (toSlot === picked.fromSlot) {
-        Store.cancelPickedItem();
+        Bag.cancelPickedItem();
         return;
       }
 
       if (canPlace(squares, at.column, at.row, pickedSize.w, pickedSize.h)) {
-        Store.placePickedItem(toSlot);
+        Bag.placePickedItem(toSlot);
       }
       return;
     }
@@ -456,7 +457,7 @@ export const Inventory = observer(() => {
       return;
     }
 
-    Store.pickInventoryItem(entry.slot);
+    Bag.pickInventoryItem(entry.slot);
   };
 
   const onGridContextMenu = (event: React.MouseEvent) => {
@@ -469,7 +470,7 @@ export const Inventory = observer(() => {
     }
 
     if (picked) {
-      Store.cancelPickedItem();
+      Bag.cancelPickedItem();
       return;
     }
 
@@ -484,7 +485,7 @@ export const Inventory = observer(() => {
     // of equipping or drinking it.
     const target = Economy.autoMoveTarget;
     if (target !== null) {
-      Store.autoMoveItem(StorageKind.Inventory, entry.slot, target);
+      Bag.autoMoveItem(StorageKind.Inventory, entry.slot, target);
       return;
     }
 
@@ -495,18 +496,18 @@ export const Inventory = observer(() => {
     // Orbs, scrolls and crystals are read, not drunk
     // (NewUIMyInventory.cpp:1865): the skill is learned when the hero
     // qualifies, otherwise the reason is said.
-    if (Store.learnSkillItem(entry.slot)) return;
+    if (Bag.learnSkillItem(entry.slot)) return;
 
     if (isConsumable(entry.item)) {
-      Store.consumeItemRequest(entry.slot);
+      Bag.consumeItemRequest(entry.slot);
       return;
     }
 
     const destination = equipDestination(entry.item, playerData.items);
     if (destination < 0) return;
 
-    Store.pickInventoryItem(entry.slot);
-    Store.placePickedItem(destination);
+    Bag.pickInventoryItem(entry.slot);
+    Bag.placePickedItem(destination);
   };
 
   return (
@@ -556,7 +557,7 @@ export const Inventory = observer(() => {
 
       <div
         ref={gridRef}
-        className={`inventory-items${Store.pendingItemMove ? ' busy' : ''}`}
+        className={`inventory-items${Bag.pendingItemMove ? ' busy' : ''}`}
         data-no-drag="true"
         style={{
           left: GRID_X,

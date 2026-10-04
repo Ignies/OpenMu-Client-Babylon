@@ -5,7 +5,7 @@ import { EventBus } from '@/core/eventBus';
 import { InventoryConstants } from '@/core/inventoryConstants';
 import { ItemSerializer } from '@/controllers/item_rules';
 import { NetStats } from '@/controllers/net/roundTrip';
-import { Store } from '@/app/store';
+import { Bag } from './state';
 import { Hero } from '@/modules/hero';
 import { addNotification } from '@/modules/chat';
 import { pickupSound } from '@/controllers/sound/combatSounds';
@@ -85,7 +85,7 @@ export function installNet(): void {
 
     if (!KNOWN_STORAGES.includes(storage)) {
       console.warn(`ItemMoved into unknown storage ${storage}`);
-      Store.confirmItemMove(-1, null);
+      Bag.confirmItemMove(-1, null);
       return;
     }
 
@@ -99,7 +99,7 @@ export function installNet(): void {
     const shopStorage = storeStorageOf(storage, p.TargetSlot);
     const slot = localIndexOf(shopStorage, p.TargetSlot);
 
-    Store.confirmItemMove(slot, item, shopStorage);
+    Bag.confirmItemMove(slot, item, shopStorage);
 
     // A newly stocked shop square starts unpriced (`AddPersonalItemPrice`).
     if (shopStorage === StorageKind.PersonalShop) Economy.stockedShopSquare(slot);
@@ -109,7 +109,7 @@ export function installNet(): void {
     // A refusal is still an answer, so it times the same round trip.
     NetStats.markAnswered('itemMove');
     console.warn('ItemMoveRequestFailed - rolling the item back');
-    Store.rollbackItemMove();
+    Bag.rollbackItemMove();
     addNotification(t('notify.cannotMoveItem'), 'error');
   });
 
@@ -149,7 +149,7 @@ export function installNet(): void {
 
     const item = ItemSerializer.DeserializeItem(new Uint8Array(p.ItemData.buffer));
 
-    Store.upgradeInventoryItem(p.InventorySlot, item);
+    Bag.upgradeInventoryItem(p.InventorySlot, item);
   });
 
   /**
@@ -158,7 +158,7 @@ export function installNet(): void {
    * second, so a burst of clicks reads as one).
    */
   EventBus.on('ItemConsumptionFailed', () => {
-    Store.consumptionFailed();
+    Bag.consumptionFailed();
     addNotification(t('notify.cannotUseItem'), 'error');
   });
 

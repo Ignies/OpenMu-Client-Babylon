@@ -1,6 +1,7 @@
 import { reaction } from 'mobx';
 import { t } from '../../i18n';
 import { Store } from '../../app/store';
+import { Bag } from './state';
 import { Hero } from '../hero';
 import { Session } from '../session';
 import { addNotification } from '../chat';
@@ -29,7 +30,7 @@ import type { Item } from '../../ecs/world';
  * windows that are open, and it travels by the requests a drag or a shop
  * click already sends (`autoMoveItem`, `sellPickedItemToNpc`,
  * `buyItemFromNpc`), through the one-move-in-flight guard
- * `Store.pendingItemMove`. Nothing new goes on the wire.
+ * `Bag.pendingItemMove`. Nothing new goes on the wire.
  */
 
 export const QuickItemActions = new (class _QuickItemActions {
@@ -45,7 +46,7 @@ export const QuickItemActions = new (class _QuickItemActions {
   /** Ctrl-click on an inventory square. */
   fromInventory(slot: number): void {
     if (!GameOptions.quickItemActions) return;
-    if (Store.pickedItem || Store.pendingItemMove) return;
+    if (Bag.pickedItem || Bag.pendingItemMove) return;
 
     const item = Hero.items[slot];
     if (!item) return;
@@ -57,7 +58,7 @@ export const QuickItemActions = new (class _QuickItemActions {
     if (!target) return;
 
     if (target.kind === 'move') {
-      Store.autoMoveItem(StorageKind.Inventory, slot, target.to);
+      Bag.autoMoveItem(StorageKind.Inventory, slot, target.to);
       return;
     }
 
@@ -68,14 +69,14 @@ export const QuickItemActions = new (class _QuickItemActions {
   toInventory(storage: StorageKind, slot: number): void {
     if (!GameOptions.quickItemActions) return;
 
-    Store.autoMoveItem(storage, slot, StorageKind.Inventory);
+    Bag.autoMoveItem(storage, slot, StorageKind.Inventory);
   }
 
   // --- selling and dropping ------------------------------------------------
 
   /** The carried item let go over the merchant's grid. */
   sellPickedItem(): void {
-    const item = Store.pickedItem?.item;
+    const item = Bag.pickedItem?.item;
     if (!item) return;
 
     this.confirm(item, MsgWinCode.ConfirmSellItem, () =>
@@ -85,24 +86,24 @@ export const QuickItemActions = new (class _QuickItemActions {
 
   /** The carried item let go over the ground (`itemPickupSystem`). */
   dropPickedItem(x: number, y: number): void {
-    const item = Store.pickedItem?.item;
+    const item = Bag.pickedItem?.item;
     if (!item) return;
 
     this.confirm(item, MsgWinCode.ConfirmDropItem, () =>
-      Store.dropPickedItem(x, y)
+      Bag.dropPickedItem(x, y)
     );
   }
 
   private sellSlot(slot: number): void {
-    if (!Store.npcShop || Store.pickedItem || Store.pendingItemMove) return;
+    if (!Store.npcShop || Bag.pickedItem || Bag.pendingItemMove) return;
 
-    Store.pickInventoryItem(slot);
-    if (!Store.pickedItem) return;
+    Bag.pickInventoryItem(slot);
+    if (!Bag.pickedItem) return;
 
     Store.sellPickedItemToNpc();
 
     // A refusal leaves the item hanging off the cursor: put it back.
-    if (Store.pickedItem && !Store.pendingItemMove) Store.cancelPickedItem();
+    if (Bag.pickedItem && !Bag.pendingItemMove) Bag.cancelPickedItem();
   }
 
   private confirm(item: Item, code: MsgWinCode, go: () => void): void {
@@ -135,7 +136,7 @@ export const QuickItemActions = new (class _QuickItemActions {
 
     this.disposers.push(
       reaction(
-        () => Store.shopBuyPending || !!Store.pendingItemMove,
+        () => Store.shopBuyPending || !!Bag.pendingItemMove,
         busy => {
           if (!busy) this.step();
         }
@@ -143,7 +144,7 @@ export const QuickItemActions = new (class _QuickItemActions {
       // The player picking something up takes the shop over: the run stops,
       // exactly as the arrange and bulk-move runs do.
       reaction(
-        () => !!Store.pickedItem,
+        () => !!Bag.pickedItem,
         picked => {
           if (picked) this.cancel();
         }
@@ -162,8 +163,8 @@ export const QuickItemActions = new (class _QuickItemActions {
   private step(): void {
     const run = this.run;
     if (!run) return;
-    if (Store.shopBuyPending || Store.pendingItemMove) return;
-    if (Store.pickedItem) {
+    if (Store.shopBuyPending || Bag.pendingItemMove) return;
+    if (Bag.pickedItem) {
       this.cancel();
       return;
     }
@@ -176,7 +177,7 @@ export const QuickItemActions = new (class _QuickItemActions {
       item,
       price: item ? itemValue(item, 0) : 0,
       money: Hero.money,
-      freeSquare: item ? Store.findFreeSquare(StorageKind.Inventory, item) : -1,
+      freeSquare: item ? Bag.findFreeSquare(StorageKind.Inventory, item) : -1,
       refused: Store.shopBuyRefused,
     });
 

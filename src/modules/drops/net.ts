@@ -5,7 +5,7 @@ import { ItemDropRemovedPacket, ItemDropResponsePacket, ItemPickUpRequestFailedI
 import { ItemGroup, angleRotation, itemRestHeight, itemRestPose, itemRestRotation } from '@/controllers/actors/itemAngle';
 import { ItemSerializer } from '@/controllers/item_rules';
 import { ItemsDatabase, itemBaseName } from '@versions/shared/items/itemsDatabase';
-import { Store } from '@/app/store';
+import { Bag } from '@/modules/inventory';
 import { Hero } from '@/modules/hero';
 import { addNotification } from '@/modules/chat';
 import { Ecs } from '@/ecs/current';
@@ -228,7 +228,7 @@ export function installNet(): void {
 
     if (!p.Success) {
       console.warn(`Drop of slot ${p.InventorySlot} refused`);
-      Store.rollbackItemMove();
+      Bag.rollbackItemMove();
       addNotification(t('notify.cannotDropItem'), 'error');
       return;
     }
@@ -239,7 +239,7 @@ export function installNet(): void {
       Hero.items[p.InventorySlot] = null;
     });
 
-    Store.confirmItemMove(-1, null);
+    Bag.confirmItemMove(-1, null);
   });
 
   EventBus.on('ItemPickUpRequestFailed', packet => {
