@@ -2,7 +2,7 @@ import './style.less';
 import { useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import type { Item } from '@/ecs/world';
-import { GameOptions } from '@/modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import { emojiSegments, type ChatEmoji } from '@/modules/chat/chatEmojis';
 import { scanItemLinks } from '@/modules/chat/chatItemLinks';
 import { EMOJI_CATALOG } from '@/modules/chat/emojis';

@@ -11,7 +11,7 @@ import {
 } from './babylon/exports';
 import type { Entity, World } from '../../ecs/world';
 import { ModelObject, extendByPosedLocalBounds } from './modelObject';
-import { GameOptions } from '../../modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import { lightingTier, type LightingTier } from '../lighting/lightingQuality';
 import { packBodyLight, packBodyLightFor } from '../item_fx/itemMaterial';
 import { blendMeshFor } from './blendMeshes';

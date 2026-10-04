@@ -12,7 +12,7 @@ vi.mock('../render/babylon/exports', () => ({
   Texture: {},
   Vector3: class {},
 }));
-vi.mock('../../modules/options/gameOptions', () => ({ GameOptions: { advancedEffects: true } }));
+vi.mock('../settings/gameOptions', () => ({ GameOptions: { advancedEffects: true } }));
 vi.mock('../fx', () => ({ effects: { spawn: () => {} } }));
 vi.mock('../fx/recipes', () => ({ FIRE_SPARKS: {} }));
 

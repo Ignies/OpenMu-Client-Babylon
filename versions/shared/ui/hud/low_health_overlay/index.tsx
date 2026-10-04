@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { reaction } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { Store } from '@/app/store';
-import { GameOptions } from '@/modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import {
   heartbeatDue,
   NO_WARNING,

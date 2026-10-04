@@ -3,7 +3,7 @@ import { t, type TextKey } from '../../i18n';
  * (NewUIQuestProgress.cpp), `CNewUIMyQuestInfoWindow` (NewUIMyQuestInfoWindow.cpp).
  * Packet map and quest key: readme.md. */
 import { observable, reaction, runInAction } from 'mobx';
-import { GameOptions } from '../options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import { itemBaseName } from '@versions/shared/items/itemsDatabase';
 import { itemLevelName } from '../items/itemLevelLook';
 import { ItemSerializer } from '../items/itemSerializer';

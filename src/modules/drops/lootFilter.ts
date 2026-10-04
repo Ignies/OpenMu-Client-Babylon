@@ -1,4 +1,4 @@
-import { GameOptions } from '../options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import { isJewel, itemDef } from '../items/itemStats';
 import { HIGH_DROP_LEVEL } from './dropTier';
 import type { Entity } from '../../ecs/world';

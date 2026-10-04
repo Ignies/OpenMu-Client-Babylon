@@ -3,7 +3,7 @@ import type { ENUM_WORLD } from '../../core/types';
 import type { World } from '../../ecs/world';
 import { SoundsManager } from './soundsManager';
 import { EventBus } from '../../core/eventBus';
-import { GameOptions, onGameOptionsChanged } from '../../modules/options/gameOptions';
+import { GameOptions, onGameOptionsChanged } from '@/controllers/settings';
 import { busGain, trackGains, type SoundBus } from './buses';
 import type { SoundLayer } from './layer';
 import { SOUND_LAYERS } from './layers';

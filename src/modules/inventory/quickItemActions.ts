@@ -2,7 +2,7 @@ import { reaction } from 'mobx';
 import { t } from '../../i18n';
 import { Store } from '../../app/store';
 import { Economy } from '../economy/economy';
-import { GameOptions } from '../options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import { StorageKind } from './itemStorage';
 import { itemValue } from '../items/itemValue';
 import { itemDisplayName } from '../../controllers/interface/itemTooltip';

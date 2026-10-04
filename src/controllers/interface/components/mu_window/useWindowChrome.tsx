@@ -8,7 +8,7 @@ import {
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { MuWindows, type WindowCloser } from '../../windowManager';
-import { GameOptions } from '@/modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import { t } from '@/i18n';
 
 type WindowChrome = {

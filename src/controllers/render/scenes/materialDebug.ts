@@ -1,5 +1,5 @@
 import type { Scene } from '../babylon/exports';
-import { GameOptions } from '@/modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import { t } from '@/i18n';
 import {
   MATERIAL_QUALITY_LABEL_KEYS,

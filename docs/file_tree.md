@@ -46,6 +46,7 @@ controllers/       generic services; controllers.ts starts them, controller.ts i
   maps/            map registry contract (the maps themselves are content)
   net/             sockets, encryption, packet facade, protocols, ping
   render/          model objects, prop batches, shadows, PBR, post passes (scenes/)
+  settings/        the player's settings (GameOptions): state, browser storage, the observable
   skills/          defineSkill, registerSkills and the skill visual engine (visuals.ts)
   sound/           buses, music, combat sounds, sound manager
   terrain/         terrain loading, grass, water, masks, minimap data

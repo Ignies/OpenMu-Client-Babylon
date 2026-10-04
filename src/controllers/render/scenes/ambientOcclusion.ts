@@ -27,7 +27,7 @@ import {
   type LightingTier,
 } from '../../lighting/lightingQuality';
 import { devQuery, devQueryNumber, devQueryNumbers } from '@/core/devSeams';
-import { GameOptions } from '@/modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import { renderDistanceRanges } from '../renderDistance';
 import { CSM_CASTER_REACH, drawsSolidGeometry } from './shadows';
 import { driveRenderList } from './renderList';

@@ -79,7 +79,7 @@ original client's item passes, the item glow tiers and the weapon swing trails.
 - uses: `render` (Babylon exports, `pbrMaps`, `materialQuality`, `renderingStyle`,
   `frameSnapshot`), `lighting` (light model, tiers, key rig, clouds, tint, point light pool),
   `weather/snowCaps`, `assets/mu/sprites`, `actors` (hand bones, weapon class), `fx` (types),
-  `modules/options/gameOptions`, `version`.
+  `settings`, `version`.
 - used by: `assets/modelLoader.ts` (materials), `render/propBatches.ts` (`packBodyLight`),
   `render/scenes` (sceneLook, materialDebug), `actors`, `fx/itemAura.ts`, `fx/itemCrackle.ts`,
   `lighting/items.ts`, the appearance, item glow, skill cast and weapon trail ECS systems,

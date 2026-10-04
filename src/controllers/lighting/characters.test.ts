@@ -6,7 +6,7 @@ vi.hoisted(() => {
 });
 
 import { characterLightFor } from './characters';
-import { GameOptions } from '@/modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings/gameOptions';
 
 const was = GameOptions.lightingQuality;
 afterEach(() => {

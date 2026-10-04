@@ -59,7 +59,7 @@ recipes. One `weather` facade steps every effect (see [docs/controllers.md](../.
   `maps` (climate flags), `fx` (`effects.spawn`, `FIRE_SPARKS`, ambient types), `net/serverTime`,
   `lighting` (`keyRig`, `lightModel`, `profiles` types), `anim/playSpeed`, `render/babylon`, `core`.
   Old exceptions to the dependency rule (`tools/checks/baselines/deps.json`): `app/store`
-  (`rainState.ts`) and `modules/options/gameOptions`.
+  (`rainState.ts`). Reads `settings`.
 - used by: `controllers.ts`, `app/lifecycle.ts`, `app/boot.tsx`, `modules/world/net.ts`,
   `ecs/systems` (`weatherSystem`, `footprintSystem`, `ambientParticleSystem`, `renderSystem`),
   `skills/visuals.ts` (`scorch`, `burn` steps), `terrain` (overlay, material, grass,

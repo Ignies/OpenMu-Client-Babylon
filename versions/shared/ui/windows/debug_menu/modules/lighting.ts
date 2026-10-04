@@ -8,7 +8,7 @@ import {
   GameOptions,
   TONE_MAPPER_MAX,
   setGameOption,
-} from '@/modules/options/gameOptions';
+} from '@/controllers/settings';
 import { ENUM_WORLD } from '@/core/types';
 import { lookDirector, type LookState } from '@/controllers/lighting/director';
 

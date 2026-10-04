@@ -25,7 +25,7 @@ import {
   useWindowStackEntry,
 } from '@/controllers/interface/components/mu_window/useWindowChrome';
 import { isTypingInField } from '@/ecs/systems/keyboardInputSystem';
-import { GameOptions } from '@/modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import { isKey } from '@/controllers/interface/keyBindings';
 import { EmojiText } from '@/controllers/interface/components/emoji_text';
 import { EMOJI_CATALOG } from '@/modules/chat/emojis';

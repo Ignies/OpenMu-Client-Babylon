@@ -8,7 +8,7 @@ import '../i18n';
 import '@/core/types';
 import '../controllers/actors/deserializeAppearance';
 import '../modules/hero/characterStats';
-import '../modules/options/gameOptions';
+import '../controllers/settings';
 import '@versions/shared/items/itemsDatabase';
 import '../modules/items/itemLevelLook';
 import '../controllers/actors/itemAngle';

@@ -2,7 +2,7 @@ import { reaction } from 'mobx';
 import { t } from '../../i18n';
 import { Store } from '../../app/store';
 import { skills } from '../../modules/skills';
-import { GameOptions } from '../../modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import { Notices } from '../../modules/chat/notices';
 import { InventoryConstants } from '../../modules/inventory/inventoryConstants';
 import { itemSquares, squareFits, stampSquares } from '../../modules/inventory/inventoryLayout';

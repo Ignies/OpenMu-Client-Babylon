@@ -6,7 +6,7 @@ import {
   isCustom,
   withImprovement,
 } from '@/controllers/fidelity';
-import { GameOptions, setGameOption } from '@/modules/options/gameOptions';
+import { GameOptions, setGameOption } from '@/controllers/settings';
 import { t } from '@/i18n';
 import { Checkbox, FitText } from './controls';
 import type { Row, Section } from './catalogue';

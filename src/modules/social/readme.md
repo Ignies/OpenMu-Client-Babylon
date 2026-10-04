@@ -41,7 +41,7 @@ Also the guild mark (emblem) codec. It has no packet handlers of its own; the ne
   `RequestAllianceList`, `RemoveAllianceGuildRequest`, `GuildWarResponse`.
 
 ## Depends on / used by
-- uses: `chat/` (log helpers, emojis, item links, `Commands`), `hero/emotes.ts`, `options/gameOptions.ts`,
+- uses: `chat/` (log helpers, emojis, item links, `Commands`), `hero/emotes.ts`, `controllers/settings`,
   `Store`, `controllers/net` (chat wire, round trip), `controllers/interface/nameTags`, `controllers/sound`.
 - used by: nearly every module (system lines), `party`, `guild`, `guild_war`, `chat`, `friends`, `band`,
   `hero/net.ts` (`reset`), `ecs/systems/skillCastSystem.ts`, `controllers/actors/guildFlag.ts` and

@@ -1,4 +1,4 @@
-import { GameOptions } from '@/modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import type { InstrumentId } from '@/modules/band/instruments';
 import type { ENUM_WORLD } from '@/core/types';
 import { Engine, Vector3 } from '../../render/babylon/exports';

@@ -48,7 +48,7 @@ other folders share.
   `session/sessionResume.ts`, `chat/commands.ts`, `_shared/net_helpers.ts`, `items`, `inventory`, `src/i18n`.
 - used by: `src/app/logic.ts`, `src/app/store.ts`, many controllers and ECS systems (`getBaseClass`),
   `social/social.ts` (`matchEmoteWord`), `session/sessionStats.ts` (`experienceGained`),
-  `options/gameOptions.ts`, `skills`, `combat`, `events`, `quests`. Windows: `versions/shared/ui/windows/character_info/`,
+  `controllers/settings`, `skills`, `combat`, `events`, `quests`. Windows: `versions/shared/ui/windows/character_info/`,
   `emote_menu/`, `move_command_window/`, `mu_helper/`, `options/`; HUD `low_health_overlay/`; page `character_select/`.
 
 ## Change it

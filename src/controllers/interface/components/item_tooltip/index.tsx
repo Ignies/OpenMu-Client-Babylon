@@ -10,7 +10,7 @@ import {
   compareTooltipsOn,
   CompareTooltips,
 } from '@/modules/items/itemCompare';
-import { GameOptions } from '@/modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import type { HeroStats } from '@/modules/items/itemStats';
 import { PET_GROUP } from '@/modules/pets/pets';
 import { PetTypeEnum } from '@versions/shared/packets/ClientToServerPackets';

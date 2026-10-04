@@ -11,7 +11,7 @@ import {
   type Observer,
   type Scene,
 } from '../babylon/exports';
-import { GameOptions } from '@/modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import { devQueryNumber } from '@/core/devSeams';
 import {
   MSAA_HEAD_ONLY,

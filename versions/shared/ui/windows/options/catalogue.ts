@@ -9,7 +9,7 @@ import {
   UI_SCALE_MAX,
   uiScaleFactor,
   type GameOptions as GameOptionsType,
-} from '@/modules/options/gameOptions';
+} from '@/controllers/settings';
 import {
   KEY_ACTION_LABEL_KEYS,
   type KeyAction,

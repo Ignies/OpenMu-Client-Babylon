@@ -3,7 +3,7 @@ import { sunLightOf } from '../lighting/keyRig';
 import type { ENUM_WORLD } from '../../core/types';
 import { maps } from '../maps';
 import type { TerrainOverlayName } from './mapTerrain';
-import { GameOptions } from '../../modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import { SNOW_GROUND_MAPS, snowCover } from '../weather/snowCover';
 import { snowTrailPainted, snowTrailTexture } from '../weather/snowTrail';
 import {

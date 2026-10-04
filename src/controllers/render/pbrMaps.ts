@@ -7,7 +7,7 @@ import {
   type Scene,
 } from './babylon/exports';
 import { resolveDataUrl } from '../assets/mu/dataFolder';
-import { onGameOptionsChanged } from '../../modules/options/gameOptions';
+import { onGameOptionsChanged } from '@/controllers/settings';
 import { filterAnisotropy } from './materialQuality';
 import { derivePbrMaps, flipRows, ROUGH_MAX, type DerivedMaps } from './pbrDerive';
 import { decodeKtx2, isKtx2, loadTranscoder, type TranscoderUrls } from '../assets/ktx2Pixels';

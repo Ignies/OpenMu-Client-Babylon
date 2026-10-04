@@ -1,5 +1,5 @@
 import type { ENUM_WORLD } from '../../core/types';
-import { GameOptions } from '../../modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import { SoundsManager } from './soundsManager';
 import { busGain, type SoundBus } from './buses';
 import type { Sounds } from './recipes';

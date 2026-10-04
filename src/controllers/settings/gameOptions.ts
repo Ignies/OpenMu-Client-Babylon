@@ -1,26 +1,25 @@
 import { makeAutoObservable, runInAction } from 'mobx';
-import {
-  CAMERA_FOV_DEG,
-  CAMERA_FOV_MAX_DEG,
-  CAMERA_FOV_MIN_DEG,
-} from '../../controllers/camera/recipes';
-import { RENDER_DISTANCE_MAX } from '../../controllers/render/renderDistance';
-import {
-  LOW_VITAL_DEFAULT_PERCENT,
-  LOW_VITAL_MAX_PERCENT,
-  LOW_VITAL_MIN_PERCENT,
-} from '../hero/lowVitals';
 import { LocalStorage } from '../../core/localStorage';
-import { RENDER_SCALE_STEP_MAX } from '../../controllers/render/renderScale';
 import {
   FIDELITY_DEFAULT,
   FIDELITY_MAX,
   cleanOverrides,
   setFidelityChoice,
   type FidelityOverrides,
-} from '../../controllers/fidelity';
+} from '../fidelity';
 
 const OPTIONS_KEY = 'mu_options';
+
+// Literals rather than the owners' constants: camera, render and hero all import this
+// controller, so naming theirs here would close an import cycle. limits.test.ts pins them.
+/** `CAMERA_FOV_DEG` / `_MIN_DEG` / `_MAX_DEG` (controllers/camera/recipes.ts). */
+const CAMERA_FOV = { deg: 30, min: 20, max: 60 } as const;
+/** `RENDER_DISTANCE_MAX` (controllers/render/renderDistance.ts). */
+const RENDER_DISTANCE_TOP = 9;
+/** `RENDER_SCALE_STEP_MAX` (controllers/render/renderScale.ts). */
+const RENDER_SCALE_TOP = 5;
+/** `LOW_VITAL_MIN/MAX/DEFAULT_PERCENT` (modules/hero/lowVitals.ts). */
+const LOW_VITAL = { min: 10, max: 50, default: 30 } as const;
 
 export type GameOptions = {
   shadows: boolean;
@@ -491,7 +490,7 @@ const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
   glow: [0, 9],
   chromatic: [0, 9],
   sharpness: [0, 9],
-  renderScale: [0, RENDER_SCALE_STEP_MAX],
+  renderScale: [0, RENDER_SCALE_TOP],
   upscale: [0, 1],
   vignette: [0, 9],
   sunShafts: [0, 9],
@@ -501,12 +500,12 @@ const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
   compareTooltips: [0, 2],
   // Literal for the same reason: `CHAT_EMOJI_SIZE_MAX`.
   chatEmojiSize: [0, 3],
-  lowHealthPercent: [LOW_VITAL_MIN_PERCENT, LOW_VITAL_MAX_PERCENT],
-  lowManaPercent: [LOW_VITAL_MIN_PERCENT, LOW_VITAL_MAX_PERCENT],
+  lowHealthPercent: [LOW_VITAL.min, LOW_VITAL.max],
+  lowManaPercent: [LOW_VITAL.min, LOW_VITAL.max],
   uiScale: [0, UI_SCALE_MAX],
-  renderDistance: [0, RENDER_DISTANCE_MAX],
+  renderDistance: [0, RENDER_DISTANCE_TOP],
   grassDensity: [0, 9],
-  cameraFov: [CAMERA_FOV_MIN_DEG, CAMERA_FOV_MAX_DEG],
+  cameraFov: [CAMERA_FOV.min, CAMERA_FOV.max],
   fidelity: [0, FIDELITY_MAX],
 };
 
@@ -587,7 +586,7 @@ const DEFAULTS: GameOptions = {
   whisperBeep: true,
   slideHelp: true,
   cameraControl: true,
-  cameraFov: CAMERA_FOV_DEG,
+  cameraFov: CAMERA_FOV.deg,
   wsadMovement: false,
   thirdPersonMouseLook: false,
   firstPersonBob: true,
@@ -607,9 +606,9 @@ const DEFAULTS: GameOptions = {
   lockWindows: false,
   stateWarnings: true,
   lowHealthWarning: true,
-  lowHealthPercent: LOW_VITAL_DEFAULT_PERCENT,
+  lowHealthPercent: LOW_VITAL.default,
   lowManaWarning: false,
-  lowManaPercent: LOW_VITAL_DEFAULT_PERCENT,
+  lowManaPercent: LOW_VITAL.default,
   blockBrowserKeys: true,
   minimapCorner: true,
   quickItemActions: true,

@@ -60,7 +60,7 @@ imports the modules below directly (baselined in `tools/checks`).
 ## Depends on / used by
 - uses: `render` (babylon, materials, `pbrMaps`, `textureScript`), `item_fx/itemMaterial`,
   `terrain` (`mapFileEncryption`, tile lists), `maps`, `net/wireUtils`, `interface/item_icons`,
-  `actors/skinTexture`, `version`, `i18n`, `core`, `modules/options`, `modules/items`.
+  `actors/skinTexture`, `version`, `i18n`, `core`, `settings`, `modules/items`.
 - used by: nearly every controller (`render`, `fx`, `terrain`, `sound`, `lighting`, `interface`,
   `actors`, `maps`, `weather`), `ecs/systems`, `app/boot.tsx`, `app/store.ts`, `modules`
   (quests, skills, inventory, economy, character select), `versions/shared` (items, monsters, ui),

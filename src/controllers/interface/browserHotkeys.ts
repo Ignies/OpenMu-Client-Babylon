@@ -3,7 +3,7 @@
  * on reserved chords, `beforeunload` as the last net. See readme.md.
  */
 
-import { GameOptions, onGameOptionsChanged } from '../../modules/options/gameOptions';
+import { GameOptions, onGameOptionsChanged } from '@/controllers/settings';
 
 /**
  * Ctrl (or Cmd) plus one of these is a browser command. None of them is

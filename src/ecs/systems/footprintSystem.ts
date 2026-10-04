@@ -1,5 +1,5 @@
 import { ENUM_WORLD } from '../../core/types';
-import { GameOptions } from '../../modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import {
   FADE_STEPS,
   FULL_STEPS,

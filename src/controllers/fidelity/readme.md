@@ -18,10 +18,10 @@ the code that deviates from the original asks `isOn('<id>')` and keeps the origi
   `withImprovement(id, value, preset, overrides)`, `cleanOverrides(raw)`, `presetTurnsOn(def, preset)`.
 
 ## How it works
-- The choice is stored in `GameOptions` (`modules/options`): `fidelity` (the preset) and
-  `fidelityOverrides` (id -> boolean, only the ids set apart from the preset). The options module
+- The choice is stored in `GameOptions` (`controllers/settings`): `fidelity` (the preset) and
+  `fidelityOverrides` (id -> boolean, only the ids set apart from the preset). The settings controller
   pushes both here at load and on every change (`setFidelityChoice`); this controller never reads
-  `GameOptions`, so it adds no controller -> module import.
+  `GameOptions`, so settings can import it without a cycle.
 - On each push or registration the answer for every registered id is cached in a `Map`; `isOn`
   reads it.
 - "Custom" is any registered id whose override differs from its preset. A preset click clears the
@@ -38,7 +38,7 @@ the code that deviates from the original asks `isOn('<id>')` and keeps the origi
 
 ## Depends on / used by
 - uses: nothing (the `TextKey` type).
-- used by: `modules/options/gameOptions.ts` (pushes the choice), the Options window's Fidelity page
+- used by: `settings/gameOptions.ts` (pushes the choice), the Options window's Fidelity page
   (`versions/shared/ui/windows/options/fidelity.tsx`), `versions/shared/improvements/` and every
   deviation site (`isOn`).
 

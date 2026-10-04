@@ -1,5 +1,5 @@
 import type { Entity, ISystemFactory } from '../world';
-import { GameOptions } from '../../modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import { monsterVisualFor, visualMonster } from '../../controllers/fx/monsterVisuals';
 import type { EffectHandle } from '../../controllers/fx';
 

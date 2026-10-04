@@ -1,6 +1,6 @@
-import { GameOptions } from '../options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import { i18n } from '../../i18n';
-import { texturePacks } from '../../controllers/assets/texturePacks';
+import { texturePacks } from '@/controllers/assets';
 
 /**
  * Every setting a player has, as a short hex string.

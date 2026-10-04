@@ -6,7 +6,7 @@ import type { ISystemFactory, World } from '../world';
 import { Store, UIState } from '../../app/store';
 import { isMobileDevice } from '../../controllers/interface/mobile';
 import { MoveTargetEffect } from '../../controllers/fx/moveTargetEffect';
-import { GameOptions } from '../../modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import { WALK_KEYS } from '../../controllers/interface/keyBindings';
 import { aimX, aimY } from '../../controllers/camera';
 import { Commands } from '../../modules/chat/commands';

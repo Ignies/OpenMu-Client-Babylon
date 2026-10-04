@@ -6,7 +6,7 @@ import './logic';
 // Content model classes register here, at boot, where no controller can reach (controllers import the Store, which imports logic.ts).
 import '@versions/shared/monsters/models';
 import { Store, UIState } from './store';
-import { GameOptions } from '../modules/options/gameOptions';
+import { GameOptions } from '@/controllers/settings';
 import { Social } from '../modules/social/social';
 import { Commands } from '../modules/chat/commands';
 import { GmPanel } from '../modules/gm/gmPanel';

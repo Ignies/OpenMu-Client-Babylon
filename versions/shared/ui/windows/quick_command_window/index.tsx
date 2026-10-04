@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { t, type TextKey } from '@/i18n';
 import { Commands } from '@/modules/chat/commands';
-import { GameOptions, uiScaleFactor } from '@/modules/options/gameOptions';
+import { GameOptions, uiScaleFactor } from '@/controllers/settings';
 import type { CommandKind } from '@/modules/chat/chatCommands';
 import { playUiSound, uiClick } from '@/controllers/sound/sfx';
 import { MuSpriteFrame, useMuSprite } from '@/controllers/interface/components/mu_sprite';

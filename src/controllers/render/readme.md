@@ -31,6 +31,8 @@ There is no `index.ts` facade; other folders import the modules directly.
 - helpers: `boneLink.ts` (bone-link matrices), `meshAnimation.ts` (`meshAnimationFor`),
   `renderAngles.ts` (`toRenderAngles`), `viewPlanes.ts`, `frameSnapshot.ts`, `textureScript.ts`,
   `sceneCover.ts`, `blendMeshes.ts`, `effectOnlyObjects.ts`, `perfOverlay.ts` (Shift+Ctrl+Alt+P).
+- `configFingerprint.ts`: `configFingerprintLines()` and friends, every game option packed into a hex
+  string for the perf overlay.
 
 ## How it works
 - `ModelObject.load(gltf)` puts a GLB under the object's node with the BMD to Babylon basis change
@@ -48,8 +50,8 @@ There is no `index.ts` facade; other folders import the modules directly.
 
 ## Depends on / used by
 - uses: `assets` (model loader, texture packs), `lighting`, `terrain`, `maps`, `item_fx`, `anim`,
-  `net`, `ecs` (world types, two system helpers), `core`; old exceptions in `tools/checks/baselines/deps.json`: `modules/options`,
-  `modules/session`, `app/storeRef`.
+  `net`, `settings`, `ecs` (world types, two system helpers), `core`; old exceptions in
+  `tools/checks/baselines/deps.json`: `app/storeRef`.
 - used by: `app/boot.tsx`, `ecs` systems, `actors`, `fx`, `lighting`, `terrain`, `item_fx`,
   `assets`, `modules`, `versions/shared` maps, npcs and the Options window.
 
@@ -63,9 +65,13 @@ There is no `index.ts` facade; other folders import the modules directly.
   `lighting/director.ts` in chain order, return true when the chain changed.
 - a new render option: add its steps and reader next to the others (e.g. `renderingStyle.ts`) and
   the slider in `versions/shared/ui/windows/options/catalogue.ts`.
+- a new game option: run `bun run tools/configHexTable.ts` to rewrite `docs/configuration_hex.md`;
+  bump `CONFIG_FINGERPRINT_VERSION` if the byte layout itself changes.
 - see [docs/controllers.md](../../../docs/controllers.md) for adding a new look next to the classic one.
 
 ## Tests
+- `configFingerprint.test.ts`: `configuration_hex.md` matches the options, the layout and lengths,
+  the number bias round trip, and the pack digest.
 - `frameSnapshot.test.ts`: fills once per frame and per scene, refills after a throw.
 - `meshAnimation.test.ts`: `meshAnimationFor` reads the map row per world.
 - `versions/shared/contentRows.golden.test.ts`: every map's mesh animations, sampled over time.
