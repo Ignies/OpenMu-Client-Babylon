@@ -194,7 +194,7 @@ function spearCone(c: SkillContext, hd = false): void {
 }
 
 /**
- * Impale's AttackStage (ZzzCharacter.cpp:2702-2760), `t` = AttackTime (1 at the packet): t4 the gather at the weapon's
+ * Impale's AttackStage (ZzzCharacter.cpp:2702-2760), `t` = AttackTime, seen on tick `t` after the packet: t4 the gather at the weapon's
  * link bone, t8 the cone, t10 SOUND_RIDINGSPEAR, t13 and t14 three MODEL_SPEARSKILL each (ZzzEffect.cpp:641-646,
  * :8683-8694): RidingSpear01 at Scale 1.5, 145 cm ahead and 110 cm up +-30 cm, drawn RENDER_BRIGHT at 0.3 grey x
  * LT x 0.05, drifting 5 cm a tick along the facing. No light. The mounted cast's glint and swing are the cast's
@@ -202,17 +202,17 @@ function spearCone(c: SkillContext, hd = false): void {
  */
 const impaleOf = (hd: boolean): Step => (at, c) => {
   const caster = c.caster;
-  delay(ticks(3), () => {
+  delay(ticks(4), () => {
     if (!entityGone(caster)) spearGather(c, bonePos(caster, WEAPON_LINK_BONE, new Vector3(), CAST_HEIGHT), hd);
   });
-  delay(ticks(7), () => {
+  delay(ticks(8), () => {
     if (!entityGone(caster)) spearCone(c, hd);
   });
-  delay(ticks(9), () => {
+  delay(ticks(10), () => {
     if (!entityGone(caster)) sayAt(c, 'Sound/eRidingSpear');
   });
   for (const t of [13, 14]) {
-    delay(ticks(t - 1), () => {
+    delay(ticks(t), () => {
       if (entityGone(caster)) return;
       const yaw = entityYaw(caster);
       const f = forwardOf(yaw);

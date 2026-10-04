@@ -198,3 +198,17 @@ describe('the release-block sounds play at the release, not at the packet', () =
     expect(timeline(53, CLIP, playerPlaySpeed(CLIP, 0, 1400), 5, 25, { sound: 'Sound/eSwellLife' })).toEqual({ key: 2, release: 2 });
   });
 });
+
+describe('AttackStage sees AttackTime t on tick t after the packet', () => {
+  // The packet sets AttackTime 1; each tick AttackStage runs, then AttackTime += 1 and the release comes at 15 (ZzzCharacter.cpp:4132-4140).
+  const ONETOONE = PlayerAction.PLAYER_ATTACK_ONETOONE;
+  const SPEAR = PlayerAction.PLAYER_ATTACK_SKILL_SPEAR;
+
+  it('Death Stab: SOUND_SKILL_SWORD2 at AttackTime 8 (ZzzCharacter.cpp:2628-2634)', () => {
+    expect(timeline(43, ONETOONE, 0.25, 99, 25, { sound: 'Sound/sKnightSkill2' }).release).toBe(8);
+  });
+
+  it('Impale: SOUND_RIDINGSPEAR at AttackTime 10 (ZzzCharacter.cpp:2707-2711)', () => {
+    expect(timeline(47, SPEAR, 0.25, 99, 25, { sound: 'Sound/eRidingSpear' }).release).toBe(10);
+  });
+});
