@@ -48,6 +48,13 @@ clip is one file in `versions/shared/animations/` that says its own speed, flags
   authored at 24 keys/s, so Babylon's `speedRatio = PlaySpeed * 25 / 24` (`render/modelObject.ts`).
 - Monster speeds are keyed by model index, read off the body files (versions/shared/monster_models);
   `monsterModelTypeOf` maps an npc number to its model.
+- Whose speeds scale a player clip (an improvement over the original): the original writes the hero's
+  `CharacterAttribute` speeds into the one `Models[MODEL_PLAYER]` table (`SetAttackSpeed`,
+  ZzzCharacter.cpp:812-1028), so every player body swings and casts at the hero's rate. Here another
+  player in scope plays at its own `AttackSpeed` / `MagicSpeed` from the extended scope packet
+  (`AddCharacterToScopeExtended`, its `speeds` component, `ecs/systems/animationSystem.ts`), so its
+  clips and its casts' release (`onRelease`, which watches the clip) follow its stats. The hero, and a
+  player from the classic packet (no speeds), keep the hero's speeds as before.
 - `applyPlayerActionSpeed` sets the attack / cast rate at once, so a duration read in the same frame
   does not see the idle rate.
 - Monster attack state (`c->SwordCount`, `c->Skill`) lives in a `WeakMap` keyed by the owner.

@@ -43,7 +43,8 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
   ([../../docs/guidelines/performance.md](../../docs/guidelines/performance.md)).
 
 ## Tests
-- `systems/animationSystem.test.ts`: every player body takes the hero's attack and magic speed.
+- `systems/animationSystem.test.ts`: the hero and a player with no reported speeds take the hero's
+  attack and magic speed; another player with speeds from the scope packet keeps its own.
 - `systems/deathSystem.test.ts`: Chaos Castle bomb sounds on odd ticks 15..25, the pit scream,
   no sound off the Blood Castle bridge, the skill knock and Nova motes, the Dead counter in whole
   ticks at 25 fps, the Die clip at Dead 15 (less the hero's blow wait), the fade from the kill.
@@ -65,10 +66,11 @@ is disposed after its last particle dies, except on a map change. A recipe with 
 gusts from `ambientSchedule.ts`, rolled from `serverNow()` so every client sees the same weather.
 
 ### animationSystem.ts
-Clip speeds come from `controllers/anim`. The attack and magic speeds that scale them are the
-hero's for every player body: the original's `SetAttackSpeed` writes `CharacterAttribute` into the
-one `MODEL_PLAYER` action table (ZzzCharacter.cpp:812-1028), so another player swings and casts at
-the hero's rate. The extended scope packet's own speeds are not used for clips (nor by the original).
+Clip speeds come from `controllers/anim`. The attack and magic speeds that scale them are another
+player's own when the extended scope packet sent them (its `speeds` component), else the hero's: the
+original's `SetAttackSpeed` writes `CharacterAttribute` into the one `MODEL_PLAYER` action table
+(ZzzCharacter.cpp:812-1028), so there everyone swings at the hero's rate. That deviation is described
+in `controllers/anim/readme.md`.
 
 ### ceilingHideSystem.ts
 Fades the roof of the building the hero is in, so the fixed camera still sees inside (Devias; the

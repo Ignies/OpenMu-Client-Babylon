@@ -6,7 +6,7 @@ import { EventBus } from '@/core/eventBus';
 import { type MUAttributeSystem } from '@/core/attributeSystem';
 import { MonsterActionType, PlayerAction, ServerPlayerActionType } from '@versions/shared/objects/enum';
 import { ObjectAnimationPacket, ObjectGotKilledPacket, ObjectHitExtendedPacket, ObjectHitPacket, RageAttackPacket, RageAttackRangeResponsePacket, SkillAnimationPacket } from '@versions/shared/packets/ServerToClientPackets';
-import { ServerToClientActionMap, isPlayerAttackAction, resolveGenderedAction } from '@/controllers/anim/playerActionMapper';
+import { ServerToClientActionMap, resolveGenderedAction } from '@/controllers/anim/playerActionMapper';
 import { Store } from '@/app/store';
 import { attackInputOf, attackPoseOf, convertDirectionToAngle, isDeadMonster, monsterNumberOf, playCastAnimation, playTrapSounds, setMonsterClip } from '../_shared/net_helpers';
 import { chooseAttackAction, isWeaponItem } from '@/controllers/actors/weaponClass';
@@ -17,7 +17,7 @@ import { isPlayerBody } from '@/controllers/actors/playerObject';
 import { isTeleportSkill } from '../skills/skillCasting';
 import { meteoriteStormRunning, santaActionSound } from '@/controllers/sound/packetSounds';
 import { mountKind } from '../pets/pets';
-import { playBowShotVisual, playBuffHits, playTargetedSkillVisual } from '@versions/shared/skills/skillVisuals';
+import { afterHeroRelease, playBowShotVisual, playBuffHits, playTargetedSkillVisual } from '@versions/shared/skills/skillVisuals';
 import { playSfx } from '@/controllers/sound/sfx';
 import { playTeleportAnimation } from '../skills/net';
 import { playerPlaySpeed } from '@/controllers/anim/playSpeed';
@@ -101,43 +101,23 @@ function stopNetObjectAtTarget(obj: Entity) {
 const ENERGY_BASE_TICKS = 22;
 /** Homing at up to 30 units a tick, turning as fast: fitted to MoveJoint. */
 const ENERGY_TICKS_PER_TILE = 3.5;
-/** DeathSystem's connect point and fallback: where the hero-kill Die starts. */
-const SWING_HIT_FRACTION = 0.5;
-const SWING_CONNECT_FALLBACK_TICKS = 15;
-
-/** Ticks until the hero's swing connects (ZzzCharacter.cpp:4139). */
-function heroSwingConnectTicks(hero: Entity): number {
-  const action = hero.playerAnimation?.action;
-  const model = hero.modelObject;
-  if (action === undefined || !model || !isPlayerAttackAction(action)) return 0;
-  if (model.CurrentAction !== action || model.ActionIterationWasFinished) {
-    return 0;
-  }
-  const left =
-    (SWING_HIT_FRACTION - model.actionProgress()) *
-    model.getActionDuration(action) *
-    25;
-  return Math.min(SWING_CONNECT_FALLBACK_TICKS, Math.max(0, left));
-}
 
 /**
- * ATTACK_DIE orbs (ZzzCharacter.cpp:5242-5247), not drawn: both land on one
- * tick, so the 1-channel SOUND_GET_ENERGY plays once (ZzzEffectJoint.cpp:3369).
+ * ATTACK_DIE orbs (ZzzCharacter.cpp:5242-5247), not drawn: the release block creates them, so they start at the
+ * hero's cast release; a plain blow's request went out on its release (combat attackTiming), so at once. Both
+ * land on one tick and the 1-channel SOUND_GET_ENERGY plays once (ZzzEffectJoint.cpp:3369).
  */
-function playKillEnergy(world: World, victim: Entity): void {
-  const hero = world.playerEntity;
-  if (!hero?.transform || !victim.transform) return;
-  const tiles = Math.hypot(
-    victim.transform.pos.x - hero.transform.pos.x,
-    victim.transform.pos.z - hero.transform.pos.z
-  );
-  const ticks =
-    heroSwingConnectTicks(hero) +
-    ENERGY_BASE_TICKS +
-    ENERGY_TICKS_PER_TILE * tiles;
-  delay(ticks / 25, () =>
-    playSfx('Sound/pEnergy', null, { bus: COMBAT_BUS, channels: 1 })
-  );
+export function playKillEnergy(world: World, victim: Entity, skill: number): void {
+  const fly = (): void => {
+    const hero = world.playerEntity;
+    if (!hero?.transform || !victim.transform) return;
+    const tiles = Math.hypot(victim.transform.pos.x - hero.transform.pos.x, victim.transform.pos.z - hero.transform.pos.z);
+    delay((ENERGY_BASE_TICKS + ENERGY_TICKS_PER_TILE * tiles) / 25, () =>
+      playSfx('Sound/pEnergy', null, { bus: COMBAT_BUS, channels: 1 })
+    );
+  };
+  if (skill) afterHeroRelease(fly);
+  else fly();
 }
 
 type ObjectHitView = Pick<
@@ -469,7 +449,7 @@ export function installNet(): void {
     const killerId = p.KillerId & 0x7fff;
     const heroKill = killerId === Store.playerId;
     markKilled(world, obj, heroKill, p.SkillId, killerId);
-    if (heroKill && obj.npcType !== undefined) playKillEnergy(world, obj);
+    if (heroKill && obj.npcType !== undefined) playKillEnergy(world, obj, p.SkillId);
   });
 
   /** Dark Side (0x4B): the targets the server chose for the follow-up blows. */

@@ -274,6 +274,10 @@ function addCharacterToScope(
       // object under the cursor. The hero is left out - its own body would
       // sit on every click and stop the walk (playerControllerSystem).
       world.addComponent(playerEntity, 'interactable', true);
+      // Their own speeds drive their clips (an improvement over the original, see controllers/anim/readme.md).
+      if (char.attackSpeed != null && char.magicSpeed != null) {
+        world.addComponent(playerEntity, 'speeds', { attack: char.attackSpeed, magic: char.magicSpeed });
+      }
     }
 
     if (char.effects?.length) {

@@ -107,7 +107,12 @@ export interface ReleaseRule {
   readonly key?: number;
   /** The clips that count; by default AttackStage's attack clips (`combat.releasesOnKey`). */
   readonly clips?: ReadonlySet<number>;
+  /** `g_iLimitAttackTime` for the cast: 15 by default, 5 for Penetration (ZzzCharacter.cpp:2779). */
+  readonly limit?: number;
 }
+
+/** `clips` for an AttackStage case that never forces the release: it comes when AttackTime runs out. */
+export const NO_KEY: ReadonlySet<number> = new Set();
 
 /** The caster's clip has passed the rule's key (`AnimationFrame >= key`, ZzzCharacter.cpp:2598-2604). */
 function keyReached(e: Entity, rule: ReleaseRule): boolean {
@@ -124,7 +129,7 @@ function keyReached(e: Entity, rule: ReleaseRule): boolean {
  * (attack / magic speed) releases sooner.
  */
 export function onRelease(c: SkillContext, fn: () => void, rule: ReleaseRule = {}): void {
-  const last = ticks(RELEASE_TICKS);
+  const last = ticks(rule.limit === undefined ? RELEASE_TICKS : rule.limit - 1);
   if (!c.caster.modelObject) {
     delay(last, fn);
     return;
@@ -138,10 +143,41 @@ export function onRelease(c: SkillContext, fn: () => void, rule: ReleaseRule = {
   delay(TICK, poll);
 }
 
-/** `step` at the cast's release (`onRelease`). */
+/** The hero's last cast: when its packet came, and whether it has released since. */
+let heroCastAt = -Infinity;
+let heroReleased = true;
+
+/** A cast by the hero: watch its release (default rule) for `afterHeroRelease`. */
+function watchHeroRelease(c: SkillContext): void {
+  if (!c.caster.localPlayer) return;
+  const at = fxNow();
+  heroCastAt = at;
+  heroReleased = false;
+  onRelease(c, () => {
+    if (heroCastAt === at) heroReleased = true;
+  });
+}
+
+/**
+ * Run `fn` at the hero's cast release, or now when none is pending: the release block is where the
+ * kill's ATTACK_DIE energy is created (ZzzCharacter.cpp:5242-5247). Never later than 14 ticks after the cast.
+ */
+export function afterHeroRelease(fn: () => void): void {
+  const poll = (): void => {
+    if (heroReleased || fxNow() - heroCastAt + 1e-9 >= ticks(RELEASE_TICKS)) fn();
+    else delay(0, poll);
+  };
+  poll();
+}
+
+/** `step` at the cast's release (`onRelease`), with the skill being dispatched now as `currentSkill`. */
 export const afterRelease = (step: Step, rule?: ReleaseRule): Step => (at, c) => {
   const p = at.clone();
-  onRelease(c, () => step(p, c), rule);
+  const skill = currentSkill;
+  onRelease(c, () => {
+    currentSkill = skill;
+    step(p, c);
+  }, rule);
 };
 
 /** `step` `n` times, `every` seconds apart (a per-frame spawn over a few frames). */
@@ -289,6 +325,8 @@ export interface Travel extends Omit<ProjectileOptions, 'to' | 'onArrive' | 'fro
   fromSky?: boolean;
   /** Sky start: tiles up and tiles along +x / -z from the target (the original's Pos += (x, y, z)). */
   skyOffset?: readonly [number, number, number];
+  /** Leave at the cast's release (`onRelease`, `true` for the default rule) instead of at the packet. */
+  release?: true | ReleaseRule;
 }
 
 export interface SkillVisual {
@@ -518,7 +556,18 @@ export function contextFor(scene: Scene, caster: Entity, target: Entity | null):
 }
 
 function runTravel(row: SkillVisual, ctx: SkillContext, target: Entity): void {
-  const { fromSky, skyOffset, ...travel } = row.travel!;
+  const { release, ...rest } = row.travel!;
+  if (!release) return launch(row, rest, ctx, target);
+  const skill = currentSkill;
+  onRelease(ctx, () => {
+    if (entityGone(ctx.caster) || entityGone(target)) return;
+    currentSkill = skill;
+    launch(row, rest, ctx, target);
+  }, release === true ? {} : release);
+}
+
+function launch(row: SkillVisual, flight: Omit<Travel, 'release'>, ctx: SkillContext, target: Entity): void {
+  const { fromSky, skyOffset, ...travel } = flight;
   const from = fromSky ? entityPos(target, IMPACT_HEIGHT, new Vector3()) : entityPos(ctx.caster, CAST_HEIGHT, new Vector3());
   if (fromSky) {
     const [ox, up, oz] = skyOffset ?? [1.5, 8, 1];
@@ -553,6 +602,7 @@ export function playTargetedSkillVisual(
     currentSkill = skill;
     const row = skillVisualFor(skill);
     const ctx = contextFor(scene, caster, target);
+    watchHeroRelease(ctx);
     const at = target?.transform ? entityPos(target, IMPACT_HEIGHT, new Vector3()) : entityPos(caster, IMPACT_HEIGHT, new Vector3());
     row.cast?.(at, ctx);
     if (row.travel && target?.transform) runTravel(row, ctx, target);
@@ -591,6 +641,7 @@ export function playAreaSkillVisual(
     const row = skillVisualFor(skill);
     const aimed = target?.transform ? target : null;
     const ctx = contextFor(scene, caster, aimed);
+    watchHeroRelease(ctx);
     const at = new Vector3(x, y, z);
     row.cast?.(at, ctx);
     if (row.travel && aimed) runTravel(row, ctx, aimed);
