@@ -26,7 +26,7 @@ import { gameVersion } from '../../versions/season6';
 export const HEADERS = new Set([0xc1, 0xc2, 0xc3, 0xc4]);
 
 /** Above this the packet is encrypted; below it, plain. */
-export const ENCRYPTED_FROM = 0xc3;
+const ENCRYPTED_FROM = 0xc3;
 
 export class BotCrypto {
   private readonly encryptor = new SimpleModulusEncryptor();

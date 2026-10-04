@@ -26,7 +26,7 @@ export const CLAIM_TTL_MS = Number(process.env.MARKETPLACE_CLAIM_TTL_MS ?? 3 * 6
 /** A seller who never sent the cancel token, or whose bag was full. */
 export const RETURN_TTL_MS = Number(process.env.MARKETPLACE_RETURN_TTL_MS ?? 3 * 60_000);
 
-export type Reconcilable = {
+type Reconcilable = {
   state: ListingState;
   itemId: string | null;
   /** When the state last changed; what the deadlines count from. */

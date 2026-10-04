@@ -54,7 +54,7 @@ const commits = new BurstLimit(30, 60_000);
 /** Reads and settles. Generous, because browsing pages through the catalogue. */
 const reads = new BurstLimit(240, 60_000);
 
-export type AppDeps = {
+type AppDeps = {
   boxes: Boxes;
   /** Signs the tokens; the game server's plugin holds the same one. */
   secret: Uint8Array;

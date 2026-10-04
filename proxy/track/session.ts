@@ -80,7 +80,7 @@ import { itemName, mapName, monsterName, storageName } from './names';
  * it frames the client's own encoders built and read the events back.
  */
 
-export type SessionSink = {
+type SessionSink = {
   event(session: TrackedSession, event: TrackEvent): void;
   /** A field of the snapshot other than the position changed. */
   change(session: TrackedSession): void;

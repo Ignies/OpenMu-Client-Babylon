@@ -26,7 +26,7 @@ export type Frame = {
   bytes: Uint8Array;
 };
 
-export type FrameHandler = (frame: Frame) => void;
+type FrameHandler = (frame: Frame) => void;
 
 /** Matches a frame by code, and by sub-code when the packet has one. */
 export type Match = { code: number; sub?: number };

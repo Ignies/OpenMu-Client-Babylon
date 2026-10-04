@@ -72,7 +72,7 @@ function forPlayer(order: Order): Order {
 }
 
 /** What GET /api/orders answers: the queue, and what the window needs to explain it. */
-export interface OrdersView {
+interface OrdersView {
   orders: Order[];
   /**
    * Whether an order placed now would be taken. False when the service

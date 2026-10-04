@@ -92,7 +92,7 @@ const BCRYPT_VARIANT = '$2a$';
  * and the sync call would stall every other request in the process for that
  * long. `bcryptjs` chunks the async path so the loop keeps turning.
  */
-export async function hashPassword(password: string): Promise<string> {
+async function hashPassword(password: string): Promise<string> {
   const hash = await bcrypt.hash(password, BCRYPT_COST);
 
   if (hash.startsWith(BCRYPT_VARIANT)) return hash;
@@ -156,7 +156,7 @@ export async function createAccount(
  * The accounts OpenMU's Season 6 seed creates, each with its login as its password
  * (Persistence/Initialization/VersionSeasonSix/TestAccounts); three are Game Masters.
  */
-export const SEEDED_TEST_ACCOUNTS = [
+const SEEDED_TEST_ACCOUNTS = [
   'ancient', 'quest1', 'quest2', 'quest3', 'socket', 'test0', 'test1', 'test2', 'test3', 'test4',
   'test5', 'test6', 'test7', 'test8', 'test9', 'test300', 'test400', 'testgm', 'testgm2', 'testunlock',
 ] as const;

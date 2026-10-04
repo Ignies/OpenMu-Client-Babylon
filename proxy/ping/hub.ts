@@ -29,13 +29,13 @@ export interface PingPeer {
   send(frame: Uint8Array): number;
 }
 
-export type PingHubOptions = {
+type PingHubOptions = {
   now?: () => number;
   maxReceivers?: number;
   log?: (line: string) => void;
 };
 
-export type PingStats = {
+type PingStats = {
   peers: number;
   pings: number;
   framesSent: number;

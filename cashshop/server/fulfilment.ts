@@ -59,7 +59,7 @@ import {
 
 /* ------------------------------------------------------------------ config */
 
-export interface FulfilmentConfig {
+interface FulfilmentConfig {
   /** Whether anything is ever written. Off is a rehearsal with the real gate and reads. */
   fulfil: boolean;
   /** How often the queue is looked at. Every look costs a gate check per account with orders. */

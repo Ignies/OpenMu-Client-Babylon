@@ -16,7 +16,7 @@ import postgres from 'postgres';
 export const DATABASE_URL =
   process.env.DATABASE_URL || 'postgres://postgres:admin@127.0.0.1:5432/openmu';
 
-export type BoxItem = {
+type BoxItem = {
   id: string;
   group: number;
   number: number;
@@ -47,7 +47,7 @@ type BoxRow = {
   durability: number | null;
 };
 
-export type PostgresBoxes = Boxes & {
+type PostgresBoxes = Boxes & {
   sql: ReturnType<typeof postgres>;
   /** Boxes in Postgres that nothing owns, for the audit. */
   unowned(): Promise<{ id: string; money: number; items: number }[]>;

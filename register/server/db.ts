@@ -55,7 +55,7 @@ export function forgetSignupsBefore(cutoff: number): void {
 
 /* -------------------------------------------------------------- account log */
 
-export type AccountLogEntry = {
+type AccountLogEntry = {
   id: number;
   login_name: string;
   bucket: string;

@@ -87,16 +87,6 @@ export type ListingState =
   | 'returning'
   | 'cancelled';
 
-export const LISTING_STATES: readonly ListingState[] = [
-  'pending',
-  'active',
-  'claimed',
-  'sold',
-  'paid',
-  'returning',
-  'cancelled',
-];
-
 export type ListingRow = {
   id: string;
   seller: string;

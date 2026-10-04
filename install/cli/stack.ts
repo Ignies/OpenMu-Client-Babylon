@@ -1,8 +1,5 @@
 // Names, ports and addresses shared by the renderers and install/stack/compose.yml. Change both together.
 export const PROJECT = 'mu';
-
-/** The Compose network, and Caddy's fixed address on it (the services trust its X-Forwarded-For). */
-export const SUBNET = '172.30.77.0/24';
 export const WEB_IP = '172.30.77.10';
 
 export const PORTS = {
@@ -28,8 +25,7 @@ export const HOSTS = {
   marketplace: 'marketplace',
 } as const;
 
-export const SERVICES = ['database', 'openmu', 'proxy', 'register', 'cashshop', 'marketplace', 'ops', 'web'] as const;
-export type Service = (typeof SERVICES)[number];
+export type Service = 'database' | 'openmu' | 'proxy' | 'register' | 'cashshop' | 'marketplace' | 'ops' | 'web';
 
 /** Every service's data lives under one volume mounted at /data. */
 export const DATA = {

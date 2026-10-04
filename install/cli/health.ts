@@ -40,14 +40,3 @@ export async function waitForOpenMu(stack: Stack, timeoutMs = 10 * 60_000, onLin
   }
   throw new Error('OpenMU did not start in time; see `mu logs openmu-startup`.');
 }
-
-export async function waitHealthy(stack: Stack, timeoutMs = 3 * 60_000): Promise<Check[]> {
-  const until = Date.now() + timeoutMs;
-  let last: Check[] = [];
-  while (Date.now() < until) {
-    last = await checks(stack);
-    if (last.length && last.every(c => c.ok)) return last;
-    await Bun.sleep(3000);
-  }
-  return last;
-}

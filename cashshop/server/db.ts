@@ -83,7 +83,7 @@ console.info(`cash shop orders in ${DB_PATH}`);
 
 /* ------------------------------------------------------------------- types */
 
-export type OrderState = 'queued' | 'delivering' | 'delivered' | 'failed' | 'cancelled';
+type OrderState = 'queued' | 'delivering' | 'delivered' | 'failed' | 'cancelled';
 
 export interface Order {
   id: string;
@@ -110,7 +110,7 @@ export interface Order {
 export type QueuedOrder = Order & { account: string };
 
 /** What the placement route knows; everything else in the row is derived here. */
-export interface NewOrder {
+interface NewOrder {
   account: string;
   productId: string;
   productName: string;
@@ -119,7 +119,7 @@ export interface NewOrder {
   roll: Roll | null;
 }
 
-export interface StateLock {
+interface StateLock {
   accountId: string;
   originalState: number;
   lockedAt: number;
@@ -247,10 +247,6 @@ interface LockRow {
   locked_at: number;
 }
 
-const selectLock = db.query<LockRow, [string]>(
-  'SELECT account_id, original_state, locked_at FROM state_locks WHERE account_id = ?'
-);
-
 const selectStaleLocks = db.query<LockRow, [number]>(
   `SELECT account_id, original_state, locked_at FROM state_locks
     WHERE locked_at <= ? ORDER BY locked_at ASC`
@@ -310,7 +306,7 @@ export function deliveringOrders(): QueuedOrder[] {
   return selectDelivering.all().map(row => ({ ...toOrder(row), account: row.account }));
 }
 
-export type AuditLine = Omit<AuditRow, 'detail'> & { detail: unknown };
+type AuditLine = Omit<AuditRow, 'detail'> & { detail: unknown };
 
 /** Every audit line written about one order, oldest first, for the operator's look. */
 export function auditFor(orderId: string): AuditLine[] {
@@ -326,12 +322,12 @@ export function auditFor(orderId: string): AuditLine[] {
  * the wallet the placement route reads until the fulfilment transaction
  * commits, so a placement racing a delivery must see them as spoken for.
  */
-export function chaosCommittedBy(account: string): number {
+function chaosCommittedBy(account: string): number {
   return sumCommitted.get(account)?.n ?? 0;
 }
 
 /** Midnight on the service's clock: the caps are per calendar day, not per 24 hours. */
-export function startOfToday(now = Date.now()): number {
+function startOfToday(now = Date.now()): number {
   const day = new Date(now);
   day.setHours(0, 0, 0, 0);
   return day.getTime();
@@ -475,7 +471,7 @@ export function explainDelivering(id: string, reason: string): void {
   annotateDelivering.run(reason, Date.now(), id);
 }
 
-export type Cancellation =
+type Cancellation =
   | { ok: true; order: Order }
   | { ok: false; reason: 'notFound' | 'notQueued' | 'gacha' };
 
@@ -539,11 +535,6 @@ export function clearLock(accountId: string): void {
 
 function toLock(row: LockRow): StateLock {
   return { accountId: row.account_id, originalState: row.original_state, lockedAt: row.locked_at };
-}
-
-export function lockFor(accountId: string): StateLock | null {
-  const row = selectLock.get(accountId);
-  return row ? toLock(row) : null;
 }
 
 /** Locks older than `LOCK_STALE_MS`, oldest first, for the sweep to restore. */

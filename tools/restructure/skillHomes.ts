@@ -17,13 +17,6 @@ const EXTRA: Record<number, { name: string; classes: string }> = {
   220: { name: 'Blind', classes: 'AllSummoners' },
 };
 
-/** Buff effect id -> the skill whose folder holds its look. Unlisted ids go to common/buff_looks.ts. */
-export const BUFF_OWNERS: Record<number, number> = {
-  1: 28, 3: 28, 4: 16, 5: 64, 148: 64, 7: 53, 8: 48, 135: 48, 58: 55, 61: 67, 71: 217, 72: 219, 73: 220,
-  74: 224, 75: 223, 76: 221, 77: 222, 81: 218, 82: 233, 138: 233, 139: 233, 86: 232,
-  129: 266, 130: 267, 131: 268, 153: 266, 154: 267, 155: 268,
-};
-
 const CLASSES: [RegExp, string][] = [
   [/Magician|SoulMaster|GrandMaster/, 'dark_wizard'],
   [/Knight|BladeMaster/, 'dark_knight'],
@@ -123,10 +116,6 @@ const HOMES = new Map<number, Home>();
     taken.add(h.file);
     HOMES.set(id, h);
   }
-}
-
-export function hasHome(id: number): boolean {
-  return HOMES.has(id);
 }
 
 export function skillHome(id: number): Home {

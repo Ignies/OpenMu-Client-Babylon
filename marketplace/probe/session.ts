@@ -58,9 +58,9 @@ export function view(frame: Frame): DataView {
   );
 }
 
-export type CharacterEntry = ReturnType<CharacterListPacket['getCharacters']>[number];
+type CharacterEntry = ReturnType<CharacterListPacket['getCharacters']>[number];
 
-export type BotIdentity = {
+type BotIdentity = {
   account: string;
   password: string;
   /** Which character to play. Defaults to the lowest slot. */
