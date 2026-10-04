@@ -278,3 +278,28 @@ describe('Twisting Slash releases through the default case', () => {
     expect(release).toBe(14);
   });
 });
+
+describe('Multi-Shot', () => {
+  // MODEL_BLADE_SKILL sub1 (LifeTime 14) fires one arrow on every even LifeTime >= 3: ticks 0, 2 .. 10 (MoveHandlers.cpp:332-415).
+  it('shoots one arrow every 2 ticks from tick 0 to 10', () => {
+    const caster = {
+      netId: 1,
+      transform: { pos: new Vector3(100, 0, 100), rot: new Vector3(0, 0.5, 0), scale: 1 },
+      playerAnimation: { action: PlayerAction.PLAYER_ATTACK_BOW },
+      modelObject: { CurrentAction: PlayerAction.PLAYER_ATTACK_BOW, actionFrame: () => 0 },
+    } as unknown as Entity;
+    effects.reset();
+    const spawn = vi.spyOn(effects, 'spawn');
+    spawn.mockClear();
+    const arrows = () => spawn.mock.calls.filter(c => c[0] === 'projectile').length;
+    playAreaSkillVisual(scene, 235, caster, { x: 103, y: 104 }, () => 0, null);
+    const at: number[] = Array(arrows()).fill(0);
+    for (let t = 1; t <= 20; t++) {
+      const before = arrows();
+      effects.update(ENUM_WORLD.WD_0LORENCIA, 1 / 25);
+      for (let k = before; k < arrows(); k++) at.push(t);
+    }
+    spawn.mockRestore();
+    expect(at).toEqual([0, 2, 4, 6, 8, 10]);
+  });
+});

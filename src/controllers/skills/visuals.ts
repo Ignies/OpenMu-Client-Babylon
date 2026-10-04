@@ -448,19 +448,19 @@ function shoot(scene: Scene, from: Vector3, skill: number, opts: ProjectileOptio
 /**
  * `n` arrows fanning out from the caster toward `at`: `spread` radians
  * between them, or the explicit angles (Triple Shot ±15°, the five-arrow
- * masters ±5/10/20, Javelin's three).
+ * masters ±5/10/20, Javelin's three). With `every` > 0 arrow `i` leaves
+ * `i * every` seconds later from where the caster then stands (Multi-Shot).
  */
-export function fanArrows(at: Vector3, c: SkillContext, n: number, m: string, colour: RGB, spread: number | readonly number[] = TRIPLE_SPREAD, scale = 1): void {
-  const from = entityPos(c.caster, CAST_HEIGHT, new Vector3());
-  const dx = at.x - from.x;
-  const dz = at.z - from.z;
-  const dist = Math.hypot(dx, dz) || 1;
-  const base = Math.atan2(dx, dz);
+export function fanArrows(at: Vector3, c: SkillContext, n: number, m: string, colour: RGB, spread: number | readonly number[] = TRIPLE_SPREAD, scale = 1, every = 0): void {
+  const start = entityPos(c.caster, CAST_HEIGHT, new Vector3());
+  const dist = Math.hypot(at.x - start.x, at.z - start.z) || 1;
+  const base = Math.atan2(at.x - start.x, at.z - start.z);
   // Captured now: by the time an arrow lands, another skill has been dispatched.
   const skill = currentSkill;
   const own = SKILL_VISUALS[skill];
   const impact = (own && forTier(own).impact) ?? steelHit;
-  for (let i = 0; i < n; i++) {
+  const fire = (i: number): void => {
+    const from = i === 0 || every <= 0 ? start : entityPos(c.caster, CAST_HEIGHT, new Vector3());
     const a = base + (typeof spread === 'number' ? (i - (n - 1) / 2) * spread : spread[i] ?? 0);
     const to = new Vector3(from.x + Math.sin(a) * dist, at.y + IMPACT_HEIGHT * 0.5, from.z + Math.cos(a) * dist);
     shoot(c.scene, from, baseSkill(skill), {
@@ -472,6 +472,13 @@ export function fanArrows(at: Vector3, c: SkillContext, n: number, m: string, co
         impact(hit, c);
       },
     });
+  };
+  for (let i = 0; i < n; i++) {
+    if (i === 0 || every <= 0) fire(i);
+    else
+      delay(i * every, () => {
+        if (!entityGone(c.caster)) fire(i);
+      });
   }
 }
 
