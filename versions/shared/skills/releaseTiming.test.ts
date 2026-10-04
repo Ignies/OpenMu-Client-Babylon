@@ -240,3 +240,41 @@ describe('Fire Slash and Spiral Slash draw only on their clip key', () => {
     expect(timeline(57, FLASH, 0.5, 2.3, 25)).toEqual({ key: 5, release: 5 });
   });
 });
+
+describe('Twisting Slash releases through the default case', () => {
+  // No AttackStage case of its own: IsAttackImpactFrame (any attack clip at frame 5) or tick 14 (ZzzCharacter.cpp:3044-3063,
+  // :4410-4422). Every caster plays PLAYER_ATTACK_SKILL_WHEEL (WSclient.cpp:5236-5238; the riding clips are compiled out).
+  const WHEEL = PlayerAction.PLAYER_ATTACK_SKILL_WHEEL;
+
+  it('on key 5 of the wheel clip', () => {
+    expect(timeline(41, WHEEL, 0.5, 5, 25, { area: true, sound: 'Sound/sKnightSkill4' })).toEqual({ key: 10, release: 10 });
+  });
+
+  it('a wheel cut short before its key (a flinch) waits for tick 14', () => {
+    let frame = 0;
+    const model = { CurrentAction: WHEEL as number, actionFrame: () => frame };
+    const caster = {
+      netId: 1,
+      transform: { pos: new Vector3(100, 0, 100), rot: new Vector3(0, 0.5, 0), scale: 1 },
+      playerAnimation: { action: WHEEL },
+      modelObject: model,
+    } as unknown as Entity;
+    effects.reset();
+    const spawn = vi.spyOn(effects, 'spawn');
+    spawn.mockClear();
+    played.length = 0;
+    playAreaSkillVisual(scene, 41, caster, { x: 103, y: 104 }, () => 0, null);
+    let release = 0;
+    for (let f = 1; f <= 30 && !release; f++) {
+      frame += 0.5;
+      if (f === 4) {
+        model.CurrentAction = PlayerAction.PLAYER_SHOCK;
+        frame = 0;
+      }
+      effects.update(ENUM_WORLD.WD_0LORENCIA, 1 / 25);
+      if (played.includes('Sound/sKnightSkill4')) release = f;
+    }
+    spawn.mockRestore();
+    expect(release).toBe(14);
+  });
+});

@@ -1,9 +1,8 @@
 import { defineSkill } from '@/controllers/skills/define';
-import { DEG, whenClipKey } from '../../_shared';
+import { DEG } from '../../_shared';
 import { ITEM_LIGHT, JOINT_SPARKS_HD, SPARK_CHIPS_HD, itemScale, jointSpark, muAngles, rand, sayAt, sparkHeading, wieldedWeapon } from '../_shared';
 import { delay, entityGone, entityPos, entityYaw, fxNow, type ParticleRecipe, type PointSource, type RGB } from '@/controllers/fx/core';
-import { PlayerAction } from '@versions/shared/objects/enum';
-import { SkillContext, Step, TICK, baseSkill, cm, currentSkill, forwardOf, perTick, ticks } from '@/controllers/skills/visuals';
+import { SkillContext, Step, TICK, afterRelease, baseSkill, cm, currentSkill, forwardOf, perTick, ticks } from '@/controllers/skills/visuals';
 import { TEX } from '@/controllers/fx/recipes';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
@@ -209,12 +208,13 @@ export default defineSkill({
   lookAliases: [330, 332],
   // Master numbers cast, heard, lit and drawn as this skill (the original names them in its `case`).
   masterAliases: [481],
-  // 41 Twisting Slash: at clip key 5 (or AttackTime 15) five copies of the wielded weapon whirl round the knight
+  // 41 Twisting Slash: at the release, through AttackStage's default case (any attack clip at key 5, else tick 14,
+  // ZzzCharacter.cpp:3044-3063), five copies of the wielded weapon whirl round the knight
   // with sparks, smoke, a glow and a grey light under each; see twistingSlash.
   visual: {
-    area: whenClipKey(PlayerAction.PLAYER_ATTACK_SKILL_WHEEL, 5, 14, twistingSlash),
+    area: afterRelease(twistingSlash),
     // Graded tiers: the swept band, warm sparks and chips, dust for smoke, a warm light on each copy.
-    enhanced: { area: whenClipKey(PlayerAction.PLAYER_ATTACK_SKILL_WHEEL, 5, 14, twistingSlashOf(true)) },
+    enhanced: { area: afterRelease(twistingSlashOf(true)) },
   },
   clip: { ground: A.PLAYER_ATTACK_SKILL_WHEEL }, // Twisting Slash
   // Twisting Slash: each MODEL_SKILL_WHEEL2 copy lights Luminosity x 0.3 grey, range 3, under itself
