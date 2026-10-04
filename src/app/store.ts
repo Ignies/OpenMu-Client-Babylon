@@ -333,8 +333,6 @@ export const Store = new (class _Store {
   requestPetInfo(pet: PetTypeEnum, slot: number) {
     Pets.requestPetInfo(pet, slot);
   }
-  /** WeatherStatusUpdate (0x0F): weather kind + variation of the current map. */
-  weather = { weather: 0, variation: 0 };
 
   pickedItem: PickedItem | null = null;
 
@@ -379,7 +377,6 @@ export const Store = new (class _Store {
 
   constructor() {
     makeObservable(this, {
-      weather: observable,
       pickedItem: observable,
       itemHotkeys: observable,
       pendingItemMove: observable,

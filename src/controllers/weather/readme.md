@@ -5,6 +5,8 @@ footprints, the ploughed snow trail, snow melted and grass burnt by fire, and th
 recipes. One `weather` facade steps every effect (see [docs/controllers.md](../../../docs/controllers.md)).
 
 ## Public API
+- `WeatherStatus.weather` (`status.ts`): `{ weather, variation }` of the current map
+  (`WeatherStatusUpdate` 0x0F); the world module writes it, `rainState.ts` reads it.
 - `weather` (`index.ts`, a `Controller`): `update(map, dt)` once a frame, `reset()` on map change,
   `register(layer)` (returns the unregister), `layersFor(map)`.
   - readers: `rain`, `snowCover`, `wetness`, `puddles`, `inPuddles()`, `snowCapAt(x, z)`,
@@ -58,8 +60,7 @@ recipes. One `weather` facade steps every effect (see [docs/controllers.md](../.
 - uses: `terrain` (`terrainMask.isTileOpen`, `terrainOverlay` bed table and `overlayAmountAt`),
   `maps` (climate flags), `fx` (`effects.spawn`, `FIRE_SPARKS`, ambient types), `net/serverTime`,
   `lighting` (`keyRig`, `lightModel`, `profiles` types), `anim/playSpeed`, `render/babylon`, `core`.
-  Old exceptions to the dependency rule (`tools/checks/baselines/deps.json`): `app/store`
-  (`rainState.ts`). Reads `settings`.
+  Reads `settings`.
 - used by: `controllers.ts`, `app/lifecycle.ts`, `app/boot.tsx`, `modules/world/net.ts`,
   `ecs/systems` (`weatherSystem`, `footprintSystem`, `ambientParticleSystem`, `renderSystem`),
   `skills/visuals.ts` (`scorch`, `burn` steps), `terrain` (overlay, material, grass,

@@ -1,14 +1,14 @@
 # world
 
 Map-wide packets that are not owned by another module: weather, the medal fanfare and the
-object effects (level-up beam, shield potion, shield lost, swirl). Weather state lives in the
-central `Store` (`Store.weather`).
+object effects (level-up beam, shield potion, shield lost, swirl). The weather status it receives
+lives in the weather controller (`WeatherStatus.weather`), which reads it.
 
 ## Public API
 - none. `installNet()` in `net.ts` registers its handlers (`module.ts`, installed by `src/app/logic.ts`).
 
 ## How it works
-- `WeatherStatusUpdate` writes `{ weather, variation }` into `Store.weather`;
+- `WeatherStatusUpdate` writes `{ weather, variation }` into `WeatherStatus.weather`;
   `controllers/weather/rainState.ts` reads it. Each change is logged; rain with intensity 0
   (`RainTarget = (Value & 15) * 6` is zero, so the original shows no rain) is logged once per
   session as clear.

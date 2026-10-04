@@ -7,7 +7,7 @@ import { Vector3 } from '@/controllers/render/babylon/exports';
 import { delay } from '@/controllers/fx/core';
 import { events } from '../events';
 import { spawnFireworks } from '@/controllers/fx/fireworks';
-import { Store } from '@/app/store';
+import { WeatherStatus } from '@/controllers/weather';
 import { Ecs } from '@/ecs/current';
 import { UI_BUS, playSfx } from '@/controllers/sound/sfx';
 import { WEATHER_RAIN } from '@/controllers/weather/rainState';
@@ -101,8 +101,8 @@ export function installNet(): void {
     // nothing in the client reports when it does not arrive - so a weather
     // change is worth one line. Only on change: the proxy heartbeats.
     if (
-      weather !== Store.weather.weather ||
-      variation !== Store.weather.variation
+      weather !== WeatherStatus.weather.weather ||
+      variation !== WeatherStatus.weather.variation
     ) {
       if (weather === WEATHER_RAIN && variation === 0) {
         // `RainTarget = (Value & 15) * 6` is zero: the original client simply
@@ -121,7 +121,7 @@ export function installNet(): void {
     }
 
     runInAction(() => {
-      Store.weather = { weather, variation };
+      WeatherStatus.weather = { weather, variation };
     });
   });
 

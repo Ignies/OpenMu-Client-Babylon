@@ -1,6 +1,6 @@
 import type { ENUM_WORLD } from '../../core/types';
 import type { WeatherLayer } from './layer';
-import { Store } from '../../app/store';
+import { WeatherStatus } from './status';
 import { maps } from '../maps';
 
 /**
@@ -50,7 +50,7 @@ export function rainTarget(map: ENUM_WORLD): number {
   // so the ground, the splashes and the sound all agree with the sky.
   if (!maps.canRain(map)) return 0;
 
-  const { weather, variation } = Store.weather;
+  const { weather, variation } = WeatherStatus.weather;
 
   if (weather !== WEATHER_RAIN) return 0;
 
@@ -86,7 +86,7 @@ export function rainStrength(): number {
 }
 
 /**
- * A map change re-seeds the rain instead of re-ramping it: `Store.weather` is kept (the sky is
+ * A map change re-seeds the rain instead of re-ramping it: `WeatherStatus.weather` is kept (the sky is
  * global) and the next `updateRain` takes the target whole. Dry maps get a zero `rainTarget`.
  */
 function resetRain(): void {
