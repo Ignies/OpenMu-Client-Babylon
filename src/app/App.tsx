@@ -2,7 +2,7 @@ import { t } from '../i18n';
 import { ServersPage } from '@versions/shared/ui/pages/server_select';
 import { observer } from 'mobx-react-lite';
 import { lazy, Suspense } from 'react';
-import { Store } from './store';
+import { addNotification } from '../modules/chat';
 import { AppState, UIState } from './uiState';
 import { loadVersionUi } from '../version';
 import { WorldPage } from '@versions/shared/ui/pages/world';
@@ -57,7 +57,7 @@ const onPreloader = () => AppState.uiState === UIState.Preloader;
 
 export const App = observer(() => {
   useEventBus('wsError', () => {
-    Store.addNotification(t('notify.wsError'), 'error');
+    addNotification(t('notify.wsError'), 'error');
   });
 
   return (

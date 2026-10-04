@@ -4,6 +4,7 @@ import { BaseClass, getBaseClass } from '../hero/characterStats';
 import type { Item } from '../../ecs/world';
 import { EventBus } from '../../core/eventBus';
 import { Store } from '../../app/store';
+import { addNotification } from '../chat';
 import { Ecs } from '../../ecs/current';
 import {
   BloodCastleEnterRequestPacket,
@@ -266,7 +267,7 @@ function useTicket(_slot: number, item: Item): boolean {
 
   const level = item.lvl ?? 0;
   if (level === 0) {
-    Store.addNotification(EVENT_TEXT.cloakLevelWrong, 'error', MESSAGE_MS);
+    addNotification(EVENT_TEXT.cloakLevelWrong, 'error', MESSAGE_MS);
     return true;
   }
 
@@ -325,7 +326,7 @@ function sayArchangelLine(dialog: number): void {
   const key = ARCHANGEL_TEXT[dialog];
   if (!key) return;
   lastArchangelLine = { dialog, at: performance.now() };
-  Store.addNotification(EVENT_TEXT[key], 'info', ARCHANGEL_MESSAGE_MS);
+  addNotification(EVENT_TEXT[key], 'info', ARCHANGEL_MESSAGE_MS);
 }
 
 /**
@@ -408,7 +409,7 @@ EventBus.on('BloodCastleEnterResult', packet => {
           : formatText(EVENT_TEXT.killersRestricted, EVENT_TEXT.bloodCastle);
       break;
   }
-  if (text) Store.addNotification(text, 'error', MESSAGE_MS);
+  if (text) addNotification(text, 'error', MESSAGE_MS);
 });
 
 /** `ReceiveEventZoneOpenTime`, Value 2: the cloak's answer. */
@@ -422,7 +423,7 @@ EventBus.on('MiniGameOpeningState', packet => {
   if (takeOpeningState(OPENING_STATE_GAME.bloodCastle, minutes)) return;
 
   const zone = EVENT_TEXT.bloodCastleZone;
-  Store.addNotification(
+  addNotification(
     minutes === 0
       ? formatText(EVENT_TEXT.enterNow, zone)
       : formatText(EVENT_TEXT.enterAfterMinutes, minutes, zone),

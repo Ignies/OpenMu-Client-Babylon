@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { t } from '../../i18n';
 import { Store } from '../../app/store';
+import { addNotification } from '../chat';
 import { GameOptions } from '@/controllers/settings';
 
 /** Getting back in after the connection drops: redial, send the same login, select the same
@@ -79,7 +80,7 @@ export const SessionResume = new (class _SessionResume {
   /** Cancel plus the ordinary "start over at the server list" path. */
   giveUp(reason: 'cancelled' | 'failed'): void {
     this.stop();
-    Store.addNotification(
+    addNotification(
       t(reason === 'cancelled' ? 'resume.cancelled' : 'resume.failed'),
       'error'
     );
@@ -145,7 +146,7 @@ export const SessionResume = new (class _SessionResume {
   finish(): void {
     if (!this.active) return;
     this.stop();
-    Store.addNotification(t('resume.done'));
+    addNotification(t('resume.done'));
   }
 
   /**

@@ -1,6 +1,7 @@
 import { reaction } from 'mobx';
 import { t } from '../../i18n';
 import { Store } from '../../app/store';
+import { addNotification } from '../chat';
 import { gridFirstIndex, StorageKind, storageColumns, storageRows } from './itemStorage';
 import type { Item } from '../../ecs/world';
 
@@ -68,14 +69,14 @@ export const BulkMove = new (class _BulkMove {
     if (slot < 0) {
       const moved = this.moves;
       this.cancel();
-      if (moved > 0) Store.addNotification(t('notify.itemsMoved', { count: moved }));
+      if (moved > 0) addNotification(t('notify.itemsMoved', { count: moved }));
       return;
     }
 
     const item = Store.itemsOfStorage(this.from)[slot];
     if (!item || Store.findFreeSquare(this.to, item) < 0) {
       this.cancel();
-      Store.addNotification(t('notify.noRoomForItem'), 'error');
+      addNotification(t('notify.noRoomForItem'), 'error');
       return;
     }
 

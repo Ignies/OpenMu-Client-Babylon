@@ -6,6 +6,7 @@ import { ItemGroup, angleRotation, itemRestHeight, itemRestPose, itemRestRotatio
 import { ItemSerializer } from '@/controllers/item_rules';
 import { ItemsDatabase, itemBaseName } from '@versions/shared/items/itemsDatabase';
 import { Store } from '@/app/store';
+import { addNotification } from '@/modules/chat';
 import { Ecs } from '@/ecs/current';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { archangelWeapon, dropModelProxy } from '@/controllers/item_rules';
@@ -227,7 +228,7 @@ export function installNet(): void {
     if (!p.Success) {
       console.warn(`Drop of slot ${p.InventorySlot} refused`);
       Store.rollbackItemMove();
-      Store.addNotification(t('notify.cannotDropItem'), 'error');
+      addNotification(t('notify.cannotDropItem'), 'error');
       return;
     }
 
@@ -249,7 +250,7 @@ export function installNet(): void {
       return;
     }
 
-    Store.addNotification(
+    addNotification(
       reason ===
         ItemPickUpRequestFailedItemPickUpFailReasonEnum.__MaximumInventoryMoneyReached
         ? t('notify.carryingTooMuchZen')

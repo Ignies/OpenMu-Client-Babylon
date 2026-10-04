@@ -1,6 +1,7 @@
 import { reaction } from 'mobx';
 import { t } from '../../i18n';
 import { Store } from '../../app/store';
+import { addNotification } from '../chat';
 import {
   itemSquares,
   planLayout,
@@ -119,7 +120,7 @@ export const InventorySort = new (class _InventorySort {
     this.stop?.();
     this.stop = null;
     this.running = false;
-    if (done && this.moves > 0) Store.addNotification(t('notify.inventorySorted'));
+    if (done && this.moves > 0) addNotification(t('notify.inventorySorted'));
   }
 
   private step(): void {

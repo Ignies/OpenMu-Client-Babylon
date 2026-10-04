@@ -3,6 +3,7 @@ import { ENUM_WORLD } from '../../core/types';
 import type { Entity, Item } from '../../ecs/world';
 import { EventBus } from '../../core/eventBus';
 import { Store } from '../../app/store';
+import { addNotification } from '../chat';
 import { Ecs } from '../../ecs/current';
 import {
   ChaosCastleEnterRequestPacket,
@@ -355,7 +356,7 @@ EventBus.on('ChaosCastleEnterResult', packet => {
         (p.Result as number) === 3 ? EVENT_TEXT.levelTooHigh : EVENT_TEXT.levelTooLow;
       break;
   }
-  if (text) Store.addNotification(text, 'error', MESSAGE_MS);
+  if (text) addNotification(text, 'error', MESSAGE_MS);
 });
 
 /** `CNewChaosCastleSystem::SetMatchGameCommand`: states 5..10. */

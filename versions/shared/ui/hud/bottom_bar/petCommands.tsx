@@ -1,6 +1,7 @@
 import { observer } from 'mobx-react-lite';
 import { t, type TextKey } from '@/i18n';
 import { Store } from '@/app/store';
+import { addNotification } from '@/modules/chat';
 import { Ecs } from '@/ecs/current';
 import { PET_GROUP } from '@versions/shared/items/petItems';
 import { InventoryConstants } from '@/core/inventoryConstants';
@@ -56,7 +57,7 @@ export function sendRavenCommand(mode: PetCommandModeEnum): void {
   if (mode === PetCommandModeEnum.AttackTarget) {
     target = Ecs.world?.attackTarget?.netId ?? NO_TARGET;
     if (target === NO_TARGET) {
-      Store.addNotification(t('bottomBar.pet.needTarget'), 'error');
+      addNotification(t('bottomBar.pet.needTarget'), 'error');
       return;
     }
   }

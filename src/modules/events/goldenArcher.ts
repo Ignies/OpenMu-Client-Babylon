@@ -1,6 +1,7 @@
 import { observable, runInAction } from 'mobx';
 import { EventBus } from '../../core/eventBus';
 import { Store } from '../../app/store';
+import { addNotification } from '../chat';
 import { t } from '../../i18n';
 import { ItemGroup } from '@/controllers/item_rules';
 import {
@@ -64,7 +65,7 @@ export function registerRena(): void {
     item => item?.group === RENA.group && item?.num === RENA.num
   );
   if (slot < 0) {
-    Store.addNotification(t('goldenArcher.noRena'), 'error', MESSAGE_MS);
+    addNotification(t('goldenArcher.noRena'), 'error', MESSAGE_MS);
     return;
   }
 
@@ -99,7 +100,7 @@ EventBus.on('EventChipRegistrationResult', packet => {
     runInAction(() => {
       state.remaining = p.RemainingInventoryCount;
     });
-    Store.addNotification(t('goldenArcher.noRena'), 'error', MESSAGE_MS);
+    addNotification(t('goldenArcher.noRena'), 'error', MESSAGE_MS);
     return;
   }
 

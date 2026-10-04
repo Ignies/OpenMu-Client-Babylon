@@ -4,6 +4,7 @@ import { EventBus } from '@/core/eventBus';
 import { ItemBoughtPacket, NpcItemSellResultPacket, NpcWindowResponseNpcWindowEnum, NpcWindowResponsePacket, StoreItemListItemWindowEnum, StoreItemListPacket } from '@versions/shared/packets/ServerToClientPackets';
 import { ItemSerializer } from '@/controllers/item_rules';
 import { Store } from '@/app/store';
+import { addNotification } from '@/modules/chat';
 import { events } from '../events';
 import { playUiSound } from '@/controllers/sound/sfx';
 import { quests } from '../quests';
@@ -60,7 +61,7 @@ export function installNet(): void {
         // Lahap, the refineries…: not ported yet.
         console.warn(`NpcWindowResponse: window ${p.Window} is not supported yet`);
         Store.dropNpcTalk();
-        Store.addNotification(t('notify.npcNothingYet'), 'info');
+        addNotification(t('notify.npcNothingYet'), 'info');
         // OpenMU keeps the player in NpcDialogOpened after opening ANY window
         // (TalkNpcAction.cs) - without this reset it ignores every later
         // TalkToNpcRequest until relogin (the "one refusal bricks all NPCs" bug).

@@ -3,6 +3,7 @@ import { CharacterClassCreationUnlockPacket, CharacterCreationSuccessfulPacket, 
 import { EventBus } from '@/core/eventBus';
 import { MsgWinCode } from '@/controllers/interface/msgWin';
 import { Store } from '@/app/store';
+import { addNotification } from '@/modules/chat';
 import { MsgBox } from '@/controllers/interface';
 import { emptyAppearance, isAppearanceBlank, withAppearanceClass } from '@/controllers/actors/deserializeAppearance';
 import { runInAction } from 'mobx';
@@ -56,7 +57,7 @@ export function installNet(): void {
 
     if (!p.Success) {
       Store.charCreationPending = false;
-      Store.addNotification(CREATE_MESSAGES.failed, 'error');
+      addNotification(CREATE_MESSAGES.failed, 'error');
       return;
     }
 
@@ -75,6 +76,6 @@ export function installNet(): void {
 
   EventBus.on('CharacterCreationFailed', () => {
     Store.charCreationPending = false;
-    Store.addNotification(CREATE_MESSAGES.failed, 'error');
+    addNotification(CREATE_MESSAGES.failed, 'error');
   });
 }

@@ -6,6 +6,7 @@ import { InventoryConstants } from '@/core/inventoryConstants';
 import { ItemSerializer } from '@/controllers/item_rules';
 import { NetStats } from '@/controllers/net/roundTrip';
 import { Store } from '@/app/store';
+import { addNotification } from '@/modules/chat';
 import { pickupSound } from '@/controllers/sound/combatSounds';
 import { playUiSound } from '@/controllers/sound/sfx';
 import { prefetchItemIcons } from '@/controllers/assets/itemIconPack';
@@ -108,7 +109,7 @@ export function installNet(): void {
     NetStats.markAnswered('itemMove');
     console.warn('ItemMoveRequestFailed - rolling the item back');
     Store.rollbackItemMove();
-    Store.addNotification(t('notify.cannotMoveItem'), 'error');
+    addNotification(t('notify.cannotMoveItem'), 'error');
   });
 
   EventBus.on('ItemAddedToInventory', packet => {
@@ -157,7 +158,7 @@ export function installNet(): void {
    */
   EventBus.on('ItemConsumptionFailed', () => {
     Store.consumptionFailed();
-    Store.addNotification(t('notify.cannotUseItem'), 'error');
+    addNotification(t('notify.cannotUseItem'), 'error');
   });
 
   EventBus.on('ItemDurabilityChanged', packet => {

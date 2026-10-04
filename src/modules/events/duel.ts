@@ -4,6 +4,7 @@ import { cleanName } from '../chat/chat';
 import { EventBus } from '../../core/eventBus';
 import { playUiSound } from '../../controllers/sound/sfx';
 import { Store } from '../../app/store';
+import { addNotification } from '../chat';
 import { Ecs } from '../../ecs/current';
 import { t } from '../../i18n';
 import {
@@ -260,12 +261,12 @@ EventBus.on('DuelStartResult', packet => {
   const failure = duelStartFailureKey(p.Result);
   if (failure === null) {
     playUiSound('duelStart');
-    Store.addNotification(t('duel.started', { name }), 'info', MESSAGE_MS);
+    addNotification(t('duel.started', { name }), 'info', MESSAGE_MS);
     return;
   }
   const text =
     failure === 'duel.refused' ? t(failure, { name }) : t(failure);
-  Store.addNotification(text, 'error', MESSAGE_MS);
+  addNotification(text, 'error', MESSAGE_MS);
 });
 
 /** `ReceiveDuelWatchRequestReply` + duel start: sides, ids, perspective. */
@@ -322,7 +323,7 @@ EventBus.on('DuelHealthUpdate', packet => {
 /** `ReceiveDuelEnd`: OpenMU always sends Result 0 and no name - just clear. */
 EventBus.on('DuelEnd', () => {
   if (state.duel && !state.duel.watching) {
-    Store.addNotification(t('duel.ended'), 'info', MESSAGE_MS);
+    addNotification(t('duel.ended'), 'info', MESSAGE_MS);
   }
   clearDuel();
 });

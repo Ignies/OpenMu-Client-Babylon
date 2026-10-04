@@ -4,6 +4,7 @@ import { BaseClass, getBaseClass } from '../hero/characterStats';
 import type { Item } from '../../ecs/world';
 import { EventBus } from '../../core/eventBus';
 import { Store } from '../../app/store';
+import { addNotification } from '../chat';
 import { Ecs } from '../../ecs/current';
 import { skills } from '../skills';
 import {
@@ -212,7 +213,7 @@ EventBus.on('DevilSquareEnterResult', packet => {
       text = formatText(EVENT_TEXT.killersRestricted, EVENT_TEXT.devilSquare);
       break;
   }
-  if (text) Store.addNotification(text, 'error', MESSAGE_MS);
+  if (text) addNotification(text, 'error', MESSAGE_MS);
 });
 
 /** `ReceiveEventZoneOpenTime`, Value 1: the invitation's answer. */
@@ -225,7 +226,7 @@ EventBus.on('MiniGameOpeningState', packet => {
   // feed the schedule and say nothing.
   if (takeOpeningState(OPENING_STATE_GAME.devilSquare, minutes)) return;
 
-  Store.addNotification(
+  addNotification(
     minutes === 0
       ? EVENT_TEXT.devilOpenNow
       : formatText(EVENT_TEXT.devilOpensIn, minutes),

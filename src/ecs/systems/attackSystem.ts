@@ -1,5 +1,6 @@
 import type { Entity, ISystemFactory } from '../world';
 import { Store } from '../../app/store';
+import { addNotification } from '../../modules/chat';
 import { Ecs } from '../current';
 import { applyPlayerActionSpeed, serverMinAttackInterval } from '../../controllers/anim/playSpeed';
 import { HitRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
@@ -74,7 +75,7 @@ function reloadAmmo(hands: Hands): boolean {
   );
   if (!reload) return false;
   if (reload.from < 0) {
-    Store.addNotification(t('notify.noMoreArrows'), 'error');
+    addNotification(t('notify.noMoreArrows'), 'error');
     return false;
   }
 
@@ -82,7 +83,7 @@ function reloadAmmo(hands: Hands): boolean {
   if (reload.from === lastReload.from && now - lastReload.at < RELOAD_RETRY_MS) return false;
   lastReload = { from: reload.from, at: now };
   if (!Store.moveItemToSquare(StorageKind.Inventory, reload.from, reload.to)) return false;
-  Store.addNotification(t('notify.arrowsReloaded'));
+  addNotification(t('notify.arrowsReloaded'));
   return true;
 }
 

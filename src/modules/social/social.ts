@@ -83,6 +83,7 @@ import {
 } from '../../controllers/interface/nameTags';
 import { NetStats } from '../../controllers/net/roundTrip';
 import { playUiSound } from '../../controllers/sound/sfx';
+import { setNotificationSink } from '../chat/notify';
 
 type PartyMember = {
   name: string;
@@ -1118,6 +1119,12 @@ export const Social = new (class _Social {
     return GuildRelation.None;
   }
 })();
+
+// The system log `addNotification` writes to (`chat/notify.ts`).
+setNotificationSink((text, type) => {
+  if (type === 'error') Social.errorMessage(text);
+  else Social.systemMessage(text);
+});
 
 // A hot update that reaches this module must reload the page: Vite would
 // otherwise re-execute it and hand later-loaded importers a second instance

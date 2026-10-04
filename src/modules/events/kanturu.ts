@@ -4,6 +4,7 @@ import { ENUM_WORLD } from '../../core/types';
 import { EventBus } from '../../core/eventBus';
 import { playSfx } from '../../controllers/sound/sfx';
 import { Store } from '../../app/store';
+import { addNotification } from '../chat';
 import { Ecs } from '../../ecs/current';
 import { effects } from '../../controllers/fx';
 import { MODEL } from '../../controllers/fx/recipes';
@@ -378,7 +379,7 @@ EventBus.on('KanturuEnterResult', packet => {
     closeKanturu();
     return;
   }
-  Store.addNotification(EVENT_TEXT.ktFailedToEnter, 'error', MESSAGE_MS);
+  addNotification(EVENT_TEXT.ktFailedToEnter, 'error', MESSAGE_MS);
 });
 
 /** The cutscene `GetKanturuMayaState` / `GetKanturuNightmareState` start. */

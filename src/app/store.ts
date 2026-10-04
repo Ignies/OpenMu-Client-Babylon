@@ -118,11 +118,11 @@ import {
 } from '../modules/inventory/itemHotkeys';
 import { spawnPlayer } from './logic';
 import { devVitalPercent } from '../core/devSeams';
-import { Social } from '../modules/social/social';
 import { Economy } from '../modules/economy/economy';
 import { Ecs } from '../ecs/current';
 import { AppState, UIState } from './uiState';
 import { MsgBox } from '../controllers/interface';
+import { addNotification } from '../modules/chat';
 
 /**
  * How long the game server named by `ConnectionInfo` has to say `GameServerEntered`
@@ -537,12 +537,6 @@ class PlayerData {
   }
 }
 
-/**
- * `Store.addNotification` kind: `info` is `TYPE_SYSTEM_MESSAGE`, `error` is
- * `TYPE_ERROR_MESSAGE` of `g_pSystemLogBox->AddText`.
- */
-type NotificationType = 'info' | 'error';
-
 /** `PET_INFO` (`giPetManager::SetPetInfo`): what `PetInfoResponse` carries. */
 export type PetInfo = {
   /** `PetTypeEnum`: 0 Dark Raven, 1 Dark Horse. */
@@ -820,7 +814,7 @@ export const Store = new (class _Store {
       // The running-total line of `ReceiveMuHelperStatusUpdate`
       // (WSclient.cpp:1199-1207, GlobalText 3586).
       this.muHelper.totalMoneyConsumed += moneyConsumed;
-      this.addNotification(
+      addNotification(
         t('notify.helperCost', {
           total: this.muHelper.totalMoneyConsumed.toLocaleString('en-US'),
         }),
@@ -829,7 +823,7 @@ export const Store = new (class _Store {
     }
     // `[MU Helper] Started` / `Stopped` (MuHelper.cpp:116/122) go to the console log.
     if (changed) {
-      this.addNotification(
+      addNotification(
         t(active ? 'notify.helperStarted' : 'notify.helperStopped'),
         'info'
       );
@@ -848,14 +842,14 @@ export const Store = new (class _Store {
       // No server to answer: flip locally so the loop can be exercised
       // against the test scene.
       if (!active && Ecs.world?.playerEntity?.attributeSystem?.isAboveZero('inSafeZone')) {
-        this.addNotification(t('notify.helperSafeZone'), 'error');
+        addNotification(t('notify.helperSafeZone'), 'error');
         return;
       }
       this.setMuHelperStatus(!active, 0);
       return;
     }
     if (!active && Ecs.world?.playerEntity?.attributeSystem?.isAboveZero('inSafeZone')) {
-      this.addNotification(t('notify.helperSafeZone'), 'error');
+      addNotification(t('notify.helperSafeZone'), 'error');
       return;
     }
     const packet = MuHelperStatusChangeRequestPacket.createPacket();
@@ -1216,14 +1210,14 @@ export const Store = new (class _Store {
         this.connectionLost = true;
         this.loginProcessing = false;
       });
-      this.addNotification(t('notify.connectionLost'), 'error');
+      addNotification(t('notify.connectionLost'), 'error');
       this.playOnline();
       return;
     }
     if (socket === this.csSocket) {
       this.csSocket = undefined;
       if (AppState.uiState === UIState.Servers) {
-        this.addNotification(t('notify.serverListLost'), 'error');
+        addNotification(t('notify.serverListLost'), 'error');
         this.playOnline();
       }
     }
@@ -1381,23 +1375,6 @@ export const Store = new (class _Store {
       password: this.password,
       remember: this.rememberLogin,
     });
-  }
-
-  /**
-   * Client-side feedback, the way the original gives it: a line in the
-   * system log at the bottom left (`g_pSystemLogBox->AddText`, blue for
-   * `TYPE_SYSTEM_MESSAGE`, red for `TYPE_ERROR_MESSAGE`) and the error
-   * sound. Server notices never come through here - `ServerMessage` type 0
-   * goes to the golden banner (`Notices.create`). The third argument is the
-   * retired toast's delay, kept so no caller changes.
-   */
-  addNotification(text: string, type: NotificationType = 'info', _delay = 0) {
-    if (type === 'error') {
-      playUiSound('error');
-      Social.errorMessage(text);
-    } else {
-      Social.systemMessage(text);
-    }
   }
 
   sendToCS(buffer: DataView) {
@@ -2015,7 +1992,7 @@ export const Store = new (class _Store {
     });
 
     this.finishShopBuy();
-    this.addNotification(t('notify.cannotBuy'), 'error');
+    addNotification(t('notify.cannotBuy'), 'error');
   }
 
   /**
@@ -2031,12 +2008,12 @@ export const Store = new (class _Store {
     const price = itemValue(picked.item, 1);
 
     if (this.playerData.money + price > 2000000000) {
-      this.addNotification(t('notify.zenCap'), 'error');
+      addNotification(t('notify.zenCap'), 'error');
       return;
     }
 
     if (isSellingBanned(picked.item)) {
-      this.addNotification(t('notify.cannotSell'), 'error');
+      addNotification(t('notify.cannotSell'), 'error');
       this.cancelPickedItem();
       return;
     }
@@ -2078,7 +2055,7 @@ export const Store = new (class _Store {
     }
 
     this.rollbackItemMove();
-    this.addNotification(t('notify.merchantRefuses'), 'error');
+    addNotification(t('notify.merchantRefuses'), 'error');
   }
 
   /** Whether a repair can be asked for here: a smith, or self-repair from 50. */
@@ -2135,13 +2112,13 @@ export const Store = new (class _Store {
   private buyOffline(item: Item): void {
     const price = itemValue(item, 0);
     if (this.playerData.money < price) {
-      this.addNotification(t('common.notEnoughZen'), 'error');
+      addNotification(t('common.notEnoughZen'), 'error');
       return;
     }
 
     const slot = findFreeInventorySlot(this.playerData.items, item);
     if (slot < 0) {
-      this.addNotification(t('notify.noInventoryRoom'), 'error');
+      addNotification(t('notify.noInventoryRoom'), 'error');
       return;
     }
 
@@ -2169,7 +2146,7 @@ export const Store = new (class _Store {
 
     if (repaired.length === 0) return;
     if (this.playerData.money < cost) {
-      this.addNotification(t('common.notEnoughZen'), 'error');
+      addNotification(t('common.notEnoughZen'), 'error');
       return;
     }
 
@@ -2271,7 +2248,7 @@ export const Store = new (class _Store {
     // packet goes out, the way the original logs it and puts the item back.
     const ban = storageBan(toStorage, picked.item);
     if (ban) {
-      this.addNotification(t(ban), 'error');
+      addNotification(t(ban), 'error');
       this.cancelPickedItem();
       return;
     }
@@ -2411,13 +2388,13 @@ export const Store = new (class _Store {
 
     const ban = storageBan(toStorage, item);
     if (ban) {
-      this.addNotification(t(ban), 'error');
+      addNotification(t(ban), 'error');
       return;
     }
 
     const toSlot = this.findFreeSquare(toStorage, item);
     if (toSlot < 0) {
-      this.addNotification(t('notify.noRoomForItem'), 'error');
+      addNotification(t('notify.noRoomForItem'), 'error');
       return;
     }
 
@@ -2541,7 +2518,7 @@ export const Store = new (class _Store {
       this.skills.map(s => s.number)
     );
     if (error) {
-      this.addNotification(error, 'error');
+      addNotification(error, 'error');
       return true;
     }
 
@@ -2554,7 +2531,7 @@ export const Store = new (class _Store {
         this.addSkill({ index, number, level: 0 });
       });
       const name = skillDefinition(number)?.name ?? 'the skill';
-      this.addNotification(t('notify.learnedSkill', { name }), 'info');
+      addNotification(t('notify.learnedSkill', { name }), 'info');
       return true;
     }
 
@@ -2609,7 +2586,7 @@ export const Store = new (class _Store {
     // click handler returns right after this call, so the refusal text is
     // the only feedback there is.
     if (targetSlot < InventoryConstants.EquippableSlotsCount) {
-      this.addNotification(
+      addNotification(
         jewelTargetError(picked.item, target, targetSlot) ?? t('item.takeItemOffFirst'),
         'error'
       );
@@ -2619,19 +2596,19 @@ export const Store = new (class _Store {
     // `IsCanUseItem` (ZzzInventory.cpp:510, GlobalText[474]): nothing is
     // used while the vault or a trade is open.
     if (Economy.autoMoveTarget !== null) {
-      this.addNotification(t('notify.storageOpen'), 'error');
+      addNotification(t('notify.storageOpen'), 'error');
       return true;
     }
 
     const error = jewelTargetError(picked.item, target, targetSlot);
     if (error) {
       // The original keeps the jewel on the cursor; a wrong square is a no-op.
-      this.addNotification(error, 'error');
+      addNotification(error, 'error');
       return true;
     }
 
     if (this.isOffline) {
-      this.addNotification(t('notify.upgradeNeedsServer'), 'error');
+      addNotification(t('notify.upgradeNeedsServer'), 'error');
       return true;
     }
 
@@ -2723,7 +2700,7 @@ export const Store = new (class _Store {
 
       console.warn('Item move timed out with no answer - rolling it back');
       this.rollbackItemMove();
-      this.addNotification(t('notify.noAnswerRestored'), 'error');
+      addNotification(t('notify.noAnswerRestored'), 'error');
     }, ITEM_MOVE_TIMEOUT);
   }
 

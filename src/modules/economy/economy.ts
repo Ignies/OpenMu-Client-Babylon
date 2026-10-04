@@ -3,6 +3,7 @@ import { t, type TextKey } from '../../i18n';
 import { makeObservable, observable, action, runInAction } from 'mobx';
 import { prefetchItemIcons } from '../../controllers/assets/itemIconPack';
 import { Store } from '../../app/store';
+import { addNotification } from '../chat';
 import { Social } from '../social/social';
 import type { Item } from '../../ecs/world';
 import { playUiSound } from '../../controllers/sound/sfx';
@@ -534,17 +535,17 @@ export const Economy = new (class _Economy {
           this.vaultUnlocked = false;
           break;
         case E.UnlockFailedByWrongPin:
-          Store.addNotification(t('notify.wrongVaultPin'), 'error');
+          addNotification(t('notify.wrongVaultPin'), 'error');
           break;
         case E.SetPinFailedBecauseLock:
-          Store.addNotification(t('notify.unlockBeforePin'), 'error');
+          addNotification(t('notify.unlockBeforePin'), 'error');
           break;
         case E.Unlocked:
           this.vaultLocked = true;
           this.vaultUnlocked = true;
           break;
         case E.RemovePinFailedByWrongPassword:
-          Store.addNotification(t('notify.wrongPassword'), 'error');
+          addNotification(t('notify.wrongPassword'), 'error');
           break;
       }
     });
@@ -582,14 +583,14 @@ export const Economy = new (class _Economy {
     if (!this.vaultOpen || amount <= 0) return;
 
     if (!this.vaultUsable) {
-      Store.addNotification(t('notify.unlockVaultFirst'), 'error');
+      addNotification(t('notify.unlockVaultFirst'), 'error');
       this.openPrompt({ kind: 'vault-unlock' });
       return;
     }
 
     const available = toVault ? Store.playerData.money : this.vaultMoney;
     if (amount > available) {
-      Store.addNotification(t('common.notEnoughZen'), 'error');
+      addNotification(t('common.notEnoughZen'), 'error');
       return;
     }
 
@@ -617,7 +618,7 @@ export const Economy = new (class _Economy {
   /** `VaultMoneyUpdate` (0x81). */
   vaultMoneyUpdate(success: boolean, vaultMoney: number, inventoryMoney: number): void {
     if (!success) {
-      Store.addNotification(t('notify.zenNotMoved'), 'error');
+      addNotification(t('notify.zenNotMoved'), 'error');
       return;
     }
 
@@ -748,7 +749,7 @@ export const Economy = new (class _Economy {
     }
 
     if (Store.isOffline) {
-      Store.addNotification(t('notify.chaosNeedsServer'), 'info');
+      addNotification(t('notify.chaosNeedsServer'), 'info');
       return;
     }
 
@@ -905,7 +906,7 @@ export const Economy = new (class _Economy {
     if (!this.tradeOpen) return;
 
     if (amount > Store.playerData.money + this.myTradeMoney) {
-      Store.addNotification(t('notify.notThatMuchZen'), 'error');
+      addNotification(t('notify.notThatMuchZen'), 'error');
       return;
     }
 
@@ -1067,7 +1068,7 @@ export const Economy = new (class _Economy {
     }
 
     if (price < 0) {
-      Store.addNotification(t('notify.negativePrice'), 'error');
+      addNotification(t('notify.negativePrice'), 'error');
       return;
     }
 

@@ -20,6 +20,7 @@ import {
 } from '@versions/shared/packets/ClientToServerPackets';
 import { EventBus } from '../../core/eventBus';
 import { Store } from '../../app/store';
+import { addNotification } from '../chat';
 import { Ecs } from '../../ecs/current';
 import type { QuestLayer } from './layer';
 import { LegacyQuestState, legacyQuestState } from './legacyQuests';
@@ -128,7 +129,7 @@ export function enterBalgass(): void {
   hide();
 
   if (kind === 'werewolf' && Store.playerData.money < BARRACKS_PRICE) {
-    Store.addNotification(t('event.shortOfZen'), 'error');
+    addNotification(t('event.shortOfZen'), 'error');
     return;
   }
   if (Store.isOffline) return;

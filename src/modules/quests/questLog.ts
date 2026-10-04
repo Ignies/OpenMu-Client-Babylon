@@ -35,6 +35,7 @@ import type { ENUM_WORLD } from '../../core/types';
 import { EventBus } from '../../core/eventBus';
 import { playUiSound } from '../../controllers/sound/sfx';
 import { Store } from '../../app/store';
+import { addNotification } from '../chat';
 import { Ecs } from '../../ecs/current';
 import type { QuestLayer } from './layer';
 import { questDataReady, questProgressEntry, questProgressKeys, questWordLines, questWords } from './questData';
@@ -722,7 +723,7 @@ EventBus.on('AvailableQuests', packet => {
 
   if (inDialogue) return;
   if (available.length === 0) {
-    Store.addNotification(t('quest.npcHasNone'), 'info');
+    addNotification(t('quest.npcHasNone'), 'info');
     Store.dropNpcTalk();
   } else {
     playUiSound('window');
@@ -750,7 +751,7 @@ EventBus.on('QuestStepInfo', packet => {
         state.busy = false;
       });
     }
-    Store.addNotification(t(MSG_UNAVAILABLE), 'error');
+    addNotification(t(MSG_UNAVAILABLE), 'error');
     return;
   }
 
@@ -794,12 +795,12 @@ EventBus.on('QuestCompletionResponse', packet => {
     const wasOpen = state.progressOpen;
     removeActive(key);
     if (wasOpen) closeQuestProgress();
-    Store.addNotification(
+    addNotification(
       t('quest.completedNamed', { subject: questSubject(key) }),
       'info'
     );
   } else {
-    Store.addNotification(t(MSG_NOT_FULFILLED), 'error');
+    addNotification(t(MSG_NOT_FULFILLED), 'error');
   }
 });
 

@@ -9,6 +9,7 @@ import { SessionResume } from '../session/sessionResume';
 import { Social } from '../social/social';
 import { StatType, masterExperienceActive } from './characterStats';
 import { Store } from '@/app/store';
+import { addNotification } from '@/modules/chat';
 import { AppState, UIState } from '@/app/uiState';
 import { Ecs } from '@/ecs/current';
 import { convertDirectionToAngle } from '../_shared/net_helpers';
@@ -239,7 +240,7 @@ function applyLevelUpdate(p: LevelUpdateView) {
     }
   });
 
-  Store.addNotification(t('notify.levelUp', { level: p.Level }));
+  addNotification(t('notify.levelUp', { level: p.Level }));
 }
 
 // C3 16 - sent for every kill share. Without this handler the exp bar only
@@ -400,7 +401,7 @@ export function installNet(): void {
     const p = new CharacterStatIncreaseResponsePacket(packet);
 
     if (!p.Success) {
-      Store.addNotification(t('notify.pointNotAdded'), 'error');
+      addNotification(t('notify.pointNotAdded'), 'error');
       EventBus.emit('statPointAnswered', { stat: p.Attribute, added: 0 });
       return;
     }
@@ -447,7 +448,7 @@ export function installNet(): void {
 
   EventBus.on('MasterCharacterLevelUpdate', packet => {
     const p = new MasterCharacterLevelUpdatePacket(packet);
-    Store.addNotification(t('notify.masterLevelUp', { level: p.MasterLevel }));
+    addNotification(t('notify.masterLevelUp', { level: p.MasterLevel }));
   });
 
   EventBus.on('ExperienceGained', packet =>
@@ -470,7 +471,7 @@ export function installNet(): void {
     const added = p.AddedAmount;
 
     if (added === 0) {
-      Store.addNotification(t('notify.pointNotAdded'), 'error');
+      addNotification(t('notify.pointNotAdded'), 'error');
       EventBus.emit('statPointAnswered', { stat: p.Attribute, added: 0 });
       return;
     }
@@ -521,7 +522,7 @@ export function installNet(): void {
       Store.playerData.maxSD = p.MaximumShield;
       Store.playerData.maxAG = p.MaximumAbility;
     });
-    Store.addNotification(t('notify.masterLevelUp', { level: p.MasterLevel }));
+    addNotification(t('notify.masterLevelUp', { level: p.MasterLevel }));
   });
 
   /**
@@ -568,31 +569,31 @@ export function installNet(): void {
     switch (p.Result) {
       case R.PlusSuccess:
         move(1);
-        Store.addNotification(t('notify.fruitAdd', { stat: statName, points }));
+        addNotification(t('notify.fruitAdd', { stat: statName, points }));
         break;
       case R.MinusSuccess:
       case R.MinusSuccessCashShopFruit:
         move(-1);
-        Store.addNotification(t('notify.fruitRemove', { stat: statName, points }));
+        addNotification(t('notify.fruitRemove', { stat: statName, points }));
         break;
       case R.PlusFailed:
       case R.MinusFailed:
-        Store.addNotification(t('notify.fruitNoEffect'), 'error');
+        addNotification(t('notify.fruitNoEffect'), 'error');
         break;
       case R.PlusPreventedByMaximum:
       case R.MinusPreventedByMaximum:
-        Store.addNotification(t('notify.fruitLimit'), 'error');
+        addNotification(t('notify.fruitLimit'), 'error');
         break;
       case R.MinusPreventedByDefault:
-        Store.addNotification(t('notify.fruitFloor', { stat: statName }), 'error');
+        addNotification(t('notify.fruitFloor', { stat: statName }), 'error');
         break;
       case R.PreventedByEquippedItems:
-        Store.addNotification(t('notify.fruitEquipped'), 'error');
+        addNotification(t('notify.fruitEquipped'), 'error');
         break;
       case R.PlusPrevented:
       case R.MinusPrevented:
       default:
-        Store.addNotification(t('notify.fruitNotNow'), 'error');
+        addNotification(t('notify.fruitNotNow'), 'error');
         break;
     }
   });

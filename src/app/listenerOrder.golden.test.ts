@@ -10,7 +10,7 @@ import '@/app/store';
 
 // Pins every packet's listeners and their order once the app has loaded (the order modules
 // install in is the order listeners run for a packet several modules handle). Whitespace is ignored.
-const LISTENERS_HASH = '836541a8461f696e83310ee09d3745c7f847c3c4';
+const LISTENERS_HASH = '3da1b3cfb66580175605d0965442fb1d661e103d';
 
 describe('packet listeners', () => {
   it('are the same functions in the same order', () => {

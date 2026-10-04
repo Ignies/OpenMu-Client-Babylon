@@ -2,6 +2,7 @@ import { observable, runInAction } from 'mobx';
 import { ENUM_WORLD } from '../../core/types';
 import { EventBus } from '../../core/eventBus';
 import { Store } from '../../app/store';
+import { addNotification } from '../chat';
 import { Ecs } from '../../ecs/current';
 import {
   CrywolfContractRequestPacket,
@@ -227,9 +228,9 @@ EventBus.on('CrywolfAltarInfo', packet => {
 EventBus.on('CrywolfContractResult', packet => {
   const p = new CrywolfContractResultPacket(packet);
   if (p.Result === 1) {
-    Store.addNotification(EVENT_TEXT.cwContractMade, 'info', MESSAGE_MS);
+    addNotification(EVENT_TEXT.cwContractMade, 'info', MESSAGE_MS);
   } else {
-    Store.addNotification(EVENT_TEXT.cwContractRefused, 'error', MESSAGE_MS);
+    addNotification(EVENT_TEXT.cwContractRefused, 'error', MESSAGE_MS);
   }
 });
 
@@ -257,7 +258,7 @@ EventBus.on('CrywolfBossMonsterInfo', packet => {
 EventBus.on('CrywolfBenefit', packet => {
   const p = new CrywolfBenefitPacket(packet);
   if (p.ChaosRatePlus > 0) {
-    Store.addNotification(
+    addNotification(
       formatText(EVENT_TEXT.cwBenefit, p.ChaosRatePlus),
       'info',
       MESSAGE_MS

@@ -5,6 +5,9 @@ chat rooms, item links, custom emojis and emoji bubbles. The chat log state and 
 live in the `Social` store ([../social/readme.md](../social/readme.md)).
 
 ## Public API
+- `addNotification(text, type?)` (`index.ts`, the door; `notify.ts`): a blue (`info`) or red (`error`,
+  with the error sound) line in the system log, the client's own feedback. `Social` takes the lines
+  (`setNotificationSink`, set when social.ts loads), so a caller does not load the whole store.
 - `cleanName(raw)`: strips NUL padding and blanks from a packet string. Used by most nets.
 - `chat.ts`: `ChatLineType`, `classifyInboundChat(message)`, log layout helpers and constants
   (`splitChatLine`, `layoutChatRows`, `scrollChatEnd`, `CHAT_FILTERS`, ...) for `Social` and `hud/chat`.

@@ -2,6 +2,7 @@ import { MuWindows } from '@/controllers/interface/windowManager';
 import { makeAutoObservable, runInAction } from 'mobx';
 import { t } from '../../i18n';
 import { Store } from '../../app/store';
+import { addNotification } from '../chat';
 import { MsgBox } from '../../controllers/interface';
 import { AppState, UIState } from '../../app/uiState';
 import { Ecs } from '../../ecs/current';
@@ -103,7 +104,7 @@ export const SessionExit = new (class _SessionExit {
       runInAction(() => {
         this.pending = null;
       });
-      Store.addNotification(t('exit.noAnswer'), 'error');
+      addNotification(t('exit.noAnswer'), 'error');
       this.leave(kind);
     }, ANSWER_TIMEOUT);
 

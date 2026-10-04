@@ -27,6 +27,7 @@ import { playUiSound } from '../../controllers/sound/sfx';
 import { showObjectEffect } from '../../ecs/systems/objectEffectSystem';
 import { MAX_QUESTS, QuestActKind, type QuestDefinition } from '../../controllers/assets/mu/questFiles';
 import { Store } from '../../app/store';
+import { addNotification } from '../chat';
 import { Ecs } from '../../ecs/current';
 import type { QuestLayer } from './layer';
 import {
@@ -689,7 +690,7 @@ EventBus.on('LegacySetQuestStateResponse', packet => {
   const p = new LegacySetQuestStateResponsePacket(packet);
   // `ReceiveQuestResult`: Result 0 = accepted; anything else leaves the dialog where it is.
   if (p.Result !== 0) {
-    Store.addNotification(t('quest.stateFailed'), 'error');
+    addNotification(t('quest.stateFailed'), 'error');
     return;
   }
   // `HideAll` before `Show`: the visible window closes, and the NPC talk with it.
@@ -715,7 +716,7 @@ function evolveHero(cls: number, step: number): void {
     hero.charAppearance.charClass = cls as CharacterClassNumber;
     hero.charAppearance.changed = true;
   }
-  Store.addNotification(t(step === 3 ? 'quest.evolvedThird' : 'quest.evolved'), 'info');
+  addNotification(t(step === 3 ? 'quest.evolvedThird' : 'quest.evolved'), 'info');
 }
 
 EventBus.on('LegacyQuestReward', packet => {
@@ -732,7 +733,7 @@ EventBus.on('LegacyQuestReward', packet => {
         runInAction(() => {
           Store.playerData.points += p.Count;
         });
-        Store.addNotification(t('quest.rewardPoints', { count: p.Count }), 'info');
+        addNotification(t('quest.rewardPoints', { count: p.Count }), 'info');
       }
       break;
     case Reward.CharacterEvolutionFirstToSecond:
@@ -742,7 +743,7 @@ EventBus.on('LegacyQuestReward', packet => {
       if (isHero) evolveHero(p.Count >> 3, 3);
       break;
     case Reward.ComboSkill:
-      if (isHero) Store.addNotification(t('quest.comboLearned'), 'info');
+      if (isHero) addNotification(t('quest.comboLearned'), 'info');
       break;
   }
 

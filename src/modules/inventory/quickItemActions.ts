@@ -1,6 +1,7 @@
 import { reaction } from 'mobx';
 import { t } from '../../i18n';
 import { Store } from '../../app/store';
+import { addNotification } from '../chat';
 import { MsgBox } from '../../controllers/interface';
 import { Economy } from '../economy/economy';
 import { GameOptions } from '@/controllers/settings';
@@ -193,13 +194,13 @@ export const QuickItemActions = new (class _QuickItemActions {
     this.cancel();
 
     if (bought > 0) {
-      Store.addNotification(t('notify.itemsBought', { count: bought }));
+      addNotification(t('notify.itemsBought', { count: bought }));
     }
 
     if (stop === 'noRoom') {
-      Store.addNotification(t('notify.noInventoryRoom'), 'error');
+      addNotification(t('notify.noInventoryRoom'), 'error');
     } else if (stop === 'noZen') {
-      Store.addNotification(t('common.notEnoughZen'), 'error');
+      addNotification(t('common.notEnoughZen'), 'error');
     }
   }
 })();

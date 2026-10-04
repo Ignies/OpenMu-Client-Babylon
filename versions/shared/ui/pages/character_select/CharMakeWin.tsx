@@ -4,6 +4,7 @@ import { CREATE_MESSAGES } from '@/modules/character_select/messages';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useRef } from 'react';
 import { Store } from '@/app/store';
+import { addNotification } from '@/modules/chat';
 import { MsgBox } from '@/controllers/interface';
 import { Ecs } from '@/ecs/current';
 import { isReservedName } from '@/modules/servers/reservedNames';
@@ -134,17 +135,17 @@ export const CharMakeWin = observer(({ onClose }: CharMakeWinProps) => {
     const name = Store.newCharName;
 
     if (name.length < NAME_MIN_LENGTH) {
-      Store.addNotification(CREATE_MESSAGES.minLength, 'error');
+      addNotification(CREATE_MESSAGES.minLength, 'error');
       return;
     }
 
     if (hasSpecialCharacters(name)) {
-      Store.addNotification(CREATE_MESSAGES.specialName, 'error');
+      addNotification(CREATE_MESSAGES.specialName, 'error');
       return;
     }
 
     if (isReservedName(name)) {
-      Store.addNotification(CREATE_MESSAGES.reservedName, 'error');
+      addNotification(CREATE_MESSAGES.reservedName, 'error');
       return;
     }
 
