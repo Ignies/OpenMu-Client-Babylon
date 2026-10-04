@@ -11,8 +11,7 @@ import { uiClick } from '@/controllers/sound/sfx';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuItemWindow, WINDOW_WIDTH } from '@/controllers/interface/components/mu_window';
-import { MuText } from '@/controllers/interface/components/mu_text';
-import { TEXT_COLOR } from '../../pages/server_select/layout';
+import { MuText, TEXT_COLOR } from '@/controllers/interface/components/mu_text';
 
 /**
  * `CNewUICommandWindow` (NewUICommandWindow.cpp): the "D" window - eleven

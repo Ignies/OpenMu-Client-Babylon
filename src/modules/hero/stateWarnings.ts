@@ -1,13 +1,13 @@
 import { reaction } from 'mobx';
 import { t } from '../../i18n';
 import { Store } from '../../app/store';
-import { skills } from '../../modules/skills';
+import { skills } from '../skills';
 import { GameOptions } from '@/controllers/settings';
-import { Notices } from '../../modules/chat/notices';
+import { Notices } from '../chat/notices';
 import { InventoryConstants } from '@/core/inventoryConstants';
-import { itemSquares, squareFits, stampSquares } from '../../modules/inventory/inventoryLayout';
+import { itemSquares, squareFits, stampSquares } from '../inventory/inventoryLayout';
 import { calcMaxDurability, itemDef } from '@/controllers/item_rules';
-import { findHotkeyItem } from '../../modules/inventory/itemHotkeys';
+import { findHotkeyItem } from '../inventory/itemHotkeys';
 import type { Item } from '../../ecs/world';
 
 /**

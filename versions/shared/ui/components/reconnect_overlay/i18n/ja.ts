@@ -1,4 +1,4 @@
-/** Japanese text of the `reconnect_overlay` interface widget. */
+/** Japanese text of the `reconnect_overlay` UI component. */
 
 import type en from './en';
 

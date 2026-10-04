@@ -16,7 +16,7 @@ import { QuickItemActions } from '@/modules/inventory/quickItemActions';
 import { MAX_BULK_BUY } from '@/modules/inventory/quickItemRules';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuButton } from '@/controllers/interface/components/mu_button';
-import { TEXT_COLOR } from '../../pages/server_select/layout';
+import { TEXT_COLOR } from '@/controllers/interface/components/mu_text';
 import {
   BACK_SPRITE,
   BTN_BOTH_CANCEL_X,

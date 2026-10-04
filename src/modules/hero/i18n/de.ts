@@ -41,4 +41,8 @@ export default {
   'notify.fruitEquipped':
     'Lege zuerst die Gegenstände ab, die diesen Wert verlangen',
   'notify.fruitNotNow': 'Diese Frucht kannst du jetzt nicht benutzen',
+  'warn.durability': 'Haltbarkeit der Ausrüstung bei {percent}%',
+  'warn.inventoryFull': 'Das Inventar ist voll',
+  'warn.noPotions': 'Keine Heiltränke mehr',
+  'warn.buffEnding': '{name} läuft gleich ab',
 } satisfies Partial<Record<keyof typeof en, string>>;

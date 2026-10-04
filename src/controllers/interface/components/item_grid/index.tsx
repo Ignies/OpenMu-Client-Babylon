@@ -8,7 +8,7 @@ import { ItemIcon } from '../item_icon';
 import { ItemTooltip, type TooltipContext } from '../item_tooltip';
 import { MuSpriteFrame } from '../mu_sprite';
 import { MuTableFrame } from '../mu_window';
-import { stableKeyOf } from '@versions/shared/ui/hud/party_bars/stableKey';
+import { stableKeyOf } from '@/core/stableKey';
 
 export const SQUARE = 20;
 export const SQUARE_SPRITE = 'newui_item_box.OZT';

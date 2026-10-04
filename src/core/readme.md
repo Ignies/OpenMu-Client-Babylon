@@ -16,6 +16,8 @@ pathfinding. Nothing here knows about a skill, a window or a map.
 - `turnAngle.ts`: `normalizeAngle`, `signedAngleDelta`, `turnAngle`, `approachAngle`,
   `createAngleDeg`, `rotationByteOf`, from `ZzzAI.cpp` (`TurnAngle2`, `CreateAngle`, ...).
 - `binaryUtils.ts`: byte helpers (`castToByte`, `ArrayCopy`, `GetByteValue`, ...).
+- `stableKeyOf(object)` (`stableKey.ts`): a stable React key for an object with no id (entities,
+  notice lines, items); the item grid widget and the HUD share it.
 - `guildMark.ts`: `GUILD_MARK_SIZE`, `GUILD_MARK_PALETTE`, `unpackGuildMark`, `packGuildMark`,
   `isEmptyGuildMark`, `guildMarkDataUrl(packed)`: the 8x8 guild mark (`CreateGuildMark`,
   ZzzInventory.cpp:11204). Pure, so the guild flag (actors), the guild window and the module share it.

@@ -34,8 +34,8 @@ import { setKeyProfile } from '../controllers/interface/keyBindings';
 import { installBrowserHotkeyGuard } from '../controllers/interface/browserHotkeys';
 import { SessionResume } from '../modules/session/sessionResume';
 import { reaction } from 'mobx';
-import { watchStateWarnings } from '../controllers/interface/stateWarnings';
-import { watchPageTitle } from '../controllers/interface/pageTitle';
+import { watchStateWarnings } from '../modules/hero/stateWarnings';
+import { watchPageTitle } from '../modules/servers/pageTitle';
 import {
   preloadPregameSprites,
   preloadWorldSprites,

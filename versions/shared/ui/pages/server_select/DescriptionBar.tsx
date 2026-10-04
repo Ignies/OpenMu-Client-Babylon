@@ -1,14 +1,6 @@
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
-import {
-  DESC_EDGE_HEIGHT,
-  DESC_HEIGHT,
-  DESC_SIDE_HEIGHT,
-  DESC_WIDTH,
-  DESC_X,
-  DESC_Y,
-  SPRITE,
-  TEXT_COLOR,
-} from './layout';
+import { DESC_EDGE_HEIGHT, DESC_HEIGHT, DESC_SIDE_HEIGHT, DESC_WIDTH, DESC_X, DESC_Y, SPRITE } from './layout';
+import { TEXT_COLOR } from '@/controllers/interface/components/mu_text';
 
 type DescriptionBarProps = {
   text?: string;

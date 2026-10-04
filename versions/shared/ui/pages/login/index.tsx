@@ -8,11 +8,10 @@ import { Store } from '@/app/store';
 import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH } from '@/app/consts';
 import { registerApiUrl, registerUrl } from '@/modules/servers/serverServices';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
-import { MuText } from '@/controllers/interface/components/mu_text';
+import { MuText, TEXT_COLOR } from '@/controllers/interface/components/mu_text';
 import { MuLogo } from '@/controllers/interface/components/mu_logo';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { RegisterWindow } from './registerWindow';
-import { TEXT_COLOR } from '../server_select/layout';
 
 const WIN_WIDTH = 329;
 const WIN_HEIGHT = 245;

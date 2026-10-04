@@ -1,4 +1,4 @@
-/** Italian text of the `reconnect_overlay` interface widget. */
+/** Italian text of the `reconnect_overlay` UI component. */
 
 import type en from './en';
 

@@ -38,6 +38,10 @@ const en = {
   'notify.fruitFloor': '{stat} cannot go any lower',
   'notify.fruitEquipped': 'Take off the items that need this stat first',
   'notify.fruitNotNow': 'You cannot use this fruit now',
+  'warn.durability': 'Equipment durability at {percent}%',
+  'warn.inventoryFull': 'The inventory is full',
+  'warn.noPotions': 'No healing potions left',
+  'warn.buffEnding': '{name} is about to end',
 };
 
 export default en;

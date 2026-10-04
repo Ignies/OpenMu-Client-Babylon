@@ -5,7 +5,7 @@ import { Store } from '@/app/store';
 import { MuSpriteFrame } from '../mu_sprite';
 import { MuButton } from '../mu_button';
 import { playUiSound } from '@/controllers/sound/sfx';
-import { TEXT_COLOR } from '@versions/shared/ui/pages/server_select/layout';
+import { TEXT_COLOR } from '@/controllers/interface/components/mu_text';
 import { MSG_WIN_MESSAGES, MsgWinCode, MsgWinType } from '@/controllers/interface/msgWin';
 import {
   BACK_SPRITE,

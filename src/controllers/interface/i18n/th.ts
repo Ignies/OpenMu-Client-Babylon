@@ -27,10 +27,6 @@ export default {
   'stat.vitality': 'พลังชีวิต',
   'stat.energy': 'พลังงาน',
   'stat.command': 'การบัญชาการ',
-  'warn.durability': 'ความทนทานของอุปกรณ์ {percent}%',
-  'warn.inventoryFull': 'กระเป๋าเต็ม',
-  'warn.noPotions': 'ไม่มียาฟื้นพลังชีวิตแล้ว',
-  'warn.buffEnding': '{name} กำลังจะหมด',
 
   'keys.minimap': 'แผนที่ย่อ',
   'keys.sessionStats': 'แผงข้อมูลรอบนี้',

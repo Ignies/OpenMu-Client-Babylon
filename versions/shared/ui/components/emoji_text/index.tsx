@@ -4,9 +4,9 @@ import { observer } from 'mobx-react-lite';
 import type { Item } from '@/ecs/world';
 import { GameOptions } from '@/controllers/settings';
 import { emojiSegments, type ChatEmoji } from '@/modules/chat/chatEmojis';
-import { scanItemLinks } from '@/modules/chat/chatItemLinks';
+import { itemLinkLabel, scanItemLinks } from '@/modules/chat/chatItemLinks';
 import { EMOJI_CATALOG } from '@/modules/chat/emojis';
-import { ChatItemLink } from '../chat_item_link';
+import { ChatItemLink } from '@/controllers/interface/components/chat_item_link';
 
 type Piece = string | ChatEmoji | { link: Item };
 
@@ -55,7 +55,7 @@ export const EmojiText = observer(
           typeof piece === 'string' ? (
             piece
           ) : 'link' in piece ? (
-            <ChatItemLink key={i} item={piece.link} />
+            <ChatItemLink key={i} item={piece.link} label={itemLinkLabel(piece.link)} />
           ) : (
             <img
               key={i}

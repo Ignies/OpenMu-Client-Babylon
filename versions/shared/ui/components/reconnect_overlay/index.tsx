@@ -1,7 +1,7 @@
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { SessionResume } from '@/modules/session/sessionResume';
-import { uiClick } from '@/controllers/sound/sfx';
+import { uiClick } from '@/controllers/sound';
 import { t } from '@/i18n';
 
 /**

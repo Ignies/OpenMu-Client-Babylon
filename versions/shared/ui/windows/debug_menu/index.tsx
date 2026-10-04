@@ -8,7 +8,7 @@ import { uiClick } from '@/controllers/sound/sfx';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuResizeGrip, useWindowChrome } from '@/controllers/interface/components/mu_window/useWindowChrome';
-import { TEXT_COLOR } from '../../pages/server_select/layout';
+import { TEXT_COLOR } from '@/controllers/interface/components/mu_text';
 import {
   DebugMenu,
   type DebugAction,

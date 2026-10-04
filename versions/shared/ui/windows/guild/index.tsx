@@ -23,7 +23,7 @@ import {
   guildMarkDataUrl,
   packGuildMark,
 } from '@/core/guildMark';
-import { TEXT_COLOR } from '../../pages/server_select/layout';
+import { TEXT_COLOR } from '@/controllers/interface/components/mu_text';
 import {
   BACK_SPRITE,
   BTN_BOTH_CANCEL_X,

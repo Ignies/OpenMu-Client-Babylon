@@ -41,4 +41,8 @@ export default {
   'notify.fruitEquipped':
     'Първо свали предметите, които изискват тази характеристика',
   'notify.fruitNotNow': 'Сега не можеш да използваш този плод',
+  'warn.durability': 'Издръжливост на екипировката: {percent}%',
+  'warn.inventoryFull': 'Инвентарът е пълен',
+  'warn.noPotions': 'Няма лечебни отвари',
+  'warn.buffEnding': '{name} скоро свършва',
 } satisfies Partial<Record<keyof typeof en, string>>;

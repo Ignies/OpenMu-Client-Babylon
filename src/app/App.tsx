@@ -10,7 +10,7 @@ import { PreloaderPage } from '@versions/shared/ui/pages/preloader';
 import { LoadingScreen } from '../controllers/loading/classic';
 import { OptionsWindow } from '@versions/shared/ui/windows/options';
 import { GameCursor } from '../controllers/interface/components/game_cursor';
-import { ReconnectOverlay } from '../controllers/interface/components/reconnect_overlay';
+import { ReconnectOverlay } from '@versions/shared/ui/components/reconnect_overlay';
 
 // The login and character screens are the version's own: Season 6 draws its
 // two windows over a login world, 0.97d draws period chrome over a ship at

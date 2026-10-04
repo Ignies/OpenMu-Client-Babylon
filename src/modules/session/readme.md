@@ -47,7 +47,7 @@ still live in the central `Store` (`src/app/store.ts`).
 - uses: `app/store.ts`, `servers/serverConfig.ts`, `quests`, `economy`, `social`, `friends/messenger`,
   `controllers/settings`, `controllers/sound`, `controllers/interface/browserHotkeys`.
 - used by: `src/app/logic.ts`, `src/app/boot.tsx`, `hero/net.ts` (`remember`, `finish`),
-  `ecs/systems/keyboardInputSystem.ts`, `controllers/interface/components/reconnect_overlay`.
+  `ecs/systems/keyboardInputSystem.ts`, `versions/shared/ui/components/reconnect_overlay`.
 - windows: `versions/shared/ui/windows/options/` (exit buttons), `windows/session_stats/`,
   `hud/bottom_bar/` (`expTooltip.tsx`, `index.tsx`).
 

@@ -27,7 +27,7 @@ import {
 import { isTypingInField } from '@/ecs/systems/keyboardInputSystem';
 import { GameOptions } from '@/controllers/settings';
 import { isKey } from '@/controllers/interface/keyBindings';
-import { EmojiText } from '@/controllers/interface/components/emoji_text';
+import { EmojiText } from '../../components/emoji_text';
 import { EMOJI_CATALOG } from '@/modules/chat/emojis';
 import { EmojiPicker, RecentEmojis } from './emojiPicker';
 import { installItemLinkGesture } from './itemLinkGesture';

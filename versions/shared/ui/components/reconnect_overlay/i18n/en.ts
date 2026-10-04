@@ -1,4 +1,4 @@
-/** English text of the `reconnect_overlay` interface widget. See src/i18n/readme.md. */
+/** English text of the `reconnect_overlay` UI component. See src/i18n/readme.md. */
 
 const en = {
   'resume.title': 'Connection lost',
@@ -12,6 +12,6 @@ export default en;
 
 declare module '@/i18n' {
   interface TextOwners {
-    'src/controllers/interface/components/reconnect_overlay': typeof en;
+    'versions/shared/ui/components/reconnect_overlay': typeof en;
   }
 }

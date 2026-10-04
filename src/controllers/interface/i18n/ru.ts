@@ -27,10 +27,6 @@ export default {
   'stat.vitality': 'Выносливость',
   'stat.energy': 'Энергия',
   'stat.command': 'Командование',
-  'warn.durability': 'Прочность экипировки: {percent}%',
-  'warn.inventoryFull': 'Инвентарь заполнен',
-  'warn.noPotions': 'Лечебные зелья закончились',
-  'warn.buffEnding': '{name} скоро закончится',
 
   'keys.minimap': 'Мини-карта',
   'keys.sessionStats': 'Панель сессии',

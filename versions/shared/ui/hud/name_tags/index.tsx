@@ -35,7 +35,7 @@ import { Economy } from '@/modules/economy/economy';
 import { GuildMemberRoleEnum } from '@versions/shared/packets/ServerToClientPackets';
 import { devQuery } from '@/core/devSeams';
 import { onLanguageChanged } from '@/i18n';
-import { EmojiText } from '@/controllers/interface/components/emoji_text';
+import { EmojiText } from '../../components/emoji_text';
 import {
   type TagInputs,
   type TagSlot,

@@ -7,7 +7,7 @@ import { Messenger } from '@/modules/friends/messenger';
 import { GuildRelationshipTypeEnum } from '@versions/shared/packets/ClientToServerPackets';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
-import { TEXT_COLOR } from '../../pages/server_select/layout';
+import { TEXT_COLOR } from '@/controllers/interface/components/mu_text';
 import {
   BACK_SPRITE,
   BTN_BOTH_CANCEL_X,

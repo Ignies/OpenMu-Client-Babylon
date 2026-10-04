@@ -15,7 +15,7 @@ import { GameOptions } from '@/controllers/settings';
 import { ItemTooltip } from '@/controllers/interface/components/item_tooltip';
 import { ItemLinkHover } from '@/controllers/interface/itemLinkHover';
 import type { Entity } from '@/ecs/world';
-import { stableKeyOf } from '../party_bars/stableKey';
+import { stableKeyOf } from '@/core/stableKey';
 
 const isAlt = (code: string) => code === 'AltLeft' || code === 'AltRight';
 

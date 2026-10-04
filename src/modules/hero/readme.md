@@ -14,6 +14,9 @@ other folders share.
 - `statAmounts.ts`: `clampAmount(amount, points)`, `needsConfirm(amount)`.
 - `lowVitals.ts`: `vitalWarning(fraction, percent)`, `heartbeatDue(life, lifeMax)`, `NO_WARNING`,
   `LOW_VITAL_MIN_PERCENT` / `MAX` / `DEFAULT`.
+- `watchStateWarnings()` (`stateWarnings.ts`, was `controllers/interface/`): watches the store for low
+  durability, a full grid, the last potion and a buff running out, and posts one notice per crossing
+  (option `stateWarnings`); `boot.tsx` starts it. Its `warn.*` text is in `i18n/` here.
 
 ## How it works
 - The hero's state lives in the Store: `Store.playerData` (`PlayerData` in `src/app/store.ts`: level,

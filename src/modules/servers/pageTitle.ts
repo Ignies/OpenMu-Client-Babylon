@@ -1,6 +1,6 @@
 import { reaction } from 'mobx';
 import { Store, UIState } from '../../app/store';
-import { ServerConfig } from '../../modules/servers/serverConfig';
+import { ServerConfig } from './serverConfig';
 
 /**
  * What the browser tab says. `index.html` ships the client's own name so the

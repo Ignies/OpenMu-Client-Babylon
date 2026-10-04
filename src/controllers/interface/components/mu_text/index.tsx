@@ -86,3 +86,13 @@ export const MuTipText = ({
     {text}
   </div>
 );
+
+/** Text colours the pre-game screens and the dialogs share (was `server_select/layout.ts`). */
+export const TEXT_COLOR = {
+  white: '#ffffff',
+  brightGray: '#e2e2e2',
+  yellow: '#ffff79',
+  brightYellow: '#ffeec1',
+  orange: '#ffb400',
+  brightOrange: '#ffd927',
+} as const;

@@ -40,4 +40,8 @@ export default {
   'notify.fruitFloor': '{stat} 已经无法再降低',
   'notify.fruitEquipped': '请先脱下需要该属性的装备',
   'notify.fruitNotNow': '现在不能使用这个果实',
+  'warn.durability': '装备耐久度剩余 {percent}%',
+  'warn.inventoryFull': '背包已满',
+  'warn.noPotions': '没有治疗药水了',
+  'warn.buffEnding': '{name} 即将结束',
 } satisfies Partial<Record<keyof typeof en, string>>;
