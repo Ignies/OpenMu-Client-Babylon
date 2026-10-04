@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite';
 import { t, type TextKey } from '@/i18n';
-import { Store } from '@/app/store';
+import { Pets } from '@/modules/pets';
 import { Hero } from '@/modules/hero';
 import { addNotification } from '@/modules/chat';
 import { Ecs } from '@/ecs/current';
@@ -62,12 +62,12 @@ export function sendRavenCommand(mode: PetCommandModeEnum): void {
       return;
     }
   }
-  Store.sendPetCommand(mode, target);
+  Pets.sendPetCommand(mode, target);
 }
 
 export const PetCommandBar = observer(() => {
   if (!ravenEquipped()) return null;
-  const current = Store.petMode;
+  const current = Pets.petMode;
 
   return (
     <>

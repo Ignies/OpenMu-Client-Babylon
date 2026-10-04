@@ -1,4 +1,5 @@
 import { Store } from '../../app/store';
+import { Pets } from '../pets';
 import { HeroSkills } from '../skills';
 import { Hero } from '../hero';
 import { Social } from '../social/social';
@@ -175,7 +176,7 @@ function activatePet(config: MuHelperConfig): void {
       : config.darkRavenMode === 2
         ? PetCommandModeEnum.AttackWithOwner
         : PetCommandModeEnum.Normal;
-  Store.sendPetCommand(mode);
+  Pets.sendPetCommand(mode);
   petActivated = true;
 }
 

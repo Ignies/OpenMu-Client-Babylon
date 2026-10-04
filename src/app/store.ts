@@ -5,7 +5,7 @@ import type { PlayerObject } from '../controllers/actors/playerObject';
 import { playUiSound } from '../controllers/sound/sfx';
 import { consumeSound, upgradedItemSound } from '../controllers/sound/ui';
 import { CharacterClassNumber, ENUM_WORLD } from '@/core/types';
-import { ConsumeItemRequestPacket, DropItemRequestPacket, EnterGateRequestPacket, ItemMoveRequestPacket, PickupItemRequestPacket, WarpCommandRequestPacket, TalkToNpcRequestPacket, CloseNpcRequestPacket, MuHelperStatusChangeRequestPacket, PetCommandModeEnum, PetCommandRequestPacket, PetInfoRequestPacket, PetTypeEnum, StorageTypeEnum, BuyItemFromNpcRequestPacket, SellItemToNpcRequestPacket, RepairItemRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
+import { ConsumeItemRequestPacket, DropItemRequestPacket, EnterGateRequestPacket, ItemMoveRequestPacket, PickupItemRequestPacket, WarpCommandRequestPacket, TalkToNpcRequestPacket, CloseNpcRequestPacket, MuHelperStatusChangeRequestPacket, PetTypeEnum, BuyItemFromNpcRequestPacket, SellItemToNpcRequestPacket, RepairItemRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
 import { NetStats } from '../controllers/net/roundTrip';
 import {
   makeObservable,
@@ -59,6 +59,7 @@ import { AppState, UIState } from './uiState';
 import { addNotification } from '../modules/chat';
 import { Session } from '../modules/session';
 import { Hero } from '../modules/hero';
+import { Pets } from '../modules/pets';
 import { HeroSkills } from '../modules/skills';
 
 const ITEM_MOVE_TIMEOUT = 5000;
@@ -198,19 +199,6 @@ function serializeItemBytes(item: Item): number[] {
   return Array.from(bytes);
 }
 
-/** `PET_INFO` (`giPetManager::SetPetInfo`): what `PetInfoResponse` carries. */
-export type PetInfo = {
-  /** `PetTypeEnum`: 0 Dark Raven, 1 Dark Horse. */
-  pet: number;
-  /** Where the pet item sits (`StorageType`: inventory, pet slot, vault…). */
-  storage: number;
-  slot: number;
-  level: number;
-  experience: number;
-  /** `m_wLife`: durability as life, 0…255. */
-  health: number;
-};
-
 /**
  * `?offline&map=noria` / `?offline&map=3`: the world the offline scene boots
  * into, by number or by the `ENUM_WORLD` name after its number (a prefix is
@@ -329,7 +317,7 @@ function applyOfflineHandOverrides(items: (Item | null)[]): void {
 }
 
 export const Store = new (class _Store {
-  // Read by `interface/components/item_tooltip` until it moves up to the ui; the hero is `Hero`.
+  // Read by `interface/components/item_tooltip` until it moves up to the ui (`Hero`, `Pets`).
   get playerData() {
     return Hero;
   }
@@ -337,60 +325,16 @@ export const Store = new (class _Store {
   heroStats(): HeroStats {
     return Hero.heroStats();
   }
+
+  get petInfo() {
+    return Pets.petInfo;
+  }
+
+  requestPetInfo(pet: PetTypeEnum, slot: number) {
+    Pets.requestPetInfo(pet, slot);
+  }
   /** WeatherStatusUpdate (0x0F): weather kind + variation of the current map. */
   weather = { weather: 0, variation: 0 };
-
-  // ---- pets (`giPetManager`): Dark Horse / Dark Raven state, no UI yet ----
-
-  /** `PetInfoResponse` (A9): level / exp / life of the pet the tooltip asked about. */
-  petInfo: PetInfo | null = null;
-  /**
-   * `Hero->GetEquipedPetInfo`: the last answer per pet type, so the pet
-   * window's two tabs each keep theirs when both pets are equipped.
-   */
-  petInfoByPet: Partial<Record<number, PetInfo>> = {};
-  /** `PetMode` (A7): the Dark Raven's command mode (`PetCommandModeEnum`). */
-  petMode = 0;
-  /** `PetMode`: the raven's target while in AttackTarget mode; 0xFFFF = none. */
-  petTargetId = 0xffff;
-
-  setPetInfo(info: PetInfo) {
-    this.petInfo = info;
-    this.petInfoByPet = { ...this.petInfoByPet, [info.pet]: info };
-  }
-
-  setPetMode(mode: number, targetId: number) {
-    this.petMode = mode;
-    this.petTargetId = targetId;
-  }
-
-  /**
-   * `SendPetInfoRequest` (ZzzInventory.cpp:2116): the tooltip over a Dark
-   * Horse / Dark Raven asks for its level, experience and life; the answer
-   * (`PetInfoResponse`) lands in `petInfo`. `slot` is the inventory index.
-   */
-  requestPetInfo(pet: PetTypeEnum, slot: number, storage: StorageTypeEnum = StorageTypeEnum.Inventory) {
-    if (Session.isOffline) return;
-    const packet = PetInfoRequestPacket.createPacket();
-    packet.Pet = pet;
-    packet.Storage = storage;
-    packet.ItemSlot = slot;
-    Session.sendToGS(packet.buffer);
-  }
-
-  /**
-   * `giPetManager::SendPetCommand` → `SendPetCommandRequest`: put the Dark
-   * Raven in a command mode; `AttackTarget` carries the target's id,
-   * everything else 0xFFFF. The server confirms with `PetMode`.
-   */
-  sendPetCommand(mode: PetCommandModeEnum, targetId = 0xffff) {
-    if (Session.isOffline) return;
-    const packet = PetCommandRequestPacket.createPacket();
-    packet.PetType = PetTypeEnum.DarkRaven;
-    packet.CommandMode = mode;
-    packet.TargetId = mode === PetCommandModeEnum.AttackTarget ? targetId : 0xffff;
-    Session.sendToGS(packet.buffer);
-  }
 
   // ---- MU Helper (`MUHelper::g_MuHelper`) ----
 
@@ -515,13 +459,7 @@ export const Store = new (class _Store {
   constructor() {
     makeObservable(this, {
       weather: observable,
-      petInfo: observable,
-      petInfoByPet: observable,
-      petMode: observable,
-      petTargetId: observable,
       muHelper: observable,
-      setPetInfo: action,
-      setPetMode: action,
       setMuHelperStatus: action,
       setMuHelperConfig: action,
       pickedItem: observable,

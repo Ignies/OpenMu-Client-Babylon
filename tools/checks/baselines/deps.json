@@ -6,7 +6,6 @@
  "controllers-are-generic: src/controllers/interface/components/picked_item/index.tsx -> src/app/store.ts",
  "controllers-are-generic: src/controllers/weather/rainState.ts -> src/app/store.ts",
  "windows-use-modules-not-store: versions/shared/ui/hud/bottom_bar/index.tsx -> src/app/store.ts",
- "windows-use-modules-not-store: versions/shared/ui/hud/bottom_bar/petCommands.tsx -> src/app/store.ts",
  "windows-use-modules-not-store: versions/shared/ui/hud/chat/itemLinkGesture.ts -> src/app/store.ts",
  "windows-use-modules-not-store: versions/shared/ui/hud/name_tags/index.tsx -> src/app/store.ts",
  "windows-use-modules-not-store: versions/shared/ui/hud/soccer_score/index.tsx -> src/app/store.ts",
@@ -20,7 +19,6 @@
  "windows-use-modules-not-store: versions/shared/ui/windows/npc_shop/index.tsx -> src/app/store.ts",
  "windows-use-modules-not-store: versions/shared/ui/windows/npc_shop/layout.ts -> src/app/store.ts",
  "windows-use-modules-not-store: versions/shared/ui/windows/personal_shop/index.tsx -> src/app/store.ts",
- "windows-use-modules-not-store: versions/shared/ui/windows/pet_info/index.tsx -> src/app/store.ts",
  "windows-use-modules-not-store: versions/shared/ui/windows/trade/index.tsx -> src/app/store.ts",
  "windows-use-modules-not-store: versions/shared/ui/windows/vault/index.tsx -> src/app/store.ts"
 ]
