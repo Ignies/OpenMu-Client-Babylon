@@ -43,7 +43,9 @@ const stem = (p: string) => p.replace(/\/index\.tsx?$/, '').replace(/\.tsx?$/, '
 function specFor(file: string, target: string, aliasStyle: boolean): string {
   const s = stem(target);
   const alias = s.startsWith('src/') ? '@/' + s.slice(4) : '@versions/' + s.slice(9);
-  if (aliasStyle || file.startsWith('versions/') || file.startsWith('tools/')) return alias;
+  const area = (p: string) => p.match(/^src\/(modules|controllers)\/[^/]+\//)?.[0];
+  const same = area(file) && area(file) === area(target);
+  if (!same && (aliasStyle || file.startsWith('versions/') || file.startsWith('tools/'))) return alias;
   let rel = posix.relative(posix.dirname(file), s);
   if (!rel.startsWith('.')) rel = './' + rel;
   return rel.startsWith('../../../') ? alias : rel;
@@ -184,6 +186,22 @@ for (const file of files) {
   }
   const aliasStyle = !!storeImport && ts.isStringLiteral(storeImport.moduleSpecifier) && storeImport.moduleSpecifier.text.startsWith('@/');
   for (const [target, names] of byTarget) {
+    // Join an import the file already has from that file.
+    const existing = sf2.statements.find(
+      st =>
+        ts.isImportDeclaration(st) &&
+        ts.isStringLiteral(st.moduleSpecifier) &&
+        resolve(file, st.moduleSpecifier.text) === target &&
+        !st.importClause?.isTypeOnly &&
+        st.importClause?.namedBindings &&
+        ts.isNamedImports(st.importClause.namedBindings)
+    ) as ts.ImportDeclaration | undefined;
+    const nb = existing?.importClause?.namedBindings;
+    if (nb && ts.isNamedImports(nb)) {
+      const all = [...nb.elements.map(e => e.getText(sf2)), ...names];
+      lineEdits.push([nb.getStart(sf2), nb.getEnd(), `{ ${all.join(', ')} }`]);
+      continue;
+    }
     const allType = names.every(n => n.startsWith('type '));
     const list = allType ? names.map(n => n.slice(5)) : names;
     imports.push(`import ${allType ? 'type ' : ''}{ ${list.join(', ')} } from '${specFor(file, target, aliasStyle)}';`);

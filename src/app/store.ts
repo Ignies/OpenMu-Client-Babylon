@@ -122,6 +122,7 @@ import { devVitalPercent } from '../core/devSeams';
 import { Social } from '../modules/social/social';
 import { Economy } from '../modules/economy/economy';
 import { Ecs } from '../ecs/current';
+import { AppState, UIState } from './uiState';
 
 /**
  * How long the game server named by `ConnectionInfo` has to say `GameServerEntered`
@@ -284,15 +285,6 @@ function serializeItemBytes(item: Item): number[] {
   const bytes = new Uint8Array(ItemSerializer.NeededSpace);
   ItemSerializer.SerializeItem(bytes, item);
   return Array.from(bytes);
-}
-
-export enum UIState {
-  Preloader,
-  Servers,
-  Login,
-  Characters,
-  LoadingWorld,
-  World,
 }
 
 class ActionBarSlot {
@@ -712,7 +704,6 @@ export const Store = new (class _Store {
     channelName?: string;
   } | null = null;
   charactersList: ReturnType<CharacterListPacket['getCharacters']> = [];
-  uiState = UIState.Preloader;
   playerId?: number;
   /**
    * The last game-server connection ended without us asking (set by
@@ -1001,19 +992,6 @@ export const Store = new (class _Store {
     { name: string; alliance: string; logo: number[] }
   >();
 
-  /** The hide-interface key: the HUD layer is not drawn while this is set. */
-  hudHidden = false;
-
-  sceneLoading = false;
-
-  loadingProgress = 0;
-
-  spritesLoading = true;
-
-  get isLoading(): boolean {
-    return this.sceneLoading || this.spritesLoading;
-  }
-
   pickedItem: PickedItem | null = null;
 
   /** Q/W/E/R consumable kinds (`CNewUIItemHotKey`); unbound = the key's default potion. */
@@ -1078,7 +1056,6 @@ export const Store = new (class _Store {
       password: observable,
       serverList: observable,
       selectedServer: observable,
-      uiState: observable,
       connectionLost: observable,
       playerId: observable,
       skills: observable,
@@ -1108,11 +1085,6 @@ export const Store = new (class _Store {
       focusedChar: observable,
       msgWin: observable,
       playerData: observable,
-      hudHidden: observable,
-      sceneLoading: observable,
-      loadingProgress: observable,
-      spritesLoading: observable,
-      isLoading: computed,
       pickedItem: observable,
       itemHotkeys: observable,
       pendingItemMove: observable,
@@ -1161,7 +1133,7 @@ export const Store = new (class _Store {
     // Keep the query: a dev-server reload must land on the same map.
     history.replaceState(null, '', '/offline' + location.search);
     this.isOffline = true;
-    this.uiState = UIState.World;
+    AppState.uiState = UIState.World;
     // `?bare` skips the test loadout: the per-class close-up shots need the
     // default body (class gear masks the class), and the weapon matrix
     // wants exactly the `?hand1=`/`?hand2=` items and nothing else.
@@ -1213,7 +1185,7 @@ export const Store = new (class _Store {
   }
 
   playOnline() {
-    this.uiState = UIState.Servers;
+    AppState.uiState = UIState.Servers;
     // The login fields belong to the world being entered, and which world that
     // is was decided on the screen this was called from.
     this.loadAccount();
@@ -1260,7 +1232,7 @@ export const Store = new (class _Store {
     }
     if (socket === this.csSocket) {
       this.csSocket = undefined;
-      if (this.uiState === UIState.Servers) {
+      if (AppState.uiState === UIState.Servers) {
         this.addNotification(t('notify.serverListLost'), 'error');
         this.playOnline();
       }
@@ -1405,29 +1377,6 @@ export const Store = new (class _Store {
       this.username = account.username;
       this.password = account.password;
       this.rememberLogin = account.remember;
-    });
-  }
-
-  setSceneLoading(loading: boolean): void {
-    if (this.sceneLoading === loading) return;
-
-    runInAction(() => {
-      this.sceneLoading = loading;
-      if (loading) this.loadingProgress = 0;
-    });
-  }
-
-  setLoadingProgress(progress: number): void {
-    if (Math.abs(this.loadingProgress - progress) < 0.01) return;
-
-    runInAction(() => {
-      this.loadingProgress = progress;
-    });
-  }
-
-  setSpritesLoading(loading: boolean): void {
-    runInAction(() => {
-      this.spritesLoading = loading;
     });
   }
 

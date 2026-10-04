@@ -94,7 +94,8 @@ import { summonDisplayName } from '../modules/_shared/net_helpers';
 
 import { PingPacket } from '@versions/shared/packets/ClientToServerPackets';
 
-import { Store, UIState } from './store';
+import { Store } from './store';
+import { AppState, UIState } from './uiState';
 import { Ecs } from '../ecs/current';
 
 
@@ -143,7 +144,7 @@ void loadNpcNames();
  */
 const PING_INTERVAL_MS = 5000;
 setInterval(() => {
-  if (Store.uiState !== UIState.World || !Store.gsSocket) return;
+  if (AppState.uiState !== UIState.World || !Store.gsSocket) return;
   const p = PingPacket.createPacket();
   p.TickCount = Math.floor(performance.now()) >>> 0;
   p.AttackSpeed = Store.playerData.attackSpeed ?? 0;

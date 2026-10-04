@@ -1,5 +1,6 @@
 import type { ISystemFactory } from '../world';
 import { Store } from '../../app/store';
+import { Loading } from '../../controllers/loading';
 import { findEntranceGateAt, loadGates, type Gate } from '../../controllers/assets/mu/gates';
 import { EventBus } from '../../core/eventBus';
 import { prefetchWorldTerrain } from '../../controllers/assets/mu/prefetchWorld';
@@ -29,7 +30,7 @@ export const GateSystem: ISystemFactory = world => {
       if (Store.isOffline) return;
       // A warp is in flight: the hero's position is the old map's until the
       // new terrain is up, and a second EnterGate on top of it double-warps.
-      if (Store.sceneLoading) return;
+      if (Loading.sceneLoading) return;
 
       const playerEntity = world.playerEntity;
       if (!playerEntity) return;

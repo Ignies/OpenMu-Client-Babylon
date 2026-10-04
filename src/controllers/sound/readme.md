@@ -28,7 +28,8 @@ never which skill or item asks for it.
 - `soundsManager.ts`: `SoundsManager`, the mixer (`loadSound`, `loopInstance`, `stopSoundEffect`).
 - `instruments/`: `ensureBank`, `bankReady`, `noteOn`, `noteOff`, `allNotesOff`,
   `setPerformerPosition`, `dropPerformer`, `audioNow`, `contextReady`, `instrumentVoices`.
-- `loginMusic.ts`: `installLoginMusic()`, called once from `app/boot.tsx`.
+- `loginMusic.ts`: `installLoginMusic(menus, preloader)`, called once from `app/boot.tsx`; the two
+  readers say which page the app shows (the app owns the pages).
 
 ## How it works
 - The facade holds no state. `soundSystem` calls `sound.attach(world)` once and `sound.update`

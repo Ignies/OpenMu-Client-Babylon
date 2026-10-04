@@ -2,7 +2,7 @@ import './style.less';
 import '../../index';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
-import { Store } from '@/app/store';
+import { AppState } from '@/app/uiState';
 import { isKey } from '@/controllers/interface/keyBindings';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { windowsIn } from '@/controllers/interface/windows';
@@ -19,7 +19,7 @@ const HUD = observer(() => (
 export const WorldPage = observer(() => {
   useEventBus('keyPressed', key => {
     if (isKey('hideUi', key)) {
-      runInAction(() => (Store.hudHidden = !Store.hudHidden));
+      runInAction(() => (AppState.hudHidden = !AppState.hudHidden));
     }
   });
 
@@ -29,7 +29,7 @@ export const WorldPage = observer(() => {
       {windowsIn('world').map(w => (
         <w.component key={w.id} />
       ))}
-      {!Store.hudHidden && <HUD />}
+      {!AppState.hudHidden && <HUD />}
     </div>
   );
 });

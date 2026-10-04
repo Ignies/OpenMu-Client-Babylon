@@ -8,7 +8,8 @@ import { PlayerAction } from '@versions/shared/objects/enum';
 import { SessionResume } from '../session/sessionResume';
 import { Social } from '../social/social';
 import { StatType, masterExperienceActive } from './characterStats';
-import { Store, UIState } from '@/app/store';
+import { Store } from '@/app/store';
+import { AppState, UIState } from '@/app/uiState';
 import { Ecs } from '@/ecs/current';
 import { convertDirectionToAngle } from '../_shared/net_helpers';
 import { experienceForLevel } from './experience';
@@ -111,7 +112,7 @@ function applyCharacterInformation(p: CharacterInformationView) {
     // select, so a normal character on the same account clears it.
     playerData.isGameMaster = (p.Status & GAME_MASTER_STATUS) !== 0;
 
-    Store.uiState = UIState.World;
+    AppState.uiState = UIState.World;
     SessionResume.remember(playerData.name);
     SessionResume.finish();
     // Lazy: preloadSprites pulls the window layouts in, and app/logic.ts sits under them.

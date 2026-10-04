@@ -11,7 +11,8 @@ import { Notices } from '../chat/notices';
 import { QuickItemActions } from '../inventory/quickItemActions';
 import { SlideHelp } from '@/controllers/interface/slideHelp';
 import { Social } from '../social/social';
-import { Store, UIState } from '@/app/store';
+import { Store } from '@/app/store';
+import { AppState, UIState } from '@/app/uiState';
 import { Ecs } from '@/ecs/current';
 import { TELEPORT } from '../skills/skillCasting';
 import { addNpcToScope, applyObjectEffect, convertDirectionToAngle } from '../_shared/net_helpers';
@@ -130,7 +131,7 @@ export function installNet(): void {
     // objects are in (`ClientReadyAfterMapChange`, C1 04 F3 12).
     // Only after a server-initiated MapChanged: on the first world entry OpenMU
     // already placed us and logs "Ignoring client-ready packet" otherwise.
-    if (awaitingClientReady && !Store.isOffline && Store.uiState === UIState.World) {
+    if (awaitingClientReady && !Store.isOffline && AppState.uiState === UIState.World) {
       awaitingClientReady = false;
       Store.sendToGS(ClientReadyAfterMapChangePacket.createPacket().buffer);
       holdForWarpScope();

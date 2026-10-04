@@ -1,7 +1,8 @@
 import { MuWindows } from '@/controllers/interface/windowManager';
 import { makeAutoObservable, runInAction } from 'mobx';
 import { t } from '../../i18n';
-import { Store, UIState } from '../../app/store';
+import { Store } from '../../app/store';
+import { AppState, UIState } from '../../app/uiState';
 import { Ecs } from '../../ecs/current';
 import { Economy } from '../economy/economy';
 import { Social } from '../social/social';
@@ -46,7 +47,7 @@ const ANSWER_TIMEOUT = 5000;
 
 function inWorld(): boolean {
   return (
-    Store.uiState === UIState.World || Store.uiState === UIState.LoadingWorld
+    AppState.uiState === UIState.World || AppState.uiState === UIState.LoadingWorld
   );
 }
 
@@ -69,9 +70,9 @@ export const SessionExit = new (class _SessionExit {
       case 'characters':
         return inWorld();
       case 'servers':
-        return inWorld() || Store.uiState === UIState.Characters;
+        return inWorld() || AppState.uiState === UIState.Characters;
       case 'quit':
-        return Store.uiState !== UIState.Preloader;
+        return AppState.uiState !== UIState.Preloader;
     }
   }
 
@@ -141,7 +142,7 @@ export const SessionExit = new (class _SessionExit {
 
     if (kind === 'characters') {
       runInAction(() => {
-        Store.uiState = UIState.Characters;
+        AppState.uiState = UIState.Characters;
       });
       // The window sheets go with the world; decoded again on the next entry.
       void import('../../controllers/assets/mu/preloadSprites').then(m => m.clearWorldSprites());
@@ -168,7 +169,7 @@ export const SessionExit = new (class _SessionExit {
     Store.disconnectFromConnectServer();
     void import('../../controllers/assets/mu/preloadSprites').then(m => m.clearWorldSprites());
     runInAction(() => {
-      Store.uiState = UIState.Preloader;
+      AppState.uiState = UIState.Preloader;
     });
   }
 })();
@@ -187,7 +188,7 @@ export const SessionExit = new (class _SessionExit {
  * the login window keeps Escape for its Cancel.
  */
 export function openSystemMenu(): boolean {
-  const screen = Store.uiState;
+  const screen = AppState.uiState;
   if (
     screen !== UIState.World &&
     screen !== UIState.Servers &&

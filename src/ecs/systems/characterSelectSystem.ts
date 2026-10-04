@@ -11,7 +11,8 @@ import {
   Vector3,
 } from '../../controllers/render/babylon/exports';
 import type { Entity, ISystemFactory } from '../world';
-import { Store, UIState } from '../../app/store';
+import { Store } from '../../app/store';
+import { AppState, UIState } from '../../app/uiState';
 import { ENUM_WORLD } from '@/core/types';
 import { spawnPlayer } from '../../app/logic';
 import { deserializeAppearance } from '../../controllers/actors/deserializeAppearance';
@@ -484,7 +485,7 @@ export const CharacterSelectSystem: ISystemFactory = world => {
 
   world.scene.onPointerObservable.add(event => {
     if (event.type !== PointerEventTypes.POINTERDOWN) return;
-    if (Store.uiState !== UIState.Characters) return;
+    if (AppState.uiState !== UIState.Characters) return;
 
     const target = world.currentPointerTarget;
     const hovered = target && spawned.includes(target) ? target.objectNameInWorld : null;
@@ -521,7 +522,7 @@ export const CharacterSelectSystem: ISystemFactory = world => {
   return {
     update: (deltaTime: number) => {
       const staged =
-        Store.uiState === UIState.Characters &&
+        AppState.uiState === UIState.Characters &&
         world.mapIndex === ENUM_WORLD.WD_74NEW_CHARACTER_SCENE &&
         !!world.terrain;
 
@@ -533,7 +534,7 @@ export const CharacterSelectSystem: ISystemFactory = world => {
         // has to wait for it: the terrain lands first and the character list
         // is still in flight, and without this hold the gate lifted on an
         // empty scene with the characters walking in behind it.
-        setSceneHold(GATE, Store.uiState === UIState.Characters);
+        setSceneHold(GATE, AppState.uiState === UIState.Characters);
         return;
       }
 

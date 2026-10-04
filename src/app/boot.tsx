@@ -7,7 +7,9 @@ import './style.less';
 import './logic';
 // Content model classes register here, at boot, where no controller can reach (controllers import the Store, which imports logic.ts).
 import '@versions/shared/monsters/models';
-import { Store, UIState } from './store';
+import { Store } from './store';
+import { AppState, UIState } from './uiState';
+import { Loading } from '../controllers/loading';
 import { Ecs } from '../ecs/current';
 import { GameOptions } from '@/controllers/settings';
 import { Social } from '../modules/social/social';
@@ -118,9 +120,9 @@ reaction(
 // stack - live in `ecs/systems/keyboardInputSystem.ts`.
 installBrowserHotkeyGuard(
   () =>
-    Store.uiState === UIState.World ||
-    Store.uiState === UIState.LoadingWorld ||
-    Store.uiState === UIState.Characters
+    AppState.uiState === UIState.World ||
+    AppState.uiState === UIState.LoadingWorld ||
+    AppState.uiState === UIState.Characters
 );
 
 const ignoredIds = ['scene-explorer-host', 'inspector-host'];
@@ -198,7 +200,11 @@ const scene = new TestScene(engine);
 initControllers({ scene });
 onMapChange(resetForMapChange);
 // `MUSIC_LOGIN_THEME` over the server / login / character pages.
-installLoginMusic();
+const MENU_PAGES = new Set([UIState.Servers, UIState.Login, UIState.Characters]);
+installLoginMusic(
+  () => MENU_PAGES.has(AppState.uiState),
+  () => AppState.uiState === UIState.Preloader
+);
 
 const { world, updateSystems } = createWorld(scene);
 Ecs.world = world;
@@ -273,7 +279,7 @@ engine.runRenderLoop(() => {
     updateSystems(deltaTime);
     const updateEnded = performance.now();
 
-    const idle = sceneCovered() && !Store.sceneLoading;
+    const idle = sceneCovered() && !Loading.sceneLoading;
 
     if (!idle || ++coveredFrames % COVERED_RENDER_EVERY === 0) {
       scene.render();
@@ -309,7 +315,7 @@ EventBus.on('requestWarp', ({ map, pos }) => {
   // Every warp, the step from the login backdrop to the character one
   // included: that one is a full terrain swap plus the character line-up, and
   // skipping the screen for it meant watching both load on an open scene.
-  Store.setSceneLoading(true);
+  Loading.setSceneLoading(true);
 
   // The terrain files go out together, before the loader's first await; the
   // loader picks up the same promises (prefetchWorld.ts).
@@ -319,7 +325,7 @@ EventBus.on('requestWarp', ({ map, pos }) => {
 });
 
 preloadPregameSprites()
-  .finally(() => Store.setSpritesLoading(false))
+  .finally(() => Loading.setSpritesLoading(false))
   .then(() => preloadWorldSprites());
 
 // The published server list (`modules/servers/serverList.ts`), once per launch. Nothing

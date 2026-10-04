@@ -2,7 +2,8 @@ import { t } from '../i18n';
 import { ServersPage } from '@versions/shared/ui/pages/server_select';
 import { observer } from 'mobx-react-lite';
 import { lazy, Suspense } from 'react';
-import { Store, UIState } from './store';
+import { Store } from './store';
+import { AppState, UIState } from './uiState';
 import { loadVersionUi } from '../version';
 import { WorldPage } from '@versions/shared/ui/pages/world';
 import { useEventBus } from '../controllers/interface/hooks/useEventBus';
@@ -25,7 +26,7 @@ const CharactersPage = lazy(() =>
 );
 
 const CurrentPage = observer(() => {
-  const state = Store.uiState;
+  const state = AppState.uiState;
 
   switch (state) {
     case UIState.Preloader:
@@ -52,6 +53,8 @@ const CurrentPage = observer(() => {
   }
 });
 
+const onPreloader = () => AppState.uiState === UIState.Preloader;
+
 export const App = observer(() => {
   useEventBus('wsError', () => {
     Store.addNotification(t('notify.wsError'), 'error');
@@ -62,7 +65,7 @@ export const App = observer(() => {
       <CurrentPage />
       <OptionsWindow />
       {}
-      <LoadingScreen />
+      <LoadingScreen hidden={onPreloader} />
       {}
       <ReconnectOverlay />
       {}

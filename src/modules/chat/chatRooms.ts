@@ -1,6 +1,7 @@
 import { t } from '../../i18n';
 import { action, makeObservable, observable, reaction, runInAction } from 'mobx';
-import { Store, UIState } from '../../app/store';
+import { Store } from '../../app/store';
+import { AppState, UIState } from '../../app/uiState';
 import { Social } from '../social/social';
 import {
   ChatRoomCreateRequestPacket,
@@ -82,7 +83,7 @@ export const ChatRooms = new (class _ChatRooms {
   private ensureWatching(): void {
     if (this.stopWatching) return;
     this.stopWatching = reaction(
-      () => Store.uiState,
+      () => AppState.uiState,
       state => {
         if (state !== UIState.World) this.reset();
       }

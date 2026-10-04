@@ -1,7 +1,7 @@
 import './style.less';
 import { useEffect, useRef, useState } from 'react';
 import { i18n } from '@/i18n';
-import { Store } from '@/app/store';
+import { Loading } from '@/controllers/loading';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { useMuSprite } from '@/controllers/interface/components/mu_sprite';
 import { useUiStageScale } from '@/controllers/interface/components/ui_stage';
@@ -115,7 +115,7 @@ export const MapNameBanner = () => {
       // The original's load blocks the frame loop; here the loading screen
       // still covers the world, so the clock waits for it.
       if (start < 0) {
-        if (Store.sceneLoading) {
+        if (Loading.sceneLoading) {
           frame = requestAnimationFrame(tick);
           return;
         }

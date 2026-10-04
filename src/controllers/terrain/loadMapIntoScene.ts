@@ -2,6 +2,7 @@ import { disposeGrassField } from './terrainGrass';
 import { ENUM_WORLD } from '@/core/types';
 import type { World } from '../../ecs/world';
 import { Store } from '../../app/store';
+import { Loading } from '../loading';
 import { maps } from '../maps';
 // Side effect: the `ChangeTerrainAttributes` packet → `world.setTerrainFlags`.
 import './terrainAttributeUpdates';
@@ -237,7 +238,7 @@ function failWarp(
   console.error(`Could not load world ${map}; staying on ${oldMap}:`, error);
   world.mapIndex = oldMap;
   setShadowWorld(oldMap);
-  Store.setSceneLoading(false);
+  Loading.setSceneLoading(false);
   EventBus.emit('warpFailed', { map, error });
 
   const delay = WARP_RETRY_DELAYS_MS[attempt];

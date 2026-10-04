@@ -3,7 +3,8 @@ import { GameOptions } from '@/controllers/settings';
 import { devQueryNumbers } from '../../core/devSeams';
 import { serverNow } from '../../controllers/net/serverTime';
 import { MiniGameOpeningStateRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
-import { Store, UIState } from '../../app/store';
+import { Store } from '../../app/store';
+import { AppState, UIState } from '../../app/uiState';
 import { Ecs } from '../../ecs/current';
 import type { EventLayer } from './layer';
 import { OPENING_STATE_GAME } from './recipes';
@@ -218,7 +219,7 @@ function pollable(): boolean {
   return (
     GameOptions.eventTimers &&
     !Store.isOffline &&
-    Store.uiState === UIState.World &&
+    AppState.uiState === UIState.World &&
     Ecs.world !== null
   );
 }

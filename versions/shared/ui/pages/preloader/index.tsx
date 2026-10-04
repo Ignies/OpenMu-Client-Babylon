@@ -3,6 +3,7 @@ import './style.less';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Store } from '@/app/store';
+import { Loading } from '@/controllers/loading';
 import { Ecs } from '@/ecs/current';
 import { i18n, t, type TextKey } from '@/i18n';
 import {
@@ -127,8 +128,8 @@ function backgroundLoad(backdrop: PregameBackdrop | null): {
   done: boolean;
 } {
   // Read before anything can return: an observer only redraws for what it read.
-  const loading = Store.sceneLoading;
-  const loaded = Store.loadingProgress;
+  const loading = Loading.sceneLoading;
+  const loaded = Loading.loadingProgress;
   const warmed = pregameLoad.characters;
 
   if (!backdrop) return { progress: 0, done: false };

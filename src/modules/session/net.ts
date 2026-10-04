@@ -4,7 +4,8 @@ import { EventBus } from '@/core/eventBus';
 import { GameServerEnteredPacket, LoginResponseLoginResultEnum, LoginResponsePacket, LogoutResponsePacket } from '@versions/shared/packets/ServerToClientPackets';
 import { SessionExit } from './sessionExit';
 import { SessionResume } from './sessionResume';
-import { Store, UIState } from '@/app/store';
+import { Store } from '@/app/store';
+import { AppState, UIState } from '@/app/uiState';
 import { gameServerTarget } from '../servers/serverConfig';
 import { quests } from '../quests';
 import { runInAction } from 'mobx';
@@ -41,7 +42,7 @@ export function installNet(): void {
     if (SessionResume.onGameServerEntered()) return;
 
     runInAction(() => {
-      Store.uiState = UIState.Login;
+      AppState.uiState = UIState.Login;
     });
   });
 
@@ -101,7 +102,7 @@ export function installNet(): void {
       if (SessionResume.onLoginOk()) return;
       Store.disconnectFromConnectServer();
       runInAction(() => {
-        Store.uiState = UIState.Characters;
+        AppState.uiState = UIState.Characters;
       });
       return;
     }
@@ -111,7 +112,7 @@ export function installNet(): void {
 
     runInAction(() => {
       Store.loginError = `Error: ${LoginResponseLoginResultEnum[p.Success]}`;
-      Store.uiState = UIState.Login;
+      AppState.uiState = UIState.Login;
     });
   });
 
