@@ -138,6 +138,19 @@ const CHANDELIER_GROUND: LightEmitter['terrain'] = {
 };
 
 /**
+ * Case 37's flare as the original draws it (GMEmpireGuardian4.cpp:864-875):
+ * `CreateSprite(BITMAP_FLARE, bone1, 4 * Scale, fLumi * 0.7)` on all three
+ * channels, `fLumi = (sin(WorldTime * 0.039) + 1) * 0.2 + 0.6`. `pulse` is
+ * fLumi, so the colour is the 0.7 grey. The login scene's torch draws it on
+ * Classic.
+ */
+export const WALL_TORCH_FLARE: NonNullable<LightEmitter['sprite']> = {
+  scale: 4,
+  color: [0.7, 0.7, 0.7],
+  pulse: { speed: 0.039, amount: 0.2, base: 0.6 },
+};
+
+/**
  * Type 37's flare, `sos_bob02.smd` bone 1 (GMEmpireGuardian4.cpp:864-875,
  * x20). The original is `CreateSprite(BITMAP_FLARE, bone1, 4 * Scale, grey)`
  * with `grey = ((sin(WorldTime * 0.039) + 1) * 0.2 + 0.6) * 0.7`, i.e. 0.42

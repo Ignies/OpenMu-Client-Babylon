@@ -2,12 +2,16 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { FIDELITY_CLASSIC, FIDELITY_DEFAULT, setFidelityChoice } from '@/controllers/fidelity';
 import type { Entity, World } from '@/ecs/world';
 
-// What the torch built: 'flare', 'light', 'fire'.
+// What the torch built: 'flare', 'light', 'fire'; and the flare's colour.
 const built = vi.hoisted(() => [] as string[]);
+const flareColors = vi.hoisted(() => [] as (readonly number[])[]);
 
 vi.mock('@/controllers/lighting', () => ({
-  LOGIN_WALL_TORCH: { sprite: { scale: 4, color: [1, 1, 1] }, terrain: { range: 2, color: [1, 1, 1] } },
-  createEffectLight: async () => void built.push('flare'),
+  LOGIN_WALL_TORCH: { sprite: { scale: 4, color: [1, 0.45, 0.15] }, terrain: { range: 2, color: [1, 1, 1] } },
+  createEffectLight: async (_scene: unknown, spec: { color: readonly number[] }) => {
+    built.push('flare');
+    flareColors.push(spec.color);
+  },
   lightMapObject: () => void built.push('light'),
 }));
 
@@ -33,6 +37,7 @@ import { LoginWallTorchObject } from './wallTorchObject';
 
 async function build(): Promise<string[]> {
   built.length = 0;
+  flareColors.length = 0;
   // The mocked base takes no arguments.
   const torch = new (LoginWallTorchObject as unknown as new () => LoginWallTorchObject)();
   await torch.init({ scene: {} } as unknown as World, {} as Entity);
@@ -42,12 +47,15 @@ async function build(): Promise<string[]> {
 describe('the login wall torch', () => {
   afterEach(() => setFidelityChoice(FIDELITY_DEFAULT, {}));
 
-  it('burns with its light on Enhanced (the loginWallTorches improvement)', async () => {
+  it('burns with its light and a warm flare on Enhanced (the loginWallTorches improvement)', async () => {
     expect(await build()).toEqual(['fire', 'flare', 'light']);
+    expect(flareColors).toEqual([[1, 0.45, 0.15]]);
   });
 
-  it('is the flare alone on Classic (GMEmpireGuardian4.cpp:864-875)', async () => {
+  // Case 37: CreateSprite(BITMAP_FLARE, ..., fLumi * 0.7 on all three channels).
+  it('is the grey flare alone on Classic (GMEmpireGuardian4.cpp:864-875)', async () => {
     setFidelityChoice(FIDELITY_CLASSIC, {});
     expect(await build()).toEqual(['flare']);
+    expect(flareColors).toEqual([[0.7, 0.7, 0.7]]);
   });
 });

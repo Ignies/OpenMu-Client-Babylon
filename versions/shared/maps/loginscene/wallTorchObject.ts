@@ -9,12 +9,13 @@ import { MapTileObject } from '@/controllers/terrain';
 import { reportLoadFailure } from '@/controllers/assets';
 import { isOn } from '@/controllers/fidelity';
 import type { Entity, World } from '@/ecs/world';
+import { WALL_TORCH_FLARE } from '../empireguardian4/spec';
 
 /**
- * The login scene's wall torch, type 37 on `WD_73NEW_LOGIN_SCENE`: a flare card at bone 1 (the
+ * The login scene's wall torch, type 37 on `WD_73NEW_LOGIN_SCENE`: a grey flare card at bone 1 (the
  * object origin without one), as `RenderObjectVisual` case 37 draws it (GMEmpireGuardian4.cpp:864-875).
- * The `loginWallTorches` improvement adds the `LOGIN_WALL_TORCH` ground light and the cycling
- * `FIRE_HIK1` / `CURSEDLICH` / `HIK3` flame; the original has neither.
+ * The `loginWallTorches` improvement makes it burn: the warm `LOGIN_WALL_TORCH` flare, its ground
+ * light and the cycling `FIRE_HIK1` / `CURSEDLICH` / `HIK3` flame; the original has none of them.
  */
 export class LoginWallTorchObject extends MapTileObject {
   // Its flame and light are per object: never a batched prop.
@@ -48,7 +49,11 @@ export class LoginWallTorchObject extends MapTileObject {
       z: position.z,
     };
 
-    void createEffectLight(world.scene, LOGIN_WALL_TORCH.sprite!, spritePosition, scale).then(light => {
+    // Classic: case 37's grey flare alone; a burning torch's flare is warm.
+    const burning = isOn('loginWallTorches');
+    const flare = burning ? LOGIN_WALL_TORCH.sprite! : WALL_TORCH_FLARE;
+
+    void createEffectLight(world.scene, flare, spritePosition, scale).then(light => {
       this.#light = light;
 
       if (this.#disposed) {
@@ -57,8 +62,7 @@ export class LoginWallTorchObject extends MapTileObject {
       }
     }).catch(reportLoadFailure('effect light flare'));
 
-    // Classic: the flare alone.
-    if (!isOn('loginWallTorches')) return;
+    if (!burning) return;
 
     this.#source = lightMapObject(world.scene, LOGIN_WALL_TORCH, spritePosition);
 
