@@ -12,6 +12,8 @@ export interface WindowDef {
   readonly slot: WindowSlot;
   readonly order: number;
   readonly component: ComponentType;
+  /** The optional gameplay module it belongs to (`src/modules/<id>`): it hides while that module is off. */
+  readonly module?: string;
 }
 
 export const defineWindow = (def: WindowDef): WindowDef => def;

@@ -11,7 +11,9 @@ windows themselves are content in `versions/shared/ui/` (see
   `components/<widget>/index.tsx` are the doors into those folders.
 - `uiState.ts`: `AppState` (the page the app shows, `uiState`, and the hide-interface key,
   `hudHidden`) and `UIState`. Session and hero packets move the page; it imports only mobx.
-- `windows.ts`: `defineWindow({ id, slot, order, component })`, `registerWindows(defs)` (a later
+- `windows.ts`: `defineWindow({ id, slot, order, component, module? })` (`module`: the optional
+  gameplay module the window belongs to; the world page hides it while that module is off),
+  `registerWindows(defs)` (a later
   def with the same id replaces the earlier one), `windowsIn(slot)` (stacking order). Slots:
   `world` (on the 3D view, stays up when the interface is hidden) and `hud`.
 - `windowManager.ts`: `MuWindows`: open state (`isOpen(id)`, `setOpen(id, open)`), placement,

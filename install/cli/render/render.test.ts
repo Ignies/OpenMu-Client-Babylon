@@ -91,7 +91,12 @@ describe('client build', () => {
 
 describe('server.json', () => {
   it('holds the original behaviour by default', () => {
-    expect(JSON.parse(serverManifest(domain))).toEqual({ version: 1, settings: { heldHitRequest: false } });
+    expect(JSON.parse(serverManifest(domain))).toEqual({ version: 1, settings: { heldHitRequest: false }, modulesOff: [] });
+  });
+
+  it('turns off the modules the config lists, and band when its relay is off', () => {
+    expect(JSON.parse(serverManifest({ ...domain, modulesOff: ' events, marketplace ', band: false })).modulesOff).toEqual(['band', 'events', 'marketplace']);
+    expect(parseServerManifest(JSON.parse(serverManifest({ ...domain, modulesOff: 'events' })))?.modulesOff).toEqual(['events']);
   });
 
   it('follows the config', () => {

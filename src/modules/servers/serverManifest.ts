@@ -1,6 +1,7 @@
 import { LocalStorage } from '../../core/localStorage';
 import { ServerConfig, onWorldEntered, type ServerProfile } from './serverConfig';
 import { serverManifestUrl } from './serverServices';
+import { setServerModulesOff } from '../module';
 
 /**
  * A world's `server.json`: what the server decides for every player on it. Fetched when the world
@@ -14,11 +15,19 @@ type ServerSettings = {
   readonly heldHitRequest: boolean;
 };
 
-type ServerManifest = { readonly version: 1; readonly settings: ServerSettings };
+type ServerManifest = {
+  readonly version: 1;
+  readonly settings: ServerSettings;
+  /** The optional modules the server turned off, by id (`src/modules/modules.ts`). */
+  readonly modulesOff: readonly string[];
+};
 
 const SERVER_MANIFEST_VERSION = 1;
 
 export const ORIGINAL_SETTINGS: ServerSettings = { heldHitRequest: false };
+
+const MODULE_ID = /^[a-z][a-z0-9_]{0,31}$/;
+const MAX_MODULES_OFF = 64;
 
 /** The type each known setting must have; a key not listed here is ignored. */
 const SETTING_TYPES: { readonly [K in keyof ServerSettings]: 'boolean' } = {
@@ -32,10 +41,17 @@ const TIMEOUT_MS = 5000;
 const isObject = (v: unknown): v is Record<string, unknown> =>
   typeof v === 'object' && v !== null && !Array.isArray(v);
 
+/** `modulesOff`, when present: at most 64 lowercase module ids. Anything else is invalid. */
+function parseModulesOff(raw: unknown): string[] | null {
+  if (!Array.isArray(raw) || raw.length > MAX_MODULES_OFF) return null;
+  if (!raw.every(id => typeof id === 'string' && MODULE_ID.test(id))) return null;
+  return [...new Set(raw as string[])];
+}
+
 /**
  * A `server.json` body, or null. It must be an object with `version` 1 and a `settings` object
- * whose known keys have their type; a wrong type anywhere rejects the whole document. Unknown keys
- * are skipped: a newer server may know settings this client does not.
+ * whose known keys have their type, and may carry `modulesOff`; a wrong type anywhere rejects the
+ * whole document. Unknown keys are skipped: a newer server may know settings this client does not.
  */
 export function parseServerManifest(raw: unknown): ServerManifest | null {
   if (!isObject(raw) || raw.version !== SERVER_MANIFEST_VERSION || !isObject(raw.settings)) return null;
@@ -49,7 +65,10 @@ export function parseServerManifest(raw: unknown): ServerManifest | null {
     settings[key] = value;
   }
 
-  return { version: SERVER_MANIFEST_VERSION, settings: settings as ServerSettings };
+  const modulesOff = Object.prototype.hasOwnProperty.call(raw, 'modulesOff') ? parseModulesOff(raw.modulesOff) : [];
+  if (!modulesOff) return null;
+
+  return { version: SERVER_MANIFEST_VERSION, settings: settings as ServerSettings, modulesOff };
 }
 
 /** The settings now in force, by manifest URL. */
@@ -99,21 +118,31 @@ export async function loadServerManifest(
   profile: ServerProfile = ServerConfig.active
 ): Promise<ServerSettings> {
   const url = serverManifestUrl(profile);
-  if (!url) return ORIGINAL_SETTINGS;
+  if (!url) {
+    setServerModulesOff([]);
+    return ORIGINAL_SETTINGS;
+  }
 
   asked.add(url);
-  if (!current.has(url)) current.set(url, cachedSettings(url));
+  const cached = cachedManifest(url);
+  if (!current.has(url)) current.set(url, cached?.settings ?? ORIGINAL_SETTINGS);
+  setServerModulesOff(cached?.modulesOff ?? []);
 
   const manifest = await fetchManifest(url);
   const settings = manifest?.settings ?? ORIGINAL_SETTINGS;
   current.set(url, settings);
+  setServerModulesOff(manifest?.modulesOff ?? []);
   writeCache(url, manifest);
 
   return settings;
 }
 
+function cachedManifest(url: string): ServerManifest | null {
+  return parseServerManifest(readCache()[url]);
+}
+
 function cachedSettings(url: string): ServerSettings {
-  return parseServerManifest(readCache()[url])?.settings ?? ORIGINAL_SETTINGS;
+  return cachedManifest(url)?.settings ?? ORIGINAL_SETTINGS;
 }
 
 /**

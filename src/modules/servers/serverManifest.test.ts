@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { parseServerLine } from './serverList';
 import { ServerConfig } from './serverConfig';
 import { serverManifestUrl } from './serverServices';
+import { defineModule, installModules, moduleOn } from '../module';
 import {
   ORIGINAL_SETTINGS,
   loadServerManifest,
@@ -45,6 +46,7 @@ describe('parseServerManifest', () => {
     expect(parseServerManifest({ version: 1, settings: { heldHitRequest: true } })).toEqual({
       version: 1,
       settings: { heldHitRequest: true },
+      modulesOff: [],
     });
   });
 
@@ -56,7 +58,7 @@ describe('parseServerManifest', () => {
   it('skips unknown keys', () => {
     expect(
       parseServerManifest({ version: 1, modules: [], settings: { heldHitRequest: true, somethingNew: 3 } })
-    ).toEqual({ version: 1, settings: { heldHitRequest: true } });
+    ).toEqual({ version: 1, settings: { heldHitRequest: true }, modulesOff: [] });
   });
 
   it('refuses another version', () => {
@@ -68,6 +70,17 @@ describe('parseServerManifest', () => {
   it('refuses anything else', () => {
     for (const raw of [null, 'x', 1, [], { version: 1 }, { version: 1, settings: [] }, { version: 1, settings: null }]) {
       expect(parseServerManifest(raw), JSON.stringify(raw)).toBeNull();
+    }
+  });
+
+  it('reads the optional modules the server turned off', () => {
+    expect(parseServerManifest({ version: 1, settings: {}, modulesOff: ['events', 'band', 'events'] })?.modulesOff).toEqual(['events', 'band']);
+  });
+
+  it('refuses the whole document when modulesOff is not a list of module ids', () => {
+    const many = Array.from({ length: 65 }, (_, i) => `m${i}`);
+    for (const modulesOff of ['events', [1], ['Events'], ['no spaces'], many]) {
+      expect(parseServerManifest({ version: 1, settings: {}, modulesOff }), JSON.stringify(modulesOff)).toBeNull();
     }
   });
 
@@ -105,6 +118,16 @@ describe('the server settings', () => {
     await loadServerManifest(listed);
     expect(fetch).toHaveBeenCalledWith('https://ws.ignies.net/server.json', expect.anything());
     expect(serverSetting('heldHitRequest')).toBe(true);
+  });
+
+  it('turns off the modules the world lists, and back on for a world that lists none', async () => {
+    installModules([defineModule({ id: 'manifest_events', install: () => {} })]);
+    serve('{"version":1,"settings":{},"modulesOff":["manifest_events"]}');
+    await loadServerManifest(listed);
+    expect(moduleOn('manifest_events')).toBe(false);
+    serve('{"version":1,"settings":{}}');
+    await loadServerManifest(listed);
+    expect(moduleOn('manifest_events')).toBe(true);
   });
 
   it('keeps the original behaviour when the manifest is missing, unreachable or invalid', async () => {

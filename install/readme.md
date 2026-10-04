@@ -92,13 +92,19 @@ everything the stack reads is rendered from `mu.env`, so `mu config` can change 
   origin, so a client loaded from another site reads it too:
 
   ```json
-  { "version": 1, "settings": { "heldHitRequest": false } }
+  { "version": 1, "settings": { "heldHitRequest": false }, "modulesOff": [] }
   ```
 
   `heldHitRequest` (`mu config` > Features, `MU_HELD_HIT_REQUEST` in `mu.env`, default off) sends a
-  plain attack's hit when the swing lands instead of on the click, as the original does. The
-  intervals then follow the swing, not the clicks, and can trip OpenMU's attack-speed check; leave it
-  off unless you have tested it. A missing or broken file means the original behaviour.
+  plain attack's hit when the swing lands; the original sends it on the click. The intervals then
+  follow the swing, not the clicks, and can trip OpenMU's attack-speed check; leave it off unless
+  you have tested it. A missing or broken file means the original behaviour.
+
+  `modulesOff` (`mu config` > Features, `MU_MODULES_OFF` in `mu.env`, comma separated, default
+  none) lists the optional client modules this world does without: their windows hide for its
+  players. `band` is added by itself when the band relay is off. The ids are the folders of
+  `src/modules/` that are not core: events, quests, marketplace, guild, guild_war, party, friends,
+  economy, trade, vault, personal_shop, chaos_mix, pets, mu_helper, band, gm.
 
 ## Change it
 
@@ -114,7 +120,8 @@ everything the stack reads is rendered from `mu.env`, so `mu config` can change 
 - `cli/config.test.ts`: config round trip, answer checks, secrets.
 - `cli/render/render.test.ts`: service env (secrets only where used, proxy pinned, trusted proxy),
   Caddyfile (both modes, admin login, route order), server list, compose interpolation,
-  `server.json` (default, the setting, accepted by the client's parser, served on both hosts).
+  `server.json` (default, the setting, the modules off, accepted by the client's parser, served on
+  both hosts).
 - `cli/backup.test.ts`: role filtering, backup names.
 - End to end, with Docker: `MU_STATE=<scratch folder> bun install/cli/e2e.ts` (build, start, check;
   then `backup`, `down`). It refuses to run without `MU_STATE`, so it never touches a real install.

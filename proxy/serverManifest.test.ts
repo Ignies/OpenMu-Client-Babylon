@@ -8,6 +8,12 @@ describe('the proxy server.json', () => {
     expect(serverManifest({ MU_HELD_HIT_REQUEST: 'on' }).settings.heldHitRequest).toBe(true);
   });
 
+  it('turns off the modules MU_MODULES_OFF lists, and band when the relay is off', () => {
+    expect(serverManifest({}).modulesOff).toEqual([]);
+    expect(serverManifest({ MU_MODULES_OFF: 'events, marketplace', BAND: 'off' }).modulesOff).toEqual(['band', 'events', 'marketplace']);
+    expect(parseServerManifest(serverManifest({ MU_MODULES_OFF: 'events' }))?.modulesOff).toEqual(['events']);
+  });
+
   it('is a document the client accepts, readable from any origin', async () => {
     const res = serverManifestResponse({ MU_HELD_HIT_REQUEST: 'on' });
     expect(res.headers.get('Access-Control-Allow-Origin')).toBe('*');

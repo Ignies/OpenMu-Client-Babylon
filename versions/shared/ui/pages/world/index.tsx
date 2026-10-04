@@ -5,12 +5,12 @@ import { runInAction } from 'mobx';
 import { AppState } from '@/controllers/interface/uiState';
 import { isKey } from '@/controllers/interface/keyBindings';
 import { useEventBus } from '@/controllers/interface/hooks';
-import { windowsIn } from '@/controllers/interface/windows';
+import { shownWindows } from './shown';
 
-/** Every registered window and HUD element, in stacking order. Each one hides itself when closed. */
+/** Every registered window and HUD element whose module is on, in stacking order. Each one hides itself when closed. */
 const HUD = observer(() => (
   <div className="hud">
-    {windowsIn('hud').map(w => (
+    {shownWindows('hud').map(w => (
       <w.component key={w.id} />
     ))}
   </div>
@@ -26,7 +26,7 @@ export const WorldPage = observer(() => {
   return (
     <div className="world-page">
       {/* Over the world, under the HUD and outside it: the hide-interface key leaves these up. */}
-      {windowsIn('world').map(w => (
+      {shownWindows('world').map(w => (
         <w.component key={w.id} />
       ))}
       {!AppState.hudHidden && <HUD />}

@@ -96,7 +96,15 @@ Controllers, ECS systems and `app/boot.tsx` add theirs at runtime, after the mod
 - add a module: `src/modules/<name>/` with `net.ts` (`installNet`), `module.ts`, a `readme.md`
   (`bun tools/checks/index.ts` checks it exists), and one line in `modules.ts` where its
   listeners should run.
-- turn a module off: pass `enabled` to `installModules` (servers will choose this; not wired yet).
+- turn a module off for a world: list it in the world's `server.json` `modulesOff` (the installer's
+  `MU_MODULES_OFF`; `band` follows the band relay). `moduleOn(id)` (`module.ts`) then answers false
+  for it and for every module that requires it, and the world page leaves out the windows that name
+  it (`defineWindow({ ..., module: '<id>' })`). Core modules never turn off. The module's listeners
+  stay installed, since that server sends none of its packets; installing a different set per
+  server comes with the module API (phase 3). `enabled` on `installModules` decides what installs
+  at boot.
+- give an optional module's window its module: `module: '<id>'` in its `window.ts`
+  (`versions/shared/ui/windowModules.test.ts` checks the id is an optional module).
 - add state: a field on the module's state (`state.ts`), exported through `index.ts`; windows read
   it there. A controller that needs it gets a reader through a hook the app or the module sets.
 
@@ -104,11 +112,13 @@ Controllers, ECS systems and `app/boot.tsx` add theirs at runtime, after the mod
 - `social` (core), `economy` and `gm` have a `module.ts` with nothing to install: their state is
   loaded by whoever imports it. Turning `economy` off turns off `vault`, `chaos_mix`, `trade` and
   `personal_shop` (they require it).
-- Windows do not yet hide when their module is off, and the `events` and `quests` facades keep
-  their frame update and client-side entry points (their readmes, "When it is off").
+- A module the server turns off keeps its listeners and, for `events` and `quests`, the facade's
+  frame update and client-side entry points (their readmes, "When it is off"); only its windows
+  hide. A window several modules share (`social_prompts`) names none and stays.
 
 ## Tests
-- `module.test.ts`: install order, disabled and core modules, requirements.
+- `module.test.ts`: install order, disabled and core modules, requirements; `moduleOn` with a
+  server's `modulesOff`.
 - `modules.test.ts`: every `module.ts` is listed once and named after its folder.
 - `switchOff.test.ts`: every module registers its listeners when installed, not when loaded;
   with events or quests off, their packets keep only the other modules' listeners.

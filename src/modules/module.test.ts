@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { defineModule, installModules } from './module';
+import { defineModule, installModules, moduleOn, setServerModulesOff } from './module';
 
 function recorder() {
   const installed: string[] = [];
@@ -25,5 +25,33 @@ describe('installModules', () => {
     const { installed, mod } = recorder();
     installModules([mod('guild'), mod('guild_war', { requires: ['guild'] })], id => id !== 'guild');
     expect(installed).toEqual([]);
+  });
+});
+
+describe('moduleOn', () => {
+  it('follows the server for an optional module, never for a core one', () => {
+    const { mod } = recorder();
+    installModules([mod('on_core', { core: true }), mod('on_optional')]);
+    expect(moduleOn('on_optional')).toBe(true);
+    setServerModulesOff(['on_optional', 'on_core']);
+    expect(moduleOn('on_optional')).toBe(false);
+    expect(moduleOn('on_core')).toBe(true);
+    setServerModulesOff([]);
+    expect(moduleOn('on_optional')).toBe(true);
+  });
+
+  it('turns a module off with one it requires', () => {
+    const { mod } = recorder();
+    installModules([mod('on_economy'), mod('on_trade', { requires: ['on_economy'] })]);
+    setServerModulesOff(['on_economy']);
+    expect(moduleOn('on_trade')).toBe(false);
+    setServerModulesOff([]);
+  });
+
+  it('is off for a module that was not installed, or does not exist', () => {
+    const { mod } = recorder();
+    installModules([mod('on_skipped')], () => false);
+    expect(moduleOn('on_skipped')).toBe(false);
+    expect(moduleOn('on_unknown')).toBe(false);
   });
 });
