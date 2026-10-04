@@ -6,7 +6,8 @@
  * like the staff, sword or crossbow it displays, not like a ring.
  */
 
-import { ItemGroup, type ItemRestPose } from '../../controllers/actors/itemAngle';
+import type { ItemRestPose } from '../actors';
+import { ItemGroup } from './itemStats';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 
 type DropModelProxy = {

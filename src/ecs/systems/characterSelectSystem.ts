@@ -25,7 +25,7 @@ import { setSceneHold } from '../../controllers/loading/sceneGate';
 import { createCharacterSelectBackdrop } from '../../modules/character_select/characterSelectBackdrop';
 import { PlayerAction } from '@versions/shared/objects/enum';
 import { genderedEmoteAction } from '../../modules/hero/emotes';
-import { isRidingMount } from '../../modules/pets/pets';
+import { isRidingMount } from '@/controllers/pets';
 import {
   registerPointLightEmitter,
   type PointLightEmitter,

@@ -48,7 +48,7 @@ import {
   isSwimWorld,
 } from '../../controllers/actors/locomotion';
 import { isWingItem } from '../../controllers/actors/wings';
-import { isRidingMount, petSpec } from '../../modules/pets/pets';
+import { isRidingMount, petSpec } from '@/controllers/pets';
 import { Store } from '../../app/store';
 import { heldWeapons } from '../../controllers/actors';
 import { isOn } from '../../controllers/fidelity';

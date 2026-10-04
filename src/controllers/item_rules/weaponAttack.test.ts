@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BaseClass } from '../../modules/hero/characterStats';
+import { BaseClass } from '../../core/types';
 import { PlayerAction as A } from '@versions/shared/objects/enum';
 import {
   chooseAttackAction,

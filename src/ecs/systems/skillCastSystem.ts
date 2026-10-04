@@ -38,7 +38,7 @@ import { isFemaleClass } from '../../controllers/actors/mapPlayerNetClassToModel
 import { getBaseClass } from '../../modules/hero/characterStats';
 import { isWingItem } from '../../controllers/actors/wings';
 import type { AttackPose } from '../../controllers/actors/weaponClass';
-import { mountKind } from '../../modules/pets/pets';
+import { mountKind } from '@/controllers/pets';
 import { clipCastSound, heroCastSound, playCombat, playSkill } from '../../controllers/sound/combat';
 import { skills } from '../../modules/skills';
 import { combat } from '../../controllers/combat';

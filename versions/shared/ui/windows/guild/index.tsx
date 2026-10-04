@@ -22,7 +22,7 @@ import {
   GUILD_MARK_SIZE,
   guildMarkDataUrl,
   packGuildMark,
-} from '@/modules/social/guildMark';
+} from '@/core/guildMark';
 import { TEXT_COLOR } from '../../pages/server_select/layout';
 import {
   BACK_SPRITE,

@@ -19,7 +19,7 @@ import { isPlayerBody, npcClassOf, npcHeroStateOf } from '@/controllers/actors/p
 import { isWingItem } from '@/controllers/actors/wings';
 import { monsterDisplayName, monsterMaxHealth } from '@versions/shared/monsters/monstersDatabase';
 import { monsterModelTypeOf } from '@/controllers/anim/playSpeed';
-import { mountKind } from '../pets/pets';
+import { mountKind } from '@/controllers/pets';
 import { playSfx } from '@/controllers/sound/sfx';
 import { playSkill } from '@/controllers/sound';
 import { setBuffVisual } from '@versions/shared/skills/skillVisuals';

@@ -7,7 +7,7 @@ import { ItemSerializer } from '@/controllers/item_rules';
 import { ItemsDatabase, itemBaseName } from '@versions/shared/items/itemsDatabase';
 import { Store } from '@/app/store';
 import { Vector3 } from '@/controllers/render/babylon/exports';
-import { archangelWeapon, dropModelProxy } from './dropModelProxy';
+import { archangelWeapon, dropModelProxy } from '@/controllers/item_rules';
 import { createAttributeSystem } from '@/core/attributeSystem';
 import { itemLevelName } from '@/controllers/item_rules';
 import { playDrop } from '@/controllers/sound';

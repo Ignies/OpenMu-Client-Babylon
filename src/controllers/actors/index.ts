@@ -13,3 +13,4 @@ export { ModelObject, isKnownObjectType, npcSpawnScale, resolveModelFactory } fr
 export { NPC_MODEL_TABLE, TRAP_MODEL_TABLE, npcModelFile } from './npcModelTable';
 export { GEARED_NPC_TABLE, TRANSFORMED_NPC_TABLE } from './playerNpcTables';
 export { WINGS_OF_SPIRITS, WING_GROUP } from './wings';
+export type { ItemRestPose } from './itemAngle';

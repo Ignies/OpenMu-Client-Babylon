@@ -1,6 +1,5 @@
 import type { Item } from '../../ecs/world';
-import { CharacterClassNumber } from '../../core/types';
-import { getBaseClass, BaseClass } from '../../modules/hero/characterStats';
+import { BaseClass, CharacterClassNumber, getBaseClass } from '../../core/types';
 import { isFemaleClass } from '../actors/mapPlayerNetClassToModelClass';
 import {
   GROUP_SPEAR,

@@ -25,6 +25,9 @@ the table would import itself.
 - `dropTier(drop)`, `DROP_TIER_COLOURS`, `HIGH_DROP_LEVEL`: a drop's name colour and glow tier.
 - `learnableSkill(item)` (`skillItems.ts`, with `learnableSkillNumber`): the skill an orb, scroll or
   crystal teaches.
+- `dropModelProxy(group, num, lvl)`, `archangelWeapon(level)` (`dropModelProxy.ts`, was `modules/drops`):
+  the model a drop is shown as (`CreateItem`, ZzzObject.cpp:6056-6116), and the Divine weapon a Weapon of
+  Archangel is drawn as; `actors/playerObject.ts` reads the second.
 - `goldColor(amount)`: the colour of a zen amount (`getGoldColor`, ZzzInventory.cpp:1094-1110).
 
 ## How it works
@@ -38,7 +41,7 @@ the table would import itself.
 - Strength requirements follow OpenMU (four per option level), not the original's `Option3 * 5`.
 - `itemLevelLook.ts`: Box of Luck by level, Box of Kundun, Weapon of Archangel, Scroll of the Emperor +1 and
   Broken Sword +1 get their own name and icon (`GetItemName`, ZzzInventory.cpp:1418-1445, 1593-1609).
-  The ground model for the same items is `actors/dropModelProxy.ts`.
+  The ground model for the same items is `dropModelProxy.ts`.
 - `itemCompare.ts`: the worn item of the same item group in a slot the hovered item could take
   (`equipSlots.ts`), gated by `GameOptions.compareTooltips`.
 - `skillItems.ts`: the item -> skill table (OpenMU `Orbs.cs` / `Scrolls.cs`). Why the hero cannot learn
@@ -63,7 +66,7 @@ the table would import itself.
 - a new item flag on the wire: `itemSerializer.ts` (both directions) and the `Item` type in `src/ecs/world.ts`.
 - a stat or requirement formula: `itemStats.ts`. A price or repair cost: `itemValue.ts`.
 - an item that looks like another at some level: `LEVEL_LOOKS` in `itemLevelLook.ts`, and
-  `actors/dropModelProxy.ts` for the ground model.
+  `dropModelProxy.ts` for the ground model.
 - what the compare tooltip measures against: `comparedItem` in `itemCompare.ts`.
 
 ## Tests
@@ -72,6 +75,7 @@ the table would import itself.
 - `itemRequirements.test.ts`: strength per option level, wing and pet level requirements.
 - `itemCompare.test.ts`: which worn item is compared, and the green / red deltas on the tooltip.
 - `itemLevelLook.test.ts`: Box of Luck / Box of Kundun names and icons.
+- `dropModelProxy.test.ts`: Box of Kundun / Box of Luck models, medals, chocolate boxes, Rena, quest items.
 - `archangelWeapons.test.ts`: Divine weapon and Weapon of Archangel names, colours and icons.
 - `portedItems.test.ts`: MuMain items and capes (tests `controllers/actors/wings.ts`, appearance).
 - `questItemLink.test.ts`: the Blood Castle weapon on the back (tests `controllers/actors/weaponAttachment.ts`).

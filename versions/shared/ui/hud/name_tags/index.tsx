@@ -30,7 +30,7 @@ import {
   unionLine,
 } from '@/controllers/interface/nameTags';
 import { Social } from '@/modules/social/social';
-import { guildMarkDataUrl, isEmptyGuildMark } from '@/modules/social/guildMark';
+import { guildMarkDataUrl, isEmptyGuildMark } from '@/core/guildMark';
 import { Economy } from '@/modules/economy/economy';
 import { GuildMemberRoleEnum } from '@versions/shared/packets/ServerToClientPackets';
 import { devQuery } from '@/core/devSeams';

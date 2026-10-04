@@ -11,7 +11,7 @@ import { isFlagInBinaryMask } from '../../controllers/assets/download';
 import { chooseAttackAction } from '../../controllers/actors/weaponClass';
 import { getBaseClass } from '../../modules/hero/characterStats';
 import { isWingItem } from '../../controllers/actors/wings';
-import { mountKind } from '../../modules/pets/pets';
+import { mountKind } from '@/controllers/pets';
 import { playBowShotVisual } from '@versions/shared/skills/skillVisuals';
 import { combat } from '../../controllers/combat';
 import { MOUSE_UPDATE_SECONDS_MAX } from '../../controllers/combat/inputGate';

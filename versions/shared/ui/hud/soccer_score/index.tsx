@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { Store } from '@/app/store';
 import { Social } from '@/modules/social/social';
 import { ENUM_WORLD } from '@/core/types';
-import { guildMarkDataUrl } from '@/modules/social/guildMark';
+import { guildMarkDataUrl } from '@/core/guildMark';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuText } from '@/controllers/interface/components/mu_text';
 import {

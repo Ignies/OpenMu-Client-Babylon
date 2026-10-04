@@ -25,7 +25,8 @@ There is no `index.ts` facade; other folders import the modules directly.
   steps and readers for the Options window, the materials and boot).
 - `pbrMaps.ts`: `pbrMapsFor`, `pbrMapsIfReady`, `textureSourceName`; `readPackLabelsWith(reader)`, the
   texture pack's remembered names, which `textureSourceName` asks first (set by `assets/modelLoader.ts`).
-- `index.ts`: the types below, `ModelObject` as a type, and `HIDDEN_MESH_ALL` for map object classes.
+- `index.ts`: the types below, `ModelObject` (the pets controller extends it) and `HIDDEN_MESH_ALL` for
+  map object classes.
 - `MapRender`, `MeshAnimation`, `MeshAnimations` (`meshAnimation.ts`, types on `index.ts`): a map's own
   render row, `MapLayer.render`.
 - helpers: `boneLink.ts` (bone-link matrices), `meshAnimation.ts` (`meshAnimationFor`),

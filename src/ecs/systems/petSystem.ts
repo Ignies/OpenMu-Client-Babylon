@@ -12,7 +12,7 @@ import {
   petSpec,
   type PetFollow,
   type PetSpec,
-} from '../../modules/pets/pets';
+} from '@/controllers/pets';
 import { createAngleDeg, turnAngle } from '../../core/turnAngle';
 import { inChaosCastle } from '../../controllers/actors/locomotion';
 import { effects } from '../../controllers/fx';

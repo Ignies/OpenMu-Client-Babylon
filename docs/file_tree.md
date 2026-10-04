@@ -42,6 +42,7 @@ controllers/       generic services; controllers.ts starts them, controller.ts i
   interface/       window registry (windows.ts), shared widgets (components/), hotkeys, cursor
   item_fx/         item materials, glow tiers, weapon trails
   item_rules/      item stats, values, wire format, level looks, compare, worn slots, drop tier
+  pets/            what each pet and mount looks like and how it is drawn (PetSpec, mountKind)
   lighting/        light sources, sky, the skill light engine (skills.ts)
   loading/         loading gates; classic/ is the original loading screen
   maps/            map registry contract (the maps themselves are content)

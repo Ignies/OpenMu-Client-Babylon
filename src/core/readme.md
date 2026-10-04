@@ -16,6 +16,9 @@ pathfinding. Nothing here knows about a skill, a window or a map.
 - `turnAngle.ts`: `normalizeAngle`, `signedAngleDelta`, `turnAngle`, `approachAngle`,
   `createAngleDeg`, `rotationByteOf`, from `ZzzAI.cpp` (`TurnAngle2`, `CreateAngle`, ...).
 - `binaryUtils.ts`: byte helpers (`castToByte`, `ArrayCopy`, `GetByteValue`, ...).
+- `guildMark.ts`: `GUILD_MARK_SIZE`, `GUILD_MARK_PALETTE`, `unpackGuildMark`, `packGuildMark`,
+  `isEmptyGuildMark`, `guildMarkDataUrl(packed)`: the 8x8 guild mark (`CreateGuildMark`,
+  ZzzInventory.cpp:11204). Pure, so the guild flag (actors), the guild window and the module share it.
 - `InventoryConstants` (`inventoryConstants.ts`): OpenMU's inventory slot numbers and grid sizes. Pure, so
   the item rules controller, every module and the cash shop server share it.
 - `devQuery`, `devQueryNumber`, `devVitalPercent` (`devSeams.ts`): URL seams, `null` outside dev.

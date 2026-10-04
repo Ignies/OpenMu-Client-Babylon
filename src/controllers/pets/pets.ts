@@ -1,13 +1,13 @@
 import type { Entity, World } from '../../ecs/world';
-import { Vector3 } from '../../controllers/render/babylon/exports';
-import { loadGLTF } from '../../controllers/assets/modelLoader';
-import { ModelObject } from '../../controllers/render/modelObject';
+import { Vector3 } from '../render/babylon/exports';
+import { loadGLTF } from '../assets';
+import { ModelObject } from '../render';
 import type { Item } from '../../ecs/world';
 import { PlayerAction } from '@versions/shared/objects/enum';
 import {
   improvedItemEffectsOn,
   legacyItemEffectsOn,
-} from '../../controllers/item_fx/itemEffectMode';
+} from '../item_fx';
 
 /** `c->Helper`, the pet / mount slot (group 13): angel, imp, mounts, followers (readme.md). Refs:
  * GOBoid.cpp:66-660, 494-556; ZzzCharacter.cpp:6263-6273, 12992-12999, 15144-15180;
