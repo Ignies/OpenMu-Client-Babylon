@@ -1,22 +1,4 @@
 [
- "src/controllers/actors/modelFactoryPerId.ts -> src/controllers/actors/playerNpc.ts",
- "src/controllers/actors/playerNpc.ts -> src/controllers/actors/transformedBody.ts",
- "src/controllers/actors/transformedBody.ts -> src/controllers/actors/modelFactoryPerId.ts",
- "src/controllers/fx/core.ts -> src/controllers/fx/moveTargetEffect.ts",
- "src/controllers/fx/deathVisuals.ts -> src/controllers/fx/index.ts",
- "src/controllers/fx/effectParticles.ts -> src/controllers/fx/core.ts",
- "src/controllers/fx/index.ts -> src/controllers/fx/deathVisuals.ts",
- "src/controllers/fx/moveTargetEffect.ts -> src/controllers/fx/effectParticles.ts",
- "src/controllers/lighting/director.ts -> src/controllers/lighting/horizon.ts",
- "src/controllers/lighting/director.ts -> src/controllers/lighting/skyDome.ts",
- "src/controllers/lighting/horizon.ts -> src/controllers/lighting/director.ts",
- "src/controllers/lighting/skyDome.ts -> src/controllers/lighting/director.ts",
- "src/modules/chat/commands.ts -> src/modules/economy/economy.ts",
- "src/modules/chat/commands.ts -> src/modules/friends/messenger.ts",
- "src/modules/chat/commands.ts -> src/modules/social/social.ts",
- "src/modules/economy/economy.ts -> src/modules/social/social.ts",
- "src/modules/friends/messenger.ts -> src/modules/social/social.ts",
  "src/modules/quests/npcDialogue.ts -> src/modules/quests/questLog.ts",
- "src/modules/quests/questLog.ts -> src/modules/quests/npcDialogue.ts",
- "src/modules/social/social.ts -> src/modules/chat/commands.ts"
+ "src/modules/quests/questLog.ts -> src/modules/quests/npcDialogue.ts"
 ]

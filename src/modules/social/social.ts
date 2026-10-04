@@ -53,7 +53,7 @@ import { EMOJI_CATALOG } from '../chat/emojis';
 import { clipChatText, toChatWire } from '@/controllers/net/protocols';
 import { chatTextWidth } from '../chat/chatTextWidth';
 import { GameOptions } from '@/controllers/settings';
-import { Commands } from '../chat/commands';
+import type { Commands } from '../chat/commands';
 import {
   CancelGuildCreationPacket,
   GuildCreateRequestPacket,
@@ -157,6 +157,15 @@ export const INVITE_RANGE_TILES = 1;
 export const GUILD_SECURITY_CODE_MAX = 10;
 
 const SYSTEM_ROW = '';
+
+type LocalCommands = Pick<typeof Commands, 'run' | 'duelStop' | 'stopFollowingOutside'>;
+
+/** The slash commands (`chat/commands.ts`); they call back into social, so the chat module hands them in. */
+let localCommands: LocalCommands | null = null;
+
+export function setLocalCommands(commands: LocalCommands): void {
+  localCommands = commands;
+}
 
 /**
  * Chat, party and guild state - the client side of the original's
@@ -662,8 +671,8 @@ export const Social = new (class _Social {
     // `/union`… act on the player under the cursor and are never sent.
     const local = localCommandOf(text);
     if (local?.local) {
-      if (local.name === '/duelend') Commands.duelStop();
-      else Commands.run(local.local, Ecs.world?.currentPointerTarget);
+      if (local.name === '/duelend') localCommands?.duelStop();
+      else localCommands?.run(local.local, Ecs.world?.currentPointerTarget);
       this.remember(this.chatHistory, text);
       return true;
     }
@@ -793,7 +802,7 @@ export const Social = new (class _Social {
     } else {
       this.partyMembers = this.partyMembers.filter(m => m.index !== index);
     }
-    Commands.stopFollowingOutside(this.partyMembers.map(m => m.name));
+    localCommands?.stopFollowingOutside(this.partyMembers.map(m => m.name));
   }
 
   setPartyHealth(steps: { index: number; value: number }[]): void {

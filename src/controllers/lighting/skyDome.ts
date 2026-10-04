@@ -7,7 +7,8 @@ import {
 import { CreateSphereVertexData } from '@babylonjs/core/Meshes/Builders/sphereBuilder';
 import { linearBufferActive } from './lightModel';
 import { devQueryNumber } from '../../core/devSeams';
-import { lookDirector, type LookDirector, type LookState } from './director';
+import type { LookDirector, LookState } from './director';
+import { lookDirector } from './activeDirector';
 import {
   bindClouds,
   cloudFieldGlsl,

@@ -13,7 +13,8 @@ live in the `Social` store ([../social/readme.md](../social/readme.md)).
   (`splitChatLine`, `layoutChatRows`, `scrollChatEnd`, `CHAT_FILTERS`, ...) for `Social` and `hud/chat`.
 - `Notices.create(text)`, `Notices.createGuildNotice(text)`, `Notices.clear()`: the golden notice stack.
 - `Commands`: command window and quick menu; `run(kind, entity)`, `runPendingOn(entity)`,
-  `openQuickOn(...)`, `stopFollowing()`, `duelStop()`.
+  `openQuickOn(...)`, `stopFollowing()`, `duelStop()`. The module's `install` hands it to social
+  (`setLocalCommands`), which runs the typed `/commands` and stops a follow when the party changes.
 - `ChatRooms`: `openRoomWith(name)`, `inviteFriend(name)`, `inviteResult(ok, requestId)`,
   `onConnectionInfo(info)`, `sendMessage(text)`, `leaveRoom(key)`.
 - `CHAT_COMMANDS`, `matchChatCommands(text, gm)`, `localCommandOf(text)`, `CommandKind`.

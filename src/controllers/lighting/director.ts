@@ -51,6 +51,7 @@ import {
 } from './shadowPolicy';
 import { syncSkyDome } from './skyDome';
 import { syncSkyline } from './horizon';
+import { setLookDirector } from './activeDirector';
 import { syncShadows, syncTerrainDefines } from '@/controllers/render/shadows';
 import {
   syncAmbientOcclusion,
@@ -175,12 +176,7 @@ export interface LookDirector {
   readonly onChange: Observable<Readonly<LookState>>;
 }
 
-let active: LookDirector | null = null;
-
-/** The scene's director, for the readers (terrain, water, area hand-off). */
-export function lookDirector(): LookDirector | null {
-  return active;
-}
+export { lookDirector } from './activeDirector';
 
 type Blendable = {
   ev: number;
@@ -630,7 +626,7 @@ export function createLookDirector(
     onChange,
   };
 
-  active = director;
+  setLookDirector(director);
   (globalThis as { __lighting?: unknown }).__lighting = director;
 
   return director;

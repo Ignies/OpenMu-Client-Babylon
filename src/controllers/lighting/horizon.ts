@@ -8,7 +8,8 @@ import {
   type Scene,
 } from '../render/babylon/exports';
 import { linearBufferActive } from './lightModel';
-import { lookDirector, type LookDirector, type LookState } from './director';
+import type { LookDirector, LookState } from './director';
+import { lookDirector } from './activeDirector';
 import { profileFor, toLinear, type Rgb, type SkylineLook } from './profiles';
 
 /**

@@ -27,8 +27,8 @@ shared pools, textures and particle recipes other folders reuse.
   - `effectParticles.ts`: the map-object sprite pool (`Emission`, `ParticleEmitter`,
     `BonedParticleEmitter`, `HeldSprites`, `spawnParticle`, `emissionsFor`); `BonedParticleEmitter`
     and `BonedEmission` are also on `index.ts` for map object classes.
-  - `moveTargetEffect.ts`: `loadEffectTexture` (the shared effect texture cache), `TerrainDecal`,
-    `MoveTargetEffect` (the click-to-move marker).
+  - `effectTexture.ts`: `loadEffectTexture` (the shared effect texture cache).
+  - `moveTargetEffect.ts`: `TerrainDecal`, `MoveTargetEffect` (the click-to-move marker).
   - `ambientParticles.ts` `createAmbientSystem`, `boids.ts` `boidsFor` / `boidFactoryFor`,
     `bursts.ts` `playBurst`, `fireworks.ts` `spawnFireworks`, `impactVisuals.ts` `spawnHitImpact`,
     `bloodDecals.ts` `BloodDecals`, `deathVisuals.ts` `shatterDeathFor` / `skeletonShatter` /

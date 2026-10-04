@@ -28,7 +28,8 @@ policy. It knows how to light something, never which skill or item asks for it.
 - `lightingQuality.ts`: the tiers (`lightingTier()`, `tierIndex()`: Classic, Enhanced, Ultra),
   `pointLightBudget`, MSAA and CSM state.
 - `pointLightPool.ts`: `initPointLightPool`, `updatePointLightPool`, `registerPointLightEmitter`.
-- Look: `director.ts` (`createLookDirector`, `lookDirector`), `profiles.ts` (`profileFor`,
+- Look: `director.ts` (`createLookDirector`, `lookDirector`; the live director is held in
+  `activeDirector.ts`, so the sky dome and horizon read it without importing the director), `profiles.ts` (`profileFor`,
   `areaProfile`, `MapLook`, `MapArea`, the open and enclosed defaults, omen looks), `keyRig.ts`, `shadowPolicy.ts`, `skyDome.ts`, `horizon.ts`,
   `clouds.ts`, `lightModel.ts`, `lightTint.ts`; read by terrain, render, item_fx and weather.
 

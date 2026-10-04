@@ -28,8 +28,9 @@ Also the guild mark (emblem) codec. It has no packet handlers of its own; the ne
 - `addChatLine` (`CNewUIChatLogWindow::AddText`) snapshots the speaker (guild, PK state, GM), splits the
   line at the log width (emojis and item links stay whole) and keeps the last `MAX_CHAT_LINES`.
 - `sendChat` (`NewUIChatInputBox.cpp:505`): whisper if a target is set, else a client `/command`
-  (`Commands`), else public chat with the input mode's prefix. Public chat also runs `CheckChatText`
-  emotes and pops emoji bubbles locally.
+  (`chat/commands.ts`, handed in by the chat module through `setLocalCommands`: they call back into
+  social, so social does not import them), else public chat with the input mode's prefix. Public
+  chat also runs `CheckChatText` emotes and pops emoji bubbles locally.
 - Self-defense comes from OpenMU's blue system line (`SelfDefensePlugIn.cs`), parsed in `chat/net.ts`.
 - `guildTeamOf` is `GuildTeam` (`WSclient.cpp:221`). `guildRelationOf` derives the `GR_*` relation
   OpenMU does not send, from `myGuild`, `allianceGuilds`, the rival name and the war.
@@ -41,7 +42,7 @@ Also the guild mark (emblem) codec. It has no packet handlers of its own; the ne
   `RequestAllianceList`, `RemoveAllianceGuildRequest`, `GuildWarResponse`.
 
 ## Depends on / used by
-- uses: `chat/` (log helpers, emojis, item links, `Commands`), `hero/emotes.ts`, `controllers/settings`,
+- uses: `chat/` (log helpers, emojis, item links), `hero/emotes.ts`, `controllers/settings`,
   `session` (sending), `hero`, `guild` (`GuildMarks`), `controllers/net` (chat wire, round trip), `controllers/interface/nameTags`, `controllers/sound`.
 - used by: nearly every module (system lines), `party`, `guild`, `guild_war`, `chat`, `friends`, `band`,
   `hero/net.ts` (`reset`), `ecs/systems/skillCastSystem.ts`, `controllers/actors/guildFlag.ts` and

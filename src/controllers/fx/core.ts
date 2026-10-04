@@ -13,7 +13,7 @@ import {
   type Scene,
   type Texture,
 } from '../render/babylon/exports';
-import { loadEffectTexture } from './moveTargetEffect';
+import { loadEffectTexture } from './effectTexture';
 import { reportLoadFailure } from '../assets';
 import { linearBufferActive } from '../lighting/lightModel';
 import { devQueryNumber } from '../../core/devSeams';
