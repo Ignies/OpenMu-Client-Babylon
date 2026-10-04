@@ -1,5 +1,6 @@
 import type { Entity, ISystemFactory } from '../world';
 import { Store } from '../../app/store';
+import { Session } from '../../modules/session';
 import { applyPlayerActionSpeed, serverMinAttackInterval } from '../../controllers/anim/playSpeed';
 import {
   AreaSkillPacket,
@@ -190,19 +191,19 @@ export const SkillCastSystem: ISystemFactory = world => {
   }
 
   function sendTargeted(skill: number, targetId: number): void {
-    if (Store.isOffline) return;
+    if (Session.isOffline) return;
     const packet = TargetedSkillPacket.createPacket();
     packet.SkillId = skill;
     packet.TargetId = targetId;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   function sendRageAttack(skill: number, targetId: number): void {
-    if (Store.isOffline) return;
+    if (Session.isOffline) return;
     const packet = RageAttackRequestPacket.createPacket();
     packet.SkillId = skill;
     packet.TargetId = targetId;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   /** Dark Side: one 0x4A per extra target as the follow-up blows come round. */
@@ -297,12 +298,12 @@ export const SkillCastSystem: ISystemFactory = world => {
         target!.playerAnimation.action = PlayerAction.PLAYER_SKILL_TELEPORT;
         target!.modelObject?.restartAction();
       }
-      if (!Store.isOffline) {
+      if (!Session.isOffline) {
         const packet = TeleportTargetPacket.createPacket();
         packet.TargetId = target!.netId!;
         packet.TeleportTargetX = to.x;
         packet.TeleportTargetY = to.y;
-        Store.sendToGS(packet.buffer);
+        Session.sendToGS(packet.buffer);
       }
       // What the caster's reply would draw (`CreateTeleportEnd(so)`, WSclient.cpp:4312-4316):
       // OpenMU names the ally as both caster and target instead, so the caster's half is drawn here.
@@ -316,12 +317,12 @@ export const SkillCastSystem: ISystemFactory = world => {
     const dz = to.y - heroPos.z;
     if (dx * dx + dz * dz > 0.01) hero.transform!.rot.y = Math.atan2(dz, dx) + Math.PI / 2;
 
-    if (!Store.isOffline) {
+    if (!Session.isOffline) {
       const packet = EnterGateRequestPacket.createPacket();
       packet.GateNumber = 0;
       packet.TeleportTargetX = to.x;
       packet.TeleportTargetY = to.y;
-      Store.sendToGS(packet.buffer);
+      Session.sendToGS(packet.buffer);
     }
     teleportGate.begin(from, to, now);
     beginTeleport(hero, def.num, { move: to });
@@ -364,11 +365,11 @@ export const SkillCastSystem: ISystemFactory = world => {
     const x = ~~to.x;
     const y = ~~to.y;
     if (!world.isWalkable(x, y)) return;
-    if (!Store.isOffline) {
+    if (!Session.isOffline) {
       const packet = InstantMoveRequestPacket.createPacket();
       packet.TargetX = x;
       packet.TargetY = y;
-      Store.sendToGS(packet.buffer);
+      Session.sendToGS(packet.buffer);
     }
     const pos = hero.transform!.pos;
     pos.x = x;
@@ -406,7 +407,7 @@ export const SkillCastSystem: ISystemFactory = world => {
 
   /** 0xDB: name the attackable objects inside the area around (x, y). */
   function sendAreaHit(def: SkillDefinition, x: number, y: number): void {
-    if (Store.isOffline || !combat.needsAreaHit(def)) return;
+    if (Session.isOffline || !combat.needsAreaHit(def)) return;
     const radius = combat.areaHitRadius(def);
     const ids: number[] = [];
     for (const e of world.netObjsQuery.entities) {
@@ -416,7 +417,7 @@ export const SkillCastSystem: ISystemFactory = world => {
       if (dx * dx + dz * dz <= radius * radius) ids.push(e.netId!);
     }
     const packet = combat.buildAreaHit(def.num, x, y, ids);
-    if (packet) Store.sendToGS(packet.buffer);
+    if (packet) Session.sendToGS(packet.buffer);
   }
 
   return {
@@ -666,7 +667,7 @@ export const SkillCastSystem: ISystemFactory = world => {
       }
       skills.startCooldown(def.num);
 
-      if (!Store.isOffline) {
+      if (!Session.isOffline) {
         if (!area && !target) {
           // Forced cast with nothing near the cursor: the clip whiffs
           // toward the ground point and nothing goes on the wire. The hero
@@ -679,7 +680,7 @@ export const SkillCastSystem: ISystemFactory = world => {
           const range = RageAttackRangeRequestPacket.createPacket();
           range.SkillId = def.num;
           range.TargetId = targetId;
-          Store.sendToGS(range.buffer);
+          Session.sendToGS(range.buffer);
           sendRageAttack(def.num, targetId);
           combat.beginDarkSide(def.num, targetId);
         } else if (area) {
@@ -689,7 +690,7 @@ export const SkillCastSystem: ISystemFactory = world => {
           packet.TargetY = ~~ty;
           packet.Rotation = rotationByte256(hero.transform.rot.y);
           packet.ExtraTargetId = target?.netId ?? NO_EXTRA_TARGET;
-          Store.sendToGS(packet.buffer);
+          Session.sendToGS(packet.buffer);
           sendAreaHit(def, ~~tx, ~~ty);
         } else {
           sendTargeted(def.num, target!.netId ?? Store.playerId ?? 0);

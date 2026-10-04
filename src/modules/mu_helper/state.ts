@@ -1,5 +1,6 @@
 import { observable, reaction, runInAction } from 'mobx';
 import { Store } from '../../app/store';
+import { Session } from '../session';
 import { MuHelperSaveDataRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
 import {
   decodeMuHelperConfig,
@@ -74,8 +75,8 @@ export function saveMuHelperConfig(): void {
     MuHelperState.config = decodeMuHelperConfig(blob);
     MuHelperState.windowOpen = false;
   });
-  if (Store.isOffline) return;
+  if (Session.isOffline) return;
   const packet = MuHelperSaveDataRequestPacket.createPacket();
   packet.setHelperData(blob);
-  Store.sendToGS(packet.buffer);
+  Session.sendToGS(packet.buffer);
 }

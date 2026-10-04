@@ -8,6 +8,7 @@ import './logic';
 // Content model classes register here, at boot, where no controller can reach (controllers import the Store, which imports logic.ts).
 import '@versions/shared/monsters/models';
 import { Store } from './store';
+import { Session } from '../modules/session';
 import { AppState, UIState } from './uiState';
 import { Loading } from '../controllers/loading';
 import { Ecs } from '../ecs/current';
@@ -69,7 +70,7 @@ void ensureCacheWorker();
 // What a lost game server socket does before falling back to the server
 // list. Wired here rather than in app/logic.ts, which the store's own module
 // graph reaches before `Store` exists.
-Store.resumeHook = () => SessionResume.retry() || SessionResume.begin();
+Session.resumeHook = () => SessionResume.retry() || SessionResume.begin();
 
 // Hot keys are per character: the shared set is what a new one starts from.
 reaction(
@@ -339,6 +340,6 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   </React.StrictMode>
 );
 
-if (Store.isOffline) {
+if (Session.isOffline) {
   Store.playOffline();
 }

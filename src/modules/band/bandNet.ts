@@ -1,5 +1,6 @@
 import { EventBus } from '../../core/eventBus';
 import { Store } from '../../app/store';
+import { Session } from '../session';
 import { Ecs } from '../../ecs/current';
 import { Social } from '../social/social';
 import { t, type TextKey } from '../../i18n';
@@ -72,18 +73,18 @@ export function installBandNet(): void {
   if (installed) return;
   installed = true;
 
-  const sender = new BandSender(frame => Store.sendBandFrame(frame));
-  const online = () => Band.available && !Store.isOffline;
+  const sender = new BandSender(frame => Session.sendBandFrame(frame));
+  const online = () => Band.available && !Session.isOffline;
 
   const transport: BandTransport = {
     start(instrument) {
       if (!online()) return;
       sender.reset();
-      Store.sendBandFrame(encodeStart(instrument));
+      Session.sendBandFrame(encodeStart(instrument));
     },
     stop() {
       if (!online()) return;
-      Store.sendBandFrame(encodeStop());
+      Session.sendBandFrame(encodeStop());
     },
     batch(baseMs, events) {
       if (!online()) return;
@@ -91,15 +92,15 @@ export function installBandNet(): void {
     },
     join(masterId, instrument, channelMask) {
       if (!online()) return;
-      Store.sendBandFrame(encodeJoin(masterId, instrument, channelMask));
+      Session.sendBandFrame(encodeJoin(masterId, instrument, channelMask));
     },
     leave() {
       if (!online()) return;
-      Store.sendBandFrame(encodeLeave());
+      Session.sendBandFrame(encodeLeave());
     },
     state(masterMask, members) {
       if (!online()) return;
-      Store.sendBandFrame(
+      Session.sendBandFrame(
         encodeBandState(
           masterMask,
           members.map(m => ({ id: m.netId, instrument: instrumentIndex(m.instrument), mask: m.channelMask }))
@@ -125,7 +126,7 @@ export function installBandNet(): void {
     if (!msg) return;
 
     if (msg.sub === BandSub.Hello) {
-      helloSocket = Store.gsSocket ?? null;
+      helloSocket = Session.gsSocket ?? null;
       setBandAvailable(msg.version === BAND_VERSION);
       console.info(`band: relay hello, version ${msg.version} (this client speaks ${BAND_VERSION})`);
       return;

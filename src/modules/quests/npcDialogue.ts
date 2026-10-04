@@ -17,6 +17,7 @@ import { monsterDisplayName } from '@versions/shared/monsters/monstersDatabase';
 import { EventBus } from '../../core/eventBus';
 import { playUiSound } from '../../controllers/sound/sfx';
 import { Store } from '../../app/store';
+import { Session } from '../session';
 import type { QuestLayer } from './layer';
 import {
   npcDialogueEntry,
@@ -116,8 +117,8 @@ export function npcDialogueContribution(): number | null {
 // ---- commands ----------------------------------------------------------------
 
 function send(buffer: DataView): boolean {
-  if (Store.isOffline) return false;
-  Store.sendToGS(buffer);
+  if (Session.isOffline) return false;
+  Session.sendToGS(buffer);
   return true;
 }
 

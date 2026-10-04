@@ -3,6 +3,7 @@ import { EventBus } from '@/core/eventBus';
 import { GuildInfoRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
 import { Social } from '../social/social';
 import { Store } from '@/app/store';
+import { Session } from '@/modules/session';
 import { Ecs } from '@/ecs/current';
 import { t, type TextKey } from '@/i18n';
 import { cleanName } from '../chat/chat';
@@ -88,7 +89,7 @@ export function installNet(): void {
         requested.add(member.GuildId);
         const req = GuildInfoRequestPacket.createPacket();
         req.GuildId = member.GuildId;
-        Store.sendToGS(req.buffer);
+        Session.sendToGS(req.buffer);
       }
     });
   });

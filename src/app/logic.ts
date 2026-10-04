@@ -95,6 +95,7 @@ import { summonDisplayName } from '../modules/_shared/net_helpers';
 import { PingPacket } from '@versions/shared/packets/ClientToServerPackets';
 
 import { Store } from './store';
+import { Session } from '../modules/session';
 import { AppState, UIState } from './uiState';
 import { Ecs } from '../ecs/current';
 
@@ -144,11 +145,11 @@ void loadNpcNames();
  */
 const PING_INTERVAL_MS = 5000;
 setInterval(() => {
-  if (AppState.uiState !== UIState.World || !Store.gsSocket) return;
+  if (AppState.uiState !== UIState.World || !Session.gsSocket) return;
   const p = PingPacket.createPacket();
   p.TickCount = Math.floor(performance.now()) >>> 0;
   p.AttackSpeed = Store.playerData.attackSpeed ?? 0;
-  Store.sendToGS(p.buffer);
+  Session.sendToGS(p.buffer);
 }, PING_INTERVAL_MS);
 
 // A hot update that reaches this module must reload the page: Vite would
@@ -161,4 +162,9 @@ if (hot) hot.decline();
 installModules(MODULES);
 
 // The map ping: the proxy relay listener behind Shift + middle click.
-installPingNet();
+installPingNet({
+  selfId: () => Store.playerId,
+  offline: () => Session.isOffline,
+  socket: () => Session.gsSocket,
+  send: frame => Session.sendPingFrame(frame),
+});

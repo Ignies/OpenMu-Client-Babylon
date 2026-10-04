@@ -4,6 +4,7 @@ import { BaseClass, getBaseClass } from '../hero/characterStats';
 import type { Item } from '../../ecs/world';
 import { EventBus } from '../../core/eventBus';
 import { Store } from '../../app/store';
+import { Session } from '../session';
 import { addNotification } from '../chat';
 import { Ecs } from '../../ecs/current';
 import { skills } from '../skills';
@@ -148,7 +149,7 @@ export function enterDevilSquare(grade: number): void {
   const packet = DevilSquareEnterRequestPacket.createPacket();
   packet.SquareLevel = grade;
   packet.TicketItemInventoryIndex = NO_TICKET_SLOT;
-  Store.sendToGS(packet.buffer);
+  Session.sendToGS(packet.buffer);
 }
 
 /** Double-clicked Devil's Invitation: `SendMiniGameOpeningStateRequest(1, Level)`. */
@@ -160,7 +161,7 @@ function useTicket(_slot: number, item: Item): boolean {
   const packet = MiniGameOpeningStateRequestPacket.createPacket();
   packet.EventType = OPENING_STATE_GAME.devilSquare;
   packet.EventLevel = item.lvl ?? 0;
-  Store.sendToGS(packet.buffer);
+  Session.sendToGS(packet.buffer);
   return true;
 }
 

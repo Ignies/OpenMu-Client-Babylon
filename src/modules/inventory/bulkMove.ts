@@ -1,6 +1,7 @@
 import { reaction } from 'mobx';
 import { t } from '../../i18n';
 import { Store } from '../../app/store';
+import { Session } from '../session';
 import { addNotification } from '../chat';
 import { gridFirstIndex, StorageKind, storageColumns, storageRows } from './itemStorage';
 import type { Item } from '../../ecs/world';
@@ -82,7 +83,7 @@ export const BulkMove = new (class _BulkMove {
 
     this.moves++;
     Store.autoMoveItem(this.from, slot, this.to);
-    if (Store.isOffline) this.step();
+    if (Session.isOffline) this.step();
   }
 
   private nextSlot(wanted: (item: Item) => boolean): number {

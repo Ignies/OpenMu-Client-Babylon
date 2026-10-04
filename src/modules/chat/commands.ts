@@ -1,6 +1,7 @@
 import { t } from '../../i18n';
 import { action, makeObservable, observable, runInAction } from 'mobx';
 import { Store } from '../../app/store';
+import { Session } from '../session';
 import { Ecs } from '../../ecs/current';
 import { Social, INVITE_RANGE_TILES } from '../social/social';
 import { Economy } from '../economy/economy';
@@ -307,13 +308,13 @@ export const Commands = new (class _Commands {
     const packet = DuelStartRequestPacket.createPacket();
     packet.PlayerId = target.netId;
     packet.setPlayerName(target.name);
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
     Social.systemMessage(t('command.duelRequestSent', { name: target.name }));
   }
 
   /** `/duelend`: `SendDuelStopRequest`. */
   duelStop(): void {
-    Store.sendToGS(DuelStopRequestPacket.createPacket().buffer);
+    Session.sendToGS(DuelStopRequestPacket.createPacket().buffer);
   }
 
   /**

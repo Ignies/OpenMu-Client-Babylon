@@ -2,7 +2,7 @@ import { observable, runInAction } from 'mobx';
 import { ENUM_WORLD } from '../../core/types';
 import type { Entity, Item } from '../../ecs/world';
 import { EventBus } from '../../core/eventBus';
-import { Store } from '../../app/store';
+import { Session } from '../session';
 import { addNotification } from '../chat';
 import { Ecs } from '../../ecs/current';
 import {
@@ -175,7 +175,7 @@ export function enterChaosCastle(): void {
   const packet = ChaosCastleEnterRequestPacket.createPacket();
   packet.CastleLevel = t.level;
   packet.TicketItemInventoryIndex = t.slot;
-  Store.sendToGS(packet.buffer);
+  Session.sendToGS(packet.buffer);
 }
 
 /**
@@ -189,7 +189,7 @@ export function askChaosCastleOpening(): void {
   const packet = MiniGameOpeningStateRequestPacket.createPacket();
   packet.EventType = OPENING_STATE_GAME.chaosCastle;
   packet.EventLevel = ASK_EVENT_LEVEL;
-  Store.sendToGS(packet.buffer);
+  Session.sendToGS(packet.buffer);
 }
 
 /** Double-clicked Armor of Guardsman: ask for the opening state first. */
@@ -202,7 +202,7 @@ function useTicket(slot: number, item: Item): boolean {
   const packet = MiniGameOpeningStateRequestPacket.createPacket();
   packet.EventType = OPENING_STATE_GAME.chaosCastle;
   packet.EventLevel = ticket.level;
-  Store.sendToGS(packet.buffer);
+  Session.sendToGS(packet.buffer);
   return true;
 }
 

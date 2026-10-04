@@ -2,6 +2,7 @@ import { MuWindows } from '@/controllers/interface/windowManager';
 import { makeAutoObservable, runInAction } from 'mobx';
 import { t } from '../../i18n';
 import { Store } from '../../app/store';
+import { Session } from './state';
 import { addNotification } from '../chat';
 import { MsgBox } from '../../controllers/interface';
 import { AppState, UIState } from '../../app/uiState';
@@ -66,7 +67,7 @@ export const SessionExit = new (class _SessionExit {
   /** Whether this way out leads anywhere from the screen we are on. */
   available(kind: ExitKind): boolean {
     // Offline has no account behind it: the only way out is back to the menu.
-    if (Store.isOffline) return kind === 'quit';
+    if (Session.isOffline) return kind === 'quit';
 
     switch (kind) {
       case 'characters':
@@ -90,7 +91,7 @@ export const SessionExit = new (class _SessionExit {
 
     // Nobody to ask: offline, or a screen the server does not think of us as
     // playing on. The transition is ours to make.
-    if (Store.isOffline || !inWorld()) {
+    if (Session.isOffline || !inWorld()) {
       this.leave(kind);
       return;
     }
@@ -110,7 +111,7 @@ export const SessionExit = new (class _SessionExit {
 
     const p = LogOutPacket.createPacket();
     p.Type = LOGOUT_TYPE[kind];
-    Store.sendToGS(p.buffer);
+    Session.sendToGS(p.buffer);
   }
 
   /**
@@ -152,23 +153,23 @@ export const SessionExit = new (class _SessionExit {
     }
 
     if (kind === 'servers') {
-      Store.disconnectFromGameServer();
+      Session.disconnectFromGameServer();
       void import('../../controllers/assets/mu/preloadSprites').then(m => m.clearWorldSprites());
-      Store.playOnline();
+      Session.playOnline();
       return;
     }
 
     // Exit Game. A browser tab cannot close itself, so the equivalent of the
     // original's `DestroyWindow` is the start menu it would boot back into.
     // Offline rewrote the URL to `/offline`, so that one restarts instead.
-    if (Store.isOffline) {
+    if (Session.isOffline) {
       allowUnload();
       location.href = '/';
       return;
     }
 
-    Store.disconnectFromGameServer();
-    Store.disconnectFromConnectServer();
+    Session.disconnectFromGameServer();
+    Session.disconnectFromConnectServer();
     void import('../../controllers/assets/mu/preloadSprites').then(m => m.clearWorldSprites());
     runInAction(() => {
       AppState.uiState = UIState.Preloader;

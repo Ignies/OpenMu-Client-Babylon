@@ -1,5 +1,6 @@
 import type { Entity, ISystemFactory } from '../world';
 import { Store } from '../../app/store';
+import { Session } from '../../modules/session';
 import { addNotification } from '../../modules/chat';
 import { Ecs } from '../current';
 import { applyPlayerActionSpeed, serverMinAttackInterval } from '../../controllers/anim/playSpeed';
@@ -324,7 +325,7 @@ export const AttackSystem: ISystemFactory = world => {
         packet.TargetId = target.netId;
         packet.AttackAnimation = attackAnimation;
         packet.LookingDirection = lookingDirection;
-        Store.sendToGS(packet.buffer);
+        Session.sendToGS(packet.buffer);
       };
       // The original sends on the click (ZzzInterface.cpp:3355); a server may ask for the
       // request at the hit key instead (its server.json, modules/servers/serverManifest.ts).

@@ -18,6 +18,7 @@ import {
 import { aimX, aimY } from '../../controllers/camera';
 import { sound } from '../../controllers/sound';
 import { Store } from '../../app/store';
+import { Session } from '../../modules/session';
 import type { ISystemFactory } from '../world';
 
 /** `?autoPick=1`: the old full scene pick, read only for its ray. */
@@ -211,7 +212,7 @@ if (done.useObjectAngle) {
         isFemale
       );
 
-      if (!Store.isOffline) {
+      if (!Session.isOffline) {
         Store.sendAnimationRequest(
           rotationByte(playerEntity.transform.rot.y),
           SERVER_ACTION[done.kind]

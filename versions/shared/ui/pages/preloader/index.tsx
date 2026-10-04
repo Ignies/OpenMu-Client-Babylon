@@ -3,6 +3,7 @@ import './style.less';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Store } from '@/app/store';
+import { Session } from '@/modules/session';
 import { Loading } from '@/controllers/loading';
 import { Ecs } from '@/ecs/current';
 import { i18n, t, type TextKey } from '@/i18n';
@@ -284,7 +285,7 @@ export const PreloaderPage = observer(() => {
 
     ServerConfig.select(id);
     ServerConfig.markPlayed(id);
-    leave(() => Store.playOnline());
+    leave(() => Session.playOnline());
   };
 
   const offline = () => {

@@ -5,42 +5,7 @@ import type { PlayerObject } from '../controllers/actors/playerObject';
 import { playUiSound } from '../controllers/sound/sfx';
 import { consumeSound, upgradedItemSound } from '../controllers/sound/ui';
 import { CharacterClassNumber, ENUM_WORLD } from '@/core/types';
-import {
-  SimpleModulusEncryptor,
-  SimpleModulusKeys,
-  Xor32Encryptor,
-  Xor3Byte,
-} from '@/controllers/net/encryption';
-import {
-  AnimationRequestPacket,
-  ConsumeItemRequestPacket,
-  SaveKeyConfigurationPacket,
-  CreateCharacterPacket,
-  DeleteCharacterPacket,
-  DropItemRequestPacket,
-  EnterGateRequestPacket,
-  FocusCharacterPacket,
-  IncreaseCharacterStatPointPacket,
-  ItemMoveRequestPacket,
-  LoginShortPasswordPacket,
-  PickupItemRequestPacket,
-  RequestCharacterListPacket,
-  SelectCharacterPacket,
-  WarpCommandRequestPacket,
-  WalkRequestPacket,
-  TalkToNpcRequestPacket,
-  CloseNpcRequestPacket,
-  MuHelperStatusChangeRequestPacket,
-  PetCommandModeEnum,
-  PetCommandRequestPacket,
-  PetInfoRequestPacket,
-  PetTypeEnum,
-  StorageTypeEnum,
-  BuyItemFromNpcRequestPacket,
-  SellItemToNpcRequestPacket,
-  RepairItemRequestPacket,
-  ServerChangeAuthenticationPacket,
-} from '@versions/shared/packets/ClientToServerPackets';
+import { AnimationRequestPacket, ConsumeItemRequestPacket, SaveKeyConfigurationPacket, CreateCharacterPacket, DeleteCharacterPacket, DropItemRequestPacket, EnterGateRequestPacket, FocusCharacterPacket, IncreaseCharacterStatPointPacket, ItemMoveRequestPacket, PickupItemRequestPacket, RequestCharacterListPacket, SelectCharacterPacket, WarpCommandRequestPacket, WalkRequestPacket, TalkToNpcRequestPacket, CloseNpcRequestPacket, MuHelperStatusChangeRequestPacket, PetCommandModeEnum, PetCommandRequestPacket, PetInfoRequestPacket, PetTypeEnum, StorageTypeEnum, BuyItemFromNpcRequestPacket, SellItemToNpcRequestPacket, RepairItemRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
 import {
   ConnectionInfoRequestPacket,
   ServerListRequestPacket,
@@ -52,17 +17,7 @@ import {
   GuildMemberRoleEnum,
 } from '@versions/shared/packets/ServerToClientPackets';
 import { classFromAppearance } from '../controllers/actors/deserializeAppearance';
-import { stringToBytes } from '../controllers/assets/download';
-import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH } from '../modules/servers/serverAccounts';
-import {
-  connectServerAddress,
-  ServerConfig,
-  wsAddress,
-} from '../modules/servers/serverConfig';
 import { NetStats } from '../controllers/net/roundTrip';
-import { ServerAccounts } from '../modules/servers/serverAccounts';
-import { createSocket } from '../controllers/net/sockets/createSocket';
-import { ensureActiveVersion, gameVersion } from '../version';
 import {
   makeObservable,
   observable,
@@ -121,22 +76,8 @@ import { devVitalPercent } from '../core/devSeams';
 import { Economy } from '../modules/economy/economy';
 import { Ecs } from '../ecs/current';
 import { AppState, UIState } from './uiState';
-import { MsgBox } from '../controllers/interface';
 import { addNotification } from '../modules/chat';
-
-/**
- * How long the game server named by `ConnectionInfo` has to say `GameServerEntered`
- * before the `auto` policy falls back to the connect-server host. Long enough for
- * a slow TCP handshake through the proxy, short enough that a player staring at a
- * dead login screen is not what tells them.
- */
-const GS_ANSWER_TIMEOUT = 4000;
-
-/** `ServerChangeAuthentication`'s XOR3 name fields are 12 bytes each. */
-const SERVER_CHANGE_NAME_LENGTH = 12;
-
-const xor32 = new Xor32Encryptor();
-xor32.xor32Key = gameVersion.protocol.encryption.xor32Key;
+import { Session } from '../modules/session';
 
 const ITEM_MOVE_TIMEOUT = 5000;
 
@@ -668,27 +609,6 @@ function applyOfflineHandOverrides(items: (Item | null)[]): void {
 }
 
 export const Store = new (class _Store {
-  csSocket?: WebSocket;
-  gsSocket?: WebSocket;
-
-  /**
-   * Where the game server we are on lives, kept after the connection is
-   * established so a dropped socket can be dialled again without walking
-   * the connect server a second time (`modules/session/sessionResume.ts`).
-   */
-  lastGameServer: { host: string; port: number; fallbackHost: string | null } | null = null;
-
-  /**
-   * Asked before a lost game-server socket sends the player back to the
-   * server list. Returns true when something else (the session resume) has
-   * taken the loss over. Set by `app/logic.ts`; the store stays unaware of it.
-   */
-  resumeHook: (() => boolean) | null = null;
-
-  private encryptor?: SimpleModulusEncryptor;
-
-  username = '';
-  password = '';
   serverList: ReturnType<ServerListResponsePacket['getServers']> = [];
   /** `g_ServerListManager->GetSelectServerName()` / `Index`: the login window's server line. */
   selectedServer: {
@@ -699,12 +619,6 @@ export const Store = new (class _Store {
   } | null = null;
   charactersList: ReturnType<CharacterListPacket['getCharacters']> = [];
   playerId?: number;
-  /**
-   * The last game-server connection ended without us asking (set by
-   * `onSocketLost`, cleared when the next game server connects). The server
-   * list reads it to show the notice.
-   */
-  connectionLost = false;
 
   /** Learned skills from SkillListUpdate / SkillAdded / SkillRemoved (F3 11). */
   skills: { index: number; number: number; level: number }[] = [];
@@ -770,12 +684,12 @@ export const Store = new (class _Store {
    * (`PetInfoResponse`) lands in `petInfo`. `slot` is the inventory index.
    */
   requestPetInfo(pet: PetTypeEnum, slot: number, storage: StorageTypeEnum = StorageTypeEnum.Inventory) {
-    if (this.isOffline) return;
+    if (Session.isOffline) return;
     const packet = PetInfoRequestPacket.createPacket();
     packet.Pet = pet;
     packet.Storage = storage;
     packet.ItemSlot = slot;
-    this.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   /**
@@ -784,12 +698,12 @@ export const Store = new (class _Store {
    * everything else 0xFFFF. The server confirms with `PetMode`.
    */
   sendPetCommand(mode: PetCommandModeEnum, targetId = 0xffff) {
-    if (this.isOffline) return;
+    if (Session.isOffline) return;
     const packet = PetCommandRequestPacket.createPacket();
     packet.PetType = PetTypeEnum.DarkRaven;
     packet.CommandMode = mode;
     packet.TargetId = mode === PetCommandModeEnum.AttackTarget ? targetId : 0xffff;
-    this.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   // ---- MU Helper (`MUHelper::g_MuHelper`) ----
@@ -838,7 +752,7 @@ export const Store = new (class _Store {
    */
   toggleMuHelper() {
     const active = this.muHelper.active;
-    if (this.isOffline) {
+    if (Session.isOffline) {
       // No server to answer: flip locally so the loop can be exercised
       // against the test scene.
       if (!active && Ecs.world?.playerEntity?.attributeSystem?.isAboveZero('inSafeZone')) {
@@ -854,7 +768,7 @@ export const Store = new (class _Store {
     }
     const packet = MuHelperStatusChangeRequestPacket.createPacket();
     packet.PauseStatus = active;
-    this.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   setMuHelperConfig(config: Uint8Array) {
@@ -905,14 +819,14 @@ export const Store = new (class _Store {
    * QWER level), left zero.
    */
   private saveKeyConfiguration(): void {
-    if (this.isOffline) return;
+    if (Session.isOffline) return;
     const packet = SaveKeyConfigurationPacket.createPacket(4 + 20 + 1 + 3 + 1 + 1 + 1);
     const data = packet.buffer;
     for (let i = 0; i < 10; i++) {
       const number = this.skillHotkeys[i];
       data.setUint16(4 + i * 2, number >= 0 ? number : 0xffff, false);
     }
-    this.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   private refreshSkillSelection() {
@@ -944,14 +858,6 @@ export const Store = new (class _Store {
     }
     this.skillHotkeys = next;
   }
-
-  loginProcessing = false;
-  loginError?: string;
-
-  rememberLogin = true;
-
-  /** Which world's account the login fields hold, as `world/account`. */
-  private accountFor = '';
 
   loadingCharactersList = false;
   newCharName: string = '';
@@ -1018,30 +924,10 @@ export const Store = new (class _Store {
     return this.pendingNpcTalk?.npcType ?? 0;
   }
 
-  /**
-   * The game server being dialled, while it is unproven. `ConnectionInfo` names
-   * an address the server believes clients reach it at, which is often not the
-   * address that works from where the proxy sits - the OpenMU demo hands out its
-   * public IP to a client on the same box. Under the `auto` policy the second
-   * attempt is the connect-server host, which answered a moment ago.
-   */
-  private gsAttempt: {
-    host: string;
-    port: number;
-    /** Where to retry; null when there is nothing left to try. */
-    fallbackHost: string | null;
-    timer: ReturnType<typeof setTimeout> | null;
-  } | null = null;
-
-  isOffline = location.href.includes('offline');
-
   constructor() {
     makeObservable(this, {
-      username: observable,
-      password: observable,
       serverList: observable,
       selectedServer: observable,
-      connectionLost: observable,
       playerId: observable,
       skills: observable,
       buffs: observable,
@@ -1058,9 +944,6 @@ export const Store = new (class _Store {
       setPetMode: action,
       setMuHelperStatus: action,
       setMuHelperConfig: action,
-      loginError: observable,
-      loginProcessing: observable,
-      rememberLogin: observable,
       charactersList: observable,
       loadingCharactersList: observable,
       newCharName: observable,
@@ -1088,8 +971,6 @@ export const Store = new (class _Store {
       assignSkillHotkey: action,
       setTestItems: action,
       playOffline: action,
-      playOnline: action,
-      onSocketLost: action,
     });
 
     // `HideAll` on the inventory hides the shop with it, and the repair
@@ -1104,8 +985,6 @@ export const Store = new (class _Store {
         });
       }
     );
-
-    this.loadAccount();
   }
 
   playOffline() {
@@ -1116,7 +995,7 @@ export const Store = new (class _Store {
 
     // Keep the query: a dev-server reload must land on the same map.
     history.replaceState(null, '', '/offline' + location.search);
-    this.isOffline = true;
+    Session.isOffline = true;
     AppState.uiState = UIState.World;
     // `?bare` skips the test loadout: the per-class close-up shots need the
     // default body (class gear masks the class), and the weapon matrix
@@ -1166,61 +1045,6 @@ export const Store = new (class _Store {
         this.playerData.currentMP = Math.round((this.playerData.maxMP * mp) / 100);
       }
     });
-  }
-
-  playOnline() {
-    AppState.uiState = UIState.Servers;
-    // The login fields belong to the world being entered, and which world that
-    // is was decided on the screen this was called from.
-    this.loadAccount();
-    // Also the landing for a connection lost mid-game, which never passes
-    // through `SessionExit`: the hero does not stay behind on the backdrop.
-    Ecs.world?.removeHero();
-    // The server list and login window draw no message box; one left up
-    // from the world would only swallow Enter and Escape there.
-    MsgBox.closeMsgWin();
-
-    this.connectToConnectServer();
-  }
-
-  /**
-   * A socket we did not close ourselves went away (`wsClosed` / `wsError`
-   * from `createSocket`). Deliberate closes clear `gsSocket` / `csSocket`
-   * first, so a close event for a socket that is no longer ours is ignored.
-   * Losing the game server is the original's `case 2` of `ReceiveLogOut`:
-   * the connection is gone, so start over at the server list, with a red
-   * system-log line saying why. Losing the connect server only matters while
-   * the server list is what we are looking at; it is reconnected in place.
-   */
-  onSocketLost(socket: WebSocket): void {
-    if (socket === this.gsSocket) {
-      this.gsSocket = undefined;
-      this.encryptor = undefined;
-
-      // The proxy closes the ws when its TCP connect fails, so this is where a
-      // wrong `ConnectionInfo` address usually lands. One retry, then the
-      // ordinary lost-connection path.
-      if (this.retryGameServer('closed the connection')) return;
-
-      // The session resume takes the loss over when it can (and when the
-      // option is on); otherwise this is the old start-over path.
-      if (this.resumeHook?.()) return;
-
-      runInAction(() => {
-        this.connectionLost = true;
-        this.loginProcessing = false;
-      });
-      addNotification(t('notify.connectionLost'), 'error');
-      this.playOnline();
-      return;
-    }
-    if (socket === this.csSocket) {
-      this.csSocket = undefined;
-      if (AppState.uiState === UIState.Servers) {
-        addNotification(t('notify.serverListLost'), 'error');
-        this.playOnline();
-      }
-    }
   }
 
   setTestItems() {
@@ -1338,221 +1162,9 @@ export const Store = new (class _Store {
     playerEntity.charAppearance.changed = true;
   }
 
-  /**
-   * The login fields, filled from the account saved for the world being
-   * entered. Called on the way into a world rather than only at construction:
-   * which world that is may still change - the published list arrives after
-   * launch, and picking another card is the whole point of the worlds screen.
-   *
-   * Filling them again for the world they already hold would undo what the
-   * player has typed, and `playOnline` is also where a lost connection lands,
-   * so the same world is a no-op unless the caller insists.
-   */
-  loadAccount(id: string = ServerConfig.activeId, force = false): void {
-    const account = ServerAccounts.of(id);
-    // The world and the account chosen on it: picking another of that world's
-    // accounts has to refill the fields as surely as picking another world.
-    const token = `${id}/${account.id}`;
-
-    if (!force && token === this.accountFor) return;
-
-    runInAction(() => {
-      this.accountFor = token;
-      this.username = account.username;
-      this.password = account.password;
-      this.rememberLogin = account.remember;
-    });
-  }
-
-  /**
-   * The login the server just accepted, kept against the world it was used on.
-   * `remember` off stores nothing but the choice itself, which is what the
-   * original did with its one saved account.
-   */
-  saveLoginData(): void {
-    ServerAccounts.record(ServerConfig.activeId, {
-      username: this.username,
-      password: this.password,
-      remember: this.rememberLogin,
-    });
-  }
-
-  sendToCS(buffer: DataView) {
-    this.csSocket?.send(buffer);
-  }
-
-  sendToGS(buffer: DataView) {
-    let packet = new Uint8Array(buffer.buffer);
-
-    const header = packet[0];
-    xor32.Encrypt(packet);
-    if (this.encryptor && header >= 0xc3) {
-      packet = this.encryptor.Encrypt(packet);
-    }
-
-    if (this.gsSocket?.readyState === WebSocket.OPEN) this.gsSocket.send(packet);
-  }
-
-  connectToConnectServer() {
-    // A world that needs another carried version is entered by reloading
-    // into it; the selection is already persisted.
-    if (!ensureActiveVersion(ServerConfig.active.version)) return;
-
-    const { host, port } = connectServerAddress();
-
-    const { socket } = createSocket({
-      wsAddress: wsAddress(),
-      tcpIP: host,
-      tcpPort: port,
-    });
-
-    this.csSocket = socket;
-  }
-
-  disconnectFromConnectServer() {
-    this.csSocket?.close();
-    this.csSocket = undefined;
-  }
-
-  /**
-   * Opens the game-server socket. `fallbackHost` is the address to try if this
-   * one never answers - `gameServerTarget` decides which of the two addresses
-   * (the one the server advertised, the connect-server host) goes first.
-   */
-  connectToGameServer(ip: string, port: number, fallbackHost: string | null = null) {
-    runInAction(() => {
-      this.connectionLost = false;
-    });
-
-    this.lastGameServer = { host: ip, port, fallbackHost };
-
-    const { socket } = createSocket({
-      wsAddress: wsAddress(),
-      tcpIP: ip,
-      tcpPort: port,
-    });
-
-    this.gsSocket = socket;
-
-    this.encryptor = new SimpleModulusEncryptor();
-    this.encryptor.encryptionKeys = SimpleModulusKeys.CreateEncryptionKeys([
-      ...gameVersion.protocol.encryption.clientToServer,
-    ]);
-
-    this.gsAttempt = { host: ip, port, fallbackHost, timer: null };
-
-    // The proxy closes the ws when the TCP connect fails, which is the fast
-    // path into the retry. The timer is for the case with no close at all -
-    // a firewall that drops the SYN, an address that routes nowhere.
-    if (fallbackHost) {
-      this.gsAttempt.timer = setTimeout(
-        () => this.retryGameServer('never answered'),
-        GS_ANSWER_TIMEOUT
-      );
-    }
-  }
-
-  /** `GameServerEntered` arrived: this address works, drop the fallback. */
-  onGameServerReached(): void {
-    if (this.gsAttempt?.timer) clearTimeout(this.gsAttempt.timer);
-    this.gsAttempt = null;
-  }
-
-  /**
-   * Second and last attempt at the game server, on the connect-server host.
-   * Returns false when there is nothing to retry - the caller then treats the
-   * dead socket as a lost connection, as it always did.
-   */
-  private retryGameServer(reason: string): boolean {
-    const attempt = this.gsAttempt;
-
-    if (!attempt?.fallbackHost) return false;
-
-    if (attempt.timer) clearTimeout(attempt.timer);
-    this.gsAttempt = null;
-
-    console.warn(
-      `game server ${attempt.host}:${attempt.port} ${reason}; retrying on ${attempt.fallbackHost}:${attempt.port}`
-    );
-
-    this.disconnectFromGameServer();
-    this.connectToGameServer(attempt.fallbackHost, attempt.port);
-
-    return true;
-  }
-
-  disconnectFromGameServer() {
-    if (this.gsAttempt?.timer) clearTimeout(this.gsAttempt.timer);
-    this.gsAttempt = null;
-    this.gsSocket?.close();
-    this.gsSocket = undefined;
-    // A new socket is a new set of round trips.
-    NetStats.reset();
-  }
-
-  /**
-   * Join auth codes of a pending map-server switch. The original learns them
-   * from C1 B1 00 (`ReceiveChangeMapServerInfo`); consumed by the next
-   * `GameServerEntered`.
-   */
-  private pendingServerChange: {
-    authCode1: number;
-    authCode2: number;
-    authCode3: number;
-    authCode4: number;
-  } | null = null;
-
-  /**
-   * `CSMServer::ConnectChangeMapServer`: drop the current game server on
-   * purpose and dial the one hosting the destination map; `GameServerEntered`
-   * then re-authenticates instead of opening the login form.
-   */
-  switchToMapServer(
-    host: string,
-    port: number,
-    auth: NonNullable<typeof this.pendingServerChange>
-  ): void {
-    this.pendingServerChange = { ...auth };
-    this.disconnectFromGameServer();
-    this.connectToGameServer(host, port);
-  }
-
-  /**
-   * `CSMServer::SendChangeMapServer` - C3 B1 01 with the XOR3 account and
-   * character names, the join auth codes, tick count, version and serial.
-   * Returns false when no switch is pending.
-   */
-  sendServerChangeAuthentication(): boolean {
-    const pending = this.pendingServerChange;
-    if (!pending) return false;
-    this.pendingServerChange = null;
-
-    const account = stringToBytes(this.username, SERVER_CHANGE_NAME_LENGTH);
-    const character = stringToBytes(
-      this.playerData.name,
-      SERVER_CHANGE_NAME_LENGTH
-    );
-    Xor3Byte(account);
-    Xor3Byte(character);
-
-    const p = ServerChangeAuthenticationPacket.createPacket();
-    p.setAccountXor3(account, SERVER_CHANGE_NAME_LENGTH);
-    p.setCharacterNameXor3(character, SERVER_CHANGE_NAME_LENGTH);
-    p.AuthCode1 = pending.authCode1;
-    p.AuthCode2 = pending.authCode2;
-    p.AuthCode3 = pending.authCode3;
-    p.AuthCode4 = pending.authCode4;
-    p.TickCount = Math.floor(performance.now()) >>> 0;
-    p.setClientVersion(gameVersion.clientVersionBytes);
-    p.setClientSerial(gameVersion.serialBytes);
-
-    this.sendToGS(p.buffer);
-    return true;
-  }
-
   updateServerListRequest(): void {
     const buffer = ServerListRequestPacket.createPacket().buffer;
-    this.sendToCS(buffer);
+    Session.sendToCS(buffer);
   }
 
   getConnectionInfoRequest(serverId: number): void {
@@ -1560,24 +1172,7 @@ export const Store = new (class _Store {
       ConnectionInfoRequestPacket.createPacket();
     connectionInfoRequestPacket.ServerId = serverId;
 
-    this.sendToCS(connectionInfoRequestPacket.buffer);
-  }
-
-  loginRequest(username: string, password: string) {
-    const usernameBytes = stringToBytes(username, MAX_USERNAME_LENGTH);
-    const passwordBytes = stringToBytes(password, MAX_PASSWORD_LENGTH);
-
-    Xor3Byte(usernameBytes);
-    Xor3Byte(passwordBytes);
-
-    const loginShortPasswordPacket = LoginShortPasswordPacket.createPacket();
-    loginShortPasswordPacket.setUsername(usernameBytes, usernameBytes.length);
-    loginShortPasswordPacket.setPassword(passwordBytes, passwordBytes.length);
-    loginShortPasswordPacket.setClientVersion(gameVersion.clientVersionBytes);
-    loginShortPasswordPacket.setClientSerial(gameVersion.serialBytes);
-
-    console.log(`send login`);
-    this.sendToGS(loginShortPasswordPacket.buffer);
+    Session.sendToCS(connectionInfoRequestPacket.buffer);
   }
 
   refreshCharactersListRequest(): void {
@@ -1586,13 +1181,13 @@ export const Store = new (class _Store {
     });
     const packet = RequestCharacterListPacket.createPacket();
     packet.Language = 0;
-    this.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   focusCharacterRequest(name: string): void {
     const packet = FocusCharacterPacket.createPacket();
     packet.setName(name);
-    this.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   selectCharacterRequest(name: string): void {
@@ -1612,18 +1207,18 @@ export const Store = new (class _Store {
     });
 
     console.log(`select character [${name}]`);
-    this.sendToGS(selectCharacterPacket.buffer);
+    Session.sendToGS(selectCharacterPacket.buffer);
   }
 
   increaseStatRequest(stat: number): void {
-    if (this.isOffline) {
+    if (Session.isOffline) {
       this.answerStatOffline(stat);
       return;
     }
 
     const packet = IncreaseCharacterStatPointPacket.createPacket();
     packet.StatType = stat;
-    this.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   /**
@@ -1672,7 +1267,7 @@ export const Store = new (class _Store {
     packet.setSecurityCode(securityCode);
 
     console.log(`delete character [${name}]`);
-    this.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
     // DeleteCharacter (LoginScene.cpp:124): SOUND_MENU01.
     playUiSound('menuMove');
   }
@@ -1687,7 +1282,7 @@ export const Store = new (class _Store {
     });
 
     console.log(`create character [${name}] class ${charClass}`);
-    this.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   addCreatedCharacter(character: {
@@ -1717,29 +1312,12 @@ export const Store = new (class _Store {
     });
   }
 
-  /**
-   * A band frame (`bandProtocol.ts`) to the ws proxy, which handles it
-   * itself and never forwards it. Same path as every packet, so it gets the
-   * Xor32 the proxy expects and rides the one socket.
-   */
-  sendBandFrame(frame: Uint8Array): void {
-    this.sendToGS(new DataView(frame.buffer, frame.byteOffset, frame.byteLength));
-  }
-
-  /**
-   * A map ping (`pingProtocol.ts`) to the ws proxy, which relays it itself
-   * and never forwards it. Same path as a band frame.
-   */
-  sendPingFrame(frame: Uint8Array): void {
-    this.sendToGS(new DataView(frame.buffer, frame.byteOffset, frame.byteLength));
-  }
-
   sendAnimationRequest(rotation: number, animationNumber: number): void {
     const packet = AnimationRequestPacket.createPacket();
     packet.Rotation = rotation;
     packet.AnimationNumber = animationNumber;
 
-    this.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   enterGateRequest(gateNumber: number): void {
@@ -1749,7 +1327,7 @@ export const Store = new (class _Store {
     packet.TeleportTargetY = 0;
 
     NetStats.markSent('warp');
-    this.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   /**
@@ -1766,7 +1344,7 @@ export const Store = new (class _Store {
     packet.WarpInfoIndex = index;
 
     NetStats.markSent('warp');
-    this.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   /**
@@ -1802,7 +1380,7 @@ export const Store = new (class _Store {
     packet.setDirections(packed, packed.length);
 
     this.lastWalkRequest = { x, y, steps: dirs.length, at: performance.now() };
-    this.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   /**
@@ -1835,7 +1413,7 @@ export const Store = new (class _Store {
       steps: 0,
       at: performance.now(),
     };
-    this.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   // --- NPC shop & repair (CNewUINPCShop, NewUIMyInventory repair mode) -------
@@ -1855,7 +1433,7 @@ export const Store = new (class _Store {
     // `ReceiveTalk` / `ReceiveQuestState` open with `HideAll`.
     EventBus.emit('npcTalkStarted', { npcType: npc.npcType });
 
-    if (this.isOffline) {
+    if (Session.isOffline) {
       const which = this.offlineNpcWindow++ % 3;
       // What the NpcWindowResponse handler plays for every window
       // (ReceiveTalk, WSclient.cpp:6563-6564).
@@ -1881,10 +1459,10 @@ export const Store = new (class _Store {
     // Reset OpenMU's dialog state first, every time: a talk that never produced a
     // window (or one closed without a CloseNpcRequest) leaves it in NpcDialogOpened,
     // and it ignores new talks until a CloseNpcRequest arrives.
-    this.sendToGS(CloseNpcRequestPacket.createPacket().buffer);
+    Session.sendToGS(CloseNpcRequestPacket.createPacket().buffer);
     const packet = TalkToNpcRequestPacket.createPacket();
     packet.NpcId = npc.netId;
-    this.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   /** NpcWindowResponse(Merchant): the shop opens, with the inventory beside it. */
@@ -1931,8 +1509,8 @@ export const Store = new (class _Store {
   closeNpcShop(): void {
     if (!this.npcShop) return;
 
-    if (!this.isOffline) {
-      this.sendToGS(CloseNpcRequestPacket.createPacket().buffer);
+    if (!Session.isOffline) {
+      Session.sendToGS(CloseNpcRequestPacket.createPacket().buffer);
     }
 
     this.finishShopBuy();
@@ -1955,14 +1533,14 @@ export const Store = new (class _Store {
       this.shopBuyRefused = false;
     });
 
-    if (this.isOffline) {
+    if (Session.isOffline) {
       this.buyOffline(item);
       return;
     }
 
     const packet = BuyItemFromNpcRequestPacket.createPacket();
     packet.ItemSlot = shopSlot;
-    this.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
 
     runInAction(() => {
       this.shopBuyPending = true;
@@ -2018,7 +1596,7 @@ export const Store = new (class _Store {
       return;
     }
 
-    if (this.isOffline) {
+    if (Session.isOffline) {
       runInAction(() => {
         this.playerData.money += price;
         this.pickedItem = null;
@@ -2037,7 +1615,7 @@ export const Store = new (class _Store {
       StorageKind.Inventory,
       -1
     );
-    this.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   /** NpcItemSellResult: the item is gone and the money is in - or neither. */
@@ -2088,7 +1666,7 @@ export const Store = new (class _Store {
       if (!needsRepair(item)) return;
     }
 
-    if (this.isOffline) {
+    if (Session.isOffline) {
       this.repairOffline(slot, selfRepair);
       return;
     }
@@ -2096,7 +1674,7 @@ export const Store = new (class _Store {
     const packet = RepairItemRequestPacket.createPacket();
     packet.ItemSlot = slot;
     packet.IsSelfRepair = selfRepair;
-    this.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   /** The smith's second button (`m_BtnRepairAll`). */
@@ -2253,7 +1831,7 @@ export const Store = new (class _Store {
       return;
     }
 
-    if (this.isOffline) {
+    if (Session.isOffline) {
       runInAction(() => {
         this.itemsOfStorage(toStorage)[toSlot] = picked.item;
         this.pickedItem = null;
@@ -2283,7 +1861,7 @@ export const Store = new (class _Store {
     const item = items[fromSlot];
     if (!item || items[toSlot]) return false;
 
-    if (this.isOffline) {
+    if (Session.isOffline) {
       runInAction(() => {
         items[fromSlot] = null;
         items[toSlot] = item;
@@ -2327,7 +1905,7 @@ export const Store = new (class _Store {
 
     this.beginItemMove(fromStorage, fromSlot, toStorage, toSlot);
     NetStats.markSent('itemMove');
-    this.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   /**
@@ -2398,7 +1976,7 @@ export const Store = new (class _Store {
       return;
     }
 
-    if (this.isOffline) {
+    if (Session.isOffline) {
       runInAction(() => {
         this.itemsOfStorage(fromStorage)[fromSlot] = null;
         this.itemsOfStorage(toStorage)[toSlot] = item;
@@ -2522,7 +2100,7 @@ export const Store = new (class _Store {
       return true;
     }
 
-    if (this.isOffline) {
+    if (Session.isOffline) {
       // No server to answer: the scroll is read here so the skill list (K)
       // and the hot keys behave.
       const index = this.skills.reduce((max, s) => Math.max(max, s.index), -1) + 1;
@@ -2540,7 +2118,7 @@ export const Store = new (class _Store {
   }
 
   consumeItemRequest(slot: number, targetSlot = 0): void {
-    if (this.isOffline) {
+    if (Session.isOffline) {
       this.consumeItemOffline(slot);
       return;
     }
@@ -2563,7 +2141,7 @@ export const Store = new (class _Store {
     packet.TargetSlot = targetSlot;
     packet.FruitConsumption = 0;
 
-    this.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   /**
@@ -2607,7 +2185,7 @@ export const Store = new (class _Store {
       return true;
     }
 
-    if (this.isOffline) {
+    if (Session.isOffline) {
       addNotification(t('notify.upgradeNeedsServer'), 'error');
       return true;
     }
@@ -2649,7 +2227,7 @@ export const Store = new (class _Store {
       return;
     }
 
-    if (this.isOffline) {
+    if (Session.isOffline) {
       this.cancelPickedItem();
       return;
     }
@@ -2665,7 +2243,7 @@ export const Store = new (class _Store {
       StorageKind.Inventory,
       -1
     );
-    this.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   toggleDropNames(): void {
@@ -2675,12 +2253,12 @@ export const Store = new (class _Store {
   }
 
   pickupItemRequest(itemNetId: number): void {
-    if (this.isOffline) return;
+    if (Session.isOffline) return;
 
     const packet = PickupItemRequestPacket.createPacket();
     packet.ItemId = itemNetId;
 
-    this.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   private beginItemMove(

@@ -35,6 +35,7 @@ import type { ENUM_WORLD } from '../../core/types';
 import { EventBus } from '../../core/eventBus';
 import { playUiSound } from '../../controllers/sound/sfx';
 import { Store } from '../../app/store';
+import { Session } from '../session';
 import { addNotification } from '../chat';
 import { Ecs } from '../../ecs/current';
 import type { QuestLayer } from './layer';
@@ -244,8 +245,8 @@ export function myQuestEmptyMessage(): string {
 // ---- commands ----------------------------------------------------------------
 
 function send(buffer: DataView): boolean {
-  if (Store.isOffline) return false;
-  Store.sendToGS(buffer);
+  if (Session.isOffline) return false;
+  Session.sendToGS(buffer);
   return true;
 }
 

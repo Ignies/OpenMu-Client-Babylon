@@ -2,7 +2,7 @@ import './style.less';
 import { useRef, type CSSProperties } from 'react';
 import { observer } from 'mobx-react-lite';
 import { t } from '@/i18n';
-import { Store } from '@/app/store';
+import { Session } from '@/modules/session';
 import { Ecs } from '@/ecs/current';
 import {
   Band,
@@ -264,7 +264,7 @@ export const InstrumentWindow = observer(() => {
     ? t('instrument.loading')
     : Band.error
       ? t(Band.error)
-      : !Band.available && !Store.isOffline
+      : !Band.available && !Session.isOffline
         ? t('instrument.unavailable')
         : '';
 

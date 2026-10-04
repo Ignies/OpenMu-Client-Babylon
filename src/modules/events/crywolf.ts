@@ -1,7 +1,7 @@
 import { observable, runInAction } from 'mobx';
 import { ENUM_WORLD } from '../../core/types';
 import { EventBus } from '../../core/eventBus';
-import { Store } from '../../app/store';
+import { Session } from '../session';
 import { addNotification } from '../chat';
 import { Ecs } from '../../ecs/current';
 import {
@@ -126,10 +126,10 @@ function useNpc(npc: { netId: number; npcType: number }): boolean {
   if (npc.npcType !== STATUE_NPC) return false;
   if (Ecs.world === null || !MAPS.has(Ecs.world.mapIndex)) return false;
 
-  if (state.state === CrywolfState.Ready && !Store.isOffline) {
+  if (state.state === CrywolfState.Ready && !Session.isOffline) {
     const packet = CrywolfContractRequestPacket.createPacket();
     packet.StatueId = npc.netId;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
   // The statue never opens a server window; consume the talk either way.
   return true;
@@ -185,8 +185,8 @@ function reset(): void {
 
 /** WSclient.cpp:789: entering the map asks for the event state. */
 EventBus.on('warpCompleted', ({ map }) => {
-  if (!MAPS.has(map) || Store.isOffline) return;
-  Store.sendToGS(CrywolfInfoRequestPacket.createPacket().buffer);
+  if (!MAPS.has(map) || Session.isOffline) return;
+  Session.sendToGS(CrywolfInfoRequestPacket.createPacket().buffer);
 });
 
 /** `CheckCryWolf1stMVP`: the state pair, and the end-of-war banner. */

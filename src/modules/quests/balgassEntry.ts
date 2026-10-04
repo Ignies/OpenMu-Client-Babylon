@@ -20,6 +20,7 @@ import {
 } from '@versions/shared/packets/ClientToServerPackets';
 import { EventBus } from '../../core/eventBus';
 import { Store } from '../../app/store';
+import { Session } from '../session';
 import { addNotification } from '../chat';
 import { Ecs } from '../../ecs/current';
 import type { QuestLayer } from './layer';
@@ -116,7 +117,7 @@ export function talkToBalgassNpc(npc: NpcTarget): boolean {
   if (!kind || Store.pendingItemMove || Store.npcShop) return false;
 
   // Offline, a talk opens the test merchant; only the `HideAll` half applies.
-  if (Store.isOffline) EventBus.emit('npcTalkStarted', { npcType: npc.npcType });
+  if (Session.isOffline) EventBus.emit('npcTalkStarted', { npcType: npc.npcType });
   else Store.talkToNpc(npc);
   show(kind);
   return true;
@@ -132,13 +133,13 @@ export function enterBalgass(): void {
     addNotification(t('event.shortOfZen'), 'error');
     return;
   }
-  if (Store.isOffline) return;
+  if (Session.isOffline) return;
 
   const packet =
     kind === 'werewolf'
       ? EnterOnWerewolfRequestPacket.createPacket()
       : EnterOnGatekeeperRequestPacket.createPacket();
-  Store.sendToGS(packet.buffer);
+  Session.sendToGS(packet.buffer);
 }
 
 /**
@@ -148,7 +149,7 @@ export function enterBalgass(): void {
 export function cancelBalgassEntry(): void {
   if (!state.kind) return;
   hide();
-  if (!Store.isOffline) Store.sendToGS(CloseNpcRequestPacket.createPacket().buffer);
+  if (!Session.isOffline) Session.sendToGS(CloseNpcRequestPacket.createPacket().buffer);
   Store.dropNpcTalk();
 }
 
@@ -168,7 +169,7 @@ function stageDevBox(): void {
   if (!devRead) {
     devRead = true;
     const [kind, unlock] = (devQuery('balgass') ?? '').split(',');
-    if (Store.isOffline && (kind === 'werewolf' || kind === 'gatekeeper')) {
+    if (Session.isOffline && (kind === 'werewolf' || kind === 'gatekeeper')) {
       devKind = kind;
       devUnlocked = unlock === '1';
     }

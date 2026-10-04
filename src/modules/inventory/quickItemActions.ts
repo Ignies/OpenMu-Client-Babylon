@@ -1,6 +1,7 @@
 import { reaction } from 'mobx';
 import { t } from '../../i18n';
 import { Store } from '../../app/store';
+import { Session } from '../session';
 import { addNotification } from '../chat';
 import { MsgBox } from '../../controllers/interface';
 import { Economy } from '../economy/economy';
@@ -187,7 +188,7 @@ export const QuickItemActions = new (class _QuickItemActions {
     Store.buyItemFromNpc(run.slot);
 
     // Offline there is no answer to wait for, so the loop runs itself.
-    if (Store.isOffline) this.step();
+    if (Session.isOffline) this.step();
   }
 
   private finish(stop: BuyStop, bought: number): void {

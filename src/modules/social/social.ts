@@ -1,6 +1,7 @@
 import { t } from '../../i18n';
 import { action, computed, makeObservable, observable, runInAction } from 'mobx';
 import { Store } from '../../app/store';
+import { Session } from '../session';
 import { Ecs } from '../../ecs/current';
 import {
   CHAT_COOLDOWN_MS,
@@ -649,7 +650,7 @@ export const Social = new (class _Social {
       );
       packet.setReceiverName(whisperTo);
       packet.setMessage(wire);
-      Store.sendToGS(packet.buffer);
+      Session.sendToGS(packet.buffer);
       // The original logs an outgoing whisper under the hero's name.
       this.addChatLine(heroName, text, ChatLineType.Whisper);
       this.remember(this.whisperHistory, whisperTo);
@@ -703,7 +704,7 @@ export const Social = new (class _Social {
     // The server echoes our own line back, which is the one request/answer
     // pair a player can trigger on demand (controllers/net/roundTrip.ts).
     NetStats.markSent('chat');
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
 
     this.remember(this.chatHistory, text);
     return true;
@@ -723,7 +724,7 @@ export const Social = new (class _Social {
    */
   broadcastEmojiBubble(id: EmojiBubbleId): boolean {
     // Offline there is nothing to send to, and the local bubble is the point.
-    if (Store.isOffline) return true;
+    if (Session.isOffline) return true;
 
     const now = performance.now();
     if (now - this.lastChatTime < CHAT_COOLDOWN_MS) return false;
@@ -735,7 +736,7 @@ export const Social = new (class _Social {
     );
     packet.setCharacter(Store.playerData.name);
     packet.setMessage(token);
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
 
     return true;
   }
@@ -813,7 +814,7 @@ export const Social = new (class _Social {
     }
     const packet = PartyInviteRequestPacket.createPacket();
     packet.TargetPlayerId = target.netId;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
     this.systemMessage(t('party.invitationSent', { name: target.name }));
   }
 
@@ -824,21 +825,21 @@ export const Social = new (class _Social {
     const packet = PartyInviteResponsePacket.createPacket();
     packet.Accepted = accepted;
     packet.RequesterId = request.requesterId;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
     runInAction(() => {
       this.partyRequest = null;
     });
   }
 
   requestPartyList(): void {
-    Store.sendToGS(PartyListRequestPacket.createPacket().buffer);
+    Session.sendToGS(PartyListRequestPacket.createPacket().buffer);
   }
 
   /** The leader's X on a row, or the hero's own row to leave. */
   partyKick(index: number): void {
     const packet = PartyPlayerKickRequestPacket.createPacket();
     packet.PlayerIndex = index;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   partyLeave(): void {
@@ -853,7 +854,7 @@ export const Social = new (class _Social {
   }
 
   requestGuildList(): void {
-    Store.sendToGS(GuildListRequestPacket.createPacket().buffer);
+    Session.sendToGS(GuildListRequestPacket.createPacket().buffer);
   }
 
   /** `CommandGuild`: ask a guild master standing next to the hero. */
@@ -872,7 +873,7 @@ export const Social = new (class _Social {
     }
     const packet = GuildJoinRequestPacket.createPacket();
     packet.GuildMasterPlayerId = master.netId;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
     this.systemMessage(t('guild.joinRequestSent', { name: master.name }));
   }
 
@@ -882,7 +883,7 @@ export const Social = new (class _Social {
     const packet = GuildJoinResponsePacket.createPacket();
     packet.Accepted = accepted;
     packet.RequesterId = request.requesterId;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
     runInAction(() => {
       this.guildJoinRequest = null;
     });
@@ -927,7 +928,7 @@ export const Social = new (class _Social {
     );
     packet.setPlayerName(name);
     packet.setSecurityCode(code);
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   guildLeave(securityCode = ''): void {
@@ -947,7 +948,7 @@ export const Social = new (class _Social {
   guildMasterAnswer(create: boolean): void {
     const packet = GuildMasterAnswerPacket.createPacket();
     packet.ShowCreationDialog = create;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
     runInAction(() => {
       this.guildMasterDialog = false;
       if (create && !this.myGuild) {
@@ -966,7 +967,7 @@ export const Social = new (class _Social {
     const packet = GuildCreateRequestPacket.createPacket();
     packet.setGuildName(guildName);
     packet.setGuildEmblem(emblem);
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
     runInAction(() => {
       this.guildCreationPending = true;
     });
@@ -974,7 +975,7 @@ export const Social = new (class _Social {
   }
 
   cancelGuildCreation(): void {
-    Store.sendToGS(CancelGuildCreationPacket.createPacket().buffer);
+    Session.sendToGS(CancelGuildCreationPacket.createPacket().buffer);
     runInAction(() => {
       this.guildCreationDialog = false;
       this.guildCreationPending = false;
@@ -1000,7 +1001,7 @@ export const Social = new (class _Social {
     packet.Type = role === GuildMemberRoleEnum.NormalMember ? 3 : 2;
     packet.Role = role;
     packet.setPlayerName(name);
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
     this.requestGuildList();
   }
 
@@ -1008,7 +1009,7 @@ export const Social = new (class _Social {
 
   /** `SendRequestAllianceList` (WSclient.cpp:7479). */
   requestAllianceList(): void {
-    Store.sendToGS(RequestAllianceListPacket.createPacket().buffer);
+    Session.sendToGS(RequestAllianceListPacket.createPacket().buffer);
   }
 
   /**
@@ -1029,7 +1030,7 @@ export const Social = new (class _Social {
     packet.RelationshipType = relationship;
     packet.RequestType = join ? GuildRequestTypeEnum.Join : GuildRequestTypeEnum.Leave;
     packet.TargetPlayerId = target.netId;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
     this.systemMessage(
       relationship === GuildRelationshipTypeEnum.Alliance
         ? t('guild.allianceRequestSent', { name: target.name })
@@ -1048,7 +1049,7 @@ export const Social = new (class _Social {
       : GuildRequestTypeEnum.Leave;
     packet.Response = accepted;
     packet.TargetPlayerId = request.senderId;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
     runInAction(() => {
       this.guildRelationRequest = null;
     });
@@ -1058,7 +1059,7 @@ export const Social = new (class _Social {
   removeAllianceGuild(guildName: string): void {
     const packet = RemoveAllianceGuildRequestPacket.createPacket();
     packet.setGuildName(guildName.slice(0, 8));
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   // ---- guild war ----------------------------------------------------------
@@ -1068,7 +1069,7 @@ export const Social = new (class _Social {
     if (!this.guildWarRequest) return;
     const packet = GuildWarResponsePacket.createPacket();
     packet.Accepted = accepted;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
     runInAction(() => {
       this.guildWarRequest = null;
     });

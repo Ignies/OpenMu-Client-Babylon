@@ -1,6 +1,7 @@
 import { t } from '../../i18n';
 import { action, makeObservable, observable, runInAction } from 'mobx';
 import { Store } from '../../app/store';
+import { Session } from '../session';
 import { Social } from '../social/social';
 import {
   MAX_FRIENDS,
@@ -145,7 +146,7 @@ export const Messenger = new (class _Messenger {
   // ---- friends ------------------------------------------------------------
 
   requestFriendList(): void {
-    Store.sendToGS(FriendListRequestPacket.createPacket().buffer);
+    Session.sendToGS(FriendListRequestPacket.createPacket().buffer);
   }
 
   setFriends(friends: Friend[]): void {
@@ -189,7 +190,7 @@ export const Messenger = new (class _Messenger {
     }
     const packet = FriendAddRequestPacket.createPacket();
     packet.setFriendName(target);
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
     Social.systemMessage(t('friends.requestSent', { name: target }));
     return true;
   }
@@ -201,7 +202,7 @@ export const Messenger = new (class _Messenger {
     const packet = FriendAddResponsePacket.createPacket();
     packet.Accepted = accepted;
     packet.setFriendRequesterName(request.name);
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
     runInAction(() => {
       this.friendRequest = null;
     });
@@ -210,14 +211,14 @@ export const Messenger = new (class _Messenger {
   deleteFriend(name: string): void {
     const packet = FriendDeletePacket.createPacket();
     packet.setFriendName(name);
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   /** `SetChatReject`: hide from the friend list without logging out. */
   setAppearOffline(offline: boolean): void {
     const packet = SetFriendOnlineStatePacket.createPacket();
     packet.OnlineState = !offline;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
     runInAction(() => {
       this.appearOffline = offline;
     });
@@ -232,7 +233,7 @@ export const Messenger = new (class _Messenger {
   // ---- letters ------------------------------------------------------------
 
   requestLetterList(): void {
-    Store.sendToGS(LetterListRequestPacket.createPacket().buffer);
+    Session.sendToGS(LetterListRequestPacket.createPacket().buffer);
   }
 
   addLetter(letter: Letter): void {
@@ -268,13 +269,13 @@ export const Messenger = new (class _Messenger {
     if (letter?.body !== undefined) return; // already cached
     const packet = LetterReadRequestPacket.createPacket();
     packet.LetterIndex = index;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   deleteLetter(index: number): void {
     const packet = LetterDeleteRequestPacket.createPacket();
     packet.LetterIndex = index;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   /** The Write button, and Reply with the sender pre-filled. */
@@ -333,7 +334,7 @@ export const Messenger = new (class _Messenger {
     packet.Animation = 0;
     packet.MessageLength = body.length;
     packet.setMessage(body);
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
 
     runInAction(() => {
       this.sending = true;

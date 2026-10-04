@@ -4,6 +4,7 @@ import { ENUM_WORLD } from '../../core/types';
 import { EventBus } from '../../core/eventBus';
 import { playSfx } from '../../controllers/sound/sfx';
 import { Store } from '../../app/store';
+import { Session } from '../session';
 import { addNotification } from '../chat';
 import { Ecs } from '../../ecs/current';
 import { effects } from '../../controllers/fx';
@@ -333,8 +334,8 @@ export function closeKanturu(): void {
 
 /** The Refresh button (`SendRequestKanturu3rdInfo`). */
 export function refreshKanturu(): void {
-  if (Store.isOffline) return;
-  Store.sendToGS(KanturuInfoRequestPacket.createPacket().buffer);
+  if (Session.isOffline) return;
+  Session.sendToGS(KanturuInfoRequestPacket.createPacket().buffer);
 }
 
 /**
@@ -342,7 +343,7 @@ export function refreshKanturu(): void {
  * sends at frame 42 (`IsNpcAnimation`); the request itself is the same.
  */
 export function enterKanturu(): void {
-  if (!state.canEnter || Store.isOffline) return;
+  if (!state.canEnter || Session.isOffline) return;
   const p = Store.playerData;
   startGatewayTurn({
     tower: state.state === KanturuState.Tower,
@@ -351,7 +352,7 @@ export function enterKanturu(): void {
     ring1: p.ring1Slot,
     ring2: p.ring2Slot,
   });
-  Store.sendToGS(KanturuEnterRequestPacket.createPacket().buffer);
+  Session.sendToGS(KanturuEnterRequestPacket.createPacket().buffer);
 }
 
 // ---- packets ---------------------------------------------------------------

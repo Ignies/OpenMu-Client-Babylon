@@ -4,7 +4,7 @@ import { t } from '@/i18n';
 import './style.less';
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Store } from '@/app/store';
+import { Session } from '@/modules/session';
 import { Ecs } from '@/ecs/current';
 import { Social } from '@/modules/social/social';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
@@ -64,7 +64,7 @@ type RadialEntry =
 function entryLabel(entry: RadialEntry): string {
   if (entry.kind === 'emote') return t(entry.emote.labelKey);
   if (entry.kind === 'emoji') return `${t(entry.emoji.labelKey)}  ${entry.emoji.words[0]}`;
-  if (!Store.isOffline && !Band.available) return t('instrument.unavailable');
+  if (!Session.isOffline && !Band.available) return t('instrument.unavailable');
   return Band.instrument === entry.instrument.id
     ? `${t(entry.instrument.labelKey)} - ${t('instrument.putAway')}`
     : t(entry.instrument.labelKey);
@@ -248,7 +248,7 @@ export const EmoteMenu = observer(() => {
     if (entry.kind === 'instrument') {
       // Online, an instrument only plays for others through the proxy's
       // relay; without its hello there is nothing to take out.
-      if (!Store.isOffline && !Band.available) {
+      if (!Session.isOffline && !Band.available) {
         playUiSound('error');
         return;
       }
@@ -325,7 +325,7 @@ export const EmoteMenu = observer(() => {
                     ? ' held'
                     : ''
                 }${
-                  w.entry.kind === 'instrument' && !Store.isOffline && !Band.available
+                  w.entry.kind === 'instrument' && !Session.isOffline && !Band.available
                     ? ' unavailable'
                     : ''
                 }`}

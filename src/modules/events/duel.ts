@@ -3,7 +3,7 @@ import type { ENUM_WORLD } from '../../core/types';
 import { cleanName } from '../chat/chat';
 import { EventBus } from '../../core/eventBus';
 import { playUiSound } from '../../controllers/sound/sfx';
-import { Store } from '../../app/store';
+import { Session } from '../session';
 import { addNotification } from '../chat';
 import { Ecs } from '../../ecs/current';
 import { t } from '../../i18n';
@@ -172,20 +172,20 @@ export function answerDuelRequest(accepted: boolean): void {
   runInAction(() => {
     state.request = null;
   });
-  if (Store.isOffline) return;
+  if (Session.isOffline) return;
   const packet = DuelStartResponsePacket.createPacket();
   packet.Response = accepted;
   packet.PlayerId = request.requesterId;
   packet.setPlayerName(request.requesterName);
-  Store.sendToGS(packet.buffer);
+  Session.sendToGS(packet.buffer);
 }
 
 /** `SendDuelChannelJoinRequest(i)`: a watch-window join button. */
 export function joinDuelChannel(channel: number): void {
-  if (Store.isOffline) return;
+  if (Session.isOffline) return;
   const packet = DuelChannelJoinRequestPacket.createPacket();
   packet.ChannelId = channel;
-  Store.sendToGS(packet.buffer);
+  Session.sendToGS(packet.buffer);
 }
 
 /**
@@ -193,8 +193,8 @@ export function joinDuelChannel(channel: number): void {
  * with a warp only, so the watching state clears here.
  */
 export function quitDuelChannel(): void {
-  if (!Store.isOffline) {
-    Store.sendToGS(DuelChannelQuitRequestPacket.createPacket().buffer);
+  if (!Session.isOffline) {
+    Session.sendToGS(DuelChannelQuitRequestPacket.createPacket().buffer);
   }
   clearDuel();
 }

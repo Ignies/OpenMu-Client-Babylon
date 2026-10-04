@@ -1,5 +1,6 @@
 import type { ISystemFactory } from '../world';
 import { Store } from '../../app/store';
+import { Session } from '../../modules/session';
 import { Loading } from '../../controllers/loading';
 import { findEntranceGateAt, loadGates, type Gate } from '../../controllers/assets/mu/gates';
 import { EventBus } from '../../core/eventBus';
@@ -27,7 +28,7 @@ export const GateSystem: ISystemFactory = world => {
   return {
     update: () => {
       if (!allGates) return;
-      if (Store.isOffline) return;
+      if (Session.isOffline) return;
       // A warp is in flight: the hero's position is the old map's until the
       // new terrain is up, and a second EnterGate on top of it double-warps.
       if (Loading.sceneLoading) return;

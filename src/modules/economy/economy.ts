@@ -3,6 +3,7 @@ import { t, type TextKey } from '../../i18n';
 import { makeObservable, observable, action, runInAction } from 'mobx';
 import { prefetchItemIcons } from '../../controllers/assets/itemIconPack';
 import { Store } from '../../app/store';
+import { Session } from '../session';
 import { addNotification } from '../chat';
 import { Social } from '../social/social';
 import type { Item } from '../../ecs/world';
@@ -561,8 +562,8 @@ export const Economy = new (class _Economy {
 
     this.returnPickedFrom(StorageKind.Vault);
 
-    if (notify && !Store.isOffline) {
-      Store.sendToGS(VaultClosedPacket.createPacket().buffer);
+    if (notify && !Session.isOffline) {
+      Session.sendToGS(VaultClosedPacket.createPacket().buffer);
     }
 
     runInAction(() => {
@@ -594,7 +595,7 @@ export const Economy = new (class _Economy {
       return;
     }
 
-    if (Store.isOffline) {
+    if (Session.isOffline) {
       runInAction(() => {
         if (toVault) {
           Store.playerData.money -= amount;
@@ -612,7 +613,7 @@ export const Economy = new (class _Economy {
       ? VaultMoveMoneyRequestVaultMoneyMoveDirectionEnum.InventoryToVault
       : VaultMoveMoneyRequestVaultMoneyMoveDirectionEnum.VaultToInventory;
     packet.Amount = amount;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   /** `VaultMoneyUpdate` (0x81). */
@@ -630,7 +631,7 @@ export const Economy = new (class _Economy {
 
   /** `CStorageUnlockMsgBoxLayout`: the numeric pin pad. */
   unlockVault(pin: number): void {
-    if (Store.isOffline) {
+    if (Session.isOffline) {
       runInAction(() => {
         this.vaultUnlocked = true;
       });
@@ -639,25 +640,25 @@ export const Economy = new (class _Economy {
 
     const packet = UnlockVaultPacket.createPacket();
     packet.Pin = pin;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   /** `CStorageLockKeyPadMsgBoxLayout`: a new pin needs the account password. */
   setVaultPin(pin: number, password: string): void {
-    if (Store.isOffline) return;
+    if (Session.isOffline) return;
 
     const packet = SetVaultPinPacket.createPacket();
     packet.Pin = pin;
     packet.setPassword(password, 20);
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   removeVaultPin(password: string): void {
-    if (Store.isOffline) return;
+    if (Session.isOffline) return;
 
     const packet = RemoveVaultPinPacket.createPacket();
     packet.setPassword(password, 20);
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   // =========================================================================
@@ -726,8 +727,8 @@ export const Economy = new (class _Economy {
       return false;
     }
 
-    if (notify && !Store.isOffline) {
-      Store.sendToGS(CraftingDialogCloseRequestPacket.createPacket().buffer);
+    if (notify && !Session.isOffline) {
+      Session.sendToGS(CraftingDialogCloseRequestPacket.createPacket().buffer);
     }
 
     runInAction(() => {
@@ -748,7 +749,7 @@ export const Economy = new (class _Economy {
       return;
     }
 
-    if (Store.isOffline) {
+    if (Session.isOffline) {
       addNotification(t('notify.chaosNeedsServer'), 'info');
       return;
     }
@@ -762,7 +763,7 @@ export const Economy = new (class _Economy {
         ? (0 as ChaosMachineMixRequestChaosMachineMixTypeEnum)
         : this.mixType;
     packet.SocketSlot = 0;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
 
     runInAction(() => {
       this.mixPending = true;
@@ -849,7 +850,7 @@ export const Economy = new (class _Economy {
 
     const packet = TradeRequestPacket.createPacket();
     packet.PlayerId = target.netId;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
     Social.systemMessage(t('trade.requestSent', { name: target.name }));
   }
 
@@ -867,7 +868,7 @@ export const Economy = new (class _Economy {
   answerTradeRequest(accepted: boolean): void {
     const packet = TradeRequestResponsePacket.createPacket();
     packet.TradeAccepted = accepted;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
     runInAction(() => {
       this.tradeRequest = null;
     });
@@ -916,7 +917,7 @@ export const Economy = new (class _Economy {
 
     const packet = SetTradeMoneyPacket.createPacket();
     packet.Amount = amount;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   /** `TradeMoneySetResponse` (0x3A 0x01). */
@@ -952,7 +953,7 @@ export const Economy = new (class _Economy {
     packet.NewState = checked
       ? TradeButtonStateEnum.Checked
       : TradeButtonStateEnum.Unchecked;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   toggleMyConfirm(): void {
@@ -985,7 +986,7 @@ export const Economy = new (class _Economy {
     if (!this.tradeOpen) return;
     if (Store.pickedItem) return;
 
-    Store.sendToGS(TradeCancelPacket.createPacket().buffer);
+    Session.sendToGS(TradeCancelPacket.createPacket().buffer);
   }
 
   /** `TradeFinished` (0x3D): the window always closes, the reason varies. */
@@ -1080,12 +1081,12 @@ export const Economy = new (class _Economy {
       this.myShopPrices[square] = price;
     });
 
-    if (Store.isOffline) return;
+    if (Session.isOffline) return;
 
     const packet = PlayerShopSetItemPricePacket.createPacket();
     packet.ItemSlot = this.shopSlotOf(square);
     packet.Price = price;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   /**
@@ -1143,7 +1144,7 @@ export const Economy = new (class _Economy {
       this.myShopName = title;
     });
 
-    if (Store.isOffline) {
+    if (Session.isOffline) {
       runInAction(() => {
         this.myShopSelling = true;
       });
@@ -1153,7 +1154,7 @@ export const Economy = new (class _Economy {
 
     const packet = PlayerShopOpenPacket.createPacket();
     packet.setStoreName(title, 26);
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   /**
@@ -1180,9 +1181,9 @@ export const Economy = new (class _Economy {
     });
     this.hideHeroShopTitle();
 
-    if (Store.isOffline) return;
+    if (Session.isOffline) return;
 
-    Store.sendToGS(PlayerShopClosePacket.createPacket().buffer);
+    Session.sendToGS(PlayerShopClosePacket.createPacket().buffer);
   }
 
   /** `PlayerShopClosed` for the hero: the stall is down, nothing to send. */
@@ -1240,7 +1241,7 @@ export const Economy = new (class _Economy {
     const packet = PlayerShopItemListRequestPacket.createPacket();
     packet.PlayerId = target.netId;
     packet.setPlayerName(target.name, 10);
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   /** `PlayerShopItemList` (0x3F 0x05). */
@@ -1255,11 +1256,11 @@ export const Economy = new (class _Economy {
     const browse = this.browsing;
     if (!browse) return;
 
-    if (!Store.isOffline) {
+    if (!Session.isOffline) {
       const packet = PlayerShopCloseOtherPacket.createPacket();
       packet.PlayerId = browse.playerId;
       packet.setPlayerName(browse.playerName, 10);
-      Store.sendToGS(packet.buffer);
+      Session.sendToGS(packet.buffer);
     }
 
     runInAction(() => {
@@ -1292,7 +1293,7 @@ export const Economy = new (class _Economy {
     packet.PlayerId = browse.playerId;
     packet.setPlayerName(browse.playerName, 10);
     packet.ItemSlot = entry.slot;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   /**

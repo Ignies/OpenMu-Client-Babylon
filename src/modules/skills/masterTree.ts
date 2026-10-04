@@ -15,6 +15,7 @@ import { decodeLocalText, downloadLocalDataFile } from '../../controllers/assets
 import { convertBux } from '../../controllers/terrain/mapFileEncryption';
 import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
 import { Store } from '../../app/store';
+import { Session } from '../session';
 import type { SkillLayer } from './layer';
 import { isWeaponSkill, skillRequirementsMet } from './usability';
 import { masterLevelUpPoints, setMasterLevelUpPoints } from './masterLevel';
@@ -567,7 +568,7 @@ export function masterSkillTooltipLines(entry: MasterTreeEntry): MasterTooltipLi
 export function learnMasterSkill(skill: number): void {
   const packet = AddMasterSkillPointPacket.createPacket();
   packet.SkillId = skill;
-  Store.sendToGS(packet.buffer);
+  Session.sendToGS(packet.buffer);
 }
 
 EventBus.on('MasterSkillList', packet => {

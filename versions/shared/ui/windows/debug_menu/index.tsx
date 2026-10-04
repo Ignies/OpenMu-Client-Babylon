@@ -2,7 +2,7 @@ import './style.less';
 import './modules';
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Store } from '@/app/store';
+import { Session } from '@/modules/session';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { uiClick } from '@/controllers/sound/sfx';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
@@ -210,10 +210,10 @@ export const DebugMenuWindow = observer(() => {
   // The `info` rows read live counters; bump a tick so they re-render.
   const [, setTick] = useState(0);
 
-  const open = Store.isOffline && DebugMenu.open;
+  const open = Session.isOffline && DebugMenu.open;
 
   useEventBus('keyPressed', key => {
-    if (!Store.isOffline) return;
+    if (!Session.isOffline) return;
     if (key === TOGGLE_KEY) DebugMenu.toggle();
   });
 

@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, type WheelEvent } from 'react';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
 import { Store } from '@/app/store';
+import { Session } from '@/modules/session';
 import { Ecs } from '@/ecs/current';
 import { isKey } from '@/controllers/interface/keyBindings';
 import { BaseClass, getBaseClass } from '@/modules/hero/characterStats';
@@ -302,7 +303,7 @@ export const MoveCommandWindow = observer(() => {
 
   const warpTo = (entry: MoveReqEntry) => {
     closeMoveWindow();
-    if (Store.isOffline) {
+    if (Session.isOffline) {
       const map = OFFLINE_MAPS[entry.index];
       if (map !== undefined) EventBus.emit('requestWarp', { map });
       return;

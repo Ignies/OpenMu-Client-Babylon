@@ -1,6 +1,7 @@
 import { t } from '../../i18n';
 import { action, makeObservable, observable, reaction, runInAction } from 'mobx';
 import { Store } from '../../app/store';
+import { Session } from '../session';
 import { AppState, UIState } from '../../app/uiState';
 import { Social } from '../social/social';
 import {
@@ -155,7 +156,7 @@ export const ChatRooms = new (class _ChatRooms {
     );
     const packet = ChatRoomCreateRequestPacket.createPacket();
     packet.setFriendName(friendName);
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   /** The invite list of the room window: pull one more friend in. */
@@ -173,7 +174,7 @@ export const ChatRooms = new (class _ChatRooms {
     packet.setFriendName(friendName);
     packet.RoomId = room.roomId;
     packet.RequestId = requestId;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   /** FriendInvitationResult echoes our RequestId; true when it was ours. */

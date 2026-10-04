@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { Social } from '../social/social';
 import { Store } from '../../app/store';
+import { Session } from '../session';
 import {
   GM_GROUPS,
   buildCommandLine,
@@ -148,7 +149,7 @@ export const GmPanel = new (class _GmPanel {
    * sends go nowhere, because there is no socket.
    */
   get available(): boolean {
-    return Store.playerData.isGameMaster || Store.isOffline;
+    return Store.playerData.isGameMaster || Session.isOffline;
   }
 
   toggle(): void {

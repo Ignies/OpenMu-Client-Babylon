@@ -4,6 +4,7 @@ import { BaseClass, getBaseClass } from '../hero/characterStats';
 import type { Item } from '../../ecs/world';
 import { EventBus } from '../../core/eventBus';
 import { Store } from '../../app/store';
+import { Session } from '../session';
 import { addNotification } from '../chat';
 import { Ecs } from '../../ecs/current';
 import {
@@ -254,7 +255,7 @@ export function enterBloodCastle(grade: number): void {
   const packet = BloodCastleEnterRequestPacket.createPacket();
   packet.CastleLevel = grade + 1;
   packet.TicketItemInventoryIndex = NO_TICKET_SLOT;
-  Store.sendToGS(packet.buffer);
+  Session.sendToGS(packet.buffer);
 }
 
 /**
@@ -275,7 +276,7 @@ function useTicket(_slot: number, item: Item): boolean {
   const packet = MiniGameOpeningStateRequestPacket.createPacket();
   packet.EventType = OPENING_STATE_GAME.bloodCastle;
   packet.EventLevel = level - 1;
-  Store.sendToGS(packet.buffer);
+  Session.sendToGS(packet.buffer);
   return true;
 }
 

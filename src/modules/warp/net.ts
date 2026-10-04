@@ -12,6 +12,7 @@ import { QuickItemActions } from '../inventory/quickItemActions';
 import { SlideHelp } from '@/controllers/interface/slideHelp';
 import { Social } from '../social/social';
 import { Store } from '@/app/store';
+import { Session } from '@/modules/session';
 import { AppState, UIState } from '@/app/uiState';
 import { Ecs } from '@/ecs/current';
 import { TELEPORT } from '../skills/skillCasting';
@@ -131,9 +132,9 @@ export function installNet(): void {
     // objects are in (`ClientReadyAfterMapChange`, C1 04 F3 12).
     // Only after a server-initiated MapChanged: on the first world entry OpenMU
     // already placed us and logs "Ignoring client-ready packet" otherwise.
-    if (awaitingClientReady && !Store.isOffline && AppState.uiState === UIState.World) {
+    if (awaitingClientReady && !Session.isOffline && AppState.uiState === UIState.World) {
       awaitingClientReady = false;
-      Store.sendToGS(ClientReadyAfterMapChangePacket.createPacket().buffer);
+      Session.sendToGS(ClientReadyAfterMapChangePacket.createPacket().buffer);
       holdForWarpScope();
     }
 
@@ -156,7 +157,7 @@ export function installNet(): void {
    * tile y, and an optional direction (0-7), `;`-separated.
    */
   EventBus.on('warpCompleted', () => {
-    if (!Store.isOffline) return;
+    if (!Session.isOffline) return;
 
     const spec = devQuery('npcs');
     const world = Ecs.world;
@@ -191,7 +192,7 @@ export function installNet(): void {
    * without a server granting it.
    */
   EventBus.on('warpCompleted', () => {
-    if (!Store.isOffline) return;
+    if (!Session.isOffline) return;
 
     const spec = devQuery('buffs');
     const hero = Ecs.world?.playerEntity;
@@ -213,7 +214,7 @@ export function installNet(): void {
    * server offline, so this is the only way to look at any of them without one.
    */
   EventBus.on('warpCompleted', () => {
-    if (!Store.isOffline) return;
+    if (!Session.isOffline) return;
 
     const demo = devQuery('quickItems');
     if (!demo) return;

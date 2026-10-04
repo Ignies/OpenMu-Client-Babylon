@@ -22,7 +22,7 @@ import {
 } from '@/controllers/maps/rooms';
 import { createAttributeSystem } from '@/core/attributeSystem';
 import { Vector3 } from '@/controllers/render/babylon/exports';
-import { Store } from '@/app/store';
+import { Session } from '@/modules/session';
 import { BeerObject } from './beerObject';
 import { BonfireObject } from './bonfireObject';
 import { BridgeObject } from './bridgeObject';
@@ -207,7 +207,7 @@ terrain.MapTileObjects[133] = PoseBoxObject;
 
   for (var i = 0; i < 3; i++) terrain.MapTileObjects[151 + i] = BeerObject;
 
-  if (Store.isOffline) {
+  if (Session.isOffline) {
     const modelFactory = ElfSoldier;
 
     const npcEntity = world.add({

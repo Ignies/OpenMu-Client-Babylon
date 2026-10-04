@@ -4,6 +4,7 @@ import { EventBus } from '@/core/eventBus';
 import { ItemBoughtPacket, NpcItemSellResultPacket, NpcWindowResponseNpcWindowEnum, NpcWindowResponsePacket, StoreItemListItemWindowEnum, StoreItemListPacket } from '@versions/shared/packets/ServerToClientPackets';
 import { ItemSerializer } from '@/controllers/item_rules';
 import { Store } from '@/app/store';
+import { Session } from '@/modules/session';
 import { addNotification } from '@/modules/chat';
 import { events } from '../events';
 import { playUiSound } from '@/controllers/sound/sfx';
@@ -65,7 +66,7 @@ export function installNet(): void {
         // OpenMU keeps the player in NpcDialogOpened after opening ANY window
         // (TalkNpcAction.cs) - without this reset it ignores every later
         // TalkToNpcRequest until relogin (the "one refusal bricks all NPCs" bug).
-        Store.sendToGS(CloseNpcRequestPacket.createPacket().buffer);
+        Session.sendToGS(CloseNpcRequestPacket.createPacket().buffer);
         break;
     }
     playUiSound('window');

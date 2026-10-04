@@ -27,6 +27,7 @@ import { playUiSound } from '../../controllers/sound/sfx';
 import { showObjectEffect } from '../../ecs/systems/objectEffectSystem';
 import { MAX_QUESTS, QuestActKind, type QuestDefinition } from '../../controllers/assets/mu/questFiles';
 import { Store } from '../../app/store';
+import { Session } from '../session';
 import { addNotification } from '../chat';
 import { Ecs } from '../../ecs/current';
 import type { QuestLayer } from './layer';
@@ -563,7 +564,7 @@ function showLegacyQuestWindow(index: number): void {
  */
 function endNpcTalk(): void {
   if (Store.npcShop) Store.closeNpcShop();
-  else if (!Store.isOffline) Store.sendToGS(CloseNpcRequestPacket.createPacket().buffer);
+  else if (!Session.isOffline) Session.sendToGS(CloseNpcRequestPacket.createPacket().buffer);
   Store.dropNpcTalk();
 }
 
@@ -588,7 +589,7 @@ function sendSetState(index: number): void {
   const packet = LegacyQuestStateSetRequestPacket.createPacket();
   packet.QuestNumber = index;
   packet.NewState = SET_STATE_ADVANCE;
-  Store.sendToGS(packet.buffer);
+  Session.sendToGS(packet.buffer);
 }
 
 /** `ProcessNextProgress`: re-check with zen enforced, then ask the server. Returns true on error. */
@@ -622,8 +623,8 @@ export function answerLegacyQuest(i: number): void {
 
 /** `SendLegacyQuestStateRequest` (0xA0): ask for every state after entering. */
 export function requestLegacyQuestStates(): void {
-  if (Store.isOffline) return;
-  Store.sendToGS(LegacyQuestStateRequestPacket.createPacket().buffer);
+  if (Session.isOffline) return;
+  Session.sendToGS(LegacyQuestStateRequestPacket.createPacket().buffer);
 }
 
 /**

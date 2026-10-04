@@ -1,6 +1,7 @@
 import { reaction } from 'mobx';
 import { t } from '../../i18n';
 import { Store } from '../../app/store';
+import { Session } from '../session';
 import { addNotification } from '../chat';
 import {
   itemSquares,
@@ -150,7 +151,7 @@ export const InventorySort = new (class _InventorySort {
       return;
     }
     // Offline there is no answer to wait for, so drive the next step here.
-    if (Store.isOffline) this.step();
+    if (Session.isOffline) this.step();
   }
 
   /** The next item that can go straight to its planned square. */

@@ -3,6 +3,7 @@ import { emoteById, genderedEmoteAction } from '../../modules/hero/emotes';
 import { isStandingIdle } from '../../controllers/anim/playerActionMapper';
 import { rotationByteOf } from '../../core/turnAngle';
 import { Store } from '../../app/store';
+import { Session } from '../../modules/session';
 import type { ISystemFactory } from '../world';
 
 /**
@@ -74,7 +75,7 @@ export const EmoteSystem: ISystemFactory = world => {
           // it from re-evaluating to idle on the frame the clip ends.
           if (active.restore !== null) {
             anim.action = active.restore;
-            if (!Store.isOffline) {
+            if (!Session.isOffline) {
               Store.sendAnimationRequest(
                 rotationByteOf(hero.transform.rot.y),
                 restServerAction(active.restore)
@@ -103,7 +104,7 @@ export const EmoteSystem: ISystemFactory = world => {
       anim.action = action;
       active = { action, restore: resting ? current : null };
 
-      if (!Store.isOffline) {
+      if (!Session.isOffline) {
         Store.sendAnimationRequest(
           rotationByteOf(hero.transform.rot.y),
           emote.serverAction

@@ -3,6 +3,7 @@ import './style.less';
 import { useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Store } from '@/app/store';
+import { Session } from '@/modules/session';
 import { ConnectionInfoRequestPacket } from '@versions/shared/packets/ConnectServerPackets';
 import {
   ServerConfig,
@@ -94,7 +95,7 @@ export const ServersPage = observer(() => {
     const packet = ConnectionInfoRequestPacket.createPacket();
     packet.ServerId = serverId;
 
-    Store.sendToCS(packet.buffer);
+    Session.sendToCS(packet.buffer);
   };
 
 const leftGroups = groups.slice(0, LEFT_GROUP_MAX);
@@ -153,7 +154,7 @@ const leftGroups = groups.slice(0, LEFT_GROUP_MAX);
   return (
     <div className="servers-page">
       <div className="server-sel-win" style={{ width: WIN_WIDTH, height: WIN_HEIGHT }}>
-        {Store.connectionLost && (
+        {Session.connectionLost && (
           <div className="servers-notice">{t('servers.connectionLost')}</div>
         )}
         {groups.length === 0 ? (
