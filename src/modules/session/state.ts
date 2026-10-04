@@ -16,7 +16,7 @@ import {
 } from '@versions/shared/packets/ClientToServerPackets';
 import { ensureActiveVersion, gameVersion } from '@/version';
 import { Ecs } from '@/ecs/current';
-import { AppState, UIState } from '@/app/uiState';
+import { AppState, UIState } from '@/controllers/interface/uiState';
 import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH, ServerAccounts } from '../servers/serverAccounts';
 import { connectServerAddress, ServerConfig, wsAddress } from '../servers/serverConfig';
 import { addNotification } from '../chat';

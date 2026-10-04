@@ -3,14 +3,14 @@ import '@versions/shared/maps/all';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { App } from './App';
-import './style.less';
+import '../controllers/interface/root.less';
 import './logic';
 // Content model classes register here, at boot, where no controller can reach (controllers import no content).
 import '@versions/shared/monsters/models';
 import { playOffline } from './offline';
 import { Hero } from '../modules/hero';
 import { Session } from '../modules/session';
-import { AppState, UIState } from './uiState';
+import { AppState, UIState } from '../controllers/interface/uiState';
 import { Loading } from '../controllers/loading';
 import { Ecs } from '../ecs/current';
 import { GameOptions } from '@/controllers/settings';

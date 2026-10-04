@@ -1,6 +1,6 @@
 import './style.less';
 import { observer } from 'mobx-react-lite';
-import { AppState, UIState } from '@/app/uiState';
+import { AppState, UIState } from '@/controllers/interface/uiState';
 import { useIsMobile } from '@/controllers/interface/mobile';
 import { MoveButton } from './moveButton';
 import { MenuCluster } from './menuCluster';

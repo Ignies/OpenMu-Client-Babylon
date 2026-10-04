@@ -4,7 +4,7 @@ import { SoundTrack } from '@babylonjs/core/Audio/soundTrack';
 import { Engine, PointerEventTypes, type Scene } from '../render/babylon/exports';
 import { isMusicKey, soundUrl, type Sounds } from './recipes';
 
-/** Dev switch: false keeps the background music silent (was `app/consts.ts`). */
+/** Dev switch: false keeps the background music silent. */
 const ENABLE_BG_MUSIC = true;
 
 /**

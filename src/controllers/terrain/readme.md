@@ -19,7 +19,7 @@ water, ground picks, minimap data and the base class for map objects. There is n
   `getTerrainLight`. Picks: `pickGround(world, x, y)` and `TerrainPicker` (`terrainPick.ts`).
 - `MapTileObject` (`mapTileObject.ts`): the `ModelObject` every map object extends.
 - `consts.ts`: `TERRAIN_SIZE`, `TILE_CM`, `cmToTiles`, the `TW_*` / `TWFlags` attribute bits, and the
-  dev switches `DEBUG_SHOW_TERRAIN_ATTRIBUTES`, `DISABLE_OBJECTS_LOADING` (were `app/consts.ts`).
+  dev switches `DEBUG_SHOW_TERRAIN_ATTRIBUTES`, `DISABLE_OBJECTS_LOADING`.
 - `terrainDynamicLight.ts`: `registerTerrainLight(emitter)` (returns the unregister),
   `updateTerrainDynamicLight`, `uploadTerrainLightDelta`, `requestTerrainLight`,
   `requestBodyTerrainLight`, `terrainLightReaches`, `terrainLightTouchesSample`.

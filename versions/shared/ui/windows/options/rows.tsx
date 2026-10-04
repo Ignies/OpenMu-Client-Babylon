@@ -13,7 +13,7 @@ import {
   type KeyAction,
 } from '@/controllers/interface/keyBindings';
 import { isFullscreen, toggleFullscreen } from '@/controllers/interface/browserHotkeys';
-import { PwaInstall } from '@/app/pwaInstall';
+import { PwaInstall } from '@/modules/options/pwaInstall';
 import {
   TIER_PRESETS,
   TIER_PRESET_LABEL_KEYS,

@@ -1,6 +1,6 @@
 // Dev-only standalone harness for the marketplace window, against fixtures and a mock
 // service: `bun run dev`, then open `/marketplace.html`. See readme.md.
-import '@/app/style.less';
+import '@/controllers/interface/root.less';
 import { loadGameVersion, versionIdForTag } from '@/version';
 
 async function bootstrap() {

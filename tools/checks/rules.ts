@@ -28,14 +28,9 @@ export const RULES: Rule[] = [
     test: e => under(e.from, 'src/modules/') && !isTest(e.from) && (under(e.to, 'versions/shared/ui/') || under(e.to, 'src/app/App')),
   },
   {
-    name: 'windows-use-modules-not-store',
-    why: 'a window reads its module and calls its actions; the Store is being split into modules',
-    test: e => under(e.from, 'versions/shared/ui/') && e.to === 'src/app/store.ts',
-  },
-  {
-    name: 'versions-do-not-reach-into-app',
-    why: 'version folders hold data and overrides; the app wires them, not the other way round',
-    test: e => under(e.from, 'versions/') && !under(e.from, 'versions/shared/ui/') && under(e.to, 'src/app/') && !isTest(e.from),
+    name: 'only-the-app-imports-the-app',
+    why: 'src/app wires everything at boot (installs the modules, mounts the pages); nothing it wires may depend on it',
+    test: e => under(e.to, 'src/app/') && !under(e.from, 'src/app/') && !isTest(e.from),
   },
 ];
 

@@ -95,7 +95,7 @@ import { PingPacket } from '@versions/shared/packets/ClientToServerPackets';
 
 import { Hero } from '../modules/hero';
 import { Session } from '../modules/session';
-import { AppState, UIState } from './uiState';
+import { AppState, UIState } from '../controllers/interface/uiState';
 import { Ecs } from '../ecs/current';
 
 
@@ -105,9 +105,6 @@ import { MODULES } from '../modules/modules';
 import { installPingNet } from '../controllers/net/pingNet';
 import { loadNpcNames, onNpcNamesChanged } from '@/controllers/assets/mu';
 import { monsterDisplayName } from '@versions/shared/monsters/monstersDatabase';
-
-
-export { spawnPlayer } from '../modules/scope/net';
 
 /**
  * `objectNameInWorld` is a snapshot, and deliberately so: it is also the
@@ -153,7 +150,7 @@ setInterval(() => {
 
 // A hot update that reaches this module must reload the page: Vite would
 // otherwise re-execute it and hand later-loaded importers a second instance
-// of this singleton (same guard as app/store.ts).
+// of this singleton.
 const hot = (import.meta as { hot?: { decline(): void } }).hot;
 if (hot) hot.decline();
 

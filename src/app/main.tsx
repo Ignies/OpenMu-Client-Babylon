@@ -13,7 +13,7 @@ import { loadGameVersion, versionIdForTag } from '../version';
 // Imported for its one side effect: the `mu-mobile` root class has to be on
 // the document before the first paint, or a phone flashes the desktop rules.
 import '../controllers/interface/mobile';
-import { watchInstallState } from './pwaInstall';
+import { watchInstallState } from '../modules/options/pwaInstall';
 
 // The browser offers the install once, early, and takes the offer back if
 // nobody catches it. Listening here rather than when the options window

@@ -1,4 +1,3 @@
-import { DEBUG_SHOW_BOUNDING_BOXES } from '../../app/consts';
 import {
   CreateBox,
   Matrix,
@@ -7,6 +6,9 @@ import {
   Vector3,
 } from '../../controllers/render/babylon/exports';
 import type { ISystemFactory } from '../world';
+
+/** Dev switch: draw every entity's bounding box. */
+const DEBUG_SHOW_BOUNDING_BOXES = false;
 
 const vec3Tmp = new Vector3();
 const qTmp = Quaternion.Identity();

@@ -4,7 +4,7 @@ import { devQueryNumbers } from '../../core/devSeams';
 import { serverNow } from '../../controllers/net/serverTime';
 import { MiniGameOpeningStateRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
 import { Session } from '../session';
-import { AppState, UIState } from '../../app/uiState';
+import { AppState, UIState } from '../../controllers/interface/uiState';
 import { Ecs } from '../../ecs/current';
 import type { EventLayer } from './layer';
 import { OPENING_STATE_GAME } from './recipes';

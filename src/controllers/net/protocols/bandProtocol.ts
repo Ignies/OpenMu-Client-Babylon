@@ -1,7 +1,7 @@
 /**
  * The band system's wire format: `C1 len FA sub ...`, both ways.
  *
- * Client -> proxy frames go through `Store.sendToGS`, which Xor32s bytes 3..
+ * Client -> proxy frames go through `Session.sendToGS`, which Xor32s bytes 3..
  * like every other C1; the proxy decrypts a copy, validates, and relays.
  * Proxy -> client frames are plain (a C1 never touches the SimpleModulus
  * counter) and carry the performer's object id at bytes 4-5, stamped by the

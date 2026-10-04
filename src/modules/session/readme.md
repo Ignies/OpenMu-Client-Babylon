@@ -55,7 +55,7 @@ the client-to-server encryption, the login fields and the offline flag.
 - Outgoing: `LogOut` (from `SessionExit.request`).
 
 ## Depends on / used by
-- uses: `app/uiState.ts`, `servers` (`serverConfig.ts`, `serverAccounts.ts`, `Servers`), `hero`,
+- uses: `controllers/interface/uiState.ts`, `servers` (`serverConfig.ts`, `serverAccounts.ts`, `Servers`), `hero`,
   `character_select`, `npc_shop`, `quests`, `economy`, `social`, `friends/messenger`,
   `controllers/settings`, `controllers/sound`, `controllers/interface/browserHotkeys`.
 - used by: `src/app/logic.ts`, `src/app/boot.tsx`, `hero/net.ts` (`remember`, `finish`),

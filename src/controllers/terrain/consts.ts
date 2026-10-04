@@ -48,6 +48,6 @@ export enum TWFlags {
 export const LOG_IN_SCENE = 2;
 export const CHARACTER_SCENE = 4;
 
-/** Dev switches (were `app/consts.ts`): draw the terrain attribute overlay, skip map objects. */
+/** Dev switches: draw the terrain attribute overlay, skip map objects. */
 export const DEBUG_SHOW_TERRAIN_ATTRIBUTES = false;
 export const DISABLE_OBJECTS_LOADING = false;

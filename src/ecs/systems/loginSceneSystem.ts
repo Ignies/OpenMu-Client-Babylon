@@ -1,7 +1,7 @@
 import { runInAction } from 'mobx';
 import type { ISystemFactory } from '../world';
 import { CharSelect } from '../../modules/character_select';
-import { AppState, UIState } from '../../app/uiState';
+import { AppState, UIState } from '../../controllers/interface/uiState';
 import { ENUM_WORLD } from '@/core/types';
 import { EventBus } from '../../core/eventBus';
 import { Vector3, type ArcRotateCamera } from '../../controllers/render/babylon/exports';

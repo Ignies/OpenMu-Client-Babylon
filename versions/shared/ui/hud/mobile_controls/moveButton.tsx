@@ -10,9 +10,9 @@ const PORTAL_SPRITE = 'mini_map_ui_portal.OZT';
 const GLYPH = 34;
 
 /**
- * The warp list, one thumb away. It writes `Store.warpWindowEnabled` - the
- * same field the `M` key writes - so the Move Command window itself needs no
- * knowledge of any of this. That window already registers its size with
+ * The warp list, one thumb away. It toggles the `move_command` window the way
+ * the `M` key does, so the Move Command window itself needs no knowledge of
+ * any of this. That window already registers its size with
  * `MuWindows`, so `fitScaleOf` caps it to something that fits a phone.
  */
 export const MoveButton = observer(() => {

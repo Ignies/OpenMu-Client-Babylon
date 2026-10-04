@@ -2,7 +2,7 @@
  * The map ping's wire format: `C1 len FB sub ...`, both ways. Modelled on
  * `bandProtocol.ts`, which solved the same problems first.
  *
- * Client -> proxy frames go through `Store.sendToGS`, which Xor32s bytes 3..
+ * Client -> proxy frames go through `Session.sendToGS`, which Xor32s bytes 3..
  * like every other C1; the proxy decrypts a copy, validates, and relays.
  * Proxy -> client frames are plain (a C1 never touches the SimpleModulus
  * counter) and carry the sender's object id at bytes 4-5, stamped by the

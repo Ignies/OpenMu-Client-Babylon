@@ -14,7 +14,7 @@ import { Social } from '../social/social';
 import { Merchant } from '@/modules/npc_shop';
 import { HeroSkills } from '@/modules/skills';
 import { Session } from '@/modules/session';
-import { AppState, UIState } from '@/app/uiState';
+import { AppState, UIState } from '@/controllers/interface/uiState';
 import { Ecs } from '@/ecs/current';
 import { TELEPORT } from '../skills/skillCasting';
 import { addNpcToScope, applyObjectEffect, convertDirectionToAngle } from '../_shared/net_helpers';

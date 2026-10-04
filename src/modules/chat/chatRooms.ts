@@ -2,7 +2,7 @@ import { t } from '../../i18n';
 import { action, makeObservable, observable, reaction, runInAction } from 'mobx';
 import { Hero } from '../hero';
 import { Session } from '../session';
-import { AppState, UIState } from '../../app/uiState';
+import { AppState, UIState } from '../../controllers/interface/uiState';
 import { Social } from '../social/social';
 import {
   ChatRoomCreateRequestPacket,
@@ -77,9 +77,7 @@ export const ChatRooms = new (class _ChatRooms {
   /**
    * Rooms live on their own connections but belong to the character: gone
    * with the world (relog, lost server, back to the server list). Armed
-   * lazily, not in the constructor: app/store.ts imports this module through
-   * app/logic.ts, so at module-evaluation time `Store` is still in its temporal
-   * dead zone and a top-level reaction throws (same as modules/skills/buffs.ts).
+   * lazily, on the first room, so loading this module starts nothing.
    */
   private ensureWatching(): void {
     if (this.stopWatching) return;
@@ -354,6 +352,6 @@ export const ChatRooms = new (class _ChatRooms {
 
 // A hot update that reaches this module must reload the page: Vite would
 // otherwise re-execute it and hand later-loaded importers a second instance
-// of this singleton (same guard as app/store.ts).
+// of this singleton.
 const hot = (import.meta as { hot?: { decline(): void } }).hot;
 if (hot) hot.decline();

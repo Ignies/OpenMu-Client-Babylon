@@ -5,7 +5,7 @@ import { Merchant } from '../npc_shop';
 import { Session } from './state';
 import { addNotification } from '../chat';
 import { MsgBox } from '../../controllers/interface';
-import { AppState, UIState } from '../../app/uiState';
+import { AppState, UIState } from '../../controllers/interface/uiState';
 import { Ecs } from '../../ecs/current';
 import { Economy } from '../economy/economy';
 import { Social } from '../social/social';

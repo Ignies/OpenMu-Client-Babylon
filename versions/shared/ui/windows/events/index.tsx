@@ -560,7 +560,7 @@ const TimerFigure = ({
 /** `RenderMatchTimes` of both castle systems: the figure while a match runs. */
 const EventTimer = observer(() => {
   // Subscribe to the observable timers *before* the map check: `mapIndex` is
-  // a plain field of `World` (only `Store.world` itself is observable), so a
+  // a plain field of `World` (only `Ecs.world` itself is observable), so a
   // render that returned on it alone was never re-run when a match started
   // on the castle map (B11 - the figure never mounted live).
   const bc = bloodCastleTimer();

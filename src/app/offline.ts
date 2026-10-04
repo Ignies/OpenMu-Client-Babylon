@@ -7,7 +7,7 @@ import { InventoryConstants } from '@/core/inventoryConstants';
 import { ItemGroups } from '@versions/shared/objects/enum';
 import { devVitalPercent } from '../core/devSeams';
 import { Ecs } from '../ecs/current';
-import { AppState, UIState } from './uiState';
+import { AppState, UIState } from '../controllers/interface/uiState';
 import { Session } from '../modules/session';
 import { Hero } from '../modules/hero';
 import { spawnPlayer } from '../modules/scope/net';

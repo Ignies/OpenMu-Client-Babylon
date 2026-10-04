@@ -12,9 +12,9 @@ import {
 } from '../../controllers/render/babylon/exports';
 import type { Entity, ISystemFactory } from '../world';
 import { CharSelect } from '../../modules/character_select';
-import { AppState, UIState } from '../../app/uiState';
+import { AppState, UIState } from '../../controllers/interface/uiState';
 import { ENUM_WORLD } from '@/core/types';
-import { spawnPlayer } from '../../app/logic';
+import { spawnPlayer } from '../../modules/scope/net';
 import { deserializeAppearance } from '../../controllers/actors/deserializeAppearance';
 import { runInAction } from 'mobx';
 import {

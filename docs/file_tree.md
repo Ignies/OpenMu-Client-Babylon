@@ -25,7 +25,7 @@ docker/            development container: dev server + proxy from this checkout 
 ## src/ - the engine
 
 ```
-app/               boot (main.tsx, boot.tsx), App.tsx, the page state (uiState.ts), the offline
+app/               boot (main.tsx, boot.tsx), App.tsx, the offline
                    scene (offline.ts), logic.ts (installs the modules), lifecycle.ts (what resets
                    on map change)
 core/              types, math, rand, queue, event bus, local storage, pathfinding

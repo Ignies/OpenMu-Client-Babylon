@@ -10,7 +10,7 @@ import { Social } from '../social/social';
 import { StatType, masterExperienceActive } from './characterStats';
 import { Hero } from './state';
 import { addNotification } from '@/modules/chat';
-import { AppState, UIState } from '@/app/uiState';
+import { AppState, UIState } from '@/controllers/interface/uiState';
 import { Ecs } from '@/ecs/current';
 import { convertDirectionToAngle } from '../_shared/net_helpers';
 import { experienceForLevel } from './experience';

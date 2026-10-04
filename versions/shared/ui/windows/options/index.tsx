@@ -15,7 +15,7 @@ import {
   type GameOptions as GameOptionsType,
 } from '@/controllers/settings';
 import { invalidateShadowState } from '@/controllers/render/objectShadow';
-import { installApp } from '@/app/pwaInstall';
+import { installApp } from '@/modules/options/pwaInstall';
 import { reloadMapObjects } from '@/controllers/terrain/loadMapIntoScene';
 import {
   KeyBindings,

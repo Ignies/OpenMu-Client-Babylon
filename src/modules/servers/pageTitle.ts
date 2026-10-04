@@ -1,5 +1,5 @@
 import { reaction } from 'mobx';
-import { AppState, UIState } from '../../app/uiState';
+import { AppState, UIState } from '../../controllers/interface/uiState';
 import { ServerConfig } from './serverConfig';
 
 /**

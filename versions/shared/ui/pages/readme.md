@@ -16,7 +16,7 @@ The full-screen pages: the pre-game screens and the world page that holds every 
   packets, roster drawn as the line-up plate or as rows). Every character page uses it; see its
   readme.
 - `WorldPage` (`world/`): every `world` slot window, then the HUD with every `hud` slot window in
-  stacking order. Toggles `AppState.hudHidden` (`app/uiState.ts`) on the hide-interface key.
+  stacking order. Toggles `AppState.hudHidden` (`controllers/interface/uiState.ts`) on the hide-interface key.
 
 ## How it works
 - `src/app/App.tsx` mounts `PreloaderPage`, `ServersPage` and `WorldPage` directly.
@@ -28,7 +28,7 @@ The full-screen pages: the pre-game screens and the world page that holds every 
   `src/i18n`'s glob. A version's own page (v097d login and characters) uses the shared page's keys.
 
 ## Depends on / used by
-- uses: `src/modules/{servers,session,character_select,hero}`, `app/uiState.ts`, `src/controllers/interface`
+- uses: `src/modules/{servers,session,character_select,hero}`, `controllers/interface/uiState.ts`, `src/controllers/interface`
 - used by: `src/app/App.tsx`, `versions/season6/ui/index.ts`,
   `versions/v097d/ui/pregame/charactersPage.tsx` (`character_list`)
 

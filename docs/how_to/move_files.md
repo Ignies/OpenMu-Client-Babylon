@@ -24,7 +24,7 @@ and moves named imports of `app/store.ts` (types, enums) to the file that export
 ```json
 { "members": { "playerData": { "expr": "Hero", "name": "Hero", "door": "src/modules/hero/index.ts",
   "home": "src/modules/hero/state.ts" } },
-  "exports": { "UIState": { "door": "src/app/uiState.ts" } } }
+  "exports": { "UIState": { "door": "src/controllers/interface/uiState.ts" } } }
 ```
 
 Files inside the home's folder import the home file, the rest the door. Move the member's code by
