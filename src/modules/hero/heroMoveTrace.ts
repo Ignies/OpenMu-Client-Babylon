@@ -1,4 +1,4 @@
-import { Store } from '../../app/store';
+import { HeroSkills } from '../skills';
 import { Hero } from './state';
 import type { Entity } from '../../ecs/world';
 
@@ -30,7 +30,7 @@ export function traceHeroInstantMove(
     `hero moved by server: ${tiles.toFixed(1)} tiles, ` +
       `(${from.x}, ${from.y}) -> (${to.x}, ${to.y})`,
     {
-      skill: Store.currentSkill,
+      skill: HeroSkills.currentSkill,
       // The walk the server was last told about. If it ends where the hero
       // was just put, the server was still walking one we thought we stopped.
       sentWalk: walk

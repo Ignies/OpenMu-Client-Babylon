@@ -8,7 +8,7 @@ import { InventoryConstants } from '@/core/inventoryConstants';
 import { ItemSerializer } from '@/controllers/item_rules';
 import { MonsterActionType, PlayerAction } from '@versions/shared/objects/enum';
 import { PlayerObject, npcClassOf } from '@/controllers/actors/playerObject';
-import { Store } from '@/app/store';
+import { HeroSkills } from '@/modules/skills';
 import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
 import { Vector3 } from '@/controllers/render/babylon/exports';
@@ -285,7 +285,7 @@ function addCharacterToScope(
     if (char.effects?.length) {
       world.addComponent(playerEntity, 'buffs', new Set(char.effects));
       if (Hero.playerId === maskedId) {
-        char.effects.forEach(id => Store.setBuff(id, true));
+        char.effects.forEach(id => HeroSkills.setBuff(id, true));
       }
     }
 

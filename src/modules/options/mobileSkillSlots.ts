@@ -5,7 +5,7 @@ import { isHotbarSkill } from '../skills/skillCasting';
 /**
  * The three skills linked to the mobile pad, per character.
  *
- * Deliberately not `Store.skillHotkeys`: those ten are the digit keys and are
+ * Deliberately not `HeroSkills.skillHotkeys`: those ten are the digit keys and are
  * round-tripped to the server through `SaveKeyConfiguration`, so borrowing
  * three of them would rewrite the player's desktop bar from their phone.
  * These live in the browser only, keyed by character name so two characters

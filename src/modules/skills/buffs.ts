@@ -1,8 +1,8 @@
 /**
  * Active buffs / debuffs of the hero with the moment each one arrived.
  *
- * Driven by `Store.buffs` (MagicEffectStatus 0x07 / MagicEffectCancelled,
- * `app/logic.ts`): a MobX reaction stamps every newly present effect id with the
+ * Driven by `HeroSkills.buffs` (MagicEffectStatus 0x07 / MagicEffectCancelled,
+ * `net.ts`): a MobX reaction stamps every newly present effect id with the
  * layer clock. OpenMU S6 sends no durations, so `buffRemaining` only counts
  * down for effects whose duration formula the client knows (`recipes.ts`),
  * and answers `null` otherwise.
@@ -14,7 +14,7 @@ import { reaction } from 'mobx';
 import type { ENUM_WORLD } from '../../core/types';
 import type { SkillLayer } from './layer';
 import { buffRecipe, type BuffKind } from './recipes';
-import { Store } from '../../app/store';
+import { HeroSkills } from './state';
 import { Hero } from '../hero';
 
 // ---- 1. tuning -------------------------------------------------------------
@@ -45,22 +45,17 @@ function noteBuffs(ids: readonly number[] | undefined): void {
   }
 }
 
-/** Disposer of the `Store.buffs` reaction once it is running. */
+/** Disposer of the `HeroSkills.buffs` reaction once it is running. */
 let stopWatching: (() => void) | null = null;
 
 /**
- * Start following `Store.buffs`. Deferred to the first `update` on purpose:
- * `app/store.ts` imports (through `app/logic.ts` and the facade) this very file, so
- * at module-evaluation time `Store` is still in its temporal dead zone and a
- * top-level reaction throws `Cannot access 'Store' before initialization`.
- * By the first frame every module has finished evaluating.
- *
- * `Store.buffs` is replaced wholesale on every change, so the reaction fires
+ * Start following `HeroSkills.buffs`, on the first `update` (by the first frame every module has
+ * finished evaluating). `buffs` is replaced wholesale on every change, so the reaction fires
  * once per packet; `fireImmediately` catches a hero that logged in buffed.
  */
 function ensureWatching(): void {
   if (stopWatching) return;
-  stopWatching = reaction(() => Store.buffs, noteBuffs, { fireImmediately: true });
+  stopWatching = reaction(() => HeroSkills.buffs, noteBuffs, { fireImmediately: true });
 }
 
 /**
@@ -70,7 +65,7 @@ function ensureWatching(): void {
 export function activeBuffs(): ActiveBuff[] {
   const buffs: ActiveBuff[] = [];
   const debuffs: ActiveBuff[] = [];
-  for (const id of Store.buffs) {
+  for (const id of HeroSkills.buffs) {
     const recipe = buffRecipe(id);
     const entry: ActiveBuff = {
       id,
@@ -86,7 +81,7 @@ export function activeBuffs(): ActiveBuff[] {
 
 /** Whether the hero currently carries this effect. */
 export function hasBuff(effectId: number): boolean {
-  return Store.buffs.includes(effectId);
+  return HeroSkills.buffs.includes(effectId);
 }
 
 /**

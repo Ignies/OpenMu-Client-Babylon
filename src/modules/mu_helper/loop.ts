@@ -1,4 +1,5 @@
 import { Store } from '../../app/store';
+import { HeroSkills } from '../skills';
 import { Hero } from '../hero';
 import { Social } from '../social/social';
 import { gameVersion } from '../../version';
@@ -129,7 +130,7 @@ function entityTile(e: Entity): Point {
 }
 
 function isLearned(num: number): boolean {
-  return num > 0 && Store.skills.some(s => s.number === num);
+  return num > 0 && HeroSkills.skills.some(s => s.number === num);
 }
 
 /** `(life * 100 + max - 1) / max` - the original's ceiling percent. */
@@ -142,8 +143,8 @@ function heroHpPercent(): number {
 /** Issue a cast through the same seam a right-click uses. Returns busy. */
 function castSkill(world: World, num: number, target: Entity): boolean {
   if (world.castRequest) return true; // the player's own cast wins
-  if (Store.currentSkill !== num) Store.selectSkill(num);
-  if (Store.currentSkill !== num) return false;
+  if (HeroSkills.currentSkill !== num) HeroSkills.selectSkill(num);
+  if (HeroSkills.currentSkill !== num) return false;
   const pos = target.transform!.pos;
   world.castRequest = { target, point: { x: pos.x, y: pos.z } };
   return true;

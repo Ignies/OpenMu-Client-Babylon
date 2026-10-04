@@ -12,6 +12,7 @@ import { QuickItemActions } from '../inventory/quickItemActions';
 import { SlideHelp } from '@/controllers/interface/slideHelp';
 import { Social } from '../social/social';
 import { Store } from '@/app/store';
+import { HeroSkills } from '@/modules/skills';
 import { Session } from '@/modules/session';
 import { AppState, UIState } from '@/app/uiState';
 import { Ecs } from '@/ecs/current';
@@ -202,7 +203,7 @@ export function installNet(): void {
     for (const raw of spec.split(',')) {
       const id = Number(raw.trim());
       if (!Number.isInteger(id) || id <= 0) continue;
-      Store.setBuff(id, true);
+      HeroSkills.setBuff(id, true);
       applyObjectEffect(hero, id, true);
     }
   });

@@ -3,13 +3,12 @@ import './style.less';
 import { t } from '@/i18n';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
-import { Store } from '@/app/store';
 import { Ecs } from '@/ecs/current';
 import { isKey } from '@/controllers/interface/keyBindings';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { playUiSound } from '@/controllers/sound/sfx';
 import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
-import { skills } from '@/modules/skills';
+import { skills, HeroSkills } from '@/modules/skills';
 import { SkillIcon } from '../../components/skill_icon';
 import {
   SKILL_ICON_HEIGHT,
@@ -21,7 +20,7 @@ import { toggleMasterSkillsWindow } from '../master_skills/windowState';
 import { OK_SPRITE, BTN_HEIGHT, BTN_WIDTH } from '@/controllers/interface/components/msg_window/layout';
 
 /**
- * The learned-skill list: every skill the server taught (`Store.skills`),
+ * The learned-skill list: every skill the server taught (`HeroSkills.skills`),
  * with its icon, name, level, mana / AG cost and the master level of a
  * master skill, greyed when `skills.requirementsMet` fails (the hotbar's
  * `bCantSkill` rule). A click makes it the current skill, like a click on a
@@ -41,7 +40,7 @@ const MASTER_BUTTON = { x: 68, y: 382 };
 const SkillRow = observer(({ number, level }: { number: number; level: number }) => {
   const def = skillDefinition(number);
   const usable = skills.requirementsMet(number);
-  const selected = Store.currentSkill === number;
+  const selected = HeroSkills.currentSkill === number;
   const cost = def ? (def.ag > 0 ? `AG ${def.ag}` : def.mana > 0 ? `MP ${def.mana}` : '') : '';
   const masterLevel = skills.masterSkillLevel(number);
 
@@ -50,7 +49,7 @@ const SkillRow = observer(({ number, level }: { number: number; level: number })
       className={`skill-row${selected ? ' skill-row-selected' : ''}${usable ? '' : ' skill-row-blocked'}`}
       style={{ height: ROW_HEIGHT }}
       onClick={() => {
-        Store.selectSkill(number);
+        HeroSkills.selectSkill(number);
         playUiSound('click');
       }}
     >
@@ -111,10 +110,10 @@ export const SkillListWindow = observer(() => {
         className="skill-list"
         style={{ left: LIST.x + 6, top: LIST.y + 6, width: LIST.width - 12, height: LIST.height - 12 }}
       >
-        {Store.skills.length === 0 && (
+        {HeroSkills.skills.length === 0 && (
           <div className="skill-list-empty">{t('skills.empty')}</div>
         )}
-        {Store.skills.map(s => (
+        {HeroSkills.skills.map(s => (
           <SkillRow key={s.number} number={s.number} level={s.level} />
         ))}
       </div>

@@ -14,7 +14,7 @@ import { downloadDataFile } from '../../controllers/assets/mu/dataFolder';
 import { decodeLocalText, downloadLocalDataFile } from '../../controllers/assets/mu/localData';
 import { convertBux } from '../../controllers/terrain/mapFileEncryption';
 import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
-import { Store } from '../../app/store';
+import { HeroSkills } from './state';
 import { Hero } from '../hero';
 import { Session } from '../session';
 import type { SkillLayer } from './layer';
@@ -447,7 +447,7 @@ function masterBaseSkillMet(entry: MasterTreeEntry): boolean {
   const brand = skillAttributes[entry.skill]?.brand ?? 0;
   if (!brand) return true;
   if (skillAttributes[brand]?.useType === SKILL_USE_TYPE_INNATE) return true;
-  return Store.skills.some(s => s.number === brand);
+  return HeroSkills.skills.some(s => s.number === brand);
 }
 
 /**

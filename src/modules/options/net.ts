@@ -1,6 +1,6 @@
 import { ApplyKeyConfigurationPacket } from '@versions/shared/packets/ServerToClientPackets';
 import { EventBus } from '@/core/eventBus';
-import { Store } from '@/app/store';
+import { HeroSkills } from '@/modules/skills';
 
 /** Registers this module's packet listeners (see ../module.ts). */
 export function installNet(): void {
@@ -26,6 +26,6 @@ export function installNet(): void {
       const word = (data.getUint8(i * 2) << 8) | data.getUint8(i * 2 + 1);
       hotkeys.push(word === 0xffff ? -1 : word);
     }
-    Store.applyKeyConfiguration(hotkeys);
+    HeroSkills.applyKeyConfiguration(hotkeys);
   });
 }

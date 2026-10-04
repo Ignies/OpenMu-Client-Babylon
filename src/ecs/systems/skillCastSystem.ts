@@ -42,7 +42,7 @@ import { isWingItem } from '../../controllers/actors/wings';
 import type { AttackPose } from '../../controllers/actors/weaponClass';
 import { mountKind } from '@/controllers/pets';
 import { clipCastSound, heroCastSound, playCombat, playSkill } from '../../controllers/sound/combat';
-import { skills } from '../../modules/skills';
+import { skills, HeroSkills } from '../../modules/skills';
 import { combat } from '../../controllers/combat';
 
 import { CONSECUTIVE_ATTACK_KEY } from '../../controllers/combat/skillMovement';
@@ -491,7 +491,7 @@ export const SkillCastSystem: ISystemFactory = world => {
 
       if (!req) return;
 
-      const def = skillDefinition(Store.currentSkill);
+      const def = skillDefinition(HeroSkills.currentSkill);
       if (!def) {
         // No skill selected: the right button behaves like a plain attack
         // click, and another player is only swung at with Ctrl held.

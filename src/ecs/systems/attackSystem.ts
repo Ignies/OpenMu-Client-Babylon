@@ -1,5 +1,6 @@
 import type { Entity, ISystemFactory } from '../world';
 import { Store } from '../../app/store';
+import { HeroSkills } from '../../modules/skills';
 import { Hero } from '../../modules/hero';
 import { Session } from '../../modules/session';
 import { addNotification } from '../../modules/chat';
@@ -224,7 +225,7 @@ export const AttackSystem: ISystemFactory = world => {
       // `playerMoveTo` every frame and drag the hero onto what he is casting
       // at. The target stays selected (the health bar, head tracking and the
       // mobile skill pad all read it); only the walk and the swing yield.
-      if (world.castRequest && skillDefinition(Store.currentSkill)) return;
+      if (world.castRequest && skillDefinition(HeroSkills.currentSkill)) return;
 
       const hands = playerEntity.charAppearance;
       const playerPos = playerEntity.transform.pos;

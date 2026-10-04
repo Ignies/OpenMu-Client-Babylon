@@ -1,11 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { t } from '@/i18n';
-import { Store } from '@/app/store';
 import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
 import { Social } from '@/modules/social/social';
-import { skills } from '@/modules/skills';
+import { skills, HeroSkills } from '@/modules/skills';
 import { onCooldownTick } from '@/modules/skills/cooldowns';
 import { isHotbarSkill, TELEPORT, TELEPORT_ALLY } from '@/modules/skills/skillCasting';
 import { aimAlongFacing, teleportSquareOpen } from '@/modules/warp/teleportRules';
@@ -41,7 +40,7 @@ function castSkill(number: number): void {
   const hero = world?.playerEntity;
   if (!world || !hero || hero.dying) return;
 
-  Store.selectSkill(number);
+  HeroSkills.selectSkill(number);
 
   // Teleport has no cursor to aim at here, and neither the monster's tile nor
   // the hero's own is a jump: it takes the furthest open square straight ahead.
@@ -122,7 +121,7 @@ const TargetLabel = () => {
 const PadSlot = observer(({ slot, onPick }: { slot: number; onPick: (slot: number) => void }) => {
   const number = MobileSkillSlots.slots[slot] ?? -1;
   const usable = number >= 0 && skills.requirementsMet(number);
-  const selected = number >= 0 && number === Store.currentSkill;
+  const selected = number >= 0 && number === HeroSkills.currentSkill;
   const sweep = useRef<HTMLDivElement>(null);
 
   // RenderSkillDelay: the sweep is written straight to the element on the
@@ -167,7 +166,7 @@ const PadSlot = observer(({ slot, onPick }: { slot: number; onPick: (slot: numbe
 
 /** Every learned skill that can sit on a bar, plus the entry that clears the slot. */
 const SkillPicker = observer(({ slot, onClose }: { slot: number; onClose: () => void }) => {
-  const learned = Store.skills.map(s => s.number).filter(isHotbarSkill);
+  const learned = HeroSkills.skills.map(s => s.number).filter(isHotbarSkill);
 
   return (
     <div className="mobile-skill-picker" onPointerDown={onClose}>
@@ -233,7 +232,7 @@ const SkillPicker = observer(({ slot, onClose }: { slot: number; onClose: () => 
 export const SkillPad = observer(() => {
   const [picking, setPicking] = useState(-1);
   const character = Hero.name;
-  const learned = Store.skills;
+  const learned = HeroSkills.skills;
 
   useEffect(() => {
     if (character) MobileSkillSlots.use(character);

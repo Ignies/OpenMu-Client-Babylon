@@ -8,7 +8,7 @@ import { TW_SAFEZONE } from '../../controllers/terrain/consts';
 import type { Item } from '../../ecs/world';
 import type { SkillLayer } from './layer';
 import { skillCooldownRemaining } from './cooldowns';
-import { Store } from '../../app/store';
+import { HeroSkills } from './state';
 import { Hero } from '../hero';
 
 // ---- 1. tuning -------------------------------------------------------------
@@ -142,7 +142,7 @@ export function skillUsability(num: number): SkillUsability {
 
   // The server only teaches a class its own skills, so a learned skill has
   // already passed this; the rule matters for lists of skills not yet held.
-  const learned = Store.skills.some(s => s.number === num);
+  const learned = HeroSkills.skills.some(s => s.number === num);
   if (!learned && !skillClasses(def).has(pd.charClass)) blocks.push('class');
   if (def.level > 0 && pd.level < def.level) blocks.push('level');
   if (def.energy > 0 && pd.eng < def.energy) blocks.push('energy');

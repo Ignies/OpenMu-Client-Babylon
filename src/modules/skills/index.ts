@@ -40,6 +40,7 @@ import {
 } from './masterTree';
 
 export type { SkillLayer } from './layer';
+export { HeroSkills } from './state';
 export type { ActiveBuff } from './buffs';
 export type { SkillCooldown } from './cooldowns';
 export type { SkillBlock, SkillUsability } from './usability';

@@ -5,7 +5,7 @@ import type { PlayerObject } from '../controllers/actors/playerObject';
 import { playUiSound } from '../controllers/sound/sfx';
 import { consumeSound, upgradedItemSound } from '../controllers/sound/ui';
 import { CharacterClassNumber, ENUM_WORLD } from '@/core/types';
-import { ConsumeItemRequestPacket, SaveKeyConfigurationPacket, DropItemRequestPacket, EnterGateRequestPacket, ItemMoveRequestPacket, PickupItemRequestPacket, WarpCommandRequestPacket, TalkToNpcRequestPacket, CloseNpcRequestPacket, MuHelperStatusChangeRequestPacket, PetCommandModeEnum, PetCommandRequestPacket, PetInfoRequestPacket, PetTypeEnum, StorageTypeEnum, BuyItemFromNpcRequestPacket, SellItemToNpcRequestPacket, RepairItemRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
+import { ConsumeItemRequestPacket, DropItemRequestPacket, EnterGateRequestPacket, ItemMoveRequestPacket, PickupItemRequestPacket, WarpCommandRequestPacket, TalkToNpcRequestPacket, CloseNpcRequestPacket, MuHelperStatusChangeRequestPacket, PetCommandModeEnum, PetCommandRequestPacket, PetInfoRequestPacket, PetTypeEnum, StorageTypeEnum, BuyItemFromNpcRequestPacket, SellItemToNpcRequestPacket, RepairItemRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
 import { NetStats } from '../controllers/net/roundTrip';
 import {
   makeObservable,
@@ -35,7 +35,6 @@ import {
 import { calcMaxDurability, itemDef, itemStats, type HeroStats } from '@/controllers/item_rules';
 import { learnableSkill } from '@/controllers/item_rules';
 import { learnSkillError } from '@/modules/skills/skillItems';
-import { isHotbarSkill } from '../modules/skills/skillCasting';
 import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
 import {
   StorageKind,
@@ -60,6 +59,7 @@ import { AppState, UIState } from './uiState';
 import { addNotification } from '../modules/chat';
 import { Session } from '../modules/session';
 import { Hero } from '../modules/hero';
+import { HeroSkills } from '../modules/skills';
 
 const ITEM_MOVE_TIMEOUT = 5000;
 
@@ -337,40 +337,8 @@ export const Store = new (class _Store {
   heroStats(): HeroStats {
     return Hero.heroStats();
   }
-
-  /** Learned skills from SkillListUpdate / SkillAdded / SkillRemoved (F3 11). */
-  skills: { index: number; number: number; level: number }[] = [];
-  /** Hero->CurrentSkill as a wire skill number; -1 = plain attack. */
-  currentSkill = -1;
   /** WeatherStatusUpdate (0x0F): weather kind + variation of the current map. */
   weather = { weather: 0, variation: 0 };
-
-  /** Active MagicEffectStatus effect ids of the hero (buff bar). */
-  buffs: number[] = [];
-
-  setBuff(effectId: number, active: boolean) {
-    const has = this.buffs.includes(effectId);
-    if (active && !has) this.buffs = this.buffs.concat(effectId);
-    else if (!active && has) this.buffs = this.buffs.filter(b => b !== effectId);
-  }
-
-  /** Digit keys 1..9,0 → skill number (CNewUISkillList hot keys). */
-  skillHotkeys: number[] = new Array(10).fill(-1);
-  /**
-   * `ApplyKeyConfiguration` (F3 30, `ReceiveOption`): the hot keys the server
-   * saved for this character, by slot. Kept apart from `skillHotkeys` because
-   * the packet may land before the skill list does; `refreshSkillSelection`
-   * re-applies them once the skill is known.
-   */
-  savedSkillHotkeys: number[] = new Array(10).fill(-1);
-
-  /** Restore the server-saved hot keys (`g_pMainFrame->SetSkillHotKey`). */
-  applyKeyConfiguration(hotkeys: number[]) {
-    const next = new Array(10).fill(-1);
-    for (let i = 0; i < 10 && i < hotkeys.length; i++) next[i] = hotkeys[i];
-    this.savedSkillHotkeys = next;
-    this.refreshSkillSelection();
-  }
 
   // ---- pets (`giPetManager`): Dark Horse / Dark Raven state, no UI yet ----
 
@@ -493,90 +461,6 @@ export const Store = new (class _Store {
     this.muHelper.config = config;
   }
 
-  setSkillList(list: { index: number; number: number; level: number }[]) {
-    this.skills = list.slice().sort((a, b) => a.index - b.index);
-    this.refreshSkillSelection();
-  }
-
-  addSkill(skill: { index: number; number: number; level: number }) {
-    this.skills = this.skills
-      .filter(s => s.number !== skill.number)
-      .concat(skill)
-      .sort((a, b) => a.index - b.index);
-    this.refreshSkillSelection();
-  }
-
-  removeSkill(number: number) {
-    this.skills = this.skills.filter(s => s.number !== number);
-    this.refreshSkillSelection();
-  }
-
-  selectSkill(number: number) {
-    this.currentSkill = this.skills.some(s => s.number === number) ? number : -1;
-  }
-
-  /**
-   * `CNewUISkillList::SetHotKey` (NewUIMainFrameWindow.cpp:1803): a skill
-   * sits on one key only, so the key it held before is cleared. The layout
-   * is sent to the server right away (the original saves it on leaving the
-   * world; OpenMU accepts it at any time) so it survives a relog.
-   */
-  assignSkillHotkey(slot: number, number: number) {
-    if (slot < 0 || slot > 9) return;
-    const next = this.skillHotkeys.map(n => (n === number ? -1 : n));
-    next[slot] = number;
-    this.skillHotkeys = next;
-    this.savedSkillHotkeys = next.slice();
-    this.saveKeyConfiguration();
-  }
-
-  /**
-   * `SaveOptions` (ZzzOpenData.cpp:4764): F3 30 with the ten hot keys as
-   * big-endian skill numbers (0xFFFF = empty) followed by the option bytes
-   * the client does not model yet (game options, Q/W/E/R, chat log, R,
-   * QWER level), left zero.
-   */
-  private saveKeyConfiguration(): void {
-    if (Session.isOffline) return;
-    const packet = SaveKeyConfigurationPacket.createPacket(4 + 20 + 1 + 3 + 1 + 1 + 1);
-    const data = packet.buffer;
-    for (let i = 0; i < 10; i++) {
-      const number = this.skillHotkeys[i];
-      data.setUint16(4 + i * 2, number >= 0 ? number : 0xffff, false);
-    }
-    Session.sendToGS(packet.buffer);
-  }
-
-  private refreshSkillSelection() {
-    if (!this.skills.some(s => s.number === this.currentSkill)) {
-      this.currentSkill = -1;
-    }
-    // Unassigned hot keys default to the learned skills in order (1..9, 0).
-    const next = this.skillHotkeys.map(n =>
-      this.skills.some(s => s.number === n) ? n : -1
-    );
-    // Server-saved hot keys win over the defaults once the skill is learned.
-    for (let slot = 0; slot < 10; slot++) {
-      const saved = this.savedSkillHotkeys[slot];
-      if (saved === -1 || next[slot] === saved) continue;
-      if (!this.skills.some(s => s.number === saved)) continue;
-      const prev = next.indexOf(saved);
-      if (prev !== -1) next[prev] = -1;
-      next[slot] = saved;
-    }
-    const used = new Set(next);
-    // Master-tree entries and the siege commands are learned skills that never
-    // sit on a bar slot, so they never claim one by default either.
-    const free = this.skills
-      .map(s => s.number)
-      .filter(n => isHotbarSkill(n) && !used.has(n));
-    for (let slot = 1; slot <= 10 && free.length; slot++) {
-      const i = slot % 10;
-      if (next[i] === -1) next[i] = free.shift()!;
-    }
-    this.skillHotkeys = next;
-  }
-
   /**
    * GuildInformation by guild id (the original's `GuildMark[]` table): what
    * `AssignCharacterToGuild` members print over their heads. Plain (not
@@ -630,17 +514,12 @@ export const Store = new (class _Store {
 
   constructor() {
     makeObservable(this, {
-      skills: observable,
-      buffs: observable,
       weather: observable,
-      currentSkill: observable,
-      skillHotkeys: observable,
       petInfo: observable,
       petInfoByPet: observable,
       petMode: observable,
       petTargetId: observable,
       muHelper: observable,
-      applyKeyConfiguration: action,
       setPetInfo: action,
       setPetMode: action,
       setMuHelperStatus: action,
@@ -656,12 +535,6 @@ export const Store = new (class _Store {
       canRepair: computed,
       // Packet handlers (app/logic.ts) and the UI call these straight from a
       // non-action context; declaring them actions keeps strict mode quiet.
-      setBuff: action,
-      setSkillList: action,
-      addSkill: action,
-      removeSkill: action,
-      selectSkill: action,
-      assignSkillHotkey: action,
       setTestItems: action,
       playOffline: action,
     });
@@ -1521,7 +1394,7 @@ export const Store = new (class _Store {
       item,
       stats,
       Hero.heroStats(),
-      this.skills.map(s => s.number)
+      HeroSkills.skills.map(s => s.number)
     );
     if (error) {
       addNotification(error, 'error');
@@ -1531,10 +1404,10 @@ export const Store = new (class _Store {
     if (Session.isOffline) {
       // No server to answer: the scroll is read here so the skill list (K)
       // and the hot keys behave.
-      const index = this.skills.reduce((max, s) => Math.max(max, s.index), -1) + 1;
+      const index = HeroSkills.skills.reduce((max, s) => Math.max(max, s.index), -1) + 1;
       runInAction(() => {
         Hero.items[slot] = null;
-        this.addSkill({ index, number, level: 0 });
+        HeroSkills.addSkill({ index, number, level: 0 });
       });
       const name = skillDefinition(number)?.name ?? 'the skill';
       addNotification(t('notify.learnedSkill', { name }), 'info');

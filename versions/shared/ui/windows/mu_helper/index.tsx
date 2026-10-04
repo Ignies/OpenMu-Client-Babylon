@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
 import { t } from '@/i18n';
-import { Store } from '@/app/store';
+import { HeroSkills } from '@/modules/skills';
 import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
 import { gameVersion } from '@/version';
@@ -184,7 +184,7 @@ const SkillPicker = observer(
     onDone: () => void;
   }) => {
     const filter = target.kind === 'skill' ? isAttackSkill : isBuffSkill;
-    const options = Store.skills
+    const options = HeroSkills.skills
       .map(s => skillDefinition(s.number))
       .filter((def): def is SkillDefinition => !!def && filter(def));
 

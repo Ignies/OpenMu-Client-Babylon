@@ -8,7 +8,6 @@
  "windows-use-modules-not-store: versions/shared/ui/hud/bottom_bar/index.tsx -> src/app/store.ts",
  "windows-use-modules-not-store: versions/shared/ui/hud/bottom_bar/petCommands.tsx -> src/app/store.ts",
  "windows-use-modules-not-store: versions/shared/ui/hud/chat/itemLinkGesture.ts -> src/app/store.ts",
- "windows-use-modules-not-store: versions/shared/ui/hud/mobile_controls/skillPad.tsx -> src/app/store.ts",
  "windows-use-modules-not-store: versions/shared/ui/hud/name_tags/index.tsx -> src/app/store.ts",
  "windows-use-modules-not-store: versions/shared/ui/hud/soccer_score/index.tsx -> src/app/store.ts",
  "windows-use-modules-not-store: versions/shared/ui/hud/world_objects/index.tsx -> src/app/store.ts",
@@ -18,13 +17,10 @@
  "windows-use-modules-not-store: versions/shared/ui/windows/guild/index.tsx -> src/app/store.ts",
  "windows-use-modules-not-store: versions/shared/ui/windows/inventory/index.tsx -> src/app/store.ts",
  "windows-use-modules-not-store: versions/shared/ui/windows/move_command_window/index.tsx -> src/app/store.ts",
- "windows-use-modules-not-store: versions/shared/ui/windows/mu_helper/index.tsx -> src/app/store.ts",
  "windows-use-modules-not-store: versions/shared/ui/windows/npc_shop/index.tsx -> src/app/store.ts",
  "windows-use-modules-not-store: versions/shared/ui/windows/npc_shop/layout.ts -> src/app/store.ts",
- "windows-use-modules-not-store: versions/shared/ui/windows/party/index.tsx -> src/app/store.ts",
  "windows-use-modules-not-store: versions/shared/ui/windows/personal_shop/index.tsx -> src/app/store.ts",
  "windows-use-modules-not-store: versions/shared/ui/windows/pet_info/index.tsx -> src/app/store.ts",
- "windows-use-modules-not-store: versions/shared/ui/windows/skills/index.tsx -> src/app/store.ts",
  "windows-use-modules-not-store: versions/shared/ui/windows/trade/index.tsx -> src/app/store.ts",
  "windows-use-modules-not-store: versions/shared/ui/windows/vault/index.tsx -> src/app/store.ts"
 ]

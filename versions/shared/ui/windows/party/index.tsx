@@ -3,7 +3,7 @@ import { t } from '@/i18n';
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
-import { Store } from '@/app/store';
+import { HeroSkills } from '@/modules/skills';
 import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
 import { MAX_PARTY_MEMBERS, Social } from '@/modules/social/social';
@@ -65,7 +65,7 @@ const X_SIZE = 10;
  */
 function castAllyOn(name: string): void {
   const world = Ecs.world;
-  if (!world || Store.currentSkill !== TELEPORT_ALLY) return;
+  if (!world || HeroSkills.currentSkill !== TELEPORT_ALLY) return;
   const target = world.netObjsQuery.entities.find(
     e => !e.localPlayer && e.playerAnimation && e.objectNameInWorld?.trimEnd() === name.trimEnd()
   );
