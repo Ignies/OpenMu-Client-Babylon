@@ -129,7 +129,7 @@ water, ground picks, minimap data and the base class for map objects. There is n
   `vWorldXZ` (light and mask lookup), `vWorldPos` (cascade lookup), `vViewZ` (which cascade).
 - `terrainMask.ts`: texel (x, y) is tile (x, z), read at `(worldXZ + 0.5) / 256`. No `.att` marks
   interiors (Lorencia has zero `Height` tiles), so two sources are painted: roof slabs (the
-  `CeilingHideSystem` test over the whole map) and known room boxes. Painting is additive for the
+  roof test of `ecs/systems/roofDetection.ts` over the whole map) and known room boxes. Painting is additive for the
   life of the map, so a roof hidden while the hero is inside still counts.
 - `terrainMaterial.ts`: every `AlphaTile*.Tga` is zero, so the cutout slot draws nothing. A tile
   fully covered by layer 2 never reaches the cutout; a partial one takes a 0.5 cut (11 of 309

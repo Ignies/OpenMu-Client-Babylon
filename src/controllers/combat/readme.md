@@ -57,8 +57,9 @@ It never sends packets or touches the scene; the ECS systems that fight read it 
 A swing sets `AttackTime = 1`; it adds one per 25 Hz tick whatever the clip's speed.
 `CheckAttackTime(n)` is true once per swing when the counter passes `n`. The swing ends at 15 ticks
 or when the clip reaches its hit key (`AnimationFrame >= 5`, ZzzCharacter.cpp:2755). The original
-sends `SendHitRequest` on the click (ZzzInterface.cpp:3355); here the request is latched to the hit
-key so it lands with the blow. A slow clip reaches the key after 15 ticks, so the limit only ends a
+sends `SendHitRequest` on the click (ZzzInterface.cpp:3355), and so does this client unless the
+server's `server.json` sets `heldHitRequest` (then the request is latched to the hit key so it lands
+with the blow). A slow clip reaches the key after 15 ticks, so the limit only ends a
 swing after the blow fired. `hitTickFor` gives the tick, `1 + key / playSpeed`, capped by the
 clip's length:
 
