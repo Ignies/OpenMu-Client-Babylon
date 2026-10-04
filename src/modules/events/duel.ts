@@ -244,6 +244,12 @@ function heroNetId(): number | null {
 
 /** Registers the duel's packet listeners; the events module installs it (module.ts). */
 export function installDuel(): void {
+  /** `DuelMgr.Reset()` on connection close (WSclient.cpp:646); events installs before warp for it. */
+  EventBus.on('wsClosed', () => {
+    clearDuel();
+    reset();
+  });
+
   /** `ReceiveDuelRequest`: the challenge prompt. */
   EventBus.on('DuelStartRequest', packet => {
     const p = new DuelStartRequestS2CPacket(packet);
@@ -383,15 +389,6 @@ export function installDuel(): void {
     });
   });
 }
-
-/**
- * `DuelMgr.Reset()` on connection close (WSclient.cpp:646). Still registered at import: it must run
- * before `warp/warpScopeHold.ts`'s, which registers at import too (readme.md).
- */
-EventBus.on('wsClosed', () => {
-  clearDuel();
-  reset();
-});
 
 // ---- 3. the layer ----------------------------------------------------------
 

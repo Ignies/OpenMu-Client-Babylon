@@ -28,7 +28,8 @@ Not in the original client: the notes travel through our proxy (`proxy/band/`), 
   transport is silent and the hero just plays for themselves. `BandSender` numbers batches, splits
   big ones and keeps under the proxy's rate.
 - Frames are encoded in `controllers/net/protocols/bandProtocol.ts` and sent with `Session.sendBandFrame`.
-- A warp (`requestWarp`) resets every stream and puts the hero's instrument away.
+- A warp (`requestWarp`) resets every stream and puts the hero's instrument away
+  (`installBandMusic`, called by `module.ts` after the net, so a band switched off hears nothing).
 
 ## Packets
 - `BandRelay` (C1 FA, from the proxy), by sub type:

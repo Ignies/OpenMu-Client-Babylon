@@ -43,11 +43,14 @@ export function holdForWarpScope(): void {
   releaseIn(WAIT_MS);
 }
 
-for (const name of SCOPE_PACKETS) {
-  EventBus.on(name as never, () => {
-    if (held) releaseIn(SETTLE_MS);
-  });
-}
+/** The first scope packet, a new warp or a lost socket ends the hold; the warp module installs this. */
+export function installScopeHold(): void {
+  for (const name of SCOPE_PACKETS) {
+    EventBus.on(name as never, () => {
+      if (held) releaseIn(SETTLE_MS);
+    });
+  }
 
-EventBus.on('requestWarp', release);
-EventBus.on('wsClosed', release);
+  EventBus.on('requestWarp', release);
+  EventBus.on('wsClosed', release);
+}

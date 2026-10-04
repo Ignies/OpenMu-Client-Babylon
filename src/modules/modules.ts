@@ -35,13 +35,13 @@ import gm from './gm/module';
 
 export const MODULES: readonly ModuleDef[] = [
   servers,
+  events, // before warp: Crywolf's warpCompleted and the duel's wsClosed run first
+  warp, // before session: the scope hold's wsClosed runs before the session's
   session,
   characterSelect,
   quests, // before hero and combat: its CharacterInformation and ObjectGotKilled listeners run first
   skills, // before hero: the master level (masterLevel.ts) reads the experience packets first
   hero,
-  events, // before warp: Crywolf's warpCompleted listener runs first
-  warp,
   inventory,
   scope,
   social,
