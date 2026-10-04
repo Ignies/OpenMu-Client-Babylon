@@ -18,7 +18,7 @@
  * taken from FluidR3_GM as `surikov/webaudiofontdata` renders it
  * (`--kit-source <url>` to point elsewhere).
  *
- * Output, per registry row (`src/common/instruments.ts`):
+ * Output, per registry row (`src/modules/band/instruments.ts`):
  *   public/game-assets/Instrument/<id>/<Note>.ogg   every note the source has (A0..C8)
  *   public/game-assets/Instrument/<id>.json         the bank manifest the sampler reads
  *   public/game-assets/Instrument/LICENSE.txt       attribution (MusyngKite is CC BY-SA 3.0)

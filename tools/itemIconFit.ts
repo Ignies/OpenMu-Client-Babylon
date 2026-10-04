@@ -1,6 +1,6 @@
 /**
- * Builds `src/common/itemIconFit.ts` from the pixels in `public/items` and the
- * original's own icon scales (`src/common/itemIconScale.ts`).
+ * Builds `src/controllers/interface/item_icons/itemIconFit.ts` from the pixels in `public/items` and the
+ * original's own icon scales (`src/controllers/interface/item_icons/itemIconScale.ts`).
  *
  *   bun run tools/itemIconFit.ts
  *
@@ -33,7 +33,7 @@ const items = readItemFiles();
 
 const ROOT = join(import.meta.dir, '..');
 const ITEMS_DIR = join(ROOT, 'public', 'items');
-const OUT = join(ROOT, 'src', 'common', 'itemIconFit.ts');
+const OUT = join(ROOT, 'src', 'controllers', 'interface', 'item_icons', 'itemIconFit.ts');
 
 const FILE = /^item_(\d+)_(\d+)_(\d+)(_e|_a)?\.png$/;
 
