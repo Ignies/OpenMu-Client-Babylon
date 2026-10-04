@@ -141,3 +141,23 @@ describe('Chain Drive (262): BITMAP_SWORDEFF reads the caster\'s GIANTSWING key 
     expect(soundTicks(r, ATT)).toEqual([16]);
   });
 });
+
+describe('Dragon Roar (264): the dragon on BLOW_OF_DESTRUCTION\'s LifeTime, the fire ring on DRAGONLORE key 5', () => {
+  const LORE = PlayerAction.PLAYER_SKILL_DRAGONLORE;
+  const dragon = (r: Run) => r.spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.dragonHead).map(s => s.tick);
+  const ring = (r: Run) => r.spawns.filter(s => s.name === 'ring' && s.opts.texture === TEX.shockwave).map(s => s.tick);
+
+  it('the dragon on tick 21 (LifeTime 50 reaches 30, MoveHandlers.cpp:7650-7666), the ring past key 5 (tick 17 at 0.3 a tick)', () => {
+    for (const skill of [264, 560]) {
+      const r = run(skill, LORE, { keysPerTick: 0.3, area: true });
+      expect(dragon(r)).toEqual([21]);
+      expect(ring(r)).toEqual([17]);
+    }
+  });
+
+  it('no ring when the clip is left before key 5; the dragon comes anyway', () => {
+    const r = run(264, LORE, { keysPerTick: 0.3, area: true, leaveAt: 15 });
+    expect(dragon(r)).toEqual([21]);
+    expect(ring(r)).toEqual([]);
+  });
+});
