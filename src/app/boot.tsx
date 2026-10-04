@@ -5,9 +5,9 @@ import ReactDOM from 'react-dom/client';
 import { App } from './App';
 import './style.less';
 import './logic';
-// Content model classes register here, at boot, where no controller can reach (controllers import the Store, which imports logic.ts).
+// Content model classes register here, at boot, where no controller can reach (controllers import no content).
 import '@versions/shared/monsters/models';
-import { Store } from './store';
+import { playOffline } from './offline';
 import { Hero } from '../modules/hero';
 import { Session } from '../modules/session';
 import { AppState, UIState } from './uiState';
@@ -33,6 +33,7 @@ import { TestScene } from '../controllers/render/scenes/testScene';
 import { loadMapIntoScene, onHeroPlaced, onMapChange } from '../controllers/terrain/loadMapIntoScene';
 import { setRepairCursor } from '../controllers/interface/components/game_cursor';
 import { Merchant } from '../modules/npc_shop';
+import { Bag } from '../modules/inventory';
 import { initControllers } from '../controllers/controllers';
 import { resetForMapChange } from './lifecycle';
 import { prefetchWorldTerrain } from '../controllers/assets/mu/prefetchWorld';
@@ -71,8 +72,7 @@ watchPageTitle();
 void ensureCacheWorker();
 
 // What a lost game server socket does before falling back to the server
-// list. Wired here rather than in app/logic.ts, which the store's own module
-// graph reaches before `Store` exists.
+// list; the session module stays unaware of the resume.
 Session.resumeHook = () => SessionResume.retry() || SessionResume.begin();
 
 // Hot keys are per character: the shared set is what a new one starts from.
@@ -228,7 +228,8 @@ installPerfOverlay(scene);
 // gets a second module copy (vite serves the live graph as `?t=`-stamped URLs)
 // whose state never changes.
 (window as any).__eco = Economy;
-(window as any).__store = Store;
+// The module states the Store used to hold, for the same scripts (`__modules.Hero.money`).
+(window as any).__modules = { Hero, Session, Bag, Merchant };
 // The sound facade, for the headless verification scripts (`sound.unlocked`,
 // `sound.isPlaying(key)`, `sound.crackling`).
 (window as any).__sound = sound;
@@ -347,5 +348,5 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 );
 
 if (Session.isOffline) {
-  Store.playOffline();
+  playOffline();
 }

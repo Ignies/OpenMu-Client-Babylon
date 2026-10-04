@@ -8,6 +8,7 @@ import { loadVersionUi } from '../version';
 import { WorldPage } from '@versions/shared/ui/pages/world';
 import { useEventBus } from '../controllers/interface/hooks/useEventBus';
 import { PreloaderPage } from '@versions/shared/ui/pages/preloader';
+import { playOffline } from './offline';
 import { LoadingScreen } from '../controllers/loading/classic';
 import { OptionsWindow } from '@versions/shared/ui/windows/options';
 import { GameCursor } from '../controllers/interface/components/game_cursor';
@@ -30,7 +31,7 @@ const CurrentPage = observer(() => {
 
   switch (state) {
     case UIState.Preloader:
-      return <PreloaderPage />;
+      return <PreloaderPage onPlayOffline={playOffline} />;
     case UIState.Servers:
       return <ServersPage />;
     case UIState.Login:

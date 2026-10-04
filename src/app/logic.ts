@@ -83,7 +83,6 @@ import '../controllers/actors/locomotion';
 import '../controllers/actors/transformedBody';
 import '../modules/quests';
 import '../modules/session/sessionExit';
-import './store';
 import '../core/devSeams';
 import '../modules/inventory/quickItemActions';
 import '../modules/servers/serverConfig';

@@ -6,7 +6,7 @@ vi.hoisted(() => {
 });
 import { createHash } from 'node:crypto';
 import { EventBus } from '@/core/eventBus';
-import '@/app/store';
+import '@/app/logic';
 
 // Pins every packet's listeners and their order once the app has loaded (the order modules
 // install in is the order listeners run for a packet several modules handle). Whitespace is ignored.

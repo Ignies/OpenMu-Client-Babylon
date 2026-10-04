@@ -2,7 +2,6 @@ import { MuWindows } from '@/controllers/interface/windowManager';
 import './style.less';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Store } from '@/app/store';
 import { Session } from '@/modules/session';
 import { Loading } from '@/controllers/loading';
 import { Ecs } from '@/ecs/current';
@@ -160,7 +159,8 @@ function backgroundLoad(backdrop: PregameBackdrop | null): {
  * The filters live here rather than in the worlds view because they outlive
  * it: search, look at the setup tab, come back, and the search is still there.
  */
-export const PreloaderPage = observer(() => {
+/** `onPlayOffline`: the app's offline test scene (`app/offline.ts`), handed in by `App.tsx`. */
+export const PreloaderPage = observer(({ onPlayOffline }: { onPlayOffline: () => void }) => {
   const [section, setSection] = useState<Section>('worlds');
   const [language, setLanguage] = useState(ALL);
   const [search, setSearch] = useState('');
@@ -289,7 +289,7 @@ export const PreloaderPage = observer(() => {
   };
 
   const offline = () => {
-    if (!leaving) leave(() => Store.playOffline());
+    if (!leaving) leave(() => onPlayOffline());
   };
 
   // Enter enters from the grid or the search box. Anywhere else it belongs to

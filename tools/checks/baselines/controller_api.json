@@ -45,8 +45,6 @@
  "src/app/logic.ts -> src/controllers/sound/soundsManager.ts",
  "src/app/logic.ts -> src/controllers/weather/rainState.ts",
  "src/app/main.tsx -> src/controllers/interface/mobile.ts",
- "src/app/store.ts -> src/controllers/actors/playerObject.ts",
- "src/app/store.ts -> src/controllers/actors/transformedBody.ts",
  "src/controllers/actors/debuffBody.ts -> src/controllers/fx/core.ts",
  "src/controllers/actors/deserializeAppearance.ts -> src/controllers/assets/download.ts",
  "src/controllers/actors/guildFlag.ts -> src/controllers/render/boneLink.ts",
