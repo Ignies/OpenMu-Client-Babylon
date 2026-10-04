@@ -48,8 +48,9 @@ export function warmWorldObjects(
 
   return fetchTerrainFile(file).then(
     bytes => {
+      // A negative type has no model (`placesObject` in terrain/objectRecords.ts).
       const files = [...objectTypesIn(bytes)]
-        .filter(type => !absent.includes(type) && !isEffectOnlyObject(map, type))
+        .filter(type => type >= 0 && !absent.includes(type) && !isEffectOnlyObject(map, type))
         .map(type => `${dir}Object${(type + 1).toString().padStart(2, '0')}.glb`);
       let done = 0;
 
