@@ -1,22 +1,17 @@
 import { characterSkinBody } from '../controllers/actors/transformedBody';
 import type { PlayerObject } from '../controllers/actors/playerObject';
 import { CharacterClassNumber, ENUM_WORLD } from '@/core/types';
-import { PetTypeEnum } from '@versions/shared/packets/ClientToServerPackets';
 import { makeObservable, action, runInAction } from 'mobx';
 import { Item } from '../ecs/world';
 import { EventBus } from '../core/eventBus';
 import { InventoryConstants } from '@/core/inventoryConstants';
 import { ItemGroups } from '@versions/shared/objects/enum';
-import { type HeroStats } from '@/controllers/item_rules';
 import { spawnPlayer } from './logic';
 import { devVitalPercent } from '../core/devSeams';
 import { Ecs } from '../ecs/current';
 import { AppState, UIState } from './uiState';
 import { Session } from '../modules/session';
 import { Hero } from '../modules/hero';
-import { Pets } from '../modules/pets';
-import { Bag } from '../modules/inventory';
-import { Merchant } from '../modules/npc_shop';
 
 /**
  * `?offline&map=noria` / `?offline&map=3`: the world the offline scene boots
@@ -136,44 +131,6 @@ function applyOfflineHandOverrides(items: (Item | null)[]): void {
 }
 
 export const Store = new (class _Store {
-  // Read by `interface/components/item_tooltip` until it moves up to the ui (`Hero`, `Pets`).
-  get playerData() {
-    return Hero;
-  }
-
-  heroStats(): HeroStats {
-    return Hero.heroStats();
-  }
-
-  get petInfo() {
-    return Pets.petInfo;
-  }
-
-  requestPetInfo(pet: PetTypeEnum, slot: number) {
-    Pets.requestPetInfo(pet, slot);
-  }
-
-  // Read by the item grid, the carried item and the chat item link until they move up to the ui.
-  get pickedItem() {
-    return Bag.pickedItem;
-  }
-
-  cancelPickedItem(): void {
-    Bag.cancelPickedItem();
-  }
-
-  get npcShop() {
-    return Merchant.npcShop;
-  }
-
-  get repairMode() {
-    return Merchant.repairMode;
-  }
-
-  get isSelfRepair() {
-    return Merchant.isSelfRepair;
-  }
-
   constructor() {
     makeObservable(this, {
       // Packet handlers (app/logic.ts) and the UI call these straight from a

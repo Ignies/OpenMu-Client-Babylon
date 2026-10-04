@@ -1,7 +1,3 @@
 [
- "controllers-are-generic: src/controllers/interface/components/chat_item_link/index.tsx -> src/app/store.ts",
- "controllers-are-generic: src/controllers/interface/components/item_grid/index.tsx -> src/app/store.ts",
- "controllers-are-generic: src/controllers/interface/components/item_tooltip/index.tsx -> src/app/store.ts",
- "controllers-are-generic: src/controllers/interface/components/picked_item/index.tsx -> src/app/store.ts",
  "windows-use-modules-not-store: versions/shared/ui/pages/preloader/index.tsx -> src/app/store.ts"
 ]

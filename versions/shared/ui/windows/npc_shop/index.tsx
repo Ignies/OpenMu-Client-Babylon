@@ -7,14 +7,14 @@ import { Merchant } from '@/modules/npc_shop';
 import { Bag } from '@/modules/inventory';
 import { ItemIcon } from '@/controllers/interface/components/item_icon';
 import { ItemSearchBox, useItemSearch } from '@/controllers/interface/components/item_search';
-import { ItemTooltip } from '@/controllers/interface/components/item_tooltip';
+import { ItemTooltip } from '../../components/item_tooltip';
 import { Item } from '@/ecs/world';
 import {
   GridSquares,
   hoveredMask,
   occupancyStamp,
   usedMask,
-} from '@/controllers/interface/components/item_grid';
+} from '../../components/item_grid';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { isSellingBanned } from '@/controllers/item_rules';
 import { QuickItemActions } from '@/modules/inventory/quickItemActions';

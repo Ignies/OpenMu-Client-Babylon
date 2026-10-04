@@ -7,7 +7,7 @@ import { Economy, MIX_MENU } from '@/modules/economy/economy';
 import { StorageKind } from '@/modules/inventory/itemStorage';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuItemWindow, MuTableFrame } from '@/controllers/interface/components/mu_window';
-import { ItemGrid } from '@/controllers/interface/components/item_grid';
+import { ItemGrid } from '../../components/item_grid';
 import { QuickItemActions } from '@/modules/inventory/quickItemActions';
 
 import { uiClick } from '@/controllers/sound/sfx';

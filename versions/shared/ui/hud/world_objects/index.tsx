@@ -14,7 +14,7 @@ import { onScreenPosition } from '@/controllers/interface/screenPositionBus';
 import { DROP_TIER_COLOURS, dropTier } from '@/controllers/item_rules';
 import { dropPassesLootFilter } from '@/modules/drops/lootFilter';
 import { GameOptions } from '@/controllers/settings';
-import { ItemTooltip } from '@/controllers/interface/components/item_tooltip';
+import { ItemTooltip } from '../../components/item_tooltip';
 import { ItemLinkHover } from '@/controllers/interface/itemLinkHover';
 import type { Entity } from '@/ecs/world';
 import { stableKeyOf } from '@/core/stableKey';

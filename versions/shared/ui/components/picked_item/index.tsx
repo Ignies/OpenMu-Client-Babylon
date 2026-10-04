@@ -1,10 +1,10 @@
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { useLayoutEffect, useRef } from 'react';
-import { Store } from '@/app/store';
+import { Bag } from '@/modules/inventory';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
-import { ItemIcon } from '../item_icon';
-import { MuWindows } from '../../windowManager';
+import { ItemIcon } from '@/controllers/interface/components/item_icon';
+import { MuWindows } from '@/controllers/interface';
 import { SQUARE } from '../item_grid';
 
 /**
@@ -33,7 +33,7 @@ if (typeof window !== 'undefined') {
  * `transform` on every pointer move (no state, no React render per event).
  */
 export const PickedItemCursor = observer(() => {
-  const picked = Store.pickedItem;
+  const picked = Bag.pickedItem;
   const ref = useRef<HTMLDivElement>(null);
   const item = picked?.item ?? null;
 

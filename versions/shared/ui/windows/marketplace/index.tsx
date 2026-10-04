@@ -3,7 +3,7 @@ import { useEffect, type PointerEvent as ReactPointerEvent } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useWindowChrome } from '@/controllers/interface/components/mu_window/useWindowChrome';
 import { ItemIcon } from '@/controllers/interface/components/item_icon';
-import { ItemTooltip } from '@/controllers/interface/components/item_tooltip';
+import { ItemTooltip } from '../../components/item_tooltip';
 import { t, type TextKey } from '@/i18n';
 import { CATEGORIES, displayName } from '@/modules/marketplace/categories';
 import { cancellable, stateLabelKey, statePillKey } from '@/modules/marketplace/catalogue';

@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 import { defineWindow, registerWindows, type WindowDef } from '@/controllers/interface/windows';
 import { MsgWindow } from '@/controllers/interface/components/msg_window';
-import { PickedItemCursor } from '@/controllers/interface/components/picked_item';
+import { PickedItemCursor } from './components/picked_item';
 import { loadVersionUi } from '@/version';
 
 // Every window and HUD element under windows/ and hud/ registers itself from its

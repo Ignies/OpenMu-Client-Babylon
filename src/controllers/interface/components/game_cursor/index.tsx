@@ -13,6 +13,8 @@ import {
   type CursorKind,
 } from './cursors';
 
+export { CURSOR_HOTSPOT, CURSOR_SIZE } from './cursors';
+
 type Sprites = Record<CursorKind, MuSprite>;
 
 /** Whether the repair hammer is up (the merchant's repair mode); the app hands the reader in. */

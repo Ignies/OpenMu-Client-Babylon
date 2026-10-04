@@ -10,14 +10,14 @@ import { Ecs } from '@/ecs/current';
 import { Economy } from '@/modules/economy/economy';
 import { events } from '@/modules/events';
 import { ItemIcon } from '@/controllers/interface/components/item_icon';
-import { ItemTooltip } from '@/controllers/interface/components/item_tooltip';
+import { ItemTooltip } from '../../components/item_tooltip';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { Item } from '@/ecs/world';
 import {
   GridSquares,
   occupancyStamp,
   usedMask,
-} from '@/controllers/interface/components/item_grid';
+} from '../../components/item_grid';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { goldColor } from '@/controllers/item_rules';
 import {

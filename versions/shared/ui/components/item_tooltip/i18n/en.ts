@@ -16,6 +16,6 @@ export default en;
 
 declare module '@/i18n' {
   interface TextOwners {
-    'src/controllers/interface/components/item_tooltip': typeof en;
+    'versions/shared/ui/components/item_tooltip': typeof en;
   }
 }

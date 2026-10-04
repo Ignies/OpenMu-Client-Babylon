@@ -9,7 +9,7 @@ import { StorageKind, isTradeBanned } from '@/modules/inventory/itemStorage';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuItemWindow } from '@/controllers/interface/components/mu_window';
-import { ItemGrid } from '@/controllers/interface/components/item_grid';
+import { ItemGrid } from '../../components/item_grid';
 import { QuickItemActions } from '@/modules/inventory/quickItemActions';
 
 import { goldColor } from '@/controllers/item_rules';
