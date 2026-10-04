@@ -29,6 +29,10 @@ Rules for skill folders: [../readme.md](../readme.md).
 
 `_shared.ts` holds `flashDrop(colour)`: the falling flash ribbon of 68 and 71.
 
+Improve AG, Stun and Swell Mana draw at the cast's release (ZzzCharacter.cpp:4214-4258, :4343-4363): Improve AG
+on an attack clip's key 5 or 14 ticks after the packet; Stun and Swell Mana always 14 ticks after it, since their
+AttackStage case forces nothing (`NO_KEY`, :2917-2918).
+
 ## Depends on / used by
 - uses: `../_shared.ts`, `@/controllers/{skills,fx,lighting,sound,combat}`
 - used by: `../index.ts` (glob, and `buff_looks.ts` directly)
@@ -38,4 +42,5 @@ Rules for skill folders: [../readme.md](../readme.md).
 - a buff look no skill owns: add a row to `buff_looks.ts`.
 
 ## Tests
-- Covered by the golden tests in `../` (`skillVisuals.golden.test.ts`, `skillTables.golden.test.ts`).
+- Covered by the golden tests in `../` (`skillVisuals.golden.test.ts`, `skillTables.golden.test.ts`);
+  `../releaseTiming.test.ts` times Improve AG, Stun and Swell Mana.

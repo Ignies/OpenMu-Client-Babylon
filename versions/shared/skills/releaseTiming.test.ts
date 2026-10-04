@@ -151,3 +151,16 @@ describe('Penetration', () => {
     expect(shot(1000).release).toBe(4);
   });
 });
+
+describe('the release-block common skills', () => {
+  it('Improve AG on key 5 of an attack clip, or 14 ticks after the packet (ZzzCharacter.cpp:2859-2864, :4343-4363)', () => {
+    expect(timeline(53, CLIP, playerPlaySpeed(CLIP, 0, 0), 5)).toEqual({ key: 18, release: 14 });
+    expect(timeline(53, CLIP, playerPlaySpeed(CLIP, 0, 1400), 5)).toEqual({ key: 2, release: 2 });
+  });
+
+  it('Stun and Swell Mana 14 ticks after the packet however fast the clip: their AttackStage case forces nothing (:2917-2918)', () => {
+    const vitality = PlayerAction.PLAYER_SKILL_VITALITY;
+    expect(timeline(67, vitality, 1, 5, 25, { area: true })).toEqual({ key: 5, release: 14 });
+    expect(timeline(69, vitality, 1, 5)).toEqual({ key: 5, release: 14 });
+  });
+});
