@@ -4,6 +4,8 @@ Items and zen on the ground: the drop packets, the drop entity and model, the na
 and the loot filter for the ALT name overlay.
 
 ## Public API
+- `Drops` (`state.ts`, through `index.ts`, the door): `showDropNames`, `toggleDropNames()` (ALT),
+  `pickupItemRequest(netId)`.
 - none for packets. `installNet()` in `net.ts` registers its handlers (`module.ts`, installed by `src/app/logic.ts`).
 - `DropObject`: the model class of a drop (frozen pose, zen coin pile, the fall). `setPileFall(height)`.
 - `dropTier(drop)`, `DROP_TIER_COLOURS`, `HIGH_DROP_LEVEL` (7) moved to `controllers/item_rules`
@@ -21,8 +23,8 @@ and the loot filter for the ALT name overlay.
   from a 100-value `RandomTable`. Two departures: the pile is 1.5x wider, and the radius uses a square root
   so the coins spread over the disc. `DropObject` draws the coins as thin instances.
 - Leaving view (`ItemDropRemoved`) marks the entity `objOutOfScope`, like any object leaving scope.
-- Picking up and dropping are `Store` actions: `pickupItemRequest`, `dropPickedItem`, `toggleDropNames`
-  (`showDropNames`). `QuickItemActions.dropPickedItem` asks first for valuable items.
+- Picking up is `Drops.pickupItemRequest`, the names are `Drops.toggleDropNames` (`showDropNames`);
+  dropping the carried item is the inventory's `dropPickedItem`. `QuickItemActions.dropPickedItem` asks first for valuable items.
 - The loot filter reads `GameOptions.loot*`; ALT held still shows every name.
 
 ## Packets
@@ -35,7 +37,7 @@ and the loot filter for the ALT name overlay.
 
 ## Depends on / used by
 - uses: `items` (`ItemSerializer`, `itemDef`, `itemLevelName`), `options` (`GameOptions`), `_shared/net_helpers.ts`
-  (`removeNetObject`), `controllers/actors/itemAngle.ts`, `controllers/render`, `controllers/sound`, `Store`.
+  (`removeNetObject`), `controllers/actors/itemAngle.ts`, `controllers/render`, `controllers/sound`, `session` (sending), `Store` (item moves).
 - used by: `src/app/logic.ts` (net), `inventory/quickItemRules.ts` (`HIGH_DROP_LEVEL`),
   `items/archangelWeapons.test.ts`, ecs `dropMotionSystem` / `objectEffectSystem`,
   `controllers/sound/drops.ts`, `controllers/actors/playerObject.ts` (`archangelWeapon`).

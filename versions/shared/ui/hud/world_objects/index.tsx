@@ -1,5 +1,6 @@
 import { observer } from 'mobx-react-lite';
 import { Store } from '@/app/store';
+import { Drops } from '@/modules/drops';
 import { Ecs } from '@/ecs/current';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { With } from 'miniplex';
@@ -37,19 +38,19 @@ function useDropNamesOverlay(): { overlay: boolean; showAll: boolean } {
     setHeld(true);
     ItemLinkHover.linkedDuringAlt = false;
     toggled.current = true;
-    Store.toggleDropNames();
+    Drops.toggleDropNames();
   });
   useEventBus('keyReleased', code => {
     if (!isAlt(code)) return;
     setHeld(false);
     // That Alt was for linking an item into chat, not for the names.
-    if (ItemLinkHover.linkedDuringAlt && toggled.current) Store.toggleDropNames();
+    if (ItemLinkHover.linkedDuringAlt && toggled.current) Drops.toggleDropNames();
     ItemLinkHover.linkedDuringAlt = false;
     toggled.current = false;
   });
 
   // Held ALT is the escape hatch: it names every drop, filter or not.
-  return { overlay: Store.showDropNames || held, showAll: held };
+  return { overlay: Drops.showDropNames || held, showAll: held };
 }
 
 type DropEntity = With<Entity, 'transform' | 'screenPosition' | 'droppedItem'>;

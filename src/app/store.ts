@@ -5,7 +5,7 @@ import type { PlayerObject } from '../controllers/actors/playerObject';
 import { playUiSound } from '../controllers/sound/sfx';
 import { consumeSound, upgradedItemSound } from '../controllers/sound/ui';
 import { CharacterClassNumber, ENUM_WORLD } from '@/core/types';
-import { ConsumeItemRequestPacket, DropItemRequestPacket, EnterGateRequestPacket, ItemMoveRequestPacket, PickupItemRequestPacket, WarpCommandRequestPacket, TalkToNpcRequestPacket, CloseNpcRequestPacket, PetTypeEnum, BuyItemFromNpcRequestPacket, SellItemToNpcRequestPacket, RepairItemRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
+import { ConsumeItemRequestPacket, DropItemRequestPacket, EnterGateRequestPacket, ItemMoveRequestPacket, WarpCommandRequestPacket, TalkToNpcRequestPacket, CloseNpcRequestPacket, PetTypeEnum, BuyItemFromNpcRequestPacket, SellItemToNpcRequestPacket, RepairItemRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
 import { NetStats } from '../controllers/net/roundTrip';
 import {
   makeObservable,
@@ -339,9 +339,6 @@ export const Store = new (class _Store {
   /** Q/W/E/R consumable kinds (`CNewUIItemHotKey`); unbound = the key's default potion. */
   itemHotkeys: ItemHotkey[] = Array.from({ length: HOTKEY_COUNT }, () => UNBOUND_HOTKEY);
 
-  /** Names over every drop (CNewUINameWindow::m_bShowItemName, toggled by ALT). */
-  showDropNames = false;
-
   pendingItemMove: {
     fromStorage: StorageKind;
     fromSlot: number;
@@ -380,7 +377,6 @@ export const Store = new (class _Store {
       pickedItem: observable,
       itemHotkeys: observable,
       pendingItemMove: observable,
-      showDropNames: observable,
       npcShop: observable,
       repairMode: observable,
       shopBuyPending: observable,
@@ -1397,21 +1393,6 @@ export const Store = new (class _Store {
       StorageKind.Inventory,
       -1
     );
-    Session.sendToGS(packet.buffer);
-  }
-
-  toggleDropNames(): void {
-    runInAction(() => {
-      this.showDropNames = !this.showDropNames;
-    });
-  }
-
-  pickupItemRequest(itemNetId: number): void {
-    if (Session.isOffline) return;
-
-    const packet = PickupItemRequestPacket.createPacket();
-    packet.ItemId = itemNetId;
-
     Session.sendToGS(packet.buffer);
   }
 
