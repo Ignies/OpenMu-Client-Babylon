@@ -4,7 +4,7 @@ import { t } from '@/i18n';
 import { useEffect, useRef, useState, type WheelEvent } from 'react';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
-import { Store } from '@/app/store';
+import { warpCommandRequest } from '@/modules/warp';
 import { Hero } from '@/modules/hero';
 import { Session } from '@/modules/session';
 import { Ecs } from '@/ecs/current';
@@ -309,7 +309,7 @@ export const MoveCommandWindow = observer(() => {
       if (map !== undefined) EventBus.emit('requestWarp', { map });
       return;
     }
-    Store.warpCommandRequest(SERVER_INDEX[entry.index] ?? entry.index);
+    warpCommandRequest(SERVER_INDEX[entry.index] ?? entry.index);
   };
 
   return (

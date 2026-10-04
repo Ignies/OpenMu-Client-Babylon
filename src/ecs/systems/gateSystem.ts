@@ -1,5 +1,5 @@
 import type { ISystemFactory } from '../world';
-import { Store } from '../../app/store';
+import { enterGateRequest } from '../../modules/warp';
 import { Session } from '../../modules/session';
 import { Loading } from '../../controllers/loading';
 import { findEntranceGateAt, loadGates, type Gate } from '../../controllers/assets/mu/gates';
@@ -69,7 +69,7 @@ export const GateSystem: ISystemFactory = world => {
       const exit = allGates[gate.target];
       if (exit && exit.map !== map) prefetchWorldTerrain(exit.map);
 
-      Store.enterGateRequest(gate.index);
+      enterGateRequest(gate.index);
     },
   };
 };
