@@ -198,3 +198,22 @@ describe('Beast Uppercut (261): MODEL_DOWN_ATTACK_DUMMY_R then _L, on their own 
     expect(skillSound(261)).toBeNull();
   });
 });
+
+describe('Killing Blow (260): BITMAP_SBUMB on its LifeTime (MoveHandlers.cpp:9196-9216)', () => {
+  const THRUST = PlayerAction.PLAYER_SKILL_THRUST;
+  const ATT = 'Sound/Ragefighter/Rage_Thrust_Att';
+
+  it('a burst on the target each tick 5-20, Rage_Thrust_Att on ticks 6, 12 and 15', () => {
+    for (const skill of [260, 551, 554]) {
+      const r = run(skill, THRUST);
+      expect(spriteTicks(r, 'Effect/sbumb.OZJ')).toEqual(range(5, 20));
+      expect(soundTicks(r, ATT)).toEqual([6, 12, 15]);
+    }
+  });
+
+  it('nothing on the target without one', () => {
+    const r = run(260, THRUST, { target: false });
+    expect(spriteTicks(r, 'Effect/sbumb.OZJ')).toEqual([]);
+    expect(soundTicks(r, ATT)).toEqual([]);
+  });
+});
