@@ -9,7 +9,8 @@ reset. This is the top of the graph: it wires modules, controllers and versions 
 - `storeRef()` (`storeRef.ts`): a late-bound handle on `Store` for modules inside the store's own
   import cycle (`render/modelObject.ts`, `skills/visuals.ts`).
 - `consts.ts`: default connect-server / ws-proxy endpoints (`VITE_CS_HOST`, `VITE_WS_HOST`, ...)
-  and debug flags.
+  and the ECS debug flags. The login field limits are `modules/servers/serverAccounts.ts`; the
+  terrain and music dev switches live in `terrain/consts.ts` and `sound/soundsManager.ts`.
 - `spawnPlayer`, `summonDisplayName`, `emitObjectEffect` (`logic.ts`).
 - `PwaInstall`, `installApp()` (`pwaInstall.ts`): install the client as an app (options window).
 

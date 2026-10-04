@@ -31,6 +31,7 @@ import {
   formatText,
 } from './recipes';
 import { strikePillar } from '@versions/shared/maps/chaoscastle/bolt';
+import { registerAmbientGate } from '@/controllers/sound';
 
 /**
  * Chaos Castle: there is no NPC window - the Armor of Guardsman in the
@@ -139,6 +140,10 @@ export function chaosCastlePrompt(): ChaosCastlePrompt | null {
 export function chaosCastleTimer(): ChaosCastleTimer {
   return state.timer;
 }
+
+// The castle's waiting and match beds (sound/ambientBeds.ts).
+registerAmbientGate('chaosCastleWaiting', () => !chaosCastleTimer().running);
+registerAmbientGate('chaosCastleRunning', () => chaosCastleTimer().running);
 
 export function chaosCastleImminent(): boolean {
   return state.timer.seconds / 60 < IMMINENT_MINUTES;

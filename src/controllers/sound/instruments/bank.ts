@@ -1,4 +1,5 @@
-import type { InstrumentId } from '@/modules/band/instruments';
+/** Which sample bank: the band module's `InstrumentId` (`modules/band/instruments.ts`); the sampler only needs the name. */
+export type BankId = string;
 import { resolveUrlToDataFolder } from '../../assets/resolveUrlToDataFolder';
 
 /**
@@ -9,7 +10,7 @@ import { resolveUrlToDataFolder } from '../../assets/resolveUrlToDataFolder';
  */
 
 export type BankManifest = {
-  instrument: InstrumentId;
+  instrument: BankId;
   bank: string;
   sustained: boolean;
   /**
@@ -37,7 +38,7 @@ export type DecodedBank = {
 type NoteSource = { buffer: AudioBuffer; rate: number };
 
 /** Where a bank's files live, through the active version's asset root. */
-function bankUrl(id: InstrumentId, file?: string): string {
+function bankUrl(id: BankId, file?: string): string {
   return resolveUrlToDataFolder(file ? `Instrument/${id}/${file}` : `Instrument/${id}.json`);
 }
 
@@ -61,7 +62,7 @@ export function noteSource(bank: DecodedBank, note: number): NoteSource | null {
 }
 
 /** Fetches and decodes one bank. Rejects on a missing manifest or a bank with no playable note. */
-export async function loadBank(ctx: AudioContext, id: InstrumentId): Promise<DecodedBank> {
+export async function loadBank(ctx: AudioContext, id: BankId): Promise<DecodedBank> {
   const res = await fetch(bankUrl(id));
   if (!res.ok) throw new Error(`instrument bank ${id}: ${res.status}`);
   const manifest = (await res.json()) as BankManifest;

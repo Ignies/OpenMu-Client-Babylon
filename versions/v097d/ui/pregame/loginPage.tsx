@@ -16,7 +16,7 @@ import { Store } from '@/app/store';
 import {
   MAX_PASSWORD_LENGTH,
   MAX_USERNAME_LENGTH,
-} from '@/app/consts';
+} from '@/modules/servers/serverAccounts';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import './style.less';

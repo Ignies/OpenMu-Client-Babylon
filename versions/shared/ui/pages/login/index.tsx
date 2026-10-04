@@ -5,7 +5,7 @@ import { playUiSound, uiClick } from '@/controllers/sound/sfx';
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { Store } from '@/app/store';
-import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH } from '@/app/consts';
+import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH } from '@/modules/servers/serverAccounts';
 import { registerApiUrl, registerUrl } from '@/modules/servers/serverServices';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuText, TEXT_COLOR } from '@/controllers/interface/components/mu_text';

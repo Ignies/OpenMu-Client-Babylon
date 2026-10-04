@@ -54,7 +54,7 @@ import {
 import { classFromAppearance } from '../controllers/actors/deserializeAppearance';
 import { formatMsgWinText, MsgWinCode, type MsgWinArg } from '../controllers/interface/msgWin';
 import { stringToBytes } from '../controllers/assets/download';
-import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH } from './consts';
+import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH } from '../modules/servers/serverAccounts';
 import {
   connectServerAddress,
   ServerConfig,

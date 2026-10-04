@@ -27,7 +27,7 @@ import {
 import { LightCarrier } from '../lighting/lightCarrier';
 import { IVector3Like } from '../render/babylon/exports';
 import { EventBus } from '../../core/eventBus';
-import { DISABLE_OBJECTS_LOADING } from '../../app/consts';
+import { DISABLE_OBJECTS_LOADING } from './consts';
 import { evictWorldMinimaps, prefetchWorldMinimap } from './minimap';
 import { resetTerrainMask } from './terrainMask';
 import { setShadowWorld } from '../render/objectShadow';

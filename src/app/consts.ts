@@ -1,6 +1,3 @@
-export const MAX_USERNAME_LENGTH = 10;
-export const MAX_PASSWORD_LENGTH = 10;
-
 // Connect-server and ws-proxy endpoints - the DEFAULTS only. They seed the
 // first server profile on a fresh install; from then on `modules/servers/serverConfig.ts`
 // owns where the client connects (saved profiles, edited in the start screen's
@@ -15,9 +12,5 @@ export const CS_PORT = Number(env.VITE_CS_PORT) || 44405;
 export const WS_HOST = env.VITE_WS_HOST || 'ws://localhost';
 export const WS_PORT = Number(env.VITE_WS_PORT) || 3000;
 
-export const DISABLE_OBJECTS_LOADING = false;
 export const DEBUG_PATHFINDING = false;
-export const DEBUG_SHOW_TERRAIN_ATTRIBUTES = false;
 export const DEBUG_SHOW_BOUNDING_BOXES = false;
-
-export const ENABLE_BG_MUSIC = true;

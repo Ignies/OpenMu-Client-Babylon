@@ -15,7 +15,11 @@ event is one entry file with its own MobX state and packet handlers, behind the 
 - `events.enterBloodCastle(grade)`, `enterDevilSquare(grade)`, `enterChaosCastle()`,
   `askChaosCastleOpening()`, `enterDoppelganger()`, `answerDuelRequest(ok)`, `joinDuelChannel(i)`,
   `quitDuelChannel()`, `closeAll()`, `countdownLine`: window buttons and the HUD.
-- Readers imported directly: `bloodCastleTimer`, `chaosCastleTimer` (`sound/ambientBeds.ts`),
+- `bloodCastle.ts` and `chaosCastle.ts` register their timers as the map beds' gates with the sound
+  controller (`registerAmbientGate`) when they load; `layers.ts` imports Blood Castle, Chaos Castle
+  and Devil Square in that order, which is the order their `MiniGameOpeningState` /
+  `BloodCastleState` listeners run (pinned by `src/app/listenerOrder.golden.test.ts`).
+- Readers imported directly:
   `bloodCastleQuestItem` (`questItemSystem.ts`), `duelEnemyId` (`attackSystem.ts`), `invasionEvent`
   (`boidSystem.ts`), `crywolfHud` (`maps/crywolf/eventObjects.ts`), plus each entry's window readers.
 

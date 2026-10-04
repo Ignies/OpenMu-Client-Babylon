@@ -13,6 +13,8 @@ connect server's own list (`Store.serverList`) is filled by `session/net.ts`.
   `gameServerTarget(returnedIp)`, types `ServerProfile`, `PublishedGameServer`.
 - `ServerList`, `refreshServerList()`, `parseServerList(text)`: the published list.
 - `ServerAccounts`: `list`, `of`, `select`, `add`, `update`, `forget`, `record(worldId, login)`.
+  `MAX_USERNAME_LENGTH` / `MAX_PASSWORD_LENGTH` (`serverAccounts.ts`, were `app/consts.ts`): the login
+  fields, read by the Store and the login pages.
 - `ServerProbe`: `check(profiles)`, `of(id)` -> `Reach` (`unknown`, `checking`, `up`, `down`).
 - `registerUrl()`, `registerApiUrl()`, `marketApiUrl()`, `serverManifestUrl()`.
 - `serverSetting(key)`: one setting of the world being played (`ServerSettings`, defaults

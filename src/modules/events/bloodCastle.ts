@@ -28,6 +28,7 @@ import {
   isMasterClass,
   type EntryButton,
 } from './recipes';
+import { registerAmbientGate } from '@/controllers/sound';
 
 /**
  * Blood Castle: the Archangel's messenger window (`CNewUIEnterBloodCastle`,
@@ -195,6 +196,9 @@ export function bloodCastleWindow(): {
 export function bloodCastleTimer(): BloodCastleTimer {
   return state.timer;
 }
+
+// The map's Blood Castle bed plays only while the match runs (sound/ambientBeds.ts).
+registerAmbientGate('bloodCastleRunning', () => bloodCastleTimer().running);
 
 /** `SetTime`: red clock under five minutes. */
 export function bloodCastleImminent(): boolean {

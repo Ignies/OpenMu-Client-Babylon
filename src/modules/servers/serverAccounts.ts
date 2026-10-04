@@ -1,12 +1,15 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { LocalStorage } from '../../core/localStorage';
-import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH } from '../../app/consts';
 import { ServerConfig, URL_PROFILE_ID } from './serverConfig';
 
 /** The saved accounts of each world (keyed by profile id) and which one the login window fills.
  * Plain text in localStorage, as the original stored them. Details: readme.md. */
 
 const ACCOUNTS_KEY = 'mu_accounts';
+
+/** Login field limits: the account and password bytes of the login packet (was `app/consts.ts`). */
+export const MAX_USERNAME_LENGTH = 10;
+export const MAX_PASSWORD_LENGTH = 10;
 
 /** The pre-rework blob (app/store.ts `CONFIG_KEY`), read once to migrate. */
 const LEGACY_KEY = '_mu_key';
