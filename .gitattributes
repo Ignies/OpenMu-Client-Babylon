@@ -4,3 +4,5 @@
 *.ps1 text eol=crlf
 # Vitest writes snapshots with LF: keep them LF so a test run leaves no phantom change.
 *.snap text eol=lf
+# The checks write their baselines with LF.
+tools/checks/baselines/*.json text eol=lf
