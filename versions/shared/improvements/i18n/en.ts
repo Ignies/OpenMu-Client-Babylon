@@ -13,9 +13,6 @@ const en = {
   'fidelity.loginChandeliers': 'Lit login chandeliers',
   'fidelity.loginChandeliers.hint':
     'The chandeliers on the login screen burn. Classic: they are cold, as in the original.',
-  'fidelity.heldHitRequest': 'Hits land with the swing',
-  'fidelity.heldHitRequest.hint':
-    'Your attack reaches the server when the blow lands, so the damage shows in time with the swing. Classic: it is sent on the click.',
   'fidelity.wingShadows': 'Wing shadows',
   'fidelity.wingShadows.hint': 'Wings cast a shadow. Classic: no shadow, as in the original.',
   'fidelity.torchCrackle': 'Torch sounds',

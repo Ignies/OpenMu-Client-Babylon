@@ -15,9 +15,6 @@ export default {
   'fidelity.loginChandeliers': 'ログイン画面のシャンデリア点灯',
   'fidelity.loginChandeliers.hint':
     'ログイン画面のシャンデリアに火がともります。クラシック: オリジナル通り消えたままです。',
-  'fidelity.heldHitRequest': '攻撃は振りに合わせて届く',
-  'fidelity.heldHitRequest.hint':
-    '攻撃は打撃が当たった瞬間にサーバーへ送られ、ダメージ表示が動きと合います。クラシック: クリック時に送られます。',
   'fidelity.wingShadows': '翼の影',
   'fidelity.wingShadows.hint':
     '翼が影を落とします。クラシック: オリジナル通り影はありません。',

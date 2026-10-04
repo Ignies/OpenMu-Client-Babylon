@@ -26,6 +26,12 @@ describe('config file', () => {
     expect(parseEnvFile("A='x@y:z/#1'\r\n# note\nB=plain\n")).toEqual({ A: 'x@y:z/#1', B: 'plain' });
   });
 
+  it('stores the held hit request as MU_HELD_HIT_REQUEST, off unless set', () => {
+    expect(configToEnv({ ...config, heldHitRequest: true }).MU_HELD_HIT_REQUEST).toBe('on');
+    expect(envToConfig({ MU_HELD_HIT_REQUEST: 'on' }).heldHitRequest).toBe(true);
+    expect(envToConfig({}).heldHitRequest).toBe(false);
+  });
+
   it('fills what an older file does not have from the defaults', () => {
     expect(envToConfig({ MU_DOMAIN: 'old.net' })).toEqual({ ...DEFAULTS, domain: 'old.net' });
   });

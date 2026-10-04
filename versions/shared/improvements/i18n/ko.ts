@@ -15,9 +15,6 @@ export default {
   'fidelity.loginChandeliers': '로그인 화면 샹들리에 점등',
   'fidelity.loginChandeliers.hint':
     '로그인 화면의 샹들리에에 불이 켜집니다. 클래식: 원작처럼 꺼져 있습니다.',
-  'fidelity.heldHitRequest': '타격과 함께 들어가는 공격',
-  'fidelity.heldHitRequest.hint':
-    '공격이 타격 순간에 서버로 전송되어 대미지가 동작과 맞게 표시됩니다. 클래식: 클릭할 때 전송됩니다.',
   'fidelity.wingShadows': '날개 그림자',
   'fidelity.wingShadows.hint':
     '날개가 그림자를 드리웁니다. 클래식: 원작처럼 그림자가 없습니다.',

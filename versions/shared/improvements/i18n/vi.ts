@@ -15,9 +15,6 @@ export default {
   'fidelity.loginChandeliers': 'Đèn chùm sáng ở màn hình đăng nhập',
   'fidelity.loginChandeliers.hint':
     'Các đèn chùm ở màn hình đăng nhập được thắp sáng. Cổ điển: chúng tắt, như bản gốc.',
-  'fidelity.heldHitRequest': 'Đòn đánh khớp với cú vung',
-  'fidelity.heldHitRequest.hint':
-    'Đòn tấn công gửi đến máy chủ khi cú đánh trúng, nên sát thương hiện đúng lúc. Cổ điển: gửi ngay khi nhấp chuột.',
   'fidelity.wingShadows': 'Bóng của cánh',
   'fidelity.wingShadows.hint':
     'Cánh đổ bóng. Cổ điển: không có bóng, như bản gốc.',

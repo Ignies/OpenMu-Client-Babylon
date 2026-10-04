@@ -15,9 +15,6 @@ export default {
   'fidelity.loginChandeliers': '登录画面吊灯点亮',
   'fidelity.loginChandeliers.hint':
     '登录画面的吊灯会燃烧。经典：与原版一样是熄灭的。',
-  'fidelity.heldHitRequest': '攻击随挥击命中',
-  'fidelity.heldHitRequest.hint':
-    '攻击在击中瞬间发送到服务器，伤害显示与动作同步。经典：点击时即发送。',
   'fidelity.wingShadows': '翅膀阴影',
   'fidelity.wingShadows.hint':
     '翅膀会投下阴影。经典：与原版一样没有阴影。',

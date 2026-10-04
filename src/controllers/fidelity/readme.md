@@ -29,6 +29,8 @@ the code that deviates from the original asks `isOn('<id>')` and keeps the origi
   and dropped the next time a check changes.
 - Only deliberate deviations are improvements. A fix that makes the client match the original is
   never a toggle: Classic must be the true original.
+- A deviation the server can see (what a packet says, or when it leaves) is not the player's to
+  choose: it is a server setting in the world's `server.json` (`modules/servers/serverManifest.ts`).
 - Enhanced is the default, so every improvement that existed before this option stays on.
 - The graded lighting and material looks (`tierIndex() >= ENHANCED_TIER`, skill `enhanced` rows)
   stay on their own quality options (`lighting/lightingQuality.ts`, `render/materialQuality.ts`);

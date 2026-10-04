@@ -15,9 +15,6 @@ export default {
   'fidelity.loginChandeliers': 'Zapalone żyrandole przy logowaniu',
   'fidelity.loginChandeliers.hint':
     'Żyrandole na ekranie logowania płoną. Klasyczne: są zgaszone, jak w oryginale.',
-  'fidelity.heldHitRequest': 'Trafienia razem z ciosem',
-  'fidelity.heldHitRequest.hint':
-    'Twój atak trafia do serwera, gdy cios dosięga celu, więc obrażenia pojawiają się w rytm ruchu. Klasyczne: wysyłany jest przy kliknięciu.',
   'fidelity.wingShadows': 'Cienie skrzydeł',
   'fidelity.wingShadows.hint':
     'Skrzydła rzucają cień. Klasyczne: bez cienia, jak w oryginale.',

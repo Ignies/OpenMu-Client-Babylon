@@ -15,9 +15,6 @@ export default {
   'fidelity.loginChandeliers': 'Lampadari accesi al login',
   'fidelity.loginChandeliers.hint':
     'I lampadari della schermata di accesso sono accesi. Classica: sono spenti, come nell\'originale.',
-  'fidelity.heldHitRequest': 'Colpi a tempo con l\'attacco',
-  'fidelity.heldHitRequest.hint':
-    'Il tuo attacco arriva al server quando il colpo va a segno, così il danno appare in tempo con il gesto. Classica: viene inviato al clic.',
   'fidelity.wingShadows': 'Ombre delle ali',
   'fidelity.wingShadows.hint':
     'Le ali proiettano un\'ombra. Classica: nessuna ombra, come nell\'originale.',

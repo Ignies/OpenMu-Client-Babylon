@@ -15,9 +15,6 @@ export default {
   'fidelity.loginChandeliers': 'โคมระย้าหน้าล็อกอินติดไฟ',
   'fidelity.loginChandeliers.hint':
     'โคมระย้าในหน้าล็อกอินมีไฟลุก คลาสสิก: ดับอยู่ เหมือนต้นฉบับ',
-  'fidelity.heldHitRequest': 'การโจมตีตรงจังหวะฟัน',
-  'fidelity.heldHitRequest.hint':
-    'การโจมตีของคุณถูกส่งถึงเซิร์ฟเวอร์ตอนที่ฟันโดน ความเสียหายจึงขึ้นตรงกับท่า คลาสสิก: ส่งตอนคลิก',
   'fidelity.wingShadows': 'เงาปีก',
   'fidelity.wingShadows.hint':
     'ปีกมีเงา คลาสสิก: ไม่มีเงา เหมือนต้นฉบับ',

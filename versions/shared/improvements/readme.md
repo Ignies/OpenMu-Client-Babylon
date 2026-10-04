@@ -17,15 +17,14 @@ asks `isOn('<id>')`. Classic turns them all off and runs the original.
 | `masterBuffCancel` | Enhanced | `controllers/skills/index.ts` (`cancelledEffects`) | skill ids 256+ cancel nothing (BYTE, WSclient.cpp:3884) |
 | `archangelFeathers` | Enhanced | `monsters/_archangels/model.ts` | no feathers, 2.7-tile halo on the NPC (ZzzCharacter.cpp:8695-8708) |
 | `loginChandeliers` | Enhanced | `maps/loginscene/create.ts` | cold chandeliers (GMEmpireGuardian4.cpp:1050-1053) |
-| `heldHitRequest` | Enhanced | `ecs/systems/attackSystem.ts`, `modules/combat/net.ts` | hit request sent on the click (ZzzInterface.cpp:3355) |
 | `wingShadows` | Enhanced | `controllers/actors/wingObject.ts` | wings cast no shadow (ZzzCharacter.cpp:8394-8425) |
 | `torchCrackle` | Enhanced | `controllers/sound/crackle.ts` | torches are silent (no `SOUND_FIRE`) |
 
 - The file's comment cites the original and names the site; the site keeps the original path when
   `isOn` is false.
-- `heldHitRequest` changes when a packet leaves: the server still sees one request per swing at
-  the same cadence, only later (when the blow lands). A target that dies or leaves before the key
-  gets no request.
+- Never an improvement: anything that changes what the server sees. Holding the hit request until
+  the blow lands is a server setting (`heldHitRequest` in the world's `server.json`,
+  `src/modules/servers/serverManifest.ts`), not a player choice.
 - Some deviations read at build time: `wingShadows` when a wing is created, `loginChandeliers` when
   the login scene loads.
 

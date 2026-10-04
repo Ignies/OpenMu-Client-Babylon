@@ -3,7 +3,9 @@
 An improvement is a deliberate change from the original client that the player can turn off. The
 Fidelity option's Classic preset runs the original 1:1; Enhanced and Ultra turn improvements on.
 
-A fix that makes the client match the original is not an improvement: just fix it.
+A fix that makes the client match the original is not an improvement: just fix it. A change the
+server can see (packet content or timing) is not one either: it is a server setting
+(`src/modules/servers/serverManifest.ts`, readme there).
 
 ## Steps
 

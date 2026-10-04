@@ -15,9 +15,6 @@ export default {
   'fidelity.loginChandeliers': 'Lustres acesos no login',
   'fidelity.loginChandeliers.hint':
     'Os lustres da tela de login ficam acesos. Clássica: ficam apagados, como no original.',
-  'fidelity.heldHitRequest': 'Golpes no ritmo do ataque',
-  'fidelity.heldHitRequest.hint':
-    'Seu ataque chega ao servidor quando o golpe acerta, então o dano aparece junto com o movimento. Clássica: é enviado no clique.',
   'fidelity.wingShadows': 'Sombras das asas',
   'fidelity.wingShadows.hint':
     'As asas projetam sombra. Clássica: sem sombra, como no original.',

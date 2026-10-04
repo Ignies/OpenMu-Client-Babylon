@@ -10,7 +10,7 @@ export const GROUPS: { value: Group; label: string; hint: string }[] = [
   { value: 'address', label: 'Address', hint: 'domain or IP, certificate e-mail' },
   { value: 'listing', label: 'Server list entry', hint: 'name, description, language' },
   { value: 'passwords', label: 'Passwords', hint: 'database, admin panel' },
-  { value: 'features', label: 'Features', hint: 'band, map ping, weather, shop delivery, marketplace fees' },
+  { value: 'features', label: 'Features', hint: 'band, map ping, weather, shop delivery, marketplace fees, hit timing' },
   { value: 'openmu', label: 'OpenMU version', hint: 'release, or a source ref' },
 ];
 
@@ -54,6 +54,7 @@ export async function ask(c: Config, group: Group): Promise<Config> {
       next.shopDelivery = await ui.confirm('Cash shop delivers purchases into the game? (off = rehearsal only)', c.shopDelivery);
       next.marketFee = Number(await ui.text('Marketplace listing fee (Zen)', { initial: String(c.marketFee), validate: v => (/^\d+$/.test(v) ? undefined : 'A whole number.') }));
       next.marketCommission = Number(await ui.text('Marketplace commission (%)', { initial: String(c.marketCommission), validate: v => (/^\d+$/.test(v) && Number(v) <= 100 ? undefined : '0 to 100.') }));
+      next.heldHitRequest = await ui.confirm('Send a hit when the swing lands instead of on the click? (off = the original; the uneven timing can trip the OpenMU speed check)', c.heldHitRequest);
       break;
     case 'openmu': {
       const source = await ui.select('Which OpenMU?', [

@@ -15,9 +15,6 @@ export default {
   'fidelity.loginChandeliers': 'Brennende Kronleuchter beim Login',
   'fidelity.loginChandeliers.hint':
     'Die Kronleuchter im Login-Bildschirm brennen. Klassisch: sie sind kalt, wie im Original.',
-  'fidelity.heldHitRequest': 'Treffer kommen mit dem Schlag',
-  'fidelity.heldHitRequest.hint':
-    'Dein Angriff erreicht den Server, wenn der Schlag trifft, sodass der Schaden zum Schwung passt. Klassisch: er wird beim Klick gesendet.',
   'fidelity.wingShadows': 'Flügelschatten',
   'fidelity.wingShadows.hint':
     'Flügel werfen einen Schatten. Klassisch: kein Schatten, wie im Original.',

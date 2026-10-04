@@ -15,9 +15,6 @@ export default {
   'fidelity.loginChandeliers': 'Candelabros encendidos en el inicio',
   'fidelity.loginChandeliers.hint':
     'Los candelabros de la pantalla de inicio de sesión arden. Clásica: están apagados, como en el original.',
-  'fidelity.heldHitRequest': 'Golpes al ritmo del ataque',
-  'fidelity.heldHitRequest.hint':
-    'Tu ataque llega al servidor cuando el golpe impacta, así el daño aparece a tiempo con el movimiento. Clásica: se envía al hacer clic.',
   'fidelity.wingShadows': 'Sombras de las alas',
   'fidelity.wingShadows.hint':
     'Las alas proyectan sombra. Clásica: sin sombra, como en el original.',

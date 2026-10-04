@@ -15,9 +15,6 @@ export default {
   'fidelity.loginChandeliers': 'Горящие люстры при входе',
   'fidelity.loginChandeliers.hint':
     'Люстры на экране входа горят. Классика: они потушены, как в оригинале.',
-  'fidelity.heldHitRequest': 'Удар в такт атаке',
-  'fidelity.heldHitRequest.hint':
-    'Ваша атака уходит на сервер в момент удара, и урон появляется вовремя. Классика: отправляется по клику.',
   'fidelity.wingShadows': 'Тени крыльев',
   'fidelity.wingShadows.hint':
     'Крылья отбрасывают тень. Классика: без тени, как в оригинале.',

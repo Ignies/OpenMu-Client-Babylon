@@ -15,9 +15,6 @@ export default {
   'fidelity.loginChandeliers': 'Candelabre aprinse la autentificare',
   'fidelity.loginChandeliers.hint':
     'Candelabrele din ecranul de autentificare ard. Clasică: sunt stinse, ca în original.',
-  'fidelity.heldHitRequest': 'Lovituri în ritmul atacului',
-  'fidelity.heldHitRequest.hint':
-    'Atacul tău ajunge la server când lovitura nimerește, așa că daunele apar odată cu mișcarea. Clasică: se trimite la clic.',
   'fidelity.wingShadows': 'Umbre de aripi',
   'fidelity.wingShadows.hint':
     'Aripile aruncă umbră. Clasică: fără umbră, ca în original.',

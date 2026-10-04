@@ -21,8 +21,8 @@ the Rage Fighter's Dark Side blows. This folder has only the handlers; it keeps 
 - A kill adds the `dying` component; `DeathSystem` starts the Die clip 14 ticks later
   (`c->Dead >= 15`, ZzzCharacter.cpp:4074-4080). A hero's plain blow (skill 0) also marks `held`, the
   ticks its request waited for the blow (`combat.blowHeldTicks`): the original sends it on the click,
-  so the 14 ticks count from the swing's start. On Classic Fidelity (`heldHitRequest` off) the request
-  goes on the click and `held` is 0. A hero kill plays the energy sound once when its orbs
+  so the 14 ticks count from the swing's start. The request goes on the click and `held` is 0 unless
+  the world's `server.json` sets `heldHitRequest` (`servers/serverManifest.ts`). A hero kill plays the energy sound once when its orbs
   arrive (`playKillEnergy`, `ZzzEffectJoint.cpp:3369`); the orbs start at the hero's release, where the
   original creates them (`ZzzCharacter.cpp:5242-5247`): a skill kill waits for the cast's release
   (`afterHeroRelease`), a plain blow's has passed already (its request went out on it).

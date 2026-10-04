@@ -423,6 +423,13 @@ function urlOverride(saved: StoredState): {
   };
 }
 
+const enterListeners: ((profile: ServerProfile) => void)[] = [];
+
+/** Runs `fn` each time a world is entered (`markPlayed`); `serverManifest.ts` fetches there. */
+export function onWorldEntered(fn: (profile: ServerProfile) => void): void {
+  enterListeners.push(fn);
+}
+
 class ServerConfigStore {
   profiles: ServerProfile[];
 
@@ -539,10 +546,14 @@ class ServerConfigStore {
   }
 
   /**
-   * That world was entered, not merely looked at. The URL profile is skipped:
+   * That world was entered, not merely looked at: the enter listeners run
+   * (the world's `server.json` is fetched). The URL profile is not saved:
    * it is a link somebody followed once, and it is gone next launch anyway.
    */
   markPlayed(id: string): void {
+    const profile = id === URL_PROFILE_ID ? this.urlProfile : this.all.find(p => p.id === id);
+    if (profile) for (const fn of enterListeners) fn(profile);
+
     if (id === URL_PROFILE_ID) return;
 
     runInAction(() => {

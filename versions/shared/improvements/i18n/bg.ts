@@ -15,9 +15,6 @@ export default {
   'fidelity.loginChandeliers': 'Запалени полилеи при вход',
   'fidelity.loginChandeliers.hint':
     'Полилеите на екрана за вход горят. Класическо: угаснали са, както в оригинала.',
-  'fidelity.heldHitRequest': 'Ударите съвпадат със замаха',
-  'fidelity.heldHitRequest.hint':
-    'Атаката ви стига до сървъра, когато ударът попадне, и щетите се виждат навреме. Класическо: изпраща се при клика.',
   'fidelity.wingShadows': 'Сенки на крилете',
   'fidelity.wingShadows.hint':
     'Крилете хвърлят сянка. Класическо: без сянка, както в оригинала.',
