@@ -56,7 +56,7 @@ let lastMap: ENUM_WORLD | null = null;
  * bare: walking into a blizzard over clean ground and waiting ninety seconds
  * for it to whiten looks like a bug, not like weather.
  */
-export function updateSnowCover(map: ENUM_WORLD, dt: number): number {
+function updateSnowCover(map: ENUM_WORLD, dt: number): number {
   if (!SNOW_GROUND_MAPS.has(map)) {
     cover = 0;
     lastMap = map;
@@ -87,7 +87,7 @@ export function snowCover(): number {
 }
 
 /** Drop the cover - a map change that is not to a snow map, or a teardown. */
-export function resetSnowCover(): void {
+function resetSnowCover(): void {
   cover = 0;
   lastMap = null;
 }

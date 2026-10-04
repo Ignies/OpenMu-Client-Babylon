@@ -113,7 +113,7 @@ function createPass(scene: Scene, camera: ArcRotateCamera): PostProcess {
   return pass;
 }
 
-export function disposeSpeedLines(): void {
+function disposeSpeedLines(): void {
   if (!runtime) return;
 
   runtime.camera.detachPostProcess(runtime.pass);

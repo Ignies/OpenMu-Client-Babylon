@@ -107,7 +107,7 @@ type Gate = BodyFxGate;
 /** A box in the original's centimetres: `rand() % (2x) - x` each way, `z` up. */
 type Cm3 = readonly [number, number, number];
 
-export type MonsterVisual = readonly Emitter[];
+type MonsterVisual = readonly Emitter[];
 
 const PARTICLES: Readonly<Record<BodyParticle, ParticleRecipe>> = {
   bodySmoke: BODY_SMOKE,
@@ -497,7 +497,7 @@ function reset(): void {
 
 // ---- 4. the layer ----------------------------------------------------------
 
-export interface MonsterVisualsOptions {
+interface MonsterVisualsOptions {
   entity: Entity;
   row?: MonsterVisual;
 }

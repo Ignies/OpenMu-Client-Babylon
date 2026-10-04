@@ -176,7 +176,7 @@ function createMask(scene: Scene, camera: ArcRotateCamera): Runtime {
   return rt;
 }
 
-export function disposeEffectMask(): void {
+function disposeEffectMask(): void {
   if (!runtime) return;
 
   const { scene, mask } = runtime;

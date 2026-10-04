@@ -9,7 +9,7 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `babylon/exports.ts`: every Babylon class the game uses; also sets the self-hosted decoder URLs
   (Draco, meshopt, KTX2, Basis). Imported by about 260 files.
 - `babylon/utils.ts`: `createEngine(canvas, aa)` (boot), `addInspectorForScene` (Shift+Ctrl+Alt+I),
-  `findInChildren`, `projectWorldPositionToScreenRef`. `babylon/emptyTexture.ts`: `getEmptyTexture`.
+  `projectWorldPositionToScreenRef`. `babylon/emptyTexture.ts`: `getEmptyTexture`.
 - `babylon/spriteLinear.ts`: `installSpriteLinearDecode()` (called by `fx/core.ts`).
 - `modelObject.ts`: `ModelObject`, the base class of every drawn model (actors, map objects, npcs,
   drops, pets); `PartPose`, `BodyShine`, `HIDDEN_MESH_ALL`.

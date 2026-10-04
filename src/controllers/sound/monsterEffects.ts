@@ -17,7 +17,7 @@ import type { Sounds } from './recipes';
  */
 
 /** One `PlayBuffer` on one AttackTime tick. */
-export type AttackEffectSound = {
+type AttackEffectSound = {
   readonly play: Sounds;
   /** `CheckAttackTime(n)`. */
   readonly tick: number;
@@ -133,7 +133,7 @@ export function attackEffectSounds(
 }
 
 /** The monster; the original deletes one that leaves scope, AttackTime and all. */
-export type EffectOwner = { readonly objOutOfScope?: boolean };
+type EffectOwner = { readonly objOutOfScope?: boolean };
 
 /** The clip in hand at a tick: `o->CurrentAction`. */
 export type ClipSource = { readonly CurrentAction: number };

@@ -83,7 +83,7 @@ import {
 import { NetStats } from '../../controllers/net/roundTrip';
 import { playUiSound } from '../../controllers/sound/sfx';
 
-export type PartyMember = {
+type PartyMember = {
   name: string;
   index: number;
   mapId: number;
@@ -95,7 +95,7 @@ export type PartyMember = {
   healthStep: number;
 };
 
-export type GuildMember = {
+type GuildMember = {
   name: string;
   /** `Server` in the original: -1 offline, otherwise the server id. */
   server: number;
@@ -103,7 +103,7 @@ export type GuildMember = {
 };
 
 /** One row of `AllianceList` (`ReceiveUnionList`). */
-export type AllianceGuild = {
+type AllianceGuild = {
   name: string;
   memberCount: number;
   logo: number[];
@@ -113,7 +113,7 @@ export type AllianceGuild = {
  * `EnableGuildWar` / `GuildWarName` / `GuildWarTeam` (WSclient.cpp:221). The
  * team code decides the `GuildColor` of the chat boxes over a head.
  */
-export type GuildWar = {
+type GuildWar = {
   enemyGuild: string;
   /** `GuildWarTypeEnum`: a normal war or a Battle Soccer match. */
   soccer: boolean;
@@ -127,7 +127,7 @@ export type GuildWar = {
  * GuildSoccerScoreUpdate (F3 23): the stadium scoreboard the original's
  * `CNewUIBattleSoccerScore` draws. Sent to players and observers alike.
  */
-export type SoccerScore = {
+type SoccerScore = {
   redTeam: string;
   blueTeam: string;
   redGoals: number;
@@ -137,7 +137,7 @@ export type SoccerScore = {
 };
 
 /** A yes/no question from another player (party invite, guild join). */
-export type SocialRequest = {
+type SocialRequest = {
   requesterId: number;
   requesterName: string;
 };

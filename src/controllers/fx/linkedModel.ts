@@ -22,7 +22,7 @@ const HOLD_SLIVER = 0.05;
 
 // ---- 2. state + readers ----------------------------------------------------
 
-export interface LinkedModelOptions {
+interface LinkedModelOptions {
   /** `Effect/…glb` (recipes.ts `MODEL`). */
   model: string;
   /** The character it hangs off. */
@@ -37,7 +37,7 @@ export interface LinkedModelOptions {
   vStep?: { mesh: number; offset: (ms: number) => number };
 }
 
-export interface LinkedModelHandle extends EffectHandle {
+interface LinkedModelHandle extends EffectHandle {
   /** `o->Alpha`: the bright meshes' visibility. */
   setAlpha(alpha: number): void;
   /** Show clip key `frame` and play on at `speed` keys a tick (`PlaySpeed`); 0 holds the key. */

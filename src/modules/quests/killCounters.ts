@@ -31,7 +31,7 @@ const EMPTY_SLOT = -1;
 // ---- 2. state + readers ----------------------------------------------------
 
 /** One `m_anKillMobType[i]` / `m_anKillMobCount[i]` pair. */
-export type KillSlot = { monsterType: number; count: number };
+type KillSlot = { monsterType: number; count: number };
 
 const state = observable({
   slots: Array.from({ length: KILL_SLOTS }, (): KillSlot => ({ monsterType: EMPTY_SLOT, count: EMPTY_SLOT })),

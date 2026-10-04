@@ -120,7 +120,7 @@ function handGrants(item: Item | null, num: number): boolean {
 }
 
 /** The classes a skill's `classes` expression admits. */
-export function skillClasses(def: SkillDefinition): ReadonlySet<CharacterClassNumber> {
+function skillClasses(def: SkillDefinition): ReadonlySet<CharacterClassNumber> {
   const out = new Set<CharacterClassNumber>();
   for (const flag of def.classes.split('|')) {
     for (const c of CLASS_FLAGS[flag.trim()] ?? []) out.add(c);

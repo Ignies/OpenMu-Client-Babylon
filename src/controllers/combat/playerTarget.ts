@@ -15,7 +15,7 @@ import type { CombatLayer } from './layer';
 
 // ---- 2. readers ------------------------------------------------------------
 
-export type PlayerTargetContext = {
+type PlayerTargetContext = {
   /** The other duelist's id while the hero is fighting one, else null. */
   duelEnemyId: number | null;
   /** Ctrl is held: `CheckAttack`'s force attack. */
@@ -23,7 +23,7 @@ export type PlayerTargetContext = {
 };
 
 /** A player under the cursor: the id and the `HeroState` byte (`c->PK`). */
-export type PlayerTargetLike = { netId?: number; heroState?: number };
+type PlayerTargetLike = { netId?: number; heroState?: number };
 
 export function isHostilePlayer(
   target: PlayerTargetLike,

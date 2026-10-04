@@ -50,7 +50,7 @@ export type GmSection =
   | 'macros'
   | 'console';
 
-export type GmSectionInfo = { id: GmSection; titleKey: TextKey; hintKey: TextKey };
+type GmSectionInfo = { id: GmSection; titleKey: TextKey; hintKey: TextKey };
 
 export const GM_SECTIONS: readonly GmSectionInfo[] = [
   { id: 'live', titleKey: 'gm.section.live', hintKey: 'gm.section.liveHint' },
@@ -65,10 +65,10 @@ export const GM_SECTIONS: readonly GmSectionInfo[] = [
   { id: 'console', titleKey: 'gm.section.console', hintKey: 'gm.section.consoleHint' },
 ];
 
-export type SentLine = { id: number; line: string; at: number };
+type SentLine = { id: number; line: string; at: number };
 
 /** A macro going through its steps: which one, and how far. */
-export type MacroRun = { id: string; name: string; step: number; total: number };
+type MacroRun = { id: string; name: string; step: number; total: number };
 
 /** How often a macro looks whether its last line has gone out yet, ms. */
 const MACRO_POLL_MS = 50;

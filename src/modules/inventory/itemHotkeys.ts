@@ -13,9 +13,9 @@ import { InventoryConstants } from './inventoryConstants';
  */
 
 export const HOTKEY_COUNT = 4;
-export const HOTKEY_Q = 0;
-export const HOTKEY_W = 1;
-export const HOTKEY_E = 2;
+const HOTKEY_Q = 0;
+const HOTKEY_W = 1;
+const HOTKEY_E = 2;
 
 /** The four key codes, in slot order. Ctrl + one of them binds that slot. */
 export const ITEM_HOTKEY_CODES: readonly string[] = ['KeyQ', 'KeyW', 'KeyE', 'KeyR'];

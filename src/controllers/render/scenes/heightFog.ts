@@ -303,7 +303,7 @@ function createFog(scene: Scene, camera: ArcRotateCamera): PostProcess {
   return fog;
 }
 
-export function disposeHeightFog(): void {
+function disposeHeightFog(): void {
   if (!runtime) return;
 
   runtime.camera.detachPostProcess(runtime.fog);

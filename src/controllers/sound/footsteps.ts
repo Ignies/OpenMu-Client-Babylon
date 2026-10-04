@@ -88,7 +88,7 @@ export function footstepSound(): Sounds | null {
 }
 
 /** Play one footstep for the tile under the hero. */
-export function playFootstep(): void {
+function playFootstep(): void {
   // Not through `playSfx`: a footstep is never attenuated (it is under the
   // listener) and it needs the per-play pitch below, which `playSfx` throttle
   // aside has no way to carry.

@@ -355,7 +355,7 @@ function createSsao(
   return ssao;
 }
 
-export function disposeAmbientOcclusion(): void {
+function disposeAmbientOcclusion(): void {
   if (!runtime) return;
 
   const { scene, ssao } = runtime;

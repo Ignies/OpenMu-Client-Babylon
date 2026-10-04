@@ -33,7 +33,7 @@ const FLARE_SIZE_PX = 64;
 
 const MAX_SPRITES_PER_MANAGER = 512;
 
-export type FlareSpec = {
+type FlareSpec = {
   readonly scale: number;
   readonly color: readonly [number, number, number];
   readonly pulse?: { speed: number; amount: number; base: number };

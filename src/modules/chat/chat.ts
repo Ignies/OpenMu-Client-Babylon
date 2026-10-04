@@ -58,8 +58,8 @@ export const CHATBOX_HEIGHT = 47;
 export const CHAT_LINE_FONT_SIZE = 11;
 
 /** `SCROLL_BAR_WIDTH` / `WND_LEFT_RIGHT_EDGE` (NewUIChatLogWindow.h:92-95). */
-export const CHAT_SCROLL_BAR_WIDTH = 7;
-export const CHAT_WND_EDGE = 4;
+const CHAT_SCROLL_BAR_WIDTH = 7;
+const CHAT_WND_EDGE = 4;
 
 /**
  * `CLIENT_WIDTH` (NewUIChatLogWindow.h:100): the width a log line has to fit
@@ -176,7 +176,7 @@ export function chatRowsSpaced(text: string, rows: readonly string[]): boolean[]
  * carried. The colours are `SetPlayerColor`'s (nameTags.ts); the hero and
  * outlaw ones are animated in the stylesheet, a commoner is left plain.
  */
-export const CHAT_PK_CLASS: Readonly<Record<number, string>> = {
+const CHAT_PK_CLASS: Readonly<Record<number, string>> = {
   // `New`: OpenMU leaves every character on it until they first turn outlaw,
   // so this is the state almost every name in the log carries.
   0: 'pk-new',
@@ -284,7 +284,7 @@ export function layoutChatRows(
 }
 
 /** A wheel notch (100 px in Chrome) moves the log two rows. */
-export const CHAT_WHEEL_PIXELS_PER_ROW = 50;
+const CHAT_WHEEL_PIXELS_PER_ROW = 50;
 
 /**
  * Rows a wheel event scrolls, carrying the remainder so a touchpad's small

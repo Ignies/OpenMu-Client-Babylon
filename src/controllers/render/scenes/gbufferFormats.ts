@@ -11,7 +11,7 @@ import { devQuery } from '@/core/devSeams';
  */
 const LEAN_FORMATS = devQuery('gbufFormats') !== 'old';
 
-export type GbufferFormats = {
+type GbufferFormats = {
   [key: number]: { textureType: number; textureFormat: number };
 };
 

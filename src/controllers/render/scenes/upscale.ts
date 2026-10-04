@@ -466,7 +466,7 @@ function present(rt: Runtime): void {
   rt.renderer.render(rt.easu);
 }
 
-export function disposeUpscale(): void {
+function disposeUpscale(): void {
   if (!runtime) return;
 
   const { scene, camera, entry, target, sharpTarget, renderer, easu, rcas } =

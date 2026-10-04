@@ -7,7 +7,7 @@ import { itemLevelLook } from '../../modules/items/itemLevelLook';
  * checked against the manifest (`itemIconFiles.ts`), and a warm-up for it. See assets/readme.md.
  */
 
-export function itemIconTint(lvl: number): number {
+function itemIconTint(lvl: number): number {
   if (lvl < 3) return 0;
   if (lvl < 5) return 3;
   if (lvl < 7) return 5;

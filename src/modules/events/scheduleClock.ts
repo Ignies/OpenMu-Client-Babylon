@@ -10,11 +10,11 @@ import { EVENT_TEXT } from './recipes';
 /** The floor: one request per event per 30 s, whatever else asks. */
 export const MIN_REQUEST_MS = 30_000;
 /** Nothing known yet, or the server has no timetable: ask again soon. */
-export const POLL_UNKNOWN_MS = 30_000;
+const POLL_UNKNOWN_MS = 30_000;
 /** The gate is open: the row only has to notice it closing again. */
-export const POLL_OPEN_MS = 60_000;
+const POLL_OPEN_MS = 60_000;
 /** A countdown is running: nothing can change it, so drift slowly. */
-export const POLL_KNOWN_MS = 5 * 60_000;
+const POLL_KNOWN_MS = 5 * 60_000;
 
 export type EventScheduleEntry = {
   /** Epoch ms on the shared clock, or null while there is no moment to print. */

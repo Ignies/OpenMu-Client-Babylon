@@ -60,7 +60,7 @@ const MESSAGE_MS = 5000;
 
 // ---- 2. state + readers ----------------------------------------------------
 
-export type CrywolfHud = {
+type CrywolfHud = {
   occupation: Occupation;
   state: CrywolfState;
   /** 0..100, the statue shield the bar erodes. */

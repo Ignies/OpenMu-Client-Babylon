@@ -27,7 +27,7 @@ export type LightingTier = {
   readonly ssaoSamples: number;
 };
 
-export const LIGHTING_TIERS: readonly (LightingTier | null)[] = [
+const LIGHTING_TIERS: readonly (LightingTier | null)[] = [
   null,
   { cascades: 3, shadowMapSize: 2048, pcss: false, ssaoRatio: 0.5, ssaoSamples: 8 },
   { cascades: 3, shadowMapSize: 4096, pcss: true, ssaoRatio: 1, ssaoSamples: 16 },
@@ -143,7 +143,7 @@ export function csmActive(): boolean {
  * tuning - the `pointGain`/`floorGain` each recipe carries - stays where it
  * was set. A constant rather than an option: the layer is additive by rule.
  */
-export const DYNAMIC_LIGHT_GAIN = 1;
+const DYNAMIC_LIGHT_GAIN = 1;
 
 export function dynamicLightGain(): number {
   return DYNAMIC_LIGHT_GAIN;

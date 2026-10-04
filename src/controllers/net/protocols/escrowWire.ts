@@ -27,7 +27,7 @@ export const EscrowOperation = {
 export type EscrowOperationName = keyof typeof EscrowOperation;
 
 /** One byte in the result; the names are the plugin's `EscrowStatus`. */
-export const EscrowStatus = {
+const EscrowStatus = {
   ok: 0,
   badToken: 1,
   expired: 2,
@@ -48,7 +48,7 @@ const STATUS_NAMES = Object.fromEntries(
   Object.entries(EscrowStatus).map(([name, code]) => [code, name])
 ) as Record<number, EscrowStatusName>;
 
-export function escrowStatusName(code: number): EscrowStatusName {
+function escrowStatusName(code: number): EscrowStatusName {
   return STATUS_NAMES[code] ?? 'failed';
 }
 

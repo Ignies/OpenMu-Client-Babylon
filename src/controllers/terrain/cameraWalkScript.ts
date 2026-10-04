@@ -15,7 +15,7 @@ export type CameraWaypoint = {
   distanceLevel: number;
 };
 
-export function parseCameraWalkScript(
+function parseCameraWalkScript(
   name: string,
   buffer: Uint8Array
 ): CameraWaypoint[] {

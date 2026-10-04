@@ -144,7 +144,7 @@ const OFFLINE_ANSWER_DELAY = 30;
 /** `CNewUINPCShop`'s item control: 8 columns × 15 rows. */
 export const SHOP_COLUMNS = 8;
 export const SHOP_ROWS = 15;
-export const SHOP_SLOTS = SHOP_COLUMNS * SHOP_ROWS;
+const SHOP_SLOTS = SHOP_COLUMNS * SHOP_ROWS;
 
 /** `SendRepairItemRequest(0xFF, …)`: everything at once. */
 const REPAIR_ALL_SLOT = 0xff;
@@ -174,7 +174,7 @@ type NpcTarget = { netId: number; name: string; npcType: number };
  * carries both ends (`FromStorage` / `ToStorage`) and because a refusal has
  * to put the item back where it came from.
  */
-export type PickedItem = {
+type PickedItem = {
   item: Item;
   fromSlot: number;
   fromStorage: StorageKind;
@@ -548,7 +548,7 @@ class PlayerData {
  * `Store.addNotification` kind: `info` is `TYPE_SYSTEM_MESSAGE`, `error` is
  * `TYPE_ERROR_MESSAGE` of `g_pSystemLogBox->AddText`.
  */
-export type NotificationType = 'info' | 'error';
+type NotificationType = 'info' | 'error';
 
 /** `PET_INFO` (`giPetManager::SetPetInfo`): what `PetInfoResponse` carries. */
 export type PetInfo = {

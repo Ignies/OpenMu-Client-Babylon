@@ -4,7 +4,7 @@
 
 import { t, type TextKey } from '../../i18n';
 
-export type GmParamType = 'text' | 'number' | 'boolean';
+type GmParamType = 'text' | 'number' | 'boolean';
 
 export type GmParam = {
   /** Matches the property on the server's argument class. */
@@ -35,7 +35,7 @@ export type GmCommand = {
   confirm?: boolean;
 };
 
-export type GmGroup = {
+type GmGroup = {
   id: string;
   titleKey: TextKey;
   commands: readonly GmCommand[];
@@ -488,7 +488,7 @@ export const GM_GROUPS: readonly GmGroup[] = [
 /** Every command in the catalogue, flat - the search box reads this. */
 export const GM_COMMANDS: readonly GmCommand[] = GM_GROUPS.flatMap(g => g.commands);
 
-export type BuiltCommand = { line: string } | { error: string };
+type BuiltCommand = { line: string } | { error: string };
 
 /**
  * Build the line to send, or say why it cannot be built.

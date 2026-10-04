@@ -14,7 +14,7 @@
  * a React render.
  */
 
-export type NetSampleKind = 'chat' | 'itemMove' | 'warp';
+type NetSampleKind = 'chat' | 'itemMove' | 'warp';
 
 /** Slower than this is a stalled request, not a round trip. */
 const MAX_SAMPLE_MS = 5000;

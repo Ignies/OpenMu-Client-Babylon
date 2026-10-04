@@ -52,7 +52,7 @@ function track(name: string, events: Event[]): number[] {
 /** The arpeggio's notes, one bar = C4 E4 G4 C5. */
 export const TEST_LEAD_NOTES = [60, 64, 67, 72] as const;
 
-export const TEST_TEMPO_BPM = 120;
+const TEST_TEMPO_BPM = 120;
 
 /** Milliseconds one quarter note lasts at the test tempo. */
 export const TEST_QUARTER_MS = 60000 / TEST_TEMPO_BPM;

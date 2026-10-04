@@ -11,7 +11,7 @@ const SERVERS_KEY = 'mu_servers';
 /** The pre-profile config blob (app/store.ts `CONFIG_KEY`), read once to migrate. */
 const LEGACY_KEY = '_mu_key';
 
-export type GameServerPolicy =
+type GameServerPolicy =
   /** Use the address `ConnectionInfo` returns; fall back to `csHost`. */
   | 'auto'
   /** Ignore it and always reconnect to `csHost` (single-box setups). */
@@ -22,7 +22,7 @@ export type GameServerPolicy =
  * low byte of the `ServerId` the connect server sends - the id that server was
  * configured with, which is the whole of it in a single-group deployment.
  */
-export type PublishedChannel = { id: number; name: string };
+type PublishedChannel = { id: number; name: string };
 
 /**
  * One of a world's game servers, as the published list named it. `id` is the
@@ -154,7 +154,7 @@ export function isInsecureWsUrl(url: string): boolean {
  * half-finished host (`127.`) or a cleared port is not rewritten under the
  * cursor. `effective` is what normalizes it, at connect time.
  */
-export function draftProfile(
+function draftProfile(
   patch: Partial<ServerProfile>,
   base: ServerProfile
 ): ServerProfile {
@@ -172,7 +172,7 @@ export function draftProfile(
 }
 
 /** The strict pass: storage, the URL override and a new profile go through it. */
-export function sanitizeProfile(
+function sanitizeProfile(
   patch: Partial<ServerProfile>,
   base: ServerProfile
 ): ServerProfile {

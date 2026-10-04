@@ -7,7 +7,7 @@
  * Read by: controllers/fx/model.ts `native` (Twisting Slash's wheel copies, Rageful Blow's thrown weapon).
  */
 
-export interface ItemMeshRule {
+interface ItemMeshRule {
   /** `o->BlendMesh`: the additive mesh, -2 for every mesh, -1 none. */
   blendMesh: number;
   /** `o->HiddenMesh`, -1 none. */

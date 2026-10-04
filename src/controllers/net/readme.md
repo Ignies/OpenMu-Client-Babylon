@@ -20,7 +20,7 @@ readouts. Handlers for packets live in `src/modules/<module>/net.ts`, not here.
 - `pingNet.ts`: `installPingNet()`, `requestPing(x, z)`, `pingAvailable()`.
 - `roundTrip.ts`: `NetStats` (`markSent`, `markAnswered`, `roundTripMs`, `reset`).
 - `socketCost.ts`: `recordSocketDrain(bytes, ms)`, `netStats()`, `NET_BURST_MS`.
-- `serverTime.ts`: `serverNow()`, `setServerTimeOffset(ms)`.
+- `serverTime.ts`: `serverNow()`.
 - `sessionNonce.ts`: `sessionNonce()`, `SESSION_NONCE_RE`.
 
 ## How it works
@@ -42,8 +42,8 @@ readouts. Handlers for packets live in `src/modules/<module>/net.ts`, not here.
   client already sends (chat line and echo, item move and `ItemMoved`, warp and `MapChanged`).
   The figure is the median of the last 7 samples; it is not observable, the readout polls it.
 - `serverTime`: anything two players must see alike (ambient weather, timed events) is a
-  function of `serverNow()`. Today it is UTC wall time; `setServerTimeOffset` is the seam for a
-  server-stamped packet.
+  function of `serverNow()`. Today it is UTC wall time; an offset from a server-stamped packet
+  would go there.
 
 ### Notes
 - `sessionNonce.ts`: the cash shop never sees a password. Its proof of login is that the same

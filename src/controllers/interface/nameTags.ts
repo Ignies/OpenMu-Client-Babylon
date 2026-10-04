@@ -58,7 +58,7 @@ export const PK_MURDERER2_COLOUR = 'rgb(255, 0, 0)';
 
 /** `PVP_*` of the original, the values the HeroState byte carries. */
 export const PVP_NEUTRAL = 3;
-export const PVP_CAUTION = 4;
+const PVP_CAUTION = 4;
 export const PVP_MURDERER1 = 5;
 export const PVP_MURDERER2 = 6;
 
@@ -156,16 +156,16 @@ export enum GuildRelation {
  * `GetGuildRelationShipTextColor` / `BGColor` (ZzzCharacter.cpp:12161).
  * `SetBgColor(DWORD)` unpacks `r | g << 8 | b << 16 | a << 24`.
  */
-export const RELATION_NONE = {
+const RELATION_NONE = {
   text: 'rgb(230, 230, 255)',
   bg: 'rgba(10, 30, 50, 0.59)',
 };
-export const RELATION_RIVAL = {
+const RELATION_RIVAL = {
   text: 'rgb(255, 30, 0)',
   bg: 'rgba(0, 0, 0, 0.59)',
 };
 /** Same guild / union (GR_UNION and everything that is not rival). */
-export const RELATION_UNION = {
+const RELATION_UNION = {
   text: 'rgb(200, 255, 0)',
   bg: 'rgba(20, 50, 80, 0.59)',
 };
@@ -190,11 +190,11 @@ export const GM_NAME_TEXT = 'rgb(100, 250, 250)';
 export const GM_CHAT_TEXT = 'rgb(250, 200, 50)';
 
 /** Chat line background by `GuildColor` (`GuildTeam`, WSclient.cpp:221). */
-export const CHAT_BG: Record<number, string> = {
+const CHAT_BG: Record<number, string> = {
   0: 'rgba(10, 30, 50, 0.59)',
   1: 'rgba(30, 50, 0, 0.59)',
 };
-export const CHAT_BG_OTHER = 'rgba(50, 0, 0, 0.59)';
+const CHAT_BG_OTHER = 'rgba(50, 0, 0, 0.59)';
 export const CHAT_TEXT = 'rgb(230, 220, 200)';
 /** Ticks left below which a chat line drops to half alpha. */
 export const CHAT_FADE_TICKS = 10;

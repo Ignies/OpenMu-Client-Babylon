@@ -32,7 +32,7 @@ import type { Rgb } from '../../lighting/profiles';
  */
 
 /** What the post chain needs from the look; the director hands it over. */
-export type PostLook = {
+type PostLook = {
   /** Enhanced/Ultra: the grade runs. Classic: no image-processing pass at all. */
   readonly shaped: boolean;
   /** The viewer's brightness trim, `2^(brightness/10)`; the map's level is in the key. */

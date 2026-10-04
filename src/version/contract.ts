@@ -16,7 +16,7 @@
 export type GameVersionId = string;
 
 /** The 12-number list `SimpleModulusKeys.Create*Keys` takes: 4 modulus, 4 crypt, 4 xor. */
-export type SimpleModulusKeyList = readonly number[];
+type SimpleModulusKeyList = readonly number[];
 
 export interface VersionEncryption {
   /**

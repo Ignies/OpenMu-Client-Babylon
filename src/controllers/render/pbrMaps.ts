@@ -18,7 +18,7 @@ import type { PbrWorkerRequest, PbrWorkerResponse } from './pbrMaps.worker';
  * else they are derived from the texture's own bytes in a worker (`pbrDerive.ts`).
  */
 
-export type PbrMapSet = {
+type PbrMapSet = {
   normal: BaseTexture;
   metallicRoughness: BaseTexture;
   /** Null when the derivation found nothing worth glowing. */

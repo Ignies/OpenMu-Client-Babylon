@@ -19,7 +19,7 @@ import type { StatType } from './characterStats';
 /** A step with no answer this long is a lost request; the run ends. */
 const STEP_TIMEOUT = 5000;
 
-export type StatRun = {
+type StatRun = {
   stat: StatType;
   /** Requests sent so far. */
   sent: number;

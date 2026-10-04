@@ -8,7 +8,7 @@ import { t } from '../../i18n';
 
 export type BuffKind = 'buff' | 'debuff';
 
-export interface BuffRecipe {
+interface BuffRecipe {
   name: string;
   kind: BuffKind;
   /**

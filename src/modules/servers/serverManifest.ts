@@ -9,14 +9,14 @@ import { serverManifestUrl } from './serverServices';
  */
 
 /** The settings a server may set. Each default is the original client's behaviour. */
-export type ServerSettings = {
+type ServerSettings = {
   /** Hold the plain attack's HitRequest until the swing's hit key (ZzzInterface.cpp:3355 sends it on the click). */
   readonly heldHitRequest: boolean;
 };
 
-export type ServerManifest = { readonly version: 1; readonly settings: ServerSettings };
+type ServerManifest = { readonly version: 1; readonly settings: ServerSettings };
 
-export const SERVER_MANIFEST_VERSION = 1;
+const SERVER_MANIFEST_VERSION = 1;
 
 export const ORIGINAL_SETTINGS: ServerSettings = { heldHitRequest: false };
 

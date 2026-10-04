@@ -7,14 +7,14 @@ const GAP = 4;
 // The pointer is drawn by GameCursor, not the OS: a CURSOR_SIZE sprite hanging
 // down-right from the hotspot. Anything closer than that is behind the cursor,
 // which is what used to swallow the item's name.
-export const BELOW_CURSOR = CURSOR_SIZE - CURSOR_HOTSPOT + GAP;
-export const ABOVE_CURSOR = CURSOR_HOTSPOT + GAP;
+const BELOW_CURSOR = CURSOR_SIZE - CURSOR_HOTSPOT + GAP;
+const ABOVE_CURSOR = CURSOR_HOTSPOT + GAP;
 
 export type Viewport = { width: number; height: number };
 
 export type Placement = { left: number; top: number };
 
-export type BoxSize = { width: number; height: number };
+type BoxSize = { width: number; height: number };
 
 /** The cursor sprite's footprint in viewport pixels (gameCursor/index.tsx). */
 function cursorBox(x: number, y: number) {

@@ -47,7 +47,7 @@ export type ChatCommand = {
   gm?: boolean;
 };
 
-export const CHAT_COMMANDS: readonly ChatCommand[] = [
+const CHAT_COMMANDS: readonly ChatCommand[] = [
   // ---- client (CheckCommand) -----------------------------------------
   { name: '/trade', helpKey: 'cmd.trade', local: 'trade' },
   { name: '/party', helpKey: 'cmd.party', local: 'party' },

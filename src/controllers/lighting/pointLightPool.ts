@@ -90,7 +90,7 @@ const emitters = new Set<PointLightEmitter>();
 let pool: PointLight[] = [];
 
 /** One ground light per slot, as `terrainLighting.ts` binds it. */
-export type GroundLight = {
+type GroundLight = {
   x: number;
   z: number;
   /** Tile-map footprint radius, 0 for an empty slot. */

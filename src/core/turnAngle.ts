@@ -4,11 +4,11 @@
  * The original runs them once per 25 Hz tick; `approachAngle` converts the
  * per-tick fraction into a frame-rate independent step.
  */
-export const REFERENCE_TICK = 1 / 25;
+const REFERENCE_TICK = 1 / 25;
 
 const TWO_PI = Math.PI * 2;
 
-export function normalizeAngle(a: number): number {
+function normalizeAngle(a: number): number {
   a %= TWO_PI;
   if (a < 0) a += TWO_PI;
   return a;

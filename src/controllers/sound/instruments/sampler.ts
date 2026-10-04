@@ -40,7 +40,7 @@ const PAN_MAKEUP = Math.SQRT2;
 export type PerformerKey = string;
 
 /** The part of a voice's envelope known ahead: 0 at `startedAt`, `peak` from `attackEnd` on. */
-export type Envelope = { startedAt: number; attackEnd: number; peak: number };
+type Envelope = { startedAt: number; attackEnd: number; peak: number };
 
 /**
  * The envelope's level at audio time `at`, from its own schedule. An
@@ -65,7 +65,7 @@ type Voice = Envelope & {
 };
 
 /** Where a performer is heard from: their level and stereo position. */
-export type PerformerSpace = { gain: number; pan: number };
+type PerformerSpace = { gain: number; pan: number };
 
 /** A performer's chain: voices -> limiter -> gain -> pan -> out. */
 type PerformerChain = { limiter: DynamicsCompressorNode; gain: GainNode; pan: StereoPannerNode };

@@ -38,7 +38,7 @@ const UPRIGHT = Quaternion.FromEulerAngles(-Math.PI / 2, 0, 0);
 
 // ---- 2. state + readers ----------------------------------------------------
 
-export interface StampsOptions {
+interface StampsOptions {
   /** `Skill/…glb` (recipes.ts `MODEL`). */
   model: string;
   /** The mesh (BMD order) that is stamped - the others are the original's `HiddenMesh`. */

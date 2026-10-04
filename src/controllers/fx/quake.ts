@@ -22,7 +22,7 @@ const RAD = Math.PI / 180;
 
 // ---- 2. state + readers ----------------------------------------------------
 
-export interface QuakeOptions {
+interface QuakeOptions {
   /** How long it shakes, seconds. */
   seconds: number;
   /** The pitch roll's range in degrees, re-rolled every tick. */

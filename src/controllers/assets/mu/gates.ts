@@ -4,7 +4,7 @@ import { downloadDataFile } from './dataFolder';
 const MAX_GATES = 512;
 const GATE_RECORD_SIZE = 14;
 
-export const GateFlag = {
+const GateFlag = {
   Entrance: 1,
   Exit: 2,
 } as const;

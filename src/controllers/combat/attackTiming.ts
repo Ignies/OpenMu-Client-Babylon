@@ -64,7 +64,7 @@ export function blowHeldTicks(): number {
  * Tick at which a clip at `playSpeed` reaches its hit key: `1 + key / playSpeed`,
  * capped by `clipTicks`. The 15-tick limit must not cut it off. See controllers/combat/readme.md.
  */
-export function hitTickFor(
+function hitTickFor(
   action: PlayerAction,
   playSpeed: number,
   clipTicks = Infinity

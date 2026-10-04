@@ -15,7 +15,7 @@ const BOTH_SCALE = 0.65;
  * Legacy look from ZzzObject.cpp `RenderPartObjectEffect`; the improved ladder is in readme.md.
  */
 
-export type ItemGlowTier = 0 | 1 | 2 | 3 | 4;
+type ItemGlowTier = 0 | 1 | 2 | 3 | 4;
 
 export type RGB = readonly [number, number, number];
 

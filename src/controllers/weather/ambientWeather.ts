@@ -487,7 +487,7 @@ const DUST: Record<MapDustRoom['dust'], AmbientRecipe> = {
   houseHearth: HOUSE_HEARTH_DUST,
 };
 
-export type DustRoom = { readonly world: ENUM_WORLD; readonly room: Room; readonly recipe: AmbientRecipe };
+type DustRoom = { readonly world: ENUM_WORLD; readonly room: Room; readonly recipe: AmbientRecipe };
 
 /** A map's dust rooms (`MapWeather.dust`), each with its recipe. */
 export function ambientDustFor(world: ENUM_WORLD): DustRoom[] {

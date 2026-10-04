@@ -44,7 +44,7 @@ const MONSTER_MODEL_ICE_MONSTER = 15;
 const MONSTER_MODEL_DEATH_KNIGHT = 29;
 const MONSTER_MODEL_HYDRA = 37;
 
-export const MONSTER_BLEND_MESHES: Partial<Record<number, MonsterBlendMesh>> = {
+const MONSTER_BLEND_MESHES: Partial<Record<number, MonsterBlendMesh>> = {
   // Gorgon 18 / Death Gorgon 35: mesh 1 (:14051, :13903), and every tick
   // `BlendMeshLight = (rand() % 10) * 0.1f` (:6061) - the flicker.
   [MONSTER_MODEL_GORGON]: {

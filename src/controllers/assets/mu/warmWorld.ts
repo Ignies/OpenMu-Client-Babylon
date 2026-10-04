@@ -11,7 +11,7 @@ const OBJ_HEADER = 4;
 const OBJ_RECORD = 30;
 
 /** The object types an `EncTerrain<n>.obj` places, read off its records. */
-export function objectTypesIn(encoded: Uint8Array): Set<number> {
+function objectTypesIn(encoded: Uint8Array): Set<number> {
   const decoded = new Uint8Array(encoded.length);
   decryptMapFile(decoded, encoded, encoded.length);
 

@@ -51,7 +51,7 @@ const SCALE = 1.4;
 
 // ---- 2. state + readers ----------------------------------------------------
 
-export interface FeathersOptions {
+interface FeathersOptions {
   /** How many feathers. */
   count?: number;
   /** Tint (`o->Light`); white is an angel's. */

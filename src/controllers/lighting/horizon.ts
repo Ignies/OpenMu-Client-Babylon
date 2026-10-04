@@ -81,7 +81,7 @@ export function syncSkyline(scene: Scene): void {
   director.onChange.add(syncBand);
 }
 
-export function disposeSkyline(): void {
+function disposeSkyline(): void {
   if (!band) return;
 
   band.texture.dispose();

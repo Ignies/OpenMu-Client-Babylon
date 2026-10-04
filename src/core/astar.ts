@@ -33,7 +33,7 @@ function getHeap() {
   return new BinaryHeap(node => node.f);
 }
 
-export type AStarOptions = {
+type AStarOptions = {
   /**
    * Return the path to the closest node when the target is unreachable (or
    * the expansion cap is hit) instead of an empty path.

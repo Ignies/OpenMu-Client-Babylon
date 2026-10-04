@@ -9,7 +9,7 @@ import type { Texture } from '../render/babylon/exports';
  * see assets/readme.md and docs/texture_packs.md.
  */
 
-export type TexturePackInfo = {
+type TexturePackInfo = {
   id: string;
   name: string;
   /** How many textures it carries, for the Options row. */

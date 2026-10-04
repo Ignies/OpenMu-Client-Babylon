@@ -47,7 +47,7 @@ export const MU_UNIT = 1 / 100;
 /** The original steps its movement per 25 Hz tick. */
 export const TICKS_PER_SECOND = 25;
 
-export type BoidKind = 'bird' | 'bat' | 'butterfly' | 'crow' | 'fish' | 'dragon';
+type BoidKind = 'bird' | 'bat' | 'butterfly' | 'crow' | 'fish' | 'dragon';
 
 export type BoidSpec = {
   readonly kind: BoidKind;
@@ -109,7 +109,7 @@ export type BoidSpec = {
   readonly calls?: readonly BoidCall[];
 };
 
-export type EyeGlow = {
+type EyeGlow = {
   readonly bone: number;
   readonly spreadCm: number;
   readonly scale: number;
@@ -117,7 +117,7 @@ export type EyeGlow = {
   readonly luminosity: readonly [number, number];
 };
 
-export type BoidCall = {
+type BoidCall = {
   readonly sound: Sounds;
   readonly withinCm: number;
   readonly oneIn: number;

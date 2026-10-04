@@ -10,10 +10,10 @@ import type { ThinEngine } from '@babylonjs/core/Engines/thinEngine';
 // ---- 1. tuning -------------------------------------------------------------
 
 /** Texels per tile. Eight resolves a 0.1-tile rim; the map is 256 tiles. */
-export const TRAIL_RES = 8;
+const TRAIL_RES = 8;
 
 /** Side of the depth map in texels. */
-export const TRAIL_SIZE = 256 * TRAIL_RES;
+const TRAIL_SIZE = 256 * TRAIL_RES;
 
 /**
  * Seconds for a full-depth channel to fill back in to nothing. Long: a walked
@@ -275,7 +275,7 @@ function update(dt: number): void {
 }
 
 /** Wipe the trail: a map change or a teardown. */
-export function resetSnowTrail(): void {
+function resetSnowTrail(): void {
   if (data && !rectEmpty(painted)) {
     // Only the painted rectangle can hold anything, so only it is zeroed
     // and only it goes back up.

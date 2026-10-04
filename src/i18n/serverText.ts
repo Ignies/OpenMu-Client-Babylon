@@ -53,7 +53,7 @@ function build(): void {
   }
 }
 
-export type ServerTextMatch = {
+type ServerTextMatch = {
   readonly key: TextKey;
   readonly params: Record<string, string>;
 };

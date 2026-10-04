@@ -30,7 +30,7 @@ export type EntityTypeFromQuery<TB extends Bucket<any> = Bucket<any>> =
 /** An entity the server named: it has a `netId` and, like every scoped object, a `transform`. */
 export type NetEntity = With<Entity, 'netId' | 'transform'>;
 
-export type BandRequest =
+type BandRequest =
   | { kind: 'takeOut'; instrument: InstrumentId }
   | { kind: 'putAway' };
 

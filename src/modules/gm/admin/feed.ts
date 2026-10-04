@@ -31,7 +31,7 @@ const RECONNECT_MS = 4000;
 const MAX_LIVE = 400;
 const PAGE = 100;
 
-export type LogPage = {
+type LogPage = {
   events: TrackEvent[];
   more: boolean;
   loading: boolean;

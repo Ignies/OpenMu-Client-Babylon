@@ -75,7 +75,7 @@ type GlowCard = {
   readonly blend?: GlowBlend;
 };
 
-export type MonsterGlow = {
+type MonsterGlow = {
   /**
    * MU bone indices the cards hang on, or `'body'` for the Shadow's "every
    * bone that is not a dummy" walk.
@@ -464,7 +464,7 @@ function reset(): void {
 
 // ---- 3. the layer ----------------------------------------------------------
 
-export interface MonsterGlowOptions {
+interface MonsterGlowOptions {
   entity: Entity;
   glow: MonsterGlow;
 }

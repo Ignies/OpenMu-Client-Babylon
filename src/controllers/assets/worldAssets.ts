@@ -80,17 +80,3 @@ export const DOPPELGANGER_WORLDS: readonly ENUM_WORLD[] = lazyWorlds(
   'doppelganger3',
   'doppelganger4'
 );
-
-/**
- * The same table row for every world in a list - what a per-world table
- * outside the map entries spreads in for an event whose instances share one
- * art set. Calling it at load reads the list then: prefer a row on the map.
- */
-export function onWorlds<T>(
-  worlds: readonly ENUM_WORLD[],
-  value: T
-): Partial<Record<ENUM_WORLD, T>> {
-  const out: Partial<Record<ENUM_WORLD, T>> = {};
-  for (const w of worlds) out[w] = value;
-  return out;
-}

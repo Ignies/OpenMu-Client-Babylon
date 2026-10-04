@@ -32,7 +32,7 @@ export function itemSquares(item: Item): { w: number; h: number } {
 const POTION_GROUP = 14;
 
 /** Kinds in the order they are packed: what a player looks for, first. */
-export function itemCategory(item: Item): number {
+function itemCategory(item: Item): number {
   if (item.group === POTION_GROUP) return 5;
   const def = itemDef(item.group, item.num);
   if (!def) return 6;
@@ -45,7 +45,7 @@ export function itemCategory(item: Item): number {
 }
 
 /** Big items first inside a kind, so first-fit leaves no holes behind them. */
-export function compareSquares(a: Square, b: Square): number {
+function compareSquares(a: Square, b: Square): number {
   const ai = a.item;
   const bi = b.item;
   return (

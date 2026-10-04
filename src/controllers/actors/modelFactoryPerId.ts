@@ -115,7 +115,7 @@ export function npcFactoryFor(
  * only the event turns them on. Loading no model and reporting `Ready` keeps ModelLoaderSystem from
  * standing a missing-model placeholder there.
  */
-export class HiddenNpc extends ModelObject {
+class HiddenNpc extends ModelObject {
   override init(_world: World, _entity: Entity): Promise<void> {
     this.Ready = true;
     return Promise.resolve();
@@ -134,7 +134,7 @@ const trapCache = new Map<number, typeof ModelObject>();
  * Tower are the same three lines of client code. 105 (the Kanturu canon) is a
  * real NPC model and is not a trap here.
  */
-export function trapFactoryFor(npcType: number, modelIndex: number, castsShadow: boolean): typeof ModelObject {
+function trapFactoryFor(npcType: number, modelIndex: number, castsShadow: boolean): typeof ModelObject {
   const cached = trapCache.get(npcType);
   if (cached) return cached;
 

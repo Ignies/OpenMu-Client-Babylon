@@ -315,7 +315,7 @@ function createPass(
   return pass;
 }
 
-export function disposeInkOutline(): void {
+function disposeInkOutline(): void {
   if (!runtime) return;
 
   runtime.camera.detachPostProcess(runtime.pass);

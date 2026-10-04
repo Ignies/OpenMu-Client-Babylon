@@ -47,9 +47,9 @@ const SKILL_ICON_OFFSET = 68;
 const SKILL_USE_TYPE_INNATE = 4;
 
 /** `MAX_MASTER_SKILL_CATEGORY`: the three columns of the window. */
-export const MASTER_GROUPS = 3;
+const MASTER_GROUPS = 3;
 /** Nodes per rank row; `(Index - 1) % 4` is the column (`RenderIcon`). */
-export const MASTER_RANK_COLUMNS = 4;
+const MASTER_RANK_COLUMNS = 4;
 /** Indices per group: `MAX_MASTER_TREE_RANK` rows minus one, times the columns. */
 const INDICES_PER_GROUP = 36;
 /** `MASTER_SKILL_LEVEL_REQ_FOR_NEXT_RANK`: a rank opens the next at level 10. */
@@ -64,7 +64,7 @@ export const MASTER_ICON_HEIGHT = 28;
 const MASTER_ICONS_PER_ROW = 25;
 
 /** `MASTER_SKILL_TREE_CLASS`: the class-flag column of both files. */
-export const enum MasterTreeClass {
+const enum MasterTreeClass {
   None = 0,
   BladeMaster = 1,
   GrandMaster = 2,
@@ -341,7 +341,7 @@ export function masterTreeDataLoaded(): boolean {
 }
 
 /** The tree the hero's class line uses, `None` for an unknown class. */
-export function masterTreeClass(charClass = Store.playerData.charClass): MasterTreeClass {
+function masterTreeClass(charClass = Store.playerData.charClass): MasterTreeClass {
   return TREE_CLASS[charClass] ?? MasterTreeClass.None;
 }
 
@@ -411,7 +411,7 @@ function isMasterSkill(skill: number): boolean {
 }
 
 /** `CheckParentSkill`: every required master skill is at level 10. */
-export function masterParentsMet(entry: MasterTreeEntry): boolean {
+function masterParentsMet(entry: MasterTreeEntry): boolean {
   for (const required of entry.requireSkills) {
     if (!required || !isMasterSkill(required)) return true;
     if (masterSkillLevel(required) < RANK_UNLOCK_LEVEL) return false;
@@ -431,7 +431,7 @@ function rankTopLevel(group: number, rank: number): number {
 }
 
 /** `CheckRankPoint`: rank 1 is open; rank N needs a level-10 node in N-1. */
-export function masterRankMet(entry: MasterTreeEntry): boolean {
+function masterRankMet(entry: MasterTreeEntry): boolean {
   if (entry.rank === 1) return true;
   return rankTopLevel(entry.group, entry.rank - 1) >= RANK_UNLOCK_LEVEL;
 }
@@ -440,7 +440,7 @@ export function masterRankMet(entry: MasterTreeEntry): boolean {
  * `CheckBeforeSkill`: a strengthener's base skill (`SkillBrand`) must be
  * learned before the first point, unless the base is innate (use type 4).
  */
-export function masterBaseSkillMet(entry: MasterTreeEntry): boolean {
+function masterBaseSkillMet(entry: MasterTreeEntry): boolean {
   if (masterSkillInfo(entry).level > 0) return true;
   const brand = skillAttributes[entry.skill]?.brand ?? 0;
   if (!brand) return true;
@@ -452,7 +452,7 @@ export function masterBaseSkillMet(entry: MasterTreeEntry): boolean {
  * `IsNonWeaponSkillOrIsSkillEquipped`: a strengthener of a weapon skill
  * needs that weapon in hand.
  */
-export function masterEquipmentMet(entry: MasterTreeEntry): boolean {
+function masterEquipmentMet(entry: MasterTreeEntry): boolean {
   const brand = skillAttributes[entry.skill]?.brand ?? 0;
   if (!brand || !isWeaponSkill(brand)) return true;
   return skillRequirementsMet(brand);

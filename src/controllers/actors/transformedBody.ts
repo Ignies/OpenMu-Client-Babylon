@@ -127,7 +127,7 @@ export function characterSkinParts(): Readonly<
  */
 const SKIN_SCALE: Readonly<Record<number, number>> = { 7: 0.8 };
 
-export type SkinBody = {
+type SkinBody = {
   /**
    * A part file worn on the character's own rig, or a whole monster with a
    * rig of its own. The second kind has none of a character's clips, so

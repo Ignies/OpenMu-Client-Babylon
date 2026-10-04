@@ -29,7 +29,7 @@ import type { ParticleRecipe } from '../fx/core';
 export const BURN_RES = 4;
 
 /** Side of the burn map in texels. */
-export const BURN_SIZE = 256 * BURN_RES;
+const BURN_SIZE = 256 * BURN_RES;
 
 /**
  * Seconds for a full burn to grow back. The ask was "at least five minutes",
@@ -696,7 +696,7 @@ function update(dt: number): void {
 }
 
 /** Put every fire out and wipe the scar: a map change or a teardown. */
-export function resetGrassBurn(): void {
+function resetGrassBurn(): void {
   fires.length = 0;
   emberScene = null;
 

@@ -9,7 +9,7 @@ import { animations, type SpeedRule } from './animation';
  * authored at 24 keys/s, so Babylon `speedRatio = PlaySpeed * 25 / 24`
  * (applied in ModelObject).
  */
-export const BMD_KEYS_PER_SECOND = 24;
+const BMD_KEYS_PER_SECOND = 24;
 export const REFERENCE_FPS = 25;
 export const PLAY_SPEED_TO_RATIO = REFERENCE_FPS / BMD_KEYS_PER_SECOND;
 
@@ -17,7 +17,7 @@ export const PLAY_SPEED_TO_RATIO = REFERENCE_FPS / BMD_KEYS_PER_SECOND;
  * `SetAttackSpeed()` stat scaling (ZzzCharacter.cpp:812-847): the piecewise
  * multiplier is the cap - there is no clamp on the result.
  */
-export function attackSpeedFactor(attackSpeed: number): number {
+function attackSpeedFactor(attackSpeed: number): number {
   if (attackSpeed >= 509 && attackSpeed <= 549) return attackSpeed * 0.0026;
   if (attackSpeed >= 550 && attackSpeed <= 750) return attackSpeed * 0.0017;
   return attackSpeed * 0.004;
@@ -190,9 +190,9 @@ export function applyPlayerActionSpeed(
  * play at its stat rate, the *request* waits. Values mirror the plugin's
  * defaults; a small margin absorbs timer/network jitter.
  */
-export const SERVER_ATTACK_BASE_DELAY_MS = 450;
-export const SERVER_ATTACK_SCALING_FACTOR = 1.2;
-export const SERVER_ATTACK_MIN_INTERVAL_MS = 60;
+const SERVER_ATTACK_BASE_DELAY_MS = 450;
+const SERVER_ATTACK_SCALING_FACTOR = 1.2;
+const SERVER_ATTACK_MIN_INTERVAL_MS = 60;
 const SERVER_ATTACK_SAFETY_MARGIN = 1.1;
 
 export function serverMinAttackInterval(attackSpeed: number): number {

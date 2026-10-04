@@ -3,7 +3,7 @@ const TGA_HEADER_SIZE = 18;
 const TGA_UNCOMPRESSED_TRUE_COLOR = 2;
 const TGA_TOP_LEFT_ORIGIN = 0x20;
 
-export type DecodedTGA = {
+type DecodedTGA = {
   width: number;
   height: number;
   pixels: Uint8ClampedArray;

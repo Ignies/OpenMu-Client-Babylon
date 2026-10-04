@@ -16,11 +16,11 @@ import type { Item } from '../../ecs/world';
 /** Upper bound on one bulk buy, the same order as the arrange run's. */
 export const MAX_BULK_BUY = 120;
 
-export type QuickTarget =
+type QuickTarget =
   | { kind: 'move'; to: StorageKind }
   | { kind: 'sell' };
 
-export type OpenWindows = {
+type OpenWindows = {
   /** `Economy.autoMoveTarget`: the storage grid a right click already feeds. */
   storage: StorageKind | null;
   /** `Store.npcShop`: the merchant's stall is open. */

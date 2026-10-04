@@ -30,7 +30,7 @@ const BODY_HEIGHT = 0.8;
 const SWIRL_HEIGHT = 0.6;
 
 /** Keyed by the event's effect name. */
-export const OBJECT_EFFECT_LIGHTS: Record<ObjectEffect, LightRecipe> = {
+const OBJECT_EFFECT_LIGHTS: Record<ObjectEffect, LightRecipe> = {
   levelUp: {
     color: [1, 0.85, 0.4],
     range: 3,

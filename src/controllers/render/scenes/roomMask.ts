@@ -430,7 +430,7 @@ function createPass(scene: Scene, camera: ArcRotateCamera): Runtime {
   return { scene, camera, pass, ownDepth };
 }
 
-export function disposeRoomMask(): void {
+function disposeRoomMask(): void {
   if (!runtime) return;
 
   const { scene, camera, pass, ownDepth } = runtime;

@@ -38,7 +38,7 @@ const BODY_TOP = 1.15;
 
 export type ItemSparkleKind = 'character' | 'drop';
 
-export interface ItemSparkleOptions {
+interface ItemSparkleOptions {
   kind: ItemSparkleKind;
   /** The item's position; a wearer moves, a drop falls in. */
   follow?: PointSource;

@@ -431,7 +431,7 @@ export const BRIGHTNESS_MIN = -10;
 export const BRIGHTNESS_MAX = 10;
 
 /** `uiScale` steps: the factor every window's own scale is multiplied by. */
-export const UI_SCALE_STEPS = [0.7, 0.8, 0.9, 1, 1.15, 1.3, 1.5, 1.75, 2] as const;
+const UI_SCALE_STEPS = [0.7, 0.8, 0.9, 1, 1.15, 1.3, 1.5, 1.75, 2] as const;
 
 export const UI_SCALE_MAX = UI_SCALE_STEPS.length - 1;
 

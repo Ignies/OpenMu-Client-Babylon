@@ -30,7 +30,7 @@ const DEFAULT_WIDTH = 1;
 
 // ---- 2. state + readers ----------------------------------------------------
 
-export interface PathOptions {
+interface PathOptions {
   /** The path in tiles, from its root (index 0) to its tip. */
   points: readonly Vector3[];
   /** Points drawn `tick` ticks into the growth (1 on the first tick). Default: all of them. */
@@ -68,7 +68,7 @@ export interface PathOptions {
 }
 
 /** The two faces' across axes (the tail matrix's X and Z), unit. */
-export interface PathAxes {
+interface PathAxes {
   side: Vector3;
   up: Vector3;
 }

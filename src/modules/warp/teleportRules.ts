@@ -17,15 +17,15 @@ export interface Tile {
 }
 
 /** A pending request is dropped after this long without an answer. */
-export const TELEPORT_PENDING_TIMEOUT = 3;
+const TELEPORT_PENDING_TIMEOUT = 3;
 /** `GetTickCount() - g_dwLatestZoneMoving < 3000` (ClassAttack.cpp:1524). */
-export const MAP_CHANGE_HOLD = 3;
+const MAP_CHANGE_HOLD = 3;
 
 /** Stone, Stun, Sleep, Freeze2 and Earth Binds (WizardTeleportAction.cs:18-25). */
 export const TELEPORT_PREVENTING_EFFECTS: readonly number[] = [0x39, 0x3d, 0x48, 0x92, 0x93];
 
 /** What a `MapChanged` means for the hero. */
-export type MapChangeVerdict =
+type MapChangeVerdict =
   /** A real map change (IsMapChange): the full warp treatment. */
   | 'warp'
   /** The server's answer to the pending teleport, on the square the hero asked for. */
@@ -87,7 +87,7 @@ export function teleportSquareOpen(flag: number): boolean {
 }
 
 /** Teleport Ally's square: `Wall == 0` with only TW_ACTION removed (ClassAttack.cpp:1454-1464), OpenMU's walk map on top. */
-export function allySquareOpen(flag: number): boolean {
+function allySquareOpen(flag: number): boolean {
   return (flag & ~TW_ACTION) === 0 && openMuWalkable(flag);
 }
 
@@ -117,7 +117,7 @@ export interface TeleportCheck {
   sinceMapChange: number;
 }
 
-export type TeleportRefusal =
+type TeleportRefusal =
   | 'safeZone'
   | 'disabled'
   | 'holdingItem'

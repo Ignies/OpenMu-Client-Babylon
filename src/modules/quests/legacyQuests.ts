@@ -81,7 +81,7 @@ const ANSWER_SET_STATE = 3;
 const SET_STATE_ADVANCE = 1;
 
 /** `NUM_LINE_CMB` / `MAX_LENGTH_CMB`: the window wraps to 7 lines of 38 chars. */
-export const DIALOG_MAX_LINES = 7;
+const DIALOG_MAX_LINES = 7;
 const DIALOG_LINE_CHARS = 38;
 
 /** `MAX_ITEM_INDEX`: item `Type = group * 512 + index`. */
@@ -93,7 +93,7 @@ const DEFAULT_ANSWER_KEY: TextKey = 'common.close';
 // ---- 2. state + readers ----------------------------------------------------
 
 /** One clickable line of the dialog. */
-export type LegacyQuestAnswer = { text: string; link: number; action: number };
+type LegacyQuestAnswer = { text: string; link: number; action: number };
 
 const state = observable({
   /** `m_byQuestList` unpacked: one state per quest index. */

@@ -19,7 +19,7 @@ import { t } from '../../i18n';
 export const JEWEL_GROUP = 14;
 
 /** Item numbers inside group 14 that are dropped onto gear. */
-export const JEWEL = {
+const JEWEL = {
   bless: 13,
   soul: 14,
   life: 16,
@@ -80,7 +80,7 @@ const WING_NUMBERS: ReadonlySet<number> = new Set([
 const AMMO_NUMBERS: ReadonlySet<number> = new Set([7, 15]);
 
 /** Gear that accepts a jewel: weapons, armour, wings, Cape of Lord (13, 30). */
-export function isJewelTarget(item: Item): boolean {
+function isJewelTarget(item: Item): boolean {
   if (item.group <= 11) return !(item.group === 4 && AMMO_NUMBERS.has(item.num));
   if (item.group === 12) return WING_NUMBERS.has(item.num);
   if (item.group === 13) return item.num === 30;

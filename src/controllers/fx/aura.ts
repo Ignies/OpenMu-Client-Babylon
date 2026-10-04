@@ -327,13 +327,13 @@ export interface SpearJoints {
 }
 
 /** Shiny cards on bones, each rolling its brightness a tick. */
-export interface HandShiny {
+interface HandShiny {
   bones: readonly number[];
   colour: RGB;
 }
 
 /** Short-lived rising cards born on random bones a tick (Swell Life). */
-export interface BoneMotes {
+interface BoneMotes {
   bones: readonly number[];
   colour: RGB;
 }
@@ -351,7 +351,7 @@ export interface BoneGlow {
 }
 
 /** Something fired on a timer (the crit flare, the Swell of Magic hand rune). */
-export interface Pulse {
+interface Pulse {
   every: number;
   fire: () => void;
   /** Seconds before the first fire (default 0: at once). */

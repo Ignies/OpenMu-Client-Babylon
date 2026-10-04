@@ -12,8 +12,8 @@
 import { CHAT_LINE_HEIGHT, splitChatLine } from './chat';
 
 export type ChatEmoji = { code: string; pack: string; url: string };
-export type EmojiPack = { id: string; emojis: ChatEmoji[] };
-export type EmojiCatalog = {
+type EmojiPack = { id: string; emojis: ChatEmoji[] };
+type EmojiCatalog = {
   packs: readonly EmojiPack[];
   byCode: ReadonlyMap<string, ChatEmoji>;
   /** Files left out: a name that is not lowercase snake_case, or one another pack already has. */
@@ -53,8 +53,8 @@ export function chatEmojiRowHeight(size: number): number {
 export const CHAT_EMOJI_ADVANCE = chatEmojiAdvance(CHAT_EMOJI_SIZES[0]);
 
 /** Letters typed after a `:` before the completion list opens. */
-export const EMOJI_QUERY_MIN = 2;
-export const EMOJI_RECENT_MAX = 16;
+const EMOJI_QUERY_MIN = 2;
+const EMOJI_RECENT_MAX = 16;
 
 const byText = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
 
@@ -120,7 +120,7 @@ function scanEmojis(text: string, catalog: EmojiCatalog): EmojiHit[] {
 }
 
 /** The line holds a code this client draws as a picture. */
-export function hasEmojiCode(text: string, catalog: EmojiCatalog): boolean {
+function hasEmojiCode(text: string, catalog: EmojiCatalog): boolean {
   return scanEmojis(text, catalog).length > 0;
 }
 
@@ -145,7 +145,7 @@ export function chatLogRowHeight(
   return has ? chatEmojiRowHeight(emojiSize) : CHAT_LINE_HEIGHT;
 }
 
-export type EmojiSegment = string | ChatEmoji;
+type EmojiSegment = string | ChatEmoji;
 
 /** The line as runs of text and emojis, in order. */
 export function emojiSegments(text: string, catalog: EmojiCatalog): EmojiSegment[] {
@@ -186,7 +186,7 @@ const GLYPHS = new RegExp(`[${String.fromCharCode(GLYPH_BASE)}-${String.fromChar
 const HAS_GLYPH = new RegExp(GLYPHS.source);
 
 /** A run of the line drawn as one piece (an emoji, an item link): never split, `width` wide. */
-export type ChatAtom = { start: number; end: number; width: number };
+type ChatAtom = { start: number; end: number; width: number };
 
 export function emojiAtoms(
   text: string,

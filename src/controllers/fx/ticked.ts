@@ -39,7 +39,7 @@ const PARKED_Y = -1000;
  * Which of a tail's two faces a strip draws: `flat` is `RENDER_FACE_TWO` (corners 0/1, the
  * joint's local X), `upright` is `RENDER_FACE_ONE` (corners 2/3, its local Z).
  */
-export type StripFaces = 'both' | 'flat' | 'upright';
+type StripFaces = 'both' | 'flat' | 'upright';
 
 export interface StripOptions {
   /** The joint's `TexType` sheet (recipes.ts `TEX`). */
@@ -127,7 +127,7 @@ export interface TickedFx {
   drop(strip: TailStrip): void;
 }
 
-export interface TickedOptions {
+interface TickedOptions {
   /** One tick, `n` counting from 0 at the spawn. Return false to end. */
   tick(fx: TickedFx, n: number): boolean;
 }

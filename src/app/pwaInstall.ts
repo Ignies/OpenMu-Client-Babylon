@@ -15,7 +15,7 @@ type InstallPromptEvent = Event & {
  * browser having no install to offer. `busy` is a second press while its
  * dialog is already up, which needs saying nothing at all.
  */
-export type InstallResult = 'installed' | 'dismissed' | 'unavailable' | 'busy';
+type InstallResult = 'installed' | 'dismissed' | 'unavailable' | 'busy';
 
 /**
  * Whether the page is running as the installed app.

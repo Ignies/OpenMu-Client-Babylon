@@ -396,7 +396,7 @@ const BLADE_ROWS = {
   },
 } as const;
 
-export type BladeKind = keyof typeof BLADE_ROWS;
+type BladeKind = keyof typeof BLADE_ROWS;
 
 function bladeVertexData(kind: BladeKind): VertexData {
   const { v, width } = BLADE_ROWS[kind];
@@ -899,7 +899,7 @@ function hash01(x: number, y: number, i: number): number {
   return s - Math.floor(s);
 }
 
-export type GrassSource = {
+type GrassSource = {
   readonly layer1: Uint8Array;
   readonly layer2: Uint8Array;
   readonly alpha: Uint8Array;
@@ -925,7 +925,7 @@ export type GrassActor = {
 
 type Press = { x: number; z: number; life: number; flying: boolean };
 
-export type GrassField = {
+type GrassField = {
   /** Where the camera is, in tiles; drives residency. */
   setCenter(x: number, z: number): void;
   /**
@@ -938,7 +938,7 @@ export type GrassField = {
   dispose(): void;
 };
 
-export function createGrassField(
+function createGrassField(
   scene: Scene,
   src: GrassSource
 ): GrassField | null {

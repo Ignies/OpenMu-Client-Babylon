@@ -127,7 +127,7 @@ export function snowSprayBurst(
 }
 
 /** Drop the spray - a map change or a teardown. */
-export function resetSnowSpray(): void {
+function resetSnowSpray(): void {
   system?.dispose(false);
   system = null;
   emitter = null;

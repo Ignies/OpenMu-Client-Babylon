@@ -13,7 +13,7 @@ import type { TextKey } from '../../i18n';
  * excellent / ancient passes entirely (ZzzObject.cpp:9555, :10307). It applies
  * to both styles so the slider means the same thing whichever look is on.
  */
-export const enum ItemEffectMode {
+const enum ItemEffectMode {
   Off = 0,
   Legacy = 1,
   Both = 2,

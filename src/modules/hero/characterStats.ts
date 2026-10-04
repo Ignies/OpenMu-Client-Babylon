@@ -208,7 +208,7 @@ function itemMagicPower(item: Item): number {
   return power;
 }
 
-export type CharacterStatsInput = {
+type CharacterStatsInput = {
   charClass: CharacterClassNumber;
   level: number;
   strength: number;
@@ -252,7 +252,7 @@ export function magicSpeedOf(cls: CharacterClassNumber, agility: number): number
   return Math.trunc(agility / MAGIC_SPEED_DIVISOR[getBaseClass(cls)]);
 }
 
-export type DerivedStats = {
+type DerivedStats = {
   attackSpeed: number;
   magicSpeed: number;
   damageMin: number;
@@ -606,7 +606,7 @@ export function isMasterClass(cls: CharacterClassNumber): boolean {
 }
 
 /** `IsMasterExperienceActive` (CharacterManager.cpp:228-231): kills feed master experience instead of normal experience. */
-export const MASTER_EXPERIENCE_LEVEL = 400;
+const MASTER_EXPERIENCE_LEVEL = 400;
 
 export function masterExperienceActive(cls: CharacterClassNumber, level: number): boolean {
   return isMasterClass(cls) && level >= MASTER_EXPERIENCE_LEVEL;

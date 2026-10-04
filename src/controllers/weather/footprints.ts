@@ -809,20 +809,6 @@ function soleHeight(
   return { height, coverage };
 }
 
-/**
- * The whole sole atlas (R height around 0.5, G/B normal x/z, A coverage), for tests. The
- * runtime bakes one row per shape on first use instead (`ensureShape`).
- */
-export function buildSole(kind: PrintKind): Uint8Array {
-  const data = new Uint8Array(atlasWidth() * atlasHeight(kind) * 4);
-
-  for (const shape of DRAWN_SHAPES.slice(0, atlasRows(kind))) {
-    writeShape(data, kind, shape);
-  }
-
-  return data;
-}
-
 /** Width of the atlas in texels: one column per variant. */
 function atlasWidth(): number {
   return TEX * ATLAS_COLS;
@@ -903,11 +889,6 @@ function writeVariant(
       data[o + 3] = Math.round(Math.min(1, coverage[i]) * 255);
     }
   }
-}
-
-/** Colour a print of this kind is tinted toward at full depth. */
-export function soleTint(kind: PrintKind): readonly [number, number, number] {
-  return TINT[kind];
 }
 
 /**
@@ -1665,7 +1646,7 @@ function place(
 }
 
 /** Everything one print needs. An object because there are now eleven of them. */
-export interface FootprintSpec {
+interface FootprintSpec {
   x: number;
   y: number;
   z: number;
@@ -1805,7 +1786,7 @@ export function resetFootprints(): void {
  * already on the ground go with them - they were drawn with the old numbers
  * and keeping them would show two looks at once.
  */
-export function applyFootprintTuning(): void {
+function applyFootprintTuning(): void {
   for (const pool of pools.values()) pool.mesh.dispose();
   pools.clear();
 

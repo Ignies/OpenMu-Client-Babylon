@@ -15,7 +15,7 @@ import { devQuery } from '@/core/devSeams';
  * kept between frames instead of re-swept over every scene mesh.
  */
 
-export type CsmBoundsMode = 'babylon' | 'own' | 'check';
+type CsmBoundsMode = 'babylon' | 'own' | 'check';
 
 /**
  * `?csmBounds=babylon` (or `0`) hands the box back to Babylon's per-frame
@@ -295,7 +295,7 @@ export type CsmBoundsTarget = Pick<
 >;
 
 /** The fields Babylon's own box function reads and writes on `this`. */
-export type BabylonBoxProbe = {
+type BabylonBoxProbe = {
   _scbiMin: Vector3;
   _scbiMax: Vector3;
   _shadowMap: ReturnType<CsmBoundsTarget['getShadowMap']>;
@@ -328,7 +328,7 @@ export function runBabylonCasterBox(
   )._computeShadowCastersBoundingInfo.call(probe);
 }
 
-export type CsmBoundsStats = {
+type CsmBoundsStats = {
   frames: number;
   /** Receiver-box sweeps from scratch, resyncs included. */
   rebuilds: number;

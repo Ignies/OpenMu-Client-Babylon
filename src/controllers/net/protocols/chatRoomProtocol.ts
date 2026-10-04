@@ -11,7 +11,7 @@ import { Xor3Byte } from '../encryption/xor3';
 /** OpenMU's ChatServer listens here; the connection info packet carries no port. */
 export const CHAT_SERVER_PORT = 55980;
 
-export const MAX_CHAT_MESSAGE_BYTES = 250;
+const MAX_CHAT_MESSAGE_BYTES = 250;
 
 const NAME_LENGTH = 10;
 

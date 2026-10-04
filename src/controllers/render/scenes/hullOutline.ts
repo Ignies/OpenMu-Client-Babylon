@@ -64,7 +64,7 @@ function sweep(scene: Scene): void {
   for (const mesh of scene.meshes) dress(mesh);
 }
 
-export function disposeHullOutline(): void {
+function disposeHullOutline(): void {
   if (!runtime) return;
 
   runtime.scene.onNewMeshAddedObservable.remove(runtime.added);

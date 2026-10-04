@@ -10,7 +10,7 @@
  * No Babylon imports: this runs inside the PBR map worker.
  */
 
-export type Ktx2Image = { data: Uint8ClampedArray; width: number; height: number };
+type Ktx2Image = { data: Uint8ClampedArray; width: number; height: number };
 
 export type TranscoderUrls = { js: string; wasm: string };
 
@@ -34,7 +34,7 @@ type Ktx2File = {
   delete(): void;
 };
 
-export type Transcoder = {
+type Transcoder = {
   KTX2File: new (data: Uint8Array) => Ktx2File;
   initializeBasis(): void;
 };

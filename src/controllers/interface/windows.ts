@@ -4,7 +4,7 @@ import type { ComponentType } from 'react';
  * Where a window draws: `world` sits on the 3D view under the HUD and stays
  * up when the hide-interface key is pressed; `hud` is everything else.
  */
-export type WindowSlot = 'world' | 'hud';
+type WindowSlot = 'world' | 'hud';
 
 /** One window, panel or HUD element. `order` is its stacking order inside the slot. */
 export interface WindowDef {

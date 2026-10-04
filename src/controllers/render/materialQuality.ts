@@ -29,7 +29,7 @@ export function pbrMaterialsOn(): boolean {
 }
 
 /** True while every lit surface also takes a derived map set (tier 2). */
-export function pbrMaterialsEverywhere(): boolean {
+function pbrMaterialsEverywhere(): boolean {
   return materialQuality() >= 2;
 }
 
@@ -114,7 +114,7 @@ export function filterAnisotropy(): number {
   return ANISOTROPY_STEPS[step] ?? 16;
 }
 
-export type TextureFiltering = { sampling: number; anisotropy: number };
+type TextureFiltering = { sampling: number; anisotropy: number };
 
 /**
  * Sampler state for the art, per lighting tier. Classic reads level 0 with

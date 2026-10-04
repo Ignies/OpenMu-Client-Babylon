@@ -14,7 +14,7 @@ export type LightHost = {
   };
 };
 
-export type LightPlacement = {
+type LightPlacement = {
   readonly pos: { readonly x: number; readonly z: number };
   readonly entity: { readonly modelObject?: LightHost };
 };

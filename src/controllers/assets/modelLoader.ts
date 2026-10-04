@@ -182,7 +182,7 @@ export function getMaterial(
  */
 const scrollMaterialsCache: Map<string, ItemMaterial> = new Map();
 
-export function getScrollMaterial(
+function getScrollMaterial(
   scene: Scene,
   backFaceCulling: boolean,
   transparencyMode: number,
@@ -412,7 +412,7 @@ export async function syncTexturePack(): Promise<void> {
   await Promise.all(all.map(t => applyPackToTexture(t)));
 }
 
-export type LoadedModel = {
+type LoadedModel = {
   mesh: AbstractMesh;
   skeleton: Skeleton;
   animationGroups: AnimationGroup[];

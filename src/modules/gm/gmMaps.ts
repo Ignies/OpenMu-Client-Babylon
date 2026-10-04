@@ -13,7 +13,7 @@
  * `Land_of_Trials` and `Silent Map?` are not names anyone will type.
  */
 
-export type GmMap = {
+type GmMap = {
   number: number;
   name: string;
   /** Groups the picker; also what its filter matches against. */

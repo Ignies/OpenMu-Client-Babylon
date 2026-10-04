@@ -112,7 +112,7 @@ export function disposeTerrainWaterFrames(frames: readonly Texture[]): void {
  * i.e. one repeat every width/16 tiles. vUV is x/256, so the multiplier is
  * 256 / (width / 16).
  */
-export function terrainWaterFlipUvScale(frames: readonly Texture[]): number {
+function terrainWaterFlipUvScale(frames: readonly Texture[]): number {
   const width = frames[0]?.getSize().width || 256;
   return 4096 / width;
 }
@@ -291,7 +291,7 @@ export function bindTerrainWater(
   }
 }
 
-export type AmbientRing = {
+type AmbientRing = {
   readonly x: number;
   readonly z: number;
   readonly spawnTime: number;

@@ -56,14 +56,14 @@ const UPRIGHT = Quaternion.FromEulerAngles(-Math.PI / 2, 0, 0);
 
 // ---- 2. state + readers ----------------------------------------------------
 
-export interface SwarmWave {
+interface SwarmWave {
   amplitude: number;
   cycles: number;
   speed: number;
   phase?: number;
 }
 
-export interface SwarmRibbon {
+interface SwarmRibbon {
   width: number;
   colour: RGB;
   /** The most the coverage gain may reach, whatever the map's dark gain asks for. */

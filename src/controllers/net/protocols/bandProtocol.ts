@@ -13,7 +13,7 @@
  * here knows an instrument by name - the id is the registry index.
  */
 
-export const BAND_CODE = 0xfa;
+const BAND_CODE = 0xfa;
 export const BAND_VERSION = 1;
 
 export const BandSub = {

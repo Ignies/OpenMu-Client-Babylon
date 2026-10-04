@@ -54,7 +54,7 @@ export function parseSkillNames(bytes: Uint8Array): Map<number, string> {
 }
 
 /** Load the overlay for the active language; a no-op without a pack. */
-export function loadSkillNames(): Promise<void> {
+function loadSkillNames(): Promise<void> {
   if (pending) return pending;
 
   const pack = i18n.dataPack;

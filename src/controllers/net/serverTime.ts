@@ -9,19 +9,11 @@
  * The protocol carries no timestamp today (`WeatherStatusUpdate` pushes state,
  * not time), so the base is UTC wall time: NTP keeps desktops within a second
  * or two of each other, which is far tighter than the tens of seconds an
- * ambient episode lasts. `setServerTimeOffset` is the seam for the day a
- * server-stamped packet arrives - set it once from
- * `serverEpochMs - Date.now()` and every consumer follows without changing.
+ * ambient episode lasts. Once a server-stamped packet arrives, add its offset
+ * here and every consumer follows without changing.
  */
-
-let offsetMs = 0;
-
-/** Re-anchor the shared clock: `offset = serverEpochMs - Date.now()`. */
-export function setServerTimeOffset(ms: number): void {
-  offsetMs = Number.isFinite(ms) ? ms : 0;
-}
 
 /** Epoch milliseconds on the shared clock. */
 export function serverNow(): number {
-  return Date.now() + offsetMs;
+  return Date.now();
 }

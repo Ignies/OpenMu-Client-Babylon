@@ -99,7 +99,7 @@ const CELLS = { w: CELL, h: CELL, count: 2 };
 
 // ---- 2. state + readers ----------------------------------------------------
 
-export interface BandNoteOptions {
+interface BandNoteOptions {
   /** MIDI pitch, 0..127; only its class (the note within the octave) shows. */
   pitch: number;
   /** MIDI velocity, 0..127; the size. */
@@ -127,7 +127,7 @@ const p1 = new Vector3();
 const span = new Vector3();
 
 /** Twelve hues around the octave, C red: the same pitch class is always the same colour. */
-export function pitchColour(pitch: number): RGB {
+function pitchColour(pitch: number): RGB {
   const h = ((((pitch % 12) + 12) % 12) / 12) * 6;
   const i = Math.floor(h);
   const f = h - i;

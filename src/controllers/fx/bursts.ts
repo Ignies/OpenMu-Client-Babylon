@@ -78,7 +78,7 @@ type BurstRow = {
 export type BurstKind = 'levelUp' | 'shieldPotion' | 'shieldLost' | 'swirl';
 
 /** Keyed by the `objectEffect` event's name. */
-export const BURSTS: Record<BurstKind, BurstRow> = {
+const BURSTS: Record<BurstKind, BurstRow> = {
   // 15 joints × ~40 ticks, gold: a column of rising sparks.
   levelUp: {
     colour: [1, 0.85, 0.4],
@@ -111,7 +111,7 @@ export const BURSTS: Record<BurstKind, BurstRow> = {
 
 // ---- 2. state + readers ----------------------------------------------------
 
-export interface BurstsOptions {
+interface BurstsOptions {
   kind: BurstKind;
 }
 

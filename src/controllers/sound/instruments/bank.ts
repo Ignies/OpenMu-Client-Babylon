@@ -34,10 +34,10 @@ export type DecodedBank = {
   keys: number[];
 };
 
-export type NoteSource = { buffer: AudioBuffer; rate: number };
+type NoteSource = { buffer: AudioBuffer; rate: number };
 
 /** Where a bank's files live, through the active version's asset root. */
-export function bankUrl(id: InstrumentId, file?: string): string {
+function bankUrl(id: InstrumentId, file?: string): string {
   return resolveUrlToDataFolder(file ? `Instrument/${id}/${file}` : `Instrument/${id}.json`);
 }
 

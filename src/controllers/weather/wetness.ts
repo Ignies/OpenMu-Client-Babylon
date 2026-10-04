@@ -62,7 +62,7 @@ let lastMap: ENUM_WORLD | null = null;
  * Arriving on a map mid-shower seeds the wetness from the packet's target, so
  * a warp into a downpour does not land on bone-dry stone.
  */
-export function updateWetness(map: ENUM_WORLD, dt: number): number {
+function updateWetness(map: ENUM_WORLD, dt: number): number {
   if (!WET_MAPS.has(map)) {
     wet = 0;
     puddles = 0;
@@ -129,7 +129,7 @@ export function inPuddles(): boolean {
 }
 
 /** Drop both - a map change that is not to a wet map, or a teardown. */
-export function resetWetness(): void {
+function resetWetness(): void {
   wet = 0;
   puddles = 0;
   lastMap = null;
