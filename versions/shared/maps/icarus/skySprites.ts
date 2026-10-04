@@ -12,7 +12,7 @@ const OZJ_HEADER_SIZE = 24;
 
 /** MU units per world unit - the whole client divides positions by this. */
 
-export type SkySpriteTexture = {
+type SkySpriteTexture = {
   readonly file: string;
   readonly size: number;
   readonly capacity: number;

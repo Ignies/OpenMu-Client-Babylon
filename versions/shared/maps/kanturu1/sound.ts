@@ -53,7 +53,7 @@ const KENTAUROS = kanturuLine(
  * both Kentauros never clear `o->SubType` (`'life'`): one attack or death
  * line per spawn.
  */
-export const KANTURU_1ST: VoiceSet = {
+const KANTURU_1ST: VoiceSet = {
   106: BERSERK,
   // SPLINTER_WOLF
   107: kanturuLine(

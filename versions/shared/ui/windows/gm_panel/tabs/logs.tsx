@@ -51,7 +51,7 @@ const KIND_KEY: Record<EventKind, TextKey> = {
   band: 'gm.kind.band',
 };
 
-export function kindLabel(kind: EventKind): string {
+function kindLabel(kind: EventKind): string {
   return KIND_KEY[kind] ? t(KIND_KEY[kind]) : kind;
 }
 

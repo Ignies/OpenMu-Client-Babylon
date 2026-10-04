@@ -14,13 +14,13 @@ export type SkillType =
   | "AreaSkillExplicitTarget"
   | "PassiveBoost";
 
-export type SkillTargetKind =
+type SkillTargetKind =
   | "Explicit"
   | "ExplicitWithImplicitInRange"
   | "ImplicitParty"
   | "ImplicitPlayer";
 
-export type SkillDamageType = "Wizardry" | "None" | "Physical" | "Fenrir" | "Curse";
+type SkillDamageType = "Wizardry" | "None" | "Physical" | "Fenrir" | "Curse";
 
 export interface SkillDefinition {
   num: number;

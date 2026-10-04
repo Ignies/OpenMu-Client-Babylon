@@ -8,7 +8,7 @@ import commonBuffLooks from './common/buff_looks';
 const files = import.meta.glob<{ default?: SkillDef }>(['./*/*/*.ts', '!./**/*.test.ts'], { eager: true });
 
 /** Every shared skill, one entry per file, ordered by id. A version picks from this list. */
-export const SHARED_SKILLS: readonly SkillDef[] = Object.values(files)
+const SHARED_SKILLS: readonly SkillDef[] = Object.values(files)
   .map(m => m.default)
   .filter((d): d is SkillDef => !!d && typeof d.id === 'number')
   .sort((a, b) => a.id - b.id);

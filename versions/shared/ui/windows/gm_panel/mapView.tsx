@@ -21,7 +21,7 @@ import type { Nearby } from '@/modules/gm/gmWorld';
 
 const TERRAIN_SIZE = 256;
 
-export type MapViewProps = {
+type MapViewProps = {
   map: number;
   players: readonly TrackedPlayer[];
   /** The game master's own tile on this map, if standing on it. */

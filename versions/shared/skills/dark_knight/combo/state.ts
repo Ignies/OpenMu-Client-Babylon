@@ -17,7 +17,7 @@ import type { CombatLayer } from '@/controllers/combat/layer';
 // ---- 1. tuning -------------------------------------------------------------
 
 /** AT_SKILL_COMBO: the server announces a landed Dark Knight combo with this id. */
-export const SKILL_COMBO = 59;
+const SKILL_COMBO = 59;
 
 /** Seconds the combo flash stays readable for effects (MODEL_COMBO's life). */
 const FLASH_SECONDS = 1.0;

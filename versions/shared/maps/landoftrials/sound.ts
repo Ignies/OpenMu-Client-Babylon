@@ -19,7 +19,7 @@ const NOT_DYING: readonly MonsterActionType[] = [
  * `M31HuntingGround::RenderHuntingGroundMonsterVisual` (GMHuntingGround.cpp:371-719),
  * no world guard, and the Erohim's entrance in `CreateHuntingGroundMonster` (:285).
  */
-export const LAND_OF_TRIALS: VoiceSet = {
+const LAND_OF_TRIALS: VoiceSet = {
   // LIZARD_WARRIOR
   81: [
     hookWalk(['Sound/w31/mLWidle1', 'Sound/w31/mLWidle2']),

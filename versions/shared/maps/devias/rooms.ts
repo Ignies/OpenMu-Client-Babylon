@@ -130,7 +130,7 @@ export const DEVIAS_CASTLE_SPEC: RoomSpec = {
  * y 34.5/35 rows at 34. The colonnade stands inside that (pillars 9..10 and
  * 24..25), which is right - a pillar is furniture in the room, not its edge.
  */
-export const DEVIAS_BLACK_CASTLE_HALL: Room = {
+const DEVIAS_BLACK_CASTLE_HALL: Room = {
   min: { x: 9, y: 18 },
   max: { x: 28, y: 34 },
   centre: { x: 18.5, z: 26 },
@@ -144,7 +144,7 @@ export const DEVIAS_BLACK_CASTLE_HALL: Room = {
  * Floor read the same way: the x 217 wall bodies end at 218, the x 234.5 ones
  * at 234, the z 223.5 row at 224 and the z 239.5/240 rows at 239.
  */
-export const DEVIAS_WHITE_CASTLE_HALL: Room = {
+const DEVIAS_WHITE_CASTLE_HALL: Room = {
   min: { x: 218, y: 224 },
   max: { x: 234, y: 239 },
   centre: { x: 226, z: 231.5 },

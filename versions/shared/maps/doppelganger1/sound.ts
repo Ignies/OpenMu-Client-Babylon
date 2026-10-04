@@ -15,7 +15,7 @@ export const ICE_WALKER: readonly MonsterCue[] = [
   { on: [A.Die], play: 'Sound/w52/SE_Mon_wolfhuman_death01' },
 ];
 
-export const DOPPELGANGER: VoiceSet = {
+const DOPPELGANGER: VoiceSet = {
   // The Ice Walker's waves are loaded with one channel (ZzzOpenData.cpp:3994-3997)
   ...oneChannel({ 145: ICE_WALKER }),
   // MAD_BUTCHER

@@ -1,5 +1,5 @@
 /** Hot to cool, as a spark burns out. */
-export const SPARK_RAMP = [
+const SPARK_RAMP = [
   '255,240,200',
   '255,196,110',
   '255,128,64',

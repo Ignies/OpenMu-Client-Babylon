@@ -18,7 +18,7 @@ const STAMP_SPEED = 0.4;
  * R hits at key 3 and hands over to L at key 6; L, first moving the tick after, hits at its key 5
  * (MoveHandlers.cpp:9221-9309).
  */
-export function uppercutBlows(playSpeed: number): [number, number] {
+function uppercutBlows(playSpeed: number): [number, number] {
   const v = 2 * playSpeed;
   const reach = (key: number): number => {
     let k = 1;

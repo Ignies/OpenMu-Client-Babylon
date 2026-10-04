@@ -25,9 +25,9 @@ export function hasFreeSlot(list: readonly ListedCharacter[]): boolean {
  * - `pick` (the line-up): only while nothing is selected, once there are characters.
  * - `empty` (the 0.97d list): over an empty list, and "loading" even with a selection.
  */
-export type StatusPrompt = 'pick' | 'empty';
+type StatusPrompt = 'pick' | 'empty';
 
-export type ListStatus = 'loading' | 'select' | null;
+type ListStatus = 'loading' | 'select' | null;
 
 export function listStatus(
   state: { loading: boolean; count: number; selected: boolean },

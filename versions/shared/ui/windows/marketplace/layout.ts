@@ -14,8 +14,8 @@ export const FRAME_SRC = '/ui/marketplace_frame.png';
 export const FRAME_W = 1595;
 export const FRAME_H = 986;
 
-export const pctX = (px: number): string => `${(px / FRAME_W) * 100}%`;
-export const pctY = (px: number): string => `${(px / FRAME_H) * 100}%`;
+const pctX = (px: number): string => `${(px / FRAME_W) * 100}%`;
+const pctY = (px: number): string => `${(px / FRAME_H) * 100}%`;
 
 /** Left/top/width/height in image pixels, as a positioned CSS box. */
 export const box = (l: number, t: number, r: number, b: number) => ({

@@ -11,7 +11,7 @@ all.ts      finds every file (glob in the client and tests, from disk in the Bun
 ```
 
 ## Public API
-- `monsterModels` (`all.ts`): the monsters controller's body registry, filled with these files.
+- `all.ts` fills the monsters controller's body registry (`monsterModelRegistry`) with these files.
   Code reads bodies through the controllers: `monsterVoices` / `playMonster` (sound),
   `monsterPlaySpeed` (anim).
 

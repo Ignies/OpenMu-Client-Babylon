@@ -30,7 +30,7 @@ export type VersionPackets = {
 };
 
 /** What `versions/<id>/index.ts` exports. */
-export type VersionModule = {
+type VersionModule = {
   gameVersion: GameVersion;
   packets: VersionPackets;
 };

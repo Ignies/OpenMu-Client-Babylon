@@ -18,7 +18,7 @@ import { t } from '@/i18n';
  * The time to level is `SessionStats.msToLevel`: the session panel's rate,
  * read here, never recomputed.
  */
-export function buildExpTooltip(
+function buildExpTooltip(
   percent: number,
   exp: number,
   next: number,

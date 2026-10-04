@@ -98,13 +98,13 @@ type RowBase = {
   appliesKey?: TextKey;
 };
 
-export type ToggleRow = RowBase & { kind: 'toggle'; key: BoolKey };
+type ToggleRow = RowBase & { kind: 'toggle'; key: BoolKey };
 
 /**
  * A number the player sets. `slider` is a magnitude on the gauge, `choice`
  * a mode picked with the arrows; both store an index and print `display`.
  */
-export type NumberRow = RowBase & {
+type NumberRow = RowBase & {
   kind: 'slider' | 'choice';
   key: NumberKey;
   min?: number;
@@ -112,7 +112,7 @@ export type NumberRow = RowBase & {
   display: (value: number) => string;
 };
 
-export type KeyRow = { kind: 'key'; action: KeyAction; labelKey: TextKey };
+type KeyRow = { kind: 'key'; action: KeyAction; labelKey: TextKey };
 
 export type ButtonRow = RowBase & {
   kind: 'button';
@@ -120,12 +120,12 @@ export type ButtonRow = RowBase & {
   buttonKey: TextKey;
 };
 
-export type WidgetRow = RowBase & {
+type WidgetRow = RowBase & {
   kind: 'presets' | 'language' | 'texturePack' | 'fullscreen' | 'fidelity';
 };
 
 /** One registered improvement's check (`controllers/fidelity`). */
-export type ImprovementRow = RowBase & { kind: 'improvement'; id: string };
+type ImprovementRow = RowBase & { kind: 'improvement'; id: string };
 
 export type Row = ToggleRow | NumberRow | KeyRow | ButtonRow | WidgetRow | ImprovementRow;
 

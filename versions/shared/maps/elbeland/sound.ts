@@ -14,7 +14,7 @@ const A = MonsterActionType;
  * `GMNewTown::PlayMonsterSound` (GMNewTown.cpp:1110-1252); one channel each
  * (ZzzOpenData.cpp:3915-3953).
  */
-export const ELBELAND: VoiceSet = oneChannel({
+const ELBELAND: VoiceSet = oneChannel({
   // RABBIT
   128: [
     { on: ATTACK_1_2, play: 'Sound/w52/SE_Mon_rabbitstrange_attack01' },

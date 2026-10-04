@@ -67,7 +67,7 @@ const GATE_BLEND_MESH_LIGHT = 0.8;
  * That flag only moves on a server state packet (`SetState`, :2747-2781) and
  * its constructor value is `true`.
  */
-export class RaklionWarpHaloObject extends ModelObject {
+class RaklionWarpHaloObject extends ModelObject {
   CastsShadow = false;
 
   /** Radians a second, from the per-instance `Gravity` roll. */
@@ -129,7 +129,7 @@ export class RaklionWarpHaloObject extends ModelObject {
 }
 
 /** MODEL_WARP5, the `RENDER_BRIGHT` ring (GM_Raklion.cpp:1377-1381). */
-export class RaklionWarpHalo2Object extends RaklionWarpHaloObject {
+class RaklionWarpHalo2Object extends RaklionWarpHaloObject {
   protected modelFile(): string {
     return 'NPC/warp02.glb';
   }
@@ -139,7 +139,7 @@ export class RaklionWarpHalo2Object extends RaklionWarpHaloObject {
  * MODEL_WARP6 (GM_Raklion.cpp:1382-1386): the flat disc rather than a ring,
  * `o->Scale = 0.6f` and no `Gravity` roll.
  */
-export class RaklionWarpHalo3Object extends RaklionWarpHaloObject {
+class RaklionWarpHalo3Object extends RaklionWarpHaloObject {
   protected modelFile(): string {
     return 'NPC/warp03.glb';
   }
