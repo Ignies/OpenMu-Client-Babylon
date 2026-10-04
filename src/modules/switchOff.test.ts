@@ -20,21 +20,24 @@ function onEmptyBus(run: () => void): Bus {
   return snapshot();
 }
 
+const installedAlone = (id: string) => onEmptyBus(() => MODULES.filter(m => m.id === id).forEach(m => m.install()));
+
 describe.each([
   ['quests', ['LegacyQuestStateList', 'QuestStateList', 'AvailableQuests', 'OpenNpcDialog', 'CharacterInformation']],
+  ['skills', ['MasterStatsUpdate', 'MasterCharacterLevelUpdate', 'ExperienceGained', 'MasterSkillList']],
 ])('the %s module', (id, packets) => {
-  const own = () => onEmptyBus(() => MODULES.filter(m => m.id === id).forEach(m => m.install()));
-
   it('registers its listeners when installed, not when loaded', () => {
-    const mine = own();
+    const mine = installedAlone(id);
     expect([...mine.keys()]).toEqual(expect.arrayContaining(packets));
     for (const [event, handlers] of mine) {
       for (const h of handlers) expect(loaded.get(event) ?? []).not.toContain(h);
     }
   });
+});
 
-  it('switched off, leaves its packets with the other modules\' listeners only', () => {
-    const mine = own();
+describe.each(['quests'])('with %s off', id => {
+  it('its packets keep the other modules\' listeners only', () => {
+    const mine = installedAlone(id);
     const all = onEmptyBus(() => installModules(MODULES));
     const off = onEmptyBus(() => installModules(MODULES, m => m !== id));
     for (const [event, handlers] of mine) {

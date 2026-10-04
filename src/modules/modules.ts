@@ -5,6 +5,7 @@ import servers from './servers/module';
 import session from './session/module';
 import characterSelect from './character_select/module';
 import quests from './quests/module';
+import skills from './skills/module';
 import hero from './hero/module';
 import warp from './warp/module';
 import inventory from './inventory/module';
@@ -16,7 +17,6 @@ import party from './party/module';
 import guildWar from './guild_war/module';
 import friends from './friends/module';
 import combat from './combat/module';
-import skills from './skills/module';
 import drops from './drops/module';
 import world from './world/module';
 import marketplace from './marketplace/module';
@@ -37,6 +37,7 @@ export const MODULES: readonly ModuleDef[] = [
   session,
   characterSelect,
   quests, // before hero and combat: its CharacterInformation and ObjectGotKilled listeners run first
+  skills, // before hero: the master level (masterLevel.ts) reads the experience packets first
   hero,
   warp,
   inventory,
@@ -48,7 +49,6 @@ export const MODULES: readonly ModuleDef[] = [
   guildWar,
   friends,
   combat,
-  skills,
   drops,
   world,
   marketplace,

@@ -572,41 +572,44 @@ export function learnMasterSkill(skill: number): void {
   Session.sendToGS(packet.buffer);
 }
 
-EventBus.on('MasterSkillList', packet => {
-  const p = new MasterSkillListPacket(packet);
-  const b = p.buffer;
-  // The generated reader drops the two floats; read the 12-byte entries
-  // (index, level, pad, value, next value) straight from the buffer.
-  const count = p.MasterSkillCount;
-  runInAction(() => {
-    infoByIndex.clear();
-    infoBySkill.clear();
-    for (let i = 0, at = 12; i < count && at + 12 <= b.byteLength; i++, at += 12) {
-      infoByIndex.set(b.getUint8(at), {
-        level: b.getUint8(at + 1),
-        value: b.getFloat32(at + 4, true),
-        nextValue: b.getFloat32(at + 8, true),
-      });
-    }
+/** Registers the master tree's listeners; the skills module installs it (module.ts). */
+export function installMasterTree(): void {
+  EventBus.on('MasterSkillList', packet => {
+    const p = new MasterSkillListPacket(packet);
+    const b = p.buffer;
+    // The generated reader drops the two floats; read the 12-byte entries
+    // (index, level, pad, value, next value) straight from the buffer.
+    const count = p.MasterSkillCount;
+    runInAction(() => {
+      infoByIndex.clear();
+      infoBySkill.clear();
+      for (let i = 0, at = 12; i < count && at + 12 <= b.byteLength; i++, at += 12) {
+        infoByIndex.set(b.getUint8(at), {
+          level: b.getUint8(at + 1),
+          value: b.getFloat32(at + 4, true),
+          nextValue: b.getFloat32(at + 8, true),
+        });
+      }
+    });
   });
-});
 
-EventBus.on('MasterSkillLevelUpdate', packet => {
-  const p = new MasterSkillLevelUpdatePacket(packet);
-  if (!p.Success) return;
-  const info: MasterSkillInfo = {
-    level: p.Level,
-    // Generated as uint32; they are IEEE floats on the wire.
-    value: p.buffer.getFloat32(20, true),
-    nextValue: p.buffer.getFloat32(24, true),
-  };
-  runInAction(() => {
-    infoBySkill.set(p.MasterSkillNumber, info);
-    const index = p.MasterSkillIndex || entryBySkill(p.MasterSkillNumber)?.index;
-    if (index) infoByIndex.set(index, info);
+  EventBus.on('MasterSkillLevelUpdate', packet => {
+    const p = new MasterSkillLevelUpdatePacket(packet);
+    if (!p.Success) return;
+    const info: MasterSkillInfo = {
+      level: p.Level,
+      // Generated as uint32; they are IEEE floats on the wire.
+      value: p.buffer.getFloat32(20, true),
+      nextValue: p.buffer.getFloat32(24, true),
+    };
+    runInAction(() => {
+      infoBySkill.set(p.MasterSkillNumber, info);
+      const index = p.MasterSkillIndex || entryBySkill(p.MasterSkillNumber)?.index;
+      if (index) infoByIndex.set(index, info);
+    });
+    setMasterLevelUpPoints(p.MasterLevelUpPoints);
   });
-  setMasterLevelUpPoints(p.MasterLevelUpPoints);
-});
+}
 
 function reset(): void {
   // The list is sent once, on entering the game; the learned levels

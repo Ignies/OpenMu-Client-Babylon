@@ -103,17 +103,6 @@ export function setMasterLevelUpPoints(points: number): void {
   });
 }
 
-EventBus.on('MasterStatsUpdate', packet => {
-  const p = new MasterStatsUpdatePacket(packet);
-  runInAction(() => {
-    state.level = p.MasterLevel;
-    state.experience = Number(p.MasterExperience);
-    state.experienceOfNextLevel = Number(p.MasterExperienceOfNextLevel);
-    state.levelUpPoints = p.MasterLevelUpPoints;
-    state.received = true;
-  });
-});
-
 function levelUp(p: { MasterLevel: number; CurrentMasterPoints: number }): void {
   runInAction(() => {
     state.level = p.MasterLevel;
@@ -129,15 +118,6 @@ function levelUp(p: { MasterLevel: number; CurrentMasterPoints: number }): void 
   });
 }
 
-EventBus.on('MasterCharacterLevelUpdate', packet =>
-  levelUp(new MasterCharacterLevelUpdatePacket(packet))
-);
-// F3 51 extended (client >= 106.3): the same, with 32-bit maximum stats
-// (`Receive_Master_LevelUp` reads `LPPMSG_MASTERLEVEL_UP_EXTENDED`).
-EventBus.on('MasterCharacterLevelUpdateExtended', packet =>
-  levelUp(new MasterCharacterLevelUpdateExtendedPacket(packet))
-);
-
 function gained(p: { AddedExperience: number }): void {
   const pd = Hero;
   if (!state.received || p.AddedExperience <= 0 || !masterExperienceActive(pd.charClass, pd.level)) return;
@@ -146,10 +126,33 @@ function gained(p: { AddedExperience: number }): void {
   });
 }
 
-EventBus.on('ExperienceGained', packet => gained(new ExperienceGainedPacket(packet)));
-EventBus.on('ExperienceGainedExtended', packet =>
-  gained(new ExperienceGainedExtendedPacket(packet))
-);
+/** Registers the master level's listeners; the skills module installs it (module.ts). */
+export function installMasterLevel(): void {
+  EventBus.on('MasterStatsUpdate', packet => {
+    const p = new MasterStatsUpdatePacket(packet);
+    runInAction(() => {
+      state.level = p.MasterLevel;
+      state.experience = Number(p.MasterExperience);
+      state.experienceOfNextLevel = Number(p.MasterExperienceOfNextLevel);
+      state.levelUpPoints = p.MasterLevelUpPoints;
+      state.received = true;
+    });
+  });
+
+  EventBus.on('MasterCharacterLevelUpdate', packet =>
+    levelUp(new MasterCharacterLevelUpdatePacket(packet))
+  );
+  // F3 51 extended (client >= 106.3): the same, with 32-bit maximum stats
+  // (`Receive_Master_LevelUp` reads `LPPMSG_MASTERLEVEL_UP_EXTENDED`).
+  EventBus.on('MasterCharacterLevelUpdateExtended', packet =>
+    levelUp(new MasterCharacterLevelUpdateExtendedPacket(packet))
+  );
+
+  EventBus.on('ExperienceGained', packet => gained(new ExperienceGainedPacket(packet)));
+  EventBus.on('ExperienceGainedExtended', packet =>
+    gained(new ExperienceGainedExtendedPacket(packet))
+  );
+}
 
 function reset(): void {
   // The server sends master stats once, on entering the game, and nothing

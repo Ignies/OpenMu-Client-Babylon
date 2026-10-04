@@ -60,7 +60,8 @@ the hero is a walk the client failed to stop; no walk at all means the server mo
 - `CharacterStatIncreaseResponse(Extended)`: applies the point(s), emits `statPointAnswered`.
 - `CharacterLevelUpdate(Extended)`: level, points, maxima, fruit points; moves the exp bracket.
 - `MasterCharacterLevelUpdate(Extended)`: `playerData.masterLevel` (and maxima); see also `skills/masterLevel.ts`.
-- `ExperienceGained(Extended)`: adds exp, emits `experienceGained`.
+- `ExperienceGained(Extended)`: adds exp, emits `experienceGained`. A master's exp goes to
+  `skills/masterLevel.ts` instead, whose listener runs first (skills installs before hero).
 - `FruitConsumptionResponse`: the fruit result (`ReceiveUseStateItem`). `BaseStatsExtended`: base stats.
 
 ## Depends on / used by

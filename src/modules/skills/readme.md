@@ -35,8 +35,11 @@ hotbar share.
   `applyKeyConfiguration`. Learning from a scroll is the inventory's `learnSkillItem`.
 - Casts go out from `src/ecs/systems/skillCastSystem.ts` (TargetedSkill / AreaSkill), which asks
   `skills.canUse` and calls `skills.startCooldown`.
-- `masterLevel.ts` and `masterTree.ts` register their own `EventBus.on` handlers when the facade is
-  imported, not through `src/app/logic.ts`.
+- `masterLevel.ts` and `masterTree.ts` register their handlers in `installMasterLevel()` /
+  `installMasterTree()`; the module's install (`module.ts`) calls them before `installNet()`. The
+  module installs before `hero` (`../modules.ts`): on `ExperienceGained` and
+  `MasterCharacterLevelUpdate` the master level runs before the hero's own listener, as when it
+  registered at import.
 
 ## Packets
 - `SkillListUpdate`, `SkillAdded`, `SkillRemoved` (F3 11): one handler; the count byte (0xFE add,
@@ -54,7 +57,7 @@ hotbar share.
 - uses: `session`, `hero`, `_shared/net_helpers.ts`, `hero/characterStats.ts`, `controllers/item_rules/itemStats.ts`,
   `@versions/shared/skills/skillsDatabase` and `skillVisuals`, `ecs/systems/teleportSystem.ts`,
   controllers `combat`, `actors`, `assets/mu`, `terrain`, `src/i18n`.
-- used by: `src/app` (logic, lifecycle, store), ECS `skillSystem`, `skillCastSystem`, `pointerInputSystem`;
+- used by: `../modules.ts` (`module.ts`, before `hero`), `src/app` (logic, lifecycle), ECS `skillSystem`, `skillCastSystem`, `pointerInputSystem`;
   `combat/net.ts`, `warp/net.ts`, `options/mobileSkillSlots.ts`, `events/devilSquare.ts`; controllers
   `skills`, `combat`, `lighting`, `sound`, `interface`. Windows `versions/shared/ui/windows/skills/`,
   `master_skills/`, `party/`, `mu_helper/`; HUD `bottom_bar/`, `buff_bar/`, `mobile_controls/`.
@@ -73,6 +76,8 @@ hotbar share.
 - `teleportSound.test.ts`: a monster teleporting plays its own sound only on its map (the
   Nightmare in Kanturu 3rd); anyone else the plain one.
 - `versions/shared/skills/skillTables.golden.test.ts` snapshots `SKILL_DELAY_MS`.
+- `../switchOff.test.ts`: the master level and tree register their listeners when the module
+  installs, not when loaded.
 
 ## Notes
 ### cooldowns.ts
