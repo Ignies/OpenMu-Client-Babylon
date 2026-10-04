@@ -55,7 +55,8 @@ in one object that most files imported, which tied every module (and many contro
 whole app graph. Each piece moved to the module that owns it (`Hero`, `Session`, `Servers`,
 `CharSelect`, `HeroSkills`, `Pets`, `MuHelper`, `GuildMarks`, `Drops`, `Bag`, `Merchant`, the warp
 requests, chat's `addNotification`) or down to a controller (`Loading`, `MsgBox`, `WeatherStatus`)
-or `src/ecs` (`Ecs.world`); `tools/restructure/storeSplit.ts` did the `Store.x` rewrites.
+or `src/ecs` (`Ecs.world`). The codemod that rewrote `Store.x` is in git history
+(`tools/restructure/storeSplit.ts`).
 
 ## Depends on / used by
 - uses: every module (`net.ts`, state), most controllers, `src/ecs`, `src/version`, `versions/`.
