@@ -24,10 +24,10 @@ themselves are content in `versions/shared/skills/` (see [docs/content.md](../..
 
 ## How it works
 - `registerSkills` writes `visual` into `SKILL_VISUALS`, `lookAliases` / `masterAliases` into
-  `LOOK_ALIASES` (and `MASTER_BASES`, `modules/skills/skillAliases.ts`), `light` into
+  `LOOK_ALIASES` (and `MASTER_BASES`, `combat/skillAliases.ts`), `light` into
   `lighting/skills.ts`, `sound` / `clipSound` / `soundOnLanding` / `silentHeroCast` into
-  `sound/combat.ts`, `delayMs` and `effect` (also under each of its `effectAliases`) into
-  `modules/skills/recipes.ts`, `cancel` into the table `cancelledEffects` reads, `buffs` /
+  `sound/combat.ts`, `delayMs` into `combat/skillDelays.ts` (`SKILL_DELAY_MS`), `effect` (also under
+  each of its `effectAliases`) into `tables.ts` (`SKILL_EFFECTS`), `cancel` into the table `cancelledEffects` reads, `buffs` /
   `buffArrivals` / `buffHits` into `BUFF_VISUALS` / `BUFF_ARRIVALS` / `BUFF_HITS`, and hands
   the combat fields (clip rules, `target`, `stepIn`, `noFlinch`, `holdsFacing`, `quietOn`,
   `othersSee`, `explicitHits`, `kill`, `combat.layer` / `combat.hooks`) to
@@ -74,8 +74,11 @@ themselves are content in `versions/shared/skills/` (see [docs/content.md](../..
 ## Depends on / used by
 - uses: fx (`effects.spawn`), lighting, combat, sound and weather (`scorch`, `burn`) controllers,
   `versions/shared/skills/skillsDatabase`. Old exceptions to the dependency rule (listed in
-  `tools/checks/baselines/deps.json`): `modules/skills/recipes.ts`, `modules/skills/skillAliases.ts`,
-  `app/storeRef.ts` (dev hook only).
+  `tools/checks/baselines/deps.json`): `app/storeRef.ts` (dev hook only).
+- Dependency direction: the tables the skills module and the lighting, sound and combat controllers
+  read (`MASTER_BASES`, `SKILL_DELAY_MS`) live in `combat`, not here: this door imports combat,
+  lighting, sound and the visual engine, so a reader importing it would close a cycle.
+  `skillDisplayName` lives in `assets/mu/skillNames.ts`, beside the language pack it reads.
 - used by: every skill file in `versions/shared/skills/`, which registers them in
   `versions/shared/skills/index.ts`; `versions/shared/skills/skillVisuals.ts` re-exports the
   dispatch for `modules/combat`, `modules/skills`, `modules/_shared/net_helpers.ts` and the

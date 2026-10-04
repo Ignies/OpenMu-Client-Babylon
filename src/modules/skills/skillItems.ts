@@ -1,6 +1,6 @@
 import type { Item } from '../../ecs/world';
 import { classCanUse, type HeroStats, type ItemStats } from '../items/itemStats';
-import { skillDisplayName } from './skillNames';
+import { skillDisplayName } from '@/controllers/assets';
 import { t } from '../../i18n';
 
 /**

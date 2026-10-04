@@ -1,4 +1,4 @@
-/** Thai text of the `skill_tooltip` interface widget. */
+/** Thai text of the `skill_tooltip` UI component. */
 
 import type en from './en';
 

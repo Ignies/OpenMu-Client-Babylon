@@ -10,7 +10,7 @@ import { aimAlongFacing, teleportSquareOpen } from '@/modules/warp/teleportRules
 import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
 import { MobileSkillSlots, MOBILE_SKILL_SLOTS } from '@/modules/options/mobileSkillSlots';
 import { isAttackableEntity } from '@/ecs/systems/attackSystem';
-import { SkillIcon } from '@/controllers/interface/components/skill_icon';
+import { SkillIcon } from '../../components/skill_icon';
 import { MobileButton, ScaledFrame } from './mobileButton';
 import {
   BOX_HEIGHT,

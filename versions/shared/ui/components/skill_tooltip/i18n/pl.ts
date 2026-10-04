@@ -1,4 +1,4 @@
-/** Polish text of the `skill_tooltip` interface widget. */
+/** Polish text of the `skill_tooltip` UI component. */
 
 import type en from './en';
 

@@ -375,3 +375,9 @@ export const combat = new Combat();
 // of this singleton (same guard as app/store.ts).
 const hot = (import.meta as { hot?: { decline(): void } }).hot;
 if (hot) hot.decline();
+
+// Skill tables `registerSkills` fills; read by lighting, sound and the skills module.
+export { MASTER_BASES, masterBase } from './skillAliases';
+export { SKILL_DELAY_MS } from './skillDelays';
+export { castsOnSelf } from './castTargets';
+export { castSwing, castsAsSpell, magicClip, poseClip, skillClip, swordCountRule } from './skillClips';

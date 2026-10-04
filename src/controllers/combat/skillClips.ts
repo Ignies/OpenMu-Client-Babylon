@@ -7,7 +7,7 @@ import type { MountKind } from '../../modules/pets/pets';
 import type { ENUM_WORLD } from '../../core/types';
 import type { CombatLayer } from './layer';
 import type { Hands } from './weaponRange';
-import { masterBase } from '../../modules/skills/skillAliases';
+import { masterBase } from './skillAliases';
 import { MAGIC_CLIPS, SKILL_CLIPS } from './recipes';
 
 // ---- 1. tuning -------------------------------------------------------------

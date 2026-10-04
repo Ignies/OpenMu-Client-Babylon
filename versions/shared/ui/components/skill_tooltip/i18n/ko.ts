@@ -1,4 +1,4 @@
-/** Korean text of the `skill_tooltip` interface widget. */
+/** Korean text of the `skill_tooltip` UI component. */
 
 import type en from './en';
 

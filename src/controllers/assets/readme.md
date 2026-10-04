@@ -35,6 +35,7 @@ imports the modules below directly (baselined in `tools/checks`).
   (`prefetchWorldTerrain`, `fetchTerrainFile`, `consumeTerrainFile`, `terrainFilesFor`);
   `warmWorldObjects`; `SNOW_ART`, `ArtMatch`; `loadQuestTables` and its types; `loadMoveReqList`;
   `localisedItemName`, `localisedSkillName`, `localisedBuffName`, `localisedNpcName`,
+  `skillDisplayName(number)` (`mu/skillNames.ts`: the pack's name, else `skillsDatabase`'s; on the door),
   `loadNpcNames`, `onNpcNamesChanged`; `decodeLocalText`, `downloadLocalDataFile`.
 
 ## How it works

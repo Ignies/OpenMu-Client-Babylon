@@ -3,3 +3,4 @@ export { loadGLTF } from './modelLoader';
 export { localisedNpcName } from './mu/npcNameFile';
 export { reportLoadFailure, settle } from './loadFailure';
 export { texturePacks } from './texturePacks';
+export { skillDisplayName } from './mu/skillNames';

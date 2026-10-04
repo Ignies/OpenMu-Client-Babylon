@@ -4,7 +4,7 @@ import './skillVisuals';
 import { PlayerAction } from '@versions/shared/objects/enum';
 import { combat } from '@/controllers/combat';
 import { hasWarriorGlint } from '@/controllers/skills';
-import { SKILL_EFFECTS } from '@/modules/skills/recipes';
+import { SKILL_EFFECTS } from '@/controllers/skills/tables';
 
 vi.hoisted(() => {
   const g = globalThis as Record<string, unknown>;

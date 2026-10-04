@@ -4,7 +4,7 @@ import { observer } from 'mobx-react-lite';
 import { useLayoutEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
-import { skillDisplayName } from '@/modules/skills/skillNames';
+import { skillDisplayName } from '@/controllers/assets';
 import { skills, type SkillBlock } from '@/modules/skills';
 import { skillDelaySeconds } from '@/modules/skills/cooldowns';
 

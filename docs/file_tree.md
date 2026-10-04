@@ -69,6 +69,7 @@ shared/            content any version can load
   ui/windows/<window>/      one folder per window: index.tsx draws, window.ts registers it
   ui/hud/<element>/         bottom bar, minimap, chat, buff bar, name tags...
   ui/pages/<page>/          login, server_select, character_select, preloader, world
+  ui/components/<piece>/    shared pieces that read a module (skill icon, skill tooltip, emoji text)
   maps/<map>/               one folder per map: spec, create, object classes
   monsters/<name>/          one folder per monster or npc: data (index.ts), model.ts when it has a look of its own
   items/                    item table, launcher arrows

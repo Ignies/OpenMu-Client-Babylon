@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
-import { MuSpriteFrame } from '../mu_sprite';
+import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import {
   MASTER_SKILL_FIRST,
   SKILL_ICON_HEIGHT,

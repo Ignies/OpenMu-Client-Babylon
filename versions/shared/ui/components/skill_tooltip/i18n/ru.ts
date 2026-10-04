@@ -1,4 +1,4 @@
-/** Russian text of the `skill_tooltip` interface widget. */
+/** Russian text of the `skill_tooltip` UI component. */
 
 import type en from './en';
 

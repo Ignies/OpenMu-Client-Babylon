@@ -14,7 +14,7 @@ import type { SoundBus } from './buses';
 import type { Sounds } from './recipes';
 import type { SoundLayer } from './layer';
 import { playSfx, type SfxOptions, type SfxPosition } from './listener';
-import { masterBase } from '../../modules/skills/skillAliases';
+import { masterBase } from '@/controllers/combat';
 import { SoundsManager } from './soundsManager';
 
 /**

@@ -11,13 +11,13 @@ import {
   skillDefinition,
   type SkillDefinition,
 } from '@versions/shared/skills/skillsDatabase';
-import { skillDisplayName } from '@/modules/skills/skillNames';
+import { skillDisplayName } from '@/controllers/assets';
 import { uiClick } from '@/controllers/sound/sfx';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuItemWindow } from '@/controllers/interface/components/mu_window';
-import { SkillIcon } from '@/controllers/interface/components/skill_icon';
+import { SkillIcon } from '../../components/skill_icon';
 import {
   MAX_EXTRA_ITEM_CHARS,
   MAX_EXTRA_ITEMS,

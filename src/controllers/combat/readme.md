@@ -25,6 +25,9 @@ It never sends packets or touches the scene; the ECS systems that fight read it 
 - `recipes.ts`: `SKILL_CLIPS`, `HIT_KEYS`, `SHOCK_IMMUNE_CLIPS`, `RIDER_FLY_WORLDS` (also on the
   door, for Fire Breath and petSystem). No skill numbers: those live in the skill files.
 - `skillRules.ts`: `registerSkillRules` / `SkillCombatRules`, the combat half of a skill file.
+- `skillAliases.ts`: `MASTER_BASES`, `masterBase(skill)` (a master number's base skill, for clips,
+  sounds and lights); `skillDelays.ts`: `SKILL_DELAY_MS` (re-use delays, read by the skills
+  module's cooldowns). Both on the door; `registerSkills` fills them from the skill files.
 - `skillKills.ts`: `SkillKill` (`knock`, `dying`) and `skillKill(skill)`.
 - Door types: `CastContext`, `CastPose`, `PoseClip`, `ClipPick`, `SkillClipSet`, `SkillKill`,
   `SkillCombatRules`.
@@ -93,9 +96,10 @@ the server sends the new square.
 
 ## Depends on / used by
 - uses: `anim/playSpeed.ts`, `interface/nameTags.ts`, skill and packet tables in
-  `versions/shared`, `modules/pets` and `modules/skills/skillAliases` (baselined rule
-  exceptions in `tools/checks/baselines/deps.json`).
-- used by: `ecs/systems` (attack, skill cast, death, pet), `controllers/skills`,
+  `versions/shared`, `modules/pets` (a baselined rule exception in
+  `tools/checks/baselines/deps.json`).
+- used by: `ecs/systems` (attack, skill cast, death, pet), `controllers/skills`, `lighting/skills.ts`,
+  `sound/combat.ts`, `modules/skills/cooldowns.ts`,
   `modules/combat/net.ts`, `modules/skills/skillCasting.ts`, `app/lifecycle.ts`, skill files.
 
 ## Change it

@@ -1,4 +1,4 @@
-/** English text of the `skill_tooltip` interface widget. See src/i18n/readme.md. */
+/** English text of the `skill_tooltip` UI component. See src/i18n/readme.md. */
 
 const en = {
   'skills.tooltip.unknown': 'Unknown skill',
@@ -24,6 +24,6 @@ export default en;
 
 declare module '@/i18n' {
   interface TextOwners {
-    'src/controllers/interface/components/skill_tooltip': typeof en;
+    'versions/shared/ui/components/skill_tooltip': typeof en;
   }
 }

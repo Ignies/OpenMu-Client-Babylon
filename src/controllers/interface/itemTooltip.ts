@@ -29,7 +29,7 @@ import {
 import { itemBaseName } from '@versions/shared/items/itemsDatabase';
 import { itemLevelName } from '../../modules/items/itemLevelLook';
 import { learnableSkill } from '../../modules/skills/skillItems';
-import { skillDisplayName } from '../../modules/skills/skillNames';
+import { skillDisplayName } from '@/controllers/assets';
 
 /**
  * `RenderItemInfo` (ZzzInventory.cpp:2091) as data: the tooltip is a list

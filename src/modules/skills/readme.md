@@ -12,10 +12,13 @@ hotbar share.
 - `skillCasting.ts`: `TELEPORT`, `TELEPORT_ALLY`, `isTeleportSkill`, `isAreaSkill`, `isSelfCastable`,
   `chooseSkillAction`, `advancesSwordCount`, `rotationByte256`, `isHotbarSkill`, `skillIconCell`.
 - `cooldowns.ts`: `skillCooldowns`, `onCooldownTick(listener)`, `skillDelaySeconds(num)`.
-  `recipes.ts`: `SKILL_DELAY_MS`, `buffIconCell(effectId)`. `masterTree.ts`: `MASTER_TEXT`,
+  `recipes.ts`: `buffRecipe(effectId)`, `buffIconCell(effectId)`. `masterTree.ts`: `MASTER_TEXT`,
   `formatMasterText`, `masterSkillIconCell`. `masterLevel.ts`: `MASTER_EXP_SUB_BARS`.
-- `masterBase(skill)` (`skillAliases.ts`, `MASTER_BASES` filled from each base skill's `masterAliases`), `learnableSkill(item)` / `learnSkillError(...)` (`skillItems.ts`),
-  `skillDisplayName(number)` (`skillNames.ts`), `playTeleportAnimation(...)` (`net.ts`).
+- `learnableSkill(item)` / `learnSkillError(...)` (`skillItems.ts`), `playTeleportAnimation(...)` (`net.ts`).
+- Moved down (a controller may not import a module): `masterBase` / `MASTER_BASES` and
+  `SKILL_DELAY_MS` to `controllers/combat`, `SKILL_EFFECTS` to `controllers/skills/tables.ts`,
+  `skillDisplayName` to `controllers/assets`; the skill icon and tooltip widgets up to
+  `versions/shared/ui/components/`.
 
 ## How it works
 - Layers: `layer.ts` is the `SkillLayer` contract (`name`, optional `maps`, `update`, `reset`).
@@ -34,7 +37,7 @@ hotbar share.
 - `SkillListUpdate`, `SkillAdded`, `SkillRemoved` (F3 11): one handler; the count byte (0xFE add,
   0xFF remove) picks the shape, then `Store.setSkillList` / `addSkill` / `removeSkill`.
 - `MagicEffectStatus`: sets an effect on the object; the hero's also goes to `Store.setBuff`.
-- `MagicEffectCancelled`: `cancelledEffects` (skills controller): the skill's `cancel` hook, then its effect (`SKILL_EFFECTS`, `recipes.ts`, filled from
+- `MagicEffectCancelled`: `cancelledEffects` (skills controller): the skill's `cancel` hook, then its effect (`SKILL_EFFECTS`, `controllers/skills/tables.ts`, filled from
   each skill's `effect`) and clears it.
 - `AreaSkillAnimation`: turns the caster, plays the cast clip and the area visual.
 - `ChainLightningHitInfo`: draws the hops caster -> target -> target (`WSclient.cpp:5577-5629`).
@@ -84,7 +87,8 @@ use type, base skill). A wrong path returns the SPA fallback page, not a 404, he
 OpenMU's `MagicEffectNumber` is the original's `eBuffState` (`_enum.h`), the record index of
 `Data/Local/BuffEffect.bmd` (`w_BuffScriptLoader.cpp`) and the icon index of `newui_statusicon*.jpg`.
 `kind` is `s_BuffClassType`. Names: language pack (`buffNameFile.ts`), then catalogue, then enum name.
-Delays are `Skill.bmd` `Delay` (offset 44, ms); `SKILL_DELAY_MS` starts empty, `registerSkills` fills it.
+Delays are `Skill.bmd` `Delay` (offset 44, ms); `SKILL_DELAY_MS` (`controllers/combat/skillDelays.ts`)
+starts empty, `registerSkills` fills it.
 ### usability.ts
 `skillRequirementsMet` is the static rule (class, level, energy, weapon) that greys the icon
 (`bCantSkill`); `canUseSkill` adds mana, AG, the running delay and the safe zone. Pure readers over

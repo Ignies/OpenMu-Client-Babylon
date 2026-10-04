@@ -6,7 +6,7 @@
  */
 
 import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
-import { localisedSkillName } from '../../controllers/assets/mu/skillNameFile';
+import { localisedSkillName } from './skillNameFile';
 
 export function skillDisplayName(number: number): string | undefined {
   return localisedSkillName(number) ?? skillDefinition(number)?.name;
