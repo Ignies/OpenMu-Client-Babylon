@@ -60,7 +60,7 @@ function timeline(
   { area = false, only, sound }: { area?: boolean; only?: string; sound?: string } = {}
 ): { key: number; release: number } {
   let frame = 0;
-  const model = { CurrentAction: clip, actionFrame: () => frame };
+  const model = { CurrentAction: clip, actionFrame: () => frame, ActionPlaySpeeds: new Map(), setActionSpeed: () => {} };
   const caster = {
     netId: 1,
     transform: { pos: new Vector3(100, 0, 100), rot: new Vector3(0, 0.5, 0), scale: 1 },
@@ -220,5 +220,23 @@ describe('a clip-key cast whose clip never gets there', () => {
   it('Gigantic Storm and Mana Rays release 14 ticks after the packet (:3001-3006, :2990-2995)', () => {
     expect(timeline(237, IDLE, 0.25, 99, 25, { area: true }).release).toBe(14);
     expect(timeline(73, IDLE, 0.25, 99, 25, { only: 'ticked' }).release).toBe(14);
+  });
+});
+
+describe('Fire Slash and Spiral Slash draw only on their clip key', () => {
+  // Both draw inside AttackStage on the clip frame (ZzzCharacter.cpp:2796-2813, :2960-2977); their release blocks draw
+  // nothing (:4180-4183, :4696-4697), so a clip that never gets there draws nothing.
+  const IDLE = PlayerAction.PLAYER_STOP_MALE;
+  const WHEEL = PlayerAction.PLAYER_ATTACK_SKILL_WHEEL;
+  const FLASH = PlayerAction.PLAYER_ATTACK_ONE_FLASH;
+
+  it('nothing when the clip never reaches the key', () => {
+    expect(timeline(55, IDLE, 0.25, 99, 25, { sound: 'Sound/sKnightSkill3' }).release).toBe(0);
+    expect(timeline(57, IDLE, 0.25, 99, 25).release).toBe(0);
+  });
+
+  it('on the key otherwise', () => {
+    expect(timeline(55, WHEEL, 0.5, 3, 25, { sound: 'Sound/sKnightSkill3' })).toEqual({ key: 6, release: 6 });
+    expect(timeline(57, FLASH, 0.5, 2.3, 25)).toEqual({ key: 5, release: 5 });
   });
 });

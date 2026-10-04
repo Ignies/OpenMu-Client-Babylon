@@ -267,7 +267,8 @@ function mgCrescent(c: SkillContext, strengthened: boolean, enh = false): void {
 /**
  * Fire Slash (55, and 490 through its masterAliases): the WHEEL clip's charge and key (ZzzCharacter.cpp:2782-2817). Two
  * gatherings at AttackTime 1 and 2; at WHEEL frame 3 sKnightSkill3, the crescent, and the rest of the clip at
- * `0.54 + AttackSpeed * 0.004`. The skull and eBloodAttack come with the debuff (BUFF_VISUALS[58]).
+ * `0.54 + AttackSpeed * 0.004`. The skull and eBloodAttack come with the debuff (BUFF_VISUALS[58]). No key by tick 14,
+ * no crescent: the release block draws nothing (:4180-4183).
  */
 const mgFireSlash = (enh: boolean): Step => (at, c) => {
   const strengthened = currentSkill === 490;
@@ -283,7 +284,7 @@ const mgFireSlash = (enh: boolean): Step => (at, c) => {
       cc.caster.modelObject?.setActionSpeed(PlayerAction.PLAYER_ATTACK_SKILL_WHEEL, 0.54 + speed * 0.004);
     }
     mgCrescent(cc, strengthened, enh);
-  })(at, c);
+  }, false)(at, c);
 };
 const fireSlash = mgFireSlash(false);
 const fireSlashEnhanced = mgFireSlash(true);

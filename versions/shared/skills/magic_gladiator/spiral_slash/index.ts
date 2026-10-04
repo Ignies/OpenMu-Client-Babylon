@@ -103,15 +103,16 @@ const mgSpiralWave = (ks: readonly number[], enh = false): Step => (_at, c) => {
 /**
  * Spiral Slash (57): ribbons 2 and 3 at ONE_FLASH frame 2.3, then 0, 1 and 4 past frame 5. The original's first wave
  * only fires inside frames 2.3-2.6, which a fast clip can step over; here it always fires. The hero's own cast
- * brandishes the blade (UseSkillWarrior, SkillCast.cpp:357-376).
+ * brandishes the blade (UseSkillWarrior, SkillCast.cpp:357-376). A wave whose frame never comes by tick 14 is not drawn:
+ * the release block draws nothing (ZzzCharacter.cpp:4696-4697).
  */
 const mgSpiralSlash = (enh: boolean): Step => (at, c) => {
   if (c.caster.localPlayer) {
     mgGlint(c);
     mgSay(randInt(2) ? 'Sound/eSwingWeapon2' : 'Sound/eSwingWeapon1');
   }
-  whenClipKey(PlayerAction.PLAYER_ATTACK_ONE_FLASH, 2.3, 14, mgSpiralWave([2, 3], enh))(at, c);
-  whenClipKey(PlayerAction.PLAYER_ATTACK_ONE_FLASH, 5.001, 14, mgSpiralWave([0, 1, 4], enh))(at, c);
+  whenClipKey(PlayerAction.PLAYER_ATTACK_ONE_FLASH, 2.3, 14, mgSpiralWave([2, 3], enh), false)(at, c);
+  whenClipKey(PlayerAction.PLAYER_ATTACK_ONE_FLASH, 5.001, 14, mgSpiralWave([0, 1, 4], enh), false)(at, c);
 };
 const spiralSlash = mgSpiralSlash(false);
 const spiralSlashEnhanced = mgSpiralSlash(true);

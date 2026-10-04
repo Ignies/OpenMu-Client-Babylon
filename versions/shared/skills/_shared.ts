@@ -194,9 +194,10 @@ export const lit = (body: number, blendMeshLight: (tick: number) => number) => (
 /**
  * `step` once the caster's `action` reaches clip key `key` (`IsAttackImpactFrame`, or Rageful Blow's
  * `AnimationFrame >= 1`), or `maxTicks` after the packet, when `AttackTime` reaches 15 by itself
- * (ZzzCharacter.cpp:3044-3063, :4132-4141). A caster that has left the clip fires at once.
+ * (ZzzCharacter.cpp:3044-3063, :4132-4141). A caster that has left the clip fires at once. `onTimeout: false` for a
+ * step the original draws in AttackStage on the key only (Fire Slash, Spiral Slash): at `maxTicks` it is dropped.
  */
-export const whenClipKey = (action: PlayerAction, key: number, maxTicks: number, step: Step): Step => (at, c) => {
+export const whenClipKey = (action: PlayerAction, key: number, maxTicks: number, step: Step, onTimeout = true): Step => (at, c) => {
   const p = at.clone();
   const t0 = fxNow();
   let n = 0;
@@ -207,8 +208,12 @@ export const whenClipKey = (action: PlayerAction, key: number, maxTicks: number,
     const m = c.caster.modelObject;
     const inClip = !!m && m.CurrentAction === action;
     seen ||= inClip;
-    if ((inClip && m!.actionFrame() >= key) || (seen && !inClip) || n >= maxTicks) {
+    if ((inClip && m!.actionFrame() >= key) || (seen && !inClip)) {
       step(p, c);
+      return;
+    }
+    if (n >= maxTicks) {
+      if (onTimeout) step(p, c);
       return;
     }
     n++;
