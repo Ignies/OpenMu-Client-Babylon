@@ -23,6 +23,7 @@ import { ammoReload, type Hands } from '../../controllers/combat/weaponRange';
 import { InventoryConstants } from '../../modules/inventory/inventoryConstants';
 import { StorageKind } from '../../modules/inventory/itemStorage';
 import { t } from '../../i18n';
+import { heldWeapons } from '../../controllers/actors';
 
 /**
  * Left-click basic attack (`Action()` MOVEMENT_ATTACK, ZzzInterface.cpp:3283-3356):
@@ -283,7 +284,7 @@ export const AttackSystem: ISystemFactory = world => {
       const anim = playerEntity.playerAnimation;
       const swordCount = anim.swordCount ?? 0;
       const action = chooseAttackAction({
-        hands,
+        hands: heldWeapons(playerEntity, world.mapIndex),
         baseClass: getBaseClass(hands?.charClass ?? Store.playerData.charClass),
         swordCount,
         wings: isWingItem(hands?.wings),

@@ -55,6 +55,7 @@ import { hasWarriorGlint } from '../../controllers/skills';
 import { tierIndex } from '../../controllers/lighting/lightingQuality';
 import { lighting } from '../../controllers/lighting';
 import { isPlayerAttackAction } from '../../controllers/anim/playerActionMapper';
+import { heldWeapons } from '../../controllers/actors';
 
 /** The first lighting tier that draws the improved looks (controllers/skills/visuals.ts). */
 const ENHANCED_TIER = 1;
@@ -142,7 +143,7 @@ export const SkillCastSystem: ISystemFactory = world => {
     const hands = hero.charAppearance;
     const inSafeZone = !!hero.attributeSystem?.isAboveZero('inSafeZone');
     return {
-      hands,
+      hands: heldWeapons(hero, world.mapIndex),
       baseClass: getBaseClass(hands?.charClass ?? Store.playerData.charClass),
       swordCount: hero.playerAnimation?.swordCount ?? 0,
       wings: isWingItem(hands?.wings),

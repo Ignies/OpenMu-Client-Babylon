@@ -93,7 +93,7 @@ export const effects = new Effects();
 const hot = (import.meta as { hot?: { decline(): void } }).hot;
 if (hot) hot.decline();
 
-export { bonePos, entityPos, tmpA } from './core';
+export { bonePos, entityPos, spriteLevel, tmpA } from './core';
 export type { ParticleRecipe, RGB } from './core';
 export { skeletonShatter, spawnCrystalShards } from './deathVisuals';
 export { EXPLOSION_CELLS, FLAME_TONGUES, MODEL, SAND_SMOKE, TEX } from './recipes';

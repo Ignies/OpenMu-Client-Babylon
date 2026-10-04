@@ -4,7 +4,8 @@ Small helpers every other folder may use: shared enums, math, the event bus, loc
 pathfinding. Nothing here knows about a skill, a window or a map.
 
 ## Public API
-- `types.ts`: `ENUM_WORLD` (map ids), `PlayerClass`, `CharacterClassNumber`, `IsCharacterFemale`.
+- `types.ts`: `ENUM_WORLD` (map ids), `PlayerClass`, `CharacterClassNumber`, `IsCharacterFemale`, `BaseClass` and
+  `getBaseClass` (a class number's first-tier class; `modules/hero/characterStats.ts` re-exports them).
 - `EventBus` (`eventBus/index.ts`): the global `mitt` bus. `eventBus/events.ts` types every event:
   one per connect-server and game-server packet name (payload `DataView`) plus client events
   (`wsOpened`, `requestWarp`, `objectEffect`, ...).

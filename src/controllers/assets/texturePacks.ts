@@ -147,6 +147,14 @@ async function ensureActiveManifest(): Promise<void> {
   activeFor = id;
 }
 
+/** The converter's name for a texture: the one remembered before a swap, mid-swap too. */
+export function textureLabel(texture: Texture): string | null {
+  const internal = texture.getInternalTexture() as { label?: string } | null;
+  const label = internal?.label;
+  const remembered = originals.get(texture);
+  return remembered?.label ?? (label && !label.includes('://') ? label : null);
+}
+
 type Original = {
   url: string;
   buffer: unknown;

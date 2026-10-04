@@ -1,6 +1,6 @@
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { itemVisualTier } from '../../controllers/item_fx/itemVisualTier';
-import { inChaosCastle } from '../../controllers/actors/locomotion';
+import { heldWeapons, wearsChaosCastleSkin } from '../../controllers/actors';
 import type { ModelObject } from '../../controllers/render/modelObject';
 import { isPlayerBody, type PlayerObject } from '../../controllers/actors/playerObject';
 import { applyWeaponAttachments } from '../../controllers/actors/weaponAttachment';
@@ -46,7 +46,8 @@ function loadPart(
  * Inside Chaos Castle every player is drawn as the one `Player/Angel` body
  * instead of their equipment (`RenderCharacter`, ZzzCharacter.cpp:9536-9568):
  * the castle's participant skin, the armour its monsters wear too. Wings and
- * the pet go with it (`ClearChaosCastleHelper`, CSChaosCastle.cpp:113-128).
+ * the pet go with it (`ClearChaosCastleHelper`, CSChaosCastle.cpp:113-128),
+ * and the hands hold the castle's weapons (`heldWeapons`).
  */
 const CHAOS_CASTLE_BODY = 'Angel.glb';
 
@@ -75,14 +76,9 @@ export const AppearanceSystem: ISystemFactory = world => {
 
   return {
     update: () => {
-      for (const {
-        charAppearance,
-        modelObject,
-        visibility,
-        attributeSystem,
-        skin,
-        npcType,
-      } of query) {
+      for (const entity of query) {
+        const { charAppearance, modelObject, visibility, attributeSystem } =
+          entity;
         if (visibility.state === 'hidden') continue;
         if (!charAppearance.changed) continue;
         if (!modelObject.Ready) continue;
@@ -92,9 +88,7 @@ export const AppearanceSystem: ISystemFactory = world => {
 
         const playerObject = modelObject as PlayerObject;
 
-        // Players only, and not one already in a transformation skin: the
-        // original keeps that body there too (`!c->Change`).
-        if (inChaosCastle(world.mapIndex) && !skin && npcType === undefined) {
+        if (wearsChaosCastleSkin(entity, world.mapIndex)) {
           wearChaosCastleSkin(playerObject);
         } else {
           if (inCastleSkin.delete(playerObject)) {
@@ -120,14 +114,11 @@ export const AppearanceSystem: ISystemFactory = world => {
           void settle(playerObject.setBodyPetAsync(charAppearance.pet), 'pet');
         }
 
+        const held = heldWeapons(entity, world.mapIndex) ?? charAppearance;
         // Summoner books are never drawn on the character (`RenderLinkObject`
         // returns before them, ZzzCharacter.cpp:6453-6456).
-        const mainHand = isBook(charAppearance.leftHand)
-          ? null
-          : charAppearance.leftHand;
-        const offHand = isBook(charAppearance.rightHand)
-          ? null
-          : charAppearance.rightHand;
+        const mainHand = isBook(held.leftHand) ? null : held.leftHand;
+        const offHand = isBook(held.rightHand) ? null : held.rightHand;
         loadPart(mainHand, playerObject, playerObject.Weapon1, 0) ||
           playerObject.Weapon1.Unload();
         loadPart(offHand, playerObject, playerObject.Weapon2, 1) ||
@@ -147,7 +138,7 @@ export const AppearanceSystem: ISystemFactory = world => {
 
         applyWeaponAttachments(
           playerObject,
-          charAppearance,
+          held,
           attributeSystem?.isAboveZero('weaponsOnBack') ?? false
         );
 

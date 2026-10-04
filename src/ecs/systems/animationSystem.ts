@@ -50,6 +50,7 @@ import {
 import { isWingItem } from '../../controllers/actors/wings';
 import { isRidingMount, petSpec } from '../../modules/pets/pets';
 import { Store } from '../../app/store';
+import { heldWeapons } from '../../controllers/actors';
 
 // Clip rates come from the original's PlaySpeed tables (controllers/anim/playSpeed.ts);
 // attack/cast rates additionally scale with the attackSpeed/magicSpeed
@@ -441,7 +442,7 @@ export const AnimationSystem: ISystemFactory = world => {
 
         playerAnimation.action = calculateAnimation({
           pose: {
-            hands,
+            hands: heldWeapons(entity, mapIndex),
             baseClass: getBaseClass(charClass),
             isFemale:
               npcClass !== undefined

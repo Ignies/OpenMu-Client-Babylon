@@ -22,7 +22,7 @@ import {
   sidecarFailed,
 } from './compressedAssets';
 import { resolveUrlToDataFolder } from './resolveUrlToDataFolder';
-import { applyPackToTexture } from './texturePacks';
+import { applyPackToTexture, textureLabel } from './texturePacks';
 import {
   createItemMaterial,
   createItemPbrMaterial,
@@ -33,11 +33,14 @@ import {
   pbrCovers,
   textureFiltering,
 } from '../render/materialQuality';
-import { textureSourceName } from '../render/pbrMaps';
+import { readPackLabelsWith, textureSourceName } from '../render/pbrMaps';
 import { getEmptyTexture } from '../render/babylon/emptyTexture';
 import { BlendState } from '@versions/shared/objects/enum';
 import { isHideTexture, isSkinOrHairTexture } from '../actors/skinTexture';
 import { parseTextureScriptFromPath } from '../render/textureScript';
+
+// Texture names are read through the pack, so a swap in flight still reads the converter's name.
+readPackLabelsWith(textureLabel);
 
 const reader = new BMDReader();
 const Models: Partial<Record<number, Promise<BMD>>> = {};

@@ -1,6 +1,6 @@
 import { observable, runInAction } from 'mobx';
 import { ENUM_WORLD } from '../../core/types';
-import type { Item } from '../../ecs/world';
+import type { Entity, Item } from '../../ecs/world';
 import { EventBus } from '../../core/eventBus';
 import { Store } from '../../app/store';
 import {
@@ -20,7 +20,7 @@ import {
   PILLAR_TYPE,
   nextThunderSeconds,
   thunderSound,
-  thunderStrikes,
+  thunderPillar,
 } from '@versions/shared/maps/chaoscastle/thunder';
 import type { EventLayer } from './layer';
 import { noteOpeningStateRequest, takeOpeningState } from './schedule';
@@ -30,6 +30,7 @@ import {
   TICKETS,
   formatText,
 } from './recipes';
+import { strikePillar } from '@versions/shared/maps/chaoscastle/bolt';
 
 /**
  * Chaos Castle: there is no NPC window - the Armor of Guardsman in the
@@ -220,8 +221,11 @@ function update(map: ENUM_WORLD, dt: number): void {
     thunderIn -= dt;
     if (thunderIn <= 0) {
       thunderIn = nextThunderSeconds();
-      if (thunderStrikes(pillarsInView())) {
+      const pillars = pillarsInView();
+      const struck = pillars[thunderPillar(pillars.length)];
+      if (struck && Store.world) {
         playSfx(thunderSound(), null, { bus: 'ambient', channels: 1 });
+        strikePillar(Store.world.scene, struck);
       }
     }
   }
@@ -232,21 +236,21 @@ function update(map: ENUM_WORLD, dt: number): void {
  * faded out (`versions/shared/maps/chaoscastle/arena.ts`) does not count; a batched one has
  * no model object of its own and is always drawn.
  */
-function pillarsInView(): number {
+function pillarsInView(): Entity[] {
   const world = Store.world;
   const hero = world?.playerEntity?.transform?.pos;
-  if (!world || !hero) return 0;
+  if (!world || !hero) return [];
 
   const reach2 = PILLAR_VIEW_TILES * PILLAR_VIEW_TILES;
-  let n = 0;
+  const pillars: Entity[] = [];
   for (const e of world.with('modelId', 'transform', 'worldIndex')) {
     if (e.modelId !== PILLAR_TYPE || e.worldIndex !== world.mapIndex) continue;
     if (e.modelObject && e.modelObject.Alpha <= 0) continue;
     const dx = e.transform.pos.x - hero.x;
     const dz = e.transform.pos.z - hero.z;
-    if (dx * dx + dz * dz < reach2) n++;
+    if (dx * dx + dz * dz < reach2) pillars.push(e);
   }
-  return n;
+  return pillars;
 }
 
 function clearTimer(): void {

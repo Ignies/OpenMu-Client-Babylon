@@ -341,11 +341,23 @@ function loadManifest(): Promise<Manifest> {
   return manifest;
 }
 
-/** Source file name of a texture - the GLB label when loaded from one. */
+/** The texture pack's remembered name (`assets/texturePacks.textureLabel`); the assets controller sets it. */
+let packLabel: (texture: Texture) => string | null = () => null;
+
+export function readPackLabelsWith(reader: (texture: Texture) => string | null): void {
+  packLabel = reader;
+}
+
+/**
+ * Source file name of a texture - the GLB label when loaded from one. The pack's
+ * remembered name wins, so a read mid-swap still gets the converter's name.
+ */
 export function textureSourceName(texture: BaseTexture): string {
   const internal = texture.getInternalTexture() as { label?: string } | null;
+  const name =
+    packLabel(texture as Texture) || internal?.label || texture.name;
 
-  return (internal?.label || texture.name).split(/[\\/]/).pop() ?? '';
+  return name.split(/[\\/]/).pop() ?? '';
 }
 
 function authored(file: string, scene: Scene): Texture {

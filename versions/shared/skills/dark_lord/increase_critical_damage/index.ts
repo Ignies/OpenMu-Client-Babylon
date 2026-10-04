@@ -1,5 +1,5 @@
 import { defineSkill } from '@/controllers/skills/define';
-import { CAST_HEIGHT, ENHANCED_TIER, Step, TICK, afterRelease, atCaster, cm, ticks } from '@/controllers/skills/visuals';
+import { CAST_HEIGHT, ENHANCED_TIER, Step, TICK, afterRelease, atCaster, cm, ticks, weaponsOf } from '@/controllers/skills/visuals';
 import { COMBAT_BUS, playSfx } from '@/controllers/sound';
 import { DEG } from '../../_shared';
 import { type Entity } from '@/ecs/world';
@@ -40,8 +40,8 @@ interface CritHand {
  * `held`: the buff pulse also skips an empty hand (:10039, :10052).
  */
 function critHands(e: Entity, held: boolean): CritHand[] {
-  const right = e.charAppearance?.rightHand ?? null;
-  const left = e.charAppearance?.leftHand ?? null;
+  const right = weaponsOf(e)?.rightHand ?? null;
+  const left = weaponsOf(e)?.leftHand ?? null;
   const out: CritHand[] = [];
   if ((!held || right) && !(right?.group === GROUP_BOW && right.num === ARROWS)) out.push({ bone: RIGHT_HAND_BONE, sub: 0, bow: right?.group === GROUP_BOW });
   if ((!held || left) && !(left?.group === GROUP_BOW && left.num === BOLT) && left?.group !== GROUP_SHIELD) out.push({ bone: LEFT_HAND_BONE, sub: 1, bow: left?.group === GROUP_BOW });

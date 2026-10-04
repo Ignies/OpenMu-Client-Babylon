@@ -23,7 +23,9 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `objectShadow.ts`: `setShadowWorld`, `invalidateShadowState`.
 - options: `materialQuality.ts`, `renderingStyle.ts`, `renderScale.ts`, `renderDistance.ts` (slider
   steps and readers for the Options window, the materials and boot).
-- `pbrMaps.ts`: `pbrMapsFor`, `pbrMapsIfReady`, `textureSourceName`.
+- `pbrMaps.ts`: `pbrMapsFor`, `pbrMapsIfReady`, `textureSourceName`; `readPackLabelsWith(reader)`, the
+  texture pack's remembered names, which `textureSourceName` asks first (set by `assets/modelLoader.ts`).
+- `index.ts`: the types below, `ModelObject` as a type, and `HIDDEN_MESH_ALL` for map object classes.
 - `MapRender`, `MeshAnimation`, `MeshAnimations` (`meshAnimation.ts`, types on `index.ts`): a map's own
   render row, `MapLayer.render`.
 - helpers: `boneLink.ts` (bone-link matrices), `meshAnimation.ts` (`meshAnimationFor`),
@@ -67,6 +69,7 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `frameSnapshot.test.ts`: fills once per frame and per scene, refills after a throw.
 - `meshAnimation.test.ts`: `meshAnimationFor` reads the map row per world.
 - `versions/shared/contentRows.golden.test.ts`: every map's mesh animations, sampled over time.
+- `pbrMaps.test.ts`: `textureSourceName` reads the pack's remembered name mid-swap.
 - `pbrDerive.test.ts`: `flipRows`, flat normal and emissive mask of `derivePbrMaps`.
 - `propBatchLight.test.ts`: `ChunkLight` re-packs match a whole-chunk re-pack on every tier.
 - `propBatchRules.test.ts`: `batchExclusion`, `chunkOf`, placement and instance matrices.
@@ -133,7 +136,8 @@ There is no `index.ts` facade; other folders import the modules directly.
   torch's 4) became a floating ball of light. The guard runs on the linear buffer before the
   pipeline. Off on Classic, with bloom off, and when the tone pass is live.
 - `scenes/heightFog.ts`: `EFFECT_HAZE_SHARE` was a fixed 12 tiles, past every outdoor `fog.start`, so
-  edge torches burned at full HDR over hazed ground.
+  edge torches burned at full HDR over hazed ground. A look's `fog.fromTarget` adds the camera radius
+  to `start`, so the haze starts that far past the hero at every zoom (Chaos Castle).
 - `scenes/hullOutline.ts`: Babylon's outline renderer redraws back faces pushed out along normals:
   cheap, exact silhouettes, but no creases and gaps at split normals, so it is an option, not the
   default. Figures only. Width is world space, so it thins with distance.

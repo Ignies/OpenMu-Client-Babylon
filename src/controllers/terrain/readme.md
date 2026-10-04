@@ -9,7 +9,7 @@ water, ground picks, minimap data and the base class for map objects. There is n
 - `index.ts`: `MapTileObject` (the base class a map folder's object classes extend; import it only
   from code a map's `create.ts` loads) and the types - `MapTerrain` (`mapTerrain.ts`, a map's `terrain` field:
   `overlays`, `snowBed`, `water`, `rest`, `leanCursor`, `objectFixups`, `grass`, `hidden`),
-  `TerrainOverlayName`, `RestObject`, `RestKind`, `MapObjectFixup`, `TerrainWaterSpec`.
+  `TerrainOverlayName`, `RestObject`, `RestKind`, `MapObjectFixup`, `TerrainWaterSpec`; `TILE_CM`.
 - `loadMapIntoScene(world, map, pos?)` (`loadMapIntoScene.ts`): queue a warp to `map`.
   `onMapChange(fn)` sets what resets on map change (set once by `app/boot.tsx`);
   `reloadMapObjects()` rebuilds the map's objects after the batching option changes.

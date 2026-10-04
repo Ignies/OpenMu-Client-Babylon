@@ -22,6 +22,7 @@ import { playSfx } from '@/controllers/sound/sfx';
 import { playTeleportAnimation } from '../skills/net';
 import { playerPlaySpeed } from '@/controllers/anim/playSpeed';
 import { runInAction } from 'mobx';
+import { heldWeapons } from '@/controllers/actors';
 
 /** `SetAction_Fenrir_Damage` (ZzzAI.cpp:283-311): the rider's flinch, by what is in hand. */
 function fenrirDamageAction(obj: Entity): PlayerAction {
@@ -334,7 +335,7 @@ export function installNet(): void {
         // CreateArrows(): a bow in scope lets go at its clip's hit key. The
         // hero's own shot is fired by AttackSystem, off the swing it latched.
         const shotAt = world.getByNetId(p.TargetId & 0x7fff);
-        if (shotAt && combat.equippedLauncher(obj.charAppearance)) {
+        if (shotAt && combat.equippedLauncher(heldWeapons(obj, world.mapIndex))) {
           const playSpeed =
             obj.modelObject?.actionPlaySpeed(action) ??
             playerPlaySpeed(action, obj.attributeSystem?.getValue('attackSpeed') ?? 0);

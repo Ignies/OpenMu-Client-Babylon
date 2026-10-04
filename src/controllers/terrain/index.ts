@@ -7,3 +7,4 @@ export { MapTileObject } from './mapTileObject';
 export type { MapObjectFixup } from './mapObjectFixups';
 export type { RestKind, RestObject } from './restObjects';
 export type { TerrainWaterSpec } from './terrainWater';
+export { TILE_CM } from './consts';
