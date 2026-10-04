@@ -25,7 +25,7 @@ import {
   propTypeCarriesLight,
 } from '../render/propBatches';
 import { LightCarrier } from '../lighting/lightCarrier';
-import { IVector3Like } from '../render/babylon/exports';
+import { placesObject, type MapObjectRecord } from './objectRecords';
 import { EventBus } from '../../core/eventBus';
 import { DISABLE_OBJECTS_LOADING } from './consts';
 import { evictWorldMinimaps, prefetchWorldMinimap } from './minimap';
@@ -79,13 +79,6 @@ export function onHeroPlaced(fn: () => void): void {
 }
 let sceneWorld: World | null = null;
 
-type MapObjectRecord = {
-  id: number;
-  pos: IVector3Like;
-  rot: IVector3Like;
-  scale: number;
-};
-
 /**
  * The map's own setup: the look director takes the map (its profile, and
  * with it the clear colour - `SetWorldClearColor` bytes on Classic,
@@ -106,14 +99,7 @@ function createObjects(world: World, objs: MapObjectRecord[]) {
   const batching = propBatchingActive();
 
   for (const data of objs) {
-    // CreateObject (ZzzObject.cpp:4433-4435) discards records outside the
-    // 16×16 block grid (1600 MU units per block).
-    const blockX = Math.floor(data.pos.x / 1600);
-    const blockY = Math.floor(data.pos.y / 1600);
-    if (blockX < 0 || blockX >= 16 || blockY < 0 || blockY >= 16) continue;
-    // NaN coordinates (two Devias gate records) pass the range test above and
-    // would otherwise become entities with a NaN position.
-    if (!Number.isFinite(blockX) || !Number.isFinite(blockY)) continue;
+    if (!placesObject(data)) continue;
 
     // AngleMatrix is Rz·Ry·Rx in a Z-up right-handed frame; our model-root
     // mirror means every axis is negated on the way in. Pitch/roll are

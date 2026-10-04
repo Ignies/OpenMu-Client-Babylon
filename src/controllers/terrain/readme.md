@@ -11,6 +11,8 @@ water, ground picks, minimap data and the base class for map objects. There is n
   `overlays`, `snowBed`, `water`, `rest`, `leanCursor`, `objectFixups`, `grass`, `hidden`),
   `TerrainOverlayName`, `RestObject`, `RestKind`, `MapObjectFixup`, `TerrainWaterSpec`; `TILE_CM`.
 - `loadMapIntoScene(world, map, pos?)` (`loadMapIntoScene.ts`): queue a warp to `map`.
+- `objectRecords.ts`: `MapObjectRecord` and `placesObject(record)`, which records become objects
+  (inside the block grid, finite, a type with a model; World7 places one at -515).
   `onMapChange(fn)` sets what resets on map change and `onHeroPlaced(fn)` what runs once the hero
   stands on the new map (both set once by `app/boot.tsx`; the hero puts its gear back on);
   `reloadMapObjects()` rebuilds the map's objects after the batching option changes.
@@ -100,6 +102,7 @@ water, ground picks, minimap data and the base class for map objects. There is n
 - `terrainOverlay.test.ts`: the snow melt loop and upload, with and without `?snowGate=0`.
 - `snowArtMatch.test.ts`: `SNOW_ART` against measured tile colours.
 - `terrainPick.test.ts`: `TerrainPicker` finds the same hit as Babylon's mesh pick.
+- `objectRecords.test.ts`: the block grid, NaN coordinates and a negative type.
 - `terrainWater.test.ts`: the surface is a pure function of time and position, carries the
   `CSWaterTerrain` wave constants, stays in the amplitude bound; the ambient ring spreads and damps.
 
