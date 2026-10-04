@@ -27,7 +27,7 @@ Not in the original client: the notes travel through our proxy (`proxy/band/`), 
 - `bandNet.ts` plugs a `BandTransport` into the facade. Before the proxy's hello (or offline) the
   transport is silent and the hero just plays for themselves. `BandSender` numbers batches, splits
   big ones and keeps under the proxy's rate.
-- Frames are encoded in `controllers/net/protocols/bandProtocol.ts` and sent with `Store.sendBandFrame`.
+- Frames are encoded in `controllers/net/protocols/bandProtocol.ts` and sent with `Session.sendBandFrame`.
 - A warp (`requestWarp`) resets every stream and puts the hero's instrument away.
 
 ## Packets
@@ -42,7 +42,7 @@ Not in the original client: the notes travel through our proxy (`proxy/band/`), 
 - Outgoing frames: start, stop, batch, join, leave, band state.
 
 ## Depends on / used by
-- uses: `social/social.ts` (system lines), `Store`, `controllers/net/protocols/bandProtocol.ts`,
+- uses: `social/social.ts` (system lines), `session` (`Session`), `hero` (`Hero.playerId`), `controllers/net/protocols/bandProtocol.ts`,
   `controllers/sound/instruments`, `controllers/render/boneLink`, `src/i18n`.
 - used by: `src/app/logic.ts`, `ecs/systems/bandSystem.ts`, `ecs/world.ts` (types),
   `tools/instrumentSamples.ts`; the sound sampler takes an `InstrumentId` as its plain `BankId`. UI:

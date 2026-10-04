@@ -34,7 +34,7 @@ petItems.ts           pet and mount item numbers in group 13 (PET_GROUP, DARK_HO
 
 ## Depends on / used by
 - uses: the items controller, `@/controllers/assets/mu/itemNameFile`, `@/controllers/fx/recipes`
-- used by: the Store, item grid / tooltip widgets, actors, drops, inventory, items, marketplace,
+- used by: `inventory`, `npc_shop`, item grid / tooltip widgets, actors, drops, inventory, items, marketplace,
   quest and gm modules; the cash shop, marketplace audit and proxy tracker read `all.ts`
 
 ## Change it

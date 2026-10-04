@@ -25,10 +25,11 @@ docker/            development container: dev server + proxy from this checkout 
 ## src/ - the engine
 
 ```
-app/               boot (main.tsx, boot.tsx), App.tsx, the Store, logic.ts (installs the modules),
-                   lifecycle.ts (what resets on map change)
+app/               boot (main.tsx, boot.tsx), App.tsx, the page state (uiState.ts), the offline
+                   scene (offline.ts), logic.ts (installs the modules), lifecycle.ts (what resets
+                   on map change)
 core/              types, math, rand, queue, event bus, local storage, pathfinding
-ecs/               the miniplex world and its per-frame systems
+ecs/               the miniplex world, its per-frame systems and the live world (current.ts)
 i18n/              text in every language
 version/           which game version runs (contract, loader)
 controllers/       generic services; controllers.ts starts them, controller.ts is the contract
@@ -53,7 +54,8 @@ controllers/       generic services; controllers.ts starts them, controller.ts i
   sound/           buses, music, combat sounds, sound manager
   terrain/         terrain loading, grass, water, masks, minimap data
   weather/         rain and snow
-modules/           gameplay modules; each has net.ts (packets in) and its state and actions
+modules/           gameplay modules; each has net.ts (packets in), its state and actions (state.ts)
+                   and its door (index.ts)
   band chaos_mix character_select chat combat drops economy events friends gm guild guild_war
   hero inventory marketplace mu_helper npc_shop options party personal_shop pets quests
   scope (objects in view) servers session skills social trade vault warp world (weather, fireworks)

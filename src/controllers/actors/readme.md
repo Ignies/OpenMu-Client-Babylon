@@ -89,7 +89,7 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   `item_rules/dropModelProxy.ts`, the guild mark `core/guildMark.ts`, the pet numbers
   `versions/shared/items/petItems.ts`. Each new door is light, so module load order is unchanged.
 - used by: `ecs/systems`, `modules/_shared/net_helpers.ts`, `modules/scope`,
-  `modules/character_select`, `modules/drops`, `modules/gm/admin/skins.ts`, `app/store.ts` (offline),
+  `modules/character_select`, `modules/drops`, `modules/gm/admin/skins.ts`, `app/offline.ts`,
   `sound`, `item_fx/weaponBlur.ts`, `anim`, `assets/modelLoader.ts`, monster, npc, map and skill
   content in `versions/shared/`, `tools/assetCase.ts`.
 
@@ -116,7 +116,7 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 - `trapModels.test.ts`: every (map, trap) pair names an `Object<world+1>` model that exists.
 - `resolveModel.golden.test.ts`: what every type 0..600 is drawn with (class, scale, base, kit,
   shared classes) and the NPC tables, as hashes; update them on purpose. It runs the real model
-  classes under Node with the Store mocked.
+  classes under Node.
 - `npcLooks.test.ts`: NPCs drawn as the original builds them (Hanzo's scale, the 0.9 default and who sets its own, the plain-model NPCs,
   Zyro, the Cursed Wizard's kit, the plate helpers), each with its ZzzCharacter.cpp lines.
 - `skinTexture.test.ts`: skin / hair / level and hide texture names.

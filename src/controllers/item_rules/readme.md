@@ -56,7 +56,7 @@ the table would import itself.
 - uses: `@versions/shared/items/itemsDatabase` and `petItems.ts`, `@versions/shared/skills/skillsDatabase`,
   `core` (`binaryUtils`, `inventoryConstants`), `settings` (`GameOptions`), `src/i18n`.
 - used by: every net that reads item bytes (`inventory`, `drops`, `npc_shop`, `trade`, `chaos_mix`,
-  `personal_shop`, `scope`, `quests`, `chat/chatItemLinks.ts`), `Store` (prices, repair, requirements),
+  `personal_shop`, `scope`, `quests`, `chat/chatItemLinks.ts`), `inventory` and `npc_shop` (prices, repair, requirements),
   `inventory`, `drops`, `mu_helper`, `events`, `skills`, controllers (`interface/itemTooltip.ts`,
   `components/item_tooltip`, `components/item_icon`, `assets/itemIconPack.ts`, `sound/drops.ts`).
 - windows: `inventory`, `vault`, `trade`, `npc_shop` (`goldColor`, `itemValue`), `economy_prompts`, `options`,

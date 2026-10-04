@@ -36,7 +36,7 @@ the two server packets, with its running state and the raw config blob (`MuHelpe
 - outgoing: `MuHelperSaveDataRequest` (`state.ts`), `MuHelperStatusChangeRequest` (`MuHelper.toggleMuHelper`).
 
 ## Depends on / used by
-- uses: `session`, `hero`, `skills`, `pets`, `src/app/store.ts` (item use and repair),
+- uses: `session`, `hero`, `skills`, `pets`, `inventory` (item use), `npc_shop` (repair),
   `social/social.ts` (`partyMembers` for party buffs and heals),
   `controllers/item_rules/itemStats.ts`, `core/inventoryConstants.ts`, `ecs/systems/attackSystem.ts`
   (`isAttackableEntity`), `versions/shared/skills/skillsDatabase`.

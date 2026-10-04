@@ -27,8 +27,8 @@ lives in the weather controller (`WeatherStatus.weather`), which reads it.
 - `fanfare` (bus event): plays `Sound/eMedal`.
 
 ## Depends on / used by
-- uses: `app/store.ts`, `app/logic.ts` (`emitObjectEffect`), `controllers/sound`,
-  `controllers/weather/rainState`, `controllers/actors/locomotion` (`inChaosCastle`).
+- uses: `app/logic.ts` (`emitObjectEffect`), `controllers/sound`,
+  `controllers/weather` (`WeatherStatus`), `controllers/actors/locomotion` (`inChaosCastle`).
 - used by: `src/app/logic.ts`.
 
 ## Change it

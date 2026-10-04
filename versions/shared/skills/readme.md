@@ -50,7 +50,7 @@ _shared.ts                      helpers for several classes
 ## Depends on / used by
 - uses: `@/controllers/skills`, `fx`, `lighting`, `sound`, `combat`, `render`; `../items/launcher_arrows`
 - used by: `src/modules/{combat,skills,scope,_shared}`, `src/ecs/systems` (through
-  `skillVisuals.ts`); `skillsDatabase.ts` by the Store, combat, lighting and skill widgets;
+  `skillVisuals.ts`); `skillsDatabase.ts` by `inventory`, combat, lighting and skill widgets;
   `versions/<id>/tables`
 
 ## Change it

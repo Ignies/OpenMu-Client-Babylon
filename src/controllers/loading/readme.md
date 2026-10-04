@@ -34,7 +34,7 @@ loading screen; a new look is a sibling implementation (`loading/<name>/`), neve
   (worldsOpen); `sound/loginMusic.ts` starts the menu music once `worldsOpen` is set.
 
 ## Depends on / used by
-- uses: `app/store` (`Store`, `UIState`), `interface/components/mu_sprite`, `ecs/world` (types).
+- uses: `interface/components/mu_sprite`, `ecs/world` (types).
 - used by: `app/App.tsx` (`LoadingScreen`); `sceneReadySystem`, `characterSelectSystem`,
   `modules/warp/warpScopeHold.ts` (scene gate); `loginSceneSystem`,
   `versions/shared/ui/pages/preloader`, `sound/loginMusic.ts` (`pregameLoad`).

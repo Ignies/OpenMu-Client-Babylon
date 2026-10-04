@@ -23,7 +23,7 @@ server decides whether to run them.
   `Social.sendChat`. Sends are queued and retried every 600 ms because `sendChat` refuses a line
   inside `CHAT_COOLDOWN_MS`. A `confirm: true` command arms on the first press and sends on the
   second; editing a field disarms it. The last 12 sent lines are kept.
-- `available` reads `Hero.isGameMaster` (set by `hero/net.ts`) or `Store.isOffline`.
+- `available` reads `Hero.isGameMaster` (set by `hero/net.ts`) or `Session.isOffline`.
 - `gmWorld.ts` reads the ECS on every call (not observable); the window polls it while open.
   `gmNearby.ts` holds the sorting and distance math (players first, then Chebyshev distance).
 - `admin/`: `feed.ts` opens a WebSocket to the proxy (`adminStreamUrl`) only while the panel is
@@ -34,7 +34,7 @@ server decides whether to run them.
 - `debugMenu.ts` is a registry only; the window draws the modules and opens only offline.
 
 ## Depends on / used by
-- uses: `social/social.ts` (`sendChat`), `src/app/store.ts` (`playerData`, `isOffline`, `world`),
+- uses: `social/social.ts` (`sendChat`), `hero`, `session` (`isOffline`), `Ecs.world`,
   `controllers/net/protocols/adminProtocol.ts`, `controllers/actors` model tables, `src/i18n`.
 - used by: `versions/shared/ui/windows/gm_panel/` (all of it), `versions/shared/ui/windows/debug_menu/`
   (registry and modules), `hero/net.ts` (`GmPanel.reset()` on character select), `src/app/boot.tsx`.

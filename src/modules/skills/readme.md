@@ -51,7 +51,7 @@ hotbar share.
 - `MasterSkillList`, `MasterSkillLevelUpdate`: learned master levels (`masterTree.ts`). Out: `AddMasterSkillPoint`.
 
 ## Depends on / used by
-- uses: `src/app/store.ts`, `_shared/net_helpers.ts`, `hero/characterStats.ts`, `controllers/item_rules/itemStats.ts`,
+- uses: `session`, `hero`, `_shared/net_helpers.ts`, `hero/characterStats.ts`, `controllers/item_rules/itemStats.ts`,
   `@versions/shared/skills/skillsDatabase` and `skillVisuals`, `ecs/systems/teleportSystem.ts`,
   controllers `combat`, `actors`, `assets/mu`, `terrain`, `src/i18n`.
 - used by: `src/app` (logic, lifecycle, store), ECS `skillSystem`, `skillCastSystem`, `pointerInputSystem`;

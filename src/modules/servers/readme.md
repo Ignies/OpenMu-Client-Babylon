@@ -44,7 +44,7 @@ connect server's own list (`Servers.serverList`) is filled by `session/net.ts`.
 
 ## Depends on / used by
 - uses: `core/localStorage`, `app/consts`, `src/version` (`versionByTag`).
-- used by: `src/app/store.ts`, `src/app/boot.tsx`, `src/app/main.tsx`, `session/net.ts`,
+- used by: `session` (`state.ts`, `net.ts`), `src/app/boot.tsx`, `src/app/main.tsx`,
   `marketplace/api.ts`, `gm/admin/feed.ts`,
   `pageTitle.ts`, `chat/chatRooms.ts` (the chat socket's address), the pages
   `versions/shared/ui/pages/preloader/`, `pages/server_select/`, `pages/login/` and

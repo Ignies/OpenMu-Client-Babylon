@@ -55,8 +55,7 @@ never which skill or item asks for it.
 
 ## Depends on / used by
 - uses: lighting (`crackle.ts` reads `lighting.emitters`), assets (data folder URLs, world sets),
-  render (Babylon exports), terrain (`TW_SAFEZONE`), anim, actors, `core`, `ecs` types. Old exceptions to the dependency
-  rule are listed in `tools/checks/baselines/deps.json` (`app/store`).
+  render (Babylon exports), terrain (`TW_SAFEZONE`), anim, actors, `core`, `ecs` types.
 - Dependency direction: the event gates are handed in (`registerAmbientGate`, below); the instrument
   sampler keys its banks by a plain `BankId` string (the band module's `InstrumentId`); the music
   dev switch `ENABLE_BG_MUSIC` lives in `soundsManager.ts`; `settings`, `combat` (`masterBase`) and

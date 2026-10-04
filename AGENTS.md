@@ -8,10 +8,10 @@ Details live next to the code: every folder has a `readme.md`.
 
 ```
 src/            engine: the same for every game version
-  app/          boot, store, the list of packet handlers (logic.ts), map-change reset (lifecycle.ts)
+  app/          boot, the page state, the list of packet handlers (logic.ts), map-change reset (lifecycle.ts)
   core/         small pure helpers: types, math, event bus, storage
   controllers/  one folder per controller; the game starts them from controllers.ts
-  modules/      one folder per gameplay module: net.ts (packets in), state, actions
+  modules/      one folder per gameplay module: net.ts (packets in), state.ts, index.ts (its door)
   ecs/          the entity world and its per-frame systems
   version/      the version seam: which game version is running
 versions/       content, per game version
@@ -49,6 +49,7 @@ How agents work here (workflow, roles, tools, where things are): [docs/agents/](
 | add a skill | add `<class>/<skill>/index.ts` with `export default defineSkill({...})`; it is found by glob |
 | change how all effects / sounds / lights work | the controller folder in `src/controllers/` |
 | handle a new packet | `src/modules/<module>/net.ts` (listener order: `src/modules/modules.ts`) |
+| add gameplay state or read it from a window | `src/modules/<module>/state.ts`, through the module's `index.ts` |
 | add a texture pack | build it into `public/packs/<pack>/`, list it in `public/packs/index.json` |
 | redraw a window or panel | `versions/shared/ui/windows/<window>/index.tsx` |
 | change one version only | `versions/<id>/` (override), never an `if (version)` in `src/` |

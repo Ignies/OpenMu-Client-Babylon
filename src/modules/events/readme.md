@@ -58,8 +58,8 @@ event is one entry file with its own MobX state and packet handlers, behind the 
   (the 30 s line), `MapEventState` (dragon banner).
 
 ## Depends on / used by
-- uses: `app/store` (`sendToGS`, `addNotification`, `world`, `isOffline`, `playerData`,
-  `dropNpcTalk`, `uiState`), `controllers/` (fx, lighting, sound, `net/serverTime`), `chat/`, `hero/`,
+- uses: `session` (`sendToGS`, `isOffline`), chat's `addNotification`, `Ecs.world`, `Hero`,
+  `Merchant.dropNpcTalk`, `AppState.uiState`, `controllers/` (fx, lighting, sound, `net/serverTime`), `chat/`, `hero/`,
   `items/`, `skills`, `options/`, `src/i18n`, `versions/shared/maps/` (chaoscastle thunder, kanturu2 gateway).
 - used by: see Public API. Windows: `versions/shared/ui/windows/events/` (`index.tsx`, `eventTimers.tsx`,
   `goldenArcherWindow.tsx`, `kanturuWindow.tsx`), `.../windows/duel/`, `.../windows/inventory/` (tickets).

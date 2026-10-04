@@ -32,7 +32,8 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
 - `world.ts` declines hot updates: a second `World` class would fork the ECS.
 
 ## Depends on / used by
-- uses: most controllers, `app/store.ts`, some modules (options, chat, drops), `src/core`.
+- uses: most controllers, the modules' state through their doors (`Hero`, `Session`, `Bag`,
+  `HeroSkills`, `Merchant`, ...), `app/uiState.ts`, `app/logic.ts` (`spawnPlayer`), `src/core`.
 - used by: `app/boot.tsx` (`createWorld`); `Entity` / `World` types everywhere an entity is
   touched (controllers, modules, `versions/shared` maps, skills, npcs, monsters, ui).
 

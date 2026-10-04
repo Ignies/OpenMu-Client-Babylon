@@ -12,17 +12,26 @@ Gameplay, one folder per module. A module owns its packets, its state and its ac
 - `modules.ts` lists every module in install order, and `src/app/logic.ts` calls
   `installModules(MODULES)`. That order is the listener order for a packet several modules
   handle (pinned by `src/app/listenerOrder.golden.test.ts`). Keep it.
-- state: a mobx store (`Social`, `Economy`, `Messenger`, `GmPanel`, ...) or plain module state.
-- actions: functions that check the rules and send packets (`Store.sendToGS`).
+- state: a mobx store in `state.ts` (`Hero`, `Session`, `Bag`, `Merchant`, ...; older ones keep their
+  own file: `Social`, `Economy`, `Messenger`, `GmPanel`) or plain module state.
+- `index.ts`: the module's door, a small list of what windows and other modules may use (its state
+  object and a few actions). Files inside the module import their neighbours directly.
+- actions: methods on the state or functions that check the rules and send packets
+  (`Session.sendToGS`).
 - the classic rules it ports, with the original source cited next to the code.
 - `i18n/<code>.ts`: its packet and system messages (`en.ts` required, one file per language),
   found by `src/i18n`'s glob and read with `t()`. Keys several modules share sit in
   `_shared/i18n/`. A streamed module calls `registerText` instead and needs only English. See
   [../i18n/readme.md](../i18n/readme.md).
 
-Much state still lives in the central Store (`src/app/store.ts`): the hero (`playerData`), sockets,
-login, the merchant, item moves, hot keys, skills, buffs, pets and MU Helper flags. It is being split
-into modules; each module readme names the Store members it still uses.
+There is no central store any more. What used to be `Store` lives here: `Hero` (hero), `Session`
+(session: sockets, sending, login fields, offline), `Servers` (servers), `CharSelect`
+(character_select), `HeroSkills` (skills), `Pets` (pets), `MuHelper` (mu_helper), `GuildMarks`
+(guild), `Drops` (drops), `Bag` (inventory), `Merchant` (npc_shop), the warp requests (warp) and
+`addNotification` (chat). The page is the app's (`app/uiState.ts`), the world `Ecs.world`
+(`src/ecs/current.ts`), the loading flags, the message box and the weather status their
+controllers'. When two modules would import each other, one hands the other a port instead
+(`Bag.grids` from economy, `Bag.beforeConsume` from npc_shop, chat's notification sink from social).
 
 Some handlers register outside `logic.ts` order: the `quests` and `events` entry files register
 when their facade is first imported (`session/net.ts`, `npc_shop/net.ts`), `skills/masterLevel.ts`
@@ -43,10 +52,9 @@ and `masterTree.ts` through the `skills` facade, and `band` through `installBand
 - [guild_war](guild_war/readme.md): guild war, Battle Soccer, alliances; state in `Social`.
 - [hero](hero/readme.md): the hero's stats, vitals, level, experience, respawn, stat points.
 - [inventory](inventory/readme.md): the bag, the shared item grid model and item runs.
-- [items](items/readme.md): item rules: wire format, stats, requirements, values, compare.
 - [marketplace](marketplace/readme.md): player marketplace window state and its service link.
 - [mu_helper](mu_helper/readme.md): MU Helper config codec, settings and the auto-hunt loop.
-- [npc_shop](npc_shop/readme.md): NPC talk and merchant packets; state in the Store.
+- [npc_shop](npc_shop/readme.md): NPC talk and merchant packets, the merchant window (`Merchant`).
 - [options](options/readme.md): player settings (`GameOptions`), mobile skill slots, saved hot keys.
 - [party](party/readme.md): party packets; state in `Social`.
 - [personal_shop](personal_shop/readme.md): player stall packets; state in `Economy`.
@@ -65,8 +73,8 @@ and `masterTree.ts` through the `skills` facade, and `band` through `installBand
   `_shared/i18n/`: text more than one module uses.
 
 ## Depends on / used by
-- uses: `src/controllers`, `src/core`, `src/ecs`, `src/app/store.ts`, packet codecs in
-  `versions/shared/packets/`.
+- uses: `src/controllers` (through their doors), `src/core`, `src/ecs`, `src/app/uiState.ts` (the
+  page), each other's doors, packet codecs in `versions/shared/packets/`.
 - used by: `src/app/logic.ts` (nets), windows and HUD in `versions/shared/ui/`, ECS systems.
 - a module never imports a window (`modules-do-not-draw` in `tools/checks/rules.ts`).
 
@@ -76,12 +84,19 @@ and `masterTree.ts` through the `skills` facade, and `band` through `installBand
   (`bun tools/checks/index.ts` checks it exists), and one line in `modules.ts` where its
   listeners should run.
 - turn a module off: pass `enabled` to `installModules` (servers will choose this; not wired yet).
-- move state out of the Store: put it in the module, point the windows at the module.
+- add state: a field on the module's state (`state.ts`), exported through `index.ts`; windows read
+  it there. A controller that needs it gets a reader through a hook the app or the module sets.
 
 ## Not modules yet
-- `events`, `quests` entry files, `skills/masterLevel.ts` and `masterTree.ts` still register at
-  import; `economy`, `social`, `gm`, `items` have no `module.ts`. They are always on
-  until their state leaves the Store. Windows do not yet hide when their module is off.
+- `events`, the `quests` entry files (`killCounters`, `legacyQuests`, `npcDialogue`, `questLog`,
+  `balgassEntry`), `skills/masterLevel.ts` and `masterTree.ts` still register their listeners at
+  import, so they cannot be switched off. Moving them into an `install` must keep each packet's
+  order with the listeners that stay at import: `events/duel.ts` runs before
+  `warp/warpScopeHold.ts` on `wsClosed`, `maps/kanturu2/gateway.ts` before `events/kanturu.ts` on
+  `KanturuEnterResult`, and `masterLevel` before `hero/net.ts` on the experience and master level
+  packets. Such a module goes first in `modules.ts`.
+- `economy`, `social` and `gm` have no `module.ts` and are always on. Windows do not yet hide when
+  their module is off.
 
 ## Tests
 - `module.test.ts`: install order, disabled and core modules, requirements.

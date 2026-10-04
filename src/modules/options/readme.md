@@ -22,7 +22,7 @@ for the character, and the mobile skill pad's three slots. The player's settings
   empty) and calls `HeroSkills.applyKeyConfiguration`. The other option bytes are ignored.
 
 ## Depends on / used by
-- uses: `src/app/store.ts`, `core/localStorage`, `skills/skillCasting.ts` (`isHotbarSkill`).
+- uses: `skills` (`HeroSkills`), `core/localStorage`, `skills/skillCasting.ts` (`isHotbarSkill`).
 - used by: `src/app/logic.ts` (net), HUD `mobile_controls/skillPad.tsx` (`MobileSkillSlots`).
 
 ## Change it

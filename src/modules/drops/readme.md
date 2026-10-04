@@ -37,7 +37,7 @@ and the loot filter for the ALT name overlay.
 
 ## Depends on / used by
 - uses: `items` (`ItemSerializer`, `itemDef`, `itemLevelName`), `options` (`GameOptions`), `_shared/net_helpers.ts`
-  (`removeNetObject`), `controllers/actors/itemAngle.ts`, `controllers/render`, `controllers/sound`, `session` (sending), `Store` (item moves).
+  (`removeNetObject`), `controllers/actors/itemAngle.ts`, `controllers/render`, `controllers/sound`, `session` (sending), `inventory` (`Bag`, item moves).
 - used by: `src/app/logic.ts` (net), `inventory/quickItemRules.ts` (`HIGH_DROP_LEVEL`),
   `items/archangelWeapons.test.ts`, ecs `dropMotionSystem` / `objectEffectSystem`,
   `controllers/sound/drops.ts`, `controllers/actors/playerObject.ts` (`archangelWeapon`).

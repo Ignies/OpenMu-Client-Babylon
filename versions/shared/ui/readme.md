@@ -21,10 +21,10 @@ Shared by every game version; a version replaces a window by id.
 ## How it works
 The world page (`pages/world`) draws `windowsIn('world')` under the HUD and `windowsIn('hud')` in
 stacking order (`src/controllers/interface/windows.ts`). Each window still decides itself whether it is
-open (today from Store flags; these are moving into the interface controller's window manager).
+open (`MuWindows`, or a module's own window flag).
 
 ## Depends on / used by
-- uses: `src/controllers/interface` (registry, shared widgets), modules and the Store for state.
+- uses: `src/controllers/interface` (registry, shared widgets), the modules' doors for state.
 - used by: `src/app/App.tsx` (pages), versions' UI modules (pre-game pages).
 
 ## Change it

@@ -33,13 +33,13 @@ vault, chaos machine, trade and personal shop. The packet handlers that feed it 
   `closeBrowsedShop`, `shopBuyResult`.
 - `prompt` is the one open yes/no or amount box (`openPrompt`, `closePrompt`). `autoMoveTarget` is where a
   right click in the bag sends an item. `reset()` clears everything on character select.
-- Offline (`Store.isOffline`) most actions change state locally, or do nothing, instead of sending.
+- Offline (`Session.isOffline`) most actions change state locally, or do nothing, instead of sending.
 
 ## Depends on / used by
-- uses: `Store`, `Social` (system and error lines), `chat/notices.ts`, `inventory/itemStorage.ts`,
+- uses: `session`, `hero`, `inventory` (`Bag`), `Social` (system and error lines), `chat/notices.ts`, `inventory/itemStorage.ts`,
   `controllers/sound/sfx.ts`, `controllers/assets/itemIconPack.ts`, `src/i18n`.
 - used by: the nets of `vault`, `chaos_mix`, `trade`, `npc_shop`, `personal_shop`, `inventory`, `scope`, `hero`
-  (`reset`), `warp`; `Store`, `chat/commands.ts`, `session/sessionExit.ts`, `src/app/boot.tsx`,
+  (`reset`), `warp`; `inventory` (`Bag.grids`), `chat/commands.ts`, `session/sessionExit.ts`, `src/app/boot.tsx`,
   ecs `nameTagSystem`.
 - windows: `vault`, `chaos_machine`, `trade`, `personal_shop`, `economy_prompts`, `inventory`, `party`;
   HUD `name_tags` (shop titles).

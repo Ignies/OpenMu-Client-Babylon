@@ -36,8 +36,8 @@ only has the handlers.
 
 ## Depends on / used by
 - uses: `economy/economy.ts`, `controllers/item_rules/itemSerializer.ts`, `inventory/itemStorage.ts`,
-  `social/social.ts` (`errorMessage`), `chat/chat.ts` (`cleanName`), `src/app/store.ts`
-  (`playerId`, `playerData.items`, `syncPlayerAppearance`), `src/i18n`.
+  `social/social.ts` (`errorMessage`), `chat/chat.ts` (`cleanName`), `hero`
+  (`playerId`, `items`, `syncPlayerAppearance`), `src/i18n`.
 - used by: `src/app/logic.ts`. The windows are `versions/shared/ui/windows/personal_shop/` and
   `economy_prompts/` (price and buy prompts); `inventory/` opens the stall, `party/` browses one,
   and the name tags (`versions/shared/ui/hud/name_tags/`) read `Economy.shopTitles`.

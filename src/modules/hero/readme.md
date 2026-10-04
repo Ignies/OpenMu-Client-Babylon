@@ -64,10 +64,10 @@ the hero is a walk the client failed to stop; no walk at all means the server mo
 - `FruitConsumptionResponse`: the fruit result (`ReceiveUseStateItem`). `BaseStatsExtended`: base stats.
 
 ## Depends on / used by
-- uses: `session` (sending), `src/app/store.ts` (the selected skill, the item hot keys),
+- uses: `session` (sending), `skills` (the selected skill), `inventory` (the item hot keys),
   `social/social.ts`, `friends/messenger.ts`, `economy/economy.ts`, `gm/gmPanel.ts`,
   `session/sessionResume.ts`, `chat/commands.ts`, `_shared/net_helpers.ts`, `items`, `inventory`, `src/i18n`.
-- used by: `src/app/logic.ts`, `src/app/store.ts`, many controllers and ECS systems (`getBaseClass`),
+- used by: `src/app/logic.ts`, `src/app/offline.ts`, nearly every module and window (`Hero`), many controllers and ECS systems (`getBaseClass`),
   `social/social.ts` (`matchEmoteWord`), `session/sessionStats.ts` (`experienceGained`),
   `controllers/settings`, `skills`, `combat`, `events`, `quests`. Windows: `versions/shared/ui/windows/character_info/`,
   `emote_menu/`, `move_command_window/`, `mu_helper/`, `options/`; HUD `low_health_overlay/`; page `character_select/`.

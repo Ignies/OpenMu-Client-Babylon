@@ -40,8 +40,8 @@ the client-to-server encryption, the login fields and the offline flag.
   from the app and the interface, never a module above it.
 - `sessionStats.ts` listens to `experienceGained` and watches `Hero.money`; it starts
   only when a panel calls `watch()`. A new character name resets it.
-- Store members still used: `closeNpcShop`. The hero's id and name come from `Hero`, the character
-  select from `CharSelect`.
+- Other modules it reads: `Hero` (id, name), `CharSelect` (select after a resume), `Merchant`
+  (`closeNpcShop` on a lost socket).
 
 ## Packets
 - `Hello`: requests the server list (once).
@@ -55,7 +55,8 @@ the client-to-server encryption, the login fields and the offline flag.
 - Outgoing: `LogOut` (from `SessionExit.request`).
 
 ## Depends on / used by
-- uses: `app/store.ts`, `servers/serverConfig.ts`, `quests`, `economy`, `social`, `friends/messenger`,
+- uses: `app/uiState.ts`, `servers` (`serverConfig.ts`, `serverAccounts.ts`, `Servers`), `hero`,
+  `character_select`, `npc_shop`, `quests`, `economy`, `social`, `friends/messenger`,
   `controllers/settings`, `controllers/sound`, `controllers/interface/browserHotkeys`.
 - used by: `src/app/logic.ts`, `src/app/boot.tsx`, `hero/net.ts` (`remember`, `finish`),
   `ecs/systems/keyboardInputSystem.ts`, `versions/shared/ui/components/reconnect_overlay`.
