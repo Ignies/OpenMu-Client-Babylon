@@ -21,4 +21,10 @@ export default {
   'fidelity.torchCrackle': 'Sunetul torțelor',
   'fidelity.torchCrackle.hint':
     'Torțele aprinse trosnesc când ești aproape. Clasică: torțele sunt tăcute.',
+  'fidelity.loginWallTorches': 'Torțe de perete aprinse la autentificare',
+  'fidelity.loginWallTorches.hint':
+    'Torțele de pe pereții ecranului de autentificare ard și luminează podeaua. Clasică: doar strălucirea lor, ca în original.',
+  'fidelity.fortressLights': 'Luminile Fortăreței Imperiale',
+  'fidelity.fortressLights.hint':
+    'Torțele și candelabrele din Fortăreața Imperială luminează podeaua din jur. Clasică: fără lumină, ca în original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

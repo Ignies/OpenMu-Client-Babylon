@@ -21,4 +21,10 @@ export default {
   'fidelity.torchCrackle': 'Som das tochas',
   'fidelity.torchCrackle.hint':
     'As tochas acesas estalam quando você está perto. Clássica: as tochas são silenciosas.',
+  'fidelity.loginWallTorches': 'Tochas de parede acesas no login',
+  'fidelity.loginWallTorches.hint':
+    'As tochas de parede da tela de login queimam com fogo e iluminam o chão. Clássica: só o brilho delas, como no original.',
+  'fidelity.fortressLights': 'Luzes da Fortaleza Imperial',
+  'fidelity.fortressLights.hint':
+    'As tochas e lustres da Fortaleza Imperial iluminam o chão ao redor. Clássica: sem luz, como no original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

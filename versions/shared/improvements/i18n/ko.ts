@@ -21,4 +21,10 @@ export default {
   'fidelity.torchCrackle': '횃불 소리',
   'fidelity.torchCrackle.hint':
     '가까이 있는 횃불이 타닥거립니다. 클래식: 횃불은 소리가 없습니다.',
+  'fidelity.loginWallTorches': '로그인 화면 벽 횃불 점등',
+  'fidelity.loginWallTorches.hint':
+    '로그인 화면의 벽 횃불이 불타며 바닥을 비춥니다. 클래식: 원작처럼 빛 번짐만 있습니다.',
+  'fidelity.fortressLights': '제국 요새의 불빛',
+  'fidelity.fortressLights.hint':
+    '제국 요새의 벽 횃불과 샹들리에가 주변 바닥을 비춥니다. 클래식: 원작처럼 불빛이 없습니다.',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -1,5 +1,6 @@
 import type { Emission } from '@/controllers/fx/effectParticles';
 import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
+import { isOn } from '@/controllers/fidelity';
 
 /**
  * Fortress of Imperial Guardian day 4 (`WD_72EMPIREGUARDIAN4`, `World73` /
@@ -124,6 +125,18 @@ export const EMPIRE_GUARDIAN_4_ABSENT_MODELS: readonly number[] = [
   75, 159, 160, 163,
 ];
 
+const WALL_TORCH_GROUND: LightEmitter['terrain'] = {
+  range: 2,
+  color: [1, 0.6, 0.2],
+  flicker: { min: 0.3, max: 0.6, steps: 4 },
+};
+
+const CHANDELIER_GROUND: LightEmitter['terrain'] = {
+  range: 5,
+  color: [1, 0.62, 0.22],
+  flicker: { min: 0.3, max: 0.6, steps: 4 },
+};
+
 /**
  * Type 37's flare, `sos_bob02.smd` bone 1 (GMEmpireGuardian4.cpp:864-875,
  * x20). The original is `CreateSprite(BITMAP_FLARE, bone1, 4 * Scale, grey)`
@@ -135,7 +148,8 @@ export const EMPIRE_GUARDIAN_4_ABSENT_MODELS: readonly number[] = [
  * Hosted by `wallTorchObject.ts` rather than by a row in the table because
  * the table resolves an emitter at the object's origin and the flame is on a
  * bone; the original never gives 37 an `AddTerrainLight`, so `terrain` here
- * is ours.
+ * is ours: the `fortressLights` improvement (none on Classic, read when the
+ * torch lights).
  */
 export const EMPIRE_GUARDIAN_4_WALL_TORCH: LightEmitter = {
   sprite: {
@@ -143,10 +157,8 @@ export const EMPIRE_GUARDIAN_4_WALL_TORCH: LightEmitter = {
     color: [1, 0.45, 0.15],
     pulse: { speed: 0.039, amount: 0.2, base: 0.6 },
   },
-  terrain: {
-    range: 2,
-    color: [1, 0.6, 0.2],
-    flicker: { min: 0.3, max: 0.6, steps: 4 },
+  get terrain() {
+    return isOn('fortressLights') ? WALL_TORCH_GROUND : undefined;
   },
 };
 
@@ -154,13 +166,12 @@ export const EMPIRE_GUARDIAN_4_WALL_TORCH: LightEmitter = {
  * Type 157's light, `Chandelier.smd` (x6). The original hangs no light on it
  * at all - this is ours, at the object origin with the table candle's colour,
  * and it is the row `maps/loginscene/` already uses for the login
- * scene under the name `LOGIN_CHANDELIER`.
+ * scene under the name `LOGIN_CHANDELIER`. The `fortressLights` improvement:
+ * Classic lights nothing (the fire and smoke stay, they are the original's).
  */
 export const EMPIRE_GUARDIAN_4_CHANDELIER: LightEmitter = {
-  terrain: {
-    range: 5,
-    color: [1, 0.62, 0.22],
-    flicker: { min: 0.3, max: 0.6, steps: 4 },
+  get terrain() {
+    return isOn('fortressLights') ? CHANDELIER_GROUND : undefined;
   },
 };
 

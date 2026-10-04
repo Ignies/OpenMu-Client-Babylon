@@ -63,7 +63,8 @@ export async function createLoginScene(world: World) {
     }
   }
 
-  // World74's lit chandeliers and wall torches (ours on this world; see the classes).
+  // World74's chandeliers and wall torches. The torch class always draws the original's flare;
+  // its fire and light are the `loginWallTorches` improvement (see the class).
   if (world.mapIndex === ENUM_WORLD.WD_73NEW_LOGIN_SCENE) {
     // Classic: cold, case 157 returns early here (GMEmpireGuardian4.cpp:1050-1053).
     if (isOn('loginChandeliers')) tiles[157] = LoginChandelierObject;

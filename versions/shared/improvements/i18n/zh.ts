@@ -21,4 +21,10 @@ export default {
   'fidelity.torchCrackle': '火把声音',
   'fidelity.torchCrackle.hint':
     '靠近燃烧的火把时会听到噼啪声。经典：火把没有声音。',
+  'fidelity.loginWallTorches': '登录画面壁挂火把点亮',
+  'fidelity.loginWallTorches.hint':
+    '登录画面的壁挂火把会燃烧并照亮地面。经典：与原版一样只有光晕。',
+  'fidelity.fortressLights': '帝国要塞的灯光',
+  'fidelity.fortressLights.hint':
+    '帝国要塞的壁挂火把和吊灯会照亮周围的地面。经典：与原版一样没有灯光。',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -21,4 +21,10 @@ export default {
   'fidelity.torchCrackle': 'Bruit des torches',
   'fidelity.torchCrackle.hint':
     'Les torches crépitent quand vous êtes proche. Classique : les torches sont muettes.',
+  'fidelity.loginWallTorches': 'Torches murales allumées à la connexion',
+  'fidelity.loginWallTorches.hint':
+    'Les torches murales de l\'écran de connexion brûlent et éclairent le sol. Classique : seulement leur halo, comme dans l\'original.',
+  'fidelity.fortressLights': 'Lumières de la Forteresse impériale',
+  'fidelity.fortressLights.hint':
+    'Les torches et lustres de la Forteresse impériale éclairent le sol autour d\'eux. Classique : aucune lumière, comme dans l\'original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

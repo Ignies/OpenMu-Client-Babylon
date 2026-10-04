@@ -17,6 +17,12 @@ const en = {
   'fidelity.wingShadows.hint': 'Wings cast a shadow. Classic: no shadow, as in the original.',
   'fidelity.torchCrackle': 'Torch sounds',
   'fidelity.torchCrackle.hint': 'Burning torches crackle when you are near. Classic: torches are silent.',
+  'fidelity.loginWallTorches': 'Burning login wall torches',
+  'fidelity.loginWallTorches.hint':
+    'The wall torches on the login screen burn with fire and light the floor. Classic: only their flare, as in the original.',
+  'fidelity.fortressLights': 'Imperial Fortress lights',
+  'fidelity.fortressLights.hint':
+    'Wall torches and chandeliers in the Imperial Fortress light the floor around them. Classic: no light, as in the original.',
 };
 
 export default en;

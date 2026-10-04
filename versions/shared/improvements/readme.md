@@ -19,6 +19,8 @@ asks `isOn('<id>')`. Classic turns them all off and runs the original.
 | `loginChandeliers` | Enhanced | `maps/loginscene/create.ts` | cold chandeliers (GMEmpireGuardian4.cpp:1050-1053) |
 | `wingShadows` | Enhanced | `controllers/actors/wingObject.ts` | wings cast no shadow (ZzzCharacter.cpp:8394-8425) |
 | `torchCrackle` | Enhanced | `controllers/sound/crackle.ts` | torches are silent (no `SOUND_FIRE`) |
+| `loginWallTorches` | Enhanced | `maps/loginscene/wallTorchObject.ts` | the login wall torch is its flare alone (GMEmpireGuardian4.cpp:864-875) |
+| `fortressLights` | Enhanced | `maps/empireguardian4/spec.ts` | day-4 wall torches and chandeliers light no ground (no `AddTerrainLight` in cases 37, 157) |
 
 - The file's comment cites the original and names the site; the site keeps the original path when
   `isOn` is false.
@@ -26,7 +28,7 @@ asks `isOn('<id>')`. Classic turns them all off and runs the original.
   the blow lands is a server setting (`heldHitRequest` in the world's `server.json`,
   `src/modules/servers/serverManifest.ts`), not a player choice.
 - Some deviations read at build time: `wingShadows` when a wing is created, `loginChandeliers` when
-  the login scene loads.
+  the login scene loads, `loginWallTorches` and `fortressLights` when a torch or chandelier lights.
 
 ## Depends on / used by
 - uses: `src/controllers/fidelity`.
@@ -41,3 +43,5 @@ asks `isOn('<id>')`. Classic turns them all off and runs the original.
   by an `isOn('<id>')` somewhere and every such read names a registered id; Enhanced keeps them all
   on, Classic turns them off; `cancelledEffects` on Classic and Enhanced.
 - `maps/loginscene/create.test.ts`: the chandeliers stay cold on Classic.
+- `maps/loginscene/wallTorchObject.test.ts`, `maps/empireguardian4/spec.test.ts`: the torch is its
+  flare and the fortress lights are off on Classic.

@@ -21,4 +21,10 @@ export default {
   'fidelity.torchCrackle': 'たいまつの音',
   'fidelity.torchCrackle.hint':
     '近くの燃えるたいまつがパチパチと鳴ります。クラシック: たいまつは無音です。',
+  'fidelity.loginWallTorches': 'ログイン画面の壁たいまつ点灯',
+  'fidelity.loginWallTorches.hint':
+    'ログイン画面の壁たいまつが炎を上げ、床を照らします。クラシック: オリジナル通り光の輝きだけです。',
+  'fidelity.fortressLights': '帝国要塞の明かり',
+  'fidelity.fortressLights.hint':
+    '帝国要塞の壁たいまつとシャンデリアが周りの床を照らします。クラシック: オリジナル通り明かりはありません。',
 } satisfies Partial<Record<keyof typeof en, string>>;

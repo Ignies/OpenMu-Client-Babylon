@@ -21,4 +21,10 @@ export default {
   'fidelity.torchCrackle': 'Tiếng đuốc',
   'fidelity.torchCrackle.hint':
     'Đuốc đang cháy kêu lách tách khi bạn ở gần. Cổ điển: đuốc im lặng.',
+  'fidelity.loginWallTorches': 'Đuốc tường cháy ở màn hình đăng nhập',
+  'fidelity.loginWallTorches.hint':
+    'Đuốc trên tường ở màn hình đăng nhập cháy lửa và chiếu sáng mặt sàn. Cổ điển: chỉ có ánh lóe, như bản gốc.',
+  'fidelity.fortressLights': 'Ánh sáng Pháo đài Hoàng gia',
+  'fidelity.fortressLights.hint':
+    'Đuốc tường và đèn chùm trong Pháo đài Hoàng gia chiếu sáng mặt sàn xung quanh. Cổ điển: không có ánh sáng, như bản gốc.',
 } satisfies Partial<Record<keyof typeof en, string>>;

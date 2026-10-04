@@ -21,4 +21,10 @@ export default {
   'fidelity.torchCrackle': 'Odgłos pochodni',
   'fidelity.torchCrackle.hint':
     'Płonące pochodnie trzaskają, gdy jesteś blisko. Klasyczne: pochodnie są ciche.',
+  'fidelity.loginWallTorches': 'Płonące pochodnie przy logowaniu',
+  'fidelity.loginWallTorches.hint':
+    'Pochodnie na ścianach ekranu logowania płoną ogniem i oświetlają podłogę. Klasyczne: tylko ich blask, jak w oryginale.',
+  'fidelity.fortressLights': 'Światła Cesarskiej Twierdzy',
+  'fidelity.fortressLights.hint':
+    'Pochodnie i żyrandole w Cesarskiej Twierdzy oświetlają podłogę wokół. Klasyczne: brak światła, jak w oryginale.',
 } satisfies Partial<Record<keyof typeof en, string>>;

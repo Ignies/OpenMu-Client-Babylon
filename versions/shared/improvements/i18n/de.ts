@@ -21,4 +21,10 @@ export default {
   'fidelity.torchCrackle': 'Fackelgeräusche',
   'fidelity.torchCrackle.hint':
     'Brennende Fackeln knistern, wenn du in der Nähe bist. Klassisch: Fackeln sind stumm.',
+  'fidelity.loginWallTorches': 'Brennende Wandfackeln beim Login',
+  'fidelity.loginWallTorches.hint':
+    'Die Wandfackeln im Login-Bildschirm brennen mit Feuer und erhellen den Boden. Klassisch: nur ihr Schein, wie im Original.',
+  'fidelity.fortressLights': 'Lichter der Kaiserfestung',
+  'fidelity.fortressLights.hint':
+    'Wandfackeln und Kronleuchter in der Kaiserfestung erhellen den Boden um sich. Klassisch: kein Licht, wie im Original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

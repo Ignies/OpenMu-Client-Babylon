@@ -21,4 +21,10 @@ export default {
   'fidelity.torchCrackle': 'Звук факелов',
   'fidelity.torchCrackle.hint':
     'Горящие факелы потрескивают, когда вы рядом. Классика: факелы беззвучны.',
+  'fidelity.loginWallTorches': 'Горящие настенные факелы при входе',
+  'fidelity.loginWallTorches.hint':
+    'Настенные факелы на экране входа горят огнём и освещают пол. Классика: только их отблеск, как в оригинале.',
+  'fidelity.fortressLights': 'Огни Имперской крепости',
+  'fidelity.fortressLights.hint':
+    'Факелы и люстры Имперской крепости освещают пол вокруг себя. Классика: без света, как в оригинале.',
 } satisfies Partial<Record<keyof typeof en, string>>;

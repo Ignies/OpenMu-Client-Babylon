@@ -21,4 +21,10 @@ export default {
   'fidelity.torchCrackle': 'Suono delle torce',
   'fidelity.torchCrackle.hint':
     'Le torce accese crepitano quando sei vicino. Classica: le torce sono silenziose.',
+  'fidelity.loginWallTorches': 'Torce a muro accese al login',
+  'fidelity.loginWallTorches.hint':
+    'Le torce a muro della schermata di accesso bruciano e illuminano il pavimento. Classica: solo il loro bagliore, come nell\'originale.',
+  'fidelity.fortressLights': 'Luci della Fortezza Imperiale',
+  'fidelity.fortressLights.hint':
+    'Torce e lampadari della Fortezza Imperiale illuminano il pavimento intorno. Classica: nessuna luce, come nell\'originale.',
 } satisfies Partial<Record<keyof typeof en, string>>;
