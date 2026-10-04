@@ -1,6 +1,7 @@
 import { Vector3 } from '../render/babylon/exports';
 import { EventBus } from '../../core/eventBus';
 import { Store } from '../../app/store';
+import { Ecs } from '../../ecs/current';
 import { effects } from '../fx';
 import { followEntity } from '../fx/core';
 import { TRAIL_ANCHOR, pingLiveFor } from '../fx/ping';
@@ -35,7 +36,7 @@ let available = false;
 let helloSocket: WebSocket | null = null;
 
 function targetOf(point: PingPoint): Vector3 | null {
-  const world = Store.world;
+  const world = Ecs.world;
   if (!world) return null;
   const y = world.getTerrainHeight(point.x, point.z);
   if (!Number.isFinite(y)) return null;
@@ -49,7 +50,7 @@ function targetOf(point: PingPoint): Vector3 | null {
  * not an error. Returns whether a pointer was dropped.
  */
 export function requestPing(x: number, z: number): boolean {
-  const world = Store.world;
+  const world = Ecs.world;
   if (!world) return false;
   // Offline, and until the server names this hero, there is no object id -
   // but the pointer is still the player's own to see, so it is keyed by
@@ -100,7 +101,7 @@ export function installPingNet(): void {
     // echoes it back, so anything wearing this client's id is a stray.
     if (msg.senderId === (Store.playerId ?? -1)) return;
 
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
 
     // A trail has to start at a body: a ping from someone this client cannot

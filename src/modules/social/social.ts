@@ -1,6 +1,7 @@
 import { t } from '../../i18n';
 import { action, computed, makeObservable, observable, runInAction } from 'mobx';
 import { Store } from '../../app/store';
+import { Ecs } from '../../ecs/current';
 import {
   CHAT_COOLDOWN_MS,
   CHAT_FILTERS,
@@ -372,7 +373,7 @@ export const Social = new (class _Social {
     senderPk?: number;
     senderGm?: boolean;
   } {
-    const world = Store.world;
+    const world = Ecs.world;
     if (!sender || !world) return {};
 
     // `AssignChat`: players first, then anything else wearing the name.
@@ -659,7 +660,7 @@ export const Social = new (class _Social {
     const local = localCommandOf(text);
     if (local?.local) {
       if (local.name === '/duelend') Commands.duelStop();
-      else Commands.run(local.local, Store.world?.currentPointerTarget);
+      else Commands.run(local.local, Ecs.world?.currentPointerTarget);
       this.remember(this.chatHistory, text);
       return true;
     }
@@ -675,7 +676,7 @@ export const Social = new (class _Social {
       // Emoji codes and item links are not words: `:dk_cry:` would play the
       // cry emote, and a link's bytes can spell anything.
       const emote = matchEmoteWord(stripItemLinks(stripEmojiCodes(text, EMOJI_CATALOG)));
-      if (emote && Store.world) Store.world.emoteRequest = emote;
+      if (emote && Ecs.world) Ecs.world.emoteRequest = emote;
 
       // A line that is nothing but an emoji token pops the bubble here too.
       // Everyone else gets it from this very message (the ChatMessage handler
@@ -684,12 +685,12 @@ export const Social = new (class _Social {
       // party line reaches members three maps away, where a bubble would hang
       // over nobody.
       const bubble = prefix ? null : matchEmojiBubbleWord(text);
-      if (bubble && Store.world) Store.world.emojiRequest = bubble;
+      if (bubble && Ecs.world) Ecs.world.emojiRequest = bubble;
 
       // A line of only chat emojis pops over the sender at once, for the same reason.
-      if (!bubble && !prefix && GameOptions.chatEmojis && Store.world) {
+      if (!bubble && !prefix && GameOptions.chatEmojis && Ecs.world) {
         const shown = chatEmojiBubbleOf(text, EMOJI_CATALOG).bubble;
-        if (shown) Store.world.emojiRequest = shown;
+        if (shown) Ecs.world.emojiRequest = shown;
       }
     }
 

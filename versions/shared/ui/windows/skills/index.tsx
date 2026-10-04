@@ -4,6 +4,7 @@ import { t } from '@/i18n';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
 import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { isKey } from '@/controllers/interface/keyBindings';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { playUiSound } from '@/controllers/sound/sfx';
@@ -80,7 +81,7 @@ export const SkillListWindow = observer(() => {
     });
 
   useEventBus('keyPressed', key => {
-    if (isKey(HOT_KEY, key) && Store.world?.playerEntity) {
+    if (isKey(HOT_KEY, key) && Ecs.world?.playerEntity) {
       toggle();
       playUiSound('click');
     }

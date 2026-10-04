@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
 import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import {
   GUILD_SECURITY_CODE_MAX,
   Social,
@@ -575,7 +576,7 @@ export const GuildWindow = observer(() => {
     });
 
   useEventBus('keyPressed', key => {
-    if (isKey(HOT_KEY, key) && Store.world?.playerEntity) toggle();
+    if (isKey(HOT_KEY, key) && Ecs.world?.playerEntity) toggle();
   });
 
   if (!Social.guildWindowEnabled) return null;

@@ -9,7 +9,7 @@ import { Vector3 } from '@/controllers/render/babylon/exports';
 import { atFrame, sfx } from '../_shared';
 import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
-import { storeRef } from '@/app/storeRef';
+import { Ecs } from '@/ecs/current';
 
 import { A } from '@/controllers/combat/recipes';
 import { MOUNTED_COMMAND } from '../../_shared';
@@ -199,7 +199,7 @@ const removalBandsOf = (hd: boolean): Step => (_at, c) => {
     })(feet, c);
   }
   // SOUND_BMS_MAGIC_REMOVAL is loaded on the Battle Castle map only (MapManager.cpp:251-276).
-  if (storeRef().world?.mapIndex === ENUM_WORLD.WD_30BATTLECASTLE) sfx('Sound/battlecastle/sDMagicCancel')(feet, c);
+  if (Ecs.world?.mapIndex === ENUM_WORLD.WD_30BATTLECASTLE) sfx('Sound/battlecastle/sDMagicCancel')(feet, c);
 };
 
 const removalBuff: Step = atFrame(REMOVAL_CLIPS, 3.5, ticks(14), removalBandsOf(false));

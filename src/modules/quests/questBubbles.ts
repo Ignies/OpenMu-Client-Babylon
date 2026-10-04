@@ -14,7 +14,7 @@
 import type { ENUM_WORLD } from '../../core/types';
 import type { EmojiBubbleId } from '../chat/emojiBubbles';
 import { startEmojiBubble } from '../../ecs/systems/emojiBubbleSystem';
-import { Store } from '../../app/store';
+import { Ecs } from '../../ecs/current';
 import type { QuestLayer } from './layer';
 import { questDefinition } from './questData';
 import {
@@ -60,7 +60,7 @@ function update(_map: ENUM_WORLD, dt: number): void {
   if (sinceRefresh < REFRESH_SECONDS) return;
   sinceRefresh = 0;
 
-  const world = Store.world;
+  const world = Ecs.world;
   if (!world) return;
 
   for (const entity of world.netObjsQuery) {

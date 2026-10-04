@@ -6,7 +6,7 @@ import { TW_NOGROUND, TW_NOMOVE, TW_WATER } from '@/controllers/terrain/consts';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
 import { stones } from '../../_shared';
-import { storeRef } from '@/app/storeRef';
+import { Ecs } from '@/ecs/current';
 
 import { type LightRecipe } from '@/controllers/lighting/lightSource';
 import { SkillLight } from '@/controllers/lighting/skills';
@@ -28,7 +28,7 @@ const EARTH_BLOCKED = TW_NOMOVE | TW_NOGROUND | TW_WATER;
  * chip each tick at LT 36-33, 60 cm off it and 50 up; Alpha x1/1.3 a tick over the last 8.
  */
 const earthPrisonWith = (onStone?: (p: Vector3, c: SkillContext) => void): Step => (at, c) => {
-  const world = storeRef().world;
+  const world = Ecs.world;
   const feet = at.clone();
   feet.y -= IMPACT_HEIGHT;
   let a = Math.random() * Math.PI * 2;

@@ -8,6 +8,7 @@ import { delay } from '@/controllers/fx/core';
 import { events } from '../events';
 import { spawnFireworks } from '@/controllers/fx/fireworks';
 import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { UI_BUS, playSfx } from '@/controllers/sound/sfx';
 import { WEATHER_RAIN } from '@/controllers/weather/rainState';
 import { emitObjectEffect } from '../_shared/net_helpers';
@@ -68,7 +69,7 @@ function routeServerCommand(packet: DataView) {
 
 /** ShowFireworks / ShowChristmasFireworks: the burst at the given tile. */
 function spawnFireworksAt(x: number, y: number, christmas: boolean) {
-  const world = Store.world;
+  const world = Ecs.world;
   if (!world) return;
   const at = new Vector3(x, world.getTerrainHeight(x, y), y);
   spawnFireworks(world.scene, at, christmas);
@@ -76,7 +77,7 @@ function spawnFireworksAt(x: number, y: number, christmas: boolean) {
 
 /** Server command 58's cherry-blossom sound, then the blooms its effect replays while the target stays. */
 function playSwirlSounds(netId: number) {
-  const world = Store.world;
+  const world = Ecs.world;
   const target = world?.getByNetId(netId);
   if (!world || !target) return;
   playSfx(SWIRL_START.key, target.transform.pos, SWIRL_START.opts);
@@ -147,7 +148,7 @@ export function installNet(): void {
         emitObjectEffect(netId, 'shieldLost');
         // ReceiveDisplayEffectViewport (WSclient.cpp:9662-9668): SOUND_SHIELDCLASH,
         // except in Chaos Castle.
-        const world = Store.world;
+        const world = Ecs.world;
         const who = world?.getByNetId(netId);
         if (world && who?.transform && !inChaosCastle(world.mapIndex)) {
           playSfx('Sound/shieldclash', who.transform.pos, { bus: COMBAT_BUS, channels: 1 });

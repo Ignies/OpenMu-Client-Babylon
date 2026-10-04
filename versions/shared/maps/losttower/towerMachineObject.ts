@@ -3,7 +3,7 @@ import {
   type MovableFlare,
 } from '@/controllers/lighting/effectLights';
 import { MapTileObject } from '@/controllers/terrain/mapTileObject';
-import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import type { BonedEmission } from '@/controllers/fx/effectParticles';
 import type { Entity, World } from '@/ecs/world';
 import { reportLoadFailure } from '@/controllers/assets';
@@ -185,7 +185,7 @@ export class LostTowerMachineObject extends MapTileObject {
 
     if (!this.Ready || this.#bones.length === 0) return;
 
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
 
     if (!this.#lit) {

@@ -72,7 +72,7 @@ import {
   computed,
   reaction,
 } from 'mobx';
-import { Item, World } from '../ecs/world';
+import { Item } from '../ecs/world';
 import { EventBus } from '../core/eventBus';
 import { Scalar } from '../controllers/render/babylon/exports';
 import { InventoryConstants } from '@/core/inventoryConstants';
@@ -118,10 +118,10 @@ import {
   findHotkeyItem,
 } from '../modules/inventory/itemHotkeys';
 import { spawnPlayer } from './logic';
-import { registerStore } from './storeRef';
 import { devVitalPercent } from '../core/devSeams';
 import { Social } from '../modules/social/social';
 import { Economy } from '../modules/economy/economy';
+import { Ecs } from '../ecs/current';
 
 /**
  * How long the game server named by `ConnectionInfo` has to say `GameServerEntered`
@@ -856,14 +856,14 @@ export const Store = new (class _Store {
     if (this.isOffline) {
       // No server to answer: flip locally so the loop can be exercised
       // against the test scene.
-      if (!active && this.world?.playerEntity?.attributeSystem?.isAboveZero('inSafeZone')) {
+      if (!active && Ecs.world?.playerEntity?.attributeSystem?.isAboveZero('inSafeZone')) {
         this.addNotification(t('notify.helperSafeZone'), 'error');
         return;
       }
       this.setMuHelperStatus(!active, 0);
       return;
     }
-    if (!active && this.world?.playerEntity?.attributeSystem?.isAboveZero('inSafeZone')) {
+    if (!active && Ecs.world?.playerEntity?.attributeSystem?.isAboveZero('inSafeZone')) {
       this.addNotification(t('notify.helperSafeZone'), 'error');
       return;
     }
@@ -1070,8 +1070,6 @@ export const Store = new (class _Store {
     timer: ReturnType<typeof setTimeout> | null;
   } | null = null;
 
-  world: World | null = null;
-
   isOffline = location.href.includes('offline');
 
   constructor() {
@@ -1110,7 +1108,6 @@ export const Store = new (class _Store {
       focusedChar: observable,
       msgWin: observable,
       playerData: observable,
-      world: observable,
       hudHidden: observable,
       sceneLoading: observable,
       loadingProgress: observable,
@@ -1156,7 +1153,7 @@ export const Store = new (class _Store {
   }
 
   playOffline() {
-    if (!this.world) return;
+    if (!Ecs.world) return;
 
     const map = offlineMapFromUrl();
     const cls = offlineClassFromUrl() ?? CharacterClassNumber.DarkKnight;
@@ -1177,20 +1174,20 @@ export const Store = new (class _Store {
     if (!bare) this.setTestItems();
     applyOfflineHandOverrides(this.playerData.items);
 
-    const testPlayer = spawnPlayer(this.world, { cls });
+    const testPlayer = spawnPlayer(Ecs.world, { cls });
 
     // `?offline&skin=503`: the hero in a transformation ring's body, which
     // online only arrives on a scope packet from the server.
     const skin = offlineSkinFromUrl();
     const body = skin ? characterSkinBody(skin) : null;
     if (body) {
-      this.world.addComponent(testPlayer, 'skin', skin);
+      Ecs.world.addComponent(testPlayer, 'skin', skin);
       testPlayer.modelFactory = body.factory as typeof PlayerObject;
       testPlayer.transform.scale = body.scale;
     }
 
-    this.world.addComponent(testPlayer, 'localPlayer', true);
-    this.world.addComponent(testPlayer, 'worldIndex', map);
+    Ecs.world.addComponent(testPlayer, 'localPlayer', true);
+    Ecs.world.addComponent(testPlayer, 'worldIndex', map);
     testPlayer.objectNameInWorld = 'TestPlayer';
 
     this.playerData.name = 'TestPlayer';
@@ -1222,7 +1219,7 @@ export const Store = new (class _Store {
     this.loadAccount();
     // Also the landing for a connection lost mid-game, which never passes
     // through `SessionExit`: the hero does not stay behind on the backdrop.
-    this.world?.removeHero();
+    Ecs.world?.removeHero();
     // The server list and login window draw no message box; one left up
     // from the world would only swallow Enter and Escape there.
     this.closeMsgWin();
@@ -1366,7 +1363,7 @@ export const Store = new (class _Store {
 
   syncPlayerAppearance() {
     const playerData = this.playerData;
-    const playerEntity = this.world?.playerEntity;
+    const playerEntity = Ecs.world?.playerEntity;
 
     if (!playerEntity || !playerEntity.charAppearance) return;
 
@@ -2857,10 +2854,6 @@ export const Store = new (class _Store {
     this.pendingItemMoveTimer = null;
   }
 })();
-
-// `controllers/render/modelObject.ts` reaches Store through this handle instead of an
-// import, which would close a cycle back to the monster classes (B14).
-registerStore(Store);
 
 // A hot update that reaches this module must reload the page: Vite would
 // otherwise re-execute the chain with a second `Store` instance (`app/store.ts?t=…`)

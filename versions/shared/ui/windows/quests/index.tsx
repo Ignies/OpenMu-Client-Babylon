@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { observable, runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { isKey } from '@/controllers/interface/keyBindings';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { playUiSound, uiClick } from '@/controllers/sound/sfx';
@@ -858,7 +859,7 @@ const CastleTempleTab = () => (
 /** `CNewUIMyQuestInfoWindow` (T): the quest log with its three tabs. */
 const MyQuestInfoWindow = observer(() => {
   useEventBus('keyPressed', key => {
-    if (isKey(HOT_KEY, key) && Store.world?.playerEntity) quests.toggleLog();
+    if (isKey(HOT_KEY, key) && Ecs.world?.playerEntity) quests.toggleLog();
     if (key === 'Escape' && quests.anyWindowOpen) quests.closeAll();
   });
 

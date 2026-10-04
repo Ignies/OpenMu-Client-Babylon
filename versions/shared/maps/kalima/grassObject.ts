@@ -2,7 +2,7 @@ import { devQuery } from '@/core/devSeams';
 import { MapTileObject } from '@/controllers/terrain/mapTileObject';
 import { PlayerAction } from '../../objects/enum';
 import { waterSurfaceHeight } from '@/controllers/terrain/terrainWater';
-import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import type { Entity, World } from '@/ecs/world';
 
 /** MU world units per terrain tile. The original's `Position` is in these. */
@@ -147,7 +147,7 @@ export class KalimaWaterPlantObject extends MapTileObject {
   }
 
   #push(transform: NonNullable<Entity['transform']>): void {
-    const hero = Store.world?.playerEntity;
+    const hero = Ecs.world?.playerEntity;
 
     if (!hero || hero.worldIndex !== this.WorldIndex) return;
 

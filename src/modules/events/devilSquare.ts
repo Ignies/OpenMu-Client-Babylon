@@ -4,6 +4,7 @@ import { BaseClass, getBaseClass } from '../hero/characterStats';
 import type { Item } from '../../ecs/world';
 import { EventBus } from '../../core/eventBus';
 import { Store } from '../../app/store';
+import { Ecs } from '../../ecs/current';
 import { skills } from '../skills';
 import {
   DevilSquareEnterRequestPacket,
@@ -239,7 +240,7 @@ EventBus.on('MiniGameOpeningState', packet => {
  * (chaosCastle.ts), so it is taken only on the square.
  */
 EventBus.on('MiniGameScoreTable', packet => {
-  if (!MAPS.has(Store.world?.mapIndex ?? ENUM_WORLD.WD_0LORENCIA)) return;
+  if (!MAPS.has(Ecs.world?.mapIndex ?? ENUM_WORLD.WD_0LORENCIA)) return;
 
   const p = new MiniGameScoreTablePacket(packet);
   if (p.ResultCount >= MAX_RANK_ROWS) return;

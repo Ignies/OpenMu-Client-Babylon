@@ -3,7 +3,7 @@
  * SubType 0, ZzzEffect.cpp:2742-2890 init, :10993-11062 move). Listed before `model`. See fx/readme.md.
  */
 import { Vector3, type Scene } from '../render/babylon/exports';
-import { Store } from '../../app/store';
+import { Ecs } from '../../ecs/current';
 import { CM, LiveList, TICK, WHITE, emitBurst, type ParticleRecipe, type RGB } from './core';
 import { spawnModel, type ModelHandle } from './model';
 import type { EffectHandle, EffectLayer } from './layer';
@@ -98,7 +98,7 @@ function cmPerTick(v: number): number {
 }
 
 export function spawnDebris(scene: Scene, at: Vector3, opts: DebrisOptions): EffectHandle {
-  const world = Store.world;
+  const world = Ecs.world;
   const count = opts.count ?? 1;
   const colour = opts.colour ?? WHITE;
   const lift = (opts.liftCm ?? 0) * CM;

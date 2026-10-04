@@ -4,10 +4,9 @@ Boot, the root React component, the `Store`, the list of packet handlers and the
 reset. This is the top of the graph: it wires modules, controllers and versions together.
 
 ## Public API
-- `Store`, `UIState` (`store.ts`): the global mobx store (sockets, hero data, inventory, windows,
-  world). Imported by most modules, ECS systems and windows.
-- `storeRef()` (`storeRef.ts`): a late-bound handle on `Store` for modules inside the store's own
-  import cycle (`render/modelObject.ts`, `skills/visuals.ts`).
+- `Store`, `UIState` (`store.ts`): the global mobx store (sockets, hero data, inventory, windows).
+  Imported by most modules, ECS systems and windows; being split into the modules. The live
+  ECS world is `Ecs.world` (`src/ecs/current.ts`), which any layer may read.
 - `consts.ts`: default connect-server / ws-proxy endpoints (`VITE_CS_HOST`, `VITE_WS_HOST`, ...)
   and the ECS debug flags. The login field limits are `modules/servers/serverAccounts.ts`; the
   terrain and music dev switches live in `terrain/consts.ts` and `sound/soundsManager.ts`.

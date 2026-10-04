@@ -9,6 +9,7 @@ import { SessionResume } from '../session/sessionResume';
 import { Social } from '../social/social';
 import { StatType, masterExperienceActive } from './characterStats';
 import { Store, UIState } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { convertDirectionToAngle } from '../_shared/net_helpers';
 import { experienceForLevel } from './experience';
 import { heroStateMessage } from '@/controllers/interface/nameTags';
@@ -158,7 +159,7 @@ function handleRespawnAfterDeath(packet: DataView) {
   // Done here rather than on the kill packet so every respawn path clears it.
   Commands.stopFollowing();
 
-  const world = Store.world;
+  const world = Ecs.world;
   const playerEntity = world?.playerEntity;
   if (playerEntity) {
     playerEntity.attributeSystem.setValue('currentHealth', p.CurrentHealth);
@@ -279,7 +280,7 @@ export function installNet(): void {
   EventBus.on('CurrentHealthAndShield', packet => {
     const p = new CurrentHealthAndShieldPacket(packet);
 
-    const playerEntity = Store.world?.playerEntity;
+    const playerEntity = Ecs.world?.playerEntity;
     if (!playerEntity) return;
     playerEntity.attributeSystem.setValue('currentHealth', p.Health);
     runInAction(() => {
@@ -290,7 +291,7 @@ export function installNet(): void {
 
   EventBus.on('CurrentStatsExtended', packet => {
     const p = new CurrentStatsExtendedPacket(packet);
-    const playerEntity = Store.world?.playerEntity;
+    const playerEntity = Ecs.world?.playerEntity;
     playerEntity?.attributeSystem.setValue('currentHealth', p.Health);
     playerEntity?.attributeSystem.setValue('currentMana', p.Mana);
     runInAction(() => {
@@ -334,7 +335,7 @@ export function installNet(): void {
   EventBus.on('CurrentManaAndAbility', packet => {
     const p = new CurrentManaAndAbilityPacket(packet);
 
-    const playerEntity = Store.world?.playerEntity;
+    const playerEntity = Ecs.world?.playerEntity;
     if (!playerEntity) return;
 
     playerEntity.attributeSystem.setValue('currentMana', p.Mana);
@@ -346,7 +347,7 @@ export function installNet(): void {
 
   EventBus.on('HeroStateChanged', packet => {
     const p = new HeroStateChangedPacket(packet);
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
     const maskedId = p.PlayerId & 0x7fff;
     const obj = world.getByNetId(maskedId);
@@ -385,7 +386,7 @@ export function installNet(): void {
       Store.playerData.currentSD = p.CurrentShield;
     });
 
-    const playerEntity = Store.world?.playerEntity;
+    const playerEntity = Ecs.world?.playerEntity;
     if (playerEntity) {
       playerEntity.attributeSystem.setValue(
         'currentHealth',

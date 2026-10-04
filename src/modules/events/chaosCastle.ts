@@ -3,6 +3,7 @@ import { ENUM_WORLD } from '../../core/types';
 import type { Entity, Item } from '../../ecs/world';
 import { EventBus } from '../../core/eventBus';
 import { Store } from '../../app/store';
+import { Ecs } from '../../ecs/current';
 import {
   ChaosCastleEnterRequestPacket,
   MiniGameOpeningStateRequestPacket,
@@ -228,9 +229,9 @@ function update(map: ENUM_WORLD, dt: number): void {
       thunderIn = nextThunderSeconds();
       const pillars = pillarsInView();
       const struck = pillars[thunderPillar(pillars.length)];
-      if (struck && Store.world) {
+      if (struck && Ecs.world) {
         playSfx(thunderSound(), null, { bus: 'ambient', channels: 1 });
-        strikePillar(Store.world.scene, struck);
+        strikePillar(Ecs.world.scene, struck);
       }
     }
   }
@@ -242,7 +243,7 @@ function update(map: ENUM_WORLD, dt: number): void {
  * no model object of its own and is always drawn.
  */
 function pillarsInView(): Entity[] {
-  const world = Store.world;
+  const world = Ecs.world;
   const hero = world?.playerEntity?.transform?.pos;
   if (!world || !hero) return [];
 
@@ -383,7 +384,7 @@ EventBus.on('BloodCastleState', packet => {
       clearTimer();
       // `aChaosEnd` over the returning `aChaos` bed, on the castle maps
       // only (NewChaosCastleSystem.cpp:74-80).
-      if (MAPS.has(Store.world?.mapIndex ?? ENUM_WORLD.WD_0LORENCIA)) {
+      if (MAPS.has(Ecs.world?.mapIndex ?? ENUM_WORLD.WD_0LORENCIA)) {
         playSfx('Sound/aChaosEnd', null, { channels: 1 });
       }
       break;
@@ -396,7 +397,7 @@ EventBus.on('BloodCastleState', packet => {
 
 /** The shared 0x93 rank table, taken only on the castle maps. */
 EventBus.on('MiniGameScoreTable', packet => {
-  if (!MAPS.has(Store.world?.mapIndex ?? ENUM_WORLD.WD_0LORENCIA)) return;
+  if (!MAPS.has(Ecs.world?.mapIndex ?? ENUM_WORLD.WD_0LORENCIA)) return;
 
   const p = new MiniGameScoreTablePacket(packet);
   if (p.ResultCount >= MAX_RANK_ROWS) return;

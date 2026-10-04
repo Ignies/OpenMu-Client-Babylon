@@ -13,7 +13,7 @@ import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
 import { playLandingSound } from '@/controllers/sound/combat';
 import { spawnModel } from '@/controllers/fx/model';
-import { storeRef } from '@/app/storeRef';
+import { Ecs } from '@/ecs/current';
 
 import { A, SkillClipSet } from '@/controllers/combat/recipes';
 
@@ -32,7 +32,7 @@ const holding = (e: Entity, height: number): PointSource => {
  * white with the tint on it, not as the pure tint.
  */
 export function bodyLight(at: Vector3, tint: RGB): RGB {
-  const l = storeRef().world?.getTerrainLight(at.x, at.z);
+  const l = Ecs.world?.getTerrainLight(at.x, at.z);
   const lx = l?.x ?? 1;
   const ly = l?.y ?? 1;
   const lz = l?.z ?? 1;

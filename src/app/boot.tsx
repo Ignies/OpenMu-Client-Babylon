@@ -8,6 +8,7 @@ import './logic';
 // Content model classes register here, at boot, where no controller can reach (controllers import the Store, which imports logic.ts).
 import '@versions/shared/monsters/models';
 import { Store, UIState } from './store';
+import { Ecs } from '../ecs/current';
 import { GameOptions } from '@/controllers/settings';
 import { Social } from '../modules/social/social';
 import { Commands } from '../modules/chat/commands';
@@ -200,7 +201,7 @@ onMapChange(resetForMapChange);
 installLoginMusic();
 
 const { world, updateSystems } = createWorld(scene);
-Store.world = world;
+Ecs.world = world;
 
 // Render-budget overlay: Shift+Ctrl+Alt+P. Dormant until toggled.
 installPerfOverlay(scene);

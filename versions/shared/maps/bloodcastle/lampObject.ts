@@ -3,7 +3,7 @@ import {
   type MovableFlare,
 } from '@/controllers/lighting/effectLights';
 import { MapTileObject } from '@/controllers/terrain/mapTileObject';
-import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import type { Entity, World } from '@/ecs/world';
 import { findBone, bonePosed, type BoneNode } from './bones';
 import { reportLoadFailure } from '@/controllers/assets';
@@ -81,7 +81,7 @@ export class BloodCastleLampObject extends MapTileObject {
 
     if (!this.Ready || !this.#bone) return;
 
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
 
     if (!this.#lit) {

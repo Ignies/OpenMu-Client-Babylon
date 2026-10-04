@@ -3,6 +3,7 @@ import { t } from '@/i18n';
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { ItemIcon } from '@/controllers/interface/components/item_icon';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuButton } from '@/controllers/interface/components/mu_button';
@@ -187,7 +188,7 @@ const ConsumableItems = () => {
     const i = HOTKEY_CODES.indexOf(code);
     if (i < 0) return;
     // Ctrl+key over the inventory binds; that is the inventory's job.
-    const keys = Store.world?.keyboardInput.pressedKeys;
+    const keys = Ecs.world?.keyboardInput.pressedKeys;
     if (keys && (keys.has('ControlLeft') || keys.has('ControlRight'))) return;
     Store.useItemHotkey(i);
   });
@@ -443,7 +444,7 @@ const SkillSlots = observer(() => {
     const m = /^(?:Digit|Numpad)(\d)$/.exec(code);
     if (!m) return;
     const slot = +m[1];
-    const keys = Store.world?.keyboardInput.pressedKeys;
+    const keys = Ecs.world?.keyboardInput.pressedKeys;
     const ctrl = !!keys && (keys.has('ControlLeft') || keys.has('ControlRight'));
     // Ctrl+digit over a slot, or a digit while dragging, binds the key.
     const bind = drag?.number ?? (ctrl ? hovered : -1);
@@ -782,7 +783,7 @@ export const BottomBar = observer(() => {
 
   // `CMuHelper::Toggle`: the Start / Stop button of the position panel, on its key.
   useEventBus('keyPressed', code => {
-    if (isKey('muHelper', code) && Store.world?.playerEntity) Store.toggleMuHelper();
+    if (isKey('muHelper', code) && Ecs.world?.playerEntity) Store.toggleMuHelper();
   });
 
   return (

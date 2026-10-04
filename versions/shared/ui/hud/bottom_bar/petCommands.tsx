@@ -1,6 +1,7 @@
 import { observer } from 'mobx-react-lite';
 import { t, type TextKey } from '@/i18n';
 import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { PET_GROUP } from '@versions/shared/items/petItems';
 import { InventoryConstants } from '@/core/inventoryConstants';
 import { PetCommandModeEnum } from '@versions/shared/packets/ClientToServerPackets';
@@ -53,7 +54,7 @@ function ravenEquipped(): boolean {
 export function sendRavenCommand(mode: PetCommandModeEnum): void {
   let target = NO_TARGET;
   if (mode === PetCommandModeEnum.AttackTarget) {
-    target = Store.world?.attackTarget?.netId ?? NO_TARGET;
+    target = Ecs.world?.attackTarget?.netId ?? NO_TARGET;
     if (target === NO_TARGET) {
       Store.addNotification(t('bottomBar.pet.needTarget'), 'error');
       return;

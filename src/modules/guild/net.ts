@@ -3,6 +3,7 @@ import { EventBus } from '@/core/eventBus';
 import { GuildInfoRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
 import { Social } from '../social/social';
 import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { t, type TextKey } from '@/i18n';
 import { cleanName } from '../chat/chat';
 import { playerNameById } from '../_shared/net_helpers';
@@ -14,7 +15,7 @@ import { runInAction } from 'mobx';
  * member in scope loses its mark too, not just the hero.
  */
 function leaveGuild(guildId: number, disbanded: boolean): void {
-  const world = Store.world;
+  const world = Ecs.world;
   if (world) {
     const gone = world.netObjsQuery.entities.filter(
       e => e.guild && (disbanded ? e.guild.id === guildId : e.netId === Store.playerId)
@@ -65,7 +66,7 @@ export function installNet(): void {
 
   EventBus.on('AssignCharacterToGuild', packet => {
     const p = new AssignCharacterToGuildPacket(packet);
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
     const requested = new Set<number>();
     p.getMembers().forEach(member => {
@@ -94,7 +95,7 @@ export function installNet(): void {
 
   EventBus.on('GuildMemberLeftGuild', packet => {
     const p = new GuildMemberLeftGuildPacket(packet);
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
     const maskedId = p.PlayerId & 0x7fff;
     const obj = world.getByNetId(maskedId);

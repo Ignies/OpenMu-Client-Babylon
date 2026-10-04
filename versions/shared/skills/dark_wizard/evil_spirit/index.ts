@@ -6,7 +6,7 @@ import { type SpiritSwarmOptions, type SwarmSpirit } from '@/controllers/fx/spir
 import { type TaperShape } from '@/controllers/fx/joint';
 import { atCaster, facing, perTick, ticks } from '@/controllers/skills/visuals';
 import { effects } from '@/controllers/fx';
-import { storeRef } from '@/app/storeRef';
+import { Ecs } from '@/ecs/current';
 
 /**
  * Evil Spirit's spirits: the original's JOINT_SPIRIT flights (ZzzEffectJoint.cpp:3732-3772) each
@@ -152,7 +152,7 @@ export default defineSkill({
       }
       // The shadow they bring: smoke closing in from the edge of the view, lighter on the caster's
       // own screen than on anyone else's near the cast.
-      const mine = c.caster === storeRef().world?.playerEntity;
+      const mine = c.caster === Ecs.world?.playerEntity;
       effects.spawn('shroud', c.scene, at, {
         seconds,
         fadeTail,

@@ -6,7 +6,7 @@ import { ModelObject } from '../render/modelObject';
 import { createMovableFlare, type MovableFlare } from '../lighting/effectLights';
 import { boneLocalPos } from './core';
 import { TILE_CM } from '../terrain/consts';
-import { Store } from '../../app/store';
+import { Ecs } from '../../ecs/current';
 import type { Sounds } from '../sound/soundsManager';
 import type { Entity, World } from '../../ecs/world';
 import { reportLoadFailure } from '../assets';
@@ -341,7 +341,7 @@ export function boidFactoryFor(spec: BoidSpec, model: string): typeof ModelObjec
     }
 
     #makeEyes(eyes: EyeGlow): void {
-      const scene = Store.world?.scene;
+      const scene = Ecs.world?.scene;
       if (!scene) return;
 
       for (let i = 0; i < 2; i++) {

@@ -1,6 +1,6 @@
 import { MapTileObject } from '@/controllers/terrain/mapTileObject';
 import { ParticleEmitter } from '@/controllers/fx/effectParticles';
-import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import type { Entity, World } from '@/ecs/world';
 import {
   chaosCastleRingDrop,
@@ -55,7 +55,7 @@ export class ChaosCastleRingObject extends MapTileObject {
     super.Update(gameTime);
     if (!this.Ready) return;
 
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
 
     const now = gameTime.TotalGameTime.TotalSeconds;

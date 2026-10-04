@@ -4,7 +4,7 @@ import './style.less';
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
-import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { uiClick } from '@/controllers/sound/sfx';
 import type { WorldMinimap } from '@/controllers/terrain/minimap';
 import type { MinimapMarker } from '@/controllers/terrain/minimapData';
@@ -280,7 +280,7 @@ const SheetView = ({
 
 export const MinimapSheet = observer(() => {
   const open = MuWindows.isOpen('minimap');
-  const world = Store.world;
+  const world = Ecs.world;
   const map = open ? world?.mapIndex : undefined;
   const minimap = useWorldMinimap(map);
   const [zoom, setZoom] = useState(0);

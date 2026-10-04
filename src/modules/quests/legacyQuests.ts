@@ -27,6 +27,7 @@ import { playUiSound } from '../../controllers/sound/sfx';
 import { showObjectEffect } from '../../ecs/systems/objectEffectSystem';
 import { MAX_QUESTS, QuestActKind, type QuestDefinition } from '../../controllers/assets/mu/questFiles';
 import { Store } from '../../app/store';
+import { Ecs } from '../../ecs/current';
 import type { QuestLayer } from './layer';
 import {
   dialogScript,
@@ -709,7 +710,7 @@ function evolveHero(cls: number, step: number): void {
   runInAction(() => {
     Store.playerData.charClass = cls as CharacterClassNumber;
   });
-  const hero = Store.world?.playerEntity;
+  const hero = Ecs.world?.playerEntity;
   if (hero?.charAppearance) {
     hero.charAppearance.charClass = cls as CharacterClassNumber;
     hero.charAppearance.changed = true;
@@ -719,7 +720,7 @@ function evolveHero(cls: number, step: number): void {
 
 EventBus.on('LegacyQuestReward', packet => {
   const p = new LegacyQuestRewardPacket(packet);
-  const world = Store.world;
+  const world = Ecs.world;
   const hero = world?.playerEntity;
   const isHero = !!hero && (p.PlayerId & 0x7fff) === hero.netId;
 

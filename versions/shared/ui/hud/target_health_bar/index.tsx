@@ -1,7 +1,7 @@
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useState } from 'react';
-import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { isNpcOrTrapType } from '@/ecs/systems/attackSystem';
 
 const STEPS = 20;
@@ -32,7 +32,7 @@ type Target = { name: string; steps: number; showBar: boolean };
 const scratch: Target = { name: '', steps: 0, showBar: false };
 
 function readTarget(out: Target): boolean {
-  const world = Store.world;
+  const world = Ecs.world;
   if (!world) return false;
 
   const entity = world.currentPointerTarget ?? world.attackTarget;

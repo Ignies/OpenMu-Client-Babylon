@@ -9,6 +9,7 @@ import { ItemSerializer } from '@/controllers/item_rules';
 import { MonsterActionType, PlayerAction } from '@versions/shared/objects/enum';
 import { PlayerObject, npcClassOf } from '@/controllers/actors/playerObject';
 import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { addNpcToScope, convertDirectionToAngle, isDeadMonster, removeNetObject, resumeWalkIntoScope } from '../_shared/net_helpers';
 import { characterSkinBody } from '@/controllers/actors/transformedBody';
@@ -324,7 +325,7 @@ function applyAppearanceChange(
   slot: number,
   item: Item | null
 ): void {
-  const world = Store.world;
+  const world = Ecs.world;
   if (!world) return;
   const netId = playerId & 0x7fff;
   if (netId === Store.playerId) return;
@@ -373,7 +374,7 @@ export function installNet(): void {
   EventBus.on('AddNpcsToScope', packet => {
     const p = new AddNpcsToScopePacket(packet);
 
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
 
     p.getNPCs().forEach(npc => addNpcToScope(world, npc));
@@ -384,7 +385,7 @@ export function installNet(): void {
   EventBus.on('AddSummonedMonstersToScope', packet => {
     const p = new AddSummonedMonstersToScopePacket(packet);
 
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
 
     p.getSummonedMonsters().forEach(m => {
@@ -400,7 +401,7 @@ export function installNet(): void {
   EventBus.on('SummonHealthUpdate', packet => {
     const p = new SummonHealthUpdatePacket(packet);
 
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
 
     const owner = Store.playerData.name;
@@ -417,7 +418,7 @@ export function installNet(): void {
     const p = new AddCharactersToScopePacket(packet);
     const chars = p.getCharacters();
 
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
 
     chars.forEach(char => {
@@ -436,7 +437,7 @@ export function installNet(): void {
   EventBus.on('AddCharacterToScopeExtended', packet => {
     const p = new AddCharacterToScopeExtendedPacket(packet);
 
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
 
     const data = p.AppearanceAndEffects;
@@ -475,7 +476,7 @@ export function installNet(): void {
   EventBus.on('AddTransformedCharactersToScope', packet => {
     const p = new AddTransformedCharactersToScopePacket(packet);
 
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
 
     for (const char of p.getCharacters()) {
@@ -509,7 +510,7 @@ export function installNet(): void {
       Economy.setShopTitle(maskedId, null);
       Economy.dropBrowsedShop(maskedId);
 
-      const world = Store.world;
+      const world = Ecs.world;
       if (!world) return;
 
       let objEntity = world.getByNetId(maskedId);
@@ -524,7 +525,7 @@ export function installNet(): void {
   EventBus.on('ObjectMoved', packet => {
     const p = new ObjectMovedPacket(packet);
 
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
 
     const maskedId = p.ObjectId & 0x7fff;
@@ -565,7 +566,7 @@ export function installNet(): void {
   EventBus.on('ObjectWalked', packet => {
     const p = new ObjectWalkedPacket(packet);
 
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
 
     const maskedId = p.ObjectId & 0x7fff;

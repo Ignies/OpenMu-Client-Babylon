@@ -6,7 +6,7 @@ import { Quaternion, TransformNode, VertexBuffer, type AbstractMesh, type Animat
 import type { Entity } from '../../ecs/world';
 import { loadGLTF } from '../assets/modelLoader';
 import { PLAY_SPEED_TO_RATIO } from '../anim/playSpeed';
-import { Store } from '../../app/store';
+import { Ecs } from '../../ecs/current';
 import type { TestScene } from '../render/scenes/testScene';
 import { LiveList, additiveMaterial, fxNow, WHITE, type RGB } from './core';
 import { addEffectGlow, releaseEffectGlow } from './glow';
@@ -53,7 +53,7 @@ const SOCKET = Quaternion.FromEulerAngles(Math.PI * 1.5, 0, 0);
 const UPRIGHT = Quaternion.FromEulerAngles(-Math.PI / 2, 0, 0);
 
 export function spawnLinkedModel(scene: Scene, _at: Vector3, opts: LinkedModelOptions): LinkedModelHandle {
-  const world = Store.world;
+  const world = Ecs.world;
   const boneNode = opts.entity.modelObject?.gltf?.skeleton?.bones[opts.bone + 1]?.getTransformNode();
   if (!world || !boneNode) return { ...DEAD_HANDLE, setAlpha() {}, lock() {}, bonePos: () => false };
 

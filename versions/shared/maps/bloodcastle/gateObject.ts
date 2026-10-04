@@ -1,7 +1,7 @@
 import { MapTileObject } from '@/controllers/terrain/mapTileObject';
 import { ParticleEmitter } from '@/controllers/fx/effectParticles';
 import { toRadians } from '@/controllers/assets/download';
-import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import type { Entity, World } from '@/ecs/world';
 import {
   bloodCastleGateDown,
@@ -53,7 +53,7 @@ export class BloodCastleGateObject extends MapTileObject {
 
     if (!this.Ready) return;
 
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
 
     updateBloodCastleGate(world, world.scene.getEngine().getDeltaTime() / 1000);

@@ -6,6 +6,7 @@ import { ItemGroup, angleRotation, itemRestHeight, itemRestPose, itemRestRotatio
 import { ItemSerializer } from '@/controllers/item_rules';
 import { ItemsDatabase, itemBaseName } from '@versions/shared/items/itemsDatabase';
 import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { archangelWeapon, dropModelProxy } from '@/controllers/item_rules';
 import { createAttributeSystem } from '@/core/attributeSystem';
@@ -23,7 +24,7 @@ function spawnMoneyDrop(
   amount: number,
   fresh: boolean
 ) {
-  const world = Store.world;
+  const world = Ecs.world;
   if (!world) return;
   const maskedId = id & 0x7fff;
   removeNetObject(world, maskedId);
@@ -66,7 +67,7 @@ function spawnMoneyDrop(
  * up here.
  */
 function applyItemsDropped(p: ItemsDroppedPacket) {
-  const world = Store.world;
+  const world = Ecs.world;
 
   if (!world) return;
 
@@ -205,7 +206,7 @@ export function installNet(): void {
   });
 
   EventBus.on('ItemDropRemoved', packet => {
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
 
     const p = new ItemDropRemovedPacket(packet);

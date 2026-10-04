@@ -1,6 +1,6 @@
 import { ChangeTerrainAttributesPacket } from '@versions/shared/packets/ServerToClientPackets';
 import { EventBus } from '../../core/eventBus';
-import { Store } from '../../app/store';
+import { Ecs } from '../../ecs/current';
 
 /**
  * `ReceiveSetAttribute` (WSclient.cpp:8320-8345): the server rewrites terrain
@@ -16,7 +16,7 @@ import { Store } from '../../app/store';
  * Imported for its side effect by `loadMapIntoScene`.
  */
 EventBus.on('ChangeTerrainAttributes', packet => {
-  const world = Store.world;
+  const world = Ecs.world;
   if (!world) return;
 
   const p = new ChangeTerrainAttributesPacket(packet);

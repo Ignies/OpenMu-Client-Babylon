@@ -1,5 +1,6 @@
 import { observer } from 'mobx-react-lite';
 import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { With } from 'miniplex';
 import { WorldLabel } from '@/controllers/interface/components/world_label';
@@ -67,7 +68,7 @@ type Point = { x: number; y: number };
 function tooltipAnchor(entity: DropEntity, onLabel: Point | null): Point {
   if (onLabel) return onLabel;
 
-  const scene = Store.world?.scene;
+  const scene = Ecs.world?.scene;
 
   if (scene && (scene.pointerX !== 0 || scene.pointerY !== 0)) {
     return { x: scene.pointerX, y: scene.pointerY };
@@ -103,7 +104,7 @@ const DropLabel = observer(({
     () =>
       onScreenPosition(entity, pos => {
         const onScreen = pos.x * pos.x + pos.y * pos.y >= 0.1;
-        const now = onScreen && Store.world?.currentPointerTarget === entity;
+        const now = onScreen && Ecs.world?.currentPointerTarget === entity;
         if (now !== hoveredRef.current) {
           hoveredRef.current = now;
           setHovered(now);
@@ -154,7 +155,7 @@ const DropLabel = observer(({
         onPointerDown={ev => {
           if (ev.button !== 0) return;
           ev.stopPropagation();
-          const world = Store.world;
+          const world = Ecs.world;
           if (!world || Store.pickedItem || Store.pendingItemMove) return;
           world.pickupTarget = entity;
         }}
@@ -180,7 +181,7 @@ const DropLabel = observer(({
  * the original never draws a character's name permanently.
  */
 export const WorldObjects = observer(() => {
-  const world = Store.world!;
+  const world = Ecs.world!;
 
   const { refresh } = useRenderId();
 

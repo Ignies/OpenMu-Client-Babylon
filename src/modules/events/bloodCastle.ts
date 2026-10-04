@@ -4,6 +4,7 @@ import { BaseClass, getBaseClass } from '../hero/characterStats';
 import type { Item } from '../../ecs/world';
 import { EventBus } from '../../core/eventBus';
 import { Store } from '../../app/store';
+import { Ecs } from '../../ecs/current';
 import {
   BloodCastleEnterRequestPacket,
   MiniGameOpeningStateRequestPacket,
@@ -366,7 +367,7 @@ function archangelAnswer(): number {
  */
 function useNpc(npc: { npcType: number }): boolean {
   if (npc.npcType !== ARCHANGEL_NPC) return false;
-  const map = Store.world?.mapIndex;
+  const map = Ecs.world?.mapIndex;
   if (map === undefined || !MAPS.has(map)) return false;
   sayArchangelLine(archangelAnswer());
   return false;

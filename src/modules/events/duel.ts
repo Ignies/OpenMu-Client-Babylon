@@ -4,6 +4,7 @@ import { cleanName } from '../chat/chat';
 import { EventBus } from '../../core/eventBus';
 import { playUiSound } from '../../controllers/sound/sfx';
 import { Store } from '../../app/store';
+import { Ecs } from '../../ecs/current';
 import { t } from '../../i18n';
 import {
   DuelChannelJoinRequestPacket,
@@ -237,7 +238,7 @@ function reset(): void {
 const ID_MASK = 0x7fff;
 
 function heroNetId(): number | null {
-  return Store.world?.playerEntity?.netId ?? null;
+  return Ecs.world?.playerEntity?.netId ?? null;
 }
 
 /** `ReceiveDuelRequest`: the challenge prompt. */

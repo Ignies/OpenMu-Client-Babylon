@@ -3,6 +3,7 @@ import { useRef, type CSSProperties } from 'react';
 import { observer } from 'mobx-react-lite';
 import { t } from '@/i18n';
 import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import {
   Band,
   instrumentById,
@@ -71,13 +72,13 @@ function mmss(ms: number): string {
 }
 
 function nameOf(netId: number): string {
-  return Store.world?.getByNetId(netId)?.objectNameInWorld ?? `#${netId}`;
+  return Ecs.world?.getByNetId(netId)?.objectNameInWorld ?? `#${netId}`;
 }
 
 type Nearby = { netId: number; name: string; instrument: string };
 
 function nearbyPerformers(): Nearby[] {
-  const world = Store.world;
+  const world = Ecs.world;
   const hero = world?.playerEntity;
   if (!world || !hero) return [];
   const out: Nearby[] = [];

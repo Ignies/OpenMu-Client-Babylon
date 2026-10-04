@@ -35,6 +35,7 @@ import type { ENUM_WORLD } from '../../core/types';
 import { EventBus } from '../../core/eventBus';
 import { playUiSound } from '../../controllers/sound/sfx';
 import { Store } from '../../app/store';
+import { Ecs } from '../../ecs/current';
 import type { QuestLayer } from './layer';
 import { questDataReady, questProgressEntry, questProgressKeys, questWordLines, questWords } from './questData';
 import { npcDialogueOpen } from './npcDialogue';
@@ -693,7 +694,7 @@ reaction(
 EventBus.on('ObjectGotKilled', packet => {
   if (!GameOptions.questTracker && !state.myQuestOpen) return;
   const p = new ObjectGotKilledPacket(packet);
-  const world = Store.world;
+  const world = Ecs.world;
   const hero = world?.playerEntity;
   if (!world || !hero || (p.KillerId & 0x7fff) !== hero.netId) return;
 

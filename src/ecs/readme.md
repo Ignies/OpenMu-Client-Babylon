@@ -12,6 +12,8 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
   that carry an entity (`objectDamaged`, `objectEffect`) into `EventMap` (`core/eventBus/events.ts`).
 - `createWorld(scene)` (`createWorld.ts`): builds the world and returns `updateSystems(dt)`.
   Called once from `app/boot.tsx`.
+- `Ecs.world` (`current.ts`): the live world, null until boot sets it. Observable; imports only
+  mobx, so controllers, content and windows read it without reaching the app.
 - A few systems export helpers other code reads (`isHeroUnderRoof`, `mayBeCeilingPiece` in `roofDetection.ts`,
   `isTeleporting` / `teleportMountAlpha` in `teleportSystem.ts`).
 

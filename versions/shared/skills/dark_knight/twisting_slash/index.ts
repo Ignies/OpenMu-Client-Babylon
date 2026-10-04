@@ -9,7 +9,7 @@ import { effects } from '@/controllers/fx';
 import { inHellas } from '@/controllers/actors/locomotion';
 import { itemObjectAttribute } from '@/controllers/actors/itemObjectAttribute';
 import { lighting } from '@/controllers/lighting';
-import { storeRef } from '@/app/storeRef';
+import { Ecs } from '@/ecs/current';
 
 import { A } from '@/controllers/combat/recipes';
 
@@ -109,7 +109,7 @@ function wheelCopy(c: SkillContext, skill: number, yaw0: number, radius: number,
   };
   const seconds = ticks(25);
   const start = ground(new Vector3());
-  const hellas = inHellas(storeRef().world?.mapIndex ?? -1);
+  const hellas = inHellas(Ecs.world?.mapIndex ?? -1);
   if (weapon) {
     effects.spawn('model', c.scene, start, {
       model: weapon.file,

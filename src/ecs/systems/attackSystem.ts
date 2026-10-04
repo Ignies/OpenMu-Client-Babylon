@@ -1,5 +1,6 @@
 import type { Entity, ISystemFactory } from '../world';
 import { Store } from '../../app/store';
+import { Ecs } from '../current';
 import { applyPlayerActionSpeed, serverMinAttackInterval } from '../../controllers/anim/playSpeed';
 import { HitRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
 import {
@@ -46,7 +47,7 @@ export function truncatePathForAttack(
     path,
     ~~target.transform!.pos.x,
     ~~target.transform!.pos.z,
-    combat.attackRange(Store.world?.playerEntity?.charAppearance)
+    combat.attackRange(Ecs.world?.playerEntity?.charAppearance)
   );
 }
 

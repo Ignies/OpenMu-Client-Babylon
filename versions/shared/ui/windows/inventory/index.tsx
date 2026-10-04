@@ -4,6 +4,7 @@ import { t } from '@/i18n';
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { Economy } from '@/modules/economy/economy';
 import { events } from '@/modules/events';
 import { ItemIcon } from '@/controllers/interface/components/item_icon';
@@ -303,7 +304,7 @@ export const Inventory = observer(() => {
     // NewUIMyInventory.cpp:622: Ctrl+Q/W/E/R over a potion binds that bar slot.
     const bind = ITEM_HOT_KEYS.indexOf(key);
     if (bind >= 0 && MuWindows.isOpen('inventory') && hover) {
-      const keys = Store.world?.keyboardInput.pressedKeys;
+      const keys = Ecs.world?.keyboardInput.pressedKeys;
       const ctrl = !!keys && (keys.has('ControlLeft') || keys.has('ControlRight'));
       if (ctrl && canRegisterItemHotkey(hover.item)) {
         Store.setItemHotkey(bind, hover.item);

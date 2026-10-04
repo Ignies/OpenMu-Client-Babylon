@@ -20,6 +20,7 @@ import {
 } from '@versions/shared/packets/ClientToServerPackets';
 import { EventBus } from '../../core/eventBus';
 import { Store } from '../../app/store';
+import { Ecs } from '../../ecs/current';
 import type { QuestLayer } from './layer';
 import { LegacyQuestState, legacyQuestState } from './legacyQuests';
 
@@ -95,7 +96,7 @@ function hide(): void {
 }
 
 function entryFor(npcType: number): BalgassEntryKind | null {
-  const map = Store.world?.mapIndex;
+  const map = Ecs.world?.mapIndex;
   if (npcType === WEREWOLF_NPC && map === WEREWOLF_MAP) return 'werewolf';
   if (npcType === GATEKEEPER_NPC && map === GATEKEEPER_MAP) return 'gatekeeper';
   return null;
@@ -171,7 +172,7 @@ function stageDevBox(): void {
       devUnlocked = unlock === '1';
     }
   }
-  if (devKind && !state.kind && Store.world?.playerEntity) show(devKind);
+  if (devKind && !state.kind && Ecs.world?.playerEntity) show(devKind);
 }
 
 function update(_map: ENUM_WORLD, _dt: number): void {

@@ -4,6 +4,7 @@ import './style.less';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
 import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { MAX_PARTY_MEMBERS, Social } from '@/modules/social/social';
 import { Economy } from '@/modules/economy/economy';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
@@ -62,7 +63,7 @@ const X_SIZE = 10;
  * if they are in sight.
  */
 function castAllyOn(name: string): void {
-  const world = Store.world;
+  const world = Ecs.world;
   if (!world || Store.currentSkill !== TELEPORT_ALLY) return;
   const target = world.netObjsQuery.entities.find(
     e => !e.localPlayer && e.playerAnimation && e.objectNameInWorld?.trimEnd() === name.trimEnd()
@@ -212,7 +213,7 @@ export const PartyWindow = observer(() => {
     });
 
   useEventBus('keyPressed', key => {
-    if (isKey(HOT_KEY, key) && Store.world?.playerEntity) toggle();
+    if (isKey(HOT_KEY, key) && Ecs.world?.playerEntity) toggle();
   });
 
   if (!Social.partyWindowEnabled) return null;

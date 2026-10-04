@@ -12,6 +12,7 @@ import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
 import { Social } from '@/modules/social/social';
 import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { playUiSound, uiClick } from '@/controllers/sound/sfx';
 import { MuButton } from '@/controllers/interface/components/mu_button';
@@ -1123,7 +1124,7 @@ export const ChatWindow = observer(() => {
   // bare Enter.
   useEventBus('keyPressed', key => {
     if (isTypingInField()) return;
-    if (!Store.world?.playerEntity) return;
+    if (!Ecs.world?.playerEntity) return;
     if (Store.msgWin) return;
 
     // The reply key: the box opens already addressed to whoever whispered

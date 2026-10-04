@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { t } from '@/i18n';
 import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { Social } from '@/modules/social/social';
 import { skills } from '@/modules/skills';
 import { onCooldownTick } from '@/modules/skills/cooldowns';
@@ -35,7 +36,7 @@ const SLOT_HEIGHT = BOX_HEIGHT * SLOT_SCALE;
  * (`playerControllerSystem`) - the touch stand-in for letting the button go.
  */
 function castSkill(number: number): void {
-  const world = Store.world;
+  const world = Ecs.world;
   const hero = world?.playerEntity;
   if (!world || !hero || hero.dying) return;
 
@@ -97,7 +98,7 @@ const TargetLabel = () => {
     let shown = '';
     const poll = () => {
       frame = requestAnimationFrame(poll);
-      const world = Store.world;
+      const world = Ecs.world;
       const target = world?.attackTarget;
       const next =
         target && !target.dying && world && isAttackableEntity(world, target)

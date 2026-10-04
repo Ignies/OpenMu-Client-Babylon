@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { INVITE_RANGE_TILES } from '@/modules/social/social';
 import type { GuildMemberRoleEnum } from '@versions/shared/packets/ServerToClientPackets';
 
@@ -17,7 +17,7 @@ type NearbyPlayer = {
  * Without a command window we offer the same set as a list.
  */
 function nearbyPlayers(range = INVITE_RANGE_TILES): NearbyPlayer[] {
-  const world = Store.world;
+  const world = Ecs.world;
   const hero = world?.playerEntity;
   if (!world || !hero) return [];
 

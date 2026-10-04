@@ -1,6 +1,6 @@
 import { registerDebugModule, type DebugRow } from '@/modules/gm/debugMenu';
 import { ENUM_WORLD } from '@/core/types';
-import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 
 /**
  * Info: read-only counters off the live scene and engine - the perfOverlay's
@@ -14,9 +14,9 @@ function row(label: string, value: () => string): DebugRow {
 }
 
 /** A value off the scene, '-' while no world is loaded. */
-function scene(read: (scene: NonNullable<typeof Store.world>['scene']) => string): () => string {
+function scene(read: (scene: NonNullable<typeof Ecs.world>['scene']) => string): () => string {
   return () => {
-    const world = Store.world;
+    const world = Ecs.world;
     return world ? read(world.scene) : '-';
   };
 }
@@ -57,11 +57,11 @@ registerDebugModule({
     ),
     { kind: 'section', id: 'world', label: 'World' },
     row('Map', () => {
-      const world = Store.world?.mapIndex;
+      const world = Ecs.world?.mapIndex;
       return world === undefined ? '-' : `${ENUM_WORLD[world]} (${world})`;
     }),
     row('Hero tile', () => {
-      const pos = Store.world?.playerEntity?.transform?.pos;
+      const pos = Ecs.world?.playerEntity?.transform?.pos;
       return pos ? `${pos.x.toFixed(1)}, ${pos.z.toFixed(1)}` : '-';
     }),
   ],

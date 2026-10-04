@@ -8,6 +8,7 @@ import { MonsterActionType, PlayerAction, ServerPlayerActionType } from '@versio
 import { ObjectAnimationPacket, ObjectGotKilledPacket, ObjectHitExtendedPacket, ObjectHitPacket, RageAttackPacket, RageAttackRangeResponsePacket, SkillAnimationPacket } from '@versions/shared/packets/ServerToClientPackets';
 import { ServerToClientActionMap, resolveGenderedAction } from '@/controllers/anim/playerActionMapper';
 import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { attackInputOf, attackPoseOf, convertDirectionToAngle, isDeadMonster, monsterNumberOf, playCastAnimation, playTrapSounds, setMonsterClip } from '../_shared/net_helpers';
 import { chooseAttackAction, isWeaponItem } from '@/controllers/actors/weaponClass';
 import { combat } from '@/controllers/combat';
@@ -80,7 +81,7 @@ function stopNetObjectAtTarget(obj: Entity) {
 
   transform.pos.x = targetX;
   transform.pos.z = targetY;
-  transform.pos.y = Store.world?.getTerrainHeight(targetX, targetY) ?? 0;
+  transform.pos.y = Ecs.world?.getTerrainHeight(targetX, targetY) ?? 0;
 
   if (playerMoveTo) playerMoveTo.handled = true;
 
@@ -170,7 +171,7 @@ const RAGE_RANGE_TARGETS_OFFSET = 6;
 let lastAttacker: Entity | null = null;
 
 function applyObjectHit(p: ObjectHitView) {
-  const world = Store.world;
+  const world = Ecs.world;
   if (!world) return;
 
   const maskedId = p.ObjectId & 0x7fff;
@@ -281,7 +282,7 @@ export function installNet(): void {
     const p = new ObjectAnimationPacket(packet);
 
     const maskedId = p.ObjectId & 0x7fff;
-    const world = Store.world;
+    const world = Ecs.world;
     const obj = world?.getByNetId(maskedId);
 
     if (!world || !obj) return;
@@ -378,7 +379,7 @@ export function installNet(): void {
 
   EventBus.on('SkillAnimation', packet => {
     const p = new SkillAnimationPacket(packet);
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
     const casterId = p.PlayerId & 0x7fff;
     const targetId = p.TargetId & 0x7fff;
@@ -407,7 +408,7 @@ export function installNet(): void {
   EventBus.on('ObjectGotKilled', packet => {
     const p = new ObjectGotKilledPacket(packet);
 
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
 
     const killedId = p.KilledId & 0x7fff;
@@ -478,7 +479,7 @@ export function installNet(): void {
   EventBus.on('RageAttack', packet => {
     if (packet.byteLength < RageAttackPacket.Length!) return;
     const p = new RageAttackPacket(packet);
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
     const caster = world.getByNetId(p.SourceId & 0x7fff);
     if (!caster) return;

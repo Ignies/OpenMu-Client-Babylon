@@ -4,6 +4,7 @@ import { CREATE_MESSAGES } from '@/modules/character_select/messages';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useRef } from 'react';
 import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { isReservedName } from '@/modules/servers/reservedNames';
 import { playUiSound } from '@/controllers/sound/sfx';
 import { MuButton } from '@/controllers/interface/components/mu_button';
@@ -104,7 +105,7 @@ export const CharMakeWin = observer(({ onClose }: CharMakeWinProps) => {
   const preview = useRef<ClassPreview | null>(null);
 
   useEffect(() => {
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
 
     const instance = createClassPreview(world, () =>

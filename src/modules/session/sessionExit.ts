@@ -2,6 +2,7 @@ import { MuWindows } from '@/controllers/interface/windowManager';
 import { makeAutoObservable, runInAction } from 'mobx';
 import { t } from '../../i18n';
 import { Store, UIState } from '../../app/store';
+import { Ecs } from '../../ecs/current';
 import { Economy } from '../economy/economy';
 import { Social } from '../social/social';
 import { Messenger } from '../friends/messenger';
@@ -130,7 +131,7 @@ export const SessionExit = new (class _SessionExit {
     quests.closeAll();
     // The character is out of the world on all three of these; the backdrop
     // behind the pre-game screens is not a map it stands on.
-    Store.world?.removeHero();
+    Ecs.world?.removeHero();
     runInAction(() => {
       MuWindows.setOpen('options', false);
       // The sheet is the world's; left open, it holds Escape on the screens

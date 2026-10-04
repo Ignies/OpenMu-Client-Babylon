@@ -6,7 +6,7 @@
 import { Mesh, Texture, VertexBuffer, VertexData, type Scene, type StandardMaterial, type Vector3 } from '../render/babylon/exports';
 import type { TestScene } from '../render/scenes/testScene';
 import { TerrainDecal } from './moveTargetEffect';
-import { Store } from '../../app/store';
+import { Ecs } from '../../ecs/current';
 import {
   EFFECT_RENDERING_GROUP,
   LiveList,
@@ -549,7 +549,7 @@ const decalPools = new Map<string, TerrainDecal[]>();
 let decalSeq = 0;
 
 function acquireDecal(texture: string): TerrainDecal | null {
-  const world = Store.world;
+  const world = Ecs.world;
   if (!world) return null;
   return decalPools.get(texture)?.pop() ?? new TerrainDecal(world, `fxTickedDecal${decalSeq++}`, texture, DECAL_MAX_SCALE);
 }
@@ -630,7 +630,7 @@ class Fx implements TickedFx {
   }
 
   decal(texture: string, colour: RGB, x: number, z: number, size: number, rotationDeg: number, lum = 1): void {
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world || size <= 0) return;
     const i = this.decalsUsed;
     let d: TerrainDecal | undefined = this.decals[i];

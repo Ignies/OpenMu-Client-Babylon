@@ -8,7 +8,7 @@ import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
 import { randInt } from '../../_shared';
 import { playCombat } from '@/controllers/sound/combat';
-import { storeRef } from '@/app/storeRef';
+import { Ecs } from '@/ecs/current';
 
 import { SUMMON_CLIPS } from '../_shared';
 
@@ -145,7 +145,7 @@ function sahamuttBlastGrace(c: SkillContext, at: Vector3, tier: number): void {
 const sahamuttOf = (graded: boolean): Step => (at, c) => {
   if (entityGone(c.caster)) return;
   const tier = bookTier(c.caster);
-  const world = storeRef().world;
+  const world = Ecs.world;
   const start = entityPos(c.caster, 0, new Vector3());
   start.x += Math.random() < 0.5 ? cm(randInt(300) + 150) : -cm(randInt(250) + 150);
   start.z += Math.random() < 0.5 ? cm(randInt(300) + 150) : -cm(randInt(250) + 150);

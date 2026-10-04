@@ -3,6 +3,7 @@ import './style.less';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { i18n, t, type TextKey } from '@/i18n';
 import {
   displayAddress,
@@ -134,7 +135,7 @@ function backgroundLoad(backdrop: PregameBackdrop | null): {
 
   const loginReady =
     !loading &&
-    (backdrop.kind !== 'world' || Store.world?.mapIndex === backdrop.login);
+    (backdrop.kind !== 'world' || Ecs.world?.mapIndex === backdrop.login);
   const login = loginReady ? 1 : loading ? loaded : 0;
 
   // A set-piece backdrop has no second world to warm.

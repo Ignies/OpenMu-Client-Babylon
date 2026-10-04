@@ -5,6 +5,7 @@ import './style.less';
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { Social } from '@/modules/social/social';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { useWindowStackEntry } from '@/controllers/interface/components/mu_window/useWindowChrome';
@@ -190,7 +191,7 @@ export const EmoteMenu = observer(() => {
   useEventBus('keyPressed', key => {
     if (isKey(HOT_KEY, key)) {
       if (isTypingInField()) return;
-      if (!Store.world?.playerEntity) return;
+      if (!Ecs.world?.playerEntity) return;
       MuWindows.setOpen('emote_menu', !MuWindows.isOpen('emote_menu'));
       playUiSound(MuWindows.isOpen('emote_menu') ? 'window' : 'click');
     }
@@ -207,7 +208,7 @@ export const EmoteMenu = observer(() => {
 
   if (!open) return null;
 
-  const hero = Store.world?.playerEntity;
+  const hero = Ecs.world?.playerEntity;
   const velocity = hero?.movement?.velocity;
   const heroBusy =
     !hero ||
@@ -219,7 +220,7 @@ export const EmoteMenu = observer(() => {
   };
 
   const pick = (entry: RadialEntry) => {
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
 
     if (entry.kind === 'emoji') {

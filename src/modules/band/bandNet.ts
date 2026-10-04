@@ -1,5 +1,6 @@
 import { EventBus } from '../../core/eventBus';
 import { Store } from '../../app/store';
+import { Ecs } from '../../ecs/current';
 import { Social } from '../social/social';
 import { t, type TextKey } from '../../i18n';
 import {
@@ -64,7 +65,7 @@ const REFUSE_TEXT: Partial<Record<number, TextKey>> = {
 let installed = false;
 
 function nameOf(netId: number): string {
-  return Store.world?.getByNetId(netId)?.objectNameInWorld ?? `#${netId}`;
+  return Ecs.world?.getByNetId(netId)?.objectNameInWorld ?? `#${netId}`;
 }
 
 export function installBandNet(): void {
@@ -149,7 +150,7 @@ export function installBandNet(): void {
       return;
     }
 
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
 
     switch (msg.sub) {

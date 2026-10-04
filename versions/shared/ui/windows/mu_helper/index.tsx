@@ -4,6 +4,7 @@ import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
 import { t } from '@/i18n';
 import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { gameVersion } from '@/version';
 import { isKey } from '@/controllers/interface/keyBindings';
 import { BaseClass, getBaseClass } from '@/modules/hero/characterStats';
@@ -660,7 +661,7 @@ export const MuHelperWindow = observer(() => {
 
   useEventBus('keyPressed', key => {
     if (!gameVersion.features.muHelper) return;
-    if (isKey('muHelperConfig', key) && Store.world?.playerEntity) {
+    if (isKey('muHelperConfig', key) && Ecs.world?.playerEntity) {
       toggleMuHelperWindow();
     }
   });

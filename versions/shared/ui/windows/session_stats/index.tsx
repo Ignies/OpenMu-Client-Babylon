@@ -3,7 +3,7 @@ import './style.less';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useState } from 'react';
 import { runInAction } from 'mobx';
-import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { SessionStats } from '@/modules/session/sessionStats';
 import { formatDuration } from '@/controllers/interface/hudFormat';
 import { isKey } from '@/controllers/interface/keyBindings';
@@ -62,7 +62,7 @@ export const SessionStatsWindow = observer(() => {
   });
 
   useEventBus('keyPressed', key => {
-    if (!Store.world?.playerEntity) return;
+    if (!Ecs.world?.playerEntity) return;
     if (isKey(HOT_KEY, key)) {
       runInAction(() => (MuWindows.setOpen('session_stats', !MuWindows.isOpen('session_stats'))));
     }

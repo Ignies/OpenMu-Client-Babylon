@@ -1,6 +1,7 @@
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { events } from '@/modules/events';
 import {
   bloodCastleImminent,
@@ -564,7 +565,7 @@ const EventTimer = observer(() => {
   // on the castle map (B11 - the figure never mounted live).
   const bc = bloodCastleTimer();
   const cc = chaosCastleTimer();
-  const map = Store.world?.mapIndex;
+  const map = Ecs.world?.mapIndex;
   const stage = useStage();
   if (map === undefined) return null;
 
@@ -641,7 +642,7 @@ const BloodCastleResult = observer(() => {
   if (!score) return null;
 
   // OpenMU ends a Chaos Castle with this same packet (B16): word it for the map.
-  const cc = Store.world !== null && inChaosCastle(Store.world.mapIndex);
+  const cc = Ecs.world !== null && inChaosCastle(Ecs.world.mapIndex);
   const lines: string[] = score.success
     ? [EVENT_TEXT.bcCongrats, cc ? EVENT_TEXT.ccQuestDone : EVENT_TEXT.bcQuestDone]
     : [EVENT_TEXT.bcUnfortunately, cc ? EVENT_TEXT.ccQuestFailed : EVENT_TEXT.bcQuestFailed];
@@ -742,7 +743,7 @@ const CrywolfBar = observer(() => {
   const hud = crywolfHud();
   const result = crywolfResult();
   const page = crywolfNoticePage();
-  const map = Store.world?.mapIndex;
+  const map = Ecs.world?.mapIndex;
   const stage = useStage();
   if (map === undefined || !crywolfBarVisible(map)) return null;
 

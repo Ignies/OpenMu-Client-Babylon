@@ -5,7 +5,7 @@ import { GameOptions, setGameOption } from '@/controllers/settings';
 import { formatRoundTrip } from '@/controllers/interface/hudFormat';
 import { isKey } from '@/controllers/interface/keyBindings';
 import { NetStats } from '@/controllers/net/roundTrip';
-import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { MuText } from '@/controllers/interface/components/mu_text';
 import { useUiStageScale } from '@/controllers/interface/components/ui_stage';
@@ -40,7 +40,7 @@ type Reading = { fps: number; frameMs: number; roundTripMs: number | null };
 const EMPTY: Reading = { fps: 0, frameMs: 0, roundTripMs: null };
 
 function read(): Reading {
-  const engine = Store.world?.scene.getEngine();
+  const engine = Ecs.world?.scene.getEngine();
   if (!engine) return { ...EMPTY, roundTripMs: NetStats.roundTripMs };
 
   return {
@@ -72,7 +72,7 @@ export const PerfReadout = observer(() => {
   const [reading, setReading] = useState<Reading>(EMPTY);
 
   useEventBus('keyPressed', key => {
-    if (!Store.world?.playerEntity) return;
+    if (!Ecs.world?.playerEntity) return;
     if (isKey(HOT_KEY, key)) {
       setGameOption('performanceReadout', !GameOptions.performanceReadout);
     }

@@ -63,8 +63,8 @@ shared pools, textures and particle recipes other folders reuse.
 
 ## Depends on / used by
 - uses: `render`, `assets`, `lighting`, `sound`, `terrain`, `weather`, `maps`, `item_fx`, `anim`,
-  `net/protocols/pingProtocol`, `core`, `ecs/world` (types), `@versions/shared/objects/enum`. Old
-  exceptions (`tools/checks/baselines/deps.json`): `app/store.ts` (15 files). Reads `settings` (`GameOptions`).
+  `net/protocols/pingProtocol`, `core`, `ecs/world` (types), `ecs/current` (the live world),
+  `@versions/shared/objects/enum`. Reads `settings` (`GameOptions`).
 - used by: skill files (`versions/shared/skills/`) and `controllers/skills/visuals.ts`; map,
   monster, npc and item content; most ECS systems; `actors`, `weather`, `lighting`, `net`,
   `item_fx`, `maps`, `terrain`; `modules/events`, `modules/combat`; `app/logic.ts`,

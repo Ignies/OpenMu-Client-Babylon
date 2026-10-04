@@ -11,7 +11,7 @@ import { FIRE_TRAIL, MODEL, RGBS } from '../../controllers/fx/recipes';
 import { lighting } from '../../controllers/lighting';
 import { ember } from '../../controllers/lighting/recipes';
 import { playSfx } from '../../controllers/sound/sfx';
-import { Store } from '../../app/store';
+import { Ecs } from '../../ecs/current';
 import type { EventLayer } from './layer';
 
 /**
@@ -87,7 +87,7 @@ const state = observable(
 export function invasionEvent(): number {
   if (!state.event) return 0;
   if (state.map < 0) return state.event;
-  return Store.world?.mapIndex === state.map ? state.event : 0;
+  return Ecs.world?.mapIndex === state.map ? state.event : 0;
 }
 
 /** MoveBoids' meteor pass, one roll per frame. */
@@ -100,7 +100,7 @@ function update(_map: ENUM_WORLD, dt: number): void {
   lighting.omen(event ? 'invasion' : null);
 
   if (!event) return;
-  const world = Store.world;
+  const world = Ecs.world;
   const hero = world?.playerEntity;
   if (!world || !hero) return;
   const pos = hero.transform.pos;
@@ -135,7 +135,7 @@ EventBus.on('MapEventState', packet => {
     // `ReceiveTeleport` clears `EnableEvent` on every warp (WSclient.cpp:1919)
     // and the server announces it again on arrival; the map it was announced
     // for is the same rule without the round trip.
-    state.map = Store.world?.mapIndex ?? -1;
+    state.map = Ecs.world?.mapIndex ?? -1;
   });
 });
 

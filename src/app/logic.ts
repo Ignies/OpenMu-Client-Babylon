@@ -95,6 +95,7 @@ import { summonDisplayName } from '../modules/_shared/net_helpers';
 import { PingPacket } from '@versions/shared/packets/ClientToServerPackets';
 
 import { Store, UIState } from './store';
+import { Ecs } from '../ecs/current';
 
 
 
@@ -116,8 +117,8 @@ export { spawnPlayer } from '../modules/scope/net';
  * change - has to walk them again.
  */
 onNpcNamesChanged(() => {
-  // The table can land while store.ts is still loading (a test importing this first): no world yet.
-  const world = Store?.world;
+  // The table can land before boot builds the world: nothing to rename yet.
+  const world = Ecs.world;
   if (!world) return;
 
   for (const e of world.with('npcType', 'objectNameInWorld')) {

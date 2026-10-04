@@ -2,6 +2,7 @@ import { observable, runInAction } from 'mobx';
 import { ENUM_WORLD } from '../../core/types';
 import { EventBus } from '../../core/eventBus';
 import { Store } from '../../app/store';
+import { Ecs } from '../../ecs/current';
 import {
   CrywolfContractRequestPacket,
   CrywolfInfoRequestPacket,
@@ -122,7 +123,7 @@ export function crywolfNoticePage(): number {
 /** `SendCrywolfContractRequest`: talk to the wolf statue during READY. */
 function useNpc(npc: { netId: number; npcType: number }): boolean {
   if (npc.npcType !== STATUE_NPC) return false;
-  if (Store.world === null || !MAPS.has(Store.world.mapIndex)) return false;
+  if (Ecs.world === null || !MAPS.has(Ecs.world.mapIndex)) return false;
 
   if (state.state === CrywolfState.Ready && !Store.isOffline) {
     const packet = CrywolfContractRequestPacket.createPacket();

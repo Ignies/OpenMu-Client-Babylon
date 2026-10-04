@@ -4,6 +4,7 @@ import { devQueryNumbers } from '../../core/devSeams';
 import { serverNow } from '../../controllers/net/serverTime';
 import { MiniGameOpeningStateRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
 import { Store, UIState } from '../../app/store';
+import { Ecs } from '../../ecs/current';
 import type { EventLayer } from './layer';
 import { OPENING_STATE_GAME } from './recipes';
 import {
@@ -218,7 +219,7 @@ function pollable(): boolean {
     GameOptions.eventTimers &&
     !Store.isOffline &&
     Store.uiState === UIState.World &&
-    Store.world !== null
+    Ecs.world !== null
   );
 }
 

@@ -4,6 +4,7 @@ import { ENUM_WORLD } from '../../core/types';
 import { EventBus } from '../../core/eventBus';
 import { playSfx } from '../../controllers/sound/sfx';
 import { Store } from '../../app/store';
+import { Ecs } from '../../ecs/current';
 import { effects } from '../../controllers/fx';
 import { MODEL } from '../../controllers/fx/recipes';
 import {
@@ -419,7 +420,7 @@ EventBus.on('KanturuStateChange', packet => {
 
   // `CheckSuccessBattle` (GM_Kanturu_3rd.cpp:59-89): the barrier coming down
   // is heard once, inside the tower.
-  if (Store.world?.mapIndex === EVENT_MAP) {
+  if (Ecs.world?.mapIndex === EVENT_MAP) {
     const open =
       next === KanturuState.Tower &&
       (detail === TOWER.revitalization || detail === TOWER.notify);
@@ -433,7 +434,7 @@ EventBus.on('KanturuStateChange', packet => {
     if (phase !== lastPhase) {
       lastPhase = phase;
       cue = directionCue(next, detail);
-      const pos = Store.world?.playerEntity?.transform?.pos;
+      const pos = Ecs.world?.playerEntity?.transform?.pos;
       if (cue) {
         const tiles = pos ? Math.hypot(pos.x - cue.x, pos.z - cue.y) : 0;
         const frames = Math.ceil(tiles) + DIRECTION_FRAMES;
@@ -528,7 +529,7 @@ function pick<T>(list: readonly T[]): T {
 
 /** The chips thrown up around the hero. */
 function mayaStorm(): void {
-  const world = Store.world;
+  const world = Ecs.world;
   const pos = world?.playerEntity?.transform?.pos;
   if (!world || !pos) return;
   // `SOUND_KANTURU_3RD_MAYA_STORM` (GM_Kanturu_3rd.cpp:1541), unpositioned.
@@ -550,7 +551,7 @@ function mayaStorm(): void {
 
 /** One fall of the stone rain. */
 function mayaRain(): void {
-  const world = Store.world;
+  const world = Ecs.world;
   const pos = world?.playerEntity?.transform?.pos;
   if (!world || !pos) return;
   for (let i = 0; i < RAIN_COUNT; i++) {

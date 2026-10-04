@@ -12,6 +12,7 @@ import { QuickItemActions } from '../inventory/quickItemActions';
 import { SlideHelp } from '@/controllers/interface/slideHelp';
 import { Social } from '../social/social';
 import { Store, UIState } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { TELEPORT } from '../skills/skillCasting';
 import { addNpcToScope, applyObjectEffect, convertDirectionToAngle } from '../_shared/net_helpers';
 import { cancelTeleport, endTeleport } from '@/ecs/systems/teleportSystem';
@@ -65,7 +66,7 @@ export function installNet(): void {
     const p = new MapChangedPacket(packet);
     const pos = { x: p.PositionX, y: p.PositionY };
     const verdict = teleportGate.onMapChanged(p.IsMapChange, pos.x, pos.y, performance.now() / 1000);
-    const playerEntity = Store.world?.playerEntity;
+    const playerEntity = Ecs.world?.playerEntity;
 
     // The packet's byte 9 is the arrival facing (`gate.angle`, the exit gate's
     // `Rotation` column, 0-7 × 45°); the generated class has no accessor for it.
@@ -99,7 +100,7 @@ export function installNet(): void {
 
     if (!playerEntity) return;
 
-    const world = Store.world!;
+    const world = Ecs.world!;
     const playerPos = playerEntity.transform.pos;
     const onSquare = Math.floor(playerPos.x) === pos.x && Math.floor(playerPos.z) === pos.y;
 
@@ -135,7 +136,7 @@ export function installNet(): void {
       holdForWarpScope();
     }
 
-    const world = Store.world;
+    const world = Ecs.world;
     if (!world) return;
 
     for (const e of world.netObjsQuery.entities) {
@@ -157,7 +158,7 @@ export function installNet(): void {
     if (!Store.isOffline) return;
 
     const spec = devQuery('npcs');
-    const world = Store.world;
+    const world = Ecs.world;
 
     if (!spec || !world) return;
 
@@ -192,7 +193,7 @@ export function installNet(): void {
     if (!Store.isOffline) return;
 
     const spec = devQuery('buffs');
-    const hero = Store.world?.playerEntity;
+    const hero = Ecs.world?.playerEntity;
 
     if (!spec || !hero) return;
 

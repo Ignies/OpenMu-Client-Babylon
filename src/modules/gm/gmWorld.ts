@@ -1,4 +1,5 @@
 import { Store } from '../../app/store';
+import { Ecs } from '../../ecs/current';
 import { nearbyOf } from './gmNearby';
 
 export { RADAR_RANGE, type Nearby, type NearbyKind } from './gmNearby';
@@ -42,7 +43,7 @@ export type WorldView = {
 const EMPTY: WorldView = { hero: null, nearby: [], targetNetId: null };
 
 export function worldView(): WorldView {
-  const world = Store.world;
+  const world = Ecs.world;
   const hero = world?.playerEntity;
   if (!world || !hero?.transform) return EMPTY;
 

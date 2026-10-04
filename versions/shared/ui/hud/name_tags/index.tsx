@@ -2,6 +2,7 @@ import './style.less';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { With } from 'miniplex';
 import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { useRenderId } from '@/controllers/interface/hooks';
 import {
   onAnyScreenPosition,
@@ -88,7 +89,7 @@ type Line = {
  */
 function buildLines(entity: TagEntity): Line[] {
   const tag = entity.nameTag;
-  const hero = Store.world?.playerEntity;
+  const hero = Ecs.world?.playerEntity;
   const isHero = entity === hero;
   const isGm = !!entity.isGm;
 
@@ -194,7 +195,7 @@ function buildLines(entity: TagEntity): Line[] {
  * period instead of 24 ms so it reads as a blink and not as a strobe.
  */
 function shouldBlink(entity: TagEntity): boolean {
-  const world = Store.world;
+  const world = Ecs.world;
   if (!world) return false;
   if (world.currentPointerTarget !== entity) return false;
   if (entity === world.playerEntity) return false;
@@ -208,7 +209,7 @@ onLanguageChanged(() => languageEpoch++);
 /** Every value buildLines and shouldBlink read, written into `out`. */
 function readTagInputs(entity: TagEntity, out: TagInputs): void {
   const tag = entity.nameTag;
-  const isHero = entity === Store.world?.playerEntity;
+  const isHero = entity === Ecs.world?.playerEntity;
   const isGm = !!entity.isGm;
   const guildId = entity.guild?.id;
   const guild = guildId !== undefined ? Store.guilds.get(guildId) : undefined;
@@ -351,7 +352,7 @@ const NameTag = ({
 };
 
 export const NameTags = () => {
-  const world = Store.world!;
+  const world = Ecs.world!;
   const { refresh } = useRenderId();
   const query = useMemo(
     () => world.with('nameTag', 'screenPosition'),

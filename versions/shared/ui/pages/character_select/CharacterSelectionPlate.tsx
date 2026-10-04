@@ -2,6 +2,7 @@ import { observer } from 'mobx-react-lite';
 import { useEffect, useRef, useState } from 'react';
 import { Matrix, Vector3, Viewport } from '@/controllers/render/babylon/exports';
 import { Store } from '@/app/store';
+import { Ecs } from '@/ecs/current';
 import { classFromAppearance } from '@/controllers/actors/deserializeAppearance';
 import { getClassName } from '@/modules/hero/characterStats';
 import { characterSelectView } from '@/modules/character_select/characterSelect';
@@ -27,7 +28,7 @@ export const CharacterSelectionPlate = observer(() => {
   const ref = useRef<HTMLDivElement>(null);
   const [name, setName] = useState<string | null>(null);
 
-  const world = Store.world;
+  const world = Ecs.world;
 
   useEffect(() => {
     if (!world) return;
