@@ -22,7 +22,7 @@ imports the modules below directly (baselined in `tools/checks`).
   `getScrollVariant`, `getFlatLitVariant`, `setMeshFadeBlend`, `syncMaterialQuality`,
   `syncTexturePack`, `getModel`.
 - `texturePacks.ts`: `texturePacks` (store), `loadPackIndex`, `setActivePack`, `ORIGINAL_PACK`,
-  `packsBase`, `onTexturePackChanged`, `packRepaintsPending`.
+  `packsBase`, `onTexturePackChanged`, `packRepaintsPending`, `textureLabel`.
 - `assetDownload.ts`: `assetDownload` (store), `AssetGroup`, `loadAssetsIndex`, `startDownload`,
   `cancelDownload`, `clearDownloaded`, `storageUsed`, `ensureCacheWorker`.
 - `itemIconPack.ts`: `prefetchItemIcons`, `itemIconPackChain`, `itemIconUrl`, `itemIconKey`.
@@ -86,8 +86,8 @@ imports the modules below directly (baselined in `tools/checks`).
 - `compressedAssets.test.ts`: sidecar only for listed extensions, gzip or host-unwrapped bytes,
   plain fallback, giving up after failures, SPA fallback treated as missing.
 - `ktx2Pixels.test.ts`: KTX2 detection and top-mip decode.
-- `texturePacks.test.ts`: `packsBase`, the index, swap and restore, label re-stamp, same-name and
-  same-size pairs, alpha kept, broken manifest, `setActivePack` listeners.
+- `texturePacks.test.ts`: `packsBase`, the index, swap and restore, label re-stamp, `textureLabel`
+  mid-swap, same-name and same-size pairs, alpha kept, broken manifest, `setActivePack` listeners.
 - `mu/localNames.test.ts`: item, skill and buff name record layouts.
 - `mu/snowArtMatch.test.ts`: `SNOW_ART` against measured tile colours.
 
@@ -113,8 +113,12 @@ tint and variant files exist, so missing ones are never requested.
 
 ### texturePacks.ts
 `updateURL` replaces the internal texture and its `label`, which `pbrMaps.textureSourceName()` and
-the texture script rules read, so every swap writes the converter's name back. "Original" reloads
-from the bytes the glTF loader kept on `texture._buffer`, captured before the first swap. A swap
+the texture script rules read, so every swap writes the converter's name back once the image is
+in. Until then `textureLabel()` answers from the name remembered before the swap, and
+`textureSourceName()` asks it first (`modelLoader.ts` hands it to `pbrMaps.readPackLabelsWith`,
+since render cannot import assets' door without a cycle): the sign plates read the name straight
+after a model loads, mid-swap, and saw `snotice.ozj.webp` instead of `Object3/snotice`. "Original"
+reloads from the bytes the glTF loader kept on `texture._buffer`, captured before the first swap. A swap
 also keeps the original `hasAlpha`, so a pack cannot change a cut-out into a solid.
 
 ### mu/localData.ts

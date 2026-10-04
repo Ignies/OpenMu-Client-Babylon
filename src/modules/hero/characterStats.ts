@@ -1,5 +1,5 @@
 import { t, type TextKey } from '../../i18n';
-import { CharacterClassNumber } from '../../core/types';
+import { BaseClass, CharacterClassNumber, getBaseClass } from '../../core/types';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { InventoryConstants } from '../inventory/inventoryConstants';
 import type { Item } from '../../ecs/world';
@@ -12,49 +12,8 @@ export enum StatType {
   Leadership = 4,
 }
 
-export enum BaseClass {
-  Wizard,
-  Knight,
-  Elf,
-  MagicGladiator,
-  DarkLord,
-  Summoner,
-  RageFighter,
-}
-
-export function getBaseClass(cls: CharacterClassNumber): BaseClass {
-  switch (cls) {
-    case CharacterClassNumber.DarkKnight:
-    case CharacterClassNumber.BladeKnight:
-    case CharacterClassNumber.BladeMaster:
-      return BaseClass.Knight;
-
-    case CharacterClassNumber.FairyElf:
-    case CharacterClassNumber.MuseElf:
-    case CharacterClassNumber.HighElf:
-      return BaseClass.Elf;
-
-    case CharacterClassNumber.MagicGladiator:
-    case CharacterClassNumber.DuelMaster:
-      return BaseClass.MagicGladiator;
-
-    case CharacterClassNumber.DarkLord:
-    case CharacterClassNumber.LordEmperor:
-      return BaseClass.DarkLord;
-
-    case CharacterClassNumber.Summoner:
-    case CharacterClassNumber.BloodySummoner:
-    case CharacterClassNumber.DimensionMaster:
-      return BaseClass.Summoner;
-
-    case CharacterClassNumber.RageFighter:
-    case CharacterClassNumber.FistMaster:
-      return BaseClass.RageFighter;
-
-    default:
-      return BaseClass.Wizard;
-  }
-}
+// The base class lives in core so the actors controller can read it too.
+export { BaseClass, getBaseClass };
 
 /** Wire class number -> catalogue key; `getClassName` prints `t()` of it. */
 const CLASS_NAME_KEYS: Partial<Record<CharacterClassNumber, TextKey>> = {

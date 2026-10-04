@@ -10,6 +10,7 @@ import {
 import { PVP_MURDERER2, PVP_NEUTRAL } from '../../controllers/interface/nameTags';
 import { tierIndex } from '../../controllers/lighting/lightingQuality';
 import { lighting } from '../../controllers/lighting';
+import { heldWeapons } from '../../controllers/actors';
 
 /** The first lighting tier that draws the improved looks (controllers/skills/visuals.ts). */
 const ENHANCED_TIER = 1;
@@ -58,7 +59,7 @@ export const WeaponTrailSystem: ISystemFactory = world => {
           swing.row =
             isPlayerAttackAction(action) || isPlayerSkillAction(action)
               ? // The murderer blur reads a player's c->Level; a red NPC (heroState from its gear) never sets it.
-                weaponBlurFor(e.charAppearance, action, e.npcType === undefined && (e.heroState ?? PVP_NEUTRAL) >= PVP_MURDERER2)
+                weaponBlurFor(heldWeapons(e, world.mapIndex), action, e.npcType === undefined && (e.heroState ?? PVP_NEUTRAL) >= PVP_MURDERER2)
               : null;
         }
         const row = swing.row;

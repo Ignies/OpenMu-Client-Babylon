@@ -8,7 +8,7 @@ import { METEORITE_STORM, appearSound, meteoriteStormRunning, monsterCastQuiet, 
 import { MonsterActionType, PlayerAction } from '@versions/shared/objects/enum';
 
 import { Store } from '@/app/store';
-import { TRAP_MODEL_TABLE } from '@/controllers/actors';
+import { TRAP_MODEL_TABLE, heldWeapons } from '@/controllers/actors';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { advancesSwordCount, chooseSkillAction } from '../skills/skillCasting';
 import { createAttributeSystem } from '@/core/attributeSystem';
@@ -213,7 +213,7 @@ export function attackPoseOf(obj: Entity): AttackPose {
   const hands = obj.charAppearance;
   const inSafeZone = !!obj.attributeSystem?.isAboveZero('inSafeZone');
   return {
-    hands,
+    hands: heldWeapons(obj, Store.world?.mapIndex ?? -1),
     baseClass: getBaseClass(hands?.charClass ?? Store.playerData.charClass),
     swordCount: obj.playerAnimation?.swordCount ?? 0,
     wings: isWingItem(hands?.wings),

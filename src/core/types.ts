@@ -215,3 +215,48 @@ export enum PlayerClass {
   AlchemicForce = 315,
   Creator = 415,
 }
+
+/** A class number's base class (its first-tier class), ignoring its promotions. */
+export enum BaseClass {
+  Wizard,
+  Knight,
+  Elf,
+  MagicGladiator,
+  DarkLord,
+  Summoner,
+  RageFighter,
+}
+
+export function getBaseClass(cls: CharacterClassNumber): BaseClass {
+  switch (cls) {
+    case CharacterClassNumber.DarkKnight:
+    case CharacterClassNumber.BladeKnight:
+    case CharacterClassNumber.BladeMaster:
+      return BaseClass.Knight;
+
+    case CharacterClassNumber.FairyElf:
+    case CharacterClassNumber.MuseElf:
+    case CharacterClassNumber.HighElf:
+      return BaseClass.Elf;
+
+    case CharacterClassNumber.MagicGladiator:
+    case CharacterClassNumber.DuelMaster:
+      return BaseClass.MagicGladiator;
+
+    case CharacterClassNumber.DarkLord:
+    case CharacterClassNumber.LordEmperor:
+      return BaseClass.DarkLord;
+
+    case CharacterClassNumber.Summoner:
+    case CharacterClassNumber.BloodySummoner:
+    case CharacterClassNumber.DimensionMaster:
+      return BaseClass.Summoner;
+
+    case CharacterClassNumber.RageFighter:
+    case CharacterClassNumber.FistMaster:
+      return BaseClass.RageFighter;
+
+    default:
+      return BaseClass.Wizard;
+  }
+}

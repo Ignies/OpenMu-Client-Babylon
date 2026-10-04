@@ -126,6 +126,9 @@ policy. It knows how to light something, never which skill or item asks for it.
   became a uniform tint. At 2.2 a cloud is about 130 tiles across and one or two shadows cross the
   view in about a minute; the domain warp hides the repeat. 3 was too fine for the march near the
   horizon (steps of about fifteen tiles) and drew a corrugated stipple.
+- `profiles.ts` (`fog.fromTarget`): `start` counts from the camera's target, so the haze keeps its
+  distance from the hero at every zoom. Chaos Castle uses it: its black haze starts eight tiles past
+  the hero, and it has no `underworld`, since a fog under its flat floor went black at a low camera.
 - `profiles.ts` (`underworld`): Devias' ravines are `NoGround` tiles that the ground mesh sends
   past the far plane. The fog is integrated along the ray, so a ray down a hole ends black and a
   ray that stops on a cliff a few tiles down comes back half fogged; there is no edge anywhere.

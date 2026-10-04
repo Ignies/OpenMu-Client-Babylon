@@ -84,7 +84,10 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
 - `mapRows.golden.test.ts`: every per-map row the sound, lighting, weather and terrain
   controllers answer for every world, as hashes; pinned before the rows moved here.
 - `tileFiles.test.ts`: every tile slot of every map names a file that exists in its world folder.
-- `chaoscastle/thunder.test.ts`: pillar thunder timing and when it strikes.
+- `chaoscastle/thunder.test.ts`: pillar thunder timing, which pillar it strikes and the bolt's fall.
+- `chaoscastle/clouds.test.ts`: the blue fog banks on types 6-11; 12 stays a marker.
+- `chaoscastle/lighting.test.ts`: one look row on every arena, no sky, black haze from the hero, no
+  underworld.
 - `kalima/grassObject.test.ts`: `KalimaWaterPlantObject`.
 - `kanturu2/gateway.test.ts`: the gateway turn sound loops from the click, and stays silent when
   the original refuses it.

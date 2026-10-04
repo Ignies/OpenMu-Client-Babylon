@@ -35,6 +35,10 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   `isSocialAction`), types `CharacterPose`, `AttackPose`, `Hands`.
 - `weaponAttachment.ts`: `RIGHT_HAND_BONE`, `LEFT_HAND_BONE`, `BACK_BONE`,
   `applyWeaponAttachments`, `applyWeaponPoses`, `questItemLink`, `PHOENIX_POSE`.
+- `chaosCastleUnit.ts` (on the door): `heldWeapons(e, map)` (`c->Weapon`: what a character is drawn,
+  posed, swung and lit holding), `shownGear(e, map)` (the gear its item glow comes off),
+  `wearsChaosCastleSkin(e, map)`, type `Gear`. Inside Chaos Castle every player holds the castle's
+  weapons, all +0 (`ChangeChaosCastleUnit`, CSChaosCastle.cpp:130-170); range and ammo stay its own.
 - `wings.ts`: `wingSpec`, `isWingItem`, `wingBone`, `isFastWing`, `WING_GROUP`, `HELPER_GROUP`,
   `WING_BONE`, `CAPE_BONE`, wing index constants (`WING_OF_ELF`, `CAPE_OF_LORD`, ...).
 - `locomotion.ts`: `RUN_THRESHOLD`, `FENRIR_RUN_DELAY`, `RUN_UNITS_PER_SECOND`, `canAccumulateRun`,
@@ -95,6 +99,8 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   additive or hidden mesh: `RULES` in `itemObjectAttribute.ts`.
 
 ## Tests
+- `chaosCastleUnit.test.ts`: the castle's weapons per class, own weapons elsewhere, transformed
+  players and NPCs keep theirs, no armour glow in the castle.
 - `approachPath.test.ts`: walk truncation at range, distance along the sent path, stall capping.
 - `deserializeAppearance.test.ts`: `isAppearanceBlank` on empty and real previews.
 - `itemAngle.test.ts`: drop scale and pose per group, worn height, the `ItemAngle` tail rows.

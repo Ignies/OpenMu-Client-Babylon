@@ -17,7 +17,8 @@ shared pools, textures and particle recipes other folders reuse.
 - `recipes.ts`: `TEX` (Data/Effect sheets), `MODEL` (Data/Skill models), `RGBS`, particle recipes
   several owners share (`SPARKS`, `FIRE_PUFF`, `SMOKE`, ...), `EXPLOSION_CELLS`,
   `FOOT_THUNDER_FRAMES`. A recipe only one skill uses lives in that skill's file.
-- The door (`index.ts`) also exports the `ParticleRecipe` and `RGB` types.
+- The door (`index.ts`) also exports the `ParticleRecipe` and `RGB` types, `bonePos`, `entityPos`,
+  `spriteLevel` and `TEX` for map object classes.
 - Entry option types skill files import: `ModelOptions`, `SpriteOptions`, `RingOptions`,
   `ParticlesOptions`, `ProjectileOptions`, `AuraOptions`, `JointOptions`, `CardOptions`, ... and
   handles (`ModelHandle`, `StampsHandle`, `SummonBody`, `TailStrip`). `spawnModel` (`model.ts`) and

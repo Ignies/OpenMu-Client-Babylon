@@ -1,4 +1,4 @@
-import { CAST_HEIGHT, SkillContext, Step, TICK, cm, currentSkill, perTick, repeat, ring, ticks } from '@/controllers/skills/visuals';
+import { CAST_HEIGHT, SkillContext, Step, TICK, cm, currentSkill, perTick, repeat, ring, ticks, weaponsOf } from '@/controllers/skills/visuals';
 import { type CardOptions } from '@/controllers/fx/cards';
 import { type Entity } from '@/ecs/world';
 import { type LightRecipe, type LightSource } from '@/controllers/lighting/lightSource';
@@ -605,7 +605,7 @@ export function kickSparks(scene: Scene, at: Vector3, colour: RGB, n: number, ki
 
 /** The book's tier: `Weapon[1].Level` >= 11 is 2, >= 7 is 1, else 0 (SummonSystem.cpp:128-135). */
 export function bookTier(e: Entity): number {
-  const lvl = e.charAppearance?.leftHand?.lvl ?? 0;
+  const lvl = weaponsOf(e)?.leftHand?.lvl ?? 0;
   return lvl >= 11 ? 2 : lvl >= 7 ? 1 : 0;
 }
 

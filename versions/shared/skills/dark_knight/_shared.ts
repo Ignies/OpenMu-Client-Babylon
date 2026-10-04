@@ -1,5 +1,5 @@
 import { type Entity } from '@/ecs/world';
-import { IMPACT_HEIGHT, SkillContext, Step, TICK, baseSkill, cm, currentSkill, perTick, ticks, toward } from '@/controllers/skills/visuals';
+import { IMPACT_HEIGHT, SkillContext, Step, TICK, baseSkill, cm, currentSkill, perTick, ticks, toward, weaponsOf } from '@/controllers/skills/visuals';
 import { ItemsDatabase } from '../../items/itemsDatabase';
 import { delay, entityGone, entityPos, fxNow, type ParticleRecipe, type RGB } from '@/controllers/fx/core';
 import { PlayerAction } from '../../objects/enum';
@@ -35,7 +35,7 @@ export const sayAt = (c: SkillContext, key: Sounds): void => {
 
 /** `c->Weapon[0]` - appearance slot 0 (`leftHand`), drawn in the right hand on bone 33 - with the level and tier it is drawn at. */
 export function wieldedWeapon(e: Entity): { file: string; group: number; num: number; stamp: Record<string, unknown> } | null {
-  const part = e.charAppearance?.leftHand;
+  const part = weaponsOf(e)?.leftHand;
   if (!part) return null;
   const item = ItemsDatabase.getItem(part.group, part.num);
   if (!item) return null;

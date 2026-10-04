@@ -15,7 +15,8 @@ themselves are content in `versions/shared/skills/` (see [docs/content.md](../..
 - `visuals.ts` step DSL, used by skill files: `sprite`, `particles`, `model`, `ring`, `seq`,
   `atCaster`, `scatter`, `ringOf`, `after`, `repeat`, `offset`, building blocks (`fireHit`,
   `arcHit`, `steelHit`, `explosion`, `scorch`, `burn`, `magicGround`, ...), travel (`bolt`, `arrow`),
-  `fanArrows`, `onCurseLanding`, units (`ticks`, `cm`, `perTick`, `TICK`); the release: `onRelease(c, fn, rule?)`,
+  `fanArrows`, `onCurseLanding`, `weaponsOf(e)` (`c->Weapon`: the castle's weapons inside Chaos
+  Castle, `actors.heldWeapons`), units (`ticks`, `cm`, `perTick`, `TICK`); the release: `onRelease(c, fn, rule?)`,
   `afterRelease(step, rule?)`, `ReleaseRule`.
 - Dispatch, used by modules and ECS systems through `versions/shared/skills/skillVisuals.ts`:
   `playTargetedSkillVisual`, `playAreaSkillVisual`, `playBowShotVisual`, `setBuffVisual`,

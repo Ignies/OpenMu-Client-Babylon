@@ -26,6 +26,8 @@ export type LookProfile = {
     readonly cap: number;
     readonly height: number;
     readonly color: Rgb | null;
+    /** `start` counts from the camera's target (the hero), so the haze keeps its distance at every zoom. */
+    readonly fromTarget?: boolean;
   };
   /**
    * Fog filling the bottom of the world under `top`, thickening downward and integrated along

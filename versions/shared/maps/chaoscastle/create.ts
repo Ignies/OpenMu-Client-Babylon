@@ -1,7 +1,9 @@
 import type { World } from '@/ecs/world';
 import { ChaosCastleRingObject } from './ringObject';
+import { ChaosCastleCloudObject } from './cloudObject';
 import { resetChaosCastleArena } from './arena';
 import {
+  CHAOS_CASTLE_CLOUD_BANKS,
   CHAOS_CASTLE_HIDDEN_RINGS,
   CHAOS_CASTLE_OUTER_RING,
 } from './spec';
@@ -21,20 +23,21 @@ import {
  * (WSclient.cpp:5440-5487), and what `IsWalkable` refuses.
  *
  * Elsewhere, and why:
- *  - 6-12 the smoke-box markers: `spec.ts` effect-only.
+ *  - 6-11 the fog: `ChaosCastleCloudObject`; 12 (a darkening under the
+ *    castle) stays an effect-only marker in `spec.ts`.
  *  - The black clear colour is the scene default; `SetWorldClearColor`
  *    (SceneManager.cpp:346) sets exactly that.
  *  - `aChaos` / `iChaosCastle` beds: `sound.ts`, gated on the match state.
- *  - The pillars' thunder (`eElec1/2`): `thunder.ts`, driven from
- *    `modules/events/chaosCastle.ts` as the original drives it from CSChaosCastle.cpp.
+ *  - The pillars' thunder (`eElec1/2`) and its bolt: `thunder.ts` and
+ *    `bolt.ts`, driven from `modules/events/chaosCastle.ts` as the original
+ *    drives them from CSChaosCastle.cpp.
  *  - Auto-attack off, `c->Run = 40` forced, no wings/pets, the CC 70-72
  *    monster skins from `Npc/`: all in the events / locomotion / character
  *    lanes, none of it map data.
  *
- * Not built: the thunder pillars' bolt (3 with `PKKey`, a `CreateJoint`
- * ribbon - no ribbon primitive in the clone), the quake, and the tile smoke
- * on the strip about to close (`RenderTerrainVisual`). All three are listed
- * in `arena.ts` / `spec.ts` against their C++ lines.
+ * Not built: the quake, and the tile smoke on the strip about to close
+ * (`RenderTerrainVisual`). Both are listed in `arena.ts` / `spec.ts` against
+ * their C++ lines.
  */
 export async function createChaosCastle(world: World) {
   const terrain = world.terrain;
@@ -47,4 +50,7 @@ export async function createChaosCastle(world: World) {
 
   for (const type of CHAOS_CASTLE_OUTER_RING) tiles[type] = ChaosCastleRingObject;
   for (const type of CHAOS_CASTLE_HIDDEN_RINGS) tiles[type] = ChaosCastleRingObject;
+  for (const type of Object.keys(CHAOS_CASTLE_CLOUD_BANKS)) {
+    tiles[+type] = ChaosCastleCloudObject;
+  }
 }

@@ -165,6 +165,35 @@ describe('applyPackToTexture', () => {
     expect(tex.getInternalTexture()?.label).toBe('Object1/ston01');
   });
 
+  it('answers with the converter name while the pack image is still loading', async () => {
+    // The window the sign plates fell into: a model's textures start swapping
+    // as its GLB is parsed, and the sign reads the name straight after.
+    serve({ 'packs/index.json': INDEX, 'packs/hd-512/pack.json': PACK });
+    const m = await fresh();
+    await m.loadPackIndex();
+    await m.setActivePack('hd-512');
+
+    const tex = fakeTexture('Object1/ston01', 128, 128);
+    let arrive: (() => void) | undefined;
+    const updateURL = tex.updateURL;
+    tex.updateURL = (url, buffer, onLoad) => {
+      updateURL(url, buffer);
+      arrive = onLoad;
+    };
+
+    const swap = m.applyPackToTexture(tex as never);
+    await vi.waitFor(() => expect(tex.loads).toHaveLength(1));
+
+    // Mid-swap the internal texture carries the URL...
+    expect(tex.getInternalTexture()?.label).toBe('./packs/hd-512/Object1/ston01.ozj.webp');
+    // ...and the name everything keys on is still the converter's.
+    expect(m.textureLabel(tex as never)).toBe('Object1/ston01');
+
+    arrive?.();
+    await swap;
+    expect(m.textureLabel(tex as never)).toBe('Object1/ston01');
+  });
+
   it('restores the model texture from the loader buffer', async () => {
     serve({ 'packs/index.json': INDEX, 'packs/hd-512/pack.json': PACK });
     const m = await fresh();

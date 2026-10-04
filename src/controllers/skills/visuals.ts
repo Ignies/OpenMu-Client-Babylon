@@ -14,6 +14,7 @@ import { type SpriteOptions } from '@/controllers/fx/sprite';
 import { combat, RELEASE_KEY, RELEASE_TICKS } from '@/controllers/combat';
 import { lighting } from '@/controllers/lighting';
 import { storeRef } from '@/app/storeRef';
+import { heldWeapons } from '@/controllers/actors';
 import { tierIndex } from '@/controllers/lighting/lightingQuality';
 import { weather } from '@/controllers/weather';
 
@@ -211,6 +212,8 @@ export const orbiting = (caster: Entity, radius: number, height: number, rate: n
 };
 /** The caster's weapon bone. */
 export const weaponBone = (caster: Entity): PointSource => out => bonePos(caster, WEAPON_BONE, out, CAST_HEIGHT);
+/** `c->Weapon`: the weapons a character holds, the castle's inside Chaos Castle. */
+export const weaponsOf = (e: Entity) => heldWeapons(e, storeRef().world?.mapIndex ?? -1);
 /** A blur trail swept in front of the caster (CreateWeaponBlur on the weapon bone). */
 export const slash = (colour: RGB = RGBS.steel, texture: string = TEX.swordBlur, reach = SLASH_REACH): Step => (_at, c) => {
   const t0 = fxNow();
@@ -635,7 +638,7 @@ const ARROW_BURST = bomb(RGBS.fire);
  * bursts (ZzzEffect.cpp:6620).
  */
 export function playBowShotVisual(scene: Scene, shooter: Entity, target: Entity): void {
-  const launcher = combat.equippedLauncher(shooter.charAppearance);
+  const launcher = combat.equippedLauncher(weaponsOf(shooter));
   if (!launcher || entityGone(shooter) || entityGone(target)) return;
 
   const shot = LAUNCHER_ARROWS[launcher.num] ?? { model: MODEL.arrow, colour: RGBS.steel };
