@@ -17,6 +17,8 @@ import { v097dData } from './data';
 import '../shared/monsters/all';
 // The player clips and monster swing / cast rules, registered with the anim controller.
 import '../shared/animations/all';
+// The deliberate improvements over the original, registered with the fidelity controller.
+import '../shared/improvements/all';
 
 // The packet lists ride along in the version chunk; UI does not (it reaches
 // app code and loads through the registry's loadUi, after this module).

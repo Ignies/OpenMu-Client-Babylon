@@ -347,4 +347,10 @@ export default {
   'exit.confirmServers': 'Rời game và quay về chọn máy chủ?',
   'exit.confirmCharacters': 'Rời game và quay về chọn nhân vật?',
   'options.performanceReadout': 'Chỉ số hiệu năng',
+  'options.page.fidelity': 'Độ trung thực',
+  'options.fidelity': 'Độ trung thực',
+  'options.fidelityCustom': 'Độ trung thực (Tùy chỉnh)',
+  'options.help.fidelity':
+    'Cổ điển là client gốc, y nguyên. Nâng cao và Ultra bật các cải tiến bên dưới; đổi một mục thì thiết lập thành Tùy chỉnh.',
+  'options.section.improvements': 'Cải tiến',
 } satisfies Partial<Record<keyof typeof en, string>>;

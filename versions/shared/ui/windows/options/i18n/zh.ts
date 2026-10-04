@@ -290,4 +290,10 @@ export default {
   'exit.confirmServers': '要退出游戏并返回服务器选择吗？',
   'exit.confirmCharacters': '要退出游戏并返回角色选择吗？',
   'options.performanceReadout': '性能信息',
+  'options.page.fidelity': '还原度',
+  'options.fidelity': '还原度',
+  'options.fidelityCustom': '还原度（自定义）',
+  'options.help.fidelity':
+    '经典即原版客户端，完全一致。增强和极致会开启下方的改进；改动任意一项即变为自定义。',
+  'options.section.improvements': '改进',
 } satisfies Partial<Record<keyof typeof en, string>>;

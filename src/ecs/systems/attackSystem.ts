@@ -24,6 +24,7 @@ import { InventoryConstants } from '../../modules/inventory/inventoryConstants';
 import { StorageKind } from '../../modules/inventory/itemStorage';
 import { t } from '../../i18n';
 import { heldWeapons } from '../../controllers/actors';
+import { isOn } from '../../controllers/fidelity';
 
 /**
  * Left-click basic attack (`Action()` MOVEMENT_ATTACK, ZzzInterface.cpp:3283-3356):
@@ -314,15 +315,21 @@ export const AttackSystem: ISystemFactory = world => {
       // clip length is the fallback - the request never outlives the clip.
       const playSpeed = model?.AnimationSpeed ?? 0;
       const clipSeconds = model?.getActionDuration(action) || undefined;
-      const hitDelay = combat.startAttack(action, playSpeed, () => {
-        // CreateArrows() at AttackStage's hit key: the bow lets go here.
-        playBowShotVisual(world.scene, playerEntity, target);
+      const sendHit = () => {
         if (target.dying || target.objOutOfScope || target.netId === undefined) return;
         const packet = HitRequestPacket.createPacket();
         packet.TargetId = target.netId;
         packet.AttackAnimation = attackAnimation;
         packet.LookingDirection = lookingDirection;
         Store.sendToGS(packet.buffer);
+      };
+      // Classic: SendHitRequest on the click (ZzzInterface.cpp:3355).
+      const held = isOn('heldHitRequest');
+      if (!held) sendHit();
+      const hitDelay = combat.startAttack(action, playSpeed, () => {
+        // CreateArrows() at AttackStage's hit key: the bow lets go here.
+        playBowShotVisual(world.scene, playerEntity, target);
+        if (held) sendHit();
       }, clipSeconds);
       combat.consumeInputGate();
 

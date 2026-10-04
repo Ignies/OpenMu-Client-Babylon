@@ -101,6 +101,16 @@ new window or module adds its text without touching it. Translators use one shee
 - An area's master controller (`src/controllers/items`, `src/controllers/monsters`) owns the record
   type, the `define*` function and the registry; the files are the components that use it.
 
+## Improvements
+
+- `improvements/<id>.ts`: one file per deliberate change from the original client
+  (`defineImprovement`: id, the lowest preset that turns it on, label and hint keys), found by
+  glob. The Fidelity option (Classic / Enhanced / Ultra, then one check each) decides which run;
+  the deviating code reads `isOn('<id>')` and keeps the original path when off. Classic is the
+  original 1:1, so a fix toward the original is never an improvement.
+- The master controller is `src/controllers/fidelity`. Recipe:
+  [how_to/add_improvement.md](how_to/add_improvement.md).
+
 ## Versions
 
 `versions/<id>/` holds what differs for one version: data paths, packet set, UI overrides (same

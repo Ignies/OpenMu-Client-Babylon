@@ -3,6 +3,7 @@ import { Vector3 } from '@/controllers/render/babylon/exports';
 import { TEX, TerrainDecal, effects } from '@/controllers/fx';
 import { loadGLTF } from '@/controllers/assets';
 import { ModelObject, npcModelFile, registerModelClass } from '@/controllers/actors';
+import { isOn } from '@/controllers/fidelity';
 
 /**
  * The Blood Castle archangels of Devias: Archangel (232, `BloodCastle01`)
@@ -15,7 +16,8 @@ import { ModelObject, npcModelFile, registerModelClass } from '@/controllers/act
  *   `ShadowHiddenMesh`.
  * - A breathing, bluish-white `Magic_Ground2` circle 2.7 tiles wide on the
  *   ground under the NPC, additive (ZzzCharacter.cpp:8486-8498): the halo.
- * - Feathers, the reviewer's ask: the original has none here.
+ * - Feathers, the reviewer's ask: the original has none here. Both looks are the
+ *   `archangelFeathers` improvement; Classic draws the original halo only.
  */
 
 /**
@@ -27,6 +29,7 @@ import { ModelObject, npcModelFile, registerModelClass } from '@/controllers/act
 const HALO_TEXTURE = TEX.magicGround2;
 const HALO_SIZE = 4.5;
 const HALO_AHEAD = 1;
+const CLASSIC_HALO_SIZE = 2.7;
 
 /** `Luminosity = sinf(WorldTime * 0.0015f) * 0.3f + 0.8f`. */
 const HALO_BREATHE_PER_MS = 0.0015;
@@ -123,20 +126,23 @@ function archangelFactory(file: string): typeof ModelObject {
       forward.normalize();
       right.set(forward.z, 0, -forward.x);
 
+      const improved = isOn('archangelFeathers');
+      const haloAhead = improved ? HALO_AHEAD : 0;
+
       // `Vector(Luminosity * 0.5f, Luminosity * 0.5f, Luminosity, Light)`.
-      // The halo drapes the ground; a wall's tiles are left dark so it does
-      // not run on into the building the angel stands beside.
+      // Improved, the halo stops at a wall's tiles so it does not run on into
+      // the building the angel stands beside.
       halo.draw(
         world,
-        pos.x + forward.x * HALO_AHEAD,
-        pos.z + forward.z * HALO_AHEAD,
-        HALO_SIZE,
+        pos.x + forward.x * haloAhead,
+        pos.z + forward.z * haloAhead,
+        improved ? HALO_SIZE : CLASSIC_HALO_SIZE,
         0,
         [luminosity * 0.5, luminosity * 0.5, luminosity],
-        open
+        improved ? open : undefined
       );
 
-      if (seconds < this.#nextFeather) return;
+      if (!improved || seconds < this.#nextFeather) return;
       this.#nextFeather = seconds + FEATHER_GAP_MIN + Math.random() * FEATHER_GAP_SPAN;
 
       const span = (Math.random() * 2 - 1) * FEATHER_SPAN;

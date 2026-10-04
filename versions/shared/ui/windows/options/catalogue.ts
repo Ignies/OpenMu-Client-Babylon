@@ -78,6 +78,7 @@ import {
   needStyle,
   type Need,
 } from './gating';
+import { fidelitySections } from './fidelity';
 
 export type BoolKey = {
   [K in keyof GameOptionsType]: GameOptionsType[K] extends boolean ? K : never;
@@ -120,10 +121,13 @@ export type ButtonRow = RowBase & {
 };
 
 export type WidgetRow = RowBase & {
-  kind: 'presets' | 'language' | 'texturePack' | 'fullscreen';
+  kind: 'presets' | 'language' | 'texturePack' | 'fullscreen' | 'fidelity';
 };
 
-export type Row = ToggleRow | NumberRow | KeyRow | ButtonRow | WidgetRow;
+/** One registered improvement's check (`controllers/fidelity`). */
+export type ImprovementRow = RowBase & { kind: 'improvement'; id: string };
+
+export type Row = ToggleRow | NumberRow | KeyRow | ButtonRow | WidgetRow | ImprovementRow;
 
 export type Section = { titleKey?: TextKey; rows: Row[] };
 
@@ -139,6 +143,8 @@ export type Category = { id: string; labelKey: TextKey; pages: Page[] };
 
 /** The option a row writes, when it writes one. */
 export function optionKeyOf(row: Row): keyof GameOptionsType | null {
+  if (row.kind === 'fidelity') return 'fidelity';
+  if (row.kind === 'improvement') return 'fidelityOverrides';
   return row.kind === 'toggle' || row.kind === 'slider' || row.kind === 'choice'
     ? row.key
     : null;
@@ -154,6 +160,8 @@ export function rowId(row: Row): string {
       return `key:${row.action}`;
     case 'button':
       return row.id;
+    case 'improvement':
+      return `improvement:${row.id}`;
     default:
       return row.kind;
   }
@@ -310,6 +318,15 @@ export const CATEGORIES: Category[] = [
             rows: [toggle('autoReconnect')],
           },
         ],
+      },
+      {
+        id: 'fidelity',
+        labelKey: 'options.page.fidelity',
+        hintKey: 'options.help.fidelity',
+        // Built from the registry each time, so a new improvement file needs no row here.
+        get sections() {
+          return fidelitySections();
+        },
       },
       {
         id: 'loot',

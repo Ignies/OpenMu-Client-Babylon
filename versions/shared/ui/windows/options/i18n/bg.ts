@@ -341,4 +341,10 @@ export default {
   'exit.confirmServers': 'Да излезеш ли от играта и да се върнеш към избора на сървър?',
   'exit.confirmCharacters': 'Да излезеш ли от играта и да се върнеш към избора на герой?',
   'options.performanceReadout': 'Показатели на работата',
+  'options.page.fidelity': 'Вярност',
+  'options.fidelity': 'Вярност',
+  'options.fidelityCustom': 'Вярност (Собствена)',
+  'options.help.fidelity':
+    'Класическо е точно оригиналният клиент. Подобрено и Ултра включват подобренията по-долу; промените ли едно, наборът става Собствен.',
+  'options.section.improvements': 'Подобрения',
 } satisfies Partial<Record<keyof typeof en, string>>;

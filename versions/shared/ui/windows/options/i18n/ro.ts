@@ -365,4 +365,10 @@ export default {
   'exit.confirmServers': 'Ieși din joc și te întorci la alegerea serverului?',
   'exit.confirmCharacters': 'Ieși din joc și te întorci la alegerea personajului?',
   'options.performanceReadout': 'Date de performanță',
+  'options.page.fidelity': 'Fidelitate',
+  'options.fidelity': 'Fidelitate',
+  'options.fidelityCustom': 'Fidelitate (Personalizată)',
+  'options.help.fidelity':
+    'Clasică este clientul original, exact. Îmbunătățită și Ultra pornesc îmbunătățirile de mai jos; schimbă una și presetarea devine Personalizată.',
+  'options.section.improvements': 'Îmbunătățiri',
 } satisfies Partial<Record<keyof typeof en, string>>;

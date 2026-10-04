@@ -51,6 +51,7 @@ import { isWingItem } from '../../controllers/actors/wings';
 import { isRidingMount, petSpec } from '../../modules/pets/pets';
 import { Store } from '../../app/store';
 import { heldWeapons } from '../../controllers/actors';
+import { isOn } from '../../controllers/fidelity';
 
 // Clip rates come from the original's PlaySpeed tables (controllers/anim/playSpeed.ts);
 // attack/cast rates additionally scale with the attackSpeed/magicSpeed
@@ -288,6 +289,7 @@ export const AnimationSystem: ISystemFactory = world => {
       const pd = Store.playerData;
       const heroAttackSpeed = pd.attackSpeed ?? attackSpeedOf(pd.charClass, pd.agi);
       const heroMagicSpeed = pd.magicSpeed ?? magicSpeedOf(pd.charClass, pd.agi);
+      const ownSpeeds = isOn('otherPlayersOwnSpeed');
 
       for (const entity of playersQuery) {
         const { playerAnimation, movement, attributeSystem, modelObject } = entity;
@@ -308,7 +310,7 @@ export const AnimationSystem: ISystemFactory = world => {
 
         // The original plays every body at the hero's speeds (one MODEL_PLAYER table, ZzzCharacter.cpp:812-1028);
         // another player with speeds from the scope packet plays at its own (controllers/anim/readme.md).
-        const own = entity.localPlayer ? undefined : entity.speeds;
+        const own = entity.localPlayer || !ownSpeeds ? undefined : entity.speeds;
         attributeSystem.setValue('attackSpeed', own?.attack ?? heroAttackSpeed);
         attributeSystem.setValue('magicSpeed', own?.magic ?? heroMagicSpeed);
 

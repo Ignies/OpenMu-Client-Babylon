@@ -388,6 +388,12 @@ const en = {
   'exit.confirmServers': 'Leave the game and go back to server selection?',
   'exit.confirmCharacters': 'Leave the game and go back to character selection?',
   'options.performanceReadout': 'Performance readout',
+  'options.page.fidelity': 'Fidelity',
+  'options.fidelity': 'Fidelity',
+  'options.fidelityCustom': 'Fidelity (Custom)',
+  'options.help.fidelity':
+    'Classic is the original client, exactly. Enhanced and Ultra turn on the improvements below; change one and the preset reads Custom.',
+  'options.section.improvements': 'Improvements',
 };
 
 export default en;

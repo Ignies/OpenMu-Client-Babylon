@@ -12,6 +12,13 @@ import {
 } from '../hero/lowVitals';
 import { LocalStorage } from '../../core/localStorage';
 import { RENDER_SCALE_STEP_MAX } from '../../controllers/render/renderScale';
+import {
+  FIDELITY_DEFAULT,
+  FIDELITY_MAX,
+  cleanOverrides,
+  setFidelityChoice,
+  type FidelityOverrides,
+} from '../../controllers/fidelity';
 
 const OPTIONS_KEY = 'mu_options';
 
@@ -409,6 +416,13 @@ export type GameOptions = {
    * calls the same item - so this turns that one table off and nothing else.
    */
   englishItemNames: boolean;
+  /**
+   * 0 Classic (the original client, 1:1) / 1 Enhanced / 2 Ultra: which deliberate
+   * improvements run (`controllers/fidelity`).
+   */
+  fidelity: number;
+  /** Improvements the player set apart from the preset, by id; any entry makes it Custom. */
+  fidelityOverrides: FidelityOverrides;
 };
 
 export const TONE_MAPPER_MAX = 3;
@@ -493,6 +507,7 @@ const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
   renderDistance: [0, RENDER_DISTANCE_MAX],
   grassDensity: [0, 9],
   cameraFov: [CAMERA_FOV_MIN_DEG, CAMERA_FOV_MAX_DEG],
+  fidelity: [0, FIDELITY_MAX],
 };
 
 const DEFAULTS: GameOptions = {
@@ -604,6 +619,8 @@ const DEFAULTS: GameOptions = {
   eventTimers: true,
   questTracker: true,
   englishItemNames: false,
+  fidelity: FIDELITY_DEFAULT,
+  fidelityOverrides: {},
 };
 
 /**
@@ -661,6 +678,29 @@ export function migrate(stored: Record<string, unknown>): boolean {
   return true;
 }
 
+/** A migrated stored blob over the defaults, numbers clamped to `RANGES`. */
+export function optionsFrom(parsed: Record<string, unknown>): GameOptions {
+  const loaded = {
+    ...DEFAULTS,
+    ...(parsed as Partial<GameOptions>),
+  };
+  // A save from before Fidelity has neither key and gets the defaults; a bad blob is dropped.
+  loaded.fidelityOverrides = cleanOverrides(loaded.fidelityOverrides);
+
+  for (const [key, [min, max]] of Object.entries(RANGES)) {
+    const value = loaded[key as keyof GameOptions];
+
+    if (typeof value === 'number') {
+      (loaded as Record<string, unknown>)[key] = Math.max(
+        min,
+        Math.min(max, value)
+      );
+    }
+  }
+
+  return loaded;
+}
+
 function load(): GameOptions {
   const stored = LocalStorage.load(OPTIONS_KEY);
 
@@ -669,22 +709,7 @@ function load(): GameOptions {
   try {
     const parsed = JSON.parse(stored) as Record<string, unknown>;
     const migrated = migrate(parsed);
-
-    const loaded = {
-      ...DEFAULTS,
-      ...(parsed as Partial<GameOptions>),
-    };
-
-    for (const [key, [min, max]] of Object.entries(RANGES)) {
-      const value = loaded[key as keyof GameOptions];
-
-      if (typeof value === 'number') {
-        (loaded as Record<string, unknown>)[key] = Math.max(
-          min,
-          Math.min(max, value)
-        );
-      }
-    }
+    const loaded = optionsFrom(parsed);
 
     if (migrated) LocalStorage.save(OPTIONS_KEY, JSON.stringify(loaded));
 
@@ -702,6 +727,8 @@ function load(): GameOptions {
  */
 export const GameOptions: GameOptions = makeAutoObservable(load());
 
+setFidelityChoice(GameOptions.fidelity, GameOptions.fidelityOverrides);
+
 export function setGameOption<K extends keyof GameOptions>(
   key: K,
   value: GameOptions[K]
@@ -713,6 +740,10 @@ export function setGameOption<K extends keyof GameOptions>(
   });
 
   LocalStorage.save(OPTIONS_KEY, JSON.stringify(GameOptions));
+
+  if (key === 'fidelity' || key === 'fidelityOverrides') {
+    setFidelityChoice(GameOptions.fidelity, GameOptions.fidelityOverrides);
+  }
 
   for (const listener of listeners) listener(GameOptions);
 }

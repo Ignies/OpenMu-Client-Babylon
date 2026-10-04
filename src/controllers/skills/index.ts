@@ -7,6 +7,7 @@ import { MASTER_BASES, SKILL_DELAY_MS, SKILL_EFFECTS } from '@/modules/skills/re
 import type { SkillCancel, SkillDef } from './define';
 import type { Entity } from '@/ecs/world';
 import type { Scene } from '../render/babylon/exports';
+import { isOn } from '../fidelity';
 import { BUFF_ARRIVALS, BUFF_HITS, BUFF_VISUALS, LAUNCHER_ARROWS, LOOK_ALIASES, SKILL_VISUALS, WARRIOR_GLINTS, type BuffLook } from './visuals';
 
 export { defineSkill, defineBuffLooks, type SkillCancel, type SkillDef, type Mount } from './define';
@@ -45,7 +46,8 @@ export function registerSkills(defs: readonly SkillDef[]): void {
  */
 export function cancelledEffects(skill: number, scene: Scene, target: Entity | null): readonly number[] {
   const out = new Set(target ? (SKILL_CANCELS[skill]?.(scene, target) ?? []) : []);
-  const effect = SKILL_EFFECTS[skill];
+  // Classic: ReceiveMagicFinish reads a BYTE (WSclient.cpp:3884), so 256+ cancels nothing.
+  const effect = skill > 0xff && !isOn('masterBuffCancel') ? undefined : SKILL_EFFECTS[skill];
   if (effect !== undefined) out.add(effect);
   return [...out];
 }

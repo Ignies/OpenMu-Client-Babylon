@@ -54,7 +54,8 @@ clip is one file in `versions/shared/animations/` that says its own speed, flags
   player in scope plays at its own `AttackSpeed` / `MagicSpeed` from the extended scope packet
   (`AddCharacterToScopeExtended`, its `speeds` component, `ecs/systems/animationSystem.ts`), so its
   clips and its casts' release (`onRelease`, which watches the clip) follow its stats. The hero, and a
-  player from the classic packet (no speeds), keep the hero's speeds as before.
+  player from the classic packet (no speeds), keep the hero's speeds as before. It is the
+  `otherPlayersOwnSpeed` improvement (`controllers/fidelity`): on Classic everyone plays at the hero's.
 - `applyPlayerActionSpeed` sets the attack / cast rate at once, so a duration read in the same frame
   does not see the idle rate.
 - Monster attack state (`c->SwordCount`, `c->Skill`) lives in a `WeakMap` keyed by the owner.

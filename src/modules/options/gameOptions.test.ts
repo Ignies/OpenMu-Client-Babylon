@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { migrate } from './gameOptions';
+import { migrate, optionsFrom } from './gameOptions';
 
 const DROPPED = [
   'darkness',
@@ -107,5 +107,21 @@ describe('gameOptions migration', () => {
     migrate(blob);
     expect(blob.lightingQuality).toBe(0);
     expect(blob.materialQuality).toBe(0);
+  });
+});
+
+describe('fidelity in a stored blob', () => {
+  it('a save from before Fidelity gets Enhanced and no overrides', () => {
+    const loaded = optionsFrom(oldBlob());
+    expect(loaded.fidelity).toBe(1);
+    expect(loaded.fidelityOverrides).toEqual({});
+  });
+
+  it('keeps a stored choice, clamps the preset and drops a bad overrides blob', () => {
+    expect(optionsFrom({ fidelity: 0, fidelityOverrides: { wingShadows: true } }).fidelityOverrides)
+      .toEqual({ wingShadows: true });
+    expect(optionsFrom({ fidelity: 7 }).fidelity).toBe(2);
+    expect(optionsFrom({ fidelityOverrides: 'x' }).fidelityOverrides).toEqual({});
+    expect(optionsFrom({ fidelityOverrides: { a: 1, b: false } }).fidelityOverrides).toEqual({ b: false });
   });
 });

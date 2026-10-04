@@ -36,7 +36,8 @@ import { ENUM_WORLD } from '@/core/types';
  *  - `GMEmpireGuardian4::RenderObjectVisual` case 157 (:1050-1053) returns
  *    before its body on these two worlds: the six chandeliers on World74 burn
  *    on the fortress and are cold here. See the note on
- *    `loginscene/chandelierObject.ts`, which lights them (kept as it was).
+ *    `loginscene/chandelierObject.ts`, which lights them: the `loginChandeliers`
+ *    improvement, cold on Classic Fidelity.
  *
  * These tables hold only the types the two folders actually place. The rows
  * for the day-4 types neither folder has (80, 83, 84, 85, 130, 131) are left

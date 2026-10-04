@@ -393,4 +393,10 @@ export default {
   'exit.confirmServers': 'Das Spiel verlassen und zur Serverauswahl zurückkehren?',
   'exit.confirmCharacters': 'Das Spiel verlassen und zur Charakterauswahl zurückkehren?',
   'options.performanceReadout': 'Leistungsanzeige',
+  'options.page.fidelity': 'Originaltreue',
+  'options.fidelity': 'Originaltreue',
+  'options.fidelityCustom': 'Originaltreue (Eigene)',
+  'options.help.fidelity':
+    'Klassisch ist exakt der Original-Client. Verbessert und Ultra schalten die Verbesserungen unten ein; änderst du eine, steht die Vorgabe auf Eigene.',
+  'options.section.improvements': 'Verbesserungen',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -294,4 +294,10 @@ export default {
   'exit.confirmServers': 'ゲームを終了してサーバー選択に戻りますか？',
   'exit.confirmCharacters': 'ゲームを終了してキャラクター選択に戻りますか？',
   'options.performanceReadout': 'パフォーマンス表示',
+  'options.page.fidelity': '再現度',
+  'options.fidelity': '再現度',
+  'options.fidelityCustom': '再現度 (カスタム)',
+  'options.help.fidelity':
+    'クラシックはオリジナルのクライアントそのままです。強化とウルトラは下の改善をオンにします。どれかを変えるとカスタムになります。',
+  'options.section.improvements': '改善',
 } satisfies Partial<Record<keyof typeof en, string>>;

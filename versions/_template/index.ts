@@ -23,6 +23,8 @@ import { templateData } from './data';
 import '../shared/monsters/all';
 // The player clips and monster swing / cast rules, registered with the anim controller.
 import '../shared/animations/all';
+// The deliberate improvements over the original, registered with the fidelity controller.
+import '../shared/improvements/all';
 
 // Keep this export: the registry's load() hands the base game the packet
 // lists through it. Never import app code from this file - it evaluates
