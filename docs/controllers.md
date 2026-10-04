@@ -16,6 +16,19 @@ src/controllers/<name>/
   readme.md     what it does, its API, how to extend it
 ```
 
+## Public files
+
+Code outside a controller imports the files at its root (`fx/recipes.ts`, `skills/define.ts`,
+`sound/sfx.ts`...) and the `index.ts` of any of its folders (`net/protocols`, `assets/mu`,
+`interface/hooks`, each widget in `interface/components/<widget>/`). The rest of a subfolder is
+private: when outside code needs a file in there, export it from that folder's `index.ts`.
+`bun run check` enforces it.
+
+There is no single door per controller on purpose. The controllers use each other's files, and
+routing all of that through one `index.ts` each would turn the import graph into one 228-file
+cycle, where load order decides whether a class exists yet. Pointing at the file that has the code
+keeps the graph free of cycles, and check 7 keeps it that way.
+
 Every facade satisfies `Controller` (`src/controllers/controller.ts`): an `id`, and optionally
 `init(ctx)` once at boot, `update(map, dt)` every frame (from its ECS system) and `reset()` on map
 change. `src/controllers/controllers.ts` lists the controllers the game starts, in order;
@@ -52,5 +65,6 @@ to it, chosen by a game version or an option:
 - A controller imports `src/core`, other controllers and data tables. Never a module, the app,
   or content (`bun run check` enforces it; old exceptions are listed in
   `tools/checks/baselines/deps.json` and may only shrink).
+- No import cycles (`bun run check`; the old ones are in `tools/checks/baselines/cycles.json`).
 - Per-frame code allocates nothing and walks no scene graph.
 - Each controller folder has a `readme.md`.

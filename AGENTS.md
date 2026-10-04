@@ -31,8 +31,9 @@ How agents work here (workflow, roles, tools, where things are): [docs/agents/](
 
 1. **Controllers are generic.** A controller (sound, fx, lighting, weather, item_fx, loading,
    anim, render, camera, terrain, assets, net, interface, combat, skills) knows *how* to play a
-   sound or spawn an effect, never *which* skill or item does it. Each one is a folder with an
-   `index.ts` facade. See [docs/controllers.md](docs/controllers.md).
+   sound or spawn an effect, never *which* skill or item does it. Each one is a folder: `index.ts`
+   is its facade, its root files are its public API, its subfolders are private (reach them
+   through the subfolder's `index.ts`). See [docs/controllers.md](docs/controllers.md).
 2. **Content owns its data.** A skill, item, monster or map object is one file (or folder) under
    `versions/shared/` that calls the controllers. Nothing about Nova lives outside
    `versions/shared/skills/dark_wizard/nova/`. See [docs/content.md](docs/content.md).
