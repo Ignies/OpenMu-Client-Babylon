@@ -27,7 +27,7 @@ Always-on interface elements, one folder per element, same shape as a window. Re
 | `buff_bar` | buff_bar (hud, 60) | the hero's buffs and debuffs with tooltips | skills |
 | `bottom_bar` | bottom_bar (hud, 70) | main frame: orbs, potion slots, skill hotkeys and fan, exp bar | Hero, skills, inventory |
 | `chat` | chat (hud, 230) | chat input box and chat log | chat, social, options |
-| `soccer_score` | soccer_score (hud, 420) | Battle Soccer scoreboard and clock | Store.guilds, social |
+| `soccer_score` | soccer_score (hud, 420) | Battle Soccer scoreboard and clock | GuildMarks, social |
 | `minimap` | minimap (hud, 450) | full world map on TAB and the corner minimap | Store.world, options, social |
 | `mobile_controls` | mobile_controls (hud, 490) | touch HUD: move button, skill pad, menu cluster | Store, skills, warp, social |
 | `name_tags` | - | names and guild marks over characters | Store.world, social |

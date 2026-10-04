@@ -4,7 +4,7 @@ import './style.less';
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
-import { Store } from '@/app/store';
+import { GuildMarks } from '@/modules/guild';
 import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
 import {
@@ -206,7 +206,7 @@ function selectTab(tab: GuildTab): void {
 /** `Render_Guild_History` + the stats block of `Render_Text`. */
 const InfoTab = observer(() => {
   const mine = Social.myGuild!;
-  const guild = Store.guilds.get(mine.id);
+  const guild = GuildMarks.get(mine.id);
   const logo = guild?.logo ?? [];
   const war = Social.guildWar;
 
@@ -547,7 +547,7 @@ const NoGuild = observer(() => {
           <div key={p.netId} className="guild-row">
             <span className="guild-row-name">{p.name}</span>
             <span className="guild-row-role">
-              {Store.guilds.get(p.guildId!)?.name ?? ''}
+              {GuildMarks.get(p.guildId!)?.name ?? ''}
             </span>
             <button
               type="button"
@@ -583,7 +583,7 @@ export const GuildWindow = observer(() => {
   if (!Social.guildWindowEnabled) return null;
 
   const mine = Social.myGuild;
-  const guild = mine ? Store.guilds.get(mine.id) : undefined;
+  const guild = mine ? GuildMarks.get(mine.id) : undefined;
   const tab = Social.guildTab;
 
   return (

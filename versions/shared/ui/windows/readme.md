@@ -35,7 +35,7 @@ One folder per in-game window. A window draws; its state and actions belong to i
 | `command_window` | command (240) | the "D" player command buttons | chat (commands) |
 | `quick_command_window` | quick_command (250) | right-click menu on another player | chat, options |
 | `party` | party (260) | members with HP, invite list of nearby players | social, economy, skills |
-| `guild` | guild (270), guild_master_dialog (370), guild_creation_dialog (380), guild_kick_password_dialog (390) | guild tabs and its dialogs | social, Store.guilds |
+| `guild` | guild (270), guild_master_dialog (370), guild_creation_dialog (380), guild_kick_password_dialog (390) | guild tabs and its dialogs | social, GuildMarks |
 | `skills` | skills (280) | the learned-skill list | HeroSkills, skills |
 | `master_skills` | master_skills (290) | the version's master tree (`loadVersionUi().MasterSkillsWindow`), lazy | skills |
 | `quests` | quests (300), quest_tracker (460) | quest NPC pages and the on-screen tracker | quests, options |

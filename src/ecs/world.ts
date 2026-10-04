@@ -310,7 +310,7 @@ export type Entity = Partial<{
     /** `LifeTime[0..1]` in ticks. */
     life: [number, number];
   };
-  /** AssignCharacterToGuild: the guild a player belongs to (name via Store.guilds). */
+  /** AssignCharacterToGuild: the guild a player belongs to (name via GuildMarks). */
   guild: {
     id: number;
     role: GuildMemberRoleEnum;

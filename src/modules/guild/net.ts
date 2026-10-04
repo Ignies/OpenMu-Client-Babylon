@@ -2,7 +2,7 @@ import { AssignCharacterToGuildPacket, GuildCreationResultGuildCreationErrorType
 import { EventBus } from '@/core/eventBus';
 import { GuildInfoRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
 import { Social } from '../social/social';
-import { Store } from '@/app/store';
+import { GuildMarks } from './state';
 import { Hero } from '@/modules/hero';
 import { Session } from '@/modules/session';
 import { Ecs } from '@/ecs/current';
@@ -24,7 +24,7 @@ function leaveGuild(guildId: number, disbanded: boolean): void {
     );
     for (const obj of gone) world.removeComponent(obj, 'guild');
   }
-  if (disbanded) Store.guilds.delete(guildId);
+  if (disbanded) GuildMarks.delete(guildId);
   runInAction(() => {
     Social.myGuild = null;
     Social.guildMembers = [];
@@ -59,7 +59,7 @@ export function installNet(): void {
    */
   EventBus.on('GuildInformation', packet => {
     const p = new GuildInformationPacket(packet);
-    Store.guilds.set(p.GuildId, {
+    GuildMarks.set(p.GuildId, {
       name: cleanName(p.GuildName),
       alliance: cleanName(p.AllianceGuildName),
       logo: Array.from(new Uint8Array(p.Logo.buffer)),
@@ -86,7 +86,7 @@ export function installNet(): void {
         });
       }
       // Unknown guild: ask for its name/mark, as the original does for a new GuildMarkIndex.
-      if (!Store.guilds.has(member.GuildId) && !requested.has(member.GuildId)) {
+      if (!GuildMarks.has(member.GuildId) && !requested.has(member.GuildId)) {
         requested.add(member.GuildId);
         const req = GuildInfoRequestPacket.createPacket();
         req.GuildId = member.GuildId;

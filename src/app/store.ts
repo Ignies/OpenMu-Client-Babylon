@@ -336,16 +336,6 @@ export const Store = new (class _Store {
   /** WeatherStatusUpdate (0x0F): weather kind + variation of the current map. */
   weather = { weather: 0, variation: 0 };
 
-  /**
-   * GuildInformation by guild id (the original's `GuildMark[]` table): what
-   * `AssignCharacterToGuild` members print over their heads. Plain (not
-   * observable) - the name tags re-read it every frame anyway.
-   */
-  readonly guilds = new Map<
-    number,
-    { name: string; alliance: string; logo: number[] }
-  >();
-
   pickedItem: PickedItem | null = null;
 
   /** Q/W/E/R consumable kinds (`CNewUIItemHotKey`); unbound = the key's default potion. */

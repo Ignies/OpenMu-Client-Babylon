@@ -1,6 +1,6 @@
 import './style.less';
 import { observer } from 'mobx-react-lite';
-import { Store } from '@/app/store';
+import { GuildMarks } from '@/modules/guild';
 import { Ecs } from '@/ecs/current';
 import { Social } from '@/modules/social/social';
 import { ENUM_WORLD } from '@/core/types';
@@ -39,7 +39,7 @@ const SPRITE = 'newui_Figure_ground.OZT';
 
 /** `FindGuildMark`: the mark table by name; the viewport may not have it yet. */
 function logoOf(name: string): number[] | null {
-  for (const guild of Store.guilds.values()) {
+  for (const guild of GuildMarks.values()) {
     if (guild.name === name) return guild.logo;
   }
   return null;

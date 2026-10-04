@@ -32,7 +32,7 @@ Also the guild mark (emblem) codec. It has no packet handlers of its own; the ne
 - Self-defense comes from OpenMU's blue system line (`SelfDefensePlugIn.cs`), parsed in `chat/net.ts`.
 - `guildTeamOf` is `GuildTeam` (`WSclient.cpp:221`). `guildRelationOf` derives the `GR_*` relation
   OpenMU does not send, from `myGuild`, `allianceGuilds`, the rival name and the war.
-- Guild names and logos by id live in `Store.guilds` (written by `guild/net.ts`).
+- Guild names and logos by id live in `GuildMarks` (`guild/state.ts`, written by `guild/net.ts`).
 - Guild marks are 8x8 pixels of 4-bit palette indices, 32 bytes packed high nibble first;
   palette from `CreateGuildMark` (`ZzzInventory.cpp:11204`).
 - Outgoing packets: `PublicChatMessage`, `WhisperMessage`, `PartyInviteRequest`, `PartyInviteResponse`,
@@ -41,7 +41,7 @@ Also the guild mark (emblem) codec. It has no packet handlers of its own; the ne
 
 ## Depends on / used by
 - uses: `chat/` (log helpers, emojis, item links, `Commands`), `hero/emotes.ts`, `controllers/settings`,
-  `Store`, `controllers/net` (chat wire, round trip), `controllers/interface/nameTags`, `controllers/sound`.
+  `session` (sending), `hero`, `guild` (`GuildMarks`), `controllers/net` (chat wire, round trip), `controllers/interface/nameTags`, `controllers/sound`.
 - used by: nearly every module (system lines), `party`, `guild`, `guild_war`, `chat`, `friends`, `band`,
   `hero/net.ts` (`reset`), `ecs/systems/skillCastSystem.ts`, `controllers/actors/guildFlag.ts` and
   `ecs/systems/guildFlagSystem.ts` (marks). UI: `hud/chat`, `hud/name_tags`, `hud/party_bars`,
@@ -50,7 +50,7 @@ Also the guild mark (emblem) codec. It has no packet handlers of its own; the ne
 
 ## Change it
 - add chat log behaviour: `social.ts` chat section; pure layout code goes in `chat/chat.ts`.
-- add a party or guild action: a method in `social.ts` that builds the packet and calls `Store.sendToGS`.
+- add a party or guild action: a method in `social.ts` that builds the packet and calls `Session.sendToGS`.
 - add party or guild state: a field here (register it in `makeObservable` and clear it in `reset`);
   the handler that fills it goes in `party/net.ts` or `guild/net.ts`.
 - change the mark palette or format: `src/core/guildMark.ts`.

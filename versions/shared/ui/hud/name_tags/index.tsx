@@ -1,7 +1,7 @@
 import './style.less';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { With } from 'miniplex';
-import { Store } from '@/app/store';
+import { GuildMarks } from '@/modules/guild';
 import { Ecs } from '@/ecs/current';
 import { useRenderId } from '@/controllers/interface/hooks';
 import {
@@ -118,7 +118,7 @@ function buildLines(entity: TagEntity): Line[] {
       prefix: { text: SHOP_TITLE_PREFIX, colour: shop.prefix },
     });
   } else {
-    const guild = entity.guild ? Store.guilds.get(entity.guild.id) : undefined;
+    const guild = entity.guild ? GuildMarks.get(entity.guild.id) : undefined;
     if (guild?.alliance) {
       lines.push({
         text: unionLine(
@@ -139,7 +139,7 @@ function buildLines(entity: TagEntity): Line[] {
     }
   }
 
-  const ownMark = entity.guild ? Store.guilds.get(entity.guild.id)?.logo : undefined;
+  const ownMark = entity.guild ? GuildMarks.get(entity.guild.id)?.logo : undefined;
   // Self-defense outranks the PK tint for its 60s: the aggressor is marked
   // to the victim (violet in the official client; the state itself comes
   // from OpenMU's blue message, modules/social/social.ts trackSelfDefense).
@@ -212,7 +212,7 @@ function readTagInputs(entity: TagEntity, out: TagInputs): void {
   const isHero = entity === Ecs.world?.playerEntity;
   const isGm = !!entity.isGm;
   const guildId = entity.guild?.id;
-  const guild = guildId !== undefined ? Store.guilds.get(guildId) : undefined;
+  const guild = guildId !== undefined ? GuildMarks.get(guildId) : undefined;
 
   out.name = entity.objectNameInWorld;
   out.color = tag.color;

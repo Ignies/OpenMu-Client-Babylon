@@ -19,7 +19,7 @@ has the handlers. Plain guild membership is in [../guild/readme.md](../guild/rea
 - Battle Soccer: `Social.battleSoccer` holds the team names, goals and remaining seconds. Observers
   on the stadium get it too, without a `guildWar`.
 - Alliance and hostility: an offer sets `Social.guildRelationRequest`. A successful change clears
-  `Store.guilds` (the alliance name over heads changed) and re-reads the guild list, and the
+  `GuildMarks` (the alliance name over heads changed) and re-reads the guild list, and the
   alliance list when that tab is open. Error texts follow GlobalText 1313 / 1326-1333.
 - Outgoing packets are `Social` actions: `guildWarRespond`, `guildRelationRequestSend`,
   `guildRelationRespond`, `requestAllianceList`, `removeAllianceGuild`.

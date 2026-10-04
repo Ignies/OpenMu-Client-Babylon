@@ -2,8 +2,8 @@
 
 Guild packets from the game server: guild marks, membership, the member list, join, kick, leave,
 disband and guild creation. The guild state and the guild actions live in the `Social` store
-([../social/readme.md](../social/readme.md)); the guild mark table is `Store.guilds`
-(`src/app/store.ts`). This folder only has the handlers. Wars and alliances are in
+([../social/readme.md](../social/readme.md)); the guild mark table is `GuildMarks`
+(`state.ts`, through `index.ts`, the door). This folder only has the handlers. Wars and alliances are in
 [../guild_war/readme.md](../guild_war/readme.md).
 
 ## Public API
@@ -11,13 +11,13 @@ disband and guild creation. The guild state and the guild actions live in the `S
 
 ## How it works
 - The handlers port `ReceiveGuild*` (`WSclient.cpp:6987`).
-- `Store.guilds` is the original's `GuildMark[]` table (`ReceiveGuildViewport`): guild id to name,
+- `GuildMarks` is the original's `GuildMark[]` table (`ReceiveGuildViewport`): guild id to name,
   alliance name and the 32-byte logo. `AssignCharacterToGuild` puts a `guild` component
   (`{ id, role }`) on each player in scope, sets `Social.myGuild` for the hero, and sends one
   `GuildInfoRequest` per guild id it does not know yet.
 - `leaveGuild` clears `Social.myGuild`, the member and alliance lists, the war and soccer state,
   the scores and closes the window. On a disband every member in scope loses the mark and the
-  guild is dropped from `Store.guilds`.
+  guild is dropped from `GuildMarks`.
 - OpenMU sends no `GuildMemberLeftGuild` after a disband, so `GuildKickResponse` with
   `GuildDisband` clears the guild itself. `KickSucceeded` reaches the kicked player too, after
   `myGuild` is already cleared, so only a player still in a guild prints the removal line.
@@ -30,7 +30,7 @@ disband and guild creation. The guild state and the guild actions live in the `S
   `guildAssignRole`. Only `GuildInfoRequest` is sent from here.
 
 ## Packets
-- `GuildInformation`: name, alliance and logo of one guild into `Store.guilds`.
+- `GuildInformation`: name, alliance and logo of one guild into `GuildMarks`.
 - `AssignCharacterToGuild`: guild id and role of players in scope.
 - `GuildMemberLeftGuild`: a member left; the hero leaving (or the master, disband) clears the guild.
 - `GuildJoinRequest`: someone asks to join the hero's guild; sets `Social.guildJoinRequest`.
@@ -45,7 +45,7 @@ disband and guild creation. The guild state and the guild actions live in the `S
 - uses: `social/social.ts`, `chat/chat.ts` (`cleanName`), `_shared/net_helpers.ts`
   (`playerNameById`), `app/store.ts`, `src/i18n`.
 - used by: `src/app/logic.ts`. The window is `versions/shared/ui/windows/guild/`; the join prompt is
-  `windows/social_prompts/`. `Store.guilds` is read by `hud/name_tags/`,
+  `windows/social_prompts/`. `GuildMarks` is read by `hud/name_tags/`,
   `ecs/systems/guildFlagSystem.ts` and `ecs/world.ts`.
   `chat/commands.ts` calls `Social.guildJoin`.
 

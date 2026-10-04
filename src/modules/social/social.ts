@@ -1,6 +1,6 @@
 import { t } from '../../i18n';
 import { action, computed, makeObservable, observable, runInAction } from 'mobx';
-import { Store } from '../../app/store';
+import { GuildMarks } from '../guild';
 import { Hero } from '../hero';
 import { Session } from '../session';
 import { Ecs } from '../../ecs/current';
@@ -386,7 +386,7 @@ export const Social = new (class _Social {
       (world.playerEntity?.objectNameInWorld === sender ? world.playerEntity : undefined);
     if (!entity) return {};
 
-    const guild = entity.guild ? Store.guilds.get(entity.guild.id) : undefined;
+    const guild = entity.guild ? GuildMarks.get(entity.guild.id) : undefined;
     // For ourselves the server answered both outright (CharacterInformation);
     // for anyone else `isGm` is the `#` shout guess and all there is.
     const own = sender === Hero.name;
@@ -1085,7 +1085,7 @@ export const Social = new (class _Social {
     if (guildId === undefined) return 0;
     if (this.myGuild && guildId === this.myGuild.id) return 1;
     const war = this.guildWar;
-    if (war && Store.guilds.get(guildId)?.name === war.enemyGuild) return 2;
+    if (war && GuildMarks.get(guildId)?.name === war.enemyGuild) return 2;
     return 0;
   }
 
@@ -1100,7 +1100,7 @@ export const Social = new (class _Social {
     const mine = this.myGuild;
     if (mine && guildId === mine.id) return GuildRelation.Union;
 
-    const guild = Store.guilds.get(guildId);
+    const guild = GuildMarks.get(guildId);
     if (!guild) return GuildRelation.None;
 
     if (this.guildRivalName && guild.name === this.guildRivalName) {
@@ -1113,7 +1113,7 @@ export const Social = new (class _Social {
       return GuildRelation.Union;
     }
 
-    const myAlliance = mine ? Store.guilds.get(mine.id)?.alliance : '';
+    const myAlliance = mine ? GuildMarks.get(mine.id)?.alliance : '';
     if (myAlliance && guild.alliance && guild.alliance === myAlliance) {
       return GuildRelation.Union;
     }
