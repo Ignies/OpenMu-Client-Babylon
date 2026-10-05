@@ -93,6 +93,8 @@ water, ground picks, minimap data and the base class for map objects. There is n
   objects, lean boxes, fixups and grass, pinned across the move into the map folders.
 - `mapTerrain.test.ts`: only Icarus hides its ground; rest objects and lean boxes and the
   nearest-object height fix from a registered entry.
+- `tools/grassCards.test.ts`: every grass card `Data/` ships for a converted world is in
+  `public/game-assets` (a missing card silently grows no grass; 58 were missing until 2026-10-05).
 - `groundArrays.test.ts`: `refreshGroundTile` raises and drops a tile and leaves its neighbours;
   `groundTiles` copies tiles out with their own quads.
 - `terrainDynamicLight.test.ts`: `terrainLightTouchesSample` and its version, the bilinear sample.
