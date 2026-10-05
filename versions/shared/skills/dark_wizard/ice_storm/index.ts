@@ -100,7 +100,7 @@ const iceShard = (i: number, extra?: IceExtra): Step => (at, c) => {
     return out.set(lerp(path[a * 3], path[b * 3], f), lerp(path[a * 3 + 1], path[b * 3 + 1], f), lerp(path[a * 3 + 2], path[b * 3 + 2], f));
   };
   const from = new Vector3(path[0], path[1], path[2]);
-  const yaw = entityYaw(c.caster);
+  const yaw = -entityYaw(c.caster);
   const fadeIn = Math.min(1, ICE_RAMP_TICKS / last);
   effects.spawn('model', c.scene, from, { model: MODEL.blizzard, seconds, scale: 0.5, colour: RGBS.white, yaw, follow: shard, life: q => Math.min(1, (q * last) / ICE_RAMP_TICKS) });
   // Each tick a white SMOKE sub0 puff, and at even odds an ENERGY sub1 chip or a FIRE+2 sub7 flame (MoveHandlers.cpp:5148-5156).

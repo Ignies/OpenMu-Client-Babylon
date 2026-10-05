@@ -37,7 +37,7 @@ function handRunes(scene: Scene, e: Entity): void {
   for (const bone of HAND_BONES) {
     const at: PointSource = out => bonePos(e, bone, out, CAST_HEIGHT);
     const p = at(new Vector3());
-    effects.spawn('model', scene, p, { model: MODEL.arrowsRe06, seconds: ticks(RUNE_TICKS), colour: RUNE_LIGHT, follow: at, loop: false, yaw: entityYaw(e), scaleAt: runeScale, intensity: runeLight, fadeTail: 0 });
+    effects.spawn('model', scene, p, { model: MODEL.arrowsRe06, seconds: ticks(RUNE_TICKS), colour: RUNE_LIGHT, follow: at, loop: false, yaw: -entityYaw(e), scaleAt: runeScale, intensity: runeLight, fadeTail: 0 });
     for (const k of [1, 0.8]) {
       effects.spawn('sprite', scene, p, { texture: TEX.flare, colour: RUNE_LIGHT, size: cm(64) * k, sizeAt: p => runeScale(p * ticks(RUNE_TICKS)), seconds: ticks(RUNE_TICKS), follow: at, fadeTail: 0 });
     }
@@ -143,7 +143,7 @@ const swellWith = (body: RGB, boneLight: RGB): Step => (at, c) => {
     scale: 0.9,
     colour: body,
     follow: followEntity(c.caster, 0),
-    yaw: entityYaw(c.caster),
+    yaw: -entityYaw(c.caster),
     fadeTail: 0,
     intensity: swellLight,
   });

@@ -58,7 +58,7 @@ const infernoWith = (tint: RGB, extra?: InfernoExtra): Step => (_at, c) => {
     seconds: ticks(INFERNO_TICKS),
     scale: 0.9,
     colour: [0.8, 0.8, 0.8],
-    yaw: entityYaw(c.caster),
+    yaw: -entityYaw(c.caster),
     keysPerTick: 0.5,
     life: p => (INFERNO_TICKS * (1 - p)) / 20,
   });

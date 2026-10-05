@@ -98,7 +98,7 @@ export interface ModelOptions {
   spin?: number;
   /** Tiles/s upward. */
   rise?: number;
-  /** Initial yaw, radians. */
+  /** Initial yaw, radians, the node's own: MU's Angle[2] turned the other way (renderAngles.ts), so a body's facing is `-entityYaw(body)`. */
   yaw?: number;
   /** Lay the model flat on the ground (rings, circles). Default: upright like a character. */
   flat?: boolean;

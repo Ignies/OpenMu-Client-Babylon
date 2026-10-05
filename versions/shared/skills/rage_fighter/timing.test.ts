@@ -3,13 +3,17 @@ import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
 import { Scene } from '@babylonjs/core/scene';
 import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 import { effects } from '@/controllers/fx';
+import { fxNow } from '@/controllers/fx/core';
+import { lighting } from '@/controllers/lighting';
+import { SKILL_LIGHTS } from '@/controllers/lighting/skills';
 import { MODEL, TEX } from '@/controllers/fx/recipes';
 import type { TailStrip, TickedFx } from '@/controllers/fx/ticked';
 import { ENUM_WORLD } from '@/core/types';
 import type { Entity } from '@/ecs/world';
 import { PlayerAction } from '../../objects/enum';
-import { playAreaSkillVisual, playTargetedSkillVisual } from '../skillVisuals';
+import { clearBuffVisuals, playAreaSkillVisual, playTargetedSkillVisual, setBuffVisual } from '../skillVisuals';
 import { skillSound } from '@/controllers/sound/combat';
+import { JOINT_SPARKS } from '../_shared';
 import { beginDarkSide, darkSideHitTicks, isDarkSide, nextDarkSideHit, observeDarkSideEcho, observeDarkSideTargets, rageLayer } from './dark_side/rage';
 
 vi.hoisted(() => {
@@ -77,7 +81,27 @@ interface Run {
 function run(
   skill: number,
   clip: PlayerAction,
-  { keysPerTick = 0.4, ticks = 60, area = false, hero = false, leaveAt = 0, target = true }: { keysPerTick?: number; ticks?: number; area?: boolean; hero?: boolean; leaveAt?: number; target?: boolean } = {}
+  {
+    keysPerTick = 0.4,
+    ticks = 60,
+    area = false,
+    hero = false,
+    leaveAt = 0,
+    target = true,
+    buffs,
+    onTick,
+  }: {
+    keysPerTick?: number;
+    ticks?: number;
+    area?: boolean;
+    hero?: boolean;
+    leaveAt?: number;
+    target?: boolean;
+    /** The caster's buffs. */
+    buffs?: Set<number>;
+    /** Called before each tick with the caster and the target. */
+    onTick?: (tick: number, caster: Entity, target: Entity | null) => void;
+  } = {}
 ): Run {
   let tick = 0;
   const model = { CurrentAction: clip as number, actionFrame: () => 0, AnimationSpeed: keysPerTick };
@@ -85,6 +109,7 @@ function run(
   const caster = {
     netId: 1,
     localPlayer: hero || undefined,
+    buffs,
     transform: { pos: new Vector3(100, 0, 100), rot: new Vector3(0, 0.5, 0), scale: 1 },
     playerAnimation: { action: clip },
     modelObject: model,
@@ -136,6 +161,7 @@ function run(
   take();
   for (tick = 1; tick <= ticks; tick++) {
     if (leaveAt && tick >= leaveAt) model.CurrentAction = PlayerAction.PLAYER_STOP_MALE;
+    onTick?.(tick, caster, aim);
     effects.update(ENUM_WORLD.WD_0LORENCIA, 1 / 25);
     take();
     for (const s of out.spawns) if (s.end === undefined && s.handle && !s.handle.alive) s.end = tick;
@@ -148,6 +174,12 @@ function run(
 const spriteTicks = (r: Run, texture: string): number[] => [...new Set(r.spawns.filter(s => s.name === 'sprite' && s.opts.texture === texture).map(s => s.tick))];
 /** The ticks on which `key` played. */
 const soundTicks = (r: Run, key: string): number[] => r.sounds.filter(s => s.key === key).map(s => s.tick);
+/** The ticks a ticked script drew a one-tick sprite of `texture` on, and how many it drew on each. */
+const drawTicks = (r: Run, texture: string): [number, number][] => {
+  const n = new Map<number, number>();
+  for (const d of r.draws) if (d.kind === 'sprite' && d.args[0] === texture) n.set(d.tick, (n.get(d.tick) ?? 0) + 1);
+  return [...n.entries()];
+};
 const range = (from: number, to: number): number[] => Array.from({ length: to - from + 1 }, (_, i) => from + i);
 
 describe('Dragon Slasher (265): MODEL_DRAGON_KICK_DUMMY reads the caster\'s DRAGONKICK clip (MoveHandlers.cpp:9826-9915)', () => {
@@ -157,20 +189,52 @@ describe('Dragon Slasher (265): MODEL_DRAGON_KICK_DUMMY reads the caster\'s DRAG
   it('bursts on the target every tick past key 5, and Rage_Dragonkick_Att every tick past key 8', () => {
     // Key 5.2 on tick 13, 8.4 on tick 21; the clip is left on tick 26.
     const r = run(265, KICK, { leaveAt: 26, ticks: 40 });
-    expect(spriteTicks(r, TEX.spark2)).toEqual(range(13, 25));
+    // Twice a tick four BITMAP_ENERGY sub7, each drawn on its moves 1-4: made on ticks 13-25.
+    expect(drawTicks(r, TEX.thunder)).toEqual(range(13, 28).map(t => [t, 8 * (Math.min(t, 25) - Math.max(13, t - 3) + 1)]));
     expect(soundTicks(r, ATT)).toEqual(range(21, 25));
   });
 
   it('drops everything when the caster leaves the clip first', () => {
     const r = run(265, KICK, { leaveAt: 10, ticks: 40 });
-    expect(spriteTicks(r, TEX.spark2)).toEqual([]);
+    expect(drawTicks(r, TEX.thunder)).toEqual([]);
     expect(soundTicks(r, ATT)).toEqual([]);
   });
 
-  it('draws nothing on the target without one (m_sTargetIndex < 0)', () => {
+  it('draws nothing on the target without one (m_sTargetIndex < 0), and casts in silence (MonkSystem.cpp:1226-1227, :1259)', () => {
     const r = run(265, KICK, { leaveAt: 26, ticks: 40, target: false });
-    expect(spriteTicks(r, TEX.spark2)).toEqual([]);
+    expect(drawTicks(r, TEX.thunder)).toEqual([]);
     expect(soundTicks(r, ATT)).toEqual([]);
+    expect(soundTicks(r, 'Sound/Ragefighter/Rage_Dragonkick')).toEqual([]);
+    // With one, Rage_Dragonkick goes with the volley at the packet; the click has none of its own.
+    expect(soundTicks(run(265, KICK, { leaveAt: 26, ticks: 40 }), 'Sound/Ragefighter/Rage_Dragonkick')).toEqual([0]);
+    expect(skillSound(265)).toBeNull();
+  });
+
+  it('a burst, twice over: four BITMAP_ENERGY sub7, LIGHTNING_MEGA1 sub0 and SPARK+1 sub3 and sub8, and two SPARK sub13 (MoveHandlers.cpp:9866-9895)', () => {
+    // rand() % n is n / 2: fScale (0.5 + 0.2) x 1.5 x 1.8 = 1.89. One burst: the clip is left on tick 14.
+    const random = vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    const r = run(265, KICK, { leaveAt: 14, ticks: 60 });
+    random.mockRestore();
+    const drawn = (texture: string, tick: number) => r.draws.filter(d => d.kind === 'sprite' && d.tick === tick && d.args[0] === texture);
+    const [energy] = drawn(TEX.thunder, 13);
+    const [mega] = drawn(TEX.lightningMega1, 13);
+    // ENERGY: Thunder01 64 px x 1.89 x (4 + 6) x 0.1, turned 180 + 20 a move, Light x0.97 a move (ZzzEffectParticle.cpp:723-753, :4939-4985).
+    expect([energy.args[1], energy.args[5], energy.args[7], energy.args[8]]).toEqual([[0.7, 0.7, 1], expect.closeTo(0.64 * 1.89), expect.closeTo((200 * Math.PI) / 180), expect.closeTo(0.97)]);
+    // MEGA1: 128 px x 1.89 x 0.9, turned 180, Alpha 1 - 0.15 a move over its Light (:1826-1843, :6071-6091).
+    expect([mega.args[5], mega.args[7], mega.args[8]]).toEqual([expect.closeTo(1.28 * 1.89 * 0.9), expect.closeTo(Math.PI), expect.closeTo(0.85)]);
+    expect([13, 14, 15, 16, 17].map(t => [drawn(TEX.thunder, t).length, drawn(TEX.lightningMega1, t).length])).toEqual([[8, 8], [8, 8], [8, 8], [8, 8], [0, 0]]);
+    // Spark03: 8 sub3 (Scale 1 x0.8 a move, 4 moves), 8 sub8 (Scale 1 - 0.5 a move, gone under 0.2), both +-1 % with WorldTime,
+    // and 4 sub13 (Scale 0.6 x 1.6).
+    const sparks = drawn(TEX.spark3, 13).map(d => d.args[5] as number);
+    const near = (v: number, tolerance: number) => sparks.filter(s => Math.abs(s - v) <= tolerance);
+    expect(near(0.32 * 0.8, 0.003)).toHaveLength(8);
+    expect(near(0.32 * 0.5, 0.004)).toHaveLength(8);
+    expect(near(0.32 * 0.96, 1e-9)).toHaveLength(4);
+    expect(drawn(TEX.spark3, 14)).toHaveLength(8 + 4);
+    // The sub13 sparks fly 4.5 cm a tick, rise and fall by a Gravity of 14 losing 2 a move, bounce and die by LifeTime 32 (:2016-2061, :6558-6608).
+    const last = Math.max(...r.draws.filter(d => d.kind === 'sprite' && d.args[0] === TEX.spark3).map(d => d.tick));
+    expect(last).toBeGreaterThan(20);
+    expect(last).toBeLessThan(13 + 32);
   });
 
   const winds = (r: Run) => r.draws.filter(d => d.kind === 'push' && (d.args[0] as { texture: string }).texture === TEX.groundWind);
@@ -210,17 +274,70 @@ describe('Chain Drive (262): BITMAP_SWORDEFF reads the caster\'s GIANTSWING key 
   it('two blows with Rage_Giantswing_Att: past key 6 (tick 16) and past key 11 (tick 28)', () => {
     for (const skill of [262, 558]) {
       const r = run(skill, SWING);
-      expect(spriteTicks(r, TEX.thunder)).toEqual([16, 28]);
       expect(soundTicks(r, ATT)).toEqual([16, 28]);
-      // The giant-swing wave goes out with the first blow.
-      expect(r.spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.shockwave).map(s => s.tick)).toEqual([16]);
+      // The giant-swing wave goes out with the first blow, drawn twice.
+      expect(r.spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.shockwave).map(s => s.tick)).toEqual([16, 16]);
     }
+  });
+
+  it('the first blow\'s MODEL_SHOCKWAVE01 sub0 leaves bone 0 + (-180, 100, 0) and backs off at 220 + Scale x 80 cm (MoveHandlers.cpp:9330-9338, :9428-9436)', () => {
+    // The run ends on tick 19, the wave's third move.
+    const r = run(262, SWING, { ticks: 19 });
+    const waves = r.spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.shockwave);
+    const { seconds, scaleAt, intensity, colour, angle, follow } = waves[0].opts as { seconds: number; scaleAt: (t: number) => number; intensity: (t: number) => number; colour: number[]; angle: number[]; follow: (out: Vector3) => Vector3 };
+    // LifeTime 5 / (2 x 0.4) = 6.25: drawn 7 ticks; Scale + 0.2 and Light x0.65 a move.
+    expect([Math.round(seconds * 25), scaleAt(3 / 25), intensity(3 / 25), colour]).toEqual([7, expect.closeTo(1.6), expect.closeTo(0.65 ** 3), [0.4, 0.5, 1]]);
+    expect(angle).toEqual([60, 0, expect.closeTo(0.5 * (180 / Math.PI) - 180)]);
+    // No skeleton here: it starts at the feet + 90 cm, right over the caster, so it has no way to back off along.
+    expect([waves[0].at.x, waves[0].at.y, waves[0].at.z]).toEqual([100, 0.9, 100]);
+    // Each move sets its height above sea level outright: 220 + (1 + 0.2 x 3) x 80 cm.
+    const at = follow(new Vector3());
+    expect([at.x, at.y, at.z]).toEqual([100, expect.closeTo((220 + 1.6 * 80) / 100), 100]);
   });
 
   it('drops a blow whose key the clip never reaches', () => {
     const r = run(262, SWING, { leaveAt: 20 });
-    expect(spriteTicks(r, TEX.thunder)).toEqual([16]);
     expect(soundTicks(r, ATT)).toEqual([16]);
+    expect(drawTicks(r, TEX.ring)).toEqual([]);
+  });
+
+  it('the first blow\'s BITMAP_DAMAGE1 throws a particle on its moves 5, 9, 13 and 17, each drawn 4 ticks growing x1.2 (MoveHandlers.cpp:9456-9475)', () => {
+    const random = vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    const r = run(262, SWING);
+    random.mockRestore();
+    const sparks = r.draws.filter(d => d.kind === 'sprite' && d.args[0] === TEX.damage1);
+    expect(drawTicks(r, TEX.damage1)).toEqual(range(21, 36).map(t => [t, 1]));
+    // Scale (1.5 + 0.02) x 1.4 with rand() % n at n / 2, 64 px, x1.2 a move; Light (0.6, 0.94, 1) x 1.6 a move, clamped.
+    expect(sparks.slice(0, 4).map(d => Math.round((d.args[5] as number) * 1e4) / 1e4)).toEqual([1, 2, 3, 4].map(m => Math.round(0.64 * 1.52 * 1.4 * 1.2 ** m * 1e4) / 1e4));
+    expect(sparks[0].args[1]).toEqual([0.96, 1, 1]);
+    expect(sparks[1].args[1]).toEqual([1, 1, 1]);
+    // -40 + 45 cm across, 50 + 50 cm over the target's feet.
+    expect(sparks[0].args.slice(2, 5).map(v => Math.round((v as number) * 100) / 100)).toEqual([103.05, 1, 104.05]);
+    // None without a target.
+    expect(drawTicks(run(262, SWING, { target: false }), TEX.damage1)).toEqual([]);
+  });
+
+  it('the second blow\'s BITMAP_SHINY+4 throws a ring particle a move for 16 moves, each drawn 7 ticks (ZzzEffect.cpp:8497-8504)', () => {
+    const r = run(262, SWING);
+    // Rings born on ticks 29-44, each on its moves 1-7.
+    expect(drawTicks(r, TEX.ring)).toEqual(range(29, 50).map(t => [t, Math.min(t, 44) - Math.max(29, t - 6) + 1]));
+    const first = r.draws.filter(d => d.kind === 'sprite' && d.args[0] === TEX.ring).slice(0, 2);
+    // 64 px x 1.9 x 1.1 a move, Light x0.9 a move.
+    expect(first.map(d => [d.args[5], d.args[8]])).toEqual([[expect.closeTo(0.64 * 1.9 * 1.1), expect.closeTo(0.9)], [expect.closeTo(0.64 * 1.9 * 1.1 ** 2), expect.closeTo(0.81)]]);
+  });
+
+  it('BITMAP_SWORDEFF makes a joint on bone 5 each tick it lives, flat, 100 cm wide, each drawn 10 moves (MoveHandlers.cpp:9322-9324, ZzzEffectJoint.cpp:2720-2729)', () => {
+    const pushes = (r: Run) => r.draws.filter(d => d.kind === 'push' && (d.args[0] as { texture: string }).texture === TEX.swordEffJoint);
+    const all = pushes(run(262, SWING));
+    // Its LifeTime: 200, 45 at the first blow, 20 at the second (tick 28), so joints on ticks 1-47, each laying 10 tails.
+    expect(all).toHaveLength(47 * 10);
+    expect([1, 10, 47, 56, 57].map(t => all.filter(d => d.tick === t).length)).toEqual([1, 10, 10, 1, 0]);
+    const [opts, light, x, y, z, half, yaw, pitch] = all[0].args as [{ colour: number[]; maxTails: number; faces: string }, number, number, number, number, number, number, number];
+    expect([opts.colour, opts.maxTails, opts.faces, light, half, yaw, pitch]).toEqual([[0.6, 0.6, 1], 50, 'flat', 1, 0.5, 0.5, 0]);
+    // Bone 5; no skeleton here, so the feet + 90 cm.
+    expect([x, y, z]).toEqual([100, 0.9, 100]);
+    // It ends with the clip: joints on ticks 1-19 when the caster leaves it on tick 20.
+    expect(pushes(run(262, SWING, { leaveAt: 20 }))).toHaveLength(19 * 10);
   });
 
   /** [tick, drawn ticks, Scale at the spawn and 3 moves on] of each `model` spawn. */
@@ -235,6 +352,8 @@ describe('Chain Drive (262): BITMAP_SWORDEFF reads the caster\'s GIANTSWING key 
       // LifeTime 14 / (2 x 0.4) = 17.5, drawn 18 ticks, Scale 0.5 + 0.1 a tick; 8 / 0.4 = 20, Scale x 1.01 a tick.
       expect(models(r, 'Effect/shockwave02.glb')).toEqual([[28, 18, 0.5, 0.8], [28, 18, 0.5, 0.8]]);
       expect(models(r, MODEL.shockwaveSpin)).toEqual([[28, 20, 0.5, 0.515], [28, 20, 0.9, 0.927]]);
+      // The spin waves draw Damage1 over their own sheet (ZzzObject.cpp:2499-2503).
+      expect(r.spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.shockwaveSpin).map(s => s.opts.texture)).toEqual([TEX.damage1, TEX.damage1]);
     }
     expect(models(run(262, SWING, { leaveAt: 20 }), MODEL.shockwaveSpin)).toEqual([]);
   });
@@ -261,23 +380,74 @@ describe('Chain Drive (262): BITMAP_SWORDEFF reads the caster\'s GIANTSWING key 
   });
 });
 
-describe('Dragon Roar (264): the dragon on BLOW_OF_DESTRUCTION\'s LifeTime, the fire ring on DRAGONLORE key 5', () => {
+describe('Dragon Roar (264): the dragon on BLOW_OF_DESTRUCTION\'s LifeTime, BITMAP_LAVA\'s waves and fire past DRAGONLORE key 5', () => {
   const LORE = PlayerAction.PLAYER_SKILL_DRAGONLORE;
   const dragon = (r: Run) => r.spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.dragonHead).map(s => s.tick);
-  const ring = (r: Run) => r.spawns.filter(s => s.name === 'ring' && s.opts.texture === TEX.shockwave).map(s => s.tick);
+  const waves = (r: Run, model: string) => r.spawns.filter(s => s.name === 'model' && s.opts.model === model);
 
-  it('the dragon on tick 21 (LifeTime 50 reaches 30, MoveHandlers.cpp:7650-7666), the ring past key 5 (tick 17 at 0.3 a tick)', () => {
+  it('the dragon on tick 21 (LifeTime 50 reaches 30, MoveHandlers.cpp:7650-7666), the waves past key 5 (tick 17 at 0.3 a tick)', () => {
     for (const skill of [264, 560]) {
       const r = run(skill, LORE, { keysPerTick: 0.3, area: true });
       expect(dragon(r)).toEqual([21]);
-      expect(ring(r)).toEqual([17]);
+      expect(waves(r, MODEL.shockwave).map(s => s.tick)).toEqual([17]);
+      expect(waves(r, MODEL.shockwaveGround).map(s => s.tick)).toEqual([17]);
     }
   });
 
-  it('no ring when the clip is left before key 5; the dragon comes anyway', () => {
+  it('no waves and no fire when the clip is left before key 5; the dragon comes anyway', () => {
     const r = run(264, LORE, { keysPerTick: 0.3, area: true, leaveAt: 15 });
     expect(dragon(r)).toEqual([21]);
-    expect(ring(r)).toEqual([]);
+    expect(waves(r, MODEL.shockwave)).toEqual([]);
+    expect(drawTicks(r, TEX.fireHik1)).toEqual([]);
+  });
+
+  it('MODEL_SHOCKWAVE01 sub1 on the caster: Scale x1.24, Light x 5 x 0.45 a move on Damage2, for 5 / PlaySpeed ticks (ZzzEffect.cpp:5884-5888, MoveHandlers.cpp:9383-9395, ZzzObject.cpp:2462-2467)', () => {
+    const [wave] = waves(run(264, LORE, { keysPerTick: 0.3, area: true }), MODEL.shockwave);
+    const { seconds, colour, texture, angle, scaleAt, blendLight } = wave.opts as { seconds: number; colour: number[]; texture: string; angle: number[]; scaleAt: (t: number) => number; blendLight: (t: number) => number };
+    expect([Math.round(seconds * 25), colour, texture, scaleAt(2 / 25)]).toEqual([17, [1, 0.12, 0], TEX.damage2, expect.closeTo(1.24 ** 2)]);
+    expect(angle[2]).toBeCloseTo(0.5 * (180 / Math.PI));
+    expect([blendLight(2 / 25), blendLight(9 / 25)]).toEqual([expect.closeTo(5 * 0.45 ** 2), 0]);
+  });
+
+  it('MODEL_SHOCKWAVE_GROUND01 sub1 where the lava lies: LifeTime 50, Scale x1.2 and Light x 6 x 0.9 a move on Kwave2 (ZzzEffect.cpp:6123-6128, MoveHandlers.cpp:9806-9810, ZzzObject.cpp:2520-2525)', () => {
+    const [ground] = waves(run(264, LORE, { keysPerTick: 0.3, area: true }), MODEL.shockwaveGround);
+    const { seconds, colour, texture, scaleAt, blendLight } = ground.opts as { seconds: number; colour: number[]; texture: string; scaleAt: (t: number) => number; blendLight: (t: number) => number };
+    expect([Math.round(seconds * 25), colour, texture, scaleAt(2 / 25), blendLight(2 / 25)]).toEqual([50, [1, 0.1, 0], TEX.kwave2, expect.closeTo(1.44), expect.closeTo(6 * 0.81)]);
+  });
+
+  it('each tick past key 5 a flame climbing 7 cm a tick and four FIRE_HIK1 sub5 round it, each with a SPARK sub12 from 250 cm up (MoveHandlers.cpp:9969-10014)', () => {
+    const random = vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    const r = run(264, LORE, { keysPerTick: 0.3, area: true, leaveAt: 19 });
+    random.mockRestore();
+    // rand() % 3 is 1: the middle flame is BITMAP_FIRE_CURSEDLICH sub4; the four round it firehik01. Fire on ticks 17 and 18.
+    const born = (texture: string, tick: number) => r.draws.filter(d => d.kind === 'sprite' && d.tick === tick && d.args[0] === texture);
+    expect([born(TEX.fireCursedLich, 17).length, born(TEX.fireHik1, 17).length, born(TEX.spark2, 17).length]).toEqual([1, 4, 4]);
+    expect([born(TEX.fireCursedLich, 18).length, born(TEX.fireHik1, 18).length]).toEqual([2, 8]);
+    const [first] = born(TEX.fireCursedLich, 17);
+    const [second] = born(TEX.fireCursedLich, 18).slice(-1);
+    // (80 - LifeTime) x 7 cm: the lava's LifeTime is 80 on tick 17 and 79 on 18; each flame climbs 6.4-8.7 cm a move.
+    expect((second.args[3] as number) - (first.args[3] as number)).toBeCloseTo(0.07);
+    // firehik02 64 px x (0.72 + 0.36) x (1.8 + 0.2), less 0.07 on its first move; Alpha 0.3 on its first move.
+    expect([first.args[5], first.args[8]]).toEqual([expect.closeTo(0.64 * (1.08 * 2 - 0.07)), expect.closeTo(0.3)]);
+    // The round flames take half the Light.
+    expect(born(TEX.fireHik1, 17)[0].args[8]).toBeCloseTo(0.15);
+    // A spark: Spark02 4 px x (1.5 + 0.6), from 250 cm above sea level.
+    const [spark] = born(TEX.spark2, 17);
+    expect(spark.args[5]).toBeCloseTo(0.04 * 2.1);
+    expect(spark.args[3]).toBeGreaterThan(2.5);
+  });
+});
+
+describe('The master skills sound as their base: RageCreateEffect plays one sound for each case (MonkSystem.cpp:1089-1301)', () => {
+  it.each([
+    [551, 260],
+    [554, 260],
+    [558, 262],
+    [559, 263],
+    [560, 264],
+  ])('%i as %i', (master, base) => {
+    expect(skillSound(base)).not.toBeNull();
+    expect(skillSound(master)).toBe(skillSound(base));
   });
 });
 
@@ -377,8 +547,25 @@ describe('Killing Blow (260): BITMAP_SBUMB on its LifeTime (MoveHandlers.cpp:919
 
 describe('Charge (269): AttackStage\'s AT_SKILL_OCCUPY case (ZzzCharacter.cpp:2934-2959, :4690-4695)', () => {
   const RUSH = PlayerAction.PLAYER_ATTACK_RUSH;
-  const sprays = (r: Run) => [...new Set(r.spawns.filter(s => s.name === 'joint').map(s => s.tick))];
-  const force = (r: Run) => r.spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.swordForce).map(s => s.tick);
+  /** The ticks of the charge's sprays, 20 cm over the feet (the sword force's are on the ground). */
+  const sprays = (r: Run) => [...new Set(r.spawns.filter(s => s.name === 'particles' && s.opts.recipe === JOINT_SPARKS && Math.abs(s.at.y - 0.2) < 1e-6).map(s => s.tick))];
+
+  it('each tick of the charge, 20 cm over the feet: four JOINT_SPARK sub0 thrown back and four BITMAP_FIRE sub18 ground smokes (ZzzCharacter.cpp:2942-2957)', () => {
+    const r = run(269, RUSH, { keysPerTick: 0.3 });
+    const smokes = (s: Spawn) => (s.opts.recipe as { texture?: string } | undefined)?.texture === TEX.groundSmoke;
+    const at = (t: number) => r.spawns.filter(s => s.tick === t && s.name === 'particles' && (s.opts.recipe === JOINT_SPARKS || smokes(s)));
+    expect(range(1, 14).map(t => at(t).length)).toEqual(range(1, 14).map(() => 8));
+    const smoke = at(1).find(s => s.opts.recipe !== JOINT_SPARKS)?.opts.recipe as { texture: string; blend: string; size: number; life: number };
+    // ground_smoke 128 px x Scale 1.5, alpha-blended (EnableAlphaBlend3), LifeTime 24 (ZzzEffectParticle.cpp:481-488, :9151-9154).
+    expect([smoke.texture, smoke.blend, smoke.size, Math.round(smoke.life * 25)]).toEqual([TEX.groundSmoke, 'alpha', expect.closeTo(1.92), 24]);
+    // Thrown back along the caster's facing, pitched 150-209 degrees.
+    const heading = at(1)[0].opts.heading as Vector3;
+    expect(heading.x * Math.sin(0.5) - heading.z * Math.cos(0.5)).toBeLessThan(0);
+    expect(at(1)[0].at.y).toBeCloseTo(0.2);
+  });
+  const forces = (r: Run) => r.spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.swordForce);
+  /** The ticks the sword force leaves on, not its copies. */
+  const force = (r: Run) => forces(r).filter(s => s.opts.scale !== 3.5).map(s => s.tick);
   const volley = (r: Run) => r.spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.multishot).map(s => s.tick);
 
   it('sprays every tick until AttackTime runs out on tick 14 at 0.3 keys a tick, then the sword force', () => {
@@ -391,6 +578,41 @@ describe('Charge (269): AttackStage\'s AT_SKILL_OCCUPY case (ZzzCharacter.cpp:29
     const r = run(269, RUSH, { keysPerTick: 0.5 });
     expect(sprays(r)).toEqual(range(1, 11));
     expect(force(r)).toEqual([11]);
+  });
+
+  it('the sword force, MODEL_SWORD_FORCE sub2 in knightSt_blue: 100 cm up, running 10 + 2k cm on move k, Scale +0.9 for three moves then -0.05, BlendMeshLight LifeTime / 18 from move 4 (ZzzEffect.cpp:4531-4548, MoveHandlers.cpp:7154-7212, ZzzObject.cpp:2566-2570)', () => {
+    const [blade, ...copies] = forces(run(269, RUSH, { keysPerTick: 0.3, ticks: 40 }));
+    // Made on the release tick and moved in it (MoveCharactersClient before MoveEffects, MainScene.cpp:284-290); dead after move 15.
+    expect([blade.tick, blade.opts.texture, Math.round((blade.opts.seconds as number) * 25)]).toEqual([14, TEX.knightStBlue, 14]);
+    expect([blade.at.x, blade.at.y, blade.at.z]).toEqual([expect.closeTo(100 + 0.12 * Math.sin(0.5)), expect.closeTo(1), expect.closeTo(100 - 0.12 * Math.cos(0.5))]);
+    const { scaleAt, intensity } = blade.opts as { scaleAt: (t: number) => number; intensity: (t: number) => number };
+    expect([0, 2, 3, 13].map(k => scaleAt(k / 25))).toEqual([0.9, 2.7, 2.65, 2.15].map(v => expect.closeTo(v)));
+    // BodyLight (the terrain's, 1 here, + Light) x BlendMeshLight, clamped: 1, then (1 + l) x l with l = LifeTime / 18.
+    expect([intensity(0), intensity(9 / 25)]).toEqual([1, expect.closeTo((1 + 6 / 18) * (6 / 18))]);
+    // On moves 1-3 a sub3 copy where it was: Scale 3.5, LifeTime 5, BlendMeshLight LifeTime / 10, in knightSt_blue too.
+    expect(copies.map(s => [s.tick, s.opts.scale, s.opts.texture, Math.round((s.opts.seconds as number) * 25)])).toEqual([14, 15, 16].map(t => [t, 3.5, TEX.knightStBlue, 5]));
+    expect([copies[0].at.x, copies[0].at.z]).toEqual([expect.closeTo(100), expect.closeTo(100)]);
+    // Neither has the stand-in's fire tint or growth.
+    expect([blade.opts.colour, blade.opts.grow]).toEqual([undefined, undefined]);
+  });
+
+  it('from its move 4 to 15, four JOINT_SPARK and four BITMAP_FIRE sub18 a tick on the ground under it, in its Light (MoveHandlers.cpp:7182-7199)', () => {
+    const r = run(269, RUSH, { keysPerTick: 0.3, ticks: 40 });
+    const ground = r.spawns.filter(s => s.name === 'particles' && s.tick > 14);
+    const on = [...new Set(ground.map(s => s.tick))];
+    expect(on).toEqual(range(17, 28));
+    expect(on.map(t => ground.filter(s => s.tick === t).length)).toEqual(on.map(() => 8));
+    const smoke = ground.find(s => s.opts.recipe !== JOINT_SPARKS)?.opts.recipe as { texture: string; colour: number[]; colourEnd: number[] };
+    expect([smoke.texture, smoke.colour[0], smoke.colourEnd[0]]).toEqual([TEX.groundSmoke, expect.closeTo(12 / 18), expect.closeTo(0.29 * (12 / 18))]);
+    expect(ground[0].at.y).toBeCloseTo(0);
+  });
+
+  it('its AddTerrainLight (1, 0.8, 0.6), range 1, every move (MoveHandlers.cpp:7201-7202)', () => {
+    const body = vi.spyOn(lighting, 'skillBody');
+    run(269, RUSH, { keysPerTick: 0.3, ticks: 20 });
+    expect(body.mock.calls.map(c => [c[1], c[2]])).toEqual([[269, 'force']]);
+    body.mockRestore();
+    expect(SKILL_LIGHTS[269]?.bodies?.force).toMatchObject({ color: [1, 0.8, 0.6], range: 1 });
   });
 
   it('SOUND_SKILL_SWORD2 at the packet (WSclient.cpp:5123-5129)', () => {
@@ -453,7 +675,8 @@ describe('Ignore Defense, Increase Health, Increase Block (266-268): RageCreateE
   it('a slow pillar of 50 ticks at the caster, and the fast two it raises on ticks 11 and 21 in its Light (MoveHandlers.cpp:9529-9554)', () => {
     for (const [skills, colour] of PILLARS) {
       for (const skill of skills) {
-        const pillars = run(skill, PlayerAction.PLAYER_SKILL_ATT_UP_OURFORCES).spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.windForce);
+        // Increase Block's lasting sub1 is below.
+        const pillars = run(skill, PlayerAction.PLAYER_SKILL_ATT_UP_OURFORCES).spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.windForce && s.opts.seconds !== Infinity);
         expect(pillars.map(s => [s.tick, s.opts.colour, Math.round((s.opts.seconds as number) * 25)])).toEqual([
           [0, colour, 50],
           [11, colour, 70],
@@ -577,6 +800,58 @@ describe('Ignore Defense, Increase Health, Increase Block (266-268): RageCreateE
   });
 });
 
+describe('Increase Block\'s MODEL_WINDFOCE sub1: a pillar on the body while it holds an Ourforces buff (WSclient.cpp:5072-5081, MoveHandlers.cpp:9556-9575)', () => {
+  const ATT = PlayerAction.PLAYER_SKILL_ATT_UP_OURFORCES;
+  const lasting = (r: Run): Spawn[] => r.spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.windForce && s.opts.seconds === Infinity);
+
+  it('Increase Block and its master skills raise it on the caster: Scale 1, Light (0.6, 0.6, 1) x a breath, drawn x 6, turning -WorldTime x 0.3 degrees', () => {
+    for (const skill of [268, 569, 572]) {
+      const [pillar, ...more] = lasting(run(skill, ATT, { buffs: new Set([131]), ticks: 2 }));
+      expect(more).toEqual([]);
+      expect([pillar.tick, pillar.at.x, pillar.at.z]).toEqual([0, 100, 100]);
+      const { scale, colour, blendLight, blendClamp, spin } = pillar.opts as { scale?: number; colour: number[]; blendLight: (t: number) => number; blendClamp: boolean; spin: number };
+      expect([scale ?? 1, colour, blendClamp]).toEqual([1, [0.6, 0.6, 1], true]);
+      // (sin(WorldTime x 0.001) + 1) x 0.25 + 0.2, WorldTime in ms.
+      expect(blendLight(0)).toBeCloseTo(6 * ((Math.sin(fxNow()) + 1) * 0.25 + 0.2));
+      expect(spin).toBeCloseTo((300 * Math.PI) / 180);
+    }
+    for (const skill of [266, 267, 573]) expect(lasting(run(skill, ATT, { buffs: new Set([131]), ticks: 2 }))).toEqual([]);
+  });
+
+  it('stands while the body holds any Ourforces buff and goes with the last (LifeTime kept at 10, then 0)', () => {
+    const buffs = new Set([131, 130]);
+    const drop = (tick: number): void => {
+      if (tick === 30) buffs.delete(131);
+      if (tick === 50) buffs.delete(130);
+    };
+    const [pillar] = lasting(run(268, ATT, { buffs, ticks: 60, onTick: drop }));
+    expect(pillar.end).toBe(50);
+  });
+
+  it('stands 25 ticks for the buff, which comes in its own packet, and goes without it (the original registers it at once, WSclient.cpp:5089-5102)', () => {
+    const [pillar] = lasting(run(268, ATT, { buffs: new Set(), ticks: 40 }));
+    expect(pillar.end).toBe(25);
+  });
+
+  it('one a body: a new cast takes the old one\'s place (DeleteEffect, WSclient.cpp:5080-5081)', () => {
+    const recast = (tick: number, caster: Entity): void => void (tick === 10 && playTargetedSkillVisual(scene, 268, caster, null));
+    const pillars = lasting(run(268, ATT, { buffs: new Set([131]), ticks: 20, onTick: recast }));
+    expect(pillars.map(p => [p.tick, p.end])).toEqual([
+      [0, 10],
+      [10, undefined],
+    ]);
+  });
+
+  it('on the hero\'s target when the hero casts, on the caster when another does (_pObj, WSclient.cpp:5060-5064)', () => {
+    const at = (hero: boolean): number[] => {
+      const [pillar] = lasting(run(268, ATT, { hero, buffs: new Set([131]), ticks: 1 }));
+      return [pillar.at.x, pillar.at.z];
+    };
+    expect(at(true)).toEqual([103, 104]);
+    expect(at(false)).toEqual([100, 100]);
+  });
+});
+
 describe('Dark Side (263)', () => {
   const READY = PlayerAction.PLAYER_SKILL_DARKSIDE_READY;
 
@@ -600,6 +875,20 @@ describe('Dark Side (263)', () => {
       const { scaleAt, blendLight } = pillars[0].opts as { scaleAt: (t: number) => number; blendLight: (t: number) => number };
       expect([0, 5, 20, 40].map(t => scaleAt(t / 25))).toEqual([1, 1.5, 3, 3]);
       expect(blendLight(2 / 25)).toBeCloseTo(6 * 0.85 ** 2);
+    }
+  });
+
+  it('the ground decals at the caster: BITMAP_EVENT_CLOUD sub1 (1, 0.6, 0.6) growing to 5 and BITMAP_MAGIC sub14 (1, 0.4, 0) drawn twice (MonkSystem.cpp:1289-1294, MoveHandlers.cpp:9497-9506, :1436-1447)', () => {
+    for (const skill of [263, 559]) {
+      const rings = run(skill, READY, { keysPerTick: 0.3 }).spawns.filter(s => s.name === 'ring');
+      expect(rings.map(s => [s.tick, s.opts.texture, s.opts.colour, Math.round((s.opts.seconds as number) * 25)])).toEqual([
+        [0, TEX.eventCloud, [1, 0.6, 0.6], 30],
+        [0, TEX.magicGround, [1, 0.4, 0], 22],
+        [0, TEX.magicGround, [1, 0.4, 0], 22],
+      ]);
+      // Sub1 grows x1.08 a move up to 5, not 3.
+      const cloud = rings[0].opts as { scaleAt: (t: number) => number };
+      expect([15, 20, 21, 29].map(n => cloud.scaleAt(n / 25))).toEqual([1.08 ** 15, 1.08 ** 20, 5, 5]);
     }
   });
 
@@ -666,5 +955,128 @@ describe('Dark Side (263)', () => {
 
   it('a later echo does not restart the count', () => {
     expect(followUps([0, 10])).toEqual([8, 15, 22]);
+  });
+});
+
+describe('The Ourforces buff looks: BITMAP_LIGHT_RED on the buffed body, by sub (WSclient.cpp:15662-15679, MoveHandlers.cpp:9613-9672, ZzzEffect.cpp:9563-9640)', () => {
+  /**
+   * The aura options a buff look gives, and what it spawns and draws over `ticks` ticks on a body that keeps `effect` and `others`;
+   * `onTick` may change the body's buffs before each tick.
+   */
+  function look(effect: number, ticks = 40, others: number[] = [], onTick?: (tick: number, buffs: Set<number>, body: Entity) => void): { aura: Record<string, unknown>; spawns: Spawn[]; draws: Draw[] } {
+    const buffs = new Set([effect, ...others]);
+    const body = { netId: 3, transform: { pos: new Vector3(100, 0, 100), rot: new Vector3(0, 0.5, 0), scale: 1 }, buffs } as unknown as Entity;
+    effects.reset();
+    let tick = 0;
+    const spawns: Spawn[] = [];
+    const draws: Draw[] = [];
+    const real = effects.spawn.bind(effects);
+    const spy = vi.spyOn(effects, 'spawn').mockImplementation(((name: never, s: Scene, at: Vector3, opts: never) => {
+      spawns.push({ tick, name, at: at.clone(), opts: (opts ?? {}) as Record<string, unknown> });
+      if (name !== 'ticked') return real(name, s, at, opts);
+      const script = opts as unknown as { tick: (fx: TickedFx, n: number) => boolean };
+      return real(name, s, at, {
+        tick: (fx: TickedFx, n: number) =>
+          script.tick({ ...fx, scene: fx.scene, strip: o => fx.strip(o), drop: st => fx.drop(st), ribbon: o => fx.ribbon(o), decal: (...a) => fx.decal(...a), sprite: (...a) => (draws.push({ tick, kind: 'sprite', args: a }), fx.sprite(...a)) }, n),
+      } as never);
+    }) as never);
+    setBuffVisual(scene, body, effect, true);
+    for (tick = 1; tick <= ticks; tick++) {
+      onTick?.(tick, buffs, body);
+      effects.update(ENUM_WORLD.WD_0LORENCIA, 1 / 25);
+    }
+    spy.mockRestore();
+    clearBuffVisuals(body);
+    const aura = spawns.find(s => s.name === 'aura')?.opts ?? {};
+    return { aura, spawns, draws };
+  }
+
+  it('Increase Health (130, 155): sub0, the 17-bone glow and two flare01_red decals 3.5 across under the body, breathing 0.2-0.7 (ZzzEffect.cpp:9563-9583)', () => {
+    for (const effect of [130, 155]) {
+      const { aura } = look(effect, 1);
+      const ground = aura.groundGlow as { texture: string; size: number; count: number; breathe: (t: number) => number };
+      expect(aura.boneGlow).toBeDefined();
+      expect([ground.texture, ground.size, ground.count]).toEqual([TEX.flareRed, 3.5, 2]);
+      const levels = range(0, 100).map(i => ground.breathe(i * 0.5));
+      expect([Math.min(...levels), Math.max(...levels)]).toEqual([expect.closeTo(0.2, 2), expect.closeTo(0.7, 2)]);
+    }
+  });
+
+  it('Ignore Defense (129): sub1, no glow; each tick a red SMOKELINE1 sub5 from bone 26 or 35, drawn 30 ticks (MoveHandlers.cpp:9659-9672, ZzzEffectParticle.cpp:1767-1786, :5963-5990)', () => {
+    for (const effect of [129]) {
+      const { aura, draws } = look(effect);
+      expect(aura.boneGlow).toBeUndefined();
+      const smokes = draws.filter(d => d.args[0] === TEX.smokeLine1);
+      // One a tick from tick 1, each on its moves 1-30: its Alpha is 0.7 until LifeTime 10, then 0.1 less a move.
+      expect([1, 2, 30, 31, 40].map(t => smokes.filter(d => d.tick === t).length)).toEqual([1, 2, 30, 30, 30]);
+      expect(smokes[0].args[1]).toEqual([1, 0.12, 0]);
+      // No skeleton here: bone 26 is the feet + 90 cm.
+      expect(smokes[0].args[3]).toBeGreaterThan(0.9);
+    }
+  });
+
+  it('each BITMAP_LIGHT_RED on an Ignore Defense body makes a smoke: one for each Ourforces buff it holds (MoveHandlers.cpp:9659-9672)', () => {
+    const made = (others: number[]): number[] => {
+      const smokes = look(129, 3, others).draws.filter(d => d.args[0] === TEX.smokeLine1);
+      return [1, 2, 3].map(t => smokes.filter(d => d.tick === t).length);
+    };
+    expect(made([130])).toEqual([2, 4, 6]);
+    expect(made([155, 131])).toEqual([3, 6, 9]);
+    // A master buff counts as its base, not on its own.
+    expect(made([130, 155])).toEqual([2, 4, 6]);
+  });
+
+  it('none while the body is cloaked, and again once it is not (MoveHandlers.cpp:9657-9658)', () => {
+    const cloak = (tick: number, buffs: Set<number>): void => void (tick === 3 ? buffs.add(18) : tick === 40 ? buffs.delete(18) : undefined);
+    const smokes = look(129, 42, [], cloak).draws.filter(d => d.args[0] === TEX.smokeLine1);
+    // The two made on ticks 1 and 2 are drawn to ticks 30 and 31; none more until tick 40.
+    expect([2, 30, 31, 32, 39, 40, 41].map(t => smokes.filter(d => d.tick === t).length)).toEqual([2, 2, 1, 0, 0, 1, 2]);
+  });
+
+  it('Increase Block (131, 153, 154): sub2, no glow; one tick in 70 a MODEL_WINDFOCE_MIRROR while none is up (MoveHandlers.cpp:9624-9636, :9675-9692)', () => {
+    // rand() % 70 == 7 every tick: one mirror, then none while it lives.
+    const random = vi.spyOn(Math, 'random').mockReturnValue(7.5 / 70);
+    const { aura, spawns } = look(131);
+    random.mockRestore();
+    expect(aura.boneGlow).toBeUndefined();
+    const mirrors = spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.windForceMirror);
+    expect(mirrors.map(s => s.tick)).toEqual([1]);
+    const { seconds, colour, spin, scaleAt, blendLight } = mirrors[0].opts as { seconds: number; colour: number[]; spin: number; scaleAt: (t: number) => number; blendLight: (t: number) => number };
+    // LifeTime 50; Light (0.6, 0.6, 1) x 6, keeping 0.9 a tick; Scale x1.015 a tick to 1.5; turning WorldTime x 0.4 degrees.
+    expect([Math.round(seconds * 25), colour, scaleAt(2 / 25), scaleAt(40 / 25), blendLight(2 / 25)]).toEqual([50, [0.6, 0.6, 1], expect.closeTo(1.015 ** 2), 1.5, expect.closeTo(6 * 0.81)]);
+    expect(spin).toBeCloseTo((-400 * Math.PI) / 180);
+    for (const effect of [153, 154]) expect(look(effect, 1).aura.pulse).toBeDefined();
+  });
+
+  it('each BITMAP_LIGHT_RED on an Increase Block body rolls for the mirror (MoveHandlers.cpp:9617-9636)', () => {
+    // Only the third roll comes up 7: tick 1 with three of them, tick 3 with one.
+    const mirrorTick = (others: number[]): number[] => {
+      let n = 0;
+      const random = vi.spyOn(Math, 'random').mockImplementation(() => (++n === 3 ? 7.5 / 70 : 0));
+      const { spawns } = look(131, 5, others);
+      random.mockRestore();
+      return spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.windForceMirror).map(s => s.tick);
+    };
+    expect(mirrorTick([129, 130])).toEqual([1]);
+    expect(mirrorTick([])).toEqual([3]);
+  });
+
+  it('the mirror goes with Increase Block, or with the body (MoveHandlers.cpp:9682-9688)', () => {
+    const random = vi.spyOn(Math, 'random').mockReturnValue(7.5 / 70);
+    let held = new Set<number>();
+    let body: { objOutOfScope?: boolean } = {};
+    const { spawns } = look(131, 2, [130], (_t, buffs, e) => {
+      held = buffs;
+      body = e as { objOutOfScope?: boolean };
+    });
+    random.mockRestore();
+    const until = spawns.find(s => s.name === 'model' && s.opts.model === MODEL.windForceMirror)?.opts.until as () => boolean;
+    expect(until()).toBe(false);
+    // Increase Health keeps its BITMAP_LIGHT_RED, not the mirror.
+    held.delete(131);
+    expect(until()).toBe(true);
+    held.add(131);
+    body.objOutOfScope = true;
+    expect(until()).toBe(true);
   });
 });

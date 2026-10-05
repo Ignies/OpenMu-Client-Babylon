@@ -48,6 +48,33 @@ export const stones = (n: number, radius = 0.6): Step =>
   );
 /** MODEL_FIRE's `o->BlendMesh = 1`: the fire01 tail is additive, the fire02 lava core is drawn opaque. */
 export const FIRE_BLEND_MESH = 1;
+
+/**
+ * BITMAP_JOINT_SPARK sub0 (ZzzEffectJoint.cpp:950-959): Spark01, white, 6-25 cm a tick along its `Angle`,
+ * LT 8-15, two tails. Drawn as a stretched particle rather than a two-point ribbon: a Twisting Slash throws
+ * twenty a tick. 2 cm wide and one tick of travel long, 6-25 cm with its speed. The Dark Knight's Rush and the
+ * Rage Fighter's Charge throw it.
+ */
+export const JOINT_SPARKS: ParticleRecipe = {
+  texture: TEX.spark,
+  colour: RGBS.white,
+  size: 0.02,
+  sizeJitter: 0,
+  stretch: 12.5,
+  stretchBySpeed: true,
+  aimed: true,
+  life: ticks(15),
+  lifeJitter: 7 / 15,
+  box: [0.1, 0, 0.1],
+  dir1: [0, 0, 0],
+  dir2: [0, 0, 0],
+  power: perTick(25),
+  powerJitter: 19 / 25,
+  capacity: 600,
+};
+/** `VectorRotate((0, -1, 0), AngleMatrix(pitch, 0, yaw))`: the way a JOINT_SPARK's `Velocity` carries its head. */
+export const sparkHeading = (pitch: number, yaw: number, out = new Vector3()): Vector3 =>
+  out.set(Math.sin(yaw) * Math.cos(pitch), -Math.sin(pitch), -Math.cos(yaw) * Math.cos(pitch));
 /** `n` streamers fanning around the up axis, `i*step` radians apart, from `at`. */
 export const streamerFan = (
   n: number,
@@ -138,6 +165,12 @@ export function bodyLight(at: Vector3, tint: RGB): RGB {
   const ly = l?.y ?? 1;
   const lz = l?.z ?? 1;
   return [Math.min(1, lx + tint[0]), Math.min(1, ly + tint[1]), Math.min(1, lz + tint[2])];
+}
+
+/** `RequestTerrainLight` at a point, as the grey level the original's BodyLight adds `o->Light` to. */
+export function terrainLevel(x: number, z: number): number {
+  const l = Ecs.world?.getTerrainLight(x, z);
+  return l ? 0.2126 * l.x + 0.7152 * l.y + 0.0722 * l.z : 1;
 }
 
 /** `rand() % n`. */
@@ -572,7 +605,7 @@ export function playSummonArrival(scene: Scene, monster: Entity): void {
     scale: 0.7,
     grow: 1 / 0.7,
     colour: RGBS.white,
-    yaw: entityYaw(monster),
+    yaw: -entityYaw(monster),
     follow: followEntity(monster, 0),
     fadeTail: 0,
     keysPerTick: 0.1,

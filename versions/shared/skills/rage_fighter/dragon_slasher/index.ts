@@ -1,11 +1,12 @@
 import { defineSkill } from '@/controllers/skills/define';
-import { TEX } from '@/controllers/fx/recipes';
+import { RGBS, TEX } from '@/controllers/fx/recipes';
 import { Vector3 } from '@/controllers/render/babylon/exports';
-import { bonePos, entityGone, entityPos, entityYaw } from '@/controllers/fx/core';
-import type { TailStrip } from '@/controllers/fx/ticked';
-import { DEG, deg, eachClipTick, multiShotVolleyAt } from '../../_shared';
-import { angleToward, clipSpeed, eachMove } from '../_shared';
-import { IMPACT_HEIGHT, cm, steelHit, type SkillContext, type Step } from '@/controllers/skills/visuals';
+import { bonePos, entityGone, entityPos, entityYaw, fxNow, type RGB } from '@/controllers/fx/core';
+import type { TailStrip, TickedFx } from '@/controllers/fx/ticked';
+import type { Entity } from '@/ecs/world';
+import { DEG, deg, eachClipTick, multiShotVolleyAt, randInt } from '../../_shared';
+import { angleToward, clipSpeed, eachMove, fallSpark } from '../_shared';
+import { cm, type SkillContext, type Step } from '@/controllers/skills/visuals';
 import { playCombat } from '@/controllers/sound';
 
 import { A } from '@/controllers/combat/recipes';
@@ -111,23 +112,156 @@ function groundWind(c: SkillContext, over: () => boolean): (frame: number) => vo
   };
 }
 
+/** The dummy's Light, which its particles on the target take (MonkSystem.cpp:1222-1223). */
+const KICK_LIGHT: RGB = [0.7, 0.7, 1];
+
+/** The particles of a burst, each with its own move rule: BITMAP_ENERGY sub7, LIGHTNING_MEGA1 sub0, SPARK+1 sub3 and sub8, SPARK sub13. */
+const enum Kind {
+  Energy,
+  Mega,
+  Spark3,
+  Spark8,
+  Spark13,
+}
+
+/** One particle of a burst: where it is (tiles), its Scale, its turn (degrees), its moves, and a SPARK sub13's flight. */
+interface Mote {
+  kind: Kind;
+  x: number;
+  y: number;
+  z: number;
+  scale: number;
+  roll: number;
+  moves: number;
+  vx: number;
+  vz: number;
+  gravity: number;
+  life: number;
+}
+
+/** Spent particles, reused for the next burst. */
+const spentMotes: Mote[] = [];
+function mote(kind: Kind, x: number, y: number, z: number, scale: number, roll: number): Mote {
+  const m = spentMotes.pop() ?? { kind, x, y, z, scale, roll, moves: 0, vx: 0, vz: 0, gravity: 0, life: 0 };
+  m.kind = kind;
+  m.x = x;
+  m.y = y;
+  m.z = z;
+  m.scale = scale;
+  m.roll = roll;
+  m.moves = 0;
+  return m;
+}
+const burstAt = new Vector3();
+
 /**
- * At the packet the dummy, which has no mesh, and the MULTI_SHOT1/2/3 volley turned to the target, none without one
- * (MonkSystem.cpp:1215-1260). Each tick the dummy lives (MoveHandlers.cpp:9826-9915): the ground wind between keys 4 and 5,
- * past key 5 the burst on the target, past key 8 Rage_Dragonkick_Att (LifeTime = 150 then == 150, so every tick). Leaving the
- * clip ends it all.
+ * Each tick past DRAGONKICK key 5, twice: from 30 cm over the target, four times a BITMAP_ENERGY sub7 (Scale fScale x 0.6-1.3), a
+ * LIGHTNING_MEGA1 sub0 (fScale x 0.9), a SPARK+1 sub3 and a sub8 (1 +- 1 % with WorldTime), every other time a SPARK sub13, and a
+ * step aside; fScale is (0.5-0.89) x 1.5 x 1.8 (MoveHandlers.cpp:9866-9895, ZzzEffectParticle.cpp:723-753, :1826-1843, :2016-2061).
+ */
+function burst(target: Entity, motes: Mote[]): void {
+  const base = entityPos(target, 0, burstAt);
+  for (let j = 0; j < 2; j++) {
+    let x = base.x;
+    let y = base.y + cm(30);
+    let z = base.z;
+    const fScale = (randInt(40) + 50) * 0.01 * 1.5 * 1.8;
+    const sparkScale = 1 + Math.sin(fxNow() * 2) * 0.2 * 0.05;
+    for (let i = 0; i < 4; i++) {
+      motes.push(mote(Kind.Energy, x, y, z, fScale * (randInt(8) + 6) * 0.1, randInt(360)));
+      motes.push(mote(Kind.Mega, x, y, z, fScale * 0.9, randInt(360)));
+      motes.push(mote(Kind.Spark3, x, y, z, sparkScale, 0));
+      motes.push(mote(Kind.Spark8, x, y, z, sparkScale, 0));
+      if (i % 2) {
+        const s = mote(Kind.Spark13, x, y, z, (randInt(4) + 4) * 0.1 * 1.6, 0);
+        s.life = randInt(16) + 24;
+        const turn = randInt(360) * DEG;
+        s.gravity = randInt(16) + 6;
+        // (0, v, 0) turned by Angle[2]: MU (-v sin, v cos).
+        const v = cm((randInt(20) + 20) * 0.1 * 1.5);
+        s.vx = -v * Math.sin(turn);
+        s.vz = v * Math.cos(turn);
+        motes.push(s);
+        x += cm(randInt(40) + 20);
+        z += cm(randInt(30) + 10);
+        y += cm(randInt(30) + 25);
+      } else {
+        x -= cm(randInt(20) + 10);
+        z += cm(randInt(30) - 10);
+        y += cm(randInt(30) + 30);
+      }
+    }
+  }
+}
+
+/** One move of a particle, drawn if it lives: false once it is gone. */
+function moveMote(m: Mote, fx: TickedFx): boolean {
+  m.moves++;
+  switch (m.kind) {
+    // LifeTime 5, Rotation + 20 and Light x0.97 a move; Thunder01 64 px (ZzzEffectParticle.cpp:4939-4985).
+    case Kind.Energy:
+      if (m.moves > 4) return false;
+      m.roll += 20;
+      fx.sprite(TEX.thunder, KICK_LIGHT, m.x, m.y, m.z, cm(64 * m.scale), cm(64 * m.scale), m.roll * DEG, 0.97 ** m.moves);
+      return true;
+    // LifeTime 5, Alpha - 0.15 a move over its Light; lighting_mega01 128 px (:6071-6091).
+    case Kind.Mega:
+      if (m.moves > 4) return false;
+      fx.sprite(TEX.lightningMega1, KICK_LIGHT, m.x, m.y, m.z, cm(128 * m.scale), cm(128 * m.scale), m.roll * DEG, 1 - 0.15 * m.moves);
+      return true;
+    // LifeTime 5, Scale x0.8 a move; Spark03 32 px (:2145-2147, :6646-6648).
+    case Kind.Spark3:
+      if (m.moves > 4) return false;
+      m.scale *= 0.8;
+      break;
+    // Scale - 0.5 a move, gone under 0.2 (:6683-6688).
+    case Kind.Spark8:
+      m.scale -= 0.5;
+      if (m.scale < 0.2) return false;
+      break;
+    // Falls and bounces, white at LifeTime / 16 (fallSpark).
+    default: {
+      const light = fallSpark(m);
+      if (light < 0) return false;
+      fx.sprite(TEX.spark3, RGBS.white, m.x, m.y, m.z, cm(32 * m.scale), cm(32 * m.scale), 0, Math.min(1, light));
+      return true;
+    }
+  }
+  fx.sprite(TEX.spark3, KICK_LIGHT, m.x, m.y, m.z, cm(32 * m.scale), cm(32 * m.scale), 0);
+  return true;
+}
+
+/**
+ * At the packet the dummy, which has no mesh, and with a target the MULTI_SHOT1/2/3 volley turned to it and Rage_Dragonkick:
+ * RageCreateEffect returns before both without one (MonkSystem.cpp:1215-1260). Each tick the dummy lives
+ * (MoveHandlers.cpp:9826-9915): the ground wind between keys 4 and 5, past key 5 the burst on the target, past key 8
+ * Rage_Dragonkick_Att (LifeTime = 150 then == 150, so every tick). Leaving the clip ends it all but the particles already out.
  */
 const dragonKick: Step = (_at, c) => {
   let over = false;
   const target = c.target?.transform ? c.target : null;
-  if (target) multiShotVolleyAt(c, angleToward(c, target));
+  const p = c.caster.transform?.pos;
+  if (target) {
+    multiShotVolleyAt(c, angleToward(c, target));
+    if (p) playCombat('Sound/Ragefighter/Rage_Dragonkick', { x: p.x, z: p.z });
+  }
   const wind = groundWind(c, () => over);
+  const motes: Mote[] = [];
+  // Particles move in the frame they are made, after the dummy (MoveEffects, then MoveParticles).
+  eachMove(c.scene, entityPos(c.caster, 0, new Vector3()), (_m, fx) => {
+    let n = 0;
+    for (const m of motes) {
+      if (moveMote(m, fx)) motes[n++] = m;
+      else spentMotes.push(m);
+    }
+    motes.length = n;
+    return !over || n > 0;
+  });
   eachClipTick(c, A.PLAYER_SKILL_DRAGONKICK, DUMMY_TICKS, frame => {
     wind(frame);
     // m_sTargetIndex < 0 returns before the burst and the sound.
     if (!target || entityGone(target)) return;
-    if (frame > 5) steelHit(entityPos(target, IMPACT_HEIGHT, new Vector3()), c);
-    const p = c.caster.transform?.pos;
+    if (frame > 5) burst(target, motes);
     if (frame > 8 && p) playCombat('Sound/Ragefighter/Rage_Dragonkick_Att', { x: p.x, z: p.z });
   }, () => {
     over = true;
@@ -138,8 +272,8 @@ export default defineSkill({
   id: 265,
   name: "Dragon Slasher",
   // 265 Dragon Slasher (AT_SKILL_DRAGON_KICK): the volley, the ground wind and the per-tick burst; see dragonKick.
+  // Rage_Dragonkick is the effect's, with a target only, so it plays with it rather than at the click.
   visual: { cast: dragonKick },
-  sound: 'Sound/Ragefighter/Rage_Dragonkick', // Dragon Slasher
   delayMs: 3000, // Dragon Slasher
   clip: { ground: A.PLAYER_SKILL_DRAGONKICK }, // Dragon Slasher
   stepIn: 'midClip',

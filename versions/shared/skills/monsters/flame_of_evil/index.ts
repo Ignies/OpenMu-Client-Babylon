@@ -438,7 +438,7 @@ const deathGorgon = (n: number, feet: Vector3, c: SkillContext, graded = false):
     const p = new Vector3(feet.x + f.x * cm(50), feet.y + cm(120), feet.z + f.z * cm(50));
     // Graded: each fireball held 6 ticks and burning out, since one tick never reaches the screen.
     const life = graded ? { seconds: ticks(6), fadeTail: 0.6 } : { seconds: ticks(1), fadeTail: 0 };
-    effects.spawn('model', c.scene, p, { model: MODEL.fire, ...life, scale: (randInt(4) + 8) * 0.1, colour: RGBS.white, yaw: a, blendMesh: FIRE_BLEND_MESH });
+    effects.spawn('model', c.scene, p, { model: MODEL.fire, ...life, scale: (randInt(4) + 8) * 0.1, colour: RGBS.white, yaw: -a, blendMesh: FIRE_BLEND_MESH });
     stones(2, 0.2)(p, c);
   }
   if (graded) {

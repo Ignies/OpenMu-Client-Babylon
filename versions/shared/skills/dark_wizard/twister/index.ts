@@ -85,7 +85,7 @@ const twisterWith = (extra?: TwisterExtra): Step => (_at, c) => {
     scale: TWISTER_SCALE,
     colour: RGBS.white,
     follow: storm,
-    yaw: entityYaw(c.caster),
+    yaw: -entityYaw(c.caster),
     fadeTail: 10 / TWISTER_TICKS,
     scrollU: TWISTER_UV,
   });
@@ -140,7 +140,7 @@ const TWISTER_STRIKE: RGB = [0.75, 0.82, 1];
 const twisterGraded = twisterWith({
   base: (storm, c) => {
     const at = storm(new Vector3());
-    effects.spawn('model', c.scene, at, { model: MODEL.storm, seconds: ticks(TWISTER_TICKS), scale: TWISTER_SCALE * 0.88, colour: RGBS.white, follow: storm, yaw: entityYaw(c.caster) + 1, fadeTail: 10 / TWISTER_TICKS, scrollU: TWISTER_UV });
+    effects.spawn('model', c.scene, at, { model: MODEL.storm, seconds: ticks(TWISTER_TICKS), scale: TWISTER_SCALE * 0.88, colour: RGBS.white, follow: storm, yaw: -entityYaw(c.caster) + 1, fadeTail: 10 / TWISTER_TICKS, scrollU: TWISTER_UV });
     effects.spawn('particles', c.scene, at, { recipe: TWISTER_DUST, rate: 20, seconds: ticks(TWISTER_TICKS - 10), follow: storm });
     effects.spawn('ring', c.scene, at, { texture: TEX.shockwave, colour: [0.95, 0.85, 0.7], scale: 2.6, growFrom: 0.6, grow: 1, spin: 300, seconds: ticks(TWISTER_TICKS), fadeTail: 10 / TWISTER_TICKS, follow: storm });
   },

@@ -89,7 +89,7 @@ const POISON_BUBBLES: ParticleRecipe = {
 const poisonCloud = (extra?: Step): Step =>
   atRelease((feet, c) => {
     if (c.caster.charAppearance) {
-      effects.spawn('model', c.scene, feet, { model: MODEL.poison, seconds: ticks(40), scale: 1, colour: RGBS.white, blendMesh: 1, yaw: entityYaw(c.caster), loop: false, fadeTail: 0.25 });
+      effects.spawn('model', c.scene, feet, { model: MODEL.poison, seconds: ticks(40), scale: 1, colour: RGBS.white, blendMesh: 1, yaw: -entityYaw(c.caster), loop: false, fadeTail: 0.25 });
     }
     particles({ recipe: POISON_SMOKE, count: 10, height: 0.64 })(feet, c);
     releaseSound('Sound/pHeartBeat')(feet, c);

@@ -24,11 +24,11 @@ vi.mock('@versions/shared/skills/skillVisuals', async importOriginal => ({
   ...(await importOriginal<object>()),
   playTargetedSkillVisual: (_scene: unknown, _skill: number, caster: { netId: number }) => void drawn.push(caster.netId),
 }));
-// SetRageSkillAni: the caster plays the Dark Side clip.
+// SetRageSkillAni: another caster plays the Dark Side clip (the hero's is his own, clips.ts).
 vi.mock('./clips', async importOriginal => ({
   ...(await importOriginal<object>()),
-  playCastAnimation: (caster: { playerAnimation?: { action: number } }) => {
-    if (caster.playerAnimation) caster.playerAnimation.action = PlayerAction.PLAYER_SKILL_DARKSIDE_READY;
+  playCastAnimation: (caster: { localPlayer?: boolean; playerAnimation?: { action: number } }) => {
+    if (caster.playerAnimation && !caster.localPlayer) caster.playerAnimation.action = PlayerAction.PLAYER_SKILL_DARKSIDE_READY;
   },
 }));
 
@@ -38,14 +38,17 @@ const { installNet } = await import('./net');
 const { combat } = await import('@/controllers/combat');
 const { Hero } = await import('@/modules/hero');
 const { EventBus } = await import('@/core/eventBus');
-const { RageAttackPacket } = await import('@versions/shared/packets/ServerToClientPackets');
+const { RageAttackPacket, RageAttackRangeResponsePacket } = await import('@versions/shared/packets/ServerToClientPackets');
+const { TargetedSkillPacket } = await import('@versions/shared/packets/ClientToServerPackets');
+const { Session } = await import('@/modules/session');
 
 const HERO = 7;
 const OTHER = 9;
 
 const body = (netId: number, x: number, z: number, more: object = {}) =>
   ({ netId, transform: { pos: new Vector3(x, 0, z), rot: new Vector3(), scale: 1 }, ...more }) as unknown as Entity;
-const hero = body(HERO, 100, 100, { localPlayer: true, modelObject: { CurrentAction: PlayerAction.PLAYER_SKILL_DARKSIDE_READY, AnimationSpeed: 0.3 } });
+const heroClip = { action: PlayerAction.PLAYER_SKILL_DARKSIDE_READY as PlayerAction };
+const hero = body(HERO, 100, 100, { localPlayer: true, playerAnimation: heroClip, modelObject: { CurrentAction: PlayerAction.PLAYER_SKILL_DARKSIDE_READY, AnimationSpeed: 0.3 } });
 const otherClip = { action: PlayerAction.PLAYER_STOP_MALE as PlayerAction };
 const otherFacing = new Vector3();
 const other = { netId: OTHER, transform: { pos: new Vector3(110, 0, 100), rot: otherFacing, scale: 1 }, playerAnimation: otherClip } as unknown as Entity;
@@ -89,6 +92,15 @@ describe('RageAttack (C3 4A)', () => {
     combat.reset();
   });
 
+  it('the echo of the hero\'s cast puts him back in the Dark Side clip once it is over (SetRageSkillAni, WSclient.cpp:13427)', () => {
+    // SetAction starts the clip only when he has left it (ZzzAI.cpp:425-436): a late echo still gets its follow-ups.
+    heroClip.action = PlayerAction.PLAYER_STOP_MALE;
+    combat.beginDarkSide(263, 5);
+    rageAttack(HERO);
+    expect(heroClip.action).toBe(PlayerAction.PLAYER_SKILL_DARKSIDE_READY);
+    combat.reset();
+  });
+
   it('draws a cast once: a later 0x4A of it only turns its caster (MonkSystem.cpp:1285-1288)', () => {
     drawn.length = 0;
     otherClip.action = PlayerAction.PLAYER_STOP_MALE;
@@ -108,6 +120,50 @@ describe('RageAttack (C3 4A)', () => {
     rageAttack(HERO);
     rageAttack(HERO, 6);
     expect(drawn).toEqual([HERO]);
+    combat.reset();
+  });
+});
+
+/** C1 4B for `skill`: its five slots, the ones past `targets` the empty DS_TARGET_NONE (10000) OpenMU fills them with. */
+function rangeResponse(skill: number, targets: number[]): void {
+  const p = RageAttackRangeResponsePacket.createPacket();
+  p.SkillId = skill;
+  for (let i = 0; i < 5; i++) p.buffer.setUint16(6 + i * 2, targets[i] ?? 10000, true);
+  EventBus.emit('RageAttackRangeResponse', p.buffer);
+}
+
+describe('RageAttackRangeResponse (C1 4B)', () => {
+  const sent: DataView[] = [];
+  const send = (): void => {
+    sent.length = 0;
+    vi.spyOn(Session, 'sendToGS').mockImplementation(b => void sent.push(b));
+  };
+
+  it('naming no target, the hero asks for the skill on himself (SendRequestMagic(skill, HeroKey), MonkSystem.cpp:551-553)', () => {
+    send();
+    combat.beginDarkSide(559, 5);
+    rangeResponse(559, []);
+    vi.restoreAllMocks();
+    expect(sent).toHaveLength(1);
+    const p = new TargetedSkillPacket(sent[0]);
+    expect([p.SkillId, p.TargetId]).toEqual([559, HERO]);
+    combat.reset();
+  });
+
+  it('naming targets, nothing goes out and the empty slots are no targets (DS_TARGET_NONE, MonkSystem.cpp:537-549)', () => {
+    send();
+    combat.beginDarkSide(263, 5);
+    rangeResponse(263, [6]);
+    vi.restoreAllMocks();
+    expect(sent).toEqual([]);
+    rageAttack(HERO);
+    ticks(8);
+    expect(combat.nextDarkSideHit()).toBe(6);
+    // 6 was the only one: no follow-up comes due for an empty slot.
+    for (let i = 0; i < 14; i++) {
+      ticks(1);
+      expect(combat.nextDarkSideHit()).toBe(-1);
+    }
     combat.reset();
   });
 });

@@ -123,6 +123,21 @@ export const TEX = {
   /** BITMAP_BLUR+10 / sword trails. */
   swordBlur: 'Effect/sword_blur.OZJ',
   swordEff: 'Effect/SwordEff.OZJ',
+  /** BITMAP_SWORDEFF (!SwordEff.jpg, ZzzOpenData.cpp:4649): Chain Drive's joints. */
+  swordEffJoint: 'Effect/!SwordEff.OZJ',
+  /** BITMAP_DAMAGE1 (Damage1.jpg, 64 px, ZzzOpenData.cpp:4650): Chain Drive's sparks and its spin waves' sheet. */
+  damage1: 'Effect/Damage1.OZJ',
+  /** BITMAP_GROUND_SMOKE (ground_smoke.tga, 128 px with alpha, ZzzOpenData.cpp:4657): BITMAP_FIRE sub18, the Charge's smoke. */
+  groundSmoke: 'Effect/ground_smoke.OZT',
+  /** BITMAP_FIRE_HIK1 / HIK3 (firehik01 / 03.jpg, 64 px, ZzzOpenData.cpp:5247-5248): Dragon Roar's fire column. */
+  fireHik1: 'Effect/firehik01.OZJ',
+  fireHik3: 'Effect/firehik03.OZJ',
+  /** BITMAP_KWAVE2 (Kwave2.jpg, ZzzOpenData.cpp:4652): the sheet Dragon Roar's ground wave draws. */
+  kwave2: 'Effect/Kwave2.OZJ',
+  /** BITMAP_SMOKELINE1 (smokelines01.jpg, 64 px, ZzzOpenData.cpp:5241): Ignore Defense's red smoke. */
+  smokeLine1: 'Effect/smokelines01.OZJ',
+  /** BITMAP_KNIGHTST_BLUE (knightSt_blue.jpg, ZzzOpenData.cpp:4658): the sheet Charge's sword force draws (ZzzObject.cpp:2566-2570). */
+  knightStBlue: 'Effect/knightSt_blue.OZJ',
   swordEff2: 'Effect/SwordEffor2.OZJ',
   /** BITMAP_SWORD_EFFECT_MONO (Swordeff_mono.jpg): Strike of Destruction's flash at the caster. */
   swordEffMono: 'Effect/Swordeff_mono.OZJ',
@@ -345,6 +360,8 @@ export const MODEL = {
   shockwaveSpin: 'Effect/shockwave_spin01.glb',
   windSpin: 'Effect/wind_spin02.glb',
   windForce: 'Effect/wind_foce.glb',
+  /** MODEL_WINDFOCE_MIRROR (ZzzOpenData.cpp:4634): Increase Block's passing pillar. */
+  windForceMirror: 'Effect/wind_foce_mirror.glb',
   bladeTornado: 'Effect/bladetonedo.glb',
   phoenixShot: 'Effect/phoenix_shot_effect.glb',
   superPower: 'Effect/superpower.glb',

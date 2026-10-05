@@ -3,6 +3,7 @@ import { MODEL, RGBS, SMOKE, TEX } from '@/controllers/fx/recipes';
 import { ICE_MOTES } from '../_shared';
 import { IMPACT_HEIGHT, arrow, cm, hitSparks, orbiting, ticks } from '@/controllers/skills/visuals';
 import { effects } from '@/controllers/fx';
+import { entityYaw } from '@/controllers/fx/core';
 
 import { frost } from '@/controllers/lighting/recipes';
 
@@ -20,8 +21,10 @@ export default defineSkill({
     cast: (at, c) => {
       const feet = at.clone();
       feet.y -= IMPACT_HEIGHT;
-      effects.spawn('model', c.scene, feet, { model: MODEL.ice, seconds: ticks(20), scale: 0.8, colour: [0.5, 0.5, 0.5] });
-      effects.spawn('model', c.scene, feet, { model: MODEL.ice, seconds: ticks(20), scale: 0.8, colour: [0.5, 0.5, 0.5], yaw: Math.PI });
+      // At the target's Angle and that + 180 (WSclient.cpp:4486-4491); a node's yaw is MU's turned the other way.
+      const yaw = c.target ? -entityYaw(c.target) : 0;
+      effects.spawn('model', c.scene, feet, { model: MODEL.ice, seconds: ticks(20), scale: 0.8, colour: [0.5, 0.5, 0.5], yaw });
+      effects.spawn('model', c.scene, feet, { model: MODEL.ice, seconds: ticks(20), scale: 0.8, colour: [0.5, 0.5, 0.5], yaw: yaw - Math.PI });
       effects.spawn('particles', c.scene, feet, { recipe: SMOKE, count: 3, height: 0.3 });
       if (c.target) effects.spawn('sprite', c.scene, feet, { texture: TEX.fire3, colour: RGBS.ice, size: 0.5, seconds: ticks(20), follow: orbiting(c.target, cm(60), 0.3, 4, 0), spin: 3 });
     },

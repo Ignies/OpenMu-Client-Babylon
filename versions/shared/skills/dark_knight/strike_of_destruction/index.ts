@@ -120,7 +120,7 @@ const blowOfDestruction: Step = (at, c) => {
     for (let i = 0; i < n; i++) {
       const side = ((10 + Math.floor(Math.random() * 20)) * Math.PI) / 180;
       const p = new Vector3(a.x + dir.x * cm(55) * i, a.y, a.z + dir.z * cm(55) * i);
-      effects.spawn('model', cc.scene, p, { model: MODEL.knightPlanCrack2, scale: 1, colour: tint, yaw: yaw + Math.PI / 2 + (i % 2 === 0 ? side : -side), height: cm(15), seconds: ticks(25), fadeTail: 1, scrollV: streaks });
+      effects.spawn('model', cc.scene, p, { model: MODEL.knightPlanCrack2, scale: 1, colour: tint, yaw: -(yaw + Math.PI / 2 + (i % 2 === 0 ? side : -side)), height: cm(15), seconds: ticks(25), fadeTail: 1, scrollV: streaks });
     }
     splash(b, 2);
     splash(b, 1);

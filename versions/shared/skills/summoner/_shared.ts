@@ -191,9 +191,10 @@ export const aliceCurse = (k: AliceCurse, graded = false): Step => (_at, c) => {
   const blend = k.dark ? 'subtract' : 'add';
   const tint = k.dark ? k.models : graded ? aliceRingTint(bodyLight(at, k.models), k.models) : bodyLight(at, k.models);
   const dim = graded ? ALICE_FLARE_DIM : 1;
+  // From Angle 0, ALICE_BUFFSKILL_EFFECT turns +8 degrees a tick and EFFECT2 -8 (MoveHandlers.cpp:2241-2248); MU's yaw turns the other way.
   const bodies = [
-    { model: MODEL.elShieldRing, life: 28, scale: 0.1, spin: 1, peak: 0.7 },
-    { model: MODEL.elShieldRing2, life: 30, scale: 0.15, spin: -1, peak: 0.75 },
+    { model: MODEL.elShieldRing, life: 28, scale: 0.1, spin: -1, peak: 0.7 },
+    { model: MODEL.elShieldRing2, life: 30, scale: 0.15, spin: 1, peak: 0.75 },
   ];
   for (const b of bodies) {
     const seconds = ticks(b.life);
@@ -260,8 +261,9 @@ export const zinCurse = (k: ZinCurse): Step => (_at, c) => {
     ring({ texture: TEX.magicZin, colour: k.core, seconds: ticks(30), scale: s, grow: (s + 0.1 * 30) / s, cap: 3.5, alphaAt: p => Math.min(1, (1 - p) * 1.5) })(feet, c);
   }
   const lit = bodyLight(feet, k.core);
+  // At the caster's Angle (ZzzCharacter.cpp:4733-4735); the node turns MU's yaw the other way (fx/model.ts `yaw`).
   [MODEL.suhwanzin2, MODEL.suhwanzin22, MODEL.suhwanzin222].forEach((m, i) => {
-    effects.spawn('model', c.scene, feet, { model: m, seconds: ticks(37), scale: 0.6, colour: lit, alpha: 0.5, fadeIn: 10 / 37, fadeTail: 17 / 37, spin: (i % 2 ? -1 : 1) * degPerTick(3) });
+    effects.spawn('model', c.scene, feet, { model: m, seconds: ticks(37), scale: 0.6, colour: lit, alpha: 0.5, fadeIn: 10 / 37, fadeTail: 17 / 37, spin: (i % 2 ? 1 : -1) * degPerTick(3), yaw: -entityYaw(c.caster) });
   });
   const origin = feet.clone();
   const drop = (): Vector3 => new Vector3(origin.x + (Math.random() - 0.5) * 5, origin.y + 1.5 - Math.random(), origin.z + (Math.random() - 0.5) * 5);
@@ -640,10 +642,11 @@ export const summonCast = (k: SummonCast): Step => (_at, c) => {
     [MODEL.suhwanzin22, inner, -1],
     [MODEL.suhwanzin222, inner, 1],
   ];
+  // `turn` is MU's: the node turns its yaw the other way (fx/model.ts `yaw`).
   for (const [m, colour, turn] of circles) {
-    effects.spawn('model', c.scene, feet, { model: m, seconds: ticks(37), scale: 0.9, colour, alpha: 0.5, fadeIn: 10 / 37, fadeTail: 17 / 37, spin: turn * degPerTick(3), yaw });
+    effects.spawn('model', c.scene, feet, { model: m, seconds: ticks(37), scale: 0.9, colour, alpha: 0.5, fadeIn: 10 / 37, fadeTail: 17 / 37, spin: -turn * degPerTick(3), yaw: -yaw });
   }
-  effects.spawn('model', c.scene, feet, { model: MODEL.suhwanzin4, seconds: ticks(13), scale: 1, grow: 1 + 0.6 * 13, colour: bodyLight(feet, k.burst), alpha: 0.25, fadeIn: 5 / 13, fadeTail: 8 / 13, yaw });
+  effects.spawn('model', c.scene, feet, { model: MODEL.suhwanzin4, seconds: ticks(13), scale: 1, grow: 1 + 0.6 * 13, colour: bodyLight(feet, k.burst), alpha: 0.25, fadeIn: 5 / 13, fadeTail: 8 / 13, yaw: -yaw });
 };
 
 // Enhanced and Ultra: the summons throw the light of their art and gain embers, soot and ground contact.

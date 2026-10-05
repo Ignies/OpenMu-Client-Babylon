@@ -1,16 +1,49 @@
-import { type BoneGlow } from '@/controllers/fx/aura';
+import { type BoneGlow, type GroundGlow } from '@/controllers/fx/aura';
 import { MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
 import { effects } from '@/controllers/fx';
-import { bonePos, entityGone, entityPos, entityYaw, fxNow, type RGB } from '@/controllers/fx/core';
+import { TICK, bonePos, entityGone, entityPos, entityYaw, followEntity, fxNow, type RGB } from '@/controllers/fx/core';
+import type { EffectHandle } from '@/controllers/fx/layer';
 import type { TickedFx } from '@/controllers/fx/ticked';
 import { Vector3, type Scene } from '@/controllers/render/babylon/exports';
-import { after, cm, seq, ticks, type SkillContext, type Step } from '@/controllers/skills/visuals';
+import { after, cm, seq, ticks, type BuffLook, type SkillContext, type Step } from '@/controllers/skills/visuals';
 import { PlayerAction } from '@versions/shared/objects/enum';
 import type { ClipPick } from '@/controllers/combat';
 import type { Sounds } from '@/controllers/sound';
-import { DEG, deg, movesAt, randInt } from '../_shared';
+import { DEG, deg, groundY, movesAt, randInt } from '../_shared';
 import { createAngleDeg } from '@/core/turnAngle';
 import type { Entity } from '@/ecs/world';
+
+/** A BITMAP_SPARK particle in flight: where it is (tiles), its drift (tiles a move), its Gravity (cm a move, up) and LifeTime. */
+export interface FallingSpark {
+  x: number;
+  y: number;
+  z: number;
+  vx: number;
+  vz: number;
+  gravity: number;
+  life: number;
+}
+
+/**
+ * One move of a BITMAP_SPARK (ZzzEffectParticle.cpp:6558-6608): it loses a LifeTime, climbs by a Gravity that loses 2 a move,
+ * bounces off the ground at 0.6 for 4 more of its LifeTime, and drifts. Returns the Light it is drawn at, LifeTime / 16, or -1 once
+ * it is gone.
+ */
+export function fallSpark(s: FallingSpark): number {
+  if (--s.life <= 0) return -1;
+  const light = s.life / 16;
+  s.y += cm(s.gravity);
+  s.gravity -= 2;
+  const ground = groundY(s.x, s.z);
+  if (s.y < ground) {
+    s.y = ground;
+    s.gravity = -s.gravity * 0.6;
+    s.life -= 4;
+  }
+  s.x += s.vx;
+  s.z += s.vz;
+  return light;
+}
 
 const towardFrom = new Vector3();
 const towardTo = new Vector3();
@@ -121,6 +154,165 @@ const OURFORCES_SLOW = new Set([5, 12, 7, 8, 9, 14, 15, 16]);
 const ourforcesBreathe = (t: number, i: number): number =>
   i < 3 ? (Math.sin(t * 10) + 1) * 0.25 + 0.2 : OURFORCES_SLOW.has(i) ? (Math.sin(t * 5) + 1) * 0.25 + 0.5 : (Math.sin(t * 10) + 1) * 0.3 + 0.3;
 export const OURFORCES_GLOW: BoneGlow = { bones: OURFORCES_BONES, texture: TEX.flareRed, colour: RGBS.white, size: 0.96, breathe: ourforcesBreathe };
+/** With it, flare01_red 3.5 across under the body, drawn twice, (sin(WorldTime x 0.0005) + 1) x 0.25 + 0.2 bright (ZzzEffect.cpp:9563-9583). */
+export const OURFORCES_GROUND: GroundGlow = { texture: TEX.flareRed, colour: RGBS.white, size: 3.5, count: 2, breathe: t => (Math.sin(t * 0.5) + 1) * 0.25 + 0.2 };
+
+/** eBuff_Cloaking (_enum.h:3913). */
+const CLOAKING = 18;
+/** The Ourforces buffs, each with the master ones that count as it: Ignore Defense, Increase Health, Increase Block (magicEffects.ts). */
+const OURFORCES: readonly (readonly number[])[] = [[129], [130, 155], [131, 153, 154]];
+const BLOCK_UP = OURFORCES[2];
+
+function holds(e: Entity, ids: readonly number[]): boolean {
+  const buffs = e.buffs;
+  if (buffs) for (const id of ids) if (buffs.has(id)) return true;
+  return false;
+}
+
+/**
+ * The BITMAP_LIGHT_RED riding `e`, one for each Ourforces buff it holds (WSclient.cpp:15662-15678). Each one's move rolls for
+ * the mirror on an Increase Block body and makes a smoke on an Ignore Defense one (MoveHandlers.cpp:9617-9672), so they add up.
+ */
+function lightReds(e: Entity): number {
+  let n = 0;
+  for (const ids of OURFORCES) if (holds(e, ids)) n++;
+  return n;
+}
+
+/** A BITMAP_SMOKELINE1 sub5 an Ignore Defense body gives off: where it is from the feet (tiles), Scale, turn, rise (cm a tick), Alpha, LifeTime. */
+interface Smoke {
+  dx: number;
+  dy: number;
+  dz: number;
+  scale: number;
+  roll: number;
+  rise: number;
+  alpha: number;
+  life: number;
+}
+const SMOKE_LIGHT: RGB = [1, 0.12, 0];
+/** The Alpha steps in the original's floats: 0.7 less six 0.1 is under 0.1 there, so a smoke is drawn 30 ticks. */
+const TENTH = Math.fround(0.1);
+const SEVEN_TENTHS = Math.fround(0.7);
+const smokeBone = new Vector3();
+const smokeFeet = new Vector3();
+const spentSmokes: Smoke[] = [];
+
+/**
+ * BITMAP_LIGHT_RED sub1 on an Ignore Defense body (MoveHandlers.cpp:9659-9672): each tick a SMOKELINE1 sub5 from bone 26 or 35,
+ * red (1, 0.12, 0), riding the body: smokelines01 64 px x 0.005 x (0.96-1.91), growing 0.06-0.08 and climbing 1.2-2.7 cm a tick,
+ * its Alpha in by 0.2-0.6 a tick to 0.7 and out by 0.1 under its LifeTime 10 of 35 (ZzzEffectParticle.cpp:1767-1786, :5963-5990).
+ */
+export const ourforcesSmoke: BuffLook = (e, scene) => {
+  const smokes: Smoke[] = [];
+  let beat = fxNow();
+  // Moved after the aura that makes them (fx/layers.ts), so in the frame they are made; done once the aura stops beating.
+  eachMove(scene, entityPos(e, 0, new Vector3()), (_m, fx) => {
+    const feet = entityPos(e, 0, smokeFeet);
+    let n = 0;
+    for (const s of smokes) {
+      if (--s.life < 10) s.alpha = Math.fround(s.alpha - TENTH);
+      else if (s.alpha < SEVEN_TENTHS) s.alpha = Math.fround(s.alpha + Math.fround((randInt(5) + 2) * TENTH));
+      else s.alpha = SEVEN_TENTHS;
+      if (s.life <= 0 || s.alpha < TENTH) {
+        spentSmokes.push(s);
+        continue;
+      }
+      s.scale += (randInt(3) + 6) * 0.01;
+      s.dy += cm(s.rise);
+      const size = cm(64 * s.scale);
+      fx.sprite(TEX.smokeLine1, SMOKE_LIGHT, feet.x + s.dx, feet.y + s.dy, feet.z + s.dz, size, size, s.roll * DEG, Math.min(1, s.alpha));
+      smokes[n++] = s;
+    }
+    smokes.length = n;
+    return n > 0 || fxNow() - beat < 2 * TICK;
+  });
+  const smoke = (): void => {
+    beat = fxNow();
+    // None while cloaked (MoveHandlers.cpp:9657-9658).
+    if (entityGone(e) || e.buffs?.has(CLOAKING)) return;
+    const feet = entityPos(e, 0, smokeFeet);
+    for (let i = lightReds(e); i > 0; i--) {
+      const at = bonePos(e, randInt(2) ? 26 : 35, smokeBone);
+      const s = spentSmokes.pop() ?? { dx: 0, dy: 0, dz: 0, scale: 0, roll: 0, rise: 0, alpha: 0, life: 0 };
+      s.dx = at.x - feet.x;
+      s.dy = at.y - feet.y;
+      s.dz = at.z - feet.z;
+      s.scale = (randInt(96) + 96) * 0.01 * 0.005;
+      s.roll = randInt(360);
+      s.rise = (randInt(16) + 12) * 0.1;
+      s.alpha = 0;
+      s.life = 35;
+      smokes.push(s);
+    }
+  };
+  return { pulse: { every: TICK, fire: smoke } };
+};
+
+/**
+ * MODEL_WINDFOCE_MIRROR (wind_foce_mirror.bmd) riding the body, LifeTime 50, gone once the body loses Increase Block
+ * (ZzzEffect.cpp:6061-6066, MoveHandlers.cpp:9675-9692): it turns to WorldTime x 0.4 degrees, Scale x1.015 a tick to 1.5 and
+ * Light (0.6, 0.6, 1) x0.9 a tick, drawn x 6, clamped (ZzzObject.cpp:2511-2516).
+ */
+const windForceMirror = (scene: Scene, e: Entity): { alive: boolean } =>
+  effects.spawn('model', scene, entityPos(e, 0, new Vector3()), {
+    model: MODEL.windForceMirror,
+    seconds: ticks(50),
+    follow: followEntity(e, 0),
+    until: () => entityGone(e) || !holds(e, BLOCK_UP),
+    // Degrees a ms of WorldTime as radians a second; MU's yaw turns the other way.
+    spin: -0.4 * 1000 * DEG,
+    scaleAt: t => Math.min(1.5, 1.015 ** movesAt(t)),
+    colour: [0.6, 0.6, 1],
+    blendMesh: 0,
+    blendLight: t => 6 * 0.9 ** movesAt(t),
+    blendClamp: true,
+    fadeTail: 0,
+  });
+
+/**
+ * BITMAP_LIGHT_RED sub2 on an Increase Block body (MoveHandlers.cpp:9624-9636): one tick in 70 a mirror wind pillar while none
+ * is up, rolled by each BITMAP_LIGHT_RED the body carries.
+ */
+export const ourforcesMirror: BuffLook = (e, scene) => {
+  let mirror: { alive: boolean } | null = null;
+  const roll = (): void => {
+    for (let i = lightReds(e); i > 0; i--) if (randInt(70) === 7 && !mirror?.alive && !entityGone(e)) mirror = windForceMirror(scene, e);
+  };
+  return { pulse: { every: TICK, fire: roll } };
+};
+
+/** The MODEL_WINDFOCE sub1 on each body, the last Increase Block's: DeleteEffect before CreateEffect (WSclient.cpp:5078-5081). */
+const blockPillars = new WeakMap<Entity, EffectHandle>();
+/** The ticks it stands before it asks for a buff: the original registers Increase Block as it makes it (WSclient.cpp:5089-5102), ours comes in its own packet. */
+const BLOCK_PILLAR_GRACE = 25;
+
+/**
+ * Increase Block's MODEL_WINDFOCE sub1 (WSclient.cpp:5072-5081) on the body the cast is for: the hero's target, or another
+ * caster himself. LifeTime 999, kept while the body holds any Ourforces buff (ZzzEffect.cpp:6004-6013, MoveHandlers.cpp:9556-9575):
+ * Scale 1, turning to -WorldTime x 0.3 degrees, Light (0.6, 0.6, 1) x ((sin(WorldTime x 0.001) + 1) x 0.25 + 0.2), drawn x 6,
+ * clamped (ZzzObject.cpp:2509-2514).
+ */
+export const blockPillar: Step = (_at, c) => {
+  const body = c.caster.localPlayer && c.target ? c.target : c.caster;
+  blockPillars.get(body)?.stop();
+  const t0 = fxNow();
+  const pillar = effects.spawn('model', c.scene, entityPos(body, 0, new Vector3()), {
+    model: MODEL.windForce,
+    seconds: Infinity,
+    follow: followEntity(body, 0),
+    until: () => entityGone(body) || (movesSince(t0) >= BLOCK_PILLAR_GRACE && lightReds(body) === 0),
+    // Degrees a ms of WorldTime as radians a second; MU's yaw turns the other way.
+    spin: 0.3 * 1000 * DEG,
+    colour: [0.6, 0.6, 1],
+    blendMesh: 0,
+    blendLight: () => 6 * ((Math.sin(fxNow()) + 1) * 0.25 + 0.2),
+    blendClamp: true,
+    fadeTail: 0,
+  });
+  blockPillars.set(body, pillar);
+  return pillar;
+};
 
 /** The ticks a wind pillar raises its sub 3: LifeTime 40 and 30 of 50, or 60 and 50 of 70 (MoveHandlers.cpp:9538, :9590). */
 const WIND_FORCE_THROWS = [11, 21];
@@ -139,7 +331,7 @@ function windPillar(colour: RGB, fast: boolean): Step {
     effects.spawn('model', c.scene, at, {
       model: MODEL.windForce,
       seconds: ticks(fast ? 70 : 50),
-      yaw: entityYaw(c.caster),
+      yaw: -entityYaw(c.caster),
       spin,
       scaleAt: t => Math.min(3, 1 + 0.1 * movesAt(t)),
       colour,
@@ -266,21 +458,27 @@ export const magicGround13 = (light: RGB): Step => (_at, c) => {
 };
 
 /**
- * MODEL_SHOCKWAVE_GROUND01 sub0 (shockwave_ground01.bmd) at the caster's feet, LifeTime 20 (ZzzEffect.cpp:6109-6115): each move
- * Scale x1.2 and Light x0.8 (MoveHandlers.cpp:9803-9822), drawn bright at Light x 6, clamped (ZzzObject.cpp:2521-2534).
+ * MODEL_SHOCKWAVE_GROUND01 (shockwave_ground01.bmd) at `at`, turned `yaw` degrees: sub0 lives LifeTime 20 keeping 0.8 of its Light a
+ * move, sub1 lives 50 keeping 0.9 and draws Kwave2 (ZzzEffect.cpp:6109-6128); each move Scale x1.2 (MoveHandlers.cpp:9803-9822),
+ * drawn bright at Light x 6, clamped (ZzzObject.cpp:2515-2534).
  */
-const groundShock = (light: RGB, scale: number): Step => (_at, c) =>
-  effects.spawn('model', c.scene, entityPos(c.caster, 0, new Vector3()), {
+export function shockGround(c: SkillContext, at: Vector3, yaw: number, light: RGB, scale: number, sub1 = false): void {
+  const keep = sub1 ? 0.9 : 0.8;
+  effects.spawn('model', c.scene, at, {
     model: MODEL.shockwaveGround,
-    seconds: ticks(20),
-    angle: [0, 0, deg(entityYaw(c.caster))],
+    seconds: ticks(sub1 ? 50 : 20),
+    angle: [0, 0, yaw],
     colour: light,
+    ...(sub1 ? { texture: TEX.kwave2 } : {}),
     scaleAt: t => scale * 1.2 ** movesAt(t),
     blendMesh: 0,
-    blendLight: t => 6 * 0.8 ** movesAt(t),
+    blendLight: t => 6 * keep ** movesAt(t),
     blendClamp: true,
     fadeTail: 0,
   });
+}
+/** A party buff's sub0 at the caster's feet. */
+const groundShock = (light: RGB, scale: number): Step => (_at, c) => shockGround(c, entityPos(c.caster, 0, new Vector3()), deg(entityYaw(c.caster)), light, scale);
 
 /** The Lights of a party buff's RageCreateEffect (MonkSystem.cpp:1128-1214). */
 export interface OurforcesLights {

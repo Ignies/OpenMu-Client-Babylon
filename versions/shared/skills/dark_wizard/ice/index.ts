@@ -82,7 +82,7 @@ const ICE_MIST: ParticleRecipe = {
  */
 const iceCrystal = (extra?: Step): Step =>
   atRelease((feet, c) => {
-    effects.spawn('model', c.scene, feet, { model: MODEL.ice, seconds: ticks(25), scale: 0.8, colour: RGBS.white, yaw: entityYaw(c.caster), keysPerTick: 1, playTo: 5, fadeTail: 0.04 });
+    effects.spawn('model', c.scene, feet, { model: MODEL.ice, seconds: ticks(25), scale: 0.8, colour: RGBS.white, yaw: -entityYaw(c.caster), keysPerTick: 1, playTo: 5, fadeTail: 0.04 });
     const smokeAt = feet.clone();
     delay(ticks(5), () => effects.spawn('particles', c.scene, smokeAt, { recipe: ICE_SMOKE, rate: 12.5, seconds: ticks(20), height: 0.955 }));
     effects.spawn('debris', c.scene, feet, { model: MODEL.ice2, count: 5, colour: [0.3, 0.3, 0.3], liftCm: 50, puff: ICE_SHARD_SMOKE });

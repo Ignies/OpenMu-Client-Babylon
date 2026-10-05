@@ -1603,9 +1603,9 @@ exports[`skill rules golden > cast clip and SwordCount per pose and context 1`] 
     "sword": "70effb7bd5b146d0",
   },
   "569": {
-    "clips": "PLAYER_ATTACK_BOW PLAYER_ATTACK_FIST PLAYER_ATTACK_RIDE_BOW PLAYER_ATTACK_RIDE_HORSE_SWORD PLAYER_ATTACK_RIDE_SWORD PLAYER_ATTACK_SWORD_LEFT1 PLAYER_ATTACK_SWORD_RIGHT1 PLAYER_ATTACK_SWORD_RIGHT2 PLAYER_FENRIR_ATTACK PLAYER_FENRIR_ATTACK_BOW PLAYER_FENRIR_ATTACK_ONE_SWORD PLAYER_FENRIR_ATTACK_TWO_SWORD PLAYER_RAGE_FENRIR_ATTACK_RIGHT PLAYER_RAGE_UNI_ATTACK",
-    "hash": "47d941c3e523c6bb",
-    "sword": "3f0550defa8d53b4",
+    "clips": "PLAYER_SKILL_ATT_UP_OURFORCES PLAYER_SKILL_HP_UP_OURFORCES",
+    "hash": "05014efc183fec15",
+    "sword": "70effb7bd5b146d0",
   },
   "57": {
     "clips": "PLAYER_ATTACK_ONE_FLASH",
@@ -1618,14 +1618,14 @@ exports[`skill rules golden > cast clip and SwordCount per pose and context 1`] 
     "sword": "70effb7bd5b146d0",
   },
   "572": {
-    "clips": "PLAYER_ATTACK_BOW PLAYER_ATTACK_FIST PLAYER_ATTACK_RIDE_BOW PLAYER_ATTACK_RIDE_HORSE_SWORD PLAYER_ATTACK_RIDE_SWORD PLAYER_ATTACK_SWORD_LEFT1 PLAYER_ATTACK_SWORD_RIGHT1 PLAYER_ATTACK_SWORD_RIGHT2 PLAYER_FENRIR_ATTACK PLAYER_FENRIR_ATTACK_BOW PLAYER_FENRIR_ATTACK_ONE_SWORD PLAYER_FENRIR_ATTACK_TWO_SWORD PLAYER_RAGE_FENRIR_ATTACK_RIGHT PLAYER_RAGE_UNI_ATTACK",
-    "hash": "47d941c3e523c6bb",
-    "sword": "3f0550defa8d53b4",
+    "clips": "PLAYER_SKILL_ATT_UP_OURFORCES PLAYER_SKILL_HP_UP_OURFORCES",
+    "hash": "05014efc183fec15",
+    "sword": "70effb7bd5b146d0",
   },
   "573": {
-    "clips": "PLAYER_ATTACK_BOW PLAYER_ATTACK_FIST PLAYER_ATTACK_RIDE_BOW PLAYER_ATTACK_RIDE_HORSE_SWORD PLAYER_ATTACK_RIDE_SWORD PLAYER_ATTACK_SWORD_LEFT1 PLAYER_ATTACK_SWORD_RIGHT1 PLAYER_ATTACK_SWORD_RIGHT2 PLAYER_FENRIR_ATTACK PLAYER_FENRIR_ATTACK_BOW PLAYER_FENRIR_ATTACK_ONE_SWORD PLAYER_FENRIR_ATTACK_TWO_SWORD PLAYER_RAGE_FENRIR_ATTACK_RIGHT PLAYER_RAGE_UNI_ATTACK",
-    "hash": "47d941c3e523c6bb",
-    "sword": "3f0550defa8d53b4",
+    "clips": "PLAYER_SKILL_ATT_UP_OURFORCES PLAYER_SKILL_HP_UP_OURFORCES",
+    "hash": "05014efc183fec15",
+    "sword": "70effb7bd5b146d0",
   },
   "578": {
     "clips": "PLAYER_FENRIR_ATTACK_MAGIC PLAYER_RIDE_SKILL PLAYER_SKILL_ELF1 PLAYER_SKILL_HAND1 PLAYER_SKILL_HAND2",
@@ -1933,6 +1933,21 @@ exports[`skill rules golden > cast sound paired with the clip 1`] = `
     "Sound/Ragefighter/Rage_Buff_1",
   ],
   "268": [
+    "Sound/Ragefighter/Rage_Buff_1",
+    "Sound/Ragefighter/Rage_Buff_2",
+    "Sound/Ragefighter/Rage_Buff_1",
+  ],
+  "569": [
+    "Sound/Ragefighter/Rage_Buff_1",
+    "Sound/Ragefighter/Rage_Buff_2",
+    "Sound/Ragefighter/Rage_Buff_1",
+  ],
+  "572": [
+    "Sound/Ragefighter/Rage_Buff_1",
+    "Sound/Ragefighter/Rage_Buff_2",
+    "Sound/Ragefighter/Rage_Buff_1",
+  ],
+  "573": [
     "Sound/Ragefighter/Rage_Buff_1",
     "Sound/Ragefighter/Rage_Buff_2",
     "Sound/Ragefighter/Rage_Buff_1",

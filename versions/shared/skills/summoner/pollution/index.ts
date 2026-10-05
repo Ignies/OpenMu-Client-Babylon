@@ -134,7 +134,7 @@ const pollutionOf = (graded: boolean): Step => (at, c) => {
         b.alpha = t <= 15 ? t / 20 : t < 130 ? 0.75 : (160 - t) / 40;
         body = b;
         b.at.copyFrom(head);
-        if ((head.x - prev.x) ** 2 + (head.z - prev.z) ** 2 > 1e-8) b.yaw = yawToward(prev, head);
+        if ((head.x - prev.x) ** 2 + (head.z - prev.z) ** 2 > 1e-8) b.yaw = -yawToward(prev, head);
         prev.copyFrom(head);
         if (!b.loaded) return;
         if (!rigged) {

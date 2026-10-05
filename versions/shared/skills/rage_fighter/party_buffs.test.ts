@@ -10,12 +10,13 @@ vi.hoisted(() => {
   g.location ??= { href: 'http://localhost/', search: '', hostname: 'localhost', protocol: 'http:' };
 });
 
-// SkillCast.cpp:915-931: the three party buffs toss a coin once, and the clip and the
-// sound come from the same toss (ATT_UP with Buff_1, HP_UP with Buff_2).
+// SkillCast.cpp:913-931: the three party buffs toss a coin once, and the clip and the
+// sound come from the same toss (ATT_UP with Buff_1, HP_UP with Buff_2). The case takes the
+// master ones too: 573 (HP_UP_OURFORCES_STR), 569 and 572 (DEF_UP_OURFORCES_STR, _MASTERY).
 describe('rage fighter party buff sound', () => {
   afterEach(() => vi.restoreAllMocks());
 
-  for (const skill of [266, 267, 268]) {
+  for (const skill of [266, 267, 268, 569, 572, 573]) {
     it(`pairs skill ${skill}'s sound with the clip the toss picked`, () => {
       vi.spyOn(Math, 'random').mockReturnValue(0.1);
       const first = skillClip(skill)!;
