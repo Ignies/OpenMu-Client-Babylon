@@ -157,7 +157,7 @@ const EntryBox = observer(({ kind, canEnter }: BalgassEntryBox) => {
   );
 });
 
-/** One line in `worldPage/index.tsx`. */
+/** Registered by `window.ts`. */
 export const BalgassEntryWindow = observer(() => {
   const box = balgassEntryBox();
   if (!box) return null;

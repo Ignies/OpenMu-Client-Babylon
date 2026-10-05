@@ -274,7 +274,7 @@ export type GameOptions = {
   slideHelp: boolean;
   /**
    * The original client's camera: Ctrl+wheel zoom levels, Insert/Delete
-   * rotate, 30-degree frustum, per-map overrides (`src/camera/`). Off is
+   * rotate, 30-degree frustum, per-map overrides (`src/controllers/camera/`). Off is
    * today's fixed framing.
    */
   cameraControl: boolean;

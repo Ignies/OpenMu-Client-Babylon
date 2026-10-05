@@ -5,7 +5,8 @@
  * beside `versionPackets` in src/version/index.ts, Phase 7 step b) so a
  * version with different tables replaces them without touching base code.
  *
- * Sources: `items.json` (tools/convertItemTXTtoJson.ts from the S6 Item.txt),
+ * Sources: the item files (`versions/shared/items/`, first converted from the S6 Item.txt by
+ * tools/convertItemTXTtoJson.ts),
  * `skillsDatabase.ts` (generated from `SkillsInitializer.cs`), the monster folders,
  * `jewelUpgrade.ts` (S6 jewel rules incl. Harmony / refine stones).
  */

@@ -1,6 +1,6 @@
 /**
  * `Data/Local/<pack>/item_<lang>.bmd` item names: `ITEM_ATTRIBUTE_FILE`
- * (`GameData/ItemData/ItemStructs.h`), an overlay over `items.json`. See assets/readme.md.
+ * (`GameData/ItemData/ItemStructs.h`), an overlay over the item files' `ItemName`. See assets/readme.md.
  */
 
 import { observable, runInAction } from 'mobx';
@@ -48,7 +48,7 @@ export function parseItemNames(bytes: Uint8Array): Map<number, string> {
 
 /**
  * Load the overlay for the active language. A no-op for a language with no
- * pack, and for English - `items.json` already holds those names.
+ * pack, and for English - the item files already hold those names.
  */
 function loadItemNames(): Promise<void> {
   if (pending) return pending;
@@ -79,13 +79,13 @@ function loadItemNames(): Promise<void> {
   return pending;
 }
 
-/** The localised name for an item code, or undefined to use `items.json`. */
+/** The localised name for an item code, or undefined to use the item file's `ItemName`. */
 export function localisedItemName(
   group: number,
   index: number
 ): string | undefined {
   // The one option that turns a whole table off: a trader who wants to match
-  // a price list reads `items.json` instead, with the rest of the interface
+  // a price list reads the item files instead, with the rest of the interface
   // still in their own language. Observable, so every open window redraws the
   // moment it is switched.
   if (GameOptions.englishItemNames) return undefined;

@@ -1329,7 +1329,7 @@ export class ModelObject {
     if (anim) this.bindMeshAnimation(anim);
   }
 
-  /** Binds one entry: the map table's, or a monster's (`monsters/monsterBlendMesh.ts`). */
+  /** Binds one entry: the map table's, or a monster's (`actors/monsterBlendMesh.ts`). */
   protected bindMeshAnimation(anim: MeshAnimation) {
     if (!this.gltf) return;
 

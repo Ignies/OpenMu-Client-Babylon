@@ -3,7 +3,7 @@ import { InventoryConstants } from '../../core/inventoryConstants';
 import { itemDef } from './itemStats';
 
 /**
- * Which worn slot an item belongs to. `ItemSlot` in `items.json` names one
+ * Which worn slot an item belongs to. `ItemSlot` in the item files names one
  * slot per item; the two pairs the original lets an item fall through to are
  * the hands (a weapon may go to the off hand) and the fingers.
  *

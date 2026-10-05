@@ -32,7 +32,7 @@ export class MonsterObject extends ModelObject {
 
   /**
    * The additive body mesh the original gives this model in `CreateMonster`
-   * and the per-tick writes on it (`monsters/monsterBlendMesh.ts`). A class
+   * and the per-tick writes on it (`actors/monsterBlendMesh.ts`). A class
    * that set its own `BlendMesh` (the golden line's metal pass) keeps it;
    * the animation binds either way.
    */

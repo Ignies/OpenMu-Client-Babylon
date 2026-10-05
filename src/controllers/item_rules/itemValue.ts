@@ -31,7 +31,7 @@ function roundGold(gold: number): number {
   return gold;
 }
 
-/** Raw `items.json` columns `ItemDef` does not carry (`iZen`, `Value`). */
+/** Raw item file columns `ItemDef` does not carry (`iZen`, `Value`). */
 function rawColumns(def: ItemDef): { zen: number; value: number } {
   const raw = ItemsDatabase.getItem(def.group, def.index) as
     | Record<string, unknown>

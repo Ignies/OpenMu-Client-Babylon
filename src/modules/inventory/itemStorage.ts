@@ -108,7 +108,7 @@ const is = (item: Item, group: number, num: number) =>
 /**
  * The part of `IsStoreBan` / `IsTradeBan` / `IsPersonalShopBan`
  * (ZzzInventory.cpp:7529-7690) this Data copy can express: the Season 6
- * lists name dozens of item numbers that `items.json` here does not carry,
+ * lists name dozens of item numbers that the item files here do not carry,
  * so only the entries whose group/number exist are checked - the server
  * refuses the rest anyway and the move rolls back.
  */

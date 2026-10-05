@@ -4,7 +4,7 @@ import { makeAutoObservable, runInAction } from 'mobx';
  * The debug menu registry.
  *
  * One window, one registry: features register a `DebugModule` here and the
- * window (`controllers/interface/components/debugMenu/`) renders whatever is registered - it
+ * window (`versions/shared/ui/windows/debug_menu/`) renders whatever is registered - it
  * knows no module by name. Modules describe their content as data (rows of
  * checks, sliders, buttons, lists and live info lines) carrying getters and
  * setters as closures; the registry stores nothing beyond `open` and the

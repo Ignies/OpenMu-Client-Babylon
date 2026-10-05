@@ -492,7 +492,7 @@ export function itemRestHeight(group: number): number {
 /**
  * `ItemHeight` (ZzzObject.cpp:6274), world units: how far a worn body part has
  * to come down to sit on the drop's own origin. Armour drops reuse the model
- * the character wears (`items.json` points group 7-11 at `Player/`), so a helm
+ * the character wears (the item files point group 7-11 at `Player/`), so a helm
  * is authored up at head height and lands in the air without this.
  */
 export function itemWornHeight(group: number): number {

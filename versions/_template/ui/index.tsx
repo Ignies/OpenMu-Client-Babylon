@@ -6,7 +6,7 @@
  *   (below), and its `gameVersion.features.*` flag goes false so the
  *   consumer stops asking for it;
  * - a window that *differs* is a sibling file here that composes the shared
- *   primitives from `src/ui/components/`, never a fork of them;
+ *   primitives from `src/controllers/interface/components/`, never a fork of them;
  * - a window that is the same is a re-export of the base one.
  *
  * This module may import app code: it is only ever loaded from inside the

@@ -236,7 +236,7 @@ const DRAGON: BoidSpec = {
  * `EnableEvent == 3` is the Golden Dragon and its only difference is
  * `SubType = 1` (GOBoid.cpp:1293), which the original renders as the
  * `RENDER_METAL | RENDER_BRIGHT` / `RENDER_CHROME | RENDER_BRIGHT` pair -
- * the same pass `monsters/goldenMonsters.ts` gives the rest of the golden
+ * the same pass `versions/shared/monsters/_golden_line/` gives the rest of the golden
  * line, at the same tint.
  */
 const GOLDEN_DRAGON: BoidSpec = { ...DRAGON, shine: [1, 0.5, 0] };

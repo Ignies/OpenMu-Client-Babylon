@@ -8,7 +8,7 @@ import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
  * equip checks: `ZzzInfomation.cpp` `CalcDamageMin/Max`, `CalcMagicPower`,
  * `CalcSuccessfulBlocking`, `CalcDefense`, `CalcRequirements` and
  * `ZzzInventory.cpp` `CalcMaxDurability`, on top of a normalised view of
- * `items.json` (whose column names differ per group: `Strength`/`Str`,
+ * the item files (whose column names differ per group: `Strength`/`Str`,
  * `Durability`/`Dur`, `RequiredLvl`/`ReqLvl`, …).
  */
 
@@ -96,7 +96,7 @@ function num(raw: Record<string, unknown>, ...keys: string[]): number {
   return 0;
 }
 
-/** Normalised `items.json` row, or null for an unknown item. */
+/** Normalised item file row, or null for an unknown item. */
 export function itemDef(group: number, index: number): ItemDef | null {
   const key = `${group}:${index}`;
   const cached = defCache.get(key);

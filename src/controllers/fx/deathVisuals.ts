@@ -114,7 +114,7 @@ export function spawnCrystalShards(
 }
 
 /** `o->SubType` in MODEL_SKELETON1..3 (:1383-1390): the player-rig skeleton monsters
- *  (`versions/shared/monsters/skeleton_warrior.ts`) take the same bone shatter. */
+ *  (`versions/shared/monsters/_skeleton_line/`) take the same bone shatter. */
 export const skeletonShatter: ShatterDeath = boneShatter;
 
 /** What a body file's `shatter` names. */

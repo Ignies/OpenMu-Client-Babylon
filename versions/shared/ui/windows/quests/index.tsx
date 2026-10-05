@@ -971,7 +971,7 @@ const GiveUpPrompt = observer(() => {
 
 export { QuestTracker } from './tracker';
 
-/** Every quest window; one line in `worldPage/index.tsx`. */
+/** Every quest window; registered by `window.ts`. */
 export const QuestWindows = () => (
   <>
     <NpcQuestWindow />
