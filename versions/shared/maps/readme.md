@@ -122,8 +122,9 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
 - `lampFlares.test.ts`, `lorencia/candleObject.test.ts`, `devias/candleObject.test.ts`: what the original
   never draws is the `lampFlares` improvement, gone on Classic: the flares of Lorencia 90 and 150, Devias
   66 and the candelabra, Elbeland 61 and Lost Tower 23 (the light under them kept), the candle wick
-  fire, the Land of Trials brazier's fire (42, its ground light kept) and the Stadium brazier's
-  (`stadium/brazierObject.test.ts`), and the ground lights of the Devias candelabra, Lost Tower 18,
+  fire, the Land of Trials brazier's fire (42, its ground light kept), the Kanturu deep-red
+  brazier's (60, on the GM area and Doppelganger 4 too, its ground light kept) and the Stadium
+  brazier's (`stadium/brazierObject.test.ts`), and the ground lights of the Devias candelabra, Lost Tower 18,
   19, 20 and 23, the fire vents (Vulcanus and Doppelganger 2 6, Loren Market 57), the Noria forge,
   the Stadium braziers and the Blood Castle candelabra (`bloodcastle/candelabraObject.test.ts`; their
   cards kept); no row shapes its ground light on Classic (no `falloff` or `floorGain`), and Lorencia

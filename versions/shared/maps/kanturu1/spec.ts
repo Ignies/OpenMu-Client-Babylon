@@ -1,6 +1,7 @@
 import type { Emission } from '@/controllers/fx/effectParticles';
 import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
 import type { MeshAnimations } from '@/controllers/render';
+import { isOn } from '@/controllers/fidelity';
 import { saw } from '../shared/meshAnimation';
 
 /**
@@ -71,11 +72,11 @@ export const KANTURU1_EMISSIONS: Partial<Record<number, readonly Emission[]>> =
 
 /**
  * `MoveKanturu1stObject`:
- *  - **60** (×5), :64-70: `L = (rand%4+3)*0.1; AddTerrainLight(x, y,
- *    (0.9L, 0.2L, 0.1L), 3)` + hidden - a deep-red brazier; the render
- *    side (:156-162) adds `BITMAP_TRUE_FIRE` particles.
- *  - **61** (×58), :71-77: the same with `(L, 0.6L, 0.2L)` - the orange
- *    brazier, again `TRUE_FIRE` (:156-162).
+ *  - **60** (×5), :71-77: `L = (rand%4+3)*0.1; AddTerrainLight(x, y,
+ *    (0.9L, 0.2L, 0.1L), 3)` + hidden - a deep-red brazier. Nothing renders
+ *    it: its fire is ours (`lampFlares`).
+ *  - **61** (×58), :78-84: the same with `(L, 0.6L, 0.2L)` - the orange
+ *    brazier; the render side (:158-164) adds `BITMAP_TRUE_FIRE` particles.
  *  - **70** (×0 placed here, in the GM area and on Doppelganger 4; table
  *    kept to match the source), :85-91: `Velocity 0.04` and a pulsing
  *    `(1.4, 0.7, 0.4) * (sin(t*0.002)*0.45+0.55)` at range 4, plus
@@ -87,6 +88,9 @@ export const KANTURU1_EMISSIONS: Partial<Record<number, readonly Emission[]>> =
  *    :292-302).
  */
 const LAMP_GROW = { speed: 0.002, amount: 1, base: 0.8 };
+
+/** Ours (`lampFlares`, none on Classic): the original hides 60 and draws nothing there (:71-77). */
+const DEEP_RED_FIRE: readonly Emission[] = [{ kinds: ['fire1', 'fire3'], every: 2, jitter: 6 }];
 
 /** One of 70's two sparks on bone 6, at its rest height. */
 const lampSpark = (
@@ -108,7 +112,9 @@ export const KANTURU1_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
           color: [0.9, 0.2, 0.1],
           flicker: { min: 0.3, max: 0.6, steps: 4 },
         },
-        emissions: [{ kinds: ['fire1', 'fire3'], every: 2, jitter: 6 }],
+        get emissions() {
+          return isOn('lampFlares') ? DEEP_RED_FIRE : undefined;
+        },
       },
     ],
     61: [
