@@ -4,6 +4,7 @@ import { Scene } from '@babylonjs/core/scene';
 import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 import { effects } from '@/controllers/fx';
 import { MODEL, TEX } from '@/controllers/fx/recipes';
+import type { TailStrip, TickedFx } from '@/controllers/fx/ticked';
 import { ENUM_WORLD } from '@/core/types';
 import type { Entity } from '@/ecs/world';
 import { PlayerAction } from '../../objects/enum';
@@ -47,8 +48,15 @@ interface Spawn {
   name: string;
   opts: Record<string, unknown>;
 }
+/** One call a `ticked` script made on its tick: `sprite`, `decal` or a strip's `push` (with the strip's options and light). */
+interface Draw {
+  tick: number;
+  kind: 'sprite' | 'decal' | 'push';
+  args: unknown[];
+}
 interface Run {
   spawns: Spawn[];
+  draws: Draw[];
   sounds: { tick: number; key: string }[];
 }
 
@@ -70,10 +78,37 @@ function run(
   const aim = target ? ({ netId: 2, transform: { pos: new Vector3(103, 0, 104), rot: new Vector3(), scale: 1 } } as unknown as Entity) : null;
 
   effects.reset();
-  const out: Run = { spawns: [], sounds: [] };
+  const out: Run = { spawns: [], draws: [], sounds: [] };
   const real = effects.spawn.bind(effects);
+  // A ticked script draws through `fx`: record each call with the tick it was made on.
+  const strips = new WeakMap<object, TailStrip>();
+  const recorded = (fx: TickedFx): TickedFx => ({
+    scene: fx.scene,
+    sprite: (...a: Parameters<TickedFx['sprite']>) => {
+      out.draws.push({ tick, kind: 'sprite', args: a });
+      fx.sprite(...a);
+    },
+    decal: (...a: Parameters<TickedFx['decal']>) => {
+      out.draws.push({ tick, kind: 'decal', args: a });
+      fx.decal(...a);
+    },
+    ribbon: o => fx.ribbon(o),
+    strip: o => {
+      const s = fx.strip(o);
+      const proxy = new Proxy(s, {
+        get: (t, k) => (k === 'push' ? (...a: Parameters<TailStrip['push']>) => (out.draws.push({ tick, kind: 'push', args: [o, t.light, ...a] }), t.push(...a)) : t[k as keyof TailStrip]),
+      });
+      strips.set(proxy, s);
+      return proxy;
+    },
+    drop: s => fx.drop(strips.get(s) ?? s),
+  });
   const spy = vi.spyOn(effects, 'spawn').mockImplementation(((name: never, s: Scene, at: Vector3, opts: never) => {
     out.spawns.push({ tick, name, opts: (opts ?? {}) as Record<string, unknown> });
+    if (name === 'ticked') {
+      const script = opts as unknown as { tick: (fx: TickedFx, n: number) => boolean };
+      return real(name, s, at, { tick: (fx: TickedFx, n: number) => script.tick(recorded(fx), n) } as never);
+    }
     return real(name, s, at, opts);
   }) as never);
   played.length = 0;
@@ -284,6 +319,58 @@ describe('Ignore Defense, Increase Health, Increase Block (266-268): RageCreateE
         expect(blendLight(2 / 25)).toBeCloseTo(6 * 0.9 ** 2);
         expect(spin).toBeCloseTo((300 * Math.PI) / 180);
         expect(pillars[1].opts.spin).toBeCloseTo((900 * Math.PI) / 180);
+      }
+    }
+  });
+
+  /** [skills, BITMAP_SWORD_EFFECT_MONO's Light, its shock wave's Light] (MonkSystem.cpp:1136-1140, MoveHandlers.cpp:9714-9728). */
+  const FLASHES: [readonly number[], number[], number[]][] = [
+    [[266], [0.2, 0.4, 1], [0.4, 0.4, 1]],
+    [[267, 573], [0.5, 0.28, 1], [0.7, 0.5, 1]],
+    [[268, 569, 572], [1, 0.15, 0], [1, 0.12, 0]],
+  ];
+  /** The particle's Scale after `n` moves: x1.2 until past 6, then x0.8 (ZzzEffectParticle.cpp:8861-8886). */
+  const monoScale = (n: number): number => (n <= 10 ? 1.2 ** n : 1.2 ** 10 * 0.8 ** (n - 10));
+
+  it('BITMAP_SWORD_EFFECT_MONO at the caster, not a flash: a Swordeff_mono particle each tick LifeTime 3 does not divide (MoveHandlers.cpp:9705-9730)', () => {
+    for (const [skills, light] of FLASHES) {
+      for (const skill of skills) {
+        const r = run(skill, PlayerAction.PLAYER_SKILL_ATT_UP_OURFORCES);
+        expect(r.spawns.filter(s => s.name === 'sprite' && s.opts.texture === TEX.shiny)).toEqual([]);
+        const monos = r.draws.filter(d => d.kind === 'sprite' && d.args[0] === TEX.swordEffMono);
+        // A particle moves in the frame it is made: Scale 1.2 on its first tick.
+        const born = monos.filter(d => Math.abs((d.args[5] as number) - (64 * 0.9 * 1.2) / 100) < 1e-6).map(d => d.tick);
+        expect(born).toEqual([2, 3, 5, 6, 8, 9, 11, 12, 14, 15]);
+        // Each is drawn after its moves 1-18: 64 px x Scale x 0.9 by x 1.1, 31 cm x Scale up, Light x0.94 a move but the 10th.
+        expect(monos.length).toBe(10 * 18);
+        expect(Math.max(...monos.map(d => d.tick))).toBe(32);
+        // Tick 2's particle on its 10th move (tick 11), the move it turns on.
+        const first = monos.filter(d => d.tick === 11 && Math.abs((d.args[5] as number) - (64 * 0.9 * monoScale(10)) / 100) < 1e-6);
+        expect(first).toHaveLength(1);
+        const [, colour, , y, , , h, roll, lum] = first[0].args as [string, number[], number, number, number, number, number, number, number];
+        expect(colour).toEqual(light);
+        expect(y).toBeCloseTo((31 * monoScale(10)) / 100);
+        expect(h).toBeCloseTo((64 * 1.1 * monoScale(10)) / 100);
+        expect(roll).toBe(0);
+        expect(lum).toBeCloseTo(0.94 ** 9);
+      }
+    }
+  });
+
+  it('its MODEL_SHOCKWAVE01 sub 2, drawn twice, on LifeTime 14 (tick 2): Scale x1.24 and Light x 15 x 0.45 a move (ZzzEffect.cpp:5874-5893, MoveHandlers.cpp:9383-9395)', () => {
+    for (const [skills, , wave] of FLASHES) {
+      for (const skill of skills) {
+        const waves = run(skill, PlayerAction.PLAYER_SKILL_ATT_UP_OURFORCES).spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.shockwave);
+        expect(waves.map(s => [s.tick, s.opts.colour, Math.round((s.opts.seconds as number) * 25)])).toEqual([
+          [2, wave, 17],
+          [2, wave, 17],
+        ]);
+        const { scaleAt, blendLight, angle } = waves[0].opts as { scaleAt: (t: number) => number; blendLight: (t: number) => number; angle: number[] };
+        expect([0, 1, 2].map(n => scaleAt(n / 25))).toEqual([1, 1.24, 1.24 ** 2]);
+        expect(blendLight(2 / 25)).toBeCloseTo(15 * 0.45 ** 2);
+        // Light[0] under 0.001 is zeroed.
+        expect(blendLight(16 / 25)).toBe(0);
+        expect(angle[2]).toBeCloseTo(0.5 * (180 / Math.PI));
       }
     }
   });

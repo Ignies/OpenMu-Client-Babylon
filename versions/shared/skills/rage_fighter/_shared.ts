@@ -1,12 +1,16 @@
 import { type BoneGlow } from '@/controllers/fx/aura';
 import { MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
 import { effects } from '@/controllers/fx';
-import { TICK, entityPos, entityYaw, type RGB } from '@/controllers/fx/core';
-import { Vector3 } from '@/controllers/render/babylon/exports';
-import { after, ticks, type Step } from '@/controllers/skills/visuals';
+import { TICK, entityPos, entityYaw, fxNow, type RGB } from '@/controllers/fx/core';
+import { Vector3, type Scene } from '@/controllers/render/babylon/exports';
+import { after, cm, ticks, type Step } from '@/controllers/skills/visuals';
 import { PlayerAction } from '@versions/shared/objects/enum';
 import type { ClipPick } from '@/controllers/combat';
 import type { Sounds } from '@/controllers/sound';
+import { deg } from '../_shared';
+
+/** Moves an effect has made `t` seconds after its spawn: the first on the next tick (readme.md). */
+export const movesAt = (t: number): number => Math.floor(t / TICK + 1e-6);
 
 /** The two clips a party buff (266-268) picks between, evens (SetRageSkillAni, MonkSystem.cpp:2866-2874). */
 export const PARTY_BUFF_CLIPS: readonly PlayerAction[] = [PlayerAction.PLAYER_SKILL_ATT_UP_OURFORCES, PlayerAction.PLAYER_SKILL_HP_UP_OURFORCES];
@@ -36,17 +40,16 @@ function windPillar(colour: RGB, fast: boolean): Step {
   const keep = fast ? 0.85 : 0.9;
   // Degrees a ms of WorldTime as radians a second; MU's yaw turns the other way.
   const spin = ((fast ? 0.9 : 0.3) * 1000 * Math.PI) / 180;
-  const moves = (t: number): number => Math.floor(t / TICK + 1e-6);
   return (at, c) =>
     effects.spawn('model', c.scene, at, {
       model: MODEL.windForce,
       seconds: ticks(fast ? 70 : 50),
       yaw: entityYaw(c.caster),
       spin,
-      scaleAt: t => Math.min(3, 1 + 0.1 * moves(t)),
+      scaleAt: t => Math.min(3, 1 + 0.1 * movesAt(t)),
       colour,
       blendMesh: 0,
-      blendLight: t => 6 * keep ** moves(t),
+      blendLight: t => 6 * keep ** movesAt(t),
       blendClamp: true,
       fadeTail: 0,
     });
@@ -64,4 +67,68 @@ export const windForce = (colour: RGB, fast: boolean, thrown: RGB): Step => {
     own(feet, c);
     for (const tick of WIND_FORCE_THROWS) after(ticks(tick), sub3)(feet, c);
   };
+};
+
+/** BITMAP_SWORD_EFFECT_MONO's particle Scale after `n` moves: x1.2 until past 6 (move 10), then x0.8 (ZzzEffectParticle.cpp:8861-8886). */
+const monoScale = (n: number): number => (n <= 10 ? 1.2 ** n : 1.2 ** 10 * 0.8 ** (n - 10));
+/** Its Light: x0.94 a move, but not on the move it turns. */
+const monoLight = (n: number): number => 0.94 ** (n < 10 ? n : n - 1);
+/** It is drawn after moves 1-18: on move 19 its Scale is under 1 and it dies. */
+const MONO_MOVES = 18;
+/** The effect's LifeTime (ZzzEffect.cpp:6068-6073). */
+const MONO_LIFE = 15;
+/** MODEL_SHOCKWAVE01 sub 2's LifeTime 5 / 0.3: drawn after moves 1-16 (ZzzEffect.cpp:5887-5891). */
+const WAVE_TICKS = 17;
+
+/**
+ * MODEL_SHOCKWAVE01 sub 2 at `feet`: each move Scale x1.24, Position[2] x1.19 (the height above sea level, so it rises off
+ * high ground) and Light x0.45, zeroed under 0.001 (MoveHandlers.cpp:9387-9395); drawn twice at Light x 15
+ * (ZzzObject.cpp:2467-2473), so twice here.
+ */
+function swordFlashWave(scene: Scene, feet: Vector3, yaw: number, light: RGB): void {
+  const t0 = fxNow();
+  for (let pass = 0; pass < 2; pass++) {
+    effects.spawn('model', scene, feet.clone(), {
+      model: MODEL.shockwave,
+      seconds: ticks(WAVE_TICKS),
+      angle: [0, 0, yaw],
+      colour: light,
+      scaleAt: t => 1.24 ** movesAt(t),
+      follow: out => out.set(feet.x, feet.y * 1.19 ** movesAt(fxNow() - t0), feet.z),
+      blendMesh: 0,
+      blendLight: t => (light[0] * 0.45 ** movesAt(t) < 0.001 ? 0 : 15 * 0.45 ** movesAt(t)),
+      blendClamp: true,
+      fadeTail: 0,
+    });
+  }
+}
+
+/**
+ * BITMAP_SWORD_EFFECT_MONO where the caster stands, LifeTime 15 (MonkSystem.cpp:1140, :1169, :1198). Each move on a LifeTime 3
+ * does not divide (ticks 2, 3, 5 .. 15) makes a Swordeff_mono particle in its Light, and LifeTime 14 (tick 2) the shock wave in
+ * `wave` (MoveHandlers.cpp:9705-9730). A particle moves in the frame it is made; it is drawn 64 px x Scale x 0.9 wide and x 1.1
+ * high, 31 cm x Scale over the feet (ZzzEffectParticle.cpp:3820-3825, :9324-9330).
+ */
+export const swordFlash = (light: RGB, wave: RGB): Step => (_at, c) => {
+  const feet = entityPos(c.caster, 0, new Vector3());
+  const yaw = deg(entityYaw(c.caster));
+  const born: number[] = [];
+  effects.spawn('ticked', c.scene, feet, {
+    tick(fx, n) {
+      const lifeTime = MONO_LIFE + 1 - n;
+      if (n > 0 && lifeTime > 0) {
+        if (lifeTime % 3 !== 0) born.push(n);
+        if (lifeTime === 14) swordFlashWave(fx.scene, feet, yaw, wave);
+      }
+      let drawn = false;
+      for (const b of born) {
+        const m = n - b + 1;
+        if (m > MONO_MOVES) continue;
+        const s = monoScale(m);
+        fx.sprite(TEX.swordEffMono, light, feet.x, feet.y + cm(31 * s), feet.z, cm(64 * 0.9 * s), cm(64 * 1.1 * s), 0, monoLight(m));
+        drawn = true;
+      }
+      return drawn || lifeTime > 1;
+    },
+  });
 };

@@ -18,9 +18,9 @@ folders: [../readme.md](../readme.md).
 | `dark_side` | 263, 559 str | the wind pillar at the caster and the two it raises on ticks 11 and 21; per blow, damage bursts on ticks 20-21 and a dark shock wave on 30-31 (the afterimage's frame, a tick per rendered frame) |
 | `dragon_roar` | 264, 560 str | a dragon head on tick 21; a fire shock ring and scattered fire hits past DRAGONLORE key 5 |
 | `dragon_slasher` | 265 | the dragon kick model and the multi-shot volley fired forward; a burst on the target each tick past DRAGONKICK key 5 |
-| `ignore_defense` | 266 | the blue wind pillar at the caster and a red flash; the Ourforces bone glow as a buff look |
-| `increase_health` | 267, 573 str | the violet wind pillar at the caster and a holy flash; the Ourforces bone glow |
-| `increase_block` | 268, 569 power up, 572 mastery | the red wind pillar at the caster and a steel flash; the Ourforces bone glow |
+| `ignore_defense` | 266 | the blue sword flash and wind pillar at the caster; the Ourforces bone glow as a buff look |
+| `increase_health` | 267, 573 str | the violet sword flash and wind pillar at the caster; the Ourforces bone glow |
+| `increase_block` | 268, 569 power up, 572 mastery | the red sword flash and wind pillar at the caster; the Ourforces bone glow |
 | `charge` | 269 | Rush's charge: sparks and fire each tick until RUSH key 5 or tick 14, then the sword force at the caster |
 | `phoenix_shot` | 270 | a phoenix arrow, a fire hit and the phoenix model |
 
@@ -40,7 +40,9 @@ damage numbers.
 `_shared.ts` holds `OURFORCES_GLOW`: the red glow on 17 bones in three breathing groups, used by
 the buff looks of 266-268; and `windForce`, MODEL_WINDFOCE (Dark Side and 266-268): a wind pillar that stays where it rose,
 turns, grows to 3 and fades through its Light (drawn x 6, clamped, additive), raising a fast sub 3
-pillar on its 11th and 21st tick.
+pillar on its 11th and 21st tick. `swordFlash`, BITMAP_SWORD_EFFECT_MONO (266-268): Swordeff_mono cards rising where
+the caster stood, two in three ticks, each growing x1.2 a tick to 6 and shrinking back; on its second tick a
+MODEL_SHOCKWAVE01 that grows x1.24 a tick and climbs x1.19 of its height above sea level, so it rises off high ground.
 
 ## Depends on / used by
 - uses: `../_shared.ts`, `@/controllers/{skills,fx,lighting,sound,combat}`
