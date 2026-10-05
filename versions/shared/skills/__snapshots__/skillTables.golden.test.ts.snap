@@ -3387,9 +3387,9 @@ exports[`skill tables golden > skill 265 1`] = `
     252,
   ],
   "delay": 3000,
-  "heroSound": "Sound/Ragefighter/Rage_Dragonkick",
+  "heroSound": null,
   "light": "0/0 12438107cd988e1a",
-  "sound": "Sound/Ragefighter/Rage_Dragonkick",
+  "sound": null,
   "stepIn": "midClip",
   "target": "enemy",
 }

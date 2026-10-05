@@ -148,6 +148,12 @@ function run(
 const spriteTicks = (r: Run, texture: string): number[] => [...new Set(r.spawns.filter(s => s.name === 'sprite' && s.opts.texture === texture).map(s => s.tick))];
 /** The ticks on which `key` played. */
 const soundTicks = (r: Run, key: string): number[] => r.sounds.filter(s => s.key === key).map(s => s.tick);
+/** The ticks a ticked script drew a one-tick sprite of `texture` on, and how many it drew on each. */
+const drawTicks = (r: Run, texture: string): [number, number][] => {
+  const n = new Map<number, number>();
+  for (const d of r.draws) if (d.kind === 'sprite' && d.args[0] === texture) n.set(d.tick, (n.get(d.tick) ?? 0) + 1);
+  return [...n.entries()];
+};
 const range = (from: number, to: number): number[] => Array.from({ length: to - from + 1 }, (_, i) => from + i);
 
 describe('Dragon Slasher (265): MODEL_DRAGON_KICK_DUMMY reads the caster\'s DRAGONKICK clip (MoveHandlers.cpp:9826-9915)', () => {
@@ -157,20 +163,52 @@ describe('Dragon Slasher (265): MODEL_DRAGON_KICK_DUMMY reads the caster\'s DRAG
   it('bursts on the target every tick past key 5, and Rage_Dragonkick_Att every tick past key 8', () => {
     // Key 5.2 on tick 13, 8.4 on tick 21; the clip is left on tick 26.
     const r = run(265, KICK, { leaveAt: 26, ticks: 40 });
-    expect(spriteTicks(r, TEX.spark2)).toEqual(range(13, 25));
+    // Twice a tick four BITMAP_ENERGY sub7, each drawn on its moves 1-4: made on ticks 13-25.
+    expect(drawTicks(r, TEX.thunder)).toEqual(range(13, 28).map(t => [t, 8 * (Math.min(t, 25) - Math.max(13, t - 3) + 1)]));
     expect(soundTicks(r, ATT)).toEqual(range(21, 25));
   });
 
   it('drops everything when the caster leaves the clip first', () => {
     const r = run(265, KICK, { leaveAt: 10, ticks: 40 });
-    expect(spriteTicks(r, TEX.spark2)).toEqual([]);
+    expect(drawTicks(r, TEX.thunder)).toEqual([]);
     expect(soundTicks(r, ATT)).toEqual([]);
   });
 
-  it('draws nothing on the target without one (m_sTargetIndex < 0)', () => {
+  it('draws nothing on the target without one (m_sTargetIndex < 0), and casts in silence (MonkSystem.cpp:1226-1227, :1259)', () => {
     const r = run(265, KICK, { leaveAt: 26, ticks: 40, target: false });
-    expect(spriteTicks(r, TEX.spark2)).toEqual([]);
+    expect(drawTicks(r, TEX.thunder)).toEqual([]);
     expect(soundTicks(r, ATT)).toEqual([]);
+    expect(soundTicks(r, 'Sound/Ragefighter/Rage_Dragonkick')).toEqual([]);
+    // With one, Rage_Dragonkick goes with the volley at the packet; the click has none of its own.
+    expect(soundTicks(run(265, KICK, { leaveAt: 26, ticks: 40 }), 'Sound/Ragefighter/Rage_Dragonkick')).toEqual([0]);
+    expect(skillSound(265)).toBeNull();
+  });
+
+  it('a burst, twice over: four BITMAP_ENERGY sub7, LIGHTNING_MEGA1 sub0 and SPARK+1 sub3 and sub8, and two SPARK sub13 (MoveHandlers.cpp:9866-9895)', () => {
+    // rand() % n is n / 2: fScale (0.5 + 0.2) x 1.5 x 1.8 = 1.89. One burst: the clip is left on tick 14.
+    const random = vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    const r = run(265, KICK, { leaveAt: 14, ticks: 60 });
+    random.mockRestore();
+    const drawn = (texture: string, tick: number) => r.draws.filter(d => d.kind === 'sprite' && d.tick === tick && d.args[0] === texture);
+    const [energy] = drawn(TEX.thunder, 13);
+    const [mega] = drawn(TEX.lightningMega1, 13);
+    // ENERGY: Thunder01 64 px x 1.89 x (4 + 6) x 0.1, turned 180 + 20 a move, Light x0.97 a move (ZzzEffectParticle.cpp:723-753, :4939-4985).
+    expect([energy.args[1], energy.args[5], energy.args[7], energy.args[8]]).toEqual([[0.7, 0.7, 1], expect.closeTo(0.64 * 1.89), expect.closeTo((200 * Math.PI) / 180), expect.closeTo(0.97)]);
+    // MEGA1: 128 px x 1.89 x 0.9, turned 180, Alpha 1 - 0.15 a move over its Light (:1826-1843, :6071-6091).
+    expect([mega.args[5], mega.args[7], mega.args[8]]).toEqual([expect.closeTo(1.28 * 1.89 * 0.9), expect.closeTo(Math.PI), expect.closeTo(0.85)]);
+    expect([13, 14, 15, 16, 17].map(t => [drawn(TEX.thunder, t).length, drawn(TEX.lightningMega1, t).length])).toEqual([[8, 8], [8, 8], [8, 8], [8, 8], [0, 0]]);
+    // Spark03: 8 sub3 (Scale 1 x0.8 a move, 4 moves), 8 sub8 (Scale 1 - 0.5 a move, gone under 0.2), both +-1 % with WorldTime,
+    // and 4 sub13 (Scale 0.6 x 1.6).
+    const sparks = drawn(TEX.spark3, 13).map(d => d.args[5] as number);
+    const near = (v: number, tolerance: number) => sparks.filter(s => Math.abs(s - v) <= tolerance);
+    expect(near(0.32 * 0.8, 0.003)).toHaveLength(8);
+    expect(near(0.32 * 0.5, 0.004)).toHaveLength(8);
+    expect(near(0.32 * 0.96, 1e-9)).toHaveLength(4);
+    expect(drawn(TEX.spark3, 14)).toHaveLength(8 + 4);
+    // The sub13 sparks fly 4.5 cm a tick, rise and fall by a Gravity of 14 losing 2 a move, bounce and die by LifeTime 32 (:2016-2061, :6558-6608).
+    const last = Math.max(...r.draws.filter(d => d.kind === 'sprite' && d.args[0] === TEX.spark3).map(d => d.tick));
+    expect(last).toBeGreaterThan(20);
+    expect(last).toBeLessThan(13 + 32);
   });
 
   const winds = (r: Run) => r.draws.filter(d => d.kind === 'push' && (d.args[0] as { texture: string }).texture === TEX.groundWind);
@@ -206,13 +244,6 @@ describe('Dragon Slasher (265): MODEL_DRAGON_KICK_DUMMY reads the caster\'s DRAG
 describe('Chain Drive (262): BITMAP_SWORDEFF reads the caster\'s GIANTSWING key (MoveHandlers.cpp:9312-9380)', () => {
   const SWING = PlayerAction.PLAYER_SKILL_GIANTSWING;
   const ATT = 'Sound/Ragefighter/Rage_Giantswing_Att';
-
-  /** The ticks a one-tick sprite of `texture` was drawn on, and how many were drawn on each. */
-  const drawTicks = (r: Run, texture: string): [number, number][] => {
-    const n = new Map<number, number>();
-    for (const d of r.draws) if (d.kind === 'sprite' && d.args[0] === texture) n.set(d.tick, (n.get(d.tick) ?? 0) + 1);
-    return [...n.entries()];
-  };
 
   it('two blows with Rage_Giantswing_Att: past key 6 (tick 16) and past key 11 (tick 28)', () => {
     for (const skill of [262, 558]) {
