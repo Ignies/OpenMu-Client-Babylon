@@ -37,8 +37,8 @@ export const EMPIRE_GUARDIAN_4_BLEND_MESHES: Readonly<
  * `MoveObject` sets `o->HiddenMesh = -2` on these and nothing else
  * (GMEmpireGuardian4.cpp:212-226): the marker boxes whose only job is to sit
  * somewhere and emit. On World73: 79 (x120), 82 (x32), 83 (x25), 85 (x12),
- * 86 (x18), 129 (x24); 80, 84, 130, 131 and 132 are placed on other days and
- * on the login scene (x0 here).
+ * 86 (x18), 129 (x24); x0 here: 80 (days 2-3), 130 and 131 (day 3), 132
+ * (days 1 and 3, the character scene) and 84 (no world).
  *
  * 157 and 158 are deliberately *not* in this list - the original draws both
  * (`Chandelier.smd`, `¿¬±â¹Ú½º_³ì.smd`) and emits on top of the model.
@@ -254,7 +254,9 @@ export const EMPIRE_GUARDIAN_4_LIGHTS: Partial<
   ],
 
   /**
-   * :941-948 (x0 here, days 1-3 and the login scene place it) -
+   * :941-948 (x0 here and on both login scenes, which read this table too;
+   * only days 2 and 3 place it, x1 and x6, under their own
+   * `GMEmpireGuardian2/3` case 80) -
    * `CreateSprite(BITMAP_LIGHT, pos, 8 * Scale, (L*0.1, L*0.1, L*0.5))` with
    * `L = (sin(WorldTime * 0.04) + 1) * 0.3 + 0.4`. Scale, colour ratio and
    * pulse are the original's; the point and terrain light are ours
