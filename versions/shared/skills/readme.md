@@ -84,7 +84,8 @@ _shared.ts                      helpers for several classes
 - `facing.test.ts`: the effect models and summon bodies a skill turns to its caster's facing, a bearing
   or an angle of the original's face where `AngleMatrix` of that `o->Angle` points, and the casting
   circles and the Alice curse rings turn the original's way; Gigantic Storm's stone chips fly off backward
-  from their own Angle; Ice Arrow's ice takes its target's. A model's `yaw` is the node's: a caster's facing is `-entityYaw`.
+  from their own Angle; Ice Arrow's ice takes its target's; an arrow and Fire Ball fly nose first; Lance's stars
+  spin from the caster's Angle. A model's `yaw` is the node's: a caster's facing is `-entityYaw`.
 - Tests that load the skills import `./skillVisuals` first (it keeps the app import cycle in
   order) and stub `fetch` in `vi.hoisted`: Data/ is not there under Node.
 - Snapshots are in `__snapshots__/`. When a change is meant, update them with

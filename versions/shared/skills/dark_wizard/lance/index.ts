@@ -191,7 +191,8 @@ function lanceStar(c: SkillContext, target: Entity, sub: number, look?: LanceLoo
     const w = Math.min(1, k - n);
     Vector3.LerpToRef(a.p, b.p, w, out);
     const yaw = a.angle + (b.angle - a.angle) * w;
-    handle?.yawTo(facingDir.set(Math.sin(yaw), 0, Math.cos(yaw)));
+    // Its nose along Angle[2], where AngleMatrix points the BMD's -Y.
+    handle?.yawTo(facingDir.set(Math.sin(yaw), 0, -Math.cos(yaw)));
     handle?.scaleTo(a.scale + (b.scale - a.scale) * w);
     return out;
   };

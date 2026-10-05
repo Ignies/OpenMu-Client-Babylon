@@ -741,7 +741,8 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
     },
     stop: () => handle.stop(),
     yawTo(dir: Vector3) {
-      node.rotation.y = Math.atan2(dir.x, dir.z);
+      // The nose (BMD -Y, the node's -Z) along `dir`: the original flies a projectile along its own Angle (ZzzEffect.cpp:1661-1665).
+      node.rotation.y = Math.atan2(-dir.x, -dir.z);
     },
     aimAlong(dir: Vector3) {
       // `rotation` is pitch-then-yaw, so the mesh's up axis lands on
