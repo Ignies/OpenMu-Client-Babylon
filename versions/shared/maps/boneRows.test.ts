@@ -18,6 +18,7 @@ const ON_BONES: readonly [ENUM_WORLD, number, string][] = [
   [ENUM_WORLD.WD_38KANTURU_2ND, 4, 'GM_Kanturu_2nd.cpp:335-346'],
   [ENUM_WORLD.WD_38KANTURU_2ND, 8, 'GM_Kanturu_2nd.cpp:347-355'],
   [ENUM_WORLD.WD_39KANTURU_3RD, 5, 'GM_Kanturu_3rd.cpp:262-272'],
+  [ENUM_WORLD.WD_45CURSEDTEMPLE_LV1, 62, 'ZzzObject.cpp:684-696'],
   [ENUM_WORLD.WD_51ELBELAND, 63, 'GMNewTown.cpp:289-300'],
   [ENUM_WORLD.WD_51ELBELAND, 110, 'GMNewTown.cpp:301-311'],
   [ENUM_WORLD.WD_51ELBELAND, 121, 'GMNewTown.cpp:312-327'],

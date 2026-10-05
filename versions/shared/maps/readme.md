@@ -98,27 +98,35 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   Loren Market 30 on its three heads and 35 on bone 2), `BITMAP_SPARK + 1` (Aida 30 and 71 on their
   six bulbs, Kanturu 70 whose size breathes, Kanturu 2 8, Karutan 72's plant bulbs breathing on
   `|sin|`), `BITMAP_KANTURU_2ND_EFFECT1` (Kanturu 2 4's pair over its lamp); Karutan 66 and Crywolf 41
-  have none (the insect hangs its `BITMAP_SHINY + 5` points itself, the beacon its turning pair).
+  have none (the insect hangs its `BITMAP_SHINY + 5` points itself, the beacon its turning pair);
+  `BITMAP_SHINY + 1` (Shiny02.jpg, 32 by 64: Kanturu 3 5's pair, Land of Trials 49's grey card,
+  Cursed Temple 62's eyes); Icarus 10's `BITMAP_LIGHT` particle is sized without the pillar's scale.
 - `flareWaves.test.ts`: the table cards' waves are the original's `sinf(WorldTime * k)`, k in radians a
-  millisecond: the fire vents (Karutan 113, Loren Market 57, Vulcanus 6) burn steady red; Kalima's
-  flower glows (12, 32) grow and shrink on bone 5; the Kanturu relic lamps (Kanturu 2 4, Kanturu 3 5)
-  breathe and grow with their fLumi; Land of Trials 49 draws two red cards on bone 3; Elbeland's
-  lantern (63) breathes and its totem (121) breathes and grows on six bones; and no table wave is
-  faster than 0.05.
+  millisecond: the fire vents (Karutan 113, Loren Market 57, Vulcanus 6) burn steady red, with one
+  particle of the original's three fire sheets every tick; Kalima's flower glows (12, 32) grow and shrink on bone 5; the Kanturu relic lamps (Kanturu 2 4, Kanturu 3 5)
+  breathe and grow with their fLumi, and Kanturu 3's two `BITMAP_SHINY + 1` turn 0.5 and 0.25
+  degrees a millisecond; Land of Trials 49 draws two red cards on bone 3 and a grey `BITMAP_SHINY + 1`
+  at a fresh angle every frame; Cursed Temple 62's two pink eyes grow and shrink at the middle of the
+  dragon's head swing; Elbeland's lantern (63) breathes and its totem (121) breathes and grows on six
+  bones; and no table wave is faster than 0.05.
 - `boneRows.test.ts`: the rows the original hangs on a bone are `bone: true` (Noria's lamps, Icarus
-  10, Kalima's flowers, Aida's plants and torch, the Kanturu lamps, Elbeland 63, 110 and 121, Loren
-  Market 30 and 35, Karutan 72, Land of Trials 49), and Noria's swinging lanterns sit at the middle of
-  their swing.
+  10, Kalima's flowers, Aida's plants and torch, the Kanturu lamps, Cursed Temple 62, Elbeland 63, 110
+  and 121, Loren Market 30 and 35, Karutan 72, Land of Trials 49), and Noria's swinging lanterns sit at
+  the middle of their swing.
 - `fireLights.test.ts`: the ground lights the original throws take its position and range on every
   preset: Devias 66's `CreateFire` 50 up at range 4, Lorencia 150 at range 3, Loren Market 30 and 35
   breathing on their bones, Kanturu 70 and the Tarkan braziers on their sine.
-- `bloodcastle/lampObject.test.ts`: the throne-room lamp's flare is `BITMAP_FLARE` too.
+- `bloodcastle/lampObject.test.ts`: the throne-room lamp's flare is `BITMAP_FLARE` too;
+  `bloodcastle/candelabraObject.test.ts`: the candelabra's seven flares are 0.5 on any object scale.
 - `lampFlares.test.ts`, `lorencia/candleObject.test.ts`, `devias/candleObject.test.ts`: what the original
   never draws is the `lampFlares` improvement, gone on Classic: the flares of Lorencia 90 and 150, Devias
-  66 and the candelabra, Elbeland 61 and Lost Tower 23 (the light under them kept), the candle wick fire,
-  and the ground lights of the Devias candelabra, Lost Tower 18, 19, 20 and 23, the fire vents (Vulcanus
-  and Doppelganger 2 6, Loren Market 57) and the Noria forge (their cards kept); no row shapes its ground
-  light on Classic (no `falloff` or `floorGain`), and Lorencia 90 and Elbeland 61 light at the object.
+  66 and the candelabra, Elbeland 61 and Lost Tower 23 (the light under them kept), the candle wick
+  fire, the Land of Trials brazier's fire (42, its ground light kept) and the Stadium brazier's
+  (`stadium/brazierObject.test.ts`), and the ground lights of the Devias candelabra, Lost Tower 18,
+  19, 20 and 23, the fire vents (Vulcanus and Doppelganger 2 6, Loren Market 57), the Noria forge,
+  the Stadium braziers and the Blood Castle candelabra (`bloodcastle/candelabraObject.test.ts`; their
+  cards kept); no row shapes its ground light on Classic (no `falloff` or `floorGain`), and Lorencia
+  90 and Elbeland 61 light at the object.
 - `loginscene/wallTorchObject.test.ts`, `empireguardian4/spec.test.ts`: the wall torch's flare, on
   the `BITMAP_FLARE` sheet lit or not, and the fortress lights on Classic and Enhanced; a lit torch's
   warm tint gives Flare.jpg the mean colour its old tint gave flare01.jpg, worked out from the two
@@ -138,5 +146,7 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   and breathe on `|sin|`; it is never a batched prop.
 - `tarkan/impactGlowObject.test.ts`: the temple glow is `BITMAP_IMPACT`, its size and colour
   breathing together.
+- `stadium/brazierObject.test.ts`: the brazier's card is `Luminosity * 5` every frame, whatever the
+  pillar's scale; its fire is `lampFlares`.
 - `losttower/towerMachineObject.test.ts`: the machines draw `BITMAP_MAGIC + 1` (19) and
   `BITMAP_LIGHTNING + 1` (20) pairs that turn against each other.

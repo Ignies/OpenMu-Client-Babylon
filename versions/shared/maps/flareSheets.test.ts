@@ -79,6 +79,13 @@ describe('the BITMAP_SPARK + 1 cards (Spark03.jpg)', () => {
   });
 });
 
+describe('the BITMAP_LIGHT particle cards (flare01.jpg)', () => {
+  // Subtype 0 sizes `(rand() % 50 + 50) / 100 * 1.f` and draws `Width * o->Scale`, no object scale (ZzzEffectParticle.cpp:3161-3167, :8994-8996).
+  it('Icarus 10: the orb card on bone 3 keeps its size on a scaled pillar (ZzzObject.cpp:3126-3131)', () => {
+    expect(cardsOf(ENUM_WORLD.WD_10ICARUS, 10).map(e => e.sprite?.unscaled)).toEqual([true]);
+  });
+});
+
 describe('the BITMAP_KANTURU_2ND_EFFECT1 cards (k_effect_01.jpg)', () => {
   // `CreateSprite(BITMAP_KANTURU_2ND_EFFECT1, Position, fLumi / 3.2, Light, o)` twice over the BITMAP_LIGHT.
   it('Kanturu 2 4: two on bone 1 that breathe and grow with fLumi (GM_Kanturu_2nd.cpp:335-346)', () => {
@@ -89,6 +96,17 @@ describe('the BITMAP_KANTURU_2ND_EFFECT1 cards (k_effect_01.jpg)', () => {
       sprite: { scale: 1 / 3.2, color: [0.3, 0.5, 1], pulse: fLumi, grow: fLumi, unscaled: true, texture: 'kanturu2ndEffect1' },
     };
     expect(cardsOf(ENUM_WORLD.WD_38KANTURU_2ND, 4).filter(e => e.sprite?.texture)).toEqual([card, card]);
+  });
+});
+
+// Shiny02.jpg is 32 by 64: the card is twice as tall as wide (zzzeffectsprite.cpp:72-77).
+describe('the BITMAP_SHINY + 1 cards (Shiny02.jpg)', () => {
+  const shiny = (world: ENUM_WORLD, type: number) => cardsOf(world, type).filter(e => e.sprite?.texture === 'shiny1').length;
+
+  it('Kanturu 3 5 draws two, Land of Trials 49 one, Cursed Temple 62 two (GM_Kanturu_3rd.cpp:270-271, GMHuntingGround.cpp:154, ZzzObject.cpp:692, :696)', () => {
+    expect(shiny(ENUM_WORLD.WD_39KANTURU_3RD, 5)).toBe(2);
+    expect(shiny(ENUM_WORLD.WD_31HUNTING_GROUND, 49)).toBe(1);
+    expect(shiny(ENUM_WORLD.WD_45CURSEDTEMPLE_LV1, 62)).toBe(2);
   });
 });
 

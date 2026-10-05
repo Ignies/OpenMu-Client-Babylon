@@ -28,20 +28,23 @@ import { EFFECT_RENDERING_GROUP, keepDepthForEffects } from '../fx/core';
 /**
  * The sheets, by the bitmap the original names (ZzzOpenData.cpp): `light` is BITMAP_LIGHT,
  * flare01.jpg, a soft white glow (:5207); `flare` BITMAP_FLARE, Flare.jpg, a warm star (:5309);
- * `spark1` BITMAP_SPARK + 1, Spark03.jpg, a white dot in a blue halo (:5216); `shiny5`
+ * `spark1` BITMAP_SPARK + 1, Spark03.jpg, a white dot in a blue halo (:5216); `shiny1`
+ * BITMAP_SHINY + 1, Shiny02.jpg, a tall sparkle (:5275); `shiny5`
  * BITMAP_SHINY + 5, shiny05.jpg, an eight-point sparkle (:5325 loads it over :5279's shiny04.jpg,
  * and a second name replaces the first, GlobalBitmap.cpp:549-568); `impact` BITMAP_IMPACT,
  * Impack03.jpg, a blue-white burst (:5267; Tarkan reloads the same file from Object9,
  * MapManager.cpp:146); `magic1` BITMAP_MAGIC + 1, Magic_Ground2.jpg, a ring of rays (:5209);
  * `lightning1` BITMAP_LIGHTNING + 1, lightning2.jpg, a cyan burst (:5295); `kanturu2ndEffect1`
  * BITMAP_KANTURU_2ND_EFFECT1, Object39's k_effect_01.jpg, a white star (:5495). `px` is the
- * sheet's width: a sprite is `Width * Scale` across (zzzeffectsprite.cpp:76). `sprites` caps a busy
- * sheet higher: Aida's 183 plants carry twelve sparks each.
+ * sheet's width and `py` its height when it differs: a sprite is `Width * Scale` by `Height * Scale`
+ * (zzzeffectsprite.cpp:72-77). `sprites` caps a busy sheet higher: Aida's 183 plants carry twelve
+ * sparks each.
  */
 const FLARE_TEXTURES = {
   light: { file: 'Effect/flare01.OZJ', px: 64 },
   flare: { file: 'Effect/Flare.OZJ', px: 64 },
   spark1: { file: 'Effect/Spark03.OZJ', px: 32, sprites: 2560 },
+  shiny1: { file: 'Effect/Shiny02.OZJ', px: 32, py: 64 },
   shiny5: { file: 'Effect/shiny05.OZJ', px: 64 },
   impact: { file: 'Effect/Impack03.OZJ', px: 64 },
   magic1: { file: 'Effect/Magic_Ground2.OZJ', px: 128 },
@@ -77,6 +80,8 @@ export type FlareSpec = {
   readonly grow?: Wave;
   /** Degrees a millisecond it turns, counter-clockwise: `CreateSprite`'s `Rotation` (ZzzOpenglUtil.cpp:899-908). */
   readonly spin?: number;
+  /** A fresh `rand() % 360` degrees every frame (GMHuntingGround.cpp:154). */
+  readonly randomAngle?: boolean;
   /** The sheet the original names; `BITMAP_LIGHT` when left out. */
   readonly texture?: FlareTexture;
   /** The original sizes it without `* o->Scale` (`CreateSprite(..., 5.5f, ...)`): the object's scale does not apply. */
@@ -85,8 +90,19 @@ export type FlareSpec = {
 
 const RADIANS_PER_DEGREE = Math.PI / 180;
 
-/** A card's width in tiles: the sheet's pixels times its scale. */
-const cardSize = (texture: FlareTexture, scale: number) => (FLARE_TEXTURES[texture].px * scale) / TILE_CM;
+type SheetSource = { file: string; px: number; py?: number; sprites?: number };
+
+const sourceOf = (texture: FlareTexture): SheetSource => FLARE_TEXTURES[texture];
+
+/** Sizes a card in tiles: the sheet's pixels times its scale, each way. */
+function sizer(sprite: Sprite, texture: FlareTexture) {
+  const { px, py = px } = sourceOf(texture);
+
+  return (scale: number) => {
+    sprite.width = (px * scale) / TILE_CM;
+    sprite.height = (py * scale) / TILE_CM;
+  };
+}
 
 /** A sheet's manager for the scene it was built in, once it has loaded. */
 type Sheet = {
@@ -132,7 +148,7 @@ function getManager(scene: Scene, texture: FlareTexture): Promise<SpriteManager 
 
   const sheet: Sheet = { scene, manager: null, pending: Promise.resolve(null) };
   sheet.pending = (async () => {
-    const source: { file: string; px: number; sprites?: number } = FLARE_TEXTURES[texture];
+    const source = sourceOf(texture);
     const ozj = await downloadDataFile(source.file);
 
     const blob = new Blob([ozj.slice(OZJ_HEADER_SIZE)], { type: 'image/jpeg' });
@@ -142,7 +158,7 @@ function getManager(scene: Scene, texture: FlareTexture): Promise<SpriteManager 
       'effectLights',
       url,
       source.sprites ?? MAX_SPRITES_PER_MANAGER,
-      { width: source.px, height: source.px },
+      { width: source.px, height: source.py ?? source.px },
       scene
     );
 
@@ -236,17 +252,16 @@ export async function createMovableFlare(
 
   sprite.isPickable = false;
 
-  const size = cardSize(texture, scale);
+  const resize = sizer(sprite, texture);
 
-  sprite.width = size;
-  sprite.height = size;
+  resize(scale);
 
   const paint = paintFlare(sprite, color);
 
   return {
     moveTo: (x, y, z) => sprite.position.set(x, y, z),
     setLuminosity: lumi => paint.setLuminosity(lumi),
-    setScale: next => void (sprite.width = sprite.height = cardSize(texture, next)),
+    setScale: resize,
     setAngle: degrees => void (sprite.angle = degrees * RADIANS_PER_DEGREE),
     dispose: () => {
       paint.release();
@@ -272,26 +287,27 @@ export async function createEffectLight(
   sprite.position.set(position.x, position.y, position.z);
   sprite.isPickable = false;
 
-  const size = cardSize(texture, spec.scale * (spec.unscaled ? 1 : objectScale));
-  sprite.width = size;
-  sprite.height = size;
+  const scale = spec.scale * (spec.unscaled ? 1 : objectScale);
+  const resize = sizer(sprite, texture);
+  resize(scale);
 
   const paint = paintFlare(sprite, spec.color);
 
   let observer: ReturnType<Scene['onBeforeRenderObservable']['add']> | null =
     null;
 
-  const { pulse, grow, spin } = spec;
+  const { pulse, grow, spin, randomAngle } = spec;
 
-  if (pulse || grow || spin) {
+  if (pulse || grow || spin || randomAngle) {
     let elapsed = 0;
 
     observer = scene.onBeforeRenderObservable.add(() => {
       elapsed += scene.getEngine().getDeltaTime();
 
       if (pulse) paint.setLuminosity(wave(pulse, elapsed));
-      if (grow) sprite.width = sprite.height = size * wave(grow, elapsed);
+      if (grow) resize(scale * wave(grow, elapsed));
       if (spin) sprite.angle = elapsed * spin * RADIANS_PER_DEGREE;
+      if (randomAngle) sprite.angle = Math.floor(Math.random() * 360) * RADIANS_PER_DEGREE;
     });
   }
 

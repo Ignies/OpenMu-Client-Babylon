@@ -42,6 +42,7 @@ describe('the lamp lights and flares the original never draws (lampFlares)', () 
     expect(cards(ENUM_WORLD.WD_4LOSTTOWER, 23)).toBe(1);
     for (const [type, what] of LOST_TOWER) expect(lostTower(type)[0]?.terrain, what).toBeDefined();
     expect(DEVIAS_CANDELABRA.terrain).toBeDefined();
+    expect(lit(ENUM_WORLD.WD_6STADIUM, 9)).toBe(true);
     for (const [world, type, what] of UNLIT_FIRES) expect(lit(world, type), what).toBe(true);
   });
 
@@ -53,11 +54,13 @@ describe('the lamp lights and flares the original never draws (lampFlares)', () 
     }
   });
 
-  // The candelabra (54, 56) have a BlendMesh alone (ZzzObject.cpp:4658-4660).
-  it('light no ground on Classic where the original lights none: Lost Tower, the Devias candelabra', () => {
+  // The candelabra (54, 56) have a BlendMesh alone (ZzzObject.cpp:4658-4660); the Stadium brazier a sprite alone
+  // (ZzzObject.cpp:2939-2946).
+  it('light no ground on Classic where the original lights none: Lost Tower, the Devias candelabra, the Stadium brazier', () => {
     setFidelityChoice(FIDELITY_CLASSIC, {});
     for (const [type, what] of LOST_TOWER) expect(lostTower(type).some(e => e.terrain || e.sprite), what).toBe(false);
     expect(DEVIAS_CANDELABRA.terrain).toBeUndefined();
+    expect(lit(ENUM_WORLD.WD_6STADIUM, 9)).toBe(false);
   });
 
   // `AddTerrainLight` is linear in the distance (ZzzLodTerrain.cpp:938-968): no falloff, no floor gain.
@@ -79,6 +82,15 @@ describe('the lamp lights and flares the original never draws (lampFlares)', () 
     setFidelityChoice(FIDELITY_CLASSIC, {});
     expect([at(ENUM_WORLD.WD_0LORENCIA, 90), at(ENUM_WORLD.WD_51ELBELAND, 61)]).toEqual([undefined, undefined]);
     expect(at(ENUM_WORLD.WD_0LORENCIA, 150)).toEqual([0, 0, 78]);
+  });
+
+  // `MoveHuntingGroundObject` lights the ground and hides the brazier; nothing renders it (GMHuntingGround.cpp:101-108).
+  it('burn no fire on the Land of Trials brazier (42) on Classic, its ground light kept', () => {
+    const brazier = () => lightEmittersFor(ENUM_WORLD.WD_31HUNTING_GROUND, 42)?.[0];
+    expect(brazier()?.emissions).toHaveLength(1);
+    setFidelityChoice(FIDELITY_CLASSIC, {});
+    expect(brazier()?.emissions).toBeUndefined();
+    expect(brazier()?.terrain).toBeDefined();
   });
 
   it('light no ground under the fire vents and the Noria forge on Classic, their cards kept', () => {

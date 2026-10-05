@@ -21,6 +21,20 @@ describe('the map flare waves', () => {
     }
   });
 
+  // `switch (rand() % 3)`: one FIRE_HIK1, FIRE_CURSEDLICH or FIRE_HIK3 particle a tick (`CreateParticleFpsChecked`).
+  it('fire vents burn the original\'s three fire sheets every tick (GMKarutan1.cpp:107-120, GMUnitedMarketPlace.cpp:303-316)', () => {
+    const vents: [ENUM_WORLD, number][] = [
+      [ENUM_WORLD.WD_80KARUTAN1, 113],
+      [ENUM_WORLD.WD_81KARUTAN2, 113],
+      [ENUM_WORLD.WD_79UNITEDMARKETPLACE, 57],
+      [ENUM_WORLD.WD_63PK_FIELD, 6],
+    ];
+    for (const [world, type] of vents) {
+      const fires = lightEmittersFor(world, type)?.flatMap(e => (Array.isArray(e.emissions) ? e.emissions : []));
+      expect(fires?.map(f => [f.kinds, f.every]), `world ${world} type ${type}`).toEqual([[['fire1', 'fire2', 'fire3'], 1]]);
+    }
+  });
+
   // `CreateSprite(BITMAP_LIGHT, bone 5, Luminosity + 0.2f, (0.6, 0.6, 1), o)`, `Luminosity = sinf(WorldTime * 0.001f) * 0.3f + 0.7f`.
   it('Kalima 12 and 32: the flower glow grows and shrinks on bone 5, unscaled (GMHellas.cpp:439-460)', () => {
     const glow = {
@@ -33,25 +47,44 @@ describe('the map flare waves', () => {
     }
   });
 
-  // `fLumi = (sinf(WorldTime * 0.002f) + 2.0f) * 0.5f` tints `(0.3, 0.5, 1)` and sizes the card, on bone 1 + (-1, 0, 0).
-  it('Kanturu 2 4 and Kanturu 3 5: the lamps breathe and grow with fLumi on bone 1 (GM_Kanturu_2nd.cpp:335-346, GM_Kanturu_3rd.cpp:262-272)', () => {
+  // `fLumi = (sinf(WorldTime * 0.002f) + 2.0f) * 0.5f` tints `(0.3, 0.5, 1)` and sizes the card, on bone 1 + (-1, 0, 0);
+  // Kanturu 3's two BITMAP_SHINY + 1 turn `(int)(WorldTime / 2) % 360` and `/ 4` degrees.
+  it('Kanturu 2 4 and Kanturu 3 5: the lamps breathe and grow with fLumi on bone 1, Kanturu 3\'s two Shiny02 cards turning (GM_Kanturu_2nd.cpp:335-346, GM_Kanturu_3rd.cpp:262-272)', () => {
     const fLumi = { speed: 0.002, amount: 0.5, base: 0.5 };
-    const lamp = (scale: number) => ({
+    const lamp = (scale: number, texture?: string, spin?: number) => ({
       offset: [0, 13, 244],
       bone: true,
-      sprite: { scale, color: [0.3, 0.5, 1], pulse: fLumi, grow: fLumi, unscaled: true },
+      sprite: { scale, color: [0.3, 0.5, 1], pulse: fLumi, grow: fLumi, unscaled: true, texture, spin },
     });
     expect(cardsOf(ENUM_WORLD.WD_38KANTURU_2ND, 4).filter(e => !e.sprite?.texture)).toEqual([lamp(1 / 3.2)]);
-    expect(cardsOf(ENUM_WORLD.WD_39KANTURU_3RD, 5)).toEqual([lamp(1 / 2.4)]);
+    expect(cardsOf(ENUM_WORLD.WD_39KANTURU_3RD, 5)).toEqual([
+      lamp(1 / 2.4),
+      lamp(1 / 2.4, 'shiny1', 0.5),
+      lamp(1 / 2.4, 'shiny1', 0.25),
+    ]);
   });
 
-  // Red: one card `Luminosity * 1.2f + 0.3f` across, `Luminosity = sinf(WorldTime * 0.002f) * 0.35f + 0.65f`, one 0.5.
-  it('Land of Trials 49: two red cards on bone 3, the first growing and shrinking (GMHuntingGround.cpp:143-156)', () => {
+  // Red: one card `Luminosity * 1.2f + 0.3f` across, `Luminosity = sinf(WorldTime * 0.002f) * 0.35f + 0.65f`, one 0.5;
+  // then a grey BITMAP_SHINY + 1, 1.2, at `rand() % 360` degrees.
+  it('Land of Trials 49: two red cards on bone 3, the first growing and shrinking, and a grey Shiny02 at a fresh angle (GMHuntingGround.cpp:143-156)', () => {
     const at = { offset: [-2, -82, 232], bone: true };
     expect(cardsOf(ENUM_WORLD.WD_31HUNTING_GROUND, 49)).toEqual([
       { ...at, sprite: { scale: 1, color: [1, 0, 0], grow: { speed: 0.002, amount: 0.42, base: 0.66 }, unscaled: true } },
       { ...at, sprite: { scale: 0.5, color: [1, 0, 0], unscaled: true } },
+      { ...at, sprite: { scale: 1.2, color: [0.3, 0.3, 0.3], texture: 'shiny1', unscaled: true, randomAngle: true } },
     ]);
+  });
+
+  // `CreateSprite(BITMAP_SHINY + 1, ..., 1.5f + fLumi / 2.f, (1, 0.5, 0.5), NULL)`, `fLumi = sinf(WorldTime * 0.001f) * 0.5f + 0.5f`,
+  // at bones 22 and 23 + (6, +-5, 2), the middle of the head's swing.
+  it('Cursed Temple 62: two pink Shiny02 cards on the dragon\'s eyes that grow and shrink (ZzzObject.cpp:684-696)', () => {
+    const sprite = { scale: 1, color: [1, 0.5, 0.5], grow: { speed: 0.001, amount: 0.25, base: 1.5 }, texture: 'shiny1', unscaled: true };
+    for (let world = ENUM_WORLD.WD_45CURSEDTEMPLE_LV1; world <= ENUM_WORLD.WD_45CURSEDTEMPLE_LV6; world++) {
+      expect(cardsOf(world, 62), `world ${world}`).toEqual([
+        { offset: [32, -29, 1032], bone: true, sprite },
+        { offset: [32, 23, 1030], bone: true, sprite },
+      ]);
+    }
   });
 
   // `fLumi = (sinf(WorldTime * 0.001f) + 1.0f) * 0.3f + 0.4f` tints `(1, 1, 0.6)`; `Scale * 6` at bone 5 + (-40, -10, 0).

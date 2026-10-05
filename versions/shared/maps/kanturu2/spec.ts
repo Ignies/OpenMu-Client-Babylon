@@ -62,11 +62,12 @@ export const KANTURU2_EMISSIONS: Partial<Record<number, readonly Emission[]>> =
 /**
  * Kanturu 2 4 and Kanturu 3 5 are one model, `cho_cliff_04`, whose lamp hangs
  * on bone 1 + (-1, 0, 0), 244 up. `fLumi = (sin(WorldTime * 0.002) + 2) * 0.5`
- * tints a card `(0.3, 0.5, 1)` and sizes it, with no `* o->Scale`.
+ * tints a card `(0.3, 0.5, 1)` and sizes it, with no `* o->Scale`; `spin` is its `Rotation` in
+ * degrees a millisecond.
  */
 const RELIC_LAMP_LUMI = { speed: 0.002, amount: 0.5, base: 0.5 } as const;
 
-export const relicLamp = (scale: number, texture?: FlareTexture): LightEmitter => ({
+export const relicLamp = (scale: number, texture?: FlareTexture, spin?: number): LightEmitter => ({
   offset: [0, 13, 244],
   bone: true,
   sprite: {
@@ -76,6 +77,7 @@ export const relicLamp = (scale: number, texture?: FlareTexture): LightEmitter =
     grow: RELIC_LAMP_LUMI,
     unscaled: true,
     texture,
+    spin,
   },
 });
 

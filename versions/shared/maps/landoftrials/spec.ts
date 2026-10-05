@@ -1,5 +1,6 @@
 import type { Emission } from '@/controllers/fx/effectParticles';
 import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
+import { isOn } from '@/controllers/fidelity';
 
 /**
  * Land of Trials (`WD_31HUNTING_GROUND`, `World32`/`Object32`), the plain-data
@@ -52,6 +53,9 @@ export const LAND_OF_TRIALS_EMISSIONS: Partial<
   53: [{ kinds: ['smoke21'], every: 6 }],
 };
 
+/** Ours (`lampFlares`, none on Classic): the original hides the brazier and draws nothing there (:101-108). */
+const BRAZIER_FIRE: readonly Emission[] = [{ kinds: ['fire1', 'fire3'], every: 3, jitter: 6 }];
+
 /**
  * Type 42 (x55), `MoveHuntingGroundObject` :101-108:
  * `L = (rand%4+3) * 0.1; AddTerrainLight(x, y, (0.9L, 0.2L, 0.1L), 3)` -
@@ -59,12 +63,12 @@ export const LAND_OF_TRIALS_EMISSIONS: Partial<
  * `RenderHuntingGroundObjectVisual` :143-156: two red `BITMAP_LIGHT` sprites
  * at bone 3 + (0, -10, 0), sized `sin(WorldTime * 0.002) * 0.42 + 1.08` and
  * 0.5 with no `* o->Scale` - the statue's orb; no terrain light. Bone 3 swings
- * 12 across and the cards sit at the middle. Its grey `BITMAP_SHINY + 1` at a
- * fresh angle every frame is not drawn: Shiny02.jpg is 32 by 64.
+ * 12 across and the cards sit at the middle. A grey `BITMAP_SHINY + 1`, 1.2,
+ * turns to a fresh `rand() % 360` degrees every frame (:154).
  *
  * The 42 point light is ours (the original has no dynamic lights); 55 of them
  * in the open at range 3, at most 6 in a 32-tile window, is well under the
- * pool.
+ * pool. So is its fire (`BRAZIER_FIRE`).
  */
 export const LAND_OF_TRIALS_LIGHTS: Partial<
   Record<number, readonly LightEmitter[]>
@@ -77,7 +81,9 @@ export const LAND_OF_TRIALS_LIGHTS: Partial<
         color: [0.9, 0.2, 0.1],
         flicker: { min: 0.3, max: 0.6, steps: 4 },
       },
-      emissions: [{ kinds: ['fire1', 'fire3'], every: 3, jitter: 6 }],
+      get emissions() {
+        return isOn('lampFlares') ? BRAZIER_FIRE : undefined;
+      },
     },
   ],
   49: [
@@ -95,6 +101,11 @@ export const LAND_OF_TRIALS_LIGHTS: Partial<
       offset: [-2, -82, 232],
       bone: true,
       sprite: { scale: 0.5, color: [1, 0, 0], unscaled: true },
+    },
+    {
+      offset: [-2, -82, 232],
+      bone: true,
+      sprite: { scale: 1.2, color: [0.3, 0.3, 0.3], texture: 'shiny1', unscaled: true, randomAngle: true },
     },
   ],
 };

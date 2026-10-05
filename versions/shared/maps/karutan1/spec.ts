@@ -139,7 +139,7 @@ export const KARUTAN_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = 
         color: [1, 0.6, 0.2],
         flicker: { min: 0.3, max: 0.6, steps: 4 },
       },
-      emissions: [{ kinds: ['fire1', 'fire3'], every: 2, jitter: 6 }],
+      emissions: [{ kinds: ['fire1', 'fire2', 'fire3'], every: 1, jitter: 6 }],
     },
   ],
   72: [...plantBulb([24, -18, 207], 2), ...plantBulb([-153, -34, 151], 4, true)],
