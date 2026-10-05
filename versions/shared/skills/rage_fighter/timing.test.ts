@@ -356,7 +356,7 @@ describe('Dark Side (263)', () => {
     expect(followUps([5])).toEqual([13, 20, 27]);
   });
 
-  it('a later echo, of a follow-up of ours, does not restart the count', () => {
+  it('a later echo does not restart the count', () => {
     expect(followUps([0, 10])).toEqual([8, 15, 22]);
   });
 });

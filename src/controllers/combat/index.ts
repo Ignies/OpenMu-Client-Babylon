@@ -352,12 +352,12 @@ class Combat implements Controller {
     skillHooks.darkSide?.observeEcho(skill);
   }
 
-  /** Next follow-up target whose 0x4A is due, or -1. */
+  /** Next follow-up target whose blow is due, or -1. */
   nextDarkSideHit(): number {
     return skillHooks.darkSide?.nextHit() ?? -1;
   }
 
-  /** Skill id for the follow-up 0x4A. */
+  /** The Dark Side skill whose blow the follow-ups draw. */
   get darkSidePendingSkill(): number {
     return skillHooks.darkSide?.pendingSkill() ?? 0;
   }

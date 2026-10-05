@@ -54,6 +54,7 @@ import { effects } from '../../controllers/fx';
 import { boneLocalPos } from '../../controllers/fx/core';
 import { warriorGlint, warriorGlintStar, WARRIOR_GLINT_BONE, WARRIOR_GLINT_TIP } from '../../controllers/item_fx/weaponBlur';
 import { hasWarriorGlint } from '../../controllers/skills';
+import { playSkillImpact } from '@versions/shared/skills/skillVisuals';
 import { tierIndex } from '../../controllers/lighting/lightingQuality';
 import { lighting } from '../../controllers/lighting';
 import { isPlayerAttackAction } from '../../controllers/anim/playerActionMapper';
@@ -207,13 +208,12 @@ export const SkillCastSystem: ISystemFactory = world => {
     Session.sendToGS(packet.buffer);
   }
 
-  /** Dark Side: one 0x4A per extra target as the follow-up blows come round. */
-  function drainDarkSide(): void {
-    for (;;) {
-      const id = combat.nextDarkSideHit();
-      if (id < 0) return;
-      sendRageAttack(combat.darkSidePendingSkill, id);
-    }
+  /** Dark Side: a blow on the next target as the follow-ups come round; nothing goes out (MonkSystem.cpp:610). */
+  function drainDarkSide(hero: Entity): void {
+    const skill = combat.darkSidePendingSkill; // before the pull: the last blow ends the cast
+    const id = combat.nextDarkSideHit();
+    const target = id < 0 ? undefined : world.getByNetId(id);
+    if (target) playSkillImpact(world.scene, skill, hero, target);
   }
 
   /**
@@ -437,7 +437,7 @@ export const SkillCastSystem: ISystemFactory = world => {
         return;
       }
 
-      drainDarkSide();
+      drainDarkSide(hero);
       drainPendingStep(hero, dt);
 
       // Standing on a safe zone tile: no skill goes out at all, whatever the

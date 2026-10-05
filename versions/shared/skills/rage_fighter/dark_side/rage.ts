@@ -6,8 +6,9 @@
  * with up to five targets it chose (`ReceiveDarkside` →
  * `SetDarksideTargetIndex`) and echoes the 0x4A (`ReceiveStraightAttack`,
  * which sets the caster's `AttackTime = 1`, :13422-13429), and the client then
- * lands one 0x4A per extra target as the clip's follow-up blows come round
- * (`SendDarksideAtt`, one per `m_nDarksideCnt`), counted from that echo.
+ * lands a blow on each target as the clip's follow-ups come round, counted from
+ * that echo (`SendDarksideAtt`, one per `m_nDarksideCnt`). The blows are drawn
+ * only: their 0x4A send is commented out (MonkSystem.cpp:610).
  * Every other Rage Fighter skill is a plain `TargetedSkill` / `AreaSkill`
  * with its own clip (`SetRageSkillAni`, `recipes.ts`).
  *
@@ -17,8 +18,8 @@
  *
  * Driven by `skillCastSystem` (`beginDarkSide`) and the combat module's
  * packet handlers (`observeDarkSideTargets`, `observeDarkSideEcho`,
- * `observeRageHit`); the cast system drains the due follow-ups through the
- * facade's `nextDarkSideHit`.
+ * `observeRageHit`); the cast system draws the due follow-ups it pulls
+ * through the facade's `nextDarkSideHit`.
  */
 import type { ENUM_WORLD } from '@/core/types';
 import type { CombatLayer } from '@/controllers/combat/layer';
@@ -95,8 +96,7 @@ export function beginDarkSide(skill: number, _targetId: number): void {
 
 /**
  * Command: the server echoed the hero's own Dark Side (0x4A): `ReceiveStraightAttack` sets `AttackTime = 1`
- * (WSclient.cpp:13422-13429), so the follow-ups count from here. The original sends one 0x4A a cast; ours also
- * sends one per follow-up, and their echoes do not restart the count.
+ * (WSclient.cpp:13422-13429), so the follow-ups count from here. Only the cast's echo starts the count.
  */
 export function observeDarkSideEcho(skill: number): void {
   if (!isDarkSide(skill) || darkSideSkill === 0 || counting) return;
@@ -114,7 +114,8 @@ export function observeDarkSideTargets(skill: number, targetIds: readonly number
 
 /**
  * Command: pull the next follow-up target whose blow is due. Returns the
- * target id, or `-1` when none is due this frame. The caller sends 0x4A.
+ * target id, or `-1` when none is due this frame. The caller draws the blow;
+ * nothing goes out (`SendDarksideAtt`'s send is commented out, MonkSystem.cpp:610).
  */
 export function nextDarkSideHit(): number {
   if (darkSideSkill === 0 || !counting || pendingTargets.length === 0) return -1;
@@ -127,7 +128,7 @@ export function nextDarkSideHit(): number {
   return id;
 }
 
-/** The skill id to put in the follow-up 0x4A. */
+/** The Dark Side skill in flight, whose blow the follow-ups draw; 0 once the last one is pulled. */
 export function darkSidePendingSkill(): number {
   return darkSideSkill;
 }
