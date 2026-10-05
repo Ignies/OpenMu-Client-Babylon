@@ -68,7 +68,7 @@ the hero is a walk the client failed to stop; no walk at all means the server mo
 ## Depends on / used by
 - uses: `session` (sending), `skills` (the selected skill), `inventory` (the item hot keys),
   `social/social.ts`, `friends/messenger.ts`, `economy/economy.ts`, `gm/gmPanel.ts`,
-  `session/sessionResume.ts`, `chat/commands.ts`, `_shared/net_helpers.ts`, `items`, `inventory`, `src/i18n`.
+  `session/sessionResume.ts`, `chat/commands.ts`, `items`, `inventory`, `src/i18n`.
 - used by: `src/app/logic.ts`, `src/app/offline.ts`, nearly every module and window (`Hero`), many controllers and ECS systems (`getBaseClass`),
   `social/social.ts` (`matchEmoteWord`), `session/sessionStats.ts` (`experienceGained`),
   `controllers/settings`, `skills`, `combat`, `events`, `quests`. Windows: `versions/shared/ui/windows/character_info/`,

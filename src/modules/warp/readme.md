@@ -46,7 +46,7 @@ in `requests.ts`, through `index.ts` (the door).
 
 ## Depends on / used by
 - uses: `session`, `hero`, `npc_shop`, `ecs/systems/teleportSystem` (`cancelTeleport`, `endTeleport`),
-  `_shared/net_helpers.ts`, `skills/skillCasting` (`TELEPORT`), `chat/notices`, `social`
+  `scope/objects.ts` (`addNpcToScope`), `skills/objectEffects.ts`, `skills/skillCasting` (`TELEPORT`), `chat/notices`, `social`
   (`battleSoccer`), `economy`, `inventory/quickItemActions`, `controllers/loading/sceneGate`.
 - used by: `src/app/logic.ts`, `ecs/systems/skillCastSystem.ts`, `playerControllerSystem.ts`,
   `teleportSystem.ts`, `versions/shared/ui/hud/mobile_controls/skillPad.tsx`,

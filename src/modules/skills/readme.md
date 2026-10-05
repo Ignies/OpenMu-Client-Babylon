@@ -44,7 +44,8 @@ hotbar share.
 ## Packets
 - `SkillListUpdate`, `SkillAdded`, `SkillRemoved` (F3 11): one handler; the count byte (0xFE add,
   0xFF remove) picks the shape, then `HeroSkills.setSkillList` / `addSkill` / `removeSkill`.
-- `MagicEffectStatus`: sets an effect on the object; the hero's also goes to `HeroSkills.setBuff`.
+- `MagicEffectStatus`: sets an effect on the object (`objectEffects.ts`, also used by warp); the hero's
+  also goes to `HeroSkills.setBuff`.
 - `MagicEffectCancelled`: `cancelledEffects` (skills controller): the skill's `cancel` hook, then its effect (`SKILL_EFFECTS`, `controllers/skills/tables.ts`, filled from
   each skill's `effect`) and clears it.
 - `AreaSkillAnimation`: turns the caster, plays the cast clip and the area visual.
@@ -54,7 +55,7 @@ hotbar share.
 - `MasterSkillList`, `MasterSkillLevelUpdate`: learned master levels (`masterTree.ts`). Out: `AddMasterSkillPoint`.
 
 ## Depends on / used by
-- uses: `session`, `hero`, `_shared/net_helpers.ts`, `hero/characterStats.ts`, `controllers/item_rules/itemStats.ts`,
+- uses: `session`, `hero`, `combat/clips.ts` (`playCastAnimation`), `hero/characterStats.ts`, `controllers/item_rules/itemStats.ts`,
   `@versions/shared/skills/skillsDatabase` and `skillVisuals`, `ecs/systems/teleportSystem.ts`,
   controllers `combat`, `actors`, `assets/mu`, `terrain`, `src/i18n`.
 - used by: `../modules.ts` (`module.ts`, before `hero`), `src/app` (logic, lifecycle), ECS `skillSystem`, `skillCastSystem`, `pointerInputSystem`;

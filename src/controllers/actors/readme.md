@@ -7,7 +7,7 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 ## Public API
 - `PlayerObject` (the player rig with its part sockets; player-rig NPCs and monsters subclass it
   and set `NpcClass`, `NpcAlwaysFly`, `NpcHeroState`, `DeathShatter`), `isPlayerBody`, `npcClassOf`,
-  `npcHeroStateOf` (a geared NPC's `pk`: net_helpers gives the entity that `heroState`, so the
+  `npcHeroStateOf` (a geared NPC's `pk`: `modules/scope/objects.ts` gives the entity that `heroState`, so the
   render system draws an outlaw's red body, ZzzCharacter.cpp:9988-9991);
   `MonsterObject`; `OperateBoxObject`, `LeanBoxObject` (invisible click targets for maps).
 - `resolveModelFactory(type)`, `isKnownObjectType(type)` (`modelFactoryPerId.ts`): registered
@@ -55,7 +55,7 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 
 ## How it works
 - A spawned object's class comes from `resolveModelFactory(type)`, called by
-  `modules/_shared/net_helpers.ts` and `modules/scope/net.ts`. It checks, in order: a
+  `modules/scope/objects.ts` and `modules/scope/net.ts`. It checks, in order: a
   registered class (`versions/shared/monsters/<name>/model.ts`), then the type's folder:
   `hidden` (`HiddenNpc`), `trap` (the map's world object), `model`
   (`Monster/Monster<modelType + 1>.glb`), `npcModel` (`NPC/<file>.glb`, or a path off the asset
@@ -89,7 +89,7 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   re-exports them); the pet specs became `controllers/pets`, the drop model proxy
   `item_rules/dropModelProxy.ts`, the guild mark `core/guildMark.ts`, the pet numbers
   `versions/shared/items/petItems.ts`. Each new door is light, so module load order is unchanged.
-- used by: `ecs/systems`, `modules/_shared/net_helpers.ts`, `modules/scope`,
+- used by: `ecs/systems`, `modules/scope/objects.ts`, `modules/combat/clips.ts`, `modules/scope`,
   `modules/character_select`, `modules/drops`, `modules/gm/admin/skins.ts`, `app/offline.ts`,
   `sound`, `item_fx/weaponBlur.ts`, `anim`, `assets/modelLoader.ts`, monster, npc, map and skill
   content in `versions/shared/`, `tools/assetCase.ts`.

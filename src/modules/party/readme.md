@@ -22,7 +22,7 @@ Party packets from the game server. The party state and the party actions live i
 - `PartyHealthUpdate`: each member's health in tenths.
 
 ## Depends on / used by
-- uses: `social/social.ts`, `chat/chat.ts` (`cleanName`), `_shared/net_helpers.ts`
+- uses: `social/social.ts`, `chat/chat.ts` (`cleanName`), `scope/objects.ts` (`playerNameById`)
   (`playerNameById`), `src/i18n`.
 - used by: `src/app/logic.ts`. The window is `versions/shared/ui/windows/party/`; `chat/commands.ts`
   (`/party`) and `mu_helper/loop.ts` read `Social.partyMembers`.

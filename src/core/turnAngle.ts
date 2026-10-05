@@ -64,3 +64,8 @@ export function rotationByteOf(rotYRadians: number): number {
   if (deg < 0) deg += 360;
   return Math.floor(((deg + 22.5) / 360) * 8 + 1) % 8;
 }
+
+/** The yaw of an 8-direction byte from the server; `rotationByteOf` turns it back. */
+export function convertDirectionToAngle(direction: number): number {
+  return (direction * Math.PI) / 4 - Math.PI / 4;
+}

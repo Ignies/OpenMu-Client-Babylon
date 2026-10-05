@@ -80,7 +80,7 @@ themselves are content in `versions/shared/skills/` (see [docs/content.md](../..
   `skillDisplayName` lives in `assets/mu/skillNames.ts`, beside the language pack it reads.
 - used by: every skill file in `versions/shared/skills/`, which registers them in
   `versions/shared/skills/index.ts`; `versions/shared/skills/skillVisuals.ts` re-exports the
-  dispatch for `modules/combat`, `modules/skills`, `modules/_shared/net_helpers.ts` and the
+  dispatch for `modules/combat`, `modules/skills` and the
   attack and teleport ECS systems.
 
 ## Change it

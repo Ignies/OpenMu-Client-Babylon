@@ -16,7 +16,8 @@ pathfinding. Nothing here knows about a skill, a window or a map.
 - `createAttributeSystem()` (`attributeSystem.ts`): the per-entity stat bag (health, mana, speeds,
   `inSafeZone`, `weaponsOnBack`, ...).
 - `turnAngle.ts`: `normalizeAngle`, `signedAngleDelta`, `turnAngle`, `approachAngle`,
-  `createAngleDeg`, `rotationByteOf`, from `ZzzAI.cpp` (`TurnAngle2`, `CreateAngle`, ...).
+  `createAngleDeg`, `rotationByteOf`, from `ZzzAI.cpp` (`TurnAngle2`, `CreateAngle`, ...), and
+  `convertDirectionToAngle` (a direction byte from the server as a yaw; `rotationByteOf` turns it back).
 - `binaryUtils.ts`: byte helpers (`castToByte`, `ArrayCopy`, `GetByteValue`, ...).
 - `stableKeyOf(object)` (`stableKey.ts`): a stable React key for an object with no id (entities,
   notice lines, items); the item grid widget and the HUD share it.
@@ -69,5 +70,6 @@ pathfinding. Nothing here knows about a skill, a window or a map.
 ## Tests
 - `pathfinding.test.ts`: the Elbeland bridge pinch (a diagonal past two blocked tiles is walkable)
   and a closed tile is never walked onto.
+- `turnAngle.test.ts`: every direction byte turns into a yaw and back to itself.
 - `rateLimit.test.ts`: IP buckets (IPv4, mapped IPv4, IPv6 /64), loopback, the forwarded header
   trusted only from Caddy on this box, the burst window.

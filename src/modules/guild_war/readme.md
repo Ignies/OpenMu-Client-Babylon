@@ -38,7 +38,7 @@ has the handlers. Plain guild membership is in [../guild/readme.md](../guild/rea
 - `RemoveAllianceGuildResult`: a guild was removed from the alliance.
 
 ## Depends on / used by
-- uses: `social/social.ts`, `chat/chat.ts` (`cleanName`), `_shared/net_helpers.ts`
+- uses: `social/social.ts`, `chat/chat.ts` (`cleanName`), `scope/objects.ts` (`playerNameById`)
   (`playerNameById`), `guild` (`GuildMarks`), `src/i18n`.
 - used by: `src/app/logic.ts`. The state is drawn by `versions/shared/ui/hud/soccer_score/`,
   `hud/name_tags/`, `windows/guild/` (alliance tab) and `windows/social_prompts/` (war and

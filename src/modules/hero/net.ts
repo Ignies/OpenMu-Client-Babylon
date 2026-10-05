@@ -12,7 +12,7 @@ import { Hero } from './state';
 import { addNotification } from '@/modules/chat';
 import { AppState, UIState } from '@/controllers/interface/uiState';
 import { Ecs } from '@/ecs/current';
-import { convertDirectionToAngle } from '../_shared/net_helpers';
+import { convertDirectionToAngle } from '@/core/turnAngle';
 import { experienceForLevel } from './experience';
 import { heroStateMessage } from '@/controllers/interface/nameTags';
 import { runInAction } from 'mobx';

@@ -11,12 +11,20 @@ import { WeatherStatus } from '@/controllers/weather';
 import { Ecs } from '@/ecs/current';
 import { UI_BUS, playSfx } from '@/controllers/sound/sfx';
 import { WEATHER_RAIN } from '@/controllers/weather/rainState';
-import { emitObjectEffect } from '../_shared/net_helpers';
+import type { Events } from '@/core/eventBus/events';
 import { inChaosCastle } from '@/controllers/actors/locomotion';
 import { runInAction } from 'mobx';
 
 /** The "rain, intensity 0" value is logged once per session, not per packet. */
 let weatherZeroReported = false;
+
+function emitObjectEffect(netId: number, effect: Events['objectEffect']['effect']) {
+  const world = Ecs.world;
+  if (!world) return;
+  const entity = world.getByNetId(netId);
+  if (!entity) return;
+  EventBus.emit('objectEffect', { entity, effect });
+}
 
 // ReceiveServerCommand (WSclient.cpp:8359-8360): command 2 is SOUND_MEDAL.
 const FANFARE_EFFECT = 2;

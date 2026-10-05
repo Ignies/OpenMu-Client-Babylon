@@ -82,8 +82,9 @@ Controllers, ECS systems and `app/boot.tsx` add theirs at runtime, after the mod
 - [vault](vault/readme.md): vault packets; state in `Economy`.
 - [warp](warp/readme.md): map changes, teleports, the loading hold after a warp.
 - [world](world/readme.md): weather, fanfare and map-wide object effects.
-- `_shared/net_helpers.ts`: helpers more than one `net.ts` uses (player names, monster attacks).
-  `_shared/i18n/`: text more than one module uses.
+- `_shared/i18n/`: text more than one module uses. A helper other modules' handlers reuse lives
+  with its owner: `scope/objects.ts` (objects in view, player and summon names), `combat/clips.ts`
+  (attack and cast clips), `skills/objectEffects.ts` (an effect on any object).
 
 ## Depends on / used by
 - uses: `src/controllers` (their public files), `src/core`, `src/ecs`, `controllers/interface/uiState.ts`

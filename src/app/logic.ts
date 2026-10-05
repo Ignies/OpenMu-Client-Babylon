@@ -85,7 +85,7 @@ import '../modules/inventory/quickItemActions';
 import '../modules/servers/serverConfig';
 import '../controllers/interface/msgWin';
 import '../modules/character_select/messages';
-import { summonDisplayName } from '../modules/_shared/net_helpers';
+import { summonDisplayName } from '../modules/scope/objects';
 
 import { PingPacket } from '@versions/shared/packets/ClientToServerPackets';
 

@@ -42,7 +42,7 @@ disband and guild creation. The guild state and the guild actions live in the `S
 - `GuildCreationResult`: closes the editor or shows the error.
 
 ## Depends on / used by
-- uses: `social/social.ts`, `chat/chat.ts` (`cleanName`), `_shared/net_helpers.ts`
+- uses: `social/social.ts`, `chat/chat.ts` (`cleanName`), `scope/objects.ts` (`playerNameById`)
   (`playerNameById`), `session`, `hero`, `src/i18n`.
 - used by: `src/app/logic.ts`. The window is `versions/shared/ui/windows/guild/`; the join prompt is
   `windows/social_prompts/`. `GuildMarks` is read by `hud/name_tags/`,

@@ -4,7 +4,7 @@ import { Social } from '../social/social';
 import { GuildMarks } from '@/modules/guild';
 import { t, type TextKey } from '@/i18n';
 import { cleanName } from '../chat/chat';
-import { playerNameById } from '../_shared/net_helpers';
+import { playerNameById } from '../scope/objects';
 import { runInAction } from 'mobx';
 
 const GUILD_WAR_RESULTS: Record<GuildWarRequestResultRequestResultEnum, TextKey> = {

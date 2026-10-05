@@ -31,7 +31,7 @@ pets module (`src/modules/pets`) keeps the pet packets; the item numbers are
 - used by: `src/app/logic.ts`, `ecs/systems/petSystem.ts`, `animationSystem.ts`, `attackSystem.ts`,
   `moveAlongPathSystem.ts`, `skillCastSystem.ts`, `characterSelectSystem.ts`, `ecs/world.ts`,
   `controllers/actors` (`playerObject`, `weaponClass`), `controllers/combat/skillClips.ts`,
-  `modules/combat/net.ts`, `modules/_shared/net_helpers.ts`, `versions/shared/skills/common/plasma_storm`.
+  `modules/combat/net.ts`, `modules/combat/clips.ts`, `versions/shared/skills/common/plasma_storm`.
 
 ## Change it
 - add a pet: its number in `versions/shared/items/petItems.ts`, a `PetSpec` in `PETS` (`pets.ts`).

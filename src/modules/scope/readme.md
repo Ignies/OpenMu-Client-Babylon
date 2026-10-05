@@ -13,7 +13,8 @@ players, plus their moves and equipment changes. The entities live in the ECS wo
 - Every add first removes any entity with the same net id (`removeNetObject`), then builds a new one.
   Ids are masked with `0x7fff`; for summons bit 15 is the create flag that plays the arrival
   (`WSclient.cpp:3113-3117`).
-- NPCs, monsters and summons go through `addNpcToScope` in `_shared/net_helpers.ts`.
+- NPCs, monsters and summons go through `addNpcToScope` in `objects.ts`, which also keeps a mid-walk
+  entry walking, removes objects and names players and summons for other modules (party, guild, drops).
 - Players: `addCharacterToScope` spawns with `spawnPlayer`, places them on the terrain, copies the
   PK state (`WSclient.cpp:804`), buffs and the visible equipment. The hero gets `localPlayer`
   (and `isGm`, attack and magic speed from the packet); other players get `interactable`
@@ -39,7 +40,7 @@ players, plus their moves and equipment changes. The entities live in the ECS wo
 - `AppearanceChanged` / `AppearanceChangedExtended`: one equipment slot of a player changed.
 
 ## Depends on / used by
-- uses: `_shared/net_helpers.ts`, `economy` (shop titles), `controllers/item_rules/itemSerializer`,
+- uses: `economy` (shop titles), `controllers/item_rules/itemSerializer`,
   `core/inventoryConstants`, `controllers/actors`, `ecs/systems/teleportSystem`,
   `versions/shared/skills/skillVisuals` (`playSummonArrival`).
 - used by: `src/app/logic.ts` (import and `spawnPlayer` re-export), `src/app/offline.ts`,
@@ -48,7 +49,7 @@ players, plus their moves and equipment changes. The entities live in the ECS wo
 
 ## Change it
 - change how a player entity is built: `spawnPlayer` / `addCharacterToScope` in `net.ts`.
-- change how an NPC or monster is built: `addNpcToScope` in `_shared/net_helpers.ts`.
+- change how an NPC or monster is built: `addNpcToScope` in `objects.ts`.
 - show a new equipment slot on other players: `applyAppearanceChange` in `net.ts`.
 
 ## Tests

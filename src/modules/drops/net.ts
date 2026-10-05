@@ -14,7 +14,7 @@ import { archangelWeapon, dropModelProxy } from '@/controllers/item_rules';
 import { createAttributeSystem } from '@/core/attributeSystem';
 import { itemLevelName } from '@/controllers/item_rules';
 import { playDrop } from '@/controllers/sound';
-import { removeNetObject } from '../_shared/net_helpers';
+import { removeNetObject } from '../scope/objects';
 import { runInAction } from 'mobx';
 import { t } from '@/i18n';
 

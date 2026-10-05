@@ -7,7 +7,8 @@ import { HeroSkills } from './state';
 import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
 import { TELEPORT } from './skillCasting';
-import { applyObjectEffect, playCastAnimation } from '../_shared/net_helpers';
+import { applyObjectEffect } from './objectEffects';
+import { playCastAnimation } from '../combat/clips';
 import { beginTeleport, endTeleport, justArrived } from '@/ecs/systems/teleportSystem';
 import { playAreaSkillVisual, playChainLightningHop } from '@versions/shared/skills/skillVisuals';
 

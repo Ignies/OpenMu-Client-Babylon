@@ -73,5 +73,7 @@ or `src/ecs` (`Ecs.world`). The codemod that rewrote `Store.x` is in git history
 
 ## Tests
 - `listenerOrder.golden.test.ts`: every packet's listeners and their order once the app has loaded.
+  It hashes each listener's code without whitespace or vitest's numbered import aliases, so moving
+  an import keeps the hash; changing a listener or the install order changes it.
 - `observableStores.test.ts`: no observable store member is named after an `Object.prototype`
   member (mobx would throw while building the store).

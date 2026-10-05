@@ -2,7 +2,7 @@ import { EventBus } from '@/core/eventBus';
 import { PartyHealthUpdatePacket, PartyListPacket, PartyRequestPacket, RemovePartyMemberPacket } from '@versions/shared/packets/ServerToClientPackets';
 import { Social } from '../social/social';
 import { cleanName } from '../chat/chat';
-import { playerNameById } from '../_shared/net_helpers';
+import { playerNameById } from '../scope/objects';
 import { runInAction } from 'mobx';
 import { t } from '@/i18n';
 

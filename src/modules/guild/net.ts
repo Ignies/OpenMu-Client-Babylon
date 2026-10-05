@@ -8,7 +8,7 @@ import { Session } from '@/modules/session';
 import { Ecs } from '@/ecs/current';
 import { t, type TextKey } from '@/i18n';
 import { cleanName } from '../chat/chat';
-import { playerNameById } from '../_shared/net_helpers';
+import { playerNameById } from '../scope/objects';
 import { runInAction } from 'mobx';
 
 /**

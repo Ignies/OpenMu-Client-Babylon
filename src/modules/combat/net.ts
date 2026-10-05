@@ -9,7 +9,9 @@ import { ObjectAnimationPacket, ObjectGotKilledPacket, ObjectHitExtendedPacket, 
 import { ServerToClientActionMap, resolveGenderedAction } from '@/controllers/anim/playerActionMapper';
 import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
-import { attackInputOf, attackPoseOf, convertDirectionToAngle, isDeadMonster, monsterNumberOf, playCastAnimation, playTrapSounds, setMonsterClip } from '../_shared/net_helpers';
+import { attackInputOf, attackPoseOf, monsterNumberOf, playCastAnimation, playTrapSounds, setMonsterClip } from './clips';
+import { isDeadMonster } from '../scope/objects';
+import { convertDirectionToAngle } from '@/core/turnAngle';
 import { chooseAttackAction, isWeaponItem } from '@/controllers/actors/weaponClass';
 import { combat } from '@/controllers/combat';
 import { delay } from '@/controllers/fx/core';

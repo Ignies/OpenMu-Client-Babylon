@@ -5,6 +5,8 @@ the Rage Fighter's Dark Side blows. This folder has only the handlers; it keeps 
 
 ## Public API
 - none. `installNet()` in `net.ts` registers its handlers (`module.ts`, installed by `src/app/logic.ts`).
+- `clips.ts`: the attack and cast clips of objects in view and their sounds (`playCastAnimation`,
+  `attackPoseOf`, `attackInputOf`, `setMonsterClip`, `playTrapSounds`); `skills/net.ts` uses it too.
 
 ## How it works
 - Handlers read `Ecs.world` and write straight onto the entities (animation components,
@@ -39,7 +41,7 @@ the Rage Fighter's Dark Side blows. This folder has only the handlers; it keeps 
 
 ## Depends on / used by
 - uses: `src/controllers/combat` (`combat`, `clipIgnoresHit`), `controllers/anim`, `controllers/actors`,
-  `controllers/sound`, `controllers/fx` (`delay`), `_shared/net_helpers.ts`, `hero/characterStats.ts`,
+  `controllers/sound`, `controllers/fx` (`delay`), `scope/objects.ts` (`isDeadMonster`), `hero/characterStats.ts`,
   `skills/skillCasting.ts`, `skills/net.ts`, `pets/pets.ts` (`mountKind`),
   `@versions/shared/skills/skillVisuals` (`playBuffHits`: Soul Barrier's shell when the hero is hit;
   `afterHeroRelease` for the kill energy).

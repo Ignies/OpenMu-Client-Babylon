@@ -36,7 +36,7 @@ and the loot filter for the ALT name overlay.
 - `ItemPickUpRequestFailed`: a red line, except for `ItemStacked`.
 
 ## Depends on / used by
-- uses: `items` (`ItemSerializer`, `itemDef`, `itemLevelName`), `options` (`GameOptions`), `_shared/net_helpers.ts`
+- uses: `items` (`ItemSerializer`, `itemDef`, `itemLevelName`), `options` (`GameOptions`), `scope/objects.ts`
   (`removeNetObject`), `controllers/actors/itemAngle.ts`, `controllers/render`, `controllers/sound`, `session` (sending), `inventory` (`Bag`, item moves).
 - used by: `src/app/logic.ts` (net), `inventory/quickItemRules.ts` (`HIGH_DROP_LEVEL`),
   `controllers/item_rules/archangelWeapons.test.ts`, ecs `dropMotionSystem` / `objectEffectSystem`,
