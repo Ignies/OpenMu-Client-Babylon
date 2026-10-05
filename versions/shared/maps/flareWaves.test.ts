@@ -54,6 +54,21 @@ describe('the map flare waves', () => {
     ]);
   });
 
+  // `fLumi = (sinf(WorldTime * 0.001f) + 1.0f) * 0.3f + 0.4f` tints `(1, 1, 0.6)`; `Scale * 6` at bone 5 + (-40, -10, 0).
+  it('Elbeland 63: the great lantern breathes on bone 5 (GMNewTown.cpp:289-300)', () => {
+    expect(cardsOf(ENUM_WORLD.WD_51ELBELAND, 63)).toEqual([
+      { offset: [10, -167, 415], bone: true, sprite: { scale: 6, color: [1, 1, 0.6], pulse: { speed: 0.001, amount: 0.3, base: 0.4 } } },
+    ]);
+  });
+
+  // `fLumi = (sinf(WorldTime * 0.002f) + 1.0f) * 0.5f + 0.5f` tints `(1, 0.5, 0.3)` and sizes a card at each of bones 3-8 + (5, -4, -1).
+  it('Elbeland 121: six cards on the totem that breathe and grow, unscaled (GMNewTown.cpp:312-327)', () => {
+    const fLumi = { speed: 0.002, amount: 0.5, base: 0.5 };
+    const bones = [[-12, 11, 348], [-12, -13, 348], [-17, 13, 232], [-20, 17, 105], [-20, -19, 105], [-17, -16, 232]];
+    const sprite = { scale: 1, color: [1, 0.5, 0.3], pulse: fLumi, grow: fLumi, unscaled: true };
+    expect(cardsOf(ENUM_WORLD.WD_51ELBELAND, 121)).toEqual(bones.map(offset => ({ offset, bone: true, sprite })));
+  });
+
   it('turn at most 0.05 radians a millisecond on every map: a per-second speed strobes', () => {
     for (let world = 0; world < 90; world++) {
       for (let type = 0; type < 400; type++) {

@@ -101,8 +101,9 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
 - `flareWaves.test.ts`: the table cards' waves are the original's `sinf(WorldTime * k)`, k in radians a
   millisecond: the fire vents (Karutan 113, Loren Market 57, Vulcanus 6) burn steady red; Kalima's
   flower glows (12, 32) grow and shrink on bone 5; the Kanturu relic lamps (Kanturu 2 4, Kanturu 3 5)
-  breathe and grow with their fLumi; Land of Trials 49 draws two red cards on bone 3; and no table wave
-  is faster than 0.05.
+  breathe and grow with their fLumi; Land of Trials 49 draws two red cards on bone 3; Elbeland's
+  lantern (63) breathes and its totem (121) breathes and grows on six bones; and no table wave is
+  faster than 0.05.
 - `fireLights.test.ts`: the ground lights the original throws take its position and range on every
   preset: Devias 66's `CreateFire` 50 up at range 4, Lorencia 150 at range 3.
 - `bloodcastle/lampObject.test.ts`: the throne-room lamp's flare is `BITMAP_FLARE` too.
