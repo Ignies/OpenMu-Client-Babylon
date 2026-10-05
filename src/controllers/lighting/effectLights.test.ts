@@ -6,7 +6,7 @@ import type { Scene } from '../render/babylon/exports';
 const asked = vi.hoisted(() => [] as string[]);
 const drawnFrom = vi.hoisted(() => [] as string[]);
 const cells = vi.hoisted(() => new Map<string, number>());
-const sprites = vi.hoisted(() => [] as { width: number; height: number; angle: number }[]);
+const sprites = vi.hoisted(() => [] as { width: number; height: number; angle: number; position: { y: number } }[]);
 
 vi.mock('@/controllers/assets/mu', () => ({
   downloadDataFile: async (path: string) => {
@@ -27,7 +27,14 @@ vi.mock('../render/babylon/exports', () => {
     }
   }
   class Sprite {
-    position = { set() {} };
+    position = {
+      x: 0,
+      y: 0,
+      z: 0,
+      set(x: number, y: number, z: number) {
+        Object.assign(this, { x, y, z });
+      },
+    };
     color = new Color4();
     width = 0;
     height = 0;
@@ -155,6 +162,20 @@ describe('flare cards', () => {
     expect(card.angle).toBeCloseTo(Math.PI / 2);
     step(900);
     expect(card.angle).toBeCloseTo(Math.PI);
+  });
+
+  // Crywolf's flares ride `350 + aaa`, `aaa` Time_Effect's 0 to 20 and back (GMCrywolf1st.cpp:403-410).
+  it('bob a card up its height and back down over its period', async () => {
+    const { scene, step } = clockedScene();
+    const bob = { height: 20, period: 1640 };
+    await createEffectLight(scene, { scale: 1.3, color: [1, 1, 1], texture: 'flare', bob }, { x: 0, y: 3.5, z: 0 }, 1);
+    const card = lastSprite();
+    step(410);
+    expect(card.position.y).toBeCloseTo(3.6);
+    step(410);
+    expect(card.position.y).toBeCloseTo(3.7);
+    step(820);
+    expect(card.position.y).toBeCloseTo(3.5);
   });
 
   it.skipIf(!existsSync('Data/Effect'))('cut each sheet at the width of its file', async () => {

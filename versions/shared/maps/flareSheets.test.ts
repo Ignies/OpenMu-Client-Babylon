@@ -79,11 +79,14 @@ describe('the map flares the original draws as BITMAP_FLARE', () => {
     ]);
   });
 
-  it('Crywolf 41: white, 1.3, 350-370 up (GMCrywolf1st.cpp:395-414)', () => {
-    expect(flareOf(ENUM_WORLD.WD_34CRYWOLF_1ST, 41)).toEqual({
-      offset: [0, 0, 360],
-      sprite: { scale: 1.3, color: [1, 1, 1], texture: 'flare' },
-    });
+  // `p[2] += 350 + aaa`, `aaa` riding Time_Effect 0 to 20 and back over 41 frames at 25 a second; the second
+  // card turns by the shared `Ro`, a degree a frame.
+  it('Crywolf 41: two white, 1.3, bobbing 350-370 up, the second turning (GMCrywolf1st.cpp:395-416)', () => {
+    const card = { scale: 1.3, color: [1, 1, 1], texture: 'flare', unscaled: true, bob: { height: 20, period: 1640 } };
+    expect(cardsOf(ENUM_WORLD.WD_34CRYWOLF_1ST, 41)).toEqual([
+      { offset: [0, 0, 350], sprite: card },
+      { offset: [0, 0, 350], sprite: { ...card, spin: 0.025 } },
+    ]);
   });
 
   it('Loren Market 30 and 35: grey, breathing like their fLumi (GMUnitedMarketPlace.cpp:248-274)', () => {
