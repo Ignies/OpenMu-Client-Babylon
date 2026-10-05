@@ -1,6 +1,7 @@
 import type { Emission } from '@/controllers/fx/effectParticles';
 import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
 import type { MeshAnimations } from '@/controllers/render';
+import { isOn } from '@/controllers/fidelity';
 import { perTick } from '../shared/meshAnimation';
 import { EMPIRE_GUARDIAN_4_LIGHTS } from '../empireguardian4/spec';
 
@@ -57,6 +58,17 @@ export const EMPIRE_GUARDIAN_EMISSIONS: Partial<
 };
 
 /**
+ * Ours, as day 4's (`fortressLights`): `MoveObject` only hides 79 and its
+ * case draws a sprite and the fire (GMEmpireGuardian1.cpp:264-278,
+ * :1689-1711), no `AddTerrainLight`.
+ */
+const BRAZIER_GROUND: LightEmitter['terrain'] = {
+  range: 3,
+  color: [1, 0.6, 0.2],
+  flicker: { min: 0.5, max: 1, steps: 4 },
+};
+
+/**
  * The 79 torch, as the login scene lights it, and day 4's 80, the blue lamp:
  * each day's case 80 is day 4's (GMEmpireGuardian1.cpp:1713-1721,
  * 2.cpp:698-706, 3.cpp:887-895), placed once on day 2 and six times on day 3.
@@ -69,10 +81,8 @@ export const EMPIRE_GUARDIAN_LIGHTS: Partial<
     {
       sprite: { scale: 2, color: [1, 0.2, 0] },
       pointRange: 6,
-      terrain: {
-        range: 3,
-        color: [1, 0.6, 0.2],
-        flicker: { min: 0.5, max: 1, steps: 4 },
+      get terrain() {
+        return isOn('fortressLights') ? BRAZIER_GROUND : undefined;
       },
     },
   ],
