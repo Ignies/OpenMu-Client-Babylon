@@ -29,7 +29,7 @@ export default {
     'Torțele, candelabrele și mangalele din Fortăreața Imperială luminează podeaua din jur. Clasică: fără lumină, ca în original.',
   'fidelity.lampFlares': 'Lumina și strălucirea lămpilor',
   'fidelity.lampFlares.hint':
-    'Felinarele, lumânările, vetrele și mangalele strălucesc, lumânările ard, iar unele lămpi luminează podeaua din jur. Clasică: doar ce desenează originalul.',
+    'Felinarele, lumânările, vetrele și mangalele strălucesc, lumânările ard, iar unele lămpi și focuri luminează podeaua din jur. Clasică: doar ce desenează originalul.',
   'fidelity.roofFade': 'Acoperișuri transparente',
   'fidelity.roofFade.hint':
     'Acoperișurile dispar cât stai sub ele, ca să vezi înăuntru. Clasică: acoperișurile rămân mereu vizibile.',

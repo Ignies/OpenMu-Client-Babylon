@@ -96,6 +96,13 @@ export const ELBELAND_EMISSIONS: Partial<Record<number, readonly Emission[]>> =
  */
 const FIRE_BOWL_FLARE: NonNullable<LightEmitter['sprite']> = { scale: 0.9, color: [0.2, 0.5, 1] };
 
+/**
+ * Ours (`lampFlares`): every 61 record sits 11 west and 8 north of the bowl it belongs to (its
+ * type-34 post), so the flame burned beside the rim; this puts its base inside the bowl. Classic
+ * burns and lights at `o->Position`, as the original (GMNewTown.cpp:135-140, :282-288).
+ */
+const FIRE_BOWL_DROP: readonly [number, number, number] = [11, -8, -10];
+
 const TOTEM_LUMI = { speed: 0.002, amount: 0.5, base: 0.5 } as const;
 
 const TOTEM_LIGHT: NonNullable<LightEmitter['sprite']> = {
@@ -131,12 +138,10 @@ export const ELBELAND_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
     ],
     61: [
       {
-        // Every 61 record sits 11 west and 8 north of the bowl it belongs to
-        // (its type-34 post), so the flame burned beside the rim; the drop
-        // puts its base inside the bowl instead of on top of it. `pointDrop`
-        // keeps the pool where it was - an `offset` otherwise takes the
-        // pool's default 0.6 hover away.
-        offset: [11, -8, -10],
+        // `pointDrop` keeps the pool's default 0.6 hover, which an `offset` takes away.
+        get offset() {
+          return isOn('lampFlares') ? FIRE_BOWL_DROP : undefined;
+        },
         pointDrop: 0.6,
         get sprite() {
           return isOn('lampFlares') ? FIRE_BOWL_FLARE : undefined;

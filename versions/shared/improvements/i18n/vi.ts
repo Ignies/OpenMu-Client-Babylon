@@ -29,7 +29,7 @@ export default {
     'Đuốc tường, đèn chùm và chậu lửa trong Pháo đài Hoàng gia chiếu sáng mặt sàn xung quanh. Cổ điển: không có ánh sáng, như bản gốc.',
   'fidelity.lampFlares': 'Ánh sáng và ánh lóe của đèn',
   'fidelity.lampFlares.hint':
-    'Đèn đường, nến, lò sưởi và chậu lửa tỏa ánh lóe, nến cháy và một số đèn chiếu sáng mặt đất xung quanh. Cổ điển: chỉ những gì bản gốc vẽ.',
+    'Đèn đường, nến, lò sưởi và chậu lửa tỏa ánh lóe, nến cháy và một số đèn và ngọn lửa chiếu sáng mặt đất xung quanh. Cổ điển: chỉ những gì bản gốc vẽ.',
   'fidelity.roofFade': 'Mái nhà trong suốt',
   'fidelity.roofFade.hint':
     'Mái nhà mờ dần khi bạn đứng bên dưới để bạn nhìn thấy bên trong. Cổ điển: mái nhà luôn hiển thị.',

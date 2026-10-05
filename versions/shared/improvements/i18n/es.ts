@@ -29,7 +29,7 @@ export default {
     'Las antorchas, candelabros y braseros de la Fortaleza Imperial iluminan el suelo a su alrededor. Clásica: sin luz, como en el original.',
   'fidelity.lampFlares': 'Luces y destellos de lámparas',
   'fidelity.lampFlares.hint':
-    'Las farolas, velas, chimeneas y braseros brillan con un destello, las velas arden y algunas lámparas iluminan el suelo a su alrededor. Clásica: solo lo que dibuja el original.',
+    'Las farolas, velas, chimeneas y braseros brillan con un destello, las velas arden y algunas lámparas y fuegos iluminan el suelo a su alrededor. Clásica: solo lo que dibuja el original.',
   'fidelity.roofFade': 'Techos transparentes',
   'fidelity.roofFade.hint':
     'Los techos se desvanecen cuando estás debajo, para que veas el interior. Clásica: los techos siempre se ven.',

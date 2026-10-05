@@ -58,8 +58,8 @@ export const DOPPELGANGER2_EFFECT_ONLY_TYPES: readonly number[] = [
 
 /**
  * The vents are Vulcanus' table unchanged - of them only 3 (x40, the red fog
- * box) and 6 (x12, the red fire box, whose flare and terrain light are in
- * `DOPPELGANGER2_LIGHTS`) are placed here. 47 and 48 are this map's two
+ * box) and 6 (x12, the red fire box, whose flare and ground light - ours,
+ * `lampFlares` - are in `DOPPELGANGER2_LIGHTS`) are placed here. 47 and 48 are this map's two
  * extras, and are Doppelganger 1's 70 and 101 verbatim:
  *
  *  - **47** (x0, :513-531), the blue-fire box: one of three `_MONO` fire

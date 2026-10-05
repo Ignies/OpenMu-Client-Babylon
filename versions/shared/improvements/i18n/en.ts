@@ -25,7 +25,7 @@ const en = {
     'Wall torches, chandeliers and braziers in the Imperial Fortress light the floor around them. Classic: no light, as in the original.',
   'fidelity.lampFlares': 'Lamp lights and flares',
   'fidelity.lampFlares.hint':
-    'Street lamps, candles, hearths and braziers glow with a flare, candles burn, and some lamps light the floor around them. Classic: only what the original draws.',
+    'Street lamps, candles, hearths and braziers glow with a flare, candles burn, and some lamps and fires light the floor around them. Classic: only what the original draws.',
   'fidelity.roofFade': 'See-through roofs',
   'fidelity.roofFade.hint':
     'Roofs fade away while you stand under them, so you can see inside. Classic: roofs always stay drawn.',

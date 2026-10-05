@@ -116,7 +116,9 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
 - `lampFlares.test.ts`, `lorencia/candleObject.test.ts`, `devias/candleObject.test.ts`: what the original
   never draws is the `lampFlares` improvement, gone on Classic: the flares of Lorencia 90 and 150, Devias
   66 and the candelabra, Elbeland 61 and Lost Tower 23 (the light under them kept), the candle wick fire,
-  and the ground lights of the Devias candelabra and Lost Tower 18, 19, 20 and 23.
+  and the ground lights of the Devias candelabra, Lost Tower 18, 19, 20 and 23, the fire vents (Vulcanus
+  and Doppelganger 2 6, Loren Market 57) and the Noria forge (their cards kept); no row shapes its ground
+  light on Classic (no `falloff` or `floorGain`), and Lorencia 90 and Elbeland 61 light at the object.
 - `loginscene/wallTorchObject.test.ts`, `empireguardian4/spec.test.ts`: the wall torch's flare, on
   the `BITMAP_FLARE` sheet lit or not, and the fortress lights on Classic and Enhanced; a lit torch's
   warm tint gives Flare.jpg the mean colour its old tint gave flare01.jpg, worked out from the two

@@ -1,6 +1,7 @@
 import type { Emission } from '@/controllers/fx/effectParticles';
 import type { MeshAnimation } from '@/controllers/render';
 import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
+import { isOn } from '@/controllers/fidelity';
 
 /**
  * Vulcanus / the PK Field (`WD_63PK_FIELD`, `World64`/`Object64`), the
@@ -91,20 +92,25 @@ export const VULCANUS_EMISSIONS: Partial<Record<number, readonly Emission[]>> =
  * `FIRE_CURSEDLICH` SubType 4 and `FIRE_HIK3` SubType 0 - `fire1`, `fire2`
  * and `fire3` here - picked afresh every tick.
  *
- * No `AddTerrainLight` in the PK Field code at all - the lava glow is the
- * baked lightmap - so the terrain light here is ours, kept small (range 2)
- * so it only lifts the rim of the vent.
+ * No `AddTerrainLight` in the PK Field code at all (:252-264 only hides the
+ * vent) - the lava glow is the baked lightmap - so the ground light is ours
+ * (`lampFlares`, none on Classic), kept small (range 2) so it only lifts the
+ * rim of the vent. Without it the fire keeps the original's white `vLight`.
  */
+const VENT_GROUND: LightEmitter['terrain'] = {
+  range: 2,
+  color: [1, 0.45, 0.15],
+  flicker: { min: 0.5, max: 1, steps: 4 },
+};
+
 export const VULCANUS_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
   {
     6: [
       {
         pointRange: 4,
         sprite: { scale: 2, color: [1, 0.2, 0] },
-        terrain: {
-          range: 2,
-          color: [1, 0.45, 0.15],
-          flicker: { min: 0.5, max: 1, steps: 4 },
+        get terrain() {
+          return isOn('lampFlares') ? VENT_GROUND : undefined;
         },
         emissions: [{ kinds: ['fire1', 'fire2', 'fire3'], every: 1, jitter: 6 }],
       },

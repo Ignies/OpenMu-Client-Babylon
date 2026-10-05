@@ -42,8 +42,9 @@ export const LORENCIA_EMISSIONS: Partial<Record<number, readonly Emission[]>> = 
 /**
  * Lorencia 90, the street lamp (ZzzObject.cpp:3781-3785): `Luminosity =
  * (rand() % 2 + 6) * 0.1`, then `AddTerrainLight(x, y, (L, 0.8L, 0.6L), 3)`.
- * The colour and the two-step 0.6/0.7 roll are the original's; the flare
- * (`lampFlares`) and the point light are ours.
+ * The colour and the two-step 0.6/0.7 roll are the original's; the point
+ * light is ours, and so (`lampFlares`; Classic lights linearly at the post)
+ * are the flare, the steeper, brighter floor pool and its place:
  *
  * The original hangs its light on the post's map tile. `StreetLight01` puts
  * the lit part - the `streetlight_brightness2` glass, the model's second mesh
@@ -63,12 +64,29 @@ const STREET_LAMP_FLARE: NonNullable<LightEmitter['sprite']> = {
   pulse: { speed: 0.0011, amount: 0.06, base: 0.34 },
 };
 
+const STREET_LAMP_GROUND: LightEmitter['terrain'] = {
+  range: 3,
+  color: STREET_LAMP_COLOR,
+  flicker: { min: 0.6, max: 0.7, steps: 2 },
+};
+
+const STREET_LAMP_POOL: LightEmitter['terrain'] = { ...STREET_LAMP_GROUND, falloff: 1.4, floorGain: 1.8 };
+
 /**
  * Ours, on 150 the table candle: the original gives it a BlendMesh and its
  * `AddTerrainLight` alone, `(L, 0.6L, 0.2L)` at range 3 with `L = (rand() %
- * 4 + 3) * 0.1` (ZzzObject.cpp:3810-3814, :4587-4590).
+ * 4 + 3) * 0.1` (ZzzObject.cpp:3810-3814, :4587-4590). The flare and the
+ * steeper, brighter floor pool are `lampFlares`; Classic lights linearly.
  */
 const CANDLE_FLARE: NonNullable<LightEmitter['sprite']> = { scale: 3, color: [1, 0.62, 0.22] };
+
+const CANDLE_GROUND: LightEmitter['terrain'] = {
+  range: 3,
+  color: [1, 0.6, 0.2],
+  flicker: { min: 0.3, max: 0.6, steps: 4 },
+};
+
+const CANDLE_POOL: LightEmitter['terrain'] = { ...CANDLE_GROUND, falloff: 1.6, floorGain: 2.5 };
 
 export const LORENCIA_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
   50: [createFire([0, 0, 200])],
@@ -83,18 +101,16 @@ export const LORENCIA_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
 
   90: [
     {
-      offset: STREET_LAMP_GLASS,
+      get offset() {
+        return isOn('lampFlares') ? STREET_LAMP_GLASS : undefined;
+      },
       get sprite() {
         return isOn('lampFlares') ? STREET_LAMP_FLARE : undefined;
       },
       pointRange: 6,
       pointGain: 1.5,
-      terrain: {
-        range: 3,
-        color: STREET_LAMP_COLOR,
-        flicker: { min: 0.6, max: 0.7, steps: 2 },
-        falloff: 1.4,
-        floorGain: 1.8,
+      get terrain() {
+        return isOn('lampFlares') ? STREET_LAMP_POOL : STREET_LAMP_GROUND;
       },
     },
   ],
@@ -111,12 +127,8 @@ export const LORENCIA_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
       pointRange: 5,
       pointGain: 1.6,
       wander: 0.05,
-      terrain: {
-        range: 3,
-        color: [1, 0.6, 0.2],
-        flicker: { min: 0.3, max: 0.6, steps: 4 },
-        falloff: 1.6,
-        floorGain: 2.5,
+      get terrain() {
+        return isOn('lampFlares') ? CANDLE_POOL : CANDLE_GROUND;
       },
     },
   ],
