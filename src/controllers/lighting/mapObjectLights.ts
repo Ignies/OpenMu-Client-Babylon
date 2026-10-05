@@ -16,6 +16,7 @@ import type { ENUM_WORLD } from '../../core/types';
 import type { Emission } from '../fx/effectParticles';
 import { maps, type MapLayer } from '../maps';
 import type { LightingLayer } from './layer';
+import type { FlareTexture } from './effectLights';
 import {
   LightSource,
   PRIORITY_TORCH,
@@ -37,6 +38,8 @@ export type LightEmitter = {
     readonly scale: number;
     readonly color: readonly [number, number, number];
     readonly pulse?: { speed: number; amount: number; base: number };
+    /** `'flare'` where the original draws `BITMAP_FLARE`; `BITMAP_LIGHT` otherwise. */
+    readonly texture?: FlareTexture;
   };
   /** MU units, in the object's local frame; rotated by the host. */
   readonly offset?: readonly [number, number, number];
@@ -79,12 +82,13 @@ export const LOGIN_CHANDELIER: LightEmitter = {
   },
 };
 
-/** Login-scene wall torch, type 37: at `bone_1_`, a breathing flare. */
+/** Login-scene wall torch, type 37: at `bone_1_`, a breathing flare on case 37's BITMAP_FLARE sheet. */
 export const LOGIN_WALL_TORCH: LightEmitter = {
   sprite: {
     scale: 4,
     color: [1, 0.45, 0.15],
     pulse: { speed: 0.039, amount: 0.2, base: 0.6 },
+    texture: 'flare',
   },
   terrain: {
     range: 2,

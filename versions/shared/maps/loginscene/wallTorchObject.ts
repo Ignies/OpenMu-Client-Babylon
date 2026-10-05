@@ -12,8 +12,8 @@ import type { Entity, World } from '@/ecs/world';
 import { WALL_TORCH_FLARE } from '../empireguardian4/spec';
 
 /**
- * The login scene's wall torch, type 37 on `WD_73NEW_LOGIN_SCENE`: a grey flare card at bone 1 (the
- * object origin without one), as `RenderObjectVisual` case 37 draws it (GMEmpireGuardian4.cpp:864-875).
+ * The login scene's wall torch, type 37 on `WD_73NEW_LOGIN_SCENE`: a grey BITMAP_FLARE card at bone 1
+ * (the object origin without one), as `RenderObjectVisual` case 37 draws it (GMEmpireGuardian4.cpp:864-875).
  * The `loginWallTorches` improvement makes it burn: the warm `LOGIN_WALL_TORCH` flare, its ground
  * light and the cycling `FIRE_HIK1` / `CURSEDLICH` / `HIK3` flame; the original has none of them.
  */

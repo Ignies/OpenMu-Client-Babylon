@@ -169,13 +169,15 @@ const BRAZIER_BREATHING_FLARE: NonNullable<LightEmitter['sprite']> = {
  * Case 37's flare as the original draws it (GMEmpireGuardian4.cpp:864-875):
  * `CreateSprite(BITMAP_FLARE, bone1, 4 * Scale, fLumi * 0.7)` on all three
  * channels, `fLumi = (sin(WorldTime * 0.039) + 1) * 0.2 + 0.6`. `pulse` is
- * fLumi, so the colour is the 0.7 grey. Both wall torches draw it on Classic:
+ * fLumi, so the colour is the 0.7 grey over BITMAP_FLARE's own warm star
+ * (Flare.jpg, ZzzOpenData.cpp:5309). Both wall torches draw it on Classic:
  * day 4's below and the login scene's.
  */
 export const WALL_TORCH_FLARE: NonNullable<LightEmitter['sprite']> = {
   scale: 4,
   color: [0.7, 0.7, 0.7],
   pulse: { speed: 0.039, amount: 0.2, base: 0.6 },
+  texture: 'flare',
 };
 
 /** The same flare warm, ours: a lit torch's, as `LOGIN_WALL_TORCH` draws it on the login scene. */
