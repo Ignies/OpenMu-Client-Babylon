@@ -123,6 +123,10 @@ export const TEX = {
   /** BITMAP_BLUR+10 / sword trails. */
   swordBlur: 'Effect/sword_blur.OZJ',
   swordEff: 'Effect/SwordEff.OZJ',
+  /** BITMAP_SWORDEFF (!SwordEff.jpg, ZzzOpenData.cpp:4649): Chain Drive's joints. */
+  swordEffJoint: 'Effect/!SwordEff.OZJ',
+  /** BITMAP_DAMAGE1 (Damage1.jpg, 64 px, ZzzOpenData.cpp:4650): Chain Drive's sparks and its spin waves' sheet. */
+  damage1: 'Effect/Damage1.OZJ',
   swordEff2: 'Effect/SwordEffor2.OZJ',
   /** BITMAP_SWORD_EFFECT_MONO (Swordeff_mono.jpg): Strike of Destruction's flash at the caster. */
   swordEffMono: 'Effect/Swordeff_mono.OZJ',

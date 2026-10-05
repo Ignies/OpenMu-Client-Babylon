@@ -207,10 +207,16 @@ describe('Chain Drive (262): BITMAP_SWORDEFF reads the caster\'s GIANTSWING key 
   const SWING = PlayerAction.PLAYER_SKILL_GIANTSWING;
   const ATT = 'Sound/Ragefighter/Rage_Giantswing_Att';
 
+  /** The ticks a one-tick sprite of `texture` was drawn on, and how many were drawn on each. */
+  const drawTicks = (r: Run, texture: string): [number, number][] => {
+    const n = new Map<number, number>();
+    for (const d of r.draws) if (d.kind === 'sprite' && d.args[0] === texture) n.set(d.tick, (n.get(d.tick) ?? 0) + 1);
+    return [...n.entries()];
+  };
+
   it('two blows with Rage_Giantswing_Att: past key 6 (tick 16) and past key 11 (tick 28)', () => {
     for (const skill of [262, 558]) {
       const r = run(skill, SWING);
-      expect(spriteTicks(r, TEX.thunder)).toEqual([16, 28]);
       expect(soundTicks(r, ATT)).toEqual([16, 28]);
       // The giant-swing wave goes out with the first blow.
       expect(r.spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.shockwave).map(s => s.tick)).toEqual([16]);
@@ -219,8 +225,47 @@ describe('Chain Drive (262): BITMAP_SWORDEFF reads the caster\'s GIANTSWING key 
 
   it('drops a blow whose key the clip never reaches', () => {
     const r = run(262, SWING, { leaveAt: 20 });
-    expect(spriteTicks(r, TEX.thunder)).toEqual([16]);
     expect(soundTicks(r, ATT)).toEqual([16]);
+    expect(drawTicks(r, TEX.ring)).toEqual([]);
+  });
+
+  it('the first blow\'s BITMAP_DAMAGE1 throws a particle on its moves 5, 9, 13 and 17, each drawn 4 ticks growing x1.2 (MoveHandlers.cpp:9456-9475)', () => {
+    const random = vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    const r = run(262, SWING);
+    random.mockRestore();
+    const sparks = r.draws.filter(d => d.kind === 'sprite' && d.args[0] === TEX.damage1);
+    expect(drawTicks(r, TEX.damage1)).toEqual(range(21, 36).map(t => [t, 1]));
+    // Scale (1.5 + 0.02) x 1.4 with rand() % n at n / 2, 64 px, x1.2 a move; Light (0.6, 0.94, 1) x 1.6 a move, clamped.
+    expect(sparks.slice(0, 4).map(d => Math.round((d.args[5] as number) * 1e4) / 1e4)).toEqual([1, 2, 3, 4].map(m => Math.round(0.64 * 1.52 * 1.4 * 1.2 ** m * 1e4) / 1e4));
+    expect(sparks[0].args[1]).toEqual([0.96, 1, 1]);
+    expect(sparks[1].args[1]).toEqual([1, 1, 1]);
+    // -40 + 45 cm across, 50 + 50 cm over the target's feet.
+    expect(sparks[0].args.slice(2, 5).map(v => Math.round((v as number) * 100) / 100)).toEqual([103.05, 1, 104.05]);
+    // None without a target.
+    expect(drawTicks(run(262, SWING, { target: false }), TEX.damage1)).toEqual([]);
+  });
+
+  it('the second blow\'s BITMAP_SHINY+4 throws a ring particle a move for 16 moves, each drawn 7 ticks (ZzzEffect.cpp:8497-8504)', () => {
+    const r = run(262, SWING);
+    // Rings born on ticks 29-44, each on its moves 1-7.
+    expect(drawTicks(r, TEX.ring)).toEqual(range(29, 50).map(t => [t, Math.min(t, 44) - Math.max(29, t - 6) + 1]));
+    const first = r.draws.filter(d => d.kind === 'sprite' && d.args[0] === TEX.ring).slice(0, 2);
+    // 64 px x 1.9 x 1.1 a move, Light x0.9 a move.
+    expect(first.map(d => [d.args[5], d.args[8]])).toEqual([[expect.closeTo(0.64 * 1.9 * 1.1), expect.closeTo(0.9)], [expect.closeTo(0.64 * 1.9 * 1.1 ** 2), expect.closeTo(0.81)]]);
+  });
+
+  it('BITMAP_SWORDEFF makes a joint on bone 5 each tick it lives, flat, 100 cm wide, each drawn 10 moves (MoveHandlers.cpp:9322-9324, ZzzEffectJoint.cpp:2720-2729)', () => {
+    const pushes = (r: Run) => r.draws.filter(d => d.kind === 'push' && (d.args[0] as { texture: string }).texture === TEX.swordEffJoint);
+    const all = pushes(run(262, SWING));
+    // Its LifeTime: 200, 45 at the first blow, 20 at the second (tick 28), so joints on ticks 1-47, each laying 10 tails.
+    expect(all).toHaveLength(47 * 10);
+    expect([1, 10, 47, 56, 57].map(t => all.filter(d => d.tick === t).length)).toEqual([1, 10, 10, 1, 0]);
+    const [opts, light, x, y, z, half, yaw, pitch] = all[0].args as [{ colour: number[]; maxTails: number; faces: string }, number, number, number, number, number, number, number];
+    expect([opts.colour, opts.maxTails, opts.faces, light, half, yaw, pitch]).toEqual([[0.6, 0.6, 1], 50, 'flat', 1, 0.5, 0.5, 0]);
+    // Bone 5; no skeleton here, so the feet + 90 cm.
+    expect([x, y, z]).toEqual([100, 0.9, 100]);
+    // It ends with the clip: joints on ticks 1-19 when the caster leaves it on tick 20.
+    expect(pushes(run(262, SWING, { leaveAt: 20 }))).toHaveLength(19 * 10);
   });
 
   /** [tick, drawn ticks, Scale at the spawn and 3 moves on] of each `model` spawn. */
