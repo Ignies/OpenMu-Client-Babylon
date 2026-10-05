@@ -42,4 +42,6 @@ Dark Lord skills, one folder per skill. Rules for skill folders: [../readme.md](
 - see [docs/how_to/add_skill.md](../../../../docs/how_to/add_skill.md).
 
 ## Tests
+- `hand_cards.test.ts`: the MODEL_DARKLORD_SKILL cards of the hand skills, on Weapon[0]'s bone 33 and Weapon[1]'s bone 42
+  (the appearance's left and right hand), with their skips.
 - Covered by the golden tests in `../` (`skillVisuals.golden.test.ts`, `skillTables.golden.test.ts`).

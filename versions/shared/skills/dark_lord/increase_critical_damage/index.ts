@@ -35,16 +35,16 @@ interface CritHand {
 }
 
 /**
- * Weapon[0] (right, link bone 33) and Weapon[1] (left, 42) with Add Critical's skips: no card at a
- * right hand holding arrows, or a left hand holding bolts or a shield (ZzzCharacter.cpp:4370-4381).
- * `held`: the buff pulse also skips an empty hand (:10039, :10052).
+ * Weapon[0] (equipment slot 0, the appearance's left hand, on link bone 33) and Weapon[1] (slot 1, its right hand, on 42)
+ * with Add Critical's skips: no card at Weapon[0] holding arrows, or Weapon[1] holding bolts or a shield
+ * (ZzzCharacter.cpp:4370-4381, :12180-12193). `held`: the buff pulse also skips an empty hand (:10039, :10052).
  */
 function critHands(e: Entity, held: boolean): CritHand[] {
-  const right = weaponsOf(e)?.rightHand ?? null;
-  const left = weaponsOf(e)?.leftHand ?? null;
+  const first = weaponsOf(e)?.leftHand ?? null;
+  const second = weaponsOf(e)?.rightHand ?? null;
   const out: CritHand[] = [];
-  if ((!held || right) && !(right?.group === GROUP_BOW && right.num === ARROWS)) out.push({ bone: RIGHT_HAND_BONE, sub: 0, bow: right?.group === GROUP_BOW });
-  if ((!held || left) && !(left?.group === GROUP_BOW && left.num === BOLT) && left?.group !== GROUP_SHIELD) out.push({ bone: LEFT_HAND_BONE, sub: 1, bow: left?.group === GROUP_BOW });
+  if ((!held || first) && !(first?.group === GROUP_BOW && first.num === ARROWS)) out.push({ bone: RIGHT_HAND_BONE, sub: 0, bow: first?.group === GROUP_BOW });
+  if ((!held || second) && !(second?.group === GROUP_BOW && second.num === BOLT) && second?.group !== GROUP_SHIELD) out.push({ bone: LEFT_HAND_BONE, sub: 1, bow: second?.group === GROUP_BOW });
   return out;
 }
 
