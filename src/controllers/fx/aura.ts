@@ -21,6 +21,7 @@ import {
 import { MODEL, TEX } from './recipes';
 import { spawnJoint } from './joint';
 import { modelLayer, type ModelHandle } from './model';
+import { spawnRing } from './ring';
 import type { EffectHandle, EffectLayer } from './layer';
 
 // ---- 1. tuning -------------------------------------------------------------
@@ -350,6 +351,20 @@ export interface BoneGlow {
   breathe: (t: number, i: number) => number;
 }
 
+/**
+ * Decals under the wearer, redrawn where it stands each frame (`RenderTerrainAlphaBitmap`), `count` of them over each other,
+ * breathing: BITMAP_LIGHT_RED sub0's pair under an Increase Health body (ZzzEffect.cpp:9563-9583).
+ */
+export interface GroundGlow {
+  texture: string;
+  colour: RGB;
+  /** Diameter in tiles. */
+  size: number;
+  count: number;
+  /** Brightness at clock `t`. */
+  breathe: (t: number) => number;
+}
+
 /** Something fired on a timer (the crit flare, the Swell of Magic hand rune). */
 interface Pulse {
   every: number;
@@ -372,6 +387,7 @@ export interface AuraOptions {
   handShiny?: HandShiny;
   boneMotes?: BoneMotes;
   boneGlow?: BoneGlow;
+  groundGlow?: GroundGlow;
   pulse?: Pulse;
   /** Thorns: the rising pin lights. */
   pins?: { colour: RGB };
@@ -581,6 +597,21 @@ function boneGlow(scene: Scene, o: AuraOptions, p: BoneGlow): Part {
     release() {
       for (const c of cards) releaseCard(scene, c);
       cards = [];
+    },
+  };
+}
+
+/** The decals of `g`, each a ring that follows the wearer until the aura starts to stop. */
+function groundGlow(scene: Scene, o: AuraOptions, g: GroundGlow, isStopping: () => boolean): Part {
+  const rings: EffectHandle[] = [];
+  const brightness = (): number => g.breathe(fxNow());
+  for (let i = 0; i < g.count; i++) {
+    rings.push(spawnRing(scene, o.follow(new Vector3()), { texture: g.texture, colour: g.colour, scale: g.size, seconds: Infinity, follow: o.follow, until: isStopping, brightness, fadeTail: 0 }));
+  }
+  return {
+    update() {},
+    release() {
+      for (const r of rings) r.stop();
     },
   };
 }
@@ -1036,6 +1067,7 @@ function spawn(scene: Scene, _at: Vector3, opts: AuraOptions): EffectHandle {
   if (opts.handShiny) parts.push(handShiny(scene, opts, opts.handShiny));
   if (opts.boneMotes) parts.push(boneMotes(scene, opts, opts.boneMotes));
   if (opts.boneGlow) parts.push(boneGlow(scene, opts, opts.boneGlow));
+  if (opts.groundGlow) parts.push(groundGlow(scene, opts, opts.groundGlow, isStopping));
   if (opts.pulse) parts.push(pulse(opts.pulse));
   if (opts.pins) parts.push(pins(scene, opts, opts.pins.colour));
   if (opts.boneSparks) parts.push(boneSparks(scene, opts, opts.boneSparks));

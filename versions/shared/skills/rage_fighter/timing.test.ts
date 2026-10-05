@@ -8,7 +8,7 @@ import type { TailStrip, TickedFx } from '@/controllers/fx/ticked';
 import { ENUM_WORLD } from '@/core/types';
 import type { Entity } from '@/ecs/world';
 import { PlayerAction } from '../../objects/enum';
-import { playAreaSkillVisual, playTargetedSkillVisual } from '../skillVisuals';
+import { clearBuffVisuals, playAreaSkillVisual, playTargetedSkillVisual, setBuffVisual } from '../skillVisuals';
 import { skillSound } from '@/controllers/sound/combat';
 import { JOINT_SPARKS } from '../_shared';
 import { beginDarkSide, darkSideHitTicks, isDarkSide, nextDarkSideHit, observeDarkSideEcho, observeDarkSideTargets, rageLayer } from './dark_side/rage';
@@ -825,5 +825,128 @@ describe('Dark Side (263)', () => {
 
   it('a later echo does not restart the count', () => {
     expect(followUps([0, 10])).toEqual([8, 15, 22]);
+  });
+});
+
+describe('The Ourforces buff looks: BITMAP_LIGHT_RED on the buffed body, by sub (WSclient.cpp:15662-15679, MoveHandlers.cpp:9613-9672, ZzzEffect.cpp:9563-9640)', () => {
+  /**
+   * The aura options a buff look gives, and what it spawns and draws over `ticks` ticks on a body that keeps `effect` and `others`;
+   * `onTick` may change the body's buffs before each tick.
+   */
+  function look(effect: number, ticks = 40, others: number[] = [], onTick?: (tick: number, buffs: Set<number>, body: Entity) => void): { aura: Record<string, unknown>; spawns: Spawn[]; draws: Draw[] } {
+    const buffs = new Set([effect, ...others]);
+    const body = { netId: 3, transform: { pos: new Vector3(100, 0, 100), rot: new Vector3(0, 0.5, 0), scale: 1 }, buffs } as unknown as Entity;
+    effects.reset();
+    let tick = 0;
+    const spawns: Spawn[] = [];
+    const draws: Draw[] = [];
+    const real = effects.spawn.bind(effects);
+    const spy = vi.spyOn(effects, 'spawn').mockImplementation(((name: never, s: Scene, at: Vector3, opts: never) => {
+      spawns.push({ tick, name, at: at.clone(), opts: (opts ?? {}) as Record<string, unknown> });
+      if (name !== 'ticked') return real(name, s, at, opts);
+      const script = opts as unknown as { tick: (fx: TickedFx, n: number) => boolean };
+      return real(name, s, at, {
+        tick: (fx: TickedFx, n: number) =>
+          script.tick({ ...fx, scene: fx.scene, strip: o => fx.strip(o), drop: st => fx.drop(st), ribbon: o => fx.ribbon(o), decal: (...a) => fx.decal(...a), sprite: (...a) => (draws.push({ tick, kind: 'sprite', args: a }), fx.sprite(...a)) }, n),
+      } as never);
+    }) as never);
+    setBuffVisual(scene, body, effect, true);
+    for (tick = 1; tick <= ticks; tick++) {
+      onTick?.(tick, buffs, body);
+      effects.update(ENUM_WORLD.WD_0LORENCIA, 1 / 25);
+    }
+    spy.mockRestore();
+    clearBuffVisuals(body);
+    const aura = spawns.find(s => s.name === 'aura')?.opts ?? {};
+    return { aura, spawns, draws };
+  }
+
+  it('Increase Health (130, 155): sub0, the 17-bone glow and two flare01_red decals 3.5 across under the body, breathing 0.2-0.7 (ZzzEffect.cpp:9563-9583)', () => {
+    for (const effect of [130, 155]) {
+      const { aura } = look(effect, 1);
+      const ground = aura.groundGlow as { texture: string; size: number; count: number; breathe: (t: number) => number };
+      expect(aura.boneGlow).toBeDefined();
+      expect([ground.texture, ground.size, ground.count]).toEqual([TEX.flareRed, 3.5, 2]);
+      const levels = range(0, 100).map(i => ground.breathe(i * 0.5));
+      expect([Math.min(...levels), Math.max(...levels)]).toEqual([expect.closeTo(0.2, 2), expect.closeTo(0.7, 2)]);
+    }
+  });
+
+  it('Ignore Defense (129): sub1, no glow; each tick a red SMOKELINE1 sub5 from bone 26 or 35, drawn 30 ticks (MoveHandlers.cpp:9659-9672, ZzzEffectParticle.cpp:1767-1786, :5963-5990)', () => {
+    for (const effect of [129]) {
+      const { aura, draws } = look(effect);
+      expect(aura.boneGlow).toBeUndefined();
+      const smokes = draws.filter(d => d.args[0] === TEX.smokeLine1);
+      // One a tick from tick 1, each on its moves 1-30: its Alpha is 0.7 until LifeTime 10, then 0.1 less a move.
+      expect([1, 2, 30, 31, 40].map(t => smokes.filter(d => d.tick === t).length)).toEqual([1, 2, 30, 30, 30]);
+      expect(smokes[0].args[1]).toEqual([1, 0.12, 0]);
+      // No skeleton here: bone 26 is the feet + 90 cm.
+      expect(smokes[0].args[3]).toBeGreaterThan(0.9);
+    }
+  });
+
+  it('each BITMAP_LIGHT_RED on an Ignore Defense body makes a smoke: one for each Ourforces buff it holds (MoveHandlers.cpp:9659-9672)', () => {
+    const made = (others: number[]): number[] => {
+      const smokes = look(129, 3, others).draws.filter(d => d.args[0] === TEX.smokeLine1);
+      return [1, 2, 3].map(t => smokes.filter(d => d.tick === t).length);
+    };
+    expect(made([130])).toEqual([2, 4, 6]);
+    expect(made([155, 131])).toEqual([3, 6, 9]);
+    // A master buff counts as its base, not on its own.
+    expect(made([130, 155])).toEqual([2, 4, 6]);
+  });
+
+  it('none while the body is cloaked, and again once it is not (MoveHandlers.cpp:9657-9658)', () => {
+    const cloak = (tick: number, buffs: Set<number>): void => void (tick === 3 ? buffs.add(18) : tick === 40 ? buffs.delete(18) : undefined);
+    const smokes = look(129, 42, [], cloak).draws.filter(d => d.args[0] === TEX.smokeLine1);
+    // The two made on ticks 1 and 2 are drawn to ticks 30 and 31; none more until tick 40.
+    expect([2, 30, 31, 32, 39, 40, 41].map(t => smokes.filter(d => d.tick === t).length)).toEqual([2, 2, 1, 0, 0, 1, 2]);
+  });
+
+  it('Increase Block (131, 153, 154): sub2, no glow; one tick in 70 a MODEL_WINDFOCE_MIRROR while none is up (MoveHandlers.cpp:9624-9636, :9675-9692)', () => {
+    // rand() % 70 == 7 every tick: one mirror, then none while it lives.
+    const random = vi.spyOn(Math, 'random').mockReturnValue(7.5 / 70);
+    const { aura, spawns } = look(131);
+    random.mockRestore();
+    expect(aura.boneGlow).toBeUndefined();
+    const mirrors = spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.windForceMirror);
+    expect(mirrors.map(s => s.tick)).toEqual([1]);
+    const { seconds, colour, spin, scaleAt, blendLight } = mirrors[0].opts as { seconds: number; colour: number[]; spin: number; scaleAt: (t: number) => number; blendLight: (t: number) => number };
+    // LifeTime 50; Light (0.6, 0.6, 1) x 6, keeping 0.9 a tick; Scale x1.015 a tick to 1.5; turning WorldTime x 0.4 degrees.
+    expect([Math.round(seconds * 25), colour, scaleAt(2 / 25), scaleAt(40 / 25), blendLight(2 / 25)]).toEqual([50, [0.6, 0.6, 1], expect.closeTo(1.015 ** 2), 1.5, expect.closeTo(6 * 0.81)]);
+    expect(spin).toBeCloseTo((-400 * Math.PI) / 180);
+    for (const effect of [153, 154]) expect(look(effect, 1).aura.pulse).toBeDefined();
+  });
+
+  it('each BITMAP_LIGHT_RED on an Increase Block body rolls for the mirror (MoveHandlers.cpp:9617-9636)', () => {
+    // Only the third roll comes up 7: tick 1 with three of them, tick 3 with one.
+    const mirrorTick = (others: number[]): number[] => {
+      let n = 0;
+      const random = vi.spyOn(Math, 'random').mockImplementation(() => (++n === 3 ? 7.5 / 70 : 0));
+      const { spawns } = look(131, 5, others);
+      random.mockRestore();
+      return spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.windForceMirror).map(s => s.tick);
+    };
+    expect(mirrorTick([129, 130])).toEqual([1]);
+    expect(mirrorTick([])).toEqual([3]);
+  });
+
+  it('the mirror goes with Increase Block, or with the body (MoveHandlers.cpp:9682-9688)', () => {
+    const random = vi.spyOn(Math, 'random').mockReturnValue(7.5 / 70);
+    let held = new Set<number>();
+    let body: { objOutOfScope?: boolean } = {};
+    const { spawns } = look(131, 2, [130], (_t, buffs, e) => {
+      held = buffs;
+      body = e as { objOutOfScope?: boolean };
+    });
+    random.mockRestore();
+    const until = spawns.find(s => s.name === 'model' && s.opts.model === MODEL.windForceMirror)?.opts.until as () => boolean;
+    expect(until()).toBe(false);
+    // Increase Health keeps its BITMAP_LIGHT_RED, not the mirror.
+    held.delete(131);
+    expect(until()).toBe(true);
+    held.add(131);
+    body.objOutOfScope = true;
+    expect(until()).toBe(true);
   });
 });

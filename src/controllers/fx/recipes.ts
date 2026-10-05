@@ -134,6 +134,8 @@ export const TEX = {
   fireHik3: 'Effect/firehik03.OZJ',
   /** BITMAP_KWAVE2 (Kwave2.jpg, ZzzOpenData.cpp:4652): the sheet Dragon Roar's ground wave draws. */
   kwave2: 'Effect/Kwave2.OZJ',
+  /** BITMAP_SMOKELINE1 (smokelines01.jpg, 64 px, ZzzOpenData.cpp:5241): Ignore Defense's red smoke. */
+  smokeLine1: 'Effect/smokelines01.OZJ',
   swordEff2: 'Effect/SwordEffor2.OZJ',
   /** BITMAP_SWORD_EFFECT_MONO (Swordeff_mono.jpg): Strike of Destruction's flash at the caster. */
   swordEffMono: 'Effect/Swordeff_mono.OZJ',
@@ -356,6 +358,8 @@ export const MODEL = {
   shockwaveSpin: 'Effect/shockwave_spin01.glb',
   windSpin: 'Effect/wind_spin02.glb',
   windForce: 'Effect/wind_foce.glb',
+  /** MODEL_WINDFOCE_MIRROR (ZzzOpenData.cpp:4634): Increase Block's passing pillar. */
+  windForceMirror: 'Effect/wind_foce_mirror.glb',
   bladeTornado: 'Effect/bladetonedo.glb',
   phoenixShot: 'Effect/phoenix_shot_effect.glb',
   superPower: 'Effect/superpower.glb',

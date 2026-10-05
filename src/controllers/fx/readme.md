@@ -90,7 +90,8 @@ shared pools, textures and particle recipes other folders reuse.
 - `clock.test.ts`: an n-tick delay fires on the n-th frame at 25 fps from any start, and on the first
   due frame at 60 fps.
 - `softEdge.test.ts`: `fadeSheetEdges` / `fadeSheetSides` fade sheet borders and only touch alpha.
-- `ring.test.ts`: a ring with `scaleAt` is drawn at that diameter each frame (a per-tick `o->Scale` curve).
+- `ring.test.ts`: a ring with `scaleAt` is drawn at that diameter each frame (a per-tick `o->Scale` curve); an aura's
+  `groundGlow` draws its decals where the wearer stands each frame until the aura stops.
 - `ticked.test.ts`: a strip with `maxSegment` parks a segment whose tail centres lie further apart.
 - `model.test.ts`: a model turned by `angle` (MU degrees) or by `yaw: -entityYaw` faces where its caster is
   drawn facing; `yaw` is the node's own turn, so `entityYaw` as it is mirrors it.
@@ -113,7 +114,8 @@ A `NoiseProceduralTexture` stands in for the per-tick random walk
 ### aura.ts
 Parts follow the wearer by `follow` (feet) and `bone` (MU bone index), step at 25 Hz where a rate
 is per tick, ramp in and out over `RAMP_SECONDS`, and end together on `stop()` or `until`.
-Examples: the five MODEL_SPEARSKILL ribbons of Greater Defense, Swell Life's shoulder motes.
+Examples: the five MODEL_SPEARSKILL ribbons of Greater Defense, Swell Life's shoulder motes. `groundGlow` keeps
+`ring` decals under the wearer, redrawn where it stands each frame (`RenderTerrainAlphaBitmap`), breathing on the clock.
 Spawned from `controllers/skills/visuals.ts` (`BUFF_VISUALS`, keyed by `eBuffState`).
 
 ### bandNotes.ts

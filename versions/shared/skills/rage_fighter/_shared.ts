@@ -1,10 +1,10 @@
-import { type BoneGlow } from '@/controllers/fx/aura';
+import { type BoneGlow, type GroundGlow } from '@/controllers/fx/aura';
 import { MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
 import { effects } from '@/controllers/fx';
-import { bonePos, entityGone, entityPos, entityYaw, fxNow, type RGB } from '@/controllers/fx/core';
+import { TICK, bonePos, entityGone, entityPos, entityYaw, followEntity, fxNow, type RGB } from '@/controllers/fx/core';
 import type { TickedFx } from '@/controllers/fx/ticked';
 import { Vector3, type Scene } from '@/controllers/render/babylon/exports';
-import { after, cm, seq, ticks, type SkillContext, type Step } from '@/controllers/skills/visuals';
+import { after, cm, seq, ticks, type BuffLook, type SkillContext, type Step } from '@/controllers/skills/visuals';
 import { PlayerAction } from '@versions/shared/objects/enum';
 import type { ClipPick } from '@/controllers/combat';
 import type { Sounds } from '@/controllers/sound';
@@ -153,6 +153,133 @@ const OURFORCES_SLOW = new Set([5, 12, 7, 8, 9, 14, 15, 16]);
 const ourforcesBreathe = (t: number, i: number): number =>
   i < 3 ? (Math.sin(t * 10) + 1) * 0.25 + 0.2 : OURFORCES_SLOW.has(i) ? (Math.sin(t * 5) + 1) * 0.25 + 0.5 : (Math.sin(t * 10) + 1) * 0.3 + 0.3;
 export const OURFORCES_GLOW: BoneGlow = { bones: OURFORCES_BONES, texture: TEX.flareRed, colour: RGBS.white, size: 0.96, breathe: ourforcesBreathe };
+/** With it, flare01_red 3.5 across under the body, drawn twice, (sin(WorldTime x 0.0005) + 1) x 0.25 + 0.2 bright (ZzzEffect.cpp:9563-9583). */
+export const OURFORCES_GROUND: GroundGlow = { texture: TEX.flareRed, colour: RGBS.white, size: 3.5, count: 2, breathe: t => (Math.sin(t * 0.5) + 1) * 0.25 + 0.2 };
+
+/** eBuff_Cloaking (_enum.h:3913). */
+const CLOAKING = 18;
+/** The Ourforces buffs, each with the master ones that count as it: Ignore Defense, Increase Health, Increase Block (magicEffects.ts). */
+const OURFORCES: readonly (readonly number[])[] = [[129], [130, 155], [131, 153, 154]];
+const BLOCK_UP = OURFORCES[2];
+
+function holds(e: Entity, ids: readonly number[]): boolean {
+  const buffs = e.buffs;
+  if (buffs) for (const id of ids) if (buffs.has(id)) return true;
+  return false;
+}
+
+/**
+ * The BITMAP_LIGHT_RED riding `e`, one for each Ourforces buff it holds (WSclient.cpp:15662-15678). Each one's move rolls for
+ * the mirror on an Increase Block body and makes a smoke on an Ignore Defense one (MoveHandlers.cpp:9617-9672), so they add up.
+ */
+function lightReds(e: Entity): number {
+  let n = 0;
+  for (const ids of OURFORCES) if (holds(e, ids)) n++;
+  return n;
+}
+
+/** A BITMAP_SMOKELINE1 sub5 an Ignore Defense body gives off: where it is from the feet (tiles), Scale, turn, rise (cm a tick), Alpha, LifeTime. */
+interface Smoke {
+  dx: number;
+  dy: number;
+  dz: number;
+  scale: number;
+  roll: number;
+  rise: number;
+  alpha: number;
+  life: number;
+}
+const SMOKE_LIGHT: RGB = [1, 0.12, 0];
+/** The Alpha steps in the original's floats: 0.7 less six 0.1 is under 0.1 there, so a smoke is drawn 30 ticks. */
+const TENTH = Math.fround(0.1);
+const SEVEN_TENTHS = Math.fround(0.7);
+const smokeBone = new Vector3();
+const smokeFeet = new Vector3();
+const spentSmokes: Smoke[] = [];
+
+/**
+ * BITMAP_LIGHT_RED sub1 on an Ignore Defense body (MoveHandlers.cpp:9659-9672): each tick a SMOKELINE1 sub5 from bone 26 or 35,
+ * red (1, 0.12, 0), riding the body: smokelines01 64 px x 0.005 x (0.96-1.91), growing 0.06-0.08 and climbing 1.2-2.7 cm a tick,
+ * its Alpha in by 0.2-0.6 a tick to 0.7 and out by 0.1 under its LifeTime 10 of 35 (ZzzEffectParticle.cpp:1767-1786, :5963-5990).
+ */
+export const ourforcesSmoke: BuffLook = (e, scene) => {
+  const smokes: Smoke[] = [];
+  let beat = fxNow();
+  // Moved after the aura that makes them (fx/layers.ts), so in the frame they are made; done once the aura stops beating.
+  eachMove(scene, entityPos(e, 0, new Vector3()), (_m, fx) => {
+    const feet = entityPos(e, 0, smokeFeet);
+    let n = 0;
+    for (const s of smokes) {
+      if (--s.life < 10) s.alpha = Math.fround(s.alpha - TENTH);
+      else if (s.alpha < SEVEN_TENTHS) s.alpha = Math.fround(s.alpha + Math.fround((randInt(5) + 2) * TENTH));
+      else s.alpha = SEVEN_TENTHS;
+      if (s.life <= 0 || s.alpha < TENTH) {
+        spentSmokes.push(s);
+        continue;
+      }
+      s.scale += (randInt(3) + 6) * 0.01;
+      s.dy += cm(s.rise);
+      const size = cm(64 * s.scale);
+      fx.sprite(TEX.smokeLine1, SMOKE_LIGHT, feet.x + s.dx, feet.y + s.dy, feet.z + s.dz, size, size, s.roll * DEG, Math.min(1, s.alpha));
+      smokes[n++] = s;
+    }
+    smokes.length = n;
+    return n > 0 || fxNow() - beat < 2 * TICK;
+  });
+  const smoke = (): void => {
+    beat = fxNow();
+    // None while cloaked (MoveHandlers.cpp:9657-9658).
+    if (entityGone(e) || e.buffs?.has(CLOAKING)) return;
+    const feet = entityPos(e, 0, smokeFeet);
+    for (let i = lightReds(e); i > 0; i--) {
+      const at = bonePos(e, randInt(2) ? 26 : 35, smokeBone);
+      const s = spentSmokes.pop() ?? { dx: 0, dy: 0, dz: 0, scale: 0, roll: 0, rise: 0, alpha: 0, life: 0 };
+      s.dx = at.x - feet.x;
+      s.dy = at.y - feet.y;
+      s.dz = at.z - feet.z;
+      s.scale = (randInt(96) + 96) * 0.01 * 0.005;
+      s.roll = randInt(360);
+      s.rise = (randInt(16) + 12) * 0.1;
+      s.alpha = 0;
+      s.life = 35;
+      smokes.push(s);
+    }
+  };
+  return { pulse: { every: TICK, fire: smoke } };
+};
+
+/**
+ * MODEL_WINDFOCE_MIRROR (wind_foce_mirror.bmd) riding the body, LifeTime 50, gone once the body loses Increase Block
+ * (ZzzEffect.cpp:6061-6066, MoveHandlers.cpp:9675-9692): it turns to WorldTime x 0.4 degrees, Scale x1.015 a tick to 1.5 and
+ * Light (0.6, 0.6, 1) x0.9 a tick, drawn x 6, clamped (ZzzObject.cpp:2511-2516).
+ */
+const windForceMirror = (scene: Scene, e: Entity): { alive: boolean } =>
+  effects.spawn('model', scene, entityPos(e, 0, new Vector3()), {
+    model: MODEL.windForceMirror,
+    seconds: ticks(50),
+    follow: followEntity(e, 0),
+    until: () => entityGone(e) || !holds(e, BLOCK_UP),
+    // Degrees a ms of WorldTime as radians a second; MU's yaw turns the other way.
+    spin: -0.4 * 1000 * DEG,
+    scaleAt: t => Math.min(1.5, 1.015 ** movesAt(t)),
+    colour: [0.6, 0.6, 1],
+    blendMesh: 0,
+    blendLight: t => 6 * 0.9 ** movesAt(t),
+    blendClamp: true,
+    fadeTail: 0,
+  });
+
+/**
+ * BITMAP_LIGHT_RED sub2 on an Increase Block body (MoveHandlers.cpp:9624-9636): one tick in 70 a mirror wind pillar while none
+ * is up, rolled by each BITMAP_LIGHT_RED the body carries.
+ */
+export const ourforcesMirror: BuffLook = (e, scene) => {
+  let mirror: { alive: boolean } | null = null;
+  const roll = (): void => {
+    for (let i = lightReds(e); i > 0; i--) if (randInt(70) === 7 && !mirror?.alive && !entityGone(e)) mirror = windForceMirror(scene, e);
+  };
+  return { pulse: { every: TICK, fire: roll } };
+};
 
 /** The ticks a wind pillar raises its sub 3: LifeTime 40 and 30 of 50, or 60 and 50 of 70 (MoveHandlers.cpp:9538, :9590). */
 const WIND_FORCE_THROWS = [11, 21];
