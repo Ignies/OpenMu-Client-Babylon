@@ -74,7 +74,7 @@ describe('Dark Side follow-up blows', () => {
     effects.reset();
     combat.beginDarkSide(263, 5);
     combat.observeDarkSideTargets(263, [6, 7]);
-    combat.observeDarkSideEcho(263);
+    combat.observeDarkSideEcho(263, hero);
     for (tick = 1; tick <= 40; tick++) {
       combat.update(ENUM_WORLD.WD_0LORENCIA, TICK);
       system.update?.(TICK);

@@ -327,14 +327,15 @@ describe('Dark Side (263)', () => {
 
   /** The ticks a follow-up goes out on, with the server's echo of the cast at the end of each tick in `echoes`. */
   function followUps(echoes: readonly number[], skill = 263): number[] {
+    const hero = { localPlayer: true } as Entity;
     beginDarkSide(skill, 5);
     observeDarkSideTargets(skill, [6, 7, 8]);
-    if (echoes.includes(0)) observeDarkSideEcho(skill);
+    if (echoes.includes(0)) observeDarkSideEcho(skill, hero);
     const sent: number[] = [];
     for (let t = 1; t <= 40; t++) {
       rageLayer.update?.(ENUM_WORLD.WD_0LORENCIA, 1 / 25);
       if (nextDarkSideHit() >= 0) sent.push(t);
-      if (echoes.includes(t)) observeDarkSideEcho(skill);
+      if (echoes.includes(t)) observeDarkSideEcho(skill, hero);
     }
     rageLayer.reset?.();
     return sent;

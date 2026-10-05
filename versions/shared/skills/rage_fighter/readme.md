@@ -36,8 +36,10 @@ when the targets arrive, the first blow `(int)(2.5 / PlaySpeed)` ticks after the
 speed; the echo sets `AttackTime = 1`, WSclient.cpp:13422-13429), the next ones a tick sooner. A
 follow-up sends nothing (`SendDarksideAtt`'s send is commented out, MonkSystem.cpp:610; OpenMU deals
 every hit from the 0x4B): the cast system draws the skill's `impact` on its target, the bursts and the
-dark wave, and the cast's `impact` is the first blow. Only the cast's echo starts the count. It also
-keeps the hit streak for the damage numbers.
+dark wave, and the cast's `impact` is the first blow. Only the cast's echo starts the count, and the
+cast is drawn once (RageCreateEffect's `m_bUseEffectOnce`, MonkSystem.cpp:1285-1288): a later echo,
+the hero's or another caster's while he still plays the clip (another client's follow-up), only turns
+its caster (`observeDarkSideEcho`). It also keeps the hit streak for the damage numbers.
 
 `_shared.ts` holds `OURFORCES_GLOW`: the red glow on 17 bones in three breathing groups, used by
 the buff looks of 266-268; and `windForce`, MODEL_WINDFOCE (Dark Side and 266-268): a wind pillar that stays where it rose,

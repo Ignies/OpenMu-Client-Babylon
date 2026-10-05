@@ -22,6 +22,7 @@
  * through the facade's `nextDarkSideHit`.
  */
 import type { ENUM_WORLD } from '@/core/types';
+import type { Entity } from '@/ecs/world';
 import type { CombatLayer } from '@/controllers/combat/layer';
 import { playCombat } from '@/controllers/sound';
 import { PlayerAction } from '../../../objects/enum';
@@ -95,13 +96,19 @@ export function beginDarkSide(skill: number, _targetId: number): void {
 }
 
 /**
- * Command: the server echoed the hero's own Dark Side (0x4A): `ReceiveStraightAttack` sets `AttackTime = 1`
- * (WSclient.cpp:13422-13429), so the follow-ups count from here. Only the cast's echo starts the count.
+ * Command: the server echoed a 0x4A of `caster`'s. True when it repeats a Dark Side cast already drawn, which
+ * RageCreateEffect draws once (MonkSystem.cpp:1285-1288): the hero's after the echo of his cast, which alone sets
+ * his `AttackTime = 1` and so starts the follow-ups (WSclient.cpp:13422-13429); another caster's while he still
+ * plays the Dark Side clip, which SetRageSkillAni leaves running (ZzzAI.cpp:425).
  */
-export function observeDarkSideEcho(skill: number): void {
-  if (!isDarkSide(skill) || darkSideSkill === 0 || counting) return;
+export function observeDarkSideEcho(skill: number, caster: Entity): boolean {
+  if (!isDarkSide(skill)) return false;
+  if (!caster.localPlayer) return caster.playerAnimation?.action === PlayerAction.PLAYER_SKILL_DARKSIDE_READY;
+  if (counting) return true;
+  if (darkSideSkill === 0) return false;
   counting = true;
   sinceHit = 0;
+  return false;
 }
 
 /** Command: the 0x4B response arrived with the targets the server picked; any target plays Rage_Darkside_Att (MonkSystem.cpp:551-558). */
