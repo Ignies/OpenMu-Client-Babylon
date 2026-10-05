@@ -84,6 +84,7 @@ Full guide: [docs/guidelines/tdd.md](docs/guidelines/tdd.md).
 
 ```
 bun install
+bun install --cwd install   # the installer's own packages; tsc checks install/ too
 bun run tsc          # type check
 bun run test         # vitest (client + tools)
 bun run test:server  # bun test for the marketplace service
