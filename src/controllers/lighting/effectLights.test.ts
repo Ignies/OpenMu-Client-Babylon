@@ -146,6 +146,17 @@ describe('flare cards', () => {
     expect([card.width, card.height]).toEqual([0.32 * 7 * 0.8, 0.32 * 7 * 0.8].map(v => expect.closeTo(v)));
   });
 
+  // Aida's torch turns `WorldTime / 10.0f` degrees (GMAida.cpp:310): a tenth of a degree a millisecond.
+  it('turn a spinning card counter-clockwise by its degrees a millisecond', async () => {
+    const { scene, step } = clockedScene();
+    await createEffectLight(scene, { scale: 3, color: [1, 1, 1], texture: 'flare', spin: 0.1 }, at, 1);
+    const card = lastSprite();
+    step(900);
+    expect(card.angle).toBeCloseTo(Math.PI / 2);
+    step(900);
+    expect(card.angle).toBeCloseTo(Math.PI);
+  });
+
   it.skipIf(!existsSync('Data/Effect'))('cut each sheet at the width of its file', async () => {
     const scene = {} as Scene;
     for (const texture of ['light', 'flare', 'spark1', 'shiny5', 'impact', 'magic1', 'lightning1'] as const) {

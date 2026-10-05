@@ -68,8 +68,15 @@ describe('the BITMAP_SHINY + 5 cards (shiny05.jpg)', () => {
 
 // BITMAP_FLARE is Flare.jpg, a warm star (ZzzOpenData.cpp:5309): the tint is the original's, not a warm stand-in.
 describe('the map flares the original draws as BITMAP_FLARE', () => {
-  it('Aida 75: white, 3 (GMAida.cpp:304-311)', () => {
-    expect(flareOf(ENUM_WORLD.WD_33AIDA, 75)?.sprite).toEqual({ scale: 3, color: [1, 1, 1], texture: 'flare' });
+  // `CreateSprite(BITMAP_FLARE, Position, 3.0f, Light, pObject, (WorldTime / 10.0f))` on bone 4, 201 up.
+  it('Aida 75: white, 3 across, on bone 4, turning a tenth of a degree a millisecond (GMAida.cpp:304-311)', () => {
+    expect(cardsOf(ENUM_WORLD.WD_33AIDA, 75)).toEqual([
+      {
+        offset: [0, -1, 201],
+        bone: true,
+        sprite: { scale: 3, color: [1, 1, 1], texture: 'flare', unscaled: true, spin: 0.1 },
+      },
+    ]);
   });
 
   it('Crywolf 41: white, 1.3, 350-370 up (GMCrywolf1st.cpp:395-414)', () => {

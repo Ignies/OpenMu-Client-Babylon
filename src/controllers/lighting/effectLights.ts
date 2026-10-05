@@ -66,6 +66,8 @@ export type FlareSpec = {
   readonly pulse?: Wave;
   /** Its size over time: `CreateSprite(..., Luminosity * 7.0f, ...)`. */
   readonly grow?: Wave;
+  /** Degrees a millisecond it turns, counter-clockwise: `CreateSprite`'s `Rotation` (ZzzOpenglUtil.cpp:899-908). */
+  readonly spin?: number;
   /** The sheet the original names; `BITMAP_LIGHT` when left out. */
   readonly texture?: FlareTexture;
   /** The original sizes it without `* o->Scale` (`CreateSprite(..., 5.5f, ...)`): the object's scale does not apply. */
@@ -270,9 +272,9 @@ export async function createEffectLight(
   let observer: ReturnType<Scene['onBeforeRenderObservable']['add']> | null =
     null;
 
-  const { pulse, grow } = spec;
+  const { pulse, grow, spin } = spec;
 
-  if (pulse || grow) {
+  if (pulse || grow || spin) {
     let elapsed = 0;
 
     observer = scene.onBeforeRenderObservable.add(() => {
@@ -280,6 +282,7 @@ export async function createEffectLight(
 
       if (pulse) paint.setLuminosity(wave(pulse, elapsed));
       if (grow) sprite.width = sprite.height = size * wave(grow, elapsed);
+      if (spin) sprite.angle = elapsed * spin * RADIANS_PER_DEGREE;
     });
   }
 

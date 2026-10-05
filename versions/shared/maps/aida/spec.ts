@@ -100,9 +100,10 @@ const RED: Vec3 = [0.25, 0, 0];
  *  - **71** (×28), :65-71: the same with `(L+0.9, L+0.2, L+0.2)` - the red
  *    crystals - and the same bulbs (:259-303): red `(0.5, 0, 0)` at 6 on the
  *    first, `(0.25, 0, 0)` at 5.5 / 5 on the rest, over `(0.15, 0, 0)` at 3.
- *  - **75** (×1), :304-311: a rotating `BITMAP_FLARE` (Flare.jpg's own warm
- *    star) at bone 4, white - the `fLumi` tint is overwritten by `(1, 1, 1)` -
- *    scale 3: the one torch. The turn (`WorldTime / 10` degrees) is not ported.
+ *  - **75** (×1), :304-311: a `BITMAP_FLARE` (Flare.jpg's own warm star) at
+ *    bone 4 (201 up at scale 1), white - the `fLumi` tint is overwritten by
+ *    `(1, 1, 1)` - 3 across with no `* o->Scale`, turning `WorldTime / 10`
+ *    degrees: the one torch.
  *
  * The plants stand at scale 0.56-2.84 (most 2-2.5): the bulbs grow with them,
  * the sparks keep their size. The `rand() % 5 * 0.01` jitter is ±0.05 - a
@@ -119,8 +120,9 @@ export const AIDA_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
   ],
   75: [
     {
-      offset: [0, 0, 120],
-      sprite: { scale: 3, color: [1, 1, 1], texture: 'flare' },
+      offset: [0, -1, 201],
+      bone: true,
+      sprite: { scale: 3, color: [1, 1, 1], texture: 'flare', unscaled: true, spin: 0.1 },
     },
   ],
 };
