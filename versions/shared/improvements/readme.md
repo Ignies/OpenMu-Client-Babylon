@@ -20,7 +20,7 @@ asks `isOn('<id>')`. Classic turns them all off and runs the original.
 | `wingShadows` | Enhanced | `controllers/actors/wingObject.ts` | wings cast no shadow (ZzzCharacter.cpp:8394-8425) |
 | `torchCrackle` | Enhanced | `controllers/sound/crackle.ts` | torches are silent (no `SOUND_FIRE`) |
 | `loginWallTorches` | Enhanced | `maps/loginscene/wallTorchObject.ts` | the login wall torch is its grey flare alone (GMEmpireGuardian4.cpp:864-875); Enhanced burns it with a warm one |
-| `fortressLights` | Enhanced | `maps/empireguardian4/spec.ts` | day-4 wall torches (a grey flare), chandeliers and braziers (79 and 80, also the login scene's; 79's flare steady) light no ground (no `AddTerrainLight` in cases 37, 79, 80, 157) |
+| `fortressLights` | Enhanced | `maps/empireguardian4/spec.ts` | day-4 wall torches (a grey flare), chandeliers and braziers (79 and 80, also the login scene's, 80 also days 2-3's; 79's flare steady) light no ground (no `AddTerrainLight` in cases 37, 79, 80, 157) |
 | `lampFlares` | Enhanced | the `spec.ts` rows of `maps/lorencia` (90, 150), `devias` (66), `elbeland` (61), `losttower` (23); `maps/devias/candleObject.ts` | those lamps, candles, hearths and braziers have no flare, only their light (ZzzObject.cpp:3781-3785, :3810-3814, :3874-3876, :3971-3975, :4658-4660; GMNewTown.cpp:135-140) |
 | `roofFade` | Enhanced | `ecs/systems/ceilingHideSystem.ts` | roofs stay drawn (the only object fade is Chaos Castle's) |
 

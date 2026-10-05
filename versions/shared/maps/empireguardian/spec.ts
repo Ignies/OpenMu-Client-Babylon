@@ -2,6 +2,7 @@ import type { Emission } from '@/controllers/fx/effectParticles';
 import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
 import type { MeshAnimations } from '@/controllers/render';
 import { perTick } from '../shared/meshAnimation';
+import { EMPIRE_GUARDIAN_4_LIGHTS } from '../empireguardian4/spec';
 
 /**
  * Fortress of Imperial Guardian, days 1-4 (`WD_69EMPIREGUARDIAN1 …
@@ -55,7 +56,12 @@ export const EMPIRE_GUARDIAN_EMISSIONS: Partial<
   ],
 };
 
-/** The 79 torch, as the login scene lights it. */
+/**
+ * The 79 torch, as the login scene lights it, and day 4's 80, the blue lamp:
+ * each day's case 80 is day 4's (GMEmpireGuardian1.cpp:1713-1721,
+ * 2.cpp:698-706, 3.cpp:887-895), placed once on day 2 and six times on day 3.
+ * 37, the wall torch, is a class (`create.ts`).
+ */
 export const EMPIRE_GUARDIAN_LIGHTS: Partial<
   Record<number, readonly LightEmitter[]>
 > = {
@@ -70,6 +76,7 @@ export const EMPIRE_GUARDIAN_LIGHTS: Partial<
       },
     },
   ],
+  80: EMPIRE_GUARDIAN_4_LIGHTS[80],
 };
 
 /** Fortress of Imperial Guardian (GMEmpireGuardian1.cpp:281-284 and copies): the rain sheet. */
