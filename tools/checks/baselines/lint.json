@@ -2,7 +2,7 @@
  "(parse error)": 3,
  "@typescript-eslint/ban-ts-comment": 8,
  "@typescript-eslint/no-explicit-any": 71,
- "@typescript-eslint/no-non-null-assertion": 411,
+ "@typescript-eslint/no-non-null-assertion": 410,
  "@typescript-eslint/no-this-alias": 2,
  "@typescript-eslint/no-unnecessary-type-constraint": 2,
  "@typescript-eslint/no-unused-expressions": 19,
