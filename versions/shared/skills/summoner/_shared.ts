@@ -191,9 +191,10 @@ export const aliceCurse = (k: AliceCurse, graded = false): Step => (_at, c) => {
   const blend = k.dark ? 'subtract' : 'add';
   const tint = k.dark ? k.models : graded ? aliceRingTint(bodyLight(at, k.models), k.models) : bodyLight(at, k.models);
   const dim = graded ? ALICE_FLARE_DIM : 1;
+  // From Angle 0, ALICE_BUFFSKILL_EFFECT turns +8 degrees a tick and EFFECT2 -8 (MoveHandlers.cpp:2241-2248); MU's yaw turns the other way.
   const bodies = [
-    { model: MODEL.elShieldRing, life: 28, scale: 0.1, spin: 1, peak: 0.7 },
-    { model: MODEL.elShieldRing2, life: 30, scale: 0.15, spin: -1, peak: 0.75 },
+    { model: MODEL.elShieldRing, life: 28, scale: 0.1, spin: -1, peak: 0.7 },
+    { model: MODEL.elShieldRing2, life: 30, scale: 0.15, spin: 1, peak: 0.75 },
   ];
   for (const b of bodies) {
     const seconds = ticks(b.life);

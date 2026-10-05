@@ -169,6 +169,12 @@ describe('effect models turned as the original turns them', () => {
     expectTurned(made.find(m => m.model === MODEL.suhwanzin22), [0, 0, 30 - 15], 5);
   });
 
+  it('the Alice rings turn 8 degrees a tick from 0, ALICE_BUFFSKILL_EFFECT up and EFFECT2 down (ZzzEffect.cpp:875-914, MoveHandlers.cpp:2241-2248)', () => {
+    const made = cast(218, 30);
+    expectTurned(made.find(m => m.model === MODEL.elShieldRing), [0, 0, 40], 5);
+    expectTurned(made.find(m => m.model === MODEL.elShieldRing2), [0, 0, -40], 5);
+  });
+
   it('Explosion\'s Sahamutt faces the point it runs to', () => {
     const made = cast(223, 30).find(m => m.model === MODEL.summonSahamutt);
     expectTurned(made, [0, 0, made ? angleTo(made.at.x, made.at.z, TARGET.x, TARGET.z) : 0]);
