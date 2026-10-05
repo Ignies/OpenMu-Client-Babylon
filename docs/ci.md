@@ -25,8 +25,8 @@ run locally:
 - **Controllers through their public files:** code outside `src/controllers/<name>/` imports the
   files at that controller's root or a folder's `index.ts`; the rest of a subfolder is private
   ([controllers.md](controllers.md#public-files)). Old exceptions: `baselines/controller_api.json`.
-- **No new import cycles:** the imports that close a cycle (type-only imports and tests aside) are
-  listed in `baselines/cycles.json`; a new one fails.
+- **No import cycles:** an import that closes a cycle (type-only imports and tests aside) fails;
+  `baselines/cycles.json` is empty.
 - **Servers stay off the client:** no server entry (proxy, register, cash shop, marketplace, ops)
   may load `src/version/index.ts`, `src/app/`, Babylon or React at run time.
 

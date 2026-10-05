@@ -94,6 +94,8 @@ answer click: m_iReturnForAnswer 1 -> ProcessNextProgress (re-check zen, then
 Pages are keyed `npc * 0x10000 + page`. An answer result up to 900 is the next page, otherwise a
 request (`ProcessSelTextResult`): 901 the NPC's quest list (`AvailableQuestsRequest`, drawn inside
 the dialogue as in `ProcessQuestListReceive`), 902 the NPC buff (then close), 903..907 Gens join /
-leave / reward. `questLog.ts` keeps the list data.
+leave / reward. `questLog.ts` keeps the list data. It also asks whether this dialogue is up, through
+a reader `installNpcDialogue` hands it (`setDialogueOpenReader`): this file imports `questLog.ts`,
+so `questLog.ts` cannot import it back.
 ### questLog.ts
 A quest key is `(group << 16) | number` (`dwQuestIndex`), also the key of `QuestProgress.bmd`.

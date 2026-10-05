@@ -1,4 +1,1 @@
-[
- "src/modules/quests/npcDialogue.ts -> src/modules/quests/questLog.ts",
- "src/modules/quests/questLog.ts -> src/modules/quests/npcDialogue.ts"
-]
+[]

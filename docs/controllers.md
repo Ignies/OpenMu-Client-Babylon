@@ -65,6 +65,6 @@ to it, chosen by a game version or an option:
 - A controller imports `src/core`, other controllers and data tables. Never a module, the app,
   or content (`bun run check` enforces it; old exceptions are listed in
   `tools/checks/baselines/deps.json` and may only shrink).
-- No import cycles (`bun run check`; the old ones are in `tools/checks/baselines/cycles.json`).
+- No import cycles (`bun run check`; there are none, and `tools/checks/baselines/cycles.json` is empty).
 - Per-frame code allocates nothing and walks no scene graph.
 - Each controller folder has a `readme.md`.

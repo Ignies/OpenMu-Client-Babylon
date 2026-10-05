@@ -41,7 +41,6 @@ import { addNotification } from '../chat';
 import { Ecs } from '../../ecs/current';
 import type { QuestLayer } from './layer';
 import { questDataReady, questProgressEntry, questProgressKeys, questWordLines, questWords } from './questData';
-import { npcDialogueOpen } from './npcDialogue';
 import { objectiveDone, objectiveText, type QuestObjective } from './objectives';
 import { devQueryNumber } from '../../core/devSeams';
 
@@ -67,6 +66,13 @@ const MSG_NO_QUESTS: TextKey = 'quest.noneInProgress';
 /** `RewardTypeEnum.Random`: the "one of these" reward group. */
 
 // ---- 2. state + readers ----------------------------------------------------
+
+/** Whether the S6 NPC dialogue is up. npcDialogue.ts hands its reader in: it imports this file. */
+let dialogueOpen: () => boolean = () => false;
+
+export function setDialogueOpenReader(read: () => boolean): void {
+  dialogueOpen = read;
+}
 
 /** `(group << 16) | number`, the original's `dwQuestIndex` (WSclient.cpp:10577), unsigned like the file's keys. */
 function questKey(number: number, group: number): number {
@@ -716,7 +722,7 @@ export function installQuestLog(): void {
 
     // `ProcessQuestListReceive`: while the S6 dialogue is up the list is drawn
     // inside it (npcDialogue.ts); the stand-alone list window is the fallback.
-    const inDialogue = npcDialogueOpen();
+    const inDialogue = dialogueOpen();
 
     runInAction(() => {
       state.npcNumber = p.QuestNpcNumber;
