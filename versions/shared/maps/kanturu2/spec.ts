@@ -59,9 +59,28 @@ export const KANTURU2_EMISSIONS: Partial<Record<number, readonly Emission[]>> =
   };
 
 /**
+ * Kanturu 2 4 and Kanturu 3 5 are one model, `cho_cliff_04`, whose lamp hangs
+ * on bone 1 + (-1, 0, 0), 244 up. `fLumi = (sin(WorldTime * 0.002) + 2) * 0.5`
+ * tints it `(0.3, 0.5, 1)` and sizes it, with no `* o->Scale`.
+ */
+const RELIC_LAMP_LUMI = { speed: 0.002, amount: 0.5, base: 0.5 } as const;
+
+export const relicLamp = (scale: number): LightEmitter => ({
+  offset: [0, 13, 244],
+  bone: true,
+  sprite: {
+    scale,
+    color: [0.3, 0.5, 1],
+    pulse: RELIC_LAMP_LUMI,
+    grow: RELIC_LAMP_LUMI,
+    unscaled: true,
+  },
+});
+
+/**
  * `Render_Kanturu2nd_ObjectVisual`:
  *  - **4** (×21), :335-346: `BITMAP_LIGHT` + two `KANTURU_2ND_EFFECT1`
- *    sprites at bone 1, sized `fLumi / 3.2` - the relic lamps.
+ *    sprites at bone 1, sized `fLumi / 3.2` - the relic lamps (`relicLamp`).
  *  - **8** (×18), :347-371: a `BITMAP_SPARK + 1` (Spark03.jpg) sprite at
  *    bone 4, 10 across with no `* o->Scale`, white `fLumi = (sin(WorldTime *
  *    0.001) + 1) * 0.5` - the power conduits; its `BITMAP_ENERGY` particles
@@ -72,15 +91,7 @@ export const KANTURU2_EMISSIONS: Partial<Record<number, readonly Emission[]>> =
  */
 export const KANTURU2_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
   {
-    4: [
-      {
-        sprite: {
-          scale: 1.4,
-          color: [0.6, 0.8, 1],
-          pulse: { speed: 1.5, amount: 0.3, base: 0.8 },
-        },
-      },
-    ],
+    4: [relicLamp(1 / 3.2)],
     8: [
       {
         offset: [0, 0, 94],

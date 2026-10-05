@@ -32,4 +32,16 @@ describe('the map flare waves', () => {
       for (const type of [12, 32]) expect(cardsOf(world, type), `world ${world} type ${type}`).toEqual([glow]);
     }
   });
+
+  // `fLumi = (sinf(WorldTime * 0.002f) + 2.0f) * 0.5f` tints `(0.3, 0.5, 1)` and sizes the card, on bone 1 + (-1, 0, 0).
+  it('Kanturu 2 4 and Kanturu 3 5: the lamps breathe and grow with fLumi on bone 1 (GM_Kanturu_2nd.cpp:335-346, GM_Kanturu_3rd.cpp:262-272)', () => {
+    const fLumi = { speed: 0.002, amount: 0.5, base: 0.5 };
+    const lamp = (scale: number) => ({
+      offset: [0, 13, 244],
+      bone: true,
+      sprite: { scale, color: [0.3, 0.5, 1], pulse: fLumi, grow: fLumi, unscaled: true },
+    });
+    expect(cardsOf(ENUM_WORLD.WD_38KANTURU_2ND, 4)).toEqual([lamp(1 / 3.2)]);
+    expect(cardsOf(ENUM_WORLD.WD_39KANTURU_3RD, 5)).toEqual([lamp(1 / 2.4)]);
+  });
 });
