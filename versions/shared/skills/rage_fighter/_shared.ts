@@ -16,6 +16,15 @@ export const movesAt = (t: number): number => Math.floor(t / TICK + 1e-6);
 export const movesSince = (t0: number): number => movesAt(fxNow() - t0);
 
 /**
+ * `Models[MODEL_PLAYER].Actions[action].PlaySpeed`, 0.4 at attack speed 0 (SetAttackSpeed, ZzzCharacter.cpp:1018-1023): the
+ * caster's while it plays the clip.
+ */
+export function clipSpeed(c: SkillContext, action: PlayerAction): number {
+  const m = c.caster.modelObject;
+  return m?.CurrentAction === action && m.AnimationSpeed > 0 ? m.AnimationSpeed : 0.4;
+}
+
+/**
  * `move(m, fx)` once for each move m = 1, 2 .. of an effect made now, counted on the effects clock (a ticked script's own count
  * runs a tick early when it is made inside the clock's step); it ends when `move` returns false.
  */

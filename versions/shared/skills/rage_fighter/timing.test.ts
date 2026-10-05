@@ -294,6 +294,45 @@ describe('Killing Blow (260): BITMAP_SBUMB on its LifeTime (MoveHandlers.cpp:919
     expect(spriteTicks(r, 'Effect/sbumb.OZJ')).toEqual([]);
     expect(soundTicks(r, ATT)).toEqual([]);
   });
+
+  it('MODEL_WOLF_HEAD_EFFECT on bone 27, lit by the ground under it: while its LifeTime is 3 or more it throws a sub1, a sub2 and three BITMAP_PIN_LIGHT joints a move (MoveHandlers.cpp:9137-9182)', () => {
+    // rand() % n is n / 2: yaw and pitch shaken by +8, sub1 Scale 1.4 for 3 ticks, sub2 0.9 for 4, pins at 45 cm a tick for 2.
+    const random = vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    try {
+      for (const skill of [260, 551, 554]) {
+        const r = run(skill, THRUST);
+        const heads = r.spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.wolfHead);
+        const at = (t: number) => heads.filter(s => s.tick === t);
+        // LifeTime 10 / 0.4 = 25: it throws on its moves 1-23 and dies on move 25.
+        expect([0, ...range(1, 25)].map(t => at(t).length)).toEqual([1, ...range(1, 23).map(() => 2), 0, 0]);
+        const head = at(0)[0];
+        // Turned to the target (MonkSystem.cpp:1097-1099); the terrain light under it is its BodyLight (white with no map).
+        const toTarget = (Math.atan2(3, -4) * 180) / Math.PI;
+        expect([head.opts.scale, head.end, head.opts.colour]).toEqual([1, 25, [1, 1, 1]]);
+        expect((head.opts.angle as number[])[2]).toBeCloseTo(toTarget);
+        // Scale 1.5 from its first move: by the end of the run it has moved.
+        expect((head.opts.scaleAt as (t: number) => number)(0)).toBe(1.5);
+        const [one, two] = at(1).map(s => [s.opts.scale, Math.round((s.opts.seconds as number) * 25), (s.opts.angle as number[])[0], (s.opts.angle as number[])[2]]);
+        expect(one).toEqual([expect.closeTo(1.4), 3, 8, expect.closeTo(toTarget + 8)]);
+        expect(two).toEqual([expect.closeTo(0.9), 4, 8, expect.closeTo(toTarget + 8)]);
+        // Each pin: a start tail and its first move's tail on the tick it is made, its second the tick after; 5 cm wide.
+        const pins = r.draws.filter(d => d.kind === 'push' && (d.args[0] as { texture: string }).texture === TEX.pinLights);
+        const born = pins.filter(d => d.args[1] === 1);
+        expect(range(1, 23).map(t => born.filter(d => d.tick === t).length)).toEqual(range(1, 23).map(() => 3));
+        expect(born.filter(d => d.tick > 23)).toEqual([]);
+        expect(pins).toHaveLength(23 * 3 * 3);
+        const [x0, y0, z0, half] = born[0].args.slice(2) as number[];
+        const [x1, y1, z1] = pins[1].args.slice(2) as number[];
+        expect(half).toBeCloseTo(0.025);
+        expect(Math.hypot(x1 - x0, y1 - y0, z1 - z0)).toBeCloseTo(0.45);
+        // Pitched down 8 degrees.
+        expect((y0 - y1) / 0.45).toBeCloseTo(Math.sin((8 * Math.PI) / 180));
+        expect(pins[1].args[1]).toBeCloseTo(0.9);
+      }
+    } finally {
+      random.mockRestore();
+    }
+  });
 });
 
 describe('Charge (269): AttackStage\'s AT_SKILL_OCCUPY case (ZzzCharacter.cpp:2934-2959, :4690-4695)', () => {

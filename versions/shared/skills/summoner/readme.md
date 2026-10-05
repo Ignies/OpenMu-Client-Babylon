@@ -34,7 +34,7 @@ Summoner skills, one folder per skill. Rules for skill folders: [../readme.md](.
 - book summons (Explosion, Requiem, Pollution): `SummonCast`, `summonCast`, `summonCastGrace`,
   `bookTier`, `SUMMON_CLIPS`, `SLEEP_CLIPS`;
 - carriers and lights: `Carrier`, `carrierSprites`, `carrierLight`, `sum1Light`, `levelLight`,
-  `curseLight`, `groundGlow`, `bodyLight`, `fenrirThunder`;
+  `curseLight`, `groundGlow`, `fenrirThunder` (`bodyLight` is in `../_shared.ts`);
 - helpers: `tickLoop`, `TickPoint`, `muTurn`, `humming`, `boneCount`, `atAttackTime`,
   `yawToward`, `swell`, `kickSparks`, `throwSmoke`, `magicParticle`, `risingEmbersFor`,
   `jitterCm`, `spawnCard`, the `PX_*` texture sizes and `SPRITE_TURN`.

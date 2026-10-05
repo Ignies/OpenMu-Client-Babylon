@@ -7,7 +7,7 @@ import { type ModelHandle } from '@/controllers/fx/model';
 import { TICK, boneLocalPos, delay, entityGone, entityPos, entityYaw, fxNow, type RGB } from '@/controllers/fx/core';
 import { playCombat } from '@/controllers/sound';
 import { deg, groundY, randInt, whenClipKey } from '../../_shared';
-import { eachMove, shake, throwHead, wolfHead } from '../_shared';
+import { clipSpeed, eachMove, shake, throwHead, wolfHead } from '../_shared';
 
 import { A } from '@/controllers/combat/recipes';
 
@@ -23,11 +23,8 @@ const SPIN_AT = new Vector3(cm(-80), cm(20), 0);
 /** The two spin waves: sub0's Scale and roll a tick, sub1's (Angle[1] -= 10, then += 20 for sub1). */
 const SPINS: readonly (readonly [number, number])[] = [[0.5, -10], [0.9, 10]];
 
-/** The caster's GIANTSWING PlaySpeed, 0.4 at attack speed 0 (SetAttackSpeed, ZzzCharacter.cpp:1020). */
-function swingSpeed(c: SkillContext): number {
-  const m = c.caster.modelObject;
-  return m?.CurrentAction === A.PLAYER_SKILL_GIANTSWING && m.AnimationSpeed > 0 ? m.AnimationSpeed : 0.4;
-}
+/** The caster's GIANTSWING PlaySpeed. */
+const swingSpeed = (c: SkillContext): number => clipSpeed(c, A.PLAYER_SKILL_GIANTSWING);
 
 /** Moves an effect has made `t` seconds after its spawn: the first on the next tick (readme.md). */
 const movesAt = (t: number): number => Math.floor(t / TICK + 1e-6);

@@ -99,6 +99,19 @@ export function spiralRibbons(n: number, colour: RGB, width: number, tails: numb
     }
   };
 }
+/**
+ * An effect model's `BodyLight`: the terrain light under it plus its `Light`, clamped by the colour
+ * write (ZzzObject.cpp:226-232, `LightEnable` from CreateEffect :349). A tinted model reads as lit
+ * white with the tint on it, not as the pure tint.
+ */
+export function bodyLight(at: Vector3, tint: RGB): RGB {
+  const l = Ecs.world?.getTerrainLight(at.x, at.z);
+  const lx = l?.x ?? 1;
+  const ly = l?.y ?? 1;
+  const lz = l?.z ?? 1;
+  return [Math.min(1, lx + tint[0]), Math.min(1, ly + tint[1]), Math.min(1, lz + tint[2])];
+}
+
 /** `rand() % n`. */
 export const randInt = (n: number): number => Math.floor(Math.random() * n);
 

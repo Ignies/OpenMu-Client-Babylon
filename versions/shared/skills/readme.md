@@ -16,7 +16,8 @@ class. Recipe: [docs/how_to/add_skill.md](../../../docs/how_to/add_skill.md).
 - `_shared.ts`: steps and helpers several classes use (stones, comets, decay smoke, Iron Defense,
   summon arrival and light, clip-key timing (`whenClipKey`, `eachClipTick`: a step each tick while the
   caster plays a clip), light anchors, mounted clip sets, `landingSound`: a
-  `soundOnLanding` skill's sound from the caster, put inside `afterRelease` for a release-block `PlayBuffer`).
+  `soundOnLanding` skill's sound from the caster, put inside `afterRelease` for a release-block `PlayBuffer`;
+  `bodyLight`: an effect model's BodyLight, the terrain light under it plus its Light).
 
 ## How it works
 ```
