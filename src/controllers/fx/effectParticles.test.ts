@@ -8,7 +8,7 @@ type FakeSprite = {
   color: { r: number; g: number; b: number };
 };
 
-const fakes = vi.hoisted(() => ({ sprites: [] as FakeSprite[], files: [] as string[] }));
+const fakes = vi.hoisted(() => ({ sprites: [] as FakeSprite[], files: [] as string[], colors: 0 }));
 
 // Babylon's sprites, the data folder and the effects layer are stubbed: the
 // real ones need a GPU scene, and `maps` / `controllers/fx/core` reach the store.
@@ -19,7 +19,9 @@ vi.mock('../render/babylon/exports', () => {
       public g = 0,
       public b = 0,
       public a = 1
-    ) {}
+    ) {
+      fakes.colors++;
+    }
 
     set(r: number, g: number, b: number, a: number) {
       this.r = r;
@@ -312,6 +314,16 @@ describe('smoke13, BITMAP_SMOKE SubType 13 (ZzzEffectParticle.cpp:1238-1243, :53
     expect((await play('smoke13', 1, 0.5, 19)).isVisible).toBe(true);
     disposeEffectParticles();
     expect((await play('smoke13', 1, 0.5, 20)).isVisible).toBe(false);
+  });
+});
+
+describe('the particle tick', () => {
+  it('makes no colour: one is reused frame after frame', async () => {
+    await play('trueFire', 1, 0.5, 1);
+    await play('smoke13', 1, 0.5, 1);
+    const made = fakes.colors;
+    for (let n = 0; n < 10; n++) tick?.();
+    expect(fakes.colors).toBe(made);
   });
 });
 
