@@ -44,4 +44,14 @@ describe.each([
       { range: 1, color: [0.7, 0.5, 0.2], pulse: breath(0.039) },
     ]);
   });
+
+  // `Luminosity = sinf(WorldTime * 0.002f) * 0.45f + 0.55f`, `AddTerrainLight(..., L * (1.4, 0.7, 0.4), 4)`.
+  it('Kanturu 70 breathes on its sine (GM_Kanturu_1st.cpp:85-91)', () => {
+    setFidelityChoice(choice, {});
+    expect(groundOf(ENUM_WORLD.WD_37KANTURU_1ST, 70)?.terrain).toEqual({
+      range: 4,
+      color: [1.4, 0.7, 0.4],
+      pulse: { speed: 0.002, amount: 0.45, base: 0.1 },
+    });
+  });
 });

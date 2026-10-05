@@ -128,7 +128,7 @@ export const KANTURU1_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
         terrain: {
           range: 4,
           color: [1.4, 0.7, 0.4],
-          flicker: { min: 0.1, max: 1, steps: 6 },
+          pulse: { speed: 0.002, amount: 0.45, base: 0.1 },
         },
       },
       lampSpark(7, [0.8, 0.4, 0.2]),
