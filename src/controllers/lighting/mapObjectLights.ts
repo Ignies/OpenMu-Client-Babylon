@@ -21,6 +21,7 @@ import {
   LightSource,
   PRIORITY_TORCH,
   TORCH_FLICKER_SMOOTHING,
+  type LightPulse,
   type LightRecipe,
 } from './lightSource';
 
@@ -65,6 +66,8 @@ export type LightEmitter = {
     readonly range: number;
     readonly color: readonly [number, number, number];
     readonly flicker?: { min: number; max: number; steps: number };
+    /** A smooth breath instead of a roll: the original's `sinf(WorldTime * k)` luminosity. */
+    readonly pulse?: LightPulse;
     readonly falloff?: number;
     readonly floorGain?: number;
   };
@@ -142,9 +145,9 @@ export function recipeFromEmitter(emitter: LightEmitter): LightRecipe | null {
 
   if (!terrain) return null;
 
-  // Sprite pulses used to drive the terrain luminosity too when the row had
-  // no flicker (the login-scene orb): keep that.
-  const pulse = terrain.flicker ? undefined : emitter.sprite?.pulse;
+  // A row without a flicker breathes on its own pulse, else on its flare's
+  // (the login-scene orb).
+  const pulse = terrain.flicker ? undefined : terrain.pulse ?? emitter.sprite?.pulse;
 
   return {
     color: terrain.color,

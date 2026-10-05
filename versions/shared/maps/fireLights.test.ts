@@ -27,4 +27,21 @@ describe.each([
     const candle = groundOf(ENUM_WORLD.WD_0LORENCIA, 150)?.terrain;
     expect([candle?.range, candle?.color, candle?.flicker]).toEqual([3, [1, 0.6, 0.2], { min: 0.3, max: 0.6, steps: 4 }]);
   });
+
+  // `fLumi = (sinf(WorldTime * k) + 1.0f) * 0.2f + 0.6f`, `AddTerrainLight(bone, fLumi * (0.7, 0.5, 0.2), range)`: no roll.
+  it('Loren Market 30 and 35 breathe on their bones, 30 at 0.002 and 35 at 0.039 (GMUnitedMarketPlace.cpp:92-127)', () => {
+    setFidelityChoice(choice, {});
+    const lamp = (type: number) => groundOf(ENUM_WORLD.WD_79UNITEDMARKETPLACE, type);
+    const breath = (speed: number) => ({ speed, amount: 0.2, base: 0.6 });
+    expect([lamp(30)?.offset, lamp(30)?.bone, lamp(30)?.terrain]).toEqual([
+      [0, 0, 304],
+      true,
+      { range: 3, color: [0.7, 0.5, 0.2], pulse: breath(0.002) },
+    ]);
+    expect([lamp(35)?.offset, lamp(35)?.bone, lamp(35)?.terrain]).toEqual([
+      [-2, -24, 16],
+      true,
+      { range: 1, color: [0.7, 0.5, 0.2], pulse: breath(0.039) },
+    ]);
+  });
 });

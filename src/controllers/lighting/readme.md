@@ -21,7 +21,8 @@ policy. It knows how to light something, never which skill or item asks for it.
 - `mapLighting.ts`: `MapLighting`, the type of a map's `lighting` field (`look`, `areas`,
   `objectLights`, `thunder`). The row types are exported from `index.ts` for the map folders.
 - `mapObjectLights.ts`: `LightEmitter` (map specs build their light tables from it; `bone` marks an
-  offset that stands for a bone and grows with the object, ZzzBMD.cpp:168-180),
+  offset that stands for a bone and grows with the object, ZzzBMD.cpp:168-180; `terrain.pulse`
+  breathes the ground light where the original writes a `sinf(WorldTime * k)` and no roll),
   `MapObjectLights`, `lightMapObject`, `lightEmittersFor`. `mapObjectLightAdapter.ts`: `MapObjectLights`, the
   `ModelObject` host. `lightCarrier.ts`: `LightCarrier`, a light without a drawn body.
 - `effectLights.ts`: `createEffectLight`, `createMovableFlare` (flare cards; they light nothing),
@@ -111,6 +112,8 @@ policy. It knows how to light something, never which skill or item asks for it.
   on a scaled object; an `abs` wave breathes on `|sin|`; a `grow` card grows and shrinks, a `spin` card turns, a `bob` card rides up
   and down; a movable card resizes and turns.
 - `mapObjectLightAdapter.test.ts`: a `bone` offset grows with the object, a plain one does not.
+- `mapObjectLights.test.ts`: a row's ground light breathes on its own pulse, else on its flare's, and a
+  flicker wins over both.
 - `versions/shared/maps/mapRows.golden.test.ts`: every world's look, room looks, thunder and
   map-object lights, pinned across the move into the map folders.
 - `mapLighting.test.ts`: a look over the open or enclosed default, the sky's default for a map

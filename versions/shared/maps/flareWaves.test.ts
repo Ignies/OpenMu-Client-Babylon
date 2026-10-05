@@ -72,8 +72,8 @@ describe('the map flare waves', () => {
   it('turn at most 0.05 radians a millisecond on every map: a per-second speed strobes', () => {
     for (let world = 0; world < 90; world++) {
       for (let type = 0; type < 400; type++) {
-        for (const { sprite } of lightEmittersFor(world as ENUM_WORLD, type) ?? []) {
-          for (const wave of [sprite?.pulse, sprite?.grow]) {
+        for (const { sprite, terrain } of lightEmittersFor(world as ENUM_WORLD, type) ?? []) {
+          for (const wave of [sprite?.pulse, sprite?.grow, terrain?.pulse]) {
             if (wave) expect(wave.speed, `world ${world} type ${type}`).toBeLessThanOrEqual(0.05);
           }
         }

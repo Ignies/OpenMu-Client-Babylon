@@ -105,7 +105,8 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   lantern (63) breathes and its totem (121) breathes and grows on six bones; and no table wave is
   faster than 0.05.
 - `fireLights.test.ts`: the ground lights the original throws take its position and range on every
-  preset: Devias 66's `CreateFire` 50 up at range 4, Lorencia 150 at range 3.
+  preset: Devias 66's `CreateFire` 50 up at range 4, Lorencia 150 at range 3, Loren Market 30 and 35
+  breathing on their bones.
 - `bloodcastle/lampObject.test.ts`: the throne-room lamp's flare is `BITMAP_FLARE` too.
 - `lampFlares.test.ts`, `lorencia/candleObject.test.ts`, `devias/candleObject.test.ts`: what the original
   never draws is the `lampFlares` improvement, gone on Classic: the flares of Lorencia 90 and 150, Devias
