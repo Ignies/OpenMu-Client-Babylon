@@ -5,6 +5,7 @@ import {
 import { MapTileObject } from '@/controllers/terrain/mapTileObject';
 import { lightMapObjectWith } from '@/controllers/lighting/mapObjectLights';
 import { PRIORITY_TORCH, type LightSource } from '@/controllers/lighting/lightSource';
+import { isOn } from '@/controllers/fidelity';
 import { Ecs } from '@/ecs/current';
 import type { Entity, World } from '@/ecs/world';
 import { findBone, bonePosed, type BoneNode } from './bones';
@@ -31,10 +32,11 @@ const YAW_PHASE_MS = 20;
 const FLARE_COLOR: readonly [number, number, number] = [1, 0.5, 0];
 
 /**
- * Ours: the original lights nothing on this map (`AddTerrainLight` is never
- * called in Blood Castle), but eleven seven-flame candelabra that leave the
- * stone around them black read as props. One pooled light per candelabra at
- * the object, range 3 tiles, candle colour, riding the same breath.
+ * Ours (`lampFlares`, none on Classic): the original lights nothing on this map
+ * (no `AddTerrainLight` in ZzzObject.cpp:3161-3175), but eleven seven-flame
+ * candelabra that leave the stone around them black read as props. One pooled
+ * light per candelabra at the object, range 3 tiles, candle colour, riding the
+ * same breath.
  */
 const LIGHT_RANGE = 3;
 const POINT_RANGE = 5;
@@ -95,6 +97,8 @@ export class BloodCastleCandelabraObject extends MapTileObject {
         this.#flares.push(flare);
       }).catch(reportLoadFailure('effect light flare'));
     }
+
+    if (!isOn('lampFlares')) return;
 
     const phaseMs = (this.#yawDegrees() * YAW_PHASE_MS) | 0;
     this.#source = lightMapObjectWith(
