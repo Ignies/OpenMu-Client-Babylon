@@ -76,7 +76,9 @@ export const KANTURU1_EMISSIONS: Partial<Record<number, readonly Emission[]>> =
  *    (0.9L, 0.2L, 0.1L), 3)` + hidden - a deep-red brazier. Nothing renders
  *    it: its fire is ours (`lampFlares`).
  *  - **61** (×58), :78-84: the same with `(L, 0.6L, 0.2L)` - the orange
- *    brazier; the render side (:158-164) adds `BITMAP_TRUE_FIRE` particles.
+ *    brazier; the render side (:158-164) adds a `BITMAP_TRUE_FIRE` particle
+ *    one tick in three. Its sheet, fantaF.jpg, has no kind: `fire1`/`fire3`
+ *    stand in. 60's fire (ours) is the same.
  *  - **70** (×0 placed here, in the GM area and on Doppelganger 4; table
  *    kept to match the source), :85-91: `Velocity 0.04` and a pulsing
  *    `(1.4, 0.7, 0.4) * (sin(t*0.002)*0.45+0.55)` at range 4, plus
@@ -90,7 +92,7 @@ export const KANTURU1_EMISSIONS: Partial<Record<number, readonly Emission[]>> =
 const LAMP_GROW = { speed: 0.002, amount: 1, base: 0.8 };
 
 /** Ours (`lampFlares`, none on Classic): the original hides 60 and draws nothing there (:71-77). */
-const DEEP_RED_FIRE: readonly Emission[] = [{ kinds: ['fire1', 'fire3'], every: 2, jitter: 6 }];
+const DEEP_RED_FIRE: readonly Emission[] = [{ kinds: ['fire1', 'fire3'], every: 3, jitter: 6 }];
 
 /** One of 70's two sparks on bone 6, at its rest height. */
 const lampSpark = (
@@ -125,7 +127,7 @@ export const KANTURU1_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
           color: [1, 0.6, 0.2],
           flicker: { min: 0.3, max: 0.6, steps: 4 },
         },
-        emissions: [{ kinds: ['fire1', 'fire3'], every: 2, jitter: 6 }],
+        emissions: [{ kinds: ['fire1', 'fire3'], every: 3, jitter: 6 }],
       },
     ],
     70: [

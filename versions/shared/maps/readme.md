@@ -105,7 +105,8 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   pillar's scale.
 - `flareWaves.test.ts`: the table cards' waves are the original's `sinf(WorldTime * k)`, k in radians a
   millisecond: the fire vents (Karutan 113, Loren Market 57, Vulcanus 6) burn steady red, with one
-  particle of the original's three fire sheets every tick; Kalima's flower glows (12, 32) grow and shrink on bone 5; the Kanturu relic lamps (Kanturu 2 4, Kanturu 3 5)
+  particle of the original's three fire sheets every tick; the `BITMAP_TRUE_FIRE` braziers (Elbeland
+  0, Kanturu 61, Balgas 3, the Swamp's 57 with its smoke) burn one tick in three; Kalima's flower glows (12, 32) grow and shrink on bone 5; the Kanturu relic lamps (Kanturu 2 4, Kanturu 3 5)
   breathe and grow with their fLumi, and Kanturu 3's two `BITMAP_SHINY + 1` turn 0.5 and 0.25
   degrees a millisecond; Land of Trials 49 draws two red cards on bone 3 and a grey `BITMAP_SHINY + 1`
   at a fresh angle every frame; Elbeland's lantern (63) breathes and its totem (121) breathes and grows on six

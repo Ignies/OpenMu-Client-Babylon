@@ -35,6 +35,24 @@ describe('the map flare waves', () => {
     }
   });
 
+  // `if (rand_fps_check(3)) CreateParticle(BITMAP_TRUE_FIRE, ...)`: one tick in three; the Swamp's smoke on the same roll.
+  it('the BITMAP_TRUE_FIRE braziers burn one tick in three (GMNewTown.cpp:249-254, GM_Kanturu_1st.cpp:158-164, GM3rdChangeUp.cpp:126-132, GMSwampOfQuiet.cpp:139-148)', () => {
+    const braziers: [ENUM_WORLD, number][] = [
+      [ENUM_WORLD.WD_51ELBELAND, 0],
+      [ENUM_WORLD.WD_37KANTURU_1ST, 61],
+      [ENUM_WORLD.WD_40AREA_FOR_GM, 61],
+      [ENUM_WORLD.WD_68DOPPLEGANGER4, 61],
+      [ENUM_WORLD.WD_41CHANGEUP3RD_1ST, 3],
+      [ENUM_WORLD.WD_42CHANGEUP3RD_2ND, 3],
+      [ENUM_WORLD.WD_56MAP_SWAMP_OF_QUIET, 57],
+    ];
+    for (const [world, type] of braziers) {
+      const emissions = lightEmittersFor(world, type)?.flatMap(e => (Array.isArray(e.emissions) ? e.emissions : []));
+      expect(emissions?.length, `world ${world} type ${type}`).toBeGreaterThan(0);
+      expect(emissions?.map(f => f.every), `world ${world} type ${type}`).toEqual(emissions?.map(() => 3));
+    }
+  });
+
   // `CreateSprite(BITMAP_LIGHT, bone 5, Luminosity + 0.2f, (0.6, 0.6, 1), o)`, `Luminosity = sinf(WorldTime * 0.001f) * 0.3f + 0.7f`.
   it('Kalima 12 and 32: the flower glow grows and shrinks on bone 5, unscaled (GMHellas.cpp:439-460)', () => {
     const glow = {

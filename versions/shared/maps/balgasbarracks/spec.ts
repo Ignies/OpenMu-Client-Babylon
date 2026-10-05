@@ -42,7 +42,9 @@ export const BALGAS_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {
 /**
  * Type 3 (Barracks ×39, Refuge ×17), :79-85: `L = (rand%4+3)*0.1;
  * AddTerrainLight(x, y, (L, 0.6L, 0.2L), 3)` + hidden - the brazier, the
- * same recipe as Kanturu 61.
+ * same recipe as Kanturu 61: `RenderObjectVisual` :126-132 adds a
+ * `BITMAP_TRUE_FIRE` particle one tick in three (fantaF.jpg, no kind:
+ * `fire1`/`fire3` stand in).
  */
 export const BALGAS_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
   3: [
@@ -53,7 +55,7 @@ export const BALGAS_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
         color: [1, 0.6, 0.2],
         flicker: { min: 0.3, max: 0.6, steps: 4 },
       },
-      emissions: [{ kinds: ['fire1', 'fire3'], every: 2, jitter: 6 }],
+      emissions: [{ kinds: ['fire1', 'fire3'], every: 3, jitter: 6 }],
     },
   ],
 };
