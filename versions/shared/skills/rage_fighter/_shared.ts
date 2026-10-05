@@ -3,7 +3,7 @@ import { MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
 import { effects } from '@/controllers/fx';
 import { TICK, entityPos, entityYaw, fxNow, type RGB } from '@/controllers/fx/core';
 import { Vector3, type Scene } from '@/controllers/render/babylon/exports';
-import { after, cm, ticks, type Step } from '@/controllers/skills/visuals';
+import { after, cm, seq, ticks, type Step } from '@/controllers/skills/visuals';
 import { PlayerAction } from '@versions/shared/objects/enum';
 import type { ClipPick } from '@/controllers/combat';
 import type { Sounds } from '@/controllers/sound';
@@ -132,3 +132,56 @@ export const swordFlash = (light: RGB, wave: RGB): Step => (_at, c) => {
     },
   });
 };
+
+/**
+ * BITMAP_EVENT_CLOUD (clouds2) at the caster's feet, LifeTime 30 (ZzzEffect.cpp:5993-6002): each move Scale x1.08 up to `cap`
+ * (3, sub1 5) and Light x0.9, turned -WorldTime x 0.5 degrees (MoveHandlers.cpp:9495-9518), drawn on the ground at its Light
+ * (ZzzEffect.cpp:9543-9548). WorldTime's phase is not kept: every cloud starts its turn at 0.
+ */
+export const eventCloud = (light: RGB, cap = 3): Step => (_at, c) =>
+  effects.spawn('ring', c.scene, entityPos(c.caster, 0, new Vector3()), {
+    texture: TEX.eventCloud,
+    colour: light,
+    seconds: ticks(30),
+    scaleAt: t => Math.min(cap, 1.08 ** movesAt(t)),
+    brightness: t => 0.9 ** movesAt(t),
+    spin: -500,
+    fadeTail: 0,
+  });
+
+/**
+ * BITMAP_MAGIC sub13 / 14 (Magic_Ground1) at the caster's feet, Scale 1 (ZzzEffect.cpp:1179-1184): each move Scale x1.1 and
+ * Light x0.95, halved again past Scale 4; past 8 (move 22) it dies (MoveHandlers.cpp:1424-1448). Drawn twice at the
+ * caster's facing (ZzzEffect.cpp:9776-9780), so twice here.
+ */
+export const magicGround13 = (light: RGB): Step => (_at, c) => {
+  const feet = entityPos(c.caster, 0, new Vector3());
+  const turn = -deg(entityYaw(c.caster));
+  for (let pass = 0; pass < 2; pass++) {
+    effects.spawn('ring', c.scene, feet, {
+      texture: TEX.magicGround,
+      colour: light,
+      seconds: ticks(22),
+      scaleAt: t => 1.1 ** movesAt(t),
+      brightness: t => 0.95 ** movesAt(t) * 0.5 ** Math.max(0, movesAt(t) - 14),
+      spinFrom: turn,
+      fadeTail: 0,
+    });
+  }
+};
+
+/** The Lights of a party buff's RageCreateEffect (MonkSystem.cpp:1128-1214). */
+export interface OurforcesLights {
+  /** BITMAP_SWORD_EFFECT_MONO and the MODEL_SHOCKWAVE01 it sends. */
+  flash: RGB;
+  wave: RGB;
+  /** The three BITMAP_EVENT_CLOUD. */
+  cloud: RGB;
+  /** MODEL_WINDFOCE, and the BITMAP_MAGIC sub13 under it. */
+  pillar: RGB;
+  magic: RGB;
+}
+
+/** A party buff's RageCreateEffect at the caster, in the original's order. */
+export const ourforcesCast = (l: OurforcesLights): Step =>
+  seq(swordFlash(l.flash, l.wave), eventCloud(l.cloud), eventCloud(l.cloud), eventCloud(l.cloud), windForce(l.pillar, false, l.pillar), magicGround13(l.magic));

@@ -90,6 +90,7 @@ shared pools, textures and particle recipes other folders reuse.
 - `clock.test.ts`: an n-tick delay fires on the n-th frame at 25 fps from any start, and on the first
   due frame at 60 fps.
 - `softEdge.test.ts`: `fadeSheetEdges` / `fadeSheetSides` fade sheet borders and only touch alpha.
+- `ring.test.ts`: a ring with `scaleAt` is drawn at that diameter each frame (a per-tick `o->Scale` curve).
 - The skill golden tests (`versions/shared/skills/*.golden.test.ts`) drive `effects.spawn` and
   `effects.update` for every skill.
 

@@ -102,6 +102,8 @@ export const TEX = {
   smokeAlpha: 'Effect/smoke02.ozt',
   smoke5: 'Effect/smoke05.OZT',
   cloud: 'Effect/clouds.OZJ',
+  /** BITMAP_EVENT_CLOUD (clouds2.jpg, 256 px): the cloud the Rage buffs and Dark Side spin on the ground. */
+  eventCloud: 'Effect/clouds2.OZJ',
   clud: 'Effect/clud64.OZJ',
   mist: 'Effect/mist01.OZJ',
   /** BITMAP_SHINY..+6: Shiny01/02/03, eye01 (`eye`), ring (`ring`), shiny04, shiny05. */

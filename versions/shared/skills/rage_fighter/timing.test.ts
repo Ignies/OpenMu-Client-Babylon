@@ -357,6 +357,39 @@ describe('Ignore Defense, Increase Health, Increase Block (266-268): RageCreateE
     }
   });
 
+  /** [skills, BITMAP_EVENT_CLOUD's Light, BITMAP_MAGIC sub13's Light] (MonkSystem.cpp:1147-1154, :1175-1182, :1205-1212). */
+  const DECALS: [readonly number[], number[], number[]][] = [
+    [[266], [0.65, 0.8, 1], [0.5, 0.55, 0.9]],
+    [[267, 573], [0.8, 0.4, 1], [0.78, 0.2, 1]],
+    [[268, 569, 572], [1, 0.3, 0.2], [1, 0.15, 0]],
+  ];
+
+  it('the ground decals at the caster: BITMAP_MAGIC sub13 drawn twice and three BITMAP_EVENT_CLOUD (MonkSystem.cpp:1142-1154)', () => {
+    for (const [skills, cloud, magic] of DECALS) {
+      for (const skill of skills) {
+        const rings = run(skill, PlayerAction.PLAYER_SKILL_ATT_UP_OURFORCES).spawns.filter(s => s.name === 'ring');
+        const at = (s: Spawn) => [s.tick, s.opts.texture, s.opts.colour, Math.round((s.opts.seconds as number) * 25)];
+        // Magic_Ground1 dies past Scale 8 (move 22); the clouds live 30.
+        expect(rings.map(at)).toEqual([
+          ...[0, 1, 2].map(() => [0, TEX.eventCloud, cloud, 30]),
+          ...[0, 1].map(() => [0, TEX.magicGround, magic, 22]),
+        ]);
+        type Curves = { scaleAt: (t: number) => number; brightness: (t: number) => number; spin?: number; spinFrom?: number };
+        // Magic_Ground1: Scale x1.1 and Light x0.95 a move, halved again past Scale 4 (move 15), at the caster's facing.
+        const magicRing = rings.filter(s => s.opts.texture === TEX.magicGround)[0].opts as Curves;
+        expect([1, 15, 21].map(n => magicRing.scaleAt(n / 25))).toEqual([1.1, 1.1 ** 15, 1.1 ** 21]);
+        expect(magicRing.brightness(14 / 25)).toBeCloseTo(0.95 ** 14);
+        expect(magicRing.brightness(16 / 25)).toBeCloseTo(0.95 ** 16 * 0.25);
+        expect(magicRing.spinFrom).toBeCloseTo(-0.5 * (180 / Math.PI));
+        // clouds2: Scale x1.08 a move up to 3, Light x0.9, turning -0.5 degrees a ms.
+        const cloudRing = rings.filter(s => s.opts.texture === TEX.eventCloud)[0].opts as Curves;
+        expect([1, 14, 15].map(n => cloudRing.scaleAt(n / 25))).toEqual([1.08, 1.08 ** 14, 3]);
+        expect(cloudRing.brightness(3 / 25)).toBeCloseTo(0.9 ** 3);
+        expect(cloudRing.spin).toBe(-500);
+      }
+    }
+  });
+
   it('its MODEL_SHOCKWAVE01 sub 2, drawn twice, on LifeTime 14 (tick 2): Scale x1.24 and Light x 15 x 0.45 a move (ZzzEffect.cpp:5874-5893, MoveHandlers.cpp:9383-9395)', () => {
     for (const [skills, , wave] of FLASHES) {
       for (const skill of skills) {
