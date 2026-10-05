@@ -8,6 +8,7 @@ import { ENUM_WORLD } from '@/core/types';
 import type { Entity } from '@/ecs/world';
 import { PlayerAction } from '../../objects/enum';
 import { playTargetedSkillVisual } from '../skillVisuals';
+import { muAngle } from './_shared';
 
 vi.hoisted(() => {
   const g = globalThis as Record<string, unknown>;
@@ -80,5 +81,33 @@ describe('Add Critical (64): a card at each hand (ZzzCharacter.cpp:4366-4383)', 
   it('none at a shield, which Weapon[1] holds: the left hand slot 1, bone 42 (:4377)', () => {
     expect(cards(cast(64, caster(0, { leftHand: SCEPTER, rightHand: SHIELD }))).map(m => m.at)).toEqual([BONE33]);
     expect(cards(cast(64, caster(0, { leftHand: SCEPTER }))).map(m => m.at)).toEqual([BONE33, BONE42]);
+  });
+});
+
+describe('Brand of Skill (75): the same cards in their white Light (ZzzCharacter.cpp:4699-4714)', () => {
+  it('a card at Weapon[0]\'s bone 33 and one at Weapon[1]\'s bone 42, at (45, 45, 0) and (45, -45, 0) whatever the facing (ZzzEffect.cpp:3449-3470)', () => {
+    for (const yaw of [30, 200]) {
+      const made = cards(cast(75, caster(yaw)));
+      expect(made.map(m => m.at)).toEqual([BONE33, BONE42]);
+      made.forEach((m, sub) => {
+        const turn = muAngle(45, sub ? -45 : 45, 0);
+        expect([m.opts.pitch, m.opts.yaw, m.opts.roll]).toEqual([turn.pitch, turn.yaw, turn.roll]);
+        // Scale 0.2 and LifeTime 10, left where it was made, drawn in its Light (ZzzObject.cpp:948-953).
+        expect([m.opts.colour, m.opts.scale, Math.round((m.opts.seconds as number) * 25), m.opts.follow]).toEqual([[1, 1, 1], 0.2, 10, undefined]);
+      });
+    }
+  });
+
+  it('none at Weapon[0] holding arrows or Weapon[1] holding bolts or a shield (:4702, :4707)', () => {
+    expect(cards(cast(75, caster(0, { leftHand: { group: 4, num: 15 }, rightHand: SHIELD })))).toEqual([]);
+    expect(cards(cast(75, caster(0, { leftHand: SCEPTER, rightHand: { group: 4, num: 7 } }))).map(m => m.at)).toEqual([BONE33]);
+  });
+
+  it('at the cast\'s release with Add Critical\'s, and no motes of its own (ZzzCharacter.cpp:4139-4145)', () => {
+    const brand = cast(75, caster(0));
+    const at = (r: { made: Made[] }) => cards(r).map(m => m.tick);
+    expect(at(brand)).toEqual(at(cast(64, caster(0))));
+    expect(at(brand)[0]).toBeGreaterThan(0);
+    expect(brand.names).not.toContain('particles');
   });
 });

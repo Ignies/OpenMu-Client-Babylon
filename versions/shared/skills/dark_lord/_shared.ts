@@ -1,10 +1,13 @@
 import { COMBAT_BUS, playSfx } from '@/controllers/sound';
 import { DEG, randInt } from '../_shared';
 import { DUST, MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
-import { Matrix, Quaternion, Vector3 } from '@/controllers/render/babylon/exports';
-import { delay, entityGone, entityPos, entityYaw, fxNow, type ParticleRecipe, type RGB } from '@/controllers/fx/core';
+import { Matrix, Quaternion, Vector3, type Scene } from '@/controllers/render/babylon/exports';
+import { GROUP_BOW, GROUP_SHIELD } from '@/controllers/actors/weaponClass';
+import { LEFT_HAND_BONE, RIGHT_HAND_BONE } from '@/controllers/actors/weaponAttachment';
+import type { Entity } from '@/ecs/world';
+import { bonePos, delay, entityGone, entityPos, entityYaw, fxNow, type ParticleRecipe, type RGB } from '@/controllers/fx/core';
 import { PlayerAction } from '../../objects/enum';
-import { type ReleaseRule, SkillContext, Step, TICK, baseSkill, cm, currentSkill, facing, onRelease, ticks } from '@/controllers/skills/visuals';
+import { CAST_HEIGHT, type ReleaseRule, SkillContext, Step, TICK, baseSkill, cm, currentSkill, facing, onRelease, ticks, weaponsOf } from '@/controllers/skills/visuals';
 import { type Sounds } from '@/controllers/sound/recipes';
 import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
@@ -285,6 +288,45 @@ export function muAngle(a0: number, a1: number, a2: number): { pitch: number; ya
   const m = Matrix.RotationX(-a0 * DEG).multiply(Matrix.RotationZ(-a1 * DEG)).multiply(Matrix.RotationY(-a2 * DEG));
   const e = Quaternion.FromRotationMatrix(m).toEulerAngles();
   return { pitch: e.x, yaw: e.y, roll: e.z };
+}
+
+// ---- the hand cards -----------------------------------------------------------------
+
+/** A hand a MODEL_DARKLORD_SKILL card goes on: its link bone, the card's sub, and whether it holds a bow. */
+export interface HandCard {
+  bone: number;
+  sub: 0 | 1;
+  bow: boolean;
+}
+const ARROWS = 15;
+const BOLT = 7;
+/** MODEL_DARKLORD_SKILL sub0 / sub1: `Angle (45, 45 - 90 x SubType, 0)`, whatever it was made with (ZzzEffect.cpp:3449-3470). */
+const CARD_ANGLES = [muAngle(45, 45, 0), muAngle(45, -45, 0)] as const;
+
+/**
+ * Weapon[0] (equipment slot 0, the appearance's left hand, on link bone 33) and Weapon[1] (slot 1, its right hand, on 42)
+ * with the hand skills' skips: no card at Weapon[0] holding arrows, or Weapon[1] holding bolts or a shield
+ * (ZzzCharacter.cpp:4370-4381, :4702-4711, :12180-12193). `held`: Add Critical's buff pulse also skips an empty hand (:10039, :10052).
+ */
+export function cardHands(e: Entity, held: boolean): HandCard[] {
+  const first = weaponsOf(e)?.leftHand ?? null;
+  const second = weaponsOf(e)?.rightHand ?? null;
+  const out: HandCard[] = [];
+  if ((!held || first) && !(first?.group === GROUP_BOW && first.num === ARROWS)) out.push({ bone: RIGHT_HAND_BONE, sub: 0, bow: first?.group === GROUP_BOW });
+  if ((!held || second) && !(second?.group === GROUP_BOW && second.num === BOLT) && second?.group !== GROUP_SHIELD) out.push({ bone: LEFT_HAND_BONE, sub: 1, bow: second?.group === GROUP_BOW });
+  return out;
+}
+
+/** MODEL_DARKLORD_SKILL: KingS_R at Scale 0.2 in its `light`, 10 ticks, left where it was made (ZzzEffect.cpp:3449-3470, ZzzObject.cpp:948-953). */
+export function handCard(scene: Scene, e: Entity, hand: HandCard, light: RGB): void {
+  effects.spawn('model', scene, bonePos(e, hand.bone, new Vector3(), CAST_HEIGHT), {
+    model: MODEL.darkLordSkill,
+    colour: light,
+    scale: 0.2,
+    seconds: ticks(10),
+    fadeTail: 0.001,
+    ...CARD_ANGLES[hand.sub],
+  });
 }
 
 /**
