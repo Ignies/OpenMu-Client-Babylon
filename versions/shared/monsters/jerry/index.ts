@@ -2,7 +2,7 @@ import { defineMonster } from '@/controllers/monsters';
 
 export default defineMonster({
   Numb: 505,
-  Name: 'Jerry',
+  Name: 'Jerint',
   maxHealth: 1000000,
   model: { type: 165, scale: 1.45 },
 });

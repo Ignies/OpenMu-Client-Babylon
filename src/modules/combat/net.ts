@@ -476,11 +476,13 @@ export function installNet(): void {
 
   /**
    * C3 4A - `RageAttack`: a rage fighter's Dark Side blow on one target, shown
-   * to everyone in scope like a targeted skill animation.
+   * to everyone in scope like a targeted skill animation. The echo of the
+   * hero's own cast starts his follow-up blows (`AttackTime = 1`, WSclient.cpp:13422-13429).
    */
   EventBus.on('RageAttack', packet => {
     if (packet.byteLength < RageAttackPacket.Length!) return;
     const p = new RageAttackPacket(packet);
+    if ((p.SourceId & 0x7fff) === Hero.playerId) combat.observeDarkSideEcho(p.SkillId);
     const world = Ecs.world;
     if (!world) return;
     const caster = world.getByNetId(p.SourceId & 0x7fff);

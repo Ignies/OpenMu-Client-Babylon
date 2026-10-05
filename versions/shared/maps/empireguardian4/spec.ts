@@ -138,24 +138,67 @@ const CHANDELIER_GROUND: LightEmitter['terrain'] = {
 };
 
 /**
- * Type 37's flare, `sos_bob02.smd` bone 1 (GMEmpireGuardian4.cpp:864-875,
- * x20). The original is `CreateSprite(BITMAP_FLARE, bone1, 4 * Scale, grey)`
- * with `grey = ((sin(WorldTime * 0.039) + 1) * 0.2 + 0.6) * 0.7`, i.e. 0.42
- * to 0.70 - the `pulse` block below is that curve exactly. The colour and the
- * point light are `LOGIN_WALL_TORCH`'s (controllers/lighting/mapObjectLights.ts), kept
- * identical so a wall torch reads the same on day 4 and on the login scene.
+ * The braziers 79 and 80 light no ground in the original: `MoveObject` only
+ * hides their mesh (GMEmpireGuardian4.cpp:212-226) and `RenderObjectVisual`
+ * draws a sprite (:917-948). These ground lights are ours (`fortressLights`).
+ */
+const BRAZIER_GROUND: LightEmitter['terrain'] = {
+  range: 3,
+  color: [1, 0.6, 0.2],
+  flicker: { min: 0.3, max: 0.6, steps: 4 },
+};
+
+const BLUE_LAMP_GROUND: LightEmitter['terrain'] = {
+  range: 2,
+  color: [0.1, 0.1, 0.5],
+};
+
+/** Brazier 79's flare: `CreateSprite(BITMAP_LIGHT, pos, 2 * Scale, (1, 0.2, 0))`, steady (:917-921). */
+const BRAZIER_FLARE: NonNullable<LightEmitter['sprite']> = {
+  scale: 2,
+  color: [1, 0.2, 0],
+};
+
+/** Ours: the wall torch's breathing on it (`fortressLights`). */
+const BRAZIER_BREATHING_FLARE: NonNullable<LightEmitter['sprite']> = {
+  ...BRAZIER_FLARE,
+  pulse: { speed: 0.039, amount: 0.2, base: 0.6 },
+};
+
+/**
+ * Case 37's flare as the original draws it (GMEmpireGuardian4.cpp:864-875):
+ * `CreateSprite(BITMAP_FLARE, bone1, 4 * Scale, fLumi * 0.7)` on all three
+ * channels, `fLumi = (sin(WorldTime * 0.039) + 1) * 0.2 + 0.6`. `pulse` is
+ * fLumi, so the colour is the 0.7 grey. Both wall torches draw it on Classic:
+ * day 4's below and the login scene's.
+ */
+export const WALL_TORCH_FLARE: NonNullable<LightEmitter['sprite']> = {
+  scale: 4,
+  color: [0.7, 0.7, 0.7],
+  pulse: { speed: 0.039, amount: 0.2, base: 0.6 },
+};
+
+/** The same flare warm, ours: a lit torch's, as `LOGIN_WALL_TORCH` draws it on the login scene. */
+const WALL_TORCH_WARM_FLARE: NonNullable<LightEmitter['sprite']> = {
+  ...WALL_TORCH_FLARE,
+  color: [1, 0.45, 0.15],
+};
+
+/**
+ * Type 37, `sos_bob02.smd` bone 1 (GMEmpireGuardian4.cpp:864-875, x20): the
+ * original is `WALL_TORCH_FLARE` alone. Hosted by `wallTorchObject.ts` rather
+ * than by a row in the table because the table resolves an emitter at the
+ * object's origin and the flame is on a bone.
  *
- * Hosted by `wallTorchObject.ts` rather than by a row in the table because
- * the table resolves an emitter at the object's origin and the flame is on a
- * bone; the original never gives 37 an `AddTerrainLight`, so `terrain` here
- * is ours: the `fortressLights` improvement (none on Classic, read when the
- * torch lights).
+ * The original never gives 37 an `AddTerrainLight`, so the ground light and
+ * the warm flare are ours: the `fortressLights` improvement (read when the
+ * torch lights). They are `LOGIN_WALL_TORCH`'s
+ * (controllers/lighting/mapObjectLights.ts), so a lit torch reads the same on
+ * day 4 and on the login scene.
  */
 export const EMPIRE_GUARDIAN_4_WALL_TORCH: LightEmitter = {
-  sprite: {
-    scale: 4,
-    color: [1, 0.45, 0.15],
-    pulse: { speed: 0.039, amount: 0.2, base: 0.6 },
+  get sprite() {
+    return isOn('fortressLights') ? WALL_TORCH_WARM_FLARE : WALL_TORCH_FLARE;
   },
   get terrain() {
     return isOn('fortressLights') ? WALL_TORCH_GROUND : undefined;
@@ -190,24 +233,20 @@ export const EMPIRE_GUARDIAN_4_LIGHTS: Partial<
   Record<number, readonly LightEmitter[]>
 > = {
   /**
-   * :917-921 (x120) - `CreateSprite(BITMAP_LIGHT, pos, 2 * Scale, (1, 0.2, 0))`.
-   * The original's sprite is a constant; the breathing, the wander and the
-   * terrain light are ours, matched to the wall torch below it so a brazier
-   * reads as a jet rather than as something burning.
+   * :917-921 (x120) - `CreateSprite(BITMAP_LIGHT, pos, 2 * Scale, (1, 0.2, 0))`,
+   * a steady flare. The breathing, the wander and the terrain light are ours,
+   * matched to the wall torch below it so a brazier reads as a jet rather than
+   * as something burning: the `fortressLights` improvement.
    */
   79: [
     {
-      sprite: {
-        scale: 2,
-        color: [1, 0.2, 0],
-        pulse: { speed: 0.039, amount: 0.2, base: 0.6 },
+      get sprite() {
+        return isOn('fortressLights') ? BRAZIER_BREATHING_FLARE : BRAZIER_FLARE;
       },
       pointRange: 6,
       wander: 0.08,
-      terrain: {
-        range: 3,
-        color: [1, 0.6, 0.2],
-        flicker: { min: 0.3, max: 0.6, steps: 4 },
+      get terrain() {
+        return isOn('fortressLights') ? BRAZIER_GROUND : undefined;
       },
     },
   ],
@@ -216,7 +255,8 @@ export const EMPIRE_GUARDIAN_4_LIGHTS: Partial<
    * :941-948 (x0 here, days 1-3 and the login scene place it) -
    * `CreateSprite(BITMAP_LIGHT, pos, 8 * Scale, (L*0.1, L*0.1, L*0.5))` with
    * `L = (sin(WorldTime * 0.04) + 1) * 0.3 + 0.4`. Scale, colour ratio and
-   * pulse are the original's; the point and terrain light are ours.
+   * pulse are the original's; the point and terrain light are ours
+   * (`fortressLights`).
    */
   80: [
     {
@@ -226,9 +266,8 @@ export const EMPIRE_GUARDIAN_4_LIGHTS: Partial<
         pulse: { speed: 0.04, amount: 0.3, base: 0.4 },
       },
       pointRange: 4,
-      terrain: {
-        range: 2,
-        color: [0.1, 0.1, 0.5],
+      get terrain() {
+        return isOn('fortressLights') ? BLUE_LAMP_GROUND : undefined;
       },
     },
   ],

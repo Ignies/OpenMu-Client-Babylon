@@ -8,7 +8,7 @@ import { monsters } from './all';
  * are those tables', so any change to a monster's data shows here: update them on purpose, in the
  * same commit.
  */
-const ROWS_HASH = '6c1233ed9b9d170eec6dc6a174a8e14978aeac5dc9ff8cdbc8ce1c7e955129e6';
+const ROWS_HASH = '9f27833ef3e036ecbc74d0b71129ab60bc648a2ec2a8d791817865edb3061f07';
 const HEALTH_HASH = '5f2f7fd14493321a0ae38909609cc52af6c05f355a66d609118274cff2d16d55';
 const MODELS_HASH = '02093793a8f3fff577e403be65d353d3e5dc7fcc2d793523b8f057a08d2d2239';
 

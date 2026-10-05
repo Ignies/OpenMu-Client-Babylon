@@ -26,6 +26,7 @@ interface DarkSideHooks {
   isDarkSide(skill: number): boolean;
   begin(skill: number, targetId: number): void;
   observeTargets(skill: number, targetIds: readonly number[]): void;
+  observeEcho(skill: number): void;
   nextHit(): number;
   pendingSkill(): number;
   observeRageHit(isStreak: boolean, isFinal: boolean): void;

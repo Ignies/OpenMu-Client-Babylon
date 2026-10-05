@@ -9,7 +9,7 @@ import type { Entity } from '@/ecs/world';
 import { PlayerAction } from '../../objects/enum';
 import { playAreaSkillVisual, playTargetedSkillVisual } from '../skillVisuals';
 import { skillSound } from '@/controllers/sound/combat';
-import { beginDarkSide, darkSideHitTicks, nextDarkSideHit, observeDarkSideTargets, rageLayer } from './dark_side/rage';
+import { beginDarkSide, darkSideHitTicks, nextDarkSideHit, observeDarkSideEcho, observeDarkSideTargets, rageLayer } from './dark_side/rage';
 
 vi.hoisted(() => {
   const g = globalThis as Record<string, unknown>;
@@ -142,6 +142,22 @@ describe('Chain Drive (262): BITMAP_SWORDEFF reads the caster\'s GIANTSWING key 
     expect(spriteTicks(r, TEX.thunder)).toEqual([16]);
     expect(soundTicks(r, ATT)).toEqual([16]);
   });
+
+  /** [tick, drawn ticks, Scale at the spawn and 3 moves on] of each `model` spawn. */
+  const models = (r: Run, model: string) =>
+    r.spawns
+      .filter(s => s.name === 'model' && s.opts.model === model)
+      .map(s => [s.tick, Math.round((s.opts.seconds as number) * 25), ...[0, 3].map(n => Math.round((s.opts.scaleAt as (t: number) => number)(n / 25) * 1000) / 1000)]);
+
+  it('the second blow sends MODEL_SHOCKWAVE02, drawn twice, and two MODEL_SHOCKWAVE_SPIN01 (MoveHandlers.cpp:9350-9367)', () => {
+    for (const skill of [262, 558]) {
+      const r = run(skill, SWING);
+      // LifeTime 14 / (2 x 0.4) = 17.5, drawn 18 ticks, Scale 0.5 + 0.1 a tick; 8 / 0.4 = 20, Scale x 1.01 a tick.
+      expect(models(r, 'Effect/shockwave02.glb')).toEqual([[28, 18, 0.5, 0.8], [28, 18, 0.5, 0.8]]);
+      expect(models(r, MODEL.shockwaveSpin)).toEqual([[28, 20, 0.5, 0.515], [28, 20, 0.9, 0.927]]);
+    }
+    expect(models(run(262, SWING, { leaveAt: 20 }), MODEL.shockwaveSpin)).toEqual([]);
+  });
 });
 
 describe('Dragon Roar (264): the dragon on BLOW_OF_DESTRUCTION\'s LifeTime, the fire ring on DRAGONLORE key 5', () => {
@@ -247,6 +263,32 @@ describe('Charge (269): AttackStage\'s AT_SKILL_OCCUPY case (ZzzCharacter.cpp:29
   });
 });
 
+describe('Ignore Defense, Increase Health, Increase Block (266-268): RageCreateEffect\'s wind pillar (MonkSystem.cpp:1150-1209)', () => {
+  const PILLARS: [readonly number[], readonly number[]][] = [
+    [[266], [0.5, 0.55, 1]],
+    [[267, 573], [0.85, 0.2, 1]],
+    [[268, 569, 572], [1, 0.2, 0]],
+  ];
+
+  it('a slow pillar of 50 ticks at the caster, and the fast two it raises on ticks 11 and 21 in its Light (MoveHandlers.cpp:9529-9554)', () => {
+    for (const [skills, colour] of PILLARS) {
+      for (const skill of skills) {
+        const pillars = run(skill, PlayerAction.PLAYER_SKILL_ATT_UP_OURFORCES).spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.windForce);
+        expect(pillars.map(s => [s.tick, s.opts.colour, Math.round((s.opts.seconds as number) * 25)])).toEqual([
+          [0, colour, 50],
+          [11, colour, 70],
+          [21, colour, 70],
+        ]);
+        // Light x 6 keeping 0.9 a tick; the turn at 0.3 degrees a ms of WorldTime, the sub 3s at 0.9.
+        const { blendLight, spin } = pillars[0].opts as { blendLight: (t: number) => number; spin: number };
+        expect(blendLight(2 / 25)).toBeCloseTo(6 * 0.9 ** 2);
+        expect(spin).toBeCloseTo((300 * Math.PI) / 180);
+        expect(pillars[1].opts.spin).toBeCloseTo((900 * Math.PI) / 180);
+      }
+    }
+  });
+});
+
 describe('Dark Side (263)', () => {
   const READY = PlayerAction.PLAYER_SKILL_DARKSIDE_READY;
 
@@ -255,6 +297,21 @@ describe('Dark Side (263)', () => {
       const r = run(skill, READY, { keysPerTick: 0.3 });
       expect(spriteTicks(r, TEX.damage2)).toEqual([20, 21]);
       expect(r.spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.shockwave).map(s => s.tick)).toEqual([30, 31]);
+    }
+  });
+
+  it('the wind pillar at the caster, and the two it raises on ticks 11 and 21 (MonkSystem.cpp:1297-1298, MoveHandlers.cpp:9579-9596)', () => {
+    for (const skill of [263, 559]) {
+      const pillars = run(skill, READY, { keysPerTick: 0.3 }).spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.windForce);
+      expect(pillars.map(s => [s.tick, s.opts.colour, Math.round((s.opts.seconds as number) * 25)])).toEqual([
+        [0, [1, 0.5, 0.2], 70],
+        [11, [1, 0.5, 0], 70],
+        [21, [1, 0.5, 0], 70],
+      ]);
+      // Scale 1 + 0.1 a tick up to 3, Light x 6 keeping 0.85 a tick.
+      const { scaleAt, blendLight } = pillars[0].opts as { scaleAt: (t: number) => number; blendLight: (t: number) => number };
+      expect([0, 5, 20, 40].map(t => scaleAt(t / 25))).toEqual([1, 1.5, 3, 3]);
+      expect(blendLight(2 / 25)).toBeCloseTo(6 * 0.85 ** 2);
     }
   });
 
@@ -268,17 +325,33 @@ describe('Dark Side (263)', () => {
     rageLayer.reset?.();
   });
 
-  it('follow-ups on (int)(2.5 / PlaySpeed): 8 ticks after the cast at 0.3, then every 7 (SkillCast.cpp:1117-1129)', () => {
-    expect(darkSideHitTicks(0.3)).toBe(8);
-    expect(darkSideHitTicks(0.5)).toBe(5);
+  /** The ticks a follow-up goes out on, with the server's echo of the cast at the end of each tick in `echoes`. */
+  function followUps(echoes: readonly number[]): number[] {
     beginDarkSide(263, 5);
     observeDarkSideTargets(263, [6, 7, 8]);
+    if (echoes.includes(0)) observeDarkSideEcho(263);
     const sent: number[] = [];
     for (let t = 1; t <= 40; t++) {
       rageLayer.update?.(ENUM_WORLD.WD_0LORENCIA, 1 / 25);
       if (nextDarkSideHit() >= 0) sent.push(t);
+      if (echoes.includes(t)) observeDarkSideEcho(263);
     }
-    expect(sent).toEqual([8, 15, 22]);
     rageLayer.reset?.();
+    return sent;
+  }
+
+  it('follow-ups on (int)(2.5 / PlaySpeed): 8 ticks after the echo at 0.3, then every 7 (SkillCast.cpp:1117-1129)', () => {
+    expect(darkSideHitTicks(0.3)).toBe(8);
+    expect(darkSideHitTicks(0.5)).toBe(5);
+    expect(followUps([0])).toEqual([8, 15, 22]);
+  });
+
+  it('count from the server\'s echo of the cast, not the cast (AttackTime = 1, WSclient.cpp:13422-13429)', () => {
+    expect(followUps([])).toEqual([]);
+    expect(followUps([5])).toEqual([13, 20, 27]);
+  });
+
+  it('a later echo, of a follow-up of ours, does not restart the count', () => {
+    expect(followUps([0, 10])).toEqual([8, 15, 22]);
   });
 });
