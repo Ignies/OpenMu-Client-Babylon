@@ -84,6 +84,15 @@ describe('the lamp lights and flares the original never draws (lampFlares)', () 
     expect(at(ENUM_WORLD.WD_0LORENCIA, 150)).toEqual([0, 0, 78]);
   });
 
+  // `MoveHuntingGroundObject` lights the ground and hides the brazier; nothing renders it (GMHuntingGround.cpp:101-108).
+  it('burn no fire on the Land of Trials brazier (42) on Classic, its ground light kept', () => {
+    const brazier = () => lightEmittersFor(ENUM_WORLD.WD_31HUNTING_GROUND, 42)?.[0];
+    expect(brazier()?.emissions).toHaveLength(1);
+    setFidelityChoice(FIDELITY_CLASSIC, {});
+    expect(brazier()?.emissions).toBeUndefined();
+    expect(brazier()?.terrain).toBeDefined();
+  });
+
   it('light no ground under the fire vents and the Noria forge on Classic, their cards kept', () => {
     const cardsOn = UNLIT_FIRES.map(([world, type]) => cards(world, type));
     setFidelityChoice(FIDELITY_CLASSIC, {});

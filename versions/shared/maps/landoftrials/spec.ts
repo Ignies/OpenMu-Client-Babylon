@@ -1,5 +1,6 @@
 import type { Emission } from '@/controllers/fx/effectParticles';
 import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
+import { isOn } from '@/controllers/fidelity';
 
 /**
  * Land of Trials (`WD_31HUNTING_GROUND`, `World32`/`Object32`), the plain-data
@@ -52,6 +53,9 @@ export const LAND_OF_TRIALS_EMISSIONS: Partial<
   53: [{ kinds: ['smoke21'], every: 6 }],
 };
 
+/** Ours (`lampFlares`, none on Classic): the original hides the brazier and draws nothing there (:101-108). */
+const BRAZIER_FIRE: readonly Emission[] = [{ kinds: ['fire1', 'fire3'], every: 3, jitter: 6 }];
+
 /**
  * Type 42 (x55), `MoveHuntingGroundObject` :101-108:
  * `L = (rand%4+3) * 0.1; AddTerrainLight(x, y, (0.9L, 0.2L, 0.1L), 3)` -
@@ -64,7 +68,7 @@ export const LAND_OF_TRIALS_EMISSIONS: Partial<
  *
  * The 42 point light is ours (the original has no dynamic lights); 55 of them
  * in the open at range 3, at most 6 in a 32-tile window, is well under the
- * pool.
+ * pool. So is its fire (`BRAZIER_FIRE`).
  */
 export const LAND_OF_TRIALS_LIGHTS: Partial<
   Record<number, readonly LightEmitter[]>
@@ -77,7 +81,9 @@ export const LAND_OF_TRIALS_LIGHTS: Partial<
         color: [0.9, 0.2, 0.1],
         flicker: { min: 0.3, max: 0.6, steps: 4 },
       },
-      emissions: [{ kinds: ['fire1', 'fire3'], every: 3, jitter: 6 }],
+      get emissions() {
+        return isOn('lampFlares') ? BRAZIER_FIRE : undefined;
+      },
     },
   ],
   49: [
