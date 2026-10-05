@@ -93,6 +93,20 @@ describe('the lamp lights and flares the original never draws (lampFlares)', () 
     expect(brazier()?.terrain).toBeDefined();
   });
 
+  // `MoveKanturu1stObject` lights the ground and hides 60; only 61 burns (GM_Kanturu_1st.cpp:71-77, :158-164).
+  // The GM area runs the same code and Doppelganger 4 a copy (GMDoppelGanger4.cpp:91-96, :407-414).
+  it('burn no fire on the Kanturu deep-red brazier (60) on Classic, its ground light kept', () => {
+    const worlds = [ENUM_WORLD.WD_37KANTURU_1ST, ENUM_WORLD.WD_40AREA_FOR_GM, ENUM_WORLD.WD_68DOPPLEGANGER4];
+    const brazier = (world: ENUM_WORLD) => lightEmittersFor(world, 60)?.[0];
+    for (const world of worlds) expect(brazier(world)?.emissions, `world ${world}`).toHaveLength(1);
+    setFidelityChoice(FIDELITY_CLASSIC, {});
+    for (const world of worlds) {
+      expect(brazier(world)?.emissions, `world ${world}`).toBeUndefined();
+      expect(brazier(world)?.terrain, `world ${world}`).toBeDefined();
+      expect(lightEmittersFor(world, 61)?.[0].emissions, `world ${world}`).toHaveLength(1);
+    }
+  });
+
   it('light no ground under the fire vents and the Noria forge on Classic, their cards kept', () => {
     const cardsOn = UNLIT_FIRES.map(([world, type]) => cards(world, type));
     setFidelityChoice(FIDELITY_CLASSIC, {});

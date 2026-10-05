@@ -103,10 +103,14 @@ describe('the BITMAP_KANTURU_2ND_EFFECT1 cards (k_effect_01.jpg)', () => {
 describe('the BITMAP_SHINY + 1 cards (Shiny02.jpg)', () => {
   const shiny = (world: ENUM_WORLD, type: number) => cardsOf(world, type).filter(e => e.sprite?.texture === 'shiny1').length;
 
-  it('Kanturu 3 5 draws two, Land of Trials 49 one, Cursed Temple 62 two (GM_Kanturu_3rd.cpp:270-271, GMHuntingGround.cpp:154, ZzzObject.cpp:692, :696)', () => {
+  it('Kanturu 3 5 draws two, Land of Trials 49 one (GM_Kanturu_3rd.cpp:270-271, GMHuntingGround.cpp:154)', () => {
     expect(shiny(ENUM_WORLD.WD_39KANTURU_3RD, 5)).toBe(2);
     expect(shiny(ENUM_WORLD.WD_31HUNTING_GROUND, 49)).toBe(1);
-    expect(shiny(ENUM_WORLD.WD_45CURSEDTEMPLE_LV1, 62)).toBe(2);
+  });
+
+  // Its eyes ride a head that sweeps 138 across: the dragon hangs them itself (cursedtemple/dragonObject.test.ts).
+  it('Cursed Temple 62: no table card on top of the dragon\'s own (ZzzObject.cpp:684-696)', () => {
+    expect(cardsOf(ENUM_WORLD.WD_45CURSEDTEMPLE_LV1, 62)).toEqual([]);
   });
 });
 

@@ -35,8 +35,8 @@ import type { MeshAnimations } from '@/controllers/render';
  *  - **type 62 (×8)** (ZzzObject.cpp:678-704): mesh 2 lit then additive
  *    chrome, meshes 1 and 0 additive, and a `BITMAP_SMOKE` puff at bone 20
  *    one tick in five. The mesh passes are covered by the `_R` textures; the
- *    puff is not built. Its two `BITMAP_SHINY + 1` cards are rows in
- *    `CURSED_TEMPLE_LIGHTS`.
+ *    puff is not built. Its two `BITMAP_SHINY + 1` eyes ride bones 22 and 23
+ *    (`dragonObject.ts`).
  *  - **type 32's scrolling mesh** (ZzzObject.cpp:660-666): `StreamMesh = 2`
  *    drawn twice with U scrolling `-(t%4000)*0.00025` and `-(t%5000)*0.0002`.
  *    It would be a second row in `CURSEDTEMPLE_MESH_ANIMATIONS` below, which
@@ -160,17 +160,8 @@ export const CURSED_TEMPLE_EMISSIONS: Partial<
   ],
 };
 
-/** Type 62's eye: a Shiny02.jpg card `1.5 + fLumi / 2` across (ZzzObject.cpp:689-692). */
-const DRAGON_EYE = {
-  scale: 1,
-  color: [1, 0.5, 0.5],
-  grow: { speed: 0.001, amount: 0.25, base: 1.5 },
-  texture: 'shiny1',
-  unscaled: true,
-} as const;
-
 /**
- * The map's flames, its one glowing prop and the dragon's eyes. No row has a `terrain` block,
+ * The map's flames and its one glowing prop. No row has a `terrain` block,
  * because the original adds no terrain light anywhere on this map - the
  * torches are a `CreateSprite(BITMAP_LIGHT, …)` flare card and nothing else
  * (:630, :646), the way Icarus type 10 is. `recipeFromEmitter` returns null
@@ -193,10 +184,9 @@ const DRAGON_EYE = {
  *    0.70…1.70; the card takes the middle of that.
  *  - **77** (×20, :633-648): the same in blue, `0.70…1.20` on the blue
  *    channel.
- *  - **62** (×8, ZzzObject.cpp:684-696): two pink `BITMAP_SHINY + 1` cards,
- *    `1.5 + fLumi / 2` with `fLumi = sin(t * 0.001) * 0.5 + 0.5` and no
- *    `* o->Scale`, at bones 22 and 23 + (6, ±5, 2): the dragon's eyes. The
- *    head sweeps 138 across and 100 up; the cards sit at the middle.
+ *
+ * The dragon's eyes (62, ZzzObject.cpp:684-696) are not rows: its head sweeps
+ * 138 across and 100 up, so `dragonObject.ts` hangs them on bones 22 and 23.
  */
 export const CURSED_TEMPLE_LIGHTS: Partial<
   Record<number, readonly LightEmitter[]>
@@ -232,10 +222,6 @@ export const CURSED_TEMPLE_LIGHTS: Partial<
         { kinds: ['fire1', 'fire3'], every: 1, light: [0.21, 0.28, 0.95] },
       ],
     },
-  ],
-  62: [
-    { offset: [32, -29, 1032], bone: true, sprite: DRAGON_EYE },
-    { offset: [32, 23, 1030], bone: true, sprite: DRAGON_EYE },
   ],
 };
 

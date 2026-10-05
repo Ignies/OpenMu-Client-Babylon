@@ -57,10 +57,9 @@ export const SWAMP_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {
 /**
  * Type 57 (×18), `MoveObject` :81-86: `L = (rand%4+3)*0.1;
  * AddTerrainLight(x, y, (L, 0.6L, 0.2L), 3)` + hidden; the render side
- * (:139-148) adds `TRUE_FIRE` SubType 5 and `SMOKE` SubType 21, both at
- * `rand_fps_check(3)`. The point light and the 2/6 split of that one rate
- * are this port's, not the original's: a brazier reads as a flame with smoke
- * drifting off it rather than as equal parts of both.
+ * (:139-148) adds `TRUE_FIRE` SubType 5 and `SMOKE` SubType 21 together, one
+ * tick in three. `TRUE_FIRE`'s sheet, fantaF.jpg, has no kind: `fire1`/`fire3`
+ * stand in. The point light is this port's, not the original's.
  */
 export const SWAMP_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
   57: [
@@ -72,8 +71,8 @@ export const SWAMP_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
         flicker: { min: 0.3, max: 0.6, steps: 4 },
       },
       emissions: [
-        { kinds: ['fire1', 'fire3'], every: 2, jitter: 6 },
-        { kinds: ['smoke21'], every: 6 },
+        { kinds: ['fire1', 'fire3'], every: 3, jitter: 6 },
+        { kinds: ['smoke21'], every: 3 },
       ],
     },
   ],

@@ -35,6 +35,40 @@ describe('the map flare waves', () => {
     }
   });
 
+  // `CreateParticle` copies `o->Position` (ZzzEffectParticle.cpp:75) and FIRE_HIK1 0, FIRE_CURSEDLICH 4 and FIRE_HIK3 0
+  // add no offset (:1847-1856, :321-330, :1924-1933): every preset, a correction.
+  it('fire vents spawn their fire at the vent, no spread (ZzzEffectParticle.cpp:321-330, :1847-1856, :1924-1933)', () => {
+    const vents: [ENUM_WORLD, number][] = [
+      [ENUM_WORLD.WD_80KARUTAN1, 113],
+      [ENUM_WORLD.WD_81KARUTAN2, 113],
+      [ENUM_WORLD.WD_79UNITEDMARKETPLACE, 57],
+      [ENUM_WORLD.WD_63PK_FIELD, 6],
+      [ENUM_WORLD.WD_66DOPPLEGANGER2, 6],
+    ];
+    for (const [world, type] of vents) {
+      const fires = lightEmittersFor(world, type)?.flatMap(e => (Array.isArray(e.emissions) ? e.emissions : []));
+      expect(fires?.map(f => f.jitter), `world ${world} type ${type}`).toEqual([undefined]);
+    }
+  });
+
+  // `if (rand_fps_check(3)) CreateParticle(BITMAP_TRUE_FIRE, ...)`: one tick in three; the Swamp's smoke on the same roll.
+  it('the BITMAP_TRUE_FIRE braziers burn one tick in three (GMNewTown.cpp:249-254, GM_Kanturu_1st.cpp:158-164, GM3rdChangeUp.cpp:126-132, GMSwampOfQuiet.cpp:139-148)', () => {
+    const braziers: [ENUM_WORLD, number][] = [
+      [ENUM_WORLD.WD_51ELBELAND, 0],
+      [ENUM_WORLD.WD_37KANTURU_1ST, 61],
+      [ENUM_WORLD.WD_40AREA_FOR_GM, 61],
+      [ENUM_WORLD.WD_68DOPPLEGANGER4, 61],
+      [ENUM_WORLD.WD_41CHANGEUP3RD_1ST, 3],
+      [ENUM_WORLD.WD_42CHANGEUP3RD_2ND, 3],
+      [ENUM_WORLD.WD_56MAP_SWAMP_OF_QUIET, 57],
+    ];
+    for (const [world, type] of braziers) {
+      const emissions = lightEmittersFor(world, type)?.flatMap(e => (Array.isArray(e.emissions) ? e.emissions : []));
+      expect(emissions?.length, `world ${world} type ${type}`).toBeGreaterThan(0);
+      expect(emissions?.map(f => f.every), `world ${world} type ${type}`).toEqual(emissions?.map(() => 3));
+    }
+  });
+
   // `CreateSprite(BITMAP_LIGHT, bone 5, Luminosity + 0.2f, (0.6, 0.6, 1), o)`, `Luminosity = sinf(WorldTime * 0.001f) * 0.3f + 0.7f`.
   it('Kalima 12 and 32: the flower glow grows and shrinks on bone 5, unscaled (GMHellas.cpp:439-460)', () => {
     const glow = {
@@ -73,18 +107,6 @@ describe('the map flare waves', () => {
       { ...at, sprite: { scale: 0.5, color: [1, 0, 0], unscaled: true } },
       { ...at, sprite: { scale: 1.2, color: [0.3, 0.3, 0.3], texture: 'shiny1', unscaled: true, randomAngle: true } },
     ]);
-  });
-
-  // `CreateSprite(BITMAP_SHINY + 1, ..., 1.5f + fLumi / 2.f, (1, 0.5, 0.5), NULL)`, `fLumi = sinf(WorldTime * 0.001f) * 0.5f + 0.5f`,
-  // at bones 22 and 23 + (6, +-5, 2), the middle of the head's swing.
-  it('Cursed Temple 62: two pink Shiny02 cards on the dragon\'s eyes that grow and shrink (ZzzObject.cpp:684-696)', () => {
-    const sprite = { scale: 1, color: [1, 0.5, 0.5], grow: { speed: 0.001, amount: 0.25, base: 1.5 }, texture: 'shiny1', unscaled: true };
-    for (let world = ENUM_WORLD.WD_45CURSEDTEMPLE_LV1; world <= ENUM_WORLD.WD_45CURSEDTEMPLE_LV6; world++) {
-      expect(cardsOf(world, 62), `world ${world}`).toEqual([
-        { offset: [32, -29, 1032], bone: true, sprite },
-        { offset: [32, 23, 1030], bone: true, sprite },
-      ]);
-    }
   });
 
   // `fLumi = (sinf(WorldTime * 0.001f) + 1.0f) * 0.3f + 0.4f` tints `(1, 1, 0.6)`; `Scale * 6` at bone 5 + (-40, -10, 0).

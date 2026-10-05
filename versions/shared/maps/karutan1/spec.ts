@@ -106,7 +106,8 @@ export const KARUTAN_MESH_ANIMATION: Partial<Record<number, MeshAnimation>> = {
  * `MoveObject` :43-49, type 113: `L = (rand%4+3)*0.1; AddTerrainLight(x, y,
  * (L, 0.6L, 0.2L), 3)` (the `case 113:` falls through into the hidden list)
  * + `RenderObjectVisual` :100-122: a steady `BITMAP_LIGHT` sprite at
- * `2 * scale` in `(1, 0.2, 0)` and the cycling `FIRE_HIK1` / `CURSEDLICH` / `HIK3`. Type 66's two `SHINY+5`
+ * `2 * scale` in `(1, 0.2, 0)` and the cycling `FIRE_HIK1` / `CURSEDLICH` / `HIK3` at the vent (as
+ * Vulcanus 6, `vulcanus/spec.ts`). Type 66's two `SHINY+5`
  * points (:68-82) ride bones that sweep with its clips, so the insect hangs
  * them itself (`insectObject.ts`).
  */
@@ -139,7 +140,7 @@ export const KARUTAN_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = 
         color: [1, 0.6, 0.2],
         flicker: { min: 0.3, max: 0.6, steps: 4 },
       },
-      emissions: [{ kinds: ['fire1', 'fire2', 'fire3'], every: 1, jitter: 6 }],
+      emissions: [{ kinds: ['fire1', 'fire2', 'fire3'], every: 1 }],
     },
   ],
   72: [...plantBulb([24, -18, 207], 2), ...plantBulb([-153, -34, 151], 4, true)],
