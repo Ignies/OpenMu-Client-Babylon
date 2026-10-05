@@ -180,10 +180,13 @@ export const WALL_TORCH_FLARE: NonNullable<LightEmitter['sprite']> = {
   texture: 'flare',
 };
 
-/** The same flare warm, ours: a lit torch's, as `LOGIN_WALL_TORCH` draws it on the login scene. */
+/**
+ * The same flare warm, ours: a lit torch's, as `LOGIN_WALL_TORCH` draws it on the login scene. The
+ * tint gives Flare.jpg the mean colour [1, 0.45, 0.15] gave flare01.jpg, the sheet it was tuned on.
+ */
 const WALL_TORCH_WARM_FLARE: NonNullable<LightEmitter['sprite']> = {
   ...WALL_TORCH_FLARE,
-  color: [1, 0.45, 0.15],
+  color: [0.395, 0.277, 0.279],
 };
 
 /**

@@ -8,7 +8,7 @@ const flareColors = vi.hoisted(() => [] as (readonly number[])[]);
 const flareSheets = vi.hoisted(() => [] as (string | undefined)[]);
 
 vi.mock('@/controllers/lighting', () => ({
-  LOGIN_WALL_TORCH: { sprite: { scale: 4, color: [1, 0.45, 0.15], texture: 'flare' }, terrain: { range: 2, color: [1, 1, 1] } },
+  LOGIN_WALL_TORCH: { sprite: { scale: 4, color: [0.395, 0.277, 0.279], texture: 'flare' }, terrain: { range: 2, color: [1, 1, 1] } },
   createEffectLight: async (_scene: unknown, spec: { color: readonly number[]; texture?: string }) => {
     built.push('flare');
     flareColors.push(spec.color);
@@ -52,7 +52,7 @@ describe('the login wall torch', () => {
 
   it('burns with its light and a warm flare on Enhanced (the loginWallTorches improvement)', async () => {
     expect(await build()).toEqual(['fire', 'flare', 'light']);
-    expect(flareColors).toEqual([[1, 0.45, 0.15]]);
+    expect(flareColors).toEqual([[0.395, 0.277, 0.279]]);
   });
 
   // Case 37: CreateSprite(BITMAP_FLARE, ..., fLumi * 0.7 on all three channels).

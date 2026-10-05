@@ -82,11 +82,15 @@ export const LOGIN_CHANDELIER: LightEmitter = {
   },
 };
 
-/** Login-scene wall torch, type 37: at `bone_1_`, a breathing flare on case 37's BITMAP_FLARE sheet. */
+/**
+ * Login-scene wall torch, type 37: at `bone_1_`, a breathing flare on case 37's BITMAP_FLARE sheet.
+ * Its warm tint gives Flare.jpg, already an orange star, the mean colour [1, 0.45, 0.15] gave the
+ * white flare01.jpg it was tuned on (`empireguardian4/spec.test.ts` works it out from the pixels).
+ */
 export const LOGIN_WALL_TORCH: LightEmitter = {
   sprite: {
     scale: 4,
-    color: [1, 0.45, 0.15],
+    color: [0.395, 0.277, 0.279],
     pulse: { speed: 0.039, amount: 0.2, base: 0.6 },
     texture: 'flare',
   },

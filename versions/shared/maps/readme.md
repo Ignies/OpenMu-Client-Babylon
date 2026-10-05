@@ -101,7 +101,9 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   (Lorencia 90 and 150, Devias 66 and the candelabra, Elbeland 61, Lost Tower 23) are the
   `lampFlares` improvement: gone on Classic, the light under them kept.
 - `loginscene/wallTorchObject.test.ts`, `empireguardian4/spec.test.ts`: the wall torch's flare, on
-  the `BITMAP_FLARE` sheet lit or not, and the fortress lights on Classic and Enhanced.
+  the `BITMAP_FLARE` sheet lit or not, and the fortress lights on Classic and Enhanced; a lit torch's
+  warm tint gives Flare.jpg the mean colour its old tint gave flare01.jpg, worked out from the two
+  sheets' pixels in `Data/Effect`.
 - `empireguardian/spec.test.ts`: days 1-3 draw day 4's blue lamp (80) and bind its wall torch (37).
 - `chaoscastle/thunder.test.ts`: pillar thunder timing, which pillar it strikes and the bolt's fall.
 - `chaoscastle/clouds.test.ts`: the blue fog banks on types 6-11; 12 stays a marker.
