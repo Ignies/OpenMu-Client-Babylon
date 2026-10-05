@@ -732,7 +732,7 @@ export const SkillCastSystem: ISystemFactory = world => {
       // ExecuteSkill plays the skill's sound as the cast starts (Fire Scream's only at its spawn); a cast
       // its skill makes quiet on this mount (a Dark Horse rider's guard) has none.
       if (!combat.castQuietOn(def.num, castContext(hero).mount)) {
-        playCombat(clipCastSound(def.num, action) ?? heroCastSound(def.num), hero.transform.pos);
+        playCombat(clipCastSound(def.num, action) ?? heroCastSound(def.num, !!target && target !== hero), hero.transform.pos);
       }
 
       cooldown = Math.max(

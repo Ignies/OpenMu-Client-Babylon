@@ -21,6 +21,16 @@ vi.mock('@/ecs/current', () => ({
   },
 }));
 
+// The sounds the cast plays.
+const played = vi.hoisted(() => [] as string[]);
+vi.mock('@/controllers/sound/listener', async importOriginal => ({
+  ...(await importOriginal<object>()),
+  playSfx: (key: string) => {
+    played.push(key);
+    return 0;
+  },
+}));
+
 // Skills first: they keep the app import cycle in order (versions/shared/skills/readme.md).
 await import('@versions/shared/skills/skillVisuals');
 const { SkillCastSystem } = await import('./skillCastSystem');
@@ -30,6 +40,7 @@ const { TEX } = await import('../../controllers/fx/recipes');
 const { Session } = await import('../../modules/session');
 const { HeroSkills, skills } = await import('../../modules/skills');
 const { RageAttackRangeRequestPacket, RageAttackRequestPacket } = await import('@versions/shared/packets/ClientToServerPackets');
+const { darkSideCast } = await import('@versions/shared/skills/rage_fighter/dark_side/rage');
 
 const TICK = 1 / 25;
 
@@ -50,7 +61,7 @@ const body = (netId: number, x: number, z: number) =>
   ({ netId, transform: { pos: new Vector3(x, 0, z), rot: new Vector3(), scale: 1 } }) as unknown as Entity;
 
 describe('Dark Side follow-up blows', () => {
-  it('draw a blow on each target the 0x4B response named and send nothing (MonkSystem.cpp:610)', () => {
+  it('send nothing and draw nothing of their own: the hero\'s DarksideRendering draws what shows (MonkSystem.cpp:610, :697-857)', () => {
     const hero = {
       ...body(1, 100, 100),
       localPlayer: true,
@@ -81,21 +92,20 @@ describe('Dark Side follow-up blows', () => {
     combat.beginDarkSide(263, 5);
     combat.observeDarkSideTargets(263, [6, 7]);
     combat.observeDarkSideEcho(263, hero);
+    const hits: number[] = [];
     for (tick = 1; tick <= 40; tick++) {
+      const before = darkSideCast.sent;
       combat.update(ENUM_WORLD.WD_0LORENCIA, TICK);
+      if (darkSideCast.sent > before) hits.push(tick);
       system.update?.(TICK);
       effects.update(ENUM_WORLD.WD_0LORENCIA, TICK);
     }
     combat.reset();
 
     expect(sent).not.toHaveBeenCalled();
-    // The blows on ticks 8 and 15 (SkillCast.cpp:1117-1129) burst on their targets 20 and 21 effect steps on.
-    expect(bursts).toEqual([
-      [27, 103],
-      [28, 103],
-      [34, 107],
-      [35, 107],
-    ]);
+    // The blows on ticks 8 and 15 (SkillCast.cpp:1117-1129) landed; none drew a burst.
+    expect(hits).toEqual([8, 15]);
+    expect(bursts).toEqual([]);
   });
 });
 
@@ -146,5 +156,53 @@ describe('Dark Side with nothing selected', () => {
     // No walk to the cursor and no turn: the Dark Side case sets no Angle (SkillCast.cpp:881-895).
     expect(world.castApproach).toBeNull();
     expect(hero.transform?.rot.y).toBe(0);
+  });
+});
+
+describe('Dragon Slasher at the click', () => {
+  /** The hero casts 265 at `target` (a forced cast at the ground with none) and the sounds it plays. */
+  function cast(target: Entity | null): string[] {
+    const hero = {
+      ...body(1, 100, 100),
+      localPlayer: true,
+      pathfinding: { path: null },
+      attributeSystem: { isAboveZero: () => false, getValue: () => 0 },
+      playerAnimation: { action: PlayerAction.PLAYER_STOP_MALE },
+      modelObject: {
+        CurrentAction: PlayerAction.PLAYER_STOP_MALE,
+        AnimationSpeed: 0.3,
+        ActionIterationWasFinished: true,
+        actionPlaySpeed: () => undefined,
+        restartAction: () => {},
+        getActionDuration: () => 1,
+      },
+    } as unknown as Entity;
+    const world = {
+      scene,
+      mapIndex: 0,
+      playerEntity: hero,
+      castRequest: { target, point: { x: 101, y: 101 }, forced: !target },
+      rightPointerPressed: false,
+      getByNetId: () => target ?? undefined,
+      getTerrainFlag: () => 0,
+      netObjsQuery: { entities: [] },
+    } as unknown as World;
+    store.world = world;
+    HeroSkills.currentSkill = 265;
+    vi.spyOn(skills, 'canUse').mockReturnValue(true);
+    vi.spyOn(skills, 'startCooldown').mockReturnValue(true);
+    vi.spyOn(Session, 'sendToGS').mockImplementation(() => {});
+    played.length = 0;
+    SkillCastSystem(world).update?.(TICK);
+    combat.reset();
+    HeroSkills.currentSkill = -1;
+    store.world = null;
+    return [...played];
+  }
+
+  it('plays Rage_Dragonkick with a target and none without: RageCreateEffect returns before it (SkillCast.cpp:866-879, MonkSystem.cpp:1226-1227, :1259)', () => {
+    const monster = { ...body(9, 101, 101), npcType: 3 } as unknown as Entity;
+    expect(cast(monster)).toContain('Sound/Ragefighter/Rage_Dragonkick');
+    expect(cast(null)).not.toContain('Sound/Ragefighter/Rage_Dragonkick');
   });
 });

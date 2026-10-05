@@ -18,7 +18,7 @@ Dark Lord skills, one folder per skill. Rules for skill folders: [../readme.md](
 | `electric_spike` | 65, 519 str | a gathering charge, five flare force joints, skill models at the weapon |
 | `abolish_magic` | 72 | six bands spiral in on the caster, rise and burst out, four shock waves |
 | `fire_blast` | 74 | a hidden homing piece drops six inferno pillars on the target |
-| `brand_of_skill` | 75 | skill models at the weapon bones and a mana rune above |
+| `brand_of_skill` | 75 | at the release, white skill models at (45, +-45, 0) on Weapon[0]'s and Weapon[1]'s link bones (none at arrows, bolts or a shield) and a mana rune above |
 | `fire_scream` | 78, 518 str, 520 mastery | three pairs of dark scream models, ground streaks, puffs and flames |
 | `chaotic_diseier` | 238 | dark stars on the body, eight dark ribbons with birds, feathers and smoke |
 | `iron_defense` | 521, 524 str | `IRON_DEFENSE` from `../_shared.ts`: nothing in Classic |
@@ -32,14 +32,18 @@ Dark Lord skills, one folder per skill. Rules for skill folders: [../readme.md](
 - Force parts: `force`, `forceGraded`, `forceHeads`, `hummingDir`;
 - `SPLIT_EMBERS`, `sfx`;
 - angle helpers: `yawDegrees`, `sideOf`, `forwardOfDeg`, `muYaw`, `muRotated`, `muAngle`;
+- the hand cards: `cardHands` (Weapon[0] = the appearance's left hand on bone 33, Weapon[1] = its right hand on 42, with
+  the skips) and `handCard` (MODEL_DARKLORD_SKILL at (45, +-45, 0), Scale 0.2, 10 ticks, in a Light): Add Critical and Brand of Skill;
 - `MOUNTED_STRIKE`: the strike clip per mount.
 
 ## Depends on / used by
-- uses: `../_shared.ts`, `@/controllers/{skills,fx,lighting,sound,combat}`
+- uses: `../_shared.ts`, `@/controllers/{skills,fx,lighting,sound,combat}`, `actors` (the hand bones and item groups)
 - used by: `../index.ts` (glob)
 
 ## Change it
 - see [docs/how_to/add_skill.md](../../../../docs/how_to/add_skill.md).
 
 ## Tests
+- `hand_cards.test.ts`: the MODEL_DARKLORD_SKILL cards of the hand skills, on Weapon[0]'s bone 33 and Weapon[1]'s bone 42
+  (the appearance's left and right hand), with their skips.
 - Covered by the golden tests in `../` (`skillVisuals.golden.test.ts`, `skillTables.golden.test.ts`).

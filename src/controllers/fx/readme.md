@@ -21,7 +21,7 @@ shared pools, textures and particle recipes other folders reuse.
   `spriteLevel` and `TEX` for map object classes.
 - Entry option types skill files import: `ModelOptions`, `SpriteOptions`, `RingOptions`,
   `ParticlesOptions`, `ProjectileOptions`, `AuraOptions`, `JointOptions`, `CardOptions`, ... and
-  handles (`ModelHandle`, `StampsHandle`, `SummonBody`, `TailStrip`). `spawnModel` (`model.ts`) and
+  handles (`ModelHandle`, `StampsHandle`, `SummonBody`, `TailStrip`, `AfterimageHandle`). `spawnModel` (`model.ts`) and
   `spawnLinkedModel` (`linkedModel.ts`) spawn without the facade and hand back a richer handle.
 - Modules the ECS systems and other controllers call directly:
   - `effectParticles.ts`: the map-object sprite pool (`Emission`, `ParticleEmitter`,
@@ -83,6 +83,9 @@ shared pools, textures and particle recipes other folders reuse.
 ## Tests
 - `effectParticles.test.ts`: `KIND_REACH` covers every particle kind, and the view gate of
   `ParticleEmitter` / `BonedParticleEmitter` (spawns only when a sprite could reach the frustum).
+- `afterimage.test.ts`: a copy takes the drawn meshes of each part onto a skeleton of its own, posed on
+  the clip's first key while the body keeps its own; a placed part stands where a body facing that way
+  would draw it, at its alpha; an unplaced or 0-alpha part is not drawn; it ends taking its copies along.
 - `glow.test.ts`: the effect halo's render list draws only the included meshes and follows
   resizes and map changes.
 - `greasedLineRelease.test.ts`: releasing simple and textured lines never throws and keeps the
@@ -105,6 +108,15 @@ shared pools, textures and particle recipes other folders reuse.
 Pools come from `core.ts`: `additiveMaterial` + `acquireCard` for a handful of billboards,
 `particleSystemFor` / `emitBurst` / `Emitter` for many. Each tuning constant says what it is in
 real units and why. Module state lives in the entry file, never in the facade.
+
+### afterimage.ts
+The original draws a body again where it is not: `DarksideRendering` renders each part a second time at
+another Position, Angle, action and Alpha (MonkSystem.cpp:697-857). A spawn clones the drawn meshes of the
+parts it is given (geometry and materials stay the body's, metadata is copied so the item shader lights
+them as the body) onto one clone of the body's skeleton, unlinked from the rig's nodes and stood once on
+the clip's first key, so nothing poses per frame. Each part hangs on a node of its own, so the spawner
+can put every part where its own call left it; below alpha 1 the meshes take their blended twin
+(`setMeshFadeBlend`), as a fading body does. Clones stay out of the cascades, the depth and the halo.
 
 ### ambientParticles.ts
 High-count, long-lived emitters (rain, snow, leaves, dust) that the CPU sprite pool is wrong for.
@@ -250,6 +262,7 @@ a pool. Spawned by `versions/shared/skills/dark_wizard/evil_spirit`.
 Each mesh is drawn bright, textured at `Alpha`, both, or hidden, in its own light; the clip is
 picked by index and run at the original's keys a tick; the spawner reads its bones. The clone,
 skeleton and animation groups are the spawn's own; materials are cached, nothing compiles per spawn.
+A mesh's `scrollV` writes the V offset of the GLB's own sheet once a frame, as model.ts `scrollV` does.
 
 ### tails.ts
 Tail centres are laid one a tick, each tail two crossed faces `width` wide, U per tail slot

@@ -30,6 +30,7 @@ import { weaponHideLayer } from './weaponHide';
 import { quakeLayer } from './quake';
 import { homingLayer } from './homing';
 import { summonLayer } from './summon';
+import { afterimageLayer } from './afterimage';
 import { tickedLayer } from './ticked';
 
 /**
@@ -47,6 +48,7 @@ export const EFFECT_LAYERS = [
   modelLayer, // reads projectile's / debris' / feathers' points
   stampsLayer,
   summonLayer, // its spawners read its bones; nothing it reads moves after it
+  afterimageLayer, // a body's parts copied; its spawner places them on its own tick
   linkedModelLayer, // hangs off a character bone; the ticked driver below reads its bones
   spriteLayer,
   cardsLayer,

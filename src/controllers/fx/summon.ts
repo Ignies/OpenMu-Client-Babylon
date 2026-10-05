@@ -45,6 +45,8 @@ interface SummonMesh {
   colour?: RGB;
   /** Sheet widths a second the U coordinate runs (`BlendMeshTexCoordU = -WorldTime * 0.001` is -1). */
   scrollU?: number;
+  /** The V offset on the effects clock (`BlendMeshTexCoordV`); the GLB's sheet, so every user of it shares the offset, as model.ts `scrollV`. */
+  scrollV?: (now: number) => number;
 }
 
 interface SummonOptions {
@@ -145,6 +147,8 @@ function spawn(scene: Scene, at: Vector3, opts: SummonOptions): EffectHandle {
   let overlays: (AbstractMesh | null)[] = [];
   let groups: AnimationGroup[] = [];
   let skeleton: Skeleton | null = null;
+  /** The sheets a mesh scrolls in V, and how. */
+  const scrollsV: { tex: Texture; at: (now: number) => number }[] = [];
   let root: AbstractMesh | null = null;
   let disposed = false;
   let pending: ClipRequest | null = { clip: opts.clip ?? 0, keysPerTick: opts.keysPerTick ?? DEFAULT_KEYS_PER_TICK, loop: opts.loop ?? true, holdKey: undefined };
@@ -240,6 +244,9 @@ function spawn(scene: Scene, at: Vector3, opts: SummonOptions): EffectHandle {
         meshes = root.getChildMeshes(false).sort((a, b) => a.name.localeCompare(b.name));
         overlays = meshes.map(() => null);
         meshes.forEach((mesh, i) => {
+          const scroll = specs[i]?.scrollV;
+          const sheet = mesh.metadata?.diffuseTexture as Texture | undefined;
+          if (scroll && sheet) scrollsV.push({ tex: sheet, at: scroll });
           const c = specs[i]?.colour ?? RGBS.white;
           mesh.metadata ??= {};
           mesh.metadata.bodyLight = new Vector3(c[0], c[1], c[2]);
@@ -268,6 +275,7 @@ function spawn(scene: Scene, at: Vector3, opts: SummonOptions): EffectHandle {
         for (let i = 0; i < meshes.length; i++) if (drawOf[i] === 'alpha' || drawOf[i] === 'both') meshes[i].material = fading ? faded : solid;
       }
       for (const m of meshes) m.visibility = vis;
+      for (const s of scrollsV) s.tex.vOffset = s.at(fxNow());
       for (const o of overlays) if (o) o.visibility = vis;
       return true;
     },

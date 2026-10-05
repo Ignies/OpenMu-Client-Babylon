@@ -39,6 +39,8 @@ export interface SkillDef {
   readonly soundOnLanding?: true;
   /** The hero's own cast is silent at the click; the effect makes its sound later. */
   readonly silentHeroCast?: true;
+  /** The hero's click plays this only when the cast has a target (the effect it belongs to has none without one). */
+  readonly targetSound?: Sounds;
   /** Cast animation, on foot and per mount, or a pick of its own (a coin toss, the map). */
   readonly clip?: SkillClipSet | ClipPick;
   /** A clip picked from the caster's hands and swing count, ahead of `clip`; null falls through. */

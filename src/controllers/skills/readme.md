@@ -27,7 +27,7 @@ themselves are content in `versions/shared/skills/` (see [docs/content.md](../..
 ## How it works
 - `registerSkills` writes `visual` into `SKILL_VISUALS`, `lookAliases` / `masterAliases` into
   `LOOK_ALIASES` (and `MASTER_BASES`, `combat/skillAliases.ts`), `light` into
-  `lighting/skills.ts`, `sound` / `clipSound` / `soundOnLanding` / `silentHeroCast` into
+  `lighting/skills.ts`, `sound` / `clipSound` / `soundOnLanding` / `silentHeroCast` / `targetSound` into
   `sound/combat.ts`, `delayMs` into `combat/skillDelays.ts` (`SKILL_DELAY_MS`), `effect` (also under
   each of its `effectAliases`) into `tables.ts` (`SKILL_EFFECTS`), `cancel` into the table `cancelledEffects` reads, `buffs` /
   `buffArrivals` / `buffHits` into `BUFF_VISUALS` / `BUFF_ARRIVALS` / `BUFF_HITS`, and hands

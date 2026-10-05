@@ -112,6 +112,9 @@ function groundWind(c: SkillContext, over: () => boolean): (frame: number) => vo
   };
 }
 
+/** RageCreateEffect's SOUND_RAGESKILL_DRAGONKICK, with a target only (MonkSystem.cpp:1259). */
+const KICK_SOUND = 'Sound/Ragefighter/Rage_Dragonkick';
+
 /** The dummy's Light, which its particles on the target take (MonkSystem.cpp:1222-1223). */
 const KICK_LIGHT: RGB = [0.7, 0.7, 1];
 
@@ -233,9 +236,10 @@ function moveMote(m: Mote, fx: TickedFx): boolean {
 
 /**
  * At the packet the dummy, which has no mesh, and with a target the MULTI_SHOT1/2/3 volley turned to it and Rage_Dragonkick:
- * RageCreateEffect returns before both without one (MonkSystem.cpp:1215-1260). Each tick the dummy lives
- * (MoveHandlers.cpp:9826-9915): the ground wind between keys 4 and 5, past key 5 the burst on the target, past key 8
- * Rage_Dragonkick_Att (LifeTime = 150 then == 150, so every tick). Leaving the clip ends it all but the particles already out.
+ * RageCreateEffect returns before both without one (MonkSystem.cpp:1215-1260). The hero's sound went at his click (his
+ * RageCreateEffect runs at the cast, SkillCast.cpp:866-879; the echo makes none for him, WSclient.cpp:5115-5121). Each tick
+ * the dummy lives (MoveHandlers.cpp:9826-9915): the ground wind between keys 4 and 5, past key 5 the burst on the target, past
+ * key 8 Rage_Dragonkick_Att (LifeTime = 150 then == 150, so every tick). Leaving the clip ends it all but the particles out.
  */
 const dragonKick: Step = (_at, c) => {
   let over = false;
@@ -243,7 +247,7 @@ const dragonKick: Step = (_at, c) => {
   const p = c.caster.transform?.pos;
   if (target) {
     multiShotVolleyAt(c, angleToward(c, target));
-    if (p) playCombat('Sound/Ragefighter/Rage_Dragonkick', { x: p.x, z: p.z });
+    if (p && !c.caster.localPlayer) playCombat(KICK_SOUND, { x: p.x, z: p.z });
   }
   const wind = groundWind(c, () => over);
   const motes: Mote[] = [];
@@ -272,8 +276,9 @@ export default defineSkill({
   id: 265,
   name: "Dragon Slasher",
   // 265 Dragon Slasher (AT_SKILL_DRAGON_KICK): the volley, the ground wind and the per-tick burst; see dragonKick.
-  // Rage_Dragonkick is the effect's, with a target only, so it plays with it rather than at the click.
+  // Rage_Dragonkick is the effect's, with a target only: the hero's click plays it, everyone else's effect.
   visual: { cast: dragonKick },
+  targetSound: KICK_SOUND,
   delayMs: 3000, // Dragon Slasher
   clip: { ground: A.PLAYER_SKILL_DRAGONKICK }, // Dragon Slasher
   stepIn: 'midClip',

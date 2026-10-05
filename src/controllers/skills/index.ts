@@ -2,7 +2,7 @@ import type { RGB } from '../fx/core';
 import type { Sounds } from '../sound/recipes';
 import { combat, MASTER_BASES, SKILL_DELAY_MS } from '../combat';
 import { SKILL_LIGHTS } from '../lighting/skills';
-import { LANDING_SOUNDS, SILENT_HERO_CASTS, SKILL_CLIP_SOUNDS, SKILL_SOUNDS } from '../sound/combat';
+import { LANDING_SOUNDS, SILENT_HERO_CASTS, SKILL_CLIP_SOUNDS, SKILL_SOUNDS, SKILL_TARGET_SOUNDS } from '../sound/combat';
 import { SKILL_EFFECTS } from './tables';
 import type { SkillCancel, SkillDef } from './define';
 import type { Entity } from '@/ecs/world';
@@ -28,6 +28,7 @@ export function registerSkills(defs: readonly SkillDef[]): void {
     if (d.clipSound) SKILL_CLIP_SOUNDS[d.id] = d.clipSound;
     if (d.soundOnLanding) LANDING_SOUNDS.add(d.id);
     if (d.silentHeroCast) SILENT_HERO_CASTS.add(d.id);
+    if (d.targetSound) SKILL_TARGET_SOUNDS[d.id] = d.targetSound;
     if (d.delayMs !== undefined) (SKILL_DELAY_MS as Record<number, number>)[d.id] = d.delayMs;
     if (d.effect !== undefined) for (const id of [d.id, ...(d.effectAliases ?? [])]) SKILL_EFFECTS[id] = d.effect;
     if (d.cancel) SKILL_CANCELS[d.id] = d.cancel;
