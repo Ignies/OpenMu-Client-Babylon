@@ -6,6 +6,8 @@ import { EventBus } from '@/core/eventBus';
 import { type MUAttributeSystem } from '@/core/attributeSystem';
 import { MonsterActionType, PlayerAction, ServerPlayerActionType } from '@versions/shared/objects/enum';
 import { ObjectAnimationPacket, ObjectGotKilledPacket, ObjectHitExtendedPacket, ObjectHitPacket, RageAttackPacket, RageAttackRangeResponsePacket, SkillAnimationPacket } from '@versions/shared/packets/ServerToClientPackets';
+import { TargetedSkillPacket } from '@versions/shared/packets/ClientToServerPackets';
+import { Session } from '../session';
 import { ServerToClientActionMap, resolveGenderedAction } from '@/controllers/anim/playerActionMapper';
 import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
@@ -168,6 +170,17 @@ function applyHealthStatus(attributes: MUAttributeSystem, status: number): void 
 
 /** Bytes before the target list of RageAttackRangeResponse (C1 header 3 + skill 2 + count 1). */
 const RAGE_RANGE_TARGETS_OFFSET = 6;
+/** An empty target slot: OpenMU's RageTarget default, the original's DS_TARGET_NONE (NUMOFMON, MonkSystem.h:78). */
+const DS_TARGET_NONE = 10000;
+
+/** `SendRequestMagic`: 0x19, `skill` on `targetId`. */
+function sendTargetedSkill(skill: number, targetId: number): void {
+  if (Session.isOffline) return;
+  const packet = TargetedSkillPacket.createPacket();
+  packet.SkillId = skill;
+  packet.TargetId = targetId;
+  Session.sendToGS(packet.buffer);
+}
 
 /** The original's `AttackPlayer`: who last sent an attack or skill animation, for Soul Barrier's hit shell. */
 let lastAttacker: Entity | null = null;
@@ -457,14 +470,16 @@ export function installNet(): void {
     if (heroKill && obj.npcType !== undefined) playKillEnergy(world, obj, p.SkillId);
   });
 
-  /** Dark Side (0x4B): the targets the server chose for the follow-up blows. */
+  /**
+   * Dark Side (0x4B): the targets the server chose for the follow-up blows. Naming none, the
+   * hero asks for the skill on himself instead (SendRequestMagic, MonkSystem.cpp:537-553).
+   */
   EventBus.on('RageAttackRangeResponse', packet => {
     const p = new RageAttackRangeResponsePacket(packet);
     const count = Math.floor((p.buffer.byteLength - RAGE_RANGE_TARGETS_OFFSET) / 2);
-    combat.observeDarkSideTargets(
-      p.SkillId,
-      p.getTargets(count).map(t => t.TargetId & 0x7fff)
-    );
+    const targets = p.getTargets(count).map(t => t.TargetId & 0x7fff).filter(id => id !== DS_TARGET_NONE);
+    combat.observeDarkSideTargets(p.SkillId, targets);
+    if (!targets.length && combat.isDarkSide(p.SkillId) && Hero.playerId !== undefined) sendTargetedSkill(p.SkillId, Hero.playerId);
   });
 
   EventBus.on('ObjectHit', packet => applyObjectHit(new ObjectHitPacket(packet)));

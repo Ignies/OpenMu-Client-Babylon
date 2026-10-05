@@ -38,7 +38,9 @@ const { installNet } = await import('./net');
 const { combat } = await import('@/controllers/combat');
 const { Hero } = await import('@/modules/hero');
 const { EventBus } = await import('@/core/eventBus');
-const { RageAttackPacket } = await import('@versions/shared/packets/ServerToClientPackets');
+const { RageAttackPacket, RageAttackRangeResponsePacket } = await import('@versions/shared/packets/ServerToClientPackets');
+const { TargetedSkillPacket } = await import('@versions/shared/packets/ClientToServerPackets');
+const { Session } = await import('@/modules/session');
 
 const HERO = 7;
 const OTHER = 9;
@@ -118,6 +120,50 @@ describe('RageAttack (C3 4A)', () => {
     rageAttack(HERO);
     rageAttack(HERO, 6);
     expect(drawn).toEqual([HERO]);
+    combat.reset();
+  });
+});
+
+/** C1 4B for `skill`: its five slots, the ones past `targets` the empty DS_TARGET_NONE (10000) OpenMU fills them with. */
+function rangeResponse(skill: number, targets: number[]): void {
+  const p = RageAttackRangeResponsePacket.createPacket();
+  p.SkillId = skill;
+  for (let i = 0; i < 5; i++) p.buffer.setUint16(6 + i * 2, targets[i] ?? 10000, true);
+  EventBus.emit('RageAttackRangeResponse', p.buffer);
+}
+
+describe('RageAttackRangeResponse (C1 4B)', () => {
+  const sent: DataView[] = [];
+  const send = (): void => {
+    sent.length = 0;
+    vi.spyOn(Session, 'sendToGS').mockImplementation(b => void sent.push(b));
+  };
+
+  it('naming no target, the hero asks for the skill on himself (SendRequestMagic(skill, HeroKey), MonkSystem.cpp:551-553)', () => {
+    send();
+    combat.beginDarkSide(559, 5);
+    rangeResponse(559, []);
+    vi.restoreAllMocks();
+    expect(sent).toHaveLength(1);
+    const p = new TargetedSkillPacket(sent[0]);
+    expect([p.SkillId, p.TargetId]).toEqual([559, HERO]);
+    combat.reset();
+  });
+
+  it('naming targets, nothing goes out and the empty slots are no targets (DS_TARGET_NONE, MonkSystem.cpp:537-549)', () => {
+    send();
+    combat.beginDarkSide(263, 5);
+    rangeResponse(263, [6]);
+    vi.restoreAllMocks();
+    expect(sent).toEqual([]);
+    rageAttack(HERO);
+    ticks(8);
+    expect(combat.nextDarkSideHit()).toBe(6);
+    // 6 was the only one: no follow-up comes due for an empty slot.
+    for (let i = 0; i < 14; i++) {
+      ticks(1);
+      expect(combat.nextDarkSideHit()).toBe(-1);
+    }
     combat.reset();
   });
 });
