@@ -93,7 +93,8 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
 - `tileFiles.test.ts`: every tile slot of every map names a file that exists in its world folder.
 - `flareSheets.test.ts`: the table flares the original draws from another sheet than `BITMAP_LIGHT`
   take it with the original's tint and size: `BITMAP_FLARE` (Aida 75, Crywolf 41, Loren Market 30
-  and 35), `BITMAP_SPARK + 1` (Aida 30 and 71, on their six bulbs; Kanturu 70, whose size breathes).
+  and 35), `BITMAP_SPARK + 1` (Aida 30 and 71, on their six bulbs; Kanturu 70, whose size breathes;
+  Kanturu 2 8).
 - `bloodcastle/lampObject.test.ts`: the throne-room lamp's flare is `BITMAP_FLARE` too.
 - `loginscene/wallTorchObject.test.ts`, `empireguardian4/spec.test.ts`: the wall torch's flare, on
   the `BITMAP_FLARE` sheet lit or not, and the fortress lights on Classic and Enhanced.

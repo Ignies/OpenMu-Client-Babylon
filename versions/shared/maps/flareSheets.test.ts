@@ -40,6 +40,23 @@ describe('the BITMAP_SPARK + 1 cards (Spark03.jpg)', () => {
     });
     expect(cardsOf(ENUM_WORLD.WD_37KANTURU_1ST, 70)).toEqual([card(7, [0.8, 0.4, 0.2]), card(4, [0.65, 0.65, 0.65])]);
   });
+
+  // `fLumi = (sinf(WorldTime * 0.001f) + 1.0f) * 0.5f` on all three channels, 10 across; bone 4 rides 21-151 up.
+  it('Kanturu 2 8: one on bone 4, white breathing up from black (GM_Kanturu_2nd.cpp:347-371)', () => {
+    expect(cardsOf(ENUM_WORLD.WD_38KANTURU_2ND, 8)).toEqual([
+      {
+        offset: [0, 0, 94],
+        bone: true,
+        sprite: {
+          scale: 10,
+          color: [1, 1, 1],
+          pulse: { speed: 0.001, amount: 0.5, base: 0 },
+          texture: 'spark1',
+          unscaled: true,
+        },
+      },
+    ]);
+  });
 });
 
 // BITMAP_FLARE is Flare.jpg, a warm star (ZzzOpenData.cpp:5309): the tint is the original's, not a warm stand-in.
