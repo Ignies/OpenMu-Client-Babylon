@@ -67,11 +67,6 @@ const wave = (w: Wave, ms: number) => {
   return (w.abs ? Math.abs(s) : s + 1) * w.amount + w.base;
 };
 
-/** Up `height` MU units and back down every `period` ms, a straight ride each way. */
-type Bob = { height: number; period: number };
-
-const lift = (b: Bob, ms: number) => b.height * (1 - Math.abs(((ms / b.period) % 1) * 2 - 1));
-
 /** A card as a map's light table names it (`LightEmitter.sprite`). */
 export type FlareSpec = {
   readonly scale: number;
@@ -82,8 +77,6 @@ export type FlareSpec = {
   readonly grow?: Wave;
   /** Degrees a millisecond it turns, counter-clockwise: `CreateSprite`'s `Rotation` (ZzzOpenglUtil.cpp:899-908). */
   readonly spin?: number;
-  /** Its height over time, above where the host put it. */
-  readonly bob?: Bob;
   /** The sheet the original names; `BITMAP_LIGHT` when left out. */
   readonly texture?: FlareTexture;
   /** The original sizes it without `* o->Scale` (`CreateSprite(..., 5.5f, ...)`): the object's scale does not apply. */
@@ -288,9 +281,9 @@ export async function createEffectLight(
   let observer: ReturnType<Scene['onBeforeRenderObservable']['add']> | null =
     null;
 
-  const { pulse, grow, spin, bob } = spec;
+  const { pulse, grow, spin } = spec;
 
-  if (pulse || grow || spin || bob) {
+  if (pulse || grow || spin) {
     let elapsed = 0;
 
     observer = scene.onBeforeRenderObservable.add(() => {
@@ -299,7 +292,6 @@ export async function createEffectLight(
       if (pulse) paint.setLuminosity(wave(pulse, elapsed));
       if (grow) sprite.width = sprite.height = size * wave(grow, elapsed);
       if (spin) sprite.angle = elapsed * spin * RADIANS_PER_DEGREE;
-      if (bob) sprite.position.y = position.y + lift(bob, elapsed) / TILE_CM;
     });
   }
 

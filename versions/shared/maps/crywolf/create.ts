@@ -1,13 +1,15 @@
 import type { World } from '@/ecs/world';
+import { CrywolfBeaconObject } from './beaconObject';
 import { CrywolfDomeObject, CrywolfVentObject } from './eventObjects';
 
 /**
  * Crywolf Fortress (`WD_34CRYWOLF_1ST`, `World35`/`Object35`).
  *
  * `MoveCryWolf1stObject` (GMCrywolf1st.cpp:330-372) is the whole runtime:
- * three lights and three hidden markers (`spec.ts`), plus the event staging
- * in `eventObjects.ts` - the energy dome **81** (×1, 120.9/31.9) and the
- * smoke vents **74** and **84**, all reading `modules/events/crywolf.ts`.
+ * three lights and three hidden markers (`spec.ts`), the beacon's turning
+ * flares (**41**, `beaconObject.ts`), plus the event staging in
+ * `eventObjects.ts` - the energy dome **81** (×1, 120.9/31.9) and the smoke
+ * vents **74** and **84**, all reading `modules/events/crywolf.ts`.
  *
  * Not built:
  *  - The three-state map: `EncTerrain351.att` / `352.att` and
@@ -27,6 +29,7 @@ export async function createCrywolf(world: World) {
 
   const tiles = terrain.MapTileObjects;
 
+  tiles[41] = CrywolfBeaconObject;
   tiles[74] = CrywolfVentObject;
   tiles[81] = CrywolfDomeObject;
   tiles[84] = CrywolfVentObject;

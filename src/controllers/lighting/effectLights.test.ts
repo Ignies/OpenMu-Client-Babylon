@@ -183,20 +183,6 @@ describe('flare cards', () => {
     expect(card.angle).toBeCloseTo(Math.PI);
   });
 
-  // Crywolf's flares ride `350 + aaa`, `aaa` Time_Effect's 0 to 20 and back (GMCrywolf1st.cpp:403-410).
-  it('bob a card up its height and back down over its period', async () => {
-    const { scene, step } = clockedScene();
-    const bob = { height: 20, period: 1640 };
-    await createEffectLight(scene, { scale: 1.3, color: [1, 1, 1], texture: 'flare', bob }, { x: 0, y: 3.5, z: 0 }, 1);
-    const card = lastSprite();
-    step(410);
-    expect(card.position.y).toBeCloseTo(3.6);
-    step(410);
-    expect(card.position.y).toBeCloseTo(3.7);
-    step(820);
-    expect(card.position.y).toBeCloseTo(3.5);
-  });
-
   it.skipIf(!existsSync('Data/Effect'))('cut each sheet at the width of its file', async () => {
     const scene = {} as Scene;
     const textures = ['light', 'flare', 'spark1', 'shiny5', 'impact', 'magic1', 'lightning1', 'kanturu2ndEffect1'] as const;

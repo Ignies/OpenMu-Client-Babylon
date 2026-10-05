@@ -93,11 +93,10 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
 - `tileFiles.test.ts`: every tile slot of every map names a file that exists in its world folder.
 - `flareSheets.test.ts`: the table flares the original draws from another sheet than `BITMAP_LIGHT`
   take it with the original's tint, size and motion: `BITMAP_FLARE` (Aida 75 turning on bone 4,
-  Crywolf 41's bobbing pair, Loren Market 30 on its three heads and 35 on bone 2), `BITMAP_SPARK + 1` (Aida
-  30 and 71 on their six bulbs, Kanturu 70 whose size breathes, Kanturu 2 8, Karutan 72's plant
-  bulbs breathing on `|sin|`),
-  `BITMAP_KANTURU_2ND_EFFECT1` (Kanturu 2 4's pair over its lamp); Karutan 66 has none (its insect
-  hangs its `BITMAP_SHINY + 5` points itself).
+  Loren Market 30 on its three heads and 35 on bone 2), `BITMAP_SPARK + 1` (Aida 30 and 71 on their
+  six bulbs, Kanturu 70 whose size breathes, Kanturu 2 8, Karutan 72's plant bulbs breathing on
+  `|sin|`), `BITMAP_KANTURU_2ND_EFFECT1` (Kanturu 2 4's pair over its lamp); Karutan 66 and Crywolf 41
+  have none (the insect hangs its `BITMAP_SHINY + 5` points itself, the beacon its turning pair).
 - `flareWaves.test.ts`: the table cards' waves are the original's `sinf(WorldTime * k)`, k in radians a
   millisecond: the fire vents (Karutan 113, Loren Market 57, Vulcanus 6) burn steady red; Kalima's
   flower glows (12, 32) grow and shrink on bone 5; the Kanturu relic lamps (Kanturu 2 4, Kanturu 3 5)
@@ -124,6 +123,9 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
 - `kalima/grassObject.test.ts`: `KalimaWaterPlantObject`.
 - `kanturu2/gateway.test.ts`: the gateway turn sound loops from the click, and stays silent when
   the original refuses it.
+- `crywolf/beaconObject.test.ts`: the beacon's two `BITMAP_FLARE`s ride `350 + aaa` in step on every
+  beacon, and the second turns by the one `Ro` each beacon in view bumps a degree a frame, so n in view
+  turn it n times as fast.
 - `karutan1/insectObject.test.ts`: the insect's two `BITMAP_SHINY + 5` points ride bones 13 and 14
   and breathe on `|sin|`; it is never a batched prop.
 - `tarkan/impactGlowObject.test.ts`: the temple glow is `BITMAP_IMPACT`, its size and colour

@@ -112,14 +112,9 @@ describe('the map flares the original draws as BITMAP_FLARE', () => {
     ]);
   });
 
-  // `p[2] += 350 + aaa`, `aaa` riding Time_Effect 0 to 20 and back over 41 frames at 25 a second; the second
-  // card turns by the shared `Ro`, a degree a frame.
-  it('Crywolf 41: two white, 1.3, bobbing 350-370 up, the second turning (GMCrywolf1st.cpp:395-416)', () => {
-    const card = { scale: 1.3, color: [1, 1, 1], texture: 'flare', unscaled: true, bob: { height: 20, period: 1640 } };
-    expect(cardsOf(ENUM_WORLD.WD_34CRYWOLF_1ST, 41)).toEqual([
-      { offset: [0, 0, 350], sprite: card },
-      { offset: [0, 0, 350], sprite: { ...card, spin: 0.025 } },
-    ]);
+  // The second turns by the `Ro` every drawn beacon bumps: the beacon draws its pair (crywolf/beaconObject.test.ts).
+  it('Crywolf 41: no table card on top of the beacon\'s own (GMCrywolf1st.cpp:395-416)', () => {
+    expect(cardsOf(ENUM_WORLD.WD_34CRYWOLF_1ST, 41)).toEqual([]);
   });
 
   // `for (i = 1; i <= 3; ++i)` a card on bone i: the top head 304 up, the two arms 264 up and 56 out.
