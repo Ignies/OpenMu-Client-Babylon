@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { ENUM_WORLD } from '@/core/types';
 import { lightEmittersFor } from '@/controllers/lighting/mapObjectLights';
 import { maps } from '@/controllers/maps';
+import { FIDELITY_CLASSIC, FIDELITY_DEFAULT, setFidelityChoice } from '@/controllers/fidelity';
 
 /** The cards a map object's light table draws. */
 const cardsOf = (world: ENUM_WORLD, type: number) => lightEmittersFor(world, type)?.filter(e => e.sprite) ?? [];
@@ -98,6 +99,18 @@ describe('the map flare waves', () => {
     ]);
     // The Kanturu deep-red brazier's fire is ours (`lampFlares`): it burns as 61 does.
     expect(emissionsOf(ENUM_WORLD.WD_37KANTURU_1ST, 60)).toEqual(emissionsOf(ENUM_WORLD.WD_37KANTURU_1ST, 61));
+  });
+
+  // `if (rand_fps_check(3)) CreateParticle(BITMAP_TRUE_BLUE, o->Position, o->Angle, (1, 1, 1), 0, o->Scale)`.
+  it('Elbeland 61: the blue lamp burns one trueBlue a tick in three, white, at its scale, on every preset (GMNewTown.cpp:282-288)', () => {
+    const lamp = () => emissionsOf(ENUM_WORLD.WD_51ELBELAND, 61);
+    expect(lamp()).toEqual([{ kinds: ['trueBlue'], every: 3 }]);
+    try {
+      setFidelityChoice(FIDELITY_CLASSIC, {});
+      expect(lamp()).toEqual([{ kinds: ['trueBlue'], every: 3 }]);
+    } finally {
+      setFidelityChoice(FIDELITY_DEFAULT, {});
+    }
   });
 
   // `CreateSprite(BITMAP_LIGHT, bone 5, Luminosity + 0.2f, (0.6, 0.6, 1), o)`, `Luminosity = sinf(WorldTime * 0.001f) * 0.3f + 0.7f`.

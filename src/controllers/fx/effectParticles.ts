@@ -335,25 +335,12 @@ const KINDS = {
 
   fire0b: stripFireKind('fire03'),
 
-  /**
-   * The elf lamps' blue flame (`BITMAP_TRUE_BLUE`, GMNewTown.cpp:283-289):
-   * the login braziers' fire burning the original's blue sheet instead of
-   * an orange one. Tinting a firehik sheet blue only makes it muddy - the
-   * colour has to come from the texture.
-   */
-  fireBlue: fireKind('fantaB', {
-    lifeBase: 17,
-    lifeRand: 5,
-    fadeBelow: 10,
-    gravityBase: 20,
-    gravityRand: 16,
-    shrinkBase: 7,
-    shrinkRand: 3,
-  }),
-
   trueFire: trueFireKind('fantaF', 24),
 
   trueFire5: trueFireKind('fantaF', 20),
+
+  /** `BITMAP_TRUE_BLUE`: every line `BITMAP_TRUE_FIRE`'s but the sheet, fantaB.jpg (ZzzOpenData.cpp:5198). */
+  trueBlue: trueFireKind('fantaB', 24),
 
   smoke0: {
     texture: 'smoke',
@@ -959,9 +946,9 @@ export const KIND_REACH: Record<KindName, Reach> = {
   ember: { travel: 1, base: 0, perScale: 0.34 },
   fire0: { travel: 1.4, base: 0, perScale: 0.87 },
   fire0b: { travel: 1.4, base: 0, perScale: 0.87 },
-  fireBlue: { travel: 0.75, base: 0, perScale: 0.65 },
   trueFire: { travel: 1, base: 0, perScale: 0.46 },
   trueFire5: { travel: 0.85, base: 0, perScale: 0.46 },
+  trueBlue: { travel: 1, base: 0, perScale: 0.46 },
   smoke0: { travel: 0.55, base: 0.72, perScale: 0 },
   smoke2: { travel: 3.4, base: 0.58, perScale: 0 },
   smoke65: { travel: 0.75, base: 0, perScale: 0.29 },

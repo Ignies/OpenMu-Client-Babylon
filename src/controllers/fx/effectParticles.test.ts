@@ -8,7 +8,7 @@ type FakeSprite = {
   color: { r: number; g: number; b: number };
 };
 
-const fakes = vi.hoisted(() => ({ sprites: [] as FakeSprite[] }));
+const fakes = vi.hoisted(() => ({ sprites: [] as FakeSprite[], files: [] as string[] }));
 
 // Babylon's sprites, the data folder and the effects layer are stubbed: the
 // real ones need a GPU scene, and `maps` / `controllers/fx/core` reach the store.
@@ -75,7 +75,7 @@ vi.mock('../render/babylon/exports', () => {
 });
 vi.mock('../assets/mu/dataFolder', () => ({
   hasDataFile: () => true,
-  downloadDataFile: async () => new Uint8Array(32),
+  downloadDataFile: async (file: string) => (fakes.files.push(file), new Uint8Array(32)),
 }));
 vi.mock('../maps', () => ({ maps: { emissionsFor: () => undefined } }));
 vi.mock('./core', () => ({
@@ -148,6 +148,7 @@ afterEach(() => {
   publishViewPlanes(scene, null);
   disposeEffectParticles();
   fakes.sprites.length = 0;
+  fakes.files.length = 0;
   tick = null;
   deltaMs = 40;
 });
@@ -273,6 +274,16 @@ describe('trueFire, BITMAP_TRUE_FIRE SubType 0 and 5 (ZzzEffectParticle.cpp:3337
     const sprite = await play('trueFire', 1, 0.999999, 1);
     expect(sprite.position.x).toBeCloseTo(0.016);
     expect(sprite.position.y).toBeCloseTo(0.038);
+  });
+
+  // BITMAP_TRUE_BLUE shares every line with BITMAP_TRUE_FIRE but its sheet, fantaB.jpg (ZzzOpenData.cpp:5197-5198).
+  it('draws fantaF.jpg, and trueBlue, BITMAP_TRUE_BLUE, is the same particle on fantaB.jpg', async () => {
+    const fire = await play('trueFire', 1.5, 0, 2);
+    const look = (s: FakeSprite) => [s.position.x, s.position.y, s.position.z, s.width, s.color.r, s.color.g, s.color.b];
+    const fireLook = look(fire);
+    const blue = await play('trueBlue', 1.5, 0, 2);
+    expect(look(blue)).toEqual(fireLook);
+    expect(fakes.files).toEqual(['Effect/fantaF.OZJ', 'Effect/fantaB.OZJ']);
   });
 
   it('lives 24 ticks, SubType 5 20', async () => {

@@ -74,9 +74,9 @@ export const ELBELAND_EMISSIONS: Partial<Record<number, readonly Emission[]>> =
  *    (L, 0.6L, 0.2L), 3)` + hidden; `RenderObjectVisual` :249-254 adds
  *    `BITMAP_TRUE_FIRE` SubType 0 one tick in three (`trueFire`) - the
  *    town's fire pits.
- *  - **61** (×23), :135-140: `(0.2L, 0.6L, L)` at range 3 + hidden, with
- *    `BITMAP_TRUE_BLUE` particles (:282-288) - the blue elf lamps. No
- *    sprite: the flare is ours (`lampFlares`).
+ *  - **61** (×23), :135-140: `(0.2L, 0.6L, L)` at range 3 + hidden, with a
+ *    `BITMAP_TRUE_BLUE` particle one tick in three (`trueBlue`, :282-288) -
+ *    the blue elf lamps. No sprite: the flare is ours (`lampFlares`).
  *  - **63** (×6), `RenderObjectVisual` :289-300: one `BITMAP_LIGHT` sprite at
  *    bone 5 + (-40, -10, 0) sized `scale * 6`, `fLumi * (1, 1, 0.6)` with
  *    `fLumi = (sin(WorldTime * 0.001) + 1) * 0.3 + 0.4` - the great lanterns;
@@ -153,19 +153,8 @@ export const ELBELAND_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
           color: [0.2, 0.6, 1],
           flicker: { min: 0.3, max: 0.6, steps: 4 },
         },
-        // The login braziers' flame on the original's blue sheet (:283-289).
-        // A `flareBlue` card stood here before - a lens flare with long
-        // streaks, drawn at a random angle, so every lamp had a blue spike
-        // leaning out of its bowl instead of a fire in it.
-        emissions: [
-          {
-            kinds: ['fireBlue'],
-            every: 1,
-            count: 2,
-            scale: 0.5,
-            light: [0.5, 0.75, 1],
-          },
-        ],
+        // One `BITMAP_TRUE_BLUE` one tick in three, white, at the lamp's scale (:282-288).
+        emissions: [{ kinds: ['trueBlue'], every: 3 }],
       },
     ],
     63: [
