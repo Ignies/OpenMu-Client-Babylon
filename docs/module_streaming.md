@@ -90,3 +90,8 @@ All in [src/modules/_api/](../src/modules/_api/readme.md), a folder that is not 
   source) and the port hand-over. Mounting it in the world page is phase 5.
 - `example.test.ts`: a module that uses nothing but the API runs in process and over messages and
   makes the same calls.
+
+Left for phase 5, when third-party code first runs (decided 2026-10-06): caps on a sandboxed module's
+windows, listeners and calls and a rate limit (today only the 64K message cap); a timeout on the
+guest's pending calls; refusing a streamed module that claims `core`. `playEffect` and `playSound`
+stay narrow until a module needs more.
