@@ -7225,11 +7225,13 @@ exports[`skill tables golden > skill 568 1`] = `
 
 exports[`skill tables golden > skill 569 1`] = `
 {
-  "clip": null,
+  "clip": [
+    255,
+  ],
   "delay": null,
-  "heroSound": null,
+  "heroSound": "Sound/Ragefighter/Rage_Buff_1",
   "light": "0/0 12438107cd988e1a",
-  "sound": null,
+  "sound": "Sound/Ragefighter/Rage_Buff_1",
   "stepIn": null,
   "target": "self",
 }
@@ -7261,11 +7263,13 @@ exports[`skill tables golden > skill 571 1`] = `
 
 exports[`skill tables golden > skill 572 1`] = `
 {
-  "clip": null,
+  "clip": [
+    255,
+  ],
   "delay": null,
-  "heroSound": null,
+  "heroSound": "Sound/Ragefighter/Rage_Buff_1",
   "light": "0/0 12438107cd988e1a",
-  "sound": null,
+  "sound": "Sound/Ragefighter/Rage_Buff_1",
   "stepIn": null,
   "target": "self",
 }
@@ -7273,11 +7277,13 @@ exports[`skill tables golden > skill 572 1`] = `
 
 exports[`skill tables golden > skill 573 1`] = `
 {
-  "clip": null,
+  "clip": [
+    255,
+  ],
   "delay": null,
-  "heroSound": null,
+  "heroSound": "Sound/Ragefighter/Rage_Buff_2",
   "light": "0/0 12438107cd988e1a",
-  "sound": null,
+  "sound": "Sound/Ragefighter/Rage_Buff_2",
   "stepIn": null,
   "target": "self",
 }

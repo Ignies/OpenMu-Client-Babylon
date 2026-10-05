@@ -75,4 +75,5 @@ count moves on the effects clock (`eachMove`, `movesSince`), so a script made in
   sound as their base, as RageCreateEffect plays one sound for each case; the Ourforces buff looks by sub, the smoke
   and the mirror rolls adding up with the buffs, the smoke stopping under a cloak; Increase Block's lasting pillar, its
   body and how long it stands; Charge's sword force, its copies, spray and light.
+- `party_buffs.test.ts`: the party buffs and their master ones (569, 572, 573) toss one coin for the clip and its sound.
 - Covered by the golden tests in `../` (`skillVisuals.golden.test.ts`, `skillTables.golden.test.ts`).
