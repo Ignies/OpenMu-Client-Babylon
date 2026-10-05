@@ -76,7 +76,9 @@ shared/            content any version can load
   ui/components/<piece>/    shared pieces that read a module (skill icon, skill tooltip, emoji text)
   maps/<map>/               one folder per map: spec, create, object classes
   monsters/<name>/          one folder per monster or npc: data (index.ts), model.ts when it has a look of its own
-  items/                    item table, launcher arrows
+  monster_models/<body>.ts  what follows a monster body: voices, clip speeds, quiet casts, shatter
+  animations/<action>.ts    one file per player clip (defineAnimation); monster swings and casts
+  items/<group>/<item>.ts   one file per item (defineItem); launcher arrows
   improvements/             one file per deliberate improvement over the original (Fidelity option)
   objects/                  object enums, sign objects
   packets/                  generated packet codecs (bun run generate)
