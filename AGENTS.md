@@ -83,7 +83,7 @@ bun install
 bun run tsc          # type check
 bun run test         # vitest (client + tools)
 bun run test:server  # bun test for the marketplace service
-bun run check        # dependency direction, controller public files, import cycles, readmes, doc names, no em-dash
+bun run check        # dependency direction, controller public files, import cycles, readmes, doc names, doc links, no em-dash
 bun run check:lint   # eslint; fails if any rule's count rises
 bunx vite build      # production build
 ```

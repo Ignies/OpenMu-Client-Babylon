@@ -17,8 +17,9 @@ Builds or changes one module.
 
 ## Integrator
 The only role that edits shared seams.
-- Owns: `src/core/`, `src/app/` (boot, store, logic.ts order, lifecycle), controller contracts
-  (`controller.ts`, `define.ts`, `windows.ts`, `skillHooks.ts`), `versions/registry.ts`.
+- Owns: `src/core/`, `src/app/` (boot, logic.ts load order, lifecycle), the module list and its
+  install order (`src/modules/modules.ts`, `module.ts`), controller contracts (`controller.ts`,
+  `define.ts`, `windows.ts`, `skillHooks.ts`), `versions/registry.ts`.
 - Applies builders' requests one at a time, runs every check after each.
 
 ## Reviewer

@@ -29,6 +29,8 @@ run locally:
   `baselines/cycles.json` is empty.
 - **Servers stay off the client:** no server entry (proxy, register, cash shop, marketplace, ops)
   may load `src/version/index.ts`, `src/app/`, Babylon or React at run time.
+- **Doc links lead somewhere:** a relative link in any `.md` names a file or folder that exists
+  (links in code spans and fences are examples; `serverlist.md` is data).
 
 ## Baselines
 

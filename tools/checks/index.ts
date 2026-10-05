@@ -1,6 +1,7 @@
 // Structure checks. `bun run check` runs them; `bun run check --update` rewrites
 // the baselines, which may only shrink (CI compares against the base branch).
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'fs';
+import { posix } from 'path';
 import { cycles, importGraph, runtimeSpecifiers, trackedFiles } from './graph';
 import { RULES, edgeKey } from './rules';
 
@@ -105,6 +106,26 @@ function baseline(name: string, current: string[]): string[] {
   cycles(edges).forEach((group, i) => group.forEach(f => inCycle.set(f, i)));
   const closing = edges.filter(e => inCycle.has(e.from) && inCycle.get(e.from) === inCycle.get(e.to));
   fail('import cycles (break the cycle; see docs/guidelines/code_style.md)', baseline('cycles', [...new Set(closing.map(e => `${e.from} -> ${e.to}`))].sort()));
+}
+
+// 8. Doc links lead somewhere: a relative link in a doc names a file or folder that exists. Links in code
+//    spans and fences are examples; serverlist.md is data (its links are worlds).
+{
+  const docs = trackedFiles(['*.md']).filter(f => !f.startsWith('references/') && f !== 'serverlist.md');
+  const broken: string[] = [];
+  for (const f of docs) {
+    let fence = false;
+    readFileSync(f, 'utf8').split('\n').forEach((line, i) => {
+      if (line.trimStart().startsWith('```')) fence = !fence;
+      if (fence) return;
+      for (const [, target] of line.replace(/`[^`]*`/g, '').matchAll(/\]\(([^)\s]+)\)/g)) {
+        if (/^([a-z]+:|#)/.test(target)) continue;
+        const path = decodeURIComponent(target.split('#')[0]);
+        if (!existsSync(path.startsWith('/') ? path.slice(1) : posix.join(posix.dirname(f), path))) broken.push(`${f}:${i + 1} -> ${target}`);
+      }
+    });
+  }
+  fail('doc links that lead nowhere (fix the path)', broken);
 }
 
 if (failures.length) {

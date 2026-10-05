@@ -3,7 +3,7 @@
 ## Checks (`tools/checks/`)
 | Command | What it does |
 |---|---|
-| `bun run check` | dependency direction (`rules.ts`), readme per folder, doc names, no em-dash |
+| `bun run check` | dependency direction (`rules.ts`), readme per folder, doc names, no em-dash, controller public files, import cycles, server code off the client, doc links ([ci.md](../ci.md)) |
 | `bun run check --update` | drops fixed entries from the baselines (they only shrink) |
 | `bun run check:lint` | ESLint counts per rule against `baselines/lint.json` |
 | `bun run check:commits origin/main` | commit subjects, em-dashes, attribution |

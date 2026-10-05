@@ -39,7 +39,7 @@ and the loot filter for the ALT name overlay.
 - uses: `items` (`ItemSerializer`, `itemDef`, `itemLevelName`), `options` (`GameOptions`), `_shared/net_helpers.ts`
   (`removeNetObject`), `controllers/actors/itemAngle.ts`, `controllers/render`, `controllers/sound`, `session` (sending), `inventory` (`Bag`, item moves).
 - used by: `src/app/logic.ts` (net), `inventory/quickItemRules.ts` (`HIGH_DROP_LEVEL`),
-  `items/archangelWeapons.test.ts`, ecs `dropMotionSystem` / `objectEffectSystem`,
+  `controllers/item_rules/archangelWeapons.test.ts`, ecs `dropMotionSystem` / `objectEffectSystem`,
   `controllers/sound/drops.ts`, `controllers/actors/playerObject.ts` (`archangelWeapon`).
 - HUD `world_objects` (names, tier colours, loot filter); window `options` (loot zen slider).
 
