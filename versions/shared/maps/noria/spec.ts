@@ -104,10 +104,10 @@ const LAMP_COLOR: readonly [number, number, number] = [0.4, 0.7, 1];
  * over: the colour is cold here, and 300-odd blue pools summing into the
  * delta texture's 2.0 clamp would flatten the whole west of the map.
  *
- * `offset` is in BMD units and `resolveEmitterPosition` maps it as
- * `(x, z, y)` then rotates it by the object's own yaw/pitch/roll - the same
- * frame the model root ends up in after `scaling(1,-1,1) · rotX(-90°)`, so a
- * bone's BMD rest position can be pasted in unchanged.
+ * `offset` is a bone's BMD position at scale 1 (`bone: true`, so it grows
+ * with the object as the bone transforms do), at the middle of the bone's
+ * motion; `resolveEmitterPosition` maps it as `(x, z, y)` then rotates it
+ * by the object's own yaw/pitch/roll.
  */
 const lamp = (
   offset: readonly [number, number, number],
@@ -115,6 +115,7 @@ const lamp = (
   color: readonly [number, number, number] = LAMP_COLOR
 ): LightEmitter => ({
   offset,
+  bone: true,
   sprite: { scale, color, pulse: LAMP_PULSE },
 });
 
@@ -129,23 +130,23 @@ const FORGE_GLOW: LightEmitter['sprite'] = {
 
 /**
  * Noria's map-object light sprites, `RenderObjectVisual` ZzzObject.cpp:
- * 2826-2890. All five entries are bone-anchored in the original; the offsets
- * below are those bones' rest positions read out of the converted GLBs (the
- * first animation key of each channel, composed down the parent chain).
+ * 2820-2890. All five entries are bone-anchored in the original; the offsets
+ * below are those bones' positions out of the BMDs, at the middle of their
+ * clip.
  *
- * The animation moves them 5…30 MU - under a third of a tile, against
+ * The animation moves them 5…25 MU - under a third of a tile, against
  * sprites 0.3…1.5 tiles across - so a fixed offset costs the slow bob and
  * buys back the bone lookups. Type 17's hanging lanterns swing the furthest
- * (~0.3 tile); with three of them on the map that is the one place a
+ * (~0.25 tile); with three of them on the map that is the one place a
  * bone-following class would still be visible, and it is noted rather than
  * built.
  */
 export const NORIA_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
   /**
    * The glow plant (Object02, 2336 records - the signature blue of the
-   * fairy forest). ZzzObject.cpp:2839-2847 draws three 0.5-scale sprites, at
-   * bones 2/4/6 - named `light03`/`light02`/`light01` in the BMD, resting at
-   * (-20.9, -8.7, 138.3), (13.3, -28.6, 138.4) and (24.8, 6.3, 115.1).
+   * fairy forest). ZzzObject.cpp:2833-2841 draws three 0.5-scale sprites, at
+   * bones 2/4/6 - named `light03`/`light02`/`light01` in the BMD, swaying
+   * about (-28, -9, 136), (17, -29, 138) and (17, 6, 114).
    *
    * One sprite, at their centroid and grown to cover the ~45 MU spread. Three
    * each does not fit: 309 of these plants fall inside the 40-tile load
@@ -164,33 +165,28 @@ export const NORIA_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
   // original's three sprites are 0.5 *of a BITMAP_LIGHT*, a much tighter
   // texture than flare01. At 0.3 this is a fifth of the area and stays a
   // point of light. If it still crowds the map, this constant is the dial.
-  1: [lamp([6, -10, 131], 0.3)],
+  1: [lamp([2, -10, 129], 0.3)],
 
-  /** Street lamp (Object10, 14 records): bone 1, scale 1.5 - :2829-2833. */
-  9: [lamp([-1, 0, 179], 1.5)],
+  /** Street lamp (Object10, 14 records): bone 1, bobbing 21 up and down, scale 1.5 - :2823-2827. */
+  9: [lamp([-1, 0, 189], 1.5)],
 
   /**
    * The lantern arch by the spawn (Object18, 3 records): bones 4, 7, 10, 13,
-   * scale 1.0 each - :2848-2858.
+   * swinging up to 25 across, scale 1.0 each - :2842-2852.
    */
   17: [
-    lamp([65, -5, 281], 1),
-    lamp([103, -5, 280], 1),
-    lamp([165, -5, 281], 1),
-    lamp([196, -5, 281], 1),
+    lamp([53, -13, 284], 1),
+    lamp([116, 3, 285], 1),
+    lamp([154, -5, 280], 1),
+    lamp([207, -5, 280], 1),
   ],
 
   /**
-   * Glow shrub (Object36, 228 records): bone 3, scale 1.5 - :2834-2838.
-   *
-   * The one type here whose records are not all 1.00 scale (EncTerrain4.obj
-   * has them from 1.00 to 1.48), and `resolveEmitterPosition` rotates the
-   * offset but does not scale it, so the largest shrubs carry their glow up
-   * to ~0.5 tile low. The sprite itself does scale with the object, so this
-   * reads as the glow sitting a little deep in the foliage rather than as a
-   * misplaced light.
+   * Glow shrub (Object36, 228 records): bone 3, scale 1.5 - :2828-2832.
+   * Its records run from 1.00 to 1.48 scale (EncTerrain4.obj), and the glow
+   * grows with them up the shrub as the bone does.
    */
-  35: [lamp([-23, 0, 110], 1.5)],
+  35: [lamp([-28, 2, 109], 1.5)],
 
   /**
    * The blacksmith forge (Object40, one record at (181, 104.5)), the busiest
@@ -211,12 +207,13 @@ export const NORIA_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
    */
   39: [
     // bone 57 (light01) - the lightning pair, flattened to one sprite.
-    lamp([-18, 0, 152], 1, [0.4, 0.8, 1]),
+    lamp([-20, 0, 150], 1, [0.4, 0.8, 1]),
 
     // bones 61…65 (light06/04/03/05/02) - BITMAP_LIGHT, white, scale 1.
-    { offset: [-186, -42, 85], sprite: FORGE_GLOW },
+    { offset: [-185, -42, 86], bone: true, sprite: FORGE_GLOW },
     {
-      offset: [-178, 9, 92],
+      offset: [-178, 9, 93],
+      bone: true,
       sprite: FORGE_GLOW,
       /**
        * Stated deviation: Noria has no `AddTerrainLight` anywhere, so this
@@ -241,9 +238,9 @@ export const NORIA_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
         { kinds: ['ember'], every: 6, count: 2, light: [1, 0.5, 0.12] },
       ],
     },
-    { offset: [-180, -15, 92], sprite: FORGE_GLOW },
-    { offset: [-196, 31, 92], sprite: FORGE_GLOW },
-    { offset: [-198, -32, 92], sprite: FORGE_GLOW },
+    { offset: [-179, -15, 93], bone: true, sprite: FORGE_GLOW },
+    { offset: [-195, 31, 93], bone: true, sprite: FORGE_GLOW },
+    { offset: [-198, -32, 93], bone: true, sprite: FORGE_GLOW },
 
     /**
      * bone 58 (light07) - the anvil. `rand_fps_check(8)` is a 1-in-8 roll per
@@ -255,6 +252,7 @@ export const NORIA_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
      */
     {
       offset: [146, 0, 88],
+      bone: true,
       emissions: [
         { kinds: ['spark03_24'], every: 8, count: 8, light: [1, 1, 1] },
         { kinds: ['ember'], every: 8, count: 3, light: [1, 0.55, 0.15] },

@@ -85,7 +85,9 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   Flare.jpg, already a warm star; `'spark1'` for `BITMAP_SPARK + 1`) and the original's own tint,
   not a warm one; `BITMAP_LIGHT` (flare01.jpg) is the default. A size the original writes without
   `* o->Scale` is `unscaled`; an offset that stands for a bone is `bone: true`, so it grows with the
-  object. `flareSheets.test.ts` lists the table rows that take another sheet.
+  object. A row on an animated bone sits at the middle of the bone's motion: a table row cannot
+  follow the bone (an object that must, like the Karutan insect, hangs its cards itself).
+  `flareSheets.test.ts` lists the table rows that take another sheet.
 
 ## Tests
 - `mapRows.golden.test.ts`: every per-map row the sound, lighting, weather and terrain
@@ -103,6 +105,9 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   breathe and grow with their fLumi; Land of Trials 49 draws two red cards on bone 3; Elbeland's
   lantern (63) breathes and its totem (121) breathes and grows on six bones; and no table wave is
   faster than 0.05.
+- `boneRows.test.ts`: the rows the original hangs on a bone are `bone: true` (Noria's lamps, Kalima's
+  flowers, Aida's plants and torch, the Kanturu lamps, Elbeland 63 and 121, Loren Market 30 and 35,
+  Karutan 72, Land of Trials 49), and Noria's swinging lanterns sit at the middle of their swing.
 - `fireLights.test.ts`: the ground lights the original throws take its position and range on every
   preset: Devias 66's `CreateFire` 50 up at range 4, Lorencia 150 at range 3, Loren Market 30 and 35
   breathing on their bones, Kanturu 70 on its sine.
