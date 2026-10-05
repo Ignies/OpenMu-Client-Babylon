@@ -4,7 +4,9 @@ Always-on interface elements, one folder per element, same shape as a window. Re
 [docs/how_to/change_a_window.md](../../../../docs/how_to/change_a_window.md).
 
 ## Public API
-- Each `window.ts` default-exports a `defineWindow({ id, slot, order, component })`.
+- Each `window.ts` default-exports a `defineWindow({ id, slot, order, component, module? })`.
+  An element of an optional module names it and is not drawn where that module is off
+  (`soccer_score`: `guild_war`); see [../windows/readme.md](../windows/readme.md).
 - `stableKeyOf` (stable React keys) is `src/core/stableKey.ts`, shared with the item grid widget.
 
 ## How it works

@@ -16,7 +16,8 @@ The full-screen pages: the pre-game screens and the world page that holds every 
   packets, roster drawn as the line-up plate or as rows). Every character page uses it; see its
   readme.
 - `WorldPage` (`world/`): every `world` slot window, then the HUD with every `hud` slot window in
-  stacking order. Toggles `AppState.hudHidden` (`controllers/interface/uiState.ts`) on the hide-interface key.
+  stacking order, leaving out the windows of modules this world turned off (`world/shown.ts`).
+  Toggles `AppState.hudHidden` (`controllers/interface/uiState.ts`) on the hide-interface key.
 
 ## How it works
 - `src/app/App.tsx` mounts `PreloaderPage`, `ServersPage` and `WorldPage` directly.
@@ -40,3 +41,4 @@ The full-screen pages: the pre-game screens and the world page that holds every 
 ## Tests
 - `character_select/character_list/roster.test.ts`: the list rules (selection, free slot, status,
   row order).
+- `world/shown.test.ts`: a window of a module the server turned off leaves the page.

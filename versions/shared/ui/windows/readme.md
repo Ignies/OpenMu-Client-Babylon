@@ -4,14 +4,17 @@ One folder per in-game window. A window draws; its state and actions belong to i
 (`src/modules/<module>`, through its door). Recipe: [docs/how_to/change_a_window.md](../../../../docs/how_to/change_a_window.md).
 
 ## Public API
-- Each `window.ts` default-exports one `defineWindow({ id, slot, order, component })` or an array
-  of them. All windows here use `slot: 'hud'`; higher `order` draws on top.
+- Each `window.ts` default-exports one `defineWindow({ id, slot, order, component, module? })` or an
+  array of them. All windows here use `slot: 'hud'`; higher `order` draws on top.
+- `module`: the optional module the window belongs to (`'trade'`, `'guild'`...). On a world whose
+  `server.json` turns that module off (`modulesOff`) the world page does not draw the window.
 
 ## How it works
 - `versions/shared/ui/index.ts` globs `./{windows,hud}/*/window.{ts,tsx}` and registers every
   definition, then registers the running version's `ui.windows` (same `id` replaces).
-- The world page (`../pages/world`) draws every `hud` window in order. Each window hides itself
-  when its module's flag says it is closed.
+- The world page (`../pages/world`) draws every `hud` window in order, minus the windows of modules
+  that are off (`../pages/world/shown.ts`). Each window hides itself when its module's flag says it
+  is closed.
 - Folder shape: `index.tsx` (drawing), `window.ts`, `layout.ts` (geometry, sprite lists),
   `style.less`, `i18n/<code>.ts` (the window's text: `en.ts` plus one file per language, found by
   `src/i18n`'s glob; see [src/i18n/readme.md](../../../../src/i18n/readme.md)). Shared widgets (item grid, tooltip, frames, buttons) are in
@@ -62,7 +65,8 @@ controller, and the HUD elements in `../hud`.
 
 ## Change it
 - redraw a window: edit its `index.tsx`, `layout.ts` or `style.less`.
-- add a window: new folder with `index.tsx` and `window.ts`; pick an unused `order`.
+- add a window: new folder with `index.tsx` and `window.ts`; pick an unused `order`. If it belongs
+  to an optional module, name it (`module: '<id>'`), so a world without that module hides it.
 - change or add a window's words: its `i18n/en.ts` and every other `<code>.ts` there
   ([docs/how_to/add_text.md](../../../../docs/how_to/add_text.md)).
 - the Options window's Fidelity page builds its checks from the improvement registry
@@ -70,5 +74,6 @@ controller, and the HUD elements in `../hud`.
 - one version draws it differently: export it in `windows` from `versions/<id>/ui` with the same id.
 
 ## Tests
+- `../windowModules.test.ts`: every `module:` names an optional module.
 - `gm_panel/commands.test.ts`: every command the panel names resolves against the catalogue.
 - `options/search.test.ts`: the options search text normalising and matching.
