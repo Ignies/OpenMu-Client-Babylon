@@ -3,10 +3,10 @@ import { MODEL, TEX } from '@/controllers/fx/recipes';
 import { entityGone, fixedPoint, scaleRGB, type ParticleRecipe, type PointSource, type RGB } from '@/controllers/fx/core';
 import { SkillContext, Step, TICK, cm, perTick, repeat, ring, seq, ticks } from '@/controllers/skills/visuals';
 import { type SummonBody } from '@/controllers/fx/summon';
-import { SummonCast, bodyLight, bookTier, curseLight, levelLight, summonCast, summonCastGrace, yawToward } from '../_shared';
+import { SummonCast, bookTier, curseLight, levelLight, summonCast, summonCastGrace, yawToward } from '../_shared';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
-import { rad, randInt } from '../../_shared';
+import { bodyLight, rad, randInt } from '../../_shared';
 
 import { SUMMON_CLIPS } from '../_shared';
 

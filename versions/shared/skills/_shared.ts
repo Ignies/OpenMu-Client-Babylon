@@ -1,6 +1,6 @@
 import { DUST, MODEL, RGBS, STEEL_GLINTS, TEX } from '@/controllers/fx/recipes';
 import { COMBAT_BUS, playSfx } from '@/controllers/sound';
-import { ENHANCED_TIER, SkillContext, SkillVisual, Step, TICK, cm, currentSkill, explosion, flash, flying, forwardOf, model, particles, perTick, ring, scatter, seq, sprite, ticks } from '@/controllers/skills/visuals';
+import { ENHANCED_TIER, SkillContext, SkillVisual, Step, TICK, cm, currentSkill, explosion, flash, forwardOf, model, particles, perTick, ring, scatter, seq, sprite, ticks } from '@/controllers/skills/visuals';
 import { type Entity } from '@/ecs/world';
 import { type JointOptions } from '@/controllers/fx/joint';
 import { type LightRecipe } from '@/controllers/lighting/lightSource';
@@ -63,23 +63,51 @@ export const streamerFan = (
   }
 };
 
+/** Moves an effect has made `t` seconds after its spawn: the first on the next tick. */
+export const movesAt = (t: number): number => Math.floor(t / TICK + 1e-6);
+
+/** Each shot of the volley in the order made: model, cm behind the caster, LifeTime, Scale a move (ZzzEffect.cpp:1682-1700, MoveHandlers.cpp:304-329). */
+const VOLLEY: readonly (readonly [string, number, number, number])[] = [
+  [MODEL.multishot3, 20, 12, 0.25],
+  [MODEL.multishot3, 20, 12, 0.25],
+  [MODEL.multishot, 0, 16, 0.2],
+  [MODEL.multishot, 0, 16, 0.2],
+  [MODEL.multishot, 0, 16, 0.2],
+  [MODEL.multishot2, 20, 13, 0.3],
+  [MODEL.multishot2, 20, 13, 0.3],
+];
+const VOLLEY_LIGHT: RGB = [0.8, 0.9, 1.6];
+
 /**
- * The MODEL_MULTI_SHOT volley (WSclient.cpp AT_SKILL_MULTI_SHOT, Dragon Kick):
- * 3× sub1 at the hands, 2× sub2 and 2× sub3 twenty cm ahead, Light (0.8,0.9,1.6),
- * fired along the facing.
+ * The MODEL_MULTI_SHOT volley at `yaw` (MU degrees): two MULTI_SHOT3 and two MULTI_SHOT2 20 cm behind the caster, three
+ * MULTI_SHOT1 on it (WSclient.cpp:5381-5410, MonkSystem.cpp:1225-1258, :1305-1331), each then moved (-10, -60, 135) cm along
+ * the angle (ZzzEffect.cpp:1662-1668). None flies: from Scale 0 they grow 0.25, 0.2 and 0.3 a move for 12, 16 and 13 ticks,
+ * bright at Light x LifeTime / 18 (MoveHandlers.cpp:304-329, ZzzObject.cpp:1502-1506), the clip at Velocity / 6 a frame
+ * (ZzzEffect.cpp:8754-8762).
  */
-export const multiShotVolley: Step = (_at, c) => {
-  const tint: RGB = [0.8, 0.9, 1];
-  const volley = (m: string, fwd: number, n: number): void => {
-    for (let i = 0; i < n; i++) {
-      const turn = (i - (n - 1) / 2) * 0.14;
-      effects.spawn('model', c.scene, entityPos(c.caster, 0.9, new Vector3()), { model: m, seconds: ticks(20), scale: 1, colour: tint, follow: flying(c, 0.9, perTick(45), turn, fwd), yaw: entityYaw(c.caster) + turn });
-    }
-  };
-  volley(MODEL.multishot3, cm(20), 2);
-  volley(MODEL.multishot, 0, 3);
-  volley(MODEL.multishot2, cm(20), 2);
-};
+export function multiShotVolleyAt(c: SkillContext, yaw: number): void {
+  const feet = entityPos(c.caster, 0, new Vector3());
+  const r = yaw * DEG;
+  for (const [model, back, life, grow] of VOLLEY) {
+    const ahead = 60 - back;
+    const at = new Vector3(feet.x + cm(ahead * Math.sin(r) - 10 * Math.cos(r)), feet.y + cm(135), feet.z - cm(ahead * Math.cos(r) + 10 * Math.sin(r)));
+    effects.spawn('model', c.scene, at, {
+      model,
+      seconds: ticks(life),
+      scale: 0,
+      scaleAt: t => grow * movesAt(t),
+      angle: [0, 0, yaw],
+      colour: VOLLEY_LIGHT,
+      keysPerTick: 1 / 6,
+      blendMesh: 0,
+      blendLight: t => (life + 1 - movesAt(t)) / 18,
+      blendClamp: true,
+      fadeTail: 0,
+    });
+  }
+}
+/** The volley along the caster's facing (Multi-Shot, Charge). */
+export const multiShotVolley: Step = (_at, c) => multiShotVolleyAt(c, deg(entityYaw(c.caster)));
 
 /**
  * `n` JOINT_HEALING-style ribbons spiralling up round a body from ±80 cm at
@@ -99,6 +127,19 @@ export function spiralRibbons(n: number, colour: RGB, width: number, tails: numb
     }
   };
 }
+/**
+ * An effect model's `BodyLight`: the terrain light under it plus its `Light`, clamped by the colour
+ * write (ZzzObject.cpp:226-232, `LightEnable` from CreateEffect :349). A tinted model reads as lit
+ * white with the tint on it, not as the pure tint.
+ */
+export function bodyLight(at: Vector3, tint: RGB): RGB {
+  const l = Ecs.world?.getTerrainLight(at.x, at.z);
+  const lx = l?.x ?? 1;
+  const ly = l?.y ?? 1;
+  const lz = l?.z ?? 1;
+  return [Math.min(1, lx + tint[0]), Math.min(1, ly + tint[1]), Math.min(1, lz + tint[2])];
+}
+
 /** `rand() % n`. */
 export const randInt = (n: number): number => Math.floor(Math.random() * n);
 

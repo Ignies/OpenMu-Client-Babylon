@@ -102,6 +102,8 @@ export const TEX = {
   smokeAlpha: 'Effect/smoke02.ozt',
   smoke5: 'Effect/smoke05.OZT',
   cloud: 'Effect/clouds.OZJ',
+  /** BITMAP_EVENT_CLOUD (clouds2.jpg, 256 px): the cloud the Rage buffs and Dark Side spin on the ground. */
+  eventCloud: 'Effect/clouds2.OZJ',
   clud: 'Effect/clud64.OZJ',
   mist: 'Effect/mist01.OZJ',
   /** BITMAP_SHINY..+6: Shiny01/02/03, eye01 (`eye`), ring (`ring`), shiny04, shiny05. */
@@ -347,7 +349,8 @@ export const MODEL = {
   phoenixShot: 'Effect/phoenix_shot_effect.glb',
   superPower: 'Effect/superpower.glb',
   wolfHead: 'Effect/wolf_head_effect.glb',
-  dragonKick: 'Effect/dragon_kick_dummy.glb',
+  /** MODEL_WOLF_HEAD_EFFECT2 (wolf_head_effect2.bmd): Chain Drive's wolf heads. */
+  wolfHead2: 'Effect/wolf_head_effect2.glb',
   magicPowerUp: 'Effect/magic_powerup.glb',
   ringRoute: 'Effect/ringtyperout.glb',
   clinderLight: 'Effect/clinderlight.glb',

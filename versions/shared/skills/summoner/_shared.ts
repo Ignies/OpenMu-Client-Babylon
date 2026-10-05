@@ -7,13 +7,12 @@ import { bonePos, delay, entityGone, entityPos, entityYaw, fadeOut, fxNow, scale
 import { PlayerAction } from '../../objects/enum';
 import { Vector3, type Scene } from '@/controllers/render/babylon/exports';
 import { type SpriteOptions } from '@/controllers/fx/sprite';
-import { deg, humTurn, muForward, rad, randInt } from '../_shared';
+import { bodyLight, deg, humTurn, muForward, rad, randInt } from '../_shared';
 import { effectLight } from '@/controllers/lighting/recipes';
 import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
 import { playLandingSound } from '@/controllers/sound/combat';
 import { spawnModel } from '@/controllers/fx/model';
-import { Ecs } from '@/ecs/current';
 
 import { A, SkillClipSet } from '@/controllers/combat/recipes';
 
@@ -25,19 +24,6 @@ const holding = (e: Entity, height: number): PointSource => {
   const last = entityPos(e, height, new Vector3());
   return out => (entityGone(e) ? out.copyFrom(last) : last.copyFrom(entityPos(e, height, out)));
 };
-
-/**
- * An effect model's `BodyLight`: the terrain light under it plus its `Light`, clamped by the colour
- * write (ZzzObject.cpp:226-232, `LightEnable` from CreateEffect :349). A tinted model reads as lit
- * white with the tint on it, not as the pure tint.
- */
-export function bodyLight(at: Vector3, tint: RGB): RGB {
-  const l = Ecs.world?.getTerrainLight(at.x, at.z);
-  const lx = l?.x ?? 1;
-  const ly = l?.y ?? 1;
-  const lz = l?.z ?? 1;
-  return [Math.min(1, lx + tint[0]), Math.min(1, ly + tint[1]), Math.min(1, lz + tint[2])];
-}
 
 /** Hand FX tints, the three `vLight` blocks of the PLAYER_SKILL_SLEEP hand code (ZzzCharacter.cpp:10591-10740). */
 export interface CurseHand {

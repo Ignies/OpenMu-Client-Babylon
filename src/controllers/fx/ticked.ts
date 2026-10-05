@@ -55,6 +55,8 @@ export interface StripOptions {
   uScroll?: boolean;
   /** Per-segment face gain, `j = 0` the newest (JOINT_FORCE sub0's `(MaxTails - j) / MaxTails * 2`). */
   gain?: (j: number) => number;
+  /** A segment whose tail centres lie further apart than this (tiles) is not drawn: RenderJoints' 60 cm cull (ZzzEffectJoint.cpp:7071-7075). */
+  maxSegment?: number;
   /** Strips of these options one effect keeps in one mesh (default 1). */
   batch?: number;
 }
@@ -141,6 +143,16 @@ function copy3(src: Float32Array, s: number, dst: Float32Array, d: number): void
   dst[d] = src[s];
   dst[d + 1] = src[s + 1];
   dst[d + 2] = src[s + 2];
+}
+
+/** The squared gap between the centres (corners 0 and 1) of tails `j` and `j + 1`. */
+function centreGapSq(t: Float32Array, j: number): number {
+  const c = j * 12;
+  const n = c + 12;
+  const dx = (t[c] + t[c + 3] - t[n] - t[n + 3]) * 0.5;
+  const dy = (t[c + 1] + t[c + 4] - t[n + 1] - t[n + 4]) * 0.5;
+  const dz = (t[c + 2] + t[c + 5] - t[n + 2] - t[n + 5]) * 0.5;
+  return dx * dx + dy * dy + dz * dz;
 }
 
 function colourKey(c: RGB): string {
@@ -284,6 +296,7 @@ class Batch {
     const denom = o.maxTails - 1;
     const uScale = o.uScale ?? 1;
     const scroll = o.uScroll ? fxNow() % 1 : 0;
+    const maxSq = o.maxSegment === undefined ? Infinity : o.maxSegment * o.maxSegment;
     const pos = this.#positions;
     const uv = this.#uvs;
     const col = this.#colors;
@@ -297,7 +310,7 @@ class Batch {
         const va = a === 2 ? 1 : 0;
         const shift = a === 0 ? scroll : -scroll;
         for (let j = 0; j < segments; j++, v += 4) {
-          if (j >= drawn) {
+          if (j >= drawn || (maxSq < Infinity && centreGapSq(t, j) > maxSq)) {
             for (let k = 0; k < 4; k++) {
               pos[(v + k) * 3] = 0;
               pos[(v + k) * 3 + 1] = PARKED_Y;
@@ -347,7 +360,7 @@ class Batch {
 }
 
 function batchKey(o: StripOptions): string {
-  return `${o.texture}|${colourKey(o.colour ?? WHITE)}|${o.maxTails}|${o.faces ?? 'both'}|${o.batch ?? 1}`;
+  return `${o.texture}|${colourKey(o.colour ?? WHITE)}|${o.maxTails}|${o.faces ?? 'both'}|${o.batch ?? 1}|${o.maxSegment ?? ''}`;
 }
 
 function acquireBatch(scene: Scene, opts: StripOptions): Batch {

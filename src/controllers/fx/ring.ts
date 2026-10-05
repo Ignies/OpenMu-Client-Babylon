@@ -60,6 +60,11 @@ export interface RingOptions {
   /** Largest diameter the growth reaches, tiles (BITMAP_MAGIC_ZIN sub2 stops at 3.5). */
   cap?: number;
   /**
+   * The diameter in tiles at `t` seconds alive, in place of `scale`, `grow` and `growFrom`: a per-tick `o->Scale` curve
+   * (BITMAP_MAGIC sub13's x1.1 a move, MoveHandlers.cpp:1424-1448). `maxScale` must hold its largest value.
+   */
+  scaleAt?: (t: number) => number;
+  /**
    * Re-read the position every frame instead of standing where it was
    * spawned. `RenderTerrainAlphaBitmap` is an immediate-mode call in the
    * original - the mark a character carries is redrawn under its feet each
@@ -132,6 +137,7 @@ export function spawnRing(_scene: Scene, at: Vector3, opts: RingOptions): Effect
   const fadeColour = opts.fadeColour === true;
   const decay = opts.decay ?? 1;
   const brightness = opts.brightness;
+  const scaleAt = opts.scaleAt;
   const lit: [number, number, number] = [colour[0], colour[1], colour[2]];
   let x = at.x;
   let z = at.z;
@@ -148,7 +154,7 @@ export function spawnRing(_scene: Scene, at: Vector3, opts: RingOptions): Effect
         x = followTmp.x;
         z = followTmp.z;
       }
-      const s = scale * lerp(growFrom, grow, p);
+      const s = scaleAt ? scaleAt(t) : scale * lerp(growFrom, grow, p);
       // One level over the life: the `alphaAt` keys or the tail fade, times the fade-in and the per-tick `decay`.
       const level = (alphaAt ? alphaAt(p) : fadeOut(p, tail)) * (fadeIn > 0 ? Math.min(1, p / fadeIn) : 1) * (decay !== 1 ? decay ** (t / TICK) : 1);
       let light: readonly [number, number, number] = colour;

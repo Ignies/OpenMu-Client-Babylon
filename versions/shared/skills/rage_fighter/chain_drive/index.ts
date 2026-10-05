@@ -4,9 +4,10 @@ import { Vector3 } from '@/controllers/render/babylon/exports';
 import { IMPACT_HEIGHT, arcHit, atCaster, cm, flying, perTick, seq, slash, sprite, ticks, type SkillContext, type Step } from '@/controllers/skills/visuals';
 import { effects } from '@/controllers/fx';
 import { type ModelHandle } from '@/controllers/fx/model';
-import { TICK, boneLocalPos, delay, entityGone, entityPos, entityYaw, fxNow } from '@/controllers/fx/core';
+import { TICK, boneLocalPos, delay, entityGone, entityPos, entityYaw, fxNow, type RGB } from '@/controllers/fx/core';
 import { playCombat } from '@/controllers/sound';
-import { groundY, whenClipKey } from '../../_shared';
+import { deg, groundY, movesAt, randInt, whenClipKey } from '../../_shared';
+import { clipSpeed, eachMove, shake, throwHead, wolfHead } from '../_shared';
 
 import { A } from '@/controllers/combat/recipes';
 
@@ -22,14 +23,8 @@ const SPIN_AT = new Vector3(cm(-80), cm(20), 0);
 /** The two spin waves: sub0's Scale and roll a tick, sub1's (Angle[1] -= 10, then += 20 for sub1). */
 const SPINS: readonly (readonly [number, number])[] = [[0.5, -10], [0.9, 10]];
 
-/** The caster's GIANTSWING PlaySpeed, 0.4 at attack speed 0 (SetAttackSpeed, ZzzCharacter.cpp:1020). */
-function swingSpeed(c: SkillContext): number {
-  const m = c.caster.modelObject;
-  return m?.CurrentAction === A.PLAYER_SKILL_GIANTSWING && m.AnimationSpeed > 0 ? m.AnimationSpeed : 0.4;
-}
-
-/** Moves an effect has made `t` seconds after its spawn: the first on the next tick (readme.md). */
-const movesAt = (t: number): number => Math.floor(t / TICK + 1e-6);
+/** The caster's GIANTSWING PlaySpeed. */
+const swingSpeed = (c: SkillContext): number => clipSpeed(c, A.PLAYER_SKILL_GIANTSWING);
 
 /**
  * The second blow's waves (MoveHandlers.cpp:9350-9367), on their side (Angle[0] 90) at the caster's yaw - 180.
@@ -90,6 +85,32 @@ const secondWaves: Step = (_at, c) => {
   }
 };
 
+/** MODEL_WOLF_HEAD_EFFECT2 is drawn bright at Light (0.4, 0.4, 0.6) x 0.3, whatever it was made with (ZzzObject.cpp:2452-2458). */
+const HEAD2_LIGHT: RGB = [0.12, 0.12, 0.18];
+
+/**
+ * MODEL_WOLF_HEAD_EFFECT2 with a blow (MoveHandlers.cpp:9331, :9354): made on bone 5, it lives 4 / PlaySpeed (ZzzEffect.cpp:6075-6107)
+ * at the caster's facing, which GIANTSWING holds. Sub3 (the first blow) rides bone 4 while its LifeTime is 3 or more and each such
+ * move throws a sub4 and a sub6 at the caster's angle shaken by 2-4 degrees x 1, 3 or 5; sub5 (the second) rides bone 27 at
+ * Scale 1.5 (MoveHandlers.cpp:9736-9800).
+ */
+const wolfHead2 = (second: boolean): Step => (_at, c) => {
+  if (entityGone(c.caster)) return;
+  const life = 4 / swingSpeed(c);
+  const scale = second ? 1.5 : 1;
+  const riding = (m: number): boolean => m > 0 && (second || life - m + 1 >= 3);
+  wolfHead(c, MODEL.wolfHead2, HEAD2_LIGHT, [0, 0, deg(entityYaw(c.caster))], 5, second ? 27 : 4, scale, scale, life, riding);
+  if (second) return;
+  eachMove(c.scene, entityPos(c.caster, 0, new Vector3()), m => {
+    if (m >= life || entityGone(c.caster)) return false;
+    if (!riding(m)) return true;
+    const angle = shake(deg(entityYaw(c.caster)), 2);
+    throwHead(c, MODEL.wolfHead2, HEAD2_LIGHT, angle, 0.7 + randInt(3) * 0.1, 5 + randInt(2), 40);
+    throwHead(c, MODEL.wolfHead2, HEAD2_LIGHT, angle, 1.2 + randInt(5) * 0.1, 2 + randInt(2), 50);
+    return true;
+  });
+};
+
 /** One of the two blows: an arc burst on the target and Rage_Giantswing_Att (no target: neither, MoveHandlers.cpp:9346-9347). */
 const blow: Step = (_at, c) => {
   const target = c.target;
@@ -105,14 +126,14 @@ const wave: Step = (_at, c) =>
 
 /**
  * BITMAP_SWORDEFF at the packet (MonkSystem.cpp:1121-1126); it reads the caster's GIANTSWING key each tick
- * (MoveHandlers.cpp:9312-9380): past 6 the wave and the first blow, past 11 the second blow and its waves. Leaving the
- * clip drops them.
+ * (MoveHandlers.cpp:9312-9380): past 6 the wave, the first wolf head and the first blow, past 11 the second blow, its waves
+ * and wolf head. Leaving the clip drops them.
  */
 const chainDrive: Step = (at, c) => {
   slash(RGBS.arc, TEX.motionBlur, 0.7)(at, c);
   atCaster(sprite({ texture: TEX.swordEff, colour: RGBS.arc, size: 1.6, seconds: 0.5, spin: 4, grow: 1.6 }), 0.9)(at, c);
-  whenClipKey(A.PLAYER_SKILL_GIANTSWING, 6.001, SWORDEFF_TICKS, seq(wave, blow), false, 'drop')(at, c);
-  whenClipKey(A.PLAYER_SKILL_GIANTSWING, 11.001, SWORDEFF_TICKS, seq(secondWaves, blow), false, 'drop')(at, c);
+  whenClipKey(A.PLAYER_SKILL_GIANTSWING, 6.001, SWORDEFF_TICKS, seq(wave, wolfHead2(false), blow), false, 'drop')(at, c);
+  whenClipKey(A.PLAYER_SKILL_GIANTSWING, 11.001, SWORDEFF_TICKS, seq(secondWaves, wolfHead2(true), blow), false, 'drop')(at, c);
 };
 
 export default defineSkill({
