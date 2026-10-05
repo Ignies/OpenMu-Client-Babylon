@@ -56,9 +56,11 @@ export const LAND_OF_TRIALS_EMISSIONS: Partial<
  * Type 42 (x55), `MoveHuntingGroundObject` :101-108:
  * `L = (rand%4+3) * 0.1; AddTerrainLight(x, y, (0.9L, 0.2L, 0.1L), 3)` -
  * a deep-red brazier, hidden mesh, no sprite. Type 49 (x18),
- * `RenderHuntingGroundObjectVisual` :143-156: two `BITMAP_LIGHT` sprites and
- * a spinning `SHINY` at bone 3, white, sized by a sine - the crystal orbs;
- * no terrain light.
+ * `RenderHuntingGroundObjectVisual` :143-156: two red `BITMAP_LIGHT` sprites
+ * at bone 3 + (0, -10, 0), sized `sin(WorldTime * 0.002) * 0.42 + 1.08` and
+ * 0.5 with no `* o->Scale` - the statue's orb; no terrain light. Bone 3 swings
+ * 12 across and the cards sit at the middle. Its grey `BITMAP_SHINY + 1` at a
+ * fresh angle every frame is not drawn: Shiny02.jpg is 32 by 64.
  *
  * The 42 point light is ours (the original has no dynamic lights); 55 of them
  * in the open at range 3, at most 6 in a 32-tile window, is well under the
@@ -80,11 +82,19 @@ export const LAND_OF_TRIALS_LIGHTS: Partial<
   ],
   49: [
     {
+      offset: [-2, -82, 232],
+      bone: true,
       sprite: {
-        scale: 1.5,
-        color: [1, 1, 1],
-        pulse: { speed: 1, amount: 0.4, base: 0.8 },
+        scale: 1,
+        color: [1, 0, 0],
+        grow: { speed: 0.002, amount: 0.42, base: 0.66 },
+        unscaled: true,
       },
+    },
+    {
+      offset: [-2, -82, 232],
+      bone: true,
+      sprite: { scale: 0.5, color: [1, 0, 0], unscaled: true },
     },
   ],
 };

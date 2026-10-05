@@ -44,4 +44,25 @@ describe('the map flare waves', () => {
     expect(cardsOf(ENUM_WORLD.WD_38KANTURU_2ND, 4)).toEqual([lamp(1 / 3.2)]);
     expect(cardsOf(ENUM_WORLD.WD_39KANTURU_3RD, 5)).toEqual([lamp(1 / 2.4)]);
   });
+
+  // Red: one card `Luminosity * 1.2f + 0.3f` across, `Luminosity = sinf(WorldTime * 0.002f) * 0.35f + 0.65f`, one 0.5.
+  it('Land of Trials 49: two red cards on bone 3, the first growing and shrinking (GMHuntingGround.cpp:143-156)', () => {
+    const at = { offset: [-2, -82, 232], bone: true };
+    expect(cardsOf(ENUM_WORLD.WD_31HUNTING_GROUND, 49)).toEqual([
+      { ...at, sprite: { scale: 1, color: [1, 0, 0], grow: { speed: 0.002, amount: 0.42, base: 0.66 }, unscaled: true } },
+      { ...at, sprite: { scale: 0.5, color: [1, 0, 0], unscaled: true } },
+    ]);
+  });
+
+  it('turn at most 0.05 radians a millisecond on every map: a per-second speed strobes', () => {
+    for (let world = 0; world < 90; world++) {
+      for (let type = 0; type < 400; type++) {
+        for (const { sprite } of lightEmittersFor(world as ENUM_WORLD, type) ?? []) {
+          for (const wave of [sprite?.pulse, sprite?.grow]) {
+            if (wave) expect(wave.speed, `world ${world} type ${type}`).toBeLessThanOrEqual(0.05);
+          }
+        }
+      }
+    }
+  });
 });
