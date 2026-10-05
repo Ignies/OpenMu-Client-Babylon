@@ -1,5 +1,6 @@
 import { MapTileObject } from '@/controllers/terrain/mapTileObject';
 import { createMovableFlare, type MovableFlare } from '@/controllers/lighting/effectLights';
+import { BonedParticleEmitter } from '@/controllers/fx/effectParticles';
 import { Vector3, type TransformNode } from '@/controllers/render/babylon/exports';
 import type { Entity, World } from '@/ecs/world';
 import { findBone } from '../bloodcastle/bones';
@@ -21,20 +22,32 @@ const eyeSize = (ms: number) => 1.5 + (Math.sin(ms * 0.001) * 0.5 + 0.5) / 2;
 
 const at = Vector3.Zero();
 
+/** `if (rand_fps_check(5))` a `BITMAP_SMOKE` (SubType 0, scale 1, white) at bone 20 (ZzzObject.cpp:698-704). */
+const SMOKE_BONE = 20;
+
 /**
  * Cursed Temple 62 (×8), the dragon: its head sweeps about 138 across and 100 up, so its two eye
- * cards ride bones 22 and 23 every frame, the way the original draws them. Never a batched prop:
- * each plays its own clip.
+ * cards ride bones 22 and 23 every frame, the way the original draws them, and its smoke leaves
+ * bone 20 where the bone is. Never a batched prop: each plays its own clip.
  */
 export class CursedTempleDragonObject extends MapTileObject {
   static Batchable = false;
 
   #eyes: { node: TransformNode; nudge: Vector3; flare: MovableFlare }[] = [];
 
+  #smoke: BonedParticleEmitter | null = null;
+
   #disposed = false;
 
   async init(world: World, entity: Entity): Promise<void> {
     await super.init(world, entity);
+
+    const snout = findBone(this, SMOKE_BONE);
+    if (snout) {
+      this.#smoke = new BonedParticleEmitter(world.scene, [
+        { node: snout, kinds: ['smoke0'], count: 1, scale: 1, light: [1, 1, 1], every: 5 },
+      ]);
+    }
 
     for (const { bone, nudge } of EYES) {
       const node = findBone(this, bone) as TransformNode | null;
@@ -53,12 +66,15 @@ export class CursedTempleDragonObject extends MapTileObject {
 
     for (const eye of this.#eyes) eye.flare.dispose();
     this.#eyes = [];
+    this.#smoke = null;
 
     super.dispose();
   }
 
   Update(gameTime: World['gameTime']): void {
     super.Update(gameTime);
+
+    this.#smoke?.update();
 
     const size = eyeSize(gameTime.TotalGameTime.TotalSeconds * 1000);
 
