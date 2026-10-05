@@ -25,3 +25,18 @@
 | per-frame systems | `src/ecs/systems/` |
 | text in every language | `src/i18n/` |
 | what runs at boot, what resets on map change | `src/app/boot.tsx`, `src/controllers/controllers.ts`, `src/app/lifecycle.ts` |
+
+## Same name, different layer
+
+Some areas have a folder in each layer. Pick by the question: how it looks or is computed is the
+engine's; what the server says and the hero's own state is the module's; the data of one thing is
+content.
+
+| Area | Engine (`src/controllers/`) | Gameplay (`src/modules/`) | Content (`versions/shared/`) |
+|---|---|---|---|
+| items | `items/`: what an item is, the registry. `item_rules/`: wire format, stats, requirements, zen, tooltip rules | `inventory/`: the bag, item packets, grid moves | `items/<group>/<item>.ts` |
+| skills | `skills/`: `defineSkill`, the visual engine | `skills/`: learned skills, re-use delays, master tree, skill packets | `skills/<class>/<skill>/` |
+| combat | `combat/`: when a swing lands, reach, cast clips, aim | `combat/`: attack, hit and kill packets | the skill folders |
+| pets | `pets/`: how each pet or mount is drawn | `pets/`: Dark Horse and Raven packets, raven commands | `items/petItems.ts` |
+| monsters | `monsters/`: what a monster type is, the registry | `scope/`: monsters entering and leaving view | `monsters/<name>/` |
+| maps | `maps/`: the map contract and facade | `warp/`: map changes; `world/`: map-wide packets | `maps/<map>/` |
