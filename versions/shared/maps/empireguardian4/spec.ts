@@ -141,8 +141,8 @@ const CHANDELIER_GROUND: LightEmitter['terrain'] = {
  * Case 37's flare as the original draws it (GMEmpireGuardian4.cpp:864-875):
  * `CreateSprite(BITMAP_FLARE, bone1, 4 * Scale, fLumi * 0.7)` on all three
  * channels, `fLumi = (sin(WorldTime * 0.039) + 1) * 0.2 + 0.6`. `pulse` is
- * fLumi, so the colour is the 0.7 grey. The login scene's torch draws it on
- * Classic.
+ * fLumi, so the colour is the 0.7 grey. Both wall torches draw it on Classic:
+ * day 4's below and the login scene's.
  */
 export const WALL_TORCH_FLARE: NonNullable<LightEmitter['sprite']> = {
   scale: 4,
@@ -150,25 +150,27 @@ export const WALL_TORCH_FLARE: NonNullable<LightEmitter['sprite']> = {
   pulse: { speed: 0.039, amount: 0.2, base: 0.6 },
 };
 
+/** The same flare warm, ours: a lit torch's, as `LOGIN_WALL_TORCH` draws it on the login scene. */
+const WALL_TORCH_WARM_FLARE: NonNullable<LightEmitter['sprite']> = {
+  ...WALL_TORCH_FLARE,
+  color: [1, 0.45, 0.15],
+};
+
 /**
- * Type 37's flare, `sos_bob02.smd` bone 1 (GMEmpireGuardian4.cpp:864-875,
- * x20). The original is `CreateSprite(BITMAP_FLARE, bone1, 4 * Scale, grey)`
- * with `grey = ((sin(WorldTime * 0.039) + 1) * 0.2 + 0.6) * 0.7`, i.e. 0.42
- * to 0.70 - the `pulse` block below is that curve exactly. The colour and the
- * point light are `LOGIN_WALL_TORCH`'s (controllers/lighting/mapObjectLights.ts), kept
- * identical so a wall torch reads the same on day 4 and on the login scene.
+ * Type 37, `sos_bob02.smd` bone 1 (GMEmpireGuardian4.cpp:864-875, x20): the
+ * original is `WALL_TORCH_FLARE` alone. Hosted by `wallTorchObject.ts` rather
+ * than by a row in the table because the table resolves an emitter at the
+ * object's origin and the flame is on a bone.
  *
- * Hosted by `wallTorchObject.ts` rather than by a row in the table because
- * the table resolves an emitter at the object's origin and the flame is on a
- * bone; the original never gives 37 an `AddTerrainLight`, so `terrain` here
- * is ours: the `fortressLights` improvement (none on Classic, read when the
- * torch lights).
+ * The original never gives 37 an `AddTerrainLight`, so the ground light and
+ * the warm flare are ours: the `fortressLights` improvement (read when the
+ * torch lights). They are `LOGIN_WALL_TORCH`'s
+ * (controllers/lighting/mapObjectLights.ts), so a lit torch reads the same on
+ * day 4 and on the login scene.
  */
 export const EMPIRE_GUARDIAN_4_WALL_TORCH: LightEmitter = {
-  sprite: {
-    scale: 4,
-    color: [1, 0.45, 0.15],
-    pulse: { speed: 0.039, amount: 0.2, base: 0.6 },
+  get sprite() {
+    return isOn('fortressLights') ? WALL_TORCH_WARM_FLARE : WALL_TORCH_FLARE;
   },
   get terrain() {
     return isOn('fortressLights') ? WALL_TORCH_GROUND : undefined;
