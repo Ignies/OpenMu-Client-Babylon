@@ -1,5 +1,6 @@
 import type { Emission } from '@/controllers/fx/effectParticles';
 import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
+import { isOn } from '@/controllers/fidelity';
 
 /**
  * Loren Market (`WD_79UNITEDMARKETPLACE`, `World80`/`Object80`), the
@@ -15,7 +16,7 @@ import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
 export const LOREN_MARKET_BLEND_MESHES: Readonly<Record<number, number>> = {};
 
 /**
- * `MoveObject` :132-139 hides 54-58; `RenderObjectVisual` draws them as:
+ * `MoveObject` :128-136 hides 54-58; `RenderObjectVisual` draws them as:
  *  - **54** (×5) `WATERFALL_5` every tick, **55** (×5) `WATERFALL_3` SubType
  *    8, **56** (×4) `WATERFALL_2` one in four - the fountain's spray.
  *  - **57** (×12): a fire vent - see `LOREN_MARKET_LIGHTS`.
@@ -48,6 +49,8 @@ export const LOREN_MARKET_EMISSIONS: Partial<
  *  - **57** (×12), `RenderObjectVisual` :297-318: a steady `BITMAP_LIGHT`
  *    sprite at `2 * scale` in `(1, 0.2, 0)` plus the cycling `FIRE_HIK1` /
  *    `CURSEDLICH` / `HIK3` - the same vent Vulcanus 6 and Karutan 113 are.
+ *    `MoveObject` only hides it: the ground light is ours (`lampFlares`, none
+ *    on Classic).
  */
 
 /** `fLumi * (0.7, 0.5, 0.2)`, the lamps' ground light. */
@@ -68,6 +71,12 @@ const STREET_LAMP_FLARE: NonNullable<LightEmitter['sprite']> = {
   color: [0.5, 0.5, 0.5],
   pulse: STREET_LAMP_LUMI,
   texture: 'flare',
+};
+
+const VENT_GROUND: LightEmitter['terrain'] = {
+  range: 2,
+  color: [1, 0.45, 0.15],
+  flicker: { min: 0.5, max: 1, steps: 4 },
 };
 
 export const LOREN_MARKET_LIGHTS: Partial<
@@ -95,10 +104,8 @@ export const LOREN_MARKET_LIGHTS: Partial<
     {
       pointRange: 4,
       sprite: { scale: 2, color: [1, 0.2, 0] },
-      terrain: {
-        range: 2,
-        color: [1, 0.45, 0.15],
-        flicker: { min: 0.5, max: 1, steps: 4 },
+      get terrain() {
+        return isOn('lampFlares') ? VENT_GROUND : undefined;
       },
       emissions: [{ kinds: ['fire1', 'fire3'], every: 2, jitter: 6 }],
     },

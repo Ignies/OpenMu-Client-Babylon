@@ -20,7 +20,17 @@ const LOST_TOWER: readonly [number, string][] = [
   [23, 'the brazier, its sprite commented out (ZzzObject.cpp:3971-3975)'],
 ];
 
+/** Fires whose cards and flames the original draws, with no `AddTerrainLight` under them. */
+const UNLIT_FIRES: readonly [ENUM_WORLD, number, string][] = [
+  [ENUM_WORLD.WD_63PK_FIELD, 6, 'the Vulcanus vent (GM_PK_Field.cpp:252-264, :363-386)'],
+  [ENUM_WORLD.WD_66DOPPLEGANGER2, 6, 'the same vent (GMDoppelGanger2.cpp:62-72, :488-511)'],
+  [ENUM_WORLD.WD_79UNITEDMARKETPLACE, 57, 'the Loren Market vent (GMUnitedMarketPlace.cpp:128-136, :296-318)'],
+  [ENUM_WORLD.WD_3NORIA, 39, 'the Noria forge (ZzzObject.cpp:2853-2884, :3935-3937)'],
+];
+
 const cards = (world: ENUM_WORLD, type: number) => lightEmittersFor(world, type)?.filter(e => e.sprite).length;
+
+const lit = (world: ENUM_WORLD, type: number) => (lightEmittersFor(world, type) ?? []).some(e => e.terrain);
 
 const lostTower = (type: number) => lightEmittersFor(ENUM_WORLD.WD_4LOSTTOWER, type) ?? [];
 
@@ -32,6 +42,7 @@ describe('the lamp lights and flares the original never draws (lampFlares)', () 
     expect(cards(ENUM_WORLD.WD_4LOSTTOWER, 23)).toBe(1);
     for (const [type, what] of LOST_TOWER) expect(lostTower(type)[0]?.terrain, what).toBeDefined();
     expect(DEVIAS_CANDELABRA.terrain).toBeDefined();
+    for (const [world, type, what] of UNLIT_FIRES) expect(lit(world, type), what).toBe(true);
   });
 
   it('draw no flare on Classic, the light the original throws under them stays', () => {
@@ -47,5 +58,14 @@ describe('the lamp lights and flares the original never draws (lampFlares)', () 
     setFidelityChoice(FIDELITY_CLASSIC, {});
     for (const [type, what] of LOST_TOWER) expect(lostTower(type).some(e => e.terrain || e.sprite), what).toBe(false);
     expect(DEVIAS_CANDELABRA.terrain).toBeUndefined();
+  });
+
+  it('light no ground under the fire vents and the Noria forge on Classic, their cards kept', () => {
+    const cardsOn = UNLIT_FIRES.map(([world, type]) => cards(world, type));
+    setFidelityChoice(FIDELITY_CLASSIC, {});
+    for (const [i, [world, type, what]] of UNLIT_FIRES.entries()) {
+      expect(lit(world, type), what).toBe(false);
+      expect(cards(world, type), what).toBe(cardsOn[i]);
+    }
   });
 });

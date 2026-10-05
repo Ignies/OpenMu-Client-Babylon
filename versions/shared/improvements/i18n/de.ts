@@ -29,7 +29,7 @@ export default {
     'Wandfackeln, Kronleuchter und Feuerschalen in der Kaiserfestung erhellen den Boden um sich. Klassisch: kein Licht, wie im Original.',
   'fidelity.lampFlares': 'Licht und Schein von Lampen',
   'fidelity.lampFlares.hint':
-    'Straßenlaternen, Kerzen, Herdfeuer und Feuerschalen leuchten mit einem Schein, Kerzen brennen und manche Lampen erhellen den Boden um sie herum. Klassisch: nur, was das Original zeichnet.',
+    'Straßenlaternen, Kerzen, Herdfeuer und Feuerschalen leuchten mit einem Schein, Kerzen brennen und manche Lampen und Feuer erhellen den Boden um sie herum. Klassisch: nur, was das Original zeichnet.',
   'fidelity.roofFade': 'Durchsichtige Dächer',
   'fidelity.roofFade.hint':
     'Dächer blenden aus, solange du darunter stehst, damit du hineinsiehst. Klassisch: Dächer bleiben immer sichtbar.',

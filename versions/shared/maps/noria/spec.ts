@@ -1,6 +1,7 @@
 import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
 import type { Emission } from '@/controllers/fx/effectParticles';
 import type { MeshAnimations } from '@/controllers/render';
+import { isOn } from '@/controllers/fidelity';
 import { saw, sawUp } from '../shared/meshAnimation';
 
 /**
@@ -129,6 +130,21 @@ const FORGE_GLOW: LightEmitter['sprite'] = {
 };
 
 /**
+ * Ours (`lampFlares`, none on Classic): Noria has no `AddTerrainLight` anywhere
+ * (ZzzObject.cpp:2853-2884, :3923-3944), but a smithy whose sparks light
+ * nothing reads as a prop rather than a fire. One object on the map, so the
+ * cost and the clamp argument that rule the light out for the lamps do not
+ * apply. While it is on, `emitsLight` makes `load()` clear `csmCaster`: the
+ * forge casts no sun shadow, the same trade Lorencia's braziers make.
+ */
+const FORGE_GROUND: LightEmitter['terrain'] = {
+  range: 4,
+  color: [1, 0.55, 0.2],
+  flicker: { min: 0.55, max: 0.9, steps: 4 },
+  falloff: 1.8,
+};
+
+/**
  * Noria's map-object light sprites, `RenderObjectVisual` ZzzObject.cpp:
  * 2820-2890. All five entries are bone-anchored in the original; the offsets
  * below are those bones' positions out of the BMDs, at the middle of their
@@ -215,24 +231,11 @@ export const NORIA_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
       offset: [-178, 9, 93],
       bone: true,
       sprite: FORGE_GLOW,
-      /**
-       * Stated deviation: Noria has no `AddTerrainLight` anywhere, so this
-       * ground glow is ours. It is confined to the single forge - one object
-       * on a 9399-object map - because a smithy whose sparks light nothing
-       * reads as a prop rather than a fire, and because the cost and the
-       * clamp argument that rule the light out for the 2500-odd lamps do not
-       * apply to one instance. Side effect worth knowing: `emitsLight` makes
-       * `load()` clear `csmCaster`, so the forge stops casting a sun shadow,
-       * the same trade Lorencia's braziers make.
-       */
       pointRange: 6,
       pointGain: 1.4,
       wander: 0.1,
-      terrain: {
-        range: 4,
-        color: [1, 0.55, 0.2],
-        flicker: { min: 0.55, max: 0.9, steps: 4 },
-        falloff: 1.8,
+      get terrain() {
+        return isOn('lampFlares') ? FORGE_GROUND : undefined;
       },
       emissions: [
         { kinds: ['ember'], every: 6, count: 2, light: [1, 0.5, 0.12] },
