@@ -262,6 +262,7 @@ a pool. Spawned by `versions/shared/skills/dark_wizard/evil_spirit`.
 Each mesh is drawn bright, textured at `Alpha`, both, or hidden, in its own light; the clip is
 picked by index and run at the original's keys a tick; the spawner reads its bones. The clone,
 skeleton and animation groups are the spawn's own; materials are cached, nothing compiles per spawn.
+A mesh's `scrollV` writes the V offset of the GLB's own sheet once a frame, as model.ts `scrollV` does.
 
 ### tails.ts
 Tail centres are laid one a tick, each tail two crossed faces `width` wide, U per tail slot

@@ -382,8 +382,67 @@ describe('Chain Drive (262): BITMAP_SWORDEFF reads the caster\'s GIANTSWING key 
 
 describe('Dragon Roar (264): the dragon on BLOW_OF_DESTRUCTION\'s LifeTime, BITMAP_LAVA\'s waves and fire past DRAGONLORE key 5', () => {
   const LORE = PlayerAction.PLAYER_SKILL_DRAGONLORE;
-  const dragon = (r: Run) => r.spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.dragonHead).map(s => s.tick);
+  const dragons = (r: Run) => r.spawns.filter(s => s.name === 'summon' && String(s.opts.model).endsWith('/knight_plancrack_dragon.glb'));
+  const dragon = (r: Run) => dragons(r).map(s => s.tick);
   const waves = (r: Run, model: string) => r.spawns.filter(s => s.name === 'model' && s.opts.model === model);
+
+  it('MODEL_DRAGON_LOWER_DUMMY, not a dragon head: 55 cm from the caster toward his target, 10 cm over the ground, Scale 0.8, Angle[2] 45-224 (MoveHandlers.cpp:7650-7661, ZzzEffect.cpp:6149-6161)', () => {
+    const random = vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    const r = run(264, LORE, { keysPerTick: 0.3, area: true });
+    random.mockRestore();
+    expect(r.spawns.filter(s => String(s.opts.model).includes('dragonhead'))).toEqual([]);
+    const [d] = dragons(r);
+    // The target stands 3, 4 tiles off: 0.55 tiles along (0.6, 0.8).
+    expect([d.at.x, d.at.y, d.at.z]).toEqual([expect.closeTo(100.33, 5), expect.closeTo(0.1, 5), expect.closeTo(100.44, 5)]);
+    const o = d.opts as { scale: number; yaw: number; keysPerTick: number; seconds: number; meshes: { colour: number[]; scrollV: (now: number) => number }[]; drive: (b: { alpha: number }, t: number) => void };
+    // rand() % 180 is 90: Angle[2] 135, the node turned the other way.
+    expect([o.scale, o.yaw]).toEqual([0.8, expect.closeTo((-135 * Math.PI) / 180, 6)]);
+    // Grandmark2 and grandmark in (1, 0.8, 0.2), lines2 in (1, 0.2, 0.1), all scrolling V -(WorldTime % 2000) x 0.0001 (ZzzObject.cpp:2536-2550).
+    expect(o.meshes.map(m => m.colour)).toEqual([[1, 0.8, 0.2], [1, 0.2, 0.1], [1, 0.8, 0.2]]);
+    expect(o.meshes.map(m => m.scrollV(1.5))).toEqual([-0.15, -0.15, -0.15].map(v => expect.closeTo(v, 6)));
+    expect(o.meshes[0].scrollV(2.5)).toBeCloseTo(-0.05, 6);
+    // 0.3 keys a move and 0.05 a draw (ZzzEffect.cpp:9555-9561); Alpha x0.96 a move; past key 1 (move 3) 80 moves are left.
+    expect(o.keysPerTick).toBeCloseTo(0.35, 6);
+    const body = { alpha: 1 };
+    o.drive(body, 10);
+    expect(body.alpha).toBeCloseTo(0.96 ** 10, 6);
+    expect(Math.round(o.seconds * 25)).toBe(82);
+  });
+
+  it('the screen shakes while the blow\'s LifeTime is 35 to 15, ticks 16-36: EarthQuake (rand() % 8 - 4) x 0.1 (MoveHandlers.cpp:7641-7648)', () => {
+    const quakes = run(264, LORE, { keysPerTick: 0.3, area: true }).spawns.filter(s => s.name === 'quake');
+    expect(quakes.map(s => [s.tick, Math.round((s.opts.seconds as number) * 25), s.opts.min, s.opts.max])).toEqual([[16, 22, -0.4, 0.3]]);
+  });
+
+  it('BITMAP_LIGHT_RED sub4 where the dragon is let out: flare01_red 3 tiles across, drawn twice at LifeTime x 0.01 for its LifeTime 50 (ZzzEffect.cpp:6030-6056, :9563-9599)', () => {
+    const r = run(264, LORE, { keysPerTick: 0.3, area: true, ticks: 80 });
+    const decals = r.draws.filter(d => d.kind === 'decal' && d.args[0] === TEX.flareRed);
+    expect([...new Set(decals.map(d => d.tick))]).toEqual(range(21, 70));
+    expect(decals.filter(d => d.tick === 21).map(d => [d.args[2], d.args[3], d.args[4], d.args[6]])).toEqual([
+      [expect.closeTo(100.33, 5), expect.closeTo(100.44, 5), 3, expect.closeTo(0.5, 6)],
+      [expect.closeTo(100.33, 5), expect.closeTo(100.44, 5), 3, expect.closeTo(0.5, 6)],
+    ]);
+    expect(decals.filter(d => d.tick === 70).map(d => d.args[6])).toEqual([expect.closeTo(0.01, 6), expect.closeTo(0.01, 6)]);
+  });
+
+  it('the dummy throws a SPARK sub12 from 250 cm up in its Light (1, 0.2, 0.1) each move its key is past 1 and short of 6: moves 3-17, ticks 24-38 (MoveHandlers.cpp:10027-10034)', () => {
+    const random = vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    const r = run(264, LORE, { keysPerTick: 0.3, area: true, leaveAt: 3, ticks: 60 });
+    random.mockRestore();
+    const red = (tick: number) => r.draws.filter(d => d.kind === 'sprite' && d.tick === tick && d.args[0] === TEX.spark2 && (d.args[1] as number[])[1] === 0.2).length;
+    expect([23, 24, 25, 38, 39].map(red)).toEqual([0, 1, 2, 15, 15]);
+  });
+
+  it('between DRAGONLORE keys 2 and 8, a BITMAP_LAVA joint on bone 36 and one on bone 28 for each tenth of a key the clip runs a tick: 20 cm wide, Light x0.8 a move, 10 moves (MoveHandlers.cpp:9933-9953, ZzzEffectJoint.cpp:2742-2752, :6917-6939)', () => {
+    const r = run(264, LORE, { keysPerTick: 0.3, area: true, ticks: 40 });
+    const lava = r.draws.filter(d => d.kind === 'push' && (d.args[0] as { texture: string }).texture === TEX.lava);
+    const at = (tick: number) => lava.filter(d => d.tick === tick);
+    // Keys 2.1-7.8: ticks 7-26, three tenths a tick so six joints, each laying a tail ten moves.
+    expect([6, 7, 8, 16, 26, 27, 35, 36].map(t => at(t).length)).toEqual([0, 6, 12, 60, 60, 54, 6, 0]);
+    const [first] = at(7);
+    const o = first.args[0] as { maxTails: number; faces: string };
+    expect([o.maxTails, o.faces, first.args[1], first.args[5]]).toEqual([10, 'flat', expect.closeTo(0.8, 6), expect.closeTo(0.1, 6)]);
+  });
 
   it('the dragon on tick 21 (LifeTime 50 reaches 30, MoveHandlers.cpp:7650-7666), the waves past key 5 (tick 17 at 0.3 a tick)', () => {
     for (const skill of [264, 560]) {
