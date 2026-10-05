@@ -139,7 +139,7 @@ function windPillar(colour: RGB, fast: boolean): Step {
     effects.spawn('model', c.scene, at, {
       model: MODEL.windForce,
       seconds: ticks(fast ? 70 : 50),
-      yaw: entityYaw(c.caster),
+      yaw: -entityYaw(c.caster),
       spin,
       scaleAt: t => Math.min(3, 1 + 0.1 * movesAt(t)),
       colour,

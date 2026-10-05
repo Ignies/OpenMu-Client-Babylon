@@ -60,7 +60,7 @@ const soulBarrierShell: BuffHit = (scene, hero, attacker) => {
     seconds: ticks(20),
     scale: 0.9,
     colour: RGBS.white,
-    yaw: bearing + Math.PI,
+    yaw: -(bearing + Math.PI),
     follow: followEntity(hero, 0),
     blendMesh: 0,
     fadeTail: 0.5,
@@ -101,7 +101,7 @@ const soulBarrierSeal: Step = afterRelease((_at, c) => {
   const p = chest(new Vector3());
   effects.spawn('sprite', c.scene, p, { texture: TEX.flareBlue, colour: SOUL_SEAL, size: 2.2, seconds: 0.4, grow: 1.4, growFrom: 0.4, fadeTail: 0.6, follow: chest });
   for (let i = 0; i < 3; i++) {
-    const yaw = entityYaw(to) + (i * 2 * Math.PI) / 3;
+    const yaw = -entityYaw(to) + (i * 2 * Math.PI) / 3;
     effects.spawn('model', c.scene, feet(new Vector3()), { model: MODEL.protect2, seconds: 0.6, scale: 0.8, grow: 0.85, colour: SOUL_SHELL, alpha: 0.7, yaw, follow: feet, blendMesh: 0, fadeIn: 0.3, fadeTail: 0.6 });
   }
   effects.spawn('ring', c.scene, feet(new Vector3()), { texture: TEX.flareBlue, colour: SOUL_SEAL, scale: 2.4, grow: 1.2, seconds: 0.8, fadeIn: 0.15, fadeTail: 0.7, follow: feet });

@@ -76,7 +76,7 @@ const requiemOf = (graded: boolean): Step => (at, c) => {
   const neil = effects.spawn('summon', c.scene, home, {
     model: MODEL.summonNeil,
     seconds: ticks(80),
-    yaw,
+    yaw: -yaw,
     alpha: 0,
     meshes: [{ draw: 'add' }, { draw: 'add', colour: [1, 0, 0] }, { draw: 'add' }],
     keysPerTick: 0.35,
@@ -103,7 +103,7 @@ const requiemOf = (graded: boolean): Step => (at, c) => {
           effects.spawn('summon', c.scene, point, {
             model: NEIL_KNIVES[i],
             seconds: ticks(50),
-            yaw,
+            yaw: -yaw,
             meshes: [{ draw: 'alpha' }, { draw: 'add', colour: [1, 0, 0] }],
             loop: false,
             drive: (k, kt) => {
@@ -118,7 +118,7 @@ const requiemOf = (graded: boolean): Step => (at, c) => {
           effects.spawn('summon', c.scene, p, {
             model: m,
             seconds: ticks(50),
-            yaw,
+            yaw: -yaw,
             alpha: 0,
             meshes: [{ draw: 'add' }, { draw: 'add', scrollU: -1 }],
             drive: (g, gt) => {

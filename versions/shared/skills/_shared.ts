@@ -572,7 +572,7 @@ export function playSummonArrival(scene: Scene, monster: Entity): void {
     scale: 0.7,
     grow: 1 / 0.7,
     colour: RGBS.white,
-    yaw: entityYaw(monster),
+    yaw: -entityYaw(monster),
     follow: followEntity(monster, 0),
     fadeTail: 0,
     keysPerTick: 0.1,

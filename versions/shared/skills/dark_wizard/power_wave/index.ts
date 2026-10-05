@@ -116,7 +116,7 @@ function powerWaveSheet(c: SkillContext, feet: Vector3, yaw: number, look?: Wave
     const d = reach();
     return out.set(feet.x + f.x * d, feet.y, feet.z + f.z * d);
   };
-  effects.spawn('model', c.scene, feet, { model: MODEL.magic2, follow: path, yaw, scale: 0.9, colour: look?.colour ?? RGBS.white, seconds: ticks(POWER_WAVE_TICKS), blendMesh: 0, blendLight: powerWaveLight, fadeTail: 0, uvScroll: 0.2 });
+  effects.spawn('model', c.scene, feet, { model: MODEL.magic2, follow: path, yaw: -yaw, scale: 0.9, colour: look?.colour ?? RGBS.white, seconds: ticks(POWER_WAVE_TICKS), blendMesh: 0, blendLight: powerWaveLight, fadeTail: 0, uvScroll: 0.2 });
   effects.spawn('particles', c.scene, feet, { recipe: POWER_WAVE_SMOKE, rate: 100, seconds: ticks(POWER_WAVE_TICKS), follow: path });
   look?.extra(c, feet, path);
   lighting.skillLand(c.scene, 11, feet, out => {

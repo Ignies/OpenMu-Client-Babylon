@@ -226,7 +226,7 @@ exports[`skill visuals golden trace > buff look 80 1`] = `"0 calls, 97d170e1550e
 
 exports[`skill visuals golden trace > buff look 81 1`] = `"1 calls, 611690c5f8e76f2d"`;
 
-exports[`skill visuals golden trace > buff look 82 1`] = `"7 calls, a0852f0e8aaa11fe"`;
+exports[`skill visuals golden trace > buff look 82 1`] = `"7 calls, cb968e264f076335"`;
 
 exports[`skill visuals golden trace > buff look 83 1`] = `"0 calls, 97d170e1550eee4a"`;
 
@@ -338,9 +338,9 @@ exports[`skill visuals golden trace > buff look 136 1`] = `"0 calls, 97d170e1550
 
 exports[`skill visuals golden trace > buff look 137 1`] = `"0 calls, 97d170e1550eee4a"`;
 
-exports[`skill visuals golden trace > buff look 138 1`] = `"7 calls, a0852f0e8aaa11fe"`;
+exports[`skill visuals golden trace > buff look 138 1`] = `"7 calls, cb968e264f076335"`;
 
-exports[`skill visuals golden trace > buff look 139 1`] = `"7 calls, a0852f0e8aaa11fe"`;
+exports[`skill visuals golden trace > buff look 139 1`] = `"7 calls, cb968e264f076335"`;
 
 exports[`skill visuals golden trace > buff look 140 1`] = `"0 calls, 97d170e1550eee4a"`;
 
@@ -400,25 +400,25 @@ exports[`skill visuals golden trace > skill 5 1`] = `"6/6 spawns, 2/2 lights, e5
 
 exports[`skill visuals golden trace > skill 6 1`] = `"84/84 spawns, 2/2 lights, a89b5c95b60f8843"`;
 
-exports[`skill visuals golden trace > skill 7 1`] = `"10/10 spawns, 4/4 lights, 13da58eb1d3ee630"`;
+exports[`skill visuals golden trace > skill 7 1`] = `"10/10 spawns, 4/4 lights, f72a6f49ba889abd"`;
 
-exports[`skill visuals golden trace > skill 8 1`] = `"196/196 spawns, 4/4 lights, 0a2a867f5fb61002"`;
+exports[`skill visuals golden trace > skill 8 1`] = `"196/196 spawns, 4/4 lights, 8c6f44b30ea127ce"`;
 
 exports[`skill visuals golden trace > skill 9 1`] = `"22/22 spawns, 2/2 lights, 9b8b05f647aa0015"`;
 
 exports[`skill visuals golden trace > skill 10 1`] = `"18/18 spawns, 2/2 lights, fb57e53b8e94bae8"`;
 
-exports[`skill visuals golden trace > skill 11 1`] = `"8/8 spawns, 4/4 lights, 1cf3a2a1c2cc265a"`;
+exports[`skill visuals golden trace > skill 11 1`] = `"8/8 spawns, 4/4 lights, 381bdc946ed60d09"`;
 
 exports[`skill visuals golden trace > skill 12 1`] = `"49/49 spawns, 10/10 lights, 44fc79a6c095b3d0"`;
 
 exports[`skill visuals golden trace > skill 13 1`] = `"50/50 spawns, 10/10 lights, 54ce0ac4de5d8ab7"`;
 
-exports[`skill visuals golden trace > skill 14 1`] = `"83/83 spawns, 20/20 lights, a69d2972a4cd31ab"`;
+exports[`skill visuals golden trace > skill 14 1`] = `"83/83 spawns, 20/20 lights, 4e70c84456b50459"`;
 
 exports[`skill visuals golden trace > skill 15 1`] = `"84/84 spawns, 2/2 lights, b227a87b78028906"`;
 
-exports[`skill visuals golden trace > skill 16 1`] = `"8/8 spawns, 2/2 lights, 4c4f3905359eb0f4"`;
+exports[`skill visuals golden trace > skill 16 1`] = `"8/8 spawns, 2/2 lights, 565dcfae1f97f144"`;
 
 exports[`skill visuals golden trace > skill 17 1`] = `"10/10 spawns, 5/5 lights, 9f878b1a9f3b3472"`;
 
@@ -464,7 +464,7 @@ exports[`skill visuals golden trace > skill 37 1`] = `"0/0 spawns, 2/2 lights, d
 
 exports[`skill visuals golden trace > skill 38 1`] = `"122/122 spawns, 10/10 lights, 8344998e5e2f36b4"`;
 
-exports[`skill visuals golden trace > skill 39 1`] = `"205/205 spawns, 3/3 lights, f9218f0266ff73dc"`;
+exports[`skill visuals golden trace > skill 39 1`] = `"205/205 spawns, 3/3 lights, 7efef4183498df6a"`;
 
 exports[`skill visuals golden trace > skill 40 1`] = `"164/164 spawns, 6/6 lights, 4d2d6dd8a3d63bce"`;
 
@@ -828,15 +828,15 @@ exports[`skill visuals golden trace > skill 219 1`] = `"23/23 spawns, 4/4 lights
 
 exports[`skill visuals golden trace > skill 220 1`] = `"23/23 spawns, 2/2 lights, dcdba6ccbe7928b2"`;
 
-exports[`skill visuals golden trace > skill 221 1`] = `"151/151 spawns, 3/3 lights, c28ddfd1fd36c8a8"`;
+exports[`skill visuals golden trace > skill 221 1`] = `"151/151 spawns, 3/3 lights, 859e8700d55d1273"`;
 
-exports[`skill visuals golden trace > skill 222 1`] = `"164/164 spawns, 3/3 lights, 96047236fd77650d"`;
+exports[`skill visuals golden trace > skill 222 1`] = `"164/164 spawns, 3/3 lights, ee8ae597ed2aac19"`;
 
-exports[`skill visuals golden trace > skill 223 1`] = `"101/101 spawns, 5/5 lights, ae5ae485fbee9e28"`;
+exports[`skill visuals golden trace > skill 223 1`] = `"101/101 spawns, 5/5 lights, 6b91b18c31b2f41b"`;
 
-exports[`skill visuals golden trace > skill 224 1`] = `"41/41 spawns, 4/4 lights, 154693a0c779a308"`;
+exports[`skill visuals golden trace > skill 224 1`] = `"41/41 spawns, 4/4 lights, 878e82ca701c0176"`;
 
-exports[`skill visuals golden trace > skill 225 1`] = `"209/209 spawns, 5/5 lights, ef6dd1d352f1dcb6"`;
+exports[`skill visuals golden trace > skill 225 1`] = `"209/209 spawns, 5/5 lights, bb1d05a33f80e40e"`;
 
 exports[`skill visuals golden trace > skill 226 1`] = `"0/0 spawns, 2/2 lights, b8539d85424a0368"`;
 
@@ -850,9 +850,9 @@ exports[`skill visuals golden trace > skill 230 1`] = `"874/874 spawns, 4/4 ligh
 
 exports[`skill visuals golden trace > skill 231 1`] = `"0/0 spawns, 2/2 lights, 96ab324831ad12e0"`;
 
-exports[`skill visuals golden trace > skill 232 1`] = `"106/106 spawns, 5/5 lights, c0e42763e8b825d3"`;
+exports[`skill visuals golden trace > skill 232 1`] = `"106/106 spawns, 5/5 lights, 9e2f19b579051814"`;
 
-exports[`skill visuals golden trace > skill 233 1`] = `"98/98 spawns, 2/2 lights, 632ce9d27238479b"`;
+exports[`skill visuals golden trace > skill 233 1`] = `"98/98 spawns, 2/2 lights, 4262f87c3bacee7c"`;
 
 exports[`skill visuals golden trace > skill 234 1`] = `"20/20 spawns, 2/2 lights, 30b7aed6f98da195"`;
 
@@ -912,19 +912,19 @@ exports[`skill visuals golden trace > skill 261 1`] = `"14/14 spawns, 2/2 lights
 
 exports[`skill visuals golden trace > skill 262 1`] = `"4/4 spawns, 2/2 lights, af00dd39df2c1817"`;
 
-exports[`skill visuals golden trace > skill 263 1`] = `"20/20 spawns, 2/2 lights, accba4947ad67b02"`;
+exports[`skill visuals golden trace > skill 263 1`] = `"20/20 spawns, 2/2 lights, 01f1333b70ec3296"`;
 
 exports[`skill visuals golden trace > skill 264 1`] = `"2/2 spawns, 2/2 lights, 68d19b8ccaad0057"`;
 
 exports[`skill visuals golden trace > skill 265 1`] = `"16/16 spawns, 2/2 lights, 627b53281a9bdeaf"`;
 
-exports[`skill visuals golden trace > skill 266 1`] = `"28/28 spawns, 2/2 lights, 1077c9ebde618412"`;
+exports[`skill visuals golden trace > skill 266 1`] = `"28/28 spawns, 2/2 lights, df9112a480d44abf"`;
 
-exports[`skill visuals golden trace > skill 267 1`] = `"28/28 spawns, 2/2 lights, f819e1b89fc5eb83"`;
+exports[`skill visuals golden trace > skill 267 1`] = `"28/28 spawns, 2/2 lights, 34fe0b0e9712cdde"`;
 
-exports[`skill visuals golden trace > skill 268 1`] = `"28/28 spawns, 2/2 lights, b8b3a31e3d4cc704"`;
+exports[`skill visuals golden trace > skill 268 1`] = `"28/28 spawns, 2/2 lights, ffb3641f5721e612"`;
 
-exports[`skill visuals golden trace > skill 269 1`] = `"116/116 spawns, 2/2 lights, 9262d836ed5424ab"`;
+exports[`skill visuals golden trace > skill 269 1`] = `"116/116 spawns, 2/2 lights, 5b3605a05e7c3402"`;
 
 exports[`skill visuals golden trace > skill 270 1`] = `"8/10 spawns, 2/4 lights, 43686571b0a758ad"`;
 
@@ -1060,19 +1060,19 @@ exports[`skill visuals golden trace > skill 335 1`] = `"0/0 spawns, 2/2 lights, 
 
 exports[`skill visuals golden trace > skill 336 1`] = `"15/15 spawns, 5/5 lights, 049fffab29c71b05"`;
 
-exports[`skill visuals golden trace > skill 337 1`] = `"106/106 spawns, 5/5 lights, b2f8deb811707f17"`;
+exports[`skill visuals golden trace > skill 337 1`] = `"106/106 spawns, 5/5 lights, bf186528d115a148"`;
 
 exports[`skill visuals golden trace > skill 338 1`] = `"0/0 spawns, 2/2 lights, c918f82926f75cb1"`;
 
 exports[`skill visuals golden trace > skill 339 1`] = `"11/11 spawns, 5/5 lights, 601432f84ef83a85"`;
 
-exports[`skill visuals golden trace > skill 340 1`] = `"106/106 spawns, 5/5 lights, bd402523077492a5"`;
+exports[`skill visuals golden trace > skill 340 1`] = `"106/106 spawns, 5/5 lights, a7bdfbcf231c9c62"`;
 
 exports[`skill visuals golden trace > skill 341 1`] = `"0/0 spawns, 2/2 lights, 883d7948eeb985f0"`;
 
 exports[`skill visuals golden trace > skill 342 1`] = `"11/11 spawns, 5/5 lights, a542186741712a41"`;
 
-exports[`skill visuals golden trace > skill 343 1`] = `"106/106 spawns, 5/5 lights, 966184942462187e"`;
+exports[`skill visuals golden trace > skill 343 1`] = `"106/106 spawns, 5/5 lights, a63fdc07c932c7bb"`;
 
 exports[`skill visuals golden trace > skill 344 1`] = `"21/21 spawns, 3/3 lights, dc5912b70e59df4c"`;
 
@@ -1146,13 +1146,13 @@ exports[`skill visuals golden trace > skill 378 1`] = `"6/6 spawns, 2/2 lights, 
 
 exports[`skill visuals golden trace > skill 379 1`] = `"10/10 spawns, 2/2 lights, b9069d78d2f4fe72"`;
 
-exports[`skill visuals golden trace > skill 380 1`] = `"98/98 spawns, 2/2 lights, 18d653e36c5a9b7f"`;
+exports[`skill visuals golden trace > skill 380 1`] = `"98/98 spawns, 2/2 lights, 206237d203bc1191"`;
 
-exports[`skill visuals golden trace > skill 381 1`] = `"83/83 spawns, 20/20 lights, c65f55173efdee90"`;
+exports[`skill visuals golden trace > skill 381 1`] = `"83/83 spawns, 20/20 lights, ecdb4210e60304e5"`;
 
 exports[`skill visuals golden trace > skill 382 1`] = `"50/50 spawns, 10/10 lights, ce37e2a7ec9d8ee8"`;
 
-exports[`skill visuals golden trace > skill 383 1`] = `"98/98 spawns, 2/2 lights, 388a964b6c9d5bc5"`;
+exports[`skill visuals golden trace > skill 383 1`] = `"98/98 spawns, 2/2 lights, 711af75dfb673f0b"`;
 
 exports[`skill visuals golden trace > skill 384 1`] = `"5/5 spawns, 4/4 lights, c7c48605a680bbe1"`;
 
@@ -1164,15 +1164,15 @@ exports[`skill visuals golden trace > skill 387 1`] = `"122/122 spawns, 10/10 li
 
 exports[`skill visuals golden trace > skill 388 1`] = `"18/18 spawns, 2/2 lights, c715017937610799"`;
 
-exports[`skill visuals golden trace > skill 389 1`] = `"10/10 spawns, 4/4 lights, d6942afcc8ef50c1"`;
+exports[`skill visuals golden trace > skill 389 1`] = `"10/10 spawns, 4/4 lights, 0253ce63e8fa38ac"`;
 
 exports[`skill visuals golden trace > skill 390 1`] = `"23/23 spawns, 6/6 lights, 14a60be157e536d9"`;
 
-exports[`skill visuals golden trace > skill 391 1`] = `"203/203 spawns, 3/3 lights, 40c456f3296ac608"`;
+exports[`skill visuals golden trace > skill 391 1`] = `"203/203 spawns, 3/3 lights, f21e331e0f1919ee"`;
 
 exports[`skill visuals golden trace > skill 392 1`] = `"158/158 spawns, 6/6 lights, d329698c83a1126b"`;
 
-exports[`skill visuals golden trace > skill 393 1`] = `"203/203 spawns, 3/3 lights, c6b096484ce1bcc8"`;
+exports[`skill visuals golden trace > skill 393 1`] = `"203/203 spawns, 3/3 lights, 05a859558448fc70"`;
 
 exports[`skill visuals golden trace > skill 394 1`] = `"23/23 spawns, 6/6 lights, 0ceb808b61fe739e"`;
 
@@ -1192,13 +1192,13 @@ exports[`skill visuals golden trace > skill 401 1`] = `"0/0 spawns, 2/2 lights, 
 
 exports[`skill visuals golden trace > skill 402 1`] = `"0/0 spawns, 2/2 lights, 8537aaaccf2a9512"`;
 
-exports[`skill visuals golden trace > skill 403 1`] = `"8/8 spawns, 2/2 lights, e09fb7a6cc6878bb"`;
+exports[`skill visuals golden trace > skill 403 1`] = `"8/8 spawns, 2/2 lights, a3672eb7e783e9e3"`;
 
-exports[`skill visuals golden trace > skill 404 1`] = `"8/8 spawns, 2/2 lights, 2ccb95944d9b7a80"`;
+exports[`skill visuals golden trace > skill 404 1`] = `"8/8 spawns, 2/2 lights, 0c52db05ad668752"`;
 
 exports[`skill visuals golden trace > skill 405 1`] = `"0/0 spawns, 2/2 lights, 72e8d11755f08b7a"`;
 
-exports[`skill visuals golden trace > skill 406 1`] = `"8/8 spawns, 2/2 lights, 4484a8ce9c3edaa1"`;
+exports[`skill visuals golden trace > skill 406 1`] = `"8/8 spawns, 2/2 lights, 50de38c1f56774c2"`;
 
 exports[`skill visuals golden trace > skill 407 1`] = `"0/0 spawns, 2/2 lights, c284930918c4740c"`;
 
@@ -1304,9 +1304,9 @@ exports[`skill visuals golden trace > skill 457 1`] = `"0/0 spawns, 2/2 lights, 
 
 exports[`skill visuals golden trace > skill 458 1`] = `"286/286 spawns, 5/5 lights, da144e50c3457846"`;
 
-exports[`skill visuals golden trace > skill 459 1`] = `"155/155 spawns, 3/3 lights, c09d44738c095c4f"`;
+exports[`skill visuals golden trace > skill 459 1`] = `"155/155 spawns, 3/3 lights, 59a97990d7c3e634"`;
 
-exports[`skill visuals golden trace > skill 460 1`] = `"148/148 spawns, 3/3 lights, a2d7fd1bc3bf62c5"`;
+exports[`skill visuals golden trace > skill 460 1`] = `"148/148 spawns, 3/3 lights, bfec285d9c3162df"`;
 
 exports[`skill visuals golden trace > skill 461 1`] = `"23/23 spawns, 2/2 lights, 30d446426677cd0d"`;
 
@@ -1358,17 +1358,17 @@ exports[`skill visuals golden trace > skill 484 1`] = `"50/50 spawns, 10/10 ligh
 
 exports[`skill visuals golden trace > skill 485 1`] = `"0/0 spawns, 2/2 lights, dd0972c4c71b28a1"`;
 
-exports[`skill visuals golden trace > skill 486 1`] = `"83/83 spawns, 20/20 lights, cb30ec135556807e"`;
+exports[`skill visuals golden trace > skill 486 1`] = `"83/83 spawns, 20/20 lights, 8d955382173de145"`;
 
 exports[`skill visuals golden trace > skill 487 1`] = `"22/22 spawns, 2/2 lights, 86de2ac0d4c073cb"`;
 
 exports[`skill visuals golden trace > skill 488 1`] = `"0/0 spawns, 2/2 lights, 8eafef2fb3c7bdd2"`;
 
-exports[`skill visuals golden trace > skill 489 1`] = `"10/10 spawns, 4/4 lights, 1f19f378cc4346f4"`;
+exports[`skill visuals golden trace > skill 489 1`] = `"10/10 spawns, 4/4 lights, 13bd38fd4a20aaf9"`;
 
 exports[`skill visuals golden trace > skill 490 1`] = `"4/4 spawns, 2/2 lights, c5f19f5488b7173b"`;
 
-exports[`skill visuals golden trace > skill 491 1`] = `"10/10 spawns, 4/4 lights, 7c766cc16a7bf6a6"`;
+exports[`skill visuals golden trace > skill 491 1`] = `"10/10 spawns, 4/4 lights, 06d1ba7b339d96d9"`;
 
 exports[`skill visuals golden trace > skill 492 1`] = `"2/2 spawns, 3/3 lights, bca5020a6cf5750c"`;
 
@@ -1504,7 +1504,7 @@ exports[`skill visuals golden trace > skill 557 1`] = `"0/0 spawns, 2/2 lights, 
 
 exports[`skill visuals golden trace > skill 558 1`] = `"4/4 spawns, 2/2 lights, fcfa7d9dfb24a994"`;
 
-exports[`skill visuals golden trace > skill 559 1`] = `"20/20 spawns, 2/2 lights, eb0a97831553e231"`;
+exports[`skill visuals golden trace > skill 559 1`] = `"20/20 spawns, 2/2 lights, 38d64e50b35fe4b1"`;
 
 exports[`skill visuals golden trace > skill 560 1`] = `"2/2 spawns, 2/2 lights, d1914f09075985db"`;
 
@@ -1524,15 +1524,15 @@ exports[`skill visuals golden trace > skill 567 1`] = `"0/0 spawns, 2/2 lights, 
 
 exports[`skill visuals golden trace > skill 568 1`] = `"0/0 spawns, 2/2 lights, a425b22861ae523c"`;
 
-exports[`skill visuals golden trace > skill 569 1`] = `"28/28 spawns, 2/2 lights, 6a8062ab772de852"`;
+exports[`skill visuals golden trace > skill 569 1`] = `"28/28 spawns, 2/2 lights, 469e60e3fbeb8f2d"`;
 
 exports[`skill visuals golden trace > skill 570 1`] = `"0/0 spawns, 2/2 lights, 91a7466e6385d878"`;
 
 exports[`skill visuals golden trace > skill 571 1`] = `"0/0 spawns, 2/2 lights, c24389cb91bbfdb8"`;
 
-exports[`skill visuals golden trace > skill 572 1`] = `"28/28 spawns, 2/2 lights, 2ae7f570a1f142ac"`;
+exports[`skill visuals golden trace > skill 572 1`] = `"28/28 spawns, 2/2 lights, a6ebacb51241dc0a"`;
 
-exports[`skill visuals golden trace > skill 573 1`] = `"28/28 spawns, 2/2 lights, 05984e3f338446e1"`;
+exports[`skill visuals golden trace > skill 573 1`] = `"28/28 spawns, 2/2 lights, e546c5adc1693cb8"`;
 
 exports[`skill visuals golden trace > skill 574 1`] = `"0/0 spawns, 2/2 lights, b588f3c84ffd86da"`;
 

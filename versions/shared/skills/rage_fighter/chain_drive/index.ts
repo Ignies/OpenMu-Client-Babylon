@@ -120,9 +120,9 @@ const blow: Step = (_at, c) => {
   if (p) playCombat('Sound/Ragefighter/Rage_Giantswing_Att', { x: p.x, z: p.z });
 };
 
-/** The first blow also sends the giant-swing MODEL_SHOCKWAVE01 wave out from the caster (:9330-9340). */
+/** The first blow also sends the giant-swing MODEL_SHOCKWAVE01 wave out from the caster, at (60, 0, Angle[2] - 180) (:9330-9340). */
 const wave: Step = (_at, c) =>
-  effects.spawn('model', c.scene, entityPos(c.caster, 0.05, new Vector3()), { model: MODEL.shockwave, seconds: ticks(15), scale: 0.8, colour: RGBS.arc, follow: flying(c, 0.05, perTick(40)), yaw: entityYaw(c.caster) });
+  effects.spawn('model', c.scene, entityPos(c.caster, 0.05, new Vector3()), { model: MODEL.shockwave, seconds: ticks(15), scale: 0.8, colour: RGBS.arc, follow: flying(c, 0.05, perTick(40)), angle: [60, 0, deg(entityYaw(c.caster)) - 180] });
 
 /**
  * BITMAP_SWORDEFF at the packet (MonkSystem.cpp:1121-1126); it reads the caster's GIANTSWING key each tick

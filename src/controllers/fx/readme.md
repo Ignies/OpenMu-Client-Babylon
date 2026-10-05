@@ -92,6 +92,8 @@ shared pools, textures and particle recipes other folders reuse.
 - `softEdge.test.ts`: `fadeSheetEdges` / `fadeSheetSides` fade sheet borders and only touch alpha.
 - `ring.test.ts`: a ring with `scaleAt` is drawn at that diameter each frame (a per-tick `o->Scale` curve).
 - `ticked.test.ts`: a strip with `maxSegment` parks a segment whose tail centres lie further apart.
+- `model.test.ts`: a model turned by `angle` (MU degrees) or by `yaw: -entityYaw` faces where its caster is
+  drawn facing; `yaw` is the node's own turn, so `entityYaw` as it is mirrors it.
 - The skill golden tests (`versions/shared/skills/*.golden.test.ts`) drive `effects.spawn` and
   `effects.update` for every skill.
 

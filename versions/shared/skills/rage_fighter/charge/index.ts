@@ -20,7 +20,7 @@ const spray: Step = atCaster(streamerFan(4, 0.35, { velocity: perTick(40), secon
  */
 function swordForce(c: SkillContext): void {
   const at = entityPos(c.caster, 1, new Vector3());
-  effects.spawn('model', c.scene, at, { model: MODEL.swordForce, seconds: ticks(15), scale: 1, colour: RGBS.fire, grow: 3, follow: flying(c, 1, perTick(10)), yaw: entityYaw(c.caster) });
+  effects.spawn('model', c.scene, at, { model: MODEL.swordForce, seconds: ticks(15), scale: 1, colour: RGBS.fire, grow: 3, follow: flying(c, 1, perTick(10)), yaw: -entityYaw(c.caster) });
   particles({ recipe: FIRE_PUFF, count: 8 })(at, c);
   const p = c.caster.transform?.pos;
   if (p && currentMap() === ENUM_WORLD.WD_30BATTLECASTLE) playCombat('Sound/battlecastle/sCHaveyBlow', { x: p.x, z: p.z });

@@ -7,6 +7,7 @@ import { entityGone, entityPos, entityYaw } from '@/controllers/fx/core';
 import { IMPACT_HEIGHT, after, flash, flying, particles, perTick, seq, slash, ticks, type Step } from '@/controllers/skills/visuals';
 
 import { A } from '@/controllers/combat/recipes';
+import { deg } from '../../_shared';
 import { windForce } from '../_shared';
 
 /** RageCreateEffect's MODEL_WINDFOCE sub2 (1, 0.5, 0.2) and the sub3s (1, 0.5, 0) it raises (MonkSystem.cpp:1297-1298, MoveHandlers.cpp:9579-9596). */
@@ -20,9 +21,10 @@ const windPillar = windForce([1, 0.5, 0.2], true, [1, 0.5, 0]);
 const BURST_TICKS = [20, 21];
 const WAVE_TICKS = [30, 31];
 
+/** The wave stands on its side at the afterimage's way - 180 (MonkSystem.cpp:813-816); the caster's facing stands in for that way. */
 const wave: Step = (_at, c) => {
   if (entityGone(c.caster)) return;
-  effects.spawn('model', c.scene, entityPos(c.caster, 0.05, new Vector3()), { model: MODEL.shockwave, seconds: ticks(12), scale: 0.8, colour: [0.25, 0.2, 0.3], follow: flying(c, 0.05, perTick(60)), yaw: entityYaw(c.caster) });
+  effects.spawn('model', c.scene, entityPos(c.caster, 0.05, new Vector3()), { model: MODEL.shockwave, seconds: ticks(12), scale: 0.8, colour: [0.25, 0.2, 0.3], follow: flying(c, 0.05, perTick(60)), angle: [90, 0, deg(entityYaw(c.caster)) - 180] });
 };
 const burst: Step = (_at, c) => {
   const target = c.target;

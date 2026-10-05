@@ -79,6 +79,9 @@ _shared.ts                      helpers for several classes
 - `releaseTiming.test.ts`: when Fire Ball leaves against the caster's magic speed: 14 ticks at a
   slow clip, on the clip's key 5 at a fast one; Force on its strike clip's key 3 at a low and a
   high attack speed, at 25 and 60 fps, and 0.56 s after the packet when the key never comes.
+- `facing.test.ts`: the effect models and summon bodies a skill turns to its caster's facing, a bearing
+  or an angle of the original's face where `AngleMatrix` of that `o->Angle` points, and the casting
+  circles turn the original's way. A model's `yaw` is the node's: a caster's facing is `-entityYaw`.
 - Tests that load the skills import `./skillVisuals` first (it keeps the app import cycle in
   order) and stub `fetch` in `vi.hoisted`: Data/ is not there under Node.
 - Snapshots are in `__snapshots__/`. When a change is meant, update them with

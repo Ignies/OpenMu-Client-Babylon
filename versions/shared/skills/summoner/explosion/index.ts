@@ -160,7 +160,7 @@ const sahamuttOf = (graded: boolean): Step => (at, c) => {
     model: MODEL.summonSahamutt,
     seconds: ticks(80),
     scale: SAHAMUTT_SCALE[tier],
-    yaw: yawToward(start, at),
+    yaw: -yawToward(start, at),
     alpha: 0,
     meshes: [{ draw: 'both' }, { draw: 'both' }],
     clip: 0,
