@@ -17,7 +17,7 @@ import { reportLoadFailure } from '@/controllers/assets';
  */
 const FLAME_BONES: readonly number[] = [1, 2, 4, 6, 9, 10, 11];
 
-/** `CreateSprite(BITMAP_LIGHT, Position, 0.5f, Light, o)`: sprite scale. */
+/** `CreateSprite(BITMAP_LIGHT, Position, 0.5f, Light, o)` (ZzzObject.cpp:3172): no `* o->Scale`. */
 const FLARE_SCALE = 0.5;
 
 /**
@@ -47,8 +47,8 @@ const POSE_WAIT_LIMIT = 120;
 /**
  * Blood Castle type 11, the candelabra (x11, EncTerrain12.obj): seven light
  * sprites on the candle-tip bones, brightness a slow sine phased by yaw
- * (ZzzObject.cpp:3165-3181). Sprites are sized once and only their
- * brightness follows the sine - the same trade Stadium's brazier makes.
+ * (ZzzObject.cpp:3161-3175). The sprites keep the original's steady 0.5 and
+ * only their brightness follows the sine.
  */
 export class BloodCastleCandelabraObject extends MapTileObject {
   // Seven flares on posed bones and a pulsing light: this one has to stay a
@@ -79,14 +79,8 @@ export class BloodCastleCandelabraObject extends MapTileObject {
   #light(world: World): void {
     this.#lit = true;
 
-    const scale = this.node.scaling.x;
-
     for (const bone of this.#bones) {
-      void createMovableFlare(
-        world.scene,
-        FLARE_SCALE * scale,
-        FLARE_COLOR
-      ).then(flare => {
+      void createMovableFlare(world.scene, FLARE_SCALE, FLARE_COLOR).then(flare => {
         if (!flare) return;
         if (this.#disposed) {
           flare.dispose();
