@@ -134,13 +134,8 @@ export const TARKAN_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {
  * sprite. The original creates neither, and the scrolling `gearB` sheet is
  * already a fire.
  *
- * The sine is ported as `flicker` rather than as a pulse because
- * `recipeFromEmitter` (controllers/lighting/mapObjectLights.ts) only runs its smooth `pulse` path for emitters that also
- * declare a `sprite`, and a brazier has no flare in the original. `flicker`
- * over `min` 0.3 / `max` 1.0 covers exactly the sine's range
- * (0.65 ± 0.35) in five steps; what is lost is the metronome - a random walk
- * inside that range instead of a 3.14 s breath. For a fire that is the better
- * of the two errors.
+ * The sine is the ground light's own `pulse`: `(sin + 1) * 0.35 + 0.3` is the
+ * original's 0.65 ± 0.35, a 3.14 s breath.
  *
  * `pointRange` has no C++ counterpart at all (the original has no dynamic
  * point lights); it feeds the Babylon pool, and 6 matches what Lorencia's
@@ -162,7 +157,7 @@ const brazier: LightEmitter = {
   terrain: {
     range: 2,
     color: [1, 0.6, 0.2],
-    flicker: { min: 0.3, max: 1, steps: 5 },
+    pulse: { speed: 0.002, amount: 0.35, base: 0.3 },
   },
 };
 

@@ -111,7 +111,7 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   their swing.
 - `fireLights.test.ts`: the ground lights the original throws take its position and range on every
   preset: Devias 66's `CreateFire` 50 up at range 4, Lorencia 150 at range 3, Loren Market 30 and 35
-  breathing on their bones, Kanturu 70 on its sine.
+  breathing on their bones, Kanturu 70 and the Tarkan braziers on their sine.
 - `bloodcastle/lampObject.test.ts`: the throne-room lamp's flare is `BITMAP_FLARE` too.
 - `lampFlares.test.ts`, `lorencia/candleObject.test.ts`, `devias/candleObject.test.ts`: what the original
   never draws is the `lampFlares` improvement, gone on Classic: the flares of Lorencia 90 and 150, Devias

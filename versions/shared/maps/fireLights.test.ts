@@ -45,6 +45,18 @@ describe.each([
     ]);
   });
 
+  // `Luminosity = sinf(WorldTime * 0.002f) * 0.35f + 0.65f`, `AddTerrainLight(..., (L, 0.6L, 0.2L), 2)`.
+  it('Tarkan 61, 65 and 66 breathe on their sine (ZzzObject.cpp:4090-4112)', () => {
+    setFidelityChoice(choice, {});
+    for (const type of [61, 65, 66]) {
+      expect(groundOf(ENUM_WORLD.WD_8TARKAN, type)?.terrain, `type ${type}`).toEqual({
+        range: 2,
+        color: [1, 0.6, 0.2],
+        pulse: { speed: 0.002, amount: 0.35, base: 0.3 },
+      });
+    }
+  });
+
   // `Luminosity = sinf(WorldTime * 0.002f) * 0.45f + 0.55f`, `AddTerrainLight(..., L * (1.4, 0.7, 0.4), 4)`.
   it('Kanturu 70 breathes on its sine (GM_Kanturu_1st.cpp:85-91)', () => {
     setFidelityChoice(choice, {});
