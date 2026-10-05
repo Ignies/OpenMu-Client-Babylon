@@ -423,11 +423,29 @@ function urlOverride(saved: StoredState): {
   };
 }
 
+/**
+ * What keys a listed world that published no id: its domain, or the address it
+ * named. A world that later publishes one is moved off this key (`setListed`).
+ */
+export function listedAddressId(
+  profile: Pick<ServerProfile, 'domain' | 'csHost' | 'csPort'>
+): string {
+  return profile.domain
+    ? `list:${profile.domain}`
+    : `list:${profile.csHost}:${profile.csPort}`;
+}
+
 const enterListeners: ((profile: ServerProfile) => void)[] = [];
+const rekeyListeners: ((from: string, to: string) => void)[] = [];
 
 /** Runs `fn` each time a world is entered (`markPlayed`); `serverManifest.ts` fetches there. */
 export function onWorldEntered(fn: (profile: ServerProfile) => void): void {
   enterListeners.push(fn);
+}
+
+/** Runs `fn` when a listed world moves to a new key; `serverAccounts.ts` re-keys its book there. */
+export function onWorldRekeyed(fn: (from: string, to: string) => void): void {
+  rekeyListeners.push(fn);
 }
 
 class ServerConfigStore {
@@ -527,10 +545,33 @@ class ServerConfigStore {
    * The published list arrived. The selection is left alone: an id that is not
    * in the list yet (a saved one, or a listed one this fetch dropped) already
    * falls back to the first saved profile in `active`.
+   * A world that just published an id moves off its address key (readme.md).
    */
   setListed(entries: ServerProfile[]): void {
     runInAction(() => {
       this.listed = entries;
+
+      let moved = false;
+
+      for (const entry of entries) {
+        const from = listedAddressId(entry);
+
+        if (from === entry.id) continue;
+
+        if (this.activeId === from) {
+          this.activeId = entry.id;
+          moved = true;
+        }
+
+        if (this.lastPlayedId === from) {
+          this.lastPlayedId = entry.id;
+          moved = true;
+        }
+
+        for (const fn of rekeyListeners) fn(from, entry.id);
+      }
+
+      if (moved) this.save();
     });
   }
 

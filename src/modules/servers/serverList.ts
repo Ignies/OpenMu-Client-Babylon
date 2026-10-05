@@ -3,6 +3,7 @@ import { LocalStorage } from '../../core/localStorage';
 import { WS_HOST, WS_PORT } from './defaults';
 import {
   isUsableHost,
+  listedAddressId,
   normalizeHost,
   normalizeWsUrl,
   ServerConfig,
@@ -88,6 +89,9 @@ const WS_RE = /^wss?:\/\/[A-Za-z0-9._-]+(?::\d{1,5})?\/?$/i;
  */
 const VERSION_RE = /^(?=.*\d)[A-Za-z0-9.]{2,12}$/;
 
+/** The optional world id before the version: digits only, so never a version token or a name. */
+const WORLD_ID_RE = /^\d{1,6}$/;
+
 /**
  * A name line under a world: a bullet, an id, and what to call it. Flush left
  * it names a game server; indented it names a channel of the game server above
@@ -163,7 +167,9 @@ export function parseServerLine(line: string): ServerProfile | null {
   if (!match) return null;
 
   const { fields: raw, image } = splitImage(match[1].split(':'));
-  const withVersion = raw.map(trimField);
+  const withId = raw.map(trimField);
+  const worldId = WORLD_ID_RE.test(withId[0] ?? '') ? withId[0] : '';
+  const withVersion = worldId ? withId.slice(1) : withId;
   const version = VERSION_RE.test(withVersion[0] ?? '') ? withVersion[0] : '';
   const fields = version ? withVersion.slice(1) : withVersion;
 
@@ -193,10 +199,12 @@ export function parseServerLine(line: string): ServerProfile | null {
   if (!Number.isInteger(port) || port < 1 || port > 65535) return null;
 
   return {
-    // Stable across refreshes, so a selected server stays selected: the list
-    // has no ids of its own, so a world is identified by what it published -
-    // its domain, or the address it named.
-    id: domain ? `list:${domain}` : `list:${host}:${port}`,
+    // Stable across refreshes, so a selected server stays selected: the id the
+    // world published, or failing that what it published itself as - its
+    // domain, or the address it named.
+    id: worldId
+      ? `list:${Number(worldId)}`
+      : listedAddressId({ domain, csHost: host, csPort: port }),
     name,
     csHost: host,
     csPort: port,

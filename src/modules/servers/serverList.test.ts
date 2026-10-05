@@ -37,6 +37,20 @@ describe('parseServerLine', () => {
     });
   });
 
+  it('keys a world by the id it published', () => {
+    expect(
+      parseServerLine('[1:S6EP3:Ignies:A world:es](ignies.net)')
+    ).toMatchObject({
+      id: 'list:1',
+      version: 'S6EP3',
+      name: 'Ignies',
+      domain: 'ignies.net',
+    });
+    expect(parseServerLine('[12:Ignies:A world:es](ignies.net)')).toMatchObject(
+      { id: 'list:12', name: 'Ignies' }
+    );
+  });
+
   it('lets a domain name a proxy that is not the conventional one', () => {
     expect(
       parseServerLine('[Ignies:A world:es](ignies.net@wss://gate.ignies.net)')
@@ -156,6 +170,10 @@ describe('serverlist.md', () => {
 
   it('publishes at least one world', () => {
     expect(published.length).toBeGreaterThan(0);
+  });
+
+  it('keys every world by an id of its own', () => {
+    for (const world of published) expect(world.id).toMatch(/^list:\d+$/);
   });
 
   // The prose around the entries shows the syntax, which means it is written

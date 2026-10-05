@@ -1,6 +1,6 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { LocalStorage } from '../../core/localStorage';
-import { ServerConfig, URL_PROFILE_ID } from './serverConfig';
+import { ServerConfig, URL_PROFILE_ID, onWorldRekeyed } from './serverConfig';
 
 /** The saved accounts of each world (keyed by profile id) and which one the login window fills.
  * Plain text in localStorage, as the original stored them. Details: readme.md. */
@@ -331,9 +331,24 @@ class ServerAccountsStore {
     return !!worldId && worldId !== URL_PROFILE_ID;
   }
 
+  /** A listed world moved keys; its accounts follow, unless the new key already has some. */
+  rekey(from: string, to: string): void {
+    const world = this.book[from];
+
+    if (!world || this.book[to]) return;
+
+    runInAction(() => {
+      this.book[to] = world;
+      delete this.book[from];
+    });
+    this.save();
+  }
+
   private save(): void {
     LocalStorage.save(ACCOUNTS_KEY, JSON.stringify(this.book));
   }
 }
 
 export const ServerAccounts = new ServerAccountsStore();
+
+onWorldRekeyed((from, to) => ServerAccounts.rekey(from, to));

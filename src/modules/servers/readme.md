@@ -77,8 +77,11 @@ connect server's own list (`Servers.serverList`) is filled by `session/net.ts`.
   proxy's network. They need not be the same machine.
 
 ### serverList.ts
-- One world per line: `[VERSION:NAME:DESCRIPTION:LANGUAGE:IMAGE](host:port@WSPROXY)`. Version,
-  banner and proxy are optional; the old three-field form still parses. The version is the
+- One world per line: `[ID:VERSION:NAME:DESCRIPTION:LANGUAGE:IMAGE](host:port@WSPROXY)`. Id,
+  version, banner and proxy are optional; the old three-field form still parses.
+- The id (digits only) keys the world as `list:<id>`; without one the key is `list:<domain>` or
+  `list:<host>:<port>`. When a world first publishes an id, `setListed` moves the selection, the
+  last played world and its saved accounts (`onWorldRekeyed`) from the old key to the new one. The version is the
   `gameVersion.listTag` of a `versions/<id>` folder (`S6EP3`); a world asking for another is shown
   as not playable here.
 - The target is `host:port` (the connect server as the world's proxy reaches it) or the world's

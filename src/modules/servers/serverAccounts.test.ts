@@ -1,12 +1,15 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { ServerAccounts } from './serverAccounts';
-import { URL_PROFILE_ID } from './serverConfig';
+import { ServerConfig, URL_PROFILE_ID } from './serverConfig';
+import { parseServerLine } from './serverList';
 
 const ONE = 'list:one.net';
 const TWO = 'list:two.net';
+const NUMBERED = 'list:7';
 
 afterEach(() => {
-  for (const id of [ONE, TWO, URL_PROFILE_ID]) ServerAccounts.forget(id);
+  for (const id of [ONE, TWO, NUMBERED, URL_PROFILE_ID])
+    ServerAccounts.forget(id);
 });
 
 /** An account with a name on it, since a blank row is not a login. */
@@ -19,6 +22,21 @@ function named(worldId: string, username: string, password = 'pw'): string {
 }
 
 describe('ServerAccounts', () => {
+  it('moves a world to the id it starts publishing, accounts and selection with it', () => {
+    const listed = (line: string) =>
+      ServerConfig.setListed([line].flatMap(l => parseServerLine(l) ?? []));
+
+    named(ONE, 'main');
+    listed('[One:A world:en](one.net)');
+    ServerConfig.select(ONE);
+    listed('[7:One:A world:en](one.net)');
+
+    expect(ServerConfig.activeId).toBe(NUMBERED);
+    expect(ServerAccounts.of(NUMBERED).username).toBe('main');
+    expect(ServerAccounts.has(ONE)).toBe(false);
+    ServerConfig.setListed([]);
+  });
+
   it('reads a world with no account as a blank one', () => {
     expect(ServerAccounts.of(ONE)).toMatchObject({ username: '', password: '' });
     expect(ServerAccounts.list(ONE)).toEqual([]);
