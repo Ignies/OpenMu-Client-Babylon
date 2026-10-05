@@ -144,5 +144,7 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   and breathe on `|sin|`; it is never a batched prop.
 - `tarkan/impactGlowObject.test.ts`: the temple glow is `BITMAP_IMPACT`, its size and colour
   breathing together.
+- `stadium/brazierObject.test.ts`: the brazier's card is `Luminosity * 5` every frame, whatever the
+  pillar's scale.
 - `losttower/towerMachineObject.test.ts`: the machines draw `BITMAP_MAGIC + 1` (19) and
   `BITMAP_LIGHTNING + 1` (20) pairs that turn against each other.

@@ -41,7 +41,7 @@ export async function createStadium(world: World) {
   const tiles = terrain.MapTileObjects;
 
   // Type 9 (n=32): the brazier, the world's only `RenderObjectVisual` case
-  // (ZzzObject.cpp:2945-2953).
+  // (ZzzObject.cpp:2939-2946).
   tiles[9] = StadiumBrazierObject;
 
   // The notice boards. What each one says is versions/shared/objects/signs/signLabels.ts.
