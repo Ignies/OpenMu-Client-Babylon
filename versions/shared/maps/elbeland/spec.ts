@@ -83,8 +83,9 @@ export const ELBELAND_EMISSIONS: Partial<Record<number, readonly Emission[]>> =
  *    middle of the swing.
  *  - **110** (×1, at 47.5/218.5), `RenderObjectVisual` :301-311: one
  *    `BITMAP_LIGHT` particle every other tick at
- *    `(cos, sin)(WorldTime * 0.03) * (30 + rand()%5)` around bone 0, 70 up,
- *    scale 0.6, white - the village-protection shrine. 0.03 rad/ms is 4.8
+ *    `(cos, sin)(WorldTime * 0.03) * (30 + rand()%5)` around bone 0, 70 up
+ *    in its frame - 31 over the origin, as bone 0 sits 39 under it - scale
+ *    0.6, white - the village-protection shrine. 0.03 rad/ms is 4.8
  *    turns a second against 12.5 spawns, so consecutive sparks land 138°
  *    apart and the ring never reads as an orbit in the original either: what
  *    it looks like is a light hanging over the shrine, which is the sprite
@@ -170,7 +171,8 @@ export const ELBELAND_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
     ],
     110: [
       {
-        offset: [0, 0, 70],
+        offset: [0, 0, 31],
+        bone: true,
         sprite: { scale: 1.2, color: [1, 1, 1] },
       },
     ],

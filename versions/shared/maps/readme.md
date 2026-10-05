@@ -105,9 +105,10 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   breathe and grow with their fLumi; Land of Trials 49 draws two red cards on bone 3; Elbeland's
   lantern (63) breathes and its totem (121) breathes and grows on six bones; and no table wave is
   faster than 0.05.
-- `boneRows.test.ts`: the rows the original hangs on a bone are `bone: true` (Noria's lamps, Kalima's
-  flowers, Aida's plants and torch, the Kanturu lamps, Elbeland 63 and 121, Loren Market 30 and 35,
-  Karutan 72, Land of Trials 49), and Noria's swinging lanterns sit at the middle of their swing.
+- `boneRows.test.ts`: the rows the original hangs on a bone are `bone: true` (Noria's lamps, Icarus
+  10, Kalima's flowers, Aida's plants and torch, the Kanturu lamps, Elbeland 63, 110 and 121, Loren
+  Market 30 and 35, Karutan 72, Land of Trials 49), and Noria's swinging lanterns sit at the middle of
+  their swing.
 - `fireLights.test.ts`: the ground lights the original throws take its position and range on every
   preset: Devias 66's `CreateFire` 50 up at range 4, Lorencia 150 at range 3, Loren Market 30 and 35
   breathing on their bones, Kanturu 70 on its sine.

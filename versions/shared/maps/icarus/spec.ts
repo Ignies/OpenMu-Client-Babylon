@@ -84,7 +84,8 @@ export const ICARUS_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {}
  * metres), rounded to MU units - the two `Sphere01`/`Sphere02` bones sit at
  * (-1.403, 0.004, 4.969) and (-1.400, 0.005, 4.976), i.e. the orb the flare is
  * meant to be inside. `resolveEmitterPosition` rotates it by the object's yaw,
- * so the 1.4 MU-metre lateral kick follows the pillar around.
+ * so the 1.4 MU-metre lateral kick follows the pillar around, and scales it
+ * with the pillar (`bone`), as the bone transform does.
  *
  * No `terrain` block: the original does not call `AddTerrainLight` here, so
  * there is no terrain pool and no point light either - 180 of these stand on
@@ -95,6 +96,7 @@ export const ICARUS_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
   10: [
     {
       offset: [-140, 0, 500],
+      bone: true,
       // `Light = (1,1,1)`, ZzzObject.cpp:3128. BITMAP_LIGHT's own base size is
       // not recoverable from the call (it passes Scale 1.f and the particle
       // supplies the rest), so the flare is sized to the orb it sits in
