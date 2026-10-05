@@ -20,7 +20,7 @@ asks `isOn('<id>')`. Classic turns them all off and runs the original.
 | `wingShadows` | Enhanced | `controllers/actors/wingObject.ts` | wings cast no shadow (ZzzCharacter.cpp:8394-8425) |
 | `torchCrackle` | Enhanced | `controllers/sound/crackle.ts` | torches are silent (no `SOUND_FIRE`) |
 | `loginWallTorches` | Enhanced | `maps/loginscene/wallTorchObject.ts` | the login wall torch is its grey flare alone (GMEmpireGuardian4.cpp:864-875); Enhanced burns it with a warm one |
-| `fortressLights` | Enhanced | `maps/empireguardian4/spec.ts` | day-4 wall torches (a grey flare) and chandeliers light no ground (no `AddTerrainLight` in cases 37, 157) |
+| `fortressLights` | Enhanced | `maps/empireguardian4/spec.ts` | day-4 wall torches (a grey flare), chandeliers and braziers (79 and 80, also the login scene's; 79's flare steady) light no ground (no `AddTerrainLight` in cases 37, 79, 80, 157) |
 | `roofFade` | Enhanced | `ecs/systems/ceilingHideSystem.ts` | roofs stay drawn (the only object fade is Chaos Castle's) |
 
 - The file's comment cites the original and names the site; the site keeps the original path when
@@ -29,7 +29,8 @@ asks `isOn('<id>')`. Classic turns them all off and runs the original.
   the blow lands is a server setting (`heldHitRequest` in the world's `server.json`,
   `src/modules/servers/serverManifest.ts`), not a player choice.
 - Some deviations read at build time: `wingShadows` when a wing is created, `loginChandeliers` when
-  the login scene loads, `loginWallTorches` and `fortressLights` when a torch or chandelier lights.
+  the login scene loads, `loginWallTorches` and `fortressLights` when a torch, chandelier or brazier
+  lights.
 - `roofFade` only turns the fade off: `ecs/systems/roofDetection.ts` still finds the roof over the
   hero on Classic, because the weather and the indoor ambience read it.
 

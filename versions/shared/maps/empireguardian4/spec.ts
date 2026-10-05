@@ -138,6 +138,34 @@ const CHANDELIER_GROUND: LightEmitter['terrain'] = {
 };
 
 /**
+ * The braziers 79 and 80 light no ground in the original: `MoveObject` only
+ * hides their mesh (GMEmpireGuardian4.cpp:212-226) and `RenderObjectVisual`
+ * draws a sprite (:917-948). These ground lights are ours (`fortressLights`).
+ */
+const BRAZIER_GROUND: LightEmitter['terrain'] = {
+  range: 3,
+  color: [1, 0.6, 0.2],
+  flicker: { min: 0.3, max: 0.6, steps: 4 },
+};
+
+const BLUE_LAMP_GROUND: LightEmitter['terrain'] = {
+  range: 2,
+  color: [0.1, 0.1, 0.5],
+};
+
+/** Brazier 79's flare: `CreateSprite(BITMAP_LIGHT, pos, 2 * Scale, (1, 0.2, 0))`, steady (:917-921). */
+const BRAZIER_FLARE: NonNullable<LightEmitter['sprite']> = {
+  scale: 2,
+  color: [1, 0.2, 0],
+};
+
+/** Ours: the wall torch's breathing on it (`fortressLights`). */
+const BRAZIER_BREATHING_FLARE: NonNullable<LightEmitter['sprite']> = {
+  ...BRAZIER_FLARE,
+  pulse: { speed: 0.039, amount: 0.2, base: 0.6 },
+};
+
+/**
  * Case 37's flare as the original draws it (GMEmpireGuardian4.cpp:864-875):
  * `CreateSprite(BITMAP_FLARE, bone1, 4 * Scale, fLumi * 0.7)` on all three
  * channels, `fLumi = (sin(WorldTime * 0.039) + 1) * 0.2 + 0.6`. `pulse` is
@@ -205,24 +233,20 @@ export const EMPIRE_GUARDIAN_4_LIGHTS: Partial<
   Record<number, readonly LightEmitter[]>
 > = {
   /**
-   * :917-921 (x120) - `CreateSprite(BITMAP_LIGHT, pos, 2 * Scale, (1, 0.2, 0))`.
-   * The original's sprite is a constant; the breathing, the wander and the
-   * terrain light are ours, matched to the wall torch below it so a brazier
-   * reads as a jet rather than as something burning.
+   * :917-921 (x120) - `CreateSprite(BITMAP_LIGHT, pos, 2 * Scale, (1, 0.2, 0))`,
+   * a steady flare. The breathing, the wander and the terrain light are ours,
+   * matched to the wall torch below it so a brazier reads as a jet rather than
+   * as something burning: the `fortressLights` improvement.
    */
   79: [
     {
-      sprite: {
-        scale: 2,
-        color: [1, 0.2, 0],
-        pulse: { speed: 0.039, amount: 0.2, base: 0.6 },
+      get sprite() {
+        return isOn('fortressLights') ? BRAZIER_BREATHING_FLARE : BRAZIER_FLARE;
       },
       pointRange: 6,
       wander: 0.08,
-      terrain: {
-        range: 3,
-        color: [1, 0.6, 0.2],
-        flicker: { min: 0.3, max: 0.6, steps: 4 },
+      get terrain() {
+        return isOn('fortressLights') ? BRAZIER_GROUND : undefined;
       },
     },
   ],
@@ -231,7 +255,8 @@ export const EMPIRE_GUARDIAN_4_LIGHTS: Partial<
    * :941-948 (x0 here, days 1-3 and the login scene place it) -
    * `CreateSprite(BITMAP_LIGHT, pos, 8 * Scale, (L*0.1, L*0.1, L*0.5))` with
    * `L = (sin(WorldTime * 0.04) + 1) * 0.3 + 0.4`. Scale, colour ratio and
-   * pulse are the original's; the point and terrain light are ours.
+   * pulse are the original's; the point and terrain light are ours
+   * (`fortressLights`).
    */
   80: [
     {
@@ -241,9 +266,8 @@ export const EMPIRE_GUARDIAN_4_LIGHTS: Partial<
         pulse: { speed: 0.04, amount: 0.3, base: 0.4 },
       },
       pointRange: 4,
-      terrain: {
-        range: 2,
-        color: [0.1, 0.1, 0.5],
+      get terrain() {
+        return isOn('fortressLights') ? BLUE_LAMP_GROUND : undefined;
       },
     },
   ],
