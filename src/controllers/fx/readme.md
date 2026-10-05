@@ -91,6 +91,7 @@ shared pools, textures and particle recipes other folders reuse.
   due frame at 60 fps.
 - `softEdge.test.ts`: `fadeSheetEdges` / `fadeSheetSides` fade sheet borders and only touch alpha.
 - `ring.test.ts`: a ring with `scaleAt` is drawn at that diameter each frame (a per-tick `o->Scale` curve).
+- `ticked.test.ts`: a strip with `maxSegment` parks a segment whose tail centres lie further apart.
 - The skill golden tests (`versions/shared/skills/*.golden.test.ts`) drive `effects.spawn` and
   `effects.update` for every skill.
 
@@ -253,4 +254,5 @@ Tail centres are laid one a tick, each tail two crossed faces `width` wide, U pe
 For effects whose per-tick maths are kept as written. Nothing is interpolated between ticks.
 `sprite` is a one-tick `CreateSprite`, `strip` a `CreateTail` strip, `ribbon` an object blur that
 loses one sample a tick, `decal` a one-tick `RenderTerrainAlphaBitmap`. Strips of one kind share a
-mesh. Used by the Magic Gladiator skills.
+mesh; `maxSegment` leaves out a segment longer than RenderJoints draws (60 cm). Used by the Magic
+Gladiator and Rage Fighter skills.

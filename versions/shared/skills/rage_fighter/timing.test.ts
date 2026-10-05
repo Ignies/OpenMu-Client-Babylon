@@ -161,6 +161,35 @@ describe('Dragon Slasher (265): MODEL_DRAGON_KICK_DUMMY reads the caster\'s DRAG
     expect(spriteTicks(r, TEX.spark2)).toEqual([]);
     expect(soundTicks(r, ATT)).toEqual([]);
   });
+
+  const winds = (r: Run) => r.draws.filter(d => d.kind === 'push' && (d.args[0] as { texture: string }).texture === TEX.groundWind);
+
+  it('BITMAP_GROUND_WIND: between DRAGONKICK keys 4 and 5, Velocity x 10 joints a tick from bone 1, each then riding the dummy\'s bone 2 (MoveHandlers.cpp:9839-9860, ZzzEffectJoint.cpp:2731-2740, :6900-6915)', () => {
+    const r = run(265, KICK, { leaveAt: 26, ticks: 40 });
+    const all = winds(r);
+    const born = all.filter(d => d.args[1] === 1);
+    // Keys 4.4 and 4.8 (ticks 11 and 12); the dummy plays at twice the clip's 0.4, so 8 joints each.
+    expect([11, 12].map(t => born.filter(d => d.tick === t).length)).toEqual([8, 8]);
+    expect(born).toHaveLength(16);
+    // Each lays a tail on its tick and the 9 after (LifeTime 10), Light x0.7 a move.
+    expect(all).toHaveLength(16 * 11);
+    expect(Math.max(...all.map(d => d.tick))).toBe(21);
+    const [opts, , , , , half, yaw] = born[0].args as [{ colour: number[]; maxTails: number; faces: string; maxSegment: number }, number, number, number, number, number, number];
+    expect([opts.colour, opts.maxTails, opts.faces, opts.maxSegment, half, yaw]).toEqual([[0.7, 0.7, 1], 8, 'flat', 0.6, 0.75, 0.5]);
+    // Made on the caster's bone 1 (no skeleton here: the feet + 90 cm).
+    expect(born[0].args.slice(2, 5)).toEqual([100, 0.9, 100]);
+    // Its first move (tick 11): the dummy at frame 8.8 blends its prior key 7 into key 8 by 0.8 (ZzzBMD.cpp:146-281), so bone
+    // 2 stands 130.65 cm out at the caster's yaw and the turn between, 134.64 cm up and 20 more.
+    const [qz, qw] = [0.2 * -0.57686 + 0.8 * 0.06498, 0.2 * 0.81684 + 0.8 * 0.99789];
+    const turn = 0.5 + 2 * Math.atan2(qz, qw);
+    const [x, y, z, , , ] = all[1].args.slice(2) as number[];
+    expect([x, y, z].map(v => Math.round(v * 1000) / 1000)).toEqual([100 - 1.3065 * Math.cos(turn), 1.3464 + 0.2, 100 - 1.3065 * Math.sin(turn)].map(v => Math.round(v * 1000) / 1000));
+    expect(all[1].args[1]).toBeCloseTo(0.7);
+  });
+
+  it('the joints go with the dummy when the caster leaves the clip', () => {
+    expect(Math.max(...winds(run(265, KICK, { leaveAt: 15, ticks: 40 })).map(d => d.tick))).toBe(14);
+  });
 });
 
 describe('Chain Drive (262): BITMAP_SWORDEFF reads the caster\'s GIANTSWING key (MoveHandlers.cpp:9312-9380)', () => {

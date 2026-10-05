@@ -351,7 +351,6 @@ export const MODEL = {
   wolfHead: 'Effect/wolf_head_effect.glb',
   /** MODEL_WOLF_HEAD_EFFECT2 (wolf_head_effect2.bmd): Chain Drive's wolf heads. */
   wolfHead2: 'Effect/wolf_head_effect2.glb',
-  dragonKick: 'Effect/dragon_kick_dummy.glb',
   magicPowerUp: 'Effect/magic_powerup.glb',
   ringRoute: 'Effect/ringtyperout.glb',
   clinderLight: 'Effect/clinderlight.glb',
