@@ -523,30 +523,81 @@ describe('Beast Uppercut (261): MODEL_DOWN_ATTACK_DUMMY_R then _L, on their own 
   const ATT = 'Sound/Ragefighter/Rage_Stamp_Att';
   const CAST = 'Sound/Ragefighter/Rage_Stamp';
 
+  const BLAST = TEX.sahamuttBlast;
+
   it('another caster: Rage_Stamp at the packet, the two blows 5 and 17 ticks later at 0.4 a tick', () => {
     for (const skill of [261, 552, 555]) {
       const r = run(skill, STAMP);
       expect(soundTicks(r, CAST)).toEqual([0]);
-      expect(spriteTicks(r, TEX.spark2)).toEqual([5, 17]);
+      expect(spriteTicks(r, BLAST)).toEqual([5, 17]);
       expect(soundTicks(r, ATT)).toEqual([5, 17]);
     }
   });
 
   it('follows the STAMP PlaySpeed: 0.45 a tick hits 5 and 15 ticks later', () => {
     // v = 0.9: R reaches key 3 on move 5 and key 6 on move 8; L reaches key 5 on its move 7.
-    expect(spriteTicks(run(261, STAMP, { keysPerTick: 0.45 }), TEX.spark2)).toEqual([5, 15]);
+    expect(spriteTicks(run(261, STAMP, { keysPerTick: 0.45 }), BLAST)).toEqual([5, 15]);
   });
 
   it('the hero: the effect waits for STAMP key 2 (SkillCast.cpp:1111-1115), tick 5 at 0.45 a tick', () => {
     const r = run(261, STAMP, { hero: true, keysPerTick: 0.45 });
     expect(soundTicks(r, CAST)).toEqual([5]);
-    expect(spriteTicks(r, TEX.spark2)).toEqual([10, 20]);
+    expect(spriteTicks(r, BLAST)).toEqual([10, 20]);
   });
 
   it('the hero: nothing if the clip is left before key 2', () => {
     const r = run(261, STAMP, { hero: true, leaveAt: 3 });
     expect(soundTicks(r, CAST)).toEqual([]);
-    expect(spriteTicks(r, TEX.spark2)).toEqual([]);
+    expect(spriteTicks(r, BLAST)).toEqual([]);
+    expect(r.spawns.filter(s => s.name === 'model')).toEqual([]);
+  });
+
+  it('each blow is CreateBomb3(target, 3, 0.9), not a gold burst: two loungexflow cards, Magic_Ground2 in (1, 0.5, 0.2), three stones and twenty sparks (ZzzEffect.cpp:6373-6433)', () => {
+    const random = vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    const r = run(261, STAMP);
+    random.mockRestore();
+    const at = (tick: number, pred: (s: Spawn) => boolean) => r.spawns.filter(s => s.tick === tick && pred(s));
+    const cards = at(5, s => s.name === 'sprite' && s.opts.texture === BLAST);
+    expect(cards.length).toBe(2);
+    // -40..49 cm about the target and 70-169 cm up (rand() % 90 - 40 is 5, rand() % 100 + 70 is 120); 256 px x Scale 0.9.
+    expect([cards[0].at.x, cards[0].at.y, cards[0].at.z, cards[0].opts.size]).toEqual([expect.closeTo(103.05, 6), expect.closeTo(1.2, 6), expect.closeTo(104.05, 6), expect.closeTo(2.56 * 0.9, 6)]);
+    const [flash] = at(5, s => s.name === 'sprite' && s.opts.texture === TEX.magicGround2);
+    expect([flash.opts.colour, flash.opts.size]).toEqual([[1, 0.5, 0.2], expect.closeTo(1.28 * (2.2 * 0.9 + 0.064), 6)]);
+    expect(at(5, s => s.name === 'model' && (s.opts.model === MODEL.stone || s.opts.model === MODEL.stone2)).length).toBe(3);
+    expect(at(5, s => s.name === 'particles').map(s => s.opts.count)).toEqual([20]);
+    expect(r.spawns.filter(s => s.opts.texture === TEX.impact)).toEqual([]);
+  });
+
+  it('MODEL_DOWN_ATTACK_DUMMY_R then _L at the caster, at 2 x the STAMP PlaySpeed: R till its key 6 (tick 9), L till its key 8 (tick 20) (ZzzEffect.cpp:5864-5872)', () => {
+    const r = run(261, STAMP);
+    const dummies = r.spawns.filter(s => s.name === 'model' && String(s.opts.model).includes('_punch.glb'));
+    expect(dummies.map(s => [s.tick, String(s.opts.model).split('/').pop(), Math.round((s.opts.seconds as number) * 25), s.opts.keysPerTick, s.opts.scale])).toEqual([
+      [0, 'down_left_punch.glb', 9, expect.closeTo(0.8, 6), 0.9],
+      [9, 'down_right_punch.glb', 11, expect.closeTo(0.8, 6), 0.9],
+    ]);
+    // The gold blur that stood in for them is gone.
+    expect(r.spawns.filter(s => s.name === 'blur')).toEqual([]);
+  });
+
+  it('each move a FORCEPILLAR joint off the dummy\'s bone 0, 50 cm wide, riding it 7 moves, and a Flare 320 cm across at it (MoveHandlers.cpp:9241-9254, ZzzEffectJoint.cpp:2709-2717, :6874-6884)', () => {
+    const r = run(261, STAMP);
+    const pushes = (tick: number) => r.draws.filter(d => d.tick === tick && d.kind === 'push' && (d.args[0] as { texture: string }).texture === TEX.forcePillar);
+    // R's joints go with it on tick 9; L moves first on tick 10.
+    expect([1, 2, 7, 8, 9, 10, 11].map(t => pushes(t).length)).toEqual([1, 2, 7, 7, 0, 1, 2]);
+    const [first] = pushes(1);
+    expect([(first.args[0] as { colour: number[] }).colour, first.args[5]]).toEqual([[0.95, 0.72, 0.48], expect.closeTo(0.25, 6)]);
+    const flares = drawTicks(r, TEX.flareBig);
+    expect(flares).toEqual(range(1, 20).map(t => [t, 1]));
+    const flare = r.draws.find(d => d.tick === 1 && d.args[0] === TEX.flareBig) as Draw;
+    expect([flare.args[1], flare.args[5]]).toEqual([[0.47, 0.36, 0.24], expect.closeTo(3.2, 6)]);
+  });
+
+  it('with no target, none of it past the blow key: each dummy returns before it (MoveHandlers.cpp:9235-9236, :9282-9283)', () => {
+    const r = run(261, STAMP, { target: false });
+    expect(spriteTicks(r, BLAST)).toEqual([]);
+    expect(soundTicks(r, ATT)).toEqual([]);
+    // R's keys 0-2.4 on its moves 1-4; L's keys 0-4.8 on its moves 1-7, ticks 10-16.
+    expect(drawTicks(r, TEX.flareBig).map(([t]) => t)).toEqual([...range(1, 4), ...range(10, 16)]);
   });
 
   it('the cast sound left the click: the effect plays it', () => {
