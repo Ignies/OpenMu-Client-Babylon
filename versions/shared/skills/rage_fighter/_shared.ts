@@ -1,17 +1,26 @@
 import { type BoneGlow } from '@/controllers/fx/aura';
 import { MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
 import { effects } from '@/controllers/fx';
-import { TICK, bonePos, entityGone, entityPos, entityYaw, fxNow, type RGB } from '@/controllers/fx/core';
+import { bonePos, entityGone, entityPos, entityYaw, fxNow, type RGB } from '@/controllers/fx/core';
 import type { TickedFx } from '@/controllers/fx/ticked';
 import { Vector3, type Scene } from '@/controllers/render/babylon/exports';
 import { after, cm, seq, ticks, type SkillContext, type Step } from '@/controllers/skills/visuals';
 import { PlayerAction } from '@versions/shared/objects/enum';
 import type { ClipPick } from '@/controllers/combat';
 import type { Sounds } from '@/controllers/sound';
-import { DEG, deg, randInt } from '../_shared';
+import { DEG, deg, movesAt, randInt } from '../_shared';
+import { createAngleDeg } from '@/core/turnAngle';
+import type { Entity } from '@/ecs/world';
 
-/** Moves an effect has made `t` seconds after its spawn: the first on the next tick (readme.md). */
-export const movesAt = (t: number): number => Math.floor(t / TICK + 1e-6);
+const towardFrom = new Vector3();
+const towardTo = new Vector3();
+/** CreateAngle2D from the caster to `target`, MU degrees (ZzzAI.cpp:82-100). */
+export function angleToward(c: SkillContext, target: Entity): number {
+  entityPos(c.caster, 0, towardFrom);
+  entityPos(target, 0, towardTo);
+  return createAngleDeg(towardFrom.x, towardFrom.z, towardTo.x, towardTo.z);
+}
+
 /** Moves an effect made at `t0` on the effects clock has made by now. */
 export const movesSince = (t0: number): number => movesAt(fxNow() - t0);
 

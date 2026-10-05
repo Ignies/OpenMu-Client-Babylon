@@ -3,8 +3,8 @@ import { TEX } from '@/controllers/fx/recipes';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { bonePos, entityGone, entityPos, entityYaw } from '@/controllers/fx/core';
 import type { TailStrip } from '@/controllers/fx/ticked';
-import { DEG, deg, eachClipTick, multiShotVolley } from '../../_shared';
-import { clipSpeed, eachMove } from '../_shared';
+import { DEG, deg, eachClipTick, multiShotVolleyAt } from '../../_shared';
+import { angleToward, clipSpeed, eachMove } from '../_shared';
 import { IMPACT_HEIGHT, cm, steelHit, type SkillContext, type Step } from '@/controllers/skills/visuals';
 import { playCombat } from '@/controllers/sound';
 
@@ -112,15 +112,16 @@ function groundWind(c: SkillContext, over: () => boolean): (frame: number) => vo
 }
 
 /**
- * At the packet the MULTI_SHOT1/2/3 volley and the dummy, which has no mesh (MonkSystem.cpp:1215-1260). Each tick the dummy
- * lives (MoveHandlers.cpp:9826-9915): the ground wind between keys 4 and 5, past key 5 the burst on the target, past key 8
- * Rage_Dragonkick_Att (LifeTime = 150 then == 150, so every tick). Leaving the clip ends it all.
+ * At the packet the dummy, which has no mesh, and the MULTI_SHOT1/2/3 volley turned to the target, none without one
+ * (MonkSystem.cpp:1215-1260). Each tick the dummy lives (MoveHandlers.cpp:9826-9915): the ground wind between keys 4 and 5,
+ * past key 5 the burst on the target, past key 8 Rage_Dragonkick_Att (LifeTime = 150 then == 150, so every tick). Leaving the
+ * clip ends it all.
  */
-const dragonKick: Step = (at, c) => {
+const dragonKick: Step = (_at, c) => {
   let over = false;
-  multiShotVolley(at, c);
+  const target = c.target?.transform ? c.target : null;
+  if (target) multiShotVolleyAt(c, angleToward(c, target));
   const wind = groundWind(c, () => over);
-  const target = c.target;
   eachClipTick(c, A.PLAYER_SKILL_DRAGONKICK, DUMMY_TICKS, frame => {
     wind(frame);
     // m_sTargetIndex < 0 returns before the burst and the sound.

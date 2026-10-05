@@ -28,8 +28,8 @@ export default defineSkill({
   // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
   lookAliases: [411, 431],
   // 235 Multi-Shot: MODEL_BLADE_SKILL sub1 at the packet fires one arrow every 2 ticks from tick 0 to 10, each turned
-  // +-7/21/35 deg off the facing (MoveHandlers.cpp:332-415; WSclient.cpp:5381-5430). The muzzle volley is 3x
-  // MODEL_MULTI_SHOT1 at the caster and 2x MULTI_SHOT2 / MULTI_SHOT3 20 cm ahead, Light (0.8,0.9,1.6).
+  // +-7/21/35 deg off the facing (MoveHandlers.cpp:332-415; WSclient.cpp:5381-5430). The muzzle volley
+  // (multiShotVolley): 3x MODEL_MULTI_SHOT1, 2x MULTI_SHOT2 and 2x MULTI_SHOT3 growing where they are made, ahead of the caster.
   visual: {
     area: (at, c) => {
       fanArrows(at, c, ARROWS, MODEL.arrow, RGBS.steel, bladeTurns(), 1, ticks(2));

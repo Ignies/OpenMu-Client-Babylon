@@ -6,7 +6,7 @@ import { effects } from '@/controllers/fx';
 import { type ModelHandle } from '@/controllers/fx/model';
 import { TICK, boneLocalPos, delay, entityGone, entityPos, entityYaw, fxNow, type RGB } from '@/controllers/fx/core';
 import { playCombat } from '@/controllers/sound';
-import { deg, groundY, randInt, whenClipKey } from '../../_shared';
+import { deg, groundY, movesAt, randInt, whenClipKey } from '../../_shared';
 import { clipSpeed, eachMove, shake, throwHead, wolfHead } from '../_shared';
 
 import { A } from '@/controllers/combat/recipes';
@@ -25,9 +25,6 @@ const SPINS: readonly (readonly [number, number])[] = [[0.5, -10], [0.9, 10]];
 
 /** The caster's GIANTSWING PlaySpeed. */
 const swingSpeed = (c: SkillContext): number => clipSpeed(c, A.PLAYER_SKILL_GIANTSWING);
-
-/** Moves an effect has made `t` seconds after its spawn: the first on the next tick (readme.md). */
-const movesAt = (t: number): number => Math.floor(t / TICK + 1e-6);
 
 /**
  * The second blow's waves (MoveHandlers.cpp:9350-9367), on their side (Angle[0] 90) at the caster's yaw - 180.

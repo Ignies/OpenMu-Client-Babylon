@@ -46,6 +46,7 @@ afterAll(() => {
 interface Spawn {
   tick: number;
   name: string;
+  at: Vector3;
   opts: Record<string, unknown>;
   /** The tick on which it ended, if it did. */
   end?: number;
@@ -107,7 +108,7 @@ function run(
     drop: s => fx.drop(strips.get(s) ?? s),
   });
   const spy = vi.spyOn(effects, 'spawn').mockImplementation(((name: never, s: Scene, at: Vector3, opts: never) => {
-    const spawn: Spawn = { tick, name, opts: (opts ?? {}) as Record<string, unknown> };
+    const spawn: Spawn = { tick, name, at: at.clone(), opts: (opts ?? {}) as Record<string, unknown> };
     out.spawns.push(spawn);
     if (name === 'ticked') {
       const script = opts as unknown as { tick: (fx: TickedFx, n: number) => boolean };
@@ -389,6 +390,46 @@ describe('Charge (269): AttackStage\'s AT_SKILL_OCCUPY case (ZzzCharacter.cpp:29
   it('the MULTI_SHOT volley only on the hero\'s own cast (MonkSystem.cpp:1305-1333)', () => {
     expect(volley(run(269, RUSH, { hero: true }))).toEqual([0, 0, 0]);
     expect(volley(run(269, RUSH))).toEqual([]);
+  });
+});
+
+describe('The MULTI_SHOT volley: Multi-Shot, Dragon Slasher and Charge (WSclient.cpp:5381-5410, MonkSystem.cpp:1225-1258, :1305-1331)', () => {
+  /** [model, LifeTime, Scale a move, cm ahead] of each, in the order made. */
+  const VOLLEY: [string, number, number, number][] = [
+    ...[0, 1].map((): [string, number, number, number] => [MODEL.multishot3, 12, 0.25, 40]),
+    ...[0, 1, 2].map((): [string, number, number, number] => [MODEL.multishot, 16, 0.2, 60]),
+    ...[0, 1].map((): [string, number, number, number] => [MODEL.multishot2, 13, 0.3, 40]),
+  ];
+  const shots = (r: Run) => r.spawns.filter(s => s.name === 'model' && String(s.opts.model).startsWith('Effect/multishot0'));
+
+  /** Where the original puts each: 10 cm aside, `ahead` cm along `yaw` and 135 cm up (ZzzEffect.cpp:1665-1668). */
+  const placed = (yaw: number, ahead: number): number[] => {
+    const r = (yaw * Math.PI) / 180;
+    return [100 + (-10 * Math.cos(r) + ahead * Math.sin(r)) / 100, 1.35, 100 + (-10 * Math.sin(r) - ahead * Math.cos(r)) / 100].map(v => Math.round(v * 1000) / 1000);
+  };
+
+  it('stays where it is made, unturned, from Scale 0 growing a move, at Light (0.8, 0.9, 1.6) x LifeTime / 18 (ZzzEffect.cpp:1636-1700, MoveHandlers.cpp:304-329)', () => {
+    const yaw = 0.5 * (180 / Math.PI);
+    const r = run(269, PlayerAction.PLAYER_ATTACK_RUSH, { hero: true });
+    const made = shots(r);
+    expect(made.map(s => [s.opts.model, Math.round((s.opts.seconds as number) * 25)])).toEqual(VOLLEY.map(([m, life]) => [m, life]));
+    VOLLEY.forEach(([, life, grow, ahead], i) => {
+      const { scale, scaleAt, blendLight, colour, angle, follow, keysPerTick } = made[i].opts as {
+        scale: number; scaleAt: (t: number) => number; blendLight: (t: number) => number; colour: number[]; angle: number[]; follow?: unknown; keysPerTick: number;
+      };
+      expect([made[i].tick, scale, scaleAt(3 / 25), blendLight(3 / 25), colour, follow, keysPerTick]).toEqual([0, 0, expect.closeTo(grow * 3), expect.closeTo((life - 2) / 18), [0.8, 0.9, 1.6], undefined, expect.closeTo(1 / 6)]);
+      expect(angle[2]).toBeCloseTo(yaw);
+      expect([made[i].at.x, made[i].at.y, made[i].at.z].map(v => Math.round(v * 1000) / 1000)).toEqual(placed(yaw, ahead));
+    });
+  });
+
+  it('Dragon Slasher aims it at the target, and makes none without one (MonkSystem.cpp:1226-1233)', () => {
+    const toTarget = (Math.atan2(3, -4) * 180) / Math.PI;
+    const made = shots(run(265, PlayerAction.PLAYER_SKILL_DRAGONKICK, { leaveAt: 26, ticks: 40 }));
+    expect(made).toHaveLength(7);
+    for (const s of made) expect((s.opts.angle as number[])[2]).toBeCloseTo(toTarget);
+    expect([made[2].at.x, made[2].at.y, made[2].at.z].map(v => Math.round(v * 1000) / 1000)).toEqual(placed(toTarget, 60));
+    expect(shots(run(265, PlayerAction.PLAYER_SKILL_DRAGONKICK, { leaveAt: 26, ticks: 40, target: false }))).toEqual([]);
   });
 });
 

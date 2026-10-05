@@ -17,7 +17,7 @@ folders: [../readme.md](../readme.md).
 | `chain_drive` | 262, 558 str | sword effect at the caster; past GIANTSWING keys 6 and 11 a blow on the target, the first with a shock wave, the second with MODEL_SHOCKWAVE02 (drawn twice) backing off and two MODEL_SHOCKWAVE_SPIN01 rolling, from bone 4; with each a dim MODEL_WOLF_HEAD_EFFECT2, the first riding bone 4 and throwing two smaller heads a tick, the second riding bone 27 |
 | `dark_side` | 263, 559 str | the wind pillar at the caster and the two it raises on ticks 11 and 21; per blow, damage bursts on ticks 20-21 and a dark shock wave on 30-31 (the afterimage's frame, a tick per rendered frame) |
 | `dragon_roar` | 264, 560 str | a dragon head on tick 21; a fire shock ring and scattered fire hits past DRAGONLORE key 5 |
-| `dragon_slasher` | 265 | the multi-shot volley; between DRAGONKICK keys 4 and 5 the ground wind, joints that leave bone 1 and ride the meshless dummy's bone 2 as it swings round; a burst on the target each tick past key 5 |
+| `dragon_slasher` | 265 | the multi-shot volley turned to the target (none without one); between DRAGONKICK keys 4 and 5 the ground wind, joints that leave bone 1 and ride the meshless dummy's bone 2 as it swings round; a burst on the target each tick past key 5 |
 | `ignore_defense` | 266 | at the caster, all blue: the sword flash, three ground shock rings and spinning clouds, the wind pillar and a widening magic circle; the Ourforces bone glow as a buff look |
 | `increase_health` | 267, 573 str | the same in violet; the Ourforces bone glow |
 | `increase_block` | 268, 569 power up, 572 mastery | the same in red; the Ourforces bone glow |

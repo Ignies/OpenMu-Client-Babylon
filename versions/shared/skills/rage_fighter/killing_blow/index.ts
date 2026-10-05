@@ -7,9 +7,8 @@ import type { TailStrip, TickedFx } from '@/controllers/fx/ticked';
 import { cm, ticks, type SkillContext, type Step } from '@/controllers/skills/visuals';
 import { type Entity } from '@/ecs/world';
 import { playCombat } from '@/controllers/sound';
-import { createAngleDeg } from '@/core/turnAngle';
 import { DEG, bodyLight, deg, randInt } from '../../_shared';
-import { clipSpeed, eachMove, shake, throwHead, wolfHead } from '../_shared';
+import { angleToward, clipSpeed, eachMove, shake, throwHead, wolfHead } from '../_shared';
 
 import { A } from '@/controllers/combat/recipes';
 
@@ -118,14 +117,7 @@ const wolf: Step = (_at, c) => {
   if (entityGone(c.caster)) return;
   const life = 10 / clipSpeed(c, A.PLAYER_SKILL_THRUST);
   const target = c.target?.transform ? c.target : null;
-  const from = new Vector3();
-  const to = new Vector3();
-  const facing = (): number => {
-    if (!target || entityGone(target)) return deg(entityYaw(c.caster));
-    entityPos(c.caster, 0, from);
-    entityPos(target, 0, to);
-    return createAngleDeg(from.x, from.z, to.x, to.z);
-  };
+  const facing = (): number => (target && !entityGone(target) ? angleToward(c, target) : deg(entityYaw(c.caster)));
   const at = bonePos(c.caster, 27, new Vector3());
   const light = bodyLight(at, [0, 0, 0]);
   const riding = (m: number): boolean => m > 0 && life - m + 1 >= 3;
