@@ -24,11 +24,11 @@ vi.mock('@versions/shared/skills/skillVisuals', async importOriginal => ({
   ...(await importOriginal<object>()),
   playTargetedSkillVisual: (_scene: unknown, _skill: number, caster: { netId: number }) => void drawn.push(caster.netId),
 }));
-// SetRageSkillAni: the caster plays the Dark Side clip.
+// SetRageSkillAni: another caster plays the Dark Side clip (the hero's is his own, clips.ts).
 vi.mock('./clips', async importOriginal => ({
   ...(await importOriginal<object>()),
-  playCastAnimation: (caster: { playerAnimation?: { action: number } }) => {
-    if (caster.playerAnimation) caster.playerAnimation.action = PlayerAction.PLAYER_SKILL_DARKSIDE_READY;
+  playCastAnimation: (caster: { localPlayer?: boolean; playerAnimation?: { action: number } }) => {
+    if (caster.playerAnimation && !caster.localPlayer) caster.playerAnimation.action = PlayerAction.PLAYER_SKILL_DARKSIDE_READY;
   },
 }));
 
@@ -45,7 +45,8 @@ const OTHER = 9;
 
 const body = (netId: number, x: number, z: number, more: object = {}) =>
   ({ netId, transform: { pos: new Vector3(x, 0, z), rot: new Vector3(), scale: 1 }, ...more }) as unknown as Entity;
-const hero = body(HERO, 100, 100, { localPlayer: true, modelObject: { CurrentAction: PlayerAction.PLAYER_SKILL_DARKSIDE_READY, AnimationSpeed: 0.3 } });
+const heroClip = { action: PlayerAction.PLAYER_SKILL_DARKSIDE_READY as PlayerAction };
+const hero = body(HERO, 100, 100, { localPlayer: true, playerAnimation: heroClip, modelObject: { CurrentAction: PlayerAction.PLAYER_SKILL_DARKSIDE_READY, AnimationSpeed: 0.3 } });
 const otherClip = { action: PlayerAction.PLAYER_STOP_MALE as PlayerAction };
 const otherFacing = new Vector3();
 const other = { netId: OTHER, transform: { pos: new Vector3(110, 0, 100), rot: otherFacing, scale: 1 }, playerAnimation: otherClip } as unknown as Entity;
@@ -86,6 +87,15 @@ describe('RageAttack (C3 4A)', () => {
     expect(combat.nextDarkSideHit()).toBe(-1);
     ticks(1);
     expect(combat.nextDarkSideHit()).toBe(6);
+    combat.reset();
+  });
+
+  it('the echo of the hero\'s cast puts him back in the Dark Side clip once it is over (SetRageSkillAni, WSclient.cpp:13427)', () => {
+    // SetAction starts the clip only when he has left it (ZzzAI.cpp:425-436): a late echo still gets its follow-ups.
+    heroClip.action = PlayerAction.PLAYER_STOP_MALE;
+    combat.beginDarkSide(263, 5);
+    rageAttack(HERO);
+    expect(heroClip.action).toBe(PlayerAction.PLAYER_SKILL_DARKSIDE_READY);
     combat.reset();
   });
 

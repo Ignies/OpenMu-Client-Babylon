@@ -96,6 +96,15 @@ export function playTrapSounds(
 }
 
 /**
+ * SetRageSkillAni on the echo of the hero's own cast (WSclient.cpp:13427): `SetAction` puts him back in the skill's
+ * clip once he has left it and leaves a running one alone (ZzzAI.cpp:425-436), so a late echo still finds him in it.
+ */
+export function resumeHeroCastClip(hero: Entity, skill: number) {
+  const action = skillClip(skill);
+  if (hero.playerAnimation && action !== null) hero.playerAnimation.action = action;
+}
+
+/**
  * Cast clip for an object in scope: SetPlayerMagic for a player, and for a
  * monster the clip `ReceiveMagic` (0x19) or, for `area`, `ReceiveMagicContinue`
  * (0x1E) gives it.

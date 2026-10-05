@@ -6,7 +6,8 @@ the Rage Fighter's Dark Side blows. This folder has only the handlers; it keeps 
 ## Public API
 - none. `installNet()` in `net.ts` registers its handlers (`module.ts`, installed by `src/app/logic.ts`).
 - `clips.ts`: the attack and cast clips of objects in view and their sounds (`playCastAnimation`,
-  `attackPoseOf`, `attackInputOf`, `setMonsterClip`, `playTrapSounds`); `skills/net.ts` uses it too.
+  `attackPoseOf`, `attackInputOf`, `setMonsterClip`, `playTrapSounds`), and `resumeHeroCastClip` for the
+  echo of the hero's own Dark Side; `skills/net.ts` uses it too.
 
 ## How it works
 - Handlers read `Ecs.world` and write straight onto the entities (animation components,
@@ -37,8 +38,9 @@ the Rage Fighter's Dark Side blows. This folder has only the handlers; it keeps 
 - `ObjectHit`, `ObjectHitExtended`: damage, sound, health bar, flinch, damage numbers.
 - `RageAttackRangeResponse`: the Dark Side targets, handed to `combat.observeDarkSideTargets`.
 - `RageAttack` (C3 4A): one Dark Side blow, drawn like a targeted skill. The echo of the hero's own
-  cast starts his follow-up blows (`combat.observeDarkSideEcho`; `AttackTime = 1`, WSclient.cpp:13422-13429).
-  RageCreateEffect draws a cast once (MonkSystem.cpp:1285-1288): a later 0x4A of a Dark Side cast
+  cast starts his follow-up blows (`combat.observeDarkSideEcho`; `AttackTime = 1`, WSclient.cpp:13422-13429)
+  and, as SetRageSkillAni does, puts him back in the Dark Side clip if he has left it (`resumeHeroCastClip`;
+  `SetAction` leaves a running clip alone), so a late echo still gets its follow-ups. RageCreateEffect draws a cast once (MonkSystem.cpp:1285-1288): a later 0x4A of a Dark Side cast
   already drawn (another client's follow-up while its caster still plays the clip, or one after the
   hero's echo) only turns its caster.
 - Outgoing attacks are sent by `src/ecs/systems/attackSystem.ts` and `skillCastSystem.ts`, not here.
@@ -62,5 +64,5 @@ the Rage Fighter's Dark Side blows. This folder has only the handlers; it keeps 
 ## Tests
 - `killEnergy.test.ts`: the energy sound waits for the hero's cast release, and starts at the kill
   after a plain blow; 22 ticks plus 3.5 a tile of flight.
-- `darkSideEcho.test.ts`: the hero's Dark Side follow-ups wait for the `RageAttack` echo of his cast;
-  a cast is drawn once, a later 0x4A of it only turns its caster.
+- `darkSideEcho.test.ts`: the hero's Dark Side follow-ups wait for the `RageAttack` echo of his cast,
+  which puts him back in the clip; a cast is drawn once, a later 0x4A of it only turns its caster.

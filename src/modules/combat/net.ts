@@ -9,7 +9,7 @@ import { ObjectAnimationPacket, ObjectGotKilledPacket, ObjectHitExtendedPacket, 
 import { ServerToClientActionMap, resolveGenderedAction } from '@/controllers/anim/playerActionMapper';
 import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
-import { attackInputOf, attackPoseOf, monsterNumberOf, playCastAnimation, playTrapSounds, setMonsterClip } from './clips';
+import { attackInputOf, attackPoseOf, monsterNumberOf, playCastAnimation, playTrapSounds, resumeHeroCastClip, setMonsterClip } from './clips';
 import { isDeadMonster } from '../scope/objects';
 import { convertDirectionToAngle } from '@/core/turnAngle';
 import { chooseAttackAction, isWeaponItem } from '@/controllers/actors/weaponClass';
@@ -477,7 +477,8 @@ export function installNet(): void {
   /**
    * C3 4A - `RageAttack`: a rage fighter's Dark Side blow on one target, shown
    * to everyone in scope like a targeted skill animation. The echo of the
-   * hero's own cast starts his follow-up blows (`AttackTime = 1`, WSclient.cpp:13422-13429).
+   * hero's own cast starts his follow-up blows (`AttackTime = 1`, WSclient.cpp:13422-13429) and
+   * puts him back in its clip (SetRageSkillAni).
    * A later 0x4A of a Dark Side cast already drawn only turns its caster (MonkSystem.cpp:1285-1288).
    */
   EventBus.on('RageAttack', packet => {
@@ -491,6 +492,7 @@ export function installNet(): void {
 
     faceTarget(caster, target);
     if (combat.observeDarkSideEcho(p.SkillId, caster)) return;
+    if (caster.localPlayer) resumeHeroCastClip(caster, p.SkillId);
     playCastAnimation(caster, p.SkillId, false);
     playTargetedSkillVisual(world.scene, p.SkillId, caster, target);
   });
