@@ -10,7 +10,7 @@ export default defineSkill({
   // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
   lookAliases: [569, 572],
   // RageCreateEffect at the caster (MonkSystem.cpp:1185-1214): BITMAP_SWORD_EFFECT_MONO sub2, MODEL_WINDFOCE sub5.
-  visual: { cast: ourforcesCast({ flash: [1, 0.15, 0], wave: [1, 0.12, 0], cloud: [1, 0.3, 0.2], pillar: [1, 0.2, 0], magic: [1, 0.15, 0] }) },
+  visual: { cast: ourforcesCast({ flash: [1, 0.15, 0], wave: [1, 0.12, 0], ring: [1, 0.1, 0], cloud: [1, 0.3, 0.2], pillar: [1, 0.2, 0], magic: [1, 0.15, 0] }) },
   buffs: {
     131: () => ({ boneGlow: OURFORCES_GLOW }),
     155: () => ({ boneGlow: OURFORCES_GLOW }),

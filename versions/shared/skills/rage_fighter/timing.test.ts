@@ -390,6 +390,29 @@ describe('Ignore Defense, Increase Health, Increase Block (266-268): RageCreateE
     }
   });
 
+  it('three MODEL_SHOCKWAVE_GROUND01 at the caster, Scale 1, 0.85 and 0.7, growing x1.2 a move at Light x 6 x 0.8 a move (MonkSystem.cpp:1142-1146, MoveHandlers.cpp:9803-9822)', () => {
+    const RINGS: [readonly number[], number[]][] = [
+      [[266], [0.6, 0.65, 1]],
+      [[267, 573], [1, 0.35, 1]],
+      [[268, 569, 572], [1, 0.1, 0]],
+    ];
+    for (const [skills, light] of RINGS) {
+      for (const skill of skills) {
+        const rings = run(skill, PlayerAction.PLAYER_SKILL_ATT_UP_OURFORCES).spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.shockwaveGround);
+        type Curves = { scaleAt: (t: number) => number; blendLight: (t: number) => number; angle: number[] };
+        expect(rings.map(s => [s.tick, s.opts.colour, Math.round((s.opts.seconds as number) * 25), (s.opts as Curves).scaleAt(0)])).toEqual([
+          [0, light, 20, 1],
+          [0, light, 20, 0.85],
+          [0, light, 20, 0.7],
+        ]);
+        const { scaleAt, blendLight, angle } = rings[1].opts as Curves;
+        expect(scaleAt(2 / 25)).toBeCloseTo(0.85 * 1.2 ** 2);
+        expect(blendLight(3 / 25)).toBeCloseTo(6 * 0.8 ** 3);
+        expect(angle[2]).toBeCloseTo(0.5 * (180 / Math.PI));
+      }
+    }
+  });
+
   it('its MODEL_SHOCKWAVE01 sub 2, drawn twice, on LifeTime 14 (tick 2): Scale x1.24 and Light x 15 x 0.45 a move (ZzzEffect.cpp:5874-5893, MoveHandlers.cpp:9383-9395)', () => {
     for (const [skills, , wave] of FLASHES) {
       for (const skill of skills) {

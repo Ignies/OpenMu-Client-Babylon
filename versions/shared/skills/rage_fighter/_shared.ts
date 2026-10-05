@@ -170,12 +170,30 @@ export const magicGround13 = (light: RGB): Step => (_at, c) => {
   }
 };
 
+/**
+ * MODEL_SHOCKWAVE_GROUND01 sub0 (shockwave_ground01.bmd) at the caster's feet, LifeTime 20 (ZzzEffect.cpp:6109-6115): each move
+ * Scale x1.2 and Light x0.8 (MoveHandlers.cpp:9803-9822), drawn bright at Light x 6, clamped (ZzzObject.cpp:2521-2534).
+ */
+const groundShock = (light: RGB, scale: number): Step => (_at, c) =>
+  effects.spawn('model', c.scene, entityPos(c.caster, 0, new Vector3()), {
+    model: MODEL.shockwaveGround,
+    seconds: ticks(20),
+    angle: [0, 0, deg(entityYaw(c.caster))],
+    colour: light,
+    scaleAt: t => scale * 1.2 ** movesAt(t),
+    blendMesh: 0,
+    blendLight: t => 6 * 0.8 ** movesAt(t),
+    blendClamp: true,
+    fadeTail: 0,
+  });
+
 /** The Lights of a party buff's RageCreateEffect (MonkSystem.cpp:1128-1214). */
 export interface OurforcesLights {
   /** BITMAP_SWORD_EFFECT_MONO and the MODEL_SHOCKWAVE01 it sends. */
   flash: RGB;
   wave: RGB;
-  /** The three BITMAP_EVENT_CLOUD. */
+  /** The three MODEL_SHOCKWAVE_GROUND01, Scale 1, 0.85 and 0.7, each with a BITMAP_EVENT_CLOUD. */
+  ring: RGB;
   cloud: RGB;
   /** MODEL_WINDFOCE, and the BITMAP_MAGIC sub13 under it. */
   pillar: RGB;
@@ -184,4 +202,9 @@ export interface OurforcesLights {
 
 /** A party buff's RageCreateEffect at the caster, in the original's order. */
 export const ourforcesCast = (l: OurforcesLights): Step =>
-  seq(swordFlash(l.flash, l.wave), eventCloud(l.cloud), eventCloud(l.cloud), eventCloud(l.cloud), windForce(l.pillar, false, l.pillar), magicGround13(l.magic));
+  seq(
+    swordFlash(l.flash, l.wave),
+    ...[1, 0.85, 0.7].flatMap(s => [groundShock(l.ring, s), eventCloud(l.cloud)]),
+    windForce(l.pillar, false, l.pillar),
+    magicGround13(l.magic)
+  );

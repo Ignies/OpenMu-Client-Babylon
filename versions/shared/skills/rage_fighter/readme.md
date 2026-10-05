@@ -18,7 +18,7 @@ folders: [../readme.md](../readme.md).
 | `dark_side` | 263, 559 str | the wind pillar at the caster and the two it raises on ticks 11 and 21; per blow, damage bursts on ticks 20-21 and a dark shock wave on 30-31 (the afterimage's frame, a tick per rendered frame) |
 | `dragon_roar` | 264, 560 str | a dragon head on tick 21; a fire shock ring and scattered fire hits past DRAGONLORE key 5 |
 | `dragon_slasher` | 265 | the dragon kick model and the multi-shot volley fired forward; a burst on the target each tick past DRAGONKICK key 5 |
-| `ignore_defense` | 266 | at the caster, all blue: the sword flash, three spinning clouds, the wind pillar and a widening magic circle; the Ourforces bone glow as a buff look |
+| `ignore_defense` | 266 | at the caster, all blue: the sword flash, three ground shock rings and spinning clouds, the wind pillar and a widening magic circle; the Ourforces bone glow as a buff look |
 | `increase_health` | 267, 573 str | the same in violet; the Ourforces bone glow |
 | `increase_block` | 268, 569 power up, 572 mastery | the same in red; the Ourforces bone glow |
 | `charge` | 269 | Rush's charge: sparks and fire each tick until RUSH key 5 or tick 14, then the sword force at the caster |
@@ -44,7 +44,7 @@ pillar on its 11th and 21st tick. `swordFlash`, BITMAP_SWORD_EFFECT_MONO (266-26
 the caster stood, two in three ticks, each growing x1.2 a tick to 6 and shrinking back; on its second tick a
 MODEL_SHOCKWAVE01 that grows x1.24 a tick and climbs x1.19 of its height above sea level, so it rises off high ground.
 `eventCloud` (BITMAP_EVENT_CLOUD) and `magicGround13` (BITMAP_MAGIC sub13) are ground decals that grow by a factor a
-tick (the `ring` entry's `scaleAt`). `ourforcesCast` is the whole RageCreateEffect of a party buff, given its Lights.
+tick (the `ring` entry's `scaleAt`), the shock rings (MODEL_SHOCKWAVE_GROUND01) models that do the same. `ourforcesCast` is the whole RageCreateEffect of a party buff, given its Lights.
 
 ## Depends on / used by
 - uses: `../_shared.ts`, `@/controllers/{skills,fx,lighting,sound,combat}`
