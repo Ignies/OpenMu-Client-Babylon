@@ -57,13 +57,12 @@ anything third party and new, downloads into Cache Storage keyed by hash, checks
 signature for first party), then loads it (in process or in its iframe). A module whose hash or API
 range does not match is skipped with a notice, never run.
 
-## Decisions needed
+## Decisions (2026-10-05)
 
-1. Third-party modules run in a sandboxed iframe with a message API (recommended), or in the page
-   with consent as first planned (not safe for other worlds' accounts, see above).
-2. Saved logins become tokens issued by an OpenMU plugin (recommended), or by the proxy.
-3. The signing key for first-party modules: whose key, and kept where (it never ships; only the
-   public half is in the build).
-4. The order: 3, 4, 6, then 5 (recommended); 5 is useless without 3 and unsafe without 6.
+1. Third-party modules run in a sandboxed iframe with the message API, not in the page.
+2. Saved logins become per-world tokens issued by an OpenMU plugin, not by the proxy.
+3. First-party modules are signed with the owner's own ed25519 key, kept offline outside the repo
+   (never in CI); only its public half is built into the client. Needed from phase 5 on.
+4. The order is 3, 4, 6, then 5.
 
-Nothing in phases 3 to 6 is built yet.
+Nothing in phases 3 to 6 is built yet; phase 3 is next.
