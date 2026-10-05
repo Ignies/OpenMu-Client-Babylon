@@ -83,32 +83,25 @@ export const KALIMA_OBJECT_LOOPS: readonly MapObjectLoop[] = [
 ];
 
 /**
- * `RenderHellasVisual` case 12 (×49) and 32 (×19): a `BITMAP_LIGHT` sprite
- * at bone 5, `(0.6, 0.6, 1)`, sized `sin(t * 0.001) * 0.3 + 0.7 + 0.2` - the
- * glowing crystal clusters. No `AddTerrainLight` anywhere on this map, so no
- * `terrain` block and no point light; the flare is the whole effect.
- *
- * The bone-5 rest offset has not been read out of the GLBs, so the flare sits
- * at the object origin; the crystals are compact enough (1-2 tiles) that it
- * lands inside them.
+ * `RenderHellasVisual` case 12 (×49) and 32 (×19), GMHellas.cpp:439-460: a
+ * `BITMAP_LIGHT` sprite at bone 5 of the flower, steady `(0.6, 0.6, 1)`,
+ * sized `sin(WorldTime * 0.001) * 0.3 + 0.7 + 0.2` with no `* o->Scale`. No
+ * `AddTerrainLight` anywhere on this map, so no `terrain` block and no point
+ * light; the flare is the whole effect. Bone 5 sways 7 across; the card sits
+ * at the middle of the sway.
  */
+const FLOWER_GLOW: LightEmitter = {
+  offset: [-5, -1, 35],
+  bone: true,
+  sprite: {
+    scale: 1,
+    color: [0.6, 0.6, 1],
+    grow: { speed: 0.001, amount: 0.3, base: 0.6 },
+    unscaled: true,
+  },
+};
+
 export const KALIMA_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
-  12: [
-    {
-      sprite: {
-        scale: 1.6,
-        color: [0.6, 0.6, 1],
-        pulse: { speed: 1, amount: 0.3, base: 0.9 },
-      },
-    },
-  ],
-  32: [
-    {
-      sprite: {
-        scale: 1.6,
-        color: [0.6, 0.6, 1],
-        pulse: { speed: 1, amount: 0.3, base: 0.9 },
-      },
-    },
-  ],
+  12: [FLOWER_GLOW],
+  32: [FLOWER_GLOW],
 };

@@ -97,7 +97,8 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   30 and 71 on their six bulbs, Kanturu 70 whose size breathes, Kanturu 2 8); Karutan 66 has none
   (its insect hangs its `BITMAP_SHINY + 5` points itself).
 - `flareWaves.test.ts`: the table cards' waves are the original's `sinf(WorldTime * k)`, k in radians a
-  millisecond: the fire vents (Karutan 113, Loren Market 57, Vulcanus 6) burn steady red.
+  millisecond: the fire vents (Karutan 113, Loren Market 57, Vulcanus 6) burn steady red; Kalima's
+  flower glows (12, 32) grow and shrink on bone 5.
 - `bloodcastle/lampObject.test.ts`: the throne-room lamp's flare is `BITMAP_FLARE` too.
 - `lampFlares.test.ts`, `devias/candleObject.test.ts`: the flares the original never draws
   (Lorencia 90 and 150, Devias 66 and the candelabra, Elbeland 61, Lost Tower 23) are the

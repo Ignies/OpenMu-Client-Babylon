@@ -20,4 +20,16 @@ describe('the map flare waves', () => {
       expect(cardsOf(world, type).map(e => e.sprite), `world ${world} type ${type}`).toEqual([{ scale: 2, color: [1, 0.2, 0] }]);
     }
   });
+
+  // `CreateSprite(BITMAP_LIGHT, bone 5, Luminosity + 0.2f, (0.6, 0.6, 1), o)`, `Luminosity = sinf(WorldTime * 0.001f) * 0.3f + 0.7f`.
+  it('Kalima 12 and 32: the flower glow grows and shrinks on bone 5, unscaled (GMHellas.cpp:439-460)', () => {
+    const glow = {
+      offset: [-5, -1, 35],
+      bone: true,
+      sprite: { scale: 1, color: [0.6, 0.6, 1], grow: { speed: 0.001, amount: 0.3, base: 0.6 }, unscaled: true },
+    };
+    for (const world of [24, 25, 26, 27, 28, 29, 36] as ENUM_WORLD[]) {
+      for (const type of [12, 32]) expect(cardsOf(world, type), `world ${world} type ${type}`).toEqual([glow]);
+    }
+  });
 });
