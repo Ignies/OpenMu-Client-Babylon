@@ -9,10 +9,9 @@
  *
  * Another version generates into *its own* `versions/<id>/packets/` and never
  * touches these files. `controllers/net/packets.ts` hands out the active
- * version's lists, so every `from '../common/packets'` / `from '../common'`
- * importer (the dispatcher in createSocket.ts among them) already goes
- * through the version; the ~49 direct imports of the generated class files
- * are remaining work (Phase 7 step c).
+ * version's lists, which the dispatcher (createSocket.ts) reads; the packet
+ * handlers import the generated classes they read straight from
+ * `versions/shared/packets`.
  *
  * Only the three packet lists are exported: the class modules share a few
  * names (GuildJoinRequestPacket, TradeRequestPacket, ...) in both directions,

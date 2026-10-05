@@ -183,7 +183,7 @@ function createShadowMaterial(scene: Scene, slot: number): CustomMaterial {
     }
 
     #ifdef INSTANCES
-      // A prop batch (common/propBatches.ts): the caster is one thin
+      // A prop batch (render/propBatches.ts): the caster is one thin
       // instance, and its origin is the instance matrix's translation - the
       // loader's basis change carries none, so this is the record's position.
       vec3 shadowOriginI = (world * mat4(world0, world1, world2, world3))[3].xyz;
