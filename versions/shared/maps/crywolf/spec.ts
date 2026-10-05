@@ -29,33 +29,21 @@ export const CRYWOLF_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {
  * `MoveCryWolf1stObject`:
  *  - **41** (×9), :350-355: `AddTerrainLight(x, y, (0.2, 0.7, 0.5), 2)` -
  *    a steady teal glow, no flicker; `RenderCryWolf1stObjectVisual` :395-416
- *    adds two white `BITMAP_FLARE`s (Flare.jpg's warm star), 1.3 with no
- *    `* o->Scale`, at `350 + aaa` above it: `aaa` rides `Time_Effect`, 0 to 20
- *    and back over its 41 frames at 25 a second (ZzzObject.cpp:3263-3265). The
- *    second turns by `Ro`, one static every drawn 41 bumps a degree a frame:
- *    with n of them in view it turns n times as fast, here each turns as one.
+ *    adds two white `BITMAP_FLARE`s, the second turned by `Ro`, one static
+ *    every drawn 41 bumps a degree a frame: with n of them in view it turns n
+ *    times as fast. The beacon class draws them (`beaconObject.ts`).
  *  - **57** (×12) and **71** (×8), :356-363: `L = (rand%4+3)*0.1;
  *    AddTerrainLight(x, y, (L, 0.6L, 0.2L), 3)` - the standard MU brazier
  *    fire, the same recipe as Kanturu 61 / Swamp 57 / Balgas 3 / Karutan 113.
  *    Not hidden here (the brazier model draws), so no `emissions` on the
  *    light - the flame is in the mesh.
  */
-const BEACON_FLARE: NonNullable<LightEmitter['sprite']> = {
-  scale: 1.3,
-  color: [1, 1, 1],
-  texture: 'flare',
-  unscaled: true,
-  bob: { height: 20, period: 1640 },
-};
-
 export const CRYWOLF_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
   41: [
     {
       pointRange: 4,
       terrain: { range: 2, color: [0.2, 0.7, 0.5] },
     },
-    { offset: [0, 0, 350], sprite: BEACON_FLARE },
-    { offset: [0, 0, 350], sprite: { ...BEACON_FLARE, spin: 0.025 } },
   ],
   57: [
     {

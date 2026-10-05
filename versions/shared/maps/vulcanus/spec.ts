@@ -86,7 +86,7 @@ export const VULCANUS_EMISSIONS: Partial<Record<number, readonly Emission[]>> =
   };
 
 /**
- * Type 6 (x50), `RenderObjectVisual` :363-386: a `BITMAP_LIGHT` sprite sized
+ * Type 6 (x50), `RenderObjectVisual` :363-386: a steady `BITMAP_LIGHT` sprite sized
  * `2 * scale` in `(1.0, 0.2, 0.0)`, plus one of `FIRE_HIK1` SubType 0,
  * `FIRE_CURSEDLICH` SubType 4 and `FIRE_HIK3` SubType 0 - `fire1`, `fire2`
  * and `fire3` here - picked afresh every tick.
@@ -100,11 +100,7 @@ export const VULCANUS_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
     6: [
       {
         pointRange: 4,
-        sprite: {
-          scale: 2,
-          color: [1, 0.2, 0],
-          pulse: { speed: 3, amount: 0.2, base: 0.9 },
-        },
+        sprite: { scale: 2, color: [1, 0.2, 0] },
         terrain: {
           range: 2,
           color: [1, 0.45, 0.15],

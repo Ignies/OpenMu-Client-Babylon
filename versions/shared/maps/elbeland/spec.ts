@@ -76,20 +76,45 @@ export const ELBELAND_EMISSIONS: Partial<Record<number, readonly Emission[]>> =
  *  - **61** (×23), :135-140: `(0.2L, 0.6L, L)` at range 3 + hidden, with
  *    `BITMAP_TRUE_BLUE` particles (:282-288) - the blue elf lamps. No
  *    sprite: the flare is ours (`lampFlares`).
- *  - **63** (×6), `RenderObjectVisual` :290-299: one `BITMAP_LIGHT` sprite at
- *    bone 5 sized `scale * 6` - the great lanterns; no terrain light.
+ *  - **63** (×6), `RenderObjectVisual` :289-300: one `BITMAP_LIGHT` sprite at
+ *    bone 5 + (-40, -10, 0) sized `scale * 6`, `fLumi * (1, 1, 0.6)` with
+ *    `fLumi = (sin(WorldTime * 0.001) + 1) * 0.3 + 0.4` - the great lanterns;
+ *    no terrain light. The lantern swings 27 across; the card sits at the
+ *    middle of the swing.
  *  - **110** (×1, at 47.5/218.5), `RenderObjectVisual` :301-311: one
  *    `BITMAP_LIGHT` particle every other tick at
- *    `(cos, sin)(WorldTime * 0.03) * (30 + rand()%5)` around bone 0, 70 up,
- *    scale 0.6, white - the village-protection shrine. 0.03 rad/ms is 4.8
+ *    `(cos, sin)(WorldTime * 0.03) * (30 + rand()%5)` around bone 0, 70 up
+ *    in its frame - 31 over the origin, as bone 0 sits 39 under it - scale
+ *    0.6, white - the village-protection shrine. 0.03 rad/ms is 4.8
  *    turns a second against 12.5 spawns, so consecutive sparks land 138°
  *    apart and the ring never reads as an orbit in the original either: what
  *    it looks like is a light hanging over the shrine, which is the sprite
- *    below. The same stand-in 63 and 121 already take.
- *  - **121** (×26): `BITMAP_LIGHT` sprites on bones 3…8 (:312-327) - the
- *    lamp posts; one sprite each.
+ *    below.
+ *  - **121** (×26), :312-327: a `BITMAP_LIGHT` sprite on each of bones 3…8
+ *    + (5, -4, -1) of the totem, `fLumi * (1, 0.5, 0.3)` and `fLumi` across
+ *    with no `* o->Scale`, `fLumi = (sin(WorldTime * 0.002) + 1) * 0.5 + 0.5`.
  */
 const FIRE_BOWL_FLARE: NonNullable<LightEmitter['sprite']> = { scale: 0.9, color: [0.2, 0.5, 1] };
+
+const TOTEM_LUMI = { speed: 0.002, amount: 0.5, base: 0.5 } as const;
+
+const TOTEM_LIGHT: NonNullable<LightEmitter['sprite']> = {
+  scale: 1,
+  color: [1, 0.5, 0.3],
+  pulse: TOTEM_LUMI,
+  grow: TOTEM_LUMI,
+  unscaled: true,
+};
+
+/** The totem's bones 3-8 + (5, -4, -1), at scale 1. */
+const TOTEM_BONES: readonly (readonly [number, number, number])[] = [
+  [-12, 11, 348],
+  [-12, -13, 348],
+  [-17, 13, 232],
+  [-20, 17, 105],
+  [-20, -19, 105],
+  [-17, -16, 232],
+];
 
 export const ELBELAND_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
   {
@@ -139,22 +164,19 @@ export const ELBELAND_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
     ],
     63: [
       {
-        offset: [0, 0, 300],
-        sprite: { scale: 3, color: [1, 0.9, 0.7] },
+        offset: [10, -167, 415],
+        bone: true,
+        sprite: { scale: 6, color: [1, 1, 0.6], pulse: { speed: 0.001, amount: 0.3, base: 0.4 } },
       },
     ],
     110: [
       {
-        offset: [0, 0, 70],
+        offset: [0, 0, 31],
+        bone: true,
         sprite: { scale: 1.2, color: [1, 1, 1] },
       },
     ],
-    121: [
-      {
-        offset: [0, 0, 250],
-        sprite: { scale: 1.2, color: [1, 0.9, 0.7] },
-      },
-    ],
+    121: TOTEM_BONES.map(offset => ({ offset, bone: true, sprite: TOTEM_LIGHT })),
   };
 
 /**

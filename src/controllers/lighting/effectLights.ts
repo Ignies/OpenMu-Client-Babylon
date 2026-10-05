@@ -33,9 +33,10 @@ import { EFFECT_RENDERING_GROUP, keepDepthForEffects } from '../fx/core';
  * and a second name replaces the first, GlobalBitmap.cpp:549-568); `impact` BITMAP_IMPACT,
  * Impack03.jpg, a blue-white burst (:5267; Tarkan reloads the same file from Object9,
  * MapManager.cpp:146); `magic1` BITMAP_MAGIC + 1, Magic_Ground2.jpg, a ring of rays (:5209);
- * `lightning1` BITMAP_LIGHTNING + 1, lightning2.jpg, a cyan burst (:5295). `px` is the sheet's
- * width: a sprite is `Width * Scale` across (zzzeffectsprite.cpp:76). `sprites` caps a busy sheet
- * higher: Aida's 183 plants carry twelve sparks each.
+ * `lightning1` BITMAP_LIGHTNING + 1, lightning2.jpg, a cyan burst (:5295); `kanturu2ndEffect1`
+ * BITMAP_KANTURU_2ND_EFFECT1, Object39's k_effect_01.jpg, a white star (:5495). `px` is the
+ * sheet's width: a sprite is `Width * Scale` across (zzzeffectsprite.cpp:76). `sprites` caps a busy
+ * sheet higher: Aida's 183 plants carry twelve sparks each.
  */
 const FLARE_TEXTURES = {
   light: { file: 'Effect/flare01.OZJ', px: 64 },
@@ -45,6 +46,7 @@ const FLARE_TEXTURES = {
   impact: { file: 'Effect/Impack03.OZJ', px: 64 },
   magic1: { file: 'Effect/Magic_Ground2.OZJ', px: 128 },
   lightning1: { file: 'Effect/lightning2.OZJ', px: 128 },
+  kanturu2ndEffect1: { file: 'Object39/k_effect_01.OZJ', px: 64 },
 } as const;
 
 export type FlareTexture = keyof typeof FLARE_TEXTURES;
@@ -53,15 +55,17 @@ const OZJ_HEADER_SIZE = 24;
 
 const MAX_SPRITES_PER_MANAGER = 512;
 
-/** `(sin(ms * speed) + 1) * amount + base`, the original's `sinf(WorldTime * k)` shapes. */
-type Wave = { speed: number; amount: number; base: number };
+/**
+ * `(sin(ms * speed) + 1) * amount + base`, the original's `sinf(WorldTime * k)` shapes; `abs` folds
+ * it up at zero instead, `|sin| * amount + base` (`absf(sinf(...))`, GMKarutan1.cpp:88).
+ */
+type Wave = { speed: number; amount: number; base: number; abs?: boolean };
 
-const wave = (w: Wave, ms: number) => (Math.sin(ms * w.speed) + 1) * w.amount + w.base;
+const wave = (w: Wave, ms: number) => {
+  const s = Math.sin(ms * w.speed);
 
-/** Up `height` MU units and back down every `period` ms, a straight ride each way. */
-type Bob = { height: number; period: number };
-
-const lift = (b: Bob, ms: number) => b.height * (1 - Math.abs(((ms / b.period) % 1) * 2 - 1));
+  return (w.abs ? Math.abs(s) : s + 1) * w.amount + w.base;
+};
 
 /** A card as a map's light table names it (`LightEmitter.sprite`). */
 export type FlareSpec = {
@@ -73,8 +77,6 @@ export type FlareSpec = {
   readonly grow?: Wave;
   /** Degrees a millisecond it turns, counter-clockwise: `CreateSprite`'s `Rotation` (ZzzOpenglUtil.cpp:899-908). */
   readonly spin?: number;
-  /** Its height over time, above where the host put it. */
-  readonly bob?: Bob;
   /** The sheet the original names; `BITMAP_LIGHT` when left out. */
   readonly texture?: FlareTexture;
   /** The original sizes it without `* o->Scale` (`CreateSprite(..., 5.5f, ...)`): the object's scale does not apply. */
@@ -279,9 +281,9 @@ export async function createEffectLight(
   let observer: ReturnType<Scene['onBeforeRenderObservable']['add']> | null =
     null;
 
-  const { pulse, grow, spin, bob } = spec;
+  const { pulse, grow, spin } = spec;
 
-  if (pulse || grow || spin || bob) {
+  if (pulse || grow || spin) {
     let elapsed = 0;
 
     observer = scene.onBeforeRenderObservable.add(() => {
@@ -290,7 +292,6 @@ export async function createEffectLight(
       if (pulse) paint.setLuminosity(wave(pulse, elapsed));
       if (grow) sprite.width = sprite.height = size * wave(grow, elapsed);
       if (spin) sprite.angle = elapsed * spin * RADIANS_PER_DEGREE;
-      if (bob) sprite.position.y = position.y + lift(bob, elapsed) / TILE_CM;
     });
   }
 

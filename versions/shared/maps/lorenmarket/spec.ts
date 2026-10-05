@@ -36,20 +36,26 @@ export const LOREN_MARKET_EMISSIONS: Partial<
 
 /**
  * `MoveObject`:
- *  - **30** (×4), :98-113: the street lamp - `L = (rand%4+3)*0.1` fire
- *    colour at bone 1, `AddTerrainLight(…, 3)`; `RenderObjectVisual`
- *    :248-263 adds a `BITMAP_FLARE` (Flare.jpg's warm star) on each of bones
- *    1-3, its three heads (`STREET_LAMP_HEADS`), `1.5 * Scale`, grey
- *    `fLumi * 0.5` with `fLumi = (sin(WorldTime * 0.002) + 1) * 0.2 + 0.6`.
- *  - **35** (×8), :115-130: the wall lamp - the same at bone 2, range 1; its
- *    one `BITMAP_FLARE` (:264-274) is grey `fLumi * 0.7`, breathing at 0.039
- *    like the fortress wall torch.
- *  - **57** (×12), `RenderObjectVisual` :297-318: `BITMAP_LIGHT` sprite at
- *    `2 * scale` plus the cycling `FIRE_HIK1` / `CURSEDLICH` / `HIK3` - the
- *    same vent Vulcanus 6 and Karutan 113 are.
- *
- * The lights' offsets are approximated by height (lamp heads ~2.5 tiles up).
+ *  - **30** (×4), :92-108: the street lamp - `AddTerrainLight(bone 1,
+ *    fLumi * (0.7, 0.5, 0.2), 3)`, breathing with `fLumi = (sin(WorldTime *
+ *    0.002) + 1) * 0.2 + 0.6`, no roll; `RenderObjectVisual` :248-263 adds a
+ *    `BITMAP_FLARE` (Flare.jpg's warm star) on each of bones 1-3, its three
+ *    heads (`STREET_LAMP_HEADS`), `1.5 * Scale`, grey `fLumi * 0.5`.
+ *  - **35** (×8), :110-127: the wall lamp - the same at bone 2, range 1, its
+ *    `fLumi` at 0.039 like the fortress wall torch; its one `BITMAP_FLARE`
+ *    (:264-274) is grey `fLumi * 0.7`. Bone 2 is the hanging lantern, 16 up,
+ *    swaying 5 across in x; the row sits at the middle of the sway.
+ *  - **57** (×12), `RenderObjectVisual` :297-318: a steady `BITMAP_LIGHT`
+ *    sprite at `2 * scale` in `(1, 0.2, 0)` plus the cycling `FIRE_HIK1` /
+ *    `CURSEDLICH` / `HIK3` - the same vent Vulcanus 6 and Karutan 113 are.
  */
+
+/** `fLumi * (0.7, 0.5, 0.2)`, the lamps' ground light. */
+const LAMP_GROUND_COLOR: readonly [number, number, number] = [0.7, 0.5, 0.2];
+
+const STREET_LAMP_LUMI = { speed: 0.002, amount: 0.2, base: 0.6 } as const;
+
+const WALL_LAMP_LUMI = { speed: 0.039, amount: 0.2, base: 0.6 } as const;
 /** Bones 1, 2 and 3 of the street lamp (Object31), at scale 1: the top head and the two arms. */
 const STREET_LAMP_HEADS: readonly (readonly [number, number, number])[] = [
   [0, 0, 304],
@@ -60,7 +66,7 @@ const STREET_LAMP_HEADS: readonly (readonly [number, number, number])[] = [
 const STREET_LAMP_FLARE: NonNullable<LightEmitter['sprite']> = {
   scale: 1.5,
   color: [0.5, 0.5, 0.5],
-  pulse: { speed: 0.002, amount: 0.2, base: 0.6 },
+  pulse: STREET_LAMP_LUMI,
   texture: 'flare',
 };
 
@@ -69,36 +75,26 @@ export const LOREN_MARKET_LIGHTS: Partial<
 > = {
   30: [
     {
-      offset: [0, 0, 250],
+      offset: STREET_LAMP_HEADS[0],
+      bone: true,
       pointRange: 6,
-      terrain: {
-        range: 3,
-        color: [1, 0.6, 0.2],
-        flicker: { min: 0.3, max: 0.6, steps: 4 },
-      },
+      terrain: { range: 3, color: LAMP_GROUND_COLOR, pulse: STREET_LAMP_LUMI },
     },
     ...STREET_LAMP_HEADS.map(offset => ({ offset, bone: true, sprite: STREET_LAMP_FLARE })),
   ],
   35: [
     {
-      offset: [0, 0, 200],
+      offset: [-2, -24, 16],
+      bone: true,
       pointRange: 4,
-      sprite: { scale: 1.5, color: [0.7, 0.7, 0.7], pulse: { speed: 0.039, amount: 0.2, base: 0.6 }, texture: 'flare' },
-      terrain: {
-        range: 1,
-        color: [1, 0.6, 0.2],
-        flicker: { min: 0.3, max: 0.6, steps: 4 },
-      },
+      sprite: { scale: 1.5, color: [0.7, 0.7, 0.7], pulse: WALL_LAMP_LUMI, texture: 'flare' },
+      terrain: { range: 1, color: LAMP_GROUND_COLOR, pulse: WALL_LAMP_LUMI },
     },
   ],
   57: [
     {
       pointRange: 4,
-      sprite: {
-        scale: 2,
-        color: [1, 0.5, 0.2],
-        pulse: { speed: 3, amount: 0.2, base: 0.9 },
-      },
+      sprite: { scale: 2, color: [1, 0.2, 0] },
       terrain: {
         range: 2,
         color: [1, 0.45, 0.15],

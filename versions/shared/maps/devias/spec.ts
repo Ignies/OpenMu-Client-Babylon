@@ -33,7 +33,8 @@ export const DEVIAS_BLEND_MESHES: Readonly<Record<number, number>> = {
  *    202.5/62, 225/44.5); the fire gets the flame, the hearth nothing.
  *    66 also burns alone as the camp fires (11.5/77.5, 174/192, …). The
  *    original's 66 is `CreateFire(0, o, 0, 0, 50)` (ZzzObject.cpp:3874-3876):
- *    fire and a range-4 light, no flare; the flare is ours (`lampFlares`).
+ *    fire and a range-4 light 50 up, `createFire`'s, no flare; the flare is
+ *    ours (`lampFlares`).
  *  - 54 / 56 candelabra are DeviasCandleObject: flames and light come from
  *    the wick bones (DEVIAS_CANDELABRA below), nothing is needed here.
  */
@@ -45,15 +46,10 @@ const HEARTH_FLARE: NonNullable<LightEmitter['sprite']> = { scale: 4.5, color: [
 export const DEVIAS_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
   66: [
     {
-      ...createFire([0, 0, 30]),
+      ...createFire([0, 0, 50]),
       pointRange: 8,
       get sprite() {
         return isOn('lampFlares') ? HEARTH_FLARE : undefined;
-      },
-      terrain: {
-        range: 5,
-        color: [1, 0.6, 0.35],
-        flicker: { min: 0.6, max: 1, steps: 5 },
       },
       // EncTerrain3.obj carries 66 in two sizes and the emitter multiplies
       // its sprites by the object's own scale, so one recipe cannot serve
@@ -81,6 +77,18 @@ export const DEVIAS_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
 };
 
 /**
+ * Ours (`lampFlares`): the original gives the candelabra a BlendMesh and no
+ * light (ZzzObject.cpp:4658-4660).
+ */
+const CANDELABRA_GROUND: LightEmitter['terrain'] = {
+  range: 5.5,
+  color: [1, 0.66, 0.3],
+  flicker: { min: 0.45, max: 0.75, steps: 4 },
+  falloff: 1.4,
+  floorGain: 1.3,
+};
+
+/**
  * Devias standing candelabra (Object3 types 54 / 56), lit from the average
  * of the three wick bones by `DeviasCandleObject`. Lorencia's table candle
  * (150 above) minus the fixed offset, reaching further and yellower: the
@@ -94,11 +102,7 @@ export const DEVIAS_CANDELABRA: LightEmitter = {
   pointDrop: 0,
   pointGain: 1.4,
   wander: 0.05,
-  terrain: {
-    range: 5.5,
-    color: [1, 0.66, 0.3],
-    flicker: { min: 0.45, max: 0.75, steps: 4 },
-    falloff: 1.4,
-    floorGain: 1.3,
+  get terrain() {
+    return isOn('lampFlares') ? CANDELABRA_GROUND : undefined;
   },
 };

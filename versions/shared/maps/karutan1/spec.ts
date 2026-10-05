@@ -105,22 +105,35 @@ export const KARUTAN_MESH_ANIMATION: Partial<Record<number, MeshAnimation>> = {
 /**
  * `MoveObject` :43-49, type 113: `L = (rand%4+3)*0.1; AddTerrainLight(x, y,
  * (L, 0.6L, 0.2L), 3)` (the `case 113:` falls through into the hidden list)
- * + `RenderObjectVisual` :100-122: a `BITMAP_LIGHT` sprite at `2 * scale`
- * and the cycling `FIRE_HIK1` / `CURSEDLICH` / `HIK3`. Type 72 (×85 / ×113)
- * carries bone sprites (`LIGHT` + `SPARK` at bones 11/7, :83-99) - the
- * Kardamahal lamps; sprites only, one flare here. Type 66's two `SHINY+5`
+ * + `RenderObjectVisual` :100-122: a steady `BITMAP_LIGHT` sprite at
+ * `2 * scale` in `(1, 0.2, 0)` and the cycling `FIRE_HIK1` / `CURSEDLICH` / `HIK3`. Type 66's two `SHINY+5`
  * points (:68-82) ride bones that sweep with its clips, so the insect hangs
  * them itself (`insectObject.ts`).
  */
+
+/** `flumi = absf(sinf(WorldTime * 0.0004)) * 0.4f` (GMKarutan1.cpp:88). */
+const PLANT_LUMI = { speed: 0.0004, amount: 0.4, base: 0, abs: true } as const;
+
+/**
+ * Type 72 (×85 / ×113), `so_plant01`, :83-99: at bone 11 + (20, 0, 0) a
+ * `BITMAP_LIGHT` 2.0 across, at bone 7 + (20, 0, 0) a `BITMAP_SPARK + 1` 4.0,
+ * both tinted `flumi * (1.3, 1.3, 1.9)`, and on each a steady `(0.15, 0.15,
+ * 0.15)` `BITMAP_SPARK + 1` 1.5; no `* o->Scale`. The bones sway 11 and 4
+ * across; the cards sit at the middle.
+ */
+const plantBulb = (offset: readonly [number, number, number], scale: number, spark?: boolean): LightEmitter[] => [
+  {
+    offset,
+    bone: true,
+    sprite: { scale, color: [1.3, 1.3, 1.9], pulse: PLANT_LUMI, texture: spark ? 'spark1' : undefined, unscaled: true },
+  },
+  { offset, bone: true, sprite: { scale: 1.5, color: [0.15, 0.15, 0.15], texture: 'spark1', unscaled: true } },
+];
 export const KARUTAN_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
   113: [
     {
       pointRange: 5,
-      sprite: {
-        scale: 2,
-        color: [1, 0.6, 0.3],
-        pulse: { speed: 3, amount: 0.2, base: 0.9 },
-      },
+      sprite: { scale: 2, color: [1, 0.2, 0] },
       terrain: {
         range: 3,
         color: [1, 0.6, 0.2],
@@ -129,5 +142,5 @@ export const KARUTAN_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = 
       emissions: [{ kinds: ['fire1', 'fire3'], every: 2, jitter: 6 }],
     },
   ],
-  72: [{ offset: [0, 0, 220], sprite: { scale: 1.5, color: [1, 0.8, 0.5] } }],
+  72: [...plantBulb([24, -18, 207], 2), ...plantBulb([-153, -34, 151], 4, true)],
 };

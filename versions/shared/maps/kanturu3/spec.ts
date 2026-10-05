@@ -1,5 +1,6 @@
 import type { Emission } from '@/controllers/fx/effectParticles';
 import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
+import { relicLamp } from '../kanturu2/spec';
 
 /**
  * Kanturu Remain (`WD_39KANTURU_3RD`, `World40`/`Object40`), the plain-data
@@ -58,9 +59,10 @@ export const KANTURU3_EMISSIONS: Partial<Record<number, readonly Emission[]>> =
  *    range `1 + scale` - harsher, flickering to black.
  *  - **54** (×45), :173-184: a single flash on the first frame, then hidden
  *    - a one-shot, reduced here to a dim steady glow.
- *  - **5** (×13, `RenderKanturu3rdObjectVisual` :262-272): `BITMAP_LIGHT`
- *    plus two counter-spinning `SHINY` sprites at bone 1 - the crystal
- *    lamps, no terrain light.
+ *  - **5** (×13, `RenderKanturu3rdObjectVisual` :262-272): Kanturu 2's relic
+ *    lamp (`relicLamp`), its `BITMAP_LIGHT` sized `fLumi / 2.4`, no terrain
+ *    light. Its two `BITMAP_SHINY + 1` turning at `WorldTime / 2` and `/ 4`
+ *    degrees are not drawn: Shiny02.jpg is 32 by 64 and a card sheet is square.
  *
  * `range` is fixed at the scale-1 value; the objects sit at 1.0-1.9.
  */
@@ -91,13 +93,5 @@ export const KANTURU3_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
         terrain: { range: 2, color: [0.4, 0.4, 0.4] },
       },
     ],
-    5: [
-      {
-        sprite: {
-          scale: 1.4,
-          color: [0.7, 0.8, 1],
-          pulse: { speed: 1.5, amount: 0.3, base: 0.8 },
-        },
-      },
-    ],
+    5: [relicLamp(1 / 2.4)],
   };

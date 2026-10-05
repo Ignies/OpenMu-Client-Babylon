@@ -21,7 +21,8 @@ policy. It knows how to light something, never which skill or item asks for it.
 - `mapLighting.ts`: `MapLighting`, the type of a map's `lighting` field (`look`, `areas`,
   `objectLights`, `thunder`). The row types are exported from `index.ts` for the map folders.
 - `mapObjectLights.ts`: `LightEmitter` (map specs build their light tables from it; `bone` marks an
-  offset that stands for a bone and grows with the object, ZzzBMD.cpp:168-180),
+  offset that stands for a bone and grows with the object, ZzzBMD.cpp:168-180; `terrain.pulse`
+  breathes the ground light where the original writes a `sinf(WorldTime * k)` and no roll),
   `MapObjectLights`, `lightMapObject`, `lightEmittersFor`. `mapObjectLightAdapter.ts`: `MapObjectLights`, the
   `ModelObject` host. `lightCarrier.ts`: `LightCarrier`, a light without a drawn body.
 - `effectLights.ts`: `createEffectLight`, `createMovableFlare` (flare cards; they light nothing),
@@ -30,11 +31,13 @@ policy. It knows how to light something, never which skill or item asks for it.
   ZzzOpenData.cpp:5207) unless a spec names another (`'flare'` BITMAP_FLARE, Flare.jpg, a warm star,
   :5309; `'spark1'` BITMAP_SPARK + 1, Spark03.jpg, :5216; `'shiny5'` BITMAP_SHINY + 5, shiny05.jpg,
   :5325; `'impact'` BITMAP_IMPACT, Impack03.jpg, :5267; `'magic1'` BITMAP_MAGIC + 1,
-  Magic_Ground2.jpg, :5209; `'lightning1'` BITMAP_LIGHTNING + 1, lightning2.jpg, :5295). A card is
+  Magic_Ground2.jpg, :5209; `'lightning1'` BITMAP_LIGHTNING + 1, lightning2.jpg, :5295;
+  `'kanturu2ndEffect1'` BITMAP_KANTURU_2ND_EFFECT1, Object39's k_effect_01.jpg, :5495). A card is
   its sheet's own width times its scale (zzzeffectsprite.cpp:76), times the object's scale unless
-  the spec is `unscaled`; `pulse` waves its brightness, `grow` its size, `spin` turns it and `bob`
-  lifts it, and a `MovableFlare` takes `setLuminosity`, `setScale` and `setAngle` (degrees, the
-  original's `Rotation`) from its host. One sprite manager per sheet and scene.
+  the spec is `unscaled`; `pulse` waves its brightness (`abs` folds the wave up at zero, the
+  original's `absf(sinf(...))`), `grow` its size and `spin` turns it, and a `MovableFlare` takes
+  `setLuminosity`, `setScale` and `setAngle` (degrees, the original's `Rotation`) from its host.
+  One sprite manager per sheet and scene.
 - `items.ts`: `lightItem`, `itemSelfLight`. `sky.ts`: `strikeThunder`.
 - `lightingQuality.ts`: the tiers (`lightingTier()`, `tierIndex()`: Classic, Enhanced, Ultra),
   `pointLightBudget`, MSAA and CSM state.
@@ -106,10 +109,12 @@ policy. It knows how to light something, never which skill or item asks for it.
 - `recipes.test.ts`: `effectLight` hue, reach and gain ceiling, minimum range.
 - `characters.test.ts`: a steady carried glow (Poison Shadow), one that breathes, and the Scorpion's per-frame flicker.
 - `effectLights.test.ts`: a card is drawn from the sheet its spec names, one manager per sheet, at
-  the sheet's own width (checked against the file in `Data/Effect`); an `unscaled` card keeps its size
-  on a scaled object; a `grow` card grows and shrinks, a `spin` card turns, a `bob` card rides up
-  and down; a movable card resizes and turns.
+  the sheet's own width (checked against the file in `Data`); an `unscaled` card keeps its size
+  on a scaled object; an `abs` wave breathes on `|sin|`; a `grow` card grows and shrinks, a `spin`
+  card turns; a movable card resizes and turns.
 - `mapObjectLightAdapter.test.ts`: a `bone` offset grows with the object, a plain one does not.
+- `mapObjectLights.test.ts`: a row's ground light breathes on its own pulse, else on its flare's, and a
+  flicker wins over both.
 - `versions/shared/maps/mapRows.golden.test.ts`: every world's look, room looks, thunder and
   map-object lights, pinned across the move into the map folders.
 - `mapLighting.test.ts`: a look over the open or enclosed default, the sky's default for a map

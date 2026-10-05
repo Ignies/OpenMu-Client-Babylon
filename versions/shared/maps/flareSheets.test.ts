@@ -41,6 +41,26 @@ describe('the BITMAP_SPARK + 1 cards (Spark03.jpg)', () => {
     expect(cardsOf(ENUM_WORLD.WD_37KANTURU_1ST, 70)).toEqual([card(7, [0.8, 0.4, 0.2]), card(4, [0.65, 0.65, 0.65])]);
   });
 
+  // `flumi = absf(sinf(WorldTime * 0.0004)) * 0.4f` tints `(1.3, 1.3, 1.9)`; the 1.5 sparks are a steady 0.15 grey.
+  it('Karutan 72: three on bones 11 and 7 with a BITMAP_LIGHT, breathing on |sin| (GMKarutan1.cpp:83-99)', () => {
+    const flumi = { speed: 0.0004, amount: 0.4, base: 0, abs: true };
+    const card = (offset: number[], scale: number, texture?: string) => ({
+      offset,
+      bone: true,
+      sprite: { scale, color: [1.3, 1.3, 1.9], pulse: flumi, texture, unscaled: true },
+    });
+    const grey = (offset: number[]) => ({
+      offset,
+      bone: true,
+      sprite: { scale: 1.5, color: [0.15, 0.15, 0.15], texture: 'spark1', unscaled: true },
+    });
+    // Bones 11 and 7 + (20, 0, 0), at the middle of their sway.
+    const [b11, b7] = [[24, -18, 207], [-153, -34, 151]];
+    for (const world of [ENUM_WORLD.WD_80KARUTAN1, ENUM_WORLD.WD_81KARUTAN2]) {
+      expect(cardsOf(world, 72)).toEqual([card(b11, 2), grey(b11), card(b7, 4, 'spark1'), grey(b7)]);
+    }
+  });
+
   // `fLumi = (sinf(WorldTime * 0.001f) + 1.0f) * 0.5f` on all three channels, 10 across; bone 4 rides 21-151 up.
   it('Kanturu 2 8: one on bone 4, white breathing up from black (GM_Kanturu_2nd.cpp:347-371)', () => {
     expect(cardsOf(ENUM_WORLD.WD_38KANTURU_2ND, 8)).toEqual([
@@ -56,6 +76,19 @@ describe('the BITMAP_SPARK + 1 cards (Spark03.jpg)', () => {
         },
       },
     ]);
+  });
+});
+
+describe('the BITMAP_KANTURU_2ND_EFFECT1 cards (k_effect_01.jpg)', () => {
+  // `CreateSprite(BITMAP_KANTURU_2ND_EFFECT1, Position, fLumi / 3.2, Light, o)` twice over the BITMAP_LIGHT.
+  it('Kanturu 2 4: two on bone 1 that breathe and grow with fLumi (GM_Kanturu_2nd.cpp:335-346)', () => {
+    const fLumi = { speed: 0.002, amount: 0.5, base: 0.5 };
+    const card = {
+      offset: [0, 13, 244],
+      bone: true,
+      sprite: { scale: 1 / 3.2, color: [0.3, 0.5, 1], pulse: fLumi, grow: fLumi, unscaled: true, texture: 'kanturu2ndEffect1' },
+    };
+    expect(cardsOf(ENUM_WORLD.WD_38KANTURU_2ND, 4).filter(e => e.sprite?.texture)).toEqual([card, card]);
   });
 });
 
@@ -79,14 +112,9 @@ describe('the map flares the original draws as BITMAP_FLARE', () => {
     ]);
   });
 
-  // `p[2] += 350 + aaa`, `aaa` riding Time_Effect 0 to 20 and back over 41 frames at 25 a second; the second
-  // card turns by the shared `Ro`, a degree a frame.
-  it('Crywolf 41: two white, 1.3, bobbing 350-370 up, the second turning (GMCrywolf1st.cpp:395-416)', () => {
-    const card = { scale: 1.3, color: [1, 1, 1], texture: 'flare', unscaled: true, bob: { height: 20, period: 1640 } };
-    expect(cardsOf(ENUM_WORLD.WD_34CRYWOLF_1ST, 41)).toEqual([
-      { offset: [0, 0, 350], sprite: card },
-      { offset: [0, 0, 350], sprite: { ...card, spin: 0.025 } },
-    ]);
+  // The second turns by the `Ro` every drawn beacon bumps: the beacon draws its pair (crywolf/beaconObject.test.ts).
+  it('Crywolf 41: no table card on top of the beacon\'s own (GMCrywolf1st.cpp:395-416)', () => {
+    expect(cardsOf(ENUM_WORLD.WD_34CRYWOLF_1ST, 41)).toEqual([]);
   });
 
   // `for (i = 1; i <= 3; ++i)` a card on bone i: the top head 304 up, the two arms 264 up and 56 out.
@@ -96,8 +124,11 @@ describe('the map flares the original draws as BITMAP_FLARE', () => {
     expect(cardsOf(ENUM_WORLD.WD_79UNITEDMARKETPLACE, 30)).toEqual(heads.map(offset => ({ offset, bone: true, sprite })));
   });
 
-  it('Loren Market 35: grey, breathing like its fLumi (GMUnitedMarketPlace.cpp:264-275)', () => {
-    expect(flareOf(ENUM_WORLD.WD_79UNITEDMARKETPLACE, 35)?.sprite).toEqual({
+  // `TransformPosition(BoneTransform[2], ...)`: the lantern's bone 2, 16 up, swaying 5 across in x.
+  it('Loren Market 35: grey, breathing like its fLumi, on bone 2 (GMUnitedMarketPlace.cpp:264-275)', () => {
+    const flare = flareOf(ENUM_WORLD.WD_79UNITEDMARKETPLACE, 35);
+    expect([flare?.offset, flare?.bone]).toEqual([[-2, -24, 16], true]);
+    expect(flare?.sprite).toEqual({
       scale: 1.5,
       color: [0.7, 0.7, 0.7],
       pulse: { speed: 0.039, amount: 0.2, base: 0.6 },

@@ -18,10 +18,9 @@ import { PlaySpeedObject } from '../shared/objectVariants';
  * `PlayWorldAmbientSounds` case, so its `sound` row has no `beds`.
  *
  * Not built:
- *  - The eagle boids on 62, the decorative monsters on 133-155, the
- *    bone-anchored sprite rows on 30/110/121 beyond one flare each. 110 has
- *    no `ELBELAND_LIGHTS` row at all: its sprite orbits bone 0 on a
- *    `WorldTime` circle, which the static-offset emitter cannot say.
+ *  - The eagle boids on 62, the decorative monsters on 133-155, and 110's
+ *    sparks orbiting bone 0 on a `WorldTime` circle, which a static-offset
+ *    row cannot say (its row is one flare standing in).
  *
  * `Music/elbeland`; clear colour `(178, 178, 178)/256` set by
  * `loadMapIntoScene` (SceneManager.cpp:361).

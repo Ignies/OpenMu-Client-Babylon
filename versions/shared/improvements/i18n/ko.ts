@@ -27,9 +27,9 @@ export default {
   'fidelity.fortressLights': '제국 요새의 불빛',
   'fidelity.fortressLights.hint':
     '제국 요새의 벽 횃불, 샹들리에, 화로가 주변 바닥을 비춥니다. 클래식: 원작처럼 불빛이 없습니다.',
-  'fidelity.lampFlares': '등불과 불꽃의 빛 번짐',
+  'fidelity.lampFlares': '등불의 빛과 빛 번짐',
   'fidelity.lampFlares.hint':
-    '가로등, 촛불, 화덕, 화로에 빛 번짐이 생깁니다. 클래식: 원작처럼 빛 번짐이 없습니다.',
+    '가로등, 촛불, 화덕, 화로에 빛 번짐이 생기고, 촛불이 타오르며, 일부 등불이 주변 바닥을 밝힙니다. 클래식: 원작이 그리는 것만 보입니다.',
   'fidelity.roofFade': '투명해지는 지붕',
   'fidelity.roofFade.hint':
     '지붕 아래에 서 있으면 지붕이 사라져 안이 보입니다. 클래식: 지붕은 항상 보입니다.',

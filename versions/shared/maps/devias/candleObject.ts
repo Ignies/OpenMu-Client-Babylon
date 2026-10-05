@@ -23,7 +23,8 @@ const POSE_WAIT_LIMIT = 120;
  * BlendMesh and nothing else (ZzzObject.cpp:4658-4660).
  *
  * The light is ours - `DEVIAS_CANDELABRA` in the lighting layer's map-object
- * table - and so are the wick flares (`lampFlares`; Classic draws none).
+ * table - and so are the wick fire and flares (`lampFlares`; Classic draws
+ * none of them).
  * Instead of a fixed table offset it sits at the wicks: BMD bone
  * transforms only exist once the skeleton has been posed by a render (see
  * the bounds note in the memory), so the light is created from `Update` the

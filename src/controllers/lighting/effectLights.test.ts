@@ -132,6 +132,13 @@ describe('flare cards', () => {
     expect(drawnFrom[drawnFrom.length - 1]).toBe('Effect/lightning2.OZJ');
   });
 
+  // Kanturu 2's relic lamps draw it over their BITMAP_LIGHT (GM_Kanturu_2nd.cpp:343-344).
+  it('draw BITMAP_KANTURU_2ND_EFFECT1 from Object39\'s k_effect_01.jpg (ZzzOpenData.cpp:5495)', async () => {
+    await createEffectLight({} as Scene, { scale: 0.5, color: [0.3, 0.5, 1], texture: 'kanturu2ndEffect1' }, at, 1);
+    expect(drawnFrom[drawnFrom.length - 1]).toBe('Object39/k_effect_01.OZJ');
+    expect(lastSprite().width).toBeCloseTo(0.32);
+  });
+
   // `CreateSprite(BITMAP_SPARK + 1, Position, 5.5f, ...)` has no `* o->Scale` (GMAida.cpp:110).
   it('size an unscaled card without the object scale', async () => {
     const scene = {} as Scene;
@@ -153,6 +160,18 @@ describe('flare cards', () => {
     expect([card.width, card.height]).toEqual([0.32 * 7 * 0.8, 0.32 * 7 * 0.8].map(v => expect.closeTo(v)));
   });
 
+  // Karutan's lamps are `absf(sinf(WorldTime * 0.0004)) * 0.4f` bright (GMKarutan1.cpp:88): the wave folds up at zero.
+  it('breathe a card on |sin| when its wave is abs', async () => {
+    const { scene, step } = clockedScene();
+    const pulse = { speed: 0.0004, amount: 0.4, base: 0, abs: true };
+    await createEffectLight(scene, { scale: 2, color: [1.3, 1.3, 1.9], pulse, unscaled: true }, at, 1);
+    const card = lastSprite() as unknown as { color: { r: number; b: number } };
+    step((Math.PI * 1.5) / 0.0004);
+    expect([card.color.r, card.color.b]).toEqual([0.52, 0.76].map(v => expect.closeTo(v)));
+    step(Math.PI / 2 / 0.0004);
+    expect(card.color.r).toBeCloseTo(0);
+  });
+
   // Aida's torch turns `WorldTime / 10.0f` degrees (GMAida.cpp:310): a tenth of a degree a millisecond.
   it('turn a spinning card counter-clockwise by its degrees a millisecond', async () => {
     const { scene, step } = clockedScene();
@@ -164,23 +183,10 @@ describe('flare cards', () => {
     expect(card.angle).toBeCloseTo(Math.PI);
   });
 
-  // Crywolf's flares ride `350 + aaa`, `aaa` Time_Effect's 0 to 20 and back (GMCrywolf1st.cpp:403-410).
-  it('bob a card up its height and back down over its period', async () => {
-    const { scene, step } = clockedScene();
-    const bob = { height: 20, period: 1640 };
-    await createEffectLight(scene, { scale: 1.3, color: [1, 1, 1], texture: 'flare', bob }, { x: 0, y: 3.5, z: 0 }, 1);
-    const card = lastSprite();
-    step(410);
-    expect(card.position.y).toBeCloseTo(3.6);
-    step(410);
-    expect(card.position.y).toBeCloseTo(3.7);
-    step(820);
-    expect(card.position.y).toBeCloseTo(3.5);
-  });
-
   it.skipIf(!existsSync('Data/Effect'))('cut each sheet at the width of its file', async () => {
     const scene = {} as Scene;
-    for (const texture of ['light', 'flare', 'spark1', 'shiny5', 'impact', 'magic1', 'lightning1'] as const) {
+    const textures = ['light', 'flare', 'spark1', 'shiny5', 'impact', 'magic1', 'lightning1', 'kanturu2ndEffect1'] as const;
+    for (const texture of textures) {
       await createEffectLight(scene, { scale: 1, color: [1, 1, 1], texture }, at, 1);
     }
     for (const [sheet, width] of cells) {

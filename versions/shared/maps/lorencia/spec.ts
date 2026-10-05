@@ -65,7 +65,8 @@ const STREET_LAMP_FLARE: NonNullable<LightEmitter['sprite']> = {
 
 /**
  * Ours, on 150 the table candle: the original gives it a BlendMesh and its
- * `AddTerrainLight` alone (ZzzObject.cpp:3810-3814, :4587-4590).
+ * `AddTerrainLight` alone, `(L, 0.6L, 0.2L)` at range 3 with `L = (rand() %
+ * 4 + 3) * 0.1` (ZzzObject.cpp:3810-3814, :4587-4590).
  */
 const CANDLE_FLARE: NonNullable<LightEmitter['sprite']> = { scale: 3, color: [1, 0.62, 0.22] };
 
@@ -111,8 +112,8 @@ export const LORENCIA_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
       pointGain: 1.6,
       wander: 0.05,
       terrain: {
-        range: 5,
-        color: [1, 0.52, 0.16],
+        range: 3,
+        color: [1, 0.6, 0.2],
         flicker: { min: 0.3, max: 0.6, steps: 4 },
         falloff: 1.6,
         floorGain: 2.5,
