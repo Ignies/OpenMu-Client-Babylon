@@ -55,10 +55,17 @@ const OZJ_HEADER_SIZE = 24;
 
 const MAX_SPRITES_PER_MANAGER = 512;
 
-/** `(sin(ms * speed) + 1) * amount + base`, the original's `sinf(WorldTime * k)` shapes. */
-type Wave = { speed: number; amount: number; base: number };
+/**
+ * `(sin(ms * speed) + 1) * amount + base`, the original's `sinf(WorldTime * k)` shapes; `abs` folds
+ * it up at zero instead, `|sin| * amount + base` (`absf(sinf(...))`, GMKarutan1.cpp:88).
+ */
+type Wave = { speed: number; amount: number; base: number; abs?: boolean };
 
-const wave = (w: Wave, ms: number) => (Math.sin(ms * w.speed) + 1) * w.amount + w.base;
+const wave = (w: Wave, ms: number) => {
+  const s = Math.sin(ms * w.speed);
+
+  return (w.abs ? Math.abs(s) : s + 1) * w.amount + w.base;
+};
 
 /** Up `height` MU units and back down every `period` ms, a straight ride each way. */
 type Bob = { height: number; period: number };

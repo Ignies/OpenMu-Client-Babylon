@@ -160,6 +160,18 @@ describe('flare cards', () => {
     expect([card.width, card.height]).toEqual([0.32 * 7 * 0.8, 0.32 * 7 * 0.8].map(v => expect.closeTo(v)));
   });
 
+  // Karutan's lamps are `absf(sinf(WorldTime * 0.0004)) * 0.4f` bright (GMKarutan1.cpp:88): the wave folds up at zero.
+  it('breathe a card on |sin| when its wave is abs', async () => {
+    const { scene, step } = clockedScene();
+    const pulse = { speed: 0.0004, amount: 0.4, base: 0, abs: true };
+    await createEffectLight(scene, { scale: 2, color: [1.3, 1.3, 1.9], pulse, unscaled: true }, at, 1);
+    const card = lastSprite() as unknown as { color: { r: number; b: number } };
+    step((Math.PI * 1.5) / 0.0004);
+    expect([card.color.r, card.color.b]).toEqual([0.52, 0.76].map(v => expect.closeTo(v)));
+    step(Math.PI / 2 / 0.0004);
+    expect(card.color.r).toBeCloseTo(0);
+  });
+
   // Aida's torch turns `WorldTime / 10.0f` degrees (GMAida.cpp:310): a tenth of a degree a millisecond.
   it('turn a spinning card counter-clockwise by its degrees a millisecond', async () => {
     const { scene, step } = clockedScene();

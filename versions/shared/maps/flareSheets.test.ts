@@ -41,6 +41,26 @@ describe('the BITMAP_SPARK + 1 cards (Spark03.jpg)', () => {
     expect(cardsOf(ENUM_WORLD.WD_37KANTURU_1ST, 70)).toEqual([card(7, [0.8, 0.4, 0.2]), card(4, [0.65, 0.65, 0.65])]);
   });
 
+  // `flumi = absf(sinf(WorldTime * 0.0004)) * 0.4f` tints `(1.3, 1.3, 1.9)`; the 1.5 sparks are a steady 0.15 grey.
+  it('Karutan 72: three on bones 11 and 7 with a BITMAP_LIGHT, breathing on |sin| (GMKarutan1.cpp:83-99)', () => {
+    const flumi = { speed: 0.0004, amount: 0.4, base: 0, abs: true };
+    const card = (offset: number[], scale: number, texture?: string) => ({
+      offset,
+      bone: true,
+      sprite: { scale, color: [1.3, 1.3, 1.9], pulse: flumi, texture, unscaled: true },
+    });
+    const grey = (offset: number[]) => ({
+      offset,
+      bone: true,
+      sprite: { scale: 1.5, color: [0.15, 0.15, 0.15], texture: 'spark1', unscaled: true },
+    });
+    // Bones 11 and 7 + (20, 0, 0), at the middle of their sway.
+    const [b11, b7] = [[24, -18, 207], [-153, -34, 151]];
+    for (const world of [ENUM_WORLD.WD_80KARUTAN1, ENUM_WORLD.WD_81KARUTAN2]) {
+      expect(cardsOf(world, 72)).toEqual([card(b11, 2), grey(b11), card(b7, 4, 'spark1'), grey(b7)]);
+    }
+  });
+
   // `fLumi = (sinf(WorldTime * 0.001f) + 1.0f) * 0.5f` on all three channels, 10 across; bone 4 rides 21-151 up.
   it('Kanturu 2 8: one on bone 4, white breathing up from black (GM_Kanturu_2nd.cpp:347-371)', () => {
     expect(cardsOf(ENUM_WORLD.WD_38KANTURU_2ND, 8)).toEqual([
