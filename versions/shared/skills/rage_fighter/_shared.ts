@@ -8,9 +8,41 @@ import { after, cm, seq, ticks, type SkillContext, type Step } from '@/controlle
 import { PlayerAction } from '@versions/shared/objects/enum';
 import type { ClipPick } from '@/controllers/combat';
 import type { Sounds } from '@/controllers/sound';
-import { DEG, deg, movesAt, randInt } from '../_shared';
+import { DEG, deg, groundY, movesAt, randInt } from '../_shared';
 import { createAngleDeg } from '@/core/turnAngle';
 import type { Entity } from '@/ecs/world';
+
+/** A BITMAP_SPARK particle in flight: where it is (tiles), its drift (tiles a move), its Gravity (cm a move, up) and LifeTime. */
+export interface FallingSpark {
+  x: number;
+  y: number;
+  z: number;
+  vx: number;
+  vz: number;
+  gravity: number;
+  life: number;
+}
+
+/**
+ * One move of a BITMAP_SPARK (ZzzEffectParticle.cpp:6558-6608): it loses a LifeTime, climbs by a Gravity that loses 2 a move,
+ * bounces off the ground at 0.6 for 4 more of its LifeTime, and drifts. Returns the Light it is drawn at, LifeTime / 16, or -1 once
+ * it is gone.
+ */
+export function fallSpark(s: FallingSpark): number {
+  if (--s.life <= 0) return -1;
+  const light = s.life / 16;
+  s.y += cm(s.gravity);
+  s.gravity -= 2;
+  const ground = groundY(s.x, s.z);
+  if (s.y < ground) {
+    s.y = ground;
+    s.gravity = -s.gravity * 0.6;
+    s.life -= 4;
+  }
+  s.x += s.vx;
+  s.z += s.vz;
+  return light;
+}
 
 const towardFrom = new Vector3();
 const towardTo = new Vector3();
@@ -266,21 +298,27 @@ export const magicGround13 = (light: RGB): Step => (_at, c) => {
 };
 
 /**
- * MODEL_SHOCKWAVE_GROUND01 sub0 (shockwave_ground01.bmd) at the caster's feet, LifeTime 20 (ZzzEffect.cpp:6109-6115): each move
- * Scale x1.2 and Light x0.8 (MoveHandlers.cpp:9803-9822), drawn bright at Light x 6, clamped (ZzzObject.cpp:2521-2534).
+ * MODEL_SHOCKWAVE_GROUND01 (shockwave_ground01.bmd) at `at`, turned `yaw` degrees: sub0 lives LifeTime 20 keeping 0.8 of its Light a
+ * move, sub1 lives 50 keeping 0.9 and draws Kwave2 (ZzzEffect.cpp:6109-6128); each move Scale x1.2 (MoveHandlers.cpp:9803-9822),
+ * drawn bright at Light x 6, clamped (ZzzObject.cpp:2515-2534).
  */
-const groundShock = (light: RGB, scale: number): Step => (_at, c) =>
-  effects.spawn('model', c.scene, entityPos(c.caster, 0, new Vector3()), {
+export function shockGround(c: SkillContext, at: Vector3, yaw: number, light: RGB, scale: number, sub1 = false): void {
+  const keep = sub1 ? 0.9 : 0.8;
+  effects.spawn('model', c.scene, at, {
     model: MODEL.shockwaveGround,
-    seconds: ticks(20),
-    angle: [0, 0, deg(entityYaw(c.caster))],
+    seconds: ticks(sub1 ? 50 : 20),
+    angle: [0, 0, yaw],
     colour: light,
+    ...(sub1 ? { texture: TEX.kwave2 } : {}),
     scaleAt: t => scale * 1.2 ** movesAt(t),
     blendMesh: 0,
-    blendLight: t => 6 * 0.8 ** movesAt(t),
+    blendLight: t => 6 * keep ** movesAt(t),
     blendClamp: true,
     fadeTail: 0,
   });
+}
+/** A party buff's sub0 at the caster's feet. */
+const groundShock = (light: RGB, scale: number): Step => (_at, c) => shockGround(c, entityPos(c.caster, 0, new Vector3()), deg(entityYaw(c.caster)), light, scale);
 
 /** The Lights of a party buff's RageCreateEffect (MonkSystem.cpp:1128-1214). */
 export interface OurforcesLights {

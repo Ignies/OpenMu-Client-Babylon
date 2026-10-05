@@ -355,23 +355,61 @@ describe('Chain Drive (262): BITMAP_SWORDEFF reads the caster\'s GIANTSWING key 
   });
 });
 
-describe('Dragon Roar (264): the dragon on BLOW_OF_DESTRUCTION\'s LifeTime, the fire ring on DRAGONLORE key 5', () => {
+describe('Dragon Roar (264): the dragon on BLOW_OF_DESTRUCTION\'s LifeTime, BITMAP_LAVA\'s waves and fire past DRAGONLORE key 5', () => {
   const LORE = PlayerAction.PLAYER_SKILL_DRAGONLORE;
   const dragon = (r: Run) => r.spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.dragonHead).map(s => s.tick);
-  const ring = (r: Run) => r.spawns.filter(s => s.name === 'ring' && s.opts.texture === TEX.shockwave).map(s => s.tick);
+  const waves = (r: Run, model: string) => r.spawns.filter(s => s.name === 'model' && s.opts.model === model);
 
-  it('the dragon on tick 21 (LifeTime 50 reaches 30, MoveHandlers.cpp:7650-7666), the ring past key 5 (tick 17 at 0.3 a tick)', () => {
+  it('the dragon on tick 21 (LifeTime 50 reaches 30, MoveHandlers.cpp:7650-7666), the waves past key 5 (tick 17 at 0.3 a tick)', () => {
     for (const skill of [264, 560]) {
       const r = run(skill, LORE, { keysPerTick: 0.3, area: true });
       expect(dragon(r)).toEqual([21]);
-      expect(ring(r)).toEqual([17]);
+      expect(waves(r, MODEL.shockwave).map(s => s.tick)).toEqual([17]);
+      expect(waves(r, MODEL.shockwaveGround).map(s => s.tick)).toEqual([17]);
     }
   });
 
-  it('no ring when the clip is left before key 5; the dragon comes anyway', () => {
+  it('no waves and no fire when the clip is left before key 5; the dragon comes anyway', () => {
     const r = run(264, LORE, { keysPerTick: 0.3, area: true, leaveAt: 15 });
     expect(dragon(r)).toEqual([21]);
-    expect(ring(r)).toEqual([]);
+    expect(waves(r, MODEL.shockwave)).toEqual([]);
+    expect(drawTicks(r, TEX.fireHik1)).toEqual([]);
+  });
+
+  it('MODEL_SHOCKWAVE01 sub1 on the caster: Scale x1.24, Light x 5 x 0.45 a move on Damage2, for 5 / PlaySpeed ticks (ZzzEffect.cpp:5884-5888, MoveHandlers.cpp:9383-9395, ZzzObject.cpp:2462-2467)', () => {
+    const [wave] = waves(run(264, LORE, { keysPerTick: 0.3, area: true }), MODEL.shockwave);
+    const { seconds, colour, texture, angle, scaleAt, blendLight } = wave.opts as { seconds: number; colour: number[]; texture: string; angle: number[]; scaleAt: (t: number) => number; blendLight: (t: number) => number };
+    expect([Math.round(seconds * 25), colour, texture, scaleAt(2 / 25)]).toEqual([17, [1, 0.12, 0], TEX.damage2, expect.closeTo(1.24 ** 2)]);
+    expect(angle[2]).toBeCloseTo(0.5 * (180 / Math.PI));
+    expect([blendLight(2 / 25), blendLight(9 / 25)]).toEqual([expect.closeTo(5 * 0.45 ** 2), 0]);
+  });
+
+  it('MODEL_SHOCKWAVE_GROUND01 sub1 where the lava lies: LifeTime 50, Scale x1.2 and Light x 6 x 0.9 a move on Kwave2 (ZzzEffect.cpp:6123-6128, MoveHandlers.cpp:9806-9810, ZzzObject.cpp:2520-2525)', () => {
+    const [ground] = waves(run(264, LORE, { keysPerTick: 0.3, area: true }), MODEL.shockwaveGround);
+    const { seconds, colour, texture, scaleAt, blendLight } = ground.opts as { seconds: number; colour: number[]; texture: string; scaleAt: (t: number) => number; blendLight: (t: number) => number };
+    expect([Math.round(seconds * 25), colour, texture, scaleAt(2 / 25), blendLight(2 / 25)]).toEqual([50, [1, 0.1, 0], TEX.kwave2, expect.closeTo(1.44), expect.closeTo(6 * 0.81)]);
+  });
+
+  it('each tick past key 5 a flame climbing 7 cm a tick and four FIRE_HIK1 sub5 round it, each with a SPARK sub12 from 250 cm up (MoveHandlers.cpp:9969-10014)', () => {
+    const random = vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    const r = run(264, LORE, { keysPerTick: 0.3, area: true, leaveAt: 19 });
+    random.mockRestore();
+    // rand() % 3 is 1: the middle flame is BITMAP_FIRE_CURSEDLICH sub4; the four round it firehik01. Fire on ticks 17 and 18.
+    const born = (texture: string, tick: number) => r.draws.filter(d => d.kind === 'sprite' && d.tick === tick && d.args[0] === texture);
+    expect([born(TEX.fireCursedLich, 17).length, born(TEX.fireHik1, 17).length, born(TEX.spark2, 17).length]).toEqual([1, 4, 4]);
+    expect([born(TEX.fireCursedLich, 18).length, born(TEX.fireHik1, 18).length]).toEqual([2, 8]);
+    const [first] = born(TEX.fireCursedLich, 17);
+    const [second] = born(TEX.fireCursedLich, 18).slice(-1);
+    // (80 - LifeTime) x 7 cm: the lava's LifeTime is 80 on tick 17 and 79 on 18; each flame climbs 6.4-8.7 cm a move.
+    expect((second.args[3] as number) - (first.args[3] as number)).toBeCloseTo(0.07);
+    // firehik02 64 px x (0.72 + 0.36) x (1.8 + 0.2), less 0.07 on its first move; Alpha 0.3 on its first move.
+    expect([first.args[5], first.args[8]]).toEqual([expect.closeTo(0.64 * (1.08 * 2 - 0.07)), expect.closeTo(0.3)]);
+    // The round flames take half the Light.
+    expect(born(TEX.fireHik1, 17)[0].args[8]).toBeCloseTo(0.15);
+    // A spark: Spark02 4 px x (1.5 + 0.6), from 250 cm above sea level.
+    const [spark] = born(TEX.spark2, 17);
+    expect(spark.args[5]).toBeCloseTo(0.04 * 2.1);
+    expect(spark.args[3]).toBeGreaterThan(2.5);
   });
 });
 

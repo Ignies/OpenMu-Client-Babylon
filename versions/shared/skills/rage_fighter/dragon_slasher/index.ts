@@ -4,8 +4,8 @@ import { Vector3 } from '@/controllers/render/babylon/exports';
 import { bonePos, entityGone, entityPos, entityYaw, fxNow, type RGB } from '@/controllers/fx/core';
 import type { TailStrip, TickedFx } from '@/controllers/fx/ticked';
 import type { Entity } from '@/ecs/world';
-import { DEG, deg, eachClipTick, groundY, multiShotVolleyAt, randInt } from '../../_shared';
-import { angleToward, clipSpeed, eachMove } from '../_shared';
+import { DEG, deg, eachClipTick, multiShotVolleyAt, randInt } from '../../_shared';
+import { angleToward, clipSpeed, eachMove, fallSpark } from '../_shared';
 import { cm, type SkillContext, type Step } from '@/controllers/skills/visuals';
 import { playCombat } from '@/controllers/sound';
 
@@ -219,21 +219,11 @@ function moveMote(m: Mote, fx: TickedFx): boolean {
       m.scale -= 0.5;
       if (m.scale < 0.2) return false;
       break;
-    // Falls by a Gravity that loses 2 a move, bounces off the ground at 0.6 for 4 of its LifeTime, white at LifeTime / 16 (:6558-6608).
+    // Falls and bounces, white at LifeTime / 16 (fallSpark).
     default: {
-      if (--m.life <= 0) return false;
-      const lum = Math.min(1, m.life / 16);
-      m.y += cm(m.gravity);
-      m.gravity -= 2;
-      const ground = groundY(m.x, m.z);
-      if (m.y < ground) {
-        m.y = ground;
-        m.gravity = -m.gravity * 0.6;
-        m.life -= 4;
-      }
-      m.x += m.vx;
-      m.z += m.vz;
-      fx.sprite(TEX.spark3, RGBS.white, m.x, m.y, m.z, cm(32 * m.scale), cm(32 * m.scale), 0, lum);
+      const light = fallSpark(m);
+      if (light < 0) return false;
+      fx.sprite(TEX.spark3, RGBS.white, m.x, m.y, m.z, cm(32 * m.scale), cm(32 * m.scale), 0, Math.min(1, light));
       return true;
     }
   }

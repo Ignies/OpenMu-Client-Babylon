@@ -16,7 +16,7 @@ folders: [../readme.md](../readme.md).
 | `beast_uppercut` | 261, 552 str, 555 mastery | two blows on the dummies' keys, a rising gold burst each (the model is not converted); the hero's waits for STAMP key 2 |
 | `chain_drive` | 262, 558 str | a BITMAP_SWORDEFF joint each tick of GIANTSWING, riding bone 5 for 10 moves; past keys 6 and 11 a blow on the target, the first with MODEL_SHOCKWAVE01 (drawn twice) leaving bone 0 and backing off at 220 + Scale x 80 cm above sea level and BITMAP_DAMAGE1's four sparks, the second with MODEL_SHOCKWAVE02 (drawn twice) backing off, two MODEL_SHOCKWAVE_SPIN01 in Damage1 rolling, from bone 4, and BITMAP_SHINY+4's rings for 16 ticks; with each a dim MODEL_WOLF_HEAD_EFFECT2, the first riding bone 4 and throwing two smaller heads a tick, the second riding bone 27 |
 | `dark_side` | 263, 559 str | the wind pillar at the caster and the two it raises on ticks 11 and 21; per blow, damage bursts on ticks 20-21 and a dark shock wave on 30-31 (the afterimage's frame, a tick per rendered frame) |
-| `dragon_roar` | 264, 560 str | a dragon head on tick 21; a fire shock ring and scattered fire hits past DRAGONLORE key 5 |
+| `dragon_roar` | 264, 560 str | a dragon head on tick 21; past DRAGONLORE key 5 the lava's MODEL_SHOCKWAVE01 sub1 (Damage2) on the caster and MODEL_SHOCKWAVE_GROUND01 sub1 (Kwave2) where it lies, and each tick a fire column, one flame climbing 7 cm a tick with four flames and four falling sparks round it (the lava joints of keys 2-8 are not ported) |
 | `dragon_slasher` | 265 | the multi-shot volley turned to the target and Rage_Dragonkick (neither without one); between DRAGONKICK keys 4 and 5 the ground wind, joints that leave bone 1 and ride the meshless dummy's bone 2 as it swings round; each tick past key 5, twice over the target, four energy, lightning and spark cards and two bouncing sparks |
 | `ignore_defense` | 266 | at the caster, all blue: the sword flash, three ground shock rings and spinning clouds, the wind pillar and a widening magic circle; the Ourforces bone glow as a buff look |
 | `increase_health` | 267, 573 str | the same in violet; the Ourforces bone glow |
@@ -51,7 +51,9 @@ pillar on its 11th and 21st tick. `swordFlash`, BITMAP_SWORD_EFFECT_MONO (266-26
 the caster stood, two in three ticks, each growing x1.2 a tick to 6 and shrinking back; on its second tick a
 MODEL_SHOCKWAVE01 that grows x1.24 a tick and climbs x1.19 of its height above sea level, so it rises off high ground.
 `eventCloud` (BITMAP_EVENT_CLOUD) and `magicGround13` (BITMAP_MAGIC sub13) are ground decals that grow by a factor a
-tick (the `ring` entry's `scaleAt`), the shock rings (MODEL_SHOCKWAVE_GROUND01) models that do the same. `ourforcesCast` is the whole RageCreateEffect of a party buff, given its Lights. The wolf heads
+tick (the `ring` entry's `scaleAt`), the shock rings (MODEL_SHOCKWAVE_GROUND01, `shockGround`: sub0 for the buffs, sub1 for
+Dragon Roar) models that do the same. `ourforcesCast` is the whole RageCreateEffect of a party buff, given its Lights.
+`fallSpark` moves a BITMAP_SPARK a tick (Dragon Slasher's and Dragon Roar's): it climbs, falls and bounces. The wolf heads
 (`wolfHead`, `throwHead`, `shake`) ride a bone of the caster and throw copies along its angle, shaken; their scripts
 count moves on the effects clock (`eachMove`, `movesSince`), so a script made inside the clock's step does not run a tick early.
 
