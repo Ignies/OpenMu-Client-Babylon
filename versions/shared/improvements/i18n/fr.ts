@@ -26,7 +26,7 @@ export default {
     'Les torches murales de l\'écran de connexion brûlent et éclairent le sol. Classique : seulement leur halo, comme dans l\'original.',
   'fidelity.fortressLights': 'Lumières de la Forteresse impériale',
   'fidelity.fortressLights.hint':
-    'Les torches et lustres de la Forteresse impériale éclairent le sol autour d\'eux. Classique : aucune lumière, comme dans l\'original.',
+    'Les torches, lustres et braseros de la Forteresse impériale éclairent le sol autour d\'eux. Classique : aucune lumière, comme dans l\'original.',
   'fidelity.roofFade': 'Toits transparents',
   'fidelity.roofFade.hint':
     'Les toits s\'effacent quand vous êtes dessous, pour voir l\'intérieur. Classique : les toits restent toujours affichés.',

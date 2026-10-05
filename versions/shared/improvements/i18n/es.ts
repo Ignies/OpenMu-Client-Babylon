@@ -26,7 +26,7 @@ export default {
     'Las antorchas de la pantalla de inicio de sesión arden con fuego e iluminan el suelo. Clásica: solo su destello, como en el original.',
   'fidelity.fortressLights': 'Luces de la Fortaleza Imperial',
   'fidelity.fortressLights.hint':
-    'Las antorchas y candelabros de la Fortaleza Imperial iluminan el suelo a su alrededor. Clásica: sin luz, como en el original.',
+    'Las antorchas, candelabros y braseros de la Fortaleza Imperial iluminan el suelo a su alrededor. Clásica: sin luz, como en el original.',
   'fidelity.roofFade': 'Techos transparentes',
   'fidelity.roofFade.hint':
     'Los techos se desvanecen cuando estás debajo, para que veas el interior. Clásica: los techos siempre se ven.',

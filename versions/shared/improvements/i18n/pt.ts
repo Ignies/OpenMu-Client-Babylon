@@ -26,7 +26,7 @@ export default {
     'As tochas de parede da tela de login queimam com fogo e iluminam o chão. Clássica: só o brilho delas, como no original.',
   'fidelity.fortressLights': 'Luzes da Fortaleza Imperial',
   'fidelity.fortressLights.hint':
-    'As tochas e lustres da Fortaleza Imperial iluminam o chão ao redor. Clássica: sem luz, como no original.',
+    'As tochas, lustres e braseiros da Fortaleza Imperial iluminam o chão ao redor. Clássica: sem luz, como no original.',
   'fidelity.roofFade': 'Telhados transparentes',
   'fidelity.roofFade.hint':
     'Os telhados somem enquanto você está embaixo deles, para ver o interior. Clássica: os telhados sempre aparecem.',

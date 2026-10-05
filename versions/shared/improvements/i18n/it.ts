@@ -26,7 +26,7 @@ export default {
     'Le torce a muro della schermata di accesso bruciano e illuminano il pavimento. Classica: solo il loro bagliore, come nell\'originale.',
   'fidelity.fortressLights': 'Luci della Fortezza Imperiale',
   'fidelity.fortressLights.hint':
-    'Torce e lampadari della Fortezza Imperiale illuminano il pavimento intorno. Classica: nessuna luce, come nell\'originale.',
+    'Torce, lampadari e bracieri della Fortezza Imperiale illuminano il pavimento intorno. Classica: nessuna luce, come nell\'originale.',
   'fidelity.roofFade': 'Tetti trasparenti',
   'fidelity.roofFade.hint':
     'I tetti svaniscono mentre ci sei sotto, così vedi l\'interno. Classica: i tetti restano sempre visibili.',

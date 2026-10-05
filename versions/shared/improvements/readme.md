@@ -45,7 +45,8 @@ asks `isOn('<id>')`. Classic turns them all off and runs the original.
 ## Tests
 - `improvements.test.ts`: each file registers an id named after it, has its English text, is read
   by an `isOn('<id>')` somewhere and every such read names a registered id; Enhanced keeps them all
-  on, Classic turns them off; `cancelledEffects` on Classic and Enhanced.
+  on, Classic turns them off; `cancelledEffects` on Classic and Enhanced; the `fortressLights` hint
+  names the braziers it switches in every language.
 - `maps/loginscene/create.test.ts`: the chandeliers stay cold on Classic.
 - `maps/loginscene/wallTorchObject.test.ts`, `maps/empireguardian4/spec.test.ts`,
   `ecs/systems/ceilingHideSystem.test.ts`: the torch is its grey flare, the fortress lights are off and
