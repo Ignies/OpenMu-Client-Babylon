@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { defineModule, installModules, moduleOn, refusedModules, setServerModulesOff } from './module';
+import type { InProcessApi } from './_api/host';
 
 function recorder() {
   const installed: string[] = [];
@@ -25,6 +26,14 @@ describe('installModules', () => {
     const { installed, mod } = recorder();
     installModules([mod('guild'), mod('guild_war', { requires: ['guild'] })], id => id !== 'guild');
     expect(installed).toEqual([]);
+  });
+
+  it('hands each install its module\'s API when the app gives one', () => {
+    const got: [string, unknown][] = [];
+    const apiFor = (id: string) => ({ id }) as unknown as InProcessApi;
+    const mod = (id: string) => defineModule({ id, install: api => got.push([id, api]) });
+    installModules([mod('api_a'), mod('api_b')], undefined, apiFor);
+    expect(got).toEqual([['api_a', { id: 'api_a' }], ['api_b', { id: 'api_b' }]]);
   });
 });
 

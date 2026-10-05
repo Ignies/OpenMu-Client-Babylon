@@ -1,5 +1,6 @@
 import { observable, runInAction } from 'mobx';
 import { MODULE_API_VERSION, canServe } from './_api/contract';
+import type { InProcessApi } from './_api/host';
 
 /** One gameplay module (`src/modules/<id>/module.ts`). See readme.md. */
 export type ModuleDef = {
@@ -11,8 +12,11 @@ export type ModuleDef = {
   requires?: readonly string[];
   /** The module API range it needs (`^1.0`, `_api/contract.ts`). Built-in modules declare none. */
   api?: string;
-  /** Registers its packet listeners and anything else it hooks into. Runs once. */
-  install(): void;
+  /**
+   * Registers its packet listeners and anything else it hooks into. Runs once. Gets the module API
+   * when the app hands `installModules` one (`_api/`); built-in modules ignore it.
+   */
+  install(api?: InProcessApi): void;
 };
 
 export function defineModule(def: ModuleDef): ModuleDef {
@@ -38,9 +42,14 @@ function refusal(m: ModuleDef): string | undefined {
  * Installs `modules` in list order (that order is the listener order for a packet several modules
  * handle). A module is on when it is core or `enabled(id)` says so, and every module it requires is on.
  * A module whose API range this client cannot serve is refused, with every module that requires it:
- * nothing of it installs, and `refusedModules()` says why. Returns the ids that were installed.
+ * nothing of it installs, and `refusedModules()` says why. `apiFor(id)` is the module API each install
+ * gets (`_api/ports.ts`). Returns the ids that were installed.
  */
-export function installModules(modules: readonly ModuleDef[], enabled: (id: string) => boolean = () => true): string[] {
+export function installModules(
+  modules: readonly ModuleDef[],
+  enabled: (id: string) => boolean = () => true,
+  apiFor?: (id: string) => InProcessApi
+): string[] {
   const on = new Set<string>();
   for (const m of modules) {
     const why = refusal(m);
@@ -57,7 +66,7 @@ export function installModules(modules: readonly ModuleDef[], enabled: (id: stri
     defs.set(m.id, m);
     if (!on.has(m.id)) continue;
     installed.add(m.id);
-    m.install();
+    m.install(apiFor?.(m.id));
   }
   return [...on];
 }
