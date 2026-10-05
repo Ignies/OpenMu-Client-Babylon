@@ -37,8 +37,9 @@ the Rage Fighter's Dark Side blows. This folder has only the handlers; it keeps 
 - `ObjectGotKilled`: stops the object, zeroes its health, marks it dying.
 - `ObjectHit`, `ObjectHitExtended`: damage, sound, health bar, flinch, damage numbers.
 - `RageAttackRangeResponse`: the Dark Side targets, handed to `combat.observeDarkSideTargets`; an empty
-  slot is DS_TARGET_NONE (10000), no target. Naming none, the hero sends the skill at himself (0x19,
-  SendRequestMagic(skill, HeroKey), MonkSystem.cpp:551-553).
+  slot is DS_TARGET_NONE (10000, OpenMU's UndefinedTargetId in ShowRageAttackRangePlugIn), no target.
+  Naming none, the hero sends the skill at himself (0x19, SendRequestMagic(skill, HeroKey),
+  MonkSystem.cpp:551-553).
 - `RageAttack` (C3 4A): one Dark Side blow, drawn like a targeted skill. The echo of the hero's own
   cast starts his follow-up blows (`combat.observeDarkSideEcho`; `AttackTime = 1`, WSclient.cpp:13422-13429)
   and, as SetRageSkillAni does, puts him back in the Dark Side clip if he has left it (`resumeHeroCastClip`;

@@ -575,10 +575,13 @@ export const SkillCastSystem: ISystemFactory = world => {
       if (castsOnSelfOnly(def)) target = hero;
       else if (!area && !target && isSelfCastable(def)) target = hero;
 
+      // Dark Side goes out with nothing selected too, where the hero stands and with no turn
+      // (SkillCast.cpp:881-895, :1047-1049; CheckTarget needs only the cursor on the ground).
+      const here = inPlace || (!target && combat.isDarkSide(def.num) && !!req.point);
       const heroPos = hero.transform.pos;
       let tx: number | undefined;
       let ty: number | undefined;
-      if (inPlace) {
+      if (here) {
         tx = heroPos.x;
         ty = heroPos.z;
       } else if (target) {
@@ -649,7 +652,7 @@ export const SkillCastSystem: ISystemFactory = world => {
         hero.modelObject &&
         !hero.modelObject.ActionIterationWasFinished &&
         combat.clipHoldsFacing(hero.modelObject.CurrentAction);
-      if (!inPlace && target !== hero && dist > 0.01 && !heldClip) {
+      if (!here && target !== hero && dist > 0.01 && !heldClip) {
         hero.transform.rot.y = Math.atan2(dz, dx) + Math.PI / 2;
       }
       // The stop is a packet, not just a dropped path. The server is still
@@ -668,21 +671,21 @@ export const SkillCastSystem: ISystemFactory = world => {
       skills.startCooldown(def.num);
 
       if (!Session.isOffline) {
-        if (!area && !target) {
-          // Forced cast with nothing near the cursor: the clip whiffs
-          // toward the ground point and nothing goes on the wire. The hero
-          // key must not stand in here - a targeted packet naming the
-          // caster lands the skill on the character, not at the cursor.
-        } else if (combat.isDarkSide(def.num)) {
-          // Dark Side: 0x4B asks the server for the targets, 0x4A lands the
-          // first blow (ZzzInterface.cpp:2841-2842).
-          const targetId = target?.netId ?? Hero.playerId ?? 0;
+        if (combat.isDarkSide(def.num)) {
+          // Dark Side: 0x4B asks the server for the targets, 0x4A lands the first blow; with nothing
+          // selected the key is 0 and the server picks them (SkillCast.cpp:881-895; OpenMU RageSkillAttackAction).
+          const targetId = target?.netId ?? 0;
           const range = RageAttackRangeRequestPacket.createPacket();
           range.SkillId = def.num;
           range.TargetId = targetId;
           Session.sendToGS(range.buffer);
           sendRageAttack(def.num, targetId);
           combat.beginDarkSide(def.num, targetId);
+        } else if (!area && !target) {
+          // Forced cast with nothing near the cursor: the clip whiffs
+          // toward the ground point and nothing goes on the wire. The hero
+          // key must not stand in here - a targeted packet naming the
+          // caster lands the skill on the character, not at the cursor.
         } else if (area) {
           const packet = AreaSkillPacket.createPacket();
           packet.SkillId = def.num;

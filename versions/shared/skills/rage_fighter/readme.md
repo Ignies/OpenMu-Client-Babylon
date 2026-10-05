@@ -30,9 +30,10 @@ leaves the clip (`eachClipTick`, `whenClipKey(..., 'drop')` in `../_shared.ts`).
 the packet; an effect it creates first moves on tick 1.
 
 Dark Side (263 and its Strengthener 559, SkillCast.cpp:881-896) is the one skill on its own wire: the
-cast sends 0x4B and 0x4A, the server answers with up to five targets and echoes the 0x4A, and the
-client lands a blow on each target as the clip's follow-ups come round (`rage.ts`): Rage_Darkside_Att
-when the targets arrive, the first blow `(int)(2.5 / PlaySpeed)` ticks after the echo (8 at base
+cast sends 0x4B and 0x4A (target key 0 with nothing selected: it is cast anyway where the hero stands,
+with no turn, SkillCast.cpp:1047-1049, and OpenMU's RageSkillAttackAction picks the five nearest monsters
+in range), the server answers with up to five targets and echoes the 0x4A, and the client lands a blow
+on each target as the clip's follow-ups come round (`rage.ts`): Rage_Darkside_Att when the targets arrive, the first blow `(int)(2.5 / PlaySpeed)` ticks after the echo (8 at base
 speed; the echo sets `AttackTime = 1`, WSclient.cpp:13422-13429), the next ones a tick sooner. They
 come only while the hero plays the Dark Side clip (SkillCast.cpp:1117), and none once AttackTime has
 reached 15 and stopped (ZzzCharacter.cpp:4139-4141): targets that come 15 ticks after the echo get no

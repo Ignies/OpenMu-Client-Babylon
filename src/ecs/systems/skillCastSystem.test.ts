@@ -28,6 +28,8 @@ const { combat } = await import('../../controllers/combat');
 const { effects } = await import('../../controllers/fx');
 const { TEX } = await import('../../controllers/fx/recipes');
 const { Session } = await import('../../modules/session');
+const { HeroSkills, skills } = await import('../../modules/skills');
+const { RageAttackRangeRequestPacket, RageAttackRequestPacket } = await import('@versions/shared/packets/ClientToServerPackets');
 
 const TICK = 1 / 25;
 
@@ -94,5 +96,55 @@ describe('Dark Side follow-up blows', () => {
       [34, 107],
       [35, 107],
     ]);
+  });
+});
+
+describe('Dark Side with nothing selected', () => {
+  it('casts where the hero stands with target key 0 on the 0x4B and the 0x4A: the server picks the targets (SkillCast.cpp:881-895, :1047-1049)', () => {
+    // Off the tile's corner, so a turn toward his own tile would show.
+    const hero = {
+      ...body(1, 100.4, 100.6),
+      localPlayer: true,
+      pathfinding: { path: null },
+      playerAnimation: { action: PlayerAction.PLAYER_STOP_MALE },
+      modelObject: {
+        CurrentAction: PlayerAction.PLAYER_STOP_MALE,
+        AnimationSpeed: 0.3,
+        ActionIterationWasFinished: true,
+        actionPlaySpeed: () => undefined,
+        restartAction: () => {},
+        getActionDuration: () => 1,
+      },
+    } as unknown as Entity;
+    const world = {
+      scene,
+      mapIndex: 0,
+      playerEntity: hero,
+      castRequest: { target: null, point: { x: 108, y: 104 }, forced: false },
+      rightPointerPressed: false,
+      getByNetId: () => undefined,
+    } as unknown as World;
+    store.world = world;
+    HeroSkills.currentSkill = 263;
+    vi.spyOn(skills, 'canUse').mockReturnValue(true);
+    vi.spyOn(skills, 'startCooldown').mockReturnValue(true);
+    const sent: [number, number, number][] = [];
+    vi.spyOn(Session, 'sendToGS').mockImplementation(((b: DataView) => {
+      const p = b.getUint8(2) === RageAttackRangeRequestPacket.Code ? new RageAttackRangeRequestPacket(b) : new RageAttackRequestPacket(b);
+      sent.push([b.getUint8(2), p.SkillId, p.TargetId]);
+    }) as never);
+
+    SkillCastSystem(world).update?.(TICK);
+    combat.reset();
+    HeroSkills.currentSkill = -1;
+
+    expect(sent).toEqual([
+      [RageAttackRangeRequestPacket.Code, 263, 0],
+      [RageAttackRequestPacket.Code, 263, 0],
+    ]);
+    expect(hero.playerAnimation?.action).toBe(PlayerAction.PLAYER_SKILL_DARKSIDE_READY);
+    // No walk to the cursor and no turn: the Dark Side case sets no Angle (SkillCast.cpp:881-895).
+    expect(world.castApproach).toBeNull();
+    expect(hero.transform?.rot.y).toBe(0);
   });
 });
