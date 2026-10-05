@@ -49,6 +49,21 @@ const { createEffectLight, createMovableFlare } = await import('./effectLights')
 const at = { x: 0, y: 0, z: 0 };
 const lastSprite = () => sprites[sprites.length - 1];
 
+/** A scene whose frames the test steps, `ms` at a time. */
+function clockedScene() {
+  const frames: (() => void)[] = [];
+  let delta = 0;
+  const scene = {
+    onBeforeRenderObservable: { add: (frame: () => void) => (frames.push(frame), frame), remove() {} },
+    getEngine: () => ({ getDeltaTime: () => delta }),
+  } as unknown as Scene;
+  const step = (ms: number) => {
+    delta = ms;
+    for (const frame of frames) frame();
+  };
+  return { scene, step };
+}
+
 /** A JPEG's width, from its SOF0/SOF2 marker. */
 function jpegWidth(bytes: Uint8Array): number {
   for (let i = 2; i < bytes.length; ) {
@@ -87,6 +102,18 @@ describe('flare cards', () => {
     expect(lastSprite().width).toBeCloseTo(1.28);
     await createEffectLight(scene, { scale: 4, color: [1, 1, 1], texture: 'spark1' }, at, 2.25);
     expect(lastSprite().width).toBeCloseTo(2.88);
+  });
+
+  // Kanturu's lamp is `Luminosity * 7` across, `Luminosity = sinf(WorldTime * 0.002f) + 1.8f` (GM_Kanturu_1st.cpp:179).
+  it('grow and shrink a card by its size wave', async () => {
+    const { scene, step } = clockedScene();
+    const grow = { speed: 0.002, amount: 1, base: 0.8 };
+    await createEffectLight(scene, { scale: 7, color: [0.8, 0.4, 0.2], texture: 'spark1', unscaled: true, grow }, at, 1);
+    const card = lastSprite();
+    step(Math.PI / 2 / 0.002);
+    expect(card.width).toBeCloseTo(0.32 * 7 * 2.8);
+    step(Math.PI / 0.002);
+    expect([card.width, card.height]).toEqual([0.32 * 7 * 0.8, 0.32 * 7 * 0.8].map(v => expect.closeTo(v)));
   });
 
   it.skipIf(!existsSync('Data/Effect'))('cut each sheet at the width of its file', async () => {

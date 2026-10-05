@@ -44,11 +44,19 @@ const OZJ_HEADER_SIZE = 24;
 
 const MAX_SPRITES_PER_MANAGER = 512;
 
+/** `(sin(ms * speed) + 1) * amount + base`, the original's `sinf(WorldTime * k)` shapes. */
+type Wave = { speed: number; amount: number; base: number };
+
+const wave = (w: Wave, ms: number) => (Math.sin(ms * w.speed) + 1) * w.amount + w.base;
+
 /** A card as a map's light table names it (`LightEmitter.sprite`). */
 export type FlareSpec = {
   readonly scale: number;
   readonly color: readonly [number, number, number];
-  readonly pulse?: { speed: number; amount: number; base: number };
+  /** Its brightness over time. */
+  readonly pulse?: Wave;
+  /** Its size over time: `CreateSprite(..., Luminosity * 7.0f, ...)`. */
+  readonly grow?: Wave;
   /** The sheet the original names; `BITMAP_LIGHT` when left out. */
   readonly texture?: FlareTexture;
   /** The original sizes it without `* o->Scale` (`CreateSprite(..., 5.5f, ...)`): the object's scale does not apply. */
@@ -245,15 +253,16 @@ export async function createEffectLight(
   let observer: ReturnType<Scene['onBeforeRenderObservable']['add']> | null =
     null;
 
-  if (spec.pulse) {
-    const { speed, amount, base } = spec.pulse;
+  const { pulse, grow } = spec;
 
+  if (pulse || grow) {
     let elapsed = 0;
 
     observer = scene.onBeforeRenderObservable.add(() => {
       elapsed += scene.getEngine().getDeltaTime();
 
-      paint.setLuminosity((Math.sin(elapsed * speed) + 1) * amount + base);
+      if (pulse) paint.setLuminosity(wave(pulse, elapsed));
+      if (grow) sprite.width = sprite.height = size * wave(grow, elapsed);
     });
   }
 

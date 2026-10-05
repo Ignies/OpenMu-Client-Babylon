@@ -8,11 +8,11 @@ const flareOf = (world: ENUM_WORLD, type: number) => lightEmittersFor(world, typ
 /** Every card a map object draws. */
 const cardsOf = (world: ENUM_WORLD, type: number) => lightEmittersFor(world, type)?.filter(e => e.sprite) ?? [];
 
-describe('the Aida plant sparks', () => {
-  // Bones 6, 7, 8, 12, 13, 17 (their sway's middle, at scale 1): a big tinted spark and a 3.0 one at each.
+describe('the BITMAP_SPARK + 1 cards (Spark03.jpg)', () => {
+  // Aida's bulbs, bones 6, 7, 8, 12, 13, 17 (their sway's middle, at scale 1): a big tinted spark and a 3.0 one at each.
   const BONES = [[32, 2, 54], [32, 1, 41], [32, 0, 26], [-24, 9, 46], [-23, 5, 31], [-10, -22, 59]];
 
-  it('30: twelve BITMAP_SPARK + 1 cards, blue over grey, sized without the object scale (GMAida.cpp:106-150)', () => {
+  it('Aida 30: twelve on the plant bulbs, blue over grey, sized without the object scale (GMAida.cpp:106-150)', () => {
     const cards = cardsOf(ENUM_WORLD.WD_33AIDA, 30);
     expect(cards.map(e => e.offset)).toEqual(BONES.flatMap(b => [b, b]));
     expect(cards.map(e => e.sprite?.scale)).toEqual([5.5, 3, 4.5, 3, 4, 3, 4.5, 3, 4, 3, 4, 3]);
@@ -20,7 +20,7 @@ describe('the Aida plant sparks', () => {
     expect(cards.every(e => e.bone && e.sprite?.texture === 'spark1' && e.sprite.unscaled)).toBe(true);
   });
 
-  it('71: the same rig on the red crystals (GMAida.cpp:259-303)', () => {
+  it('Aida 71: the same rig on the red crystals (GMAida.cpp:259-303)', () => {
     const cards = cardsOf(ENUM_WORLD.WD_33AIDA, 71);
     expect(cards.map(e => e.offset)).toEqual(BONES.flatMap(b => [b, b]));
     expect(cards.map(e => e.sprite?.scale)).toEqual([6, 3, 5.5, 3, 5, 3, 5.5, 3, 5, 3, 5, 3]);
@@ -28,6 +28,17 @@ describe('the Aida plant sparks', () => {
       ['0.5 0 0', ...Array(5).fill('0.25 0 0')].flatMap(big => [big, '0.15 0 0'])
     );
     expect(cards.every(e => e.bone && e.sprite?.texture === 'spark1' && e.sprite.unscaled)).toBe(true);
+  });
+
+  // `Luminosity = sinf(WorldTime * 0.002f) + 1.8f` sizes both; Doppelganger 4 and the GM area read this table.
+  it('Kanturu 70: two on bone 6 that grow and shrink (GM_Kanturu_1st.cpp:175-186)', () => {
+    const grow = { speed: 0.002, amount: 1, base: 0.8 };
+    const card = (scale: number, color: number[]) => ({
+      offset: [0, -1, 200],
+      bone: true,
+      sprite: { scale, color, grow, texture: 'spark1', unscaled: true },
+    });
+    expect(cardsOf(ENUM_WORLD.WD_37KANTURU_1ST, 70)).toEqual([card(7, [0.8, 0.4, 0.2]), card(4, [0.65, 0.65, 0.65])]);
   });
 });
 

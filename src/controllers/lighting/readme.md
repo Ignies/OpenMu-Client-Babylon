@@ -29,8 +29,8 @@ policy. It knows how to light something, never which skill or item asks for it.
   the bitmap the original names: `'light'` (BITMAP_LIGHT, flare01.jpg, a soft white glow,
   ZzzOpenData.cpp:5207) unless a spec names another (`'flare'` BITMAP_FLARE, Flare.jpg, a warm star,
   :5309; `'spark1'` BITMAP_SPARK + 1, Spark03.jpg, :5216). A card is its sheet's own width times its
-  scale (zzzeffectsprite.cpp:76), times the object's scale unless the spec is `unscaled`. One sprite
-  manager per sheet and scene.
+  scale (zzzeffectsprite.cpp:76), times the object's scale unless the spec is `unscaled`; `pulse`
+  waves its brightness and `grow` its size. One sprite manager per sheet and scene.
 - `items.ts`: `lightItem`, `itemSelfLight`. `sky.ts`: `strikeThunder`.
 - `lightingQuality.ts`: the tiers (`lightingTier()`, `tierIndex()`: Classic, Enhanced, Ultra),
   `pointLightBudget`, MSAA and CSM state.
@@ -103,7 +103,7 @@ policy. It knows how to light something, never which skill or item asks for it.
 - `characters.test.ts`: a steady carried glow (Poison Shadow), one that breathes, and the Scorpion's per-frame flicker.
 - `effectLights.test.ts`: a card is drawn from the sheet its spec names, one manager per sheet, at
   the sheet's own width (checked against the file in `Data/Effect`); an `unscaled` card keeps its size
-  on a scaled object.
+  on a scaled object; a `grow` card grows and shrinks.
 - `mapObjectLightAdapter.test.ts`: a `bone` offset grows with the object, a plain one does not.
 - `versions/shared/maps/mapRows.golden.test.ts`: every world's look, room looks, thunder and
   map-object lights, pinned across the move into the map folders.
