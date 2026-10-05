@@ -878,6 +878,20 @@ describe('Dark Side (263)', () => {
     }
   });
 
+  it('the ground decals at the caster: BITMAP_EVENT_CLOUD sub1 (1, 0.6, 0.6) growing to 5 and BITMAP_MAGIC sub14 (1, 0.4, 0) drawn twice (MonkSystem.cpp:1289-1294, MoveHandlers.cpp:9497-9506, :1436-1447)', () => {
+    for (const skill of [263, 559]) {
+      const rings = run(skill, READY, { keysPerTick: 0.3 }).spawns.filter(s => s.name === 'ring');
+      expect(rings.map(s => [s.tick, s.opts.texture, s.opts.colour, Math.round((s.opts.seconds as number) * 25)])).toEqual([
+        [0, TEX.eventCloud, [1, 0.6, 0.6], 30],
+        [0, TEX.magicGround, [1, 0.4, 0], 22],
+        [0, TEX.magicGround, [1, 0.4, 0], 22],
+      ]);
+      // Sub1 grows x1.08 a move up to 5, not 3.
+      const cloud = rings[0].opts as { scaleAt: (t: number) => number };
+      expect([15, 20, 21, 29].map(n => cloud.scaleAt(n / 25))).toEqual([1.08 ** 15, 1.08 ** 20, 5, 5]);
+    }
+  });
+
   it('Rage_Darkside_Att when the server names targets (MonkSystem.cpp:551-558)', () => {
     played.length = 0;
     beginDarkSide(263, 5);
