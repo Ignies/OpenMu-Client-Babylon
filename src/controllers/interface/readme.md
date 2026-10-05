@@ -14,8 +14,9 @@ windows themselves are content in `versions/shared/ui/` (see
 - `windows.ts`: `defineWindow({ id, slot, order, component, module? })` (`module`: the optional
   gameplay module the window belongs to; the world page hides it while that module is off),
   `registerWindows(defs)` (a later
-  def with the same id replaces the earlier one), `windowsIn(slot)` (stacking order). Slots:
-  `world` (on the 3D view, stays up when the interface is hidden) and `hud`.
+  def with the same id replaces the earlier one), `unregisterWindow(id)` (a module's window when the
+  module goes), `windowsIn(slot)` (stacking order; observable, so the world page redraws when a
+  window comes or goes). Slots: `world` (on the 3D view, stays up when the interface is hidden) and `hud`.
 - `windowManager.ts`: `MuWindows`: open state (`isOpen(id)`, `setOpen(id, open)`), placement,
   scale and z-order, Escape closes the top window.
 - `components/`: shared widgets. Frames and text: `mu_window` (item window, table frame),
@@ -23,7 +24,9 @@ windows themselves are content in `versions/shared/ui/` (see
   `mu_button`, `mu_sprite`, `mu_logo`, `mu_flag`. Items: `item_icon`, `item_search` (the grid, the
   tooltip, the carried item and the chat item link read the inventory, hero, pets and merchant, so
   they live in `versions/shared/ui/components/`). Text: `mu_text`
-  also holds `TEXT_COLOR`, the pre-game and dialog colours. Other: `msg_window`, `game_cursor`
+  also holds `TEXT_COLOR`, the pre-game and dialog colours. `module_window`: the frame a module's
+  window draws in (`ModuleWindowFrame`: item window, title, its hot key unless a built-in action
+  has that key; `src/modules/_api`). Other: `msg_window`, `game_cursor`
   (`setRepairCursor(read)`: the app hands it the merchant's repair mode), `world_label`,
   `ui_stage` (the 640x480 stage scale).
 - `keyBindings.ts`: `KeyBindings`, `keyFor`, `isKey`, `actionOfKey`, `setKeyBinding`,
@@ -104,4 +107,7 @@ windows themselves are content in `versions/shared/ui/` (see
 - `nameTags.test.ts`: hero state messages, self-defence parsing, PK colours, outlaw body light.
 - `screenPositionBus.test.ts`: the frame-end listener runs once per pass.
 - `windowManager.test.ts`: open state reacts, including the first open of an unseen id.
+- `windows.test.ts`: a window dropped from the registry, and a slot reader that sees it come and go.
+- `components/module_window/index.test.tsx`: the module frame draws only while open; its hot key
+  never takes a built-in action's key.
 - `components/item_tooltip/placement.test.ts`: tooltip and compare-pair placement.
