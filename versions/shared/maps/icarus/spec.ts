@@ -47,8 +47,9 @@ export const ICARUS_BLEND_MESHES: Readonly<Record<number, number>> = {};
 export const ICARUS_EFFECT_ONLY_TYPES: readonly number[] = [0, 1, 2, 3, 4, 5];
 
 /**
- * Also empty, and also not an omission - the clouds are the map's only
- * particle work, and they cannot be expressed as an `Emission`.
+ * Also empty, and also not an omission - besides type 10's light stream (in
+ * `ICARUS_LIGHTS`), the clouds are the map's only particle work, and they
+ * cannot be expressed as an `Emission`.
  *
  * `ParticleEmitter` re-spawns a `KindName` at a fixed cadence and each particle
  * then lives out a canned life. The Icarus clouds are the opposite shape: a
@@ -75,34 +76,29 @@ export const ICARUS_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {}
  *   Light = (1,1,1);
  *   CreateParticleFpsChecked(BITMAP_LIGHT, Position, o->Angle, Light, 0, 1.f);
  *
- * A re-created-every-frame particle at a fixed point on a static object is a
- * static flare, so this is one sprite, not an emission - the same reduction
- * `effectLights.ts` already makes for Lorencia's street lamp.
+ * SubType 0 is a particle that lives 10-19 ticks, rising and drifting on the
+ * wind as it shrinks (`light0`), so the orb streams a column of light. It is
+ * sized `1.f`, not by the pillar: the emission's scale undoes the object's.
  *
  * The offset is bone 3's own rest translation out of `Object11.glb`
  * (`bone_3_Bone01` at -1.399, -0.000, 5.006 in the BMD's z-up bone frame,
  * metres), rounded to MU units - the two `Sphere01`/`Sphere02` bones sit at
- * (-1.403, 0.004, 4.969) and (-1.400, 0.005, 4.976), i.e. the orb the flare is
- * meant to be inside. `resolveEmitterPosition` rotates it by the object's yaw,
+ * (-1.403, 0.004, 4.969) and (-1.400, 0.005, 4.976), i.e. the orb the stream is
+ * meant to rise from. `resolveEmitterPosition` rotates it by the object's yaw,
  * so the 1.4 MU-metre lateral kick follows the pillar around, and scales it
  * with the pillar (`bone`), as the bone transform does.
  *
  * No `terrain` block: the original does not call `AddTerrainLight` here, so
  * there is no terrain pool and no point light either - 180 of these stand on
  * the map (EncTerrain11.obj), and giving each a real light would swamp the
- * point-light pool for a glow that is a billboard in the original.
+ * point-light pool for a glow that is particles in the original.
  */
 export const ICARUS_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
   10: [
     {
       offset: [-140, 0, 500],
       bone: true,
-      // `Light = (1,1,1)`, ZzzObject.cpp:3128. BITMAP_LIGHT's own base size is
-      // not recoverable from the call (it passes Scale 1.f and the particle
-      // supplies the rest), so the flare is sized to the orb it sits in
-      // rather than guessed: 64 px × 2.5 ÷ 100 ≈ 1.6 tiles across. The particle
-      // draws `Width * o->Scale` with no object scale (ZzzEffectParticle.cpp:8994-8996).
-      sprite: { scale: 2.5, color: [1, 1, 1], unscaled: true },
+      emissions: s => [{ kinds: ['light0'], every: 1, scale: 1 / s }],
     },
   ],
 };

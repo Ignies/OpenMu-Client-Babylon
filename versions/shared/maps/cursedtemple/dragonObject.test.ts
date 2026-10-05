@@ -33,7 +33,19 @@ vi.mock('../bloodcastle/bones', () => ({
   findBone: (_object: unknown, index: number) => {
     const world = Matrix.Identity();
     const pose = () => Matrix.TranslationToRef(...((index === 22 ? [1, 2, 3] : [4, 5, 6]).map((v, i) => (i ? v : v + head.x)) as [number, number, number]), world);
-    return { computeWorldMatrix: () => (pose(), world), getWorldMatrix: () => world };
+    return { bone: index, computeWorldMatrix: () => (pose(), world), getWorldMatrix: () => world };
+  },
+}));
+// The smoke the dragon asked for, and how often it was stepped.
+const smoke = vi.hoisted(() => ({ points: [] as unknown[], steps: 0 }));
+vi.mock('@/controllers/fx/effectParticles', () => ({
+  BonedParticleEmitter: class {
+    constructor(_scene: unknown, points: unknown[]) {
+      smoke.points.push(...points);
+    }
+    update() {
+      smoke.steps++;
+    }
   },
 }));
 vi.mock('@/controllers/assets', () => ({ reportLoadFailure: () => () => {} }));
@@ -64,6 +76,20 @@ describe('the Cursed Temple dragon (type 62)', () => {
     head.x = 1.38;
     dragon.Update({ TotalGameTime: { TotalSeconds: 5.04 } } as World['gameTime']);
     expect(flares.map(f => f.at?.[0])).toEqual([2.44, 5.44].map(v => expect.closeTo(v)));
+  });
+
+  // `if (rand_fps_check(5)) CreateParticleFpsChecked(BITMAP_SMOKE, vPos, o->Angle, (1, 1, 1))` at
+  // `TransformPosition(BoneTransform[20], (0, 0, 0))`: SubType 0 at scale 1 (ZzzObject.cpp:698-704).
+  it('puffs a BITMAP_SMOKE from bone 20 one tick in five, where the bone is each frame', async () => {
+    smoke.points.length = 0;
+    const dragon = new (CursedTempleDragonObject as unknown as new () => InstanceType<typeof CursedTempleDragonObject>)();
+    await dragon.init({ scene: {} } as World, {} as Entity);
+    expect(smoke.points).toEqual([
+      { node: expect.objectContaining({ bone: 20 }), kinds: ['smoke0'], count: 1, scale: 1, light: [1, 1, 1], every: 5 },
+    ]);
+    const steps = smoke.steps;
+    dragon.Update({ TotalGameTime: { TotalSeconds: 6 } } as World['gameTime']);
+    expect(smoke.steps).toBe(steps + 1);
   });
 
   it('is its own object, not a batched prop, and no table card sits at the middle of the swing', () => {

@@ -138,7 +138,7 @@ export function lightEmittersFor(
 
 /**
  * The adapter from a table row to the framework's recipe. Null when the row
- * has no `terrain` block - a bare flare (Icarus type 10) lights nothing.
+ * has no `terrain` block - a bare particle stream (Icarus type 10) lights nothing.
  */
 export function recipeFromEmitter(emitter: LightEmitter): LightRecipe | null {
   const terrain = emitter.terrain;

@@ -101,13 +101,15 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   `|sin|`), `BITMAP_KANTURU_2ND_EFFECT1` (Kanturu 2 4's pair over its lamp); Karutan 66, Crywolf 41
   and Cursed Temple 62 have none (the insect hangs its `BITMAP_SHINY + 5` points itself, the beacon
   its turning pair, the dragon its eyes); `BITMAP_SHINY + 1` (Shiny02.jpg, 32 by 64: Kanturu 3 5's
-  pair, Land of Trials 49's grey card); Icarus 10's `BITMAP_LIGHT` particle is sized without the
-  pillar's scale.
+  pair, Land of Trials 49's grey card); Icarus 10 streams `light0` (`BITMAP_LIGHT` SubType 0) from
+  bone 3, one a tick at scale 1 on any pillar, and draws no card.
 - `flareWaves.test.ts`: the table cards' waves are the original's `sinf(WorldTime * k)`, k in radians a
   millisecond: the fire vents (Karutan 113, Loren Market 57, Vulcanus 6) burn steady red, with one
   particle of the original's three fire sheets every tick, spawned at the vent; the
   `BITMAP_TRUE_FIRE` braziers (Elbeland 0, Kanturu 61, Balgas 3, the Swamp's 57 with its smoke) burn
-  one tick in three; Kalima's flower glows (12, 32) grow and shrink on bone 5; the Kanturu relic
+  one tick in three, a white `trueFire` at the brazier with no spread (the Swamp's 57 and 71 SubType
+  5, `trueFire5`; Kanturu 60's fire, ours, as 61), and Elbeland's blue lamp (61) one white
+  `trueBlue` (`BITMAP_TRUE_BLUE`, fantaB.jpg) one tick in three on every preset; Kalima's flower glows (12, 32) grow and shrink on bone 5; the Kanturu relic
   lamps (Kanturu 2 4, Kanturu 3 5) breathe and grow with their fLumi, and Kanturu 3's two `BITMAP_SHINY + 1` turn 0.5 and 0.25
   degrees a millisecond; Land of Trials 49 draws two red cards on bone 3 and a grey `BITMAP_SHINY + 1`
   at a fresh angle every frame; Elbeland's lantern (63) breathes and its totem (121) breathes and grows on six
@@ -136,6 +138,8 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   warm tint gives Flare.jpg the mean colour its old tint gave flare01.jpg, worked out from the two
   sheets' pixels in `Data/Effect`.
 - `empireguardian/spec.test.ts`: days 1-3 draw day 4's blue lamp (80) and bind its wall torch (37).
+- `balgasbarracks/spec.test.ts`: the lava vents (2) puff a `BITMAP_SMOKE` SubType 13 (`smoke13`) one
+  tick in three on both worlds.
 - `chaoscastle/thunder.test.ts`: pillar thunder timing, which pillar it strikes and the bolt's fall.
 - `chaoscastle/clouds.test.ts`: the blue fog banks on types 6-11; 12 stays a marker.
 - `chaoscastle/lighting.test.ts`: one look row on every arena, no sky, black haze from the hero, no
@@ -149,7 +153,8 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
 - `karutan1/insectObject.test.ts`: the insect's two `BITMAP_SHINY + 5` points ride bones 13 and 14
   and breathe on `|sin|`; it is never a batched prop.
 - `cursedtemple/dragonObject.test.ts`: the dragon's two pink `BITMAP_SHINY + 1` eyes ride bones 22
-  and 23 every frame and grow with `fLumi`; it is never a batched prop.
+  and 23 every frame and grow with `fLumi`, and it puffs a `BITMAP_SMOKE` (`smoke0`) from bone 20 one
+  tick in five; it is never a batched prop.
 - `tarkan/impactGlowObject.test.ts`: the temple glow is `BITMAP_IMPACT`, its size and colour
   breathing together.
 - `stadium/brazierObject.test.ts`: the brazier's card is `Luminosity * 5` every frame, whatever the

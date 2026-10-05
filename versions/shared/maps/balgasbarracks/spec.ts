@@ -30,9 +30,12 @@ export const BALGAS_EFFECT_ONLY_TYPES: readonly number[] = [
   2, 3, 5, 58, 59, 60, 85, 86, 87, 88, 89, 90, 91, 92, 93,
 ];
 
-/** The lava vents (2) and the smoke columns (58-60). */
+/**
+ * The lava vents (2): a `BITMAP_SMOKE` SubType 13 glow one tick in three (:119-125). 5 and the
+ * smoke columns (58-60) are stand-ins.
+ */
 export const BALGAS_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {
-  2: [{ kinds: ['fire1', 'fire2'], every: 3, light: [1, 0.5, 0.2] }],
+  2: [{ kinds: ['smoke13'], every: 3 }],
   5: [{ kinds: ['fire1', 'fire2'], every: 3, light: [1, 0.5, 0.2] }],
   58: [{ kinds: ['smoke21'], every: 3 }],
   59: [{ kinds: ['smoke21'], every: 3 }],
@@ -43,8 +46,7 @@ export const BALGAS_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {
  * Type 3 (Barracks ×39, Refuge ×17), :79-85: `L = (rand%4+3)*0.1;
  * AddTerrainLight(x, y, (L, 0.6L, 0.2L), 3)` + hidden - the brazier, the
  * same recipe as Kanturu 61: `RenderObjectVisual` :126-132 adds a
- * `BITMAP_TRUE_FIRE` particle one tick in three (fantaF.jpg, no kind:
- * `fire1`/`fire3` stand in).
+ * `BITMAP_TRUE_FIRE` particle one tick in three (`trueFire`).
  */
 export const BALGAS_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
   3: [
@@ -55,7 +57,7 @@ export const BALGAS_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
         color: [1, 0.6, 0.2],
         flicker: { min: 0.3, max: 0.6, steps: 4 },
       },
-      emissions: [{ kinds: ['fire1', 'fire3'], every: 3, jitter: 6 }],
+      emissions: [{ kinds: ['trueFire'], every: 3 }],
     },
   ],
 };

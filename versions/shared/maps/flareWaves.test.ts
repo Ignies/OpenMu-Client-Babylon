@@ -1,9 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import { ENUM_WORLD } from '@/core/types';
 import { lightEmittersFor } from '@/controllers/lighting/mapObjectLights';
+import { maps } from '@/controllers/maps';
+import { FIDELITY_CLASSIC, FIDELITY_DEFAULT, setFidelityChoice } from '@/controllers/fidelity';
 
 /** The cards a map object's light table draws. */
 const cardsOf = (world: ENUM_WORLD, type: number) => lightEmittersFor(world, type)?.filter(e => e.sprite) ?? [];
+
+/** The particles a map object emits: its light rows' and its map's own table's. */
+const emissionsOf = (world: ENUM_WORLD, type: number) => [
+  ...(lightEmittersFor(world, type) ?? []).flatMap(e => (Array.isArray(e.emissions) ? e.emissions : [])),
+  ...(maps.emissionsFor(world, type) ?? []),
+];
 
 // The original's waves are `sinf(WorldTime * k)`, WorldTime in milliseconds: a card's wave takes its k.
 describe('the map flare waves', () => {
@@ -66,6 +74,42 @@ describe('the map flare waves', () => {
       const emissions = lightEmittersFor(world, type)?.flatMap(e => (Array.isArray(e.emissions) ? e.emissions : []));
       expect(emissions?.length, `world ${world} type ${type}`).toBeGreaterThan(0);
       expect(emissions?.map(f => f.every), `world ${world} type ${type}`).toEqual(emissions?.map(() => 3));
+    }
+  });
+
+  // `CreateParticle(BITMAP_TRUE_FIRE, o->Position, o->Angle, (1, 1, 1), 0, o->Scale)`, SubType 5 on the Swamp: the
+  // sheet at the brazier, white; its push at birth is the spread (ZzzEffectParticle.cpp:3337-3378). Every preset.
+  it('the BITMAP_TRUE_FIRE braziers burn trueFire at the brazier, the Swamp\'s SubType 5 (GMNewTown.cpp:249-254, GM_Kanturu_1st.cpp:158-164, GM3rdChangeUp.cpp:126-132, GMSwampOfQuiet.cpp:139-157)', () => {
+    const braziers: [ENUM_WORLD, number, string][] = [
+      [ENUM_WORLD.WD_51ELBELAND, 0, 'trueFire'],
+      [ENUM_WORLD.WD_37KANTURU_1ST, 61, 'trueFire'],
+      [ENUM_WORLD.WD_40AREA_FOR_GM, 61, 'trueFire'],
+      [ENUM_WORLD.WD_68DOPPLEGANGER4, 61, 'trueFire'],
+      [ENUM_WORLD.WD_41CHANGEUP3RD_1ST, 3, 'trueFire'],
+      [ENUM_WORLD.WD_42CHANGEUP3RD_2ND, 3, 'trueFire'],
+      [ENUM_WORLD.WD_56MAP_SWAMP_OF_QUIET, 57, 'trueFire5'],
+      [ENUM_WORLD.WD_56MAP_SWAMP_OF_QUIET, 71, 'trueFire5'],
+    ];
+    for (const [world, type, kind] of braziers) {
+      expect(emissionsOf(world, type)[0], `world ${world} type ${type}`).toEqual({ kinds: [kind], every: 3 });
+    }
+    expect(emissionsOf(ENUM_WORLD.WD_56MAP_SWAMP_OF_QUIET, 57)).toEqual([
+      { kinds: ['trueFire5'], every: 3 },
+      { kinds: ['smoke21'], every: 3 },
+    ]);
+    // The Kanturu deep-red brazier's fire is ours (`lampFlares`): it burns as 61 does.
+    expect(emissionsOf(ENUM_WORLD.WD_37KANTURU_1ST, 60)).toEqual(emissionsOf(ENUM_WORLD.WD_37KANTURU_1ST, 61));
+  });
+
+  // `if (rand_fps_check(3)) CreateParticle(BITMAP_TRUE_BLUE, o->Position, o->Angle, (1, 1, 1), 0, o->Scale)`.
+  it('Elbeland 61: the blue lamp burns one trueBlue a tick in three, white, at its scale, on every preset (GMNewTown.cpp:282-288)', () => {
+    const lamp = () => emissionsOf(ENUM_WORLD.WD_51ELBELAND, 61);
+    expect(lamp()).toEqual([{ kinds: ['trueBlue'], every: 3 }]);
+    try {
+      setFidelityChoice(FIDELITY_CLASSIC, {});
+      expect(lamp()).toEqual([{ kinds: ['trueBlue'], every: 3 }]);
+    } finally {
+      setFidelityChoice(FIDELITY_DEFAULT, {});
     }
   });
 

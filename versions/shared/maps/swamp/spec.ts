@@ -18,7 +18,8 @@ export const SWAMP_BLEND_MESHES: Readonly<Record<number, number>> = {};
 /**
  * `MoveObject` :81-104 hides 57, 71, 72, 73, 74, 77, 78:
  *  - **57** (×18): the brazier - see `SWAMP_LIGHTS`.
- *  - **71** (×8): `BITMAP_TRUE_FIRE` SubType 5 - fire without light.
+ *  - **71** (×8): `BITMAP_TRUE_FIRE` SubType 5 one tick in three (`trueFire5`,
+ *    white, :149-157) - fire without light.
  *  - **72** (×59): `BITMAP_SMOKE` SubType 49 lifted 50 - marsh gas, in
  *    `marshGasObject.ts` because of that lift.
  *  - **73** (×51): hidden, nothing drawn (:171-172 is a bare `break`).
@@ -48,7 +49,7 @@ export const SWAMP_EFFECT_ONLY_TYPES: readonly number[] = [
  * one, and adding one is a shared-file change.
  */
 export const SWAMP_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {
-  71: [{ kinds: ['fire1', 'fire2'], every: 3, light: [1, 0.6, 0.3] }],
+  71: [{ kinds: ['trueFire5'], every: 3 }],
   74: [{ kinds: ['smoke21'], every: 3, scale: 2 }],
   77: [{ kinds: ['cloud21'], every: 6, light: [0.04, 0.06, 0.03] }],
   78: [{ kinds: ['cloud21'], every: 6, light: [0.03, 0.03, 0.05] }],
@@ -57,9 +58,9 @@ export const SWAMP_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {
 /**
  * Type 57 (×18), `MoveObject` :81-86: `L = (rand%4+3)*0.1;
  * AddTerrainLight(x, y, (L, 0.6L, 0.2L), 3)` + hidden; the render side
- * (:139-148) adds `TRUE_FIRE` SubType 5 and `SMOKE` SubType 21 together, one
- * tick in three. `TRUE_FIRE`'s sheet, fantaF.jpg, has no kind: `fire1`/`fire3`
- * stand in. The point light is this port's, not the original's.
+ * (:139-148) adds `TRUE_FIRE` SubType 5 (`trueFire5`) and `SMOKE` SubType 21
+ * together, one tick in three. The point light is this port's, not the
+ * original's.
  */
 export const SWAMP_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
   57: [
@@ -71,7 +72,7 @@ export const SWAMP_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
         flicker: { min: 0.3, max: 0.6, steps: 4 },
       },
       emissions: [
-        { kinds: ['fire1', 'fire3'], every: 3, jitter: 6 },
+        { kinds: ['trueFire5'], every: 3 },
         { kinds: ['smoke21'], every: 3 },
       ],
     },

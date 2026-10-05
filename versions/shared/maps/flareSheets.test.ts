@@ -79,10 +79,18 @@ describe('the BITMAP_SPARK + 1 cards (Spark03.jpg)', () => {
   });
 });
 
-describe('the BITMAP_LIGHT particle cards (flare01.jpg)', () => {
-  // Subtype 0 sizes `(rand() % 50 + 50) / 100 * 1.f` and draws `Width * o->Scale`, no object scale (ZzzEffectParticle.cpp:3161-3167, :8994-8996).
-  it('Icarus 10: the orb card on bone 3 keeps its size on a scaled pillar (ZzzObject.cpp:3126-3131)', () => {
-    expect(cardsOf(ENUM_WORLD.WD_10ICARUS, 10).map(e => e.sprite?.unscaled)).toEqual([true]);
+describe('the BITMAP_LIGHT particle stream (flare01.jpg)', () => {
+  // `CreateParticleFpsChecked(BITMAP_LIGHT, bone 3, o->Angle, (1, 1, 1), 0, 1.f)` every tick; SubType 0 sizes
+  // `(rand() % 50 + 50) / 100 * 1.f`, no object scale (ZzzEffectParticle.cpp:3161-3164).
+  it('Icarus 10: one light0 a tick from bone 3, at scale 1 on any pillar, and no card (ZzzObject.cpp:3126-3131)', () => {
+    const rows = lightEmittersFor(ENUM_WORLD.WD_10ICARUS, 10) ?? [];
+    expect(rows.map(e => [e.offset, e.bone, e.sprite, e.terrain])).toEqual([[[-140, 0, 500], true, undefined, undefined]]);
+    for (const pillar of [0.6, 1, 1.4]) {
+      const stream = typeof rows[0].emissions === 'function' ? rows[0].emissions(pillar) : rows[0].emissions;
+      expect(stream?.map(e => [e.kinds, e.every, e.count ?? 1, pillar * (e.scale ?? 1)])).toEqual([
+        [['light0'], 1, 1, expect.closeTo(1)],
+      ]);
+    }
   });
 });
 

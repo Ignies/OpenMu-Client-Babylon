@@ -36,6 +36,7 @@ type TextureKey =
   | 'spark03'
   | 'flareBlue'
   | 'fantaB'
+  | 'fantaF'
   | 'clud64'
   | 'flare01';
 
@@ -55,6 +56,7 @@ const TEXTURES: Record<
   spark03: { file: 'Effect/Spark03.OZJ', size: 32 },
   flareBlue: { file: 'Effect/flareBlue.OZJ', size: 64 },
   fantaB: { file: 'Effect/fantaB.OZJ', size: 64 },
+  fantaF: { file: 'Effect/fantaF.OZJ', size: 64 },
   clud64: { file: 'Effect/clud64.OZJ', size: 64 },
   flare01: { file: 'Effect/flare01.OZJ', size: 64 },
 };
@@ -106,6 +108,26 @@ const rand = (n: number) => Math.floor(Math.random() * n);
 const WHITE: readonly [number, number, number] = [1, 1, 1];
 
 const plainColor = (p: Particle, out: Color4) => out.set(p.lr, p.lg, p.lb, 1);
+
+/**
+ * `g_vParticleWind`: MoveParticles walks its pace by up to 0.6 a tick, held within 0.6, and the wind
+ * by its pace, held within 1.7 (ZzzEffectParticle.cpp:3847-3859). `light0` drifts on half of it.
+ */
+const wind = { x: 0, y: 0, vx: 0, vy: 0, due: 0 };
+
+const within = (v: number, limit: number) => Math.max(-limit, Math.min(limit, v));
+
+function stepWind(ticks: number): void {
+  wind.due = Math.min(wind.due + ticks, 4);
+
+  while (wind.due >= 1) {
+    wind.due -= 1;
+    wind.vx = within(wind.vx + (rand(2001) - 1000) * 0.0006, 0.6);
+    wind.vy = within(wind.vy + (rand(2001) - 1000) * 0.0006, 0.6);
+    wind.x = within(wind.x + wind.vx, 1.7);
+    wind.y = within(wind.y + wind.vy, 1.7);
+  }
+}
 
 function fireKind(
   texture: TextureKey,
@@ -201,6 +223,32 @@ function stripFireKind(texture: TextureKey): ParticleKind {
   };
 }
 
+/**
+ * `BITMAP_TRUE_FIRE` SubType 0 (5 lives 20): the whole sheet, upright and additive, at the spawn
+ * scale, pushed `(rand() % 10 - 5) * 0.4` sideways and `(rand() % 10 + 5) * 0.2` up along the
+ * object (ZzzEffectParticle.cpp:3337-3378). A tick it loses 0.02 of its scale, the sideways push
+ * fades by 0.95, it rises 1 more and is `LifeTime / 25` bright, white (:8273-8337).
+ */
+function trueFireKind(texture: TextureKey, life: number): ParticleKind {
+  return {
+    texture,
+    blend: 'add',
+    init(p, scale) {
+      p.lifeTime = life;
+      p.scale = scale;
+      p.vx = (rand(10) - 5) * 0.4;
+      p.vz = (rand(10) + 5) * 0.2;
+    },
+    update(p, f) {
+      p.vx *= Math.pow(0.95, f);
+      p.pz += f;
+      p.scale -= 0.02 * f;
+      p.lr = p.lg = p.lb = p.lifeTime / 25;
+    },
+    color: plainColor,
+  };
+}
+
 const KINDS = {
   fire1: fireKind('fireHik1', {
     lifeBase: 27,
@@ -287,21 +335,12 @@ const KINDS = {
 
   fire0b: stripFireKind('fire03'),
 
-  /**
-   * The elf lamps' blue flame (`BITMAP_TRUE_BLUE`, GMNewTown.cpp:283-289):
-   * the login braziers' fire burning the original's blue sheet instead of
-   * an orange one. Tinting a firehik sheet blue only makes it muddy - the
-   * colour has to come from the texture.
-   */
-  fireBlue: fireKind('fantaB', {
-    lifeBase: 17,
-    lifeRand: 5,
-    fadeBelow: 10,
-    gravityBase: 20,
-    gravityRand: 16,
-    shrinkBase: 7,
-    shrinkRand: 3,
-  }),
+  trueFire: trueFireKind('fantaF', 24),
+
+  trueFire5: trueFireKind('fantaF', 20),
+
+  /** `BITMAP_TRUE_BLUE`: every line `BITMAP_TRUE_FIRE`'s but the sheet, fantaB.jpg (ZzzOpenData.cpp:5198). */
+  trueBlue: trueFireKind('fantaB', 24),
 
   smoke0: {
     texture: 'smoke',
@@ -319,6 +358,29 @@ const KINDS = {
       p.gravity += 0.2 * fps;
       p.pz += p.gravity * fps;
       p.scale += fps * 0.05;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
+
+  /**
+   * `BITMAP_SMOKE` SubType 13, the Balgass lava vents' glow: sized `(rand() % 64 + 64) * 0.01` whatever
+   * it is made with, it stays put, grows 0.09 a tick and fades orange, `(L, 0.5L, 0.1L)` at
+   * `L = LifeTime / 20`, additive (ZzzEffectParticle.cpp:1238-1243, :5389-5393, :9085-9097).
+   */
+  smoke13: {
+    texture: 'smoke',
+    blend: 'add',
+    init(p) {
+      p.lifeTime = 20;
+      p.scale = (rand(64) + 64) * 0.01;
+      p.rotation = rand(360);
+    },
+    update(p, f) {
+      const luminosity = p.lifeTime / 20;
+      p.lr = luminosity;
+      p.lg = luminosity * 0.5;
+      p.lb = luminosity * 0.1;
+      p.scale += 0.09 * f;
     },
     color: plainColor,
   } satisfies ParticleKind,
@@ -523,6 +585,29 @@ const KINDS = {
       }
 
       p.scale -= f * 0.02;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
+
+  /**
+   * `BITMAP_LIGHT` SubType 0, flare01.jpg drawn additive (ZzzEffectParticle.cpp:3161-3164): a tick it
+   * drifts +-0.2 plus half the wind, rises 2.5, loses 0.05 of its scale and is as bright as its
+   * scale, gone at 0.1 (:7943-8010).
+   */
+  light0: {
+    texture: 'flare01',
+    blend: 'add',
+    init(p, scale) {
+      p.lifeTime = rand(10) + 10;
+      p.scale = ((rand(50) + 50) / 100) * scale;
+    },
+    update(p, f) {
+      p.px += ((rand(2001) - 1000) * 0.0004 + wind.x) * 0.5 * f;
+      p.py += ((rand(2001) - 1000) * 0.0004 + wind.y) * 0.5 * f;
+      p.pz += 2.5 * f;
+      p.scale -= 0.05 * f;
+      if (p.scale <= 0.1) p.live = false;
+      p.lr = p.lg = p.lb = p.scale;
     },
     color: plainColor,
   } satisfies ParticleKind,
@@ -751,6 +836,8 @@ function ensureTicking(target: Scene) {
 
     const f = Math.min(1, (deltaMs / 1000) * TICKS_PER_SECOND);
 
+    stepWind((deltaMs / 1000) * TICKS_PER_SECOND);
+
     const color = new Color4(1, 1, 1, 1);
 
     for (let i = particles.length - 1; i >= 0; i--) {
@@ -882,8 +969,11 @@ export const KIND_REACH: Record<KindName, Reach> = {
   ember: { travel: 1, base: 0, perScale: 0.34 },
   fire0: { travel: 1.4, base: 0, perScale: 0.87 },
   fire0b: { travel: 1.4, base: 0, perScale: 0.87 },
-  fireBlue: { travel: 0.75, base: 0, perScale: 0.65 },
+  trueFire: { travel: 1, base: 0, perScale: 0.46 },
+  trueFire5: { travel: 0.85, base: 0, perScale: 0.46 },
+  trueBlue: { travel: 1, base: 0, perScale: 0.46 },
   smoke0: { travel: 0.55, base: 0.72, perScale: 0 },
+  smoke13: { travel: 0, base: 1.4, perScale: 0 },
   smoke2: { travel: 3.4, base: 0.58, perScale: 0 },
   smoke65: { travel: 0.75, base: 0, perScale: 0.29 },
   cloud21: { travel: 1.75, base: 0, perScale: 3.61 },
@@ -892,6 +982,7 @@ export const KIND_REACH: Record<KindName, Reach> = {
   smoke60: { travel: 3.7, base: 1.09, perScale: 0.29 },
   waterfall5_9: { travel: 2.9, base: 0.28, perScale: 0.46 },
   spark03_24: { travel: 0.6, base: 0.19, perScale: 0 },
+  light0: { travel: 0.6, base: 0, perScale: 0.45 },
   wingFlareBlue: { travel: 0, base: 0, perScale: 0.46 },
   wingCloud: { travel: 0, base: 0, perScale: 0.46 },
 };
@@ -1181,6 +1272,8 @@ export function disposeEffectParticles(): void {
   for (const pool of pools.values()) pool.manager.dispose();
   pools.clear();
   loading.clear();
+
+  wind.x = wind.y = wind.vx = wind.vy = wind.due = 0;
 
   if (tickObserver && scene) {
     scene.onBeforeRenderObservable.remove(tickObserver as never);
