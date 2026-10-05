@@ -29,7 +29,8 @@ or their own LifeTime each 25 Hz tick (`MoveHandlers.cpp`), and drop what is lef
 leaves the clip (`eachClipTick`, `whenClipKey(..., 'drop')` in `../_shared.ts`). Ticks count from
 the packet; an effect it creates first moves on tick 1.
 
-Dark Side is the one skill on its own wire: the cast sends 0x4B and 0x4A, the server answers with
+Dark Side (263 and its Strengthener 559, SkillCast.cpp:881-896) is the one skill on its own wire: the
+cast sends 0x4B and 0x4A, the server answers with
 up to five targets and echoes the 0x4A, and the client lands one 0x4A per extra target as the clip's
 blows come round (`rage.ts`): Rage_Darkside_Att when the targets arrive, the first blow
 `(int)(2.5 / PlaySpeed)` ticks after the echo (8 at base speed; the echo sets `AttackTime = 1`,

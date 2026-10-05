@@ -1,6 +1,6 @@
 /**
  * Rage Fighter packets (MonkSystem.cpp, SkillCast.cpp:881-896,
- * WSclient.cpp:14952-14957): Dark Side (263) is the one skill on its own
+ * WSclient.cpp:14952-14957): Dark Side (263, 559) is the one skill on its own
  * wire - the cast sends `RageAttackRangeRequest` (0x4B) *and*
  * `RageAttackRequest` (0x4A) at the picked target; the server answers 0x4B
  * with up to five targets it chose (`ReceiveDarkside` →
@@ -26,8 +26,8 @@ import { playCombat } from '@/controllers/sound';
 import { PlayerAction } from '../../../objects/enum';
 import { heroEntity } from '../../_shared';
 
-/** AT_SKILL_DARKSIDE: the one Rage Fighter skill that uses the 0x4A/0x4B pair. */
-const SKILL_DARK_SIDE = 263;
+/** AT_SKILL_DARKSIDE and AT_SKILL_DARKSIDE_STR: the Rage Fighter skills on the 0x4A/0x4B pair (SkillCast.cpp:881-896). */
+const DARK_SIDE_SKILLS: readonly number[] = [263, 559];
 
 // ---- 1. tuning -------------------------------------------------------------
 
@@ -74,9 +74,9 @@ let hitsSent = 0;
 let streakHits = 0;
 let streakOpenFor = 0;
 
-/** Whether `skill` is Dark Side (the server sends the base id back). */
+/** Whether `skill` is Dark Side or its Strengthener. */
 export function isDarkSide(skill: number): boolean {
-  return skill === SKILL_DARK_SIDE;
+  return DARK_SIDE_SKILLS.includes(skill);
 }
 
 /** Hits landed in the running Rage Fighter streak, 0 outside one. */
