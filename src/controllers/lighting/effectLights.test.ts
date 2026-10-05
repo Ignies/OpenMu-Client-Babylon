@@ -132,6 +132,13 @@ describe('flare cards', () => {
     expect(drawnFrom[drawnFrom.length - 1]).toBe('Effect/lightning2.OZJ');
   });
 
+  // Kanturu 2's relic lamps draw it over their BITMAP_LIGHT (GM_Kanturu_2nd.cpp:343-344).
+  it('draw BITMAP_KANTURU_2ND_EFFECT1 from Object39\'s k_effect_01.jpg (ZzzOpenData.cpp:5495)', async () => {
+    await createEffectLight({} as Scene, { scale: 0.5, color: [0.3, 0.5, 1], texture: 'kanturu2ndEffect1' }, at, 1);
+    expect(drawnFrom[drawnFrom.length - 1]).toBe('Object39/k_effect_01.OZJ');
+    expect(lastSprite().width).toBeCloseTo(0.32);
+  });
+
   // `CreateSprite(BITMAP_SPARK + 1, Position, 5.5f, ...)` has no `* o->Scale` (GMAida.cpp:110).
   it('size an unscaled card without the object scale', async () => {
     const scene = {} as Scene;
@@ -180,7 +187,8 @@ describe('flare cards', () => {
 
   it.skipIf(!existsSync('Data/Effect'))('cut each sheet at the width of its file', async () => {
     const scene = {} as Scene;
-    for (const texture of ['light', 'flare', 'spark1', 'shiny5', 'impact', 'magic1', 'lightning1'] as const) {
+    const textures = ['light', 'flare', 'spark1', 'shiny5', 'impact', 'magic1', 'lightning1', 'kanturu2ndEffect1'] as const;
+    for (const texture of textures) {
       await createEffectLight(scene, { scale: 1, color: [1, 1, 1], texture }, at, 1);
     }
     for (const [sheet, width] of cells) {

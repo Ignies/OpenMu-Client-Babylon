@@ -59,6 +59,8 @@ const RULES: Rule[] = [
   { dir: 'Skill', ext: SPRITE },
   // libs/mu/terrainWater.ts → Object8/wt00..wt31.OZJ (Atlans caustics flipbook)
   { dir: 'Object8', ext: [], names: Array.from({ length: 32 }, (_, i) => `wt${String(i).padStart(2, '0')}.ozj`) },
+  // lighting/effectLights.ts → Object39/k_effect_01.OZJ (BITMAP_KANTURU_2ND_EFFECT1, the relic lamps' star)
+  { dir: 'Object39', ext: [], names: ['k_effect_01.ozj'] },
 ];
 
 function keep(rule: Rule, file: string): boolean {

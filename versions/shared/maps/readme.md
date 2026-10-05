@@ -94,8 +94,9 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
 - `flareSheets.test.ts`: the table flares the original draws from another sheet than `BITMAP_LIGHT`
   take it with the original's tint, size and motion: `BITMAP_FLARE` (Aida 75 turning on bone 4,
   Crywolf 41's bobbing pair, Loren Market 30 on its three heads and 35), `BITMAP_SPARK + 1` (Aida
-  30 and 71 on their six bulbs, Kanturu 70 whose size breathes, Kanturu 2 8); Karutan 66 has none
-  (its insect hangs its `BITMAP_SHINY + 5` points itself).
+  30 and 71 on their six bulbs, Kanturu 70 whose size breathes, Kanturu 2 8),
+  `BITMAP_KANTURU_2ND_EFFECT1` (Kanturu 2 4's pair over its lamp); Karutan 66 has none (its insect
+  hangs its `BITMAP_SHINY + 5` points itself).
 - `flareWaves.test.ts`: the table cards' waves are the original's `sinf(WorldTime * k)`, k in radians a
   millisecond: the fire vents (Karutan 113, Loren Market 57, Vulcanus 6) burn steady red; Kalima's
   flower glows (12, 32) grow and shrink on bone 5; the Kanturu relic lamps (Kanturu 2 4, Kanturu 3 5)

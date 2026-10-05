@@ -59,6 +59,19 @@ describe('the BITMAP_SPARK + 1 cards (Spark03.jpg)', () => {
   });
 });
 
+describe('the BITMAP_KANTURU_2ND_EFFECT1 cards (k_effect_01.jpg)', () => {
+  // `CreateSprite(BITMAP_KANTURU_2ND_EFFECT1, Position, fLumi / 3.2, Light, o)` twice over the BITMAP_LIGHT.
+  it('Kanturu 2 4: two on bone 1 that breathe and grow with fLumi (GM_Kanturu_2nd.cpp:335-346)', () => {
+    const fLumi = { speed: 0.002, amount: 0.5, base: 0.5 };
+    const card = {
+      offset: [0, 13, 244],
+      bone: true,
+      sprite: { scale: 1 / 3.2, color: [0.3, 0.5, 1], pulse: fLumi, grow: fLumi, unscaled: true, texture: 'kanturu2ndEffect1' },
+    };
+    expect(cardsOf(ENUM_WORLD.WD_38KANTURU_2ND, 4).filter(e => e.sprite?.texture)).toEqual([card, card]);
+  });
+});
+
 describe('the BITMAP_SHINY + 5 cards (shiny05.jpg)', () => {
   // Its two points ride bones that sweep 1.4 tiles: the insect hangs them itself (karutan1/insectObject.test.ts).
   it('Karutan 66: no table card on top of the insect\'s own (GMKarutan1.cpp:68-82)', () => {

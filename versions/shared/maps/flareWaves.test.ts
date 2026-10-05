@@ -41,7 +41,7 @@ describe('the map flare waves', () => {
       bone: true,
       sprite: { scale, color: [0.3, 0.5, 1], pulse: fLumi, grow: fLumi, unscaled: true },
     });
-    expect(cardsOf(ENUM_WORLD.WD_38KANTURU_2ND, 4)).toEqual([lamp(1 / 3.2)]);
+    expect(cardsOf(ENUM_WORLD.WD_38KANTURU_2ND, 4).filter(e => !e.sprite?.texture)).toEqual([lamp(1 / 3.2)]);
     expect(cardsOf(ENUM_WORLD.WD_39KANTURU_3RD, 5)).toEqual([lamp(1 / 2.4)]);
   });
 

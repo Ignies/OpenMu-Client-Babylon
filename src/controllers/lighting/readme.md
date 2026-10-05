@@ -30,7 +30,8 @@ policy. It knows how to light something, never which skill or item asks for it.
   ZzzOpenData.cpp:5207) unless a spec names another (`'flare'` BITMAP_FLARE, Flare.jpg, a warm star,
   :5309; `'spark1'` BITMAP_SPARK + 1, Spark03.jpg, :5216; `'shiny5'` BITMAP_SHINY + 5, shiny05.jpg,
   :5325; `'impact'` BITMAP_IMPACT, Impack03.jpg, :5267; `'magic1'` BITMAP_MAGIC + 1,
-  Magic_Ground2.jpg, :5209; `'lightning1'` BITMAP_LIGHTNING + 1, lightning2.jpg, :5295). A card is
+  Magic_Ground2.jpg, :5209; `'lightning1'` BITMAP_LIGHTNING + 1, lightning2.jpg, :5295;
+  `'kanturu2ndEffect1'` BITMAP_KANTURU_2ND_EFFECT1, Object39's k_effect_01.jpg, :5495). A card is
   its sheet's own width times its scale (zzzeffectsprite.cpp:76), times the object's scale unless
   the spec is `unscaled`; `pulse` waves its brightness, `grow` its size, `spin` turns it and `bob`
   lifts it, and a `MovableFlare` takes `setLuminosity`, `setScale` and `setAngle` (degrees, the
@@ -106,7 +107,7 @@ policy. It knows how to light something, never which skill or item asks for it.
 - `recipes.test.ts`: `effectLight` hue, reach and gain ceiling, minimum range.
 - `characters.test.ts`: a steady carried glow (Poison Shadow), one that breathes, and the Scorpion's per-frame flicker.
 - `effectLights.test.ts`: a card is drawn from the sheet its spec names, one manager per sheet, at
-  the sheet's own width (checked against the file in `Data/Effect`); an `unscaled` card keeps its size
+  the sheet's own width (checked against the file in `Data`); an `unscaled` card keeps its size
   on a scaled object; a `grow` card grows and shrinks, a `spin` card turns, a `bob` card rides up
   and down; a movable card resizes and turns.
 - `mapObjectLightAdapter.test.ts`: a `bone` offset grows with the object, a plain one does not.

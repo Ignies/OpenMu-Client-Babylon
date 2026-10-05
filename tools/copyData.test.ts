@@ -2,16 +2,22 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { shipsDataFile } from './copyData';
 
-/** The effect texture registry: every sprite it names is fetched from Data/ at run time. */
-function namedDataFiles(): string[] {
-  const text = readFileSync('src/controllers/fx/recipes.ts', 'utf8');
-  return [...new Set([...text.matchAll(/'([A-Za-z]+\/[\w./-]+\.(?:OZJ|OZT))'/g)].map(m => m[1]))].sort();
+/** The sprites a registry names: each is fetched from Data/ at run time. */
+function namedDataFiles(registry: string): string[] {
+  const text = readFileSync(registry, 'utf8');
+  return [...new Set([...text.matchAll(/'([A-Za-z0-9]+\/[\w./-]+\.(?:OZJ|OZT))'/g)].map(m => m[1]))].sort();
 }
 
 describe('copyData', () => {
   it('ships every effect texture the client loads', () => {
-    const named = namedDataFiles();
+    const named = namedDataFiles('src/controllers/fx/recipes.ts');
     expect(named.length).toBeGreaterThan(20);
+    expect(named.filter(f => !shipsDataFile(f))).toEqual([]);
+  });
+
+  it('ships every flare card sheet', () => {
+    const named = namedDataFiles('src/controllers/lighting/effectLights.ts');
+    expect(named.length).toBeGreaterThan(7);
     expect(named.filter(f => !shipsDataFile(f))).toEqual([]);
   });
 

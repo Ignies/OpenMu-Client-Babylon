@@ -33,9 +33,10 @@ import { EFFECT_RENDERING_GROUP, keepDepthForEffects } from '../fx/core';
  * and a second name replaces the first, GlobalBitmap.cpp:549-568); `impact` BITMAP_IMPACT,
  * Impack03.jpg, a blue-white burst (:5267; Tarkan reloads the same file from Object9,
  * MapManager.cpp:146); `magic1` BITMAP_MAGIC + 1, Magic_Ground2.jpg, a ring of rays (:5209);
- * `lightning1` BITMAP_LIGHTNING + 1, lightning2.jpg, a cyan burst (:5295). `px` is the sheet's
- * width: a sprite is `Width * Scale` across (zzzeffectsprite.cpp:76). `sprites` caps a busy sheet
- * higher: Aida's 183 plants carry twelve sparks each.
+ * `lightning1` BITMAP_LIGHTNING + 1, lightning2.jpg, a cyan burst (:5295); `kanturu2ndEffect1`
+ * BITMAP_KANTURU_2ND_EFFECT1, Object39's k_effect_01.jpg, a white star (:5495). `px` is the
+ * sheet's width: a sprite is `Width * Scale` across (zzzeffectsprite.cpp:76). `sprites` caps a busy
+ * sheet higher: Aida's 183 plants carry twelve sparks each.
  */
 const FLARE_TEXTURES = {
   light: { file: 'Effect/flare01.OZJ', px: 64 },
@@ -45,6 +46,7 @@ const FLARE_TEXTURES = {
   impact: { file: 'Effect/Impack03.OZJ', px: 64 },
   magic1: { file: 'Effect/Magic_Ground2.OZJ', px: 128 },
   lightning1: { file: 'Effect/lightning2.OZJ', px: 128 },
+  kanturu2ndEffect1: { file: 'Object39/k_effect_01.OZJ', px: 64 },
 } as const;
 
 export type FlareTexture = keyof typeof FLARE_TEXTURES;
