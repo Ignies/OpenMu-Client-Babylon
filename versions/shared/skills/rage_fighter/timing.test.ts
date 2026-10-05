@@ -47,6 +47,9 @@ interface Spawn {
   tick: number;
   name: string;
   opts: Record<string, unknown>;
+  /** The tick on which it ended, if it did. */
+  end?: number;
+  handle?: { alive: boolean };
 }
 /** One call a `ticked` script made on its tick: `sprite`, `decal` or a strip's `push` (with the strip's options and light). */
 interface Draw {
@@ -104,12 +107,13 @@ function run(
     drop: s => fx.drop(strips.get(s) ?? s),
   });
   const spy = vi.spyOn(effects, 'spawn').mockImplementation(((name: never, s: Scene, at: Vector3, opts: never) => {
-    out.spawns.push({ tick, name, opts: (opts ?? {}) as Record<string, unknown> });
+    const spawn: Spawn = { tick, name, opts: (opts ?? {}) as Record<string, unknown> };
+    out.spawns.push(spawn);
     if (name === 'ticked') {
       const script = opts as unknown as { tick: (fx: TickedFx, n: number) => boolean };
-      return real(name, s, at, { tick: (fx: TickedFx, n: number) => script.tick(recorded(fx), n) } as never);
+      return (spawn.handle = real(name, s, at, { tick: (fx: TickedFx, n: number) => script.tick(recorded(fx), n) } as never));
     }
-    return real(name, s, at, opts);
+    return (spawn.handle = real(name, s, at, opts));
   }) as never);
   played.length = 0;
   const take = () => {
@@ -123,6 +127,7 @@ function run(
     if (leaveAt && tick >= leaveAt) model.CurrentAction = PlayerAction.PLAYER_STOP_MALE;
     effects.update(ENUM_WORLD.WD_0LORENCIA, 1 / 25);
     take();
+    for (const s of out.spawns) if (s.end === undefined && s.handle && !s.handle.alive) s.end = tick;
   }
   spy.mockRestore();
   return out;
@@ -192,6 +197,27 @@ describe('Chain Drive (262): BITMAP_SWORDEFF reads the caster\'s GIANTSWING key 
       expect(models(r, MODEL.shockwaveSpin)).toEqual([[28, 20, 0.5, 0.515], [28, 20, 0.9, 0.927]]);
     }
     expect(models(run(262, SWING, { leaveAt: 20 }), MODEL.shockwaveSpin)).toEqual([]);
+  });
+
+  it('MODEL_WOLF_HEAD_EFFECT2 with each blow: sub3 throws a sub4 and a sub6 a move while its LifeTime is 3 or more, sub5 throws none (MoveHandlers.cpp:9736-9800)', () => {
+    const between = (v: unknown, lo: number, hi: number): boolean => typeof v === 'number' && v >= lo - 1e-9 && v <= hi + 1e-9;
+    for (const skill of [262, 558]) {
+      const heads = run(skill, SWING).spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.wolfHead2);
+      const at = (t: number) => heads.filter(s => s.tick === t);
+      // LifeTime 4 / 0.4 = 10: sub3 on the first blow (tick 16) throws on its moves 1-8; sub5 on the second (tick 28).
+      expect([16, ...range(17, 27), 28].map(t => at(t).length)).toEqual([1, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 1]);
+      expect(heads).toHaveLength(1 + 16 + 1);
+      expect([at(16)[0].opts.scale, at(16)[0].end]).toEqual([1, 26]);
+      expect([at(28)[0].opts.scale, at(28)[0].end]).toEqual([1.5, 38]);
+      for (const t of range(17, 24)) {
+        // sub4: Scale 0.7-0.9 for 5-6 ticks; sub6: 1.2-1.6 for 2-3 (ZzzEffect.cpp:6091-6104).
+        const [four, six] = at(t).map(s => [s.opts.scale, Math.round((s.opts.seconds as number) * 25), s.end]);
+        expect(between(four[0], 0.7, 0.9) && between(four[1], 5, 6) && four[2] === t + (four[1] as number)).toBe(true);
+        expect(between(six[0], 1.2, 1.6) && between(six[1], 2, 3) && six[2] === t + (six[1] as number)).toBe(true);
+      }
+      // Drawn bright at Light (0.4, 0.4, 0.6) x 0.3 (ZzzObject.cpp:2452-2458).
+      expect(new Set(heads.map(s => JSON.stringify(s.opts.colour)))).toEqual(new Set([JSON.stringify([0.12, 0.12, 0.18])]));
+    }
   });
 });
 

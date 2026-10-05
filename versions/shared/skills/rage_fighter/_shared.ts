@@ -1,16 +1,93 @@
 import { type BoneGlow } from '@/controllers/fx/aura';
 import { MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
 import { effects } from '@/controllers/fx';
-import { TICK, entityPos, entityYaw, fxNow, type RGB } from '@/controllers/fx/core';
+import { TICK, bonePos, entityGone, entityPos, entityYaw, fxNow, type RGB } from '@/controllers/fx/core';
+import type { TickedFx } from '@/controllers/fx/ticked';
 import { Vector3, type Scene } from '@/controllers/render/babylon/exports';
-import { after, cm, seq, ticks, type Step } from '@/controllers/skills/visuals';
+import { after, cm, seq, ticks, type SkillContext, type Step } from '@/controllers/skills/visuals';
 import { PlayerAction } from '@versions/shared/objects/enum';
 import type { ClipPick } from '@/controllers/combat';
 import type { Sounds } from '@/controllers/sound';
-import { deg } from '../_shared';
+import { DEG, deg, randInt } from '../_shared';
 
 /** Moves an effect has made `t` seconds after its spawn: the first on the next tick (readme.md). */
 export const movesAt = (t: number): number => Math.floor(t / TICK + 1e-6);
+/** Moves an effect made at `t0` on the effects clock has made by now. */
+export const movesSince = (t0: number): number => movesAt(fxNow() - t0);
+
+/**
+ * `move(m, fx)` once for each move m = 1, 2 .. of an effect made now, counted on the effects clock (a ticked script's own count
+ * runs a tick early when it is made inside the clock's step); it ends when `move` returns false.
+ */
+export function eachMove(scene: Scene, at: Vector3, move: (m: number, fx: TickedFx) => boolean): void {
+  const t0 = fxNow();
+  let done = 0;
+  effects.spawn('ticked', scene, at, {
+    tick(fx) {
+      for (const m = movesSince(t0); done < m; ) if (!move(++done, fx)) return false;
+      return true;
+    },
+  });
+}
+
+/**
+ * The owner's angle while a wolf head throws: Angle[2] +-(base + rand() % 3) x 1, 3 or 5, and Angle[0] by as much one time in
+ * three each way (MoveHandlers.cpp:9156-9167, :9761-9772). [pitch, yaw], degrees.
+ */
+export function shake(yaw: number, base: number): [number, number] {
+  const n = randInt(6);
+  const k = (base + randInt(3)) * ((n % 3) * 2 + 1);
+  const t = randInt(3);
+  return [t === 1 ? k : t === 2 ? -k : 0, n >= 3 ? yaw + k : yaw - k];
+}
+
+/**
+ * A wolf head made on bone `from` at `scale`, the original's angle `angle`: from its first move at `ridingScale`, it rides
+ * bone `rides` on the moves `riding(m)` allows and holds still between; it dies on move ceil(`life`), its LifeTime run out.
+ */
+export function wolfHead(c: SkillContext, model: string, colour: RGB, angle: readonly [number, number, number], from: number, rides: number, scale: number, ridingScale: number, life: number, riding: (m: number) => boolean): void {
+  const t0 = fxNow();
+  const last = bonePos(c.caster, from, new Vector3());
+  const dies = Math.ceil(life);
+  effects.spawn('model', c.scene, last.clone(), {
+    model,
+    seconds: Infinity,
+    scale,
+    scaleAt: () => (movesSince(t0) > 0 ? ridingScale : scale),
+    colour,
+    angle,
+    fadeTail: 0,
+    until: () => movesSince(t0) >= dies || entityGone(c.caster),
+    follow: out => out.copyFrom(riding(movesSince(t0)) ? bonePos(c.caster, rides, last) : last),
+  });
+}
+
+/**
+ * A thrown wolf head (MODEL_WOLF_HEAD_EFFECT sub1/2, MODEL_WOLF_HEAD_EFFECT2 sub4/6): made on the owner's bone 27 at [pitch,
+ * yaw], it flies `speed` cm a tick along that angle (its Direction[1], MoveParticle, ZzzEffect.cpp:6231-6247) for `life` ticks.
+ */
+export function throwHead(c: SkillContext, model: string, colour: RGB, angle: readonly [number, number], scale: number, life: number, speed: number): void {
+  const from = bonePos(c.caster, 27, new Vector3());
+  const p = angle[0] * DEG;
+  const y = angle[1] * DEG;
+  const step = cm(speed);
+  const dx = step * Math.cos(p) * Math.sin(y);
+  const dy = -step * Math.sin(p);
+  const dz = -step * Math.cos(p) * Math.cos(y);
+  const t0 = fxNow();
+  effects.spawn('model', c.scene, from.clone(), {
+    model,
+    seconds: ticks(life),
+    scale,
+    colour,
+    angle: [angle[0], 0, angle[1]],
+    fadeTail: 0,
+    follow: out => {
+      const m = movesSince(t0);
+      return out.set(from.x + dx * m, from.y + dy * m, from.z + dz * m);
+    },
+  });
+}
 
 /** The two clips a party buff (266-268) picks between, evens (SetRageSkillAni, MonkSystem.cpp:2866-2874). */
 export const PARTY_BUFF_CLIPS: readonly PlayerAction[] = [PlayerAction.PLAYER_SKILL_ATT_UP_OURFORCES, PlayerAction.PLAYER_SKILL_HP_UP_OURFORCES];
