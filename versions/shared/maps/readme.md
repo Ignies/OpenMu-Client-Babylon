@@ -101,8 +101,8 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   `|sin|`), `BITMAP_KANTURU_2ND_EFFECT1` (Kanturu 2 4's pair over its lamp); Karutan 66, Crywolf 41
   and Cursed Temple 62 have none (the insect hangs its `BITMAP_SHINY + 5` points itself, the beacon
   its turning pair, the dragon its eyes); `BITMAP_SHINY + 1` (Shiny02.jpg, 32 by 64: Kanturu 3 5's
-  pair, Land of Trials 49's grey card); Icarus 10's `BITMAP_LIGHT` particle is sized without the
-  pillar's scale.
+  pair, Land of Trials 49's grey card); Icarus 10 streams `light0` (`BITMAP_LIGHT` SubType 0) from
+  bone 3, one a tick at scale 1 on any pillar, and draws no card.
 - `flareWaves.test.ts`: the table cards' waves are the original's `sinf(WorldTime * k)`, k in radians a
   millisecond: the fire vents (Karutan 113, Loren Market 57, Vulcanus 6) burn steady red, with one
   particle of the original's three fire sheets every tick, spawned at the vent; the
