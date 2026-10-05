@@ -21,7 +21,7 @@ folders: [../readme.md](../readme.md).
 | `ignore_defense` | 266 | at the caster, all blue: the sword flash, three ground shock rings and spinning clouds, the wind pillar and a widening magic circle; the Ourforces bone glow as a buff look |
 | `increase_health` | 267, 573 str | the same in violet; the Ourforces bone glow |
 | `increase_block` | 268, 569 power up, 572 mastery | the same in red; the Ourforces bone glow |
-| `charge` | 269 | Rush's charge: sparks and fire each tick until RUSH key 5 or tick 14, then the sword force at the caster |
+| `charge` | 269 | Rush's charge: each tick until RUSH key 5 or tick 14, 20 cm over the feet, four JOINT_SPARKs thrown back and four BITMAP_FIRE sub18 ground smokes; then the sword force at the caster |
 | `phoenix_shot` | 270 | a phoenix arrow, a fire hit and the phoenix model |
 
 Timing follows the original's effects, not the packet: most of them read the caster's clip key

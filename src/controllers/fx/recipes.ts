@@ -127,6 +127,8 @@ export const TEX = {
   swordEffJoint: 'Effect/!SwordEff.OZJ',
   /** BITMAP_DAMAGE1 (Damage1.jpg, 64 px, ZzzOpenData.cpp:4650): Chain Drive's sparks and its spin waves' sheet. */
   damage1: 'Effect/Damage1.OZJ',
+  /** BITMAP_GROUND_SMOKE (ground_smoke.tga, 128 px with alpha, ZzzOpenData.cpp:4657): BITMAP_FIRE sub18, the Charge's smoke. */
+  groundSmoke: 'Effect/ground_smoke.OZT',
   swordEff2: 'Effect/SwordEffor2.OZJ',
   /** BITMAP_SWORD_EFFECT_MONO (Swordeff_mono.jpg): Strike of Destruction's flash at the caster. */
   swordEffMono: 'Effect/Swordeff_mono.OZJ',

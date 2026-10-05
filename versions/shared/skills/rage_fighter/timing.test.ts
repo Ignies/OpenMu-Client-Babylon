@@ -10,6 +10,7 @@ import type { Entity } from '@/ecs/world';
 import { PlayerAction } from '../../objects/enum';
 import { playAreaSkillVisual, playTargetedSkillVisual } from '../skillVisuals';
 import { skillSound } from '@/controllers/sound/combat';
+import { JOINT_SPARKS } from '../_shared';
 import { beginDarkSide, darkSideHitTicks, isDarkSide, nextDarkSideHit, observeDarkSideEcho, observeDarkSideTargets, rageLayer } from './dark_side/rage';
 
 vi.hoisted(() => {
@@ -483,7 +484,21 @@ describe('Killing Blow (260): BITMAP_SBUMB on its LifeTime (MoveHandlers.cpp:919
 
 describe('Charge (269): AttackStage\'s AT_SKILL_OCCUPY case (ZzzCharacter.cpp:2934-2959, :4690-4695)', () => {
   const RUSH = PlayerAction.PLAYER_ATTACK_RUSH;
-  const sprays = (r: Run) => [...new Set(r.spawns.filter(s => s.name === 'joint').map(s => s.tick))];
+  const sprays = (r: Run) => [...new Set(r.spawns.filter(s => s.name === 'particles' && s.opts.recipe === JOINT_SPARKS).map(s => s.tick))];
+
+  it('each tick of the charge, 20 cm over the feet: four JOINT_SPARK sub0 thrown back and four BITMAP_FIRE sub18 ground smokes (ZzzCharacter.cpp:2942-2957)', () => {
+    const r = run(269, RUSH, { keysPerTick: 0.3 });
+    const smokes = (s: Spawn) => (s.opts.recipe as { texture?: string } | undefined)?.texture === TEX.groundSmoke;
+    const at = (t: number) => r.spawns.filter(s => s.tick === t && s.name === 'particles' && (s.opts.recipe === JOINT_SPARKS || smokes(s)));
+    expect(range(1, 14).map(t => at(t).length)).toEqual(range(1, 14).map(() => 8));
+    const smoke = at(1).find(s => s.opts.recipe !== JOINT_SPARKS)?.opts.recipe as { texture: string; blend: string; size: number; life: number };
+    // ground_smoke 128 px x Scale 1.5, alpha-blended (EnableAlphaBlend3), LifeTime 24 (ZzzEffectParticle.cpp:481-488, :9151-9154).
+    expect([smoke.texture, smoke.blend, smoke.size, Math.round(smoke.life * 25)]).toEqual([TEX.groundSmoke, 'alpha', expect.closeTo(1.92), 24]);
+    // Thrown back along the caster's facing, pitched 150-209 degrees.
+    const heading = at(1)[0].opts.heading as Vector3;
+    expect(heading.x * Math.sin(0.5) - heading.z * Math.cos(0.5)).toBeLessThan(0);
+    expect(at(1)[0].at.y).toBeCloseTo(0.2);
+  });
   const force = (r: Run) => r.spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.swordForce).map(s => s.tick);
   const volley = (r: Run) => r.spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.multishot).map(s => s.tick);
 

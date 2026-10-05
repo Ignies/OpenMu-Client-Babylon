@@ -1,5 +1,5 @@
 import { type Entity } from '@/ecs/world';
-import { IMPACT_HEIGHT, SkillContext, Step, TICK, baseSkill, cm, currentSkill, perTick, ticks, toward, weaponsOf } from '@/controllers/skills/visuals';
+import { IMPACT_HEIGHT, SkillContext, Step, TICK, baseSkill, cm, currentSkill, ticks, toward, weaponsOf } from '@/controllers/skills/visuals';
 import { ItemsDatabase } from '../../items/itemsDatabase';
 import { delay, entityGone, entityPos, fxNow, type ParticleRecipe, type RGB } from '@/controllers/fx/core';
 import { PlayerAction } from '../../objects/enum';
@@ -10,6 +10,7 @@ import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
 import { playCombat } from '@/controllers/sound/combat';
 import { Ecs } from '@/ecs/current';
+import { JOINT_SPARKS, sparkHeading } from '../_shared';
 
 // ---- dk2 steps
 
@@ -17,9 +18,8 @@ export const rand = (min: number, max: number): number => min + Math.random() * 
 
 /** The original's `Angle` (MU Z-up; pitch, roll, yaw in radians) as a node rotation: `(-a0, -a2, -a1)` (controllers/render/renderAngles.ts). */
 export const muAngles = (out: Vector3, pitch: number, roll: number, yaw: number): Vector3 => out.set(-pitch, -yaw, -roll);
-/** `VectorRotate((0, -1, 0), AngleMatrix(pitch, 0, yaw))`: the way a JOINT_SPARK's `Velocity` carries its head. */
-export const sparkHeading = (pitch: number, yaw: number): Vector3 =>
-  new Vector3(Math.sin(yaw) * Math.cos(pitch), -Math.sin(pitch), -Math.cos(yaw) * Math.cos(pitch));
+// The Rage Fighter's Charge throws the same sparks: they live in ../_shared.ts.
+export { JOINT_SPARKS, sparkHeading };
 
 /** `RequestTerrainLight` at a point, as the grey level the original's BodyLight adds `o->Light` to. */
 export function terrainLevel(x: number, z: number): number {
@@ -52,28 +52,6 @@ export const itemScale = (w: { group: number; num: number }): number => (w.group
 /** `ItemObjectAttribute` overwrites `o->Light` with 0.3 grey before `RequestTerrainLight` is added to it (ZzzObject.cpp:5157). */
 export const ITEM_LIGHT: RGB = [0.3, 0.3, 0.3];
 
-/**
- * BITMAP_JOINT_SPARK sub0 (ZzzEffectJoint.cpp:950-959): Spark01, white, 6-25 cm a tick along its `Angle`,
- * LT 8-15, two tails. Drawn as a stretched particle rather than a two-point ribbon: a Twisting Slash throws
- * twenty a tick. 2 cm wide and one tick of travel long, 6-25 cm with its speed.
- */
-export const JOINT_SPARKS: ParticleRecipe = {
-  texture: TEX.spark,
-  colour: RGBS.white,
-  size: 0.02,
-  sizeJitter: 0,
-  stretch: 12.5,
-  stretchBySpeed: true,
-  aimed: true,
-  life: ticks(15),
-  lifeJitter: 7 / 15,
-  box: [0.1, 0, 0.1],
-  dir1: [0, 0, 0],
-  dir2: [0, 0, 0],
-  power: perTick(25),
-  powerJitter: 19 / 25,
-  capacity: 600,
-};
 /** BITMAP_SPARK sub0 (ZzzEffectParticle.cpp): a Spark02 chip thrown up and falling, 1.6-2.8 cm; 3 cm. */
 const SPARK_CHIPS: ParticleRecipe = {
   texture: TEX.spark2,

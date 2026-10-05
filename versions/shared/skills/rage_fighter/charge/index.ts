@@ -1,18 +1,62 @@
 import { defineSkill } from '@/controllers/skills/define';
-import { FIRE_PUFF, MODEL, RGBS } from '@/controllers/fx/recipes';
-import { atCaster, flying, particles, perTick, ticks, type SkillContext, type Step } from '@/controllers/skills/visuals';
+import { FIRE_PUFF, MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
+import { cm, flying, particles, perTick, ticks, type SkillContext, type Step } from '@/controllers/skills/visuals';
 import { effects } from '@/controllers/fx';
-import { delay, entityGone, entityPos, entityYaw, fxNow } from '@/controllers/fx/core';
+import { delay, entityGone, entityPos, entityYaw, fxNow, type ParticleRecipe } from '@/controllers/fx/core';
 import { RELEASE_TICKS } from '@/controllers/combat';
 import { playCombat } from '@/controllers/sound';
 import { ENUM_WORLD } from '@/core/types';
-import { currentMap, multiShotVolley, streamerFan } from '../../_shared';
+import { DEG, JOINT_SPARKS, currentMap, multiShotVolley, randInt, sparkHeading } from '../../_shared';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 
 import { A } from '@/controllers/combat/recipes';
 
-/** The charge's sparks and fire at the caster, every tick (the BITMAP_FIRE sub18 spray stands in as streamers). */
-const spray: Step = atCaster(streamerFan(4, 0.35, { velocity: perTick(40), seconds: ticks(8), maxTails: 4, width: 0.15, colour: RGBS.fire, pitch: -0.9 }), 0.2);
+/**
+ * BITMAP_FIRE sub18 (ZzzEffectParticle.cpp:481-488, :4687-4696, :9151-9154): the whole ground_smoke sheet, 128 px x Scale 1.5,
+ * alpha-blended (EnableAlphaBlend3), the Scale growing by a Gravity that climbs 0.004 a tick (1.5 -> 2.7), the card rising 12 cm
+ * and drifting under 1.6 cm a tick, white keeping 0.95 of its Light a tick (to 0.29); LifeTime 24.
+ */
+const CHARGE_SMOKE: ParticleRecipe = {
+  texture: TEX.groundSmoke,
+  colour: RGBS.white,
+  colourEnd: [0.29, 0.29, 0.29],
+  size: cm(128) * 1.5,
+  sizeJitter: 0,
+  life: ticks(24),
+  lifeJitter: 0,
+  endScale: 1.8,
+  box: [0, 0, 0],
+  dir1: [-1, -1, -1],
+  dir2: [1, 1, 1],
+  power: perTick(1.6),
+  powerJitter: 1,
+  gravity: 0.25,
+  blend: 'alpha',
+  fade: [
+    [0, 1],
+    [1, 1],
+  ],
+  realSeconds: true,
+  capacity: 256,
+};
+
+const sprayAt = new Vector3();
+const sprayHeading = new Vector3();
+
+/**
+ * The charge's spray each tick (ZzzCharacter.cpp:2942-2957): 20 cm over the feet +-15 cm, four JOINT_SPARK sub0 at
+ * `Angle (150..209, 0, yaw)` (thrown back, pitched +-30 degrees), each with a BITMAP_FIRE sub18.
+ */
+const spray: Step = (_at, c) => {
+  const p = entityPos(c.caster, cm(20), sprayAt);
+  p.x += cm(randInt(30) - 15);
+  p.z += cm(randInt(30) - 15);
+  const yaw = entityYaw(c.caster);
+  for (let i = 0; i < 4; i++) {
+    effects.spawn('particles', c.scene, p, { recipe: JOINT_SPARKS, count: 1, heading: sparkHeading((randInt(60) + 150) * DEG, yaw, sprayHeading) });
+    effects.spawn('particles', c.scene, p, { recipe: CHARGE_SMOKE, count: 1 });
+  }
+};
 
 /**
  * The release block (ZzzCharacter.cpp:4690-4695): MODEL_SWORD_FORCE sub2 at the caster and SOUND_BCS_RUSH, a wave
