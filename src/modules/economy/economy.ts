@@ -322,9 +322,9 @@ const emptyGrid = (size: number) => new Array<Item | null>(size).fill(null);
  * chaos machine (`CNewUIMixInventory`), trade (`CNewUITrade`) and the
  * personal shop (`CNewUIMyShopInventory` / `CNewUIPurchaseShopInventory`).
  *
- * They live beside `Store` the way `Social` does: `Store` owns the hero's
- * inventory and the shared picked-item cursor, this owns the grids that only
- * exist while one of these windows is open. `Bag.itemsOfStorage` resolves a
+ * The inventory's `Bag` owns the hero's items and the shared picked-item
+ * cursor; this store owns the grids that only exist while one of these
+ * windows is open. `Bag.itemsOfStorage` resolves a
  * `StorageKind` to one of them, so the pick / place / move code is written
  * once and knows nothing about which window is up.
  */
