@@ -13,9 +13,9 @@ import { CURSED_TEMPLE_LIGHTING } from './lighting';
  * Illusion Temple (World47 / Object47) - the map entry: identity and the per-world data the
  * renderer, the terrain loader, the weather and the sound tables read.
  *
- * No `create`: every runtime behaviour of this map is table data (spec.ts) or
- * lives in another system; the notes below and `spec.ts`'s header say what is
- * and is not built.
+ * Every runtime behaviour of this map is table data (spec.ts), the dragon's
+ * eyes on its bones (`create` binds `dragonObject.ts`) or lives in another
+ * system; the notes below and `spec.ts`'s header say what is and is not built.
  *
  * Illusion Temple (`WD_45CURSEDTEMPLE_LV1 … LV6`, all six on
  * `World47`/`Object47`).

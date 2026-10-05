@@ -75,18 +75,6 @@ describe('the map flare waves', () => {
     ]);
   });
 
-  // `CreateSprite(BITMAP_SHINY + 1, ..., 1.5f + fLumi / 2.f, (1, 0.5, 0.5), NULL)`, `fLumi = sinf(WorldTime * 0.001f) * 0.5f + 0.5f`,
-  // at bones 22 and 23 + (6, +-5, 2), the middle of the head's swing.
-  it('Cursed Temple 62: two pink Shiny02 cards on the dragon\'s eyes that grow and shrink (ZzzObject.cpp:684-696)', () => {
-    const sprite = { scale: 1, color: [1, 0.5, 0.5], grow: { speed: 0.001, amount: 0.25, base: 1.5 }, texture: 'shiny1', unscaled: true };
-    for (let world = ENUM_WORLD.WD_45CURSEDTEMPLE_LV1; world <= ENUM_WORLD.WD_45CURSEDTEMPLE_LV6; world++) {
-      expect(cardsOf(world, 62), `world ${world}`).toEqual([
-        { offset: [32, -29, 1032], bone: true, sprite },
-        { offset: [32, 23, 1030], bone: true, sprite },
-      ]);
-    }
-  });
-
   // `fLumi = (sinf(WorldTime * 0.001f) + 1.0f) * 0.3f + 0.4f` tints `(1, 1, 0.6)`; `Scale * 6` at bone 5 + (-40, -10, 0).
   it('Elbeland 63: the great lantern breathes on bone 5 (GMNewTown.cpp:289-300)', () => {
     expect(cardsOf(ENUM_WORLD.WD_51ELBELAND, 63)).toEqual([
