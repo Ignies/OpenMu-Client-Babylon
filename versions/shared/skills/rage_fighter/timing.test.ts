@@ -218,9 +218,24 @@ describe('Chain Drive (262): BITMAP_SWORDEFF reads the caster\'s GIANTSWING key 
     for (const skill of [262, 558]) {
       const r = run(skill, SWING);
       expect(soundTicks(r, ATT)).toEqual([16, 28]);
-      // The giant-swing wave goes out with the first blow.
-      expect(r.spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.shockwave).map(s => s.tick)).toEqual([16]);
+      // The giant-swing wave goes out with the first blow, drawn twice.
+      expect(r.spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.shockwave).map(s => s.tick)).toEqual([16, 16]);
     }
+  });
+
+  it('the first blow\'s MODEL_SHOCKWAVE01 sub0 leaves bone 0 + (-180, 100, 0) and backs off at 220 + Scale x 80 cm (MoveHandlers.cpp:9330-9338, :9428-9436)', () => {
+    // The run ends on tick 19, the wave's third move.
+    const r = run(262, SWING, { ticks: 19 });
+    const waves = r.spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.shockwave);
+    const { seconds, scaleAt, intensity, colour, angle, follow } = waves[0].opts as { seconds: number; scaleAt: (t: number) => number; intensity: (t: number) => number; colour: number[]; angle: number[]; follow: (out: Vector3) => Vector3 };
+    // LifeTime 5 / (2 x 0.4) = 6.25: drawn 7 ticks; Scale + 0.2 and Light x0.65 a move.
+    expect([Math.round(seconds * 25), scaleAt(3 / 25), intensity(3 / 25), colour]).toEqual([7, expect.closeTo(1.6), expect.closeTo(0.65 ** 3), [0.4, 0.5, 1]]);
+    expect(angle).toEqual([60, 0, expect.closeTo(0.5 * (180 / Math.PI) - 180)]);
+    // No skeleton here: it starts at the feet + 90 cm, right over the caster, so it has no way to back off along.
+    expect([waves[0].at.x, waves[0].at.y, waves[0].at.z]).toEqual([100, 0.9, 100]);
+    // Each move sets its height above sea level outright: 220 + (1 + 0.2 x 3) x 80 cm.
+    const at = follow(new Vector3());
+    expect([at.x, at.y, at.z]).toEqual([100, expect.closeTo((220 + 1.6 * 80) / 100), 100]);
   });
 
   it('drops a blow whose key the clip never reaches', () => {
@@ -280,6 +295,8 @@ describe('Chain Drive (262): BITMAP_SWORDEFF reads the caster\'s GIANTSWING key 
       // LifeTime 14 / (2 x 0.4) = 17.5, drawn 18 ticks, Scale 0.5 + 0.1 a tick; 8 / 0.4 = 20, Scale x 1.01 a tick.
       expect(models(r, 'Effect/shockwave02.glb')).toEqual([[28, 18, 0.5, 0.8], [28, 18, 0.5, 0.8]]);
       expect(models(r, MODEL.shockwaveSpin)).toEqual([[28, 20, 0.5, 0.515], [28, 20, 0.9, 0.927]]);
+      // The spin waves draw Damage1 over their own sheet (ZzzObject.cpp:2499-2503).
+      expect(r.spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.shockwaveSpin).map(s => s.opts.texture)).toEqual([TEX.damage1, TEX.damage1]);
     }
     expect(models(run(262, SWING, { leaveAt: 20 }), MODEL.shockwaveSpin)).toEqual([]);
   });

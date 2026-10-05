@@ -1,7 +1,7 @@
 import { defineSkill } from '@/controllers/skills/define';
 import { MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
 import { Vector3 } from '@/controllers/render/babylon/exports';
-import { cm, flying, perTick, seq, ticks, type SkillContext, type Step } from '@/controllers/skills/visuals';
+import { cm, seq, ticks, type SkillContext, type Step } from '@/controllers/skills/visuals';
 import { effects } from '@/controllers/fx';
 import { type ModelHandle } from '@/controllers/fx/model';
 import { TICK, boneLocalPos, bonePos, delay, entityGone, entityPos, entityYaw, fxNow, type RGB } from '@/controllers/fx/core';
@@ -72,6 +72,8 @@ const secondWaves: Step = (_at, c) => {
       seconds: ticks(spinTicks),
       angle: [90, 0, yaw],
       colour: [1, 1, 1],
+      // RenderBody's Damage1 over its own sheet (ZzzObject.cpp:2499-2503).
+      texture: TEX.damage1,
       scaleAt: t => scale * 1.01 ** movesAt(t),
       intensity: t => 0.9 ** movesAt(t),
       fadeTail: 0,
@@ -196,9 +198,43 @@ const blow = (sparks: (c: SkillContext, target: Entity) => void): Step => (_at, 
   if (p) playCombat('Sound/Ragefighter/Rage_Giantswing_Att', { x: p.x, z: p.z });
 };
 
-/** The first blow also sends the giant-swing MODEL_SHOCKWAVE01 wave out from the caster, at (60, 0, Angle[2] - 180) (:9330-9340). */
-const wave: Step = (_at, c) =>
-  effects.spawn('model', c.scene, entityPos(c.caster, 0.05, new Vector3()), { model: MODEL.shockwave, seconds: ticks(15), scale: 0.8, colour: RGBS.arc, follow: flying(c, 0.05, perTick(40)), angle: [60, 0, deg(entityYaw(c.caster)) - 180] });
+/** The first blow's wave starts at bone 0 + (-180, 100, 0) cm (MoveHandlers.cpp:9332-9334). */
+const WAVE1_AT = new Vector3(cm(-180), cm(100), 0);
+
+/**
+ * The first blow's MODEL_SHOCKWAVE01 sub0, Light (0.4, 0.5, 1), Scale 1, at (60, 0, Angle[2] - 180) (MoveHandlers.cpp:9330-9338). It
+ * lives 5 / (2 x PlaySpeed) ticks (ZzzEffect.cpp:5931-5945); each move Scale + 0.2 and Light x0.65, and it backs off along the line
+ * from the caster to it, 30 cm a tick slowing by 0.99, at 220 + Scale x 80 cm above sea level (MoveHandlers.cpp:9428-9436). Drawn
+ * twice at its Light (ZzzObject.cpp:2483-2488), so twice here.
+ */
+const wave: Step = (_at, c) => {
+  if (entityGone(c.caster)) return;
+  const start = boneLocalPos(c.caster, 0, WAVE1_AT, new Vector3());
+  const feet = entityPos(c.caster, 0, new Vector3());
+  // StartPosition: 30 cm from the caster towards the wave, ground to ground (ZzzEffect.cpp:5937-5944).
+  const back = new Vector3(start.x - feet.x, groundY(start.x, start.z) - groundY(feet.x, feet.z), start.z - feet.z).normalize().scaleInPlace(cm(30));
+  const angle: [number, number, number] = [60, 0, deg(entityYaw(c.caster)) - 180];
+  const seconds = ticks(Math.ceil(5 / (2 * swingSpeed(c))));
+  const t0 = fxNow();
+  for (let pass = 0; pass < 2; pass++) {
+    effects.spawn('model', c.scene, start.clone(), {
+      model: MODEL.shockwave,
+      seconds,
+      angle,
+      colour: [0.4, 0.5, 1],
+      scaleAt: t => 1 + 0.2 * movesAt(t),
+      intensity: t => 0.65 ** movesAt(t),
+      fadeTail: 0,
+      // Position -= StartPosition after StartPosition *= 0.99: 30 x 99 x (1 - 0.99^n) cm back after n moves; the height is set outright.
+      follow: out => {
+        const n = movesAt(fxNow() - t0);
+        if (n === 0) return out.copyFrom(start);
+        const k = 99 * (1 - 0.99 ** n);
+        return out.set(start.x - back.x * k, cm(220 + (1 + 0.2 * n) * 80), start.z - back.z * k);
+      },
+    });
+  }
+};
 
 /** BITMAP_SWORDEFF's joint (ZzzEffectJoint.cpp:2720-2729): !SwordEff on its flat face, Scale 100 cm wide, Light (0.6, 0.6, 1), MaxTails 50. */
 const SWORDEFF_JOINT = { texture: TEX.swordEffJoint, colour: [0.6, 0.6, 1] as const, maxTails: 50, faces: 'flat' as const, maxSegment: cm(60), batch: 11 };
