@@ -35,6 +35,22 @@ describe('the map flare waves', () => {
     }
   });
 
+  // `CreateParticle` copies `o->Position` (ZzzEffectParticle.cpp:75) and FIRE_HIK1 0, FIRE_CURSEDLICH 4 and FIRE_HIK3 0
+  // add no offset (:1847-1856, :321-330, :1924-1933): every preset, a correction.
+  it('fire vents spawn their fire at the vent, no spread (ZzzEffectParticle.cpp:321-330, :1847-1856, :1924-1933)', () => {
+    const vents: [ENUM_WORLD, number][] = [
+      [ENUM_WORLD.WD_80KARUTAN1, 113],
+      [ENUM_WORLD.WD_81KARUTAN2, 113],
+      [ENUM_WORLD.WD_79UNITEDMARKETPLACE, 57],
+      [ENUM_WORLD.WD_63PK_FIELD, 6],
+      [ENUM_WORLD.WD_66DOPPLEGANGER2, 6],
+    ];
+    for (const [world, type] of vents) {
+      const fires = lightEmittersFor(world, type)?.flatMap(e => (Array.isArray(e.emissions) ? e.emissions : []));
+      expect(fires?.map(f => f.jitter), `world ${world} type ${type}`).toEqual([undefined]);
+    }
+  });
+
   // `if (rand_fps_check(3)) CreateParticle(BITMAP_TRUE_FIRE, ...)`: one tick in three; the Swamp's smoke on the same roll.
   it('the BITMAP_TRUE_FIRE braziers burn one tick in three (GMNewTown.cpp:249-254, GM_Kanturu_1st.cpp:158-164, GM3rdChangeUp.cpp:126-132, GMSwampOfQuiet.cpp:139-148)', () => {
     const braziers: [ENUM_WORLD, number][] = [

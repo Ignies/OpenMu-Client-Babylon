@@ -90,7 +90,8 @@ export const VULCANUS_EMISSIONS: Partial<Record<number, readonly Emission[]>> =
  * Type 6 (x50), `RenderObjectVisual` :363-386: a steady `BITMAP_LIGHT` sprite sized
  * `2 * scale` in `(1.0, 0.2, 0.0)`, plus one of `FIRE_HIK1` SubType 0,
  * `FIRE_CURSEDLICH` SubType 4 and `FIRE_HIK3` SubType 0 - `fire1`, `fire2`
- * and `fire3` here - picked afresh every tick.
+ * and `fire3` here - picked afresh every tick, at `o->Position`: none of the
+ * three adds an offset (ZzzEffectParticle.cpp:321-330, :1847-1856, :1924-1933).
  *
  * No `AddTerrainLight` in the PK Field code at all (:252-264 only hides the
  * vent) - the lava glow is the baked lightmap - so the ground light is ours
@@ -112,7 +113,7 @@ export const VULCANUS_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
         get terrain() {
           return isOn('lampFlares') ? VENT_GROUND : undefined;
         },
-        emissions: [{ kinds: ['fire1', 'fire2', 'fire3'], every: 1, jitter: 6 }],
+        emissions: [{ kinds: ['fire1', 'fire2', 'fire3'], every: 1 }],
       },
     ],
   };

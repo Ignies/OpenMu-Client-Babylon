@@ -48,7 +48,7 @@ export const LOREN_MARKET_EMISSIONS: Partial<
  *    swaying 5 across in x; the row sits at the middle of the sway.
  *  - **57** (×12), `RenderObjectVisual` :297-318: a steady `BITMAP_LIGHT`
  *    sprite at `2 * scale` in `(1, 0.2, 0)` plus the cycling `FIRE_HIK1` /
- *    `CURSEDLICH` / `HIK3` - the same vent Vulcanus 6 and Karutan 113 are.
+ *    `CURSEDLICH` / `HIK3` at the vent - the same vent Vulcanus 6 and Karutan 113 are.
  *    `MoveObject` only hides it: the ground light is ours (`lampFlares`, none
  *    on Classic).
  */
@@ -107,7 +107,7 @@ export const LOREN_MARKET_LIGHTS: Partial<
       get terrain() {
         return isOn('lampFlares') ? VENT_GROUND : undefined;
       },
-      emissions: [{ kinds: ['fire1', 'fire2', 'fire3'], every: 1, jitter: 6 }],
+      emissions: [{ kinds: ['fire1', 'fire2', 'fire3'], every: 1 }],
     },
   ],
 };
