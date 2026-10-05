@@ -281,6 +281,19 @@ describe('Dragon Roar (264): the dragon on BLOW_OF_DESTRUCTION\'s LifeTime, the 
   });
 });
 
+describe('The master skills sound as their base: RageCreateEffect plays one sound for each case (MonkSystem.cpp:1089-1301)', () => {
+  it.each([
+    [551, 260],
+    [554, 260],
+    [558, 262],
+    [559, 263],
+    [560, 264],
+  ])('%i as %i', (master, base) => {
+    expect(skillSound(base)).not.toBeNull();
+    expect(skillSound(master)).toBe(skillSound(base));
+  });
+});
+
 describe('Beast Uppercut (261): MODEL_DOWN_ATTACK_DUMMY_R then _L, on their own keys (MoveHandlers.cpp:9221-9309)', () => {
   const STAMP = PlayerAction.PLAYER_SKILL_STAMP;
   const ATT = 'Sound/Ragefighter/Rage_Stamp_Att';

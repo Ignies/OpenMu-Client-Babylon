@@ -64,5 +64,6 @@ count moves on the effects clock (`eachMove`, `movesSince`), so a script made in
 
 ## Tests
 - `timing.test.ts`: per skill, the tick each part draws or sounds at, against the clip; Dark Side's
-  follow-ups against the echo, the hero's clip and AttackTime's stop at 15.
+  follow-ups against the echo, the hero's clip and AttackTime's stop at 15; the master skills (551, 554, 558-560)
+  sound as their base, as RageCreateEffect plays one sound for each case.
 - Covered by the golden tests in `../` (`skillVisuals.golden.test.ts`, `skillTables.golden.test.ts`).
