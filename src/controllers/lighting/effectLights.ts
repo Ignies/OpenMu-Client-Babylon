@@ -80,6 +80,8 @@ export type FlareSpec = {
   readonly grow?: Wave;
   /** Degrees a millisecond it turns, counter-clockwise: `CreateSprite`'s `Rotation` (ZzzOpenglUtil.cpp:899-908). */
   readonly spin?: number;
+  /** A fresh `rand() % 360` degrees every frame (GMHuntingGround.cpp:154). */
+  readonly randomAngle?: boolean;
   /** The sheet the original names; `BITMAP_LIGHT` when left out. */
   readonly texture?: FlareTexture;
   /** The original sizes it without `* o->Scale` (`CreateSprite(..., 5.5f, ...)`): the object's scale does not apply. */
@@ -294,9 +296,9 @@ export async function createEffectLight(
   let observer: ReturnType<Scene['onBeforeRenderObservable']['add']> | null =
     null;
 
-  const { pulse, grow, spin } = spec;
+  const { pulse, grow, spin, randomAngle } = spec;
 
-  if (pulse || grow || spin) {
+  if (pulse || grow || spin || randomAngle) {
     let elapsed = 0;
 
     observer = scene.onBeforeRenderObservable.add(() => {
@@ -305,6 +307,7 @@ export async function createEffectLight(
       if (pulse) paint.setLuminosity(wave(pulse, elapsed));
       if (grow) resize(scale * wave(grow, elapsed));
       if (spin) sprite.angle = elapsed * spin * RADIANS_PER_DEGREE;
+      if (randomAngle) sprite.angle = Math.floor(Math.random() * 360) * RADIANS_PER_DEGREE;
     });
   }
 

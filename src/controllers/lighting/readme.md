@@ -36,7 +36,8 @@ policy. It knows how to light something, never which skill or item asks for it.
   BITMAP_KANTURU_2ND_EFFECT1, Object39's k_effect_01.jpg, :5495). A card is its sheet's own width
   by its height times its scale (zzzeffectsprite.cpp:72-77), times the object's scale unless
   the spec is `unscaled`; `pulse` waves its brightness (`abs` folds the wave up at zero, the
-  original's `absf(sinf(...))`), `grow` its size and `spin` turns it, and a `MovableFlare` takes
+  original's `absf(sinf(...))`), `grow` its size, `spin` turns it and `randomAngle` turns it to a
+  fresh `rand() % 360` degrees every frame, and a `MovableFlare` takes
   `setLuminosity`, `setScale` and `setAngle` (degrees, the original's `Rotation`) from its host.
   One sprite manager per sheet and scene.
 - `items.ts`: `lightItem`, `itemSelfLight`. `sky.ts`: `strikeThunder`.
@@ -111,8 +112,9 @@ policy. It knows how to light something, never which skill or item asks for it.
 - `characters.test.ts`: a steady carried glow (Poison Shadow), one that breathes, and the Scorpion's per-frame flicker.
 - `effectLights.test.ts`: a card is drawn from the sheet its spec names, one manager per sheet, at
   the sheet's own width and height (checked against the file in `Data`; Shiny02.jpg is twice as tall
-  as wide, and grows and resizes both ways); an `unscaled` card keeps its size on a scaled object; an `abs` wave breathes on `|sin|`; a `grow` card grows and shrinks, a `spin`
-  card turns; a movable card resizes and turns.
+  as wide, and grows and resizes both ways); an `unscaled` card keeps its size on a scaled object;
+  an `abs` wave breathes on `|sin|`; a `grow` card grows and shrinks, a `spin` card turns, a
+  `randomAngle` card takes a fresh whole degree every frame; a movable card resizes and turns.
 - `mapObjectLightAdapter.test.ts`: a `bone` offset grows with the object, a plain one does not.
 - `mapObjectLights.test.ts`: a row's ground light breathes on its own pulse, else on its flare's, and a
   flicker wins over both.

@@ -60,9 +60,9 @@ export const KANTURU3_EMISSIONS: Partial<Record<number, readonly Emission[]>> =
  *  - **54** (×45), :173-184: a single flash on the first frame, then hidden
  *    - a one-shot, reduced here to a dim steady glow.
  *  - **5** (×13, `RenderKanturu3rdObjectVisual` :262-272): Kanturu 2's relic
- *    lamp (`relicLamp`), its `BITMAP_LIGHT` sized `fLumi / 2.4`, no terrain
- *    light. Its two `BITMAP_SHINY + 1` turning at `WorldTime / 2` and `/ 4`
- *    degrees are not drawn: Shiny02.jpg is 32 by 64 and a card sheet is square.
+ *    lamp (`relicLamp`), its `BITMAP_LIGHT` and two `BITMAP_SHINY + 1` sized
+ *    `fLumi / 2.4`, no terrain light; the two turn `(int)(WorldTime / 2) % 360`
+ *    and `/ 4` degrees, 0.5 and 0.25 a millisecond.
  *
  * `range` is fixed at the scale-1 value; the objects sit at 1.0-1.9.
  */
@@ -93,5 +93,5 @@ export const KANTURU3_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
         terrain: { range: 2, color: [0.4, 0.4, 0.4] },
       },
     ],
-    5: [relicLamp(1 / 2.4)],
+    5: [relicLamp(1 / 2.4), relicLamp(1 / 2.4, 'shiny1', 0.5), relicLamp(1 / 2.4, 'shiny1', 0.25)],
   };

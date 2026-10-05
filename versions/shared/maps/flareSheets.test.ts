@@ -99,6 +99,17 @@ describe('the BITMAP_KANTURU_2ND_EFFECT1 cards (k_effect_01.jpg)', () => {
   });
 });
 
+// Shiny02.jpg is 32 by 64: the card is twice as tall as wide (zzzeffectsprite.cpp:72-77).
+describe('the BITMAP_SHINY + 1 cards (Shiny02.jpg)', () => {
+  const shiny = (world: ENUM_WORLD, type: number) => cardsOf(world, type).filter(e => e.sprite?.texture === 'shiny1').length;
+
+  it('Kanturu 3 5 draws two, Land of Trials 49 one, Cursed Temple 62 two (GM_Kanturu_3rd.cpp:270-271, GMHuntingGround.cpp:154, ZzzObject.cpp:692, :696)', () => {
+    expect(shiny(ENUM_WORLD.WD_39KANTURU_3RD, 5)).toBe(2);
+    expect(shiny(ENUM_WORLD.WD_31HUNTING_GROUND, 49)).toBe(1);
+    expect(shiny(ENUM_WORLD.WD_45CURSEDTEMPLE_LV1, 62)).toBe(2);
+  });
+});
+
 describe('the BITMAP_SHINY + 5 cards (shiny05.jpg)', () => {
   // Its two points ride bones that sweep 1.4 tiles: the insect hangs them itself (karutan1/insectObject.test.ts).
   it('Karutan 66: no table card on top of the insect\'s own (GMKarutan1.cpp:68-82)', () => {

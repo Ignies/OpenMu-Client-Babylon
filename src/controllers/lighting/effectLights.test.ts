@@ -185,6 +185,19 @@ describe('flare cards', () => {
     expect(card.angle).toBeCloseTo(Math.PI);
   });
 
+  // Land of Trials 49's grey card is `CreateSprite(..., NULL, rand() % 360)` every frame (GMHuntingGround.cpp:154).
+  it('turn a randomAngle card to a fresh whole degree every frame', async () => {
+    const { scene, step } = clockedScene();
+    await createEffectLight(scene, { scale: 1.2, color: [0.3, 0.3, 0.3], texture: 'shiny1', randomAngle: true }, at, 1);
+    const card = lastSprite();
+    const roll = vi.spyOn(Math, 'random').mockReturnValueOnce(0.25).mockReturnValueOnce(0.9999);
+    step(16);
+    expect(card.angle).toBeCloseTo(Math.PI / 2);
+    step(16);
+    expect(card.angle).toBeCloseTo((359 * Math.PI) / 180);
+    roll.mockRestore();
+  });
+
   // A sprite is `Width * Scale` by `Height * Scale` (zzzeffectsprite.cpp:72-77): Shiny02.jpg is 32 by 64.
   it('draw BITMAP_SHINY + 1 from Shiny02.jpg twice as tall as wide, growing and resizing both ways (ZzzOpenData.cpp:5275)', async () => {
     const { scene, step } = clockedScene();
