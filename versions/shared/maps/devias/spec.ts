@@ -81,6 +81,18 @@ export const DEVIAS_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
 };
 
 /**
+ * Ours (`lampFlares`): the original gives the candelabra a BlendMesh and no
+ * light (ZzzObject.cpp:4658-4660).
+ */
+const CANDELABRA_GROUND: LightEmitter['terrain'] = {
+  range: 5.5,
+  color: [1, 0.66, 0.3],
+  flicker: { min: 0.45, max: 0.75, steps: 4 },
+  falloff: 1.4,
+  floorGain: 1.3,
+};
+
+/**
  * Devias standing candelabra (Object3 types 54 / 56), lit from the average
  * of the three wick bones by `DeviasCandleObject`. Lorencia's table candle
  * (150 above) minus the fixed offset, reaching further and yellower: the
@@ -94,11 +106,7 @@ export const DEVIAS_CANDELABRA: LightEmitter = {
   pointDrop: 0,
   pointGain: 1.4,
   wander: 0.05,
-  terrain: {
-    range: 5.5,
-    color: [1, 0.66, 0.3],
-    flicker: { min: 0.45, max: 0.75, steps: 4 },
-    falloff: 1.4,
-    floorGain: 1.3,
+  get terrain() {
+    return isOn('lampFlares') ? CANDELABRA_GROUND : undefined;
   },
 };

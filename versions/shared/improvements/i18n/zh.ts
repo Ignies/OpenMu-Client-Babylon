@@ -27,9 +27,9 @@ export default {
   'fidelity.fortressLights': '帝国要塞的灯光',
   'fidelity.fortressLights.hint':
     '帝国要塞的壁挂火把、吊灯和火盆会照亮周围的地面。经典：与原版一样没有灯光。',
-  'fidelity.lampFlares': '灯与火的光晕',
+  'fidelity.lampFlares': '灯光与光晕',
   'fidelity.lampFlares.hint':
-    '路灯、蜡烛、壁炉和火盆会发出光晕。经典：与原版一样没有光晕。',
+    '路灯、蜡烛、壁炉和火盆会发出光晕，蜡烛会燃烧，部分灯会照亮周围的地面。经典：只有原版绘制的内容。',
   'fidelity.roofFade': '透明屋顶',
   'fidelity.roofFade.hint':
     '站在屋顶下时屋顶会淡出，让你看到室内。经典：屋顶始终显示。',

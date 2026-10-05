@@ -1,7 +1,12 @@
 import { BonedParticleEmitter, type BonedEmission } from '@/controllers/fx/effectParticles';
 import { ModelObject } from '@/controllers/render/modelObject';
+import { isOn } from '@/controllers/fidelity';
 import type { Entity, World } from '@/ecs/world';
 
+/**
+ * Lorencia's table candle (150) and the rig of the Devias candelabra. The wick fire is ours
+ * (`lampFlares`): the original lights the ground under 150 and draws no flame (ZzzObject.cpp:3810-3814).
+ */
 export class CandleObject extends ModelObject {
   #fire: BonedParticleEmitter | null = null;
 
@@ -17,7 +22,7 @@ export class CandleObject extends ModelObject {
 
     await this.loadSpecificModel(this.modelName());
 
-    this.#fire = this.#createFire(world);
+    if (isOn('lampFlares')) this.#fire = this.#createFire(world);
   }
 
   /** Per-wick particle recipe (one table candle: 5 sprites a tick per wick). */

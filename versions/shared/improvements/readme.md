@@ -21,7 +21,7 @@ asks `isOn('<id>')`. Classic turns them all off and runs the original.
 | `torchCrackle` | Enhanced | `controllers/sound/crackle.ts` | torches are silent (no `SOUND_FIRE`) |
 | `loginWallTorches` | Enhanced | `maps/loginscene/wallTorchObject.ts` | the login wall torch is its grey flare alone (GMEmpireGuardian4.cpp:864-875); Enhanced burns it with a warm one |
 | `fortressLights` | Enhanced | `maps/empireguardian4/spec.ts`, `maps/empireguardian/spec.ts` | day-4 wall torches (a grey flare), chandeliers and braziers (79 and 80, also the login scene's and days 1-3's; 79's flare steady) light no ground (no `AddTerrainLight` in cases 37, 79, 80, 157) |
-| `lampFlares` | Enhanced | the `spec.ts` rows of `maps/lorencia` (90, 150), `devias` (66), `elbeland` (61), `losttower` (23); `maps/devias/candleObject.ts` | those lamps, candles, hearths and braziers have no flare, only their light (ZzzObject.cpp:3781-3785, :3810-3814, :3874-3876, :3971-3975, :4658-4660; GMNewTown.cpp:135-140) |
+| `lampFlares` | Enhanced | the `spec.ts` rows of `maps/lorencia` (90, 150), `devias` (66, the candelabra light), `elbeland` (61), `losttower` (18, 19, 20, 23); `maps/lorencia/candleObject.ts`, `maps/devias/candleObject.ts` | those lamps, candles, hearths and braziers have no flare, only their light; the candle wicks do not burn; the Devias candelabra and the Lost Tower lamps, machines and braziers light no ground (ZzzObject.cpp:2887-2912, :3781-3785, :3810-3814, :3874-3876, :3952-3985, :4658-4660; GMNewTown.cpp:135-140) |
 | `roofFade` | Enhanced | `ecs/systems/ceilingHideSystem.ts` | roofs stay drawn (the only object fade is Chaos Castle's) |
 
 - The file's comment cites the original and names the site; the site keeps the original path when
@@ -31,7 +31,7 @@ asks `isOn('<id>')`. Classic turns them all off and runs the original.
   `src/modules/servers/serverManifest.ts`), not a player choice.
 - Some deviations read at build time: `wingShadows` when a wing is created, `loginChandeliers` when
   the login scene loads, `loginWallTorches` and `fortressLights` when a torch, chandelier or brazier
-  lights, `lampFlares` when a lamp's flare is made.
+  lights, `lampFlares` when a lamp's flare, light or wick fire is made.
 - `roofFade` only turns the fade off: `ecs/systems/roofDetection.ts` still finds the roof over the
   hero on Classic, because the weather and the indoor ambience read it.
 
@@ -52,5 +52,6 @@ asks `isOn('<id>')`. Classic turns them all off and runs the original.
 - `maps/loginscene/wallTorchObject.test.ts`, `maps/empireguardian4/spec.test.ts`,
   `ecs/systems/ceilingHideSystem.test.ts`: the torch is its grey flare, the fortress lights are off and
   the roof stays drawn (still detected) on Classic.
-- `maps/lampFlares.test.ts`, `maps/devias/candleObject.test.ts`: the flares the original never draws
-  are gone on Classic, the light under them stays.
+- `maps/lampFlares.test.ts`, `maps/lorencia/candleObject.test.ts`, `maps/devias/candleObject.test.ts`: the
+  flares, wick fires and ground lights the original never draws are gone on Classic, the original's
+  light under them stays.

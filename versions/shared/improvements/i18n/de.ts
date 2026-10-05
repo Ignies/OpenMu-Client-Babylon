@@ -27,9 +27,9 @@ export default {
   'fidelity.fortressLights': 'Lichter der Kaiserfestung',
   'fidelity.fortressLights.hint':
     'Wandfackeln, Kronleuchter und Feuerschalen in der Kaiserfestung erhellen den Boden um sich. Klassisch: kein Licht, wie im Original.',
-  'fidelity.lampFlares': 'Schein von Lampen und Feuern',
+  'fidelity.lampFlares': 'Licht und Schein von Lampen',
   'fidelity.lampFlares.hint':
-    'Straßenlaternen, Kerzen, Herdfeuer und Feuerschalen leuchten mit einem Schein. Klassisch: kein Schein, wie im Original.',
+    'Straßenlaternen, Kerzen, Herdfeuer und Feuerschalen leuchten mit einem Schein, Kerzen brennen und manche Lampen erhellen den Boden um sie herum. Klassisch: nur, was das Original zeichnet.',
   'fidelity.roofFade': 'Durchsichtige Dächer',
   'fidelity.roofFade.hint':
     'Dächer blenden aus, solange du darunter stehst, damit du hineinsiehst. Klassisch: Dächer bleiben immer sichtbar.',

@@ -27,9 +27,9 @@ export default {
   'fidelity.fortressLights': '帝国要塞の明かり',
   'fidelity.fortressLights.hint':
     '帝国要塞の壁たいまつ、シャンデリア、かがり火が周りの床を照らします。クラシック: オリジナル通り明かりはありません。',
-  'fidelity.lampFlares': 'ランプと炎の輝き',
+  'fidelity.lampFlares': 'ランプの明かりと輝き',
   'fidelity.lampFlares.hint':
-    '街灯、ろうそく、暖炉、かがり火が光の輝きを放ちます。クラシック: オリジナル通り輝きはありません。',
+    '街灯、ろうそく、暖炉、かがり火が光の輝きを放ち、ろうそくが燃え、一部のランプが周りの地面を照らします。クラシック: オリジナルが描くものだけです。',
   'fidelity.roofFade': '透ける屋根',
   'fidelity.roofFade.hint':
     '屋根の下に立つと屋根が消え、中が見えます。クラシック: 屋根は常に表示されます。',

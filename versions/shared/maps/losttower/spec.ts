@@ -93,6 +93,33 @@ const FLAME_LUMINOSITY = { min: 0.7, max: 1, steps: 4 } as const;
 /** The brazier's flare, from the line the original commented out; ours (`lampFlares`). */
 const BRAZIER_FLARE: NonNullable<LightEmitter['sprite']> = { scale: 2, color: [1, 0.55, 0.25] };
 
+/**
+ * The ground lights below are all ours: no `AddTerrainLight` in the tower's map code
+ * (ZzzObject.cpp:2887-2912, :3952-3985). They are the `lampFlares` improvement; Classic lights
+ * only the flame vents' `BITMAP_FLAME` (24).
+ */
+const ours = (ground: LightEmitter['terrain']) => (isOn('lampFlares') ? ground : undefined);
+
+const WALL_LAMP_GROUND: LightEmitter['terrain'] = { range: 3, color: [1, 0.85, 0.6] };
+
+const RED_MACHINE_GROUND: LightEmitter['terrain'] = {
+  range: 4,
+  color: [1, 0.2, 0],
+  flicker: VISUAL_LUMINOSITY,
+};
+
+const BLUE_MACHINE_GROUND: LightEmitter['terrain'] = {
+  range: 4,
+  color: [0.4, 0.8, 1],
+  flicker: VISUAL_LUMINOSITY,
+};
+
+const BRAZIER_GROUND: LightEmitter['terrain'] = {
+  range: 3.5,
+  color: [1, 0.55, 0.25],
+  flicker: { min: 0.6, max: 1, steps: 4 },
+};
+
 export const LOST_TOWER_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
   {
     /**
@@ -111,9 +138,8 @@ export const LOST_TOWER_LIGHTS: Partial<Record<number, readonly LightEmitter[]>>
     18: [
       {
         pointRange: 4,
-        terrain: {
-          range: 3,
-          color: [1, 0.85, 0.6],
+        get terrain() {
+          return ours(WALL_LAMP_GROUND);
         },
       },
     ],
@@ -133,10 +159,8 @@ export const LOST_TOWER_LIGHTS: Partial<Record<number, readonly LightEmitter[]>>
     19: [
       {
         pointRange: 6,
-        terrain: {
-          range: 4,
-          color: [1, 0.2, 0],
-          flicker: VISUAL_LUMINOSITY,
+        get terrain() {
+          return ours(RED_MACHINE_GROUND);
         },
       },
     ],
@@ -145,10 +169,8 @@ export const LOST_TOWER_LIGHTS: Partial<Record<number, readonly LightEmitter[]>>
     20: [
       {
         pointRange: 6,
-        terrain: {
-          range: 4,
-          color: [0.4, 0.8, 1],
-          flicker: VISUAL_LUMINOSITY,
+        get terrain() {
+          return ours(BLUE_MACHINE_GROUND);
         },
       },
     ],
@@ -173,10 +195,8 @@ export const LOST_TOWER_LIGHTS: Partial<Record<number, readonly LightEmitter[]>>
         },
         pointRange: 5,
         wander: 0.06,
-        terrain: {
-          range: 3.5,
-          color: [1, 0.55, 0.25],
-          flicker: { min: 0.6, max: 1, steps: 4 },
+        get terrain() {
+          return ours(BRAZIER_GROUND);
         },
       },
     ],
