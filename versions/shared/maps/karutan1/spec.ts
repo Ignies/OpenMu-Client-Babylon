@@ -105,8 +105,8 @@ export const KARUTAN_MESH_ANIMATION: Partial<Record<number, MeshAnimation>> = {
 /**
  * `MoveObject` :43-49, type 113: `L = (rand%4+3)*0.1; AddTerrainLight(x, y,
  * (L, 0.6L, 0.2L), 3)` (the `case 113:` falls through into the hidden list)
- * + `RenderObjectVisual` :100-122: a `BITMAP_LIGHT` sprite at `2 * scale`
- * and the cycling `FIRE_HIK1` / `CURSEDLICH` / `HIK3`. Type 72 (×85 / ×113)
+ * + `RenderObjectVisual` :100-122: a steady `BITMAP_LIGHT` sprite at
+ * `2 * scale` in `(1, 0.2, 0)` and the cycling `FIRE_HIK1` / `CURSEDLICH` / `HIK3`. Type 72 (×85 / ×113)
  * carries bone sprites (`LIGHT` + `SPARK` at bones 11/7, :83-99) - the
  * Kardamahal lamps; sprites only, one flare here. Type 66's two `SHINY+5`
  * points (:68-82) ride bones that sweep with its clips, so the insect hangs
@@ -116,11 +116,7 @@ export const KARUTAN_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = 
   113: [
     {
       pointRange: 5,
-      sprite: {
-        scale: 2,
-        color: [1, 0.6, 0.3],
-        pulse: { speed: 3, amount: 0.2, base: 0.9 },
-      },
+      sprite: { scale: 2, color: [1, 0.2, 0] },
       terrain: {
         range: 3,
         color: [1, 0.6, 0.2],

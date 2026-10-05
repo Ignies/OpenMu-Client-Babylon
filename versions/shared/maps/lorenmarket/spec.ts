@@ -44,9 +44,9 @@ export const LOREN_MARKET_EMISSIONS: Partial<
  *  - **35** (×8), :115-130: the wall lamp - the same at bone 2, range 1; its
  *    one `BITMAP_FLARE` (:264-274) is grey `fLumi * 0.7`, breathing at 0.039
  *    like the fortress wall torch.
- *  - **57** (×12), `RenderObjectVisual` :297-318: `BITMAP_LIGHT` sprite at
- *    `2 * scale` plus the cycling `FIRE_HIK1` / `CURSEDLICH` / `HIK3` - the
- *    same vent Vulcanus 6 and Karutan 113 are.
+ *  - **57** (×12), `RenderObjectVisual` :297-318: a steady `BITMAP_LIGHT`
+ *    sprite at `2 * scale` in `(1, 0.2, 0)` plus the cycling `FIRE_HIK1` /
+ *    `CURSEDLICH` / `HIK3` - the same vent Vulcanus 6 and Karutan 113 are.
  *
  * The lights' offsets are approximated by height (lamp heads ~2.5 tiles up).
  */
@@ -94,11 +94,7 @@ export const LOREN_MARKET_LIGHTS: Partial<
   57: [
     {
       pointRange: 4,
-      sprite: {
-        scale: 2,
-        color: [1, 0.5, 0.2],
-        pulse: { speed: 3, amount: 0.2, base: 0.9 },
-      },
+      sprite: { scale: 2, color: [1, 0.2, 0] },
       terrain: {
         range: 2,
         color: [1, 0.45, 0.15],
