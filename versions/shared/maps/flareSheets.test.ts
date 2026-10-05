@@ -89,13 +89,14 @@ describe('the map flares the original draws as BITMAP_FLARE', () => {
     ]);
   });
 
-  it('Loren Market 30 and 35: grey, breathing like their fLumi (GMUnitedMarketPlace.cpp:248-274)', () => {
-    expect(flareOf(ENUM_WORLD.WD_79UNITEDMARKETPLACE, 30)?.sprite).toEqual({
-      scale: 1.5,
-      color: [0.5, 0.5, 0.5],
-      pulse: { speed: 0.002, amount: 0.2, base: 0.6 },
-      texture: 'flare',
-    });
+  // `for (i = 1; i <= 3; ++i)` a card on bone i: the top head 304 up, the two arms 264 up and 56 out.
+  it('Loren Market 30: grey, breathing like its fLumi, one on each of its three heads (GMUnitedMarketPlace.cpp:248-263)', () => {
+    const sprite = { scale: 1.5, color: [0.5, 0.5, 0.5], pulse: { speed: 0.002, amount: 0.2, base: 0.6 }, texture: 'flare' };
+    const heads = [[0, 0, 304], [0, 57, 264], [0, -56, 264]];
+    expect(cardsOf(ENUM_WORLD.WD_79UNITEDMARKETPLACE, 30)).toEqual(heads.map(offset => ({ offset, bone: true, sprite })));
+  });
+
+  it('Loren Market 35: grey, breathing like its fLumi (GMUnitedMarketPlace.cpp:264-275)', () => {
     expect(flareOf(ENUM_WORLD.WD_79UNITEDMARKETPLACE, 35)?.sprite).toEqual({
       scale: 1.5,
       color: [0.7, 0.7, 0.7],

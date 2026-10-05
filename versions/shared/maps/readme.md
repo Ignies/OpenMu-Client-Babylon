@@ -92,9 +92,10 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   controllers answer for every world, as hashes; pinned before the rows moved here.
 - `tileFiles.test.ts`: every tile slot of every map names a file that exists in its world folder.
 - `flareSheets.test.ts`: the table flares the original draws from another sheet than `BITMAP_LIGHT`
-  take it with the original's tint and size: `BITMAP_FLARE` (Aida 75, Crywolf 41, Loren Market 30
-  and 35), `BITMAP_SPARK + 1` (Aida 30 and 71, on their six bulbs; Kanturu 70, whose size breathes;
-  Kanturu 2 8); Karutan 66 has none (its insect hangs its `BITMAP_SHINY + 5` points itself).
+  take it with the original's tint, size and motion: `BITMAP_FLARE` (Aida 75 turning on bone 4,
+  Crywolf 41's bobbing pair, Loren Market 30 on its three heads and 35), `BITMAP_SPARK + 1` (Aida
+  30 and 71 on their six bulbs, Kanturu 70 whose size breathes, Kanturu 2 8); Karutan 66 has none
+  (its insect hangs its `BITMAP_SHINY + 5` points itself).
 - `bloodcastle/lampObject.test.ts`: the throne-room lamp's flare is `BITMAP_FLARE` too.
 - `lampFlares.test.ts`, `devias/candleObject.test.ts`: the flares the original never draws
   (Lorencia 90 and 150, Devias 66 and the candelabra, Elbeland 61, Lost Tower 23) are the
