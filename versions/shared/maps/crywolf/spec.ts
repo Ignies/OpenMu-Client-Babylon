@@ -28,8 +28,10 @@ export const CRYWOLF_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {
 /**
  * `MoveCryWolf1stObject`:
  *  - **41** (×9), :344-348: `AddTerrainLight(x, y, (0.2, 0.7, 0.5), 2)` -
- *    a steady teal glow, no flicker; `RenderCryWolf1stObjectVisual` :393-412
- *    adds two counter-rotating `BITMAP_FLARE`s sized by a sine.
+ *    a steady teal glow, no flicker; `RenderCryWolf1stObjectVisual` :395-414
+ *    adds two white `BITMAP_FLARE`s (Flare.jpg's warm star), scale 1.3,
+ *    350-370 above it as `Time_Effect` bobs them. One here at the middle of
+ *    the bob; the second, turning a degree a frame, and the bob are not ported.
  *  - **57** (×12) and **71** (×8), :349-356: `L = (rand%4+3)*0.1;
  *    AddTerrainLight(x, y, (L, 0.6L, 0.2L), 3)` - the standard MU brazier
  *    fire, the same recipe as Kanturu 61 / Swamp 57 / Balgas 3 / Karutan 113.
@@ -41,11 +43,10 @@ export const CRYWOLF_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = 
     {
       pointRange: 4,
       terrain: { range: 2, color: [0.2, 0.7, 0.5] },
-      sprite: {
-        scale: 1.5,
-        color: [0.2, 0.7, 0.5],
-        pulse: { speed: 1, amount: 0.3, base: 0.8 },
-      },
+    },
+    {
+      offset: [0, 0, 360],
+      sprite: { scale: 1.3, color: [1, 1, 1], texture: 'flare' },
     },
   ],
   57: [

@@ -1,5 +1,5 @@
 import type { Controller } from '../controller';
-import type { Item } from '../../ecs/world';
+import type { Entity, Item } from '../../ecs/world';
 import type { PlayerAction } from '@versions/shared/objects/enum';
 import type { AreaSkillHitPacket } from '@versions/shared/packets/ClientToServerPackets';
 import type { SkillDefinition } from '@versions/shared/skills/skillsDatabase';
@@ -347,17 +347,20 @@ class Combat implements Controller {
     skillHooks.darkSide?.observeTargets(skill, targetIds);
   }
 
-  /** The server echoed the hero's own Dark Side (0x4A): its follow-ups count from here. */
-  observeDarkSideEcho(skill: number): void {
-    skillHooks.darkSide?.observeEcho(skill);
+  /**
+   * The server echoed a 0x4A of `caster`'s; the hero's cast's starts his follow-ups. True when it repeats
+   * a Dark Side cast already drawn.
+   */
+  observeDarkSideEcho(skill: number, caster: Entity): boolean {
+    return skillHooks.darkSide?.observeEcho(skill, caster) ?? false;
   }
 
-  /** Next follow-up target whose 0x4A is due, or -1. */
+  /** Next follow-up target whose blow is due, or -1. */
   nextDarkSideHit(): number {
     return skillHooks.darkSide?.nextHit() ?? -1;
   }
 
-  /** Skill id for the follow-up 0x4A. */
+  /** The Dark Side skill whose blow the follow-ups draw. */
   get darkSidePendingSkill(): number {
     return skillHooks.darkSide?.pendingSkill() ?? 0;
   }

@@ -23,7 +23,10 @@ policy. It knows how to light something, never which skill or item asks for it.
 - `mapObjectLights.ts`: `LightEmitter` (map specs build their light tables from it),
   `MapObjectLights`, `lightMapObject`, `lightEmittersFor`. `mapObjectLightAdapter.ts`: `MapObjectLights`, the
   `ModelObject` host. `lightCarrier.ts`: `LightCarrier`, a light without a drawn body.
-- `effectLights.ts`: `createEffectLight`, `createMovableFlare` (flare cards; they light nothing).
+- `effectLights.ts`: `createEffectLight`, `createMovableFlare` (flare cards; they light nothing),
+  `FlareTexture`: the sheet a card is drawn from, `'light'` (BITMAP_LIGHT, flare01.jpg, a soft white
+  glow, ZzzOpenData.cpp:5207) unless a spec names `'flare'` (BITMAP_FLARE, Flare.jpg, a warm star,
+  :5309). One sprite manager per sheet and scene.
 - `items.ts`: `lightItem`, `itemSelfLight`. `sky.ts`: `strikeThunder`.
 - `lightingQuality.ts`: the tiers (`lightingTier()`, `tierIndex()`: Classic, Enhanced, Ultra),
   `pointLightBudget`, MSAA and CSM state.
@@ -94,6 +97,7 @@ policy. It knows how to light something, never which skill or item asks for it.
 - `lightingQuality.test.ts`: `sceneTargetSamples` (MSAA per pass, Classic at one sample).
 - `recipes.test.ts`: `effectLight` hue, reach and gain ceiling, minimum range.
 - `characters.test.ts`: a steady carried glow (Poison Shadow), one that breathes, and the Scorpion's per-frame flicker.
+- `effectLights.test.ts`: a card is drawn from the sheet its spec names, one manager per sheet.
 - `versions/shared/maps/mapRows.golden.test.ts`: every world's look, room looks, thunder and
   map-object lights, pinned across the move into the map folders.
 - `mapLighting.test.ts`: a look over the open or enclosed default, the sky's default for a map

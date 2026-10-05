@@ -26,7 +26,7 @@ export default {
     '로그인 화면의 벽 횃불이 불타며 바닥을 비춥니다. 클래식: 원작처럼 빛 번짐만 있습니다.',
   'fidelity.fortressLights': '제국 요새의 불빛',
   'fidelity.fortressLights.hint':
-    '제국 요새의 벽 횃불과 샹들리에가 주변 바닥을 비춥니다. 클래식: 원작처럼 불빛이 없습니다.',
+    '제국 요새의 벽 횃불, 샹들리에, 화로가 주변 바닥을 비춥니다. 클래식: 원작처럼 불빛이 없습니다.',
   'fidelity.roofFade': '투명해지는 지붕',
   'fidelity.roofFade.hint':
     '지붕 아래에 서 있으면 지붕이 사라져 안이 보입니다. 클래식: 지붕은 항상 보입니다.',

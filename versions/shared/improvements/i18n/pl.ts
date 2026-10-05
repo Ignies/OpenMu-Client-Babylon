@@ -26,7 +26,7 @@ export default {
     'Pochodnie na ścianach ekranu logowania płoną ogniem i oświetlają podłogę. Klasyczne: tylko ich blask, jak w oryginale.',
   'fidelity.fortressLights': 'Światła Cesarskiej Twierdzy',
   'fidelity.fortressLights.hint':
-    'Pochodnie i żyrandole w Cesarskiej Twierdzy oświetlają podłogę wokół. Klasyczne: brak światła, jak w oryginale.',
+    'Pochodnie, żyrandole i paleniska w Cesarskiej Twierdzy oświetlają podłogę wokół. Klasyczne: brak światła, jak w oryginale.',
   'fidelity.roofFade': 'Przezroczyste dachy',
   'fidelity.roofFade.hint':
     'Dachy znikają, gdy stoisz pod nimi, więc widzisz wnętrze. Klasyczne: dachy są zawsze widoczne.',

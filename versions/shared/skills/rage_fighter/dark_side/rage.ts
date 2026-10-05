@@ -1,13 +1,14 @@
 /**
  * Rage Fighter packets (MonkSystem.cpp, SkillCast.cpp:881-896,
- * WSclient.cpp:14952-14957): Dark Side (263) is the one skill on its own
+ * WSclient.cpp:14952-14957): Dark Side (263, 559) is the one skill on its own
  * wire - the cast sends `RageAttackRangeRequest` (0x4B) *and*
  * `RageAttackRequest` (0x4A) at the picked target; the server answers 0x4B
  * with up to five targets it chose (`ReceiveDarkside` →
  * `SetDarksideTargetIndex`) and echoes the 0x4A (`ReceiveStraightAttack`,
  * which sets the caster's `AttackTime = 1`, :13422-13429), and the client then
- * lands one 0x4A per extra target as the clip's follow-up blows come round
- * (`SendDarksideAtt`, one per `m_nDarksideCnt`), counted from that echo.
+ * lands a blow on each target as the clip's follow-ups come round, counted from
+ * that echo (`SendDarksideAtt`, one per `m_nDarksideCnt`). The blows are drawn
+ * only: their 0x4A send is commented out (MonkSystem.cpp:610).
  * Every other Rage Fighter skill is a plain `TargetedSkill` / `AreaSkill`
  * with its own clip (`SetRageSkillAni`, `recipes.ts`).
  *
@@ -17,17 +18,18 @@
  *
  * Driven by `skillCastSystem` (`beginDarkSide`) and the combat module's
  * packet handlers (`observeDarkSideTargets`, `observeDarkSideEcho`,
- * `observeRageHit`); the cast system drains the due follow-ups through the
- * facade's `nextDarkSideHit`.
+ * `observeRageHit`); the cast system draws the due follow-ups it pulls
+ * through the facade's `nextDarkSideHit`.
  */
 import type { ENUM_WORLD } from '@/core/types';
+import type { Entity } from '@/ecs/world';
 import type { CombatLayer } from '@/controllers/combat/layer';
 import { playCombat } from '@/controllers/sound';
 import { PlayerAction } from '../../../objects/enum';
 import { heroEntity } from '../../_shared';
 
-/** AT_SKILL_DARKSIDE: the one Rage Fighter skill that uses the 0x4A/0x4B pair. */
-const SKILL_DARK_SIDE = 263;
+/** AT_SKILL_DARKSIDE and AT_SKILL_DARKSIDE_STR: the Rage Fighter skills on the 0x4A/0x4B pair (SkillCast.cpp:881-896). */
+const DARK_SIDE_SKILLS: readonly number[] = [263, 559];
 
 // ---- 1. tuning -------------------------------------------------------------
 
@@ -48,10 +50,14 @@ const READY_SPEED = 0.3;
  */
 export const darkSideHitTicks = (playSpeed: number): number => Math.trunc(2.5 / playSpeed);
 
-/** The hero's DARKSIDE_READY PlaySpeed while he plays it, else the base one. */
+/** `g_iLimitAttackTime`: AttackTime stops when it reaches 15 (ZzzCharacter.cpp:171, :4139-4141). */
+const LIMIT_ATTACK_TIME = 15;
+
+/** The hero's DARKSIDE_READY PlaySpeed while he plays it, else 0: a follow-up only comes in the clip (SkillCast.cpp:1117). */
 function readySpeed(): number {
   const m = heroEntity()?.modelObject;
-  return m?.CurrentAction === PlayerAction.PLAYER_SKILL_DARKSIDE_READY && m.AnimationSpeed > 0 ? m.AnimationSpeed : READY_SPEED;
+  if (m?.CurrentAction !== PlayerAction.PLAYER_SKILL_DARKSIDE_READY) return 0;
+  return m.AnimationSpeed > 0 ? m.AnimationSpeed : READY_SPEED;
 }
 
 /** Seconds a streak stays open with no further hit before it is considered done. */
@@ -59,24 +65,24 @@ const STREAK_TIMEOUT = 1.0;
 
 // ---- 2. state + readers ----------------------------------------------------
 
-/** Dark Side skill in flight (263 or a strengthened variant), 0 = none. */
+/** Dark Side skill of the hero's last cast (263 or 559), 0 = none. */
 let darkSideSkill = 0;
-/** Extra targets the server named, still to be hit. */
+/** Targets the server named, still to be hit. */
 const pendingTargets: number[] = [];
-/** The hero's AttackTime runs: the server echoed the cast. */
-let counting = false;
-/** Seconds since the echo or the last follow-up blow. */
-let sinceHit = 0;
-/** Follow-up blows sent this cast. */
-let hitsSent = 0;
+/** The server echoed the cast: a later echo repeats it. */
+let echoed = false;
+/** The hero's AttackTime in ticks: 1 at the echo of his cast and at each blow, 0 once it reached 15. */
+let attackTime = 0;
+/** The target whose blow came due this frame, -1 for none. */
+let dueTarget = -1;
 
 /** Hits in the current streak; 0 when none is open. */
 let streakHits = 0;
 let streakOpenFor = 0;
 
-/** Whether `skill` is Dark Side (the server sends the base id back). */
+/** Whether `skill` is Dark Side or its Strengthener. */
 export function isDarkSide(skill: number): boolean {
-  return skill === SKILL_DARK_SIDE;
+  return DARK_SIDE_SKILLS.includes(skill);
 }
 
 /** Hits landed in the running Rage Fighter streak, 0 outside one. */
@@ -88,20 +94,24 @@ export function rageStreak(): number {
 export function beginDarkSide(skill: number, _targetId: number): void {
   darkSideSkill = skill;
   pendingTargets.length = 0;
-  counting = false;
-  sinceHit = 0;
-  hitsSent = 0;
+  echoed = false;
+  attackTime = 0;
 }
 
 /**
- * Command: the server echoed the hero's own Dark Side (0x4A): `ReceiveStraightAttack` sets `AttackTime = 1`
- * (WSclient.cpp:13422-13429), so the follow-ups count from here. The original sends one 0x4A a cast; ours also
- * sends one per follow-up, and their echoes do not restart the count.
+ * Command: the server echoed a 0x4A of `caster`'s. True when it repeats a Dark Side cast already drawn, which
+ * RageCreateEffect draws once (MonkSystem.cpp:1285-1288): the hero's after the echo of his cast, which alone sets
+ * his `AttackTime = 1` and so starts the follow-ups (WSclient.cpp:13422-13429); another caster's while he still
+ * plays the Dark Side clip, which SetRageSkillAni leaves running (ZzzAI.cpp:425).
  */
-export function observeDarkSideEcho(skill: number): void {
-  if (!isDarkSide(skill) || darkSideSkill === 0 || counting) return;
-  counting = true;
-  sinceHit = 0;
+export function observeDarkSideEcho(skill: number, caster: Entity): boolean {
+  if (!isDarkSide(skill)) return false;
+  if (!caster.localPlayer) return caster.playerAnimation?.action === PlayerAction.PLAYER_SKILL_DARKSIDE_READY;
+  if (echoed) return true;
+  if (darkSideSkill === 0) return false;
+  echoed = true;
+  attackTime = 1;
+  return false;
 }
 
 /** Command: the 0x4B response arrived with the targets the server picked; any target plays Rage_Darkside_Att (MonkSystem.cpp:551-558). */
@@ -113,21 +123,17 @@ export function observeDarkSideTargets(skill: number, targetIds: readonly number
 }
 
 /**
- * Command: pull the next follow-up target whose blow is due. Returns the
- * target id, or `-1` when none is due this frame. The caller sends 0x4A.
+ * Command: pull the follow-up target whose blow came due this frame. Returns the
+ * target id, or `-1` when none is due. The caller draws the blow; nothing goes
+ * out (`SendDarksideAtt`'s send is commented out, MonkSystem.cpp:610).
  */
 export function nextDarkSideHit(): number {
-  if (darkSideSkill === 0 || !counting || pendingTargets.length === 0) return -1;
-  const due = darkSideHitTicks(readySpeed()) - (hitsSent > 0 ? 1 : 0);
-  if (sinceHit + 1e-9 < due * TICK) return -1;
-  sinceHit = 0;
-  hitsSent++;
-  const id = pendingTargets.shift()!;
-  if (pendingTargets.length === 0) darkSideSkill = 0;
+  const id = dueTarget;
+  dueTarget = -1;
   return id;
 }
 
-/** The skill id to put in the follow-up 0x4A. */
+/** The Dark Side skill of the hero's last cast, whose blow the follow-ups draw. */
 export function darkSidePendingSkill(): number {
   return darkSideSkill;
 }
@@ -144,7 +150,17 @@ export function observeRageHit(isStreak: boolean, isFinal: boolean): void {
 }
 
 function update(_map: ENUM_WORLD, dt: number): void {
-  sinceHit += dt;
+  dueTarget = -1;
+  if (attackTime > 0) {
+    // MoveHero's UseSkillRagePosition reads AttackTime, then MoveCharacter runs it on (MainScene.cpp:283-284).
+    const speed = readySpeed();
+    if (speed > 0 && pendingTargets.length > 0 && attackTime + 1e-9 >= darkSideHitTicks(speed)) {
+      dueTarget = pendingTargets.shift() ?? -1;
+      attackTime = 1;
+    }
+    attackTime += dt / TICK;
+    if (attackTime + 1e-9 >= LIMIT_ATTACK_TIME) attackTime = 0;
+  }
   if (streakOpenFor > 0) {
     streakOpenFor -= dt;
     if (streakOpenFor <= 0) streakHits = 0;
@@ -154,9 +170,9 @@ function update(_map: ENUM_WORLD, dt: number): void {
 function reset(): void {
   darkSideSkill = 0;
   pendingTargets.length = 0;
-  counting = false;
-  sinceHit = 0;
-  hitsSent = 0;
+  echoed = false;
+  attackTime = 0;
+  dueTarget = -1;
   streakHits = 0;
   streakOpenFor = 0;
 }

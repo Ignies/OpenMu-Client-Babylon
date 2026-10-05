@@ -12,7 +12,7 @@ import {
   isOn,
   setFidelityChoice,
 } from '@/controllers/fidelity';
-import { EN_TEXT } from '@/i18n';
+import { EN_TEXT, i18n, t } from '@/i18n';
 
 vi.hoisted(() => {
   const g = globalThis as Record<string, unknown>;
@@ -87,5 +87,38 @@ describe('master buff cancel', () => {
     expect(cancelledEffects(266, scene, null)).toEqual([]);
     expect(cancelledEffects(384, scene, null)).toEqual([]);
     expect(cancelledEffects(1, scene, null)).toEqual([55]);
+  });
+});
+
+describe('the fortress lights hint', () => {
+  // Each language's word for the braziers (79, 80), which fortressLights switches with the torches and chandeliers.
+  const BRAZIERS: Record<string, string> = {
+    en: 'braziers',
+    bg: 'мангали',
+    de: 'Feuerschalen',
+    es: 'braseros',
+    fr: 'braseros',
+    it: 'bracieri',
+    ja: 'かがり火',
+    ko: '화로',
+    pl: 'paleniska',
+    pt: 'braseiros',
+    ro: 'mangalele',
+    ru: 'жаровни',
+    th: 'กระถางไฟ',
+    vi: 'chậu lửa',
+    zh: '火盆',
+  };
+
+  it('names the braziers in every language', () => {
+    const was = i18n.language;
+    const hints = Object.fromEntries(
+      i18n.languages.map(l => {
+        i18n.setLanguage(l.code);
+        return [l.code, t('fidelity.fortressLights.hint').includes(BRAZIERS[l.code] ?? '?')];
+      })
+    );
+    i18n.setLanguage(was);
+    expect(hints).toEqual(Object.fromEntries(Object.keys(BRAZIERS).map(code => [code, true])));
   });
 });

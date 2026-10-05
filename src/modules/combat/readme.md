@@ -38,6 +38,9 @@ the Rage Fighter's Dark Side blows. This folder has only the handlers; it keeps 
 - `RageAttackRangeResponse`: the Dark Side targets, handed to `combat.observeDarkSideTargets`.
 - `RageAttack` (C3 4A): one Dark Side blow, drawn like a targeted skill. The echo of the hero's own
   cast starts his follow-up blows (`combat.observeDarkSideEcho`; `AttackTime = 1`, WSclient.cpp:13422-13429).
+  RageCreateEffect draws a cast once (MonkSystem.cpp:1285-1288): a later 0x4A of a Dark Side cast
+  already drawn (another client's follow-up while its caster still plays the clip, or one after the
+  hero's echo) only turns its caster.
 - Outgoing attacks are sent by `src/ecs/systems/attackSystem.ts` and `skillCastSystem.ts`, not here.
 
 ## Depends on / used by
@@ -59,4 +62,5 @@ the Rage Fighter's Dark Side blows. This folder has only the handlers; it keeps 
 ## Tests
 - `killEnergy.test.ts`: the energy sound waits for the hero's cast release, and starts at the kill
   after a plain blow; 22 ticks plus 3.5 a tile of flight.
-- `darkSideEcho.test.ts`: the hero's Dark Side follow-ups wait for the `RageAttack` echo of his cast.
+- `darkSideEcho.test.ts`: the hero's Dark Side follow-ups wait for the `RageAttack` echo of his cast;
+  a cast is drawn once, a later 0x4A of it only turns its caster.

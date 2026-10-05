@@ -9,12 +9,22 @@ import type { Entity } from '@/ecs/world';
 import { PlayerAction } from '../../objects/enum';
 import { playAreaSkillVisual, playTargetedSkillVisual } from '../skillVisuals';
 import { skillSound } from '@/controllers/sound/combat';
-import { beginDarkSide, darkSideHitTicks, nextDarkSideHit, observeDarkSideEcho, observeDarkSideTargets, rageLayer } from './dark_side/rage';
+import { beginDarkSide, darkSideHitTicks, isDarkSide, nextDarkSideHit, observeDarkSideEcho, observeDarkSideTargets, rageLayer } from './dark_side/rage';
 
 vi.hoisted(() => {
   const g = globalThis as Record<string, unknown>;
   g.location ??= { href: 'http://localhost/', search: '', hostname: 'localhost', protocol: 'http:' };
 });
+
+// The live world: only Dark Side's follow-ups read it (the hero's clip).
+const store = vi.hoisted(() => ({ world: null as unknown }));
+vi.mock('@/ecs/current', () => ({
+  Ecs: {
+    get world() {
+      return store.world;
+    },
+  },
+}));
 
 const played: string[] = [];
 vi.mock('@/controllers/sound/listener', async importOriginal => ({
@@ -325,18 +335,28 @@ describe('Dark Side (263)', () => {
     rageLayer.reset?.();
   });
 
-  /** The ticks a follow-up goes out on, with the server's echo of the cast at the end of each tick in `echoes`. */
-  function followUps(echoes: readonly number[]): number[] {
-    beginDarkSide(263, 5);
-    observeDarkSideTargets(263, [6, 7, 8]);
-    if (echoes.includes(0)) observeDarkSideEcho(263);
+  /**
+   * The ticks a follow-up goes out on: the server's echo of the cast comes at the end of each tick in `echoes`, its
+   * targets at the end of tick `targetsAt` (0: before the echo) and the hero leaves the Dark Side clip on `leaveAt`.
+   */
+  function followUps(echoes: readonly number[], { skill = 263, targetsAt = 0, leaveAt = Infinity } = {}): number[] {
+    const model = { CurrentAction: READY as number, AnimationSpeed: 0.3 };
+    const hero = { localPlayer: true, modelObject: model } as unknown as Entity;
+    store.world = { playerEntity: hero };
+    const targets = () => observeDarkSideTargets(skill, [6, 7, 8]);
+    beginDarkSide(skill, 5);
+    if (targetsAt === 0) targets();
+    if (echoes.includes(0)) observeDarkSideEcho(skill, hero);
     const sent: number[] = [];
     for (let t = 1; t <= 40; t++) {
+      if (t >= leaveAt) model.CurrentAction = PlayerAction.PLAYER_STOP_MALE;
       rageLayer.update?.(ENUM_WORLD.WD_0LORENCIA, 1 / 25);
       if (nextDarkSideHit() >= 0) sent.push(t);
-      if (echoes.includes(t)) observeDarkSideEcho(263);
+      if (echoes.includes(t)) observeDarkSideEcho(skill, hero);
+      if (t === targetsAt) targets();
     }
     rageLayer.reset?.();
+    store.world = null;
     return sent;
   }
 
@@ -346,12 +366,27 @@ describe('Dark Side (263)', () => {
     expect(followUps([0])).toEqual([8, 15, 22]);
   });
 
+  it('Dark Side Strengthener (559) is Dark Side too: the 0x4B/0x4A pair and its follow-ups (SkillCast.cpp:881-896)', () => {
+    expect(isDarkSide(559)).toBe(true);
+    expect(followUps([0], { skill: 559 })).toEqual([8, 15, 22]);
+  });
+
+  it('stop when the hero leaves the Dark Side clip (SkillCast.cpp:1117)', () => {
+    expect(followUps([0], { leaveAt: 16 })).toEqual([8, 15]);
+    expect(followUps([0], { leaveAt: 8 })).toEqual([]);
+  });
+
+  it('none once AttackTime reaches 15 before the targets come (ZzzCharacter.cpp:4139-4141)', () => {
+    expect(followUps([0], { targetsAt: 13 })).toEqual([14, 21, 28]);
+    expect(followUps([0], { targetsAt: 14 })).toEqual([]);
+  });
+
   it('count from the server\'s echo of the cast, not the cast (AttackTime = 1, WSclient.cpp:13422-13429)', () => {
     expect(followUps([])).toEqual([]);
     expect(followUps([5])).toEqual([13, 20, 27]);
   });
 
-  it('a later echo, of a follow-up of ours, does not restart the count', () => {
+  it('a later echo does not restart the count', () => {
     expect(followUps([0, 10])).toEqual([8, 15, 22]);
   });
 });

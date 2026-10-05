@@ -610,6 +610,13 @@ export function playTargetedSkillVisual(
   lighting.skillTargeted(scene, skill, caster, target);
 }
 
+/** One more blow of a cast already drawn: the row's `impact` on `target`, without its cast (Dark Side's follow-ups). */
+export function playSkillImpact(scene: Scene, skill: number, caster: Entity, target: Entity): void {
+  if (!caster.transform || !target.transform) return;
+  currentSkill = skill;
+  skillVisualFor(skill).impact?.(entityPos(target, IMPACT_HEIGHT, new Vector3()), contextFor(scene, caster, target));
+}
+
 /**
  * `AreaSkillAnimation` carries no target, but the explicit-target area
  * skills (Chain Lightning, Drain Life, Teleport Ally) draw a bolt or a

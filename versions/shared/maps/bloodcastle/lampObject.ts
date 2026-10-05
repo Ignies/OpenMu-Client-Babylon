@@ -14,7 +14,8 @@ const FLARE_BONE = 3;
 /**
  * `Luminosity = sinf(WorldTime * 0.001f) * 0.3f + 0.7f` and
  * `CreateSprite(BITMAP_FLARE, Position, Luminosity + 0.5f, Light, o)`
- * (ZzzObject.cpp:3183-3187): a white flare, 1.2…1.5 in size, 0.4…1 bright.
+ * (ZzzObject.cpp:3176-3181): a white flare on BITMAP_FLARE's warm star
+ * (Flare.jpg), 1.2…1.5 in size, 0.4…1 bright.
  * The sprite is built at the mid size and only its brightness breathes.
  */
 const FLARE_SCALE = 1.35;
@@ -55,7 +56,8 @@ export class BloodCastleLampObject extends MapTileObject {
     void createMovableFlare(
       world.scene,
       FLARE_SCALE * this.node.scaling.x,
-      FLARE_COLOR
+      FLARE_COLOR,
+      'flare'
     ).then(flare => {
       if (!flare) return;
       if (this.#disposed) {

@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { FIDELITY_CLASSIC, FIDELITY_DEFAULT, setFidelityChoice } from '@/controllers/fidelity';
+import { LOGIN_WALL_TORCH } from '@/controllers/lighting/mapObjectLights';
 import { EMPIRE_GUARDIAN_4_CHANDELIER, EMPIRE_GUARDIAN_4_LIGHTS, EMPIRE_GUARDIAN_4_WALL_TORCH } from './spec';
 
 const brazier = (type: number) => EMPIRE_GUARDIAN_4_LIGHTS[type]?.[0];
@@ -29,14 +30,17 @@ describe('the fortress torch and chandelier lights', () => {
   it('light the ground and the torch burns warm on Enhanced (the fortressLights improvement)', () => {
     expect(EMPIRE_GUARDIAN_4_WALL_TORCH.terrain?.range).toBe(2);
     expect(EMPIRE_GUARDIAN_4_CHANDELIER.terrain?.range).toBe(5);
-    expect(EMPIRE_GUARDIAN_4_WALL_TORCH.sprite?.color).toEqual([1, 0.45, 0.15]);
+    // The login scene's lit torch, the same flare.
+    for (const torch of [EMPIRE_GUARDIAN_4_WALL_TORCH, LOGIN_WALL_TORCH]) {
+      expect(torch.sprite).toMatchObject({ color: [1, 0.45, 0.15], texture: 'flare' });
+    }
   });
 
-  // Case 37 is a grey flare alone, case 157 fire and smoke (GMEmpireGuardian4.cpp:864-875, :1050-1098).
+  // Case 37 is a grey BITMAP_FLARE (Flare.jpg) alone, case 157 fire and smoke (GMEmpireGuardian4.cpp:864-875, :1050-1098).
   it('light nothing on Classic; the torch keeps its grey flare', () => {
     setFidelityChoice(FIDELITY_CLASSIC, {});
     expect(EMPIRE_GUARDIAN_4_WALL_TORCH.terrain).toBeUndefined();
     expect(EMPIRE_GUARDIAN_4_CHANDELIER.terrain).toBeUndefined();
-    expect(EMPIRE_GUARDIAN_4_WALL_TORCH.sprite).toMatchObject({ scale: 4, color: [0.7, 0.7, 0.7] });
+    expect(EMPIRE_GUARDIAN_4_WALL_TORCH.sprite).toMatchObject({ scale: 4, color: [0.7, 0.7, 0.7], texture: 'flare' });
   });
 });

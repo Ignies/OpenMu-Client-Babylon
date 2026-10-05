@@ -35,11 +35,11 @@ export default defineSkill({
   name: "Dark Side",
   // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
   lookAliases: [559],
-  // 263 Dark Side: the wind pillar at the caster; each blow, the dark wave and the BITMAP_DAMAGE2 bursts on the
-  // afterimage's frame (see above).
+  // 263 Dark Side: the wind pillar at the caster, once a cast; each blow (the cast's and every follow-up's,
+  // rage.ts), the BITMAP_DAMAGE2 bursts and the dark wave on the afterimage's frame (see above).
   visual: {
-    cast: seq(slash(RGBS.shade, TEX.motionBlur, 0.8), windPillar, ...WAVE_TICKS.map(t => after(ticks(t), wave))),
-    impact: seq(...BURST_TICKS.map(t => after(ticks(t), burst))),
+    cast: seq(slash(RGBS.shade, TEX.motionBlur, 0.8), windPillar),
+    impact: seq(...BURST_TICKS.map(t => after(ticks(t), burst)), ...WAVE_TICKS.map(t => after(ticks(t), wave))),
   },
   sound: 'Sound/Ragefighter/Rage_Darkside', // Dark Side
   clip: { ground: A.PLAYER_SKILL_DARKSIDE_READY }, // Dark Side

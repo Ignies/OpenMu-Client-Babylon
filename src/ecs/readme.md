@@ -57,6 +57,8 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
 - `systems/restObjectRay.test.ts`: the rest-object picking ray matches `scene.pick`.
 - `systems/ceilingHideSystem.test.ts`: the roof over the hero fades on Enhanced, stays drawn but
   detected on Classic, and comes back when `roofFade` is turned off.
+- `systems/skillCastSystem.test.ts`: Dark Side's follow-up blows draw on each target the server
+  named and send nothing.
 
 ## Notes
 Long file comments from `systems/`, condensed.

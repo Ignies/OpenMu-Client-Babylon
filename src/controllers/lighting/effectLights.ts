@@ -11,8 +11,8 @@ import { lookDirector, type LookDirector } from './director';
 import { EFFECT_RENDERING_GROUP, keepDepthForEffects } from '../fx/core';
 
 /**
- * Flare cards: the additive `flare01` sprite the original draws over a
- * flame (`BITMAP_LIGHT` / `BITMAP_FLARE`). Purely visual - a flare lights
+ * Flare cards: the additive sprite the original draws over a flame, from
+ * the sheet it names (`FLARE_TEXTURES`). Purely visual - a flare lights
  * nothing. The light a flame throws is the lighting layer's
  * (`controllers/lighting/mapObjectLights.ts`), whose `LightEmitter.sprite` block is
  * the `FlareSpec` a host hands to `createEffectLight`.
@@ -22,10 +22,19 @@ import { EFFECT_RENDERING_GROUP, keepDepthForEffects } from '../fx/core';
  * when the director's state changes. The decode to linear is the sprite
  * shader's (controllers/render/babylon/spriteLinear.ts), as it is for any material.
  *
- * One `SpriteManager` per scene, shared by every flare on the map.
+ * One `SpriteManager` per sheet and scene, shared by every flare on the map.
  */
 
-const FLARE_TEXTURE = 'Effect/flare01.OZJ';
+/**
+ * The sheets: `BITMAP_LIGHT` is flare01.jpg, a soft white glow (ZzzOpenData.cpp:5207);
+ * `BITMAP_FLARE` is Flare.jpg, a warm star (:5309). Both 64 x 64.
+ */
+const FLARE_TEXTURES = {
+  light: 'Effect/flare01.OZJ',
+  flare: 'Effect/Flare.OZJ',
+} as const;
+
+export type FlareTexture = keyof typeof FLARE_TEXTURES;
 
 const OZJ_HEADER_SIZE = 24;
 
@@ -37,11 +46,18 @@ type FlareSpec = {
   readonly scale: number;
   readonly color: readonly [number, number, number];
   readonly pulse?: { speed: number; amount: number; base: number };
+  /** The sheet the original names; `BITMAP_LIGHT` when left out. */
+  readonly texture?: FlareTexture;
 };
 
-let manager: SpriteManager | null = null;
-let managerScene: Scene | null = null;
-let pending: Promise<SpriteManager | null> | null = null;
+/** A sheet's manager for the scene it was built in, once it has loaded. */
+type Sheet = {
+  scene: Scene;
+  manager: SpriteManager | null;
+  pending: Promise<SpriteManager | null>;
+};
+
+const sheets = new Map<FlareTexture, Sheet>();
 
 /** Every live flare's repaint, run when the director publishes a new state. */
 const repaints = new Set<() => void>();
@@ -69,20 +85,16 @@ function watchLook(): void {
   });
 }
 
-async function getManager(scene: Scene): Promise<SpriteManager | null> {
-  if (manager && managerScene === scene) return manager;
+function getManager(scene: Scene, texture: FlareTexture): Promise<SpriteManager | null> {
+  // Only a sheet built for another scene is stale. One still loading for
+  // this scene is shared: a fresh one per caller made seven empty
+  // 'effectLights' managers per map load.
+  const current = sheets.get(texture);
+  if (current?.scene === scene) return current.pending;
 
-  // Only a manager built for another scene is stale. While the first
-  // request is still in flight `manager` is null too, and resetting
-  // `pending` there made every concurrent caller build its own manager
-  // (seven empty 'effectLights' managers per map load).
-  if (manager && managerScene !== scene) {
-    pending = null;
-    manager = null;
-  }
-
-  pending ??= (async () => {
-    const ozj = await downloadDataFile(FLARE_TEXTURE);
+  const sheet: Sheet = { scene, manager: null, pending: Promise.resolve(null) };
+  sheet.pending = (async () => {
+    const ozj = await downloadDataFile(FLARE_TEXTURES[texture]);
 
     const blob = new Blob([ozj.slice(OZJ_HEADER_SIZE)], { type: 'image/jpeg' });
     const url = URL.createObjectURL(blob);
@@ -106,13 +118,20 @@ async function getManager(scene: Scene): Promise<SpriteManager | null> {
     created.renderingGroupId = EFFECT_RENDERING_GROUP;
     keepDepthForEffects(scene);
 
-    manager = created;
-    managerScene = scene;
+    sheet.manager = created;
 
     return created;
   })();
+  sheets.set(texture, sheet);
 
-  return pending;
+  return sheet.pending;
+}
+
+/** The sheet's manager, unless another scene replaced it while it loaded. */
+async function liveManager(scene: Scene, texture: FlareTexture): Promise<SpriteManager | null> {
+  const spriteManager = await getManager(scene, texture);
+
+  return spriteManager && sheets.get(texture)?.manager === spriteManager ? spriteManager : null;
 }
 
 export type EffectLight = {
@@ -163,11 +182,12 @@ function paintFlare(
 export async function createMovableFlare(
   scene: Scene,
   scale: number,
-  color: readonly [number, number, number]
+  color: readonly [number, number, number],
+  texture: FlareTexture = 'light'
 ): Promise<MovableFlare | null> {
-  const spriteManager = await getManager(scene);
+  const spriteManager = await liveManager(scene, texture);
 
-  if (!spriteManager || manager !== spriteManager) return null;
+  if (!spriteManager) return null;
 
   const sprite = new Sprite('candleFlare', spriteManager);
 
@@ -197,9 +217,9 @@ export async function createEffectLight(
   position: { x: number; y: number; z: number },
   objectScale: number
 ): Promise<EffectLight | null> {
-  const spriteManager = await getManager(scene);
+  const spriteManager = await liveManager(scene, spec.texture ?? 'light');
 
-  if (!spriteManager || manager !== spriteManager) return null;
+  if (!spriteManager) return null;
 
   const sprite = new Sprite('effectLight', spriteManager);
 

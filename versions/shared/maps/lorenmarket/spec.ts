@@ -38,8 +38,12 @@ export const LOREN_MARKET_EMISSIONS: Partial<
  * `MoveObject`:
  *  - **30** (×4), :98-113: the street lamp - `L = (rand%4+3)*0.1` fire
  *    colour at bone 1, `AddTerrainLight(…, 3)`; `RenderObjectVisual`
- *    :249-263 adds a `BITMAP_FLARE` per bone.
- *  - **35** (×8), :115-130: the wall lamp - the same at bone 2, range 1.
+ *    :248-262 adds a `BITMAP_FLARE` (Flare.jpg's warm star) on bones 1-3
+ *    (one here), `1.5 * Scale`, grey `fLumi * 0.5` with `fLumi =
+ *    (sin(WorldTime * 0.002) + 1) * 0.2 + 0.6`.
+ *  - **35** (×8), :115-130: the wall lamp - the same at bone 2, range 1; its
+ *    one `BITMAP_FLARE` (:264-274) is grey `fLumi * 0.7`, breathing at 0.039
+ *    like the fortress wall torch.
  *  - **57** (×12), `RenderObjectVisual` :297-318: `BITMAP_LIGHT` sprite at
  *    `2 * scale` plus the cycling `FIRE_HIK1` / `CURSEDLICH` / `HIK3` - the
  *    same vent Vulcanus 6 and Karutan 113 are.
@@ -53,7 +57,7 @@ export const LOREN_MARKET_LIGHTS: Partial<
     {
       offset: [0, 0, 250],
       pointRange: 6,
-      sprite: { scale: 1.5, color: [1, 0.7, 0.4] },
+      sprite: { scale: 1.5, color: [0.5, 0.5, 0.5], pulse: { speed: 0.002, amount: 0.2, base: 0.6 }, texture: 'flare' },
       terrain: {
         range: 3,
         color: [1, 0.6, 0.2],
@@ -65,7 +69,7 @@ export const LOREN_MARKET_LIGHTS: Partial<
     {
       offset: [0, 0, 200],
       pointRange: 4,
-      sprite: { scale: 1.5, color: [1, 0.7, 0.4] },
+      sprite: { scale: 1.5, color: [0.7, 0.7, 0.7], pulse: { speed: 0.039, amount: 0.2, base: 0.6 }, texture: 'flare' },
       terrain: {
         range: 1,
         color: [1, 0.6, 0.2],

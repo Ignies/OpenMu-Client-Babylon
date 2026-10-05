@@ -81,11 +81,19 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
 - data files stay pure: import controller types only (`import type ... from '@/controllers/x'`),
   and plain values from `shared/` or `@versions/shared/objects/enum`, never a controller at run
   time - `layers.ts` loads every entry when the `maps` controller loads.
+- a flare card the original draws as `BITMAP_FLARE` (Flare.jpg, already a warm star) gets
+  `texture: 'flare'` and the original's own tint, not a warm one; `BITMAP_LIGHT` (flare01.jpg) is
+  the default. `flareSheets.test.ts` lists the table rows that take it.
 
 ## Tests
 - `mapRows.golden.test.ts`: every per-map row the sound, lighting, weather and terrain
   controllers answer for every world, as hashes; pinned before the rows moved here.
 - `tileFiles.test.ts`: every tile slot of every map names a file that exists in its world folder.
+- `flareSheets.test.ts`: the table flares the original draws as `BITMAP_FLARE` (Aida 75, Crywolf 41,
+  Loren Market 30 and 35) take that sheet and the original's tint.
+- `bloodcastle/lampObject.test.ts`: the throne-room lamp's flare is `BITMAP_FLARE` too.
+- `loginscene/wallTorchObject.test.ts`, `empireguardian4/spec.test.ts`: the wall torch's flare, on
+  the `BITMAP_FLARE` sheet lit or not, and the fortress lights on Classic and Enhanced.
 - `chaoscastle/thunder.test.ts`: pillar thunder timing, which pillar it strikes and the bolt's fall.
 - `chaoscastle/clouds.test.ts`: the blue fog banks on types 6-11; 12 stays a marker.
 - `chaoscastle/lighting.test.ts`: one look row on every arena, no sky, black haze from the hero, no
