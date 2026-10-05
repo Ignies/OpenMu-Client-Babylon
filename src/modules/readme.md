@@ -5,11 +5,17 @@ Gameplay, one folder per module. A module owns its packets, its state and its ac
 (not built yet): [docs/module_streaming.md](../../docs/module_streaming.md).
 
 ## What a module is
-- `module.ts`: `defineModule({ id, core?, requires?, install })`. `id` is the folder name; `core`
+- `module.ts`: `defineModule({ id, core?, requires?, api?, install })`. `id` is the folder name; `core`
   modules are always on; `requires` turns a module off when one it needs is off (`guild_war` needs
   `guild`). `install` runs once at boot. When the module's handlers live in several files, it
   calls each file's `install<Name>()` in the order their listeners should run (`events`,
   `quests`, `skills`).
+- `api`: the module API range a module needs (`^1.0`, see [_api/readme.md](_api/readme.md)).
+  `installModules` refuses a module whose range this client cannot serve (`canServe`), even a core
+  one, and every module that requires it: nothing of it installs, a warning is logged and
+  `refusedModules()` lists it with why. Built-in modules declare none and install as before.
+  `install(api)` gets the module's API (`src/app/logic.ts` hands `moduleHost.api` in); built-in
+  modules ignore it.
 - `net.ts`: the packet handlers, registered by `installNet()` (its `install`). Importing the file
   registers nothing.
 - `modules.ts` lists every module in install order, and `src/app/logic.ts` calls
@@ -82,6 +88,8 @@ Controllers, ECS systems and `app/boot.tsx` add theirs at runtime, after the mod
 - [vault](vault/readme.md): vault packets; state in `Economy`.
 - [warp](warp/readme.md): map changes, teleports, the loading hold after a warp.
 - [world](world/readme.md): weather, fanfare and map-wide object effects.
+- [_api](_api/readme.md): the module API (not a module): the versioned contract, the in-process
+  host, the message binding for sandboxed modules and the sandbox frame.
 - `_shared/i18n/`: text more than one module uses. A helper other modules' handlers reuse lives
   with its owner: `scope/objects.ts` (objects in view, player and summon names), `combat/clips.ts`
   (attack and cast clips), `skills/objectEffects.ts` (an effect on any object).
@@ -103,8 +111,8 @@ Controllers, ECS systems and `app/boot.tsx` add theirs at runtime, after the mod
   for it and for every module that requires it, and the world page leaves out the windows that name
   it (`defineWindow({ ..., module: '<id>' })`). Core modules never turn off. The module's listeners
   stay installed, since that server sends none of its packets; installing a different set per
-  server comes with the module API (phase 3). `enabled` on `installModules` decides what installs
-  at boot.
+  server comes with streaming (phase 5; the module API's `dispose(id)` is the half that takes a
+  module back). `enabled` on `installModules` decides what installs at boot.
 - give an optional module's window its module: `module: '<id>'` in its `window.ts`
   (`versions/shared/ui/windowModules.test.ts` checks the id is an optional module).
 - add state: a field on the module's state (`state.ts`), exported through `index.ts`; windows read
@@ -119,8 +127,9 @@ Controllers, ECS systems and `app/boot.tsx` add theirs at runtime, after the mod
   hide. A window several modules share (`social_prompts`) names none and stays.
 
 ## Tests
-- `module.test.ts`: install order, disabled and core modules, requirements; `moduleOn` with a
-  server's `modulesOff`.
+- `module.test.ts`: install order, disabled and core modules, requirements, the API each install
+  gets, API ranges served and refused (with the modules that require a refused one); `moduleOn`
+  with a server's `modulesOff`.
 - `modules.test.ts`: every `module.ts` is listed once and named after its folder.
 - `switchOff.test.ts`: every module registers its listeners when installed, not when loaded;
   with events or quests off, their packets keep only the other modules' listeners.

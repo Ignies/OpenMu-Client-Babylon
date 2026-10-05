@@ -65,4 +65,28 @@ range does not match is skipped with a notice, never run.
    (never in CI); only its public half is built into the client. Needed from phase 5 on.
 4. The order is 3, 4, 6, then 5.
 
-Nothing in phases 3 to 6 is built yet; phase 3 is next.
+Phase 3 is built (below); phase 4 is next. Nothing of phases 4 to 6 is built yet.
+
+## Phase 3: built (2026-10-06)
+
+All in [src/modules/_api/](../src/modules/_api/readme.md), a folder that is not a module:
+
+- `contract.ts`: `MODULE_API_VERSION` (`1.0.0`), `canServe(range)` and the v1 calls (`ModuleApi`):
+  `registerText`, `registerWindow`, `playSound`, `playEffect` (an fx burst by name), `hero()` (a
+  read-only snapshot) and `onMapChange`. It imports nothing, so a streamed module can import it alone.
+- The range check: `ModuleDef.api` (`src/modules/module.ts`). `installModules` refuses a module whose
+  range this client cannot serve, and every module that requires it, and lists them in
+  `refusedModules()`.
+- In process: `host.ts` builds one API per module id over the game (`ports.ts`: hero, warp's
+  `onMapChanged`, i18n, sound, fx, the window registry and `ModuleWindowFrame` in
+  `controllers/interface`) and `dispose(id)` takes back its windows and listeners. A module's text
+  keys and titles must start with its id, and its windows show as `<module>:<id>`, so it cannot
+  overwrite the client's own. `src/app/logic.ts` hands the host to `installModules`; built-in
+  modules ignore it.
+- As messages: `protocol.ts` (the JSON wire, versioned by `v`), `dispatcher.ts` (`serveModule`: the
+  client's end refuses anything invalid before the game sees it) and `guest.ts` (`connectModule`:
+  the module's end, the same calls answering with promises).
+- `sandbox.ts`: the iframe's attributes (`sandbox="allow-scripts"` only, a `srcdoc` or `blob:`
+  source) and the port hand-over. Mounting it in the world page is phase 5.
+- `example.test.ts`: a module that uses nothing but the API runs in process and over messages and
+  makes the same calls.

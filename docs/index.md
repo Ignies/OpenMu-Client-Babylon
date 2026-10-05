@@ -9,7 +9,7 @@ Start with [AGENTS.md](../AGENTS.md), then [agents/](agents/readme.md) for how a
 - [texture_packs.md](texture_packs.md): where packs live and how to add one
 - [configuration_hex.md](configuration_hex.md): reading the performance overlay's config hex
 - [ci.md](ci.md): every check and how baselines work
-- [module_streaming.md](module_streaming.md): the design for modules a server ships (phases 3 to 6)
+- [module_streaming.md](module_streaming.md): the design for modules a server ships (phases 3 to 6; phase 3, the module API, is built)
 - [install/readme.md](../install/readme.md): the server installer (`mu`); [openmu/readme.md](../openmu/readme.md): our OpenMU plugins
 - guidelines: [tdd](guidelines/tdd.md), [porting](guidelines/porting.md),
   [performance](guidelines/performance.md), [code_style](guidelines/code_style.md),
