@@ -151,6 +151,15 @@ describe('effect models turned as the original turns them', () => {
     fires.forEach((m, i) => expectTurned(m, [0, 0, i * 20]));
   });
 
+  it('Zaikan\'s staff ring: the i-th of its 18 MODEL_STAFF_OF_DESTRUCTION at (20, 0, Angle[2] + i x 20) all its flight (ZzzCharacter.cpp:1826-1832, ZzzEffect.cpp:1330-1336)', () => {
+    const staffs = cast(50, 30, { caster: { npcType: 59 } }).filter(m => m.model === 'Item/Staff09.glb');
+    expect(staffs).toHaveLength(18);
+    staffs.forEach((m, i) => {
+      expectTurned(m, [20, 0, 30 + i * 20]);
+      expectTurned(m, [20, 0, 30 + i * 20], 1);
+    });
+  });
+
   it('a summon arriving: MODEL_MAGIC_CIRCLE1 at the monster\'s Angle (WSclient.cpp:3115)', () => {
     for (const y of YAWS) expectTurned(record(() => playSummonArrival(scene, body(3, CASTER, y))).find(m => m.model === MODEL.magicCircle), [0, 0, y]);
   });

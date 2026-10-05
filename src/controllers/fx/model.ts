@@ -189,7 +189,7 @@ export interface ModelOptions {
   /**
    * The original's `o->Angle` in degrees on MU's axes (x, y, z = yaw), turned
    * the way `AngleMatrix` does (ZzzMathLib.cpp:185). Replaces `yaw` and `flat`;
-   * `spin` and `aim` do not apply.
+   * `spin`, `aim` and `yawTo` do not apply (a projectile keeps it).
    */
   angle?: readonly [number, number, number];
   /** `o->HiddenMesh`: this mesh (BMD order) is not drawn. */

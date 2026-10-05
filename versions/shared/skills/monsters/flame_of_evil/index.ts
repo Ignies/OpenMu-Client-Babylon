@@ -261,7 +261,8 @@ const staffRing = (feet: Vector3, c: SkillContext, graded = false): void => {
     const f = forwardOf(a);
     const start = new Vector3(feet.x, feet.y + cm(280), feet.z);
     const fall: Fall = {
-      model: { model: STAFF_OF_DESTRUCTION, colour: RGBS.white, scale: 1, yaw: a },
+      // Its Angle all the flight, tipped 20 degrees down (ZzzEffect.cpp:1334).
+      model: { model: STAFF_OF_DESTRUCTION, colour: RGBS.white, scale: 1, angle: [FALL_TILT / DEG, 0, a / DEG] },
       light: BLAST_LIGHT,
       land: groundBurst,
     };
