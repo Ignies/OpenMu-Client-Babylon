@@ -29,11 +29,12 @@ policy. It knows how to light something, never which skill or item asks for it.
   `FlareSpec` (a card as a light table names it), `FlareTexture`: the sheet a card is drawn from, by
   the bitmap the original names: `'light'` (BITMAP_LIGHT, flare01.jpg, a soft white glow,
   ZzzOpenData.cpp:5207) unless a spec names another (`'flare'` BITMAP_FLARE, Flare.jpg, a warm star,
-  :5309; `'spark1'` BITMAP_SPARK + 1, Spark03.jpg, :5216; `'shiny5'` BITMAP_SHINY + 5, shiny05.jpg,
-  :5325; `'impact'` BITMAP_IMPACT, Impack03.jpg, :5267; `'magic1'` BITMAP_MAGIC + 1,
-  Magic_Ground2.jpg, :5209; `'lightning1'` BITMAP_LIGHTNING + 1, lightning2.jpg, :5295;
-  `'kanturu2ndEffect1'` BITMAP_KANTURU_2ND_EFFECT1, Object39's k_effect_01.jpg, :5495). A card is
-  its sheet's own width times its scale (zzzeffectsprite.cpp:76), times the object's scale unless
+  :5309; `'spark1'` BITMAP_SPARK + 1, Spark03.jpg, :5216; `'shiny1'` BITMAP_SHINY + 1,
+  Shiny02.jpg, 32 by 64, :5275; `'shiny5'` BITMAP_SHINY + 5, shiny05.jpg, :5325; `'impact'`
+  BITMAP_IMPACT, Impack03.jpg, :5267; `'magic1'` BITMAP_MAGIC + 1, Magic_Ground2.jpg, :5209;
+  `'lightning1'` BITMAP_LIGHTNING + 1, lightning2.jpg, :5295; `'kanturu2ndEffect1'`
+  BITMAP_KANTURU_2ND_EFFECT1, Object39's k_effect_01.jpg, :5495). A card is its sheet's own width
+  by its height times its scale (zzzeffectsprite.cpp:72-77), times the object's scale unless
   the spec is `unscaled`; `pulse` waves its brightness (`abs` folds the wave up at zero, the
   original's `absf(sinf(...))`), `grow` its size and `spin` turns it, and a `MovableFlare` takes
   `setLuminosity`, `setScale` and `setAngle` (degrees, the original's `Rotation`) from its host.
@@ -109,8 +110,8 @@ policy. It knows how to light something, never which skill or item asks for it.
 - `recipes.test.ts`: `effectLight` hue, reach and gain ceiling, minimum range.
 - `characters.test.ts`: a steady carried glow (Poison Shadow), one that breathes, and the Scorpion's per-frame flicker.
 - `effectLights.test.ts`: a card is drawn from the sheet its spec names, one manager per sheet, at
-  the sheet's own width (checked against the file in `Data`); an `unscaled` card keeps its size
-  on a scaled object; an `abs` wave breathes on `|sin|`; a `grow` card grows and shrinks, a `spin`
+  the sheet's own width and height (checked against the file in `Data`; Shiny02.jpg is twice as tall
+  as wide, and grows and resizes both ways); an `unscaled` card keeps its size on a scaled object; an `abs` wave breathes on `|sin|`; a `grow` card grows and shrinks, a `spin`
   card turns; a movable card resizes and turns.
 - `mapObjectLightAdapter.test.ts`: a `bone` offset grows with the object, a plain one does not.
 - `mapObjectLights.test.ts`: a row's ground light breathes on its own pulse, else on its flare's, and a

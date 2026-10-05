@@ -5,7 +5,7 @@ import type { Scene } from '../render/babylon/exports';
 // The sheets the flares asked for, the sheet each sprite was drawn from, each manager's cell and every sprite.
 const asked = vi.hoisted(() => [] as string[]);
 const drawnFrom = vi.hoisted(() => [] as string[]);
-const cells = vi.hoisted(() => new Map<string, number>());
+const cells = vi.hoisted(() => new Map<string, { width: number; height: number }>());
 const sprites = vi.hoisted(() => [] as { width: number; height: number; angle: number; position: { y: number } }[]);
 
 vi.mock('@/controllers/assets/mu', () => ({
@@ -22,8 +22,8 @@ vi.mock('../render/babylon/exports', () => {
     }
   }
   class SpriteManager {
-    constructor(public name: string, public sheet: string, _capacity: number, cell: { width: number }) {
-      cells.set(sheet, cell.width);
+    constructor(public name: string, public sheet: string, _capacity: number, cell: { width: number; height: number }) {
+      cells.set(sheet, { width: cell.width, height: cell.height });
     }
   }
   class Sprite {
@@ -72,14 +72,16 @@ function clockedScene() {
   return { scene, step };
 }
 
-/** A JPEG's width, from its SOF0/SOF2 marker. */
-function jpegWidth(bytes: Uint8Array): number {
+/** A JPEG's width and height, from its SOF0/SOF2 marker. */
+function jpegSize(bytes: Uint8Array): { width: number; height: number } {
   for (let i = 2; i < bytes.length; ) {
     const marker = bytes[i + 1];
-    if (marker === 0xc0 || marker === 0xc2) return (bytes[i + 7] << 8) | bytes[i + 8];
+    if (marker === 0xc0 || marker === 0xc2) {
+      return { width: (bytes[i + 7] << 8) | bytes[i + 8], height: (bytes[i + 5] << 8) | bytes[i + 6] };
+    }
     i += 2 + ((bytes[i + 2] << 8) | bytes[i + 3]);
   }
-  return 0;
+  return { width: 0, height: 0 };
 }
 
 describe('flare cards', () => {
@@ -183,14 +185,29 @@ describe('flare cards', () => {
     expect(card.angle).toBeCloseTo(Math.PI);
   });
 
-  it.skipIf(!existsSync('Data/Effect'))('cut each sheet at the width of its file', async () => {
+  // A sprite is `Width * Scale` by `Height * Scale` (zzzeffectsprite.cpp:72-77): Shiny02.jpg is 32 by 64.
+  it('draw BITMAP_SHINY + 1 from Shiny02.jpg twice as tall as wide, growing and resizing both ways (ZzzOpenData.cpp:5275)', async () => {
+    const { scene, step } = clockedScene();
+    const grow = { speed: 0.002, amount: 0.5, base: 0.5 };
+    await createEffectLight(scene, { scale: 2, color: [1, 1, 1], texture: 'shiny1', grow }, at, 1);
+    const card = lastSprite();
+    expect(drawnFrom[drawnFrom.length - 1]).toBe('Effect/Shiny02.OZJ');
+    expect([card.width, card.height]).toEqual([0.64, 1.28].map(v => expect.closeTo(v)));
+    step(Math.PI / 2 / 0.002);
+    expect([card.width, card.height]).toEqual([0.96, 1.92].map(v => expect.closeTo(v)));
+    const flare = await createMovableFlare(scene, 1, [1, 1, 1], 'shiny1');
+    flare?.setScale(0.5);
+    expect([lastSprite().width, lastSprite().height]).toEqual([0.16, 0.32].map(v => expect.closeTo(v)));
+  });
+
+  it.skipIf(!existsSync('Data/Effect'))('cut each sheet at the width and height of its file', async () => {
     const scene = {} as Scene;
-    const textures = ['light', 'flare', 'spark1', 'shiny5', 'impact', 'magic1', 'lightning1', 'kanturu2ndEffect1'] as const;
+    const textures = ['light', 'flare', 'spark1', 'shiny1', 'shiny5', 'impact', 'magic1', 'lightning1', 'kanturu2ndEffect1'] as const;
     for (const texture of textures) {
       await createEffectLight(scene, { scale: 1, color: [1, 1, 1], texture }, at, 1);
     }
-    for (const [sheet, width] of cells) {
-      expect(width, sheet).toBe(jpegWidth(new Uint8Array(readFileSync(`Data/${sheet}`).subarray(24))));
+    for (const [sheet, cell] of cells) {
+      expect(cell, sheet).toEqual(jpegSize(new Uint8Array(readFileSync(`Data/${sheet}`).subarray(24))));
     }
   });
 });
