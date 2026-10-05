@@ -129,8 +129,11 @@ describe('the map flares the original draws as BITMAP_FLARE', () => {
     expect(cardsOf(ENUM_WORLD.WD_79UNITEDMARKETPLACE, 30)).toEqual(heads.map(offset => ({ offset, bone: true, sprite })));
   });
 
-  it('Loren Market 35: grey, breathing like its fLumi (GMUnitedMarketPlace.cpp:264-275)', () => {
-    expect(flareOf(ENUM_WORLD.WD_79UNITEDMARKETPLACE, 35)?.sprite).toEqual({
+  // `TransformPosition(BoneTransform[2], ...)`: the lantern's bone 2, 16 up, swaying 5 across in x.
+  it('Loren Market 35: grey, breathing like its fLumi, on bone 2 (GMUnitedMarketPlace.cpp:264-275)', () => {
+    const flare = flareOf(ENUM_WORLD.WD_79UNITEDMARKETPLACE, 35);
+    expect([flare?.offset, flare?.bone]).toEqual([[-2, -24, 16], true]);
+    expect(flare?.sprite).toEqual({
       scale: 1.5,
       color: [0.7, 0.7, 0.7],
       pulse: { speed: 0.039, amount: 0.2, base: 0.6 },

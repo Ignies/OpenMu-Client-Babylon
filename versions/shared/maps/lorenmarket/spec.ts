@@ -43,7 +43,8 @@ export const LOREN_MARKET_EMISSIONS: Partial<
  *    `fLumi * 0.5` with `fLumi = (sin(WorldTime * 0.002) + 1) * 0.2 + 0.6`.
  *  - **35** (×8), :115-130: the wall lamp - the same at bone 2, range 1; its
  *    one `BITMAP_FLARE` (:264-274) is grey `fLumi * 0.7`, breathing at 0.039
- *    like the fortress wall torch.
+ *    like the fortress wall torch. Bone 2 is the hanging lantern, 16 up,
+ *    swaying 5 across in x; the row sits at the middle of the sway.
  *  - **57** (×12), `RenderObjectVisual` :297-318: a steady `BITMAP_LIGHT`
  *    sprite at `2 * scale` in `(1, 0.2, 0)` plus the cycling `FIRE_HIK1` /
  *    `CURSEDLICH` / `HIK3` - the same vent Vulcanus 6 and Karutan 113 are.
@@ -81,7 +82,8 @@ export const LOREN_MARKET_LIGHTS: Partial<
   ],
   35: [
     {
-      offset: [0, 0, 200],
+      offset: [-2, -24, 16],
+      bone: true,
       pointRange: 4,
       sprite: { scale: 1.5, color: [0.7, 0.7, 0.7], pulse: { speed: 0.039, amount: 0.2, base: 0.6 }, texture: 'flare' },
       terrain: {

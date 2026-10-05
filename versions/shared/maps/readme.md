@@ -93,7 +93,7 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
 - `tileFiles.test.ts`: every tile slot of every map names a file that exists in its world folder.
 - `flareSheets.test.ts`: the table flares the original draws from another sheet than `BITMAP_LIGHT`
   take it with the original's tint, size and motion: `BITMAP_FLARE` (Aida 75 turning on bone 4,
-  Crywolf 41's bobbing pair, Loren Market 30 on its three heads and 35), `BITMAP_SPARK + 1` (Aida
+  Crywolf 41's bobbing pair, Loren Market 30 on its three heads and 35 on bone 2), `BITMAP_SPARK + 1` (Aida
   30 and 71 on their six bulbs, Kanturu 70 whose size breathes, Kanturu 2 8, Karutan 72's plant
   bulbs breathing on `|sin|`),
   `BITMAP_KANTURU_2ND_EFFECT1` (Kanturu 2 4's pair over its lamp); Karutan 66 has none (its insect
