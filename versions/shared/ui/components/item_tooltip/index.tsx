@@ -350,13 +350,11 @@ export const ItemTooltip = observer(
         : { width: 0, height: 0 };
 
       move(cursor.current.x, cursor.current.y);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [lines, wornLines, picture]);
 
     // The initial position from the props, then the pointer itself.
     useLayoutEffect(() => {
       move(x, y);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [x, y]);
 
     useEffect(() => {
@@ -375,7 +373,6 @@ export const ItemTooltip = observer(
         window.removeEventListener('pointermove', onMove);
         if (frame) cancelAnimationFrame(frame);
       };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     if (!lines) return null;

@@ -1,5 +1,4 @@
 {
- "(parse error)": 3,
  "@typescript-eslint/ban-ts-comment": 8,
  "@typescript-eslint/no-explicit-any": 71,
  "@typescript-eslint/no-non-null-assertion": 410,

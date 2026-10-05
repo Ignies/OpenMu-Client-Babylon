@@ -4,10 +4,16 @@ import { existsSync, readFileSync, writeFileSync } from 'fs';
 
 const PATH = 'tools/checks/baselines/lint.json';
 const text = await Bun.stdin.text();
-const results = JSON.parse(text.slice(text.indexOf('['))) as { messages: { ruleId: string | null }[] }[];
+const results = JSON.parse(text.slice(text.indexOf('['))) as { messages: { ruleId: string | null; fatal?: boolean }[] }[];
 
+// A message with no rule is a file ESLint could not parse, or an eslint-disable comment that disables nothing.
 const counts: Record<string, number> = {};
-for (const r of results) for (const m of r.messages) counts[m.ruleId ?? '(parse error)'] = (counts[m.ruleId ?? '(parse error)'] ?? 0) + 1;
+for (const r of results) {
+  for (const m of r.messages) {
+    const key = m.ruleId ?? (m.fatal ? '(parse error)' : '(unused eslint-disable)');
+    counts[key] = (counts[key] ?? 0) + 1;
+  }
+}
 
 if (process.argv.includes('--update') || !existsSync(PATH)) {
   writeFileSync(PATH, JSON.stringify(Object.fromEntries(Object.entries(counts).sort()), null, 1) + '\n');
