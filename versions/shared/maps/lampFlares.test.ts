@@ -60,6 +60,27 @@ describe('the lamp lights and flares the original never draws (lampFlares)', () 
     expect(DEVIAS_CANDELABRA.terrain).toBeUndefined();
   });
 
+  // `AddTerrainLight` is linear in the distance (ZzzLodTerrain.cpp:938-968): no falloff, no floor gain.
+  it('shape no ground light on Classic, on any map', () => {
+    setFidelityChoice(FIDELITY_CLASSIC, {});
+    for (let world = 0; world < 90; world++) {
+      for (let type = 0; type < 400; type++) {
+        for (const { terrain } of lightEmittersFor(world as ENUM_WORLD, type) ?? []) {
+          expect([terrain?.falloff, terrain?.floorGain], `world ${world} type ${type}`).toEqual([undefined, undefined]);
+        }
+      }
+    }
+  });
+
+  // `AddTerrainLight(o->Position[0], o->Position[1], ...)`: 150's offset is straight up, under the wick.
+  it('light the street lamp and the blue fire bowl at the object on Classic, their glass and bowl on Enhanced', () => {
+    const at = (world: ENUM_WORLD, type: number) => lightEmittersFor(world, type)?.find(e => e.terrain)?.offset;
+    expect([at(ENUM_WORLD.WD_0LORENCIA, 90), at(ENUM_WORLD.WD_51ELBELAND, 61)]).toEqual([[0, -62, 226], [11, -8, -10]]);
+    setFidelityChoice(FIDELITY_CLASSIC, {});
+    expect([at(ENUM_WORLD.WD_0LORENCIA, 90), at(ENUM_WORLD.WD_51ELBELAND, 61)]).toEqual([undefined, undefined]);
+    expect(at(ENUM_WORLD.WD_0LORENCIA, 150)).toEqual([0, 0, 78]);
+  });
+
   it('light no ground under the fire vents and the Noria forge on Classic, their cards kept', () => {
     const cardsOn = UNLIT_FIRES.map(([world, type]) => cards(world, type));
     setFidelityChoice(FIDELITY_CLASSIC, {});
