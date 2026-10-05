@@ -258,6 +258,21 @@ describe('Dark Side (263)', () => {
     }
   });
 
+  it('the wind pillar at the caster, and the two it raises on ticks 11 and 21 (MonkSystem.cpp:1297-1298, MoveHandlers.cpp:9579-9596)', () => {
+    for (const skill of [263, 559]) {
+      const pillars = run(skill, READY, { keysPerTick: 0.3 }).spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.windForce);
+      expect(pillars.map(s => [s.tick, s.opts.colour, Math.round((s.opts.seconds as number) * 25)])).toEqual([
+        [0, [1, 0.5, 0.2], 70],
+        [11, [1, 0.5, 0], 70],
+        [21, [1, 0.5, 0], 70],
+      ]);
+      // Scale 1 + 0.1 a tick up to 3, Light x 6 keeping 0.85 a tick.
+      const { scaleAt, blendLight } = pillars[0].opts as { scaleAt: (t: number) => number; blendLight: (t: number) => number };
+      expect([0, 5, 20, 40].map(t => scaleAt(t / 25))).toEqual([1, 1.5, 3, 3]);
+      expect(blendLight(2 / 25)).toBeCloseTo(6 * 0.85 ** 2);
+    }
+  });
+
   it('Rage_Darkside_Att when the server names targets (MonkSystem.cpp:551-558)', () => {
     played.length = 0;
     beginDarkSide(263, 5);

@@ -7,6 +7,10 @@ import { entityGone, entityPos, entityYaw } from '@/controllers/fx/core';
 import { IMPACT_HEIGHT, after, flash, flying, particles, perTick, seq, slash, ticks, type Step } from '@/controllers/skills/visuals';
 
 import { A } from '@/controllers/combat/recipes';
+import { windForce } from '../_shared';
+
+/** RageCreateEffect's MODEL_WINDFOCE sub2 (1, 0.5, 0.2) and the sub3s (1, 0.5, 0) it raises (MonkSystem.cpp:1297-1298, MoveHandlers.cpp:9579-9596). */
+const windPillar = windForce([1, 0.5, 0.2], true, [1, 0.5, 0]);
 
 /**
  * The afterimage (CDummyUnit, MonkSystem.cpp:1479-1498) advances its frame 0.05 a call; DarksideRendering bursts
@@ -31,9 +35,10 @@ export default defineSkill({
   name: "Dark Side",
   // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
   lookAliases: [559],
-  // 263 Dark Side: each blow, the dark wave and the BITMAP_DAMAGE2 bursts on the afterimage's frame (see above).
+  // 263 Dark Side: the wind pillar at the caster; each blow, the dark wave and the BITMAP_DAMAGE2 bursts on the
+  // afterimage's frame (see above).
   visual: {
-    cast: seq(slash(RGBS.shade, TEX.motionBlur, 0.8), ...WAVE_TICKS.map(t => after(ticks(t), wave))),
+    cast: seq(slash(RGBS.shade, TEX.motionBlur, 0.8), windPillar, ...WAVE_TICKS.map(t => after(ticks(t), wave))),
     impact: seq(...BURST_TICKS.map(t => after(ticks(t), burst))),
   },
   sound: 'Sound/Ragefighter/Rage_Darkside', // Dark Side
