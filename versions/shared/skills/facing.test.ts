@@ -175,6 +175,15 @@ describe('effect models turned as the original turns them', () => {
     expectTurned(made.find(m => m.model === MODEL.elShieldRing2), [0, 0, -40], 5);
   });
 
+  it('Ice Arrow\'s two MODEL_ICE at the target\'s Angle and that + 180 (WSclient.cpp:4486-4491)', () => {
+    for (const y of YAWS) {
+      const ice = record(() => playTargetedSkillVisual(scene, 51, body(1, CASTER, 0), body(2, TARGET, y))).filter(m => m.model === MODEL.ice);
+      expect(ice).toHaveLength(2);
+      expectTurned(ice[0], [0, 0, y]);
+      expectTurned(ice[1], [0, 0, y + 180]);
+    }
+  });
+
   it('Gigantic Storm\'s stone chips fly off backward from their Angle[2] (ZzzEffect.cpp:2710-2714, :7278-7284)', () => {
     // Every roll 0.2: a chip off each site each tick, each turned 72 degrees.
     const random = vi.spyOn(Math, 'random').mockReturnValue(0.2);
