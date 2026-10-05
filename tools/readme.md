@@ -24,7 +24,8 @@ and how to run it.
 
 ## Checks (`bun run check`, CI)
 - `checks/`: structure checks and their baselines, the lint ratchet, the commit message rules
-  ([docs/ci.md](../docs/ci.md)). `lintCounts.ts`: `bun run lint:count`.
+  ([docs/ci.md](../docs/ci.md)). `lintCounts.ts`: `bun run lint:count`. `checks/graph.test.ts`
+  pins the cycle finder and the type-only import rule the cycle check stands on.
 - `assetCase.ts`: the converted assets' file name case against the client's own tables.
 - `weatherStats.ts`: what the proxy's weather schedule does, measured.
 
