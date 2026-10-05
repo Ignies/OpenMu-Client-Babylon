@@ -36,7 +36,7 @@ export class PlayerObject extends ModelObject {
    * The class a *player-rig NPC* poses as (`c->Class` on the NPC the
    * original creates with `CreateCharacter(..., MODEL_PLAYER, ...)`).
    * `null` on real players - their class arrives with the appearance.
-   * Read by app/logic.ts so `isFemale` is not hard-zeroed for these.
+   * Read by `modules/scope/objects.ts` so `isFemale` is not hard-zeroed for these.
    */
   static NpcClass: CharacterClassNumber | null = null;
 

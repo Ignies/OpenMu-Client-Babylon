@@ -1299,7 +1299,7 @@ export const Economy = new (class _Economy {
 
   /**
    * `PlayerShopBuyResult` (0x3F 0x06), refusals only: a success is the item
-   * itself arriving, and app/logic.ts puts that in the inventory.
+   * itself arriving, which the inventory module's `ItemAddedToInventory` handler puts in the bag.
    */
   shopBuyResult(result: PlayerShopBuyResultResultKindEnum): void {
     const E = PlayerShopBuyResultResultKindEnum;

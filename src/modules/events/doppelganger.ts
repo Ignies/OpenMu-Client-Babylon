@@ -15,7 +15,7 @@ import type { EventLayer } from './layer';
  *
  * Driven by: `NpcWindowResponse` (LugardDoppelgangerEntry) via
  * `openDoppelganger`. Read by: the entry window in
- * `versions/shared/ui/windows/events`, and `app/logic.ts` through the facade.
+ * `versions/shared/ui/windows/events`, and `npc_shop/net.ts` (NPC windows) through the facade.
  */
 
 // ---- 1. tuning -------------------------------------------------------------

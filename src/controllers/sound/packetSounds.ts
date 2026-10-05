@@ -11,7 +11,7 @@ import type { Sounds } from './recipes';
  * firing, a monster spawning, the cherry-blossom swirl, the Nightmare's
  * teleport and the Christmas-ring emotes.
  *
- * Driven by: `app/logic.ts`, from the packet handlers named on each row; it plays
+ * Driven by: the modules' packet handlers (`modules/<module>/net.ts`) named on each row; it plays
  * `key` with `opts` through `playSfx`, at the object the original names.
  * Pure data and selectors: no state, nothing plays from here.
  *

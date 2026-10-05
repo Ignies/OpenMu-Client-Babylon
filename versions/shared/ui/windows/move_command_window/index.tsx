@@ -28,7 +28,7 @@ import { useWindowChrome } from '@/controllers/interface/components/mu_window';
  * centred columns, white when the hero can go and dark red when not, with
  * the failing number in bright red (`SettingCanMoveMap` / `Render`). A click
  * on a white row sends `WarpCommandRequest` with the row's index and hides
- * the window; the server answers with `MapChanged` (app/logic.ts) or a blue
+ * the window; the server answers with `MapChanged` (modules/warp/net.ts) or a blue
  * message. Escape and the red bar at the bottom close it.
  *
  * Rules kept from `SettingCanMoveMap`: level (2/3 for MG / DL / RF, never

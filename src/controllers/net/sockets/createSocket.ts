@@ -53,7 +53,7 @@ packetsCacheByCode.forEach(list => {
  * itself (field index 2): OpenMU writes `Whisper` = 0x02 there
  * (`ChatMessageRef.Type`, GameServer/RemoteView/ChatViewPlugIn.cs), so an
  * inbound whisper arrives as "code 0x02", which no generated class claims.
- * Route it to the same parser; app/logic.ts reads `p.Type` off that byte and
+ * Route it to the same parser; the chat module's handler reads `p.Type` off that byte and
  * colours the line as a whisper. OpenMU emits only Normal (0x00) and Whisper
  * (0x02) - party / guild / alliance lines are Normal with a text prefix.
  */

@@ -44,7 +44,7 @@ import { registerAmbientGate } from '@/controllers/sound';
  * inventory ticket via `useTicket`, and the `BloodCastleEnterResult` /
  * `MiniGameOpeningState` / `BloodCastleState` / `BloodCastleScore` packets.
  * Read by: the entry window and timer HUD in
- * `versions/shared/ui/windows/events`, and `app/logic.ts` through the facade.
+ * `versions/shared/ui/windows/events`, and `npc_shop/net.ts` (NPC windows) through the facade.
  */
 
 // ---- 1. tuning -------------------------------------------------------------

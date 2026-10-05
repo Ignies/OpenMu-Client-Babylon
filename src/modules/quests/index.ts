@@ -38,8 +38,8 @@ export type { QuestLayer } from './layer';
  * `quests.reset` on a map change (`loadMapIntoScene`); both fan out over
  * `QUEST_LAYERS` (`layers.ts`), the only list of entries in the codebase.
  * The readers and commands below are the facade's public surface for
- * consumers that want the whole system from one import (`app/logic.ts`, the
- * bottom bar); every entry file stays importable directly for the windows.
+ * consumers that want the whole system from one import (`npc_shop/net.ts`,
+ * `npcTalkSystem.ts`, the bottom bar); every entry file stays importable directly for the windows.
  */
 class Quests {
   private readonly layers: QuestLayer[] = [...QUEST_LAYERS];

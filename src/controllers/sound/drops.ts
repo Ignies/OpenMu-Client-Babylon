@@ -23,7 +23,7 @@ const BUS: SoundBus = 'drops';
 const BUNDLE_GROUP = 12;
 const BUNDLED_JEWELS: readonly number[] = [30, 31];
 
-/** What `app/logic.ts` knows about a drop when the packet lands. */
+/** What the drops module's handler knows about a drop when the packet lands. */
 export type DropSoundInfo = {
   isMoney: boolean;
   /** Parsed item, absent for zen and for a row the serializer could not read. */

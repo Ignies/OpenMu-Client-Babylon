@@ -5,7 +5,7 @@ import type { Item } from '../../ecs/world';
  * the inventory (`CNewUIMyInventory::UseItem`, NewUIMyInventory.cpp:1865).
  * Pure rules only - the packet (0x26 ConsumeItemRequest, ItemSlot = the
  * orb / scroll) is sent by `Bag.learnSkillItem`, the answer (`SkillAdded`
- * F3 11 / `ItemConsumptionFailed`) lands in app/logic.ts.
+ * F3 11 / `ItemConsumptionFailed`) lands in the skills and inventory modules' `net.ts`.
  *
  * Server truth (OpenMU `LearnablesConsumeHandlerPlugIn`): the item's
  * definition names the skill, the hero's class must be on the item's class

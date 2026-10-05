@@ -24,7 +24,7 @@ import { SoundsManager } from './soundsManager';
  * ZzzCharacter.cpp:4280-5045, `ReceiveAttackSkill` WSclient.cpp:3880-4760).
  * Monster voices are their own entry (`monsters.ts`).
  *
- * Driven by: `CombatSfxSystem` (swing / pain / death), `app/logic.ts` and
+ * Driven by: `CombatSfxSystem` (swing / pain / death), the combat module's handlers and
  * `skillCastSystem` (skills, hits), through the selectors + `playCombat` /
  * `playSkill`. Command-only: no per-frame state.
  */

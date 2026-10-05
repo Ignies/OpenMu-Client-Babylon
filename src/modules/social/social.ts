@@ -692,7 +692,7 @@ export const Social = new (class _Social {
 
       // A line that is nothing but an emoji token pops the bubble here too.
       // Everyone else gets it from this very message (the ChatMessage handler
-      // in app/logic.ts), and waiting for the server to echo it back would show
+      // in chat/net.ts), and waiting for the server to echo it back would show
       // the sender their own bubble a round trip late. Public chat only: a
       // party line reaches members three maps away, where a bubble would hang
       // over nobody.

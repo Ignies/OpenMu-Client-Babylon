@@ -7,7 +7,7 @@
  * plays `SOUND_COMBO` and knocks the target up (`m_byDieType = COMBO`,
  * ZzzCharacter.cpp:3173).
  *
- * Driven by `app/logic.ts`'s `SkillAnimation` handler (`observeSkillAnimation`);
+ * Driven by the combat module's `SkillAnimation` handler (`observeSkillAnimation`);
  * read by effects / HUD (`comboFlash`) and by the death system for the
  * knock-up (`comboKnockUp`).
  */

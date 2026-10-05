@@ -7,7 +7,7 @@ import { t } from '../../i18n';
  * (`CNewUIMyInventory::ApplyJewels`, NewUIMyInventory.cpp:1546). Pure rules
  * only - the packet (0x26 ConsumeItemRequest, ItemSlot = jewel, TargetSlot =
  * item) is sent by `Bag.applyPickedJewel`, the answer
- * (`InventoryItemUpgraded` / `ItemConsumptionFailed`) lands in app/logic.ts.
+ * (`InventoryItemUpgraded` / `ItemConsumptionFailed`) lands in this module's `net.ts`.
  *
  * Server truth (OpenMU `ItemModifyConsumeHandlerPlugIn`): the target must sit
  * in the inventory grid, never in an equipment slot, and the jewel's own

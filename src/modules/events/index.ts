@@ -50,7 +50,7 @@ export type { EventLayer, EventEntryState } from './layer';
  * The game talks to `events.update` once a frame (`ecs/systems/eventSystem.ts`)
  * and `events.reset` on a map change (`controllers/terrain/loadMapIntoScene.ts`); both
  * fan out over `EVENT_LAYERS` (`layers.ts`), the only list of events in the
- * codebase. The commands below are what `app/logic.ts` (NPC windows) and the
+ * codebase. The commands below are what `npc_shop/net.ts` (NPC windows) and the
  * inventory (tickets) call; the HUD reads the entry files directly.
  */
 class Events {
