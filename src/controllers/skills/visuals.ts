@@ -191,7 +191,7 @@ export const repeat = (n: number, every: number, step: Step): Step => (at, c) =>
 };
 /**
  * The facing convention: `transform.rot.y` is `atan2(dz, dx) + π/2`
- * (skillCastSystem / app/logic.ts), so the forward vector is (sin yaw, −cos yaw)
+ * (skillCastSystem / modules/combat/net.ts), so the forward vector is (sin yaw, −cos yaw)
  * - the same one deathSystem and the debris entry use.
  */
 export const forwardOf = (yaw: number): { x: number; z: number } => ({ x: Math.sin(yaw), z: -Math.cos(yaw) });
@@ -621,8 +621,8 @@ export function playSkillImpact(scene: Scene, skill: number, caster: Entity, tar
  * `AreaSkillAnimation` carries no target, but the explicit-target area
  * skills (Chain Lightning, Drain Life, Teleport Ally) draw a bolt or a
  * ribbon to one: `target` is the object the caller found standing on the
- * cast point (the hero's own cast knows it; for others app/logic.ts picks the
- * nearest object to the point). Objects stand on integer tile coordinates,
+ * cast point (the hero's own cast knows it; for others modules/skills/net.ts
+ * picks the nearest object to the point). Objects stand on integer tile coordinates,
  * so the point is used as is.
  */
 export function playAreaSkillVisual(
@@ -801,7 +801,7 @@ export function clearBuffVisuals(entity: Entity): void {
 // Dev hook for the live harness: no offline test character casts every skill,
 // so probes fire a row by hand (`window.__skillVisuals.area(9)`). `victim` is
 // whatever else is standing about - offline that is the second test character,
-// and it stands in for the object `app/logic.ts` finds on the cast point, so the
+// and it stands in for the object `modules/skills/net.ts` finds on the cast point, so the
 // rows that draw at a target (a bolt, a siphon) can be shot at all.
 if (import.meta.env.DEV && typeof window !== 'undefined') {
   const victim = (): Entity | null => {
