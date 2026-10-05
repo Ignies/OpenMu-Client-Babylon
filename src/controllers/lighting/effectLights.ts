@@ -28,14 +28,17 @@ import { EFFECT_RENDERING_GROUP, keepDepthForEffects } from '../fx/core';
 /**
  * The sheets, by the bitmap the original names (ZzzOpenData.cpp): `light` is BITMAP_LIGHT,
  * flare01.jpg, a soft white glow (:5207); `flare` BITMAP_FLARE, Flare.jpg, a warm star (:5309);
- * `spark1` BITMAP_SPARK + 1, Spark03.jpg, a white dot in a blue halo (:5216). `px` is the
- * sheet's width: a sprite is `Width * Scale` across (zzzeffectsprite.cpp:76). `sprites` caps a
- * busy sheet higher: Aida's 183 plants carry twelve sparks each.
+ * `spark1` BITMAP_SPARK + 1, Spark03.jpg, a white dot in a blue halo (:5216); `shiny5`
+ * BITMAP_SHINY + 5, shiny05.jpg, an eight-point sparkle (:5325 loads it over :5279's shiny04.jpg,
+ * and a second name replaces the first, GlobalBitmap.cpp:549-568). `px` is the sheet's width: a
+ * sprite is `Width * Scale` across (zzzeffectsprite.cpp:76). `sprites` caps a busy sheet higher:
+ * Aida's 183 plants carry twelve sparks each.
  */
 const FLARE_TEXTURES = {
   light: { file: 'Effect/flare01.OZJ', px: 64 },
   flare: { file: 'Effect/Flare.OZJ', px: 64 },
   spark1: { file: 'Effect/Spark03.OZJ', px: 32, sprites: 2560 },
+  shiny5: { file: 'Effect/shiny05.OZJ', px: 64 },
 } as const;
 
 export type FlareTexture = keyof typeof FLARE_TEXTURES;

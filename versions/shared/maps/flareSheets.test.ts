@@ -59,6 +59,13 @@ describe('the BITMAP_SPARK + 1 cards (Spark03.jpg)', () => {
   });
 });
 
+describe('the BITMAP_SHINY + 5 cards (shiny05.jpg)', () => {
+  // Its two points ride bones that sweep 1.4 tiles: the insect hangs them itself (karutan1/insectObject.test.ts).
+  it('Karutan 66: no table card on top of the insect\'s own (GMKarutan1.cpp:68-82)', () => {
+    expect(lightEmittersFor(ENUM_WORLD.WD_80KARUTAN1, 66)).toBeUndefined();
+  });
+});
+
 // BITMAP_FLARE is Flare.jpg, a warm star (ZzzOpenData.cpp:5309): the tint is the original's, not a warm stand-in.
 describe('the map flares the original draws as BITMAP_FLARE', () => {
   it('Aida 75: white, 3 (GMAida.cpp:304-311)', () => {

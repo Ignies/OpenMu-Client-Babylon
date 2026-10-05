@@ -95,6 +95,15 @@ describe('flare cards', () => {
     expect(lastSprite().width).toBeCloseTo(3.52);
   });
 
+  // The slot is loaded twice, shiny04.jpg then shiny05.jpg, and a load under a new name replaces the old one
+  // (ZzzOpenData.cpp:5279, :5325; GlobalBitmap.cpp:549-568).
+  it('draw BITMAP_SHINY + 5 from shiny05.jpg', async () => {
+    const scene = {} as Scene;
+    await createMovableFlare(scene, 1.2, [1.9, 1.1, 1.1], 'shiny5');
+    expect(drawnFrom[drawnFrom.length - 1]).toBe('Effect/shiny05.OZJ');
+    expect(lastSprite().width).toBeCloseTo(0.768);
+  });
+
   // `CreateSprite(BITMAP_SPARK + 1, Position, 5.5f, ...)` has no `* o->Scale` (GMAida.cpp:110).
   it('size an unscaled card without the object scale', async () => {
     const scene = {} as Scene;
@@ -118,7 +127,7 @@ describe('flare cards', () => {
 
   it.skipIf(!existsSync('Data/Effect'))('cut each sheet at the width of its file', async () => {
     const scene = {} as Scene;
-    for (const texture of ['light', 'flare', 'spark1'] as const) {
+    for (const texture of ['light', 'flare', 'spark1', 'shiny5'] as const) {
       await createEffectLight(scene, { scale: 1, color: [1, 1, 1], texture }, at, 1);
     }
     for (const [sheet, width] of cells) {

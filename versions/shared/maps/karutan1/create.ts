@@ -15,15 +15,16 @@ import { KarutanInsectObject } from './insectObject';
  * `spec.ts` (the hidden vents, the fire light, the bone sprites, the
  * `RenderAfterObjectMesh` sines and scrolls) and `sound.ts`.
  *
- *  - **66** (×6): 0.15, plus the tail-of-clip action roll - `insectObject.ts`.
+ *  - **66** (×6): 0.15, plus the tail-of-clip action roll and the two
+ *    glowing points on its bones - `insectObject.ts`.
  *  - **107** (×17): 5.0 - `flag.SMD`, the Kardamahal banner, 31 times the
  *    default 0.16: the cloth snaps rather than stirs.
  *
  * Not built:
  *  - The `o->m_bRenderAfterCharacter = true` on 1, 3, 54, 55, 56, 57, 58, 62,
  *    63, 66 and 119 (:170-188) - see `KARUTAN_MESH_ANIMATION`.
- *  - The bone-anchored sprite pairs on 66 (bones 13/14) and 72 (bones 11/7,
- *    :83-99), each reduced to one flare in `KARUTAN_LIGHTS`.
+ *  - The bone-anchored sprite pairs on 72 (bones 11/7, :83-99), reduced to
+ *    one flare in `KARUTAN_LIGHTS`.
  *  - The map's two new particle SubTypes - `BITMAP_WATERFALL_3` 16
  *    (ZzzEffectParticle.cpp:3624-3632, :8667-8686) on 114 and `BITMAP_SMOKE`
  *    69 (:1654-1661, :5880-5888) on 116 - stand in as the nearest existing

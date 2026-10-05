@@ -94,7 +94,7 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
 - `flareSheets.test.ts`: the table flares the original draws from another sheet than `BITMAP_LIGHT`
   take it with the original's tint and size: `BITMAP_FLARE` (Aida 75, Crywolf 41, Loren Market 30
   and 35), `BITMAP_SPARK + 1` (Aida 30 and 71, on their six bulbs; Kanturu 70, whose size breathes;
-  Kanturu 2 8).
+  Kanturu 2 8); Karutan 66 has none (its insect hangs its `BITMAP_SHINY + 5` points itself).
 - `bloodcastle/lampObject.test.ts`: the throne-room lamp's flare is `BITMAP_FLARE` too.
 - `loginscene/wallTorchObject.test.ts`, `empireguardian4/spec.test.ts`: the wall torch's flare, on
   the `BITMAP_FLARE` sheet lit or not, and the fortress lights on Classic and Enhanced.
@@ -105,3 +105,5 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
 - `kalima/grassObject.test.ts`: `KalimaWaterPlantObject`.
 - `kanturu2/gateway.test.ts`: the gateway turn sound loops from the click, and stays silent when
   the original refuses it.
+- `karutan1/insectObject.test.ts`: the insect's two `BITMAP_SHINY + 5` points ride bones 13 and 14
+  and breathe on `|sin|`; it is never a batched prop.
