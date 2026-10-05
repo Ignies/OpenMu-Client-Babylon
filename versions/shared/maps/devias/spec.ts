@@ -33,7 +33,8 @@ export const DEVIAS_BLEND_MESHES: Readonly<Record<number, number>> = {
  *    202.5/62, 225/44.5); the fire gets the flame, the hearth nothing.
  *    66 also burns alone as the camp fires (11.5/77.5, 174/192, …). The
  *    original's 66 is `CreateFire(0, o, 0, 0, 50)` (ZzzObject.cpp:3874-3876):
- *    fire and a range-4 light, no flare; the flare is ours (`lampFlares`).
+ *    fire and a range-4 light 50 up, `createFire`'s, no flare; the flare is
+ *    ours (`lampFlares`).
  *  - 54 / 56 candelabra are DeviasCandleObject: flames and light come from
  *    the wick bones (DEVIAS_CANDELABRA below), nothing is needed here.
  */
@@ -45,15 +46,10 @@ const HEARTH_FLARE: NonNullable<LightEmitter['sprite']> = { scale: 4.5, color: [
 export const DEVIAS_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
   66: [
     {
-      ...createFire([0, 0, 30]),
+      ...createFire([0, 0, 50]),
       pointRange: 8,
       get sprite() {
         return isOn('lampFlares') ? HEARTH_FLARE : undefined;
-      },
-      terrain: {
-        range: 5,
-        color: [1, 0.6, 0.35],
-        flicker: { min: 0.6, max: 1, steps: 5 },
       },
       // EncTerrain3.obj carries 66 in two sizes and the emitter multiplies
       // its sprites by the object's own scale, so one recipe cannot serve
