@@ -20,7 +20,7 @@ folders: [../readme.md](../readme.md).
 | `dragon_slasher` | 265 | the multi-shot volley turned to the target and Rage_Dragonkick (neither without one); between DRAGONKICK keys 4 and 5 the ground wind, joints that leave bone 1 and ride the meshless dummy's bone 2 as it swings round; each tick past key 5, twice over the target, four energy, lightning and spark cards and two bouncing sparks |
 | `ignore_defense` | 266 | at the caster, all blue: the sword flash, three ground shock rings and spinning clouds, the wind pillar and a widening magic circle; on the buffed body (129) a red smoke off the hands each tick |
 | `increase_health` | 267, 573 str | the same in violet; on the buffed body (130, 155) the Ourforces bone glow and two red decals under it |
-| `increase_block` | 268, 569 power up, 572 mastery | the same in red; on the buffed body (131, 153, 154) now and then a mirror wind pillar |
+| `increase_block` | 268, 569 power up, 572 mastery | the same in red, then a pale wind pillar on the caster (the hero's target on his own cast) that stands while that body holds an Ourforces buff; on the buffed body (131, 153, 154) now and then a mirror wind pillar |
 | `charge` | 269 | Rush's charge: each tick until RUSH key 5 or tick 14, 20 cm over the feet, four JOINT_SPARKs thrown back and four BITMAP_FIRE sub18 ground smokes; then the sword force at the caster |
 | `phoenix_shot` | 270 | a phoenix arrow, a fire hit and the phoenix model |
 
@@ -48,7 +48,9 @@ its caster (`observeDarkSideEcho`). It also keeps the hit streak for the damage 
 on 17 bones in three breathing groups and the decals under the body (Increase Health); `ourforcesSmoke`, a red
 SMOKELINE1 off bone 26 or 35 each tick (Ignore Defense, none while cloaked); `ourforcesMirror`, one tick in 70 a
 MODEL_WINDFOCE_MIRROR while none is up (Increase Block). The body carries one BITMAP_LIGHT_RED per Ourforces buff and each
-makes the smoke and rolls for the mirror, so they add up (`lightReds`). And `windForce`, MODEL_WINDFOCE (Dark Side and 266-268): a wind pillar that stays where it rose,
+makes the smoke and rolls for the mirror, so they add up (`lightReds`). `blockPillar` is Increase Block's MODEL_WINDFOCE sub1, one
+a body, standing while it holds an Ourforces buff: the original registers the buff as it casts, ours comes in its own
+packet, so the pillar waits 25 ticks for one. And `windForce`, MODEL_WINDFOCE (Dark Side and 266-268): a wind pillar that stays where it rose,
 turns, grows to 3 and fades through its Light (drawn x 6, clamped, additive), raising a fast sub 3
 pillar on its 11th and 21st tick. `swordFlash`, BITMAP_SWORD_EFFECT_MONO (266-268): Swordeff_mono cards rising where
 the caster stood, two in three ticks, each growing x1.2 a tick to 6 and shrinking back; on its second tick a
@@ -71,5 +73,6 @@ count moves on the effects clock (`eachMove`, `movesSince`), so a script made in
 - `timing.test.ts`: per skill, the tick each part draws or sounds at, against the clip; Dark Side's
   follow-ups against the echo, the hero's clip and AttackTime's stop at 15; the master skills (551, 554, 558-560)
   sound as their base, as RageCreateEffect plays one sound for each case; the Ourforces buff looks by sub, the smoke
-  and the mirror rolls adding up with the buffs, the smoke stopping under a cloak.
+  and the mirror rolls adding up with the buffs, the smoke stopping under a cloak; Increase Block's lasting pillar, its
+  body and how long it stands.
 - Covered by the golden tests in `../` (`skillVisuals.golden.test.ts`, `skillTables.golden.test.ts`).

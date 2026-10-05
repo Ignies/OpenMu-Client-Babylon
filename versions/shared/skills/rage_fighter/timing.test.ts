@@ -3,6 +3,7 @@ import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
 import { Scene } from '@babylonjs/core/scene';
 import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 import { effects } from '@/controllers/fx';
+import { fxNow } from '@/controllers/fx/core';
 import { MODEL, TEX } from '@/controllers/fx/recipes';
 import type { TailStrip, TickedFx } from '@/controllers/fx/ticked';
 import { ENUM_WORLD } from '@/core/types';
@@ -78,7 +79,27 @@ interface Run {
 function run(
   skill: number,
   clip: PlayerAction,
-  { keysPerTick = 0.4, ticks = 60, area = false, hero = false, leaveAt = 0, target = true }: { keysPerTick?: number; ticks?: number; area?: boolean; hero?: boolean; leaveAt?: number; target?: boolean } = {}
+  {
+    keysPerTick = 0.4,
+    ticks = 60,
+    area = false,
+    hero = false,
+    leaveAt = 0,
+    target = true,
+    buffs,
+    onTick,
+  }: {
+    keysPerTick?: number;
+    ticks?: number;
+    area?: boolean;
+    hero?: boolean;
+    leaveAt?: number;
+    target?: boolean;
+    /** The caster's buffs. */
+    buffs?: Set<number>;
+    /** Called before each tick with the caster and the target. */
+    onTick?: (tick: number, caster: Entity, target: Entity | null) => void;
+  } = {}
 ): Run {
   let tick = 0;
   const model = { CurrentAction: clip as number, actionFrame: () => 0, AnimationSpeed: keysPerTick };
@@ -86,6 +107,7 @@ function run(
   const caster = {
     netId: 1,
     localPlayer: hero || undefined,
+    buffs,
     transform: { pos: new Vector3(100, 0, 100), rot: new Vector3(0, 0.5, 0), scale: 1 },
     playerAnimation: { action: clip },
     modelObject: model,
@@ -137,6 +159,7 @@ function run(
   take();
   for (tick = 1; tick <= ticks; tick++) {
     if (leaveAt && tick >= leaveAt) model.CurrentAction = PlayerAction.PLAYER_STOP_MALE;
+    onTick?.(tick, caster, aim);
     effects.update(ENUM_WORLD.WD_0LORENCIA, 1 / 25);
     take();
     for (const s of out.spawns) if (s.end === undefined && s.handle && !s.handle.alive) s.end = tick;
@@ -612,7 +635,8 @@ describe('Ignore Defense, Increase Health, Increase Block (266-268): RageCreateE
   it('a slow pillar of 50 ticks at the caster, and the fast two it raises on ticks 11 and 21 in its Light (MoveHandlers.cpp:9529-9554)', () => {
     for (const [skills, colour] of PILLARS) {
       for (const skill of skills) {
-        const pillars = run(skill, PlayerAction.PLAYER_SKILL_ATT_UP_OURFORCES).spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.windForce);
+        // Increase Block's lasting sub1 is below.
+        const pillars = run(skill, PlayerAction.PLAYER_SKILL_ATT_UP_OURFORCES).spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.windForce && s.opts.seconds !== Infinity);
         expect(pillars.map(s => [s.tick, s.opts.colour, Math.round((s.opts.seconds as number) * 25)])).toEqual([
           [0, colour, 50],
           [11, colour, 70],
@@ -733,6 +757,58 @@ describe('Ignore Defense, Increase Health, Increase Block (266-268): RageCreateE
         expect(angle[2]).toBeCloseTo(0.5 * (180 / Math.PI));
       }
     }
+  });
+});
+
+describe('Increase Block\'s MODEL_WINDFOCE sub1: a pillar on the body while it holds an Ourforces buff (WSclient.cpp:5072-5081, MoveHandlers.cpp:9556-9575)', () => {
+  const ATT = PlayerAction.PLAYER_SKILL_ATT_UP_OURFORCES;
+  const lasting = (r: Run): Spawn[] => r.spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.windForce && s.opts.seconds === Infinity);
+
+  it('Increase Block and its master skills raise it on the caster: Scale 1, Light (0.6, 0.6, 1) x a breath, drawn x 6, turning -WorldTime x 0.3 degrees', () => {
+    for (const skill of [268, 569, 572]) {
+      const [pillar, ...more] = lasting(run(skill, ATT, { buffs: new Set([131]), ticks: 2 }));
+      expect(more).toEqual([]);
+      expect([pillar.tick, pillar.at.x, pillar.at.z]).toEqual([0, 100, 100]);
+      const { scale, colour, blendLight, blendClamp, spin } = pillar.opts as { scale?: number; colour: number[]; blendLight: (t: number) => number; blendClamp: boolean; spin: number };
+      expect([scale ?? 1, colour, blendClamp]).toEqual([1, [0.6, 0.6, 1], true]);
+      // (sin(WorldTime x 0.001) + 1) x 0.25 + 0.2, WorldTime in ms.
+      expect(blendLight(0)).toBeCloseTo(6 * ((Math.sin(fxNow()) + 1) * 0.25 + 0.2));
+      expect(spin).toBeCloseTo((300 * Math.PI) / 180);
+    }
+    for (const skill of [266, 267, 573]) expect(lasting(run(skill, ATT, { buffs: new Set([131]), ticks: 2 }))).toEqual([]);
+  });
+
+  it('stands while the body holds any Ourforces buff and goes with the last (LifeTime kept at 10, then 0)', () => {
+    const buffs = new Set([131, 130]);
+    const drop = (tick: number): void => {
+      if (tick === 30) buffs.delete(131);
+      if (tick === 50) buffs.delete(130);
+    };
+    const [pillar] = lasting(run(268, ATT, { buffs, ticks: 60, onTick: drop }));
+    expect(pillar.end).toBe(50);
+  });
+
+  it('stands 25 ticks for the buff, which comes in its own packet, and goes without it (the original registers it at once, WSclient.cpp:5089-5102)', () => {
+    const [pillar] = lasting(run(268, ATT, { buffs: new Set(), ticks: 40 }));
+    expect(pillar.end).toBe(25);
+  });
+
+  it('one a body: a new cast takes the old one\'s place (DeleteEffect, WSclient.cpp:5080-5081)', () => {
+    const recast = (tick: number, caster: Entity): void => void (tick === 10 && playTargetedSkillVisual(scene, 268, caster, null));
+    const pillars = lasting(run(268, ATT, { buffs: new Set([131]), ticks: 20, onTick: recast }));
+    expect(pillars.map(p => [p.tick, p.end])).toEqual([
+      [0, 10],
+      [10, undefined],
+    ]);
+  });
+
+  it('on the hero\'s target when the hero casts, on the caster when another does (_pObj, WSclient.cpp:5060-5064)', () => {
+    const at = (hero: boolean): number[] => {
+      const [pillar] = lasting(run(268, ATT, { hero, buffs: new Set([131]), ticks: 1 }));
+      return [pillar.at.x, pillar.at.z];
+    };
+    expect(at(true)).toEqual([103, 104]);
+    expect(at(false)).toEqual([100, 100]);
   });
 });
 

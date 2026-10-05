@@ -2,6 +2,7 @@ import { type BoneGlow, type GroundGlow } from '@/controllers/fx/aura';
 import { MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
 import { effects } from '@/controllers/fx';
 import { TICK, bonePos, entityGone, entityPos, entityYaw, followEntity, fxNow, type RGB } from '@/controllers/fx/core';
+import type { EffectHandle } from '@/controllers/fx/layer';
 import type { TickedFx } from '@/controllers/fx/ticked';
 import { Vector3, type Scene } from '@/controllers/render/babylon/exports';
 import { after, cm, seq, ticks, type BuffLook, type SkillContext, type Step } from '@/controllers/skills/visuals';
@@ -279,6 +280,38 @@ export const ourforcesMirror: BuffLook = (e, scene) => {
     for (let i = lightReds(e); i > 0; i--) if (randInt(70) === 7 && !mirror?.alive && !entityGone(e)) mirror = windForceMirror(scene, e);
   };
   return { pulse: { every: TICK, fire: roll } };
+};
+
+/** The MODEL_WINDFOCE sub1 on each body, the last Increase Block's: DeleteEffect before CreateEffect (WSclient.cpp:5078-5081). */
+const blockPillars = new WeakMap<Entity, EffectHandle>();
+/** The ticks it stands before it asks for a buff: the original registers Increase Block as it makes it (WSclient.cpp:5089-5102), ours comes in its own packet. */
+const BLOCK_PILLAR_GRACE = 25;
+
+/**
+ * Increase Block's MODEL_WINDFOCE sub1 (WSclient.cpp:5072-5081) on the body the cast is for: the hero's target, or another
+ * caster himself. LifeTime 999, kept while the body holds any Ourforces buff (ZzzEffect.cpp:6004-6013, MoveHandlers.cpp:9556-9575):
+ * Scale 1, turning to -WorldTime x 0.3 degrees, Light (0.6, 0.6, 1) x ((sin(WorldTime x 0.001) + 1) x 0.25 + 0.2), drawn x 6,
+ * clamped (ZzzObject.cpp:2509-2514).
+ */
+export const blockPillar: Step = (_at, c) => {
+  const body = c.caster.localPlayer && c.target ? c.target : c.caster;
+  blockPillars.get(body)?.stop();
+  const t0 = fxNow();
+  const pillar = effects.spawn('model', c.scene, entityPos(body, 0, new Vector3()), {
+    model: MODEL.windForce,
+    seconds: Infinity,
+    follow: followEntity(body, 0),
+    until: () => entityGone(body) || (movesSince(t0) >= BLOCK_PILLAR_GRACE && lightReds(body) === 0),
+    // Degrees a ms of WorldTime as radians a second; MU's yaw turns the other way.
+    spin: 0.3 * 1000 * DEG,
+    colour: [0.6, 0.6, 1],
+    blendMesh: 0,
+    blendLight: () => 6 * ((Math.sin(fxNow()) + 1) * 0.25 + 0.2),
+    blendClamp: true,
+    fadeTail: 0,
+  });
+  blockPillars.set(body, pillar);
+  return pillar;
 };
 
 /** The ticks a wind pillar raises its sub 3: LifeTime 40 and 30 of 50, or 60 and 50 of 70 (MoveHandlers.cpp:9538, :9590). */
