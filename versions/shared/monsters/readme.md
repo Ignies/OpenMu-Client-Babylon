@@ -28,6 +28,12 @@ Soldier, (Death) Beam Knight, Metal Balrog and Great Drakan. 421 stays `werewolf
 calls it WEREWOLF2 and the client draws it with MODEL_WEREWOLF2 (GMNewTown.cpp:910); the
 `NpcName_Eng.txt` lines 419-421 are shifted by one.
 
+`Name` is the table row's name where there is a row. A type without one carries the original
+client's name, the first `NpcName_Eng.txt` row for it (`Setting_Monster`, ZzzCharacter.cpp:13163-13171),
+not the server's: the Imperial Fortress line (504-528) is Gaion Kharein, Jerint, Erkanne and so on,
+the three spider eggs are all Spider Eggs. 419-421 keep the `_enum.h` reading, as their folders do.
+In game the name a player reads is the language pack's in either case (`monsterDisplayName`).
+
 ## Public API
 - `MonstersDatabase.get(id)`: the original table's row for a type (`stats` with `Numb` and `Name`),
   or `null` for a type that table lacks.
@@ -108,7 +114,9 @@ tables list. A plain NPC model at a fixed scale needs no class: `npcModel` is en
 ## Tests
 - `monsters.golden.test.ts`: the original table and the server health, unchanged (hashes); update
   them on purpose.
-- `names.test.ts`: no name holds a level or a stray quote, and rows 434 and 436 sit in their columns.
+- `names.test.ts`: no name holds a level or a stray quote, and rows 434 and 436 sit in their columns;
+  a type without a table row has the original client's name (checked against `NpcName_Eng.txt` when
+  `Data/` is there).
 - `models.test.ts`: every registration names a class its file defines; the set of types with a
   class of their own.
 - `src/controllers/actors/resolveModel.golden.test.ts`: what every type 0..600 is drawn with, and
