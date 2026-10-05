@@ -175,6 +175,35 @@ describe('effect models turned as the original turns them', () => {
     expectTurned(made.find(m => m.model === MODEL.elShieldRing2), [0, 0, -40], 5);
   });
 
+  it('Gigantic Storm\'s stone chips fly off backward from their Angle[2] (ZzzEffect.cpp:2710-2714, :7278-7284)', () => {
+    // Every roll 0.2: a chip off each site each tick, each turned 72 degrees.
+    const random = vi.spyOn(Math, 'random').mockReturnValue(0.2);
+    effects.reset();
+    const before = new Set(scene.transformNodes);
+    playTargetedSkillVisual(scene, 237, body(1, CASTER, 30), body(2, TARGET, 0));
+    const first = new Map<TransformNode, { at: Vector3; heading: Vector3 }>();
+    const dots: number[] = [];
+    for (let tick = 1; tick <= 20; tick++) {
+      effects.update(ENUM_WORLD.WD_0LORENCIA, 1 / 25);
+      for (const n of scene.transformNodes) {
+        if (before.has(n) || n.name !== 'fxModel' || n.isDisposed()) continue;
+        const seen = first.get(n);
+        if (!seen) {
+          const [f] = axes(n);
+          first.set(n, { at: n.position.clone(), heading: new Vector3(f.x, 0, f.z).normalize() });
+          continue;
+        }
+        const d = n.position.subtract(seen.at);
+        d.y = 0;
+        if (d.lengthSquared() > 1e-8) dots.push(Vector3.Dot(seen.heading, d.normalize()));
+      }
+    }
+    random.mockRestore();
+    expect(dots.length).toBeGreaterThan(0);
+    // Straight back from the nose, give or take the 2-8 degrees its tumble has turned the nose by then.
+    for (const dot of dots) expect(dot).toBeLessThan(-0.98);
+  });
+
   it('Explosion\'s Sahamutt faces the point it runs to', () => {
     const made = cast(223, 30).find(m => m.model === MODEL.summonSahamutt);
     expectTurned(made, [0, 0, made ? angleTo(made.at.x, made.at.z, TARGET.x, TARGET.z) : 0]);

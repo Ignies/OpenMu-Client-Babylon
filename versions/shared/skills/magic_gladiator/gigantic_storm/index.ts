@@ -108,7 +108,8 @@ interface MgStone {
   vy: number;
   vz: number;
   grav: number;
-  pitch: number;
+  /** Its Angle, degrees: Angle[0] and Angle[1] tumble 0.5 x LifeTime a tick. */
+  angle: [number, number, number];
   alpha: number;
   lt: number;
 }
@@ -172,8 +173,9 @@ const mgGiganticStorm = (enh: boolean): Step => (at, c) =>
             if (randInt(4) === 0) {
               const pos = s.clone();
               // HeadAngle = (0, 6.4-19.1, 0) turned by the chip's own random Angle[2]: backward along the way it faces.
-              const turn = randInt(360) * DEG;
-              const dir = forwardOf(turn + Math.PI);
+              const turn = randInt(360);
+              const dir = forwardOf(turn * DEG + Math.PI);
+              const angle: [number, number, number] = [0, 0, turn];
               const speed = cm((randInt(128) + 64) * 0.1);
               stones.push({
                 pos,
@@ -181,7 +183,7 @@ const mgGiganticStorm = (enh: boolean): Step => (at, c) =>
                 vy: cm(15),
                 vz: dir.z * speed,
                 grav: cm(randInt(3) + 3),
-                pitch: 0,
+                angle,
                 alpha: 1,
                 lt: randInt(16) + 20,
                 handle: spawnModel(cc.scene, pos, {
@@ -189,7 +191,7 @@ const mgGiganticStorm = (enh: boolean): Step => (at, c) =>
                   seconds: ticks(36),
                   scale: (randInt(13) + 3) * 0.08,
                   colour: MG_STORM_TINT,
-                  yaw: turn,
+                  angle,
                   blendMesh: -1,
                   loop: false,
                   fadeTail: 0,
@@ -270,7 +272,8 @@ const mgGiganticStorm = (enh: boolean): Step => (at, c) =>
           s.pos.x += s.vx;
           s.pos.y += s.vy;
           s.pos.z += s.vz;
-          s.pitch += 0.5 * s.lt * DEG;
+          s.angle[0] += 0.5 * s.lt;
+          s.angle[1] += 0.5 * s.lt;
           const ground = world ? world.getTerrainHeight(s.pos.x, s.pos.z) : -Infinity;
           if (s.pos.y <= ground) {
             s.pos.y = ground;
@@ -280,7 +283,7 @@ const mgGiganticStorm = (enh: boolean): Step => (at, c) =>
             if (s.vy < cm(0.5)) s.vy = 0;
             s.alpha -= 0.1;
           }
-          s.handle.pitchTo(s.pitch);
+          s.handle.setAngle(s.angle);
           s.handle.setAlpha(s.alpha);
         }
         return siteLt > 0 || bolts.length > 0 || rings.length > 0 || energy.length > 0 || smokes.length > 0 || stones.length > 0 || flashes.length > 0;
