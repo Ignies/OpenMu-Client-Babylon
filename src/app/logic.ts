@@ -96,6 +96,7 @@ import { Ecs } from '../ecs/current';
 
 import { installModules } from '../modules/module';
 import { MODULES } from '../modules/modules';
+import { moduleHost } from '../modules/_api/ports';
 import { installPingNet } from '../controllers/net/pingNet';
 import { loadNpcNames, onNpcNamesChanged } from '@/controllers/assets/mu';
 import { monsterDisplayName } from '@versions/shared/monsters/monstersDatabase';
@@ -146,8 +147,8 @@ setInterval(() => {
 const hot = (import.meta as { hot?: { decline(): void } }).hot;
 if (hot) hot.decline();
 
-// Every gameplay module's listeners, in list order (see modules/modules.ts).
-installModules(MODULES);
+// Every gameplay module's listeners, in list order (see modules/modules.ts); each install gets the module API.
+installModules(MODULES, undefined, moduleHost.api);
 
 // The map ping: the proxy relay listener behind Shift + middle click.
 installPingNet({

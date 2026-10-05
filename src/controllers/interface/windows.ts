@@ -1,4 +1,5 @@
 import type { ComponentType } from 'react';
+import { observable, runInAction } from 'mobx';
 
 /**
  * Where a window draws: `world` sits on the 3D view under the HUD and stays
@@ -18,11 +19,19 @@ export interface WindowDef {
 
 export const defineWindow = (def: WindowDef): WindowDef => def;
 
-const registry = new Map<string, WindowDef>();
+// Observable (not deep: the defs stay plain), so a page that draws a slot redraws when a window comes or goes.
+const registry = observable.map<string, WindowDef>(undefined, { deep: false });
 
 /** Adds windows; a later definition with the same id replaces the earlier one (version overrides). */
 export function registerWindows(defs: readonly WindowDef[]): void {
-  for (const d of defs) registry.set(d.id, d);
+  runInAction(() => {
+    for (const d of defs) registry.set(d.id, d);
+  });
+}
+
+/** Removes a window (a module's, when the module goes). */
+export function unregisterWindow(id: string): void {
+  runInAction(() => registry.delete(id));
 }
 
 /** The windows of a slot in stacking order. */

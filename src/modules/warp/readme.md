@@ -9,6 +9,8 @@ in `requests.ts`, through `index.ts` (the door).
 ## Public API
 - `warpCommandRequest(index)`, `enterGateRequest(gate)` (`requests.ts`, through `index.ts`, the door):
   the two warp requests (both mark the round-trip timer).
+- `onMapChanged(fn)` (`mapChanges.ts`, through the door): `fn(map)` each time the hero stands on a
+  new map (`warpCompleted`); returns the unsubscribe. The module API's `onMapChange` (`../_api/`).
 - `teleportGate`: the hero's `TeleportGate` (`begin`, `isPending`, `sinceMapChange`,
   `onMapChanged`, `reset`). Tells the server's late same-map answer apart from a refusal.
 - `teleportRefusal(check)`: why the server would refuse a Teleport, or null.
@@ -48,7 +50,7 @@ in `requests.ts`, through `index.ts` (the door).
 - uses: `session`, `hero`, `npc_shop`, `ecs/systems/teleportSystem` (`cancelTeleport`, `endTeleport`),
   `scope/objects.ts` (`addNpcToScope`), `skills/objectEffects.ts`, `skills/skillCasting` (`TELEPORT`), `chat/notices`, `social`
   (`battleSoccer`), `economy`, `inventory/quickItemActions`, `controllers/loading/sceneGate`.
-- used by: `src/app/logic.ts`, `ecs/systems/skillCastSystem.ts`, `playerControllerSystem.ts`,
+- used by: `src/app/logic.ts`, `../_api/ports.ts` (`onMapChanged`), `ecs/systems/skillCastSystem.ts`, `playerControllerSystem.ts`,
   `teleportSystem.ts`, `versions/shared/ui/hud/mobile_controls/skillPad.tsx`,
   `versions/shared/ui/windows/move_command_window/` (`WarpFavourites`).
 
@@ -61,3 +63,4 @@ in `requests.ts`, through `index.ts` (the door).
 ## Tests
 - `teleportRules.test.ts`: `TeleportGate` verdicts and timeout, `teleportRefusal` cases,
   `pickAllySquare`, `aimAlongFacing`.
+- `mapChanges.test.ts`: `onMapChanged` calls back with the new map until unsubscribed.

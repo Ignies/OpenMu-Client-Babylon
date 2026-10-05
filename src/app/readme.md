@@ -36,8 +36,10 @@ the interface controller's (`AppState`, `controllers/interface/uiState.ts`).
   Debug handles: `window.__modules` (`Hero`, `Session`, `Bag`, `Merchant`), `__world`, `__social`, ...
 - `App.tsx` picks the page from `AppState.uiState`. Login and character pages come from the version
   (`loadVersionUi().pregame`), lazy loaded.
-- `logic.ts` installs the modules (`installModules(MODULES)`, `src/modules/modules.ts`); that list's
-  order is the listener order per packet. It also refreshes NPC names when their table loads, sends
+- `logic.ts` installs the modules (`installModules(MODULES, undefined, moduleHost.api)`,
+  `src/modules/modules.ts`); that list's order is the listener order per packet. Each install gets
+  its module's API (`src/modules/_api/ports.ts`); the wiring is here because `module.ts` importing
+  the host would close an import cycle (`src/modules/_api/readme.md`). It also refreshes NPC names when their table loads, sends
   `Ping` every 5 s in the world and hands the map ping its `PingLink`. The shared F3/0x40 server
   command is the world module's (`modules/world/net.ts`).
 - `lifecycle.ts` lists what resets on a map change, in order:
