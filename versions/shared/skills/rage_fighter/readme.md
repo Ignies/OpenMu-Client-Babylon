@@ -6,7 +6,7 @@ folders: [../readme.md](../readme.md).
 ## Public API
 - Each folder's default export is a `defineSkill`, found by glob in `../index.ts`.
 - `dark_side/rage.ts`: `isDarkSide`, `beginDarkSide`, `observeDarkSideTargets`, `observeDarkSideEcho`,
-  `nextDarkSideHit`, `darkSidePendingSkill`, `observeRageHit`, `rageStreak`, `rageLayer`, `darkSideCast` (the targets
+  `observeRageHit`, `rageStreak`, `rageLayer`, `darkSideCast` (the targets
   named and the follow-ups gone, for DarksideRendering).
 - `dark_side/rendering.ts`: `DarksideRendering`, one DarksideRendering call at a time, and its `DarksideState` and `DarksideSink`.
 

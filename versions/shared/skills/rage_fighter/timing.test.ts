@@ -14,7 +14,7 @@ import { PlayerAction } from '../../objects/enum';
 import { clearBuffVisuals, playAreaSkillVisual, playTargetedSkillVisual, setBuffVisual } from '../skillVisuals';
 import { heroCastSound, skillSound } from '@/controllers/sound/combat';
 import { JOINT_SPARKS } from '../_shared';
-import { beginDarkSide, darkSideCast, darkSideHitTicks, isDarkSide, nextDarkSideHit, observeDarkSideEcho, observeDarkSideTargets, rageLayer } from './dark_side/rage';
+import { beginDarkSide, darkSideCast, darkSideHitTicks, isDarkSide, observeDarkSideEcho, observeDarkSideTargets, rageLayer } from './dark_side/rage';
 
 vi.hoisted(() => {
   const g = globalThis as Record<string, unknown>;
@@ -1022,7 +1022,6 @@ describe('Dark Side (263)', () => {
     playTargetedSkillVisual(scene, 263, hero, null);
     for (tick = 1; tick <= ticks; tick++) {
       rageLayer.update?.(ENUM_WORLD.WD_0LORENCIA, 1 / 25);
-      nextDarkSideHit();
       effects.update(ENUM_WORLD.WD_0LORENCIA, 1 / 25);
     }
     spy.mockRestore();
@@ -1143,8 +1142,9 @@ describe('Dark Side (263)', () => {
     const sent: number[] = [];
     for (let t = 1; t <= 40; t++) {
       if (t >= leaveAt) model.CurrentAction = PlayerAction.PLAYER_STOP_MALE;
+      const gone = darkSideCast.sent;
       rageLayer.update?.(ENUM_WORLD.WD_0LORENCIA, 1 / 25);
-      if (nextDarkSideHit() >= 0) sent.push(t);
+      if (darkSideCast.sent > gone) sent.push(t);
       if (echoes.includes(t)) observeDarkSideEcho(skill, hero);
       if (t === targetsAt) targets();
     }
@@ -1171,7 +1171,6 @@ describe('Dark Side (263)', () => {
     const seen: [number, number][] = [];
     for (let t = 1; t <= 45; t++) {
       rageLayer.update?.(ENUM_WORLD.WD_0LORENCIA, 1 / 25);
-      nextDarkSideHit();
       if (seen.at(-1)?.[1] !== darkSideCast.sent) seen.push([t, darkSideCast.sent]);
     }
     expect(seen).toEqual([

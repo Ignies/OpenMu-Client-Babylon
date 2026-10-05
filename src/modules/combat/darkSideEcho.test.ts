@@ -36,6 +36,8 @@ vi.mock('./clips', async importOriginal => ({
 await import('@versions/shared/skills/skillVisuals');
 const { installNet } = await import('./net');
 const { combat } = await import('@/controllers/combat');
+// The follow-ups gone (m_nDarksideCnt), as DarksideRendering reads them.
+const { darkSideCast } = await import('@versions/shared/skills/rage_fighter/dark_side/rage');
 const { Hero } = await import('@/modules/hero');
 const { EventBus } = await import('@/core/eventBus');
 const { RageAttackPacket, RageAttackRangeResponsePacket } = await import('@versions/shared/packets/ServerToClientPackets');
@@ -83,12 +85,12 @@ describe('RageAttack (C3 4A)', () => {
     // Another rage fighter's blow is not the echo.
     rageAttack(OTHER);
     ticks(20);
-    expect(combat.nextDarkSideHit()).toBe(-1);
+    expect(darkSideCast.sent).toBe(0);
     rageAttack(HERO);
     ticks(7);
-    expect(combat.nextDarkSideHit()).toBe(-1);
+    expect(darkSideCast.sent).toBe(0);
     ticks(1);
-    expect(combat.nextDarkSideHit()).toBe(6);
+    expect(darkSideCast.sent).toBe(1);
     combat.reset();
   });
 
@@ -158,11 +160,11 @@ describe('RageAttackRangeResponse (C1 4B)', () => {
     expect(sent).toEqual([]);
     rageAttack(HERO);
     ticks(8);
-    expect(combat.nextDarkSideHit()).toBe(6);
+    expect([darkSideCast.targets, darkSideCast.sent]).toEqual([[6], 1]);
     // 6 was the only one: no follow-up comes due for an empty slot.
     for (let i = 0; i < 14; i++) {
       ticks(1);
-      expect(combat.nextDarkSideHit()).toBe(-1);
+      expect(darkSideCast.sent).toBe(1);
     }
     combat.reset();
   });

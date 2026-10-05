@@ -29,8 +29,6 @@ interface DarkSideHooks {
   begin(skill: number, targetId: number): void;
   observeTargets(skill: number, targetIds: readonly number[]): void;
   observeEcho(skill: number, caster: Entity): boolean;
-  nextHit(): number;
-  pendingSkill(): number;
   observeRageHit(isStreak: boolean, isFinal: boolean): void;
   streak(): number;
 }

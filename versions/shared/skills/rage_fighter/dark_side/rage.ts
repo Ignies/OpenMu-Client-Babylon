@@ -18,8 +18,7 @@
  *
  * Driven by `skillCastSystem` (`beginDarkSide`) and the combat module's
  * packet handlers (`observeDarkSideTargets`, `observeDarkSideEcho`,
- * `observeRageHit`); the cast system draws the due follow-ups it pulls
- * through the facade's `nextDarkSideHit`.
+ * `observeRageHit`); DarksideRendering reads the follow-ups gone (`darkSideCast`).
  */
 import type { ENUM_WORLD } from '@/core/types';
 import type { Entity } from '@/ecs/world';
@@ -73,8 +72,6 @@ const pendingTargets: number[] = [];
 let echoed = false;
 /** The hero's AttackTime in ticks: 1 at the echo of his cast and at each blow, 0 once it reached 15. */
 let attackTime = 0;
-/** The target whose blow came due this frame, -1 for none. */
-let dueTarget = -1;
 
 /**
  * What DarksideRendering reads of the hero's cast (MonkSystem.cpp:697-857): the targets the 0x4B named (`m_DarkTargetIndex`),
@@ -139,22 +136,6 @@ export function observeDarkSideTargets(skill: number, targetIds: readonly number
   if (pendingTargets.length > 0) playCombat('Sound/Ragefighter/Rage_Darkside_Att', null);
 }
 
-/**
- * Command: pull the follow-up target whose blow came due this frame. Returns the
- * target id, or `-1` when none is due. The caller draws the blow; nothing goes
- * out (`SendDarksideAtt`'s send is commented out, MonkSystem.cpp:610).
- */
-export function nextDarkSideHit(): number {
-  const id = dueTarget;
-  dueTarget = -1;
-  return id;
-}
-
-/** The Dark Side skill of the hero's last cast, whose blow the follow-ups draw. */
-export function darkSidePendingSkill(): number {
-  return darkSideSkill;
-}
-
 /** Command: an `ObjectHit` flagged as part of a Rage Fighter streak arrived. */
 export function observeRageHit(isStreak: boolean, isFinal: boolean): void {
   if (!isStreak && !isFinal) return;
@@ -167,7 +148,6 @@ export function observeRageHit(isStreak: boolean, isFinal: boolean): void {
 }
 
 function update(_map: ENUM_WORLD, dt: number): void {
-  dueTarget = -1;
   if (attackTime > 0) {
     // MoveHero's UseSkillRagePosition reads AttackTime, then MoveCharacter runs it on (MainScene.cpp:283-284).
     const speed = readySpeed();
@@ -176,7 +156,8 @@ function update(_map: ENUM_WORLD, dt: number): void {
       // SendDarksideAtt past the fifth: InitDarksideTarget, and no blow (MonkSystem.cpp:591-595).
       setTargets([]);
     } else if (due && pendingTargets.length > 0) {
-      dueTarget = pendingTargets.shift() ?? -1;
+      // A blow that sends and draws nothing of its own (MonkSystem.cpp:610).
+      pendingTargets.shift();
       attackTime = 1;
       cast.sent++;
     }
@@ -194,7 +175,6 @@ function reset(): void {
   pendingTargets.length = 0;
   echoed = false;
   attackTime = 0;
-  dueTarget = -1;
   streakHits = 0;
   streakOpenFor = 0;
   setTargets([]);
