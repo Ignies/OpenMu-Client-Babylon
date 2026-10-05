@@ -28,11 +28,11 @@ function filesUnder(dir: string, base = dir): string[] {
 
 const onDisk = new Map(filesUnder(ASSETS).map(f => [f.toLowerCase(), f]));
 
-/** Quoted `<folder>/<name>.glb` literals in the client. */
+/** Quoted `<folder>/<name>.glb` literals in the client; tests are not the client and may use stand-in names. */
 function glbLiteralsInSource(): string[] {
   const found = new Set<string>();
   for (const root of CODE_ROOTS) for (const file of filesUnder(root)) {
-    if (!/\.tsx?$/.test(file)) continue;
+    if (!/\.tsx?$/.test(file) || /\.test\.tsx?$/.test(file)) continue;
     const text = readFileSync(join(root, file), 'utf8');
     for (const [, path] of text.matchAll(
       /['"]([A-Za-z0-9_-]+\/[A-Za-z0-9_/-]+\.glb)['"]/g
