@@ -20,19 +20,19 @@ import { LostTowerSkullObject } from './skullObject';
  *    ground bugs want the same thing.
  *
  *  - **Type 9.** `RenderObjectVisual`'s `case WD_4LOSTTOWER:` has no `break`
- *    before `case WD_6STADIUM:` (ZzzObject.cpp:2944), so in this world a
- *    type-9 object also runs Stadium's `case 9` - a warm `BITMAP_LIGHT`
- *    sprite at bone 1, on all 200 of Lost Tower's type-9 objects.
+ *    before `case WD_6STADIUM:`, so in this world a type-9 object also runs
+ *    Stadium's `case 9` - a warm `BITMAP_LIGHT` sprite at bone 1, on all 200
+ *    of Lost Tower's type-9 stair pieces (ZzzObject.cpp:2938-2946).
  *
  *    Not reproduced, and it is not a close call. Stadium's `case 9` is a
- *    2-bone brazier; Lost Tower's type 9 is `Object10.glb`, a re_08 stone
- *    block with **zero bones**. `BoneTransform[1]` is a global scratch array
- *    left over from whatever model was drawn last, and the call reads it
- *    through arguments the original has swapped anyway
+ *    2-bone brazier; Lost Tower's type 9 is `Object5/Object10.bmd`, a stair
+ *    piece with **one bone** (`Box01`) and no bone 1. `BoneTransform[1]` is
+ *    a global scratch array left over from the last multi-bone model drawn,
+ *    and the call reads it through arguments the original has swapped anyway
  *    (`TransformPosition(BoneTransform[1], Position, p)` writes `p` and reads
- *    an uninitialised `Position` - the same bug as Lorencia's merchant
- *    animal, ZzzObject.cpp:2770). There is no position to port: the sprite
- *    lands wherever the last frame's garbage put it. Treated as inert.
+ *    a `Position` never set - the same bug as Lorencia's merchant animal,
+ *    ZzzObject.cpp:2764). There is no defined place to port: the sprite lands
+ *    wherever that garbage puts it. Treated as inert.
  *
  *  - **The chrome pass** on types 3, 4, 19 and 20 (ZzzObject.cpp:1013-1032):
  *    the body redrawn with `BITMAP_CHROME` and `BodyLight` forced to
