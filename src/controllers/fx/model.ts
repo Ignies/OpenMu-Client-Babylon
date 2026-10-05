@@ -189,7 +189,7 @@ export interface ModelOptions {
   /**
    * The original's `o->Angle` in degrees on MU's axes (x, y, z = yaw), turned
    * the way `AngleMatrix` does (ZzzMathLib.cpp:185). Replaces `yaw` and `flat`;
-   * `spin` and `aim` do not apply.
+   * `spin`, `aim` and `yawTo` do not apply (a projectile keeps it).
    */
   angle?: readonly [number, number, number];
   /** `o->HiddenMesh`: this mesh (BMD order) is not drawn. */
@@ -741,7 +741,8 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
     },
     stop: () => handle.stop(),
     yawTo(dir: Vector3) {
-      node.rotation.y = Math.atan2(dir.x, dir.z);
+      // The nose (BMD -Y, the node's -Z) along `dir`: the original flies a projectile along its own Angle (ZzzEffect.cpp:1661-1665).
+      node.rotation.y = Math.atan2(-dir.x, -dir.z);
     },
     aimAlong(dir: Vector3) {
       // `rotation` is pitch-then-yaw, so the mesh's up axis lands on

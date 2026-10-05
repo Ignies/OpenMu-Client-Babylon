@@ -7,7 +7,7 @@ import { Ecs } from '../../ecs/current';
 import type { Entity } from '../../ecs/world';
 import { toRenderAngles } from '../render/renderAngles';
 import { entityYaw } from './core';
-import { modelLayer, spawnModel, type ModelOptions } from './model';
+import { modelLayer, spawnModel, type ModelHandle, type ModelOptions } from './model';
 
 vi.hoisted(() => {
   const g = globalThis as Record<string, unknown>;
@@ -44,16 +44,20 @@ function drawnForward(caster: Entity): Vector3 {
   return f;
 }
 
-function spawnedForward(opts: Omit<ModelOptions, 'model'>): Vector3 {
+function spawnedForward(opts: Omit<ModelOptions, 'model'>, turn?: (handle: ModelHandle) => void): Vector3 {
   const before = scene.transformNodes.length;
   const handle = spawnModel(scene, new Vector3(), { model: 'Skill/none.glb', ...opts });
   const node = scene.transformNodes.slice(before).find(n => n.name === 'fxModel');
   if (!node) throw new Error('spawnModel made no node');
+  turn?.(handle);
   const f = forwardOf(node);
   handle.stop();
   modelLayer.update?.(0, 0);
   return f;
 }
+
+/** MU's CreateAngle along a flight of (dx, dz) on the ground, in degrees (ZzzAI.cpp:87-99). */
+const createAngle = (dx: number, dz: number): number => (Math.atan2(dx, -dz) * 180) / Math.PI;
 
 const casterAt = (deg: number): Entity => ({ transform: { pos: new Vector3(), rot: new Vector3(0, (deg * Math.PI) / 180, 0), scale: 1 } }) as unknown as Entity;
 const YAWS = [0, 30, 90, 135, 200, 300];
@@ -75,6 +79,13 @@ describe('an effect model turned to its caster', () => {
       const mirrored = spawnedForward({ yaw: entityYaw(caster) });
       const along = deg % 180 === 0;
       expect(Math.abs(Vector3.Dot(mirrored, drawnForward(caster)) - 1) < 1e-6).toBe(along);
+    }
+  });
+
+  it('`yawTo` turns it as the original turns a projectile: Angle[2] is CreateAngle along the flight (ZzzEffect.cpp:1661-1665, :2640-2645)', () => {
+    for (const [dx, dz] of [[0, 1], [1, 0], [0, -1], [-1, 0], [3, 4], [-2, 5], [1, -1]]) {
+      const turned = spawnedForward({}, h => h.yawTo(new Vector3(dx, 0.3, dz)));
+      expect(Vector3.Dot(turned, spawnedForward({ angle: [0, 0, createAngle(dx, dz)] }))).toBeCloseTo(1, 5);
     }
   });
 });

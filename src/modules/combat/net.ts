@@ -170,7 +170,7 @@ function applyHealthStatus(attributes: MUAttributeSystem, status: number): void 
 
 /** Bytes before the target list of RageAttackRangeResponse (C1 header 3 + skill 2 + count 1). */
 const RAGE_RANGE_TARGETS_OFFSET = 6;
-/** An empty target slot: OpenMU's RageTarget default, the original's DS_TARGET_NONE (NUMOFMON, MonkSystem.h:78). */
+/** An empty target slot: OpenMU's UndefinedTargetId (ShowRageAttackRangePlugIn), the original's DS_TARGET_NONE (NUMOFMON, MonkSystem.h:78). */
 const DS_TARGET_NONE = 10000;
 
 /** `SendRequestMagic`: 0x19, `skill` on `targetId`. */

@@ -6,6 +6,7 @@ import { TransformNode } from '@babylonjs/core/Meshes/transformNode';
 import { effects } from '@/controllers/fx';
 import { MODEL } from '@/controllers/fx/recipes';
 import { muAngle } from '@/controllers/fx/model';
+import { GameOptions } from '@/controllers/settings/gameOptions';
 import { ENUM_WORLD } from '@/core/types';
 import type { Entity } from '@/ecs/world';
 import { PlayerAction } from '../objects/enum';
@@ -75,11 +76,13 @@ function record(cast: (tick: () => number) => void, ticks = 40): Made[] {
   effects.reset();
   const made: Made[] = [];
   const real = effects.spawn.bind(effects);
-  const spy = vi.spyOn(effects, 'spawn').mockImplementation(((name: string, s: Scene, at: Vector3, opts: { model?: string }) => {
+  const spy = vi.spyOn(effects, 'spawn').mockImplementation(((name: string, s: Scene, at: Vector3, opts: { model?: string | { model: string } }) => {
     const before = s.transformNodes.length;
     const handle = real(name as never, s, at, opts as never);
     const node = s.transformNodes.slice(before).find(n => n.name === 'fxModel' || n.name === 'fxSummon');
-    if (node) made.push({ model: opts.model ?? '', tick, at: at.clone(), axes: [axes(node)], node });
+    // A projectile carries its model's options.
+    const model = typeof opts.model === 'string' ? opts.model : (opts.model?.model ?? '');
+    if (node) made.push({ model, tick, at: at.clone(), axes: [axes(node)], node });
     return handle;
   }) as never);
   cast(() => tick);
@@ -100,13 +103,15 @@ function cast(skill: number, yaw: number, o: { clip?: PlayerAction; keysPerTick?
   });
 }
 
-function expectTurned(m: Made | undefined, angle: readonly [number, number, number], after = 0): void {
-  expect(m).toBeDefined();
-  if (!m) return;
-  const [f, u] = m.axes[after];
+function expectAxes([f, u]: [Vector3, Vector3], angle: readonly [number, number, number]): void {
   const [ef, eu] = expected(angle);
   expect(Vector3.Dot(f, ef)).toBeCloseTo(1, 4);
   expect(Vector3.Dot(u, eu)).toBeCloseTo(1, 4);
+}
+
+function expectTurned(m: Made | undefined, angle: readonly [number, number, number], after = 0): void {
+  expect(m).toBeDefined();
+  if (m) expectAxes(m.axes[after], angle);
 }
 
 const YAWS = [30, 200];
@@ -144,6 +149,15 @@ describe('effect models turned as the original turns them', () => {
     const fires = cast(50, 30, { caster: { npcType: 35 } }).filter(m => m.model === MODEL.fire);
     expect(fires).toHaveLength(18);
     fires.forEach((m, i) => expectTurned(m, [0, 0, i * 20]));
+  });
+
+  it('Zaikan\'s staff ring: the i-th of its 18 MODEL_STAFF_OF_DESTRUCTION at (20, 0, Angle[2] + i x 20) all its flight (ZzzCharacter.cpp:1826-1832, ZzzEffect.cpp:1330-1336)', () => {
+    const staffs = cast(50, 30, { caster: { npcType: 59 } }).filter(m => m.model === 'Item/Staff09.glb');
+    expect(staffs).toHaveLength(18);
+    staffs.forEach((m, i) => {
+      expectTurned(m, [20, 0, 30 + i * 20]);
+      expectTurned(m, [20, 0, 30 + i * 20], 1);
+    });
   });
 
   it('a summon arriving: MODEL_MAGIC_CIRCLE1 at the monster\'s Angle (WSclient.cpp:3115)', () => {
@@ -211,6 +225,40 @@ describe('effect models turned as the original turns them', () => {
     expect(dots.length).toBeGreaterThan(0);
     // Straight back from the nose, give or take the 2-8 degrees its tumble has turned the nose by then.
     for (const dot of dots) expect(dot).toBeLessThan(-0.98);
+  });
+
+  it('a projectile flies nose first, at its flight\'s Angle: an arrow at its shooter\'s (ZzzEffectMagicSkill.cpp:183-251, ZzzEffect.cpp:1661-1665), Fire Ball at the bearing (ZzzCharacter.cpp:4888-4890, :5031-5032)', () => {
+    // Classic: the graded Fire Ball lays its tail down the path instead.
+    const tier = GameOptions.lightingQuality;
+    GameOptions.lightingQuality = 0;
+    try {
+      for (const y of YAWS) {
+        expectTurned(cast(427, y).find(m => m.model === MODEL.arrowNature), [0, 0, BEARING], 1);
+        expectTurned(cast(4, y).find(m => m.model === MODEL.fire), [0, 0, BEARING], 1);
+      }
+    } finally {
+      GameOptions.lightingQuality = tier;
+    }
+  });
+
+  it('Lance\'s stars turn from the caster\'s Angle by their spin, 12, 22 and 32 degrees their first ticks (ZzzEffect.cpp:4232-4247, MoveHandlers.cpp:7101-7106)', () => {
+    for (const y of YAWS) {
+      effects.reset();
+      const before = new Set(scene.transformNodes);
+      playTargetedSkillVisual(scene, 45, body(1, CASTER, y), body(2, TARGET, 0));
+      const frames = new Map<TransformNode, number>();
+      for (let tick = 1; tick <= 20; tick++) {
+        effects.update(ENUM_WORLD.WD_0LORENCIA, 1 / 25);
+        for (const n of scene.transformNodes) {
+          if (before.has(n) || n.name !== 'fxModel' || n.isDisposed()) continue;
+          const frame = frames.get(n) ?? 0;
+          frames.set(n, frame + 1);
+          const spun = [12, 34, 66][frame];
+          if (spun !== undefined) expectAxes(axes(n), [0, 0, y + spun]);
+        }
+      }
+      expect(frames.size).toBe(3);
+    }
   });
 
   it('Explosion\'s Sahamutt faces the point it runs to', () => {
