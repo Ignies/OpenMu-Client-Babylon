@@ -39,7 +39,7 @@ import {
  *    `controllers/weather/ambientWeather.ts`.
  *
  * The Castle Gate and the Statue of Saint are monsters, not map objects:
- * `versions/shared/monsters/blood_castle_gate.ts`.
+ * `versions/shared/monsters/_blood_castle/model.ts`.
  *
  * Falling off: `deathSystem` already reads the `TW_ACTION` rails at x 13/15
  * (y 16-21) and the moat's `TW_NOGROUND` to pick the fall animation

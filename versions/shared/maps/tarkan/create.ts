@@ -88,8 +88,8 @@ export async function createTarkan(world: World) {
   // only type in the map's `CreateObject` case. It is `CreateOperate(o)` and
   // nothing else: no `HiddenMesh`, no `BoundingBoxMax` override, so unlike
   // Atlans 39 the model draws normally and keeps the default
-  // `(-40,-40,0)…(40,40,80)` pick box. `libs/mu/restObjects.ts` already maps
-  // World 9 type 78 to `sit(false)` and `RestObjectSystem` reads that from
+  // `(-40,-40,0)…(40,40,80)` pick box. The map entry (`index.ts`, `terrain.rest`)
+  // already maps type 78 to `sit(false)` and `RestObjectSystem` reads that from
   // the entity's `modelId`, so the click behaviour is wired without a class.
   // The default `MapTileObject` is the whole of the visible behaviour, and a
   // subclass that only re-loaded `Object79.glb` would be a class that does
