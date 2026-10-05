@@ -53,7 +53,7 @@ controller tests a skill number.
 | `noFlinch`, `holdsFacing` | combat | clips a hit does not cut; clips that keep the facing |
 | `kill` | combat | what a kill does to the body (`knock`, per-frame `dying`: Nova, Combo) |
 | `explicitHits` | combat | send the 0xDB hit list whatever the skill type |
-| `clipSound`, `soundOnLanding`, `silentHeroCast` | sound | cast sound by clip; sound at the landing; no sound at the hero's click |
+| `clipSound`, `soundOnLanding`, `silentHeroCast`, `targetSound` | sound | cast sound by clip; sound at the landing; no sound at the hero's click; a sound the hero's click makes with a target only |
 | `effect`, `effectAliases` | modules/skills | the MagicEffect `MagicEffectCancelled` drops for this skill, and the master numbers that drop it too (ours: skills readme) |
 | `cancel` | skills | work its cancel does on the target first, and other effects it drops (`cancelledEffects`) |
 | `buffHits` | skills | what a buff draws when its wearer is hit (Soul Barrier's shell) |

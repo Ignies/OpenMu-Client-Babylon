@@ -160,8 +160,9 @@ never which skill or item asks for it.
 ## Skill sound rules come from the skill files
 `SKILL_SOUNDS`, `SKILL_CLIP_SOUNDS` (`clipCastSound`, `hasClipSound`: the Rage Fighter party
 buffs' sound follows their coin-tossed clip), `LANDING_SOUNDS` (Drain Life, Lightning Orb,
-Weakness, Innovation and their masters) and `SILENT_HERO_CASTS` (Fire Scream) in `combat.ts` are
-filled by `registerSkills` from each skill's `sound`, `clipSound`, `soundOnLanding` and
+Weakness, Innovation and their masters), `SILENT_HERO_CASTS` (Fire Scream) and `SKILL_TARGET_SOUNDS`
+(Dragon Slasher: the hero's click plays it with a target only, `heroCastSound(skill, targeted)`) in `combat.ts` are
+filled by `registerSkills` from each skill's `sound`, `clipSound`, `soundOnLanding`, `targetSound` and
 `silentHeroCast`. Change a skill's sound in its file under `versions/shared/skills/`. The
 per-monster rows `packetSounds.ts` reads are the monster's own: `quietCasts` (on the monster
 folder or its body file), `teleport` (the Nightmare), `stormSkill` (the meteorite trap),

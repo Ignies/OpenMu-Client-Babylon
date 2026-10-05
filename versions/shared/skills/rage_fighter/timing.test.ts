@@ -12,7 +12,7 @@ import { ENUM_WORLD } from '@/core/types';
 import type { Entity } from '@/ecs/world';
 import { PlayerAction } from '../../objects/enum';
 import { clearBuffVisuals, playAreaSkillVisual, playTargetedSkillVisual, setBuffVisual } from '../skillVisuals';
-import { skillSound } from '@/controllers/sound/combat';
+import { heroCastSound, skillSound } from '@/controllers/sound/combat';
 import { JOINT_SPARKS } from '../_shared';
 import { beginDarkSide, darkSideCast, darkSideHitTicks, isDarkSide, nextDarkSideHit, observeDarkSideEcho, observeDarkSideTargets, rageLayer } from './dark_side/rage';
 
@@ -205,9 +205,17 @@ describe('Dragon Slasher (265): MODEL_DRAGON_KICK_DUMMY reads the caster\'s DRAG
     expect(drawTicks(r, TEX.thunder)).toEqual([]);
     expect(soundTicks(r, ATT)).toEqual([]);
     expect(soundTicks(r, 'Sound/Ragefighter/Rage_Dragonkick')).toEqual([]);
-    // With one, Rage_Dragonkick goes with the volley at the packet; the click has none of its own.
+    // With one, another caster's Rage_Dragonkick goes with the volley at his packet; it is no skill sound everyone plays.
     expect(soundTicks(run(265, KICK, { leaveAt: 26, ticks: 40 }), 'Sound/Ragefighter/Rage_Dragonkick')).toEqual([0]);
     expect(skillSound(265)).toBeNull();
+  });
+
+  it('the hero\'s Rage_Dragonkick goes at his click, with a target only, and not again with the echo (SkillCast.cpp:866-879, MonkSystem.cpp:1226-1227, :1259, WSclient.cpp:5115-5121)', () => {
+    expect([heroCastSound(265, true), heroCastSound(265, false)]).toEqual(['Sound/Ragefighter/Rage_Dragonkick', null]);
+    const r = run(265, KICK, { leaveAt: 26, ticks: 40, hero: true });
+    expect(soundTicks(r, 'Sound/Ragefighter/Rage_Dragonkick')).toEqual([]);
+    // The rest of the effect still comes with it.
+    expect(soundTicks(r, ATT)).toEqual(range(21, 25));
   });
 
   it('a burst, twice over: four BITMAP_ENERGY sub7, LIGHTNING_MEGA1 sub0 and SPARK+1 sub3 and sub8, and two SPARK sub13 (MoveHandlers.cpp:9866-9895)', () => {

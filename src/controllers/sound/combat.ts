@@ -76,9 +76,13 @@ export function hasClipSound(skill: number): boolean {
   return skill in SKILL_CLIP_SOUNDS;
 }
 
-/** The sound the hero's own cast plays as it starts. */
-export function heroCastSound(skill: number): Sounds | null {
-  return SILENT_HERO_CASTS.has(skill) ? null : skillSound(skill);
+/** A cast sound only a cast with a target makes (a skill's `targetSound`, by exact number). */
+export const SKILL_TARGET_SOUNDS: Record<number, Sounds> = {};
+
+/** The sound the hero's own cast plays as it starts; `targeted`: it has a target other than himself. */
+export function heroCastSound(skill: number, targeted = false): Sounds | null {
+  if (SILENT_HERO_CASTS.has(skill)) return null;
+  return skillSound(skill) ?? (targeted ? (SKILL_TARGET_SOUNDS[skill] ?? null) : null);
 }
 
 // ---- 2. selectors + commands -----------------------------------------------
