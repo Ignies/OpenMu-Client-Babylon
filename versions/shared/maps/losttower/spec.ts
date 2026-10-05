@@ -1,5 +1,6 @@
 import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
 import type { Emission } from '@/controllers/fx/effectParticles';
+import { isOn } from '@/controllers/fidelity';
 import type { MeshAnimations } from '@/controllers/render';
 import { saw } from '../shared/meshAnimation';
 
@@ -89,6 +90,9 @@ const VISUAL_LUMINOSITY = { min: 0.7, max: 0.99, steps: 30 } as const;
  */
 const FLAME_LUMINOSITY = { min: 0.7, max: 1, steps: 4 } as const;
 
+/** The brazier's flare, from the line the original commented out; ours (`lampFlares`). */
+const BRAZIER_FLARE: NonNullable<LightEmitter['sprite']> = { scale: 2, color: [1, 0.55, 0.25] };
+
 export const LOST_TOWER_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
   {
     /**
@@ -152,9 +156,10 @@ export const LOST_TOWER_LIGHTS: Partial<Record<number, readonly LightEmitter[]>>
     /**
      * Brazier (n=163). The original's `case 23` carries a commented-out
      * `TransformPosition(BoneTransform[1]) + CreateSprite(BITMAP_LIGHT, 2.f)`
-     * (ZzzObject.cpp:3967-3968) - the devs built the glow and then switched it
-     * off. The sprite scale 2 below is taken from that dead line, so if it is
-     * ever compared against the original the number matches.
+     * (ZzzObject.cpp:3971-3975) - the devs built the glow and then switched it
+     * off, so the flare is ours (`lampFlares`). Its scale 2 is taken from that
+     * dead line, so if it is ever compared against the original the number
+     * matches.
      *
      * Sprite only, no particle plume: 163 braziers are the most common prop on
      * the map and a per-brazier fire would spend the whole 2048-sprite pool on
@@ -163,7 +168,9 @@ export const LOST_TOWER_LIGHTS: Partial<Record<number, readonly LightEmitter[]>>
      */
     23: [
       {
-        sprite: { scale: 2, color: [1, 0.55, 0.25] },
+        get sprite() {
+          return isOn('lampFlares') ? BRAZIER_FLARE : undefined;
+        },
         pointRange: 5,
         wander: 0.06,
         terrain: {

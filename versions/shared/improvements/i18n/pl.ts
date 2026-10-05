@@ -27,6 +27,9 @@ export default {
   'fidelity.fortressLights': 'Światła Cesarskiej Twierdzy',
   'fidelity.fortressLights.hint':
     'Pochodnie, żyrandole i paleniska w Cesarskiej Twierdzy oświetlają podłogę wokół. Klasyczne: brak światła, jak w oryginale.',
+  'fidelity.lampFlares': 'Blask lamp i ognisk',
+  'fidelity.lampFlares.hint':
+    'Latarnie, świece, kominki i paleniska świecą blaskiem. Klasyczne: bez blasku, jak w oryginale.',
   'fidelity.roofFade': 'Przezroczyste dachy',
   'fidelity.roofFade.hint':
     'Dachy znikają, gdy stoisz pod nimi, więc widzisz wnętrze. Klasyczne: dachy są zawsze widoczne.',

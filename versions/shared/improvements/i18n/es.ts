@@ -27,6 +27,9 @@ export default {
   'fidelity.fortressLights': 'Luces de la Fortaleza Imperial',
   'fidelity.fortressLights.hint':
     'Las antorchas, candelabros y braseros de la Fortaleza Imperial iluminan el suelo a su alrededor. Clásica: sin luz, como en el original.',
+  'fidelity.lampFlares': 'Destellos de lámparas y fuegos',
+  'fidelity.lampFlares.hint':
+    'Las farolas, velas, chimeneas y braseros brillan con un destello. Clásica: sin destello, como en el original.',
   'fidelity.roofFade': 'Techos transparentes',
   'fidelity.roofFade.hint':
     'Los techos se desvanecen cuando estás debajo, para que veas el interior. Clásica: los techos siempre se ven.',

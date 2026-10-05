@@ -1,6 +1,7 @@
 import type { Emission } from '@/controllers/fx/effectParticles';
 import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
 import type { MeshAnimations } from '@/controllers/render';
+import { isOn } from '@/controllers/fidelity';
 import { perTick } from '../shared/meshAnimation';
 
 /**
@@ -72,8 +73,9 @@ export const ELBELAND_EMISSIONS: Partial<Record<number, readonly Emission[]>> =
  *  - **0** (×27), :99-104: `L = (rand%4+3)*0.1; AddTerrainLight(x, y,
  *    (L, 0.6L, 0.2L), 3)` + hidden; `RenderObjectVisual` :249-254 adds
  *    `BITMAP_TRUE_FIRE` SubType 0 - the town's fire pits.
- *  - **61** (×23), :132-137: `(0.2L, 0.6L, L)` at range 3 + hidden, with
- *    `BITMAP_TRUE_BLUE` particles (:283-289) - the blue elf lamps.
+ *  - **61** (×23), :135-140: `(0.2L, 0.6L, L)` at range 3 + hidden, with
+ *    `BITMAP_TRUE_BLUE` particles (:282-288) - the blue elf lamps. No
+ *    sprite: the flare is ours (`lampFlares`).
  *  - **63** (×6), `RenderObjectVisual` :290-299: one `BITMAP_LIGHT` sprite at
  *    bone 5 sized `scale * 6` - the great lanterns; no terrain light.
  *  - **110** (×1, at 47.5/218.5), `RenderObjectVisual` :301-311: one
@@ -87,6 +89,8 @@ export const ELBELAND_EMISSIONS: Partial<Record<number, readonly Emission[]>> =
  *  - **121** (×26): `BITMAP_LIGHT` sprites on bones 3…8 (:312-327) - the
  *    lamp posts; one sprite each.
  */
+const FIRE_BOWL_FLARE: NonNullable<LightEmitter['sprite']> = { scale: 0.9, color: [0.2, 0.5, 1] };
+
 export const ELBELAND_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
   {
     0: [
@@ -109,7 +113,9 @@ export const ELBELAND_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
         // pool's default 0.6 hover away.
         offset: [11, -8, -10],
         pointDrop: 0.6,
-        sprite: { scale: 0.9, color: [0.2, 0.5, 1] },
+        get sprite() {
+          return isOn('lampFlares') ? FIRE_BOWL_FLARE : undefined;
+        },
         pointRange: 5,
         terrain: {
           range: 3,

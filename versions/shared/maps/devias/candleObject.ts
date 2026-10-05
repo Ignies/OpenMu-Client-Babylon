@@ -1,5 +1,6 @@
 import { createMovableFlare, type MovableFlare } from '@/controllers/lighting/effectLights';
 import { lightMapObject } from '@/controllers/lighting/mapObjectLights';
+import { isOn } from '@/controllers/fidelity';
 import { DEVIAS_CANDELABRA } from './spec';
 import type { LightSource } from '@/controllers/lighting/lightSource';
 import { Ecs } from '@/ecs/current';
@@ -19,10 +20,11 @@ const POSE_WAIT_LIMIT = 120;
  * Same three-arm rig as Lorencia's Candle01 (Bone02/04/06 arms
  * with Bone03/05/07 wicks), so the Lorencia wick-fire logic applies
  * unchanged; only the model file differs. The original gives them a
- * BlendMesh and nothing else (ZzzObject.cpp:4650).
+ * BlendMesh and nothing else (ZzzObject.cpp:4658-4660).
  *
  * The light is ours - `DEVIAS_CANDELABRA` in the lighting layer's map-object
- * table. Instead of a fixed table offset it sits at the wicks: BMD bone
+ * table - and so are the wick flares (`lampFlares`; Classic draws none).
+ * Instead of a fixed table offset it sits at the wicks: BMD bone
  * transforms only exist once the skeleton has been posed by a render (see
  * the bounds note in the memory), so the light is created from `Update` the
  * first time the wicks have left the object origin, and it keeps following
@@ -115,6 +117,8 @@ export class DeviasCandleObject extends CandleObject {
     this.#updateLightPos();
 
     this.#source = lightMapObject(world.scene, DEVIAS_CANDELABRA, this.#lightPos);
+
+    if (!isOn('lampFlares')) return;
 
     const scale = this.node.scaling.x;
 

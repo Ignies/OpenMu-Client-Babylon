@@ -1,4 +1,5 @@
 import type { LightEmitter } from '@/controllers/lighting';
+import { isOn } from '@/controllers/fidelity';
 import { createFire } from '../shared/lights';
 
 /**
@@ -27,23 +28,28 @@ export const DEVIAS_BLEND_MESHES: Readonly<Record<number, number>> = {
 };
 
 /**
- * Devias (Object3). The original lights nothing here; these are ours, so
- * the placements were checked against EncTerrain3.obj first:
+ * Devias (Object3). The placements were checked against EncTerrain3.obj:
  *  - 36 fireplace + 66 fire sit on the same spot (tavern 232/27.5,
  *    202.5/62, 225/44.5); the fire gets the flame, the hearth nothing.
- *    66 also burns alone as the camp fires (11.5/77.5, 174/192, …).
+ *    66 also burns alone as the camp fires (11.5/77.5, 174/192, …). The
+ *    original's 66 is `CreateFire(0, o, 0, 0, 50)` (ZzzObject.cpp:3874-3876):
+ *    fire and a range-4 light, no flare; the flare is ours (`lampFlares`).
  *  - 54 / 56 candelabra are DeviasCandleObject: flames and light come from
  *    the wick bones (DEVIAS_CANDELABRA below), nothing is needed here.
  */
 /** Above this object scale a Devias 66 is a camp fire, below it a hearth. */
 const DEVIAS_HEARTH_SCALE = 0.9;
 
+const HEARTH_FLARE: NonNullable<LightEmitter['sprite']> = { scale: 4.5, color: [1, 0.45, 0.15] };
+
 export const DEVIAS_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
   66: [
     {
       ...createFire([0, 0, 30]),
       pointRange: 8,
-      sprite: { scale: 4.5, color: [1, 0.45, 0.15] },
+      get sprite() {
+        return isOn('lampFlares') ? HEARTH_FLARE : undefined;
+      },
       terrain: {
         range: 5,
         color: [1, 0.6, 0.35],

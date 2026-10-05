@@ -27,6 +27,9 @@ export default {
   'fidelity.fortressLights': 'Luzes da Fortaleza Imperial',
   'fidelity.fortressLights.hint':
     'As tochas, lustres e braseiros da Fortaleza Imperial iluminam o chão ao redor. Clássica: sem luz, como no original.',
+  'fidelity.lampFlares': 'Brilho de lampiões e fogueiras',
+  'fidelity.lampFlares.hint':
+    'Os postes, velas, lareiras e braseiros ganham um brilho. Clássica: sem brilho, como no original.',
   'fidelity.roofFade': 'Telhados transparentes',
   'fidelity.roofFade.hint':
     'Os telhados somem enquanto você está embaixo deles, para ver o interior. Clássica: os telhados sempre aparecem.',

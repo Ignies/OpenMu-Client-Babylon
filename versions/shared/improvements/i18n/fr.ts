@@ -27,6 +27,9 @@ export default {
   'fidelity.fortressLights': 'Lumières de la Forteresse impériale',
   'fidelity.fortressLights.hint':
     'Les torches, lustres et braseros de la Forteresse impériale éclairent le sol autour d\'eux. Classique : aucune lumière, comme dans l\'original.',
+  'fidelity.lampFlares': 'Halos des lampes et des feux',
+  'fidelity.lampFlares.hint':
+    'Les réverbères, bougies, âtres et braseros brillent d\'un halo. Classique : aucun halo, comme dans l\'original.',
   'fidelity.roofFade': 'Toits transparents',
   'fidelity.roofFade.hint':
     'Les toits s\'effacent quand vous êtes dessous, pour voir l\'intérieur. Classique : les toits restent toujours affichés.',
