@@ -6,7 +6,7 @@ import type { Entity, World } from '@/ecs/world';
 
 /**
  * `Luminosity = sinf((WorldTime + (o->Angle[2] * 5)) * 0.002f) * 0.3f + 0.7f;`
- * (ZzzObject.cpp:2972). Same shape as the type 7 lamp but shallower - 0.4 to
+ * (ZzzObject.cpp:2965). Same shape as the type 7 lamp but shallower - 0.4 to
  * 1.0 - and phased by the object's own yaw twenty times more weakly
  * (`* 5` rather than `* 100`), so the 18 glows drift apart by up to a second
  * rather than by half a minute.
@@ -19,26 +19,20 @@ const PHASE_MS_PER_DEGREE = 5;
 const DEGREES_PER_RADIAN = 180 / Math.PI;
 
 /**
- * `Vector(Luminosity / 1.7f, Luminosity, Luminosity, Light)` (:2975) - a
+ * `Vector(Luminosity / 1.7f, Luminosity, Luminosity, Light)` (:2968) - a
  * cyan-white, held here as the unit colour with the luminosity applied by
  * `setLuminosity`.
  */
 const GLOW_COLOR: readonly [number, number, number] = [1 / 1.7, 1, 1];
 
-/**
- * `Scale = Luminosity * 1.5f` (:2974). `MovableFlare` fixes a sprite's size
- * at creation and only its colour can be changed afterwards, so the sprite is
- * built at the mid-luminosity size and the pulse is carried entirely by
- * brightness. Against an additive sprite the two read almost the same; a
- * resizable flare would be a change to `effectLights`, not to this map.
- */
-const FLARE_SCALE = 1.5 * BASE;
+/** `Scale = Luminosity * 1.5f` (:2967): the size breathes with the colour, and no `* o->Scale`. */
+const SCALE_PER_LUMINOSITY = 1.5;
 
-/** `b->TransformPosition(BoneTransform[2], p, Position)` (:2976). */
+/** `b->TransformPosition(BoneTransform[2], p, Position)` (:2969). */
 const BONE_PREFIX = 'bone_2_';
 
 /**
- * Tarkan 63 (ZzzObject.cpp:2971-2977 with :4092-4094), ×18 - the pale glows
+ * Tarkan 63 (ZzzObject.cpp:2964-2971 with :4099-4102), ×18 - the pale glows
  * on the temple faces and inside the sunken arches, at scales 0.69 to 1.55.
  *
  * `MoveObject` sets `o->HiddenMesh = -2`, so `Object64.glb` is loaded,
@@ -49,11 +43,10 @@ const BONE_PREFIX = 'bone_2_';
  * for the sprite. `Object64.glb` carries exactly three bones
  * (`bone_0_Box01`, `bone_1_Bone01`, `bone_2_Bone02`) and one clip.
  *
- * Two knowing substitutions: the sprite is `Effect/flare01.OZJ` (the shared
- * flare the port's effect lights use) rather than `Object9/Impack03.jpg`,
- * because `createMovableFlare` is the only movable-sprite primitive there is;
- * and no light of any kind is registered, because the original registers
- * none - 63 calls `CreateSprite`, never `AddTerrainLight`.
+ * The sprite is `BITMAP_IMPACT`, Impack03.jpg (Tarkan loads it from Object9,
+ * MapManager.cpp:146, the same file as Effect's). No light of any kind is
+ * registered, because the original registers none - 63 calls `CreateSprite`,
+ * never `AddTerrainLight`.
  */
 export class TarkanImpactGlowObject extends MapTileObject {
   #phaseMs = 0;
@@ -86,8 +79,9 @@ export class TarkanImpactGlowObject extends MapTileObject {
 
     const flare = await createMovableFlare(
       world.scene,
-      FLARE_SCALE * this.node.scaling.x,
-      GLOW_COLOR
+      SCALE_PER_LUMINOSITY * BASE,
+      GLOW_COLOR,
+      'impact'
     );
 
     if (!flare) return;
@@ -119,6 +113,7 @@ export class TarkanImpactGlowObject extends MapTileObject {
     const lumi = Math.sin((elapsedMs + this.#phaseMs) * RATE) * AMPLITUDE + BASE;
 
     flare.setLuminosity(lumi);
+    flare.setScale(SCALE_PER_LUMINOSITY * lumi);
 
     const anchor = this.#bone;
 

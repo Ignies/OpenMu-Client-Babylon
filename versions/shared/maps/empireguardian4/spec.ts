@@ -180,10 +180,13 @@ export const WALL_TORCH_FLARE: NonNullable<LightEmitter['sprite']> = {
   texture: 'flare',
 };
 
-/** The same flare warm, ours: a lit torch's, as `LOGIN_WALL_TORCH` draws it on the login scene. */
+/**
+ * The same flare warm, ours: a lit torch's, as `LOGIN_WALL_TORCH` draws it on the login scene. The
+ * tint gives Flare.jpg the mean colour [1, 0.45, 0.15] gave flare01.jpg, the sheet it was tuned on.
+ */
 const WALL_TORCH_WARM_FLARE: NonNullable<LightEmitter['sprite']> = {
   ...WALL_TORCH_FLARE,
-  color: [1, 0.45, 0.15],
+  color: [0.395, 0.277, 0.279],
 };
 
 /**
@@ -255,8 +258,8 @@ export const EMPIRE_GUARDIAN_4_LIGHTS: Partial<
 
   /**
    * :941-948 (x0 here and on both login scenes, which read this table too;
-   * only days 2 and 3 place it, x1 and x6, under their own
-   * `GMEmpireGuardian2/3` case 80) -
+   * only days 2 and 3 place it, x1 and x6, and their own `GMEmpireGuardian2/3`
+   * case 80 is this one, so `../empireguardian` reads this row) -
    * `CreateSprite(BITMAP_LIGHT, pos, 8 * Scale, (L*0.1, L*0.1, L*0.5))` with
    * `L = (sin(WorldTime * 0.04) + 1) * 0.3 + 0.4`. Scale, colour ratio and
    * pulse are the original's; the point and terrain light are ours

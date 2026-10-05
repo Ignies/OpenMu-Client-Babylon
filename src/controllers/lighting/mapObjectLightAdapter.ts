@@ -180,8 +180,9 @@ function resolveEmitterPosition(
   if (!emitter.offset) return { x, y, z };
 
   const [ox, oy, oz] = emitter.offset;
+  const k = (emitter.bone ? node.scaling.x : 1) / TILE_CM;
 
-  localOffset.set(ox / TILE_CM, oz / TILE_CM, oy / TILE_CM);
+  localOffset.set(ox * k, oz * k, oy * k);
 
   Matrix.RotationYawPitchRollToRef(
     node.rotation.y,

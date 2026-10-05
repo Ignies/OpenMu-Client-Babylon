@@ -60,42 +60,69 @@ export const AIDA_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {
   58: [{ kinds: ['waterfall5_9'], every: 3 }],
 };
 
+/** MU units, `[x, y, z]`. */
+type Vec3 = readonly [number, number, number];
+
+/**
+ * Bones 6, 7, 8, 12, 13 and 17 of the plant rig (Object31 and Object72 share it) with the
+ * original's nudges, each the middle of its 13-key sway, at scale 1.
+ */
+const BULBS: readonly Vec3[] = [
+  [32, 2, 54],
+  [32, 1, 41],
+  [32, 0, 26],
+  [-24, 9, 46],
+  [-23, 5, 31],
+  [-10, -22, 59],
+];
+
+/** One `BITMAP_SPARK + 1` card on a bulb, sized without `* o->Scale`. */
+const spark = (offset: Vec3, scale: number, color: Vec3): LightEmitter => ({
+  offset,
+  bone: true,
+  sprite: { scale, color, texture: 'spark1', unscaled: true },
+});
+
+/** Each bulb's big tinted spark over its 3.0 one. */
+const bulbs = (big: readonly number[], tints: readonly Vec3[], small: Vec3) =>
+  BULBS.flatMap((at, i) => [spark(at, big[i], tints[i]), spark(at, 3, small)]);
+
+const BLUE: Vec3 = [0.1, 0.1, 0.3];
+const RED: Vec3 = [0.25, 0, 0];
+
 /**
  * `MoveAidaObject`:
- *  - **30** (×155), :55-60: `L = (rand%5)*0.01; AddTerrainLight(x, y,
+ *  - **30** (×155), :58-64: `L = (rand%5)*0.01; AddTerrainLight(x, y,
  *    (L+0.4, L+0.6, L+0.4), 2)` - a pale green glow under the luminous
  *    plants, plus (`RenderAidaObjectVisual` :106-150) a pair of
- *    `BITMAP_SPARK+1` sprites at each of bones 6/7/8/12/13/17, blue-tinted
- *    `(0.1, 0.1, 0.3)` over grey `(0.15, 0.15, 0.15)`. The sprites are
- *    reduced to one flare at the origin; the light is what reads.
- *  - **71** (×28), :62-67: the same with `(L+0.9, L+0.2, L+0.2)` - the red
- *    crystals - and the same bone sprites (:236-282).
- *  - **75** (×1), :304-311: a rotating `BITMAP_FLARE` (Flare.jpg's own warm
- *    star) at bone 4, white - the `fLumi` tint is overwritten by `(1, 1, 1)` -
- *    scale 3: the one torch. The turn (`WorldTime / 10` degrees) is not ported.
+ *    `BITMAP_SPARK+1` (Spark03.jpg) sprites on each bulb (`BULBS`): blue
+ *    `(0.1, 0.1, 0.3)` at 5.5 / 4.5 / 4 over grey `(0.15, 0.15, 0.15)` at 3.
+ *  - **71** (×28), :65-71: the same with `(L+0.9, L+0.2, L+0.2)` - the red
+ *    crystals - and the same bulbs (:259-303): red `(0.5, 0, 0)` at 6 on the
+ *    first, `(0.25, 0, 0)` at 5.5 / 5 on the rest, over `(0.15, 0, 0)` at 3.
+ *  - **75** (×1), :304-311: a `BITMAP_FLARE` (Flare.jpg's own warm star) at
+ *    bone 4 (201 up at scale 1), white - the `fLumi` tint is overwritten by
+ *    `(1, 1, 1)` - 3 across with no `* o->Scale`, turning `WorldTime / 10`
+ *    degrees: the one torch.
  *
- * The `rand() % 5 * 0.01` jitter is ±0.05 - a static light in practice, so no
- * flicker block.
+ * The plants stand at scale 0.56-2.84 (most 2-2.5): the bulbs grow with them,
+ * the sparks keep their size. The `rand() % 5 * 0.01` jitter is ±0.05 - a
+ * static light in practice, so no flicker block.
  */
 export const AIDA_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
   30: [
-    {
-      pointRange: 4,
-      terrain: { range: 2, color: [0.42, 0.62, 0.42] },
-      sprite: { scale: 1.2, color: [0.1, 0.1, 0.3] },
-    },
+    { pointRange: 4, terrain: { range: 2, color: [0.42, 0.62, 0.42] } },
+    ...bulbs([5.5, 4.5, 4, 4.5, 4, 4], Array(6).fill(BLUE), [0.15, 0.15, 0.15]),
   ],
   71: [
-    {
-      pointRange: 4,
-      terrain: { range: 2, color: [0.92, 0.22, 0.22] },
-      sprite: { scale: 1.2, color: [0.3, 0.1, 0.1] },
-    },
+    { pointRange: 4, terrain: { range: 2, color: [0.92, 0.22, 0.22] } },
+    ...bulbs([6, 5.5, 5, 5.5, 5, 5], [[0.5, 0, 0], ...Array(5).fill(RED)], [0.15, 0, 0]),
   ],
   75: [
     {
-      offset: [0, 0, 120],
-      sprite: { scale: 3, color: [1, 1, 1], texture: 'flare' },
+      offset: [0, -1, 201],
+      bone: true,
+      sprite: { scale: 3, color: [1, 1, 1], texture: 'flare', unscaled: true, spin: 0.1 },
     },
   ],
 };

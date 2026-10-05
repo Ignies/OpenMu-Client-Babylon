@@ -1,9 +1,20 @@
+import { existsSync, readFileSync } from 'node:fs';
+import sharp from 'sharp';
 import { afterEach, describe, expect, it } from 'vitest';
 import { FIDELITY_CLASSIC, FIDELITY_DEFAULT, setFidelityChoice } from '@/controllers/fidelity';
 import { LOGIN_WALL_TORCH } from '@/controllers/lighting/mapObjectLights';
 import { EMPIRE_GUARDIAN_4_CHANDELIER, EMPIRE_GUARDIAN_4_LIGHTS, EMPIRE_GUARDIAN_4_WALL_TORCH } from './spec';
 
 const brazier = (type: number) => EMPIRE_GUARDIAN_4_LIGHTS[type]?.[0];
+
+/** A flare sheet's mean colour, 0-1 a channel, from its pixels (an OZJ is a JPEG behind 24 bytes). */
+async function meanColor(file: string): Promise<number[]> {
+  const jpeg = readFileSync(file).subarray(24);
+  const { data, info } = await sharp(jpeg).raw().toBuffer({ resolveWithObject: true });
+  const sum = [0, 0, 0];
+  for (let i = 0; i < data.length; i += info.channels) for (let c = 0; c < 3; c++) sum[c] += data[i + c];
+  return sum.map(v => v / (info.width * info.height * 255));
+}
 
 describe('the fortress braziers (79, 80), also the login scene\'s', () => {
   afterEach(() => setFidelityChoice(FIDELITY_DEFAULT, {}));
@@ -32,7 +43,19 @@ describe('the fortress torch and chandelier lights', () => {
     expect(EMPIRE_GUARDIAN_4_CHANDELIER.terrain?.range).toBe(5);
     // The login scene's lit torch, the same flare.
     for (const torch of [EMPIRE_GUARDIAN_4_WALL_TORCH, LOGIN_WALL_TORCH]) {
-      expect(torch.sprite).toMatchObject({ color: [1, 0.45, 0.15], texture: 'flare' });
+      expect(torch.sprite).toMatchObject({ texture: 'flare' });
+      expect(torch.sprite?.color).toEqual(EMPIRE_GUARDIAN_4_WALL_TORCH.sprite?.color);
+    }
+  });
+
+  // The lit torches were tuned as [1, 0.45, 0.15] over flare01.jpg; over Flare.jpg, an orange star already, the
+  // same tint came out darker and redder. Theirs gives Flare.jpg the mean colour that one gave flare01.jpg.
+  it.skipIf(!existsSync('Data/Effect'))('tint Flare.jpg to the mean colour the warm torch had on flare01.jpg', async () => {
+    const flare01 = await meanColor('Data/Effect/flare01.OZJ');
+    const flare = await meanColor('Data/Effect/Flare.OZJ');
+    const tint = [1, 0.45, 0.15].map((k, c) => (flare01[c] * k) / flare[c]);
+    for (const torch of [EMPIRE_GUARDIAN_4_WALL_TORCH, LOGIN_WALL_TORCH]) {
+      expect(torch.sprite?.color).toEqual(tint.map(v => expect.closeTo(v, 2)));
     }
   });
 

@@ -60,10 +60,13 @@ export const KANTURU2_EMISSIONS: Partial<Record<number, readonly Emission[]>> =
 
 /**
  * `Render_Kanturu2nd_ObjectVisual`:
- *  - **4** (×21), :338-348: `BITMAP_LIGHT` + two `KANTURU_2ND_EFFECT1`
+ *  - **4** (×21), :335-346: `BITMAP_LIGHT` + two `KANTURU_2ND_EFFECT1`
  *    sprites at bone 1, sized `fLumi / 3.2` - the relic lamps.
- *  - **8** (×18), :350-360: `BITMAP_ENERGY` particles and a `SPARK` sprite
- *    at bone 4 - the power conduits.
+ *  - **8** (×18), :347-371: a `BITMAP_SPARK + 1` (Spark03.jpg) sprite at
+ *    bone 4, 10 across with no `* o->Scale`, white `fLumi = (sin(WorldTime *
+ *    0.001) + 1) * 0.5` - the power conduits; its `BITMAP_ENERGY` particles
+ *    and thunder joints are not ported. Bone 4 rides 21-151 up over the
+ *    clip; the card sits at the middle of the ride.
  *
  * No `AddTerrainLight` anywhere in Kanturu 2nd; sprites only.
  */
@@ -80,7 +83,15 @@ export const KANTURU2_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
     ],
     8: [
       {
-        sprite: { scale: 1.2, color: [0.5, 0.7, 1] },
+        offset: [0, 0, 94],
+        bone: true,
+        sprite: {
+          scale: 10,
+          color: [1, 1, 1],
+          pulse: { speed: 0.001, amount: 0.5, base: 0 },
+          texture: 'spark1',
+          unscaled: true,
+        },
       },
     ],
   };

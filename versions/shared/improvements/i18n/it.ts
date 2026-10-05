@@ -27,6 +27,9 @@ export default {
   'fidelity.fortressLights': 'Luci della Fortezza Imperiale',
   'fidelity.fortressLights.hint':
     'Torce, lampadari e bracieri della Fortezza Imperiale illuminano il pavimento intorno. Classica: nessuna luce, come nell\'originale.',
+  'fidelity.lampFlares': 'Bagliori di lampade e fuochi',
+  'fidelity.lampFlares.hint':
+    'Lampioni, candele, focolari e bracieri brillano di un bagliore. Classica: nessun bagliore, come nell\'originale.',
   'fidelity.roofFade': 'Tetti trasparenti',
   'fidelity.roofFade.hint':
     'I tetti svaniscono mentre ci sei sotto, così vedi l\'interno. Classica: i tetti restano sempre visibili.',

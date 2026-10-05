@@ -16,7 +16,7 @@ import type { ENUM_WORLD } from '../../core/types';
 import type { Emission } from '../fx/effectParticles';
 import { maps, type MapLayer } from '../maps';
 import type { LightingLayer } from './layer';
-import type { FlareTexture } from './effectLights';
+import type { FlareSpec } from './effectLights';
 import {
   LightSource,
   PRIORITY_TORCH,
@@ -34,15 +34,15 @@ import {
  * - which the host draws, tinted by this light's colour.
  */
 export type LightEmitter = {
-  readonly sprite?: {
-    readonly scale: number;
-    readonly color: readonly [number, number, number];
-    readonly pulse?: { speed: number; amount: number; base: number };
-    /** `'flare'` where the original draws `BITMAP_FLARE`; `BITMAP_LIGHT` otherwise. */
-    readonly texture?: FlareTexture;
-  };
+  /** The flare card; its `texture` is the sheet the original names (`BITMAP_LIGHT` when left out). */
+  readonly sprite?: FlareSpec;
   /** MU units, in the object's local frame; rotated by the host. */
   readonly offset?: readonly [number, number, number];
+  /**
+   * The offset is a bone's, where it sits at scale 1: it grows with the object as the original's
+   * bone transforms do (`BodyScale`, ZzzBMD.cpp:168-180). A plain offset (`o->Position + p`) does not.
+   */
+  readonly bone?: boolean;
   /** Point-light radius in tiles; defaults to the terrain range. */
   readonly pointRange?: number;
   /**
@@ -82,11 +82,15 @@ export const LOGIN_CHANDELIER: LightEmitter = {
   },
 };
 
-/** Login-scene wall torch, type 37: at `bone_1_`, a breathing flare on case 37's BITMAP_FLARE sheet. */
+/**
+ * Login-scene wall torch, type 37: at `bone_1_`, a breathing flare on case 37's BITMAP_FLARE sheet.
+ * Its warm tint gives Flare.jpg, already an orange star, the mean colour [1, 0.45, 0.15] gave the
+ * white flare01.jpg it was tuned on (`empireguardian4/spec.test.ts` works it out from the pixels).
+ */
 export const LOGIN_WALL_TORCH: LightEmitter = {
   sprite: {
     scale: 4,
-    color: [1, 0.45, 0.15],
+    color: [0.395, 0.277, 0.279],
     pulse: { speed: 0.039, amount: 0.2, base: 0.6 },
     texture: 'flare',
   },

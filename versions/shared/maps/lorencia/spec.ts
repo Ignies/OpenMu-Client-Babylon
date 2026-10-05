@@ -1,5 +1,6 @@
 import type { Emission } from '@/controllers/fx/effectParticles';
 import type { LightEmitter } from '@/controllers/lighting';
+import { isOn } from '@/controllers/fidelity';
 import { createFire } from '../shared/lights';
 import type { MapTerrain } from '@/controllers/terrain';
 import {
@@ -39,10 +40,10 @@ export const LORENCIA_EMISSIONS: Partial<Record<number, readonly Emission[]>> = 
 };
 
 /**
- * Lorencia 90, the street lamp (ZzzObject.cpp:3775-3779): `Luminosity =
+ * Lorencia 90, the street lamp (ZzzObject.cpp:3781-3785): `Luminosity =
  * (rand() % 2 + 6) * 0.1`, then `AddTerrainLight(x, y, (L, 0.8L, 0.6L), 3)`.
- * The colour and the two-step 0.6/0.7 roll are the original's; the flare and
- * the point light are ours.
+ * The colour and the two-step 0.6/0.7 roll are the original's; the flare
+ * (`lampFlares`) and the point light are ours.
  *
  * The original hangs its light on the post's map tile. `StreetLight01` puts
  * the lit part - the `streetlight_brightness2` glass, the model's second mesh
@@ -55,6 +56,18 @@ export const LORENCIA_EMISSIONS: Partial<Record<number, readonly Emission[]>> = 
 const STREET_LAMP_GLASS: readonly [number, number, number] = [0, -62, 226];
 
 const STREET_LAMP_COLOR: readonly [number, number, number] = [1, 0.8, 0.6];
+
+const STREET_LAMP_FLARE: NonNullable<LightEmitter['sprite']> = {
+  scale: 1.8,
+  color: STREET_LAMP_COLOR,
+  pulse: { speed: 0.0011, amount: 0.06, base: 0.34 },
+};
+
+/**
+ * Ours, on 150 the table candle: the original gives it a BlendMesh and its
+ * `AddTerrainLight` alone (ZzzObject.cpp:3810-3814, :4587-4590).
+ */
+const CANDLE_FLARE: NonNullable<LightEmitter['sprite']> = { scale: 3, color: [1, 0.62, 0.22] };
 
 export const LORENCIA_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
   50: [createFire([0, 0, 200])],
@@ -70,10 +83,8 @@ export const LORENCIA_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
   90: [
     {
       offset: STREET_LAMP_GLASS,
-      sprite: {
-        scale: 1.8,
-        color: STREET_LAMP_COLOR,
-        pulse: { speed: 0.0011, amount: 0.06, base: 0.34 },
+      get sprite() {
+        return isOn('lampFlares') ? STREET_LAMP_FLARE : undefined;
       },
       pointRange: 6,
       pointGain: 1.5,
@@ -93,7 +104,9 @@ export const LORENCIA_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
     {
       offset: [0, 0, 78],
       pointDrop: -0.12,
-      sprite: { scale: 3, color: [1, 0.62, 0.22] },
+      get sprite() {
+        return isOn('lampFlares') ? CANDLE_FLARE : undefined;
+      },
       pointRange: 5,
       pointGain: 1.6,
       wander: 0.05,

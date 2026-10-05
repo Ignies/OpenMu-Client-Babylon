@@ -76,12 +76,28 @@ export const KANTURU1_EMISSIONS: Partial<Record<number, readonly Emission[]>> =
  *    side (:156-162) adds `BITMAP_TRUE_FIRE` particles.
  *  - **61** (×58), :71-77: the same with `(L, 0.6L, 0.2L)` - the orange
  *    brazier, again `TRUE_FIRE` (:156-162).
- *  - **70** (×0 placed, table kept to match the source), :80-88: `Velocity
- *    0.04` and a pulsing `(1.4, 0.7, 0.4) * (sin(t*0.002)*0.45+0.55)` at
- *    range 4, plus two sprites at bone 6.
+ *  - **70** (×0 placed here, in the GM area and on Doppelganger 4; table
+ *    kept to match the source), :85-91: `Velocity 0.04` and a pulsing
+ *    `(1.4, 0.7, 0.4) * (sin(t*0.002)*0.45+0.55)` at range 4, plus
+ *    (`RenderKanturu1stObjectVisual` :175-186) two `BITMAP_SPARK + 1`
+ *    (Spark03.jpg) sprites at bone 6, `(0.8, 0.4, 0.2)` at `L * 7` over grey
+ *    0.65 at `L * 4`, `L = sin(WorldTime * 0.002) + 1.8`: the size breathes,
+ *    not the colour, and there is no `* o->Scale`.
  *  - **105** (×0 placed) and **110** (×0 placed): sprites only (:238-268,
  *    :292-302).
  */
+const LAMP_GROW = { speed: 0.002, amount: 1, base: 0.8 };
+
+/** One of 70's two sparks on bone 6, at its rest height. */
+const lampSpark = (
+  scale: number,
+  color: readonly [number, number, number]
+): LightEmitter => ({
+  offset: [0, -1, 200],
+  bone: true,
+  sprite: { scale, color, grow: LAMP_GROW, texture: 'spark1', unscaled: true },
+});
+
 export const KANTURU1_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
   {
     60: [
@@ -114,12 +130,9 @@ export const KANTURU1_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
           color: [1.4, 0.7, 0.4],
           flicker: { min: 0.1, max: 1, steps: 6 },
         },
-        sprite: {
-          scale: 2,
-          color: [1, 0.6, 0.3],
-          pulse: { speed: 2, amount: 0.45, base: 0.55 },
-        },
       },
+      lampSpark(7, [0.8, 0.4, 0.2]),
+      lampSpark(4, [0.65, 0.65, 0.65]),
     ],
   };
 
