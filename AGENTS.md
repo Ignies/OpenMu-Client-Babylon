@@ -50,6 +50,10 @@ How agents work here (workflow, roles, tools, where things are): [docs/agents/](
 | change how a skill looks, sounds, lights or animates | `versions/shared/skills/<class>/<skill>/index.ts` |
 | change a master variant (Strengthener, Mastery) | the sibling file in the same folder |
 | add a skill | add `<class>/<skill>/index.ts` with `export default defineSkill({...})`; it is found by glob |
+| add or change an item | `versions/shared/items/<group>/<item>.ts` (`defineItem`, found by glob) |
+| add or change a monster or NPC | `versions/shared/monsters/<name>/index.ts` (`defineMonster`); what follows its body: `versions/shared/monster_models/<body>.ts` |
+| change a map: its objects, sound, lighting, weather | `versions/shared/maps/<map>/` (one file per object type, `sound.ts`, `lighting.ts`, `spec.ts`) |
+| add or change a player animation | `versions/shared/animations/<action>.ts` (`defineAnimation`) |
 | change how all effects / sounds / lights work | the controller folder in `src/controllers/` |
 | handle a new packet | `src/modules/<module>/net.ts` (listener order: `src/modules/modules.ts`) |
 | add a module a server can switch off | `src/modules/<module>/module.ts` and one line in `modules.ts`; it registers listeners in `install`, never at load; its windows name it (`module:` in `window.ts`); a world turns it off in `server.json` `modulesOff` |
