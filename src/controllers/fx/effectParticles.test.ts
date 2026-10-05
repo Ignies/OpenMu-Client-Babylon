@@ -256,6 +256,36 @@ describe('light0, BITMAP_LIGHT SubType 0 (ZzzEffectParticle.cpp:3161-3164, :7943
   });
 });
 
+describe('trueFire, BITMAP_TRUE_FIRE SubType 0 and 5 (ZzzEffectParticle.cpp:3337-3378, :8273-8337)', () => {
+  // `Velocity = ((rand() % 10 - 5) * 0.4, 0, (rand() % 10 + 5) * 0.2)` along the object, the sideways part fading
+  // by 0.95 a tick; a tick it also rises 1, loses 0.02 of its scale and is `LifeTime / 25` bright, white.
+  it('is pushed sideways and up at its birth, rises 1 a tick more, shrinks 0.02 a tick and fades with its life', async () => {
+    const sprite = await play('trueFire', 1.5, 0, 2);
+    expect(sprite.position.x).toBeCloseTo(-(2 + 2 * 0.95) / 100);
+    expect(sprite.position.y).toBeCloseTo((2 * (1 + 1)) / 100);
+    expect(sprite.position.z).toBeCloseTo(0);
+    expect(sprite.width).toBeCloseTo((64 * (1.5 - 0.04)) / 100);
+    expect([sprite.color.r, sprite.color.g, sprite.color.b].map(c => c.toFixed(3))).toEqual(['0.880', '0.880', '0.880']);
+    expect(sprite.angle).toBe(0);
+  });
+
+  it('is pushed at most 1.6 the other way and 2.8 up', async () => {
+    const sprite = await play('trueFire', 1, 0.999999, 1);
+    expect(sprite.position.x).toBeCloseTo(0.016);
+    expect(sprite.position.y).toBeCloseTo(0.038);
+  });
+
+  it('lives 24 ticks, SubType 5 20', async () => {
+    expect((await play('trueFire', 1, 0.5, 23)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('trueFire', 1, 0.5, 24)).isVisible).toBe(false);
+    disposeEffectParticles();
+    expect((await play('trueFire5', 1, 0.5, 19)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('trueFire5', 1, 0.5, 20)).isVisible).toBe(false);
+  });
+});
+
 describe('ParticleEmitter view gate', () => {
   function counter() {
     const count = { n: 0 };

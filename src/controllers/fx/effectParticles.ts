@@ -36,6 +36,7 @@ type TextureKey =
   | 'spark03'
   | 'flareBlue'
   | 'fantaB'
+  | 'fantaF'
   | 'clud64'
   | 'flare01';
 
@@ -55,6 +56,7 @@ const TEXTURES: Record<
   spark03: { file: 'Effect/Spark03.OZJ', size: 32 },
   flareBlue: { file: 'Effect/flareBlue.OZJ', size: 64 },
   fantaB: { file: 'Effect/fantaB.OZJ', size: 64 },
+  fantaF: { file: 'Effect/fantaF.OZJ', size: 64 },
   clud64: { file: 'Effect/clud64.OZJ', size: 64 },
   flare01: { file: 'Effect/flare01.OZJ', size: 64 },
 };
@@ -221,6 +223,32 @@ function stripFireKind(texture: TextureKey): ParticleKind {
   };
 }
 
+/**
+ * `BITMAP_TRUE_FIRE` SubType 0 (5 lives 20): the whole sheet, upright and additive, at the spawn
+ * scale, pushed `(rand() % 10 - 5) * 0.4` sideways and `(rand() % 10 + 5) * 0.2` up along the
+ * object (ZzzEffectParticle.cpp:3337-3378). A tick it loses 0.02 of its scale, the sideways push
+ * fades by 0.95, it rises 1 more and is `LifeTime / 25` bright, white (:8273-8337).
+ */
+function trueFireKind(texture: TextureKey, life: number): ParticleKind {
+  return {
+    texture,
+    blend: 'add',
+    init(p, scale) {
+      p.lifeTime = life;
+      p.scale = scale;
+      p.vx = (rand(10) - 5) * 0.4;
+      p.vz = (rand(10) + 5) * 0.2;
+    },
+    update(p, f) {
+      p.vx *= Math.pow(0.95, f);
+      p.pz += f;
+      p.scale -= 0.02 * f;
+      p.lr = p.lg = p.lb = p.lifeTime / 25;
+    },
+    color: plainColor,
+  };
+}
+
 const KINDS = {
   fire1: fireKind('fireHik1', {
     lifeBase: 27,
@@ -322,6 +350,10 @@ const KINDS = {
     shrinkBase: 7,
     shrinkRand: 3,
   }),
+
+  trueFire: trueFireKind('fantaF', 24),
+
+  trueFire5: trueFireKind('fantaF', 20),
 
   smoke0: {
     texture: 'smoke',
@@ -928,6 +960,8 @@ export const KIND_REACH: Record<KindName, Reach> = {
   fire0: { travel: 1.4, base: 0, perScale: 0.87 },
   fire0b: { travel: 1.4, base: 0, perScale: 0.87 },
   fireBlue: { travel: 0.75, base: 0, perScale: 0.65 },
+  trueFire: { travel: 1, base: 0, perScale: 0.46 },
+  trueFire5: { travel: 0.85, base: 0, perScale: 0.46 },
   smoke0: { travel: 0.55, base: 0.72, perScale: 0 },
   smoke2: { travel: 3.4, base: 0.58, perScale: 0 },
   smoke65: { travel: 0.75, base: 0, perScale: 0.29 },

@@ -84,7 +84,9 @@ shared pools, textures and particle recipes other folders reuse.
 - `effectParticles.test.ts`: `KIND_REACH` covers every particle kind, and the view gate of
   `ParticleEmitter` / `BonedParticleEmitter` (spawns only when a sprite could reach the frustum);
   `light0` (`BITMAP_LIGHT` SubType 0) rises, shrinks, glows as its scale and drifts on half the
-  particle wind (`g_vParticleWind`, walked once a tick, ZzzEffectParticle.cpp:3847-3859).
+  particle wind (`g_vParticleWind`, walked once a tick, ZzzEffectParticle.cpp:3847-3859);
+  `trueFire` (`BITMAP_TRUE_FIRE`, fantaF.jpg) takes its sideways and upward push at birth, rises,
+  shrinks and fades with its life (24 ticks, `trueFire5` 20).
 - `afterimage.test.ts`: a copy takes the drawn meshes of each part onto a skeleton of its own, posed on
   the clip's first key while the body keeps its own; a placed part stands where a body facing that way
   would draw it, at its alpha; an unplaced or 0-alpha part is not drawn; it ends taking its copies along.
