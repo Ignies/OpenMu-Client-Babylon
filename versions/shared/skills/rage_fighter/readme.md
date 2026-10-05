@@ -33,8 +33,11 @@ Dark Side (263 and its Strengthener 559, SkillCast.cpp:881-896) is the one skill
 cast sends 0x4B and 0x4A, the server answers with up to five targets and echoes the 0x4A, and the
 client lands a blow on each target as the clip's follow-ups come round (`rage.ts`): Rage_Darkside_Att
 when the targets arrive, the first blow `(int)(2.5 / PlaySpeed)` ticks after the echo (8 at base
-speed; the echo sets `AttackTime = 1`, WSclient.cpp:13422-13429), the next ones a tick sooner. A
-follow-up sends nothing (`SendDarksideAtt`'s send is commented out, MonkSystem.cpp:610; OpenMU deals
+speed; the echo sets `AttackTime = 1`, WSclient.cpp:13422-13429), the next ones a tick sooner. They
+come only while the hero plays the Dark Side clip (SkillCast.cpp:1117), and none once AttackTime has
+reached 15 and stopped (ZzzCharacter.cpp:4139-4141): targets that come 15 ticks after the echo get no
+blow. `rage.ts` keeps AttackTime as the original does, read by the blow before it runs on (MoveHero
+then MoveCharacter, MainScene.cpp:283-284). A follow-up sends nothing (`SendDarksideAtt`'s send is commented out, MonkSystem.cpp:610; OpenMU deals
 every hit from the 0x4B): the cast system draws the skill's `impact` on its target, the bursts and the
 dark wave, and the cast's `impact` is the first blow. Only the cast's echo starts the count, and the
 cast is drawn once (RageCreateEffect's `m_bUseEffectOnce`, MonkSystem.cpp:1285-1288): a later echo,
@@ -54,5 +57,6 @@ pillar on its 11th and 21st tick.
 - see [docs/how_to/add_skill.md](../../../../docs/how_to/add_skill.md).
 
 ## Tests
-- `timing.test.ts`: per skill, the tick each part draws or sounds at, against the clip.
+- `timing.test.ts`: per skill, the tick each part draws or sounds at, against the clip; Dark Side's
+  follow-ups against the echo, the hero's clip and AttackTime's stop at 15.
 - Covered by the golden tests in `../` (`skillVisuals.golden.test.ts`, `skillTables.golden.test.ts`).

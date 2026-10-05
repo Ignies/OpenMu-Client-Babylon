@@ -3,13 +3,21 @@ import { runInAction } from 'mobx';
 import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 import { ENUM_WORLD } from '@/core/types';
 import { PlayerAction } from '@versions/shared/objects/enum';
-import type { Entity, World } from '@/ecs/world';
+import type { Entity } from '@/ecs/world';
 
 vi.hoisted(() => {
   const g = globalThis as Record<string, unknown>;
   g.location ??= { href: 'http://localhost/', search: '', hostname: 'localhost', protocol: 'http:' };
 });
 
+const store = vi.hoisted(() => ({ world: null as unknown }));
+vi.mock('@/ecs/current', () => ({
+  Ecs: {
+    get world() {
+      return store.world;
+    },
+  },
+}));
 // The casters whose Dark Side cast was drawn, in order.
 const drawn = vi.hoisted(() => [] as number[]);
 vi.mock('@versions/shared/skills/skillVisuals', async importOriginal => ({
@@ -29,7 +37,6 @@ await import('@versions/shared/skills/skillVisuals');
 const { installNet } = await import('./net');
 const { combat } = await import('@/controllers/combat');
 const { Hero } = await import('@/modules/hero');
-const { Ecs } = await import('@/ecs/current');
 const { EventBus } = await import('@/core/eventBus');
 const { RageAttackPacket } = await import('@versions/shared/packets/ServerToClientPackets');
 
@@ -38,7 +45,7 @@ const OTHER = 9;
 
 const body = (netId: number, x: number, z: number, more: object = {}) =>
   ({ netId, transform: { pos: new Vector3(x, 0, z), rot: new Vector3(), scale: 1 }, ...more }) as unknown as Entity;
-const hero = body(HERO, 100, 100, { localPlayer: true, playerAnimation: { action: PlayerAction.PLAYER_SKILL_DARKSIDE_READY } });
+const hero = body(HERO, 100, 100, { localPlayer: true, modelObject: { CurrentAction: PlayerAction.PLAYER_SKILL_DARKSIDE_READY, AnimationSpeed: 0.3 } });
 const otherClip = { action: PlayerAction.PLAYER_STOP_MALE as PlayerAction };
 const otherFacing = new Vector3();
 const other = { netId: OTHER, transform: { pos: new Vector3(110, 0, 100), rot: otherFacing, scale: 1 }, playerAnimation: otherClip } as unknown as Entity;
@@ -47,12 +54,10 @@ const objects = new Map([hero, other, body(5, 104, 100), body(6, 110, 96)].map(e
 installNet();
 runInAction(() => {
   Hero.playerId = HERO;
-  Ecs.world = { scene: {}, getByNetId: (id: number) => objects.get(id) } as unknown as World;
 });
+store.world = { scene: {}, playerEntity: hero, getByNetId: (id: number) => objects.get(id) };
 afterAll(() => {
-  runInAction(() => {
-    Ecs.world = null;
-  });
+  store.world = null;
 });
 
 /** C3 4A from `source`: a Dark Side blow on `target`. */

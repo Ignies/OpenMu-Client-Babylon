@@ -50,10 +50,14 @@ const READY_SPEED = 0.3;
  */
 export const darkSideHitTicks = (playSpeed: number): number => Math.trunc(2.5 / playSpeed);
 
-/** The hero's DARKSIDE_READY PlaySpeed while he plays it, else the base one. */
+/** `g_iLimitAttackTime`: AttackTime stops when it reaches 15 (ZzzCharacter.cpp:171, :4139-4141). */
+const LIMIT_ATTACK_TIME = 15;
+
+/** The hero's DARKSIDE_READY PlaySpeed while he plays it, else 0: a follow-up only comes in the clip (SkillCast.cpp:1117). */
 function readySpeed(): number {
   const m = heroEntity()?.modelObject;
-  return m?.CurrentAction === PlayerAction.PLAYER_SKILL_DARKSIDE_READY && m.AnimationSpeed > 0 ? m.AnimationSpeed : READY_SPEED;
+  if (m?.CurrentAction !== PlayerAction.PLAYER_SKILL_DARKSIDE_READY) return 0;
+  return m.AnimationSpeed > 0 ? m.AnimationSpeed : READY_SPEED;
 }
 
 /** Seconds a streak stays open with no further hit before it is considered done. */
@@ -61,16 +65,16 @@ const STREAK_TIMEOUT = 1.0;
 
 // ---- 2. state + readers ----------------------------------------------------
 
-/** Dark Side skill in flight (263 or a strengthened variant), 0 = none. */
+/** Dark Side skill of the hero's last cast (263 or 559), 0 = none. */
 let darkSideSkill = 0;
-/** Extra targets the server named, still to be hit. */
+/** Targets the server named, still to be hit. */
 const pendingTargets: number[] = [];
-/** The hero's AttackTime runs: the server echoed the cast. */
-let counting = false;
-/** Seconds since the echo or the last follow-up blow. */
-let sinceHit = 0;
-/** Follow-up blows sent this cast. */
-let hitsSent = 0;
+/** The server echoed the cast: a later echo repeats it. */
+let echoed = false;
+/** The hero's AttackTime in ticks: 1 at the echo of his cast and at each blow, 0 once it reached 15. */
+let attackTime = 0;
+/** The target whose blow came due this frame, -1 for none. */
+let dueTarget = -1;
 
 /** Hits in the current streak; 0 when none is open. */
 let streakHits = 0;
@@ -90,9 +94,8 @@ export function rageStreak(): number {
 export function beginDarkSide(skill: number, _targetId: number): void {
   darkSideSkill = skill;
   pendingTargets.length = 0;
-  counting = false;
-  sinceHit = 0;
-  hitsSent = 0;
+  echoed = false;
+  attackTime = 0;
 }
 
 /**
@@ -104,10 +107,10 @@ export function beginDarkSide(skill: number, _targetId: number): void {
 export function observeDarkSideEcho(skill: number, caster: Entity): boolean {
   if (!isDarkSide(skill)) return false;
   if (!caster.localPlayer) return caster.playerAnimation?.action === PlayerAction.PLAYER_SKILL_DARKSIDE_READY;
-  if (counting) return true;
+  if (echoed) return true;
   if (darkSideSkill === 0) return false;
-  counting = true;
-  sinceHit = 0;
+  echoed = true;
+  attackTime = 1;
   return false;
 }
 
@@ -120,22 +123,17 @@ export function observeDarkSideTargets(skill: number, targetIds: readonly number
 }
 
 /**
- * Command: pull the next follow-up target whose blow is due. Returns the
- * target id, or `-1` when none is due this frame. The caller draws the blow;
- * nothing goes out (`SendDarksideAtt`'s send is commented out, MonkSystem.cpp:610).
+ * Command: pull the follow-up target whose blow came due this frame. Returns the
+ * target id, or `-1` when none is due. The caller draws the blow; nothing goes
+ * out (`SendDarksideAtt`'s send is commented out, MonkSystem.cpp:610).
  */
 export function nextDarkSideHit(): number {
-  if (darkSideSkill === 0 || !counting || pendingTargets.length === 0) return -1;
-  const due = darkSideHitTicks(readySpeed()) - (hitsSent > 0 ? 1 : 0);
-  if (sinceHit + 1e-9 < due * TICK) return -1;
-  sinceHit = 0;
-  hitsSent++;
-  const id = pendingTargets.shift()!;
-  if (pendingTargets.length === 0) darkSideSkill = 0;
+  const id = dueTarget;
+  dueTarget = -1;
   return id;
 }
 
-/** The Dark Side skill in flight, whose blow the follow-ups draw; 0 once the last one is pulled. */
+/** The Dark Side skill of the hero's last cast, whose blow the follow-ups draw. */
 export function darkSidePendingSkill(): number {
   return darkSideSkill;
 }
@@ -152,7 +150,17 @@ export function observeRageHit(isStreak: boolean, isFinal: boolean): void {
 }
 
 function update(_map: ENUM_WORLD, dt: number): void {
-  sinceHit += dt;
+  dueTarget = -1;
+  if (attackTime > 0) {
+    // MoveHero's UseSkillRagePosition reads AttackTime, then MoveCharacter runs it on (MainScene.cpp:283-284).
+    const speed = readySpeed();
+    if (speed > 0 && pendingTargets.length > 0 && attackTime + 1e-9 >= darkSideHitTicks(speed)) {
+      dueTarget = pendingTargets.shift() ?? -1;
+      attackTime = 1;
+    }
+    attackTime += dt / TICK;
+    if (attackTime + 1e-9 >= LIMIT_ATTACK_TIME) attackTime = 0;
+  }
   if (streakOpenFor > 0) {
     streakOpenFor -= dt;
     if (streakOpenFor <= 0) streakHits = 0;
@@ -162,9 +170,9 @@ function update(_map: ENUM_WORLD, dt: number): void {
 function reset(): void {
   darkSideSkill = 0;
   pendingTargets.length = 0;
-  counting = false;
-  sinceHit = 0;
-  hitsSent = 0;
+  echoed = false;
+  attackTime = 0;
+  dueTarget = -1;
   streakHits = 0;
   streakOpenFor = 0;
 }

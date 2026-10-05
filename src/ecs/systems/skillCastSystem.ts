@@ -210,10 +210,9 @@ export const SkillCastSystem: ISystemFactory = world => {
 
   /** Dark Side: a blow on the next target as the follow-ups come round; nothing goes out (MonkSystem.cpp:610). */
   function drainDarkSide(hero: Entity): void {
-    const skill = combat.darkSidePendingSkill; // before the pull: the last blow ends the cast
     const id = combat.nextDarkSideHit();
     const target = id < 0 ? undefined : world.getByNetId(id);
-    if (target) playSkillImpact(world.scene, skill, hero, target);
+    if (target) playSkillImpact(world.scene, combat.darkSidePendingSkill, hero, target);
   }
 
   /**

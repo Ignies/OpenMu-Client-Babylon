@@ -2,7 +2,6 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
 import { Scene } from '@babylonjs/core/scene';
 import { Vector3 } from '@babylonjs/core/Maths/math.vector';
-import { runInAction } from 'mobx';
 import { ENUM_WORLD } from '../../core/types';
 import { PlayerAction } from '@versions/shared/objects/enum';
 import type { Entity, World } from '../world';
@@ -12,6 +11,16 @@ vi.hoisted(() => {
   g.location ??= { href: 'http://localhost/', search: '', hostname: 'localhost', protocol: 'http:' };
 });
 
+// The live world: Dark Side's follow-ups read the hero's clip from it.
+const store = vi.hoisted(() => ({ world: null as unknown }));
+vi.mock('@/ecs/current', () => ({
+  Ecs: {
+    get world() {
+      return store.world;
+    },
+  },
+}));
+
 // Skills first: they keep the app import cycle in order (versions/shared/skills/readme.md).
 await import('@versions/shared/skills/skillVisuals');
 const { SkillCastSystem } = await import('./skillCastSystem');
@@ -19,7 +28,6 @@ const { combat } = await import('../../controllers/combat');
 const { effects } = await import('../../controllers/fx');
 const { TEX } = await import('../../controllers/fx/recipes');
 const { Session } = await import('../../modules/session');
-const { Ecs } = await import('../current');
 
 const TICK = 1 / 25;
 
@@ -31,9 +39,7 @@ beforeAll(() => {
 });
 afterAll(() => {
   vi.restoreAllMocks();
-  runInAction(() => {
-    Ecs.world = null;
-  });
+  store.world = null;
   scene.dispose();
   engine.dispose();
 });
@@ -57,9 +63,7 @@ describe('Dark Side follow-up blows', () => {
       rightPointerPressed: false,
       getByNetId: (id: number) => targets.get(id),
     } as unknown as World;
-    runInAction(() => {
-      Ecs.world = world;
-    });
+    store.world = world;
     const sent = vi.spyOn(Session, 'sendToGS').mockImplementation(() => {});
     const bursts: [number, number][] = [];
     const spawn = effects.spawn.bind(effects);
