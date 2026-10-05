@@ -107,7 +107,7 @@ export const LOREN_MARKET_LIGHTS: Partial<
       get terrain() {
         return isOn('lampFlares') ? VENT_GROUND : undefined;
       },
-      emissions: [{ kinds: ['fire1', 'fire3'], every: 2, jitter: 6 }],
+      emissions: [{ kinds: ['fire1', 'fire2', 'fire3'], every: 1, jitter: 6 }],
     },
   ],
 };

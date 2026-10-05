@@ -21,6 +21,20 @@ describe('the map flare waves', () => {
     }
   });
 
+  // `switch (rand() % 3)`: one FIRE_HIK1, FIRE_CURSEDLICH or FIRE_HIK3 particle a tick (`CreateParticleFpsChecked`).
+  it('fire vents burn the original\'s three fire sheets every tick (GMKarutan1.cpp:107-120, GMUnitedMarketPlace.cpp:303-316)', () => {
+    const vents: [ENUM_WORLD, number][] = [
+      [ENUM_WORLD.WD_80KARUTAN1, 113],
+      [ENUM_WORLD.WD_81KARUTAN2, 113],
+      [ENUM_WORLD.WD_79UNITEDMARKETPLACE, 57],
+      [ENUM_WORLD.WD_63PK_FIELD, 6],
+    ];
+    for (const [world, type] of vents) {
+      const fires = lightEmittersFor(world, type)?.flatMap(e => (Array.isArray(e.emissions) ? e.emissions : []));
+      expect(fires?.map(f => [f.kinds, f.every]), `world ${world} type ${type}`).toEqual([[['fire1', 'fire2', 'fire3'], 1]]);
+    }
+  });
+
   // `CreateSprite(BITMAP_LIGHT, bone 5, Luminosity + 0.2f, (0.6, 0.6, 1), o)`, `Luminosity = sinf(WorldTime * 0.001f) * 0.3f + 0.7f`.
   it('Kalima 12 and 32: the flower glow grows and shrinks on bone 5, unscaled (GMHellas.cpp:439-460)', () => {
     const glow = {
