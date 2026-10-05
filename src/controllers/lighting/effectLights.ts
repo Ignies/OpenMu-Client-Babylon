@@ -32,9 +32,10 @@ import { EFFECT_RENDERING_GROUP, keepDepthForEffects } from '../fx/core';
  * BITMAP_SHINY + 5, shiny05.jpg, an eight-point sparkle (:5325 loads it over :5279's shiny04.jpg,
  * and a second name replaces the first, GlobalBitmap.cpp:549-568); `impact` BITMAP_IMPACT,
  * Impack03.jpg, a blue-white burst (:5267; Tarkan reloads the same file from Object9,
- * MapManager.cpp:146). `px` is the sheet's width: a sprite is `Width * Scale` across
- * (zzzeffectsprite.cpp:76). `sprites` caps a busy sheet higher: Aida's 183 plants carry twelve
- * sparks each.
+ * MapManager.cpp:146); `magic1` BITMAP_MAGIC + 1, Magic_Ground2.jpg, a ring of rays (:5209);
+ * `lightning1` BITMAP_LIGHTNING + 1, lightning2.jpg, a cyan burst (:5295). `px` is the sheet's
+ * width: a sprite is `Width * Scale` across (zzzeffectsprite.cpp:76). `sprites` caps a busy sheet
+ * higher: Aida's 183 plants carry twelve sparks each.
  */
 const FLARE_TEXTURES = {
   light: { file: 'Effect/flare01.OZJ', px: 64 },
@@ -42,6 +43,8 @@ const FLARE_TEXTURES = {
   spark1: { file: 'Effect/Spark03.OZJ', px: 32, sprites: 2560 },
   shiny5: { file: 'Effect/shiny05.OZJ', px: 64 },
   impact: { file: 'Effect/Impack03.OZJ', px: 64 },
+  magic1: { file: 'Effect/Magic_Ground2.OZJ', px: 128 },
+  lightning1: { file: 'Effect/lightning2.OZJ', px: 128 },
 } as const;
 
 export type FlareTexture = keyof typeof FLARE_TEXTURES;
@@ -68,6 +71,8 @@ export type FlareSpec = {
   /** The original sizes it without `* o->Scale` (`CreateSprite(..., 5.5f, ...)`): the object's scale does not apply. */
   readonly unscaled?: boolean;
 };
+
+const RADIANS_PER_DEGREE = Math.PI / 180;
 
 /** A card's width in tiles: the sheet's pixels times its scale. */
 const cardSize = (texture: FlareTexture, scale: number) => (FLARE_TEXTURES[texture].px * scale) / TILE_CM;
@@ -166,6 +171,8 @@ export type MovableFlare = {
   setLuminosity(lumi: number): void;
   /** Resizes it: a sprite the original sizes by its `Luminosity`. */
   setScale(scale: number): void;
+  /** Turns it on the screen, counter-clockwise: `CreateSprite`'s `Rotation` (ZzzOpenglUtil.cpp:899-908). */
+  setAngle(degrees: number): void;
   dispose(): void;
 };
 
@@ -229,6 +236,7 @@ export async function createMovableFlare(
     moveTo: (x, y, z) => sprite.position.set(x, y, z),
     setLuminosity: lumi => paint.setLuminosity(lumi),
     setScale: next => void (sprite.width = sprite.height = cardSize(texture, next)),
+    setAngle: degrees => void (sprite.angle = degrees * RADIANS_PER_DEGREE),
     dispose: () => {
       paint.release();
       sprite.dispose();

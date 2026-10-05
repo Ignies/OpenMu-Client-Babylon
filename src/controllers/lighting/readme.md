@@ -29,10 +29,12 @@ policy. It knows how to light something, never which skill or item asks for it.
   the bitmap the original names: `'light'` (BITMAP_LIGHT, flare01.jpg, a soft white glow,
   ZzzOpenData.cpp:5207) unless a spec names another (`'flare'` BITMAP_FLARE, Flare.jpg, a warm star,
   :5309; `'spark1'` BITMAP_SPARK + 1, Spark03.jpg, :5216; `'shiny5'` BITMAP_SHINY + 5, shiny05.jpg,
-  :5325; `'impact'` BITMAP_IMPACT, Impack03.jpg, :5267). A card is its sheet's own width times its
-  scale (zzzeffectsprite.cpp:76), times the object's scale unless the spec is `unscaled`; `pulse`
-  waves its brightness and `grow` its size, and a `MovableFlare` takes `setLuminosity` and
-  `setScale` from its host. One sprite manager per sheet and scene.
+  :5325; `'impact'` BITMAP_IMPACT, Impack03.jpg, :5267; `'magic1'` BITMAP_MAGIC + 1,
+  Magic_Ground2.jpg, :5209; `'lightning1'` BITMAP_LIGHTNING + 1, lightning2.jpg, :5295). A card is
+  its sheet's own width times its scale (zzzeffectsprite.cpp:76), times the object's scale unless
+  the spec is `unscaled`; `pulse` waves its brightness and `grow` its size, and a `MovableFlare`
+  takes `setLuminosity`, `setScale` and `setAngle` (degrees, the original's `Rotation`) from its
+  host. One sprite manager per sheet and scene.
 - `items.ts`: `lightItem`, `itemSelfLight`. `sky.ts`: `strikeThunder`.
 - `lightingQuality.ts`: the tiers (`lightingTier()`, `tierIndex()`: Classic, Enhanced, Ultra),
   `pointLightBudget`, MSAA and CSM state.
@@ -105,7 +107,7 @@ policy. It knows how to light something, never which skill or item asks for it.
 - `characters.test.ts`: a steady carried glow (Poison Shadow), one that breathes, and the Scorpion's per-frame flicker.
 - `effectLights.test.ts`: a card is drawn from the sheet its spec names, one manager per sheet, at
   the sheet's own width (checked against the file in `Data/Effect`); an `unscaled` card keeps its size
-  on a scaled object; a `grow` card grows and shrinks.
+  on a scaled object; a `grow` card grows and shrinks; a movable card resizes and turns.
 - `mapObjectLightAdapter.test.ts`: a `bone` offset grows with the object, a plain one does not.
 - `versions/shared/maps/mapRows.golden.test.ts`: every world's look, room looks, thunder and
   map-object lights, pinned across the move into the map folders.

@@ -6,7 +6,7 @@ import type { Scene } from '../render/babylon/exports';
 const asked = vi.hoisted(() => [] as string[]);
 const drawnFrom = vi.hoisted(() => [] as string[]);
 const cells = vi.hoisted(() => new Map<string, number>());
-const sprites = vi.hoisted(() => [] as { width: number; height: number }[]);
+const sprites = vi.hoisted(() => [] as { width: number; height: number; angle: number }[]);
 
 vi.mock('@/controllers/assets/mu', () => ({
   downloadDataFile: async (path: string) => {
@@ -31,6 +31,7 @@ vi.mock('../render/babylon/exports', () => {
     color = new Color4();
     width = 0;
     height = 0;
+    angle = 0;
     constructor(_name: string, manager: SpriteManager) {
       drawnFrom.push(manager.sheet);
       sprites.push(this);
@@ -112,6 +113,18 @@ describe('flare cards', () => {
     expect([lastSprite().width, lastSprite().height]).toEqual([0.384, 0.384].map(v => expect.closeTo(v)));
   });
 
+  // Lost Tower's machines turn their pairs by `Rotation` degrees (ZzzObject.cpp:2902-2911).
+  it('draw BITMAP_MAGIC + 1 and BITMAP_LIGHTNING + 1 at their 128 pixels, turned by degrees', async () => {
+    const scene = {} as Scene;
+    const flare = await createMovableFlare(scene, 1.5, [1, 0.2, 0], 'magic1');
+    expect(drawnFrom[drawnFrom.length - 1]).toBe('Effect/Magic_Ground2.OZJ');
+    expect(lastSprite().width).toBeCloseTo(1.92);
+    flare?.setAngle(-90);
+    expect(lastSprite().angle).toBeCloseTo(-Math.PI / 2);
+    await createMovableFlare(scene, 0.3, [0.4, 0.8, 1], 'lightning1');
+    expect(drawnFrom[drawnFrom.length - 1]).toBe('Effect/lightning2.OZJ');
+  });
+
   // `CreateSprite(BITMAP_SPARK + 1, Position, 5.5f, ...)` has no `* o->Scale` (GMAida.cpp:110).
   it('size an unscaled card without the object scale', async () => {
     const scene = {} as Scene;
@@ -135,7 +148,7 @@ describe('flare cards', () => {
 
   it.skipIf(!existsSync('Data/Effect'))('cut each sheet at the width of its file', async () => {
     const scene = {} as Scene;
-    for (const texture of ['light', 'flare', 'spark1', 'shiny5', 'impact'] as const) {
+    for (const texture of ['light', 'flare', 'spark1', 'shiny5', 'impact', 'magic1', 'lightning1'] as const) {
       await createEffectLight(scene, { scale: 1, color: [1, 1, 1], texture }, at, 1);
     }
     for (const [sheet, width] of cells) {
