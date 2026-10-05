@@ -107,6 +107,26 @@ const WHITE: readonly [number, number, number] = [1, 1, 1];
 
 const plainColor = (p: Particle, out: Color4) => out.set(p.lr, p.lg, p.lb, 1);
 
+/**
+ * `g_vParticleWind`: MoveParticles walks its pace by up to 0.6 a tick, held within 0.6, and the wind
+ * by its pace, held within 1.7 (ZzzEffectParticle.cpp:3847-3859). `light0` drifts on half of it.
+ */
+const wind = { x: 0, y: 0, vx: 0, vy: 0, due: 0 };
+
+const within = (v: number, limit: number) => Math.max(-limit, Math.min(limit, v));
+
+function stepWind(ticks: number): void {
+  wind.due = Math.min(wind.due + ticks, 4);
+
+  while (wind.due >= 1) {
+    wind.due -= 1;
+    wind.vx = within(wind.vx + (rand(2001) - 1000) * 0.0006, 0.6);
+    wind.vy = within(wind.vy + (rand(2001) - 1000) * 0.0006, 0.6);
+    wind.x = within(wind.x + wind.vx, 1.7);
+    wind.y = within(wind.y + wind.vy, 1.7);
+  }
+}
+
 function fireKind(
   texture: TextureKey,
   opts: {
@@ -528,6 +548,29 @@ const KINDS = {
   } satisfies ParticleKind,
 
   /**
+   * `BITMAP_LIGHT` SubType 0, flare01.jpg drawn additive (ZzzEffectParticle.cpp:3161-3164): a tick it
+   * drifts +-0.2 plus half the wind, rises 2.5, loses 0.05 of its scale and is as bright as its
+   * scale, gone at 0.1 (:7943-8010).
+   */
+  light0: {
+    texture: 'flare01',
+    blend: 'add',
+    init(p, scale) {
+      p.lifeTime = rand(10) + 10;
+      p.scale = ((rand(50) + 50) / 100) * scale;
+    },
+    update(p, f) {
+      p.px += ((rand(2001) - 1000) * 0.0004 + wind.x) * 0.5 * f;
+      p.py += ((rand(2001) - 1000) * 0.0004 + wind.y) * 0.5 * f;
+      p.pz += 2.5 * f;
+      p.scale -= 0.05 * f;
+      if (p.scale <= 0.1) p.live = false;
+      p.lr = p.lg = p.lb = p.scale;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
+
+  /**
    * Wings of Darkness membrane flare (ZzzObject.cpp:9860-9884). The original
    * re-creates a BITMAP_FLARE_BLUE sprite at each of ten wing bones every
    * frame; a short-lived pooled particle reads the same and costs a tenth of
@@ -751,6 +794,8 @@ function ensureTicking(target: Scene) {
 
     const f = Math.min(1, (deltaMs / 1000) * TICKS_PER_SECOND);
 
+    stepWind((deltaMs / 1000) * TICKS_PER_SECOND);
+
     const color = new Color4(1, 1, 1, 1);
 
     for (let i = particles.length - 1; i >= 0; i--) {
@@ -892,6 +937,7 @@ export const KIND_REACH: Record<KindName, Reach> = {
   smoke60: { travel: 3.7, base: 1.09, perScale: 0.29 },
   waterfall5_9: { travel: 2.9, base: 0.28, perScale: 0.46 },
   spark03_24: { travel: 0.6, base: 0.19, perScale: 0 },
+  light0: { travel: 0.6, base: 0, perScale: 0.45 },
   wingFlareBlue: { travel: 0, base: 0, perScale: 0.46 },
   wingCloud: { travel: 0, base: 0, perScale: 0.46 },
 };
@@ -1181,6 +1227,8 @@ export function disposeEffectParticles(): void {
   for (const pool of pools.values()) pool.manager.dispose();
   pools.clear();
   loading.clear();
+
+  wind.x = wind.y = wind.vx = wind.vy = wind.due = 0;
 
   if (tickObserver && scene) {
     scene.onBeforeRenderObservable.remove(tickObserver as never);

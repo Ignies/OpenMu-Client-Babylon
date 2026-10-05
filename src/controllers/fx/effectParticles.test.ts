@@ -3,7 +3,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 type FakeSprite = {
   position: { x: number; y: number; z: number };
   width: number;
+  angle: number;
   isVisible: boolean;
+  color: { r: number; g: number; b: number };
 };
 
 const fakes = vi.hoisted(() => ({ sprites: [] as FakeSprite[] }));
@@ -202,6 +204,55 @@ describe('KIND_REACH', () => {
         }
       }
     }
+  });
+});
+
+/** Spawns one `kind` at the origin with every roll at `roll`, then plays `ticks` 25 Hz ticks. */
+async function play(kind: KindName, scale: number, roll: number, ticks: number): Promise<FakeSprite> {
+  const original = Math.random;
+  Math.random = () => roll;
+
+  try {
+    await spawnParticle(scene, kind, { x: 0, y: 0, z: 0 }, 0, scale, [0.2, 0.4, 0.6]);
+    const sprite = fakes.sprites[fakes.sprites.length - 1];
+    for (let n = 0; n < ticks; n++) tick?.();
+    return sprite;
+  } finally {
+    Math.random = original;
+  }
+}
+
+describe('light0, BITMAP_LIGHT SubType 0 (ZzzEffectParticle.cpp:3161-3164, :7943-8010)', () => {
+  // `rand() % 10 + 10` ticks, `(rand() % 50 + 50) / 100 * Scale`; a tick it rises `5 * 0.5`, loses 0.05 and is
+  // `Light = Scale`, whatever light it was made with.
+  it('rises 2.5 a tick, loses 0.05 of its scale a tick and is as bright as its scale', async () => {
+    const sprite = await play('light0', 2, 0.5, 4);
+    expect(sprite.position.x).toBeCloseTo(0);
+    expect(sprite.position.y).toBeCloseTo(0.1);
+    expect(sprite.position.z).toBeCloseTo(0);
+    expect(sprite.width).toBeCloseTo((64 * (0.75 * 2 - 0.2)) / 100);
+    expect([sprite.color.r, sprite.color.g, sprite.color.b].map(c => c.toFixed(3))).toEqual(['1.300', '1.300', '1.300']);
+    expect(sprite.angle).toBe(0);
+  });
+
+  it('lives rand() % 10 + 10 ticks, and goes once its scale is down to 0.1', async () => {
+    expect((await play('light0', 3, 0.5, 14)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('light0', 3, 0.5, 15)).isVisible).toBe(false);
+    disposeEffectParticles();
+    expect((await play('light0', 1, 0.5, 12)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('light0', 1, 0.5, 14)).isVisible).toBe(false);
+  });
+
+  // `(rand() % 2001 - 1000) * 0.0004` plus `g_vParticleWind`, halved; the wind walks by up to 0.6 a tick, its
+  // pace held within 0.6 and itself within 1.7 (ZzzEffectParticle.cpp:3847-3859).
+  it('drifts up to 0.2 a tick in x and y, plus half the wind', async () => {
+    const sprite = await play('light0', 1, 0, 3);
+    const drift = -(0.4 + 0.6) / 2 - (0.4 + 1.2) / 2 - (0.4 + 1.7) / 2;
+    expect(sprite.position.x).toBeCloseTo(drift / 100);
+    expect(sprite.position.z).toBeCloseTo(drift / 100);
+    expect(sprite.position.y).toBeCloseTo(0.075);
   });
 });
 
