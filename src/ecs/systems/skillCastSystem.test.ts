@@ -30,6 +30,7 @@ const { TEX } = await import('../../controllers/fx/recipes');
 const { Session } = await import('../../modules/session');
 const { HeroSkills, skills } = await import('../../modules/skills');
 const { RageAttackRangeRequestPacket, RageAttackRequestPacket } = await import('@versions/shared/packets/ClientToServerPackets');
+const { darkSideCast } = await import('@versions/shared/skills/rage_fighter/dark_side/rage');
 
 const TICK = 1 / 25;
 
@@ -50,7 +51,7 @@ const body = (netId: number, x: number, z: number) =>
   ({ netId, transform: { pos: new Vector3(x, 0, z), rot: new Vector3(), scale: 1 } }) as unknown as Entity;
 
 describe('Dark Side follow-up blows', () => {
-  it('draw a blow on each target the 0x4B response named and send nothing (MonkSystem.cpp:610)', () => {
+  it('send nothing and draw nothing of their own: the hero\'s DarksideRendering draws what shows (MonkSystem.cpp:610, :697-857)', () => {
     const hero = {
       ...body(1, 100, 100),
       localPlayer: true,
@@ -81,21 +82,20 @@ describe('Dark Side follow-up blows', () => {
     combat.beginDarkSide(263, 5);
     combat.observeDarkSideTargets(263, [6, 7]);
     combat.observeDarkSideEcho(263, hero);
+    const hits: number[] = [];
     for (tick = 1; tick <= 40; tick++) {
+      const before = darkSideCast.sent;
       combat.update(ENUM_WORLD.WD_0LORENCIA, TICK);
+      if (darkSideCast.sent > before) hits.push(tick);
       system.update?.(TICK);
       effects.update(ENUM_WORLD.WD_0LORENCIA, TICK);
     }
     combat.reset();
 
     expect(sent).not.toHaveBeenCalled();
-    // The blows on ticks 8 and 15 (SkillCast.cpp:1117-1129) burst on their targets 20 and 21 effect steps on.
-    expect(bursts).toEqual([
-      [27, 103],
-      [28, 103],
-      [34, 107],
-      [35, 107],
-    ]);
+    // The blows on ticks 8 and 15 (SkillCast.cpp:1117-1129) landed; none drew a burst.
+    expect(hits).toEqual([8, 15]);
+    expect(bursts).toEqual([]);
   });
 });
 

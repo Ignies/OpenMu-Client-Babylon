@@ -11,6 +11,8 @@ import { ENUM_WORLD } from '@/core/types';
 import type { Entity } from '@/ecs/world';
 import { PlayerAction } from '../objects/enum';
 import { playBuffHits, playSummonArrival, playTargetedSkillVisual } from './skillVisuals';
+import { beginDarkSide, observeDarkSideTargets, rageLayer } from './rage_fighter/dark_side/rage';
+import { Ecs } from '@/ecs/current';
 
 vi.hoisted(() => {
   const g = globalThis as Record<string, unknown>;
@@ -77,6 +79,8 @@ function record(cast: (tick: () => number) => void, ticks = 40): Made[] {
   const made: Made[] = [];
   const real = effects.spawn.bind(effects);
   const spy = vi.spyOn(effects, 'spawn').mockImplementation(((name: string, s: Scene, at: Vector3, opts: { model?: string | { model: string } }) => {
+    // The afterimage copies a loaded body, which these are not: a stand-in that draws five parts.
+    if (name === 'afterimage') return { alive: true, parts: 5, stop() {}, hide() {}, place() {} };
     const before = s.transformNodes.length;
     const handle = real(name as never, s, at, opts as never);
     const node = s.transformNodes.slice(before).find(n => n.name === 'fxModel' || n.name === 'fxSummon');
@@ -121,7 +125,6 @@ const A = PlayerAction;
 /** [what, skill, model, the original's Angle for a caster turned `y`, the caster's clip and its speed, more caster]. */
 const CASES: [string, number, string, (y: number) => [number, number, number], PlayerAction?, number?, object?][] = [
   ['Charge: MODEL_SWORD_FORCE sub2 at the caster\'s Angle (ZzzCharacter.cpp:4692)', 269, MODEL.swordForce, y => [0, 0, y], A.PLAYER_ATTACK_RUSH, 0.3],
-  ['Dark Side: the dark MODEL_SHOCKWAVE01 on its side, Angle[2] - 180 (MonkSystem.cpp:813-816)', 263, MODEL.shockwave, y => [90, 0, y - 180], A.PLAYER_SKILL_DARKSIDE_READY, 0.3],
   ['Chain Drive: the giant-swing MODEL_SHOCKWAVE01 at (60, 0, Angle[2] - 180) (MoveHandlers.cpp:9334-9336)', 262, MODEL.shockwave, y => [60, 0, y - 180], A.PLAYER_SKILL_GIANTSWING],
   ['Ignore Defense: MODEL_WINDFOCE made at the caster\'s Angle (MonkSystem.cpp:1151)', 266, MODEL.windForce, y => [0, 0, y], A.PLAYER_SKILL_ATT_UP_OURFORCES],
   ['Expansion of Wizardry: MODEL_SWELL_OF_MAGICPOWER at the caster\'s Angle (WSclient.cpp:4960)', 233, MODEL.magicPowerUp, y => [0, 0, y]],
@@ -158,6 +161,21 @@ describe('effect models turned as the original turns them', () => {
       expectTurned(m, [20, 0, 30 + i * 20]);
       expectTurned(m, [20, 0, 30 + i * 20], 1);
     });
+  });
+
+  it('Dark Side: the hero\'s body runs out at the target and its dark MODEL_SHOCKWAVE01 lies on its side at that way - 180, whatever his facing (MonkSystem.cpp:728, :736-742)', () => {
+    for (const y of YAWS) {
+      const model = { CurrentAction: A.PLAYER_SKILL_DARKSIDE_READY, actionFrame: () => 0, AnimationSpeed: 0.3 };
+      const hero = body(1, CASTER, y, { localPlayer: true, modelObject: model });
+      const aim = body(2, TARGET, 0);
+      Ecs.world = { scene, playerEntity: hero, getByNetId: (id: number) => (id === 2 ? aim : undefined), mapIndex: ENUM_WORLD.WD_0LORENCIA, getTerrainHeight: () => 0 } as never;
+      beginDarkSide(263, 0);
+      observeDarkSideTargets(263, [2]);
+      const made = record(() => playTargetedSkillVisual(scene, 263, hero, null), 6);
+      expectTurned(made.find(m => m.model === MODEL.shockwave), [90, 0, BEARING - 180]);
+      rageLayer.reset?.();
+      Ecs.world = null;
+    }
   });
 
   it('a summon arriving: MODEL_MAGIC_CIRCLE1 at the monster\'s Angle (WSclient.cpp:3115)', () => {

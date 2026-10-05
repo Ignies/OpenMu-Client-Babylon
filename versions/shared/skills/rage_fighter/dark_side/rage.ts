@@ -76,6 +76,21 @@ let attackTime = 0;
 /** The target whose blow came due this frame, -1 for none. */
 let dueTarget = -1;
 
+/**
+ * What DarksideRendering reads of the hero's cast (MonkSystem.cpp:697-857): the targets the 0x4B named (`m_DarkTargetIndex`),
+ * the follow-ups gone since (`m_nDarksideCnt`), and a count that moves whenever InitDarksideTarget sets or drops them.
+ */
+const cast = { targets: [] as number[], sent: 0, serial: 0 };
+export const darkSideCast: { readonly targets: readonly number[]; readonly sent: number; readonly serial: number } = cast;
+
+/** InitDarksideTarget (MonkSystem.cpp:615-639): the targets and the follow-ups go, `named` come instead. */
+function setTargets(named: readonly number[]): void {
+  cast.targets.length = 0;
+  for (const id of named) cast.targets.push(id);
+  cast.sent = 0;
+  cast.serial++;
+}
+
 /** Hits in the current streak; 0 when none is open. */
 let streakHits = 0;
 let streakOpenFor = 0;
@@ -96,6 +111,7 @@ export function beginDarkSide(skill: number, _targetId: number): void {
   pendingTargets.length = 0;
   echoed = false;
   attackTime = 0;
+  setTargets([]);
 }
 
 /**
@@ -119,6 +135,7 @@ export function observeDarkSideTargets(skill: number, targetIds: readonly number
   if (!isDarkSide(skill) || darkSideSkill === 0) return;
   pendingTargets.length = 0;
   for (const id of targetIds.slice(0, DARK_SIDE_MAX_TARGETS)) pendingTargets.push(id);
+  setTargets(pendingTargets);
   if (pendingTargets.length > 0) playCombat('Sound/Ragefighter/Rage_Darkside_Att', null);
 }
 
@@ -154,9 +171,14 @@ function update(_map: ENUM_WORLD, dt: number): void {
   if (attackTime > 0) {
     // MoveHero's UseSkillRagePosition reads AttackTime, then MoveCharacter runs it on (MainScene.cpp:283-284).
     const speed = readySpeed();
-    if (speed > 0 && pendingTargets.length > 0 && attackTime + 1e-9 >= darkSideHitTicks(speed)) {
+    const due = speed > 0 && attackTime + 1e-9 >= darkSideHitTicks(speed);
+    if (due && cast.sent >= DARK_SIDE_MAX_TARGETS) {
+      // SendDarksideAtt past the fifth: InitDarksideTarget, and no blow (MonkSystem.cpp:591-595).
+      setTargets([]);
+    } else if (due && pendingTargets.length > 0) {
       dueTarget = pendingTargets.shift() ?? -1;
       attackTime = 1;
+      cast.sent++;
     }
     attackTime += dt / TICK;
     if (attackTime + 1e-9 >= LIMIT_ATTACK_TIME) attackTime = 0;
@@ -175,6 +197,7 @@ function reset(): void {
   dueTarget = -1;
   streakHits = 0;
   streakOpenFor = 0;
+  setTargets([]);
 }
 
 // ---- 3. the layer ----------------------------------------------------------

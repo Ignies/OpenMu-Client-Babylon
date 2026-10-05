@@ -14,7 +14,7 @@ import { PlayerAction } from '../../objects/enum';
 import { clearBuffVisuals, playAreaSkillVisual, playTargetedSkillVisual, setBuffVisual } from '../skillVisuals';
 import { skillSound } from '@/controllers/sound/combat';
 import { JOINT_SPARKS } from '../_shared';
-import { beginDarkSide, darkSideHitTicks, isDarkSide, nextDarkSideHit, observeDarkSideEcho, observeDarkSideTargets, rageLayer } from './dark_side/rage';
+import { beginDarkSide, darkSideCast, darkSideHitTicks, isDarkSide, nextDarkSideHit, observeDarkSideEcho, observeDarkSideTargets, rageLayer } from './dark_side/rage';
 
 vi.hoisted(() => {
   const g = globalThis as Record<string, unknown>;
@@ -855,12 +855,120 @@ describe('Increase Block\'s MODEL_WINDFOCE sub1: a pillar on the body while it h
 describe('Dark Side (263)', () => {
   const READY = PlayerAction.PLAYER_SKILL_DARKSIDE_READY;
 
-  it('per blow: the bursts on ticks 20-21 and the dark wave on 30-31, a 25 Hz tick standing for a rendered frame (MonkSystem.cpp:811-826)', () => {
+  it('another caster\'s draws no afterimage, burst or dark wave: the CMonkSystem DarksideRendering reads is the hero\'s (MonkSystem.cpp:697-857)', () => {
     for (const skill of [263, 559]) {
       const r = run(skill, READY, { keysPerTick: 0.3 });
-      expect(spriteTicks(r, TEX.damage2)).toEqual([20, 21]);
-      expect(r.spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.shockwave).map(s => s.tick)).toEqual([30, 31]);
+      expect(r.spawns.filter(s => s.name === 'afterimage')).toEqual([]);
+      expect(drawTicks(r, TEX.damage2)).toEqual([]);
+      expect(spriteTicks(r, TEX.damage2)).toEqual([]);
+      expect(r.spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.shockwave)).toEqual([]);
     }
+  });
+
+  /**
+   * The hero's cast, echoed at the end of tick 0 with targets 6 (4 tiles ahead) and 7 (3 tiles aside) already named, at READY's
+   * 0.3 keys a tick: the follow-ups go on ticks 8 and 15. The afterimage copies are stand-ins that record where each part is put;
+   * the body draws five parts, so five DarksideRendering calls a tick.
+   */
+  function heroDarkSide(ticks = 30) {
+    let tick = 0;
+    const model = { CurrentAction: READY as number, AnimationSpeed: 0.3, actionFrame: () => tick * 0.3 };
+    const hero = { netId: 1, localPlayer: true, transform: { pos: new Vector3(100, 0, 100), rot: new Vector3(), scale: 1 }, modelObject: model } as unknown as Entity;
+    const others: Record<number, Entity> = {
+      6: { netId: 6, transform: { pos: new Vector3(100, 0, 104), rot: new Vector3(), scale: 1 } } as unknown as Entity,
+      7: { netId: 7, transform: { pos: new Vector3(103, 0, 100), rot: new Vector3(), scale: 1 } } as unknown as Entity,
+    };
+    store.world = { scene, playerEntity: hero, getByNetId: (id: number) => others[id], mapIndex: ENUM_WORLD.WD_0LORENCIA, getTerrainHeight: () => 0 };
+    const copies: { tick: number; placed: { tick: number; part: number; at: Vector3; angle: number; alpha: number }[] }[] = [];
+    const spawns: Spawn[] = [];
+    const draws: Draw[] = [];
+    const real = effects.spawn.bind(effects);
+    effects.reset();
+    const spy = vi.spyOn(effects, 'spawn').mockImplementation(((name: never, s: Scene, at: Vector3, opts: never) => {
+      spawns.push({ tick, name, at: at.clone(), opts: (opts ?? {}) as Record<string, unknown> });
+      if (name === 'afterimage') {
+        const copy = { tick, placed: [] as (typeof copies)[number]['placed'] };
+        copies.push(copy);
+        return { alive: true, parts: 5, stop() {}, hide() {}, place: (part: number, p: Vector3, angle: number, alpha: number) => copy.placed.push({ tick, part, at: p.clone(), angle, alpha }) };
+      }
+      if (name === 'ticked') {
+        const script = opts as unknown as { tick: (fx: TickedFx, n: number) => boolean };
+        const wrap = (fx: TickedFx): TickedFx => ({ ...fx, sprite: (...a: Parameters<TickedFx['sprite']>) => (draws.push({ tick, kind: 'sprite', args: a }), fx.sprite(...a)) });
+        return real(name, s, at, { tick: (fx: TickedFx, n: number) => script.tick(wrap(fx), n) } as never);
+      }
+      return real(name, s, at, opts);
+    }) as never);
+    beginDarkSide(263, 0);
+    observeDarkSideTargets(263, [6, 7]);
+    observeDarkSideEcho(263, hero);
+    playTargetedSkillVisual(scene, 263, hero, null);
+    for (tick = 1; tick <= ticks; tick++) {
+      rageLayer.update?.(ENUM_WORLD.WD_0LORENCIA, 1 / 25);
+      nextDarkSideHit();
+      effects.update(ENUM_WORLD.WD_0LORENCIA, 1 / 25);
+    }
+    spy.mockRestore();
+    rageLayer.reset?.();
+    store.world = null;
+    return { copies, spawns, draws };
+  }
+
+  it('the hero\'s body runs out to each target in turn, five parts a tick, and his afterimages come with the first follow-up (MonkSystem.cpp:711-834)', () => {
+    const { copies } = heroDarkSide();
+    // Dummies 0 and 1 as READY passes key 2 on tick 8, 2 past key 4 on tick 14; 3 and 4 find no target left and no echo target.
+    expect(copies.map(c => c.tick)).toEqual([0, 8, 8, 14]);
+    const [runner, first] = copies;
+    // Ticks 1-14 five parts each; on tick 15 the second follow-up leaves no target to run at after part 0.
+    const perTick = new Map<number, number>();
+    for (const p of runner.placed) perTick.set(p.tick, (perTick.get(p.tick) ?? 0) + 1);
+    expect([...perTick]).toEqual([...range(1, 14).map(t => [t, 5]), [15, 1]]);
+    // f x f x 0.05 cm toward target 6, a part a call, at full alpha.
+    expect(runner.placed.slice(0, 5).map(p => +((p.at.z - 100) * 100).toFixed(2))).toEqual([0.05, 0.2, 0.45, 0.8, 1.25]);
+    expect(runner.placed.every(p => p.alpha === 1)).toBe(true);
+    // The first afterimage runs at target 7 from 150, 150 cm off it, its parts in RenderCharacter's order.
+    expect(first.placed.slice(0, 5).map(p => p.part)).toEqual([0, 1, 2, 3, 4]);
+    expect(first.placed[0].alpha).toBeCloseTo(0.22, 5);
+    expect(Vector3.Distance(first.placed[0].at, new Vector3(104.5, 0, 101.5))).toBeLessThan(0.01);
+  });
+
+  it('the bursts on the target the body runs at from the afterimages\' calls 20 and 21, the waves from their calls 31 and 32 and the body\'s past 30 cm (MonkSystem.cpp:736-747, :811-826)', () => {
+    const { spawns, draws } = heroDarkSide();
+    const waves = spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.shockwave);
+    const light = (s: Spawn) => (s.opts.blendLight as (t: number) => number)(0);
+    // The body's sub3, drawn twice, on ticks 5 and 13 (its 25th call each time); the first two afterimages' sub4 on tick 14, the third's on 20.
+    expect(waves.map(s => [s.tick, light(s)])).toEqual([
+      [5, 1],
+      [5, 1],
+      [13, 1],
+      [13, 1],
+      [14, 0.2],
+      [14, 0.2],
+      [14, 0.2],
+      [14, 0.2],
+      [20, 0.2],
+      [20, 0.2],
+    ]);
+    const n = new Map<number, number>();
+    for (const d of draws) if (d.args[0] === TEX.damage2) n.set(d.tick, (n.get(d.tick) ?? 0) + 1);
+    // One burst on tick 11, three on tick 12, each drawn 15 ticks; all at target 7.
+    expect([...n]).toEqual([[11, 1], ...range(12, 25).map(t => [t, 4]), [26, 3]]);
+    expect(draws.filter(d => d.args[0] === TEX.damage2).every(d => d.args[2] === 103 && d.args[4] === 100)).toBe(true);
+  });
+
+  it('the body\'s wave backs off from 150 cm on, sub3 then sub5: 180 + Scale x 80 cm up on its first move, then 160 + Scale x 10 (ZzzEffect.cpp:5895-5913, MoveHandlers.cpp:9397-9425)', () => {
+    const { spawns } = heroDarkSide();
+    const wave = spawns.find(s => s.name === 'model' && s.opts.model === MODEL.shockwave) as Spawn;
+    const o = wave.opts as { follow: (out: Vector3) => Vector3; scaleAt: (t: number) => number; angle: number[]; texture: string };
+    expect(o.texture).toBe(TEX.damage2);
+    // Made 31.25 cm out toward target 6 (ahead, +z), turned its way - 180: (90, 0, 0).
+    expect(o.angle).toEqual([90, 0, 0]);
+    expect(wave.at.z).toBeCloseTo(100 + 0.3125 + 1.5, 5);
+    expect(o.scaleAt(0)).toBeCloseTo(0.8, 6);
+    expect(o.scaleAt(1 / 25)).toBeCloseTo(0.92, 6);
+    // Light x0.7 turns it sub5 on its first move, then x0.5; it lives 5 / (2 x 0.3) ticks.
+    const light = wave.opts.blendLight as (t: number) => number;
+    expect([0, 1, 2].map(m => light(m / 25))).toEqual([1, 0.7, 0.35]);
+    expect(Math.round((wave.opts.seconds as number) * 25)).toBe(9);
   });
 
   it('the wind pillar at the caster, and the two it raises on ticks 11 and 21 (MonkSystem.cpp:1297-1298, MoveHandlers.cpp:9579-9596)', () => {
@@ -931,6 +1039,36 @@ describe('Dark Side (263)', () => {
     expect(darkSideHitTicks(0.3)).toBe(8);
     expect(darkSideHitTicks(0.5)).toBe(5);
     expect(followUps([0])).toEqual([8, 15, 22]);
+  });
+
+  it('keeps the targets named and the follow-ups gone for DarksideRendering; past the fifth, the next one due drops them (MonkSystem.cpp:591-595, :615-639)', () => {
+    const model = { CurrentAction: READY as number, AnimationSpeed: 0.3 };
+    const hero = { localPlayer: true, modelObject: model } as unknown as Entity;
+    store.world = { playerEntity: hero };
+    beginDarkSide(263, 5);
+    observeDarkSideTargets(263, [6, 7, 8, 9, 10]);
+    expect(darkSideCast.targets).toEqual([6, 7, 8, 9, 10]);
+    const named = darkSideCast.serial;
+    observeDarkSideEcho(263, hero);
+    const seen: [number, number][] = [];
+    for (let t = 1; t <= 45; t++) {
+      rageLayer.update?.(ENUM_WORLD.WD_0LORENCIA, 1 / 25);
+      nextDarkSideHit();
+      if (seen.at(-1)?.[1] !== darkSideCast.sent) seen.push([t, darkSideCast.sent]);
+    }
+    expect(seen).toEqual([
+      [1, 0],
+      [8, 1],
+      [15, 2],
+      [22, 3],
+      [29, 4],
+      [36, 5],
+      [43, 0],
+    ]);
+    expect(darkSideCast.targets).toEqual([]);
+    expect(darkSideCast.serial).toBe(named + 1);
+    rageLayer.reset?.();
+    store.world = null;
   });
 
   it('Dark Side Strengthener (559) is Dark Side too: the 0x4B/0x4A pair and its follow-ups (SkillCast.cpp:881-896)', () => {
