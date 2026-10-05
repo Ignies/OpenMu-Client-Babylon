@@ -30,15 +30,18 @@ import { EFFECT_RENDERING_GROUP, keepDepthForEffects } from '../fx/core';
  * flare01.jpg, a soft white glow (:5207); `flare` BITMAP_FLARE, Flare.jpg, a warm star (:5309);
  * `spark1` BITMAP_SPARK + 1, Spark03.jpg, a white dot in a blue halo (:5216); `shiny5`
  * BITMAP_SHINY + 5, shiny05.jpg, an eight-point sparkle (:5325 loads it over :5279's shiny04.jpg,
- * and a second name replaces the first, GlobalBitmap.cpp:549-568). `px` is the sheet's width: a
- * sprite is `Width * Scale` across (zzzeffectsprite.cpp:76). `sprites` caps a busy sheet higher:
- * Aida's 183 plants carry twelve sparks each.
+ * and a second name replaces the first, GlobalBitmap.cpp:549-568); `impact` BITMAP_IMPACT,
+ * Impack03.jpg, a blue-white burst (:5267; Tarkan reloads the same file from Object9,
+ * MapManager.cpp:146). `px` is the sheet's width: a sprite is `Width * Scale` across
+ * (zzzeffectsprite.cpp:76). `sprites` caps a busy sheet higher: Aida's 183 plants carry twelve
+ * sparks each.
  */
 const FLARE_TEXTURES = {
   light: { file: 'Effect/flare01.OZJ', px: 64 },
   flare: { file: 'Effect/Flare.OZJ', px: 64 },
   spark1: { file: 'Effect/Spark03.OZJ', px: 32, sprites: 2560 },
   shiny5: { file: 'Effect/shiny05.OZJ', px: 64 },
+  impact: { file: 'Effect/Impack03.OZJ', px: 64 },
 } as const;
 
 export type FlareTexture = keyof typeof FLARE_TEXTURES;
@@ -161,6 +164,8 @@ export type EffectLight = {
 export type MovableFlare = {
   moveTo(x: number, y: number, z: number): void;
   setLuminosity(lumi: number): void;
+  /** Resizes it: a sprite the original sizes by its `Luminosity`. */
+  setScale(scale: number): void;
   dispose(): void;
 };
 
@@ -223,6 +228,7 @@ export async function createMovableFlare(
   return {
     moveTo: (x, y, z) => sprite.position.set(x, y, z),
     setLuminosity: lumi => paint.setLuminosity(lumi),
+    setScale: next => void (sprite.width = sprite.height = cardSize(texture, next)),
     dispose: () => {
       paint.release();
       sprite.dispose();

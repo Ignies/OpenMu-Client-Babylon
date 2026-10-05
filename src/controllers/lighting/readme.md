@@ -29,9 +29,10 @@ policy. It knows how to light something, never which skill or item asks for it.
   the bitmap the original names: `'light'` (BITMAP_LIGHT, flare01.jpg, a soft white glow,
   ZzzOpenData.cpp:5207) unless a spec names another (`'flare'` BITMAP_FLARE, Flare.jpg, a warm star,
   :5309; `'spark1'` BITMAP_SPARK + 1, Spark03.jpg, :5216; `'shiny5'` BITMAP_SHINY + 5, shiny05.jpg,
-  :5325). A card is its sheet's own width times its
+  :5325; `'impact'` BITMAP_IMPACT, Impack03.jpg, :5267). A card is its sheet's own width times its
   scale (zzzeffectsprite.cpp:76), times the object's scale unless the spec is `unscaled`; `pulse`
-  waves its brightness and `grow` its size. One sprite manager per sheet and scene.
+  waves its brightness and `grow` its size, and a `MovableFlare` takes `setLuminosity` and
+  `setScale` from its host. One sprite manager per sheet and scene.
 - `items.ts`: `lightItem`, `itemSelfLight`. `sky.ts`: `strikeThunder`.
 - `lightingQuality.ts`: the tiers (`lightingTier()`, `tierIndex()`: Classic, Enhanced, Ultra),
   `pointLightBudget`, MSAA and CSM state.

@@ -104,6 +104,14 @@ describe('flare cards', () => {
     expect(lastSprite().width).toBeCloseTo(0.768);
   });
 
+  // Tarkan's glow is `CreateSprite(BITMAP_IMPACT, Position, Luminosity * 1.5f, ...)` (ZzzObject.cpp:2967).
+  it('draw BITMAP_IMPACT from Impack03.jpg and resize a movable card', async () => {
+    const flare = await createMovableFlare({} as Scene, 1.05, [1 / 1.7, 1, 1], 'impact');
+    expect(drawnFrom[drawnFrom.length - 1]).toBe('Effect/Impack03.OZJ');
+    flare?.setScale(0.6);
+    expect([lastSprite().width, lastSprite().height]).toEqual([0.384, 0.384].map(v => expect.closeTo(v)));
+  });
+
   // `CreateSprite(BITMAP_SPARK + 1, Position, 5.5f, ...)` has no `* o->Scale` (GMAida.cpp:110).
   it('size an unscaled card without the object scale', async () => {
     const scene = {} as Scene;
@@ -127,7 +135,7 @@ describe('flare cards', () => {
 
   it.skipIf(!existsSync('Data/Effect'))('cut each sheet at the width of its file', async () => {
     const scene = {} as Scene;
-    for (const texture of ['light', 'flare', 'spark1', 'shiny5'] as const) {
+    for (const texture of ['light', 'flare', 'spark1', 'shiny5', 'impact'] as const) {
       await createEffectLight(scene, { scale: 1, color: [1, 1, 1], texture }, at, 1);
     }
     for (const [sheet, width] of cells) {
