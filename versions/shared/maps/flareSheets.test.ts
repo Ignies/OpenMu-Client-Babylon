@@ -79,6 +79,13 @@ describe('the BITMAP_SPARK + 1 cards (Spark03.jpg)', () => {
   });
 });
 
+describe('the BITMAP_LIGHT particle cards (flare01.jpg)', () => {
+  // Subtype 0 sizes `(rand() % 50 + 50) / 100 * 1.f` and draws `Width * o->Scale`, no object scale (ZzzEffectParticle.cpp:3161-3167, :8994-8996).
+  it('Icarus 10: the orb card on bone 3 keeps its size on a scaled pillar (ZzzObject.cpp:3126-3131)', () => {
+    expect(cardsOf(ENUM_WORLD.WD_10ICARUS, 10).map(e => e.sprite?.unscaled)).toEqual([true]);
+  });
+});
+
 describe('the BITMAP_KANTURU_2ND_EFFECT1 cards (k_effect_01.jpg)', () => {
   // `CreateSprite(BITMAP_KANTURU_2ND_EFFECT1, Position, fLumi / 3.2, Light, o)` twice over the BITMAP_LIGHT.
   it('Kanturu 2 4: two on bone 1 that breathe and grow with fLumi (GM_Kanturu_2nd.cpp:335-346)', () => {

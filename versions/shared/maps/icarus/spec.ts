@@ -100,8 +100,9 @@ export const ICARUS_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
       // `Light = (1,1,1)`, ZzzObject.cpp:3128. BITMAP_LIGHT's own base size is
       // not recoverable from the call (it passes Scale 1.f and the particle
       // supplies the rest), so the flare is sized to the orb it sits in
-      // rather than guessed: 64 px × 2.5 ÷ 100 ≈ 1.6 tiles across.
-      sprite: { scale: 2.5, color: [1, 1, 1] },
+      // rather than guessed: 64 px × 2.5 ÷ 100 ≈ 1.6 tiles across. The particle
+      // draws `Width * o->Scale` with no object scale (ZzzEffectParticle.cpp:8994-8996).
+      sprite: { scale: 2.5, color: [1, 1, 1], unscaled: true },
     },
   ],
 };

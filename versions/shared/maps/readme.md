@@ -98,7 +98,8 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   Loren Market 30 on its three heads and 35 on bone 2), `BITMAP_SPARK + 1` (Aida 30 and 71 on their
   six bulbs, Kanturu 70 whose size breathes, Kanturu 2 8, Karutan 72's plant bulbs breathing on
   `|sin|`), `BITMAP_KANTURU_2ND_EFFECT1` (Kanturu 2 4's pair over its lamp); Karutan 66 and Crywolf 41
-  have none (the insect hangs its `BITMAP_SHINY + 5` points itself, the beacon its turning pair).
+  have none (the insect hangs its `BITMAP_SHINY + 5` points itself, the beacon its turning pair);
+  Icarus 10's `BITMAP_LIGHT` particle is sized without the pillar's scale.
 - `flareWaves.test.ts`: the table cards' waves are the original's `sinf(WorldTime * k)`, k in radians a
   millisecond: the fire vents (Karutan 113, Loren Market 57, Vulcanus 6) burn steady red; Kalima's
   flower glows (12, 32) grow and shrink on bone 5; the Kanturu relic lamps (Kanturu 2 4, Kanturu 3 5)
