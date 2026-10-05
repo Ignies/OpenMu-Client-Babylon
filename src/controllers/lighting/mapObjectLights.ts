@@ -16,7 +16,7 @@ import type { ENUM_WORLD } from '../../core/types';
 import type { Emission } from '../fx/effectParticles';
 import { maps, type MapLayer } from '../maps';
 import type { LightingLayer } from './layer';
-import type { FlareTexture } from './effectLights';
+import type { FlareSpec } from './effectLights';
 import {
   LightSource,
   PRIORITY_TORCH,
@@ -34,15 +34,15 @@ import {
  * - which the host draws, tinted by this light's colour.
  */
 export type LightEmitter = {
-  readonly sprite?: {
-    readonly scale: number;
-    readonly color: readonly [number, number, number];
-    readonly pulse?: { speed: number; amount: number; base: number };
-    /** `'flare'` where the original draws `BITMAP_FLARE`; `BITMAP_LIGHT` otherwise. */
-    readonly texture?: FlareTexture;
-  };
+  /** The flare card; its `texture` is the sheet the original names (`BITMAP_LIGHT` when left out). */
+  readonly sprite?: FlareSpec;
   /** MU units, in the object's local frame; rotated by the host. */
   readonly offset?: readonly [number, number, number];
+  /**
+   * The offset is a bone's, where it sits at scale 1: it grows with the object as the original's
+   * bone transforms do (`BodyScale`, ZzzBMD.cpp:168-180). A plain offset (`o->Position + p`) does not.
+   */
+  readonly bone?: boolean;
   /** Point-light radius in tiles; defaults to the terrain range. */
   readonly pointRange?: number;
   /**

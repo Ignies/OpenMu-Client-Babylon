@@ -81,16 +81,19 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
 - data files stay pure: import controller types only (`import type ... from '@/controllers/x'`),
   and plain values from `shared/` or `@versions/shared/objects/enum`, never a controller at run
   time - `layers.ts` loads every entry when the `maps` controller loads.
-- a flare card the original draws as `BITMAP_FLARE` (Flare.jpg, already a warm star) gets
-  `texture: 'flare'` and the original's own tint, not a warm one; `BITMAP_LIGHT` (flare01.jpg) is
-  the default. `flareSheets.test.ts` lists the table rows that take it.
+- a flare card takes the sheet the original names (`texture`: `'flare'` for `BITMAP_FLARE`,
+  Flare.jpg, already a warm star; `'spark1'` for `BITMAP_SPARK + 1`) and the original's own tint,
+  not a warm one; `BITMAP_LIGHT` (flare01.jpg) is the default. A size the original writes without
+  `* o->Scale` is `unscaled`; an offset that stands for a bone is `bone: true`, so it grows with the
+  object. `flareSheets.test.ts` lists the table rows that take another sheet.
 
 ## Tests
 - `mapRows.golden.test.ts`: every per-map row the sound, lighting, weather and terrain
   controllers answer for every world, as hashes; pinned before the rows moved here.
 - `tileFiles.test.ts`: every tile slot of every map names a file that exists in its world folder.
-- `flareSheets.test.ts`: the table flares the original draws as `BITMAP_FLARE` (Aida 75, Crywolf 41,
-  Loren Market 30 and 35) take that sheet and the original's tint.
+- `flareSheets.test.ts`: the table flares the original draws from another sheet than `BITMAP_LIGHT`
+  take it with the original's tint and size: `BITMAP_FLARE` (Aida 75, Crywolf 41, Loren Market 30
+  and 35), `BITMAP_SPARK + 1` (Aida 30 and 71, on their six bulbs).
 - `bloodcastle/lampObject.test.ts`: the throne-room lamp's flare is `BITMAP_FLARE` too.
 - `loginscene/wallTorchObject.test.ts`, `empireguardian4/spec.test.ts`: the wall torch's flare, on
   the `BITMAP_FLARE` sheet lit or not, and the fortress lights on Classic and Enhanced.

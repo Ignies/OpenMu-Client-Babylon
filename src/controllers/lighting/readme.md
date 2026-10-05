@@ -20,13 +20,17 @@ policy. It knows how to light something, never which skill or item asks for it.
   `registerSkills`), `ARROW_LIGHTS`, `EFFECT_LUMINOSITY`, `CAST_HEIGHT`.
 - `mapLighting.ts`: `MapLighting`, the type of a map's `lighting` field (`look`, `areas`,
   `objectLights`, `thunder`). The row types are exported from `index.ts` for the map folders.
-- `mapObjectLights.ts`: `LightEmitter` (map specs build their light tables from it),
+- `mapObjectLights.ts`: `LightEmitter` (map specs build their light tables from it; `bone` marks an
+  offset that stands for a bone and grows with the object, ZzzBMD.cpp:168-180),
   `MapObjectLights`, `lightMapObject`, `lightEmittersFor`. `mapObjectLightAdapter.ts`: `MapObjectLights`, the
   `ModelObject` host. `lightCarrier.ts`: `LightCarrier`, a light without a drawn body.
 - `effectLights.ts`: `createEffectLight`, `createMovableFlare` (flare cards; they light nothing),
-  `FlareTexture`: the sheet a card is drawn from, `'light'` (BITMAP_LIGHT, flare01.jpg, a soft white
-  glow, ZzzOpenData.cpp:5207) unless a spec names `'flare'` (BITMAP_FLARE, Flare.jpg, a warm star,
-  :5309). One sprite manager per sheet and scene.
+  `FlareSpec` (a card as a light table names it), `FlareTexture`: the sheet a card is drawn from, by
+  the bitmap the original names: `'light'` (BITMAP_LIGHT, flare01.jpg, a soft white glow,
+  ZzzOpenData.cpp:5207) unless a spec names another (`'flare'` BITMAP_FLARE, Flare.jpg, a warm star,
+  :5309; `'spark1'` BITMAP_SPARK + 1, Spark03.jpg, :5216). A card is its sheet's own width times its
+  scale (zzzeffectsprite.cpp:76), times the object's scale unless the spec is `unscaled`. One sprite
+  manager per sheet and scene.
 - `items.ts`: `lightItem`, `itemSelfLight`. `sky.ts`: `strikeThunder`.
 - `lightingQuality.ts`: the tiers (`lightingTier()`, `tierIndex()`: Classic, Enhanced, Ultra),
   `pointLightBudget`, MSAA and CSM state.
@@ -97,7 +101,10 @@ policy. It knows how to light something, never which skill or item asks for it.
 - `lightingQuality.test.ts`: `sceneTargetSamples` (MSAA per pass, Classic at one sample).
 - `recipes.test.ts`: `effectLight` hue, reach and gain ceiling, minimum range.
 - `characters.test.ts`: a steady carried glow (Poison Shadow), one that breathes, and the Scorpion's per-frame flicker.
-- `effectLights.test.ts`: a card is drawn from the sheet its spec names, one manager per sheet.
+- `effectLights.test.ts`: a card is drawn from the sheet its spec names, one manager per sheet, at
+  the sheet's own width (checked against the file in `Data/Effect`); an `unscaled` card keeps its size
+  on a scaled object.
+- `mapObjectLightAdapter.test.ts`: a `bone` offset grows with the object, a plain one does not.
 - `versions/shared/maps/mapRows.golden.test.ts`: every world's look, room looks, thunder and
   map-object lights, pinned across the move into the map folders.
 - `mapLighting.test.ts`: a look over the open or enclosed default, the sky's default for a map

@@ -26,29 +26,37 @@ import { EFFECT_RENDERING_GROUP, keepDepthForEffects } from '../fx/core';
  */
 
 /**
- * The sheets: `BITMAP_LIGHT` is flare01.jpg, a soft white glow (ZzzOpenData.cpp:5207);
- * `BITMAP_FLARE` is Flare.jpg, a warm star (:5309). Both 64 x 64.
+ * The sheets, by the bitmap the original names (ZzzOpenData.cpp): `light` is BITMAP_LIGHT,
+ * flare01.jpg, a soft white glow (:5207); `flare` BITMAP_FLARE, Flare.jpg, a warm star (:5309);
+ * `spark1` BITMAP_SPARK + 1, Spark03.jpg, a white dot in a blue halo (:5216). `px` is the
+ * sheet's width: a sprite is `Width * Scale` across (zzzeffectsprite.cpp:76). `sprites` caps a
+ * busy sheet higher: Aida's 183 plants carry twelve sparks each.
  */
 const FLARE_TEXTURES = {
-  light: 'Effect/flare01.OZJ',
-  flare: 'Effect/Flare.OZJ',
+  light: { file: 'Effect/flare01.OZJ', px: 64 },
+  flare: { file: 'Effect/Flare.OZJ', px: 64 },
+  spark1: { file: 'Effect/Spark03.OZJ', px: 32, sprites: 2560 },
 } as const;
 
 export type FlareTexture = keyof typeof FLARE_TEXTURES;
 
 const OZJ_HEADER_SIZE = 24;
 
-const FLARE_SIZE_PX = 64;
-
 const MAX_SPRITES_PER_MANAGER = 512;
 
-type FlareSpec = {
+/** A card as a map's light table names it (`LightEmitter.sprite`). */
+export type FlareSpec = {
   readonly scale: number;
   readonly color: readonly [number, number, number];
   readonly pulse?: { speed: number; amount: number; base: number };
   /** The sheet the original names; `BITMAP_LIGHT` when left out. */
   readonly texture?: FlareTexture;
+  /** The original sizes it without `* o->Scale` (`CreateSprite(..., 5.5f, ...)`): the object's scale does not apply. */
+  readonly unscaled?: boolean;
 };
+
+/** A card's width in tiles: the sheet's pixels times its scale. */
+const cardSize = (texture: FlareTexture, scale: number) => (FLARE_TEXTURES[texture].px * scale) / TILE_CM;
 
 /** A sheet's manager for the scene it was built in, once it has loaded. */
 type Sheet = {
@@ -94,7 +102,8 @@ function getManager(scene: Scene, texture: FlareTexture): Promise<SpriteManager 
 
   const sheet: Sheet = { scene, manager: null, pending: Promise.resolve(null) };
   sheet.pending = (async () => {
-    const ozj = await downloadDataFile(FLARE_TEXTURES[texture]);
+    const source: { file: string; px: number; sprites?: number } = FLARE_TEXTURES[texture];
+    const ozj = await downloadDataFile(source.file);
 
     const blob = new Blob([ozj.slice(OZJ_HEADER_SIZE)], { type: 'image/jpeg' });
     const url = URL.createObjectURL(blob);
@@ -102,8 +111,8 @@ function getManager(scene: Scene, texture: FlareTexture): Promise<SpriteManager 
     const created = new SpriteManager(
       'effectLights',
       url,
-      MAX_SPRITES_PER_MANAGER,
-      { width: FLARE_SIZE_PX, height: FLARE_SIZE_PX },
+      source.sprites ?? MAX_SPRITES_PER_MANAGER,
+      { width: source.px, height: source.px },
       scene
     );
 
@@ -193,7 +202,7 @@ export async function createMovableFlare(
 
   sprite.isPickable = false;
 
-  const size = (FLARE_SIZE_PX * scale) / TILE_CM;
+  const size = cardSize(texture, scale);
 
   sprite.width = size;
   sprite.height = size;
@@ -217,7 +226,8 @@ export async function createEffectLight(
   position: { x: number; y: number; z: number },
   objectScale: number
 ): Promise<EffectLight | null> {
-  const spriteManager = await liveManager(scene, spec.texture ?? 'light');
+  const texture = spec.texture ?? 'light';
+  const spriteManager = await liveManager(scene, texture);
 
   if (!spriteManager) return null;
 
@@ -226,7 +236,7 @@ export async function createEffectLight(
   sprite.position.set(position.x, position.y, position.z);
   sprite.isPickable = false;
 
-  const size = (FLARE_SIZE_PX * spec.scale * objectScale) / TILE_CM;
+  const size = cardSize(texture, spec.scale * (spec.unscaled ? 1 : objectScale));
   sprite.width = size;
   sprite.height = size;
 
