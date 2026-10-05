@@ -1,22 +1,24 @@
 /**
- * Rage Fighter packets (MonkSystem.cpp, ZzzInterface.cpp:2835-2845,
- * WSclient.cpp:14228-14233): Dark Side (263) is the one skill on its own
+ * Rage Fighter packets (MonkSystem.cpp, SkillCast.cpp:881-896,
+ * WSclient.cpp:14952-14957): Dark Side (263) is the one skill on its own
  * wire - the cast sends `RageAttackRangeRequest` (0x4B) *and*
  * `RageAttackRequest` (0x4A) at the picked target; the server answers 0x4B
  * with up to five targets it chose (`ReceiveDarkside` →
- * `SetDarksideTargetIndex`), and the client then lands one 0x4A per extra
- * target as the clip's follow-up blows come round (`SendDarksideAtt`, one
- * per `m_nDarksideCnt`). Every other Rage Fighter skill is a plain
- * `TargetedSkill` / `AreaSkill` with its own clip (`SetRageSkillAni`,
- * `recipes.ts`).
+ * `SetDarksideTargetIndex`) and echoes the 0x4A (`ReceiveStraightAttack`,
+ * which sets the caster's `AttackTime = 1`, :13422-13429), and the client then
+ * lands one 0x4A per extra target as the clip's follow-up blows come round
+ * (`SendDarksideAtt`, one per `m_nDarksideCnt`), counted from that echo.
+ * Every other Rage Fighter skill is a plain `TargetedSkill` / `AreaSkill`
+ * with its own clip (`SetRageSkillAni`, `recipes.ts`).
  *
  * The streak the server reports back (`ObjectHit.IsRageFighterStreakHit` /
  * `…FinalHit`, the original's `bRepeatedly` / `bEndRepeatedly`) is kept here
  * for the damage-number stack (`CMonkSystem::SetRepeatedly`).
  *
- * Driven by `skillCastSystem` (`beginDarkSide`), `app/logic.ts`
- * (`observeDarkSideTargets`, `observeRageHit`); the pending follow-ups are
- * drained by the facade's `drainDarkSideHits` from the cast system.
+ * Driven by `skillCastSystem` (`beginDarkSide`) and the combat module's
+ * packet handlers (`observeDarkSideTargets`, `observeDarkSideEcho`,
+ * `observeRageHit`); the cast system drains the due follow-ups through the
+ * facade's `nextDarkSideHit`.
  */
 import type { ENUM_WORLD } from '@/core/types';
 import type { CombatLayer } from '@/controllers/combat/layer';
@@ -40,8 +42,9 @@ const READY_SPEED = 0.3;
 
 /**
  * Follow-up spacing: the next blow goes once `AttackTime >= (int)(2.5 / PlaySpeed)` (SkillCast.cpp:1117-1129).
- * AttackTime runs 1, 2, ... a tick from the cast, so the first comes that many ticks after it; each blow sets it
- * back to 1 and AttackStage adds 1 the same tick (ZzzCharacter.cpp:4132-4136), so the next ones are a tick sooner.
+ * AttackTime runs 1, 2, ... a tick from the server's echo of the cast, so the first comes that many ticks after it;
+ * each blow sets it back to 1 and AttackStage adds 1 the same tick (ZzzCharacter.cpp:4132-4136), so the next ones
+ * are a tick sooner.
  */
 export const darkSideHitTicks = (playSpeed: number): number => Math.trunc(2.5 / playSpeed);
 
@@ -60,7 +63,9 @@ const STREAK_TIMEOUT = 1.0;
 let darkSideSkill = 0;
 /** Extra targets the server named, still to be hit. */
 const pendingTargets: number[] = [];
-/** Seconds since the cast or the last follow-up blow. */
+/** The hero's AttackTime runs: the server echoed the cast. */
+let counting = false;
+/** Seconds since the echo or the last follow-up blow. */
 let sinceHit = 0;
 /** Follow-up blows sent this cast. */
 let hitsSent = 0;
@@ -79,12 +84,24 @@ export function rageStreak(): number {
   return streakHits;
 }
 
-/** Command: Dark Side was cast on `targetId`; the 0x4B/0x4A pair goes out now. */
+/** Command: Dark Side was cast on `targetId`; the 0x4B/0x4A pair goes out now. The follow-ups wait for its echo. */
 export function beginDarkSide(skill: number, _targetId: number): void {
   darkSideSkill = skill;
   pendingTargets.length = 0;
+  counting = false;
   sinceHit = 0;
   hitsSent = 0;
+}
+
+/**
+ * Command: the server echoed the hero's own Dark Side (0x4A): `ReceiveStraightAttack` sets `AttackTime = 1`
+ * (WSclient.cpp:13422-13429), so the follow-ups count from here. The original sends one 0x4A a cast; ours also
+ * sends one per follow-up, and their echoes do not restart the count.
+ */
+export function observeDarkSideEcho(skill: number): void {
+  if (!isDarkSide(skill) || darkSideSkill === 0 || counting) return;
+  counting = true;
+  sinceHit = 0;
 }
 
 /** Command: the 0x4B response arrived with the targets the server picked; any target plays Rage_Darkside_Att (MonkSystem.cpp:551-558). */
@@ -100,7 +117,7 @@ export function observeDarkSideTargets(skill: number, targetIds: readonly number
  * target id, or `-1` when none is due this frame. The caller sends 0x4A.
  */
 export function nextDarkSideHit(): number {
-  if (darkSideSkill === 0 || pendingTargets.length === 0) return -1;
+  if (darkSideSkill === 0 || !counting || pendingTargets.length === 0) return -1;
   const due = darkSideHitTicks(readySpeed()) - (hitsSent > 0 ? 1 : 0);
   if (sinceHit + 1e-9 < due * TICK) return -1;
   sinceHit = 0;
@@ -137,6 +154,7 @@ function update(_map: ENUM_WORLD, dt: number): void {
 function reset(): void {
   darkSideSkill = 0;
   pendingTargets.length = 0;
+  counting = false;
   sinceHit = 0;
   hitsSent = 0;
   streakHits = 0;

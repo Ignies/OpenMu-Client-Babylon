@@ -1,5 +1,5 @@
 import { defineSkill } from '@/controllers/skills/define';
-import { beginDarkSide, darkSidePendingSkill, isDarkSide, nextDarkSideHit, observeDarkSideTargets, observeRageHit, rageLayer, rageStreak } from './rage';
+import { beginDarkSide, darkSidePendingSkill, isDarkSide, nextDarkSideHit, observeDarkSideEcho, observeDarkSideTargets, observeRageHit, rageLayer, rageStreak } from './rage';
 import { MODEL, RGBS, SHADE_MOTES, TEX } from '@/controllers/fx/recipes';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
@@ -46,6 +46,7 @@ export default defineSkill({
         isDarkSide,
         begin: beginDarkSide,
         observeTargets: observeDarkSideTargets,
+        observeEcho: observeDarkSideEcho,
         nextHit: nextDarkSideHit,
         pendingSkill: darkSidePendingSkill,
         observeRageHit,

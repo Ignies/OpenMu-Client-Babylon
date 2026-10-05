@@ -347,6 +347,11 @@ class Combat implements Controller {
     skillHooks.darkSide?.observeTargets(skill, targetIds);
   }
 
+  /** The server echoed the hero's own Dark Side (0x4A): its follow-ups count from here. */
+  observeDarkSideEcho(skill: number): void {
+    skillHooks.darkSide?.observeEcho(skill);
+  }
+
   /** Next follow-up target whose 0x4A is due, or -1. */
   nextDarkSideHit(): number {
     return skillHooks.darkSide?.nextHit() ?? -1;

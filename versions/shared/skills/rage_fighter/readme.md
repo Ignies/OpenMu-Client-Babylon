@@ -5,7 +5,7 @@ folders: [../readme.md](../readme.md).
 
 ## Public API
 - Each folder's default export is a `defineSkill`, found by glob in `../index.ts`.
-- `dark_side/rage.ts`: `isDarkSide`, `darkSideActive`, `beginDarkSide`, `observeDarkSideTargets`,
+- `dark_side/rage.ts`: `isDarkSide`, `beginDarkSide`, `observeDarkSideTargets`, `observeDarkSideEcho`,
   `nextDarkSideHit`, `darkSidePendingSkill`, `observeRageHit`, `rageStreak`, `rageLayer`.
 
 ## How it works
@@ -30,9 +30,11 @@ leaves the clip (`eachClipTick`, `whenClipKey(..., 'drop')` in `../_shared.ts`).
 the packet; an effect it creates first moves on tick 1.
 
 Dark Side is the one skill on its own wire: the cast sends 0x4B and 0x4A, the server answers with
-up to five targets, and the client lands one 0x4A per extra target as the clip's blows come round
-(`rage.ts`): Rage_Darkside_Att when the targets arrive, the first blow `(int)(2.5 / PlaySpeed)` ticks
-after the cast (8 at base speed), the next ones a tick sooner. It also keeps the hit streak for the
+up to five targets and echoes the 0x4A, and the client lands one 0x4A per extra target as the clip's
+blows come round (`rage.ts`): Rage_Darkside_Att when the targets arrive, the first blow
+`(int)(2.5 / PlaySpeed)` ticks after the echo (8 at base speed; the echo sets `AttackTime = 1`,
+WSclient.cpp:13422-13429), the next ones a tick sooner. Only the cast's echo starts the count: ours
+also sends a 0x4A per follow-up, which the original does not. It also keeps the hit streak for the
 damage numbers.
 
 `_shared.ts` holds `OURFORCES_GLOW`: the red glow on 17 bones in three breathing groups, used by
