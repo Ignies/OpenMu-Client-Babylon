@@ -247,6 +247,32 @@ describe('Charge (269): AttackStage\'s AT_SKILL_OCCUPY case (ZzzCharacter.cpp:29
   });
 });
 
+describe('Ignore Defense, Increase Health, Increase Block (266-268): RageCreateEffect\'s wind pillar (MonkSystem.cpp:1150-1209)', () => {
+  const PILLARS: [readonly number[], readonly number[]][] = [
+    [[266], [0.5, 0.55, 1]],
+    [[267, 573], [0.85, 0.2, 1]],
+    [[268, 569, 572], [1, 0.2, 0]],
+  ];
+
+  it('a slow pillar of 50 ticks at the caster, and the fast two it raises on ticks 11 and 21 in its Light (MoveHandlers.cpp:9529-9554)', () => {
+    for (const [skills, colour] of PILLARS) {
+      for (const skill of skills) {
+        const pillars = run(skill, PlayerAction.PLAYER_SKILL_ATT_UP_OURFORCES).spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.windForce);
+        expect(pillars.map(s => [s.tick, s.opts.colour, Math.round((s.opts.seconds as number) * 25)])).toEqual([
+          [0, colour, 50],
+          [11, colour, 70],
+          [21, colour, 70],
+        ]);
+        // Light x 6 keeping 0.9 a tick; the turn at 0.3 degrees a ms of WorldTime, the sub 3s at 0.9.
+        const { blendLight, spin } = pillars[0].opts as { blendLight: (t: number) => number; spin: number };
+        expect(blendLight(2 / 25)).toBeCloseTo(6 * 0.9 ** 2);
+        expect(spin).toBeCloseTo((300 * Math.PI) / 180);
+        expect(pillars[1].opts.spin).toBeCloseTo((900 * Math.PI) / 180);
+      }
+    }
+  });
+});
+
 describe('Dark Side (263)', () => {
   const READY = PlayerAction.PLAYER_SKILL_DARKSIDE_READY;
 
