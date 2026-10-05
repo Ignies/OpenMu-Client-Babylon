@@ -42,7 +42,10 @@ calls it WEREWOLF2 and the client draws it with MODEL_WEREWOLF2 (GMNewTown.cpp:9
 - The monsters controller (`src/controllers/monsters`) owns the types (`MonsterDef`, `MonsterRow`,
   the `Npc*` field types), `defineMonster` and the registry. Every field is pure data.
 - `stats` is the original client's table row; the types the server knows without a row carry only
-  a name and `maxHealth`.
+  a name and `maxHealth`. Rows 434 (Gigantis) and 436 (Balram (Trainee)) came out of the old table's
+  converter one column off, the level inside the quoted name and every stat a column up; they are
+  read back into their columns (437's row, the same set, lines up with them). Their folder names
+  still carry the level (`gigantis_98`, `balram_trainee_134`).
 - `maxHealth` is written by `tools/buildMonsterHealth.ts` from the server's monster definitions
   (through `tools/monsterFiles.ts`, which only touches that line in an existing file). The server
   never sends monster health; `stats.HP` is an older version's and is not used for the bar.
@@ -105,6 +108,7 @@ tables list. A plain NPC model at a fixed scale needs no class: `npcModel` is en
 ## Tests
 - `monsters.golden.test.ts`: the original table and the server health, unchanged (hashes); update
   them on purpose.
+- `names.test.ts`: no name holds a level or a stray quote, and rows 434 and 436 sit in their columns.
 - `models.test.ts`: every registration names a class its file defines; the set of types with a
   class of their own.
 - `src/controllers/actors/resolveModel.golden.test.ts`: what every type 0..600 is drawn with, and
