@@ -10,6 +10,7 @@ import { MapTileObject } from '@/controllers/terrain/mapTileObject';
 import { Ecs } from '@/ecs/current';
 import type { Entity, World } from '@/ecs/world';
 import { reportLoadFailure } from '@/controllers/assets';
+import { isOn } from '@/controllers/fidelity';
 
 type BoneNode = BonedEmission['node'];
 
@@ -63,8 +64,8 @@ const POSE_WAIT_LIMIT = 120;
  * What was meant is unambiguous: local (0,0,0) through bone 1, i.e. the bone's
  * own world position, with a warm light sprite on it. That is what this does.
  *
- * The fire particles and the pose-wait are ours; the floor light is in
- * spec.ts. Auto-attack and auto-targeting are disabled in this world (the same
+ * The fire particles (`lampFlares`, none on Classic) and the pose-wait are
+ * ours; the floor light is in spec.ts. Auto-attack and auto-targeting are disabled in this world (the same
  * rule Chaos Castle runs under) - that is combat work and is not touched
  * here. Music and ambience are handled centrally, and Stadium deliberately has
  * neither: the arena is silent in the original.
@@ -107,14 +108,15 @@ export class StadiumBrazierObject extends MapTileObject {
       }
     }
 
-    if (!this.#bone) return;
+    if (!this.#bone || !isOn('lampFlares')) return;
 
     const scale = this.node.scaling.x;
 
-    // Ours. 32 braziers ring the arena, so the recipe is the restrained one:
-    // two flame sprites and a wisp of smoke every fourth tick, which fills the
-    // bowl at this scale without spending the shared 2048-sprite pool on a map
-    // whose whole point is what the two players in the middle are doing.
+    // Ours (`lampFlares`): the original draws the card alone. 32 braziers ring
+    // the arena, so the recipe is the restrained one: two flame sprites and a
+    // wisp of smoke every fourth tick, which fills the bowl at this scale
+    // without spending the shared 2048-sprite pool on a map whose whole point
+    // is what the two players in the middle are doing.
     this.#fire = new BonedParticleEmitter(world.scene, [
       {
         node: this.#bone,

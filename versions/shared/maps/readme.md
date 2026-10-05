@@ -120,11 +120,13 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   `bloodcastle/candelabraObject.test.ts`: the candelabra's seven flares are 0.5 on any object scale.
 - `lampFlares.test.ts`, `lorencia/candleObject.test.ts`, `devias/candleObject.test.ts`: what the original
   never draws is the `lampFlares` improvement, gone on Classic: the flares of Lorencia 90 and 150, Devias
-  66 and the candelabra, Elbeland 61 and Lost Tower 23 (the light under them kept), the candle wick fire
-  and the Land of Trials brazier's fire (42, its ground light kept), and the ground lights of the Devias candelabra, Lost Tower 18, 19, 20 and 23, the fire vents (Vulcanus
-  and Doppelganger 2 6, Loren Market 57), the Noria forge, the Stadium braziers and the Blood Castle
-  candelabra (`bloodcastle/candelabraObject.test.ts`; their cards kept); no row shapes its ground
-  light on Classic (no `falloff` or `floorGain`), and Lorencia 90 and Elbeland 61 light at the object.
+  66 and the candelabra, Elbeland 61 and Lost Tower 23 (the light under them kept), the candle wick
+  fire, the Land of Trials brazier's fire (42, its ground light kept) and the Stadium brazier's
+  (`stadium/brazierObject.test.ts`), and the ground lights of the Devias candelabra, Lost Tower 18,
+  19, 20 and 23, the fire vents (Vulcanus and Doppelganger 2 6, Loren Market 57), the Noria forge,
+  the Stadium braziers and the Blood Castle candelabra (`bloodcastle/candelabraObject.test.ts`; their
+  cards kept); no row shapes its ground light on Classic (no `falloff` or `floorGain`), and Lorencia
+  90 and Elbeland 61 light at the object.
 - `loginscene/wallTorchObject.test.ts`, `empireguardian4/spec.test.ts`: the wall torch's flare, on
   the `BITMAP_FLARE` sheet lit or not, and the fortress lights on Classic and Enhanced; a lit torch's
   warm tint gives Flare.jpg the mean colour its old tint gave flare01.jpg, worked out from the two
@@ -145,6 +147,6 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
 - `tarkan/impactGlowObject.test.ts`: the temple glow is `BITMAP_IMPACT`, its size and colour
   breathing together.
 - `stadium/brazierObject.test.ts`: the brazier's card is `Luminosity * 5` every frame, whatever the
-  pillar's scale.
+  pillar's scale; its fire is `lampFlares`.
 - `losttower/towerMachineObject.test.ts`: the machines draw `BITMAP_MAGIC + 1` (19) and
   `BITMAP_LIGHTNING + 1` (20) pairs that turn against each other.
