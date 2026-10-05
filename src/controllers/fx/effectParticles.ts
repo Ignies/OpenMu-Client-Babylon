@@ -362,6 +362,29 @@ const KINDS = {
     color: plainColor,
   } satisfies ParticleKind,
 
+  /**
+   * `BITMAP_SMOKE` SubType 13, the Balgass lava vents' glow: sized `(rand() % 64 + 64) * 0.01` whatever
+   * it is made with, it stays put, grows 0.09 a tick and fades orange, `(L, 0.5L, 0.1L)` at
+   * `L = LifeTime / 20`, additive (ZzzEffectParticle.cpp:1238-1243, :5389-5393, :9085-9097).
+   */
+  smoke13: {
+    texture: 'smoke',
+    blend: 'add',
+    init(p) {
+      p.lifeTime = 20;
+      p.scale = (rand(64) + 64) * 0.01;
+      p.rotation = rand(360);
+    },
+    update(p, f) {
+      const luminosity = p.lifeTime / 20;
+      p.lr = luminosity;
+      p.lg = luminosity * 0.5;
+      p.lb = luminosity * 0.1;
+      p.scale += 0.09 * f;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
+
   smoke2: {
     texture: 'smoke',
     blend: 'subtract',
@@ -950,6 +973,7 @@ export const KIND_REACH: Record<KindName, Reach> = {
   trueFire5: { travel: 0.85, base: 0, perScale: 0.46 },
   trueBlue: { travel: 1, base: 0, perScale: 0.46 },
   smoke0: { travel: 0.55, base: 0.72, perScale: 0 },
+  smoke13: { travel: 0, base: 1.4, perScale: 0 },
   smoke2: { travel: 3.4, base: 0.58, perScale: 0 },
   smoke65: { travel: 0.75, base: 0, perScale: 0.29 },
   cloud21: { travel: 1.75, base: 0, perScale: 3.61 },

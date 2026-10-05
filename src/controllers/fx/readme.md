@@ -87,7 +87,8 @@ shared pools, textures and particle recipes other folders reuse.
   particle wind (`g_vParticleWind`, walked once a tick, ZzzEffectParticle.cpp:3847-3859);
   `trueFire` (`BITMAP_TRUE_FIRE`, fantaF.jpg) takes its sideways and upward push at birth, rises,
   shrinks and fades with its life (24 ticks, `trueFire5` 20); `trueBlue` (`BITMAP_TRUE_BLUE`) is
-  the same particle on fantaB.jpg.
+  the same particle on fantaB.jpg; `smoke13` (`BITMAP_SMOKE` SubType 13) stays put, grows and fades
+  orange.
 - `afterimage.test.ts`: a copy takes the drawn meshes of each part onto a skeleton of its own, posed on
   the clip's first key while the body keeps its own; a placed part stands where a body facing that way
   would draw it, at its alpha; an unplaced or 0-alpha part is not drawn; it ends taking its copies along.

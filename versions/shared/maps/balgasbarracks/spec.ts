@@ -30,9 +30,12 @@ export const BALGAS_EFFECT_ONLY_TYPES: readonly number[] = [
   2, 3, 5, 58, 59, 60, 85, 86, 87, 88, 89, 90, 91, 92, 93,
 ];
 
-/** The lava vents (2) and the smoke columns (58-60). */
+/**
+ * The lava vents (2): a `BITMAP_SMOKE` SubType 13 glow one tick in three (:119-125). 5 and the
+ * smoke columns (58-60) are stand-ins.
+ */
 export const BALGAS_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {
-  2: [{ kinds: ['fire1', 'fire2'], every: 3, light: [1, 0.5, 0.2] }],
+  2: [{ kinds: ['smoke13'], every: 3 }],
   5: [{ kinds: ['fire1', 'fire2'], every: 3, light: [1, 0.5, 0.2] }],
   58: [{ kinds: ['smoke21'], every: 3 }],
   59: [{ kinds: ['smoke21'], every: 3 }],

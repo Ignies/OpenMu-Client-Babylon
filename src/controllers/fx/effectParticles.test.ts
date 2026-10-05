@@ -297,6 +297,24 @@ describe('trueFire, BITMAP_TRUE_FIRE SubType 0 and 5 (ZzzEffectParticle.cpp:3337
   });
 });
 
+describe('smoke13, BITMAP_SMOKE SubType 13 (ZzzEffectParticle.cpp:1238-1243, :5389-5393, :9085-9097)', () => {
+  // `Scale = (rand() % 64 + 64) * 0.01f` whatever it is made with, `Rotation = rand() % 360`; a tick it grows 0.09
+  // and is `(L, 0.5L, 0.1L)`, `L = LifeTime / 20`; it does not move, and draws additive.
+  it('sits where it is made, grows 0.09 a tick and fades orange with its life', async () => {
+    const sprite = await play('smoke13', 3, 0.5, 4);
+    expect([sprite.position.x, sprite.position.y, sprite.position.z]).toEqual([0, 0, 0]);
+    expect(sprite.width).toBeCloseTo((64 * (0.96 + 4 * 0.09)) / 100);
+    expect([sprite.color.r, sprite.color.g, sprite.color.b].map(c => c.toFixed(3))).toEqual(['0.800', '0.400', '0.080']);
+    expect(sprite.angle).toBeCloseTo(Math.PI);
+  });
+
+  it('lives 20 ticks', async () => {
+    expect((await play('smoke13', 1, 0.5, 19)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('smoke13', 1, 0.5, 20)).isVisible).toBe(false);
+  });
+});
+
 describe('ParticleEmitter view gate', () => {
   function counter() {
     const count = { n: 0 };
