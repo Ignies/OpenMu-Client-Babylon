@@ -136,6 +136,8 @@ export const TEX = {
   kwave2: 'Effect/Kwave2.OZJ',
   /** BITMAP_SMOKELINE1 (smokelines01.jpg, 64 px, ZzzOpenData.cpp:5241): Ignore Defense's red smoke. */
   smokeLine1: 'Effect/smokelines01.OZJ',
+  /** BITMAP_KNIGHTST_BLUE (knightSt_blue.jpg, ZzzOpenData.cpp:4658): the sheet Charge's sword force draws (ZzzObject.cpp:2566-2570). */
+  knightStBlue: 'Effect/knightSt_blue.OZJ',
   swordEff2: 'Effect/SwordEffor2.OZJ',
   /** BITMAP_SWORD_EFFECT_MONO (Swordeff_mono.jpg): Strike of Destruction's flash at the caster. */
   swordEffMono: 'Effect/Swordeff_mono.OZJ',

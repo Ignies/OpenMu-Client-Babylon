@@ -17,7 +17,8 @@ class. Recipe: [docs/how_to/add_skill.md](../../../docs/how_to/add_skill.md).
   summon arrival and light, clip-key timing (`whenClipKey`, `eachClipTick`: a step each tick while the
   caster plays a clip), light anchors, mounted clip sets, `landingSound`: a
   `soundOnLanding` skill's sound from the caster, put inside `afterRelease` for a release-block `PlayBuffer`;
-  `bodyLight`: an effect model's BodyLight, the terrain light under it plus its Light; the MODEL_MULTI_SHOT volley,
+  `bodyLight`: an effect model's BodyLight, the terrain light under it plus its Light, and `terrainLevel` that terrain
+  light as a grey level (the Dark Knight's and Charge's sword force); the MODEL_MULTI_SHOT volley,
   `multiShotVolley` at the caster's facing or `multiShotVolleyAt` an angle: seven rings that grow where they are made;
   `movesAt`: the moves an effect has made after `t` seconds; `JOINT_SPARKS` and `sparkHeading`: BITMAP_JOINT_SPARK
   sub0, the Dark Knight's Rush and the Rage Fighter's Charge).

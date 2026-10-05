@@ -9,8 +9,7 @@ import { type Sounds } from '@/controllers/sound/recipes';
 import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
 import { playCombat } from '@/controllers/sound/combat';
-import { Ecs } from '@/ecs/current';
-import { JOINT_SPARKS, sparkHeading } from '../_shared';
+import { JOINT_SPARKS, sparkHeading, terrainLevel } from '../_shared';
 
 // ---- dk2 steps
 
@@ -18,14 +17,8 @@ export const rand = (min: number, max: number): number => min + Math.random() * 
 
 /** The original's `Angle` (MU Z-up; pitch, roll, yaw in radians) as a node rotation: `(-a0, -a2, -a1)` (controllers/render/renderAngles.ts). */
 export const muAngles = (out: Vector3, pitch: number, roll: number, yaw: number): Vector3 => out.set(-pitch, -yaw, -roll);
-// The Rage Fighter's Charge throws the same sparks: they live in ../_shared.ts.
-export { JOINT_SPARKS, sparkHeading };
-
-/** `RequestTerrainLight` at a point, as the grey level the original's BodyLight adds `o->Light` to. */
-export function terrainLevel(x: number, z: number): number {
-  const l = Ecs.world?.getTerrainLight(x, z);
-  return l ? 0.2126 * l.x + 0.7152 * l.y + 0.0722 * l.z : 1;
-}
+// The Rage Fighter's Charge throws the same sparks and lights its sword force the same: they live in ../_shared.ts.
+export { JOINT_SPARKS, sparkHeading, terrainLevel };
 
 /** Play one of the original's `PlayBuffer`s at the caster. */
 export const sayAt = (c: SkillContext, key: Sounds): void => {

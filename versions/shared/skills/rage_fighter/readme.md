@@ -21,7 +21,7 @@ folders: [../readme.md](../readme.md).
 | `ignore_defense` | 266 | at the caster, all blue: the sword flash, three ground shock rings and spinning clouds, the wind pillar and a widening magic circle; on the buffed body (129) a red smoke off the hands each tick |
 | `increase_health` | 267, 573 str | the same in violet; on the buffed body (130, 155) the Ourforces bone glow and two red decals under it |
 | `increase_block` | 268, 569 power up, 572 mastery | the same in red, then a pale wind pillar on the caster (the hero's target on his own cast) that stands while that body holds an Ourforces buff; on the buffed body (131, 153, 154) now and then a mirror wind pillar |
-| `charge` | 269 | Rush's charge: each tick until RUSH key 5 or tick 14, 20 cm over the feet, four JOINT_SPARKs thrown back and four BITMAP_FIRE sub18 ground smokes; then the sword force at the caster |
+| `charge` | 269 | Rush's charge: each tick until RUSH key 5 or tick 14, 20 cm over the feet, four JOINT_SPARKs thrown back and four BITMAP_FIRE sub18 ground smokes; then MODEL_SWORD_FORCE sub2 in knightSt_blue, 100 cm up, running ahead faster each tick, growing for three ticks and leaving a copy each, then fading and spraying the same on the ground under it, lighting it |
 | `phoenix_shot` | 270 | a phoenix arrow, a fire hit and the phoenix model |
 
 Timing follows the original's effects, not the packet: most of them read the caster's clip key
@@ -74,5 +74,5 @@ count moves on the effects clock (`eachMove`, `movesSince`), so a script made in
   follow-ups against the echo, the hero's clip and AttackTime's stop at 15; the master skills (551, 554, 558-560)
   sound as their base, as RageCreateEffect plays one sound for each case; the Ourforces buff looks by sub, the smoke
   and the mirror rolls adding up with the buffs, the smoke stopping under a cloak; Increase Block's lasting pillar, its
-  body and how long it stands.
+  body and how long it stands; Charge's sword force, its copies, spray and light.
 - Covered by the golden tests in `../` (`skillVisuals.golden.test.ts`, `skillTables.golden.test.ts`).

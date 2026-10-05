@@ -3444,7 +3444,7 @@ exports[`skill tables golden > skill 269 1`] = `
   ],
   "delay": null,
   "heroSound": "Sound/sKnightSkill2",
-  "light": "0/0 12438107cd988e1a",
+  "light": "0/0 24a62262d24d396c",
   "sound": "Sound/sKnightSkill2",
   "stepIn": "cast",
   "target": "enemy",

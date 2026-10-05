@@ -167,6 +167,12 @@ export function bodyLight(at: Vector3, tint: RGB): RGB {
   return [Math.min(1, lx + tint[0]), Math.min(1, ly + tint[1]), Math.min(1, lz + tint[2])];
 }
 
+/** `RequestTerrainLight` at a point, as the grey level the original's BodyLight adds `o->Light` to. */
+export function terrainLevel(x: number, z: number): number {
+  const l = Ecs.world?.getTerrainLight(x, z);
+  return l ? 0.2126 * l.x + 0.7152 * l.y + 0.0722 * l.z : 1;
+}
+
 /** `rand() % n`. */
 export const randInt = (n: number): number => Math.floor(Math.random() * n);
 

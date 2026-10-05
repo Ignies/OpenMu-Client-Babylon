@@ -4,6 +4,8 @@ import { Scene } from '@babylonjs/core/scene';
 import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 import { effects } from '@/controllers/fx';
 import { fxNow } from '@/controllers/fx/core';
+import { lighting } from '@/controllers/lighting';
+import { SKILL_LIGHTS } from '@/controllers/lighting/skills';
 import { MODEL, TEX } from '@/controllers/fx/recipes';
 import type { TailStrip, TickedFx } from '@/controllers/fx/ticked';
 import { ENUM_WORLD } from '@/core/types';
@@ -545,7 +547,8 @@ describe('Killing Blow (260): BITMAP_SBUMB on its LifeTime (MoveHandlers.cpp:919
 
 describe('Charge (269): AttackStage\'s AT_SKILL_OCCUPY case (ZzzCharacter.cpp:2934-2959, :4690-4695)', () => {
   const RUSH = PlayerAction.PLAYER_ATTACK_RUSH;
-  const sprays = (r: Run) => [...new Set(r.spawns.filter(s => s.name === 'particles' && s.opts.recipe === JOINT_SPARKS).map(s => s.tick))];
+  /** The ticks of the charge's sprays, 20 cm over the feet (the sword force's are on the ground). */
+  const sprays = (r: Run) => [...new Set(r.spawns.filter(s => s.name === 'particles' && s.opts.recipe === JOINT_SPARKS && Math.abs(s.at.y - 0.2) < 1e-6).map(s => s.tick))];
 
   it('each tick of the charge, 20 cm over the feet: four JOINT_SPARK sub0 thrown back and four BITMAP_FIRE sub18 ground smokes (ZzzCharacter.cpp:2942-2957)', () => {
     const r = run(269, RUSH, { keysPerTick: 0.3 });
@@ -560,7 +563,9 @@ describe('Charge (269): AttackStage\'s AT_SKILL_OCCUPY case (ZzzCharacter.cpp:29
     expect(heading.x * Math.sin(0.5) - heading.z * Math.cos(0.5)).toBeLessThan(0);
     expect(at(1)[0].at.y).toBeCloseTo(0.2);
   });
-  const force = (r: Run) => r.spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.swordForce).map(s => s.tick);
+  const forces = (r: Run) => r.spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.swordForce);
+  /** The ticks the sword force leaves on, not its copies. */
+  const force = (r: Run) => forces(r).filter(s => s.opts.scale !== 3.5).map(s => s.tick);
   const volley = (r: Run) => r.spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.multishot).map(s => s.tick);
 
   it('sprays every tick until AttackTime runs out on tick 14 at 0.3 keys a tick, then the sword force', () => {
@@ -573,6 +578,41 @@ describe('Charge (269): AttackStage\'s AT_SKILL_OCCUPY case (ZzzCharacter.cpp:29
     const r = run(269, RUSH, { keysPerTick: 0.5 });
     expect(sprays(r)).toEqual(range(1, 11));
     expect(force(r)).toEqual([11]);
+  });
+
+  it('the sword force, MODEL_SWORD_FORCE sub2 in knightSt_blue: 100 cm up, running 10 + 2k cm on move k, Scale +0.9 for three moves then -0.05, BlendMeshLight LifeTime / 18 from move 4 (ZzzEffect.cpp:4531-4548, MoveHandlers.cpp:7154-7212, ZzzObject.cpp:2566-2570)', () => {
+    const [blade, ...copies] = forces(run(269, RUSH, { keysPerTick: 0.3, ticks: 40 }));
+    // Made on the release tick and moved in it (MoveCharactersClient before MoveEffects, MainScene.cpp:284-290); dead after move 15.
+    expect([blade.tick, blade.opts.texture, Math.round((blade.opts.seconds as number) * 25)]).toEqual([14, TEX.knightStBlue, 14]);
+    expect([blade.at.x, blade.at.y, blade.at.z]).toEqual([expect.closeTo(100 + 0.12 * Math.sin(0.5)), expect.closeTo(1), expect.closeTo(100 - 0.12 * Math.cos(0.5))]);
+    const { scaleAt, intensity } = blade.opts as { scaleAt: (t: number) => number; intensity: (t: number) => number };
+    expect([0, 2, 3, 13].map(k => scaleAt(k / 25))).toEqual([0.9, 2.7, 2.65, 2.15].map(v => expect.closeTo(v)));
+    // BodyLight (the terrain's, 1 here, + Light) x BlendMeshLight, clamped: 1, then (1 + l) x l with l = LifeTime / 18.
+    expect([intensity(0), intensity(9 / 25)]).toEqual([1, expect.closeTo((1 + 6 / 18) * (6 / 18))]);
+    // On moves 1-3 a sub3 copy where it was: Scale 3.5, LifeTime 5, BlendMeshLight LifeTime / 10, in knightSt_blue too.
+    expect(copies.map(s => [s.tick, s.opts.scale, s.opts.texture, Math.round((s.opts.seconds as number) * 25)])).toEqual([14, 15, 16].map(t => [t, 3.5, TEX.knightStBlue, 5]));
+    expect([copies[0].at.x, copies[0].at.z]).toEqual([expect.closeTo(100), expect.closeTo(100)]);
+    // Neither has the stand-in's fire tint or growth.
+    expect([blade.opts.colour, blade.opts.grow]).toEqual([undefined, undefined]);
+  });
+
+  it('from its move 4 to 15, four JOINT_SPARK and four BITMAP_FIRE sub18 a tick on the ground under it, in its Light (MoveHandlers.cpp:7182-7199)', () => {
+    const r = run(269, RUSH, { keysPerTick: 0.3, ticks: 40 });
+    const ground = r.spawns.filter(s => s.name === 'particles' && s.tick > 14);
+    const on = [...new Set(ground.map(s => s.tick))];
+    expect(on).toEqual(range(17, 28));
+    expect(on.map(t => ground.filter(s => s.tick === t).length)).toEqual(on.map(() => 8));
+    const smoke = ground.find(s => s.opts.recipe !== JOINT_SPARKS)?.opts.recipe as { texture: string; colour: number[]; colourEnd: number[] };
+    expect([smoke.texture, smoke.colour[0], smoke.colourEnd[0]]).toEqual([TEX.groundSmoke, expect.closeTo(12 / 18), expect.closeTo(0.29 * (12 / 18))]);
+    expect(ground[0].at.y).toBeCloseTo(0);
+  });
+
+  it('its AddTerrainLight (1, 0.8, 0.6), range 1, every move (MoveHandlers.cpp:7201-7202)', () => {
+    const body = vi.spyOn(lighting, 'skillBody');
+    run(269, RUSH, { keysPerTick: 0.3, ticks: 20 });
+    expect(body.mock.calls.map(c => [c[1], c[2]])).toEqual([[269, 'force']]);
+    body.mockRestore();
+    expect(SKILL_LIGHTS[269]?.bodies?.force).toMatchObject({ color: [1, 0.8, 0.6], range: 1 });
   });
 
   it('SOUND_SKILL_SWORD2 at the packet (WSclient.cpp:5123-5129)', () => {
