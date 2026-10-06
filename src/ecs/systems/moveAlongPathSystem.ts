@@ -120,19 +120,10 @@ export const MoveAlongPathSystem: ISystemFactory = world => {
           entity;
 
         if (localPlayer) {
-          // Both setters are MobX actions: writing an unchanged value still
-          // runs the action (and its reaction pass) every frame, so only the
-          // tile the hero stands on - not its float position - is mirrored,
-          // and only when it moved.
-          const tileX = ~~transform.pos.x;
-          const tileY = ~~transform.pos.z;
-          const playerData = Hero;
-          if (playerData.x !== tileX || playerData.y !== tileY) {
-            playerData.setPosition(tileX, tileY);
-          }
-
-          const flag = world.getTerrainFlag(tileX, tileY);
-          if (playerData.tileFlag !== flag) playerData.setTileFlag(flag);
+          // A MobX action: writing an unchanged value still runs it (and its
+          // reaction pass), so the flag of the hero's tile is mirrored only when it changes.
+          const flag = world.getTerrainFlag(~~transform.pos.x, ~~transform.pos.z);
+          if (Hero.tileFlag !== flag) Hero.setTileFlag(flag);
         }
 
         let speed: number;
