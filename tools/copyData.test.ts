@@ -21,6 +21,12 @@ describe('copyData', () => {
     expect(named.filter(f => !shipsDataFile(f))).toEqual([]);
   });
 
+  it('ships every bitmap a dropped body part is drawn with', () => {
+    const named = namedDataFiles('src/controllers/actors/skinTexture.ts');
+    expect(named.length).toBe(4);
+    expect(named.filter(f => !shipsDataFile(f))).toEqual([]);
+  });
+
   it('follows the rules', () => {
     expect(shipsDataFile('Skill/magic_a01.OZJ')).toBe(true);
     expect(shipsDataFile('World74/mini_map.OZT')).toBe(true);

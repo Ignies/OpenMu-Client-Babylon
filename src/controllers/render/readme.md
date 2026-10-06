@@ -40,6 +40,8 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `ModelObject.load(gltf)` puts a GLB under the object's node with the BMD to Babylon basis change
   (`scaling (1,-1,1)`, `rotX(-90)`), sets per-mesh metadata (body light, shine, shadow flags) and
   applies `BlendMesh`, `BrightMesh`, `HiddenMesh`, `HideSkin`, mesh animations and the blob shadow.
+  Under `HideSkin`, `HideSkinTexture` (a `Data/` path) is the bitmap mesh 0 is drawn with instead of its
+  own, alpha-tested (ZzzObject.cpp:7774-7790); a drop sets it from `actors/skinTexture.ts`.
   Map objects also drop still clips (`staticClips.ts`) and mark themselves static CSM casters.
 - `textureScript.ts` reads a texture name's `_R/_H/_S/_N/_DC/_DT` suffix for the model loader.
 - `propBatches.ts` draws map scenery as thin instances, one mesh per type, submesh and 32-tile chunk

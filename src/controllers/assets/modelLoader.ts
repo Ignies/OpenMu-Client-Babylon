@@ -22,6 +22,8 @@ import {
   sidecarFailed,
 } from './compressedAssets';
 import { resolveUrlToDataFolder } from './resolveUrlToDataFolder';
+import { loadMuSprite } from './mu';
+import { reportLoadFailure } from './loadFailure';
 import { applyPackToTexture, textureLabel } from './texturePacks';
 import {
   createItemMaterial,
@@ -73,7 +75,7 @@ const materialsCache: Map<string, ItemMaterial> = new Map();
 const materialArgs: Map<ItemMaterial, MaterialArgs> = new Map();
 
 /** Babylon `Material.MATERIAL_ALPHATESTANDBLEND`. */
-const ALPHA_TEST_AND_BLEND = 3;
+export const ALPHA_TEST_AND_BLEND = 3;
 /** glAlphaFunc(GL_GREATER, 0.25f) - the threshold the original runs with. */
 const ALPHA_TEST_CUTOFF = 0.25;
 
@@ -372,6 +374,28 @@ function syncTextureFiltering(): void {
   for (const byName of texturesCache.values()) {
     for (const texture of byName.values()) applyTextureFiltering(texture);
   }
+  for (const texture of dataTextures.values()) applyTextureFiltering(texture);
+}
+
+/** The bitmaps `getDataTexture` made, one per path. */
+const dataTextures: Map<string, Texture> = new Map();
+
+/**
+ * A bitmap of the original `Data/` tree for a mesh drawn with another texture
+ * than its own (`RenderMesh`'s explicit texture, ZzzBMD.cpp:1319-1322). Top-down
+ * like the GLBs' own (invertY off) and filtered with them; blank until it lands.
+ */
+export function getDataTexture(scene: Scene, path: string): Texture {
+  const cached = dataTextures.get(path);
+  if (cached?.getScene() === scene) return cached;
+
+  const { sampling, anisotropy } = textureFiltering();
+  const texture = new Texture(null, scene, false, false, sampling);
+  texture.name = path;
+  texture.anisotropicFilteringLevel = anisotropy;
+  loadMuSprite(path).then(sprite => texture.updateURL(sprite.url), reportLoadFailure(path));
+  dataTextures.set(path, texture);
+  return texture;
 }
 
 function getTexture(filePath: string, key: string, fallback: Texture) {

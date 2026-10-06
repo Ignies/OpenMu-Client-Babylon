@@ -11,6 +11,8 @@ import {
 import type { Entity, World } from '../../ecs/world';
 import { ENUM_WORLD } from '../../core/types';
 import {
+  ALPHA_TEST_AND_BLEND,
+  getDataTexture,
   getFlatLitVariant,
   getMaterial,
   getScrollVariant,
@@ -420,6 +422,12 @@ export class ModelObject {
    * they *are* the head.
    */
   HideSkin = false;
+
+  /**
+   * Under `HideSkin`, the `Data/` bitmap mesh 0 is drawn with in place of its
+   * own (`RenderMesh(0, ..., nTexture)`, ZzzObject.cpp:7774-7790). Null = its own.
+   */
+  HideSkinTexture: string | null = null;
 
   /**
    * `o->AnimationFrame = 0` with nothing ever advancing it
@@ -1250,8 +1258,25 @@ export class ModelObject {
   private applyHideSkin() {
     if (!this.HideSkin || !this.gltf) return;
 
+    // The bitmap decides the skin test (ZzzBMD.cpp:1319-1327), and a loose one
+    // never carries the flag. 32-bit, so EnableAlphaTest, double-sided (:1517).
+    const bitmap = this.HideSkinTexture;
+    const swapped = bitmap ? this.getMesh(0) : undefined;
+    if (swapped && bitmap) {
+      swapped.metadata.diffuseTexture = getDataTexture(this.scene, bitmap);
+      swapped.material = getMaterial(
+        this.scene,
+        false,
+        ALPHA_TEST_AND_BLEND,
+        BlendState.ALPHA_COMBINE,
+        false,
+        false,
+        swapped.metadata.characterAsset === true
+      );
+    }
+
     for (const mesh of this._frustumMeshes) {
-      if (mesh.metadata?.skinTexture !== true) continue;
+      if (mesh === swapped || mesh.metadata?.skinTexture !== true) continue;
 
       mesh.isVisible = false;
       mesh.metadata.csmCaster = false;

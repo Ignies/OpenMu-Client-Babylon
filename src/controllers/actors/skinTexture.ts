@@ -15,6 +15,23 @@ export function isSkinOrHairTexture(fileName: string): boolean {
   );
 }
 
+/** Keyed `group * 512 + num`, as `MODEL_ITEM` indexes them; the files ZzzOpenData.cpp:556-563 loads. */
+const HIDE_SKIN_TEXTURES = new Map<number, string>([
+  [8 * 512 + 50, 'Player/Item312_Armoritem.OZT'], // MODEL_FAITH_ARMOR
+  [9 * 512 + 50, 'Player/Item312_Pantitem.OZT'], // MODEL_FAITH_PANTS
+  [8 * 512 + 53, 'Player/SkinClass706_upperitem.OZT'], // MODEL_ARMOR + 53, Queen
+  [9 * 512 + 53, 'Player/SkinClass706_loweritem.OZT'], // MODEL_PANTS + 53, Queen
+]);
+
+/**
+ * The bitmap mesh 0 of an item is drawn with under `HideSkin` (a drop), in
+ * place of its own (`RenderPartObjectBody`, ZzzObject.cpp:7774-7790): the
+ * part's texture with the skin cut out. Null for every other item.
+ */
+export function hideSkinTexture(group: number, num: number): string | null {
+  return HIDE_SKIN_TEXTURES.get(group * 512 + num) ?? null;
+}
+
 /**
  * The hide slot (`LoadData.cpp:70-73`): a mesh whose texture name starts with
  * `hid` binds BITMAP_HIDE instead of a bitmap, and every RenderMesh returns
