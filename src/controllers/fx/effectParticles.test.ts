@@ -580,6 +580,57 @@ describe('waterfall3_3, BITMAP_WATERFALL_3 SubType 3 (ZzzEffectParticle.cpp:3602
   });
 });
 
+describe('waterfall2_2, BITMAP_WATERFALL_2 SubType 2 (ZzzEffectParticle.cpp:3501-3533, :8494-8503)', () => {
+  // 40 ticks, `Scale = (rand() % 6 + 6) * 0.1f + Scale`, `Velocity[2] = -(rand() % 3 + 3)`, 0.4 grey; a tick it grows
+  // 0.03 and falls 0.1 slower, and SubType 1's teal and 1.05 dimming are not its.
+  it('falls slowing 0.1 a tick, grows 0.03 from its scale plus the object scale, grey', async () => {
+    const sprite = await play('waterfall2_2', 1, 0.5, 2);
+    expect([sprite.position.x, sprite.position.z]).toEqual([0, 0]);
+    expect(sprite.position.y).toBeCloseTo(-0.079);
+    expect(sprite.width).toBeCloseTo((64 * 1.96) / 100);
+    expect(sprite.angle).toBeCloseTo(Math.PI);
+    expect(rgba(sprite)).toEqual(['0.400', '0.400', '0.400', '1.000']);
+    expect(fakes.files).toEqual(['Effect/waterFall2.OZJ']);
+  });
+
+  it('is made up to 10 aside and 20 below and wobbles up to 1 a tick', async () => {
+    const sprite = await play('waterfall2_2', 1, 0, 2);
+    expect(sprite.position.x).toBeCloseTo(-0.11);
+    expect(sprite.position.z).toBeCloseTo(-0.11);
+    expect(sprite.position.y).toBeCloseTo(-0.259);
+  });
+
+  it('dims 1.1 a tick below 10 ticks left and lives 40', async () => {
+    expect(rgba(await play('waterfall2_2', 1, 0.5, 30))[0]).toBe('0.400');
+    disposeEffectParticles();
+    expect(rgba(await play('waterfall2_2', 1, 0.5, 31))[0]).toBe('0.364');
+    disposeEffectParticles();
+    expect((await play('waterfall2_2', 1, 0.5, 39)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('waterfall2_2', 1, 0.5, 40)).isVisible).toBe(false);
+  });
+});
+
+describe('waterfall3_4, BITMAP_WATERFALL_3 SubType 4 (ZzzEffectParticle.cpp:3635-3643, :8687-8691)', () => {
+  // 20 ticks, `Rotation = rand() % 360`, `Scale = (rand() % 10 + 10) * 0.02f + Scale`, `Velocity[2] = rand() % 5 + 2`,
+  // in the light it is made with; a tick (no case of its own) it grows 0.005, sinks 2.5 faster and dims 1.1.
+  it('leaps up, sinks 2.5 faster a tick, grows 0.005 and dims 1.1 a tick', async () => {
+    const sprite = await play('waterfall3_4', 1, 0.5, 2);
+    expect([sprite.position.x, sprite.position.z]).toEqual([0, 0]);
+    expect(sprite.position.y).toBeCloseTo(0.055);
+    expect(sprite.width).toBeCloseTo((64 * 1.31) / 100);
+    expect(sprite.angle).toBeCloseTo(Math.PI);
+    expect(rgba(sprite)).toEqual(['0.165', '0.331', '0.496', '1.000']);
+    expect(fakes.files).toEqual(['Effect/waterFall3.OZJ']);
+  });
+
+  it('lives 20 ticks', async () => {
+    expect((await play('waterfall3_4', 1, 0.5, 19)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('waterfall3_4', 1, 0.5, 20)).isVisible).toBe(false);
+  });
+});
+
 describe('the particle tick', () => {
   it('makes no colour: one is reused frame after frame', async () => {
     await play('trueFire', 1, 0.5, 1);

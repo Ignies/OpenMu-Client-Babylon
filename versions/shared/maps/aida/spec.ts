@@ -40,8 +40,9 @@ export const AIDA_EFFECT_ONLY_TYPES: readonly number[] = [
 ];
 
 /**
- * The falls. `every` is the C++ `rand_fps_check` divisor where one is given
- * (:169, :180: 56 spawns one in two, 58 one in three, 57 every tick).
+ * The falls, Kanturu's three kinds (:167-184): 56 `WATERFALL_1` SubType 2 one
+ * in two, 57 `WATERFALL_3` SubType 4 every tick, 58 `WATERFALL_2` SubType 2
+ * one in three, white at `o->Scale`.
  *
  * **59**, **62** and **63** emit nothing. All three bodies are wrapped in
  * `if (pObject->HiddenMesh != -2)` (:184-225) and `MoveAidaObject` (:76-84)
@@ -55,9 +56,9 @@ export const AIDA_EFFECT_ONLY_TYPES: readonly number[] = [
  * instead buried the map in cloud.
  */
 export const AIDA_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {
-  56: [{ kinds: ['waterfall5_9'], every: 2 }],
-  57: [{ kinds: ['waterfall5_9'], every: 1 }],
-  58: [{ kinds: ['waterfall5_9'], every: 3 }],
+  56: [{ kinds: ['waterfall1_2'], every: 2 }],
+  57: [{ kinds: ['waterfall3_4'], every: 1 }],
+  58: [{ kinds: ['waterfall2_2'], every: 3 }],
 };
 
 /** MU units, `[x, y, z]`. */

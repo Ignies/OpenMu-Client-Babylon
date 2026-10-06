@@ -377,6 +377,44 @@ function waterfallKind(texture: TextureKey, scaleBase: number, fadeBelow: number
 }
 
 /**
+ * `BITMAP_WATERFALL_2` (waterFall2.jpg, additive): `Rotation = rand() % 360`, `(rand() % 6 + 6) * 0.1`
+ * big plus `scaleAdd` times the object's scale, falling `rand() % 3 + 3`, made up to 10 aside and 20 off
+ * in height, `(red, 0.4, 0.4)` (ZzzEffectParticle.cpp:3501-3533). A tick it grows 0.03, takes
+ * `(rand() % 20 - 10) * 0.1` sideways, falls 0.1 slower, dims 1.1 below 10 ticks left and `dim` always
+ * (:8494-8503).
+ */
+function waterfall2Kind(life: number, red: number, scaleAdd: number, dim: number): ParticleKind {
+  return {
+    texture: 'waterfall2',
+    blend: 'add',
+    init(p, scale) {
+      p.lifeTime = life;
+      p.rotation = rand(360);
+      p.scale = (rand(6) + 6) * 0.1 + scaleAdd * scale;
+      p.vz = -(rand(3) + 3);
+      p.px += rand(20) - 10;
+      p.py += rand(20) - 10;
+      p.pz += rand(40) - 20;
+      p.lr = red;
+      p.lg = p.lb = 0.4;
+    },
+    update(p, f) {
+      p.scale += 0.03 * f;
+      p.vx = (rand(20) - 10) * 0.1;
+      p.vy = (rand(20) - 10) * 0.1;
+      p.vz += 0.1 * f;
+
+      const gain = Math.pow(1 / dim, f) * (p.lifeTime < 10 ? Math.pow(1 / 1.1, f) : 1);
+
+      p.lr *= gain;
+      p.lg *= gain;
+      p.lb *= gain;
+    },
+    color: plainColor,
+  };
+}
+
+/**
  * The tick `BITMAP_ADV_SMOKE + 1` and `BITMAP_CLOUD` SubType 6 share: it moves again, rises 0.6
  * faster, wanders `rand() % 4 - 2` (z * 0.8), grows 0.05, turns 1 or 2 degrees and is
  * `LifeTime / fade`, white (ZzzEffectParticle.cpp:7553-7564, :8250-8270).
@@ -713,35 +751,34 @@ const KINDS = {
 
   waterfall1_2: waterfallKind('waterfall1', 1.6, 5),
 
+  /** `BITMAP_WATERFALL_2` SubType 1: 50 ticks, `(0, 0.4, 0.4)`, dimming 1.05 a tick more (:3535-3540, :8505-8510). */
+  waterfall2_1: waterfall2Kind(50, 0, 0, 1.05),
+
+  /** `BITMAP_WATERFALL_2` SubType 2: 40 ticks, grey, the object's scale added to its own (:3505-3509). */
+  waterfall2_2: waterfall2Kind(40, 0.4, 1, 1),
+
   /**
-   * `BITMAP_WATERFALL_2` SubType 1 (waterFall2.jpg, additive): 50 ticks, `Rotation = rand() % 360`,
-   * `(rand() % 6 + 6) * 0.1` big whatever its scale, falling `rand() % 3 + 3`, made up to 10 aside and
-   * 20 off in height, `(0, 0.4, 0.4)` (ZzzEffectParticle.cpp:3501-3540). A tick it grows 0.03, takes
-   * `(rand() % 20 - 10) * 0.1` sideways, falls 0.1 slower and dims 1.05, 1.1 more below 10 ticks
-   * left (:8494-8510).
+   * `BITMAP_WATERFALL_3` SubType 4 (waterFall3.jpg, additive): 20 ticks, `Rotation = rand() % 360`,
+   * `(rand() % 10 + 10) * 0.02 + Scale` big, leaping `rand() % 5 + 2`, in the light it is made with
+   * (ZzzEffectParticle.cpp:3635-3643). With no case of its own a tick it grows 0.005, sinks 2.5 faster
+   * and dims 1.1 (:8687-8691).
    */
-  waterfall2_1: {
-    texture: 'waterfall2',
+  waterfall3_4: {
+    texture: 'waterfall3',
     blend: 'add',
-    init(p) {
-      p.lifeTime = 50;
+    init(p, scale) {
+      p.lifeTime = 20;
       p.rotation = rand(360);
-      p.scale = (rand(6) + 6) * 0.1;
-      p.vz = -(rand(3) + 3);
-      p.px += rand(20) - 10;
-      p.py += rand(20) - 10;
-      p.pz += rand(40) - 20;
-      p.lr = 0;
-      p.lg = p.lb = 0.4;
+      p.scale = (rand(10) + 10) * 0.02 + scale;
+      p.vz = rand(5) + 2;
     },
     update(p, f) {
-      p.scale += 0.03 * f;
-      p.vx = (rand(20) - 10) * 0.1;
-      p.vy = (rand(20) - 10) * 0.1;
-      p.vz += 0.1 * f;
+      p.scale += 0.005 * f;
+      p.vz -= 2.5 * f;
 
-      const gain = Math.pow(1 / 1.05, f) * (p.lifeTime < 10 ? Math.pow(1 / 1.1, f) : 1);
+      const gain = Math.pow(1 / 1.1, f);
 
+      p.lr *= gain;
       p.lg *= gain;
       p.lb *= gain;
     },
@@ -1232,7 +1269,9 @@ export const KIND_REACH: Record<KindName, Reach> = {
   waterfall5_9: { travel: 2.9, base: 0.28, perScale: 0.46 },
   waterfall1_2: { travel: 2.9, base: 0.73, perScale: 0.46 },
   waterfall2_1: { travel: 1.7, base: 1.18, perScale: 0 },
+  waterfall2_2: { travel: 1.6, base: 1.05, perScale: 0.46 },
   waterfall3_3: { travel: 1.62, base: 0.14, perScale: 0.22 },
+  waterfall3_4: { travel: 4.55, base: 0.22, perScale: 0.46 },
   spark03_24: { travel: 0.6, base: 0.19, perScale: 0 },
   light0: { travel: 0.6, base: 0, perScale: 0.45 },
   wingFlareBlue: { travel: 0, base: 0, perScale: 0.46 },
