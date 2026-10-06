@@ -1,5 +1,5 @@
 import { defineSkill } from '@/controllers/skills/define';
-import { darkSideCast, beginDarkSide, isDarkSide, observeDarkSideEcho, observeDarkSideTargets, observeRageHit, rageLayer, rageStreak } from './rage';
+import { darkSideCast, beginDarkSide, isDarkSide, observeDarkSideEcho, observeDarkSideMagic, observeDarkSideTargets, observeRageHit, rageLayer, rageStreak } from './rage';
 import { DarksideRendering, type DarksideSink, type DarksideState } from './rendering';
 import { MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
 import { Vector3 } from '@/controllers/render/babylon/exports';
@@ -221,6 +221,7 @@ export default defineSkill({
         begin: beginDarkSide,
         observeTargets: observeDarkSideTargets,
         observeEcho: observeDarkSideEcho,
+        observeMagic: observeDarkSideMagic,
         observeRageHit,
         streak: rageStreak,
       },

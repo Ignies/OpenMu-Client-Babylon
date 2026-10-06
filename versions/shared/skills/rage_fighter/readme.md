@@ -6,7 +6,7 @@ folders: [../readme.md](../readme.md).
 ## Public API
 - Each folder's default export is a `defineSkill`, found by glob in `../index.ts`.
 - `dark_side/rage.ts`: `isDarkSide`, `beginDarkSide`, `observeDarkSideTargets`, `observeDarkSideEcho`,
-  `observeRageHit`, `rageStreak`, `rageLayer`, `darkSideCast` (the targets
+  `observeDarkSideMagic`, `observeRageHit`, `rageStreak`, `rageLayer`, `darkSideCast` (the targets
   named and the follow-ups gone, for DarksideRendering).
 - `dark_side/rendering.ts`: `DarksideRendering`, one DarksideRendering call at a time, and its `DarksideState` and `DarksideSink`.
 
@@ -47,6 +47,10 @@ cast is drawn once (RageCreateEffect's `m_bUseEffectOnce`, MonkSystem.cpp:1285-1
 the hero's or another caster's while he still plays the clip (another client's follow-up), only turns
 its caster (`observeDarkSideEcho`). It also keeps the hit streak for the damage numbers. Past the fifth
 follow-up the next one due drops the targets (SendDarksideAtt's InitDarksideTarget, MonkSystem.cpp:591-595).
+A SkillAnimation (0x19) of Dark Side draws nothing, and another caster's counts one of the hero's follow-ups gone, as the
+original's one CMonkSystem does (SetDarksideCnt, WSclient.cpp:5144-5148, `observeDarkSideMagic`): his next follow-up skips a
+target and the fifth comes sooner. OpenMU sends one when a caster's 0x4B names no target: his client then asks for the skill
+on himself (MonkSystem.cpp:551-553) and TargetedSkillDefaultPlugin shows it to everyone in view.
 
 Dragon Roar's hits (264, 560): the original server sends a SkillAnimation (0x19) for each target the roar hits, and ReceiveMagic
 (WSclient.cpp:5130-5143) draws it as the row's `impact`: the cast's first three hits (CMonkSystem's m_nLowerEffCnt, zeroed as

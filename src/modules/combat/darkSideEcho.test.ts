@@ -40,7 +40,7 @@ const { combat } = await import('@/controllers/combat');
 const { darkSideCast } = await import('@versions/shared/skills/rage_fighter/dark_side/rage');
 const { Hero } = await import('@/modules/hero');
 const { EventBus } = await import('@/core/eventBus');
-const { RageAttackPacket, RageAttackRangeResponsePacket } = await import('@versions/shared/packets/ServerToClientPackets');
+const { RageAttackPacket, RageAttackRangeResponsePacket, SkillAnimationPacket } = await import('@versions/shared/packets/ServerToClientPackets');
 const { TargetedSkillPacket } = await import('@versions/shared/packets/ClientToServerPackets');
 const { Session } = await import('@/modules/session');
 
@@ -166,6 +166,47 @@ describe('RageAttackRangeResponse (C1 4B)', () => {
       ticks(1);
       expect(darkSideCast.sent).toBe(1);
     }
+    combat.reset();
+  });
+});
+
+/** C3 19 from `source`: a SkillAnimation of `skill` on `target`. */
+function skillAnimation(source: number, skill = 263, target = 5): void {
+  const p = SkillAnimationPacket.createPacket();
+  p.SkillId = skill;
+  p.PlayerId = source;
+  p.TargetId = target;
+  EventBus.emit('SkillAnimation', p.buffer);
+}
+
+describe('SkillAnimation (C3 19) of Dark Side (ReceiveMagic, WSclient.cpp:5144-5148)', () => {
+  it('another caster\'s counts one of the hero\'s follow-ups gone: his next skips a target (SetDarksideCnt, MonkSystem.cpp:582-613)', () => {
+    combat.beginDarkSide(263, 5);
+    combat.observeDarkSideTargets(263, [5, 6]);
+    rageAttack(HERO);
+    skillAnimation(OTHER);
+    expect(darkSideCast.sent).toBe(1);
+    // The follow-up due on tick 8 is the one at 6, the last: none after it.
+    ticks(8);
+    expect(darkSideCast.sent).toBe(2);
+    ticks(14);
+    expect(darkSideCast.sent).toBe(2);
+    combat.reset();
+  });
+
+  it('only turns its caster: no clip and nothing drawn, the hero\'s counting nothing', () => {
+    combat.beginDarkSide(263, 5);
+    combat.observeDarkSideTargets(263, [5, 6]);
+    drawn.length = 0;
+    otherClip.action = PlayerAction.PLAYER_STOP_MALE;
+    skillAnimation(OTHER, 559, 6);
+    expect([drawn, otherClip.action, darkSideCast.sent]).toEqual([[], PlayerAction.PLAYER_STOP_MALE, 1]);
+    expect(otherFacing.y).toBeCloseTo(Math.atan2(-4, 0) + Math.PI / 2);
+    skillAnimation(HERO);
+    expect([drawn, darkSideCast.sent]).toEqual([[], 1]);
+    // Another skill's goes on as before.
+    skillAnimation(OTHER, 264);
+    expect([drawn, darkSideCast.sent]).toEqual([[OTHER], 1]);
     combat.reset();
   });
 });

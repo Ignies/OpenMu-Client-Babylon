@@ -355,6 +355,14 @@ class Combat implements Controller {
     return skillHooks.darkSide?.observeEcho(skill, caster) ?? false;
   }
 
+  /**
+   * A `SkillAnimation` (0x19) of `caster`'s on `target` arrived. True when it is Dark Side's, which draws nothing; another
+   * caster's counts one of the hero's follow-ups gone.
+   */
+  observeDarkSideMagic(skill: number, caster: Entity, target: Entity | null): boolean {
+    return skillHooks.darkSide?.observeMagic(skill, caster, target) ?? false;
+  }
+
   /** An `ObjectHit` flagged as a Rage Fighter streak hit arrived. */
   observeRageHit(isStreak: boolean, isFinal: boolean): void {
     skillHooks.darkSide?.observeRageHit(isStreak, isFinal);

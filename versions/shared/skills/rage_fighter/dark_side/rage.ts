@@ -127,6 +127,20 @@ export function observeDarkSideEcho(skill: number, caster: Entity): boolean {
   return false;
 }
 
+/**
+ * Command: a SkillAnimation (0x19) of `caster`'s on `target` arrived. True when it is a Dark Side's, which ReceiveMagic draws nothing
+ * for: another caster's counts one of the hero's follow-ups gone in the one CMonkSystem (SetDarksideCnt, WSclient.cpp:5144-5148),
+ * so his next one skips a target and the fifth comes sooner. ReceiveMagic does nothing with no target in view (:4155-4158).
+ */
+export function observeDarkSideMagic(skill: number, caster: Entity, target: Entity | null): boolean {
+  if (!isDarkSide(skill)) return false;
+  if (target && !caster.localPlayer) {
+    pendingTargets.shift();
+    cast.sent++;
+  }
+  return true;
+}
+
 /** Command: the 0x4B response arrived with the targets the server picked; any target plays Rage_Darkside_Att (MonkSystem.cpp:551-558). */
 export function observeDarkSideTargets(skill: number, targetIds: readonly number[]): void {
   if (!isDarkSide(skill) || darkSideSkill === 0) return;
