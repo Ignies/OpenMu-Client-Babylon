@@ -459,17 +459,17 @@ export const magicGround13 = (light: RGB): Step => (_at, c) => {
 
 /**
  * MODEL_SHOCKWAVE_GROUND01 (shockwave_ground01.bmd) at `at`, turned `yaw` degrees: sub0 lives LifeTime 20 keeping 0.8 of its Light a
- * move, sub1 lives 50 keeping 0.9 and draws Kwave2 (ZzzEffect.cpp:6109-6128); each move Scale x1.2 (MoveHandlers.cpp:9803-9822),
- * drawn bright at Light x 6, clamped (ZzzObject.cpp:2515-2534).
+ * move, sub1 lives 50 keeping 0.9 and draws Kwave2, sub2 lives 10 keeping 0.7 (ZzzEffect.cpp:6109-6128); each move Scale x1.2
+ * (MoveHandlers.cpp:9803-9822), drawn bright at Light x 6, clamped (ZzzObject.cpp:2515-2534).
  */
-export function shockGround(c: SkillContext, at: Vector3, yaw: number, light: RGB, scale: number, sub1 = false): void {
-  const keep = sub1 ? 0.9 : 0.8;
+export function shockGround(c: SkillContext, at: Vector3, yaw: number, light: RGB, scale: number, sub: 0 | 1 | 2 = 0): void {
+  const keep = [0.8, 0.9, 0.7][sub];
   effects.spawn('model', c.scene, at, {
     model: MODEL.shockwaveGround,
-    seconds: ticks(sub1 ? 50 : 20),
+    seconds: ticks([20, 50, 10][sub]),
     angle: [0, 0, yaw],
     colour: light,
-    ...(sub1 ? { texture: TEX.kwave2 } : {}),
+    ...(sub === 1 ? { texture: TEX.kwave2 } : {}),
     scaleAt: t => scale * 1.2 ** movesAt(t),
     blendMesh: 0,
     blendLight: t => 6 * keep ** movesAt(t),

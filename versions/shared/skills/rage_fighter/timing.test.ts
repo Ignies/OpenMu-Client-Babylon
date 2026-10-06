@@ -13,7 +13,7 @@ import type { Entity } from '@/ecs/world';
 import { PlayerAction } from '../../objects/enum';
 import { clearBuffVisuals, playAreaSkillVisual, playTargetedSkillVisual, setBuffVisual } from '../skillVisuals';
 import { heroCastSound, skillSound } from '@/controllers/sound/combat';
-import { JOINT_SPARKS } from '../_shared';
+import { DEG, JOINT_SPARKS } from '../_shared';
 import { beginDarkSide, darkSideCast, darkSideHitTicks, isDarkSide, observeDarkSideEcho, observeDarkSideTargets, rageLayer } from './dark_side/rage';
 
 vi.hoisted(() => {
@@ -502,6 +502,105 @@ describe('Dragon Roar (264): the dragon on BLOW_OF_DESTRUCTION\'s LifeTime, BITM
     const [spark] = born(TEX.spark2, 17);
     expect(spark.args[5]).toBeCloseTo(0.04 * 2.1);
     expect(spark.args[3]).toBeGreaterThan(2.5);
+  });
+});
+
+describe('Dragon Roar (264): a SkillAnimation (0x19) for each target it hits (ReceiveMagic, WSclient.cpp:5130-5143)', () => {
+  const LORE = PlayerAction.PLAYER_SKILL_DRAGONLORE;
+  const VOLCANO = 'Effect/volcano_of_monk.glb';
+  const FIRES: string[] = [TEX.fireHik1, TEX.fireCursedLich, TEX.fireHik3];
+  /**
+   * The cast at tick 0 (RageCreateEffect's InitLower, MonkSystem.cpp:1277), then a hit on its target before each of the steps of
+   * ticks 1 to `hits`, every roll 0: a hit made before a tick's step first moves in it.
+   */
+  function roar(ticks: number, hits = 5, onTick?: (tick: number, target: Entity | null) => void): Run {
+    const random = vi.spyOn(Math, 'random').mockReturnValue(0);
+    try {
+      return run(264, LORE, {
+        keysPerTick: 0.3,
+        area: true,
+        ticks,
+        onTick: (t, caster, aim) => {
+          onTick?.(t, aim);
+          if (t <= hits) playTargetedSkillVisual(scene, 264, caster, aim);
+        },
+      });
+    } finally {
+      random.mockRestore();
+    }
+  }
+  const at = (s: Spawn | Draw, x: number, z: number) => ('at' in s ? s.at.x === x && s.at.z === z : s.args[2] === x && s.args[4] === z);
+  const volcanoes = (r: Run) => r.spawns.filter(s => s.name === 'model' && s.opts.model === VOLCANO);
+
+  it('MODEL_VOLCANO_OF_MONK by the cast\'s hit count: sub1 on the first at once (Scale 0.8), sub2 and sub3 erupting as a sub1 (Scale 1) on their LifeTime 2, none on the fourth and on (MonkSystem.cpp:1358-1377, ZzzEffect.cpp:6172-6201, MoveHandlers.cpp:10146-10164)', () => {
+    const r = roar(60);
+    // Each a textured body and mesh 0 again in volcano_core, bright; sub2 lives 20, sub3 30 (rolls 0): made on ticks 2 and 3.
+    expect(volcanoes(r).map(s => [s.tick, s.opts.scale, s.opts.blendMesh, s.opts.texture])).toEqual([
+      [1, 0.8, -1, undefined],
+      [1, 0.8, 0, 'Effect/volcano_core.OZJ'],
+      [20, 1, -1, undefined],
+      [20, 1, 0, 'Effect/volcano_core.OZJ'],
+      [31, 1, -1, undefined],
+      [31, 1, 0, 'Effect/volcano_core.OZJ'],
+    ]);
+    expect(volcanoes(r).every(s => at(s, 103, 104) && s.opts.keysPerTick === 0.6 && Math.round((s.opts.seconds as number) * 25) === 100)).toBe(true);
+    // Rage_Dragonlower_Att with each hit (StopBuffer, then PlayBuffer).
+    expect(soundTicks(r, 'Sound/Ragefighter/Rage_Dragonlower_Att')).toEqual([1, 2, 3, 4, 5]);
+  });
+
+  it('a sub2 or sub3 whose target is gone first makes none', () => {
+    const r = roar(60, 2, (t, target) => {
+      if (t === 10 && target) (target as { objOutOfScope?: boolean }).objOutOfScope = true;
+    });
+    expect(volcanoes(r).map(s => s.tick)).toEqual([1, 1]);
+  });
+
+  it('sub1: a flame a tick climbing its column, unturned, fading in its last 20 ticks and its core in its last 30; four stones as it is made and at LifeTime 10 with MODEL_SHOCKWAVE_GROUND01 sub2; under it BITMAP_LIGHT_RED sub3 (MoveHandlers.cpp:10093-10144, :9613-9640, ZzzEffect.cpp:9580-9585)', () => {
+    // Read before each step: as drawn after the move before it (the first runs in tick 1's step).
+    const seen: number[][] = [];
+    const r = roar(140, 1, t => {
+      const made = vi.mocked(effects.spawn).mock.calls.filter(call => (call[3] as { model?: string } | undefined)?.model === VOLCANO);
+      if (made.length < 2 || ![72, 73, 92, 93, 100].includes(t)) return;
+      const life = (made[0][3] as { life: (p: number) => number }).life;
+      const glow = (made[1][3] as { blendLight: (t: number) => number }).blendLight;
+      seen.push([t, +life(0).toFixed(4), +glow(0).toFixed(4)]);
+    });
+    // Alpha LifeTime x 0.1 under 20, BlendMeshLight LifeTime x 0.03 under 30: after its moves 71, 72, 91, 92 and 99.
+    expect(seen).toEqual([
+      [72, 1, 1],
+      [73, 1, 0.87],
+      [92, 1, 0.3],
+      [93, 0.9, 0.27],
+      [100, 0.2, 0.06],
+    ]);
+    // The column: firehik01 sub6 (rolls 0), (80 - 100) x 0.9 + 20 cm up on its first move, climbing 2.2 x Gravity, never turned.
+    const column = r.draws.filter(d => d.kind === 'sprite' && d.tick === 1 && d.args[0] === TEX.fireHik1 && at(d, 103, 104) && d.args[7] === 0);
+    expect(column.map(d => +(d.args[3] as number).toFixed(4))).toEqual([+((2 + 6.4 * 2.2) / 100).toFixed(4)]);
+    // 0.8 x 8 x 0.19 x 0.72, less 0.05 on its move.
+    expect(column[0].args[5]).toBeCloseTo(0.64 * (0.8 * 8 * 0.19 * 0.72 - 0.05));
+    const stones = r.spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.volcanoStone);
+    expect(stones.map(s => s.tick)).toEqual([1, 1, 1, 1, 91, 91, 91, 91]);
+    // Scale 1 + 5 x 0.06, less 0.03 on each of its moves, and LifeTime 30 (rolls 0): all have run their 30 by tick 140.
+    expect(stones.map(s => [(s.opts.scaleAt as (t: number) => number)(0), Math.round((s.opts.seconds as number) * 25)])).toEqual(Array(8).fill([expect.closeTo(1.3 - 30 * 0.03), 30]));
+    const ring = r.spawns.filter(s => s.name === 'model' && s.opts.model === MODEL.shockwaveGround && at(s, 103, 104));
+    expect(ring.map(s => [s.tick, Math.round((s.opts.seconds as number) * 25), s.opts.colour, s.opts.texture])).toEqual([[91, 10, [1, 0.1, 0], undefined]]);
+    const fade = ring[0].opts.blendLight as (t: number) => number;
+    expect(fade(2 / 25)).toBeCloseTo(6 * 0.7 ** 2);
+    // flare01_red 3 tiles across at its LifeTime x 0.01, drawn once a tick.
+    const red = r.draws.filter(d => d.kind === 'decal' && d.args[0] === TEX.flareRed && d.args[2] === 103 && d.args[3] === 104);
+    expect(red.map(d => d.tick)).toEqual(range(1, 99));
+    expect(red[0].args.slice(4)).toEqual([3, 0, expect.closeTo(0.99)]);
+  });
+
+  it('TARGETMON_EFFECT: three flames a tick on random bones of the target, turning, for 100 ticks while it is there (MoveHandlers.cpp:10049-10090)', () => {
+    const r = roar(130, 1, (t, target) => {
+      if (t === 120 && target) (target as { objOutOfScope?: boolean }).objOutOfScope = true;
+    });
+    // No skeleton: its bones fall back on the body, 90 cm up. Each climbs Gravity (6.4) and turns 3 degrees on its move.
+    const born = (tick: number) =>
+      r.draws.filter(d => d.kind === 'sprite' && d.tick === tick && FIRES.includes(d.args[0] as string) && at(d, 103, 104) && Math.abs((d.args[3] as number) - (0.9 + 0.064)) < 1e-6);
+    expect(born(1).map(d => [d.args[0], +(d.args[7] as number).toFixed(4)])).toEqual(Array(3).fill([TEX.fireHik1, +(3 * DEG).toFixed(4)]));
+    expect([born(100).length, born(101).length]).toEqual([3, 0]);
   });
 });
 

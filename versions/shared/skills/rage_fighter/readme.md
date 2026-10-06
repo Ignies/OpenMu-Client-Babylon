@@ -18,7 +18,7 @@ folders: [../readme.md](../readme.md).
 | `beast_uppercut` | 261, 552 str, 555 mastery | MODEL_DOWN_ATTACK_DUMMY_R then _L at the caster, at twice the STAMP speed, each a tick laying a FORCEPILLAR joint and a flare off its bone 0, and on its blow key CreateBomb3 on the target (two loungexflow cards, a Magic_Ground2 flash, three stones, twenty sparks) with Rage_Stamp_Att; with no target nothing past the blow key; the hero's waits for STAMP key 2 |
 | `chain_drive` | 262, 558 str | a BITMAP_SWORDEFF joint each tick of GIANTSWING, riding bone 5 for 10 moves; past keys 6 and 11 a blow on the target, the first with MODEL_SHOCKWAVE01 (drawn twice) leaving bone 0 and backing off at 220 + Scale x 80 cm above sea level and BITMAP_DAMAGE1's four sparks, the second with MODEL_SHOCKWAVE02 (drawn twice) backing off, two MODEL_SHOCKWAVE_SPIN01 in Damage1 rolling, from bone 4, and BITMAP_SHINY+4's rings for 16 ticks; with each a dim MODEL_WOLF_HEAD_EFFECT2, the first riding bone 4 and throwing two smaller heads a tick, the second riding bone 27 |
 | `dark_side` | 263, 559 str | at the caster a red cloud growing to 5 tiles, a magic circle drawn twice and the wind pillar with the two it raises on ticks 11 and 21; for the hero, DarksideRendering: his body running out to the next target and up to five afterimages running through the targets, with their dark waves and BITMAP_DAMAGE2 bursts (below) |
-| `dragon_roar` | 264, 560 str | the blow's shake on ticks 16-36 and on tick 21, 55 cm toward the target, MODEL_DRAGON_LOWER_DUMMY (gold and red, scrolling, fading x0.96 a tick, throwing red sparks while its key is 1-6) over BITMAP_LIGHT_RED sub4's two red ground flares and terrain light; between DRAGONLORE keys 2 and 8 the lava joints off bones 36 and 28; past key 5 the lava's MODEL_SHOCKWAVE01 sub1 (Damage2) on the caster and MODEL_SHOCKWAVE_GROUND01 sub1 (Kwave2) where it lies, and each tick a fire column, one flame climbing 7 cm a tick with four flames and four falling sparks round it |
+| `dragon_roar` | 264, 560 str | the blow's shake on ticks 16-36 and on tick 21, 55 cm toward the target, MODEL_DRAGON_LOWER_DUMMY (gold and red, scrolling, fading x0.96 a tick, throwing red sparks while its key is 1-6) over BITMAP_LIGHT_RED sub4's two red ground flares and terrain light; between DRAGONLORE keys 2 and 8 the lava joints off bones 36 and 28; past key 5 the lava's MODEL_SHOCKWAVE01 sub1 (Damage2) on the caster and MODEL_SHOCKWAVE_GROUND01 sub1 (Kwave2) where it lies, and each tick a fire column, one flame climbing 7 cm a tick with four flames and four falling sparks round it; a SkillAnimation (0x19) for each target hit (below) |
 | `dragon_slasher` | 265 | the multi-shot volley turned to the target and Rage_Dragonkick (neither without one; the hero's sound at his click); between DRAGONKICK keys 4 and 5 the ground wind, joints that leave bone 1 and ride the meshless dummy's bone 2 as it swings round; each tick past key 5, twice over the target, four energy, lightning and spark cards and two bouncing sparks |
 | `ignore_defense` | 266 | at the caster, all blue: the sword flash, three ground shock rings and spinning clouds, the wind pillar and a widening magic circle; on the buffed body (129) a red smoke off the hands each tick |
 | `increase_health` | 267, 573 str | the same in violet; on the buffed body (130, 155) the Ourforces bone glow and two red decals under it |
@@ -47,6 +47,15 @@ cast is drawn once (RageCreateEffect's `m_bUseEffectOnce`, MonkSystem.cpp:1285-1
 the hero's or another caster's while he still plays the clip (another client's follow-up), only turns
 its caster (`observeDarkSideEcho`). It also keeps the hit streak for the damage numbers. Past the fifth
 follow-up the next one due drops the targets (SendDarksideAtt's InitDarksideTarget, MonkSystem.cpp:591-595).
+
+Dragon Roar's hits (264, 560): the original server sends a SkillAnimation (0x19) for each target the roar hits, and ReceiveMagic
+(WSclient.cpp:5130-5143) draws it as the row's `impact`: the cast's first three hits (CMonkSystem's m_nLowerEffCnt, zeroed as
+RageCreateEffect draws the cast) make MODEL_VOLCANO_OF_MONK sub1, sub2 and sub3, the last two erupting as a sub1 19-28 and 29-48
+ticks later where the target stood (none once it is gone); sub4 does nothing. A sub1 stands 100 ticks on the ground, textured with
+its mesh 0 again in volcano_core, a flame climbing its column a tick, four stones flying off as it is made and four more with a
+MODEL_SHOCKWAVE_GROUND01 sub2 at LifeTime 10, BITMAP_LIGHT_RED sub3's flare and terrain light under it. Each hit also burns
+TARGETMON_EFFECT's three flames a tick on random bones of the target for 100 ticks and plays Rage_Dragonlower_Att. OpenMU sends no
+0x19 for Dragon Roar (AreaSkillAttackAction, DragonRoarSkillPlugIn hit through AttackByAsync), so with it none of this shows.
 
 DarksideRendering (MonkSystem.cpp:697-857) is the hero's alone: it reads the CMonkSystem only his cast fills, so another
 caster's Dark Side shows RageCreateEffect only. RenderCharacter calls it for each body part it draws while he plays
@@ -77,7 +86,7 @@ the caster stood, two in three ticks, each growing x1.2 a tick to 6 and shrinkin
 MODEL_SHOCKWAVE01 that grows x1.24 a tick and climbs x1.19 of its height above sea level, so it rises off high ground.
 `eventCloud` (BITMAP_EVENT_CLOUD) and `magicGround13` (BITMAP_MAGIC sub13) are ground decals that grow by a factor a
 tick (the `ring` entry's `scaleAt`), the shock rings (MODEL_SHOCKWAVE_GROUND01, `shockGround`: sub0 for the buffs, sub1 for
-Dragon Roar) models that do the same. `ourforcesCast` is the whole RageCreateEffect of a party buff, given its Lights.
+Dragon Roar, sub2 for its volcano) models that do the same. `ourforcesCast` is the whole RageCreateEffect of a party buff, given its Lights.
 `fallSpark` moves a BITMAP_SPARK a tick (Dragon Slasher's and Dragon Roar's): it climbs, falls and bounces. The wolf heads
 (`wolfHead`, `throwHead`, `shake`) ride a bone of the caster and throw copies along its angle, shaken; their scripts
 count moves on the effects clock (`eachMove`, `movesSince`), so a script made inside the clock's step does not run a tick early.
@@ -94,7 +103,8 @@ count moves on the effects clock (`eachMove`, `movesSince`), so a script made in
 - `timing.test.ts`: per skill, the tick each part draws or sounds at, against the clip; Dark Side's
   follow-ups against the echo, the hero's clip and AttackTime's stop at 15, the targets dropped past the fifth, and the
   hero's DarksideRendering a tick at a time (five parts a tick: the body, the afterimages, their waves and bursts, none
-  for another caster), the parts it calls for by helm, Chaos Castle and skin, and a changed body's x30; Dragon Roar's dragon dummy, its red flares, the shake and the lava joints; the master skills (551, 554, 558-560)
+  for another caster), the parts it calls for by helm, Chaos Castle and skin, and a changed body's x30; Dragon Roar's dragon dummy, its red flares, the shake and the lava joints, and its hits' volcanoes by count, their column,
+  stones, fades and flare, and the flames on the target; the master skills (551, 554, 558-560)
   sound as their base, as RageCreateEffect plays one sound for each case; the Ourforces buff looks by sub, the smoke
   and the mirror rolls adding up with the buffs, the smoke stopping under a cloak; Increase Block's lasting pillar, its
   body and how long it stands; Charge's sword force, its copies, spray and light.
