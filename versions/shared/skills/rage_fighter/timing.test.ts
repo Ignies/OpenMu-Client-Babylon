@@ -6,6 +6,7 @@ import { effects } from '@/controllers/fx';
 import { fxNow } from '@/controllers/fx/core';
 import { lighting } from '@/controllers/lighting';
 import { SKILL_LIGHTS } from '@/controllers/lighting/skills';
+import { LightSource } from '@/controllers/lighting/lightSource';
 import { MODEL, TEX } from '@/controllers/fx/recipes';
 import type { TailStrip, TickedFx } from '@/controllers/fx/ticked';
 import { ENUM_WORLD } from '@/core/types';
@@ -590,6 +591,30 @@ describe('Dragon Roar (264): a SkillAnimation (0x19) for each target it hits (Re
     const red = r.draws.filter(d => d.kind === 'decal' && d.args[0] === TEX.flareRed && d.args[2] === 103 && d.args[3] === 104);
     expect(red.map(d => d.tick)).toEqual(range(1, 99));
     expect(red[0].args.slice(4)).toEqual([3, 0, expect.closeTo(0.99)]);
+  });
+
+  it('sub1: its own terrain light (1, 0.4, 0.4) a move, none on a move its flame is past 400 cm above sea level (MoveHandlers.cpp:10101-10109, :10138-10141)', () => {
+    const attach = vi.spyOn(LightSource, 'attach');
+    const out = { r: 0, g: 0, b: 0 };
+    /** The volcano light's red after each of its 100 moves, the ground `height` m above sea level. */
+    const reds = (height: number): number[] => {
+      attach.mockClear();
+      store.world = { scene, getTerrainHeight: () => height, getByNetId: () => undefined };
+      const seen: number[] = [];
+      try {
+        roar(101, 1, t => {
+          const glow = attach.mock.calls.map(call => call[1]).find(l => l.range === 1 && Math.round((l.seconds ?? 0) * 25) === 100);
+          if (t > 1 && typeof glow?.color === 'function') seen.push(+glow.color(out).r.toFixed(2));
+        });
+      } finally {
+        store.world = null;
+      }
+      return seen;
+    };
+    expect(reds(0)).toEqual(Array(100).fill(1));
+    // 320 cm up, the flame (80 - LifeTime) x 0.9 + 20 cm over it (rolls 0) passes 400 cm from LifeTime 13, its move 88.
+    expect(reds(3.2)).toEqual([...Array(87).fill(1), ...Array(13).fill(0)]);
+    attach.mockRestore();
   });
 
   it('TARGETMON_EFFECT: three flames a tick on random bones of the target, turning, for 100 ticks while it is there (MoveHandlers.cpp:10049-10090)', () => {

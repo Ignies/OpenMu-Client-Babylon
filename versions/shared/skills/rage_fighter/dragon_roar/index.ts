@@ -5,7 +5,7 @@ import { effects } from '@/controllers/fx';
 import { TICK, bonePos, entityGone, entityPos, entityYaw, fxNow, type RGB } from '@/controllers/fx/core';
 import type { TailStrip, TickedFx } from '@/controllers/fx/ticked';
 import type { ModelHandle } from '@/controllers/fx/model';
-import { lighting } from '@/controllers/lighting';
+import { lighting, type LightRecipe } from '@/controllers/lighting';
 import { playCombat } from '@/controllers/sound';
 import type { Entity } from '@/ecs/world';
 import { cm, ticks, type SkillContext, type Step } from '@/controllers/skills/visuals';
@@ -456,7 +456,8 @@ function moveEmbers(embers: Ember[], fx: TickedFx): void {
  * textured in white and its mesh 0 again in volcano_core, bright at BlendMeshLight (ZzzObject.cpp:2551-2559). Made with four stones
  * and BITMAP_LIGHT_RED sub3 (Scale 3: flare01_red under it at LifeTime x 0.01, ZzzEffect.cpp:9580-9585, and its terrain light). Each
  * move a sub6 / sub9 flame (80 - LifeTime) x 0.9-1.3 + 20 cm over it, and unless that is past 400 cm above sea level, at LifeTime 10
- * four stones and MODEL_SHOCKWAVE_GROUND01 sub2, under 20 Alpha LifeTime x 0.1, under 30 BlendMeshLight x 0.03 (MoveHandlers.cpp:10093-10144).
+ * four stones and MODEL_SHOCKWAVE_GROUND01 sub2, under 20 Alpha LifeTime x 0.1, under 30 BlendMeshLight x 0.03, and its own terrain
+ * light (MoveHandlers.cpp:10093-10144).
  */
 function volcano(c: SkillContext, x: number, z: number, yaw: number, scale: number): void {
   const spot = new Vector3(x, groundY(x, z), z);
@@ -468,7 +469,9 @@ function volcano(c: SkillContext, x: number, z: number, yaw: number, scale: numb
   const stones: Stone[] = [];
   const embers: Ember[] = [];
   for (let i = 0; i < 4; i++) stone(c, spot, stones);
-  for (const light of ['volcanoMade', 'volcanoRed', 'volcano']) lighting.skillBody(c.scene, DRAGON_ROAR, light, at(spot));
+  for (const light of ['volcanoMade', 'volcanoRed']) lighting.skillBody(c.scene, DRAGON_ROAR, light, at(spot));
+  const glow = { lit: false };
+  lighting.flash(c.scene, volcanoGlow(glow), { position: { x: spot.x, y: spot.y, z: spot.z } });
   eachMove(c.scene, spot, (m, fx) => {
     // The stones made before this move run first; the ones it makes, on the next.
     let n = 0;
@@ -477,7 +480,8 @@ function volcano(c: SkillContext, x: number, z: number, yaw: number, scale: numb
     const life = VOLCANO_LIFE + 1 - m;
     if (life > 0) {
       const y = spot.y + cm((80 - life) * (0.9 + randInt(5) * 0.1) + 20);
-      if (y <= cm(400)) {
+      glow.lit = y <= cm(400);
+      if (glow.lit) {
         embers.push(anyFlame(spot.x, y, spot.z, scale * (randInt(5) + 8) * 0.19, true));
         if (life === 10) {
           for (let i = 0; i < 4; i++) stone(c, spot, stones);
@@ -547,7 +551,15 @@ const roarHit: Step = (_at, c) => {
   playCombat('Sound/Ragefighter/Rage_Dragonlower_Att');
 };
 
-/** The volcano's own AddTerrainLight a move: (1, 0.4, 0.4) + rand() % 5 x 0.01 on each, rolled a tick (MoveHandlers.cpp:10138-10141). */
+const DARK = { r: 0, g: 0, b: 0 } as const;
+/**
+ * The volcano's own AddTerrainLight a move, range 1: (1, 0.4, 0.4) + rand() % 5 x 0.01 on each, rolled a tick, none on a move it
+ * returned early, its flame past 400 cm above sea level (MoveHandlers.cpp:10106-10109, :10138-10141).
+ */
+function volcanoGlow(glow: { readonly lit: boolean }): LightRecipe {
+  const color = (out: { r: number; g: number; b: number }) => (glow.lit ? volcanoLight(out) : Object.assign(out, DARK));
+  return { color, range: 1, seconds: ticks(VOLCANO_LIFE), release: 0 };
+}
 let volcanoTick = -1;
 let volcanoRoll = 0;
 function volcanoLight(out: { r: number; g: number; b: number }): { r: number; g: number; b: number } {
@@ -596,10 +608,9 @@ export default defineSkill({
       made: { color: [1.02, 0.22, 0.22], range: 4, seconds: TICK, release: 0 },
       lightRed: { color: lightRed, range: 3, seconds: ticks(LIGHT_RED_LIFE), release: 0 },
       // A volcano's BITMAP_LIGHT_RED sub3: the same at range 2 as it is made, then lightRed, range 2, its 100 moves; the volcano's
-      // own volcanoLight, range 1 (ZzzEffect.cpp:6046-6055, MoveHandlers.cpp:9631-9640, :10138-10141).
+      // own is volcanoGlow (ZzzEffect.cpp:6046-6055, MoveHandlers.cpp:9631-9640).
       volcanoMade: { color: [1.02, 0.22, 0.22], range: 2, seconds: TICK, release: 0 },
       volcanoRed: { color: lightRed, range: 2, seconds: ticks(VOLCANO_LIFE), release: 0 },
-      volcano: { color: volcanoLight, range: 1, seconds: ticks(VOLCANO_LIFE), release: 0 },
     },
   },
 });

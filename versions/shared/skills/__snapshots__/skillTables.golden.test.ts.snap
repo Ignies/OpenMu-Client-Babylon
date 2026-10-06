@@ -3374,7 +3374,7 @@ exports[`skill tables golden > skill 264 1`] = `
   ],
   "delay": 700,
   "heroSound": "Sound/Ragefighter/Rage_Dragonlower",
-  "light": "0/0 0eba2e890a3dee8e",
+  "light": "0/0 4db79f20cb7ef099",
   "sound": "Sound/Ragefighter/Rage_Dragonlower",
   "stepIn": null,
   "target": "enemy",
