@@ -135,6 +135,29 @@ describe('the message binding', () => {
     expect(seen).toEqual(['a7,8', 'b7,8', 'b9']);
   });
 
+  it('counts a function subscribed twice once, map changes and packets alike, as in process', async () => {
+    const { module, host, changeMap, mapListeners } = setUp();
+    const api = connectModule(module);
+    const seen: string[] = [];
+    const onMap = (map: number) => seen.push(`map ${map}`);
+    const onPacket = (p: Uint8Array) => seen.push(`packet ${p.join()}`);
+    const offMap = api.onMapChange(onMap);
+    api.onMapChange(onMap);
+    const offPacket = api.onPacket(onPacket);
+    api.onPacket(onPacket);
+    await api.hero();
+    changeMap(2);
+    host.deliver('example', Uint8Array.from([7]));
+    await api.hero();
+    expect(seen).toEqual(['map 2', 'packet 7']);
+    // Either unsubscribe removes it.
+    offMap();
+    offPacket();
+    await api.hero();
+    expect(mapListeners()).toBe(0);
+    expect(host.deliver('example', Uint8Array.from([8]))).toBe(false);
+  });
+
   it('stops the packets once the host disposes the module', async () => {
     const { module, host } = setUp();
     const api = connectModule(module);

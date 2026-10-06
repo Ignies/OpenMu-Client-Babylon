@@ -1,6 +1,5 @@
 import { reaction } from 'mobx';
 import { t } from '../../i18n';
-import { Bag } from '../inventory';
 import { Hero } from './state';
 import { skills } from '../skills';
 import { GameOptions } from '@/controllers/settings';
@@ -8,7 +7,7 @@ import { Notices } from '../chat/notices';
 import { InventoryConstants } from '@/core/inventoryConstants';
 import { itemSquares, squareFits, stampSquares } from '../inventory/inventoryLayout';
 import { calcMaxDurability, itemDef } from '@/controllers/item_rules';
-import { findHotkeyItem } from '../inventory/itemHotkeys';
+import { countHotkeyItems, UNBOUND_HOTKEY } from '../inventory/itemHotkeys';
 import type { Item } from '../../ecs/world';
 
 /**
@@ -68,16 +67,11 @@ function gridHasRoom(items: (Item | null)[]): boolean {
   return false;
 }
 
-/** The healing potions the Q/W/E/R keys would reach for, summed. */
-function healingPotions(items: (Item | null)[]): number {
-  let total = 0;
-  for (let hotkey = 0; hotkey < Bag.itemHotkeys.length; hotkey++) {
-    const slot = findHotkeyItem(items, hotkey, Bag.itemHotkeys[hotkey]);
-    if (slot < 0) continue;
-    total += items[slot]?.durability ?? 1;
-  }
-  return total;
-}
+/**
+ * The healing potions in the grid, apple to large, summed: what an unbound Q slot counts
+ * (`FindHealingItemIndex`, NewUIMyInventory.cpp:1872). The original has no such warning.
+ */
+const healingPotions = (items: (Item | null)[]) => countHotkeyItems(items, 0, UNBOUND_HOTKEY);
 
 function warn(text: string): void {
   Notices.create(text);

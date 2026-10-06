@@ -46,8 +46,10 @@ Not a module: no `module.ts`, like `_shared/`.
   that is not reserved, sounds and effects must be ones the game knows, a packet fits one frame. A
   refusal throws; over messages it comes back as `{ id, error }`.
 - It keeps what each module registered: `dispose(id)` removes its windows (closed) and ends its map
-  and packet listeners, and its old API object refuses every call after. Text stays registered (the
-  registry has no removal; the keys are the module's own).
+  and packet listeners, and its old API object refuses every call after. A module's map and packet
+  listeners are sets in both bindings (`host.ts`, `guest.ts`): a function subscribed again is a
+  no-op, and either unsubscribe removes it. Text stays registered (the registry has no removal; the
+  keys are the module's own).
 - `ports.ts` reaches the game: `registerText` (i18n), the window registry plus
   `ModuleWindowFrame` (`controllers/interface/components/module_window`: the item window frame, the
   title, the hot key unless a built-in action has it; HUD order 1000), `playSfx` on the UI bus for a
@@ -128,8 +130,9 @@ Not a module: no `module.ts`, like `_shared/`.
   ids that are not module ids, a payload over the limit; decoding a C2 frame that would fit C1, a
   frame cut short, lengths that disagree, bad ids.
 - `host.test.ts`: one API per module, text and window rules, unknown sounds and effects, map
-  listeners, packets sent and refused, payloads delivered and their end, `dispose`. Over
-  `testGame.ts`, a game that records what reaches it.
+  listeners, a function subscribed twice counted once, packets sent and refused, payloads delivered
+  and their end, `dispose`. Over `testGame.ts`, a game that records what reaches it (one listener
+  per map subscription, as warp's `onMapChanged`).
 - `router.test.ts`: each frame to the module it names, frames nobody hears and frames it cannot read
   counted, never thrown.
 - `ports.test.ts`: the real game: text through `t()`, a window in the HUD and out, the sounds and
@@ -139,7 +142,7 @@ Not a module: no `module.ts`, like `_shared/`.
   the largest packet a message carries; base64 round trips.
 - `binding.test.ts`: both ends over a real `MessageChannel`: a round trip, the host's refusals, an
   unknown call, a wrong argument type, an oversized message, map events, packets both ways, their
-  end, `dispose` and the stop.
+  end, a function subscribed twice counted once, `dispose` and the stop.
 - `sandbox.test.ts`: the frame's attributes pinned, the port hand-over.
 - `example.test.ts`: a module that uses nothing but the API, run in process and over messages:
   both make the same calls on the game and hear the same map changes and packets.

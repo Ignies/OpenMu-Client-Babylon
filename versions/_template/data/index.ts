@@ -15,4 +15,6 @@ export const templateData: VersionData = {
   folder: withTrailingSlash(import.meta.env.VITE_DATA_URL || './Data-TODO/'),
   assets: './game-assets-TODO/',
   locale: 'Eng',
+  // TODO: the World<n> / Object<n> folder numbers this version ships.
+  worlds: [],
 };

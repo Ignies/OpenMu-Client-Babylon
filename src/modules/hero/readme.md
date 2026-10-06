@@ -7,7 +7,7 @@ other folders share.
 ## Public API
 - `Hero` (`state.ts`, through `index.ts`, the door): the hero's data (see How it works) and
   `heroStats()`, `increaseStatRequest(stat)`, `syncPlayerAppearance()`, `sendWalkPath(x, y, dirs)`,
-  `sendWalkStop(x, y, rot)`, `sendAnimationRequest(rot, anim)`, `setPosition`, `setTileFlag`.
+  `sendWalkStop(x, y, rot)`, `sendAnimationRequest(rot, anim)`, `setTileFlag`.
 - `traceHeroInstantMove(hero, to, approach)` (`heroMoveTrace.ts`): the `ObjectMoved` log (scope).
 - `characterStats.ts`: `BaseClass`, `getBaseClass(cls)`, `StatType`, `getClassName(cls)`, `getStatName(stat)`,
   `attackSpeedOf` / `magicSpeedOf(cls, agility)`, `deriveCharacterStats(input)` (damage, defense,
@@ -19,7 +19,7 @@ other folders share.
 - `lowVitals.ts`: `vitalWarning(fraction, percent)`, `heartbeatDue(life, lifeMax)`, `NO_WARNING`,
   `LOW_VITAL_MIN_PERCENT` / `MAX` / `DEFAULT`.
 - `watchStateWarnings()` (`stateWarnings.ts`, was `controllers/interface/`): watches the store for low
-  durability, a full grid, the last potion and a buff running out, and posts one notice per crossing
+  durability, a full grid, the last healing potion and a buff running out, and posts one notice per crossing
   (option `stateWarnings`); `boot.tsx` starts it. Its `warn.*` text is in `i18n/` here.
 
 ## How it works
@@ -28,7 +28,8 @@ other folders share.
   `isGameMaster`, money, the inventory `items` and the worn-slot getters, `playerId`). `net.ts` writes
   it and the hero entity's `attributeSystem`. `syncPlayerAppearance()` puts the worn items on the hero
   entity; the terrain calls it through `onHeroPlaced` (wired in `boot.tsx`) once the hero stands on a
-  new map.
+  new map. Where the hero stands is the hero entity's (`transform.pos`); `Hero` keeps only that
+  tile's terrain flag (`tileFlag`, which `moveAlongPathSystem` mirrors).
 - Adding a point is `Hero.increaseStatRequest(stat)` (`IncreaseCharacterStatPoint`, one point per
   packet; offline it answers itself after 30 ms). The answer emits `statPointAnswered`.
 - `StatAllocation` runs "add N points": one request in flight, the next sent when the server answers
@@ -84,3 +85,5 @@ the hero is a walk the client failed to stop; no walk at all means the server mo
 ## Tests
 - `lowVitals.test.ts`: heartbeat rule, threshold clamping, edge strength and beat speed.
 - `statAmounts.test.ts`: amount clamping, the confirm threshold and the run's next step.
+- `stateWarnings.test.ts`: the no healing potions warning counts healing potions only.
+- `state.test.ts`: `Hero` keeps no tile of its own.

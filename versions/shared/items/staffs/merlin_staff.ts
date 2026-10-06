@@ -33,5 +33,5 @@ export default defineItem({
   SUM: 2,
   RF: 0,
   szModelFolder: 'Item/',
-  szModelName: 'summonsprit.glb',
+  szModelName: 'Staff_33.glb',
 });

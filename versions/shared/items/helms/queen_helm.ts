@@ -30,5 +30,5 @@ export default defineItem({
   SUM: 2,
   RF: 0,
   szModelFolder: 'Player/',
-  szModelName: 'HelmMail_succubus.glb',
+  szModelName: 'HelmMale54.glb',
 });

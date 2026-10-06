@@ -68,8 +68,6 @@ function applyCharacterInformation(p: CharacterInformationView) {
 
   runInAction(() => {
     playerData.money = p.Money;
-    playerData.x = p.X;
-    playerData.y = p.Y;
 
     playerData.exp = Number(p.CurrentExperience);
     playerData.expToNextLvl = Number(p.ExperienceForNextLevel);

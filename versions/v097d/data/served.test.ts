@@ -146,15 +146,8 @@ describe('0.97d worlds', () => {
 /** The class bodies 0.97d's `Player/` ships: `<Part>Class01..05` and `201..203`. */
 const CLASS_SKINS = [1, 2, 3, 4, 5, 201, 202, 203];
 
-/**
- * Models no tree serves, Season 6 included: monster 50 has no row and no BMD (`tools/assetCase.test.ts`);
- * the Summoner's Queen set names no BMD either, and Merlin Staff's `summonsprit.bmd` was never converted.
- */
-const NO_MODEL = new Set([
-  'Monster/Monster50.glb',
-  'Item/summonsprit.glb',
-  ...['Helm', 'Armor', 'Pant', 'Glove', 'Boot'].map(part => `Player/${part}Mail_succubus.glb`),
-]);
+/** Models no tree serves, Season 6 included: monster 50 has no row and no BMD (`tools/assetCase.test.ts`). */
+const NO_MODEL = new Set(['Monster/Monster50.glb']);
 
 describe('0.97d characters and items', () => {
   it('serves the model of every item, class body, monster and NPC', () => {

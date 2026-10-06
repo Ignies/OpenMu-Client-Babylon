@@ -32,8 +32,6 @@ function walkDirection(rotYRadians: number): number {
  */
 class HeroState {
   money = 0;
-  x = 0;
-  y = 0;
 
   name = '';
   charClass: CharacterClassNumber = CharacterClassNumber.DarkKnight;
@@ -179,8 +177,6 @@ class HeroState {
   constructor() {
     makeObservable(this, {
       money: observable,
-      x: observable,
-      y: observable,
       tileFlag: observable,
       currentHP: observable,
       maxHP: observable,
@@ -227,13 +223,6 @@ class HeroState {
       petSlot: computed,
       inventoryItems: computed,
       playerId: observable,
-    });
-  }
-
-  setPosition(x: number, y: number) {
-    runInAction(() => {
-      this.x = x;
-      this.y = y;
     });
   }
 

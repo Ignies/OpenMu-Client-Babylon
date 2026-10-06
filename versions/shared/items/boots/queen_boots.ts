@@ -30,5 +30,5 @@ export default defineItem({
   SUM: 2,
   RF: 0,
   szModelFolder: 'Player/',
-  szModelName: 'BootMail_succubus.glb',
+  szModelName: 'BootMale54.glb',
 });
