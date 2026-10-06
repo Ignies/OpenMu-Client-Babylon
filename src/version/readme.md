@@ -19,8 +19,8 @@ the loader that resolves which version this page runs. See [../../docs/versions.
 
 ## How it works
 - `contract.ts` is everything a version may differ in: OpenMU identity, client version / serial
-  bytes, packet set and `variantRank`, encryption keys (SimpleModulus, Xor32, Xor3), data URLs and
-  an optional file `inventory`, `features` flags, `modulesOff` and `miniGames`. Base code reads
+  bytes, packet set and `variantRank`, encryption keys (SimpleModulus, Xor32, Xor3), data URLs, its
+  worlds and an optional file `inventory`, `features` flags, `modulesOff` and `miniGames`. Base code reads
   these and never compares a version id.
 - `features`: what the version's server knows. Each flag has a reader: `masterSkills` (the master
   tree), `socketItems` / `ancientItems` (item visuals), `darkLord`, `magicGladiator`, `summoner`,
@@ -30,6 +30,9 @@ the loader that resolves which version this page runs. See [../../docs/versions.
   `server.json` `modulesOff`) the version's server never has; `src/app/logic.ts` never installs them.
 - `miniGames`: the timed events the version's client has (`MiniGame`); the HUD schedule rows
   (`modules/events/schedule.ts`) draw and poll only these.
+- `data.worlds`: the `World<n>` / `Object<n>` folder numbers the version ships (Season 6 all of its
+  own, 0.97d World1-12). The pre-download index (`tools/assetsIndex.ts`) offers only those map groups,
+  though a borrowed tree holds more.
 - `data.inventory` lists every file a period `Data/` tree ships. Base code asks for Season 6 files
   a period tree lacks; with the list, loaders draw nothing instead of logging misses. Season 6
   omits it.

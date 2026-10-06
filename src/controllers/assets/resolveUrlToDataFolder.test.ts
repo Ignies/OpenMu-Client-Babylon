@@ -2,12 +2,13 @@ import { describe, expect, it } from 'vitest';
 import type { VersionData } from '../../version/contract';
 import { assetsIndexUrl, assetUrl, hasAsset } from './resolveUrlToDataFolder';
 
-const season6: VersionData = { folder: './Data/', assets: './game-assets/', locale: 'Eng' };
+const season6: VersionData = { folder: './Data/', assets: './game-assets/', locale: 'Eng', worlds: [] };
 
 const period: VersionData = {
   folder: './Data-v097d/',
   assets: './game-assets-v097d/',
   locale: '',
+  worlds: [],
   borrows: {
     assets: './game-assets/',
     ownAssets: new Set(['world3/encterrain3.att', 'sound/atower.wav']),

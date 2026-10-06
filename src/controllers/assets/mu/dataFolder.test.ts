@@ -2,12 +2,13 @@ import { describe, expect, it } from 'vitest';
 import type { VersionData } from '../../../version/contract';
 import { dataUrl, hasData } from './dataFolder';
 
-const season6: VersionData = { folder: './Data/', assets: './game-assets/', locale: 'Eng' };
+const season6: VersionData = { folder: './Data/', assets: './game-assets/', locale: 'Eng', worlds: [] };
 
 const period: VersionData = {
   folder: './Data-v097d/',
   assets: './game-assets-v097d/',
   locale: '',
+  worlds: [],
   inventory: new Set(['gate.bmd', 'interface/cursor.ozt']),
   borrows: {
     assets: './game-assets/',

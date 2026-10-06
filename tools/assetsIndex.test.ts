@@ -1,18 +1,20 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
+import { mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { dirname, join } from 'path';
 import type { VersionData } from '../src/version/contract';
 import { VERSION_REGISTRY } from '../versions/registry';
 import { buildAssetsIndex, INDEXED_VERSIONS } from './assetsIndex';
 
-const season6: VersionData = { folder: './Data/', assets: './game-assets/', locale: 'Eng' };
+const season6: VersionData = { folder: './Data/', assets: './game-assets/', locale: 'Eng', worlds: [1, 19] };
 
 /** A version shaped like 0.97d: its own trees, and Season 6's for what it does not ship. */
 const period: VersionData = {
   folder: './Data-v097d/',
   assets: './game-assets-v097d/',
   locale: '',
+  // It has World3 and not Chaos Castle's World19.
+  worlds: [1, 3],
   inventory: new Set(['gate.bmd', 'interface/cursor.ozt', 'world3/leaf01.ozj']),
   borrows: {
     assets: './game-assets/',
@@ -34,6 +36,8 @@ const TREE: Record<string, number> = {
   'game-assets/World1/EncTerrain1.map': 50,
   'game-assets/World1/TileGrass02.OZT': 30,
   'game-assets/World1/x.jpg': 9,
+  'game-assets/World19/EncTerrain19.att': 70,
+  'game-assets/Object19/Object01.glb': 80,
   'game-assets/Sound/aTower.ogg': 20,
   'game-assets-v097d/Item/Bow01.glb': 111,
   'game-assets-v097d/World1/EncTerrain1.att': 61,
@@ -78,6 +82,8 @@ describe('assetsIndex', () => {
       './game-assets/World1/EncTerrain1.att': 60,
       './game-assets/World1/EncTerrain1.map': 50,
       './game-assets/World1/TileGrass02.OZT': 30,
+      './game-assets/World19/EncTerrain19.att': 70,
+      './game-assets/Object19/Object01.glb': 80,
       './game-assets/Sound/aTower.ogg': 20,
       './Data/gate.bmd': 5,
       './Data/Interface/Cursor.OZT': 13,
@@ -117,5 +123,19 @@ describe('assetsIndex', () => {
 
   it('writes an index for every version the client carries', () => {
     expect(INDEXED_VERSIONS.map(v => v.id)).toEqual(VERSION_REGISTRY.map(v => v.id));
+  });
+
+  it('offers Season 6 every world folder it ships, and 0.97d World1-12', () => {
+    const ROOT = join(import.meta.dirname, '..');
+    const numbers = (dir: string, folder: RegExp) =>
+      readdirSync(join(ROOT, dir)).flatMap(name => folder.exec(name)?.slice(1).map(Number) ?? []);
+    const shipped = new Set([
+      ...numbers('public/game-assets', /^(?:World|Object)(\d+)$/),
+      ...numbers('Data', /^World(\d+)$/),
+    ]);
+    const worlds = Object.fromEntries(INDEXED_VERSIONS.map(v => [v.id, [...v.data.worlds]]));
+
+    expect(worlds.season6.sort((a, b) => a - b)).toEqual([...shipped].sort((a, b) => a - b));
+    expect(worlds.v097d).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
   });
 });

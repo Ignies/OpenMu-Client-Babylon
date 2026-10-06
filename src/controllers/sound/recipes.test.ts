@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { VersionData } from '../../version/contract';
 
-let data: VersionData = { folder: './Data/', assets: './game-assets/', locale: 'Eng' };
+let data: VersionData = { folder: './Data/', assets: './game-assets/', locale: 'Eng', worlds: [] };
 vi.mock('../../version', () => ({
   get gameVersion() {
     return { data };
@@ -14,7 +14,7 @@ const { soundUrl } = await import('./recipes');
 
 describe('soundUrl', () => {
   beforeEach(() => {
-    data = { folder: './Data/', assets: './game-assets/', locale: 'Eng' };
+    data = { folder: './Data/', assets: './game-assets/', locale: 'Eng', worlds: [] };
   });
 
   it('is the catalogue file under the version assets', () => {
@@ -26,6 +26,7 @@ describe('soundUrl', () => {
       folder: './Data-v097d/',
       assets: './game-assets-v097d/',
       locale: '',
+      worlds: [],
       sounds: { 'Sound/aTower': 'Sound/aTower.wav' },
       borrows: { assets: './game-assets/', ownAssets: new Set(['sound/atower.wav']) },
     };

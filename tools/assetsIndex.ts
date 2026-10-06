@@ -20,7 +20,8 @@
 // reads it from: its own file where it ships one, the lender's otherwise, never
 // both, and nothing it lacks; nor the lender's sound for a key it plays its own
 // file for (`data.sounds`). The resolvers are the client's own (`assetUrl`,
-// `dataUrl`), so the index cannot disagree with what the game asks for.
+// `dataUrl`), so the index cannot disagree with what the game asks for. Its map
+// groups are its own worlds (`data.worlds`), not every one the lender holds.
 
 import { existsSync, readdirSync, statSync, writeFileSync } from 'fs';
 import { join, relative, resolve, sep } from 'path';
@@ -171,6 +172,7 @@ function treesOf(data: VersionData): Tree[] {
 /** One version's index over a built tree (`dist/`). */
 export function buildAssetsIndex(root: string, data: VersionData): { sidecars: boolean; groups: Group[] } {
   const groups = new Map<string, Group>();
+  const worlds = new Set(data.worlds);
 
   for (const tree of treesOf(data)) {
     const folder = folderOf(tree.url);
@@ -182,6 +184,8 @@ export function buildAssetsIndex(root: string, data: VersionData): { sidecars: b
       if (ignored(tree, rel) || tree.reads(rel) !== tree.url + rel) continue;
 
       const where = groupOf(tree, rel);
+      // A world the version does not have (`data.worlds`), though a lender's tree holds it.
+      if (where.world !== undefined && !worlds.has(where.world)) continue;
       let group = groups.get(where.id);
       if (!group) {
         group = {

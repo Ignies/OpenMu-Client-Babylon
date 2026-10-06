@@ -63,6 +63,11 @@ export interface VersionData {
   /** `Data/Local/<locale>/` subfolder used for language tables. */
   readonly locale: string;
   /**
+   * The `World<n>` / `Object<n>` folder numbers this version ships. The
+   * pre-download index offers a map group only for these (`tools/assetsIndex.ts`).
+   */
+  readonly worlds: readonly number[];
+  /**
    * Every path `folder` contains, lower-cased and relative to it. A period
    * tree is a subset of the Season 6 one, so base code routinely asks it for
    * files it never shipped - Season 6 window chrome, post-0.97 effect
