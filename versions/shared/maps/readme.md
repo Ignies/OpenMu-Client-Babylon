@@ -142,7 +142,12 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   tick in three on both worlds; 5 makes `BITMAP_ADV_SMOKE + 1` with `ADV_SMOKE` SubType 0 and
   `BITMAP_CLOUD` SubType 6 with `ADV_SMOKE` SubType 1, each pair one tick in eight, the rate of the
   original's `o->Timer` walk; 58-60 make `BITMAP_WATERFALL_1` SubType 2, `_2` SubType 1 and `_3`
-  SubType 3 (`waterfall1_2`, `waterfall2_1`, `waterfall3_3`).
+  SubType 3 (`waterfall1_2`, `waterfall2_1`, `waterfall3_3`); the volcano's 85 smokes as 5 with its
+  own SubTypes (`fi02_1` one tick in sixteen, `fi01_2`, `cloud14`, `fi01_2` at twice the scale), 88
+  drifts a dark `cloud10` and 89 a faint red `cloud11`, one tick in four.
+- `balgasbarracks/firePillarObject.test.ts`: the Refuge's 92 makes two `BITMAP_FIRE_RED` effects a
+  tick on the crest of its `sinf(WorldTime * 0.0005f)` wave, each making a `fireRed` a tick for 40
+  ticks at the effect's own 0.9, only in view, the made ones running out after the crest.
 - `doppelganger4/spec.test.ts`: 59 puffs a `BITMAP_SMOKE` SubType 13 (`smoke13`) one tick in three where
   Kanturu's puffs SubType 21, and 82 / 83 make `BITMAP_WATERFALL_3` SubType 3 / `_2` SubType 1 where
   Kanturu makes SubType 4 / 2; every other Kanturu row stays.

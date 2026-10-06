@@ -101,7 +101,12 @@ shared pools, textures and particle recipes other folders reuse.
   (`BITMAP_WATERFALL_2` SubType 1) is made off its spot, falls, wobbles, grows and dims teal;
   `waterfall2_2` (SubType 2) is the same grey, 40 ticks, the object's scale added to its own;
   `waterfall3_3` (`BITMAP_WATERFALL_3` SubType 3) sinks faster each tick and keeps 0.97 of its light;
-  `waterfall3_4` (SubType 4) leaps up, sinks 2.5 faster a tick and dims 1.1.
+  `waterfall3_4` (SubType 4) leaps up, sinks 2.5 faster a tick and dims 1.1; the Balgass volcano's
+  `fi01_2` / `fi02_1` (`BITMAP_ADV_SMOKE` SubType 2, `+ 1` SubType 1) are SubType 0 at half the
+  spawn scale, `cloud14` (`BITMAP_CLOUD` SubType 14) is `cloud6` at a fifth of it, subtracted,
+  `cloud10` (SubType 10) drifts twice its push from up to 200 off and darkens 0.01 a tick to 0.15,
+  fading past 300 and gone past 500, `cloud11` (SubType 11) drifts the same in its own light, turning,
+  and `fireRed` (`BITMAP_FIRE_RED`, firered.jpg) shoots up steady for 20 ticks.
 - `afterimage.test.ts`: a copy takes the drawn meshes of each part onto a skeleton of its own, posed on
   the clip's first key while the body keeps its own; a placed part stands where a body facing that way
   would draw it, at its alpha; an unplaced or 0-alpha part is not drawn; it ends taking its copies along.
