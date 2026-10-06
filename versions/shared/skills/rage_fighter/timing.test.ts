@@ -986,17 +986,26 @@ describe('Dark Side (263)', () => {
   /**
    * The hero's cast, echoed at the end of tick 0 with targets 6 (4 tiles ahead) and 7 (3 tiles aside) already named, at READY's
    * 0.3 keys a tick: the follow-ups go on ticks 8 and 15. The afterimage copies are stand-ins that record where each part is put;
-   * the body draws five parts, so five DarksideRendering calls a tick.
+   * the body draws five parts (no helm: the head in its place), so five DarksideRendering calls a tick. `look` dresses the hero:
+   * a helm item, a skin (a changed body) or the map.
    */
-  function heroDarkSide(ticks = 30) {
+  function heroDarkSide(ticks = 30, look: { helm?: { group: number; num: number }; skin?: number; map?: ENUM_WORLD } = {}) {
     let tick = 0;
-    const model = { CurrentAction: READY as number, AnimationSpeed: 0.3, actionFrame: () => tick * 0.3 };
-    const hero = { netId: 1, localPlayer: true, transform: { pos: new Vector3(100, 0, 100), rot: new Vector3(), scale: 1 }, modelObject: model } as unknown as Entity;
+    const parts = Object.fromEntries(['Boots', 'Gloves', 'Pants', 'Armor', 'HelmMask', 'Helm'].map(k => [k, { part: k }]));
+    const model = { ...parts, CurrentAction: READY as number, AnimationSpeed: 0.3, actionFrame: () => tick * 0.3 };
+    const hero = {
+      netId: 1,
+      localPlayer: true,
+      skin: look.skin,
+      charAppearance: { helm: look.helm ?? null },
+      transform: { pos: new Vector3(100, 0, 100), rot: new Vector3(), scale: 1 },
+      modelObject: model,
+    } as unknown as Entity;
     const others: Record<number, Entity> = {
       6: { netId: 6, transform: { pos: new Vector3(100, 0, 104), rot: new Vector3(), scale: 1 } } as unknown as Entity,
       7: { netId: 7, transform: { pos: new Vector3(103, 0, 100), rot: new Vector3(), scale: 1 } } as unknown as Entity,
     };
-    store.world = { scene, playerEntity: hero, getByNetId: (id: number) => others[id], mapIndex: ENUM_WORLD.WD_0LORENCIA, getTerrainHeight: () => 0 };
+    store.world = { scene, playerEntity: hero, getByNetId: (id: number) => others[id], mapIndex: look.map ?? ENUM_WORLD.WD_0LORENCIA, getTerrainHeight: () => 0 };
     const copies: { tick: number; placed: { tick: number; part: number; at: Vector3; angle: number; alpha: number }[] }[] = [];
     const spawns: Spawn[] = [];
     const draws: Draw[] = [];
@@ -1007,7 +1016,8 @@ describe('Dark Side (263)', () => {
       if (name === 'afterimage') {
         const copy = { tick, placed: [] as (typeof copies)[number]['placed'] };
         copies.push(copy);
-        return { alive: true, parts: 5, stop() {}, hide() {}, place: (part: number, p: Vector3, angle: number, alpha: number) => copy.placed.push({ tick, part, at: p.clone(), angle, alpha }) };
+        const n = (opts as unknown as { parts: unknown[] }).parts.length;
+        return { alive: true, parts: n, stop() {}, hide() {}, place: (part: number, p: Vector3, angle: number, alpha: number) => copy.placed.push({ tick, part, at: p.clone(), angle, alpha }) };
       }
       if (name === 'ticked') {
         const script = opts as unknown as { tick: (fx: TickedFx, n: number) => boolean };
@@ -1046,6 +1056,34 @@ describe('Dark Side (263)', () => {
     expect(first.placed.slice(0, 5).map(p => p.part)).toEqual([0, 1, 2, 3, 4]);
     expect(first.placed[0].alpha).toBeCloseTo(0.22, 5);
     expect(Vector3.Distance(first.placed[0].at, new Vector3(104.5, 0, 101.5))).toBeLessThan(0.01);
+  });
+
+  it('copies the parts RenderCharacter draws: the head only under an open helm, the Angel alone in Chaos Castle, a changed body\'s one part (ZzzCharacter.cpp:9345-9390, :9536-9654, :12114-12128)', () => {
+    const copied = (look: Parameters<typeof heroDarkSide>[1]) =>
+      heroDarkSide(1, look).spawns.filter(s => s.name === 'afterimage').map(s => (s.opts.parts as { part: string }[]).map(p => p.part));
+    const BODY = ['Boots', 'Gloves', 'Pants', 'Armor'];
+    // No helm: BODYPART_HELM is the head; a closed helm hides it (BODYPART_HEAD -1); an open one shows it after the helm.
+    expect(copied({})).toEqual([[...BODY, 'Helm']]);
+    expect(copied({ helm: { group: 7, num: 1 } })).toEqual([[...BODY, 'HelmMask']]);
+    for (const num of [0, 2, 10, 13, 63, 65, 68, 70]) expect(copied({ helm: { group: 7, num } })).toEqual([[...BODY, 'HelmMask', 'Helm']]);
+    expect(copied({ helm: { group: 7, num: 14 } })).toEqual([[...BODY, 'HelmMask']]);
+    expect(copied({ map: ENUM_WORLD.WD_18CHAOS_CASTLE })).toEqual([['Armor']]);
+    // Skeleton, Elite Skull Soldier, Jack O'Lantern, Christmas girl, panda and skeleton rings: the one part file on Armor.
+    for (const skin of [14, 372, 373, 374, 503, 548]) expect(copied({ skin })).toEqual([['Armor']]);
+    // Any other skin draws plainly, with no DarksideRendering.
+    for (const skin of [7, 488]) expect(copied({ skin })).toEqual([]);
+  });
+
+  it('a changed body\'s afterimages run 30 times as far a call, as in Chaos Castle (bChange, MonkSystem.cpp:786-792, :1489-1493)', () => {
+    const steps = (look: Parameters<typeof heroDarkSide>[1]) => {
+      const placed = heroDarkSide(12, look).copies[1].placed.filter(p => p.part === 0);
+      return [1, 2].map(i => +(Vector3.Distance(placed[i].at, placed[i - 1].at) * 100).toFixed(2));
+    };
+    // 0.7 x 0.7 cm more a call: five calls a tick run its calls 2-6 and 7-11 between its first part's draws, 9.8 and 22.05 cm.
+    expect(steps({})).toEqual([9.8, 22.05]);
+    // One call a tick, its calls 2 and 3: 0.98 and 1.47 cm, x30.
+    expect(steps({ skin: 503 })).toEqual([29.4, 44.1]);
+    expect(steps({ map: ENUM_WORLD.WD_18CHAOS_CASTLE })).toEqual([29.4, 44.1]);
   });
 
   it('the bursts on the target the body runs at from the afterimages\' calls 20 and 21, the waves from their calls 31 and 32 and the body\'s past 30 cm (MonkSystem.cpp:736-747, :811-826)', () => {

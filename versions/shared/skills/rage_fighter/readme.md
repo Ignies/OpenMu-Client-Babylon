@@ -50,17 +50,19 @@ follow-up the next one due drops the targets (SendDarksideAtt's InitDarksideTarg
 
 DarksideRendering (MonkSystem.cpp:697-857) is the hero's alone: it reads the CMonkSystem only his cast fills, so another
 caster's Dark Side shows RageCreateEffect only. RenderCharacter calls it for each body part it draws while he plays
-DARKSIDE_READY (ZzzCharacter.cpp:9572-9654) and each call moves everything on, so a tick makes five or six calls and the
-parts of one tick stand apart; `rendering.ts` ports it a call at a time and the cast's driver (`index.ts`) places the
-`afterimage` copies (fx), each in DARKSIDE_ATTACK's one key. While a target is left to visit, his body (full alpha) runs
+DARKSIDE_READY (ZzzCharacter.cpp:9572-9654) and each call moves everything on, so the parts of one tick stand apart: boots,
+gloves, pants, armour and helm (the head with no helm), and the head too under an open helm (SetCharacterScale,
+ZzzCharacter.cpp:12114-12128); the Angel alone in Chaos Castle (:9536-9568); a changed body's one part with the six skins
+whose SubType takes the Rage Fighter branch (:9345-9390), none with any other. `rendering.ts` ports it a call at a time
+and the cast's driver (`index.ts`) places the `afterimage` copies (fx), each in DARKSIDE_ATTACK's one key. While a target is left to visit, his body (full alpha) runs
 `f x f x 0.05` cm out toward it, `f` the calls since the last follow-up, with a MODEL_SHOCKWAVE01 sub3 once past 30 cm and
 a burst on the target on the call before it passes it. Once a follow-up has gone, an afterimage (CDummyUnit) a call while
 the READY key passes 0, 2, 4, 6 and 8: from 150, 150 cm turned 60 degrees a dummy off the target the body runs at (the
 echo's target once none is left; with none known it is never seen), through it 0.49 cm more a call, alpha 0.2 up 0.02 a
 call to 0.6 (0.6 and 0.62 by turns, float steps), down 0.07 a call past 300 cm, gone past 500, 30 times as far a call in
-Chaos Castle; on its calls 20-21 a burst on the target while one is left, on 31-32 a MODEL_SHOCKWAVE01 sub4 at it, turned
-its own way - 180. The waves start 150 cm on and back off toward their maker (ZzzEffect.cpp:5895-5930,
-MoveHandlers.cpp:9397-9425); the bursts are BITMAP_DAMAGE2 particles. A changed body (bChange's x 30) is not told apart.
+Chaos Castle or a changed body (bChange); on its calls 20-21 a burst on the target while one is left, on 31-32 a
+MODEL_SHOCKWAVE01 sub4 at it, turned its own way - 180. The waves start 150 cm on and back off toward their maker (ZzzEffect.cpp:5895-5930,
+MoveHandlers.cpp:9397-9425); the bursts are BITMAP_DAMAGE2 particles.
 
 `_shared.ts` holds the Ourforces buff looks, BITMAP_LIGHT_RED by sub: `OURFORCES_GLOW` and `OURFORCES_GROUND`, the red glow
 on 17 bones in three breathing groups and the decals under the body (Increase Health); `ourforcesSmoke`, a red
@@ -92,7 +94,7 @@ count moves on the effects clock (`eachMove`, `movesSince`), so a script made in
 - `timing.test.ts`: per skill, the tick each part draws or sounds at, against the clip; Dark Side's
   follow-ups against the echo, the hero's clip and AttackTime's stop at 15, the targets dropped past the fifth, and the
   hero's DarksideRendering a tick at a time (five parts a tick: the body, the afterimages, their waves and bursts, none
-  for another caster); Dragon Roar's dragon dummy, its red flares, the shake and the lava joints; the master skills (551, 554, 558-560)
+  for another caster), the parts it calls for by helm, Chaos Castle and skin, and a changed body's x30; Dragon Roar's dragon dummy, its red flares, the shake and the lava joints; the master skills (551, 554, 558-560)
   sound as their base, as RageCreateEffect plays one sound for each case; the Ourforces buff looks by sub, the smoke
   and the mirror rolls adding up with the buffs, the smoke stopping under a cloak; Increase Block's lasting pillar, its
   body and how long it stands; Charge's sword force, its copies, spray and light.
