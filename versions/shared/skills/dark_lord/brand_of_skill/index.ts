@@ -5,8 +5,10 @@ import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
 import { TICK, WHITE, delay, entityGone, entityPos, fxNow, type RGB } from '@/controllers/fx/core';
 
+import { playCombat } from '@/controllers/sound';
+import { ENUM_WORLD } from '@/core/types';
 import { A } from '@/controllers/combat/recipes';
-import { MOUNTED_HAND, bodyLight } from '../../_shared';
+import { MOUNTED_HAND, bodyLight, currentMap } from '../../_shared';
 import { cardHands, handCard } from '../_shared';
 
 const f32 = Math.fround;
@@ -99,12 +101,14 @@ function manaRune(c: SkillContext): void {
 /**
  * At the cast's release (AttackTime 15, ZzzCharacter.cpp:4139-4145), as Add Critical: the MODEL_DARKLORD_SKILL card at each
  * hand in its white Light, at Weapon[0]'s link bone unless it holds arrows and Weapon[1]'s unless it holds bolts or a shield,
- * and the mana rune over the caster (ZzzCharacter.cpp:4699-4714).
+ * the mana rune over the caster and SOUND_BCS_BRAND_OF_SKILL, with no object (ZzzCharacter.cpp:4699-4714). Only Battle Castle
+ * loads that sound (MapManager.cpp:283): anywhere else the original plays nothing.
  */
 const brand = afterRelease((_at, c) => {
   if (entityGone(c.caster)) return;
   for (const hand of cardHands(c.caster, false)) handCard(c.scene, c.caster, hand, WHITE);
   manaRune(c);
+  if (currentMap() === ENUM_WORLD.WD_30BATTLECASTLE) playCombat('Sound/battlecastle/sCDarkAssist');
 });
 
 export default defineSkill({

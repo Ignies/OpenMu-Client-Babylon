@@ -15,6 +15,25 @@ vi.hoisted(() => {
   g.location ??= { href: 'http://localhost/', search: '', hostname: 'localhost', protocol: 'http:' };
 });
 
+// The live world: the map, and a full terrain light.
+const store = vi.hoisted(() => ({ map: 0 }));
+vi.mock('@/ecs/current', () => ({
+  Ecs: {
+    get world() {
+      return { mapIndex: store.map, getTerrainLight: () => ({ x: 1, y: 1, z: 1 }) };
+    },
+  },
+}));
+
+const played: string[] = [];
+vi.mock('@/controllers/sound/listener', async importOriginal => ({
+  ...(await importOriginal<object>()),
+  playSfx: (key: string) => {
+    played.push(key);
+    return 0;
+  },
+}));
+
 /**
  * MODEL_DARKLORD_SKILL, the card the Dark Lord's hand skills leave at each weapon's link bone: c->Weapon[0] (the appearance's
  * left hand, slot 0) on bone 33 and c->Weapon[1] (its right hand, slot 1) on bone 42 (ZzzCharacter.cpp:12180-12193, :11849-11850).
@@ -156,5 +175,21 @@ describe('Brand of Skill (75): MODEL_MANA_RUNE over the caster (ZzzCharacter.cpp
       expect([o.colour, o.shine, o.hideMesh, r.opts.angle, Math.round(o.seconds * 25)]).toEqual([[0.4, 0.4, 0.4], undefined, undefined, [0, 0, 45], 9]);
       expect([1, 2, 5, 9].map(m => +o.scaleAt(atMove(m)).toFixed(4))).toEqual([1.08, 1.06, 1, 1]);
     }
+  });
+});
+
+describe('Brand of Skill (75): its sound', () => {
+  it('sCDarkAssist at the release, in Battle Castle only, the one map that loads it (ZzzCharacter.cpp:4714, MapManager.cpp:283)', () => {
+    const release = cards(cast(75, caster(0)))[0].tick;
+    const heard = (map: ENUM_WORLD, ticks: number) => {
+      store.map = map;
+      played.length = 0;
+      cast(75, caster(0), ticks);
+      store.map = 0;
+      return [...played];
+    };
+    expect(heard(ENUM_WORLD.WD_30BATTLECASTLE, release - 1)).toEqual([]);
+    expect(heard(ENUM_WORLD.WD_30BATTLECASTLE, release)).toEqual(['Sound/battlecastle/sCDarkAssist']);
+    expect(heard(ENUM_WORLD.WD_0LORENCIA, 30)).toEqual([]);
   });
 });
