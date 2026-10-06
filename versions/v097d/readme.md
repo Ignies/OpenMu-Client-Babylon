@@ -119,7 +119,8 @@ What drawing the in-game interface the 0.97d way needs, none of it built yet:
 - `data/inventory.test.ts`: the inventory matches the files in `Data-v097d/`; `gate.bmd` is spelled
   the way the client asks for it.
 - `data/assets.test.ts`: `assets.ts` matches the files in `public/game-assets-v097d/`.
-- `data/served.test.ts`: every terrain file, tile and placed object model of each world, and
-  every sound key, resolves to a file that exists, in its case; Lorencia grows grass from its one
+- `data/served.test.ts`: every terrain file, tile and placed object model of each world, every
+  item, class body, monster and NPC model, and every sound key, resolves to a file that exists,
+  in its case; Lorencia grows grass from its one
   card only; the gate table decodes; the sign plates and the borrowed minimap pictures resolve.
 - `ui/preload.test.ts`: every world sheet it preloads is read from a tree that has it.
