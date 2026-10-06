@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { defineModule, installModules, moduleOn, refusedModules, setServerModulesOff } from './module';
+import { defineModule, installModules, moduleOn, onInVersion, refusedModules, setServerModulesOff } from './module';
 import type { InProcessApi } from './_api/host';
 
 function recorder() {
@@ -34,6 +34,19 @@ describe('installModules', () => {
     const mod = (id: string) => defineModule({ id, install: api => got.push([id, api]) });
     installModules([mod('api_a'), mod('api_b')], undefined, apiFor);
     expect(got).toEqual([['api_a', { id: 'api_a' }], ['api_b', { id: 'api_b' }]]);
+  });
+});
+
+describe('onInVersion', () => {
+  it('leaves out the modules a version turns off, and every module that requires one', () => {
+    const { installed, mod } = recorder();
+    installModules(
+      [mod('ver_guild'), mod('ver_guild_war', { requires: ['ver_guild'] }), mod('ver_band')],
+      onInVersion({ modulesOff: ['ver_guild'] })
+    );
+    expect(installed).toEqual(['ver_band']);
+    expect(moduleOn('ver_guild')).toBe(false);
+    expect(moduleOn('ver_guild_war')).toBe(false);
   });
 });
 

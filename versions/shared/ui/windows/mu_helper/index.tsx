@@ -6,7 +6,6 @@ import { t } from '@/i18n';
 import { HeroSkills } from '@/modules/skills';
 import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
-import { gameVersion } from '@/version';
 import { isKey } from '@/controllers/interface/keyBindings';
 import { BaseClass, getBaseClass } from '@/modules/hero/characterStats';
 import {
@@ -661,7 +660,6 @@ export const MuHelperWindow = observer(() => {
   const [picker, setPicker] = useState<PickerTarget | null>(null);
 
   useEventBus('keyPressed', key => {
-    if (!gameVersion.features.muHelper) return;
     if (isKey('muHelperConfig', key) && Ecs.world?.playerEntity) {
       toggleMuHelperWindow();
     }
@@ -672,7 +670,7 @@ export const MuHelperWindow = observer(() => {
     if (!open) setPicker(null);
   }, [open]);
 
-  if (!gameVersion.features.muHelper || !open) return null;
+  if (!open) return null;
 
   const close = () => toggleMuHelperWindow(false);
 

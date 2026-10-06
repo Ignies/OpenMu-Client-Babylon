@@ -125,6 +125,8 @@ Controllers, ECS systems and `app/boot.tsx` add theirs at runtime, after the mod
 - `social` (core), `economy` and `gm` have a `module.ts` with nothing to install: their state is
   loaded by whoever imports it. Turning `economy` off turns off `vault`, `chaos_mix`, `trade` and
   `personal_shop` (they require it).
+- A module the game version turns off (`gameVersion.modulesOff`, `onInVersion` in `src/app/logic.ts`)
+  is never installed: no listener, no window. One a world's server turns off is installed by then.
 - A module the server turns off keeps its listeners and, for `events` and `quests`, the facade's
   frame update and client-side entry points (their readmes, "When it is off"); only its windows
   hide. A window several modules share (`social_prompts`) names none and stays.
@@ -132,7 +134,7 @@ Controllers, ECS systems and `app/boot.tsx` add theirs at runtime, after the mod
 ## Tests
 - `module.test.ts`: install order, disabled and core modules, requirements, the API each install
   gets, API ranges served and refused (with the modules that require a refused one); `moduleOn`
-  with a server's `modulesOff`.
+  with a server's `modulesOff`; a version's `modulesOff` (`onInVersion`).
 - `modules.test.ts`: every `module.ts` is listed once and named after its folder.
 - `switchOff.test.ts`: every module registers its listeners when installed, not when loaded;
   with events or quests off, their packets keep only the other modules' listeners.

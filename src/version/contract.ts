@@ -147,22 +147,17 @@ export interface VersionFeatures {
   readonly socketItems: boolean;
   /** Ancient sets (0.97+). */
   readonly ancientItems: boolean;
-  /** Harmony jewel + refine stones (S3+). */
-  readonly harmonyJewel: boolean;
-  /** Dark Lord / Magic Gladiator character classes (0.97 / 0.99+). */
+  /**
+   * The character classes after the first three: the create window offers
+   * only those the version has (Dark Lord, Magic Gladiator: 0.99 / 0.97;
+   * Summoner, Rage Fighter: S3 / S5).
+   */
   readonly darkLord: boolean;
   readonly magicGladiator: boolean;
-  /** Summoner / Rage Fighter (S3 / S5+). */
   readonly summoner: boolean;
   readonly rageFighter: boolean;
-  /** MU Helper (S6 E3, OpenMU `MuHelper`). */
-  readonly muHelper: boolean;
-  /** Item hotkeys / consumable belt row (S6). */
+  /** The Q/W/E/R consumable belt on the bottom bar (S6, `CNewUIItemHotKey`). */
   readonly itemHotkeys: boolean;
-  /** Blood Castle / Devil Square / Chaos Castle event windows. */
-  readonly events: boolean;
-  /** Quest system with the S6 NPC dialogue windows (`Quest_eng.bmd`). */
-  readonly questDialogs: boolean;
 }
 
 export interface GameVersion {
@@ -196,6 +191,12 @@ export interface GameVersion {
   readonly protocol: VersionProtocol;
   readonly data: VersionData;
   readonly features: VersionFeatures;
+  /**
+   * The optional gameplay modules this version's server never has, in the
+   * words a world's `server.json` `modulesOff` uses (`mu_helper`). They are
+   * never installed, so no listener of theirs runs and their windows hide.
+   */
+  readonly modulesOff: readonly string[];
 }
 
 export function asciiBytes(s: string): number[] {

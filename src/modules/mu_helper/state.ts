@@ -3,6 +3,7 @@ import { t } from '@/i18n';
 import { Ecs } from '@/ecs/current';
 import { addNotification } from '../chat';
 import { Session } from '../session';
+import { moduleOn } from '../module';
 import {
   MuHelperSaveDataRequestPacket,
   MuHelperStatusChangeRequestPacket,
@@ -71,6 +72,8 @@ export const MuHelper = new (class {
    * server answers with `MuHelperStatusUpdate`, which flips `active`.
    */
   toggleMuHelper() {
+    // Off (a version or a world without it): the key does nothing.
+    if (!moduleOn('mu_helper')) return;
     const active = this.active;
     if (Session.isOffline) {
       // No server to answer: flip locally so the loop can be exercised

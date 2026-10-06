@@ -22,7 +22,8 @@ the two server packets, with its running state and the raw config blob (`MuHelpe
   into `draft` while the window is closed. `saveMuHelperConfig` (`NewUIMuHelper.cpp:1095-1116`)
   applies the draft and sends `MuHelperSaveDataRequest`; the server echoes the config back.
 - `loop.ts` ports `CMuHelper` (`MuHelper.cpp`). It runs only while `MuHelper.active` and the
-  version has `features.muHelper`. Every 250 ms (`Winmain.cpp:1282`) `work` does at most one of:
+  module is on (`moduleOn('mu_helper')`: a version's `modulesOff` or a world's turns it off, and then
+  `toggleMuHelper` does nothing either). Every 250 ms (`Winmain.cpp:1282`) `work` does at most one of:
   pet command, buff, heal / drain life / potion, pick up, regroup, attack, then repair.
 - It never builds packets. It writes the same seams as the player's clicks: `world.castRequest`,
   `world.pickupTarget`, `hero.playerMoveTo` and the commands a click calls (`HeroSkills.selectSkill`,
@@ -53,3 +54,4 @@ the two server packets, with its running state and the raw config blob (`MuHelpe
 ## Tests
 - `config.test.ts`: blob size, default layout, flag bits, round trips, zero blob, extra item names,
   away seconds clamp.
+- `loop.test.ts`, `state.test.ts`: nothing runs or starts while the module is off.

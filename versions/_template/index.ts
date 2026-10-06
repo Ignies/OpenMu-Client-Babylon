@@ -77,14 +77,12 @@ export const gameVersion: GameVersion = {
     masterSkills: false,
     socketItems: false,
     ancientItems: false,
-    harmonyJewel: false,
     darkLord: false,
     magicGladiator: false,
     summoner: false,
     rageFighter: false,
-    muHelper: false,
     itemHotkeys: false,
-    events: false,
-    questDialogs: false,
   },
+  // TODO: the optional modules (`src/modules/modules.ts` ids) its server has no counterpart for.
+  modulesOff: [],
 };

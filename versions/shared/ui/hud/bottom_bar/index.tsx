@@ -42,6 +42,7 @@ import { SkillTooltip } from '../../components/skill_tooltip';
 import { ExpTooltip } from './expTooltip';
 import { SessionStats } from '@/modules/session/sessionStats';
 import { devQuery } from '@/core/devSeams';
+import { gameVersion } from '@/version';
 import { itemBaseName } from '@versions/shared/items/itemsDatabase';
 import {
   ITEM_HOTKEY_CODES,
@@ -811,7 +812,8 @@ export const BottomBar = observer(() => {
 
       <Orbs />
 
-      <ConsumableItems />
+      {/* The Q/W/E/R belt is Season 6's (`CNewUIItemHotKey`); a version without it has none. */}
+      {gameVersion.features.itemHotkeys && <ConsumableItems />}
 
       <SkillSlots />
 
