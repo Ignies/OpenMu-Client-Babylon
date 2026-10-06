@@ -113,7 +113,8 @@ import {
   type KindName,
 } from './effectParticles';
 import { publishViewPlanes, type ViewPlane } from '../render/viewPlanes';
-import type { Scene } from '../render/babylon/exports';
+import { toRenderAngles } from '../render/renderAngles';
+import type { Scene, Vector3 } from '../render/babylon/exports';
 
 let deltaMs = 40;
 let tick: (() => void) | null = null;
@@ -224,13 +225,13 @@ describe('KIND_REACH', () => {
   });
 });
 
-/** Spawns one `kind` at the origin with every roll at `roll`, then plays `ticks` 25 Hz ticks. */
-async function play(kind: KindName, scale: number, roll: number, ticks: number, angleZ = 0): Promise<FakeSprite> {
+/** Spawns one `kind` at the origin with every roll at `roll` on a node turned `yaw`, then plays `ticks` 25 Hz ticks. */
+async function play(kind: KindName, scale: number, roll: number, ticks: number, yaw = 0): Promise<FakeSprite> {
   const original = Math.random;
   Math.random = () => roll;
 
   try {
-    await spawnParticle(scene, kind, { x: 0, y: 0, z: 0 }, angleZ, scale, [0.2, 0.4, 0.6]);
+    await spawnParticle(scene, kind, { x: 0, y: 0, z: 0 }, yaw, scale, [0.2, 0.4, 0.6]);
     const sprite = fakes.sprites[fakes.sprites.length - 1];
     for (let n = 0; n < ticks; n++) tick?.();
     return sprite;
@@ -333,11 +334,47 @@ describe('smoke13, BITMAP_SMOKE SubType 13 (ZzzEffectParticle.cpp:1238-1243, :53
 
 const rgba = (s: FakeSprite) => [s.color.r, s.color.g, s.color.b, s.color.a].map(c => c.toFixed(3));
 
+/** The yaw a node turned `degrees` the MU way carries (renderAngles.ts), which the emitters are handed. */
+const nodeYaw = (degrees: number) => toRenderAngles({ x: 0, y: (degrees * Math.PI) / 180, z: 0 }, { x: 0, y: 0, z: 0 } as Vector3).y;
+
+describe('the push, turned with the object (MovePosition, ZzzAI.cpp:148-156, ZzzEffectParticle.cpp:3885)', () => {
+  // `VectorRotate(Speed, AngleMatrix(Angle))` with only Angle[2] set: x' = x cy - y sy, y' = x sy + y cy.
+  const movePosition = (degrees: number, [x, y]: readonly number[]) => {
+    const a = (degrees * Math.PI) / 180;
+    return [x * Math.cos(a) - y * Math.sin(a), x * Math.sin(a) + y * Math.cos(a)];
+  };
+
+  // trueFire at roll 0 is pushed `(-2, 0, 1)` along the object; a tick moves it once by that, turned.
+  it('goes where MovePosition turns its velocity on an object turned any way', async () => {
+    for (const degrees of [0, 90, 30, 200]) {
+      const sprite = await play('trueFire', 1, 0, 1, nodeYaw(degrees));
+      const [x, y] = movePosition(degrees, [-2, 0]);
+      expect([sprite.position.x, sprite.position.z], `${degrees} degrees`).toEqual([expect.closeTo(x / 100, 5), expect.closeTo(y / 100, 5)]);
+      disposeEffectParticles();
+    }
+  });
+
+  it('is turned the same way by an emitter handed the node yaw', async () => {
+    const emitter = new ParticleEmitter(scene, [{ kinds: ['trueFire'], every: 1 }], { x: 0, y: 0, z: 0 }, nodeYaw(90), 1);
+    const original = Math.random;
+    Math.random = () => 0;
+    try {
+      emitter.update();
+      await new Promise(resolve => setTimeout(resolve, 0));
+    } finally {
+      Math.random = original;
+    }
+    tick?.();
+    const sprite = fakes.sprites[fakes.sprites.length - 1];
+    expect([sprite.position.x, sprite.position.z]).toEqual([expect.closeTo(0, 5), expect.closeTo(-0.02, 5)]);
+  });
+});
+
 describe('fi01_0 and fi01_1, BITMAP_ADV_SMOKE SubType 0 and 1 (ZzzEffectParticle.cpp:3292-3323, :8219-8248)', () => {
   // `MovePosition(Position, Angle, Velocity)` for every particle (:3885), then `VectorAddScaled(Position, Velocity)`
   // again in its own case (:8220).
   it('moves by its velocity twice a tick: turned with the object, then as it is', async () => {
-    const sprite = await play('fi01_0', 3, 0.5, 1, Math.PI / 2);
+    const sprite = await play('fi01_0', 3, 0.5, 1, nodeYaw(90));
     expect(sprite.position.x).toBeCloseTo(0.04);
     expect(sprite.position.z).toBeCloseTo(0.04);
     expect(sprite.position.y).toBeCloseTo(0.04);

@@ -94,6 +94,7 @@ type Particle = {
   vx: number;
   vy: number;
   vz: number;
+  /** MU's `Angle[2]` in radians, which MovePosition turns the velocity by. */
   angleZ: number;
   lr: number;
   lg: number;
@@ -1040,6 +1041,7 @@ function ensureTicking(target: Scene) {
       if (p.lifeTime <= 0) p.live = false;
 
       if (p.live) {
+        // MovePosition (ZzzEffectParticle.cpp:3885): the velocity turned by Angle[2].
         if (p.vx !== 0 || p.vy !== 0 || p.vz !== 0) {
           const c = Math.cos(p.angleZ);
           const s = Math.sin(p.angleZ);
@@ -1090,11 +1092,15 @@ function release(p: Particle) {
   if (pool) pool.free.push(p.sprite);
 }
 
+/**
+ * `yaw` is the node's own (`rotation.y`), MU's `Angle[2]` turned the other way (renderAngles.ts); it is
+ * turned back here, so the tick turns the velocity as MovePosition does (ZzzAI.cpp:148-156).
+ */
 export async function spawnParticle(
   target: Scene,
   kindName: KindName,
   position: { x: number; y: number; z: number },
-  angleZ: number,
+  yaw: number,
   scale: number,
   light: readonly [number, number, number],
   jitter = 0
@@ -1128,7 +1134,7 @@ export async function spawnParticle(
     vx: 0,
     vy: 0,
     vz: 0,
-    angleZ,
+    angleZ: -yaw,
     lr: light[0],
     lg: light[1],
     lb: light[2],
@@ -1212,7 +1218,8 @@ export class ParticleEmitter {
     private readonly target: Scene,
     private readonly emissions: readonly Emission[],
     private readonly position: { x: number; y: number; z: number },
-    private readonly angleZ: number,
+    /** The node's `rotation.y`, as `spawnParticle` takes it. */
+    private readonly yaw: number,
     private readonly scale: number
   ) {
     this.#due = emissions.map(() => 0);
@@ -1268,7 +1275,7 @@ export class ParticleEmitter {
             this.target,
             kind,
             this.position,
-            this.angleZ,
+            this.yaw,
             this.scale * (emission.scale ?? 1),
             light,
             emission.jitter

@@ -83,6 +83,8 @@ shared pools, textures and particle recipes other folders reuse.
 ## Tests
 - `effectParticles.test.ts`: `KIND_REACH` covers every particle kind, and the view gate of
   `ParticleEmitter` / `BonedParticleEmitter` (spawns only when a sprite could reach the frustum);
+  a pushed particle on a turned object goes where MovePosition turns its velocity (ZzzAI.cpp:148-156),
+  from `spawnParticle` and from an emitter handed the node yaw;
   `light0` (`BITMAP_LIGHT` SubType 0) rises, shrinks, glows as its scale and drifts on half the
   particle wind (`g_vParticleWind`, walked once a tick, ZzzEffectParticle.cpp:3847-3859);
   `trueFire` (`BITMAP_TRUE_FIRE`, fantaF.jpg) takes its sideways and upward push at birth, rises,
@@ -186,7 +188,9 @@ drawn `EnableAlphaBlend3`. RenderSprite colours such a sheet
 `(L, L, L, L)` (ZzzOpenglUtil.cpp:918-933), so an `alpha` kind writes its alpha into the colour too.
 Every particle moves by its velocity turned with the object first (MovePosition,
 ZzzEffectParticle.cpp:3885); a kind whose case adds `VectorAddScaled` moves a second time
-(`moveAgain`).
+(`moveAgain`). The emitters are handed the node's yaw (`rotation.y`, MU's `Angle[2]` turned the
+other way by `render/renderAngles.ts`) and `spawnParticle` turns it back; taken as it was, every
+pushed particle on a turned object went the mirrored way.
 
 ### feathers.ts
 Jitter up to 40 cm per axis, random tumble 0..5° a tick, `Alpha` 0.6..0.8. The original drops these
