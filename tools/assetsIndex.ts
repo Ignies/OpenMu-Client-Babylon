@@ -123,13 +123,14 @@ function groupOf(tree: Tree, rel: string): { id: string; kind: Group['kind']; wo
     if (folder === 'Music' || folder === 'Sound') return { id: 'audio', kind: 'audio' };
     if (folder === 'Monster') return { id: 'monsters', kind: 'monsters' };
     if (CORE_FOLDERS.has(folder)) return { id: 'core', kind: 'core' };
-    const world = /^(?:World|Object)(\d+)$/.exec(folder);
+    const world = /^(?:World|Object)(\d+)$/i.exec(folder);
     if (world) return { id: `map:${world[1]}`, kind: 'map', world: Number(world[1]) };
     return { id: 'core', kind: 'core' };
   }
 
-  // A map's minimap lives in the original tree, not the converted one.
-  const world = /^World(\d+)$/.exec(folder);
+  // A map's minimap lives in the original tree, not the converted one. A folder is a
+  // world in any case: the original reads them on Windows (Data/world55 is World55).
+  const world = /^World(\d+)$/i.exec(folder);
   if (world) return { id: `map:${world[1]}`, kind: 'map', world: Number(world[1]) };
   return { id: 'core', kind: 'core' };
 }

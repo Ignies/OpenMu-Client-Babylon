@@ -4,6 +4,7 @@ import { tmpdir } from 'os';
 import { dirname, join } from 'path';
 import type { VersionData } from '../src/version/contract';
 import { VERSION_REGISTRY } from '../versions/registry';
+import { MAP_LAYERS } from '../versions/shared/maps/layers';
 import { buildAssetsIndex, INDEXED_VERSIONS } from './assetsIndex';
 
 const season6: VersionData = { folder: './Data/', assets: './game-assets/', locale: 'Eng', worlds: [1, 19] };
@@ -47,6 +48,9 @@ const TREE: Record<string, number> = {
   'Data/Interface/newui_menu01.OZJ': 12,
   'Data/Local/Eng/Item.bmd': 14,
   'Data/World1/mini_map.OZT': 15,
+  // A world folder spelled in lower case is still that world, not core.
+  'Data/world55/leaf01.OZT': 16,
+  'game-assets/object55/Object01.glb': 19,
   'Data-v097d/gate.bmd': 4,
   'Data-v097d/Interface/Cursor.OZT': 17,
   'Data-v097d/World3/leaf01.OZJ': 18,
@@ -125,17 +129,21 @@ describe('assetsIndex', () => {
     expect(INDEXED_VERSIONS.map(v => v.id)).toEqual(VERSION_REGISTRY.map(v => v.id));
   });
 
-  it('offers Season 6 every world folder it ships, and 0.97d World1-12', () => {
+  // Season 6 also ships World6 (Exile, map 5), World55/56 and Object55/56 (the old character and login
+  // scenes, maps 54/55): no map entry claims them, and its login and character scenes are 73 and 74.
+  it('offers Season 6 every world folder a map reads, and 0.97d World1-12', () => {
     const ROOT = join(import.meta.dirname, '..');
     const numbers = (dir: string, folder: RegExp) =>
       readdirSync(join(ROOT, dir)).flatMap(name => folder.exec(name)?.slice(1).map(Number) ?? []);
     const shipped = new Set([
-      ...numbers('public/game-assets', /^(?:World|Object)(\d+)$/),
-      ...numbers('Data', /^World(\d+)$/),
+      ...numbers('public/game-assets', /^(?:World|Object)(\d+)$/i),
+      ...numbers('Data', /^World(\d+)$/i),
     ]);
+    const read = new Set(MAP_LAYERS.flatMap(layer => layer.worlds.map(world => layer.assetWorld ?? world + 1)));
     const worlds = Object.fromEntries(INDEXED_VERSIONS.map(v => [v.id, [...v.data.worlds]]));
 
-    expect(worlds.season6.sort((a, b) => a - b)).toEqual([...shipped].sort((a, b) => a - b));
+    expect(worlds.season6.sort((a, b) => a - b)).toEqual([...read].sort((a, b) => a - b));
+    expect(worlds.season6.filter(world => !shipped.has(world))).toEqual([]);
     expect(worlds.v097d).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
   });
 });

@@ -30,8 +30,8 @@ the loader that resolves which version this page runs. See [../../docs/versions.
   `server.json` `modulesOff`) the version's server never has; `src/app/logic.ts` never installs them.
 - `miniGames`: the timed events the version's client has (`MiniGame`); the HUD schedule rows
   (`modules/events/schedule.ts`) draw and poll only these.
-- `data.worlds`: the `World<n>` / `Object<n>` folder numbers the version ships (Season 6 all of its
-  own, 0.97d World1-12). The pre-download index (`tools/assetsIndex.ts`) offers only those map groups,
+- `data.worlds`: the `World<n>` / `Object<n>` folder numbers the version ships (Season 6 every one
+  a map entry reads, not World6 or World55/56 which nothing reads; 0.97d World1-12). The pre-download index (`tools/assetsIndex.ts`) offers only those map groups,
   though a borrowed tree holds more.
 - `data.inventory` lists every file a period `Data/` tree ships. Base code asks for Season 6 files
   a period tree lacks; with the list, loaders draw nothing instead of logging misses. Season 6
