@@ -19,9 +19,13 @@ export const DOPPELGANGER4_EFFECT_ONLY_TYPES: readonly number[] = [
   47, 48, 59, 60, 61, 62, 81, 82, 83, 97, 107, 108,
 ];
 
+/**
+ * Kanturu's rows but 59, which `RenderObjectVisual` makes a `BITMAP_SMOKE` SubType 13 one tick in
+ * three, not Kanturu's SubType 21 (GMDoppelGanger4.cpp:399-405). EncTerrain69.obj places no 59.
+ */
 export const DOPPELGANGER4_EMISSIONS: Partial<
   Record<number, readonly Emission[]>
-> = KANTURU1_EMISSIONS;
+> = { ...KANTURU1_EMISSIONS, 59: [{ kinds: ['smoke13'], every: 3 }] };
 
 export const DOPPELGANGER4_LIGHTS: Partial<
   Record<number, readonly LightEmitter[]>
