@@ -57,6 +57,16 @@ describe.each([
     }
   });
 
+  // `Luminosity = sinf(WorldTime * 0.002f) * 0.35f + 0.65f`, `AddTerrainLight(..., (L, L, L), 3)`: no model, still lit.
+  it('Tarkan 4 breathes white at range 3 with no body (ZzzObject.cpp:4051-4062)', () => {
+    setFidelityChoice(choice, {});
+    expect(groundOf(ENUM_WORLD.WD_8TARKAN, 4)?.terrain).toEqual({
+      range: 3,
+      color: [1, 1, 1],
+      pulse: { speed: 0.002, amount: 0.35, base: 0.3 },
+    });
+  });
+
   // `Luminosity = sinf(WorldTime * 0.002f) * 0.45f + 0.55f`, `AddTerrainLight(..., L * (1.4, 0.7, 0.4), 4)`.
   it('Kanturu 70 breathes on its sine (GM_Kanturu_1st.cpp:85-91)', () => {
     setFidelityChoice(choice, {});
