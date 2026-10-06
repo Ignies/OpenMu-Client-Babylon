@@ -19,7 +19,7 @@ other folders share.
 - `lowVitals.ts`: `vitalWarning(fraction, percent)`, `heartbeatDue(life, lifeMax)`, `NO_WARNING`,
   `LOW_VITAL_MIN_PERCENT` / `MAX` / `DEFAULT`.
 - `watchStateWarnings()` (`stateWarnings.ts`, was `controllers/interface/`): watches the store for low
-  durability, a full grid, the last potion and a buff running out, and posts one notice per crossing
+  durability, a full grid, the last healing potion and a buff running out, and posts one notice per crossing
   (option `stateWarnings`); `boot.tsx` starts it. Its `warn.*` text is in `i18n/` here.
 
 ## How it works
@@ -84,3 +84,4 @@ the hero is a walk the client failed to stop; no walk at all means the server mo
 ## Tests
 - `lowVitals.test.ts`: heartbeat rule, threshold clamping, edge strength and beat speed.
 - `statAmounts.test.ts`: amount clamping, the confirm threshold and the run's next step.
+- `stateWarnings.test.ts`: the no healing potions warning counts healing potions only.
