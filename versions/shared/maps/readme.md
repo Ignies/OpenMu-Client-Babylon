@@ -111,7 +111,7 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   5, `trueFire5`; Kanturu 60's fire, ours, as 61), and Elbeland's blue lamp (61) one white
   `trueBlue` (`BITMAP_TRUE_BLUE`, fantaB.jpg) one tick in three on every preset; Kalima's flower glows (12, 32) grow and shrink on bone 5; the Kanturu relic
   lamps (Kanturu 2 4, Kanturu 3 5) breathe and grow with their fLumi, and Kanturu 3's two `BITMAP_SHINY + 1` turn 0.5 and 0.25
-  degrees a millisecond; Land of Trials 49 draws two red cards on bone 3 and a grey `BITMAP_SHINY + 1`
+  degrees a millisecond of world time, in whole degrees (Aida 75's torch turns smoothly, `flareSheets.test.ts`); Land of Trials 49 draws two red cards on bone 3 and a grey `BITMAP_SHINY + 1`
   at a fresh angle every frame; Elbeland's lantern (63) breathes and its totem (121) breathes and grows on six
   bones; and no table wave is faster than 0.05.
 - `boneRows.test.ts`: the rows the original hangs on a bone are `bone: true` (Noria's lamps, Icarus

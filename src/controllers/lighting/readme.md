@@ -36,7 +36,9 @@ policy. It knows how to light something, never which skill or item asks for it.
   BITMAP_KANTURU_2ND_EFFECT1, Object39's k_effect_01.jpg, :5495). A card is its sheet's own width
   by its height times its scale (zzzeffectsprite.cpp:72-77), times the object's scale unless
   the spec is `unscaled`; `pulse` waves its brightness (`abs` folds the wave up at zero, the
-  original's `absf(sinf(...))`), `grow` its size, `spin` turns it and `randomAngle` turns it to a
+  original's `absf(sinf(...))`), `grow` its size, `spin` turns it from the world's clock (the
+  original's `WorldTime`, shared by every card) in whole degrees, smoothly with `smoothSpin`
+  (Aida's torch, GMAida.cpp:310), and `randomAngle` turns it to a
   fresh `rand() % 360` degrees every frame, and a `MovableFlare` takes
   `setLuminosity`, `setScale` and `setAngle` (degrees, the original's `Rotation`) from its host.
   One sprite manager per sheet and scene.
@@ -113,7 +115,8 @@ policy. It knows how to light something, never which skill or item asks for it.
 - `effectLights.test.ts`: a card is drawn from the sheet its spec names, one manager per sheet, at
   the sheet's own width and height (checked against the file in `Data`; Shiny02.jpg is twice as tall
   as wide, and grows and resizes both ways); an `unscaled` card keeps its size on a scaled object;
-  an `abs` wave breathes on `|sin|`; a `grow` card grows and shrinks, a `spin` card turns, a
+  an `abs` wave breathes on `|sin|`; a `grow` card grows and shrinks, a `spin` card turns from the
+  world's clock in whole degrees (two made apart stand at one angle) and a `smoothSpin` one smoothly, a
   `randomAngle` card takes a fresh whole degree every frame; a movable card resizes and turns.
 - `mapObjectLightAdapter.test.ts`: a `bone` offset grows with the object, a plain one does not, and a
   record with both pitch and roll turns its offset by `AngleMatrix` (ZzzMathLib.cpp:185-212).

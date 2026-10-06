@@ -7,6 +7,7 @@ import {
   type Scene,
 } from '../render/babylon/exports';
 import { downloadDataFile } from '@/controllers/assets/mu';
+import { Ecs } from '../../ecs/current';
 import { lookDirector, type LookDirector } from './director';
 import { EFFECT_RENDERING_GROUP, keepDepthForEffects } from '../fx/core';
 
@@ -78,8 +79,13 @@ export type FlareSpec = {
   readonly pulse?: Wave;
   /** Its size over time: `CreateSprite(..., Luminosity * 7.0f, ...)`. */
   readonly grow?: Wave;
-  /** Degrees a millisecond it turns, counter-clockwise: `CreateSprite`'s `Rotation` (ZzzOpenglUtil.cpp:899-908). */
+  /**
+   * Degrees a millisecond of world time it turns, counter-clockwise: `CreateSprite`'s `Rotation`
+   * (ZzzOpenglUtil.cpp:899-908), in whole degrees, `(int)(WorldTime / 2) % 360` (GM_Kanturu_3rd.cpp:270).
+   */
   readonly spin?: number;
+  /** The spin is a float, not whole degrees: `WorldTime / 10.0f` (GMAida.cpp:310). */
+  readonly smoothSpin?: boolean;
   /** A fresh `rand() % 360` degrees every frame (GMHuntingGround.cpp:154). */
   readonly randomAngle?: boolean;
   /** The sheet the original names; `BITMAP_LIGHT` when left out. */
@@ -89,6 +95,16 @@ export type FlareSpec = {
 };
 
 const RADIANS_PER_DEGREE = Math.PI / 180;
+
+/** The original's `WorldTime`: the world's clock in milliseconds, one for every card. */
+const worldMs = () => (Ecs.world?.gameTime.TotalGameTime.TotalSeconds ?? 0) * 1000;
+
+/** A spinning card's angle in radians at world time `ms`. */
+function spinAngle(spin: number, smooth: boolean | undefined, ms: number): number {
+  const degrees = ms * spin;
+
+  return ((smooth ? degrees : Math.floor(degrees)) % 360) * RADIANS_PER_DEGREE;
+}
 
 type SheetSource = { file: string; px: number; py?: number; sprites?: number };
 
@@ -296,7 +312,7 @@ export async function createEffectLight(
   let observer: ReturnType<Scene['onBeforeRenderObservable']['add']> | null =
     null;
 
-  const { pulse, grow, spin, randomAngle } = spec;
+  const { pulse, grow, spin, smoothSpin, randomAngle } = spec;
 
   if (pulse || grow || spin || randomAngle) {
     let elapsed = 0;
@@ -306,7 +322,7 @@ export async function createEffectLight(
 
       if (pulse) paint.setLuminosity(wave(pulse, elapsed));
       if (grow) resize(scale * wave(grow, elapsed));
-      if (spin) sprite.angle = elapsed * spin * RADIANS_PER_DEGREE;
+      if (spin) sprite.angle = spinAngle(spin, smoothSpin, worldMs());
       if (randomAngle) sprite.angle = Math.floor(Math.random() * 360) * RADIANS_PER_DEGREE;
     });
   }
