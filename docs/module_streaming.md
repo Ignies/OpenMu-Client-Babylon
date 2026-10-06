@@ -95,3 +95,18 @@ Left for phase 5, when third-party code first runs (decided 2026-10-06): caps on
 windows, listeners and calls and a rate limit (today only the 64K message cap); a timeout on the
 guest's pending calls; refusing a streamed module that claims `core`. `playEffect` and `playSound`
 stay narrow until a module needs more.
+
+## Phase 4: the extension code
+
+The module packet is `0xE8`, the same code in both directions. Checked on 2026-10-06:
+
+- OpenMU master, `src/Network/Packets/ClientToServer/ClientToServerPackets.xml`: the codes from 0xE0
+  up are E1, E2, E5, E6, E9, EB, F1, F2, F3, F5, F6, F7, F8. `ServerToClient/ServerToClientPackets.xml`:
+  E5, E6, E9, EB, F1, F3, F5, F6, F7, F8, F9. No E8 in either (free in both from 0xE0 up: E0, E3, E4,
+  E7, E8, EA, EC to F0, F4, FA to FF).
+- The original client (`references/MuMain-main`, `WSclient.cpp` `ProcessPacket`) handles no 0xE8 and
+  sends none, so OpenMU has no reason to take it later.
+- Ours: 0xE7 is the marketplace (`escrowWire.ts`, `openmu/plugins/`), 0xFA the band and 0xFB the map
+  ping (both answered by the proxy, never by OpenMU), C1 B1 00 the hand-written map-server move.
+  Nothing in `src/`, `versions/`, `proxy/` or `openmu/` uses 0xE8.
+- It sits next to the marketplace's 0xE7, the other code our OpenMU plugin owns.
