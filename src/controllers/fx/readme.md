@@ -25,7 +25,7 @@ shared pools, textures and particle recipes other folders reuse.
   `spawnLinkedModel` (`linkedModel.ts`) spawn without the facade and hand back a richer handle.
 - Modules the ECS systems and other controllers call directly:
   - `effectParticles.ts`: the map-object sprite pool (`Emission`, `ParticleEmitter`,
-    `BonedParticleEmitter`, `HeldSprites`, `spawnParticle`, `emissionsFor`); `BonedParticleEmitter`
+    `BonedParticleEmitter`, `HeldSprites`, `spawnParticle`, `emissionsFor`, `NodeTurn`, `NO_TURN`); `BonedParticleEmitter`
     and `BonedEmission` are also on `index.ts` for map object classes.
   - `effectTexture.ts`: `loadEffectTexture` (the shared effect texture cache).
   - `moveTargetEffect.ts`: `TerrainDecal`, `MoveTargetEffect` (the click-to-move marker).
@@ -83,8 +83,9 @@ shared pools, textures and particle recipes other folders reuse.
 ## Tests
 - `effectParticles.test.ts`: `KIND_REACH` covers every particle kind, and the view gate of
   `ParticleEmitter` / `BonedParticleEmitter` (spawns only when a sprite could reach the frustum);
-  a pushed particle on a turned object goes where MovePosition turns its velocity (ZzzAI.cpp:148-156),
-  from `spawnParticle` and from an emitter handed the node yaw; every kind's colour stays in 0..1
+  a pushed particle on a turned or tilted object goes where MovePosition turns its velocity
+  (ZzzAI.cpp:148-156), from `spawnParticle` and from an emitter handed the node's rotation, and
+  `KIND_REACH` holds on any turn; every kind's colour stays in 0..1
   over its life whatever light it is made with;
   `light0` (`BITMAP_LIGHT` SubType 0) rises, shrinks, glows as its scale up to 1 and drifts on half the
   particle wind (`g_vParticleWind`, walked once a tick, ZzzEffectParticle.cpp:3847-3859);
@@ -189,9 +190,12 @@ drawn `EnableAlphaBlend3`. RenderSprite colours such a sheet
 `(L, L, L, L)` (ZzzOpenglUtil.cpp:918-933), so an `alpha` kind writes its alpha into the colour too.
 Every particle moves by its velocity turned with the object first (MovePosition,
 ZzzEffectParticle.cpp:3885); a kind whose case adds `VectorAddScaled` moves a second time
-(`moveAgain`). The emitters are handed the node's yaw (`rotation.y`, MU's `Angle[2]` turned the
-other way by `render/renderAngles.ts`) and `spawnParticle` turns it back; taken as it was, every
-pushed particle on a turned object went the mirrored way. The tick holds each channel of a kind's
+(`moveAgain`). The emitters are handed the node's rotation (`NodeTurn`: MU's `Angle` as
+`(-Angle[0], -Angle[2], -Angle[1])`, `terrain/loadMapIntoScene.ts` then `render/renderAngles.ts`) and
+`spawnParticle` turns it back into the original's `AngleMatrix` (ZzzMathLib.cpp:185-212), pitch and
+roll included: a waterfall on a tilted object (Kalima, Elbeland 58, the GM area's 81) falls along
+it. The yaw taken as it was sent every pushed particle the mirrored way; `NO_TURN` is no turn at
+all (bones, the Chaos Castle cracks). The tick holds each channel of a kind's
 colour in 0..1, as RenderSprite packs the light a byte a channel (ZzzOpenglUtil.cpp:918-933,
 RenderUtils.h:8-18): `smoke0` starts at `LifeTime / 8` = 2, `light0` at its scale, a torch fire at
 its light, and none of that past 1 reached the screen.

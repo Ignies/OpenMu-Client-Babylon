@@ -496,6 +496,8 @@ export class MoveTargetEffect {
   #live = false;
   readonly #position = new Vector3();
   #yaw = 0;
+  /** `#yaw` as the node turn the sparks take. */
+  readonly #turn = { x: 0, y: 0, z: 0 };
   #lifeTime = 0;
   #blendMeshLight = 1;
   #sparkDue = 0;
@@ -551,6 +553,7 @@ export class MoveTargetEffect {
   spawn(x: number, y: number, z: number, yaw: number): void {
     this.#position.set(x, y, z);
     this.#yaw = yaw;
+    this.#turn.y = yaw;
 
     this.#live = true;
     this.#lifeTime = 30;
@@ -622,7 +625,7 @@ export class MoveTargetEffect {
           y: this.#position.y + 110 / TILE_CM,
           z: this.#position.z,
         },
-        this.#yaw,
+        this.#turn,
         1,
         ORANGE
       ).catch(reportLoadFailure('particle spark03_24'));

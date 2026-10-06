@@ -107,10 +107,12 @@ vi.mock('../assets', async () => ({ reportLoadFailure: (await import('../assets/
 import {
   BonedParticleEmitter,
   KIND_REACH,
+  NO_TURN,
   ParticleEmitter,
   disposeEffectParticles,
   spawnParticle,
   type KindName,
+  type NodeTurn,
 } from './effectParticles';
 import { publishViewPlanes, type ViewPlane } from '../render/viewPlanes';
 import { toRenderAngles } from '../render/renderAngles';
@@ -161,6 +163,12 @@ function seeded(seed: number): () => number {
   };
 }
 
+/** The turn a placed object's node carries for MU `Angle` in degrees: loadMapIntoScene.ts:109-113, then renderAngles.ts. */
+const nodeTurn = (a0: number, a1: number, a2: number) => {
+  const rad = Math.PI / 180;
+  return toRenderAngles({ x: -a0 * rad, y: a2 * rad, z: -a1 * rad }, { x: 0, y: 0, z: 0 } as Vector3);
+};
+
 afterEach(() => {
   publishViewPlanes(scene, null);
   disposeEffectParticles();
@@ -172,13 +180,13 @@ afterEach(() => {
 
 describe('KIND_REACH', () => {
   /** Farthest the particle's sprite gets from its spawn point over its life. */
-  async function farthest(kind: KindName, scale: number, random: () => number) {
+  async function farthest(kind: KindName, scale: number, random: () => number, turn: NodeTurn) {
     // Swapped by hand: a spy records every call, which is most of the run.
     const original = Math.random;
     Math.random = random;
 
     try {
-      await spawnParticle(scene, kind, { x: 0, y: 0, z: 0 }, 1.3, scale, [1, 1, 1]);
+      await spawnParticle(scene, kind, { x: 0, y: 0, z: 0 }, turn, scale, [1, 1, 1]);
 
       const sprite = fakes.sprites.find(s => s.isVisible)!;
       let far = 0;
@@ -200,12 +208,13 @@ describe('KIND_REACH', () => {
     }
   }
 
-  it('covers every kind at any frame rate, scale and roll', async () => {
+  it('covers every kind at any frame rate, scale, roll and turn of its object', async () => {
     const randoms: (() => () => number)[] = [
       () => () => 0,
       () => () => 0.999999,
       ...Array.from({ length: 16 }, (_, seed) => () => seeded(seed + 1)),
     ];
+    const turns = [nodeTurn(0, 0, 0), nodeTurn(0, 0, 74), nodeTurn(-30, 0, 29), nodeTurn(40, -60, 200)];
 
     for (const kind of Object.keys(KIND_REACH) as KindName[]) {
       for (const frameMs of [40, 16.7, 6.9]) {
@@ -213,11 +222,13 @@ describe('KIND_REACH', () => {
 
         for (const scale of [0.1, 1, 2.5]) {
           for (const random of randoms) {
-            const far = await farthest(kind, scale, random());
+            for (const turn of turns) {
+              const far = await farthest(kind, scale, random(), turn);
 
-            expect(far, `${kind} @${frameMs}ms x${scale}`).toBeLessThanOrEqual(
-              reach(kind, scale)
-            );
+              expect(far, `${kind} @${frameMs}ms x${scale}`).toBeLessThanOrEqual(
+                reach(kind, scale)
+              );
+            }
           }
         }
       }
@@ -225,13 +236,13 @@ describe('KIND_REACH', () => {
   });
 });
 
-/** Spawns one `kind` at the origin with every roll at `roll` on a node turned `yaw`, then plays `ticks` 25 Hz ticks. */
-async function play(kind: KindName, scale: number, roll: number, ticks: number, yaw = 0): Promise<FakeSprite> {
+/** Spawns one `kind` at the origin with every roll at `roll` on a node turned `turn`, then plays `ticks` 25 Hz ticks. */
+async function play(kind: KindName, scale: number, roll: number, ticks: number, turn: NodeTurn = NO_TURN): Promise<FakeSprite> {
   const original = Math.random;
   Math.random = () => roll;
 
   try {
-    await spawnParticle(scene, kind, { x: 0, y: 0, z: 0 }, yaw, scale, [0.2, 0.4, 0.6]);
+    await spawnParticle(scene, kind, { x: 0, y: 0, z: 0 }, turn, scale, [0.2, 0.4, 0.6]);
     const sprite = fakes.sprites[fakes.sprites.length - 1];
     for (let n = 0; n < ticks; n++) tick?.();
     return sprite;
@@ -337,28 +348,34 @@ describe('smoke13, BITMAP_SMOKE SubType 13 (ZzzEffectParticle.cpp:1238-1243, :53
 
 const rgba = (s: FakeSprite) => [s.color.r, s.color.g, s.color.b, s.color.a].map(c => c.toFixed(3));
 
-/** The yaw a node turned `degrees` the MU way carries (renderAngles.ts), which the emitters are handed. */
-const nodeYaw = (degrees: number) => toRenderAngles({ x: 0, y: (degrees * Math.PI) / 180, z: 0 }, { x: 0, y: 0, z: 0 } as Vector3).y;
-
 describe('the push, turned with the object (MovePosition, ZzzAI.cpp:148-156, ZzzEffectParticle.cpp:3885)', () => {
-  // `VectorRotate(Speed, AngleMatrix(Angle))` with only Angle[2] set: x' = x cy - y sy, y' = x sy + y cy.
-  const movePosition = (degrees: number, [x, y]: readonly number[]) => {
-    const a = (degrees * Math.PI) / 180;
-    return [x * Math.cos(a) - y * Math.sin(a), x * Math.sin(a) + y * Math.cos(a)];
+  // `VectorRotate(Speed, AngleMatrix(Angle))` (ZzzMathLib.cpp:185-212, :261-267).
+  const movePosition = ([a0, a1, a2]: readonly number[], [x, y, z]: readonly number[]) => {
+    const rad = Math.PI / 180;
+    const [sr, cr, sp, cp] = [Math.sin(a0 * rad), Math.cos(a0 * rad), Math.sin(a1 * rad), Math.cos(a1 * rad)];
+    const [sy, cy] = [Math.sin(a2 * rad), Math.cos(a2 * rad)];
+    const matrix = [
+      [cp * cy, sr * sp * cy + cr * -sy, cr * sp * cy + -sr * -sy],
+      [cp * sy, sr * sp * sy + cr * cy, cr * sp * sy + -sr * cy],
+      [-sp, sr * cp, cr * cp],
+    ];
+    return matrix.map(row => row[0] * x + row[1] * y + row[2] * z);
   };
 
-  // trueFire at roll 0 is pushed `(-2, 0, 1)` along the object; a tick moves it once by that, turned.
-  it('goes where MovePosition turns its velocity on an object turned any way', async () => {
-    for (const degrees of [0, 90, 30, 200]) {
-      const sprite = await play('trueFire', 1, 0, 1, nodeYaw(degrees));
-      const [x, y] = movePosition(degrees, [-2, 0]);
-      expect([sprite.position.x, sprite.position.z], `${degrees} degrees`).toEqual([expect.closeTo(x / 100, 5), expect.closeTo(y / 100, 5)]);
+  // trueFire at roll 0 is pushed `(-2, 0, 1)` along the object; a tick moves it once by that, turned, and it rises 1.
+  it("goes where MovePosition turns its velocity, by the object's yaw, pitch and roll", async () => {
+    const angles = [[0, 0, 0], [0, 0, 90], [0, 0, 30], [0, 0, 200], [0, 60, 0], [-30, 0, 29], [20, -35, 110]];
+    for (const angle of angles) {
+      const sprite = await play('trueFire', 1, 0, 1, nodeTurn(angle[0], angle[1], angle[2]));
+      const [x, y, z] = movePosition(angle, [-2, 0, 1]);
+      const at = [sprite.position.x, sprite.position.z, sprite.position.y];
+      expect(at, `Angle ${angle}`).toEqual([x / 100, y / 100, (z + 1) / 100].map(v => expect.closeTo(v, 5)));
       disposeEffectParticles();
     }
   });
 
-  it('is turned the same way by an emitter handed the node yaw', async () => {
-    const emitter = new ParticleEmitter(scene, [{ kinds: ['trueFire'], every: 1 }], { x: 0, y: 0, z: 0 }, nodeYaw(90), 1);
+  it('is turned the same way by an emitter handed the node turn', async () => {
+    const emitter = new ParticleEmitter(scene, [{ kinds: ['trueFire'], every: 1 }], { x: 0, y: 0, z: 0 }, nodeTurn(0, 0, 90), 1);
     const original = Math.random;
     Math.random = () => 0;
     try {
@@ -377,7 +394,7 @@ describe('fi01_0 and fi01_1, BITMAP_ADV_SMOKE SubType 0 and 1 (ZzzEffectParticle
   // `MovePosition(Position, Angle, Velocity)` for every particle (:3885), then `VectorAddScaled(Position, Velocity)`
   // again in its own case (:8220).
   it('moves by its velocity twice a tick: turned with the object, then as it is', async () => {
-    const sprite = await play('fi01_0', 3, 0.5, 1, nodeYaw(90));
+    const sprite = await play('fi01_0', 3, 0.5, 1, nodeTurn(0, 0, 90));
     expect(sprite.position.x).toBeCloseTo(0.04);
     expect(sprite.position.z).toBeCloseTo(0.04);
     expect(sprite.position.y).toBeCloseTo(0.04);
@@ -581,7 +598,7 @@ describe('the particle tick', () => {
         const original = Math.random;
         Math.random = () => roll;
         try {
-          await spawnParticle(scene, kind, { x: 0, y: 0, z: 0 }, 0, 1, [3, 3, 3]);
+          await spawnParticle(scene, kind, { x: 0, y: 0, z: 0 }, NO_TURN, 1, [3, 3, 3]);
           const sprite = fakes.sprites[fakes.sprites.length - 1];
           for (let n = 0; n < 200 && sprite.isVisible; n++) {
             tick?.();
@@ -616,7 +633,7 @@ describe('ParticleEmitter view gate', () => {
       scene,
       [{ kinds: ['fire1'], every: 1, light }],
       { x: 1000, y: 0, z: 0 },
-      0,
+      NO_TURN,
       1
     );
 
@@ -639,7 +656,7 @@ describe('ParticleEmitter view gate', () => {
       scene,
       [{ kinds: ['cloud21'], every: 1, light, jitter }],
       position,
-      0,
+      NO_TURN,
       scale
     );
 
@@ -665,7 +682,7 @@ describe('ParticleEmitter view gate', () => {
         { kinds: ['cloud21'], every: 1, light: cloud.light },
       ],
       { x: 10 + reach('smoke65', 1) + 0.5, y: 0, z: 0 },
-      0,
+      NO_TURN,
       1
     );
 
@@ -685,7 +702,7 @@ describe('ParticleEmitter view gate', () => {
       scene,
       [{ kinds: ['fire1'], every: 1, light }],
       position,
-      0,
+      NO_TURN,
       1
     );
 
@@ -709,7 +726,7 @@ describe('ParticleEmitter view gate', () => {
       scene,
       [{ kinds: ['fire1'], every: 1, light }],
       { x: 1000, y: 0, z: 0 },
-      0,
+      NO_TURN,
       1
     );
 

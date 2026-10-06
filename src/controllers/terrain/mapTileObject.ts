@@ -26,7 +26,7 @@ export class MapTileObject extends ModelObject {
           world.scene,
           emissions,
           this.node.position,
-          this.node.rotation.y,
+          this.node.rotation,
           this.node.scaling.x
         );
       }

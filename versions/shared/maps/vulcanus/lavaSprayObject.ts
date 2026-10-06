@@ -82,7 +82,7 @@ export class VulcanusLavaSprayObject extends MapTileObject {
       world.scene,
       SPRAY,
       this.node.position,
-      this.node.rotation.y,
+      this.node.rotation,
       this.node.scaling.x
     );
   }

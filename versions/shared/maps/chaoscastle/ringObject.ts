@@ -81,7 +81,7 @@ export class ChaosCastleRingObject extends MapTileObject {
           world.scene,
           [{ kinds: ['smoke2'], every: 1, jitter: SMOKE_SPREAD }],
           { x: p.x, y: p.y, z: p.z },
-          this.node.rotation.y,
+          this.node.rotation,
           this.node.scaling.x
         );
       }

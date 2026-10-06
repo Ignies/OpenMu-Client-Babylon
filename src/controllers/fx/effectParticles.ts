@@ -94,8 +94,16 @@ type Particle = {
   vx: number;
   vy: number;
   vz: number;
-  /** MU's `Angle[2]` in radians, which MovePosition turns the velocity by. */
-  angleZ: number;
+  /** `AngleMatrix(Angle)` by rows, which MovePosition turns the velocity by. */
+  m00: number;
+  m01: number;
+  m02: number;
+  m10: number;
+  m11: number;
+  m12: number;
+  m20: number;
+  m21: number;
+  m22: number;
   lr: number;
   lg: number;
   lb: number;
@@ -120,6 +128,34 @@ const rand = (n: number) => Math.floor(Math.random() * n);
 const WHITE: readonly [number, number, number] = [1, 1, 1];
 
 const plainColor = (p: Particle, out: Color4) => out.set(p.lr, p.lg, p.lb, 1);
+
+/**
+ * A node's own rotation (`node.rotation`): MU's `Angle` as `(-Angle[0], -Angle[2], -Angle[1])` in
+ * radians (loadMapIntoScene.ts createObjects, then renderAngles.ts).
+ */
+export type NodeTurn = Readonly<{ x: number; y: number; z: number }>;
+
+export const NO_TURN: NodeTurn = { x: 0, y: 0, z: 0 };
+
+/** `AngleMatrix` (ZzzMathLib.cpp:185-212) of the MU `Angle` the node's turn stands for. */
+function turnWith(p: Particle, turn: NodeTurn): void {
+  const sr = Math.sin(-turn.x);
+  const cr = Math.cos(-turn.x);
+  const sp = Math.sin(-turn.z);
+  const cp = Math.cos(-turn.z);
+  const sy = Math.sin(-turn.y);
+  const cy = Math.cos(-turn.y);
+
+  p.m00 = cp * cy;
+  p.m01 = sr * sp * cy - cr * sy;
+  p.m02 = cr * sp * cy + sr * sy;
+  p.m10 = cp * sy;
+  p.m11 = sr * sp * sy + cr * cy;
+  p.m12 = cr * sp * sy - sr * cy;
+  p.m20 = -sp;
+  p.m21 = sr * cp;
+  p.m22 = cr * cp;
+}
 
 /**
  * `g_vParticleWind`: MoveParticles walks its pace by up to 0.6 a tick, held within 0.6, and the wind
@@ -413,7 +449,7 @@ const KINDS = {
       const a = Math.random() * Math.PI * 2;
       const r = Math.random() * 0.5;
 
-      p.angleZ = 0;
+      turnWith(p, NO_TURN);
       p.vx = Math.cos(a) * r;
       p.vy = Math.sin(a) * r;
       p.vz = 0;
@@ -1043,14 +1079,11 @@ function ensureTicking(target: Scene) {
       if (p.lifeTime <= 0) p.live = false;
 
       if (p.live) {
-        // MovePosition (ZzzEffectParticle.cpp:3885): the velocity turned by Angle[2].
+        // MovePosition (ZzzEffectParticle.cpp:3885): the velocity turned by the object's Angle.
         if (p.vx !== 0 || p.vy !== 0 || p.vz !== 0) {
-          const c = Math.cos(p.angleZ);
-          const s = Math.sin(p.angleZ);
-
-          p.px += (p.vx * c - p.vy * s) * f;
-          p.py += (p.vx * s + p.vy * c) * f;
-          p.pz += p.vz * f;
+          p.px += (p.vx * p.m00 + p.vy * p.m01 + p.vz * p.m02) * f;
+          p.py += (p.vx * p.m10 + p.vy * p.m11 + p.vz * p.m12) * f;
+          p.pz += (p.vx * p.m20 + p.vy * p.m21 + p.vz * p.m22) * f;
         }
 
         p.kind.update(p, f, worldTimeMs);
@@ -1097,14 +1130,14 @@ function release(p: Particle) {
 }
 
 /**
- * `yaw` is the node's own (`rotation.y`), MU's `Angle[2]` turned the other way (renderAngles.ts); it is
- * turned back here, so the tick turns the velocity as MovePosition does (ZzzAI.cpp:148-156).
+ * `turn` is the node's own rotation, MU's `Angle` mirrored (`NodeTurn`); it is turned back here, so the
+ * tick turns the velocity as MovePosition does (ZzzAI.cpp:148-156).
  */
 export async function spawnParticle(
   target: Scene,
   kindName: KindName,
   position: { x: number; y: number; z: number },
-  yaw: number,
+  turn: NodeTurn,
   scale: number,
   light: readonly [number, number, number],
   jitter = 0
@@ -1138,7 +1171,15 @@ export async function spawnParticle(
     vx: 0,
     vy: 0,
     vz: 0,
-    angleZ: -yaw,
+    m00: 1,
+    m01: 0,
+    m02: 0,
+    m10: 0,
+    m11: 1,
+    m12: 0,
+    m20: 0,
+    m21: 0,
+    m22: 1,
     lr: light[0],
     lg: light[1],
     lb: light[2],
@@ -1147,6 +1188,7 @@ export async function spawnParticle(
     tb: light[2],
   };
 
+  turnWith(p, turn);
   kind.init(p, scale, light);
 
   particles.push(p);
@@ -1222,8 +1264,8 @@ export class ParticleEmitter {
     private readonly target: Scene,
     private readonly emissions: readonly Emission[],
     private readonly position: { x: number; y: number; z: number },
-    /** The node's `rotation.y`, as `spawnParticle` takes it. */
-    private readonly yaw: number,
+    /** The node's `rotation`, as `spawnParticle` takes it. */
+    private readonly turn: NodeTurn,
     private readonly scale: number
   ) {
     this.#due = emissions.map(() => 0);
@@ -1279,7 +1321,7 @@ export class ParticleEmitter {
             this.target,
             kind,
             this.position,
-            this.yaw,
+            this.turn,
             this.scale * (emission.scale ?? 1),
             light,
             emission.jitter
@@ -1355,7 +1397,7 @@ export class BonedParticleEmitter {
           const kind =
             point.kinds[Math.floor(Math.random() * point.kinds.length)];
 
-          void spawnParticle(this.target, kind, position, 0, scale, light).catch(
+          void spawnParticle(this.target, kind, position, NO_TURN, scale, light).catch(
             reportLoadFailure(`particle ${kind}`)
           );
         }

@@ -97,7 +97,7 @@ export class MapObjectLights {
           world.scene,
           tintEmissions(emissions, source),
           position,
-          node.rotation.y,
+          node.rotation,
           objectScale
         )
       );
