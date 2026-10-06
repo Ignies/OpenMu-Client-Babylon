@@ -19,11 +19,23 @@ the loader that resolves which version this page runs. See [../../docs/versions.
 ## How it works
 - `contract.ts` is everything a version may differ in: OpenMU identity, client version / serial
   bytes, packet set and `variantRank`, encryption keys (SimpleModulus, Xor32, Xor3), data URLs and
-  an optional file `inventory`, and `features` flags. Base code reads these and never compares a
-  version id.
+  an optional file `inventory`, `features` flags and `modulesOff`. Base code reads these and never
+  compares a version id.
+- `features`: what the version's server knows. Each flag has a reader: `masterSkills` (the master
+  tree), `socketItems` / `ancientItems` (item visuals), `darkLord`, `magicGladiator`, `summoner`,
+  `rageFighter` (the create window offers only those), `itemHotkeys` (the bottom bar belt).
+- `modulesOff`: the optional modules (`src/modules/modules.ts` ids, the words of a world's
+  `server.json` `modulesOff`) the version's server never has; `src/app/logic.ts` never installs them.
 - `data.inventory` lists every file a period `Data/` tree ships. Base code asks for Season 6 files
   a period tree lacks; with the list, loaders draw nothing instead of logging misses. Season 6
   omits it.
+- `data.borrows` names another version's served tree (Season 6's) and the converted files this
+  version ships itself (`ownAssets`); every other converted file is read from the borrowed tree, so
+  a byte-identical source is never committed twice, except what it `lacks` (a grass card its world
+  never had stays absent). `borrows.folderPaths` does the same for the original `Data/` tree: a path
+  the `inventory` lacks under one of them is read from `borrows.folder`. `data.gates` is the
+  `gate.bmd` record layout of a tree that is not Season 6's. `data.sounds` maps a sound key to the file the
+  version ships for it. Season 6 omits both.
 - `uiContract.ts` is types only, so `versions/registry.ts` can name it without importing app code.
   A version's `ui/` module may import app code because it is only loaded after boot.
 - A pre-game backdrop is either `world` (warp to login worlds, Season 6) or `scene` (a set piece

@@ -14,8 +14,8 @@ never which skill or item asks for it.
 - `sfx.ts`: `playSfx`, `playUiSound`, `uiClick`, `UI_SOUNDS` from the leaf modules, without
   loading the facade. Most UI code imports this.
 - `combatSounds.ts`: re-export of the swing, hit, pain, death, pickup and monster voice selectors.
-- `recipes.ts`: the `Sounds` key union (`recipes.json` maps a key to its file), `soundUrl`,
-  `isMusicKey`, `SOUND_KEYS`.
+- `recipes.ts`: the `Sounds` key union (`recipes.json` maps a key to its file), `soundUrl` (the
+  version's own file when `gameVersion.data.sounds` names one), `isMusicKey`, `SOUND_KEYS`.
 - `combat.ts`: `SKILL_SOUNDS` (filled by `registerSkills` from each skill's `sound`), `playCombat`,
   `stopCombat`, `playSkill`, `heroCastSound`, `playLandingSound`.
 - `listener.ts`: `playSfx(key, at?, { gain, bus, channels })`, the one positioned one-shot path.
@@ -91,6 +91,7 @@ never which skill or item asks for it.
 - `objectLoops.test.ts`: the loop table and how copies are handed between sources.
 - `packetSounds.test.ts`: traps, meteorite storm, spawns, swirl, Nightmare, santa emotes.
 - `ui.test.ts`: `consumeSound`, `upgradedItemSound`.
+- `recipes.test.ts`: `soundUrl` takes the version's own file for a key it names.
 - `instruments/bank.test.ts`, `sampler.test.ts`, `space.test.ts`: nearest-note pitching and kit
   drums, the envelope, the distance and pan curves.
 

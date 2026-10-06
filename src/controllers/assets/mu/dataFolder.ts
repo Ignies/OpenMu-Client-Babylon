@@ -1,8 +1,21 @@
 import { downloadBytesBuffer } from '../download';
 import { gameVersion } from '@/version';
+import type { VersionData } from '@/version/contract';
+
+const relative = (path: string) => path.replace(/^[./]+/, '');
+
+/** The tree lending a path the version's own tree lacks (`borrows.folderPaths`), or null. */
+function lender(data: VersionData, path: string): string | null {
+  const key = relative(path).toLowerCase();
+  const { inventory, borrows } = data;
+
+  if (!inventory || inventory.has(key) || !borrows?.folder) return null;
+
+  return borrows.folderPaths?.some(prefix => key.startsWith(prefix)) ? borrows.folder : null;
+}
 
 /**
- * Base URL of the *original* `Data/` tree (sprites, effect textures, Local
+ * The *original* `Data/` tree (sprites, effect textures, Local
  * tables, gate.bmd). Kept separate from `resolveUrlToDataFolder`, which points
  * at the converted `public/game-assets`.
  *
@@ -14,28 +27,36 @@ import { gameVersion } from '@/version';
  * elsewhere (CDN, another origin) sets `VITE_DATA_URL` at build time; a
  * trailing slash is added if missing. Both are decided by the selected game
  * version (`versions/<id>/data`), since each version has its own tree.
+ *
+ * `dataUrl` is where a path is read from: the version's own tree, or the one
+ * lending it (`borrows.folderPaths`).
  */
-export const DATA_FOLDER = gameVersion.data.folder;
+export function dataUrl(data: VersionData, path: string): string {
+  return (lender(data, path) ?? data.folder) + relative(path);
+}
+
+/**
+ * Can the version read this path at all? A version that declares no
+ * inventory (Season 6) answers yes to everything; a period tree answers yes
+ * for what it ships or borrows, and no for the Season 6 files it never
+ * shipped, so its loaders draw nothing instead of fetching a 404 per frame
+ * (`versions/<id>/data/inventory.ts`).
+ */
+export function hasData(data: VersionData, path: string): boolean {
+  const inventory = data.inventory;
+
+  return !inventory || inventory.has(relative(path).toLowerCase()) || lender(data, path) !== null;
+}
 
 export function resolveDataUrl(path: string): string {
-  return DATA_FOLDER + path.replace(/^[./]+/, '');
+  return dataUrl(gameVersion.data, path);
 }
 
 export function downloadDataFile(path: string): Promise<Uint8Array> {
   return downloadBytesBuffer(resolveDataUrl(path));
 }
 
-/**
- * Does the active version's `Data/` tree contain this path? A version that
- * declares no inventory (Season 6) answers yes to everything, so nothing
- * about it changes; a period tree answers no for the Season 6 chrome and the
- * post-0.97 effect textures it never shipped, and its loaders draw nothing
- * instead of fetching a 404 per frame (`versions/<id>/data/inventory.ts`).
- */
+/** `hasData` for the active version. */
 export function hasDataFile(path: string): boolean {
-  const inventory = gameVersion.data.inventory;
-
-  if (!inventory) return true;
-
-  return inventory.has(path.replace(/^[./]+/, '').toLowerCase());
+  return hasData(gameVersion.data, path);
 }

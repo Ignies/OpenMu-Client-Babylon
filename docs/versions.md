@@ -15,8 +15,12 @@ versions/<id>/
   ui/          pre-game pages, preload lists, MasterSkillsWindow, and `windows` overrides
 ```
 
-- `features` flags (`masterSkills`, `socketItems`, `muHelper`, ...) are how `src/`
-  asks what a version supports. Never compare the version id in `src/`.
+- `features` flags (`masterSkills`, `socketItems`, `itemHotkeys`, the later classes, ...) are how
+  `src/` asks what a version supports. Never compare the version id in `src/`.
+- `modulesOff` lists the optional gameplay modules a version's server never has, in `server.json`'s
+  words (`mu_helper`): they are never installed. A world can still turn more off in its `server.json`.
+- `data.borrows` lets a version read another version's served files (Season 6's) instead of
+  committing byte-identical copies (`src/version/readme.md`).
 - A version's `ui.windows` replaces shared windows by `id`
   (`versions/shared/ui/index.ts` registers them after the shared ones).
 - Shared content (skills, windows, maps) sits in `versions/shared/`. A version that should not
@@ -26,6 +30,8 @@ versions/<id>/
 
 1. Copy `versions/_template/` to `versions/<id>/` and fill `index.ts`.
 2. Add it to `VERSION_REGISTRY` in `versions/registry.ts`.
-3. Point its data paths at its own `Data-<id>/` and `public/game-assets-<id>/`.
+3. Point its data paths at its own `Data-<id>/` and `public/game-assets-<id>/`. Commit only the
+   files whose source differs from Season 6's and borrow the rest (`data.borrows`, as
+   [versions/v097d/readme.md](../versions/v097d/readme.md) does).
 4. Override only what differs; everything else comes from `versions/shared/`.
 5. `bun run test` runs `versions/registry.test.ts`, which checks every entry loads.

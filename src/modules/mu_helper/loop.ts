@@ -4,7 +4,7 @@ import { Pets } from '../pets';
 import { HeroSkills } from '../skills';
 import { Hero } from '../hero';
 import { Social } from '../social/social';
-import { gameVersion } from '../../version';
+import { moduleOn } from '../module';
 import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
 import { calcMaxDurability, isJewel, itemDef } from '@/controllers/item_rules';
 import { InventoryConstants } from '@/core/inventoryConstants';
@@ -498,7 +498,7 @@ function work(world: World, hero: Entity, config: MuHelperConfig): void {
 }
 
 export function updateMuHelperLoop(world: World, dt: number): void {
-  if (!gameVersion.features.muHelper) return;
+  if (!moduleOn('mu_helper')) return;
   ensureMuHelperWatching();
 
   if (!MuHelper.active) {

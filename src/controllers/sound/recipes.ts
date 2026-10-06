@@ -1,5 +1,6 @@
 import soundFiles from './recipes.json';
 import { resolveUrlToDataFolder } from '../assets/resolveUrlToDataFolder';
+import { gameVersion } from '../../version';
 
 /**
  * Pure data shared by every sound entry: the sound catalogue. `recipes.json`
@@ -21,9 +22,9 @@ export const SOUND_KEYS: readonly Sounds[] = Object.keys(
   soundFiles
 ) as Sounds[];
 
-/** Resolved URL of a sound's file. */
+/** Resolved URL of a sound's file: the version's own when it ships one (`VersionData.sounds`). */
 export function soundUrl(key: Sounds): string {
-  return resolveUrlToDataFolder(soundFiles[key]);
+  return resolveUrlToDataFolder(gameVersion.data.sounds?.[key] ?? soundFiles[key]);
 }
 
 /** Whether a key is a music track (`Music/…`) rather than an effect. */

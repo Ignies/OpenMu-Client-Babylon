@@ -1,6 +1,7 @@
 import { RawTexture, Texture, type Scene } from '../render/babylon/exports';
 import { decodeTGA } from '@/controllers/assets/mu';
 import { fetchTerrainFile } from '../assets/prefetchWorld';
+import { hasAssetFile } from '../assets/resolveUrlToDataFolder';
 
 /**
  * The map's grass cards (`TileGrass01/02/03.OZT`, `BITMAP_MAPGRASS + layer1`, ZzzLodTerrain.cpp:1620):
@@ -119,6 +120,8 @@ export async function loadGrassCards(
   await Promise.all(
     Array.from({ length: GRASS_CARD_SLOTS }, async (_, slot) => {
       const name = `World${worldNum}/TileGrass0${slot + 1}.OZT`;
+      // A card the version lacks is the same "no grass here", without asking.
+      if (!hasAssetFile(name)) return;
 
       let rows: Float32Array;
 

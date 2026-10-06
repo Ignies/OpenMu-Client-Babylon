@@ -2,6 +2,7 @@ import { type TextKey } from '@/i18n';
 
 import { CharacterClassNumber } from '@/core/types';
 import { CharacterCreationUnlockFlagsEnum } from '@versions/shared/packets/ServerToClientPackets';
+import type { VersionFeatures } from '@/version/contract';
 
 export const WIN_WIDTH = 454;
 export const WIN_HEIGHT = 406;
@@ -121,8 +122,15 @@ type CreatableClass = {
   descriptionKey: TextKey;
   stats: readonly [string, string, string, string];
   unlock: CharacterCreationUnlockFlagsEnum | null;
+  /** The version flag a later class needs (`features`); the first three need none. */
+  feature?: 'summoner' | 'rageFighter' | 'magicGladiator' | 'darkLord';
   y: number;
 };
+
+/** Whether a version has this class at all: one it lacks cannot be made. */
+export function offeredBy(cls: CreatableClass, features: VersionFeatures): boolean {
+  return !cls.feature || features[cls.feature];
+}
 
 const JOB_BTN_START_Y = 131;
 const JOB_BTN_SUMMONER_ROW = 3;
@@ -171,6 +179,7 @@ export const CREATABLE_CLASSES: readonly CreatableClass[] = [
     descriptionKey: 'class.desc.summoner',
     stats: ['21', '21', '18', '23'],
     unlock: CharacterCreationUnlockFlagsEnum.Summoner,
+    feature: 'summoner',
     y: JOB_BTN_START_Y + JOB_BTN_HEIGHT * JOB_BTN_SUMMONER_ROW,
   },
   {
@@ -182,6 +191,7 @@ export const CREATABLE_CLASSES: readonly CreatableClass[] = [
     descriptionKey: 'class.desc.rageFighter',
     stats: ['32', '27', '25', '20'],
     unlock: CharacterCreationUnlockFlagsEnum.RageFighter,
+    feature: 'rageFighter',
     y: JOB_BTN_RAGE_FIGHTER_Y,
   },
   {
@@ -193,6 +203,7 @@ export const CREATABLE_CLASSES: readonly CreatableClass[] = [
     descriptionKey: 'class.desc.magicGladiator',
     stats: ['26', '26', '26', '26'],
     unlock: CharacterCreationUnlockFlagsEnum.MagicGladiator,
+    feature: 'magicGladiator',
     y: JOB_BTN_RAGE_FIGHTER_Y + JOB_BTN_HEIGHT,
   },
   {
@@ -204,6 +215,7 @@ export const CREATABLE_CLASSES: readonly CreatableClass[] = [
     descriptionKey: 'class.desc.darkLord',
     stats: ['26', '20', '20', '15'],
     unlock: CharacterCreationUnlockFlagsEnum.DarkLord,
+    feature: 'darkLord',
     y: JOB_BTN_RAGE_FIGHTER_Y + JOB_BTN_HEIGHT * 2,
   },
 ] as const;

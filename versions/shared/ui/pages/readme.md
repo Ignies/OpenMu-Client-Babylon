@@ -11,7 +11,7 @@ The full-screen pages: the pre-game screens and the world page that holds every 
 - `LoginPage` (`login/`): the login window, and account creation in its place
   (`registerWindow.tsx`). Reads the login fields of `Session`, `servers`.
 - `CharactersPage` (`character_select/`): character plates, the class preview and the create
-  window (`CharMakeWin.tsx`). Reads `character_select` (`CharSelect`), `hero`, `servers`.
+  window (`CharMakeWin.tsx`; a class the version lacks is greyed out like a locked one). Reads `character_select` (`CharSelect`), `hero`, `servers`.
 - `CharacterList` (`character_select/character_list/`): the account's character list (request,
   packets, roster drawn as the line-up plate or as rows). Every character page uses it; see its
   readme.
@@ -41,4 +41,6 @@ The full-screen pages: the pre-game screens and the world page that holds every 
 ## Tests
 - `character_select/character_list/roster.test.ts`: the list rules (selection, free slot, status,
   row order).
+- `character_select/layout.test.ts`: the create window offers only the classes the version has
+  (`offeredBy`, `features.darkLord` / `magicGladiator` / `summoner` / `rageFighter`).
 - `world/shown.test.ts`: a window of a module the server turned off leaves the page.

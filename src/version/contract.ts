@@ -74,6 +74,65 @@ export interface VersionData {
    * always done.
    */
   readonly inventory?: ReadonlySet<string>;
+  /**
+   * Another version's trees, served beside this one, that it reads instead of
+   * shipping a byte-identical copy. Omit it and every request stays on
+   * `assets`, which is what Season 6 does.
+   */
+  readonly borrows?: VersionBorrows;
+  /**
+   * Sound keys whose file this version ships itself, relative to `assets`
+   * (`'Sound/aTower': 'Sound/aTower.wav'`). Every other key plays the shared
+   * catalogue's file (`controllers/sound/recipes.json`).
+   */
+  readonly sounds?: Readonly<Record<string, string>>;
+  /** How this tree's `gate.bmd` lays out a record, when it is not Season 6's (`gates.ts`). */
+  readonly gates?: GateLayout;
+}
+
+/** One field of a `gate.bmd` record: its byte offset, and 1 for a BYTE or 2 for a WORD. */
+export interface GateField {
+  readonly at: number;
+  readonly bytes: 1 | 2;
+}
+
+/**
+ * `GATE_ATTRIBUTE` as one client's `gate.bmd` stores it: `records` of `size`
+ * bytes, each Bux-encoded, Flag / Map / x1 / y1 / x2 / y2 in bytes 0-5 and
+ * the rest where these say.
+ */
+export interface GateLayout {
+  readonly records: number;
+  readonly size: number;
+  readonly target: GateField;
+  readonly angle: GateField;
+  readonly level: GateField;
+  /** Absent from trees older than the field: reads as 0. */
+  readonly maxLevel?: GateField;
+}
+
+export interface VersionBorrows {
+  /** The other converted tree (`./game-assets/`). Trailing slash. */
+  readonly assets: string;
+  /**
+   * Every file this version's own `assets` holds, lower-cased and relative to
+   * it. A converted file not listed comes from `borrows.assets`.
+   */
+  readonly ownAssets: ReadonlySet<string>;
+  /**
+   * Converted files the borrowed tree has and this version's own source does
+   * not, where the absence means something (a world without a grass card
+   * grows no grass in that slot). They are never borrowed.
+   */
+  readonly lacks?: ReadonlySet<string>;
+  /** The other original `Data/` tree (`./Data/`). Trailing slash. */
+  readonly folder?: string;
+  /**
+   * Lower-cased paths, or folder prefixes ending in `/`, under `folder` that
+   * this version reads from there when its own `inventory` lacks them: files
+   * its source has byte-identically, or art it borrows on purpose.
+   */
+  readonly folderPaths?: readonly string[];
 }
 
 /**
@@ -88,22 +147,17 @@ export interface VersionFeatures {
   readonly socketItems: boolean;
   /** Ancient sets (0.97+). */
   readonly ancientItems: boolean;
-  /** Harmony jewel + refine stones (S3+). */
-  readonly harmonyJewel: boolean;
-  /** Dark Lord / Magic Gladiator character classes (0.97 / 0.99+). */
+  /**
+   * The character classes after the first three: the create window offers
+   * only those the version has (Dark Lord, Magic Gladiator: 0.99 / 0.97;
+   * Summoner, Rage Fighter: S3 / S5).
+   */
   readonly darkLord: boolean;
   readonly magicGladiator: boolean;
-  /** Summoner / Rage Fighter (S3 / S5+). */
   readonly summoner: boolean;
   readonly rageFighter: boolean;
-  /** MU Helper (S6 E3, OpenMU `MuHelper`). */
-  readonly muHelper: boolean;
-  /** Item hotkeys / consumable belt row (S6). */
+  /** The Q/W/E/R consumable belt on the bottom bar (S6, `CNewUIItemHotKey`). */
   readonly itemHotkeys: boolean;
-  /** Blood Castle / Devil Square / Chaos Castle event windows. */
-  readonly events: boolean;
-  /** Quest system with the S6 NPC dialogue windows (`Quest_eng.bmd`). */
-  readonly questDialogs: boolean;
 }
 
 export interface GameVersion {
@@ -137,6 +191,12 @@ export interface GameVersion {
   readonly protocol: VersionProtocol;
   readonly data: VersionData;
   readonly features: VersionFeatures;
+  /**
+   * The optional gameplay modules this version's server never has, in the
+   * words a world's `server.json` `modulesOff` uses (`mu_helper`). They are
+   * never installed, so no listener of theirs runs and their windows hide.
+   */
+  readonly modulesOff: readonly string[];
 }
 
 export function asciiBytes(s: string): number[] {

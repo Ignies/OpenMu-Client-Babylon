@@ -94,7 +94,8 @@ import { Session } from '../modules/session';
 import { AppState, UIState } from '../controllers/interface/uiState';
 import { Ecs } from '../ecs/current';
 
-import { installModules } from '../modules/module';
+import { installModules, onInVersion } from '../modules/module';
+import { gameVersion } from '../version';
 import { MODULES } from '../modules/modules';
 import { installModuleRouter, moduleHost } from '../modules/_api/ports';
 import { installPingNet } from '../controllers/net/pingNet';
@@ -147,8 +148,9 @@ setInterval(() => {
 const hot = (import.meta as { hot?: { decline(): void } }).hot;
 if (hot) hot.decline();
 
-// Every gameplay module's listeners, in list order (see modules/modules.ts); each install gets the module API.
-installModules(MODULES, undefined, moduleHost.api);
+// Every gameplay module's listeners, in list order (see modules/modules.ts), but those the version's
+// server never has (`gameVersion.modulesOff`); each install gets the module API.
+installModules(MODULES, onInVersion(gameVersion), moduleHost.api);
 // The module packet (E8): one listener hands each frame to the module it names (modules/_api/router.ts).
 installModuleRouter();
 

@@ -4,7 +4,9 @@ Scripts run by hand or by `package.json`, never by the game. Each file starts wi
 and how to run it.
 
 ## Asset conversion (original `Data/` -> what the browser loads)
-- `bmdToGlb.ts`: models (`.bmd`) to `public/game-assets/**.glb`; `shared.ts` names the source tree.
+- `bmdToGlb.ts`: models (`.bmd`) to `public/game-assets/**.glb`; `shared.ts` names the source tree
+  (`MU_DATA`, `GLB_OUTPUT` for another version's tree: convert into a scratch folder and keep only
+  what differs from Season 6's, `versions/v097d/readme.md`).
 - `ozjToJpeg.ts`, `oztToTga.ts`, `pack-textures.ts`, `texturePacker.ts`: textures and sprite sheets.
 - `copyData.ts`, `compressAssets.ts`, `assetsIndex.ts`: the production build's `dist/Data`, gzip
   sidecars and the pre-download index (`bun run build` runs all three).
@@ -26,7 +28,8 @@ and how to run it.
 - `checks/`: structure checks and their baselines, the lint ratchet, the commit message rules
   ([docs/ci.md](../docs/ci.md)). `lintCounts.ts`: `bun run lint:count`. `checks/graph.test.ts`
   pins the cycle finder and the type-only import rule the cycle check stands on.
-- `assetCase.ts`: the converted assets' file name case against the client's own tables.
+- `assetCase.ts`: the converted assets' file name case against the client's own tables (a
+  version's own-file list, `versions/<id>/data/assets.ts`, names files and is not scanned).
 - `weatherStats.ts`: what the proxy's weather schedule does, measured.
 
 ## Servers

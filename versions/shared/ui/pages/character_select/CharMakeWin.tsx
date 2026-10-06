@@ -12,6 +12,7 @@ import { playUiSound } from '@/controllers/sound/sfx';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { TEXT_COLOR } from '@/controllers/interface/components/mu_text';
+import { gameVersion } from '@/version';
 import { createClassPreview, type ClassPreview } from './classPreview';
 import {
   ACTION_BTN_FRAMES,
@@ -47,6 +48,7 @@ import {
   JOB_BTN_WIDTH,
   NAME_MAX_LENGTH,
   NAME_MIN_LENGTH,
+  offeredBy,
   OK_BTN_X,
   PANEL_ALPHA,
   PREVIEW_HEIGHT,
@@ -265,7 +267,7 @@ export const CharMakeWin = observer(({ onClose }: CharMakeWinProps) => {
 
       {}
       {CREATABLE_CLASSES.map(cls => {
-        const enabled = isUnlocked(cls.unlock);
+        const enabled = isUnlocked(cls.unlock) && offeredBy(cls, gameVersion.features);
 
         return (
           <MuButton

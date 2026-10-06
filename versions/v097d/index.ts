@@ -131,8 +131,6 @@ export const gameVersion: GameVersion = {
     // Version095d's option types are Option / Luck / Excellent only, and the
     // client ships no ItemSetOption.bmd.
     ancientItems: false,
-    // Harmony and refine stones are Season 3.
-    harmonyJewel: false,
     // OpenMU's ShowCharacterListPlugIn095: "0.95 doesn't support dark lord
     // (number 16) and newer classes yet".
     darkLord: false,
@@ -142,17 +140,14 @@ export const gameVersion: GameVersion = {
     // Summoner is Season 3, Rage Fighter Season 5.
     summoner: false,
     rageFighter: false,
-    // MU Helper is Season 6 Episode 3.
-    muHelper: false,
-    // The consumable belt row and the cash shop are Season 6; the 0.97d
-    // client's 97-file Interface set has neither.
+    // The consumable belt row is Season 6; the 0.97d client's 97-file
+    // Interface set has none.
     itemHotkeys: false,
-    // Devil Square: the client has World10, OpenMU Version095d runs
-    // DevilSquareInitializer. Blood Castle has the map (World12) but no
-    // server side yet; Chaos Castle does not exist in 0.97d.
-    events: true,
-    // The flag means the Season 6 quest windows (Quest_eng.bmd). 0.97d has
-    // the legacy chain instead (Local/Quest.bmd, OpenMU NpcWindow.LegacyQuest).
-    questDialogs: false,
   },
+  // MU Helper is Season 6 Episode 3. `events` stays: the client has World10
+  // and OpenMU Version095d runs DevilSquareInitializer (Blood Castle has its
+  // map, World12, but no server side yet; Chaos Castle is not in 0.97d).
+  // `quests` stays: it carries the legacy chain 0.97d has (Local/Quest.bmd,
+  // OpenMU NpcWindow.LegacyQuest); its Season 6 windows are never fed.
+  modulesOff: ['mu_helper'],
 };

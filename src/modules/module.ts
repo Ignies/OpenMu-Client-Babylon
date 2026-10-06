@@ -71,6 +71,11 @@ export function installModules(
   return [...on];
 }
 
+/** The `enabled` of `installModules` for a game version: on unless its `modulesOff` names it. */
+export function onInVersion(version: { readonly modulesOff: readonly string[] }): (id: string) => boolean {
+  return id => !version.modulesOff.includes(id);
+}
+
 /** The modules `installModules` refused, in the order it met them, and why. */
 export function refusedModules(): { id: string; why: string }[] {
   return [...refused].map(([id, why]) => ({ id, why }));

@@ -10,9 +10,12 @@ imports the modules below directly (baselined in `tools/checks`).
 - `loadFailure.ts`: `reportLoadFailure(what)`, a `.catch` handler for fire-and-forget loads that
   warns once per `what` and never rethrows; `settle(promise, what)`, the same as a promise that
   resolves to `undefined` instead of rejecting.
-- Data roots: `resolveUrlToDataFolder(url)` (converted assets, `gameVersion.data.assets`);
+- Data roots: `resolveUrlToDataFolder(url)` (converted assets, `gameVersion.data.assets`, or the
+  tree the version borrows a file it does not ship from; `assetUrl(data, url)` is the pure form;
+  `hasAssetFile(url)` is false for a file the version `lacks`);
   `mu/dataFolder.ts`: `resolveDataUrl`, `downloadDataFile`, `hasDataFile` (the original `Data/`
-  tree, `gameVersion.data.folder`).
+  tree, `gameVersion.data.folder`, or the tree the version borrows a path it lacks from:
+  `borrows.folderPaths`; `dataUrl(data, path)` and `hasData(data, path)` are the pure forms).
 - `download.ts`: `downloadBytesBuffer`, `downloadDataBytesBuffer`, `createOZJTexture`,
   `readOJZBufferAsJPEGBuffer`, `toRadians`, `isFlagInBinaryMask`, plus byte and packet helpers it
   re-exports from `core/binaryUtils` and `net/wireUtils`.
@@ -54,7 +57,8 @@ imports the modules below directly (baselined in `tools/checks`).
 - `mu/` reads the original files: OZJ / OZT sprites, `gate.bmd`, the quest, move and name tables
   in `Data/Local/<pack>/`. In the `.bmd` tables each record is XOR-ed with the 3-byte Bux key,
   restarting at every record. The item, skill and buff name tables only overlay the English names
-  the client already has; they load nothing for English.
+  the client already has; they load nothing for English. `gate.bmd` is decoded with the version's
+  `data.gates` layout, Season 6's (`SEASON6_GATES`: 512 records of 14 bytes) when it names none.
 
 - Fire-and-forget loads (`void loadX(file).then(...)`, nobody awaits them) end in
   `.catch(reportLoadFailure(file))`, or go through `settle`. A missing file then logs one warning
@@ -83,6 +87,8 @@ imports the modules below directly (baselined in `tools/checks`).
 - change which interface sheets preload: `versions/<id>/ui/preload.ts`.
 
 ## Tests
+- `resolveUrlToDataFolder.test.ts`: own files stay on the version root, the rest come from the
+  borrowed tree, a file the version lacks is never borrowed, absolute urls pass through.
 - `loadFailure.test.ts`: one warning per file, a different file warns again, `settle` passes a
   value through and turns a failure into `undefined`.
 - `assetDownload.test.ts`: `urlsOf`, Core cannot be unticked, transfer totals.
@@ -92,6 +98,8 @@ imports the modules below directly (baselined in `tools/checks`).
 - `texturePacks.test.ts`: `packsBase`, the index, swap and restore, label re-stamp, `textureLabel`
   mid-swap, same-name and same-size pairs, alpha kept, broken manifest, `setActivePack` listeners.
 - `mu/localNames.test.ts`: item, skill and buff name record layouts.
+- `mu/dataFolder.test.ts`: own, borrowed and absent `Data/` paths.
+- `mu/gates.test.ts`: the Season 6 gate layout, a byte-wide period one, a truncated file.
 
 ## Notes
 
