@@ -418,7 +418,8 @@ export function installNet(): void {
     faceTarget(caster, target);
     // AT_SKILL_DARKSIDE: ReceiveMagic only counts another caster's as one of the hero's follow-ups (WSclient.cpp:5144-5148).
     if (combat.observeDarkSideMagic(p.SkillId, caster, target)) return;
-    playCastAnimation(caster, p.SkillId, false);
+    // AT_SKILL_DRAGON_ROAR: a hit, with no SetAction or cast sound (WSclient.cpp:5130-5143).
+    if (!combat.magicIsHit(p.SkillId)) playCastAnimation(caster, p.SkillId, false);
     playTargetedSkillVisual(world.scene, p.SkillId, caster, target);
   });
 

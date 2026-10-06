@@ -585,6 +585,7 @@ export default defineSkill({
   noFlinch: [A.PLAYER_SKILL_DRAGONLORE], // SetPlayerShock leaves the roar alone (ZzzCharacter.cpp:1283-1297)
   // The cast at the caster, and each hit's volcano and flames on its target (roarHit).
   visual: { area: dragonRoar, impact: roarHit },
+  magicIsHit: true, // ReceiveMagic draws its 0x19 as a hit, no clip or sound (WSclient.cpp:5130-5143)
   sound: 'Sound/Ragefighter/Rage_Dragonlower', // Dragon Roar
   delayMs: 700, // Dragon Roar
   clip: { ground: A.PLAYER_SKILL_DRAGONLORE }, // Dragon Roar

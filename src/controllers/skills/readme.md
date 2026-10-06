@@ -30,7 +30,7 @@ themselves are content in `versions/shared/skills/` (see [docs/content.md](../..
   each of its `effectAliases`) into `tables.ts` (`SKILL_EFFECTS`), `cancel` into the table `cancelledEffects` reads, `buffs` /
   `buffArrivals` / `buffHits` into `BUFF_VISUALS` / `BUFF_ARRIVALS` / `BUFF_HITS`, and hands
   the combat fields (clip rules, `target`, `stepIn`, `noFlinch`, `holdsFacing`, `quietOn`,
-  `othersSee`, `explicitHits`, `kill`, `combat.layer` / `combat.hooks`) to
+  `othersSee`, `magicIsHit`, `explicitHits`, `kill`, `combat.layer` / `combat.hooks`) to
   `combat.registerSkill`. It is the only writer of those tables.
 - A `SkillVisual` row has four moments, each a `Step` (a function of a point and a
   `SkillContext`): `cast` at the caster, `travel` (a projectile whose arrival fires `impact`),

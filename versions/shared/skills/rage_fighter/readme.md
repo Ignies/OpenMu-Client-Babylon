@@ -58,7 +58,8 @@ RageCreateEffect draws the cast) make MODEL_VOLCANO_OF_MONK sub1, sub2 and sub3,
 ticks later where the target stood (none once it is gone); sub4 does nothing. A sub1 stands 100 ticks on the ground, textured with
 its mesh 0 again in volcano_core, a flame climbing its column a tick, four stones flying off as it is made and four more with a
 MODEL_SHOCKWAVE_GROUND01 sub2 at LifeTime 10, BITMAP_LIGHT_RED sub3's flare and terrain light under it. Each hit also burns
-TARGETMON_EFFECT's three flames a tick on random bones of the target for 100 ticks and plays Rage_Dragonlower_Att. OpenMU sends no
+TARGETMON_EFFECT's three flames a tick on random bones of the target for 100 ticks and plays Rage_Dragonlower_Att. It starts no clip
+and plays no Rage_Dragonlower on the caster (`magicIsHit`): that is the 0x1E cast's (ReceiveMagicContinue). OpenMU sends no
 0x19 for Dragon Roar (AreaSkillAttackAction, DragonRoarSkillPlugIn hit through AttackByAsync), so with it none of this shows.
 
 DarksideRendering (MonkSystem.cpp:697-857) is the hero's alone: it reads the CMonkSystem only his cast fills, so another

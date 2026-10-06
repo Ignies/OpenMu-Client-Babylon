@@ -50,6 +50,7 @@ export type PoseClip = (pose: CastPose, ctx: CastContext) => PlayerAction | null
  * - `SPELL_CAST_SKILLS`: cast with `SetPlayerMagic` though the table types them physical.
  * - `SKILL_OTHERS_SEE`: the clip everyone else plays in place of one of the skill's own.
  * - `SKILL_QUIET_MOUNTS`: mounts on which the cast is dropped for others and silent for the hero.
+ * - `MAGIC_HIT_SKILLS`: a SkillAnimation (0x19) of these is a hit, with no clip or cast sound.
  */
 export const SKILL_POSE_CLIPS: Record<number, PoseClip> = {};
 export const SKILL_SWINGS: Record<number, 'highBow'> = {};
@@ -57,6 +58,7 @@ export const SKILL_SWORD_COUNT: Record<number, boolean> = {};
 export const SPELL_CAST_SKILLS: Set<number> = new Set();
 export const SKILL_OTHERS_SEE: Record<number, Partial<Record<PlayerAction, PlayerAction>>> = {};
 export const SKILL_QUIET_MOUNTS: Record<number, readonly MountKind[]> = {};
+export const MAGIC_HIT_SKILLS: Set<number> = new Set();
 
 // ---- 2. state + readers ----------------------------------------------------
 
@@ -135,6 +137,11 @@ export function othersSeeClip(skill: number, clip: PlayerAction): PlayerAction {
 /** Whether a cast on this mount is dropped for others and silent for the hero. */
 export function castQuietOn(skill: number, mount: MountKind | null | undefined): boolean {
   return !!mount && !!SKILL_QUIET_MOUNTS[skill]?.includes(mount);
+}
+
+/** Whether a SkillAnimation (0x19) of the skill is one of its hits: no clip, no cast sound. */
+export function magicIsHit(skill: number): boolean {
+  return MAGIC_HIT_SKILLS.has(skill);
 }
 
 // ---- 3. the layer ----------------------------------------------------------

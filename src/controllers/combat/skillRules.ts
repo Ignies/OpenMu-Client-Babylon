@@ -8,6 +8,7 @@ import { SHOCK_IMMUNE_CLIPS, SKILL_CLIPS, type ClipPick, type SkillClipSet } fro
 import { SKILL_TARGETS, type CastTarget } from './castTargets';
 import { FACING_HELD_CLIPS, SKILL_STEP_IN } from './skillMovement';
 import {
+  MAGIC_HIT_SKILLS,
   SKILL_OTHERS_SEE,
   SKILL_POSE_CLIPS,
   SKILL_QUIET_MOUNTS,
@@ -30,6 +31,7 @@ export interface SkillCombatRules {
   readonly castsAsSpell?: true;
   readonly othersSee?: Partial<Record<PlayerAction, PlayerAction>>;
   readonly quietOn?: readonly NonNullable<CastContext['mount']>[];
+  readonly magicIsHit?: true;
   readonly noFlinch?: readonly PlayerAction[];
   readonly holdsFacing?: readonly PlayerAction[];
   readonly target?: CastTarget;
@@ -48,6 +50,7 @@ export function registerSkillRules(id: number, d: SkillCombatRules, addLayer: (l
   if (d.castsAsSpell) SPELL_CAST_SKILLS.add(id);
   if (d.othersSee) SKILL_OTHERS_SEE[id] = d.othersSee;
   if (d.quietOn) SKILL_QUIET_MOUNTS[id] = d.quietOn;
+  if (d.magicIsHit) MAGIC_HIT_SKILLS.add(id);
   for (const clip of d.noFlinch ?? []) SHOCK_IMMUNE_CLIPS.add(clip);
   for (const clip of d.holdsFacing ?? []) FACING_HELD_CLIPS.add(clip);
   if (d.target) SKILL_TARGETS[id] = d.target;

@@ -19,7 +19,7 @@ import {
   startAttack,
 } from './attackTiming';
 import { attackRange, equippedLauncher, hasAmmo, type Hands } from './weaponRange';
-import { castQuietOn, magicClip, othersSeeClip, skillClip, type CastContext } from './skillClips';
+import { castQuietOn, magicClip, magicIsHit, othersSeeClip, skillClip, type CastContext } from './skillClips';
 import {
   clipHoldsFacing,
   skillStepIn,
@@ -200,6 +200,11 @@ class Combat implements Controller {
   /** On this mount the cast is dropped for others and silent for the hero. */
   castQuietOn(skill: number, mount: CastContext['mount']): boolean {
     return castQuietOn(skill, mount);
+  }
+
+  /** A SkillAnimation (0x19) of this skill is one of its hits: no clip, no cast sound. */
+  magicIsHit(skill: number): boolean {
+    return magicIsHit(skill);
   }
 
   /** `SetPlayerShock` leaves a player in this clip alone: the cast finishes. */
