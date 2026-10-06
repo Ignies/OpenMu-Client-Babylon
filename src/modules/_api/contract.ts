@@ -2,7 +2,7 @@
 // module and the sandbox side can import this file alone.
 
 /** The API version this client serves (semver): a minor bump adds calls, a major one breaks them. */
-export const MODULE_API_VERSION = '1.0.0';
+export const MODULE_API_VERSION = '1.1.0';
 
 /** A module's id (its folder name), also the rule for a window's id: lower case, at most 40 characters. */
 export const MODULE_ID = /^[a-z][a-z0-9_]{0,39}$/;
@@ -27,7 +27,7 @@ export type ModuleWindow<Draw = never> = {
 
 /**
  * Module API v1, as a module calls it in process. Text keys and window titles start with the module's
- * id and a dot. Packets are not in v1 (phase 4 adds them as a minor version).
+ * id and a dot. 1.1 added the module's packets (`onPacket`, `sendPacket`; the wire is `packetWire.ts`).
  */
 export interface ModuleApi<Draw = never> {
   /** Adds or replaces lines of one language (`en` is the one every module needs). */
@@ -40,12 +40,19 @@ export interface ModuleApi<Draw = never> {
   hero(): HeroSnapshot;
   /** Called with the map's number once the hero stands on a new map. Returns the unsubscribe. */
   onMapChange(fn: (map: number) => void): () => void;
+  /** Called with each payload the server sends this module, and no other's. Returns the unsubscribe. */
+  onPacket(fn: (payload: Uint8Array) => void): () => void;
+  /** Sends a payload to this module's half on the server; refused over the frame limit (`maxPayload`). */
+  sendPacket(payload: Uint8Array): void;
 }
 
-/** The same calls over messages (the sandbox): each answers with a promise; `onMapChange` unsubscribes at once. */
+/** The calls that subscribe: over messages they return the unsubscribe at once, like in process. */
+type Subscriptions = 'onMapChange' | 'onPacket';
+
+/** The same calls over messages (the sandbox): each answers with a promise, except the subscriptions. */
 export type RemoteModuleApi = {
-  [K in Exclude<keyof ModuleApi, 'onMapChange'>]: (...args: Parameters<ModuleApi[K]>) => Promise<ReturnType<ModuleApi[K]>>;
-} & Pick<ModuleApi, 'onMapChange'>;
+  [K in Exclude<keyof ModuleApi, Subscriptions>]: (...args: Parameters<ModuleApi[K]>) => Promise<ReturnType<ModuleApi[K]>>;
+} & Pick<ModuleApi, Subscriptions>;
 
 type Version = readonly [number, number, number];
 

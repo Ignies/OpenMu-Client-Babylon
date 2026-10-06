@@ -12,6 +12,7 @@ import type { BurstKind } from '@/controllers/fx/bursts';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { Ecs } from '@/ecs/current';
 import { Hero } from '../hero';
+import { Session } from '../session';
 import { onMapChanged } from '../warp';
 import { createModuleHost, type Game } from './host';
 
@@ -60,6 +61,7 @@ export const game: Game = {
     });
   },
   onMapChange: onMapChanged,
+  sendPacket: frame => Session.sendToGS(new DataView(frame.buffer, frame.byteOffset, frame.byteLength)),
 };
 
 /** The client's one host: `src/app/logic.ts` hands `moduleHost.api` to `installModules`. */

@@ -13,6 +13,8 @@ import { t, type TextKey } from '@/i18n';
 import { windowsIn } from '@/controllers/interface/windows';
 import { MuWindows } from '@/controllers/interface/windowManager';
 import { Hero } from '../hero';
+import { Session } from '../session';
+import { encodeModuleFrame } from './packetWire';
 import { game, moduleHost } from './ports';
 
 afterEach(() => runInAction(() => (Ecs.world = null)));
@@ -51,6 +53,15 @@ describe('the game side of the module API', () => {
     expect(Object.isFrozen(hero)).toBe(true);
     runInAction(() => (Ecs.world = null));
     expect(game.hero()).toMatchObject({ map: -1, x: 0, y: 0 });
+  });
+
+  it('sends a module\'s frame to the game server through the session, like every other packet', () => {
+    const sent: number[][] = [];
+    const send = vi.spyOn(Session, 'sendToGS').mockImplementation(view => void sent.push([...new Uint8Array(view.buffer, view.byteOffset, view.byteLength)]));
+    const frame = encodeModuleFrame('ports_test', Uint8Array.from([1, 2]));
+    game.sendPacket(frame);
+    send.mockRestore();
+    expect(sent).toEqual([[...frame]]);
   });
 
   it('follows map changes through the warp module', () => {

@@ -7,10 +7,19 @@ export const PROTOCOL_VERSION = 1;
 /** The largest call the host reads: the length of its JSON. */
 export const MAX_MESSAGE_SIZE = 64 * 1024;
 
-type Api = Omit<ModuleApi, 'onMapChange'>;
+type Api = Omit<ModuleApi, 'onMapChange' | 'onPacket' | 'sendPacket'>;
 
-/** Each call's arguments: v1's calls, with `onMapChange` as a subscribe and an `offMapChange`. */
-export type CallArgs = { [K in keyof Api]: Parameters<Api[K]> } & { onMapChange: []; offMapChange: [] };
+/**
+ * Each call's arguments: v1's calls, with `onMapChange` and `onPacket` as a subscribe and an
+ * `offMapChange` / `offPacket`. `sendPacket` takes the payload in base64.
+ */
+export type CallArgs = { [K in keyof Api]: Parameters<Api[K]> } & {
+  onMapChange: [];
+  offMapChange: [];
+  sendPacket: [payload: string];
+  onPacket: [];
+  offPacket: [];
+};
 export type CallName = keyof CallArgs;
 /** What a call answers with. */
 export type CallResult<K extends CallName> = K extends keyof Api ? ReturnType<Api[K]> : void;
@@ -18,7 +27,7 @@ export type CallResult<K extends CallName> = K extends keyof Api ? ReturnType<Ap
 export type CallMessage = { [K in CallName]: { v: number; id: number; call: K; args: CallArgs[K] } }[CallName];
 export type Refusal = { id: number | null; error: string };
 export type AnswerMessage = { id: number; result?: unknown } | Refusal;
-export type EventMessage = { event: 'mapChange'; data: { map: number } };
+export type EventMessage = { event: 'mapChange'; data: { map: number } } | { event: 'packet'; data: { payload: string } };
 
 /** What carries the messages: a `MessagePort` (the client's end, or the module's). */
 export type PortLike = { postMessage(message: unknown): void; onmessage: ((event: MessageEvent) => void) | null };
@@ -28,6 +37,19 @@ const isObject = (o: unknown): o is Json => typeof o === 'object' && o !== null 
 const hasOnly = (o: Json, keys: string[]) => Object.keys(o).every(k => keys.includes(k));
 const isString = (s: unknown): s is string => typeof s === 'string';
 const isId = (id: unknown): id is number => Number.isSafeInteger(id) && (id as number) >= 0;
+const BASE64 = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
+
+/**
+ * A packet's payload over the wire: base64 keeps it plain JSON at a third over the bytes, so up to 48K
+ * of payload fits `MAX_MESSAGE_SIZE` whatever the bytes are.
+ */
+export function toBase64(bytes: Uint8Array): string {
+  let text = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) text += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(text);
+}
+
+export const fromBase64 = (text: string): Uint8Array => Uint8Array.from(atob(text), c => c.charCodeAt(0));
 
 /** What each call's arguments must be. */
 const ARGS: Record<CallName, (args: unknown[]) => boolean> = {
@@ -42,6 +64,9 @@ const ARGS: Record<CallName, (args: unknown[]) => boolean> = {
   hero: args => !args.length,
   onMapChange: args => !args.length,
   offMapChange: args => !args.length,
+  sendPacket: ([payload, ...rest]) => !rest.length && isString(payload) && BASE64.test(payload),
+  onPacket: args => !args.length,
+  offPacket: args => !args.length,
 };
 
 /**
