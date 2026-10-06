@@ -1,4 +1,4 @@
-import type { Emission } from '@/controllers/fx/effectParticles';
+import type { Emission, KindName } from '@/controllers/fx/effectParticles';
 import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
 import type { MeshAnimations } from '@/controllers/render';
 import { saw } from '../shared/meshAnimation';
@@ -39,39 +39,44 @@ function emberRed(): readonly [number, number, number] {
 }
 
 /**
- * The lava vents (2): a `BITMAP_SMOKE` SubType 13 glow one tick in three (:119-125). 5 (:133-153):
- * two `rand_fps_check(2)` a tick each step `o->Timer`; on 2 (mod 4) the first makes
- * `BITMAP_ADV_SMOKE + 1` and `BITMAP_ADV_SMOKE` SubType 0, on 0 the second `BITMAP_CLOUD` SubType 6
- * and `BITMAP_ADV_SMOKE` SubType 1: each pair one tick in eight. White, and none reads the scale.
- * 58-60 (:173-186), white at `o->Scale`: `BITMAP_WATERFALL_1` SubType 2 one tick in two,
+ * The lava vents (2): a `BITMAP_SMOKE` SubType 13 glow one tick in three (:119-125). 58-60
+ * (:173-186), white at `o->Scale`: `BITMAP_WATERFALL_1` SubType 2 one tick in two,
  * `BITMAP_WATERFALL_2` SubType 1 one in three, `BITMAP_WATERFALL_3` SubType 3 every tick.
  *
- * The volcano (Barracks 85 ×6, 88 ×4, 89 ×50; Refuge 88 ×1, 89 ×4), at `o->Scale`. 85 (:187-210)
- * walks `o->Timer` as 5 does: on 2 (mod 4) `BITMAP_ADV_SMOKE + 1` SubType 1 behind one more
- * `rand_fps_check(2)` (one tick in sixteen) and `BITMAP_ADV_SMOKE` SubType 2, on 0 `BITMAP_CLOUD`
- * SubType 14 (dark) and ADV_SMOKE SubType 2 at twice the scale; each move overwrites the light it is
- * made with. 88 (:211-217) a dark `BITMAP_CLOUD` SubType 10 and 89 (:218-225) a faint red SubType 11,
- * each one tick in four. 92 is the fire pillar, `BalgasFirePillarObject`.
+ * The volcano (Barracks 85 ×6, 88 ×4, 89 ×50; Refuge 88 ×1, 89 ×4), at `o->Scale`: 88 (:211-217) a
+ * dark `BITMAP_CLOUD` SubType 10 and 89 (:218-225) a faint red SubType 11, each one tick in four.
+ * 5 and 85 walk `o->Timer` (`BALGAS_TIMER_PUFFS`); 92 is the fire pillar, `BalgasFirePillarObject`.
  */
 export const BALGAS_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {
   2: [{ kinds: ['smoke13'], every: 3 }],
-  5: [
-    { kinds: ['fi02_0'], every: 8 },
-    { kinds: ['fi01_0'], every: 8 },
-    { kinds: ['cloud6'], every: 8 },
-    { kinds: ['fi01_1'], every: 8 },
-  ],
   58: [{ kinds: ['waterfall1_2'], every: 2 }],
   59: [{ kinds: ['waterfall2_1'], every: 3 }],
   60: [{ kinds: ['waterfall3_3'], every: 1 }],
-  85: [
-    { kinds: ['fi02_1'], every: 16 },
-    { kinds: ['fi01_2'], every: 8 },
-    { kinds: ['cloud14'], every: 8 },
-    { kinds: ['fi01_2'], every: 8, scale: 2 },
-  ],
   88: [{ kinds: ['cloud10'], every: 4 }],
   89: [{ kinds: ['cloud11'], every: 4, light: emberRed }],
+};
+
+/** One `CreateParticle` of a timer pair: its kind, its scale over `o->Scale`, and one more `rand_fps_check(2)`. */
+export type TimerPuff = { readonly kind: KindName; readonly scale?: number; readonly coin?: true };
+
+/**
+ * 5 (:133-153) and 85 (:187-210), drawn by `BalgasSmokeObject`: two `rand_fps_check(2)` a tick each
+ * step `o->Timer` when they pass; the first makes the first pair when its step lands on 2 (mod 4), the
+ * second the second when its step lands on 0. 5: `BITMAP_ADV_SMOKE + 1` and `BITMAP_ADV_SMOKE` SubType
+ * 0, then `BITMAP_CLOUD` SubType 6 and ADV_SMOKE SubType 1, white, none reading the scale. 85:
+ * `BITMAP_ADV_SMOKE + 1` SubType 1 behind one more `rand_fps_check(2)` and ADV_SMOKE SubType 2, then
+ * `BITMAP_CLOUD` SubType 14 (dark) and ADV_SMOKE SubType 2 at twice the scale; each move overwrites
+ * the light it is made with.
+ */
+export const BALGAS_TIMER_PUFFS: Partial<Record<number, readonly [readonly TimerPuff[], readonly TimerPuff[]]>> = {
+  5: [
+    [{ kind: 'fi02_0' }, { kind: 'fi01_0' }],
+    [{ kind: 'cloud6' }, { kind: 'fi01_1' }],
+  ],
+  85: [
+    [{ kind: 'fi02_1', coin: true }, { kind: 'fi01_2' }],
+    [{ kind: 'cloud14' }, { kind: 'fi01_2', scale: 2 }],
+  ],
 };
 
 /**
