@@ -242,15 +242,18 @@ async function play(kind: KindName, scale: number, roll: number, ticks: number, 
 
 describe('light0, BITMAP_LIGHT SubType 0 (ZzzEffectParticle.cpp:3161-3164, :7943-8010)', () => {
   // `rand() % 10 + 10` ticks, `(rand() % 50 + 50) / 100 * Scale`; a tick it rises `5 * 0.5`, loses 0.05 and is
-  // `Light = Scale`, whatever light it was made with.
-  it('rises 2.5 a tick, loses 0.05 of its scale a tick and is as bright as its scale', async () => {
+  // `Light = Scale`, whatever light it was made with, held at 1 as RenderSprite packs it (RenderUtils.h:8-18).
+  it('rises 2.5 a tick, loses 0.05 of its scale a tick and is as bright as its scale, up to 1', async () => {
     const sprite = await play('light0', 2, 0.5, 4);
     expect(sprite.position.x).toBeCloseTo(0);
     expect(sprite.position.y).toBeCloseTo(0.1);
     expect(sprite.position.z).toBeCloseTo(0);
     expect(sprite.width).toBeCloseTo((64 * (0.75 * 2 - 0.2)) / 100);
-    expect([sprite.color.r, sprite.color.g, sprite.color.b].map(c => c.toFixed(3))).toEqual(['1.300', '1.300', '1.300']);
+    expect([sprite.color.r, sprite.color.g, sprite.color.b].map(c => c.toFixed(3))).toEqual(['1.000', '1.000', '1.000']);
     expect(sprite.angle).toBe(0);
+    disposeEffectParticles();
+    const small = await play('light0', 1, 0.5, 4);
+    expect([small.color.r, small.color.g, small.color.b].map(c => c.toFixed(3))).toEqual(['0.550', '0.550', '0.550']);
   });
 
   it('lives rand() % 10 + 10 ticks, and goes once its scale is down to 0.1', async () => {
@@ -568,6 +571,31 @@ describe('the particle tick', () => {
     const made = fakes.colors;
     for (let n = 0; n < 10; n++) tick?.();
     expect(fakes.colors).toBe(made);
+  });
+
+  // RenderSprite packs the light into a byte a channel, each held in 0..1 first (ZzzOpenglUtil.cpp:918-933,
+  // RenderUtils.h:8-18): `smoke0` starts at LifeTime / 8 = 2, a torch fire takes a light past 1.
+  it('holds every kind in 0..1 over its whole life, whatever light it is made with', async () => {
+    for (const kind of Object.keys(KIND_REACH) as KindName[]) {
+      for (const roll of [0, 0.5, 0.999999]) {
+        const original = Math.random;
+        Math.random = () => roll;
+        try {
+          await spawnParticle(scene, kind, { x: 0, y: 0, z: 0 }, 0, 1, [3, 3, 3]);
+          const sprite = fakes.sprites[fakes.sprites.length - 1];
+          for (let n = 0; n < 200 && sprite.isVisible; n++) {
+            tick?.();
+            for (const c of [sprite.color.r, sprite.color.g, sprite.color.b, sprite.color.a]) {
+              expect(c, `${kind} roll ${roll} tick ${n}`).toBeGreaterThanOrEqual(0);
+              expect(c, `${kind} roll ${roll} tick ${n}`).toBeLessThanOrEqual(1);
+            }
+          }
+        } finally {
+          Math.random = original;
+        }
+        disposeEffectParticles();
+      }
+    }
   });
 });
 

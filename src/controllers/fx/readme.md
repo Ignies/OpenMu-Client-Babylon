@@ -84,8 +84,9 @@ shared pools, textures and particle recipes other folders reuse.
 - `effectParticles.test.ts`: `KIND_REACH` covers every particle kind, and the view gate of
   `ParticleEmitter` / `BonedParticleEmitter` (spawns only when a sprite could reach the frustum);
   a pushed particle on a turned object goes where MovePosition turns its velocity (ZzzAI.cpp:148-156),
-  from `spawnParticle` and from an emitter handed the node yaw;
-  `light0` (`BITMAP_LIGHT` SubType 0) rises, shrinks, glows as its scale and drifts on half the
+  from `spawnParticle` and from an emitter handed the node yaw; every kind's colour stays in 0..1
+  over its life whatever light it is made with;
+  `light0` (`BITMAP_LIGHT` SubType 0) rises, shrinks, glows as its scale up to 1 and drifts on half the
   particle wind (`g_vParticleWind`, walked once a tick, ZzzEffectParticle.cpp:3847-3859);
   `trueFire` (`BITMAP_TRUE_FIRE`, fantaF.jpg) takes its sideways and upward push at birth, rises,
   shrinks and fades with its life (24 ticks, `trueFire5` 20); `trueBlue` (`BITMAP_TRUE_BLUE`) is
@@ -190,7 +191,10 @@ Every particle moves by its velocity turned with the object first (MovePosition,
 ZzzEffectParticle.cpp:3885); a kind whose case adds `VectorAddScaled` moves a second time
 (`moveAgain`). The emitters are handed the node's yaw (`rotation.y`, MU's `Angle[2]` turned the
 other way by `render/renderAngles.ts`) and `spawnParticle` turns it back; taken as it was, every
-pushed particle on a turned object went the mirrored way.
+pushed particle on a turned object went the mirrored way. The tick holds each channel of a kind's
+colour in 0..1, as RenderSprite packs the light a byte a channel (ZzzOpenglUtil.cpp:918-933,
+RenderUtils.h:8-18): `smoke0` starts at `LifeTime / 8` = 2, `light0` at its scale, a torch fire at
+its light, and none of that past 1 reached the screen.
 
 ### feathers.ts
 Jitter up to 40 cm per axis, random tumble 0..5° a tick, `Alpha` 0.6..0.8. The original drops these

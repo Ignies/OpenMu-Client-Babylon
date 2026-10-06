@@ -280,8 +280,8 @@ function moveAgain(p: Particle, f: number): void {
  * `BITMAP_ADV_SMOKE` (fi01.jpg, additive), whatever scale it is made with: 20 + rand() % 5 ticks,
  * upright; SubType 0 `0.5 + r * 0.02` big and pushed `((r + 5) * 0.4, (r - 5) * 0.4, (r + 5) * 0.2)`,
  * SubType 1 (the `else`) `1 + r * 0.1` and half that (ZzzEffectParticle.cpp:3292-3323). A tick it
- * moves again, rises 0.3 faster, grows 0.07 (SubType 1 0.09) and is `LifeTime / 10`, white, held at
- * 1 by the vertex colour (:8219-8248).
+ * moves again, rises 0.3 faster, grows 0.07 (SubType 1 0.09) and is `LifeTime / 10`, white
+ * (:8219-8248), which the tick holds at 1.
  */
 function advSmokeKind(scaleBase: number, scaleStep: number, push: number, grow: number): ParticleKind {
   return {
@@ -298,7 +298,7 @@ function advSmokeKind(scaleBase: number, scaleStep: number, push: number, grow: 
       moveAgain(p, f);
       p.vz += 0.3 * f;
       p.scale += grow * f;
-      p.lr = p.lg = p.lb = Math.min(1, p.lifeTime / 10);
+      p.lr = p.lg = p.lb = p.lifeTime / 10;
     },
     color: plainColor,
   };
@@ -1019,6 +1019,8 @@ function acquire(pool: Pool): Sprite | null {
 /** The tick's one colour: each kind writes all four channels into it. */
 const tickColor = new Color4(1, 1, 1, 1);
 
+const unit = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
+
 function ensureTicking(target: Scene) {
   if (tickObserver && scene === target) return;
 
@@ -1077,7 +1079,9 @@ function ensureTicking(target: Scene) {
         sprite.cellIndex = ((p.frame % p.frames) + p.frames) % p.frames;
       }
 
+      // RenderSprite packs the light a byte a channel, held in 0..1 (ZzzOpenglUtil.cpp:918-933, RenderUtils.h:8-18).
       p.kind.color(p, color);
+      color.set(unit(color.r), unit(color.g), unit(color.b), unit(color.a));
       sprite.color.copyFrom(spriteLevel(target, color));
     }
   });
