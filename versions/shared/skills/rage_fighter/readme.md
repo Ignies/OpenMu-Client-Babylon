@@ -46,7 +46,9 @@ Only the cast's echo starts the count, and the
 cast is drawn once (RageCreateEffect's `m_bUseEffectOnce`, MonkSystem.cpp:1285-1288): a later echo,
 the hero's or another caster's while he still plays the clip (another client's follow-up), only turns
 its caster (`observeDarkSideEcho`). It also keeps the hit streak for the damage numbers. Past the fifth
-follow-up the next one due drops the targets (SendDarksideAtt's InitDarksideTarget, MonkSystem.cpp:591-595).
+follow-up the next one due drops the targets (SendDarksideAtt's InitDarksideTarget, MonkSystem.cpp:591-595). The cast drops
+nothing: the last cast's targets and follow-ups stay until its 0x4B answers, which drops them and names its own
+(ReceiveDarkside's InitDarksideTarget, WSclient.cpp:13440-13447), so an echo ahead of it runs on the slots left.
 A SkillAnimation (0x19) of Dark Side draws nothing, and another caster's counts one of the hero's follow-ups gone, as the
 original's one CMonkSystem does (SetDarksideCnt, WSclient.cpp:5144-5148, `observeDarkSideMagic`): his next follow-up skips a
 target and the fifth comes sooner. OpenMU sends one when a caster's 0x4B names no target: his client then asks for the skill
@@ -57,8 +59,11 @@ Dragon Roar's hits (264, 560): the original server sends a SkillAnimation (0x19)
 RageCreateEffect draws the cast) make MODEL_VOLCANO_OF_MONK sub1, sub2 and sub3, the last two erupting as a sub1 19-28 and 29-48
 ticks later where the target stood (none once it is gone); sub4 does nothing. A sub1 stands 100 ticks on the ground, textured with
 its mesh 0 again in volcano_core, a flame climbing its column a tick, four stones flying off as it is made and four more with a
-MODEL_SHOCKWAVE_GROUND01 sub2 at LifeTime 10, BITMAP_LIGHT_RED sub3's flare and terrain light under it. Each hit also burns
-TARGETMON_EFFECT's three flames a tick on random bones of the target for 100 ticks and plays Rage_Dragonlower_Att. OpenMU sends no
+MODEL_SHOCKWAVE_GROUND01 sub2 at LifeTime 10, BITMAP_LIGHT_RED sub3's flare and terrain light under it, and its own terrain light a
+move. A move whose flame would stand past 400 cm above sea level returns early (MoveHandlers.cpp:10106-10109): no flame, stones,
+fade or terrain light of its own that move, so on high ground a volcano lights only through its LIGHT_RED. Each hit also burns
+TARGETMON_EFFECT's three flames a tick on random bones of the target for 100 ticks and plays Rage_Dragonlower_Att. It starts no clip
+and plays no Rage_Dragonlower on the caster (`magicIsHit`): that is the 0x1E cast's (ReceiveMagicContinue). OpenMU sends no
 0x19 for Dragon Roar (AreaSkillAttackAction, DragonRoarSkillPlugIn hit through AttackByAsync), so with it none of this shows.
 
 DarksideRendering (MonkSystem.cpp:697-857) is the hero's alone: it reads the CMonkSystem only his cast fills, so another
@@ -108,7 +113,7 @@ count moves on the effects clock (`eachMove`, `movesSince`), so a script made in
   follow-ups against the echo, the hero's clip and AttackTime's stop at 15, the targets dropped past the fifth, and the
   hero's DarksideRendering a tick at a time (five parts a tick: the body, the afterimages, their waves and bursts, none
   for another caster), the parts it calls for by helm, Chaos Castle and skin, and a changed body's x30; Dragon Roar's dragon dummy, its red flares, the shake and the lava joints, and its hits' volcanoes by count, their column,
-  stones, fades and flare, and the flames on the target; the master skills (551, 554, 558-560)
+  stones, fades, flare and own terrain light (none on a move past 400 cm), and the flames on the target; the master skills (551, 554, 558-560)
   sound as their base, as RageCreateEffect plays one sound for each case; the Ourforces buff looks by sub, the smoke
   and the mirror rolls adding up with the buffs, the smoke stopping under a cloak; Increase Block's lasting pillar, its
   body and how long it stands; Charge's sword force, its copies, spray and light.

@@ -168,6 +168,26 @@ describe('RageAttackRangeResponse (C1 4B)', () => {
     }
     combat.reset();
   });
+
+  it('a cast keeps the last targets and follow-ups until its 0x4B answers (InitDarksideTarget, WSclient.cpp:13444, MonkSystem.cpp:615-639)', () => {
+    combat.beginDarkSide(263, 5);
+    rangeResponse(263, [5, 6]);
+    rageAttack(HERO);
+    ticks(8);
+    expect([darkSideCast.targets, darkSideCast.sent]).toEqual([[5, 6], 1]);
+    // The next cast sends 0x4B and 0x4A and drops nothing (SkillCast.cpp:881-896).
+    const serial = darkSideCast.serial;
+    combat.beginDarkSide(263, 6);
+    expect([darkSideCast.targets, darkSideCast.sent, darkSideCast.serial]).toEqual([[5, 6], 1, serial]);
+    // An echo ahead of the reply runs on the slots left: SendDarksideAtt reads m_DarksideIndex[m_nDarksideCnt] (:597-611).
+    rageAttack(HERO);
+    ticks(8);
+    expect(darkSideCast.sent).toBe(2);
+    // The reply drops them and names its own (ReceiveDarkside, WSclient.cpp:13440-13447).
+    rangeResponse(263, [5]);
+    expect([darkSideCast.targets, darkSideCast.sent, darkSideCast.serial]).toEqual([[5], 0, serial + 1]);
+    combat.reset();
+  });
 });
 
 /** C3 19 from `source`: a SkillAnimation of `skill` on `target`. */

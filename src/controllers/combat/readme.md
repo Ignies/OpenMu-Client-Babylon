@@ -13,7 +13,7 @@ It never sends packets or touches the scene; the ECS systems that fight read it 
     controller's `onRelease`; `blowHeldTicks`, how long the last hit request waited for its blow
     (`ObjectGotKilled` hands it to `DeathSystem`).
   - weapon: `attackRange(hands)`, `hasAmmo`, `equippedLauncher`.
-  - skills: `skillClip(skill, ctx)`, `magicClip`, `othersSeeClip`, `castQuietOn`,
+  - skills: `skillClip(skill, ctx)`, `magicClip`, `othersSeeClip`, `castQuietOn`, `magicIsHit`,
     `clipIgnoresHit`, `skillKill`, `skillStepIn`, `stepInSquare`, `clipHoldsFacing`,
     `castTarget(def)`, `castsOnSelf`, `castsOnSelfOnly`; `registerSkill(id, rules)` (called by
     `registerSkills` only).
@@ -42,7 +42,7 @@ It never sends packets or touches the scene; the ECS systems that fight read it 
   calls `combat.reset` on a map change.
 - Skills plug in through `registerSkills` (`controllers/skills/index.ts`), which hands each
   skill's combat fields to `combat.registerSkill` (`skillRules.ts`): `clip`, `poseClip`, `swing`,
-  `swordCount`, `castsAsSpell`, `othersSee`, `quietOn` (`skillClips.ts`), `noFlinch`
+  `swordCount`, `castsAsSpell`, `othersSee`, `quietOn`, `magicIsHit` (`skillClips.ts`), `noFlinch`
   (`SHOCK_IMMUNE_CLIPS`), `holdsFacing`, `stepIn` (`skillMovement.ts`), `target`
   (`castTargets.ts`), `explicitHits` (`areaHit.ts`), `kill` (`skillKills.ts`); its
   `combat.layer` is registered and its `combat.hooks` fill `skillHooks`. An empty slot answers

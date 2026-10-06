@@ -55,6 +55,8 @@ export interface SkillDef {
   readonly othersSee?: Partial<Record<PlayerAction, PlayerAction>>;
   /** Mounts on which the cast is dropped for everyone else and silent for the hero. */
   readonly quietOn?: readonly Mount[];
+  /** A `SkillAnimation` (0x19) of it is one of its hits: it turns the caster and draws `impact`, no clip, no cast sound. */
+  readonly magicIsHit?: true;
   /** This skill's clips that a hit does not interrupt (`SetPlayerShock`). */
   readonly noFlinch?: readonly PlayerAction[];
   /** This skill's clips that hold the caster's facing while they play (`bLookAtMouse = false`). */

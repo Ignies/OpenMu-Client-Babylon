@@ -35,7 +35,8 @@ the Rage Fighter's Dark Side blows. This folder has only the handlers; it keeps 
 - `SkillAnimation`: a targeted skill cast. Teleports go to `playTeleportAnimation` (skills); the DK
   combo only plays its sound (`WSclient.cpp:4167`, `:4829-4832`); a Dark Side one only turns its caster, and another
   caster's counts one of the hero's follow-ups gone (`combat.observeDarkSideMagic`, SetDarksideCnt, `WSclient.cpp:5144-5148`);
-  others turn, play the clip and the visual.
+  a Dragon Roar one is a hit (`magicIsHit`): it turns its caster and draws the hit, with no clip or cast sound
+  (`WSclient.cpp:5130-5143`); others turn, play the clip and the visual.
 - `ObjectGotKilled`: stops the object, zeroes its health, marks it dying.
 - `ObjectHit`, `ObjectHitExtended`: damage, sound, health bar, flinch, damage numbers.
 - `RageAttackRangeResponse`: the Dark Side targets, handed to `combat.observeDarkSideTargets`; an empty
@@ -72,5 +73,8 @@ the Rage Fighter's Dark Side blows. This folder has only the handlers; it keeps 
   after a plain blow; 22 ticks plus 3.5 a tile of flight.
 - `darkSideEcho.test.ts`: the hero's Dark Side follow-ups wait for the `RageAttack` echo of his cast,
   which puts him back in the clip; a cast is drawn once, a later 0x4A of it only turns its caster; a 0x4B
-  naming no target asks for the skill on the hero, and its empty slots get no follow-up; another caster's 0x19 of Dark Side
+  naming no target asks for the skill on the hero, and its empty slots get no follow-up; a cast keeps the last targets and
+  follow-ups until its 0x4B answers; another caster's 0x19 of Dark Side
   counts one of the hero's follow-ups and draws nothing.
+- `skillAnimation.test.ts`: another caster's 0x19 of Dragon Roar (and its Strengthener) leaves his clip running and plays
+  no cast sound, only its hit; another skill's still plays its clip.

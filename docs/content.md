@@ -49,7 +49,7 @@ controller tests a skill number.
 | `lookAliases`, `masterAliases` | skills (+ combat, sound, lighting) | master numbers drawn as this skill; `masterAliases` also cast, sound and light as it |
 | `clip` as a function | combat | a pick of its own: the map (Fire Breath), a coin toss (Rage Fighter party buffs) |
 | `poseClip`, `swing`, `swordCount`, `castsAsSpell` | combat | clip by hands or SwordCount (Plasma Storm, Slash), the high bow swing (Starfall), SwordCount, `SetPlayerMagic` for a physical-typed master |
-| `othersSee`, `quietOn` | combat | the clip others play (Electric Spike on a horse); mounts that drop the cast (Defense on a horse) |
+| `othersSee`, `quietOn`, `magicIsHit` | combat | the clip others play (Electric Spike on a horse); mounts that drop the cast (Defense on a horse); a 0x19 that is a hit, no clip or sound (Dragon Roar) |
 | `noFlinch`, `holdsFacing` | combat | clips a hit does not cut; clips that keep the facing |
 | `kill` | combat | what a kill does to the body (`knock`, per-frame `dying`: Nova, Combo) |
 | `explicitHits` | combat | send the 0xDB hit list whatever the skill type |

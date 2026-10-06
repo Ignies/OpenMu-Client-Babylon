@@ -40,7 +40,7 @@ _shared.ts                      helpers for several classes
   cast, sound and light as it: the Dark Lord and Magic Gladiator ones).
 - Everything a controller does differently for one skill is a field of its file, never a branch
   in the controller: the clip pick (`clip` as a function, `poseClip`, `swing`), `swordCount`,
-  `castsAsSpell`, `othersSee`, `quietOn`, `noFlinch`, `holdsFacing`, `clipSound`,
+  `castsAsSpell`, `othersSee`, `quietOn`, `magicIsHit`, `noFlinch`, `holdsFacing`, `clipSound`,
   `soundOnLanding`, `silentHeroCast`, `targetSound`, `kill`, `effect`, `effectAliases`, `buffHits`,
   `explicitHits`, and the combat hooks (Nova, Combo, Dark Side).
 - Deliberate deviation: `effectAliases` (on the base skill) and the Rage Fighter `effect`s 129-131
