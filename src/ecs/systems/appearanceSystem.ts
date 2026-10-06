@@ -1,6 +1,7 @@
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { itemVisualTier } from '../../controllers/item_fx/itemVisualTier';
 import { heldWeapons, wearsChaosCastleSkin } from '../../controllers/actors';
+import { showsClassHead } from '../../controllers/actors/openHelm';
 import type { ModelObject } from '../../controllers/render/modelObject';
 import { isPlayerBody, type PlayerObject } from '../../controllers/actors/playerObject';
 import { applyWeaponAttachments } from '../../controllers/actors/weaponAttachment';
@@ -51,11 +52,11 @@ function loadPart(
  */
 const CHAOS_CASTLE_BODY = 'Angel.glb';
 
-/** Bodies wearing it, so the class head goes back on once out of the castle. */
-const inCastleSkin = new WeakSet<PlayerObject>();
+/** Bodies whose class head is off (the castle skin, a closed helm), so it goes back on when the helm allows. */
+const headless = new WeakSet<PlayerObject>();
 
 function wearChaosCastleSkin(playerObject: PlayerObject) {
-  inCastleSkin.add(playerObject);
+  headless.add(playerObject);
 
   playerObject.Helm.Unload();
   playerObject.HelmMask.Unload();
@@ -91,7 +92,11 @@ export const AppearanceSystem: ISystemFactory = world => {
         if (wearsChaosCastleSkin(entity, world.mapIndex)) {
           wearChaosCastleSkin(playerObject);
         } else {
-          if (inCastleSkin.delete(playerObject)) {
+          // The class head only bare-headed or under an open helm (SetCharacterScale, ZzzCharacter.cpp:12114-12128).
+          if (!showsClassHead(charAppearance.helm)) {
+            playerObject.Helm.Unload();
+            headless.add(playerObject);
+          } else if (headless.delete(playerObject)) {
             void settle(playerObject.setDefaultHelm(), 'Player/HelmClass');
           }
 

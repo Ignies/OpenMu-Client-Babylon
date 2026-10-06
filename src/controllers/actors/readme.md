@@ -52,6 +52,7 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   `itemObjectAttribute(group, num)`; `GuildFlag`, `GUILD_FLAG_BONE`, `isThunderHawkArmor`;
   `applyOutlawLook`, `outlawUltraActive`, `OUTLAW_ULTRA_LIGHT`; `isSkinOrHairTexture`,
   `isHideTexture`; `traceHeroInstantMove`.
+- `openHelm.ts`: `showsClassHead(helm)`, whether the class head is drawn under that helm (below).
 
 ## How it works
 - A spawned object's class comes from `resolveModelFactory(type)`, called by
@@ -73,6 +74,11 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   and the quest item to 47, capes with a link matrix to 19. `ecs/systems/appearanceSystem.ts`
   fills the sockets; `animationSystem.ts` picks clips with `weaponClass.ts` / `locomotion.ts` and
   calls `applyWeaponPoses` every frame.
+- The `Helm` socket is the class head and `HelmMask` the worn helm. The head is drawn bare-headed (it is then
+  BODYPART_HELM) and under the open helms, Bronze, Pad, Vine to Spirit and 63, 65, 68, 70 (BODYPART_HEAD); any
+  other helm hides it (`showsClassHead`, SetCharacterScale, ZzzCharacter.cpp:12114-12128). Every player is dressed
+  by `appearanceSystem.ts`, the character select line-up too (ReadEquipmentExtended calls the same rule); the
+  create screen draws the whole `Logo/NewFace` model (MODEL_FACE, CharMakeWin.cpp:467), no parts.
 - `WingObject` (`wingObject.ts`) draws the extras a `WingSpec` in `wings.ts` declares: the
   additive membrane mesh, bone sprites, thunder and mesh passes (ZzzObject.cpp:9860-9925).
 - `MonsterObject` applies the blend mesh from `monsterBlendMesh.ts` on load and the Budge Dragon

@@ -9,6 +9,7 @@ import { WHITE, entityGone, entityPos, fxNow } from '@/controllers/fx/core';
 import type { TickedFx } from '@/controllers/fx/ticked';
 import { cm, seq, ticks, type SkillContext, type Step } from '@/controllers/skills/visuals';
 import { inChaosCastle } from '@/controllers/actors/locomotion';
+import { showsClassHead } from '@/controllers/actors/openHelm';
 import type { PlayerObject } from '@/controllers/actors/playerObject';
 import type { ModelObject } from '@/controllers/render/modelObject';
 import { Ecs } from '@/ecs/current';
@@ -21,9 +22,6 @@ import { clipSpeed, eachMove, eventCloud, magicGround13, windForce } from '../_s
 /** RageCreateEffect's MODEL_WINDFOCE sub2 (1, 0.5, 0.2) and the sub3s (1, 0.5, 0) it raises (MonkSystem.cpp:1297-1298, MoveHandlers.cpp:9579-9596). */
 const windPillar = windForce([1, 0.5, 0.2], true, [1, 0.5, 0]);
 
-/** Helms that leave the head on (MODEL_HELM + these), so BODYPART_HEAD is drawn too (SetCharacterScale, ZzzCharacter.cpp:12114-12128). */
-const OPEN_HELMS: ReadonlySet<number> = new Set([0, 2, 10, 11, 12, 13, 63, 65, 68, 70]);
-
 /**
  * Skins whose SubType takes the Rage Fighter branch, one part and bChange (ZzzCharacter.cpp:9347-9350, MonkSystem.cpp:786-792):
  * MODEL_SKELETON1, _SKELETON_PCBANG, _HALLOWEEN, _XMAS_EVENT_CHANGE_GIRL, _PANDA, _SKELETON_CHANGED (ZzzCharacter.cpp:14183-14243, :14787-14799).
@@ -32,15 +30,16 @@ const CHANGED_SKINS: ReadonlySet<number> = new Set([14, 372, 373, 374, 503, 548]
 
 /**
  * The parts RenderCharacter calls DarksideRendering for, in its order, or null for none: a changed body's one part (on Armor),
- * the Angel alone in Chaos Castle (:9536-9568), else boots to helm and the head under an open helm (:9572-9654); ours always
- * keeps the head (Helm) and puts a worn helm on HelmMask.
+ * the Angel alone in Chaos Castle (:9536-9568), else boots to helm and the head under an open helm (:9572-9654); ours puts
+ * a worn helm on HelmMask and the head on Helm.
  */
 function drawnParts(hero: Entity, body: PlayerObject): ModelObject[] | null {
   if (hero.skin) return CHANGED_SKINS.has(hero.skin) ? [body.Armor] : null;
   if (inChaosCastle(currentMap() ?? -1)) return [body.Armor];
   const helm = hero.charAppearance?.helm;
-  const parts = [body.Boots, body.Gloves, body.Pants, body.Armor, helm ? body.HelmMask : body.Helm];
-  if (helm && OPEN_HELMS.has(helm.num)) parts.push(body.Helm);
+  const parts = [body.Boots, body.Gloves, body.Pants, body.Armor];
+  if (helm) parts.push(body.HelmMask);
+  if (showsClassHead(helm)) parts.push(body.Helm);
   return parts;
 }
 
