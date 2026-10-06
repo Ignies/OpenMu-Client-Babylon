@@ -43,7 +43,7 @@ vi.mock('@/controllers/assets', () => ({ reportLoadFailure: () => () => {} }));
 const { LostTowerMachineObject } = await import('./towerMachineObject');
 
 /** A machine of `type` lit and run to `seconds`. */
-async function run(type: number, seconds: number): Promise<Asked[]> {
+async function lit(type: number, seconds: number) {
   flares.length = 0;
   // The mocked base takes no arguments.
   const machine = new (LostTowerMachineObject as unknown as new () => InstanceType<typeof LostTowerMachineObject>)();
@@ -53,6 +53,11 @@ async function run(type: number, seconds: number): Promise<Asked[]> {
   machine.Update(at);
   await new Promise(resolve => setTimeout(resolve, 0));
   machine.Update(at);
+  return { machine, at };
+}
+
+async function run(type: number, seconds: number): Promise<Asked[]> {
+  await lit(type, seconds);
   return flares;
 }
 
@@ -72,5 +77,16 @@ describe('the Lost Tower machines (types 19 and 20)', () => {
     expect(drawn.map(f => f.texture)).toEqual(Array(6).fill('lightning1'));
     expect(drawn.every(f => f.color.join() === '0.4,0.8,1')).toBe(true);
     expect(drawn.map(f => f.angle)).toEqual([40, -40, 40, -40, 40, -40]);
+  });
+
+  // `Update` runs every frame: the pairs turn in a plain loop, not a `forEach` callback made each frame.
+  it('turns its pairs every frame without making a callback', async () => {
+    const { machine, at } = await lit(19, 2);
+    const each = vi.spyOn(Array.prototype, 'forEach');
+    machine.Update(at);
+    const calls = each.mock.calls.length;
+    each.mockRestore();
+    expect(calls).toBe(0);
+    expect(flares.map(f => f.angle)).toEqual([200, -200, 200, -200, 200, -200]);
   });
 });
