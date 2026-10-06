@@ -151,7 +151,9 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
 - `doppelganger4/spec.test.ts`: 59 puffs a `BITMAP_SMOKE` SubType 13 (`smoke13`) one tick in three where
   Kanturu's puffs SubType 21, and 82 / 83 make `BITMAP_WATERFALL_3` SubType 3 / `_2` SubType 1 where
   Kanturu makes SubType 4 / 2; every other Kanturu row stays; its light box 48 makes a `BITMAP_LIGHT`
-  SubType 15 (`light15`) one tick in three.
+  SubType 15 (`light15`) one tick in three. `doppelganger4/create.test.ts`: the folder types
+  EncTerrain69.obj places that `Data/Object69` has no model for (34) are bound absent, so none asks
+  for a GLB and logs a failed load.
 - `kanturu1/spec.test.ts`, `aida/spec.test.ts`: the falls (Kanturu and the GM area 81-83, Aida 56-58) make
   `BITMAP_WATERFALL_1` SubType 2 one tick in two, `_3` SubType 4 every tick and `_2` SubType 2 one in
   three (`waterfall1_2`, `waterfall3_4`, `waterfall2_2`).

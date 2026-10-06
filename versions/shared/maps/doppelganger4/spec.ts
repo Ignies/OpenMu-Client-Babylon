@@ -20,6 +20,14 @@ export const DOPPELGANGER4_EFFECT_ONLY_TYPES: readonly number[] = [
 ];
 
 /**
+ * Folder types EncTerrain69.obj places with no model in `Data/Object69`: 34 (×2 at 98/53-54, no
+ * Object35.bmd). `AccessModel` fails and `Open2` leaves the slot empty (LoadData.cpp:22-49,
+ * ZzzBMD.cpp:3098-3116), so the original draws nothing there; unbound, each asked for a GLB the data
+ * never had and logged "Could not load model for id 34".
+ */
+export const DOPPELGANGER4_ABSENT_MODELS: readonly number[] = [34];
+
+/**
  * Kanturu's rows but 59, which `RenderObjectVisual` makes a `BITMAP_SMOKE` SubType 13 one tick in
  * three, not Kanturu's SubType 21 (GMDoppelGanger4.cpp:399-405), and the falls 82 and 83:
  * `BITMAP_WATERFALL_3` SubType 3 every tick and `BITMAP_WATERFALL_2` SubType 1 one in three, not
