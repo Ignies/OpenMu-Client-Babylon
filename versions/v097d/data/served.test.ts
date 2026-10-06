@@ -5,6 +5,8 @@ import { ENUM_WORLD } from '@/core/types';
 import { maps } from '@/controllers/maps/index';
 import { terrainFilesFor } from '@/controllers/assets/prefetchWorld';
 import { assetUrl, hasAsset } from '@/controllers/assets/resolveUrlToDataFolder';
+import { dataUrl, hasData } from '@/controllers/assets/mu/dataFolder';
+import { parseGates } from '@/controllers/assets/mu/gates';
 import { parseTerrainObjects } from '@/controllers/terrain/parseTerrainObjects';
 import { placesObject } from '@/controllers/terrain/objectRecords';
 import { SOUND_FILES } from '@/controllers/sound/recipes';
@@ -34,9 +36,9 @@ function listing(dir: string): Set<string> {
   return names;
 }
 
-/** Exact-case existence of a served url (`./game-assets-v097d/Sound/x.wav`). */
-function served(url: string): boolean {
-  let dir = PUBLIC;
+/** Exact-case existence of a served url (`./game-assets-v097d/Sound/x.wav`) under `root`. */
+function served(url: string, root = PUBLIC): boolean {
+  let dir = root;
   for (const part of url.replace(/^\.\//, '').split('/')) {
     if (!listing(dir).has(part)) return false;
     dir = join(dir, part);
@@ -134,6 +136,31 @@ describe('0.97d worlds', () => {
     }
 
     expect(missing).toEqual([]);
+  });
+});
+
+/** A `Data/` url on disk: `./Data-v097d/x` and `./Data/x` sit at the repo root. */
+const REPO = resolve(__dirname, '../../..');
+
+describe('0.97d Data tree', () => {
+  it('decodes its own gate table: 100 records of 9 bytes', () => {
+    const gates = parseGates(new Uint8Array(readFileSync(join(REPO, 'Data-v097d/gate.bmd'))), v097dData.gates);
+
+    expect(gates).toHaveLength(100);
+    // Lorencia's dungeon stairs, and the Dungeon landing they lead to.
+    expect(gates[1]).toMatchObject({ flag: 1, map: 0, x1: 121, y1: 232, x2: 123, y2: 233, target: 2, level: 20 });
+    expect(gates[2]).toMatchObject({ flag: 2, map: 1, x1: 107, y1: 247, x2: 110, y2: 247 });
+    // Every entrance leads to an exit: the layout is right, not just the first record.
+    for (const gate of gates.filter(g => g.flag === 1)) {
+      expect(gates[gate.target].flag, `gate ${gate.index}`).toBe(2);
+    }
+  });
+
+  it('reads the sign plates of its maps, Season 6 copies of the same bytes', () => {
+    for (const plate of ['Object1/notice.OZJ', 'Object3/snotice.OZJ', 'Object3/snotice02.OZJ', 'Object7/notice.OZJ']) {
+      expect(hasData(v097dData, plate), plate).toBe(true);
+      expect(served(dataUrl(v097dData, plate), REPO), plate).toBe(true);
+    }
   });
 });
 

@@ -14,7 +14,8 @@ imports the modules below directly (baselined in `tools/checks`).
   tree the version borrows a file it does not ship from; `assetUrl(data, url)` is the pure form;
   `hasAssetFile(url)` is false for a file the version `lacks`);
   `mu/dataFolder.ts`: `resolveDataUrl`, `downloadDataFile`, `hasDataFile` (the original `Data/`
-  tree, `gameVersion.data.folder`).
+  tree, `gameVersion.data.folder`, or the tree the version borrows a path it lacks from:
+  `borrows.folderPaths`; `dataUrl(data, path)` and `hasData(data, path)` are the pure forms).
 - `download.ts`: `downloadBytesBuffer`, `downloadDataBytesBuffer`, `createOZJTexture`,
   `readOJZBufferAsJPEGBuffer`, `toRadians`, `isFlagInBinaryMask`, plus byte and packet helpers it
   re-exports from `core/binaryUtils` and `net/wireUtils`.
@@ -56,7 +57,8 @@ imports the modules below directly (baselined in `tools/checks`).
 - `mu/` reads the original files: OZJ / OZT sprites, `gate.bmd`, the quest, move and name tables
   in `Data/Local/<pack>/`. In the `.bmd` tables each record is XOR-ed with the 3-byte Bux key,
   restarting at every record. The item, skill and buff name tables only overlay the English names
-  the client already has; they load nothing for English.
+  the client already has; they load nothing for English. `gate.bmd` is decoded with the version's
+  `data.gates` layout, Season 6's (`SEASON6_GATES`: 512 records of 14 bytes) when it names none.
 
 - Fire-and-forget loads (`void loadX(file).then(...)`, nobody awaits them) end in
   `.catch(reportLoadFailure(file))`, or go through `settle`. A missing file then logs one warning
@@ -96,6 +98,8 @@ imports the modules below directly (baselined in `tools/checks`).
 - `texturePacks.test.ts`: `packsBase`, the index, swap and restore, label re-stamp, `textureLabel`
   mid-swap, same-name and same-size pairs, alpha kept, broken manifest, `setActivePack` listeners.
 - `mu/localNames.test.ts`: item, skill and buff name record layouts.
+- `mu/dataFolder.test.ts`: own, borrowed and absent `Data/` paths.
+- `mu/gates.test.ts`: the Season 6 gate layout, a byte-wide period one, a truncated file.
 
 ## Notes
 

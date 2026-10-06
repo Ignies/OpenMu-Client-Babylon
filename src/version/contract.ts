@@ -86,6 +86,29 @@ export interface VersionData {
    * catalogue's file (`controllers/sound/recipes.json`).
    */
   readonly sounds?: Readonly<Record<string, string>>;
+  /** How this tree's `gate.bmd` lays out a record, when it is not Season 6's (`gates.ts`). */
+  readonly gates?: GateLayout;
+}
+
+/** One field of a `gate.bmd` record: its byte offset, and 1 for a BYTE or 2 for a WORD. */
+export interface GateField {
+  readonly at: number;
+  readonly bytes: 1 | 2;
+}
+
+/**
+ * `GATE_ATTRIBUTE` as one client's `gate.bmd` stores it: `records` of `size`
+ * bytes, each Bux-encoded, Flag / Map / x1 / y1 / x2 / y2 in bytes 0-5 and
+ * the rest where these say.
+ */
+export interface GateLayout {
+  readonly records: number;
+  readonly size: number;
+  readonly target: GateField;
+  readonly angle: GateField;
+  readonly level: GateField;
+  /** Absent from trees older than the field: reads as 0. */
+  readonly maxLevel?: GateField;
 }
 
 export interface VersionBorrows {
@@ -102,6 +125,14 @@ export interface VersionBorrows {
    * grows no grass in that slot). They are never borrowed.
    */
   readonly lacks?: ReadonlySet<string>;
+  /** The other original `Data/` tree (`./Data/`). Trailing slash. */
+  readonly folder?: string;
+  /**
+   * Lower-cased paths, or folder prefixes ending in `/`, under `folder` that
+   * this version reads from there when its own `inventory` lacks them: files
+   * its source has byte-identically, or art it borrows on purpose.
+   */
+  readonly folderPaths?: readonly string[];
 }
 
 /**

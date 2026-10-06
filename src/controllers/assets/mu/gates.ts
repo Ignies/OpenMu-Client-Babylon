@@ -1,8 +1,22 @@
 import { convertBux } from '../../terrain/mapFileEncryption';
+import { gameVersion } from '@/version';
+import type { GateField, GateLayout } from '@/version/contract';
 import { downloadDataFile } from './dataFolder';
 
-const MAX_GATES = 512;
-const GATE_RECORD_SIZE = 14;
+/**
+ * Season 6's `GATE_ATTRIBUTE` (_struct.h:121-134, read by `OpenGateScript`,
+ * ZzzInfomation.cpp:153): `MAX_GATES` 512 records of 14 bytes, WORD `Target`
+ * at 6, BYTE `Angle` at 8, WORD `Level` at 10 and `m_wMaxLevel` at 12. A
+ * version whose tree lays it out otherwise names its own (`data.gates`).
+ */
+export const SEASON6_GATES: GateLayout = {
+  records: 512,
+  size: 14,
+  target: { at: 6, bytes: 2 },
+  angle: { at: 8, bytes: 1 },
+  level: { at: 10, bytes: 2 },
+  maxLevel: { at: 12, bytes: 2 },
+};
 
 const GateFlag = {
   Entrance: 1,
@@ -37,8 +51,12 @@ export function loadGates(): Promise<Gate[]> {
 }
 
 async function readGates(): Promise<Gate[]> {
-  const buffer = await downloadDataFile('gate.bmd');
-  const expected = MAX_GATES * GATE_RECORD_SIZE;
+  return parseGates(await downloadDataFile('gate.bmd'), gameVersion.data.gates);
+}
+
+/** Every record of a `gate.bmd`, decoded with `layout`. */
+export function parseGates(buffer: Uint8Array, layout: GateLayout = SEASON6_GATES): Gate[] {
+  const expected = layout.records * layout.size;
 
   if (buffer.length < expected) {
     throw new Error(
@@ -48,19 +66,18 @@ async function readGates(): Promise<Gate[]> {
 
   const gates: Gate[] = [];
 
-  for (let i = 0; i < MAX_GATES; i++) {
-    const record = buffer.slice(
-      i * GATE_RECORD_SIZE,
-      (i + 1) * GATE_RECORD_SIZE
-    );
+  for (let i = 0; i < layout.records; i++) {
+    const record = buffer.slice(i * layout.size, (i + 1) * layout.size);
 
-    convertBux(record, GATE_RECORD_SIZE);
+    convertBux(record, layout.size);
 
     const view = new DataView(
       record.buffer,
       record.byteOffset,
       record.byteLength
     );
+    const read = (field: GateField | undefined) =>
+      !field ? 0 : field.bytes === 2 ? view.getUint16(field.at, true) : record[field.at];
 
     gates.push({
       index: i,
@@ -70,10 +87,10 @@ async function readGates(): Promise<Gate[]> {
       y1: record[3],
       x2: record[4],
       y2: record[5],
-      target: view.getUint16(6, true),
-      angle: record[8],
-      level: view.getUint16(10, true),
-      maxLevel: view.getUint16(12, true),
+      target: read(layout.target),
+      angle: read(layout.angle),
+      level: read(layout.level),
+      maxLevel: read(layout.maxLevel),
     });
   }
 

@@ -41,6 +41,11 @@ describe('v097d data inventory', () => {
     }
   });
 
+  it('spells the gate table the way the client asks for it', () => {
+    // `loadGates` asks for `gate.bmd`; a case-sensitive host does not find `Gate.bmd`.
+    expect(readdirSync(ROOT)).toContain('gate.bmd');
+  });
+
   it('does not claim the Season 6 sheets it never shipped', () => {
     for (const file of [
       'interface/login_back.ozt',

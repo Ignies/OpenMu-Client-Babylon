@@ -35,6 +35,18 @@ export const v097dData: VersionData = {
     ownAssets: new Set(V097D_ASSET_FILES),
     // Lorencia's only grass card is TileGrass01.OZT; Season 6 added these two.
     lacks: new Set(['world1/tilegrass02.ozt', 'world1/tilegrass03.ozt']),
+    folder: season6Data.folder,
+    // The sign plates of 0.97d's maps: its own copies are Season 6's bytes.
+    folderPaths: ['object1/notice.ozj', 'object3/snotice.ozj', 'object3/snotice02.ozj', 'object7/notice.ozj'],
   },
   sounds: V097D_SOUNDS,
+  // Its gate.bmd: 100 records of nine BYTEs (Flag, Map, x1, y1, x2, y2, Target,
+  // Angle, Level); Season 6 widened Target and Level to WORDs and added MaxLevel.
+  gates: {
+    records: 100,
+    size: 9,
+    target: { at: 6, bytes: 1 },
+    angle: { at: 7, bytes: 1 },
+    level: { at: 8, bytes: 1 },
+  },
 };

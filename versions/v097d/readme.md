@@ -29,6 +29,11 @@ MU 0.97d, the second version the client carries. OpenMU has no 0.97d data initia
   Devias BMDs that differ; `Object10/Object03`, whose `kni00/01` textures differ); the rest of
   `World2..12` / `Object2..12` is Season 6's, byte-identical. The `.jpg` / `.tga` intermediates
   are not copied: nothing loads them (`tools/assetsIndex.ts`).
+- `gate.bmd`: 100 records of nine BYTEs (`data.gates`); Season 6's reader expected 512 of 14 and
+  threw, so 0.97d had no gates. The file is spelled `gate.bmd`, the name the client asks for.
+- The sign plates (`Object1/notice.OZJ`, `Object3/snotice*.OZJ`, `Object7/notice.OZJ`) are
+  Season 6's bytes in 0.97d's client and are read from `Data/` (`borrows.folderPaths`);
+  `Data-v097d/` never shipped them, so the plate fetched the page's HTML and failed to decode.
 - `data/sounds.ts`: the 42 sounds and 1 track whose 0.97d file differs from Season 6's original
   (hashed against the Season 6 `.wav` / `.mp3`), shipped as the period `.wav` / `.mp3`. The other
   235 sounds and 6 tracks play Season 6's `.ogg`.
@@ -49,8 +54,9 @@ MU 0.97d, the second version the client carries. OpenMU has no 0.97d data initia
 
 ## Tests
 - `variantRank.test.ts`: the winning packet variant per family that shares a code.
-- `data/inventory.test.ts`: the inventory matches the files in `Data-v097d/`.
+- `data/inventory.test.ts`: the inventory matches the files in `Data-v097d/`; `gate.bmd` is spelled
+  the way the client asks for it.
 - `data/assets.test.ts`: `assets.ts` matches the files in `public/game-assets-v097d/`.
 - `data/served.test.ts`: every terrain file, tile and placed object model of each world, and
   every sound key, resolves to a file that exists, in its case; Lorencia grows grass from its one
-  card only.
+  card only; the gate table decodes; the sign plates resolve.
