@@ -69,17 +69,16 @@ export const DOPPELGANGER1_EFFECT_ONLY_TYPES: readonly number[] = [
  *    so the branch is unreachable - the same dead gate Kanturu Ruins'
  *    62/107/108 have. 30 markers that hide a model and draw nothing.
  *  - **101** (x14, :475-486), the sky-blue light box: a `BITMAP_LIGHT`
- *    SubType 15 mote one tick in three, jittered +/-30 in x/y and tinted
- *    `(0.6, 0.8, 1.0)`. SubType 15 is a 100-tick spiral climb
- *    (ZzzEffectParticle.cpp:3241-3250, :8139-8160); `spark03_24` is the only
- *    sparkle kind that keeps the emission's own colour, so it stands in, short.
+ *    SubType 15 mote one tick in three, up to `o->Scale * 30` off in x/y and tinted
+ *    `(0.6, 0.8, 1.0)`: `light15`, a 100-tick spiral climb
+ *    (ZzzEffectParticle.cpp:3241-3250, :8139-8160) that spreads itself.
  */
 export const DOPPELGANGER1_EMISSIONS: Partial<
   Record<number, readonly Emission[]>
 > = {
   70: [{ kinds: ['fire157'], every: 1, count: 2, light: [0.1, 0.4, 1] }],
   80: [{ kinds: ['fire157'], every: 1, count: 2, light: [0.7, 0.2, 0.1] }],
-  101: [{ kinds: ['spark03_24'], every: 3, light: [0.6, 0.8, 1], jitter: 30 }],
+  101: [{ kinds: ['light15'], every: 3, light: [0.6, 0.8, 1] }],
 };
 
 /**

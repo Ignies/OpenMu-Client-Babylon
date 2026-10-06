@@ -28,11 +28,15 @@ export const DOPPELGANGER3_BLEND_MESHES: Readonly<Record<number, number>> = {
  */
 export const DOPPELGANGER3_EFFECT_ONLY_TYPES: readonly number[] = [22, 47, 48];
 
-/** No bubble kind in `effectParticles`; `smoke0` rising slowly stands in. */
+/**
+ * No bubble kind in `effectParticles`; `smoke0` rising slowly stands in. 48 (×2), the sky-blue light
+ * box, makes a `BITMAP_LIGHT` SubType 15 in `(0.6, 0.8, 1.0)` one tick in three (:340-351).
+ */
 export const DOPPELGANGER3_EMISSIONS: Partial<
   Record<number, readonly Emission[]>
 > = {
   22: [{ kinds: ['smoke0'], every: 6, scale: 0.4 }],
+  48: [{ kinds: ['light15'], every: 3, light: [0.6, 0.8, 1] }],
 };
 
 /** Doppelganger 3 (GMDoppelGanger3.cpp:75-93): the Atlans sines verbatim. */

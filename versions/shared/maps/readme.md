@@ -154,6 +154,8 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   SubType 15 (`light15`) one tick in three. `doppelganger4/create.test.ts`: the folder types
   EncTerrain69.obj places that `Data/Object69` has no model for (34) are bound absent, so none asks
   for a GLB and logs a failed load.
+- `doppelgangerLights.test.ts`: the four arenas' sky-blue light boxes (Doppelganger 1's 101, the
+  others' 48) make a `BITMAP_LIGHT` SubType 15 (`light15`) one tick in three.
 - `kanturu1/spec.test.ts`, `aida/spec.test.ts`: the falls (Kanturu and the GM area 81-83, Aida 56-58) make
   `BITMAP_WATERFALL_1` SubType 2 one tick in two, `_3` SubType 4 every tick and `_2` SubType 2 one in
   three (`waterfall1_2`, `waterfall3_4`, `waterfall2_2`).
