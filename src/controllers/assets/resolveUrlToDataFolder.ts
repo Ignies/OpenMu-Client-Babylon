@@ -24,6 +24,14 @@ export function assetUrl(data: VersionData, url: string): string {
   return `${data.assets}${url}`;
 }
 
+/**
+ * The version's pre-download index (`tools/assetsIndex.ts`), beside its converted tree:
+ * `./game-assets/` reads `./assets-index.json`, `./game-assets-v097d/` `./assets-index-v097d.json`.
+ */
+export function assetsIndexUrl(data: VersionData): string {
+  return `${data.assets.replace(/\/+$/, '').replace(/game-assets/, 'assets-index')}.json`;
+}
+
 /** False for a converted file the version lacks although the tree it borrows has it. */
 export function hasAsset(data: VersionData, url: string): boolean {
   return !data.borrows?.lacks?.has(key(url));

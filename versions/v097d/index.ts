@@ -140,9 +140,10 @@ export const gameVersion: GameVersion = {
     // Summoner is Season 3, Rage Fighter Season 5.
     summoner: false,
     rageFighter: false,
-    // The consumable belt row is Season 6; the 0.97d client's 97-file
-    // Interface set has none.
-    itemHotkeys: false,
+    // Q / W / E only, fixed to healing, mana and antidote: its Menu02 art has
+    // those three slots and its key help (Local/Text.bmd 130-134) binds only
+    // skills with Ctrl. Season 6 added R and the binding.
+    itemHotkeys: { slots: 3, bindable: false },
   },
   // MU Helper is Season 6 Episode 3. `events` stays: the client has World10
   // and OpenMU Version095d runs DevilSquareInitializer (Blood Castle has its
@@ -150,4 +151,7 @@ export const gameVersion: GameVersion = {
   // `quests` stays: it carries the legacy chain 0.97d has (Local/Quest.bmd,
   // OpenMU NpcWindow.LegacyQuest); its Season 6 windows are never fed.
   modulesOff: ['mu_helper'],
+  // Its NpcName table has Blood Castle's Archangel (232, 233) and Devil Square's
+  // Charon (237); no Chaos Castle monster (162-173) and no World19.
+  miniGames: ['bloodCastle', 'devilSquare'],
 };

@@ -15,10 +15,13 @@ versions/<id>/
   ui/          pre-game pages, preload lists, MasterSkillsWindow, and `windows` overrides
 ```
 
-- `features` flags (`masterSkills`, `socketItems`, `itemHotkeys`, the later classes, ...) are how
-  `src/` asks what a version supports. Never compare the version id in `src/`.
+- `features` flags (`masterSkills`, `socketItems`, the later classes, ...) and `itemHotkeys` (how
+  many potion slots the bar draws, and whether they bind) are how `src/` asks what a version
+  supports. Never compare the version id in `src/`.
 - `modulesOff` lists the optional gameplay modules a version's server never has, in `server.json`'s
   words (`mu_helper`): they are never installed. A world can still turn more off in its `server.json`.
+- `miniGames` lists the timed events the version's client has (`bloodCastle`, `devilSquare`,
+  `chaosCastle`): the HUD schedule draws and polls only those.
 - `data.borrows` lets a version read another version's served files (Season 6's) instead of
   committing byte-identical copies (`src/version/readme.md`).
 - A version's `ui.windows` replaces shared windows by `id`

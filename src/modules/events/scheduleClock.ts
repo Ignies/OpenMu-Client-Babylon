@@ -1,11 +1,22 @@
 /**
  * The maths behind the event schedule rows, on its own so it can be tested
  * without the client: `MiniGameOpeningState` minutes into a moment on the
- * shared clock, the text that moment prints, and when to ask again.
- * `schedule.ts` owns the state and does the asking.
+ * shared clock, the text that moment prints, when to ask again, and which
+ * rows the version draws. `schedule.ts` owns the state and does the asking.
  */
 
+import type { MiniGame } from '@/version/contract';
 import { EVENT_TEXT } from './recipes';
+
+/** Display order of the rows: the only three events OpenMU runs. */
+const EVENT_SCHEDULE_KEYS: readonly MiniGame[] = ['bloodCastle', 'devilSquare', 'chaosCastle'];
+
+export type EventScheduleKey = MiniGame;
+
+/** The rows a version draws: the mini-games its client has (`GameVersion.miniGames`), in display order. */
+export function scheduleKeys(version: { readonly miniGames: readonly MiniGame[] }): readonly EventScheduleKey[] {
+  return EVENT_SCHEDULE_KEYS.filter(key => version.miniGames.includes(key));
+}
 
 /** The floor: one request per event per 30 s, whatever else asks. */
 export const MIN_REQUEST_MS = 30_000;

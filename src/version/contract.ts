@@ -156,8 +156,19 @@ export interface VersionFeatures {
   readonly magicGladiator: boolean;
   readonly summoner: boolean;
   readonly rageFighter: boolean;
-  /** The Q/W/E/R consumable belt on the bottom bar (S6, `CNewUIItemHotKey`). */
-  readonly itemHotkeys: boolean;
+  /** The potion slots on the bottom bar (`CNewUIItemHotKey`). */
+  readonly itemHotkeys: ItemHotkeys;
+}
+
+/**
+ * The bottom bar's potion slots, keyed Q, W, E, R in that order. Unbound, they
+ * reach for healing, mana, antidote and shield potions.
+ */
+export interface ItemHotkeys {
+  /** How many the bar draws and answers the key of: Season 6 four, 0.97d three. */
+  readonly slots: number;
+  /** A slot takes another potion (Ctrl+key over the inventory, a drop on the slot): Season 6. */
+  readonly bindable: boolean;
 }
 
 export interface GameVersion {
@@ -197,7 +208,15 @@ export interface GameVersion {
    * never installed, so no listener of theirs runs and their windows hide.
    */
   readonly modulesOff: readonly string[];
+  /**
+   * The scheduled mini-games this version's client has: the HUD times and
+   * polls only these (`modules/events/schedule.ts`).
+   */
+  readonly miniGames: readonly MiniGame[];
 }
+
+/** A mini-game OpenMU opens on a timetable (`MiniGameOpeningState`). */
+export type MiniGame = 'bloodCastle' | 'devilSquare' | 'chaosCastle';
 
 export function asciiBytes(s: string): number[] {
   return Array.from(s, ch => ch.charCodeAt(0));

@@ -81,8 +81,10 @@ export const gameVersion: GameVersion = {
     magicGladiator: false,
     summoner: false,
     rageFighter: false,
-    itemHotkeys: false,
+    itemHotkeys: { slots: 0, bindable: false },
   },
   // TODO: the optional modules (`src/modules/modules.ts` ids) its server has no counterpart for.
   modulesOff: [],
+  // TODO: the scheduled mini-games its client has (Blood Castle, Devil Square, Chaos Castle).
+  miniGames: [],
 };

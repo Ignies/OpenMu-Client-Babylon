@@ -9,7 +9,10 @@ and how to run it.
   what differs from Season 6's, `versions/v097d/readme.md`).
 - `ozjToJpeg.ts`, `oztToTga.ts`, `pack-textures.ts`, `texturePacker.ts`: textures and sprite sheets.
 - `copyData.ts`, `compressAssets.ts`, `assetsIndex.ts`: the production build's `dist/Data`, gzip
-  sidecars and the pre-download index (`bun run build` runs all three).
+  sidecars and the pre-download indexes (`bun run build` runs all three). `assetsIndex.ts` writes
+  one per version (`assets-index.json`, `assets-index-v097d.json`): a borrowing version lists each
+  file at the url the client's own resolvers read it from, so a file is counted once
+  (`assetsIndex.test.ts`).
 - `instrumentModels.ts`, `instrumentSamples.ts`: the band system's instruments.
 
 ## Content generators (write files under `versions/` or `src/`)

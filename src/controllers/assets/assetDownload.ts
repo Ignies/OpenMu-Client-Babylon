@@ -7,9 +7,10 @@ import {
   sidecarsAvailable,
 } from './compressedAssets';
 import { resolveDataUrl } from './mu/dataFolder';
+import { assetsIndexUrl } from './resolveUrlToDataFolder';
 
 /**
- * Pre-game download of asset groups (`assets-index.json`, `tools/assetsIndex.ts`)
+ * Pre-game download of asset groups (the version's `assets-index*.json`, `tools/assetsIndex.ts`)
  * into the service worker cache (`public/sw.js`). See assets/readme.md.
  */
 
@@ -36,12 +37,6 @@ type AssetsIndex = {
 const CHOSEN_KEY = 'mu_download_groups';
 /** How many files are in flight at once. */
 const CONCURRENCY = 6;
-
-function indexUrl(): string {
-  // Beside the version's own assets, like the pack index.
-  const assets = gameVersion.data.assets.replace(/\/+$/, '');
-  return `${assets.replace(/game-assets.*/, '')}assets-index.json`;
-}
 
 /** Every file in a group, as the plain (pre-sidecar) URL. */
 export function urlsOf(group: AssetGroup): { url: string; bytes: number }[] {
@@ -130,7 +125,7 @@ let indexPending: Promise<AssetsIndex | null> | null = null;
 export function loadAssetsIndex(): Promise<AssetsIndex | null> {
   indexPending ??= (async () => {
     try {
-      const res = await fetch(indexUrl());
+      const res = await fetch(assetsIndexUrl(gameVersion.data));
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const parsed = (await res.json()) as AssetsIndex;
       runInAction(() => {

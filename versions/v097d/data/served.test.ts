@@ -10,6 +10,10 @@ import { parseGates } from '@/controllers/assets/mu/gates';
 import { parseTerrainObjects } from '@/controllers/terrain/parseTerrainObjects';
 import { placesObject } from '@/controllers/terrain/objectRecords';
 import { SOUND_FILES } from '@/controllers/sound/recipes';
+import { monsterModelFile } from '@/controllers/actors/monsterModelTable';
+import { NPC_MODEL_TABLE, npcModelFile } from '@/controllers/actors/npcModelTable';
+import { ItemsDatabase } from '../../shared/items/itemsDatabase';
+import { monsters } from '../../shared/monsters/all';
 import { v097dData } from './index';
 import { V097D_ASSET_FILES } from './assets';
 import { V097D_SOUNDS } from './sounds';
@@ -134,6 +138,38 @@ describe('0.97d worlds', () => {
         if (!NO_SOURCE_BMD.has(file) && !served(assetUrl(v097dData, file))) missing.push(file);
       }
     }
+
+    expect(missing).toEqual([]);
+  });
+});
+
+/** The class bodies 0.97d's `Player/` ships: `<Part>Class01..05` and `201..203`. */
+const CLASS_SKINS = [1, 2, 3, 4, 5, 201, 202, 203];
+
+/**
+ * Models no tree serves, Season 6 included: monster 50 has no row and no BMD (`tools/assetCase.test.ts`);
+ * the Summoner's Queen set names no BMD either, and Merlin Staff's `summonsprit.bmd` was never converted.
+ */
+const NO_MODEL = new Set([
+  'Monster/Monster50.glb',
+  'Item/summonsprit.glb',
+  ...['Helm', 'Armor', 'Pant', 'Glove', 'Boot'].map(part => `Player/${part}Mail_succubus.glb`),
+]);
+
+describe('0.97d characters and items', () => {
+  it('serves the model of every item, class body, monster and NPC', () => {
+    const files = [
+      ...ItemsDatabase.all()
+        .filter(item => item.szModelFolder !== 'Empty')
+        .map(item => `${item.szModelFolder}${item.szModelName}`),
+      'Player/player.glb',
+      ...['Helm', 'Armor', 'Pant', 'Glove', 'Boot'].flatMap(part =>
+        CLASS_SKINS.map(skin => `Player/${part}Class${String(skin).padStart(2, '0')}.glb`)
+      ),
+      ...monsters.all().flatMap(def => (def.model ? [monsterModelFile(def.model.type)] : [])),
+      ...Object.values(NPC_MODEL_TABLE).map(([file]) => npcModelFile(file)),
+    ];
+    const missing = files.filter(file => !NO_MODEL.has(file) && !served(assetUrl(v097dData, file)));
 
     expect(missing).toEqual([]);
   });

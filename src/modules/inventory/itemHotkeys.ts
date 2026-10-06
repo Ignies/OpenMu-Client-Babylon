@@ -1,4 +1,5 @@
 import type { Item } from '../../ecs/world';
+import type { ItemHotkeys } from '../../version/contract';
 import { InventoryConstants } from '@/core/inventoryConstants';
 
 /**
@@ -9,7 +10,8 @@ import { InventoryConstants } from '@/core/inventoryConstants';
  * Every frame the bar looks the kind up in the inventory - best potion first
  * (large → small → apple) - and renders whatever it found with the summed
  * count. Using the key consumes that found item. Unbound slots fall back to
- * HP / MP / antidote / SD for Q / W / E / R.
+ * HP / MP / antidote / SD for Q / W / E / R. How many slots a version draws,
+ * and whether they bind, is `features.itemHotkeys`.
  */
 
 export const HOTKEY_COUNT = 4;
@@ -56,6 +58,14 @@ const isHealing = (n: number) => n >= APPLE && n <= LARGE_HEALING;
 const isMana = (n: number) => n >= SMALL_MANA && n <= LARGE_MANA;
 const isShield = (n: number) => n >= SMALL_SHIELD && n <= LARGE_SHIELD;
 const isComplex = (n: number) => n >= SMALL_COMPLEX && n <= LARGE_COMPLEX;
+
+/**
+ * Whether Ctrl+key or a drop may bind `slot` (`features.itemHotkeys`): one the
+ * bar draws, on a version whose slots take another potion.
+ */
+export function canBindItemHotkey(hotkeys: ItemHotkeys, slot: number): boolean {
+  return hotkeys.bindable && slot >= 0 && slot < hotkeys.slots;
+}
 
 /** `CNewUIMyInventory::CanRegisterItemHotKey`. */
 export function canRegisterItemHotkey(item: Item | null | undefined): boolean {

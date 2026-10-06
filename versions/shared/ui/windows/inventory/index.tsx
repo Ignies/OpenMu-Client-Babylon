@@ -303,7 +303,8 @@ export const Inventory = observer(() => {
       Merchant.toggleRepairMode();
     }
 
-    // NewUIMyInventory.cpp:622: Ctrl+Q/W/E/R over a potion binds that bar slot.
+    // NewUIMyInventory.cpp:622: Ctrl+Q/W/E/R over a potion binds that bar slot, on a version
+    // whose slots bind; `Bag.setItemHotkey` asks the same rule as the bar (`canBindItemHotkey`).
     const bind = ITEM_HOT_KEYS.indexOf(key);
     if (bind >= 0 && MuWindows.isOpen('inventory') && hover) {
       const keys = Ecs.world?.keyboardInput.pressedKeys;

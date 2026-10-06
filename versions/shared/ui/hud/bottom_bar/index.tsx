@@ -46,6 +46,7 @@ import { gameVersion } from '@/version';
 import { itemBaseName } from '@versions/shared/items/itemsDatabase';
 import {
   ITEM_HOTKEY_CODES,
+  canBindItemHotkey,
   canRegisterItemHotkey,
   countHotkeyItems,
   findHotkeyItem,
@@ -130,8 +131,8 @@ const Gauge = ({
 /**
  * One Q/W/E/R slot (`CNewUIItemHotKey`): shows the best matching potion the
  * inventory holds right now and the summed count. Right click drinks it
- * (`UseItemRButton`); a carried potion dropped here binds the slot to that
- * kind, the way Ctrl+key over the inventory does.
+ * (`UseItemRButton`); where the version's slots bind, a carried potion dropped
+ * here binds the slot to that kind, the way Ctrl+key over the inventory does.
  */
 const ConsumableItem = observer(({ index, hotKey }: { index: number; hotKey: string }) => {
   const items = Hero.items;
@@ -140,7 +141,10 @@ const ConsumableItem = observer(({ index, hotKey }: { index: number; hotKey: str
   const icon: Item | null = slot >= 0 ? items[slot] : null;
   const count = slot >= 0 ? countHotkeyItems(items, index, hotkey) : 0;
   const picked = Bag.pickedItem;
-  const canBind = !!picked && canRegisterItemHotkey(picked.item);
+  const canBind =
+    !!picked &&
+    canRegisterItemHotkey(picked.item) &&
+    canBindItemHotkey(gameVersion.features.itemHotkeys, index);
   const name = icon ? itemBaseName(icon.group, icon.num) : undefined;
 
   return (
@@ -186,10 +190,13 @@ const ConsumableItem = observer(({ index, hotKey }: { index: number; hotKey: str
 
 const HOTKEY_CODES = ITEM_HOTKEY_CODES;
 
+/** The slots the version has (`features.itemHotkeys`): Season 6 Q/W/E/R, 0.97d Q/W/E. */
 const ConsumableItems = () => {
+  const slots = gameVersion.features.itemHotkeys.slots;
+
   useEventBus('keyPressed', code => {
     const i = HOTKEY_CODES.indexOf(code);
-    if (i < 0) return;
+    if (i < 0 || i >= slots) return;
     // Ctrl+key over the inventory binds; that is the inventory's job.
     const keys = Ecs.world?.keyboardInput.pressedKeys;
     if (keys && (keys.has('ControlLeft') || keys.has('ControlRight'))) return;
@@ -198,7 +205,7 @@ const ConsumableItems = () => {
 
   return (
     <>
-      {HOTKEY_KEYS.map((key, i) => (
+      {HOTKEY_KEYS.slice(0, slots).map((key, i) => (
         <ConsumableItem key={key} index={i} hotKey={key} />
       ))}
     </>
@@ -812,8 +819,7 @@ export const BottomBar = observer(() => {
 
       <Orbs />
 
-      {/* The Q/W/E/R belt is Season 6's (`CNewUIItemHotKey`); a version without it has none. */}
-      {gameVersion.features.itemHotkeys && <ConsumableItems />}
+      <ConsumableItems />
 
       <SkillSlots />
 

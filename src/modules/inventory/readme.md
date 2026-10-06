@@ -18,7 +18,10 @@ items themselves are the hero's (`Hero.items`, `Hero.money`).
 - `InventorySort.start()`: auto-arrange. `BulkMove.start(from, to, wanted)`: move every matching item.
 - `QuickItemActions`: Ctrl-click moves, sell / drop confirmations, the merchant's bulk buy. `MAX_BULK_BUY`.
 - `isUpgradeJewel`, `jewelTargetError`, `JEWEL_OF_CHAOS` (`jewelUpgrade.ts`; versions re-export it as `jewelRules`).
-- `ITEM_HOTKEY_CODES`, `canRegisterItemHotkey`, `findHotkeyItem`, `countHotkeyItems`, `HOTKEY_COUNT`, `UNBOUND_HOTKEY`.
+- `ITEM_HOTKEY_CODES`, `canRegisterItemHotkey`, `canBindItemHotkey`, `findHotkeyItem`, `countHotkeyItems`,
+  `HOTKEY_COUNT`, `UNBOUND_HOTKEY`. `canBindItemHotkey(features.itemHotkeys, slot)` is the one rule the bar's
+  drop and the inventory's Ctrl+key bind by: a slot the bar draws, on a version whose slots bind
+  (`setItemHotkey` refuses the rest; 0.97d's Q / W / E are fixed).
 
 ## How it works
 - State is `Bag` (`state.ts`, through `index.ts`, the door): `pickedItem`, `pendingItemMove`, `itemHotkeys`
@@ -73,3 +76,4 @@ items themselves are the hero's (`Hero.items`, `Hero.money`).
 - `inventoryLayout.test.ts`: `planLayout` packs into the top-left, no overlaps, leaves a packed grid alone.
 - `quickItemRules.test.ts`: Ctrl-click target, `isValuableItem`, when a bulk buy stops.
 - `itemStorage.test.ts`: `storageBan` returns a translated refusal per storage.
+- `itemHotkeys.test.ts`: which slots a version lets Ctrl+key or a drop bind.

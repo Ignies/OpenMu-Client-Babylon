@@ -11,7 +11,7 @@ const ALL: VersionFeatures = {
   magicGladiator: true,
   summoner: true,
   rageFighter: true,
-  itemHotkeys: true,
+  itemHotkeys: { slots: 4, bindable: true },
 };
 
 const offered = (features: VersionFeatures) =>

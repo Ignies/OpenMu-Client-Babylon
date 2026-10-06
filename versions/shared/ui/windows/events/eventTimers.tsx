@@ -24,9 +24,10 @@ import {
 } from './layout';
 
 /**
- * When the three events OpenMU runs next open, as three lines under the
- * corner minimap's slot. Ours: the original only ever answered the question
- * at the NPC or on a ticket, one notice at a time.
+ * When the timed events next open, one line each under the corner minimap's
+ * slot: the ones the version's client has (`GameVersion.miniGames`; 0.97d has
+ * no Chaos Castle). Ours: the original only ever answered the question at the
+ * NPC or on a ticket, one notice at a time.
  *
  * No chrome of its own - the lines are the small HUD font the in-event timer
  * figure and the match notices draw in, in their colours. The rows keep the

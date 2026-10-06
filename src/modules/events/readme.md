@@ -37,12 +37,13 @@ event is one entry file with its own MobX state and packet handlers, behind the 
 - Tickets (`recipes.ts` `TICKETS`): Cloak of Invisibility, Devil's Invitation and Armor of Guardsman
   send `MiniGameOpeningStateRequest`. `schedule.ts` sends the same request on a timer for the HUD
   rows (30 s floor, only with the event timers option on); each `MiniGameOpeningState` handler calls
-  `takeOpeningState` first, and an answer to a poll shows nothing.
+  `takeOpeningState` first, and an answer to a poll shows nothing. The rows are the version's
+  `miniGames` (`scheduleKeys`, `scheduleClock.ts`): 0.97d draws and polls no Chaos Castle.
 - `closeAll` closes every entry window and sends `CloseNpcRequest` when one was an NPC window:
   OpenMU keeps the character in `NpcDialogOpened` until it arrives. Golden Archer sends `EventChipExitDialog` instead.
 - `BloodCastleState` is shared: Blood Castle reads states 0..4, Chaos Castle 5..7 (8..10 are the
   arena in `maps/chaoscastle/arena.ts`). `MiniGameScoreTable` is taken by Devil Square or Chaos Castle by map.
-- Dev seam: `?events=<blood>,<devil>,<chaos>` (minutes) stages the schedule rows.
+- Dev seam: `?events=<blood>,<devil>,<chaos>` (minutes, one per row drawn) stages the schedule rows.
 
 ## Packets
 - `bloodCastle.ts`: `BloodCastleEnterResult`, `MiniGameOpeningState` (game 2), `BloodCastleState`
@@ -90,6 +91,7 @@ castle beds' sound gates read idle timers (no match bed plays).
 
 ## Tests
 - `duelRules.test.ts`: duel id orientation, room count, spectator list, start failure texts.
-- `scheduleClock.test.ts`: opening-state minutes to a moment, row text, countdown, poll back-off.
+- `scheduleClock.test.ts`: opening-state minutes to a moment, row text, countdown, poll back-off,
+  the rows a version draws.
 - `../switchOff.test.ts`: installing registers the listeners and loading does not; off, its
   packets keep only the other modules' listeners.
