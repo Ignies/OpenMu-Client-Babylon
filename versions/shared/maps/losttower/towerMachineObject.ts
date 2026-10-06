@@ -8,6 +8,7 @@ import { Ecs } from '@/ecs/current';
 import type { BonedEmission } from '@/controllers/fx/effectParticles';
 import type { Entity, World } from '@/ecs/world';
 import { reportLoadFailure } from '@/controllers/assets';
+import { visualLuminosity, visualTurn } from './visualRoll';
 
 type BoneNode = BonedEmission['node'];
 
@@ -34,14 +35,6 @@ const BLUE_LIGHT: readonly [number, number, number] = [0.4, 0.8, 1];
 
 /** Type 19 is the red machine on `BITMAP_MAGIC + 1`, 20 the blue one on `BITMAP_LIGHTNING + 1` (ZzzObject.cpp:2892-2901). */
 const RED_MACHINE = 19;
-
-/** `Rotation = (float)((int)(WorldTime * 0.1f) % 360)` (ZzzObject.cpp:2902), degrees. */
-const turn = (ms: number) => Math.floor(ms * 0.1) % 360;
-
-/** `Luminosity = (float)(rand() % 30 + 70) * 0.01f` (ZzzObject.cpp:2737). */
-const LUMINOSITY_MIN = 0.7;
-const LUMINOSITY_STEPS = 30;
-const LUMINOSITY_STEP = 0.01;
 
 /** Updates to wait for the skeleton to be posed before lighting anyway. */
 const POSE_WAIT_LIMIT = 120;
@@ -204,10 +197,8 @@ export class LostTowerMachineObject extends MapTileObject {
     // `RenderObjectVisual` re-rolls Luminosity per object per frame, and every
     // sprite it creates that frame shares the roll - so the three emitters
     // pulse together rather than sparkling independently. One roll here, then.
-    const lumi =
-      LUMINOSITY_MIN +
-      Math.floor(Math.random() * LUMINOSITY_STEPS) * LUMINOSITY_STEP;
-    const rotation = turn(gameTime.TotalGameTime.TotalSeconds * 1000);
+    const lumi = visualLuminosity();
+    const rotation = visualTurn(gameTime.TotalGameTime.TotalSeconds * 1000);
 
     for (const emitter of this.#bones) {
       const p = emitter.node.getAbsolutePosition();

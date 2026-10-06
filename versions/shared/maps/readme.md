@@ -159,10 +159,10 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
 - `placedModels.test.ts`: every type each world's `EncTerrain<n>.obj` places (effect-only ones
   aside) asks for a model `Data` has, at a folder slot under `MAX_WORLD_OBJECTS`, or asks for none
   (bound absent with `bindAbsentModels`, or a class that draws without one: the lean boxes, the
-  Icarus and Chaos Castle clouds). The original draws no body for a type whose file is missing
-  (LoadData.cpp:22-49, ZzzBMD.cpp:3098-3116); unbound, ours fetched a GLB and logged "Could not load
-  model". Bound absent: Lost Tower 40, Tarkan 0, 3, 4, 35, 38, Valley of Loren 35, Crywolf 79, 80,
-  Kanturu 2 21, 22, 25, 28, 39, 40, 42, 43, 69, 84, the GM area 15, 33, 74, Santa Town 37, 40, 51,
+  Icarus and Chaos Castle clouds, Lost Tower 40's sprites). The original draws no body for a type
+  whose file is missing (LoadData.cpp:22-49, ZzzBMD.cpp:3098-3116); unbound, ours fetched a GLB and
+  logged "Could not load model". Bound absent: Tarkan 0, 3, 4, 35, 38, Valley of Loren 35, Crywolf
+  79, 80, Kanturu 2 21, 22, 25, 28, 39, 40, 42, 43, 69, 84, the GM area 15, 33, 74, Santa Town 37, 40, 51,
   Doppelganger 4 34 and 175 (`MODEL_BIRD01`, Lorencia's only), the Fortress 95, 126, Loren Market 51,
   besides the earlier Swamp, Vulcanus, Duel Arena, Doppelganger 1, Raklion, Cursed Temple, Empire
   Guardian 4 and login scene rows.
@@ -192,3 +192,5 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   pillar's scale; its fire is `lampFlares`.
 - `losttower/towerMachineObject.test.ts`: the machines draw `BITMAP_MAGIC + 1` (19) and
   `BITMAP_LIGHTNING + 1` (20) pairs that turn against each other.
+- `losttower/lightningObject.test.ts`: 40, with no model, draws two white `BITMAP_LIGHTNING + 1` 260
+  up at 2.5 on any scale, turning against each other on one luminosity roll a frame.

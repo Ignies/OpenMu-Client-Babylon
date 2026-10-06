@@ -1,14 +1,14 @@
 import type { World } from '@/ecs/world';
 import { LostTowerMachineObject } from './towerMachineObject';
 import { LostTowerSkullObject } from './skullObject';
-import { bindAbsentModels } from '../shared/objectVariants';
+import { LostTowerLightningObject } from './lightningObject';
 
 /**
  * Lost Tower (WD_4LOSTTOWER, world 4 / `Object5`).
  *
  * Almost everything this map does is table data - see spec.ts for the blend
  * meshes, the two hidden types and the lights, and the render.meshAnimations rows for
- * the UV scrolls. Only three of the 40 types need behaviour that a table
+ * the UV scrolls. Only five types (19, 20, 38, 39, 40) need behaviour that a table
  * cannot hold, and they are wired here.
  *
  * Three things the original does that are deliberately not built:
@@ -58,7 +58,7 @@ export async function createLostTower(world: World) {
   tiles[38] = LostTowerSkullObject;
   tiles[39] = LostTowerSkullObject;
 
-  // 40 (x1) has no Object41.bmd in `Object5` (LoadData.cpp:22-49): no body. Its
-  // `BITMAP_LIGHTNING + 1` pair (ZzzObject.cpp:2913-2920) is not drawn here.
-  bindAbsentModels(tiles, [40]);
+  // 40 (x1) has no Object41.bmd in `Object5` (LoadData.cpp:22-49): no body, but its
+  // `BITMAP_LIGHTNING + 1` pair (ZzzObject.cpp:2913-2920).
+  tiles[40] = LostTowerLightningObject;
 }
