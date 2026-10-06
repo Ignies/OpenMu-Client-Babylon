@@ -8,7 +8,7 @@ MU 0.97d, the second version the client carries. OpenMU has no 0.97d data initia
   bytes `09704` (stored mangled), serial, pre-Season 6 Xor32 key, `variantRank`, data paths and
   `modules` (no master skills, sockets, ancient, harmony, Dark Lord, Summoner, Rage Fighter,
   MU Helper, item hotkeys, cash shop or Season 6 quest dialogs).
-- `packets` (`packets/index.ts`): the shared generated set plus Season 6's three hand-written
+- `packets` (`packets/index.ts`): the shared generated set plus Season 6's four hand-written
   packets. Nothing extra to generate.
 - `ui/index.tsx`: `pregame` (the ship scene), `preload`, `MasterSkillsWindow` (renders nothing).
 - `tables/index.ts`: still the Season 6 tables; its header says what each should become.

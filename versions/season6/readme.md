@@ -16,17 +16,19 @@ Season 6 Episode 3, the default version and the one the client was written again
 ## How it works
 - `variantRank` picks the classic layout when several generated packets share a code:
   plain name first, then `...075` / `...095` / `...097`, then `...Extended`.
-- `packets/` adds three hand-written server packets to the generated set:
+- `packets/` adds four hand-written server packets to the generated set:
   - `mapServerMove.ts`: C1 B1 00, move to another game server (`WSclient.cpp:10328`).
   - `bandRelay.ts`: C1 FA, a band frame relayed by the ws proxy (`proxy/band/hub.ts`).
   - `pingRelay.ts`: C1 FB, a map ping relayed by the ws proxy (`proxy/ping/hub.ts`).
+  - `modulePacket.ts`: C1/C2 E8, a module packet from our OpenMU plugin; the module router reads it
+    (`src/modules/_api/router.ts`).
 - `data/index.ts`: assets under `./Data/` (or `VITE_DATA_URL`) and `./game-assets/`, locale `Eng`.
 - `ui/preload.ts`: the sprite sheets decoded before the start menu and on world entry.
 - `ui/index.ts` reuses the shared login and character pages and the shared master skill window.
 
 ## Depends on / used by
 - uses: `versions/shared/packets`, `versions/shared/ui`, `versions/shared/{items,skills,monsters}`
-- used by: `versions/registry.ts`; `v097d` reuses the three hand-written packets
+- used by: `versions/registry.ts`; `v097d` reuses the four hand-written packets
 
 ## Change it
 - change a Season 6 only window: export it from `ui/index.ts` in `windows` with the shared `id`.
@@ -37,4 +39,6 @@ Season 6 Episode 3, the default version and the one the client was written again
 - `packets/mapServerMove.test.ts`: parses the original C1 B1 00 layout and the ip terminator.
 - `packets/bandRelay.test.ts`, `packets/pingRelay.test.ts`: read sub and sender, keep the shape
   the dispatcher resolves by.
+- `packets/modulePacket.test.ts`: the module packet keeps the shape the dispatcher resolves by and
+  is the only packet of its code in both versions' sets.
 - `../registry.test.ts`: Season 6 keeps its login bytes, Xor keys and variant ranks.

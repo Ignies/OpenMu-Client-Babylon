@@ -17,8 +17,8 @@ connect server.
   the imports its code uses, so the output passes `noUnusedLocals`.
 - The XML holds every version's variants, so the output also has the `...075`, `...095`, `...097`
   and `...Extended` classes. A version's `variantRank` picks which one wins for a shared code.
-- Packets OpenMU does not define (map-server move, band and ping relays) are hand-written in
-  `versions/season6/packets/`.
+- Packets OpenMU does not define (map-server move, band and ping relays, the module packet) are
+  hand-written in `versions/season6/packets/`.
 
 ## Depends on / used by
 - uses: `src/core/types` (`CharacterClassNumber`), `src/core/binaryUtils`
