@@ -86,7 +86,7 @@ shared pools, textures and particle recipes other folders reuse.
   a pushed particle on a turned or tilted object goes where MovePosition turns its velocity
   (ZzzAI.cpp:148-156), from `spawnParticle` and from an emitter handed the node's rotation, and
   `KIND_REACH` holds on any turn; every kind's colour stays in 0..1
-  over its life whatever light it is made with;
+  over its life whatever light it is made with, and a held sprite's (the wing glows) whatever its look;
   `light0` (`BITMAP_LIGHT` SubType 0) rises, shrinks, glows as its scale up to 1 and drifts on half the
   particle wind (`g_vParticleWind`, walked once a tick, ZzzEffectParticle.cpp:3847-3859); `light15`
   (`BITMAP_LIGHT` SubType 15) climbs a spiral from up to `Scale * 30` off, fading in and out in the
@@ -207,7 +207,8 @@ it. The yaw taken as it was sent every pushed particle the mirrored way; `NO_TUR
 all (bones, the Chaos Castle cracks). The tick holds each channel of a kind's
 colour in 0..1, as RenderSprite packs the light a byte a channel (ZzzOpenglUtil.cpp:918-933,
 RenderUtils.h:8-18): `smoke0` starts at `LifeTime / 8` = 2, `light0` at its scale, a torch fire at
-its light, and none of that past 1 reached the screen.
+its light, and none of that past 1 reached the screen. `HeldSprites` holds its look the same way; no
+wing look goes past 1 today (the Wing of Storm's peak at 0.9).
 
 ### feathers.ts
 Jitter up to 40 cm per axis, random tumble 0..5° a tick, `Alpha` 0.6..0.8. The original drops these

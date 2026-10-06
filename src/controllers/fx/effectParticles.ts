@@ -1706,11 +1706,16 @@ export class HeldSprites {
       sprite.height = size;
       sprite.angle = (out.rotation * Math.PI) / 180;
 
+      // RenderSprite packs the light a byte a channel, held in 0..1 (ZzzOpenglUtil.cpp:918-933, RenderUtils.h:8-18).
+      const r = unit(out.r);
+      const g = unit(out.g);
+      const b = unit(out.b);
+
       if (blend === 'dark') {
-        const luma = 0.2126 * out.r + 0.7152 * out.g + 0.0722 * out.b;
+        const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
         sprite.color.set(0, 0, 0, Math.min(1, luma * darkGain * pool.cover));
       } else {
-        sprite.color.copyFrom(spriteLevel(this.target, this.#color.set(out.r, out.g, out.b, 1)));
+        sprite.color.copyFrom(spriteLevel(this.target, this.#color.set(r, g, b, 1)));
       }
     }
   }

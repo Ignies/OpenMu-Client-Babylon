@@ -106,6 +106,7 @@ vi.mock('../assets', async () => ({ reportLoadFailure: (await import('../assets/
 
 import {
   BonedParticleEmitter,
+  HeldSprites,
   KIND_REACH,
   NO_TURN,
   ParticleEmitter,
@@ -794,6 +795,24 @@ describe('the particle tick', () => {
         disposeEffectParticles();
       }
     }
+  });
+});
+
+describe('HeldSprites', () => {
+  // RenderSprite packs the light a byte a channel, each held in 0..1 (ZzzOpenglUtil.cpp:918-933, RenderUtils.h:8-18).
+  it('holds a look outside 0..1 in it, as RenderSprite does', async () => {
+    const node = { getAbsolutePosition: () => ({ x: 0, y: 0, z: 0 }) };
+    const held = new HeldSprites(scene, [{ node, texture: 'flare01', blend: 'add' }]);
+    const look = (_i: number, out: { scale: number; r: number; g: number; b: number; rotation: number }) => {
+      Object.assign(out, { scale: 1, r: 2, g: 1.5, b: -0.5, rotation: 0 });
+    };
+    await vi.waitFor(() => {
+      held.update(true, look);
+      expect(fakes.sprites.some(s => s.isVisible)).toBe(true);
+    });
+    const { r, g, b, a } = fakes.sprites.filter(s => s.isVisible)[0].color;
+    expect([r, g, b, a]).toEqual([1, 1, 0, 1]);
+    held.dispose();
   });
 });
 
