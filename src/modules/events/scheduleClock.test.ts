@@ -6,8 +6,10 @@ import {
   nextPollAt,
   resolveOpening,
   rowText,
+  scheduleKeys,
 } from './scheduleClock';
 import { EVENT_TEXT } from './recipes';
+import { gameVersion } from '@/version';
 
 const NOW = 1_700_000_000_000;
 const MIN = 60_000;
@@ -126,5 +128,20 @@ describe('event schedule', () => {
     it('watches an open gate more closely than a counting one', () => {
       expect(nextPollAt(resolveOpening(0, false, NOW), NOW)).toBe(NOW + 60_000);
     });
+  });
+});
+
+describe('the rows a version draws', () => {
+  it('keeps the mini-games the version has, in display order', () => {
+    expect(scheduleKeys({ miniGames: ['chaosCastle', 'devilSquare', 'bloodCastle'] })).toEqual([
+      'bloodCastle',
+      'devilSquare',
+      'chaosCastle',
+    ]);
+    expect(scheduleKeys({ miniGames: ['devilSquare', 'bloodCastle'] })).toEqual(['bloodCastle', 'devilSquare']);
+  });
+
+  it('draws all three on Season 6', () => {
+    expect(scheduleKeys(gameVersion)).toEqual(['bloodCastle', 'devilSquare', 'chaosCastle']);
   });
 });

@@ -7,7 +7,8 @@ MU 0.97d, the second version the client carries. OpenMU has no 0.97d data initia
 - `gameVersion` (`index.ts`): id `v097d`, label `MU 0.97d`, list tag `V097D`, client version
   bytes `09704` (stored mangled), serial, pre-Season 6 Xor32 key, `variantRank`, data paths,
   `features` (no master skills, sockets, ancient sets, Dark Lord, Summoner, Rage Fighter or item
-  hot-key belt; the Magic Gladiator is in) and `modulesOff: ['mu_helper']`.
+  hot-key belt; the Magic Gladiator is in), `modulesOff: ['mu_helper']` and `miniGames` (Blood
+  Castle and Devil Square).
 - `packets` (`packets/index.ts`): the shared generated set plus Season 6's four hand-written
   packets. Nothing extra to generate.
 - `ui/index.tsx`: `pregame` (the ship scene), `preload`, `MasterSkillsWindow` (renders nothing).
@@ -77,7 +78,9 @@ MU 0.97d, the second version the client carries. OpenMU has no 0.97d data initia
 - Harmony jewels and refine stones are Season 3: 0.97d has none. Nothing in `src/` asks, so it
   is not a flag; the item tables (`tables/`) are where it will show.
 - `events` stays on: the client has World10 and OpenMU Version095d runs Devil Square. Blood Castle
-  has its map (World12) and no server side yet; Chaos Castle is not in 0.97d.
+  has its map (World12) and no server side yet; Chaos Castle is not in 0.97d (no World19, and its
+  `NpcName` table has the Archangel and Charon but no Chaos Castle monster), so `miniGames` leaves
+  it out and the HUD schedule neither draws nor polls it.
 - `quests` stays on: it carries the legacy chain 0.97d has (`Local/Quest.bmd`, OpenMU
   `NpcWindow.LegacyQuest`). Its Season 6 quest log and NPC dialogue windows stay too, never fed
   by a 0.95d server; turning those off alone means splitting the module.
@@ -117,7 +120,8 @@ What drawing the in-game interface the 0.97d way needs, none of it built yet:
 
 ## Tests
 - `variantRank.test.ts`: the winning packet variant per family that shares a code.
-- `modules.test.ts`: MU Helper is off, `events` and `quests` stay.
+- `modules.test.ts`: MU Helper is off, `events` and `quests` stay; the HUD times Blood Castle and
+  Devil Square only.
 - `data/inventory.test.ts`: the inventory matches the files in `Data-v097d/`; `gate.bmd` is spelled
   the way the client asks for it.
 - `data/assets.test.ts`: `assets.ts` matches the files in `public/game-assets-v097d/`.

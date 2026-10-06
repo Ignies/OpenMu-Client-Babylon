@@ -6,7 +6,7 @@ Season 6 Episode 3, the default version and the one the client was written again
 ## Public API
 - `gameVersion` (`index.ts`): id `season6`, label `Season 6 Episode 3`, list tag `S6EP3`,
   client version `10404`, serial, SimpleModulus and Xor keys, `variantRank`, data paths and
-  `features` (every flag on), no `modulesOff`.
+  `features` (every flag on), no `modulesOff`, all three `miniGames`.
 - `packets` (`packets/index.ts`): `ServerToClientPackets`, `ClientToServerPackets`,
   `ConnectServerPackets`, `ChangeMapServerInfoPacket`.
 - `ui/index.ts`: `pregame` (login world 73, character world 74, the MU logo), `preload`,

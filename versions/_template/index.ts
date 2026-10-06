@@ -85,4 +85,6 @@ export const gameVersion: GameVersion = {
   },
   // TODO: the optional modules (`src/modules/modules.ts` ids) its server has no counterpart for.
   modulesOff: [],
+  // TODO: the scheduled mini-games its client has (Blood Castle, Devil Square, Chaos Castle).
+  miniGames: [],
 };

@@ -197,7 +197,15 @@ export interface GameVersion {
    * never installed, so no listener of theirs runs and their windows hide.
    */
   readonly modulesOff: readonly string[];
+  /**
+   * The scheduled mini-games this version's client has: the HUD times and
+   * polls only these (`modules/events/schedule.ts`).
+   */
+  readonly miniGames: readonly MiniGame[];
 }
+
+/** A mini-game OpenMU opens on a timetable (`MiniGameOpeningState`). */
+export type MiniGame = 'bloodCastle' | 'devilSquare' | 'chaosCastle';
 
 export function asciiBytes(s: string): number[] {
   return Array.from(s, ch => ch.charCodeAt(0));

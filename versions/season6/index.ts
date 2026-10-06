@@ -68,4 +68,5 @@ export const gameVersion: GameVersion = {
     itemHotkeys: true,
   },
   modulesOff: [],
+  miniGames: ['bloodCastle', 'devilSquare', 'chaosCastle'],
 };

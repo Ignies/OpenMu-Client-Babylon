@@ -150,4 +150,7 @@ export const gameVersion: GameVersion = {
   // `quests` stays: it carries the legacy chain 0.97d has (Local/Quest.bmd,
   // OpenMU NpcWindow.LegacyQuest); its Season 6 windows are never fed.
   modulesOff: ['mu_helper'],
+  // Its NpcName table has Blood Castle's Archangel (232, 233) and Devil Square's
+  // Charon (237); no Chaos Castle monster (162-173) and no World19.
+  miniGames: ['bloodCastle', 'devilSquare'],
 };

@@ -6,6 +6,7 @@ import { MiniGameOpeningStateRequestPacket } from '@versions/shared/packets/Clie
 import { Session } from '../session';
 import { AppState, UIState } from '../../controllers/interface/uiState';
 import { Ecs } from '../../ecs/current';
+import { gameVersion } from '../../version';
 import type { EventLayer } from './layer';
 import { OPENING_STATE_GAME } from './recipes';
 import {
@@ -14,10 +15,12 @@ import {
   countdownSeconds,
   nextPollAt,
   resolveOpening,
+  scheduleKeys,
   type EventScheduleEntry,
+  type EventScheduleKey,
 } from './scheduleClock';
 
-export type { EventScheduleEntry } from './scheduleClock';
+export type { EventScheduleEntry, EventScheduleKey } from './scheduleClock';
 
 /**
  * When each event next opens, on the one clock (`controllers/net/serverTime.ts`).
@@ -35,10 +38,8 @@ export type { EventScheduleEntry } from './scheduleClock';
 
 // ---- 1. tuning -------------------------------------------------------------
 
-/** Display order of the rows, and the only three events OpenMU runs. */
-const EVENT_SCHEDULE_KEYS = ['bloodCastle', 'devilSquare', 'chaosCastle'] as const;
-
-export type EventScheduleKey = (typeof EVENT_SCHEDULE_KEYS)[number];
+/** The rows, in display order: the mini-games the version's client has. */
+const EVENT_SCHEDULE_KEYS = scheduleKeys(gameVersion);
 
 const GAME_OF: Readonly<Record<EventScheduleKey, number>> = {
   bloodCastle: OPENING_STATE_GAME.bloodCastle,
@@ -117,7 +118,7 @@ function fresh(): PollState {
   };
 }
 
-/** What the HUD draws, one row per event, in `EVENT_SCHEDULE_KEYS` order. */
+/** What the HUD draws, one row per event the version has, in `EVENT_SCHEDULE_KEYS` order. */
 const state = observable(
   {
     rows: EVENT_SCHEDULE_KEYS.map(key => ({
@@ -258,7 +259,7 @@ function reset(): void {
   }
 }
 
-// Dev only (`?events=<blood>,<devil>,<chaos>` in minutes): stage the rows
+// Dev only (`?events=<blood>,<devil>,<chaos>` in minutes, one per row drawn): stage the rows
 // with no server. `devQueryNumbers` answers null in a production build.
 const seeded = devQueryNumbers('events', EVENT_SCHEDULE_KEYS.length);
 if (seeded) {
