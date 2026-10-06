@@ -1,9 +1,15 @@
-import { readdirSync } from 'fs';
+import { readFileSync, readdirSync } from 'fs';
 import { join, resolve } from 'path';
 import { describe, expect, it } from 'vitest';
+import { ENUM_WORLD } from '@/core/types';
+import { maps } from '@/controllers/maps/index';
+import { terrainFilesFor } from '@/controllers/assets/prefetchWorld';
 import { assetUrl, hasAsset } from '@/controllers/assets/resolveUrlToDataFolder';
+import { parseTerrainObjects } from '@/controllers/terrain/parseTerrainObjects';
+import { placesObject } from '@/controllers/terrain/objectRecords';
 import { SOUND_FILES } from '@/controllers/sound/recipes';
 import { v097dData } from './index';
+import { V097D_ASSET_FILES } from './assets';
 import { V097D_SOUNDS } from './sounds';
 
 /**
@@ -37,6 +43,99 @@ function served(url: string): boolean {
   }
   return true;
 }
+
+/** The worlds 0.97d ships (World1..World12) that a shared map entry claims; World6 has none. */
+const WORLDS = [
+  ENUM_WORLD.WD_0LORENCIA,
+  ENUM_WORLD.WD_1DUNGEON,
+  ENUM_WORLD.WD_2DEVIAS,
+  ENUM_WORLD.WD_3NORIA,
+  ENUM_WORLD.WD_4LOSTTOWER,
+  ENUM_WORLD.WD_6STADIUM,
+  ENUM_WORLD.WD_7ATLANSE,
+  ENUM_WORLD.WD_8TARKAN,
+  ENUM_WORLD.WD_9DEVILSQUARE,
+  ENUM_WORLD.WD_10ICARUS,
+  ENUM_WORLD.WD_11BLOODCASTLE1,
+];
+
+/** The converted files 0.97d ships for its worlds; any other world file is Season 6's. */
+const OWN_WORLD_FILES = [
+  'World2/EncTerrain2.obj',
+  'World3/EncTerrain3.att',
+  'World3/EncTerrain3.map',
+  'World3/EncTerrain3.obj',
+  'World3/TerrainHeight.OZB',
+  'World3/TerrainLight.OZJ',
+  'World7/EncTerrain7.att',
+  'World8/EncTerrain8.att',
+  'World8/EncTerrain8.map',
+  'World8/EncTerrain8.obj',
+  'World8/TerrainHeight.OZB',
+  'World9/EncTerrain9.att',
+  'World9/EncTerrain9.map',
+  'World9/EncTerrain9.obj',
+  'World9/TerrainHeight.OZB',
+  'World9/TerrainLight.OZJ',
+  'World11/EncTerrain11.att',
+  'World11/EncTerrain11.map',
+  'World11/EncTerrain11.obj',
+  'World11/TerrainHeight.OZB',
+  'World11/TerrainLight.OZJ',
+];
+
+/**
+ * Types the terrain places with no `ObjectNN.bmd` behind them in 0.97d's tree or
+ * Season 6's (Season 6's own terrain places them too): the original draws nothing.
+ */
+const NO_SOURCE_BMD = new Set([
+  'Object2/Object61.glb',
+  'Object5/Object41.glb',
+  'Object9/Object04.glb',
+  'Object9/Object36.glb',
+  'Object9/Object39.glb',
+]);
+
+const diskPath = (url: string) => join(PUBLIC, url.replace(/^\.\//, ''));
+
+describe('0.97d worlds', () => {
+  it('reads its own terrain and models where they differ from Season 6', () => {
+    for (const file of [...OWN_WORLD_FILES, 'Object10/Object03.glb']) {
+      expect(assetUrl(v097dData, file), file).toBe(`./game-assets-v097d/${file}`);
+    }
+    // Devias: 97 of its BMDs differ from Season 6's, and 40 of them convert differently.
+    expect(V097D_ASSET_FILES.filter(f => f.startsWith('object3/'))).toHaveLength(40);
+  });
+
+  it('serves every terrain file and tile each world asks for', () => {
+    const missing = WORLDS.flatMap(map => terrainFilesFor(map))
+      .map(file => assetUrl(v097dData, file))
+      .filter(url => !served(url));
+
+    expect(missing).toEqual([]);
+  });
+
+  it('serves the model of every object type each world places', () => {
+    const missing: string[] = [];
+
+    // Lorencia's objects are named models bound in its create.ts, not ObjectNN.
+    for (const map of WORLDS.filter(m => m !== ENUM_WORLD.WD_0LORENCIA)) {
+      const n = maps.assetWorldNum(map);
+      const objects = parseTerrainObjects(
+        new Uint8Array(readFileSync(diskPath(assetUrl(v097dData, `World${n}/EncTerrain${n}.obj`))))
+      );
+      const types = new Set(objects.filter(placesObject).map(o => o.id));
+
+      for (const type of types) {
+        if (maps.isEffectOnly(map, type)) continue;
+        const file = `Object${n}/Object${String(type + 1).padStart(2, '0')}.glb`;
+        if (!NO_SOURCE_BMD.has(file) && !served(assetUrl(v097dData, file))) missing.push(file);
+      }
+    }
+
+    expect(missing).toEqual([]);
+  });
+});
 
 describe('0.97d grass cards', () => {
   it('grows grass only from the cards 0.97d ships, never from a borrowed one', () => {

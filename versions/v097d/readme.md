@@ -23,6 +23,12 @@ MU 0.97d, the second version the client carries. OpenMU has no 0.97d data initia
   `public/game-assets-v097d/` holds; any other converted file is Season 6's (`borrows`): only a
   file whose 0.97d source differs from Season 6's is converted or copied. `lacks` keeps Season 6's
   extra Lorencia grass cards (`TileGrass02/03.OZT`) out: 0.97d's World1 ships only `TileGrass01`.
+- Worlds: the shared map entries serve 0.97d's World1..World12 (World6, Exile, has no entry).
+  Only the terrain files whose source differs from Season 6's are copied (`World2`, `3`, `7`, `8`,
+  `9`, `11`: 21 files) and only the models whose conversion differs (`Object3`: 40 of the 97
+  Devias BMDs that differ; `Object10/Object03`, whose `kni00/01` textures differ); the rest of
+  `World2..12` / `Object2..12` is Season 6's, byte-identical. The `.jpg` / `.tga` intermediates
+  are not copied: nothing loads them (`tools/assetsIndex.ts`).
 - `data/sounds.ts`: the 42 sounds and 1 track whose 0.97d file differs from Season 6's original
   (hashed against the Season 6 `.wav` / `.mp3`), shipped as the period `.wav` / `.mp3`. The other
   235 sounds and 6 tracks play Season 6's `.ogg`.
@@ -45,5 +51,6 @@ MU 0.97d, the second version the client carries. OpenMU has no 0.97d data initia
 - `variantRank.test.ts`: the winning packet variant per family that shares a code.
 - `data/inventory.test.ts`: the inventory matches the files in `Data-v097d/`.
 - `data/assets.test.ts`: `assets.ts` matches the files in `public/game-assets-v097d/`.
-- `data/served.test.ts`: every sound key resolves to a file that exists, in its case; Lorencia
-  grows grass from its one card only.
+- `data/served.test.ts`: every terrain file, tile and placed object model of each world, and
+  every sound key, resolves to a file that exists, in its case; Lorencia grows grass from its one
+  card only.
