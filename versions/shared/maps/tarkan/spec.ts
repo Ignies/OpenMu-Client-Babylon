@@ -13,12 +13,12 @@ import { saw } from '../shared/meshAnimation';
  *
  * **`Object9` has holes.** `Object01`, `04`, `05`, `35`, `36`, `39`, `65` and
  * `85` do not exist in the data, so `o->Type` 0, 3, 4, 34, 35, 38, 64 and 84
- * have no model at all. Two of them carry C++ behaviour that can therefore
- * never run: type 4 (a blend mesh, a V scroll and a white `AddTerrainLight`
+ * have no model at all. EncTerrain9.obj places 0 (x1), 3 (x2), 4 (x1), 35
+ * (x38) and 38 (x6), bound absent in `create.ts`. Two of the eight carry C++
+ * behaviour: type 4 (a blend mesh, a V scroll and a white `AddTerrainLight`
  * of range 3, ZzzObject.cpp:4044-4057) and type 64 (the red twin of the
- * type-63 impact glow, :2978). EncTerrain9.obj still places one type 4 and
- * two type 0 records, which fail their load and are logged; nothing else
- * references the missing eight. They are no-ops here, in every table.
+ * type-63 impact glow, :2978; none placed). The blend mesh and scroll have no
+ * body to act on; type 4's light is not in these tables.
  */
 
 /**

@@ -1,6 +1,7 @@
 import type { World } from '@/ecs/world';
 import { LostTowerMachineObject } from './towerMachineObject';
 import { LostTowerSkullObject } from './skullObject';
+import { bindAbsentModels } from '../shared/objectVariants';
 
 /**
  * Lost Tower (WD_4LOSTTOWER, world 4 / `Object5`).
@@ -56,4 +57,8 @@ export async function createLostTower(world: World) {
   // (ZzzObject.cpp:3949-3951).
   tiles[38] = LostTowerSkullObject;
   tiles[39] = LostTowerSkullObject;
+
+  // 40 (x1) has no Object41.bmd in `Object5` (LoadData.cpp:22-49): no body. Its
+  // `BITMAP_LIGHTNING + 1` pair (ZzzObject.cpp:2912-2919) is not drawn here.
+  bindAbsentModels(tiles, [40]);
 }

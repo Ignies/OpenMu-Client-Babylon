@@ -1,5 +1,5 @@
 import type { World } from '@/ecs/world';
-import { PlaySpeedObject } from '../shared/objectVariants';
+import { PlaySpeedObject, bindAbsentModels } from '../shared/objectVariants';
 
 /**
  * Santa Village (`WD_62SANTA_TOWN`, `World63`/`Object63`).
@@ -20,4 +20,6 @@ export async function createSantaTown(world: World) {
 
   // GMSantaTown.cpp:80-85.
   tiles[16] = PlaySpeedObject.at(0.06);
+  // 37 (x1), 40 (x1) and 51 (x4) have no Object38/41/52.bmd in `Object63` (LoadData.cpp:22-49).
+  bindAbsentModels(tiles, [37, 40, 51]);
 }

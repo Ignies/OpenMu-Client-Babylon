@@ -151,9 +151,17 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
 - `doppelganger4/spec.test.ts`: 59 puffs a `BITMAP_SMOKE` SubType 13 (`smoke13`) one tick in three where
   Kanturu's puffs SubType 21, and 82 / 83 make `BITMAP_WATERFALL_3` SubType 3 / `_2` SubType 1 where
   Kanturu makes SubType 4 / 2; every other Kanturu row stays; its light box 48 makes a `BITMAP_LIGHT`
-  SubType 15 (`light15`) one tick in three. `doppelganger4/create.test.ts`: the folder types
-  EncTerrain69.obj places that `Data/Object69` has no model for (34) are bound absent, so none asks
-  for a GLB and logs a failed load.
+  SubType 15 (`light15`) one tick in three.
+- `placedModels.test.ts`: every type each world's `EncTerrain<n>.obj` places (effect-only ones
+  aside) asks for a model `Data` has, at a folder slot under `MAX_WORLD_OBJECTS`, or asks for none
+  (bound absent with `bindAbsentModels`, or a class that draws without one: the lean boxes, the
+  Icarus and Chaos Castle clouds). The original draws no body for a type whose file is missing
+  (LoadData.cpp:22-49, ZzzBMD.cpp:3098-3116); unbound, ours fetched a GLB and logged "Could not load
+  model". Bound absent: Lost Tower 40, Tarkan 0, 3, 4, 35, 38, Valley of Loren 35, Crywolf 79, 80,
+  Kanturu 2 21, 22, 25, 28, 39, 40, 42, 43, 69, 84, the GM area 15, 33, 74, Santa Town 37, 40, 51,
+  Doppelganger 4 34 and 175 (`MODEL_BIRD01`, Lorencia's only), the Fortress 95, 126, Loren Market 51,
+  besides the earlier Swamp, Vulcanus, Duel Arena, Doppelganger 1, Raklion, Cursed Temple, Empire
+  Guardian 4 and login scene rows.
 - `doppelgangerLights.test.ts`: the four arenas' sky-blue light boxes (Doppelganger 1's 101, the
   others' 48) make a `BITMAP_LIGHT` SubType 15 (`light15`) one tick in three.
 - `kanturu1/spec.test.ts`, `aida/spec.test.ts`: the falls (Kanturu and the GM area 81-83, Aida 56-58) make

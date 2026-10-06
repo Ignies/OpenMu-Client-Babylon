@@ -1,5 +1,5 @@
 import type { World } from '@/ecs/world';
-import { AlphaObject, PlaySpeedObject } from '../shared/objectVariants';
+import { AlphaObject, PlaySpeedObject, bindAbsentModels } from '../shared/objectVariants';
 
 /**
  * The GM area (`WD_40AREA_FOR_GM`, `World41`/`Object41`) - a 670-object
@@ -26,4 +26,6 @@ export async function createGmArea(world: World) {
   tiles[90] = PlaySpeedObject.at(0.04);
   tiles[76] = AlphaObject.at(0.5);
   tiles[96] = AlphaObject.at(0.5);
+  // 15 (x3), 33 (x1) and 74 (x3) have no Object16/34/75.bmd in `Object41` (LoadData.cpp:22-49).
+  bindAbsentModels(tiles, [15, 33, 74]);
 }

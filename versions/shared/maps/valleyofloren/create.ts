@@ -4,6 +4,7 @@ import { SignObject } from '../../objects/signs/signObject';
 import { signTypes } from '../../objects/signs/signLabels';
 import { OperateBoxObject } from '@/controllers/actors/operateBoxObject';
 import type { World } from '@/ecs/world';
+import { bindAbsentModels } from '../shared/objectVariants';
 
 /**
  * Valley of Loren (`WD_30BATTLECASTLE`, `World31`/`Object31`) - the Castle
@@ -41,4 +42,7 @@ export async function createValleyOfLoren(world: World) {
   // The notice boards. What each one says is versions/shared/objects/signs/signLabels.ts.
   prefetchSignPlates(`Object${assetWorldNum(world.mapIndex)}/`);
   for (const type of signTypes(world.mapIndex)) tiles[type] = SignObject;
+
+  // 35 (x1) has no Object36.bmd in `Object31` (LoadData.cpp:22-49): no body.
+  bindAbsentModels(tiles, [35]);
 }

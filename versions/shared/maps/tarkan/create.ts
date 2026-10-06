@@ -5,6 +5,7 @@ import { TarkanGlowLampObject } from './glowLampObject';
 import { TarkanImpactGlowObject } from './impactGlowObject';
 import { TarkanLightShaftObject } from './lightShaftObject';
 import { TarkanQuakeVentObject, TarkanSandVentObject } from './ventObject';
+import { bindAbsentModels } from '../shared/objectVariants';
 
 /**
  * Tarkan (World 9 / `Object9`), the desert. `CreateObject`
@@ -23,11 +24,11 @@ import { TarkanQuakeVentObject, TarkanSandVentObject } from './ventObject';
  * light shaft, 85-87 later-season props with no code behind them.
  *
  * **`Object9` has holes**: no `Object01/04/05/35/36/39/65/85`, so types 0, 3,
- * 4, 34, 35, 38, 64 and 84 have no model. Two of them carry C++ behaviour
- * that can therefore never run - type 4's blend mesh, V scroll and white
- * range-3 terrain light (:4044-4057), and type 64, the red twin of the type
- * 63 impact glow (:2978-2986). Both are no-ops here. EncTerrain9.obj still
- * places one type 4 and two type 0 records; their loads fail and are logged.
+ * 4, 34, 35, 38, 64 and 84 have no model; the five EncTerrain9.obj places
+ * are bound absent below. Two of the eight carry C++ behaviour - type 4's
+ * blend mesh, V scroll and white range-3 terrain light (:4044-4057), and
+ * type 64, the red twin of the type 63 impact glow (:2978-2986). Both are
+ * no-ops here.
  *
  * **Not implemented, deliberately:**
  *
@@ -83,6 +84,10 @@ export async function createTarkan(world: World) {
   // Tarkan 82 (ZzzObject.cpp:4123-4127), x60: the light shaft, pinned to full
   // white rather than lit by the terrain it stands on.
   tiles[82] = TarkanLightShaftObject;
+
+  // The holes EncTerrain9.obj places: 0 (x1), 3 (x2), 4 (x1), 35 (x38) and 38 (x6)
+  // have no model in `Object9` (LoadData.cpp:22-49), so they draw no body.
+  bindAbsentModels(tiles, [0, 3, 4, 35, 38]);
 
   // Tarkan 78 (ZzzObject.cpp:4730-4734), x13 - the sittable step, and the
   // only type in the map's `CreateObject` case. It is `CreateOperate(o)` and
