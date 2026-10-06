@@ -18,9 +18,11 @@ export function testGame() {
     playSound: id => TEST_SOUNDS.includes(id) && calls.push(['playSound', id]) > 0,
     playEffect: (id, at) => TEST_EFFECTS.includes(id) && calls.push(['playEffect', id, { x: at.x, y: at.y }]) > 0,
     hero: () => TEST_HERO,
+    // One listener per subscription, as warp's `onMapChanged` adds one to the bus.
     onMapChange(fn) {
-      maps.add(fn);
-      return () => void maps.delete(fn);
+      const listener = (map: number) => fn(map);
+      maps.add(listener);
+      return () => void maps.delete(listener);
     },
     sendPacket: frame => void calls.push(['sendPacket', [...frame]]),
   };

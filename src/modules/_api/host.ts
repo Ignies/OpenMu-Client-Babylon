@@ -48,6 +48,8 @@ export function createModuleHost(game: Game): ModuleHost {
   function build(id: string): Held {
     const windows = new Map<string, () => void>();
     const listeners = new Set<() => void>();
+    /** Each map listener, with the game's end of it. */
+    const maps = new Map<(map: number) => void, () => void>();
     const packets = new Set<(payload: Uint8Array) => void>();
     const own = (key: string) => key.startsWith(`${id}.`) && key.length > id.length + 1;
     const alive = () => {
@@ -96,15 +98,19 @@ export function createModuleHost(game: Game): ModuleHost {
         alive();
         return game.hero();
       },
+      // A function subscribed again is a no-op, and either unsubscribe removes it (as `guest.ts`).
       onMapChange(fn) {
         alive();
-        return listen(game.onMapChange(fn));
+        if (!maps.has(fn)) maps.set(fn, game.onMapChange(fn));
+        return listen(() => {
+          maps.get(fn)?.();
+          maps.delete(fn);
+        });
       },
       onPacket(fn) {
         alive();
-        const each = (payload: Uint8Array) => fn(payload);
-        packets.add(each);
-        return listen(() => packets.delete(each));
+        packets.add(fn);
+        return listen(() => packets.delete(fn));
       },
       sendPacket(payload) {
         alive();

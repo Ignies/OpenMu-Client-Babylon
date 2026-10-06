@@ -104,6 +104,25 @@ describe('the in-process module host', () => {
     expect(seen).toEqual([[7, 8], [-2], [-1]]);
   });
 
+  it('counts a function subscribed twice once, map changes and packets alike, as over messages', () => {
+    const { host, api, changeMap, mapListeners } = setUp();
+    const seen: string[] = [];
+    const onMap = (map: number) => seen.push(`map ${map}`);
+    const onPacket = (p: Uint8Array) => seen.push(`packet ${p.join()}`);
+    const offMap = api.onMapChange(onMap);
+    api.onMapChange(onMap);
+    const offPacket = api.onPacket(onPacket);
+    api.onPacket(onPacket);
+    changeMap(2);
+    host.deliver('example', Uint8Array.from([7]));
+    expect(seen).toEqual(['map 2', 'packet 7']);
+    // Either unsubscribe removes it.
+    offMap();
+    offPacket();
+    expect(mapListeners()).toBe(0);
+    expect(host.deliver('example', Uint8Array.from([8]))).toBe(false);
+  });
+
   it('says a payload went nowhere when the module is not listening', () => {
     const { host } = setUp();
     expect(host.deliver('example', Uint8Array.from([1]))).toBe(false);
