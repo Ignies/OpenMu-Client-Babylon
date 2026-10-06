@@ -102,13 +102,14 @@ export function rageStreak(): number {
   return streakHits;
 }
 
-/** Command: Dark Side was cast on `targetId`; the 0x4B/0x4A pair goes out now. The follow-ups wait for its echo. */
+/**
+ * Command: Dark Side was cast on `targetId`; the 0x4B/0x4A pair goes out now. The follow-ups wait for its echo. The last
+ * cast's targets and follow-ups stay until the 0x4B answers (InitDarksideTarget only there, WSclient.cpp:13444).
+ */
 export function beginDarkSide(skill: number, _targetId: number): void {
   darkSideSkill = skill;
-  pendingTargets.length = 0;
   echoed = false;
   attackTime = 0;
-  setTargets([]);
 }
 
 /**

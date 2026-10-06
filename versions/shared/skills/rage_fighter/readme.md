@@ -46,7 +46,9 @@ Only the cast's echo starts the count, and the
 cast is drawn once (RageCreateEffect's `m_bUseEffectOnce`, MonkSystem.cpp:1285-1288): a later echo,
 the hero's or another caster's while he still plays the clip (another client's follow-up), only turns
 its caster (`observeDarkSideEcho`). It also keeps the hit streak for the damage numbers. Past the fifth
-follow-up the next one due drops the targets (SendDarksideAtt's InitDarksideTarget, MonkSystem.cpp:591-595).
+follow-up the next one due drops the targets (SendDarksideAtt's InitDarksideTarget, MonkSystem.cpp:591-595). The cast drops
+nothing: the last cast's targets and follow-ups stay until its 0x4B answers, which drops them and names its own
+(ReceiveDarkside's InitDarksideTarget, WSclient.cpp:13440-13447), so an echo ahead of it runs on the slots left.
 A SkillAnimation (0x19) of Dark Side draws nothing, and another caster's counts one of the hero's follow-ups gone, as the
 original's one CMonkSystem does (SetDarksideCnt, WSclient.cpp:5144-5148, `observeDarkSideMagic`): his next follow-up skips a
 target and the fifth comes sooner. OpenMU sends one when a caster's 0x4B names no target: his client then asks for the skill

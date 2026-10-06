@@ -73,7 +73,8 @@ the Rage Fighter's Dark Side blows. This folder has only the handlers; it keeps 
   after a plain blow; 22 ticks plus 3.5 a tile of flight.
 - `darkSideEcho.test.ts`: the hero's Dark Side follow-ups wait for the `RageAttack` echo of his cast,
   which puts him back in the clip; a cast is drawn once, a later 0x4A of it only turns its caster; a 0x4B
-  naming no target asks for the skill on the hero, and its empty slots get no follow-up; another caster's 0x19 of Dark Side
+  naming no target asks for the skill on the hero, and its empty slots get no follow-up; a cast keeps the last targets and
+  follow-ups until its 0x4B answers; another caster's 0x19 of Dark Side
   counts one of the hero's follow-ups and draws nothing.
 - `skillAnimation.test.ts`: another caster's 0x19 of Dragon Roar (and its Strengthener) leaves his clip running and plays
   no cast sound, only its hit; another skill's still plays its clip.
