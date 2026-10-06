@@ -148,11 +148,10 @@ const CLASS_SKINS = [1, 2, 3, 4, 5, 201, 202, 203];
 
 /**
  * Models no tree serves, Season 6 included: monster 50 has no row and no BMD (`tools/assetCase.test.ts`);
- * the Summoner's Queen set names no BMD either, and Merlin Staff's `summonsprit.bmd` was never converted.
+ * the Summoner's Queen set names no BMD either.
  */
 const NO_MODEL = new Set([
   'Monster/Monster50.glb',
-  'Item/summonsprit.glb',
   ...['Helm', 'Armor', 'Pant', 'Glove', 'Boot'].map(part => `Player/${part}Mail_succubus.glb`),
 ]);
 

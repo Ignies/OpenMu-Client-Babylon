@@ -14,7 +14,11 @@ const CODE_ROOTS = [SRC, join(ROOT, 'versions')];
  * `Monster50.bmd`, so nothing can spawn it. An unreachable table row, not a
  * missing conversion.
  */
-const NO_SOURCE_BMD = new Set(['Monster/Monster50.glb']);
+const NO_SOURCE_BMD = new Set([
+  'Monster/Monster50.glb',
+  // The Queen set names `*Mail_succubus`, which no tree ships (versions/v097d/data/served.test.ts).
+  ...['Helm', 'Armor', 'Pant', 'Glove', 'Boot'].map(part => `Player/${part}Mail_succubus.glb`),
+]);
 
 function filesUnder(dir: string, base = dir): string[] {
   const out: string[] = [];

@@ -1,5 +1,6 @@
 import { monsterModelFile } from '../src/controllers/actors/monsterModelTable';
 import { monsters } from '../versions/shared/monsters/all';
+import { items } from '../versions/shared/items/all';
 import {
   NPC_MODEL_TABLE,
   npcModelFile,
@@ -29,6 +30,12 @@ for (const def of monsters.all()) {
 
 for (const entry of Object.values(NPC_MODEL_TABLE)) {
   const path = npcModelFile(entry[0]);
+  FROM_TABLES.set(path.toLowerCase(), path);
+}
+
+for (const item of items.all()) {
+  if (item.szModelFolder === 'Empty') continue;
+  const path = item.szModelFolder + item.szModelName;
   FROM_TABLES.set(path.toLowerCase(), path);
 }
 
