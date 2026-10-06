@@ -24,6 +24,10 @@ the loader that resolves which version this page runs. See [../../docs/versions.
 - `data.inventory` lists every file a period `Data/` tree ships. Base code asks for Season 6 files
   a period tree lacks; with the list, loaders draw nothing instead of logging misses. Season 6
   omits it.
+- `data.borrows` names another version's served tree (Season 6's) and the converted files this
+  version ships itself (`ownAssets`); every other converted file is read from the borrowed tree, so
+  a byte-identical source is never committed twice. `data.sounds` maps a sound key to the file the
+  version ships for it. Season 6 omits both.
 - `uiContract.ts` is types only, so `versions/registry.ts` can name it without importing app code.
   A version's `ui/` module may import app code because it is only loaded after boot.
 - A pre-game backdrop is either `world` (warp to login worlds, Season 6) or `scene` (a set piece

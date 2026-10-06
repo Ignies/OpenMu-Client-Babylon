@@ -74,6 +74,28 @@ export interface VersionData {
    * always done.
    */
   readonly inventory?: ReadonlySet<string>;
+  /**
+   * Another version's trees, served beside this one, that it reads instead of
+   * shipping a byte-identical copy. Omit it and every request stays on
+   * `assets`, which is what Season 6 does.
+   */
+  readonly borrows?: VersionBorrows;
+  /**
+   * Sound keys whose file this version ships itself, relative to `assets`
+   * (`'Sound/aTower': 'Sound/aTower.wav'`). Every other key plays the shared
+   * catalogue's file (`controllers/sound/recipes.json`).
+   */
+  readonly sounds?: Readonly<Record<string, string>>;
+}
+
+export interface VersionBorrows {
+  /** The other converted tree (`./game-assets/`). Trailing slash. */
+  readonly assets: string;
+  /**
+   * Every file this version's own `assets` holds, lower-cased and relative to
+   * it. A converted file not listed comes from `borrows.assets`.
+   */
+  readonly ownAssets: ReadonlySet<string>;
 }
 
 /**

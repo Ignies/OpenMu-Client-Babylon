@@ -19,7 +19,12 @@ MU 0.97d, the second version the client carries. OpenMU has no 0.97d data initia
   `...Extended` last.
 - `data/index.ts`: the period tree at `./Data-v097d/` (or `VITE_DATA_URL_V097D`), converted assets
   at `./game-assets-v097d/`, empty locale. `data/inventory.ts` lists every file in that tree so
-  `hasDataFile` answers "absent" instead of a load error.
+  `hasDataFile` answers "absent" instead of a load error. `data/assets.ts` lists what
+  `public/game-assets-v097d/` holds; any other converted file is Season 6's (`borrows`): only a
+  file whose 0.97d source differs from Season 6's is converted or copied.
+- `data/sounds.ts`: the 42 sounds and 1 track whose 0.97d file differs from Season 6's original
+  (hashed against the Season 6 `.wav` / `.mp3`), shipped as the period `.wav` / `.mp3`. The other
+  235 sounds and 6 tracks play Season 6's `.ogg`.
 - `ui/pregame/`: `shipScene.ts` (ship, sea, sky, wordmark and sun, ported from the login set
   piece), `loginPage.tsx` (the `0Account.OZT` plate) and `charactersPage.tsx` (the shared
   `character_list` drawn as rows on the `0New_Account01.OZT` plate).
@@ -32,8 +37,11 @@ MU 0.97d, the second version the client carries. OpenMU has no 0.97d data initia
 
 ## Change it
 - `Data-v097d/` changed: regenerate the list with the command in `data/inventory.ts`.
+- `public/game-assets-v097d/` changed: regenerate `data/assets.ts` with the command in it.
 - a window drawn the 0.97d way: export it in a `windows` list from `ui/index.tsx` with the shared id.
 
 ## Tests
 - `variantRank.test.ts`: the winning packet variant per family that shares a code.
 - `data/inventory.test.ts`: the inventory matches the files in `Data-v097d/`.
+- `data/assets.test.ts`: `assets.ts` matches the files in `public/game-assets-v097d/`.
+- `data/served.test.ts`: every sound key resolves to a file that exists, in its case.
