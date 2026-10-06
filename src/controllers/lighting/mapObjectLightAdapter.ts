@@ -1,5 +1,6 @@
 import { TILE_CM } from '../terrain/consts';
-import { Matrix, Vector3 } from '../render/babylon/exports';
+import { Quaternion, Vector3 } from '../render/babylon/exports';
+import { renderAnglesQuaternion } from '../render/renderAngles';
 import type { World } from '../../ecs/world';
 import type { ModelObject } from '../render/modelObject';
 import { createEffectLight, type EffectLight } from './effectLights';
@@ -29,7 +30,7 @@ const SELF_LIGHT = 1;
 
 const localOffset = Vector3.Zero();
 const rotatedOffset = Vector3.Zero();
-const rotation = Matrix.Identity();
+const rotation = Quaternion.Identity();
 
 export class MapObjectLights {
   #sprites: EffectLight[] = [];
@@ -184,14 +185,8 @@ function resolveEmitterPosition(
 
   localOffset.set(ox * k, oz * k, oy * k);
 
-  Matrix.RotationYawPitchRollToRef(
-    node.rotation.y,
-    node.rotation.x,
-    node.rotation.z,
-    rotation
-  );
-
-  Vector3.TransformCoordinatesToRef(localOffset, rotation, rotatedOffset);
+  // The node's turn as `AngleMatrix` builds it (ZzzMathLib.cpp:185-212), pitch before roll.
+  localOffset.rotateByQuaternionToRef(renderAnglesQuaternion(node.rotation, rotation), rotatedOffset);
 
   return {
     x: x + rotatedOffset.x,

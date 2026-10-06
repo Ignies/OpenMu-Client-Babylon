@@ -1,6 +1,7 @@
 import type { World } from '@/ecs/world';
 import { CrywolfBeaconObject } from './beaconObject';
 import { CrywolfDomeObject, CrywolfVentObject } from './eventObjects';
+import { bindAbsentModels } from '../shared/objectVariants';
 
 /**
  * Crywolf Fortress (`WD_34CRYWOLF_1ST`, `World35`/`Object35`).
@@ -33,4 +34,6 @@ export async function createCrywolf(world: World) {
   tiles[74] = CrywolfVentObject;
   tiles[81] = CrywolfDomeObject;
   tiles[84] = CrywolfVentObject;
+  // 79 and 80 (x1 each) have no Object80/81.bmd in `Object35` (LoadData.cpp:22-49).
+  bindAbsentModels(tiles, [79, 80]);
 }

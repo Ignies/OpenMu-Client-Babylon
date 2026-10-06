@@ -31,7 +31,7 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `MapRender`, `MeshAnimation`, `MeshAnimations` (`meshAnimation.ts`, types on `index.ts`): a map's own
   render row, `MapLayer.render`.
 - helpers: `boneLink.ts` (bone-link matrices), `meshAnimation.ts` (`meshAnimationFor`),
-  `renderAngles.ts` (`toRenderAngles`), `viewPlanes.ts`, `frameSnapshot.ts`, `textureScript.ts`,
+  `renderAngles.ts` (`toRenderAngles`, `angleMatrixQuaternion`, `renderAnglesQuaternion`), `viewPlanes.ts`, `frameSnapshot.ts`, `textureScript.ts`,
   `sceneCover.ts`, `blendMeshes.ts`, `effectOnlyObjects.ts`, `perfOverlay.ts` (Shift+Ctrl+Alt+P).
 - `configFingerprint.ts`: `configFingerprintLines()` and friends, every game option packed into a hex
   string for the perf overlay.
@@ -80,6 +80,8 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `pbrDerive.test.ts`: `flipRows`, flat normal and emissive mask of `derivePbrMaps`.
 - `propBatchLight.test.ts`: `ChunkLight` re-packs match a whole-chunk re-pack on every tier.
 - `propBatchRules.test.ts`: `batchExclusion`, `chunkOf`, placement and instance matrices.
+- `renderAngles.test.ts`: `angleMatrixQuaternion` against the original's `AngleMatrix`, and a
+  placed record with both pitch and roll drawn by it, by its node and by its batched placement.
 - `renderingStyle.test.ts`: style readers, tier gating, the material snapshot and toon binds.
 - `renderScale.test.ts`: slider steps, `clampRenderScale`, `applyRenderScale` on the device ratio.
 - `staticClips.test.ts`: still animation detection and `settleStillAnimations`.
@@ -108,7 +110,10 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `renderAngles.ts`: every model root is mirrored (`scaling (1,-1,1)` + `rotX(-90)`), so the
   original's `AngleMatrix` (Rz.Ry.Rx, Z-up) maps to `(-a0, -a2, -a1)`. The loader negates pitch and
   roll; yaw stays MU-positive in `transform.rot.y` and is flipped only here. Babylon applies Z, X, Y
-  while the original applies X, Z, Y: they differ only with both pitch and roll set.
+  while the original applies X, Z, Y: they differ only with both pitch and roll set (4795 placed
+  records over every world). Such a map object's node takes `renderAnglesQuaternion` (the original's
+  matrix) as its `rotationQuaternion` and keeps `rotation` for its readers (particle turns, flicker
+  phases); the batched placement and the light offsets always turn by it.
 - `renderDistance.ts`: `visible` is the inner ring (loads first; read by ceiling flood fill, picking,
   highlights); `nearby` also loads, and only `hidden` disposes. The top step covers the whole map.
 - `renderingStyle.ts`: 1 steps the sun's response; 2 adds ink lines, a stepped rim, flat textures and,

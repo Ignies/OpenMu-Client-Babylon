@@ -115,7 +115,8 @@ policy. It knows how to light something, never which skill or item asks for it.
   as wide, and grows and resizes both ways); an `unscaled` card keeps its size on a scaled object;
   an `abs` wave breathes on `|sin|`; a `grow` card grows and shrinks, a `spin` card turns, a
   `randomAngle` card takes a fresh whole degree every frame; a movable card resizes and turns.
-- `mapObjectLightAdapter.test.ts`: a `bone` offset grows with the object, a plain one does not.
+- `mapObjectLightAdapter.test.ts`: a `bone` offset grows with the object, a plain one does not, and a
+  record with both pitch and roll turns its offset by `AngleMatrix` (ZzzMathLib.cpp:185-212).
 - `mapObjectLights.test.ts`: a row's ground light breathes on its own pulse, else on its flare's, and a
   flicker wins over both.
 - `versions/shared/maps/mapRows.golden.test.ts`: every world's look, room looks, thunder and

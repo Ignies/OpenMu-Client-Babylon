@@ -1,6 +1,6 @@
 import { OperateBoxObject } from '@/controllers/actors/operateBoxObject';
 import type { World } from '@/ecs/world';
-import { PlaySpeedObject } from '../shared/objectVariants';
+import { PlaySpeedObject, bindAbsentModels } from '../shared/objectVariants';
 
 /**
  * Kanturu Relics (`WD_38KANTURU_2ND`, `World39`/`Object39`).
@@ -30,4 +30,6 @@ export async function createKanturu2(world: World) {
   // :219-231, :242-245.
   tiles[10] = PlaySpeedObject.at(0.04);
   tiles[44] = PlaySpeedObject.at(0.02);
+  // Placed with no model in `Object39` (LoadData.cpp:22-49): no body.
+  bindAbsentModels(tiles, [21, 22, 25, 28, 39, 40, 42, 43, 69, 84]);
 }

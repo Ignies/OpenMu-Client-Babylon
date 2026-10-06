@@ -105,7 +105,9 @@ function createObjects(world: World, objs: MapObjectRecord[]) {
     // mirror means every axis is negated on the way in. Pitch/roll are
     // negated here, yaw stays MU-positive and is flipped by toRenderAngles
     // (see controllers/render/renderAngles.ts). Previously only yaw was negated, which
-    // mirrored every tilted object (fences, signs, rocks, ramps).
+    // mirrored every tilted object (fences, signs, rocks, ramps). Babylon's Euler rolls
+    // before it pitches, so a record with both (4795 in all) turns by `AngleMatrix`
+    // itself: `ModelObject.updateLocation`, `placementMatrix`, the light offsets.
     const angles = new Vector3(
       -toRadians(data.rot.x),
       toRadians(data.rot.z),

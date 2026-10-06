@@ -1,6 +1,6 @@
 import { ENUM_WORLD } from '@/core/types';
 import type { World } from '@/ecs/world';
-import { PlaySpeedObject } from '../shared/objectVariants';
+import { PlaySpeedObject, bindAbsentModels } from '../shared/objectVariants';
 import { EmpireGuardian4WallTorchObject } from '../empireguardian4/wallTorchObject';
 
 /**
@@ -39,4 +39,6 @@ export async function createEmpireGuardian(world: World) {
   tiles[36] = PlaySpeedObject.at(0.02);
   tiles[64] = PlaySpeedObject.at(day3 ? 0.44 : 0.64);
   tiles[37] = EmpireGuardian4WallTorchObject;
+  // Day 1 places 95 (x3) and 126 (x1); no day ships Object96/127.bmd (LoadData.cpp:22-49).
+  bindAbsentModels(tiles, [95, 126]);
 }

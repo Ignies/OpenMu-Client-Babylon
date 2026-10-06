@@ -1,6 +1,6 @@
 import { LeanBoxObject } from '@/controllers/actors/operateBoxObject';
 import type { World } from '@/ecs/world';
-import { PlaySpeedObject } from '../shared/objectVariants';
+import { PlaySpeedObject, bindAbsentModels } from '../shared/objectVariants';
 
 /**
  * Loren Market (`WD_79UNITEDMARKETPLACE`, `World80`/`Object80`) - the
@@ -31,4 +31,6 @@ export async function createLorenMarket(world: World) {
   tiles[67] = LeanBoxObject;
   // :93-96.
   tiles[8] = PlaySpeedObject.at(0.2);
+  // 51 (x4) has no Object52.bmd in `Object80` (LoadData.cpp:22-49): no body.
+  bindAbsentModels(tiles, [51]);
 }

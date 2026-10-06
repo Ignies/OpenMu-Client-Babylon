@@ -139,21 +139,33 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   sheets' pixels in `Data/Effect`.
 - `empireguardian/spec.test.ts`: days 1-3 draw day 4's blue lamp (80) and bind its wall torch (37).
 - `balgasbarracks/spec.test.ts`: the lava vents (2) puff a `BITMAP_SMOKE` SubType 13 (`smoke13`) one
-  tick in three on both worlds; 5 makes `BITMAP_ADV_SMOKE + 1` with `ADV_SMOKE` SubType 0 and
-  `BITMAP_CLOUD` SubType 6 with `ADV_SMOKE` SubType 1, each pair one tick in eight, the rate of the
-  original's `o->Timer` walk; 58-60 make `BITMAP_WATERFALL_1` SubType 2, `_2` SubType 1 and `_3`
-  SubType 3 (`waterfall1_2`, `waterfall2_1`, `waterfall3_3`); the volcano's 85 smokes as 5 with its
-  own SubTypes (`fi02_1` one tick in sixteen, `fi01_2`, `cloud14`, `fi01_2` at twice the scale), 88
-  drifts a dark `cloud10` and 89 a faint red `cloud11`, one tick in four.
+  tick in three on both worlds; 5 makes `BITMAP_ADV_SMOKE + 1` with `ADV_SMOKE` SubType 0, then
+  `BITMAP_CLOUD` SubType 6 with `ADV_SMOKE` SubType 1; the volcano's 85 smokes as 5 with its own
+  SubTypes (`fi02_1` behind one more coin, `fi01_2`, then `cloud14`, `fi01_2` at twice the scale),
+  both drawn by `BalgasSmokeObject` on both worlds; 58-60 make `BITMAP_WATERFALL_1` SubType 2, `_2`
+  SubType 1 and `_3` SubType 3 (`waterfall1_2`, `waterfall2_1`, `waterfall3_3`); 88 drifts a dark
+  `cloud10` and 89 a faint red `cloud11`, one tick in four.
+- `balgasbarracks/smokeObject.test.ts`: 5 and 85 walk the original's `o->Timer`
+  (GM3rdChangeUp.cpp:133-153, :187-210): over 200 000 ticks each pair comes one tick in eight, never
+  on the other's tick, and either may follow either; 85's `fi02_1` one tick in sixteen; nothing out
+  of view.
 - `balgasbarracks/firePillarObject.test.ts`: the Refuge's 92 makes two `BITMAP_FIRE_RED` effects a
   tick on the crest of its `sinf(WorldTime * 0.0005f)` wave, each making a `fireRed` a tick for 40
   ticks at the effect's own 0.9, only in view, the made ones running out after the crest.
 - `doppelganger4/spec.test.ts`: 59 puffs a `BITMAP_SMOKE` SubType 13 (`smoke13`) one tick in three where
   Kanturu's puffs SubType 21, and 82 / 83 make `BITMAP_WATERFALL_3` SubType 3 / `_2` SubType 1 where
   Kanturu makes SubType 4 / 2; every other Kanturu row stays; its light box 48 makes a `BITMAP_LIGHT`
-  SubType 15 (`light15`) one tick in three. `doppelganger4/create.test.ts`: the folder types
-  EncTerrain69.obj places that `Data/Object69` has no model for (34) are bound absent, so none asks
-  for a GLB and logs a failed load.
+  SubType 15 (`light15`) one tick in three.
+- `placedModels.test.ts`: every type each world's `EncTerrain<n>.obj` places (effect-only ones
+  aside) asks for a model `Data` has, at a folder slot under `MAX_WORLD_OBJECTS`, or asks for none
+  (bound absent with `bindAbsentModels`, or a class that draws without one: the lean boxes, the
+  Icarus and Chaos Castle clouds). The original draws no body for a type whose file is missing
+  (LoadData.cpp:22-49, ZzzBMD.cpp:3098-3116); unbound, ours fetched a GLB and logged "Could not load
+  model". Bound absent: Lost Tower 40, Tarkan 0, 3, 4, 35, 38, Valley of Loren 35, Crywolf 79, 80,
+  Kanturu 2 21, 22, 25, 28, 39, 40, 42, 43, 69, 84, the GM area 15, 33, 74, Santa Town 37, 40, 51,
+  Doppelganger 4 34 and 175 (`MODEL_BIRD01`, Lorencia's only), the Fortress 95, 126, Loren Market 51,
+  besides the earlier Swamp, Vulcanus, Duel Arena, Doppelganger 1, Raklion, Cursed Temple, Empire
+  Guardian 4 and login scene rows.
 - `doppelgangerLights.test.ts`: the four arenas' sky-blue light boxes (Doppelganger 1's 101, the
   others' 48) make a `BITMAP_LIGHT` SubType 15 (`light15`) one tick in three.
 - `kanturu1/spec.test.ts`, `aida/spec.test.ts`: the falls (Kanturu and the GM area 81-83, Aida 56-58) make

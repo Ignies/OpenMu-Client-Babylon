@@ -10,7 +10,7 @@ import {
  * half - Kanturu Ruins' art and a line-for-line copy of its `MoveObject`
  * (GMDoppelGanger4.cpp:61-133) with 47/48 added to the hidden list.
  * EncTerrain69.obj: 433 objects, 38 types; Object69 ships 61 models and the
- * two type-34 records have none.
+ * two type-34 records and the one 175 have none.
  */
 
 export const DOPPELGANGER4_BLEND_MESHES: Readonly<Record<number, number>> = {};
@@ -20,12 +20,13 @@ export const DOPPELGANGER4_EFFECT_ONLY_TYPES: readonly number[] = [
 ];
 
 /**
- * Folder types EncTerrain69.obj places with no model in `Data/Object69`: 34 (×2 at 98/53-54, no
- * Object35.bmd). `AccessModel` fails and `Open2` leaves the slot empty (LoadData.cpp:22-49,
- * ZzzBMD.cpp:3098-3116), so the original draws nothing there; unbound, each asked for a GLB the data
- * never had and logged "Could not load model for id 34".
+ * Types EncTerrain69.obj places with no model: 34 (×2 at 98/53-54, no Object35.bmd in `Data/Object69`)
+ * and 175 (×1 at 37/101), past `MAX_WORLD_OBJECTS`, so no folder slot: `MODEL_BIRD01`, which only
+ * Lorencia loads (MapManager.cpp:46). `AccessModel` fails and `Open2` leaves the slot empty
+ * (LoadData.cpp:22-49, ZzzBMD.cpp:3098-3116), so the original draws nothing there; unbound, each asked
+ * for a GLB the data never had and logged "Could not load model".
  */
-export const DOPPELGANGER4_ABSENT_MODELS: readonly number[] = [34];
+export const DOPPELGANGER4_ABSENT_MODELS: readonly number[] = [34, 175];
 
 /**
  * Kanturu's rows but 59, which `RenderObjectVisual` makes a `BITMAP_SMOKE` SubType 13 one tick in
