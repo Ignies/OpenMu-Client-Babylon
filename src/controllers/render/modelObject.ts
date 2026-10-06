@@ -18,6 +18,7 @@ import {
   setMeshFadeBlend,
 } from '../assets/modelLoader';
 import { NO_BLEND_MESH } from './blendMeshes';
+import { renderAnglesQuaternion } from './renderAngles';
 import { meshAnimationFor, type MeshAnimation } from './meshAnimation';
 import { BlendState } from '@versions/shared/objects/enum';
 import { Ecs } from '../../ecs/current';
@@ -1872,6 +1873,13 @@ export class ModelObject {
       rotation.y !== angles.y ||
       rotation.z !== angles.z
     ) {
+      // Babylon's Euler rolls before it pitches, `AngleMatrix` pitches first: a record with both
+      // turns by the original's matrix (ZzzMathLib.cpp:185-212). `rotation` stays for its readers.
+      if (this.IsMapObject && angles.x !== 0 && angles.z !== 0) {
+        node.rotationQuaternion = renderAnglesQuaternion(angles, node.rotationQuaternion ?? new Quaternion());
+      } else if (node.rotationQuaternion) {
+        node.rotationQuaternion = null;
+      }
       rotation.set(angles.x, angles.y, angles.z);
     }
 

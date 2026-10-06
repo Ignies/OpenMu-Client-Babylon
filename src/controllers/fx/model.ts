@@ -27,6 +27,7 @@ import {
   type Scene,
   type Texture,
 } from '../render/babylon/exports';
+import { angleMatrixQuaternion } from '../render/renderAngles';
 import { clampAlpha } from './clampAlpha';
 import { chromeMaterial, disposeChromeMaterials } from './chrome';
 import { getMaterial, loadGLTF } from '../assets/modelLoader';
@@ -273,32 +274,10 @@ const copyRel = new Matrix();
 const copyRot = new Quaternion();
 const UPRIGHT = Quaternion.FromEulerAngles(-Math.PI / 2, 0, 0);
 const FLAT = Quaternion.FromEulerAngles(0, 0, 0);
-const angleMatrix = new Matrix();
-
-/**
- * `AngleMatrix(angle)` (Z·Y·X, degrees) as the node's rotation. The default
- * conversion puts BMD (x, y, z) on (x, z, y), so the rotation is P·R·P⁻¹ with
- * P swapping y and z, written transposed for Babylon's row vectors.
- */
+/** `AngleMatrix(angle)` (Z·Y·X, degrees) as the node's rotation (`render/renderAngles.ts`). */
 export function muAngle(angle: readonly [number, number, number], out: Quaternion): Quaternion {
   const d = Math.PI / 180;
-  const sr = Math.sin(angle[0] * d);
-  const cr = Math.cos(angle[0] * d);
-  const sp = Math.sin(angle[1] * d);
-  const cp = Math.cos(angle[1] * d);
-  const sy = Math.sin(angle[2] * d);
-  const cy = Math.cos(angle[2] * d);
-  const m00 = cp * cy;
-  const m10 = cp * sy;
-  const m20 = -sp;
-  const m01 = sr * sp * cy - cr * sy;
-  const m11 = sr * sp * sy + cr * cy;
-  const m21 = sr * cp;
-  const m02 = cr * sp * cy + sr * sy;
-  const m12 = cr * sp * sy - sr * cy;
-  const m22 = cr * cp;
-  Matrix.FromValuesToRef(m00, m20, m10, 0, m02, m22, m12, 0, m01, m21, m11, 0, 0, 0, 0, 1, angleMatrix);
-  return Quaternion.FromRotationMatrixToRef(angleMatrix, out);
+  return angleMatrixQuaternion(angle[0] * d, angle[1] * d, angle[2] * d, out);
 }
 
 /**

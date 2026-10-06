@@ -6,7 +6,7 @@ import {
 } from './babylon/exports';
 import type { ModelObject } from './modelObject';
 import { TERRAIN_SIZE } from '../terrain/consts';
-import { toRenderAngles } from './renderAngles';
+import { renderAnglesQuaternion, toRenderAngles } from './renderAngles';
 
 /**
  * The pure half of the prop batches (`propBatches.ts`): which types may be
@@ -64,16 +64,15 @@ const translation = Vector3.Zero();
  * The world matrix `RenderSystem` + `ModelObject.updateLocation` give a
  * placement's node: `toRenderAngles` on the record's rotation, uniform scale,
  * the record's position lifted by `yOffset` (the snow sink, negative).
- * Babylon composes a node's Euler `rotation` as yaw-pitch-roll, which is what
- * `FromEulerAngles` builds.
+ * The rotation is the original's `AngleMatrix`, which a node's Euler equals
+ * unless both pitch and roll are set; then the node takes it too.
  */
 export function placementMatrix(
   p: PropPlacement,
   out: Matrix,
   yOffset = 0
 ): Matrix {
-  toRenderAngles(p.rot, angles);
-  Quaternion.FromEulerAnglesToRef(angles.x, angles.y, angles.z, rotation);
+  renderAnglesQuaternion(toRenderAngles(p.rot, angles), rotation);
   scaling.setAll(p.scale);
   translation.set(p.pos.x, p.pos.y + yOffset, p.pos.z);
 
