@@ -236,10 +236,11 @@ single-player offline demo.
                    features split, _template folder ready.
      [ Shipped ]: season6 and 0.97d, selected at runtime: versions/registry.ts picks the
                   version per server-list entry (or ?version=), one build carries both.
-                  0.97d brings its own encryption, packet-variant ranking, feature flags
-                  and asset tree (Data-v097d + converted Lorencia).
+                  0.97d brings its own encryption, packet-variant ranking, feature flags,
+                  modulesOff, gate table and asset tree (Data-v097d + only the worlds,
+                  models and sounds whose source differs; the rest is Season 6's).
      [ Gap ]: Outbound packets are still the Season 6 layouts, the window chrome is
-              still Season 6 art, and 11 of the 12 0.97d worlds are unconverted.
+              still Season 6 art, and 0.97d's World6 (Exile) has no map entry.
 ```
 
 

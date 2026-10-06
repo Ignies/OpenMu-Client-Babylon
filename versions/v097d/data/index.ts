@@ -2,7 +2,7 @@
  * Where the 0.97d assets live.
  *
  * `folder` is the period `Data/` tree the client fetches directly (interface
- * sprites, the logo, `Local/*.bmd`, gate.bmd, minimap tiles). It sits beside
+ * sprites, the logo, `Local/*.bmd`, gate.bmd, the weather leaves). It sits beside
  * the Season 6 `Data/` at the repo root as `Data-v097d/`, served by `vite
  * dev` the same way, and copied into `dist/Data-v097d` by the build
  * (`tools/copyData.ts --src Data-v097d`).

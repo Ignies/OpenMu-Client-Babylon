@@ -30,6 +30,8 @@ versions/<id>/
 
 1. Copy `versions/_template/` to `versions/<id>/` and fill `index.ts`.
 2. Add it to `VERSION_REGISTRY` in `versions/registry.ts`.
-3. Point its data paths at its own `Data-<id>/` and `public/game-assets-<id>/`.
+3. Point its data paths at its own `Data-<id>/` and `public/game-assets-<id>/`. Commit only the
+   files whose source differs from Season 6's and borrow the rest (`data.borrows`, as
+   [versions/v097d/readme.md](../versions/v097d/readme.md) does).
 4. Override only what differs; everything else comes from `versions/shared/`.
 5. `bun run test` runs `versions/registry.test.ts`, which checks every entry loads.
