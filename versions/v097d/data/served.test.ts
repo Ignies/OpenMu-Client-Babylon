@@ -156,6 +156,16 @@ describe('0.97d Data tree', () => {
     }
   });
 
+  it('draws a minimap picture only where its terrain is Season 6 terrain', () => {
+    // World1, 2, 4 and 5 share Season 6's EncTerrain map; Devias, Atlans, Tarkan and Icarus do not.
+    for (const n of [1, 2, 4, 5]) {
+      expect(served(dataUrl(v097dData, `World${n}/mini_map.OZT`), REPO), `World${n}`).toBe(true);
+    }
+    for (const n of [3, 8, 9, 11]) {
+      expect(hasData(v097dData, `World${n}/mini_map.OZT`), `World${n}`).toBe(false);
+    }
+  });
+
   it('reads the sign plates of its maps, Season 6 copies of the same bytes', () => {
     for (const plate of ['Object1/notice.OZJ', 'Object3/snotice.OZJ', 'Object3/snotice02.OZJ', 'Object7/notice.OZJ']) {
       expect(hasData(v097dData, plate), plate).toBe(true);

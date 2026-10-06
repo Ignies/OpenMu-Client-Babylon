@@ -36,8 +36,21 @@ export const v097dData: VersionData = {
     // Lorencia's only grass card is TileGrass01.OZT; Season 6 added these two.
     lacks: new Set(['world1/tilegrass02.ozt', 'world1/tilegrass03.ozt']),
     folder: season6Data.folder,
-    // The sign plates of 0.97d's maps: its own copies are Season 6's bytes.
-    folderPaths: ['object1/notice.ozj', 'object3/snotice.ozj', 'object3/snotice02.ozj', 'object7/notice.ozj'],
+    folderPaths: [
+      // The in-game HUD and windows are still Season 6's, so is their art
+      // wherever the period Interface/ has no sheet of that name (readme.md).
+      'interface/',
+      // The minimap pictures of the worlds whose terrain is Season 6's.
+      'world1/mini_map.ozt',
+      'world2/mini_map.ozt',
+      'world4/mini_map.ozt',
+      'world5/mini_map.ozt',
+      // The sign plates of 0.97d's maps: its own copies are Season 6's bytes.
+      'object1/notice.ozj',
+      'object3/snotice.ozj',
+      'object3/snotice02.ozj',
+      'object7/notice.ozj',
+    ],
   },
   sounds: V097D_SOUNDS,
   // Its gate.bmd: 100 records of nine BYTEs (Flag, Map, x1, y1, x2, y2, Target,

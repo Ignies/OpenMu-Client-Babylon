@@ -7,6 +7,7 @@ import {
 } from './minimapData';
 import { i18n, onLanguageChanged } from '../../i18n';
 import {
+  hasDataFile,
   resolveDataUrl,
   clearSpriteCache,
   loadMuSprite,
@@ -87,7 +88,7 @@ export function loadWorldMinimap(map: ENUM_WORLD): Promise<WorldMinimap | null> 
 
 /** Warm the HTTP cache for the picture; the TGA decode waits for the first TAB. */
 export function prefetchWorldMinimap(map: ENUM_WORLD): void {
-  if (cache.has(map)) return;
+  if (cache.has(map) || !hasDataFile(minimapImagePath(map))) return;
   void prefetchAsset(resolveDataUrl(minimapImagePath(map)));
 }
 
@@ -103,6 +104,8 @@ export function evictWorldMinimaps(keep: ENUM_WORLD): void {
 
 /** The localised marker tables: absent for most worlds, so a miss is normal. */
 async function fetchDataBytes(path: string): Promise<Uint8Array | null> {
+  if (!hasDataFile(path)) return null;
+
   try {
     return await fetchAssetBytes(resolveDataUrl(path));
   } catch {
@@ -112,6 +115,8 @@ async function fetchDataBytes(path: string): Promise<Uint8Array | null> {
 
 async function readWorldMinimap(map: ENUM_WORLD): Promise<WorldMinimap | null> {
   const worldNum = assetWorldNum(map);
+  // A tree without the picture has no minimap: the sprite loader would hand back an empty pixel.
+  if (!hasDataFile(minimapImagePath(map))) return null;
 
   let image: MuSprite;
   try {

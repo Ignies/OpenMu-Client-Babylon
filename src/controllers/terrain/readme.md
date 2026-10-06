@@ -31,7 +31,8 @@ water, ground picks, minimap data and the base class for map objects. There is n
   `snowCoverFor`, `needsTerrainMask`. `terrainGrass.ts`: `grassFieldForFrame`, `GrassActor`.
 - `artMatch.ts`: `SNOW_ART`, `ArtMatch`, `artMatch`: how much a map's own tile art already is
   the substance an overlay draws (a leaf, so its test needs no scene).
-- Smaller readers: `loadWorldMinimap`, `parseMinimapData`, `findRestObject` /
+- Smaller readers: `loadWorldMinimap` (null, without a request, when the version's tree has no
+  `mini_map.ozt` for the world: `hasDataFile`), `parseMinimapData`, `findRestObject` /
   `leanCursorObjects`, `mapObjectFixupsFor`,
   `grassAllowed`, `parseTerrainObjects`, `decryptMapFile` / `convertBux`, `getTilesList`,
   `getTerrainHeightMap`, `waterSurfaceHeight`, `loadCameraWalkScript`, `liveTileArrays`.
@@ -94,6 +95,7 @@ water, ground picks, minimap data and the base class for map objects. There is n
 - `mapTerrain.test.ts`: only Icarus hides its ground; rest objects and lean boxes and the
   nearest-object height fix from a registered entry.
 - `terrainGrassCards.test.ts`: a card the version lacks is never fetched.
+- `minimap.test.ts`: no picture in the version's tree is no minimap, and nothing is fetched for it.
 - `tools/grassCards.test.ts`: every grass card `Data/` ships for a converted world is in
   `public/game-assets` (a missing card silently grows no grass; 58 were missing until 2026-10-05).
 - `groundArrays.test.ts`: `refreshGroundTile` raises and drops a tile and leaves its neighbours;

@@ -40,7 +40,31 @@ MU 0.97d, the second version the client carries. OpenMU has no 0.97d data initia
 - `ui/pregame/`: `shipScene.ts` (ship, sea, sky, wordmark and sun, ported from the login set
   piece), `loginPage.tsx` (the `0Account.OZT` plate) and `charactersPage.tsx` (the shared
   `character_list` drawn as rows on the `0New_Account01.OZT` plate).
-- `ui/preload.ts`: cursor sprites and progress bars only; `worldSprites` is empty.
+- `ui/preload.ts`: cursor sprites and progress bars before the world; `worldSprites` is Season 6's
+  list, because the in-game HUD and windows are still Season 6's.
+- The in-game HUD reads Season 6's interface sheets from `Data/` wherever the period
+  `Interface/` has none of that name (`borrows.folderPaths: 'interface/'`); the only shared names
+  are the cursors, `FontTest.OZT` and the progress bars, which stay 0.97d's. The corner minimap
+  shows Season 6's picture for World1, 2, 4 and 5, whose terrain is Season 6's; Devias, Atlans,
+  Tarkan and Icarus have none (0.97d itself had no minimap), so there the corner and TAB show
+  nothing.
+
+## A 0.97d HUD (later wave)
+What drawing the in-game interface the 0.97d way needs, none of it built yet:
+- Art: its own 97-file `Interface/`. The bottom bar is `Menu01.OZJ`, `Menu02.OZJ`, `Menu03.OZJ`,
+  `Menu04.OZT` (and the `Menu01_new` / `Menu03_new` / `Menu03_new_AG` variants), the gauges
+  `Menu_Red` / `Menu_Blue` / `Menu_Green`, the buttons `Menu_Character`, `Menu_Inventory`,
+  `Menu_Party`, the skill icons `Skill.OZJ`. Windows: the inventory slots `Item_*.OZJ`,
+  `InventoryBox2`, `Money_01/02`; dialogs `Message_box*`, `dialogue1/2`, `ok` / `cancel` /
+  `exit` / `buy` / `sell` / `repair` / `lock_01..04`; trade (`Trading_line`, `accept_box01/02`),
+  the chaos machine (`mix_button1/2`), guild (`Guild.OZJ`, `guild.OZT`), stat points
+  (`Level_box`, `level01`, `level_01/02`); the chat window `nis_*` (frames, buttons, bar).
+- Layout: the pre-`NewUI` interface the 0.97d binary draws (640x480, the bar across the
+  bottom); the reference source here is Season 6's, so positions are measured off the art.
+- Missing outright: no minimap, no skill tree, no quest log windows (0.97d has the legacy
+  chain), no item hot-key belt, no MU Helper.
+- Each window becomes a `windows` override in `ui/index.tsx` with the shared id; `worldSprites`
+  then lists its sheets instead of Season 6's.
 
 ## Depends on / used by
 - uses: `versions/shared/packets`, `versions/season6/packets`, `versions/shared/{items,skills,monsters}`,
@@ -59,4 +83,5 @@ MU 0.97d, the second version the client carries. OpenMU has no 0.97d data initia
 - `data/assets.test.ts`: `assets.ts` matches the files in `public/game-assets-v097d/`.
 - `data/served.test.ts`: every terrain file, tile and placed object model of each world, and
   every sound key, resolves to a file that exists, in its case; Lorencia grows grass from its one
-  card only; the gate table decodes; the sign plates resolve.
+  card only; the gate table decodes; the sign plates and the borrowed minimap pictures resolve.
+- `ui/preload.test.ts`: every world sheet it preloads is read from a tree that has it.
