@@ -30,5 +30,5 @@ export default defineItem({
   SUM: 2,
   RF: 0,
   szModelFolder: 'Player/',
-  szModelName: 'ArmorMail_succubus.glb',
+  szModelName: 'ArmorMale54.glb',
 });

@@ -31,8 +31,9 @@ petItems.ts           pet and mount item numbers in group 13 (PET_GROUP, DARK_HO
   when two items of a group share a name.
 - `szModelFolder` + `szModelName` is the model the original loads for the item (`ZzzOpenData.cpp`
   `AccessModel`), where `Item.txt` names a later season's file: Merlin Staff is `Item/Staff_33`
-  (`:1116`), not `summonsprit`. The converter keeps these names on a rerun. Every one must be
-  converted (`tools/assetCase.test.ts`).
+  (`:1116`), not `summonsprit`; the Queen set (index 53) is `Player/<Part>Male54` (`:268-280`), not
+  `<Part>Mail_succubus`. The converter keeps these names on a rerun. Every one must be converted
+  (`tools/assetCase.test.ts`).
 - `launcher_arrows.ts` is handed to the skills controller by `versions/shared/skills/index.ts`
   (`registerLauncherArrows`). A launcher with no row shoots the plain steel arrow.
 

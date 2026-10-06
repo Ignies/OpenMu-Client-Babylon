@@ -30,5 +30,5 @@ export default defineItem({
   SUM: 2,
   RF: 0,
   szModelFolder: 'Player/',
-  szModelName: 'PantMail_succubus.glb',
+  szModelName: 'PantMale54.glb',
 });
