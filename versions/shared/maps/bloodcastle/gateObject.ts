@@ -80,7 +80,7 @@ export class BloodCastleGateObject extends MapTileObject {
         world.scene,
         [{ kinds: ['smoke2'], every: 1, count: SMOKE_BURST_COUNT, jitter: SMOKE_SPREAD }],
         { x: p.x, y: p.y, z: p.z - SMOKE_SOUTH_TILES },
-        this.node.rotation.y,
+        this.node.rotation,
         this.node.scaling.x
       );
       this.#smokeTicks = 2;

@@ -107,13 +107,16 @@ vi.mock('../assets', async () => ({ reportLoadFailure: (await import('../assets/
 import {
   BonedParticleEmitter,
   KIND_REACH,
+  NO_TURN,
   ParticleEmitter,
   disposeEffectParticles,
   spawnParticle,
   type KindName,
+  type NodeTurn,
 } from './effectParticles';
 import { publishViewPlanes, type ViewPlane } from '../render/viewPlanes';
-import type { Scene } from '../render/babylon/exports';
+import { toRenderAngles } from '../render/renderAngles';
+import type { Scene, Vector3 } from '../render/babylon/exports';
 
 let deltaMs = 40;
 let tick: (() => void) | null = null;
@@ -160,6 +163,12 @@ function seeded(seed: number): () => number {
   };
 }
 
+/** The turn a placed object's node carries for MU `Angle` in degrees: loadMapIntoScene.ts:109-113, then renderAngles.ts. */
+const nodeTurn = (a0: number, a1: number, a2: number) => {
+  const rad = Math.PI / 180;
+  return toRenderAngles({ x: -a0 * rad, y: a2 * rad, z: -a1 * rad }, { x: 0, y: 0, z: 0 } as Vector3);
+};
+
 afterEach(() => {
   publishViewPlanes(scene, null);
   disposeEffectParticles();
@@ -171,13 +180,13 @@ afterEach(() => {
 
 describe('KIND_REACH', () => {
   /** Farthest the particle's sprite gets from its spawn point over its life. */
-  async function farthest(kind: KindName, scale: number, random: () => number) {
+  async function farthest(kind: KindName, scale: number, random: () => number, turn: NodeTurn) {
     // Swapped by hand: a spy records every call, which is most of the run.
     const original = Math.random;
     Math.random = random;
 
     try {
-      await spawnParticle(scene, kind, { x: 0, y: 0, z: 0 }, 1.3, scale, [1, 1, 1]);
+      await spawnParticle(scene, kind, { x: 0, y: 0, z: 0 }, turn, scale, [1, 1, 1]);
 
       const sprite = fakes.sprites.find(s => s.isVisible)!;
       let far = 0;
@@ -199,12 +208,13 @@ describe('KIND_REACH', () => {
     }
   }
 
-  it('covers every kind at any frame rate, scale and roll', async () => {
+  it('covers every kind at any frame rate, scale, roll and turn of its object', async () => {
     const randoms: (() => () => number)[] = [
       () => () => 0,
       () => () => 0.999999,
       ...Array.from({ length: 16 }, (_, seed) => () => seeded(seed + 1)),
     ];
+    const turns = [nodeTurn(0, 0, 0), nodeTurn(0, 0, 74), nodeTurn(-30, 0, 29), nodeTurn(40, -60, 200)];
 
     for (const kind of Object.keys(KIND_REACH) as KindName[]) {
       for (const frameMs of [40, 16.7, 6.9]) {
@@ -212,11 +222,13 @@ describe('KIND_REACH', () => {
 
         for (const scale of [0.1, 1, 2.5]) {
           for (const random of randoms) {
-            const far = await farthest(kind, scale, random());
+            for (const turn of turns) {
+              const far = await farthest(kind, scale, random(), turn);
 
-            expect(far, `${kind} @${frameMs}ms x${scale}`).toBeLessThanOrEqual(
-              reach(kind, scale)
-            );
+              expect(far, `${kind} @${frameMs}ms x${scale}`).toBeLessThanOrEqual(
+                reach(kind, scale)
+              );
+            }
           }
         }
       }
@@ -224,13 +236,13 @@ describe('KIND_REACH', () => {
   });
 });
 
-/** Spawns one `kind` at the origin with every roll at `roll`, then plays `ticks` 25 Hz ticks. */
-async function play(kind: KindName, scale: number, roll: number, ticks: number, angleZ = 0): Promise<FakeSprite> {
+/** Spawns one `kind` at the origin with every roll at `roll` on a node turned `turn`, then plays `ticks` 25 Hz ticks. */
+async function play(kind: KindName, scale: number, roll: number, ticks: number, turn: NodeTurn = NO_TURN): Promise<FakeSprite> {
   const original = Math.random;
   Math.random = () => roll;
 
   try {
-    await spawnParticle(scene, kind, { x: 0, y: 0, z: 0 }, angleZ, scale, [0.2, 0.4, 0.6]);
+    await spawnParticle(scene, kind, { x: 0, y: 0, z: 0 }, turn, scale, [0.2, 0.4, 0.6]);
     const sprite = fakes.sprites[fakes.sprites.length - 1];
     for (let n = 0; n < ticks; n++) tick?.();
     return sprite;
@@ -241,15 +253,18 @@ async function play(kind: KindName, scale: number, roll: number, ticks: number, 
 
 describe('light0, BITMAP_LIGHT SubType 0 (ZzzEffectParticle.cpp:3161-3164, :7943-8010)', () => {
   // `rand() % 10 + 10` ticks, `(rand() % 50 + 50) / 100 * Scale`; a tick it rises `5 * 0.5`, loses 0.05 and is
-  // `Light = Scale`, whatever light it was made with.
-  it('rises 2.5 a tick, loses 0.05 of its scale a tick and is as bright as its scale', async () => {
+  // `Light = Scale`, whatever light it was made with, held at 1 as RenderSprite packs it (RenderUtils.h:8-18).
+  it('rises 2.5 a tick, loses 0.05 of its scale a tick and is as bright as its scale, up to 1', async () => {
     const sprite = await play('light0', 2, 0.5, 4);
     expect(sprite.position.x).toBeCloseTo(0);
     expect(sprite.position.y).toBeCloseTo(0.1);
     expect(sprite.position.z).toBeCloseTo(0);
     expect(sprite.width).toBeCloseTo((64 * (0.75 * 2 - 0.2)) / 100);
-    expect([sprite.color.r, sprite.color.g, sprite.color.b].map(c => c.toFixed(3))).toEqual(['1.300', '1.300', '1.300']);
+    expect([sprite.color.r, sprite.color.g, sprite.color.b].map(c => c.toFixed(3))).toEqual(['1.000', '1.000', '1.000']);
     expect(sprite.angle).toBe(0);
+    disposeEffectParticles();
+    const small = await play('light0', 1, 0.5, 4);
+    expect([small.color.r, small.color.g, small.color.b].map(c => c.toFixed(3))).toEqual(['0.550', '0.550', '0.550']);
   });
 
   it('lives rand() % 10 + 10 ticks, and goes once its scale is down to 0.1', async () => {
@@ -270,6 +285,43 @@ describe('light0, BITMAP_LIGHT SubType 0 (ZzzEffectParticle.cpp:3161-3164, :7943
     expect(sprite.position.x).toBeCloseTo(drift / 100);
     expect(sprite.position.z).toBeCloseTo(drift / 100);
     expect(sprite.position.y).toBeCloseTo(0.075);
+  });
+});
+
+describe('light15, BITMAP_LIGHT SubType 15 (ZzzEffectParticle.cpp:3241-3250, :8139-8160)', () => {
+  // `rand() % 10 + 100` ticks, `Gravity = rand() % 3 + 2`, `(rand() % 20 + 20) / 100 * Scale`, `Alpha = 0`; a tick its
+  // phase gains `(rand() % 10 + 5) * 0.01`, it stands `Gravity * 2` off where it was made at that phase and rises
+  // `Gravity`, loses 0.001 of its scale and gains 0.1 of alpha; its light is the one it was made with times alpha.
+  it('climbs a spiral, shrinks 0.001 a tick and fades in 0.1 a tick', async () => {
+    const sprite = await play('light15', 1.52, 0.5, 2);
+    expect(sprite.position.x).toBeCloseTo((Math.sin(0.2) * 6) / 100);
+    expect(sprite.position.z).toBeCloseTo((Math.cos(0.2) * 6) / 100);
+    expect(sprite.position.y).toBeCloseTo(0.06);
+    expect(sprite.width).toBeCloseTo((64 * 0.454) / 100);
+    expect(sprite.angle).toBe(0);
+    expect(rgba(sprite)).toEqual(['0.040', '0.080', '0.120', '1.000']);
+    expect(fakes.files).toEqual(['Effect/flare01.OZJ']);
+    disposeEffectParticles();
+    expect(rgba(await play('light15', 1.52, 0.5, 20))).toEqual(['0.200', '0.400', '0.600', '1.000']);
+  });
+
+  // In its last 20 ticks it loses 0.01 more of its scale and 0.1 of alpha a tick.
+  it('fades out over its last 20 ticks and lives rand() % 10 + 100', async () => {
+    expect(rgba(await play('light15', 1.52, 0.5, 84))[0]).toBe('0.200');
+    disposeEffectParticles();
+    expect(rgba(await play('light15', 1.52, 0.5, 85))[0]).toBe('0.180');
+    disposeEffectParticles();
+    expect((await play('light15', 1.52, 0.5, 104)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('light15', 1.52, 0.5, 105)).isVisible).toBe(false);
+  });
+
+  // Each of its makers, the Doppelganger light boxes, makes it `rand() % (int)(Scale * 60) - that / 2` off in x and y
+  // (GMDoppelGanger4.cpp:387-398).
+  it('is made up to 30 times its scale off in x and y', async () => {
+    const sprite = await play('light15', 1.52, 0, 1);
+    expect(sprite.position.x).toBeCloseTo((-45 + Math.sin(0.05) * 4) / 100);
+    expect(sprite.position.z).toBeCloseTo((-45 + Math.cos(0.05) * 4) / 100);
   });
 });
 
@@ -333,11 +385,53 @@ describe('smoke13, BITMAP_SMOKE SubType 13 (ZzzEffectParticle.cpp:1238-1243, :53
 
 const rgba = (s: FakeSprite) => [s.color.r, s.color.g, s.color.b, s.color.a].map(c => c.toFixed(3));
 
+describe('the push, turned with the object (MovePosition, ZzzAI.cpp:148-156, ZzzEffectParticle.cpp:3885)', () => {
+  // `VectorRotate(Speed, AngleMatrix(Angle))` (ZzzMathLib.cpp:185-212, :261-267).
+  const movePosition = ([a0, a1, a2]: readonly number[], [x, y, z]: readonly number[]) => {
+    const rad = Math.PI / 180;
+    const [sr, cr, sp, cp] = [Math.sin(a0 * rad), Math.cos(a0 * rad), Math.sin(a1 * rad), Math.cos(a1 * rad)];
+    const [sy, cy] = [Math.sin(a2 * rad), Math.cos(a2 * rad)];
+    const matrix = [
+      [cp * cy, sr * sp * cy + cr * -sy, cr * sp * cy + -sr * -sy],
+      [cp * sy, sr * sp * sy + cr * cy, cr * sp * sy + -sr * cy],
+      [-sp, sr * cp, cr * cp],
+    ];
+    return matrix.map(row => row[0] * x + row[1] * y + row[2] * z);
+  };
+
+  // trueFire at roll 0 is pushed `(-2, 0, 1)` along the object; a tick moves it once by that, turned, and it rises 1.
+  it("goes where MovePosition turns its velocity, by the object's yaw, pitch and roll", async () => {
+    const angles = [[0, 0, 0], [0, 0, 90], [0, 0, 30], [0, 0, 200], [0, 60, 0], [-30, 0, 29], [20, -35, 110]];
+    for (const angle of angles) {
+      const sprite = await play('trueFire', 1, 0, 1, nodeTurn(angle[0], angle[1], angle[2]));
+      const [x, y, z] = movePosition(angle, [-2, 0, 1]);
+      const at = [sprite.position.x, sprite.position.z, sprite.position.y];
+      expect(at, `Angle ${angle}`).toEqual([x / 100, y / 100, (z + 1) / 100].map(v => expect.closeTo(v, 5)));
+      disposeEffectParticles();
+    }
+  });
+
+  it('is turned the same way by an emitter handed the node turn', async () => {
+    const emitter = new ParticleEmitter(scene, [{ kinds: ['trueFire'], every: 1 }], { x: 0, y: 0, z: 0 }, nodeTurn(0, 0, 90), 1);
+    const original = Math.random;
+    Math.random = () => 0;
+    try {
+      emitter.update();
+      await new Promise(resolve => setTimeout(resolve, 0));
+    } finally {
+      Math.random = original;
+    }
+    tick?.();
+    const sprite = fakes.sprites[fakes.sprites.length - 1];
+    expect([sprite.position.x, sprite.position.z]).toEqual([expect.closeTo(0, 5), expect.closeTo(-0.02, 5)]);
+  });
+});
+
 describe('fi01_0 and fi01_1, BITMAP_ADV_SMOKE SubType 0 and 1 (ZzzEffectParticle.cpp:3292-3323, :8219-8248)', () => {
   // `MovePosition(Position, Angle, Velocity)` for every particle (:3885), then `VectorAddScaled(Position, Velocity)`
   // again in its own case (:8220).
   it('moves by its velocity twice a tick: turned with the object, then as it is', async () => {
-    const sprite = await play('fi01_0', 3, 0.5, 1, Math.PI / 2);
+    const sprite = await play('fi01_0', 3, 0.5, 1, nodeTurn(0, 0, 90));
     expect(sprite.position.x).toBeCloseTo(0.04);
     expect(sprite.position.z).toBeCloseTo(0.04);
     expect(sprite.position.y).toBeCloseTo(0.04);
@@ -436,6 +530,99 @@ describe('cloud6, BITMAP_CLOUD SubType 6 (ZzzEffectParticle.cpp:2815-2824, :7550
   });
 });
 
+describe('the Balgass volcano kinds (GM3rdChangeUp.cpp:187-251)', () => {
+  const at = (s: FakeSprite) => [s.position.x, s.position.y, s.position.z, s.angle];
+
+  // ADV_SMOKE SubType 2: SubType 0's push and tick, `Scale * 0.5 + (rand() % 10) * 0.02` big (:3302-3308, :8231-8235).
+  it('fi01_2, BITMAP_ADV_SMOKE SubType 2, is SubType 0 at half the scale it is made with', async () => {
+    const zero = at(await play('fi01_0', 3, 0.5, 2));
+    const sprite = await play('fi01_2', 3, 0.5, 2);
+    expect(at(sprite)).toEqual(zero);
+    expect(sprite.width).toBeCloseTo((128 * 1.74) / 100);
+    expect(rgba(sprite)).toEqual(['1.000', '1.000', '1.000', '1.000']);
+  });
+
+  // ADV_SMOKE + 1 SubType 1: `Scale = 0.5f * Scale`, the rest SubType 0's (:3325-3336).
+  it('fi02_1, BITMAP_ADV_SMOKE + 1 SubType 1, is SubType 0 at half the scale it is made with', async () => {
+    const zero = at(await play('fi02_0', 3, 0.5, 2));
+    const sprite = await play('fi02_1', 3, 0.5, 2);
+    expect(at(sprite)).toEqual(zero);
+    expect(sprite.width).toBeCloseTo((256 * 1.6) / 100);
+    expect(rgba(sprite)).toEqual(['0.880', '0.880', '0.880', '0.880']);
+  });
+
+  // CLOUD SubType 14: SubType 6's push and tick at `Scale * 0.2`, drawn `EnableAlphaBlendMinus` (:2908-2917,
+  // :7646-7660, :9236-9245).
+  it('cloud14, BITMAP_CLOUD SubType 14, is SubType 6 at a fifth of its scale, subtracted', async () => {
+    const six = at(await play('cloud6', 3, 0.5, 2));
+    const sprite = await play('cloud14', 3, 0.5, 2);
+    expect(at(sprite)).toEqual(six);
+    expect(sprite.width).toBeCloseTo((256 * 0.7) / 100);
+    expect(rgba(sprite)).toEqual(['0.500', '0.500', '0.500', '1.000']);
+    expect(sprite.manager.blendMode).toBe(3);
+  });
+
+  // CLOUD SubType 10: dark, 500 ticks, made up to 200 off on every axis, `(rand() % 15 + 10) / 15 + Scale` big, pushed
+  // `(r + 5) * 0.12` in x and y and moved by it again; within 300 of where it was made it gains 0.01 a tick up to
+  // 0.15, out to 500 it loses 1.05 a tick, past that it goes; drawn `EnableAlphaBlendMinus` (:2859-2872, :7598-7625).
+  it('cloud10, BITMAP_CLOUD SubType 10, drifts twice its push and darkens 0.01 a tick up to 0.15', async () => {
+    const sprite = await play('cloud10', 1, 0.5, 2);
+    expect(at(sprite)).toEqual([expect.closeTo(0.048), 0, expect.closeTo(0.048), 0]);
+    expect(sprite.width).toBeCloseTo((256 * (17 / 15 + 1)) / 100);
+    expect(rgba(sprite)).toEqual(['0.020', '0.020', '0.020', '1.000']);
+    expect(sprite.manager.blendMode).toBe(3);
+    expect(fakes.files).toEqual(['Effect/clouds.OZJ']);
+    disposeEffectParticles();
+    expect(rgba(await play('cloud10', 1, 0.5, 20))[0]).toBe('0.150');
+  });
+
+  it('cloud10 fades 1.05 a tick past 300 from where it was made and goes past 500', async () => {
+    expect(rgba(await play('cloud10', 1, 0.5, 88))[0]).toBe('0.150');
+    disposeEffectParticles();
+    expect(rgba(await play('cloud10', 1, 0.5, 89))[0]).toBe('0.143');
+    disposeEffectParticles();
+    expect((await play('cloud10', 1, 0.5, 147)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('cloud10', 1, 0.5, 148)).isVisible).toBe(false);
+  });
+
+  it('cloud10 is made up to 200 off on every axis', async () => {
+    const sprite = await play('cloud10', 1, 0, 1);
+    expect(at(sprite)).toEqual([expect.closeTo(-1.988), expect.closeTo(-2), expect.closeTo(-1.988), 0]);
+  });
+
+  // CLOUD SubType 11: additive, `(rand() % 15 + 15) / 30 + Scale` big, SubType 10's drift, turning 0.5 + rand() % 2
+  // a tick, in the light it is made with, gone past 500 (:2873-2885, :7626-7641).
+  it('cloud11, BITMAP_CLOUD SubType 11, drifts as SubType 10 in its own light, turning', async () => {
+    const sprite = await play('cloud11', 1, 0.5, 2);
+    expect(at(sprite)).toEqual([expect.closeTo(0.048), 0, expect.closeTo(0.048), expect.closeTo((3 * Math.PI) / 180)]);
+    expect(sprite.width).toBeCloseTo((256 * (22 / 30 + 1)) / 100);
+    expect(rgba(sprite)).toEqual(['0.200', '0.400', '0.600', '1.000']);
+    expect(sprite.manager.blendMode).toBe(1);
+    disposeEffectParticles();
+    expect((await play('cloud11', 1, 0.5, 147)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('cloud11', 1, 0.5, 148)).isVisible).toBe(false);
+  });
+
+  // BITMAP_FIRE_RED: 20 ticks, `Scale * (rand() % 64 + 64) * 0.01`, rising `(rand() % 100 + 100) * 0.15`, steady in the
+  // light it is made with (ZzzEffectParticle.cpp:701-705, :4906-4909); its effect makes it up to 16 off in x and y.
+  it('fireRed, BITMAP_FIRE_RED, shoots up steady for 20 ticks', async () => {
+    const sprite = await play('fireRed', 0.9, 0.5, 2);
+    expect(at(sprite)).toEqual([0, expect.closeTo(0.45), 0, 0]);
+    expect(sprite.width).toBeCloseTo((64 * 0.864) / 100);
+    expect(rgba(sprite)).toEqual(['0.200', '0.400', '0.600', '1.000']);
+    expect(fakes.files).toEqual(['Effect/firered.OZJ']);
+    disposeEffectParticles();
+    const low = await play('fireRed', 1, 0, 1);
+    expect(at(low)).toEqual([expect.closeTo(-0.16), expect.closeTo(0.15), expect.closeTo(-0.16), 0]);
+    disposeEffectParticles();
+    expect((await play('fireRed', 1, 0.5, 19)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('fireRed', 1, 0.5, 20)).isVisible).toBe(false);
+  });
+});
+
 describe('waterfall1_2, BITMAP_WATERFALL_1 SubType 2 (ZzzEffectParticle.cpp:3385-3405, :8359-8373)', () => {
   // 30 ticks, `Rotation = rand() % 360`, `Scale = 1.6 + Scale`, `Velocity[2] = -(rand() % 5 + 7)`, 0.2 grey; a tick it
   // loses 0.005 of its scale, falls 0.1 slower and brightens 1.1 while more than 20 ticks are left.
@@ -523,6 +710,57 @@ describe('waterfall3_3, BITMAP_WATERFALL_3 SubType 3 (ZzzEffectParticle.cpp:3602
   });
 });
 
+describe('waterfall2_2, BITMAP_WATERFALL_2 SubType 2 (ZzzEffectParticle.cpp:3501-3533, :8494-8503)', () => {
+  // 40 ticks, `Scale = (rand() % 6 + 6) * 0.1f + Scale`, `Velocity[2] = -(rand() % 3 + 3)`, 0.4 grey; a tick it grows
+  // 0.03 and falls 0.1 slower, and SubType 1's teal and 1.05 dimming are not its.
+  it('falls slowing 0.1 a tick, grows 0.03 from its scale plus the object scale, grey', async () => {
+    const sprite = await play('waterfall2_2', 1, 0.5, 2);
+    expect([sprite.position.x, sprite.position.z]).toEqual([0, 0]);
+    expect(sprite.position.y).toBeCloseTo(-0.079);
+    expect(sprite.width).toBeCloseTo((64 * 1.96) / 100);
+    expect(sprite.angle).toBeCloseTo(Math.PI);
+    expect(rgba(sprite)).toEqual(['0.400', '0.400', '0.400', '1.000']);
+    expect(fakes.files).toEqual(['Effect/waterFall2.OZJ']);
+  });
+
+  it('is made up to 10 aside and 20 below and wobbles up to 1 a tick', async () => {
+    const sprite = await play('waterfall2_2', 1, 0, 2);
+    expect(sprite.position.x).toBeCloseTo(-0.11);
+    expect(sprite.position.z).toBeCloseTo(-0.11);
+    expect(sprite.position.y).toBeCloseTo(-0.259);
+  });
+
+  it('dims 1.1 a tick below 10 ticks left and lives 40', async () => {
+    expect(rgba(await play('waterfall2_2', 1, 0.5, 30))[0]).toBe('0.400');
+    disposeEffectParticles();
+    expect(rgba(await play('waterfall2_2', 1, 0.5, 31))[0]).toBe('0.364');
+    disposeEffectParticles();
+    expect((await play('waterfall2_2', 1, 0.5, 39)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('waterfall2_2', 1, 0.5, 40)).isVisible).toBe(false);
+  });
+});
+
+describe('waterfall3_4, BITMAP_WATERFALL_3 SubType 4 (ZzzEffectParticle.cpp:3635-3643, :8687-8691)', () => {
+  // 20 ticks, `Rotation = rand() % 360`, `Scale = (rand() % 10 + 10) * 0.02f + Scale`, `Velocity[2] = rand() % 5 + 2`,
+  // in the light it is made with; a tick (no case of its own) it grows 0.005, sinks 2.5 faster and dims 1.1.
+  it('leaps up, sinks 2.5 faster a tick, grows 0.005 and dims 1.1 a tick', async () => {
+    const sprite = await play('waterfall3_4', 1, 0.5, 2);
+    expect([sprite.position.x, sprite.position.z]).toEqual([0, 0]);
+    expect(sprite.position.y).toBeCloseTo(0.055);
+    expect(sprite.width).toBeCloseTo((64 * 1.31) / 100);
+    expect(sprite.angle).toBeCloseTo(Math.PI);
+    expect(rgba(sprite)).toEqual(['0.165', '0.331', '0.496', '1.000']);
+    expect(fakes.files).toEqual(['Effect/waterFall3.OZJ']);
+  });
+
+  it('lives 20 ticks', async () => {
+    expect((await play('waterfall3_4', 1, 0.5, 19)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('waterfall3_4', 1, 0.5, 20)).isVisible).toBe(false);
+  });
+});
+
 describe('the particle tick', () => {
   it('makes no colour: one is reused frame after frame', async () => {
     await play('trueFire', 1, 0.5, 1);
@@ -531,6 +769,31 @@ describe('the particle tick', () => {
     const made = fakes.colors;
     for (let n = 0; n < 10; n++) tick?.();
     expect(fakes.colors).toBe(made);
+  });
+
+  // RenderSprite packs the light into a byte a channel, each held in 0..1 first (ZzzOpenglUtil.cpp:918-933,
+  // RenderUtils.h:8-18): `smoke0` starts at LifeTime / 8 = 2, a torch fire takes a light past 1.
+  it('holds every kind in 0..1 over its whole life, whatever light it is made with', async () => {
+    for (const kind of Object.keys(KIND_REACH) as KindName[]) {
+      for (const roll of [0, 0.5, 0.999999]) {
+        const original = Math.random;
+        Math.random = () => roll;
+        try {
+          await spawnParticle(scene, kind, { x: 0, y: 0, z: 0 }, NO_TURN, 1, [3, 3, 3]);
+          const sprite = fakes.sprites[fakes.sprites.length - 1];
+          for (let n = 0; n < 200 && sprite.isVisible; n++) {
+            tick?.();
+            for (const c of [sprite.color.r, sprite.color.g, sprite.color.b, sprite.color.a]) {
+              expect(c, `${kind} roll ${roll} tick ${n}`).toBeGreaterThanOrEqual(0);
+              expect(c, `${kind} roll ${roll} tick ${n}`).toBeLessThanOrEqual(1);
+            }
+          }
+        } finally {
+          Math.random = original;
+        }
+        disposeEffectParticles();
+      }
+    }
   });
 });
 
@@ -551,7 +814,7 @@ describe('ParticleEmitter view gate', () => {
       scene,
       [{ kinds: ['fire1'], every: 1, light }],
       { x: 1000, y: 0, z: 0 },
-      0,
+      NO_TURN,
       1
     );
 
@@ -574,7 +837,7 @@ describe('ParticleEmitter view gate', () => {
       scene,
       [{ kinds: ['cloud21'], every: 1, light, jitter }],
       position,
-      0,
+      NO_TURN,
       scale
     );
 
@@ -600,7 +863,7 @@ describe('ParticleEmitter view gate', () => {
         { kinds: ['cloud21'], every: 1, light: cloud.light },
       ],
       { x: 10 + reach('smoke65', 1) + 0.5, y: 0, z: 0 },
-      0,
+      NO_TURN,
       1
     );
 
@@ -620,7 +883,7 @@ describe('ParticleEmitter view gate', () => {
       scene,
       [{ kinds: ['fire1'], every: 1, light }],
       position,
-      0,
+      NO_TURN,
       1
     );
 
@@ -644,7 +907,7 @@ describe('ParticleEmitter view gate', () => {
       scene,
       [{ kinds: ['fire1'], every: 1, light }],
       { x: 1000, y: 0, z: 0 },
-      0,
+      NO_TURN,
       1
     );
 

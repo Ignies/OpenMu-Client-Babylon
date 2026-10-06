@@ -1,4 +1,4 @@
-import { spawnParticle } from '@/controllers/fx/effectParticles';
+import { NO_TURN, spawnParticle } from '@/controllers/fx/effectParticles';
 import { TILE_CM, TW_NOGROUND } from '@/controllers/terrain/consts';
 import { inChaosCastle } from '@/controllers/actors/locomotion';
 import { BloodCastleStatePacket } from '../../packets/ServerToClientPackets';
@@ -175,7 +175,7 @@ function puffCrack(crack: Crack): void {
     world.scene,
     CRACK_SMOKE,
     { x, y: world.getTerrainHeight(x, z), z },
-    0,
+    NO_TURN,
     CRACK_SMOKE_SCALE,
     WHITE
   ).catch(reportLoadFailure(`particle ${CRACK_SMOKE}`));

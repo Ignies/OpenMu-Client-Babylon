@@ -49,7 +49,7 @@ export class SwampMarshGasObject extends MapTileObject {
       world.scene,
       MARSH_GAS,
       { x, y: y + VENT_HEIGHT, z },
-      this.node.rotation.y,
+      this.node.rotation,
       this.node.scaling.x
     );
   }

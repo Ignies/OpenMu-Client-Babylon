@@ -43,7 +43,8 @@ type TextureKey =
   | 'clud64'
   | 'flare01'
   | 'fi01'
-  | 'fi02';
+  | 'fi02'
+  | 'fireRed';
 
 const TEXTURES: Record<
   TextureKey,
@@ -69,6 +70,7 @@ const TEXTURES: Record<
   flare01: { file: 'Effect/flare01.OZJ', size: 64 },
   fi01: { file: 'Effect/fi01.OZJ', size: 128 },
   fi02: { file: 'Effect/fi02.OZT', size: 256 },
+  fireRed: { file: 'Effect/firered.OZJ', size: 64 },
 };
 
 /**
@@ -94,7 +96,20 @@ type Particle = {
   vx: number;
   vy: number;
   vz: number;
-  angleZ: number;
+  /** `AngleMatrix(Angle)` by rows, which MovePosition turns the velocity by. */
+  m00: number;
+  m01: number;
+  m02: number;
+  m10: number;
+  m11: number;
+  m12: number;
+  m20: number;
+  m21: number;
+  m22: number;
+  /** `StartPosition`, for the kinds that measure how far they drift. */
+  sx: number;
+  sy: number;
+  sz: number;
   lr: number;
   lg: number;
   lb: number;
@@ -119,6 +134,34 @@ const rand = (n: number) => Math.floor(Math.random() * n);
 const WHITE: readonly [number, number, number] = [1, 1, 1];
 
 const plainColor = (p: Particle, out: Color4) => out.set(p.lr, p.lg, p.lb, 1);
+
+/**
+ * A node's own rotation (`node.rotation`): MU's `Angle` as `(-Angle[0], -Angle[2], -Angle[1])` in
+ * radians (loadMapIntoScene.ts createObjects, then renderAngles.ts).
+ */
+export type NodeTurn = Readonly<{ x: number; y: number; z: number }>;
+
+export const NO_TURN: NodeTurn = { x: 0, y: 0, z: 0 };
+
+/** `AngleMatrix` (ZzzMathLib.cpp:185-212) of the MU `Angle` the node's turn stands for. */
+function turnWith(p: Particle, turn: NodeTurn): void {
+  const sr = Math.sin(-turn.x);
+  const cr = Math.cos(-turn.x);
+  const sp = Math.sin(-turn.z);
+  const cp = Math.cos(-turn.z);
+  const sy = Math.sin(-turn.y);
+  const cy = Math.cos(-turn.y);
+
+  p.m00 = cp * cy;
+  p.m01 = sr * sp * cy - cr * sy;
+  p.m02 = cr * sp * cy + sr * sy;
+  p.m10 = cp * sy;
+  p.m11 = sr * sp * sy + cr * cy;
+  p.m12 = cr * sp * sy - sr * cy;
+  p.m20 = -sp;
+  p.m21 = sr * cp;
+  p.m22 = cr * cp;
+}
 
 /**
  * `g_vParticleWind`: MoveParticles walks its pace by up to 0.6 a tick, held within 0.6, and the wind
@@ -276,19 +319,25 @@ function moveAgain(p: Particle, f: number): void {
 }
 
 /**
- * `BITMAP_ADV_SMOKE` (fi01.jpg, additive), whatever scale it is made with: 20 + rand() % 5 ticks,
- * upright; SubType 0 `0.5 + r * 0.02` big and pushed `((r + 5) * 0.4, (r - 5) * 0.4, (r + 5) * 0.2)`,
- * SubType 1 (the `else`) `1 + r * 0.1` and half that (ZzzEffectParticle.cpp:3292-3323). A tick it
- * moves again, rises 0.3 faster, grows 0.07 (SubType 1 0.09) and is `LifeTime / 10`, white, held at
- * 1 by the vertex colour (:8219-8248).
+ * `BITMAP_ADV_SMOKE` (fi01.jpg, additive): 20 + rand() % 5 ticks, upright; SubType 0 `0.5 + r * 0.02`
+ * big and pushed `((r + 5) * 0.4, (r - 5) * 0.4, (r + 5) * 0.2)`, SubType 2 the same at
+ * `Scale * 0.5 + r * 0.02`, SubType 1 (the `else`) `1 + r * 0.1` and half the push
+ * (ZzzEffectParticle.cpp:3292-3323). A tick it moves again, rises 0.3 faster, grows 0.07 (SubType 1
+ * 0.09) and is `LifeTime / 10`, white (:8219-8248), which the tick holds at 1.
  */
-function advSmokeKind(scaleBase: number, scaleStep: number, push: number, grow: number): ParticleKind {
+function advSmokeKind(
+  scaleBase: number,
+  perScale: number,
+  scaleStep: number,
+  push: number,
+  grow: number
+): ParticleKind {
   return {
     texture: 'fi01',
     blend: 'add',
-    init(p) {
+    init(p, scale) {
       p.lifeTime = 20 + rand(5);
-      p.scale = scaleBase + rand(10) * scaleStep;
+      p.scale = scaleBase + perScale * scale + rand(10) * scaleStep;
       p.vx = (rand(10) + 5) * 0.4 * push;
       p.vy = (rand(10) - 5) * 0.4 * push;
       p.vz = (rand(10) + 5) * 0.2 * push;
@@ -297,7 +346,7 @@ function advSmokeKind(scaleBase: number, scaleStep: number, push: number, grow: 
       moveAgain(p, f);
       p.vz += 0.3 * f;
       p.scale += grow * f;
-      p.lr = p.lg = p.lb = Math.min(1, p.lifeTime / 10);
+      p.lr = p.lg = p.lb = p.lifeTime / 10;
     },
     color: plainColor,
   };
@@ -337,6 +386,115 @@ function waterfallKind(texture: TextureKey, scaleBase: number, fadeBelow: number
     },
     color: plainColor,
   };
+}
+
+/**
+ * `BITMAP_WATERFALL_2` (waterFall2.jpg, additive): `Rotation = rand() % 360`, `(rand() % 6 + 6) * 0.1`
+ * big plus `scaleAdd` times the object's scale, falling `rand() % 3 + 3`, made up to 10 aside and 20 off
+ * in height, `(red, 0.4, 0.4)` (ZzzEffectParticle.cpp:3501-3533). A tick it grows 0.03, takes
+ * `(rand() % 20 - 10) * 0.1` sideways, falls 0.1 slower, dims 1.1 below 10 ticks left and `dim` always
+ * (:8494-8503).
+ */
+function waterfall2Kind(life: number, red: number, scaleAdd: number, dim: number): ParticleKind {
+  return {
+    texture: 'waterfall2',
+    blend: 'add',
+    init(p, scale) {
+      p.lifeTime = life;
+      p.rotation = rand(360);
+      p.scale = (rand(6) + 6) * 0.1 + scaleAdd * scale;
+      p.vz = -(rand(3) + 3);
+      p.px += rand(20) - 10;
+      p.py += rand(20) - 10;
+      p.pz += rand(40) - 20;
+      p.lr = red;
+      p.lg = p.lb = 0.4;
+    },
+    update(p, f) {
+      p.scale += 0.03 * f;
+      p.vx = (rand(20) - 10) * 0.1;
+      p.vy = (rand(20) - 10) * 0.1;
+      p.vz += 0.1 * f;
+
+      const gain = Math.pow(1 / dim, f) * (p.lifeTime < 10 ? Math.pow(1 / 1.1, f) : 1);
+
+      p.lr *= gain;
+      p.lg *= gain;
+      p.lb *= gain;
+    },
+    color: plainColor,
+  };
+}
+
+/**
+ * `BITMAP_ADV_SMOKE + 1` (fi02.tga, `EnableAlphaBlend3`): `Rotation = rand() % 360`, `Scale = 0.5`
+ * (SubType 1 `0.5 * Scale`), then with no `break` `BITMAP_TRUE_FIRE`'s SubType 0: 24 ticks, pushed
+ * `((r - 5) * 0.4, 0, (r + 5) * 0.2)` (ZzzEffectParticle.cpp:3325-3378). It fades in its alpha
+ * too: RenderSprite colours a sheet with alpha `(L, L, L, L)` (:9104-9116, ZzzOpenglUtil.cpp:918-933).
+ */
+function advSmoke1Kind(ofScale: boolean): ParticleKind {
+  return {
+    texture: 'fi02',
+    blend: 'alpha',
+    init(p, scale) {
+      p.lifeTime = 24;
+      p.rotation = rand(360);
+      p.scale = ofScale ? 0.5 * scale : 0.5;
+      p.vx = (rand(10) - 5) * 0.4;
+      p.vz = (rand(10) + 5) * 0.2;
+    },
+    update: (p, f) => puffMove(p, f, 25),
+    color: (p, out) => out.set(p.lr, p.lg, p.lb, p.lr),
+  };
+}
+
+/**
+ * `BITMAP_CLOUD` SubType 6 (additive) and 14 (`EnableAlphaBlendMinus`, :9236-9245) on clouds.jpg:
+ * 25 + rand() % 5 ticks, `Rotation = rand() % 360`, `Scale = 0.2` (14: `Scale * 0.2`), pushed
+ * `((r + 5) * 0.4, 0, (r + 5) * 0.2)` (ZzzEffectParticle.cpp:2815-2824, :2908-2917); both take
+ * `puffMove` at `LifeTime / 50` (:7550-7565, :7646-7660).
+ */
+function cloudPuffKind(blend: Blend, ofScale: boolean): ParticleKind {
+  return {
+    texture: 'cloud',
+    blend,
+    init(p, scale) {
+      p.lifeTime = 25 + rand(5);
+      p.rotation = rand(360);
+      p.scale = ofScale ? 0.2 * scale : 0.2;
+      p.vx = (rand(10) + 5) * 0.4;
+      p.vz = (rand(10) + 5) * 0.2;
+    },
+    update: (p, f) => puffMove(p, f, 50),
+    color: plainColor,
+  };
+}
+
+/**
+ * `BITMAP_CLOUD` SubType 10 and 11: 500 ticks, made up to 200 off on every axis, kept as its
+ * `StartPosition`, pushed `(rand() % 10 + 5) * 0.12` in x and y (ZzzEffectParticle.cpp:2859-2885).
+ */
+function driftInit(p: Particle): void {
+  p.lifeTime = 500;
+  p.px += rand(400) - 200;
+  p.py += rand(400) - 200;
+  p.pz += rand(400) - 200;
+  p.sx = p.px;
+  p.sy = p.py;
+  p.sz = p.pz;
+  p.vx = p.vy = (rand(10) + 5) * 0.12;
+}
+
+/** `VectorAddScaled(Position, Velocity)`, then how far it is from where it was made (:7600-7605, :7628-7633). */
+function driftOn(p: Particle, f: number): number {
+  p.px += p.vx * f;
+  p.py += p.vy * f;
+
+  const dx = p.px - p.sx;
+  const dy = p.py - p.sy;
+  const dz = p.pz - p.sz;
+
+  return Math.sqrt(dx * dx + dy * dy + dz * dz);
 }
 
 /**
@@ -412,7 +570,7 @@ const KINDS = {
       const a = Math.random() * Math.PI * 2;
       const r = Math.random() * 0.5;
 
-      p.angleZ = 0;
+      turnWith(p, NO_TURN);
       p.vx = Math.cos(a) * r;
       p.vy = Math.sin(a) * r;
       p.vz = 0;
@@ -448,45 +606,82 @@ const KINDS = {
   /** `BITMAP_TRUE_BLUE`: every line `BITMAP_TRUE_FIRE`'s but the sheet, fantaB.jpg (ZzzOpenData.cpp:5198). */
   trueBlue: trueFireKind('fantaB', 24),
 
-  fi01_0: advSmokeKind(0.5, 0.02, 1, 0.07),
+  fi01_0: advSmokeKind(0.5, 0, 0.02, 1, 0.07),
 
-  fi01_1: advSmokeKind(1, 0.1, 0.5, 0.09),
+  fi01_1: advSmokeKind(1, 0, 0.1, 0.5, 0.09),
+
+  fi01_2: advSmokeKind(0, 0.5, 0.02, 1, 0.07),
+
+  fi02_0: advSmoke1Kind(false),
+
+  fi02_1: advSmoke1Kind(true),
+
+  cloud6: cloudPuffKind('add', false),
+
+  cloud14: cloudPuffKind('subtract', true),
 
   /**
-   * `BITMAP_ADV_SMOKE + 1` SubType 0 (fi02.tga, `EnableAlphaBlend3`): `Rotation = rand() % 360`,
-   * `Scale = 0.5`, then with no `break` `BITMAP_TRUE_FIRE`'s SubType 0: 24 ticks, pushed
-   * `((r - 5) * 0.4, 0, (r + 5) * 0.2)` (ZzzEffectParticle.cpp:3325-3378). It fades in its alpha
-   * too: RenderSprite colours a sheet with alpha `(L, L, L, L)` (:9104-9116, ZzzOpenglUtil.cpp:918-933).
+   * `BITMAP_CLOUD` SubType 10 (clouds.jpg, `EnableAlphaBlendMinus`, :9236-9245): `driftInit`,
+   * `(rand() % 15 + 10) / 15 + Scale` big, black whatever light it is made with (:2859-2872). A tick
+   * it drifts again; within 300 of where it was made it gains 0.01 up to 0.15, out to 500 it loses
+   * 1.05, and past that it goes (:7598-7625).
    */
-  fi02_0: {
-    texture: 'fi02',
-    blend: 'alpha',
-    init(p) {
-      p.lifeTime = 24;
-      p.rotation = rand(360);
-      p.scale = 0.5;
-      p.vx = (rand(10) - 5) * 0.4;
-      p.vz = (rand(10) + 5) * 0.2;
+  cloud10: {
+    texture: 'cloud',
+    blend: 'subtract',
+    init(p, scale) {
+      driftInit(p);
+      p.scale = (rand(15) + 10) / 15 + scale;
+      p.lr = 0;
     },
-    update: (p, f) => puffMove(p, f, 25),
-    color: (p, out) => out.set(p.lr, p.lg, p.lb, p.lr),
+    update(p, f) {
+      const distance = driftOn(p, f);
+
+      if (distance <= 300) p.lr = Math.min(0.15, p.lr + 0.01 * f);
+      else if (distance <= 500) p.lr *= Math.pow(1 / 1.05, f);
+      else p.live = false;
+
+      p.lg = p.lb = p.lr;
+    },
+    color: plainColor,
   } satisfies ParticleKind,
 
   /**
-   * `BITMAP_CLOUD` SubType 6 (clouds.jpg, additive): 25 + rand() % 5 ticks, `Rotation = rand() % 360`,
-   * `Scale = 0.2`, pushed `((r + 5) * 0.4, 0, (r + 5) * 0.2)` (ZzzEffectParticle.cpp:2815-2824).
+   * `BITMAP_CLOUD` SubType 11 (clouds.jpg, additive): `driftInit`, `(rand() % 15 + 15) / 30 + Scale`
+   * big, in the light it is made with (:2873-2885). A tick it drifts again, turns `0.5 + rand() % 2`
+   * degrees and goes past 500 from where it was made (:7626-7641).
    */
-  cloud6: {
+  cloud11: {
     texture: 'cloud',
     blend: 'add',
-    init(p) {
-      p.lifeTime = 25 + rand(5);
-      p.rotation = rand(360);
-      p.scale = 0.2;
-      p.vx = (rand(10) + 5) * 0.4;
-      p.vz = (rand(10) + 5) * 0.2;
+    init(p, scale) {
+      driftInit(p);
+      p.scale = (rand(15) + 15) / 30 + scale;
     },
-    update: (p, f) => puffMove(p, f, 50),
+    update(p, f) {
+      p.rotation += (0.5 + rand(2)) * f;
+      if (driftOn(p, f) > 500) p.live = false;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
+
+  /**
+   * `BITMAP_FIRE_RED` (firered.jpg, additive): 20 ticks, `Scale * (rand() % 64 + 64) * 0.01` big,
+   * rising `(rand() % 100 + 100) * 0.15` along the object, steady in the light it is made with
+   * (ZzzEffectParticle.cpp:701-705, :4906-4909). Its one maker, the `BITMAP_FIRE_RED` effect, makes it
+   * up to 16 off in x and y (EffectBehaviors.cpp:122-131).
+   */
+  fireRed: {
+    texture: 'fireRed',
+    blend: 'add',
+    init(p, scale) {
+      p.lifeTime = 20;
+      p.scale = scale * (rand(64) + 64) * 0.01;
+      p.vz = (rand(100) + 100) * 0.15;
+      p.px += rand(32) - 16;
+      p.py += rand(32) - 16;
+    },
+    update() {},
     color: plainColor,
   } satisfies ParticleKind,
 
@@ -676,35 +871,34 @@ const KINDS = {
 
   waterfall1_2: waterfallKind('waterfall1', 1.6, 5),
 
+  /** `BITMAP_WATERFALL_2` SubType 1: 50 ticks, `(0, 0.4, 0.4)`, dimming 1.05 a tick more (:3535-3540, :8505-8510). */
+  waterfall2_1: waterfall2Kind(50, 0, 0, 1.05),
+
+  /** `BITMAP_WATERFALL_2` SubType 2: 40 ticks, grey, the object's scale added to its own (:3505-3509). */
+  waterfall2_2: waterfall2Kind(40, 0.4, 1, 1),
+
   /**
-   * `BITMAP_WATERFALL_2` SubType 1 (waterFall2.jpg, additive): 50 ticks, `Rotation = rand() % 360`,
-   * `(rand() % 6 + 6) * 0.1` big whatever its scale, falling `rand() % 3 + 3`, made up to 10 aside and
-   * 20 off in height, `(0, 0.4, 0.4)` (ZzzEffectParticle.cpp:3501-3540). A tick it grows 0.03, takes
-   * `(rand() % 20 - 10) * 0.1` sideways, falls 0.1 slower and dims 1.05, 1.1 more below 10 ticks
-   * left (:8494-8510).
+   * `BITMAP_WATERFALL_3` SubType 4 (waterFall3.jpg, additive): 20 ticks, `Rotation = rand() % 360`,
+   * `(rand() % 10 + 10) * 0.02 + Scale` big, leaping `rand() % 5 + 2`, in the light it is made with
+   * (ZzzEffectParticle.cpp:3635-3643). With no case of its own a tick it grows 0.005, sinks 2.5 faster
+   * and dims 1.1 (:8687-8691).
    */
-  waterfall2_1: {
-    texture: 'waterfall2',
+  waterfall3_4: {
+    texture: 'waterfall3',
     blend: 'add',
-    init(p) {
-      p.lifeTime = 50;
+    init(p, scale) {
+      p.lifeTime = 20;
       p.rotation = rand(360);
-      p.scale = (rand(6) + 6) * 0.1;
-      p.vz = -(rand(3) + 3);
-      p.px += rand(20) - 10;
-      p.py += rand(20) - 10;
-      p.pz += rand(40) - 20;
-      p.lr = 0;
-      p.lg = p.lb = 0.4;
+      p.scale = (rand(10) + 10) * 0.02 + scale;
+      p.vz = rand(5) + 2;
     },
     update(p, f) {
-      p.scale += 0.03 * f;
-      p.vx = (rand(20) - 10) * 0.1;
-      p.vy = (rand(20) - 10) * 0.1;
-      p.vz += 0.1 * f;
+      p.scale += 0.005 * f;
+      p.vz -= 2.5 * f;
 
-      const gain = Math.pow(1 / 1.05, f) * (p.lifeTime < 10 ? Math.pow(1 / 1.1, f) : 1);
+      const gain = Math.pow(1 / 1.1, f);
 
+      p.lr *= gain;
       p.lg *= gain;
       p.lb *= gain;
     },
@@ -797,6 +991,51 @@ const KINDS = {
       p.scale -= 0.05 * f;
       if (p.scale <= 0.1) p.live = false;
       p.lr = p.lg = p.lb = p.scale;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
+
+  /**
+   * `BITMAP_LIGHT` SubType 15, flare01.jpg drawn additive: `rand() % 10 + 100` ticks,
+   * `Gravity = rand() % 3 + 2`, `(rand() % 20 + 20) / 100 * Scale` big, unseen at first
+   * (ZzzEffectParticle.cpp:3241-3250). A tick its phase gains `(rand() % 10 + 5) * 0.01`, it stands
+   * `Gravity * 2` off where it was made at that phase and rises `Gravity`, loses 0.001 of its scale
+   * and fades in 0.1, out 0.1 over its last 20 ticks losing 0.01 more; it is the light it was made
+   * with times that (:8139-8160). Its makers, the Doppelganger light boxes, all make it
+   * `rand() % (int)(Scale * 60) - that / 2` off in x and y (GMDoppelGanger4.cpp:387-398).
+   */
+  light15: {
+    texture: 'flare01',
+    blend: 'add',
+    init(p, scale) {
+      const spread = Math.trunc(scale * 60);
+      p.px += rand(spread) - Math.trunc(spread / 2);
+      p.py += rand(spread) - Math.trunc(spread / 2);
+      p.sx = p.px;
+      p.sy = p.py;
+      p.sz = 0;
+      p.lifeTime = rand(10) + 100;
+      p.gravity = rand(3) + 2;
+      p.scale = ((rand(20) + 20) / 100) * scale;
+      p.alpha = 0;
+    },
+    update(p, f) {
+      p.sz += (rand(10) + 5) * 0.01 * f;
+      p.px = p.sx + Math.sin(p.sz) * p.gravity * 2;
+      p.py = p.sy + Math.cos(p.sz) * p.gravity * 2;
+      p.pz += p.gravity * f;
+      p.scale -= 0.001 * f;
+
+      if (p.lifeTime > 20) {
+        p.alpha = Math.min(1, p.alpha + 0.1 * f);
+      } else {
+        p.scale -= 0.01 * f;
+        p.alpha -= 0.1 * f;
+      }
+
+      p.lr = p.tr * p.alpha;
+      p.lg = p.tg * p.alpha;
+      p.lb = p.tb * p.alpha;
     },
     color: plainColor,
   } satisfies ParticleKind,
@@ -1018,6 +1257,8 @@ function acquire(pool: Pool): Sprite | null {
 /** The tick's one colour: each kind writes all four channels into it. */
 const tickColor = new Color4(1, 1, 1, 1);
 
+const unit = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
+
 function ensureTicking(target: Scene) {
   if (tickObserver && scene === target) return;
 
@@ -1040,13 +1281,11 @@ function ensureTicking(target: Scene) {
       if (p.lifeTime <= 0) p.live = false;
 
       if (p.live) {
+        // MovePosition (ZzzEffectParticle.cpp:3885): the velocity turned by the object's Angle.
         if (p.vx !== 0 || p.vy !== 0 || p.vz !== 0) {
-          const c = Math.cos(p.angleZ);
-          const s = Math.sin(p.angleZ);
-
-          p.px += (p.vx * c - p.vy * s) * f;
-          p.py += (p.vx * s + p.vy * c) * f;
-          p.pz += p.vz * f;
+          p.px += (p.vx * p.m00 + p.vy * p.m01 + p.vz * p.m02) * f;
+          p.py += (p.vx * p.m10 + p.vy * p.m11 + p.vz * p.m12) * f;
+          p.pz += (p.vx * p.m20 + p.vy * p.m21 + p.vz * p.m22) * f;
         }
 
         p.kind.update(p, f, worldTimeMs);
@@ -1075,7 +1314,9 @@ function ensureTicking(target: Scene) {
         sprite.cellIndex = ((p.frame % p.frames) + p.frames) % p.frames;
       }
 
+      // RenderSprite packs the light a byte a channel, held in 0..1 (ZzzOpenglUtil.cpp:918-933, RenderUtils.h:8-18).
       p.kind.color(p, color);
+      color.set(unit(color.r), unit(color.g), unit(color.b), unit(color.a));
       sprite.color.copyFrom(spriteLevel(target, color));
     }
   });
@@ -1090,11 +1331,15 @@ function release(p: Particle) {
   if (pool) pool.free.push(p.sprite);
 }
 
+/**
+ * `turn` is the node's own rotation, MU's `Angle` mirrored (`NodeTurn`); it is turned back here, so the
+ * tick turns the velocity as MovePosition does (ZzzAI.cpp:148-156).
+ */
 export async function spawnParticle(
   target: Scene,
   kindName: KindName,
   position: { x: number; y: number; z: number },
-  angleZ: number,
+  turn: NodeTurn,
   scale: number,
   light: readonly [number, number, number],
   jitter = 0
@@ -1128,7 +1373,18 @@ export async function spawnParticle(
     vx: 0,
     vy: 0,
     vz: 0,
-    angleZ,
+    m00: 1,
+    m01: 0,
+    m02: 0,
+    m10: 0,
+    m11: 1,
+    m12: 0,
+    m20: 0,
+    m21: 0,
+    m22: 1,
+    sx: 0,
+    sy: 0,
+    sz: 0,
     lr: light[0],
     lg: light[1],
     lb: light[2],
@@ -1137,6 +1393,7 @@ export async function spawnParticle(
     tb: light[2],
   };
 
+  turnWith(p, turn);
   kind.init(p, scale, light);
 
   particles.push(p);
@@ -1167,8 +1424,14 @@ export const KIND_REACH: Record<KindName, Reach> = {
   trueBlue: { travel: 1, base: 0, perScale: 0.46 },
   fi01_0: { travel: 3.5, base: 2.14, perScale: 0 },
   fi01_1: { travel: 2.55, base: 3.68, perScale: 0 },
+  fi01_2: { travel: 3.5, base: 1.7, perScale: 0.46 },
   fi02_0: { travel: 5.15, base: 3.08, perScale: 0 },
+  fi02_1: { travel: 5.15, base: 2.2, perScale: 0.91 },
   cloud6: { travel: 7.3, base: 2.99, perScale: 0 },
+  cloud14: { travel: 7.3, base: 2.75, perScale: 0.37 },
+  cloud10: { travel: 8.5, base: 2.9, perScale: 1.82 },
+  cloud11: { travel: 8.5, base: 1.76, perScale: 1.82 },
+  fireRed: { travel: 6.2, base: 0, perScale: 0.58 },
   smoke0: { travel: 0.55, base: 0.72, perScale: 0 },
   smoke13: { travel: 0, base: 1.4, perScale: 0 },
   smoke2: { travel: 3.4, base: 0.58, perScale: 0 },
@@ -1180,9 +1443,12 @@ export const KIND_REACH: Record<KindName, Reach> = {
   waterfall5_9: { travel: 2.9, base: 0.28, perScale: 0.46 },
   waterfall1_2: { travel: 2.9, base: 0.73, perScale: 0.46 },
   waterfall2_1: { travel: 1.7, base: 1.18, perScale: 0 },
+  waterfall2_2: { travel: 1.6, base: 1.05, perScale: 0.46 },
   waterfall3_3: { travel: 1.62, base: 0.14, perScale: 0.22 },
+  waterfall3_4: { travel: 4.55, base: 0.22, perScale: 0.46 },
   spark03_24: { travel: 0.6, base: 0.19, perScale: 0 },
   light0: { travel: 0.6, base: 0, perScale: 0.45 },
+  light15: { travel: 4.45, base: 0, perScale: 0.62 },
   wingFlareBlue: { travel: 0, base: 0, perScale: 0.46 },
   wingCloud: { travel: 0, base: 0, perScale: 0.46 },
 };
@@ -1212,7 +1478,8 @@ export class ParticleEmitter {
     private readonly target: Scene,
     private readonly emissions: readonly Emission[],
     private readonly position: { x: number; y: number; z: number },
-    private readonly angleZ: number,
+    /** The node's `rotation`, as `spawnParticle` takes it. */
+    private readonly turn: NodeTurn,
     private readonly scale: number
   ) {
     this.#due = emissions.map(() => 0);
@@ -1268,7 +1535,7 @@ export class ParticleEmitter {
             this.target,
             kind,
             this.position,
-            this.angleZ,
+            this.turn,
             this.scale * (emission.scale ?? 1),
             light,
             emission.jitter
@@ -1344,7 +1611,7 @@ export class BonedParticleEmitter {
           const kind =
             point.kinds[Math.floor(Math.random() * point.kinds.length)];
 
-          void spawnParticle(this.target, kind, position, 0, scale, light).catch(
+          void spawnParticle(this.target, kind, position, NO_TURN, scale, light).catch(
             reportLoadFailure(`particle ${kind}`)
           );
         }

@@ -53,7 +53,7 @@ abstract class TimedVentObject extends MapTileObject {
       world.scene,
       window.emissions,
       this.node.position,
-      this.node.rotation.y,
+      this.node.rotation,
       this.node.scaling.x
     );
   }

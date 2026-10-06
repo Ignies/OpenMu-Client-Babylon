@@ -142,9 +142,23 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   tick in three on both worlds; 5 makes `BITMAP_ADV_SMOKE + 1` with `ADV_SMOKE` SubType 0 and
   `BITMAP_CLOUD` SubType 6 with `ADV_SMOKE` SubType 1, each pair one tick in eight, the rate of the
   original's `o->Timer` walk; 58-60 make `BITMAP_WATERFALL_1` SubType 2, `_2` SubType 1 and `_3`
-  SubType 3 (`waterfall1_2`, `waterfall2_1`, `waterfall3_3`).
+  SubType 3 (`waterfall1_2`, `waterfall2_1`, `waterfall3_3`); the volcano's 85 smokes as 5 with its
+  own SubTypes (`fi02_1` one tick in sixteen, `fi01_2`, `cloud14`, `fi01_2` at twice the scale), 88
+  drifts a dark `cloud10` and 89 a faint red `cloud11`, one tick in four.
+- `balgasbarracks/firePillarObject.test.ts`: the Refuge's 92 makes two `BITMAP_FIRE_RED` effects a
+  tick on the crest of its `sinf(WorldTime * 0.0005f)` wave, each making a `fireRed` a tick for 40
+  ticks at the effect's own 0.9, only in view, the made ones running out after the crest.
 - `doppelganger4/spec.test.ts`: 59 puffs a `BITMAP_SMOKE` SubType 13 (`smoke13`) one tick in three where
-  Kanturu's puffs SubType 21; every other Kanturu row stays.
+  Kanturu's puffs SubType 21, and 82 / 83 make `BITMAP_WATERFALL_3` SubType 3 / `_2` SubType 1 where
+  Kanturu makes SubType 4 / 2; every other Kanturu row stays; its light box 48 makes a `BITMAP_LIGHT`
+  SubType 15 (`light15`) one tick in three. `doppelganger4/create.test.ts`: the folder types
+  EncTerrain69.obj places that `Data/Object69` has no model for (34) are bound absent, so none asks
+  for a GLB and logs a failed load.
+- `doppelgangerLights.test.ts`: the four arenas' sky-blue light boxes (Doppelganger 1's 101, the
+  others' 48) make a `BITMAP_LIGHT` SubType 15 (`light15`) one tick in three.
+- `kanturu1/spec.test.ts`, `aida/spec.test.ts`: the falls (Kanturu and the GM area 81-83, Aida 56-58) make
+  `BITMAP_WATERFALL_1` SubType 2 one tick in two, `_3` SubType 4 every tick and `_2` SubType 2 one in
+  three (`waterfall1_2`, `waterfall3_4`, `waterfall2_2`).
 - `chaoscastle/thunder.test.ts`: pillar thunder timing, which pillar it strikes and the bolt's fall.
 - `chaoscastle/clouds.test.ts`: the blue fog banks on types 6-11; 12 stays a marker.
 - `chaoscastle/lighting.test.ts`: one look row on every arena, no sky, black haze from the hero, no

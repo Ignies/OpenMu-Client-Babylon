@@ -1,4 +1,4 @@
-import { ParticleEmitter } from '@/controllers/fx/effectParticles';
+import { NO_TURN, ParticleEmitter } from '@/controllers/fx/effectParticles';
 import { loadGLTF } from '@/controllers/assets/modelLoader';
 import { ModelObject } from '@/controllers/render/modelObject';
 import { Rand } from '@/core/rand';
@@ -109,7 +109,7 @@ export class NoriaWarpHaloObject extends ModelObject {
         // 9 variant's own motion curve is not ported.
         [{ kinds: ['spark03_24'], every: 1, count: 1, light: [0.5, 0.5, 0.5] }],
         { x: p.x, y: p.y, z: p.z + sparkZ },
-        0,
+        NO_TURN,
         1.4
       );
     }

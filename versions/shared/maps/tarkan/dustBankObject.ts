@@ -68,12 +68,12 @@ const CLOUD_SCALE = 0.27;
  *     p.px += (rand(200) - 100) * scale;
  *     p.py += (rand(200) - 100) * scale;
  *     p.pz += rand(20) + 20;
- *     p.angleZ = p.pz;                 // base height; velocity is zero here,
- *     p.rotation = rand(360);          // so angleZ is free (the original
+ *     p.alpha = p.pz;                  // base height; nothing reads alpha here,
+ *     p.rotation = rand(360);          // so it is free (the original
  *   },                                 // parks it in Rotation and spins)
  *   update(p, _f, t) {
  *     p.lifeTime = 10;                 // pinned: these never expire
- *     p.pz = p.angleZ + Math.sin((t + p.gravity) / 5000) * 20;
+ *     p.pz = p.alpha + Math.sin((t + p.gravity) / 5000) * 20;
  *     p.scale =
  *       Math.sin((((p.gravity + t) % 1800) * 0.1 * Math.PI) / 180) * 0.5 + 1.8;
  *     p.lr = 0.36; p.lg = 0.3; p.lb = 0.24;
@@ -121,7 +121,7 @@ export class TarkanDustBankObject extends MapTileObject {
         scene,
         'cloud21',
         this.node.position,
-        this.node.rotation.y,
+        this.node.rotation,
         scale,
         DUST_LIGHT
       ).catch(reportLoadFailure('particle cloud21'));

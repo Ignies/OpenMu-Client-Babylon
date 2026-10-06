@@ -1,5 +1,6 @@
 import type { World } from '@/ecs/world';
 import { AlphaObject } from '../shared/objectVariants';
+import { BalgasFirePillarObject } from './firePillarObject';
 
 /**
  * Barracks of Balgass (`WD_41CHANGEUP3RD_1ST`, `World42`/`Object42`) - the
@@ -7,7 +8,8 @@ import { AlphaObject } from '../shared/objectVariants';
  *
  * `CGM3rdChangeUp::MoveObject` (GM3rdChangeUp.cpp:63-116) is shared with the
  * Refuge; its tables are in `spec.ts` here and imported by
- * `versions/shared/maps/balgasrefuge`. Per-object here: **78** (×2) `Alpha = 0.5`.
+ * `versions/shared/maps/balgasrefuge`. Per-object here: **78** (×2) `Alpha = 0.5`; **92** (×0
+ * here, ×5 on the Refuge) the fire pillar (`firePillarObject.ts`).
  *
  * Not built:
  *  - **84** (×0 placed): `Position[2] = terrainHeight + sin(t*0.0005)*150 -
@@ -27,4 +29,6 @@ export async function createBalgasBarracks(world: World) {
 
   // GM3rdChangeUp.cpp:100-102.
   tiles[78] = AlphaObject.at(0.5);
+  // GM3rdChangeUp.cpp:239-252 (none placed here, as 78 on the Refuge).
+  tiles[92] = BalgasFirePillarObject;
 }

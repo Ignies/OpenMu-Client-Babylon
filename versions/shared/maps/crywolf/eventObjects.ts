@@ -70,7 +70,7 @@ export class CrywolfVentObject extends MapTileObject {
       world.scene,
       [{ kinds: ['smoke21'], every: VENT_EVERY }],
       this.node.position,
-      this.node.rotation.y,
+      this.node.rotation,
       this.node.scaling.x
     );
   }

@@ -67,17 +67,16 @@ export const DOPPELGANGER2_EFFECT_ONLY_TYPES: readonly number[] = [
  *    `(0.1, 0.4, 1.0)`. `fire157` is the only mono sheet `effectParticles`
  *    carries, so it stands for all three.
  *  - **48** (x2, :532-543), the sky-blue light box: a `BITMAP_LIGHT` SubType
- *    15 mote one tick in three, jittered +/-30 in x/y and tinted
- *    `(0.6, 0.8, 1.0)`. SubType 15 is a 100-tick spiral climb
- *    (ZzzEffectParticle.cpp:3241-3250, :8139-8160); `spark03_24` is the only
- *    sparkle kind that keeps the emission's own colour, so it stands in, short.
+ *    15 mote one tick in three, up to `o->Scale * 30` off in x/y and tinted
+ *    `(0.6, 0.8, 1.0)`: `light15`, a 100-tick spiral climb
+ *    (ZzzEffectParticle.cpp:3241-3250, :8139-8160) that spreads itself.
  */
 export const DOPPELGANGER2_EMISSIONS: Partial<
   Record<number, readonly Emission[]>
 > = {
   ...VULCANUS_EMISSIONS,
   47: [{ kinds: ['fire157'], every: 1, count: 2, light: [0.1, 0.4, 1] }],
-  48: [{ kinds: ['spark03_24'], every: 3, light: [0.6, 0.8, 1], jitter: 30 }],
+  48: [{ kinds: ['light15'], every: 3, light: [0.6, 0.8, 1] }],
 };
 
 export const DOPPELGANGER2_LIGHTS: Partial<

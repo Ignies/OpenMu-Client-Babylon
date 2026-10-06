@@ -96,7 +96,7 @@ export class AtlansBubbleVentObject extends MapTileObject {
       world.scene,
       BUBBLES,
       this.node.position,
-      this.node.rotation.y,
+      this.node.rotation,
       this.node.scaling.x
     );
   }

@@ -38,9 +38,11 @@ export const KANTURU1_BLEND_MESHES: Readonly<Record<number, number>> = {};
  *  - **59** (×16): `BITMAP_SMOKE` puffs (:148-155).
  *  - **62** (×60), **107** (×77), **108** (×11): `BITMAP_CLOUD` SubType 1
  *    mist, one in eight (:164-172, :272-291).
- *  - **81** (×26) `WATERFALL_1` one in two, **82** (×35) `WATERFALL_3` every
- *    tick, **83** (×52) `WATERFALL_2` one in two (:185-201) - the falls by
- *    the wheel at 55/58.
+ *  - **81** (×26; GM area ×4) `WATERFALL_1` SubType 2 one in two, **82** (×35)
+ *    `WATERFALL_3` SubType 4 every tick, **83** (×52; GM area ×16) `WATERFALL_2`
+ *    SubType 2 one in three (:187-202), white at `o->Scale` - the falls by the
+ *    wheel at 55/58. 24 of the 26 81s lean (the GM area's 4 too), and their
+ *    drops fall along the lean.
  *  - **97** (×1): a 10-tick timer, bubbles (`BITMAP_BUBBLE` SubType 5) for
  *    the second half of it - the spring at 207/150.
  */
@@ -64,9 +66,9 @@ export const KANTURU1_EFFECT_ONLY_TYPES: readonly number[] = [
 export const KANTURU1_EMISSIONS: Partial<Record<number, readonly Emission[]>> =
   {
     59: [{ kinds: ['smoke21'], every: 3 }],
-    81: [{ kinds: ['waterfall5_9'], every: 2 }],
-    82: [{ kinds: ['waterfall5_9'], every: 1 }],
-    83: [{ kinds: ['waterfall5_9'], every: 2 }],
+    81: [{ kinds: ['waterfall1_2'], every: 2 }],
+    82: [{ kinds: ['waterfall3_4'], every: 1 }],
+    83: [{ kinds: ['waterfall2_2'], every: 3 }],
     97: [{ kinds: ['smoke0'], every: 6, scale: 0.4 }],
   };
 
