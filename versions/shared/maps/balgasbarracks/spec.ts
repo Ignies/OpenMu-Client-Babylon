@@ -22,8 +22,8 @@ export const BALGAS_BLEND_MESHES: Readonly<Record<number, number>> = {};
 /**
  * `MoveObject` :73-78 hides 2, 5, 58, 59, 60; :79-85 hides 3 (the brazier,
  * see `BALGAS_LIGHTS`); :103-113 hides 85-93. `RenderObjectVisual`
- * (:118-255) gives 2 (Barracks ×45 / Refuge ×10) and 5 (×0) the lava
- * spatter and 58-60 the smoke; 85-93 are the volcano's markers (the Refuge
+ * (:110-256) gives 2 (Barracks ×45 / Refuge ×10) the lava glow, 5 (×0)
+ * smoke puffs and 58-60 (×0) waterfall drops; 85-93 are the volcano's markers (the Refuge
  * places 92 five times; its fire sound is in `sound.ts`).
  */
 export const BALGAS_EFFECT_ONLY_TYPES: readonly number[] = [
@@ -31,15 +31,24 @@ export const BALGAS_EFFECT_ONLY_TYPES: readonly number[] = [
 ];
 
 /**
- * The lava vents (2): a `BITMAP_SMOKE` SubType 13 glow one tick in three (:119-125). 5 and the
- * smoke columns (58-60) are stand-ins.
+ * The lava vents (2): a `BITMAP_SMOKE` SubType 13 glow one tick in three (:119-125). 5 (:133-153):
+ * two `rand_fps_check(2)` a tick each step `o->Timer`; on 2 (mod 4) the first makes
+ * `BITMAP_ADV_SMOKE + 1` and `BITMAP_ADV_SMOKE` SubType 0, on 0 the second `BITMAP_CLOUD` SubType 6
+ * and `BITMAP_ADV_SMOKE` SubType 1: each pair one tick in eight. White, and none reads the scale.
+ * 58-60 (:173-186), white at `o->Scale`: `BITMAP_WATERFALL_1` SubType 2 one tick in two,
+ * `BITMAP_WATERFALL_2` SubType 1 one in three, `BITMAP_WATERFALL_3` SubType 3 every tick.
  */
 export const BALGAS_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {
   2: [{ kinds: ['smoke13'], every: 3 }],
-  5: [{ kinds: ['fire1', 'fire2'], every: 3, light: [1, 0.5, 0.2] }],
-  58: [{ kinds: ['smoke21'], every: 3 }],
-  59: [{ kinds: ['smoke21'], every: 3 }],
-  60: [{ kinds: ['smoke22'], every: 3 }],
+  5: [
+    { kinds: ['fi02_0'], every: 8 },
+    { kinds: ['fi01_0'], every: 8 },
+    { kinds: ['cloud6'], every: 8 },
+    { kinds: ['fi01_1'], every: 8 },
+  ],
+  58: [{ kinds: ['waterfall1_2'], every: 2 }],
+  59: [{ kinds: ['waterfall2_1'], every: 3 }],
+  60: [{ kinds: ['waterfall3_3'], every: 1 }],
 };
 
 /**

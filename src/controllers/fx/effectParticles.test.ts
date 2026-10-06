@@ -5,7 +5,8 @@ type FakeSprite = {
   width: number;
   angle: number;
   isVisible: boolean;
-  color: { r: number; g: number; b: number };
+  color: { r: number; g: number; b: number; a: number };
+  manager: { url: string; blendMode: number };
 };
 
 const fakes = vi.hoisted(() => ({ sprites: [] as FakeSprite[], files: [] as string[], colors: 0 }));
@@ -55,7 +56,10 @@ vi.mock('../render/babylon/exports', () => {
     isPickable = true;
     color = new Color4();
 
-    constructor(_name: string, manager: { sprites: unknown[] }) {
+    constructor(
+      _name: string,
+      public manager: { sprites: unknown[]; url: string; blendMode: number }
+    ) {
       manager.sprites.push(this);
       fakes.sprites.push(this);
     }
@@ -70,14 +74,24 @@ vi.mock('../render/babylon/exports', () => {
     isPickable = true;
     renderingGroupId = 0;
 
+    constructor(
+      _name: string,
+      public url: string
+    ) {}
+
     dispose() {}
   }
 
-  return { Color4, Constants: { ALPHA_ONEONE: 1, ALPHA_SUBTRACT: 3 }, Sprite, SpriteManager };
+  return { Color4, Constants: { ALPHA_ONEONE: 1, ALPHA_COMBINE: 2, ALPHA_SUBTRACT: 3 }, Sprite, SpriteManager };
 });
 vi.mock('../assets/mu/dataFolder', () => ({
   hasDataFile: () => true,
   downloadDataFile: async (file: string) => (fakes.files.push(file), new Uint8Array(32)),
+}));
+// An OZT sheet is decoded by the sprite loader, which needs a canvas.
+vi.mock('../assets/mu/sprites', async importOriginal => ({
+  ...(await importOriginal<object>()),
+  loadMuSprite: async (file: string) => (fakes.files.push(file), { url: `sprite:${file}`, width: 256, height: 256 }),
 }));
 vi.mock('../maps', () => ({ maps: { emissionsFor: () => undefined } }));
 vi.mock('./core', () => ({
@@ -211,12 +225,12 @@ describe('KIND_REACH', () => {
 });
 
 /** Spawns one `kind` at the origin with every roll at `roll`, then plays `ticks` 25 Hz ticks. */
-async function play(kind: KindName, scale: number, roll: number, ticks: number): Promise<FakeSprite> {
+async function play(kind: KindName, scale: number, roll: number, ticks: number, angleZ = 0): Promise<FakeSprite> {
   const original = Math.random;
   Math.random = () => roll;
 
   try {
-    await spawnParticle(scene, kind, { x: 0, y: 0, z: 0 }, 0, scale, [0.2, 0.4, 0.6]);
+    await spawnParticle(scene, kind, { x: 0, y: 0, z: 0 }, angleZ, scale, [0.2, 0.4, 0.6]);
     const sprite = fakes.sprites[fakes.sprites.length - 1];
     for (let n = 0; n < ticks; n++) tick?.();
     return sprite;
@@ -317,10 +331,203 @@ describe('smoke13, BITMAP_SMOKE SubType 13 (ZzzEffectParticle.cpp:1238-1243, :53
   });
 });
 
+const rgba = (s: FakeSprite) => [s.color.r, s.color.g, s.color.b, s.color.a].map(c => c.toFixed(3));
+
+describe('fi01_0 and fi01_1, BITMAP_ADV_SMOKE SubType 0 and 1 (ZzzEffectParticle.cpp:3292-3323, :8219-8248)', () => {
+  // `MovePosition(Position, Angle, Velocity)` for every particle (:3885), then `VectorAddScaled(Position, Velocity)`
+  // again in its own case (:8220).
+  it('moves by its velocity twice a tick: turned with the object, then as it is', async () => {
+    const sprite = await play('fi01_0', 3, 0.5, 1, Math.PI / 2);
+    expect(sprite.position.x).toBeCloseTo(0.04);
+    expect(sprite.position.z).toBeCloseTo(0.04);
+    expect(sprite.position.y).toBeCloseTo(0.04);
+  });
+
+  // SubType 0: `Scale = 0.5 + (rand() % 10) * 0.02`, `Velocity = ((r + 5) * 0.4, (r - 5) * 0.4, (r + 5) * 0.2)`; a tick
+  // x and y lose 5%, z gains 0.3, it grows 0.07 and is `LifeTime / 10` bright, white, held at 1 by the vertex colour.
+  it('SubType 0 rises faster each tick, slows sideways, grows 0.07 a tick and is LifeTime / 10 bright', async () => {
+    const sprite = await play('fi01_0', 3, 0.5, 2);
+    expect(sprite.position.x).toBeCloseTo(0.156);
+    expect(sprite.position.y).toBeCloseTo(0.086);
+    expect(sprite.position.z).toBeCloseTo(0);
+    expect(sprite.width).toBeCloseTo((128 * 0.74) / 100);
+    expect(sprite.angle).toBe(0);
+    expect(rgba(sprite)).toEqual(['1.000', '1.000', '1.000', '1.000']);
+    disposeEffectParticles();
+    expect(rgba(await play('fi01_0', 1, 0.5, 14))).toEqual(['0.800', '0.800', '0.800', '1.000']);
+    expect(sprite.manager.blendMode).toBe(1);
+    expect(fakes.files).toEqual(['Effect/fi01.OZJ', 'Effect/fi01.OZJ']);
+  });
+
+  // SubType 1, the `else`: `Scale = 1 + r * 0.1`, `Velocity = ((r + 5) * 0.2, (r - 5) * 0.2, (r + 5) * 0.1)`, growing 0.09.
+  it('SubType 1 starts bigger and slower and grows 0.09 a tick', async () => {
+    const sprite = await play('fi01_1', 3, 0.5, 2);
+    expect(sprite.position.x).toBeCloseTo(0.078);
+    expect(sprite.position.y).toBeCloseTo(0.046);
+    expect(sprite.width).toBeCloseTo((128 * 1.68) / 100);
+    expect(rgba(sprite)).toEqual(['1.000', '1.000', '1.000', '1.000']);
+  });
+
+  it('lives 20 + rand() % 5 ticks', async () => {
+    expect((await play('fi01_0', 1, 0, 19)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('fi01_0', 1, 0, 20)).isVisible).toBe(false);
+    disposeEffectParticles();
+    expect((await play('fi01_1', 1, 0.999999, 23)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('fi01_1', 1, 0.999999, 24)).isVisible).toBe(false);
+  });
+});
+
+describe('fi02_0, BITMAP_ADV_SMOKE + 1 SubType 0 (ZzzEffectParticle.cpp:3325-3378, :8249-8271, :9104-9116)', () => {
+  // `Rotation = rand() % 360`, `Scale = 0.5`, then no `break`: BITMAP_TRUE_FIRE's SubType 0 sets `LifeTime = 24` and
+  // `Velocity = ((r - 5) * 0.4, 0, (r + 5) * 0.2)`. A tick it moves twice, z gains 0.6, it wanders `rand() % 4 - 2`
+  // (z * 0.8), grows 0.05, turns 1 or 2 degrees and is `LifeTime / 25`, drawn `EnableAlphaBlend3` on fi02.tga, whose
+  // alpha RenderSprite also takes from the light (ZzzOpenglUtil.cpp:918-933).
+  it('rises twice its velocity, grows 0.05 a tick and fades as LifeTime / 25 in colour and alpha', async () => {
+    const sprite = await play('fi02_0', 3, 0.5, 2);
+    expect([sprite.position.x, sprite.position.z]).toEqual([0, 0]);
+    expect(sprite.position.y).toBeCloseTo(0.092);
+    expect(sprite.width).toBeCloseTo((256 * 0.6) / 100);
+    expect(sprite.angle).toBeCloseTo((184 * Math.PI) / 180);
+    expect(rgba(sprite)).toEqual(['0.880', '0.880', '0.880', '0.880']);
+    expect(sprite.manager.blendMode).toBe(2);
+    expect(sprite.manager.url).toBe('sprite:Effect/fi02.OZT');
+  });
+
+  it('is pushed up to 2 the other way and wanders up to 2 a tick', async () => {
+    const sprite = await play('fi02_0', 1, 0, 1);
+    expect(sprite.position.x).toBeCloseTo(-0.06);
+    expect(sprite.position.z).toBeCloseTo(-0.02);
+    expect(sprite.position.y).toBeCloseTo(0.004);
+    expect(sprite.angle).toBeCloseTo(Math.PI / 180);
+  });
+
+  it('lives 24 ticks', async () => {
+    expect((await play('fi02_0', 1, 0.5, 23)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('fi02_0', 1, 0.5, 24)).isVisible).toBe(false);
+  });
+});
+
+describe('cloud6, BITMAP_CLOUD SubType 6 (ZzzEffectParticle.cpp:2815-2824, :7550-7565)', () => {
+  // `LifeTime = 25 + rand() % 5`, `Rotation = rand() % 360`, `Scale = 0.2`, `Velocity = ((r + 5) * 0.4, 0, (r + 5) * 0.2)`;
+  // a tick it moves twice, wanders, grows 0.05, turns and is `LifeTime / 50`, white, additive on clouds.jpg.
+  it('moves like fi02_0 at a fifth of the size and is LifeTime / 50 bright', async () => {
+    const sprite = await play('cloud6', 3, 0.5, 2);
+    expect(sprite.position.x).toBeCloseTo(0.156);
+    expect(sprite.position.y).toBeCloseTo(0.092);
+    expect(sprite.position.z).toBeCloseTo(0);
+    expect(sprite.width).toBeCloseTo((256 * 0.3) / 100);
+    expect(sprite.angle).toBeCloseTo((184 * Math.PI) / 180);
+    expect(rgba(sprite)).toEqual(['0.500', '0.500', '0.500', '1.000']);
+    expect(sprite.manager.blendMode).toBe(1);
+    expect(fakes.files).toEqual(['Effect/clouds.OZJ']);
+  });
+
+  it('lives 25 + rand() % 5 ticks', async () => {
+    expect((await play('cloud6', 1, 0, 24)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('cloud6', 1, 0, 25)).isVisible).toBe(false);
+    disposeEffectParticles();
+    expect((await play('cloud6', 1, 0.999999, 28)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('cloud6', 1, 0.999999, 29)).isVisible).toBe(false);
+  });
+});
+
+describe('waterfall1_2, BITMAP_WATERFALL_1 SubType 2 (ZzzEffectParticle.cpp:3385-3405, :8359-8373)', () => {
+  // 30 ticks, `Rotation = rand() % 360`, `Scale = 1.6 + Scale`, `Velocity[2] = -(rand() % 5 + 7)`, 0.2 grey; a tick it
+  // loses 0.005 of its scale, falls 0.1 slower and brightens 1.1 while more than 20 ticks are left.
+  it('falls, slowing 0.1 a tick, 1.6 bigger than it is made, and brightens 1.1 a tick at first', async () => {
+    const sprite = await play('waterfall1_2', 0.5, 0.5, 3);
+    expect([sprite.position.x, sprite.position.z]).toEqual([0, 0]);
+    expect(sprite.position.y).toBeCloseTo(-0.267);
+    expect(sprite.width).toBeCloseTo((64 * 2.085) / 100);
+    expect(sprite.angle).toBeCloseTo(Math.PI);
+    expect(rgba(sprite)).toEqual(['0.266', '0.266', '0.266', '1.000']);
+    expect(fakes.files).toEqual(['Effect/waterFall1.OZJ']);
+  });
+
+  // WATERFALL_5 dims below 8 ticks left; WATERFALL_1 below 5.
+  it('dims 1.2 a tick below 5 ticks left and lives 30', async () => {
+    expect(rgba(await play('waterfall1_2', 1, 0.5, 25))[0]).toBe('0.472');
+    disposeEffectParticles();
+    expect(rgba(await play('waterfall1_2', 1, 0.5, 26))[0]).toBe('0.393');
+    disposeEffectParticles();
+    expect(rgba(await play('waterfall5_9', 1, 0.5, 25))[0]).toBe('0.273');
+    disposeEffectParticles();
+    expect((await play('waterfall1_2', 1, 0.5, 29)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('waterfall1_2', 1, 0.5, 30)).isVisible).toBe(false);
+  });
+});
+
+describe('waterfall2_1, BITMAP_WATERFALL_2 SubType 1 (ZzzEffectParticle.cpp:3501-3540, :8494-8510)', () => {
+  // `Scale = (rand() % 6 + 6) * 0.1` whatever it is made with, `Velocity[2] = -(rand() % 3 + 3)`, `(0, 0.4, 0.4)`, 50
+  // ticks; a tick it grows 0.03, falls 0.1 slower and dims 1.05.
+  it('falls slowing 0.1 a tick, grows 0.03 and dims 1.05 a tick, teal', async () => {
+    const sprite = await play('waterfall2_1', 3, 0.5, 2);
+    expect([sprite.position.x, sprite.position.z]).toEqual([0, 0]);
+    expect(sprite.position.y).toBeCloseTo(-0.079);
+    expect(sprite.width).toBeCloseTo((64 * 0.96) / 100);
+    expect(sprite.angle).toBeCloseTo(Math.PI);
+    expect(rgba(sprite)).toEqual(['0.000', '0.363', '0.363', '1.000']);
+    expect(fakes.files).toEqual(['Effect/waterFall2.OZJ']);
+  });
+
+  // `Position += (rand() % 20 - 10, rand() % 20 - 10, rand() % 40 - 20)`; a tick `Velocity = (rand() % 20 - 10) * 0.1`
+  // in x and y, which the next tick moves it by.
+  it('is made up to 10 aside and 20 below and wobbles up to 1 a tick', async () => {
+    const sprite = await play('waterfall2_1', 1, 0, 2);
+    expect(sprite.position.x).toBeCloseTo(-0.11);
+    expect(sprite.position.z).toBeCloseTo(-0.11);
+    expect(sprite.position.y).toBeCloseTo(-0.259);
+  });
+
+  it('dims 1.1 more below 10 ticks left and lives 50', async () => {
+    expect(rgba(await play('waterfall2_1', 1, 0.5, 40))[1]).toBe('0.057');
+    disposeEffectParticles();
+    expect(rgba(await play('waterfall2_1', 1, 0.5, 41))[1]).toBe('0.049');
+    disposeEffectParticles();
+    expect((await play('waterfall2_1', 1, 0.5, 49)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('waterfall2_1', 1, 0.5, 50)).isVisible).toBe(false);
+  });
+});
+
+describe('waterfall3_3, BITMAP_WATERFALL_3 SubType 3 (ZzzEffectParticle.cpp:3602-3611, :8559-8567)', () => {
+  // 60 ticks, `Scale *= (rand() % 10 + 15) * 0.02`, `Velocity[2] = -1`, `Position += (rand() % 40 - 20, 0,
+  // rand() % 25 - 10)`, in the light it is made with; a tick it grows 0.005, falls 0.05 faster and keeps 0.97 of it.
+  it('sinks faster each tick, grows 0.005 and keeps 0.97 of its light a tick', async () => {
+    const sprite = await play('waterfall3_3', 2, 0.5, 2);
+    expect([sprite.position.x, sprite.position.z]).toEqual([0, 0]);
+    expect(sprite.position.y).toBeCloseTo(-0.0005);
+    expect(sprite.width).toBeCloseTo((64 * 0.81) / 100);
+    expect(sprite.angle).toBeCloseTo(Math.PI);
+    expect(rgba(sprite)).toEqual(['0.188', '0.376', '0.565', '1.000']);
+    expect(fakes.files).toEqual(['Effect/waterFall3.OZJ']);
+  });
+
+  it('is made up to 20 aside in x and 10 below', async () => {
+    const sprite = await play('waterfall3_3', 1, 0, 1);
+    expect(sprite.position.x).toBeCloseTo(-0.2);
+    expect(sprite.position.z).toBeCloseTo(0);
+    expect(sprite.position.y).toBeCloseTo(-0.11);
+  });
+
+  it('lives 60 ticks', async () => {
+    expect((await play('waterfall3_3', 1, 0.5, 59)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('waterfall3_3', 1, 0.5, 60)).isVisible).toBe(false);
+  });
+});
+
 describe('the particle tick', () => {
   it('makes no colour: one is reused frame after frame', async () => {
     await play('trueFire', 1, 0.5, 1);
     await play('smoke13', 1, 0.5, 1);
+    await play('fi02_0', 1, 0.5, 1);
     const made = fakes.colors;
     for (let n = 0; n < 10; n++) tick?.();
     expect(fakes.colors).toBe(made);

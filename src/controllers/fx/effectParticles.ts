@@ -6,7 +6,7 @@ import {
   SpriteManager,
   type Scene,
 } from '../render/babylon/exports';
-import { downloadDataFile, hasDataFile } from '@/controllers/assets/mu';
+import { downloadDataFile, hasDataFile, loadMuSprite } from '@/controllers/assets/mu';
 import { maps } from '../maps';
 import { EFFECT_RENDERING_GROUP, darkCardGain, keepDepthForEffects, spriteLevel } from './core';
 import { devQuery, devQueryNumber } from '../../core/devSeams';
@@ -32,13 +32,18 @@ type TextureKey =
   | 'fireHik2'
   | 'fireHik3'
   | 'fireHik3Mono'
+  | 'waterfall1'
+  | 'waterfall2'
+  | 'waterfall3'
   | 'waterfall5'
   | 'spark03'
   | 'flareBlue'
   | 'fantaB'
   | 'fantaF'
   | 'clud64'
-  | 'flare01';
+  | 'flare01'
+  | 'fi01'
+  | 'fi02';
 
 const TEXTURES: Record<
   TextureKey,
@@ -52,6 +57,9 @@ const TEXTURES: Record<
   fireHik2: { file: 'Effect/firehik02.OZJ', size: 64 },
   fireHik3: { file: 'Effect/firehik03.OZJ', size: 64 },
   fireHik3Mono: { file: 'Effect/firehik_mono03.OZJ', size: 64 },
+  waterfall1: { file: 'Effect/waterFall1.OZJ', size: 64 },
+  waterfall2: { file: 'Effect/waterFall2.OZJ', size: 64 },
+  waterfall3: { file: 'Effect/waterFall3.OZJ', size: 64 },
   waterfall5: { file: 'Effect/waterFall5.OZJ', size: 64 },
   spark03: { file: 'Effect/Spark03.OZJ', size: 32 },
   flareBlue: { file: 'Effect/flareBlue.OZJ', size: 64 },
@@ -59,14 +67,17 @@ const TEXTURES: Record<
   fantaF: { file: 'Effect/fantaF.OZJ', size: 64 },
   clud64: { file: 'Effect/clud64.OZJ', size: 64 },
   flare01: { file: 'Effect/flare01.OZJ', size: 64 },
+  fi01: { file: 'Effect/fi01.OZJ', size: 128 },
+  fi02: { file: 'Effect/fi02.OZT', size: 256 },
 };
 
 /**
  * `dark` is a held sprite's `EnableAlphaBlendMinus`: black, with the sheet's
  * luminance as its coverage (`coverageSheet`), the rule the effects draw dark
- * art by (controllers/fx/core `darkCardGain`).
+ * art by (controllers/fx/core `darkCardGain`). `alpha` is `EnableAlphaBlend3`
+ * (SRC_ALPHA, ONE_MINUS_SRC_ALPHA) on a sheet with alpha (OZT).
  */
-type Blend = 'add' | 'subtract' | 'dark';
+type Blend = 'add' | 'subtract' | 'dark' | 'alpha';
 
 type Particle = {
   live: boolean;
@@ -249,6 +260,101 @@ function trueFireKind(texture: TextureKey, life: number): ParticleKind {
   };
 }
 
+/**
+ * `VectorAddScaled(Position, Velocity)` in the particle's own case: a second move, as it is (the
+ * tick made the first, turned with the object, MovePosition, ZzzEffectParticle.cpp:3885); then it
+ * loses 5% sideways.
+ */
+function moveAgain(p: Particle, f: number): void {
+  p.px += p.vx * f;
+  p.py += p.vy * f;
+  p.pz += p.vz * f;
+
+  const drag = Math.pow(0.95, f);
+  p.vx *= drag;
+  p.vy *= drag;
+}
+
+/**
+ * `BITMAP_ADV_SMOKE` (fi01.jpg, additive), whatever scale it is made with: 20 + rand() % 5 ticks,
+ * upright; SubType 0 `0.5 + r * 0.02` big and pushed `((r + 5) * 0.4, (r - 5) * 0.4, (r + 5) * 0.2)`,
+ * SubType 1 (the `else`) `1 + r * 0.1` and half that (ZzzEffectParticle.cpp:3292-3323). A tick it
+ * moves again, rises 0.3 faster, grows 0.07 (SubType 1 0.09) and is `LifeTime / 10`, white, held at
+ * 1 by the vertex colour (:8219-8248).
+ */
+function advSmokeKind(scaleBase: number, scaleStep: number, push: number, grow: number): ParticleKind {
+  return {
+    texture: 'fi01',
+    blend: 'add',
+    init(p) {
+      p.lifeTime = 20 + rand(5);
+      p.scale = scaleBase + rand(10) * scaleStep;
+      p.vx = (rand(10) + 5) * 0.4 * push;
+      p.vy = (rand(10) - 5) * 0.4 * push;
+      p.vz = (rand(10) + 5) * 0.2 * push;
+    },
+    update(p, f) {
+      moveAgain(p, f);
+      p.vz += 0.3 * f;
+      p.scale += grow * f;
+      p.lr = p.lg = p.lb = Math.min(1, p.lifeTime / 10);
+    },
+    color: plainColor,
+  };
+}
+
+/**
+ * `BITMAP_WATERFALL_1` SubType 2 and `BITMAP_WATERFALL_5` SubType 9: 30 ticks, `Rotation = rand() % 360`,
+ * `scaleBase + Scale` big, falling `rand() % 5 + 7`, 0.2 grey; a tick it loses 0.005 of its scale,
+ * falls 0.1 slower, brightens 1.1 while more than 20 ticks are left and dims 1.2 below `fadeBelow`
+ * (ZzzEffectParticle.cpp:3385-3405, :3482-3490, :8359-8373, :8447-8464).
+ */
+function waterfallKind(texture: TextureKey, scaleBase: number, fadeBelow: number): ParticleKind {
+  return {
+    texture,
+    blend: 'add',
+    init(p, scale) {
+      p.lifeTime = 30;
+      p.rotation = rand(360);
+      p.scale = scaleBase + scale;
+      p.vz = -(rand(5) + 7);
+      p.lr = p.lg = p.lb = 0.2;
+    },
+    update(p, f) {
+      p.scale -= f * 0.005;
+      p.vz += 0.1 * f;
+
+      const gain =
+        p.lifeTime < fadeBelow
+          ? Math.pow(1 / 1.2, f)
+          : p.lifeTime > 20
+            ? Math.pow(1.1, f)
+            : 1;
+
+      p.lr *= gain;
+      p.lg *= gain;
+      p.lb *= gain;
+    },
+    color: plainColor,
+  };
+}
+
+/**
+ * The tick `BITMAP_ADV_SMOKE + 1` and `BITMAP_CLOUD` SubType 6 share: it moves again, rises 0.6
+ * faster, wanders `rand() % 4 - 2` (z * 0.8), grows 0.05, turns 1 or 2 degrees and is
+ * `LifeTime / fade`, white (ZzzEffectParticle.cpp:7553-7564, :8250-8270).
+ */
+function puffMove(p: Particle, f: number, fade: number): void {
+  moveAgain(p, f);
+  p.vz += 0.6 * f;
+  p.px += (rand(4) - 2) * f;
+  p.py += (rand(4) - 2) * f;
+  p.pz += (rand(4) - 2) * 0.8 * f;
+  p.scale += 0.05 * f;
+  p.lr = p.lg = p.lb = p.lifeTime / fade;
+  p.rotation += (1 + rand(2)) * f;
+}
+
 const KINDS = {
   fire1: fireKind('fireHik1', {
     lifeBase: 27,
@@ -341,6 +447,48 @@ const KINDS = {
 
   /** `BITMAP_TRUE_BLUE`: every line `BITMAP_TRUE_FIRE`'s but the sheet, fantaB.jpg (ZzzOpenData.cpp:5198). */
   trueBlue: trueFireKind('fantaB', 24),
+
+  fi01_0: advSmokeKind(0.5, 0.02, 1, 0.07),
+
+  fi01_1: advSmokeKind(1, 0.1, 0.5, 0.09),
+
+  /**
+   * `BITMAP_ADV_SMOKE + 1` SubType 0 (fi02.tga, `EnableAlphaBlend3`): `Rotation = rand() % 360`,
+   * `Scale = 0.5`, then with no `break` `BITMAP_TRUE_FIRE`'s SubType 0: 24 ticks, pushed
+   * `((r - 5) * 0.4, 0, (r + 5) * 0.2)` (ZzzEffectParticle.cpp:3325-3378). It fades in its alpha
+   * too: RenderSprite colours a sheet with alpha `(L, L, L, L)` (:9104-9116, ZzzOpenglUtil.cpp:918-933).
+   */
+  fi02_0: {
+    texture: 'fi02',
+    blend: 'alpha',
+    init(p) {
+      p.lifeTime = 24;
+      p.rotation = rand(360);
+      p.scale = 0.5;
+      p.vx = (rand(10) - 5) * 0.4;
+      p.vz = (rand(10) + 5) * 0.2;
+    },
+    update: (p, f) => puffMove(p, f, 25),
+    color: (p, out) => out.set(p.lr, p.lg, p.lb, p.lr),
+  } satisfies ParticleKind,
+
+  /**
+   * `BITMAP_CLOUD` SubType 6 (clouds.jpg, additive): 25 + rand() % 5 ticks, `Rotation = rand() % 360`,
+   * `Scale = 0.2`, pushed `((r + 5) * 0.4, 0, (r + 5) * 0.2)` (ZzzEffectParticle.cpp:2815-2824).
+   */
+  cloud6: {
+    texture: 'cloud',
+    blend: 'add',
+    init(p) {
+      p.lifeTime = 25 + rand(5);
+      p.rotation = rand(360);
+      p.scale = 0.2;
+      p.vx = (rand(10) + 5) * 0.4;
+      p.vz = (rand(10) + 5) * 0.2;
+    },
+    update: (p, f) => puffMove(p, f, 50),
+    color: plainColor,
+  } satisfies ParticleKind,
 
   smoke0: {
     texture: 'smoke',
@@ -524,30 +672,71 @@ const KINDS = {
     color: plainColor,
   } satisfies ParticleKind,
 
-  waterfall5_9: {
-    texture: 'waterfall5',
+  waterfall5_9: waterfallKind('waterfall5', 0.6, 8),
+
+  waterfall1_2: waterfallKind('waterfall1', 1.6, 5),
+
+  /**
+   * `BITMAP_WATERFALL_2` SubType 1 (waterFall2.jpg, additive): 50 ticks, `Rotation = rand() % 360`,
+   * `(rand() % 6 + 6) * 0.1` big whatever its scale, falling `rand() % 3 + 3`, made up to 10 aside and
+   * 20 off in height, `(0, 0.4, 0.4)` (ZzzEffectParticle.cpp:3501-3540). A tick it grows 0.03, takes
+   * `(rand() % 20 - 10) * 0.1` sideways, falls 0.1 slower and dims 1.05, 1.1 more below 10 ticks
+   * left (:8494-8510).
+   */
+  waterfall2_1: {
+    texture: 'waterfall2',
     blend: 'add',
-    init(p, scale) {
-      p.lifeTime = 30;
+    init(p) {
+      p.lifeTime = 50;
       p.rotation = rand(360);
-      p.scale = 0.6 + scale;
-      p.vz = -(rand(5) + 7);
-      p.lr = p.lg = p.lb = 0.2;
+      p.scale = (rand(6) + 6) * 0.1;
+      p.vz = -(rand(3) + 3);
+      p.px += rand(20) - 10;
+      p.py += rand(20) - 10;
+      p.pz += rand(40) - 20;
+      p.lr = 0;
+      p.lg = p.lb = 0.4;
     },
     update(p, f) {
-      p.scale -= f * 0.005;
+      p.scale += 0.03 * f;
+      p.vx = (rand(20) - 10) * 0.1;
+      p.vy = (rand(20) - 10) * 0.1;
       p.vz += 0.1 * f;
 
-      const gain =
-        p.lifeTime < 8
-          ? Math.pow(1 / 1.2, f)
-          : p.lifeTime > 20
-            ? Math.pow(1.1, f)
-            : 1;
+      const gain = Math.pow(1 / 1.05, f) * (p.lifeTime < 10 ? Math.pow(1 / 1.1, f) : 1);
 
-      p.lr *= gain;
       p.lg *= gain;
       p.lb *= gain;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
+
+  /**
+   * `BITMAP_WATERFALL_3` SubType 3 (waterFall3.jpg, additive): 60 ticks, `Scale * (rand() % 10 + 15) * 0.02`,
+   * `Rotation = rand() % 360`, falling 1, made up to 20 aside in x and -10 to 14 in height, in the light it
+   * is made with (ZzzEffectParticle.cpp:3602-3611). A tick it grows 0.005, falls 0.05 faster and keeps
+   * 0.97 of its light (:8559-8567).
+   */
+  waterfall3_3: {
+    texture: 'waterfall3',
+    blend: 'add',
+    init(p, scale) {
+      p.lifeTime = 60;
+      p.vz = -1;
+      p.scale = scale * (rand(10) + 15) * 0.02;
+      p.rotation = rand(360);
+      p.px += rand(40) - 20;
+      p.pz += rand(25) - 10;
+    },
+    update(p, f) {
+      p.scale += 0.005 * f;
+      p.vz -= 0.05 * f;
+
+      const keep = Math.pow(0.97, f);
+
+      p.lr *= keep;
+      p.lg *= keep;
+      p.lb *= keep;
     },
     color: plainColor,
   } satisfies ParticleKind,
@@ -724,6 +913,14 @@ async function coverageSheet(jpeg: Blob): Promise<{ url: string; cover: number }
   return { url: URL.createObjectURL(png), cover: peak / 255 };
 }
 
+/** An OZJ sheet: the JPEG past its header, or its coverage for `dark`. */
+async function jpegSheet(file: string, blend: Blend): Promise<{ url: string; cover: number }> {
+  const ozj = await downloadDataFile(file);
+  const blob = new Blob([ozj.slice(OZJ_HEADER_SIZE)], { type: 'image/jpeg' });
+
+  return blend === 'dark' ? coverageSheet(blob) : { url: URL.createObjectURL(blob), cover: 1 };
+}
+
 let scene: Scene | null = null;
 const pools = new Map<string, Pool>();
 const loading = new Map<string, Promise<Pool | null>>();
@@ -753,16 +950,9 @@ async function getPool(
       // fetch per emission for the rest of the session (`hasDataFile`).
       if (!hasDataFile(file)) return null;
 
-      const ozj = await downloadDataFile(file);
-
-      const blob = new Blob([ozj.slice(OZJ_HEADER_SIZE)], {
-        type: 'image/jpeg',
-      });
-
-      const sheet =
-        blend === 'dark'
-          ? await coverageSheet(blob)
-          : { url: URL.createObjectURL(blob), cover: 1 };
+      const sheet = /\.ozt$/i.test(file)
+        ? { url: (await loadMuSprite(file)).url, cover: 1 }
+        : await jpegSheet(file, blend);
 
       const manager = new SpriteManager(
         `effectParticles_${key}`,
@@ -775,9 +965,9 @@ async function getPool(
       manager.blendMode =
         blend === 'add'
           ? Constants.ALPHA_ONEONE
-          : blend === 'dark'
-            ? Constants.ALPHA_COMBINE
-            : Constants.ALPHA_SUBTRACT;
+          : blend === 'subtract'
+            ? Constants.ALPHA_SUBTRACT
+            : Constants.ALPHA_COMBINE;
 
       manager.disableDepthWrite = true;
       manager.isPickable = false;
@@ -975,6 +1165,10 @@ export const KIND_REACH: Record<KindName, Reach> = {
   trueFire: { travel: 1, base: 0, perScale: 0.46 },
   trueFire5: { travel: 0.85, base: 0, perScale: 0.46 },
   trueBlue: { travel: 1, base: 0, perScale: 0.46 },
+  fi01_0: { travel: 3.5, base: 2.14, perScale: 0 },
+  fi01_1: { travel: 2.55, base: 3.68, perScale: 0 },
+  fi02_0: { travel: 5.15, base: 3.08, perScale: 0 },
+  cloud6: { travel: 7.3, base: 2.99, perScale: 0 },
   smoke0: { travel: 0.55, base: 0.72, perScale: 0 },
   smoke13: { travel: 0, base: 1.4, perScale: 0 },
   smoke2: { travel: 3.4, base: 0.58, perScale: 0 },
@@ -984,6 +1178,9 @@ export const KIND_REACH: Record<KindName, Reach> = {
   smoke22: { travel: 3.7, base: 1.09, perScale: 0.29 },
   smoke60: { travel: 3.7, base: 1.09, perScale: 0.29 },
   waterfall5_9: { travel: 2.9, base: 0.28, perScale: 0.46 },
+  waterfall1_2: { travel: 2.9, base: 0.73, perScale: 0.46 },
+  waterfall2_1: { travel: 1.7, base: 1.18, perScale: 0 },
+  waterfall3_3: { travel: 1.62, base: 0.14, perScale: 0.22 },
   spark03_24: { travel: 0.6, base: 0.19, perScale: 0 },
   light0: { travel: 0.6, base: 0, perScale: 0.45 },
   wingFlareBlue: { travel: 0, base: 0, perScale: 0.46 },

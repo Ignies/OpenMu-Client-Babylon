@@ -88,7 +88,14 @@ shared pools, textures and particle recipes other folders reuse.
   `trueFire` (`BITMAP_TRUE_FIRE`, fantaF.jpg) takes its sideways and upward push at birth, rises,
   shrinks and fades with its life (24 ticks, `trueFire5` 20); `trueBlue` (`BITMAP_TRUE_BLUE`) is
   the same particle on fantaB.jpg; `smoke13` (`BITMAP_SMOKE` SubType 13) stays put, grows and fades
-  orange.
+  orange; `fi01_0` / `fi01_1` (`BITMAP_ADV_SMOKE` SubType 0 / 1) move by their velocity twice a tick,
+  turned with the object and as it is, rise faster, grow and are `LifeTime / 10` bright, held at 1;
+  `fi02_0` (`BITMAP_ADV_SMOKE + 1`, fi02.tga drawn `alpha`) takes `BITMAP_TRUE_FIRE`'s life and push,
+  wanders, turns and fades in colour and alpha; `cloud6` (`BITMAP_CLOUD` SubType 6) moves the same at a
+  fifth of its size, additive, `LifeTime / 50` bright; `waterfall1_2` (`BITMAP_WATERFALL_1` SubType 2)
+  falls as `waterfall5_9` 1.6 bigger and dims below 5 ticks left, not 8; `waterfall2_1`
+  (`BITMAP_WATERFALL_2` SubType 1) is made off its spot, falls, wobbles, grows and dims teal;
+  `waterfall3_3` (`BITMAP_WATERFALL_3` SubType 3) sinks faster each tick and keeps 0.97 of its light.
 - `afterimage.test.ts`: a copy takes the drawn meshes of each part onto a skeleton of its own, posed on
   the clip's first key while the body keeps its own; a placed part stands where a body facing that way
   would draw it, at its alpha; an unplaced or 0-alpha part is not drawn; it ends taking its copies along.
@@ -171,6 +178,15 @@ Init: random yaw, horizontal speed (64..319) x 0.1 cm/tick, rise 8..23 cm/tick, 
 life 32..47 ticks. Move: drag x0.9 a tick, gravity 3 cm/tick², bounce at half speed (costs 4
 ticks), tumble `Scale x 32°` a tick, a puff 1 tick in 10. Each piece is a `spawnModel` driven from
 here, so `debris` comes before `model` in the list. Spawned from `deathVisuals.ts` and skill files.
+
+### effectParticles.ts
+A kind names its sheet and blend: `add` (`EnableAlphaBlend`), `subtract` (`EnableAlphaBlendMinus`;
+held sprites draw it `dark`), or `alpha` for a sheet with alpha (OZT, decoded by `loadMuSprite`)
+drawn `EnableAlphaBlend3`. RenderSprite colours such a sheet
+`(L, L, L, L)` (ZzzOpenglUtil.cpp:918-933), so an `alpha` kind writes its alpha into the colour too.
+Every particle moves by its velocity turned with the object first (MovePosition,
+ZzzEffectParticle.cpp:3885); a kind whose case adds `VectorAddScaled` moves a second time
+(`moveAgain`).
 
 ### feathers.ts
 Jitter up to 40 cm per axis, random tumble 0..5° a tick, `Alpha` 0.6..0.8. The original drops these
