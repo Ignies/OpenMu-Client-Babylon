@@ -15,7 +15,7 @@ import { MuWindows } from '@/controllers/interface/windowManager';
 import { Hero } from '../hero';
 import { Session } from '../session';
 import { encodeModuleFrame } from './packetWire';
-import { game, moduleHost } from './ports';
+import { game, installModuleRouter, moduleHost, moduleRouter } from './ports';
 
 afterEach(() => runInAction(() => (Ecs.world = null)));
 
@@ -62,6 +62,21 @@ describe('the game side of the module API', () => {
     game.sendPacket(frame);
     send.mockRestore();
     expect(sent).toEqual([[...frame]]);
+  });
+
+  it('routes a module packet off the socket to the module that listens, and counts one nobody hears', () => {
+    const stop = installModuleRouter();
+    const heard: number[][] = [];
+    moduleHost.api('ports_test').onPacket(p => heard.push([...p]));
+    const emit = (frame: Uint8Array) => EventBus.emit('ModulePacket', new DataView(frame.buffer, frame.byteOffset, frame.byteLength));
+    const unheard = moduleRouter.dropped.noListener;
+    emit(encodeModuleFrame('ports_test', Uint8Array.from([4, 5])));
+    emit(encodeModuleFrame('ports_nobody', Uint8Array.from([6])));
+    stop();
+    emit(encodeModuleFrame('ports_test', Uint8Array.from([7])));
+    moduleHost.dispose('ports_test');
+    expect(heard).toEqual([[4, 5]]);
+    expect(moduleRouter.dropped.noListener).toBe(unheard + 1);
   });
 
   it('follows map changes through the warp module', () => {

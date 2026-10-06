@@ -12,9 +12,10 @@ import { ServerToClientPackets as generated } from '../../shared/packets/ServerT
 import { ChangeMapServerInfoPacket } from '../../season6/packets/mapServerMove';
 import { BandRelayPacket } from '../../season6/packets/bandRelay';
 import { PingRelayPacket } from '../../season6/packets/pingRelay';
+import { ModulePacket } from '../../season6/packets/modulePacket';
 
-/** The generated set plus the hand-written map-server move (C1 B1 00) and the proxy's relays (C1 FA band, C1 FB ping). */
-export const ServerToClientPackets = [...generated, ChangeMapServerInfoPacket, BandRelayPacket, PingRelayPacket];
-export { ChangeMapServerInfoPacket, BandRelayPacket, PingRelayPacket };
+/** The generated set plus the hand-written map-server move (C1 B1 00), the proxy's relays (C1 FA band, C1 FB ping) and the module packet (E8). */
+export const ServerToClientPackets = [...generated, ChangeMapServerInfoPacket, BandRelayPacket, PingRelayPacket, ModulePacket];
+export { ChangeMapServerInfoPacket, BandRelayPacket, PingRelayPacket, ModulePacket };
 export { ConnectServerPackets } from '../../shared/packets/ConnectServerPackets';
 export { ClientToServerPackets } from '../../shared/packets/ClientToServerPackets';
