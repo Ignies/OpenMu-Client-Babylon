@@ -288,6 +288,43 @@ describe('light0, BITMAP_LIGHT SubType 0 (ZzzEffectParticle.cpp:3161-3164, :7943
   });
 });
 
+describe('light15, BITMAP_LIGHT SubType 15 (ZzzEffectParticle.cpp:3241-3250, :8139-8160)', () => {
+  // `rand() % 10 + 100` ticks, `Gravity = rand() % 3 + 2`, `(rand() % 20 + 20) / 100 * Scale`, `Alpha = 0`; a tick its
+  // phase gains `(rand() % 10 + 5) * 0.01`, it stands `Gravity * 2` off where it was made at that phase and rises
+  // `Gravity`, loses 0.001 of its scale and gains 0.1 of alpha; its light is the one it was made with times alpha.
+  it('climbs a spiral, shrinks 0.001 a tick and fades in 0.1 a tick', async () => {
+    const sprite = await play('light15', 1.52, 0.5, 2);
+    expect(sprite.position.x).toBeCloseTo((Math.sin(0.2) * 6) / 100);
+    expect(sprite.position.z).toBeCloseTo((Math.cos(0.2) * 6) / 100);
+    expect(sprite.position.y).toBeCloseTo(0.06);
+    expect(sprite.width).toBeCloseTo((64 * 0.454) / 100);
+    expect(sprite.angle).toBe(0);
+    expect(rgba(sprite)).toEqual(['0.040', '0.080', '0.120', '1.000']);
+    expect(fakes.files).toEqual(['Effect/flare01.OZJ']);
+    disposeEffectParticles();
+    expect(rgba(await play('light15', 1.52, 0.5, 20))).toEqual(['0.200', '0.400', '0.600', '1.000']);
+  });
+
+  // In its last 20 ticks it loses 0.01 more of its scale and 0.1 of alpha a tick.
+  it('fades out over its last 20 ticks and lives rand() % 10 + 100', async () => {
+    expect(rgba(await play('light15', 1.52, 0.5, 84))[0]).toBe('0.200');
+    disposeEffectParticles();
+    expect(rgba(await play('light15', 1.52, 0.5, 85))[0]).toBe('0.180');
+    disposeEffectParticles();
+    expect((await play('light15', 1.52, 0.5, 104)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('light15', 1.52, 0.5, 105)).isVisible).toBe(false);
+  });
+
+  // Each of its makers, the Doppelganger light boxes, makes it `rand() % (int)(Scale * 60) - that / 2` off in x and y
+  // (GMDoppelGanger4.cpp:387-398).
+  it('is made up to 30 times its scale off in x and y', async () => {
+    const sprite = await play('light15', 1.52, 0, 1);
+    expect(sprite.position.x).toBeCloseTo((-45 + Math.sin(0.05) * 4) / 100);
+    expect(sprite.position.z).toBeCloseTo((-45 + Math.cos(0.05) * 4) / 100);
+  });
+});
+
 describe('trueFire, BITMAP_TRUE_FIRE SubType 0 and 5 (ZzzEffectParticle.cpp:3337-3378, :8273-8337)', () => {
   // `Velocity = ((rand() % 10 - 5) * 0.4, 0, (rand() % 10 + 5) * 0.2)` along the object, the sideways part fading
   // by 0.95 a tick; a tick it also rises 1, loses 0.02 of its scale and is `LifeTime / 25` bright, white.

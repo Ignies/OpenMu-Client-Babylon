@@ -996,6 +996,51 @@ const KINDS = {
   } satisfies ParticleKind,
 
   /**
+   * `BITMAP_LIGHT` SubType 15, flare01.jpg drawn additive: `rand() % 10 + 100` ticks,
+   * `Gravity = rand() % 3 + 2`, `(rand() % 20 + 20) / 100 * Scale` big, unseen at first
+   * (ZzzEffectParticle.cpp:3241-3250). A tick its phase gains `(rand() % 10 + 5) * 0.01`, it stands
+   * `Gravity * 2` off where it was made at that phase and rises `Gravity`, loses 0.001 of its scale
+   * and fades in 0.1, out 0.1 over its last 20 ticks losing 0.01 more; it is the light it was made
+   * with times that (:8139-8160). Its makers, the Doppelganger light boxes, all make it
+   * `rand() % (int)(Scale * 60) - that / 2` off in x and y (GMDoppelGanger4.cpp:387-398).
+   */
+  light15: {
+    texture: 'flare01',
+    blend: 'add',
+    init(p, scale) {
+      const spread = Math.trunc(scale * 60);
+      p.px += rand(spread) - Math.trunc(spread / 2);
+      p.py += rand(spread) - Math.trunc(spread / 2);
+      p.sx = p.px;
+      p.sy = p.py;
+      p.sz = 0;
+      p.lifeTime = rand(10) + 100;
+      p.gravity = rand(3) + 2;
+      p.scale = ((rand(20) + 20) / 100) * scale;
+      p.alpha = 0;
+    },
+    update(p, f) {
+      p.sz += (rand(10) + 5) * 0.01 * f;
+      p.px = p.sx + Math.sin(p.sz) * p.gravity * 2;
+      p.py = p.sy + Math.cos(p.sz) * p.gravity * 2;
+      p.pz += p.gravity * f;
+      p.scale -= 0.001 * f;
+
+      if (p.lifeTime > 20) {
+        p.alpha = Math.min(1, p.alpha + 0.1 * f);
+      } else {
+        p.scale -= 0.01 * f;
+        p.alpha -= 0.1 * f;
+      }
+
+      p.lr = p.tr * p.alpha;
+      p.lg = p.tg * p.alpha;
+      p.lb = p.tb * p.alpha;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
+
+  /**
    * Wings of Darkness membrane flare (ZzzObject.cpp:9860-9884). The original
    * re-creates a BITMAP_FLARE_BLUE sprite at each of ten wing bones every
    * frame; a short-lived pooled particle reads the same and costs a tenth of
@@ -1403,6 +1448,7 @@ export const KIND_REACH: Record<KindName, Reach> = {
   waterfall3_4: { travel: 4.55, base: 0.22, perScale: 0.46 },
   spark03_24: { travel: 0.6, base: 0.19, perScale: 0 },
   light0: { travel: 0.6, base: 0, perScale: 0.45 },
+  light15: { travel: 4.45, base: 0, perScale: 0.62 },
   wingFlareBlue: { travel: 0, base: 0, perScale: 0.46 },
   wingCloud: { travel: 0, base: 0, perScale: 0.46 },
 };

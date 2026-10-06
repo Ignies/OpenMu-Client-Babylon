@@ -88,7 +88,9 @@ shared pools, textures and particle recipes other folders reuse.
   `KIND_REACH` holds on any turn; every kind's colour stays in 0..1
   over its life whatever light it is made with;
   `light0` (`BITMAP_LIGHT` SubType 0) rises, shrinks, glows as its scale up to 1 and drifts on half the
-  particle wind (`g_vParticleWind`, walked once a tick, ZzzEffectParticle.cpp:3847-3859);
+  particle wind (`g_vParticleWind`, walked once a tick, ZzzEffectParticle.cpp:3847-3859); `light15`
+  (`BITMAP_LIGHT` SubType 15) climbs a spiral from up to `Scale * 30` off, fading in and out in the
+  light it is made with;
   `trueFire` (`BITMAP_TRUE_FIRE`, fantaF.jpg) takes its sideways and upward push at birth, rises,
   shrinks and fades with its life (24 ticks, `trueFire5` 20); `trueBlue` (`BITMAP_TRUE_BLUE`) is
   the same particle on fantaB.jpg; `smoke13` (`BITMAP_SMOKE` SubType 13) stays put, grows and fades

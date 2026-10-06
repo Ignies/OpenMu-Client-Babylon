@@ -2,6 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { ENUM_WORLD } from '@/core/types';
 import { maps } from '@/controllers/maps';
 
+describe('Doppelganger 4 type 48', () => {
+  // `if (rand_fps_check(3)) CreateParticle(BITMAP_LIGHT, vPos, o->Angle, (0.6, 0.8, 1.0), 15, o->Scale, o)`, `vPos` up
+  // to `o->Scale * 30` off in x and y (the kind's own spread).
+  it('makes a BITMAP_LIGHT SubType 15 one tick in three (GMDoppelGanger4.cpp:387-398)', () => {
+    expect(maps.emissionsFor(ENUM_WORLD.WD_68DOPPLEGANGER4, 48)).toEqual([{ kinds: ['light15'], every: 3, light: [0.6, 0.8, 1] }]);
+  });
+});
+
 describe('Doppelganger 4 type 59', () => {
   // `if (rand_fps_check(3)) CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, (1, 1, 1), 13, o->Scale)`.
   it('puffs a BITMAP_SMOKE SubType 13 one tick in three, where Kanturu puffs SubType 21 (GMDoppelGanger4.cpp:399-405)', () => {

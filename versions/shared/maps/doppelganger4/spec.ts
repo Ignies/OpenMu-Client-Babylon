@@ -23,12 +23,15 @@ export const DOPPELGANGER4_EFFECT_ONLY_TYPES: readonly number[] = [
  * Kanturu's rows but 59, which `RenderObjectVisual` makes a `BITMAP_SMOKE` SubType 13 one tick in
  * three, not Kanturu's SubType 21 (GMDoppelGanger4.cpp:399-405), and the falls 82 and 83:
  * `BITMAP_WATERFALL_3` SubType 3 every tick and `BITMAP_WATERFALL_2` SubType 1 one in three, not
- * SubType 4 and 2 (:439-447). EncTerrain69.obj places none of the three.
+ * SubType 4 and 2 (:439-447). EncTerrain69.obj places none of the three. Its own 48 (×2), the
+ * sky-blue light box, makes a `BITMAP_LIGHT` SubType 15 in `(0.6, 0.8, 1.0)` one tick in three
+ * (:387-398).
  */
 export const DOPPELGANGER4_EMISSIONS: Partial<
   Record<number, readonly Emission[]>
 > = {
   ...KANTURU1_EMISSIONS,
+  48: [{ kinds: ['light15'], every: 3, light: [0.6, 0.8, 1] }],
   59: [{ kinds: ['smoke13'], every: 3 }],
   82: [{ kinds: ['waterfall3_3'], every: 1 }],
   83: [{ kinds: ['waterfall2_1'], every: 3 }],
