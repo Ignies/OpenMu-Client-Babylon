@@ -825,6 +825,9 @@ function acquire(pool: Pool): Sprite | null {
   return sprite;
 }
 
+/** The tick's one colour: each kind writes all four channels into it. */
+const tickColor = new Color4(1, 1, 1, 1);
+
 function ensureTicking(target: Scene) {
   if (tickObserver && scene === target) return;
 
@@ -838,7 +841,7 @@ function ensureTicking(target: Scene) {
 
     stepWind((deltaMs / 1000) * TICKS_PER_SECOND);
 
-    const color = new Color4(1, 1, 1, 1);
+    const color = tickColor;
 
     for (let i = particles.length - 1; i >= 0; i--) {
       const p = particles[i];

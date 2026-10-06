@@ -355,14 +355,12 @@ class Combat implements Controller {
     return skillHooks.darkSide?.observeEcho(skill, caster) ?? false;
   }
 
-  /** Next follow-up target whose blow is due, or -1. */
-  nextDarkSideHit(): number {
-    return skillHooks.darkSide?.nextHit() ?? -1;
-  }
-
-  /** The Dark Side skill whose blow the follow-ups draw. */
-  get darkSidePendingSkill(): number {
-    return skillHooks.darkSide?.pendingSkill() ?? 0;
+  /**
+   * A `SkillAnimation` (0x19) of `caster`'s on `target` arrived. True when it is Dark Side's, which draws nothing; another
+   * caster's counts one of the hero's follow-ups gone.
+   */
+  observeDarkSideMagic(skill: number, caster: Entity, target: Entity | null): boolean {
+    return skillHooks.darkSide?.observeMagic(skill, caster, target) ?? false;
   }
 
   /** An `ObjectHit` flagged as a Rage Fighter streak hit arrived. */

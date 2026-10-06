@@ -19,7 +19,7 @@ It never sends packets or touches the scene; the ECS systems that fight read it 
     `registerSkills` only).
   - area hits: `needsAreaHit`, `areaHitRadius`, `buildAreaHit`.
   - skill hooks: Nova (`novaSkill`, `novaBeginSkill`, `beginNova`, `releaseNova`, `novaCharge`, ...), Combo (`comboFlash`,
-    `comboKnockUp`, ...), Dark Side (`beginDarkSide`, `observeDarkSideEcho`, `nextDarkSideHit`,
+    `comboKnockUp`, ...), Dark Side (`beginDarkSide`, `observeDarkSideEcho`,
     `rageStreak`, ...).
   - `register(layer)`, `update(map, dt)`, `reset()`.
 - `skillHooks` (`skillHooks.ts`): the Nova / Combo / Dark Side slots a skill file fills.

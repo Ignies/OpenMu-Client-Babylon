@@ -4,7 +4,10 @@ import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
 import { TICK, bonePos, entityGone, entityPos, entityYaw, fxNow, type RGB } from '@/controllers/fx/core';
 import type { TailStrip, TickedFx } from '@/controllers/fx/ticked';
+import type { ModelHandle } from '@/controllers/fx/model';
 import { lighting } from '@/controllers/lighting';
+import { playCombat } from '@/controllers/sound';
+import type { Entity } from '@/ecs/world';
 import { cm, ticks, type SkillContext, type Step } from '@/controllers/skills/visuals';
 import { DEG, deg, groundY, movesAt, randInt } from '../../_shared';
 import { clipSpeed, eachMove, fallSpark, shockGround, type FallingSpark } from '../_shared';
@@ -19,6 +22,8 @@ interface Ember extends FallingSpark {
   texture: string;
   scale: number;
   roll: number;
+  /** Degrees it turns a move: 3, or 0 for sub6 and sub9, which are held at Rotation 0. */
+  turn: number;
   alpha: number;
   light: number;
   rise: number;
@@ -41,7 +46,7 @@ const FLAMES = [
 /** Spent embers, reused for the next tick's. */
 const spent: Ember[] = [];
 function ember(texture: string, x: number, y: number, z: number): Ember {
-  const e = spent.pop() ?? { texture, x, y, z, vx: 0, vz: 0, gravity: 0, life: 0, scale: 0, roll: 0, alpha: 0, light: 0, rise: 0, fadeAt: 0, shrink: 0, tint: RGBS.white };
+  const e = spent.pop() ?? { texture, x, y, z, vx: 0, vz: 0, gravity: 0, life: 0, scale: 0, roll: 0, turn: 3, alpha: 0, light: 0, rise: 0, fadeAt: 0, shrink: 0, tint: RGBS.white };
   e.texture = texture;
   e.x = x;
   e.y = y;
@@ -55,6 +60,7 @@ function flame(kind: (typeof FLAMES)[number], x: number, y: number, z: number, s
   f.life = randInt(5) + kind.life;
   f.scale = (randInt(72) + 72) * 0.01 * scale;
   f.roll = randInt(360);
+  f.turn = 3;
   f.rise = (randInt(24) + 64) * 0.1;
   f.alpha = 0;
   f.light = light;
@@ -99,7 +105,7 @@ function moveEmber(e: Ember, fx: TickedFx): boolean {
   if (e.alpha < 0.1 || e.scale <= 0) return false;
   e.scale -= (randInt(3) + e.shrink) * 0.01;
   e.y += cm(e.rise);
-  e.roll += 3;
+  e.roll += e.turn;
   if (e.scale > 0) fx.sprite(e.texture, RGBS.white, e.x, e.y, e.z, cm(64 * e.scale), cm(64 * e.scale), e.roll * DEG, Math.min(1, e.alpha * e.light));
   return true;
 }
@@ -220,7 +226,7 @@ function lava(c: SkillContext): void {
         lifeTime = 95;
       }
       if (lifeTime > 80) {
-        shockGround(c, at.clone(), yaw, [1, 0.1, 0], 1, true);
+        shockGround(c, at.clone(), yaw, [1, 0.1, 0], 1, 1);
         lifeTime = 80;
       }
       fireColumn(at, lifeTime, embers);
@@ -346,9 +352,215 @@ function blow(c: SkillContext): void {
  * is left first (:9922-10014).
  */
 const dragonRoar: Step = (_at, c) => {
+  lowerCount = 0; // InitLower (MonkSystem.cpp:1277)
   blow(c);
   lava(c);
 };
+
+// ---- the hit on each target (ReceiveMagic, WSclient.cpp:5130-5143) -------------------------------------------------------------
+
+/** MODEL_VOLCANO_OF_MONK (volcano_of_monk.bmd, ZzzOpenData.cpp:4644) and BITMAP_VOLCANO_CORE, the sheet its mesh 0 draws bright (:4654). */
+const VOLCANO = 'Effect/volcano_of_monk.glb';
+const VOLCANO_CORE = 'Effect/volcano_core.OZJ';
+/** Its LifeTime and BITMAP_LIGHT_RED sub3's (ZzzEffect.cpp:6040-6045, :6172-6190). */
+const VOLCANO_LIFE = 100;
+
+/** CMonkSystem's m_nLowerEffCnt: the volcanoes the last cast's hits made, zeroed as RageCreateEffect draws it (MonkSystem.cpp:1358-1377). */
+let lowerCount = 0;
+
+/** One of the three flames by rand() % 3, in white; `held`: sub6 or sub9, kept at Rotation 0 and climbing 2.2 x Gravity (ZzzEffectParticle.cpp:6115-6119, :4383-4387). */
+function anyFlame(x: number, y: number, z: number, scale: number, held: boolean): Ember {
+  const f = flame(FLAMES[randInt(3)], x, y, z, scale, 1);
+  if (held) {
+    f.roll = 0;
+    f.turn = 0;
+    f.rise *= 2.2;
+  }
+  return f;
+}
+
+/** A MODEL_VOLCANO_STONE: where it is, its HeadAngle (cm a move), Gravity, LifeTime, Scale, Alpha and Angle. */
+interface Stone {
+  at: Vector3;
+  head: Vector3;
+  gravity: number;
+  life: number;
+  scale: number;
+  alpha: number;
+  angle: [number, number, number];
+  model?: ModelHandle;
+}
+
+/**
+ * MODEL_VOLCANO_STONE at `at` (ZzzEffect.cpp:6203-6216): Scale 1.3-2.44, LifeTime 30-39, Gravity 2-3, a HeadAngle of 6.4-19.1 cm a
+ * move along a random Angle[2] and 25 up; drawn textured in white at its Alpha (ZzzObject.cpp:2561-2565).
+ */
+function stone(c: SkillContext, at: Vector3, stones: Stone[]): void {
+  const scale = 1 + (randInt(20) + 5) * 0.06;
+  const life = randInt(10) + 30;
+  const gravity = randInt(2) + 2;
+  const yaw = randInt(360);
+  // (0, v, 0) turned by Angle[2]: MU (-v sin, v cos).
+  const v = (randInt(128) + 64) * 0.1;
+  const s: Stone = { at: at.clone(), head: new Vector3(-v * Math.sin(yaw * DEG), 25, v * Math.cos(yaw * DEG)), gravity, life, scale, alpha: 1, angle: [0, 0, yaw] };
+  s.model = effects.spawn('model', c.scene, at.clone(), {
+    model: MODEL.volcanoStone,
+    seconds: ticks(life),
+    angle: s.angle,
+    colour: RGBS.white,
+    blendMesh: -1,
+    solidFade: true,
+    scaleAt: () => s.scale,
+    life: () => s.alpha,
+    follow: out => out.copyFrom(s.at),
+  }) as ModelHandle;
+  stones.push(s);
+}
+
+/**
+ * A stone's move (MoveHandlers.cpp:10170-10229): it falls Gravity, turns 0.3 x LifeTime on Angle[0] and [1], and on the ground slows
+ * x0.6, bounces LifeTime (none under 0.5) and fades 0.05; Scale less 0.03; and it lets a flame of 0.5-0.9 its Scale. False once gone.
+ */
+function moveStone(s: Stone, embers: Ember[]): boolean {
+  s.head.y -= s.gravity;
+  s.at.addInPlaceFromFloats(cm(s.head.x), cm(s.head.y), cm(s.head.z));
+  const ground = groundY(s.at.x, s.at.z);
+  s.angle[0] += 0.3 * s.life;
+  s.angle[1] += 0.3 * s.life;
+  if (s.at.y <= ground) {
+    s.at.y = ground;
+    s.head.x *= 0.6;
+    s.head.z *= 0.6;
+    s.head.y += s.life;
+    if (s.head.y < 0.5) s.head.y = 0;
+    s.alpha -= 0.05;
+  }
+  s.scale -= 0.03;
+  embers.push(anyFlame(s.at.x, s.at.y, s.at.z, s.scale * (randInt(5) + 5) * 0.1, false));
+  s.model?.setAngle(s.angle);
+  return --s.life > 0;
+}
+
+/** Its embers on a move: false for the ones gone, which go back to `spent`. */
+function moveEmbers(embers: Ember[], fx: TickedFx): void {
+  let n = 0;
+  for (const e of embers) {
+    if (moveEmber(e, fx)) embers[n++] = e;
+    else spent.push(e);
+  }
+  embers.length = n;
+}
+
+/**
+ * MODEL_VOLCANO_OF_MONK sub1 on the ground at (x, z) (ZzzEffect.cpp:6172-6190): LifeTime 100, its one action at 0.6 keys a move, drawn
+ * textured in white and its mesh 0 again in volcano_core, bright at BlendMeshLight (ZzzObject.cpp:2551-2559). Made with four stones
+ * and BITMAP_LIGHT_RED sub3 (Scale 3: flare01_red under it at LifeTime x 0.01, ZzzEffect.cpp:9580-9585, and its terrain light). Each
+ * move a sub6 / sub9 flame (80 - LifeTime) x 0.9-1.3 + 20 cm over it, and unless that is past 400 cm above sea level, at LifeTime 10
+ * four stones and MODEL_SHOCKWAVE_GROUND01 sub2, under 20 Alpha LifeTime x 0.1, under 30 BlendMeshLight x 0.03 (MoveHandlers.cpp:10093-10144).
+ */
+function volcano(c: SkillContext, x: number, z: number, yaw: number, scale: number): void {
+  const spot = new Vector3(x, groundY(x, z), z);
+  let alpha = 1;
+  let core = 1;
+  const body = { model: VOLCANO, seconds: ticks(VOLCANO_LIFE), angle: [0, 0, yaw] as const, scale, colour: RGBS.white, keysPerTick: 0.6, fadeTail: 0 };
+  effects.spawn('model', c.scene, spot.clone(), { ...body, blendMesh: -1, alphaTest: true, solidFade: true, life: () => Math.min(1, alpha) });
+  effects.spawn('model', c.scene, spot.clone(), { ...body, blendMesh: 0, hideMesh: 1, texture: VOLCANO_CORE, blendLight: () => core });
+  const stones: Stone[] = [];
+  const embers: Ember[] = [];
+  for (let i = 0; i < 4; i++) stone(c, spot, stones);
+  for (const light of ['volcanoMade', 'volcanoRed', 'volcano']) lighting.skillBody(c.scene, DRAGON_ROAR, light, at(spot));
+  eachMove(c.scene, spot, (m, fx) => {
+    // The stones made before this move run first; the ones it makes, on the next.
+    let n = 0;
+    for (const s of stones) if (moveStone(s, embers)) stones[n++] = s;
+    stones.length = n;
+    const life = VOLCANO_LIFE + 1 - m;
+    if (life > 0) {
+      const y = spot.y + cm((80 - life) * (0.9 + randInt(5) * 0.1) + 20);
+      if (y <= cm(400)) {
+        embers.push(anyFlame(spot.x, y, spot.z, scale * (randInt(5) + 8) * 0.19, true));
+        if (life === 10) {
+          for (let i = 0; i < 4; i++) stone(c, spot, stones);
+          shockGround(c, spot.clone(), yaw, [1, 0.1, 0], 1, 2);
+        }
+        if (life < 20) alpha = life * 0.1;
+        if (life < 30) core = life * 0.03;
+      }
+      if (life > 1) fx.decal(TEX.flareRed, RGBS.white, spot.x, spot.z, 3, 0, (life - 1) * 0.01);
+    }
+    moveEmbers(embers, fx);
+    return life > 1 || stones.length > 0 || embers.length > 0;
+  });
+}
+
+/**
+ * MODEL_VOLCANO_OF_MONK sub2 or sub3 (ZzzEffect.cpp:6191-6200, MoveHandlers.cpp:10146-10164): under the ground for LifeTime 20-29 or
+ * 30-49, then on its LifeTime 2 a sub1 of Scale 1 where it was made; none if its target is gone first.
+ */
+function laterVolcano(c: SkillContext, to: Entity, at: Vector3, yaw: number, sub: 2 | 3): void {
+  const life = sub === 2 ? 20 + randInt(10) : 30 + randInt(20);
+  eachMove(c.scene, at, m => {
+    if (entityGone(to)) return false;
+    if (life + 1 - m !== 2) return true;
+    volcano(c, at.x, at.z, yaw, 1);
+    return false;
+  });
+}
+
+/**
+ * MODEL_TARGETMON_EFFECT on the target (ZzzEffect.cpp:6165-6170, MoveHandlers.cpp:10049-10090): LifeTime 100, no model of its own;
+ * each move while the target is there three flames of 0.5-0.9 at one of its bones, rand() % (NumBones - 1).
+ */
+function targetFlames(c: SkillContext, to: Entity): void {
+  const bone = new Vector3();
+  const embers: Ember[] = [];
+  let burning = true;
+  eachMove(c.scene, entityPos(to, 0, new Vector3()), (m, fx) => {
+    burning &&= m <= VOLCANO_LIFE && !entityGone(to);
+    if (burning) {
+      const bones = (to.modelObject?.gltf?.skeleton?.bones.length ?? 1) - 2;
+      bonePos(to, bones > 0 ? randInt(bones) : 0, bone);
+      const scale = (randInt(5) + 5) * 0.1;
+      for (let i = 0; i < 3; i++) embers.push(anyFlame(bone.x, bone.y, bone.z, scale, false));
+    }
+    moveEmbers(embers, fx);
+    return burning || embers.length > 0;
+  });
+}
+
+/**
+ * ReceiveMagic's AT_SKILL_DRAGON_ROAR (WSclient.cpp:5130-5143), a SkillAnimation for each target the roar hits: the cast's first
+ * four make MODEL_VOLCANO_OF_MONK sub 1-4 (SetLowerEffEct; sub4 does nothing), each MODEL_TARGETMON_EFFECT, and
+ * SOUND_RAGESKILL_DRAGONLOWER_ATTACK starts again, with no object.
+ */
+const roarHit: Step = (_at, c) => {
+  const to = c.target;
+  if (!to || entityGone(to)) return;
+  const spot = entityPos(to, 0, new Vector3());
+  const yaw = deg(entityYaw(to));
+  if (lowerCount <= 3) {
+    lowerCount++;
+    if (lowerCount === 1) volcano(c, spot.x, spot.z, yaw, 0.8);
+    else if (lowerCount < 4) laterVolcano(c, to, spot, yaw, lowerCount === 2 ? 2 : 3);
+  }
+  targetFlames(c, to);
+  playCombat('Sound/Ragefighter/Rage_Dragonlower_Att');
+};
+
+/** The volcano's own AddTerrainLight a move: (1, 0.4, 0.4) + rand() % 5 x 0.01 on each, rolled a tick (MoveHandlers.cpp:10138-10141). */
+let volcanoTick = -1;
+let volcanoRoll = 0;
+function volcanoLight(out: { r: number; g: number; b: number }): { r: number; g: number; b: number } {
+  const tick = Math.floor(fxNow() / TICK + 1e-6);
+  if (tick !== volcanoTick) {
+    volcanoTick = tick;
+    volcanoRoll = randInt(5) * 0.01;
+  }
+  out.r = 1 + volcanoRoll;
+  out.g = 0.4 + volcanoRoll;
+  out.b = 0.4 + volcanoRoll;
+  return out;
+}
 
 /** LIGHT_RED sub4's AddTerrainLight a move: (0.4, 0, 0) + rand() % 5 x 0.1 on each, rolled a tick (MoveHandlers.cpp:9640-9650). */
 let redTick = -1;
@@ -371,7 +583,8 @@ export default defineSkill({
   // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
   lookAliases: [560],
   noFlinch: [A.PLAYER_SKILL_DRAGONLORE], // SetPlayerShock leaves the roar alone (ZzzCharacter.cpp:1283-1297)
-  visual: { area: dragonRoar },
+  // The cast at the caster, and each hit's volcano and flames on its target (roarHit).
+  visual: { area: dragonRoar, impact: roarHit },
   sound: 'Sound/Ragefighter/Rage_Dragonlower', // Dragon Roar
   delayMs: 700, // Dragon Roar
   clip: { ground: A.PLAYER_SKILL_DRAGONLORE }, // Dragon Roar
@@ -381,6 +594,11 @@ export default defineSkill({
     bodies: {
       made: { color: [1.02, 0.22, 0.22], range: 4, seconds: TICK, release: 0 },
       lightRed: { color: lightRed, range: 3, seconds: ticks(LIGHT_RED_LIFE), release: 0 },
+      // A volcano's BITMAP_LIGHT_RED sub3: the same at range 2 as it is made, then lightRed, range 2, its 100 moves; the volcano's
+      // own volcanoLight, range 1 (ZzzEffect.cpp:6046-6055, MoveHandlers.cpp:9631-9640, :10138-10141).
+      volcanoMade: { color: [1.02, 0.22, 0.22], range: 2, seconds: TICK, release: 0 },
+      volcanoRed: { color: lightRed, range: 2, seconds: ticks(VOLCANO_LIFE), release: 0 },
+      volcano: { color: volcanoLight, range: 1, seconds: ticks(VOLCANO_LIFE), release: 0 },
     },
   },
 });

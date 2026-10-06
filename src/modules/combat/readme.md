@@ -33,7 +33,9 @@ the Rage Fighter's Dark Side blows. This folder has only the handlers; it keeps 
 ## Packets
 - `ObjectAnimation`: attack, emote and action clips of other players and monsters; faces the direction.
 - `SkillAnimation`: a targeted skill cast. Teleports go to `playTeleportAnimation` (skills); the DK
-  combo only plays its sound (`WSclient.cpp:4167`, `:4829-4832`); others turn, play the clip and the visual.
+  combo only plays its sound (`WSclient.cpp:4167`, `:4829-4832`); a Dark Side one only turns its caster, and another
+  caster's counts one of the hero's follow-ups gone (`combat.observeDarkSideMagic`, SetDarksideCnt, `WSclient.cpp:5144-5148`);
+  others turn, play the clip and the visual.
 - `ObjectGotKilled`: stops the object, zeroes its health, marks it dying.
 - `ObjectHit`, `ObjectHitExtended`: damage, sound, health bar, flinch, damage numbers.
 - `RageAttackRangeResponse`: the Dark Side targets, handed to `combat.observeDarkSideTargets`; an empty
@@ -70,4 +72,5 @@ the Rage Fighter's Dark Side blows. This folder has only the handlers; it keeps 
   after a plain blow; 22 ticks plus 3.5 a tile of flight.
 - `darkSideEcho.test.ts`: the hero's Dark Side follow-ups wait for the `RageAttack` echo of his cast,
   which puts him back in the clip; a cast is drawn once, a later 0x4A of it only turns its caster; a 0x4B
-  naming no target asks for the skill on the hero, and its empty slots get no follow-up.
+  naming no target asks for the skill on the hero, and its empty slots get no follow-up; another caster's 0x19 of Dark Side
+  counts one of the hero's follow-ups and draws nothing.

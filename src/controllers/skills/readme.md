@@ -20,9 +20,7 @@ themselves are content in `versions/shared/skills/` (see [docs/content.md](../..
   `afterRelease(step, rule?)`, `ReleaseRule`, `NO_KEY`, `afterHeroRelease(fn)`.
 - Dispatch, used by modules and ECS systems through `versions/shared/skills/skillVisuals.ts`:
   `playTargetedSkillVisual`, `playAreaSkillVisual`, `playBowShotVisual`, `setBuffVisual`,
-  `clearBuffVisuals`, `playBuffHits`, `skillVisualFor`, `baseSkill`, `fallbackFor`;
-  `playSkillImpact`: a row's `impact` alone, one more blow of a cast already drawn (Dark Side's
-  follow-ups, `skillCastSystem`).
+  `clearBuffVisuals`, `playBuffHits`, `skillVisualFor`, `baseSkill`, `fallbackFor`.
 
 ## How it works
 - `registerSkills` writes `visual` into `SKILL_VISUALS`, `lookAliases` / `masterAliases` into

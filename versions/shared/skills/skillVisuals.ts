@@ -14,7 +14,6 @@ export { baseSkill } from '@/controllers/skills/visuals';
 export { skillVisualFor } from '@/controllers/skills/visuals';
 export { skillVisualCount } from '@/controllers/skills/visuals';
 export { playTargetedSkillVisual } from '@/controllers/skills/visuals';
-export { playSkillImpact } from '@/controllers/skills/visuals';
 export { playAreaSkillVisual } from '@/controllers/skills/visuals';
 export { playBowShotVisual } from '@/controllers/skills/visuals';
 export { afterHeroRelease } from '@/controllers/skills/visuals';
