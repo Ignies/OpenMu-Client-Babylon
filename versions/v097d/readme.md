@@ -33,11 +33,12 @@ MU 0.97d, the second version the client carries. OpenMU has no 0.97d data initia
   - The period `Data/` tree (`Data-v097d/`, `data/inventory.ts`): interface, logo, `Local/`
     tables, effect textures, leaves, the Atlans water and `gate.bmd`.
 - Season 6's, read from its tree (`borrows` in `data/index.ts`):
-  - every converted file 0.97d does not ship: the rest of World2..12 and Object2..12
-    (byte-identical), the 235 identical sounds and 6 tracks, and whatever Season 6 code asks for
-    that 0.97d never had (effect models, later sounds), so no request answers the page's HTML.
-    Except what it `lacks`: Season 6's extra Lorencia grass cards (`TileGrass02/03.OZT`); 0.97d's
-    World1 grows grass from `TileGrass01` only.
+  - every converted file 0.97d does not ship: all of Object1 and Logo, the Item, Player,
+    Monster, NPC and Skill models and World1 files that match byte for byte, the rest of
+    World2..12 and Object2..12 (byte-identical), the 235 identical sounds and 6 tracks, and
+    whatever Season 6 code asks for that 0.97d never had (effect models, later sounds), so no
+    request answers the page's HTML. Except what it `lacks`: Season 6's extra Lorencia grass
+    cards (`TileGrass02/03.OZT`); 0.97d's World1 grows grass from `TileGrass01` only.
   - from `Data/` (`borrows.folderPaths`): the in-game HUD and window art wherever the period
     `Interface/` has no sheet of that name (only the cursors, `FontTest.OZT` and the progress
     bars share a name, and stay 0.97d's); the minimap pictures of World1, 2, 4 and 5, whose
@@ -73,6 +74,11 @@ MU 0.97d, the second version the client carries. OpenMU has no 0.97d data initia
   `character_list` drawn as rows on the `0New_Account01.OZT` plate).
 - `ui/preload.ts`: cursor sprites and progress bars before the world; `worldSprites` is Season 6's
   list, because the in-game HUD and windows are still Season 6's.
+- Pre-download (production): `tools/assetsIndex.ts` writes `assets-index-v097d.json`, which the
+  download screen reads on 0.97d. It lists each file at the url 0.97d reads it from: its own
+  file where it ships one, Season 6's otherwise (so a borrowed file is cached once for both
+  versions), never a file it lacks or a Season 6 sound it plays its own file for. It still offers
+  every Season 6 map group: nothing tells the tool which worlds 0.97d has.
 
 ## What it has and has not, beyond the flags
 - Harmony jewels and refine stones are Season 3: 0.97d has none. Nothing in `src/` asks, so it
@@ -120,7 +126,7 @@ What drawing the in-game interface the 0.97d way needs, none of it built yet:
 - convert another 0.97d file: hash its source against Season 6's first; convert it
   (`MU_DATA=<0.97d Data> GLB_OUTPUT=<scratch folder> bun run tools/bmdToGlb.ts <folder>`) or copy
   it into `public/game-assets-v097d/` only when the result differs from Season 6's file, then
-  regenerate `data/assets.ts`.
+  regenerate `data/assets.ts` (`data/assets.test.ts` fails on a copy).
 - a window drawn the 0.97d way: export it in a `windows` list from `ui/index.tsx` with the shared id.
 
 ## Tests
@@ -131,8 +137,10 @@ What drawing the in-game interface the 0.97d way needs, none of it built yet:
   only skills, so the bar draws three fixed slots.
 - `data/inventory.test.ts`: the inventory matches the files in `Data-v097d/`; `gate.bmd` is spelled
   the way the client asks for it.
-- `data/assets.test.ts`: `assets.ts` matches the files in `public/game-assets-v097d/`.
+- `data/assets.test.ts`: `assets.ts` matches the files in `public/game-assets-v097d/`, and none
+  of them is a byte-identical copy of Season 6's file at the same path.
 - `data/served.test.ts`: every terrain file, tile and placed object model of each world, every
   item, class body, monster and NPC model, and every sound key, resolves to a file that exists,
-  in its case; Lorencia grows grass from its one card only; the gate table decodes; the sign plates and the borrowed minimap pictures resolve.
+  in its case; Lorencia grows grass from its one card only; the gate table decodes; the sign
+  plates and the borrowed minimap pictures resolve.
 - `ui/preload.test.ts`: every world sheet it preloads is read from a tree that has it.

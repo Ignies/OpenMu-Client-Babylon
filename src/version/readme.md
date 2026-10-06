@@ -14,8 +14,8 @@ the loader that resolves which version this page runs. See [../../docs/versions.
   until it has loaded.
 - `ensureActiveVersion(tag)`: `true` when the loaded version plays `tag`, else reloads the page.
 - Types: `GameVersion`, `VersionData`, `VersionFeatures`, `VersionProtocol`, `VersionEncryption`,
-  `MiniGame`, `ItemHotkeys` (`contract.ts`); `VersionUi`, `PregameUi`, `PregameBackdrop`, `PregameScene`
-  (`uiContract.ts`).
+  `MiniGame`, `ItemHotkeys` (`contract.ts`); `VersionUi`, `PregameUi`, `PregameBackdrop`,
+  `PregameScene` (`uiContract.ts`).
 
 ## How it works
 - `contract.ts` is everything a version may differ in: OpenMU identity, client version / serial
@@ -52,9 +52,8 @@ the loader that resolves which version this page runs. See [../../docs/versions.
 - uses: `versions/registry.ts`; types from `core/types`, `ecs/world`, `controllers/interface/windows`.
 - used by: `app/` (main, App, store), `controllers/assets` loaders, `controllers/net/packets.ts`,
   `controllers/item_fx`, modules `servers`, `mu_helper`, `events` (the schedule rows) and
-  `inventory` (the potion slots),
-  `ecs/systems/loginSceneSystem.ts`,
-  `versions/registry.ts`, every `versions/<id>/` and some shared windows.
+  `inventory` (the potion slots), `ecs/systems/loginSceneSystem.ts`, `versions/registry.ts`,
+  every `versions/<id>/`, some shared windows and `tools/assetsIndex.ts` (the data roots).
 
 ## Change it
 - something a version can differ in: add a field to `GameVersion` (or a flag to `VersionFeatures`)
