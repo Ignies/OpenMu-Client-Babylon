@@ -13,7 +13,7 @@ import { saw } from '../shared/meshAnimation';
  * `CreateOperate`, no `BoundingBoxMax` override, no warp stack. Everything
  * the map does lives in `MoveObject` (ZzzObject.cpp:3946-3977),
  * `RenderObjectVisual` (:2893) and `Draw_RenderObject` (:1002), which is why
- * this file is almost all table and only three types need a class.
+ * this file is almost all table and only five types need a class.
  *
  * Counts below are from EncTerrain5.obj (5380 records) - they decide how much
  * each recipe is allowed to cost.

@@ -16,9 +16,9 @@ import { saw } from '../shared/meshAnimation';
  * have no model at all. EncTerrain9.obj places 0 (x1), 3 (x2), 4 (x1), 35
  * (x38) and 38 (x6), bound absent in `create.ts`. Two of the eight carry C++
  * behaviour: type 4 (a blend mesh, a V scroll and a white `AddTerrainLight`
- * of range 3, ZzzObject.cpp:4044-4057) and type 64 (the red twin of the
+ * of range 3, ZzzObject.cpp:4051-4062) and type 64 (the red twin of the
  * type-63 impact glow, :2978; none placed). The blend mesh and scroll have no
- * body to act on; type 4's light is not in these tables.
+ * body to act on; type 4's light needs none and is in `TARKAN_LIGHTS`.
  */
 
 /**
@@ -161,7 +161,17 @@ const brazier: LightEmitter = {
   },
 };
 
+/**
+ * Type 4 has no `Object05.bmd`, but `MoveObject` runs for it all the same (`PlayAnimation` returns at
+ * once with no actions, ZzzBMD.cpp:747): `AddTerrainLight(x, y, (L, L, L), 3)` on the brazier's sine
+ * (ZzzObject.cpp:4051-4062).
+ */
+const whiteSine: LightEmitter = {
+  terrain: { range: 3, color: [1, 1, 1], pulse: { speed: 0.002, amount: 0.35, base: 0.3 } },
+};
+
 export const TARKAN_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
+  4: [whiteSine],
   61: [brazier],
   65: [brazier],
   66: [brazier],
