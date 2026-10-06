@@ -69,7 +69,9 @@ the client-to-server encryption, the login fields and the offline flag.
 - change retry count or backoff: `BACKOFF` in `sessionResume.ts`.
 
 ## Tests
-- none here; the login flow is covered by the listener order golden (`src/app/listenerOrder.golden.test.ts`).
+- `state.test.ts`: `sendToGS` sends only the bytes its DataView covers (a view into a larger buffer, as a module's
+  packet can be).
+- the login flow is covered by the listener order golden (`src/app/listenerOrder.golden.test.ts`).
 
 ## Notes
 

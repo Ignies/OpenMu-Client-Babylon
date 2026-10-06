@@ -197,7 +197,7 @@ export const Session = new (class {
   }
 
   sendToGS(buffer: DataView) {
-    let packet = new Uint8Array(buffer.buffer);
+    let packet = new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
 
     const header = packet[0];
     xor32.Encrypt(packet);
