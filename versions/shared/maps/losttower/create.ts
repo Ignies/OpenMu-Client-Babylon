@@ -59,6 +59,6 @@ export async function createLostTower(world: World) {
   tiles[39] = LostTowerSkullObject;
 
   // 40 (x1) has no Object41.bmd in `Object5` (LoadData.cpp:22-49): no body. Its
-  // `BITMAP_LIGHTNING + 1` pair (ZzzObject.cpp:2912-2919) is not drawn here.
+  // `BITMAP_LIGHTNING + 1` pair (ZzzObject.cpp:2913-2920) is not drawn here.
   bindAbsentModels(tiles, [40]);
 }
