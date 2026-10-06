@@ -120,7 +120,8 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   their swing.
 - `fireLights.test.ts`: the ground lights the original throws take its position and range on every
   preset: Devias 66's `CreateFire` 50 up at range 4, Lorencia 150 at range 3, Loren Market 30 and 35
-  breathing on their bones, Kanturu 70 and the Tarkan braziers on their sine.
+  breathing on their bones, Kanturu 70 and the Tarkan braziers on their sine, and Tarkan 4, which has
+  no model, white at range 3 on the same sine.
 - `bloodcastle/lampObject.test.ts`: the throne-room lamp's flare is `BITMAP_FLARE` too;
   `bloodcastle/candelabraObject.test.ts`: the candelabra's seven flares are 0.5 on any object scale.
 - `lampFlares.test.ts`, `lorencia/candleObject.test.ts`, `devias/candleObject.test.ts`: what the original
@@ -165,7 +166,14 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   79, 80, Kanturu 2 21, 22, 25, 28, 39, 40, 42, 43, 69, 84, the GM area 15, 33, 74, Santa Town 37, 40, 51,
   Doppelganger 4 34 and 175 (`MODEL_BIRD01`, Lorencia's only), the Fortress 95, 126, Loren Market 51,
   besides the earlier Swamp, Vulcanus, Duel Arena, Doppelganger 1, Raklion, Cursed Temple, Empire
-  Guardian 4 and login scene rows.
+  Guardian 4 and login scene rows. No body is not no object: `MoveObject` and `RenderObjectVisual`
+  run for every visible record (`PlayAnimation` returns at once with no actions, ZzzBMD.cpp:747), so
+  a case that makes a light, sprite or particle from `o->Position` still does. Two do: Tarkan 4
+  lights the ground white on its sine (ZzzObject.cpp:4051-4062, a `spec.ts` row, which attaches to
+  the absent object too) and Lost Tower 40 draws its turning `BITMAP_LIGHTNING + 1` pair
+  (:2913-2920, `losttower/lightningObject.ts`). Every other absent type has no case in its world's
+  `MoveObject`, `RenderObjectVisual` or GM file, or one that only touches the body it lacks (Kanturu
+  2 42's UV scroll, GM_Kanturu_2nd.cpp:240-245; the Dungeon's lean box 60, ZzzObject.cpp:4617-4621).
 - `doppelgangerLights.test.ts`: the four arenas' sky-blue light boxes (Doppelganger 1's 101, the
   others' 48) make a `BITMAP_LIGHT` SubType 15 (`light15`) one tick in three.
 - `kanturu1/spec.test.ts`, `aida/spec.test.ts`: the falls (Kanturu and the GM area 81-83, Aida 56-58) make

@@ -83,6 +83,8 @@ export class PlaySpeedObject extends MapTileObject {
  * simply never opens the absent file, so the record becomes an object that
  * draws nothing. Here an unbound type would ask the dev server for a GLB it
  * does not have and log a failed load per record, so the gaps are declared.
+ * A light row for the type still attaches to it (Tarkan 4); a type whose case
+ * draws something without a body gets a class instead (Lost Tower 40).
  *
  * Also the home for types at or above `MAX_WORLD_OBJECTS` (160, `_enum.h`):
  * `LoadWorld` only ever fills slots 0-159 from the folder, so a higher id -
