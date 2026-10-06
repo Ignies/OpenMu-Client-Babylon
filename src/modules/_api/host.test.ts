@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { observer } from 'mobx-react-lite';
 import { createModuleHost } from './host';
+import { encodeModuleFrame, maxPayload } from './packetWire';
 import { TEST_HERO, testGame } from './testGame';
 
 const Panel = observer(() => null);
@@ -79,15 +80,49 @@ describe('the in-process module host', () => {
     expect(mapListeners()).toBe(0);
   });
 
+  it('sends a packet as the module\'s frame, and refuses one over the frame limit', () => {
+    const { api, calls } = setUp();
+    api.sendPacket(Uint8Array.from([1, 2, 3]));
+    api.sendPacket(new Uint8Array(maxPayload('example')));
+    expect(() => api.sendPacket(new Uint8Array(maxPayload('example') + 1))).toThrow('frame limit');
+    expect(calls).toEqual([
+      ['sendPacket', [...encodeModuleFrame('example', Uint8Array.from([1, 2, 3]))]],
+      ['sendPacket', [...encodeModuleFrame('example', new Uint8Array(maxPayload('example')))]],
+    ]);
+  });
+
+  it('hands a module the payloads delivered to it, until unsubscribed', () => {
+    const { host, api } = setUp();
+    const seen: number[][] = [];
+    const off = api.onPacket(p => seen.push([...p]));
+    api.onPacket(p => seen.push([-p.length]));
+    expect(host.deliver('example', Uint8Array.from([7, 8]))).toBe(true);
+    expect(host.deliver('other', Uint8Array.from([9]))).toBe(false);
+    off();
+    off();
+    host.deliver('example', Uint8Array.from([5]));
+    expect(seen).toEqual([[7, 8], [-2], [-1]]);
+  });
+
+  it('says a payload went nowhere when the module is not listening', () => {
+    const { host } = setUp();
+    expect(host.deliver('example', Uint8Array.from([1]))).toBe(false);
+    expect(host.deliver('nobody', Uint8Array.from([1]))).toBe(false);
+  });
+
   it('takes back a disposed module\'s windows and listeners, and refuses its later calls', () => {
     const { host, api, calls, mapListeners } = setUp();
     api.registerWindow({ id: 'main', title: 'example.title' });
     api.onMapChange(() => {});
+    api.onPacket(() => {});
     host.dispose('example');
     expect(calls.at(-1)).toEqual(['removeWindow', 'example:main']);
     expect(mapListeners()).toBe(0);
+    expect(host.deliver('example', Uint8Array.from([1]))).toBe(false);
     expect(() => api.playSound('Sound/iButtonClick')).toThrow('disposed');
     expect(() => api.hero()).toThrow('disposed');
+    expect(() => api.sendPacket(Uint8Array.from([1]))).toThrow('disposed');
+    expect(() => api.onPacket(() => {})).toThrow('disposed');
     host.dispose('example');
   });
 });

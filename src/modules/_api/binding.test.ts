@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { createModuleHost } from './host';
 import { serveModule } from './dispatcher';
 import { connectModule } from './guest';
+import { encodeModuleFrame } from './packetWire';
 import { MAX_MESSAGE_SIZE, PROTOCOL_VERSION } from './protocol';
 import { TEST_HERO, testGame } from './testGame';
 
@@ -52,7 +53,7 @@ describe('the message binding', () => {
   it('refuses an unknown call, a wrong argument type and an oversized message before the game sees them', async () => {
     const { module, calls } = setUp();
     const v = PROTOCOL_VERSION;
-    expect(await ask(module, { v, id: 1, call: 'sendPacket', args: [] })).toEqual({ id: 1, error: 'no call sendPacket' });
+    expect(await ask(module, { v, id: 1, call: 'readBag', args: [] })).toEqual({ id: 1, error: 'no call readBag' });
     expect(await ask(module, { v, id: 2, call: 'playSound', args: [42] })).toEqual({ id: 2, error: 'bad arguments to playSound' });
     const big = { 'example.title': 'x'.repeat(MAX_MESSAGE_SIZE) };
     expect(await ask(module, { v, id: 3, call: 'registerText', args: ['en', big] })).toEqual({ id: 3, error: 'message too large' });
@@ -103,9 +104,56 @@ describe('the message binding', () => {
     expect(seen).toEqual([]);
   });
 
-  it('stops answering once the client stops serving', () => {
-    const { client, stop } = setUp();
+  it('sends a packet as the module\'s frame, and refuses one over the message cap', async () => {
+    const { module, calls } = setUp();
+    const api = connectModule(module);
+    await api.sendPacket(Uint8Array.from([1, 2, 3]));
+    await api.sendPacket(new Uint8Array(0));
+    await expect(api.sendPacket(new Uint8Array((MAX_MESSAGE_SIZE / 4) * 3))).rejects.toThrow('message too large');
+    expect(calls).toEqual([
+      ['sendPacket', [...encodeModuleFrame('example', Uint8Array.from([1, 2, 3]))]],
+      ['sendPacket', [...encodeModuleFrame('example', new Uint8Array(0))]],
+    ]);
+  });
+
+  it('delivers the module\'s packets to every packet listener, until the last one leaves', async () => {
+    const { module, host } = setUp();
+    const api = connectModule(module);
+    const seen: string[] = [];
+    const offA = api.onPacket(p => seen.push(`a${p.join()}`));
+    const offB = api.onPacket(p => seen.push(`b${p.join()}`));
+    await api.hero();
+    expect(host.deliver('example', Uint8Array.from([7, 8]))).toBe(true);
+    await api.hero();
+    offA();
+    await api.hero();
+    expect(host.deliver('example', Uint8Array.from([9]))).toBe(true);
+    await api.hero();
+    offB();
+    await api.hero();
+    expect(host.deliver('example', Uint8Array.from([1]))).toBe(false);
+    expect(seen).toEqual(['a7,8', 'b7,8', 'b9']);
+  });
+
+  it('stops the packets once the host disposes the module', async () => {
+    const { module, host } = setUp();
+    const api = connectModule(module);
+    api.onPacket(() => {});
+    await api.hero();
+    host.dispose('example');
+    expect(host.deliver('example', Uint8Array.from([1]))).toBe(false);
+    await expect(api.sendPacket(Uint8Array.from([1]))).rejects.toThrow('disposed');
+  });
+
+  it('stops answering, and ends the module\'s listeners, once the client stops serving', async () => {
+    const { client, stop, module, host, mapListeners } = setUp();
+    const api = connectModule(module);
+    api.onMapChange(() => {});
+    api.onPacket(() => {});
+    await api.hero();
     stop();
     expect(client.onmessage).toBe(null);
+    expect(mapListeners()).toBe(0);
+    expect(host.deliver('example', Uint8Array.from([1]))).toBe(false);
   });
 });

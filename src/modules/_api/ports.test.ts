@@ -13,7 +13,9 @@ import { t, type TextKey } from '@/i18n';
 import { windowsIn } from '@/controllers/interface/windows';
 import { MuWindows } from '@/controllers/interface/windowManager';
 import { Hero } from '../hero';
-import { game, moduleHost } from './ports';
+import { Session } from '../session';
+import { encodeModuleFrame } from './packetWire';
+import { game, installModuleRouter, moduleHost, moduleRouter } from './ports';
 
 afterEach(() => runInAction(() => (Ecs.world = null)));
 
@@ -51,6 +53,30 @@ describe('the game side of the module API', () => {
     expect(Object.isFrozen(hero)).toBe(true);
     runInAction(() => (Ecs.world = null));
     expect(game.hero()).toMatchObject({ map: -1, x: 0, y: 0 });
+  });
+
+  it('sends a module\'s frame to the game server through the session, like every other packet', () => {
+    const sent: number[][] = [];
+    const send = vi.spyOn(Session, 'sendToGS').mockImplementation(view => void sent.push([...new Uint8Array(view.buffer, view.byteOffset, view.byteLength)]));
+    const frame = encodeModuleFrame('ports_test', Uint8Array.from([1, 2]));
+    game.sendPacket(frame);
+    send.mockRestore();
+    expect(sent).toEqual([[...frame]]);
+  });
+
+  it('routes a module packet off the socket to the module that listens, and counts one nobody hears', () => {
+    const stop = installModuleRouter();
+    const heard: number[][] = [];
+    moduleHost.api('ports_test').onPacket(p => heard.push([...p]));
+    const emit = (frame: Uint8Array) => EventBus.emit('ModulePacket', new DataView(frame.buffer, frame.byteOffset, frame.byteLength));
+    const unheard = moduleRouter.dropped.noListener;
+    emit(encodeModuleFrame('ports_test', Uint8Array.from([4, 5])));
+    emit(encodeModuleFrame('ports_nobody', Uint8Array.from([6])));
+    stop();
+    emit(encodeModuleFrame('ports_test', Uint8Array.from([7])));
+    moduleHost.dispose('ports_test');
+    expect(heard).toEqual([[4, 5]]);
+    expect(moduleRouter.dropped.noListener).toBe(unheard + 1);
   });
 
   it('follows map changes through the warp module', () => {

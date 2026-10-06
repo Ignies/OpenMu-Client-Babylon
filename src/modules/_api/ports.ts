@@ -11,9 +11,12 @@ import { effects } from '@/controllers/fx';
 import type { BurstKind } from '@/controllers/fx/bursts';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { Ecs } from '@/ecs/current';
+import { EventBus } from '@/core/eventBus';
 import { Hero } from '../hero';
+import { Session } from '../session';
 import { onMapChanged } from '../warp';
 import { createModuleHost, type Game } from './host';
+import { createModuleRouter } from './router';
 
 /** The effects a module may play by name: the fx controller's bursts (`controllers/fx/bursts.ts`). */
 const EFFECTS: ReadonlySet<string> = new Set<BurstKind>(['levelUp', 'shieldPotion', 'shieldLost', 'swirl']);
@@ -60,7 +63,18 @@ export const game: Game = {
     });
   },
   onMapChange: onMapChanged,
+  sendPacket: frame => Session.sendToGS(new DataView(frame.buffer, frame.byteOffset, frame.byteLength)),
 };
 
 /** The client's one host: `src/app/logic.ts` hands `moduleHost.api` to `installModules`. */
 export const moduleHost = createModuleHost(game);
+
+/** The client's one router, over `moduleHost`: `moduleRouter.dropped` counts the frames that went nowhere. */
+export const moduleRouter = createModuleRouter(moduleHost);
+
+/** Installs the one listener for the module packet (E8); `src/app/logic.ts` calls it with the module host. Returns the uninstall. */
+export function installModuleRouter(): () => void {
+  const route = (packet: DataView) => moduleRouter.route(new Uint8Array(packet.buffer, packet.byteOffset, packet.byteLength));
+  EventBus.on('ModulePacket', route);
+  return () => EventBus.off('ModulePacket', route);
+}

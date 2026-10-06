@@ -22,6 +22,7 @@ export function testGame() {
       maps.add(fn);
       return () => void maps.delete(fn);
     },
+    sendPacket: frame => void calls.push(['sendPacket', [...frame]]),
   };
   /** The hero stands on `map`. */
   const changeMap = (map: number) => maps.forEach(fn => fn(map));

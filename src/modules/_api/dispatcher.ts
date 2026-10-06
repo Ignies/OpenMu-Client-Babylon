@@ -1,11 +1,12 @@
 // The client's end of the message binding (readme.md): every message a sandboxed module sends is read
 // by `readCall`; a refusal is answered and goes no further, a valid call is made on the module's API.
 import type { ModuleApi } from './contract';
-import { readCall, type AnswerMessage, type CallMessage, type EventMessage, type PortLike } from './protocol';
+import { fromBase64, readCall, toBase64, type AnswerMessage, type CallMessage, type EventMessage, type PortLike } from './protocol';
 
 /** Serves one module's in-process API (`moduleHost.api(id)`) over `port`. Returns the stop. */
 export function serveModule(port: PortLike, api: ModuleApi<unknown>): () => void {
   let offMap: (() => void) | null = null;
+  let offPacket: (() => void) | null = null;
   const send = (message: AnswerMessage | EventMessage) => port.postMessage(message);
 
   function run(m: CallMessage): unknown {
@@ -28,6 +29,15 @@ export function serveModule(port: PortLike, api: ModuleApi<unknown>): () => void
         offMap?.();
         offMap = null;
         return undefined;
+      case 'sendPacket':
+        return api.sendPacket(fromBase64(m.args[0]));
+      case 'onPacket':
+        offPacket ??= api.onPacket(payload => send({ event: 'packet', data: { payload: toBase64(payload) } }));
+        return undefined;
+      case 'offPacket':
+        offPacket?.();
+        offPacket = null;
+        return undefined;
     }
   }
 
@@ -44,6 +54,7 @@ export function serveModule(port: PortLike, api: ModuleApi<unknown>): () => void
   return () => {
     port.onmessage = null;
     offMap?.();
-    offMap = null;
+    offPacket?.();
+    offMap = offPacket = null;
   };
 }

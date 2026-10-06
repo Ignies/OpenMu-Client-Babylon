@@ -2,7 +2,8 @@
 // keeping what each module registered so `dispose(id)` takes it all back. The message binding calls it too.
 import type { ComponentType } from 'react';
 import { isReservedKey } from '@/controllers/interface/keyBindings';
-import type { HeroSnapshot, ModuleApi, ModuleWindow, Tile } from './contract';
+import { MODULE_ID as NAME, type HeroSnapshot, type ModuleApi, type ModuleWindow, type Tile } from './contract';
+import { encodeModuleFrame, maxPayload } from './packetWire';
 
 /** The API a module gets in process: its windows draw React components. */
 export type InProcessApi = ModuleApi<ComponentType>;
@@ -18,6 +19,8 @@ export interface Game {
   playEffect(id: string, at: Tile): boolean;
   hero(): HeroSnapshot;
   onMapChange(fn: (map: number) => void): () => void;
+  /** Sends a whole module frame (`packetWire.ts`) to the game server. */
+  sendPacket(frame: Uint8Array): void;
 }
 
 export interface ModuleHost {
@@ -25,13 +28,19 @@ export interface ModuleHost {
   api(id: string): InProcessApi;
   /** Removes the module's windows and ends its listeners; its old API refuses every call after. */
   dispose(id: string): void;
+  /** Hands a payload from the server to module `id`'s packet listeners; false when none is listening. */
+  deliver(id: string, payload: Uint8Array): boolean;
 }
 
-const NAME = /^[a-z][a-z0-9_]{0,39}$/;
 const LANGUAGE = /^[a-z]{2,3}(-[A-Za-z0-9]{2,8})?$/;
 const KEY_CODE = /^[A-Za-z0-9]{1,32}$/;
 
-type Held = { api: InProcessApi; windows: Map<string, () => void>; listeners: Set<() => void> };
+type Held = {
+  api: InProcessApi;
+  windows: Map<string, () => void>;
+  listeners: Set<() => void>;
+  packets: Set<(payload: Uint8Array) => void>;
+};
 
 export function createModuleHost(game: Game): ModuleHost {
   const held = new Map<string, Held>();
@@ -39,12 +48,21 @@ export function createModuleHost(game: Game): ModuleHost {
   function build(id: string): Held {
     const windows = new Map<string, () => void>();
     const listeners = new Set<() => void>();
+    const packets = new Set<(payload: Uint8Array) => void>();
     const own = (key: string) => key.startsWith(`${id}.`) && key.length > id.length + 1;
     const alive = () => {
       if (held.get(id)?.api !== api) throw new Error(`module ${id} is disposed`);
     };
     const need = (ok: boolean, why: string) => {
       if (!ok) throw new Error(`module ${id}: ${why}`);
+    };
+    /** Keeps a listener's end for `dispose`; the end it returns runs once. */
+    const listen = (off: () => void) => {
+      const stop = () => {
+        if (listeners.delete(stop)) off();
+      };
+      listeners.add(stop);
+      return stop;
     };
 
     const api: InProcessApi = {
@@ -80,15 +98,21 @@ export function createModuleHost(game: Game): ModuleHost {
       },
       onMapChange(fn) {
         alive();
-        const off = game.onMapChange(fn);
-        const stop = () => {
-          if (listeners.delete(stop)) off();
-        };
-        listeners.add(stop);
-        return stop;
+        return listen(game.onMapChange(fn));
+      },
+      onPacket(fn) {
+        alive();
+        const each = (payload: Uint8Array) => fn(payload);
+        packets.add(each);
+        return listen(() => packets.delete(each));
+      },
+      sendPacket(payload) {
+        alive();
+        need(payload.length <= maxPayload(id), `a packet of ${payload.length} bytes is over the frame limit`);
+        game.sendPacket(encodeModuleFrame(id, payload));
       },
     };
-    return { api, windows, listeners };
+    return { api, windows, listeners, packets };
   }
 
   return {
@@ -104,6 +128,12 @@ export function createModuleHost(game: Game): ModuleHost {
       held.delete(id);
       for (const remove of h.windows.values()) remove();
       for (const stop of [...h.listeners]) stop();
+    },
+    deliver(id, payload) {
+      const packets = held.get(id)?.packets;
+      if (!packets?.size) return false;
+      for (const fn of [...packets]) fn(payload);
+      return true;
     },
   };
 }

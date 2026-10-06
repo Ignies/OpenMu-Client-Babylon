@@ -7,6 +7,16 @@ describe('MODULE_API_VERSION', () => {
     expect(canServe(MODULE_API_VERSION)).toBe(true);
     expect(canServe(`^${MODULE_API_VERSION}`)).toBe(true);
   });
+
+  it('is 1.1 (packets): a module asking for 1.0 or 1.1 is served, one asking for 1.0.x or 1.2 is not', () => {
+    expect(MODULE_API_VERSION).toBe('1.1.0');
+    expect(canServe('^1.0')).toBe(true);
+    expect(canServe('^1.1')).toBe(true);
+    expect(canServe('>=1.0 <2')).toBe(true);
+    expect(canServe('~1.0')).toBe(false);
+    expect(canServe('1.0.0')).toBe(false);
+    expect(canServe('^1.2')).toBe(false);
+  });
 });
 
 describe('canServe', () => {

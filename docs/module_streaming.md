@@ -65,7 +65,7 @@ range does not match is skipped with a notice, never run.
    (never in CI); only its public half is built into the client. Needed from phase 5 on.
 4. The order is 3, 4, 6, then 5.
 
-Phase 3 is built (below); phase 4 is next. Nothing of phases 4 to 6 is built yet.
+Phases 3 and 4 are built (below); phase 6 is next. Nothing of phases 5 and 6 is built yet.
 
 ## Phase 3: built (2026-10-06)
 
@@ -95,3 +95,65 @@ Left for phase 5, when third-party code first runs (decided 2026-10-06): caps on
 windows, listeners and calls and a rate limit (today only the 64K message cap); a timeout on the
 guest's pending calls; refusing a streamed module that claims `core`. `playEffect` and `playSound`
 stay narrow until a module needs more.
+
+## Phase 4: the extension code
+
+The module packet is `0xE8`, the same code in both directions. Checked on 2026-10-06:
+
+- OpenMU master, `src/Network/Packets/ClientToServer/ClientToServerPackets.xml`: the codes from 0xE0
+  up are E1, E2, E5, E6, E9, EB, F1, F2, F3, F5, F6, F7, F8. `ServerToClient/ServerToClientPackets.xml`:
+  E5, E6, E9, EB, F1, F3, F5, F6, F7, F8, F9. No E8 in either (free in both from 0xE0 up: E0, E3, E4,
+  E7, E8, EA, EC to F0, F4, FA to FF).
+- The original client (`references/MuMain-main`, `WSclient.cpp` `ProcessPacket`) handles no 0xE8 and
+  sends none, so OpenMU has no reason to take it later.
+- Ours: 0xE7 is the marketplace (`escrowWire.ts`, `openmu/plugins/`), 0xFA the band and 0xFB the map
+  ping (both answered by the proxy, never by OpenMU), C1 B1 00 the hand-written map-server move.
+  Nothing in `src/`, `versions/`, `proxy/` or `openmu/` uses 0xE8.
+- It sits next to the marketplace's 0xE7, the other code our OpenMU plugin owns.
+
+## Phase 4: built (2026-10-06)
+
+The client half, in [src/modules/_api/](../src/modules/_api/readme.md) ("Packets"):
+
+- `packetWire.ts`: the frame, `C1 len E8 idLength id payload` (C2 when the frame does not fit 255
+  bytes), the id being the module API's own (`MODULE_ID` in `contract.ts`). Encoding throws on a bad
+  id or a frame over 65535 bytes; decoding never throws and answers why.
+- The module API is `1.1.0`: `onPacket(fn)` (this module's payloads only; returns the unsubscribe)
+  and `sendPacket(payload)` (refused over the frame limit), in process and over messages (the payload
+  as base64, checked by `readCall`; about 48 K fits the 64 K message cap). `dispose` drops the
+  module's packet listeners. A module asking for `^1.0` or `^1.1` is served, `~1.0` no longer is.
+- `router.ts` and `ports.ts`: the hand-written `ModulePacket` (`versions/season6/packets/`, in both
+  versions' sets) makes the socket emit every E8 frame; `installModuleRouter()`, called by
+  `src/app/logic.ts` right after `installModules`, is its one listener and hands each frame to the
+  module it names. A frame nobody listens to, or one it cannot read, is dropped and counted
+  (`moduleRouter.dropped`). Outgoing frames go through `Session.sendToGS`. The listener dump shows
+  this one listener added and nothing else changed (`listenerOrder.golden.test.ts` hash updated).
+
+The server half, in [openmu/plugins/](../openmu/readme.md): `ModulePacketHandlerPlugIn` (0xE8) reads
+the id and hands the payload to the `IModulePacketPlugIn` registered for it (a plugin point keyed by
+the module id, found with `PlugInManager.GetStrategy` like chat commands), or drops the frame and logs
+the id once; `ModulePacketViewPlugIn` (`IModulePacketViewPlugIn`) sends a module's frame to one
+player. No module plugin ships, so every frame is dropped for now.
+
+The installer needs no switch: the plugin DLL is in every OpenMU image it builds (`openmu/Dockerfile`)
+and the router in every client it builds, so both halves are always on together, and with no module
+plugin they do nothing. A client sends E8 only for a loaded module that calls `sendPacket`, and from
+phase 5 a world's modules are the ones its `server.json` lists, so a world without our plugin (which
+lists none) never gets one.
+
+What the lead must still build and check (the C# could not be compiled here):
+
+- `mu update` (or `docker build -t mu-openmu:local openmu`): the four new files compile against the
+  image's assemblies. They use only public OpenMU types: `IPacketHandlerPlugIn`,
+  `IStrategyPlugIn<string>`, `PlugInPointAttribute`, `PlugInManager.GetStrategy`, `IViewPlugIn`,
+  `RemotePlayer`, `IConnection` and `ConnectionExtensions.SendAsync`, all checked against the v0.9.10
+  sources.
+- The admin panel lists "Module Packet Handler" (packet handlers) and "Module Packet" (view plugins)
+  as active, and the startup log has no plugin registration error for them.
+- With a client in the world (dev build), a frame for a module nobody registered, sent from the
+  console: `__modules.Session.sendToGS(new DataView(Uint8Array.of(0xC1, 10, 0xE8, 5, 112, 114, 111,
+  98, 101, 1).buffer))` (`C1 0A E8 05 "probe" 01`). OpenMU logs "Module packet for probe dropped"
+  once, not again for the same frame sent twice, and the player stays connected.
+- When the first module ships: its `[PlugIn]` class implementing `IModulePacketPlugIn` (with its own
+  `[Guid]`) receives the payload, and its answer through `IModulePacketViewPlugIn` reaches the
+  module's `onPacket` in the client (and `moduleRouter.dropped` stays 0).

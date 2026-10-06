@@ -57,9 +57,9 @@ describe('installModules with an API range', () => {
     expect(on).toEqual(['range_other']);
     expect(moduleOn('range_next')).toBe(false);
     expect(refusedModules().filter(r => r.id.startsWith('range_'))).toEqual([
-      { id: 'range_next', why: 'needs module API ^2.0; this client serves 1.0.0' },
+      { id: 'range_next', why: 'needs module API ^2.0; this client serves 1.1.0' },
       { id: 'range_needs_next', why: 'requires range_next, which was refused' },
-      { id: 'range_unread', why: 'needs module API latest; this client serves 1.0.0' },
+      { id: 'range_unread', why: 'needs module API latest; this client serves 1.1.0' },
     ]);
     expect(warn).toHaveBeenCalledTimes(3);
     warn.mockRestore();

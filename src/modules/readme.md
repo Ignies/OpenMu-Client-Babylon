@@ -2,7 +2,7 @@
 
 Gameplay, one folder per module. A module owns its packets, its state and its actions; windows in
 `versions/shared/ui/` read the state and call the actions. Modules a server ships to the client
-(not built yet): [docs/module_streaming.md](../../docs/module_streaming.md).
+(their API and packets are built, loading them is not yet): [docs/module_streaming.md](../../docs/module_streaming.md).
 
 ## What a module is
 - `module.ts`: `defineModule({ id, core?, requires?, api?, install })`. `id` is the folder name; `core`
@@ -17,7 +17,10 @@ Gameplay, one folder per module. A module owns its packets, its state and its ac
   `install(api)` gets the module's API (`src/app/logic.ts` hands `moduleHost.api` in); built-in
   modules ignore it.
 - `net.ts`: the packet handlers, registered by `installNet()` (its `install`). Importing the file
-  registers nothing.
+  registers nothing. A module a server ships has no packets of its own in OpenMU's protocol: its
+  packets travel inside the module packet (`0xE8`, its id then its payload), and it uses the module
+  API's `onPacket` / `sendPacket` (API 1.1, [_api/readme.md](_api/readme.md) "Packets"); one router
+  hands each frame to the module it names.
 - `modules.ts` lists every module in install order, and `src/app/logic.ts` calls
   `installModules(MODULES)`. That order is the listener order for a packet several modules
   handle (pinned by `src/app/listenerOrder.golden.test.ts`). Keep it. The constraints today, each
