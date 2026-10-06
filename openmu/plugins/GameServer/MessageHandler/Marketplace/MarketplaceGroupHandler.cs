@@ -25,6 +25,8 @@ internal class MarketplaceGroupHandler : PacketHandlerPlugInContainer<ISubPacket
     public MarketplaceGroupHandler(IClientVersionProvider clientVersionProvider, PlugInManager manager, ILoggerFactory loggerFactory)
         : base(clientVersionProvider, manager, loggerFactory)
     {
+        // OpenMU's CreatePlugIn initializes only its own GroupPacketHandlerPlugIn; without this the group has no sub-handlers.
+        this.Initialize();
     }
 
     /// <inheritdoc />
