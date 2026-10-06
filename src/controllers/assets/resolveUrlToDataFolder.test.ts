@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { VersionData } from '../../version/contract';
-import { assetUrl, hasAsset } from './resolveUrlToDataFolder';
+import { assetsIndexUrl, assetUrl, hasAsset } from './resolveUrlToDataFolder';
 
 const season6: VersionData = { folder: './Data/', assets: './game-assets/', locale: 'Eng' };
 
@@ -41,5 +41,15 @@ describe('assetUrl', () => {
   it('leaves absolute and inline urls alone', () => {
     expect(assetUrl(period, 'https://cdn.example/x.glb')).toBe('https://cdn.example/x.glb');
     expect(assetUrl(period, 'base64:AAAA')).toBe('base64:AAAA');
+  });
+});
+
+describe('assetsIndexUrl', () => {
+  it('names each version its own pre-download index, beside its converted tree', () => {
+    expect(assetsIndexUrl(season6)).toBe('./assets-index.json');
+    expect(assetsIndexUrl(period)).toBe('./assets-index-v097d.json');
+    expect(assetsIndexUrl({ ...season6, assets: 'https://cdn.example/game-assets' })).toBe(
+      'https://cdn.example/assets-index.json'
+    );
   });
 });

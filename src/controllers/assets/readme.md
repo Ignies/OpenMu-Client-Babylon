@@ -12,7 +12,9 @@ imports the modules below directly (baselined in `tools/checks`).
   resolves to `undefined` instead of rejecting.
 - Data roots: `resolveUrlToDataFolder(url)` (converted assets, `gameVersion.data.assets`, or the
   tree the version borrows a file it does not ship from; `assetUrl(data, url)` is the pure form;
-  `hasAssetFile(url)` is false for a file the version `lacks`);
+  `hasAssetFile(url)` is false for a file the version `lacks`; `assetsIndexUrl(data)` is the
+  version's pre-download index, `assets-index.json` beside `game-assets/`, `assets-index-v097d.json`
+  beside `game-assets-v097d/`);
   `mu/dataFolder.ts`: `resolveDataUrl`, `downloadDataFile`, `hasDataFile` (the original `Data/`
   tree, `gameVersion.data.folder`, or the tree the version borrows a path it lacks from:
   `borrows.folderPaths`; `dataUrl(data, path)` and `hasData(data, path)` are the pure forms).
@@ -83,12 +85,13 @@ imports the modules below directly (baselined in `tools/checks`).
 - read a new `Data/Local` table: add `mu/<name>File.ts` using `downloadLocalDataFile` (English
   fallback) or `downloadPackDataFile` (pack only, for overlays), `decodeLocalText` and
   `convertBux` per record.
-- change the download groups: `tools/assetsIndex.ts` writes `assets-index.json`.
+- change the download groups: `tools/assetsIndex.ts` writes one index per version (`assetsIndexUrl`).
 - change which interface sheets preload: `versions/<id>/ui/preload.ts`.
 
 ## Tests
 - `resolveUrlToDataFolder.test.ts`: own files stay on the version root, the rest come from the
-  borrowed tree, a file the version lacks is never borrowed, absolute urls pass through.
+  borrowed tree, a file the version lacks is never borrowed, absolute urls pass through; each
+  version names its own index.
 - `loadFailure.test.ts`: one warning per file, a different file warns again, `settle` passes a
   value through and turns a failure into `undefined`.
 - `assetDownload.test.ts`: `urlsOf`, Core cannot be unticked, transfer totals.
@@ -105,6 +108,8 @@ imports the modules below directly (baselined in `tools/checks`).
 
 ### assetDownload.ts
 The player picks groups on the pre-game screen and they are fetched into the service worker cache.
+Each version reads its own index (`assetsIndexUrl`), which lists a borrowed file at the lender's url,
+so a file both versions read is cached once.
 `settleSidecars(gate.bmd)` runs before the first fetch: the client picks plain or `.gz` URLs once,
 so a download that ran earlier would warm the wrong URLs. Sizes shown are transfer sizes (the model
 set is 329 MB on disk, 93 MB gzipped).
