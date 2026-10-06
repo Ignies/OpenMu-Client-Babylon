@@ -4,6 +4,9 @@
 /** The API version this client serves (semver): a minor bump adds calls, a major one breaks them. */
 export const MODULE_API_VERSION = '1.0.0';
 
+/** A module's id (its folder name), also the rule for a window's id: lower case, at most 40 characters. */
+export const MODULE_ID = /^[a-z][a-z0-9_]{0,39}$/;
+
 /** A tile of the hero's map. */
 export type Tile = { readonly x: number; readonly y: number };
 

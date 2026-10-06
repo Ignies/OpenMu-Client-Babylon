@@ -2,7 +2,7 @@
 // keeping what each module registered so `dispose(id)` takes it all back. The message binding calls it too.
 import type { ComponentType } from 'react';
 import { isReservedKey } from '@/controllers/interface/keyBindings';
-import type { HeroSnapshot, ModuleApi, ModuleWindow, Tile } from './contract';
+import { MODULE_ID as NAME, type HeroSnapshot, type ModuleApi, type ModuleWindow, type Tile } from './contract';
 
 /** The API a module gets in process: its windows draw React components. */
 export type InProcessApi = ModuleApi<ComponentType>;
@@ -27,7 +27,6 @@ export interface ModuleHost {
   dispose(id: string): void;
 }
 
-const NAME = /^[a-z][a-z0-9_]{0,39}$/;
 const LANGUAGE = /^[a-z]{2,3}(-[A-Za-z0-9]{2,8})?$/;
 const KEY_CODE = /^[A-Za-z0-9]{1,32}$/;
 
