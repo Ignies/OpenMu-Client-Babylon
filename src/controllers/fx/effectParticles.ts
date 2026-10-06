@@ -32,6 +32,9 @@ type TextureKey =
   | 'fireHik2'
   | 'fireHik3'
   | 'fireHik3Mono'
+  | 'waterfall1'
+  | 'waterfall2'
+  | 'waterfall3'
   | 'waterfall5'
   | 'spark03'
   | 'flareBlue'
@@ -54,6 +57,9 @@ const TEXTURES: Record<
   fireHik2: { file: 'Effect/firehik02.OZJ', size: 64 },
   fireHik3: { file: 'Effect/firehik03.OZJ', size: 64 },
   fireHik3Mono: { file: 'Effect/firehik_mono03.OZJ', size: 64 },
+  waterfall1: { file: 'Effect/waterFall1.OZJ', size: 64 },
+  waterfall2: { file: 'Effect/waterFall2.OZJ', size: 64 },
+  waterfall3: { file: 'Effect/waterFall3.OZJ', size: 64 },
   waterfall5: { file: 'Effect/waterFall5.OZJ', size: 64 },
   spark03: { file: 'Effect/Spark03.OZJ', size: 32 },
   flareBlue: { file: 'Effect/flareBlue.OZJ', size: 64 },
@@ -292,6 +298,42 @@ function advSmokeKind(scaleBase: number, scaleStep: number, push: number, grow: 
       p.vz += 0.3 * f;
       p.scale += grow * f;
       p.lr = p.lg = p.lb = Math.min(1, p.lifeTime / 10);
+    },
+    color: plainColor,
+  };
+}
+
+/**
+ * `BITMAP_WATERFALL_1` SubType 2 and `BITMAP_WATERFALL_5` SubType 9: 30 ticks, `Rotation = rand() % 360`,
+ * `scaleBase + Scale` big, falling `rand() % 5 + 7`, 0.2 grey; a tick it loses 0.005 of its scale,
+ * falls 0.1 slower, brightens 1.1 while more than 20 ticks are left and dims 1.2 below `fadeBelow`
+ * (ZzzEffectParticle.cpp:3385-3405, :3482-3490, :8359-8373, :8447-8464).
+ */
+function waterfallKind(texture: TextureKey, scaleBase: number, fadeBelow: number): ParticleKind {
+  return {
+    texture,
+    blend: 'add',
+    init(p, scale) {
+      p.lifeTime = 30;
+      p.rotation = rand(360);
+      p.scale = scaleBase + scale;
+      p.vz = -(rand(5) + 7);
+      p.lr = p.lg = p.lb = 0.2;
+    },
+    update(p, f) {
+      p.scale -= f * 0.005;
+      p.vz += 0.1 * f;
+
+      const gain =
+        p.lifeTime < fadeBelow
+          ? Math.pow(1 / 1.2, f)
+          : p.lifeTime > 20
+            ? Math.pow(1.1, f)
+            : 1;
+
+      p.lr *= gain;
+      p.lg *= gain;
+      p.lb *= gain;
     },
     color: plainColor,
   };
@@ -630,30 +672,71 @@ const KINDS = {
     color: plainColor,
   } satisfies ParticleKind,
 
-  waterfall5_9: {
-    texture: 'waterfall5',
+  waterfall5_9: waterfallKind('waterfall5', 0.6, 8),
+
+  waterfall1_2: waterfallKind('waterfall1', 1.6, 5),
+
+  /**
+   * `BITMAP_WATERFALL_2` SubType 1 (waterFall2.jpg, additive): 50 ticks, `Rotation = rand() % 360`,
+   * `(rand() % 6 + 6) * 0.1` big whatever its scale, falling `rand() % 3 + 3`, made up to 10 aside and
+   * 20 off in height, `(0, 0.4, 0.4)` (ZzzEffectParticle.cpp:3501-3540). A tick it grows 0.03, takes
+   * `(rand() % 20 - 10) * 0.1` sideways, falls 0.1 slower and dims 1.05, 1.1 more below 10 ticks
+   * left (:8494-8510).
+   */
+  waterfall2_1: {
+    texture: 'waterfall2',
     blend: 'add',
-    init(p, scale) {
-      p.lifeTime = 30;
+    init(p) {
+      p.lifeTime = 50;
       p.rotation = rand(360);
-      p.scale = 0.6 + scale;
-      p.vz = -(rand(5) + 7);
-      p.lr = p.lg = p.lb = 0.2;
+      p.scale = (rand(6) + 6) * 0.1;
+      p.vz = -(rand(3) + 3);
+      p.px += rand(20) - 10;
+      p.py += rand(20) - 10;
+      p.pz += rand(40) - 20;
+      p.lr = 0;
+      p.lg = p.lb = 0.4;
     },
     update(p, f) {
-      p.scale -= f * 0.005;
+      p.scale += 0.03 * f;
+      p.vx = (rand(20) - 10) * 0.1;
+      p.vy = (rand(20) - 10) * 0.1;
       p.vz += 0.1 * f;
 
-      const gain =
-        p.lifeTime < 8
-          ? Math.pow(1 / 1.2, f)
-          : p.lifeTime > 20
-            ? Math.pow(1.1, f)
-            : 1;
+      const gain = Math.pow(1 / 1.05, f) * (p.lifeTime < 10 ? Math.pow(1 / 1.1, f) : 1);
 
-      p.lr *= gain;
       p.lg *= gain;
       p.lb *= gain;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
+
+  /**
+   * `BITMAP_WATERFALL_3` SubType 3 (waterFall3.jpg, additive): 60 ticks, `Scale * (rand() % 10 + 15) * 0.02`,
+   * `Rotation = rand() % 360`, falling 1, made up to 20 aside in x and -10 to 14 in height, in the light it
+   * is made with (ZzzEffectParticle.cpp:3602-3611). A tick it grows 0.005, falls 0.05 faster and keeps
+   * 0.97 of its light (:8559-8567).
+   */
+  waterfall3_3: {
+    texture: 'waterfall3',
+    blend: 'add',
+    init(p, scale) {
+      p.lifeTime = 60;
+      p.vz = -1;
+      p.scale = scale * (rand(10) + 15) * 0.02;
+      p.rotation = rand(360);
+      p.px += rand(40) - 20;
+      p.pz += rand(25) - 10;
+    },
+    update(p, f) {
+      p.scale += 0.005 * f;
+      p.vz -= 0.05 * f;
+
+      const keep = Math.pow(0.97, f);
+
+      p.lr *= keep;
+      p.lg *= keep;
+      p.lb *= keep;
     },
     color: plainColor,
   } satisfies ParticleKind,
@@ -1095,6 +1178,9 @@ export const KIND_REACH: Record<KindName, Reach> = {
   smoke22: { travel: 3.7, base: 1.09, perScale: 0.29 },
   smoke60: { travel: 3.7, base: 1.09, perScale: 0.29 },
   waterfall5_9: { travel: 2.9, base: 0.28, perScale: 0.46 },
+  waterfall1_2: { travel: 2.9, base: 0.73, perScale: 0.46 },
+  waterfall2_1: { travel: 1.7, base: 1.18, perScale: 0 },
+  waterfall3_3: { travel: 1.62, base: 0.14, perScale: 0.22 },
   spark03_24: { travel: 0.6, base: 0.19, perScale: 0 },
   light0: { travel: 0.6, base: 0, perScale: 0.45 },
   wingFlareBlue: { travel: 0, base: 0, perScale: 0.46 },

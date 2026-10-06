@@ -141,7 +141,8 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
 - `balgasbarracks/spec.test.ts`: the lava vents (2) puff a `BITMAP_SMOKE` SubType 13 (`smoke13`) one
   tick in three on both worlds; 5 makes `BITMAP_ADV_SMOKE + 1` with `ADV_SMOKE` SubType 0 and
   `BITMAP_CLOUD` SubType 6 with `ADV_SMOKE` SubType 1, each pair one tick in eight, the rate of the
-  original's `o->Timer` walk.
+  original's `o->Timer` walk; 58-60 make `BITMAP_WATERFALL_1` SubType 2, `_2` SubType 1 and `_3`
+  SubType 3 (`waterfall1_2`, `waterfall2_1`, `waterfall3_3`).
 - `doppelganger4/spec.test.ts`: 59 puffs a `BITMAP_SMOKE` SubType 13 (`smoke13`) one tick in three where
   Kanturu's puffs SubType 21; every other Kanturu row stays.
 - `chaoscastle/thunder.test.ts`: pillar thunder timing, which pillar it strikes and the bolt's fall.

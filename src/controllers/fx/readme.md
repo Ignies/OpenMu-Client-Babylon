@@ -92,7 +92,10 @@ shared pools, textures and particle recipes other folders reuse.
   turned with the object and as it is, rise faster, grow and are `LifeTime / 10` bright, held at 1;
   `fi02_0` (`BITMAP_ADV_SMOKE + 1`, fi02.tga drawn `alpha`) takes `BITMAP_TRUE_FIRE`'s life and push,
   wanders, turns and fades in colour and alpha; `cloud6` (`BITMAP_CLOUD` SubType 6) moves the same at a
-  fifth of its size, additive, `LifeTime / 50` bright.
+  fifth of its size, additive, `LifeTime / 50` bright; `waterfall1_2` (`BITMAP_WATERFALL_1` SubType 2)
+  falls as `waterfall5_9` 1.6 bigger and dims below 5 ticks left, not 8; `waterfall2_1`
+  (`BITMAP_WATERFALL_2` SubType 1) is made off its spot, falls, wobbles, grows and dims teal;
+  `waterfall3_3` (`BITMAP_WATERFALL_3` SubType 3) sinks faster each tick and keeps 0.97 of its light.
 - `afterimage.test.ts`: a copy takes the drawn meshes of each part onto a skeleton of its own, posed on
   the clip's first key while the body keeps its own; a placed part stands where a body facing that way
   would draw it, at its alpha; an unplaced or 0-alpha part is not drawn; it ends taking its copies along.

@@ -436,6 +436,93 @@ describe('cloud6, BITMAP_CLOUD SubType 6 (ZzzEffectParticle.cpp:2815-2824, :7550
   });
 });
 
+describe('waterfall1_2, BITMAP_WATERFALL_1 SubType 2 (ZzzEffectParticle.cpp:3385-3405, :8359-8373)', () => {
+  // 30 ticks, `Rotation = rand() % 360`, `Scale = 1.6 + Scale`, `Velocity[2] = -(rand() % 5 + 7)`, 0.2 grey; a tick it
+  // loses 0.005 of its scale, falls 0.1 slower and brightens 1.1 while more than 20 ticks are left.
+  it('falls, slowing 0.1 a tick, 1.6 bigger than it is made, and brightens 1.1 a tick at first', async () => {
+    const sprite = await play('waterfall1_2', 0.5, 0.5, 3);
+    expect([sprite.position.x, sprite.position.z]).toEqual([0, 0]);
+    expect(sprite.position.y).toBeCloseTo(-0.267);
+    expect(sprite.width).toBeCloseTo((64 * 2.085) / 100);
+    expect(sprite.angle).toBeCloseTo(Math.PI);
+    expect(rgba(sprite)).toEqual(['0.266', '0.266', '0.266', '1.000']);
+    expect(fakes.files).toEqual(['Effect/waterFall1.OZJ']);
+  });
+
+  // WATERFALL_5 dims below 8 ticks left; WATERFALL_1 below 5.
+  it('dims 1.2 a tick below 5 ticks left and lives 30', async () => {
+    expect(rgba(await play('waterfall1_2', 1, 0.5, 25))[0]).toBe('0.472');
+    disposeEffectParticles();
+    expect(rgba(await play('waterfall1_2', 1, 0.5, 26))[0]).toBe('0.393');
+    disposeEffectParticles();
+    expect(rgba(await play('waterfall5_9', 1, 0.5, 25))[0]).toBe('0.273');
+    disposeEffectParticles();
+    expect((await play('waterfall1_2', 1, 0.5, 29)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('waterfall1_2', 1, 0.5, 30)).isVisible).toBe(false);
+  });
+});
+
+describe('waterfall2_1, BITMAP_WATERFALL_2 SubType 1 (ZzzEffectParticle.cpp:3501-3540, :8494-8510)', () => {
+  // `Scale = (rand() % 6 + 6) * 0.1` whatever it is made with, `Velocity[2] = -(rand() % 3 + 3)`, `(0, 0.4, 0.4)`, 50
+  // ticks; a tick it grows 0.03, falls 0.1 slower and dims 1.05.
+  it('falls slowing 0.1 a tick, grows 0.03 and dims 1.05 a tick, teal', async () => {
+    const sprite = await play('waterfall2_1', 3, 0.5, 2);
+    expect([sprite.position.x, sprite.position.z]).toEqual([0, 0]);
+    expect(sprite.position.y).toBeCloseTo(-0.079);
+    expect(sprite.width).toBeCloseTo((64 * 0.96) / 100);
+    expect(sprite.angle).toBeCloseTo(Math.PI);
+    expect(rgba(sprite)).toEqual(['0.000', '0.363', '0.363', '1.000']);
+    expect(fakes.files).toEqual(['Effect/waterFall2.OZJ']);
+  });
+
+  // `Position += (rand() % 20 - 10, rand() % 20 - 10, rand() % 40 - 20)`; a tick `Velocity = (rand() % 20 - 10) * 0.1`
+  // in x and y, which the next tick moves it by.
+  it('is made up to 10 aside and 20 below and wobbles up to 1 a tick', async () => {
+    const sprite = await play('waterfall2_1', 1, 0, 2);
+    expect(sprite.position.x).toBeCloseTo(-0.11);
+    expect(sprite.position.z).toBeCloseTo(-0.11);
+    expect(sprite.position.y).toBeCloseTo(-0.259);
+  });
+
+  it('dims 1.1 more below 10 ticks left and lives 50', async () => {
+    expect(rgba(await play('waterfall2_1', 1, 0.5, 40))[1]).toBe('0.057');
+    disposeEffectParticles();
+    expect(rgba(await play('waterfall2_1', 1, 0.5, 41))[1]).toBe('0.049');
+    disposeEffectParticles();
+    expect((await play('waterfall2_1', 1, 0.5, 49)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('waterfall2_1', 1, 0.5, 50)).isVisible).toBe(false);
+  });
+});
+
+describe('waterfall3_3, BITMAP_WATERFALL_3 SubType 3 (ZzzEffectParticle.cpp:3602-3611, :8559-8567)', () => {
+  // 60 ticks, `Scale *= (rand() % 10 + 15) * 0.02`, `Velocity[2] = -1`, `Position += (rand() % 40 - 20, 0,
+  // rand() % 25 - 10)`, in the light it is made with; a tick it grows 0.005, falls 0.05 faster and keeps 0.97 of it.
+  it('sinks faster each tick, grows 0.005 and keeps 0.97 of its light a tick', async () => {
+    const sprite = await play('waterfall3_3', 2, 0.5, 2);
+    expect([sprite.position.x, sprite.position.z]).toEqual([0, 0]);
+    expect(sprite.position.y).toBeCloseTo(-0.0005);
+    expect(sprite.width).toBeCloseTo((64 * 0.81) / 100);
+    expect(sprite.angle).toBeCloseTo(Math.PI);
+    expect(rgba(sprite)).toEqual(['0.188', '0.376', '0.565', '1.000']);
+    expect(fakes.files).toEqual(['Effect/waterFall3.OZJ']);
+  });
+
+  it('is made up to 20 aside in x and 10 below', async () => {
+    const sprite = await play('waterfall3_3', 1, 0, 1);
+    expect(sprite.position.x).toBeCloseTo(-0.2);
+    expect(sprite.position.z).toBeCloseTo(0);
+    expect(sprite.position.y).toBeCloseTo(-0.11);
+  });
+
+  it('lives 60 ticks', async () => {
+    expect((await play('waterfall3_3', 1, 0.5, 59)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('waterfall3_3', 1, 0.5, 60)).isVisible).toBe(false);
+  });
+});
+
 describe('the particle tick', () => {
   it('makes no colour: one is reused frame after frame', async () => {
     await play('trueFire', 1, 0.5, 1);

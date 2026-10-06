@@ -42,3 +42,15 @@ describe('Balgass 5 (GM3rdChangeUp.cpp:133-153)', () => {
     expect(second / ticks).toBeCloseTo(1 / 8, 2);
   });
 });
+
+describe('Balgass 58-60 (GM3rdChangeUp.cpp:173-186)', () => {
+  // 58 `rand_fps_check(2)` WATERFALL_1 SubType 2, 59 `rand_fps_check(3)` WATERFALL_2 SubType 1, 60 every tick
+  // WATERFALL_3 SubType 3, each at `o->Scale`, white.
+  it('make the original waterfall particles', () => {
+    for (const world of WORLDS) {
+      expect(maps.emissionsFor(world, 58), ENUM_WORLD[world]).toEqual([{ kinds: ['waterfall1_2'], every: 2 }]);
+      expect(maps.emissionsFor(world, 59), ENUM_WORLD[world]).toEqual([{ kinds: ['waterfall2_1'], every: 3 }]);
+      expect(maps.emissionsFor(world, 60), ENUM_WORLD[world]).toEqual([{ kinds: ['waterfall3_3'], every: 1 }]);
+    }
+  });
+});
