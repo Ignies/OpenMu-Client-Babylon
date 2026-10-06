@@ -14,7 +14,7 @@ the loader that resolves which version this page runs. See [../../docs/versions.
   until it has loaded.
 - `ensureActiveVersion(tag)`: `true` when the loaded version plays `tag`, else reloads the page.
 - Types: `GameVersion`, `VersionData`, `VersionFeatures`, `VersionProtocol`, `VersionEncryption`,
-  `MiniGame` (`contract.ts`); `VersionUi`, `PregameUi`, `PregameBackdrop`, `PregameScene`
+  `MiniGame`, `ItemHotkeys` (`contract.ts`); `VersionUi`, `PregameUi`, `PregameBackdrop`, `PregameScene`
   (`uiContract.ts`).
 
 ## How it works
@@ -24,7 +24,8 @@ the loader that resolves which version this page runs. See [../../docs/versions.
   these and never compares a version id.
 - `features`: what the version's server knows. Each flag has a reader: `masterSkills` (the master
   tree), `socketItems` / `ancientItems` (item visuals), `darkLord`, `magicGladiator`, `summoner`,
-  `rageFighter` (the create window offers only those), `itemHotkeys` (the bottom bar belt).
+  `rageFighter` (the create window offers only those). `itemHotkeys` is not a flag but the bottom
+  bar's potion slots: how many (Q, W, E, R in order) and whether they bind (`canBindItemHotkey`).
 - `modulesOff`: the optional modules (`src/modules/modules.ts` ids, the words of a world's
   `server.json` `modulesOff`) the version's server never has; `src/app/logic.ts` never installs them.
 - `miniGames`: the timed events the version's client has (`MiniGame`); the HUD schedule rows
@@ -50,7 +51,8 @@ the loader that resolves which version this page runs. See [../../docs/versions.
 ## Depends on / used by
 - uses: `versions/registry.ts`; types from `core/types`, `ecs/world`, `controllers/interface/windows`.
 - used by: `app/` (main, App, store), `controllers/assets` loaders, `controllers/net/packets.ts`,
-  `controllers/item_fx`, modules `servers`, `mu_helper` and `events` (the schedule rows),
+  `controllers/item_fx`, modules `servers`, `mu_helper`, `events` (the schedule rows) and
+  `inventory` (the potion slots),
   `ecs/systems/loginSceneSystem.ts`,
   `versions/registry.ts`, every `versions/<id>/` and some shared windows.
 

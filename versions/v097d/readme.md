@@ -6,9 +6,9 @@ MU 0.97d, the second version the client carries. OpenMU has no 0.97d data initia
 ## Public API
 - `gameVersion` (`index.ts`): id `v097d`, label `MU 0.97d`, list tag `V097D`, client version
   bytes `09704` (stored mangled), serial, pre-Season 6 Xor32 key, `variantRank`, data paths,
-  `features` (no master skills, sockets, ancient sets, Dark Lord, Summoner, Rage Fighter or item
-  hot-key belt; the Magic Gladiator is in), `modulesOff: ['mu_helper']` and `miniGames` (Blood
-  Castle and Devil Square).
+  `features` (no master skills, sockets, ancient sets, Dark Lord, Summoner or Rage Fighter; the
+  Magic Gladiator is in; three fixed potion slots), `modulesOff: ['mu_helper']` and `miniGames`
+  (Blood Castle and Devil Square).
 - `packets` (`packets/index.ts`): the shared generated set plus Season 6's four hand-written
   packets. Nothing extra to generate.
 - `ui/index.tsx`: `pregame` (the ship scene), `preload`, `MasterSkillsWindow` (renders nothing).
@@ -81,6 +81,11 @@ MU 0.97d, the second version the client carries. OpenMU has no 0.97d data initia
   has its map (World12) and no server side yet; Chaos Castle is not in 0.97d (no World19, and its
   `NpcName` table has the Archangel and Charon but no Chaos Castle monster), so `miniGames` leaves
   it out and the HUD schedule neither draws nor polls it.
+- Potion slots (`features.itemHotkeys`: three, not bindable): Q / W / E drink healing, mana and
+  antidote, the slots its `Menu02.OZJ` art has and its key help lists (`Local/Text.bmd` 130-132;
+  134 binds only skills with Ctrl). No R slot (shield potions are Season 3) and no Ctrl+key or
+  drop binding (Season 6's `CNewUIItemHotKey`). The frame is still Season 6's art, so its painted
+  R box stays empty and answers no key until the 0.97d bar is drawn.
 - `quests` stays on: it carries the legacy chain 0.97d has (`Local/Quest.bmd`, OpenMU
   `NpcWindow.LegacyQuest`). Its Season 6 quest log and NPC dialogue windows stay too, never fed
   by a 0.95d server; turning those off alone means splitting the module.
@@ -98,7 +103,7 @@ What drawing the in-game interface the 0.97d way needs, none of it built yet:
 - Layout: the pre-`NewUI` interface the 0.97d binary draws (640x480, the bar across the
   bottom); the reference source here is Season 6's, so positions are measured off the art.
 - Missing outright: no minimap, no skill tree, no quest log windows (0.97d has the legacy
-  chain), no item hot-key belt, no MU Helper.
+  chain), no R potion slot and no slot binding, no MU Helper.
 - Each window becomes a `windows` override in `ui/index.tsx` with the shared id; `worldSprites`
   then lists its sheets instead of Season 6's, and `interface/` leaves `borrows.folderPaths`.
 
@@ -122,11 +127,12 @@ What drawing the in-game interface the 0.97d way needs, none of it built yet:
 - `variantRank.test.ts`: the winning packet variant per family that shares a code.
 - `modules.test.ts`: MU Helper is off, `events` and `quests` stay; the HUD times Blood Castle and
   Devil Square only.
+- `itemHotkeys.test.ts`: its own key help (`Local/Text.bmd` 130-134) names Q / W / E and binds
+  only skills, so the bar draws three fixed slots.
 - `data/inventory.test.ts`: the inventory matches the files in `Data-v097d/`; `gate.bmd` is spelled
   the way the client asks for it.
 - `data/assets.test.ts`: `assets.ts` matches the files in `public/game-assets-v097d/`.
 - `data/served.test.ts`: every terrain file, tile and placed object model of each world, every
   item, class body, monster and NPC model, and every sound key, resolves to a file that exists,
-  in its case; Lorencia grows grass from its one
-  card only; the gate table decodes; the sign plates and the borrowed minimap pictures resolve.
+  in its case; Lorencia grows grass from its one card only; the gate table decodes; the sign plates and the borrowed minimap pictures resolve.
 - `ui/preload.test.ts`: every world sheet it preloads is read from a tree that has it.

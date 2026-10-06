@@ -29,10 +29,12 @@ import {
   HOTKEY_COUNT,
   ItemHotkey,
   UNBOUND_HOTKEY,
+  canBindItemHotkey,
   canRegisterItemHotkey,
   findHotkeyItem,
 } from './itemHotkeys';
 import { jewelTargetError } from './jewelUpgrade';
+import { gameVersion } from '../../version';
 
 /** How long an item move (or a merchant buy) waits for the server's answer. */
 export const ITEM_MOVE_TIMEOUT = 5000;
@@ -333,7 +335,8 @@ export const Bag = new (class {
 
   /** Ctrl+Q/W/E/R over an inventory item, or a carried potion dropped on the bar. */
   setItemHotkey(hotkey: number, item: Item | null): void {
-    if (hotkey < 0 || hotkey >= HOTKEY_COUNT) return;
+    // A version whose slots are fixed (0.97d) binds nothing.
+    if (!canBindItemHotkey(gameVersion.features.itemHotkeys, hotkey)) return;
     const next = this.itemHotkeys.slice();
     next[hotkey] =
       item && canRegisterItemHotkey(item)

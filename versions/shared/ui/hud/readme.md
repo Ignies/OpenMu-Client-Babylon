@@ -27,7 +27,7 @@ Always-on interface elements, one folder per element, same shape as a window. Re
 | `notices` | notices (hud, 40) | the centred notice stack | chat |
 | `slide_help` | slide_help (hud, 50) | the scrolling help band at the top | options |
 | `buff_bar` | buff_bar (hud, 60) | the hero's buffs and debuffs with tooltips | skills |
-| `bottom_bar` | bottom_bar (hud, 70) | main frame: orbs, potion slots (only with `features.itemHotkeys`), skill hotkeys and fan, exp bar | Hero, skills, inventory |
+| `bottom_bar` | bottom_bar (hud, 70) | main frame: orbs, potion slots (as many as `features.itemHotkeys.slots`), skill hotkeys and fan, exp bar | Hero, skills, inventory |
 | `chat` | chat (hud, 230) | chat input box and chat log | chat, social, options |
 | `soccer_score` | soccer_score (hud, 420) | Battle Soccer scoreboard and clock | GuildMarks, social |
 | `minimap` | minimap (hud, 450) | full world map on TAB and the corner minimap | Ecs.world, hero, options, social |
@@ -48,7 +48,7 @@ Always-on interface elements, one folder per element, same shape as a window. Re
   up when the interface is hidden.
 
 ## Tests
-- `bottom_bar/belt.test.tsx`: the Q/W/E/R belt draws only for a version with item hot keys.
+- `bottom_bar/belt.test.tsx`: the bar draws the potion slots the version has (four, three, none).
 - `low_health_overlay/heartbeat.test.ts`: the heartbeat beats back to back while due, and books
   no next beat once it is not.
 - `name_tags/tagSync.test.ts`: the tag layout matches the measuring pass and pushes overlapping
