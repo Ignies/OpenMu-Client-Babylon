@@ -17,8 +17,10 @@ MU 0.97d, the second version the client carries. OpenMU has no 0.97d data initia
 - 0.97d's own, from the 0.97d client's `Data/` (`references/0.97d/StoneAgeMu/Data`), converted
   or copied only where its source differs from Season 6's (`public/game-assets-v097d/`, listed
   in `data/assets.ts`):
-  - Lorencia (World1 terrain, Object1), Player, Item, Monster, NPC, Skill and Logo, converted
-    before that rule: most of those files are byte-identical to Season 6's and could go.
+  - From the first Lorencia conversion, the 174 files Season 6 has no byte-identical copy of
+    (their BMD or the textures they bake differ, or Season 6 has no such file): 115 Player,
+    48 Item, 3 Monster, 3 NPC and 3 Skill models, and World1's `EncTerrain1.att` / `.obj`. The
+    589 byte-identical ones (all of Object1 and Logo among them) were deleted and are borrowed.
   - World2, 3, 7, 8, 9 and 11: the 21 terrain files that differ (`EncTerrain<n>.*`,
     `TerrainHeight.OZB`, `TerrainLight.OZJ`). The `.jpg` / `.tga` intermediates are not copied:
     nothing loads them (`tools/assetsIndex.ts`).
