@@ -21,7 +21,8 @@ MU 0.97d, the second version the client carries. OpenMU has no 0.97d data initia
   at `./game-assets-v097d/`, empty locale. `data/inventory.ts` lists every file in that tree so
   `hasDataFile` answers "absent" instead of a load error. `data/assets.ts` lists what
   `public/game-assets-v097d/` holds; any other converted file is Season 6's (`borrows`): only a
-  file whose 0.97d source differs from Season 6's is converted or copied.
+  file whose 0.97d source differs from Season 6's is converted or copied. `lacks` keeps Season 6's
+  extra Lorencia grass cards (`TileGrass02/03.OZT`) out: 0.97d's World1 ships only `TileGrass01`.
 - `data/sounds.ts`: the 42 sounds and 1 track whose 0.97d file differs from Season 6's original
   (hashed against the Season 6 `.wav` / `.mp3`), shipped as the period `.wav` / `.mp3`. The other
   235 sounds and 6 tracks play Season 6's `.ogg`.
@@ -44,4 +45,5 @@ MU 0.97d, the second version the client carries. OpenMU has no 0.97d data initia
 - `variantRank.test.ts`: the winning packet variant per family that shares a code.
 - `data/inventory.test.ts`: the inventory matches the files in `Data-v097d/`.
 - `data/assets.test.ts`: `assets.ts` matches the files in `public/game-assets-v097d/`.
-- `data/served.test.ts`: every sound key resolves to a file that exists, in its case.
+- `data/served.test.ts`: every sound key resolves to a file that exists, in its case; Lorencia
+  grows grass from its one card only.

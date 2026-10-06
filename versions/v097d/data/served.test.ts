@@ -1,7 +1,7 @@
 import { readdirSync } from 'fs';
 import { join, resolve } from 'path';
 import { describe, expect, it } from 'vitest';
-import { assetUrl } from '@/controllers/assets/resolveUrlToDataFolder';
+import { assetUrl, hasAsset } from '@/controllers/assets/resolveUrlToDataFolder';
 import { SOUND_FILES } from '@/controllers/sound/recipes';
 import { v097dData } from './index';
 import { V097D_SOUNDS } from './sounds';
@@ -37,6 +37,15 @@ function served(url: string): boolean {
   }
   return true;
 }
+
+describe('0.97d grass cards', () => {
+  it('grows grass only from the cards 0.97d ships, never from a borrowed one', () => {
+    // Its World1 has TileGrass01.OZT alone; Season 6 added 02 and 03.
+    expect(hasAsset(v097dData, 'World1/TileGrass01.OZT')).toBe(true);
+    expect(hasAsset(v097dData, 'World1/TileGrass02.OZT')).toBe(false);
+    expect(hasAsset(v097dData, 'World1/TileGrass03.OZT')).toBe(false);
+  });
+});
 
 describe('0.97d sounds', () => {
   it('ships its own file for the 42 sounds and 1 track that differ from Season 6', () => {

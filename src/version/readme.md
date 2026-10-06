@@ -26,7 +26,8 @@ the loader that resolves which version this page runs. See [../../docs/versions.
   omits it.
 - `data.borrows` names another version's served tree (Season 6's) and the converted files this
   version ships itself (`ownAssets`); every other converted file is read from the borrowed tree, so
-  a byte-identical source is never committed twice. `data.sounds` maps a sound key to the file the
+  a byte-identical source is never committed twice, except what it `lacks` (a grass card its world
+  never had stays absent). `data.sounds` maps a sound key to the file the
   version ships for it. Season 6 omits both.
 - `uiContract.ts` is types only, so `versions/registry.ts` can name it without importing app code.
   A version's `ui/` module may import app code because it is only loaded after boot.

@@ -96,6 +96,12 @@ export interface VersionBorrows {
    * it. A converted file not listed comes from `borrows.assets`.
    */
   readonly ownAssets: ReadonlySet<string>;
+  /**
+   * Converted files the borrowed tree has and this version's own source does
+   * not, where the absence means something (a world without a grass card
+   * grows no grass in that slot). They are never borrowed.
+   */
+  readonly lacks?: ReadonlySet<string>;
 }
 
 /**

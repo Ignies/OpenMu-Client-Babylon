@@ -11,7 +11,8 @@ imports the modules below directly (baselined in `tools/checks`).
   warns once per `what` and never rethrows; `settle(promise, what)`, the same as a promise that
   resolves to `undefined` instead of rejecting.
 - Data roots: `resolveUrlToDataFolder(url)` (converted assets, `gameVersion.data.assets`, or the
-  tree the version borrows a file it does not ship from; `assetUrl(data, url)` is the pure form);
+  tree the version borrows a file it does not ship from; `assetUrl(data, url)` is the pure form;
+  `hasAssetFile(url)` is false for a file the version `lacks`);
   `mu/dataFolder.ts`: `resolveDataUrl`, `downloadDataFile`, `hasDataFile` (the original `Data/`
   tree, `gameVersion.data.folder`).
 - `download.ts`: `downloadBytesBuffer`, `downloadDataBytesBuffer`, `createOZJTexture`,
@@ -85,7 +86,7 @@ imports the modules below directly (baselined in `tools/checks`).
 
 ## Tests
 - `resolveUrlToDataFolder.test.ts`: own files stay on the version root, the rest come from the
-  borrowed tree, absolute urls pass through.
+  borrowed tree, a file the version lacks is never borrowed, absolute urls pass through.
 - `loadFailure.test.ts`: one warning per file, a different file warns again, `settle` passes a
   value through and turns a failure into `undefined`.
 - `assetDownload.test.ts`: `urlsOf`, Core cannot be unticked, transfer totals.

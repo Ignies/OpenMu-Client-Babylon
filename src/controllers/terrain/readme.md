@@ -48,7 +48,7 @@ water, ground picks, minimap data and the base class for map objects. There is n
   (`terrainParseClient.ts` -> `terrainParse.worker.ts`, inline fallback). By default the light
   map decodes and bakes there too: the lightmap times normal dot `(0.5, -0.5, 0.5)` + 0.5. The
   ground arrays build there (`groundArrays.ts`) while the tiles pack into a texture array and the
-  water frames and grass cards load.
+  water frames and grass cards load. A card the version lacks (`hasAssetFile`) is not asked for.
 - `getTerrainData` uploads the ground mesh, the height map texture and the picker, builds the
   material (`terrainMaterial.ts`: tile splat, overlays, cutout, water), the outer edge (tiers
   only) and the grass, and returns the world accessors.
@@ -93,6 +93,7 @@ water, ground picks, minimap data and the base class for map objects. There is n
   objects, lean boxes, fixups and grass, pinned across the move into the map folders.
 - `mapTerrain.test.ts`: only Icarus hides its ground; rest objects and lean boxes and the
   nearest-object height fix from a registered entry.
+- `terrainGrassCards.test.ts`: a card the version lacks is never fetched.
 - `tools/grassCards.test.ts`: every grass card `Data/` ships for a converted world is in
   `public/game-assets` (a missing card silently grows no grass; 58 were missing until 2026-10-05).
 - `groundArrays.test.ts`: `refreshGroundTile` raises and drops a tile and leaves its neighbours;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { VersionData } from '../../version/contract';
-import { assetUrl } from './resolveUrlToDataFolder';
+import { assetUrl, hasAsset } from './resolveUrlToDataFolder';
 
 const season6: VersionData = { folder: './Data/', assets: './game-assets/', locale: 'Eng' };
 
@@ -11,6 +11,7 @@ const period: VersionData = {
   borrows: {
     assets: './game-assets/',
     ownAssets: new Set(['world3/encterrain3.att', 'sound/atower.wav']),
+    lacks: new Set(['world1/tilegrass02.ozt']),
   },
 };
 
@@ -28,6 +29,13 @@ describe('assetUrl', () => {
   it('serves every other file from the tree it borrows', () => {
     expect(assetUrl(period, 'World3/TileGrass01.OZJ')).toBe('./game-assets/World3/TileGrass01.OZJ');
     expect(assetUrl(period, '/Effect/FlameStrike.glb')).toBe('./game-assets/Effect/FlameStrike.glb');
+  });
+
+  it('borrows nothing the version lacks: its absence is the original one', () => {
+    expect(assetUrl(period, 'World1/TileGrass02.OZT')).toBe('./game-assets-v097d/World1/TileGrass02.OZT');
+    expect(hasAsset(period, 'World1/TileGrass02.OZT')).toBe(false);
+    expect(hasAsset(period, 'World1/TileGrass01.OZT')).toBe(true);
+    expect(hasAsset(season6, 'World1/TileGrass02.OZT')).toBe(true);
   });
 
   it('leaves absolute and inline urls alone', () => {

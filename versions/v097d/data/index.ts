@@ -33,6 +33,8 @@ export const v097dData: VersionData = {
   borrows: {
     assets: season6Data.assets,
     ownAssets: new Set(V097D_ASSET_FILES),
+    // Lorencia's only grass card is TileGrass01.OZT; Season 6 added these two.
+    lacks: new Set(['world1/tilegrass02.ozt', 'world1/tilegrass03.ozt']),
   },
   sounds: V097D_SOUNDS,
 };
