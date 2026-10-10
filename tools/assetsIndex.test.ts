@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from 'fs';
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { dirname, join } from 'path';
 import type { VersionData } from '../src/version/contract';
@@ -148,5 +148,27 @@ describe('assetsIndex', () => {
     expect(sorted(worlds.season6)).toEqual(sorted([...read]));
     expect(worlds.season6.filter(world => !shipped.has(world))).toEqual([]);
     expect(sorted(worlds.v097d)).toEqual(sorted([...read].filter(world => world <= 12)));
+  });
+
+  // The pack picker offers what index.json counts; a pack's World / Object folder is only ever
+  // drawn on a map's models, so one no map reads is dead weight (object55 / object56 were).
+  it('ships texture packs with only the world folders a map reads, counted as index.json says', () => {
+    const PACKS = join(import.meta.dirname, '..', 'public/packs');
+    const read = new Set(MAP_LAYERS.flatMap(layer => layer.worlds.map(world => layer.assetWorld ?? world + 1)));
+    const index = JSON.parse(readFileSync(join(PACKS, 'index.json'), 'utf8'));
+
+    for (const pack of index.packs as { id: string; textures: number; bytes: number }[]) {
+      const dir = join(PACKS, pack.id);
+      const files = Object.values(JSON.parse(readFileSync(join(dir, 'pack.json'), 'utf8')).textures) as string[];
+      const folders = [...readdirSync(dir), ...files.map(file => file.split('/')[0])];
+      const unread = folders.filter(name => {
+        const world = /^(?:World|Object)(\d+)$/i.exec(name)?.[1];
+        return world !== undefined && !read.has(Number(world));
+      });
+
+      expect([...new Set(unread)], pack.id).toEqual([]);
+      const bytes = files.reduce((n, file) => n + statSync(join(dir, file)).size, 0);
+      expect({ textures: files.length, bytes }, pack.id).toEqual({ textures: pack.textures, bytes: pack.bytes });
+    }
   });
 });
