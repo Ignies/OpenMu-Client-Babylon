@@ -235,8 +235,7 @@ function paintFlare(
   let lumi = 1;
   const repaint = () => {
     const level = flareLevel();
-    const c = (v: number) => v * lumi * level;
-    sprite.color.set(c(r), c(g), c(b), 1);
+    sprite.color.set(r * lumi * level, g * lumi * level, b * lumi * level, 1);
   };
   sprite.color = new Color4(r, g, b, 1);
   repaint();
