@@ -1,6 +1,7 @@
 import { defineSkill } from '@/controllers/skills/define';
 import { MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
 import { entityPos, entityYaw, fxNow, type ParticleRecipe, type PointSource, type RGB } from '@/controllers/fx/core';
+import { heroSkillEffect, type ModelOptions } from '@/controllers/fx/model';
 import { SkillContext, Step, TICK, cm, facing, perTick, repeat, ticks } from '@/controllers/skills/visuals';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { dw2AtAttackTime } from '../_shared';
@@ -79,7 +80,7 @@ const twisterWith = (extra?: TwisterExtra): Step => (_at, c) => {
     out.y += TWISTER_BOLT_AIM;
     return out;
   };
-  effects.spawn('model', c.scene, at, {
+  const funnel: ModelOptions = {
     model: MODEL.storm,
     seconds: ticks(TWISTER_TICKS),
     scale: TWISTER_SCALE,
@@ -88,7 +89,8 @@ const twisterWith = (extra?: TwisterExtra): Step => (_at, c) => {
     yaw: -entityYaw(c.caster),
     fadeTail: 10 / TWISTER_TICKS,
     scrollU: TWISTER_UV,
-  });
+  };
+  effects.spawn('model', c.scene, at, heroSkillEffect(funnel, c.caster));
   effects.spawn('particles', c.scene, at, { recipe: TWISTER_SMOKE, rate: 25, seconds: ticks(TWISTER_TICKS), follow: storm });
   lighting.skillSpot(c.scene, 8, 'storm', lightFollow(storm));
   dw2Sfx('Sound/sTornado', at);

@@ -1,6 +1,6 @@
 import { defineSkill } from '@/controllers/skills/define';
 import { FIRE_SPARKS, MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
-import { Step, TICK, after, atCaster, burn, model, particles, repeat, scorch, seq, ticks } from '@/controllers/skills/visuals';
+import { Step, TICK, after, atCaster, burn, model, particles, repeat, scorch, seq, skillModel, ticks } from '@/controllers/skills/visuals';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { bonePos } from '@/controllers/fx/core';
 import { effects } from '@/controllers/fx';
@@ -72,7 +72,7 @@ export default defineSkill({
           // zero thickness in Z, because MU authors ground planes in XY (Z is
           // up there), and `flat` skips the Z-up-to-Y-up basis change that lays
           // it down. It stood the fire ring on its edge like a wall.
-          model({ model: MODEL.circle, seconds: ticks(45), colour: RGBS.fire, scale: 1, grow: 1.3 }),
+          skillModel({ model: MODEL.circle, seconds: ticks(45), colour: RGBS.fire, scale: 1, grow: 1.3 }),
           model({ model: MODEL.circle2, seconds: ticks(40), colour: [1, 0.8, 0.2], scale: 1, spin: 2 }),
           stones(6, 2),
           particles({ recipe: FIRE_SPARKS, count: 30 }),

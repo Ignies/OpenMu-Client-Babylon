@@ -63,6 +63,10 @@ shared pools, textures and particle recipes other folders reuse.
 - Caps: `effects.spawn('joint')` makes nothing past `MAX_JOINTS` (500) live joints and
   `effects.spawn('model')` past `MAX_EFFECTS` (200) models, the original's fixed `Joints[]` /
   `Effects[]` slots (Core/Globals/_define.h:456,504). The level-up rings go through the joint cap.
+  The hero's own Hell Fire circle, Inferno ring, Twister funnel and Fire Scream claw take 100 slots
+  of their own instead (`g_SkillEffects`, `MAX_SKILL_EFFECTS`, SkillEffectMgr.cpp:33-62): the skill
+  marks them with `heroSkillEffect(opts, caster)` (`heroSkill`), only when the caster is the hero.
+  The other effects that list names (Blast, Flash, Flame, Sword Force) are not `model` spawns here.
   What other entries start with `spawnJoint` / `spawnModel` (aura and monster ribbons, projectile
   heads, debris) counts but is never refused: a refused aura would not come back. A joint set
   (`pairs`, `paths`) counts once.
@@ -124,7 +128,8 @@ shared pools, textures and particle recipes other folders reuse.
   clip behind when it ends (a `model` clone once the pool is emptied), also when it loads after the
   end; a `model` spawn after one ended reuses its clone, shown once dressed.
 - `caps.test.ts`: past 500 live joints or 200 live models a spawn makes nothing, and makes one
-  again once one ends; the level-up rings count toward the joint cap.
+  again once one ends; the hero's skill effects take 100 slots of their own; the level-up rings
+  count toward the joint cap.
 - `modelPool.test.ts`: a returned clone comes back as it was loaded and disabled, at most
   `POOL_PER_MODEL` per model, never to another scene; a stray one is disposed, the spares on reset.
 - `afterimage.test.ts`: a copy takes the drawn meshes of each part onto a skeleton of its own, posed on

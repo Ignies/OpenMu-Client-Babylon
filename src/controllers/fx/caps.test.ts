@@ -4,7 +4,7 @@ import { Scene } from '@babylonjs/core/scene';
 import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 import { Ecs } from '../../ecs/current';
 import { jointCount, jointLayer, MAX_JOINTS } from './joint';
-import { MAX_EFFECTS, modelLayer } from './model';
+import { MAX_EFFECTS, MAX_SKILL_EFFECTS, modelLayer } from './model';
 import { playBurst } from './bursts';
 
 vi.hoisted(() => {
@@ -49,6 +49,17 @@ describe('live caps', () => {
     expect(spawn().alive).toBe(false);
     modelLayer.update?.(0, 0.04);
     expect(spawn().alive).toBe(true);
+  });
+
+  it('model: skill effects the hero owns take 100 slots of their own (g_SkillEffects, SkillEffectMgr.cpp:33-62)', () => {
+    expect(MAX_SKILL_EFFECTS).toBe(100);
+    const spawn = (heroSkill?: boolean) => modelLayer.spawn(scene, new Vector3(), { model: 'Skill/fake.glb', seconds: 100, heroSkill });
+    for (let i = 0; i < 200; i++) spawn();
+    expect(spawn().alive).toBe(false);
+    for (let i = 0; i < 100; i++) expect(spawn(true).alive).toBe(true);
+    expect(spawn(true).alive).toBe(false);
+    // They never took one of the 200.
+    expect(spawn().alive).toBe(false);
   });
 
   it('the level-up rings count toward the joint cap', () => {

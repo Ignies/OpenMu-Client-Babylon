@@ -2,6 +2,7 @@ import { defineSkill } from '@/controllers/skills/define';
 import { type Entity } from '@/ecs/world';
 import { MODEL, TEX } from '@/controllers/fx/recipes';
 import { delay, entityGone, entityPos, fxNow, type ParticleRecipe, type PointSource, type RGB } from '@/controllers/fx/core';
+import { heroSkillEffect, type ModelOptions } from '@/controllers/fx/model';
 import { SPLIT_EMBERS, forceHeads, forwardOfDeg, movesAt, sideOf, yawDegrees } from '../_shared';
 import { SkillContext, Step, TICK, afterRelease, baseSkill, cm, currentSkill, ticks } from '@/controllers/skills/visuals';
 import { Vector3 } from '@/controllers/render/babylon/exports';
@@ -112,7 +113,7 @@ function screamPair(c: SkillContext, origin: Vector3, yaw: number, side: number,
     scaleAt: t => screamScale(2.3, 0.14, movesAt(t)),
     fadeTail: 0,
   });
-  const claw = effects.spawn('model', c.scene, origin, {
+  const clawOpts: ModelOptions = {
     model: MODEL.darkScream,
     seconds: ticks(SCREAM_MOVES - 1),
     angle: [0, 0, yaw],
@@ -120,7 +121,8 @@ function screamPair(c: SkillContext, origin: Vector3, yaw: number, side: number,
     follow: out => onGround(cm(20) + SCREAM_STEP * movesAt(fxNow() - t0), out),
     scaleAt: t => screamScale(0.9, 0.04, movesAt(t)),
     fadeTail: 0,
-  });
+  };
+  const claw = effects.spawn('model', c.scene, origin, heroSkillEffect(clawOpts, c.caster));
 
   // The streak: its tails where the head stood after moves 1..13, each on the ground there.
   const streak = SCREAM_HEADS.map(d => onGround(d, new Vector3()));

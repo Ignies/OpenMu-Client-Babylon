@@ -34,6 +34,7 @@ import { getMaterial, loadGLTF, type LoadedModel } from '../assets/modelLoader';
 import { clearModelPool, returnModel, takeModel } from './modelPool';
 import { BlendState } from '@versions/shared/objects/enum';
 import { Ecs } from '../../ecs/current';
+import type { Entity } from '../../ecs/world';
 import type { TestScene } from '../render/scenes/testScene';
 import {
   EFFECT_RENDERING_GROUP,
@@ -77,6 +78,8 @@ const ANIMATION_SPEED = (0.3 * 25) / 24;
 export interface ModelOptions {
   /** `Skill/…glb` or `Effect/…glb` (recipes.ts `MODEL`). */
   model: string;
+  /** One of the hero's own skill effects the original keeps in `g_SkillEffects` (`heroSkillEffect`). */
+  heroSkill?: boolean;
   seconds?: number;
   /** The original's `Scale`: 1 = the model's native size. */
   scale?: number;
@@ -614,6 +617,8 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
       .catch(err => console.warn('[effects] model failed', opts.model, err));
   }
 
+  const heroSkill = opts.heroSkill === true;
+  if (heroSkill) heroSkillsLive++;
   const handle = live.push({
     update(dt) {
       t += dt;
@@ -698,6 +703,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
     },
     release() {
       disposed = true;
+      if (heroSkill) heroSkillsLive--;
       clip?.stop();
       // The last scrolling spawn hands the shared sheet back unscrolled to the rows that draw it still.
       for (const tex of scrolled) {
@@ -760,8 +766,21 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
  */
 export const MAX_EFFECTS = 200;
 
+/**
+ * The hero's own Hell Fire, Inferno, Twister, Fire Scream (and Blast, Flash, Flame, Sword Force) effects take
+ * `g_SkillEffects`' 100 slots instead (MAX_SKILL_EFFECTS, _define.h:457; SkillEffectMgr.cpp:33-62).
+ */
+export const MAX_SKILL_EFFECTS = 100;
+let heroSkillsLive = 0;
+
+/** `o` as one of those when `owner` is the hero (`IsSkillEffect`: `Owner == &Hero->Object`); otherwise `o` as it is. */
+export function heroSkillEffect(o: ModelOptions, owner: Entity): ModelOptions {
+  return owner.localPlayer ? { ...o, heroSkill: true } : o;
+}
+
 function spawn(scene: Scene, at: Vector3, opts: ModelOptions): EffectHandle {
-  if (live.size >= MAX_EFFECTS) return DEAD_HANDLE;
+  const full = opts.heroSkill ? heroSkillsLive >= MAX_SKILL_EFFECTS : live.size - heroSkillsLive >= MAX_EFFECTS;
+  if (full) return DEAD_HANDLE;
   return spawnModel(scene, at, opts);
 }
 
