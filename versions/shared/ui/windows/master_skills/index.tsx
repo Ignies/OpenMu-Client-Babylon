@@ -66,9 +66,9 @@ import {
   NODE_STEP_Y,
   SHEET_HEIGHT,
   SHEET_WIDTH,
+  stageMarginLeft,
   TIP_COLORS,
-  TIP_FLIP_Y,
-  TIP_OFFSET,
+  tipPlace,
 } from './layout';
 
 /**
@@ -158,13 +158,10 @@ const Text = ({
 );
 
 const NodeTip = observer(({ entry }: { entry: MasterTreeEntry }) => {
-  const { x, y } = nodeOrigin(entry);
-  const up = y > TIP_FLIP_Y;
+  // A child of the node, so its place is relative to the node.
+  const { left, top, up } = tipPlace(nodeOrigin(entry).y);
   return (
-    <div
-      className={`master-tip${up ? ' master-tip-up' : ''}`}
-      style={{ left: x + TIP_OFFSET.x, top: up ? y : y + TIP_OFFSET.y }}
-    >
+    <div className={`master-tip${up ? ' master-tip-up' : ''}`} style={{ left, top }}>
       {skills.masterSkillTooltip(entry).map((line, i) => (
         <div
           key={i}
@@ -369,7 +366,12 @@ export const MasterSkillsWindow = observer(() => {
     <div className="master-skills-overlay" onContextMenu={e => e.preventDefault()}>
       <div
         className="master-skills-stage"
-        style={{ width: SHEET_WIDTH, height: SHEET_HEIGHT, transform: `scale(${scale})` }}
+        style={{
+          width: SHEET_WIDTH,
+          height: SHEET_HEIGHT,
+          marginLeft: stageMarginLeft(scale),
+          transform: `scale(${scale})`,
+        }}
       >
         <MuSpriteFrame
           file={BACK_LEFT_SPRITE}

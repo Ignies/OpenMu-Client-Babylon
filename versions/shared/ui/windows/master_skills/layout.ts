@@ -72,8 +72,20 @@ export const CATEGORY_TEXT_Y = 40;
 export const CATEGORY_TEXT_COLOR = 'rgb(255,155,0)';
 
 /** Tooltip anchor below the icon; nodes past y 300 tip upwards instead. */
-export const TIP_OFFSET = { x: ICON_INSET_X, y: 33 };
-export const TIP_FLIP_Y = 300;
+const TIP_OFFSET = { x: ICON_INSET_X, y: 33 };
+const TIP_FLIP_Y = 300;
+
+/**
+ * Where a node's tip goes inside the node (`RenderTipTextList(CalcX + 8, CalcY + 33, ...)`,
+ * NewUIMasterLevel.cpp:795-801): the node already stands at its origin, so only the offset is added.
+ */
+export function tipPlace(nodeY: number): { left: number; top: number; up: boolean } {
+  const up = nodeY > TIP_FLIP_Y;
+  return { left: TIP_OFFSET.x, top: up ? 0 : TIP_OFFSET.y, up };
+}
+
+/** The stage scales from its top-left corner, so it is centred by half the scaled width. */
+export const stageMarginLeft = (scale: number): number => (-SHEET_WIDTH / 2) * scale;
 
 /** `TextListColor` → colour, as `RenderTipTextList` paints them. */
 export const TIP_COLORS: Record<number, string> = {
