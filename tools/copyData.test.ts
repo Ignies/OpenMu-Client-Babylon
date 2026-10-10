@@ -34,6 +34,13 @@ describe('copyData', () => {
     expect(named.filter(f => !shipsDataFile(f))).toEqual([]);
   });
 
+  it('ships every layer a wing pass draws with', () => {
+    const named = namedDataFiles('src/controllers/actors/wings.ts');
+    expect(named).toEqual(['Item/msword01_r.OZJ']);
+    expect(named.filter(f => !inData(f))).toEqual([]);
+    expect(named.filter(f => !shipsDataFile(f))).toEqual([]);
+  });
+
   it('follows the rules', () => {
     expect(shipsDataFile('Skill/magic_a01.OZJ')).toBe(true);
     expect(shipsDataFile('World74/mini_map.OZT')).toBe(true);

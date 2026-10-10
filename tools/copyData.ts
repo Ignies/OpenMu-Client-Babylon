@@ -61,6 +61,8 @@ const RULES: Rule[] = [
   { dir: 'Object8', ext: [], names: Array.from({ length: 32 }, (_, i) => `wt${String(i).padStart(2, '0')}.ozj`) },
   // lighting/effectLights.ts → Object39/k_effect_01.OZJ (BITMAP_KANTURU_2ND_EFFECT1, the relic lamps' star)
   { dir: 'Object39', ext: [], names: ['k_effect_01.ozj'] },
+  // actors/wings.ts → Item/msword01_r.OZJ (BITMAP_3RDWING_LAYER, the Wing of Ruin's layer)
+  { dir: 'Item', ext: [], names: ['msword01_r.ozj'] },
   // actors/skinTexture.ts → the bitmaps a dropped armour / pants draws mesh 0 with (Mistery to Lilium,
   // Faith, Queen, and Lucky 65 / 70 under Player/LuckyItem/)
   {
