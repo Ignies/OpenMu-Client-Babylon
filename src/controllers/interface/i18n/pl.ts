@@ -219,4 +219,6 @@ export default {
   'item.fenrir.heroes': 'Edycja specjalna tylko dla bohaterów MU',
   'item.fenrir.summon': 'Przyzywa Fenrira po założeniu.',
   'item.fenrir.upgrade': 'Umiejętności rosną wraz z ulepszaniem.',
+  'item.count': 'Liczba przedmiotów: {count}',
+  'item.pieces': '{count} / {max}',
 } satisfies Partial<Record<keyof typeof en, string>>;

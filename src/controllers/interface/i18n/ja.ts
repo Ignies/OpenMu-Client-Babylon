@@ -224,4 +224,6 @@ export default {
   'item.fenrir.heroes': 'MUの英雄だけに贈られる特別版',
   'item.fenrir.summon': '装備するとフェンリルを召喚できる。',
   'item.fenrir.upgrade': '強化するとスキルが向上する。',
+  'item.count': 'アイテム数: {count}',
+  'item.pieces': '{count} / {max}',
 } satisfies Partial<Record<keyof typeof en, string>>;

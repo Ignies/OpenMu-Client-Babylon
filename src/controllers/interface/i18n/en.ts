@@ -226,6 +226,8 @@ const en = {
   'item.fenrir.heroes': 'Exclusive edition only given to MU Heroes',
   'item.fenrir.summon': 'Can summon the Fenrir when equipped.',
   'item.fenrir.upgrade': 'Skills will improve through upgrading.',
+  'item.count': 'Number of items: {count}',
+  'item.pieces': '{count} / {max}',
 };
 
 export default en;

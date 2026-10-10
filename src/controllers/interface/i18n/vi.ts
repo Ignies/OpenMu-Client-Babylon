@@ -219,4 +219,6 @@ export default {
   'item.fenrir.heroes': 'Phiên bản đặc biệt chỉ dành cho anh hùng MU',
   'item.fenrir.summon': 'Triệu hồi Fenrir khi trang bị.',
   'item.fenrir.upgrade': 'Kỹ năng tăng khi nâng cấp.',
+  'item.count': 'Số lượng: {count}',
+  'item.pieces': '{count} / {max}',
 } satisfies Partial<Record<keyof typeof en, string>>;

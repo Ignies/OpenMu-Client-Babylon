@@ -191,3 +191,20 @@ describe('the Horn of Fenrir tooltip', () => {
     expect(fenrir(0).map(l => l.text)).toContain('Skills will improve through upgrading.');
   });
 });
+
+// The stack lines of the durability section (ZzzInventory.cpp:4556-4584).
+describe('a stack count', () => {
+  it('shows on the SD and complex potions', () => {
+    for (let num = 35; num <= 40; num++) {
+      expect(lines({ group: 14, num, durability: 3 }).map(l => l.text)).toContain('Number of items: 3');
+    }
+  });
+
+  it('counts the Fenrir materials against what a mix takes', () => {
+    expect(lines({ group: 13, num: 32, durability: 7 }).map(l => l.text)).toContain('7 / 20');
+    expect(lines({ group: 13, num: 33, durability: 7 }).map(l => l.text)).toContain('7 / 20');
+    const claw = lines({ group: 13, num: 34, durability: 4 }).map(l => l.text);
+    expect(claw).toContain('4 / 10');
+    expect(claw.some(l => l.startsWith('Durability'))).toBe(false);
+  });
+});

@@ -225,4 +225,6 @@ export default {
   'item.fenrir.heroes': 'Особое издание только для героев MU',
   'item.fenrir.summon': 'Призывает Фенрира, когда надет.',
   'item.fenrir.upgrade': 'Умения растут с улучшением.',
+  'item.count': 'Количество: {count}',
+  'item.pieces': '{count} / {max}',
 } satisfies Partial<Record<keyof typeof en, string>>;

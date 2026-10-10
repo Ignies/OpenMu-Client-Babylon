@@ -224,4 +224,6 @@ export default {
   'item.fenrir.heroes': 'รุ่นพิเศษสำหรับฮีโร่ MU เท่านั้น',
   'item.fenrir.summon': 'เรียกเฟนริลได้เมื่อสวมใส่',
   'item.fenrir.upgrade': 'สกิลจะดีขึ้นเมื่ออัปเกรด',
+  'item.count': 'จำนวนไอเทม: {count}',
+  'item.pieces': '{count} / {max}',
 } satisfies Partial<Record<keyof typeof en, string>>;

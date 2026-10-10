@@ -224,4 +224,6 @@ export default {
   'item.fenrir.heroes': 'MU 영웅에게만 주어지는 한정판',
   'item.fenrir.summon': '장착하면 펜릴을 소환할 수 있습니다.',
   'item.fenrir.upgrade': '강화하면 스킬이 향상됩니다.',
+  'item.count': '아이템 개수: {count}',
+  'item.pieces': '{count} / {max}',
 } satisfies Partial<Record<keyof typeof en, string>>;

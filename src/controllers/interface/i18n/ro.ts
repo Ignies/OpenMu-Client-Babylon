@@ -225,4 +225,6 @@ export default {
   'item.fenrir.heroes': 'Ediție exclusivă doar pentru eroii MU',
   'item.fenrir.summon': 'Cheamă Fenrir când este echipat.',
   'item.fenrir.upgrade': 'Abilitățile cresc prin îmbunătățire.',
+  'item.count': 'Număr de obiecte: {count}',
+  'item.pieces': '{count} / {max}',
 } satisfies Partial<Record<keyof typeof en, string>>;

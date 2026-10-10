@@ -390,6 +390,8 @@ function consumableLines(out: Lines, def: ItemDef, item: Item) {
     else if (def.index === 8) out.add(t('item.curesPoison', { count }));
     else if (def.index === 9) out.add(t('item.liquor', { count }));
     else if (def.index === 10) out.add(t('item.townScroll', { count }));
+    // The SD and complex potions (ZzzInventory.cpp:4556-4559).
+    else if (def.index >= 35 && def.index <= 40) out.add(t('item.count', { count }));
     return;
   }
   // Orbs, scrolls and crystals name the skill they teach.
@@ -397,6 +399,9 @@ function consumableLines(out: Lines, def: ItemDef, item: Item) {
   const skill = taught === undefined ? undefined : skillDisplayName(taught);
   if (skill) out.add(t('item.learns', { skill }), 'blue');
 }
+
+/** Splinter of Armor, Bless of Guardian, Claw of Beast: the pieces their mix takes. */
+const FENRIR_MATERIAL_PIECES: Readonly<Record<number, number>> = { 32: 20, 33: 20, 34: 10 };
 
 /** Skill numbers of the Divine Sword and Crossbow of Archangel. */
 const CYCLONE = 22;
@@ -570,8 +575,14 @@ function equipmentLines(
   jewelLines(out, def);
   consumableLines(out, def, item);
 
+  // The Fenrir materials count toward their mix: Splinter of Armor and Bless of Guardian
+  // 20, Claw of Beast 10 (ZzzInventory.cpp:4576-4584).
+  const pieces = def.group === ItemGroup.Helper ? FENRIR_MATERIAL_PIECES[def.index] : undefined;
+  if (pieces) out.add(t('item.pieces', { count: item.durability ?? 0, max: pieces }));
+
   // Durability: gear, wings and helpers show current/max.
   const hasDurability =
+    !pieces &&
     (def.durability || def.magicDur) &&
     (def.group <= ItemGroup.Boots || def.group === ItemGroup.Helper || isWing(def));
   if (hasDurability) {

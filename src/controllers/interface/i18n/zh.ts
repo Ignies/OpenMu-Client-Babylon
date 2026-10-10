@@ -224,4 +224,6 @@ export default {
   'item.fenrir.heroes': '仅赠予MU英雄的限定版',
   'item.fenrir.summon': '装备后可召唤芬里尔。',
   'item.fenrir.upgrade': '强化后技能提升。',
+  'item.count': '物品数量: {count}',
+  'item.pieces': '{count} / {max}',
 } satisfies Partial<Record<keyof typeof en, string>>;
