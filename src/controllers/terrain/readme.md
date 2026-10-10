@@ -100,7 +100,8 @@ water, ground picks, minimap data and the base class for map objects. There is n
   `public/game-assets` (a missing card silently grows no grass; 58 were missing until 2026-10-05).
 - `groundArrays.test.ts`: `refreshGroundTile` raises and drops a tile and leaves its neighbours;
   `groundTiles` copies tiles out with their own quads.
-- `terrainDynamicLight.test.ts`: `terrainLightTouchesSample` and its version, the bilinear sample.
+- `terrainDynamicLight.test.ts`: `terrainLightTouchesSample` and its version, the touched set
+  rebuilt in one buffer as a light crosses tiles, the bilinear sample.
 - `terrainJpeg.test.ts`: `lightFromPixels` and `decodeJpegPixels` (worker and main-thread paths).
 - `terrainLighting.test.ts`: the GLSL branches on the tier uniforms, `?terrainBranch=0`, range 0
   for unfilled pool slots.

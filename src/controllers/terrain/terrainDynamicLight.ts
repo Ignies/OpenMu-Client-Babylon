@@ -63,7 +63,9 @@ const emitters = new Set<TerrainLightEmitter>();
 /** Tile each emitter last wrote from; a change rebuilds the touched set. */
 const emitterTiles = new Map<TerrainLightEmitter, number>();
 
-let touched: Int32Array | null = null;
+/** The tiles the layer writes: the first `touchedCount` of one buffer the size of the map. */
+const touched = new Int32Array(TERRAIN_SIZE * TERRAIN_SIZE);
+let touchedCount = 0;
 let touchedDirty = true;
 
 /** `touched` as a flag per tile, for readers that test a sample point. */
@@ -93,7 +95,7 @@ export function initTerrainDynamicLight(liftedBaked: Float32Array): void {
   deltaDirty = true;
   emitters.clear();
   emitterTiles.clear();
-  touched = null;
+  touchedCount = 0;
   touchedDirty = true;
   touchedMask.fill(0);
   touchedVersion++;
@@ -212,8 +214,10 @@ export function registerTerrainLight(emitter: TerrainLightEmitter): () => void {
   };
 }
 
+/** Refills the touched set in place: it runs whenever any light crosses a tile. */
 function rebuildTouched(): void {
-  const indices = new Set<number>();
+  for (let i = 0; i < touchedCount; i++) touchedMask[touched[i]] = 0;
+  touchedCount = 0;
 
   for (const emitter of emitters) {
     const { x, z } = emitter.position;
@@ -225,27 +229,24 @@ function rebuildTouched(): void {
 
     for (let y = yi - range; y <= yi + range; y++) {
       for (let x = xi - range; x <= xi + range; x++) {
-        indices.add(TERRAIN_INDEX_REPEAT(x, y));
+        const tile = TERRAIN_INDEX_REPEAT(x, y);
+
+        if (touchedMask[tile]) continue;
+        touchedMask[tile] = 1;
+        touched[touchedCount++] = tile;
       }
     }
   }
 
-  if (touched) {
-    for (let i = 0; i < touched.length; i++) touchedMask[touched[i]] = 0;
-  }
-
-  touched = Int32Array.from(indices);
   touchedDirty = false;
-
-  for (let i = 0; i < touched.length; i++) touchedMask[touched[i]] = 1;
   touchedVersion++;
 }
 
 /** Clears the set last written; the rebuild that follows never precedes it. */
 function resetTouched(): void {
-  if (!primary || !baked || !touched) return;
+  if (!primary || !baked) return;
 
-  for (let i = 0; i < touched.length; i++) {
+  for (let i = 0; i < touchedCount; i++) {
     const o = touched[i] * CHANNELS;
 
     primary[o] = baked[o];
@@ -388,10 +389,10 @@ export function updateTerrainDynamicLight(
     );
   }
 
-  if (deltaBytes && touched && floor) {
+  if (deltaBytes && floor) {
     const encode = DELTA_ENCODE * dynamicLightGain();
 
-    for (let i = 0; i < touched.length; i++) {
+    for (let i = 0; i < touchedCount; i++) {
       const o = touched[i] * CHANNELS;
       const d = touched[i] * 4;
 
