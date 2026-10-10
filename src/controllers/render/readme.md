@@ -78,6 +78,8 @@ There is no `index.ts` facade; other folders import the modules directly.
   the number bias round trip, and the pack digest.
 - `frameSnapshot.test.ts`: fills once per frame and per scene, refills after a throw.
 - `meshAnimation.test.ts`: `meshAnimationFor` reads the map row per world.
+- `modelObject.test.ts`: a model whose clips are cloned on first play reads every clip's keys at load
+  without cloning one, and a clip cloned later reports its end.
 - `versions/shared/contentRows.golden.test.ts`: every map's mesh animations, sampled over time.
 - `pbrMaps.test.ts`: `textureSourceName` reads the pack's remembered name mid-swap.
 - `pbrDerive.test.ts`: `flipRows`, flat normal and emissive mask of `derivePbrMaps`.

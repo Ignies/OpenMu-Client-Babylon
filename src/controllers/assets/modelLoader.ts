@@ -41,6 +41,7 @@ import { getEmptyTexture } from '../render/babylon/emptyTexture';
 import { BlendState } from '@versions/shared/objects/enum';
 import { isHideTexture, isSkinOrHairTexture } from '../actors/skinTexture';
 import { parseTextureScriptFromPath } from '../render/textureScript';
+import { cloneTargets, lazyAnimationGroups } from './lazyAnimationGroups';
 
 // Texture names are read through the pack, so a swap in flight still reads the converter's name.
 readPackLabelsWith(textureLabel);
@@ -769,7 +770,14 @@ export async function loadGLTF(
   // materials bind `metadata.diffuseTexture` and `metadata.bodyLight` per
   // mesh in `onBindObservable`, and hardware instances draw in one call with
   // one uniform set - every object would take the last one's terrain light.
-  const entries = container.instantiateModelsToScene(name => name, false);
+  // Without the clips when they can be cloned later onto the copy's nodes (`lazyClips`).
+  const lazy = clipsClonedLater(container);
+  const entries = container.instantiateModelsToScene(
+    name => name,
+    false,
+    lazy ? { predicate: entity => !(entity instanceof AnimationGroup) } : undefined
+  );
+  const animationGroups = lazy ? lazyClips(container, entries.rootNodes) : entries.animationGroups;
 
   const root = entries.rootNodes[0] as AbstractMesh;
   root.name = fileName;
@@ -793,7 +801,7 @@ export async function loadGLTF(
   // converter leaves every bone node at identity, so an unplayed model sits in
   // the raw, tilted BMD orientation. Instantiated clones do not inherit the
   // auto-play, so reproduce it here.
-  const first = entries.animationGroups[0];
+  const first = animationGroups[0];
 
   if (first) {
     first.play(true);
@@ -806,8 +814,32 @@ export async function loadGLTF(
   return {
     mesh: root,
     skeleton,
-    animationGroups: entries.animationGroups,
+    animationGroups,
   };
+}
+
+const rootsOf = (container: AssetContainer): Node[] =>
+  [...container.transformNodes, ...container.meshes].filter(node => !node.parent);
+
+/** Per container: its clips can be cloned later, every node having a name path of its own. */
+const namedContainers = new WeakMap<AssetContainer, boolean>();
+
+function clipsClonedLater(container: AssetContainer): boolean {
+  let named = namedContainers.get(container);
+  if (named === undefined) {
+    named = container.animationGroups.length > 0 && cloneTargets(rootsOf(container), rootsOf(container)) !== null;
+    namedContainers.set(container, named);
+  }
+  return named;
+}
+
+/** A copy's clips, each cloned onto the copy's own nodes (matched by name path) the first time it is read. */
+function lazyClips(container: AssetContainer, cloneRoots: readonly Node[]): AnimationGroup[] {
+  const targets = cloneTargets(rootsOf(container), cloneRoots);
+  const root = cloneRoots[0];
+  return lazyAnimationGroups(container.animationGroups, source =>
+    root && !root.isDisposed() ? source.clone(source.name, target => targets?.get(target) ?? target) : null
+  );
 }
 
 /**

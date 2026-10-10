@@ -28,6 +28,9 @@ imports the modules below directly (baselined in `tools/checks`).
   `getScrollVariant`, `getFlatLitVariant`, `setMeshFadeBlend`, `syncMaterialQuality`,
   `syncTexturePack`, `getModel`; `getDataTexture(scene, path)` (a `Data/` bitmap for a mesh drawn with
   another texture than its own, top-down like the GLBs'), `ALPHA_TEST_AND_BLEND`.
+- `lazyAnimationGroups.ts`: `lazyAnimationGroups` (the clip list `loadGLTF` hands out),
+  `forEachAnimationGroup(groups, fn)` (every clip, and each one cloned later),
+  `animationGroupSource(groups, i)` (a clip's keys without cloning it), `cloneTargets`.
 - `texturePacks.ts`: `texturePacks` (store), `loadPackIndex`, `setActivePack`, `ORIGINAL_PACK`,
   `packsBase`, `onTexturePackChanged`, `packRepaintsPending`, `textureLabel`.
 - `assetDownload.ts`: `assetDownload` (store), `AssetGroup`, `loadAssetsIndex`, `startDownload`,
@@ -97,7 +100,11 @@ imports the modules below directly (baselined in `tools/checks`).
 - change which interface sheets preload: `versions/<id>/ui/preload.ts`.
 
 ## Tests
-- `modelLoader.test.ts`: `syncMaterialQuality` drops a skinned mesh's draw cache only;
+- `lazyAnimationGroups.test.ts`: a clip is cloned on its first read only, iteration walks the
+  cloned ones, hooks run on later clones, a clip made later is appended, a source is read without cloning, nodes map
+  by name path or not at all.
+- `modelLoader.test.ts`: a clone gets only the clip it plays at load, another on first read onto
+  its own node, every clip at once when its nodes cannot be matched; `syncMaterialQuality` drops a skinned mesh's draw cache only;
   `evictUnusedContainers` drops a monster or NPC model with no clone left,
   keeps one still drawn, one asked for in the last 10 s and the folders it is not given.
 - `resolveUrlToDataFolder.test.ts`: own files stay on the version root, the rest come from the
@@ -130,6 +137,17 @@ GLB, OZT, terrain files and BMD tables gzip to about a third; OZJ and audio are 
 and are not packed. Whether sidecars exist is decided once per session by the first compressible
 read (or `settleSidecars`); three failures in a row turn them off. The `?nogz` URL query turns
 them off for the page load. `prefetchAsset` never starts the probe itself.
+
+### lazyAnimationGroups.ts
+`instantiateModelsToScene` cloned every clip for every copy, and the player rig carries 284 of
+them (a few dozen for a monster) while a copy plays a handful: thousands of AnimationGroups in a
+crowd, and the clone cost on each player that came into view. `loadGLTF` now instantiates without
+the clips and hands out this list, which clones clip `i` onto the copy's nodes the first time
+`groups[i]` is read. The nodes are matched by their name path (the clones are named after their
+sources); a model with two nodes on one path gets every clip at load, as before. Iterating the list
+walks only the cloned clips, so whatever every clip must get as it comes (the end observer, the
+speed) goes through `forEachAnimationGroup`. The original keeps one copy of each action per model
+(`Models[].Actions`) for every object drawing it.
 
 ### itemIconPack.ts
 An `<img>` is a low-priority request queued behind the world's fetches, so a shop's icons used to

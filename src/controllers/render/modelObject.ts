@@ -19,6 +19,7 @@ import {
   loadGLTF,
   setMeshFadeBlend,
 } from '../assets/modelLoader';
+import { animationGroupSource, forEachAnimationGroup } from '../assets/lazyAnimationGroups';
 import { NO_BLEND_MESH } from './blendMeshes';
 import { renderAnglesQuaternion } from './renderAngles';
 import { meshAnimationFor, type MeshAnimation } from './meshAnimation';
@@ -957,7 +958,8 @@ export class ModelObject {
 
   /** Wall-clock seconds of one iteration of an action at the current AnimationSpeed. */
   getActionDuration(actionIndex: number): number {
-    const group = this.gltf?.animationGroups[actionIndex];
+    // The source's range: how long a clip lasts does not need its clone.
+    const group = this.gltf ? animationGroupSource(this.gltf.animationGroups, actionIndex) : undefined;
     if (!group) return 0;
     const fps = group.targetedAnimations[0]?.animation.framePerSecond ?? 60;
     const speed = Math.max(0.0001, this.speedRatioFor(actionIndex));
@@ -1108,14 +1110,17 @@ export class ModelObject {
     this._bakedKeyDt.clear();
     this._lastRealFrame.clear();
     this._keyFrameStep.clear();
-    gltf.animationGroups.forEach((group, index) => {
-      const anim = group.targetedAnimations[0]?.animation;
+    // Keys off every clip, cloned or not; the rest on each clip as it is cloned (lazyAnimationGroups.ts).
+    for (let index = 0; index < gltf.animationGroups.length; index++) {
+      const anim = animationGroupSource(gltf.animationGroups, index)?.targetedAnimations[0]?.animation;
       const keys = anim?.getKeys();
       if (anim && keys && keys.length > 1) {
         this._bakedKeyDt.set(index, (keys[1].frame - keys[0].frame) / anim.framePerSecond);
         this._lastRealFrame.set(index, keys[keys.length - 2].frame);
         this._keyFrameStep.set(index, keys[1].frame - keys[0].frame);
       }
+    }
+    forEachAnimationGroup(gltf.animationGroups, (group, index) => {
       group.speedRatio = this.speedRatioFor(index);
       const markFinished = () => {
         if (this.gltf === gltf && this.CurrentAction === index) {
@@ -1223,11 +1228,12 @@ export class ModelObject {
 
     this.setStaticCaster(true);
 
-    for (const group of groups) {
+    // Clips cloned later get it as they come.
+    forEachAnimationGroup(groups, group => {
       group.onAnimationGroupPlayObservable.addOnce(() =>
         this.setStaticCaster(false)
       );
-    }
+    });
   }
 
   private setStaticCaster(still: boolean) {
