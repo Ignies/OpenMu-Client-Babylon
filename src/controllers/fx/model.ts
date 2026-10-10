@@ -30,9 +30,11 @@ import {
 import { angleMatrixQuaternion } from '../render/renderAngles';
 import { clampAlpha } from './clampAlpha';
 import { chromeMaterial, disposeChromeMaterials } from './chrome';
-import { getMaterial, loadGLTF } from '../assets/modelLoader';
+import { getMaterial, loadGLTF, type LoadedModel } from '../assets/modelLoader';
+import { clearModelPool, returnModel, takeModel } from './modelPool';
 import { BlendState } from '@versions/shared/objects/enum';
 import { Ecs } from '../../ecs/current';
+import type { Entity } from '../../ecs/world';
 import type { TestScene } from '../render/scenes/testScene';
 import {
   EFFECT_RENDERING_GROUP,
@@ -52,7 +54,7 @@ import {
 } from './core';
 import { addEffectGlow, releaseEffectGlow } from './glow';
 import { RGBS } from './recipes';
-import type { EffectHandle, EffectLayer } from './layer';
+import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
 
 // ---- 1. tuning -------------------------------------------------------------
 
@@ -76,6 +78,8 @@ const ANIMATION_SPEED = (0.3 * 25) / 24;
 export interface ModelOptions {
   /** `Skill/…glb` or `Effect/…glb` (recipes.ts `MODEL`). */
   model: string;
+  /** One of the hero's own skill effects the original keeps in `g_SkillEffects` (`heroSkillEffect`). */
+  heroSkill?: boolean;
   seconds?: number;
   /** The original's `Scale`: 1 = the model's native size. */
   scale?: number;
@@ -420,6 +424,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
   let solidFaded = false;
   let scaleOverride = 0;
   let clip: AnimationGroup | null = null;
+  let loaded: LoadedModel | null = null;
   let scrolledV: Texture | null = null;
   let disposed = false;
   let t = 0;
@@ -441,12 +446,13 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
   };
 
   if (world) {
-    void loadGLTF(opts.model, world)
+    void takeModel(world.scene, opts.model, () => loadGLTF(opts.model, world))
       .then(gltf => {
         if (disposed) {
-          gltf.mesh.dispose(false, false);
+          returnModel(gltf);
           return;
         }
+        loaded = gltf;
         gltf.mesh.setParent(node);
         gltf.mesh.position.setAll(0);
         gltf.mesh.scaling.set(1, -1, 1);
@@ -478,6 +484,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
           });
           clip = gltf.animationGroups[0] ?? null;
           meshes.push(gltf.mesh);
+          gltf.mesh.setEnabled(true);
           return;
         }
         const bodyLight = new Vector3(colour[0], colour[1], colour[2]);
@@ -604,10 +611,14 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
           } else clip.play(opts.loop ?? true);
         }
         meshes.push(gltf.mesh);
+        // Only now, dressed: a clone that failed to dress never shows as the raw GLB.
+        gltf.mesh.setEnabled(true);
       })
       .catch(err => console.warn('[effects] model failed', opts.model, err));
   }
 
+  const heroSkill = opts.heroSkill === true;
+  if (heroSkill) heroSkillsLive++;
   const handle = live.push({
     update(dt) {
       t += dt;
@@ -692,6 +703,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
     },
     release() {
       disposed = true;
+      if (heroSkill) heroSkillsLive--;
       clip?.stop();
       // The last scrolling spawn hands the shared sheet back unscrolled to the rows that draw it still.
       for (const tex of scrolled) {
@@ -710,6 +722,8 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
       for (const m of fadeMats) m.dispose(false, false);
       for (const m of meshes) releaseEffectGlow(m);
       for (const cp of copyNodes) cp.node.dispose(false, false);
+      // Back to the pool before the node goes: it is detached there.
+      if (loaded) returnModel(loaded);
       node.dispose(false, false);
     },
   });
@@ -746,7 +760,27 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
   };
 }
 
+/**
+ * The most effect models alive at once: the original's `Effects[MAX_EFFECTS]` (Core/Globals/_define.h:456).
+ * CreateEffect makes none when every slot is live (ZzzEffect.cpp:336).
+ */
+export const MAX_EFFECTS = 200;
+
+/**
+ * The hero's own Hell Fire, Inferno, Twister, Fire Scream (and Blast, Flash, Flame, Sword Force) effects take
+ * `g_SkillEffects`' 100 slots instead (MAX_SKILL_EFFECTS, _define.h:457; SkillEffectMgr.cpp:33-62).
+ */
+export const MAX_SKILL_EFFECTS = 100;
+let heroSkillsLive = 0;
+
+/** `o` as one of those when `owner` is the hero (`IsSkillEffect`: `Owner == &Hero->Object`); otherwise `o` as it is. */
+export function heroSkillEffect(o: ModelOptions, owner: Entity): ModelOptions {
+  return owner.localPlayer ? { ...o, heroSkill: true } : o;
+}
+
 function spawn(scene: Scene, at: Vector3, opts: ModelOptions): EffectHandle {
+  const full = opts.heroSkill ? heroSkillsLive >= MAX_SKILL_EFFECTS : live.size - heroSkillsLive >= MAX_EFFECTS;
+  if (full) return DEAD_HANDLE;
   return spawnModel(scene, at, opts);
 }
 
@@ -757,6 +791,7 @@ function update(_map: number, dt: number): void {
 function reset(): void {
   live.clear();
   disposeChromeMaterials();
+  clearModelPool();
 }
 
 // ---- 3. the layer ----------------------------------------------------------

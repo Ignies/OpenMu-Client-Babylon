@@ -12,7 +12,8 @@ themselves are content in `versions/shared/skills/` (see [docs/content.md](../..
   bow arrow tables. `cancelledEffects(skill, scene, target)`: the effects a `MagicEffectCancelled`
   naming `skill` drops, after running its `cancel` hook (`SkillCancel`). `hasWarriorGlint(skill, mounted)`: the skill's `warriorGlint` field, for
   `skillCastSystem` (item_fx draws the glint).
-- `visuals.ts` step DSL, used by skill files: `sprite`, `particles`, `model`, `ring`, `seq`,
+- `visuals.ts` step DSL, used by skill files: `sprite`, `particles`, `model`, `skillModel` (a
+  `model` the hero's cast keeps out of the effect cap, fx `heroSkillEffect`), `ring`, `seq`,
   `atCaster`, `scatter`, `ringOf`, `after`, `repeat`, `offset`, building blocks (`fireHit`,
   `arcHit`, `steelHit`, `explosion`, `scorch`, `burn`, `magicGround`, ...), travel (`bolt`, `arrow`),
   `fanArrows` (`every`: one arrow at a time, Multi-Shot), `onCurseLanding`, `weaponsOf(e)` (`c->Weapon`: the castle's weapons inside Chaos

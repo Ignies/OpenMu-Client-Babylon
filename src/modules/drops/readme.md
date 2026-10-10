@@ -59,6 +59,7 @@ and the loot filter for the ALT name overlay.
 ## Tests
 - `zenPile.test.ts`: coin count by amount, scatter inside the radius and over the disc, same pile per seed.
 - `dropObject.test.ts`: a dropped armour / pants with a HideSkin bitmap draws mesh 0 with it, alpha-tested;
-  every other part keeps its own textures; the parts that draw only some meshes, with real texture names.
+  every other part keeps its own textures; the parts that draw only some meshes, with real texture names;
+  a drop casts no shadow (`ItemObjectAttribute`, ZzzObject.cpp:5160).
 - `net.test.ts`: the ground label marks skill, option and luck in the original order; the Horn of Dinorant knight skill;
   an ancient piece's set name (reads the real set files).

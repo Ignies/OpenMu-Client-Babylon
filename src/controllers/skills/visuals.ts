@@ -3,7 +3,7 @@ import { type AuraOptions, type SpearJoints } from '@/controllers/fx/aura';
 
 import { effects, type EffectHandle } from '@/controllers/fx';
 import { type Entity } from '@/ecs/world';
-import { type ModelOptions } from '@/controllers/fx/model';
+import { heroSkillEffect, type ModelOptions } from '@/controllers/fx/model';
 import { type ParticlesOptions } from '@/controllers/fx/particles';
 import { bonePos, delay, entityGone, entityPos, entityYaw, followEntity, fxNow, type PointSource, type RGB } from '@/controllers/fx/core';
 import { type ProjectileOptions } from '@/controllers/fx/projectile';
@@ -67,6 +67,8 @@ export type Step = (at: Vector3, ctx: SkillContext) => EffectHandle | void;
 export const sprite = (o: SpriteOptions): Step => (at, c) => effects.spawn('sprite', c.scene, at, o);
 export const particles = (o: ParticlesOptions): Step => (at, c) => effects.spawn('particles', c.scene, at, o);
 export const model = (o: ModelOptions): Step => (at, c) => effects.spawn('model', c.scene, at, o);
+/** `model` for an effect the original keeps out of the effect cap when the hero casts it (`heroSkillEffect`). */
+export const skillModel = (o: ModelOptions): Step => (at, c) => effects.spawn('model', c.scene, at, heroSkillEffect(o, c.caster));
 export const ring = (o: RingOptions): Step => (at, c) => effects.spawn('ring', c.scene, at, o);
 export const seq = (...steps: Step[]): Step => (at, c) => {
   for (const s of steps) s(at, c);

@@ -76,6 +76,8 @@ _shared.ts                      helpers for several classes
 - `skillRules.golden.test.ts`: per id 0-700, the clip `chooseSkillAction` picks over hands,
   class, SwordCount, mount, gender, map and coin toss; SwordCount; clip-paired and landing
   sounds; the clips that hold facing or ignore a hit; master aliases; the cancel effect.
+- `skillEffectSlots.test.ts`: Hell Fire, Inferno, Twister and Fire Scream mark the model the original
+  keeps in `g_SkillEffects` (SkillEffectMgr.cpp:33-62) when the hero casts them, and nothing else.
 - `castRules.test.ts`: the quiet mount (Defense), what others see (Electric Spike), the kill
   rules (Nova, Combo), Nova's hook numbers, the cancel effects (masters included) against `ReceiveMagicFinish`
   (WSclient.cpp:3878). `rage_fighter/party_buffs.test.ts`: the party buffs'

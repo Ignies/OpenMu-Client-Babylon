@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
+import { Bone } from '@babylonjs/core/Bones/bone';
 import {
   ArcRotateCamera,
   Color3,
@@ -8,7 +9,9 @@ import {
   Matrix,
   Plane,
   Scene,
+  Skeleton,
   Vector3,
+  VertexBuffer,
   type AbstractMesh,
   type Mesh,
 } from '../babylon/exports';
@@ -223,6 +226,29 @@ describe('highlight mask selection', () => {
 
     expect(selected).toBe(out);
     expect(out.map(m => m.name)).toEqual(['front', 'effect', 'lit', 'behind']);
+  });
+
+  /** A box skinned whole to one bone at rest, as a worn part is to its rig. */
+  function skinned(name: string, at: Vector3): Mesh {
+    const mesh = box(name, at);
+    const n = mesh.getTotalVertices();
+    mesh.setVerticesData(VertexBuffer.MatricesIndicesKind, new Array<number>(n * 4).fill(0), false, 4);
+    mesh.setVerticesData(VertexBuffer.MatricesWeightsKind, Array.from({ length: n * 4 }, (_, i) => (i % 4 ? 0 : 1)), false, 4);
+    mesh.numBoneInfluencers = 1;
+    mesh.skeleton = new Skeleton(name, name, scene);
+    new Bone('bone_0', mesh.skeleton);
+    mesh.skeleton.prepare();
+    return mesh;
+  }
+
+  it('keeps a skinned part only when its posed bones reach the lit box', () => {
+    const lit = box('lit', Vector3.Zero(), 2);
+    const near = skinned('near', new Vector3(0.5, 0.5, -3));
+    const far = skinned('far', new Vector3(12, 0, 0));
+    const list: AbstractMesh[] = [far, near, lit];
+    const out: AbstractMesh[] = [];
+    selectMaskMeshes(list, list.length, mesh => mesh === lit, viewProjection(), planes(), out);
+    expect(out.map(m => m.name)).toEqual(['near', 'lit']);
   });
 
   it('leaves the mask empty when nothing lit is active', () => {

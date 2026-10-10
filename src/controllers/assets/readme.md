@@ -3,7 +3,7 @@
 Getting game files into the client: the two data roots, fetching with gzip sidecars, the glTF
 model cache and item materials, texture packs, the pre-game download, the item icon pack, the BMD
 reader (`bmd/`) and the readers for the original `Data/` tree (`mu/`). `index.ts` is the door
-for new imports (`loadGLTF`, `localisedNpcName`, `reportLoadFailure`, `settle`); older code still
+for new imports (`loadGLTF`, `evictUnusedContainers`, `localisedNpcName`, `reportLoadFailure`, `settle`); older code still
 imports the modules below directly (baselined in `tools/checks`).
 
 ## Public API
@@ -23,10 +23,14 @@ imports the modules below directly (baselined in `tools/checks`).
   re-exports from `core/binaryUtils` and `net/wireUtils`.
 - `compressedAssets.ts`: `fetchAssetBytes`, `prefetchAsset`; `COMPRESSED_EXTENSIONS`,
   `COMPRESSED_SUFFIX` for the build tools.
-- `modelLoader.ts`: `loadGLTF(path, world)`, `warmGLTF`, `evictContainers`, `getMaterial`,
+- `modelLoader.ts`: `loadGLTF(path, world)`, `disposeLoadedModel` (a clone with its skeleton and
+  clips), `warmGLTF`, `evictContainers`, `evictUnusedContainers(folders)`, `getMaterial`,
   `getScrollVariant`, `getFlatLitVariant`, `setMeshFadeBlend`, `syncMaterialQuality`,
   `syncTexturePack`, `getModel`; `getDataTexture(scene, path)` (a `Data/` bitmap for a mesh drawn with
   another texture than its own, top-down like the GLBs'), `ALPHA_TEST_AND_BLEND`.
+- `lazyAnimationGroups.ts`: `lazyAnimationGroups` (the clip list `loadGLTF` hands out),
+  `forEachAnimationGroup(groups, fn)` (every clip, and each one cloned later),
+  `animationGroupSource(groups, i)` (a clip's keys without cloning it), `cloneTargets`.
 - `texturePacks.ts`: `texturePacks` (store), `loadPackIndex`, `setActivePack`, `ORIGINAL_PACK`,
   `packsBase`, `onTexturePackChanged`, `packRepaintsPending`, `textureLabel`.
 - `assetDownload.ts`: `assetDownload` (store), `AssetGroup`, `loadAssetsIndex`, `startDownload`,
@@ -59,9 +63,15 @@ imports the modules below directly (baselined in `tools/checks`).
   `<file>.gz` first and unpacks it with `DecompressionStream`, else it reads the plain file. A
   missing file or a dev server's `index.html` answer throws instead of returning garbage.
 - `loadGLTF` parses each GLB once into an `AssetContainer` and hands out clones. Item materials are
-  cached by their arguments, so a Classic / PBR switch (`syncMaterialQuality`) swaps pointers. Each
+  cached by their arguments, so a Classic / PBR switch (`syncMaterialQuality`) swaps pointers; it
+  also drops each skinned mesh's draw cache, as a frozen material kept its stale effect (the hero
+  drew dark, then in shards). Each
   newly cached texture goes through `applyPackToTexture`. `evictContainers` drops a map's folder
-  on warp.
+  on warp; `evictUnusedContainers` drops the monster and NPC models nothing draws any more (called
+  last in `app/lifecycle.ts`), as the original releases them on every map change (`DeleteMonsters`,
+  `DeleteNpcs`). A container counts as used while a clone shares its geometry, and one asked for in
+  the last 10 s is kept (a clone may be on its way). Items, player gear and skill models stay
+  cached, as the original keeps them loaded.
 - Texture packs: `packsBase()` swaps `game-assets` for `packs` in the version's asset path. A
   pack's `pack.json` maps `<label>|<WxH>` (and `|ozt` / `|ozj` for same-size pairs) to a file, and
   `updateURL` repoints the live texture. See [texture_packs.md](../../../docs/texture_packs.md).
@@ -98,6 +108,13 @@ imports the modules below directly (baselined in `tools/checks`).
 - change which interface sheets preload: `versions/<id>/ui/preload.ts`.
 
 ## Tests
+- `lazyAnimationGroups.test.ts`: a clip is cloned on its first read only, iteration walks the
+  cloned ones, hooks run on later clones, a clip made later is appended, a source is read without cloning, nodes map
+  by name path or not at all.
+- `modelLoader.test.ts`: a clone gets only the clip it plays at load, another on first read onto
+  its own node, every clip at once when its nodes cannot be matched; `syncMaterialQuality` drops a skinned mesh's draw cache only;
+  `evictUnusedContainers` drops a monster or NPC model with no clone left,
+  keeps one still drawn, one asked for in the last 10 s and the folders it is not given.
 - `resolveUrlToDataFolder.test.ts`: own files stay on the version root, the rest come from the
   borrowed tree, a file the version lacks is never borrowed, absolute urls pass through; each
   version names its own index.
@@ -131,6 +148,17 @@ GLB, OZT, terrain files and BMD tables gzip to about a third; OZJ and audio are 
 and are not packed. Whether sidecars exist is decided once per session by the first compressible
 read (or `settleSidecars`); three failures in a row turn them off. The `?nogz` URL query turns
 them off for the page load. `prefetchAsset` never starts the probe itself.
+
+### lazyAnimationGroups.ts
+`instantiateModelsToScene` cloned every clip for every copy, and the player rig carries 284 of
+them (a few dozen for a monster) while a copy plays a handful: thousands of AnimationGroups in a
+crowd, and the clone cost on each player that came into view. `loadGLTF` now instantiates without
+the clips and hands out this list, which clones clip `i` onto the copy's nodes the first time
+`groups[i]` is read. The nodes are matched by their name path (the clones are named after their
+sources); a model with two nodes on one path gets every clip at load, as before. Iterating the list
+walks only the cloned clips, so whatever every clip must get as it comes (the end observer, the
+speed) goes through `forEachAnimationGroup`. The original keeps one copy of each action per model
+(`Models[].Actions`) for every object drawing it.
 
 ### itemIconPack.ts
 An `<img>` is a low-priority request queued behind the world's fetches, so a shop's icons used to

@@ -11,6 +11,7 @@ import {
   Texture,
   TransformNode,
   type AbstractMesh,
+  type Mesh,
   type Node,
 } from '../render/babylon/exports';
 import type { World } from '../../ecs/world';
@@ -40,6 +41,7 @@ import { getEmptyTexture } from '../render/babylon/emptyTexture';
 import { BlendState } from '@versions/shared/objects/enum';
 import { isHideTexture, isSkinOrHairTexture } from '../actors/skinTexture';
 import { parseTextureScriptFromPath } from '../render/textureScript';
+import { cloneTargets, lazyAnimationGroups } from './lazyAnimationGroups';
 
 // Texture names are read through the pack, so a swap in flight still reads the converter's name.
 readPackLabelsWith(textureLabel);
@@ -333,6 +335,9 @@ export function setMeshFadeBlend(mesh: AbstractMesh, on: boolean): void {
  */
 export function syncMaterialQuality(scene: Scene): void {
   for (const mesh of scene.meshes) {
+    // The shared materials are frozen and kept a skinned mesh's old effect: after a switch
+    // mid-game the hero and its wings drew dark, then in shards. The next frame compiles afresh.
+    if (mesh.skeleton) mesh.resetDrawCache();
     const args = materialArgs.get(mesh.material as ItemMaterial);
     if (!args) continue;
 
@@ -436,7 +441,7 @@ export async function syncTexturePack(): Promise<void> {
   await Promise.all(all.map(t => applyPackToTexture(t)));
 }
 
-type LoadedModel = {
+export type LoadedModel = {
   mesh: AbstractMesh;
   skeleton: Skeleton;
   animationGroups: AnimationGroup[];
@@ -452,6 +457,10 @@ type LoadedModel = {
  * cache is strictly less GPU memory than the duplication it replaces.
  */
 const containersCache = new Map<string, Promise<AssetContainer>>();
+
+/** The settled containers and when each path was last asked for, for `evictUnusedContainers`. */
+const resolvedContainers = new Map<string, AssetContainer>();
+const lastAsked = new Map<string, number>();
 
 /**
  * Set to false to bypass the cache entirely and give every request its own
@@ -614,11 +623,14 @@ function loadContainer(
   fileName: string,
   characterAsset: boolean
 ): Promise<AssetContainer> {
+  lastAsked.set(filePath, performance.now());
   const cached = containersCache.get(filePath);
   if (cached) return cached;
 
   const pending = loadContainerBytes(filePath, fileName, scene)
     .then(container => {
+      // Not when it was evicted while it loaded: that dispose is already queued.
+      if (containersCache.get(filePath) === pending) resolvedContainers.set(filePath, container);
       prepareMeshes(
         container.meshes,
         container.skeletons,
@@ -758,7 +770,14 @@ export async function loadGLTF(
   // materials bind `metadata.diffuseTexture` and `metadata.bodyLight` per
   // mesh in `onBindObservable`, and hardware instances draw in one call with
   // one uniform set - every object would take the last one's terrain light.
-  const entries = container.instantiateModelsToScene(name => name, false);
+  // Without the clips when they can be cloned later onto the copy's nodes (`lazyClips`).
+  const lazy = clipsClonedLater(container);
+  const entries = container.instantiateModelsToScene(
+    name => name,
+    false,
+    lazy ? { predicate: entity => !(entity instanceof AnimationGroup) } : undefined
+  );
+  const animationGroups = lazy ? lazyClips(container, entries.rootNodes) : entries.animationGroups;
 
   const root = entries.rootNodes[0] as AbstractMesh;
   root.name = fileName;
@@ -782,7 +801,7 @@ export async function loadGLTF(
   // converter leaves every bone node at identity, so an unplayed model sits in
   // the raw, tilted BMD orientation. Instantiated clones do not inherit the
   // auto-play, so reproduce it here.
-  const first = entries.animationGroups[0];
+  const first = animationGroups[0];
 
   if (first) {
     first.play(true);
@@ -795,8 +814,42 @@ export async function loadGLTF(
   return {
     mesh: root,
     skeleton,
-    animationGroups: entries.animationGroups,
+    animationGroups,
   };
+}
+
+const rootsOf = (container: AssetContainer): Node[] =>
+  [...container.transformNodes, ...container.meshes].filter(node => !node.parent);
+
+/** Per container: its clips can be cloned later, every node having a name path of its own. */
+const namedContainers = new WeakMap<AssetContainer, boolean>();
+
+function clipsClonedLater(container: AssetContainer): boolean {
+  let named = namedContainers.get(container);
+  if (named === undefined) {
+    named = container.animationGroups.length > 0 && cloneTargets(rootsOf(container), rootsOf(container)) !== null;
+    namedContainers.set(container, named);
+  }
+  return named;
+}
+
+/** A copy's clips, each cloned onto the copy's own nodes (matched by name path) the first time it is read. */
+function lazyClips(container: AssetContainer, cloneRoots: readonly Node[]): AnimationGroup[] {
+  const targets = cloneTargets(rootsOf(container), cloneRoots);
+  const root = cloneRoots[0];
+  return lazyAnimationGroups(container.animationGroups, source =>
+    root && !root.isDisposed() ? source.clone(source.name, target => targets?.get(target) ?? target) : null
+  );
+}
+
+/**
+ * Frees one `loadGLTF` clone: its meshes, and the skeleton and clips
+ * `instantiateModelsToScene` cloned with them, which a mesh dispose leaves in the scene.
+ */
+export function disposeLoadedModel(model: LoadedModel): void {
+  if (!model.mesh.isDisposed()) model.mesh.dispose(false, false);
+  model.skeleton?.dispose();
+  for (const group of model.animationGroups) group.dispose();
 }
 
 /** Fetch and parse a GLB into the cache without placing a clone, so a later `loadGLTF` of it is not late. */
@@ -816,12 +869,14 @@ export function warmGLTF(filePath: string, world: World): Promise<void> {
  * world changes, after the old map's entities - the clones that shared the
  * containers' geometry - are gone. Without this the cache grew by one map's
  * worth of GLBs per warp for the whole session. Shared folders (`Player/`,
- * `Item/`, `Npc/`) are never passed here.
+ * `Item/`, `Npc/`) are never passed here; see `evictUnusedContainers`.
  */
 export function evictContainers(pathPrefix: string): void {
   for (const [key, pending] of containersCache) {
     if (!key.includes(pathPrefix)) continue;
     containersCache.delete(key);
+    resolvedContainers.delete(key);
+    lastAsked.delete(key);
     // `AssetContainer.dispose` disposes the container's textures, so the
     // diffuse textures parsed out of this file die with it. Dropping them
     // here is what makes the map's next visit re-parse the GLB and keep the
@@ -833,4 +888,40 @@ export function evictContainers(pathPrefix: string): void {
       () => {}
     );
   }
+}
+
+/** A model asked for this recently may be about to be cloned: kept. */
+const RECENTLY_ASKED_MS = 10_000;
+
+/** Anything still drawing from it: a clone shares its geometry. A container with none (a bare rig) counts as used. */
+function containerInUse(container: AssetContainer): boolean {
+  let judged = false;
+  for (const mesh of container.meshes as Mesh[]) {
+    if (mesh.instances?.length) return true;
+    const geometry = mesh.geometry;
+    if (!geometry) continue;
+    judged = true;
+    if (geometry.meshes.some(user => user !== mesh)) return true;
+  }
+  return !judged;
+}
+
+/**
+ * Drop the cached containers under any of `folders` that nothing in the scene draws from: the
+ * original releases every monster and NPC model on a map change (`DeleteMonsters`, `DeleteNpcs`,
+ * MapManager.cpp:1183-1185). Returns how many went.
+ */
+export function evictUnusedContainers(folders: readonly string[], now = performance.now()): number {
+  let released = 0;
+  for (const [key, container] of resolvedContainers) {
+    if (!folders.some(folder => key.includes(folder))) continue;
+    if (now - (lastAsked.get(key) ?? 0) < RECENTLY_ASKED_MS || containerInUse(container)) continue;
+    containersCache.delete(key);
+    resolvedContainers.delete(key);
+    lastAsked.delete(key);
+    texturesCache.delete(key);
+    container.dispose();
+    released++;
+  }
+  return released;
 }

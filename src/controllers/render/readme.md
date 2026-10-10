@@ -78,6 +78,8 @@ There is no `index.ts` facade; other folders import the modules directly.
   the number bias round trip, and the pack digest.
 - `frameSnapshot.test.ts`: fills once per frame and per scene, refills after a throw.
 - `meshAnimation.test.ts`: `meshAnimationFor` reads the map row per world.
+- `modelObject.test.ts`: a model whose clips are cloned on first play reads every clip's keys at load
+  without cloning one, and a clip cloned later reports its end.
 - `versions/shared/contentRows.golden.test.ts`: every map's mesh animations, sampled over time.
 - `pbrMaps.test.ts`: `textureSourceName` reads the pack's remembered name mid-swap.
 - `pbrDerive.test.ts`: `flipRows`, flat normal and emissive mask of `derivePbrMaps`.
@@ -94,7 +96,8 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `scenes/csmBounds.test.ts`: the kept receiver box matches Babylon's sweep.
 - `scenes/csmCache.test.ts`: the pinned Babylon private methods, map size and margin, `isStaticCaster`.
 - `scenes/gbufferFormats.test.ts`: R32F depth and RGBA16F normals, defaults otherwise.
-- `scenes/highlightMask.test.ts`: bone boxes, screen rects and hover mask selection.
+- `scenes/highlightMask.test.ts`: bone boxes, screen rects and hover mask selection; a skinned part
+  is kept only when its posed bone boxes reach the lit box.
 - `scenes/sunShafts.test.ts`: the shaft pass leaves and rejoins the chain with the sun.
 
 ## Notes
@@ -150,6 +153,10 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `scenes/fireflyGuard.ts`: bloom spreads a pixel by its value, so one aliased grass fragment (32 vs a
   torch's 4) became a floating ball of light. The guard runs on the linear buffer before the
   pipeline. Off on Classic, with bloom off, and when the tone pass is live.
+- `scenes/highlightMask.ts`: Babylon draws every active mesh into the hover mask, unlit ones black.
+  The list keeps the lit meshes and what can reach their screen box: a static mesh by the narrowed
+  frustum, a skinned one (its culling box is not trusted) by its posed bone boxes, anything else
+  whole. Worn parts were most of a crowd's mask draws before the skinned test.
 - `scenes/heightFog.ts`: `EFFECT_HAZE_SHARE` was a fixed 12 tiles, past every outdoor `fog.start`, so
   edge torches burned at full HDR over hazed ground. A look's `fog.fromTarget` adds the camera radius
   to `start`, so the haze starts that far past the hero at every zoom (Chaos Castle).

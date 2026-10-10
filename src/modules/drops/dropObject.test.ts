@@ -138,3 +138,12 @@ describe('a drop the original draws only some meshes of', () => {
     expect(drawn(await drop(7, 45, ['Item2001_Helm', 'skinClass301']))).toEqual([0]);
   });
 });
+
+// ItemObjectAttribute sets `EnableShadow = false` (ZzzObject.cpp:5160), so RenderItems draws no shadow.
+describe('a dropped item', () => {
+  it('casts no shadow, neither a sun one nor a blob', async () => {
+    const object = await drop(0, 0, ['sword']);
+    expect(object.CastsShadow).toBe(false);
+    expect(object.getMeshes().map(mesh => mesh.metadata.csmCaster)).toEqual([false]);
+  });
+});

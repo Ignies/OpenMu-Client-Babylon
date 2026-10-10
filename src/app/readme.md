@@ -44,12 +44,14 @@ the interface controller's (`AppState`, `controllers/interface/uiState.ts`).
   command is the world module's (`modules/world/net.ts`).
 - `lifecycle.ts` lists what resets on a map change, in order:
   `weather, lighting, effects, events, skills, combat, quests, sound, maps` (the order of the
-  original inline sequence in `loadMapIntoScene`). Why each one resets:
+  original inline sequence in `loadMapIntoScene`), then `releaseUnused`. Why each one resets:
   - weather, events, skills, combat, maps: drop per-map layer state.
   - lighting: disposes every light source; the terrain light field is rebuilt from the new bake.
   - effects: ends live effects, cancels pending timed steps, drops pools.
   - quests: closes the NPC windows and drops per-map state.
   - sound: stops the old map's sounds and evicts decoded effects not used lately.
+  - last, `releaseUnused`: frees the old map's sign plates and the monster and NPC models nothing
+    draws any more (`DeleteMonsters` / `DeleteNpcs`), once the effects above dropped their clones.
 
 ### Notes: the old Store
 `store.ts` held the hero, the sockets, the login, the bag, the merchant, the skills, pets and more
@@ -77,5 +79,7 @@ or `src/ecs` (`Ecs.world`). The codemod that rewrote `Store.x` is in git history
 - `listenerOrder.golden.test.ts`: every packet's listeners and their order once the app has loaded.
   It hashes each listener's code without whitespace or vitest's numbered import aliases, so moving
   an import keeps the hash; changing a listener or the install order changes it.
+- `lifecycle.test.ts`: the map-change resets run in order, then the sign plates and the unused
+  monster and NPC models are freed.
 - `observableStores.test.ts`: no observable store member is named after an `Object.prototype`
   member (mobx would throw while building the store).

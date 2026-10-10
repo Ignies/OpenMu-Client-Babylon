@@ -1,6 +1,7 @@
 import { defineSkill } from '@/controllers/skills/define';
 import { HIT_SPARKS, MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
 import { entityPos, entityYaw, type ParticleRecipe, type RGB } from '@/controllers/fx/core';
+import { heroSkillEffect, type ModelOptions } from '@/controllers/fx/model';
 import { Step, burn, cm, explosion, particles, ring, scorch, seq, ticks } from '@/controllers/skills/visuals';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { dw2AtAttackTime } from '../_shared';
@@ -53,7 +54,7 @@ const infernoWith = (tint: RGB, extra?: InfernoExtra): Step => (_at, c) => {
     lighting.skillSpot(c.scene, 14, 'blast', lightAt(p));
     extra?.bomb(p, c);
   }
-  effects.spawn('model', c.scene, centre, {
+  const ring: ModelOptions = {
     model: MODEL.inferno,
     seconds: ticks(INFERNO_TICKS),
     scale: 0.9,
@@ -61,7 +62,8 @@ const infernoWith = (tint: RGB, extra?: InfernoExtra): Step => (_at, c) => {
     yaw: -entityYaw(c.caster),
     keysPerTick: 0.5,
     life: p => (INFERNO_TICKS * (1 - p)) / 20,
-  });
+  };
+  effects.spawn('model', c.scene, centre, heroSkillEffect(ring, c.caster));
   lighting.skillSpot(c.scene, 14, 'inferno', lightAt(centre));
   dw2Sfx('Sound/eExplosion', centre);
   extra?.centre(centre, c);

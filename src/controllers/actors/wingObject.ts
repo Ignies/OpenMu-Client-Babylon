@@ -182,11 +182,13 @@ export class WingObject extends ModelObject {
     super.Unload();
   }
 
-  /** Any of the model's meshes is being drawn (the hero body hides them all in first person). */
+  /**
+   * Any of the model's meshes is being drawn (the hero body hides them all in first person). All of
+   * them, not the root's children: an unskinned GLB hangs its meshes under its `model_<name>` node.
+   */
   #drawn(): boolean {
-    const root = this.gltf?.mesh;
-    if (!root || !this.node.isEnabled()) return false;
-    for (const mesh of root.getChildMeshes(true)) if (mesh.isVisible) return true;
+    if (!this.gltf || !this.node.isEnabled()) return false;
+    for (const mesh of this._frustumMeshes) if (mesh.isVisible) return true;
     return false;
   }
 
