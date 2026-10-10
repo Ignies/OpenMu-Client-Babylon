@@ -12,7 +12,6 @@ import {
   HERO_SIZE,
   HERO_SPRITE,
   isPanned,
-  MAP_ROTATION,
   MARKER_SIZE,
   MARKER_SPRITE,
   NO_PAN,
@@ -21,16 +20,18 @@ import {
   Sprite,
   TERRAIN_SIZE,
   useMapDrag,
+  useMapRotation,
   usePartyMarkers,
   useWorldMinimap,
   type MapPan,
 } from './shared';
+import { markerTurn } from './rotation';
 
 /**
  * The corner minimap: ours. The original's one map is the TAB sheet
  * (`CNewUIMiniMap`, `sheet.tsx`); later clients keep a small copy of it in
  * the top right corner of the play area, and this is that - the same
- * `mini_map.ozt`, the same 45° spin about the hero, the same marker files,
+ * `mini_map.ozt`, the same turn about the hero (`rotation.ts`), the same marker files,
  * drawn small and left on screen. TAB still opens the sheet, over it;
  * the panel steps aside while the sheet is up.
  *
@@ -54,7 +55,15 @@ const PANEL_SCALE = 0.75;
 const ZOOM_LEVELS = [512, 640, 768, 1024, 1280];
 const DEFAULT_ZOOM = 2;
 
-const MapMarker = ({ marker, mapSize }: { marker: MinimapMarker; mapSize: number }) => {
+const MapMarker = ({
+  marker,
+  mapSize,
+  rotation,
+}: {
+  marker: MinimapMarker;
+  mapSize: number;
+  rotation: number;
+}) => {
   const [hovered, setHovered] = useState(false);
   const size = MARKER_SIZE[marker.kind] ?? NPC_SIZE;
 
@@ -69,7 +78,7 @@ const MapMarker = ({ marker, mapSize }: { marker: MinimapMarker; mapSize: number
         top: (marker.x / TERRAIN_SIZE) * mapSize - size / 2,
         width: size,
         height: size,
-        transform: `rotate(${-MAP_ROTATION}deg)`,
+        transform: `rotate(${-rotation}deg)`,
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -77,7 +86,7 @@ const MapMarker = ({ marker, mapSize }: { marker: MinimapMarker; mapSize: number
       <Sprite
         file={MARKER_SPRITE[marker.kind] ?? NPC_SPRITE}
         size={size}
-        style={{ transform: `rotate(${marker.rotation}deg)` }}
+        style={{ transform: `rotate(${markerTurn(marker.rotation, rotation)}deg)` }}
       />
       {hovered && (
         <MuTipText
@@ -105,7 +114,8 @@ export const MinimapCorner = observer(() => {
   const coordsRef = useRef<HTMLDivElement>(null);
   const scale = PANEL_SCALE * uiScaleFactor(GameOptions.uiScale);
   const mapSize = ZOOM_LEVELS[zoom];
-  const { dragging, handlers } = useMapDrag(mapSize, scale, setPan);
+  const rotation = useMapRotation(shown);
+  const { dragging, handlers } = useMapDrag(mapSize, scale, rotation, setPan);
 
   // Before paint, so the picture never shows its top-left corner for a frame.
   useLayoutEffect(() => {
@@ -171,7 +181,7 @@ export const MinimapCorner = observer(() => {
       <div className={`minimap-corner-clip${dragging ? ' is-dragging' : ''}`} {...handlers}>
         <div
           className="minimap-corner-spin"
-          style={{ transform: `rotate(${MAP_ROTATION}deg)` }}
+          style={{ transform: `rotate(${rotation}deg)` }}
         >
           <div
             ref={pictureRef}
@@ -183,10 +193,10 @@ export const MinimapCorner = observer(() => {
             }}
           >
             {minimap.markers.map((marker, i) => (
-              <MapMarker key={i} marker={marker} mapSize={mapSize} />
+              <MapMarker key={i} marker={marker} mapSize={mapSize} rotation={rotation} />
             ))}
             {partyMarkers.map((marker, i) => (
-              <MapMarker key={`party-${i}`} marker={marker} mapSize={mapSize} />
+              <MapMarker key={`party-${i}`} marker={marker} mapSize={mapSize} rotation={rotation} />
             ))}
             <div
               ref={heroRef}
@@ -194,7 +204,7 @@ export const MinimapCorner = observer(() => {
               style={{
                 width: HERO_SIZE,
                 height: HERO_SIZE,
-                transform: `rotate(${-MAP_ROTATION}deg)`,
+                transform: `rotate(${-rotation}deg)`,
               }}
             >
               <Sprite file={HERO_SPRITE} size={HERO_SIZE} />
