@@ -47,8 +47,9 @@ hotbar share.
 ## Packets
 - `SkillListUpdate`, `SkillAdded`, `SkillRemoved` (F3 11): one handler; the count byte (0xFE add,
   0xFF remove) picks the shape, then `HeroSkills.setSkillList` / `addSkill` / `removeSkill`.
-- `MagicEffectStatus`: sets an effect on the object (`objectEffects.ts`, also used by warp); the hero's
-  also goes to `HeroSkills.setBuff`.
+- `MagicEffectStatus`: sets an effect on the object (`objectEffects.ts`, also used by warp and scope); the
+  hero's also goes to `HeroSkills.setBuff`, first, so the bar takes it while no world is up (a warp).
+  `redrawBuffLooks` (same file) draws the held looks again after a map change ends them (`app/lifecycle.ts`).
 - `MagicEffectCancelled`: `cancelledEffects` (skills controller): the skill's `cancel` hook, then its effect (`SKILL_EFFECTS`, `controllers/skills/tables.ts`, filled from
   each skill's `effect`) and clears it.
 - `AreaSkillAnimation`: turns the caster, plays the cast clip and the area visual.
@@ -79,6 +80,8 @@ hotbar share.
 ## Tests
 - `teleportSound.test.ts`: a monster teleporting plays its own sound only on its map (the
   Nightmare in Kanturu 3rd); anyone else the plain one.
+- `objectEffects.test.ts`: the bar takes the hero's effect with no world; a map change's reset is
+  followed by the held looks drawn again.
 - `state.test.ts`: active master skills sit on the bar; a Strengthener takes its base skill's hot key
   and selection.
 - `masterTree.test.ts`: the tree reads the Season 6 skill table: a node's icon cell and its base

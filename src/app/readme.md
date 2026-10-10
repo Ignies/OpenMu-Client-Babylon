@@ -43,11 +43,13 @@ the interface controller's (`AppState`, `controllers/interface/uiState.ts`).
   `Ping` every 5 s in the world and hands the map ping its `PingLink`. The shared F3/0x40 server
   command is the world module's (`modules/world/net.ts`).
 - `lifecycle.ts` lists what resets on a map change, in order:
-  `weather, lighting, effects, events, skills, combat, quests, sound, maps` (the order of the
+  `weather, lighting, effects, buffLooks, events, skills, combat, quests, sound, maps` (the order of the
   original inline sequence in `loadMapIntoScene`), then `releaseUnused`. Why each one resets:
   - weather, events, skills, combat, maps: drop per-map layer state.
   - lighting: disposes every light source; the terrain light field is rebuilt from the new bake.
   - effects: ends live effects, cancels pending timed steps, drops pools.
+  - buffLooks (right after effects): draws again the buff looks of the bodies the new map keeps (the
+    hero, and whoever entered view while it loaded), which still hold their effects.
   - quests: closes the NPC windows and drops per-map state.
   - sound: stops the old map's sounds and evicts decoded effects not used lately.
   - last, `releaseUnused`: frees the old map's sign plates and the monster and NPC models nothing
@@ -79,7 +81,7 @@ or `src/ecs` (`Ecs.world`). The codemod that rewrote `Store.x` is in git history
 - `listenerOrder.golden.test.ts`: every packet's listeners and their order once the app has loaded.
   It hashes each listener's code without whitespace or vitest's numbered import aliases, so moving
   an import keeps the hash; changing a listener or the install order changes it.
-- `lifecycle.test.ts`: the map-change resets run in order, then the sign plates and the unused
-  monster and NPC models are freed.
+- `lifecycle.test.ts`: the map-change resets run in order (the buff looks redrawn right after the
+  effects end), then the sign plates and the unused monster and NPC models are freed.
 - `observableStores.test.ts`: no observable store member is named after an `Object.prototype`
   member (mobx would throw while building the store).

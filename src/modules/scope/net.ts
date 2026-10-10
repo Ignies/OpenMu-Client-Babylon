@@ -9,6 +9,7 @@ import { ItemSerializer } from '@/controllers/item_rules';
 import { MonsterActionType, PlayerAction } from '@versions/shared/objects/enum';
 import { PlayerObject, npcClassOf } from '@/controllers/actors/playerObject';
 import { HeroSkills } from '@/modules/skills';
+import { applyObjectEffect } from '@/modules/skills/objectEffects';
 import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
 import { Vector3 } from '@/controllers/render/babylon/exports';
@@ -189,7 +190,8 @@ function addTransformedCharacterToScope(world: World, char: ScopeCharacter, skin
   });
 
   if (char.HeroState != null) entity.heroState = char.HeroState;
-  if (char.effects?.length) world.addComponent(entity, 'buffs', new Set(char.effects));
+  // RegisterBuff per listed effect: the set and its look (WSclient.cpp:2959).
+  for (const id of char.effects ?? []) applyObjectEffect(entity, id, true);
 
   const npcClass = npcClassOf(modelFactory);
   entity.attributeSystem.setValue(
@@ -283,11 +285,10 @@ function addCharacterToScope(
       }
     }
 
-    if (char.effects?.length) {
-      world.addComponent(playerEntity, 'buffs', new Set(char.effects));
-      if (Hero.playerId === maskedId) {
-        char.effects.forEach(id => HeroSkills.setBuff(id, true));
-      }
+    // RegisterBuff per listed effect: the set and its look (WSclient.cpp:2688-2697, :2800).
+    for (const id of char.effects ?? []) {
+      applyObjectEffect(playerEntity, id, true);
+      if (Hero.playerId === maskedId) HeroSkills.setBuff(id, true);
     }
 
     const cApp = playerEntity.charAppearance;

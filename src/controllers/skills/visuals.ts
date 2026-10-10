@@ -785,6 +785,14 @@ export function setBuffVisual(scene: Scene, entity: Entity, effectId: number, ac
   }
 }
 
+/** Command: draw again every look `entity` holds (a map reset ended them), without the arrival work. */
+export function refreshBuffVisuals(scene: Scene, entity: Entity): void {
+  const held = entity.buffs;
+  if (!held) return;
+  for (const id of held) keepLook(scene, entity, id, BUFF_VISUALS[id] ?? null);
+  for (const shared of SHARED_LOOKS) if (shared.ids.some(id => held.has(id))) keepLook(scene, entity, shared.key, shared.look);
+}
+
 /** Drop every buff look on an entity that left (despawn, out of scope). */
 export function clearBuffVisuals(entity: Entity): void {
   const byEffect = buffHandles.get(entity);

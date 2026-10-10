@@ -95,10 +95,11 @@ function objectOnTile(world: World, except: Entity, x: number, y: number): Entit
 }
 
 function setObjectEffect(objectId: number, effectId: number, active: boolean) {
+  const maskedId = objectId & 0x7fff;
+  // First: the hero object outlives a map load in the original, so the bar takes it during a warp too.
+  if (maskedId === Hero.playerId) HeroSkills.setBuff(effectId, active);
   const world = Ecs.world;
   if (!world) return;
-  const maskedId = objectId & 0x7fff;
-  if (maskedId === Hero.playerId) HeroSkills.setBuff(effectId, active);
   const obj = world.getByNetId(maskedId);
   if (obj) applyObjectEffect(obj, effectId, active);
 }
