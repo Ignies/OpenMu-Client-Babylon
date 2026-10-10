@@ -97,6 +97,8 @@ the table would import itself.
 - `archangelWeapons.test.ts`: Divine weapon and Weapon of Archangel names, colours and icons.
 - `portedItems.test.ts`: MuMain items and capes (tests `controllers/actors/wings.ts`, appearance).
 - `ancientSets.test.ts`: set lookup by discriminator, worn piece count, which options light.
+- `bundlesAndParchments.test.ts`: the packed jewels 12/136-143 and the Rage Fighter parchments 15/30-36 exist,
+  with Item.bmd's names, the original's models and the skills the parchments teach.
 - `questItemLink.test.ts`: the Blood Castle weapon on the back (tests `controllers/actors/weaponAttachment.ts`).
 - `weaponAttack.test.ts`: attack clip choice per weapon (tests `controllers/actors/weaponClass.ts`).
 - `versions/shared/items/items.golden.test.ts` covers the item table these rules read.

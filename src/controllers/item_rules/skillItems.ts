@@ -91,6 +91,15 @@ const SCROLL_SKILLS: Readonly<Record<number, number>> = {
   27: 222, // ITEM_INNOVATION_PARCHMENT
   28: 233, // ITEM_SCROLL_OF_WIZARDRY_ENHANCE -> Expansion of Wizardry
   29: 237, // ITEM_SCROLL_OF_GIGANTIC_STORM
+  // The Rage Fighter's parchments, each named for its skill (GetSkillByBook, ZzzInfomation.cpp:449-451
+  // lists 30-32; OpenMU's Scrolls.cs all seven).
+  30: 262, // ITEM_CHAIN_DRIVE_PARCHMENT
+  31: 263, // ITEM_DARK_SIDE_PARCHMENT
+  32: 264, // ITEM_DRAGON_ROAR_PARCHMENT
+  33: 265, // ITEM_DRAGON_SLASHER_PARCHMENT
+  34: 266, // ITEM_IGNORE_DEFENSE_PARCHMENT
+  35: 267, // ITEM_INCREASE_HEALTH_PARCHMENT
+  36: 268, // ITEM_INCREASE_BLOCK_PARCHMENT
 };
 
 /**
