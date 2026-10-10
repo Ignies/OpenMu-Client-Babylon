@@ -4,6 +4,7 @@ import { EventBus } from '@/core/eventBus';
 import { ItemBoughtPacket, NpcItemSellResultPacket, NpcWindowResponseNpcWindowEnum, NpcWindowResponsePacket, StoreItemListItemWindowEnum, StoreItemListPacket } from '@versions/shared/packets/ServerToClientPackets';
 import { ItemSerializer } from '@/controllers/item_rules';
 import { Merchant } from './state';
+import { MuWindows } from '@/controllers/interface';
 import { Hero } from '@/modules/hero';
 import { Session } from '@/modules/session';
 import { addNotification } from '@/modules/chat';
@@ -124,5 +125,20 @@ export function installNet(): void {
   EventBus.on('NpcItemSellResult', packet => {
     const p = new NpcItemSellResultPacket(packet);
     Merchant.itemSoldToNpc(p.Success, p.Money);
+  });
+
+  // `UpdateSendMoveInterface` (NewUISystem.cpp:2025, from SendMove ZzzInterface.cpp:1876): a walk
+  // cancels the trade and closes the vault, both shop windows and the NPC entry windows; the
+  // merchant, vault and trade take the inventory with them (`Hide`, NewUISystem.cpp:1313-1410).
+  // The quest windows close in their own listeners; the chaos machine stays.
+  EventBus.on('heroWalked', () => {
+    const docked = !!Merchant.npcShop || Economy.vaultOpen || Economy.tradeOpen;
+    Economy.cancelTrade();
+    Economy.closeVault();
+    Economy.closeMyShop();
+    Economy.closeBrowsedShop();
+    events.closeEntryWindows();
+    // The merchant closes with the inventory (state.ts).
+    if (docked) MuWindows.setOpen('inventory', false);
   });
 }

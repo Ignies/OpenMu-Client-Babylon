@@ -20,8 +20,8 @@ in `requests.ts`, through `index.ts` (the door).
   in local storage only.
 
 ## How it works
-- `MapChanged` with `IsMapChange`: closes the NPC shop, notices, slide help and minimap
-  (`ReceiveMapChange`, `WSclient.cpp:622`), clears the soccer board off the stadium, turns the hero
+- `MapChanged` with `IsMapChange`: closes every window (`MuWindows.closeAll`, the `HideAll` of
+  `ReceiveTeleport`, `WSclient.cpp:2285`), the notices and the slide help, clears the soccer board off the stadium, turns the hero
   to byte 9 (arrival facing) and emits `requestWarp`. The terrain loader then emits `warpCompleted`.
 - On `warpCompleted` after such a warp it sends `ClientReadyAfterMapChange` (C1 04 F3 12). OpenMU
   parks the hero until it gets it, so no NPC or monster would enter scope otherwise. It also snaps

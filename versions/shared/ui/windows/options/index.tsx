@@ -240,6 +240,8 @@ export const OptionsWindow = observer(() => {
     width: WIN_WIDTH,
     height: WIN_HEIGHT,
     onClose: () => {
+      // Already shut by `MuWindows.closeAll` (HideAll plays no click).
+      if (!MuWindows.isOpen('options')) return;
       MuWindows.setOpen('options', false);
       // NewUIOptionWindow.cpp:525.
       playUiSound('click');

@@ -18,7 +18,8 @@ windows themselves are content in `versions/shared/ui/` (see
   module goes), `windowsIn(slot)` (stacking order; observable, so the world page redraws when a
   window comes or goes). Slots: `world` (on the 3D view, stays up when the interface is hidden) and `hud`.
 - `windowManager.ts`: `MuWindows`: open state (`isOpen(id)`, `setOpen(id, open)`), placement,
-  scale and z-order, Escape closes the top window.
+  scale and z-order, Escape closes the top window, `closeAll()` is the original's `HideAll` (every
+  open flag drops, then every stacked closer runs; a closer that finds its flag already down plays no click).
 - `components/`: shared widgets. Frames and text: `mu_window` (item window, table frame),
   `mu_frame`, `msg_box_frame`, `mu_text`, `mu_number`,
   `mu_button`, `mu_sprite`, `mu_logo`, `mu_flag`. Items: `item_icon`, `item_search` (the grid, the
@@ -113,7 +114,7 @@ windows themselves are content in `versions/shared/ui/` (see
 - `hudFormat.test.ts`: experience percent and grouping, durations, dashes before data.
 - `nameTags.test.ts`: hero state messages, self-defence parsing, PK colours, outlaw body light.
 - `screenPositionBus.test.ts`: the frame-end listener runs once per pass.
-- `windowManager.test.ts`: open state reacts, including the first open of an unseen id.
+- `windowManager.test.ts`: open state reacts, including the first open of an unseen id; `closeAll`.
 - `windows.test.ts`: a window dropped from the registry, and a slot reader that sees it come and go.
 - `components/module_window/index.test.tsx`: the module frame draws only while open; its hot key
   never takes a built-in action's key.

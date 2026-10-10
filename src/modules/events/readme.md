@@ -15,6 +15,8 @@ event is one entry file with its own MobX state and packet handlers, behind the 
 - `events.enterBloodCastle(grade)`, `enterDevilSquare(grade)`, `enterChaosCastle()`,
   `askChaosCastleOpening()`, `enterDoppelganger()`, `answerDuelRequest(ok)`, `joinDuelChannel(i)`,
   `quitDuelChannel()`, `closeAll()`, `countdownLine`: window buttons and the HUD.
+- `events.closeEntryWindows()`: a walk (`npc_shop/net.ts`, `UpdateSendMoveInterface`) closes the
+  Blood Castle, Devil Square, duel watch and Doppelganger windows, not the Kanturu gateway or the Golden Archer.
 - `bloodCastle.ts` and `chaosCastle.ts` register their timers as the map beds' gates with the sound
   controller (`registerAmbientGate`) when they load.
 - Readers imported directly:
