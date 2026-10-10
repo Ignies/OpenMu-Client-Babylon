@@ -329,6 +329,9 @@ export const AttackSystem: ISystemFactory = world => {
         packet.LookingDirection = lookingDirection;
         Session.sendToGS(packet.buffer);
       };
+      // `LetHeroStop()` (ZzzInterface.cpp:1299): every swing tells the server the tile and facing
+      // first, which parks its walker when the swing cut a walk (else it walks on and snaps us back).
+      Hero.sendWalkStop(playerPos.x, playerPos.z, playerEntity.transform.rot.y);
       // The original sends on the click (ZzzInterface.cpp:3355); a server may ask for the
       // request at the hit key instead (its server.json, modules/servers/serverManifest.ts).
       const held = serverSetting('heldHitRequest');

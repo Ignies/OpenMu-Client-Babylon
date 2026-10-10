@@ -354,7 +354,7 @@ class HeroState {
     null;
 
   /**
-   * `LetHeroStop()` (ZzzInterface.cpp:1935-1948): the walk a cast opens with.
+   * `LetHeroStop()` (ZzzInterface.cpp:1070, called at :1299 and :1935): the walk a swing or a cast opens with.
    * `SendCharacterMove` with a single path point sends the hero's own tile,
    * no steps and just the facing (:1925-1932), which parks the server's
    * walker where the client stopped. Without it the server keeps walking the
