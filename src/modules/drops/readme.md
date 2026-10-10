@@ -14,7 +14,8 @@ and the loot filter for the ALT name overlay.
 
 ## How it works
 - `ItemsDropped` adds one entity per item with `droppedItem`, `modelFactory: DropObject` and a name
-  (`RenderItemName`, ZzzInventory.cpp:6714). A fresh drop plays its sound (ZzzObject.cpp:5997-6002 / :6198).
+  (`RenderItemName`, ZzzInventory.cpp:6714) with +Skill, +Option and +Luck after it, in that order and with no
+  option number (ZzzInventory.cpp:6645-6663). A fresh drop plays its sound (ZzzObject.cpp:5997-6002 / :6198).
 - `controllers/item_rules/dropModelProxy.ts` ports `CreateItem`'s per-level model swap (ZzzObject.cpp:6056-6116):
   Box of Luck by level, candy boxes, Rena +1/+2, quest items, Weapon of Archangel, Wizards Ring. The pose
   follows the shown model. It moved there because `actors/playerObject.ts` reads it too.
@@ -58,3 +59,4 @@ and the loot filter for the ALT name overlay.
 - `zenPile.test.ts`: coin count by amount, scatter inside the radius and over the disc, same pile per seed.
 - `dropObject.test.ts`: a dropped armour / pants with a HideSkin bitmap draws mesh 0 with it, alpha-tested;
   every other part keeps its own textures; the parts that draw only some meshes, with real texture names.
+- `net.test.ts`: the ground label marks skill, option and luck in the original order; the Horn of Dinorant knight skill.
