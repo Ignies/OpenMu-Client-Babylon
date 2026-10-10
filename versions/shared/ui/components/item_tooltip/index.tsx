@@ -28,6 +28,8 @@ import {
 import { placePair } from './placement';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { ItemIcon } from '@/controllers/interface/components/item_icon';
+import { itemSetTables } from '@/controllers/assets';
+import { InventoryConstants } from '@/core/inventoryConstants';
 
 /** One inventory square of the picture, as the grids draw it. */
 const PICTURE_SQUARE = 20;
@@ -269,14 +271,20 @@ export const ItemTooltip = observer(
     const itemStamp = JSON.stringify(item);
     const heroStamp = JSON.stringify(hero);
     const wornStamp = worn ? JSON.stringify(worn) : '';
+    // An ancient piece lists its set's options as lit by the worn pieces; an item in the
+    // bag greys them (`bThisisEquippedItem`, ZzzInventory.cpp:5549-5555).
+    const sets = item.isAncient ? itemSetTables() : null;
+    const equipped = Hero.items.slice(0, InventoryConstants.EquippableSlotsCount);
+    const equippedStamp = item.isAncient ? JSON.stringify(equipped) : '';
+    const inBag = context === 'inventory' && (slot ?? -1) >= InventoryConstants.EquippableSlotsCount;
     const data = useMemo(
-      () => buildItemTooltip(item, hero, worn),
+      () => buildItemTooltip(item, hero, worn, { worn: equipped, equipped: !inBag }),
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [itemStamp, heroStamp, wornStamp]
+      [itemStamp, heroStamp, wornStamp, equippedStamp, inBag, sets]
     );
 
     const wornLines = useMemo(() => {
-      const built = worn ? buildItemTooltip(worn, hero) : null;
+      const built = worn ? buildItemTooltip(worn, hero, null, { worn: equipped, equipped: true }) : null;
       if (!built) return null;
       return [
         { text: t('item.equipped'), color: 'gray', bold: false },
@@ -284,7 +292,7 @@ export const ItemTooltip = observer(
         ...built.lines,
       ] as TooltipLine[];
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [wornStamp, heroStamp]);
+    }, [wornStamp, heroStamp, equippedStamp, sets]);
 
     useEffect(() => {
       if (!linkable) return;

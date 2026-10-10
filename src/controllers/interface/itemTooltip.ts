@@ -26,6 +26,7 @@ import {
   type ItemDef,
   type ItemStats,
 } from '@/controllers/item_rules';
+import { ancientSetOf, setOptionLines, wornSetPieces } from '@/controllers/item_rules';
 import { itemBaseName } from '@versions/shared/items/itemsDatabase';
 import { itemLevelName } from '@/controllers/item_rules';
 import { learnableSkill } from '@/controllers/item_rules';
@@ -150,6 +151,9 @@ export function itemNameColor(item: Item): TooltipColor {
 
 function nameLine(item: Item, def: ItemDef, level: number): string {
   let name = itemBaseName(def.group, def.index) || def.name;
+  // `GetSetItemName`: the set's name goes in front (ZzzInventory.cpp:2586).
+  const set = ancientSetOf(item);
+  if (set) name = `${set.name} ${name}`;
   if (item.isExcellent) name = t('item.excellentPrefix', { name });
   return itemLevelName(def.group, def.index, level, name);
 }
@@ -411,7 +415,8 @@ function weaponOfArchangelLines(out: Lines, level: number, hero: HeroStats) {
 export function buildItemTooltip(
   item: Item,
   hero: HeroStats,
-  compareWith?: Item | null
+  compareWith?: Item | null,
+  ancient?: AncientContext
 ): ItemTooltipData | null {
   const stats = itemStats(item);
   if (!stats) return null;
@@ -430,6 +435,7 @@ export function buildItemTooltip(
   }
 
   equipmentLines(out, item, stats, hero, worn);
+  setOptionBlock(out, item, hero, ancient);
 
   const requirementsFail =
     hero.level < stats.reqLvl ||
@@ -580,6 +586,8 @@ function equipmentLines(
 
   if (hasOptions) out.blank();
 
+  ancientBonusLines(out, def, item);
+
   if (item.hasSkill) {
     const skill = skillDisplayName(def.skill);
     out.add(skill ? t('item.skillNamed', { skill }) : t('item.skill'), 'blue');
@@ -600,16 +608,79 @@ function equipmentLines(
   if (excellentFlags > 0) {
     excellentLines(out, def, excellentFlags, hero.level);
   }
+}
 
-  if (item.isAncient) {
-    out.blank();
-    const bonus = item.ancientBonusLevel ?? 0;
-    out.add(
-      bonus > 0
-        ? t('item.ancientBonus', { value: bonus * 5 })
-        : t('item.ancient'),
-      'greenBlue'
-    );
+/** `SET_OPTION_*` (1 str, 2 agi, 3 ene, 4 vit) -> the +5 / +10 bonus line (`GetDefaultOptionText`). */
+const ANCIENT_BONUS_TEXT: Readonly<Record<number, TextKey>> = {
+  1: 'item.setOpt.strength',
+  2: 'item.setOpt.agility',
+  3: 'item.setOpt.energy',
+  4: 'item.setOpt.stamina',
+};
+
+/** Rings and pendants also name their attribute damage (CSItemOption.cpp:670-676). */
+function hasAttributeDamage(def: ItemDef): boolean {
+  if (def.group !== ItemGroup.Helper) return false;
+  return (def.index >= 8 && def.index <= 9) || (def.index >= 12 && def.index <= 13) || (def.index >= 21 && def.index <= 28);
+}
+
+/** `RenderDefaultOptionText` (CSItemOption.cpp:664-680): an ancient piece's stat bonus. */
+function ancientBonusLines(out: Lines, def: ItemDef, item: Item) {
+  const bonus = item.ancientBonusLevel ?? 0;
+  const key = ANCIENT_BONUS_TEXT[def.attType];
+  if (bonus <= 0 || !key) return;
+  out.add(t(key, { value: bonus * 5 }), 'blue');
+  if (hasAttributeDamage(def)) out.add(t('item.attributeDamage'), 'blue');
+}
+
+/** What the set block reads: the hero's worn items, and whether this item is outside the bag (`bThisisEquippedItem`). */
+export type AncientContext = { worn: readonly (Item | null)[]; equipped: boolean };
+
+/** `getExplainText` (CSItemOption.cpp:375-445) by set option number; no S6 set uses the class masteries past 23. */
+const SET_OPTION_TEXT: readonly TextKey[] = [
+  'item.setOpt.strength',
+  'item.setOpt.agility',
+  'item.setOpt.energy',
+  'item.setOpt.stamina',
+  'item.setOpt.command',
+  'item.setOpt.minDamage',
+  'item.setOpt.maxDamage',
+  'item.setOpt.wizardry',
+  'item.setOpt.damage',
+  'item.setOpt.attackRate',
+  'item.setOpt.defense',
+  'item.setOpt.maxLife',
+  'item.setOpt.maxMana',
+  'item.setOpt.maxAg',
+  'item.setOpt.agRate',
+  'item.setOpt.criticalRate',
+  'item.setOpt.criticalDamage',
+  'item.setOpt.excellentRate',
+  'item.setOpt.excellentDamage',
+  'item.setOpt.skillAttack',
+  'item.setOpt.doubleDamage',
+  'item.setOpt.ignoreDefense',
+  'item.setOpt.shieldDefense',
+  'item.setOpt.twoHanded',
+];
+
+/**
+ * `RenderSetOptionListInItem` (CSItemOption.cpp:1052-1095): the header, then the options of the set
+ * while two or more pieces are worn, lit as `RenderSetOptionList` lights them (grey in the bag).
+ */
+function setOptionBlock(out: Lines, item: Item, hero: HeroStats, ancient?: AncientContext) {
+  const set = ancientSetOf(item);
+  if (!set) return;
+  out.blank();
+  out.add(t('item.setInfo'), 'yellow');
+  out.blank();
+  const pieces = ancient ? wornSetPieces(set, ancient.worn, hero) : 0;
+  for (const line of setOptionLines(set, pieces)) {
+    const key = SET_OPTION_TEXT[line.option];
+    if (!key) continue;
+    const lit = ancient?.equipped && line.active;
+    const color = !lit ? 'gray' : line.kind === 'full' ? 'yellow' : line.kind === 'ext' ? 'green' : 'blue';
+    out.add(t(key, { value: line.value }), color);
   }
 }
 

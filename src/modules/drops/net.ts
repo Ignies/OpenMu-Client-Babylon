@@ -10,7 +10,8 @@ import { Hero } from '@/modules/hero';
 import { addNotification } from '@/modules/chat';
 import { Ecs } from '@/ecs/current';
 import { Vector3 } from '@/controllers/render/babylon/exports';
-import { archangelWeapon, dropModelProxy } from '@/controllers/item_rules';
+import { ancientSetOf, archangelWeapon, dropModelProxy } from '@/controllers/item_rules';
+import { itemSetTables } from '@/controllers/assets';
 import { createAttributeSystem } from '@/core/attributeSystem';
 import { itemLevelName } from '@/controllers/item_rules';
 import { playDrop } from '@/controllers/sound';
@@ -196,11 +197,16 @@ export function dropName(
     return String(itemBaseName(group, num));
   }
   const name = String(baseName);
-  return item ? itemLevelName(item.group, item.num, item.lvl, name) + optionMarks(item) : name;
+  if (!item) return name;
+  // The set name goes in front (`GetSetItemName`, ZzzInventory.cpp:6632-6643).
+  const set = ancientSetOf(item);
+  return (set ? `${set.name} ` : '') + itemLevelName(item.group, item.num, item.lvl, name) + optionMarks(item);
 }
 
 /** Registers this module's packet listeners (see ../module.ts). */
 export function installNet(): void {
+  // The ground labels are written once, so the ancient set names load before the first drop.
+  itemSetTables();
   EventBus.on('MoneyDropped', packet => {
     // Same bytes as a one-item ItemsDropped (the dispatcher chose this class by
     // length alone), and that item is not always zen: let the item path decide.

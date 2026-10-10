@@ -12,3 +12,5 @@ export type { HeroStats, ItemDef, ItemStats } from './itemStats';
 export { isRepairBanned, isSellingBanned, itemValue, needsRepair, repairAllCost, repairCost, withTax } from './itemValue';
 export { learnableSkill } from './skillItems';
 export { archangelWeapon, dropModelProxy } from './dropModelProxy';
+export { ancientSetOf, setOptionLines, wornSetPieces } from './ancientSets';
+export type { SetOptionLine } from './ancientSets';

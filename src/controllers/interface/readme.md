@@ -49,6 +49,9 @@ windows themselves are content in `versions/shared/ui/` (see
 - `itemTooltip.ts` is `RenderItemInfo` (ZzzInventory.cpp:2091) as data: a list of coloured lines
   drawn by `versions/shared/ui/components/item_tooltip` (its `placement.ts` places it like the original:
   centred on the cursor, below the cursor art, flipped above, inside the viewport).
+  An ancient piece carries its set name, its stat bonus line (`RenderDefaultOptionText`) and the set
+  block (`RenderSetOptionListInItem`); the caller hands in the worn items and whether the item sits
+  in the bag (`AncientContext`), since this controller cannot read the hero.
 - `nameTags.ts`: the original's name balloons (`CHAT`, ZzzInterface.cpp:703): a name shows while
   hovered, 100 ticks on creation, refreshed to 10 per hovered frame; chat lines keep it up for
   their own lifetime; lines of 20+ characters split (`CutText`, ZzzInterface.cpp:605).

@@ -45,6 +45,8 @@ imports the modules below directly (baselined in `tools/checks`).
   `localisedItemName`, `localisedSkillName`, `localisedBuffName`, `localisedNpcName`,
   `skillDisplayName(number)` (`mu/skillNames.ts`: the pack's name, else `skillsDatabase`'s; on the door),
   `loadNpcNames`, `onNpcNamesChanged`; `decodeLocalText`, `downloadLocalDataFile`.
+- `itemSetTables()`, `loadItemSetTables(types, options)` and `ItemSet`, `ItemSetTables`, `SetOption`
+  (`mu/itemSetFile.ts`, on the door): the ancient sets, loaded on first ask.
 
 ## How it works
 - Every byte read goes through `fetchAsset`: for a compressible extension it asks for
@@ -104,6 +106,8 @@ imports the modules below directly (baselined in `tools/checks`).
 - `mu/localNames.test.ts`: item, skill and buff name record layouts.
 - `mu/dataFolder.test.ts`: own, borrowed and absent `Data/` paths.
 - `mu/gates.test.ts`: the Season 6 gate layout, a byte-wide period one, a truncated file.
+- `mu/itemSetFile.ts` is tested through `controllers/item_rules/ancientSets.test.ts` and the
+  tooltip test, which read the real files.
 
 ## Notes
 
@@ -147,6 +151,13 @@ accents were lost before they shipped.
 `item_<lang>.bmd`: 8192 records of 84 bytes, a 30-byte name first, index = `group * 512 + num`;
 read first by `itemBaseName`. `BuffEffect_<lang>.bmd`: an `int` count then 158-byte records, id at
 0, name at 5 (50 bytes). `buffRecipe` (`modules/skills/recipes.ts`) shows the pack name first.
+
+### mu/itemSetFile.ts
+`ItemSetType.bmd`: 8192 records of 4 bytes (`ITEM_SET_TYPE`: two set numbers, 0 or 255 for none,
+then the mix level), each BuxConverted. `ItemSetOption_<lang>.bmd`: 64 records of 110 bytes
+(`ITEM_SET_OPTION_FILE`: name 64, standard options 6 x 2 and their values, ext 2 + 2, count, full
+5 + 5, classes 7). The set's item count comes from the type table. Some English names carry the
+Korean apostrophe `0xA1 0xAF`; it is read as `'`. The checksum after each table is not checked.
 
 ### mu/moveReqFile.ts
 An `int` count, then 84-byte records: `index`, main name (32), `/move` alias (32), required level,

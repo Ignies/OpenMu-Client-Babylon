@@ -29,10 +29,18 @@ the table would import itself.
   the model a drop is shown as (`CreateItem`, ZzzObject.cpp:6056-6116), and the Divine weapon a Weapon of
   Archangel is drawn as; `actors/playerObject.ts` reads the second.
 - `goldColor(amount)`: the colour of a zen amount (`getGoldColor`, ZzzInventory.cpp:1094-1110).
+- `ancientSetOf(item)`, `wornSetPieces(set, worn, hero)`, `setOptionLines(set, pieces)`, `SetOptionLine`
+  (`ancientSets.ts`): an ancient piece's set and which of its options the worn pieces light
+  (`CSItemOption`, from `assets/mu/itemSetFile.ts`).
 
 ## How it works
 - `itemSerializer.ts` reads level, luck, skill, option level, excellent, ancient and socket bytes. Dark Horse
   and Dark Raven keep their level in byte 2, not in the level bits. `raw` keeps the original bytes.
+- `ancientSets.ts` ports `CheckItemSetOptions` / `calcSetOptionList` (CSItemOption.cpp:316-372, :839-906):
+  a set lists options only with two pieces worn, one standard option per piece past the first, the
+  full-set ones once complete. The worn items are checked against the hero's own stats, without what
+  the sets add (the original's first pass). `ItemDef.attType` is Item.bmd's `AttType` (the item files'
+  `Type`), the stat an ancient piece's bonus raises.
 - `itemStats.ts` ports `CalcDamageMin/Max`, `CalcMagicPower`, `CalcDefense`, `CalcRequirements`
   (`ZzzInfomation.cpp`) and `CalcMaxDurability` (ZzzInventory.cpp:1549) over `itemDef`, which hides the
   per-group column names of the item files (`Strength`/`Str`, `Durability`/`Dur`, ...).
@@ -78,6 +86,7 @@ the table would import itself.
 - `dropModelProxy.test.ts`: Box of Kundun / Box of Luck models, medals, chocolate boxes, Rena, quest items.
 - `archangelWeapons.test.ts`: Divine weapon and Weapon of Archangel names, colours and icons.
 - `portedItems.test.ts`: MuMain items and capes (tests `controllers/actors/wings.ts`, appearance).
+- `ancientSets.test.ts`: set lookup by discriminator, worn piece count, which options light.
 - `questItemLink.test.ts`: the Blood Castle weapon on the back (tests `controllers/actors/weaponAttachment.ts`).
 - `weaponAttack.test.ts`: attack clip choice per weapon (tests `controllers/actors/weaponClass.ts`).
 - `versions/shared/items/items.golden.test.ts` covers the item table these rules read.

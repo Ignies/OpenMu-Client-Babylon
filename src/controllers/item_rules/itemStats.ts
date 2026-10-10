@@ -77,6 +77,8 @@ export type ItemDef = {
   reqVit: number;
   reqCmd: number;
   skill: number;
+  /** `AttType`: the stat an ancient piece's +5 / +10 bonus raises (`SET_OPTION_*`: 1 str, 2 agi, 3 ene, 4 vit). */
+  attType: number;
   /** 0 = cannot, 1 = base class, 2 = second class, 3 = third class. */
   classes: number[];
   /** Ice, Poison, Lightning, Fire, Earth, Wind, Water (helper group only). */
@@ -134,6 +136,7 @@ export function itemDef(group: number, index: number): ItemDef | null {
     reqVit: num(raw, 'Vit'),
     reqCmd: num(raw, 'Command', 'Comm'),
     skill: num(raw, 'Skill'),
+    attType: num(raw, 'Type'),
     classes: CLASS_COLUMNS.map(column => num(raw, column)),
     resistances: [
       'Ice',
