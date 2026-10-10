@@ -505,6 +505,10 @@ export function updateMuHelperLoop(world: World, dt: number): void {
     if (wasActive) {
       resetRuntime();
       wasActive = false;
+      // Switched off: let go of the monster it was casting at or swinging at and the drop it walked to.
+      world.castRequest = null;
+      world.attackTarget = null;
+      world.pickupTarget = null;
     }
     return;
   }

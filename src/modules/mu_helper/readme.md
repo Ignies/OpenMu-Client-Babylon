@@ -30,6 +30,8 @@ the two server packets, with its running state and the raw config blob (`MuHelpe
   `consumeItemRequest`, `repairItemRequest`, `Pets.sendPetCommand`).
 - Entering a safe zone calls `MuHelper.toggleMuHelper()` (stop). A warp, or a jump of more than 3
   tiles, re-anchors the regroup point.
+- Switching it off clears `world.castRequest`, `attackTarget` and `pickupTarget`, so the hero does not
+  keep walking to the monster or drop it was on.
 
 ## Packets
 - `MuHelperStatusUpdate` (BF 51): starts or pauses the helper; reports the zen it cost.
@@ -54,4 +56,5 @@ the two server packets, with its running state and the raw config blob (`MuHelpe
 ## Tests
 - `config.test.ts`: blob size, default layout, flag bits, round trips, zero blob, extra item names,
   away seconds clamp.
-- `loop.test.ts`, `state.test.ts`: nothing runs or starts while the module is off.
+- `loop.test.ts`, `state.test.ts`: nothing runs or starts while the module is off. `loop.test.ts`: switching
+  it off lets go of its cast, swing and pickup.
