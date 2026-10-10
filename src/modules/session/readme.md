@@ -15,7 +15,9 @@ the client-to-server encryption, the login fields and the offline flag.
   frames `sendBandFrame` / `sendPingFrame`.
 - `SessionExit.request(kind)` / `SessionExit.available(kind)`: Exit Game, Select Server, Switch
   Character (`kind` is `'quit' | 'servers' | 'characters'`).
-- `openSystemMenu()`: Escape on a clear screen opens the Options window; returns true when it did.
+- `openSystemMenu()`: Escape on a clear screen opens the system menu in the world
+  (`SessionExit.menuOpen`, `closeMenu()`; drawn by `versions/shared/ui/windows/system_menu`) and the
+  Options window on the server list and the character screen; returns true when it did.
 - `SessionResume`: the auto-reconnect state machine. `begin()`, `retry()`, `giveUp(reason)`,
   `remember(name)`, `finish()`, plus `attempt`, `step`, `active` for the overlay.
 - `SessionStats`: exp, kills and zen since the last reset, with per-hour rates and `msToLevel`.
@@ -29,7 +31,8 @@ the client-to-server encryption, the login fields and the offline flag.
 - `sessionExit.ts` ports `CSystemMenuMsgBox` (`NewUICustomMessageBox.cpp:2386-2470`): it sends
   `LogOut` with type 0/2/1 and only changes screen when `LogoutResponse` arrives (or after a 5 s
   timeout). The server may also send `LogoutResponse` unprompted; its type decides where we land.
-  Escape opens the menu on the world, server and character screens (`UIMng.cpp:692-705`).
+  Escape in the world opens the five-button box (`NewUIHotKey.cpp:124`); the server and character
+  screens open Options, as their own `CSysMenuWin` (`UIMng.cpp:692-705`) is not ported.
 - `sessionResume.ts`: when a game-server socket drops while a character is in the world (and the
   `autoReconnect` option is on), it redials `Session.lastGameServer`, sends the same login and selects
   the same character, with backoff 1, 2, 4, 8, 15 s. `boot.tsx` wires it as `Session.resumeHook`.
@@ -71,6 +74,7 @@ the client-to-server encryption, the login fields and the offline flag.
 ## Tests
 - `state.test.ts`: `sendToGS` sends only the bytes its DataView covers (a view into a larger buffer, as a module's
   packet can be); `cancelLogin` goes back to the server list and keeps the fields.
+- `sessionExit.test.ts`: Escape in the world opens the system menu, once, not Options.
 - the login flow is covered by the listener order golden (`src/app/listenerOrder.golden.test.ts`).
 
 ## Notes

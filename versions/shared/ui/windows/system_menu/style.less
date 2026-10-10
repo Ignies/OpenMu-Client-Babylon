@@ -1,0 +1,17 @@
+@import (reference) '@/controllers/interface/components/mu_text/style.less';
+
+// The system menu: modal like every common message box, on the stage.
+.system-menu-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+  z-index: 600; // WINDOW_Z_MODAL: over the windows and the sheets
+  .mu-font();
+  user-select: none;
+
+  .system-menu {
+    position: absolute;
+    transform-origin: top left;
+    font-size: 11px;
+  }
+}
