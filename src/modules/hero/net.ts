@@ -55,6 +55,13 @@ type CharacterInformationView = Pick<
  */
 const GAME_MASTER_STATUS = 0x20;
 
+/**
+ * The 32-bit pools (CurrentStatsExtended / MaximumStatsExtended) arrived for this character: the
+ * 16-bit fields of the other packets wrap past 65535, so from then on they are left alone, as the
+ * original's extended protocol reads only the extended layouts (WSclient.cpp:13854).
+ */
+let wideStats = false;
+
 function applyCharacterInformation(p: CharacterInformationView) {
   const playerData = Hero;
 
@@ -65,6 +72,7 @@ function applyCharacterInformation(p: CharacterInformationView) {
   Messenger.reset();
   Economy.reset();
   GmPanel.reset();
+  wideStats = false;
 
   runInAction(() => {
     playerData.money = p.Money;
@@ -134,15 +142,18 @@ function handleRespawnAfterDeath(packet: DataView) {
         : new RespawnAfterDeath075Packet(packet);
 
   const pos = { x: p.PositionX, y: p.PositionY };
+  const pools = isExtended || !wideStats;
 
   runInAction(() => {
-    Hero.currentHP = p.CurrentHealth;
-    Hero.currentMP = p.CurrentMana;
-    if (!(p instanceof RespawnAfterDeath075Packet)) {
-      Hero.currentAG = p.CurrentAbility;
-    }
-    if (!(p instanceof RespawnAfterDeath075Packet) && !(p instanceof RespawnAfterDeath095Packet)) {
-      Hero.currentSD = p.CurrentShield;
+    if (pools) {
+      Hero.currentHP = p.CurrentHealth;
+      Hero.currentMP = p.CurrentMana;
+      if (!(p instanceof RespawnAfterDeath075Packet)) {
+        Hero.currentAG = p.CurrentAbility;
+      }
+      if (!(p instanceof RespawnAfterDeath075Packet) && !(p instanceof RespawnAfterDeath095Packet)) {
+        Hero.currentSD = p.CurrentShield;
+      }
     }
     Hero.money = p.Money;
     // The generated reader hands back a BigInt (S6 / Extended: 8 bytes big-endian at offset 16,
@@ -162,8 +173,10 @@ function handleRespawnAfterDeath(packet: DataView) {
   const world = Ecs.world;
   const playerEntity = world?.playerEntity;
   if (playerEntity) {
-    playerEntity.attributeSystem.setValue('currentHealth', p.CurrentHealth);
-    playerEntity.attributeSystem.setValue('currentMana', p.CurrentMana);
+    if (pools) {
+      playerEntity.attributeSystem.setValue('currentHealth', p.CurrentHealth);
+      playerEntity.attributeSystem.setValue('currentMana', p.CurrentMana);
+    }
     playerEntity.playerAnimation.action = PlayerAction.PLAYER_STOP_MALE;
     if (playerEntity.dying) {
       world!.removeComponent(playerEntity, 'dying');
@@ -222,10 +235,12 @@ function applyLevelUpdate(p: LevelUpdateView) {
   runInAction(() => {
     playerData.level = p.Level;
     playerData.points = p.LevelUpPoints;
-    playerData.maxHP = p.MaximumHealth;
-    playerData.maxMP = p.MaximumMana;
-    playerData.maxSD = p.MaximumShield;
-    playerData.maxAG = p.MaximumAbility;
+    if (p instanceof CharacterLevelUpdateExtendedPacket || !wideStats) {
+      playerData.maxHP = p.MaximumHealth;
+      playerData.maxMP = p.MaximumMana;
+      playerData.maxSD = p.MaximumShield;
+      playerData.maxAG = p.MaximumAbility;
+    }
     playerData.usedFruitPoints = p.FruitPoints;
     playerData.maxFruitPoints = p.MaximumFruitPoints;
     playerData.usedNegativeFruitPoints = p.NegativeFruitPoints;
@@ -279,6 +294,7 @@ export function installNet(): void {
 
   EventBus.on('CurrentHealthAndShield', packet => {
     const p = new CurrentHealthAndShieldPacket(packet);
+    if (wideStats) return;
 
     const playerEntity = Ecs.world?.playerEntity;
     if (!playerEntity) return;
@@ -291,6 +307,7 @@ export function installNet(): void {
 
   EventBus.on('CurrentStatsExtended', packet => {
     const p = new CurrentStatsExtendedPacket(packet);
+    wideStats = true;
     const playerEntity = Ecs.world?.playerEntity;
     playerEntity?.attributeSystem.setValue('currentHealth', p.Health);
     playerEntity?.attributeSystem.setValue('currentMana', p.Mana);
@@ -307,6 +324,7 @@ export function installNet(): void {
 
   EventBus.on('MaximumStatsExtended', packet => {
     const p = new MaximumStatsExtendedPacket(packet);
+    wideStats = true;
     runInAction(() => {
       const pd = Hero;
       pd.maxHP = p.Health;
@@ -318,6 +336,7 @@ export function installNet(): void {
 
   EventBus.on('MaximumHealthAndShield', packet => {
     const p = new MaximumHealthAndShieldPacket(packet);
+    if (wideStats) return;
     runInAction(() => {
       Hero.maxHP = p.Health;
       Hero.maxSD = p.Shield;
@@ -326,6 +345,7 @@ export function installNet(): void {
 
   EventBus.on('MaximumManaAndAbility', packet => {
     const p = new MaximumManaAndAbilityPacket(packet);
+    if (wideStats) return;
     runInAction(() => {
       Hero.maxMP = p.Mana;
       Hero.maxAG = p.Ability;
@@ -334,6 +354,7 @@ export function installNet(): void {
 
   EventBus.on('CurrentManaAndAbility', packet => {
     const p = new CurrentManaAndAbilityPacket(packet);
+    if (wideStats) return;
 
     const playerEntity = Ecs.world?.playerEntity;
     if (!playerEntity) return;
@@ -416,19 +437,21 @@ export function installNet(): void {
           break;
         case StatType.Vitality:
           playerData.sta++;
-          playerData.maxHP = p.UpdatedDependentMaximumStat;
+          if (!wideStats) playerData.maxHP = p.UpdatedDependentMaximumStat;
           break;
         case StatType.Energy:
           playerData.eng++;
-          playerData.maxMP = p.UpdatedDependentMaximumStat;
+          if (!wideStats) playerData.maxMP = p.UpdatedDependentMaximumStat;
           break;
         case StatType.Leadership:
           playerData.leadership++;
           break;
       }
 
-      playerData.maxSD = p.UpdatedMaximumShield;
-      playerData.maxAG = p.UpdatedMaximumAbility;
+      if (!wideStats) {
+        playerData.maxSD = p.UpdatedMaximumShield;
+        playerData.maxAG = p.UpdatedMaximumAbility;
+      }
 
       if (playerData.points > 0) playerData.points--;
     });

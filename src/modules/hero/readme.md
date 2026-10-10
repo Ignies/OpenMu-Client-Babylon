@@ -54,6 +54,8 @@ the hero is a walk the client failed to stop; no walk at all means the server mo
   `playerData`, enters the world and emits `requestWarp`.
 - `CurrentHealthAndShield`, `CurrentManaAndAbility`, `CurrentStatsExtended`: current pools.
 - `MaximumHealthAndShield`, `MaximumManaAndAbility`, `MaximumStatsExtended`: maximum pools.
+  Once `CurrentStatsExtended` / `MaximumStatsExtended` arrived for the character, the 16-bit pool
+  fields of the other packets (these, level-up, stat point, respawn) are ignored: they wrap past 65535.
 - `HeroStateChanged`: a player's PK state, with a log line (`ReceivePK`, `WSclient.cpp:6609`).
 - `RespawnAfterDeath` (also `Extended`, `075`, `095`): layout by length; pools, money, exp (a zero is
   ignored), stops following, warps or moves the hero and clears its targets.
@@ -87,3 +89,4 @@ the hero is a walk the client failed to stop; no walk at all means the server mo
 - `statAmounts.test.ts`: amount clamping, the confirm threshold and the run's next step.
 - `stateWarnings.test.ts`: the no healing potions warning counts healing potions only.
 - `state.test.ts`: `Hero` keeps no tile of its own.
+- `wideStats.test.ts`: the 16-bit pool fields count until the 32-bit pools arrive, then not.
