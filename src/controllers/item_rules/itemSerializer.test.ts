@@ -124,3 +124,20 @@ describe('ItemSerializer round-trip', () => {
     expect(Array.from(serialize(item))).toEqual(Array.from(wire));
   });
 });
+
+// Wings and capes carry their wing options (bits 0-3) and the kind of their additional option
+// (bits 4-5) in the excellent byte; the Horn of Fenrir its variant. Neither is excellent.
+describe('the excellent byte of wings and the Horn of Fenrir', () => {
+  it('reads wing options and the option kind, not excellent options', () => {
+    const bytes = serialize({ group: 12, num: 3, lvl: 9 });
+    bytes[3] |= 0x01 | 0x20;
+    const wings = ItemSerializer.DeserializeItem(bytes);
+    expect(wings).toMatchObject({ isExcellent: false, excellentFlags: 0, wingOptions: 0x01, wingOptionKind: 2 });
+    expect(serialize(wings)[3]).toBe(bytes[3]);
+  });
+
+  it('keeps the Fenrir variant bits but is no excellent item', () => {
+    const bytes = serialize({ group: 13, num: 37, excellentFlags: 0x04 });
+    expect(ItemSerializer.DeserializeItem(bytes)).toMatchObject({ isExcellent: false, excellentFlags: 0x04 });
+  });
+});

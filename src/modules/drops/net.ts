@@ -10,7 +10,8 @@ import { Hero } from '@/modules/hero';
 import { addNotification } from '@/modules/chat';
 import { Ecs } from '@/ecs/current';
 import { Vector3 } from '@/controllers/render/babylon/exports';
-import { archangelWeapon, dropModelProxy } from '@/controllers/item_rules';
+import { ancientSetOf, archangelWeapon, dropModelProxy } from '@/controllers/item_rules';
+import { itemSetTables } from '@/controllers/assets';
 import { createAttributeSystem } from '@/core/attributeSystem';
 import { itemLevelName } from '@/controllers/item_rules';
 import { playDrop } from '@/controllers/sound';
@@ -165,8 +166,23 @@ const ZEN_NUM = 15;
 /** `ITEM_WEAPON_OF_ARCHANGEL`: the Blood Castle quest item. */
 const WEAPON_OF_ARCHANGEL = 19;
 
-/** RenderItemName (ZzzInventory.cpp:6714): "Zen 1234", "Short Sword +4". */
-function dropName(
+/** `ITEM_HORN_OF_DINORANT`: its skill is named as the knight's. */
+const HORN_OF_DINORANT = 3;
+
+/** Skill, option and luck after the name, in that order and with no option number (ZzzInventory.cpp:6645-6663). */
+function optionMarks(item: Item): string {
+  let marks = '';
+  if (item.hasSkill) {
+    const horn = item.group === ItemGroup.Helper && item.num === HORN_OF_DINORANT;
+    marks += horn ? ` +${t('drop.knightSkill')}` : t('drop.skill');
+  }
+  if ((item.optionLevel ?? 0) > 0) marks += t('drop.option');
+  if (item.luck) marks += t('drop.luck');
+  return marks;
+}
+
+/** RenderItemName (ZzzInventory.cpp:6714): "Zen 1234", "Short Sword +4+Skill+Luck". */
+export function dropName(
   isMoney: boolean,
   amount: number,
   baseName: unknown,
@@ -181,11 +197,16 @@ function dropName(
     return String(itemBaseName(group, num));
   }
   const name = String(baseName);
-  return item ? itemLevelName(item.group, item.num, item.lvl, name) : name;
+  if (!item) return name;
+  // The set name goes in front (`GetSetItemName`, ZzzInventory.cpp:6632-6643).
+  const set = ancientSetOf(item);
+  return (set ? `${set.name} ` : '') + itemLevelName(item.group, item.num, item.lvl, name) + optionMarks(item);
 }
 
 /** Registers this module's packet listeners (see ../module.ts). */
 export function installNet(): void {
+  // The ground labels are written once, so the ancient set names load before the first drop.
+  itemSetTables();
   EventBus.on('MoneyDropped', packet => {
     // Same bytes as a one-item ItemsDropped (the dispatcher chose this class by
     // length alone), and that item is not always zen: let the item path decide.

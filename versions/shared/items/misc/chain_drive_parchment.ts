@@ -1,0 +1,27 @@
+import { defineItem } from '@/controllers/items';
+
+export default defineItem({
+  Group: 15,
+  Index: 30,
+  ItemSlot: -1,
+  Skill: 0,
+  X: 1,
+  Y: 2,
+  Serial: 1,
+  Opt: 1,
+  Drop: 1,
+  ItemName: 'Chain Drive Parchment',
+  Lvl: 70,
+  ReqLvl: 150,
+  Energy: 0,
+  Zen: 100000,
+  'DW/SM': 0,
+  'DK/BK': 0,
+  'Elf/ME': 0,
+  MG: 0,
+  DL: 0,
+  SUM: 0,
+  RF: 1,
+  szModelFolder: 'Item/',
+  szModelName: 'rollofpaper.glb',
+});

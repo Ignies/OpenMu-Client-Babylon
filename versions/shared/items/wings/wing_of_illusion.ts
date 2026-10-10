@@ -22,7 +22,7 @@ export default defineItem({
   Zen: 0,
   'DW/SM': 0,
   'DK/BK': 0,
-  'Elf/ME': 2,
+  'Elf/ME': 3,
   MG: 0,
   DL: 0,
   SUM: 0,

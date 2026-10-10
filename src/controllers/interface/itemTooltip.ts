@@ -26,17 +26,32 @@ import {
   type ItemDef,
   type ItemStats,
 } from '@/controllers/item_rules';
+import {
+  ancientSetOf,
+  harmonyOf,
+  hasGuardianOption,
+  isOptionWing,
+  setOptionLines,
+  skillMana,
+  socketBonusOf,
+  socketsOf,
+  wingOptionKind,
+  wingOptions,
+  wornSetPieces,
+  type WingOption,
+  type WingOptionKind,
+} from '@/controllers/item_rules';
 import { itemBaseName } from '@versions/shared/items/itemsDatabase';
 import { itemLevelName } from '@/controllers/item_rules';
 import { learnableSkill } from '@/controllers/item_rules';
-import { skillDisplayName } from '@/controllers/assets';
+import { itemOptionTables, skillDisplayName, type SocketOption } from '@/controllers/assets';
 
 /**
  * `RenderItemInfo` (ZzzInventory.cpp:2091) as data: the tooltip is a list
  * of coloured lines, blank lines being half-height spacers, drawn by
  * `RenderTipTextList`. Only the paths the clone can reach are ported - the
- * generic equipment block, wings, jewels and the option/excellent lines;
- * event items and pets fall back to their name.
+ * generic equipment block, wings, pets, jewels and the option/excellent
+ * lines; event items fall back to their name.
  *
  * `GlobalText` is not available here (Text.bmd is encoded), so the English
  * strings are written out inline.
@@ -128,6 +143,7 @@ class Lines {
 function nameColor(item: Item, def: ItemDef, level: number): TooltipColor {
   const optionLevel = item.optionLevel ?? 0;
 
+  if (isFenrir(def)) return 'blue';
   if (isJewel(def) || isWeaponOfArchangel(def)) return 'yellow';
   if (isDivineArchangelWeapon(def)) return 'purple';
   if (item.isAncient) return 'greenBlue';
@@ -136,7 +152,8 @@ function nameColor(item: Item, def: ItemDef, level: number): TooltipColor {
     if (level >= 7) return 'yellow';
     return optionLevel > 0 ? 'blue' : 'white';
   }
-  if (optionLevel > 0 && item.isExcellent) return 'green';
+  // Every excellent option is a Special, so excellent is always green (ZzzInventory.cpp:2140).
+  if (item.isExcellent) return 'green';
   if (level >= 7) return 'yellow';
   return optionLevel > 0 ? 'blue' : 'white';
 }
@@ -147,8 +164,22 @@ export function itemNameColor(item: Item): TooltipColor {
   return stats ? nameColor(item, stats.def, stats.level) : 'white';
 }
 
+/** `ITEM_HORN_OF_FENRIR`. */
+const isFenrir = (def: ItemDef) => def.group === ItemGroup.Helper && def.index === 37;
+/** The Horn of Fenrir's variant, by its option bits (ZzzInventory.cpp:2526-2539). */
+const FENRIR_VARIANT: Readonly<Record<number, TextKey>> = {
+  0x01: 'item.fenrir.destroy',
+  0x02: 'item.fenrir.protect',
+  0x04: 'item.fenrir.illusion',
+};
+
 function nameLine(item: Item, def: ItemDef, level: number): string {
   let name = itemBaseName(def.group, def.index) || def.name;
+  const variant = isFenrir(def) ? FENRIR_VARIANT[(item.excellentFlags ?? 0) & 0x3f] : undefined;
+  if (variant) return `${name} ${t(variant)}`;
+  // `GetSetItemName`: the set's name goes in front (ZzzInventory.cpp:2586).
+  const set = ancientSetOf(item);
+  if (set) name = `${set.name} ${name}`;
   if (item.isExcellent) name = t('item.excellentPrefix', { name });
   return itemLevelName(def.group, def.index, level, name);
 }
@@ -294,6 +325,37 @@ function wingLines(out: Lines, def: ItemDef, level: number) {
   }
 }
 
+type PetLine = readonly [TextKey, TooltipColor];
+
+/** The pets' lines right under the name (ZzzInventory.cpp:3060-3135), by helper index. */
+const PET_LINES: Readonly<Record<number, readonly PetLine[]>> = {
+  64: [['item.pet.demon', 'blue'], ['item.pet.attackSpeed10', 'purple']],
+  65: [['item.pet.guardianDamage', 'blue'], ['item.pet.guardianLife', 'purple']],
+  67: [['item.pet.zenCollect', 'blue']],
+  123: [['item.pet.zenCollect', 'blue'], ['item.pet.skeletonDamage', 'blue'], ['item.pet.attackSpeed10', 'blue'], ['item.pet.skeletonExp', 'blue']],
+  80: [['item.pet.autoZen', 'blue'], ['item.pet.exp50', 'blue'], ['item.pet.defense50', 'blue']],
+  106: [['item.pet.autoZen', 'blue'], ['item.pet.zen50', 'blue'], ['item.pet.defense50', 'blue']],
+};
+
+function petLines(out: Lines, def: ItemDef) {
+  if (def.group !== ItemGroup.Helper) return;
+  for (const [key, color] of PET_LINES[def.index] ?? []) out.add(t(key), color);
+}
+
+/** Guardian Angel, Imp and Horn of Dinorant, beside the wing lines (ZzzInventory.cpp:4196-4207, :4306-4311). */
+function helperLines(out: Lines, def: ItemDef) {
+  if (def.group !== ItemGroup.Helper) return;
+  if (def.index === 0) {
+    out.add(t('item.absorbDamage', { value: 20 }));
+    out.add(t('item.pet.maxHp', { value: 50 }));
+  } else if (def.index === 1) {
+    out.add(t('item.pet.imp'));
+  } else if (def.index === 3) {
+    out.add(t('item.increaseDamage', { value: 15 }));
+    out.add(t('item.absorbDamage', { value: 10 }));
+  }
+}
+
 function jewelLines(out: Lines, def: ItemDef) {
   if (def.group === ItemGroup.Potion) {
     switch (def.index) {
@@ -328,6 +390,8 @@ function consumableLines(out: Lines, def: ItemDef, item: Item) {
     else if (def.index === 8) out.add(t('item.curesPoison', { count }));
     else if (def.index === 9) out.add(t('item.liquor', { count }));
     else if (def.index === 10) out.add(t('item.townScroll', { count }));
+    // The SD and complex potions (ZzzInventory.cpp:4556-4559).
+    else if (def.index >= 35 && def.index <= 40) out.add(t('item.count', { count }));
     return;
   }
   // Orbs, scrolls and crystals name the skill they teach.
@@ -335,6 +399,9 @@ function consumableLines(out: Lines, def: ItemDef, item: Item) {
   const skill = taught === undefined ? undefined : skillDisplayName(taught);
   if (skill) out.add(t('item.learns', { skill }), 'blue');
 }
+
+/** Splinter of Armor, Bless of Guardian, Claw of Beast: the pieces their mix takes. */
+const FENRIR_MATERIAL_PIECES: Readonly<Record<number, number>> = { 32: 20, 33: 20, 34: 10 };
 
 /** Skill numbers of the Divine Sword and Crossbow of Archangel. */
 const CYCLONE = 22;
@@ -410,7 +477,8 @@ function weaponOfArchangelLines(out: Lines, level: number, hero: HeroStats) {
 export function buildItemTooltip(
   item: Item,
   hero: HeroStats,
-  compareWith?: Item | null
+  compareWith?: Item | null,
+  extras?: TooltipExtras
 ): ItemTooltipData | null {
   const stats = itemStats(item);
   if (!stats) return null;
@@ -428,7 +496,10 @@ export function buildItemTooltip(
     return { lines: trimBlanks(out.list), usable: true };
   }
 
+  petLines(out, def);
   equipmentLines(out, item, stats, hero, worn);
+  setOptionBlock(out, item, hero, extras);
+  socketLines(out, item, hero, extras);
 
   const requirementsFail =
     hero.level < stats.reqLvl ||
@@ -500,11 +571,18 @@ function equipmentLines(
   }
 
   wingLines(out, def, level);
+  helperLines(out, def);
   jewelLines(out, def);
   consumableLines(out, def, item);
 
+  // The Fenrir materials count toward their mix: Splinter of Armor and Bless of Guardian
+  // 20, Claw of Beast 10 (ZzzInventory.cpp:4576-4584).
+  const pieces = def.group === ItemGroup.Helper ? FENRIR_MATERIAL_PIECES[def.index] : undefined;
+  if (pieces) out.add(t('item.pieces', { count: item.durability ?? 0, max: pieces }));
+
   // Durability: gear, wings and helpers show current/max.
   const hasDurability =
+    !pieces &&
     (def.durability || def.magicDur) &&
     (def.group <= ItemGroup.Boots || def.group === ItemGroup.Helper || isWing(def));
   if (hasDurability) {
@@ -573,11 +651,19 @@ function equipmentLines(
 
   // Options (`RenderDefaultOptionText`), skill, luck, excellent.
   const optionLevel = item.optionLevel ?? 0;
-  const excellentFlags = item.excellentFlags ?? (item.isExcellent ? 0 : 0);
+  const excellentFlags = isFenrir(def) ? 0 : item.excellentFlags ?? 0;
+  const wingOpts = wingOptions(item);
   const hasOptions =
-    optionLevel > 0 || item.luck || item.hasSkill || excellentFlags > 0;
+    optionLevel > 0 || item.luck || item.hasSkill || excellentFlags > 0 || wingOpts.length > 0;
 
   if (hasOptions) out.blank();
+
+  guardianOptionLines(out, item);
+  harmonyLines(out, item, def, level);
+  ancientBonusLines(out, def, item);
+
+  // `CalcWingOptions` fills the specials before the skill and luck (ZzzInfomation.cpp:1078).
+  for (const { option, value } of wingOpts) out.add(t(WING_OPTION_TEXT[option], { value }), 'blue');
 
   if (item.hasSkill) {
     const skill = skillDisplayName(def.skill);
@@ -589,7 +675,10 @@ function equipmentLines(
     out.add(t('item.luckCritical'), 'blue');
   }
 
-  if (optionLevel > 0) {
+  const wingKind = isOptionWing(def.group, def.index) ? wingOptionKind(item) : undefined;
+  if (optionLevel > 0 && wingKind !== undefined) {
+    if (wingKind) out.add(t(WING_KIND_TEXT[wingKind], { value: wingKind === 'life' ? optionLevel : optionLevel * 4 }), 'blue');
+  } else if (optionLevel > 0) {
     const bonus = optionLevel * 4;
     if (isStaff(def)) out.add(t('item.additionalWizardry', { value: bonus }), 'blue');
     else if (isWeapon(def)) out.add(t('item.additionalDamage', { value: bonus }), 'blue');
@@ -600,16 +689,231 @@ function equipmentLines(
     excellentLines(out, def, excellentFlags, hero.level);
   }
 
-  if (item.isAncient) {
+  fenrirLines(out, def, item, hero);
+}
+
+/** `GetSpecialOptionText` for the wing options (ZzzInventory.cpp:1975-2023). */
+const WING_OPTION_TEXT: Readonly<Record<WingOption, TextKey>> = {
+  maxHp: 'item.wing.maxHp',
+  maxMana: 'item.wing.maxMana',
+  ignoreDefense: 'item.wing.ignoreDefense',
+  maxAg: 'item.wing.maxAg',
+  command: 'item.setOpt.command',
+  returnDamage: 'item.wing.returnDamage',
+  fullLife: 'item.wing.fullLife',
+  fullMana: 'item.wing.fullMana',
+};
+
+/** A wing's additional option by its kind (`AT_LIFE_REGENERATION`, `AT_IMPROVE_*`). */
+const WING_KIND_TEXT: Readonly<Record<WingOptionKind, TextKey>> = {
+  life: 'item.wing.hpRecovery',
+  damage: 'item.additionalDamage',
+  wizardry: 'item.additionalWizardry',
+  curse: 'item.additionalCurse',
+  defense: 'item.additionalDefense',
+};
+
+/** `AT_SKILL_PLASMA_STORM_FENRIR`. */
+const PLASMA_STORM = 76;
+
+/** The Horn of Fenrir's own block (ZzzInventory.cpp:5160-5222). */
+function fenrirLines(out: Lines, def: ItemDef, item: Item, hero: HeroStats) {
+  if (!isFenrir(def)) return;
+  const flags = item.excellentFlags ?? 0;
+  out.add(t('item.fenrir.skill', { mana: skillMana(PLASMA_STORM) }), 'blue');
+  if (flags === 0x01 || flags === 0x02) {
+    out.add(t(flags === 0x01 ? 'item.fenrir.finalDamage' : 'item.fenrir.absorbFinal', { value: 10 }), 'blue');
+    out.add(t('item.fenrir.speed'), 'blue');
+  } else if (flags === 0x04) {
+    out.add(t('item.fenrir.life', { value: Math.trunc(hero.level / 2) }), 'blue');
+    out.add(t('item.fenrir.mana', { value: Math.trunc(hero.level / 2) }), 'blue');
+    out.add(t('item.fenrir.attack', { value: Math.trunc(hero.level / 12) }), 'blue');
+    out.add(t('item.fenrir.wizardry', { value: Math.trunc(hero.level / 25) }), 'blue');
     out.blank();
-    const bonus = item.ancientBonusLevel ?? 0;
-    out.add(
-      bonus > 0
-        ? t('item.ancientBonus', { value: bonus * 5 })
-        : t('item.ancient'),
-      'greenBlue'
-    );
+    out.add(t('item.fenrir.golden'), 'green');
+    out.add(t('item.fenrir.heroes'), 'green');
   }
+  out.blank();
+  out.add(t('item.fenrir.summon'), 'yellow');
+  if (flags === 0) out.add(t('item.fenrir.upgrade'), 'yellow');
+}
+
+/** `SET_OPTION_*` (1 str, 2 agi, 3 ene, 4 vit) -> the +5 / +10 bonus line (`GetDefaultOptionText`). */
+const ANCIENT_BONUS_TEXT: Readonly<Record<number, TextKey>> = {
+  1: 'item.setOpt.strength',
+  2: 'item.setOpt.agility',
+  3: 'item.setOpt.energy',
+  4: 'item.setOpt.stamina',
+};
+
+/** Rings and pendants also name their attribute damage (CSItemOption.cpp:670-676). */
+function hasAttributeDamage(def: ItemDef): boolean {
+  if (def.group !== ItemGroup.Helper) return false;
+  return (def.index >= 8 && def.index <= 9) || (def.index >= 12 && def.index <= 13) || (def.index >= 21 && def.index <= 28);
+}
+
+/** `RenderDefaultOptionText` (CSItemOption.cpp:664-680): an ancient piece's stat bonus. */
+function ancientBonusLines(out: Lines, def: ItemDef, item: Item) {
+  const bonus = item.ancientBonusLevel ?? 0;
+  const key = ANCIENT_BONUS_TEXT[def.attType];
+  if (bonus <= 0 || !key) return;
+  out.add(t(key, { value: bonus * 5 }), 'blue');
+  if (hasAttributeDamage(def)) out.add(t('item.attributeDamage'), 'blue');
+}
+
+/**
+ * What the tooltip reads beyond the hero's stats: the worn items and whether this item is outside the
+ * bag (`bThisisEquippedItem`) for the set block, and the hero's maximums for the socket values.
+ */
+export type TooltipExtras = {
+  worn: readonly (Item | null)[];
+  equipped: boolean;
+  maxLife?: number;
+  maxMana?: number;
+  masterLevel?: number;
+};
+
+/** `getExplainText` (CSItemOption.cpp:375-445) by set option number; no S6 set uses the class masteries past 23. */
+const SET_OPTION_TEXT: readonly TextKey[] = [
+  'item.setOpt.strength',
+  'item.setOpt.agility',
+  'item.setOpt.energy',
+  'item.setOpt.stamina',
+  'item.setOpt.command',
+  'item.setOpt.minDamage',
+  'item.setOpt.maxDamage',
+  'item.setOpt.wizardry',
+  'item.setOpt.damage',
+  'item.setOpt.attackRate',
+  'item.setOpt.defense',
+  'item.setOpt.maxLife',
+  'item.setOpt.maxMana',
+  'item.setOpt.maxAg',
+  'item.setOpt.agRate',
+  'item.setOpt.criticalRate',
+  'item.setOpt.criticalDamage',
+  'item.setOpt.excellentRate',
+  'item.setOpt.excellentDamage',
+  'item.setOpt.skillAttack',
+  'item.setOpt.doubleDamage',
+  'item.setOpt.ignoreDefense',
+  'item.setOpt.shieldDefense',
+  'item.setOpt.twoHanded',
+];
+
+/**
+ * `RenderSetOptionListInItem` (CSItemOption.cpp:1052-1095): the header, then the options of the set
+ * while two or more pieces are worn, lit as `RenderSetOptionList` lights them (grey in the bag).
+ */
+function setOptionBlock(out: Lines, item: Item, hero: HeroStats, ancient?: TooltipExtras) {
+  const set = ancientSetOf(item);
+  if (!set) return;
+  out.blank();
+  out.add(t('item.setInfo'), 'yellow');
+  out.blank();
+  const pieces = ancient ? wornSetPieces(set, ancient.worn, hero) : 0;
+  for (const line of setOptionLines(set, pieces)) {
+    const key = SET_OPTION_TEXT[line.option];
+    if (!key) continue;
+    const lit = ancient?.equipped && line.active;
+    const color = !lit ? 'gray' : line.kind === 'full' ? 'yellow' : line.kind === 'ext' ? 'green' : 'blue';
+    out.add(t(key, { value: line.value }), color);
+  }
+}
+
+/** `GetItemAddOtioninfoText` (ItemAddOptioninfo.cpp:58-99) by option number. */
+const ADD_OPTION_TEXT: Readonly<Record<number, TextKey>> = {
+  1: 'item.opt380.attackRate',
+  2: 'item.opt380.damage',
+  3: 'item.opt380.defenseRate',
+  4: 'item.opt380.defense',
+  5: 'item.opt380.maxHp',
+  6: 'item.opt380.maxSd',
+  7: 'item.opt380.sdAuto',
+  8: 'item.opt380.sdRate',
+};
+
+/** The 380 option block (ZzzInventory.cpp:5008-5025). */
+function guardianOptionLines(out: Lines, item: Item) {
+  const options = hasGuardianOption(item) ? itemOptionTables()?.addOptions[item.group * 512 + item.num] : undefined;
+  if (!options) return;
+  out.blank();
+  for (const [option, value] of options) {
+    const key = ADD_OPTION_TEXT[option];
+    if (key) out.add(t(key, { value }), 'redPurple', true);
+  }
+  out.blank();
+}
+
+/** `GetItemType` (UIJewelHarmony.cpp:133-152): 0 weapons, 1 staffs, 2 shields and armour. */
+function harmonyKind(def: ItemDef): number | null {
+  if (def.group <= ItemGroup.Bow) return 0;
+  if (def.group === ItemGroup.Staff) return 1;
+  return def.group >= ItemGroup.Shield && def.group <= ItemGroup.Boots ? 2 : null;
+}
+
+/**
+ * The Jewel of Harmony line (ZzzInventory.cpp:5037-5062): yellow once the item's level reaches the
+ * option's, grey before. Weapons take options 1-10, staffs and armour 1-8 (`IsHarmonyJewelOption`).
+ */
+function harmonyLines(out: Lines, item: Item, def: ItemDef, level: number) {
+  const harmony = harmonyOf(item);
+  const kind = harmonyKind(def);
+  if (!harmony || kind === null || harmony.option > (kind === 0 ? 10 : 8)) return;
+  const entry = itemOptionTables()?.harmony[kind]?.[harmony.option - 1];
+  if (!entry) return;
+  out.blank();
+  const percent = kind === 2 && harmony.option === 7 ? '%' : '';
+  out.add(`${entry.name} +${entry.values[harmony.level] ?? 0}${percent}`, level >= harmony.level ? 'yellow' : 'gray', true);
+  out.blank();
+}
+
+/** `GlobalText[2640 + category - 1]`: a socket option's element. */
+const SOCKET_ELEMENT: readonly TextKey[] = [
+  'element.fire',
+  'element.water',
+  'element.ice',
+  'element.wind',
+  'element.lightning',
+  'element.earth',
+  'item.socketUnique',
+];
+
+/** `CalcSocketOptionValue` / `CalcSocketOptionValueText` (SocketSystem.cpp:141-198). */
+function socketValue(option: SocketOption, value: number, hero: HeroStats, extras?: TooltipExtras): string {
+  let amount = 0;
+  if (option.type === 1 || option.type === 2) amount = value;
+  else if (option.type === 3) amount = Math.trunc((hero.level + (extras?.masterLevel ?? 0)) / value);
+  else if (option.type === 4) amount = Math.trunc((extras?.maxLife ?? 0) / value);
+  else if (option.type === 5) amount = Math.trunc((extras?.maxMana ?? 0) / value);
+  return option.type === 2 ? `+${amount}%` : `+${amount}`;
+}
+
+/** `AttachToolTipForSocketItem` (SocketSystem.cpp:218-266): each socket, then the bonus option. */
+function socketLines(out: Lines, item: Item, hero: HeroStats, extras?: TooltipExtras) {
+  const sockets = socketsOf(item);
+  const tables = itemOptionTables();
+  if (!sockets.length || !tables) return;
+  out.blank();
+  out.add(t('item.socketInfo'), 'purple');
+  out.blank();
+  sockets.forEach((socket, i) => {
+    const info = socket ? tables.sockets[0][socket.seed] : null;
+    if (!socket || !info) {
+      out.add(t('item.socketSlot', { index: i + 1, option: t('item.socketEmpty') }), 'gray');
+      return;
+    }
+    const element = SOCKET_ELEMENT[info.category - 1];
+    const option = `${element ? t(element) : ''}(${info.name} ${socketValue(info, info.values[socket.level - 1] ?? 0, hero, extras)})`;
+    out.add(t('item.socketSlot', { index: i + 1, option }), 'blue');
+  });
+  const bonus = socketBonusOf(item);
+  const info = bonus === null ? null : tables.sockets[1][bonus];
+  if (!info || info.values[0] <= 0) return;
+  out.blank();
+  out.add(t('item.socketBonus'), 'purple');
+  out.blank();
+  out.add(`${info.name} ${socketValue(info, info.values[0], hero, extras)}`, 'blue');
 }
 
 function trimBlanks(lines: TooltipLine[]): TooltipLine[] {

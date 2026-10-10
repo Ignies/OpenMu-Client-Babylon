@@ -9,7 +9,7 @@ vault, chaos machine, trade and personal shop. The packet handlers that feed it 
 - `module.ts`: nothing to install; `vault`, `chaos_mix`, `trade` and `personal_shop` require it.
 - `Economy`: the mobx store (below).
 - `vaultOpenCost(level, masterLevel, locked)`: the vault fee (NewUIStorageInventory.cpp:227).
-- `MIX_MENU`, `MixMenuEntry`: the crafting list the chaos machine window offers.
+- `MIX_TYPE`: the chaos machine's mix types (`MIXTYPE_GOBLIN_*`, the Chaos Card Master's 8).
 - `MAX_SHOP_TITLE` (26): the stall title limit. `ShopStock`, `ShopBrowse`, `TradePartner`, `EconomyPrompt`: types.
 
 ## How it works
@@ -20,11 +20,11 @@ vault, chaos machine, trade and personal shop. The packet handlers that feed it 
   to them, so item moves are the same code for every window.
 - Vault: `openVault`, `setVaultItems`, `closeVault`, `moveVaultMoney`, `unlockVault`, `setVaultPin`,
   `removeVaultPin`, `vaultProtectionState`; `vaultLocked` / `vaultUnlocked` / `vaultUsable` are the pin state.
-- Chaos machine: `openMix(kind)`, `setMixType`, `mix`, `craftingResult`, `closeMix` (refuses while items are
-  in the tray). `mixKind` picks the goblin or the Chaos Card Master; `mixWireStorage` is the storage byte
-  the move packets carry (9 for the card master). Results play the mix sounds (WSclient.cpp:6793-6794).
-- `MIX_MENU` lists every crafting the S6 OpenMU goblin registers (`ChaosMixes.cs`); the player picks the
-  recipe and the server decides. `MIX_NUMBER` names the numbers the generated enum lacks.
+- Chaos machine: `openMix(kind)`, `chooseMixType` / `cancelMixMenu` (the goblin's menu), `mix`,
+  `craftingResult`, `closeMix` (refuses while items are in the tray). `mixKind` picks the goblin or the
+  Chaos Card Master; `mixWireStorage` is the storage byte the move packets carry (9 for the card master).
+  `mixCheck` is the `Mix.bmd` recipe the tray makes ([../chaos_mix/readme.md](../chaos_mix/readme.md)) and
+  `mixAccepts` what the tray takes. Results play the mix sounds (WSclient.cpp:6793-6794).
 - Trade: `requestTrade`, `incomingTradeRequest`, `answerTradeRequest`, `openTrade`, `setYourTradeItem`,
   `setTradeMoney`, `setMyConfirm` / `toggleMyConfirm`, `partnerConfirm`, `cancelTrade`, `tradeFinished`.
   A partner change after we accepted is marked in `yourTradeChanged`.
@@ -38,7 +38,8 @@ vault, chaos machine, trade and personal shop. The packet handlers that feed it 
 
 ## Depends on / used by
 - uses: `session`, `hero`, `inventory` (`Bag`), `Social` (system and error lines), `chat/notices.ts`, `inventory/itemStorage.ts`,
-  `controllers/sound/sfx.ts`, `controllers/assets/itemIconPack.ts`, `src/i18n`.
+  `controllers/sound/sfx.ts`, `controllers/assets` (`itemIconPack.ts`, `mixRecipes`), `controllers/interface/msgWin.ts`,
+  `chaos_mix/mixRecipes.ts`, `src/i18n`.
 - used by: the nets of `vault`, `chaos_mix`, `trade`, `npc_shop`, `personal_shop`, `inventory`, `scope`, `hero`
   (`reset`), `warp`; `inventory` (`Bag.grids`), `chat/commands.ts`, `session/sessionExit.ts`, `src/app/boot.tsx`,
   ecs `nameTagSystem`.
@@ -46,10 +47,10 @@ vault, chaos machine, trade and personal shop. The packet handlers that feed it 
   HUD `name_tags` (shop titles).
 
 ## Change it
-- a new crafting in the menu: add it to `MIX_NUMBER` (if the enum lacks it) and `MIX_MENU`, plus the
-  `mix.*` text keys.
+- a chaos machine check: `mix()` follows `CNewUIMixInventory::Mix`; recipes come from `Mix.bmd`, not code.
 - a new prompt: add a kind to `EconomyPrompt` and its spec in `versions/shared/ui/windows/economy_prompts/`.
 - vault, trade or shop behaviour: the matching section of `economy.ts`; the packets in its module's `net.ts`.
 
 ## Tests
-- none yet.
+- `economy.test.ts`: `craftingResult` keeps the tray on a refused mix, empties it on a failure, holds the result on a success;
+  the mix button sends the matched recipe's id and nothing when no recipe matches.

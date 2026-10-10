@@ -15,7 +15,9 @@ controller never imports a module). Windows, HUD elements and pages import them 
 - `reconnect_overlay`: `ReconnectOverlay`, the plate over the screen while `SessionResume` walks the
   login flow again (`modules/session`); `App.tsx` mounts it.
 - `item_grid`: `ItemGrid`, the square grid every item window draws (`CNewUIInventoryCtrl`), with the
-  carried item's drop preview; reads `Bag` (`modules/inventory`). `SQUARE`.
+  carried item's drop preview; reads `Bag` (`modules/inventory`). `SQUARE`. `viewOnly` keeps the tooltip
+  but swallows clicks (the trade partner's grid). `hoverRelease.ts`: `useHoverRelease` drops a hover
+  the pointer left without a pointerleave (a grid turning busy under it); the inventory uses it too.
 - `item_tooltip`: `ItemTooltip` (`RenderItemInfo` lines from `controllers/interface/itemTooltip.ts`):
   the price, the repair cost, the pet's level and life, the compare with worn gear; reads `Hero`,
   `Merchant`, `Pets`. `placement.ts` places it at the cursor.
@@ -43,5 +45,5 @@ controller never imports a module). Windows, HUD elements and pages import them 
   is given belongs in `src/controllers/interface/components/`.
 
 ## Tests
-- none of their own; the skill goldens (`versions/shared/skills/*.golden.test.ts`) pin the data
-  they read.
+- `item_grid/hoverRelease.test.ts`: a pointer move outside the grid (or the named squares) drops the hover.
+- the skill goldens (`versions/shared/skills/*.golden.test.ts`) pin the data they read.

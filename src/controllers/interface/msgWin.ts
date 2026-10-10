@@ -22,6 +22,7 @@ export enum MsgWinCode {
   ConfirmSellItem = 'MESSAGE_CONFIRM_SELL_ITEM',
   ConfirmDropItem = 'MESSAGE_CONFIRM_DROP_ITEM',
   ConfirmAddPoints = 'MESSAGE_CONFIRM_ADD_POINTS',
+  ConfirmMix = 'MESSAGE_CONFIRM_MIX',
 }
 
 type MsgWinMessage = {
@@ -88,6 +89,12 @@ export const MSG_WIN_MESSAGES: Record<MsgWinCode, MsgWinMessage> = {
     type: MsgWinType.Both,
     textId: -1,
     textKey: 'msgWin.confirmAddPoints',
+  },
+  // `CMixCheckMsgBox`: the recipe's name, then GlobalText[539] (NewUICommonMessageBox.cpp:1895-1925).
+  [MsgWinCode.ConfirmMix]: {
+    type: MsgWinType.Both,
+    textId: 539,
+    textKey: 'msgWin.confirmMix',
   },
 };
 

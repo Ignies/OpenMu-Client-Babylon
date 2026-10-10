@@ -1,6 +1,7 @@
 import { Item } from '../../ecs/world';
 import { castToByte } from '../../core/binaryUtils';
 import { PET_GROUP, DARK_HORSE, DARK_RAVEN } from '@versions/shared/items/petItems';
+import { isOptionWing } from './wingOptions';
 
 const LuckFlag = 4;
 const SkillFlag = 128;
@@ -11,6 +12,9 @@ const AncientBonusLevelMask = 0b1100;
 const AncientDiscriminatorMask = 0b0011;
 const AncientMask = AncientBonusLevelMask | AncientDiscriminatorMask;
 const ExcellentOptionsMask = 0x3f;
+const WingOptionsMask = 0x0f;
+/** `ITEM_HORN_OF_FENRIR`: its variant rides the excellent bits (`GetFenrirType`). */
+const FENRIR = { group: 13, num: 37 } as const;
 const ItemNumberHighFlag = 0x80;
 const NoSocket = 0xff;
 const EmptySocket = 0xfe;
@@ -45,6 +49,7 @@ export class ItemSerializer {
     );
 
     target[3] |= (item.excellentFlags ?? 0) & ExcellentOptionsMask;
+    target[3] |= ((item.wingOptions ?? 0) & WingOptionsMask) | (((item.wingOptionKind ?? 0) & 0x03) << 4);
 
     if ((item.num & 0x100) === 0x100) {
       target[3] |= ItemNumberHighFlag;
@@ -77,7 +82,8 @@ export class ItemSerializer {
    *  (bit 7), option level low bits (0-1) · 2: durability · 3: excellent bits
    *  0-5, option level high bit (0x40), item number high bit (0x80) ·
    *  4: ancient discriminator (bits 0-1) + bonus level (bits 2-3) · 5: group
-   *  (high nibble) · 6: socket bonus/380 option · 7-11: sockets (0xFF = none).
+   *  (high nibble), 380 option (0x08) · 6: harmony option and level, or a socket item's
+   *  bonus · 7-11: sockets (0xFF = none).
    */
   static DeserializeItem(array: Uint8Array): Item {
     const itemNumber = array[0] + ((array[3] & ItemNumberHighFlag) << 1);
@@ -97,6 +103,16 @@ const item: Item = {
     ReadLuckOption(array[1], item);
     ReadNormalOption(array, item);
     ReadExcellentOption(array[3], item);
+    // Wings and capes carry wing options and the option's kind there; the Horn of Fenrir its
+    // variant. Neither is an excellent item (ZzzInfomation.cpp:855-940, ZzzInventory.cpp:2526).
+    if (isOptionWing(itemGroup, itemNumber)) {
+      item.wingOptions = array[3] & WingOptionsMask;
+      item.wingOptionKind = (array[3] >> 4) & 0x03;
+      item.excellentFlags = 0;
+      item.isExcellent = false;
+    } else if (itemGroup === FENRIR.group && itemNumber === FENRIR.num) {
+      item.isExcellent = false;
+    }
     ReadAncientOption(array[4], item);
 
     if (array[6] !== 0) item.socketBonus = array[6];

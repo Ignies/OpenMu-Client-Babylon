@@ -45,6 +45,14 @@ imports the modules below directly (baselined in `tools/checks`).
   `localisedItemName`, `localisedSkillName`, `localisedBuffName`, `localisedNpcName`,
   `skillDisplayName(number)` (`mu/skillNames.ts`: the pack's name, else `skillsDatabase`'s; on the door),
   `loadNpcNames`, `onNpcNamesChanged`; `decodeLocalText`, `downloadLocalDataFile`.
+- `itemSetTables()`, `loadItemSetTables(types, options)` and `ItemSet`, `ItemSetTables`, `SetOption`
+  (`mu/itemSetFile.ts`, on the door): the ancient sets, loaded on first ask.
+- `itemOptionTables()`, `loadItemOptionTables(harmony, sockets, addOptions)` and their types
+  (`mu/itemOptionFiles.ts`, on the door): the Jewel of Harmony, socket and 380 option tables.
+- `mixRecipes()`, `loadMixRecipes(bytes)`, `MIX_TYPES` and `MixRecipe`, `MixSource`, `MixRateToken`
+  (`mu/mixFile.ts`, on the door): the chaos machine recipes, loaded on first ask.
+- `globalText(id)`, `loadGlobalText(bytes)` (`mu/globalTextFile.ts`, on the door): the pack's `Text.bmd`
+  lines, for what the data files name by number.
 
 ## How it works
 - Every byte read goes through `fetchAsset`: for a compressible extension it asks for
@@ -104,6 +112,9 @@ imports the modules below directly (baselined in `tools/checks`).
 - `mu/localNames.test.ts`: item, skill and buff name record layouts.
 - `mu/dataFolder.test.ts`: own, borrowed and absent `Data/` paths.
 - `mu/gates.test.ts`: the Season 6 gate layout, a byte-wide period one, a truncated file.
+- `mu/itemSetFile.ts` is tested through `controllers/item_rules/ancientSets.test.ts` and the
+  tooltip test, which read the real files.
+- `mu/mixFile.ts` is tested through `modules/chaos_mix/mixRecipes.test.ts` on the real `Mix.bmd`.
 
 ## Notes
 
@@ -147,6 +158,31 @@ accents were lost before they shipped.
 `item_<lang>.bmd`: 8192 records of 84 bytes, a 30-byte name first, index = `group * 512 + num`;
 read first by `itemBaseName`. `BuffEffect_<lang>.bmd`: an `int` count then 158-byte records, id at
 0, name at 5 (50 bytes). `buffRecipe` (`modules/skills/recipes.ts`) shows the pack name first.
+
+### mu/itemSetFile.ts
+`ItemSetType.bmd`: 8192 records of 4 bytes (`ITEM_SET_TYPE`: two set numbers, 0 or 255 for none,
+then the mix level), each BuxConverted. `ItemSetOption_<lang>.bmd`: 64 records of 110 bytes
+(`ITEM_SET_OPTION_FILE`: name 64, standard options 6 x 2 and their values, ext 2 + 2, count, full
+5 + 5, classes 7). The set's item count comes from the type table. Some English names carry the
+Korean apostrophe `0xA1 0xAF`; it is read as `'`. The checksum after each table is not checked.
+
+### mu/itemOptionFiles.ts
+`JewelOfHarmonyOption_<lang>.bmd`: 3 x 10 records of 180 bytes (type, name 60, min level, 14
+values, 14 prices), one BuxConvert over the whole table; option N is record N - 1.
+`SocketItem_<lang>.bmd`: 3 x 50 records of 104 bytes (id, category, name 64, type, 5 values, 6
+check bytes), one BuxConvert per record. `ItemAddOption.bmd`: 8192 records of 16 bytes (option,
+value, option, value, type, time), one BuxConvert over the whole table.
+
+### mu/mixFile.ts
+`Mix.bmd`: 14 BuxConverted `int` counts (one per mix type), then that many 656-byte `MIX_RECIPE`
+records, each BuxConverted on its own: index, `m_iMixID`, the name, description and advice text
+ids, the result's size, level, zen type and zen, 32 rate tokens (op, float), the max rate, three
+option chars and 8 40-byte sources (item code, level, option, durability and count ranges, special
+bits).
+
+### mu/globalTextFile.ts
+`Text_<lang>.bmd`: 'GT', a `uint32` count, then per line its id, its length and its BuxConverted bytes.
+The Eng, Spn and Por packs ship the same English file, so recipe names read English everywhere.
 
 ### mu/moveReqFile.ts
 An `int` count, then 84-byte records: `index`, main name (32), `/move` alias (32), required level,

@@ -25,7 +25,7 @@ export default defineItem({
   Vit: 0,
   Command: 0,
   Type: 1,
-  'DW/SM': 1,
+  'DW/SM': 0,
   'DK/BK': 1,
   'Elf/ME': 1,
   MG: 1,

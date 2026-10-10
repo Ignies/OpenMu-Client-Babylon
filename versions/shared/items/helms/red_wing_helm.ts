@@ -22,7 +22,7 @@ export default defineItem({
   Vit: 0,
   Command: 0,
   Type: 4,
-  'DW/SM': 1,
+  'DW/SM': 0,
   'DK/BK': 0,
   'Elf/ME': 0,
   MG: 0,

@@ -565,11 +565,38 @@ function calculateWizardry(input: CharacterStatsInput): {
   return { min, max, rate };
 }
 
+/** The helpers the character window reads (NewUICharacterInfoWindow.cpp:707-737, :954-959). */
+const PET = { imp: 1, fenrir: 37, demon: 64, panda: 80, unicorn: 106, skeleton: 123 } as const;
+/** The gold Fenrir's option bit. */
+const FENRIR_GOLD = 0x04;
+
+type Range = { min: number; max: number };
+
+/**
+ * A damage range after the pet: the gold Fenrir adds level / 12 to damage and level / 25 to
+ * wizardry, then the Demon adds 40%, the Skeleton 20% and the Imp 30% (not to curse).
+ */
+function withPet<T extends Range>(range: T, pet: Item | null, kind: 'damage' | 'wizardry' | 'curse', level: number): T {
+  if (pet?.group !== GROUP_HELPER) return range;
+  let { min, max } = range;
+  if (pet.num === PET.fenrir && pet.excellentFlags === FENRIR_GOLD && kind !== 'curse') {
+    const flat = Math.trunc(level / (kind === 'damage' ? 12 : 25));
+    min += flat;
+    max += flat;
+  }
+  const rate = pet.num === PET.demon ? 0.4 : pet.num === PET.skeleton ? 0.2 : pet.num === PET.imp && kind !== 'curse' ? 0.3 : 0;
+  return { ...range, min: min + Math.trunc(min * rate), max: max + Math.trunc(max * rate) };
+}
+
 export function deriveCharacterStats(input: CharacterStatsInput): DerivedStats {
   const base = getBaseClass(input.charClass);
 
-  const damage = calculateDamage(input, base);
-  const wizardry = calculateWizardry(input);
+  const pet = equipped(input.items, InventoryConstants.PetSlot);
+  const damage = withPet(calculateDamage(input, base), pet, 'damage', input.level);
+  const wizardry = withPet(calculateWizardry(input), pet, 'wizardry', input.level);
+  const curse = withPet({ min: Math.trunc(input.energy / 9), max: Math.trunc(input.energy / 4) }, pet, 'curse', input.level);
+  // The Panda and the Unicorn add 50 defense.
+  const petDefense = pet?.group === GROUP_HELPER && (pet.num === PET.panda || pet.num === PET.unicorn) ? 50 : 0;
 
   return {
     attackSpeed: attackSpeedOf(input.charClass, input.agility),
@@ -579,14 +606,14 @@ export function deriveCharacterStats(input: CharacterStatsInput): DerivedStats {
     dualWield: damage.dualWield,
     attackRate: calculateAttackRate(input, base),
     attackRatePvp: calculateAttackRatePvp(input, base),
-    defense: calculateDefense(input, base),
+    defense: calculateDefense(input, base) + petDefense,
     defenseRate: calculateDefenseRate(input, base),
     defenseRatePvp: calculateDefenseRatePvp(input, base),
     wizardryMin: wizardry.min,
     wizardryMax: wizardry.max,
     staffRate: wizardry.rate,
-    curseMin: Math.trunc(input.energy / 9),
-    curseMax: Math.trunc(input.energy / 4),
+    curseMin: curse.min,
+    curseMax: curse.max,
   };
 }
 

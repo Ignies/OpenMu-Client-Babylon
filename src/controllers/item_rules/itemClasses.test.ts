@@ -1,3 +1,4 @@
+import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import {
   CLASS_COLUMNS,
@@ -112,5 +113,30 @@ describe('unrestricted items', () => {
 
   it('still treats a class-gated item as gated', () => {
     expect(classUnrestricted(def(0, 31))).toBe(false); // Rune Blade, MG only
+  });
+});
+
+const ITEM_BMD = 'Data/Local/Eng/item_eng.bmd';
+/** `ITEM_ATTRIBUTE_FILE_LEGACY` (ItemStructs.h): 84-byte records, `RequireClass[7]` at 69. */
+const bmdClasses = (bytes: Uint8Array, group: number, index: number) => {
+  const at = (group * 512 + index) * 84;
+  const record = bytes.slice(at, at + 84);
+  for (let i = 0; i < record.length; i++) record[i] ^= [0xfc, 0xcf, 0xab][i % 3];
+  return [...record.subarray(69, 76)];
+};
+
+// The rows the item files took from a server table that let the Dark Wizard wear Summoner gear,
+// and that read the 3rd wings as 2nd-class items.
+describe.skipIf(!existsSync(ITEM_BMD))('the class columns', () => {
+  const bytes = new Uint8Array(readFileSync(ITEM_BMD));
+  const rows: [number, number][] = [
+    [0, 2], // Rapier
+    ...[14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 34].map(index => [5, index] as [number, number]),
+    ...[7, 8, 9, 10, 11].flatMap(group => [39, 40, 41, 42, 43, 44].map(index => [group, index] as [number, number])),
+    ...[36, 37, 38, 39, 41, 42, 43].map(index => [12, index] as [number, number]),
+  ];
+
+  it.each(rows)('of %i/%i match Item.bmd', (group, index) => {
+    expect(def(group, index).classes).toEqual(bmdClasses(bytes, group, index));
   });
 });

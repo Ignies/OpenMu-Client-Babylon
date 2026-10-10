@@ -49,6 +49,13 @@ windows themselves are content in `versions/shared/ui/` (see
 - `itemTooltip.ts` is `RenderItemInfo` (ZzzInventory.cpp:2091) as data: a list of coloured lines
   drawn by `versions/shared/ui/components/item_tooltip` (its `placement.ts` places it like the original:
   centred on the cursor, below the cursor art, flipped above, inside the viewport).
+  An ancient piece carries its set name, its stat bonus line (`RenderDefaultOptionText`) and the set
+  block (`RenderSetOptionListInItem`); the caller hands in the worn items and whether the item sits
+  in the bag (`TooltipExtras`), since this controller cannot read the hero. The 380 option, Jewel of
+  Harmony and socket blocks read `assets/mu/itemOptionFiles.ts`; a socket value of the level / life /
+  mana kind needs the hero's master level and maximums, also from `TooltipExtras`. Wings list their wing
+  options before skill and luck and name the additional option by its kind; the Horn of Fenrir is
+  named for its variant and has its own block (ZzzInventory.cpp:5160-5222).
 - `nameTags.ts`: the original's name balloons (`CHAT`, ZzzInterface.cpp:703): a name shows while
   hovered, 100 ticks on creation, refreshed to 10 per hovered frame; chat lines keep it up for
   their own lifetime; lines of 20+ characters split (`CutText`, ZzzInterface.cpp:605).
@@ -111,3 +118,6 @@ windows themselves are content in `versions/shared/ui/` (see
 - `components/module_window/index.test.tsx`: the module frame draws only while open; its hot key
   never takes a built-in action's key.
 - `components/item_tooltip/placement.test.ts`: tooltip and compare-pair placement.
+- `itemTooltip.test.ts`: tooltip lines and name colours against `RenderItemInfo`: ancient sets, pets, harmony,
+  sockets, 380 options, wings, the Horn of Fenrir, stack counts.
+- `item_icons/itemIconFit.test.ts`: every Box of Luck level and the newer icons have a fit entry.

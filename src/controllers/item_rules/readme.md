@@ -29,10 +29,26 @@ the table would import itself.
   the model a drop is shown as (`CreateItem`, ZzzObject.cpp:6056-6116), and the Divine weapon a Weapon of
   Archangel is drawn as; `actors/playerObject.ts` reads the second.
 - `goldColor(amount)`: the colour of a zen amount (`getGoldColor`, ZzzInventory.cpp:1094-1110).
+- `ancientSetOf(item)`, `wornSetPieces(set, worn, hero)`, `setOptionLines(set, pieces)`, `SetOptionLine`
+  (`ancientSets.ts`): an ancient piece's set and which of its options the worn pieces light
+  (`CSItemOption`, from `assets/mu/itemSetFile.ts`).
+- `isSocketItem(group, num)`, `hasGuardianOption(item)`, `harmonyOf(item)`, `socketsOf(item)`, `socketBonusOf(item)`
+  (`itemOptions.ts`): the 380 flag (byte 5 bit 3, read from `raw`), the harmony option or socket bonus
+  (byte 6) and the socket seeds (byte % 50, sphere level byte / 50 + 1), as `CreateItem` reads them.
+- `isOptionWing(group, num)`, `wingOptionKind(item)`, `wingOptions(item)` (`wingOptions.ts`): the wing options
+  (`CalcWingOptions`) and the kind of a wing's additional option (`OptionType`, ZzzInfomation.cpp:1236-1442).
+- `skillMana(num)`: a skill's mana, for tooltip lines that name it.
 
 ## How it works
-- `itemSerializer.ts` reads level, luck, skill, option level, excellent, ancient and socket bytes. Dark Horse
+- `itemSerializer.ts` reads level, luck, skill, option level, excellent, ancient and socket bytes. On wings
+  and capes the excellent byte holds the wing options (bits 0-3) and `OptionType` (bits 4-5), and the Horn
+  of Fenrir keeps its variant there: neither counts as excellent. Dark Horse
   and Dark Raven keep their level in byte 2, not in the level bits. `raw` keeps the original bytes.
+- `ancientSets.ts` ports `CheckItemSetOptions` / `calcSetOptionList` (CSItemOption.cpp:316-372, :839-906):
+  a set lists options only with two pieces worn, one standard option per piece past the first, the
+  full-set ones once complete. The worn items are checked against the hero's own stats, without what
+  the sets add (the original's first pass). `ItemDef.attType` is Item.bmd's `AttType` (the item files'
+  `Type`), the stat an ancient piece's bonus raises.
 - `itemStats.ts` ports `CalcDamageMin/Max`, `CalcMagicPower`, `CalcDefense`, `CalcRequirements`
   (`ZzzInfomation.cpp`) and `CalcMaxDurability` (ZzzInventory.cpp:1549) over `itemDef`, which hides the
   per-group column names of the item files (`Strength`/`Str`, `Durability`/`Dur`, ...).
@@ -70,14 +86,19 @@ the table would import itself.
 - what the compare tooltip measures against: `comparedItem` in `itemCompare.ts`.
 
 ## Tests
-- `itemSerializer.test.ts`: round trips (plain, +13 luck skill, excellent, ancient, sockets, pets, number > 255).
-- `itemClasses.test.ts`: the Rage Fighter class column and unrestricted items.
+- `itemSerializer.test.ts`: round trips (plain, +13 luck skill, excellent, ancient, sockets, pets, number > 255);
+  wing options and kind, the Fenrir variant.
+- `itemClasses.test.ts`: the Rage Fighter class column and unrestricted items; the Summoner gear and wings,
+  the Rapier and the 3rd wings against `Data/Local/Eng/item_eng.bmd`'s class columns.
 - `itemRequirements.test.ts`: strength per option level, wing and pet level requirements.
 - `itemCompare.test.ts`: which worn item is compared, and the green / red deltas on the tooltip.
 - `itemLevelLook.test.ts`: Box of Luck / Box of Kundun names and icons.
 - `dropModelProxy.test.ts`: Box of Kundun / Box of Luck models, medals, chocolate boxes, Rena, quest items.
 - `archangelWeapons.test.ts`: Divine weapon and Weapon of Archangel names, colours and icons.
 - `portedItems.test.ts`: MuMain items and capes (tests `controllers/actors/wings.ts`, appearance).
+- `ancientSets.test.ts`: set lookup by discriminator, worn piece count, which options light.
+- `bundlesAndParchments.test.ts`: the packed jewels 12/136-143 and the Rage Fighter parchments 15/30-36 exist,
+  with Item.bmd's names, the original's models and the skills the parchments teach.
 - `questItemLink.test.ts`: the Blood Castle weapon on the back (tests `controllers/actors/weaponAttachment.ts`).
 - `weaponAttack.test.ts`: attack clip choice per weapon (tests `controllers/actors/weaponClass.ts`).
 - `versions/shared/items/items.golden.test.ts` covers the item table these rules read.

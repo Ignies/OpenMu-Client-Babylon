@@ -20,7 +20,7 @@ export default defineItem({
   Agi: 0,
   Comm: 0,
   Zen: 0,
-  'DW/SM': 1,
+  'DW/SM': 0,
   'DK/BK': 0,
   'Elf/ME': 0,
   MG: 0,
