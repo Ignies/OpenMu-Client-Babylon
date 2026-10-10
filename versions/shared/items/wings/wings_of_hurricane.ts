@@ -23,7 +23,7 @@ export default defineItem({
   'DW/SM': 0,
   'DK/BK': 0,
   'Elf/ME': 0,
-  MG: 2,
+  MG: 3,
   DL: 0,
   SUM: 0,
   RF: 0,

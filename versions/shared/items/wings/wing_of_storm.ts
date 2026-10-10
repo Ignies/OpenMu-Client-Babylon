@@ -21,7 +21,7 @@ export default defineItem({
   Comm: 0,
   Zen: 0,
   'DW/SM': 0,
-  'DK/BK': 2,
+  'DK/BK': 3,
   'Elf/ME': 0,
   MG: 0,
   DL: 0,
