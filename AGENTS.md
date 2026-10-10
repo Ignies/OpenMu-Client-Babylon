@@ -60,6 +60,7 @@ How agents work here (workflow, roles, tools, where things are): [docs/agents/](
 | add a call to the module API (what a streamed module may ask) | `src/modules/_api/`: the contract, both bindings and a minor version bump ([src/modules/_api/readme.md](src/modules/_api/readme.md)) |
 | add gameplay state or read it from a window | `src/modules/<module>/state.ts`, through the module's `index.ts` |
 | add an Enhanced / Ultra improvement (an Options toggle) | `versions/shared/improvements/<name>.ts` ([docs/how_to/add_improvement.md](docs/how_to/add_improvement.md)) |
+| add a setting each server decides (big-impact behaviour) | a key in `src/modules/servers/serverManifest.ts` (`ORIGINAL_SETTINGS` is the original) and the installer's `MU_*` variable that writes it (`install/readme.md`) |
 | add or change text | the owner's `i18n/en.ts` (and every other language file) ([docs/how_to/add_text.md](docs/how_to/add_text.md)) |
 | add a texture pack | build it into `public/packs/<pack>/`, list it in `public/packs/index.json` |
 | redraw a window or panel | `versions/shared/ui/windows/<window>/index.tsx` |
@@ -101,6 +102,11 @@ CI runs the same set on every pull request: [docs/ci.md](docs/ci.md).
 - **1:1 first.** Match the classic client before improving it. Cite the original
   (`ZzzCharacter.cpp:4485`) next to ported logic. New looks go behind an option or a new
   controller implementation; the classic one is never edited to add a feature.
+- **Where a change lands.** A correction toward the original is never a toggle (Classic is the
+  original). Anything new is behind a toggle: an Enhanced / Ultra improvement, or a player setting
+  that changes nothing until turned on. Anything major with big impact (gameplay automation,
+  packet timing, anything that changes what a server allows or sees) is a `server.json` setting
+  the installer writes, defaulting to the original's behaviour, so each server owner decides.
 - **Less code wins.** If the same behaviour fits in fewer lines, use fewer lines.
 - **Short code comments.** One or two lines in the file; the why and the history go in the
   folder's `readme.md`.
