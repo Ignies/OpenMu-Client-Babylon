@@ -42,14 +42,14 @@ const TOOLTIP_FIELDS: readonly [offset: number, length: number][] = [
   [486, 64],
   [550, 64],
 ];
-/** `Skill.bmd`: 600 × 80-byte records; the three columns the tree uses. */
-const SKILL_RECORDS = 600;
-const SKILL_RECORD_SIZE = 80;
+/** `Skill_<lang>.bmd` (`SKILL_ATTRIBUTE_FILE_LEGACY`): 650 records of 88 bytes; the columns the tree uses. */
+const SKILL_RECORDS = 650;
+const SKILL_RECORD_SIZE = 88;
 const SKILL_USE_TYPE_OFFSET = 55;
 const SKILL_BRAND_OFFSET = 56;
-const SKILL_ICON_OFFSET = 68;
-/** `SkillUseType == 4`: a base skill that needs no learning (`CheckBeforeSkill`). */
-const SKILL_USE_TYPE_INNATE = 4;
+const SKILL_ICON_OFFSET = 72;
+/** `SKILL_USE_TYPE_MASTERACTIVE`: a brand that is itself a master skill needs no check (`CheckBeforeSkill`). */
+const SKILL_USE_TYPE_MASTERACTIVE = 4;
 
 /** `MAX_MASTER_SKILL_CATEGORY`: the three columns of the window. */
 const MASTER_GROUPS = 3;
@@ -301,7 +301,7 @@ function parseSkillAttributes(buffer: Uint8Array): MasterSkillAttribute[] {
   return decodeRecords(buffer, SKILL_RECORD_SIZE, SKILL_RECORDS, (v, b) => ({
     icon: v.getUint16(SKILL_ICON_OFFSET, true),
     useType: b[SKILL_USE_TYPE_OFFSET],
-    brand: b[SKILL_BRAND_OFFSET],
+    brand: v.getUint32(SKILL_BRAND_OFFSET, true),
   }));
 }
 
@@ -322,7 +322,7 @@ export function ensureMasterTreeData(): Promise<void> {
     loading = Promise.all([
       downloadDataFile('Local/MasterSkillTreeData.bmd'),
       downloadLocalDataFile('MasterSkillTooltip'),
-      downloadDataFile('Local/Skill.bmd'),
+      downloadLocalDataFile('skill'),
     ])
       .then(([tree, tips, skill]) => {
         treeRecords = parseTree(tree);
@@ -442,14 +442,14 @@ function masterRankMet(entry: MasterTreeEntry): boolean {
 }
 
 /**
- * `CheckBeforeSkill`: a strengthener's base skill (`SkillBrand`) must be
- * learned before the first point, unless the base is innate (use type 4).
+ * `CheckBeforeSkill` (NewUIMasterLevel.cpp:995): a strengthener's base skill (`SkillBrand`)
+ * must be learned before the first point, unless the base is itself a master skill.
  */
 function masterBaseSkillMet(entry: MasterTreeEntry): boolean {
   if (masterSkillInfo(entry).level > 0) return true;
   const brand = skillAttributes[entry.skill]?.brand ?? 0;
   if (!brand) return true;
-  if (skillAttributes[brand]?.useType === SKILL_USE_TYPE_INNATE) return true;
+  if (skillAttributes[brand]?.useType === SKILL_USE_TYPE_MASTERACTIVE) return true;
   return HeroSkills.skills.some(s => s.number === brand);
 }
 

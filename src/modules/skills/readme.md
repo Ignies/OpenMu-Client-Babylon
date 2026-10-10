@@ -76,6 +76,8 @@ hotbar share.
 ## Tests
 - `teleportSound.test.ts`: a monster teleporting plays its own sound only on its map (the
   Nightmare in Kanturu 3rd); anyone else the plain one.
+- `masterTree.test.ts`: the tree reads the Season 6 skill table: a node's icon cell and its base
+  skill gate (`CheckBeforeSkill`).
 - `versions/shared/skills/skillTables.golden.test.ts` snapshots `SKILL_DELAY_MS`.
 - `../switchOff.test.ts`: the master level and tree register their listeners when the module
   installs, not when loaded.
@@ -93,8 +95,11 @@ Fed by `MasterStatsUpdate` (F3 50, on entering the game), `MasterCharacterLevelU
 ### masterTree.ts
 `ensureMasterTreeData` loads once, under `Data/`: `Local/MasterSkillTreeData.bmd` (512 BUX records of 24
 bytes, `_MASTER_SKILLTREE_DATA`, plus a 4-byte `GenerateCheckSum2` trailer), `Local/<lang>/MasterSkillTooltip_<lang>.bmd`
-(512 records of 616 bytes, seven printf strings) and `Local/Skill.bmd` (600 records of 80 bytes; icon,
-use type, base skill). A wrong path returns the SPA fallback page, not a 404, hence the range checks.
+(512 records of 616 bytes, seven printf strings) and `Local/<lang>/skill_<lang>.bmd` (650 records of 88
+bytes, `SKILL_ATTRIBUTE_FILE_LEGACY`; icon, use type, base skill), the table the original loads
+(ZzzOpenData.cpp:5622). `Local/Skill.bmd` is an older 600 x 80 table whose 300+ rows are not the
+Season 6 master skills (330 is a passive there), so its icons and base skills were wrong.
+A wrong path returns the SPA fallback page, not a 404, hence the range checks.
 ### recipes.ts
 OpenMU's `MagicEffectNumber` is the original's `eBuffState` (`_enum.h`), the record index of
 `Data/Local/BuffEffect.bmd` (`w_BuffScriptLoader.cpp`) and the icon index of `newui_statusicon*.jpg`.
