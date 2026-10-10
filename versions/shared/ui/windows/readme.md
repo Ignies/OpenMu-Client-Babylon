@@ -77,3 +77,4 @@ controller, and the HUD elements in `../hud`.
 - `../windowModules.test.ts`: every `module:` names an optional module.
 - `gm_panel/commands.test.ts`: every command the panel names resolves against the catalogue.
 - `options/search.test.ts`: the options search text normalising and matching.
+- `trade/index.test.tsx`: the partner grid stays live under the pointer (tooltips), only its clicks are swallowed.

@@ -146,7 +146,7 @@ export const TradeWindow = observer(() => {
         rows={ROWS}
         left={YOUR_GRID_X}
         top={YOUR_GRID_Y}
-        disabled
+        viewOnly
         marked={square => Economy.yourTradeChanged.has(square)}
       />
 

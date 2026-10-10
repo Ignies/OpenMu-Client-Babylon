@@ -11,6 +11,7 @@ import { Economy } from '@/modules/economy/economy';
 import { events } from '@/modules/events';
 import { ItemIcon } from '@/controllers/interface/components/item_icon';
 import { ItemTooltip } from '../../components/item_tooltip';
+import { useHoverRelease } from '../../components/item_grid/hoverRelease';
 import { useEventBus } from '@/controllers/interface/hooks';
 import { Item } from '@/ecs/world';
 import {
@@ -265,6 +266,8 @@ export const Inventory = observer(() => {
 
   const [target, setTarget] = useState<{ column: number; row: number } | null>(null);
   const [hover, setHover] = useState<HoverInfo | null>(null);
+  // The equipment squares sit outside the grid but keep their tooltip.
+  useHoverRelease(hover !== null, !!Bag.pendingItemMove, setHover, gridRef, '.equipment-slot');
 
   const picked = Bag.pickedItem;
   const pickedSize = picked ? itemSize(picked.item) : null;

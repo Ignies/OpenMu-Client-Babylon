@@ -9,6 +9,7 @@ import { ItemTooltip, type TooltipContext } from '../item_tooltip';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuTableFrame } from '@/controllers/interface/components/mu_window';
 import { stableKeyOf } from '@/core/stableKey';
+import { useHoverRelease } from './hoverRelease';
 
 export const SQUARE = 20;
 export const SQUARE_SPRITE = 'newui_item_box.OZT';
@@ -269,6 +270,8 @@ export type ItemGridProps = {
   className?: string;
   /** Greys the grid out and swallows clicks (`LockInventory`). */
   disabled?: boolean;
+  /** Look, don't touch: the tooltip still shows, clicks do nothing (the trade partner's side). */
+  viewOnly?: boolean;
   /** Tint under a carried item: blue when it may land here, red when banned. */
   dropTint?: 'none' | 'ok' | 'ban';
   /** Left click on an occupied square with an empty cursor. */
@@ -310,6 +313,7 @@ export const ItemGrid = observer(
     offset = 0,
     className,
     disabled = false,
+    viewOnly = false,
     dropTint = 'none',
     onPick,
     onPlace,
@@ -325,6 +329,7 @@ export const ItemGrid = observer(
     const pointer = useRef<{ x: number; y: number } | null>(null);
     const [hover, setHover] = useState<HoverInfo | null>(null);
     const [target, setTarget] = useState<Target | null>(null);
+    useHoverRelease(hover !== null, disabled, setHover, gridRef);
 
     const picked = Bag.pickedItem;
     const pickedSize = picked ? itemSize(picked.item) : null;
@@ -418,7 +423,7 @@ export const ItemGrid = observer(
       );
 
     const onPointerDown = (event: React.PointerEvent) => {
-      if (event.button !== 0 || disabled) return;
+      if (event.button !== 0 || disabled || viewOnly) return;
       const { squares, pickedSize } = latest.current;
 
       if (picked && pickedSize) {
@@ -457,7 +462,7 @@ export const ItemGrid = observer(
 
     const onContextMenu = (event: React.MouseEvent) => {
       event.preventDefault();
-      if (disabled) return;
+      if (disabled || viewOnly) return;
 
       if (picked) {
         Bag.cancelPickedItem();
