@@ -183,6 +183,8 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
 - `chaoscastle/clouds.test.ts`: the blue fog banks on types 6-11; 12 stays a marker.
 - `chaoscastle/lighting.test.ts`: one look row on every arena, no sky, black haze from the hero, no
   underworld.
+- `chaoscastle/ringObject.test.ts`: a falling ring drops by the arena's drop, in tiles, on one offset
+  it keeps for the whole fall.
 - `kalima/grassObject.test.ts`: `KalimaWaterPlantObject`.
 - `kanturu2/gateway.test.ts`: the gateway turn sound loops from the click, and stays silent when
   the original refuses it.
