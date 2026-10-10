@@ -18,7 +18,8 @@ pathfinding. Nothing here knows about a skill, a window or a map.
 - `turnAngle.ts`: `normalizeAngle`, `signedAngleDelta`, `turnAngle`, `approachAngle`,
   `createAngleDeg`, `rotationByteOf`, from `ZzzAI.cpp` (`TurnAngle2`, `CreateAngle`, ...), and
   `convertDirectionToAngle` (a direction byte from the server as a yaw; `rotationByteOf` turns it back).
-- `binaryUtils.ts`: byte helpers (`castToByte`, `ArrayCopy`, `GetByteValue`, ...).
+- `binaryUtils.ts`: byte helpers (`castToByte`, `ArrayCopy`, `GetByteValue`, ...) and `readWireString`,
+  every packet string up to its NUL as UTF-8 (what OpenMU writes; the original's `ConvertFromUtf8`).
 - `stableKeyOf(object)` (`stableKey.ts`): a stable React key for an object with no id (entities,
   notice lines, items); the item grid widget and the HUD share it.
 - `guildMark.ts`: `GUILD_MARK_SIZE`, `GUILD_MARK_PALETTE`, `unpackGuildMark`, `packGuildMark`,
@@ -71,5 +72,7 @@ pathfinding. Nothing here knows about a skill, a window or a map.
 - `pathfinding.test.ts`: the Elbeland bridge pinch (a diagonal past two blocked tiles is walkable)
   and a closed tile is never walked onto.
 - `turnAngle.test.ts`: every direction byte turns into a yaw and back to itself.
+- `binaryUtils.test.ts`: packet strings read as UTF-8, stop at the NUL, keep non-UTF-8 bytes one per
+  character, and come out of a generated reader decoded.
 - `rateLimit.test.ts`: IP buckets (IPv4, mapped IPv4, IPv6 /64), loopback, the forwarded header
   trusted only from Caddy on this box, the burst window.

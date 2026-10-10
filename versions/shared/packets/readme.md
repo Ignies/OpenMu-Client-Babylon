@@ -14,7 +14,8 @@ connect server.
 - `bun run generate` runs `generate.ts`. It reads each XML with `HTMLRewriter`, builds the matching
   `.ts` file in memory and writes it over the old one (no index: `src/controllers/net/packets.ts`
   picks the active version's set). A class keeps only the read helpers (`_readString`, `_readDataView`) its getters call and a file only
-  the imports its code uses, so the output passes `noUnusedLocals`.
+  the imports its code uses, so the output passes `noUnusedLocals`. `_readString` is
+  `readWireString` (`src/core/binaryUtils`): every string a packet carries reads as UTF-8.
 - The XML holds every version's variants, so the output also has the `...075`, `...095`, `...097`
   and `...Extended` classes. A version's `variantRank` picks which one wins for a shared code.
 - Packets OpenMU does not define (map-server move, band and ping relays, the module packet) are

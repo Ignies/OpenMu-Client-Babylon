@@ -20,7 +20,7 @@ readouts. Handlers for packets live in `src/modules/<module>/net.ts`, not here.
 - `wireUtils.ts`: packet framing (`getPacketSize`, `getPacketHeaderSize`, `setPacketSize`, ...)
   and numeric casts, with no Babylon or DOM.
 - `protocols/`: `bandProtocol`, `pingProtocol`, `adminProtocol`, `escrowWire`, `chatRoomProtocol`,
-  `chatWire` (`toChatWire`, `fromChatWire`, `clipChatText`).
+  `chatWire` (`toChatWire`, `clipChatText`).
 - `pingNet.ts`: `installPingNet(link)`, `requestPing(x, z)`, `pingAvailable()`, type `PingLink`.
 - `roundTrip.ts`: `NetStats` (`markSent`, `markAnswered`, `roundTripMs`, `reset`).
 - `socketCost.ts`: `recordSocketDrain(bytes, ms)`, `netStats()`, `NET_BURST_MS`.

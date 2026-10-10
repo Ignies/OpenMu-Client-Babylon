@@ -442,16 +442,7 @@ ${packetEnum.values.map(v => {
 
         writer.write(`
   private _readString (from :number, to: number): string {
-    let val = "";
-    for(let i = from; i < to; i++){
-      const ch = String.fromCharCode(this.buffer.getUint8(i));
-
-      if (ch === "\0")break;
-
-      val += ch;
-    }
-              
-    return val;
+    return readWireString(this.buffer, from, to);
   }
 `);
 
@@ -1038,7 +1029,7 @@ import { byteToString } from '@/controllers/assets/download';
 // Imports a generated file may need; each file keeps only the ones its code uses (noUnusedLocals).
 const HEADER_IMPORTS: [string, string[]][] = [
   ['../../../src/core/types', ['CharacterClassNumber']],
-  ['../../../src/core/binaryUtils', ['SetByteValue', 'GetByteValue', 'GetBoolean', 'SetBoolean']],
+  ['../../../src/core/binaryUtils', ['SetByteValue', 'GetByteValue', 'GetBoolean', 'SetBoolean', 'readWireString']],
 ];
 
 for (const name of files) {

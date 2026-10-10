@@ -72,3 +72,30 @@ export function SetBoolean(
 
   return oldValue;
 }
+
+const UTF8 = new TextDecoder('utf-8', { fatal: true });
+
+/**
+ * A packet string up to its first NUL. OpenMU writes them as UTF-8 and the original reads them
+ * with `ConvertFromUtf8` (WSclient.cpp); bytes that are not UTF-8 come back one character each.
+ */
+export function readWireString(view: DataView, from: number, to: number): string {
+  const end = Math.min(to, view.byteLength);
+  let stop = from;
+  let ascii = true;
+  for (; stop < end; stop++) {
+    const byte = view.getUint8(stop);
+    if (byte === 0) break;
+    if (byte >= 0x80) ascii = false;
+  }
+  if (!ascii) {
+    try {
+      return UTF8.decode(new Uint8Array(view.buffer, view.byteOffset + from, stop - from));
+    } catch {
+      // Not UTF-8: one character per byte, below.
+    }
+  }
+  let text = '';
+  for (let i = from; i < stop; i++) text += String.fromCharCode(view.getUint8(i));
+  return text;
+}
