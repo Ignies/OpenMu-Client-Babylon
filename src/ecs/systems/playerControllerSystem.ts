@@ -104,12 +104,11 @@ export const PlayerControllerSystem: ISystemFactory = world => {
     world.attackTarget = null;
     world.pickupTarget = null;
     world.talkTarget = null;
-    // Touch only: a skill fired from the mobile pad leaves a cast standing
-    // while the hero walks into range, the way a held right button does. With
-    // no button to let go of, a tap on the ground is how it is called off. On
-    // a mouse the right-drag repeat re-arms `castRequest` on every move event,
-    // so clearing it there would fight the desktop repeat cast.
-    if (isMobileDevice()) world.castRequest = null;
+    // A skill fired at something out of range leaves a cast standing while the hero walks into
+    // range; a ground click calls it off, as MOVEMENT_MOVE replaces MOVEMENT_SKILL
+    // (ZzzInterface.cpp:3285). Not while the right button is held: its drag repeat re-arms the
+    // cast on every move.
+    if (isMobileDevice() || !world.rightPointerPressed) world.castRequest = null;
   }
 
   /** The tile step the walk is currently aimed along; 0,0 when idle. */
