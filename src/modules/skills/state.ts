@@ -1,6 +1,7 @@
 import { action, makeObservable, observable } from 'mobx';
 import { SaveKeyConfigurationPacket } from '@versions/shared/packets/ClientToServerPackets';
 import { Session } from '../session';
+import { MASTER_REPLACES } from '@versions/shared/skills/skillsDatabase';
 import { isHotbarSkill } from './skillCasting';
 
 /**
@@ -48,6 +49,14 @@ export const HeroSkills = new (class {
   }
 
   addSkill(skill: { index: number; number: number; level: number }) {
+    // Receive_Master_LevelGetSkill (WSclient.cpp:8306): a master skill takes the slot of the one it
+    // replaces, so that skill's hot key (a slot there) and the selection move to it.
+    const replaced = MASTER_REPLACES[skill.number];
+    if (replaced !== undefined) {
+      if (this.currentSkill === replaced) this.currentSkill = skill.number;
+      const slot = this.skillHotkeys.indexOf(replaced);
+      if (slot !== -1) this.assignSkillHotkey(slot, skill.number);
+    }
     this.skills = this.skills
       .filter(s => s.number !== skill.number)
       .concat(skill)
@@ -114,7 +123,7 @@ export const HeroSkills = new (class {
       next[slot] = saved;
     }
     const used = new Set(next);
-    // Master-tree entries and the siege commands are learned skills that never
+    // Passive master-tree entries and the siege commands are learned skills that never
     // sit on a bar slot, so they never claim one by default either.
     const free = this.skills
       .map(s => s.number)

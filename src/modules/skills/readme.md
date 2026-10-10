@@ -32,7 +32,10 @@ hotbar share.
 - The skill list, buffs and hot keys are `HeroSkills` (`state.ts`, exported by the facade): `skills`,
   `setSkillList`, `addSkill`, `removeSkill`, `currentSkill`, `selectSkill`, `buffs`, `setBuff`,
   `skillHotkeys`, `savedSkillHotkeys`, `assignSkillHotkey` (sends `SaveKeyConfiguration`),
-  `applyKeyConfiguration`. Learning from a scroll is the inventory's `learnSkillItem`.
+  `applyKeyConfiguration`. Learning from a scroll is the inventory's `learnSkillItem`. A master skill
+  that replaces one (`MASTER_REPLACES`: OpenMU sends SkillAdded for it, then SkillRemoved for the old
+  one) takes the old skill's hot key and selection, as its slot does in `Receive_Master_LevelGetSkill`.
+  `isHotbarSkill` keeps only the passive tree entries and the siege commands off the bar.
 - Casts go out from `src/ecs/systems/skillCastSystem.ts` (TargetedSkill / AreaSkill), which asks
   `skills.canUse` and calls `skills.startCooldown`.
 - `masterLevel.ts` and `masterTree.ts` register their handlers in `installMasterLevel()` /
@@ -76,6 +79,8 @@ hotbar share.
 ## Tests
 - `teleportSound.test.ts`: a monster teleporting plays its own sound only on its map (the
   Nightmare in Kanturu 3rd); anyone else the plain one.
+- `state.test.ts`: active master skills sit on the bar; a Strengthener takes its base skill's hot key
+  and selection.
 - `masterTree.test.ts`: the tree reads the Season 6 skill table: a node's icon cell and its base
   skill gate (`CheckBeforeSkill`).
 - `versions/shared/skills/skillTables.golden.test.ts` snapshots `SKILL_DELAY_MS`.

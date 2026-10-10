@@ -213,12 +213,11 @@ export function skillIconCell(
 }
 
 /**
- * `CNewUISkillList::Render`'s filter on the learned-skill fan: the castle
- * siege commands and every master-tree entry are learned skills the hero can
- * never put on a bar slot, so they are kept out of the fan and out of the
- * default hot-key layout.
+ * `CNewUISkillList::Render`'s filter on the learned-skill fan (NewUIMainFrameWindow.cpp:2060):
+ * the castle siege commands and the passive master-tree entries (`SKILL_USE_TYPE_MASTERLEVEL`,
+ * OpenMU's PassiveBoost) never sit on a bar slot. A Strengthener or Mastery casts like any skill.
  */
 export function isHotbarSkill(num: number): boolean {
-  if (num < 1 || num >= MASTER_SKILL_FIRST) return false;
-  return num < SIEGE_FIRST || num > SIEGE_LAST;
+  if (num < 1 || (num >= SIEGE_FIRST && num <= SIEGE_LAST)) return false;
+  return skillDefinition(num)?.type !== 'PassiveBoost';
 }
