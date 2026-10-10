@@ -11,7 +11,10 @@ other folders share.
 - `traceHeroInstantMove(hero, to, approach)` (`heroMoveTrace.ts`): the `ObjectMoved` log (scope).
 - `characterStats.ts`: `BaseClass`, `getBaseClass(cls)`, `StatType`, `getClassName(cls)`, `getStatName(stat)`,
   `attackSpeedOf` / `magicSpeedOf(cls, agility)`, `deriveCharacterStats(input)` (damage, defense,
-  rates and wizardry for the character info window).
+  rates and wizardry for the character info window), with the pet's share: the gold Fenrir, Demon,
+  Skeleton and Imp on damage, wizardry and curse, Panda and Unicorn +50 defense
+  (NewUICharacterInfoWindow.cpp:707-737, :954-959, :1296-1326, :1424-1442). The transformation
+  rings of the same blocks are not added yet.
 - `emotes.ts`: `EMOTES`, `EMOTE_RINGS`, `emoteById(id)`, `matchEmoteWord(text)` (the chat words that fire
   an emote, `CheckChatText`), `genderedEmoteAction`, type `EmoteId`.
 - `statAllocation.ts`: `StatAllocation.start(stat, amount)` / `cancel()`, `run`, `running`, `isRunning(stat)`.
@@ -87,3 +90,4 @@ the hero is a walk the client failed to stop; no walk at all means the server mo
 - `statAmounts.test.ts`: amount clamping, the confirm threshold and the run's next step.
 - `stateWarnings.test.ts`: the no healing potions warning counts healing potions only.
 - `state.test.ts`: `Hero` keeps no tile of its own.
+- `characterStats.test.ts`: the pet bonuses on damage, wizardry, curse and defense.
