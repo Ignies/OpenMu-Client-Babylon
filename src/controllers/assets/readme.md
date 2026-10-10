@@ -47,6 +47,8 @@ imports the modules below directly (baselined in `tools/checks`).
   `loadNpcNames`, `onNpcNamesChanged`; `decodeLocalText`, `downloadLocalDataFile`.
 - `itemSetTables()`, `loadItemSetTables(types, options)` and `ItemSet`, `ItemSetTables`, `SetOption`
   (`mu/itemSetFile.ts`, on the door): the ancient sets, loaded on first ask.
+- `itemOptionTables()`, `loadItemOptionTables(harmony, sockets, addOptions)` and their types
+  (`mu/itemOptionFiles.ts`, on the door): the Jewel of Harmony, socket and 380 option tables.
 
 ## How it works
 - Every byte read goes through `fetchAsset`: for a compressible extension it asks for
@@ -158,6 +160,13 @@ then the mix level), each BuxConverted. `ItemSetOption_<lang>.bmd`: 64 records o
 (`ITEM_SET_OPTION_FILE`: name 64, standard options 6 x 2 and their values, ext 2 + 2, count, full
 5 + 5, classes 7). The set's item count comes from the type table. Some English names carry the
 Korean apostrophe `0xA1 0xAF`; it is read as `'`. The checksum after each table is not checked.
+
+### mu/itemOptionFiles.ts
+`JewelOfHarmonyOption_<lang>.bmd`: 3 x 10 records of 180 bytes (type, name 60, min level, 14
+values, 14 prices), one BuxConvert over the whole table; option N is record N - 1.
+`SocketItem_<lang>.bmd`: 3 x 50 records of 104 bytes (id, category, name 64, type, 5 values, 6
+check bytes), one BuxConvert per record. `ItemAddOption.bmd`: 8192 records of 16 bytes (option,
+value, option, value, type, time), one BuxConvert over the whole table.
 
 ### mu/moveReqFile.ts
 An `int` count, then 84-byte records: `index`, main name (32), `/move` alias (32), required level,

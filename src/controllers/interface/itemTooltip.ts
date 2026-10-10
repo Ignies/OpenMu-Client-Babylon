@@ -26,11 +26,11 @@ import {
   type ItemDef,
   type ItemStats,
 } from '@/controllers/item_rules';
-import { ancientSetOf, setOptionLines, wornSetPieces } from '@/controllers/item_rules';
+import { ancientSetOf, harmonyOf, hasGuardianOption, setOptionLines, socketBonusOf, socketsOf, wornSetPieces } from '@/controllers/item_rules';
 import { itemBaseName } from '@versions/shared/items/itemsDatabase';
 import { itemLevelName } from '@/controllers/item_rules';
 import { learnableSkill } from '@/controllers/item_rules';
-import { skillDisplayName } from '@/controllers/assets';
+import { itemOptionTables, skillDisplayName, type SocketOption } from '@/controllers/assets';
 
 /**
  * `RenderItemInfo` (ZzzInventory.cpp:2091) as data: the tooltip is a list
@@ -447,7 +447,7 @@ export function buildItemTooltip(
   item: Item,
   hero: HeroStats,
   compareWith?: Item | null,
-  ancient?: AncientContext
+  extras?: TooltipExtras
 ): ItemTooltipData | null {
   const stats = itemStats(item);
   if (!stats) return null;
@@ -467,7 +467,8 @@ export function buildItemTooltip(
 
   petLines(out, def);
   equipmentLines(out, item, stats, hero, worn);
-  setOptionBlock(out, item, hero, ancient);
+  setOptionBlock(out, item, hero, extras);
+  socketLines(out, item, hero, extras);
 
   const requirementsFail =
     hero.level < stats.reqLvl ||
@@ -619,6 +620,8 @@ function equipmentLines(
 
   if (hasOptions) out.blank();
 
+  guardianOptionLines(out, item);
+  harmonyLines(out, item, def, level);
   ancientBonusLines(out, def, item);
 
   if (item.hasSkill) {
@@ -666,8 +669,17 @@ function ancientBonusLines(out: Lines, def: ItemDef, item: Item) {
   if (hasAttributeDamage(def)) out.add(t('item.attributeDamage'), 'blue');
 }
 
-/** What the set block reads: the hero's worn items, and whether this item is outside the bag (`bThisisEquippedItem`). */
-export type AncientContext = { worn: readonly (Item | null)[]; equipped: boolean };
+/**
+ * What the tooltip reads beyond the hero's stats: the worn items and whether this item is outside the
+ * bag (`bThisisEquippedItem`) for the set block, and the hero's maximums for the socket values.
+ */
+export type TooltipExtras = {
+  worn: readonly (Item | null)[];
+  equipped: boolean;
+  maxLife?: number;
+  maxMana?: number;
+  masterLevel?: number;
+};
 
 /** `getExplainText` (CSItemOption.cpp:375-445) by set option number; no S6 set uses the class masteries past 23. */
 const SET_OPTION_TEXT: readonly TextKey[] = [
@@ -701,7 +713,7 @@ const SET_OPTION_TEXT: readonly TextKey[] = [
  * `RenderSetOptionListInItem` (CSItemOption.cpp:1052-1095): the header, then the options of the set
  * while two or more pieces are worn, lit as `RenderSetOptionList` lights them (grey in the bag).
  */
-function setOptionBlock(out: Lines, item: Item, hero: HeroStats, ancient?: AncientContext) {
+function setOptionBlock(out: Lines, item: Item, hero: HeroStats, ancient?: TooltipExtras) {
   const set = ancientSetOf(item);
   if (!set) return;
   out.blank();
@@ -715,6 +727,101 @@ function setOptionBlock(out: Lines, item: Item, hero: HeroStats, ancient?: Ancie
     const color = !lit ? 'gray' : line.kind === 'full' ? 'yellow' : line.kind === 'ext' ? 'green' : 'blue';
     out.add(t(key, { value: line.value }), color);
   }
+}
+
+/** `GetItemAddOtioninfoText` (ItemAddOptioninfo.cpp:58-99) by option number. */
+const ADD_OPTION_TEXT: Readonly<Record<number, TextKey>> = {
+  1: 'item.opt380.attackRate',
+  2: 'item.opt380.damage',
+  3: 'item.opt380.defenseRate',
+  4: 'item.opt380.defense',
+  5: 'item.opt380.maxHp',
+  6: 'item.opt380.maxSd',
+  7: 'item.opt380.sdAuto',
+  8: 'item.opt380.sdRate',
+};
+
+/** The 380 option block (ZzzInventory.cpp:5008-5025). */
+function guardianOptionLines(out: Lines, item: Item) {
+  const options = hasGuardianOption(item) ? itemOptionTables()?.addOptions[item.group * 512 + item.num] : undefined;
+  if (!options) return;
+  out.blank();
+  for (const [option, value] of options) {
+    const key = ADD_OPTION_TEXT[option];
+    if (key) out.add(t(key, { value }), 'redPurple', true);
+  }
+  out.blank();
+}
+
+/** `GetItemType` (UIJewelHarmony.cpp:133-152): 0 weapons, 1 staffs, 2 shields and armour. */
+function harmonyKind(def: ItemDef): number | null {
+  if (def.group <= ItemGroup.Bow) return 0;
+  if (def.group === ItemGroup.Staff) return 1;
+  return def.group >= ItemGroup.Shield && def.group <= ItemGroup.Boots ? 2 : null;
+}
+
+/**
+ * The Jewel of Harmony line (ZzzInventory.cpp:5037-5062): yellow once the item's level reaches the
+ * option's, grey before. Weapons take options 1-10, staffs and armour 1-8 (`IsHarmonyJewelOption`).
+ */
+function harmonyLines(out: Lines, item: Item, def: ItemDef, level: number) {
+  const harmony = harmonyOf(item);
+  const kind = harmonyKind(def);
+  if (!harmony || kind === null || harmony.option > (kind === 0 ? 10 : 8)) return;
+  const entry = itemOptionTables()?.harmony[kind]?.[harmony.option - 1];
+  if (!entry) return;
+  out.blank();
+  const percent = kind === 2 && harmony.option === 7 ? '%' : '';
+  out.add(`${entry.name} +${entry.values[harmony.level] ?? 0}${percent}`, level >= harmony.level ? 'yellow' : 'gray', true);
+  out.blank();
+}
+
+/** `GlobalText[2640 + category - 1]`: a socket option's element. */
+const SOCKET_ELEMENT: readonly TextKey[] = [
+  'element.fire',
+  'element.water',
+  'element.ice',
+  'element.wind',
+  'element.lightning',
+  'element.earth',
+  'item.socketUnique',
+];
+
+/** `CalcSocketOptionValue` / `CalcSocketOptionValueText` (SocketSystem.cpp:141-198). */
+function socketValue(option: SocketOption, value: number, hero: HeroStats, extras?: TooltipExtras): string {
+  let amount = 0;
+  if (option.type === 1 || option.type === 2) amount = value;
+  else if (option.type === 3) amount = Math.trunc((hero.level + (extras?.masterLevel ?? 0)) / value);
+  else if (option.type === 4) amount = Math.trunc((extras?.maxLife ?? 0) / value);
+  else if (option.type === 5) amount = Math.trunc((extras?.maxMana ?? 0) / value);
+  return option.type === 2 ? `+${amount}%` : `+${amount}`;
+}
+
+/** `AttachToolTipForSocketItem` (SocketSystem.cpp:218-266): each socket, then the bonus option. */
+function socketLines(out: Lines, item: Item, hero: HeroStats, extras?: TooltipExtras) {
+  const sockets = socketsOf(item);
+  const tables = itemOptionTables();
+  if (!sockets.length || !tables) return;
+  out.blank();
+  out.add(t('item.socketInfo'), 'purple');
+  out.blank();
+  sockets.forEach((socket, i) => {
+    const info = socket ? tables.sockets[0][socket.seed] : null;
+    if (!socket || !info) {
+      out.add(t('item.socketSlot', { index: i + 1, option: t('item.socketEmpty') }), 'gray');
+      return;
+    }
+    const element = SOCKET_ELEMENT[info.category - 1];
+    const option = `${element ? t(element) : ''}(${info.name} ${socketValue(info, info.values[socket.level - 1] ?? 0, hero, extras)})`;
+    out.add(t('item.socketSlot', { index: i + 1, option }), 'blue');
+  });
+  const bonus = socketBonusOf(item);
+  const info = bonus === null ? null : tables.sockets[1][bonus];
+  if (!info || info.values[0] <= 0) return;
+  out.blank();
+  out.add(t('item.socketBonus'), 'purple');
+  out.blank();
+  out.add(`${info.name} ${socketValue(info, info.values[0], hero, extras)}`, 'blue');
 }
 
 function trimBlanks(lines: TooltipLine[]): TooltipLine[] {

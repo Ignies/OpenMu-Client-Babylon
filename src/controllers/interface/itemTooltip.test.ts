@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import type { Item } from '@/ecs/world';
 import type { HeroStats } from '@/controllers/item_rules';
-import { loadItemSetTables } from '@/controllers/assets';
+import { loadItemOptionTables, loadItemSetTables } from '@/controllers/assets';
 import { buildItemTooltip, itemNameColor } from './itemTooltip';
 
 // RenderItemInfo name colour (ZzzInventory.cpp:2104-2160).
@@ -94,5 +94,50 @@ describe('a pet tooltip', () => {
     ]);
     expect(pet(1)[0]).toMatchObject({ text: 'Increase 30% of attacking & Wizardry Dmg', color: 'white' });
     expect(pet(3).slice(0, 2).map(l => l.text)).toEqual(['Increase Damage +15%', 'Absorb Damage +10%']);
+  });
+});
+
+const HARMONY = 'Data/Local/Eng/JewelOfHarmonyOption_eng.bmd';
+const SOCKETS = 'Data/Local/Eng/socketitem_eng.bmd';
+const ADD_OPTIONS = 'Data/Local/ItemAddOption.bmd';
+const NO_OPTIONS = !existsSync(HARMONY) || !existsSync(SOCKETS) || !existsSync(ADD_OPTIONS);
+const raw = (bytes: Partial<Record<number, number>>) => Array.from({ length: 12 }, (_, i) => bytes[i] ?? (i >= 7 ? 0xff : 0));
+
+describe.skipIf(NO_OPTIONS)('the extra options in the tooltip', () => {
+  loadItemOptionTables(new Uint8Array(readFileSync(HARMONY)), new Uint8Array(readFileSync(SOCKETS)), new Uint8Array(readFileSync(ADD_OPTIONS)));
+
+  // ZzzInventory.cpp:5008-5025, ItemAddOption.bmd through GetItemAddOtioninfoText.
+  it('lists a 380 item option from ItemAddOption.bmd', () => {
+    const text = lines({ group: 0, num: 22, durability: 50, raw: raw({ 0: 22, 5: 0x08 }) });
+    expect(text.filter(l => l.color === 'redPurple')).toMatchObject([
+      { text: 'Additional Damage +200', bold: true },
+      { text: 'Attack success rate increase +10', bold: true },
+    ]);
+    expect(lines({ group: 0, num: 22, durability: 50 }).some(l => l.color === 'redPurple')).toBe(false);
+  });
+
+  // ZzzInventory.cpp:5037-5062, JewelOfHarmonyOption_eng.bmd.
+  it('names the Jewel of Harmony option, lit once the item reaches its level', () => {
+    const kris = (lvl: number) => lines({ group: 0, num: 0, lvl, durability: 20, socketBonus: (1 << 4) | 5 });
+    expect(kris(9).find(l => l.text === 'Min. attack increase +7')).toMatchObject({ color: 'yellow', bold: true });
+    expect(kris(3).find(l => l.text === 'Min. attack increase +7')?.color).toBe('gray');
+    const armor = lines({ group: 8, num: 5, lvl: 13, durability: 30, socketBonus: (7 << 4) | 13 });
+    expect(armor.some(l => l.text === 'Damage decrement increase +7%')).toBe(true);
+  });
+
+  // AttachToolTipForSocketItem (SocketSystem.cpp:218-266); level = byte / 50 + 1 (NewUIItemMng.cpp:182).
+  it('lists the sockets and the socket bonus', () => {
+    const text = lines({ group: 0, num: 26, durability: 50, sockets: [50 + 3, 0xfe], socketCount: 2, socketBonus: 1 });
+    const header = text.findIndex(l => l.text === 'Socket Item option info');
+    expect(text[header].color).toBe('purple');
+    expect(text[header + 1]).toMatchObject({ text: 'Socket 1: Fire(Minimum attack/Wizardry increase +22)', color: 'blue' });
+    expect(text[header + 2]).toMatchObject({ text: 'Socket 2: No item application', color: 'gray' });
+    expect(text[header + 3]).toMatchObject({ text: 'Bonus socket option', color: 'purple' });
+    expect(text[header + 4]).toMatchObject({ text: 'Skill attack increase +11', color: 'blue' });
+  });
+
+  it('works the level-type socket option off the hero level', () => {
+    const text = lines({ group: 0, num: 26, durability: 50, sockets: [0], socketCount: 1 });
+    expect(text.some(l => l.text === 'Socket 1: Fire((Level type)Attack/Wizardry increase +20)')).toBe(true);
   });
 });

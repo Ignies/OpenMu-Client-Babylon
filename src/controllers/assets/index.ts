@@ -7,3 +7,5 @@ export { texturePacks } from './texturePacks';
 export { skillDisplayName } from './mu/skillNames';
 export { itemSetTables, loadItemSetTables } from './mu/itemSetFile';
 export type { ItemSet, ItemSetTables, SetOption } from './mu/itemSetFile';
+export { itemOptionTables, loadItemOptionTables } from './mu/itemOptionFiles';
+export type { AddOption, HarmonyOption, ItemOptionTables, SocketOption } from './mu/itemOptionFiles';

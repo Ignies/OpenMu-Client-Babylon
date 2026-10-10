@@ -32,6 +32,9 @@ the table would import itself.
 - `ancientSetOf(item)`, `wornSetPieces(set, worn, hero)`, `setOptionLines(set, pieces)`, `SetOptionLine`
   (`ancientSets.ts`): an ancient piece's set and which of its options the worn pieces light
   (`CSItemOption`, from `assets/mu/itemSetFile.ts`).
+- `isSocketItem(group, num)`, `hasGuardianOption(item)`, `harmonyOf(item)`, `socketsOf(item)`, `socketBonusOf(item)`
+  (`itemOptions.ts`): the 380 flag (byte 5 bit 3, read from `raw`), the harmony option or socket bonus
+  (byte 6) and the socket seeds (byte % 50, sphere level byte / 50 + 1), as `CreateItem` reads them.
 
 ## How it works
 - `itemSerializer.ts` reads level, luck, skill, option level, excellent, ancient and socket bytes. Dark Horse

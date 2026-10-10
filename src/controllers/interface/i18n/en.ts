@@ -189,6 +189,19 @@ const en = {
   'item.pet.zen50': 'Zen increase 50%',
   'item.pet.maxHp': 'Max HP +{value} increased',
   'item.pet.imp': 'Increase 30% of attacking & Wizardry Dmg',
+  'item.opt380.attackRate': 'Attack success rate increase +{value}',
+  'item.opt380.damage': 'Additional Damage +{value}',
+  'item.opt380.defenseRate': 'Defense success rate increase +{value}',
+  'item.opt380.defense': 'Defensive skill +{value}',
+  'item.opt380.maxHp': 'Max. HP increase +{value}',
+  'item.opt380.maxSd': 'Max. SD increase +{value}',
+  'item.opt380.sdAuto': 'SD auto recovery',
+  'item.opt380.sdRate': 'SD recovery rate increase +{value}%',
+  'item.socketInfo': 'Socket Item option info',
+  'item.socketSlot': 'Socket {index}: {option}',
+  'item.socketEmpty': 'No item application',
+  'item.socketBonus': 'Bonus socket option',
+  'item.socketUnique': 'Unique',
 };
 
 export default en;

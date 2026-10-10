@@ -51,7 +51,9 @@ windows themselves are content in `versions/shared/ui/` (see
   centred on the cursor, below the cursor art, flipped above, inside the viewport).
   An ancient piece carries its set name, its stat bonus line (`RenderDefaultOptionText`) and the set
   block (`RenderSetOptionListInItem`); the caller hands in the worn items and whether the item sits
-  in the bag (`AncientContext`), since this controller cannot read the hero.
+  in the bag (`TooltipExtras`), since this controller cannot read the hero. The 380 option, Jewel of
+  Harmony and socket blocks read `assets/mu/itemOptionFiles.ts`; a socket value of the level / life /
+  mana kind needs the hero's master level and maximums, also from `TooltipExtras`.
 - `nameTags.ts`: the original's name balloons (`CHAT`, ZzzInterface.cpp:703): a name shows while
   hovered, 100 ticks on creation, refreshed to 10 per hovered frame; chat lines keep it up for
   their own lifetime; lines of 20+ characters split (`CutText`, ZzzInterface.cpp:605).

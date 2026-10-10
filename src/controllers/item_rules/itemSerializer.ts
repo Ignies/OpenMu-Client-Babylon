@@ -77,7 +77,8 @@ export class ItemSerializer {
    *  (bit 7), option level low bits (0-1) · 2: durability · 3: excellent bits
    *  0-5, option level high bit (0x40), item number high bit (0x80) ·
    *  4: ancient discriminator (bits 0-1) + bonus level (bits 2-3) · 5: group
-   *  (high nibble) · 6: socket bonus/380 option · 7-11: sockets (0xFF = none).
+   *  (high nibble), 380 option (0x08) · 6: harmony option and level, or a socket item's
+   *  bonus · 7-11: sockets (0xFF = none).
    */
   static DeserializeItem(array: Uint8Array): Item {
     const itemNumber = array[0] + ((array[3] & ItemNumberHighFlag) << 1);

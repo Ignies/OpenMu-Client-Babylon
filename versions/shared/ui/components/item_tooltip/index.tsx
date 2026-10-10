@@ -28,7 +28,8 @@ import {
 import { placePair } from './placement';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { ItemIcon } from '@/controllers/interface/components/item_icon';
-import { itemSetTables } from '@/controllers/assets';
+import { itemOptionTables, itemSetTables } from '@/controllers/assets';
+import { skills } from '@/modules/skills';
 import { InventoryConstants } from '@/core/inventoryConstants';
 
 /** One inventory square of the picture, as the grids draw it. */
@@ -274,17 +275,21 @@ export const ItemTooltip = observer(
     // An ancient piece lists its set's options as lit by the worn pieces; an item in the
     // bag greys them (`bThisisEquippedItem`, ZzzInventory.cpp:5549-5555).
     const sets = item.isAncient ? itemSetTables() : null;
+    // Harmony, socket and 380 lines read their tables; the socket values the hero's maximums.
+    const options = itemOptionTables();
     const equipped = Hero.items.slice(0, InventoryConstants.EquippableSlotsCount);
     const equippedStamp = item.isAncient ? JSON.stringify(equipped) : '';
     const inBag = context === 'inventory' && (slot ?? -1) >= InventoryConstants.EquippableSlotsCount;
+    const maxima = { maxLife: Hero.maxHP, maxMana: Hero.maxMP, masterLevel: skills.masterLevel };
+    const maximaStamp = JSON.stringify(maxima);
     const data = useMemo(
-      () => buildItemTooltip(item, hero, worn, { worn: equipped, equipped: !inBag }),
+      () => buildItemTooltip(item, hero, worn, { worn: equipped, equipped: !inBag, ...maxima }),
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [itemStamp, heroStamp, wornStamp, equippedStamp, inBag, sets]
+      [itemStamp, heroStamp, wornStamp, equippedStamp, inBag, sets, options, maximaStamp]
     );
 
     const wornLines = useMemo(() => {
-      const built = worn ? buildItemTooltip(worn, hero, null, { worn: equipped, equipped: true }) : null;
+      const built = worn ? buildItemTooltip(worn, hero, null, { worn: equipped, equipped: true, ...maxima }) : null;
       if (!built) return null;
       return [
         { text: t('item.equipped'), color: 'gray', bold: false },
@@ -292,7 +297,7 @@ export const ItemTooltip = observer(
         ...built.lines,
       ] as TooltipLine[];
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [wornStamp, heroStamp, equippedStamp, sets]);
+    }, [wornStamp, heroStamp, equippedStamp, sets, options, maximaStamp]);
 
     useEffect(() => {
       if (!linkable) return;

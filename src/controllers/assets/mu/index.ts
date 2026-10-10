@@ -7,6 +7,8 @@ export type { Gate } from './gates';
 export { localisedItemName } from './itemNameFile';
 export { itemSetTables, loadItemSetTables } from './itemSetFile';
 export type { ItemSet, ItemSetTables, SetOption } from './itemSetFile';
+export { itemOptionTables, loadItemOptionTables } from './itemOptionFiles';
+export type { AddOption, HarmonyOption, ItemOptionTables, SocketOption } from './itemOptionFiles';
 export { decodeLocalText, downloadLocalDataFile } from './localData';
 export { loadMoveReqList } from './moveReqFile';
 export type { MoveReqEntry } from './moveReqFile';
