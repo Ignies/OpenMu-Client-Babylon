@@ -342,6 +342,7 @@ import { characterSkinBody } from './common/transformedBody';
 import { quests } from './quests';
 import { SessionExit } from './common/sessionExit';
 import { Store, UIState } from './store';
+import { JewelBundle } from './ui/pages/worldPage/components/jewelBundle/state';
 import { devQuery } from './common/devSeams';
 import { QuickItemActions } from './common/quickItemActions';
 import { gameServerTarget } from './common/serverConfig';
@@ -3821,11 +3822,18 @@ EventBus.on('NpcWindowResponse', packet => {
       Store.dropNpcTalk();
       events.openDoppelganger();
       break;
+    case NpcWindowResponseNpcWindowEnum.Lahap:
+      // Lahap (and Jeweler Raul in the Loren Market): combine jewels into
+      // bundles of 10/20/30 and disband them. The server needs the NPC to stay
+      // open while it does, the window closes it (`CloseNpcRequest`).
+      Store.dropNpcTalk();
+      JewelBundle.openWindow();
+      break;
     default:
       // A legacy quest NPC (Sebina, Marlon, Apostle Devin…): the dialog is
       // client-side, from Quest_eng.bmd (quests/legacyQuests.ts).
       if (quests.openNpcWindow(p.Window, Store.pendingNpcType)) return;
-      // Lahap, the refineries…: not ported yet.
+      // The refineries…: not ported yet.
       console.warn(`NpcWindowResponse: window ${p.Window} is not supported yet`);
       Store.dropNpcTalk();
       Store.addNotification(t('notify.npcNothingYet'), 'info');

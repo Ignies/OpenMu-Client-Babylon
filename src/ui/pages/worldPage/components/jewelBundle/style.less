@@ -1,0 +1,147 @@
+// Ours: the jewel bundle window (Lahap / Jeweler Raul). Same chrome as the
+// chaos machine's title block; the list is plain rows on a dark plate.
+.jewel-bundle {
+  font-size: 11px;
+
+  .window-title {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-weight: bold;
+    color: #dcdcdc;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .head-close {
+    position: absolute;
+    cursor: pointer;
+  }
+
+  .jewel-tabs {
+    position: absolute;
+    display: flex;
+    gap: 2px;
+  }
+
+  .jewel-tab {
+    flex: 1;
+    padding: 3px 0;
+    text-align: center;
+    font-size: 10px;
+    cursor: pointer;
+    color: #d2e6ff;
+    background-color: #14141480;
+    text-shadow: 1px 1px 0 #000;
+
+    &:hover {
+      color: #fff;
+      background-color: #4d666699;
+    }
+
+    &.active {
+      color: #ffff30;
+      background-color: #4d808099;
+    }
+  }
+
+  .jewel-list {
+    position: absolute;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    background-color: #14141480;
+    color: #d2e6ff;
+  }
+
+  .jewel-row {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 26px;
+    padding: 0 3px;
+    border-bottom: 1px solid #ffffff10;
+
+    &.empty .jewel-name,
+    &.empty .jewel-count {
+      opacity: 0.45;
+    }
+  }
+
+  .jewel-icon {
+    flex: none;
+    width: 20px;
+    height: 20px;
+  }
+
+  .jewel-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    font-size: 9px;
+    line-height: 10px;
+    text-shadow: 1px 1px 0 #000;
+    // Two lines: "Jewel of Bless" / "Jewel of Soul" differ at the end.
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+
+  .jewel-count {
+    flex: none;
+    min-width: 18px;
+    text-align: right;
+    font-size: 10px;
+    color: #ffff30;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .jewel-buttons {
+    flex: none;
+    display: flex;
+    gap: 1px;
+
+    button {
+      min-width: 18px;
+      padding: 1px 2px;
+      font-size: 9px;
+      line-height: 12px;
+      color: #e2e2e2;
+      background-color: #3a4f52;
+      border: 1px solid #6a6a6a;
+      cursor: pointer;
+
+      &.wide {
+        padding: 1px 4px;
+      }
+
+      &:hover:not(:disabled) {
+        color: #fff;
+        background-color: #4d8080;
+      }
+
+      &:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+    }
+  }
+
+  .jewel-hint {
+    padding: 8px 6px;
+    font-size: 10px;
+    color: #dcdcdc;
+  }
+
+  .jewel-foot {
+    position: absolute;
+    font-size: 10px;
+    line-height: 13px;
+    color: #dcdcdc;
+    text-shadow: 1px 1px 0 #000;
+
+    .yours {
+      color: #7fe07f;
+    }
+  }
+}

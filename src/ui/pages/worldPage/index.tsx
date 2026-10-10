@@ -19,6 +19,7 @@ import { Inventory } from './components/inventory';
 import { NpcShop } from './components/npcShop';
 import { Vault } from './components/vault';
 import { ChaosMachine } from './components/chaosMachine';
+import { JewelBundleWindow } from './components/jewelBundle';
 import { TradeWindow } from './components/trade';
 import { MyShop, ShopBrowser } from './components/personalShop';
 import {
@@ -83,6 +84,7 @@ const HUD = observer(() => {
       {}
       <Vault />
       <ChaosMachine />
+      <JewelBundleWindow />
       <TradeWindow />
       <MyShop />
       <ShopBrowser />
