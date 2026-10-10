@@ -114,7 +114,10 @@ shared pools, textures and particle recipes other folders reuse.
 - `core.test.ts`: a flickering tint makes a bounded number of additive materials, each within half
   a step of the colour asked for.
 - `modelClones.test.ts`: a `model`, `linkedModel` or spirit skull clone leaves no mesh, skeleton or
-  clip behind when it ends, also when it loads after the end.
+  clip behind when it ends (a `model` clone once the pool is emptied), also when it loads after the
+  end; a `model` spawn after one ended reuses its clone, shown once dressed.
+- `modelPool.test.ts`: a returned clone comes back as it was loaded and disabled, at most
+  `POOL_PER_MODEL` per model, never to another scene; a stray one is disposed, the spares on reset.
 - `afterimage.test.ts`: a copy takes the drawn meshes of each part onto a skeleton of its own, posed on
   the clip's first key while the body keeps its own; a placed part stands where a body facing that way
   would draw it, at its alpha; an unplaced or 0-alpha part is not drawn; it ends taking its copies along.
@@ -267,6 +270,16 @@ The node sits in the bone's frame like a held item (`render/modelObject.ts` basi
 BMD space is the bone's. The clip plays at the owner's speed and is put back when it drifts;
 `lock(frame, 0)` holds a key with a looping sliver, never a paused clip. Spawned by
 `spawnLinkedModel` from the Flame Strike skill, which steps it a tick at a time.
+
+### modelPool.ts
+`spawnModel` takes its clone from here and hands it back on release, so a bolt or an arrow reuses a
+clone instead of making one and dropping it (in a crowd that was a hundred a second and the GC
+stalled for 400 ms). Up to 24 spares per model and scene; what a spawn may change on the meshes
+(material, metadata, visibility, vertex colours, enabled) is put back on return, what it hung under
+the clone is disposed, and a spare's first clip restarts as on a fresh clone. A clone is handed
+out disabled and the spawn enables it once dressed, so a spawn that fails half way never shows the
+raw GLB. `reset` disposes the spares. The original makes nothing per spawn either: effects are
+fixed slots (`Effects[MAX_EFFECTS]`, Core/Globals/_define.h:456) drawing the shared `Models[]`.
 
 ### monsterGlow.ts
 `RenderLight` is warm amber breathing `sin(WorldTime * 0.002) * 0.3 + 0.7`; card size is texture

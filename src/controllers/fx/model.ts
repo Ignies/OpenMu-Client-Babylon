@@ -30,7 +30,8 @@ import {
 import { angleMatrixQuaternion } from '../render/renderAngles';
 import { clampAlpha } from './clampAlpha';
 import { chromeMaterial, disposeChromeMaterials } from './chrome';
-import { disposeLoadedModel, getMaterial, loadGLTF, type LoadedModel } from '../assets/modelLoader';
+import { getMaterial, loadGLTF, type LoadedModel } from '../assets/modelLoader';
+import { clearModelPool, returnModel, takeModel } from './modelPool';
 import { BlendState } from '@versions/shared/objects/enum';
 import { Ecs } from '../../ecs/current';
 import type { TestScene } from '../render/scenes/testScene';
@@ -442,10 +443,10 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
   };
 
   if (world) {
-    void loadGLTF(opts.model, world)
+    void takeModel(world.scene, opts.model, () => loadGLTF(opts.model, world))
       .then(gltf => {
         if (disposed) {
-          disposeLoadedModel(gltf);
+          returnModel(gltf);
           return;
         }
         loaded = gltf;
@@ -480,6 +481,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
           });
           clip = gltf.animationGroups[0] ?? null;
           meshes.push(gltf.mesh);
+          gltf.mesh.setEnabled(true);
           return;
         }
         const bodyLight = new Vector3(colour[0], colour[1], colour[2]);
@@ -606,6 +608,8 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
           } else clip.play(opts.loop ?? true);
         }
         meshes.push(gltf.mesh);
+        // Only now, dressed: a clone that failed to dress never shows as the raw GLB.
+        gltf.mesh.setEnabled(true);
       })
       .catch(err => console.warn('[effects] model failed', opts.model, err));
   }
@@ -712,9 +716,9 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
       for (const m of fadeMats) m.dispose(false, false);
       for (const m of meshes) releaseEffectGlow(m);
       for (const cp of copyNodes) cp.node.dispose(false, false);
+      // Back to the pool before the node goes: it is detached there.
+      if (loaded) returnModel(loaded);
       node.dispose(false, false);
-      // The clone's skeleton and clips outlive its meshes.
-      if (loaded) disposeLoadedModel(loaded);
     },
   });
 
@@ -761,6 +765,7 @@ function update(_map: number, dt: number): void {
 function reset(): void {
   live.clear();
   disposeChromeMaterials();
+  clearModelPool();
 }
 
 // ---- 3. the layer ----------------------------------------------------------
