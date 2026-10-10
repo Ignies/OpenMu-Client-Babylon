@@ -70,6 +70,10 @@ export type Item = {
   optionLevel?: number;
   /** Excellent option bits 0-5 of byte 3 (CalcExcellentOptions order). */
   excellentFlags?: number;
+  /** Wings and capes: the wing option bits 0-3 of byte 3 (`CalcWingOptions`). */
+  wingOptions?: number;
+  /** Wings and capes: `OptionType`, the kind of the additional option (byte 3 bits 4-5). */
+  wingOptionKind?: number;
   /** Ancient set discriminator (byte 4 bits 0-1) and +5/+10 bonus level (bits 2-3). */
   ancientDiscriminator?: number;
   ancientBonusLevel?: number;

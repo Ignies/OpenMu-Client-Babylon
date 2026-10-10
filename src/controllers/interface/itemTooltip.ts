@@ -26,7 +26,21 @@ import {
   type ItemDef,
   type ItemStats,
 } from '@/controllers/item_rules';
-import { ancientSetOf, harmonyOf, hasGuardianOption, setOptionLines, socketBonusOf, socketsOf, wornSetPieces } from '@/controllers/item_rules';
+import {
+  ancientSetOf,
+  harmonyOf,
+  hasGuardianOption,
+  isOptionWing,
+  setOptionLines,
+  skillMana,
+  socketBonusOf,
+  socketsOf,
+  wingOptionKind,
+  wingOptions,
+  wornSetPieces,
+  type WingOption,
+  type WingOptionKind,
+} from '@/controllers/item_rules';
 import { itemBaseName } from '@versions/shared/items/itemsDatabase';
 import { itemLevelName } from '@/controllers/item_rules';
 import { learnableSkill } from '@/controllers/item_rules';
@@ -129,6 +143,7 @@ class Lines {
 function nameColor(item: Item, def: ItemDef, level: number): TooltipColor {
   const optionLevel = item.optionLevel ?? 0;
 
+  if (isFenrir(def)) return 'blue';
   if (isJewel(def) || isWeaponOfArchangel(def)) return 'yellow';
   if (isDivineArchangelWeapon(def)) return 'purple';
   if (item.isAncient) return 'greenBlue';
@@ -149,8 +164,19 @@ export function itemNameColor(item: Item): TooltipColor {
   return stats ? nameColor(item, stats.def, stats.level) : 'white';
 }
 
+/** `ITEM_HORN_OF_FENRIR`. */
+const isFenrir = (def: ItemDef) => def.group === ItemGroup.Helper && def.index === 37;
+/** The Horn of Fenrir's variant, by its option bits (ZzzInventory.cpp:2526-2539). */
+const FENRIR_VARIANT: Readonly<Record<number, TextKey>> = {
+  0x01: 'item.fenrir.destroy',
+  0x02: 'item.fenrir.protect',
+  0x04: 'item.fenrir.illusion',
+};
+
 function nameLine(item: Item, def: ItemDef, level: number): string {
   let name = itemBaseName(def.group, def.index) || def.name;
+  const variant = isFenrir(def) ? FENRIR_VARIANT[(item.excellentFlags ?? 0) & 0x3f] : undefined;
+  if (variant) return `${name} ${t(variant)}`;
   // `GetSetItemName`: the set's name goes in front (ZzzInventory.cpp:2586).
   const set = ancientSetOf(item);
   if (set) name = `${set.name} ${name}`;
@@ -614,15 +640,19 @@ function equipmentLines(
 
   // Options (`RenderDefaultOptionText`), skill, luck, excellent.
   const optionLevel = item.optionLevel ?? 0;
-  const excellentFlags = item.excellentFlags ?? (item.isExcellent ? 0 : 0);
+  const excellentFlags = isFenrir(def) ? 0 : item.excellentFlags ?? 0;
+  const wingOpts = wingOptions(item);
   const hasOptions =
-    optionLevel > 0 || item.luck || item.hasSkill || excellentFlags > 0;
+    optionLevel > 0 || item.luck || item.hasSkill || excellentFlags > 0 || wingOpts.length > 0;
 
   if (hasOptions) out.blank();
 
   guardianOptionLines(out, item);
   harmonyLines(out, item, def, level);
   ancientBonusLines(out, def, item);
+
+  // `CalcWingOptions` fills the specials before the skill and luck (ZzzInfomation.cpp:1078).
+  for (const { option, value } of wingOpts) out.add(t(WING_OPTION_TEXT[option], { value }), 'blue');
 
   if (item.hasSkill) {
     const skill = skillDisplayName(def.skill);
@@ -634,7 +664,10 @@ function equipmentLines(
     out.add(t('item.luckCritical'), 'blue');
   }
 
-  if (optionLevel > 0) {
+  const wingKind = isOptionWing(def.group, def.index) ? wingOptionKind(item) : undefined;
+  if (optionLevel > 0 && wingKind !== undefined) {
+    if (wingKind) out.add(t(WING_KIND_TEXT[wingKind], { value: wingKind === 'life' ? optionLevel : optionLevel * 4 }), 'blue');
+  } else if (optionLevel > 0) {
     const bonus = optionLevel * 4;
     if (isStaff(def)) out.add(t('item.additionalWizardry', { value: bonus }), 'blue');
     else if (isWeapon(def)) out.add(t('item.additionalDamage', { value: bonus }), 'blue');
@@ -644,6 +677,54 @@ function equipmentLines(
   if (excellentFlags > 0) {
     excellentLines(out, def, excellentFlags, hero.level);
   }
+
+  fenrirLines(out, def, item, hero);
+}
+
+/** `GetSpecialOptionText` for the wing options (ZzzInventory.cpp:1975-2023). */
+const WING_OPTION_TEXT: Readonly<Record<WingOption, TextKey>> = {
+  maxHp: 'item.wing.maxHp',
+  maxMana: 'item.wing.maxMana',
+  ignoreDefense: 'item.wing.ignoreDefense',
+  maxAg: 'item.wing.maxAg',
+  command: 'item.setOpt.command',
+  returnDamage: 'item.wing.returnDamage',
+  fullLife: 'item.wing.fullLife',
+  fullMana: 'item.wing.fullMana',
+};
+
+/** A wing's additional option by its kind (`AT_LIFE_REGENERATION`, `AT_IMPROVE_*`). */
+const WING_KIND_TEXT: Readonly<Record<WingOptionKind, TextKey>> = {
+  life: 'item.wing.hpRecovery',
+  damage: 'item.additionalDamage',
+  wizardry: 'item.additionalWizardry',
+  curse: 'item.additionalCurse',
+  defense: 'item.additionalDefense',
+};
+
+/** `AT_SKILL_PLASMA_STORM_FENRIR`. */
+const PLASMA_STORM = 76;
+
+/** The Horn of Fenrir's own block (ZzzInventory.cpp:5160-5222). */
+function fenrirLines(out: Lines, def: ItemDef, item: Item, hero: HeroStats) {
+  if (!isFenrir(def)) return;
+  const flags = item.excellentFlags ?? 0;
+  out.add(t('item.fenrir.skill', { mana: skillMana(PLASMA_STORM) }), 'blue');
+  if (flags === 0x01 || flags === 0x02) {
+    out.add(t(flags === 0x01 ? 'item.fenrir.finalDamage' : 'item.fenrir.absorbFinal', { value: 10 }), 'blue');
+    out.add(t('item.fenrir.speed'), 'blue');
+  } else if (flags === 0x04) {
+    out.add(t('item.fenrir.life', { value: Math.trunc(hero.level / 2) }), 'blue');
+    out.add(t('item.fenrir.mana', { value: Math.trunc(hero.level / 2) }), 'blue');
+    out.add(t('item.fenrir.attack', { value: Math.trunc(hero.level / 12) }), 'blue');
+    out.add(t('item.fenrir.wizardry', { value: Math.trunc(hero.level / 25) }), 'blue');
+    out.blank();
+    out.add(t('item.fenrir.golden'), 'green');
+    out.add(t('item.fenrir.heroes'), 'green');
+  }
+  out.blank();
+  out.add(t('item.fenrir.summon'), 'yellow');
+  if (flags === 0) out.add(t('item.fenrir.upgrade'), 'yellow');
 }
 
 /** `SET_OPTION_*` (1 str, 2 agi, 3 ene, 4 vit) -> the +5 / +10 bonus line (`GetDefaultOptionText`). */

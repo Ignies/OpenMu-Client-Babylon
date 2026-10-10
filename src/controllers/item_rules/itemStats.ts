@@ -522,6 +522,11 @@ function calcRequirements(
   return { reqLvl, reqStr, reqAgi, reqVit, reqEne, reqCmd };
 }
 
+/** The mana a skill costs (`GetSkillInformation`), 0 for an unknown one. */
+export function skillMana(num: number): number {
+  return skillDefinition(num)?.mana ?? 0;
+}
+
 const statsCache = new Map<string, ItemStats | null>();
 
 /** The item's effective stats for its level / excellent / ancient / option state. */

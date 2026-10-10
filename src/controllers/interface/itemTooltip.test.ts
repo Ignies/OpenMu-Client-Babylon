@@ -141,3 +141,53 @@ describe.skipIf(NO_OPTIONS)('the extra options in the tooltip', () => {
     expect(text.some(l => l.text === 'Socket 1: Fire((Level type)Attack/Wizardry increase +20)')).toBe(true);
   });
 });
+
+// CalcWingOptions (ZzzInfomation.cpp:855-940) and the wing option kinds (:1236-1442).
+describe('a wing tooltip', () => {
+  it('lists its wing options before skill and luck, and is never excellent', () => {
+    const text = lines({ group: 12, num: 3, lvl: 9, durability: 200, luck: true, optionLevel: 2, wingOptions: 0x01 | 0x02, wingOptionKind: 2 });
+    expect(text[0].text).toBe('Wings of Spirit +9');
+    const at = (s: string) => text.findIndex(l => l.text === s);
+    expect(at('HP +95 increased')).toBeGreaterThan(0);
+    expect(at('Mana +95 increased')).toBe(at('HP +95 increased') + 1);
+    expect(at('Luck (success rate of Jewel of Soul +25%)')).toBeGreaterThan(at('Mana +95 increased'));
+    expect(text.some(l => l.text === 'Automatic HP recovery 2%')).toBe(true);
+  });
+
+  it('names the additional option by its kind', () => {
+    const storm = (kind: number) => lines({ group: 12, num: 36, durability: 200, optionLevel: 2, wingOptionKind: kind }).map(l => l.text);
+    expect(storm(0)).toContain('Automatic HP recovery 2%');
+    expect(storm(2)).toContain('Additional Defense +8');
+    expect(storm(3)).toContain('Additional Damage +8');
+    expect(lines({ group: 12, num: 1, durability: 200, optionLevel: 1 }).map(l => l.text)).toContain('Additional Wizardry +4');
+    expect(lines({ group: 12, num: 43, durability: 200, optionLevel: 1, wingOptionKind: 2 }).map(l => l.text)).toContain('Additional Curse +4');
+  });
+
+  it('lists the third wing options', () => {
+    const text = lines({ group: 12, num: 37, durability: 200, wingOptions: 0x02 | 0x08 }).map(l => l.text);
+    expect(text).toContain("Returns the enemy's attack power in 5%");
+    expect(text).toContain('Complete recovery of Mana in 5% rate');
+  });
+});
+
+// The Horn of Fenrir: its name and lines by variant (ZzzInventory.cpp:2526-2539, :5160-5222).
+describe('the Horn of Fenrir tooltip', () => {
+  const fenrir = (flags: number) => lines({ group: 13, num: 37, durability: 255, excellentFlags: flags });
+
+  it('is named for its variant in blue', () => {
+    expect(fenrir(0x01)[0]).toMatchObject({ text: 'Horn of Fenrir +Destroy', color: 'blue' });
+    expect(fenrir(0x02)[0].text).toBe('Horn of Fenrir +Protect');
+    expect(fenrir(0x04)[0].text).toBe('Horn of Fenrir +Illusion');
+    expect(fenrir(0)[0].text).toBe('Horn of Fenrir');
+  });
+
+  it('lists the skill, the variant lines and the summon line', () => {
+    const black = fenrir(0x01).map(l => l.text);
+    expect(black).toEqual(expect.arrayContaining(['Plasma storm skill (Mana:50)', 'Increase final damage 10%', 'Increase speed', 'Can summon the Fenrir when equipped.']));
+    expect(fenrir(0x02).map(l => l.text)).toContain('Absorb final damage 10%');
+    const gold = fenrir(0x04);
+    expect(gold.map(l => l.text)).toEqual(expect.arrayContaining(['Added 200 of Life', 'Added 200 of Mana', 'Added 33 Attack', 'Added 16 Wizardry']));
+    expect(gold.find(l => l.text === 'Golden Fenrir')?.color).toBe('green');
+    expect(fenrir(0).map(l => l.text)).toContain('Skills will improve through upgrading.');
+  });
+});

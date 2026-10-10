@@ -35,9 +35,14 @@ the table would import itself.
 - `isSocketItem(group, num)`, `hasGuardianOption(item)`, `harmonyOf(item)`, `socketsOf(item)`, `socketBonusOf(item)`
   (`itemOptions.ts`): the 380 flag (byte 5 bit 3, read from `raw`), the harmony option or socket bonus
   (byte 6) and the socket seeds (byte % 50, sphere level byte / 50 + 1), as `CreateItem` reads them.
+- `isOptionWing(group, num)`, `wingOptionKind(item)`, `wingOptions(item)` (`wingOptions.ts`): the wing options
+  (`CalcWingOptions`) and the kind of a wing's additional option (`OptionType`, ZzzInfomation.cpp:1236-1442).
+- `skillMana(num)`: a skill's mana, for tooltip lines that name it.
 
 ## How it works
-- `itemSerializer.ts` reads level, luck, skill, option level, excellent, ancient and socket bytes. Dark Horse
+- `itemSerializer.ts` reads level, luck, skill, option level, excellent, ancient and socket bytes. On wings
+  and capes the excellent byte holds the wing options (bits 0-3) and `OptionType` (bits 4-5), and the Horn
+  of Fenrir keeps its variant there: neither counts as excellent. Dark Horse
   and Dark Raven keep their level in byte 2, not in the level bits. `raw` keeps the original bytes.
 - `ancientSets.ts` ports `CheckItemSetOptions` / `calcSetOptionList` (CSItemOption.cpp:316-372, :839-906):
   a set lists options only with two pieces worn, one standard option per piece past the first, the
@@ -81,7 +86,8 @@ the table would import itself.
 - what the compare tooltip measures against: `comparedItem` in `itemCompare.ts`.
 
 ## Tests
-- `itemSerializer.test.ts`: round trips (plain, +13 luck skill, excellent, ancient, sockets, pets, number > 255).
+- `itemSerializer.test.ts`: round trips (plain, +13 luck skill, excellent, ancient, sockets, pets, number > 255);
+  wing options and kind, the Fenrir variant.
 - `itemClasses.test.ts`: the Rage Fighter class column and unrestricted items; the Summoner gear and wings,
   the Rapier and the 3rd wings against `Data/Local/Eng/item_eng.bmd`'s class columns.
 - `itemRequirements.test.ts`: strength per option level, wing and pet level requirements.

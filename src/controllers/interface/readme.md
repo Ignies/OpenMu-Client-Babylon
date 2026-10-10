@@ -53,7 +53,9 @@ windows themselves are content in `versions/shared/ui/` (see
   block (`RenderSetOptionListInItem`); the caller hands in the worn items and whether the item sits
   in the bag (`TooltipExtras`), since this controller cannot read the hero. The 380 option, Jewel of
   Harmony and socket blocks read `assets/mu/itemOptionFiles.ts`; a socket value of the level / life /
-  mana kind needs the hero's master level and maximums, also from `TooltipExtras`.
+  mana kind needs the hero's master level and maximums, also from `TooltipExtras`. Wings list their wing
+  options before skill and luck and name the additional option by its kind; the Horn of Fenrir is
+  named for its variant and has its own block (ZzzInventory.cpp:5160-5222).
 - `nameTags.ts`: the original's name balloons (`CHAT`, ZzzInterface.cpp:703): a name shows while
   hovered, 100 ticks on creation, refreshed to 10 per hovered frame; chat lines keep it up for
   their own lifetime; lines of 20+ characters split (`CutText`, ZzzInterface.cpp:605).
