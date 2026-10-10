@@ -79,4 +79,35 @@ describe('updateMuHelperLoop', () => {
   it('never casts a skill BuffTarget does not list', () => {
     expect(buffTick(422, [])).toBe(false);
   });
+
+  /** One helper tick with a drop next to the hero: what it sends the hero to pick up. */
+  function pickupTick(pickupAsked: boolean): unknown {
+    on.module = true;
+    on.state.config = { ...defaultMuHelperConfig(), pickAllItems: true };
+    const drop = {
+      netId: 5,
+      worldIndex: 0,
+      transform: { pos: { x: 11, z: 10 } },
+      droppedItem: { isMoney: false, group: 14, num: 0, pickupAsked },
+    };
+    const world = {
+      playerEntity: { transform: { pos: { x: 10, z: 10 } }, attributeSystem: { isAboveZero: () => false } },
+      mapIndex: 0,
+      castRequest: null,
+      pickupTarget: null,
+      netObjsQuery: { entities: [drop] },
+      playersQuery: { entities: [] },
+    } as unknown as World;
+    on.helper.active = true;
+    updateMuHelperLoop(world, 0.3);
+    const target = world.pickupTarget === (drop as unknown) ? 'drop' : world.pickupTarget;
+    on.helper.active = false;
+    updateMuHelperLoop(world, 0.3);
+    return target;
+  }
+
+  it('asks for a drop once: after its pickup request it is left alone (DeleteItem, MuHelper.cpp:1252)', () => {
+    expect(pickupTick(false)).toBe('drop');
+    expect(pickupTick(true)).toBeNull();
+  });
 });

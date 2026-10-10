@@ -359,7 +359,8 @@ function obtainItem(world: World, hero: Entity, config: MuHelperConfig): boolean
   let best: Entity | null = null;
   let bestDist = maxDistance + 1;
   for (const e of world.netObjsQuery.entities) {
-    if (!e.droppedItem || e.objOutOfScope) continue;
+    // One request per drop: the original takes it off its list once asked for (`DeleteItem`, MuHelper.cpp:1252).
+    if (!e.droppedItem || e.droppedItem.pickupAsked || e.objOutOfScope) continue;
     if (e.worldIndex !== undefined && e.worldIndex !== world.mapIndex) continue;
     if (!shouldObtain(config, e)) continue;
     const dist = tileDistance(from, entityTile(e));

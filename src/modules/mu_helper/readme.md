@@ -30,6 +30,8 @@ the two server packets, with its running state and the raw config blob (`MuHelpe
   `consumeItemRequest`, `repairItemRequest`, `Pets.sendPetCommand`).
 - Entering a safe zone calls `MuHelper.toggleMuHelper()` (stop). A warp, or a jump of more than 3
   tiles, re-anchors the regroup point.
+- A drop is asked for once: the pickup system marks it `pickupAsked` when the request goes out and the
+  helper never goes for it again, as the original takes it off its list (`DeleteItem`, MuHelper.cpp:1252).
 - Switching it off clears `world.castRequest`, `attackTarget` and `pickupTarget`, so the hero does not
   keep walking to the monster or drop it was on.
 
@@ -59,4 +61,4 @@ the two server packets, with its running state and the raw config blob (`MuHelpe
   away seconds clamp.
 - `loop.test.ts`, `state.test.ts`: nothing runs or starts while the module is off. `loop.test.ts`: switching
   it off lets go of its cast, swing and pickup; a buff is checked by skill number and a skill
-  `BuffTarget` does not list is never cast.
+  `BuffTarget` does not list is never cast; a drop already asked for is left alone.
