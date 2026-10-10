@@ -82,7 +82,9 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   by `appearanceSystem.ts`, the character select line-up too (ReadEquipmentExtended calls the same rule); the
   create screen draws the whole `Logo/NewFace` model (MODEL_FACE, CharMakeWin.cpp:467), no parts.
 - `WingObject` (`wingObject.ts`) draws the extras a `WingSpec` in `wings.ts` declares: the
-  additive membrane mesh, bone sprites, thunder and mesh passes (ZzzObject.cpp:9860-9925).
+  additive membrane mesh, bone sprites, thunder and mesh passes (ZzzObject.cpp:9860-9925). They
+  run while any of the model's meshes is drawn, nested ones included: an unskinned GLB (the Dark
+  Lord robe, Wing50) hangs its meshes under its `model_<name>` node, not the root.
 - `MonsterObject` applies the blend mesh from `monsterBlendMesh.ts` on load and the Budge Dragon
   hover while walking (ZzzCharacter.cpp:6274-6278).
 - A transformation skin (`characterSkinBody`) is either a part file worn on the player rig in place
@@ -130,7 +132,7 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   Zyro, the Cursed Wizard's kit, the plate helpers), each with its ZzzCharacter.cpp lines.
 - `skinTexture.test.ts`: skin / hair / level and hide texture names, and the case of each test.
 - `wingObject.test.ts`: the Wing of Ruin layer (a `Data/` bitmap, `getDataTexture`) is read top-down like
-  the GLB textures it shares the UVs of.
+  the GLB textures it shares the UVs of, and is drawn on a model whose meshes sit under its model node.
 - Also from `controllers/item_rules/`: `portedItems`, `questItemLink`, `weaponAttack` tests.
 
 ## Notes

@@ -790,7 +790,7 @@ export class ModelObject {
    * they hang off this model's bones, so they are covered by their owner's
    * `Children` walk in `anyMeshInFrustum`.
    */
-  private _frustumMeshes: AbstractMesh[] = [];
+  protected _frustumMeshes: AbstractMesh[] = [];
 
   /** Consecutive frames fully outside the frustum; see OUT_OF_VIEW_GRACE. */
   private _outOfViewFrames = 0;
