@@ -135,9 +135,11 @@ export const AIDA_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
  * `stream` rather than `blend`. Mesh indices for 25/28 are not set in the
  * C++ (the BMD's own blend flag decides); 0 is the single-mesh case.
  */
+const SCROLL_25 = perTick(0.015);
+
 export const AIDA_MESH_ANIMATIONS: MeshAnimations = {
-  25: { mesh: 0, kind: 'blend', v: t => -perTick(0.015)(t) },
-  28: { mesh: 0, kind: 'blend', v: t => -perTick(0.015)(t) },
+  25: { mesh: 0, kind: 'blend', v: t => -SCROLL_25(t) },
+  28: { mesh: 0, kind: 'blend', v: t => -SCROLL_25(t) },
   65: { mesh: 0, kind: 'stream', u: saw(100000, 0.00005) },
   66: { mesh: 0, kind: 'stream', u: saw(100000, 0.00005) },
   77: { mesh: 0, kind: 'stream', u: sawUp(100000, 0.0002) },

@@ -178,7 +178,8 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   others' 48) make a `BITMAP_LIGHT` SubType 15 (`light15`) one tick in three.
 - `kanturu1/spec.test.ts`, `aida/spec.test.ts`: the falls (Kanturu and the GM area 81-83, Aida 56-58) make
   `BITMAP_WATERFALL_1` SubType 2 one tick in two, `_3` SubType 4 every tick and `_2` SubType 2 one in
-  three (`waterfall1_2`, `waterfall3_4`, `waterfall2_2`).
+  three (`waterfall1_2`, `waterfall3_4`, `waterfall2_2`); Aida 25 and 28 scroll down 0.015 a tick from
+  one scroll built at load, never one a frame.
 - `chaoscastle/thunder.test.ts`: pillar thunder timing, which pillar it strikes and the bolt's fall.
 - `chaoscastle/clouds.test.ts`: the blue fog banks on types 6-11; 12 stays a marker.
 - `chaoscastle/lighting.test.ts`: one look row on every arena, no sky, black haze from the hero, no
