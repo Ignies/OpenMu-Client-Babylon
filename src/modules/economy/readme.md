@@ -52,4 +52,4 @@ vault, chaos machine, trade and personal shop. The packet handlers that feed it 
 - vault, trade or shop behaviour: the matching section of `economy.ts`; the packets in its module's `net.ts`.
 
 ## Tests
-- none yet.
+- `economy.test.ts`: `craftingResult` keeps the tray on a refused mix, empties it on a failure, holds the result on a success.

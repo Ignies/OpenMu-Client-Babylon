@@ -15,7 +15,7 @@ Chaos machine packets (`CNewUIMixInventory`). The mix state and actions live in 
   `Economy.closeMix` (`CraftingDialogCloseRequest`).
 
 ## Packets
-- `ItemCraftingResult`: the tray is emptied and, on success, gets the result item; `Economy.craftingResult`
+- `ItemCraftingResult`: a success or a failure empties the tray (a success then holds the result); a refusal leaves it; `Economy.craftingResult`
   plays the sounds and prints the reason.
 - `CraftingDialogClosed075`: the server closed the window; closes it without sending a close back.
 

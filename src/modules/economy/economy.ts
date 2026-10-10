@@ -778,11 +778,15 @@ export const Economy = new (class _Economy {
     item: Item | null
   ): void {
     const E = ItemCraftingResultCraftingResultEnum;
+    // Only a mix the machine tried empties the tray; a refusal (zen, level, wrong
+    // items) leaves the items in (ReceiveMixExtended, WSclient.cpp:6796-6831).
+    const tried = result === E.Success || result === E.Failed;
 
     runInAction(() => {
       this.mixPending = false;
+      this.mixResult = tried ? (result === E.Success ? 'success' : 'failed') : null;
+      if (!tried) return;
       this.mixItems = emptyGrid(MIX_SLOTS);
-      this.mixResult = result === E.Success ? 'success' : 'failed';
       if (result === E.Success && item) this.mixItems[0] = item;
     });
 
