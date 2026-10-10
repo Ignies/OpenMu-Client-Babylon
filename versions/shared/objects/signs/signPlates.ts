@@ -153,12 +153,16 @@ export function prefetchSignPlates(objectDir: string): void {
 const sources = new Map<string, Promise<ImageBitmap | null>>();
 const textures = new Map<string, Texture>();
 
-onLanguageChanged(() => {
-  // The labels are localised; the drawn copies are not reusable across a
-  // language change. The sources (the untouched originals) still are.
+/**
+ * Frees the drawn plates: on a map change (`app/lifecycle.ts`), the next map draws its own, and on
+ * a language change, the labels are localised. The sources (the untouched originals) are kept.
+ */
+export function disposeSignPlates(): void {
   for (const texture of textures.values()) texture.dispose();
   textures.clear();
-});
+}
+
+onLanguageChanged(disposeSignPlates);
 
 /** The untouched original, decoded once per plate and kept for the session. */
 function plateSource(key: string): Promise<ImageBitmap | null> {

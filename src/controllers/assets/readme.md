@@ -3,7 +3,7 @@
 Getting game files into the client: the two data roots, fetching with gzip sidecars, the glTF
 model cache and item materials, texture packs, the pre-game download, the item icon pack, the BMD
 reader (`bmd/`) and the readers for the original `Data/` tree (`mu/`). `index.ts` is the door
-for new imports (`loadGLTF`, `localisedNpcName`, `reportLoadFailure`, `settle`); older code still
+for new imports (`loadGLTF`, `evictUnusedContainers`, `localisedNpcName`, `reportLoadFailure`, `settle`); older code still
 imports the modules below directly (baselined in `tools/checks`).
 
 ## Public API
@@ -24,7 +24,7 @@ imports the modules below directly (baselined in `tools/checks`).
 - `compressedAssets.ts`: `fetchAssetBytes`, `prefetchAsset`; `COMPRESSED_EXTENSIONS`,
   `COMPRESSED_SUFFIX` for the build tools.
 - `modelLoader.ts`: `loadGLTF(path, world)`, `disposeLoadedModel` (a clone with its skeleton and
-  clips), `warmGLTF`, `evictContainers`, `getMaterial`,
+  clips), `warmGLTF`, `evictContainers`, `evictUnusedContainers(folders)`, `getMaterial`,
   `getScrollVariant`, `getFlatLitVariant`, `setMeshFadeBlend`, `syncMaterialQuality`,
   `syncTexturePack`, `getModel`; `getDataTexture(scene, path)` (a `Data/` bitmap for a mesh drawn with
   another texture than its own, top-down like the GLBs'), `ALPHA_TEST_AND_BLEND`.
@@ -54,7 +54,11 @@ imports the modules below directly (baselined in `tools/checks`).
 - `loadGLTF` parses each GLB once into an `AssetContainer` and hands out clones. Item materials are
   cached by their arguments, so a Classic / PBR switch (`syncMaterialQuality`) swaps pointers. Each
   newly cached texture goes through `applyPackToTexture`. `evictContainers` drops a map's folder
-  on warp.
+  on warp; `evictUnusedContainers` drops the monster and NPC models nothing draws any more (called
+  last in `app/lifecycle.ts`), as the original releases them on every map change (`DeleteMonsters`,
+  `DeleteNpcs`). A container counts as used while a clone shares its geometry, and one asked for in
+  the last 10 s is kept (a clone may be on its way). Items, player gear and skill models stay
+  cached, as the original keeps them loaded.
 - Texture packs: `packsBase()` swaps `game-assets` for `packs` in the version's asset path. A
   pack's `pack.json` maps `<label>|<WxH>` (and `|ozt` / `|ozj` for same-size pairs) to a file, and
   `updateURL` repoints the live texture. See [texture_packs.md](../../../docs/texture_packs.md).
@@ -91,6 +95,8 @@ imports the modules below directly (baselined in `tools/checks`).
 - change which interface sheets preload: `versions/<id>/ui/preload.ts`.
 
 ## Tests
+- `modelLoader.test.ts`: `evictUnusedContainers` drops a monster or NPC model with no clone left,
+  keeps one still drawn, one asked for in the last 10 s and the folders it is not given.
 - `resolveUrlToDataFolder.test.ts`: own files stay on the version root, the rest come from the
   borrowed tree, a file the version lacks is never borrowed, absolute urls pass through; each
   version names its own index.

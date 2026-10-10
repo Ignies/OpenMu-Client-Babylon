@@ -11,6 +11,7 @@ import {
   Texture,
   TransformNode,
   type AbstractMesh,
+  type Mesh,
   type Node,
 } from '../render/babylon/exports';
 import type { World } from '../../ecs/world';
@@ -453,6 +454,10 @@ export type LoadedModel = {
  */
 const containersCache = new Map<string, Promise<AssetContainer>>();
 
+/** The settled containers and when each path was last asked for, for `evictUnusedContainers`. */
+const resolvedContainers = new Map<string, AssetContainer>();
+const lastAsked = new Map<string, number>();
+
 /**
  * Set to false to bypass the cache entirely and give every request its own
  * freshly parsed, non-cloned copy - what the loader did before the container
@@ -614,11 +619,14 @@ function loadContainer(
   fileName: string,
   characterAsset: boolean
 ): Promise<AssetContainer> {
+  lastAsked.set(filePath, performance.now());
   const cached = containersCache.get(filePath);
   if (cached) return cached;
 
   const pending = loadContainerBytes(filePath, fileName, scene)
     .then(container => {
+      // Not when it was evicted while it loaded: that dispose is already queued.
+      if (containersCache.get(filePath) === pending) resolvedContainers.set(filePath, container);
       prepareMeshes(
         container.meshes,
         container.skeletons,
@@ -826,12 +834,14 @@ export function warmGLTF(filePath: string, world: World): Promise<void> {
  * world changes, after the old map's entities - the clones that shared the
  * containers' geometry - are gone. Without this the cache grew by one map's
  * worth of GLBs per warp for the whole session. Shared folders (`Player/`,
- * `Item/`, `Npc/`) are never passed here.
+ * `Item/`, `Npc/`) are never passed here; see `evictUnusedContainers`.
  */
 export function evictContainers(pathPrefix: string): void {
   for (const [key, pending] of containersCache) {
     if (!key.includes(pathPrefix)) continue;
     containersCache.delete(key);
+    resolvedContainers.delete(key);
+    lastAsked.delete(key);
     // `AssetContainer.dispose` disposes the container's textures, so the
     // diffuse textures parsed out of this file die with it. Dropping them
     // here is what makes the map's next visit re-parse the GLB and keep the
@@ -843,4 +853,40 @@ export function evictContainers(pathPrefix: string): void {
       () => {}
     );
   }
+}
+
+/** A model asked for this recently may be about to be cloned: kept. */
+const RECENTLY_ASKED_MS = 10_000;
+
+/** Anything still drawing from it: a clone shares its geometry. A container with none (a bare rig) counts as used. */
+function containerInUse(container: AssetContainer): boolean {
+  let judged = false;
+  for (const mesh of container.meshes as Mesh[]) {
+    if (mesh.instances?.length) return true;
+    const geometry = mesh.geometry;
+    if (!geometry) continue;
+    judged = true;
+    if (geometry.meshes.some(user => user !== mesh)) return true;
+  }
+  return !judged;
+}
+
+/**
+ * Drop the cached containers under any of `folders` that nothing in the scene draws from: the
+ * original releases every monster and NPC model on a map change (`DeleteMonsters`, `DeleteNpcs`,
+ * MapManager.cpp:1183-1185). Returns how many went.
+ */
+export function evictUnusedContainers(folders: readonly string[], now = performance.now()): number {
+  let released = 0;
+  for (const [key, container] of resolvedContainers) {
+    if (!folders.some(folder => key.includes(folder))) continue;
+    if (now - (lastAsked.get(key) ?? 0) < RECENTLY_ASKED_MS || containerInUse(container)) continue;
+    containersCache.delete(key);
+    resolvedContainers.delete(key);
+    lastAsked.delete(key);
+    texturesCache.delete(key);
+    container.dispose();
+    released++;
+  }
+  return released;
 }

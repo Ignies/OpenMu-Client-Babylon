@@ -203,8 +203,8 @@ function unloadMap(world: World, oldMap: ENUM_WORLD, newMap: ENUM_WORLD) {
   }
 
   // The old map's own GLBs (`Object<n>/`) have no user left; shared folders
-  // (`Player/`, `Item/`, `Npc/`) are not touched. Blood Castle floors share
-  // one folder, so a same-folder warp keeps everything.
+  // are not touched here (unused monster and NPC models go in app/lifecycle.ts).
+  // Blood Castle floors share one folder, so a same-folder warp keeps everything.
   const oldAssets = assetWorldNum(oldMap);
   if (oldAssets !== assetWorldNum(newMap)) {
     // Keys are `./game-assets/Object4/Object40.glb`; the leading slash keeps
