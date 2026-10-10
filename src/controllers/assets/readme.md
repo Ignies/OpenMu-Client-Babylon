@@ -52,7 +52,9 @@ imports the modules below directly (baselined in `tools/checks`).
   `<file>.gz` first and unpacks it with `DecompressionStream`, else it reads the plain file. A
   missing file or a dev server's `index.html` answer throws instead of returning garbage.
 - `loadGLTF` parses each GLB once into an `AssetContainer` and hands out clones. Item materials are
-  cached by their arguments, so a Classic / PBR switch (`syncMaterialQuality`) swaps pointers. Each
+  cached by their arguments, so a Classic / PBR switch (`syncMaterialQuality`) swaps pointers; it
+  also drops each skinned mesh's draw cache, as a frozen material kept its stale effect (the hero
+  drew dark, then in shards). Each
   newly cached texture goes through `applyPackToTexture`. `evictContainers` drops a map's folder
   on warp; `evictUnusedContainers` drops the monster and NPC models nothing draws any more (called
   last in `app/lifecycle.ts`), as the original releases them on every map change (`DeleteMonsters`,
@@ -95,7 +97,8 @@ imports the modules below directly (baselined in `tools/checks`).
 - change which interface sheets preload: `versions/<id>/ui/preload.ts`.
 
 ## Tests
-- `modelLoader.test.ts`: `evictUnusedContainers` drops a monster or NPC model with no clone left,
+- `modelLoader.test.ts`: `syncMaterialQuality` drops a skinned mesh's draw cache only;
+  `evictUnusedContainers` drops a monster or NPC model with no clone left,
   keeps one still drawn, one asked for in the last 10 s and the folders it is not given.
 - `resolveUrlToDataFolder.test.ts`: own files stay on the version root, the rest come from the
   borrowed tree, a file the version lacks is never borrowed, absolute urls pass through; each

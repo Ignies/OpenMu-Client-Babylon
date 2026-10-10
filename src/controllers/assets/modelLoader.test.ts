@@ -5,8 +5,9 @@ import { Mesh } from '@babylonjs/core/Meshes/mesh';
 import { CreateBox } from '@babylonjs/core/Meshes/Builders/boxBuilder';
 import { AssetContainer } from '@babylonjs/core/assetContainer';
 import { SceneLoader } from '@babylonjs/core/Loading/sceneLoader';
+import { Skeleton } from '@babylonjs/core/Bones/skeleton';
 import type { World } from '../../ecs/world';
-import { evictUnusedContainers, loadGLTF } from './modelLoader';
+import { evictUnusedContainers, loadGLTF, syncMaterialQuality } from './modelLoader';
 
 vi.hoisted(() => {
   const g = globalThis as Record<string, unknown>;
@@ -56,6 +57,19 @@ afterAll(() => {
 
 const LATER = 11_000;
 const count = (name: string) => parsed.filter(p => p === name).length;
+
+describe('syncMaterialQuality', () => {
+  it('drops the draw cache of a skinned mesh, so its next frame compiles for the material it is on now', () => {
+    const skinned = CreateBox('skinned', { size: 1 }, scene);
+    skinned.skeleton = new Skeleton('skeleton', 'skeleton', scene);
+    const plain = CreateBox('plain', { size: 1 }, scene);
+    const reset = [vi.spyOn(skinned, 'resetDrawCache'), vi.spyOn(plain, 'resetDrawCache')];
+    syncMaterialQuality(scene);
+    expect(reset.map(r => r.mock.calls.length > 0)).toEqual([true, false]);
+    skinned.dispose();
+    plain.dispose();
+  });
+});
 
 describe('evictUnusedContainers', () => {
   it('drops a monster or NPC model nothing draws any more, and keeps one still drawn', async () => {

@@ -334,6 +334,9 @@ export function setMeshFadeBlend(mesh: AbstractMesh, on: boolean): void {
  */
 export function syncMaterialQuality(scene: Scene): void {
   for (const mesh of scene.meshes) {
+    // The shared materials are frozen and kept a skinned mesh's old effect: after a switch
+    // mid-game the hero and its wings drew dark, then in shards. The next frame compiles afresh.
+    if (mesh.skeleton) mesh.resetDrawCache();
     const args = materialArgs.get(mesh.material as ItemMaterial);
     if (!args) continue;
 
