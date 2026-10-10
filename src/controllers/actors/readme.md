@@ -51,8 +51,9 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   `debuffSlow`; `ItemGroup`, `ItemRestPose`, `itemRestHeight`, `itemWornHeight`, `itemTumbleAxis`;
   `itemObjectAttribute(group, num)`; `GuildFlag`, `GUILD_FLAG_BONE`, `isThunderHawkArmor`;
   `applyOutlawLook`, `outlawUltraActive`, `OUTLAW_ULTRA_LIGHT`; `isSkinOrHairTexture`,
-  `isHideTexture`, `hideSkinTexture(group, num)` (on the door: the bitmap a dropped Faith or Queen
-  armour / pants draws mesh 0 with, ZzzObject.cpp:7774-7790); `traceHeroInstantMove`.
+  `isHideTexture`, `hideSkinTexture(group, num)` and `hideSkinMeshes(group, num)` (on the door: the
+  bitmap a dropped part draws mesh 0 with, and the only meshes it draws, `RenderPartObjectBody`'s
+  HideSkin branches, ZzzObject.cpp:7614-8908); `traceHeroInstantMove`.
 - `openHelm.ts`: `showsClassHead(helm)`, whether the class head is drawn under that helm (below).
 
 ## How it works
@@ -127,7 +128,9 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   classes under Node.
 - `npcLooks.test.ts`: NPCs drawn as the original builds them (Hanzo's scale, the 0.9 default and who sets its own, the plain-model NPCs,
   Zyro, the Cursed Wizard's kit, the plate helpers), each with its ZzzCharacter.cpp lines.
-- `skinTexture.test.ts`: skin / hair / level and hide texture names.
+- `skinTexture.test.ts`: skin / hair / level and hide texture names, and the case of each test.
+- `wingObject.test.ts`: the Wing of Ruin layer (a `Data/` bitmap, `getDataTexture`) is read top-down like
+  the GLB textures it shares the UVs of.
 - Also from `controllers/item_rules/`: `portedItems`, `questItemLink`, `weaponAttack` tests.
 
 ## Notes
@@ -150,6 +153,13 @@ and left-hand items get an extra `AngleMatrix(145,0,275)+(0,10,-30)` concatenate
 3x4 maths ports ZzzMathLib.cpp literally, including `R_ConcatTransforms` writing over its own input
 (see `render/boneLink.ts`): the result is sheared, but it is what the original renders. The
 `?backRot=` and `?backOff=` URL queries override the back matrix; they are not gated to dev builds.
+
+### skinTexture.ts
+`isSkinOrHairTexture` reads the name as the BMD writes it: `ski` and `hair` are tested byte by byte, so
+the capitalised `SkinClass...` textures of the Mistery to Lilium sets are not skin. The flag sits on the
+bitmap, which the original shares case-insensitively, so `SkinClass301/302/305` turn skin through the
+lower-case names in HelmMale46/47/52/53; the capitalised spellings are only in the class bodies, which
+never draw with HideSkin, so the name test alone gives the same drops.
 
 ### wings.ts
 `MODEL_WING + n` is `{ group: 12, num: n }`; capes are group 13. Not ported because the original

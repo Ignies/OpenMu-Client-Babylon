@@ -1,7 +1,7 @@
 import { type AbstractMesh, Matrix, type Mesh, Vector3 } from '../../controllers/render/babylon/exports';
 import type { Entity, World } from '../../ecs/world';
 import { itemRestHeight, itemWornHeight } from '../../controllers/actors/itemAngle';
-import { hideSkinTexture } from '../../controllers/actors';
+import { hideSkinMeshes, hideSkinTexture } from '../../controllers/actors';
 import { ModelObject } from '../../controllers/render/modelObject';
 import { zenCoinCount, zenCoinScatter, type ZenCoinOffset } from './zenPile';
 
@@ -49,8 +49,9 @@ type PileCoin = { x: number; y: number; z: number; lag: number };
  * to a prop, all of it in `RenderItems` (ZzzObject.cpp:6342):
  *
  * - `ItemHeight` pulls a worn body part back down onto the ground.
- * - `HideSkin = true` keeps the head, the skin and the hair out of it, and draws
- *   a Faith or Queen armour or pants with its skin cut out (`hideSkinTexture`).
+ * - `HideSkin = true` keeps the head, the skin and the hair out of it, draws
+ *   some parts with their skin cut out (`hideSkinTexture`) and others with only
+ *   some of their meshes (`hideSkinMeshes`).
  * - `o->AnimationFrame` is never advanced, so the model is frozen.
  * - zen is drawn as a pile: `RenderZen` scatters coins around the drop before
  *   the drop itself is drawn at the centre (`modules/drops/zenPile.ts`).
@@ -72,6 +73,7 @@ export class DropObject extends ModelObject {
 
     const drop = entity.droppedItem;
     this.HideSkinTexture = drop ? hideSkinTexture(drop.group, drop.num) : null;
+    this.HideSkinMeshes = drop ? hideSkinMeshes(drop.group, drop.num) : null;
 
     if (drop?.isMoney) {
       this.#zenScale = entity.transform?.scale || 1;

@@ -29,8 +29,9 @@ export const v097dData: VersionData = {
   folder: withTrailingSlash(import.meta.env.VITE_DATA_URL_V097D || './Data-v097d/'),
   assets: './game-assets-v097d/',
   locale: '',
-  // World1..World12, as its client ships them: Lorencia to Blood Castle.
-  worlds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+  // The worlds a map entry reads, out of the World1..World12 its client ships
+  // (Lorencia to Blood Castle): World6, Exile, has no entry.
+  worlds: [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12],
   inventory: new Set(V097D_DATA_FILES),
   borrows: {
     assets: season6Data.assets,

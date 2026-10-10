@@ -10,6 +10,16 @@ describe('isSkinOrHairTexture', () => {
     expect(isSkinOrHairTexture('hair_R')).toBe(true);
   });
 
+  // LoadData.cpp:84-86 tests lower-case `ski` and `hair` byte by byte; only `level` ignores case.
+  it('reads ski and hair in lower case only, level in any case', () => {
+    expect(isSkinOrHairTexture('skinClass301')).toBe(true);
+    expect(isSkinOrHairTexture('LevelClass207')).toBe(true);
+    expect(isSkinOrHairTexture('SkinClass106_upper')).toBe(false);
+    expect(isSkinOrHairTexture('Skinclass106_hair')).toBe(false);
+    expect(isSkinOrHairTexture('SKIN_01')).toBe(false);
+    expect(isSkinOrHairTexture('Hair_R')).toBe(false);
+  });
+
   it('leaves the armour and helmet textures alone', () => {
     expect(isSkinOrHairTexture('head_07')).toBe(false);
     expect(isSkinOrHairTexture('upper_07_m')).toBe(false);
