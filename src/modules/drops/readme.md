@@ -57,4 +57,5 @@ and the loot filter for the ALT name overlay.
 ## Tests
 - `zenPile.test.ts`: coin count by amount, scatter inside the radius and over the disc, same pile per seed.
 - `dropObject.test.ts`: a dropped armour / pants with a HideSkin bitmap draws mesh 0 with it, alpha-tested;
-  every other part keeps its own textures; the parts that draw only some meshes, with real texture names.
+  every other part keeps its own textures; the parts that draw only some meshes, with real texture names;
+  a drop casts no shadow (`ItemObjectAttribute`, ZzzObject.cpp:5160).

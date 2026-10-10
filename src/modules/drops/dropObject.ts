@@ -57,6 +57,9 @@ type PileCoin = { x: number; y: number; z: number; lag: number };
  *   the drop itself is drawn at the centre (`modules/drops/zenPile.ts`).
  */
 export class DropObject extends ModelObject {
+  /** `ItemObjectAttribute` sets `EnableShadow = false` (ZzzObject.cpp:5160): a ground item draws no shadow. */
+  CastsShadow = false;
+
   /** `transform.scale`, which the pile's centimetres must not be shrunk by. */
   #zenScale = 1;
 
