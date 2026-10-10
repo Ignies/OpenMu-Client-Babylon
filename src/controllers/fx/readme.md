@@ -56,7 +56,9 @@ shared pools, textures and particle recipes other folders reuse.
   call ends in `.catch(reportLoadFailure(file))` from `assets`: a missing file is warned once and
   the effect just does not appear.
 - Shared pools (`core.ts`): additive materials cached per (texture, colour, blend), billboard
-  cards from a free list, one `ParticleSystem` per recipe so a burst is a counter bump.
+  cards from a free list, one `ParticleSystem` per recipe so a burst is a counter bump. The colour
+  is rounded to 1/32 first: keyed by the exact tint, a flickering effect made a new material
+  nearly every frame and kept it until the map changed.
 - Units follow the original: lifetimes in 25 Hz ticks (`TICK`), distances in cm / 100 (`CM`).
   Entries cite the `CreateEffect` / `CreateJoint` / `CreateParticle` code they port
   (ZzzEffect.cpp, ZzzEffectJoint.cpp, ZzzEffectParticle.cpp).
@@ -109,6 +111,8 @@ shared pools, textures and particle recipes other folders reuse.
   `cloud10` (SubType 10) drifts twice its push from up to 200 off and darkens 0.01 a tick to 0.15,
   fading past 300 and gone past 500, `cloud11` (SubType 11) drifts the same in its own light, turning,
   and `fireRed` (`BITMAP_FIRE_RED`, firered.jpg) shoots up steady for 20 ticks.
+- `core.test.ts`: a flickering tint makes a bounded number of additive materials, each within half
+  a step of the colour asked for.
 - `afterimage.test.ts`: a copy takes the drawn meshes of each part onto a skeleton of its own, posed on
   the clip's first key while the body keeps its own; a placed part stands where a body facing that way
   would draw it, at its alpha; an unplaced or 0-alpha part is not drawn; it ends taking its copies along.

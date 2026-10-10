@@ -261,9 +261,8 @@ export function darkRibbonSheet(scene: Scene, file: string): Promise<Texture> {
 
 const materials = new Map<Scene, Map<string, StandardMaterial>>();
 
-function colourKey(c: RGB): string {
-  return `${(c[0] * 255) | 0},${(c[1] * 255) | 0},${(c[2] * 255) | 0}`;
-}
+/** A cached material's tint is rounded to 1/32: below what an additive card shows, and a flicker stays a few materials. */
+const TINT_STEPS = 32;
 
 /**
  * Effects draw after every group-0 mesh, the alpha-keyed ones included.
@@ -403,11 +402,13 @@ export function additiveMaterial(
     byKey = new Map();
     materials.set(scene, byKey);
   }
-  const gain = blend === 'add' ? lightCardGain(scene) : 1;
-  const tint: RGB = gain === 1 ? colour : [colour[0] * gain, colour[1] * gain, colour[2] * gain];
+  const gain = (blend === 'add' ? lightCardGain(scene) : 1) * TINT_STEPS;
+  const r = Math.round(colour[0] * gain);
+  const g = Math.round(colour[1] * gain);
+  const b = Math.round(colour[2] * gain);
   const texKey = typeof texture === 'string' ? texture : `#${texture.uniqueId}`;
   const softKey = soft === 'card' ? '|softCard' : soft === true ? '|soft' : soft ? `|soft${soft.w}x${soft.h}` : '';
-  const key = `${texKey}|${colourKey(tint)}|${blend}${softKey}`;
+  const key = `${texKey}|${r},${g},${b}|${blend}${softKey}`;
   let m = byKey.get(key);
   if (m) return m;
 
@@ -415,7 +416,7 @@ export function additiveMaterial(
   mat.diffuseColor.set(0, 0, 0);
   mat.specularColor.set(0, 0, 0);
   mat.ambientColor.set(0, 0, 0);
-  mat.emissiveColor.set(tint[0], tint[1], tint[2]);
+  mat.emissiveColor.set(r / TINT_STEPS, g / TINT_STEPS, b / TINT_STEPS);
   mat.disableLighting = true;
   mat.alphaMode = blend === 'subtract' ? Constants.ALPHA_SUBTRACT : ADDITIVE_ALPHA_MODE;
   mat.transparencyMode = Material.MATERIAL_ALPHABLEND;
