@@ -115,3 +115,4 @@ windows themselves are content in `versions/shared/ui/` (see
   never takes a built-in action's key.
 - `components/item_tooltip/placement.test.ts`: tooltip and compare-pair placement.
 - `itemTooltip.test.ts`: tooltip lines and name colours against `RenderItemInfo`.
+- `item_icons/itemIconFit.test.ts`: every Box of Luck level and the newer icons have a fit entry.
