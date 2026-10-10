@@ -430,6 +430,12 @@ export class ModelObject {
   HideSkinTexture: string | null = null;
 
   /**
+   * Under `HideSkin`, the only meshes drawn: the branches that call `RenderMesh`
+   * on some meshes in place of `RenderBody` (ZzzObject.cpp:7614-8908). Null = all.
+   */
+  HideSkinMeshes: readonly number[] | null = null;
+
+  /**
    * `o->AnimationFrame = 0` with nothing ever advancing it
    * (`ItemObjectAttribute`, ZzzObject.cpp:5151; `MoveItems`:6241 moves a drop
    * but never animates it): a dropped item holds the first frame of its first
@@ -1254,7 +1260,10 @@ export class ModelObject {
     }
   }
 
-  /** `HideSkin`: drop the skin and hair meshes out of the draw and the bounds. */
+  /**
+   * `HideSkin`: drop the skin, the hair and the meshes the item does not draw
+   * out of the draw and the bounds.
+   */
   private applyHideSkin() {
     if (!this.HideSkin || !this.gltf) return;
 
@@ -1275,8 +1284,13 @@ export class ModelObject {
       );
     }
 
-    for (const mesh of this._frustumMeshes) {
-      if (mesh === swapped || mesh.metadata?.skinTexture !== true) continue;
+    // RenderMesh on the kept meshes still runs the skin test (ZzzBMD.cpp:1324).
+    const kept = this.HideSkinMeshes;
+    const meshes = this._frustumMeshes;
+    for (let i = 0; i < meshes.length; i++) {
+      const mesh = meshes[i];
+      const drawn = kept === null || kept.includes(i);
+      if (drawn && (mesh === swapped || mesh.metadata?.skinTexture !== true)) continue;
 
       mesh.isVisible = false;
       mesh.metadata.csmCaster = false;

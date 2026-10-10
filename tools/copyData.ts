@@ -61,8 +61,17 @@ const RULES: Rule[] = [
   { dir: 'Object8', ext: [], names: Array.from({ length: 32 }, (_, i) => `wt${String(i).padStart(2, '0')}.ozj`) },
   // lighting/effectLights.ts → Object39/k_effect_01.OZJ (BITMAP_KANTURU_2ND_EFFECT1, the relic lamps' star)
   { dir: 'Object39', ext: [], names: ['k_effect_01.ozj'] },
-  // actors/skinTexture.ts → the bitmaps a dropped Faith or Queen armour / pants draws mesh 0 with
-  { dir: 'Player', ext: [], names: ['item312_armoritem.ozt', 'item312_pantitem.ozt', 'skinclass706_upperitem.ozt', 'skinclass706_loweritem.ozt'] },
+  // actors/skinTexture.ts → the bitmaps a dropped armour / pants draws mesh 0 with (Mistery to Lilium,
+  // Faith, Queen, and Lucky 65 / 70 under Player/LuckyItem/)
+  {
+    dir: 'Player',
+    ext: [],
+    names: [
+      ...[40, 41, 42, 43, 44, 45].flatMap(n => [`invenarmormale${n}.ozt`, `invenpantsmale${n}.ozt`]),
+      'item312_armoritem.ozt', 'item312_pantitem.ozt', 'skinclass706_upperitem.ozt', 'skinclass706_loweritem.ozt',
+      'invenarmormale40_luck.ozt', 'invenpantsmale40_luck.ozt', 'invenarmormale41_luck.ozt', 'invenpantsmale41_luck.ozt',
+    ],
+  },
 ];
 
 function keep(rule: Rule, file: string): boolean {

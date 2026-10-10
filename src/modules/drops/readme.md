@@ -19,10 +19,12 @@ and the loot filter for the ALT name overlay.
   Box of Luck by level, candy boxes, Rena +1/+2, quest items, Weapon of Archangel, Wizards Ring. The pose
   follows the shown model. It moved there because `actors/playerObject.ts` reads it too.
 - The resting pose and height come from `controllers/actors/itemAngle.ts`.
-- A drop is drawn with `HideSkin` (no head, skin or hair). A Faith or Queen armour or pants also draws mesh 0
-  with the bitmap `hideSkinTexture` names, the part with its skin cut out (ZzzObject.cpp:7774-7790), read from
-  `Data/Player/` (`tools/copyData.ts` ships the four). Queen pants' mesh 0 is the tail, so the tail takes the
-  pants bitmap: the original does the same.
+- A drop is drawn with `HideSkin` (no head, skin or hair). A Mistery to Lilium, Faith, Queen or Lucky 65 / 70
+  armour or pants also draws mesh 0 with the bitmap `hideSkinTexture` names, the part with its skin cut out
+  (ZzzObject.cpp:7706-7729, :7774-7796, :8897-8908), read from `Data/Player/` (`tools/copyData.ts` ships the 20).
+  Queen pants' mesh 0 is the tail, so the tail takes the pants bitmap: the original does the same. Some parts
+  draw only the meshes `hideSkinMeshes` names (Iris, the Mistery to Lilium helms, Seraphim, the Faith and Queen
+  helms, Sylphid Ray, Phoenix Soul, Sacred, Storm Hard, Piercing, the Lucky helms); those still skip skin.
 - Zen: `zenPile.ts` ports `RenderZen` (ZzzObject.cpp:6327): coin count from the amount (3 to 12), scattered
   from a 100-value `RandomTable`. Two departures: the pile is 1.5x wider, and the radius uses a square root
   so the coins spread over the disc. `DropObject` draws the coins as thin instances.
@@ -54,5 +56,5 @@ and the loot filter for the ALT name overlay.
 
 ## Tests
 - `zenPile.test.ts`: coin count by amount, scatter inside the radius and over the disc, same pile per seed.
-- `dropObject.test.ts`: a dropped Faith or Queen armour / pants draws mesh 0 with its bitmap, alpha-tested;
-  every other part keeps its own textures.
+- `dropObject.test.ts`: a dropped armour / pants with a HideSkin bitmap draws mesh 0 with it, alpha-tested;
+  every other part keeps its own textures; the parts that draw only some meshes, with real texture names.

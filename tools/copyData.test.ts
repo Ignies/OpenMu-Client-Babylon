@@ -1,11 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { shipsDataFile } from './copyData';
 
 /** The sprites a registry names: each is fetched from Data/ at run time. */
 function namedDataFiles(registry: string): string[] {
   const text = readFileSync(registry, 'utf8');
   return [...new Set([...text.matchAll(/'([A-Za-z0-9]+\/[\w./-]+\.(?:OZJ|OZT))'/g)].map(m => m[1]))].sort();
+}
+
+/** Whether Data/ holds the file in this exact case: a case-sensitive host serves only that. */
+function inData(rel: string): boolean {
+  const at = rel.lastIndexOf('/');
+  return readdirSync(`Data/${rel.slice(0, at)}`).includes(rel.slice(at + 1));
 }
 
 describe('copyData', () => {
@@ -23,7 +29,8 @@ describe('copyData', () => {
 
   it('ships every bitmap a dropped body part is drawn with', () => {
     const named = namedDataFiles('src/controllers/actors/skinTexture.ts');
-    expect(named.length).toBe(4);
+    expect(named.length).toBe(20);
+    expect(named.filter(f => !inData(f))).toEqual([]);
     expect(named.filter(f => !shipsDataFile(f))).toEqual([]);
   });
 
