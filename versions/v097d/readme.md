@@ -78,7 +78,8 @@ MU 0.97d, the second version the client carries. OpenMU has no 0.97d data initia
   download screen reads on 0.97d. It lists each file at the url 0.97d reads it from: its own
   file where it ships one, Season 6's otherwise (so a borrowed file is cached once for both
   versions), never a file it lacks or a Season 6 sound it plays its own file for. It offers only
-  the map groups of its worlds (`data.worlds`: World1-12), not Season 6's later maps.
+  the map groups of its worlds (`data.worlds`: World1-12 but World6, which no map entry reads), not
+  Season 6's later maps.
 
 ## What it has and has not, beyond the flags
 - Harmony jewels and refine stones are Season 3: 0.97d has none. Nothing in `src/` asks, so it

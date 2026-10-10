@@ -131,7 +131,8 @@ describe('assetsIndex', () => {
 
   // Season 6 also ships World6 (Exile, map 5), World55/56 and Object55/56 (the old character and login
   // scenes, maps 54/55): no map entry claims them, and its login and character scenes are 73 and 74.
-  it('offers Season 6 every world folder a map reads, and 0.97d World1-12', () => {
+  // 0.97d's client ships World1-12, World6 among them, which no map entry claims either.
+  it('offers each version every world folder a map reads, and no other', () => {
     const ROOT = join(import.meta.dirname, '..');
     const numbers = (dir: string, folder: RegExp) =>
       readdirSync(join(ROOT, dir)).flatMap(name => folder.exec(name)?.slice(1).map(Number) ?? []);
@@ -142,8 +143,10 @@ describe('assetsIndex', () => {
     const read = new Set(MAP_LAYERS.flatMap(layer => layer.worlds.map(world => layer.assetWorld ?? world + 1)));
     const worlds = Object.fromEntries(INDEXED_VERSIONS.map(v => [v.id, [...v.data.worlds]]));
 
-    expect(worlds.season6.sort((a, b) => a - b)).toEqual([...read].sort((a, b) => a - b));
+    const sorted = (list: number[]) => list.sort((a, b) => a - b);
+
+    expect(sorted(worlds.season6)).toEqual(sorted([...read]));
     expect(worlds.season6.filter(world => !shipped.has(world))).toEqual([]);
-    expect(worlds.v097d).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+    expect(sorted(worlds.v097d)).toEqual(sorted([...read].filter(world => world <= 12)));
   });
 });
