@@ -46,7 +46,7 @@ items themselves are the hero's (`Hero.items`, `Hero.money`).
 - Hotkeys: a slot holds an item kind, not an item (`CNewUIItemHotKey`, NewUIMainFrameWindow.cpp:929-1320).
 
 ## Packets
-- `CharacterInventory`: the full bag; slots past `FirstStoreItemSlotIndex` go to `Economy.myShopItems`.
+- `CharacterInventory`: the full bag, emptied first (WSclient.cpp:1672-1683); slots past `FirstStoreItemSlotIndex` go to `Economy.myShopItems`.
 - `ItemMoved`: the server's answer to a move, into any storage (chaos card byte 9 maps to the chaos machine).
 - `ItemMoveRequestFailed`: rolls the move back.
 - `ItemAddedToInventory`: one slot set, with the pickup sound (WSclient.cpp:5727-5734). `ItemRemoved`: one slot cleared.
@@ -77,3 +77,4 @@ items themselves are the hero's (`Hero.items`, `Hero.money`).
 - `quickItemRules.test.ts`: Ctrl-click target, `isValuableItem`, when a bulk buy stops.
 - `itemStorage.test.ts`: `storageBan` returns a translated refusal per storage.
 - `itemHotkeys.test.ts`: which slots a version lets Ctrl+key or a drop bind.
+- `net.test.ts`: `CharacterInventory` empties the bag and the stall before filling them.

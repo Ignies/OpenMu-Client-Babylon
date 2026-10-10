@@ -49,6 +49,10 @@ export function installNet(): void {
 
     runInAction(() => {
       const items = Hero.items;
+      // The whole bag comes in this packet: empty it first, or a character switch
+      // keeps the last one's items (DeleteAllItems, WSclient.cpp:1672-1683).
+      items.fill(null);
+      Economy.myShopItems.fill(null);
       for (const { slot, item } of entries) {
         // The personal store lives behind `FirstStoreItemSlotIndex` in the
         // same storage (OpenMU) - those squares belong to the stall grid.
