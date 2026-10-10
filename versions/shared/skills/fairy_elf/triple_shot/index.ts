@@ -5,6 +5,7 @@ import { TRIPLE_SPREAD, afterRelease, fanArrows, steelHit } from '@/controllers/
 export default defineSkill({
   id: 24,
   name: "Triple Shot",
+  checksArrows: true, // CheckArrow() before the shot (SkillCast.cpp:1189)
   // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
   lookAliases: [414, 418],
   // 24 Triple Shot: CreateArrows(Skill=1) → 3 arrows at ±15°, at the release (ZzzCharacter.cpp:4811-4828, :4893-4897).

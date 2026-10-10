@@ -7,5 +7,5 @@ export default defineSkill({
   name: "Soul Barrier Proficie",
   castsAsSpell: true, // cast as its base (SkillsInitializer.cs:1001-1025)
   light: { enhanced: SOUL_BARRIER_LIGHT },
-  target: 'allyOrSelf',
+  target: 'playerOrSelf',
 });

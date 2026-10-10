@@ -87,6 +87,9 @@ export function hasAmmo(hands: Hands): boolean {
   return other!.durability === undefined || other!.durability > 0;
 }
 
+/** Skills shot from the launcher, which check the ammunition first (skill files' `checksArrows`). */
+export const ARROW_SKILLS = new Set<number>();
+
 type AmmoReload = { from: number; to: number };
 
 /**

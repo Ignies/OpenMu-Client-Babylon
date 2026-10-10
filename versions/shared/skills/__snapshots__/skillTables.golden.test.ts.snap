@@ -208,7 +208,7 @@ exports[`skill tables golden > skill 16 1`] = `
   "light": "1/1 75b1979cc9f3f1a2",
   "sound": null,
   "stepIn": null,
-  "target": "allyOrSelf",
+  "target": "playerOrSelf",
 }
 `;
 
@@ -340,7 +340,7 @@ exports[`skill tables golden > skill 26 1`] = `
   "light": "0/0 a9ef509d4a97bac5",
   "sound": null,
   "stepIn": null,
-  "target": "allyOrSelf",
+  "target": "playerOrSelf",
 }
 `;
 
@@ -352,7 +352,7 @@ exports[`skill tables golden > skill 27 1`] = `
   "light": "0/0 a9ef509d4a97bac5",
   "sound": null,
   "stepIn": null,
-  "target": "allyOrSelf",
+  "target": "playerOrSelf",
 }
 `;
 
@@ -364,7 +364,7 @@ exports[`skill tables golden > skill 28 1`] = `
   "light": "0/0 0c8ef1525508ea74",
   "sound": null,
   "stepIn": null,
-  "target": "allyOrSelf",
+  "target": "playerOrSelf",
 }
 `;
 
@@ -5105,7 +5105,7 @@ exports[`skill tables golden > skill 403 1`] = `
   "light": "1/1 75b1979cc9f3f1a2",
   "sound": null,
   "stepIn": null,
-  "target": "allyOrSelf",
+  "target": "playerOrSelf",
 }
 `;
 
@@ -5117,7 +5117,7 @@ exports[`skill tables golden > skill 404 1`] = `
   "light": "1/1 75b1979cc9f3f1a2",
   "sound": null,
   "stepIn": null,
-  "target": "allyOrSelf",
+  "target": "playerOrSelf",
 }
 `;
 
@@ -5225,7 +5225,7 @@ exports[`skill tables golden > skill 413 1`] = `
   "light": "0/0 12438107cd988e1a",
   "sound": null,
   "stepIn": null,
-  "target": "allyOrSelf",
+  "target": "playerOrSelf",
 }
 `;
 
@@ -5273,7 +5273,7 @@ exports[`skill tables golden > skill 417 1`] = `
   "light": "0/0 12438107cd988e1a",
   "sound": null,
   "stepIn": null,
-  "target": "allyOrSelf",
+  "target": "playerOrSelf",
 }
 `;
 
@@ -5309,7 +5309,7 @@ exports[`skill tables golden > skill 420 1`] = `
   "light": "0/0 12438107cd988e1a",
   "sound": null,
   "stepIn": null,
-  "target": "allyOrSelf",
+  "target": "playerOrSelf",
 }
 `;
 
@@ -5333,7 +5333,7 @@ exports[`skill tables golden > skill 422 1`] = `
   "light": "0/0 12438107cd988e1a",
   "sound": null,
   "stepIn": null,
-  "target": "allyOrSelf",
+  "target": "playerOrSelf",
 }
 `;
 
@@ -5345,7 +5345,7 @@ exports[`skill tables golden > skill 423 1`] = `
   "light": "0/0 12438107cd988e1a",
   "sound": null,
   "stepIn": null,
-  "target": "allyOrSelf",
+  "target": "playerOrSelf",
 }
 `;
 
@@ -6477,7 +6477,7 @@ exports[`skill tables golden > skill 511 1`] = `
   "light": "0/0 12438107cd988e1a",
   "sound": null,
   "stepIn": null,
-  "target": "enemy",
+  "target": "allyOrSelf",
 }
 `;
 
@@ -6535,7 +6535,7 @@ exports[`skill tables golden > skill 515 1`] = `
   "light": "0/0 12438107cd988e1a",
   "sound": null,
   "stepIn": null,
-  "target": "enemy",
+  "target": "allyOrSelf",
 }
 `;
 
@@ -6565,7 +6565,7 @@ exports[`skill tables golden > skill 517 1`] = `
   "light": "0/0 12438107cd988e1a",
   "sound": null,
   "stepIn": null,
-  "target": "enemy",
+  "target": "allyOrSelf",
 }
 `;
 

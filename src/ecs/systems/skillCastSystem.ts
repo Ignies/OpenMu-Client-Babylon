@@ -35,6 +35,7 @@ import {
   isAttackableEntity,
   isAttackablePlayer,
   isOtherPlayer,
+  reloadAmmo,
 } from './attackSystem';
 import { isFemaleClass } from '../../controllers/actors/mapPlayerNetClassToModelClass';
 import { getBaseClass } from '../../modules/hero/characterStats';
@@ -46,7 +47,7 @@ import { skills, HeroSkills } from '../../modules/skills';
 import { combat } from '../../controllers/combat';
 
 import { CONSECUTIVE_ATTACK_KEY } from '../../controllers/combat/skillMovement';
-import { castsInPlace, castsOnSelfOnly } from '../../controllers/combat/castTargets';
+import { castsInPlace, castsOnPlayersOnly, castsOnSelfOnly } from '../../controllers/combat/castTargets';
 import { PlayerAction } from '@versions/shared/objects/enum';
 import type { CastContext } from '../../controllers/combat';
 import { Vector3 } from '../../controllers/render/babylon/exports';
@@ -518,6 +519,13 @@ export const SkillCastSystem: ISystemFactory = world => {
 
       if (cooldown > 0) return;
 
+      // `CheckArrow()` (SkillCast.cpp:580-590, :1189): a bow skill with no ammunition in hand puts
+      // the next quiver in and goes out once it is there; with none in the bag it is dropped.
+      if (combat.checksArrows(def.num) && !combat.hasAmmo(hero.charAppearance)) {
+        if (!reloadAmmo(hero.charAppearance)) world.castRequest = null;
+        return;
+      }
+
       // ---- Teleport: a one-shot at the square under the cursor.
       if (isTeleportSkill(def.num)) {
         // Clip, flash and sound are the Begin / End's (teleportSystem).
@@ -526,6 +534,13 @@ export const SkillCastSystem: ISystemFactory = world => {
             hero.modelObject?.getActionDuration(PlayerAction.PLAYER_SKILL_TELEPORT) ?? 0;
           cooldown = duration > 0 ? duration : FALLBACK_CAST_COOLDOWN;
         }
+        world.castRequest = null;
+        return;
+      }
+
+      // Heal, Greater Damage / Defense, Soul Barrier: a monster or NPC selected cancels the cast
+      // (`Attacking = -1`, ClassAttack.cpp:162-167, :1158).
+      if (castsOnPlayersOnly(def) && req.target?.npcType !== undefined) {
         world.castRequest = null;
         return;
       }

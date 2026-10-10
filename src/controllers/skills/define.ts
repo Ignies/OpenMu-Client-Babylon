@@ -51,6 +51,8 @@ export interface SkillDef {
   readonly swordCount?: boolean;
   /** Cast with `SetPlayerMagic` though the skill table types it physical. */
   readonly castsAsSpell?: true;
+  /** `CheckArrow()` first: shot from the launcher, it reloads the next quiver instead of going out without one. */
+  readonly checksArrows?: true;
   /** The clip everyone else plays in place of one of this skill's own. */
   readonly othersSee?: Partial<Record<PlayerAction, PlayerAction>>;
   /** Mounts on which the cast is dropped for everyone else and silent for the hero. */

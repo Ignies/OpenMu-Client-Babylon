@@ -12,7 +12,6 @@ import { Social } from '../social/social';
 import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
 
-import { fromChatWire } from '@/controllers/net/protocols';
 import { playUiSound } from '@/controllers/sound/sfx';
 import { runInAction } from 'mobx';
 import { startEmojiBubble } from '@/ecs/systems/emojiBubbleSystem';
@@ -57,8 +56,8 @@ export function installNet(): void {
   EventBus.on('ChatMessage', packet => {
     const p = new ChatMessagePacket(packet);
     const sender = cleanName(p.Sender);
-    // UTF-8 on the wire (controllers/net/protocols/chatWire.ts): accents and emoji come back whole.
-    const message = fromChatWire(p.Message.replace(/\0+$/, ''));
+    // The reader decodes the UTF-8 (core/binaryUtils readWireString): accents and emoji come back whole.
+    const message = p.Message.replace(/\0+$/, '');
 
     // Our own line coming back is the answer to the one we sent: that pair is
     // what the round-trip figure is measured on (controllers/net/roundTrip.ts).

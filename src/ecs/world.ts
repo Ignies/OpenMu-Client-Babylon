@@ -469,6 +469,8 @@ export type Entity = Partial<{
     /** `ITEM_GROUP_*` and the index inside it: what `ItemAngle` poses the drop by. */
     group: number;
     num: number;
+    /** A pickup request went out for it: the MU Helper does not go for it again (`DeleteItem`). */
+    pickupAsked?: boolean;
   };
   onDispose?: () => void;
 }>;

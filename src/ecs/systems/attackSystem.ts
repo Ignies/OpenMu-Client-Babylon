@@ -65,7 +65,7 @@ let lastReload = { from: -1, at: 0 };
  * `ReloadArrow()`: move the next quiver from the bag into the empty hand, the
  * same move a drag sends. True while the swing should wait for it.
  */
-function reloadAmmo(hands: Hands): boolean {
+export function reloadAmmo(hands: Hands): boolean {
   if (Bag.pendingItemMove) return true;
   if (Bag.pickedItem) return false;
 
@@ -329,6 +329,9 @@ export const AttackSystem: ISystemFactory = world => {
         packet.LookingDirection = lookingDirection;
         Session.sendToGS(packet.buffer);
       };
+      // `LetHeroStop()` (ZzzInterface.cpp:1299): every swing tells the server the tile and facing
+      // first, which parks its walker when the swing cut a walk (else it walks on and snaps us back).
+      Hero.sendWalkStop(playerPos.x, playerPos.z, playerEntity.transform.rot.y);
       // The original sends on the click (ZzzInterface.cpp:3355); a server may ask for the
       // request at the hit key instead (its server.json, modules/servers/serverManifest.ts).
       const held = serverSetting('heldHitRequest');

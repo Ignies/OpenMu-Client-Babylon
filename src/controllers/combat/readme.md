@@ -12,7 +12,7 @@ It never sends packets or touches the scene; the ECS systems that fight read it 
     `releasesOnKey(action, monsterRig)`, `RELEASE_TICKS` (14), `RELEASE_KEY` (5), used by the skill
     controller's `onRelease`; `blowHeldTicks`, how long the last hit request waited for its blow
     (`ObjectGotKilled` hands it to `DeathSystem`).
-  - weapon: `attackRange(hands)`, `hasAmmo`, `equippedLauncher`.
+  - weapon: `attackRange(hands)`, `hasAmmo`, `equippedLauncher`, `checksArrows(skill)`.
   - skills: `skillClip(skill, ctx)`, `magicClip`, `othersSeeClip`, `castQuietOn`, `magicIsHit`,
     `clipIgnoresHit`, `skillKill`, `skillStepIn`, `stepInSquare`, `clipHoldsFacing`,
     `castTarget(def)`, `castsOnSelf`, `castsOnSelfOnly`; `registerSkill(id, rules)` (called by
@@ -44,7 +44,8 @@ It never sends packets or touches the scene; the ECS systems that fight read it 
   skill's combat fields to `combat.registerSkill` (`skillRules.ts`): `clip`, `poseClip`, `swing`,
   `swordCount`, `castsAsSpell`, `othersSee`, `quietOn`, `magicIsHit` (`skillClips.ts`), `noFlinch`
   (`SHOCK_IMMUNE_CLIPS`), `holdsFacing`, `stepIn` (`skillMovement.ts`), `target`
-  (`castTargets.ts`), `explicitHits` (`areaHit.ts`), `kill` (`skillKills.ts`); its
+  (`castTargets.ts`), `explicitHits` (`areaHit.ts`), `checksArrows` (`ARROW_SKILLS`, `weaponRange.ts`),
+  `kill` (`skillKills.ts`); its
   `combat.layer` is registered and its `combat.hooks` fill `skillHooks`. An empty slot answers
   "nothing happening". Nova's charge (with its two skill numbers), Combo and Dark Side live with
   their skills in `versions/shared/skills/`. No file here tests a skill number.
@@ -78,8 +79,10 @@ clip's length:
 The skill table's target field is not enough (Soul Barrier reads `Explicit` but can go on
 yourself; Swell Life reads `ImplicitParty` but always goes as `HeroKey`). The original's
 `SendRequestMagic` key decides: the hero for self-only buffs, the selected party member or else
-the hero for party buffs and heals, the selected object for everything else. Read by
-`skillCastSystem` and `modules/skills/skillCasting.ts` (`isSelfCastable`).
+the hero for party buffs and heals, the selected object for everything else. Heal, Greater
+Damage / Defense and Soul Barrier (`playerOrSelf`) are cancelled outright with a monster or NPC
+selected (`Attacking = -1`, ClassAttack.cpp:162-167, :1158). Read by `skillCastSystem` and
+`modules/skills/skillCasting.ts` (`isSelfCastable`).
 
 ### Notes: skillClips.ts
 The original's `UseSkill*` switches, `Attack*` branches and `ReceiveMagic` ladders become one

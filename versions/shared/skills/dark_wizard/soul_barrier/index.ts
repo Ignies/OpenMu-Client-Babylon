@@ -138,5 +138,5 @@ export default defineSkill({
   effectAliases: [403, 404],
   // Soul Barrier (403 / 404 / 406 its master rows): no terrain light in the original; Enhanced only.
   light: { enhanced: SOUL_BARRIER_LIGHT },
-  target: 'allyOrSelf',
+  target: 'playerOrSelf',
 });

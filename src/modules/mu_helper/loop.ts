@@ -5,7 +5,6 @@ import { HeroSkills } from '../skills';
 import { Hero } from '../hero';
 import { Social } from '../social/social';
 import { moduleOn } from '../module';
-import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
 import { calcMaxDurability, isJewel, itemDef } from '@/controllers/item_rules';
 import { InventoryConstants } from '@/core/inventoryConstants';
 import { PetCommandModeEnum } from '@versions/shared/packets/ClientToServerPackets';
@@ -32,8 +31,6 @@ const MAX_ACTIONABLE_DISTANCE = 10;
 /** `DEFAULT_DURABILITY_THRESHOLD` (MuHelper.cpp:21). */
 const REPAIR_THRESHOLD = 50;
 const REPAIR_INTERVAL_SECONDS = 10;
-/** Recast gap for buffs whose effect id the client cannot observe. */
-const UNMAPPED_BUFF_RECAST_SECONDS = 60;
 /** Seconds between stop requests while standing in a safe zone. */
 const STOP_REQUEST_INTERVAL = 3;
 /** Seconds between re-issued regroup walks. */
@@ -43,20 +40,27 @@ const HEAL_SKILL = 26; // Heal (Elf)
 const DRAIN_LIFE_SKILL = 214; // Drain Life (Summoner)
 
 /**
- * Skill name -> `MagicEffectStatus` id, for the "already buffed" check
- * (`BuffTarget`'s `g_isCharacterBuff` calls). Entities carry the active
- * effect ids in their `buffs` set.
+ * `CMuHelper::BuffTarget`'s switch (MuHelper.cpp:490-569), by skill number: the `eBuffState` that
+ * shows the buff is up (entities carry the effect ids in `buffs`), whether the timer recast
+ * overrides it, and whether it goes at the member or at the caster. Any other skill is no buff.
  */
-const BUFF_EFFECT_BY_NAME: Readonly<Record<string, number>> = {
-  'Greater Damage': 1,
-  'Greater Defense': 2,
-  'Soul Barrier': 4,
-  'Critical Damage Increase': 5,
-  'Infinity Arrow': 6,
-  'Greater Fortitude': 8,
-  Berserker: 81,
-  'Expansion of Wizardry': 82,
+const BUFF_RULES: Readonly<Record<number, readonly [effect: number, timed: boolean, targeted: boolean]>> = {
+  28: [1, true, true], 420: [1, true, true], // Greater Damage
+  27: [2, true, true], 417: [2, true, true], 423: [2, true, true], // Greater Defense
+  77: [6, false, false], 441: [6, false, false], // Infinity Arrow
+  16: [4, true, true], 403: [4, true, true], 404: [4, true, true], // Soul Barrier
+  48: [8, true, false], 356: [8, true, false], 360: [8, true, false], // Swell Life
+  233: [82, false, false], 380: [82, false, false], 383: [82, false, false], // Expansion of Wizardry
+  64: [5, false, false], 511: [5, false, false], 515: [5, false, false], 517: [5, false, false], // Critical Damage
+  218: [81, false, false], 469: [81, false, false], // Berserker
+  217: [71, false, false], // Damage Reflection
+  266: [129, true, false], // the Rage Fighter's party buffs
+  267: [130, true, false], 573: [130, true, false],
+  268: [131, true, false], 569: [131, true, false], 572: [131, true, false],
 };
+
+/** Swell Life and its master rows wait out the combo's third blow (`m_iComboState == 2`). */
+const SWELL_LIFE = new Set([48, 356, 360]);
 
 interface Point {
   x: number;
@@ -82,7 +86,6 @@ let lastTimerBuffSecond = -1;
 let repairCooldown = 0;
 let stopRequestCooldown = 0;
 let moveReissueCooldown = 0;
-const lastBuffCastAt = new Map<number, number>();
 
 function resetRuntime(): void {
   lastHeroTile = null;
@@ -101,7 +104,6 @@ function resetRuntime(): void {
   repairCooldown = 0;
   stopRequestCooldown = 0;
   moveReissueCooldown = 0;
-  lastBuffCastAt.clear();
 }
 
 /**
@@ -182,31 +184,17 @@ function activatePet(config: MuHelperConfig): void {
 }
 
 /**
- * `CMuHelper::BuffTarget`: cast when the effect is missing (or the timer
- * recast is on). Buffs without a known effect id fall back to a fixed gap -
- * the client cannot observe those. Returns busy when a cast went out.
+ * `CMuHelper::BuffTarget`: cast when the effect is missing, or when the timer recast is on for a
+ * buff that honours it. Returns busy when a cast went out.
  */
 function buffTarget(world: World, target: Entity, num: number): boolean {
-  const def = skillDefinition(num);
-  if (!def || !isLearned(num)) return false;
+  const rule = BUFF_RULES[num];
+  if (!rule || !isLearned(num)) return false;
+  if (SWELL_LIFE.has(num) && comboState === 2) return false;
 
-  const effect = BUFF_EFFECT_BY_NAME[def.name];
-  if (effect !== undefined) {
-    if (target.buffs?.has(effect) && !timerBuffOngoing) return false;
-  } else {
-    const last = lastBuffCastAt.get(num);
-    if (
-      last !== undefined &&
-      secondsElapsed - last < UNMAPPED_BUFF_RECAST_SECONDS &&
-      !timerBuffOngoing
-    ) {
-      return false;
-    }
-  }
-
-  if (!castSkill(world, num, target)) return false;
-  lastBuffCastAt.set(num, secondsElapsed);
-  return true;
+  const [effect, timed, targeted] = rule;
+  if (target.buffs?.has(effect) && !(timed && timerBuffOngoing)) return false;
+  return castSkill(world, num, targeted ? target : (world.playerEntity ?? target));
 }
 
 /** `CMuHelper::Buff` - rotate the three slots over self or the party. */
@@ -371,7 +359,8 @@ function obtainItem(world: World, hero: Entity, config: MuHelperConfig): boolean
   let best: Entity | null = null;
   let bestDist = maxDistance + 1;
   for (const e of world.netObjsQuery.entities) {
-    if (!e.droppedItem || e.objOutOfScope) continue;
+    // One request per drop: the original takes it off its list once asked for (`DeleteItem`, MuHelper.cpp:1252).
+    if (!e.droppedItem || e.droppedItem.pickupAsked || e.objOutOfScope) continue;
     if (e.worldIndex !== undefined && e.worldIndex !== world.mapIndex) continue;
     if (!shouldObtain(config, e)) continue;
     const dist = tileDistance(from, entityTile(e));
@@ -505,6 +494,10 @@ export function updateMuHelperLoop(world: World, dt: number): void {
     if (wasActive) {
       resetRuntime();
       wasActive = false;
+      // Switched off: let go of the monster it was casting at or swinging at and the drop it walked to.
+      world.castRequest = null;
+      world.attackTarget = null;
+      world.pickupTarget = null;
     }
     return;
   }

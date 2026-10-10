@@ -8,7 +8,10 @@ class. Recipe: [docs/how_to/add_skill.md](../../../docs/how_to/add_skill.md).
   registers them with the skills controller, plus the common buff looks and the launcher arrows.
 - `skillsDatabase.ts`: `SKILL_DEFINITIONS`, `skillDefinition(num)` and the `SkillDefinition` type.
   The server's skill table (OpenMU `VersionSeasonSix/SkillsInitializer.cs`), generated, not edited
-  by hand. Numbers are the wire `SkillNumber`.
+  by hand. Numbers are the wire `SkillNumber`. Below it, by hand: `MASTER_REPLACES` (the skill
+  each active master skill replaces) and `masterRoot(num)`; `skillDefinition` gives a master skill
+  its root's type, target, damage type and area, as OpenMU's `AddMasterSkillDefinition` does, so it
+  goes out on the wire as its base skill (cost, reach and requirements stay its own).
 - `skillVisuals.ts`: the old entry point, kept so its importers stay unchanged. It loads
   `index.ts` and re-exports the dispatch functions (`playTargetedSkillVisual`,
   `playAreaSkillVisual`, `playBowShotVisual`, `setBuffVisual`, `playBuffHits`, ...) and three
@@ -42,7 +45,7 @@ _shared.ts                      helpers for several classes
   in the controller: the clip pick (`clip` as a function, `poseClip`, `swing`), `swordCount`,
   `castsAsSpell`, `othersSee`, `quietOn`, `magicIsHit`, `noFlinch`, `holdsFacing`, `clipSound`,
   `soundOnLanding`, `silentHeroCast`, `targetSound`, `kill`, `effect`, `effectAliases`, `buffHits`,
-  `explicitHits`, and the combat hooks (Nova, Combo, Dark Side).
+  `explicitHits`, `checksArrows`, and the combat hooks (Nova, Combo, Dark Side).
 - Deliberate deviation: `effectAliases` (on the base skill) and the Rage Fighter `effect`s 129-131
   let a master or Rage Fighter `MagicEffectCancelled` drop its buff. The original's
   ReceiveMagicFinish has those cases but reads the skill as a BYTE (WSclient.cpp:3884), so ids 256+
@@ -78,6 +81,8 @@ _shared.ts                      helpers for several classes
   (WSclient.cpp:3878). `rage_fighter/party_buffs.test.ts`: the party buffs'
   coin toss and its paired sound. `rage_fighter/timing.test.ts`: when each Rage Fighter skill
   draws and sounds against the 25 Hz tick and the caster's clip.
+- `skillsDatabase.test.ts`: a Strengthener or Mastery takes its base skill's shape and keeps its own
+  cost, reach and requirements.
 - `releaseTiming.test.ts`: when Fire Ball leaves against the caster's magic speed: 14 ticks at a
   slow clip, on the clip's key 5 at a fast one; Force on its strike clip's key 3 at a low and a
   high attack speed, at 25 and 60 fps, and 0.56 s after the packet when the key never comes.

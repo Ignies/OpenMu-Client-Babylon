@@ -30,6 +30,10 @@ the two server packets, with its running state and the raw config blob (`MuHelpe
   `consumeItemRequest`, `repairItemRequest`, `Pets.sendPetCommand`).
 - Entering a safe zone calls `MuHelper.toggleMuHelper()` (stop). A warp, or a jump of more than 3
   tiles, re-anchors the regroup point.
+- A drop is asked for once: the pickup system marks it `pickupAsked` when the request goes out and the
+  helper never goes for it again, as the original takes it off its list (`DeleteItem`, MuHelper.cpp:1252).
+- Switching it off clears `world.castRequest`, `attackTarget` and `pickupTarget`, so the hero does not
+  keep walking to the monster or drop it was on.
 
 ## Packets
 - `MuHelperStatusUpdate` (BF 51): starts or pauses the helper; reports the zen it cost.
@@ -40,7 +44,7 @@ the two server packets, with its running state and the raw config blob (`MuHelpe
 - uses: `session`, `hero`, `skills`, `pets`, `inventory` (item use), `npc_shop` (repair),
   `social/social.ts` (`partyMembers` for party buffs and heals),
   `controllers/item_rules/itemStats.ts`, `core/inventoryConstants.ts`, `ecs/systems/attackSystem.ts`
-  (`isAttackableEntity`), `versions/shared/skills/skillsDatabase`.
+  (`isAttackableEntity`).
 - used by: `src/app/logic.ts` (`net.ts`), `src/ecs/systems/muHelperSystem.ts` (`loop.ts`),
   `versions/shared/ui/windows/mu_helper/` (`config.ts`, `state.ts`). The Home key in
   `versions/shared/ui/hud/bottom_bar/` calls `MuHelper.toggleMuHelper()`.
@@ -49,9 +53,12 @@ the two server packets, with its running state and the raw config blob (`MuHelpe
 - a new config field: `MuHelperConfig`, `defaultMuHelperConfig`, `encodeMuHelperConfig` and
   `decodeMuHelperConfig` in `config.ts` (keep the reference byte layout), then the window.
 - a new helper behaviour: a step in `work` in `loop.ts`, through an existing input seam.
-- a buff the "already buffed" check should see: `BUFF_EFFECT_BY_NAME` in `loop.ts`.
+- a buff the "already buffed" check should see: `BUFF_RULES` in `loop.ts` (`BuffTarget`'s switch: the effect by
+  skill number, the timer recast, member or caster). A skill not in it is never cast as a buff.
 
 ## Tests
 - `config.test.ts`: blob size, default layout, flag bits, round trips, zero blob, extra item names,
   away seconds clamp.
-- `loop.test.ts`, `state.test.ts`: nothing runs or starts while the module is off.
+- `loop.test.ts`, `state.test.ts`: nothing runs or starts while the module is off. `loop.test.ts`: switching
+  it off lets go of its cast, swing and pickup; a buff is checked by skill number and a skill
+  `BuffTarget` does not list is never cast; a drop already asked for is left alone.

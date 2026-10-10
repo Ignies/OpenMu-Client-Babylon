@@ -62,7 +62,6 @@ import {
   type TrackedPlayer,
 } from '../../src/controllers/net/protocols/adminProtocol';
 import { Xor3Byte } from '../../src/controllers/net/encryption/xor3';
-import { fromChatWire } from '../../src/controllers/net/protocols/chatWire';
 import { FrameReader, type Frame } from './frames';
 import { itemName, mapName, monsterName, storageName } from './names';
 
@@ -778,12 +777,12 @@ export class TrackedSession {
         return;
       }
       case 0x00:
-        this.onChat(fromChatWire(withoutPadding(new PublicChatMessagePacket(view).Message)).trim());
+        this.onChat(withoutPadding(new PublicChatMessagePacket(view).Message).trim());
         return;
       case 0x02: {
         const p = new WhisperMessagePacket(view);
         const to = cleanName(p.ReceiverName);
-        const text = fromChatWire(withoutPadding(p.Message)).trim();
+        const text = withoutPadding(p.Message).trim();
         this.emit(
           'whisper',
           this.whispers ? `whispered to ${to}: ${text}` : `whispered to ${to}`,

@@ -96,6 +96,7 @@ export const ItemPickupSystem: ISystemFactory = world => {
       }
 
       world.pickupTarget = null;
+      if (target.droppedItem) target.droppedItem.pickupAsked = true;
       Drops.pickupItemRequest(target.netId!);
     },
   };

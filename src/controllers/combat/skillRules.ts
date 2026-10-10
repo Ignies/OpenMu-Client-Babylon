@@ -20,6 +20,7 @@ import {
 } from './skillClips';
 import { SKILL_KILLS, type SkillKill } from './skillKills';
 import { EXPLICIT_HIT_SKILLS } from './areaHit';
+import { ARROW_SKILLS } from './weaponRange';
 import { skillHooks, type CombatHooks } from './skillHooks';
 
 /** The fields of a skill file the combat controller reads (see `SkillDef` for each). */
@@ -29,6 +30,7 @@ export interface SkillCombatRules {
   readonly swing?: 'highBow';
   readonly swordCount?: boolean;
   readonly castsAsSpell?: true;
+  readonly checksArrows?: true;
   readonly othersSee?: Partial<Record<PlayerAction, PlayerAction>>;
   readonly quietOn?: readonly NonNullable<CastContext['mount']>[];
   readonly magicIsHit?: true;
@@ -48,6 +50,7 @@ export function registerSkillRules(id: number, d: SkillCombatRules, addLayer: (l
   if (d.swing) SKILL_SWINGS[id] = d.swing;
   if (d.swordCount !== undefined) SKILL_SWORD_COUNT[id] = d.swordCount;
   if (d.castsAsSpell) SPELL_CAST_SKILLS.add(id);
+  if (d.checksArrows) ARROW_SKILLS.add(id);
   if (d.othersSee) SKILL_OTHERS_SEE[id] = d.othersSee;
   if (d.quietOn) SKILL_QUIET_MOUNTS[id] = d.quietOn;
   if (d.magicIsHit) MAGIC_HIT_SKILLS.add(id);

@@ -1,30 +1,17 @@
 /**
- * Chat text on the wire. The packet writers put one byte per character and
- * the readers make one character per byte, while OpenMU reads and writes
- * UTF-8. Sending a line as its UTF-8 bytes, one per character, and reading
- * the bytes back the same way is what lets accents, other alphabets and
- * emoji typed with the Windows picker reach the other players intact.
+ * Chat text on the wire. The packet writers put one byte per character, while
+ * OpenMU reads UTF-8: a line goes out as its UTF-8 bytes, one per character,
+ * so accents, other alphabets and emoji typed with the Windows picker reach the
+ * other players intact. The readers decode UTF-8 themselves (`readWireString`).
  */
 
 const encoder = new TextEncoder();
-const decoder = new TextDecoder('utf-8', { fatal: true });
 
 /** The line as the string the packet writers turn into its UTF-8 bytes. */
 export function toChatWire(text: string): string {
   let wire = '';
   for (const byte of encoder.encode(text)) wire += String.fromCharCode(byte);
   return wire;
-}
-
-/** A line a packet reader made, one character per byte, back to its text. */
-export function fromChatWire(wire: string): string {
-  if (!/[\x80-\xff]/.test(wire)) return wire;
-  try {
-    return decoder.decode(Uint8Array.from(wire, c => c.charCodeAt(0) & 0xff));
-  } catch {
-    // Not UTF-8 after all: show the bytes as they came.
-    return wire;
-  }
 }
 
 /** The first `max` characters, never half of an emoji's surrogate pair. */
