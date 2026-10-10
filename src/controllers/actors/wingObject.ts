@@ -1,5 +1,4 @@
 import {
-  Texture,
   Vector3,
   type AbstractMesh,
   type Material,
@@ -8,9 +7,8 @@ import {
 } from '../render/babylon/exports';
 import type { World } from '../../ecs/world';
 import { ModelObject } from '../render/modelObject';
-import { getMaterial, getScrollVariant } from '../assets/modelLoader';
+import { getDataTexture, getMaterial, getScrollVariant } from '../assets/modelLoader';
 import { BlendState } from '@versions/shared/objects/enum';
-import { loadMuSprite } from '@/controllers/assets/mu';
 import {
   BonedParticleEmitter,
   HeldSprites,
@@ -70,23 +68,6 @@ const WHITE_CHROME = {
   star: false,
   chromeOnly: true,
 };
-
-const overlayTextures = new Map<string, Texture>();
-
-/** Starts URL-less, like the chrome maps, so nothing red flashes before the sprite lands. */
-function overlayTexture(scene: Scene, path: string): Texture {
-  let texture = overlayTextures.get(path);
-  if (texture && texture.getScene() === scene) return texture;
-  const created = new Texture(null, scene);
-  created.name = `wing_${path}`;
-  void loadMuSprite(path).then(
-    sprite => created.updateURL(sprite.url),
-    error => console.error(`Could not load wing texture ${path}:`, error)
-  );
-  overlayTextures.set(path, created);
-  texture = created;
-  return texture;
-}
 
 /**
  * The `c->Wing` part. Beyond a plain `ModelObject` it owns two things the
@@ -343,11 +324,9 @@ export class WingObject extends ModelObject {
       const scroll = getScrollVariant(target.getScene(), target);
       if (scroll) target.material = scroll;
       target.metadata.uvScroll = pass.u ? this.UvScroll : { u: 0, v: 0 };
+      // A `Data/` bitmap on the GLB's UVs: top-down like the model's own textures.
       if (pass.texture) {
-        target.metadata.diffuseTexture = overlayTexture(
-          target.getScene(),
-          pass.texture
-        );
+        target.metadata.diffuseTexture = getDataTexture(target.getScene(), pass.texture);
       }
       target.metadata.brightMesh = true;
       target.metadata.blendMeshLight = 1;
