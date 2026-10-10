@@ -25,7 +25,7 @@ One folder per in-game window. A window draws; its state and actions belong to i
 | `inventory` | inventory (80) | the hero's bag and equipment, repair mode | hero, inventory, npc_shop, items, economy, events |
 | `npc_shop` | npc_shop (90) | the merchant's stock; buy, sell, repair | Merchant, items, inventory |
 | `vault` | vault (100) | the warehouse, zen buttons, pin lock | hero, economy, inventory |
-| `chaos_machine` | chaos_machine (110) | the goblin's mix tray and recipe menu | economy, inventory |
+| `chaos_machine` | chaos_machine (110) | the goblin's mix tray, its Mix.bmd recipe text and mix type menu | economy, chaos_mix, inventory |
 | `trade` | trade (120) | partner's half on top, the hero's below | hero, economy, inventory |
 | `personal_shop` | my_shop (130), shop_browser (140) | the hero's stall; another player's stall | economy, inventory |
 | `character_info` | character_info (150) | stats and stat point buttons | Hero, hero, options |

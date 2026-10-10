@@ -226,4 +226,5 @@ export default {
   'item.fenrir.upgrade': 'สกิลจะดีขึ้นเมื่ออัปเกรด',
   'item.count': 'จำนวนไอเทม: {count}',
   'item.pieces': '{count} / {max}',
+  'msgWin.confirmMix': '%s\nต้องการผสมไอเทมหรือไม่?',
 } satisfies Partial<Record<keyof typeof en, string>>;

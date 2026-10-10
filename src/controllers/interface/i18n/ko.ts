@@ -226,4 +226,5 @@ export default {
   'item.fenrir.upgrade': '강화하면 스킬이 향상됩니다.',
   'item.count': '아이템 개수: {count}',
   'item.pieces': '{count} / {max}',
+  'msgWin.confirmMix': '%s\n아이템을 조합하시겠습니까?',
 } satisfies Partial<Record<keyof typeof en, string>>;

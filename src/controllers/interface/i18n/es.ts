@@ -226,4 +226,5 @@ export default {
   'item.fenrir.upgrade': 'Las habilidades mejoran al subirlo de nivel.',
   'item.count': 'Cantidad: {count}',
   'item.pieces': '{count} / {max}',
+  'msgWin.confirmMix': '%s\n¿Quieres combinar los objetos?',
 } satisfies Partial<Record<keyof typeof en, string>>;

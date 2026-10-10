@@ -227,4 +227,5 @@ export default {
   'item.fenrir.upgrade': 'Уменията се подобряват с надграждане.',
   'item.count': 'Брой предмети: {count}',
   'item.pieces': '{count} / {max}',
+  'msgWin.confirmMix': '%s\nДа комбинирам ли предметите?',
 } satisfies Partial<Record<keyof typeof en, string>>;

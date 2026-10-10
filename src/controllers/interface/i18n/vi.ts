@@ -221,4 +221,5 @@ export default {
   'item.fenrir.upgrade': 'Kỹ năng tăng khi nâng cấp.',
   'item.count': 'Số lượng: {count}',
   'item.pieces': '{count} / {max}',
+  'msgWin.confirmMix': '%s\nBạn muốn kết hợp vật phẩm?',
 } satisfies Partial<Record<keyof typeof en, string>>;

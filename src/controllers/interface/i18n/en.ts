@@ -228,6 +228,7 @@ const en = {
   'item.fenrir.upgrade': 'Skills will improve through upgrading.',
   'item.count': 'Number of items: {count}',
   'item.pieces': '{count} / {max}',
+  'msgWin.confirmMix': '%s\nDo you want to combine your items?',
 };
 
 export default en;

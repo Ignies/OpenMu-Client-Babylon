@@ -489,6 +489,8 @@ export const Inventory = observer(() => {
     // of equipping or drinking it.
     const target = Economy.autoMoveTarget;
     if (target !== null) {
+      // The chaos machine only takes a mix source, while ready (NewUIMixInventory.cpp:1027-1037).
+      if (target === StorageKind.ChaosMachine && !Economy.mixAccepts(entry.item)) return;
       Bag.autoMoveItem(StorageKind.Inventory, entry.slot, target);
       return;
     }

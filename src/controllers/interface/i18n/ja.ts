@@ -226,4 +226,5 @@ export default {
   'item.fenrir.upgrade': '強化するとスキルが向上する。',
   'item.count': 'アイテム数: {count}',
   'item.pieces': '{count} / {max}',
+  'msgWin.confirmMix': '%s\nアイテムを合成しますか？',
 } satisfies Partial<Record<keyof typeof en, string>>;

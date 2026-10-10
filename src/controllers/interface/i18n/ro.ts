@@ -227,4 +227,5 @@ export default {
   'item.fenrir.upgrade': 'Abilitățile cresc prin îmbunătățire.',
   'item.count': 'Număr de obiecte: {count}',
   'item.pieces': '{count} / {max}',
+  'msgWin.confirmMix': '%s\nCombini obiectele?',
 } satisfies Partial<Record<keyof typeof en, string>>;

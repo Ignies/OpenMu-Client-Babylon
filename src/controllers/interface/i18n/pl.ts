@@ -221,4 +221,5 @@ export default {
   'item.fenrir.upgrade': 'Umiejętności rosną wraz z ulepszaniem.',
   'item.count': 'Liczba przedmiotów: {count}',
   'item.pieces': '{count} / {max}',
+  'msgWin.confirmMix': '%s\nPołączyć przedmioty?',
 } satisfies Partial<Record<keyof typeof en, string>>;

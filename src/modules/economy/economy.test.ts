@@ -1,3 +1,4 @@
+import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vitest';
 import { runInAction } from 'mobx';
 import type { Item } from '@/ecs/world';
@@ -11,6 +12,14 @@ vi.hoisted(() => {
 await import('@versions/shared/skills/skillVisuals');
 const { Economy } = await import('./economy');
 const { ItemCraftingResultCraftingResultEnum: E } = await import('@versions/shared/packets/ServerToClientPackets');
+const { loadMixRecipes } = await import('@/controllers/assets');
+const { MsgBox } = await import('@/controllers/interface/msgWin');
+const { Session } = await import('@/modules/session');
+const { Hero } = await import('@/modules/hero');
+const { Social } = await import('@/modules/social/social');
+const { t } = await import('@/i18n');
+
+const MIX = 'Data/Local/mix.bmd';
 
 const jewel = { group: 12, id: 15 } as unknown as Item;
 const fillTray = () =>
@@ -44,5 +53,41 @@ describe('Economy.craftingResult', () => {
     Economy.craftingResult(E.Success, wings);
     expect(Economy.mixItems.filter(Boolean)).toMatchObject([{ group: 12, id: 0 }]);
     expect(Economy.mixResult).toBe('success');
+  });
+});
+
+// CNewUIMixInventory::Mix (NewUIMixInventory.cpp:802-840): the recipe Mix.bmd matches is confirmed
+// and its m_iMixID goes out; no matching recipe stays on this side.
+describe.skipIf(!existsSync(MIX))('the mix button', () => {
+  loadMixRecipes(new Uint8Array(readFileSync(MIX)));
+  const sent: DataView[] = [];
+  vi.spyOn(Session, 'sendToGS').mockImplementation(b => void sent.push(b));
+  const confirm = vi.spyOn(MsgBox, 'popUpMsgWin').mockImplementation((_code, _arg, onOk) => onOk?.(''));
+  const refuse = vi.spyOn(Social, 'errorMessage').mockImplementation(() => undefined);
+  const tray = (...items: Item[]) =>
+    runInAction(() => {
+      Session.isOffline = false;
+      Hero.money = 10_000_000;
+      Hero.level = 400;
+      Economy.mixOpen = true;
+      Economy.mixPending = false;
+      Economy.mixResult = null;
+      Economy.mixItems = Economy.mixItems.map((_, i) => items[i] ?? null);
+      sent.length = 0;
+    });
+
+  it('confirms the fruit recipe and sends its mix id', () => {
+    tray({ group: 14, num: 22, durability: 1 }, { group: 12, num: 15, durability: 1 });
+    Economy.mix();
+    expect(confirm).toHaveBeenCalled();
+    expect(sent.map(b => b.getUint8(3))).toEqual([6]);
+    expect(Economy.mixPending).toBe(true);
+  });
+
+  it('sends nothing when no recipe matches', () => {
+    tray({ group: 12, num: 15, durability: 1 });
+    Economy.mix();
+    expect(sent).toEqual([]);
+    expect(refuse).toHaveBeenLastCalledWith(t('chaos.lackItems'));
   });
 });

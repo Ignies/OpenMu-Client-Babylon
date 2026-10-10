@@ -49,6 +49,10 @@ imports the modules below directly (baselined in `tools/checks`).
   (`mu/itemSetFile.ts`, on the door): the ancient sets, loaded on first ask.
 - `itemOptionTables()`, `loadItemOptionTables(harmony, sockets, addOptions)` and their types
   (`mu/itemOptionFiles.ts`, on the door): the Jewel of Harmony, socket and 380 option tables.
+- `mixRecipes()`, `loadMixRecipes(bytes)`, `MIX_TYPES` and `MixRecipe`, `MixSource`, `MixRateToken`
+  (`mu/mixFile.ts`, on the door): the chaos machine recipes, loaded on first ask.
+- `globalText(id)`, `loadGlobalText(bytes)` (`mu/globalTextFile.ts`, on the door): the pack's `Text.bmd`
+  lines, for what the data files name by number.
 
 ## How it works
 - Every byte read goes through `fetchAsset`: for a compressible extension it asks for
@@ -110,6 +114,7 @@ imports the modules below directly (baselined in `tools/checks`).
 - `mu/gates.test.ts`: the Season 6 gate layout, a byte-wide period one, a truncated file.
 - `mu/itemSetFile.ts` is tested through `controllers/item_rules/ancientSets.test.ts` and the
   tooltip test, which read the real files.
+- `mu/mixFile.ts` is tested through `modules/chaos_mix/mixRecipes.test.ts` on the real `Mix.bmd`.
 
 ## Notes
 
@@ -167,6 +172,17 @@ values, 14 prices), one BuxConvert over the whole table; option N is record N - 
 `SocketItem_<lang>.bmd`: 3 x 50 records of 104 bytes (id, category, name 64, type, 5 values, 6
 check bytes), one BuxConvert per record. `ItemAddOption.bmd`: 8192 records of 16 bytes (option,
 value, option, value, type, time), one BuxConvert over the whole table.
+
+### mu/mixFile.ts
+`Mix.bmd`: 14 BuxConverted `int` counts (one per mix type), then that many 656-byte `MIX_RECIPE`
+records, each BuxConverted on its own: index, `m_iMixID`, the name, description and advice text
+ids, the result's size, level, zen type and zen, 32 rate tokens (op, float), the max rate, three
+option chars and 8 40-byte sources (item code, level, option, durability and count ranges, special
+bits).
+
+### mu/globalTextFile.ts
+`Text_<lang>.bmd`: 'GT', a `uint32` count, then per line its id, its length and its BuxConverted bytes.
+The Eng, Spn and Por packs ship the same English file, so recipe names read English everywhere.
 
 ### mu/moveReqFile.ts
 An `int` count, then 84-byte records: `index`, main name (32), `/move` alias (32), required level,

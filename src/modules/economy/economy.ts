@@ -1,6 +1,6 @@
 import { MuWindows } from '@/controllers/interface/windowManager';
 import { t, type TextKey } from '../../i18n';
-import { makeObservable, observable, action, runInAction } from 'mobx';
+import { makeObservable, observable, action, computed, runInAction } from 'mobx';
 import { prefetchItemIcons } from '../../controllers/assets/itemIconPack';
 import { Bag } from '../inventory';
 import { Hero } from '../hero';
@@ -10,6 +10,12 @@ import { Social } from '../social/social';
 import type { Item } from '../../ecs/world';
 import { playUiSound } from '../../controllers/sound/sfx';
 import { Notices } from '../chat/notices';
+import { InventoryConstants } from '@/core/inventoryConstants';
+import { MsgBox, MsgWinCode } from '@/controllers/interface/msgWin';
+import { mixRecipes } from '@/controllers/assets';
+import { findFreeSlot } from '../inventory/inventoryFit';
+import { itemSize } from '../inventory';
+import { checkMix, isMixSource, recipeNameLines, type MixCheck } from '../chaos_mix/mixRecipes';
 import {
   CHAOS_CARD_WIRE_STORAGE,
   MIX_SLOTS,
@@ -75,221 +81,10 @@ export function vaultOpenCost(level: number, masterLevel: number, locked: boolea
 export const MAX_SHOP_TITLE = 26;
 
 /**
- * Crafting numbers the S6 goblin offers that the generated
- * `ChaosMachineMixRequestChaosMachineMixTypeEnum` (OpenMU's packet XML) does
- * not name. Values are OpenMU's `ItemCrafting.Number` for Season 6
- * (`Persistence/Initialization/VersionSeasonSix/ChaosMixes.cs`) - the same
- * numbers the original's `mix.bmd` recipes carry - and go on the wire as
- * `ChaosMachineMixRequest.MixType` unchanged.
+ * The `_MIX_TYPES` this window is opened as (MixMgr.h): the goblin's menu picks the first three
+ * (`CChaosMixMenuMsgBox`), the Chaos Card Master opens the card one.
  */
-const MIX_NUMBER = {
-  /** `FirstWingsCrafting`: chaos weapon (+4 or better) + jewel(s) of chaos. */
-  firstWings: 11 as ChaosMachineMixRequestChaosMachineMixTypeEnum,
-  /** `SecondWingsCrafting`. */
-  secondWings: 7 as ChaosMachineMixRequestChaosMachineMixTypeEnum,
-  /** `ThirdWingsStage1Crafting` / `ThirdWingsStage2Crafting`. */
-  thirdWingsStage1: 38 as ChaosMachineMixRequestChaosMachineMixTypeEnum,
-  thirdWingsStage2: 39 as ChaosMachineMixRequestChaosMachineMixTypeEnum,
-  /** `CapeCrafting`: Cape of Lord / Cape of Fighter. */
-  cape: 24 as ChaosMachineMixRequestChaosMachineMixTypeEnum,
-  /** `DinorantCrafting`. */
-  dinorant: 5 as ChaosMachineMixRequestChaosMachineMixTypeEnum,
-  /** `DarkHorseCrafting` / `DarkRavenCrafting`. */
-  darkHorse: 13 as ChaosMachineMixRequestChaosMachineMixTypeEnum,
-  darkRaven: 14 as ChaosMachineMixRequestChaosMachineMixTypeEnum,
-  /** `FenrirStage1..3Crafting` + `FenrirUpgradeCrafting`. */
-  fenrirStage1: 25 as ChaosMachineMixRequestChaosMachineMixTypeEnum,
-  fenrirStage2: 26 as ChaosMachineMixRequestChaosMachineMixTypeEnum,
-  fenrirStage3: 27 as ChaosMachineMixRequestChaosMachineMixTypeEnum,
-  fenrirUpgrade: 28 as ChaosMachineMixRequestChaosMachineMixTypeEnum,
-  /** `LifeStoneCrafting`. */
-  lifeStone: 17 as ChaosMachineMixRequestChaosMachineMixTypeEnum,
-  /** `Small/Medium/LargeShieldPotionCrafting`. */
-  shieldPotionSmall: 30 as ChaosMachineMixRequestChaosMachineMixTypeEnum,
-  shieldPotionMedium: 31 as ChaosMachineMixRequestChaosMachineMixTypeEnum,
-  shieldPotionLarge: 32 as ChaosMachineMixRequestChaosMachineMixTypeEnum,
-  /** `BloodCastle` / `DevilSquare` / `IllusionTemple` ticket craftings. */
-  bloodCastleTicket: 8 as ChaosMachineMixRequestChaosMachineMixTypeEnum,
-  devilSquareTicket: 2 as ChaosMachineMixRequestChaosMachineMixTypeEnum,
-  illusionTempleTicket: 37 as ChaosMachineMixRequestChaosMachineMixTypeEnum,
-  /** `Level380OptionCrafting` / `SecromiconCrafting`. */
-  guardianOption: 36 as ChaosMachineMixRequestChaosMachineMixTypeEnum,
-  secromicon: 46 as ChaosMachineMixRequestChaosMachineMixTypeEnum,
-} as const;
-
-/** `CChaosMixMenuMsgBox`: what the goblin will attempt with what is inside. */
-type MixMenuEntry = {
-  type: ChaosMachineMixRequestChaosMachineMixTypeEnum;
-  labelKey: TextKey;
-  hintKey: TextKey;
-};
-
-/**
- * Every crafting OpenMU's Season 6 chaos goblin registers (`ChaosMixes.cs`
- * `Initialize`, in that order). The original picks the recipe itself out of
- * `mix.bmd`; that table is not decodable from this Data copy, so the window asks which one to attempt and the server keeps the
- * last word - exactly the information the protocol carries in
- * `ChaosMachineMixRequest.MixType`. Elphis' Gemstone refinery (number 33 on
- * the S6 server; the generated enum's `GemstoneRefinery` says 41) is not a
- * goblin mix and is deliberately not listed.
- */
-export const MIX_MENU: MixMenuEntry[] = [
-  {
-    type: ChaosMachineMixRequestChaosMachineMixTypeEnum.ChaosWeapon,
-    labelKey: 'mix.chaosWeapon',
-    hintKey: 'mix.chaosWeapon.hint',
-  },
-  {
-    type: ChaosMachineMixRequestChaosMachineMixTypeEnum.FruitCreation,
-    labelKey: 'mix.fruit',
-    hintKey: 'mix.fruit.hint',
-  },
-  {
-    type: MIX_NUMBER.dinorant,
-    labelKey: 'mix.dinorant',
-    hintKey: 'mix.dinorant.hint',
-  },
-  {
-    type: ChaosMachineMixRequestChaosMachineMixTypeEnum.PotionOfBless,
-    labelKey: 'mix.potionOfBless',
-    hintKey: 'mix.potionOfBless.hint',
-  },
-  {
-    type: ChaosMachineMixRequestChaosMachineMixTypeEnum.PotionOfSoul,
-    labelKey: 'mix.potionOfSoul',
-    hintKey: 'mix.potionOfSoul.hint',
-  },
-  {
-    type: ChaosMachineMixRequestChaosMachineMixTypeEnum.UpgradeItemLevelTo10,
-    labelKey: 'mix.upgrade10',
-    hintKey: 'mix.upgrade10.hint',
-  },
-  {
-    type: ChaosMachineMixRequestChaosMachineMixTypeEnum.UpgradeItemLevelTo11,
-    labelKey: 'mix.upgrade11',
-    hintKey: 'mix.upgrade11.hint',
-  },
-  {
-    type: ChaosMachineMixRequestChaosMachineMixTypeEnum.UpgradeItemLevelTo12,
-    labelKey: 'mix.upgrade12',
-    hintKey: 'mix.upgrade12.hint',
-  },
-  {
-    type: ChaosMachineMixRequestChaosMachineMixTypeEnum.UpgradeItemLevelTo13,
-    labelKey: 'mix.upgrade13',
-    hintKey: 'mix.upgrade13.hint',
-  },
-  {
-    type: ChaosMachineMixRequestChaosMachineMixTypeEnum.UpgradeItemLevelTo14,
-    labelKey: 'mix.upgrade14',
-    hintKey: 'mix.upgrade14.hint',
-  },
-  {
-    type: ChaosMachineMixRequestChaosMachineMixTypeEnum.UpgradeItemLevelTo15,
-    labelKey: 'mix.upgrade15',
-    hintKey: 'mix.upgrade15.hint',
-  },
-  {
-    type: MIX_NUMBER.bloodCastleTicket,
-    labelKey: 'mix.cloak',
-    hintKey: 'mix.cloak.hint',
-  },
-  {
-    type: MIX_NUMBER.devilSquareTicket,
-    labelKey: 'mix.devilInvitation',
-    hintKey: 'mix.devilInvitation.hint',
-  },
-  {
-    type: MIX_NUMBER.illusionTempleTicket,
-    labelKey: 'mix.illusionTicket',
-    hintKey: 'mix.illusionTicket.hint',
-  },
-  {
-    type: MIX_NUMBER.lifeStone,
-    labelKey: 'mix.lifeStone',
-    hintKey: 'mix.lifeStone.hint',
-  },
-  {
-    type: MIX_NUMBER.shieldPotionSmall,
-    labelKey: 'mix.shieldSmall',
-    hintKey: 'mix.shieldSmall.hint',
-  },
-  {
-    type: MIX_NUMBER.shieldPotionMedium,
-    labelKey: 'mix.shieldMedium',
-    hintKey: 'mix.shieldMedium.hint',
-  },
-  {
-    type: MIX_NUMBER.shieldPotionLarge,
-    labelKey: 'mix.shieldLarge',
-    hintKey: 'mix.shieldLarge.hint',
-  },
-  {
-    type: MIX_NUMBER.fenrirStage1,
-    labelKey: 'mix.fenrir1',
-    hintKey: 'mix.fenrir1.hint',
-  },
-  {
-    type: MIX_NUMBER.fenrirStage2,
-    labelKey: 'mix.fenrir2',
-    hintKey: 'mix.fenrir2.hint',
-  },
-  {
-    type: MIX_NUMBER.fenrirStage3,
-    labelKey: 'mix.fenrir3',
-    hintKey: 'mix.fenrir3.hint',
-  },
-  {
-    type: MIX_NUMBER.fenrirUpgrade,
-    labelKey: 'mix.fenrirUpgrade',
-    hintKey: 'mix.fenrirUpgrade.hint',
-  },
-  {
-    type: MIX_NUMBER.firstWings,
-    labelKey: 'mix.wings1',
-    hintKey: 'mix.wings1.hint',
-  },
-  {
-    type: MIX_NUMBER.cape,
-    labelKey: 'mix.cape',
-    hintKey: 'mix.cape.hint',
-  },
-  {
-    type: MIX_NUMBER.secondWings,
-    labelKey: 'mix.wings2',
-    hintKey: 'mix.wings2.hint',
-  },
-  {
-    type: MIX_NUMBER.thirdWingsStage1,
-    labelKey: 'mix.wings3a',
-    hintKey: 'mix.wings3a.hint',
-  },
-  {
-    type: MIX_NUMBER.thirdWingsStage2,
-    labelKey: 'mix.wings3b',
-    hintKey: 'mix.wings3b.hint',
-  },
-  {
-    type: MIX_NUMBER.guardianOption,
-    labelKey: 'mix.guardian',
-    hintKey: 'mix.guardian.hint',
-  },
-  {
-    type: MIX_NUMBER.secromicon,
-    labelKey: 'mix.secromicon',
-    hintKey: 'mix.secromicon.hint',
-  },
-  {
-    type: MIX_NUMBER.darkHorse,
-    labelKey: 'mix.darkHorse',
-    hintKey: 'mix.darkHorse.hint',
-  },
-  {
-    type: MIX_NUMBER.darkRaven,
-    labelKey: 'mix.darkRaven',
-    hintKey: 'mix.darkRaven.hint',
-  },
-];
+export const MIX_TYPE = { regular: 0, chaosWeapon: 1, option380: 2, chaosCard: 8 } as const;
 
 type TradePartner = { name: string; level: number; guildId: number };
 
@@ -343,8 +138,10 @@ export const Economy = new (class _Economy {
 
   mixOpen = false;
   mixItems: (Item | null)[] = emptyGrid(MIX_SLOTS);
-  mixType: ChaosMachineMixRequestChaosMachineMixTypeEnum =
-    ChaosMachineMixRequestChaosMachineMixTypeEnum.ChaosWeapon;
+  /** `CMixRecipeMgr::m_iMixType`: which `Mix.bmd` recipe list the tray is matched against. */
+  mixInventoryType: number = MIX_TYPE.regular;
+  /** `CChaosMixMenuMsgBox`: the goblin asks which kind of combination first. */
+  mixMenuOpen = false;
   /** `MIX_REQUESTED`: the request is out, both grids are locked. */
   mixPending = false;
   /** `MIX_FINISHED`: what the last attempt did, for the result line. */
@@ -409,7 +206,9 @@ export const Economy = new (class _Economy {
       vaultUnlocked: observable,
       mixOpen: observable,
       mixItems: observable,
-      mixType: observable,
+      mixInventoryType: observable,
+      mixMenuOpen: observable,
+      mixCheck: computed,
       mixPending: observable,
       mixResult: observable,
       mixKind: observable,
@@ -447,6 +246,8 @@ export const Economy = new (class _Economy {
     this.mixPending = false;
     this.mixResult = null;
     this.mixKind = 'chaosMachine';
+    this.mixInventoryType = MIX_TYPE.regular;
+    this.mixMenuOpen = false;
     this.closeTradeState();
     this.myShopOpen = false;
     this.myShopItems = emptyGrid(PERSONAL_SHOP_SLOTS);
@@ -674,8 +475,41 @@ export const Economy = new (class _Economy {
       this.mixItems = emptyGrid(MIX_SLOTS);
       this.mixPending = false;
       this.mixResult = null;
+      this.mixInventoryType = kind === 'chaosCard' ? MIX_TYPE.chaosCard : MIX_TYPE.regular;
+      // `OpeningProcess` (NewUIMixInventory.cpp:118-128): the goblin's menu comes up first.
+      this.mixMenuOpen = kind === 'chaosMachine';
       MuWindows.setOpen('inventory', true);
     });
+  }
+
+  /** A button of the goblin's menu (`CChaosMixMenuMsgBox`, NewUICustomMessageBox.cpp:2833-2861). */
+  chooseMixType(type: number): void {
+    runInAction(() => {
+      this.mixInventoryType = type;
+      this.mixMenuOpen = false;
+    });
+  }
+
+  /** The menu's Close hides the chaos machine too (`CancelBtnDown`). */
+  cancelMixMenu(): void {
+    runInAction(() => {
+      this.mixMenuOpen = false;
+    });
+    this.closeMix();
+  }
+
+  /** `CheckMixInventory`: the recipe the tray makes, against this window's `Mix.bmd` list. */
+  get mixCheck(): MixCheck {
+    return checkMix(mixRecipes()?.[this.mixInventoryType] ?? [], this.mixItems);
+  }
+
+  /**
+   * Whether the tray takes `item` (`InventoryProcess`, NewUIMixInventory.cpp:908-975): only a mix
+   * source, and only while the machine is ready (not after a mix finished).
+   */
+  mixAccepts(item: Item): boolean {
+    if (this.mixResult || this.mixPending) return false;
+    return isMixSource(mixRecipes()?.[this.mixInventoryType] ?? [], item, this.mixCheck);
   }
 
   /**
@@ -699,13 +533,6 @@ export const Economy = new (class _Economy {
       this.mixItems = items;
     });
     prefetchItemIcons(this.mixItems);
-  }
-
-  setMixType(type: ChaosMachineMixRequestChaosMachineMixTypeEnum): void {
-    runInAction(() => {
-      this.mixType = type;
-      this.mixResult = null;
-    });
   }
 
   /**
@@ -741,9 +568,13 @@ export const Economy = new (class _Economy {
     return true;
   }
 
-  /** The mix button (`CNewUIMixInventory::Mix`). */
+  /**
+   * The mix button (`CNewUIMixInventory::Mix`, NewUIMixInventory.cpp:836-905): zen, a matched recipe,
+   * its level and the bag space for the result, then the confirm box (`CMixCheckMsgBox`).
+   */
   mix(): void {
-    if (!this.mixOpen || this.mixPending) return;
+    // MIX_FINISHED: the button does nothing until the window is opened again (`BtnProcess`).
+    if (!this.mixOpen || this.mixPending || this.mixResult) return;
 
     if (!this.mixItems.some(Boolean)) {
       Social.errorMessage(t('chaos.putItemsIn'));
@@ -755,14 +586,34 @@ export const Economy = new (class _Economy {
       return;
     }
 
+    const check = this.mixCheck;
+    if (check.requiredZen > Hero.money) {
+      Social.errorMessage(t('chaos.notEnoughZen'));
+      return;
+    }
+    const recipe = check.recipe;
+    if (!recipe) {
+      Social.errorMessage(t('chaos.lackItems'));
+      return;
+    }
+    const name = recipeNameLines(recipe, check.firstItemType)[0];
+    if (Hero.level < recipe.requiredLevel) {
+      Social.errorMessage(t('chaos.levelRequired', { level: recipe.requiredLevel, name }));
+      return;
+    }
+    if (recipe.width !== -1 && !this.bagHasRoom(recipe.width, recipe.height)) {
+      Social.errorMessage(t('chaos.makeRoom'));
+      return;
+    }
+
+    MsgBox.popUpMsgWin(MsgWinCode.ConfirmMix, name, () => this.sendMix(recipe.mixId));
+  }
+
+  /** `CMixCheckMsgBoxLayout::OkBtnDown`: the recipe's `m_iMixID` goes out (NewUICommonMessageBox.cpp:1930-1935). */
+  private sendMix(mixId: number): void {
+    if (!this.mixOpen || this.mixPending) return;
     const packet = ChaosMachineMixRequestPacket.createPacket();
-    // The card master has no crafting menu; OpenMU resolves the mix against
-    // the opened NPC's craftings, so 0 asks for whatever a server configured
-    // there (none by default - the mix then answers IncorrectMixItems).
-    packet.MixType =
-      this.mixKind === 'chaosCard'
-        ? (0 as ChaosMachineMixRequestChaosMachineMixTypeEnum)
-        : this.mixType;
+    packet.MixType = mixId as ChaosMachineMixRequestChaosMachineMixTypeEnum;
     packet.SocketSlot = 0;
     Session.sendToGS(packet.buffer);
 
@@ -770,6 +621,16 @@ export const Economy = new (class _Economy {
       this.mixPending = true;
       this.mixResult = null;
     });
+  }
+
+  /** `FindEmptySlot` in the bag for a `width` x `height` result. */
+  private bagHasRoom(width: number, height: number): boolean {
+    const occupied = Hero.items.flatMap((item, slot) => {
+      if (!item || slot < InventoryConstants.EquippableSlotsCount) return [];
+      const { w, h } = itemSize(item);
+      return [{ slot, width: w, height: h }];
+    });
+    return findFreeSlot(occupied, InventoryConstants.InventoryRows, width, height) >= 0;
   }
 
   /** `ItemCraftingResult` (0x86). */
