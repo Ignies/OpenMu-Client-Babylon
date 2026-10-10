@@ -59,3 +59,40 @@ describe.skipIf(NO_DATA)('an ancient item', () => {
     expect(text.at(-1)?.text).toBe('Set Item option info');
   });
 });
+
+// The pets' own lines (ZzzInventory.cpp:3060-3135, :4196-4207, :4306-4311).
+describe('a pet tooltip', () => {
+  const pet = (num: number) => lines({ group: 13, num, durability: 255 }).slice(1);
+
+  it('names what the Demon and the Spirit of Guardian give', () => {
+    expect(pet(64).slice(0, 2)).toMatchObject([
+      { text: 'Increases Attack Power and Wizardry by 40%', color: 'blue' },
+      { text: 'Increases Attack Speed by 10', color: 'purple' },
+    ]);
+    expect(pet(65).slice(0, 2)).toMatchObject([
+      { text: "Alleviates monster's damage by 30%", color: 'blue' },
+      { text: 'Increases Maximum Life by 50', color: 'purple' },
+    ]);
+  });
+
+  it('names the zen pets', () => {
+    expect(pet(67)[0]).toMatchObject({ text: 'Surrounding Zens are automatically collected.', color: 'blue' });
+    expect(pet(123).slice(0, 4).map(l => l.text)).toEqual([
+      'Surrounding Zens are automatically collected.',
+      'increases Damage, Wizardry and Curse by 20%',
+      'Increases Attack Speed by 10',
+      'and EXP by 30%.',
+    ]);
+    expect(pet(80).slice(0, 3).map(l => l.text)).toEqual(['Auto-collects zen around you.', 'EXP rate 50% increase', 'Increase Defensive Skill +50']);
+    expect(pet(106).slice(0, 3).map(l => l.text)).toEqual(['Auto-collects zen around you.', 'Zen increase 50%', 'Increase Defensive Skill +50']);
+  });
+
+  it('names the Guardian Angel, the Imp and the Horn of Dinorant in white', () => {
+    expect(pet(0).slice(0, 2)).toMatchObject([
+      { text: 'Absorb Damage +20%', color: 'white' },
+      { text: 'Max HP +50 increased', color: 'white' },
+    ]);
+    expect(pet(1)[0]).toMatchObject({ text: 'Increase 30% of attacking & Wizardry Dmg', color: 'white' });
+    expect(pet(3).slice(0, 2).map(l => l.text)).toEqual(['Increase Damage +15%', 'Absorb Damage +10%']);
+  });
+});

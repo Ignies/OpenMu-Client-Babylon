@@ -36,8 +36,8 @@ import { skillDisplayName } from '@/controllers/assets';
  * `RenderItemInfo` (ZzzInventory.cpp:2091) as data: the tooltip is a list
  * of coloured lines, blank lines being half-height spacers, drawn by
  * `RenderTipTextList`. Only the paths the clone can reach are ported - the
- * generic equipment block, wings, jewels and the option/excellent lines;
- * event items and pets fall back to their name.
+ * generic equipment block, wings, pets, jewels and the option/excellent
+ * lines; event items fall back to their name.
  *
  * `GlobalText` is not available here (Text.bmd is encoded), so the English
  * strings are written out inline.
@@ -299,6 +299,37 @@ function wingLines(out: Lines, def: ItemDef, level: number) {
   }
 }
 
+type PetLine = readonly [TextKey, TooltipColor];
+
+/** The pets' lines right under the name (ZzzInventory.cpp:3060-3135), by helper index. */
+const PET_LINES: Readonly<Record<number, readonly PetLine[]>> = {
+  64: [['item.pet.demon', 'blue'], ['item.pet.attackSpeed10', 'purple']],
+  65: [['item.pet.guardianDamage', 'blue'], ['item.pet.guardianLife', 'purple']],
+  67: [['item.pet.zenCollect', 'blue']],
+  123: [['item.pet.zenCollect', 'blue'], ['item.pet.skeletonDamage', 'blue'], ['item.pet.attackSpeed10', 'blue'], ['item.pet.skeletonExp', 'blue']],
+  80: [['item.pet.autoZen', 'blue'], ['item.pet.exp50', 'blue'], ['item.pet.defense50', 'blue']],
+  106: [['item.pet.autoZen', 'blue'], ['item.pet.zen50', 'blue'], ['item.pet.defense50', 'blue']],
+};
+
+function petLines(out: Lines, def: ItemDef) {
+  if (def.group !== ItemGroup.Helper) return;
+  for (const [key, color] of PET_LINES[def.index] ?? []) out.add(t(key), color);
+}
+
+/** Guardian Angel, Imp and Horn of Dinorant, beside the wing lines (ZzzInventory.cpp:4196-4207, :4306-4311). */
+function helperLines(out: Lines, def: ItemDef) {
+  if (def.group !== ItemGroup.Helper) return;
+  if (def.index === 0) {
+    out.add(t('item.absorbDamage', { value: 20 }));
+    out.add(t('item.pet.maxHp', { value: 50 }));
+  } else if (def.index === 1) {
+    out.add(t('item.pet.imp'));
+  } else if (def.index === 3) {
+    out.add(t('item.increaseDamage', { value: 15 }));
+    out.add(t('item.absorbDamage', { value: 10 }));
+  }
+}
+
 function jewelLines(out: Lines, def: ItemDef) {
   if (def.group === ItemGroup.Potion) {
     switch (def.index) {
@@ -434,6 +465,7 @@ export function buildItemTooltip(
     return { lines: trimBlanks(out.list), usable: true };
   }
 
+  petLines(out, def);
   equipmentLines(out, item, stats, hero, worn);
   setOptionBlock(out, item, hero, ancient);
 
@@ -507,6 +539,7 @@ function equipmentLines(
   }
 
   wingLines(out, def, level);
+  helperLines(out, def);
   jewelLines(out, def);
   consumableLines(out, def, item);
 

@@ -176,6 +176,19 @@ const en = {
   'item.setOpt.shieldDefense': 'Increase defensive skill when using shield weapons {value}%',
   'item.setOpt.twoHanded': 'Increase damage when using two handed weapons +{value}%',
   'item.attributeDamage': 'Increase attribute damage',
+  'item.pet.demon': 'Increases Attack Power and Wizardry by 40%',
+  'item.pet.attackSpeed10': 'Increases Attack Speed by 10',
+  'item.pet.guardianDamage': "Alleviates monster's damage by 30%",
+  'item.pet.guardianLife': 'Increases Maximum Life by 50',
+  'item.pet.zenCollect': 'Surrounding Zens are automatically collected.',
+  'item.pet.skeletonDamage': 'increases Damage, Wizardry and Curse by 20%',
+  'item.pet.skeletonExp': 'and EXP by 30%.',
+  'item.pet.autoZen': 'Auto-collects zen around you.',
+  'item.pet.exp50': 'EXP rate 50% increase',
+  'item.pet.defense50': 'Increase Defensive Skill +50',
+  'item.pet.zen50': 'Zen increase 50%',
+  'item.pet.maxHp': 'Max HP +{value} increased',
+  'item.pet.imp': 'Increase 30% of attacking & Wizardry Dmg',
 };
 
 export default en;
