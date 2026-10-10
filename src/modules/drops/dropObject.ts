@@ -26,14 +26,11 @@ const FALL_START = 1.8;
  */
 const FALL_LAG = 0.7;
 
-/** The shadow clones' material; they do not carry the item materials' attribute. */
-const SHADOW_MATERIAL = 'objectShadow';
-
 const tmpOffset = new Vector3();
 const tmpLocal = new Vector3();
 const tmpMatrix = new Matrix();
 
-/** One mesh the pile is drawn on: the drop's own, or a shadow clone of it. */
+/** One mesh the pile is drawn on. */
 type PileTarget = {
   readonly mesh: Mesh;
   /** Takes a displacement in the node's frame into this mesh's own basis. */
@@ -137,22 +134,6 @@ export class DropObject extends ModelObject {
     this.#writePile();
   }
 
-  /**
-   * The blob under the pile has to be the pile's, not one coin's. Slots are
-   * built lazily, frames after `load`, so the clone is stamped as it appears.
-   */
-  protected onShadowBuilt(shadow: AbstractMesh): void {
-    if (this.#coins.length === 0) return;
-
-    const invNode = this.#nodeInverse();
-
-    for (const mesh of [shadow, ...shadow.getChildMeshes(false)]) {
-      this.#addTarget(mesh, invNode);
-    }
-
-    this.#writePile();
-  }
-
   #nodeInverse(): Matrix {
     const node = this.node;
     node.computeWorldMatrix(true);
@@ -160,7 +141,7 @@ export class DropObject extends ModelObject {
     return Matrix.Invert(node.getWorldMatrix());
   }
 
-  /** Puts the pile on one mesh - the drop's own, or one of its shadow clones. */
+  /** Puts the pile on one of the drop's meshes. */
   #addTarget(mesh: AbstractMesh, invNode: Matrix): void {
     if (mesh.getTotalVertices() === 0) return;
 
@@ -192,14 +173,12 @@ export class DropObject extends ModelObject {
 
     // The per-instance state the item materials read; (1, 1, 1, 1) is what a
     // non-instanced draw gets, so the coins are lit exactly as the drop was.
-    if (!target.material?.name?.startsWith(SHADOW_MATERIAL)) {
-      target.thinInstanceSetBuffer(
-        'muInst',
-        new Float32Array(this.#coins.length * 4).fill(1),
-        4,
-        true
-      );
-    }
+    target.thinInstanceSetBuffer(
+      'muInst',
+      new Float32Array(this.#coins.length * 4).fill(1),
+      4,
+      true
+    );
   }
 
   /**
