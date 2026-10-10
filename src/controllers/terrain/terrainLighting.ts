@@ -11,6 +11,7 @@ import {
   cloudFieldGlsl,
   CLOUD_NOISE_SAMPLER,
   CLOUD_UNIFORMS,
+  type CloudLook,
 } from '../lighting/clouds';
 import { SKY_CLOUDS_DEFAULT } from '../lighting/profiles';
 import {
@@ -314,15 +315,12 @@ export function bindTerrainLight(
   bindToonFilter(effect);
 
   if (clouds) {
-    bindClouds(effect, scene, {
-      // Null while the map has no sky, and inside a room, where `applyArea`
-      // clears it: the deck is not overhead, so it casts nothing.
-      base: look?.profile.sky
-        ? look.profile.sky.clouds ?? SKY_CLOUDS_DEFAULT
-        : null,
-      sunDirection: look?.key.direction ?? [0, -1, 0],
-      sunElevationDeg: look?.profile.sun.elevationDeg ?? 45,
-    });
+    // Null while the map has no sky, and inside a room, where `applyArea`
+    // clears it: the deck is not overhead, so it casts nothing.
+    cloudLook.base = look?.profile.sky ? look.profile.sky.clouds ?? SKY_CLOUDS_DEFAULT : null;
+    cloudLook.sunDirection = look?.key.direction ?? STRAIGHT_DOWN;
+    cloudLook.sunElevationDeg = look?.profile.sun.elevationDeg ?? 45;
+    bindClouds(effect, scene, cloudLook);
   }
 
   effect.setTexture('dynamicLight', getTerrainLightTexture(scene));
@@ -347,6 +345,10 @@ export function bindTerrainLight(
   effect.setArray4('groundLightCol', groundCol);
   bindTerrainCsm(effect);
 }
+
+const STRAIGHT_DOWN = [0, -1, 0] as const;
+/** The look every bind hands the clouds, rewritten in place. */
+const cloudLook: CloudLook = { base: null, sunDirection: STRAIGHT_DOWN, sunElevationDeg: 45 };
 
 const groundPos: number[] = new Array(GROUND_POINT_LIGHTS * 4).fill(0);
 const groundCol: number[] = new Array(GROUND_POINT_LIGHTS * 4).fill(0);

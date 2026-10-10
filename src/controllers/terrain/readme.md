@@ -104,7 +104,7 @@ water, ground picks, minimap data and the base class for map objects. There is n
   rebuilt in one buffer as a light crosses tiles, the bilinear sample.
 - `terrainJpeg.test.ts`: `lightFromPixels` and `decodeJpegPixels` (worker and main-thread paths).
 - `terrainLighting.test.ts`: the GLSL branches on the tier uniforms, `?terrainBranch=0`, range 0
-  for unfilled pool slots.
+  for unfilled pool slots, one cloud look rewritten on every bind.
 - `terrainOverlay.test.ts`: the snow melt loop and upload, with and without `?snowGate=0`.
 - `snowArtMatch.test.ts`: `SNOW_ART` against measured tile colours.
 - `terrainPick.test.ts`: `TerrainPicker` finds the same hit as Babylon's mesh pick.
