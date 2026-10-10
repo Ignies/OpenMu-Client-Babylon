@@ -42,7 +42,7 @@ import {
 import { addEffectGlow, releaseEffectGlow } from './glow';
 import { releaseGreasedLineMaterial } from './greasedLineRelease';
 import { RGBS } from './recipes';
-import type { EffectHandle, EffectLayer } from './layer';
+import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
 import { reportLoadFailure } from '../assets';
 
 // ---- 1. tuning -------------------------------------------------------------
@@ -1002,7 +1002,19 @@ export function spawnJoint(scene: Scene, at: Vector3, opts: JointOptions): Effec
   return opts.head || opts.velocity !== undefined ? spawnTrail(scene, at, opts) : spawnBolt(scene, at, opts);
 }
 
+/**
+ * The most joints alive at once: the original's `Joints[MAX_JOINTS]` (Core/Globals/_define.h:504).
+ * CreateJoint makes none when every slot is live (ZzzEffectJoint.cpp:76). A set counts once.
+ */
+export const MAX_JOINTS = 500;
+
+/** How many joints are running (debug). */
+export function jointCount(): number {
+  return live.size;
+}
+
 function spawn(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle {
+  if (live.size >= MAX_JOINTS) return DEAD_HANDLE;
   return spawnJoint(scene, at, opts);
 }
 

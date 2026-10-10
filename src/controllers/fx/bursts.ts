@@ -14,7 +14,7 @@
  */
 import { Vector3, type Scene } from '../render/babylon/exports';
 import { emitBurst, fxNow, hash, type ParticleRecipe, type PointSource, type RGB } from './core';
-import { spawnJoint } from './joint';
+import { jointLayer } from './joint';
 import { spawnRing } from './ring';
 import { TEX } from './recipes';
 import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
@@ -157,7 +157,8 @@ function playRings(scene: Scene, rings: BurstRings, at: Vector3): void {
         centre.z + Math.sin(a) * rings.radius
       );
     };
-    spawnJoint(scene, centre, {
+    // Through the layer: each is a CreateJoint, so they take slots under its cap (joint.ts).
+    jointLayer.spawn(scene, centre, {
       head,
       colour: rings.colour,
       seconds: rings.seconds,

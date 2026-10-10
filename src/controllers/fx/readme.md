@@ -59,6 +59,12 @@ shared pools, textures and particle recipes other folders reuse.
   cards from a free list, one `ParticleSystem` per recipe so a burst is a counter bump. The colour
   is rounded to 1/32 first: keyed by the exact tint, a flickering effect made a new material
   nearly every frame and kept it until the map changed.
+- Caps: `effects.spawn('joint')` makes nothing past `MAX_JOINTS` (500) live joints and
+  `effects.spawn('model')` past `MAX_EFFECTS` (200) models, the original's fixed `Joints[]` /
+  `Effects[]` slots (Core/Globals/_define.h:456,504). The level-up rings go through the joint cap.
+  What other entries start with `spawnJoint` / `spawnModel` (aura and monster ribbons, projectile
+  heads, debris) counts but is never refused: a refused aura would not come back. A joint set
+  (`pairs`, `paths`) counts once.
 - Units follow the original: lifetimes in 25 Hz ticks (`TICK`), distances in cm / 100 (`CM`).
   Entries cite the `CreateEffect` / `CreateJoint` / `CreateParticle` code they port
   (ZzzEffect.cpp, ZzzEffectJoint.cpp, ZzzEffectParticle.cpp).
@@ -116,6 +122,8 @@ shared pools, textures and particle recipes other folders reuse.
 - `modelClones.test.ts`: a `model`, `linkedModel` or spirit skull clone leaves no mesh, skeleton or
   clip behind when it ends (a `model` clone once the pool is emptied), also when it loads after the
   end; a `model` spawn after one ended reuses its clone, shown once dressed.
+- `caps.test.ts`: past 500 live joints or 200 live models a spawn makes nothing, and makes one
+  again once one ends; the level-up rings count toward the joint cap.
 - `modelPool.test.ts`: a returned clone comes back as it was loaded and disabled, at most
   `POOL_PER_MODEL` per model, never to another scene; a stray one is disposed, the spares on reset.
 - `afterimage.test.ts`: a copy takes the drawn meshes of each part onto a skeleton of its own, posed on

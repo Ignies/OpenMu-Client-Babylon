@@ -53,7 +53,7 @@ import {
 } from './core';
 import { addEffectGlow, releaseEffectGlow } from './glow';
 import { RGBS } from './recipes';
-import type { EffectHandle, EffectLayer } from './layer';
+import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
 
 // ---- 1. tuning -------------------------------------------------------------
 
@@ -754,7 +754,14 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
   };
 }
 
+/**
+ * The most effect models alive at once: the original's `Effects[MAX_EFFECTS]` (Core/Globals/_define.h:456).
+ * CreateEffect makes none when every slot is live (ZzzEffect.cpp:336).
+ */
+export const MAX_EFFECTS = 200;
+
 function spawn(scene: Scene, at: Vector3, opts: ModelOptions): EffectHandle {
+  if (live.size >= MAX_EFFECTS) return DEAD_HANDLE;
   return spawnModel(scene, at, opts);
 }
 
