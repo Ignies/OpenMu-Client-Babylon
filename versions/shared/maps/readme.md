@@ -202,3 +202,5 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   `BITMAP_LIGHTNING + 1` (20) pairs that turn against each other.
 - `losttower/lightningObject.test.ts`: 40, with no model, draws two white `BITMAP_LIGHTNING + 1` 260
   up at 2.5 on any scale, turning against each other on one luminosity roll a frame.
+- `devilsquare/storm.test.ts`: the storm keeps at most two flashes alight and drops the spent ones
+  in place, making no array a tick.

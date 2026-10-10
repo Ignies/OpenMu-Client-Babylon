@@ -131,7 +131,7 @@ export class DevilSquareStorm {
   /** Wall clock in the original's units, so the 4 s cycle is its own. */
   #elapsedMs = 0;
 
-  #strikes: LightSource[] = [];
+  readonly #strikes: LightSource[] = [];
 
   constructor(world: World) {
     this.#world = world;
@@ -162,9 +162,11 @@ export class DevilSquareStorm {
     while (this.#tickDue >= 1) {
       this.#tickDue -= 1;
 
-      if (this.#strikes.length > 0) {
-        this.#strikes = this.#strikes.filter(s => s.alive);
-      }
+      // Drops the strikes that went out, in place.
+      const strikes = this.#strikes;
+      let lit = 0;
+      for (let i = 0; i < strikes.length; i++) if (strikes[i].alive) strikes[lit++] = strikes[i];
+      strikes.length = lit;
 
       if (this.#elapsedMs % PERIOD_MS >= WINDOW_MS) continue;
       if (this.#strikes.length >= MAX_CONCURRENT) continue;
