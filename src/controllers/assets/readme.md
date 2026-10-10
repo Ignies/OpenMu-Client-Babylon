@@ -23,7 +23,8 @@ imports the modules below directly (baselined in `tools/checks`).
   re-exports from `core/binaryUtils` and `net/wireUtils`.
 - `compressedAssets.ts`: `fetchAssetBytes`, `prefetchAsset`; `COMPRESSED_EXTENSIONS`,
   `COMPRESSED_SUFFIX` for the build tools.
-- `modelLoader.ts`: `loadGLTF(path, world)`, `warmGLTF`, `evictContainers`, `getMaterial`,
+- `modelLoader.ts`: `loadGLTF(path, world)`, `disposeLoadedModel` (a clone with its skeleton and
+  clips), `warmGLTF`, `evictContainers`, `getMaterial`,
   `getScrollVariant`, `getFlatLitVariant`, `setMeshFadeBlend`, `syncMaterialQuality`,
   `syncTexturePack`, `getModel`; `getDataTexture(scene, path)` (a `Data/` bitmap for a mesh drawn with
   another texture than its own, top-down like the GLBs'), `ALPHA_TEST_AND_BLEND`.

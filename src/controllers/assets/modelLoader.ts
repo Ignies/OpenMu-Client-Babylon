@@ -436,7 +436,7 @@ export async function syncTexturePack(): Promise<void> {
   await Promise.all(all.map(t => applyPackToTexture(t)));
 }
 
-type LoadedModel = {
+export type LoadedModel = {
   mesh: AbstractMesh;
   skeleton: Skeleton;
   animationGroups: AnimationGroup[];
@@ -797,6 +797,16 @@ export async function loadGLTF(
     skeleton,
     animationGroups: entries.animationGroups,
   };
+}
+
+/**
+ * Frees one `loadGLTF` clone: its meshes, and the skeleton and clips
+ * `instantiateModelsToScene` cloned with them, which a mesh dispose leaves in the scene.
+ */
+export function disposeLoadedModel(model: LoadedModel): void {
+  if (!model.mesh.isDisposed()) model.mesh.dispose(false, false);
+  model.skeleton?.dispose();
+  for (const group of model.animationGroups) group.dispose();
 }
 
 /** Fetch and parse a GLB into the cache without placing a clone, so a later `loadGLTF` of it is not late. */

@@ -113,6 +113,8 @@ shared pools, textures and particle recipes other folders reuse.
   and `fireRed` (`BITMAP_FIRE_RED`, firered.jpg) shoots up steady for 20 ticks.
 - `core.test.ts`: a flickering tint makes a bounded number of additive materials, each within half
   a step of the colour asked for.
+- `modelClones.test.ts`: a `model`, `linkedModel` or spirit skull clone leaves no mesh, skeleton or
+  clip behind when it ends, also when it loads after the end.
 - `afterimage.test.ts`: a copy takes the drawn meshes of each part onto a skeleton of its own, posed on
   the clip's first key while the body keeps its own; a placed part stands where a body facing that way
   would draw it, at its alpha; an unplaced or 0-alpha part is not drawn; it ends taking its copies along.

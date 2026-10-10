@@ -30,7 +30,7 @@ import {
 import { angleMatrixQuaternion } from '../render/renderAngles';
 import { clampAlpha } from './clampAlpha';
 import { chromeMaterial, disposeChromeMaterials } from './chrome';
-import { getMaterial, loadGLTF } from '../assets/modelLoader';
+import { disposeLoadedModel, getMaterial, loadGLTF, type LoadedModel } from '../assets/modelLoader';
 import { BlendState } from '@versions/shared/objects/enum';
 import { Ecs } from '../../ecs/current';
 import type { TestScene } from '../render/scenes/testScene';
@@ -420,6 +420,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
   let solidFaded = false;
   let scaleOverride = 0;
   let clip: AnimationGroup | null = null;
+  let loaded: LoadedModel | null = null;
   let scrolledV: Texture | null = null;
   let disposed = false;
   let t = 0;
@@ -444,9 +445,10 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
     void loadGLTF(opts.model, world)
       .then(gltf => {
         if (disposed) {
-          gltf.mesh.dispose(false, false);
+          disposeLoadedModel(gltf);
           return;
         }
+        loaded = gltf;
         gltf.mesh.setParent(node);
         gltf.mesh.position.setAll(0);
         gltf.mesh.scaling.set(1, -1, 1);
@@ -711,6 +713,8 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
       for (const m of meshes) releaseEffectGlow(m);
       for (const cp of copyNodes) cp.node.dispose(false, false);
       node.dispose(false, false);
+      // The clone's skeleton and clips outlive its meshes.
+      if (loaded) disposeLoadedModel(loaded);
     },
   });
 

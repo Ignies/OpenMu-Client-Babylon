@@ -18,7 +18,7 @@ import {
   type StandardMaterial,
   type Texture,
 } from '../render/babylon/exports';
-import { loadGLTF } from '../assets/modelLoader';
+import { disposeLoadedModel, loadGLTF } from '../assets/modelLoader';
 import { Ecs } from '../../ecs/current';
 import type { TestScene } from '../render/scenes/testScene';
 import { clampAlpha } from './clampAlpha';
@@ -370,7 +370,7 @@ function buildRig(scene: Scene, at: Vector3, opts: SpiritSwarmOptions, count: nu
     void loadGLTF(sk.model, world)
       .then(gltf => {
         if (rig.disposed) {
-          gltf.mesh.dispose(false, false);
+          disposeLoadedModel(gltf);
           return;
         }
         for (const g of gltf.animationGroups) g.dispose();
@@ -471,6 +471,8 @@ function disposeRig(rig: Rig): void {
   releaseRibbon(rig.scene, rig.spine);
   for (const s of rig.skulls) {
     (rig.scene as TestScene).look?.glow.removeExcludedMesh(s.mesh);
+    // The clone's skeleton, if the skull is skinned, stays with its meshes until here.
+    s.mesh.skeleton?.dispose();
     s.mesh.dispose(false, false);
   }
   for (const m of rig.skullMats) m.mat.dispose(false, false);
