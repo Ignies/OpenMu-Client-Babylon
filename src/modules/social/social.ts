@@ -787,10 +787,12 @@ export const Social = new (class _Social {
 
   setPartyMembers(members: PartyMember[]): void {
     const previous = new Map(this.partyMembers.map(m => [m.name, m]));
-    this.partyMembers = members.map(m => ({
-      ...m,
-      healthStep: previous.get(m.name)?.healthStep ?? m.healthStep,
-    }));
+    const byIndex = new Map(this.partyMembers.map(m => [m.index, m.name]));
+    this.partyMembers = members.map(m => {
+      // A blank name (an OpenMU update) keeps the one the slot had; the original's server never sends one.
+      const name = m.name || byIndex.get(m.index) || m.name;
+      return { ...m, name, healthStep: previous.get(name)?.healthStep ?? m.healthStep };
+    });
   }
 
   /** RemovePartyMember: the hero's own index dissolves the whole list. */

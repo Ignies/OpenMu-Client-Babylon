@@ -1,0 +1,56 @@
+@import (reference) '@/controllers/interface/components/mu_text/style.less';
+
+// `CNewUIPartyListWindow`: plates at 640x480 stage positions; the component supplies the numbers.
+.party-list {
+  position: absolute;
+  transform-origin: 100% 0;
+  // Under every window (WINDOW_Z_BASE is 100), like the corner minimap.
+  z-index: 10;
+  .mu-font();
+  font-size: 11px;
+  user-select: none;
+
+  .party-list-row {
+    position: absolute;
+    right: 0;
+    pointer-events: auto;
+  }
+
+  .party-list-fill {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.9);
+
+    &.far {
+      background: rgba(77, 0, 0, 0.5);
+    }
+
+    &.defense {
+      background: rgba(51, 255, 51, 0.2);
+    }
+
+    &.hovered {
+      background: rgba(102, 102, 102, 0.7);
+    }
+  }
+
+  .party-list-back,
+  .party-list-part,
+  .party-list-name {
+    position: absolute;
+  }
+
+  .party-list-back {
+    left: 0;
+    top: 0;
+  }
+
+  .party-list-name {
+    white-space: nowrap;
+    overflow: hidden;
+    line-height: 12px;
+  }
+
+  .party-list-exit {
+    cursor: pointer;
+  }
+}

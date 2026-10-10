@@ -8,10 +8,9 @@ Party packets from the game server. The party state and the party actions live i
 
 ## How it works
 - The handlers port `ReceiveParty*` (`WSclient.cpp:6839`) and write into `Social`:
-  `partyRequest`, `partyMembers` (via `setPartyMembers`, `removePartyMember`, `setPartyHealth`)
-  and `partyWindowEnabled`.
-- Joining a party (empty list before, members after) prints a system line and opens the party
-  window.
+  `partyRequest` and `partyMembers` (via `setPartyMembers`, `removePartyMember`, `setPartyHealth`).
+- Joining a party (empty list before, members after) prints a system line and opens no window
+  (`ReceivePartyList`, WSclient.cpp:7367): the always-on list `versions/shared/ui/hud/party_list` shows it.
 - Outgoing packets are `Social` actions: `partyInvite` (leader-only and five-member checks,
   `CommandParty`), `partyRespond`, `requestPartyList`, `partyKick`, `partyLeave`.
 
@@ -32,4 +31,4 @@ Party packets from the game server. The party state and the party actions live i
 - change what the window shows: `versions/shared/ui/windows/party/index.tsx`.
 
 ## Tests
-- none yet.
+- `net.test.ts`: joining opens no window; a blank member name keeps the slot's previous one.

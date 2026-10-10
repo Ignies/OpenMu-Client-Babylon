@@ -145,6 +145,8 @@ const HUD_SPRITES = [
   'mini_map_ui_npc.OZT',
   'mini_map_ui_party.OZT',
   'mini_map_ui_portal.OZT',
+  'newui_Party_Back.OZT',
+  'newui_Party_HpBar.OZJ',
   'newui_Party_Lifebar01.OZJ',
   'newui_Party_Lifebar02.OZJ',
   'newui_Party_X.OZT',

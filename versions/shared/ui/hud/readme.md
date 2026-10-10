@@ -33,6 +33,7 @@ Always-on interface elements, one folder per element, same shape as a window. Re
 | `minimap` | minimap (hud, 450) | full world map on TAB and the corner minimap, turned by the camera heading (`rotation.ts`: the original's 45 degrees counter-clockwise) | Ecs.world, hero, options, social |
 | `mobile_controls` | mobile_controls (hud, 490) | touch HUD: move button, skill pad, menu cluster | AppState, hero, skills, warp, social |
 | `name_tags` | - | names and guild marks over characters | Ecs.world, guild, social |
+| `party_list` | party_list (hud, 65) | the always-on member list at the top right (`CNewUIPartyListWindow`); left of the corner minimap while that is on, not moved for open windows (ours are scaled and dragged) | social, skills, Ecs.world |
 | `party_bars` | - | party member HP pips over heads | social |
 | `emoji_bubbles` | - | a character's emoji bubble | chat |
 
@@ -49,7 +50,8 @@ Always-on interface elements, one folder per element, same shape as a window. Re
 
 ## Tests
 - `bottom_bar/belt.test.tsx`: the bar draws the potion slots the version has (four, three, none).
-- `minimap/rotation.test.ts`: the map turn (the camera heading, -45 with no world) and the marker turn.
+- `minimap/rotation.test.ts`: the map turn (the camera heading, -45 with no world) and the marker turn.
+- `party_list/rows.test.ts`: which members are found on screen, and the name colours.
 - `low_health_overlay/heartbeat.test.ts`: the heartbeat beats back to back while due, and books
   no next beat once it is not.
 - `name_tags/tagSync.test.ts`: the tag layout matches the measuring pass and pushes overlapping
