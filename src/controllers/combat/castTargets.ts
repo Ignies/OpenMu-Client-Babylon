@@ -13,6 +13,8 @@ export type CastTarget =
   | 'self'
   /** The selected party member, or the caster when nothing suitable is picked. */
   | 'allyOrSelf'
+  /** A selected player, or the caster with nothing selected; a monster or NPC selected cancels it. */
+  | 'playerOrSelf'
   /** The selected object; the cast does not happen without one. */
   | 'enemy'
   /** No target at all: an area cast on the caster's own tile, the selection ignored. */
@@ -22,7 +24,8 @@ export type CastTarget =
  * Skills whose rule the original names in its switches, by skill number. Each
  * skill's own file sets `target` (registerSkills fills this table); the rows
  * here have no skill file. Rules: 'self' = sent with HeroKey whatever is
- * selected; 'allyOrSelf' = the selected party member, else the caster;
+ * selected; 'allyOrSelf' = the selected party member, else the caster; 'playerOrSelf' = the
+ * same, but a monster or NPC selected cancels the cast (ClassAttack.cpp:162-167, :1158);
  * 'enemy' = refused without a live selection (Sleep, ClassAttack.cpp:1694-1735);
  * 'inPlace' = at the hero's own tile with no target key (SkillCast.cpp:722-741).
  */
@@ -66,6 +69,11 @@ export function castsOnSelf(def: SkillDefinition): boolean {
 /** Whether the cast is an area cast on the caster's own tile, with no target at all. */
 export function castsInPlace(def: SkillDefinition): boolean {
   return castTarget(def) === 'inPlace';
+}
+
+/** Whether a monster or NPC selected cancels the cast (`Attacking = -1`). */
+export function castsOnPlayersOnly(def: SkillDefinition): boolean {
+  return castTarget(def) === 'playerOrSelf';
 }
 
 /** Whether the selection is ignored outright (`HeroKey`, always). */

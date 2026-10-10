@@ -39,7 +39,7 @@ const { effects } = await import('../../controllers/fx');
 const { TEX } = await import('../../controllers/fx/recipes');
 const { Session } = await import('../../modules/session');
 const { HeroSkills, skills } = await import('../../modules/skills');
-const { AreaSkillPacket, RageAttackRangeRequestPacket, RageAttackRequestPacket } = await import('@versions/shared/packets/ClientToServerPackets');
+const { AreaSkillPacket, RageAttackRangeRequestPacket, RageAttackRequestPacket, TargetedSkillPacket } = await import('@versions/shared/packets/ClientToServerPackets');
 const { Bag } = await import('../../modules/inventory');
 const { darkSideCast } = await import('@versions/shared/skills/rage_fighter/dark_side/rage');
 
@@ -272,5 +272,62 @@ describe('a bow skill with no arrows in hand', () => {
     const { sent, request } = cast(52, new Array(76).fill(null));
     expect(sent).toEqual([]);
     expect(request).toBeNull();
+  });
+});
+
+describe('an ally cast with a monster selected', () => {
+  /** The hero casts `skill` at `target` (a monster, or nothing under the cursor). */
+  function cast(skill: number, target: Entity | null) {
+    const hero = {
+      ...body(1, 100, 100),
+      localPlayer: true,
+      pathfinding: { path: null },
+      attributeSystem: { isAboveZero: () => false, getValue: () => 0 },
+      playerAnimation: { action: PlayerAction.PLAYER_STOP_FEMALE },
+      modelObject: {
+        CurrentAction: PlayerAction.PLAYER_STOP_FEMALE,
+        AnimationSpeed: 0.3,
+        ActionIterationWasFinished: true,
+        actionPlaySpeed: () => undefined,
+        restartAction: () => {},
+        getActionDuration: () => 1,
+      },
+    } as unknown as Entity;
+    const world = {
+      scene,
+      mapIndex: 0,
+      playerEntity: hero,
+      castRequest: { target, point: { x: 102, y: 100 }, forced: false },
+      rightPointerPressed: true,
+      getByNetId: () => target ?? undefined,
+      getTerrainFlag: () => 0,
+      netObjsQuery: { entities: [] },
+    } as unknown as World;
+    store.world = world;
+    HeroSkills.currentSkill = skill;
+    vi.spyOn(skills, 'canUse').mockReturnValue(true);
+    vi.spyOn(skills, 'startCooldown').mockReturnValue(true);
+    const sent: [number, number][] = [];
+    vi.spyOn(Session, 'sendToGS').mockImplementation(((b: DataView) => {
+      if (b.getUint8(2) === TargetedSkillPacket.Code) sent.push([new TargetedSkillPacket(b).SkillId, new TargetedSkillPacket(b).TargetId]);
+    }) as never);
+    SkillCastSystem(world).update?.(TICK);
+    combat.reset();
+    HeroSkills.currentSkill = -1;
+    store.world = null;
+    const result = { sent, request: world.castRequest };
+    vi.restoreAllMocks();
+    return result;
+  }
+
+  it('is cancelled for Heal, Greater Damage / Defense and Soul Barrier (ClassAttack.cpp:162-167, :1158)', () => {
+    for (const skill of [26, 413, 27, 423, 28, 420, 16, 404]) {
+      const monster = { ...body(9, 102, 100), npcType: 3 } as unknown as Entity;
+      expect(cast(skill, monster)).toEqual({ sent: [], request: null });
+    }
+  });
+
+  it('lands on the caster with nothing selected (SendRequestMagic(Skill, HeroKey))', () => {
+    expect(cast(26, null).sent).toEqual([[26, 1]]);
   });
 });

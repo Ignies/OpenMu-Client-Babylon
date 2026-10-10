@@ -79,8 +79,10 @@ clip's length:
 The skill table's target field is not enough (Soul Barrier reads `Explicit` but can go on
 yourself; Swell Life reads `ImplicitParty` but always goes as `HeroKey`). The original's
 `SendRequestMagic` key decides: the hero for self-only buffs, the selected party member or else
-the hero for party buffs and heals, the selected object for everything else. Read by
-`skillCastSystem` and `modules/skills/skillCasting.ts` (`isSelfCastable`).
+the hero for party buffs and heals, the selected object for everything else. Heal, Greater
+Damage / Defense and Soul Barrier (`playerOrSelf`) are cancelled outright with a monster or NPC
+selected (`Attacking = -1`, ClassAttack.cpp:162-167, :1158). Read by `skillCastSystem` and
+`modules/skills/skillCasting.ts` (`isSelfCastable`).
 
 ### Notes: skillClips.ts
 The original's `UseSkill*` switches, `Attack*` branches and `ReceiveMagic` ladders become one

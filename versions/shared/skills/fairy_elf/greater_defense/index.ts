@@ -16,5 +16,5 @@ export default defineSkill({
   visual: { impact: atBuffRelease(magicGround([0.4, 0.8, 0.2])) },
   // Greater Defense / Greater Damage: the same magic circle.
   light: { strike: holy(3, 1.0) },
-  target: 'allyOrSelf',
+  target: 'playerOrSelf',
 });

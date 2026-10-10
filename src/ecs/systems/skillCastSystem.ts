@@ -47,7 +47,7 @@ import { skills, HeroSkills } from '../../modules/skills';
 import { combat } from '../../controllers/combat';
 
 import { CONSECUTIVE_ATTACK_KEY } from '../../controllers/combat/skillMovement';
-import { castsInPlace, castsOnSelfOnly } from '../../controllers/combat/castTargets';
+import { castsInPlace, castsOnPlayersOnly, castsOnSelfOnly } from '../../controllers/combat/castTargets';
 import { PlayerAction } from '@versions/shared/objects/enum';
 import type { CastContext } from '../../controllers/combat';
 import { Vector3 } from '../../controllers/render/babylon/exports';
@@ -534,6 +534,13 @@ export const SkillCastSystem: ISystemFactory = world => {
             hero.modelObject?.getActionDuration(PlayerAction.PLAYER_SKILL_TELEPORT) ?? 0;
           cooldown = duration > 0 ? duration : FALLBACK_CAST_COOLDOWN;
         }
+        world.castRequest = null;
+        return;
+      }
+
+      // Heal, Greater Damage / Defense, Soul Barrier: a monster or NPC selected cancels the cast
+      // (`Attacking = -1`, ClassAttack.cpp:162-167, :1158).
+      if (castsOnPlayersOnly(def) && req.target?.npcType !== undefined) {
         world.castRequest = null;
         return;
       }
