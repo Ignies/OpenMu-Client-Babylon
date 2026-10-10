@@ -111,3 +111,4 @@ windows themselves are content in `versions/shared/ui/` (see
 - `components/module_window/index.test.tsx`: the module frame draws only while open; its hot key
   never takes a built-in action's key.
 - `components/item_tooltip/placement.test.ts`: tooltip and compare-pair placement.
+- `itemTooltip.test.ts`: tooltip lines and name colours against `RenderItemInfo`.

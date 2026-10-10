@@ -136,7 +136,8 @@ function nameColor(item: Item, def: ItemDef, level: number): TooltipColor {
     if (level >= 7) return 'yellow';
     return optionLevel > 0 ? 'blue' : 'white';
   }
-  if (optionLevel > 0 && item.isExcellent) return 'green';
+  // Every excellent option is a Special, so excellent is always green (ZzzInventory.cpp:2140).
+  if (item.isExcellent) return 'green';
   if (level >= 7) return 'yellow';
   return optionLevel > 0 ? 'blue' : 'white';
 }
