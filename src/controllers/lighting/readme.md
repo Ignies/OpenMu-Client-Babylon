@@ -122,6 +122,8 @@ policy. It knows how to light something, never which skill or item asks for it.
   record with both pitch and roll turns its offset by `AngleMatrix` (ZzzMathLib.cpp:185-212).
 - `mapObjectLights.test.ts`: a row's ground light breathes on its own pulse, else on its flare's, and a
   flicker wins over both.
+- `pointLightPool.test.ts`: the slots go to the nearest torches, ranked every frame on one comparator
+  and rows kept from frame to frame.
 - `versions/shared/maps/mapRows.golden.test.ts`: every world's look, room looks, thunder and
   map-object lights, pinned across the move into the map folders.
 - `mapLighting.test.ts`: a look over the open or enclosed default, the sky's default for a map
