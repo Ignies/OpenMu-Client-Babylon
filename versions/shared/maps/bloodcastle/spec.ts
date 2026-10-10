@@ -58,7 +58,11 @@ export const BLOOD_CASTLE_EMISSIONS: Partial<
   ],
 };
 
-/** The gate, `Object12/Object37.glb` (type 36, x1 at 14.5, 76.1). */
+/**
+ * The gate, `Object12/Object37.glb` (type 36, x1 at 14.5, 76.1): a 3 x 6 tile
+ * drawbridge (wcd planks, pant01 rails, ses chains), the moat's size. The
+ * later client in `references/Original` ships a 4 x 4 doorc01 door there.
+ */
 export const BLOOD_CASTLE_GATE_TYPE = 36;
 
 /**
@@ -81,5 +85,12 @@ export const BLOOD_CASTLE_LAMP_TYPE = 13;
  * marks these 18 tiles `TW_NOGROUND | TW_ACTION` (0x28), and the server
  * clears the `TW_NOGROUND` over the same rectangle when the bridge is earned
  * (OpenMU's Bridge Toggle Event) - which is what starts the fall.
+ *
+ * The bridge deck is these tiles' own texture: slot 8 on all eighteen,
+ * `World12/TileRock02` (MapManager.cpp:1408), planks with an iron trim down
+ * each side; type 9 adds only the two rails at its edges (Object10, pant01).
+ * The file ships, byte for byte the original's (`deck.test.ts`). The old note
+ * "it needs the asset" was the deck staying a hole after the bridge came
+ * down (issue #455): the ground now re-lays a tile when its flag changes.
  */
 export const BLOOD_CASTLE_MOAT = { x: 13, y: 70, w: 3, h: 6 } as const;

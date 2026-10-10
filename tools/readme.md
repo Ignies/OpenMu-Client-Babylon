@@ -12,7 +12,8 @@ and how to run it.
   sidecars and the pre-download indexes (`bun run build` runs all three). `assetsIndex.ts` writes
   one per version (`assets-index.json`, `assets-index-v097d.json`): a borrowing version lists each
   file at the url the client's own resolvers read it from, so a file is counted once, and offers
-  only the map groups of the version's `data.worlds` (`assetsIndex.test.ts`).
+  only the map groups of the version's `data.worlds` (`assetsIndex.test.ts`); a world folder counts
+  in any case (`Data/world55` is World55), so a lower-case one is never core.
 - `instrumentModels.ts`, `instrumentSamples.ts`: the band system's instruments.
 
 ## Content generators (write files under `versions/` or `src/`)

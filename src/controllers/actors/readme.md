@@ -51,7 +51,8 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   `debuffSlow`; `ItemGroup`, `ItemRestPose`, `itemRestHeight`, `itemWornHeight`, `itemTumbleAxis`;
   `itemObjectAttribute(group, num)`; `GuildFlag`, `GUILD_FLAG_BONE`, `isThunderHawkArmor`;
   `applyOutlawLook`, `outlawUltraActive`, `OUTLAW_ULTRA_LIGHT`; `isSkinOrHairTexture`,
-  `isHideTexture`; `traceHeroInstantMove`.
+  `isHideTexture`, `hideSkinTexture(group, num)` (on the door: the bitmap a dropped Faith or Queen
+  armour / pants draws mesh 0 with, ZzzObject.cpp:7774-7790); `traceHeroInstantMove`.
 - `openHelm.ts`: `showsClassHead(helm)`, whether the class head is drawn under that helm (below).
 
 ## How it works

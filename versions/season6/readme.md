@@ -22,7 +22,9 @@ Season 6 Episode 3, the default version and the one the client was written again
   - `pingRelay.ts`: C1 FB, a map ping relayed by the ws proxy (`proxy/ping/hub.ts`).
   - `modulePacket.ts`: C1/C2 E8, a module packet from our OpenMU plugin; the module router reads it
     (`src/modules/_api/router.ts`).
-- `data/index.ts`: assets under `./Data/` (or `VITE_DATA_URL`) and `./game-assets/`, locale `Eng`.
+- `data/index.ts`: assets under `./Data/` (or `VITE_DATA_URL`) and `./game-assets/`, locale `Eng`,
+  and the world folders a map entry reads: not World6 (Exile) or World55/56 and Object55/56 (the old
+  character and login scenes, maps 54/55), which the trees hold and nothing reads.
 - `ui/preload.ts`: the sprite sheets decoded before the start menu and on world entry.
 - `ui/index.ts` reuses the shared login and character pages and the shared master skill window.
 

@@ -25,7 +25,8 @@ imports the modules below directly (baselined in `tools/checks`).
   `COMPRESSED_SUFFIX` for the build tools.
 - `modelLoader.ts`: `loadGLTF(path, world)`, `warmGLTF`, `evictContainers`, `getMaterial`,
   `getScrollVariant`, `getFlatLitVariant`, `setMeshFadeBlend`, `syncMaterialQuality`,
-  `syncTexturePack`, `getModel`.
+  `syncTexturePack`, `getModel`; `getDataTexture(scene, path)` (a `Data/` bitmap for a mesh drawn with
+  another texture than its own, top-down like the GLBs'), `ALPHA_TEST_AND_BLEND`.
 - `texturePacks.ts`: `texturePacks` (store), `loadPackIndex`, `setActivePack`, `ORIGINAL_PACK`,
   `packsBase`, `onTexturePackChanged`, `packRepaintsPending`, `textureLabel`.
 - `assetDownload.ts`: `assetDownload` (store), `AssetGroup`, `loadAssetsIndex`, `startDownload`,
