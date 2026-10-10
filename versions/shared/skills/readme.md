@@ -45,7 +45,7 @@ _shared.ts                      helpers for several classes
   in the controller: the clip pick (`clip` as a function, `poseClip`, `swing`), `swordCount`,
   `castsAsSpell`, `othersSee`, `quietOn`, `magicIsHit`, `noFlinch`, `holdsFacing`, `clipSound`,
   `soundOnLanding`, `silentHeroCast`, `targetSound`, `kill`, `effect`, `effectAliases`, `buffHits`,
-  `explicitHits`, and the combat hooks (Nova, Combo, Dark Side).
+  `explicitHits`, `checksArrows`, and the combat hooks (Nova, Combo, Dark Side).
 - Deliberate deviation: `effectAliases` (on the base skill) and the Rage Fighter `effect`s 129-131
   let a master or Rage Fighter `MagicEffectCancelled` drop its buff. The original's
   ReceiveMagicFinish has those cases but reads the skill as a BYTE (WSclient.cpp:3884), so ids 256+

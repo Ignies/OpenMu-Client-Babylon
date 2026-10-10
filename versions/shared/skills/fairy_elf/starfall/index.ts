@@ -9,6 +9,7 @@ import { holy } from '@/controllers/lighting/recipes';
 export default defineSkill({
   id: 46,
   name: "Starfall",
+  checksArrows: true, // CheckArrow() before the shot (SkillCast.cpp:588)
   // AT_SKILL_DEEPIMPACT shoots through SetPlayerHighBowAttack, which advances SwordCount (ZzzInterface.cpp:2523-2527,
   // ZzzCharacter.cpp:1316).
   swing: 'highBow',

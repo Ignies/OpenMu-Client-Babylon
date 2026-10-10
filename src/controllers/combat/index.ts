@@ -2,7 +2,7 @@ import type { Controller } from '../controller';
 import type { Entity, Item } from '../../ecs/world';
 import type { PlayerAction } from '@versions/shared/objects/enum';
 import type { AreaSkillHitPacket } from '@versions/shared/packets/ClientToServerPackets';
-import type { SkillDefinition } from '@versions/shared/skills/skillsDatabase';
+import { masterRoot, type SkillDefinition } from '@versions/shared/skills/skillsDatabase';
 import type { ENUM_WORLD } from '../../core/types';
 import type { CombatLayer } from './layer';
 import { COMBAT_LAYERS } from './layers';
@@ -18,7 +18,7 @@ import {
   setLastAttackEffectTime,
   startAttack,
 } from './attackTiming';
-import { attackRange, equippedLauncher, hasAmmo, type Hands } from './weaponRange';
+import { ARROW_SKILLS, attackRange, equippedLauncher, hasAmmo, type Hands } from './weaponRange';
 import { castQuietOn, magicClip, magicIsHit, othersSeeClip, skillClip, type CastContext } from './skillClips';
 import {
   clipHoldsFacing,
@@ -178,6 +178,11 @@ class Combat implements Controller {
   /** The bow or crossbow in these hands, `null` when neither is one. */
   equippedLauncher(hands: Hands): Item | null {
     return equippedLauncher(hands);
+  }
+
+  /** A bow skill, or a master skill of one: `CheckArrow()` runs before it goes out (SkillCast.cpp:580). */
+  checksArrows(skill: number): boolean {
+    return ARROW_SKILLS.has(masterRoot(skill));
   }
 
   // ---- skills ------------------------------------------------------------

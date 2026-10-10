@@ -25,6 +25,7 @@ function bladeTurns(): number[] {
 export default defineSkill({
   id: 235,
   name: "Multi-Shot",
+  checksArrows: true, // CheckArrow() before the shot (ClassAttack.cpp:328)
   // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
   lookAliases: [411, 431],
   // 235 Multi-Shot: MODEL_BLADE_SKILL sub1 at the packet fires one arrow every 2 ticks from tick 0 to 10, each turned

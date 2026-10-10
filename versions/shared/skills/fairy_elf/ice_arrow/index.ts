@@ -10,6 +10,7 @@ import { frost } from '@/controllers/lighting/recipes';
 export default defineSkill({
   id: 51,
   name: "Ice Arrow",
+  checksArrows: true, // CheckArrow() before the shot (SkillCast.cpp:580)
   // ReceiveMagicFinish drops eDeBuff_Harden (WSclient.cpp:3935-3938).
   effect: 57,
   effectAliases: [424],

@@ -35,6 +35,7 @@ import {
   isAttackableEntity,
   isAttackablePlayer,
   isOtherPlayer,
+  reloadAmmo,
 } from './attackSystem';
 import { isFemaleClass } from '../../controllers/actors/mapPlayerNetClassToModelClass';
 import { getBaseClass } from '../../modules/hero/characterStats';
@@ -517,6 +518,13 @@ export const SkillCastSystem: ISystemFactory = world => {
       }
 
       if (cooldown > 0) return;
+
+      // `CheckArrow()` (SkillCast.cpp:580-590, :1189): a bow skill with no ammunition in hand puts
+      // the next quiver in and goes out once it is there; with none in the bag it is dropped.
+      if (combat.checksArrows(def.num) && !combat.hasAmmo(hero.charAppearance)) {
+        if (!reloadAmmo(hero.charAppearance)) world.castRequest = null;
+        return;
+      }
 
       // ---- Teleport: a one-shot at the square under the cursor.
       if (isTeleportSkill(def.num)) {

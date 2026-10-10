@@ -62,6 +62,8 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
 - `systems/attackSystem.test.ts`: a swing sends the walk stop (`LetHeroStop`) before its hit.
 - `systems/skillCastSystem.test.ts`: Dark Side's follow-up blows draw on each target the server
   named and send nothing; with nothing selected it is cast where the hero stands, target key 0.
+  A bow skill with no arrows in hand reloads the next quiver instead of shooting, and is dropped
+  when the bag has none (`CheckArrow`).
 
 ## Notes
 Long file comments from `systems/`, condensed.

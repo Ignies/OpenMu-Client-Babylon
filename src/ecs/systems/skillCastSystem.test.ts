@@ -4,7 +4,7 @@ import { Scene } from '@babylonjs/core/scene';
 import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 import { ENUM_WORLD } from '../../core/types';
 import { PlayerAction } from '@versions/shared/objects/enum';
-import type { Entity, World } from '../world';
+import type { Entity, Item, World } from '../world';
 
 vi.hoisted(() => {
   const g = globalThis as Record<string, unknown>;
@@ -39,7 +39,8 @@ const { effects } = await import('../../controllers/fx');
 const { TEX } = await import('../../controllers/fx/recipes');
 const { Session } = await import('../../modules/session');
 const { HeroSkills, skills } = await import('../../modules/skills');
-const { RageAttackRangeRequestPacket, RageAttackRequestPacket } = await import('@versions/shared/packets/ClientToServerPackets');
+const { AreaSkillPacket, RageAttackRangeRequestPacket, RageAttackRequestPacket } = await import('@versions/shared/packets/ClientToServerPackets');
+const { Bag } = await import('../../modules/inventory');
 const { darkSideCast } = await import('@versions/shared/skills/rage_fighter/dark_side/rage');
 
 const TICK = 1 / 25;
@@ -204,5 +205,72 @@ describe('Dragon Slasher at the click', () => {
     const monster = { ...body(9, 101, 101), npcType: 3 } as unknown as Entity;
     expect(cast(monster)).toContain('Sound/Ragefighter/Rage_Dragonkick');
     expect(cast(null)).not.toContain('Sound/Ragefighter/Rage_Dragonkick');
+  });
+});
+
+describe('a bow skill with no arrows in hand', () => {
+  /** The elf casts `skill` at a monster in reach, a bow in the left hand and the right one empty. */
+  function cast(skill: number, bag: (Item | null)[]) {
+    const hero = {
+      ...body(1, 100, 100),
+      localPlayer: true,
+      charAppearance: { leftHand: { group: 4, num: 0 }, rightHand: null },
+      pathfinding: { path: null },
+      attributeSystem: { isAboveZero: () => false, getValue: () => 0 },
+      playerAnimation: { action: PlayerAction.PLAYER_STOP_MALE },
+      modelObject: {
+        CurrentAction: PlayerAction.PLAYER_STOP_MALE,
+        AnimationSpeed: 0.3,
+        ActionIterationWasFinished: true,
+        actionPlaySpeed: () => undefined,
+        restartAction: () => {},
+        getActionDuration: () => 1,
+      },
+    } as unknown as Entity;
+    const monster = { ...body(9, 102, 100), npcType: 3 } as unknown as Entity;
+    const world = {
+      scene,
+      mapIndex: 0,
+      playerEntity: hero,
+      castRequest: { target: monster, point: { x: 102, y: 100 }, forced: false },
+      rightPointerPressed: true,
+      getByNetId: () => monster,
+      getTerrainFlag: () => 0,
+      netObjsQuery: { entities: [] },
+    } as unknown as World;
+    store.world = world;
+    HeroSkills.currentSkill = skill;
+    vi.spyOn(skills, 'canUse').mockReturnValue(true);
+    vi.spyOn(skills, 'startCooldown').mockReturnValue(true);
+    const sent: number[] = [];
+    vi.spyOn(Session, 'sendToGS').mockImplementation(((b: DataView) => void sent.push(b.getUint8(2))) as never);
+    vi.spyOn(Bag, 'itemsOfStorage').mockReturnValue(bag);
+    const moved = vi.spyOn(Bag, 'moveItemToSquare').mockReturnValue(true);
+    SkillCastSystem(world).update?.(TICK);
+    combat.reset();
+    HeroSkills.currentSkill = -1;
+    store.world = null;
+    const result = { sent, moves: moved.mock.calls.map(c => [c[1], c[2]]), request: world.castRequest };
+    vi.restoreAllMocks();
+    return result;
+  }
+
+  it('reloads the next quiver and does not shoot (CheckArrow, SkillCast.cpp:1189)', () => {
+    // Triple Shot and its Strengthener; a quiver further down the bag each time (a refused
+    // reload of the same slot waits 3 s).
+    const bag: (Item | null)[] = new Array(76).fill(null);
+    [24, 414].forEach((skill, i) => {
+      bag[40 + i] = { group: 4, num: 15 } as Item;
+      const { sent, moves, request } = cast(skill, bag);
+      expect(sent).not.toContain(AreaSkillPacket.Code);
+      expect(moves).toEqual([[40 + i, 1]]);
+      expect(request).not.toBeNull();
+    });
+  });
+
+  it('drops the cast when the bag has none either', () => {
+    const { sent, request } = cast(52, new Array(76).fill(null));
+    expect(sent).toEqual([]);
+    expect(request).toBeNull();
   });
 });
