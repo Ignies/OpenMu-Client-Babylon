@@ -21,3 +21,26 @@ describe('Session.sendToGS', () => {
     expect([sent[0][0], sent[0][1]]).toEqual([0xc1, 4]);
   });
 });
+
+// CLoginWin::CancelLogin (LoginWin.cpp:416-427): the game server goes, the connect server is
+// dialled again and the server list shows; the typed fields stay.
+describe('Session.cancelLogin', () => {
+  it('goes back to the server list', async () => {
+    const { AppState, UIState } = await import('@/controllers/interface/uiState');
+    const dial = vi.spyOn(Session, 'connectToConnectServer').mockImplementation(() => undefined);
+    const close = vi.fn();
+    Session.gsSocket = { close } as unknown as WebSocket;
+    Session.username = 'hero';
+    Session.loginError = 'Wrong password';
+    AppState.uiState = UIState.Login;
+
+    Session.cancelLogin();
+
+    expect(close).toHaveBeenCalled();
+    expect(Session.gsSocket).toBeUndefined();
+    expect(dial).toHaveBeenCalled();
+    expect(AppState.uiState).toBe(UIState.Servers);
+    expect(Session.loginError).toBeUndefined();
+    expect(Session.username).toBe('hero');
+  });
+});

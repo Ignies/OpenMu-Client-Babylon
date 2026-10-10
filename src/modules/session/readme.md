@@ -9,7 +9,7 @@ the client-to-server encryption, the login fields and the offline flag.
   packet the client sends), `isOffline`, `gsSocket` / `csSocket`, `connectToConnectServer()`,
   `connectToGameServer(host, port, fallback?)`, `disconnectFrom...()`, `onGameServerReached()`,
   `switchToMapServer(...)`, `sendServerChangeAuthentication(characterName)`, `onSocketLost(socket)`,
-  `playOnline()` (back to the server list), `lastGameServer`, `resumeHook`, `connectionLost`; the
+  `playOnline()` (back to the server list), `cancelLogin()` (the login Cancel, `LoginWin.cpp:416`), `lastGameServer`, `resumeHook`, `connectionLost`; the
   login fields `username`, `password`, `rememberLogin`, `loginProcessing`, `loginError`,
   `loadAccount(id?, force?)`, `saveLoginData()`, `loginRequest(user, password)`; the proxy side
   frames `sendBandFrame` / `sendPingFrame`.
@@ -70,7 +70,7 @@ the client-to-server encryption, the login fields and the offline flag.
 
 ## Tests
 - `state.test.ts`: `sendToGS` sends only the bytes its DataView covers (a view into a larger buffer, as a module's
-  packet can be).
+  packet can be); `cancelLogin` goes back to the server list and keeps the fields.
 - the login flow is covered by the listener order golden (`src/app/listenerOrder.golden.test.ts`).
 
 ## Notes

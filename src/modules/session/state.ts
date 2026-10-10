@@ -113,6 +113,14 @@ export const Session = new (class {
     this.connectToConnectServer();
   }
 
+  /** `CLoginWin::CancelLogin` (LoginWin.cpp:416): back to the server list; the typed fields stay. */
+  cancelLogin() {
+    this.loginError = undefined;
+    this.loginProcessing = false;
+    this.disconnectFromGameServer();
+    this.playOnline();
+  }
+
   /**
    * A socket we did not close ourselves went away (`wsClosed` / `wsError`
    * from `createSocket`). Deliberate closes clear `gsSocket` / `csSocket`
@@ -405,6 +413,7 @@ export const Session = new (class {
       loginProcessing: observable,
       rememberLogin: observable,
       playOnline: action,
+      cancelLogin: action,
       onSocketLost: action,
     });
 

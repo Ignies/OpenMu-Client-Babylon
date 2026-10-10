@@ -54,10 +54,7 @@ const REGISTER = { x: 22, y: CHECK_Y + 3 };
 /** `CLoginWin::Render`: the server line in `g_hFixFont` at (111, 80). */
 const SERVER_LINE = { x: 111, y: 80 };
 
-const onCancelClicked = () => {
-  Session.username = '';
-  Session.password = '';
-};
+const onCancelClicked = () => Session.cancelLogin();
 
 export const LoginPage = observer(() => {
   const [registering, setRegistering] = useState(false);
