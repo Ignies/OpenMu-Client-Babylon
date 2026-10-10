@@ -261,8 +261,8 @@ export function darkRibbonSheet(scene: Scene, file: string): Promise<Texture> {
 
 const materials = new Map<Scene, Map<string, StandardMaterial>>();
 
-/** A cached material's tint is rounded to 1/32: below what an additive card shows, and a flicker stays a few materials. */
-const TINT_STEPS = 32;
+/** A cached material's tint is rounded to 1/128: under one 8-bit level, and a flicker stays a bounded set of materials. */
+const TINT_STEPS = 128;
 
 /**
  * Effects draw after every group-0 mesh, the alpha-keyed ones included.

@@ -25,18 +25,19 @@ describe('additiveMaterial', () => {
   it('a flickering tint makes a bounded number of materials, not one a frame', () => {
     const sheet = new Texture(null, scene);
     const made = new Set<unknown>();
-    for (let frame = 0; frame < 1000; frame++) {
+    for (let frame = 0; frame < 5000; frame++) {
       const f = 0.85 + 0.15 * Math.sin(frame / 7);
       made.add(additiveMaterial(scene, sheet, [1.6 * f, 0.4 * f, 0.2 * f]));
     }
-    expect(made.size).toBeLessThan(25);
+    // At most one material per 1/128 step of each channel's span (0.48, 0.12, 0.06); a 1/255 key made 123.
+    expect(made.size).toBeLessThanOrEqual(Math.ceil((0.48 + 0.12 + 0.06) * 128) + 3);
   });
 
-  it('keeps the tint within half a step of the one asked for', () => {
+  it('keeps the tint within half a step of 1/128 of the one asked for, under one 8-bit level', () => {
     const sheet = new Texture(null, scene);
     const m = additiveMaterial(scene, sheet, [0.5, 0.26, 0.1]);
-    expect(Math.abs(m.emissiveColor.r - 0.5)).toBeLessThanOrEqual(1 / 64);
-    expect(Math.abs(m.emissiveColor.g - 0.26)).toBeLessThanOrEqual(1 / 64);
-    expect(Math.abs(m.emissiveColor.b - 0.1)).toBeLessThanOrEqual(1 / 64);
+    expect(Math.abs(m.emissiveColor.r - 0.5)).toBeLessThanOrEqual(1 / 256);
+    expect(Math.abs(m.emissiveColor.g - 0.26)).toBeLessThanOrEqual(1 / 256);
+    expect(Math.abs(m.emissiveColor.b - 0.1)).toBeLessThanOrEqual(1 / 256);
   });
 });

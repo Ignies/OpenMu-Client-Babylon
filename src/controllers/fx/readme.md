@@ -57,8 +57,9 @@ shared pools, textures and particle recipes other folders reuse.
   the effect just does not appear.
 - Shared pools (`core.ts`): additive materials cached per (texture, colour, blend), billboard
   cards from a free list, one `ParticleSystem` per recipe so a burst is a counter bump. The colour
-  is rounded to 1/32 first: keyed by the exact tint, a flickering effect made a new material
-  nearly every frame and kept it until the map changed.
+  is rounded to 1/128 first, under one 8-bit level (1/32 showed as steps in a slow fade): keyed by
+  the exact tint, a flickering effect made a new material nearly every frame and kept it until the
+  map changed.
 - Caps: `effects.spawn('joint')` makes nothing past `MAX_JOINTS` (500) live joints and
   `effects.spawn('model')` past `MAX_EFFECTS` (200) models, the original's fixed `Joints[]` /
   `Effects[]` slots (Core/Globals/_define.h:456,504). The level-up rings go through the joint cap.
@@ -118,7 +119,7 @@ shared pools, textures and particle recipes other folders reuse.
   fading past 300 and gone past 500, `cloud11` (SubType 11) drifts the same in its own light, turning,
   and `fireRed` (`BITMAP_FIRE_RED`, firered.jpg) shoots up steady for 20 ticks.
 - `core.test.ts`: a flickering tint makes a bounded number of additive materials, each within half
-  a step of the colour asked for.
+  a 1/128 step of the colour asked for.
 - `modelClones.test.ts`: a `model`, `linkedModel` or spirit skull clone leaves no mesh, skeleton or
   clip behind when it ends (a `model` clone once the pool is emptied), also when it loads after the
   end; a `model` spawn after one ended reuses its clone, shown once dressed.
