@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import { SOUND_FILES } from '@/controllers/sound/recipes';
 import {
@@ -70,6 +71,15 @@ describe('Chaos Castle pillar thunder', () => {
     for (let k = 1; k < BOLT_SEGMENTS + 1; k++) {
       expect(out[k * 3 + 1]).toBeLessThanOrEqual(out[(k - 1) * 3 + 1]);
     }
+  });
+
+  // Laid again every tick (ZzzEffectJoint.cpp:5097-5131): pinned so the walk stays the same rolls for rolls.
+  it('lays the same walk for the same rolls', () => {
+    const out: number[] = [];
+    fallingBoltPath({ x: 30.03, y: 2 + BOLT_DROP_MU / 100, z: 79.98 }, { x: 30, y: 2, z: 80 }, out, seeded(5));
+    expect(createHash('sha256').update(out.map(v => v.toFixed(9)).join()).digest('hex')).toBe(
+      'e9e6eb380bd908345c5e59cd1ef4a70d1cd0fdf42df1d61a26383ca1bdeceed6'
+    );
   });
 
   it('picks one of the two catalogued thunder waves', () => {

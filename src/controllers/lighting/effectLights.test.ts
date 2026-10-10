@@ -1,6 +1,8 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vitest';
 import type { Scene } from '../render/babylon/exports';
+import type { World } from '../../ecs/world';
+import { Ecs } from '../../ecs/current';
 
 // The sheets the flares asked for, the sheet each sprite was drawn from, each manager's cell and every sprite.
 const asked = vi.hoisted(() => [] as string[]);
@@ -56,6 +58,10 @@ const { createEffectLight, createMovableFlare } = await import('./effectLights')
 
 const at = { x: 0, y: 0, z: 0 };
 const lastSprite = () => sprites[sprites.length - 1];
+
+/** Sets the world's clock, the original's `WorldTime`, to `ms`. */
+const worldAt = (ms: number) =>
+  void (Ecs.world = { gameTime: { TotalGameTime: { TotalSeconds: ms / 1000 } } } as unknown as World);
 
 /** A scene whose frames the test steps, `ms` at a time. */
 function clockedScene() {
@@ -174,14 +180,33 @@ describe('flare cards', () => {
     expect(card.color.r).toBeCloseTo(0);
   });
 
-  // Aida's torch turns `WorldTime / 10.0f` degrees (GMAida.cpp:310): a tenth of a degree a millisecond.
-  it('turn a spinning card counter-clockwise by its degrees a millisecond', async () => {
+  // Kanturu 3's Shiny02 cards turn `(int)(WorldTime / 2) % 360` degrees (GM_Kanturu_3rd.cpp:270): the world's clock, whole degrees.
+  it('turn every spinning card from the world clock in whole degrees, so cards made apart stand at one angle', async () => {
     const { scene, step } = clockedScene();
-    await createEffectLight(scene, { scale: 3, color: [1, 1, 1], texture: 'flare', spin: 0.1 }, at, 1);
+    worldAt(1001);
+    await createEffectLight(scene, { scale: 1, color: [1, 1, 1], texture: 'shiny1', spin: 0.5 }, at, 1);
+    const first = lastSprite();
+    worldAt(1001.9);
+    step(16);
+    expect(first.angle).toBeCloseTo((140 * Math.PI) / 180);
+    worldAt(50000.3);
+    await createEffectLight(scene, { scale: 1, color: [1, 1, 1], texture: 'shiny1', spin: 0.5 }, at, 1);
+    const second = lastSprite();
+    step(16);
+    expect([first.angle, second.angle]).toEqual([160, 160].map(d => expect.closeTo((d * Math.PI) / 180)));
+  });
+
+  // Aida's torch turns `WorldTime / 10.0f` degrees (GMAida.cpp:310), a float: a tenth of a degree a millisecond, smoothly.
+  it('turn a smoothSpin card counter-clockwise by its degrees a millisecond of world time', async () => {
+    const { scene, step } = clockedScene();
+    worldAt(0);
+    await createEffectLight(scene, { scale: 3, color: [1, 1, 1], texture: 'flare', spin: 0.1, smoothSpin: true }, at, 1);
     const card = lastSprite();
-    step(900);
-    expect(card.angle).toBeCloseTo(Math.PI / 2);
-    step(900);
+    worldAt(1234.5);
+    step(16);
+    expect(card.angle).toBeCloseTo((123.45 * Math.PI) / 180);
+    worldAt(3600 + 1800);
+    step(16);
     expect(card.angle).toBeCloseTo(Math.PI);
   });
 

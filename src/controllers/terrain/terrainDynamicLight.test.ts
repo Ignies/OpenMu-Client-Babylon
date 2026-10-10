@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { TERRAIN_SIZE } from './consts';
 import {
   initTerrainDynamicLight,
@@ -135,6 +135,34 @@ describe('terrainLightTouchesSample', () => {
 
     dispose();
     updateTerrainDynamicLight(80);
+  });
+
+  // A light carried across the map rebuilds the set at every tile: into one buffer, never a new array.
+  it('rebuilds the set in place each time a light crosses a tile', () => {
+    initTerrainDynamicLight(bakedField(rng(5)));
+    const torch = emitter(30.5, 30.5, 2);
+    const dispose = registerTerrainLight(torch);
+    updateTerrainDynamicLight(0);
+
+    const from = vi.spyOn(Int32Array, 'from');
+    for (let step = 1; step <= 10; step++) {
+      torch.position.x = 30.5 + step;
+      updateTerrainDynamicLight(step * 16);
+    }
+    const made = from.mock.calls.length;
+    from.mockRestore();
+
+    expect(made).toBe(0);
+    expect(terrainLightTouchesSample(40, 30)).toBe(true);
+    expect(terrainLightTouchesSample(30, 30)).toBe(false);
+    const lit = { x: 0, y: 0, z: 0 };
+    const bake = { x: 0, y: 0, z: 0 };
+    requestTerrainLight(30.5, 30.5, lit);
+    requestBakedTerrainLight(30.5, 30.5, bake);
+    expect(lit).toEqual(bake);
+
+    dispose();
+    updateTerrainDynamicLight(200);
   });
 });
 

@@ -103,7 +103,7 @@ const RED: Vec3 = [0.25, 0, 0];
  *    first, `(0.25, 0, 0)` at 5.5 / 5 on the rest, over `(0.15, 0, 0)` at 3.
  *  - **75** (×1), :304-311: a `BITMAP_FLARE` (Flare.jpg's own warm star) at
  *    bone 4 (201 up at scale 1), white - the `fLumi` tint is overwritten by
- *    `(1, 1, 1)` - 3 across with no `* o->Scale`, turning `WorldTime / 10`
+ *    `(1, 1, 1)` - 3 across with no `* o->Scale`, turning a smooth `WorldTime / 10`
  *    degrees: the one torch.
  *
  * The plants stand at scale 0.56-2.84 (most 2-2.5): the bulbs grow with them,
@@ -123,7 +123,7 @@ export const AIDA_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
     {
       offset: [0, -1, 201],
       bone: true,
-      sprite: { scale: 3, color: [1, 1, 1], texture: 'flare', unscaled: true, spin: 0.1 },
+      sprite: { scale: 3, color: [1, 1, 1], texture: 'flare', unscaled: true, spin: 0.1, smoothSpin: true },
     },
   ],
 };
@@ -135,9 +135,11 @@ export const AIDA_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
  * `stream` rather than `blend`. Mesh indices for 25/28 are not set in the
  * C++ (the BMD's own blend flag decides); 0 is the single-mesh case.
  */
+const SCROLL_25 = perTick(0.015);
+
 export const AIDA_MESH_ANIMATIONS: MeshAnimations = {
-  25: { mesh: 0, kind: 'blend', v: t => -perTick(0.015)(t) },
-  28: { mesh: 0, kind: 'blend', v: t => -perTick(0.015)(t) },
+  25: { mesh: 0, kind: 'blend', v: t => -SCROLL_25(t) },
+  28: { mesh: 0, kind: 'blend', v: t => -SCROLL_25(t) },
   65: { mesh: 0, kind: 'stream', u: saw(100000, 0.00005) },
   66: { mesh: 0, kind: 'stream', u: saw(100000, 0.00005) },
   77: { mesh: 0, kind: 'stream', u: sawUp(100000, 0.0002) },

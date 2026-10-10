@@ -316,31 +316,39 @@ const ACTOR_BUDGET = 4;
  */
 const TRAIL_SLOTS = GRASS_ACTORS - ACTOR_BUDGET;
 
-/** The `n` entries closest to a point, without sorting or allocating. */
-function nearest(
+/** The `n` entries closest to a point, nearest first, without sorting or allocating: the list is kept. */
+export function nearestActors(
   actors: readonly GrassActor[],
   cx: number,
   cz: number,
   n: number
-): GrassActor[] {
-  picked.length = 0;
+): readonly GrassActor[] {
+  let count = 0;
 
   for (const a of actors) {
     const d = (a.x - cx) ** 2 + (a.z - cz) ** 2;
 
-    let at = picked.length;
-    while (at > 0 && picked[at - 1].d > d) at--;
+    let at = count;
+    while (at > 0 && pickedD[at - 1] > d) at--;
 
     if (at >= n) continue;
 
-    picked.splice(at, 0, { a, d });
-    if (picked.length > n) picked.length = n;
+    for (let i = Math.min(count, n - 1); i > at; i--) {
+      picked[i] = picked[i - 1];
+      pickedD[i] = pickedD[i - 1];
+    }
+    picked[at] = a;
+    pickedD[at] = d;
+    if (count < n) count++;
   }
 
-  return picked.map(p => p.a);
+  picked.length = count;
+
+  return picked;
 }
 
-const picked: { a: GrassActor; d: number }[] = [];
+const picked: GrassActor[] = [];
+const pickedD: number[] = [];
 /**
  * Tiles from an actor at which the grass is untouched.
  *
@@ -959,6 +967,18 @@ function createGrassField(
   /** Live presses, oldest-faintest first out. Never reallocated per frame. */
   const presses: Press[] = [];
 
+  /** The next of this frame's `actorSlots` to write. */
+  let pressSlot = 0;
+
+  function write(x: number, z: number, flying: boolean, strength: number): void {
+    const i = pressSlot++ * 4;
+
+    actorSlots[i] = x;
+    actorSlots[i + 1] = z;
+    actorSlots[i + 2] = flying ? FLIER_RADIUS : ACTOR_RADIUS;
+    actorSlots[i + 3] = (flying ? -FLIER_PUSH : TRAMPLE_PUSH) * strength;
+  }
+
 
   /**
    * How much of this tile is drawn as grass, and which slot the blades take
@@ -1213,25 +1233,11 @@ function createGrassField(
       // around bodies fifteen tiles away while the player walked through an
       // untouched field. The budget is deliberately below the slot count so
       // there is room left for the trail these actors leave behind them.
-      const near = nearest(actors, centerX, centerZ, ACTOR_BUDGET);
+      const near = nearestActors(actors, centerX, centerZ, ACTOR_BUDGET);
 
       actorSlots.fill(0);
 
-      let slot = 0;
-
-      function write(
-        x: number,
-        z: number,
-        flying: boolean,
-        strength: number
-      ): void {
-        const i = slot++ * 4;
-
-        actorSlots[i] = x;
-        actorSlots[i + 1] = z;
-        actorSlots[i + 2] = flying ? FLIER_RADIUS : ACTOR_RADIUS;
-        actorSlots[i + 3] = (flying ? -FLIER_PUSH : TRAMPLE_PUSH) * strength;
-      }
+      pressSlot = 0;
 
       for (const a of near) {
         // Flying is measured against the ground the blade grows from, not
@@ -1294,7 +1300,7 @@ function createGrassField(
       }
 
       for (const p of presses) {
-        if (slot >= GRASS_ACTORS) break;
+        if (pressSlot >= GRASS_ACTORS) break;
 
         // Smootherstep, not smoothstep: zero first *and* second derivative at
         // both ends, so the blade neither jumps as it starts lifting nor

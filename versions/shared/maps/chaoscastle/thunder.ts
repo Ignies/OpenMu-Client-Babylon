@@ -73,41 +73,35 @@ export function fallingBoltPath(
   out: number[],
   random: () => number = Math.random
 ): void {
-  const wander = () => (Math.floor(random() * 20) - BOLT_WANDER_MU) / MU;
   let x = from.x;
   let y = from.y;
   let z = from.z;
-  let k = 0;
-  const put = () => {
+  let dx = 0;
+  let dy = -BOLT_STEP_MU / MU;
+  let dz = 0;
+
+  for (let k = 0; k < BOLT_POINTS - 1; k++) {
+    if (k === BOLT_FALL_STEPS) {
+      dx = (to.x - x) * 0.2;
+      dy = (to.y - y) * 0.2;
+      dz = (to.z - z) * 0.2;
+    }
+
+    x += dx + wander(random);
+    y += dy;
+    z += dz + wander(random);
     out[k * 3] = x;
     out[k * 3 + 1] = y;
     out[k * 3 + 2] = z;
-    k++;
-  };
-
-  for (let i = 0; i < BOLT_FALL_STEPS; i++) {
-    x += wander();
-    z += wander();
-    y -= BOLT_STEP_MU / MU;
-    put();
   }
 
-  const dx = (to.x - x) * 0.2;
-  const dy = (to.y - y) * 0.2;
-  const dz = (to.z - z) * 0.2;
-
-  for (let i = BOLT_FALL_STEPS; i < BOLT_POINTS - 1; i++) {
-    x += dx + wander();
-    y += dy;
-    z += dz + wander();
-    put();
-  }
-
-  x = to.x;
-  y = to.y;
-  z = to.z;
-  put();
+  out[(BOLT_POINTS - 1) * 3] = to.x;
+  out[(BOLT_POINTS - 1) * 3 + 1] = to.y;
+  out[(BOLT_POINTS - 1) * 3 + 2] = to.z;
 }
+
+/** `rand() % 20 - 10` MU, in tiles. */
+const wander = (random: () => number) => (Math.floor(random() * 20) - BOLT_WANDER_MU) / MU;
 
 /** `SOUND_CHAOS_THUNDER01 + RangeInt(0, 1)`. */
 export function thunderSound(random: () => number = Math.random): Sounds {

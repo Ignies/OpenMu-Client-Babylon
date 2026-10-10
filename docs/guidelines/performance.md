@@ -4,6 +4,10 @@ The client must hold its frame rate on modest hardware. Treat every per-frame pa
 
 - **No allocation per frame.** Reuse vectors and arrays (module-level scratch like
   `const tmp = new Vector3()`), use `*ToRef` / `*InPlace` Babylon calls.
+- **No callback or literal made per frame either.** `forEach` / `filter` / `map` with an arrow, an
+  inline `sort` comparator, a builder called inside a row (`perTick(k)(t)`) and an options object
+  handed over (`{ base, sunDirection }`) each allocate every call: loop by index, compact in place,
+  hoist the comparator or the built function, rewrite one kept object.
 - **No scene walks per frame.** Keep lists of what you need; never search the scene graph in
   `update`.
 - **No material recompiles at runtime.** Changing defines or light counts recompiles shaders;

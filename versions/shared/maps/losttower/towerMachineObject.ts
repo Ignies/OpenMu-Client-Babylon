@@ -202,12 +202,13 @@ export class LostTowerMachineObject extends MapTileObject {
 
     for (const emitter of this.#bones) {
       const p = emitter.node.getAbsolutePosition();
+      const { flares } = emitter;
 
-      emitter.flares.forEach((flare, i) => {
-        flare.moveTo(p.x, p.y, p.z);
-        flare.setLuminosity(lumi);
-        flare.setAngle(i === 0 ? rotation : -rotation);
-      });
+      for (let i = 0; i < flares.length; i++) {
+        flares[i].moveTo(p.x, p.y, p.z);
+        flares[i].setLuminosity(lumi);
+        flares[i].setAngle(i === 0 ? rotation : -rotation);
+      }
     }
   }
 }

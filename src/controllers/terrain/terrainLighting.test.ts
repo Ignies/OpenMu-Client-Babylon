@@ -17,8 +17,10 @@ vi.mock('../lighting/lightModel', () => ({
   linearLightActive: () => false,
 }));
 vi.mock('../lighting/director', () => ({ lookDirector: () => null }));
+// The cloud looks each bind handed over.
+const clouds = vi.hoisted(() => ({ looks: [] as unknown[] }));
 vi.mock('../lighting/clouds', () => ({
-  bindClouds: () => {},
+  bindClouds: (_effect: unknown, _scene: unknown, look: unknown) => void clouds.looks.push(look),
   cloudFieldGlsl: () => '',
   CLOUD_NOISE_SAMPLER: 'cloudNoise',
   CLOUD_UNIFORMS: [],
@@ -133,5 +135,16 @@ describe('terrain light GLSL', () => {
 
     const ranges = Array.from({ length: m.GROUND_POINT_LIGHTS }, (_, i) => arrays.groundLightPos[i * 4 + 2]);
     expect(ranges).toEqual([3, ...new Array(m.GROUND_POINT_LIGHTS - 1).fill(0)]);
+  });
+
+  // Bound for every terrain and grass draw, every frame: the clouds take one look it rewrites.
+  it('hands the clouds one look it rewrites on every bind', async () => {
+    const m = await load(null);
+    const effect = { setFloat() {}, setFloat3() {}, setTexture() {}, setArray4() {} };
+    clouds.looks.length = 0;
+    m.bindTerrainLight(effect as never, {} as never, true);
+    m.bindTerrainLight(effect as never, {} as never, true);
+    expect(clouds.looks[1]).toBe(clouds.looks[0]);
+    expect(clouds.looks[0]).toEqual({ base: null, sunDirection: [0, -1, 0], sunElevationDeg: 45 });
   });
 });

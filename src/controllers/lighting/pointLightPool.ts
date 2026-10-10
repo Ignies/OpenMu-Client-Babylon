@@ -167,7 +167,15 @@ export function registerPointLightEmitter(
   };
 }
 
-const byDistance: { emitter: PointLightEmitter; d: number }[] = [];
+type Ranked = { emitter: PointLightEmitter; d: number };
+
+/** This frame's ranking, on `rows` kept from frame to frame. */
+const byDistance: Ranked[] = [];
+const rows: Ranked[] = [];
+
+/** The priority first, then the nearest. */
+const byRank = (a: Ranked, b: Ranked) =>
+  (b.emitter.priority ?? 0) - (a.emitter.priority ?? 0) || a.d - b.d;
 
 const FADE_SECONDS = 0.35;
 
@@ -234,13 +242,14 @@ export function updatePointLightPool(elapsedMs: number, camera: Camera): void {
     const dy = emitter.position.y - focus.y;
     const dz = emitter.position.z - focus.z;
 
-    byDistance.push({ emitter, d: dx * dx + dy * dy + dz * dz });
+    const row = (rows[byDistance.length] ??= { emitter, d: 0 });
+
+    row.emitter = emitter;
+    row.d = dx * dx + dy * dy + dz * dz;
+    byDistance.push(row);
   }
 
-  byDistance.sort(
-    (a, b) =>
-      (b.emitter.priority ?? 0) - (a.emitter.priority ?? 0) || a.d - b.d
-  );
+  byDistance.sort(byRank);
 
   const active = Math.min(pool.length, byDistance.length);
 

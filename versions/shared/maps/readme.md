@@ -111,7 +111,7 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   5, `trueFire5`; Kanturu 60's fire, ours, as 61), and Elbeland's blue lamp (61) one white
   `trueBlue` (`BITMAP_TRUE_BLUE`, fantaB.jpg) one tick in three on every preset; Kalima's flower glows (12, 32) grow and shrink on bone 5; the Kanturu relic
   lamps (Kanturu 2 4, Kanturu 3 5) breathe and grow with their fLumi, and Kanturu 3's two `BITMAP_SHINY + 1` turn 0.5 and 0.25
-  degrees a millisecond; Land of Trials 49 draws two red cards on bone 3 and a grey `BITMAP_SHINY + 1`
+  degrees a millisecond of world time, in whole degrees (Aida 75's torch turns smoothly, `flareSheets.test.ts`); Land of Trials 49 draws two red cards on bone 3 and a grey `BITMAP_SHINY + 1`
   at a fresh angle every frame; Elbeland's lantern (63) breathes and its totem (121) breathes and grows on six
   bones; and no table wave is faster than 0.05.
 - `boneRows.test.ts`: the rows the original hangs on a bone are `bone: true` (Noria's lamps, Icarus
@@ -178,11 +178,15 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   others' 48) make a `BITMAP_LIGHT` SubType 15 (`light15`) one tick in three.
 - `kanturu1/spec.test.ts`, `aida/spec.test.ts`: the falls (Kanturu and the GM area 81-83, Aida 56-58) make
   `BITMAP_WATERFALL_1` SubType 2 one tick in two, `_3` SubType 4 every tick and `_2` SubType 2 one in
-  three (`waterfall1_2`, `waterfall3_4`, `waterfall2_2`).
-- `chaoscastle/thunder.test.ts`: pillar thunder timing, which pillar it strikes and the bolt's fall.
+  three (`waterfall1_2`, `waterfall3_4`, `waterfall2_2`); Aida 25 and 28 scroll down 0.015 a tick from
+  one scroll built at load, never one a frame.
+- `chaoscastle/thunder.test.ts`: pillar thunder timing, which pillar it strikes and the bolt's fall,
+  whose walk is pinned roll for roll.
 - `chaoscastle/clouds.test.ts`: the blue fog banks on types 6-11; 12 stays a marker.
 - `chaoscastle/lighting.test.ts`: one look row on every arena, no sky, black haze from the hero, no
   underworld.
+- `chaoscastle/ringObject.test.ts`: a falling ring drops by the arena's drop, in tiles, on one offset
+  it keeps for the whole fall.
 - `kalima/grassObject.test.ts`: `KalimaWaterPlantObject`.
 - `kanturu2/gateway.test.ts`: the gateway turn sound loops from the click, and stays silent when
   the original refuses it.
@@ -202,3 +206,5 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   `BITMAP_LIGHTNING + 1` (20) pairs that turn against each other.
 - `losttower/lightningObject.test.ts`: 40, with no model, draws two white `BITMAP_LIGHTNING + 1` 260
   up at 2.5 on any scale, turning against each other on one luminosity roll a frame.
+- `devilsquare/storm.test.ts`: the storm keeps at most two flashes alight and drops the spent ones
+  in place, making no array a tick.

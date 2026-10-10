@@ -28,7 +28,7 @@ water, ground picks, minimap data and the base class for map objects. There is n
 - `terrainMask.ts`: `isTileOpen(x, z)`, `paintRoof`, `isRoofSlab`, `flushTerrainMask`,
   `resetTerrainMask`, `terrainMaskVersion`.
 - `terrainOverlay.ts`: `PUDDLES`, `WET_GROUND`, `overlayAmountAt`, `overlayBedShare`,
-  `snowCoverFor`, `needsTerrainMask`. `terrainGrass.ts`: `grassFieldForFrame`, `GrassActor`.
+  `snowCoverFor`, `needsTerrainMask`. `terrainGrass.ts`: `grassFieldForFrame`, `GrassActor`, `nearestActors`.
 - `artMatch.ts`: `SNOW_ART`, `ArtMatch`, `artMatch`: how much a map's own tile art already is
   the substance an overlay draws (a leaf, so its test needs no scene).
 - Smaller readers: `loadWorldMinimap` (null, without a request, when the version's tree has no
@@ -95,15 +95,18 @@ water, ground picks, minimap data and the base class for map objects. There is n
 - `mapTerrain.test.ts`: only Icarus hides its ground; rest objects and lean boxes and the
   nearest-object height fix from a registered entry.
 - `terrainGrassCards.test.ts`: a card the version lacks is never fetched.
+- `terrainGrass.test.ts`: the bodies that press the grass are the nearest, nearest first, in one
+  list kept from frame to frame.
 - `minimap.test.ts`: no picture in the version's tree is no minimap, and nothing is fetched for it.
 - `tools/grassCards.test.ts`: every grass card `Data/` ships for a converted world is in
   `public/game-assets` (a missing card silently grows no grass; 58 were missing until 2026-10-05).
 - `groundArrays.test.ts`: `refreshGroundTile` raises and drops a tile and leaves its neighbours;
   `groundTiles` copies tiles out with their own quads.
-- `terrainDynamicLight.test.ts`: `terrainLightTouchesSample` and its version, the bilinear sample.
+- `terrainDynamicLight.test.ts`: `terrainLightTouchesSample` and its version, the touched set
+  rebuilt in one buffer as a light crosses tiles, the bilinear sample.
 - `terrainJpeg.test.ts`: `lightFromPixels` and `decodeJpegPixels` (worker and main-thread paths).
 - `terrainLighting.test.ts`: the GLSL branches on the tier uniforms, `?terrainBranch=0`, range 0
-  for unfilled pool slots.
+  for unfilled pool slots, one cloud look rewritten on every bind.
 - `terrainOverlay.test.ts`: the snow melt loop and upload, with and without `?snowGate=0`.
 - `snowArtMatch.test.ts`: `SNOW_ART` against measured tile colours.
 - `terrainPick.test.ts`: `TerrainPicker` finds the same hit as Babylon's mesh pick.

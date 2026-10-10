@@ -30,6 +30,8 @@ export class ChaosCastleRingObject extends MapTileObject {
   #entity: Entity | null = null;
   #smoke: ParticleEmitter | null = null;
   #visible = true;
+  /** The fall, in tiles: one offset the drop rewrites every frame. */
+  readonly #drop = { x: 0, y: 0, z: 0 };
 
   async init(world: World, entity: Entity) {
     await super.init(world, entity);
@@ -68,7 +70,8 @@ export class ChaosCastleRingObject extends MapTileObject {
     if (t) {
       const dropTiles = chaosCastleRingDrop(this.Type) / world.terrainScale;
       if (dropTiles > 0) {
-        t.posOffset = { x: 0, y: -dropTiles, z: 0 };
+        this.#drop.y = -dropTiles;
+        t.posOffset = this.#drop;
       } else if (t.posOffset) {
         t.posOffset = undefined;
       }
