@@ -1,10 +1,12 @@
 import { MuWindows } from '@/controllers/interface/windowManager';
 import { t } from '@/i18n';
 import './style.less';
+import { reaction } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useRef, useState } from 'react';
 import { MsgBox, MsgWinCode } from '@/controllers/interface';
 import { confirmDeleteCharacter, CharSelect } from '@/modules/character_select';
+import { characterSelectView } from '@/modules/character_select/characterSelect';
 import { useEventBus } from '@/controllers/interface/hooks';
 import { playUiSound } from '@/controllers/sound/sfx';
 import { isTypingInField } from '@/ecs/systems/keyboardInputSystem';
@@ -73,15 +75,26 @@ export const CharactersPage = observer(() => {
 
   // Enter is the Connect button while nothing else is up
   // (CharacterScene.cpp:193-207); the create window keeps its own Enter.
-  const onEnter = () => {
+  // A double click on the focused character connects too, with no click (:214-223).
+  const onEnter = (click = true) => {
     if (creating || selecting || MuWindows.isOpen('options') || !selected) return;
-    playUiSound('click'); // CharacterScene.cpp:199
+    if (click) playUiSound('click'); // CharacterScene.cpp:199
     onConnect();
   };
   const enterAction = useRef(onEnter);
   useEffect(() => {
     enterAction.current = onEnter;
   });
+  useEffect(
+    () =>
+      reaction(
+        () => characterSelectView.connectRequests,
+        () => {
+          if (!MsgBox.msgWin) enterAction.current(false);
+        }
+      ),
+    []
+  );
 
   // Its own keydown, not the keyPressed broadcast: that one takes the first
   // repeat of an Enter pressed in a field or a message box for a new press, so

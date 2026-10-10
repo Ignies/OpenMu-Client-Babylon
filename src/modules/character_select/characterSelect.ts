@@ -68,5 +68,25 @@ export function characterCameraTarget(): Vector3 {
  * Right-click close-up: the name of the character the camera is closed in on,
  * or null for the line-up shot. Set by CharacterSelectSystem, eased in and
  * out by LoginSceneSystem's camera. Independent of the focused character.
+ * `connectRequests` counts double clicks on the focused character; the page answers each
+ * like Connect (CharacterScene.cpp:214-223).
  */
-export const characterSelectView = observable({ zoomedOn: null as string | null });
+export const characterSelectView = observable({ zoomedOn: null as string | null, connectRequests: 0 });
+
+/** `GetDoubleClickTime`'s default, which `CInput` reads (Input.cpp:40). */
+const DOUBLE_CLICK_MS = 500;
+
+/**
+ * `CInput`'s left button (Input.cpp:131-148): a press within the double-click time of a single
+ * press is a double click, and the press after a double starts over. Feed it every left press.
+ */
+export function doubleClicks(windowMs = DOUBLE_CLICK_MS): (now: number) => boolean {
+  let last = -Infinity;
+  let former = false;
+  return now => {
+    const double = former && now - last <= windowMs;
+    former = !double;
+    last = now;
+    return double;
+  };
+}

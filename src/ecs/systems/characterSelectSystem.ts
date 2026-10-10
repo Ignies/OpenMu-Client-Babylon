@@ -21,6 +21,7 @@ import {
   characterSelectView,
   characterSlotAngle,
   characterSlotPosition,
+  doubleClicks,
 } from '../../modules/character_select/characterSelect';
 import { setSceneHold } from '../../controllers/loading/sceneGate';
 import { createCharacterSelectBackdrop } from '../../modules/character_select/characterSelectBackdrop';
@@ -483,6 +484,8 @@ export const CharacterSelectSystem: ISystemFactory = world => {
   // Input
   // -------------------------------------------------------------------------
 
+  const isDoubleClick = doubleClicks();
+
   world.scene.onPointerObservable.add(event => {
     if (event.type !== PointerEventTypes.POINTERDOWN) return;
     if (AppState.uiState !== UIState.Characters) return;
@@ -502,6 +505,7 @@ export const CharacterSelectSystem: ISystemFactory = world => {
 
     // Left click selects; middle does nothing here.
     if (event.event.button !== 0) return;
+    const double = isDoubleClick(performance.now());
 
     if (!target || !hovered) return;
 
@@ -509,6 +513,11 @@ export const CharacterSelectSystem: ISystemFactory = world => {
     if (!name) return;
 
     if (name === CharSelect.focusedChar) {
+      // A double click on it connects (CharacterScene.cpp:214-223); the page runs Connect.
+      if (double) {
+        runInAction(() => characterSelectView.connectRequests++);
+        return;
+      }
       // Re-trigger greeting on click even if already focused
       playGreeting(target);
       return;
