@@ -32,6 +32,7 @@ import pets from './pets/module';
 import muHelper from './mu_helper/module';
 import band from './band/module';
 import gm from './gm/module';
+import credits from './credits/module';
 
 export const MODULES: readonly ModuleDef[] = [
   servers,
@@ -65,4 +66,5 @@ export const MODULES: readonly ModuleDef[] = [
   muHelper,
   band,
   gm,
+  credits,
 ];

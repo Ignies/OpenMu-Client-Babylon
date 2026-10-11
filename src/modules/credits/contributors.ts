@@ -1,7 +1,7 @@
 /**
- * Who made the client, for the credits that drift over the map: the projects
- * it stands on, the people who wrote it, the people who reported its bugs, and
- * the people who playtested it.
+ * Who made the client, for the landing's credits that drift over the map and
+ * the Ctrl+F8 credits window: the projects it stands on, the people who wrote
+ * it, the people who reported its bugs, and the people who playtested it.
  *
  * Read from GitHub's own lists for the repository, so a new contributor or a
  * new reporter shows up without anyone touching the client. Commits made
