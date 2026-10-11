@@ -76,6 +76,11 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   and the quest item to 47, capes with a link matrix to 19. `ecs/systems/appearanceSystem.ts`
   fills the sockets; `animationSystem.ts` picks clips with `weaponClass.ts` / `locomotion.ts` and
   calls `applyWeaponPoses` every frame.
+- `GmMark` is the Webzen mark (`PARTS_WEBZEN`, `Skill/musign.glb`, CSParts.cpp:28-46) a game master
+  wears: `setGmMarkAsync(on)` (driven by `ecs/systems/gmMark.ts` from `AppearanceSystem`: the GM buff 28 or the hero's
+  operator status, never while cloaked). It is its own root, not a child, so it keeps its own orange
+  chrome pass (ZzzObject.cpp:1558-1564); each frame it is put at head bone 20 plus (70, -5, 0) cm and
+  turned with the body, not the bone (`CSParts::IRender`).
 - The `Helm` socket is the class head and `HelmMask` the worn helm. The head is drawn bare-headed (it is then
   BODYPART_HELM) and under the open helms, Bronze, Pad, Vine to Spirit and 63, 65, 68, 70 (BODYPART_HEAD); any
   other helm hides it (`showsClassHead`, SetCharacterScale, ZzzCharacter.cpp:12114-12128). Every player is dressed
