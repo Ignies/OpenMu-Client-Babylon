@@ -29,6 +29,7 @@ export default {
   'stat.command': '統率',
 
   'keys.minimap': 'ミニマップ',
+  'keys.windowMenu': 'メニュー',
   'keys.sessionStats': 'セッションパネル',
   'keys.hideUi': 'UIを隠す',
   'keys.sortInventory': '所持品を整理',

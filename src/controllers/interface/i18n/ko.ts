@@ -29,6 +29,7 @@ export default {
   'stat.command': '통솔',
 
   'keys.minimap': '미니맵',
+  'keys.windowMenu': '메뉴',
   'keys.sessionStats': '세션 창',
   'keys.hideUi': '인터페이스 숨기기',
   'keys.sortInventory': '인벤토리 정리',

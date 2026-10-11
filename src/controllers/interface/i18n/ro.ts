@@ -29,6 +29,7 @@ export default {
   'stat.command': 'Comandă',
 
   'keys.minimap': 'Minihartă',
+  'keys.windowMenu': 'Meniu',
   'keys.sessionStats': 'Panou de sesiune',
   'keys.hideUi': 'Ascunde interfața',
   'keys.sortInventory': 'Aranjează inventarul',

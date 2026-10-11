@@ -29,6 +29,7 @@ export default {
   'stat.command': 'Führung',
 
   'keys.minimap': 'Übersichtskarte',
+  'keys.windowMenu': 'Menü',
   'keys.sessionStats': 'Sitzungsfenster',
   'keys.hideUi': 'Oberfläche ausblenden',
   'keys.sortInventory': 'Inventar ordnen',

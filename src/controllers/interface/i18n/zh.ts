@@ -29,6 +29,7 @@ export default {
   'stat.command': '统率',
 
   'keys.minimap': '小地图',
+  'keys.windowMenu': '菜单',
   'keys.sessionStats': '战绩面板',
   'keys.hideUi': '隐藏界面',
   'keys.sortInventory': '整理背包',

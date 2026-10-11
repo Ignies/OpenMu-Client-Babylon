@@ -29,6 +29,7 @@ export default {
   'stat.command': 'การบัญชาการ',
 
   'keys.minimap': 'แผนที่ย่อ',
+  'keys.windowMenu': 'เมนู',
   'keys.sessionStats': 'แผงข้อมูลรอบนี้',
   'keys.hideUi': 'ซ่อนหน้าจอ',
   'keys.sortInventory': 'จัดกระเป๋า',

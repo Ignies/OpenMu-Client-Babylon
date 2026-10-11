@@ -8,6 +8,8 @@ import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { useWindowStackEntry } from '@/controllers/interface/components/mu_window';
 import { UI_STAGE_HEIGHT, UI_STAGE_WIDTH, useUiViewport } from '@/controllers/interface/components/ui_stage';
 import { playUiSound } from '@/controllers/sound/sfx';
+import { useEventBus } from '@/controllers/interface/hooks';
+import { isKey } from '@/controllers/interface/keyBindings';
 import { SessionExit } from '@/modules/session/sessionExit';
 import { Social } from '@/modules/social/social';
 
@@ -69,6 +71,12 @@ export const WindowMenu = observer(() => {
   const { width, height, scale } = useUiViewport();
   const [selected, setSelected] = useState(-1);
   const open = MuWindows.isOpen(WINDOW_MENU);
+  // U toggles it with a click (NewUIHotKey.cpp:243-247).
+  useEventBus('keyPressed', key => {
+    if (!isKey('windowMenu', key)) return;
+    MuWindows.setOpen(WINDOW_MENU, !MuWindows.isOpen(WINDOW_MENU));
+    playUiSound('click');
+  });
   // Escape hides it with a click (`UpdateKeyEvent`, NewUIWindowMenu.cpp:113-124).
   useWindowStackEntry(WINDOW_MENU, open, () => {
     close();

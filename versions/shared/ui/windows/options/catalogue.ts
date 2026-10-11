@@ -272,6 +272,7 @@ const WINDOW_KEYS: readonly KeyAction[] = [
   'command',
   'warpList',
   'minimap',
+  'windowMenu',
   'emoteMenu',
   'muHelperConfig',
   'sessionStats',

@@ -29,6 +29,7 @@ export default {
   'stat.command': 'Commandement',
 
   'keys.minimap': 'Mini-carte',
+  'keys.windowMenu': 'Menu',
   'keys.sessionStats': 'Panneau de session',
   'keys.hideUi': 'Masquer l’interface',
   'keys.sortInventory': 'Ranger l’inventaire',

@@ -29,6 +29,7 @@ const en = {
   'stat.energy': 'Energy',
   'stat.command': 'Command',
   'keys.minimap': 'Minimap',
+  'keys.windowMenu': 'Menu',
   'keys.sessionStats': 'Session panel',
   'keys.hideUi': 'Hide interface',
   'keys.sortInventory': 'Arrange inventory',

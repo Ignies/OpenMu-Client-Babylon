@@ -27,6 +27,7 @@ export default {
   'stat.energy': 'Năng lượng',
   'stat.command': 'Mệnh lệnh',
   'keys.minimap': 'Bản đồ nhỏ',
+  'keys.windowMenu': 'Menu',
   'keys.sessionStats': 'Bảng phiên chơi',
   'keys.hideUi': 'Ẩn giao diện',
   'keys.sortInventory': 'Sắp xếp hành trang',

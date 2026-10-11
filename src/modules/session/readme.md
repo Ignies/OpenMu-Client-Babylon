@@ -69,7 +69,7 @@ the client-to-server encryption, the login fields and the offline flag.
   `controllers/settings`, `controllers/sound`, `controllers/interface/browserHotkeys`.
 - used by: `src/app/logic.ts`, `src/app/boot.tsx`, `hero/net.ts` (`remember`, `finish`), `mu_helper/resume.ts` (`resumed`),
   `ecs/systems/keyboardInputSystem.ts`, `versions/shared/ui/components/reconnect_overlay`.
-- windows: `versions/shared/ui/windows/options/` (exit buttons), `windows/session_stats/`,
+- windows: `versions/shared/ui/windows/system_menu/`, `windows/session_stats/` (F6),
   `hud/bottom_bar/` (`expTooltip.tsx`, `index.tsx`).
 
 ## Change it

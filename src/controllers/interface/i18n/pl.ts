@@ -27,6 +27,7 @@ export default {
   'stat.energy': 'Energia',
   'stat.command': 'Dowodzenie',
   'keys.minimap': 'Minimapa',
+  'keys.windowMenu': 'Menu',
   'keys.sessionStats': 'Panel sesji',
   'keys.hideUi': 'Ukryj interfejs',
   'keys.sortInventory': 'Uporządkuj ekwipunek',

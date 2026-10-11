@@ -29,6 +29,7 @@ export default {
   'stat.command': 'Командование',
 
   'keys.minimap': 'Мини-карта',
+  'keys.windowMenu': 'Меню',
   'keys.sessionStats': 'Панель сессии',
   'keys.hideUi': 'Скрыть интерфейс',
   'keys.sortInventory': 'Упорядочить инвентарь',
