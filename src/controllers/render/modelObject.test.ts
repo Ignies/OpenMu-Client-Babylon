@@ -181,3 +181,11 @@ describe('the Classic blob shadow', () => {
     expect([fromGround('boid'), fromGround('plain')]).toEqual([true, false]);
   });
 });
+
+// The `Draw` / `DrawMesh` hook outlived its last override (HouseWallObject's old flicker): nothing to call per frame.
+describe('the per-frame draw hook', () => {
+  it('is gone', () => {
+    expect('Draw' in ModelObject.prototype).toBe(false);
+    expect('DrawMesh' in ModelObject.prototype).toBe(false);
+  });
+});

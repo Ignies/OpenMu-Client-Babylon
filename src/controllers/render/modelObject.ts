@@ -1814,21 +1814,6 @@ export class ModelObject {
     }
   }
 
-  Draw(_gameTime: World['gameTime']): void {
-    if (!this.Visible) return;
-
-    // The base DrawMesh is a no-op hook; only walk (and allocate) the mesh
-    // list for subclasses that actually override it (HouseWallObject flicker).
-    if (this.DrawMesh === ModelObject.prototype.DrawMesh) return;
-
-    const meshes = this.getMeshes();
-    for (let i = 0; i < meshes.length; i++) this.DrawMesh(i);
-  }
-
-  DrawMesh(mesh: Int): void {
-    if (this.HiddenMesh === mesh || this.bodyHidden) return;
-  }
-
   /**
    * Optional model-less pick box in local tile units (Babylon Y-up), mirroring
    * the fixed `BoundingBoxMin/Max` the original assigns to invisible operate
