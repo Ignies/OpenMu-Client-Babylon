@@ -24,7 +24,10 @@ in the `Economy` store ([../economy/readme.md](../economy/readme.md)); this fold
   sends `ChaosMachineMixRequest` with the recipe's `m_iMixID`, which is OpenMU's crafting number
   (`ChaosMixHandlerPlugIn` looks the crafting up by it). Closing is `Economy.closeMix` (`CraftingDialogCloseRequest`).
 - The goblin asks first which mix type to match (`CChaosMixMenuMsgBox`: regular, chaos weapon, 380 option);
-  the Chaos Card Master is type 8. The type only picks the recipes, the server does not see it.
+  the Chaos Card Master is type 8, the Seed Master's trays 10 and 11, the Seed Researcher's 12 and 13 (their
+  menus are `Economy.seedMenu`). The type picks the recipes and the storage byte; the mix id goes out.
+- `checkMix` keeps the recipes' 'H' and 'I' options: a weapon takes a fire, ice or lightning sphere, armour a
+  water, wind or earth one (`CheckRecipeSub`, MixMgr.cpp:370-371). The refinery's 'G' is not ported.
 - Recipe names and texts are `Text.bmd` lines, so they are English in every language (every pack ships the
   same English file).
 
@@ -53,5 +56,5 @@ in the `Economy` store ([../economy/readme.md](../economy/readme.md)); this fold
 
 ## Tests
 - `jewelMix.test.ts`: the bag Lahap counts, the combine and dismantle requests and their zen, the refusals.
-- `mixRecipes.test.ts`: the real `Mix.bmd` - the fruit, a +10 upgrade with and without luck, the closest
+- `mixRecipes.test.ts`: the seed sphere application recipes; the real `Mix.bmd` - the fruit, a +10 upgrade with and without luck, the closest
   recipe's source statuses, the chaos weapon zen and what the tray accepts.

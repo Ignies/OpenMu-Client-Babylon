@@ -49,4 +49,9 @@ export default {
   'chaos.lackItems': '合成に必要なアイテムが足りません。',
   'chaos.levelRequired': '{name}はレベル{level}から可能です。',
   'chaos.makeRoom': 'インベントリを整理してから合成してください。',
+  'chaos.sameSphere': '同じ種類のスフィアは装着できません。',
+  'chaos.selectSocket': 'ソケットを選択してください。',
+  'chaos.socketApplied': 'すでに装着されています。',
+  'chaos.selectDestructible': '破壊するソケットを選択してください。',
+  'chaos.noDestructible': '破壊できるシードスフィアがありません。',
 } satisfies Partial<Record<keyof typeof en, string>>;

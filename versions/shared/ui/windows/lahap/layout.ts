@@ -64,9 +64,10 @@ export const CANCEL_X = 145;
 export const LOCKED_BUTTON = { opacity: 0.6, filter: 'brightness(0.6)' };
 
 // `AddMsg` colours: the orange title, `CLRDW_YELLOW` (255, 255, 121), `CLRDW_DARKYELLOW` (255, 255, 0),
-// the list's (230, 220, 200) and its picked line, black on the scroll bar's (106, 97, 88).
+// the list's (230, 220, 200) and its picked line: black on the colour the last `RenderBitmap` (the scroll
+// thumb) left current, `glColor4f(1, 1, 1, Alpha)`.
 export const TITLE_COLOR = 'rgb(255, 128, 0)';
 export const YELLOW = 'rgb(255, 255, 121)';
 export const DARK_YELLOW = 'rgb(255, 255, 0)';
 export const LIST_TEXT = 'rgb(230, 220, 200)';
-export const LIST_PICKED = 'rgb(106, 97, 88)';
+export const LIST_PICKED = '#ffffff';

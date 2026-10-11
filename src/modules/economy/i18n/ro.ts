@@ -52,4 +52,9 @@ export default {
   'chaos.lackItems': 'Lipsesc obiecte pentru combinație.',
   'chaos.levelRequired': '{name} este disponibil de la nivelul {level}.',
   'chaos.makeRoom': 'Fă loc în inventar înainte de combinare.',
+  'chaos.sameSphere': 'Nu poți aplica o sferă de același tip.',
+  'chaos.selectSocket': 'Trebuie să alegi un soclu.',
+  'chaos.socketApplied': 'Este deja aplicat.',
+  'chaos.selectDestructible': 'Trebuie să alegi soclul de distrus.',
+  'chaos.noDestructible': 'Nu există sfere cu sămânță de distrus.',
 } satisfies Partial<Record<keyof typeof en, string>>;

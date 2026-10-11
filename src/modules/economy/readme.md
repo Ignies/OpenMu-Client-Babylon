@@ -9,7 +9,7 @@ vault, chaos machine, trade and personal shop. The packet handlers that feed it 
 - `module.ts`: nothing to install; `vault`, `chaos_mix`, `trade` and `personal_shop` require it.
 - `Economy`: the mobx store (below).
 - `vaultOpenCost(level, masterLevel, locked)`: the vault fee (NewUIStorageInventory.cpp:227).
-- `MIX_TYPE`: the chaos machine's mix types (`MIXTYPE_GOBLIN_*`, the Chaos Card Master's 8).
+- `MIX_TYPE`: the chaos machine's mix types (`MIXTYPE_GOBLIN_*`, the Chaos Card Master's 8, the seed NPCs' 10-13).
 - `MAX_SHOP_TITLE` (26): the stall title limit. `ShopStock`, `ShopBrowse`, `TradePartner`, `EconomyPrompt`: types.
 
 ## How it works
@@ -21,8 +21,13 @@ vault, chaos machine, trade and personal shop. The packet handlers that feed it 
 - Vault: `openVault`, `setVaultItems`, `closeVault`, `moveVaultMoney`, `unlockVault`, `setVaultPin`,
   `removeVaultPin`, `vaultProtectionState`; `vaultLocked` / `vaultUnlocked` / `vaultUsable` are the pin state.
 - Chaos machine: `openMix(kind)`, `chooseMixType` / `cancelMixMenu` (the goblin's menu), `mix`,
-  `craftingResult`, `closeMix` (refuses while items are in the tray). `mixKind` picks the goblin or the
-  Chaos Card Master; `mixWireStorage` is the storage byte the move packets carry (9 for the card master).
+  `craftingResult`, `closeMix` (refuses while items are in the tray). `mixWireStorage` is the storage byte
+  the move packets carry, by mix type (`GetMixStorageType`: 3, 9 for the card master, 11-14 for the seed trays).
+- Seed NPCs: `openSeedMenu` (`seedMenu`, the Seed Master's or Seed Researcher's menu), `chooseSeedMix` (its
+  tray as mix type 10-13), `closeSeedMenu` (`CraftingDialogCloseRequest`). The researcher's trays list the
+  socket item's sockets (`mixSockets`); `selectMixSocket` picks one (`mixSocket`), which `mix` checks
+  (`Mix`, NewUIMixInventory.cpp:843-890) and sends as `ChaosMachineMixRequest.SocketSlot` (OpenMU's
+  `MountSeedSphereCrafting` / `RemoveSeedSphereCrafting` read it as the socket index). Their results print no line.
   `mixCheck` is the `Mix.bmd` recipe the tray makes ([../chaos_mix/readme.md](../chaos_mix/readme.md)) and
   `mixAccepts` what the tray takes. Results play the mix sounds (WSclient.cpp:6793-6794).
 - Trade: `requestTrade`, `incomingTradeRequest`, `answerTradeRequest`, `openTrade`, `setYourTradeItem`,
@@ -53,4 +58,5 @@ vault, chaos machine, trade and personal shop. The packet handlers that feed it 
 
 ## Tests
 - `economy.test.ts`: `craftingResult` keeps the tray on a refused mix, empties it on a failure, holds the result on a success;
-  the mix button sends the matched recipe's id and nothing when no recipe matches.
+  the mix button sends the matched recipe's id and nothing when no recipe matches; the tray storage byte per
+  mix type; the seed menus; the seed researcher's socket checks and the socket it sends.

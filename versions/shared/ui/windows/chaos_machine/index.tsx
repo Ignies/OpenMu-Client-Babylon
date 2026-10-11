@@ -1,6 +1,6 @@
 import { MuWindows } from '@/controllers/interface/windowManager';
 import './style.less';
-import { t } from '@/i18n';
+import { t, type TextKey } from '@/i18n';
 import { observer } from 'mobx-react-lite';
 import { Bag } from '@/modules/inventory';
 import { Economy, MIX_TYPE } from '@/modules/economy/economy';
@@ -8,7 +8,10 @@ import { StorageKind } from '@/modules/inventory/itemStorage';
 import { recipeNameLines, recipeTextLines, sourceStatus, type MixCheck } from '@/modules/chaos_mix/mixRecipes';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuItemWindow } from '@/controllers/interface/components/mu_window';
-import { MsgBoxFrame, MSGBOX_WIDTH, msgBoxHeight } from '@/controllers/interface/components/msg_box_frame';
+import { MsgBoxFrame, MSGBOX_TOP_TITLEBAR_SPRITE, MSGBOX_WIDTH, msgBoxHeight } from '@/controllers/interface/components/msg_box_frame';
+import { socketOptionText } from '@/controllers/interface/itemTooltip';
+import { Hero } from '@/modules/hero';
+import { skills } from '@/modules/skills';
 import { TEXT_COLOR } from '@/controllers/interface/components/mu_text';
 import type { MixSource } from '@/controllers/assets';
 import { itemLevelName } from '@/controllers/item_rules';
@@ -55,6 +58,12 @@ import {
   NAME_Y,
   RATE_Y,
   ROWS,
+  SEED_BUTTON_Y,
+  SEED_MENU_LINES,
+  SEED_TEXT_LINE,
+  SEED_TEXT_Y,
+  SOCKET_LABEL_Y,
+  SOCKET_LIST,
   SOURCE_LINE,
   SOURCES_Y,
   TAX_Y,
@@ -71,13 +80,21 @@ const CHAOS_TAX_RATE = 0;
 const STRIDE = 512;
 const code = (group: number, num: number) => group * STRIDE + num;
 
-/** The window's title by mix type (`RenderFrame`, NewUIMixInventory.cpp:362-405). */
-function titleOf(type: number): string {
-  if (type === MIX_TYPE.chaosWeapon) return t('chaos.weapon');
-  if (type === MIX_TYPE.option380) return t('chaos.option');
-  if (type === MIX_TYPE.chaosCard) return t('chaos.card');
-  return t('chaos.regular');
-}
+/** The window's title by mix type (`RenderFrame`, NewUIMixInventory.cpp:362-405); also the seed trays' mix button tip. */
+const TITLE: Readonly<Record<number, TextKey>> = {
+  [MIX_TYPE.chaosWeapon]: 'chaos.weapon',
+  [MIX_TYPE.option380]: 'chaos.option',
+  [MIX_TYPE.chaosCard]: 'chaos.card',
+  [MIX_TYPE.extractSeed]: 'chaos.extraction',
+  [MIX_TYPE.seedSphere]: 'chaos.assembly',
+  [MIX_TYPE.attachSocket]: 'chaos.application',
+  [MIX_TYPE.detachSocket]: 'chaos.destruction',
+};
+const titleOf = (type: number) => t(TITLE[type] ?? 'chaos.regular');
+
+/** The goblin's three kinds: a tax line, and the title 5 higher. */
+const isGoblin = (type: number) => type <= MIX_TYPE.option380;
+const isSocketTray = (type: number) => type === MIX_TYPE.attachSocket || type === MIX_TYPE.detachSocket;
 
 /** `CMixRecipes::GetSourceName`'s kind names for ranges of item codes (MixMgr.cpp:676-711). */
 function kindName(source: MixSource): string | null {
@@ -146,7 +163,9 @@ const SOURCE_COLOR = { yes: '#ffff30', partly: '#d2e6ff', no: '#ff3214' } as con
 const RecipeText = observer(({ check, type }: { check: MixCheck; type: number }) => {
   const ready = !!check.recipe;
   const names = check.recipe ? recipeNameLines(check.recipe, check.firstItemType) : [t('chaos.improper')];
-  const goblin = type !== MIX_TYPE.chaosCard;
+  // The rate shows for the goblin and the Seed Master; the zen for them and the Seed Researcher too.
+  const rated = isGoblin(type) || type === MIX_TYPE.extractSeed || type === MIX_TYPE.seedSphere;
+  const priced = rated || isSocketTray(type);
   const taxed = Math.trunc(check.requiredZen + (check.requiredZen * CHAOS_TAX_RATE) / 100);
   const potion = ready && check.recipe?.zenType === 'C';
   const similar = check.similar;
@@ -161,15 +180,15 @@ const RecipeText = observer(({ check, type }: { check: MixCheck; type: number })
           {names[1]}
         </div>
       )}
-      {goblin && (
-        <>
-          <div className="chaos-line chaos-plate info" style={{ ...plain, top: RATE_Y }}>
-            {t('chaos.successRate', { rate: check.successRate })}
-          </div>
-          <div className="chaos-line chaos-plate info" style={{ ...plain, top: ZEN_Y }}>
-            {t(potion ? 'chaos.requiredZenPotion' : 'chaos.requiredZen', { taxed: zen(taxed), zen: zen(check.requiredZen) })}
-          </div>
-        </>
+      {rated && (
+        <div className="chaos-line chaos-plate info" style={{ ...plain, top: RATE_Y }}>
+          {t('chaos.successRate', { rate: check.successRate })}
+        </div>
+      )}
+      {priced && (
+        <div className="chaos-line chaos-plate info" style={{ ...plain, top: rated ? ZEN_Y : RATE_Y }}>
+          {t(potion ? 'chaos.requiredZenPotion' : 'chaos.requiredZen', { taxed: zen(taxed), zen: zen(check.requiredZen) })}
+        </div>
       )}
       <div className="chaos-sources" style={{ ...plain, top: SOURCES_Y, lineHeight: `${SOURCE_LINE}px` }}>
         {similar ? (
@@ -217,6 +236,75 @@ const CardText = observer(() => (
     ))}
   </>
 ));
+
+/** `RenderMixDescriptions` for the seed researcher: the socket item's sockets, one to pick (`m_SocketListBox`). */
+const SocketList = observer(({ type }: { type: number }) => {
+  const hero = Hero.heroStats();
+  const maxima = { maxLife: Hero.maxHP, maxMana: Hero.maxMP, masterLevel: skills.masterLevel };
+  return (
+    <>
+      <div className="chaos-line chaos-socket-label" style={{ left: TEXT_X, width: TEXT_WIDTH, top: SOCKET_LABEL_Y }}>
+        {t(type === MIX_TYPE.attachSocket ? 'chaos.selectApplicable' : 'chaos.selectDestructibleSocket')}
+      </div>
+      <div
+        className="chaos-socket-list"
+        data-no-drag="true"
+        style={{ left: SOCKET_LIST.x, top: SOCKET_LIST.top, width: SOCKET_LIST.width, height: SOCKET_LIST.height }}
+      >
+        {Economy.mixSockets.map((socket, i) => (
+          <div
+            key={i}
+            className={`chaos-socket-line${i === Economy.mixSocket ? ' picked' : ''}`}
+            style={{ height: SOCKET_LIST.line, lineHeight: `${SOCKET_LIST.line}px`, paddingLeft: SOCKET_LIST.textX }}
+            onClick={() => Economy.selectMixSocket(i)}
+          >
+            {`${i + 1}: ${(socket && socketOptionText(socket, hero, maxima)) || t('item.socketEmpty')}`}
+          </div>
+        ))}
+      </div>
+    </>
+  );
+});
+
+/** `CSeedMasterMenuMsgBox` / `CSeedInvestigatorMenuMsgBox`: which of the NPC's two trays to open. */
+const SeedMenu = observer(({ npc }: { npc: 'master' | 'researcher' }) => {
+  const master = npc === 'master';
+  const lines = master ? (['seed.master1', 'seed.master2'] as const) : (['seed.researcher1', 'seed.researcher2'] as const);
+  const trays = master
+    ? ([['seed.extract', MIX_TYPE.extractSeed], ['seed.sphere', MIX_TYPE.seedSphere]] as const)
+    : ([['seed.apply', MIX_TYPE.attachSocket], ['seed.destroy', MIX_TYPE.detachSocket]] as const);
+  const button = (file: string, width: number, label: string, top: number, onClick: () => void) => (
+    <MuButton
+      key={label}
+      file={file}
+      width={width}
+      height={MENU_BUTTON_HEIGHT}
+      frames={{ up: 0, active: 1, down: 2 }}
+      color={TEXT_COLOR.brightGray}
+      activeColor={TEXT_COLOR.white}
+      label={label}
+      labelStyle={{ fontSize: 11 }}
+      onClick={onClick}
+      style={{ position: 'absolute', left: (MSGBOX_WIDTH - width) / 2, top }}
+    />
+  );
+  return (
+    <div className="chaos-menu-layer" data-no-drag="true">
+      <MsgBoxFrame lines={SEED_MENU_LINES} top={MSGBOX_TOP_TITLEBAR_SPRITE} className="chaos-menu" style={{ top: MENU_TOP }}>
+        <div className="chaos-menu-title seed-menu-title" style={{ left: MENU_TEXT_X, right: MENU_TEXT_X, top: MENU_TITLE_Y }}>
+          {t(master ? 'seed.master' : 'seed.researcher')}
+        </div>
+        {lines.map((key, i) => (
+          <div key={key} className="chaos-menu-line" style={{ left: MENU_TEXT_X, right: MENU_TEXT_X, top: SEED_TEXT_Y + i * SEED_TEXT_LINE }}>
+            {t(key)}
+          </div>
+        ))}
+        {trays.map(([key, type], i) => button(MENU_BUTTON_SPRITE, MENU_BUTTON_WIDTH, t(key), SEED_BUTTON_Y[i], () => Economy.chooseSeedMix(type)))}
+        {button(MENU_CLOSE_SPRITE, MENU_CLOSE_WIDTH, t('chaos.menu.close'), msgBoxHeight(SEED_MENU_LINES) - MENU_CLOSE_BOTTOM, () => Economy.closeSeedMenu())}
+      </MsgBoxFrame>
+    </div>
+  );
+});
 
 /** `CChaosMixMenuMsgBox`: which kind of combination the goblin should match the tray against. */
 const MixMenu = observer(() => {
@@ -277,11 +365,12 @@ const MixMenu = observer(() => {
  * close (`ClosingProcess`).
  */
 export const ChaosMachine = observer(() => {
-  if (!Economy.mixOpen) return null;
+  if (!Economy.mixOpen) return Economy.seedMenu ? <SeedMenu npc={Economy.seedMenu} /> : null;
 
   const picked = Bag.pickedItem;
   const type = Economy.mixInventoryType;
   const card = type === MIX_TYPE.chaosCard;
+  const goblin = isGoblin(type);
   const title = titleOf(type);
   // MIX_FINISHED: only the title (and tax) stay up (`RenderFrame` returns early).
   const finished = Economy.mixResult !== null;
@@ -292,10 +381,10 @@ export const ChaosMachine = observer(() => {
   return (
     <>
       <MuItemWindow id={WINDOW_ID} className="chaos-machine" column={column} label={title} onClose={() => Economy.closeMix()}>
-        <div className="window-title" style={{ top: card ? CARD_TITLE_Y : TITLE_Y }}>
+        <div className="window-title" style={{ top: goblin ? TITLE_Y : CARD_TITLE_Y }}>
           {title}
         </div>
-        {!card && (
+        {goblin && (
           <div className="chaos-tax" style={{ top: TAX_Y }}>
             {t('chaos.taxRate', { rate: CHAOS_TAX_RATE })}
           </div>
@@ -310,6 +399,7 @@ export const ChaosMachine = observer(() => {
 
         {!finished && !Economy.mixMenuOpen && <RecipeText check={Economy.mixCheck} type={type} />}
         {card && <CardText />}
+        {isSocketTray(type) && <SocketList type={type} />}
 
         <ItemGrid
           items={Economy.mixItems}
@@ -336,7 +426,7 @@ export const ChaosMachine = observer(() => {
             disabled={Economy.mixPending || finished}
             onClick={() => Economy.mix()}
           >
-            <span className="button-tooltip">{t(MIX_TOOLTIP)}</span>
+            <span className="button-tooltip">{type >= MIX_TYPE.extractSeed ? title : t(MIX_TOOLTIP)}</span>
           </MuButton>
         </div>
       </MuItemWindow>

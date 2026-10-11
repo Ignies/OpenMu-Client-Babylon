@@ -229,8 +229,8 @@ export const Bag = new (class {
     toSlot: number,
     item: Item
   ): void {
-    // The mix tray's wire byte depends on the NPC that owns it: 3 for the
-    // goblin, 9 for the Chaos Card Master (modules/economy/economy.ts `mixWireStorage`).
+    // The mix tray's wire byte depends on its mix type: 3 for the goblin, 9 for the
+    // Chaos Card Master, 11-14 for the seed trays (modules/economy/economy.ts `mixWireStorage`).
     const wireStorage = (storage: StorageKind): number =>
       storage === StorageKind.ChaosMachine ? this.grids?.mixWireStorage() ?? storage : storage;
 

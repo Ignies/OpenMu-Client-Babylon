@@ -96,3 +96,14 @@ describe('Lahap', () => {
     JewelMix.exit();
   });
 });
+
+// ReceiveTalk 0x17 / 0x18 (WSclient.cpp:6503-6511): the Seed Master's and the Seed Researcher's menus.
+describe('the seed NPCs', () => {
+  it('open their menus and keep the dialog open', () => {
+    npcWindow(NpcWindowResponseNpcWindowEnum.SeedMaster);
+    expect(Economy.seedMenu).toBe('master');
+    npcWindow(NpcWindowResponseNpcWindowEnum.SeedResearcher);
+    expect(Economy.seedMenu).toBe('researcher');
+    expect(sent).not.toContain(CloseNpcRequestPacket.Code);
+  });
+});

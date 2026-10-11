@@ -49,4 +49,9 @@ export default {
   'chaos.lackItems': 'Brakuje przedmiotów do kombinacji.',
   'chaos.levelRequired': '{name} jest dostępne od poziomu {level}.',
   'chaos.makeRoom': 'Uporządkuj ekwipunek przed łączeniem.',
+  'chaos.sameSphere': 'Nie można nałożyć sfery tego samego rodzaju.',
+  'chaos.selectSocket': 'Musisz wybrać gniazdo.',
+  'chaos.socketApplied': 'Już nałożone.',
+  'chaos.selectDestructible': 'Musisz wybrać gniazdo do zniszczenia.',
+  'chaos.noDestructible': 'Brak sfer z nasionem do zniszczenia.',
 } satisfies Partial<Record<keyof typeof en, string>>;

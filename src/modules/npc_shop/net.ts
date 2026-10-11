@@ -58,6 +58,15 @@ export function installNet(): void {
         Merchant.dropNpcTalk();
         events.openDoppelganger();
         break;
+      case NpcWindowResponseNpcWindowEnum.SeedMaster:
+        // CSeedMasterMenuMsgBox / CSeedInvestigatorMenuMsgBox (WSclient.cpp:6503-6511).
+        Merchant.dropNpcTalk();
+        Economy.openSeedMenu('master');
+        break;
+      case NpcWindowResponseNpcWindowEnum.SeedResearcher:
+        Merchant.dropNpcTalk();
+        Economy.openSeedMenu('researcher');
+        break;
       case NpcWindowResponseNpcWindowEnum.Lahap:
         // CGemIntegrationMsgBox (WSclient.cpp:6446-6454); its Close tells the server.
         Merchant.dropNpcTalk();

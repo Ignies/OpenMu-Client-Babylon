@@ -50,4 +50,9 @@ export default {
   'chaos.lackItems': 'Не хватает предметов для комбинации.',
   'chaos.levelRequired': '{name} доступно с уровня {level}.',
   'chaos.makeRoom': 'Освободите место в инвентаре перед комбинацией.',
+  'chaos.sameSphere': 'Нельзя вставить сферу того же типа.',
+  'chaos.selectSocket': 'Нужно выбрать гнездо.',
+  'chaos.socketApplied': 'Уже вставлено.',
+  'chaos.selectDestructible': 'Нужно выбрать гнездо для разрушения.',
+  'chaos.noDestructible': 'Нет сфер семени для разрушения.',
 } satisfies Partial<Record<keyof typeof en, string>>;

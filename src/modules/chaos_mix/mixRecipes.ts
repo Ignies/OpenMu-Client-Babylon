@@ -6,7 +6,7 @@ import { t, type TextKey } from '@/i18n';
 /**
  * `CMixRecipes` (MixMgr.cpp): which `Mix.bmd` recipe the items in the tray make, how likely it is to
  * succeed and what it costs, and how close the tray is to the recipe it looks most like. The refinery
- * and socket options ('G', 'H', 'I') are left out: only the goblin and the Chaos Card Master use this.
+ * option ('G') is left out: Osbourne is not ported.
  */
 
 /** `MAX_ITEM_INDEX`: an item code is `group * 512 + number`. */
@@ -149,6 +149,13 @@ function fits(source: MixSource, item: MixItem): boolean {
   return true;
 }
 
+/** `IsSourceOfAttachSeedSphereToArmor` / `ToWeapon` (MixMgr.cpp:1063-1081): 'H' takes a weapon's sphere (even), 'I' an armour's. */
+function wrongSphere(recipe: MixRecipe, item: MixItem): boolean {
+  if (item.type < code(12, 100) || item.type > code(12, 129)) return false;
+  const armour = (item.type - code(12, 0)) % 2 === 1;
+  return (recipe.mixOption === 'H' && armour) || (recipe.mixOption === 'I' && !armour);
+}
+
 /** What is left over may only be a charm the recipe allows. */
 const leftOverAllowed = (recipe: MixRecipe, items: MixItem[]) =>
   items.every(item => item.testCount <= 0 || (item.charm && recipe.charmOption === 'A') || (item.chaosCharm && recipe.chaosCharmOption === 'A'));
@@ -163,7 +170,7 @@ function matches(recipe: MixRecipe, items: MixItem[]): { level: number; type: nu
     const source = recipe.sources[j];
     if (source.countMin !== 0) found = false;
     for (const item of items) {
-      if (!fits(source, item) || item.testCount <= 0 || source.countMax < taken[j] + item.testCount) continue;
+      if (!fits(source, item) || wrongSphere(recipe, item) || item.testCount <= 0 || source.countMax < taken[j] + item.testCount) continue;
       const take = Math.min(item.testCount, source.countMax);
       taken[j] += take;
       item.testCount -= take;
@@ -185,7 +192,7 @@ function similarity(recipe: MixRecipe, items: MixItem[]): { points: number; miss
   let points = 0;
   recipe.sources.forEach((source, j) => {
     for (const item of items) {
-      if (!fits(source, item) || item.testCount <= 0) continue;
+      if (!fits(source, item) || wrongSphere(recipe, item) || item.testCount <= 0) continue;
       if (item.type === code(12, 15)) points += 1;
       else if (source.countMax < item.testCount) points += 1;
       else points += j === 0 ? 10 : j === 1 ? 5 : 3;

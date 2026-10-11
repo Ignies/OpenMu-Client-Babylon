@@ -51,4 +51,9 @@ export default {
   'chaos.lackItems': 'Липсват предмети за комбинацията.',
   'chaos.levelRequired': '{name} е достъпно от ниво {level}.',
   'chaos.makeRoom': 'Подредете инвентара преди комбинацията.',
+  'chaos.sameSphere': 'Не можете да поставите сфера от същия вид.',
+  'chaos.selectSocket': 'Трябва да изберете гнездо.',
+  'chaos.socketApplied': 'Вече е поставено.',
+  'chaos.selectDestructible': 'Трябва да изберете гнездо за разрушаване.',
+  'chaos.noDestructible': 'Няма сфери със семе за разрушаване.',
 } satisfies Partial<Record<keyof typeof en, string>>;

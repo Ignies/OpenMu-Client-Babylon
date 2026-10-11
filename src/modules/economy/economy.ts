@@ -16,8 +16,10 @@ import { mixRecipes } from '@/controllers/assets';
 import { findFreeSlot } from '../inventory/inventoryFit';
 import { itemSize } from '../inventory';
 import { checkMix, isMixSource, recipeNameLines, type MixCheck } from '../chaos_mix/mixRecipes';
+import { socketsOf } from '@/controllers/item_rules';
 import {
   CHAOS_CARD_WIRE_STORAGE,
+  SEED_WIRE_STORAGES,
   MIX_SLOTS,
   PERSONAL_SHOP_SLOTS,
   StorageKind,
@@ -81,10 +83,35 @@ export function vaultOpenCost(level: number, masterLevel: number, locked: boolea
 export const MAX_SHOP_TITLE = 26;
 
 /**
- * The `_MIX_TYPES` this window is opened as (MixMgr.h): the goblin's menu picks the first three
- * (`CChaosMixMenuMsgBox`), the Chaos Card Master opens the card one.
+ * The `_MIX_TYPES` this window is opened as (MixMgr.h:100-116): the goblin's menu picks the first three
+ * (`CChaosMixMenuMsgBox`), the Chaos Card Master opens the card one, the seed NPCs' menus the last four.
  */
-export const MIX_TYPE = { regular: 0, chaosWeapon: 1, option380: 2, chaosCard: 8 } as const;
+export const MIX_TYPE = {
+  regular: 0,
+  chaosWeapon: 1,
+  option380: 2,
+  chaosCard: 8,
+  extractSeed: 10,
+  seedSphere: 11,
+  attachSocket: 12,
+  detachSocket: 13,
+} as const;
+
+/** `GetMixStorageType` (MixMgr.cpp:1153-1186): the storage byte a tray moves items under; 3 otherwise. */
+const MIX_STORAGE: Readonly<Record<number, number>> = {
+  [MIX_TYPE.chaosCard]: CHAOS_CARD_WIRE_STORAGE,
+  [MIX_TYPE.extractSeed]: SEED_WIRE_STORAGES[0],
+  [MIX_TYPE.seedSphere]: SEED_WIRE_STORAGES[1],
+  [MIX_TYPE.attachSocket]: SEED_WIRE_STORAGES[2],
+  [MIX_TYPE.detachSocket]: SEED_WIRE_STORAGES[3],
+};
+
+/** `GetSeedShpereSeedID` (SocketSystem.cpp:80-112): a seed sphere's seed, its kind's first seed plus its level. */
+const SPHERE_FIRST_SEED = [0, 10, 16, 21, 29, 34];
+function sphereSeed(item: Item): number | null {
+  if (item.group !== 12 || item.num < 100 || item.num > 129) return null;
+  return SPHERE_FIRST_SEED[(item.num - 100) % 6] + (item.lvl ?? 0);
+}
 
 type TradePartner = { name: string; level: number; guildId: number };
 
@@ -146,12 +173,10 @@ export const Economy = new (class _Economy {
   mixPending = false;
   /** `MIX_FINISHED`: what the last attempt did, for the result line. */
   mixResult: 'success' | 'failed' | null = null;
-  /**
-   * Which NPC owns the tray: the goblin (`MIXTYPE_GOBLIN_*`) or the Chaos
-   * Card Master (`MIXTYPE_CHAOS_CARD`, same window in the original's
-   * `CNewUIMixInventory`). Decides the storage byte the move packets carry.
-   */
-  mixKind: 'chaosMachine' | 'chaosCard' = 'chaosMachine';
+  /** `CSeedMasterMenuMsgBox` / `CSeedInvestigatorMenuMsgBox`: the seed NPC's menu, before its tray. */
+  seedMenu: 'master' | 'researcher' | null = null;
+  /** The socket picked in the seed researcher's list (`m_SocketListBox`), -1 for none. */
+  mixSocket = -1;
 
   // ---- trade (CNewUITrade) -------------------------------------------------
 
@@ -211,7 +236,9 @@ export const Economy = new (class _Economy {
       mixCheck: computed,
       mixPending: observable,
       mixResult: observable,
-      mixKind: observable,
+      seedMenu: observable,
+      mixSocket: observable,
+      mixSockets: computed,
       tradeOpen: observable,
       myTradeItems: observable,
       yourTradeItems: observable,
@@ -245,9 +272,10 @@ export const Economy = new (class _Economy {
     this.mixItems = emptyGrid(MIX_SLOTS);
     this.mixPending = false;
     this.mixResult = null;
-    this.mixKind = 'chaosMachine';
     this.mixInventoryType = MIX_TYPE.regular;
     this.mixMenuOpen = false;
+    this.seedMenu = null;
+    this.mixSocket = -1;
     this.closeTradeState();
     this.myShopOpen = false;
     this.myShopItems = emptyGrid(PERSONAL_SHOP_SLOTS);
@@ -469,17 +497,50 @@ export const Economy = new (class _Economy {
 
   /** `NpcWindowResponse(ChaosMachine / ChaosCardCombination)` → `OpeningProcess`. */
   openMix(kind: 'chaosMachine' | 'chaosCard' = 'chaosMachine'): void {
+    this.openTray(kind === 'chaosCard' ? MIX_TYPE.chaosCard : MIX_TYPE.regular);
+  }
+
+  /** `SetMixType` + `Show(INTERFACE_MIXINVENTORY)` + `OpeningProcess` (NewUIMixInventory.cpp:118-128). */
+  private openTray(type: number): void {
     runInAction(() => {
       this.mixOpen = true;
-      this.mixKind = kind;
       this.mixItems = emptyGrid(MIX_SLOTS);
       this.mixPending = false;
       this.mixResult = null;
-      this.mixInventoryType = kind === 'chaosCard' ? MIX_TYPE.chaosCard : MIX_TYPE.regular;
-      // `OpeningProcess` (NewUIMixInventory.cpp:118-128): the goblin's menu comes up first.
-      this.mixMenuOpen = kind === 'chaosMachine';
+      this.mixSocket = -1;
+      this.mixInventoryType = type;
+      // The goblin's menu comes up first.
+      this.mixMenuOpen = type === MIX_TYPE.regular;
       MuWindows.setOpen('inventory', true);
     });
+  }
+
+  /** `ReceiveTalk` 0x17 / 0x18 (WSclient.cpp:6503-6511): the Seed Master's or the Seed Researcher's menu. */
+  openSeedMenu(npc: 'master' | 'researcher'): void {
+    runInAction(() => (this.seedMenu = npc));
+  }
+
+  /** A seed menu button (`ExtractSeedBtnDown` .. `DetachSocketBtnDown`): its tray, as that mix type. */
+  chooseSeedMix(type: number): void {
+    runInAction(() => (this.seedMenu = null));
+    this.openTray(type);
+  }
+
+  /** The seed menu's Close (`ExitBtnDown`): `CraftingDialogCloseRequest`. */
+  closeSeedMenu(): void {
+    runInAction(() => (this.seedMenu = null));
+    if (!Session.isOffline) Session.sendToGS(CraftingDialogCloseRequestPacket.createPacket().buffer);
+  }
+
+  /** A line of the seed researcher's socket list. */
+  selectMixSocket(index: number): void {
+    runInAction(() => (this.mixSocket = index));
+  }
+
+  /** The socket item in the tray (`m_byFirstItemSocket*`): its sockets, null for an empty one. */
+  get mixSockets(): ({ seed: number; level: number } | null)[] {
+    const item = this.mixItems.find(entry => entry && (entry.socketCount ?? 0) > 0);
+    return item ? socketsOf(item) : [];
   }
 
   /** A button of the goblin's menu (`CChaosMixMenuMsgBox`, NewUICustomMessageBox.cpp:2833-2861). */
@@ -519,9 +580,7 @@ export const Economy = new (class _Economy {
    * 9 while the ChaosCardCombination window is the open one).
    */
   get mixWireStorage(): number {
-    return this.mixKind === 'chaosCard'
-      ? CHAOS_CARD_WIRE_STORAGE
-      : StorageKind.ChaosMachine;
+    return MIX_STORAGE[this.mixInventoryType] ?? StorageKind.ChaosMachine;
   }
 
   setMixItems(entries: { slot: number; item: Item }[]): void {
@@ -605,16 +664,41 @@ export const Economy = new (class _Economy {
       Social.errorMessage(t('chaos.makeRoom'));
       return;
     }
+    const refusal = this.mixSocketRefusal();
+    if (refusal) {
+      Social.errorMessage(t(refusal));
+      return;
+    }
 
-    MsgBox.popUpMsgWin(MsgWinCode.ConfirmMix, name, () => this.sendMix(recipe.mixId));
+    // `SetMixSubType`: the socket picked goes out with the seed researcher's mixes.
+    const subType = Math.max(0, this.mixSocket);
+    MsgBox.popUpMsgWin(MsgWinCode.ConfirmMix, name, () => this.sendMix(recipe.mixId, subType));
   }
 
-  /** `CMixCheckMsgBoxLayout::OkBtnDown`: the recipe's `m_iMixID` goes out (NewUICommonMessageBox.cpp:1930-1935). */
-  private sendMix(mixId: number): void {
+  /** `Mix`'s socket checks for the seed researcher's two trays (NewUIMixInventory.cpp:843-890). */
+  private mixSocketRefusal(): TextKey | null {
+    const type = this.mixInventoryType;
+    if (type !== MIX_TYPE.attachSocket && type !== MIX_TYPE.detachSocket) return null;
+    const sockets = this.mixSockets;
+    const picked = this.mixSocket;
+    if (type === MIX_TYPE.attachSocket) {
+      const sphere = this.mixItems.map(item => (item ? sphereSeed(item) : null)).find(seed => seed !== null) ?? null;
+      if (sockets.some(socket => socket !== null && socket.seed === sphere)) return 'chaos.sameSphere';
+      if (picked < 0) return 'chaos.selectSocket';
+      if (picked >= sockets.length || sockets[picked]) return 'chaos.socketApplied';
+      return null;
+    }
+    if (picked < 0) return 'chaos.selectDestructible';
+    if (picked >= sockets.length || !sockets[picked]) return 'chaos.noDestructible';
+    return null;
+  }
+
+  /** `CMixCheckMsgBoxLayout::OkBtnDown`: the recipe's `m_iMixID` and the sub type (NewUICommonMessageBox.cpp:1930-1935). */
+  private sendMix(mixId: number, subType: number): void {
     if (!this.mixOpen || this.mixPending) return;
     const packet = ChaosMachineMixRequestPacket.createPacket();
     packet.MixType = mixId as ChaosMachineMixRequestChaosMachineMixTypeEnum;
-    packet.SocketSlot = 0;
+    packet.SocketSlot = subType;
     Session.sendToGS(packet.buffer);
 
     runInAction(() => {
@@ -651,11 +735,17 @@ export const Economy = new (class _Economy {
       if (result === E.Success && item) this.mixItems[0] = item;
     });
 
-    // ReceiveMixExtended (WSclient.cpp:6793-6794).
+    // ReceiveMixExtended (WSclient.cpp:6705-6795): the seed researcher's trays print no result line.
+    const socketMix = this.mixInventoryType === MIX_TYPE.attachSocket || this.mixInventoryType === MIX_TYPE.detachSocket;
     if (result === E.Success) {
       playUiSound('mix');
       playUiSound('jewel');
-      Social.systemMessage(t('chaos.succeeded'));
+      if (!socketMix) Social.systemMessage(t('chaos.succeeded'));
+      return;
+    }
+    if (result === E.Failed && socketMix) {
+      playUiSound('mix');
+      playUiSound('mixFailed');
       return;
     }
 

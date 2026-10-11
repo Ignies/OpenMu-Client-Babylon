@@ -52,4 +52,9 @@ export default {
   'chaos.lackItems': 'Il manque des objets pour la combinaison.',
   'chaos.levelRequired': '{name} est possible à partir du niveau {level}.',
   'chaos.makeRoom': "Rangez l'inventaire avant de combiner.",
+  'chaos.sameSphere': "Impossible d'appliquer une sphère du même type.",
+  'chaos.selectSocket': 'Vous devez choisir un emplacement.',
+  'chaos.socketApplied': 'Déjà appliqué.',
+  'chaos.selectDestructible': "Vous devez choisir l'emplacement à détruire.",
+  'chaos.noDestructible': 'Aucune sphère de graine à détruire.',
 } satisfies Partial<Record<keyof typeof en, string>>;
