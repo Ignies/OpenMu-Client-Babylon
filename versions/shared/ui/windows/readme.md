@@ -49,6 +49,7 @@ One folder per in-game window. A window draws; its state and actions belong to i
 | `system_menu` | system_menu (365) | Escape's five-button box in the world (`CSystemMenuMsgBox`) | session |
 | `events` | events (400) | event entry windows, Chaos Castle prompt, timers, results | events, items |
 | `balgass_entry` | balgass_entry (410) | third class quest entry boxes | quests |
+| `lahap` | lahap (415) | Lahap's jewel combination boxes (`CGemIntegration*MsgBox`) | chaos_mix |
 | `duel` | duel (430) | challenge prompt, score, channels, spectators, winner | events (duel), chat |
 | `session_stats` | session_stats (440) | what this sitting earned, time to next level | session |
 | `debug_menu` | debug_menu (470) | offline debug window, tabs from `modules/` | gm, Session.isOffline |

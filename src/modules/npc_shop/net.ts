@@ -9,6 +9,7 @@ import { Hero } from '@/modules/hero';
 import { Session } from '@/modules/session';
 import { addNotification } from '@/modules/chat';
 import { events } from '../events';
+import { JewelMix } from '../chaos_mix/jewelMix';
 import { playUiSound } from '@/controllers/sound/sfx';
 import { quests } from '../quests';
 import { runInAction } from 'mobx';
@@ -57,11 +58,16 @@ export function installNet(): void {
         Merchant.dropNpcTalk();
         events.openDoppelganger();
         break;
+      case NpcWindowResponseNpcWindowEnum.Lahap:
+        // CGemIntegrationMsgBox (WSclient.cpp:6446-6454); its Close tells the server.
+        Merchant.dropNpcTalk();
+        JewelMix.open();
+        break;
       default:
         // A legacy quest NPC (Sebina, Marlon, Apostle Devin…): the dialog is
         // client-side, from Quest_eng.bmd (modules/quests/legacyQuests.ts).
         if (quests.openNpcWindow(p.Window, Merchant.pendingNpcType)) return;
-        // Lahap, the refineries…: not ported yet.
+        // The refineries and the rest: not ported yet.
         console.warn(`NpcWindowResponse: window ${p.Window} is not supported yet`);
         Merchant.dropNpcTalk();
         addNotification(t('notify.npcNothingYet'), 'info');

@@ -17,6 +17,8 @@ const { Session } = await import('@/modules/session');
 const { MuWindows } = await import('@/controllers/interface');
 const { EventBus } = await import('@/core/eventBus');
 const { CloseNpcRequestPacket, TradeCancelPacket } = await import('@versions/shared/packets/ClientToServerPackets');
+const { NpcWindowResponsePacket, NpcWindowResponseNpcWindowEnum } = await import('@versions/shared/packets/ServerToClientPackets');
+const { JewelMix } = await import('../chaos_mix/jewelMix');
 
 installNet();
 
@@ -76,5 +78,21 @@ describe('a walk', () => {
     walk();
     expect(Economy.mixOpen).toBe(true);
     Economy.closeMix(false);
+  });
+});
+
+const npcWindow = (window: number) => {
+  const p = NpcWindowResponsePacket.createPacket();
+  p.Window = window;
+  EventBus.emit('NpcWindowResponse', p.buffer);
+};
+
+// ReceiveTalk (WSclient.cpp:6446-6454): Lahap opens CGemIntegrationMsgBox and keeps the dialog open.
+describe('Lahap', () => {
+  it('opens the jewel combination menu', () => {
+    npcWindow(NpcWindowResponseNpcWindowEnum.Lahap);
+    expect(JewelMix.box).toBe('menu');
+    expect(sent).not.toContain(CloseNpcRequestPacket.Code);
+    JewelMix.exit();
   });
 });
