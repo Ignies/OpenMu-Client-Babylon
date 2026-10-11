@@ -51,4 +51,8 @@ export default {
   'fidelity.teleportLandsEarly': 'Teleporte chega na hora',
   'fidelity.teleportLandsEarly.hint':
     'Seu próprio Teleporte te coloca na casa assim que você some, sem esperar a resposta do servidor. Clássica: você fica sumido na casa anterior até o servidor responder, como no original.',
+  'fidelity.soccerBoardClock':
+    'Relógio do futebol no placar',
+  'fidelity.soccerBoardClock.hint':
+    'O tempo do Battle Soccer aparece como um relógio no placar em vez de uma linha no meio da tela. Clássica: o tempo restante é escrito no meio da tela, como no original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

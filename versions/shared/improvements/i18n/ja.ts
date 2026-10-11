@@ -51,4 +51,8 @@ export default {
   'fidelity.teleportLandsEarly': 'テレポートを即時に着地',
   'fidelity.teleportLandsEarly.hint':
     '自分のテレポートは、姿が消えた時点でサーバーの応答を待たずに目的のマスへ着地します。クラシック: サーバーが応答するまで元のマスで消えたまま待ちます（オリジナルどおり）。',
+  'fidelity.soccerBoardClock':
+    'サッカーの時計をスコアボードに',
+  'fidelity.soccerBoardClock.hint':
+    'バトルサッカーの時間を画面中央の行ではなく、スコアボード上の時計で表示します。クラシック: 残り時間は画面中央に表示されます（オリジナルどおり）。',
 } satisfies Partial<Record<keyof typeof en, string>>;

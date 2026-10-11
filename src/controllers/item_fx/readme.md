@@ -8,7 +8,8 @@ original client's item passes, the item glow tiers and the weapon swing trails.
 - `itemEffectMode.ts`: `ItemEffectMode` (Off, Legacy, Both, Improved), `itemEffectMode()`,
   `legacyItemEffectsOn()`, `improvedItemEffectsOn()`, `legacyRenderLevel()`, `capItemLevel(level)`,
   `itemEffectSignature()`, `ITEM_EFFECT_MODE_LABEL_KEYS` / `_MAX` (the options slider).
-- `itemVisualTier.ts`: `itemVisualTier(item)` (cached descriptor), `strongestTierOf(items)` /
+- `itemDrawLevel.ts`: `itemDrawLevel(group, num, level, ground)`, the level an item is drawn at.
+- `itemVisualTier.ts`: `itemVisualTier(item, ground)` (cached descriptor), `strongestTierOf(items)` /
   `strongestTier(items)`, `setItemGlowClock` / `itemGlowClock`, `itemEmissiveAt`, `itemHaloAt`,
   `itemLightColorAt`, type `ItemVisualTier`.
 - `itemMaterial.ts`: `createItemMaterial(scene, bright, flatLit, withScroll)`,
@@ -26,6 +27,14 @@ original client's item passes, the item glow tiers and the weapon swing trails.
 - `itemVisualTier` turns level (capped), excellent, ancient and sockets into one descriptor read
   by the body, the hand and the ground drop alike. Ancient and socket looks need the version's
   `features.ancientItems` / `socketItems`. Legacy tinting starts at +3 (ZzzObject.cpp:10213).
+- `itemDrawLevel.ts`: `RenderPartObjectEffect` first swaps the level by model, then caps it
+  (ZzzObject.cpp:9419-9563): jewels (compressed too), Tear of Elf, Soul Shard, the Heart and the plain
+  ring +8; the transformation rings and Christmas Star +13; orbs and crystals +9; wings, capes,
+  harmony, refine stones and the gemstone +0; Devil Square tickets halved up to +6, +13 above;
+  arrows and bolts `2L + 1`. On the ground (`ground`, the drops in `ecs/systems/itemGlowSystem.ts`)
+  the models `CreateItem` swaps in by level take their own case (ZzzObject.cpp:6014-6136): Box of
+  Luck, Rena, Ring of Honor, Dark Stone, Wizards Ring, Ale, Loch's Feather. Both looks read the drawn
+  level, so the improved ladder follows it too.
 - `itemLegacyEffects.ts`: colour tables from ZzzObject.cpp `PartObjectColor` (chrome),
   `PartObjectColor2` (+11..+15 Chrome02) and `PartObjectColor3` (ancient).
 - `itemMaterial.ts`: one shared, frozen material per variant; textures, BodyLight and item state
@@ -97,5 +106,7 @@ original client's item passes, the item glow tiers and the weapon swing trails.
   `itemMaterial.ts`; never change the legacy passes to add one.
 
 ## Tests
+- `itemDrawLevel.test.ts`: the drawn level of the jewels, rings, wings, orbs, tickets, arrows and the
+  ground's swapped models, every other item at its own, then the cap.
 - `itemMaterial.test.ts`: the excellent redraw takes the lit body's vertex light, and BodyLight alone
   on a flat-lit material (a bag item, `LightEnable` off, ZzzInventory.cpp:9682).

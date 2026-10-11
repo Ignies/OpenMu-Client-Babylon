@@ -19,7 +19,7 @@ import { pose, sit } from '../shared/terrain';
  * may import the scene.
  */
 
-/** `CreateObject`'s `BlendMesh` assignments for Object1 (ZzzObject.cpp:4643-4651). */
+/** `CreateObject`'s `BlendMesh` assignments for Object1 (ZzzObject.cpp:4548-4610). */
 export const LORENCIA_BLEND_MESHES: Readonly<Record<number, number>> = {
   117: 4,
   118: 8,

@@ -51,4 +51,8 @@ export default {
   'fidelity.teleportLandsEarly': '텔레포트 즉시 착지',
   'fidelity.teleportLandsEarly.hint':
     '내 텔레포트가 사라지는 즉시 서버 응답을 기다리지 않고 목표 칸에 착지합니다. 클래식: 서버가 응답할 때까지 원래 칸에서 사라진 채로 기다립니다(원작과 같음).',
+  'fidelity.soccerBoardClock':
+    '점수판의 축구 시계',
+  'fidelity.soccerBoardClock.hint':
+    '배틀 사커 시간을 화면 가운데 줄 대신 점수판의 시계로 표시합니다. 클래식: 남은 시간이 화면 가운데에 표시됩니다(원작과 같음).',
 } satisfies Partial<Record<keyof typeof en, string>>;

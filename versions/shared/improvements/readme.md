@@ -29,6 +29,7 @@ asks `isOn('<id>')`. Classic turns them all off and runs the original.
 | `drawnClothShadows` | Enhanced | `controllers/cloth/clothSet.ts` (`runClothFrame`) | every built cloth below `m_byNumCloth` lays its shadow, a skipped one where it was left (ZzzBMD.cpp:2648-2710) |
 | `loginTokens` | Enhanced | `modules/session/state.ts` (`keepsLoginTokens`, `savedToken`), on a world whose `server.json` has `loginTokens` | the password is typed each time; "remember" keeps the name only (no password is ever stored, on any preset) |
 | `teleportLandsEarly` | Enhanced | `ecs/systems/teleportSystem.ts` (lands him once faded), `modules/warp/net.ts` (the answer moves nothing) | the hero stays faded on the old square until the server's answer places him and plays End (`ReceiveTeleport`, WSclient.cpp:2157-2197) |
+| `soccerBoardClock` | Enhanced | `ui/hud/soccer_score` (the clock line), `ui/hud/match_time` (off while it is on) | the Battle Soccer time is a line at the screen centre and the board has no clock (`RenderTournamentInterface`, ZzzInterface.cpp:3740-3790) |
 
 - The file's comment cites the original and names the site; the site keeps the original path when
   `isOn` is false.
@@ -68,3 +69,5 @@ asks `isOn('<id>')`. Classic turns them all off and runs the original.
   never sent; the password field is the only way in.
 - `ecs/systems/teleportSystem.test.ts`: on Classic the hero's Teleport waits faded for the server's
   answer, then lands and plays End; `teleportLandsEarly` lands him first and the answer moves nothing.
+- `ui/hud/match_time/index.test.tsx`: on Classic the soccer time is the original centre line and the board
+  has no clock; `soccerBoardClock` moves it onto the board.

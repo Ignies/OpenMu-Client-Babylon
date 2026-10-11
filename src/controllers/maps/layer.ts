@@ -131,7 +131,7 @@ export interface MapLayer {
 
   /**
    * Object type → mesh index drawn additively (`CreateObject`'s `BlendMesh`
-   * assignments, ZzzObject.cpp:4643-4651). Read by `controllers/render/blendMeshes.ts`.
+   * assignments by world, e.g. ZzzObject.cpp:4548-4610). Read by `controllers/render/blendMeshes.ts`.
    */
   readonly blendMeshes?: Readonly<Record<number, number>>;
 

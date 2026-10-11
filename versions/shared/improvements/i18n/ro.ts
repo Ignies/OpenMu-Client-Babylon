@@ -51,4 +51,8 @@ export default {
   'fidelity.teleportLandsEarly': 'Teleportarea aterizează imediat',
   'fidelity.teleportLandsEarly.hint':
     'Propria ta Teleportare te așază pe pătrat imediat ce dispari, fără să aștepte răspunsul serverului. Clasică: rămâi dispărut pe pătratul vechi până răspunde serverul, ca în original.',
+  'fidelity.soccerBoardClock':
+    'Ceasul de fotbal pe tabelă',
+  'fidelity.soccerBoardClock.hint':
+    'Timpul Battle Soccer apare ca un ceas pe tabela de scor în loc de un rând în mijlocul ecranului. Clasică: timpul rămas este scris în mijlocul ecranului, ca în original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

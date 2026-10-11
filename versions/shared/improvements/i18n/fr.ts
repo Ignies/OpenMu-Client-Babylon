@@ -51,4 +51,8 @@ export default {
   'fidelity.teleportLandsEarly': 'Téléportation immédiate',
   'fidelity.teleportLandsEarly.hint':
     'Votre propre Téléportation vous pose sur la case dès que vous avez disparu, sans attendre la réponse du serveur. Classique : vous restez effacé sur l’ancienne case jusqu’à la réponse du serveur, comme dans l’original.',
+  'fidelity.soccerBoardClock':
+    'Horloge de football sur le tableau',
+  'fidelity.soccerBoardClock.hint':
+    'Le temps du Battle Soccer s’affiche comme une horloge sur le tableau des scores au lieu d’une ligne au centre de l’écran. Classique : le temps restant s’écrit au centre de l’écran, comme dans l’original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

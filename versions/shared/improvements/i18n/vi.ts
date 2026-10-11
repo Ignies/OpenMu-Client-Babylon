@@ -51,4 +51,8 @@ export default {
   'fidelity.teleportLandsEarly': 'Dịch chuyển đáp ngay',
   'fidelity.teleportLandsEarly.hint':
     'Dịch chuyển của bạn đặt bạn xuống ô đích ngay khi bạn mờ đi, không chờ máy chủ trả lời. Cổ điển: bạn mờ đi và đứng ở ô cũ cho đến khi máy chủ trả lời, như bản gốc.',
+  'fidelity.soccerBoardClock':
+    'Đồng hồ bóng đá trên bảng tỉ số',
+  'fidelity.soccerBoardClock.hint':
+    'Thời gian Battle Soccer hiện thành đồng hồ trên bảng tỉ số thay vì một dòng giữa màn hình. Cổ điển: thời gian còn lại được ghi ở giữa màn hình, như bản gốc.',
 } satisfies Partial<Record<keyof typeof en, string>>;

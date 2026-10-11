@@ -51,4 +51,8 @@ export default {
   'fidelity.teleportLandsEarly': 'Teleport aterriza al instante',
   'fidelity.teleportLandsEarly.hint':
     'Tu propio Teleport te deja en la casilla en cuanto te desvaneces, sin esperar la respuesta del servidor. Clásica: te quedas desvanecido en la casilla anterior hasta que el servidor responde, como en el original.',
+  'fidelity.soccerBoardClock':
+    'Reloj de fútbol en el marcador',
+  'fidelity.soccerBoardClock.hint':
+    'El tiempo de Battle Soccer aparece como un reloj en el marcador en lugar de una línea en el centro de la pantalla. Clásica: el tiempo restante se escribe en el centro de la pantalla, como en el original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

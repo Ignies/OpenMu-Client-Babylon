@@ -22,6 +22,20 @@ export function dressItemModel(object: ModelObject, group: number, num: number):
   object.HiddenMesh = rule.hiddenMesh;
   object.BlendMeshLightAt = rule.blendMeshLight ?? null;
   dressSeed(object, group, num);
+  if (group === 14 && num === 63) dressFireworks(object);
+}
+
+/**
+ * The Fireworks (`MODEL_FIRECRACKER`): mesh 0 textured at BodyLight 1, 1, 1, then mesh 1 textured and
+ * RENDER_BRIGHT | RENDER_CHROME at BodyLight 1, 0, 0, and no level passes (ZzzObject.cpp:9602-9620).
+ */
+function dressFireworks(object: ModelObject): void {
+  object.FixedLight = true;
+  object.Light.set(1, 1, 1);
+  object.BodyShine.tint.set(1, 0, 0);
+  object.BodyShine.chromeOnly = true;
+  object.ShineLight = true;
+  object.ShineMesh = 1;
 }
 
 /** RenderPartObjectBody's element colours, fire, water, ice, wind, lightning, earth (ZzzObject.cpp:8070-8088). */

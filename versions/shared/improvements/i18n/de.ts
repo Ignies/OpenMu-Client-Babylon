@@ -51,4 +51,8 @@ export default {
   'fidelity.teleportLandsEarly': 'Teleport landet sofort',
   'fidelity.teleportLandsEarly.hint':
     'Dein eigener Teleport setzt dich auf das Feld, sobald du ausgeblendet bist, ohne auf die Antwort des Servers zu warten. Klassisch: Du bleibst ausgeblendet auf dem alten Feld, bis der Server antwortet, wie im Original.',
+  'fidelity.soccerBoardClock':
+    'Fußballuhr auf der Anzeigetafel',
+  'fidelity.soccerBoardClock.hint':
+    'Die Battle-Soccer-Zeit erscheint als Uhr auf der Anzeigetafel statt als Zeile in der Bildschirmmitte. Klassisch: Die verbleibende Zeit steht in der Bildschirmmitte, wie im Original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

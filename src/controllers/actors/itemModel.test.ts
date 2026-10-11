@@ -42,3 +42,16 @@ describe('the seeds and seed spheres', () => {
     expect(dressed(14, 13).tint).toEqual([0, 0, 0]);
   });
 });
+
+// RenderPartObjectEffect's MODEL_FIRECRACKER branch (ZzzObject.cpp:9602-9620): mesh 0 textured at BodyLight 1, 1, 1,
+// then mesh 1 textured and RENDER_BRIGHT | RENDER_CHROME at BodyLight 1, 0, 0.
+describe('the fireworks', () => {
+  it('draw mesh 0 at full light and mesh 1 red with Chrome01 over it', () => {
+    const object = new ModelObject(scene);
+    dressItemModel(object, 14, 63);
+    expect(dressed(14, 63)).toEqual({ tint: [1, 0, 0], chromeOnly: true, lit: true, mesh: 1 });
+    expect(object.FixedLight).toBe(true);
+    expect([object.Light.x, object.Light.y, object.Light.z]).toEqual([1, 1, 1]);
+    expect(new ModelObject(scene).FixedLight).toBe(false);
+  });
+});

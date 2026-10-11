@@ -51,4 +51,8 @@ export default {
   'fidelity.teleportLandsEarly': 'Телепортът се приземява веднага',
   'fidelity.teleportLandsEarly.hint':
     'Вашият Teleport ви поставя на квадрата веднага щом изчезнете, без да чака отговора на сървъра. Класическо: оставате невидими на старото място, докато сървърът отговори, както в оригинала.',
+  'fidelity.soccerBoardClock':
+    'Футболен часовник на таблото',
+  'fidelity.soccerBoardClock.hint':
+    'Времето на Battle Soccer се показва като часовник на таблото вместо като ред в средата на екрана. Класическо: оставащото време се изписва в средата на екрана, както в оригинала.',
 } satisfies Partial<Record<keyof typeof en, string>>;

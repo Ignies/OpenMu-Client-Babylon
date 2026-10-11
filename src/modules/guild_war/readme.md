@@ -34,6 +34,9 @@ has the handlers. Plain guild membership is in [../guild/readme.md](../guild/rea
   every score sets off the fireworks on the hero's square (`fx/firecrackerRise.ts`, WSclient.cpp:8172-8179).
 - `GuildSoccerTimeUpdate` (F3 22): remaining seconds, `Social.soccerSeconds`. Kept while the board is
   hidden and cleared with the war, as `g_wtMatchTimeLeft` (`ReceiveWTTimeLeft`, WSclient.cpp:10947-10952, :7822).
+  We read the seconds where OpenMU sends them (a word at byte 4); the original reads a type byte there and the
+  time from byte 5 (`PMSG_MATCH_TIMEVIEW`, WSclient.h:1941-1948). We follow the server we talk to. Drawn at the
+  screen centre by `ui/hud/match_time`, or on the board with `soccerBoardClock`.
 - `GuildWarEnded`: won, lost or cancelled; clears the war.
 - `GuildRelationshipRequest` (0xE5): an alliance or hostility offer.
 - `GuildRelationshipChangeResult`: success or the error reason.
@@ -43,7 +46,7 @@ has the handlers. Plain guild membership is in [../guild/readme.md](../guild/rea
 ## Depends on / used by
 - uses: `social/social.ts`, `chat/chat.ts` (`cleanName`), `scope/objects.ts` (`playerNameById`)
   (`playerNameById`), `guild` (`GuildMarks`), `src/i18n`, `controllers/fx/firecrackerRise.ts`, `ecs/current`.
-- used by: `src/app/logic.ts`. The state is drawn by `versions/shared/ui/hud/soccer_score/`,
+- used by: `src/app/logic.ts`. The state is drawn by `versions/shared/ui/hud/soccer_score/`, `hud/match_time/`,
   `hud/name_tags/`, `windows/guild/` (alliance tab) and `windows/social_prompts/` (war and
   relationship yes/no). `chat/commands.ts` sends relationship requests.
   `warp/net.ts` clears `Social.battleSoccer` when leaving the stadium.
