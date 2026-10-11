@@ -31,6 +31,8 @@ live in the `Social` store ([../social/readme.md](../social/readme.md)).
 - Party / guild / alliance / gens / GM lines arrive with a prefix (`~`, `@`, `@@`, `$`, `#`);
   `classifyInboundChat` picks the log type and strips it.
 - `notices.ts`: the six-line golden banner (`ZzzInterface.cpp:491-603`).
+- `serverLines.ts`: the last blue system line, for `entryRefusalReason()` (an event entry OpenMU
+  refuses with a bare `Failed` after saying why; `events/`).
 - `commands.ts`: `CNewUICommandWindow` and the client `/command` lines of `CheckCommand`
   (`ZzzInterface.cpp:3990`); they act on the player under the cursor and are never sent. `/re on|off|auto`
   (ours, `partyReplyCommand` in `chatCommands.ts`) sets how party invitations are answered; also never sent.
