@@ -8,6 +8,8 @@ export type CloakWearer = {
   charClass: CharacterClassNumber;
   /** `c->Wing`: the wing slot's item. */
   wing: Item | null;
+  /** The armour slot's item; null is the class's own body (`MODEL_BODY_ARMOR + skin`). */
+  armor: Item | null;
   /** A transformation worn on the rig (`o->SubType`, a ring's body): its part file, else null. */
   skin: string | null;
   /** Inside Chaos Castle, where nobody wears one (:9183-9186). */

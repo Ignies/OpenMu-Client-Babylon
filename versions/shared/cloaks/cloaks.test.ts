@@ -10,6 +10,7 @@ import {
   PCT_MASK_LIGHT,
   PCT_RUBBER2,
   PCT_SHORT_SHOULDER,
+  PCT_STICKED,
   type ClothSpec,
 } from '@/controllers/cloth';
 import { CharacterClassNumber as C } from '@/core/types';
@@ -22,7 +23,7 @@ const WINGS_OF_SATAN: Item = { group: 12, num: 2 };
 
 function wear(over: Partial<CloakWearer>) {
   const out: (ClothSpec | null)[] = [];
-  const light = cloaksFor({ charClass: C.DarkLord, wing: null, skin: null, chaosCastle: false, ...over }, out);
+  const light = cloaksFor({ charClass: C.DarkLord, wing: null, armor: null, skin: null, chaosCastle: false, ...over }, out);
   return { out, light };
 }
 
@@ -200,5 +201,37 @@ describe('the Dark Lord\'s hair (ZzzCharacter.cpp:9707-9715)', () => {
     expect(['Skeleton01.glb', 'youngza.glb', 'panda.glb'].map(skin => wear({ skin }).out.slice(0, 2).filter(Boolean))).toEqual([[], [], []]);
     // The cape stays on under a ring's body.
     expect(wear({ wing: CAPE_OF_LORD, skin: 'jack.glb' }).out[2]).toBe(wear({ wing: CAPE_OF_LORD }).out[2]);
+  });
+});
+
+const LEATHER_ARMOR: Item = { group: 8, num: 5 };
+
+describe('the Dark Lord\'s skirt (ZzzCharacter.cpp:9752-9761, :9852-9920)', () => {
+  // What a set settles to: the frame after it is built, the skirt is made again at (0, 8, -5) with
+  // PCT_STICKED and PCT_CURVED both, which the shape switch reads as neither (:9866-9887).
+  const skirt = (front: string): ClothSpec => ({
+    bone: 18,
+    at: [0, 8, -5],
+    grid: [5, 5],
+    size: [50, 90],
+    front,
+    back: front,
+    flags: PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_CURVED | PCT_SHORT_SHOULDER,
+    spheres: [[0, -15, -20, 30, 2]],
+  });
+
+  it('hangs cloth 3 from the waist over the class\'s own body: kaa.tga on the Dark Lord, dark3chima3.tga on the Lord Emperor', () => {
+    expect(wear({}).out[3]).toEqual(skirt('Player/kaa.OZT'));
+    expect(wear({ charClass: C.LordEmperor }).out[3]).toEqual(skirt('Player/dark3chima3.OZT'));
+  });
+
+  it('goes under any armour and any ring\'s body (:9854-9865, :9938-9941)', () => {
+    expect(wear({ armor: LEATHER_ARMOR }).out[3] ?? null).toBeNull();
+    expect(wear({ skin: 'Skeleton02.glb' }).out[3] ?? null).toBeNull();
+  });
+
+  it('under the Mantle of Monarch keeps the one the set was built with, sticked at (0, 10, -5); a Lord Emperor loses it (:9888-9896)', () => {
+    expect(wear({ wing: MANTLE_OF_MONARCH }).out[3]).toEqual({ ...skirt('Player/kaa.OZT'), at: [0, 10, -5], flags: PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_SHORT_SHOULDER });
+    expect(wear({ charClass: C.LordEmperor, wing: MANTLE_OF_MONARCH }).out[3] ?? null).toBeNull();
   });
 });

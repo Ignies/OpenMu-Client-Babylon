@@ -5,6 +5,7 @@ import {
   PCT_RUBBER,
   PCT_RUBBER2,
   PCT_SHORT_SHOULDER,
+  PCT_STICKED,
   PhysicsCloth,
   setClothWind,
   stepClothWind,
@@ -90,6 +91,14 @@ describe('CPhysicsCloth::Create', () => {
     expect([3, 4, 5].map(v => vertex(cloth, v)[1])).toEqual([10, 20, 10]);
     // A pin's y is the bone's -y: the edge pins sit 10 further back than the middle one.
     expect(vertex(cloth, 0)[1] - vertex(cloth, 1)[1]).toBeCloseTo(10);
+  });
+
+  it('lays a cloth both curved and sticked out flat: the shape switch matches neither (:411-422, :540-546)', () => {
+    const both = new PhysicsCloth(spec({ flags: PCT_CURVED | PCT_STICKED }));
+    const flat = new PhysicsCloth(spec());
+    both.create(anchorAt([0, 0, 0]));
+    flat.create(anchorAt([0, 0, 0]));
+    expect(both.pos).toEqual(flat.pos);
   });
 
   it('links every neighbour, the down diagonals and the up diagonals from the third row on (:449-478)', () => {

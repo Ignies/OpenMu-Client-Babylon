@@ -11,7 +11,7 @@ the capes, the Dark Lord's hair and skirt, the Magic Gladiator's robe, the team 
 - One file per use: `cape_of_lord.ts` (the Cape of Lord and the Mantle of Monarch's cape and straps),
   `cape_of_fighter.ts` (the Cape of Fighter and the Cape of Overrule's cape and straps), `robe.ts` (the
   Magic Gladiator's robe, msword03 under the Wing of Ruin), `dark_lord_hair.ts` (the Dark Lord's two
-  strands of hair).
+  strands of hair), `dark_lord_skirt.ts` (his skirt over the class's own body).
 
 ## How it works
 - `bCloak` (:9162-9186): the Magic Gladiator class itself (`c->Class == CLASS_DARK`, so not the Duel
@@ -24,7 +24,12 @@ the capes, the Dark Lord's hair and skirt, the Magic Gladiator's robe, the team 
   their own gusts: the first a pulsing light with a sprite on each vertex, the second added), gone under a
   ring's body (`CheckDarkLordHair`); slot 2 the cape, drawn with the Cape of Lord (`Player\DarklordRobe.tga`) or the
   Mantle of Monarch (`Item\dl_redwings02.tga`, heavy, plus its straps in slots 4 and 5,
-  `Item\dl_redwings03.tga`). No cape has a texture per item level: `Render` ignores the level.
+  `Item\dl_redwings03.tga`). No cape has a texture per item level: `Render` ignores the level. Slot 3 the
+  skirt on the waist bone over the class's own body (no armour item): `Player\kaa.tga`, the Lord Emperor's
+  `Player\dark3chima3.tga`. The set is built with 3 cloths, so the skirt is made again the next frame at
+  (0, 8, -5) with `PCT_CURVED` added to `PCT_STICKED`, which the shape switch reads as neither; under the
+  Mantle (6 cloths) the first skirt stays, sticked at (0, 10, -5), and a Lord Emperor's is torn off
+  (`!= SKIN_CLASS_DARK_LORD`, :9888-9896). That settled skirt is the spec here.
 - Rage Fighter (:9777-9824): slot 0 the cape, drawn with the Cape of Fighter (`Item\NCcape.tga`) or the
   Cape of Overrule (`Item\monke_manto.TGA`, plus its straps in slots 1 and 2, `Item\monk_manto01.TGA`,
   blown out to each side by `PCT_ELASTIC_RAGE_L` / `_R`).

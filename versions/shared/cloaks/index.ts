@@ -10,6 +10,7 @@ import {
 } from './cape_of_lord';
 import { robeFor } from './robe';
 import { DARK_LORD_HAIR } from './dark_lord_hair';
+import { DARK_LORD_SKIRT, LORD_EMPEROR_SKIRT, MANTLE_SKIRT } from './dark_lord_skirt';
 import { CAPE_OF_FIGHTER_CLOTH, CAPE_OF_OVERRULE_CLOTH, CAPE_OF_OVERRULE_STRAPS, isCapeOfFighter, isCapeOfOverrule } from './cape_of_fighter';
 
 const WHITE: Rgb = [1, 1, 1];
@@ -20,15 +21,17 @@ const TEMPLE_BODIES: ReadonlySet<string> = new Set(['illusionist.glb', 'unitedso
 const SKELETON_BODY = /^Skeleton0[123]\.glb$/;
 
 /**
- * The Dark Lord's cloths (ZzzCharacter.cpp:9693-9776, drawn by :9926-9942): 0 and 1 the hair, gone under a ring's
- * body (CheckDarkLordHair), 2 the cape, 4 and 5 the Mantle's straps.
+ * The Dark Lord's cloths (ZzzCharacter.cpp:9693-9776, drawn by :9926-9942): 0 and 1 the hair and 3 the skirt over
+ * the class's own body, all gone under a ring's body (CheckDarkLordHair); 2 the cape, 4 and 5 the Mantle's straps.
  */
 function darkLord(w: CloakWearer, out: (ClothSpec | null)[]): void {
+  const mantle = isMantleOfMonarch(w.wing);
   if (w.skin === null) {
     out[0] = DARK_LORD_HAIR[0];
     out[1] = DARK_LORD_HAIR[1];
+    const emperor = w.charClass === CharacterClassNumber.LordEmperor;
+    if (w.armor === null) out[3] = mantle ? (emperor ? null : MANTLE_SKIRT) : emperor ? LORD_EMPEROR_SKIRT : DARK_LORD_SKIRT;
   }
-  const mantle = isMantleOfMonarch(w.wing);
   out[2] = mantle ? MANTLE_OF_MONARCH_CLOTH : isCapeOfLord(w.wing) ? CAPE_OF_LORD_CLOTH : null;
   if (mantle) {
     out[4] = MANTLE_OF_MONARCH_STRAPS[0];

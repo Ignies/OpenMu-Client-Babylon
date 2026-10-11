@@ -54,7 +54,7 @@ describe('ClothSystem', () => {
   it('hangs on each player body what the wearers\' rule names, in its light', () => {
     const p = player({ wings: { group: 13, num: 30 } });
     const set = run(p);
-    expect(seen).toEqual({ charClass: C.DarkLord, wing: { group: 13, num: 30 }, skin: null, chaosCastle: false });
+    expect(seen).toEqual({ charClass: C.DarkLord, wing: { group: 13, num: 30 }, armor: null, skin: null, chaosCastle: false });
     expect([set.size, set.cloth(2)?.spec]).toEqual([1, CAPE]);
     p.charAppearance.wings = null;
     expect(run(p).size).toBe(0);
