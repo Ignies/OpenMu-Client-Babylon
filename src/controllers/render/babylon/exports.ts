@@ -88,6 +88,7 @@ export { PointLight } from '@babylonjs/core/Lights/pointLight';
 export { SceneLoader } from '@babylonjs/core/Loading/sceneLoader';
 export { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera';
 export type { Camera } from '@babylonjs/core/Cameras/camera';
+export { TargetCamera } from '@babylonjs/core/Cameras/targetCamera';
 export { Texture } from '@babylonjs/core/Materials/Textures/texture';
 export { DynamicTexture } from '@babylonjs/core/Materials/Textures/dynamicTexture';
 export { RawTexture } from '@babylonjs/core/Materials/Textures/rawTexture';

@@ -37,6 +37,8 @@ There is no `index.ts` facade; other folders import the modules directly.
   `sceneCover.ts`, `blendMeshes.ts`, `effectOnlyObjects.ts`, `perfOverlay.ts` (Shift+Ctrl+Alt+P).
 - `configFingerprint.ts`: `configFingerprintLines()` and friends, every game option packed into a hex
   string for the perf overlay.
+- `iconShot.ts`: `iconShots(scene).shoot(job)`, a one-shot picture of a model as an image URL (the bag
+  icons the pack has no file for), `ICON_LAYER`, `iconPixels`.
 
 ## How it works
 - `ModelObject.load(gltf)` puts a GLB under the object's node with the BMD to Babylon basis change
@@ -60,6 +62,13 @@ There is no `index.ts` facade; other folders import the modules directly.
   tone map, firefly guard, then the post chain (`moveToEnd` when a pass ahead was rebuilt).
 - Each pass takes the lighting tier and the post option from the director. On Classic (no tier)
   the effect mask, AO, haze and tone pass are not built, and the style readers answer "off".
+- `iconShot.ts` queues jobs and runs one at a time: the job builds its model under a root that turns
+  MU's frame upright (the original's item camera: identity view, NewUI3DRenderMng.cpp:165-169), the
+  meshes go on `ICON_LAYER` (no other camera draws them), flat lit at BodyLight 1 with no fog or
+  shadow flags (the original's `Light = 1,1,1`, `LightEnable` off, ZzzInventory.cpp:9682-9699), then an
+  orthographic camera and a target of their own draw them once after the frame (`onAfterRender`,
+  only while a job waits), at most one per frame. The target is read back, encoded as a PNG object
+  URL, cached by the job's key and everything is freed.
 
 ## Depends on / used by
 - uses: `assets` (model loader, texture packs), `lighting`, `terrain`, `maps`, `item_fx`, `anim`,
@@ -85,6 +94,11 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `configFingerprint.test.ts`: `configuration_hex.md` matches the options, the layout and lengths,
   the number bias round trip, and the pack digest.
 - `frameSnapshot.test.ts`: fills once per frame and per scene, refills after a throw.
+- `iconShot.test.ts`: at most one shot per frame and no observer once idle; one build per key; the
+  subject, root, camera and target freed; the main camera never sees the subject; flat lit, no fog,
+  no caster flag; a failed build answers null; the bounded wait for readiness; `iconPixels` (row flip,
+  straight alpha over the clear, the display curve on a linear buffer). NullEngine draws no pixels,
+  so what a picture looks like is checked in a browser.
 - `meshAnimation.test.ts`: `meshAnimationFor` reads the map row per world.
 - `modelObject.test.ts`: a model whose clips are cloned on first play reads every clip's keys at load
   without cloning one, and a clip cloned later reports its end; `BlendMesh -2` and a pulsing `BlendMeshLightAt`;
@@ -119,6 +133,11 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `scenes/sunShafts.test.ts`: the shaft pass leaves and rejoins the chain with the sun.
 
 ## Notes
+- `iconShot.ts`: the subject lives in the game's scene (the item materials are cached per scene) and
+  waits there, masked, until its shaders and its per-mesh textures are ready (`READY_FRAMES` at most).
+  Orthographic, not the original's 1 degree perspective: at that angle the two differ by well under
+  a pixel. The target is cleared to transparent black, so an additive mesh leaves alpha 0 under its
+  colour; `iconPixels` reads every pixel as premultiplied over black, which is exact on the dark bag.
 - `materialQuality.ts`: tiers 1 and 2 put every lit mesh on PBR; they differ only in which meshes get
   derived (or `Data/PBR/`) maps, the rest bind flat placeholders. Additive `_R` cards and flat-lit UI
   models stay Standard; terrain keeps its own shader. All lit meshes must move together because
