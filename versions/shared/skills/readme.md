@@ -70,6 +70,13 @@ joints' white AddTerrainLight (ZzzEffectJoint.cpp:6013-6015).
 | Evil Spirit (9, 385, 487) | four JOINT_SPIRIT pairs homing on the caster, a MODEL_LASER skull on each wide one (ZzzCharacter.cpp:4584-4604) | eight spirits orbiting the skill's reach in two waves (`fx/spiritSwarm.ts`), a smoke trail behind each and the screen shroud (`fx/shroud.ts`); one trail and shroud per caster while they last, at most 2 shrouds on screen | 7b8e0acfc, ffc2dcdec, 872baefa9 |
 | Infinity Arrow (77, 441) | MODEL_INFINITY_ARROW at the caster: arrowsre02-04 at the feet (Light x0.95 a tick, LT 40), arrowsre05 on hand bone 29 (Scale x1.2, Light (1, 0.5, 0.3) x0.9, LT 15), arrowsre01 drawing only its BITMAP_FLARE + 1 sub16 joints from bones 1-9 but 5, homing on the hand (WSclient.cpp:4882-4888, ZzzEffect.cpp:435-468, MoveHandlers.cpp:131-182, ZzzObject.cpp:1598-1613, ZzzEffectJoint.cpp:2232-2240, :5983-6011) | a blue flash with ice motes | ours was Classic until now; the original is new |
 
+Audited (every skill visual commit since the restructure, 2026-10-01 to 10-11): only Evil Spirit had a
+deliberate look of ours removed. The rest replaced stand-ins for effects not ported yet (generic recipes or
+re-tinted stock models) and stay gone: Killing Blow (7782453dd, 8f8e1bdca), Chain Drive (169d69459), Dragon
+Slasher (c1b783e3d, 5c2c0fd97), Dragon Roar (1b8267a47, 43c1173fb), Charge (c9c9cefcc, 68f293c89), Dark Side
+(3d966cf46), the Rage buffs (3f85dc07a, 9ae74d387), Beast Uppercut (4472bd289), Brand of Skill (4dac2cdba,
+a34a9ae2a), Multi-Shot (65023b363, 26cba0b10). Timing, bone, facing, leak and cap fixes apply to both branches.
+
 ## Depends on / used by
 - uses: `@/controllers/skills`, `fx`, `lighting`, `sound`, `combat`, `render`; `../items/launcher_arrows`
 - used by: `src/modules/{combat,skills,scope,_shared}`, `src/ecs/systems` (through
