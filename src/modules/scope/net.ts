@@ -1,5 +1,5 @@
 import { APPEARANCE_EXTENDED_LENGTH, deserializeAppearance, deserializeAppearanceExtended, itemLevelFromGlow } from '@/controllers/actors/deserializeAppearance';
-import { AddCharacterToScopeExtendedPacket, AddCharactersToScopePacket, AddNpcsToScopePacket, AddSummonedMonstersToScopePacket, AddTransformedCharactersToScopePacket, AppearanceChangedExtendedPacket, AppearanceChangedPacket, MapObjectOutOfScopePacket, ObjectMovedPacket, ObjectWalkedPacket, SummonHealthUpdatePacket } from '@versions/shared/packets/ServerToClientPackets';
+import { AddCharacterToScopeExtendedPacket, AddCharactersToScopePacket, CharacterInformationExtendedPacket, CharacterInformationPacket, AddNpcsToScopePacket, AddSummonedMonstersToScopePacket, AddTransformedCharactersToScopePacket, AppearanceChangedExtendedPacket, AppearanceChangedPacket, MapObjectOutOfScopePacket, ObjectMovedPacket, ObjectWalkedPacket, SummonHealthUpdatePacket } from '@versions/shared/packets/ServerToClientPackets';
 import { CharacterClassNumber } from '@/core/types';
 import { Economy } from '../economy/economy';
 import { Entity, World, type Item } from '@/ecs/world';
@@ -371,8 +371,28 @@ function applyAppearanceChange(
   cApp.changed = true;
 }
 
+/**
+ * `ReceiveJoinMapServer` (WSclient.cpp:1081-1160): `CreateCharacterPointer` makes the hero on join, at the
+ * character information's position; its gear comes with the inventory. The self scope add rebuilds it,
+ * but a server that never sends it (OpenMU after a character switch) still leaves the hero a body.
+ */
+function spawnHeroOnJoin(p: { X: number; Y: number; MapId: number }): void {
+  const world = Ecs.world;
+  if (!world || world.playerEntity || Hero.playerId === undefined) return;
+  const hero = spawnPlayer(world, { cls: Hero.charClass });
+  world.addComponent(hero, 'netId', Hero.playerId);
+  world.addComponent(hero, 'worldIndex', p.MapId);
+  world.addComponent(hero, 'localPlayer', true);
+  if (Hero.isGameMaster) world.addComponent(hero, 'isGm', true);
+  hero.objectNameInWorld = Hero.name;
+  hero.transform.pos.set(p.X, world.getTerrainHeight(p.X, p.Y), p.Y);
+}
+
 /** Registers this module's packet listeners (see ../module.ts). */
 export function installNet(): void {
+  EventBus.on('CharacterInformation', packet => spawnHeroOnJoin(new CharacterInformationPacket(packet)));
+  EventBus.on('CharacterInformationExtended', packet => spawnHeroOnJoin(new CharacterInformationExtendedPacket(packet)));
+
   EventBus.on('AddNpcsToScope', packet => {
     const p = new AddNpcsToScopePacket(packet);
 
