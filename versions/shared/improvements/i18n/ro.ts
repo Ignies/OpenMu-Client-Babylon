@@ -15,9 +15,6 @@ export default {
   'fidelity.loginChandeliers': 'Candelabre aprinse la autentificare',
   'fidelity.loginChandeliers.hint':
     'Candelabrele din ecranul de autentificare ard. Clasică: sunt stinse, ca în original.',
-  'fidelity.wingShadows': 'Umbre de aripi',
-  'fidelity.wingShadows.hint':
-    'Aripile aruncă umbră. Clasică: fără umbră, ca în original.',
   'fidelity.torchCrackle': 'Sunetul torțelor',
   'fidelity.torchCrackle.hint':
     'Torțele aprinse trosnesc când ești aproape. Clasică: torțele sunt tăcute.',

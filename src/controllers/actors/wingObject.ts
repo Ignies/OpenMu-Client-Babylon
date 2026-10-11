@@ -16,7 +16,6 @@ import {
   type HeldLook,
   type HeldPoint,
 } from '../fx/effectParticles';
-import { isOn } from '../fidelity';
 import { effects } from '../fx';
 import { TICK, darkCardGain, lightCardGain } from '../fx/core';
 import { spawnModel } from '../fx/model';
@@ -79,23 +78,11 @@ export class WingObject extends ModelObject {
   spec: WingSpec | null = null;
 
   /**
-   * Wings cast a shadow here, blend mesh included.
-   *
-   * The original casts none at all: its shadow pass walks `BodyPart[]` and
-   * `Weapon[]` only (`RenderBodyShadow` calls in ZzzCharacter.cpp:8394-8425)
-   * and `c->Wing` is neither (w_CharacterInfo.h:217-219), so a winged
-   * character throws the same silhouette as a bare one. Deliberate deviation:
-   * the wings are the largest thing on the character and their absence from
-   * the shadow is what reads as broken.
-   *
-   * The blend-mesh exemption is the other half of it - on Wing of Elf and
-   * Wings of Spirits (`o->BlendMesh = 0`, ZzzObject.cpp:5276-5284) the
-   * additive card is the only mesh in the model, so the ordinary rule would
-   * leave those two wings shadowless while every other pair cast.
-   * Classic (`wingShadows` off): no shadow, read when the wing is built.
+   * `RenderLinkObject` draws every wing's shadow with `RenderBodyShadow()`, which skips no mesh, so the
+   * blend card casts too (ZzzCharacter.cpp:8404-8447). A cape casts its cloth's (not ported), so its model
+   * has no Classic shadow (`prepare`).
    */
   ShadowBlendMeshCasts = true;
-  CastsShadow = isOn('wingShadows');
 
   #wake: BonedParticleEmitter | null = null;
   #passes: LivePass[] = [];
@@ -130,6 +117,7 @@ export class WingObject extends ModelObject {
   prepare(spec: WingSpec | null): void {
     this.spec = spec;
     this.BlendMesh = spec?.blendMesh ?? -1;
+    this.ClassicShadow = !spec?.cape;
     this.setBoneLink(wingBone(spec), wingLinkMatrix(spec) ?? undefined);
     // Forces the first playAction(0) after the load to actually start the
     // flap clip; playAction is a no-op when the action is already current.

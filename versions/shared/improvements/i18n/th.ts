@@ -15,9 +15,6 @@ export default {
   'fidelity.loginChandeliers': 'โคมระย้าหน้าล็อกอินติดไฟ',
   'fidelity.loginChandeliers.hint':
     'โคมระย้าในหน้าล็อกอินมีไฟลุก คลาสสิก: ดับอยู่ เหมือนต้นฉบับ',
-  'fidelity.wingShadows': 'เงาปีก',
-  'fidelity.wingShadows.hint':
-    'ปีกมีเงา คลาสสิก: ไม่มีเงา เหมือนต้นฉบับ',
   'fidelity.torchCrackle': 'เสียงคบเพลิง',
   'fidelity.torchCrackle.hint':
     'คบเพลิงที่ลุกไหม้ส่งเสียงปะทุเมื่อคุณอยู่ใกล้ คลาสสิก: คบเพลิงไม่มีเสียง',

@@ -13,7 +13,8 @@ vi.mock('../assets/mu', async importOriginal => ({
 
 import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
 import { Scene } from '@babylonjs/core/scene';
-import { Mesh, Skeleton, TransformNode, type Texture } from '../render/babylon/exports';
+import { CreateBox, Mesh, Skeleton, TransformNode, type Texture } from '../render/babylon/exports';
+import { FIDELITY_CLASSIC, FIDELITY_DEFAULT, setFidelityChoice } from '@/controllers/fidelity';
 import type { World } from '../../ecs/world';
 import { WingObject } from './wingObject';
 import { wingSpec } from './wings';
@@ -56,5 +57,32 @@ describe('the Wing of Ruin layer', () => {
     object.load(wing(2, true));
     object.Update(tick);
     expect(object.getMesh(2)?.metadata?.diffuseTexture).toBeDefined();
+  });
+});
+
+// RenderLinkObject draws every wing's shadow, blend mesh included, and a cape's cloth alone (ZzzCharacter.cpp:8404-8447).
+describe('the Classic shadow of the back item', () => {
+  /** A one-mesh model with geometry, named so its shadow clone can be found. */
+  function solid(name: string) {
+    const root = new Mesh(name, scene);
+    CreateBox(`${name}_body`, { size: 1 }, scene).parent = root;
+    return { mesh: root, skeleton: new Skeleton(name, name, scene), animationGroups: [] };
+  }
+  const item = (num: number) => wingSpec({ group: 12, num } as Parameters<typeof wingSpec>[0]);
+
+  it('is cast by a wing on Classic, its blend card too, and never by a cape model, whose cloth casts it', () => {
+    setFidelityChoice(FIDELITY_CLASSIC, {});
+    const elf = new WingObject(scene);
+    elf.prepare(item(0));
+    elf.load(solid('wingOfElf'));
+    const cape = new WingObject(scene);
+    cape.prepare(item(40));
+    cape.load(solid('capeOfEmperor'));
+    setFidelityChoice(FIDELITY_DEFAULT, {});
+
+    expect(scene.getMeshByName('wingOfElf_shadow0')).not.toBeNull();
+    expect(scene.getMeshByName('capeOfEmperor_shadow0')).toBeNull();
+    // The cascades still take the cape.
+    expect(cape.CastsShadow).toBe(true);
   });
 });

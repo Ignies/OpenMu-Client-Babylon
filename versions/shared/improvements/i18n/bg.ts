@@ -15,9 +15,6 @@ export default {
   'fidelity.loginChandeliers': 'Запалени полилеи при вход',
   'fidelity.loginChandeliers.hint':
     'Полилеите на екрана за вход горят. Класическо: угаснали са, както в оригинала.',
-  'fidelity.wingShadows': 'Сенки на крилете',
-  'fidelity.wingShadows.hint':
-    'Крилете хвърлят сянка. Класическо: без сянка, както в оригинала.',
   'fidelity.torchCrackle': 'Звук на факлите',
   'fidelity.torchCrackle.hint':
     'Горящите факли пращят, когато сте наблизо. Класическо: факлите са беззвучни.',

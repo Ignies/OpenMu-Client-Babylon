@@ -666,6 +666,12 @@ export class ModelObject {
   MapShadow = false;
 
   /**
+   * Characters and their parts: off while the original draws no shadow for this body (a cape's model,
+   * whose cloth casts instead). Read every frame; the cascades read `CastsShadow` alone.
+   */
+  ClassicShadow = true;
+
+  /**
    * Whether snow may settle on this object (controllers/weather/snowCaps.ts). Set by
    * MapTileObject on the maps snow settles on; every mesh carries it as
    * `metadata.snowCap` for the item material to bind against.
@@ -1611,7 +1617,7 @@ export class ModelObject {
 
     for (let slot = 0; slot < this._shadows.length; slot++) {
       if (this._shadows[slot] || this._shadowSlotsBarren[slot]) continue;
-      if (!blobShadowsActive() || !this._castsBlobShadow) continue;
+      if (!blobShadowsActive() || !this._castsBlobShadow || !this.ClassicShadow) continue;
 
       const shadow = createObjectShadow(
         this.gltf!.mesh,
@@ -1646,7 +1652,7 @@ export class ModelObject {
   private syncShadowEnabled(): void {
     if (this._shadows.length === 0) return;
 
-    const visible = !this.OutOfView && this.Alpha >= 1;
+    const visible = !this.OutOfView && this.Alpha >= 1 && this.ClassicShadow;
     const serial = shadowStateVersion();
 
     if (visible === this._shadowsVisible && serial === this._shadowsSerial) {

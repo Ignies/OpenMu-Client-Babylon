@@ -153,7 +153,9 @@ There is no `index.ts` facade; other folders import the modules directly.
   dropped every alpha-blended mesh, which left a thin, naked shadow.
   Classic shadows what the original does: characters and their parts, and of the map objects only those
   whose case calls `RenderBodyShadow` (`MapShadow`: Blood Castle 28/29, Valley of Loren 50/83/85). Every
-  map object once cast one, with a size gate to keep flowers and cliffs out.
+  map object once cast one, with a size gate to keep flowers and cliffs out. `ClassicShadow` turns a
+  character's or part's blob off where the original draws none (a cape's model), read every frame; the
+  cascades still take it (`CastsShadow`).
   The fold (`SHADOW_FOLD`) is the original's `CalcShadowPosition`, which divides by the vertex's height
   under the 40-tile light: a tall map object had its top thrown tens of tiles into long black streaks.
   The divisor stays 10 tiles off zero and the move within 5 tiles; a body (anything under

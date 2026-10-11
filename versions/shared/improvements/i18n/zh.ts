@@ -15,9 +15,6 @@ export default {
   'fidelity.loginChandeliers': '登录画面吊灯点亮',
   'fidelity.loginChandeliers.hint':
     '登录画面的吊灯会燃烧。经典：与原版一样是熄灭的。',
-  'fidelity.wingShadows': '翅膀阴影',
-  'fidelity.wingShadows.hint':
-    '翅膀会投下阴影。经典：与原版一样没有阴影。',
   'fidelity.torchCrackle': '火把声音',
   'fidelity.torchCrackle.hint':
     '靠近燃烧的火把时会听到噼啪声。经典：火把没有声音。',

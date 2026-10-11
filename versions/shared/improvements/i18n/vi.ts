@@ -15,9 +15,6 @@ export default {
   'fidelity.loginChandeliers': 'Đèn chùm sáng ở màn hình đăng nhập',
   'fidelity.loginChandeliers.hint':
     'Các đèn chùm ở màn hình đăng nhập được thắp sáng. Cổ điển: chúng tắt, như bản gốc.',
-  'fidelity.wingShadows': 'Bóng của cánh',
-  'fidelity.wingShadows.hint':
-    'Cánh đổ bóng. Cổ điển: không có bóng, như bản gốc.',
   'fidelity.torchCrackle': 'Tiếng đuốc',
   'fidelity.torchCrackle.hint':
     'Đuốc đang cháy kêu lách tách khi bạn ở gần. Cổ điển: đuốc im lặng.',

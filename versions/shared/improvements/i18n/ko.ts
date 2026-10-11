@@ -15,9 +15,6 @@ export default {
   'fidelity.loginChandeliers': '로그인 화면 샹들리에 점등',
   'fidelity.loginChandeliers.hint':
     '로그인 화면의 샹들리에에 불이 켜집니다. 클래식: 원작처럼 꺼져 있습니다.',
-  'fidelity.wingShadows': '날개 그림자',
-  'fidelity.wingShadows.hint':
-    '날개가 그림자를 드리웁니다. 클래식: 원작처럼 그림자가 없습니다.',
   'fidelity.torchCrackle': '횃불 소리',
   'fidelity.torchCrackle.hint':
     '가까이 있는 횃불이 타닥거립니다. 클래식: 횃불은 소리가 없습니다.',

@@ -118,8 +118,8 @@ describe('fidelity in a stored blob', () => {
   });
 
   it('keeps a stored choice, clamps the preset and drops a bad overrides blob', () => {
-    expect(optionsFrom({ fidelity: 0, fidelityOverrides: { wingShadows: true } }).fidelityOverrides)
-      .toEqual({ wingShadows: true });
+    expect(optionsFrom({ fidelity: 0, fidelityOverrides: { torchCrackle: true } }).fidelityOverrides)
+      .toEqual({ torchCrackle: true });
     expect(optionsFrom({ fidelity: 7 }).fidelity).toBe(2);
     expect(optionsFrom({ fidelityOverrides: 'x' }).fidelityOverrides).toEqual({});
     expect(optionsFrom({ fidelityOverrides: { a: 1, b: false } }).fidelityOverrides).toEqual({ b: false });

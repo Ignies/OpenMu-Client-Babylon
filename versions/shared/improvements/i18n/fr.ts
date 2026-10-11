@@ -15,9 +15,6 @@ export default {
   'fidelity.loginChandeliers': 'Lustres allumés à la connexion',
   'fidelity.loginChandeliers.hint':
     'Les lustres de l\'écran de connexion brûlent. Classique : ils sont éteints, comme dans l\'original.',
-  'fidelity.wingShadows': 'Ombres des ailes',
-  'fidelity.wingShadows.hint':
-    'Les ailes projettent une ombre. Classique : pas d\'ombre, comme dans l\'original.',
   'fidelity.torchCrackle': 'Bruit des torches',
   'fidelity.torchCrackle.hint':
     'Les torches crépitent quand vous êtes proche. Classique : les torches sont muettes.',

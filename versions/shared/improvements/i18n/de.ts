@@ -15,9 +15,6 @@ export default {
   'fidelity.loginChandeliers': 'Brennende Kronleuchter beim Login',
   'fidelity.loginChandeliers.hint':
     'Die Kronleuchter im Login-Bildschirm brennen. Klassisch: sie sind kalt, wie im Original.',
-  'fidelity.wingShadows': 'Flügelschatten',
-  'fidelity.wingShadows.hint':
-    'Flügel werfen einen Schatten. Klassisch: kein Schatten, wie im Original.',
   'fidelity.torchCrackle': 'Fackelgeräusche',
   'fidelity.torchCrackle.hint':
     'Brennende Fackeln knistern, wenn du in der Nähe bist. Klassisch: Fackeln sind stumm.',

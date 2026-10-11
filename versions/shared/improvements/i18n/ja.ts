@@ -15,9 +15,6 @@ export default {
   'fidelity.loginChandeliers': 'ログイン画面のシャンデリア点灯',
   'fidelity.loginChandeliers.hint':
     'ログイン画面のシャンデリアに火がともります。クラシック: オリジナル通り消えたままです。',
-  'fidelity.wingShadows': '翼の影',
-  'fidelity.wingShadows.hint':
-    '翼が影を落とします。クラシック: オリジナル通り影はありません。',
   'fidelity.torchCrackle': 'たいまつの音',
   'fidelity.torchCrackle.hint':
     '近くの燃えるたいまつがパチパチと鳴ります。クラシック: たいまつは無音です。',

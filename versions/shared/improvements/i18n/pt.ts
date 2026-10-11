@@ -15,9 +15,6 @@ export default {
   'fidelity.loginChandeliers': 'Lustres acesos no login',
   'fidelity.loginChandeliers.hint':
     'Os lustres da tela de login ficam acesos. Clássica: ficam apagados, como no original.',
-  'fidelity.wingShadows': 'Sombras das asas',
-  'fidelity.wingShadows.hint':
-    'As asas projetam sombra. Clássica: sem sombra, como no original.',
   'fidelity.torchCrackle': 'Som das tochas',
   'fidelity.torchCrackle.hint':
     'As tochas acesas estalam quando você está perto. Clássica: as tochas são silenciosas.',
