@@ -68,6 +68,7 @@ cli/docker.ts             every docker call                       cli/compose.ts
 cli/openmu.ts             OpenMU checkout / source build          cli/health.ts     checks, wait for OpenMU
 cli/backup.ts             backup and restore                      cli/firewall.ts, ports.ts, launcher.ts
 cli/ui.ts                 the look (@clack/prompts)               cli/exec.ts       running programs
+cli/e2e.ts, loginCheck.ts  the end-to-end run and its game check (the client's own protocol code)
 stack/                    compose files and Dockerfiles
 ```
 
@@ -92,7 +93,7 @@ everything the stack reads is rendered from `mu.env`, so `mu config` can change 
   origin, so a client loaded from another site reads it too:
 
   ```json
-  { "version": 1, "settings": { "heldHitRequest": false }, "modulesOff": [] }
+  { "version": 1, "settings": { "heldHitRequest": false }, "modulesOff": [], "loginTokens": true }
   ```
 
   `heldHitRequest` (`mu config` > Features, `MU_HELD_HIT_REQUEST` in `mu.env`, default off) sends a
@@ -127,6 +128,11 @@ everything the stack reads is rendered from `mu.env`, so `mu config` can change 
   `src/modules/` that are not core: events, quests, marketplace, guild, guild_war, party, friends,
   economy, trade, vault, personal_shop, chaos_mix, pets, mu_helper, band, gm.
 
+  `loginTokens` (always `true`, nothing to set) says this world issues login tokens: our OpenMU
+  plugin does (`openmu/readme.md`), and it is in every OpenMU image the installer builds. A client
+  with "remember" ticked keeps a token instead of the password (Enhanced and Ultra). The tokens live
+  in the `mu_plugins` schema of OpenMU's database, so `mu backup` (the database dump) carries them.
+
 ## Change it
 
 - a new question: `cli/commands/questions.ts` (+ a field in `cli/config.ts`, + where it renders).
@@ -146,6 +152,12 @@ everything the stack reads is rendered from `mu.env`, so `mu config` can change 
 - `cli/backup.test.ts`: role filtering, backup names.
 - End to end, with Docker: `MU_STATE=<scratch folder> bun install/cli/e2e.ts` (build, start, check;
   then `backup`, `down`). It refuses to run without `MU_STATE`, so it never touches a real install.
+  Its `check` also plays the game through the proxy as the test GM (`cli/loginCheck.ts`, with the
+  client's packet classes and encryption): `server.json` offering login tokens, password login, the
+  character list, a login token (E7 03/04), a module packet (0xE8) sent at the character list dropped
+  unread while one sent in the world reaches the handler, then after a reconnect a token login (E7 05)
+  reaching the character list with the token replaced, the proxy naming that socket for the cash
+  shop, the replaced token and a junk one refused, and the new token logging in.
 
 ## Troubleshooting
 

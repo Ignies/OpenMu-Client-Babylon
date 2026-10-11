@@ -90,8 +90,9 @@ describe('client build', () => {
 });
 
 describe('server.json', () => {
-  it('holds the original behaviour by default', () => {
-    expect(JSON.parse(serverManifest(domain))).toEqual({ version: 1, settings: ORIGINAL_SETTINGS, modulesOff: [] });
+  it('holds the original behaviour by default, and offers login tokens: the plugin is in every image', () => {
+    expect(JSON.parse(serverManifest(domain))).toEqual({ version: 1, settings: ORIGINAL_SETTINGS, modulesOff: [], loginTokens: true });
+    expect(parseServerManifest(JSON.parse(serverManifest(domain)))?.loginTokens).toBe(true);
   });
 
   it('turns off the modules the config lists, and band when its relay is off', () => {

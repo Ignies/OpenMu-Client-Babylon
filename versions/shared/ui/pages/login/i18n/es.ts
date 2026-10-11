@@ -20,4 +20,5 @@ export default {
   'register.unreachable': 'No se pudo contactar con el servidor.',
   'register.failed': 'No se pudo crear la cuenta ({status}).',
   'register.created': 'Cuenta creada. Ya puedes iniciar sesión.',
+  'login.savedLogin': 'Sesión guardada',
 } satisfies Partial<Record<keyof typeof en, string>>;

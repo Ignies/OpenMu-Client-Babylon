@@ -45,4 +45,7 @@ export default {
   'fidelity.drawnClothShadows': 'Ombres de tissu nettes',
   'fidelity.drawnClothShadows.hint':
     'Seuls les capes, robes et cheveux qu’un personnage montre projettent une ombre. Classique : un tissu que le personnage ne montre plus laisse son ombre là où il est resté, comme dans l’original.',
+  'fidelity.loginTokens': 'Connexions enregistrées',
+  'fidelity.loginTokens.hint':
+    'Sur les mondes qui le proposent, « Se souvenir de moi » garde un jeton de connexion au lieu de votre mot de passe : la connexion suivante ne le demande pas. Classique : vous tapez le mot de passe à chaque fois, comme dans l’original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

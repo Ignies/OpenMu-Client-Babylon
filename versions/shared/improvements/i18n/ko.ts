@@ -45,4 +45,7 @@ export default {
   'fidelity.drawnClothShadows': '깔끔한 천 그림자',
   'fidelity.drawnClothShadows.hint':
     '캐릭터가 보여 주는 망토, 로브, 머리카락만 그림자를 드리웁니다. 클래식: 더 이상 보이지 않는 천도 남겨진 자리에 그림자를 계속 드리웁니다(원작과 같음).',
+  'fidelity.loginTokens': '로그인 저장',
+  'fidelity.loginTokens.hint':
+    '지원하는 월드에서는 "로그인 정보 저장"이 비밀번호 대신 로그인 토큰을 저장해 다음 로그인에 비밀번호가 필요 없습니다. 클래식: 원작처럼 매번 비밀번호를 입력합니다.',
 } satisfies Partial<Record<keyof typeof en, string>>;

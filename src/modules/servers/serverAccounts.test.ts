@@ -1,5 +1,5 @@
-import { afterEach, describe, expect, it } from 'vitest';
-import { ServerAccounts } from './serverAccounts';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { ServerAccounts, ServerAccountsStore, tokenFromText, tokenToText } from './serverAccounts';
 import { ServerConfig, URL_PROFILE_ID } from './serverConfig';
 import { parseServerLine } from './serverList';
 
@@ -12,13 +12,27 @@ afterEach(() => {
     ServerAccounts.forget(id);
 });
 
+/** A token as the server hands it out, as stored. */
+const TOKEN = tokenToText(Uint8Array.from({ length: 32 }, (_, i) => i));
+
 /** An account with a name on it, since a blank row is not a login. */
-function named(worldId: string, username: string, password = 'pw'): string {
+function named(worldId: string, username: string, token = TOKEN): string {
   const id = ServerAccounts.add(worldId);
 
-  ServerAccounts.update(worldId, id, { username, password });
+  ServerAccounts.update(worldId, id, { username, token });
 
   return id;
+}
+
+/** A localStorage holding these entries, for a store loaded from it. */
+function storage(entries: Record<string, unknown>): Map<string, string> {
+  const data = new Map(Object.entries(entries).map(([k, v]) => [k, JSON.stringify(v)]));
+  vi.stubGlobal('localStorage', {
+    getItem: (k: string) => data.get(k) ?? null,
+    setItem: (k: string, v: string) => void data.set(k, v),
+    removeItem: (k: string) => void data.delete(k),
+  });
+  return data;
 }
 
 describe('ServerAccounts', () => {
@@ -38,7 +52,7 @@ describe('ServerAccounts', () => {
   });
 
   it('reads a world with no account as a blank one', () => {
-    expect(ServerAccounts.of(ONE)).toMatchObject({ username: '', password: '' });
+    expect(ServerAccounts.of(ONE)).toMatchObject({ username: '', token: '' });
     expect(ServerAccounts.list(ONE)).toEqual([]);
     expect(ServerAccounts.has(ONE)).toBe(false);
   });
@@ -67,23 +81,54 @@ describe('ServerAccounts', () => {
     expect(ServerAccounts.count).toBe(2);
   });
 
-  it('keeps the name but forgets the password once "remember" is off', () => {
-    const id = named(ONE, 'main', 'secret');
+  it('keeps the name but forgets the token once "remember" is off', () => {
+    const id = named(ONE, 'main');
 
     ServerAccounts.update(ONE, id, { remember: false });
 
     expect(ServerAccounts.of(ONE)).toMatchObject({
       username: 'main',
-      password: '',
+      token: '',
       remember: false,
     });
   });
 
-  it('clamps what the login packet cannot carry', () => {
-    named(ONE, 'waylongerthanten', 'alsowaytoolong');
+  it('clamps the name to what the login packet carries, and keeps only a well-formed token', () => {
+    named(ONE, 'waylongerthanten', 'not a token');
 
     expect(ServerAccounts.of(ONE).username).toHaveLength(10);
-    expect(ServerAccounts.of(ONE).password).toHaveLength(10);
+    expect(ServerAccounts.of(ONE).token).toBe('');
+  });
+
+  it('turns a token into stored text and back', () => {
+    const bytes = crypto.getRandomValues(new Uint8Array(32));
+
+    expect(tokenFromText(tokenToText(bytes))).toEqual(bytes);
+    expect(tokenFromText('')).toBeNull();
+    expect(tokenFromText('short')).toBeNull();
+  });
+
+  it('keeps a token for the account of that name, and drops it on request', () => {
+    named(ONE, 'main', '');
+    named(ONE, 'mule', '');
+
+    ServerAccounts.saveToken(ONE, 'mule', TOKEN);
+    expect(ServerAccounts.tokenOf(ONE, 'mule')).toBe(TOKEN);
+    expect(ServerAccounts.tokenOf(ONE, 'main')).toBe('');
+
+    ServerAccounts.saveToken(ONE, 'mule', '');
+    expect(ServerAccounts.tokenOf(ONE, 'mule')).toBe('');
+    // No row of that name: nothing is written.
+    ServerAccounts.saveToken(ONE, 'nobody', TOKEN);
+    expect(ServerAccounts.list(ONE)).toHaveLength(2);
+  });
+
+  it('drops the token of a row whose name is changed', () => {
+    const id = named(ONE, 'main');
+
+    ServerAccounts.update(ONE, id, { username: 'other' });
+
+    expect(ServerAccounts.of(ONE)).toMatchObject({ username: 'other', token: '' });
   });
 
   it('refuses the URL profile, which is gone next launch anyway', () => {
@@ -91,19 +136,18 @@ describe('ServerAccounts', () => {
     expect(ServerAccounts.list(URL_PROFILE_ID)).toEqual([]);
   });
 
-  it('records a login under the account of that name, not a second one', () => {
-    const id = named(ONE, 'main', 'old');
+  it('records a login under the account of that name, not a second one, keeping its token', () => {
+    const id = named(ONE, 'main');
 
     ServerAccounts.record(ONE, {
       username: 'main',
-      password: 'new',
       remember: true,
     });
 
     expect(ServerAccounts.list(ONE)).toHaveLength(1);
     expect(ServerAccounts.of(ONE)).toMatchObject({
       id,
-      password: 'new',
+      token: TOKEN,
     });
     expect(ServerAccounts.of(ONE).lastLoginAt).toBeGreaterThan(0);
   });
@@ -113,7 +157,6 @@ describe('ServerAccounts', () => {
 
     ServerAccounts.record(ONE, {
       username: 'mule',
-      password: 'pw',
       remember: true,
     });
 
@@ -127,7 +170,6 @@ describe('ServerAccounts', () => {
   it('writes nothing down for a login the player asked not to remember', () => {
     ServerAccounts.record(ONE, {
       username: 'guest',
-      password: 'pw',
       remember: false,
     });
 
@@ -142,5 +184,32 @@ describe('ServerAccounts', () => {
 
     expect(ServerAccounts.list(ONE).map(a => a.username)).toEqual(['main']);
     expect(ServerAccounts.activeId(ONE)).toBe(main);
+  });
+});
+
+describe('passwords an older client saved', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('are wiped from the accounts on load, names kept', () => {
+    const data = storage({
+      mu_accounts: { [ONE]: { accounts: [{ id: 'a1', username: 'main', password: 'secret', remember: true }], activeId: 'a1' } },
+    });
+
+    const store = new ServerAccountsStore();
+
+    expect(store.of(ONE)).toMatchObject({ username: 'main', token: '' });
+    expect(data.get('mu_accounts')).not.toContain('secret');
+    expect(data.get('mu_accounts')).not.toContain('password');
+  });
+
+  it('are wiped from the pre-rework blob on every load, its other keys left alone', () => {
+    const data = storage({
+      mu_accounts: {},
+      _mu_key: { username: 'old', password: 'secret', rememberLogin: true, csIp: '10.0.0.1' },
+    });
+
+    new ServerAccountsStore();
+
+    expect(JSON.parse(data.get('_mu_key') ?? '{}')).toEqual({ csIp: '10.0.0.1' });
   });
 });

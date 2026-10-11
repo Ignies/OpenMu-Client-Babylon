@@ -57,8 +57,6 @@ const en = {
   'credits.everyone': 'Everyone who contributed',
   'worlds.hidePanel': 'Hide panel',
   'worlds.showPanel': 'Show panel',
-  'worlds.showPassword': 'Show password',
-  'worlds.hidePassword': 'Hide password',
   'worlds.hasAccount': 'An account is saved for this world',
   /** One glyph on the card, so it must stay short in every language. */
   'worlds.accountMark': 'ID',
@@ -84,11 +82,11 @@ const en = {
   'account.list': 'Accounts on {world}',
   'account.unnamed': 'New account',
   'account.addFirst': 'Add an account first',
-  'account.keepPassword': 'Remember the password',
+  'account.keepLogin': 'Remember the login',
   'account.entersAs': 'Enter signs in as {name}.',
-  /** The row tag for an account whose password is not kept. */
+  /** The row tag for an account whose login is not kept: the password is asked each time. */
   'account.notKept': 'ASK',
-  'account.storedLocally': 'Kept in this browser only, in plain text.',
+  'account.storedLocally': 'Kept in this browser only: the name, and a sign-in token on worlds that issue one. Never the password.',
   'account.cannotSave': 'This world cannot keep an account.',
   'account.needSignup': 'No account yet? Create one on the login screen.',
   'worlds.tabDownload': 'Download',

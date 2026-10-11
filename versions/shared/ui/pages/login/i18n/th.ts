@@ -20,4 +20,5 @@ export default {
   'register.unreachable': 'ติดต่อเซิร์ฟเวอร์ไม่ได้',
   'register.failed': 'สมัครไม่สำเร็จ ({status})',
   'register.created': 'สร้างบัญชีแล้ว เข้าสู่ระบบได้เลย',
+  'login.savedLogin': 'บันทึกไว้',
 } satisfies Partial<Record<keyof typeof en, string>>;

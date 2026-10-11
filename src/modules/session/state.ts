@@ -10,15 +10,19 @@ import {
   stringToBytes,
 } from '@/controllers/net';
 import { MsgBox } from '@/controllers/interface';
+import { isOn } from '@/controllers/fidelity';
 import {
   LoginShortPasswordPacket,
+  LoginTokenRequestPacket,
   ServerChangeAuthenticationPacket,
+  TokenLoginPacket,
 } from '@versions/shared/packets/ClientToServerPackets';
 import { ensureActiveVersion, gameVersion } from '@/version';
 import { Ecs } from '@/ecs/current';
 import { AppState, UIState } from '@/controllers/interface/uiState';
-import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH, ServerAccounts } from '../servers/serverAccounts';
+import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH, ServerAccounts, tokenFromText, tokenToText } from '../servers/serverAccounts';
 import { connectServerAddress, ServerConfig, wsAddress } from '../servers/serverConfig';
+import { serverOffersLoginTokens } from '../servers/serverManifest';
 import { addNotification } from '../chat';
 
 /**
@@ -32,6 +36,13 @@ const GS_ANSWER_TIMEOUT = 4000;
 /** Logins sent again after "account already connected", and the gap before each (`retryLogin`). */
 const LOGIN_RETRIES = 3;
 const LOGIN_RETRY_MS = 2500;
+
+/**
+ * How long a token login waits for its LoginResponse before the saved login is given up and the password
+ * asked for: a world whose server.json offers tokens without our plugin never answers E7 05. The client
+ * has no login wait of its own (the original waits on a password login for as long as it takes).
+ */
+const TOKEN_LOGIN_ANSWER_MS = 10_000;
 
 /** `ServerChangeAuthentication`'s XOR3 name fields are 12 bytes each. */
 const SERVER_CHANGE_NAME_LENGTH = 12;
@@ -67,6 +78,7 @@ export const Session = new (class {
 
   username = '';
 
+  /** Typed into the login window; kept in memory for this session's own reconnects, never stored. */
   password = '';
 
   /**
@@ -174,20 +186,21 @@ export const Session = new (class {
    *
    * Filling them again for the world they already hold would undo what the
    * player has typed, and `playOnline` is also where a lost connection lands,
-   * so the same world is a no-op unless the caller insists.
+   * so the same world is a no-op unless the caller insists. No password is
+   * stored, so the password field starts empty.
    */
   loadAccount(id: string = ServerConfig.activeId, force = false): void {
     const account = ServerAccounts.of(id);
     // The world and the account chosen on it: picking another of that world's
     // accounts has to refill the fields as surely as picking another world.
-    const token = `${id}/${account.id}`;
+    const key = `${id}/${account.id}`;
 
-    if (!force && token === this.accountFor) return;
+    if (!force && key === this.accountFor) return;
 
     runInAction(() => {
-      this.accountFor = token;
+      this.accountFor = key;
       this.username = account.username;
-      this.password = account.password;
+      this.password = '';
       this.rememberLogin = account.remember;
     });
   }
@@ -200,9 +213,93 @@ export const Session = new (class {
   saveLoginData(): void {
     ServerAccounts.record(ServerConfig.activeId, {
       username: this.username,
-      password: this.password,
       remember: this.rememberLogin,
     });
+  }
+
+  /**
+   * Whether logins here keep a token (improvement `loginTokens`): the world issues them (its
+   * `server.json`) and "remember" is ticked. Classic types the password each time, as the original.
+   */
+  get keepsLoginTokens(): boolean {
+    return isOn('loginTokens') && serverOffersLoginTokens() && this.rememberLogin;
+  }
+
+  /** The token the login window sends for the name typed, when the password field is empty. */
+  get savedToken(): Uint8Array | null {
+    if (this.password || !this.keepsLoginTokens) return null;
+    return tokenFromText(ServerAccounts.tokenOf(ServerConfig.activeId, this.username));
+  }
+
+  /** The login window has something to send: a name, and a password or a saved token. */
+  get canSubmitLogin(): boolean {
+    return !!this.username && (!!this.password || !!this.savedToken);
+  }
+
+  /** The login window's OK: the password typed, or the saved token when the field is empty. */
+  submitLogin(): void {
+    const token = this.savedToken;
+    if (token) this.tokenLoginRequest(this.username, token);
+    else this.loginRequest(this.username, this.password);
+  }
+
+  /** The login a resume sends: the password this session typed, else the token it holds. */
+  resumeLogin(): void {
+    if (this.password) this.loginRequest(this.username, this.password);
+    else if (this.sessionToken) this.tokenLoginRequest(this.username, this.sessionToken);
+  }
+
+  /** Something to log in again with after a drop: a password typed this session or a token it holds. */
+  get canResumeLogin(): boolean {
+    return !!this.username && (!!this.password || !!this.sessionToken);
+  }
+
+  /**
+   * The server accepted the last login. After a password login, where tokens are kept, ask for a
+   * fresh one; a token login gets its replacement without asking.
+   */
+  onLoginAccepted(): void {
+    this.saveLoginData();
+    if (!this.lastLogin.token && this.keepsLoginTokens) this.sendToGS(LoginTokenRequestPacket.createPacket().buffer);
+  }
+
+  /** Any LoginResponse arrived: a token login is not waiting for one any more. */
+  loginAnswered(): void {
+    if (this.tokenLoginTimer) clearTimeout(this.tokenLoginTimer);
+    this.tokenLoginTimer = null;
+  }
+
+  /**
+   * No answer to a token login (`TOKEN_LOGIN_ANSWER_MS`): the world's saved token is dropped and the
+   * login window asks for the password, the name still filled.
+   */
+  private giveUpTokenLogin(): void {
+    this.tokenLoginTimer = null;
+    this.sessionToken = null;
+    ServerAccounts.saveToken(ServerConfig.activeId, this.lastLogin.username, '');
+    runInAction(() => {
+      this.loginProcessing = false;
+      this.loginError = t('login.tokenUnanswered');
+      AppState.uiState = UIState.Login;
+    });
+  }
+
+  /**
+   * The server refused the last login. Returns true when it was a token login refused as a wrong
+   * password: the token is dropped, and the player types the password, the name still filled.
+   */
+  onLoginRefusedToken(invalidPassword: boolean): boolean {
+    const { token, username } = this.lastLogin;
+    if (!token || !invalidPassword) return false;
+    this.sessionToken = null;
+    ServerAccounts.saveToken(ServerConfig.activeId, username, '');
+    return true;
+  }
+
+  /** A new token from the server (after a token request, or replacing the one a token login used). */
+  keepLoginToken(token: Uint8Array): void {
+    this.sessionToken = token;
+    ServerAccounts.saveToken(ServerConfig.activeId, this.lastLogin.username, this.keepsLoginTokens ? tokenToText(token) : '');
   }
 
   sendToCS(buffer: DataView) {
@@ -376,15 +473,33 @@ export const Session = new (class {
     return true;
   }
 
-  /** The last login sent and how often it was sent again after "account already connected". */
-  private lastLogin = { username: '', password: '', retries: 0 };
+  /** The last login sent (a password or a token) and how often it was sent again after "account already connected". */
+  private lastLogin: { username: string; password: string; token: Uint8Array | null; retries: number } = {
+    username: '',
+    password: '',
+    token: null,
+    retries: 0,
+  };
+
+  /** The token this session holds for its own reconnects: the newest the server handed out. */
+  private sessionToken: Uint8Array | null = null;
 
   private loginRetryTimer: ReturnType<typeof setTimeout> | null = null;
 
+  /** Running while a token login waits for its answer (`giveUpTokenLogin`). */
+  private tokenLoginTimer: ReturnType<typeof setTimeout> | null = null;
+
   loginRequest(username: string, password: string) {
     this.cancelLoginRetry();
-    this.lastLogin = { username, password, retries: 0 };
+    this.lastLogin = { username, password, token: null, retries: 0 };
     this.sendLogin(username, password);
+  }
+
+  /** The token login (C3 E7 05, our OpenMU plugin): sent instead of the login, answered like it. */
+  tokenLoginRequest(username: string, token: Uint8Array) {
+    this.cancelLoginRetry();
+    this.lastLogin = { username, password: '', token, retries: 0 };
+    this.sendTokenLogin(username, token);
   }
 
   /**
@@ -399,14 +514,17 @@ export const Session = new (class {
     this.cancelLoginRetry();
     this.loginRetryTimer = setTimeout(() => {
       this.loginRetryTimer = null;
-      this.sendLogin(login.username, login.password);
+      if (login.token) this.sendTokenLogin(login.username, login.token);
+      else this.sendLogin(login.username, login.password);
     }, LOGIN_RETRY_MS);
     return true;
   }
 
+  /** Drops a pending login retry, and a token login's wait: a new login, or the socket gone. */
   private cancelLoginRetry(): void {
     if (this.loginRetryTimer) clearTimeout(this.loginRetryTimer);
     this.loginRetryTimer = null;
+    this.loginAnswered();
   }
 
   private sendLogin(username: string, password: string) {
@@ -424,6 +542,21 @@ export const Session = new (class {
 
     console.log(`send login`);
     this.sendToGS(loginShortPasswordPacket.buffer);
+  }
+
+  /** The account name Xor3-encoded as in the login, the token, the client version. */
+  private sendTokenLogin(username: string, token: Uint8Array) {
+    const usernameBytes = stringToBytes(username, MAX_USERNAME_LENGTH);
+    Xor3Byte(usernameBytes);
+
+    const packet = TokenLoginPacket.createPacket();
+    packet.setUsername(usernameBytes, usernameBytes.length);
+    packet.setToken(token, token.length);
+    packet.setClientVersion(gameVersion.clientVersionBytes);
+
+    this.sendToGS(packet.buffer);
+    this.loginAnswered();
+    this.tokenLoginTimer = setTimeout(() => this.giveUpTokenLogin(), TOKEN_LOGIN_ANSWER_MS);
   }
 
   /**

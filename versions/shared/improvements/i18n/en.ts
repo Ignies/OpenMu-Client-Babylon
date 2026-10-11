@@ -42,6 +42,9 @@ const en = {
   'fidelity.drawnClothShadows': 'Tidy cloth shadows',
   'fidelity.drawnClothShadows.hint':
     'Only the capes, robes and hair a character shows cast a shadow. Classic: a cloth the character no longer shows still lays its shadow where it was left, as in the original.',
+  'fidelity.loginTokens': 'Saved logins',
+  'fidelity.loginTokens.hint':
+    'On worlds that offer it, "Remember me" keeps a sign-in token instead of your password, so the next login needs no password. Classic: you type the password every time, as in the original.',
 };
 
 export default en;

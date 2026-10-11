@@ -28,7 +28,12 @@ type ServerManifest = {
   readonly settings: ServerSettings;
   /** The optional modules the server turned off, by id (`src/modules/modules.ts`). */
   readonly modulesOff: readonly string[];
+  /** The server issues login tokens (our OpenMU plugin, `openmu/readme.md`); a saved login may keep one. */
+  readonly loginTokens: boolean;
 };
+
+/** What a manifest puts in force for its world. */
+type InForce = Pick<ServerManifest, 'settings' | 'loginTokens'>;
 
 const SERVER_MANIFEST_VERSION = 1;
 
@@ -39,6 +44,8 @@ export const ORIGINAL_SETTINGS: ServerSettings = {
   autoManaPotion: false,
   autoQuiver: false,
 };
+
+const ORIGINAL: InForce = { settings: ORIGINAL_SETTINGS, loginTokens: false };
 
 const MODULE_ID = /^[a-z][a-z0-9_]{0,31}$/;
 const MAX_MODULES_OFF = 64;
@@ -68,8 +75,8 @@ function parseModulesOff(raw: unknown): string[] | null {
 
 /**
  * A `server.json` body, or null. It must be an object with `version` 1 and a `settings` object
- * whose known keys have their type, and may carry `modulesOff`; a wrong type anywhere rejects the
- * whole document. Unknown keys are skipped: a newer server may know settings this client does not.
+ * whose known keys have their type, and may carry `modulesOff` and `loginTokens`; a wrong type anywhere
+ * rejects the whole document. Unknown keys are skipped: a newer server may know settings this client does not.
  */
 export function parseServerManifest(raw: unknown): ServerManifest | null {
   if (!isObject(raw) || raw.version !== SERVER_MANIFEST_VERSION || !isObject(raw.settings)) return null;
@@ -86,11 +93,17 @@ export function parseServerManifest(raw: unknown): ServerManifest | null {
   const modulesOff = Object.prototype.hasOwnProperty.call(raw, 'modulesOff') ? parseModulesOff(raw.modulesOff) : [];
   if (!modulesOff) return null;
 
-  return { version: SERVER_MANIFEST_VERSION, settings: settings as ServerSettings, modulesOff };
+  const loginTokens = raw.loginTokens ?? false;
+  if (typeof loginTokens !== 'boolean') return null;
+
+  return { version: SERVER_MANIFEST_VERSION, settings: settings as ServerSettings, modulesOff, loginTokens };
 }
 
-/** The settings now in force, by manifest URL. */
-const current = new Map<string, ServerSettings>();
+const inForce = (manifest: ServerManifest | null): InForce =>
+  manifest ? { settings: manifest.settings, loginTokens: manifest.loginTokens } : ORIGINAL;
+
+/** What is in force, by manifest URL. */
+const current = new Map<string, InForce>();
 /** URLs fetched (or being fetched) this launch. */
 const asked = new Set<string>();
 
@@ -143,42 +156,47 @@ export async function loadServerManifest(
 
   asked.add(url);
   const cached = cachedManifest(url);
-  if (!current.has(url)) current.set(url, cached?.settings ?? ORIGINAL_SETTINGS);
+  if (!current.has(url)) current.set(url, inForce(cached));
   setServerModulesOff(cached?.modulesOff ?? []);
 
   const manifest = await fetchManifest(url);
-  const settings = manifest?.settings ?? ORIGINAL_SETTINGS;
-  current.set(url, settings);
+  current.set(url, inForce(manifest));
   setServerModulesOff(manifest?.modulesOff ?? []);
   writeCache(url, manifest);
 
-  return settings;
+  return inForce(manifest).settings;
 }
 
 function cachedManifest(url: string): ServerManifest | null {
   return parseServerManifest(readCache()[url]);
 }
 
-function cachedSettings(url: string): ServerSettings {
-  return cachedManifest(url)?.settings ?? ORIGINAL_SETTINGS;
-}
-
 /**
- * One setting of the world being played. Safe per click: a map read. A world nobody fetched yet
+ * What the world being played has in force. Safe per click: a map read. A world nobody fetched yet
  * (entered without the server screen) starts its fetch here and answers from the cache meanwhile.
  */
-export function serverSetting<K extends keyof ServerSettings>(key: K): ServerSettings[K] {
+function worldInForce(): InForce {
   const url = serverManifestUrl(ServerConfig.active);
-  if (!url) return ORIGINAL_SETTINGS[key];
+  if (!url) return ORIGINAL;
 
-  let settings = current.get(url);
-  if (!settings) {
-    settings = cachedSettings(url);
-    current.set(url, settings);
+  let found = current.get(url);
+  if (!found) {
+    found = inForce(cachedManifest(url));
+    current.set(url, found);
   }
   if (!asked.has(url)) void loadServerManifest(ServerConfig.active);
 
-  return settings[key];
+  return found;
+}
+
+/** One setting of the world being played. */
+export function serverSetting<K extends keyof ServerSettings>(key: K): ServerSettings[K] {
+  return worldInForce().settings[key];
+}
+
+/** Whether the world being played issues login tokens: off unless its `server.json` says `loginTokens: true`. */
+export function serverOffersLoginTokens(): boolean {
+  return worldInForce().loginTokens;
 }
 
 /** Tests only: forget what this launch fetched. */

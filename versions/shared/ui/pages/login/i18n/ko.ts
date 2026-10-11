@@ -20,4 +20,5 @@ export default {
   'register.unreachable': '서버에 연결할 수 없습니다.',
   'register.failed': '계정 생성에 실패했습니다({status}).',
   'register.created': '계정이 생성되었습니다. 이제 로그인할 수 있습니다.',
+  'login.savedLogin': '저장된 로그인',
 } satisfies Partial<Record<keyof typeof en, string>>;

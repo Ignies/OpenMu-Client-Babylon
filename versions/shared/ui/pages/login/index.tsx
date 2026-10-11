@@ -79,7 +79,7 @@ export const LoginPage = observer(() => {
 
     setNotice('');
 
-    if (!Session.username || !Session.password) {
+    if (!Session.canSubmitLogin) {
       Session.loginError = t('login.enterCredentials');
       return;
     }
@@ -87,7 +87,7 @@ export const LoginPage = observer(() => {
     Session.loginError = undefined;
     Session.loginProcessing = true;
 
-    Session.loginRequest(Session.username, Session.password);
+    Session.submitLogin();
   };
 
   const form = useRef<HTMLFormElement>(null);
@@ -209,10 +209,12 @@ export const LoginPage = observer(() => {
             height={INPUT_HEIGHT}
             style={{ position: 'absolute', left: INPUT_X, top: PASSWORD_Y }}
           >
+            {/* Empty with a saved login: OK sends the login token instead (improvement loginTokens). */}
             <input
               className="login-input"
               type="password"
               autoFocus={!!Session.username}
+              placeholder={Session.savedToken ? t('login.savedLogin') : undefined}
               value={Session.password}
               onChange={e => {
                 Session.password = e.target.value;

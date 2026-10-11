@@ -4282,6 +4282,49 @@
         </Field>
       </Fields>
     </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>E7</Code>
+      <SubCode>03</SubCode>
+      <Name>LoginTokenRequest</Name>
+      <Length>4</Length>
+      <Direction>ClientToServer</Direction>
+      <SentWhen>After a password login, at the character list, on a world whose server.json offers login tokens, when the player ticked "remember".</SentWhen>
+      <CausedReaction>Our OpenMU plugin issues a login token for the account (at most one per connection) and answers with a LoginTokenAnswer.</CausedReaction>
+      <Fields />
+    </Packet>
+    <Packet>
+      <HeaderType>C3HeaderWithSubCode</HeaderType>
+      <Code>E7</Code>
+      <SubCode>05</SubCode>
+      <Name>TokenLogin</Name>
+      <Length>51</Length>
+      <Direction>ClientToServer</Direction>
+      <SentWhen>Instead of the login (LoginShortPassword), when the client keeps a login token for the account on this world.</SentWhen>
+      <CausedReaction>Our OpenMU plugin checks the token and logs the account in the way OpenMU's own login does, answering with a LoginResponse. On success it replaces the token with a new one and sends it in a LoginTokenAnswer.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Binary</Type>
+          <Name>Username</Name>
+          <Description>The user name, "encrypted" with Xor3, as in the login.</Description>
+          <Length>10</Length>
+        </Field>
+        <Field>
+          <Index>14</Index>
+          <Type>Binary</Type>
+          <Name>Token</Name>
+          <Description>The login token: 32 bytes from a LoginTokenAnswer.</Description>
+          <Length>32</Length>
+        </Field>
+        <Field>
+          <Index>46</Index>
+          <Type>Binary</Type>
+          <Name>ClientVersion</Name>
+          <Length>5</Length>
+        </Field>
+      </Fields>
+    </Packet>
   </Packets>
   <Enums>
     <Enum>

@@ -20,4 +20,5 @@ export default {
   'register.unreachable': 'Serverul nu poate fi contactat.',
   'register.failed': 'Înregistrarea a eșuat ({status}).',
   'register.created': 'Cont creat. Te poți conecta acum.',
+  'login.savedLogin': 'Salvată',
 } satisfies Partial<Record<keyof typeof en, string>>;

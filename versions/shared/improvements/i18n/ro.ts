@@ -45,4 +45,7 @@ export default {
   'fidelity.drawnClothShadows': 'Umbre ordonate ale țesăturilor',
   'fidelity.drawnClothShadows.hint':
     'Doar pelerinele, robele și părul pe care un personaj le arată aruncă umbră. Clasică: o țesătură pe care personajul nu o mai arată își lasă umbra acolo unde a rămas, ca în original.',
+  'fidelity.loginTokens': 'Autentificări salvate',
+  'fidelity.loginTokens.hint':
+    'Pe lumile care o oferă, „Ține-mă minte” păstrează un token de autentificare în locul parolei, așa că următoarea autentificare nu cere parola. Clasică: scrii parola de fiecare dată, ca în original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

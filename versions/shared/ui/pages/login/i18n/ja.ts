@@ -20,4 +20,5 @@ export default {
   'register.unreachable': 'サーバーに接続できませんでした。',
   'register.failed': '登録に失敗しました（{status}）。',
   'register.created': 'アカウントを作成しました。ログインできます。',
+  'login.savedLogin': '保存済み',
 } satisfies Partial<Record<keyof typeof en, string>>;

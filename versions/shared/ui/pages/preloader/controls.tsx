@@ -145,33 +145,26 @@ export const TextField = ({
   onChange,
   placeholder,
   disabled = false,
-  password = false,
   numeric = false,
   mono = false,
   maxLength,
-  revealLabels,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
   disabled?: boolean;
-  password?: boolean;
   numeric?: boolean;
   mono?: boolean;
   maxLength?: number;
-  /** Tooltips for the show / hide button a password field carries. */
-  revealLabels?: { show: string; hide: string };
 }) => {
-  const [shown, setShown] = useState(false);
-
   return (
     <label className={`ws-field${disabled ? ' is-disabled' : ''}`}>
       <span className="ws-field-label">{label}</span>
       <span className="ws-input-wrap">
         <input
-          className={`ws-input${mono ? ' ws-mono' : ''}${password ? ' has-reveal' : ''}`}
-          type={password && !shown ? 'password' : 'text'}
+          className={`ws-input${mono ? ' ws-mono' : ''}`}
+          type="text"
           inputMode={numeric ? 'numeric' : undefined}
           value={value}
           placeholder={placeholder}
@@ -183,18 +176,6 @@ export const TextField = ({
             onChange(numeric ? e.target.value.replace(/\D/g, '') : e.target.value)
           }
         />
-        {password && (
-          <button
-            type="button"
-            className="ws-reveal"
-            tabIndex={-1}
-            disabled={disabled}
-            title={revealLabels ? (shown ? revealLabels.hide : revealLabels.show) : undefined}
-            onClick={() => setShown(v => !v)}
-          >
-            <Icon name={shown ? 'eyeOff' : 'eye'} />
-          </button>
-        )}
       </span>
     </label>
   );

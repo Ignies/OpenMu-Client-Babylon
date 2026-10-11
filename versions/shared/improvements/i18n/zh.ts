@@ -45,4 +45,7 @@ export default {
   'fidelity.drawnClothShadows': '整洁的布料阴影',
   'fidelity.drawnClothShadows.hint':
     '只有角色显示的披风、长袍和头发会投下阴影。经典：角色不再显示的布料仍会在原处留下阴影，与原版相同。',
+  'fidelity.loginTokens': '保存登录',
+  'fidelity.loginTokens.hint':
+    '在支持的世界中，“记住我”会保存登录令牌而不是密码，下次登录无需输入密码。经典：每次都要输入密码，与原版一致。',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -1,7 +1,14 @@
 import { ChangeMapServerInfoPacket } from '@/controllers/net/packets';
 import { ConnectionInfoPacket, ServerListResponsePacket } from '@versions/shared/packets/ConnectServerPackets';
 import { EventBus } from '@/core/eventBus';
-import { GameServerEnteredPacket, LoginResponseLoginResultEnum, LoginResponsePacket, LogoutResponsePacket } from '@versions/shared/packets/ServerToClientPackets';
+import {
+  GameServerEnteredPacket,
+  LoginResponseLoginResultEnum,
+  LoginResponsePacket,
+  LoginTokenAnswerLoginTokenStatusEnum,
+  LoginTokenAnswerPacket,
+  LogoutResponsePacket,
+} from '@versions/shared/packets/ServerToClientPackets';
 import { SessionExit } from './sessionExit';
 import { SessionResume } from './sessionResume';
 import { Merchant } from '@/modules/npc_shop';
@@ -93,6 +100,7 @@ export function installNet(): void {
 
   EventBus.on('LoginResponse', bytes => {
     const p = new LoginResponsePacket(bytes);
+    Session.loginAnswered();
 
     runInAction(() => {
       Session.loginProcessing = false;
@@ -102,7 +110,7 @@ export function installNet(): void {
       runInAction(() => {
         Session.loginError = undefined;
       });
-      Session.saveLoginData();
+      Session.onLoginAccepted();
       // A resume picks the character back up instead of opening the list.
       if (SessionResume.onLoginOk()) return;
       Session.disconnectFromConnectServer();
@@ -127,11 +135,18 @@ export function installNet(): void {
 
     // The server refused the login: the player takes over from the form.
     SessionResume.onLoginFailed();
+    const tokenRefused = Session.onLoginRefusedToken(p.Success === LoginResponseLoginResultEnum.InvalidPassword);
 
     runInAction(() => {
-      Session.loginError = `Error: ${LoginResponseLoginResultEnum[p.Success]}`;
+      Session.loginError = tokenRefused ? t('login.tokenRefused') : `Error: ${LoginResponseLoginResultEnum[p.Success]}`;
       AppState.uiState = UIState.Login;
     });
+  });
+
+  // E7 04 (our OpenMU plugin): a new login token, kept in place of the one the world had.
+  EventBus.on('LoginTokenAnswer', bytes => {
+    const p = new LoginTokenAnswerPacket(bytes);
+    if (p.Status === LoginTokenAnswerLoginTokenStatusEnum.Ok) Session.keepLoginToken(new Uint8Array(p.Token.buffer));
   });
 
   /**

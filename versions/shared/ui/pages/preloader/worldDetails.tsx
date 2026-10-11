@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { uiClick } from '@/controllers/sound/sfx';
 import { t } from '@/i18n';
-import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH } from '@/modules/servers/serverAccounts';
+import { MAX_USERNAME_LENGTH } from '@/modules/servers/serverAccounts';
 import {
   displayAddress,
   effective,
@@ -106,7 +106,8 @@ const InfoPane = observer(({ world, clients }: { world: ServerProfile; clients: 
 /**
  * Several accounts per world - a main and a mule on one server is ordinary. The
  * highlighted row is the one the login window will hold when Enter opens it.
- * These go to this browser's storage in plain text, and the note says so.
+ * Only the name goes to this browser's storage, and a login token on a world
+ * that issues one; the password is typed at the login window.
  */
 const AccountPane = observer(({ world }: { world: ServerProfile }) => {
   const rows = ServerAccounts.list(world.id);
@@ -137,7 +138,7 @@ const AccountPane = observer(({ world }: { world: ServerProfile }) => {
             >
               <Icon name="user" />
               <span className="ws-row-name">{row.username || t('account.unnamed')}</span>
-              {/* The name is kept and the password asked for each time. */}
+              {/* The name is kept and the password asked for each time, no token kept. */}
               {!row.remember && <span className="ws-tag">{t('account.notKept')}</span>}
             </button>
           ))}
@@ -172,19 +173,10 @@ const AccountPane = observer(({ world }: { world: ServerProfile }) => {
           placeholder={editable ? '' : t('account.addFirst')}
           onChange={username => set({ username })}
         />
-        <TextField
-          label={t('login.password')}
-          value={account.password}
-          disabled={!editable || !account.remember}
-          password
-          maxLength={MAX_PASSWORD_LENGTH}
-          revealLabels={{ show: t('worlds.showPassword'), hide: t('worlds.hidePassword') }}
-          onChange={password => set({ password })}
-        />
         <Toggle
           checked={account.remember}
           disabled={!editable}
-          label={t('account.keepPassword')}
+          label={t('account.keepLogin')}
           onChange={remember => set({ remember })}
         />
       </div>

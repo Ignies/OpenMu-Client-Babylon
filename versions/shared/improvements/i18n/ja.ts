@@ -45,4 +45,7 @@ export default {
   'fidelity.drawnClothShadows': '布の影を整理',
   'fidelity.drawnClothShadows.hint':
     'キャラクターが見せているマント、ローブ、髪だけが影を落とします。クラシック: 見えなくなった布も、残された場所に影を落とし続けます（オリジナルどおり）。',
+  'fidelity.loginTokens': 'ログインの保存',
+  'fidelity.loginTokens.hint':
+    '対応するワールドでは「ログイン情報を保存」がパスワードの代わりにログイン用トークンを保存し、次回はパスワードなしでログインできます。クラシック: 原作どおり毎回パスワードを入力します。',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -39,6 +39,13 @@ internal class ModulePacketHandlerPlugIn : IPacketHandlerPlugIn
     /// <summary>The ids already logged as having no plugin: each is logged once.</summary>
     private static readonly ConcurrentDictionary<string, bool> Reported = new();
 
+    /// <summary>The states before the world and after it; every other state is in the world (trade, dialogs, dead).</summary>
+    private static readonly HashSet<State> OutsideTheWorld =
+    [
+        PlayerState.Initial, PlayerState.LoginScreen, PlayerState.Authenticated, PlayerState.CharacterSelection,
+        PlayerState.Disconnected, PlayerState.Finished,
+    ];
+
     /// <inheritdoc />
     public bool IsEncryptionExpected => false;
 
@@ -51,6 +58,12 @@ internal class ModulePacketHandlerPlugIn : IPacketHandlerPlugIn
     /// <inheritdoc />
     public async ValueTask HandlePacketAsync(Player player, Memory<byte> packet)
     {
+        if (OutsideTheWorld.Contains(player.PlayerState.CurrentState))
+        {
+            // A module belongs to a character in the world; before that its packets are dropped unread.
+            return;
+        }
+
         var head = packet.Span[0] % 2 == 1 ? 2 : 3;
         if (packet.Length < head + 2)
         {

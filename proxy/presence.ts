@@ -62,6 +62,12 @@ const MAX_SNIFF_BYTES = Number(process.env.PRESENCE_SNIFF_LIMIT ?? 65536);
  */
 const LOGIN_CODE = 0xf1;
 const LOGIN_SUB_CODE = 0x01;
+/**
+ * The token login (our OpenMU plugin, `openmu/readme.md`): C3 E7 05, the name at the same offset and Xor3-encoded
+ * like the login's. The server answers it with the same `LoginResponse`.
+ */
+const TOKEN_LOGIN_CODE = 0xe7;
+const TOKEN_LOGIN_SUB_CODE = 0x05;
 /** `LoginResponseLoginResultEnum.Okay`; every other value is a refusal. */
 const LOGIN_OKAY = 0x01;
 /** `[C1, 05, F1, 01, result]`. */
@@ -358,8 +364,10 @@ export class ConnectionPresence {
     const codeIndex = getSizeOfPacketType(packet[0]);
 
     if (packet.length < codeIndex + 2) return null;
-    if (packet[codeIndex] !== LOGIN_CODE) return null;
-    if (packet[codeIndex + 1] !== LOGIN_SUB_CODE) return null;
+    const code = packet[codeIndex];
+    const sub = packet[codeIndex + 1];
+    const isLogin = (code === LOGIN_CODE && sub === LOGIN_SUB_CODE) || (code === TOKEN_LOGIN_CODE && sub === TOKEN_LOGIN_SUB_CODE);
+    if (!isLogin) return null;
     if (packet.length < NAME_OFFSET + NAME_LENGTH) return null;
 
     const name = packet.slice(NAME_OFFSET, NAME_OFFSET + NAME_LENGTH);

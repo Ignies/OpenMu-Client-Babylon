@@ -15,13 +15,14 @@ connect server's own list (`Servers.serverList`) is filled by `session/net.ts`.
   `connectServerAddress()`, `displayAddress`, `playableHere`, `matchesSearch`, `isInsecureWsUrl`,
   `gameServerTarget(returnedIp)`, types `ServerProfile`, `PublishedGameServer`.
 - `ServerList`, `refreshServerList()`, `parseServerList(text)`: the published list.
-- `ServerAccounts`: `list`, `of`, `select`, `add`, `update`, `forget`, `record(worldId, login)`.
+- `ServerAccounts`: `list`, `of`, `select`, `add`, `update`, `forget`, `record(worldId, login)`,
+  `tokenOf(worldId, name)`, `saveToken(worldId, name, token)`; `tokenToText` / `tokenFromText`.
   `MAX_USERNAME_LENGTH` / `MAX_PASSWORD_LENGTH` (`serverAccounts.ts`): the login
   fields, read by `Session.loginRequest` and the login pages.
 - `ServerProbe`: `check(profiles)`, `of(id)` -> `Reach` (`unknown`, `checking`, `up`, `down`).
 - `registerUrl()`, `registerApiUrl()`, `marketApiUrl()`, `serverManifestUrl()`.
 - `serverSetting(key)`: one setting of the world being played (`ServerSettings`, defaults
-  `ORIGINAL_SETTINGS`); `loadServerManifest(profile)`, `parseServerManifest(raw)`.
+  `ORIGINAL_SETTINGS`); `serverOffersLoginTokens()`; `loadServerManifest(profile)`, `parseServerManifest(raw)`.
   `onWorldEntered(fn)`: runs on `markPlayed`.
 - `validateSignup(signup)` and the length limits (`registerRules.ts`); `isReservedName(name)`.
 - `watchPageTitle()` (`pageTitle.ts`, was `controllers/interface/`): the one writer of `document.title`,
@@ -62,10 +63,13 @@ connect server's own list (`Servers.serverList`) is filled by `session/net.ts`.
 ## Tests
 - `serverConfig.test.ts`: `matchesSearch`.
 - `serverList.test.ts`: line parsing, game server and channel names, the committed `serverlist.md`.
-- `serverAccounts.test.ts`: several accounts per world, remember off, clamping, URL profile, `record`.
+- `serverAccounts.test.ts`: several accounts per world, remember off (no token), clamping, URL profile,
+  `record` (keeps the token), tokens (text round trip, per name, dropped on a rename), and the
+  passwords an older client saved wiped on load (`mu_accounts` and the legacy blob), names kept.
 - `serverServices.test.ts`: register, shop and market URLs for domain and address worlds.
-- `serverManifest.test.ts`: parsing (valid, unknown keys, wrong version, wrong types), the URL, the
-  fallback on missing / unreachable / invalid, the per-server cache, the fetch on enter.
+- `serverManifest.test.ts`: parsing (valid, unknown keys, wrong version, wrong types, `loginTokens`),
+  the URL, the fallback on missing / unreachable / invalid, tokens offered only where the world says
+  so, the per-server cache, the fetch on enter.
 - `registerRules.test.ts`: `validateSignup` order and the password charset.
 
 ## Notes
@@ -97,8 +101,13 @@ connect server's own list (`Servers.serverList`) is filled by `session/net.ts`.
 ### serverAccounts.ts
 - Keyed by profile id, since an account on one world means nothing on another. Several per world
   (a main and a mule is the normal case).
-- Stores what the original stored: name, password, remember. Plain text in localStorage, and the
-  accounts tab says so. Remember off stores neither field. The URL profile is never saved.
+- Stores the name and "remember", as the original keeps the name; never a password (phase 6 of
+  [docs/module_streaming.md](../../../docs/module_streaming.md)). On a world that issues login tokens
+  (`server.json` `loginTokens`, our OpenMU plugin) a remembered account also keeps its token, base64;
+  the session decides when (improvement `loginTokens`). Remember off keeps no token. A renamed row
+  drops its token. The URL profile is never saved.
+- Wiped on every load: a `password` an older client saved in `mu_accounts` (the book is written
+  again without it) and the legacy `_mu_key` blob's credential keys; the names stay.
 
 ### serverProbe.ts
 - It dials the proxy exactly like `createSocket`, sends nothing, and drops the socket.
@@ -120,6 +129,10 @@ connect server's own list (`Servers.serverList`) is filled by `session/net.ts`.
 - `modulesOff` names the optional client modules the world turns off (ids from
   `src/modules/modules.ts`): `moduleOn` answers false for them and their windows hide
   (`../readme.md`). `modules` stays free for the streamed module list (phase 5).
+- `loginTokens: true` says the world issues login tokens (our OpenMU plugin, `openmu/readme.md`);
+  missing means it does not, and the client then never sends a token request or a token login
+  (`serverOffersLoginTokens`). The installer always writes it (the plugin is in every image it
+  builds); the proxy's own answer (`proxy/serverManifest.ts`, a proxy run alone) leaves it out.
 - Fetched from the root of the world's proxy host (`https://ws.<domain>/server.json`, or
   `http://<ip>:3000/server.json`), the one address every profile has (Caddy answers it on an
   installed server; the proxy itself answers it from `MU_HELD_HIT_REQUEST`, `MU_MODULES_OFF` and

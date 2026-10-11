@@ -9,4 +9,6 @@ export default {
   'resume.failed': '无法重新连接',
   'resume.cancelled': '已取消重新连接',
   'login.closingOldSession': '账号仍在游戏中：正在关闭旧会话并重试...',
+  'login.tokenRefused': '保存的登录已过期，请输入密码。',
+  'login.tokenUnanswered': '服务器没有响应保存的登录，请输入密码。',
 } satisfies Partial<Record<keyof typeof en, string>>;

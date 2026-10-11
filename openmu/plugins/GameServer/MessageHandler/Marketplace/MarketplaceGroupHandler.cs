@@ -11,11 +11,11 @@ using MUnique.OpenMU.GameLogic;
 using MUnique.OpenMU.PlugIns;
 
 /// <summary>
-/// Packet group 0xE7: the marketplace escrow. Unused by the original protocol in either direction.
+/// Packet group 0xE7, ours: the marketplace escrow (01, 02) and the login tokens (03 to 05). Unused by the original protocol in either direction.
 /// The same dispatch as OpenMU's internal <c>GroupPacketHandlerPlugIn</c>, which a plugin outside OpenMU cannot extend.
 /// </summary>
 [PlugIn]
-[Display(Name = "Marketplace Group Handler", Description = "Handles the marketplace escrow packets (0xE7).")]
+[Display(Name = "Marketplace Group Handler", Description = "Handles our packet group 0xE7: the marketplace escrow and the login tokens.")]
 [Guid("3c6d0a5e-8f7b-4e31-9d2a-6b1f5c0e7a11")]
 internal class MarketplaceGroupHandler : PacketHandlerPlugInContainer<ISubPacketHandlerPlugIn>, IPacketHandlerPlugIn
 {

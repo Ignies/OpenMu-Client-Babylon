@@ -21,6 +21,8 @@ export function serverManifest(c: Config): string {
       autoQuiver: c.autoQuiver,
     },
     modulesOff: manifestModulesOff(c),
+    // Our OpenMU plugin issues them, and it is in every OpenMU image the installer builds (openmu/Dockerfile).
+    loginTokens: true,
   };
   return `${JSON.stringify(manifest, null, 2)}\n`;
 }
