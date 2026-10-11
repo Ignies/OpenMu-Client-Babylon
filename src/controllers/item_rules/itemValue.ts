@@ -5,7 +5,6 @@ import {
   calcMaxDurability,
   isCapeOfFighter,
   isCapeOfLord,
-  isFirstWing,
   isThirdWing,
   itemDef,
   type ItemDef,
@@ -43,6 +42,9 @@ function rawColumns(def: ItemDef): { zen: number; value: number } {
 
 /** `Level2` bonus for +5…+15 items (the `switch (Level)` table). */
 const LEVEL_BONUS = [0, 0, 0, 0, 0, 4, 10, 25, 45, 65, 95, 135, 185, 245, 305, 365];
+
+/** The wings `ItemValue` prices from 40,000,000: up to 12/6, Storm to Dimension (12/36-43) and the Cape of Overrule. */
+const onWingScale = (index: number) => index <= 6 || (index >= 36 && index <= 43) || index === 50;
 
 /** `AT_IMPROVE_DAMAGE` & co: +4/+8/+12/+16 option tiers. */
 function optionMultiplier(value: number): number {
@@ -172,20 +174,14 @@ export function itemValue(item: Item, goldType: GoldType): number {
     return gold;
   } else if (value > 0) {
     gold = idiv(value * value * 10, 12);
-  } else if (
-    (group === ItemGroup.Wing &&
-      index > 2 &&
-      !isThirdWing(def) &&
-      !isCapeOfFighter(def)) ||
-    group === ItemGroup.Helper ||
-    group === ItemGroup.Etc
-  ) {
-    // Second wings, orbs, rings / pendants, scrolls: 100 + Level2³.
+  } else if ((group === ItemGroup.Wing && !onWingScale(index)) || group === ItemGroup.Helper || group === ItemGroup.Etc) {
+    // Orbs, seeds, the Cape of Fighter, rings / pendants, scrolls: 100 + Level2³ (ZzzInfomation.cpp:1867-1871).
     gold = 100 + level2 * level2 * level2;
   } else {
     level2 += LEVEL_BONUS[Math.min(level, 15)];
 
-    if (isFirstWing(def) || isCapeOfLord(def) || isThirdWing(def)) {
+    // The Cape of Lord is in the original's list too, but group 13 took the branch above.
+    if (group === ItemGroup.Wing) {
       gold = 40000000 + (40 + level2) * level2 * level2 * 11;
     } else {
       gold = 100 + idiv((40 + level2) * level2 * level2, 8);

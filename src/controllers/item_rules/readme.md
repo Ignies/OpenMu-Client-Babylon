@@ -105,6 +105,8 @@ the table would import itself.
 - `archangelWeapons.test.ts`: Divine weapon and Weapon of Archangel names, colours and icons.
 - `portedItems.test.ts`: MuMain items and capes (tests `controllers/actors/wings.ts`, appearance).
 - `ancientSets.test.ts`: set lookup by discriminator, worn piece count, which options light.
+- `wingTiers.test.ts`: the Wing of Curse a first wing, the Wings of Despair a second one (tooltip, defense), and
+  `ItemValue`'s wing scale (every wing to 12/6, 12/36-43, 12/50).
 - `dropLabel.test.ts`: ground name colours by level and option, the item sets, jewels, level models, sets.
 - `bundlesAndParchments.test.ts`: the packed jewels 12/136-143 and the Rage Fighter parchments 15/30-36 exist,
   with Item.bmd's names, the original's models and the skills the parchments teach.
