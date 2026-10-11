@@ -11,12 +11,19 @@ the capes, the Dark Lord's hair and skirt, the Magic Gladiator's robe, the team 
 - One file per use: `cape_of_lord.ts` (the Cape of Lord and the Mantle of Monarch's cape and straps),
   `cape_of_fighter.ts` (the Cape of Fighter and the Cape of Overrule's cape and straps), `robe.ts` (the
   Magic Gladiator's robe, msword03 under the Wing of Ruin), `dark_lord_hair.ts` (the Dark Lord's two
-  strands of hair), `dark_lord_skirt.ts` (his skirt over the class's own body).
+  strands of hair), `dark_lord_skirt.ts` (his skirt over the class's own body), `team_cloak.ts` (the duel
+  and Battle Soccer colours, `teamLight`).
 
 ## How it works
 - `bCloak` (:9162-9186): the Magic Gladiator class itself (`c->Class == CLASS_DARK`, so not the Duel
   Master), every Dark Lord and Rage Fighter; never in Chaos Castle. A body worn as a whole monster is no
   `MODEL_PLAYER` and wears none (`ClothSystem` skips it).
+- A team colour (:9188-9246) puts a cloak on anyone, Chaos Castle or not, and tints every cloth it wears
+  (`CloakLight`; the hair's light keeps its own pulse). Battle Soccer: the hero's guild and the guild it
+  plays by the hero's team, then the two teams the score names, red and blue (`SoccerObserver` is set by
+  every score, for players and watchers alike). A duel only while the hero fights it: the enemy red, the
+  hero blue; a spectator's duel is never enabled. A Dark Lord or a Rage Fighter then wears his cape
+  without the item, anyone else the robe.
 - Slots are the original's indices, so a cloth keeps its swing while its spec stays. A cloth the
   original builds but skips drawing (`continue`, :9926-9983) is null here: it is not simulated either,
   and comes back built fresh, which is what the original's stale cloth tearing and rebuilding gives.
@@ -41,7 +48,8 @@ the capes, the Dark Lord's hair and skirt, the Magic Gladiator's robe, the team 
 
 ## Depends on / used by
 - uses: `@/controllers/cloth` (specs, `PCT_*`), `@/controllers/actors` (`registerCloaks`, the wing numbers),
-  `@/core/types` (classes).
+  `@/core/types` (classes), the modules' state the colours read: `@/modules/events/duel` (`duelEnemyId`),
+  `@/modules/social/social` (`Social.guildWar`, `battleSoccer`, `myGuild`), `@/modules/guild` (`GuildMarks`).
 - used by: `app/boot.tsx` (import), `ecs/systems/clothSystem.ts` through `cloaksFor`.
 
 ## Change it
@@ -50,3 +58,4 @@ the capes, the Dark Lord's hair and skirt, the Magic Gladiator's robe, the team 
 
 ## Tests
 - `cloaks.test.ts`: each use's specs against the original's numbers, and who wears them.
+- `team_cloak.test.ts`: the duel and Battle Soccer colours, who they put a cloak on, and what it is.

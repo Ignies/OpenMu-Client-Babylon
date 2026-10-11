@@ -1,4 +1,10 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+vi.hoisted(() => {
+  const g = globalThis as Record<string, unknown>;
+  g.location ??= { href: 'http://localhost/', search: '', hostname: 'localhost', protocol: 'http:' };
+});
+
 import { cloaksFor, type CloakWearer } from '@/controllers/actors/cloaks';
 import {
   PCT_CURVED,
@@ -23,7 +29,7 @@ const WINGS_OF_SATAN: Item = { group: 12, num: 2 };
 
 function wear(over: Partial<CloakWearer>) {
   const out: (ClothSpec | null)[] = [];
-  const light = cloaksFor({ charClass: C.DarkLord, wing: null, armor: null, skin: null, chaosCastle: false, ...over }, out);
+  const light = cloaksFor({ charClass: C.DarkLord, wing: null, armor: null, skin: null, chaosCastle: false, netId: null, hero: false, guild: null, ...over }, out);
   return { out, light };
 }
 

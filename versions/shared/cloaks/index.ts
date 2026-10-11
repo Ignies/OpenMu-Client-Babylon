@@ -11,6 +11,7 @@ import {
 import { robeFor } from './robe';
 import { DARK_LORD_HAIR } from './dark_lord_hair';
 import { DARK_LORD_SKIRT, LORD_EMPEROR_SKIRT, MANTLE_SKIRT } from './dark_lord_skirt';
+import { teamLight } from './team_cloak';
 import { CAPE_OF_FIGHTER_CLOTH, CAPE_OF_OVERRULE_CLOTH, CAPE_OF_OVERRULE_STRAPS, isCapeOfFighter, isCapeOfOverrule } from './cape_of_fighter';
 
 const WHITE: Rgb = [1, 1, 1];
@@ -24,7 +25,7 @@ const SKELETON_BODY = /^Skeleton0[123]\.glb$/;
  * The Dark Lord's cloths (ZzzCharacter.cpp:9693-9776, drawn by :9926-9942): 0 and 1 the hair and 3 the skirt over
  * the class's own body, all gone under a ring's body (CheckDarkLordHair); 2 the cape, 4 and 5 the Mantle's straps.
  */
-function darkLord(w: CloakWearer, out: (ClothSpec | null)[]): void {
+function darkLord(w: CloakWearer, team: boolean, out: (ClothSpec | null)[]): void {
   const mantle = isMantleOfMonarch(w.wing);
   if (w.skin === null) {
     out[0] = DARK_LORD_HAIR[0];
@@ -32,7 +33,8 @@ function darkLord(w: CloakWearer, out: (ClothSpec | null)[]): void {
     const emperor = w.charClass === CharacterClassNumber.LordEmperor;
     if (w.armor === null) out[3] = mantle ? (emperor ? null : MANTLE_SKIRT) : emperor ? LORD_EMPEROR_SKIRT : DARK_LORD_SKIRT;
   }
-  out[2] = mantle ? MANTLE_OF_MONARCH_CLOTH : isCapeOfLord(w.wing) ? CAPE_OF_LORD_CLOTH : null;
+  // The cape is built whatever the wing, and drawn with a cape or a team colour (:9930).
+  out[2] = mantle ? MANTLE_OF_MONARCH_CLOTH : isCapeOfLord(w.wing) || team ? CAPE_OF_LORD_CLOTH : null;
   if (mantle) {
     out[4] = MANTLE_OF_MONARCH_STRAPS[0];
     out[5] = MANTLE_OF_MONARCH_STRAPS[1];
@@ -40,9 +42,10 @@ function darkLord(w: CloakWearer, out: (ClothSpec | null)[]): void {
 }
 
 /** The Rage Fighter's cloths (:9777-9824, drawn by :9943-9951): 0 the cape, 1 and 2 the Overrule's straps. */
-function rageFighter(w: CloakWearer, out: (ClothSpec | null)[]): void {
+function rageFighter(w: CloakWearer, team: boolean, out: (ClothSpec | null)[]): void {
   const overrule = isCapeOfOverrule(w.wing);
-  out[0] = overrule ? CAPE_OF_OVERRULE_CLOTH : isCapeOfFighter(w.wing) ? CAPE_OF_FIGHTER_CLOTH : null;
+  // Drawn with a cape or a team colour (:9945).
+  out[0] = overrule ? CAPE_OF_OVERRULE_CLOTH : isCapeOfFighter(w.wing) || team ? CAPE_OF_FIGHTER_CLOTH : null;
   if (overrule) {
     out[1] = CAPE_OF_OVERRULE_STRAPS[0];
     out[2] = CAPE_OF_OVERRULE_STRAPS[1];
@@ -50,18 +53,20 @@ function rageFighter(w: CloakWearer, out: (ClothSpec | null)[]): void {
 }
 
 /**
- * `bCloak` (ZzzCharacter.cpp:9162-9186): the Magic Gladiator (the class itself, `c->Class == CLASS_DARK`),
- * every Dark Lord and Rage Fighter, never inside Chaos Castle.
+ * `bCloak` (ZzzCharacter.cpp:9162-9246): the Magic Gladiator (the class itself, `c->Class == CLASS_DARK`),
+ * every Dark Lord and Rage Fighter, never inside Chaos Castle; and anyone a team colour puts in one.
  */
 export function cloaks(w: CloakWearer, out: (ClothSpec | null)[]): Rgb {
   const base = getBaseClass(w.charClass);
-  const cloak = (w.charClass === CharacterClassNumber.MagicGladiator || base === BaseClass.DarkLord || base === BaseClass.RageFighter) && !w.chaosCastle;
+  const gladiator = w.charClass === CharacterClassNumber.MagicGladiator;
+  const team = teamLight(w);
+  const cloak = ((gladiator || base === BaseClass.DarkLord || base === BaseClass.RageFighter) && !w.chaosCastle) || team !== null;
   if (!cloak || (w.skin !== null && TEMPLE_BODIES.has(w.skin))) return WHITE;
-  if (base === BaseClass.DarkLord) darkLord(w, out);
-  else if (base === BaseClass.RageFighter) rageFighter(w, out);
+  if (base === BaseClass.DarkLord) darkLord(w, team !== null, out);
+  else if (base === BaseClass.RageFighter) rageFighter(w, team !== null, out);
   // The rest wear the robe (:9837-9846); a ring's body hides the Magic Gladiator's (CheckDarkCloak, :9953).
-  else if (w.skin === null || SKELETON_BODY.test(w.skin)) out[0] = robeFor(w.wing);
-  return WHITE;
+  else if (!gladiator || w.skin === null || SKELETON_BODY.test(w.skin)) out[0] = robeFor(w.wing);
+  return team ?? WHITE;
 }
 
 registerCloaks(cloaks);

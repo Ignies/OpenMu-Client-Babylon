@@ -211,9 +211,9 @@ Mantle of Monarch and Cape of Overrule keep their model and add cloth.
   Overrule, with the Overrule's straps (cloths 1 and 2); the Magic Gladiator's robe (cloth 0,
   Player/Robe01.jpg / Robe02.jpg, Item/msword03.tga under the Wing of Ruin); the Dark Lord's hair (cloths 0
   and 1, bone 20, Monster/iui06.jpg) and skirt (cloth 3, bone 18, Player/kaa.tga or dark3chima3.tga over the
-  class's own body).
-- Not yet: the team colours, the Death King
-  (Player/Robe03.tga) and the Nightmare (a cylinder).
+  class's own body); the duel and Battle Soccer colours, which cloak anyone (`team_cloak.ts`).
+- Not yet: the two monsters that wear one, the Death King (Player/Robe03.tga, :9826-9832) and the
+  Nightmare (a `PCT_CYLINDER` robe on bone 2, :9833-9836).
 - Not ported: `DeleteCloth` on a cape change (WSclient.cpp:2474-2491) resets every cloth of the set; here
   only the changed slot is rebuilt. Body parts carry a mesh cloth of their own too (`CPhysicsClothMesh`,
   ZzzObject.cpp:10626-10640), a separate port.

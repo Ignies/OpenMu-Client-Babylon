@@ -33,7 +33,7 @@ const linked = (item: Item | null | undefined): boolean => !!item && !isBook(ite
 function clothSystem(world: World) {
   const query = world.with('charAppearance', 'modelObject');
   const specs: (ClothSpec | null)[] = [];
-  const wearer: CloakWearer = { charClass: 0, wing: null, armor: null, skin: null, chaosCastle: false };
+  const wearer: CloakWearer = { charClass: 0, wing: null, armor: null, skin: null, chaosCastle: false, netId: null, hero: false, guild: null };
 
   return {
     update: (dt: number) => {
@@ -49,6 +49,9 @@ function clothSystem(world: World) {
         wearer.armor = look.armor;
         wearer.skin = skinPart(e.skin);
         wearer.chaosCastle = castle;
+        wearer.netId = e.netId ?? null;
+        wearer.hero = !!e.localPlayer;
+        wearer.guild = e.guild?.id ?? null;
         const light = cloaksFor(wearer, specs);
         const set = model.Cloth;
         set.wear(specs, light);

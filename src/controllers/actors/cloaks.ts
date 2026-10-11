@@ -14,6 +14,11 @@ export type CloakWearer = {
   skin: string | null;
   /** Inside Chaos Castle, where nobody wears one (:9183-9186). */
   chaosCastle: boolean;
+  /** `c->Key` and whether it is the hero: who the duel colours (:9234-9246). */
+  netId: number | null;
+  hero: boolean;
+  /** `c->GuildMarkIndex`: the guild id, whose name Battle Soccer colours (:9190-9232). */
+  guild: number | null;
 };
 
 /** Fills `out` with the cloths to hang by slot (`m_pCloth[i]`, null where none is drawn) and returns their `CloakLight`. */
