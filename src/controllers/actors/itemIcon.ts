@@ -4,6 +4,7 @@ import { angleMatrixQuaternion } from '../render/renderAngles';
 import { iconShots, type IconShotJob } from '../render/iconShot';
 import { loadItemModel } from './itemModel';
 import { isTwoHanded } from './weaponClass';
+import { itemVisualTier } from '../item_fx/itemVisualTier';
 import { ITEM_ICON_SCALE, ITEM_ICON_SCALE_DEFAULT, itemIconPose, type LiveItemIconSource } from '../interface/item_icons';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 
@@ -57,6 +58,14 @@ export function itemIconJob(scene: Scene, item: Item): IconShotJob | null {
       node.position.set(anchor[0] * width * unit + offset[0] * M, (offset[2] - DEPTH) * M, -anchor[1] * height * unit + offset[1] * M);
       node.rotationQuaternion = angleMatrixQuaternion(angle[0] * DEG, angle[1] * DEG, angle[2] * DEG, new Quaternion());
       node.scaling.setAll(scale);
+      // Drawn at its level and options, as worn (RenderPartObject, ZzzInventory.cpp:9699).
+      const tier = itemVisualTier(item);
+      for (const mesh of object.getMeshes(true)) {
+        mesh.metadata ??= {};
+        mesh.metadata.itemTier = tier.active ? tier : null;
+        mesh.metadata.itemLvl = tier.level;
+        mesh.metadata.isExcellent = tier.isExcellent;
+      }
       return object;
     },
   };

@@ -12,6 +12,7 @@ import { Skeleton } from '@babylonjs/core/Bones/skeleton';
 import { Quaternion } from '@babylonjs/core/Maths/math.vector';
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode';
 import { angleMatrixQuaternion } from '../render/renderAngles';
+import type { ModelObject } from '../render/modelObject';
 import { ITEM_ICON_SCALE } from '../interface/item_icons';
 
 /** The meshes of a converted model, by texture: a Queen helm is the head, the hair and the helm. */
@@ -135,6 +136,32 @@ describe('an item icon shot', () => {
     expect((root.getChildren()[0] as TransformNode).scaling.x).toBeCloseTo(0.0025, 9);
     subject?.dispose();
     root.dispose();
+  });
+
+  it('tints the model by its level and excellence, as RenderPartObject draws a bag item (ZzzInventory.cpp:9699)', async () => {
+    const root = new TransformNode('root', scene);
+    const plain = (await itemIconJob(scene, { group: 12, num: 26, lvl: 0 })?.build(root)) as ModelObject;
+    expect(plain.getMeshes(true).map(mesh => mesh.metadata.itemTier ?? null)).toEqual([null]);
+    plain.dispose();
+    const bright = (await itemIconJob(scene, { group: 12, num: 26, lvl: 9, isExcellent: true })?.build(root)) as ModelObject;
+    const meshes = bright.getMeshes(true);
+    expect(meshes.length).toBeGreaterThan(0);
+    for (const mesh of meshes) {
+      expect(mesh.metadata.itemTier?.level).toBe(9);
+      expect(mesh.metadata.itemTier?.isExcellent).toBe(true);
+      expect(mesh.metadata.itemLvl).toBe(9);
+    }
+    bright.dispose();
+    root.dispose();
+  });
+
+  it('keeps one picture per look: the level and excellence are in the key', () => {
+    const keys = [
+      itemIconJob(scene, { group: 12, num: 26, lvl: 0 })?.key,
+      itemIconJob(scene, { group: 12, num: 26, lvl: 9 })?.key,
+      itemIconJob(scene, { group: 12, num: 26, lvl: 9, isExcellent: true })?.key,
+    ];
+    expect(new Set(keys).size).toBe(3);
   });
 
   it('has no shot for an item with no model (Gladiator\'s Glory, 13/95)', () => {

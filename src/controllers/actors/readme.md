@@ -120,7 +120,11 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   is `ITEM_ICON_UNITS_PER_PIXEL` units there. The shot covers the item's squares (20 pixels each),
   places the model at its anchor in them plus its offset, turns it and sets its body height as
   `RenderObjectScreen` does (`interface/item_icons/itemIconPose.ts`, two-handed by `isTwoHanded`, the
-  inventory width proxy) and scales it by `itemIconScale.ts`; `render/iconShot.ts` draws it once.
+  inventory width proxy) and scales it by `itemIconScale.ts`; its meshes carry the item's
+  `itemVisualTier` as worn gear does (the level and excellent passes, RenderPartObject at the item's
+  level and options, ZzzInventory.cpp:9699); `render/iconShot.ts` draws it once. A picture is kept
+  per look (group, number, level, excellent, ancient) for the session: a changed item-effects
+  option shows on new looks only.
 
 ## Depends on / used by
 - uses: `render` (`ModelObject`, bone links), `assets`, `anim`, `fx`, `item_fx`, `lighting`,
@@ -156,8 +160,8 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 - `itemIcon.test.ts`: the shot covers the item's squares at the original's item depth, loads the
   item's own model under the root at its scale and angle; a worn part (the Queen helm) draws only its
   helm mesh, comes down by `ItemHeight` and keeps its own skeleton; the anchor plus offset (the Lucky
-  Penny), a weapon's hands (Mace of the King), the Heart +0's swapped model and scale; no shot for an
-  item with no model.
+  Penny), a weapon's hands (Mace of the King), the Heart +0's swapped model and scale, the level and
+  excellent tier on every mesh and one key per look; no shot for an item with no model.
 - `npcModelTable.test.ts`: every row names a file in `public/game-assets` and has a scale > 0; the
   tables behave as plain objects and read the folders when asked.
 - `trapModels.test.ts`: every (map, trap) pair names an `Object<world+1>` model that exists.
