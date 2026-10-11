@@ -327,7 +327,8 @@ const MixMenu = observer(() => {
     ));
   return (
     <div className="chaos-menu-layer" data-no-drag="true">
-      <MsgBoxFrame lines={MENU_LINES} className="chaos-menu" style={{ top: MENU_TOP }}>
+      {/* `IMAGE_MSGBOX_TOP_TITLEBAR`, as the seed menus (NewUICustomMessageBox.cpp:2921). */}
+      <MsgBoxFrame lines={MENU_LINES} top={MSGBOX_TOP_TITLEBAR_SPRITE} className="chaos-menu" style={{ top: MENU_TOP }}>
         <div className="chaos-menu-title" style={{ left: MENU_TEXT_X, right: MENU_TEXT_X, top: MENU_TITLE_Y }}>
           {t('chaos.menu.title')}
         </div>
