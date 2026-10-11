@@ -11,6 +11,7 @@ the interface controller's (`AppState`, `controllers/interface/uiState.ts`).
 - `App.tsx`: the root component; picks the page from `AppState.uiState`.
 - `logic.ts`: installs the modules, sends `Ping`, refreshes NPC names, hands the map ping its link.
 - `lifecycle.ts`: `resetForMapChange()`, what resets on a map change.
+- `backgroundTick.ts` (+ `backgroundTick.worker.ts`): the logic step while the browser gives no frames.
 - `offline.ts`: `playOffline()`, the offline test scene (`/offline`, the preloader's Play Offline):
   no server, a test hero on `?map=`, with `?class=`, `?skin=`, `?hand1=` / `?hand2=` / `?pet=`,
   `?bare`, `?hp=` / `?mp=` as screenshot seams. `App.tsx` hands it to the preloader page.
@@ -28,7 +29,12 @@ the interface controller's (`AppState`, `controllers/interface/uiState.ts`).
   ([../controllers/controllers.ts](../controllers/controllers.ts)), registers
   `resetForMapChange` with `onMapChange`, builds the ECS world (`createWorld`, set as `Ecs.world`)
   and runs the render loop. The loop clamps `dt` to 0.1 s, catches a frame that throws (logged at
-  most every 5 s) and draws only one frame in 6 while a covering page hides a loaded scene. It also
+  most every 5 s) and draws only one frame in 6 while a covering page hides a loaded scene.
+  With no frames from the browser (a hidden tab, a minimised window) a worker ticks at the original's
+  25 Hz and each tick runs the same frame without the draw: the systems and the clips
+  (`scene.animate`), so the hero walks on and the MU Helper keeps hunting, as a windowed original
+  minimised does (`Winmain.cpp:1495` runs its scene loop unfocused). The game's page timers are
+  single waits, which a hidden tab delays by a second at most, so none moved to the tick. It also
   blocks the browser context menu and wheel outside scrollables, and handles `requestWarp`.
 - `boot.tsx` is also where layers meet that may not import each other: the session resume
   (`Session.resumeHook`), the hero's gear after a warp (`onHeroPlaced`), the repair cursor
@@ -81,6 +87,7 @@ or `src/ecs` (`Ecs.world`). The codemod that rewrote `Store.x` is in git history
 - `listenerOrder.golden.test.ts`: every packet's listeners and their order once the app has loaded.
   It hashes each listener's code without whitespace or vitest's numbered import aliases, so moving
   an import keeps the hash; changing a listener or the install order changes it.
+- `backgroundTick.test.ts`: the tick runs a logic step only once the browser stopped giving frames.
 - `lifecycle.test.ts`: the map-change resets run in order (the buff looks redrawn right after the
   effects end), then the sign plates and the unused monster and NPC models are freed.
 - `observableStores.test.ts`: no observable store member is named after an `Object.prototype`
