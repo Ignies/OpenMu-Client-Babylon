@@ -879,14 +879,25 @@ const SOCKET_ELEMENT: readonly TextKey[] = [
   'item.socketUnique',
 ];
 
+/** The hero maximums a socket value reads. */
+type SocketMaxima = Pick<TooltipExtras, 'maxLife' | 'maxMana' | 'masterLevel'>;
+
 /** `CalcSocketOptionValue` / `CalcSocketOptionValueText` (SocketSystem.cpp:141-198). */
-function socketValue(option: SocketOption, value: number, hero: HeroStats, extras?: TooltipExtras): string {
+function socketValue(option: SocketOption, value: number, hero: HeroStats, extras?: SocketMaxima): string {
   let amount = 0;
   if (option.type === 1 || option.type === 2) amount = value;
   else if (option.type === 3) amount = Math.trunc((hero.level + (extras?.masterLevel ?? 0)) / value);
   else if (option.type === 4) amount = Math.trunc((extras?.maxLife ?? 0) / value);
   else if (option.type === 5) amount = Math.trunc((extras?.maxMana ?? 0) / value);
   return option.type === 2 ? `+${amount}%` : `+${amount}`;
+}
+
+/** `CreateSocketOptionText` (SocketSystem.cpp:201-213): "element(name value)", null when the tables lack it. */
+export function socketOptionText(socket: { seed: number; level: number }, hero: HeroStats, extras?: SocketMaxima): string | null {
+  const info = itemOptionTables()?.sockets[0][socket.seed];
+  if (!info) return null;
+  const element = SOCKET_ELEMENT[info.category - 1];
+  return `${element ? t(element) : ''}(${info.name} ${socketValue(info, info.values[socket.level - 1] ?? 0, hero, extras)})`;
 }
 
 /** `AttachToolTipForSocketItem` (SocketSystem.cpp:218-266): each socket, then the bonus option. */
@@ -898,13 +909,11 @@ function socketLines(out: Lines, item: Item, hero: HeroStats, extras?: TooltipEx
   out.add(t('item.socketInfo'), 'purple');
   out.blank();
   sockets.forEach((socket, i) => {
-    const info = socket ? tables.sockets[0][socket.seed] : null;
-    if (!socket || !info) {
+    const option = socket ? socketOptionText(socket, hero, extras) : null;
+    if (!option) {
       out.add(t('item.socketSlot', { index: i + 1, option: t('item.socketEmpty') }), 'gray');
       return;
     }
-    const element = SOCKET_ELEMENT[info.category - 1];
-    const option = `${element ? t(element) : ''}(${info.name} ${socketValue(info, info.values[socket.level - 1] ?? 0, hero, extras)})`;
     out.add(t('item.socketSlot', { index: i + 1, option }), 'blue');
   });
   const bonus = socketBonusOf(item);

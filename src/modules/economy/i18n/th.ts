@@ -49,4 +49,9 @@ export default {
   'chaos.lackItems': 'ไอเทมสำหรับผสมไม่ครบ',
   'chaos.levelRequired': '{name} ใช้ได้ตั้งแต่เลเวล {level}',
   'chaos.makeRoom': 'จัดกระเป๋าก่อนผสม',
+  'chaos.sameSphere': 'ไม่สามารถใส่สเฟียร์ชนิดเดียวกันได้',
+  'chaos.selectSocket': 'ต้องเลือกซ็อกเก็ต',
+  'chaos.socketApplied': 'ใส่ไว้แล้ว',
+  'chaos.selectDestructible': 'ต้องเลือกซ็อกเก็ตที่จะทำลาย',
+  'chaos.noDestructible': 'ไม่มีสเฟียร์เมล็ดที่จะทำลาย',
 } satisfies Partial<Record<keyof typeof en, string>>;

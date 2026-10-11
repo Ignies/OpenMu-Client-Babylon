@@ -11,8 +11,8 @@ talk in flight with the merchant window's state and actions (`Merchant`).
 ## How it works
 - `Merchant.talkToNpc` (called from ecs `npcTalkSystem`) sends `TalkToNpcRequest`; `NpcWindowResponse` says which
   window to open. Merchants open the shop (`Merchant.openNpcShop`); vault, chaos machine and Chaos Card Master
-  open `Economy` windows; Devil Square, Blood Castle, duel watch and Doppelganger open `events` windows;
-  legacy quest NPCs open `quests.openNpcWindow`. Anything else gets a notice and a `CloseNpcRequest`, because
+  open `Economy` windows; Lahap opens the jewel combination boxes (`chaos_mix/jewelMix.ts`); Devil Square,
+  Blood Castle, duel watch and Doppelganger open `events` windows; legacy quest NPCs open `quests.openNpcWindow`. Anything else gets a notice and a `CloseNpcRequest`, because
   OpenMU otherwise ignores every later talk (TalkNpcAction.cs).
 - `StoreItemList` carries the merchant's stock, the vault's items and the chaos machine's tray. `Normal`
   goes to the vault when it is open, the merchant otherwise.

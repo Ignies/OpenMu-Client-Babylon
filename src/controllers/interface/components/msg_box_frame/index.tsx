@@ -35,15 +35,20 @@ export function msgBoxHeight(lines: number): number {
   return MSGBOX_TOP_HEIGHT + MSGBOX_MIDDLE_HEIGHT * lines + MSGBOX_BOTTOM_HEIGHT;
 }
 
+/** `IMAGE_MSGBOX_TOP_TITLEBAR` (NewUIMessageBox.cpp:462): the top with a title bar, of the NPC menus. */
+export const MSGBOX_TOP_TITLEBAR_SPRITE = 'newui_Message_03.OZT';
+
 type MsgBoxFrameProps = {
   /** Middle slices; the box grows by `MSGBOX_MIDDLE_HEIGHT` each. */
   lines: number;
+  /** The top slice's art; the plain top unless a box draws the title bar one. */
+  top?: string;
   className?: string;
   style?: CSSProperties;
   children?: ReactNode;
 };
 
-export const MsgBoxFrame = ({ lines, className, style, children }: MsgBoxFrameProps) => {
+export const MsgBoxFrame = ({ lines, top = MSGBOX_TOP_SPRITE, className, style, children }: MsgBoxFrameProps) => {
   const height = msgBoxHeight(lines);
 
   return (
@@ -60,7 +65,7 @@ export const MsgBoxFrame = ({ lines, className, style, children }: MsgBoxFramePr
         }}
       />
       <MuSpriteFrame
-        file={MSGBOX_TOP_SPRITE}
+        file={top}
         width={MSGBOX_WIDTH}
         height={MSGBOX_TOP_HEIGHT}
         style={{ position: 'absolute', left: 0, top: 0 }}

@@ -21,7 +21,7 @@ windows themselves are content in `versions/shared/ui/` (see
   scale and z-order, Escape closes the top window, `closeAll()` is the original's `HideAll` (every
   open flag drops, then every stacked closer runs; a closer that finds its flag already down plays no click).
 - `components/`: shared widgets. Frames and text: `mu_window` (item window, table frame),
-  `mu_frame`, `msg_box_frame`, `mu_text`, `mu_number`,
+  `mu_frame`, `msg_box_frame` (`top` takes the NPC menus' title bar art, `MSGBOX_TOP_TITLEBAR_SPRITE`), `mu_text`, `mu_number`,
   `mu_button`, `mu_sprite`, `mu_logo`, `mu_flag`. Items: `item_icon`, `item_search` (the grid, the
   tooltip, the carried item and the chat item link read the inventory, hero, pets and merchant, so
   they live in `versions/shared/ui/components/`). Text: `mu_text`
@@ -33,7 +33,8 @@ windows themselves are content in `versions/shared/ui/` (see
 - `keyBindings.ts`: `KeyBindings`, `keyFor`, `isKey`, `actionOfKey`, `setKeyBinding`,
   `setKeyProfile`, `WALK_KEYS`; `browserHotkeys.ts`: `installBrowserHotkeyGuard`,
   `toggleFullscreen`, `isBrowserChord`.
-- `itemTooltip.ts`: `buildItemTooltip`, `itemDisplayName`, `itemNameColor`; `itemLinkHover.ts`.
+- `itemTooltip.ts`: `buildItemTooltip`, `itemDisplayName`, `itemNameColor`, `socketOptionText` (one socket's
+  "element(name value)", also the seed researcher's socket list); `itemLinkHover.ts`.
 - `nameTags.ts`: name balloon lifetimes and colours; `screenPositionBus.ts`: per-entity screen
   positions; `slideHelp.ts`: `SlideHelp`; `msgWin.ts`: message box codes and text, and `MsgBox`: the box
   that is up (`msgWin`), `popUpMsgWin(code, arg?, onOk?)`, `takeMsgWinOk()`, `closeMsgWin()`. `onOk`

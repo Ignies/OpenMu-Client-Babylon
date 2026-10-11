@@ -25,7 +25,7 @@ One folder per in-game window. A window draws; its state and actions belong to i
 | `inventory` | inventory (80) | the hero's bag and equipment, repair mode | hero, inventory, npc_shop, items, economy, events |
 | `npc_shop` | npc_shop (90) | the merchant's stock; buy, sell, repair | Merchant, items, inventory |
 | `vault` | vault (100) | the warehouse, zen buttons, pin lock | hero, economy, inventory |
-| `chaos_machine` | chaos_machine (110) | the goblin's mix tray, its Mix.bmd recipe text and mix type menu | economy, chaos_mix, inventory |
+| `chaos_machine` | chaos_machine (110) | the mix tray of the goblin, the Chaos Card Master and the seed NPCs, its Mix.bmd recipe text, the goblin's and the seed NPCs' menus, the socket list | economy, chaos_mix, inventory, hero |
 | `trade` | trade (120) | partner's half on top, the hero's below | hero, economy, inventory |
 | `personal_shop` | my_shop (130), shop_browser (140) | the hero's stall; another player's stall | economy, inventory |
 | `character_info` | character_info (150) | stats and stat point buttons | Hero, hero, options |
@@ -49,6 +49,7 @@ One folder per in-game window. A window draws; its state and actions belong to i
 | `system_menu` | system_menu (365) | Escape's five-button box in the world (`CSystemMenuMsgBox`) | session |
 | `events` | events (400) | event entry windows, Chaos Castle prompt, timers, results | events, items |
 | `balgass_entry` | balgass_entry (410) | third class quest entry boxes | quests |
+| `lahap` | lahap (415) | Lahap's jewel combination boxes (`CGemIntegration*MsgBox`) | chaos_mix |
 | `duel` | duel (430) | challenge prompt, score, channels, spectators, winner | events (duel), chat |
 | `session_stats` | session_stats (440) | what this sitting earned, time to next level | session |
 | `debug_menu` | debug_menu (470) | offline debug window, tabs from `modules/` | gm, Session.isOffline |

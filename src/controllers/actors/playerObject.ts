@@ -258,7 +258,7 @@ export class PlayerObject extends ModelObject {
     const spec = wingSpec(wings);
     const def = wings && spec ? ItemsDatabase.getItem(wings.group, wings.num) : null;
 
-    if (!wings || !spec || !def) {
+    if (!wings || !spec || !def || spec.clothOnly) {
       this.Wings.prepare(null);
       this.Wings.Unload();
       return;

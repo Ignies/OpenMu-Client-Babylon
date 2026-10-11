@@ -49,4 +49,9 @@ export default {
   'chaos.lackItems': 'Thiếu vật phẩm để kết hợp.',
   'chaos.levelRequired': '{name} có từ cấp {level}.',
   'chaos.makeRoom': 'Hãy sắp xếp hành trang trước khi kết hợp.',
+  'chaos.sameSphere': 'Không thể gắn quả cầu cùng loại.',
+  'chaos.selectSocket': 'Bạn phải chọn khe.',
+  'chaos.socketApplied': 'Đã được gắn rồi.',
+  'chaos.selectDestructible': 'Bạn phải chọn khe cần phá hủy.',
+  'chaos.noDestructible': 'Không có cầu hạt giống để phá hủy.',
 } satisfies Partial<Record<keyof typeof en, string>>;

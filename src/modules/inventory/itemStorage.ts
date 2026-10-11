@@ -27,6 +27,12 @@ export { StorageKind, TRADE_COLUMNS, TRADE_ROWS, TRADE_SLOTS };
  */
 export const CHAOS_CARD_WIRE_STORAGE = 9;
 
+/**
+ * `STORAGE_TYPE::EXTRACT_SEED_MIX` .. `DETACH_SOCKET_MIX` (_define.h:181-184) / OpenMU `SeedCrafting` ..
+ * `SeedUnmountCrafting`: the Seed Master's and the Seed Researcher's trays, the chaos machine's grid here.
+ */
+export const SEED_WIRE_STORAGES: readonly number[] = [11, 12, 13, 14];
+
 /** `COLUMN_*_INVENTORY` / `ROW_*_INVENTORY` (_define.h:150-155). */
 export const VAULT_COLUMNS = InventoryConstants.RowSize;
 export const VAULT_ROWS = InventoryConstants.WarehouseRows;

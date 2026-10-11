@@ -55,3 +55,20 @@ describe.skipIf(!existsSync(MIX))('the chaos machine recipes', () => {
     expect(isMixSource(goblin, { group: 8, num: 62, lvl: 9 }, empty)).toBe(false);
   });
 });
+
+// CheckRecipeSub's 'H' / 'I' (MixMgr.cpp:370-371, :1063-1081): a weapon takes a fire, ice or lightning
+// sphere, armour a water, wind or earth one.
+describe.skipIf(!existsSync(MIX))('the seed sphere application recipes', () => {
+  loadMixRecipes(new Uint8Array(readFileSync(MIX)));
+  const attach = (mixRecipes() ?? [])[12] ?? [];
+  const socketSword: Item = { group: 0, num: 26, lvl: 0, durability: 50, socketCount: 3, sockets: [0xfe, 0xfe, 0xfe] };
+  const sphere = (num: number): Item => ({ group: 12, num, lvl: 0, durability: 1 });
+
+  it('mounts a fire sphere on a socket weapon', () => {
+    expect(checkMix(attach, [socketSword, sphere(100), chaos, creation]).recipe?.mixId).toBe(44);
+  });
+
+  it('refuses a water sphere on a weapon', () => {
+    expect(checkMix(attach, [socketSword, sphere(101), chaos, creation]).recipe).toBeNull();
+  });
+});

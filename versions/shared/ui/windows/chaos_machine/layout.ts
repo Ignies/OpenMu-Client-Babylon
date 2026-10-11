@@ -17,13 +17,14 @@ export const GRID_Y = 110;
 export const TEXT_X = 15;
 export const TEXT_WIDTH = 160;
 export const TITLE_Y = 13;
-/** The Chaos Card Master's title sits 5 lower and has no tax line. */
+/** Every tray but the goblin's has its title 5 lower and no tax line. */
 export const CARD_TITLE_Y = 18;
 export const TAX_Y = 25;
 /** Recipe name lines 1 and 2, the success rate and the zen, from y 49 (`fLine_y += 24`). */
 export const NAME_Y = 49;
 export const NAME_LINE = 10;
 export const RATE_Y = 69;
+/** The zen line, under the rate; the seed researcher's trays have no rate and put it at `RATE_Y`. */
 export const ZEN_Y = 89;
 /** The prediction, the sources and the description, 15 a line from y 203. */
 export const SOURCES_Y = 203;
@@ -45,6 +46,24 @@ export const HEAD_CLOSE_X = 169;
 export const HEAD_CLOSE_Y = 7;
 export const HEAD_CLOSE_WIDTH = 13;
 export const HEAD_CLOSE_HEIGHT = 12;
+
+/**
+ * `RenderMixDescriptions` for the seed researcher's trays (NewUIMixInventory.cpp:776-790): the
+ * label at y 280, and the 160x65 `CUISocketListBox` at (275, 360) on screen, its bottom edge: from
+ * y 295 in the tray, 13 a line, the text 8 in.
+ */
+export const SOCKET_LABEL_Y = 280;
+export const SOCKET_LIST = { x: 15, top: 295, width: 160, height: 65, line: 13, textX: 8 };
+
+/**
+ * `CSeedMasterMenuMsgBox` / `CSeedInvestigatorMenuMsgBox` (NewUICustomMessageBox.cpp:6292-6680): 7
+ * middle slices under the title bar top, 60 from the top; the title at 10, two lines 18 apart from 43,
+ * the two buttons at 85 and 120, Close 49 off the bottom.
+ */
+export const SEED_MENU_LINES = 7;
+export const SEED_TEXT_Y = 43;
+export const SEED_TEXT_LINE = 18;
+export const SEED_BUTTON_Y = [85, 120] as const;
 
 /** `CChaosMixMenuMsgBox`: 13 middle slices, 60 from the top of the screen. */
 export const MENU_LINES = 13;

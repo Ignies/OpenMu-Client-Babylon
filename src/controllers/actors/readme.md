@@ -55,6 +55,10 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   bitmap a dropped part draws mesh 0 with, and the only meshes it draws, `RenderPartObjectBody`'s
   HideSkin branches, ZzzObject.cpp:7614-8908); `traceHeroInstantMove`.
 - `openHelm.ts`: `showsClassHead(helm)`, whether the class head is drawn under that helm (below).
+- `classPartModel.ts`: `classPartModel(part, charClass)`, the `Player/` model a class wears for an armour piece in
+  place of the item's own: the Summoner's Vine and Silk pieces (`HelmElfC`...), the Rage Fighter's Leather, Scale,
+  Brass and Plate (`HelmMonk`..., gloves and boots both `BootMonk`, MonkSystem.cpp:187-206) and the Dark Lord's
+  Bronze, Leather, Scale, Brass and Plate helms (`MaskHelmMale`), ZzzCharacter.cpp:9579-9617.
 
 ## How it works
 - A spawned object's class comes from `resolveModelFactory(type)`, called by
@@ -73,8 +77,11 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 - `PlayerObject` loads `Player/player.glb` (a rig with no meshes) and hangs every part on it as a
   child `ModelObject`: helm, mask, armor, pants, gloves, boots, two weapons, two Phoenix wings,
   wings, quest item and pet. Weapons link to bones 33 / 42 (ZzzCharacter.cpp:11849-11850), wings
-  and the quest item to 47, capes with a link matrix to 19. `ecs/systems/appearanceSystem.ts`
-  fills the sockets; `animationSystem.ts` picks clips with `weaponClass.ts` / `locomotion.ts` and
+  and the quest item to 47, capes with a link matrix to 19. A Rage Fighter glove weapon is the
+  exception: its worn model is skinned to the rig like an armour piece and linked to no bone, in the
+  hands and in town (`RenderSwordformGloves`, MonkSystem.cpp:248-252). `ecs/systems/appearanceSystem.ts`
+  fills the sockets and gives a held weapon its `ItemObjectAttribute` mesh rules (ZzzCharacter.cpp:6648);
+  `animationSystem.ts` picks clips with `weaponClass.ts` / `locomotion.ts` and
   calls `applyWeaponPoses` every frame.
 - `GmMark` is the Webzen mark (`PARTS_WEBZEN`, `Skill/musign.glb`, CSParts.cpp:28-46) a game master
   wears: `setGmMarkAsync(on)` (driven by `ecs/systems/gmMark.ts` from `AppearanceSystem`: the GM buff 28 or the hero's
@@ -139,6 +146,10 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   Zyro, the Cursed Wizard's kit, the plate helpers, the Kalima gates held on frame 8), each with its
   ZzzCharacter.cpp lines.
 - `skinTexture.test.ts`: skin / hair / level and hide texture names, and the case of each test.
+- `classPartModel.test.ts`: the Monk, mask and ElfC models per class, and that each file ships.
+- `weaponAttachment.test.ts`: a glove weapon on no bone and with no clip of its own, in the hands and in town.
+- `playerObject.test.ts`: the Cape of Lord and Cape of Fighter load no model (cloth only); the Mantle of Monarch and
+  Cape of Overrule keep theirs.
 - `wingObject.test.ts`: the Wing of Ruin layer (a `Data/` bitmap, `getDataTexture`) is read top-down like
   the GLB textures it shares the UVs of, and is drawn on a model whose meshes sit under its model node.
 - Also from `controllers/item_rules/`: `portedItems`, `questItemLink`, `weaponAttack` tests.
@@ -175,3 +186,30 @@ never draw with HideSkin, so the name test alone gives the same drops.
 `MODEL_WING + n` is `{ group: 12, num: n }`; capes are group 13. Not ported because the original
 never reads them: the Wings of Soul / Dragon `BlendMeshLight` sines (ZzzObject.cpp:9816-9822) and
 the Wings of Spirits `Scale = 0.5` (:5277), both written to the shared `g_ItemObject[Type]`.
+
+### Capes and the cloth (not ported)
+The Cape of Lord (13/30, DarkLordRobe) and Cape of Fighter (12/49, Wing50) draw no model on a character
+(`clothOnly`): `RenderLinkObject` skips them (ZzzCharacter.cpp:7004-7011); they are the cloth alone. The
+Mantle of Monarch and Cape of Overrule keep their model and add cloth. What porting `CPhysicsCloth` needs:
+- The cloth (Engine/Physics/PhysicsManager.cpp:304-955): a grid of `iNumHor` x `iNumVer` vertices (gravity
+  9.8, mass 0.0025, the manager's wind), its top row pinned each frame to bone `iBone` plus an offset
+  (`SetFixedVertices`), links kept by `PreventFromStretching`, collision spheres on bones, stepped with
+  `Move2(0.005, 5)` a frame (0 while stunned or asleep), drawn two-sided with a front and a back texture in
+  `CloakLight` (white, or the duel / soccer team colour). The `PCT_*` flags pick the shape (flat, curved,
+  sticked, short shoulder, cylinder), the stretch (cotton, rubber, rubber2, the Overrule straps' rage L/R),
+  the weight (heavy), the blend (opaque, alpha, additive, light mask) and the hair option.
+- Who wears it (`bCloak`, ZzzCharacter.cpp:9162-9240): the Magic Gladiator (`CLASS_DARK`), Dark Lord and
+  Rage Fighter as players (not transformed, not in Chaos Castle or Doppelganger), the Death King and the
+  Nightmare, and anyone a duel or a soccer match colours. Built once (:9689-9850), dropped when the wing
+  slot changes (`DeleteCloth`, WSclient.cpp:2474-2491); the Dark Lord's skirt follows his armour (:9852-9925).
+- Dark Lord (:9693-9776): cloths 0 and 1 are his hair (bone 20, Monster/iui06.jpg, `PCT_OPT_HAIR`), 2 the cape
+  (bone 19, 10x10; Item/dl_redwings02.tga 180x180 under the Mantle, else Player/DarklordRobe.tga, drawn only
+  with the Cape of Lord or the Mantle or a team colour, :9930), 3 the skirt under the class armour (bone 18,
+  Player/kaa.tga or dark3chima3.tga), 4 and 5 the Mantle's straps (Item/dl_redwings03.tga).
+- Rage Fighter (:9777-9824): cloth 0 the cape (bone 19, 180x170, Item/NCcape.tga, Item/monke_manto.TGA under
+  the Overrule; drawn only with a cape or a team colour, :9945), 1 and 2 the Overrule straps
+  (Item/monk_manto01.TGA).
+- The rest (:9825-9850): the Death King (Player/Robe03.tga), the Nightmare (a cylinder), else Item/msword03.tga
+  under the Wing of Ruin or Player/Robe01.jpg / Robe02.jpg.
+- The cloth casts the body shadow (`RenderBodyShadow` with `m_pCloth`, :8433-8440). Body parts carry a mesh
+  cloth of their own too (`CPhysicsClothMesh`, ZzzObject.cpp:10626-10640), a separate port.

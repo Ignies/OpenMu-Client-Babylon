@@ -49,7 +49,9 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
 
 ## Tests
 - `systems/appearanceSystem.test.ts`: the class head bare-headed and under each open helm, off under every other
-  helm and in the Chaos Castle skin, and back on when the helm allows it (SetCharacterScale, ZzzCharacter.cpp:12114-12128).
+  helm and in the Chaos Castle skin, and back on when the helm allows it (SetCharacterScale, ZzzCharacter.cpp:12114-12128);
+  the class's own models (Monk sets, Dark Lord masks); a held item's `ItemObjectAttribute` mesh rules; a glove weapon
+  skinned to the body.
 - `systems/animationSystem.test.ts`: the hero and a player with no reported speeds take the hero's
   attack and magic speed; another player with speeds from the scope packet keeps its own.
 - `systems/deathSystem.test.ts`: Chaos Castle bomb sounds on odd ticks 15..25, the pit scream,

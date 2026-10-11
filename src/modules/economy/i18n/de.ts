@@ -56,4 +56,9 @@ export default {
   'chaos.lackItems': 'Für die Kombination fehlen Gegenstände.',
   'chaos.levelRequired': '{name} ist ab Stufe {level} möglich.',
   'chaos.makeRoom': 'Räume vor dem Kombinieren dein Inventar auf.',
+  'chaos.sameSphere': 'Eine Sphäre derselben Art kann nicht eingesetzt werden.',
+  'chaos.selectSocket': 'Du musst einen Sockel wählen.',
+  'chaos.socketApplied': 'Dort ist bereits etwas eingesetzt.',
+  'chaos.selectDestructible': 'Du musst einen Sockel zum Zerstören wählen.',
+  'chaos.noDestructible': 'Es gibt keine Samensphäre zum Zerstören.',
 } satisfies Partial<Record<keyof typeof en, string>>;

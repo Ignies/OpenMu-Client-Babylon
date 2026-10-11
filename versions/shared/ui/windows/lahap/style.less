@@ -1,0 +1,46 @@
+@import (reference) '@/controllers/interface/components/mu_text/style.less';
+
+// Lahap's boxes: modal like every message box, on the stage coordinates in layout.ts.
+.lahap-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+  z-index: 600; // WINDOW_Z_MODAL: over the windows and the sheets
+  .mu-font();
+  user-select: none;
+
+  .lahap-box {
+    position: absolute;
+    transform-origin: top left;
+    font-size: 11px;
+  }
+
+  .lahap-text {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    white-space: nowrap;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .lahap-check-text {
+    position: absolute;
+    text-align: center;
+    overflow-wrap: break-word;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  // `CUIUnmixgemList::RenderInterface`: black at 40% under the lines.
+  .lahap-list {
+    position: absolute;
+    overflow-y: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+
+    .lahap-list-line {
+      padding-left: 6px;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+  }
+}

@@ -50,4 +50,9 @@ export default {
   'chaos.lackItems': 'Faltam itens para a combinação.',
   'chaos.levelRequired': '{name} está disponível a partir do nível {level}.',
   'chaos.makeRoom': 'Organize o inventário antes de combinar.',
+  'chaos.sameSphere': 'Não é possível aplicar uma esfera do mesmo tipo.',
+  'chaos.selectSocket': 'Você deve escolher um soquete.',
+  'chaos.socketApplied': 'Já está aplicado.',
+  'chaos.selectDestructible': 'Você deve escolher o soquete a destruir.',
+  'chaos.noDestructible': 'Não há esferas de semente para destruir.',
 } satisfies Partial<Record<keyof typeof en, string>>;

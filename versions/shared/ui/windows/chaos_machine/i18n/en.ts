@@ -44,6 +44,22 @@ const en = {
   'chaosCard.once': 'Combinations can be used once at a time',
   'chaosCard.space': 'More than 2x4 space in inventory is needed.',
   'chaosCard.special': 'You can achieve special items with combinations.',
+  'chaos.extraction': 'Extraction',
+  'chaos.assembly': 'Assembly',
+  'chaos.application': 'Application',
+  'chaos.destruction': 'Destruction',
+  'chaos.selectApplicable': 'Select applicable socket',
+  'chaos.selectDestructibleSocket': 'Select destructible socket',
+  'seed.master': 'Seed Master',
+  'seed.master1': 'Extract the seed or the seed sphere',
+  'seed.master2': 'You may assembly them together.',
+  'seed.researcher': 'Seed researcher',
+  'seed.researcher1': 'Either apply the seed sphere',
+  'seed.researcher2': 'or destroy the seed sphere accordingly.',
+  'seed.extract': 'Seed Extraction',
+  'seed.sphere': 'Seed Sphere Assembly',
+  'seed.apply': 'Seed sphere application',
+  'seed.destroy': 'Seed sphere destruction',
 };
 
 export default en;

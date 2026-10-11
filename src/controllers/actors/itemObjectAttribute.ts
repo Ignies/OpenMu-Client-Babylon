@@ -4,7 +4,8 @@
  * `o->BlendMeshLight` the additive mesh is drawn at. Weapons and shields only (groups 0-6); the
  * random UV jumps of the Legendary shield / staff and the Lightning Sword are not kept.
  *
- * Read by: controllers/fx/model.ts `native` (Twisting Slash's wheel copies, Rageful Blow's thrown weapon).
+ * Read by: controllers/fx/model.ts `native` (Twisting Slash's wheel copies, Rageful Blow's thrown weapon) and
+ * ecs/systems/appearanceSystem.ts, the weapon or shield a character holds (`RenderLinkObject`, ZzzCharacter.cpp:6648).
  */
 
 interface ItemMeshRule {

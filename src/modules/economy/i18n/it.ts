@@ -53,4 +53,9 @@ export default {
   'chaos.lackItems': 'Mancano oggetti per la combinazione.',
   'chaos.levelRequired': '{name} è disponibile dal livello {level}.',
   'chaos.makeRoom': "Riordina l'inventario prima di combinare.",
+  'chaos.sameSphere': 'Non puoi applicare una sfera dello stesso tipo.',
+  'chaos.selectSocket': 'Devi scegliere un incastro.',
+  'chaos.socketApplied': 'È già applicato.',
+  'chaos.selectDestructible': "Devi scegliere l'incastro da distruggere.",
+  'chaos.noDestructible': 'Non ci sono sfere con seme da distruggere.',
 } satisfies Partial<Record<keyof typeof en, string>>;

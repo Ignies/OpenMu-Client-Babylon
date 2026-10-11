@@ -90,6 +90,32 @@
     white-space: normal;
   }
 
+  // `RenderMixDescriptions` for the seed researcher: the label (200,200,200) and `CUISocketListBox`,
+  // black at 40% under (230,220,200) lines; the picked one black on white.
+  .chaos-socket-label {
+    text-align: center;
+    color: #c8c8c8;
+  }
+
+  .chaos-socket-list {
+    position: absolute;
+    overflow-y: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+    pointer-events: auto;
+
+    .chaos-socket-line {
+      color: #e6dcc8;
+      white-space: nowrap;
+      overflow: hidden;
+      cursor: pointer;
+
+      &.picked {
+        color: #000000;
+        background-color: #ffffff;
+      }
+    }
+  }
+
   .window-button {
     position: absolute;
 
@@ -138,6 +164,11 @@
     font-weight: bold;
     color: #ff8000;
     text-shadow: 1px 1px 0 #000;
+  }
+
+  // The seed NPCs' title is white (RenderTexts, NewUICustomMessageBox.cpp:6455-6462).
+  .seed-menu-title {
+    color: #ffffff;
   }
 
   .chaos-menu-line {

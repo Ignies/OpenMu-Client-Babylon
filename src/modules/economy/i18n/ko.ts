@@ -49,4 +49,9 @@ export default {
   'chaos.lackItems': '조합에 필요한 아이템이 부족합니다.',
   'chaos.levelRequired': '{name}은(는) {level} 레벨부터 가능합니다.',
   'chaos.makeRoom': '인벤토리를 정리한 후 조합하세요.',
+  'chaos.sameSphere': '같은 종류의 스피어는 적용할 수 없습니다.',
+  'chaos.selectSocket': '소켓을 선택해야 합니다.',
+  'chaos.socketApplied': '이미 적용되어 있습니다.',
+  'chaos.selectDestructible': '파괴할 소켓을 선택해야 합니다.',
+  'chaos.noDestructible': '파괴할 시드 스피어가 없습니다.',
 } satisfies Partial<Record<keyof typeof en, string>>;

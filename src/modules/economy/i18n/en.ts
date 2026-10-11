@@ -47,6 +47,11 @@ const en = {
   'chaos.lackItems': 'Some items for the combination are missing.',
   'chaos.levelRequired': '{name} is available from level {level}.',
   'chaos.makeRoom': 'Combine items after organizing your inventory.',
+  'chaos.sameSphere': 'You cannot apply the same type of Sphere.',
+  'chaos.selectSocket': 'You must select the socket.',
+  'chaos.socketApplied': "It's already applied on the character.",
+  'chaos.selectDestructible': 'You must select the destructible socket.',
+  'chaos.noDestructible': 'There are no destructible seed spheres.',
 };
 
 export default en;

@@ -21,6 +21,10 @@ players, plus their moves and equipment changes. The entities live in the ECS wo
   visible equipment. The hero gets `localPlayer`
   (and `isGm`, attack and magic speed from the packet); other players get `interactable`
   (`ZzzInterface.cpp:8110`) and, from the extended packet, their own `speeds` for their clips.
+- The hero is created on join (`CharacterInformation`, as `ReceiveJoinMapServer` does, WSclient.cpp:1081-1160)
+  when there is none: its net id, class and name, at the packet's position, its gear from the inventory
+  that follows. The self scope add rebuilds it; a server that never sends one (OpenMU after a character
+  switch) still leaves the hero a body.
 - Transformed players (`AddTransformedCharactersToScope`, 0x45): skin 0 is a normal player; the
   hero keeps the player rig with the skin's body; other players are drawn with the monster's model
   but keep the player identity (no `npcType`).
@@ -30,6 +34,7 @@ players, plus their moves and equipment changes. The entities live in the ECS wo
   from the inventory (`Hero.syncPlayerAppearance`).
 
 ## Packets
+- `CharacterInformation` / `CharacterInformationExtended`: the hero is created on join if there is none.
 - `AddNpcsToScope`: NPCs and monsters enter view.
 - `AddSummonedMonstersToScope` (0x1F): a player's summons, with the owner's name.
 - `SummonHealthUpdate` (F3 20, `ReceiveSummonLife`): health percent of the hero's own summon.
@@ -57,3 +62,4 @@ players, plus their moves and equipment changes. The entities live in the ECS wo
 ## Tests
 - `net.test.ts`: a player entering view wears its effects' looks; re-adding the body ends the old ones;
   OpenMU's own master buff numbers are listed as their base effect.
+- `heroOnJoin.test.ts`: the hero created on join at the character information position, and left alone when it exists.

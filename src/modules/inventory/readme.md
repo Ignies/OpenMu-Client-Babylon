@@ -8,7 +8,7 @@ items themselves are the hero's (`Hero.items`, `Hero.money`).
 ## Public API
 - `InventoryConstants` (now `src/core/inventoryConstants.ts`, pure, also read by the cash shop server):
   equipment slot indices, `RowSize`, `InventoryRows`, `FirstStoreItemSlotIndex`, `WarehouseRows`.
-- `StorageKind`, `VAULT_*` / `TRADE_*` / `MIX_*` / `PERSONAL_SHOP_*` sizes, `CHAOS_CARD_WIRE_STORAGE` (`itemStorage.ts`).
+- `StorageKind`, `VAULT_*` / `TRADE_*` / `MIX_*` / `PERSONAL_SHOP_*` sizes, `CHAOS_CARD_WIRE_STORAGE`, `SEED_WIRE_STORAGES` (`itemStorage.ts`): the other trays' wire bytes, the chaos machine's grid here.
 - `gridFirstIndex`, `wireSlotOf`, `localIndexOf`, `storageColumns`, `storageRows`: local index vs wire slot per storage.
 - `isVaultBanned`, `isTradeBanned`, `isPersonalShopBanned`, `storageBan(storage, item)`: what a grid refuses.
 - `isEquipable(slot, item)`, `equipDestination(item, worn)` (`controllers/item_rules/equipSlots.ts`): where an

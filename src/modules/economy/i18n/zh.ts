@@ -49,4 +49,9 @@ export default {
   'chaos.lackItems': '合成所需的道具不足。',
   'chaos.levelRequired': '{name}需要等级{level}以上。',
   'chaos.makeRoom': '请整理背包后再合成。',
+  'chaos.sameSphere': '无法镶嵌同类型的镶嵌球。',
+  'chaos.selectSocket': '必须选择镶嵌孔。',
+  'chaos.socketApplied': '已经镶嵌了。',
+  'chaos.selectDestructible': '必须选择要破坏的镶嵌孔。',
+  'chaos.noDestructible': '没有可破坏的种子镶嵌球。',
 } satisfies Partial<Record<keyof typeof en, string>>;

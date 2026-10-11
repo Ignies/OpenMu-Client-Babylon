@@ -115,6 +115,11 @@ export type WingSpec = {
   /** Capes are link-bound to bone 19 with an explicit matrix. */
   readonly cape?: 'emperor' | 'overrule';
   /**
+   * No model on the character: `RenderLinkObject` skips the Cape of Lord and Cape of Fighter
+   * (ZzzCharacter.cpp:7004-7011), which are the `CPhysicsCloth` alone (not ported, actors/readme.md).
+   */
+  readonly clothOnly?: true;
+  /**
    * Clip to play inside a safe zone instead of clip 0 - the Wings of Darkness
    * fold shut in town (`RenderLinkObject`, ZzzCharacter.cpp:6785).
    */
@@ -239,15 +244,14 @@ const WINGS: Readonly<Record<number, WingSpec>> = {
   [WING_OF_CURSE]: PLAIN,
   [WINGS_OF_DESPAIR]: { blendMesh: -1, passes: [{ mesh: 1, kind: 'chrome' }] },
   [WING_OF_DIMENSION]: { blendMesh: -1, passes: [{ mesh: 1, kind: 'chrome' }] },
-  // The model part of the Rage Fighter's capes: Cape of Fighter on the wing
-  // bone, Cape of Overrule on bone 19 (ZzzCharacter.cpp:6708-6714, :15421-15427).
-  // The cloth the original hangs under them (:9780-9809) is not drawn.
-  [CAPE_OF_FIGHTER]: PLAIN,
+  // The Rage Fighter's capes: Cape of Fighter is the cloth alone, Cape of Overrule a model on
+  // bone 19 (ZzzCharacter.cpp:6708-6714) with cloth beside it. The cloth (:9777-9824) is not drawn.
+  [CAPE_OF_FIGHTER]: { blendMesh: -1, clothOnly: true },
   [CAPE_OF_OVERRULE]: { blendMesh: -1, cape: 'overrule' },
 };
 
 const CAPES: Readonly<Record<number, WingSpec>> = {
-  [CAPE_OF_LORD]: { blendMesh: -1, cape: 'emperor' },
+  [CAPE_OF_LORD]: { blendMesh: -1, clothOnly: true },
 };
 
 /** True for the items the appearance's wing slot can legitimately hold. */
