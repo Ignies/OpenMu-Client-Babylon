@@ -18,5 +18,5 @@ export default {
   'notify.upgradeNeedsServer': 'Îmbunătățirea are nevoie de un server',
   'notify.noAnswerRestored': 'Serverul nu a răspuns - obiectul a fost restaurat',
   'notify.cannotBuy': 'Nu poți cumpăra acel obiect',
-  'notify.updateAvailable': 'A apărut o versiune nouă: pagina se reîncarcă după ce ieși din lume.',
+  'notify.updateAvailable': 'A apărut o versiune nouă: pagina se reîncarcă după ce revii la lista de servere.',
 } satisfies Partial<Record<keyof typeof en, string>>;

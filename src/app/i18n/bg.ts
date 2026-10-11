@@ -18,5 +18,5 @@ export default {
   'notify.upgradeNeedsServer': 'Подобряването има нужда от сървър',
   'notify.noAnswerRestored': 'Сървърът не отговори - предметът е върнат',
   'notify.cannotBuy': 'Не можеш да купиш този предмет',
-  'notify.updateAvailable': 'Има нова версия: страницата ще се презареди, когато излезете от света.',
+  'notify.updateAvailable': 'Има нова версия: страницата ще се презареди, когато се върнете към списъка със сървъри.',
 } satisfies Partial<Record<keyof typeof en, string>>;

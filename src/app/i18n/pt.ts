@@ -18,5 +18,5 @@ export default {
   'notify.upgradeNeedsServer': 'O aprimoramento precisa de um servidor',
   'notify.noAnswerRestored': 'O servidor não respondeu - item restaurado',
   'notify.cannotBuy': 'Você não pode comprar esse item',
-  'notify.updateAvailable': 'Há uma versão nova: a página recarrega quando você sair do mundo.',
+  'notify.updateAvailable': 'Há uma versão nova: a página recarrega quando você voltar à lista de servidores.',
 } satisfies Partial<Record<keyof typeof en, string>>;

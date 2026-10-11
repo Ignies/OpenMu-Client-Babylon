@@ -8,7 +8,8 @@ import { addNotification } from '@/modules/chat';
  * A tab left open across a deploy keeps running the old build. Every build ships `build.json`
  * with its id (`vite.config.ts`); the page asks for it at start, every few minutes and on coming
  * back to the tab. On another build it clears the cache and reloads (`clearCacheAndReload`, the
- * Options button): at once outside the world, else once the player leaves it. Readme: "Builds".
+ * Options button): at once while there is no game session (the server list, where a disconnect lands
+ * too), else once the session ends: never from the login, the characters or the world. Readme: "Builds".
  */
 
 const CHECK_EVERY_MS = 5 * 60_000;
@@ -17,9 +18,9 @@ const RELOADED_FOR = 'mu_reloaded_for_build';
 
 export type BuildAction = 'none' | 'reload' | 'later';
 
-export function buildAction(own: string, served: string | null, inGame: boolean, reloadedFor: string | null): BuildAction {
+export function buildAction(own: string, served: string | null, inSession: boolean, reloadedFor: string | null): BuildAction {
   if (!served || served === own || served === reloadedFor) return 'none';
-  return inGame ? 'later' : 'reload';
+  return inSession ? 'later' : 'reload';
 }
 
 async function servedBuild(): Promise<string | null> {
@@ -51,14 +52,15 @@ function reloadFor(build: string): void {
   void clearCacheAndReload();
 }
 
-const inWorld = (state: UIState) => state === UIState.World || state === UIState.LoadingWorld;
+/** A game server session is up: from the login screen on. The server list has none. */
+export const inGameSession = (state: UIState) => state !== UIState.Preloader && state !== UIState.Servers;
 
 let waiting = false;
 
 async function check(): Promise<void> {
   const served = await servedBuild();
   const own = typeof BUILD_ID === 'string' ? BUILD_ID : 'dev';
-  const action = buildAction(own, served, inWorld(AppState.uiState), reloadedFor());
+  const action = buildAction(own, served, inGameSession(AppState.uiState), reloadedFor());
   if (!served || action === 'none') return;
   if (action === 'reload') {
     reloadFor(served);
@@ -68,7 +70,7 @@ async function check(): Promise<void> {
   waiting = true;
   addNotification(t('notify.updateAvailable'), 'info');
   const stop = reaction(
-    () => inWorld(AppState.uiState),
+    () => inGameSession(AppState.uiState),
     still => {
       if (still) return;
       stop();

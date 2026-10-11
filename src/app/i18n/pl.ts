@@ -18,5 +18,5 @@ export default {
   'notify.upgradeNeedsServer': 'Ulepszanie wymaga serwera',
   'notify.noAnswerRestored': 'Serwer nie odpowiedział - przedmiot przywrócony',
   'notify.cannotBuy': 'Nie możesz kupić tego przedmiotu',
-  'notify.updateAvailable': 'Jest nowa wersja: strona przeładuje się, gdy opuścisz świat.',
+  'notify.updateAvailable': 'Jest nowa wersja: strona przeładuje się po powrocie do listy serwerów.',
 } satisfies Partial<Record<keyof typeof en, string>>;
