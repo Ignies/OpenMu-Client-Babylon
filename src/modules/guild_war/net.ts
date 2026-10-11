@@ -131,16 +131,15 @@ export function installNet(): void {
         blueTeam: cleanName(p.BlueTeamName),
         redGoals: p.RedTeamGoals,
         blueGoals: p.BlueTeamGoals,
-        seconds: Social.battleSoccer?.seconds ?? -1,
       };
     });
   });
 
-  /** GuildSoccerTimeUpdate (F3 22): every second while the match runs. */
+  /** GuildSoccerTimeUpdate (F3 22): every second while the match runs, kept while the board is hidden (WSclient.cpp:10947-10952). */
   EventBus.on('GuildSoccerTimeUpdate', packet => {
     const p = new GuildSoccerTimeUpdatePacket(packet);
     runInAction(() => {
-      if (Social.battleSoccer) Social.battleSoccer.seconds = p.Seconds;
+      Social.soccerSeconds = p.Seconds;
     });
   });
 
@@ -150,6 +149,7 @@ export function installNet(): void {
     runInAction(() => {
       Social.guildWar = null;
       Social.battleSoccer = null;
+      Social.soccerSeconds = -1;
       Social.guildWarRequest = null;
     });
     Social.systemMessage(t(GUILD_WAR_ENDINGS[p.Result] ?? 'guild.warEnded'));

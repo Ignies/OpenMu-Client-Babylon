@@ -31,7 +31,8 @@ has the handlers. Plain guild membership is in [../guild/readme.md](../guild/rea
 - `GuildWarDeclared`: the war starts; sets `Social.guildWar`.
 - `GuildWarScoreUpdate`: own and enemy score.
 - `GuildSoccerScoreUpdate` (F3 23): team names and goals; 255 as the first score hides the board.
-- `GuildSoccerTimeUpdate` (F3 22): remaining seconds.
+- `GuildSoccerTimeUpdate` (F3 22): remaining seconds, `Social.soccerSeconds`. Kept while the board is
+  hidden and cleared with the war, as `g_wtMatchTimeLeft` (`ReceiveWTTimeLeft`, WSclient.cpp:10947-10952, :7822).
 - `GuildWarEnded`: won, lost or cancelled; clears the war.
 - `GuildRelationshipRequest` (0xE5): an alliance or hostility offer.
 - `GuildRelationshipChangeResult`: success or the error reason.
@@ -53,4 +54,5 @@ has the handlers. Plain guild membership is in [../guild/readme.md](../guild/rea
 - change the scoreboard: `versions/shared/ui/hud/soccer_score/index.tsx`.
 
 ## Tests
-- `net.test.ts`: a soccer score shows the board, a first score of 255 clears it.
+- `net.test.ts`: a soccer score shows the board, a first score of 255 clears it; the time survives the hidden board
+  and goes with the war.
