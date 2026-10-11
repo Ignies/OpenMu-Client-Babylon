@@ -5,6 +5,9 @@ people who reported its bugs and the playtesters, read from GitHub. One list for
 credits (`versions/shared/ui/pages/preloader/backdrop.tsx`) and the Ctrl+F8 credits window
 (`versions/shared/ui/windows/project_credits/`).
 
+Protected: this loader, its GitHub sources and its notice must stay as they are ([LICENSE](../../../LICENSE),
+"Additional condition"; [AGENTS.md](../../../AGENTS.md), "Credits"). `tools/checks/credits.ts` checks it.
+
 ## Public API
 - `index.ts` (the door): `loadCredits()` (the list in its running order), type `Credit`.
 
