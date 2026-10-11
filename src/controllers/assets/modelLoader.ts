@@ -14,7 +14,6 @@ import {
   type Mesh,
   type Node,
 } from '../render/babylon/exports';
-import type { World } from '../../ecs/world';
 import { BMD } from './bmd';
 
 import {
@@ -724,9 +723,10 @@ function synthesizeRigSkeleton(
   return skeleton;
 }
 
+/** A clone of the GLB in `world.scene`, the only part read: a model with no entity (a bag icon) passes `{ scene }`. */
 export async function loadGLTF(
   filePath: string,
-  world: World
+  world: { scene: Scene }
 ): Promise<LoadedModel> {
   const characterAsset = isCharacterAsset(filePath);
 
@@ -853,7 +853,7 @@ export function disposeLoadedModel(model: LoadedModel): void {
 }
 
 /** Fetch and parse a GLB into the cache without placing a clone, so a later `loadGLTF` of it is not late. */
-export function warmGLTF(filePath: string, world: World): Promise<void> {
+export function warmGLTF(filePath: string, world: { scene: Scene }): Promise<void> {
   if (!USE_MODEL_CONTAINER_CACHE) return Promise.resolve();
   const characterAsset = isCharacterAsset(filePath);
   const path = resolveUrlToDataFolder(filePath);

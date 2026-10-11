@@ -43,7 +43,8 @@ the interface controller's (`AppState`, `controllers/interface/uiState.ts`).
   blocks the browser context menu and wheel outside scrollables, and handles `requestWarp`.
 - `boot.tsx` is also where layers meet that may not import each other: the session resume
   (`Session.resumeHook`), the hero's gear after a warp (`onHeroPlaced`), the repair cursor
-  (`setRepairCursor`), the login music's page readers and the loading screen's `hidden` reader.
+  (`setRepairCursor`), the bag icons drawn from the model (`setLiveItemIcons`), the login music's page
+  readers and the loading screen's `hidden` reader.
   Debug handles: `window.__modules` (`Hero`, `Session`, `Bag`, `Merchant`), `__world`, `__social`, ...
 - `App.tsx` picks the page from `AppState.uiState`. Login and character pages come from the version
   (`loadVersionUi().pregame`), lazy loaded.

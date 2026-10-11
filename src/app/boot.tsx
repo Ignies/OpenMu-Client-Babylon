@@ -34,6 +34,8 @@ import { upscaleLive } from '@/controllers/render/scenes';
 import { TestScene } from '../controllers/render/scenes/testScene';
 import { loadMapIntoScene, onHeroPlaced, onMapChange } from '../controllers/terrain/loadMapIntoScene';
 import { setRepairCursor } from '../controllers/interface/components/game_cursor';
+import { setLiveItemIcons } from '../controllers/interface/item_icons';
+import { liveItemIconSource } from '../controllers/actors/itemIcon';
 import { Merchant } from '../modules/npc_shop';
 import { Bag } from '../modules/inventory';
 import { initControllers } from '../controllers/controllers';
@@ -213,6 +215,8 @@ onMapChange(resetForMapChange);
 onHeroPlaced(() => Hero.syncPlayerAppearance());
 // The hammer cursor follows the merchant's repair mode.
 setRepairCursor(() => Merchant.repairMode);
+// Bag icons the pack has no file for are drawn from the item's model.
+setLiveItemIcons(liveItemIconSource(scene));
 // `MUSIC_LOGIN_THEME` over the server / login / character pages.
 const MENU_PAGES = new Set([UIState.Servers, UIState.Login, UIState.Characters]);
 installLoginMusic(

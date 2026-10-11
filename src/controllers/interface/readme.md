@@ -69,6 +69,19 @@ windows themselves are content in `versions/shared/ui/` (see
 - `item_icons/`: the generated fit table (`tools/itemIconFit.ts`) and the per-item inventory scale
   from `RenderObjectScreen` (ZzzInventory.cpp:9308-10090). Do not edit. Which icon files exist is
   `assets/itemIconManifest.ts` (`tools/itemIconManifest.ts`).
+  `liveItemIcon.ts` (on `item_icons/index.ts`): the slot `item_icon` asks for an icon the pack has no
+  file for (`liveItemIcon(item)`, observable, asked once per look); the app fills it at boot
+  (`setLiveItemIcons`) with `actors/itemIcon.ts`, which draws the model as `RenderItem3D` does. The
+  interface never reaches the scene. The live picture is framed like the original's square, so it
+  takes no fit.
+  `itemIconPose.ts` (on the index): `itemIconPose(group, num, level, twoHand)`, how the original
+  draws an item in a bag square, ported as data: `RenderObjectScreen`'s two if / else-if chains of
+  angles and `Position` offsets, the switches and scale-chain offsets after them, the body height
+  (ZzzInventory.cpp:7653-9026), `RenderItem3D`'s anchor in the squares (:9712-10056) and the model
+  the bag swaps in for the Heart and Rena levels (the only swaps of items the pack has no file for;
+  the rest are pack icons). The rows keep the original's order and line numbers; branches that can
+  never match an item are left out (the file head lists them). The gamble boxes (13/71-75) spin
+  in the original while not hovered; a still picture keeps their 180.
 - `keyBindings.ts`: each action maps to a `KeyboardEvent.code`, stored in localStorage per
   character (`setKeyProfile`), rebound from the Options Keys tab. The defaults are the original's
   keys; our own windows take keys no handler of the original reads (`NewUIHotKey.cpp`,
@@ -128,3 +141,10 @@ windows themselves are content in `versions/shared/ui/` (see
 - `itemTooltip.test.ts`: tooltip lines and name colours against `RenderItemInfo`: ancient sets, pets, harmony,
   sockets, 380 options, wings, the Horn of Fenrir, stack counts.
 - `item_icons/itemIconFit.test.ts`: every Box of Luck level and the newer icons have a fit entry.
+- `item_icons/itemIconPose.test.ts`: a test per rule group against the original's numbers: weapons
+  (hands, the Kris, the sticks, bows, books, shields, the after-switch), armour (the Queen set's default
+  and body heights, the lucky sets, named pieces), wings, orbs, seeds and packed jewels, helpers (the
+  360 range, the second chain over the first), potions and scrolls (the Heart and Rena levels and
+  their models, angle-less branches, the chocolate boxes, refine stones, parchments) and the anchors.
+- `item_icons/liveItemIcon.test.ts`: nothing asked while the slot is empty; one ask per look, the URL
+  reaching an observer; the look key; a failed draw answers null once.

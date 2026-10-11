@@ -31,7 +31,7 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 - `deserializeAppearance.ts`: `deserializeAppearance`, `deserializeAppearanceExtended`,
   `APPEARANCE_EXTENDED_LENGTH`, `classFromAppearance`, `emptyAppearance`, `withAppearanceClass`,
   `isAppearanceBlank`, `itemLevelFromGlow`.
-- `weaponClass.ts`: `GROUP_*`, item tests (`isWeaponItem`, `isBow`, `isCrossbow`, `isBook`,
+- `weaponClass.ts`: `GROUP_*`, item tests (`isWeaponItem`, `isTwoHanded`, `isBow`, `isCrossbow`, `isBook`,
   `equippedBowType`, `swordformGlovesModel`), clip pickers (`chooseIdleAction`, `chooseWalkAction`,
   `chooseRunAction`, `chooseFenrir*Action`, `chooseAttackAction`, `chooseHighBowAttackAction`,
   `isSocialAction`), types `CharacterPose`, `AttackPose`, `Hands`.
@@ -63,6 +63,14 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   place of the item's own: the Summoner's Vine and Silk pieces (`HelmElfC`...), the Rage Fighter's Leather, Scale,
   Brass and Plate (`HelmMonk`..., gloves and boots both `BootMonk`, MonkSystem.cpp:187-206) and the Dark Lord's
   Bronze, Leather, Scale, Brass and Plate helms (`MaskHelmMale`), ZzzCharacter.cpp:9579-9617.
+- `itemModel.ts`: `dressItemModel(object, group, num)`, what the original does to every loose item
+  model, on the ground or in the bag (`ItemHeight`, `HideSkin`, frozen at frame 0, the
+  `ItemObjectAttribute` mesh rules; `DropObject` and the bag icon both use it), and
+  `loadItemModel(scene, parent, group, num, file)`, such a model with no entity behind it. A worn
+  `Player/` part keeps its own file's skeleton, posed at its first frame, as a drop does.
+- `itemIcon.ts`: `itemIconJob(scene, item)`, the shot of a bag icon drawn from the item's model, and
+  `liveItemIconSource(scene)`, what the app puts in the interface's live-icon slot;
+  `ITEM_ICON_UNITS_PER_PIXEL`.
 
 ## How it works
 - A spawned object's class comes from `resolveModelFactory(type)`, called by
@@ -106,6 +114,17 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 - A transformation skin (`characterSkinBody`) is either a part file worn on the player rig in place
   of the armor (`transformedBodyFactory`, ZzzCharacter.cpp:9345-9440) or a whole monster model that
   plays monster clips (`monsterClipFor`, WSclient.cpp:2760-2800).
+- A bag icon the pack has no file for (`itemIcon.ts`) is drawn as `RenderItem3D` draws every icon
+  (ZzzInventory.cpp:9707): the original's item camera has an identity view, a 1 degree field over
+  the 640 x 480 screen and puts the item 200 units out (0.1 of `RENDER_ITEMVIEW_FAR`), so a bag pixel
+  is `ITEM_ICON_UNITS_PER_PIXEL` units there. The shot covers the item's squares (20 pixels each),
+  places the model at its anchor in them plus its offset, turns it and sets its body height as
+  `RenderObjectScreen` does (`interface/item_icons/itemIconPose.ts`, two-handed by `isTwoHanded`, the
+  inventory width proxy) and scales it by `itemIconScale.ts`; its meshes carry the item's
+  `itemVisualTier` as worn gear does (the level and excellent passes, RenderPartObject at the item's
+  level and options, ZzzInventory.cpp:9699); `render/iconShot.ts` draws it once. A picture is kept
+  per look (group, number, level, excellent, ancient) for the session: a changed item-effects
+  option shows on new looks only.
 
 ## Depends on / used by
 - uses: `render` (`ModelObject`, bone links), `assets`, `anim`, `fx`, `item_fx`, `lighting`,
@@ -138,6 +157,11 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 - `approachPath.test.ts`: walk truncation at range, distance along the sent path, stall capping.
 - `deserializeAppearance.test.ts`: `isAppearanceBlank` on empty and real previews.
 - `itemAngle.test.ts`: drop scale and pose per group, worn height, the `ItemAngle` tail rows.
+- `itemIcon.test.ts`: the shot covers the item's squares at the original's item depth, loads the
+  item's own model under the root at its scale and angle; a worn part (the Queen helm) draws only its
+  helm mesh, comes down by `ItemHeight` and keeps its own skeleton; the anchor plus offset (the Lucky
+  Penny), a weapon's hands (Mace of the King), the Heart +0's swapped model and scale, the level and
+  excellent tier on every mesh and one key per look; no shot for an item with no model.
 - `npcModelTable.test.ts`: every row names a file in `public/game-assets` and has a scale > 0; the
   tables behave as plain objects and read the folders when asked.
 - `trapModels.test.ts`: every (map, trap) pair names an `Object<world+1>` model that exists.

@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import type { Item } from '@/ecs/world';
 import { itemIconKey, itemIconPackChain } from '@/controllers/assets/itemIconPack';
 import { ITEM_ICON_FIT } from '@/controllers/interface/item_icons/itemIconFit';
+import { liveItemIcon } from '@/controllers/interface/item_icons/liveItemIcon';
 import { itemLevelLook } from '@/controllers/item_rules';
 
 /**
@@ -34,7 +35,8 @@ function fitTransform(item: Item): string | undefined {
 }
 
 /**
- * An item's icon from the pre-rendered pack (itemIconPack.ts).
+ * An item's icon from the pre-rendered pack (itemIconPack.ts), or drawn from its model when the
+ * pack has no file for it (`item_icons/liveItemIcon.ts`; already framed, so no fit).
  *
  * An observer leaf taking the item itself: only the fields the file name
  * depends on (`itemIconKey`) are read here, so a durability tick or an
@@ -53,6 +55,11 @@ export const ItemIcon = memo(
     const chain = itemIconPackChain(item);
 
     if (fallbackStep >= chain.length) {
+      // No pack file: the original draws every icon from the model, so draw this one.
+      const live = liveItemIcon(item);
+      if (live) {
+        return <img src={live} className="item-icon" alt="" draggable={false} decoding="async" />;
+      }
       return (
         <div
           className="item-icon item-icon-missing"

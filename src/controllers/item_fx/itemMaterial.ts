@@ -596,6 +596,8 @@ type ShaderVars = {
   texel: string;
   /** BodyLight × BlendMeshLight per mesh (vec4, alpha = visibility). */
   bodyLight: string;
+  /** Flat lit (`LightEnable` off, a bag item): the vertex light is BodyLight alone, not the scene's. */
+  flat?: boolean;
 };
 
 const STANDARD_VARS: ShaderVars = {
@@ -610,7 +612,7 @@ const PBR_VARS: ShaderVars = {
   bodyLight: BODY_LIGHT_UNIFORM,
 };
 
-const legacyPasses = ({ color, texel, bodyLight }: ShaderVars) => `
+const legacyPasses = ({ color, texel, bodyLight, flat }: ShaderVars) => `
     int fx = int(${ITEM_FX_UNIFORM});
     int fxLevel = fx & ${FX_LEVEL_MASK};
     bool fxExc = (fx & ${FX_EXCELLENT}) != 0;
@@ -682,7 +684,7 @@ const legacyPasses = ({ color, texel, bodyLight }: ShaderVars) => `
       vec3 nm = vec3(normalW.x, normalW.z, normalW.y);
       // RENDER_TEXTURE passes are vertex lit (BodyLight × IntensityTransform,
       // 0.2…1.2); the chrome passes are not - glColor3fv(BodyLight) only.
-      vec3 lit = clamp(diffuseBase, vec3(0.2), vec3(1.2));
+      vec3 lit = ${flat ? `${bodyLight}.rgb` : 'clamp(diffuseBase, vec3(0.2), vec3(1.2))'};
       float fade = ${LEGACY_GAIN};
 
       if (fxLevel >= 3 && fxLevel < 5) {
@@ -1133,7 +1135,7 @@ ${
     simpleMaterial.AddUniform(UV_SCROLL_UNIFORM, 'vec2', null);
   }
 
-  simpleMaterial.Fragment_Before_FragColor(legacyPasses(STANDARD_VARS));
+  simpleMaterial.Fragment_Before_FragColor(legacyPasses({ ...STANDARD_VARS, flat: flatLit }));
 
   // The sun response lands on `diffuseBase` before the UNCLAMP recompute
   // reads it; glow cards and flat-lit models take neither.

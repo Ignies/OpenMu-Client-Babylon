@@ -48,6 +48,9 @@ original client's item passes, the item glow tiers and the weapon swing trails.
 - `syncPbrDetail`: one dial moves every way Enhanced comes out paler than Classic: specular
   intensity (the Standard material has none), metallic, bump level, and the added emissive
   (`DETAIL_UNIFORM`). Roughness is left alone; scaling it would make surfaces shinier.
+- Flat-lit variants (a bag icon, `render/iconShot.ts`): the excellent redraw is vertex lit in the
+  original, and a bag item's vertex light is its BodyLight (`LightEnable` off), so `lit` is BodyLight
+  there instead of the scene's lambert sum.
 - Half-lambert (`MU_WRAP`): the original shades `dot*0.8 + 0.4`, clamped >= 0.2. It is added to
   the light sum as `sun x (wrap(dot) - max(dot, 0)) x shadow`, constants divided by 1.2 so a
   sun-facing face is unchanged. The sun's shadow factor is recovered from Babylon's aggregate as
@@ -94,4 +97,5 @@ original client's item passes, the item glow tiers and the weapon swing trails.
   `itemMaterial.ts`; never change the legacy passes to add one.
 
 ## Tests
-None in this folder.
+- `itemMaterial.test.ts`: the excellent redraw takes the lit body's vertex light, and BodyLight alone
+  on a flat-lit material (a bag item, `LightEnable` off, ZzzInventory.cpp:9682).
