@@ -203,6 +203,12 @@ describe('a wing tooltip', () => {
     expect(lines({ group: 12, num: 43, durability: 200, optionLevel: 1, wingOptionKind: 2 }).map(l => l.text)).toContain('Additional Curse +4');
   });
 
+  // GlobalText[579] (ZzzInventory.cpp:4213, :4260, :4303); the capes carry no such line (:4500-4508).
+  it('says the wings increase speed', () => {
+    for (const num of [0, 3, 36]) expect(lines({ group: 12, num, durability: 200 }).map(l => l.text)).toContain('Increase speed');
+    expect(lines({ group: 12, num: 49, durability: 200 }).map(l => l.text)).not.toContain('Increase speed');
+  });
+
   it('lists the third wing options', () => {
     const text = lines({ group: 12, num: 37, durability: 200, wingOptions: 0x02 | 0x08 }).map(l => l.text);
     expect(text).toContain("Returns the enemy's attack power in 5%");

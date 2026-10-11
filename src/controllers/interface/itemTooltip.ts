@@ -308,17 +308,17 @@ function wingLines(out: Lines, def: ItemDef, level: number) {
   if (isFirstWing(def)) {
     out.add(t('item.increaseDamage', { value: 12 + level * 2 }));
     out.add(t('item.absorbDamage', { value: 12 + level * 2 }));
-    out.add(t('item.ableToFly'));
+    out.add(t('item.increaseSpeed'));
   } else if (isSecondWing(def)) {
     out.add(t('item.increaseDamage', { value: 32 + level }));
     out.add(t('item.absorbDamage', { value: 25 + level * 2 }));
-    out.add(t('item.ableToFly'));
+    out.add(t('item.increaseSpeed'));
   } else if (isThirdWing(def)) {
     out.add(t('item.increaseDamage', { value: 39 + level * 2 }));
     // Cape of Emperor / Overrule absorb less.
     const absorb = def.index === 40 || def.index === 50 ? 24 : 39;
     out.add(t('item.absorbDamage', { value: absorb + level * 2 }));
-    out.add(t('item.ableToFly'));
+    out.add(t('item.increaseSpeed'));
   } else if (isCapeOfLord(def) || isCapeOfFighter(def)) {
     out.add(t('item.increaseDamage', { value: 20 + level * 2 }));
     const absorb = isCapeOfFighter(def) ? 10 + level * 2 : 10 + level;
@@ -733,7 +733,7 @@ function fenrirLines(out: Lines, def: ItemDef, item: Item, hero: HeroStats) {
   out.add(t('item.fenrir.skill', { mana: skillMana(PLASMA_STORM) }), 'blue');
   if (flags === 0x01 || flags === 0x02) {
     out.add(t(flags === 0x01 ? 'item.fenrir.finalDamage' : 'item.fenrir.absorbFinal', { value: 10 }), 'blue');
-    out.add(t('item.fenrir.speed'), 'blue');
+    out.add(t('item.increaseSpeed'), 'blue');
   } else if (flags === 0x04) {
     out.add(t('item.fenrir.life', { value: Math.trunc(hero.level / 2) }), 'blue');
     out.add(t('item.fenrir.mana', { value: Math.trunc(hero.level / 2) }), 'blue');
