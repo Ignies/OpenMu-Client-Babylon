@@ -64,6 +64,7 @@ export default {
   'options.blockBrowserKeys': 'Chặn phím tắt trình duyệt',
   'options.fullscreen': 'Toàn màn hình',
   'options.installApp': 'Cài ứng dụng',
+  'options.clearCache': 'Tệp trò chơi đã lưu đệm',
   'options.appInstalled': 'Đã cài ứng dụng',
   'options.installHint':
     'Trình duyệt này chưa đề nghị cài đặt. Hãy mở menu của trình duyệt và chọn Cài đặt hoặc Thêm vào màn hình.',
@@ -165,6 +166,7 @@ export default {
   'options.windowLayout': 'Vị trí cửa sổ',
   'options.reset': 'Đặt lại',
   'options.install': 'Cài đặt',
+  'options.clearCacheButton': 'Xóa',
   'options.defaults': 'Mặc định',
   'options.confirmDefaults': 'Đưa mọi thiết lập trên trang này về mặc định?',
   'options.confirmDefaultKeys': 'Đưa mọi phím về mặc định cho nhân vật này?',
@@ -336,6 +338,8 @@ export default {
   'options.help.fullscreen':
     'Chuyển giữa toàn màn hình và cửa sổ trình duyệt thường. F11 cũng làm vậy.',
   'options.help.install': 'Cài game thành ứng dụng có cửa sổ và biểu tượng riêng.',
+  'options.help.clearCache':
+    'Xóa các tệp trò chơi mà trình duyệt này lưu (giữ lại nhạc) và tải lại trang, như Ctrl+F5. Dùng khi có gì đó trông như cũ.',
   'options.help.language':
     'Ngôn ngữ của giao diện, nhiệm vụ, hội thoại NPC, tên quái vật và vật phẩm.',
   'options.help.englishItemNames':

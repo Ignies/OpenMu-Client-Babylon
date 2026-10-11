@@ -12,6 +12,10 @@ the interface controller's (`AppState`, `controllers/interface/uiState.ts`).
 - `logic.ts`: installs the modules, sends `Ping`, refreshes NPC names, hands the map ping its link.
 - `lifecycle.ts`: `resetForMapChange()`, what resets on a map change.
 - `backgroundTick.ts` (+ `backgroundTick.worker.ts`): the logic step while the browser gives no frames.
+- `buildCheck.ts` ("Builds", ours): a tab left open across a deploy compares its `BUILD_ID` with the
+  `build.json` every build ships (`vite.config.ts`), at start, every 5 min and on coming back to the
+  tab; on another build it clears the cache and reloads (`controllers/assets/cacheReset.ts`) at once
+  outside the world, else once the player leaves it. A session flag stops a reload loop.
 - `offline.ts`: `playOffline()`, the offline test scene (`/offline`, the preloader's Play Offline):
   no server, a test hero on `?map=`, with `?class=`, `?skin=`, `?hand1=` / `?hand2=` / `?pet=`,
   `?bare`, `?hp=` / `?mp=` as screenshot seams. `App.tsx` hands it to the preloader page.
@@ -87,6 +91,8 @@ or `src/ecs` (`Ecs.world`). The codemod that rewrote `Store.x` is in git history
 - `listenerOrder.golden.test.ts`: every packet's listeners and their order once the app has loaded.
   It hashes each listener's code without whitespace or vitest's numbered import aliases, so moving
   an import keeps the hash; changing a listener or the install order changes it.
+- `buildCheck.test.ts`: nothing on the same build, reload outside the world, wait inside it, never
+  twice for one build.
 - `backgroundTick.test.ts`: the tick runs a logic step only once the browser stopped giving frames.
 - `lifecycle.test.ts`: the map-change resets run in order (the buff looks redrawn right after the
   effects end), then the sign plates and the unused monster and NPC models are freed.

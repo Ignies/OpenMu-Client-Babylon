@@ -19,4 +19,5 @@ export default {
   'notify.noAnswerRestored':
     'Il server non ha risposto - oggetto ripristinato',
   'notify.cannotBuy': 'Non puoi comprare quell’oggetto',
+  'notify.updateAvailable': 'È uscita una nuova versione: la pagina si ricarica quando lasci il mondo.',
 } satisfies Partial<Record<keyof typeof en, string>>;

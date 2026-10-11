@@ -64,6 +64,7 @@ export default {
   'options.blockBrowserKeys': 'Blokuj skróty przeglądarki',
   'options.fullscreen': 'Pełny ekran',
   'options.installApp': 'Zainstaluj aplikację',
+  'options.clearCache': 'Pliki gry w pamięci podręcznej',
   'options.appInstalled': 'Aplikacja zainstalowana',
   'options.installHint':
     'Ta przeglądarka nie proponuje jeszcze instalacji. Otwórz jej menu i wybierz Zainstaluj lub Dodaj do pulpitu.',
@@ -165,6 +166,7 @@ export default {
   'options.windowLayout': 'Położenie okien',
   'options.reset': 'Resetuj',
   'options.install': 'Zainstaluj',
+  'options.clearCacheButton': 'Wyczyść',
   'options.defaults': 'Domyślne',
   'options.confirmDefaults': 'Przywrócić domyślne wartości wszystkich ustawień na tej stronie?',
   'options.confirmDefaultKeys': 'Przywrócić domyślne klawisze dla tej postaci?',
@@ -344,6 +346,8 @@ export default {
   'options.help.fullscreen':
     'Przełącza między pełnym ekranem a zwykłym oknem przeglądarki. F11 robi to samo.',
   'options.help.install': 'Instaluje grę jako aplikację z własnym oknem i ikoną.',
+  'options.help.clearCache':
+    'Czyści pliki gry przechowywane przez tę przeglądarkę (muzyka zostaje) i przeładowuje stronę, jak Ctrl+F5. Użyj, gdy coś wygląda na nieaktualne.',
   'options.help.language':
     'Język interfejsu, zadań, dialogów NPC oraz nazw potworów i przedmiotów.',
   'options.help.englishItemNames':

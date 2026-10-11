@@ -64,6 +64,7 @@ export default {
   'options.blockBrowserKeys': 'Блокирай клавишите на браузъра',
   'options.fullscreen': 'Цял екран',
   'options.installApp': 'Инсталиране като приложение',
+  'options.clearCache': 'Кеширани файлове на играта',
   'options.appInstalled': 'Инсталирано',
   'options.installHint': 'Този браузър още не предлага инсталиране. Отвори менюто му и избери Инсталиране.',
   'options.uiScale': 'Размер',
@@ -165,6 +166,7 @@ export default {
   'options.windowLayout': 'Позиции на прозорците',
   'options.reset': 'Нулирай',
   'options.install': 'Инсталирай',
+  'options.clearCacheButton': 'Изчисти',
   'options.defaults': 'Стандартни',
   'options.confirmDefaults': 'Да се възстановят ли стандартните стойности на всички настройки на тази страница?',
   'options.confirmDefaultKeys': 'Да се възстановят ли стандартните клавиши за този герой?',
@@ -330,6 +332,8 @@ export default {
   'options.help.fullscreen':
     'Превключва между цял екран и нормален прозорец на браузъра. F11 прави същото.',
   'options.help.install': 'Инсталира играта като приложение със собствен прозорец и икона.',
+  'options.help.clearCache':
+    'Изчиства файловете на играта, пазени от браузъра (музиката остава), и презарежда страницата като Ctrl+F5. Ползвайте го, когато нещо изглежда остаряло.',
   'options.help.language':
     'Езикът на интерфейса, мисиите, диалозите с NPC и имената на чудовища и предмети.',
   'options.help.englishItemNames':

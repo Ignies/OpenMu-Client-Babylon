@@ -65,6 +65,7 @@ export default {
   'options.blockBrowserKeys': 'Browser-Tastenkürzel blockieren',
   'options.fullscreen': 'Vollbild',
   'options.installApp': 'App installieren',
+  'options.clearCache': 'Zwischengespeicherte Spieldateien',
   'options.appInstalled': 'App installiert',
   'options.installHint': 'Dieser Browser bietet die Installation noch nicht an. Im Browser-Menü Installieren wählen.',
   'options.uiScale': 'Größe',
@@ -166,6 +167,7 @@ export default {
   'options.windowLayout': 'Fensterpositionen',
   'options.reset': 'Zurücksetzen',
   'options.install': 'Installieren',
+  'options.clearCacheButton': 'Leeren',
   'options.defaults': 'Standard',
   'options.confirmDefaults':
     'Alle Einstellungen dieser Seite auf Standard zurücksetzen?',
@@ -380,6 +382,8 @@ export default {
     'Wechselt zwischen Vollbild und normalem Browserfenster. F11 macht dasselbe.',
   'options.help.install':
     'Installiert das Spiel als App mit eigenem Fenster und Symbol.',
+  'options.help.clearCache':
+    'Leert die Spieldateien, die dieser Browser behält (die Musik bleibt), und lädt die Seite neu, wie Strg+F5. Nutze es, wenn etwas veraltet wirkt.',
   'options.help.language':
     'Die Sprache von Oberfläche, Quests, NPC-Dialogen sowie Monster- und Gegenstandsnamen.',
   'options.help.englishItemNames':

@@ -116,7 +116,7 @@ type KeyRow = { kind: 'key'; action: KeyAction; labelKey: TextKey };
 
 export type ButtonRow = RowBase & {
   kind: 'button';
-  id: 'install' | 'resetWindows';
+  id: 'install' | 'resetWindows' | 'clearCache';
   buttonKey: TextKey;
 };
 
@@ -783,6 +783,14 @@ export const CATEGORIES: Category[] = [
                 labelKey: 'options.installApp',
                 helpKey: 'options.help.install',
                 buttonKey: 'options.install',
+              },
+              // Ours: Ctrl+F5 for whoever cannot press it (controllers/assets/cacheReset.ts).
+              {
+                kind: 'button',
+                id: 'clearCache',
+                labelKey: 'options.clearCache',
+                helpKey: 'options.help.clearCache',
+                buttonKey: 'options.clearCacheButton',
               },
             ],
           },

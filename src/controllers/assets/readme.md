@@ -35,6 +35,9 @@ imports the modules below directly (baselined in `tools/checks`).
   `packsBase`, `onTexturePackChanged`, `packRepaintsPending`, `textureLabel`.
 - `assetDownload.ts`: `assetDownload` (store), `AssetGroup`, `loadAssetsIndex`, `startDownload`,
   `cancelDownload`, `clearDownloaded`, `storageUsed`, `ensureCacheWorker`.
+- `cacheReset.ts`: `clearCacheAndReload()` (ours, the Options button and `app/buildCheck.ts`): Ctrl+F5
+  for whoever cannot press it. Drops the worker's cached assets but the music, unregisters the
+  worker and reloads with a throwaway `?r=`.
 - `itemIconPack.ts`: `prefetchItemIcons`, `itemIconPackChain`, `itemIconUrl`, `itemIconKey`.
 - `worldAssets.ts`: `assetWorldNum`, `*_WORLDS` lists (readers over `maps`).
 - `ktx2Pixels.ts`: `isKtx2`, `loadTranscoder`, `decodeKtx2`, `TranscoderUrls`.
@@ -121,6 +124,7 @@ imports the modules below directly (baselined in `tools/checks`).
 - `loadFailure.test.ts`: one warning per file, a different file warns again, `settle` passes a
   value through and turns a failure into `undefined`.
 - `assetDownload.test.ts`: `urlsOf`, Core cannot be unticked, transfer totals.
+- `cacheReset.test.ts`: the music stays, the rest and the worker go, the page reloads.
 - `cacheWorker.test.ts`: `public/sw.js` run against an in-memory cache: a new build drops what another
   downloaded (the music kept), its own build keeps it, an asset it does not hold is revalidated once.
 - `compressedAssets.test.ts`: sidecar only for listed extensions, gzip or host-unwrapped bytes,

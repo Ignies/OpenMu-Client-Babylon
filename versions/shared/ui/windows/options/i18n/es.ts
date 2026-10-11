@@ -65,6 +65,7 @@ export default {
   'options.blockBrowserKeys': 'Bloquear atajos del navegador',
   'options.fullscreen': 'Pantalla completa',
   'options.installApp': 'Instalar aplicación',
+  'options.clearCache': 'Archivos del juego en caché',
   'options.appInstalled': 'Aplicación instalada',
   'options.installHint': 'Este navegador aún no ofrece la instalación. Abre su menú y elige Instalar.',
   'options.uiScale': 'Tamaño',
@@ -166,6 +167,7 @@ export default {
   'options.windowLayout': 'Posición de las ventanas',
   'options.reset': 'Restablecer',
   'options.install': 'Instalar',
+  'options.clearCacheButton': 'Borrar',
   'options.defaults': 'Por defecto',
   'options.confirmDefaults':
     '¿Devolver todos los ajustes de esta página a su valor por defecto?',
@@ -385,6 +387,8 @@ export default {
     'Alterna entre pantalla completa y una ventana normal del navegador. F11 hace lo mismo.',
   'options.help.install':
     'Instala el juego como una aplicación, con su propia ventana e icono.',
+  'options.help.clearCache':
+    'Borra los archivos del juego que guarda este navegador (la música se queda) y recarga la página, como Ctrl+F5. Úsalo si algo parece desactualizado.',
   'options.help.language':
     'El idioma de la interfaz, las misiones, los diálogos de los PNJ y los nombres de monstruos y objetos.',
   'options.help.englishItemNames':

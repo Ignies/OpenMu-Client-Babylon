@@ -18,4 +18,5 @@ export default {
   'notify.upgradeNeedsServer': '强化需要连接服务器',
   'notify.noAnswerRestored': '服务器没有响应 - 物品已还原',
   'notify.cannotBuy': '你无法购买这件物品',
+  'notify.updateAvailable': '有新版本：离开世界后页面会重新加载。',
 } satisfies Partial<Record<keyof typeof en, string>>;

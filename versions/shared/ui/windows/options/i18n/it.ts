@@ -65,6 +65,7 @@ export default {
   'options.blockBrowserKeys': 'Blocca le scorciatoie del browser',
   'options.fullscreen': 'Schermo intero',
   'options.installApp': 'Installa l\'app',
+  'options.clearCache': 'File di gioco in cache',
   'options.appInstalled': 'App installata',
   'options.installHint': 'Questo browser non offre ancora l\'installazione. Apri il suo menu e scegli Installa.',
   'options.uiScale': 'Dimensione',
@@ -166,6 +167,7 @@ export default {
   'options.windowLayout': 'Posizione delle finestre',
   'options.reset': 'Reimposta',
   'options.install': 'Installa',
+  'options.clearCacheButton': 'Svuota',
   'options.defaults': 'Predefiniti',
   'options.confirmDefaults':
     'Vuoi riportare tutte le impostazioni di questa pagina ai valori predefiniti?',
@@ -350,6 +352,8 @@ export default {
   'options.help.fullscreen':
     'Passa dallo schermo intero a una normale finestra del browser e viceversa. F11 fa lo stesso.',
   'options.help.install': 'Installa il gioco come app, con finestra e icona proprie.',
+  'options.help.clearCache':
+    'Svuota i file di gioco che questo browser conserva (la musica resta) e ricarica la pagina, come Ctrl+F5. Usalo quando qualcosa sembra non aggiornato.',
   'options.help.language':
     'La lingua dell’interfaccia, delle missioni, dei dialoghi con i PNG e dei nomi di mostri e oggetti.',
   'options.help.englishItemNames':

@@ -65,6 +65,7 @@ export default {
   'options.blockBrowserKeys': 'Bloquer les raccourcis du navigateur',
   'options.fullscreen': 'Plein écran',
   'options.installApp': 'Installer l\'application',
+  'options.clearCache': 'Fichiers du jeu en cache',
   'options.appInstalled': 'Application installée',
   'options.installHint': 'Ce navigateur ne propose pas encore l\'installation. Ouvrez son menu et choisissez Installer.',
   'options.uiScale': 'Taille',
@@ -166,6 +167,7 @@ export default {
   'options.windowLayout': 'Position des fenêtres',
   'options.reset': 'Réinitialiser',
   'options.install': 'Installer',
+  'options.clearCacheButton': 'Vider',
   'options.defaults': 'Par défaut',
   'options.confirmDefaults': 'Remettre tous les réglages de cette page à leur valeur par défaut ?',
   'options.confirmDefaultKeys': 'Remettre toutes les touches par défaut pour ce personnage ?',
@@ -345,6 +347,8 @@ export default {
   'options.help.fullscreen':
     'Bascule entre le plein écran et une fenêtre de navigateur normale. F11 fait de même.',
   'options.help.install': 'Installe le jeu comme une application, avec sa propre fenêtre et son icône.',
+  'options.help.clearCache':
+    'Vide les fichiers du jeu que garde ce navigateur (la musique reste) et recharge la page, comme Ctrl+F5. À utiliser si quelque chose semble dépassé.',
   'options.help.language':
     'La langue de l’interface, des quêtes, des dialogues des PNJ et des noms de monstres et d’objets.',
   'options.help.englishItemNames':

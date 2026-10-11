@@ -65,6 +65,7 @@ export default {
   'options.blockBrowserKeys': 'Blochează scurtăturile browserului',
   'options.fullscreen': 'Ecran complet',
   'options.installApp': 'Instalează aplicația',
+  'options.clearCache': 'Fișierele jocului din cache',
   'options.appInstalled': 'Aplicație instalată',
   'options.installHint': 'Acest browser nu oferă încă instalarea. Deschide meniul lui și alege Instalare.',
   'options.uiScale': 'Mărime',
@@ -167,6 +168,7 @@ export default {
   'options.windowLayout': 'Pozițiile ferestrelor',
   'options.reset': 'Resetează',
   'options.install': 'Instalează',
+  'options.clearCacheButton': 'Golește',
   'options.defaults': 'Implicite',
   'options.confirmDefaults': 'Readuci toate setările de pe această pagină la valorile implicite?',
   'options.confirmDefaultKeys':
@@ -354,6 +356,8 @@ export default {
   'options.help.fullscreen':
     'Comută între ecran complet și o fereastră normală de browser. F11 face același lucru.',
   'options.help.install': 'Instalează jocul ca aplicație, cu propria fereastră și iconiță.',
+  'options.help.clearCache':
+    'Golește fișierele jocului păstrate de acest browser (muzica rămâne) și reîncarcă pagina, ca Ctrl+F5. Folosește-l când ceva pare învechit.',
   'options.help.language':
     'Limba interfeței, a misiunilor, a dialogurilor cu NPC-urile și a numelor de monștri și obiecte.',
   'options.help.englishItemNames':

@@ -65,6 +65,7 @@ const en = {
   'options.blockBrowserKeys': 'Block browser shortcuts',
   'options.fullscreen': 'Fullscreen',
   'options.installApp': 'Install app',
+  'options.clearCache': 'Cached game files',
   'options.appInstalled': 'App installed',
   'options.installHint': 'No install offer from this browser yet. Open its menu and pick Install or Add to desktop.',
   'options.uiScale': 'Interface size',
@@ -169,6 +170,7 @@ const en = {
   'options.windowLayout': 'Window positions',
   'options.reset': 'Reset',
   'options.install': 'Install',
+  'options.clearCacheButton': 'Clear',
   'options.defaults': 'Defaults',
   'options.confirmDefaults':
     'Put every setting on this page back to its default?',
@@ -374,6 +376,8 @@ const en = {
     'Switches between fullscreen and a normal browser window. F11 does the same.',
   'options.help.install':
     'Installs the game as an app with its own window and icon.',
+  'options.help.clearCache':
+    'Clears the game files this browser keeps (the music stays) and reloads the page, like Ctrl+F5. Use it when something looks out of date.',
   'options.help.language':
     'The language of the interface, quests, NPC dialogue, and monster and item names.',
   'options.help.englishItemNames':

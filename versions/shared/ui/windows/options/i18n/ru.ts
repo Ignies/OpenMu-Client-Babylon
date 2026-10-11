@@ -64,6 +64,7 @@ export default {
   'options.blockBrowserKeys': 'Блокировать горячие клавиши браузера',
   'options.fullscreen': 'Полный экран',
   'options.installApp': 'Установить',
+  'options.clearCache': 'Кэш файлов игры',
   'options.appInstalled': 'Установлено',
   'options.installHint': 'Этот браузер пока не предлагает установку. Откройте его меню и выберите «Установить».',
   'options.uiScale': 'Размер',
@@ -165,6 +166,7 @@ export default {
   'options.windowLayout': 'Положение окон',
   'options.reset': 'Сбросить',
   'options.install': 'Установить',
+  'options.clearCacheButton': 'Очистить',
   'options.defaults': 'По умолчанию',
   'options.confirmDefaults':
     'Вернуть все настройки этой страницы к значениям по умолчанию?',
@@ -376,6 +378,8 @@ export default {
     'Переключает между полноэкранным режимом и обычным окном браузера. То же делает F11.',
   'options.help.install':
     'Устанавливает игру как приложение с отдельным окном и значком.',
+  'options.help.clearCache':
+    'Очищает файлы игры, сохранённые браузером (музыка остаётся), и перезагружает страницу, как Ctrl+F5. Используйте, если что-то выглядит устаревшим.',
   'options.help.language':
     'Язык интерфейса, заданий, диалогов NPC, названий монстров и предметов.',
   'options.help.englishItemNames':
