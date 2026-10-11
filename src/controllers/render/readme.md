@@ -96,7 +96,8 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `propBatchRules.test.ts`: `batchExclusion`, `chunkOf`, placement and instance matrices.
 - `objectShadow.test.ts`: the shadow fold, run as JS: every vertex folds as `CalcShadowPosition`, a tall
   one too; Icarus and Kalima draw no shadow; the lean is 25 tiles in Valley of Loren, 20 elsewhere.
-- `propBatches.test.ts`: batches built and disposed twice over one cached model leave its buffers whole.
+- `propBatches.test.ts`: batches built and disposed twice over one cached model leave its buffers whole; a
+  batched caster's shadow folds from the ground when it asks to (`ShadowFromGround`).
 - `renderAngles.test.ts`: `angleMatrixQuaternion` against the original's `AngleMatrix`, and a
   placed record with both pitch and roll drawn by it, by its node and by its batched placement.
 - `renderingStyle.test.ts`: style readers, tier gating, the material snapshot and toon binds.
@@ -156,7 +157,7 @@ There is no `index.ts` facade; other folders import the modules directly.
   map object once cast one, with a size gate to keep flowers and cliffs out. `ClassicShadow` turns a
   character's or part's blob off where the original draws none (a cape's model), read every frame; the
   cascades still take it (`CastsShadow`). `ShadowFromGround` folds from the terrain under the origin
-  (the shader's `shadowGround`), as the original does for the boids; `CascadeShadow` keeps a caster off
+  (the shader's `shadowGround`), as the original does for the boids and the Blood Castle statues; `CascadeShadow` keeps a caster off
   the cascades (the boids, which have the Classic shadow alone).
   The fold (`SHADOW_FOLD`) is the original's `CalcShadowPosition`, which divides by the vertex's height
   under the 40-tile light, with no limit: the tallest monsters it shadows (Selupan's highest key is 26

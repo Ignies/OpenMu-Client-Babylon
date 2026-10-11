@@ -19,14 +19,14 @@ const engine = new NullEngine();
 const scene = new Scene(engine);
 afterAll(() => engine.dispose());
 
-/** `[type, mesh the shadow leaves out]` for every type the map binds to a shadowed class. */
+/** `[type, mesh the shadow leaves out, folded from the ground]` for every type the map binds to a shadowed class. */
 async function casters(create: (world: World) => Promise<void>, mapIndex: ENUM_WORLD) {
   const tiles: (typeof ModelObject)[] = [];
   await create({ mapIndex, terrain: { MapTileObjects: tiles } } as unknown as World);
-  const out: [number, number][] = [];
+  const out: [number, number, boolean][] = [];
   tiles.forEach((factory, type) => {
     const object = new factory(scene);
-    if (object.MapShadow) out.push([type, object.ShadowHiddenMesh]);
+    if (object.MapShadow) out.push([type, object.ShadowHiddenMesh, object.ShadowFromGround]);
     object.dispose();
   });
   return out;
@@ -34,12 +34,12 @@ async function casters(create: (world: World) => Promise<void>, mapIndex: ENUM_W
 
 // The only map objects the original shadows: their cases call RenderBodyShadow.
 describe('the map objects that cast a Classic shadow', () => {
-  it('are Blood Castle 28 and 29 without mesh 2 (ZzzObject.cpp:1041-1057)', async () => {
-    expect(await casters(createBloodCastle, ENUM_WORLD.WD_11BLOODCASTLE1)).toEqual([[28, 2], [29, 2]]);
+  it('are Blood Castle 28 and 29 without mesh 2, from the ground under them (ZzzObject.cpp:1041-1057)', async () => {
+    expect(await casters(createBloodCastle, ENUM_WORLD.WD_11BLOODCASTLE1)).toEqual([[28, 2, true], [29, 2, true]]);
   });
 
   it('are Valley of Loren 50, 83, 84 and 85 outside a siege (GMBattleCastle.cpp:1219-1228)', async () => {
-    expect(await casters(createValleyOfLoren, ENUM_WORLD.WD_30BATTLECASTLE)).toEqual([[50, -1], [83, -1], [84, -1], [85, -1]]);
+    expect(await casters(createValleyOfLoren, ENUM_WORLD.WD_30BATTLECASTLE)).toEqual([[50, -1, false], [83, -1, false], [84, -1, false], [85, -1, false]]);
   });
 
   // CreateOperate alone (GMBattleCastle.cpp:1045-1047), and drawn outside a siege (:650-677): a click target with a body.
