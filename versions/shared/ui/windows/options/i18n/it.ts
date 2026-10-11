@@ -379,4 +379,7 @@ export default {
   'options.help.autoManaPotion':
     'Beve la pozione di mana più grande dello zaino quando il mana scende sotto un decimo, al massimo una al secondo. Solo sui server che lo consentono.',
   'options.needs.server': 'Questo server non lo consente.',
+  'options.autoQuiver': 'Faretra automatica',
+  'options.help.autoQuiver':
+    'Mette in mano le frecce o i dardi successivi dello zaino appena la faretra si esaurisce, invece che al tiro successivo. Solo sui server che lo consentono.',
 } satisfies Partial<Record<keyof typeof en, string>>;

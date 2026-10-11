@@ -116,6 +116,11 @@ everything the stack reads is rendered from `mu.env`, so `mu config` can change 
   the biggest mana potion in the bag, at most one a second, the same request the W key sends. Off,
   the player's option does nothing, as in the original. Gameplay automation: your call.
 
+  `autoQuiver` (`mu config` > Features, `MU_AUTO_QUIVER`, default off) lets a player turn on the
+  automatic quiver (Options > Game): the next arrows or bolts in the bag go into the hand as soon
+  as the server takes the empty quiver, the same move a drag sends. Off, the original's reload
+  stays: the next quiver goes in when the next shot finds the hand empty.
+
   `modulesOff` (`mu config` > Features, `MU_MODULES_OFF` in `mu.env`, comma separated, default
   none) lists the optional client modules this world does without: their windows hide for its
   players. `band` is added by itself when the band relay is off. The ids are the folders of

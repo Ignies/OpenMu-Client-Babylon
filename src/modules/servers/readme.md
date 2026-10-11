@@ -49,7 +49,7 @@ connect server's own list (`Servers.serverList`) is filled by `session/net.ts`.
   `pageTitle.ts`, `chat/chatRooms.ts` (the chat socket's address), the pages
   `versions/shared/ui/pages/preloader/`, `pages/server_select/`, `pages/login/` and
   `pages/character_select/CharMakeWin.tsx`, and `register/`; `serverSetting` also by
-  `inventory/autoMana.ts` and the Options window's `options/gating.ts`.
+  `inventory/autoMana.ts`, `ecs/systems/attackSystem.ts` and the Options window's `options/gating.ts`.
 
 ## Change it
 - add a profile field: `ServerProfile` and `sanitizeProfile` in `serverConfig.ts`.
@@ -143,3 +143,6 @@ connect server's own list (`Servers.serverList`) is filled by `session/net.ts`.
 - `autoManaPotion`: lets the player's `autoManaPotion` option drink a mana potion by itself when
   the mana runs low (`inventory/autoMana.ts`); the original never drinks by itself. Off (the
   original), the option is greyed and does nothing.
+- `autoQuiver`: lets the player's `autoQuiver` option put the next quiver in as soon as the server
+  takes the empty one (`ecs/systems/attackSystem.ts`). The original reloads only when a shot or
+  bow skill finds the hand empty (`CheckArrow`, ZzzInterface.cpp:1206), which stays on every server.

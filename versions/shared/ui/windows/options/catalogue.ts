@@ -317,6 +317,7 @@ export const CATEGORIES: Category[] = [
               toggle('confirmValuableItems'),
               // Gameplay automation (ours): only where the world's server.json allows it.
               toggle('autoManaPotion', { needs: [needServer('autoManaPotion')] }),
+              toggle('autoQuiver', { needs: [needServer('autoQuiver')] }),
               choice('compareTooltips', COMPARE_TOOLTIP_MAX, named(COMPARE_TOOLTIP_LABEL_KEYS)),
             ],
           },

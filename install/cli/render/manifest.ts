@@ -18,6 +18,7 @@ export function serverManifest(c: Config): string {
       retryLoginWhenConnected: c.retryLoginWhenConnected,
       muHelperAfterReconnect: c.muHelperAfterReconnect,
       autoManaPotion: c.autoManaPotion,
+      autoQuiver: c.autoQuiver,
     },
     modulesOff: manifestModulesOff(c),
   };

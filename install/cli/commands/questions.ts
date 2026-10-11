@@ -58,6 +58,7 @@ export async function ask(c: Config, group: Group): Promise<Config> {
       next.retryLoginWhenConnected = await ui.confirm('Retry a login refused as "account already connected"? (off = the original; only useful if this server drops the old session on that refusal)', c.retryLoginWhenConnected);
       next.muHelperAfterReconnect = await ui.confirm('Start the MU Helper again after an automatic reconnect if it was running? (off = it stays off; botting policy)', c.muHelperAfterReconnect);
       next.autoManaPotion = await ui.confirm('Let players turn on drinking a mana potion by itself when mana runs low? (off = the original; gameplay automation)', c.autoManaPotion);
+      next.autoQuiver = await ui.confirm('Let players turn on putting the next quiver in as soon as one runs out? (off = the original reloads at the next shot; gameplay automation)', c.autoQuiver);
       next.modulesOff = await ui.text('Client modules to turn off (comma separated, like events,marketplace; blank for none)', { initial: c.modulesOff, validate: v => (/^\s*([a-z_]+\s*(,\s*[a-z_]+\s*)*)?$/.test(v) ? undefined : 'Module names separated by commas.') });
       break;
     case 'openmu': {

@@ -19,6 +19,8 @@ type ServerSettings = {
   readonly muHelperAfterReconnect: boolean;
   /** Drink a mana potion from the bag when mana runs low (ours: the original never drinks by itself). */
   readonly autoManaPotion: boolean;
+  /** Put the next quiver in as soon as one runs out (the original waits for the next shot's CheckArrow, ZzzInterface.cpp:1206). */
+  readonly autoQuiver: boolean;
 };
 
 type ServerManifest = {
@@ -35,6 +37,7 @@ export const ORIGINAL_SETTINGS: ServerSettings = {
   retryLoginWhenConnected: false,
   muHelperAfterReconnect: false,
   autoManaPotion: false,
+  autoQuiver: false,
 };
 
 const MODULE_ID = /^[a-z][a-z0-9_]{0,31}$/;
@@ -46,6 +49,7 @@ const SETTING_TYPES: { readonly [K in keyof ServerSettings]: 'boolean' } = {
   retryLoginWhenConnected: 'boolean',
   muHelperAfterReconnect: 'boolean',
   autoManaPotion: 'boolean',
+  autoQuiver: 'boolean',
 };
 
 const CACHE_KEY = 'mu_server_manifests';

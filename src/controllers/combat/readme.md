@@ -33,7 +33,7 @@ It never sends packets or touches the scene; the ECS systems that fight read it 
 - Door types: `CastContext`, `CastPose`, `PoseClip`, `ClipPick`, `SkillClipSet`, `SkillKill`,
   `SkillCombatRules`.
 - Each entry file is importable on its own for a single function (`isHostilePlayer`,
-  `ammoReload`, `MELEE_RANGE`, ...).
+  `ammoReload`, `ammoInHand`, `MELEE_RANGE`, ...).
 
 ## How it works
 - `layers.ts` lists the entries, in update order: input gate, attack timing, then reader-only

@@ -409,4 +409,7 @@ export default {
   'options.help.autoManaPotion':
     'Trinkt den größten Manatrank aus deinem Inventar, wenn dein Mana unter ein Zehntel fällt, höchstens einen pro Sekunde. Nur auf Servern, die es erlauben.',
   'options.needs.server': 'Dieser Server erlaubt das nicht.',
+  'options.autoQuiver': 'Automatischer Köcher',
+  'options.help.autoQuiver':
+    'Legt die nächsten Pfeile oder Bolzen aus deinem Inventar in die Hand, sobald der Köcher leer ist, statt erst beim nächsten Schuss. Nur auf Servern, die es erlauben.',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -64,7 +64,8 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
 - `systems/ceilingHideSystem.test.ts`: the roof over the hero fades on Enhanced, stays drawn but
   detected on Classic, and comes back when `roofFade` is turned off.
 - `systems/attackSystem.test.ts`: a swing sends the walk stop (`LetHeroStop`) before its hit, on the
-  cut step's destination tile.
+  cut step's destination tile. `autoQuiver` puts the next quiver in when the server takes the empty
+  one, only where the server and the player allow it, and never one the player lifted.
 - `systems/itemPickupSystem.test.ts`: the pickup request marks the drop `pickupAsked`; Space takes the
   first drawn item under three tiles, not the nearest.
 - `systems/gmMark.test.ts`: the GM buff or the hero's operator status asks for the Webzen mark, cloaking hides it.

@@ -307,4 +307,6 @@ export default {
   'options.autoManaPotion': '自动喝法力药水',
   'options.help.autoManaPotion': '法力低于十分之一时，喝下背包里最大的法力药水，每秒最多一瓶。仅限允许此功能的服务器。',
   'options.needs.server': '此服务器不允许。',
+  'options.autoQuiver': '自动换箭筒',
+  'options.help.autoQuiver': '箭筒用完时立即把背包里的下一组箭或弩箭装到手上，而不是等到下一次射击。仅限允许此功能的服务器。',
 } satisfies Partial<Record<keyof typeof en, string>>;

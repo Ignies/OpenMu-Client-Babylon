@@ -33,6 +33,8 @@ export type Config = {
   muHelperAfterReconnect: boolean;
   /** `server.json`: players may have a mana potion drunk by itself when mana runs low (off = never). */
   autoManaPotion: boolean;
+  /** `server.json`: players may have the next quiver put in as soon as one runs out (off = at the next shot, the original). */
+  autoQuiver: boolean;
   /** Optional client modules this world turns off, comma separated (`server.json` `modulesOff`). */
   modulesOff: string;
 };
@@ -64,6 +66,7 @@ const KEYS: Record<keyof Config, string> = {
   retryLoginWhenConnected: 'MU_RETRY_LOGIN_WHEN_CONNECTED',
   muHelperAfterReconnect: 'MU_HELPER_AFTER_RECONNECT',
   autoManaPotion: 'MU_AUTO_MANA_POTION',
+  autoQuiver: 'MU_AUTO_QUIVER',
   modulesOff: 'MU_MODULES_OFF',
 };
 
@@ -94,6 +97,7 @@ export const DEFAULTS: Config = {
   retryLoginWhenConnected: false,
   muHelperAfterReconnect: false,
   autoManaPotion: false,
+  autoQuiver: false,
   modulesOff: '',
 };
 

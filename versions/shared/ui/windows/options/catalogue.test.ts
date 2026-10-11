@@ -24,7 +24,7 @@ describe('the party invitations row', () => {
 // Gameplay automation is the world's to allow (`server.json`): greyed and inert on the original.
 describe('the automation rows', () => {
   it('do nothing where the server does not allow them', () => {
-    for (const key of ['autoManaPotion']) {
+    for (const key of ['autoManaPotion', 'autoQuiver']) {
       const row = rows.find(r => 'key' in r && r.key === key);
       if (!row || row.kind !== 'toggle') throw new Error(`no ${key} toggle row`);
       expect(blockerOf(row.needs)?.text, key).toBe('options.needs.server');

@@ -14,14 +14,14 @@ Format version: **1**
 | Offset | Bytes | What |
 |---|---|---|
 | 0 | 1 | Format version. Anything else means a different table. |
-| 1 | 1 | Number of flag bytes that follow (currently 7). |
-| 2 | 7 | The on/off settings, one bit each, first in bit 0 of the first byte. |
-| 9 | 1 | Number of value bytes that follow (currently 55). |
-| 10 | 55 | The numeric settings, one byte each, each stored as value + 128. |
-| 65 | 2 | Language, two ASCII letters (`65 73` is `es`). |
-| 67 | 2 | Texture pack digest, `0000` when the original textures are in use. |
+| 1 | 1 | Number of flag bytes that follow (currently 8). |
+| 2 | 8 | The on/off settings, one bit each, first in bit 0 of the first byte. |
+| 10 | 1 | Number of value bytes that follow (currently 55). |
+| 11 | 55 | The numeric settings, one byte each, each stored as value + 128. |
+| 66 | 2 | Language, two ASCII letters (`65 73` is `es`). |
+| 68 | 2 | Texture pack digest, `0000` when the original textures are in use. |
 
-Total: **69 bytes**, 138 hex characters.
+Total: **70 bytes**, 140 hex characters.
 
 ## On/off settings
 
@@ -36,55 +36,56 @@ Bit `n` counts from the first flag byte: byte `n / 8`, bit `n % 8`, lowest bit f
 | 4 | 0.4 | `animeImpacts` |
 | 5 | 0.5 | `autoAttack` |
 | 6 | 0.6 | `autoManaPotion` |
-| 7 | 0.7 | `autoReconnect` |
-| 8 | 1.0 | `blockBrowserKeys` |
-| 9 | 1.1 | `cameraControl` |
-| 10 | 1.2 | `chatEmojis` |
-| 11 | 1.3 | `chatSystemMessages` |
-| 12 | 1.4 | `chatTimestamps` |
-| 13 | 1.5 | `clouds` |
-| 14 | 1.6 | `confirmValuableItems` |
-| 15 | 1.7 | `dropSoundAncient` |
-| 16 | 2.0 | `dropSoundExcellent` |
-| 17 | 2.1 | `dropSoundFilter` |
-| 18 | 2.2 | `dropSoundHighLevel` |
-| 19 | 2.3 | `dropSoundJewels` |
-| 20 | 2.4 | `dropSoundOther` |
-| 21 | 2.5 | `dropSoundZen` |
-| 22 | 2.6 | `dropTooltips` |
-| 23 | 2.7 | `dynamicLights` |
-| 24 | 3.0 | `englishItemNames` |
-| 25 | 3.1 | `eventTimers` |
-| 26 | 3.2 | `firstPersonBob` |
-| 27 | 3.3 | `fxaa` |
-| 28 | 3.4 | `grassOutline` |
-| 29 | 3.5 | `hearInstruments` |
-| 30 | 3.6 | `helperItemFilters` |
-| 31 | 3.7 | `lockWindows` |
-| 32 | 4.0 | `lootAncient` |
-| 33 | 4.1 | `lootExcellent` |
-| 34 | 4.2 | `lootFilter` |
-| 35 | 4.3 | `lootHighLevel` |
-| 36 | 4.4 | `lootJewels` |
-| 37 | 4.5 | `lootOther` |
-| 38 | 4.6 | `lowHealthWarning` |
-| 39 | 4.7 | `lowManaWarning` |
-| 40 | 5.0 | `minimapCorner` |
-| 41 | 5.1 | `monsterEffects` |
-| 42 | 5.2 | `muteInBackground` |
-| 43 | 5.3 | `performanceReadout` |
-| 44 | 5.4 | `postProcessing` |
-| 45 | 5.5 | `propBatching` |
-| 46 | 5.6 | `questTracker` |
-| 47 | 5.7 | `quickItemActions` |
-| 48 | 6.0 | `shadows` |
-| 49 | 6.1 | `slideHelp` |
-| 50 | 6.2 | `statPointAmounts` |
-| 51 | 6.3 | `stateWarnings` |
-| 52 | 6.4 | `thirdPersonMouseLook` |
-| 53 | 6.5 | `weatherEffects` |
-| 54 | 6.6 | `whisperBeep` |
-| 55 | 6.7 | `wsadMovement` |
+| 7 | 0.7 | `autoQuiver` |
+| 8 | 1.0 | `autoReconnect` |
+| 9 | 1.1 | `blockBrowserKeys` |
+| 10 | 1.2 | `cameraControl` |
+| 11 | 1.3 | `chatEmojis` |
+| 12 | 1.4 | `chatSystemMessages` |
+| 13 | 1.5 | `chatTimestamps` |
+| 14 | 1.6 | `clouds` |
+| 15 | 1.7 | `confirmValuableItems` |
+| 16 | 2.0 | `dropSoundAncient` |
+| 17 | 2.1 | `dropSoundExcellent` |
+| 18 | 2.2 | `dropSoundFilter` |
+| 19 | 2.3 | `dropSoundHighLevel` |
+| 20 | 2.4 | `dropSoundJewels` |
+| 21 | 2.5 | `dropSoundOther` |
+| 22 | 2.6 | `dropSoundZen` |
+| 23 | 2.7 | `dropTooltips` |
+| 24 | 3.0 | `dynamicLights` |
+| 25 | 3.1 | `englishItemNames` |
+| 26 | 3.2 | `eventTimers` |
+| 27 | 3.3 | `firstPersonBob` |
+| 28 | 3.4 | `fxaa` |
+| 29 | 3.5 | `grassOutline` |
+| 30 | 3.6 | `hearInstruments` |
+| 31 | 3.7 | `helperItemFilters` |
+| 32 | 4.0 | `lockWindows` |
+| 33 | 4.1 | `lootAncient` |
+| 34 | 4.2 | `lootExcellent` |
+| 35 | 4.3 | `lootFilter` |
+| 36 | 4.4 | `lootHighLevel` |
+| 37 | 4.5 | `lootJewels` |
+| 38 | 4.6 | `lootOther` |
+| 39 | 4.7 | `lowHealthWarning` |
+| 40 | 5.0 | `lowManaWarning` |
+| 41 | 5.1 | `minimapCorner` |
+| 42 | 5.2 | `monsterEffects` |
+| 43 | 5.3 | `muteInBackground` |
+| 44 | 5.4 | `performanceReadout` |
+| 45 | 5.5 | `postProcessing` |
+| 46 | 5.6 | `propBatching` |
+| 47 | 5.7 | `questTracker` |
+| 48 | 6.0 | `quickItemActions` |
+| 49 | 6.1 | `shadows` |
+| 50 | 6.2 | `slideHelp` |
+| 51 | 6.3 | `statPointAmounts` |
+| 52 | 6.4 | `stateWarnings` |
+| 53 | 6.5 | `thirdPersonMouseLook` |
+| 54 | 6.6 | `weatherEffects` |
+| 55 | 6.7 | `whisperBeep` |
+| 56 | 7.0 | `wsadMovement` |
 
 ## Value settings
 

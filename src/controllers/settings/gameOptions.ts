@@ -397,6 +397,12 @@ export type GameOptions = {
    */
   autoManaPotion: boolean;
   /**
+   * Put the next quiver in as soon as the server takes the empty one (ours,
+   * `ecs/systems/attackSystem.ts`). Only where the world's `server.json` sets
+   * `autoQuiver`; the original reloads at the next shot (`CheckArrow`).
+   */
+  autoQuiver: boolean;
+  /**
    * A small corner readout with the frame rate, the frame time and the last
    * measured server round trip (`controllers/net/roundTrip.ts`). Off is the HUD exactly
    * as it was; the `performanceReadout` key action toggles it too.
@@ -638,6 +644,7 @@ const DEFAULTS: GameOptions = {
   quickItemActions: true,
   confirmValuableItems: true,
   autoManaPotion: false,
+  autoQuiver: false,
   performanceReadout: false,
   compareTooltips: 2,
   eventTimers: true,

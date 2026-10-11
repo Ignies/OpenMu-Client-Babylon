@@ -405,6 +405,9 @@ const en = {
   'options.help.autoManaPotion':
     'Drinks the biggest mana potion in your bag when your mana falls under a tenth, at most one a second. Only on servers that allow it.',
   'options.needs.server': 'This server does not allow it.',
+  'options.autoQuiver': 'Automatic quiver',
+  'options.help.autoQuiver':
+    'Puts the next arrows or bolts from your bag in your hand as soon as the quiver runs out, instead of at your next shot. Only on servers that allow it.',
 };
 
 export default en;
