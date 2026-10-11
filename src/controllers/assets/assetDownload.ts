@@ -156,7 +156,9 @@ export function ensureCacheWorker(): Promise<ServiceWorker | null> {
       /* keep going */
     }
     try {
-      const reg = await navigator.serviceWorker.register('./sw.js');
+      // The build in the URL: a deploy installs a new worker, which drops the old build's files.
+      const build = typeof BUILD_ID === 'string' ? BUILD_ID : 'dev';
+      const reg = await navigator.serviceWorker.register(`./sw.js?build=${encodeURIComponent(build)}`);
       await navigator.serviceWorker.ready;
       return reg.active ?? navigator.serviceWorker.controller;
     } catch (e) {
