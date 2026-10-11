@@ -47,8 +47,9 @@ the two server packets, with its running state and the raw config blob (`MuHelpe
   Character, Select Server, a drop nothing resumes, a kick) clears `MuHelper.active` (`stop()`), as
   the original's menu stops it (`TriggerStop`, NewUICustomMessageBox.cpp:2374, 2406) and a lost
   connection takes the server's helper with it. A warp (LoadingWorld) and a resume keep the page.
-  Select Server and Switch Character also send `triggerStop()` before the LogOut when it runs, as the
-  original's buttons do (`SessionExit`'s `onBeforeLogOut`).
+  Exit Game, Select Server and Switch Character also send `triggerStop()` before the LogOut when it
+  runs, as the original's buttons do (NewUICustomMessageBox.cpp:2343, 2374, 2406; `SessionExit`'s
+  `onBeforeLogOut`).
 - Resume (`resume.ts`, ours): a socket drop that starts the automatic reconnect stops the helper,
   as the server's ended with the old session. Where the world's `server.json` sets
   `muHelperAfterReconnect`, it is asked to start again (`toggleMuHelper`) 3 s after the resume is
@@ -58,7 +59,7 @@ the two server packets, with its running state and the raw config blob (`MuHelpe
 - `MuHelperStatusUpdate` (BF 51): starts or pauses the helper; reports the zen it cost.
 - `MuHelperConfigurationData` (C2 AE): the saved config blob, stored as is.
 - outgoing: `MuHelperSaveDataRequest` (`state.ts`), `MuHelperStatusChangeRequest` (`MuHelper.toggleMuHelper`,
-  `MuHelper.triggerStop` before a Select Server or Switch Character LogOut).
+  `MuHelper.triggerStop` before a system menu LogOut).
 
 ## Depends on / used by
 - uses: `session` (`Session`, `SessionResume`), `servers/serverManifest.ts`, `controllers/interface/uiState.ts`, `hero`, `skills`, `pets`, `inventory` (item use), `npc_shop` (repair),
@@ -87,5 +88,5 @@ the two server packets, with its running state and the raw config blob (`MuHelpe
   a save only with the filters on.
 - `resume.test.ts`: a drop stops it; after the resume it stays off by default and is asked for again
   only where the world allows it and only when it was running. Switch Character, Select Server and
-  a drop nothing resumes stop it; a warp does not. Select Server and Switch Character send the stop
-  request before the LogOut only when it runs.
+  a drop nothing resumes stop it; a warp does not. Exit Game, Select Server and Switch Character send
+  the stop request before the LogOut only when it runs.

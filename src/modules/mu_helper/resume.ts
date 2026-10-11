@@ -19,10 +19,10 @@ const RESTART_MS = 3000;
 export function installResume(): void {
   let wasOn = false;
 
-  // Select Server and Switch Character stop a running helper before the LogOut
-  // (NewUICustomMessageBox.cpp:2374, 2406).
-  onBeforeLogOut(kind => {
-    if (kind !== 'quit' && MuHelper.active) MuHelper.triggerStop();
+  // Exit Game, Select Server and Switch Character stop a running helper before the LogOut
+  // (NewUICustomMessageBox.cpp:2343, 2374, 2406).
+  onBeforeLogOut(() => {
+    if (MuHelper.active) MuHelper.triggerStop();
   });
 
   // Out of the world: a warp stays in it (LoadingWorld), the resume keeps the page where it was.

@@ -126,8 +126,8 @@ describe('the MU Helper when the session ends', () => {
   });
 });
 
-// CSystemMenuMsgBox's Select Server and Switch Character send `TriggerStop` before the LogOut
-// when the helper runs (NewUICustomMessageBox.cpp:2374, 2406).
+// CSystemMenuMsgBox's Exit Game, Select Server and Switch Character send `TriggerStop` before the
+// LogOut when the helper runs (NewUICustomMessageBox.cpp:2343, 2374, 2406).
 describe('leaving through the system menu', () => {
   afterEach(() => {
     vi.useRealTimers();
@@ -135,7 +135,7 @@ describe('leaving through the system menu', () => {
   });
 
   /** The packets the exit sends, as code/subcode and their first data byte. */
-  function exitPackets(kind: 'servers' | 'characters', helperOn: boolean): string[] {
+  function exitPackets(kind: 'quit' | 'servers' | 'characters', helperOn: boolean): string[] {
     vi.useFakeTimers();
     runInAction(() => {
       AppState.uiState = UIState.World;
@@ -146,7 +146,7 @@ describe('leaving through the system menu', () => {
       sent.push([view.getUint8(2), view.getUint8(3), view.getUint8(4)].map(b => b.toString(16)).join(' '));
     });
     SessionExit.request(kind);
-    SessionExit.onResponse(kind === 'servers' ? 2 : 1);
+    SessionExit.onResponse({ quit: 0, characters: 1, servers: 2 }[kind]);
     return sent;
   }
 
@@ -155,11 +155,13 @@ describe('leaving through the system menu', () => {
     // BF 51 with PauseStatus 1 (what the helper's own off switch sends), then F1 02 with the type.
     expect(exitPackets('servers', true)).toEqual(['bf 51 1', 'f1 2 2']);
     expect(exitPackets('characters', true)).toEqual(['bf 51 1', 'f1 2 1']);
+    expect(exitPackets('quit', true)).toEqual(['bf 51 1', 'f1 2 0']);
   });
 
   it('sends only the LogOut when the helper is off', () => {
     vi.spyOn(Session, 'connectToConnectServer').mockImplementation(() => undefined);
     expect(exitPackets('servers', false)).toEqual(['f1 2 2']);
     expect(exitPackets('characters', false)).toEqual(['f1 2 1']);
+    expect(exitPackets('quit', false)).toEqual(['f1 2 0']);
   });
 });
