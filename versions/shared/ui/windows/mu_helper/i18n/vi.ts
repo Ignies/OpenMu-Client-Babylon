@@ -43,6 +43,8 @@ export default {
   'muHelper.pickExtra': 'Vật phẩm thêm:',
   'muHelper.itemName': 'Tên vật phẩm',
   'muHelper.addItem': 'Thêm',
+  'muHelper.itemFilters': 'Bộ lọc (+Luck +Opt 12)',
+  'muHelper.itemFilters.hint': 'Từ bắt đầu bằng + dùng để lọc vật phẩm: +Luck, +Skill, +Exc, +Anc, +Opt hoặc +Opt 12, +9 cho cấp độ. Mục có thể dài hơn; trình duyệt này giữ toàn bộ văn bản. Tắt: như bản gốc, một phần của tên.',
   'muHelper.removeItem': 'Xóa',
   'muHelper.pickSkill': 'Chọn kỹ năng',
   'muHelper.noSkills': 'Chưa học kỹ năng nào dùng được',

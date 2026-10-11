@@ -39,6 +39,10 @@ export default {
   'options.hearInstruments': 'Auzi instrumentele celorlalți jucători',
   'options.dropSoundFilter': 'Doar ce este mai jos',
   'options.statPointAmounts': 'Adaugă puncte în bloc',
+  'options.partyInviteReply': 'Invitații în grup',
+  'options.partyInviteReply.ask': 'Întreabă',
+  'options.partyInviteReply.decline': 'Refuză',
+  'options.partyInviteReply.accept': 'Acceptă',
   'options.whisperBeep': 'Sunet la primirea unei șoapte',
   'options.slideHelp': 'Anunțuri defilante',
   'options.cameraControl': 'Control cameră',
@@ -59,11 +63,13 @@ export default {
   'options.quickItemActions': 'Ctrl-clic mută obiectele',
   'options.confirmValuableItems': 'Întreabă înainte de a arunca sau vinde obiecte valoroase',
   'options.chatTimestamps': 'Ora în chat',
+  'options.chatSystemMessages': 'Mesaje de sistem',
   'options.chatEmojis': 'Emoji în chat',
   'options.chatEmojiSize': 'Mărime emoji în chat',
   'options.blockBrowserKeys': 'Blochează scurtăturile browserului',
   'options.fullscreen': 'Ecran complet',
   'options.installApp': 'Instalează aplicația',
+  'options.clearCache': 'Fișierele jocului din cache',
   'options.appInstalled': 'Aplicație instalată',
   'options.installHint': 'Acest browser nu oferă încă instalarea. Deschide meniul lui și alege Instalare.',
   'options.uiScale': 'Mărime',
@@ -151,6 +157,7 @@ export default {
   'options.page.volume': 'Volum',
   'options.page.screen': 'Ecran',
   'options.section.character': 'Personaj',
+  'options.section.party': 'Grup',
   'options.section.notices': 'Notificări',
   'options.section.movement': 'Deplasare',
   'options.section.keyboard': 'Tastatură',
@@ -166,6 +173,7 @@ export default {
   'options.windowLayout': 'Pozițiile ferestrelor',
   'options.reset': 'Resetează',
   'options.install': 'Instalează',
+  'options.clearCacheButton': 'Golește',
   'options.defaults': 'Implicite',
   'options.confirmDefaults': 'Readuci toate setările de pe această pagină la valorile implicite?',
   'options.confirmDefaultKeys':
@@ -193,6 +201,8 @@ export default {
     'Arată obiectul echipat lângă cel de sub cursor, cu liniile mai bune și mai slabe marcate.',
   'options.help.statPointAmounts':
     'Adaugă o casetă de cantitate lângă fiecare + din fereastra Personaj, ca să pui mai multe puncte deodată.',
+  'options.help.partyInviteReply':
+    'Ce face o invitație în grup: întreabă, ca în original, sau e refuzată ori acceptată singură. Comenzile /re on, /re off și /re auto setează același lucru.',
   'options.help.autoReconnect':
     'Dacă pică conexiunea în timp ce joci, te reconectează la același personaj.',
   'options.help.dropTooltips':
@@ -205,6 +215,8 @@ export default {
     'Grămezile de Zen de cel puțin această sumă își păstrează numele. Pe Oprit, toate grămezile au nume.',
   'options.help.chatTimestamps':
     'Afișează ora, de exemplu 14:03, la începutul fiecărui rând din chat.',
+  'options.help.chatSystemMessages':
+    'Liniile de sistem și de eroare din chat; același comutator ca butonul din chat, păstrat între sesiuni.',
   'options.help.whisperBeep': 'Redă un sunet când cineva îți trimite o șoaptă.',
   'options.help.chatEmojiSize':
     'Cât de mari apar emoji-urile în jurnalul conversației. Un rând cu emoji crește ca să îl cuprindă; pe Mică, fiecare rând își păstrează înălțimea obișnuită, ca în jurnalul clasic.',
@@ -351,6 +363,8 @@ export default {
   'options.help.fullscreen':
     'Comută între ecran complet și o fereastră normală de browser. F11 face același lucru.',
   'options.help.install': 'Instalează jocul ca aplicație, cu propria fereastră și iconiță.',
+  'options.help.clearCache':
+    'Golește fișierele jocului păstrate de acest browser (muzica rămâne) și reîncarcă pagina, ca Ctrl+F5. Folosește-l când ceva pare învechit.',
   'options.help.language':
     'Limba interfeței, a misiunilor, a dialogurilor cu NPC-urile și a numelor de monștri și obiecte.',
   'options.help.englishItemNames':

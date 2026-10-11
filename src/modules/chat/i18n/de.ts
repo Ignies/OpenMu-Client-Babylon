@@ -45,6 +45,7 @@ export default {
   'cmd.addfriend':
     'Den Spieler unter dem Zeiger zur Freundesliste hinzufügen',
   'cmd.follow': 'Dem Spieler unter dem Zeiger hinterherlaufen',
+  'cmd.re': 'Gruppeneinladungen: on fragt, off lehnt ab, auto nimmt an',
   'cmd.post': 'Dem ganzen Server zurufen',
   'cmd.help': 'Serverhilfe zu einem Befehl',
   'cmd.list': 'Die Serverbefehle auflisten',

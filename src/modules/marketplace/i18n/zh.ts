@@ -22,6 +22,7 @@ export default {
   'marketplace.bought': '已购买 {name}',
   'marketplace.cancelled': '已下架 {name}',
   'marketplace.listedFlash': '已挂单 {name}',
+  'marketplace.negotiateListed': '{name} 已发布为议价出售',
   'marketplace.unreachable': '无法连接交易市场。',
   'marketplace.buyRefused': '购买被拒绝。',
   'marketplace.cancelFailed': '无法下架。',

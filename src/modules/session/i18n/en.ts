@@ -7,6 +7,8 @@ const en = {
   'resume.done': 'Back online',
   'resume.failed': 'Could not reconnect',
   'resume.cancelled': 'Reconnection cancelled',
+  /** The world retries a login refused while the account was still in the game (`retryLoginWhenConnected`). */
+  'login.closingOldSession': 'Account still connected: closing the old session and trying again...',
 };
 
 export default en;

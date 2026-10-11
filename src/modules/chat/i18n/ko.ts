@@ -41,6 +41,7 @@ export default {
   'cmd.whisper': '커서 아래의 플레이어에게 귓속말',
   'cmd.addfriend': '커서 아래의 플레이어를 친구로 추가',
   'cmd.follow': '커서 아래의 플레이어를 따라 걷기',
+  'cmd.re': '파티 초대: on 확인, off 거절, auto 수락',
   'cmd.post': '서버 전체에 외치기',
   'cmd.help': '명령어에 대한 서버 도움말',
   'cmd.list': '서버 명령어 목록',

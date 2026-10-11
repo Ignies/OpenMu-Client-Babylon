@@ -5,7 +5,7 @@ import type { Item } from '../../ecs/world';
 import { EventBus } from '../../core/eventBus';
 import { Hero } from '../hero';
 import { Session } from '../session';
-import { addNotification } from '../chat';
+import { addNotification, entryRefusalReason } from '../chat';
 import { Ecs } from '../../ecs/current';
 import {
   BloodCastleEnterRequestPacket,
@@ -415,7 +415,8 @@ export function installBloodCastle(): void {
       case BloodCastleEnterResultEnterResultEnum.Success:
         break;
       case BloodCastleEnterResultEnterResultEnum.Failed:
-        text = EVENT_TEXT.cloakLevelWrong;
+        // OpenMU's reason line when it sent one (serverLines.ts), else the original's cloak text.
+        text = entryRefusalReason() ?? EVENT_TEXT.cloakLevelWrong;
         break;
       case BloodCastleEnterResultEnterResultEnum.NotOpen:
         text = formatText(EVENT_TEXT.timePassed, zone);

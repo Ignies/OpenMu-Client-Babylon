@@ -39,6 +39,10 @@ export default {
   'options.hearInstruments': 'Entendre les instruments des autres joueurs',
   'options.dropSoundFilter': 'Uniquement ce qui suit',
   'options.statPointAmounts': 'Ajouter les points par lot',
+  'options.partyInviteReply': 'Invitations de groupe',
+  'options.partyInviteReply.ask': 'Demander',
+  'options.partyInviteReply.decline': 'Refuser',
+  'options.partyInviteReply.accept': 'Accepter',
   'options.whisperBeep': 'Bip à la réception d’un chuchotement',
   'options.slideHelp': 'Annonces défilantes',
   'options.cameraControl': 'Contrôle de la caméra',
@@ -59,11 +63,13 @@ export default {
   'options.quickItemActions': 'Ctrl-clic déplace les objets',
   'options.confirmValuableItems': 'Demander avant de jeter ou vendre un objet de valeur',
   'options.chatTimestamps': 'Horodatage du chat',
+  'options.chatSystemMessages': 'Messages système',
   'options.chatEmojis': 'Emojis du chat',
   'options.chatEmojiSize': 'Taille des emojis du chat',
   'options.blockBrowserKeys': 'Bloquer les raccourcis du navigateur',
   'options.fullscreen': 'Plein écran',
   'options.installApp': 'Installer l\'application',
+  'options.clearCache': 'Fichiers du jeu en cache',
   'options.appInstalled': 'Application installée',
   'options.installHint': 'Ce navigateur ne propose pas encore l\'installation. Ouvrez son menu et choisissez Installer.',
   'options.uiScale': 'Taille',
@@ -150,6 +156,7 @@ export default {
   'options.page.volume': 'Volumes',
   'options.page.screen': 'Écran',
   'options.section.character': 'Personnage',
+  'options.section.party': 'Groupe',
   'options.section.notices': 'Notifications',
   'options.section.movement': 'Déplacement',
   'options.section.keyboard': 'Clavier',
@@ -165,6 +172,7 @@ export default {
   'options.windowLayout': 'Position des fenêtres',
   'options.reset': 'Réinitialiser',
   'options.install': 'Installer',
+  'options.clearCacheButton': 'Vider',
   'options.defaults': 'Par défaut',
   'options.confirmDefaults': 'Remettre tous les réglages de cette page à leur valeur par défaut ?',
   'options.confirmDefaultKeys': 'Remettre toutes les touches par défaut pour ce personnage ?',
@@ -191,6 +199,8 @@ export default {
     'Affiche l’objet que vous portez à côté de celui survolé, en signalant les lignes meilleures ou moins bonnes.',
   'options.help.statPointAmounts':
     'Ajoute un champ de quantité à côté de chaque + dans la fenêtre Personnage, pour attribuer plusieurs points d’un coup.',
+  'options.help.partyInviteReply':
+    'Ce que fait une invitation de groupe : demander, comme dans l’original, ou la refuser ou l’accepter d’elle-même. Les commandes /re on, /re off et /re auto règlent la même chose.',
   'options.help.autoReconnect':
     'Vous reconnecte au même personnage si la connexion est coupée pendant la partie.',
   'options.help.dropTooltips': 'Laissez le curseur sur un objet au sol pour voir tous ses détails.',
@@ -201,6 +211,8 @@ export default {
   'options.help.lootZen':
     'Les tas de Zen d’au moins ce montant gardent leur nom. Sur Non, tous les tas le gardent.',
   'options.help.chatTimestamps': 'Affiche l’heure, par exemple 14:03, devant chaque ligne du chat.',
+  'options.help.chatSystemMessages':
+    'Les lignes système et d’erreur dans le chat ; le même interrupteur que le bouton du chat, conservé d’une session à l’autre.',
   'options.help.whisperBeep': 'Émet un son quand quelqu’un vous envoie un chuchotement.',
   'options.help.chatEmojiSize':
     'La taille des emojis dans le journal du chat. Une ligne avec un emoji s’agrandit pour le contenir ; sur Petite, chaque ligne garde sa hauteur normale, comme dans le journal classique.',
@@ -342,6 +354,8 @@ export default {
   'options.help.fullscreen':
     'Bascule entre le plein écran et une fenêtre de navigateur normale. F11 fait de même.',
   'options.help.install': 'Installe le jeu comme une application, avec sa propre fenêtre et son icône.',
+  'options.help.clearCache':
+    'Vide les fichiers du jeu que garde ce navigateur (la musique reste) et recharge la page, comme Ctrl+F5. À utiliser si quelque chose semble dépassé.',
   'options.help.language':
     'La langue de l’interface, des quêtes, des dialogues des PNJ et des noms de monstres et d’objets.',
   'options.help.englishItemNames':

@@ -19,4 +19,5 @@ export default {
   'notify.noAnswerRestored':
     'Der Server hat nicht geantwortet - Gegenstand wiederhergestellt',
   'notify.cannotBuy': 'Diesen Gegenstand kannst du nicht kaufen',
+  'notify.updateAvailable': 'Eine neue Version ist da: Die Seite lädt neu, sobald du zurück in der Serverliste bist.',
 } satisfies Partial<Record<keyof typeof en, string>>;

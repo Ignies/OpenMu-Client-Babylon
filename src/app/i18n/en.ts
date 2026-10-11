@@ -16,6 +16,8 @@ const en = {
   'notify.upgradeNeedsServer': 'Upgrading needs a server',
   'notify.noAnswerRestored': 'The server did not answer - item restored',
   'notify.cannotBuy': 'You cannot buy that item',
+  /** `buildCheck.ts`: a new build is out during a game session. */
+  'notify.updateAvailable': 'A new version is out: the page reloads once you are back at the server list.',
 };
 
 export default en;

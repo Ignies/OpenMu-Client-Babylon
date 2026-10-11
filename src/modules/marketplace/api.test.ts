@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { SESSION_NONCE_RE, sessionNonce } from '../../controllers/net/sessionNonce';
 import type { Item } from '../../ecs/world';
-import { cancel, claim, list, payout, release, settle, settlePayout } from './api';
+import { cancel, claim, list, offer, payout, release, removeOffer, settle, settlePayout } from './api';
 
 /**
  * The service refuses to sign an escrow token for a body that does not carry
@@ -46,6 +46,8 @@ const commits: [string, () => Promise<unknown>][] = [
   ['cancel', () => cancel('listing-1', 'Hero')],
   ['payout', () => payout('Hero')],
   ['payout settle', () => settlePayout()],
+  ['advert', () => offer({ character: 'Hero', slot: 12, category: 'misc', item, note: '' })],
+  ['advert removal', () => removeOffer('offer-1')],
 ];
 
 describe('a commit body', () => {

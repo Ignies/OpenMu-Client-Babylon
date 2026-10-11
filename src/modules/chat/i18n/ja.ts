@@ -41,6 +41,7 @@ export default {
   'cmd.whisper': 'カーソルの下のプレイヤーにささやく',
   'cmd.addfriend': 'カーソルの下のプレイヤーを友達に追加する',
   'cmd.follow': 'カーソルの下のプレイヤーについていく',
+  'cmd.re': 'パーティー招待: on は確認、off は拒否、auto は承諾',
   'cmd.post': 'サーバー全体に叫ぶ',
   'cmd.help': 'コマンドについてのサーバーのヘルプ',
   'cmd.list': 'サーバーのコマンド一覧',

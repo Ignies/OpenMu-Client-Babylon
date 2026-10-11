@@ -8,4 +8,5 @@ export default {
   'resume.done': 'Di nuovo online',
   'resume.failed': 'Riconnessione non riuscita',
   'resume.cancelled': 'Riconnessione annullata',
+  'login.closingOldSession': 'Account ancora connesso: chiusura della vecchia sessione e nuovo tentativo...',
 } satisfies Partial<Record<keyof typeof en, string>>;

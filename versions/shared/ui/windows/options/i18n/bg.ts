@@ -39,6 +39,10 @@ export default {
   'options.hearInstruments': 'Чувай инструментите на другите играчи',
   'options.dropSoundFilter': 'Само паданията по-долу',
   'options.statPointAmounts': 'Добавяне на точки наведнъж',
+  'options.partyInviteReply': 'Покани за група',
+  'options.partyInviteReply.ask': 'Питай',
+  'options.partyInviteReply.decline': 'Откажи',
+  'options.partyInviteReply.accept': 'Приеми',
   'options.whisperBeep': 'Звук при получен шепот',
   'options.slideHelp': 'Бягащи съобщения',
   'options.cameraControl': 'Управление на камерата',
@@ -58,11 +62,13 @@ export default {
   'options.quickItemActions': 'Ctrl-клик мести предмети',
   'options.confirmValuableItems': 'Питай преди изхвърляне или продажба на ценни',
   'options.chatTimestamps': 'Час в чата',
+  'options.chatSystemMessages': 'Системни съобщения',
   'options.chatEmojis': 'Емоджи в чата',
   'options.chatEmojiSize': 'Размер на емоджи в чата',
   'options.blockBrowserKeys': 'Блокирай клавишите на браузъра',
   'options.fullscreen': 'Цял екран',
   'options.installApp': 'Инсталиране като приложение',
+  'options.clearCache': 'Кеширани файлове на играта',
   'options.appInstalled': 'Инсталирано',
   'options.installHint': 'Този браузър още не предлага инсталиране. Отвори менюто му и избери Инсталиране.',
   'options.uiScale': 'Размер',
@@ -149,6 +155,7 @@ export default {
   'options.page.volume': 'Сила на звука',
   'options.page.screen': 'Екран',
   'options.section.character': 'Герой',
+  'options.section.party': 'Група',
   'options.section.notices': 'Известия',
   'options.section.movement': 'Движение',
   'options.section.keyboard': 'Клавиатура',
@@ -164,6 +171,7 @@ export default {
   'options.windowLayout': 'Позиции на прозорците',
   'options.reset': 'Нулирай',
   'options.install': 'Инсталирай',
+  'options.clearCacheButton': 'Изчисти',
   'options.defaults': 'Стандартни',
   'options.confirmDefaults': 'Да се възстановят ли стандартните стойности на всички настройки на тази страница?',
   'options.confirmDefaultKeys': 'Да се възстановят ли стандартните клавиши за този герой?',
@@ -189,6 +197,8 @@ export default {
     'Показва носения предмет до посочения и отбелязва кои редове са по-добри и кои по-лоши.',
   'options.help.statPointAmounts':
     'Добавя поле за количество до всеки + в прозореца Герой, за да слагаш много точки наведнъж.',
+  'options.help.partyInviteReply':
+    'Какво става с покана за група: да пита, както в оригинала, или да я отказва или приема сама. Командите /re on, /re off и /re auto променят същото.',
   'options.help.autoReconnect': 'Ако връзката прекъсне по време на игра, те вписва отново със същия герой.',
   'options.help.dropTooltips': 'Задръж курсора над предмет на земята, за да видиш всичките му данни.',
   'options.help.lootFilter':
@@ -198,6 +208,8 @@ export default {
   'options.help.lootZen':
     'Купчините Zen от поне това количество запазват името си. При Изкл. всички купчини са с име.',
   'options.help.chatTimestamps': 'Показва часа, например 14:03, пред всеки ред в чата.',
+  'options.help.chatSystemMessages':
+    'Системните редове и грешките в чата; същият превключвател като бутона в чата, запазен между сесиите.',
   'options.help.whisperBeep': 'Пуска звук, когато някой ти прошепне.',
   'options.help.chatEmojiSize':
     'Колко големи се рисуват емоджи в дневника на чата. Ред с емоджи става по-висок, за да го побере; при Малък всеки ред запазва обичайната си височина, като в класическия дневник.',
@@ -327,6 +339,8 @@ export default {
   'options.help.fullscreen':
     'Превключва между цял екран и нормален прозорец на браузъра. F11 прави същото.',
   'options.help.install': 'Инсталира играта като приложение със собствен прозорец и икона.',
+  'options.help.clearCache':
+    'Изчиства файловете на играта, пазени от браузъра (музиката остава), и презарежда страницата като Ctrl+F5. Ползвайте го, когато нещо изглежда остаряло.',
   'options.help.language':
     'Езикът на интерфейса, мисиите, диалозите с NPC и имената на чудовища и предмети.',
   'options.help.englishItemNames':

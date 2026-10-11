@@ -1,4 +1,4 @@
-import type { ApiListing, HistoryEntry, Payout, Token } from './api';
+import type { ApiListing, ApiOffer, HistoryEntry, Payout, Token } from './api';
 import { MarketError } from './api';
 import type { Listing } from './mockListings';
 import type { MarketDeps, MarketplaceStore } from './state';
@@ -63,6 +63,9 @@ export function createMockMarket(
 
   const strip = ({ mine: _mine, ...row }: Row): ApiListing => row;
 
+  /** Adverts to negotiate (ours); this harness's own player is 'You'. */
+  const adverts: ApiOffer[] = [];
+
   const api: MarketDeps['api'] = {
     async browse() {
       await wait(latency);
@@ -75,7 +78,25 @@ export function createMockMarket(
       return {
         listings: own.map(strip),
         balance: own.reduce((sum, r) => sum + (r.state === 'sold' ? r.proceeds ?? 0 : 0), 0),
+        offers: adverts.filter(a => a.sellerCharacter === 'You'),
       };
+    },
+    async offers() {
+      await wait(latency);
+      return { offers: adverts.slice() };
+    },
+    async offer({ item, category, note }) {
+      await wait(latency);
+      const offer: ApiOffer = { id: uuid(), sellerCharacter: 'You', item, category, note, listedAt: Date.now(), expiresAt: Date.now() + 3 * 86_400_000 };
+      adverts.unshift(offer);
+      return { offer };
+    },
+    async removeOffer(id) {
+      await wait(latency);
+      const at = adverts.findIndex(a => a.id === id);
+      if (at < 0) throw new MarketError('no such advert', 404);
+      adverts.splice(at, 1);
+      return { removed: true };
     },
     async history() {
       await wait(latency);
@@ -204,5 +225,6 @@ export function createMockMarket(
   };
 
   void FEE;
-  return { api, bridge };
+  // The harness has no chat: a whisper about an advert goes nowhere.
+  return { api, bridge, chat: { whisperAbout: () => {} } };
 }

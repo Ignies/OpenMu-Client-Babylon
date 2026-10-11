@@ -5,9 +5,12 @@ import { cleanName } from '../chat/chat';
 import { playerNameById } from '../scope/objects';
 import { runInAction } from 'mobx';
 import { t } from '@/i18n';
+import { expireRequest } from '../social/requestTimeout';
 
 /** Registers this module's packet listeners (see ../module.ts). */
 export function installNet(): void {
+  expireRequest(() => Social.partyRequest, () => Social.partyRespond(false));
+
   // ---- party (`ReceiveParty*`, WSclient.cpp:6839) -----------------------------
 
   EventBus.on('PartyRequest', packet => {
@@ -19,6 +22,8 @@ export function installNet(): void {
         requesterName: playerNameById(requesterId),
       };
     });
+    // `/re off|auto` (ours) answers it here; the default keeps the prompt.
+    Social.autoAnswerParty();
   });
 
   EventBus.on('PartyList', packet => {

@@ -33,4 +33,10 @@ export default {
   'fidelity.roofFade': 'Acoperișuri transparente',
   'fidelity.roofFade.hint':
     'Acoperișurile dispar cât stai sub ele, ca să vezi înăuntru. Clasică: acoperișurile rămân mereu vizibile.',
+  'fidelity.requestTimeout': 'Cererile expiră după 20 s',
+  'fidelity.requestTimeout.hint':
+    'O cerere de schimb, grup sau duel lăsată fără răspuns este refuzată după 20 de secunde. Clasică: așteaptă până răspunzi.',
+  'fidelity.noticeLinks': 'Linkuri în anunțurile serverului',
+  'fidelity.noticeLinks.hint':
+    'Adresele web din anunțurile serverului sunt linkuri subliniate care se deschid într-o filă nouă. Clasică: text simplu, ca în original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

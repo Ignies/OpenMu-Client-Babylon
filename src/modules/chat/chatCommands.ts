@@ -62,6 +62,8 @@ const CHAT_COMMANDS: readonly ChatCommand[] = [
   { name: '/whisper', helpKey: 'cmd.whisper', local: 'whisper' },
   { name: '/addfriend', helpKey: 'cmd.addfriend', local: 'addFriend' },
   { name: '/follow', helpKey: 'cmd.follow', local: 'follow' },
+  // ---- this client's own (ours) -------------------------------------------
+  { name: '/re', usage: '<on|off|auto>', helpKey: 'cmd.re' },
   // ---- server (OpenMU) ---------------------------------------------------
   { name: '/post', usage: '<message>', helpKey: 'cmd.post' },
   { name: '/help', usage: '[command]', helpKey: 'cmd.help' },
@@ -143,6 +145,12 @@ export function matchChatCommands(text: string, gm: boolean): ChatCommand[] {
     if (c.gm && !gm) return false;
     return space < 0 ? c.name.startsWith(word) : c.name === word;
   });
+}
+
+/** `/re on|off|auto` (ours): how party invitations are answered. The word typed, '' for none; null when not `/re`. */
+export function partyReplyCommand(text: string): string | null {
+  const [name, word = ''] = text.trim().toLowerCase().split(/\s+/);
+  return name === '/re' ? word : null;
 }
 
 /** The client-side command a typed line stands for, if any (`/pt`, `/trade`…). */

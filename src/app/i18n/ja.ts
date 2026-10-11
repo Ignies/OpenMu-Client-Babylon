@@ -18,4 +18,5 @@ export default {
   'notify.upgradeNeedsServer': '強化にはサーバーが必要です',
   'notify.noAnswerRestored': 'サーバーが応答しませんでした - アイテムを戻しました',
   'notify.cannotBuy': 'そのアイテムは購入できません',
+  'notify.updateAvailable': '新しいバージョンがあります。サーバー一覧に戻るとページを再読み込みします。',
 } satisfies Partial<Record<keyof typeof en, string>>;

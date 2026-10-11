@@ -43,6 +43,8 @@ export default {
   'muHelper.pickExtra': 'Дополнительные предметы:',
   'muHelper.itemName': 'Название предмета',
   'muHelper.addItem': 'Добавить',
+  'muHelper.itemFilters': 'Фильтры (+Luck +Opt 12)',
+  'muHelper.itemFilters.hint': 'Слова с + фильтруют предмет: +Luck, +Skill, +Exc, +Anc, +Opt или +Opt 12, +9 для уровня. Записи могут быть длиннее; браузер хранит весь текст. Выкл.: как в оригинале, часть названия.',
   'muHelper.removeItem': 'Убрать',
   'muHelper.pickSkill': 'Выберите умение',
   'muHelper.noSkills': 'Подходящих умений не изучено',

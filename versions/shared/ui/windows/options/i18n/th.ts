@@ -39,6 +39,10 @@ export default {
   'options.hearInstruments': 'ได้ยินเครื่องดนตรีของผู้เล่นอื่น',
   'options.dropSoundFilter': 'เฉพาะรายการด้านล่าง',
   'options.statPointAmounts': 'เพิ่มแต้มทีละหลายจุด',
+  'options.partyInviteReply': 'คำเชิญปาร์ตี้',
+  'options.partyInviteReply.ask': 'ถามก่อน',
+  'options.partyInviteReply.decline': 'ปฏิเสธ',
+  'options.partyInviteReply.accept': 'ตอบรับ',
   'options.whisperBeep': 'เสียงเตือนเมื่อได้รับข้อความกระซิบ',
   'options.slideHelp': 'ประกาศแบบเลื่อน',
   'options.cameraControl': 'ควบคุมกล้อง',
@@ -58,11 +62,13 @@ export default {
   'options.quickItemActions': 'Ctrl-คลิก เพื่อย้ายไอเทม',
   'options.confirmValuableItems': 'ถามก่อนทิ้งหรือขายของมีค่า',
   'options.chatTimestamps': 'เวลาในแชท',
+  'options.chatSystemMessages': 'ข้อความระบบ',
   'options.chatEmojis': 'อีโมจิในแชท',
   'options.chatEmojiSize': 'ขนาดอีโมจิในแชท',
   'options.blockBrowserKeys': 'บล็อกคีย์ลัดของเบราว์เซอร์',
   'options.fullscreen': 'เต็มหน้าจอ',
   'options.installApp': 'ติดตั้งแอป',
+  'options.clearCache': 'ไฟล์เกมที่แคชไว้',
   'options.appInstalled': 'ติดตั้งแอปแล้ว',
   'options.installHint': 'เบราว์เซอร์นี้ยังไม่เสนอการติดตั้ง เปิดเมนูของเบราว์เซอร์แล้วเลือก ติดตั้ง',
   'options.uiScale': 'ขนาด',
@@ -149,6 +155,7 @@ export default {
   'options.page.volume': 'ระดับเสียง',
   'options.page.screen': 'หน้าจอ',
   'options.section.character': 'ตัวละคร',
+  'options.section.party': 'ปาร์ตี้',
   'options.section.notices': 'การแจ้งเตือน',
   'options.section.movement': 'การเคลื่อนที่',
   'options.section.keyboard': 'คีย์บอร์ด',
@@ -164,6 +171,7 @@ export default {
   'options.windowLayout': 'ตำแหน่งหน้าต่าง',
   'options.reset': 'รีเซ็ต',
   'options.install': 'ติดตั้ง',
+  'options.clearCacheButton': 'ล้าง',
   'options.defaults': 'ค่าเริ่มต้น',
   'options.confirmDefaults': 'คืนการตั้งค่าทั้งหมดในหน้านี้เป็นค่าเริ่มต้นหรือไม่',
   'options.confirmDefaultKeys': 'คืนค่าปุ่มทั้งหมดของตัวละครนี้เป็นค่าเริ่มต้นหรือไม่',
@@ -189,6 +197,8 @@ export default {
     'แสดงไอเทมที่สวมใส่อยู่ข้างไอเทมที่ชี้ พร้อมทำเครื่องหมายค่าที่ดีกว่าและแย่กว่า',
   'options.help.statPointAmounts':
     'เพิ่มช่องจำนวนข้างปุ่ม + แต่ละปุ่มในหน้าต่างตัวละคร เพื่อเพิ่มแต้มทีละหลายจุด',
+  'options.help.partyInviteReply':
+    'คำเชิญปาร์ตี้จะทำอย่างไร: ถามก่อนเหมือนต้นฉบับ หรือปฏิเสธหรือตอบรับเอง คำสั่งแชต /re on, /re off และ /re auto ตั้งค่าเดียวกัน',
   'options.help.autoReconnect':
     'หากการเชื่อมต่อหลุดระหว่างเล่น จะเข้าสู่ระบบกลับไปที่ตัวละครเดิมให้อัตโนมัติ',
   'options.help.dropTooltips': 'วางเคอร์เซอร์ค้างไว้ที่ไอเทมบนพื้นเพื่อดูรายละเอียดทั้งหมด',
@@ -198,6 +208,8 @@ export default {
   'options.help.lootOther': 'ไอเทมอื่นทั้งหมดจะแสดงชื่อด้วย',
   'options.help.lootZen': 'กอง Zen ที่มีอย่างน้อยเท่านี้จะแสดงชื่อ ถ้าปิด ทุกกองจะแสดงชื่อ',
   'options.help.chatTimestamps': 'แสดงเวลา เช่น 14:03 ไว้หน้าข้อความแชททุกบรรทัด',
+  'options.help.chatSystemMessages':
+    'บรรทัดระบบและข้อผิดพลาดในแชต สวิตช์เดียวกับปุ่มในกล่องแชต และจำไว้ข้ามเซสชัน',
   'options.help.whisperBeep': 'เล่นเสียงเมื่อมีคนส่งข้อความกระซิบถึงคุณ',
   'options.help.chatEmojiSize':
     'ขนาดของอีโมจิที่แสดงในบันทึกแชท บรรทัดที่มีอีโมจิจะสูงขึ้นให้พอดี ถ้าเลือก "เล็ก" ทุกบรรทัดจะสูงเท่าเดิม เหมือนบันทึกแชทแบบคลาสสิก',
@@ -318,6 +330,8 @@ export default {
   'options.help.fullscreen':
     'สลับระหว่างเต็มหน้าจอกับหน้าต่างเบราว์เซอร์ปกติ กด F11 ได้ผลเหมือนกัน',
   'options.help.install': 'ติดตั้งเกมเป็นแอปที่มีหน้าต่างและไอคอนของตัวเอง',
+  'options.help.clearCache':
+    'ล้างไฟล์เกมที่เบราว์เซอร์นี้เก็บไว้ (เพลงยังอยู่) และโหลดหน้าใหม่เหมือน Ctrl+F5 ใช้เมื่อบางอย่างดูไม่อัปเดต',
   'options.help.language': 'ภาษาของอินเทอร์เฟซ เควสต์ บทสนทนา NPC รวมถึงชื่อมอนสเตอร์และไอเทม',
   'options.help.englishItemNames':
     'แสดงชื่อไอเทมเป็นภาษาอังกฤษไม่ว่าจะใช้ภาษาใด เพื่อให้ตรงกับคู่มือและรายการราคา',

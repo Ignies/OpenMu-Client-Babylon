@@ -13,11 +13,15 @@ function modulesOff(env: Env): string[] {
   return [...new Set(listed)].sort();
 }
 
-/** The manifest from the proxy's environment; `MU_HELD_HIT_REQUEST=on` is the installer's own key. */
+/** The manifest from the proxy's environment; the `MU_*=on` keys are the installer's own. */
 export function serverManifest(env: Env = process.env) {
   return {
     version: 1,
-    settings: { heldHitRequest: env.MU_HELD_HIT_REQUEST === 'on' },
+    settings: {
+      heldHitRequest: env.MU_HELD_HIT_REQUEST === 'on',
+      retryLoginWhenConnected: env.MU_RETRY_LOGIN_WHEN_CONNECTED === 'on',
+      muHelperAfterReconnect: env.MU_HELPER_AFTER_RECONNECT === 'on',
+    },
     modulesOff: modulesOff(env),
   };
 }

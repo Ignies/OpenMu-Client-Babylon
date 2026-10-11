@@ -33,23 +33,23 @@ describe('text golden', () => {
     const hashes = Object.fromEntries(i18n.languages.map(l => [l.code, languageHash(l.code)]));
     i18n.setLanguage(was);
 
-    expect(KEYS.length).toBe(2457);
+    expect(KEYS.length).toBe(2492);
     expect(hashes).toEqual({
-      en: 'c31f132aa861cae4',
-      bg: '26ac065487dd8068',
-      zh: '6fa818488274470c',
-      fr: 'aa5ca992c2884ffc',
-      de: 'dd588b5792bf9b0f',
-      it: '93132a46785bfc10',
-      ja: '7f5aca1324c5298a',
-      ko: '2e638c951baf27ac',
-      pl: '4f0b3df379589185',
-      pt: '76f3966bdad253a1',
-      ro: '3c2fa314371668b9',
-      ru: 'a51ff4102f07bf74',
-      es: '5e27dbbcdb694599',
-      th: 'fe677445be4ba322',
-      vi: 'd14d12ee9c1d3222',
+      en: 'd9faabf92f2fea29',
+      bg: 'a6e2649b72005aff',
+      zh: 'dbe9ff5073b4f29b',
+      fr: 'b541523700a3f9ed',
+      de: 'e1b92d85b094603a',
+      it: 'a3d7b4c28f541b88',
+      ja: '962716f16023927a',
+      ko: '599fb24280ed10c6',
+      pl: 'ef793f5d518b254f',
+      pt: 'c2e588f41448101d',
+      ro: '608398dd256e4861',
+      ru: '8568b3795b782a45',
+      es: '3af153c445540048',
+      th: '5d0c2a18f05c376e',
+      vi: '128551170e29172a',
     });
   });
 });

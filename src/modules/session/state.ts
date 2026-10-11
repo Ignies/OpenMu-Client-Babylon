@@ -29,6 +29,10 @@ import { addNotification } from '../chat';
  */
 const GS_ANSWER_TIMEOUT = 4000;
 
+/** Logins sent again after "account already connected", and the gap before each (`retryLogin`). */
+const LOGIN_RETRIES = 3;
+const LOGIN_RETRY_MS = 2500;
+
 /** `ServerChangeAuthentication`'s XOR3 name fields are 12 bytes each. */
 const SERVER_CHANGE_NAME_LENGTH = 12;
 
@@ -134,6 +138,7 @@ export const Session = new (class {
     if (socket === this.gsSocket) {
       this.gsSocket = undefined;
       this.encryptor = undefined;
+      this.cancelLoginRetry();
 
       // The proxy closes the ws when its TCP connect fails, so this is where a
       // wrong `ConnectionInfo` address usually lands. One retry, then the
@@ -305,6 +310,7 @@ export const Session = new (class {
   }
 
   disconnectFromGameServer() {
+    this.cancelLoginRetry();
     if (this.gsAttempt?.timer) clearTimeout(this.gsAttempt.timer);
     this.gsAttempt = null;
     this.gsSocket?.close();
@@ -370,7 +376,40 @@ export const Session = new (class {
     return true;
   }
 
+  /** The last login sent and how often it was sent again after "account already connected". */
+  private lastLogin = { username: '', password: '', retries: 0 };
+
+  private loginRetryTimer: ReturnType<typeof setTimeout> | null = null;
+
   loginRequest(username: string, password: string) {
+    this.cancelLoginRetry();
+    this.lastLogin = { username, password, retries: 0 };
+    this.sendLogin(username, password);
+  }
+
+  /**
+   * "Account already connected" where the world asks for it (`retryLoginWhenConnected`): the same
+   * login again in 2.5 s, up to 3 times, as a server that drops the old session then lets it in.
+   * False when the retries are spent.
+   */
+  retryLogin(): boolean {
+    const login = this.lastLogin;
+    if (login.retries >= LOGIN_RETRIES) return false;
+    login.retries++;
+    this.cancelLoginRetry();
+    this.loginRetryTimer = setTimeout(() => {
+      this.loginRetryTimer = null;
+      this.sendLogin(login.username, login.password);
+    }, LOGIN_RETRY_MS);
+    return true;
+  }
+
+  private cancelLoginRetry(): void {
+    if (this.loginRetryTimer) clearTimeout(this.loginRetryTimer);
+    this.loginRetryTimer = null;
+  }
+
+  private sendLogin(username: string, password: string) {
     const usernameBytes = stringToBytes(username, MAX_USERNAME_LENGTH);
     const passwordBytes = stringToBytes(password, MAX_PASSWORD_LENGTH);
 

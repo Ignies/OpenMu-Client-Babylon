@@ -11,7 +11,8 @@ Also the guild mark (emblem) codec. It has no packet handlers of its own; the ne
 - `Social.addChatLine(sender, text, type)`, `Social.sendChat(text)`, `Social.broadcastEmojiBubble(id)`,
   chat input and log state (`chatLines`, `visibleChatLines`, `whisperTarget`, `setWhisperTarget`,
   `openChatInput`, `toggle`, `scrollChatLog`, ...).
-- party: `partyMembers`, `inParty`, `isPartyLeader`, `partyInvite`, `partyRespond`, `partyKick`,
+- party: `partyMembers`, `inParty`, `isPartyLeader`, `partyInvite`, `partyRespond`, `setPartyReply` /
+  `autoAnswerParty` (`/re on|off|auto`, ours: `GameOptions.partyInviteReply`), `partyKick`,
   `partyLeave`, `requestPartyList`, `setPartyMembers` (a blank name keeps the slot's previous one), `removePartyMember`, `setPartyHealth`.
 - guild: `myGuild`, `guildMembers`, `allianceGuilds`, `guildWar`, `battleSoccer`, the request and dialog
   fields, `guildJoin`, `guildJoinRespond`, `promptGuildKick` / `confirmGuildKick`, `guildCreate`, `guildAssignRole`,
@@ -23,6 +24,11 @@ Also the guild mark (emblem) codec. It has no packet handlers of its own; the ne
 - The guild mark bitmap helpers are `src/core/guildMark.ts` (pure; the actors' guild flag reads them).
 
 ## How it works
+- `showSystemMessages` (`m_bShowSystemMessages`) reads `GameOptions.chatSystemMessages`: the chat box's
+  button and the Options row are one saved switch (ours; the original starts every session with it on).
+- `requestTimeout.ts` (`expireRequest(read, decline)`, the `requestTimeout` improvement): another
+  player's trade, party or duel request answers itself "no" after 20 s; each owner wires its own
+  (`party/net.ts`, `trade/net.ts`, `events/duel.ts`). Classic keeps the prompt until clicked.
 - `Social` is a mobx singleton covering `CNewUIChatLogWindow` / `CNewUIChatInputBox`,
   `CNewUIPartyInfoWindow` and `CNewUIGuildInfoWindow`. Pure chat helpers come from `chat/`.
 - `addChatLine` (`CNewUIChatLogWindow::AddText`) snapshots the speaker (guild, PK state, GM), splits the
@@ -58,4 +64,6 @@ Also the guild mark (emblem) codec. It has no packet handlers of its own; the ne
 - change the mark palette or format: `src/core/guildMark.ts`.
 
 ## Tests
-- none yet.
+- `social.test.ts`: the System messages switch is the saved `GameOptions.chatSystemMessages`.
+- `requestTimeout.test.ts`: a request left alone is declined after 20 s, an answered one is left
+  alone, a new one restarts the clock, nothing expires on Classic.

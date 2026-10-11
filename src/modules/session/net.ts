@@ -10,8 +10,10 @@ import { Servers } from '@/modules/servers';
 import { Session } from './state';
 import { AppState, UIState } from '@/controllers/interface/uiState';
 import { gameServerTarget } from '../servers/serverConfig';
+import { serverSetting } from '../servers/serverManifest';
 import { quests } from '../quests';
 import { runInAction } from 'mobx';
+import { t } from '@/i18n';
 
 let serverListRequested = false;
 
@@ -106,6 +108,19 @@ export function installNet(): void {
       Session.disconnectFromConnectServer();
       runInAction(() => {
         AppState.uiState = UIState.Characters;
+      });
+      return;
+    }
+
+    // A world whose server drops the old session on this refusal asks for the login again.
+    if (
+      p.Success === LoginResponseLoginResultEnum.AccountAlreadyConnected &&
+      serverSetting('retryLoginWhenConnected') &&
+      Session.retryLogin()
+    ) {
+      runInAction(() => {
+        Session.loginProcessing = true;
+        Session.loginError = t('login.closingOldSession');
       });
       return;
     }

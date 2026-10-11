@@ -43,6 +43,8 @@ export default {
   'muHelper.pickExtra': 'その他のアイテム:',
   'muHelper.itemName': 'アイテム名',
   'muHelper.addItem': '追加',
+  'muHelper.itemFilters': 'フィルター (+Luck +Opt 12)',
+  'muHelper.itemFilters.hint': '+で始まる語でアイテムを絞り込みます: +Luck、+Skill、+Exc、+Anc、+Opt または +Opt 12、レベルは +9。長い項目も可能で、全文はこのブラウザに保存されます。オフ: オリジナル通り、名前の一部で一致。',
   'muHelper.removeItem': '削除',
   'muHelper.pickSkill': 'スキルを選ぶ',
   'muHelper.noSkills': '使えるスキルを覚えていません',

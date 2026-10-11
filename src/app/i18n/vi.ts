@@ -18,4 +18,5 @@ export default {
   'notify.upgradeNeedsServer': 'Nâng cấp cần kết nối máy chủ',
   'notify.noAnswerRestored': 'Máy chủ không phản hồi - đã khôi phục vật phẩm',
   'notify.cannotBuy': 'Bạn không thể mua vật phẩm này',
+  'notify.updateAvailable': 'Đã có phiên bản mới: trang sẽ tải lại khi bạn quay về danh sách máy chủ.',
 } satisfies Partial<Record<keyof typeof en, string>>;

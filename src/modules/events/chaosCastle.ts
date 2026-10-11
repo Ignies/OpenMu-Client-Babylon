@@ -3,7 +3,7 @@ import { ENUM_WORLD } from '../../core/types';
 import type { Entity, Item } from '../../ecs/world';
 import { EventBus } from '../../core/eventBus';
 import { Session } from '../session';
-import { addNotification } from '../chat';
+import { addNotification, entryRefusalReason } from '../chat';
 import { Ecs } from '../../ecs/current';
 import {
   ChaosCastleEnterRequestPacket,
@@ -338,7 +338,8 @@ export function installChaosCastle(): void {
       case ChaosCastleEnterResultEnterResultEnum.Success:
         break;
       case ChaosCastleEnterResultEnterResultEnum.Failed:
-        text = EVENT_TEXT.cloakLevelWrong;
+        // OpenMU's reason line when it sent one (serverLines.ts), else the original's cloak text.
+        text = entryRefusalReason() ?? EVENT_TEXT.cloakLevelWrong;
         break;
       case ChaosCastleEnterResultEnterResultEnum.NotOpen:
         text = formatText(EVENT_TEXT.timePassed, zone);

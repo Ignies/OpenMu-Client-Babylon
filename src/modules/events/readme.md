@@ -45,6 +45,10 @@ event is one entry file with its own MobX state and packet handlers, behind the 
   OpenMU keeps the character in `NpcDialogOpened` until it arrives. Golden Archer sends `EventChipExitDialog` instead.
 - `BloodCastleState` is shared: Blood Castle reads states 0..4, Chaos Castle 5..7 (8..10 are the
   arena in `maps/chaoscastle/arena.ts`). `MiniGameScoreTable` is taken by Devil Square or Chaos Castle by map.
+- A refused entry (`Failed` in `BloodCastleEnterResult`, `ChaosCastleEnterResult`,
+  `DevilSquareEnterResult`) shows the reason OpenMU sent as a system line just before (an item the
+  event bars, a map requirement; `chat/serverLines.ts`), else the original's ticket text. OpenMU
+  sends a bare `Failed` for those, which the original reads as a wrong cloak or invitation.
 - Dev seam: `?events=<blood>,<devil>,<chaos>` (minutes, one per row drawn) stages the schedule rows.
 
 ## Packets
@@ -92,6 +96,7 @@ castle beds' sound gates read idle timers (no match bed plays).
 - change event texts: `recipes.ts` (`EVENT_TEXT`, with the original `GlobalText` indices).
 
 ## Tests
+- `entryRefusal.test.ts`: a refused entry says the server's reason line, else the cloak text.
 - `duelRules.test.ts`: duel id orientation, room count, spectator list, start failure texts.
 - `scheduleClock.test.ts`: opening-state minutes to a moment, row text, countdown, poll back-off,
   the rows a version draws.

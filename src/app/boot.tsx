@@ -54,6 +54,7 @@ import { installPerfOverlay, recordFrame } from '../controllers/render/perfOverl
 import { csmCacheStats } from '@/controllers/render/shadows';
 import { refreshServerList } from '../modules/servers/serverList';
 import { ensureCacheWorker } from '../controllers/assets/assetDownload';
+import { startBuildCheck } from './buildCheck';
 import { sceneCovered } from '../controllers/render/sceneCover';
 import { installBackgroundTick, noteDrawnFrame } from './backgroundTick';
 
@@ -71,6 +72,9 @@ watchPageTitle();
 // opens the download screen: a browser will not offer to install a page it
 // has never seen register one.
 void ensureCacheWorker();
+
+// A tab left open across a deploy reloads into the new build (buildCheck.ts).
+startBuildCheck();
 
 // What a lost game server socket does before falling back to the server
 // list; the session module stays unaware of the resume.

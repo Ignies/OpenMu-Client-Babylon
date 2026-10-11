@@ -8,4 +8,5 @@ export default {
   'resume.done': 'Đã trực tuyến lại',
   'resume.failed': 'Không thể kết nối lại',
   'resume.cancelled': 'Đã hủy kết nối lại',
+  'login.closingOldSession': 'Tài khoản vẫn đang kết nối: đang đóng phiên cũ và thử lại...',
 } satisfies Partial<Record<keyof typeof en, string>>;

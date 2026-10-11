@@ -39,6 +39,10 @@ export default {
   'options.hearInstruments': 'Ouvir os instrumentos dos outros jogadores',
   'options.dropSoundFilter': 'Apenas o que está abaixo',
   'options.statPointAmounts': 'Adicionar pontos em lote',
+  'options.partyInviteReply': 'Convites de grupo',
+  'options.partyInviteReply.ask': 'Perguntar',
+  'options.partyInviteReply.decline': 'Recusar',
+  'options.partyInviteReply.accept': 'Aceitar',
   'options.whisperBeep': 'Bipe ao receber sussurro',
   'options.slideHelp': 'Faixa de anúncios',
   'options.cameraControl': 'Controle da câmera',
@@ -59,11 +63,13 @@ export default {
   'options.quickItemActions': 'Ctrl-clique move os itens',
   'options.confirmValuableItems': 'Perguntar antes de largar ou vender itens valiosos',
   'options.chatTimestamps': 'Horário no chat',
+  'options.chatSystemMessages': 'Mensagens do sistema',
   'options.chatEmojis': 'Emojis no chat',
   'options.chatEmojiSize': 'Tamanho dos emojis no chat',
   'options.blockBrowserKeys': 'Bloquear atalhos do navegador',
   'options.fullscreen': 'Tela cheia',
   'options.installApp': 'Instalar aplicativo',
+  'options.clearCache': 'Arquivos do jogo em cache',
   'options.appInstalled': 'Aplicativo instalado',
   'options.installHint': 'Este navegador ainda não oferece a instalação. Abra o menu dele e escolha Instalar.',
   'options.uiScale': 'Tamanho',
@@ -150,6 +156,7 @@ export default {
   'options.page.volume': 'Volumes',
   'options.page.screen': 'Tela',
   'options.section.character': 'Personagem',
+  'options.section.party': 'Grupo',
   'options.section.notices': 'Notificações',
   'options.section.movement': 'Movimento',
   'options.section.keyboard': 'Teclado',
@@ -165,6 +172,7 @@ export default {
   'options.windowLayout': 'Posição das janelas',
   'options.reset': 'Redefinir',
   'options.install': 'Instalar',
+  'options.clearCacheButton': 'Limpar',
   'options.defaults': 'Padrões',
   'options.confirmDefaults': 'Restaurar o padrão de todas as opções desta página?',
   'options.confirmDefaultKeys': 'Restaurar o padrão de todas as teclas deste personagem?',
@@ -191,6 +199,8 @@ export default {
     'Mostra o item equipado ao lado do item sob o cursor, marcando as linhas melhores e piores.',
   'options.help.statPointAmounts':
     'Adiciona uma caixa de quantidade ao lado de cada + na janela Personagem, para distribuir vários pontos de uma vez.',
+  'options.help.partyInviteReply':
+    'O que faz um convite de grupo: perguntar, como no original, ou recusá-lo ou aceitá-lo sozinho. Os comandos /re on, /re off e /re auto mudam o mesmo.',
   'options.help.autoReconnect':
     'Se a conexão cair durante o jogo, entra de novo com o mesmo personagem.',
   'options.help.dropTooltips':
@@ -202,6 +212,8 @@ export default {
   'options.help.lootZen':
     'Montes de Zen a partir deste valor mostram o nome. No zero, todos os montes mostram o nome.',
   'options.help.chatTimestamps': 'Mostra a hora, como 14:03, antes de cada linha do chat.',
+  'options.help.chatSystemMessages':
+    'As linhas de sistema e de erro no chat; o mesmo interruptor do botão do chat, guardado entre sessões.',
   'options.help.whisperBeep': 'Toca um som quando alguém sussurra para você.',
   'options.help.chatEmojiSize':
     'O tamanho dos emojis no registro do chat. Uma linha com emoji cresce para caber nele; no Pequeno, cada linha mantém a altura normal, como no registro clássico.',
@@ -344,6 +356,8 @@ export default {
   'options.help.fullscreen':
     'Alterna entre tela cheia e uma janela normal do navegador. F11 faz o mesmo.',
   'options.help.install': 'Instala o jogo como aplicativo, com janela e ícone próprios.',
+  'options.help.clearCache':
+    'Limpa os arquivos do jogo guardados por este navegador (a música fica) e recarrega a página, como Ctrl+F5. Use quando algo parecer desatualizado.',
   'options.help.language':
     'O idioma da interface, das missões, dos diálogos dos NPCs e dos nomes de monstros e itens.',
   'options.help.englishItemNames':

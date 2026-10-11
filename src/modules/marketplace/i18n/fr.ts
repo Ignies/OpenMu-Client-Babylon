@@ -22,6 +22,7 @@ export default {
   'marketplace.bought': '{name} acheté',
   'marketplace.cancelled': '{name} annulé',
   'marketplace.listedFlash': '{name} mis en vente',
+  'marketplace.negotiateListed': '{name} est proposé à négocier',
   'marketplace.unreachable': 'Le marché est injoignable.',
   'marketplace.buyRefused': 'L’achat a été refusé.',
   'marketplace.cancelFailed': 'L’annulation a échoué.',

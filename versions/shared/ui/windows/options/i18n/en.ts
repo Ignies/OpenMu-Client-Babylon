@@ -40,6 +40,10 @@ const en = {
   'options.dropSoundFilter': 'Only the drops below',
 
   'options.statPointAmounts': 'Add stat points in bulk',
+  'options.partyInviteReply': 'Party invitations',
+  'options.partyInviteReply.ask': 'Ask',
+  'options.partyInviteReply.decline': 'Decline',
+  'options.partyInviteReply.accept': 'Accept',
   'options.whisperBeep': 'Beep sound for whispering',
   'options.slideHelp': 'Scrolling announcements',
   'options.cameraControl': 'Camera control',
@@ -59,11 +63,13 @@ const en = {
   'options.quickItemActions': 'Ctrl-click moves items',
   'options.confirmValuableItems': 'Ask before dropping or selling valuables',
   'options.chatTimestamps': 'Chat timestamps',
+  'options.chatSystemMessages': 'System messages',
   'options.chatEmojis': 'Chat emojis',
   'options.chatEmojiSize': 'Chat emoji size',
   'options.blockBrowserKeys': 'Block browser shortcuts',
   'options.fullscreen': 'Fullscreen',
   'options.installApp': 'Install app',
+  'options.clearCache': 'Cached game files',
   'options.appInstalled': 'App installed',
   'options.installHint': 'No install offer from this browser yet. Open its menu and pick Install or Add to desktop.',
   'options.uiScale': 'Interface size',
@@ -153,6 +159,7 @@ const en = {
   'options.page.volume': 'Volume',
   'options.page.screen': 'Screen',
   'options.section.character': 'Character',
+  'options.section.party': 'Party',
   'options.section.notices': 'Notices',
   'options.section.movement': 'Movement',
   'options.section.keyboard': 'Keyboard',
@@ -168,6 +175,7 @@ const en = {
   'options.windowLayout': 'Window positions',
   'options.reset': 'Reset',
   'options.install': 'Install',
+  'options.clearCacheButton': 'Clear',
   'options.defaults': 'Defaults',
   'options.confirmDefaults':
     'Put every setting on this page back to its default?',
@@ -197,6 +205,8 @@ const en = {
     'Shows the item you are wearing beside a hovered one, with better and worse lines marked.',
   'options.help.statPointAmounts':
     'Adds an amount box next to each + in Character info, so many points go in at once.',
+  'options.help.partyInviteReply':
+    'What a party invitation does: ask, as in the original, or decline or accept it on its own. The /re on, /re off and /re auto chat commands set the same.',
   'options.help.autoReconnect':
     'If the connection drops while you play, signs you back in to the same character.',
   'options.help.dropTooltips':
@@ -209,6 +219,8 @@ const en = {
     'Zen piles of at least this amount keep their name. Off keeps every pile named.',
   'options.help.chatTimestamps':
     'Shows the time, like 14:03, in front of every chat line.',
+  'options.help.chatSystemMessages':
+    'System and error lines in the chat log, the same switch as the chat box button, kept between sessions.',
   'options.help.whisperBeep': 'Plays a sound when someone whispers to you.',
   'options.help.chatEmojiSize':
     'How big emojis are drawn in the chat log. A line with an emoji grows to fit it; Small keeps every line one row tall, like the classic log.',
@@ -371,6 +383,8 @@ const en = {
     'Switches between fullscreen and a normal browser window. F11 does the same.',
   'options.help.install':
     'Installs the game as an app with its own window and icon.',
+  'options.help.clearCache':
+    'Clears the game files this browser keeps (the music stays) and reloads the page, like Ctrl+F5. Use it when something looks out of date.',
   'options.help.language':
     'The language of the interface, quests, NPC dialogue, and monster and item names.',
   'options.help.englishItemNames':

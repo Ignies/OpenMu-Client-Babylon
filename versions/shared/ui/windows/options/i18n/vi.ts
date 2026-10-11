@@ -39,6 +39,10 @@ export default {
   'options.hearInstruments': 'Nghe nhạc cụ của người chơi khác',
   'options.dropSoundFilter': 'Chỉ các đồ rơi dưới đây',
   'options.statPointAmounts': 'Cộng điểm hàng loạt',
+  'options.partyInviteReply': 'Lời mời tổ đội',
+  'options.partyInviteReply.ask': 'Hỏi',
+  'options.partyInviteReply.decline': 'Từ chối',
+  'options.partyInviteReply.accept': 'Chấp nhận',
   'options.whisperBeep': 'Âm báo khi có tin nhắn riêng',
   'options.slideHelp': 'Thông báo chạy chữ',
   'options.cameraControl': 'Điều khiển camera',
@@ -58,11 +62,13 @@ export default {
   'options.quickItemActions': 'Ctrl-click để chuyển vật phẩm',
   'options.confirmValuableItems': 'Hỏi trước khi vứt hoặc bán đồ quý',
   'options.chatTimestamps': 'Hiện giờ trong trò chuyện',
+  'options.chatSystemMessages': 'Tin nhắn hệ thống',
   'options.chatEmojis': 'Hiện emoji trong trò chuyện',
   'options.chatEmojiSize': 'Cỡ emoji trong trò chuyện',
   'options.blockBrowserKeys': 'Chặn phím tắt trình duyệt',
   'options.fullscreen': 'Toàn màn hình',
   'options.installApp': 'Cài ứng dụng',
+  'options.clearCache': 'Tệp trò chơi đã lưu đệm',
   'options.appInstalled': 'Đã cài ứng dụng',
   'options.installHint':
     'Trình duyệt này chưa đề nghị cài đặt. Hãy mở menu của trình duyệt và chọn Cài đặt hoặc Thêm vào màn hình.',
@@ -149,6 +155,7 @@ export default {
   'options.page.volume': 'Âm lượng',
   'options.page.screen': 'Màn hình',
   'options.section.character': 'Nhân vật',
+  'options.section.party': 'Tổ đội',
   'options.section.notices': 'Thông báo',
   'options.section.movement': 'Di chuyển',
   'options.section.keyboard': 'Bàn phím',
@@ -164,6 +171,7 @@ export default {
   'options.windowLayout': 'Vị trí cửa sổ',
   'options.reset': 'Đặt lại',
   'options.install': 'Cài đặt',
+  'options.clearCacheButton': 'Xóa',
   'options.defaults': 'Mặc định',
   'options.confirmDefaults': 'Đưa mọi thiết lập trên trang này về mặc định?',
   'options.confirmDefaultKeys': 'Đưa mọi phím về mặc định cho nhân vật này?',
@@ -189,6 +197,8 @@ export default {
     'Hiện vật phẩm bạn đang mặc cạnh vật phẩm được trỏ vào, đánh dấu dòng tốt hơn và kém hơn.',
   'options.help.statPointAmounts':
     'Thêm ô nhập số lượng cạnh mỗi dấu + trong Thông tin nhân vật, để cộng nhiều điểm cùng lúc.',
+  'options.help.partyInviteReply':
+    'Lời mời tổ đội sẽ làm gì: hỏi như bản gốc, hoặc tự từ chối hay chấp nhận. Các lệnh chat /re on, /re off và /re auto chỉnh cùng cài đặt này.',
   'options.help.autoReconnect':
     'Nếu mất kết nối khi đang chơi, tự đăng nhập lại vào đúng nhân vật đó.',
   'options.help.dropTooltips': 'Để con trỏ trên vật phẩm dưới đất để xem đầy đủ chi tiết.',
@@ -199,6 +209,8 @@ export default {
   'options.help.lootZen':
     'Đống Zen có ít nhất số lượng này giữ tên. Tắt thì mọi đống đều hiện tên.',
   'options.help.chatTimestamps': 'Hiện giờ, ví dụ 14:03, trước mỗi dòng trò chuyện.',
+  'options.help.chatSystemMessages':
+    'Các dòng hệ thống và lỗi trong khung chat; cùng công tắc với nút ở khung chat, được giữ giữa các phiên.',
   'options.help.whisperBeep': 'Phát âm thanh khi có người nhắn riêng cho bạn.',
   'options.help.chatEmojiSize':
     'Độ lớn của emoji trong nhật ký chat. Dòng có emoji sẽ cao lên cho vừa; Nhỏ thì mọi dòng giữ chiều cao bình thường, như nhật ký chat cổ điển.',
@@ -333,6 +345,8 @@ export default {
   'options.help.fullscreen':
     'Chuyển giữa toàn màn hình và cửa sổ trình duyệt thường. F11 cũng làm vậy.',
   'options.help.install': 'Cài game thành ứng dụng có cửa sổ và biểu tượng riêng.',
+  'options.help.clearCache':
+    'Xóa các tệp trò chơi mà trình duyệt này lưu (giữ lại nhạc) và tải lại trang, như Ctrl+F5. Dùng khi có gì đó trông như cũ.',
   'options.help.language':
     'Ngôn ngữ của giao diện, nhiệm vụ, hội thoại NPC, tên quái vật và vật phẩm.',
   'options.help.englishItemNames':

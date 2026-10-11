@@ -55,6 +55,8 @@ export async function ask(c: Config, group: Group): Promise<Config> {
       next.marketFee = Number(await ui.text('Marketplace listing fee (Zen)', { initial: String(c.marketFee), validate: v => (/^\d+$/.test(v) ? undefined : 'A whole number.') }));
       next.marketCommission = Number(await ui.text('Marketplace commission (%)', { initial: String(c.marketCommission), validate: v => (/^\d+$/.test(v) && Number(v) <= 100 ? undefined : '0 to 100.') }));
       next.heldHitRequest = await ui.confirm('Send a hit when the swing lands instead of on the click? (off = the original; the uneven timing can trip the OpenMU speed check)', c.heldHitRequest);
+      next.retryLoginWhenConnected = await ui.confirm('Retry a login refused as "account already connected"? (off = the original; only useful if this server drops the old session on that refusal)', c.retryLoginWhenConnected);
+      next.muHelperAfterReconnect = await ui.confirm('Start the MU Helper again after an automatic reconnect if it was running? (off = it stays off; botting policy)', c.muHelperAfterReconnect);
       next.modulesOff = await ui.text('Client modules to turn off (comma separated, like events,marketplace; blank for none)', { initial: c.modulesOff, validate: v => (/^\s*([a-z_]+\s*(,\s*[a-z_]+\s*)*)?$/.test(v) ? undefined : 'Module names separated by commas.') });
       break;
     case 'openmu': {

@@ -13,6 +13,10 @@ import { setServerModulesOff } from '../module';
 type ServerSettings = {
   /** Hold the plain attack's HitRequest until the swing's hit key (ZzzInterface.cpp:3355 sends it on the click). */
   readonly heldHitRequest: boolean;
+  /** On "account already connected", send the same login again a few times (the original only shows it). */
+  readonly retryLoginWhenConnected: boolean;
+  /** Ask for the MU Helper again after an automatic reconnect when it was running (ours: the original has no resume). */
+  readonly muHelperAfterReconnect: boolean;
 };
 
 type ServerManifest = {
@@ -24,7 +28,11 @@ type ServerManifest = {
 
 const SERVER_MANIFEST_VERSION = 1;
 
-export const ORIGINAL_SETTINGS: ServerSettings = { heldHitRequest: false };
+export const ORIGINAL_SETTINGS: ServerSettings = {
+  heldHitRequest: false,
+  retryLoginWhenConnected: false,
+  muHelperAfterReconnect: false,
+};
 
 const MODULE_ID = /^[a-z][a-z0-9_]{0,31}$/;
 const MAX_MODULES_OFF = 64;
@@ -32,6 +40,8 @@ const MAX_MODULES_OFF = 64;
 /** The type each known setting must have; a key not listed here is ignored. */
 const SETTING_TYPES: { readonly [K in keyof ServerSettings]: 'boolean' } = {
   heldHitRequest: 'boolean',
+  retryLoginWhenConnected: 'boolean',
+  muHelperAfterReconnect: 'boolean',
 };
 
 const CACHE_KEY = 'mu_server_manifests';

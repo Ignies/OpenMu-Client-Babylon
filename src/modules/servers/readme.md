@@ -133,3 +133,9 @@ connect server's own list (`Servers.serverList`) is filled by `session/net.ts`.
   plain attack's HitRequest until the swing's hit key: the original sends it on the click
   (ZzzInterface.cpp:3355), and the uneven intervals a held request makes can brush OpenMU's
   attack-speed check, so only a server that allows it turns it on.
+- `retryLoginWhenConnected`: on "account already connected" the client sends the same login again,
+  3 times 2.5 s apart (`session/net.ts`, `Session.retryLogin`); the original only shows the refusal.
+  It helps only where the server drops the old session on that refusal, so the server decides.
+- `muHelperAfterReconnect`: after the automatic reconnect (`session/sessionResume.ts`) the client
+  asks for the MU Helper again when it was running at the drop (`mu_helper/resume.ts`). Keeping an
+  AFK helper going is botting policy, so the server decides; off, it stays off.

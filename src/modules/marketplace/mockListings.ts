@@ -27,6 +27,11 @@ export type Listing = {
   state?: ListingState;
   /** Zen waiting for the seller, on a sold row. */
   proceeds?: number;
+  /** Up to negotiate (ours): no price (0), the buyer whispers the seller; `offerId` is the service's id. */
+  negotiate?: boolean;
+  offerId?: string;
+  /** What the seller wants for it, if they said. */
+  note?: string;
 };
 
 const SELLERS = [

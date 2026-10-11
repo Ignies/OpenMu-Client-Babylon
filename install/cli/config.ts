@@ -27,6 +27,10 @@ export type Config = {
   marketCommission: number;
   /** The world's `server.json` setting: hold the hit request until the blow lands (off = the original). */
   heldHitRequest: boolean;
+  /** `server.json`: on "account already connected", send the login again a few times (off = the original). */
+  retryLoginWhenConnected: boolean;
+  /** `server.json`: start the MU Helper again after an automatic reconnect if it was running (off = never). */
+  muHelperAfterReconnect: boolean;
   /** Optional client modules this world turns off, comma separated (`server.json` `modulesOff`). */
   modulesOff: string;
 };
@@ -55,6 +59,8 @@ const KEYS: Record<keyof Config, string> = {
   marketFee: 'MU_MARKET_FEE',
   marketCommission: 'MU_MARKET_COMMISSION',
   heldHitRequest: 'MU_HELD_HIT_REQUEST',
+  retryLoginWhenConnected: 'MU_RETRY_LOGIN_WHEN_CONNECTED',
+  muHelperAfterReconnect: 'MU_HELPER_AFTER_RECONNECT',
   modulesOff: 'MU_MODULES_OFF',
 };
 
@@ -82,6 +88,8 @@ export const DEFAULTS: Config = {
   marketFee: 0,
   marketCommission: 0,
   heldHitRequest: false,
+  retryLoginWhenConnected: false,
+  muHelperAfterReconnect: false,
   modulesOff: '',
 };
 

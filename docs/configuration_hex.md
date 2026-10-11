@@ -16,12 +16,12 @@ Format version: **1**
 | 0 | 1 | Format version. Anything else means a different table. |
 | 1 | 1 | Number of flag bytes that follow (currently 7). |
 | 2 | 7 | The on/off settings, one bit each, first in bit 0 of the first byte. |
-| 9 | 1 | Number of value bytes that follow (currently 54). |
-| 10 | 54 | The numeric settings, one byte each, each stored as value + 128. |
-| 64 | 2 | Language, two ASCII letters (`65 73` is `es`). |
-| 66 | 2 | Texture pack digest, `0000` when the original textures are in use. |
+| 9 | 1 | Number of value bytes that follow (currently 55). |
+| 10 | 55 | The numeric settings, one byte each, each stored as value + 128. |
+| 65 | 2 | Language, two ASCII letters (`65 73` is `es`). |
+| 67 | 2 | Texture pack digest, `0000` when the original textures are in use. |
 
-Total: **68 bytes**, 136 hex characters.
+Total: **69 bytes**, 138 hex characters.
 
 ## On/off settings
 
@@ -39,49 +39,51 @@ Bit `n` counts from the first flag byte: byte `n / 8`, bit `n % 8`, lowest bit f
 | 7 | 0.7 | `blockBrowserKeys` |
 | 8 | 1.0 | `cameraControl` |
 | 9 | 1.1 | `chatEmojis` |
-| 10 | 1.2 | `chatTimestamps` |
-| 11 | 1.3 | `clouds` |
-| 12 | 1.4 | `confirmValuableItems` |
-| 13 | 1.5 | `dropSoundAncient` |
-| 14 | 1.6 | `dropSoundExcellent` |
-| 15 | 1.7 | `dropSoundFilter` |
-| 16 | 2.0 | `dropSoundHighLevel` |
-| 17 | 2.1 | `dropSoundJewels` |
-| 18 | 2.2 | `dropSoundOther` |
-| 19 | 2.3 | `dropSoundZen` |
-| 20 | 2.4 | `dropTooltips` |
-| 21 | 2.5 | `dynamicLights` |
-| 22 | 2.6 | `englishItemNames` |
-| 23 | 2.7 | `eventTimers` |
-| 24 | 3.0 | `firstPersonBob` |
-| 25 | 3.1 | `fxaa` |
-| 26 | 3.2 | `grassOutline` |
-| 27 | 3.3 | `hearInstruments` |
-| 28 | 3.4 | `lockWindows` |
-| 29 | 3.5 | `lootAncient` |
-| 30 | 3.6 | `lootExcellent` |
-| 31 | 3.7 | `lootFilter` |
-| 32 | 4.0 | `lootHighLevel` |
-| 33 | 4.1 | `lootJewels` |
-| 34 | 4.2 | `lootOther` |
-| 35 | 4.3 | `lowHealthWarning` |
-| 36 | 4.4 | `lowManaWarning` |
-| 37 | 4.5 | `minimapCorner` |
-| 38 | 4.6 | `monsterEffects` |
-| 39 | 4.7 | `muteInBackground` |
-| 40 | 5.0 | `performanceReadout` |
-| 41 | 5.1 | `postProcessing` |
-| 42 | 5.2 | `propBatching` |
-| 43 | 5.3 | `questTracker` |
-| 44 | 5.4 | `quickItemActions` |
-| 45 | 5.5 | `shadows` |
-| 46 | 5.6 | `slideHelp` |
-| 47 | 5.7 | `statPointAmounts` |
-| 48 | 6.0 | `stateWarnings` |
-| 49 | 6.1 | `thirdPersonMouseLook` |
-| 50 | 6.2 | `weatherEffects` |
-| 51 | 6.3 | `whisperBeep` |
-| 52 | 6.4 | `wsadMovement` |
+| 10 | 1.2 | `chatSystemMessages` |
+| 11 | 1.3 | `chatTimestamps` |
+| 12 | 1.4 | `clouds` |
+| 13 | 1.5 | `confirmValuableItems` |
+| 14 | 1.6 | `dropSoundAncient` |
+| 15 | 1.7 | `dropSoundExcellent` |
+| 16 | 2.0 | `dropSoundFilter` |
+| 17 | 2.1 | `dropSoundHighLevel` |
+| 18 | 2.2 | `dropSoundJewels` |
+| 19 | 2.3 | `dropSoundOther` |
+| 20 | 2.4 | `dropSoundZen` |
+| 21 | 2.5 | `dropTooltips` |
+| 22 | 2.6 | `dynamicLights` |
+| 23 | 2.7 | `englishItemNames` |
+| 24 | 3.0 | `eventTimers` |
+| 25 | 3.1 | `firstPersonBob` |
+| 26 | 3.2 | `fxaa` |
+| 27 | 3.3 | `grassOutline` |
+| 28 | 3.4 | `hearInstruments` |
+| 29 | 3.5 | `helperItemFilters` |
+| 30 | 3.6 | `lockWindows` |
+| 31 | 3.7 | `lootAncient` |
+| 32 | 4.0 | `lootExcellent` |
+| 33 | 4.1 | `lootFilter` |
+| 34 | 4.2 | `lootHighLevel` |
+| 35 | 4.3 | `lootJewels` |
+| 36 | 4.4 | `lootOther` |
+| 37 | 4.5 | `lowHealthWarning` |
+| 38 | 4.6 | `lowManaWarning` |
+| 39 | 4.7 | `minimapCorner` |
+| 40 | 5.0 | `monsterEffects` |
+| 41 | 5.1 | `muteInBackground` |
+| 42 | 5.2 | `performanceReadout` |
+| 43 | 5.3 | `postProcessing` |
+| 44 | 5.4 | `propBatching` |
+| 45 | 5.5 | `questTracker` |
+| 46 | 5.6 | `quickItemActions` |
+| 47 | 5.7 | `shadows` |
+| 48 | 6.0 | `slideHelp` |
+| 49 | 6.1 | `statPointAmounts` |
+| 50 | 6.2 | `stateWarnings` |
+| 51 | 6.3 | `thirdPersonMouseLook` |
+| 52 | 6.4 | `weatherEffects` |
+| 53 | 6.5 | `whisperBeep` |
+| 54 | 6.6 | `wsadMovement` |
 
 ## Value settings
 
@@ -129,20 +131,21 @@ Each is one byte; subtract 128 to get the value. Index 0 is the first byte after
 | 37 | `monsterVolume` |
 | 38 | `msaa` |
 | 39 | `musicVolume` |
-| 40 | `renderDistance` |
-| 41 | `renderScale` |
-| 42 | `renderingStyle` |
-| 43 | `shadeSteps` |
-| 44 | `sharpness` |
-| 45 | `stepsVolume` |
-| 46 | `styleStrength` |
-| 47 | `sunShafts` |
-| 48 | `toneMapper` |
-| 49 | `uiScale` |
-| 50 | `uiVolume` |
-| 51 | `upscale` |
-| 52 | `vignette` |
-| 53 | `volume` |
+| 40 | `partyInviteReply` |
+| 41 | `renderDistance` |
+| 42 | `renderScale` |
+| 43 | `renderingStyle` |
+| 44 | `shadeSteps` |
+| 45 | `sharpness` |
+| 46 | `stepsVolume` |
+| 47 | `styleStrength` |
+| 48 | `sunShafts` |
+| 49 | `toneMapper` |
+| 50 | `uiScale` |
+| 51 | `uiVolume` |
+| 52 | `upscale` |
+| 53 | `vignette` |
+| 54 | `volume` |
 
 ## Worked example
 

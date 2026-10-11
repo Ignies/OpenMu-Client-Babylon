@@ -328,6 +328,11 @@ export type GameOptions = {
   /** A "14:03" column in front of every chat log line. */
   chatTimestamps: boolean;
   /**
+   * System and error lines in the chat log (`m_bShowSystemMessages`), also the chat box's button;
+   * kept here so it survives a reload (ours: the original starts every session with them on).
+   */
+  chatSystemMessages: boolean;
+  /**
    * Chat emoji codes (`:dk_love:`) drawn as their pictures in the log and
    * over the speaker, plus the emoji button in the chat box (ours). Off shows
    * the codes as text.
@@ -416,6 +421,17 @@ export type GameOptions = {
    */
   englishItemNames: boolean;
   /**
+   * MU Helper extra items (ours): `+` words are filters (+Luck +Skill +Exc +Anc +Opt N +level)
+   * and an entry may run past the 14 characters the server keeps (`modules/mu_helper`). Off is
+   * the original: a name the item's name contains.
+   */
+  helperItemFilters: boolean;
+  /**
+   * Party invitations (ours, the `/re on|off|auto` chat command and Options > General > Party): 0 ask,
+   * the original's prompt / 1 decline / 2 accept on their own (`modules/social`, `autoAnswerParty`).
+   */
+  partyInviteReply: number;
+  /**
    * 0 Classic (the original client, 1:1) / 1 Enhanced / 2 Ultra: which deliberate
    * improvements run (`controllers/fidelity`).
    */
@@ -500,6 +516,7 @@ const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
   compareTooltips: [0, 2],
   // Literal for the same reason: `CHAT_EMOJI_SIZE_MAX`.
   chatEmojiSize: [0, 3],
+  partyInviteReply: [0, 2],
   lowHealthPercent: [LOW_VITAL.min, LOW_VITAL.max],
   lowManaPercent: [LOW_VITAL.min, LOW_VITAL.max],
   uiScale: [0, UI_SCALE_MAX],
@@ -600,6 +617,7 @@ const DEFAULTS: GameOptions = {
   lootOther: false,
   lootZen: 0,
   chatTimestamps: false,
+  chatSystemMessages: true,
   chatEmojis: true,
   chatEmojiSize: 2,
   uiScale: 3,
@@ -618,6 +636,8 @@ const DEFAULTS: GameOptions = {
   eventTimers: true,
   questTracker: true,
   englishItemNames: false,
+  helperItemFilters: false,
+  partyInviteReply: 0,
   fidelity: FIDELITY_DEFAULT,
   fidelityOverrides: {},
 };

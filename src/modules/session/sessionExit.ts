@@ -47,6 +47,13 @@ const KIND_OF_TYPE: Record<number, ExitKind> = {
 
 const ANSWER_TIMEOUT = 5000;
 
+/** Run just before a LogOut goes out; a module above this one fills it (mu_helper's `TriggerStop`). */
+const beforeLogOut: ((kind: ExitKind) => void)[] = [];
+
+export function onBeforeLogOut(fn: (kind: ExitKind) => void): void {
+  beforeLogOut.push(fn);
+}
+
 function inWorld(): boolean {
   return (
     AppState.uiState === UIState.World || AppState.uiState === UIState.LoadingWorld
@@ -115,6 +122,7 @@ export const SessionExit = new (class _SessionExit {
       this.leave(kind);
     }, ANSWER_TIMEOUT);
 
+    for (const fn of beforeLogOut) fn(kind);
     const p = LogOutPacket.createPacket();
     p.Type = LOGOUT_TYPE[kind];
     Session.sendToGS(p.buffer);

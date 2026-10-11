@@ -33,4 +33,10 @@ export default {
   'fidelity.roofFade': 'Mái nhà trong suốt',
   'fidelity.roofFade.hint':
     'Mái nhà mờ dần khi bạn đứng bên dưới để bạn nhìn thấy bên trong. Cổ điển: mái nhà luôn hiển thị.',
+  'fidelity.requestTimeout': 'Yêu cầu hết hạn sau 20 giây',
+  'fidelity.requestTimeout.hint':
+    'Yêu cầu giao dịch, tổ đội hoặc đấu tay đôi không được trả lời sẽ bị từ chối sau 20 giây. Cổ điển: chờ đến khi bạn trả lời.',
+  'fidelity.noticeLinks': 'Liên kết trong thông báo máy chủ',
+  'fidelity.noticeLinks.hint':
+    'Địa chỉ web trong thông báo máy chủ là liên kết gạch chân, mở trong thẻ mới. Cổ điển: văn bản thường, như bản gốc.',
 } satisfies Partial<Record<keyof typeof en, string>>;

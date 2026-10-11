@@ -38,7 +38,7 @@ import {
   matchEmojiBubbleWord,
   type EmojiBubbleId,
 } from '../chat/emojiBubbles';
-import { localCommandOf } from '../chat/chatCommands';
+import { localCommandOf, partyReplyCommand } from '../chat/chatCommands';
 import {
   chatEmojiAdvance,
   chatEmojiBubbleOf,
@@ -52,7 +52,7 @@ import { itemLinkLabel, scanItemLinks, stripItemLinks } from '../chat/chatItemLi
 import { EMOJI_CATALOG } from '../chat/emojis';
 import { clipChatText, toChatWire } from '@/controllers/net/protocols';
 import { chatTextWidth } from '../chat/chatTextWidth';
-import { GameOptions } from '@/controllers/settings';
+import { GameOptions, setGameOption } from '@/controllers/settings';
 import type { Commands } from '../chat/commands';
 import {
   CancelGuildCreationPacket,
@@ -158,6 +158,9 @@ export const GUILD_SECURITY_CODE_MAX = 10;
 
 const SYSTEM_ROW = '';
 
+/** `/re` words by `GameOptions.partyInviteReply`: ask (the original), decline, accept. */
+const PARTY_REPLIES = ['on', 'off', 'auto'] as const;
+
 type LocalCommands = Pick<typeof Commands, 'run' | 'duelStop' | 'stopFollowingOutside'>;
 
 /** The slash commands (`chat/commands.ts`); they call back into social, so the chat module hands them in. */
@@ -188,8 +191,6 @@ export const Social = new (class _Social {
   whisperEnabled = true;
   /** `m_bBlockWhisper`: incoming whispers are dropped. */
   blockWhisper = false;
-  /** `m_bShowSystemMessages`: system/error lines show in the log. */
-  showSystemMessages = true;
   /** `m_bShowFrame`: the log gets a frame and scrollbar while on. */
   chatLogFramed = false;
   chatLogVisible = true;
@@ -268,7 +269,7 @@ export const Social = new (class _Social {
       lastWhisperFrom: observable,
       whisperEnabled: observable,
       blockWhisper: observable,
-      showSystemMessages: observable,
+      showSystemMessages: computed,
       chatLogFramed: observable,
       chatLogVisible: observable,
       chatLogLines: observable,
@@ -525,8 +526,17 @@ export const Social = new (class _Social {
       | 'chatLogFramed'
       | 'chatLogVisible'
   ): void {
+    if (key === 'showSystemMessages') {
+      setGameOption('chatSystemMessages', !GameOptions.chatSystemMessages);
+      this.chatLogEndId = null;
+      return;
+    }
     this[key] = !this[key];
-    if (key === 'showSystemMessages') this.chatLogEndId = null;
+  }
+
+  /** `m_bShowSystemMessages`: system/error lines show in the log. Saved, shared with Options (ours). */
+  get showSystemMessages(): boolean {
+    return GameOptions.chatSystemMessages;
   }
 
   /** How tall the log draws this row (an emoji row grows with the option). */
@@ -664,6 +674,14 @@ export const Social = new (class _Social {
       // The original logs an outgoing whisper under the hero's name.
       this.addChatLine(heroName, text, ChatLineType.Whisper);
       this.remember(this.whisperHistory, whisperTo);
+      return true;
+    }
+
+    // `/re on|off|auto` (ours): how party invitations are answered; never sent.
+    const reply = partyReplyCommand(text);
+    if (reply !== null) {
+      this.setPartyReply(reply);
+      this.remember(this.chatHistory, text);
       return true;
     }
 
@@ -828,6 +846,27 @@ export const Social = new (class _Social {
     packet.TargetPlayerId = target.netId;
     Session.sendToGS(packet.buffer);
     this.systemMessage(t('party.invitationSent', { name: target.name }));
+  }
+
+  /** `/re on|off|auto`: ask (the original), decline or accept party invitations; else the setting now. */
+  setPartyReply(word: string): void {
+    const reply = (PARTY_REPLIES as readonly string[]).indexOf(word);
+    if (reply < 0) {
+      this.systemMessage(t('party.reply.status', { mode: PARTY_REPLIES[GameOptions.partyInviteReply] }));
+      return;
+    }
+    setGameOption('partyInviteReply', reply);
+    this.systemMessage(t(`party.reply.${PARTY_REPLIES[reply]}` as const));
+  }
+
+  /** An invitation came in: `/re off` or `/re auto` answers it here instead of the prompt. */
+  autoAnswerParty(): void {
+    const request = this.partyRequest;
+    const reply = GameOptions.partyInviteReply;
+    if (!request || !reply) return;
+    const accept = reply === 2;
+    this.partyRespond(accept);
+    this.systemMessage(t(accept ? 'party.reply.accepted' : 'party.reply.declined', { name: request.requesterName }));
   }
 
   /** The `CPartyMsgBoxLayout` answer. */

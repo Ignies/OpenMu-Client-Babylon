@@ -18,4 +18,5 @@ export default {
   'notify.upgradeNeedsServer': 'การอัปเกรดต้องใช้เซิร์ฟเวอร์',
   'notify.noAnswerRestored': 'เซิร์ฟเวอร์ไม่ตอบสนอง - คืนไอเทมแล้ว',
   'notify.cannotBuy': 'คุณซื้อไอเทมนั้นไม่ได้',
+  'notify.updateAvailable': 'มีเวอร์ชันใหม่: หน้าจะโหลดใหม่เมื่อคุณกลับไปที่รายชื่อเซิร์ฟเวอร์',
 } satisfies Partial<Record<keyof typeof en, string>>;

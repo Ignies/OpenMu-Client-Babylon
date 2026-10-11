@@ -15,7 +15,10 @@ Party packets from the game server. The party state and the party actions live i
   `CommandParty`), `partyRespond`, `requestPartyList`, `partyKick`, `partyLeave`.
 
 ## Packets
-- `PartyRequest`: someone invites the hero; sets `Social.partyRequest`.
+- `PartyRequest`: someone invites the hero; sets `Social.partyRequest`, then `Social.autoAnswerParty()`
+  answers it when the player typed `/re off` (decline) or `/re auto` (accept); `/re on`, the
+  default, keeps the original's prompt (`GameOptions.partyInviteReply`, ours; also the Options row
+  Game > General > Party).
 - `PartyList`: the full member list (name, map, position, health).
 - `RemovePartyMember`: removes one member; the hero's own index clears the list.
 - `PartyHealthUpdate`: each member's health in tenths.
@@ -31,4 +34,6 @@ Party packets from the game server. The party state and the party actions live i
 - change what the window shows: `versions/shared/ui/windows/party/index.tsx`.
 
 ## Tests
-- `net.test.ts`: joining opens no window; a blank member name keeps the slot's previous one.
+- `net.test.ts`: joining opens no window; a blank member name keeps the slot's previous one; an
+  invitation prompts by default and is answered on its own after `/re off` / `/re auto`, which
+  reaches no server; one left alone is declined after 20 s (`requestTimeout`).

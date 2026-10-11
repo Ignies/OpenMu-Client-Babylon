@@ -39,6 +39,10 @@ export default {
   'options.hearInstruments': 'Слышать инструменты других игроков',
   'options.dropSoundFilter': 'Только то, что ниже',
   'options.statPointAmounts': 'Добавлять очки пачкой',
+  'options.partyInviteReply': 'Приглашения в группу',
+  'options.partyInviteReply.ask': 'Спрашивать',
+  'options.partyInviteReply.decline': 'Отклонять',
+  'options.partyInviteReply.accept': 'Принимать',
   'options.whisperBeep': 'Звук при получении шёпота',
   'options.slideHelp': 'Бегущая строка объявлений',
   'options.cameraControl': 'Управление камерой',
@@ -58,11 +62,13 @@ export default {
   'options.quickItemActions': 'Ctrl-клик перемещает предметы',
   'options.confirmValuableItems': 'Спрашивать перед выбросом или продажей ценностей',
   'options.chatTimestamps': 'Время в чате',
+  'options.chatSystemMessages': 'Системные сообщения',
   'options.chatEmojis': 'Эмодзи в чате',
   'options.chatEmojiSize': 'Размер эмодзи в чате',
   'options.blockBrowserKeys': 'Блокировать горячие клавиши браузера',
   'options.fullscreen': 'Полный экран',
   'options.installApp': 'Установить',
+  'options.clearCache': 'Кэш файлов игры',
   'options.appInstalled': 'Установлено',
   'options.installHint': 'Этот браузер пока не предлагает установку. Откройте его меню и выберите «Установить».',
   'options.uiScale': 'Размер',
@@ -149,6 +155,7 @@ export default {
   'options.page.volume': 'Громкость',
   'options.page.screen': 'Экран',
   'options.section.character': 'Персонаж',
+  'options.section.party': 'Группа',
   'options.section.notices': 'Уведомления',
   'options.section.movement': 'Движение',
   'options.section.keyboard': 'Клавиатура',
@@ -164,6 +171,7 @@ export default {
   'options.windowLayout': 'Положение окон',
   'options.reset': 'Сбросить',
   'options.install': 'Установить',
+  'options.clearCacheButton': 'Очистить',
   'options.defaults': 'По умолчанию',
   'options.confirmDefaults':
     'Вернуть все настройки этой страницы к значениям по умолчанию?',
@@ -196,6 +204,8 @@ export default {
     'Показывает надетый предмет рядом с предметом под курсором и отмечает, какие строки лучше, а какие хуже.',
   'options.help.statPointAmounts':
     'Добавляет поле количества рядом с каждым + в окне «Персонаж», чтобы вкладывать много очков сразу.',
+  'options.help.partyInviteReply':
+    'Что делать с приглашением в группу: спрашивать, как в оригинале, или самому отклонять либо принимать его. Команды /re on, /re off и /re auto меняют то же самое.',
   'options.help.autoReconnect':
     'При обрыве связи во время игры заново входит тем же персонажем.',
   'options.help.dropTooltips':
@@ -209,6 +219,8 @@ export default {
     'Названия видны у кучек Zen от этой суммы. «Выкл.» - видны у всех кучек.',
   'options.help.chatTimestamps':
     'Показывает время, например 14:03, перед каждой строкой чата.',
+  'options.help.chatSystemMessages':
+    'Системные строки и ошибки в чате; тот же переключатель, что и кнопка в окне чата, сохраняется между сессиями.',
   'options.help.whisperBeep': 'Воспроизводит звук, когда вам приходит шёпот.',
   'options.help.chatEmojiSize':
     'Насколько крупно эмодзи рисуются в журнале чата. Строка с эмодзи растёт, чтобы оно поместилось; «Маленький» - все строки обычной высоты, как в классическом журнале.',
@@ -373,6 +385,8 @@ export default {
     'Переключает между полноэкранным режимом и обычным окном браузера. То же делает F11.',
   'options.help.install':
     'Устанавливает игру как приложение с отдельным окном и значком.',
+  'options.help.clearCache':
+    'Очищает файлы игры, сохранённые браузером (музыка остаётся), и перезагружает страницу, как Ctrl+F5. Используйте, если что-то выглядит устаревшим.',
   'options.help.language':
     'Язык интерфейса, заданий, диалогов NPC, названий монстров и предметов.',
   'options.help.englishItemNames':

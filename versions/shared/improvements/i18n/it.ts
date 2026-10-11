@@ -33,4 +33,10 @@ export default {
   'fidelity.roofFade': 'Tetti trasparenti',
   'fidelity.roofFade.hint':
     'I tetti svaniscono mentre ci sei sotto, così vedi l\'interno. Classica: i tetti restano sempre visibili.',
+  'fidelity.requestTimeout': 'Le richieste scadono dopo 20 s',
+  'fidelity.requestTimeout.hint':
+    'Una richiesta di scambio, gruppo o duello lasciata senza risposta viene rifiutata dopo 20 secondi. Classica: aspetta la tua risposta.',
+  'fidelity.noticeLinks': 'Link negli avvisi del server',
+  'fidelity.noticeLinks.hint':
+    'Gli indirizzi web negli avvisi del server sono link sottolineati che aprono una nuova scheda. Classica: testo semplice, come nell’originale.',
 } satisfies Partial<Record<keyof typeof en, string>>;

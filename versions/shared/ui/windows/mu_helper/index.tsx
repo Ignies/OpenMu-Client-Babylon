@@ -19,6 +19,8 @@ import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuItemWindow } from '@/controllers/interface/components/mu_window';
 import { SkillIcon } from '../../components/skill_icon';
+import { GameOptions, setGameOption } from '@/controllers/settings';
+import { MAX_FILTERED_ITEM_CHARS } from '@/modules/mu_helper/itemFilters';
 import {
   MAX_EXTRA_ITEM_CHARS,
   MAX_EXTRA_ITEMS,
@@ -538,9 +540,11 @@ const ObtainTab = observer(() => {
   const draft = MuHelperState.draft;
   const [itemName, setItemName] = useState('');
   const [selected, setSelected] = useState(-1);
+  // The player's item filters (ours) take longer entries; the blob keeps 14 characters of each.
+  const maxChars = GameOptions.helperItemFilters ? MAX_FILTERED_ITEM_CHARS : MAX_EXTRA_ITEM_CHARS;
 
   const addItem = () => {
-    const name = itemName.trim().slice(0, MAX_EXTRA_ITEM_CHARS);
+    const name = itemName.trim().slice(0, maxChars);
     if (!name) return;
     edit(d => {
       if (d.extraItems.length >= MAX_EXTRA_ITEMS) return;
@@ -608,11 +612,19 @@ const ObtainTab = observer(() => {
           onChange={value => edit(d => (d.pickExtraItems = value))}
         />
       </div>
+      <div className="helper-row" title={t('muHelper.itemFilters.hint')}>
+        <Check
+          label={t('muHelper.itemFilters')}
+          checked={GameOptions.helperItemFilters}
+          indent={10}
+          onChange={value => setGameOption('helperItemFilters', value)}
+        />
+      </div>
       <div className="helper-row">
         <input
           className="helper-item-input"
           type="text"
-          maxLength={MAX_EXTRA_ITEM_CHARS}
+          maxLength={maxChars}
           placeholder={t('muHelper.itemName')}
           value={itemName}
           onKeyDown={event => {

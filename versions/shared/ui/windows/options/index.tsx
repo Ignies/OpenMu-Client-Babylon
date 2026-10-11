@@ -16,6 +16,7 @@ import {
 } from '@/controllers/settings';
 import { invalidateShadowState } from '@/controllers/render/objectShadow';
 import { installApp } from '@/modules/options/pwaInstall';
+import { clearCacheAndReload } from '@/controllers/assets/cacheReset';
 import { reloadMapObjects } from '@/controllers/terrain/loadMapIntoScene';
 import {
   KeyBindings,
@@ -317,6 +318,11 @@ export const OptionsWindow = observer(() => {
 
     if (row.id === 'resetWindows') {
       MuWindows.resetAll();
+      return;
+    }
+
+    if (row.id === 'clearCache') {
+      void clearCacheAndReload();
       return;
     }
 

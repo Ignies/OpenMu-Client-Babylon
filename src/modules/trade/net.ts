@@ -5,9 +5,12 @@ import { Social } from '../social/social';
 import { TradeButtonStateChangedPacket, TradeFinishedPacket, TradeItemAddedPacket, TradeItemRemovedPacket, TradeMoneyUpdatePacket, TradeRequestAnswerPacket, TradeRequestPacket as TradeRequestS2CPacket } from '@versions/shared/packets/ServerToClientPackets';
 import { cleanName } from '../chat/chat';
 import { t } from '@/i18n';
+import { expireRequest } from '../social/requestTimeout';
 
 /** Registers this module's packet listeners (see ../module.ts). */
 export function installNet(): void {
+  expireRequest(() => Economy.tradeRequest, () => Economy.answerTradeRequest(false));
+
   // --- Trade (CNewUITrade) -----------------------------------------------------
 
   EventBus.on('TradeRequest', packet => {

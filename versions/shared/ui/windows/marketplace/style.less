@@ -130,6 +130,18 @@
     color: #fff;
     border-color: @mp-gold;
   }
+
+  // A phone: in the window's corner, sized from the script (closeButtonSize).
+  &.is-corner {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    z-index: 5;
+    color: @mp-gold;
+    background: rgba(8, 10, 15, 0.8);
+    border-width: 2px;
+    border-radius: 50%;
+  }
 }
 
 // ---- toolbar -------------------------------------------------------------
@@ -1228,4 +1240,34 @@
   .mp-row .mp-card-name {
     animation: none;
   }
+}
+
+// Items up to negotiate (ours): no price, a note, and the sell form's mode switch.
+.mp-negotiate {
+  font-style: italic;
+  color: @mp-gold;
+}
+
+.mp-row-name {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.mp-offer-note {
+  overflow: hidden;
+  font-size: 10px;
+  line-height: 12px;
+  color: @mp-dim;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.mp-sell-mode {
+  display: flex;
+  gap: 6px;
+}
+
+.mp-sell-note {
+  padding: 4px 8px;
+  font-size: 12px;
 }

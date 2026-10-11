@@ -11,7 +11,7 @@ import '@/app/logic';
 // Pins every packet's listeners and their order once the app has loaded (the order modules
 // install in is the order listeners run for a packet several modules handle). Whitespace and
 // vitest's numbered import aliases are ignored, so moving an import does not change the hash.
-const LISTENERS_HASH = 'fb2e0863ef2ee65780edba64c9f3478d3a7b97e8';
+const LISTENERS_HASH = 'aeb80167b14ab43a8968a0a8ecb484874f7d57bc';
 
 const source = (handler: unknown) =>
   String(handler)

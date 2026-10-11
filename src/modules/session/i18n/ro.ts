@@ -8,4 +8,5 @@ export default {
   'resume.done': 'Din nou online',
   'resume.failed': 'Reconectarea a eșuat',
   'resume.cancelled': 'Reconectare anulată',
+  'login.closingOldSession': 'Contul este încă conectat: se închide sesiunea veche și se reîncearcă...',
 } satisfies Partial<Record<keyof typeof en, string>>;

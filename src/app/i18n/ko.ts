@@ -18,4 +18,5 @@ export default {
   'notify.upgradeNeedsServer': '강화에는 서버가 필요합니다',
   'notify.noAnswerRestored': '서버가 응답하지 않아 아이템을 되돌렸습니다',
   'notify.cannotBuy': '그 아이템은 살 수 없습니다',
+  'notify.updateAvailable': '새 버전이 나왔습니다. 서버 목록으로 돌아가면 페이지를 새로 고칩니다.',
 } satisfies Partial<Record<keyof typeof en, string>>;

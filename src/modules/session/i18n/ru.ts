@@ -8,4 +8,5 @@ export default {
   'resume.done': 'Снова в сети',
   'resume.failed': 'Не удалось переподключиться',
   'resume.cancelled': 'Переподключение отменено',
+  'login.closingOldSession': 'Аккаунт всё ещё в игре: закрываем старую сессию и пробуем снова...',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -11,15 +11,17 @@ the client-to-server encryption, the login fields and the offline flag.
   `switchToMapServer(...)`, `sendServerChangeAuthentication(characterName)`, `onSocketLost(socket)`,
   `playOnline()` (back to the server list), `cancelLogin()` (the login Cancel, `LoginWin.cpp:416`), `lastGameServer`, `resumeHook`, `connectionLost`; the
   login fields `username`, `password`, `rememberLogin`, `loginProcessing`, `loginError`,
-  `loadAccount(id?, force?)`, `saveLoginData()`, `loginRequest(user, password)`; the proxy side
+  `loadAccount(id?, force?)`, `saveLoginData()`, `loginRequest(user, password)`, `retryLogin()`; the proxy side
   frames `sendBandFrame` / `sendPingFrame`.
 - `SessionExit.request(kind)` / `SessionExit.available(kind)`: Exit Game, Select Server, Switch
-  Character (`kind` is `'quit' | 'servers' | 'characters'`).
+  Character (`kind` is `'quit' | 'servers' | 'characters'`). `onBeforeLogOut(fn)`: runs just before
+  the LogOut goes out (mu_helper's `TriggerStop`, which this module may not import).
 - `openSystemMenu()`: Escape on a clear screen opens the system menu in the world
   (`SessionExit.menuOpen`, `closeMenu()`; drawn by `versions/shared/ui/windows/system_menu`) and the
   Options window on the server list and the character screen; returns true when it did.
-- `SessionResume`: the auto-reconnect state machine. `begin()`, `retry()`, `giveUp(reason)`,
-  `remember(name)`, `finish()`, plus `attempt`, `step`, `active` for the overlay.
+- `SessionResume`: the auto-reconnect state machine. `begin()`, `retry()`,
+  `giveUp(reason)`, `remember(name)`, `finish()`, plus `attempt`, `step`, `active` for the overlay and
+  `resumed` (a count of resumes that got back in, which `mu_helper/resume.ts` reacts to).
 - `SessionStats`: exp, kills and zen since the last reset, with per-hour rates and `msToLevel`.
   `watch()`, `tick()`, `reset()`.
 
@@ -51,17 +53,19 @@ the client-to-server encryption, the login fields and the offline flag.
 - `ServerListResponse`: fills `Servers.serverList`.
 - `ConnectionInfo`: connects to the game server it names.
 - `GameServerEntered`: sets the player id; map-server switch and resume take over here.
-- `LoginResponse`: character list on success, error on the form otherwise.
+- `LoginResponse`: character list on success, error on the form otherwise. "Account already connected"
+  sends the same login again (3 times, 2.5 s apart) where the world's `server.json` sets
+  `retryLoginWhenConnected`; the original only shows it.
 - `LogoutResponse`: hands the type to `SessionExit.onResponse`.
 - `ChangeMapServerInfo` (`WSclient.cpp:10328`): moves to another game server; port 0 cancels.
 - `wsClosed` (bus event): closes the NPC shop and quest windows, then `Session.onSocketLost`.
 - Outgoing: `LogOut` (from `SessionExit.request`).
 
 ## Depends on / used by
-- uses: `controllers/interface/uiState.ts`, `servers` (`serverConfig.ts`, `serverAccounts.ts`, `Servers`), `hero`,
+- uses: `controllers/interface/uiState.ts`, `servers` (`serverConfig.ts`, `serverAccounts.ts`, `serverManifest.ts`, `Servers`), `hero`,
   `character_select`, `npc_shop`, `quests`, `economy`, `social`, `friends/messenger`,
   `controllers/settings`, `controllers/sound`, `controllers/interface/browserHotkeys`.
-- used by: `src/app/logic.ts`, `src/app/boot.tsx`, `hero/net.ts` (`remember`, `finish`),
+- used by: `src/app/logic.ts`, `src/app/boot.tsx`, `hero/net.ts` (`remember`, `finish`), `mu_helper/resume.ts` (`resumed`),
   `ecs/systems/keyboardInputSystem.ts`, `versions/shared/ui/components/reconnect_overlay`.
 - windows: `versions/shared/ui/windows/options/` (exit buttons), `windows/session_stats/`,
   `hud/bottom_bar/` (`expTooltip.tsx`, `index.tsx`).
@@ -75,6 +79,8 @@ the client-to-server encryption, the login fields and the offline flag.
 - `state.test.ts`: `sendToGS` sends only the bytes its DataView covers (a view into a larger buffer, as a module's
   packet can be); `cancelLogin` goes back to the server list and keeps the fields.
 - `sessionExit.test.ts`: Escape in the world opens the system menu, once, not Options.
+- `net.test.ts`: "account already connected" shows the refusal by default and retries only where the
+  world asks, then gives up; leaving the login drops a pending retry.
 - the login flow is covered by the listener order golden (`src/app/listenerOrder.golden.test.ts`).
 
 ## Notes

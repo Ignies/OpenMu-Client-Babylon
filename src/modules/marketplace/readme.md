@@ -6,8 +6,9 @@ plugin ([../../../openmu/readme.md](../../../openmu/readme.md)).
 
 ## Public API
 - `Marketplace` (`state.ts`): the window store (tabs, filters, paging, sell form, `confirmBuy()`,
-  `cancelListing(id)`, `listForSale()`, `collectPayout()`, `refresh()`). Plus `SORTS`, `formatZen`,
-  `sinceLabel`, `Tab`.
+  `cancelListing(id)`, `listForSale()`, `collectPayout()`, `refresh()`; adverts to negotiate:
+  `setSellNegotiate`, `setSellNote`, `postForNegotiation()`, `negotiate(listing)`). Plus `SORTS`,
+  `NOTE_MAX`, `formatZen`, `sinceLabel`, `Tab`.
 - `toggleMarketplace()` (`gameBridge.ts`): syncs Zen and bag from the game, then opens or closes.
 - `CATEGORIES`, `displayName(item)` (`categories.ts`); `cancellable`, `stateLabelKey`,
   `statePillKey` (`catalogue.ts`); `lookClasses(item)` (`tiers.ts`): what the window draws.
@@ -25,6 +26,13 @@ plugin ([../../../openmu/readme.md](../../../openmu/readme.md)).
   kept 9 minutes, renewed once on a 401) and puts the nonce on every commit body.
 - The catalogue shows only rows the service calls `active` (`catalogue.ts`); the player's own rows
   in every state are on the My Listings tab.
+- Adverts to negotiate (ours): an item put up with no price and no escrow (`/offers`, the service's
+  `offers.ts`). It stays in the seller's bag; the advert names the character, never the account (the
+  service checks in OpenMU's database that the character is on the caller's account), and lives
+  three days (ten per account, one per bag slot). It is a row with `negotiate`, price 0, sorted after
+  any price; Whisper (`negotiate`) closes the window and opens the chat on a whisper to the
+  seller with the item linked (`gameBridge.ts`), and the deal is a trade in game, where both sides
+  see the real item. A service from before the adverts answers 404 and the listings still load.
 - In a dev build (`APP_STAGE === 'dev'`) the store seeds fixtures (`mockListings.ts`); if the
   service is not reachable it switches to `offline` mode and edits the fixtures locally.
 
@@ -33,7 +41,8 @@ plugin ([../../../openmu/readme.md](../../../openmu/readme.md)).
 - outgoing: the escrow request (`C1 E7 01 <token>`), built by `buildEscrowRequest`.
 
 ## Depends on / used by
-- uses: `hero`, `session` (`gsSocket`, `sendToGS`, `isOffline`; in `gameBridge.ts` only), `controllers/net/protocols/escrowWire.ts`, `controllers/net/sessionNonce.ts`,
+- uses: `hero`, `session` (`gsSocket`, `sendToGS`, `isOffline`; in `gameBridge.ts` only), `social`
+  and `chat/chatItemLinks.ts` (the whisper about an advert, `gameBridge.ts` only), `controllers/net/protocols/escrowWire.ts`, `controllers/net/sessionNonce.ts`,
   `servers/serverServices.ts` (`marketApiUrl`), `core/inventoryConstants.ts`, `src/i18n`.
 - used by: `src/app/logic.ts` (`net.ts`), `versions/shared/ui/windows/marketplace/` (the window),
   `versions/shared/ui/hud/bottom_bar/mainFrameButtons.ts` (`toggleMarketplace`),
@@ -47,9 +56,11 @@ plugin ([../../../openmu/readme.md](../../../openmu/readme.md)).
 - look at the window without a game: `bun run dev`, open `/marketplace.html`.
 
 ## Tests
-- `api.test.ts`: every commit body carries the session nonce and the ticket.
+- `api.test.ts`: every commit body (adverts too) carries the session nonce and the ticket.
 - `catalogue.test.ts`: `mergeCatalogue`, `isOnSale`, `cancellable`, state labels and pills.
-- `state.test.ts`: list, buy, cancel and collect flows against a fake api and bridge.
+- `state.test.ts`: list, buy, cancel and collect flows against a fake api and bridge; adverts load,
+  sort last, open a whisper instead of a buy, post with their note and come down through the service.
+- The service's own (`bun run test:server`): `marketplace/server/app.test.ts` "adverts to negotiate".
 - `tiers.test.ts`: `tierOf` steps and `lookClasses`.
 
 ## Notes

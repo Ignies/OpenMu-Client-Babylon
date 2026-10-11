@@ -8,4 +8,5 @@ export default {
   'resume.done': '已重新上线',
   'resume.failed': '无法重新连接',
   'resume.cancelled': '已取消重新连接',
+  'login.closingOldSession': '账号仍在游戏中：正在关闭旧会话并重试...',
 } satisfies Partial<Record<keyof typeof en, string>>;

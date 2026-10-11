@@ -43,6 +43,7 @@ export default {
   'cmd.whisper': 'Șoptește jucătorului de sub cursor',
   'cmd.addfriend': 'Adaugă la prieteni jucătorul de sub cursor',
   'cmd.follow': 'Mergi după jucătorul de sub cursor',
+  'cmd.re': 'Invitații în grup: on întreabă, off refuză, auto acceptă',
   'cmd.post': 'Strigă pe tot serverul',
   'cmd.help': 'Ajutorul serverului pentru o comandă',
   'cmd.list': 'Listează comenzile serverului',

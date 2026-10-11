@@ -16,6 +16,7 @@ import { playUiSound } from '@/controllers/sound/sfx';
 import { runInAction } from 'mobx';
 import { startEmojiBubble } from '@/ecs/systems/emojiBubbleSystem';
 import { translateServerText } from '@/i18n/serverText';
+import { noteServerLine } from './serverLines';
 
 /**
  * Play an inbound emoji bubble over the player with this name.
@@ -157,6 +158,8 @@ export function installNet(): void {
         // (SelfDefensePlugIn.cs); keep the state alongside showing it. It reads
         // the server's English, so it has to run before the line is translated.
         Social.trackSelfDefense(text);
+        // An event entry refused right after explains itself from it (serverLines.ts).
+        noteServerLine(text);
         Social.systemMessage(translateServerText(text));
         break;
       case 2:

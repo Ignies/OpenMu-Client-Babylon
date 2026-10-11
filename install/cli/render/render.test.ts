@@ -5,7 +5,7 @@ import { caddyfile, publicPorts } from './caddy';
 import { allowTargets, clientBuildArgs, databaseUrl, openmuImage, serviceEnv, stackEnv } from './env';
 import { serverList } from './serverList';
 import { serverManifest } from './manifest';
-import { parseServerManifest } from '../../../src/modules/servers/serverManifest';
+import { ORIGINAL_SETTINGS, parseServerManifest } from '../../../src/modules/servers/serverManifest';
 import { WEB_IP } from '../stack';
 
 const domain: Config = {
@@ -91,7 +91,7 @@ describe('client build', () => {
 
 describe('server.json', () => {
   it('holds the original behaviour by default', () => {
-    expect(JSON.parse(serverManifest(domain))).toEqual({ version: 1, settings: { heldHitRequest: false }, modulesOff: [] });
+    expect(JSON.parse(serverManifest(domain))).toEqual({ version: 1, settings: ORIGINAL_SETTINGS, modulesOff: [] });
   });
 
   it('turns off the modules the config lists, and band when its relay is off', () => {
@@ -101,12 +101,15 @@ describe('server.json', () => {
 
   it('follows the config', () => {
     expect(JSON.parse(serverManifest({ ...domain, heldHitRequest: true })).settings.heldHitRequest).toBe(true);
+    expect(JSON.parse(serverManifest({ ...domain, retryLoginWhenConnected: true })).settings.retryLoginWhenConnected).toBe(true);
+    expect(JSON.parse(serverManifest({ ...domain, muHelperAfterReconnect: true })).settings.muHelperAfterReconnect).toBe(true);
   });
 
   // The client is the reader: what the installer writes must pass its strict check.
   it('is what the client accepts', () => {
-    for (const heldHitRequest of [false, true]) {
-      expect(parseServerManifest(JSON.parse(serverManifest({ ...domain, heldHitRequest })))?.settings).toEqual({ heldHitRequest });
+    for (const on of [false, true]) {
+      const settings = { heldHitRequest: on, retryLoginWhenConnected: on, muHelperAfterReconnect: on };
+      expect(parseServerManifest(JSON.parse(serverManifest({ ...domain, ...settings })))?.settings).toEqual(settings);
     }
   });
 

@@ -33,4 +33,10 @@ export default {
   'fidelity.roofFade': '透ける屋根',
   'fidelity.roofFade.hint':
     '屋根の下に立つと屋根が消え、中が見えます。クラシック: 屋根は常に表示されます。',
+  'fidelity.requestTimeout': '申請は20秒で期限切れ',
+  'fidelity.requestTimeout.hint':
+    '放置した取引・パーティー・決闘の申請は20秒後に断られます。クラシック: 答えるまで待ちます。',
+  'fidelity.noticeLinks': 'サーバー告知のリンク',
+  'fidelity.noticeLinks.hint':
+    'サーバー告知のWebアドレスが下線付きリンクになり、新しいタブで開きます。クラシック: オリジナル通りのただの文字。',
 } satisfies Partial<Record<keyof typeof en, string>>;

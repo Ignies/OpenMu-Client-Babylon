@@ -33,4 +33,10 @@ export default {
   'fidelity.roofFade': '투명해지는 지붕',
   'fidelity.roofFade.hint':
     '지붕 아래에 서 있으면 지붕이 사라져 안이 보입니다. 클래식: 지붕은 항상 보입니다.',
+  'fidelity.requestTimeout': '요청은 20초 후 만료',
+  'fidelity.requestTimeout.hint':
+    '응답하지 않은 거래, 파티, 결투 요청은 20초 후 거절됩니다. 클래식: 응답할 때까지 기다립니다.',
+  'fidelity.noticeLinks': '서버 공지의 링크',
+  'fidelity.noticeLinks.hint':
+    '서버 공지의 웹 주소가 밑줄 친 링크가 되어 새 탭에서 열립니다. 클래식: 원본처럼 일반 텍스트.',
 } satisfies Partial<Record<keyof typeof en, string>>;

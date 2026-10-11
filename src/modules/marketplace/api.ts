@@ -137,10 +137,40 @@ export function browse(options: { category?: string; limit?: number; offset?: nu
 
 export function mine() {
   return withTicket(t =>
-    request<{ listings: ApiListing[]; balance: number }>(
+    request<{ listings: ApiListing[]; balance: number; offers?: ApiOffer[] }>(
       `/mine?ticket=${encodeURIComponent(t.ticket)}`
     )
   );
+}
+
+/**
+ * An item up to negotiate (ours): no price and no escrow. The item stays in the seller's bag, a
+ * buyer whispers the seller's character, and the deal is a trade in game. The service never names
+ * the seller's account.
+ */
+export type ApiOffer = {
+  id: string;
+  sellerCharacter: string;
+  item: Item;
+  category: string;
+  /** What the seller wants for it, if they said; one line. */
+  note: string;
+  listedAt: number;
+  expiresAt: number;
+};
+
+/** Every advert up; a service from before them answers 404. */
+export function offers() {
+  return withTicket(t => request<{ offers: ApiOffer[] }>(`/offers?ticket=${encodeURIComponent(t.ticket)}`));
+}
+
+/** Puts the item in this bag slot up to negotiate; the same slot again replaces its advert. */
+export function offer(input: { character: string; slot: number; category: string; item: Item; note: string }) {
+  return post<{ offer: ApiOffer }>('/offers', input);
+}
+
+export function removeOffer(id: string) {
+  return post<{ removed: boolean }>(`/offers/${encodeURIComponent(id)}/remove`, {});
 }
 
 type ListInput = {

@@ -1,5 +1,5 @@
 /// <reference types="vitest/config" />
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
 import { fileURLToPath } from 'node:url';
 
 const alias = [
@@ -7,12 +7,24 @@ const alias = [
   { find: /^@versions\//, replacement: fileURLToPath(new URL('./versions/', import.meta.url)) },
 ];
 
+/** One id per build: the asset worker is registered with it and open tabs compare it (`src/app/buildCheck.ts`). */
+const BUILD = process.env.GITHUB_SHA?.slice(0, 12) || Date.now().toString(36);
+
+/** Writes `build.json` next to index.html: what a tab left open across a deploy compares its own build with. */
+const buildManifest = (): Plugin => ({
+  name: 'mu-build-manifest',
+  apply: 'build',
+  generateBundle() {
+    this.emitFile({ type: 'asset', fileName: 'build.json', source: JSON.stringify({ build: BUILD }) });
+  },
+});
+
 // Game versions are selected at runtime (versions/registry.ts, loaded by
 // src/app/main.tsx before the app boots); one build carries all of them.
 
 export default defineConfig({
   base: './',
-  plugins: [],
+  plugins: [buildManifest()],
   resolve: { alias },
   /**
    * The two services the UI talks to, each its own process. Proxied here so
@@ -63,8 +75,8 @@ export default defineConfig({
   },
   define: {
     APP_VERSION: JSON.stringify(process.env.npm_package_version),
-    // One per build: the asset cache worker is registered with it (public/sw.js).
-    BUILD_ID: JSON.stringify(process.env.GITHUB_SHA?.slice(0, 12) || Date.now().toString(36)),
+    // One per build: the asset cache worker is registered with it (public/sw.js), tabs compare it.
+    BUILD_ID: JSON.stringify(BUILD),
     APP_STAGE: JSON.stringify(process.env.APP_ENV || 'unk'),
     QA_ENABLED: JSON.stringify(process.env.QA ? 'true' : ''),
     'import.meta.env.QA_ENABLED': JSON.stringify(

@@ -5,7 +5,7 @@ import type { Item } from '../../ecs/world';
 import { EventBus } from '../../core/eventBus';
 import { Hero } from '../hero';
 import { Session } from '../session';
-import { addNotification } from '../chat';
+import { addNotification, entryRefusalReason } from '../chat';
 import { Ecs } from '../../ecs/current';
 import { skills } from '../skills';
 import {
@@ -197,7 +197,8 @@ export function installDevilSquare(): void {
       case DevilSquareEnterResultEnterResultEnum.Success:
         break;
       case DevilSquareEnterResultEnterResultEnum.Failed:
-        text = EVENT_TEXT.devilBringInvitation;
+        // OpenMU's reason line when it sent one (serverLines.ts), else the original's invitation text.
+        text = entryRefusalReason() ?? EVENT_TEXT.devilBringInvitation;
         break;
       case DevilSquareEnterResultEnterResultEnum.NotOpen:
         text = EVENT_TEXT.devilTooLate;

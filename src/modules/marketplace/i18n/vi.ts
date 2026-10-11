@@ -22,6 +22,7 @@ export default {
   'marketplace.bought': 'Đã mua {name}',
   'marketplace.cancelled': 'Đã hủy {name}',
   'marketplace.listedFlash': 'Đã đăng bán {name}',
+  'marketplace.negotiateListed': 'Đã đăng {name} để thương lượng',
   'marketplace.unreachable': 'Không thể kết nối tới chợ.',
   'marketplace.buyRefused': 'Giao dịch mua đã bị từ chối.',
   'marketplace.cancelFailed': 'Không thể hủy.',
