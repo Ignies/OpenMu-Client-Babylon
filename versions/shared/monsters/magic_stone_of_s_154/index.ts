@@ -4,9 +4,9 @@ export default defineMonster({
   Numb: 154,
   Name: 'Magic stone of %s',
   maxHealth: 50,
-  // Kalima gate (ZzzCharacter.cpp:13046-13064): all seven share `MODEL_WARCRAFT`
-  // (Skill/HellGate) and stand on animation frame 10.
-  npcModel: { file: '/Skill/HellGate', scale: 1 },
+  // Kalima gate: all seven share `MODEL_WARCRAFT` (Skill/HellGate), spawn on frame 10
+  // (ZzzCharacter.cpp:13326-13334) and stop on frame 8 for good (:3504-3506, :3737-3740).
+  npcModel: { file: '/Skill/HellGate', scale: 1, holdFrame: 8 },
   summonSound: { sound: 'Sound/eWallFall', channels: 1 }, // 0x1F, WSclient.cpp:3117-3122
   stats: {
     Rate: 1,

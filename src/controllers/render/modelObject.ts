@@ -44,8 +44,8 @@ const DEFAULT_BONE_LINK_ROTATION = Quaternion.FromEulerAngles(
 const DEFAULT_ANIMATION_SPEED = 0.28;
 
 /**
- * A part's clip override. `speed` 0 holds key 0; `holdFrame` runs the clip
- * once and stops on that key; neither loops it.
+ * A part's clip override. `speed` 0 holds key 0 (or `holdFrame`); otherwise
+ * `holdFrame` runs the clip once and stops on that key; neither loops it.
  */
 export type PartPose = {
   action: number;
@@ -751,9 +751,16 @@ export class ModelObject {
     const index = groups[pose.action] ? pose.action : 0;
     const group = groups[index];
     if (!group) return;
+    const step = this._keyFrameStep.get(index);
+    // The key `holdFrame` as a clip frame: where the pose stops.
+    const held =
+      pose.holdFrame === undefined || step === undefined
+        ? group.to
+        : Math.min(group.to, group.from + pose.holdFrame * step);
     if (pose.speed <= 0) {
+      const at = pose.holdFrame === undefined ? group.from : held;
       group.start(true, group.speedRatio, group.from);
-      group.goToFrame(group.from);
+      group.goToFrame(at);
       group.pause();
       return;
     }
@@ -765,10 +772,7 @@ export class ModelObject {
     }
     // Play once and stop on that key, where it holds - the original pins
     // `AnimationFrame` to the same number and stops advancing it.
-    const step = this._keyFrameStep.get(index);
-    const to =
-      step === undefined ? group.to : Math.min(group.to, group.from + pose.holdFrame * step);
-    group.start(false, this.speedRatioFor(index), group.from, to);
+    group.start(false, this.speedRatioFor(index), group.from, held);
   }
   loadSeq = 0;
   private _node: TransformNode;

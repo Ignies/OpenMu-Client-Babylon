@@ -63,7 +63,7 @@ In game the name a player reads is the language pack's in either case (`monsterD
 | `hidden: true` | nothing (the Crywolf altars) |
 | `trap: { object, shadow }` | the world object of the map it stands on (traps 100-106) |
 | `model: { type, scale, hiddenMesh }` | monster model `Monster/Monster<type+1>.glb` |
-| `npcModel: { file, scale?, clipSpeeds? }` | `Data/NPC/<file>` (or a path off the asset root when it starts with `/`) |
+| `npcModel: { file, scale?, clipSpeeds?, holdFrame? }` | `Data/NPC/<file>` (or a path off the asset root when it starts with `/`) |
 | `gear: { charClass, set, mainHand, ... }` | a player rig in one armour set plus a kit |
 | `transformed: { dir, part, scale? }` | a player rig whose body is one part file |
 | none | the Bull Fighter, as the original's default |
@@ -71,7 +71,10 @@ In game the name a player reads is the language pack's in either case (`monsterD
 - A scale is written only where the original's case sets one; without it the type spawns at 0.9,
   CreateCharacterPointer's default (ZzzCharacter.cpp:11699), as do the classes that set none.
   `npcModel.clipSpeeds` are the `Models[].Actions[].PlaySpeed` a case writes (Moss and Zyro, 0.33);
-  the animation system reads them through the model's `actionPlaySpeed`.
+  the animation system reads them through the model's `actionPlaySpeed`. `npcModel.holdFrame` draws
+  it still on that key of clip 0 and never runs a clip: the Kalima gates (152-158) spawn on frame 10,
+  play to the clip's end and stay on frame 8 (ZzzCharacter.cpp:13326-13334, :3504-3506, :3737-3740);
+  ours stand on 8 from the start, skipping that first third of a second.
 
 - What it sounds like, besides its monster body's voices: `voice` (a town noise,
   `MoveCharacterVisual`) and `globalVoice` (`PlayMonsterSoundGlobal`, also heard from a player
