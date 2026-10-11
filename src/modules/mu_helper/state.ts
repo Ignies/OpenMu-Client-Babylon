@@ -41,6 +41,7 @@ export const MuHelper = new (class {
       config: observable,
       setMuHelperStatus: action,
       setMuHelperConfig: action,
+      stop: action,
     });
   }
 
@@ -96,6 +97,11 @@ export const MuHelper = new (class {
     const packet = MuHelperStatusChangeRequestPacket.createPacket();
     packet.PauseStatus = active;
     Session.sendToGS(packet.buffer);
+  }
+
+  /** `CMuHelper::Stop` without the server's answer: the session it ran in is over (`resume.ts`). */
+  stop() {
+    this.active = false;
   }
 
   setMuHelperConfig(config: Uint8Array) {

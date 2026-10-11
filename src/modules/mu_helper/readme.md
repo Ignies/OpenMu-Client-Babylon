@@ -16,7 +16,8 @@ the two server packets, with its running state and the raw config blob (`MuHelpe
 ## How it works
 - `MuHelper` (`state.ts`, through `index.ts`, the door): `active`, `lastMoneyConsumed`,
   `totalMoneyConsumed`, `config` blob), `setMuHelperStatus`, `setMuHelperConfig` and
-  `toggleMuHelper()` (sends `MuHelperStatusChangeRequest`; refused in a safe zone; local flip offline).
+  `toggleMuHelper()` (sends `MuHelperStatusChangeRequest`; refused in a safe zone; local flip offline),
+  `stop()` (the session ended; no packet).
 - `config.ts` encodes and decodes the 257-byte blob. The layout is `PRECEIVE_MUHELPER_DATA`
   (`WSclient.h:3592-3642`) as `ConfigDataSerDe` (`MuHelperData.cpp`) writes it, so configs move
   between this client and the reference client.
@@ -42,6 +43,10 @@ the two server packets, with its running state and the raw config blob (`MuHelpe
   `state.ts` keeps the typed list per character in localStorage (`mu_helper_items:<name>`) and puts
   it back over the cut slots on every decode. Off, the loop matches as the original (a part of the
   name, `ShouldObtainItem`).
+- Session end (`resume.ts`): leaving the world for the character screen or the server list (Switch
+  Character, Select Server, a drop nothing resumes, a kick) clears `MuHelper.active` (`stop()`), as
+  the original's menu stops it (`TriggerStop`, NewUICustomMessageBox.cpp:2374, 2406) and a lost
+  connection takes the server's helper with it. A warp (LoadingWorld) and a resume keep the page.
 - Resume (`resume.ts`, ours): a socket drop that starts the automatic reconnect stops the helper,
   as the server's ended with the old session. Where the world's `server.json` sets
   `muHelperAfterReconnect`, it is asked to start again (`toggleMuHelper`) 3 s after the resume is
@@ -53,7 +58,7 @@ the two server packets, with its running state and the raw config blob (`MuHelpe
 - outgoing: `MuHelperSaveDataRequest` (`state.ts`), `MuHelperStatusChangeRequest` (`MuHelper.toggleMuHelper`).
 
 ## Depends on / used by
-- uses: `session` (`Session`, `SessionResume`), `servers/serverManifest.ts`, `hero`, `skills`, `pets`, `inventory` (item use), `npc_shop` (repair),
+- uses: `session` (`Session`, `SessionResume`), `servers/serverManifest.ts`, `controllers/interface/uiState.ts`, `hero`, `skills`, `pets`, `inventory` (item use), `npc_shop` (repair),
   `social/social.ts` (`partyMembers` for party buffs and heals),
   `controllers/item_rules/itemStats.ts`, `core/inventoryConstants.ts`, `ecs/systems/attackSystem.ts`
   (`isAttackableEntity`).
@@ -78,4 +83,5 @@ the two server packets, with its running state and the raw config blob (`MuHelpe
   extra items match by name only until the filters are on. `state.test.ts`: the typed text survives
   a save only with the filters on.
 - `resume.test.ts`: a drop stops it; after the resume it stays off by default and is asked for again
-  only where the world allows it and only when it was running.
+  only where the world allows it and only when it was running. Switch Character, Select Server and
+  a drop nothing resumes stop it; a warp does not.

@@ -19,13 +19,17 @@ const { installResume } = await import('./resume');
 const { Session } = await import('../session');
 const { SessionResume } = await import('../session/sessionResume');
 const { Ecs } = await import('@/ecs/current');
+const { AppState, UIState } = await import('@/controllers/interface/uiState');
 const { MuHelperStatusChangeRequestPacket } = await import('@versions/shared/packets/ClientToServerPackets');
 
 installResume();
 
 /** The hero in the world, outside a safe zone. */
 runInAction(() => {
-  Ecs.world = { playerEntity: { attributeSystem: { isAboveZero: () => false } } } as unknown as typeof Ecs.world;
+  Ecs.world = {
+    playerEntity: { attributeSystem: { isAboveZero: () => false } },
+    removeHero: () => {},
+  } as unknown as typeof Ecs.world;
 });
 
 /** A socket drop in the world and a resume that gets the character back; the start requests sent. */
@@ -73,5 +77,50 @@ describe('the MU Helper across an automatic reconnect', () => {
     world.restart = true;
     MuHelper.setMuHelperStatus(false, 0);
     expect(dropAndResume()).toEqual([]);
+  });
+});
+
+// The original's helper ends with the session: the menu's Select Server and Switch Character stop
+// it (NewUICustomMessageBox.cpp:2374, 2406), and a lost connection tears the game down
+// (ReceiveLogOut case 2, WSclient.cpp:985-1013) with the server's helper gone with it.
+describe('the MU Helper when the session ends', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    runInAction(() => {
+      AppState.uiState = UIState.World;
+    });
+  });
+
+  it('stops on Switch Character and Select Server, and keeps running through a warp', () => {
+    for (const page of [UIState.Characters, UIState.Servers]) {
+      runInAction(() => {
+        AppState.uiState = UIState.World;
+      });
+      MuHelper.setMuHelperStatus(true, 0);
+      runInAction(() => {
+        AppState.uiState = UIState.LoadingWorld;
+      });
+      expect(MuHelper.active).toBe(true);
+      runInAction(() => {
+        AppState.uiState = page;
+      });
+      expect(MuHelper.active, UIState[page]).toBe(false);
+    }
+  });
+
+  it('stops when the connection drops and nothing resumes it', () => {
+    vi.spyOn(Session, 'connectToConnectServer').mockImplementation(() => undefined);
+    runInAction(() => {
+      AppState.uiState = UIState.World;
+    });
+    MuHelper.setMuHelperStatus(true, 0);
+    const socket = {} as WebSocket;
+    Session.gsSocket = socket;
+    Session.resumeHook = () => false;
+
+    Session.onSocketLost(socket);
+
+    expect(MuHelper.active).toBe(false);
+    Session.resumeHook = null;
   });
 });
