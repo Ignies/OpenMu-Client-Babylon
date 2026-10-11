@@ -56,7 +56,8 @@ export function caddyfile(c: Config): string {
   if (c.mode === 'domain') {
     const d = c.domain;
     return [
-      `{\n\temail ${c.email}\n}\n`,
+      // Let's Encrypt needs no e-mail; without one Caddy just sends no expiry warnings.
+      ...(c.email ? [`{\n\temail ${c.email}\n}\n`] : []),
       block(d, `\tredir https://play.${d}{uri}`),
       block(`play.${d}`, clientSite(`https://register.${d}`)),
       block(`api.${d}`, apiRoutes()),

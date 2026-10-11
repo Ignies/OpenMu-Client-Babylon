@@ -68,7 +68,7 @@ export async function adopt(p: Paths): Promise<void> {
   for (;;) {
     await ui.task(`Getting OpenMU ${c.openmuSourceRef || c.openmuVersion}`, () => checkoutOpenMu(c, p));
     if (knownMigration(p, migration)) break;
-    ui.warn(`OpenMU ${c.openmuSourceRef || c.openmuVersion} does not know ${migration}; the database is newer. Pick a newer release or the commit the old server ran.`);
+    ui.warn(`OpenMU ${c.openmuSourceRef || c.openmuVersion} does not know ${migration}; the database is newer. Pick the latest main branch, or the commit the old server ran.`);
     c = await ask(c, 'openmu');
   }
 

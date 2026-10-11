@@ -186,6 +186,12 @@ describe('caddyfile', () => {
     expect(text).not.toContain('auto_https off');
   });
 
+  it('leaves the e-mail block out when no e-mail was given', () => {
+    const text = caddyfile({ ...domain, email: '' });
+    expect(text).not.toContain('email');
+    expect(text).toContain('play.example.com {');
+  });
+
   it('puts the admin panel behind a login', () => {
     for (const c of [domain, ip]) expect(caddyfile(c)).toContain(`basic_auth {\n\t\tadmin ${domain.adminHash}\n\t}`);
   });

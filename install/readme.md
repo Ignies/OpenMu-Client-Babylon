@@ -32,7 +32,8 @@ checked out at the release tag) with `stack/compose.yml` layered over it.
 | web | `stack/web.Dockerfile` (client + register site) on Caddy | the only published ports |
 
 OpenMU's nginx is switched off (profile `openmu-nginx`); Caddy serves the client, routes to every
-service, gets HTTPS certificates in domain mode and asks for the admin panel login. Only the web
+service, gets HTTPS certificates in domain mode (the certificate e-mail is optional) and asks for the
+admin panel login. Only the web
 container publishes ports: 80/443 (domain mode) or 80, 3000, 8080, 8081 (IP mode, `stack/compose.ip.yml`).
 Postgres, presence and the OpenMU game ports are never reachable from outside; the cash shop gate
 relies on that.
