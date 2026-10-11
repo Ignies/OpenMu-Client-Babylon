@@ -364,23 +364,22 @@ export function speedLineStrength(): number {
   return styleTuned() ? animeSpeedLines() / ANIME_SLIDER_MAX : 0;
 }
 
+/** `animeFilmBoost`'s answer, rewritten each call. */
+const filmBoost = { bloom: 0, chromatic: 0, grain: 0 };
+
 /**
  * What the Cinematic slider adds to the player's own bloom, chromatic
  * aberration and film grain. The post chain stays the only writer of the
- * pipeline; this is one more input to it, live on Anime 2.0 alone.
+ * pipeline; this is one more input to it, live on Anime 2.0 alone. One kept
+ * object: read it before the next call.
  */
-export function animeFilmBoost(): {
-  bloom: number;
-  chromatic: number;
-  grain: number;
-} {
+export function animeFilmBoost(): Readonly<typeof filmBoost> {
   const t = styleTuned() ? animeFilm() / ANIME_SLIDER_MAX : 0;
 
-  return {
-    bloom: FILM_BLOOM * t,
-    chromatic: FILM_CHROMATIC * t,
-    grain: FILM_GRAIN * t,
-  };
+  filmBoost.bloom = FILM_BLOOM * t;
+  filmBoost.chromatic = FILM_CHROMATIC * t;
+  filmBoost.grain = FILM_GRAIN * t;
+  return filmBoost;
 }
 
 /** vec4: x bands, y band edge softness (px), z rim strength, w rim edge. */
@@ -524,8 +523,16 @@ export function syncRenderingStyle(
     : 0;
   toon.halftonePeriod = animeHalftoneScale() * pixel;
 
-  if (camX) toon.camX = [camX[0], camX[1], camX[2]];
-  if (camY) toon.camY = [camY[0], camY[1], camY[2]];
+  if (camX) {
+    toon.camX[0] = camX[0];
+    toon.camX[1] = camX[1];
+    toon.camX[2] = camX[2];
+  }
+  if (camY) {
+    toon.camY[0] = camY[0];
+    toon.camY[1] = camY[1];
+    toon.camY[2] = camY[2];
+  }
 }
 
 // Materials can compile before the director's first tick.

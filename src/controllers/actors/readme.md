@@ -185,6 +185,7 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 - `wingObject.test.ts`: the Wing of Ruin layer (a `Data/` bitmap, `getDataTexture`) is read top-down like
   the GLB textures it shares the UVs of, and is drawn on a model whose meshes sit under its model node; a wing
   casts the Classic shadow, its blend card too, a cape's model none (its cloth does).
+- `wings.test.ts`: every wake, sprite and pass light hands back one kept colour, still at its own time.
 - Also from `controllers/item_rules/`: `portedItems`, `questItemLink`, `weaponAttack` tests.
 
 ## Notes

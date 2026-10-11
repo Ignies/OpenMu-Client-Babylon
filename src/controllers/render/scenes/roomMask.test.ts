@@ -37,3 +37,11 @@ describe('the room mask depth map', () => {
     expect([depthMap().getRenderWidth(), depthMap().getRenderHeight()]).toEqual([1280, 720]);
   });
 });
+
+// The director asks every tick (lighting/director.ts): one kept answer, not a fresh object a call.
+describe('the room mask answer', () => {
+  it('is one kept object', () => {
+    const first = syncRoomMask(scene, camera, null, null, false);
+    expect(syncRoomMask(scene, camera, {} as LightingTier, ROOM, false)).toBe(first);
+  });
+});

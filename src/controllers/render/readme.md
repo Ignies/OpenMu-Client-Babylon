@@ -116,7 +116,8 @@ There is no `index.ts` facade; other folders import the modules directly.
   batched caster's shadow folds from the ground when it asks to (`ShadowFromGround`).
 - `renderAngles.test.ts`: `angleMatrixQuaternion` against the original's `AngleMatrix`, and a
   placed record with both pitch and roll drawn by it, by its node and by its batched placement.
-- `renderingStyle.test.ts`: style readers, tier gating, the material snapshot and toon binds.
+- `renderingStyle.test.ts`: style readers, tier gating, the material snapshot and toon binds; the
+  cinematic trim is one kept object.
 - `renderScale.test.ts`: slider steps, `clampRenderScale`, `applyRenderScale` on the device ratio.
 - `staticClips.test.ts`: still animation detection and `settleStillAnimations`.
 - `viewPlanes.test.ts`: `viewDepth`, matching `BoundingSphere.isInFrustum`.
@@ -129,7 +130,8 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `scenes/gbufferFormats.test.ts`: R32F depth and RGBA16F normals, defaults otherwise.
 - `scenes/highlightMask.test.ts`: bone boxes, screen rects and hover mask selection; a skinned part
   is kept only when its posed bone boxes reach the lit box.
-- `scenes/roomMask.test.ts`: the room mask's depth map follows a resize on the next tick.
+- `scenes/roomMask.test.ts`: the room mask's depth map follows a resize on the next tick; its answer is
+  one kept object.
 - `scenes/sunShafts.test.ts`: the shaft pass leaves and rejoins the chain with the sun.
 
 ## Notes

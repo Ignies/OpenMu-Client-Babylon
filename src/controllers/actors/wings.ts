@@ -103,7 +103,23 @@ export type WingMeshPass = {
   readonly dark?: boolean;
 };
 
-const grey = (l: number): Rgb => [l, l, l];
+/** A steady light: one kept colour, handed back every frame. */
+const steady = (r: number, g: number, b: number): ((timeMs: number) => Rgb) => {
+  const colour: Rgb = [r, g, b];
+  return () => colour;
+};
+
+/** A grey light at `level(timeMs)`, written into one kept colour per callback. */
+const greyAt = (level: (timeMs: number) => number): ((timeMs: number) => Rgb) => {
+  const colour: [number, number, number] = [0, 0, 0];
+  return t => {
+    const l = level(t);
+    colour[0] = l;
+    colour[1] = l;
+    colour[2] = l;
+    return colour;
+  };
+};
 
 export type WingSpec = {
   /** `o->BlendMesh`: the mesh drawn as an additive glow card. -1 = none. */
@@ -162,7 +178,7 @@ const WINGS: Readonly<Record<number, WingSpec>> = {
         bones: [22, 21, 20, 19, 18, 7, 6, 5, 4, 3],
         // Scale = (sinf(WorldTime*0.004)*0.3 + 0.3) * 10 + 20, drawn at /28.
         scale: t => ((Math.sin(t * 0.004) * 0.3 + 0.3) * 10 + 20) / 28,
-        light: () => [0.6, 0.3, 0.8],
+        light: steady(0.6, 0.3, 0.8),
         every: 2,
       },
     ],
@@ -183,7 +199,7 @@ const WINGS: Readonly<Record<number, WingSpec>> = {
           79, 80, 87, 90, 91, 106, 102,
         ],
         scale: () => 0.5,
-        light: t => grey(0.5 + Math.abs(Math.sin(t * 0.0004)) * 0.4),
+        light: greyAt(t => 0.5 + Math.abs(Math.sin(t * 0.0004)) * 0.4),
         rotation: t => t * 0.01,
       },
       // The joint glows (:9942-9963): four red, eighteen amber.
@@ -192,7 +208,7 @@ const WINGS: Readonly<Record<number, WingSpec>> = {
         blend: 'add',
         bones: [12, 64, 98, 52],
         scale: t => Math.abs(Math.sin(t * 0.003)) * 0.2 + 1.4,
-        light: () => [0.9, 0, 0],
+        light: steady(0.9, 0, 0),
       },
       {
         texture: 'flare01',
@@ -202,21 +218,21 @@ const WINGS: Readonly<Record<number, WingSpec>> = {
           45,
         ],
         scale: t => Math.abs(Math.sin(t * 0.003)) * 0.2 + 0.3,
-        light: () => [0.8, 0.5, 0.2],
+        light: steady(0.8, 0.5, 0.2),
       },
     ],
     thunder: { bones: [11, 21, 29, 63, 81, 89], light: [0.6, 0.6, 0.9] }, // :9928-9940
     // RenderPartObjectBody's branch (ZzzObject.cpp:6921-6937): mesh 2 is the
     // near-black keyed membrane, mesh 0 the bone frame, mesh 1 the lightning.
     passes: [
-      { mesh: 2, kind: 'tint', light: () => [1, 0.7, 0.5], dark: true },
-      { mesh: 0, kind: 'bright', light: () => [1, 0.7, 0.5] },
+      { mesh: 2, kind: 'tint', light: steady(1, 0.7, 0.5), dark: true },
+      { mesh: 0, kind: 'bright', light: steady(1, 0.7, 0.5) },
       // `lightningblast` is a four-frame strip: s_iTexAni counts 0..15 ticks
       // and the frame is ((int)s_iTexAni / 4) * 0.25.
       {
         mesh: 1,
         kind: 'bright',
-        light: () => [0.9, 0.6, 0.3],
+        light: steady(0.9, 0.6, 0.3),
         u: t => Math.floor((t % 640) / 160) * 0.25,
       },
     ],
@@ -230,12 +246,12 @@ const WINGS: Readonly<Record<number, WingSpec>> = {
       {
         mesh: 0,
         kind: 'bright',
-        light: t => grey(0.1 + Math.abs(Math.sin(t * 0.001)) * 0.3),
+        light: greyAt(t => 0.1 + Math.abs(Math.sin(t * 0.001)) * 0.3),
       },
       {
         mesh: 1,
         kind: 'overlay',
-        light: t => grey(Math.abs(Math.sin(t * 0.001)) * 0.8),
+        light: greyAt(t => Math.abs(Math.sin(t * 0.001)) * 0.8),
         texture: 'Item/msword01_r.OZJ', // BITMAP_3RDWING_LAYER
       },
     ],
