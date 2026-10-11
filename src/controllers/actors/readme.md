@@ -54,7 +54,7 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 - Small helpers: `MapPlayerNetClassToModelClass`, `isFemaleClass`; `classWorldScale`;
   `truncatePathWithinRange`, `distanceAlongPath`; `debuffBodyLight`, `debuffBrightBody`,
   `debuffSlow`; `ammoGoldWanted`, `paintAmmo` (Infinity Arrow's gold, chrome bolts and arrows while the buff holds,
-  ZzzObject.cpp:8023-8030; `itemGlowSystem` paints them on Skill effects: Original); `ItemGroup`, `ItemRestPose`, `itemRestHeight`, `itemWornHeight`, `itemTumbleAxis`;
+  ZzzObject.cpp:8023-8030; `itemGlowSystem` paints them on both Skill effects branches); `ItemGroup`, `ItemRestPose`, `itemRestHeight`, `itemWornHeight`, `itemTumbleAxis`;
   `itemObjectAttribute(group, num)`; `GuildFlag`, `GUILD_FLAG_BONE`, `isThunderHawkArmor`;
   `applyOutlawLook`, `outlawUltraActive`, `OUTLAW_ULTRA_LIGHT`; `isSkinOrHairTexture`,
   `isHideTexture`, `hideSkinTexture(group, num)` and `hideSkinMeshes(group, num)` (on the door: the

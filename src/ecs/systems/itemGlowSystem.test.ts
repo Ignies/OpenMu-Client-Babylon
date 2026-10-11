@@ -41,9 +41,9 @@ describe('gearKeyChanged', () => {
   });
 });
 
-// Infinity Arrow on Skill effects: Original: the bolts in a hand turn gold while the buff holds (ZzzObject.cpp:8023-8030).
+// Infinity Arrow: the bolts in a hand turn gold while the buff holds, on both Skill effects branches (ZzzObject.cpp:8023-8030).
 describe('the Infinity Arrow quiver', () => {
-  it('is painted gold on Original while the buff holds, and not on Enhanced', async () => {
+  it('is painted gold on Original and Enhanced while the buff holds', async () => {
     const { ItemGlowSystem } = await import('./itemGlowSystem');
     const { FIDELITY_CLASSIC, FIDELITY_DEFAULT, setFidelityChoice } = await import('@/controllers/fidelity');
     await import('@versions/shared/improvements/all');
@@ -69,9 +69,6 @@ describe('the Infinity Arrow quiver', () => {
       system.update?.(0 as never);
       expect(meshes[0].metadata.bodyLight).not.toBe('plain');
       setFidelityChoice(FIDELITY_DEFAULT, {});
-      system.update?.(0 as never);
-      expect(meshes[0].metadata.bodyLight).toBe('plain');
-      setFidelityChoice(FIDELITY_CLASSIC, {});
       system.update?.(0 as never);
       expect(meshes[0].metadata.bodyLight).not.toBe('plain');
       hero.buffs.clear();

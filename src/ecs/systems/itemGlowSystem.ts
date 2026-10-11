@@ -29,7 +29,6 @@ import type { LightSource } from '../../controllers/lighting/lightSource';
 import { shownGear, type Gear } from '../../controllers/actors';
 import { gearEffectsShown } from './othersShown';
 import { ammoGoldWanted, paintAmmo } from '../../controllers/actors/ammoGold';
-import { enhancedSkillFx } from '../../controllers/skills/effectsTier';
 
 /**
  * Item glow: tier stamps, the +9..+15 lamp / aura / crackle and the excellent
@@ -320,8 +319,6 @@ export const ItemGlowSystem: ISystemFactory = world => {
       setItemGlowClock(now);
 
       const lampsOn = improvedItemEffectsOn();
-      // Infinity Arrow's gold quiver is the Original branch's (actors/ammoGold.ts).
-      const ammoGold = !enhancedSkillFx();
 
       // Option changed: every baked tier is stale - re-stamp and re-light.
       const options = itemEffectSignature();
@@ -431,8 +428,8 @@ export const ItemGlowSystem: ISystemFactory = world => {
 
         const hands = modelObject as PlayerObject;
         if (hands.Weapon1) {
-          keepAmmoGold(hands.Weapon1, ammoGold && ammoGoldWanted(e.buffs, app.leftHand), state, 0);
-          keepAmmoGold(hands.Weapon2, ammoGold && ammoGoldWanted(e.buffs, app.rightHand), state, 1);
+          keepAmmoGold(hands.Weapon1, ammoGoldWanted(e.buffs, app.leftHand), state, 0);
+          keepAmmoGold(hands.Weapon2, ammoGoldWanted(e.buffs, app.rightHand), state, 1);
         }
 
         keepSparkle(e, state, 'character');

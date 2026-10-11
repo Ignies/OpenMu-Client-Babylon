@@ -23,7 +23,7 @@ Fairy Elf skills, one folder per skill. Rules for skill folders: [../readme.md](
 | `starfall` | 46 | the arrow, then the arrow impact model where it lands |
 | `ice_arrow` | 51 | ice shards, smoke and an orbiting flame at the target; one arrow |
 | `penetration` | 52 | a gathering charge on a ring of sparks, then a piercing arrow |
-| `infinity_arrow` | 77, 441 str | the original's rings (`rings.ts`): arrowsre02-04 at the feet and arrowsre05 growing on the hand, arrowsre01's flare joints homing on it and lighting the ground, the gold quiver while the buff holds (`actors/ammoGold.ts`); Enhanced (ours): a blue flash with ice motes |
+| `infinity_arrow` | 77, 441 str | the original's rings (`rings.ts`): arrowsre02-04 at the feet and arrowsre05 growing on the hand, arrowsre01's flare joints homing on it and lighting the ground, the gold quiver while the buff holds (`actors/ammoGold.ts`, on both branches); Enhanced (ours): a blue flash with ice motes, and the same gold quiver |
 | `recovery` | 234 | an impact flash at the caster, flare ribbons and a summon model on the target |
 | `multi_shot` | 235 | five arrows and the multi-shot muzzle volley |
 | `cure` | 425 | a pale green holy circle |
