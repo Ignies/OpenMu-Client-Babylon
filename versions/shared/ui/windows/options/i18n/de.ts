@@ -444,4 +444,15 @@ export default {
   'options.skillEffects.enhanced': 'Verbessert',
   'options.help.skillEffects':
     'Original zeichnet jede Fertigkeit wie der Originalclient. Verbessert bringt unser eigenes Aussehen für einige Fertigkeiten zurück, etwa den Schwarm von Evil Spirit. Derselbe Schalter wie Verbesserte Fertigkeitseffekte auf der Seite Originaltreue.',
+  'options.page.modules': 'Module',
+  'options.modules.title': 'Gestreamte Module',
+  'options.help.modules': 'Die Module, die diese Welt dir sendet. Ein Modul in der Sandbox läuft nur mit deiner Zustimmung; Vergessen löscht deine Antwort, beim nächsten Betreten der Welt wirst du erneut gefragt.',
+  'options.modules.none': 'Diese Welt sendet keine Module.',
+  'options.modules.firstParty': 'Erstanbieter',
+  'options.modules.sandboxed': 'Sandbox',
+  'options.modules.allowed': 'Erlaubt',
+  'options.modules.refused': 'Abgelehnt',
+  'options.modules.notAsked': 'Nicht gefragt',
+  'options.modules.notNeeded': 'Nicht nötig',
+  'options.modules.forget': 'Vergessen',
 } satisfies Partial<Record<keyof typeof en, string>>;

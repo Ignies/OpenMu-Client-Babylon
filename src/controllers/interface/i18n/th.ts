@@ -233,4 +233,5 @@ export default {
   'item.pieces': '{count} / {max}',
   'msgWin.confirmMix': '%s\nต้องการผสมไอเทมหรือไม่?',
   'msgWin.exitCountdown': 'จะออกจากเกมใน {seconds} วินาที',
+  'msgWin.confirmModule': 'โลกนี้ต้องการเรียกใช้โมดูล {id} {version}\nโมดูลทำงานแยกจากเกมและอ่านบัญชีของคุณไม่ได้\nอนุญาตหรือไม่?',
 } satisfies Partial<Record<keyof typeof en, string>>;

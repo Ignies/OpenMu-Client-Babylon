@@ -235,6 +235,7 @@ const en = {
   'item.pieces': '{count} / {max}',
   'msgWin.confirmMix': '%s\nDo you want to combine your items?',
   'msgWin.exitCountdown': 'You will exit game in {seconds} seconds.',
+  'msgWin.confirmModule': 'This world wants to run the module {id} {version}.\nIt runs apart from the game and cannot read your accounts.\nAllow it?',
 };
 
 export default en;

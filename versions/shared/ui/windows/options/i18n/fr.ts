@@ -409,4 +409,15 @@ export default {
   'options.skillEffects.enhanced': 'Améliorés',
   'options.help.skillEffects':
     'Originaux dessine chaque compétence comme le client original. Améliorés rétablit notre propre rendu pour certaines compétences, comme l\'essaim d\'Evil Spirit. Le même interrupteur que Effets des compétences améliorés sur la page Fidélité.',
+  'options.page.modules': 'Modules',
+  'options.modules.title': 'Modules diffusés',
+  'options.help.modules': 'Les modules que ce monde vous envoie. Un module isolé ne tourne qu\'avec votre accord ; Oublier efface votre réponse, la question sera reposée à votre prochaine entrée dans le monde.',
+  'options.modules.none': 'Ce monde ne diffuse aucun module.',
+  'options.modules.firstParty': 'Officiel',
+  'options.modules.sandboxed': 'Isolé',
+  'options.modules.allowed': 'Autorisé',
+  'options.modules.refused': 'Refusé',
+  'options.modules.notAsked': 'Non demandé',
+  'options.modules.notNeeded': 'Inutile',
+  'options.modules.forget': 'Oublier',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -415,4 +415,15 @@ export default {
   'options.skillEffects.enhanced': 'Migliorati',
   'options.help.skillEffects':
     'Originali disegna ogni abilità come il client originale. Migliorati riporta il nostro aspetto per alcune abilità, come lo sciame di Evil Spirit. Lo stesso interruttore di Effetti delle abilità migliorati nella pagina Fedeltà.',
+  'options.page.modules': 'Moduli',
+  'options.modules.title': 'Moduli trasmessi',
+  'options.help.modules': 'I moduli che questo mondo ti invia. Uno isolato funziona solo col tuo consenso; Dimentica cancella la tua risposta e la prossima volta che entri nel mondo ti verrà chiesto di nuovo.',
+  'options.modules.none': 'Questo mondo non invia moduli.',
+  'options.modules.firstParty': 'Ufficiale',
+  'options.modules.sandboxed': 'Isolato',
+  'options.modules.allowed': 'Consentito',
+  'options.modules.refused': 'Rifiutato',
+  'options.modules.notAsked': 'Non chiesto',
+  'options.modules.notNeeded': 'Non serve',
+  'options.modules.forget': 'Dimentica',
 } satisfies Partial<Record<keyof typeof en, string>>;

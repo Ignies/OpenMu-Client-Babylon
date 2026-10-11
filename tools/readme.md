@@ -43,6 +43,11 @@ and how to run it.
 
 ## Servers
 - `sqliteBackup.ts`, `sqliteMigrate.ts`: backups and migrations of the services' databases.
+- `modules/sign.ts`: the owner's key pair and the signature that makes a streamed module first party
+  (`keygen`, `pubkey`, `sign`; the key file stays outside the repository, `sign.test.ts` uses
+  throwaway keys made in memory). Why and the steps: [docs/module_streaming.md](../docs/module_streaming.md).
+- `modules/example/`: the example streamed module (`index.ts`) and `build.ts`, which bundles it to one
+  file (`bun tools/modules/example/build.ts <out.js>`); `example.test.ts` streams that file signed and not.
 
 ## Codemods (`restructure/`)
 - `move.ts`: move files and rewrite every import ([docs/how_to/move_files.md](../docs/how_to/move_files.md)).

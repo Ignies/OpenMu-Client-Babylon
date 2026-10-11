@@ -344,4 +344,15 @@ export default {
   'options.skillEffects.enhanced': '향상',
   'options.help.skillEffects':
     '오리지널은 모든 스킬을 원래 클라이언트대로 그립니다. 향상은 일부 스킬에 우리만의 모습을 되돌립니다(Evil Spirit의 무리 등). 충실도 페이지의 향상된 스킬 효과와 같은 스위치입니다.',
+  'options.page.modules': '모듈',
+  'options.modules.title': '전송 모듈',
+  'options.help.modules': '이 월드가 보내는 모듈입니다. 샌드박스 모듈은 동의한 경우에만 실행됩니다. 잊기를 누르면 답이 지워지고 다음에 월드에 들어올 때 다시 묻습니다.',
+  'options.modules.none': '이 월드는 모듈을 보내지 않습니다.',
+  'options.modules.firstParty': '공식',
+  'options.modules.sandboxed': '샌드박스',
+  'options.modules.allowed': '허용',
+  'options.modules.refused': '거부',
+  'options.modules.notAsked': '묻지 않음',
+  'options.modules.notNeeded': '필요 없음',
+  'options.modules.forget': '잊기',
 } satisfies Partial<Record<keyof typeof en, string>>;

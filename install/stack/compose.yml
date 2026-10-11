@@ -102,6 +102,7 @@ services:
         VITE_REGISTER_URL: ${VITE_REGISTER_URL}
         VITE_REGISTER_API: ${VITE_REGISTER_API}
         VITE_DATA_URL_REGISTER: ${VITE_DATA_URL_REGISTER}
+        VITE_MODULE_SIGNING_KEY: ${VITE_MODULE_SIGNING_KEY}
     restart: unless-stopped
     ports:
       - "80:80"
@@ -113,6 +114,7 @@ services:
       - ${MU_STATE}/Caddyfile:/etc/caddy/Caddyfile:ro
       - ${MU_STATE}/serverlist.md:/srv/client/serverlist.md:ro
       - ${MU_STATE}/server.json:/srv/client/server.json:ro
+      - ${MU_STATE}/modules:/srv/client/server-modules:ro
     depends_on: [proxy, register, cashshop, marketplace]
     networks:
       default:

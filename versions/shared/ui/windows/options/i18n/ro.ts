@@ -417,4 +417,15 @@ export default {
   'options.skillEffects.enhanced': 'Îmbunătățite',
   'options.help.skillEffects':
     'Originale desenează fiecare abilitate ca clientul original. Îmbunătățite readuce aspectul nostru pentru unele abilități, cum ar fi roiul Evil Spirit. Același comutator ca Efecte ale abilităților îmbunătățite din pagina Fidelitate.',
+  'options.page.modules': 'Module',
+  'options.modules.title': 'Module transmise',
+  'options.help.modules': 'Modulele pe care ți le trimite această lume. Unul izolat rulează doar cu acordul tău; Uită îți șterge răspunsul, iar la următoarea intrare în lume vei fi întrebat din nou.',
+  'options.modules.none': 'Această lume nu trimite module.',
+  'options.modules.firstParty': 'Oficial',
+  'options.modules.sandboxed': 'Izolat',
+  'options.modules.allowed': 'Permis',
+  'options.modules.refused': 'Refuzat',
+  'options.modules.notAsked': 'Neîntrebat',
+  'options.modules.notNeeded': 'Nu e nevoie',
+  'options.modules.forget': 'Uită',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -383,4 +383,15 @@ export default {
   'options.skillEffects.enhanced': 'ปรับปรุง',
   'options.help.skillEffects':
     'ดั้งเดิมวาดทุกสกิลตามไคลเอนต์ต้นฉบับ ปรับปรุงนำรูปลักษณ์ของเรากลับมาให้บางสกิล เช่น ฝูงวิญญาณของ Evil Spirit เป็นสวิตช์เดียวกับเอฟเฟกต์สกิลแบบปรับปรุงในหน้าความเที่ยงตรง',
+  'options.page.modules': 'โมดูล',
+  'options.modules.title': 'โมดูลที่ส่งมา',
+  'options.help.modules': 'โมดูลที่โลกนี้ส่งมาให้คุณ โมดูลในแซนด์บ็อกซ์จะทำงานเมื่อคุณยินยอมเท่านั้น ลืมจะล้างคำตอบ และจะถามอีกครั้งเมื่อคุณเข้าโลกนี้ครั้งถัดไป',
+  'options.modules.none': 'โลกนี้ไม่ได้ส่งโมดูลใดมา',
+  'options.modules.firstParty': 'ทางการ',
+  'options.modules.sandboxed': 'แซนด์บ็อกซ์',
+  'options.modules.allowed': 'อนุญาต',
+  'options.modules.refused': 'ปฏิเสธ',
+  'options.modules.notAsked': 'ยังไม่ได้ถาม',
+  'options.modules.notNeeded': 'ไม่จำเป็น',
+  'options.modules.forget': 'ลืม',
 } satisfies Partial<Record<keyof typeof en, string>>;

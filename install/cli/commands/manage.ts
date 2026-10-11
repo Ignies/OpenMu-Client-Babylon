@@ -14,7 +14,7 @@ import { GROUPS, ask } from './questions';
 
 /** Changes that are baked into the client or OpenMU image need a rebuild; the rest only a restart. */
 function needsBuild(a: Config, b: Config): boolean {
-  return a.mode !== b.mode || a.domain !== b.domain || a.publicIp !== b.publicIp || a.openmuVersion !== b.openmuVersion || a.openmuSourceRef !== b.openmuSourceRef;
+  return a.mode !== b.mode || a.domain !== b.domain || a.publicIp !== b.publicIp || a.openmuVersion !== b.openmuVersion || a.openmuSourceRef !== b.openmuSourceRef || a.moduleSigningKey !== b.moduleSigningKey;
 }
 
 export async function configure(c: Config, p: Paths): Promise<void> {

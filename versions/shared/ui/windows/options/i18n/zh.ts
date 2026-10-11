@@ -334,4 +334,15 @@ export default {
   'options.skillEffects.enhanced': '增强',
   'options.help.skillEffects':
     '原版按原客户端绘制每个技能。增强为部分技能恢复我们自己的外观，例如 Evil Spirit 的群灵。与还原度页面的“增强技能特效”是同一个开关。',
+  'options.page.modules': '模块',
+  'options.modules.title': '推送的模块',
+  'options.help.modules': '此世界向你推送的模块。沙盒模块只在你同意后运行；点击忘记会清除你的回答，下次进入该世界时会再次询问。',
+  'options.modules.none': '此世界没有推送模块。',
+  'options.modules.firstParty': '官方',
+  'options.modules.sandboxed': '沙盒',
+  'options.modules.allowed': '已允许',
+  'options.modules.refused': '已拒绝',
+  'options.modules.notAsked': '未询问',
+  'options.modules.notNeeded': '无需',
+  'options.modules.forget': '忘记',
 } satisfies Partial<Record<keyof typeof en, string>>;
