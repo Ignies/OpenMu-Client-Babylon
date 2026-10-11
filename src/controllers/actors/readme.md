@@ -41,9 +41,10 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   posed, swung and lit holding), `shownGear(e, map)` (the gear its item glow comes off),
   `wearsChaosCastleSkin(e, map)`, type `Gear`. Inside Chaos Castle every player holds the castle's
   weapons, all +0 (`ChangeChaosCastleUnit`, CSChaosCastle.cpp:130-170); range and ammo stay its own.
-- `PlayerObject.Cloth`, `MonsterObject.Cloth`: the body's physics cloths (`o->m_pCloth`, a `controllers/cloth` `ClothSet`).
-  `cloaks.ts`: `registerCloaks(rule)` (the wearers' content hands its rule in at boot), `cloaksFor(wearer, set)`
-  (the rule builds, destroys and draws on the body's set as `RenderCharacter` does), types `CloakWearer`,
+- `PlayerObject.Cloth`, `MonsterObject.Cloth`: the body's physics cloths (`o->m_pCloth`, a `controllers/cloth` `ClothSet`);
+  `PlayerObject.PantsCloth`: the pants part's (`BodyPart[BODYPART_PANTS].m_pCloth`, made of the `Pants` part's meshes),
+  dropped with `Cloth`. `cloaks.ts`: `registerCloaks(rule)` (the wearers' content hands its rule in at boot),
+  `cloaksFor(wearer, set, pants)` (the rule builds, destroys and draws on the body's sets as `RenderCharacter` does), types `CloakWearer`,
   `CloakSet`, `CloakRule`; `ecs/systems/clothSystem.ts` asks it every frame.
 - `wings.ts`: `wingSpec`, `isWingItem`, `wingBone`, `isFastWing`, `WING_GROUP`, `HELPER_GROUP`,
   `WING_BONE`, `CAPE_BONE`, wing index constants (`WING_OF_ELF`, `CAPE_OF_LORD`, ...).
@@ -251,9 +252,10 @@ Mantle of Monarch and Cape of Overrule keep their model and add cloth.
   and 1, bone 20, Monster/iui06.jpg) and skirt (cloth 3, bone 18, Player/kaa.tga or dark3chima3.tga over the
   class's own body); the duel and Battle Soccer colours, which cloak anyone (`team_cloak.ts`); the Death King's
   robe (Player/Robe03.tga, :9826-9832) and the Nightmare's (a `PCT_CYLINDER` robe on bone 2, :9833-9836).
-- Left out: a team colour on a player in a monster's body. The original hangs its class's cloths on that
-  monster's bones (bone 19 is a different bone on every body); here it wears none.
+- A team colour on a player in a monster's body (`MonsterObject.Cloth`) hangs his class's cloths on that
+  monster's bones, as the original does (bone 19 is a different bone on every body).
 - The set is built once and walked as the original walks it: a cloth it skips stays built, unstepped, and
   lays its shadow where it was left; a cape change resets the whole set as `DeleteCloth` does (WSclient.cpp:2474-2491,
-  NewUIMyInventory.cpp:1050-1083). Body parts carry a mesh cloth of their own too (`CPhysicsClothMesh`,
-  ZzzObject.cpp:10610-10680), as do the Magic Skeletons: not ported, see `controllers/cloth/readme.md`.
+  NewUIMyInventory.cpp:1050-1083). The soul and Divine Pants carry a cloth of their own on `PantsCloth`
+  (ZzzObject.cpp:10610-10680) and the Magic Skeletons one made of their mesh (`CPhysicsClothMesh`); the
+  Crusts, Fred and the rings' bodies theirs (`versions/shared/cloaks/readme.md`).

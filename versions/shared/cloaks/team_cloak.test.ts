@@ -62,7 +62,7 @@ function run(w: Wearer, frames: number, set = new FakeSet()) {
 }
 
 function wear(over: Partial<Wearer>) {
-  const { out, light } = run({ charClass: C.DarkKnight, wing: null, wingBefore: null, armor: null, skin: null, chaosCastle: false, netId: 7, hero: false, guild: null, monster: null, rig: true, ...over }, 2);
+  const { out, light } = run({ charClass: C.DarkKnight, wing: null, wingBefore: null, armor: null, skin: null, chaosCastle: false, netId: 7, hero: false, guild: null, monster: null, rig: true, pants: null, shadowPass: false, fading: false, ...over }, 2);
   return { out, light, fronts: out.filter(Boolean).map(s => s?.front ?? null) };
 }
 
@@ -100,9 +100,15 @@ describe('the duel colours (ZzzCharacter.cpp:9234-9246)', () => {
     expect(wear({ charClass: C.MagicGladiator, skin: 'panda.glb' }).fronts).toEqual([]);
   });
 
-  it('cloaks no duelist in a monster\'s body (the original hangs its class\'s cloths on the monster\'s bones)', () => {
+  it('cloaks a duelist in a monster\'s body too, his class\'s cloths hung on the monster\'s bones (:9164-9246, :9689-9850)', () => {
     state.enemy = 7;
-    expect(wear({ monster: 7, rig: false })).toMatchObject({ light: [1, 1, 1], fronts: [] });
+    // A Giant's body (monster 7): the robe, red; a Dark Lord his hair, cape and skirt; a Nightmare's body its own robe.
+    expect(wear({ monster: 7, rig: false })).toMatchObject({ light: RED, fronts: ['Player/Robe01.OZJ'] });
+    expect(wear({ charClass: C.DarkLord, monster: 7, rig: false }).fronts).toEqual(['Monster/iui06.OZJ', 'Monster/iui06.OZJ', 'Player/DarklordRobe.OZT', 'Player/kaa.OZT']);
+    expect(wear({ monster: 361, rig: false }).fronts).toEqual(['Monster/nightmare_cloth.OZT']);
+    // Out of the duel, nothing: a class cloak needs the player rig (`o->Type == MODEL_PLAYER`).
+    state.enemy = null;
+    expect(wear({ charClass: C.DarkLord, monster: 7, rig: false }).fronts).toEqual([]);
   });
 });
 

@@ -9,15 +9,20 @@ import { cloaksFor, type CloakSet, type CloakWearer } from '@/controllers/actors
 import {
   PCT_CURVED,
   PCT_CYLINDER,
+  PCT_ELASTIC_HALLOWEEN,
   PCT_ELASTIC_RAGE_L,
   PCT_ELASTIC_RAGE_R,
   PCT_HEAVY,
   PCT_MASK_ALPHA,
   PCT_MASK_BLEND,
   PCT_MASK_LIGHT,
+  PCT_OPT_CORRECTEDFORCE,
+  PCT_RUBBER,
   PCT_RUBBER2,
+  PCT_SHAPE_HALLOWEEN,
   PCT_SHORT_SHOULDER,
   PCT_STICKED,
+  type ClothMeshSpec,
   type ClothSpec,
 } from '@/controllers/cloth';
 import { CharacterClassNumber as C } from '@/core/types';
@@ -35,9 +40,13 @@ class FakeSet implements CloakSet {
   count = 0;
   readonly specs: (ClothSpec | null)[] = [];
   readonly drawn = new Set<number>();
+  /** Whether each slot's last draw passes the stun hold. */
+  readonly holds = new Map<number, boolean>();
+  /** Every draw this frame (a cloth stepped twice is drawn twice). */
+  draws = 0;
   drops = 0;
-  build(slot: number, spec: ClothSpec) {
-    this.specs[slot] = spec;
+  build(slot: number, spec: ClothSpec | ClothMeshSpec) {
+    this.specs[slot] = spec as ClothSpec;
     this.built = true;
   }
   destroy(slot: number) {
@@ -46,8 +55,11 @@ class FakeSet implements CloakSet {
   has(slot: number) {
     return !!this.specs[slot];
   }
-  draw(slot: number) {
-    if (this.specs[slot]) this.drawn.add(slot);
+  draw(slot: number, holds = true) {
+    if (!this.specs[slot]) return;
+    this.drawn.add(slot);
+    this.holds.set(slot, holds);
+    this.draws++;
   }
   drop() {
     this.drops++;
@@ -58,18 +70,21 @@ class FakeSet implements CloakSet {
 }
 
 /** `frames` frames of the rule on one set (two: the skirt settles); `out` is what the last one draws, by slot. */
-function run(w: CloakWearer, frames: number, set = new FakeSet()) {
+function run(w: CloakWearer, frames: number, set = new FakeSet(), pants: FakeSet | null = null) {
   let light: readonly number[] = [];
   for (let f = 0; f < frames; f++) {
-    set.drawn.clear();
-    light = cloaksFor(w, set);
+    for (const s of pants ? [set, pants] : [set]) {
+      s.drawn.clear();
+      s.draws = 0;
+    }
+    light = cloaksFor(w, set, pants);
   }
   const out = Array.from({ length: set.specs.length }, (_, i) => (set.drawn.has(i) ? (set.specs[i] ?? null) : null));
   return { out, light, set };
 }
 
 const wearer = (over: Partial<CloakWearer>): CloakWearer => ({
-  charClass: C.DarkLord, wing: null, wingBefore: over.wing ?? null, armor: null, skin: null, chaosCastle: false, netId: null, hero: false, guild: null, monster: null, rig: true, ...over,
+  charClass: C.DarkLord, wing: null, wingBefore: over.wing ?? null, armor: null, skin: null, chaosCastle: false, netId: null, hero: false, guild: null, monster: null, rig: true, pants: null, shadowPass: false, fading: false, ...over,
 });
 
 const wear = (over: Partial<CloakWearer>, frames = 2) => run(wearer(over), frames);
@@ -201,12 +216,14 @@ describe('the Magic Gladiator\'s robe (ZzzCharacter.cpp:9837-9846)', () => {
     expect(wear({ charClass: C.DuelMaster }).out.filter(Boolean)).toEqual([]);
   });
 
-  it('goes under a ring\'s body but the skeletons\' (CheckDarkCloak), and every cloth goes in the Illusion Temple\'s (:9953-9961)', () => {
-    const robe = (skin: string | null) => wear({ charClass: C.MagicGladiator, skin }).out.filter(Boolean).length;
+  it('goes under a ring\'s body but the skeletons\' (CheckDarkCloak), and the loop draws nothing in the Illusion Temple\'s (:9953-9961)', () => {
+    const robe = (skin: string | null) => (wear({ charClass: C.MagicGladiator, skin }).out.some(s => s?.front === 'Player/Robe01.OZJ') ? 1 : 0);
     expect(['Skeleton01.glb', 'Skeleton02.glb', 'Skeleton03.glb'].map(robe)).toEqual([1, 1, 1]);
     expect(['youngza.glb', 'jack.glb', 'santa.glb', 'panda.glb', 'trans_skeleton.glb'].map(robe)).toEqual([0, 0, 0, 0, 0]);
     expect(['illusionist.glb', 'unitedsoldier.glb'].map(robe)).toEqual([0, 0]);
-    expect(wear({ charClass: C.RageFighter, wing: CAPE_OF_FIGHTER, skin: 'unitedsoldier.glb' }).out.filter(Boolean)).toEqual([]);
+    // No cape either: the body's own cloth took the set, and the loop skips it there.
+    const fighter = wear({ charClass: C.RageFighter, wing: CAPE_OF_FIGHTER, skin: 'unitedsoldier.glb' });
+    expect(fighter.out.filter(Boolean).map(s => s?.front)).toEqual(['Skill/unitedsoldier_wing.OZT']);
   });
 });
 
@@ -246,8 +263,9 @@ describe('the Dark Lord\'s hair (ZzzCharacter.cpp:9707-9715)', () => {
   it('is on every Dark Lord whatever he wears, and goes under any ring\'s body (CheckDarkLordHair, :9934-9937)', () => {
     expect(wear({ charClass: C.LordEmperor, wing: CAPE_OF_LORD }).out.slice(0, 2)).toEqual(wear({}).out.slice(0, 2));
     expect(['Skeleton01.glb', 'youngza.glb', 'panda.glb'].map(skin => wear({ skin }).out.slice(0, 2).filter(Boolean))).toEqual([[], [], []]);
-    // The cape stays on under a ring's body.
-    expect(wear({ wing: CAPE_OF_LORD, skin: 'jack.glb' }).out[2]).toBe(wear({ wing: CAPE_OF_LORD }).out[2]);
+    // The cape stays on under a ring's body, unless the body hangs cloths of its own first (Jack's: no cape).
+    expect(wear({ wing: CAPE_OF_LORD, skin: 'panda.glb' }).out[2]).toBe(wear({ wing: CAPE_OF_LORD }).out[2]);
+    expect(wear({ wing: CAPE_OF_LORD, skin: 'jack.glb' }).out.filter(Boolean).map(s => s?.front)).toEqual(['Monster/iui02.OZT']);
   });
 });
 
@@ -388,5 +406,196 @@ describe('the two monsters that wear one (ZzzCharacter.cpp:9173-9176, :9826-9836
     expect(wear({ charClass: C.MagicGladiator, monster: 529 }).set.built).toBe(false);
     expect(wear({ charClass: C.MagicGladiator, monster: 539 }).set.built).toBe(false);
     expect(wear({ charClass: C.MagicGladiator, monster: 540 }).set.built).toBe(true);
+  });
+});
+
+describe('the Magic Skeletons\' cape (ZzzCharacter.cpp:8502-8539)', () => {
+  const skeleton = (monster: number) => wear({ charClass: C.DarkWizard, monster, rig: false });
+
+  it('makes mesh 2 of the body cloth, pinned on bone 18, heavy, two spheres on that bone, stepped through any stun', () => {
+    const { out, set } = skeleton(89);
+    const cape: ClothMeshSpec = {
+      mesh: 2,
+      bone: 18,
+      flags: PCT_HEAVY,
+      spheres: [
+        [0, 0, 0, 50, 18],
+        [0, -20, 0, 30, 18],
+      ],
+    };
+    expect([set.count, out[0], set.holds.get(0)]).toEqual([1, cape, false]);
+  });
+
+  it('is the seven Magic Skeletons\' alone (MONSTER_MAGIC_SKELETON_1 to _7)', () => {
+    expect([89, 95, 112, 118, 124, 130, 143].map(m => skeleton(m).set.built)).toEqual([true, true, true, true, true, true, true]);
+    expect([88, 90, 433].map(m => skeleton(m).set.built)).toEqual([false, false, false]);
+  });
+});
+
+describe('the pants that are cloth (RenderPartObject, ZzzObject.cpp:10608-10680)', () => {
+  /** A frame with the pants part drawn as `model`: the pants' set, and the body's. */
+  const pants = (model: string | null, over: Partial<CloakWearer> = {}, part = new FakeSet(), set = new FakeSet()) => {
+    run(wearer({ charClass: C.DarkWizard, pants: model, ...over }), 1, set, part);
+    return { part, set };
+  };
+  const HIPS = [[0, -15, -20, 30, 2]];
+
+  it('lays the Grand Soul Pants\' 5 x 8 grid on bone 17 over mesh 2 of t_PantMale19 (PCT_OPT_MESHPROG, :10634-10635)', () => {
+    const { part } = pants('t_PantMale19.glb');
+    expect([part.count, part.specs[0], part.holds.get(0)]).toEqual([
+      1,
+      {
+        mesh: 2,
+        bone: 17,
+        at: [0, 9, 7],
+        grid: [5, 8],
+        size: [45, 85],
+        front: 'Item/t_lower_14m.OZT',
+        back: 'Item/t_lower_14m.OZT',
+        flags: PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_SHORT_SHOULDER,
+        spheres: HIPS,
+      },
+      false,
+    ]);
+  });
+
+  it('lays the Dark Soul Pants\' 7 x 5 grid over mesh 2 of PantMale23, in that mesh\'s own texture (:10649-10650)', () => {
+    expect(pants('PantMale23.glb').part.specs[0]).toMatchObject({ mesh: 2, bone: 17, at: [0, 9, 7], grid: [7, 5], size: [50, 100], front: 'Player/lower2_15m.OZT', spheres: HIPS });
+  });
+
+  it('makes mesh 3 of the Divine Pants (PantMaleTest20) cloth on bone 2, five spheres down the legs (:10638-10645)', () => {
+    expect(pants('PantMaleTest20.glb').part.specs[0]).toEqual({
+      mesh: 3,
+      bone: 2,
+      flags: PCT_OPT_CORRECTEDFORCE | PCT_HEAVY,
+      spheres: [
+        [0, 0, -15, 22, 2],
+        [0, 0, -27, 23, 2],
+        [0, 0, -40, 24, 2],
+        [0, 0, -54, 25, 2],
+        [0, 0, -69, 26, 2],
+      ],
+    });
+  });
+
+  it('steps it once in the body pass and once more in the shadow pass (ZzzCharacter.cpp:8590-8612, :9651)', () => {
+    expect(pants('t_PantMale19.glb').part.draws).toBe(1);
+    expect(pants('t_PantMale19.glb', { shadowPass: true }).part.draws).toBe(2);
+  });
+
+  it('builds it once, and drops it when other pants are drawn (`DeleteCloth(NULL, o, p)`, :10675-10678)', () => {
+    const { part, set } = pants('t_PantMale19.glb');
+    const built = part.specs[0];
+    pants('t_PantMale19.glb', {}, part, set);
+    expect([part.specs[0], part.drops]).toEqual([built, 0]);
+    pants('PantMale19.glb', {}, part, set);
+    expect([part.built, part.drops]).toEqual([false, 1]);
+    expect(pants(null).part.built).toBe(false);
+  });
+
+  it('neither builds nor steps it under a ring\'s body, which draws no part (ZzzCharacter.cpp:9343-9440)', () => {
+    const { part } = pants('t_PantMale19.glb');
+    pants('t_PantMale19.glb', { skin: 'jack.glb' }, part);
+    expect([part.built, part.draws, part.drops]).toEqual([true, 0, 0]);
+    expect(pants('t_PantMale19.glb', { skin: 'jack.glb' }).part.built).toBe(false);
+  });
+});
+
+describe('the Crusts\' robe (ZzzCharacter.cpp:8818-8837)', () => {
+  const crust = (monster: number) => wear({ charClass: C.DarkWizard, monster, rig: false });
+
+  it('hangs a 5 x 15 rubber strip, 30 x 300, from the Mega Crust\'s neck: iui02.tga, keyed, stepped through any stun', () => {
+    const { out, set } = crust(71);
+    expect([set.count, out[0], set.holds.get(0)]).toEqual([
+      1,
+      { bone: 19, at: [0, 10, 0], grid: [5, 15], size: [30, 300], front: 'Monster/iui02.OZT', back: 'Monster/iui02.OZT', flags: PCT_RUBBER | PCT_MASK_ALPHA },
+      false,
+    ]);
+  });
+
+  it('is iui03.tga on the Alpha Crust and the Omega Wing, and on no other Crust body', () => {
+    expect([74, 301].map(m => crust(m).out[0]?.front)).toEqual(['Monster/iui03.OZT', 'Monster/iui03.OZT']);
+    expect(crust(496).set.built).toBe(false);
+  });
+});
+
+describe('Fred\'s cloth (MODEL_FRED, ZzzObject.cpp:540-561)', () => {
+  it('hangs deasuler_cloth.tga from its bone 10, sticked, heavy and keyed, one sphere on bone 2, stepped through any stun', () => {
+    const { out, set } = wear({ charClass: C.DarkWizard, monster: 508, rig: false });
+    expect([set.count, out[0], set.holds.get(0)]).toEqual([
+      1,
+      {
+        bone: 10,
+        at: [0, -10, 0],
+        grid: [5, 12],
+        size: [150, 190],
+        front: 'Monster/deasuler_cloth.OZT',
+        back: 'Monster/deasuler_cloth.OZT',
+        flags: PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_SHORT_SHOULDER,
+        spheres: [[50, -140, -20, 30, 2]],
+      },
+      false,
+    ]);
+  });
+});
+
+describe('the cloths of a ring\'s body on a player (RenderPartObjectBody, ZzzObject.cpp:8149-8417; ZzzCharacter.cpp:9436-9505)', () => {
+  const body = (skin: string, over: Partial<CloakWearer> = {}) => wear({ charClass: C.DarkKnight, skin, ...over });
+
+  it('gives the Illusion Temple\'s Mu Allies body unitedsoldier_wing.tga from the neck, held by stun (:8174-8203)', () => {
+    const { out, set } = body('unitedsoldier.glb');
+    expect([set.count, out[0], set.holds.get(0)]).toEqual([
+      1,
+      { bone: 19, at: [0, 8, 0], grid: [10, 10], size: [140, 140], front: 'Skill/unitedsoldier_wing.OZT', back: 'Skill/unitedsoldier_wing.OZT', flags: PCT_CURVED | PCT_SHORT_SHOULDER | PCT_MASK_ALPHA },
+      true,
+    ]);
+  });
+
+  it('gives the Illusion Sorcerer body illusionistcloth.tga from the head, blown the Halloween way (:8230-8259)', () => {
+    expect(body('illusionist.glb').out[0]).toEqual({
+      bone: 20,
+      at: [-4, 5, 0],
+      grid: [10, 20],
+      size: [17, 100],
+      front: 'Skill/illusionistcloth.OZT',
+      back: 'Skill/illusionistcloth.OZT',
+      flags: PCT_SHAPE_HALLOWEEN | PCT_ELASTIC_HALLOWEEN | PCT_MASK_ALPHA,
+    });
+  });
+
+  it('gives the Jack O\'Lantern body iui02.tga from the neck, never held (:8397-8416)', () => {
+    const { out, set } = body('jack.glb');
+    expect([out[0], set.holds.get(0)]).toEqual([
+      { bone: 19, at: [0, 10, 0], grid: [10, 20], size: [30, 200], front: 'Monster/iui02.OZT', back: 'Monster/iui02.OZT', flags: PCT_SHAPE_HALLOWEEN | PCT_ELASTIC_HALLOWEEN | PCT_MASK_ALPHA },
+      false,
+    ]);
+  });
+
+  it('builds the game master\'s two strands of hair and never draws them (the cloaking test inside its negation, :9440-9486)', () => {
+    const { set } = body('youngza.glb');
+    expect([set.count, set.specs.map(s => [s?.at, s?.grid, s?.size, s?.front, s?.wind]), set.drawn.size]).toEqual([
+      2,
+      [
+        [[0, 5, 10], [6, 5], [30, 70], 'Skill/younghtest1.OZT', [10, 20]],
+        [[0, 5, 25], [4, 4], [30, 40], 'Skill/younghtest3.OZT', [8, 15]],
+      ],
+      0,
+    ]);
+    expect(set.specs[0]?.flags).toBe(PCT_SHORT_SHOULDER | PCT_MASK_ALPHA);
+  });
+
+  it('is a player\'s alone, and the class loop walks it again: a Rage Fighter\'s cape slot steps Jack\'s robe twice (:9926-9983)', () => {
+    expect(body('jack.glb', { monster: 463 }).set.built).toBe(false);
+    const fighter = body('jack.glb', { charClass: C.RageFighter, wing: CAPE_OF_FIGHTER });
+    expect([fighter.set.count, fighter.out[0]?.front, fighter.set.draws]).toEqual([1, 'Monster/iui02.OZT', 2]);
+    // The Illusion Temple's bodies skip every cloth of the loop (:9958-9961).
+    expect(body('unitedsoldier.glb', { charClass: C.RageFighter, wing: CAPE_OF_FIGHTER }).set.draws).toBe(1);
+  });
+});
+
+describe('the death fade (DeadCharacter\'s DeleteCloth every frame, ZzzCharacter.cpp:3233-3251)', () => {
+  it('keeps the Dark Lord\'s set as it is built from nothing: the skirt is never made again while the body fades', () => {
+    const { set } = wear({ fading: true }, 3);
+    expect([set.count, set.specs[3]?.at, set.specs[3]?.flags]).toEqual([3, [0, 10, -5], PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_SHORT_SHOULDER]);
   });
 });

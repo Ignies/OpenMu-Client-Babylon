@@ -13,7 +13,10 @@ import { tearsSet } from './delete_cloth';
 import { DARK_LORD_HAIR } from './dark_lord_hair';
 import { DARK_LORD_SKIRT, DARK_LORD_SKIRT_BUILT, LORD_EMPEROR_SKIRT, LORD_EMPEROR_SKIRT_BUILT } from './dark_lord_skirt';
 import { teamLight } from './team_cloak';
-import { DEATH_KING, DEATH_KING_ROBE, NIGHTMARE, NIGHTMARE_ROBE, isDoppelganger } from './monster_robes';
+import { DEATH_KING, DEATH_KING_ROBE, FRED, FRED_CLOTH, NIGHTMARE, NIGHTMARE_ROBE, crustRobe, isDoppelganger } from './monster_robes';
+import { MAGIC_SKELETON_CLOTH, isMagicSkeleton } from './magic_skeleton';
+import { pantsCloth } from './soul_pants';
+import { bodyCloths } from './ring_bodies';
 import { CAPE_OF_FIGHTER_CLOTH, CAPE_OF_OVERRULE_CLOTH, CAPE_OF_OVERRULE_STRAPS, isCapeOfFighter, isCapeOfOverrule } from './cape_of_fighter';
 
 const WHITE: Rgb = [1, 1, 1];
@@ -99,15 +102,56 @@ function drawSet(w: CloakWearer, base: BaseClass, team: boolean, set: CloakSet):
 }
 
 /**
+ * The pants part's cloth (`RenderPartObject`, ZzzObject.cpp:10608-10680): built once, stepped in the parts' pass
+ * and again in the shadow pass (ZzzCharacter.cpp:8605-8612, :9651), never held; other pants drop it with the
+ * body's set (`DeleteCloth(NULL, o, p)`). A ring's body draws no part, so nothing happens to it.
+ */
+function wearPants(w: CloakWearer, pants: CloakSet): void {
+  if (w.skin !== null) return;
+  const spec = pantsCloth(w.pants);
+  if (!spec) {
+    if (pants.built) pants.drop();
+    return;
+  }
+  if (!pants.built) {
+    pants.build(0, spec);
+    pants.count = 1;
+  }
+  pants.draw(0, false);
+  if (w.shadowPass) pants.draw(0, false);
+}
+
+/**
  * `bCloak` (ZzzCharacter.cpp:9162-9246): on the player rig the Magic Gladiator (the class itself,
  * `c->Class == CLASS_DARK`), every Dark Lord and Rage Fighter; the Death King and the Nightmare; never a
- * Doppelganger nor inside Chaos Castle; and any player a team colour puts in one, unless in a monster's body.
- * The set is built once, then only its skirt changes; out of a cloak it stays as it was, undrawn.
+ * Doppelganger nor inside Chaos Castle; and any player a team colour puts in one, in a monster's body too (his
+ * class's cloths on that body's bones). The set is built once, then only its skirt changes; out of a cloak it
+ * stays as it was, undrawn.
  */
-export function cloaks(w: CloakWearer, set: CloakSet): Rgb {
+export function cloaks(w: CloakWearer, set: CloakSet, pants: CloakSet | null): Rgb {
   if (tearsSet(w)) set.drop();
+  if (pants) wearPants(w, pants);
+  // The cloths a body hangs on itself before bCloak, built once and stepped each frame, stun or not: the Magic
+  // Skeletons' (ZzzCharacter.cpp:8512-8533), Fred's (`MODEL_FRED`, ZzzObject.cpp:544-561), the Crusts' (:8818-8837).
+  const itsOwn = isMagicSkeleton(w.monster) ? MAGIC_SKELETON_CLOTH : w.monster === FRED ? FRED_CLOTH : crustRobe(w.monster);
+  if (itsOwn) {
+    if (!set.built) {
+      set.build(0, itsOwn);
+      set.count = 1;
+    }
+    set.draw(0, false);
+  }
+  // A ring's body worn by a player hangs its own (RenderPartObjectBody, ZzzObject.cpp:8149-8417; ZzzCharacter.cpp:9436-9505).
+  const body = w.rig && w.monster === null ? bodyCloths(w.skin) : null;
+  if (body) {
+    if (!set.built) {
+      for (let i = 0; i < body.cloths.length; i++) set.build(i, body.cloths[i]);
+      set.count = body.cloths.length;
+    }
+    if (body.drawn) for (let i = 0; i < body.cloths.length; i++) set.draw(i, body.holds);
+  }
   const base = getBaseClass(w.charClass);
-  const team = w.monster === null ? teamLight(w) : null;
+  const team = teamLight(w);
   const gladiator = w.charClass === CharacterClassNumber.MagicGladiator;
   const byClass = w.rig && (gladiator || base === BaseClass.DarkLord || base === BaseClass.RageFighter);
   const own = (byClass || w.monster === DEATH_KING || w.monster === NIGHTMARE) && !isDoppelganger(w.monster);
@@ -121,7 +165,8 @@ export function cloaks(w: CloakWearer, set: CloakSet): Rgb {
       set.build(0, w.monster === DEATH_KING ? DEATH_KING_ROBE : w.monster === NIGHTMARE ? NIGHTMARE_ROBE : robeFor(w.wing));
       set.count = 1;
     }
-  } else if (base === BaseClass.DarkLord) {
+  } else if (base === BaseClass.DarkLord && !w.fading) {
+    // A fading body's set is new every frame (DeleteCloth, :3251): it never gets this far.
     followArmour(w, set);
   }
   drawSet(w, base, team !== null, set);

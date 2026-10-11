@@ -11,10 +11,10 @@ vi.mock('../../controllers/assets/mu', async importOriginal => ({
 
 import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
 import { Scene } from '@babylonjs/core/scene';
-import { TransformNode } from '../../controllers/render/babylon/exports';
+import { Mesh, Skeleton, TransformNode } from '../../controllers/render/babylon/exports';
 import { PlayerObject } from '../../controllers/actors/playerObject';
 import { MonsterObject } from '../../controllers/actors/monsterObject';
-import { registerCloaks, type CloakWearer } from '../../controllers/actors/cloaks';
+import { registerCloaks, type CloakRule, type CloakWearer } from '../../controllers/actors/cloaks';
 import type { ClothSpec } from '../../controllers/cloth';
 import { CharacterClassNumber as C } from '../../core/types';
 import type { Item, World } from '../world';
@@ -27,7 +27,7 @@ afterAll(() => engine.dispose());
 const CAPE: ClothSpec = { bone: 19, at: [0, 8, 10], grid: [3, 3], size: [10, 10], front: 'a', back: 'a', flags: 0 };
 /** What the rule saw last. */
 let seen: CloakWearer | null = null;
-registerCloaks((w, set) => {
+const capeRule: CloakRule = (w, set) => {
   seen = { ...w };
   if (!w.wing || w.chaosCastle) return [1, 1, 1];
   if (!set.built) {
@@ -36,7 +36,8 @@ registerCloaks((w, set) => {
   }
   set.draw(2);
   return [1, 0.2, 0];
-});
+};
+registerCloaks(capeRule);
 
 const CHAOS_CASTLE = 18;
 
@@ -66,7 +67,7 @@ describe('ClothSystem', () => {
   it('hangs on each player body what the wearers\' rule names, in its light', () => {
     const p = player({ wings: { group: 13, num: 30 } });
     const set = run(p);
-    expect(seen).toEqual({ charClass: C.DarkLord, wing: { group: 13, num: 30 }, wingBefore: { group: 13, num: 30 }, armor: null, skin: null, chaosCastle: false, netId: null, hero: false, guild: null, monster: null, rig: true });
+    expect(seen).toEqual({ charClass: C.DarkLord, wing: { group: 13, num: 30 }, wingBefore: { group: 13, num: 30 }, armor: null, skin: null, chaosCastle: false, netId: null, hero: false, guild: null, monster: null, rig: true, pants: null, shadowPass: true, fading: false });
     expect([set.size, set.cloth(2)?.spec, set.drawn(2)]).toEqual([1, CAPE, true]);
     // Undrawn the next frame the rule names nothing; the set stays as built.
     p.charAppearance.wings = null;
@@ -83,6 +84,52 @@ describe('ClothSystem', () => {
     const p = { ...player(), skin: 14 };
     run(p);
     expect(seen?.skin).toBe('Skeleton01.glb');
+  });
+
+  it('hands the rule the pants part\'s set and model, and whether the shadow pass draws the parts again (ZzzCharacter.cpp:8590-8612)', () => {
+    let part: unknown = null;
+    registerCloaks((w, _set, pants) => {
+      seen = { ...w };
+      part = pants;
+      return [1, 1, 1];
+    });
+    const p = player();
+    p.modelObject.Pants.gltf = { mesh: new Mesh('t_PantMale19.glb', scene), skeleton: new Skeleton('s', 's', scene), animationGroups: [] };
+    run(p);
+    expect([seen?.pants, seen?.shadowPass, part]).toEqual(['t_PantMale19.glb', true, p.modelObject.PantsCloth]);
+    // Under half alpha, on a mount out of town, in Icarus or Kalima there is no shadow pass.
+    p.modelObject.Alpha = 0.4;
+    expect([run(p) && seen?.shadowPass]).toEqual([false]);
+    p.modelObject.Alpha = 1;
+    p.modelObject.Pants.ClassicShadow = false;
+    expect([run(p) && seen?.shadowPass]).toEqual([false]);
+    p.modelObject.Pants.ClassicShadow = true;
+    expect([run(p, 10) && seen?.shadowPass, run(p, 24) && seen?.shadowPass]).toEqual([false, false]);
+    registerCloaks(capeRule);
+  });
+
+  it('drops a body\'s set and its pants\' together (`DeleteCloth` takes both)', () => {
+    const p = player();
+    const { Cloth, PantsCloth } = p.modelObject;
+    Cloth.build(0, CAPE);
+    PantsCloth.build(0, CAPE);
+    PantsCloth.drop();
+    expect([Cloth.built, PantsCloth.built]).toEqual([false, false]);
+    PantsCloth.build(0, CAPE);
+    Cloth.drop();
+    expect(PantsCloth.built).toBe(false);
+  });
+
+  it('fades a dying body\'s sets once its Rot passes 1, dropped as the fade begins (DeadCharacter, ZzzCharacter.cpp:3233-3251)', () => {
+    const p = { ...player({ wings: { group: 13, num: 30 } }), dying: { rot: 0.5 } };
+    const set = run(p);
+    const drop = vi.spyOn(set, 'drop');
+    expect([set.fading, p.modelObject.PantsCloth.fading, seen?.fading]).toEqual([false, false, false]);
+    p.dying.rot = 1.02;
+    run(p);
+    expect([set.fading, p.modelObject.PantsCloth.fading, seen?.fading, drop.mock.calls.length, set.built]).toEqual([true, true, true, 1, true]);
+    run(p);
+    expect(drop.mock.calls.length).toBe(1);
   });
 
   it('tells the rule when the body is inside Chaos Castle', () => {

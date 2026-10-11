@@ -13,10 +13,11 @@ vi.mock('../assets/mu', async importOriginal => ({
 
 import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
 import { Scene } from '@babylonjs/core/scene';
-import { Bone, Constants, Material, Matrix, Skeleton, StandardMaterial, TransformNode, VertexBuffer, type Mesh } from '../render/babylon/exports';
+import { Bone, BoundingInfo, Constants, Material, Matrix, Mesh, Skeleton, StandardMaterial, TransformNode, Vector3, VertexBuffer, VertexData } from '../render/babylon/exports';
 import { getShadowMaterial } from '../render/objectShadow';
-import { cloth, ClothSet, PCT_CURVED, PCT_HEAVY, PCT_MASK_ALPHA, PCT_MASK_BLEND, PCT_MASK_LIGHT, PCT_SHORT_SHOULDER, runClothFrame, type ClothSpec } from './index';
+import { cloth, ClothSet, PCT_CURVED, PCT_HEAVY, PCT_MASK_ALPHA, PCT_MASK_BLEND, PCT_MASK_LIGHT, PCT_SHORT_SHOULDER, PCT_STICKED, runClothFrame, type ClothMeshSpec, type ClothSpec } from './index';
 import { ClothMesh, lightSprite } from './clothMesh';
+import { gridCorners, weldCorners } from './clothSkin';
 import { HeldSprites, type HeldLook } from '../fx/effectParticles';
 import { FIDELITY_CLASSIC, FIDELITY_DEFAULT, setFidelityChoice } from '../fidelity';
 
@@ -349,5 +350,193 @@ describe('the cost of 20 caped players', () => {
     expect(ticked).toBeLessThan(5);
     expect(between).toBeLessThan(0.5);
     for (const set of sets) set.dispose();
+  });
+});
+
+/**
+ * A GLB mesh as the converter writes it: every corner its own vertex in the BMD's triangle order, at its place on
+ * its bone (tiles), skinned to joint `bone + 1`. Here the quad of two triangles (0, 1, 2) and (2, 1, 3): 0 and 1
+ * on bone 18, 20 cm apart, 2 and 3 on bone 5, 10 cm along the bone's -x (down the rig).
+ */
+function quadMesh(name = 'part') {
+  const local = [[0, 0, 0], [0, 0, 20], [-10, 0, 0], [-10, 0, 20]];
+  const node = [18, 18, 5, 5];
+  const order = [0, 1, 2, 2, 1, 3];
+  const mesh = new Mesh(name, scene);
+  const data = new VertexData();
+  data.positions = order.flatMap(v => local[v].map(c => c / 100));
+  data.indices = order.map((_, k) => k);
+  data.uvs = order.flatMap(() => [0.5, 0.5]);
+  data.matricesIndices = order.flatMap(v => [node[v] + 1, 0, 0, 0]);
+  data.matricesWeights = order.flatMap(() => [1, 0, 0, 0]);
+  data.applyToMesh(mesh);
+  return mesh;
+}
+
+const MESH_CLOTH: ClothMeshSpec = { mesh: 1, bone: 18, flags: PCT_HEAVY };
+
+/** A rig whose meshes are `meshes`, by index. */
+function meshBody(meshes: Mesh[]) {
+  return { ...body(), getMesh: (i: number) => meshes[i] };
+}
+
+describe('a cloth of the model\'s own mesh (CPhysicsClothMesh, PhysicsManager.cpp:948-1209)', () => {
+  it('welds the GLB\'s corners back into the BMD\'s vertices: same place, same bone, numbered as the triangles name them', () => {
+    const p = [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0];
+    const j = [3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 4, 0, 0, 0];
+    const welded = weldCorners(p, j, [0, 1, 2, 3, 4, 5]);
+    expect([...welded.corners]).toEqual([0, 1, 2, 2, 1, 3]);
+    expect([...welded.triangles]).toEqual([0, 1, 2, 2, 1, 3]);
+    expect([...welded.nodes]).toEqual([2, 2, 2, 3]);
+    expect([...welded.local]).toEqual([0, 0, 0, 100, 0, 0, 0, 100, 0, 100, 100, 0]);
+  });
+
+  it('lays a grid cloth\'s triangles over the grid, two a quad, row by row, with its UVs (:1061-1093)', () => {
+    const corners = new Int32Array(12);
+    const uvs = new Float32Array(24);
+    gridCorners([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], 3, 2, corners, uvs);
+    expect([...corners]).toEqual([0, 1, 3, 1, 4, 3, 1, 2, 4, 2, 5, 4]);
+    expect([...uvs.slice(0, 6), ...uvs.slice(18, 24)]).toEqual([0, 0, 0.5, 0, 0, 1, 1, 0, 1, 1, 0.5, 1]);
+  });
+
+  it('lays each vertex where its bone puts it, then writes the cloth into the mesh in the cloth bone\'s frame', () => {
+    const part = quadMesh();
+    const set = new ClothSet(scene, meshBody([quadMesh('other'), part]));
+    set.build(0, MESH_CLOTH);
+    set.count = 1;
+    set.draw(0, false);
+    tick();
+    const laid = set.cloth(0);
+    if (!laid) throw new Error('no cloth');
+    // The test rig's bones stand 130 up, their x up the body, -y behind, z across: a pin at (z, -y, x + 130).
+    expect([0, 1].map(v => [...laid.pos.slice(3 * v, 3 * v + 3)].map(c => +c.toFixed(4)))).toEqual([
+      [0, 0, 130],
+      [20, 0, 130],
+    ]);
+    // Every corner on bone 18 now; a pinned corner is written back as its place on that bone.
+    const written = part.getVerticesData(VertexBuffer.PositionKind) ?? [];
+    expect([...written.slice(0, 6)].map(c => +c.toFixed(4))).toEqual([0, 0, 0, 0, 0, 0.2]);
+    expect([...(part.getVerticesData(VertexBuffer.MatricesIndicesKind) ?? [])].filter((_, i) => i % 4 === 0)).toEqual([19, 19, 19, 19, 19, 19]);
+    // A free corner, carried by bone 18: the bone puts it back where the cloth has it.
+    const bone = body().gltf.skeleton.bones[19].getTransformNode()?.getWorldMatrix() ?? Matrix.Identity();
+    const at = Vector3.TransformCoordinates(new Vector3(written[6], written[7], written[8]), bone).scale(100);
+    expect([at.x, at.z, at.y].map(c => +c.toFixed(2))).toEqual([...laid.pos.slice(6, 9)].map(c => +c.toFixed(2)));
+    set.dispose();
+  });
+
+  it('keeps the culling box the model gave the mesh (the posed body\'s, not its bone-local vertices\')', () => {
+    const part = quadMesh();
+    part.setBoundingInfo(new BoundingInfo(new Vector3(-1, 0, -1), new Vector3(1, 2, 1)));
+    const set = new ClothSet(scene, meshBody([part, part]));
+    set.build(0, MESH_CLOTH);
+    set.draw(0);
+    tick();
+    const box = part.getBoundingInfo();
+    expect([box.minimum.asArray(), box.maximum.asArray()]).toEqual([[-1, 0, -1], [1, 2, 1]]);
+    set.dispose();
+  });
+
+  it('gives the mesh geometry of its own: the model\'s other copies keep theirs', () => {
+    const part = quadMesh();
+    const twin = part.clone('twin');
+    const set = new ClothSet(scene, meshBody([part, part]));
+    set.build(0, MESH_CLOTH);
+    set.draw(0);
+    tick();
+    expect(twin.getVerticesData(VertexBuffer.MatricesIndicesKind)?.[8]).toBe(6);
+    expect(part.geometry).not.toBe(twin.geometry);
+    set.dispose();
+  });
+
+  it('builds none until the model has the mesh, and drops the set when the model lets it go', () => {
+    const meshes: Mesh[] = [];
+    const set = new ClothSet(scene, meshBody(meshes));
+    set.build(0, MESH_CLOTH);
+    expect(set.built).toBe(false);
+    meshes[1] = quadMesh();
+    set.build(0, MESH_CLOTH);
+    set.draw(0);
+    tick();
+    expect(set.built).toBe(true);
+    meshes[1].dispose();
+    meshes[1] = quadMesh();
+    tick();
+    expect([set.built, set.size]).toEqual([false, 0]);
+    set.dispose();
+  });
+
+  it('draws a grid cloth over the mesh (PCT_OPT_MESHPROG), the corners its grid vertices', () => {
+    const part = quadMesh();
+    const grid: ClothSpec = { mesh: 1, bone: 18, at: [0, 0, 0], grid: [3, 2], size: [20, 10], front: 'a', back: 'a', flags: PCT_STICKED };
+    // Two quads need four triangles: a mesh of two is the grid's first quad.
+    const set = new ClothSet(scene, meshBody([part, part]));
+    set.build(0, grid);
+    set.draw(0);
+    tick();
+    expect([...(part.getVerticesData(VertexBuffer.UVKind) ?? [])]).toEqual([0, 0, 0.5, 0, 0, 1, 0.5, 0, 0.5, 1, 0, 1]);
+    expect(set.mesh(0)).toBeNull();
+    set.dispose();
+  });
+
+  it('steps a cloth once a call to draw, and under stun only when its caller never holds it', () => {
+    const set = new ClothSet(scene, body());
+    hang(set, [CAPE], [1, 1, 1]);
+    set.draw(0);
+    expect(set.draws(0)).toBe(2);
+    set.undraw();
+    expect(set.draws(0)).toBe(0);
+    // Both stunned: the one whose caller passes the hold gains no speed (Move2(0, 5)), the other falls (Move2(0.005f, 5)).
+    const held = new ClothSet(scene, body());
+    const free = new ClothSet(scene, body());
+    for (const s of [held, free]) {
+      s.build(0, CAPE);
+      s.held = true;
+    }
+    held.draw(0);
+    free.draw(0, false);
+    tick(5);
+    const still = (s: ClothSet) => s.cloth(0)?.vel.every(v => v === 0);
+    expect([still(held), still(free)]).toEqual([true, false]);
+    for (const s of [set, held, free]) s.dispose();
+  });
+});
+
+describe('a body\'s cloths and its parts\' (DeleteCloth, ZzzCharacter.cpp:3070-3115)', () => {
+  it('drops its partner with it, dropped or torn', () => {
+    const rig = body();
+    const own = new ClothSet(scene, rig);
+    const part = new ClothSet(scene, rig);
+    own.partner = part;
+    part.partner = own;
+    hang(own, [CAPE]);
+    part.build(0, ROBE);
+    tick();
+    // Only the drawn cape tears when the body jumps far; the part's undrawn robe goes with it.
+    rig.node.position.x += 100;
+    tick();
+    expect([own.built, part.built]).toEqual([false, false]);
+    hang(part, [ROBE]);
+    part.drop();
+    expect(part.built).toBe(false);
+    for (const s of [own, part]) s.dispose();
+  });
+});
+
+describe('the death fade (DeadCharacter\'s DeleteCloth, ZzzCharacter.cpp:3233-3251)', () => {
+  it('lays every cloth anew on each 25 Hz tick while the body fades, as a set built from nothing, and leaves it between ticks', () => {
+    const rig = body();
+    const fading = new ClothSet(scene, rig);
+    hang(fading, [CAPE, ROBE]);
+    tick(10);
+    fading.fading = true;
+    const swung = Float64Array.from(pos(fading, 0));
+    frame(0.01);
+    expect(pos(fading, 0)).toEqual(swung);
+    // The tick that comes: Create and one Move2, the same as a set built that tick.
+    const fresh = new ClothSet(scene, rig);
+    hang(fresh, [CAPE, ROBE]);
+    frame(0.03);
+    expect([pos(fading, 0), pos(fading, 1)]).toEqual([pos(fresh, 0), pos(fresh, 1)]);
+    for (const s of [fading, fresh]) s.dispose();
   });
 });

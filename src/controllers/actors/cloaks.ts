@@ -24,6 +24,12 @@ export type CloakWearer = {
   monster: number | null;
   /** `o->Type == MODEL_PLAYER`: a body on the player rig, which a class cloak needs (:9164-9171). */
   rig: boolean;
+  /** The pants part as drawn (`Type` of its `RenderPartObject`): its model file, else null. */
+  pants: string | null;
+  /** `RenderCharacter`'s shadow pass runs, drawing the parts a second time (:8590-8612). */
+  shadowPass: boolean;
+  /** The body fades out dead: `DeadCharacter` deletes its cloths every frame (:3233-3251), so its sets are always new. */
+  fading: boolean;
 };
 
 /** What the rule does to a wearer's set: the original's `m_pCloth` array, `m_byNumCloth` and the loop's draws. */
@@ -31,9 +37,10 @@ export type CloakSet = Pick<ClothSet, 'built' | 'count' | 'has' | 'build' | 'des
 
 /**
  * Builds, destroys and draws the wearer's cloths this frame as `RenderCharacter` does, and returns their
- * `CloakLight`. The set's draws were cleared before; a cloth left undrawn is not stepped.
+ * `CloakLight`. The sets' draws were cleared before; a cloth left undrawn is not stepped. `pants` is the
+ * pants part's set (`p->m_pCloth`) on the player rig, else null.
  */
-export type CloakRule = (wearer: CloakWearer, set: CloakSet) => Rgb;
+export type CloakRule = (wearer: CloakWearer, set: CloakSet, pants: CloakSet | null) => Rgb;
 
 const NONE: Rgb = [1, 1, 1];
 let rule: CloakRule = () => NONE;
@@ -43,7 +50,7 @@ export function registerCloaks(cloaks: CloakRule): void {
   rule = cloaks;
 }
 
-/** This frame's cloths of `wearer` on `set`, and their light. */
-export function cloaksFor(wearer: CloakWearer, set: CloakSet): Rgb {
-  return rule(wearer, set);
+/** This frame's cloths of `wearer` on `set` (and its pants'), and their light. */
+export function cloaksFor(wearer: CloakWearer, set: CloakSet, pants: CloakSet | null = null): Rgb {
+  return rule(wearer, set, pants);
 }
