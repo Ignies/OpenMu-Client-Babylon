@@ -38,7 +38,14 @@ describe('the map objects that cast a Classic shadow', () => {
     expect(await casters(createBloodCastle, ENUM_WORLD.WD_11BLOODCASTLE1)).toEqual([[28, 2], [29, 2]]);
   });
 
-  it('are Valley of Loren 50, 83 and 85 outside a siege (GMBattleCastle.cpp:1219-1228)', async () => {
-    expect(await casters(createValleyOfLoren, ENUM_WORLD.WD_30BATTLECASTLE)).toEqual([[50, -1], [83, -1], [85, -1]]);
+  it('are Valley of Loren 50, 83, 84 and 85 outside a siege (GMBattleCastle.cpp:1219-1228)', async () => {
+    expect(await casters(createValleyOfLoren, ENUM_WORLD.WD_30BATTLECASTLE)).toEqual([[50, -1], [83, -1], [84, -1], [85, -1]]);
+  });
+
+  // CreateOperate alone (GMBattleCastle.cpp:1045-1047), and drawn outside a siege (:650-677): a click target with a body.
+  it('include Valley of Loren 84, an operate box the map draws, as it does 77', async () => {
+    const tiles: (typeof ModelObject)[] = [];
+    await createValleyOfLoren({ mapIndex: ENUM_WORLD.WD_30BATTLECASTLE, terrain: { MapTileObjects: tiles } } as unknown as World);
+    expect([77, 84].map(type => (new tiles[type](scene) as { Drawn?: boolean }).Drawn)).toEqual([true, true]);
   });
 });

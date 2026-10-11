@@ -9,7 +9,7 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   and set `NpcClass`, `NpcAlwaysFly`, `NpcHeroState`, `DeathShatter`), `isPlayerBody`, `npcClassOf`,
   `npcHeroStateOf` (a geared NPC's `pk`: `modules/scope/objects.ts` gives the entity that `heroState`, so the
   render system draws an outlaw's red body, ZzzCharacter.cpp:9988-9991);
-  `MonsterObject`; `OperateBoxObject`, `LeanBoxObject` (invisible click targets for maps).
+  `MonsterObject`; `OperateBoxObject`, `LeanBoxObject` (invisible click targets for maps; `Drawn` keeps the model on screen).
 - `resolveModelFactory(type)`, `isKnownObjectType(type)` (`modelFactoryPerId.ts`): registered
   classes first, then the engine default the type's monster folder asks for.
 - `registerModelClass(types, Class)` (`modelClasses.ts`): content's own model classes.

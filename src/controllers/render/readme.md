@@ -152,7 +152,7 @@ There is no `index.ts` facade; other folders import the modules directly.
   (3 units) closes the hairline gaps between rigid body parts once flattened. `meshCasts` once
   dropped every alpha-blended mesh, which left a thin, naked shadow.
   Classic shadows what the original does: characters and their parts, and of the map objects only those
-  whose case calls `RenderBodyShadow` (`MapShadow`: Blood Castle 28/29, Valley of Loren 50/83/85). Every
+  whose case calls `RenderBodyShadow` (`MapShadow`: Blood Castle 28/29, Valley of Loren 50/83/84/85). Every
   map object once cast one, with a size gate to keep flowers and cliffs out. `ClassicShadow` turns a
   character's or part's blob off where the original draws none (a cape's model), read every frame; the
   cascades still take it (`CastsShadow`). `ShadowFromGround` folds from the terrain under the origin

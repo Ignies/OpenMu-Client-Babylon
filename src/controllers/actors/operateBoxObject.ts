@@ -26,9 +26,14 @@ const BOX_HALF = 0.4;
  * Used by Noria 38, the healing spot, which keeps the default box height.
  */
 export class OperateBoxObject extends ModelObject {
+  /** The model is drawn too: `CreateOperate` without `HiddenMesh = -2` (Valley of Loren 77, 84). */
+  Drawn = false;
+
   async init() {
-    this.HiddenMesh = HIDDEN_MESH_ALL;
-    this.CastsShadow = false;
+    if (!this.Drawn) {
+      this.HiddenMesh = HIDDEN_MESH_ALL;
+      this.CastsShadow = false;
+    }
 
     const height = this.boxHeight();
 

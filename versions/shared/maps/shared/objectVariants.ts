@@ -79,7 +79,8 @@ export class PlaySpeedObject extends MapTileObject {
 
 /**
  * A map object the original shadows: its case calls `RenderBodyShadow` (Blood Castle 28/29,
- * Valley of Loren 50/83-85). No other map object casts a Classic blob (`ModelObject.MapShadow`).
+ * Valley of Loren 50/83/85; 84 is `valleyofloren/operateObject.ts`). No other map object casts a Classic blob
+ * (`ModelObject.MapShadow`).
  */
 export class ShadowCasterObject extends MapTileObject {
   MapShadow = true;
