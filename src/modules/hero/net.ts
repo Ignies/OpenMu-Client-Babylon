@@ -264,7 +264,10 @@ function applyExperienceGained(p: { AddedExperience: number; KilledObjectId: num
 
   // ReceiveDieExp (WSclient.cpp:5719-5743): a master gains master experience instead (modules/skills/masterLevel.ts).
   const pd = Hero;
-  if (!masterExperienceActive(pd.charClass, pd.level)) runInAction(() => (pd.exp += added));
+  const master = masterExperienceActive(pd.charClass, pd.level);
+  if (!master) runInAction(() => (pd.exp += added));
+  // GlobalText 486 / 1750 in the system log (WSclient.cpp:5745-5754).
+  Social.systemMessage(t(master ? 'notify.masterExpGained' : 'notify.expGained', { amount: added }));
 
   EventBus.emit('experienceGained', {
     added,

@@ -67,7 +67,8 @@ the hero is a walk the client failed to stop; no walk at all means the server mo
 - `CharacterLevelUpdate(Extended)`: level, points, maxima, fruit points; moves the exp bracket.
 - `MasterCharacterLevelUpdate(Extended)`: the level-up notice (and the maxima from `Extended`); the
   master level and points are `skills/masterLevel.ts`'s, whose listener runs first.
-- `ExperienceGained(Extended)`: adds exp, emits `experienceGained`. A master's exp goes to
+- `ExperienceGained(Extended)`: adds exp, prints "Obtained N Exp" (or the master line, GlobalText 486 / 1750,
+  WSclient.cpp:5745) and emits `experienceGained`. A master's exp goes to
   `skills/masterLevel.ts` instead, whose listener runs first (skills installs before hero).
 - `FruitConsumptionResponse`: the fruit result (`ReceiveUseStateItem`). `BaseStatsExtended`: base stats.
 
@@ -93,4 +94,6 @@ the hero is a walk the client failed to stop; no walk at all means the server mo
 - `stateWarnings.test.ts`: the no healing potions warning counts healing potions only.
 - `state.test.ts`: `Hero` keeps no tile of its own.
 - `wideStats.test.ts`: the 16-bit pool fields count until the 32-bit pools arrive, then not.
-- `characterStats.test.ts`: the pet bonuses on damage, wizardry, curse and defense.
+- `characterStats.test.ts`: the pet bonuses on damage, wizardry, curse and defense.
+- `experience_gained.test.ts`: a kill share feeds normal or master experience and says so in the system log;
+  a master level-up swirls the twenty flare joints.

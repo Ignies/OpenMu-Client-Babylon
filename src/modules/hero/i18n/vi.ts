@@ -32,6 +32,8 @@ export default {
   'notify.pointNotAdded': 'Không thể cộng điểm',
   'notify.levelUp': 'Cấp {level}',
   'notify.masterLevelUp': 'Cấp Master {level}',
+  'notify.expGained': 'Nhận được {amount} kinh nghiệm',
+  'notify.masterExpGained': 'Nhận được {amount} kinh nghiệm Master',
   'notify.fruitAdd': '{stat} +{points} (quả)',
   'notify.fruitRemove': '{stat} -{points} (quả)',
   'notify.fruitNoEffect': 'Quả không có tác dụng',

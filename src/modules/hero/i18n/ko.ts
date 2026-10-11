@@ -33,6 +33,8 @@ export default {
   'notify.pointNotAdded': '포인트를 올리지 못했습니다',
   'notify.levelUp': '레벨 {level}',
   'notify.masterLevelUp': '마스터 레벨 {level}',
+  'notify.expGained': '경험치 {amount} 획득',
+  'notify.masterExpGained': '마스터 경험치 {amount} 획득',
   'notify.fruitAdd': '{stat} +{points} (열매)',
   'notify.fruitRemove': '{stat} -{points} (열매)',
   'notify.fruitNoEffect': '열매의 효과가 없었습니다',
