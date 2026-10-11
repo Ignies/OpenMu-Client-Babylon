@@ -33,4 +33,7 @@ export default {
   'fidelity.roofFade': 'Toits transparents',
   'fidelity.roofFade.hint':
     'Les toits s\'effacent quand vous êtes dessous, pour voir l\'intérieur. Classique : les toits restent toujours affichés.',
+  'fidelity.requestTimeout': 'Les demandes expirent après 20 s',
+  'fidelity.requestTimeout.hint':
+    'Une demande d’échange, de groupe ou de duel laissée sans réponse est refusée après 20 secondes. Classique : elle attend votre réponse.',
 } satisfies Partial<Record<keyof typeof en, string>>;

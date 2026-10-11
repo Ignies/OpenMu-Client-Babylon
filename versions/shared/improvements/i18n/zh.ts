@@ -33,4 +33,7 @@ export default {
   'fidelity.roofFade': '透明屋顶',
   'fidelity.roofFade.hint':
     '站在屋顶下时屋顶会淡出，让你看到室内。经典：屋顶始终显示。',
+  'fidelity.requestTimeout': '请求20秒后过期',
+  'fidelity.requestTimeout.hint':
+    '未回应的交易、组队或决斗请求会在20秒后被拒绝。经典：一直等到你回应。',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -35,4 +35,4 @@ Party packets from the game server. The party state and the party actions live i
 ## Tests
 - `net.test.ts`: joining opens no window; a blank member name keeps the slot's previous one; an
   invitation prompts by default and is answered on its own after `/re off` / `/re auto`, which
-  reaches no server.
+  reaches no server; one left alone is declined after 20 s (`requestTimeout`).

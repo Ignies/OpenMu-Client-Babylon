@@ -29,6 +29,9 @@ const en = {
   'fidelity.roofFade': 'See-through roofs',
   'fidelity.roofFade.hint':
     'Roofs fade away while you stand under them, so you can see inside. Classic: roofs always stay drawn.',
+  'fidelity.requestTimeout': 'Requests expire after 20 s',
+  'fidelity.requestTimeout.hint':
+    'A trade, party or duel request you leave alone is declined after 20 seconds. Classic: it waits until you answer.',
 };
 
 export default en;

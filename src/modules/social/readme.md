@@ -24,6 +24,9 @@ Also the guild mark (emblem) codec. It has no packet handlers of its own; the ne
 - The guild mark bitmap helpers are `src/core/guildMark.ts` (pure; the actors' guild flag reads them).
 
 ## How it works
+- `requestTimeout.ts` (`expireRequest(read, decline)`, the `requestTimeout` improvement): another
+  player's trade, party or duel request answers itself "no" after 20 s; each owner wires its own
+  (`party/net.ts`, `trade/net.ts`, `events/duel.ts`). Classic keeps the prompt until clicked.
 - `Social` is a mobx singleton covering `CNewUIChatLogWindow` / `CNewUIChatInputBox`,
   `CNewUIPartyInfoWindow` and `CNewUIGuildInfoWindow`. Pure chat helpers come from `chat/`.
 - `addChatLine` (`CNewUIChatLogWindow::AddText`) snapshots the speaker (guild, PK state, GM), splits the
@@ -59,4 +62,5 @@ Also the guild mark (emblem) codec. It has no packet handlers of its own; the ne
 - change the mark palette or format: `src/core/guildMark.ts`.
 
 ## Tests
-- none yet.
+- `requestTimeout.test.ts`: a request left alone is declined after 20 s, an answered one is left
+  alone, a new one restarts the clock, nothing expires on Classic.

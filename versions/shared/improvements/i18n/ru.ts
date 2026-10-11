@@ -33,4 +33,7 @@ export default {
   'fidelity.roofFade': 'Прозрачные крыши',
   'fidelity.roofFade.hint':
     'Крыши исчезают, пока вы стоите под ними, чтобы было видно внутри. Классика: крыши видны всегда.',
+  'fidelity.requestTimeout': 'Запросы истекают через 20 с',
+  'fidelity.requestTimeout.hint':
+    'Запрос на обмен, группу или дуэль без ответа отклоняется через 20 секунд. Классика: ждёт, пока вы ответите.',
 } satisfies Partial<Record<keyof typeof en, string>>;

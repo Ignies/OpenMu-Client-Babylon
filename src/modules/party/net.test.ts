@@ -88,6 +88,15 @@ describe('party invitations and /re', () => {
     expect(invite()).toEqual({ answers: [true], prompt: false });
   });
 
+  // The requestTimeout improvement (on in Enhanced, the test default).
+  it('declines an invitation left alone for 20 s', () => {
+    vi.useFakeTimers();
+    const { answers } = invite();
+    vi.advanceTimersByTime(20_000);
+    vi.useRealTimers();
+    expect(answers).toEqual([false]);
+  });
+
   it('sends the command to nobody', () => {
     vi.spyOn(performance, 'now').mockReturnValue(3e9);
     const send = vi.spyOn(Session, 'sendToGS').mockImplementation(() => undefined);

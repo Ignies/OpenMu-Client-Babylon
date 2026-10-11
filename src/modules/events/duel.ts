@@ -5,6 +5,7 @@ import { EventBus } from '../../core/eventBus';
 import { playUiSound } from '../../controllers/sound/sfx';
 import { Session } from '../session';
 import { addNotification } from '../chat';
+import { expireRequest } from '../social/requestTimeout';
 import { Ecs } from '../../ecs/current';
 import { t } from '../../i18n';
 import {
@@ -244,6 +245,8 @@ function heroNetId(): number | null {
 
 /** Registers the duel's packet listeners; the events module installs it (module.ts). */
 export function installDuel(): void {
+  expireRequest(() => state.request, () => answerDuelRequest(false));
+
   /** `DuelMgr.Reset()` on connection close (WSclient.cpp:646); events installs before warp for it. */
   EventBus.on('wsClosed', () => {
     clearDuel();

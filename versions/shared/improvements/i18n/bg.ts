@@ -33,4 +33,7 @@ export default {
   'fidelity.roofFade': 'Прозрачни покриви',
   'fidelity.roofFade.hint':
     'Покривите изчезват, докато стоите под тях, за да виждате вътре. Класическо: покривите винаги се виждат.',
+  'fidelity.requestTimeout': 'Заявките изтичат след 20 с',
+  'fidelity.requestTimeout.hint':
+    'Заявка за търговия, група или дуел, която оставите без отговор, се отказва след 20 секунди. Класическо: чака, докато отговорите.',
 } satisfies Partial<Record<keyof typeof en, string>>;

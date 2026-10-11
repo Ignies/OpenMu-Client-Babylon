@@ -33,4 +33,7 @@ export default {
   'fidelity.roofFade': 'หลังคาโปร่งใส',
   'fidelity.roofFade.hint':
     'หลังคาจะจางหายไปเมื่อคุณยืนอยู่ใต้มัน เพื่อให้มองเห็นข้างใน คลาสสิก: หลังคาแสดงอยู่เสมอ',
+  'fidelity.requestTimeout': 'คำขอหมดอายุใน 20 วินาที',
+  'fidelity.requestTimeout.hint':
+    'คำขอแลกเปลี่ยน ปาร์ตี้ หรือดวลที่ไม่ได้ตอบจะถูกปฏิเสธหลัง 20 วินาที คลาสสิก: รอจนกว่าคุณจะตอบ',
 } satisfies Partial<Record<keyof typeof en, string>>;
