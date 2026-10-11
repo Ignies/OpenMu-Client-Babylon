@@ -53,7 +53,8 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   `inBloodCastle`, `inHellas`.
 - Small helpers: `MapPlayerNetClassToModelClass`, `isFemaleClass`; `classWorldScale`;
   `truncatePathWithinRange`, `distanceAlongPath`; `debuffBodyLight`, `debuffBrightBody`,
-  `debuffSlow`; `ItemGroup`, `ItemRestPose`, `itemRestHeight`, `itemWornHeight`, `itemTumbleAxis`;
+  `debuffSlow`; `ammoGoldWanted`, `paintAmmo` (Infinity Arrow's gold, chrome bolts and arrows while the buff holds,
+  ZzzObject.cpp:8023-8030; `itemGlowSystem` paints them on both Skill effects branches); `ItemGroup`, `ItemRestPose`, `itemRestHeight`, `itemWornHeight`, `itemTumbleAxis`;
   `itemObjectAttribute(group, num)`; `GuildFlag`, `GUILD_FLAG_BONE`, `isThunderHawkArmor`;
   `applyOutlawLook`, `outlawUltraActive`, `OUTLAW_ULTRA_LIGHT`; `isSkinOrHairTexture`,
   `isHideTexture`, `hideSkinTexture(group, num)` and `hideSkinMeshes(group, num)` (on the door: the
@@ -160,6 +161,7 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   additive or hidden mesh: `RULES` in `itemObjectAttribute.ts`.
 
 ## Tests
+- `ammoGold.test.ts`: only bolts and arrows turn gold, only while Infinity Arrow holds, and give back their light after.
 - `chaosCastleUnit.test.ts`: the castle's weapons per class, own weapons elsewhere, transformed
   players and NPCs keep theirs, no armour glow in the castle.
 - `approachPath.test.ts`: walk truncation at range, distance along the sent path, stall capping.
