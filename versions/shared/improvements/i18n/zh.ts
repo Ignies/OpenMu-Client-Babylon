@@ -54,4 +54,7 @@ export default {
     '记分牌上的足球时钟',
   'fidelity.soccerBoardClock.hint':
     'Battle Soccer 的时间显示为记分牌上的时钟，而不是屏幕中央的一行字。经典：剩余时间写在屏幕中央，与原版相同。',
+  'fidelity.enhancedSkillEffects': '增强技能特效',
+  'fidelity.enhancedSkillEffects.hint':
+    '部分技能以我们自己的外观绘制，例如带烟雾和暗幕的 Evil Spirit 群灵。也就是“技能特效”选项。经典：每个技能都按原版绘制。',
 } satisfies Partial<Record<keyof typeof en, string>>;

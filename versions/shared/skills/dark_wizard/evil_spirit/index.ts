@@ -2,9 +2,10 @@ import { defineSkill } from '@/controllers/skills/define';
 import { MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
 import { followEntity, type PointSource } from '@/controllers/fx/core';
 import { Vector3 } from '@/controllers/render/babylon/exports';
-import { atCaster, cm, perTick, ticks } from '@/controllers/skills/visuals';
+import { atCaster, cm, perTick, tiered, ticks } from '@/controllers/skills/visuals';
 import { effects } from '@/controllers/fx';
 import { groundAt, rad } from '../../_shared';
+import { spiritSwarm } from './swarm';
 
 /** JOINT_SPIRIT sub0: 70 cm a tick, LT 49, 6 tails (ZzzEffectJoint.cpp:649-658). */
 const SPIRIT_SPEED = perTick(70);
@@ -33,8 +34,9 @@ export default defineSkill({
   // Angle(0, 0, i * 90), widths 80 and 20: ALPHA_BLEND_MINUS on JointSpirit01, homing the caster
   // (ZzzEffectJoint.cpp:3745-3830). The wide one stamps MODEL_LASER at its head every tick on the
   // joint's angle, LT 1. Nothing bright: no smoke trail or screen shroud.
+  // Skill effects: Enhanced flies our swarm instead (./swarm.ts).
   visual: {
-    area: atCaster((at, c) => {
+    area: tiered(atCaster((at, c) => {
       const seconds = ticks(SPIRIT_TICKS);
       const steer = { ...SPIRIT_STEER, seek: followEntity(c.caster, cm(80)) };
       for (let i = 0; i < 4; i++) {
@@ -69,7 +71,7 @@ export default defineSkill({
           });
         }
       }
-    }, 1),
+    }, 1), atCaster(spiritSwarm, 1)),
   },
   // 8 Twister (sTornado) and 12 Aqua Beam (sAquaFlash): none at the cast, the effect plays them at AttackTime 15
   // (ZzzCharacter.cpp:4496, :4553; controllers/skills/visuals.ts).

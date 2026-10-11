@@ -339,4 +339,9 @@ export default {
   'options.effectShedding': '느릴 때 효과 줄이기',
   'options.help.effectShedding':
     '프레임이 목표(FPS 제한 또는 60)보다 크게 낮은 동안 군중 속 다른 플레이어의 스킬 효과를 덜 그립니다. 내 것은 항상 보입니다.',
+  'options.skillEffects': '스킬 효과',
+  'options.skillEffects.original': '오리지널',
+  'options.skillEffects.enhanced': '향상',
+  'options.help.skillEffects':
+    '오리지널은 모든 스킬을 원래 클라이언트대로 그립니다. 향상은 일부 스킬에 우리만의 모습을 되돌립니다(Evil Spirit의 무리 등). 충실도 페이지의 향상된 스킬 효과와 같은 스위치입니다.',
 } satisfies Partial<Record<keyof typeof en, string>>;

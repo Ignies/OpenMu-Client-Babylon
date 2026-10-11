@@ -439,4 +439,9 @@ export default {
   'options.effectShedding': 'Weniger Effekte bei Ruckeln',
   'options.help.effectShedding':
     'Solange die Bildrate deutlich unter ihrem Ziel bleibt (FPS-Grenze oder 60), werden in einer Menge weniger Fertigkeitseffekte anderer Spieler gezeichnet. Deine bleiben immer.',
+  'options.skillEffects': 'Fertigkeitseffekte',
+  'options.skillEffects.original': 'Original',
+  'options.skillEffects.enhanced': 'Verbessert',
+  'options.help.skillEffects':
+    'Original zeichnet jede Fertigkeit wie der Originalclient. Verbessert bringt unser eigenes Aussehen für einige Fertigkeiten zurück, etwa den Schwarm von Evil Spirit. Derselbe Schalter wie Verbesserte Fertigkeitseffekte auf der Seite Originaltreue.',
 } satisfies Partial<Record<keyof typeof en, string>>;

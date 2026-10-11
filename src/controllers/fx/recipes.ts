@@ -375,6 +375,8 @@ export const MODEL = {
   shieldUp: 'Effect/shield_up.glb',
   /** MODEL_ARROWSRE06 (arrowsre06.bmd): the rune Swell of Magic Power stamps on the hands every six seconds. */
   arrowsRe06: 'Effect/arrowsre06.glb',
+  /** MODEL_INFINITY_ARROW .. 4 (Skill/arrowsre01-05, ZzzOpenData.cpp:4445-4454): Infinity Arrow's rings. */
+  infinityArrow: ['Skill/arrowsre01.glb', 'Skill/arrowsre02.glb', 'Skill/arrowsre03.glb', 'Skill/arrowsre04.glb', 'Skill/arrowsre05.glb'] as const,
   volcanoStone: 'Effect/volcano_stone.glb',
   changeUp: 'Effect/Change_Up_Eff.glb',
   iceStone: 'Effect/ice_stone00.glb',

@@ -55,4 +55,7 @@ export default {
     'Relógio do futebol no placar',
   'fidelity.soccerBoardClock.hint':
     'O tempo do Battle Soccer aparece como um relógio no placar em vez de uma linha no meio da tela. Clássica: o tempo restante é escrito no meio da tela, como no original.',
+  'fidelity.enhancedSkillEffects': 'Efeitos de habilidades melhorados',
+  'fidelity.enhancedSkillEffects.hint':
+    'Algumas habilidades são desenhadas com nossa própria aparência, como o enxame do Evil Spirit com sua fumaça e sua sombra. Também a opção Efeitos de habilidades. Clássica: cada habilidade é desenhada como no original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

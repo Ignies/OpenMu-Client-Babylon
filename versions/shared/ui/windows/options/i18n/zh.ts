@@ -329,4 +329,9 @@ export default {
   'options.help.fpsLimit': '限制每秒绘制的帧数。越低越省CPU、GPU和电量；无限制则跟随显示器。',
   'options.effectShedding': '卡顿时减少特效',
   'options.help.effectShedding': '当帧率持续明显低于目标（帧率上限或60）时，在人群中少画其他玩家的技能特效。你自己的始终显示。',
+  'options.skillEffects': '技能特效',
+  'options.skillEffects.original': '原版',
+  'options.skillEffects.enhanced': '增强',
+  'options.help.skillEffects':
+    '原版按原客户端绘制每个技能。增强为部分技能恢复我们自己的外观，例如 Evil Spirit 的群灵。与还原度页面的“增强技能特效”是同一个开关。',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -406,4 +406,9 @@ export default {
   'options.effectShedding': 'Menos efeitos quando lento',
   'options.help.effectShedding':
     'Enquanto os quadros ficam bem abaixo do alvo (o limite de FPS, ou 60), desenha menos efeitos de habilidades de outros jogadores na multidão. Os seus sempre aparecem.',
+  'options.skillEffects': 'Efeitos de habilidades',
+  'options.skillEffects.original': 'Originais',
+  'options.skillEffects.enhanced': 'Melhorados',
+  'options.help.skillEffects':
+    'Originais desenha cada habilidade como o cliente original. Melhorados traz de volta nossa própria aparência para algumas habilidades, como o enxame do Evil Spirit. É o mesmo interruptor que Efeitos de habilidades melhorados na página Fidelidade.',
 } satisfies Partial<Record<keyof typeof en, string>>;

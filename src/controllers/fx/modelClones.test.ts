@@ -13,6 +13,7 @@ import type { Entity, World } from '../../ecs/world';
 import type { LoadedModel } from '../assets/modelLoader';
 import { modelLayer, spawnModel } from './model';
 import { linkedModelLayer, spawnLinkedModel } from './linkedModel';
+import { spiritSwarmLayer, type SpiritSwarmOptions } from './spiritSwarm';
 
 vi.hoisted(() => {
   const g = globalThis as Record<string, unknown>;
@@ -52,6 +53,7 @@ beforeEach(() => {
 afterAll(() => {
   modelLayer.reset?.();
   linkedModelLayer.reset?.();
+  spiritSwarmLayer.reset?.();
   Ecs.world = null;
   scene.dispose();
   engine.dispose();
@@ -105,6 +107,32 @@ describe('an effect model clone', () => {
     linkedModelLayer.update?.(0, 0.04);
     await flush();
     expect(loads.made).toHaveLength(2);
+    for (const m of loads.made) expectGone(m);
+  });
+
+  it('spiritSwarm: a disposed rig takes its skull clones along, loaded or late', async () => {
+    const ribbon = { width: 0.2, colour: [1, 1, 1] as const, maxCover: 1, texture: 'Effect/JointLaser01.OZJ', taper: {} };
+    const opts: SpiritSwarmOptions = {
+      spirits: [{ velocity: 1, heading: new Vector3(1, 0, 0), seek: out => out.setAll(0) }],
+      seconds: 1,
+      fadeTail: 0.2,
+      tails: 2,
+      smooth: 1,
+      seekRate: 0.1,
+      wander: { pitch: 0, yaw: 0 },
+      band: { floor: 1, ceiling: 4 },
+      body: { ...ribbon, wave: { amplitude: 0, cycles: 1, speed: 1 } },
+      wisps: { width: 0.1, waves: [] },
+      spine: ribbon,
+      skull: { model: 'Skill/fake.glb', scale: 1, aimYaw: 0, rearAt: 0, silhouette: [1, 1, 1], silhouetteCover: 1, sheet: [1, 1, 1], sheetCover: 1, passes: 1 },
+    };
+    spiritSwarmLayer.spawn(scene, new Vector3(), opts);
+    await flush();
+    spiritSwarmLayer.reset?.();
+    spiritSwarmLayer.spawn(scene, new Vector3(), opts);
+    spiritSwarmLayer.reset?.();
+    await flush();
+    expect(loads.made).toHaveLength(4);
     for (const m of loads.made) expectGone(m);
   });
 });

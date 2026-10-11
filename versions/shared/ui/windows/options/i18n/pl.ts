@@ -403,4 +403,9 @@ export default {
   'options.effectShedding': 'Mniej efektów przy spowolnieniu',
   'options.help.effectShedding':
     'Dopóki liczba klatek jest wyraźnie poniżej celu (limit FPS albo 60), rysuje mniej efektów umiejętności innych graczy w tłumie. Twoje są zawsze widoczne.',
+  'options.skillEffects': 'Efekty umiejętności',
+  'options.skillEffects.original': 'Oryginalne',
+  'options.skillEffects.enhanced': 'Ulepszone',
+  'options.help.skillEffects':
+    'Oryginalne rysuje każdą umiejętność jak oryginalny klient. Ulepszone przywraca nasz własny wygląd niektórych umiejętności, na przykład rój Evil Spirit. Ten sam przełącznik co Ulepszone efekty umiejętności na stronie Wierność.',
 } satisfies Partial<Record<keyof typeof en, string>>;

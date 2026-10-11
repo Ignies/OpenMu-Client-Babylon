@@ -25,7 +25,7 @@ import { TexturePackSelect } from './texturePackSelect';
 import { blockerOf, type Blocker } from './gating';
 import { rowId, type ButtonRow, type Row } from './catalogue';
 import { Checkbox, FitText, OptionsButton, Slider, Stepper } from './controls';
-import { FidelityPresets, ImprovementCheck, fidelityCustom, toggleImprovement } from './fidelity';
+import { FidelityPresets, ImprovementCheck, ImprovementChoice, fidelityCustom, toggleImprovement } from './fidelity';
 
 /** The control column: every control starts on the same x. */
 const CONTROL_WIDTH = 176;
@@ -176,7 +176,11 @@ const Control = observer(
         return <FidelityPresets width={CONTROL_WIDTH} />;
 
       case 'improvement':
-        return <ImprovementCheck id={row.id} />;
+        return row.choice ? (
+          <ImprovementChoice id={row.id} texts={row.choice} disabled={inert} width={CONTROL_WIDTH} />
+        ) : (
+          <ImprovementCheck id={row.id} />
+        );
 
       case 'language':
         return (
@@ -229,13 +233,13 @@ export const OptionRow = observer(
       }
       if (row.kind === 'toggle') actions.set(row.key, !GameOptions[row.key]);
       if (row.kind === 'fullscreen') toggleFullscreen();
-      if (row.kind === 'improvement') toggleImprovement(row.id);
+      if (row.kind === 'improvement' && !row.choice) toggleImprovement(row.id);
     };
 
     const clickable =
       (blocker !== null && blocker.target !== null) ||
       (!inert &&
-        (row.kind === 'toggle' || row.kind === 'fullscreen' || row.kind === 'improvement'));
+        (row.kind === 'toggle' || row.kind === 'fullscreen' || (row.kind === 'improvement' && !row.choice)));
     // Any improvement set apart from the preset makes it "Custom".
     const label =
       row.kind === 'fidelity' && fidelityCustom() ? 'options.fidelityCustom' : row.labelKey;

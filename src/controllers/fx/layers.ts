@@ -8,8 +8,10 @@ import { modelLayer } from './model';
 import { stampsLayer } from './stamps';
 import { linkedModelLayer } from './linkedModel';
 import { columnLayer } from './column';
+import { shroudLayer } from './shroud';
 import { pillarLayer } from './pillar';
 import { jointLayer } from './joint';
+import { spiritSwarmLayer } from './spiritSwarm';
 import { raysLayer } from './rays';
 import { blurLayer } from './blur';
 import { tailsLayer } from './tails';
@@ -52,9 +54,11 @@ export const EFFECT_LAYERS = [
   cardsLayer,
   particlesLayer,
   columnLayer,
+  shroudLayer, // one card over the view; the spawner's other effects draw over it
   pillarLayer, // its own meshes and the shared pools
   auraLayer, // drives the heads of the orbit ribbons it spawned through joint, so before it
   jointLayer, // reads aura's ribbon heads
+  spiritSwarmLayer, // steps where the joint trails did, after the particles that ride its heads
   raysLayer,
   blurLayer,
   tailsLayer,

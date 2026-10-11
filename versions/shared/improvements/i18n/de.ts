@@ -55,4 +55,7 @@ export default {
     'Fußballuhr auf der Anzeigetafel',
   'fidelity.soccerBoardClock.hint':
     'Die Battle-Soccer-Zeit erscheint als Uhr auf der Anzeigetafel statt als Zeile in der Bildschirmmitte. Klassisch: Die verbleibende Zeit steht in der Bildschirmmitte, wie im Original.',
+  'fidelity.enhancedSkillEffects': 'Verbesserte Fertigkeitseffekte',
+  'fidelity.enhancedSkillEffects.hint':
+    'Einige Fertigkeiten werden in unserem eigenen Aussehen gezeichnet, etwa der Schwarm von Evil Spirit mit Rauch und Schleier. Auch die Option Fertigkeitseffekte. Klassisch: Jede Fertigkeit wird wie im Original gezeichnet.',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -434,6 +434,11 @@ const en = {
   'options.effectShedding': 'Fewer effects when slow',
   'options.help.effectShedding':
     "While the frame rate stays well under its target (the FPS limit, or 60), draws fewer of other players' skill effects in a crowd. Yours always show.",
+  'options.skillEffects': 'Skill effects',
+  'options.skillEffects.original': 'Original',
+  'options.skillEffects.enhanced': 'Enhanced',
+  'options.help.skillEffects':
+    'Original draws every skill as the original client. Enhanced brings back our own looks for some skills, such as the Evil Spirit swarm. The same switch as Enhanced skill effects on the Fidelity page.',
 };
 
 export default en;

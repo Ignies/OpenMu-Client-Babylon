@@ -1020,6 +1020,14 @@ export function stepClock(dt: number): void {
   timers.update(dt);
 }
 
+/** The clock in ticks, and setting it back: the skill golden replays one cast on both Skill effects branches from the same tick. */
+export function fxTicks(): number {
+  return tickClock;
+}
+export function setFxTicks(ticks: number): void {
+  tickClock = ticks;
+}
+
 /** Drop every pending `delay`. The facade's reset. */
 export function clearTimers(): void {
   timers.clear();

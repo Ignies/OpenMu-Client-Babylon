@@ -126,8 +126,11 @@ type WidgetRow = RowBase & {
   kind: 'presets' | 'language' | 'texturePack' | 'fullscreen' | 'fidelity';
 };
 
-/** One registered improvement's check (`controllers/fidelity`). */
-type ImprovementRow = RowBase & { kind: 'improvement'; id: string };
+/**
+ * One registered improvement's check (`controllers/fidelity`), or with `choice` the same switch shown
+ * as a two-way choice (off, on) on another page.
+ */
+type ImprovementRow = RowBase & { kind: 'improvement'; id: string; choice?: readonly [TextKey, TextKey] };
 
 export type Row = ToggleRow | NumberRow | KeyRow | ButtonRow | WidgetRow | ImprovementRow;
 
@@ -146,7 +149,8 @@ export type Category = { id: string; labelKey: TextKey; pages: Page[] };
 /** The option a row writes, when it writes one. */
 export function optionKeyOf(row: Row): keyof GameOptionsType | null {
   if (row.kind === 'fidelity') return 'fidelity';
-  if (row.kind === 'improvement') return 'fidelityOverrides';
+  // A choice copy leaves the Fidelity choice to its own page's Restore defaults.
+  if (row.kind === 'improvement') return row.choice ? null : 'fidelityOverrides';
   return row.kind === 'toggle' || row.kind === 'slider' || row.kind === 'choice'
     ? row.key
     : null;
@@ -566,6 +570,13 @@ export const CATEGORIES: Category[] = [
                 indent: true,
                 needs: [{ kind: 'itemEffects' }],
               }),
+              {
+                kind: 'improvement',
+                id: 'enhancedSkillEffects',
+                labelKey: 'options.skillEffects',
+                helpKey: 'options.help.skillEffects',
+                choice: ['options.skillEffects.original', 'options.skillEffects.enhanced'],
+              },
             ],
           },
           {

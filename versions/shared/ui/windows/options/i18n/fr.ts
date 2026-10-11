@@ -404,4 +404,9 @@ export default {
   'options.effectShedding': "Moins d'effets en cas de lenteur",
   'options.help.effectShedding':
     "Tant que les images par seconde restent bien sous leur cible (la limite d'IPS, ou 60), affiche moins d'effets de compétences des autres joueurs dans une foule. Les vôtres restent visibles.",
+  'options.skillEffects': 'Effets des compétences',
+  'options.skillEffects.original': 'Originaux',
+  'options.skillEffects.enhanced': 'Améliorés',
+  'options.help.skillEffects':
+    'Originaux dessine chaque compétence comme le client original. Améliorés rétablit notre propre rendu pour certaines compétences, comme l\'essaim d\'Evil Spirit. Le même interrupteur que Effets des compétences améliorés sur la page Fidélité.',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -55,4 +55,7 @@ export default {
     'Horloge de football sur le tableau',
   'fidelity.soccerBoardClock.hint':
     'Le temps du Battle Soccer s’affiche comme une horloge sur le tableau des scores au lieu d’une ligne au centre de l’écran. Classique : le temps restant s’écrit au centre de l’écran, comme dans l’original.',
+  'fidelity.enhancedSkillEffects': 'Effets des compétences améliorés',
+  'fidelity.enhancedSkillEffects.hint':
+    'Certaines compétences sont dessinées avec notre propre rendu, comme l\'essaim d\'Evil Spirit avec sa fumée et son voile. Aussi l\'option Effets des compétences. Classique : chaque compétence est dessinée comme dans l\'original.',
 } satisfies Partial<Record<keyof typeof en, string>>;
