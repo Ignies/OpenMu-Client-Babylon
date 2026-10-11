@@ -1,7 +1,7 @@
 import { CloseNpcRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
 import { Economy } from '../economy/economy';
 import { EventBus } from '@/core/eventBus';
-import { ItemBoughtPacket, NpcItemSellResultPacket, NpcWindowResponseNpcWindowEnum, NpcWindowResponsePacket, StoreItemListItemWindowEnum, StoreItemListPacket } from '@versions/shared/packets/ServerToClientPackets';
+import { CastleSiegeTaxRateNotificationPacket, CastleSiegeTaxTypeEnum, ItemBoughtPacket, NpcItemSellResultPacket, NpcWindowResponseNpcWindowEnum, NpcWindowResponsePacket, StoreItemListItemWindowEnum, StoreItemListPacket } from '@versions/shared/packets/ServerToClientPackets';
 import { ItemSerializer } from '@/controllers/item_rules';
 import { Merchant } from './state';
 import { MuWindows } from '@/controllers/interface';
@@ -18,6 +18,13 @@ import { t } from '@/i18n';
 /** Registers this module's packet listeners (see ../module.ts). */
 export function installNet(): void {
   // --- NPC shop (ReceiveTalk / ReceiveShopItemList, WSclient.cpp) ---------------
+
+  // ReceiveTaxInfo (WSclient.cpp:11299-11316): the castle's chaos machine and store taxes.
+  EventBus.on('CastleSiegeTaxRateNotification', packet => {
+    const p = new CastleSiegeTaxRateNotificationPacket(packet);
+    if (p.TaxType === CastleSiegeTaxTypeEnum.ChaosMachine) runInAction(() => (Economy.chaosTaxRate = p.TaxRate));
+    else if (p.TaxType === CastleSiegeTaxTypeEnum.Store) Merchant.setStoreTaxRate(p.TaxRate);
+  });
 
   EventBus.on('NpcWindowResponse', packet => {
     const p = new NpcWindowResponsePacket(packet);

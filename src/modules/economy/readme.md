@@ -21,7 +21,8 @@ vault, chaos machine, trade and personal shop. The packet handlers that feed it 
 - Vault: `openVault`, `setVaultItems`, `closeVault`, `moveVaultMoney`, `unlockVault`, `setVaultPin`,
   `removeVaultPin`, `vaultProtectionState`; `vaultLocked` / `vaultUnlocked` / `vaultUsable` are the pin state.
 - Chaos machine: `openMix(kind)`, `chooseMixType` / `cancelMixMenu` (the goblin's menu), `mix`,
-  `craftingResult`, `closeMix` (refuses while items are in the tray). `mixWireStorage` is the storage byte
+  `craftingResult`, `closeMix` (refuses while items are in the tray); `chaosTaxRate` is the castle's tax on the
+  mix zen (`g_nChaosTaxRate`, set by `npc_shop/net.ts`). `mixWireStorage` is the storage byte
   the move packets carry, by mix type (`GetMixStorageType`: 3, 9 for the card master, 11-14 for the seed trays).
 - Seed NPCs: `openSeedMenu` (`seedMenu`, the Seed Master's or Seed Researcher's menu), `chooseSeedMix` (its
   tray as mix type 10-13), `closeSeedMenu` (`CraftingDialogCloseRequest`). The researcher's trays list the

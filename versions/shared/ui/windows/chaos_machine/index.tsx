@@ -74,8 +74,6 @@ import {
 } from './layout';
 
 const WINDOW_ID = 'chaos-machine';
-/** `g_nChaosTaxRate`: no server here sends the castle's chaos tax (ReceiveTaxInfo type 1). */
-const CHAOS_TAX_RATE = 0;
 /** `MAX_ITEM_INDEX`. */
 const STRIDE = 512;
 const code = (group: number, num: number) => group * STRIDE + num;
@@ -166,7 +164,7 @@ const RecipeText = observer(({ check, type }: { check: MixCheck; type: number })
   // The rate shows for the goblin and the Seed Master; the zen for them and the Seed Researcher too.
   const rated = isGoblin(type) || type === MIX_TYPE.extractSeed || type === MIX_TYPE.seedSphere;
   const priced = rated || isSocketTray(type);
-  const taxed = Math.trunc(check.requiredZen + (check.requiredZen * CHAOS_TAX_RATE) / 100);
+  const taxed = Math.trunc(check.requiredZen + (check.requiredZen * Economy.chaosTaxRate) / 100);
   const potion = ready && check.recipe?.zenType === 'C';
   const similar = check.similar;
   const plain = { left: TEXT_X, width: TEXT_WIDTH };
@@ -386,7 +384,7 @@ export const ChaosMachine = observer(() => {
         </div>
         {goblin && (
           <div className="chaos-tax" style={{ top: TAX_Y }}>
-            {t('chaos.taxRate', { rate: CHAOS_TAX_RATE })}
+            {t('chaos.taxRate', { rate: Economy.chaosTaxRate })}
           </div>
         )}
 

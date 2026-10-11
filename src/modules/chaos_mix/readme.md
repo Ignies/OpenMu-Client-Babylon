@@ -40,6 +40,8 @@ in the `Economy` store ([../economy/readme.md](../economy/readme.md)); this fold
 - OpenMU (`JewelMixHandlerPlugIn` / `ItemStackAction`, master) takes the same bytes while Lahap's dialog is
   open, and answers with the inventory packets and its own blue messages. It never sends the original's
   jewel mix result (`ReceiveGemMixResult`, WSclient.cpp:8546-8625), so those result boxes are not ported.
+- Opening the tray does not send `SendCrywolfChaosRateBenefitRequest` (C1 BD 09, NewUIMixInventory.cpp:129): OpenMU
+  (master) has no handler for it and never sends the Crywolf rate answer (BD 09), so the success-rate bonus stays 0.
 
 ## Packets
 - `ItemCraftingResult`: a success or a failure empties the tray (a success then holds the result); a refusal leaves it; `Economy.craftingResult`

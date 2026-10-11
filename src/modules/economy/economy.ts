@@ -177,6 +177,8 @@ export const Economy = new (class _Economy {
   seedMenu: 'master' | 'researcher' | null = null;
   /** The socket picked in the seed researcher's list (`m_SocketListBox`), -1 for none. */
   mixSocket = -1;
+  /** `g_nChaosTaxRate`: the castle's chaos machine tax, from `ReceiveTaxInfo` type 1 (WSclient.cpp:11303-11306). */
+  chaosTaxRate = 0;
 
   // ---- trade (CNewUITrade) -------------------------------------------------
 
@@ -238,6 +240,7 @@ export const Economy = new (class _Economy {
       mixResult: observable,
       seedMenu: observable,
       mixSocket: observable,
+      chaosTaxRate: observable,
       mixSockets: computed,
       tradeOpen: observable,
       myTradeItems: observable,
