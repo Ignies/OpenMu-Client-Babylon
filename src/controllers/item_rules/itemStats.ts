@@ -33,10 +33,7 @@ export const ItemGroup = {
 
 /**
  * Base-class index used by `RequireClass[]`: DW, DK, Elf, MG, DL, Summoner,
- * Rage Fighter. The Item.txt this table was converted from predates the last
- * class and names only six columns; `RF` is filled from the server's own item
- * definitions (OpenMU `VersionSeasonSix/Items`), whose class block is in this
- * same order.
+ * Rage Fighter, as the original Item.bmd's `RequireClass[7]` (`tools/syncItemClasses.ts`).
  */
 export const CLASS_COLUMNS = [
   'DW/SM',

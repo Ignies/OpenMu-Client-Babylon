@@ -27,6 +27,8 @@ export default {
   'personalShop.notEnoughZen': '你的金币不足。',
   'chaos.succeeded': '合成成功。',
   'chaos.failed': '合成失败。',
+  'chaos.cardSucceeded': '混沌卡片合成成功。',
+  'chaos.cardFailed': '混沌卡片合成失败。',
   'chaos.takeItemsOut': '请先把物品从混沌重组机中取出。',
   'chaos.putItemsIn': '请把要合成的物品放入混沌重组机。',
   'chaos.notEnoughZen': '合成所需的金币不足。',

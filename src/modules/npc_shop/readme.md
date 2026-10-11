@@ -19,7 +19,7 @@ talk in flight with the merchant window's state and actions (`Merchant`).
 - Merchant state in `Merchant`: `npcShop` (stock, tax, repair flag), `repairMode`, `shopBuyPending`,
   `shopBuyRefused`, `pendingNpcType`. Actions: `openNpcShop`, `dropNpcTalk`, `setNpcShopItems`,
   `closeNpcShop`, `buyItemFromNpc`, `finishShopBuy`, `shopBuyFailed`, `sellPickedItemToNpc`, `itemSoldToNpc`,
-  `toggleRepairMode`, `repairItemRequest`, `repairAllRequest`. Prices come from `controllers/item_rules/itemValue.ts`.
+  `toggleRepairMode`, `repairItemRequest`, `repairAllRequest`, `setStoreTaxRate`. Prices come from `controllers/item_rules/itemValue.ts`.
 - Selling and the buy timeout go through the inventory's `Bag` (the move in flight). The merchant
   sets `Bag.beforeConsume` (a use closes the shop: OpenMU refuses a consume while a dialog is open)
   and closes itself when the inventory closes. The app hands the game cursor the repair mode
@@ -36,6 +36,8 @@ talk in flight with the merchant window's state and actions (`Merchant`).
 - `ItemBought`: the bought item lands in its bag slot (WSclient.cpp:6653 sound).
 - `NpcItemBuyFailed`: marks the buy refused and shows a red line.
 - `NpcItemSellResult`: sale confirmed with the new zen, or rolled back.
+- `CastleSiegeTaxRateNotification` (`ReceiveTaxInfo`, WSclient.cpp:11299): type 1 sets `Economy.chaosTaxRate`, type 2 the
+  store tax of this and every later merchant window. OpenMU sends both on entering the world and on a change.
 
 ## Depends on / used by
 - uses: `inventory` (`Bag`), `hero`, `session`, `economy/economy.ts`, `events`, `quests`, `controllers/item_rules/itemSerializer.ts`, `controllers/sound/sfx.ts`,

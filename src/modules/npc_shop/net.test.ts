@@ -17,7 +17,7 @@ const { Session } = await import('@/modules/session');
 const { MuWindows } = await import('@/controllers/interface');
 const { EventBus } = await import('@/core/eventBus');
 const { CloseNpcRequestPacket, TradeCancelPacket } = await import('@versions/shared/packets/ClientToServerPackets');
-const { NpcWindowResponsePacket, NpcWindowResponseNpcWindowEnum } = await import('@versions/shared/packets/ServerToClientPackets');
+const { CastleSiegeTaxRateNotificationPacket, CastleSiegeTaxTypeEnum, NpcWindowResponsePacket, NpcWindowResponseNpcWindowEnum } = await import('@versions/shared/packets/ServerToClientPackets');
 const { JewelMix } = await import('../chaos_mix/jewelMix');
 
 installNet();
@@ -31,6 +31,27 @@ beforeEach(() => {
     Session.isOffline = false;
   });
   sent.length = 0;
+});
+
+// ReceiveTaxInfo (WSclient.cpp:11299-11316): OpenMU sends it on entering the world and on a change.
+describe('the castle tax notification', () => {
+  const notify = (type: number, rate: number) => {
+    const p = CastleSiegeTaxRateNotificationPacket.createPacket();
+    p.TaxType = type;
+    p.TaxRate = rate;
+    EventBus.emit('CastleSiegeTaxRateNotification', p.buffer);
+  };
+
+  it('sets the chaos machine tax and the store tax', () => {
+    notify(CastleSiegeTaxTypeEnum.ChaosMachine, 3);
+    expect(Economy.chaosTaxRate).toBe(3);
+    notify(CastleSiegeTaxTypeEnum.Store, 5);
+    Merchant.openNpcShop();
+    expect(Merchant.npcShop?.taxRate).toBe(5);
+    notify(CastleSiegeTaxTypeEnum.Store, 2);
+    expect(Merchant.npcShop?.taxRate).toBe(2);
+    Merchant.closeNpcShop();
+  });
 });
 
 // UpdateSendMoveInterface (NewUISystem.cpp:2025), called from SendMove (ZzzInterface.cpp:1876).

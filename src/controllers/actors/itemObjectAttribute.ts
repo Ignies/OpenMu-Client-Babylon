@@ -1,11 +1,12 @@
 /**
  * The per-item mesh rules of `ItemObjectAttribute` (ZzzObject.cpp:5155-5292): which mesh of an item is
  * drawn additive (`o->BlendMesh`, -2 = every mesh), which is skipped (`o->HiddenMesh`) and the
- * `o->BlendMeshLight` the additive mesh is drawn at. Weapons and shields only (groups 0-6); the
- * random UV jumps of the Legendary shield / staff and the Lightning Sword are not kept.
+ * `o->BlendMeshLight` the additive mesh is drawn at. The random UV jumps of the Legendary shield / staff
+ * and the Lightning Sword, and the Bill of Balrog's UV scroll, are not kept.
  *
- * Read by: controllers/fx/model.ts `native` (Twisting Slash's wheel copies, Rageful Blow's thrown weapon) and
- * ecs/systems/appearanceSystem.ts, the weapon or shield a character holds (`RenderLinkObject`, ZzzCharacter.cpp:6648).
+ * Read by: controllers/fx/model.ts `native` (Twisting Slash's wheel copies, Rageful Blow's thrown weapon),
+ * ecs/systems/appearanceSystem.ts, the weapon or shield a character holds (`RenderLinkObject`, ZzzCharacter.cpp:6648),
+ * and modules/drops/dropObject.ts, the model a drop shows (`CreateItemDrop`, ZzzObject.cpp:6153).
  */
 
 interface ItemMeshRule {
@@ -53,6 +54,15 @@ const RULES = new Map<number, ItemMeshRule>([
   [6 * 512 + 13, blend(1, pulse(0.3, 0.7))], // MODEL_DRAGON_SHIELD
   [6 * 512 + 14, blend(1)], // MODEL_LEGENDARY_SHIELD
   [6 * 512 + 16, hidden(2)], // MODEL_ELEMENTAL_SHIELD
+  [12 * 512 + 0, blend(0)], // MODEL_WING
+  [12 * 512 + 3, blend(0)], // MODEL_WINGS_OF_SPIRITS
+  [12 * 512 + 8, blend(0)], // MODEL_ORB_OF_HEALING
+  [12 * 512 + 9, blend(0)], // MODEL_ORB_OF_GREATER_DEFENSE
+  [12 * 512 + 10, blend(0)], // MODEL_ORB_OF_GREATER_DAMAGE
+  [12 * 512 + 11, blend(0)], // MODEL_ORB_OF_SUMMONING
+  [12 * 512 + 20, blend(0)], // MODEL_WING + 20
+  [12 * 512 + 132, blend(0)], // MODEL_WING + 132
+  [13 * 512 + 0, blend(1)], // MODEL_HELPER
 ]);
 
 /** `ItemObjectAttribute`'s mesh rules for item `group`, `num`. */

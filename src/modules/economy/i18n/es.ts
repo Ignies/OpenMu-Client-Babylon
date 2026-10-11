@@ -29,6 +29,8 @@ export default {
   'personalShop.notEnoughZen': 'No tienes suficiente Zen.',
   'chaos.succeeded': 'La combinación ha funcionado.',
   'chaos.failed': 'La combinación ha fallado.',
+  'chaos.cardSucceeded': 'La combinación de Carta del Caos ha funcionado.',
+  'chaos.cardFailed': 'La combinación de Carta del Caos ha fallado.',
   'chaos.takeItemsOut': 'Saca antes tus objetos de la Chaos Machine.',
   'chaos.putItemsIn': 'Pon en la Chaos Machine los objetos a combinar.',
   'chaos.notEnoughZen': 'No hay suficiente Zen para la combinación.',

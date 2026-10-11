@@ -15,7 +15,7 @@ export default defineItem({
   ReqLvl: 0,
   Energy: 201,
   Zen: 450000,
-  'DW/SM': 2,
+  'DW/SM': 0,
   'DK/BK': 0,
   'Elf/ME': 0,
   MG: 0,

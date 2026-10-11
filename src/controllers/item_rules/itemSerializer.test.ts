@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Item } from '../../ecs/world';
 import { ItemSerializer } from './itemSerializer';
+import { socketBonusOf } from './itemOptions';
 import { DARK_HORSE, PET_GROUP } from '@versions/shared/items/petItems';
 
 function serialize(item: Item): Uint8Array {
@@ -87,6 +88,14 @@ describe('ItemSerializer round-trip', () => {
     expect(back.socketCount).toBe(3);
     expect(back.sockets).toEqual([5, 0xfe, 10]);
     expect(back.socketBonus).toBe(1);
+  });
+
+  // OpenMU sends a socket item's bonus option number, 0xFF for none (ItemSerializerHelper.GetSocketBonusByte);
+  // the original keeps byte 6 as SocketSeedSetOption, so 0 is option 0 (NewUIItemMng.cpp:249-252).
+  it('keeps a socket item bonus of 0, and none for 0xFF', () => {
+    const bytes = (bonus: number) => Uint8Array.from([26, 0, 50, 0, 0, 0x00, bonus, 0xfe, 0xff, 0xff, 0xff, 0xff]);
+    expect(socketBonusOf(ItemSerializer.DeserializeItem(bytes(0)))).toBe(0);
+    expect(socketBonusOf(ItemSerializer.DeserializeItem(bytes(0xff)))).toBeNull();
   });
 
   it('trainable pet keeps level out of the level bits', () => {

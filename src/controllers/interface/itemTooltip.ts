@@ -30,16 +30,16 @@ import {
   ancientSetOf,
   harmonyOf,
   hasGuardianOption,
-  isOptionWing,
+  hasSpecial,
+  optionSpecials,
   setOptionLines,
   skillMana,
   socketBonusOf,
   socketsOf,
-  wingOptionKind,
   wingOptions,
   wornSetPieces,
+  type OptionSpecial,
   type WingOption,
-  type WingOptionKind,
 } from '@/controllers/item_rules';
 import { itemBaseName } from '@versions/shared/items/itemsDatabase';
 import { itemLevelName } from '@/controllers/item_rules';
@@ -141,7 +141,8 @@ class Lines {
 
 /** The first block of `RenderItemInfo`: which colour the name line takes. */
 function nameColor(item: Item, def: ItemDef, level: number): TooltipColor {
-  const optionLevel = item.optionLevel ?? 0;
+  // SpecialNum > 0: any skill, luck, option or excellent line (ZzzInventory.cpp:2148-2152).
+  const special = hasSpecial(item, def);
 
   if (isFenrir(def)) return 'blue';
   if (isJewel(def) || isWeaponOfArchangel(def)) return 'yellow';
@@ -150,12 +151,12 @@ function nameColor(item: Item, def: ItemDef, level: number): TooltipColor {
   if ((item.socketCount ?? 0) > 0) return 'violet';
   if (isWing(def)) {
     if (level >= 7) return 'yellow';
-    return optionLevel > 0 ? 'blue' : 'white';
+    return special ? 'blue' : 'white';
   }
   // Every excellent option is a Special, so excellent is always green (ZzzInventory.cpp:2140).
   if (item.isExcellent) return 'green';
   if (level >= 7) return 'yellow';
-  return optionLevel > 0 ? 'blue' : 'white';
+  return special ? 'blue' : 'white';
 }
 
 /** The colour the tooltip's name line takes, for anything else that names the item. */
@@ -307,17 +308,17 @@ function wingLines(out: Lines, def: ItemDef, level: number) {
   if (isFirstWing(def)) {
     out.add(t('item.increaseDamage', { value: 12 + level * 2 }));
     out.add(t('item.absorbDamage', { value: 12 + level * 2 }));
-    out.add(t('item.ableToFly'));
+    out.add(t('item.increaseSpeed'));
   } else if (isSecondWing(def)) {
     out.add(t('item.increaseDamage', { value: 32 + level }));
     out.add(t('item.absorbDamage', { value: 25 + level * 2 }));
-    out.add(t('item.ableToFly'));
+    out.add(t('item.increaseSpeed'));
   } else if (isThirdWing(def)) {
     out.add(t('item.increaseDamage', { value: 39 + level * 2 }));
     // Cape of Emperor / Overrule absorb less.
     const absorb = def.index === 40 || def.index === 50 ? 24 : 39;
     out.add(t('item.absorbDamage', { value: absorb + level * 2 }));
-    out.add(t('item.ableToFly'));
+    out.add(t('item.increaseSpeed'));
   } else if (isCapeOfLord(def) || isCapeOfFighter(def)) {
     out.add(t('item.increaseDamage', { value: 20 + level * 2 }));
     const absorb = isCapeOfFighter(def) ? 10 + level * 2 : 10 + level;
@@ -675,14 +676,14 @@ function equipmentLines(
     out.add(t('item.luckCritical'), 'blue');
   }
 
-  const wingKind = isOptionWing(def.group, def.index) ? wingOptionKind(item) : undefined;
-  if (optionLevel > 0 && wingKind !== undefined) {
-    if (wingKind) out.add(t(WING_KIND_TEXT[wingKind], { value: wingKind === 'life' ? optionLevel : optionLevel * 4 }), 'blue');
-  } else if (optionLevel > 0) {
-    const bonus = optionLevel * 4;
-    if (isStaff(def)) out.add(t('item.additionalWizardry', { value: bonus }), 'blue');
-    else if (isWeapon(def)) out.add(t('item.additionalDamage', { value: bonus }), 'blue');
-    else out.add(t('item.additionalDefense', { value: bonus }), 'blue');
+  for (const { kind, value } of optionSpecials(item, def)) {
+    // Loch's Feather to the Invisibility Cloak print no HP recovery (ZzzInventory.cpp:1897).
+    if (kind === 'life' && def.group === ItemGroup.Helper && def.index >= 14 && def.index <= 18) continue;
+    out.add(t(OPTION_TEXT[kind], { value }), 'blue');
+    // The Magic Gladiator swords also name it as wizardry (ZzzInventory.cpp:5119-5131).
+    if (kind === 'damage' && def.group === ItemGroup.Sword && MG_SWORDS.includes(def.index)) {
+      out.add(t('item.additionalWizardry', { value }), 'blue');
+    }
   }
 
   if (excellentFlags > 0) {
@@ -704,14 +705,23 @@ const WING_OPTION_TEXT: Readonly<Record<WingOption, TextKey>> = {
   fullMana: 'item.wing.fullMana',
 };
 
-/** A wing's additional option by its kind (`AT_LIFE_REGENERATION`, `AT_IMPROVE_*`). */
-const WING_KIND_TEXT: Readonly<Record<WingOptionKind, TextKey>> = {
+/** The option level's line by its `AT_*` kind (`GetSpecialOptionText`, ZzzInventory.cpp:1883-2010). */
+const OPTION_TEXT: Readonly<Record<OptionSpecial, TextKey>> = {
   life: 'item.wing.hpRecovery',
   damage: 'item.additionalDamage',
   wizardry: 'item.additionalWizardry',
   curse: 'item.additionalCurse',
   defense: 'item.additionalDefense',
+  defenseRate: 'item.additionalDefenseRate',
+  maxMana: 'item.maxManaPercent',
+  maxAg: 'item.maxAgPercent',
+  absorb: 'item.absorbAdditional',
+  agMax: 'item.wing.maxAg',
+  attackSpeed: 'item.attackSpeedUp',
 };
+
+/** `ITEM_DARK_REIGN_BLADE`, `ITEM_EXPLOSION_BLADE`, `ITEM_SWORD_DANCER`, `ITEM_IMPERIAL_SWORD`, `ITEM_RUNE_BLADE`. */
+const MG_SWORDS: readonly number[] = [21, 23, 25, 28, 31];
 
 /** `AT_SKILL_PLASMA_STORM_FENRIR`. */
 const PLASMA_STORM = 76;
@@ -723,7 +733,7 @@ function fenrirLines(out: Lines, def: ItemDef, item: Item, hero: HeroStats) {
   out.add(t('item.fenrir.skill', { mana: skillMana(PLASMA_STORM) }), 'blue');
   if (flags === 0x01 || flags === 0x02) {
     out.add(t(flags === 0x01 ? 'item.fenrir.finalDamage' : 'item.fenrir.absorbFinal', { value: 10 }), 'blue');
-    out.add(t('item.fenrir.speed'), 'blue');
+    out.add(t('item.increaseSpeed'), 'blue');
   } else if (flags === 0x04) {
     out.add(t('item.fenrir.life', { value: Math.trunc(hero.level / 2) }), 'blue');
     out.add(t('item.fenrir.mana', { value: Math.trunc(hero.level / 2) }), 'blue');

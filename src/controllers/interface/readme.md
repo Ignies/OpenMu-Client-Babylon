@@ -19,7 +19,8 @@ windows themselves are content in `versions/shared/ui/` (see
   window comes or goes). Slots: `world` (on the 3D view, stays up when the interface is hidden) and `hud`.
 - `windowManager.ts`: `MuWindows`: open state (`isOpen(id)`, `setOpen(id, open)`), placement,
   scale and z-order, Escape closes the top window, `closeAll()` is the original's `HideAll` (every
-  open flag drops, then every stacked closer runs; a closer that finds its flag already down plays no click).
+  open flag drops, then every stacked closer runs with the interface sounds off, `quietUiSounds`; the
+  closers of the windows that hiding the interface unmounted are kept for it until the interface is back).
 - `components/`: shared widgets. Frames and text: `mu_window` (item window, table frame),
   `mu_frame`, `msg_box_frame` (`top` takes the NPC menus' title bar art, `MSGBOX_TOP_TITLEBAR_SPRITE`), `mu_text`, `mu_number`,
   `mu_button`, `mu_sprite`, `mu_logo`, `mu_flag`. Items: `item_icon`, `item_search` (the grid, the

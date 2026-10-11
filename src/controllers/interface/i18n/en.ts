@@ -87,7 +87,6 @@ const en = {
   'item.canBeEquippedBy': 'Can be equipped by {name}',
   'item.increaseDamage': 'Increase Damage +{value}%',
   'item.absorbDamage': 'Absorb Damage +{value}%',
-  'item.ableToFly': 'Able to fly',
   'item.raiseLevel6': 'Raises the level of an item by one (up to +6)',
   'item.raiseLevel9': 'Raises the level of an item by one at a chance (up to +9)',
   'item.addOption': 'Adds or raises an additional option on an item',
@@ -203,6 +202,11 @@ const en = {
   'item.socketBonus': 'Bonus socket option',
   'item.socketUnique': 'Unique',
   'item.additionalCurse': 'Additional Curse +{value}',
+  'item.additionalDefenseRate': 'Additional defense rate +{value}',
+  'item.maxManaPercent': 'Max mana increased by {value}%',
+  'item.maxAgPercent': 'Max AG increased by {value}%',
+  'item.absorbAdditional': 'Absorb {value}% additional damage',
+  'item.attackSpeedUp': 'Increase Attacking(Wizardry)speed +{value}',
   'item.wing.hpRecovery': 'Automatic HP recovery {value}%',
   'item.wing.maxHp': 'HP +{value} increased',
   'item.wing.maxMana': 'Mana +{value} increased',
@@ -217,7 +221,7 @@ const en = {
   'item.fenrir.skill': 'Plasma storm skill (Mana:{mana})',
   'item.fenrir.finalDamage': 'Increase final damage {value}%',
   'item.fenrir.absorbFinal': 'Absorb final damage {value}%',
-  'item.fenrir.speed': 'Increase speed',
+  'item.increaseSpeed': 'Increase speed',
   'item.fenrir.life': 'Added {value} of Life',
   'item.fenrir.mana': 'Added {value} of Mana',
   'item.fenrir.attack': 'Added {value} Attack',
@@ -229,6 +233,7 @@ const en = {
   'item.count': 'Number of items: {count}',
   'item.pieces': '{count} / {max}',
   'msgWin.confirmMix': '%s\nDo you want to combine your items?',
+  'msgWin.exitCountdown': 'You will exit game in {seconds} seconds.',
 };
 
 export default en;

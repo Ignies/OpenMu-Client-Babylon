@@ -47,6 +47,7 @@ const PREGAME_SPRITES = [
   'cha_id.OZT',
 
   'op1_stone.OZJ',
+  'op1_back1.OZT',
   'op1_back2.OZT',
   'op1_back3.OZJ',
   'op1_back4.OZJ',

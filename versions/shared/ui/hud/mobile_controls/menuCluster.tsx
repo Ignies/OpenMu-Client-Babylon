@@ -9,11 +9,20 @@ import {
 } from '../bottom_bar/mainFrameButtons';
 import { MobileButton, ScaledFrame } from './mobileButton';
 import { MENU_SCALE } from './consts';
+import { quietUiSounds } from '@/controllers/sound/sfx';
+import { openSystemMenu } from '@/modules/session/sessionExit';
+
+/**
+ * The bar's Options button. A phone has no Escape, so here it opens the system menu instead
+ * (`CSystemMenuMsgBox`: Exit Game, Select Server, Switch Character, Option); the tap clicks once.
+ */
+const SYSTEM_MENU_FILE = 'partCharge1/newui_menu_Bt04.OZJ';
+const openMenu = () => quietUiSounds(() => void openSystemMenu());
 
 /**
  * Cash shop, character, inventory, friends, options - the five the bar draws
  * at x 489..619 of a 640-wide frame, which on a 375 px screen is x 357..507:
- * off the right edge and unreachable. Same sprites, same actions, at a size a
+ * off the right edge and unreachable. Same sprites and actions (but Options, below), at a size a
  * thumb can hit. A column in portrait, a row in landscape, where there is
  * width but little height.
  *
@@ -32,7 +41,7 @@ export const MenuCluster = observer(() => {
           key={button.file}
           className="mobile-menu-button"
           title={t(button.titleKey)}
-          onTap={button.toggle}
+          onTap={button.file === SYSTEM_MENU_FILE ? openMenu : button.toggle}
         >
           {pressed => (
             <ScaledFrame

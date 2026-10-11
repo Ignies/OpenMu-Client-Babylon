@@ -27,7 +27,7 @@ export default defineItem({
   MG: 1,
   DL: 1,
   SUM: 2,
-  RF: 0,
+  RF: 1,
   szModelFolder: 'Item/',
   szModelName: 'FR_6.glb',
   RequiredLvl: 300,

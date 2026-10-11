@@ -184,7 +184,7 @@ export const CommandWindow = observer(() => {
               width={EXIT_BUTTON.width}
               height={EXIT_BUTTON.height}
               frames={{ up: 0, down: 1 }}
-              onClick={close}
+              onClick={() => Commands.closeWindow()}
             />
           </div>
         </MuItemWindow>

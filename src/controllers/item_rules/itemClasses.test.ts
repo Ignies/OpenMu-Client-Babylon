@@ -62,21 +62,12 @@ describe('the Rage Fighter class column', () => {
     expect(classCanUse(def(5, 0), rf)).toBe(false); // Skull Staff
   });
 
-  it('wears a whole armour set, gloves included', () => {
+  it('wears the Leather, Scale, Brass and Plate sets but no gloves, as Item.bmd says', () => {
     const rf = hero(RAGE_FIGHTER);
-    // Leather, Scale, Brass and Plate: the four sets that are his. The server
-    // has no Rage Fighter parameter on `CreateGloves` at all, so group 10 came
-    // back 0 and each set read as four pieces out of five (#204).
     for (const set of [5, 6, 8, 9]) {
-      for (const group of [7, 8, 9, 10, 11]) {
-        expect(classCanUse(def(group, set), rf)).toBe(true);
-      }
+      for (const group of [7, 8, 9, 11]) expect(classCanUse(def(group, set), rf)).toBe(true);
+      expect(classCanUse(def(10, set), rf)).toBe(false);
     }
-  });
-
-  it('does not hand him a glove whose own set is not his', () => {
-    // Sphinx: nobody in that set is his, so the gloves are not either.
-    expect(classCanUse(def(10, 7), hero(RAGE_FIGHTER))).toBe(false);
   });
 
   it('keeps the glove weapons off every other class', () => {
@@ -125,18 +116,17 @@ const bmdClasses = (bytes: Uint8Array, group: number, index: number) => {
   return [...record.subarray(69, 76)];
 };
 
-// The rows the item files took from a server table that let the Dark Wizard wear Summoner gear,
-// and that read the 3rd wings as 2nd-class items.
+// The item files took their class block from Item.txt and a server table (Summoner gear open to the
+// Dark Wizard, 3rd wings as 2nd-class items, no Rage Fighter on the items everyone uses).
 describe.skipIf(!existsSync(ITEM_BMD))('the class columns', () => {
   const bytes = new Uint8Array(readFileSync(ITEM_BMD));
-  const rows: [number, number][] = [
-    [0, 2], // Rapier
-    ...[14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 34].map(index => [5, index] as [number, number]),
-    ...[7, 8, 9, 10, 11].flatMap(group => [39, 40, 41, 42, 43, 44].map(index => [group, index] as [number, number])),
-    ...[36, 37, 38, 39, 41, 42, 43].map(index => [12, index] as [number, number]),
-  ];
+  // A record with no name is a row Item.bmd does not have.
+  const named = (group: number, index: number) => (bytes[(group * 512 + index) * 84] ^ 0xfc) !== 0;
 
-  it.each(rows)('of %i/%i match Item.bmd', (group, index) => {
-    expect(def(group, index).classes).toEqual(bmdClasses(bytes, group, index));
+  it('match Item.bmd on every row it has', () => {
+    const rows = items.filter(row => 'SUM' in row && named(row.Group, row.Index));
+    expect(rows.length).toBeGreaterThan(600);
+    const wrong = rows.filter(row => def(row.Group, row.Index).classes.join() !== bmdClasses(bytes, row.Group, row.Index).join());
+    expect(wrong.map(row => `${row.Group}/${row.Index}`)).toEqual([]);
   });
 });

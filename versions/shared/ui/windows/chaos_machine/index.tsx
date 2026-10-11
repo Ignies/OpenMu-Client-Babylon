@@ -18,7 +18,6 @@ import { itemLevelName } from '@/controllers/item_rules';
 import { itemBaseName } from '@versions/shared/items/itemsDatabase';
 import { ItemGrid } from '../../components/item_grid';
 import { QuickItemActions } from '@/modules/inventory/quickItemActions';
-import { uiClick } from '@/controllers/sound/sfx';
 import {
   CARD_TEXT_LINE,
   CARD_TEXT_Y,
@@ -74,8 +73,6 @@ import {
 } from './layout';
 
 const WINDOW_ID = 'chaos-machine';
-/** `g_nChaosTaxRate`: no server here sends the castle's chaos tax (ReceiveTaxInfo type 1). */
-const CHAOS_TAX_RATE = 0;
 /** `MAX_ITEM_INDEX`. */
 const STRIDE = 512;
 const code = (group: number, num: number) => group * STRIDE + num;
@@ -166,7 +163,7 @@ const RecipeText = observer(({ check, type }: { check: MixCheck; type: number })
   // The rate shows for the goblin and the Seed Master; the zen for them and the Seed Researcher too.
   const rated = isGoblin(type) || type === MIX_TYPE.extractSeed || type === MIX_TYPE.seedSphere;
   const priced = rated || isSocketTray(type);
-  const taxed = Math.trunc(check.requiredZen + (check.requiredZen * CHAOS_TAX_RATE) / 100);
+  const taxed = Math.trunc(check.requiredZen + (check.requiredZen * Economy.chaosTaxRate) / 100);
   const potion = ready && check.recipe?.zenType === 'C';
   const similar = check.similar;
   const plain = { left: TEXT_X, width: TEXT_WIDTH };
@@ -318,7 +315,7 @@ const MixMenu = observer(() => {
       activeColor={TEXT_COLOR.white}
       label={label}
       labelStyle={{ fontSize: 11 }}
-      onClick={uiClick(onClick)}
+      onClick={onClick}
       style={{ position: 'absolute', left: (MSGBOX_WIDTH - MENU_BUTTON_WIDTH) / 2, top }}
     />
   );
@@ -330,7 +327,8 @@ const MixMenu = observer(() => {
     ));
   return (
     <div className="chaos-menu-layer" data-no-drag="true">
-      <MsgBoxFrame lines={MENU_LINES} className="chaos-menu" style={{ top: MENU_TOP }}>
+      {/* `IMAGE_MSGBOX_TOP_TITLEBAR`, as the seed menus (NewUICustomMessageBox.cpp:2921). */}
+      <MsgBoxFrame lines={MENU_LINES} top={MSGBOX_TOP_TITLEBAR_SPRITE} className="chaos-menu" style={{ top: MENU_TOP }}>
         <div className="chaos-menu-title" style={{ left: MENU_TEXT_X, right: MENU_TEXT_X, top: MENU_TITLE_Y }}>
           {t('chaos.menu.title')}
         </div>
@@ -349,7 +347,7 @@ const MixMenu = observer(() => {
           activeColor={TEXT_COLOR.white}
           label={t('chaos.menu.close')}
           labelStyle={{ fontSize: 11 }}
-          onClick={uiClick(() => Economy.cancelMixMenu())}
+          onClick={() => Economy.cancelMixMenu()}
           style={{ position: 'absolute', left: (MSGBOX_WIDTH - MENU_CLOSE_WIDTH) / 2, top: msgBoxHeight(MENU_LINES) - MENU_CLOSE_BOTTOM }}
         />
       </MsgBoxFrame>
@@ -386,7 +384,7 @@ export const ChaosMachine = observer(() => {
         </div>
         {goblin && (
           <div className="chaos-tax" style={{ top: TAX_Y }}>
-            {t('chaos.taxRate', { rate: CHAOS_TAX_RATE })}
+            {t('chaos.taxRate', { rate: Economy.chaosTaxRate })}
           </div>
         )}
 

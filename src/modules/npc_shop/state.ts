@@ -147,6 +147,9 @@ export const Merchant = new (class {
   /** The merchant window (`CNewUINPCShop`); null while no NPC is talking. */
   npcShop: NpcShop | null = null;
 
+  /** `g_nTaxRate`: the castle's store tax, from `ReceiveTaxInfo` type 2 (WSclient.cpp:11307-11311). */
+  private storeTaxRate = 0;
+
   /** `REPAIR_MODE_ON`: the next inventory click repairs instead of picking. */
   repairMode = false;
 
@@ -226,11 +229,19 @@ export const Merchant = new (class {
         name: npc?.name ?? 'Merchant',
         npcType: npc?.npcType ?? 0,
         repairShop: npc ? REPAIR_NPC_TYPES.has(npc.npcType) : false,
-        taxRate: 0,
+        taxRate: this.storeTaxRate,
         items: new Array<Item | null>(SHOP_SLOTS).fill(null),
       };
       this.repairMode = false;
       MuWindows.setOpen('inventory', true);
+    });
+  }
+
+  /** `CNewUINPCShop::SetTaxRate`: the open window and the next one take the new rate. */
+  setStoreTaxRate(rate: number): void {
+    this.storeTaxRate = rate;
+    runInAction(() => {
+      if (this.npcShop) this.npcShop.taxRate = rate;
     });
   }
 

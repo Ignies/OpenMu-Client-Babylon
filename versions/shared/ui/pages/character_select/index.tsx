@@ -9,7 +9,7 @@ import { confirmDeleteCharacter, CharSelect } from '@/modules/character_select';
 import { characterSelectView } from '@/modules/character_select/characterSelect';
 import { useEventBus } from '@/controllers/interface/hooks';
 import { playUiSound } from '@/controllers/sound/sfx';
-import { isTypingInField } from '@/ecs/systems/keyboardInputSystem';
+import { isTypingInField, PREGAME_MENU } from '@/ecs/systems/keyboardInputSystem';
 import { GuildMemberRoleEnum } from '@versions/shared/packets/ServerToClientPackets';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
@@ -77,7 +77,7 @@ export const CharactersPage = observer(() => {
   // (CharacterScene.cpp:193-207); the create window keeps its own Enter.
   // A double click on the focused character connects too, with no click (:214-223).
   const onEnter = (click = true) => {
-    if (creating || selecting || MuWindows.isOpen('options') || !selected) return;
+    if (creating || selecting || MuWindows.isOpen('options') || MuWindows.isOpen(PREGAME_MENU) || !selected) return;
     if (click) playUiSound('click'); // CharacterScene.cpp:199
     onConnect();
   };
@@ -167,7 +167,8 @@ export const CharactersPage = observer(() => {
           width={BTN_WIDTH}
           height={BTN_HEIGHT}
           frames={CREATE_FRAMES}
-          onClick={() => (MuWindows.setOpen('options', !MuWindows.isOpen('options')))}
+          // `CSMW_BTN_MENU` shows `CSysMenuWin` (CharSelMainWin.cpp:227-230).
+          onClick={() => MuWindows.setOpen(PREGAME_MENU, true)}
           style={{
             position: 'absolute',
             left: BTN_WIDTH + BTN_GAP,

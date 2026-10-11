@@ -29,6 +29,8 @@ export default {
   'personalShop.notEnoughZen': 'Nu ai destul Zen.',
   'chaos.succeeded': 'Combinația a reușit.',
   'chaos.failed': 'Combinația a eșuat.',
+  'chaos.cardSucceeded': 'Combinația Cărții Haosului a reușit.',
+  'chaos.cardFailed': 'Combinația Cărții Haosului a eșuat.',
   'chaos.takeItemsOut': 'Scoate mai întâi obiectele din Chaos Machine.',
   'chaos.putItemsIn': 'Pune în Chaos Machine obiectele de combinat.',
   'chaos.notEnoughZen': 'Zen insuficient pentru combinație.',

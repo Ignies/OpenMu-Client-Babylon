@@ -4,7 +4,8 @@
 // it: Item.txt names only six classes and has no Rage Fighter one. Follow
 // every run with `bun run tools/addRageFighterColumn.ts`, which puts it back
 // from the server's item definitions, then `bun run
-// tools/syncItemRequirements.ts`, which does the same for the requirements.
+// tools/syncItemRequirements.ts`, which does the same for the requirements, and
+// `bun run tools/syncItemClasses.ts`, which sets the class block to the original Item.bmd's.
 import { ItemsDatabase } from '../versions/shared/items/itemsDatabase';
 import { ItemGroups } from '../versions/shared/objects/enum';
 import { writeItemFiles } from './itemFiles';

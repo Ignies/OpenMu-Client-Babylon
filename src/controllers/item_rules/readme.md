@@ -22,7 +22,9 @@ the table would import itself.
 - `comparedItem(item, worn, hero)`, `compareTooltipsOn(shift)`, `CompareTooltips`,
   `COMPARE_TOOLTIP_LABEL_KEYS`, `COMPARE_TOOLTIP_MAX`: the second tooltip.
 - `equipSlots(item)` (inner), `isEquipable(slot, item)`, `equipDestination(item, worn)`: worn slots.
-- `dropTier(drop)`, `DROP_TIER_COLOURS`, `HIGH_DROP_LEVEL`: a drop's name colour and glow tier.
+- `dropTier(drop)`, `HIGH_DROP_LEVEL`: a drop's glow tier. `dropLabel(drop)` (`dropLabel.ts`): its ground name's colour,
+  bold face and set box, as `BuildGroundItemLabelDescriptor` draws it (ZzzInventory.cpp:6280-6663): the white,
+  yellow and orange item sets, jewels, the models some levels show, then level and option tints.
 - `learnableSkill(item)` (`skillItems.ts`, with `learnableSkillNumber`): the skill an orb, scroll or
   crystal teaches.
 - `dropModelProxy(group, num, lvl)`, `archangelWeapon(level)` (`dropModelProxy.ts`, was `modules/drops`):
@@ -38,12 +40,17 @@ the table would import itself.
 - `isOptionWing(group, num)`, `wingOptionKind(item)`, `wingOptions(item)` (`wingOptions.ts`): the wing options
   (`CalcWingOptions`) and the kind of a wing's additional option (`OptionType`, ZzzInfomation.cpp:1236-1442).
 - `skillMana(num)`: a skill's mana, for tooltip lines that name it.
+- `hasSpecial(item, def)` (`itemSpecials.ts`): `SpecialNum > 0` after `SetItemAttributes` (any skill, luck,
+  option or excellent line, by the item kinds that take each), which turns a name blue; `optionSpecials`
+  is what the option level adds, by kind.
 
 ## How it works
 - `itemSerializer.ts` reads level, luck, skill, option level, excellent, ancient and socket bytes. On wings
   and capes the excellent byte holds the wing options (bits 0-3) and `OptionType` (bits 4-5), and the Horn
   of Fenrir keeps its variant there: neither counts as excellent. Dark Horse
   and Dark Raven keep their level in byte 2, not in the level bits. `raw` keeps the original bytes.
+  A socket item's byte 6 is its bonus option even at 0 (OpenMU sends 0xFF for none, and option 0 is the
+  physical weapons' damage bonus); other items keep it only when it is not 0.
 - `ancientSets.ts` ports `CheckItemSetOptions` / `calcSetOptionList` (CSItemOption.cpp:316-372, :839-906):
   a set lists options only with two pieces worn, one standard option per piece past the first, the
   full-set ones once complete. The worn items are checked against the hero's own stats, without what
@@ -86,10 +93,11 @@ the table would import itself.
 - what the compare tooltip measures against: `comparedItem` in `itemCompare.ts`.
 
 ## Tests
-- `itemSerializer.test.ts`: round trips (plain, +13 luck skill, excellent, ancient, sockets, pets, number > 255);
+- `itemSerializer.test.ts`: round trips (plain, +13 luck skill, excellent, ancient, sockets, pets, number > 255),
+  a socket bonus of 0;
   wing options and kind, the Fenrir variant.
-- `itemClasses.test.ts`: the Rage Fighter class column and unrestricted items; the Summoner gear and wings,
-  the Rapier and the 3rd wings against `Data/Local/Eng/item_eng.bmd`'s class columns.
+- `itemClasses.test.ts`: the Rage Fighter class column and unrestricted items; every row's class block
+  against `Data/Local/Eng/item_eng.bmd`'s.
 - `itemRequirements.test.ts`: strength per option level, wing and pet level requirements.
 - `itemCompare.test.ts`: which worn item is compared, and the green / red deltas on the tooltip.
 - `itemLevelLook.test.ts`: Box of Luck / Box of Kundun names and icons.
@@ -97,6 +105,7 @@ the table would import itself.
 - `archangelWeapons.test.ts`: Divine weapon and Weapon of Archangel names, colours and icons.
 - `portedItems.test.ts`: MuMain items and capes (tests `controllers/actors/wings.ts`, appearance).
 - `ancientSets.test.ts`: set lookup by discriminator, worn piece count, which options light.
+- `dropLabel.test.ts`: ground name colours by level and option, the item sets, jewels, level models, sets.
 - `bundlesAndParchments.test.ts`: the packed jewels 12/136-143 and the Rage Fighter parchments 15/30-36 exist,
   with Item.bmd's names, the original's models and the skills the parchments teach.
 - `questItemLink.test.ts`: the Blood Castle weapon on the back (tests `controllers/actors/weaponAttachment.ts`).

@@ -171,12 +171,14 @@ export const Economy = new (class _Economy {
   mixMenuOpen = false;
   /** `MIX_REQUESTED`: the request is out, both grids are locked. */
   mixPending = false;
-  /** `MIX_FINISHED`: what the last attempt did, for the result line. */
-  mixResult: 'success' | 'failed' | null = null;
+  /** `MIX_FINISHED`: what the last attempt did; the window stays locked until it is opened again. */
+  mixResult: 'success' | 'failed' | 'refused' | null = null;
   /** `CSeedMasterMenuMsgBox` / `CSeedInvestigatorMenuMsgBox`: the seed NPC's menu, before its tray. */
   seedMenu: 'master' | 'researcher' | null = null;
   /** The socket picked in the seed researcher's list (`m_SocketListBox`), -1 for none. */
   mixSocket = -1;
+  /** `g_nChaosTaxRate`: the castle's chaos machine tax, from `ReceiveTaxInfo` type 1 (WSclient.cpp:11303-11306). */
+  chaosTaxRate = 0;
 
   // ---- trade (CNewUITrade) -------------------------------------------------
 
@@ -238,6 +240,7 @@ export const Economy = new (class _Economy {
       mixResult: observable,
       seedMenu: observable,
       mixSocket: observable,
+      chaosTaxRate: observable,
       mixSockets: computed,
       tradeOpen: observable,
       myTradeItems: observable,
@@ -726,21 +729,25 @@ export const Economy = new (class _Economy {
     // Only a mix the machine tried empties the tray; a refusal (zen, level, wrong
     // items) leaves the items in (ReceiveMixExtended, WSclient.cpp:6796-6831).
     const tried = result === E.Success || result === E.Failed;
+    // Short zen (2, 0x0B) is MIX_READY; every other refusal is MIX_FINISHED (WSclient.cpp:6795-6831).
+    const ready = result === E.NotEnoughMoney || result === E.NotEnoughMoneyForBloodCastle;
 
     runInAction(() => {
       this.mixPending = false;
-      this.mixResult = tried ? (result === E.Success ? 'success' : 'failed') : null;
+      this.mixResult = tried ? (result === E.Success ? 'success' : 'failed') : ready ? null : 'refused';
       if (!tried) return;
       this.mixItems = emptyGrid(MIX_SLOTS);
       if (result === E.Success && item) this.mixItems[0] = item;
     });
 
-    // ReceiveMixExtended (WSclient.cpp:6705-6795): the seed researcher's trays print no result line.
+    // ReceiveMixExtended (WSclient.cpp:6705-6795): the seed researcher's trays print no result line,
+    // the Chaos Card Master names its combination (GlobalText 2113 / 2112 with 2265).
     const socketMix = this.mixInventoryType === MIX_TYPE.attachSocket || this.mixInventoryType === MIX_TYPE.detachSocket;
+    const card = this.mixInventoryType === MIX_TYPE.chaosCard;
     if (result === E.Success) {
       playUiSound('mix');
       playUiSound('jewel');
-      if (!socketMix) Social.systemMessage(t('chaos.succeeded'));
+      if (!socketMix) Social.systemMessage(t(card ? 'chaos.cardSucceeded' : 'chaos.succeeded'));
       return;
     }
     if (result === E.Failed && socketMix) {
@@ -757,7 +764,7 @@ export const Economy = new (class _Economy {
     }
 
     const reason: Partial<Record<ItemCraftingResultCraftingResultEnum, TextKey>> = {
-      [E.Failed]: 'chaos.failed',
+      [E.Failed]: card ? 'chaos.cardFailed' : 'chaos.failed',
       [E.NotEnoughMoney]: 'chaos.notEnoughZen',
       [E.TooManyItems]: 'chaos.tooManyItems',
       [E.CharacterLevelTooLow]: 'chaos.levelTooLow',

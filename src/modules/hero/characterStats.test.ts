@@ -42,3 +42,30 @@ describe('the character window with a pet', () => {
     expect(stats(helper(106)).defense).toBe(bare.defense + 50);
   });
 });
+
+// NewUICharacterInfoWindow.cpp:680-704 (damage), :1259-1294 (wizardry), :1395-1418 (curse).
+describe('the character window with a transformation ring', () => {
+  const withRings = (rings: (Item | null)[], charClass = CharacterClassNumber.DarkKnight, pet: Item | null = null) => {
+    const items: (Item | null)[] = new Array(12).fill(null);
+    items[PET_SLOT] = pet;
+    [items[10], items[11]] = rings;
+    return deriveCharacterStats({ charClass, level: 240, strength: 600, agility: 300, vitality: 100, energy: 450, leadership: 0, items });
+  };
+  const bare = stats(null);
+  const bareSummoner = stats(null, CharacterClassNumber.Summoner);
+
+  it('adds the best of the Christmas 20, Panda 30 and Skeleton 40 rings to damage and wizardry', () => {
+    expect(withRings([helper(41), null]).damageMin).toBe(bare.damageMin + 20);
+    expect(withRings([null, helper(76)]).wizardryMax).toBe(bare.wizardryMax + 30);
+    expect(withRings([helper(76), helper(122)]).damageMax).toBe(bare.damageMax + 40);
+  });
+
+  it('adds only the Panda and Skeleton rings to curse', () => {
+    expect(withRings([helper(41), null], CharacterClassNumber.Summoner).curseMin).toBe(bareSummoner.curseMin);
+    expect(withRings([helper(122), null], CharacterClassNumber.Summoner).curseMin).toBe(bareSummoner.curseMin + 40);
+  });
+
+  it('adds the ring before the pet multiplies', () => {
+    expect(withRings([helper(76), null], CharacterClassNumber.DarkKnight, helper(64)).damageMin).toBe(Math.trunc((bare.damageMin + 30) * 1.4));
+  });
+});

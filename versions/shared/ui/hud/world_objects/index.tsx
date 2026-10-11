@@ -10,7 +10,7 @@ import { PartyBars } from '../party_bars';
 import { EmojiBubbles } from '../emoji_bubbles';
 import { useRenderId, useEventBus } from '@/controllers/interface/hooks';
 import { onScreenPosition } from '@/controllers/interface/screenPositionBus';
-import { DROP_TIER_COLOURS, dropTier } from '@/controllers/item_rules';
+import { dropLabel } from '@/controllers/item_rules';
 import { dropPassesLootFilter } from '@/modules/drops/lootFilter';
 import { GameOptions } from '@/controllers/settings';
 import { ItemTooltip } from '../../components/item_tooltip';
@@ -145,12 +145,16 @@ const DropLabel = observer(({
 
   if (!visible) return null;
 
+  const look = dropLabel(entity.droppedItem);
+
   return (
     <>
       <WorldLabel
         entity={entity}
         text={entity.objectNameInWorld ?? ''}
-        colour={DROP_TIER_COLOURS[dropTier(entity.droppedItem)]}
+        colour={look.colour}
+        bold={look.bold}
+        setItem={look.setItem}
         className="drop"
         onPointerDown={ev => {
           if (ev.button !== 0) return;

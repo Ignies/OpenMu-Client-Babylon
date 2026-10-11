@@ -12,6 +12,7 @@ export {
   UI_SOUNDS,
   UI_SOUND_KEYS,
   playUiSound,
+  quietUiSounds,
   uiClick,
   type UiSound,
 } from './ui';

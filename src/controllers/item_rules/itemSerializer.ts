@@ -2,6 +2,7 @@ import { Item } from '../../ecs/world';
 import { castToByte } from '../../core/binaryUtils';
 import { PET_GROUP, DARK_HORSE, DARK_RAVEN } from '@versions/shared/items/petItems';
 import { isOptionWing } from './wingOptions';
+import { isSocketItem } from './itemOptions';
 
 const LuckFlag = 4;
 const SkillFlag = 128;
@@ -115,7 +116,8 @@ const item: Item = {
     }
     ReadAncientOption(array[4], item);
 
-    if (array[6] !== 0) item.socketBonus = array[6];
+    // A socket item's byte 6 is its bonus option even at 0; OpenMU sends 0xFF for none (NewUIItemMng.cpp:249).
+    if (array[6] !== 0 || isSocketItem(itemGroup, itemNumber)) item.socketBonus = array[6];
 
     // Bytes 7–11: socket slots; 0xFF = the item has no slot there.
     const sockets: number[] = [];

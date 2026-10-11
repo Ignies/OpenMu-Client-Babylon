@@ -30,14 +30,26 @@ const fillTray = () =>
   });
 
 // ReceiveMixExtended (WSclient.cpp:6796-6831): only a success replaces the tray, and a failed
-// mix is emptied by the server's list (:1750-1754); a refusal leaves the items where they are.
+// mix is emptied by the server's list (:1750-1754); a refusal leaves the items where they are and
+// finishes the mix (MIX_FINISHED) unless it was the zen (MIX_READY).
 describe('Economy.craftingResult', () => {
-  it('keeps the tray when the machine refuses the mix', () => {
-    fillTray();
-    Economy.craftingResult(E.IncorrectMixItems, null);
-    expect(Economy.mixItems[0]).toMatchObject({ group: 12, id: 15 });
-    expect(Economy.mixPending).toBe(false);
-    expect(Economy.mixResult).toBeNull();
+  it('keeps the tray but locks the window when the machine refuses the mix', () => {
+    for (const refusal of [E.TooManyItems, E.CharacterLevelTooLow, E.LackingMixItems, E.IncorrectMixItems, E.InvalidItemLevel, E.CharacterClassTooLow, E.IncorrectBloodCastleItems]) {
+      fillTray();
+      Economy.craftingResult(refusal, null);
+      expect(Economy.mixItems[0]).toMatchObject({ group: 12, id: 15 });
+      expect(Economy.mixPending).toBe(false);
+      expect(Economy.mixResult, String(refusal)).toBe('refused');
+      expect(Economy.mixAccepts(jewel)).toBe(false);
+    }
+  });
+
+  it('leaves the window ready when the zen was short', () => {
+    for (const refusal of [E.NotEnoughMoney, E.NotEnoughMoneyForBloodCastle]) {
+      fillTray();
+      Economy.craftingResult(refusal, null);
+      expect(Economy.mixResult).toBeNull();
+    }
   });
 
   it('empties the tray on a failed mix', () => {
@@ -45,6 +57,21 @@ describe('Economy.craftingResult', () => {
     Economy.craftingResult(E.Failed, null);
     expect(Economy.mixItems.some(Boolean)).toBe(false);
     expect(Economy.mixResult).toBe('failed');
+  });
+
+  // ReceiveMixExtended's MIXTYPE_CHAOS_CARD lines: GlobalText 2113 / 2112 with 2265 (WSclient.cpp:6731-6734, :6781-6784).
+  it('names the Chaos Card combination in its result lines', () => {
+    const said = vi.spyOn(Social, 'systemMessage').mockImplementation(() => undefined);
+    const warned = vi.spyOn(Social, 'errorMessage');
+    runInAction(() => (Economy.mixInventoryType = MIX_TYPE.chaosCard));
+    fillTray();
+    Economy.craftingResult(E.Success, { group: 14, id: 0 } as unknown as Item);
+    const success = said.mock.lastCall;
+    fillTray();
+    Economy.craftingResult(E.Failed, null);
+    runInAction(() => (Economy.mixInventoryType = MIX_TYPE.regular));
+    expect(success).toEqual(['Chaos card combination was successful.']);
+    expect(warned).toHaveBeenLastCalledWith('Chaos card combination has failed.');
   });
 
   it('puts the result in the tray on a success', () => {

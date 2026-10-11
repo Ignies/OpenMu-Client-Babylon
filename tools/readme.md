@@ -17,8 +17,8 @@ and how to run it.
 - `instrumentModels.ts`, `instrumentSamples.ts`: the band system's instruments.
 
 ## Content generators (write files under `versions/` or `src/`)
-- `convertItemTXTtoJson.ts`, `itemFiles.ts`, `syncItemRequirements.ts`, `addRageFighterColumn.ts`:
-  the item files (`versions/shared/items/`).
+- `convertItemTXTtoJson.ts`, `itemFiles.ts`, `syncItemRequirements.ts`, `addRageFighterColumn.ts`,
+  `syncItemClasses.ts`: the item files (`versions/shared/items/`).
 - `monsterFiles.ts`, `buildMonsterHealth.ts`: the monster folders (`versions/shared/monsters/`).
 - `itemIconFit.ts`, `itemIconManifest.ts`: the icon tables (`interface/item_icons/`, `assets/`).
 - `configHexTable.ts`: `docs/configuration_hex.md`.
