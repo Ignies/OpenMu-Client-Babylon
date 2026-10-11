@@ -160,8 +160,9 @@ Phase 5 of [docs/module_streaming.md](../../../docs/module_streaming.md): the mo
   iframe in the page would reload it). Unloading removes the frame, stops the serving and disposes.
   Every refusal is a notice; nothing of a refused module runs.
 - The file format (`streamed.ts`): an ES module whose default export is `defineStreamedModule({ api,
-  install })`. `install` awaits every call, so the same code runs in process and over messages; the
-  export carries `connect` (`guest.ts`), which the frame's page calls with its port. A module bundles
+  install })`. `install(api, where)` awaits every call, so the same code runs in process and over
+  messages; `where` is `'page'` (a window may `draw` a component) or `'frame'` (its own document is
+  the window). The export carries `connect` (`guest.ts`), which the frame's page calls with its port. A module bundles
   `streamed.ts` and what it imports into one file.
 
 ### Limits
@@ -223,7 +224,8 @@ never reaches; a call over one is refused with an error, nothing else happens:
   unknown call, a wrong argument type, an oversized message, map events, packets both ways, their
   end, a function subscribed twice counted once, `dispose` and the stop.
 - `sandbox.test.ts`: the frame's attributes pinned, the port hand-over.
-- `example.test.ts`: a module that uses nothing but the API, run in process and over messages:
+- `example.test.ts`: a module that uses nothing but the API, run in process and over messages (the
+  streamed example, built and streamed both ways, is `tools/modules/example/example.test.ts`):
   both make the same calls on the game and hear the same map changes and packets.
 - `download.test.ts`: a download next to the manifest kept by hash, an absolute address, the cache
   answering (and a cached copy that no longer matches), a hash mismatch, an API range this client

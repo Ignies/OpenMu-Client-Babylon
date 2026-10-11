@@ -61,7 +61,7 @@ modules/           gameplay modules; each has net.ts (packets in), its state and
   hero inventory marketplace mu_helper npc_shop options party personal_shop pets quests
   scope (objects in view) servers session skills social trade vault warp world (weather, fireworks)
   _shared/         helpers more than one module net uses
-  _api/            the module API: contract, in-process host, message binding, sandbox frame
+  _api/            the module API: contract, in-process host, message binding, sandbox frame, streaming
 ```
 
 ## versions/ - content
@@ -107,5 +107,6 @@ fonts/ ui/ icons/ backdrops/ skyline/ js/   interface art, fonts, decoders
 checks/            bun run check (structure), check:lint, check:commits; baselines/ only shrink
 restructure/       move.ts (move files and fix imports), aliasImports.ts, the skill and handler splitters
 packs/             language pack vocabularies
+modules/           sign.ts (first-party module signatures), example/ (the example streamed module)
 *.ts               converters (bmdToGlb, ozj, ozt), asset index, copy and compress for the build
 ```

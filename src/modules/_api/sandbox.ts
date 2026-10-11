@@ -24,7 +24,7 @@ export const HAND_OVER = Object.freeze({ muModuleApi: PROTOCOL_VERSION });
 /**
  * The frame's page for a downloaded module (`streamed.ts` format): it waits for the parent's hand-over,
  * then imports the module from a `data:` URL (an opaque origin has no URL of its own to load from) and
- * calls `install(connect(port))`. The code travels as base64, so nothing in it can end the script.
+ * calls `install(connect(port), 'frame')`. The code travels as base64, so nothing in it can end the script.
  */
 export function sandboxPage(code: Uint8Array): string {
   let text = '';
@@ -34,7 +34,7 @@ addEventListener('message', async e => {
   if (taken || e.source !== parent || !e.data || e.data.muModuleApi !== ${PROTOCOL_VERSION} || !e.ports || !e.ports[0]) return;
   taken = true;
   const m = (await import('data:text/javascript;base64,${btoa(text)}')).default;
-  await m.install(m.connect(e.ports[0]));
+  await m.install(m.connect(e.ports[0]), 'frame');
 });`;
   return `<!doctype html><meta charset="utf-8"><style>html,body{margin:0;background:transparent}</style><script>${script}</script>`;
 }

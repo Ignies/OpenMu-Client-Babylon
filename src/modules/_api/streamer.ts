@@ -12,7 +12,7 @@ import type { ReadyModule, StreamNotice } from './download';
 export type Frame = { port: PortLike; slot: ComponentType; remove(): void };
 
 /** What a module file exports by default (`streamed.ts` `defineStreamedModule`). */
-type StreamedDef = { api?: unknown; core?: unknown; install(api: unknown): unknown };
+type StreamedDef = { api?: unknown; core?: unknown; install(api: unknown, where: 'page'): unknown };
 
 /** The streamer's side of the client (`streamPorts.ts` is the real one, the tests fake it). */
 export type StreamerDeps = {
@@ -64,7 +64,7 @@ export function createStreamer(deps: StreamerDeps) {
     }
     if (gen !== generation) return null;
     try {
-      await def.install(deps.host.api(id));
+      await def.install(deps.host.api(id), 'page');
     } catch {
       deps.host.dispose(id);
       return notice('moduleStream.failed', id), null;
