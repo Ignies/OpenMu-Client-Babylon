@@ -5,7 +5,17 @@ vi.hoisted(() => {
   g.location ??= { href: 'http://localhost/', search: '', hostname: 'localhost', protocol: 'http:' };
 });
 
-const { SHADOW_FOLD } = await import('./objectShadow');
+const { SHADOW_FOLD, blobShadowsActive, setShadowWorld } = await import('./objectShadow');
+const { ENUM_WORLD } = await import('../../core/types');
+
+// Kalima draws no shadow at all: InHellas() in RenderCharacter (ZzzCharacter.cpp:8590) and RenderPartObjectEffect (ZzzObject.cpp:9378).
+describe('the worlds with no shadow', () => {
+  it('are Icarus and every Kalima floor', () => {
+    const on = (world: number) => (setShadowWorld(world), blobShadowsActive());
+    expect([ENUM_WORLD.WD_10ICARUS, ENUM_WORLD.WD_24HELLAS, ENUM_WORLD.WD_24HELLAS_END, ENUM_WORLD.WD_24HELLAS_7].map(on)).toEqual([false, false, false, false]);
+    expect([ENUM_WORLD.WD_0LORENCIA, ENUM_WORLD.WD_11BLOODCASTLE1].map(on)).toEqual([true, true]);
+  });
+});
 
 const SX = 20;
 const SY = 40;

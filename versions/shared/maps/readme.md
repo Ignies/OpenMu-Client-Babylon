@@ -8,7 +8,8 @@ One folder per map. Each folder exports one `MapLayer` (the contract in
   of maps; there is no `switch (map)` anywhere else.
 - `FULL_TILES`, `ROCK04_TILES`, `ROCK02_TILES` (`recipes.ts`): common tile-slot lists.
 - `shared/objectVariants.ts`: `AlphaObject.at(k)`, `PlaySpeedObject.at(k)`, `AbsentModelObject`,
-  `bindAbsentModels(...)`: per-type settings without a subclass per map.
+  `bindAbsentModels(...)`, `ShadowCasterObject` (a map object the original shadows): per-type settings
+  without a subclass per map.
 - `shared/sound.ts` (`WIND`, `smallLoop` / `largeLoop`, `outsideSafeZone`, the monster hook
   shorthands `hookWalk` / `hookOnce` / `hookPlay` / `oneChannel`), `shared/looks.ts` (`OPEN_SKY`,
   `KANTURU_SKY`, `DESERT_SKY`, `GRADED_HAZE`, `sun`...), `shared/lights.ts` (`createFire`),
@@ -122,6 +123,8 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   preset: Devias 66's `CreateFire` 50 up at range 4, Lorencia 150 at range 3, Loren Market 30 and 35
   breathing on their bones, Kanturu 70 and the Tarkan braziers on their sine, and Tarkan 4, which has
   no model, white at range 3 on the same sine.
+- `shadowCasters.test.ts`: the only map objects with a Classic shadow are Blood Castle 28 and 29 (mesh 2
+  left out) and Valley of Loren 50, 83 and 85, the ones whose case calls `RenderBodyShadow`.
 - `bloodcastle/lampObject.test.ts`: the throne-room lamp's flare is `BITMAP_FLARE` too;
   `bloodcastle/candelabraObject.test.ts`: the candelabra's seven flares are 0.5 on any object scale.
 - `lampFlares.test.ts`, `lorencia/candleObject.test.ts`, `devias/candleObject.test.ts`: what the original

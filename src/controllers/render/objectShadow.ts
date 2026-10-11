@@ -60,8 +60,8 @@ const SHADOW_FADE_END = 600 / TILE_CM;
 
 /**
  * The most the fold may move a vertex along the lean axis. It divides by the vertex's height under the
- * light (`SHADOW_SY`), so a tall map object's top - which the original never shadows - was thrown tens
- * of tiles and its triangles drew long black streaks; up to SHADOW_FADE_END a vertex folds under four.
+ * light (`SHADOW_SY`), so a tall caster's top was thrown tens of tiles and its triangles drew long black
+ * streaks; up to SHADOW_FADE_END a vertex folds under four. Not in the original (see the readme).
  */
 const SHADOW_MAX_FOLD = 500 / TILE_CM;
 
@@ -341,9 +341,12 @@ export function getShadowMaterial(scene: Scene, slot: number): CustomMaterial {
 }
 
 /**
- * Worlds where nothing casts a ground shadow.
+ * Worlds where nothing casts a ground shadow: Icarus and Kalima.
  *
- * Icarus is the whole set. `RenderTerrain` is skipped there
+ * Kalima: `InHellas()` gates the character pass (ZzzCharacter.cpp:8590), the
+ * part pass that draws a monster's (ZzzObject.cpp:9378), wings and the pets.
+ *
+ * Icarus: `RenderTerrain` is skipped there
  * (MainScene.cpp:402), so there is no floor for a blob to land on - the
  * projection would hang in the void at terrain height, under islands it has
  * no relationship to. The original suppresses every shadow on this world
@@ -354,6 +357,8 @@ export function getShadowMaterial(scene: Scene, slot: number): CustomMaterial {
  */
 const SHADOWLESS_WORLDS: ReadonlySet<ENUM_WORLD> = new Set([
   ENUM_WORLD.WD_10ICARUS,
+  ...Array.from({ length: ENUM_WORLD.WD_24HELLAS_END - ENUM_WORLD.WD_24HELLAS + 1 }, (_, i) => ENUM_WORLD.WD_24HELLAS + i),
+  ENUM_WORLD.WD_24HELLAS_7,
 ]);
 
 let shadowsAllowed = true;
@@ -404,57 +409,37 @@ export function invalidateShadowState(): void {
 
 blobShadowRefresh.fn = invalidateShadowState;
 
-/** Which of a caster's meshes are in its silhouette. */
-type ShadowMeshRules = {
-  /**
-   * `o->BlendMesh` casts with the rest of the body. Off everywhere the
-   * original has it off, which is everywhere - see `WingObject`.
-   */
-  readonly blendMesh: boolean;
-  /**
-   * Alpha-keyed meshes cast, cut by their own texture (SHADOW_ALPHA_CUTOFF).
-   *
-   * On for characters and their gear, which is what the original's shadow
-   * pass covers and where the key *is* the shape - armour trim, robes,
-   * skirts, a weapon's blade. Off for map objects, which are this project's
-   * own extension of the pass and carry cards the original never meant to
-   * cast: the pre-baked shadow decals under Lorencia's bridges would throw a
-   * second, real shadow of themselves, and every barred gate its own bars.
-   */
-  readonly keyed: boolean;
-};
-
 /**
  * One projected blob for `slot`, or null when this caster has nothing to
  * project. Built on demand - every clone is a full copy of the caster's
  * submesh hierarchy and a second set of draw calls, so on a tier where the
- * slot never activates it should never exist.
+ * slot never activates it should never exist. `blendMeshCasts`: see `meshCasts`.
  */
 export function createObjectShadow(
   root: AbstractMesh,
   parent: TransformNode,
   originNode: TransformNode,
   slot: number,
-  rules: ShadowMeshRules
+  blendMeshCasts: boolean
 ): AbstractMesh | null {
   if (!(root instanceof Mesh)) return null;
 
-  return createOneShadow(root, parent, originNode, slot, rules);
+  return createOneShadow(root, parent, originNode, slot, blendMeshCasts);
 }
 
 /**
  * Whether a caster's mesh is in the silhouette. `AddMeshShadowTriangles`
- * (ZzzBMD.cpp:2295) skips only `BlendMesh` and `HiddenMesh`; keyed meshes follow `rules.keyed`.
+ * (ZzzBMD.cpp:2295) skips only `BlendMesh` and `HiddenMesh`; an alpha-keyed mesh casts, cut by its
+ * own texture (SHADOW_ALPHA_CUTOFF). `blendMeshCasts` keeps the blend mesh in (`WingObject`).
  */
-export function meshCasts(mesh: AbstractMesh, rules: ShadowMeshRules): boolean {
+export function meshCasts(mesh: AbstractMesh, blendMeshCasts: boolean): boolean {
   const blendMesh = mesh.metadata?.brightMesh === true;
   const hidden =
     mesh.metadata?.hiddenByScript === true ||
     mesh.metadata?.shadowSkip === true ||
     mesh.isVisible === false;
-  const keyed = mesh.material?.needAlphaBlending() === true;
 
-  return !hidden && (!blendMesh || rules.blendMesh) && (!keyed || rules.keyed);
+  return !hidden && (!blendMesh || blendMeshCasts);
 }
 
 function createOneShadow(
@@ -462,14 +447,12 @@ function createOneShadow(
   parent: TransformNode,
   originNode: TransformNode,
   slot: number,
-  rules: ShadowMeshRules
+  blendMeshCasts: boolean
 ): AbstractMesh | null {
-  // Decide on the caster before paying for a clone. A map object built
-  // entirely of alpha cards (Noria's fairy-forest foliage) has nothing to
-  // cast, and cloning its hierarchy just to strip every mesh and dispose the
-  // rest was the dominant frame cost of the whole map - see issue #6.
+  // Decide on the caster before paying for a clone: a model whose meshes are
+  // all hidden or blend cards has nothing to cast.
   const casts = [root, ...root.getChildMeshes(false)].some(
-    mesh => meshCasts(mesh, rules) && mesh.getTotalVertices() > 0
+    mesh => meshCasts(mesh, blendMeshCasts) && mesh.getTotalVertices() > 0
   );
 
   if (!casts) return null;
@@ -482,7 +465,7 @@ function createOneShadow(
   let hasGeometry = false;
 
   for (const mesh of [clone, ...clone.getChildMeshes(false)]) {
-    if (!meshCasts(mesh, rules)) {
+    if (!meshCasts(mesh, blendMeshCasts)) {
       if (mesh !== clone) mesh.dispose(false, false);
       continue;
     }

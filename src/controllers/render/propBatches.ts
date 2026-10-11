@@ -130,7 +130,7 @@ type Submesh = {
   /** Posed local bounds over the clip (mesh space). */
   readonly min: Vector3;
   readonly max: Vector3;
-  /** Belongs in the Classic blob (map-object rules: no keyed cards, no blend mesh). */
+  /** Belongs in the Classic blob (`meshCasts`). */
   readonly casts: boolean;
 };
 
@@ -307,8 +307,6 @@ function writeInstance(world: Matrix, target: Float32Array, offset: number): voi
 }
 const boxMin = Vector3.Zero();
 const boxMax = Vector3.Zero();
-const placeMin = Vector3.Zero();
-const placeMax = Vector3.Zero();
 
 function resetBox(min: Vector3, max: Vector3): void {
   min.setAll(Number.POSITIVE_INFINITY);
@@ -475,7 +473,7 @@ class PropBatches {
     const invNode = proto.node.computeWorldMatrix(true).clone().invert();
 
     const submeshes: Submesh[] = [];
-    const rules = { blendMesh: proto.ShadowBlendMeshCasts, keyed: false };
+    const blendMeshCasts = proto.ShadowBlendMeshCasts;
 
     for (const mesh of gltf.mesh.getChildMeshes(false)) {
       if (!(mesh instanceof Mesh)) continue;
@@ -493,7 +491,7 @@ class PropBatches {
         meshToNode,
         min,
         max,
-        casts: meshCasts(mesh, rules),
+        casts: meshCasts(mesh, blendMeshCasts),
       });
     }
 
@@ -604,7 +602,8 @@ class PropBatches {
     const chunkMax = subs.map(() => new Vector3(-Infinity, -Infinity, -Infinity));
     const casterHeight = subs.map(() => 0);
 
-    const shadows = this.tier === null && proto.CastsShadow && !pt.emitsLight;
+    const shadows =
+      this.tier === null && proto.MapShadow && proto.CastsShadow && !pt.emitsLight;
 
     // A roof holds still. A type whose clip moves is foliage: a tree crown
     // is a thin slab a few tiles up, which is the roof test to the letter,
@@ -634,8 +633,6 @@ class PropBatches {
       if (light) light.packFull(i, this.lightFrame);
       else this.packLight(p, inst, i * 4);
 
-      resetBox(placeMin, placeMax);
-
       for (let j = 0; j < subs.length; j++) {
         const sub = subs[j];
 
@@ -647,8 +644,6 @@ class PropBatches {
 
         Vector3.CheckExtends(boxMin, chunkMin[j], chunkMax[j]);
         Vector3.CheckExtends(boxMax, chunkMin[j], chunkMax[j]);
-        Vector3.CheckExtends(boxMin, placeMin, placeMax);
-        Vector3.CheckExtends(boxMax, placeMin, placeMax);
 
         const height = boxMax.y - boxMin.y;
         if (height > casterHeight[j]) casterHeight[j] = height;
@@ -670,21 +665,9 @@ class PropBatches {
         }
       }
 
-      // The blob's size gate, on the whole model at this placement's scale
-      // (`ModelObject._blobShadowIsVisible`).
       if (shadows) {
-        const height = placeMax.y - placeMin.y;
-        const footprint = Math.max(
-          placeMax.x - placeMin.x,
-          placeMax.z - placeMin.z
-        );
-        if (
-          height >= ModelObject.BLOB_SHADOW_MIN_HEIGHT &&
-          footprint <= ModelObject.BLOB_SHADOW_MAX_FOOTPRINT
-        ) {
-          for (let j = 0; j < subs.length; j++) {
-            if (subs[j].casts) shadowLists[j].push(i);
-          }
+        for (let j = 0; j < subs.length; j++) {
+          if (subs[j].casts) shadowLists[j].push(i);
         }
       }
 
