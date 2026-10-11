@@ -1,4 +1,4 @@
-// Ported from RenderObjectScreen (ZzzInventory.cpp:9308-10090) - do not edit.
+// Ported from RenderObjectScreen (ZzzInventory.cpp:8906-9674) - do not edit.
 // 671 of 674 item types; the rest fall back to
 // ITEM_ICON_SCALE_DEFAULT (the three Archangel weapons, which the original
 // draws through a separate multi-model path).

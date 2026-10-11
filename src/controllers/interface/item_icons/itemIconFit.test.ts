@@ -1,4 +1,5 @@
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { ITEM_ICON_FIT } from './itemIconFit';
 import { ITEM_ICON_SCALE } from './itemIconScale';
@@ -20,5 +21,12 @@ describe('the icon fit table', () => {
     for (const key of ['7_59', '12_50', '13_106', '13_123']) {
       if (existsSync(`public/items/item_${key}_0.png`)) expect(ITEM_ICON_FIT[key], key).toBeDefined();
     }
+  });
+});
+
+describe('the scale table', () => {
+  // RenderObjectScreen's chain runs from `float Scale = 0.f` to the last scale branch (ZzzInventory.cpp:8906-9674).
+  it('cites the chain where the original has it', () => {
+    expect(readFileSync(join(__dirname, 'itemIconScale.ts'), 'utf8').split('\n')[0]).toContain('ZzzInventory.cpp:8906-9674');
   });
 });

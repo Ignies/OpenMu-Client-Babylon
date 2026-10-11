@@ -67,7 +67,7 @@ windows themselves are content in `versions/shared/ui/` (see
 - `ui_stage`: one observer on the canvas rect scales the 640x480 stage (`ConvertX` /
   `ConvertY`); `mu_text` maps the original's four GDI Tahoma faces (Winmain.cpp:1251-1254).
 - `item_icons/`: the generated fit table (`tools/itemIconFit.ts`) and the per-item inventory scale
-  from `RenderObjectScreen` (ZzzInventory.cpp:9308-10090). Do not edit. Which icon files exist is
+  from `RenderObjectScreen` (ZzzInventory.cpp:8906-9674). Do not edit. Which icon files exist is
   `assets/itemIconManifest.ts` (`tools/itemIconManifest.ts`).
   `liveItemIcon.ts` (on `item_icons/index.ts`): the slot `item_icon` asks for an icon the pack has no
   file for (`liveItemIcon(item)`, observable, asked once per look until `forgetLiveItemIcons()`, which
@@ -145,7 +145,8 @@ windows themselves are content in `versions/shared/ui/` (see
 - `components/item_tooltip/placement.test.ts`: tooltip and compare-pair placement.
 - `itemTooltip.test.ts`: tooltip lines and name colours against `RenderItemInfo`: ancient sets, pets, harmony,
   sockets, 380 options, wings, the Horn of Fenrir, stack counts.
-- `item_icons/itemIconFit.test.ts`: every Box of Luck level and the newer icons have a fit entry.
+- `item_icons/itemIconFit.test.ts`: every Box of Luck level and the newer icons have a fit entry; the
+  scale table cites the chain where the original has it.
 - `item_icons/itemIconPose.test.ts`: a test per rule group against the original's numbers: weapons
   (hands, the Kris, the sticks, bows, books, shields, the after-switch), armour (the Queen set's default
   and body heights, the lucky sets, named pieces), wings, orbs, seeds and packed jewels, helpers (the
