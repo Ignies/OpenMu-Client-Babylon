@@ -70,8 +70,23 @@ const POTION_GROUP = 14;
 // ---- 2. state + commands ---------------------------------------------------
 // One-shots: nothing to hold between frames.
 
+/** Inside `quietUiSounds`: what runs there plays no interface sound. */
+let quiet = false;
+
 export function playUiSound(kind: UiSound): void {
+  if (quiet) return;
   playSfx(UI_SOUNDS[kind], null, { bus: UI_BUS, channels: UI_CHANNELS[kind] });
+}
+
+/** Runs `fn` with the interface sounds off: `HideAll` closes every window in silence (NewUISystem.cpp:1608). */
+export function quietUiSounds(fn: () => void): void {
+  const was = quiet;
+  quiet = true;
+  try {
+    fn();
+  } finally {
+    quiet = was;
+  }
 }
 
 /**

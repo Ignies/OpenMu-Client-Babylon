@@ -12,7 +12,8 @@ never which skill or item asks for it.
   `stopMusic`, `stop`, `tryUnlock`, `setListener`, `clearListener`, `register(layer)`.
   `index.ts` also re-exports the leaf functions (`playSfx`, `playDrop`, `playSkill`, `COMBAT_BUS`...).
 - `sfx.ts`: `playSfx`, `playUiSound`, `uiClick`, `UI_SOUNDS` from the leaf modules, without
-  loading the facade. Most UI code imports this.
+  loading the facade. Most UI code imports this. `quietUiSounds(fn)`: `fn` plays no interface sound
+  (`MuWindows.closeAll`, the original's silent `HideAll`).
 - `combatSounds.ts`: re-export of the swing, hit, pain, death, pickup and monster voice selectors.
 - `recipes.ts`: the `Sounds` key union (`recipes.json` maps a key to its file), `soundUrl` (the
   version's own file when `gameVersion.data.sounds` names one), `isMusicKey`, `SOUND_KEYS`.

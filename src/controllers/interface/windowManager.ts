@@ -1,7 +1,9 @@
-import { makeAutoObservable, runInAction } from 'mobx';
+import { makeAutoObservable, reaction, runInAction } from 'mobx';
 import { LocalStorage } from '@/core/localStorage';
 import { getUiViewport, onUiViewportChanged } from './components/ui_stage';
 import { GameOptions, uiScaleFactor } from '@/controllers/settings';
+import { quietUiSounds } from '@/controllers/sound/sfx';
+import { AppState } from './uiState';
 
 const STORAGE_KEY = 'mu-windows';
 
@@ -56,6 +58,8 @@ export const MuWindows = new (class _MuWindows {
   /** Open windows, bottom to top. */
   order: string[] = [];
   private closers = new Map<string, WindowCloser>();
+  /** Closers of the windows the hidden interface unmounted, for `closeAll` (top last). */
+  private parked = new Map<string, WindowCloser>();
   private sizes = new Map<string, WindowSize>();
   /** Observable mirror of the stage size, so scales re-fit on resize. */
   private viewport = getUiViewport();
@@ -65,6 +69,8 @@ export const MuWindows = new (class _MuWindows {
       order: true,
     });
     this.load();
+    // The interface is back: its windows mount and register again.
+    reaction(() => AppState.hudHidden, hidden => hidden || this.parked.clear());
     onUiViewportChanged(() => {
       runInAction(() => {
         this.viewport = { ...getUiViewport() };
@@ -133,6 +139,7 @@ export const MuWindows = new (class _MuWindows {
     if (size) this.sizes.set(id, size);
     if (onClose) this.closers.set(id, onClose);
     else this.closers.delete(id);
+    this.parked.delete(id);
     runInAction(() => {
       if (!this.order.includes(id)) this.order = [...this.order, id];
     });
@@ -140,6 +147,9 @@ export const MuWindows = new (class _MuWindows {
   }
 
   unregister(id: string): void {
+    // Hiding the interface unmounts every window that is still open: keep its closer for `closeAll`.
+    const closer = this.closers.get(id);
+    if (closer && AppState.hudHidden) this.parked.set(id, closer);
     this.closers.delete(id);
     this.sizes.delete(id);
     runInAction(() => {
@@ -185,14 +195,18 @@ export const MuWindows = new (class _MuWindows {
 
   /**
    * `HideAll` (NewUISystem.cpp:1608): every open flag drops, then every stacked window's
-   * closer runs, top to bottom (what `Hide` runs: a trade cancel, the vault's close packet).
+   * closer runs, top to bottom (what `Hide` runs: a trade cancel, the vault's close packet),
+   * with the interface sounds off; the windows the hidden interface unmounted are reached too.
    */
   closeAll(): void {
-    const stacked = [...this.order].reverse();
+    const closers = [...this.order.map(id => this.closers.get(id)), ...this.parked.values()].reverse();
+    this.parked.clear();
     runInAction(() => {
       for (const id of Object.keys(this.open)) this.open[id] = false;
     });
-    for (const id of stacked) this.closers.get(id)?.();
+    quietUiSounds(() => {
+      for (const closer of closers) closer?.();
+    });
   }
 
   // ---- placement ----------------------------------------------------------
