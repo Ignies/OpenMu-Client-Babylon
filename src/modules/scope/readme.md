@@ -55,4 +55,5 @@ players, plus their moves and equipment changes. The entities live in the ECS wo
 - show a new equipment slot on other players: `applyAppearanceChange` in `net.ts`.
 
 ## Tests
-- `net.test.ts`: a player entering view wears its effects' looks; re-adding the body ends the old ones.
+- `net.test.ts`: a player entering view wears its effects' looks; re-adding the body ends the old ones;
+  OpenMU's own master buff numbers are listed as their base effect.

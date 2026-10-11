@@ -80,4 +80,10 @@ describe('buff looks on a player in view', () => {
     expect(auras.length).toBeGreaterThan(0);
     expect(auras.every(a => a.alive)).toBe(true);
   });
+
+  // OpenMU numbers seven master buffs on its own; the original knows each by its base (SkillsInitializer.cs:84-90).
+  it('lists a master buff OpenMU numbers on its own as its base effect', () => {
+    enterView(6, [148]);
+    expect([...(Ecs.world?.getByNetId(6)?.buffs ?? [])]).toEqual([5]);
+  });
 });

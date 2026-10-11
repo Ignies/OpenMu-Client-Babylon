@@ -194,9 +194,8 @@ export default defineSkill({
   // 48 Swell Life: at AttackTime 10 the spirit ring, its orange glows, the rising column and two ground rings; see swellLife.
   visual: { cast: swellLife, enhanced: { cast: swellLifeOf(true) } },
   buffs: {
-    // 8 Greater Fortitude / Swell Life (135 its proficiency): orange motes off the upper body.
+    // 8 Greater Fortitude / Swell Life (OpenMU's 135 arrives as 8, modules/skills/objectEffects.ts): orange motes off the upper body.
     8: () => ({ boneMotes: { bones: UPPER_BONES, colour: [1, 0.5, 0.1] } }),
-    135: () => ({ boneMotes: { bones: UPPER_BONES, colour: [1, 0.5, 0.1] } }),
   },
   clip: { ground: A.PLAYER_SKILL_VITALITY }, // Swell Life
   // Swell Life: the original lights nothing. On the graded tiers the orange spirit ring as it leaves the knight, the

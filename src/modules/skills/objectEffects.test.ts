@@ -24,6 +24,17 @@ const { MagicEffectStatusPacket } = await import('@versions/shared/packets/Serve
 
 installNet();
 
+function effectStatus(playerId: number, effectId: number, active: boolean): void {
+  const p = MagicEffectStatusPacket.createPacket();
+  p.PlayerId = playerId;
+  p.EffectId = effectId;
+  p.IsActive = active;
+  EventBus.emit('MagicEffectStatus', p.buffer);
+}
+
+/** OpenMU's own numbers for seven master buffs and the base effect each copies (SkillsInitializer.cs:84-90). */
+const OPENMU_MASTER = [[135, 8], [138, 82], [139, 82], [148, 5], [153, 131], [154, 131], [155, 130]] as const;
+
 // The hero object outlives a map load in the original, so its buffs register meanwhile (WSclient.cpp:3805-3837).
 describe('the buff bar', () => {
   it('takes the hero effect while no world is up (a warp)', () => {
@@ -37,6 +48,17 @@ describe('the buff bar', () => {
     p.IsActive = true;
     EventBus.emit('MagicEffectStatus', p.buffer);
     expect(HeroSkills.buffs).toContain(8);
+  });
+
+  // The original knows these buffs by their base effect only (MuHelper.cpp:490-569 BuffTarget).
+  it('takes a master buff OpenMU numbers on its own as its base effect', () => {
+    runInAction(() => (HeroSkills.buffs = []));
+    for (const [openmu, base] of OPENMU_MASTER) {
+      effectStatus(1, openmu, true);
+      expect(HeroSkills.buffs).toEqual([base]);
+      effectStatus(1, openmu, false);
+      expect(HeroSkills.buffs).toEqual([]);
+    }
   });
 });
 
@@ -72,5 +94,11 @@ describe('buff looks over a map change', () => {
     redrawBuffLooks();
     expect(auras.length).toBe(before.length);
     expect(auras.every(a => a.alive)).toBe(true);
+  });
+
+  it('puts a master buff OpenMU numbers on its own on a body as its base effect', () => {
+    const world = Ecs.world as InstanceType<typeof World>;
+    effectStatus(7, 148, true);
+    expect([...(world.getByNetId(7)?.buffs ?? [])]).toEqual([1, 5]);
   });
 });
