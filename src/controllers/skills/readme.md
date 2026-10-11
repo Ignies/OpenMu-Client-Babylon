@@ -22,6 +22,7 @@ themselves are content in `versions/shared/skills/` (see [docs/content.md](../..
 - Dispatch, used by modules and ECS systems through `versions/shared/skills/skillVisuals.ts`:
   `playTargetedSkillVisual`, `playAreaSkillVisual`, `playBowShotVisual`, `setBuffVisual`,
   `clearBuffVisuals`, `playBuffHits`, `skillVisualFor`, `baseSkill`, `fallbackFor`.
+- `castIsDrawn(caster)` (`castBudget.ts`): whether a cast is drawn at all, read by the three dispatches.
 
 ## How it works
 - `registerSkills` writes `visual` into `SKILL_VISUALS`, `lookAliases` / `masterAliases` into
@@ -71,6 +72,9 @@ themselves are content in `versions/shared/skills/` (see [docs/content.md](../..
 - Buff hits: `playBuffHits(scene, wearer, attacker)` runs every `BUFF_HITS` entry whose effect the
   wearer holds (Soul Barrier's shell on the hero, WSclient.cpp:3282-3291).
 - In dev builds `window.__skillVisuals.area / targeted / buff` fire a row by hand.
+- The crowd options (ours, Options > Video > World): with `otherSkillEffects` off, `castIsDrawn` leaves
+  out another player's casts and bow shots (visual and light); the blow, its damage numbers and its
+  sound still come. The hero's and the monsters' are always drawn.
 
 ## Depends on / used by
 - uses: fx (`effects.spawn`), lighting, combat, sound and weather (`scorch`, `burn`) controllers,
@@ -96,8 +100,8 @@ themselves are content in `versions/shared/skills/` (see [docs/content.md](../..
   `registerSkills` (or `combat/skillRules.ts` for combat fields); never test a skill number there.
 
 ## Tests
-No tests in this folder. The tests in `versions/shared/skills/` cover it (`releaseTiming.test.ts`
-for the release):
+`castBudget.test.ts`: which casts are drawn. The tests in `versions/shared/skills/` cover the rest
+(`releaseTiming.test.ts` for the release):
 - `skillVisuals.golden.test.ts`: what every skill id spawns on cast, area, bow shot and buff.
 - `skillTables.golden.test.ts`: what every id resolves to for light, sound, clip, target,
   step-in and delay.

@@ -19,6 +19,10 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
   to the first drawn item under three tiles, `AutoGetItem`, NewUIHotKey.cpp:455; `startPositionSlide` /
   `isSliding` in `positionSlideSystem.ts`: `modules/scope/net.ts` starts one on `ObjectMoved`, and the
   attack, cast, talk, pickup, rest, walk and gate systems wait while the hero slides).
+- `systems/othersShown.ts`: the crowd options (ours, Options > Video > World): `isOtherPlayer`,
+  `gearEffectsShown` (`itemGlowSystem` lights no sparkle, aura or lamp for another player's gear while
+  `otherGearEffects` is off) and `petShown` (`petSystem` spawns no pet or raven for another player while
+  `otherPets` is off; a ridden mount stays). The hero and the monsters are never thinned.
 
 ## How it works
 - A system is a factory `(world) => { update?(dt) }` in `systems/`. `createWorld.ts` lists every
@@ -85,6 +89,8 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
   first drawn item under three tiles, not the nearest.
 - `systems/gmMark.test.ts`: the GM buff or the hero's operator status asks for the Webzen mark, cloaking hides it.
 - `systems/npcTalkSystem.test.ts`: the Gateway Machine is talked to from 5.5 tiles with no free tile beside it.
+- `systems/othersShown.test.ts`: the crowd options hide only other players' gear effects and pets, never a
+  ridden mount, the hero's or a monster's.
 - `systems/playerControllerSystem.test.ts`: a ground click calls off a standing cast, except while the
   right button is held; a click while the server slides the hero in is lost, walk and attack alike.
 - `systems/skillCastSystem.test.ts`: a cast that cuts a walk stops it on the path's next node.

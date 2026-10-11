@@ -550,6 +550,9 @@ export const CATEGORIES: Category[] = [
               toggle('shadows'),
               toggle('dynamicLights'),
               toggle('monsterEffects'),
+              toggle('otherSkillEffects'),
+              toggle('otherGearEffects'),
+              toggle('otherPets'),
               choice(
                 'itemEffects',
                 ITEM_EFFECT_MODE_MAX,

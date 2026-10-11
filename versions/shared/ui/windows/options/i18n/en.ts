@@ -408,6 +408,13 @@ const en = {
   'options.autoQuiver': 'Automatic quiver',
   'options.help.autoQuiver':
     'Puts the next arrows or bolts from your bag in your hand as soon as the quiver runs out, instead of at your next shot. Only on servers that allow it.',
+  'options.otherSkillEffects': "Other players' skill effects",
+  'options.help.otherSkillEffects':
+    "The effects of skills other players cast. Yours and the monsters' always show. Off saves work in crowded places.",
+  'options.otherGearEffects': "Other players' gear effects",
+  'options.help.otherGearEffects': "The sparkle, aura and light of other players' items.",
+  'options.otherPets': "Other players' pets",
+  'options.help.otherPets': "Other players' pets and Dark Raven. A mount someone rides stays.",
 };
 
 export default en;

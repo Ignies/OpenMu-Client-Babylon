@@ -376,4 +376,12 @@ export default {
   'options.autoQuiver': 'Automatyczny kołczan',
   'options.help.autoQuiver':
     'Wkłada do ręki kolejne strzały lub bełty z plecaka, gdy tylko kołczan się skończy, zamiast przy następnym strzale. Tylko na serwerach, które na to pozwalają.',
+  'options.otherSkillEffects': 'Efekty umiejętności innych graczy',
+  'options.help.otherSkillEffects':
+    'Efekty umiejętności innych graczy. Twoje i potworów są zawsze widoczne. Wyłączone odciąża zatłoczone miejsca.',
+  'options.otherGearEffects': 'Efekty ekwipunku innych graczy',
+  'options.help.otherGearEffects': 'Błysk, aura i światło przedmiotów innych graczy.',
+  'options.otherPets': 'Zwierzaki innych graczy',
+  'options.help.otherPets':
+    'Zwierzaki i Dark Raven innych graczy. Wierzchowiec, na którym ktoś jedzie, zostaje.',
 } satisfies Partial<Record<keyof typeof en, string>>;

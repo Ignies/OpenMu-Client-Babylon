@@ -27,6 +27,7 @@ import { EventBus } from '../../core/eventBus';
 import { itemSelfLight, lightItem, type ItemLampKind } from '../../controllers/lighting/items';
 import type { LightSource } from '../../controllers/lighting/lightSource';
 import { shownGear, type Gear } from '../../controllers/actors';
+import { gearEffectsShown } from './othersShown';
 
 /**
  * Item glow: tier stamps, the +9..+15 lamp / aura / crackle and the excellent
@@ -311,6 +312,7 @@ export const ItemGlowSystem: ISystemFactory = world => {
         const state = stateOf(e);
         const { charAppearance, modelObject, transform } = e;
         const app = shownGear(e, world.mapIndex) ?? charAppearance;
+        const gearEffects = gearEffectsShown(e);
 
         // The apply counter leads: the lamp belongs to this character's
         // items, so it is re-examined whenever those items are put on the
@@ -318,7 +320,7 @@ export const ItemGlowSystem: ISystemFactory = world => {
         // gear is exactly what a warp does.
         const signature =
           options +
-          '|' +
+          (gearEffects ? '|' : '|off|') +
           (charAppearance.applied ?? 0) +
           '|' +
           itemSignature(app.leftHand) +
@@ -337,7 +339,7 @@ export const ItemGlowSystem: ISystemFactory = world => {
 
         if (signature !== state.signature) {
           state.signature = signature;
-          state.sparkleWanted = anyExcellent(app);
+          state.sparkleWanted = gearEffects && anyExcellent(app);
 
           // This list is in AURA_SLOTS order: the winner's index names the
           // piece the aura comes off.
@@ -367,6 +369,7 @@ export const ItemGlowSystem: ISystemFactory = world => {
           // renders WHITE - see the note above.
           const stale =
             restamp ||
+            !gearEffects ||
             !state.lamp ||
             state.lamp.tier !== tier ||
             state.lamp.auraSlot !== slot ||
@@ -380,7 +383,7 @@ export const ItemGlowSystem: ISystemFactory = world => {
               stampPlayer(modelObject as PlayerObject, app);
             }
 
-            if (lampsOn && wantsLamp(tier)) {
+            if (lampsOn && gearEffects && wantsLamp(tier)) {
               state.lamp = lightLamp(
                 tier,
                 transform.pos.x,

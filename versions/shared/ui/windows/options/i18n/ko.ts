@@ -315,4 +315,11 @@ export default {
   'options.needs.server': '이 서버에서는 허용되지 않습니다.',
   'options.autoQuiver': '화살통 자동 장전',
   'options.help.autoQuiver': '화살통이 비면 다음 사격을 기다리지 않고 가방의 다음 화살이나 볼트를 바로 손에 장착합니다. 허용하는 서버에서만.',
+  'options.otherSkillEffects': '다른 플레이어의 스킬 효과',
+  'options.help.otherSkillEffects':
+    '다른 플레이어가 쓰는 스킬의 효과. 내 것과 몬스터의 것은 항상 보입니다. 끄면 붐비는 곳에서 부담이 줄어듭니다.',
+  'options.otherGearEffects': '다른 플레이어의 장비 효과',
+  'options.help.otherGearEffects': '다른 플레이어 아이템의 반짝임, 오라, 빛.',
+  'options.otherPets': '다른 플레이어의 펫',
+  'options.help.otherPets': '다른 플레이어의 펫과 다크 레이븐. 타고 있는 탈것은 남습니다.',
 } satisfies Partial<Record<keyof typeof en, string>>;

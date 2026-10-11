@@ -408,4 +408,12 @@ export default {
   'options.autoQuiver': 'Автоматический колчан',
   'options.help.autoQuiver':
     'Сразу кладёт в руку следующие стрелы или болты из сумки, как только колчан опустеет, а не при следующем выстреле. Только на серверах, которые это разрешают.',
+  'options.otherSkillEffects': 'Эффекты умений других игроков',
+  'options.help.otherSkillEffects':
+    'Эффекты умений других игроков. Ваши и эффекты монстров видны всегда. Выключено - легче в людных местах.',
+  'options.otherGearEffects': 'Эффекты снаряжения других игроков',
+  'options.help.otherGearEffects': 'Блеск, аура и свет предметов других игроков.',
+  'options.otherPets': 'Питомцы других игроков',
+  'options.help.otherPets':
+    'Питомцы и Dark Raven других игроков. Ездовое животное под всадником остаётся.',
 } satisfies Partial<Record<keyof typeof en, string>>;

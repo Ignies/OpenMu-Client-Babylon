@@ -379,4 +379,12 @@ export default {
   'options.autoQuiver': 'Aljava automática',
   'options.help.autoQuiver':
     'Coloca na sua mão as próximas flechas ou virotes da bolsa assim que a aljava acaba, em vez de no próximo disparo. Só em servidores que permitem.',
+  'options.otherSkillEffects': 'Efeitos de habilidades de outros jogadores',
+  'options.help.otherSkillEffects':
+    'Os efeitos das habilidades de outros jogadores. Os seus e os dos monstros sempre aparecem. Desligado alivia lugares lotados.',
+  'options.otherGearEffects': 'Efeitos do equipamento de outros jogadores',
+  'options.help.otherGearEffects': 'O brilho, a aura e a luz dos itens de outros jogadores.',
+  'options.otherPets': 'Mascotes de outros jogadores',
+  'options.help.otherPets':
+    'Os mascotes e o Dark Raven de outros jogadores. A montaria que alguém monta fica.',
 } satisfies Partial<Record<keyof typeof en, string>>;

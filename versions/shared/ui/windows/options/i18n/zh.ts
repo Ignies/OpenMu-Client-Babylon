@@ -309,4 +309,10 @@ export default {
   'options.needs.server': '此服务器不允许。',
   'options.autoQuiver': '自动换箭筒',
   'options.help.autoQuiver': '箭筒用完时立即把背包里的下一组箭或弩箭装到手上，而不是等到下一次射击。仅限允许此功能的服务器。',
+  'options.otherSkillEffects': '其他玩家的技能特效',
+  'options.help.otherSkillEffects': '其他玩家施放技能的特效。你自己和怪物的特效始终显示。关闭可减轻人多场所的负担。',
+  'options.otherGearEffects': '其他玩家的装备特效',
+  'options.help.otherGearEffects': '其他玩家物品的闪光、光环和光照。',
+  'options.otherPets': '其他玩家的宠物',
+  'options.help.otherPets': '其他玩家的宠物和黑鸦。正在骑乘的坐骑保留。',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -352,4 +352,11 @@ export default {
   'options.autoQuiver': 'เติมกระบอกธนูอัตโนมัติ',
   'options.help.autoQuiver':
     'ใส่ลูกธนูหรือลูกดอกชุดถัดไปจากกระเป๋าเข้ามือทันทีที่กระบอกธนูหมด แทนที่จะรอยิงครั้งถัดไป เฉพาะเซิร์ฟเวอร์ที่อนุญาต',
+  'options.otherSkillEffects': 'เอฟเฟกต์สกิลของผู้เล่นอื่น',
+  'options.help.otherSkillEffects':
+    'เอฟเฟกต์ของสกิลที่ผู้เล่นอื่นใช้ ของคุณและของมอนสเตอร์จะแสดงเสมอ ปิดไว้ช่วยลดภาระในที่คนเยอะ',
+  'options.otherGearEffects': 'เอฟเฟกต์อุปกรณ์ของผู้เล่นอื่น',
+  'options.help.otherGearEffects': 'ประกาย ออร่า และแสงของไอเทมของผู้เล่นอื่น',
+  'options.otherPets': 'สัตว์เลี้ยงของผู้เล่นอื่น',
+  'options.help.otherPets': 'สัตว์เลี้ยงและ Dark Raven ของผู้เล่นอื่น พาหนะที่มีคนขี่อยู่จะยังแสดง',
 } satisfies Partial<Record<keyof typeof en, string>>;

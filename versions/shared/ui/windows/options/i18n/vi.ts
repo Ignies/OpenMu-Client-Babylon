@@ -368,4 +368,13 @@ export default {
   'options.autoQuiver': 'Tự thay ống tên',
   'options.help.autoQuiver':
     'Lắp ngay bó tên hoặc tên nỏ tiếp theo trong túi vào tay khi ống tên hết, thay vì đợi lần bắn sau. Chỉ trên máy chủ cho phép.',
+  'options.otherSkillEffects': 'Hiệu ứng kỹ năng của người chơi khác',
+  'options.help.otherSkillEffects':
+    'Hiệu ứng kỹ năng của người chơi khác. Của bạn và của quái vật luôn hiện. Tắt để nhẹ hơn ở nơi đông người.',
+  'options.otherGearEffects': 'Hiệu ứng trang bị của người chơi khác',
+  'options.help.otherGearEffects':
+    'Ánh lấp lánh, hào quang và ánh sáng của vật phẩm người chơi khác.',
+  'options.otherPets': 'Thú cưng của người chơi khác',
+  'options.help.otherPets':
+    'Thú cưng và Dark Raven của người chơi khác. Thú cưỡi đang được cưỡi vẫn hiện.',
 } satisfies Partial<Record<keyof typeof en, string>>;

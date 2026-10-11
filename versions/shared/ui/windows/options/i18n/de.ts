@@ -412,4 +412,12 @@ export default {
   'options.autoQuiver': 'Automatischer Köcher',
   'options.help.autoQuiver':
     'Legt die nächsten Pfeile oder Bolzen aus deinem Inventar in die Hand, sobald der Köcher leer ist, statt erst beim nächsten Schuss. Nur auf Servern, die es erlauben.',
+  'options.otherSkillEffects': 'Fertigkeitseffekte anderer Spieler',
+  'options.help.otherSkillEffects':
+    'Die Effekte der Fertigkeiten anderer Spieler. Deine und die der Monster sind immer zu sehen. Aus spart Arbeit an vollen Orten.',
+  'options.otherGearEffects': 'Ausrüstungseffekte anderer Spieler',
+  'options.help.otherGearEffects': 'Funkeln, Aura und Licht der Gegenstände anderer Spieler.',
+  'options.otherPets': 'Begleiter anderer Spieler',
+  'options.help.otherPets':
+    'Begleiter und Dark Raven anderer Spieler. Ein gerittenes Reittier bleibt.',
 } satisfies Partial<Record<keyof typeof en, string>>;

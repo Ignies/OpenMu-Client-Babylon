@@ -382,4 +382,13 @@ export default {
   'options.autoQuiver': 'Faretra automatica',
   'options.help.autoQuiver':
     'Mette in mano le frecce o i dardi successivi dello zaino appena la faretra si esaurisce, invece che al tiro successivo. Solo sui server che lo consentono.',
+  'options.otherSkillEffects': 'Effetti delle abilità degli altri giocatori',
+  'options.help.otherSkillEffects':
+    'Gli effetti delle abilità degli altri giocatori. I tuoi e quelli dei mostri si vedono sempre. Spento alleggerisce i luoghi affollati.',
+  'options.otherGearEffects': "Effetti dell'equipaggiamento degli altri giocatori",
+  'options.help.otherGearEffects':
+    "Il luccichio, l'aura e la luce degli oggetti degli altri giocatori.",
+  'options.otherPets': 'Animali degli altri giocatori',
+  'options.help.otherPets':
+    'Gli animali e il Dark Raven degli altri giocatori. Una cavalcatura montata resta.',
 } satisfies Partial<Record<keyof typeof en, string>>;

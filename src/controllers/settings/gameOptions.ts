@@ -263,6 +263,12 @@ export type GameOptions = {
    * and nothing more.
    */
   monsterEffects: boolean;
+  /** Other players' skill visuals (ours, a crowd option); yours and the monsters' always show. */
+  otherSkillEffects: boolean;
+  /** The sparkle, aura and light of other players' gear (ours, a crowd option). */
+  otherGearEffects: boolean;
+  /** Other players' pets and Dark Raven (ours, a crowd option); a ridden mount stays. */
+  otherPets: boolean;
   autoAttack: boolean;
   /**
    * An amount box in front of every `+` in the character info window, so a
@@ -610,6 +616,9 @@ const DEFAULTS: GameOptions = {
   renderDistance: 0,
   propBatching: true,
   monsterEffects: true,
+  otherSkillEffects: true,
+  otherGearEffects: true,
+  otherPets: true,
   autoAttack: false,
   statPointAmounts: true,
   whisperBeep: true,

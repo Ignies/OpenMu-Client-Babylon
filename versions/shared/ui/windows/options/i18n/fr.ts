@@ -377,4 +377,12 @@ export default {
   'options.autoQuiver': 'Carquois automatique',
   'options.help.autoQuiver':
     'Met en main les flèches ou carreaux suivants de votre sac dès que le carquois est vide, au lieu de votre prochain tir. Seulement sur les serveurs qui l’autorisent.',
+  'options.otherSkillEffects': 'Effets des compétences des autres joueurs',
+  'options.help.otherSkillEffects':
+    'Les effets des compétences des autres joueurs. Les vôtres et ceux des monstres restent visibles. Désactivé, allège les lieux bondés.',
+  'options.otherGearEffects': "Effets de l'équipement des autres joueurs",
+  'options.help.otherGearEffects': "L'éclat, l'aura et la lumière des objets des autres joueurs.",
+  'options.otherPets': 'Familiers des autres joueurs',
+  'options.help.otherPets':
+    'Les familiers et le Dark Raven des autres joueurs. Une monture chevauchée reste.',
 } satisfies Partial<Record<keyof typeof en, string>>;

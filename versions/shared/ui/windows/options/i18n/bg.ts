@@ -362,4 +362,12 @@ export default {
   'options.autoQuiver': 'Автоматичен колчан',
   'options.help.autoQuiver':
     'Слага следващите стрели или болтове от чантата в ръката ви веднага щом колчанът свърши, а не при следващия изстрел. Само на сървъри, които го позволяват.',
+  'options.otherSkillEffects': 'Ефекти от уменията на други играчи',
+  'options.help.otherSkillEffects':
+    'Ефектите от уменията на другите играчи. Твоите и тези на чудовищата винаги се виждат. Изключено пести работа на многолюдни места.',
+  'options.otherGearEffects': 'Ефекти от екипировката на други играчи',
+  'options.help.otherGearEffects': 'Блясъкът, аурата и светлината на предметите на другите играчи.',
+  'options.otherPets': 'Любимци на други играчи',
+  'options.help.otherPets':
+    'Любимците и Dark Raven на другите играчи. Ездитното животно, което някой язди, остава.',
 } satisfies Partial<Record<keyof typeof en, string>>;

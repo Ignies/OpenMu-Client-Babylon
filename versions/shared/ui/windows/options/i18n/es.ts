@@ -417,4 +417,12 @@ export default {
   'options.autoQuiver': 'Carcaj automático',
   'options.help.autoQuiver':
     'Pone en tu mano las siguientes flechas o virotes del inventario en cuanto se acaba el carcaj, en vez de en tu próximo disparo. Solo en servidores que lo permiten.',
+  'options.otherSkillEffects': 'Efectos de habilidades de otros jugadores',
+  'options.help.otherSkillEffects':
+    'Los efectos de las habilidades de otros jugadores. Los tuyos y los de los monstruos siempre se ven. Apagado ahorra trabajo en zonas llenas.',
+  'options.otherGearEffects': 'Efectos del equipo de otros jugadores',
+  'options.help.otherGearEffects': 'El brillo, el aura y la luz de los objetos de otros jugadores.',
+  'options.otherPets': 'Mascotas de otros jugadores',
+  'options.help.otherPets':
+    'Las mascotas y el Dark Raven de otros jugadores. La montura que alguien monta se queda.',
 } satisfies Partial<Record<keyof typeof en, string>>;

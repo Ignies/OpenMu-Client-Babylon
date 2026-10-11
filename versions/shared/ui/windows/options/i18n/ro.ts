@@ -386,4 +386,11 @@ export default {
   'options.autoQuiver': 'Tolbă automată',
   'options.help.autoQuiver':
     'Pune în mână următoarele săgeți sau bolțuri din rucsac imediat ce tolba se golește, nu la următoarea tragere. Doar pe serverele care permit.',
+  'options.otherSkillEffects': 'Efectele abilităților altor jucători',
+  'options.help.otherSkillEffects':
+    'Efectele abilităților altor jucători. Ale tale și ale monștrilor se văd mereu. Oprit ușurează locurile aglomerate.',
+  'options.otherGearEffects': 'Efectele echipamentului altor jucători',
+  'options.help.otherGearEffects': 'Sclipirea, aura și lumina obiectelor altor jucători.',
+  'options.otherPets': 'Animalele altor jucători',
+  'options.help.otherPets': 'Animalele și Dark Raven ale altor jucători. Animalul călărit rămâne.',
 } satisfies Partial<Record<keyof typeof en, string>>;

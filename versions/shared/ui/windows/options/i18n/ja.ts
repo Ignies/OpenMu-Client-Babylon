@@ -313,4 +313,10 @@ export default {
   'options.needs.server': 'このサーバーでは許可されていません。',
   'options.autoQuiver': '矢筒の自動装填',
   'options.help.autoQuiver': '矢筒が尽きたら、次の射撃を待たずにバッグ内の次の矢またはボルトを手に装備します。許可しているサーバーでのみ。',
+  'options.otherSkillEffects': '他プレイヤーのスキルエフェクト',
+  'options.help.otherSkillEffects': '他のプレイヤーが使うスキルのエフェクト。自分とモンスターのものは常に表示されます。オフにすると混雑した場所で軽くなります。',
+  'options.otherGearEffects': '他プレイヤーの装備エフェクト',
+  'options.help.otherGearEffects': '他のプレイヤーのアイテムの輝き、オーラ、光。',
+  'options.otherPets': '他プレイヤーのペット',
+  'options.help.otherPets': '他のプレイヤーのペットとダークレイヴン。騎乗中の乗り物は残ります。',
 } satisfies Partial<Record<keyof typeof en, string>>;
