@@ -68,6 +68,7 @@ cli/docker.ts             every docker call                       cli/compose.ts
 cli/openmu.ts             OpenMU checkout / source build          cli/health.ts     checks, wait for OpenMU
 cli/backup.ts             backup and restore                      cli/firewall.ts, ports.ts, launcher.ts
 cli/ui.ts                 the look (@clack/prompts)               cli/exec.ts       running programs
+cli/e2e.ts, loginCheck.ts  the end-to-end run and its game check (the client's own protocol code)
 stack/                    compose files and Dockerfiles
 ```
 
@@ -146,6 +147,9 @@ everything the stack reads is rendered from `mu.env`, so `mu config` can change 
 - `cli/backup.test.ts`: role filtering, backup names.
 - End to end, with Docker: `MU_STATE=<scratch folder> bun install/cli/e2e.ts` (build, start, check;
   then `backup`, `down`). It refuses to run without `MU_STATE`, so it never touches a real install.
+  Its `check` also plays the game through the proxy as the test GM (`cli/loginCheck.ts`, with the
+  client's packet classes and encryption): password login, the character list, and a module packet
+  (0xE8) sent at the character list dropped unread while one sent in the world reaches the handler.
 
 ## Troubleshooting
 
