@@ -130,6 +130,18 @@
     color: #fff;
     border-color: @mp-gold;
   }
+
+  // A phone: in the window's corner, sized from the script (closeButtonSize).
+  &.is-corner {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    z-index: 5;
+    color: @mp-gold;
+    background: rgba(8, 10, 15, 0.8);
+    border-width: 2px;
+    border-radius: 50%;
+  }
 }
 
 // ---- toolbar -------------------------------------------------------------

@@ -36,3 +36,12 @@ export const RAIL = box(110, 266, 330, 924);
 
 /** The main area, inside the gold rail at x 359-1498. */
 export const CONTENT = box(368, 266, 1492, 924);
+
+/** The close button's side in window pixels, and the least a finger gets on a phone screen. */
+const CLOSE_PX = 20;
+const MIN_TAP_PX = 40;
+
+/** 20 on a desktop; on a phone at least 40 on screen, however small the window is scaled. */
+export function closeButtonSize(scale: number, mobile: boolean): number {
+  return mobile ? Math.max(CLOSE_PX, Math.ceil(MIN_TAP_PX / scale)) : CLOSE_PX;
+}

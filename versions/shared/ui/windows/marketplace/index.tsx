@@ -18,7 +18,8 @@ import {
 } from '@/modules/marketplace/state';
 import type { Listing } from '@/modules/marketplace/mockListings';
 import type { HistoryEntry } from '@/modules/marketplace/api';
-import { CONTENT, FRAME_H, FRAME_SRC, FRAME_W, PLAQUE, RAIL } from './layout';
+import { CONTENT, FRAME_H, FRAME_SRC, FRAME_W, PLAQUE, RAIL, closeButtonSize } from './layout';
+import { useIsMobile } from '@/controllers/interface/mobile';
 
 export const MARKETPLACE_ID = 'marketplace';
 export const MARKETPLACE_WIDTH = 1000;
@@ -572,6 +573,7 @@ export const MarketplaceWindow = observer(() => {
     height: MARKETPLACE_HEIGHT,
     onClose: () => Marketplace.close(),
   });
+  const mobile = useIsMobile();
 
   const { flash } = Marketplace;
   useEffect(() => {
@@ -594,6 +596,20 @@ export const MarketplaceWindow = observer(() => {
   const hovered = Marketplace.hoveredListing;
   const cards = Marketplace.pageItems;
   const browsing = Marketplace.tab === 'browse' || Marketplace.tab === 'mine';
+
+  // On a phone it sits in the window's corner, big enough for a finger (layout.ts).
+  const size = closeButtonSize(chrome.scale, mobile);
+  const closeButton = (
+    <button
+      data-no-drag
+      className={`mp-close${mobile ? ' is-corner' : ''}`}
+      aria-label={t('common.close')}
+      style={mobile ? { width: size, height: size, fontSize: Math.round(size / 2) } : undefined}
+      onClick={() => Marketplace.close()}
+    >
+      x
+    </button>
+  );
 
   return (
     <div
@@ -624,15 +640,10 @@ export const MarketplaceWindow = observer(() => {
           {formatZen(Marketplace.zen)} <span className="mp-zen">{t('common.zen')}</span>
         </div>
 
-        <button
-          data-no-drag
-          className="mp-close"
-          aria-label={t('common.close')}
-          onClick={() => Marketplace.close()}
-        >
-          x
-        </button>
+        {!mobile && closeButton}
       </header>
+
+      {mobile && closeButton}
 
       <Rail />
 
