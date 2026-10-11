@@ -415,6 +415,11 @@ const en = {
   'options.help.otherGearEffects': "The sparkle, aura and light of other players' items.",
   'options.otherPets': "Other players' pets",
   'options.help.otherPets': "Other players' pets and Dark Raven. A mount someone rides stays.",
+  'options.otherPlayerAnimations': "Other players' animations",
+  'options.help.otherPlayerAnimations':
+    'Off, other players hold still while standing or walking; their blows and deaths still play. Saves work in crowded places.',
+  'options.npcAnimations': 'NPC animations',
+  'options.help.npcAnimations': 'Off, the NPCs hold still.',
 };
 
 export default en;

@@ -115,7 +115,8 @@ There is no `index.ts` facade; other folders import the modules directly.
   a part unlinked from its bone goes back under its owner; an action stops every other running clip, the loader's clip 0 too;
   a character casts the blob, a map object only with `MapShadow`; `ShadowFromGround` marks the clone;
   `ShadowMeshes` keeps the other meshes out; the clone carries `ShadowAlpha` and draws from `ShadowMinAlpha`;
-  no per-frame `Draw` / `DrawMesh` hook is left.
+  no per-frame `Draw` / `DrawMesh` hook is left; `setAnimationsHeld` (the crowd options) pauses the looping clip,
+  a loop started while held too, and lets a one-shot play.
 - `versions/shared/contentRows.golden.test.ts`: every map's mesh animations, sampled over time.
 - `pbrMaps.test.ts`: `textureSourceName` reads the pack's remembered name mid-swap.
 - `pbrDerive.test.ts`: `flipRows`, flat normal and emissive mask of `derivePbrMaps`.

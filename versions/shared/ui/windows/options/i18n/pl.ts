@@ -384,4 +384,9 @@ export default {
   'options.otherPets': 'Zwierzaki innych graczy',
   'options.help.otherPets':
     'Zwierzaki i Dark Raven innych graczy. Wierzchowiec, na którym ktoś jedzie, zostaje.',
+  'options.otherPlayerAnimations': 'Animacje innych graczy',
+  'options.help.otherPlayerAnimations':
+    'Wyłączone: inni gracze stoją nieruchomo, gdy stoją lub idą; ciosy i śmierć nadal widać. Odciąża zatłoczone miejsca.',
+  'options.npcAnimations': 'Animacje NPC',
+  'options.help.npcAnimations': 'Wyłączone: NPC stoją nieruchomo.',
 } satisfies Partial<Record<keyof typeof en, string>>;

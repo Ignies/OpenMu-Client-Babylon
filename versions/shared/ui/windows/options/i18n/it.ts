@@ -391,4 +391,9 @@ export default {
   'options.otherPets': 'Animali degli altri giocatori',
   'options.help.otherPets':
     'Gli animali e il Dark Raven degli altri giocatori. Una cavalcatura montata resta.',
+  'options.otherPlayerAnimations': 'Animazioni degli altri giocatori',
+  'options.help.otherPlayerAnimations':
+    'Spento, gli altri giocatori restano fermi da in piedi o camminando; colpi e morti si vedono ancora. Alleggerisce i luoghi affollati.',
+  'options.npcAnimations': 'Animazioni degli NPC',
+  'options.help.npcAnimations': 'Spento, gli NPC restano fermi.',
 } satisfies Partial<Record<keyof typeof en, string>>;

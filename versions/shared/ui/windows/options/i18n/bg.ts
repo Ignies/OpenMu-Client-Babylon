@@ -370,4 +370,9 @@ export default {
   'options.otherPets': 'Любимци на други играчи',
   'options.help.otherPets':
     'Любимците и Dark Raven на другите играчи. Ездитното животно, което някой язди, остава.',
+  'options.otherPlayerAnimations': 'Анимации на други играчи',
+  'options.help.otherPlayerAnimations':
+    'Изключено, другите играчи застиват, докато стоят или вървят; ударите и смъртта им се виждат. Пести работа на многолюдни места.',
+  'options.npcAnimations': 'Анимации на NPC',
+  'options.help.npcAnimations': 'Изключено, NPC героите застиват.',
 } satisfies Partial<Record<keyof typeof en, string>>;

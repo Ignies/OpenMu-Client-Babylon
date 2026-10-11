@@ -1,5 +1,6 @@
 import { GameOptions } from '@/controllers/settings';
 import type { Entity } from '../world';
+import { isNpcOrTrapType } from './attackSystem';
 
 /**
  * The crowd options (ours, Options > Video > World): what of other players is drawn. The hero
@@ -19,4 +20,15 @@ export function gearEffectsShown(e: Entity): boolean {
 /** This owner's pet of `kind` (`petSystem`); a ridden mount always stays. */
 export function petShown(owner: Entity, kind: string): boolean {
   return kind === 'mount' || GameOptions.otherPets || !isOtherPlayer(owner);
+}
+
+/** An NPC: what `isNpcOrTrapType` names, less the traps (100-110), which have no clips worth holding. */
+function isNpc(e: Entity): boolean {
+  const type = e.npcType;
+  return type !== undefined && (type < 100 || type > 110) && isNpcOrTrapType(type);
+}
+
+/** This model's looping clips held still (`animationHoldSystem`); swings and deaths still play. */
+export function animationsHeld(e: Entity): boolean {
+  return (!GameOptions.otherPlayerAnimations && isOtherPlayer(e)) || (!GameOptions.npcAnimations && isNpc(e));
 }

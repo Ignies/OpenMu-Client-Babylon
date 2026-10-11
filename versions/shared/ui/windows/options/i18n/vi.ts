@@ -377,4 +377,9 @@ export default {
   'options.otherPets': 'Thú cưng của người chơi khác',
   'options.help.otherPets':
     'Thú cưng và Dark Raven của người chơi khác. Thú cưỡi đang được cưỡi vẫn hiện.',
+  'options.otherPlayerAnimations': 'Hoạt ảnh của người chơi khác',
+  'options.help.otherPlayerAnimations':
+    'Tắt thì người chơi khác đứng yên khi đứng hoặc đi; đòn đánh và cái chết vẫn hiện. Nhẹ hơn ở nơi đông người.',
+  'options.npcAnimations': 'Hoạt ảnh NPC',
+  'options.help.npcAnimations': 'Tắt thì NPC đứng yên.',
 } satisfies Partial<Record<keyof typeof en, string>>;

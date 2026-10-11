@@ -416,4 +416,9 @@ export default {
   'options.otherPets': 'Питомцы других игроков',
   'options.help.otherPets':
     'Питомцы и Dark Raven других игроков. Ездовое животное под всадником остаётся.',
+  'options.otherPlayerAnimations': 'Анимации других игроков',
+  'options.help.otherPlayerAnimations':
+    'Выключено - другие игроки замирают, стоя или при ходьбе; удары и смерть видны по-прежнему. Легче в людных местах.',
+  'options.npcAnimations': 'Анимации NPC',
+  'options.help.npcAnimations': 'Выключено - NPC замирают.',
 } satisfies Partial<Record<keyof typeof en, string>>;

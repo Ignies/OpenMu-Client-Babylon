@@ -420,4 +420,9 @@ export default {
   'options.otherPets': 'Begleiter anderer Spieler',
   'options.help.otherPets':
     'Begleiter und Dark Raven anderer Spieler. Ein gerittenes Reittier bleibt.',
+  'options.otherPlayerAnimations': 'Animationen anderer Spieler',
+  'options.help.otherPlayerAnimations':
+    'Aus stehen andere Spieler im Stand und beim Gehen still; Schläge und Tode laufen weiter. Spart Arbeit an vollen Orten.',
+  'options.npcAnimations': 'NPC-Animationen',
+  'options.help.npcAnimations': 'Aus stehen die NPCs still.',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -359,4 +359,9 @@ export default {
   'options.help.otherGearEffects': 'ประกาย ออร่า และแสงของไอเทมของผู้เล่นอื่น',
   'options.otherPets': 'สัตว์เลี้ยงของผู้เล่นอื่น',
   'options.help.otherPets': 'สัตว์เลี้ยงและ Dark Raven ของผู้เล่นอื่น พาหนะที่มีคนขี่อยู่จะยังแสดง',
+  'options.otherPlayerAnimations': 'แอนิเมชันของผู้เล่นอื่น',
+  'options.help.otherPlayerAnimations':
+    'ปิดไว้ ผู้เล่นอื่นจะหยุดนิ่งขณะยืนหรือเดิน การโจมตีและการตายยังแสดงอยู่ ช่วยลดภาระในที่คนเยอะ',
+  'options.npcAnimations': 'แอนิเมชันของ NPC',
+  'options.help.npcAnimations': 'ปิดไว้ NPC จะหยุดนิ่ง',
 } satisfies Partial<Record<keyof typeof en, string>>;

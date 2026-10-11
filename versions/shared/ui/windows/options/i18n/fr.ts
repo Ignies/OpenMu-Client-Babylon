@@ -385,4 +385,9 @@ export default {
   'options.otherPets': 'Familiers des autres joueurs',
   'options.help.otherPets':
     'Les familiers et le Dark Raven des autres joueurs. Une monture chevauchée reste.',
+  'options.otherPlayerAnimations': 'Animations des autres joueurs',
+  'options.help.otherPlayerAnimations':
+    "Désactivé, les autres joueurs restent figés à l'arrêt ou en marchant ; leurs coups et leurs morts se jouent encore. Allège les lieux bondés.",
+  'options.npcAnimations': 'Animations des PNJ',
+  'options.help.npcAnimations': 'Désactivé, les PNJ restent figés.',
 } satisfies Partial<Record<keyof typeof en, string>>;

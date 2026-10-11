@@ -393,4 +393,9 @@ export default {
   'options.help.otherGearEffects': 'Sclipirea, aura și lumina obiectelor altor jucători.',
   'options.otherPets': 'Animalele altor jucători',
   'options.help.otherPets': 'Animalele și Dark Raven ale altor jucători. Animalul călărit rămâne.',
+  'options.otherPlayerAnimations': 'Animațiile altor jucători',
+  'options.help.otherPlayerAnimations':
+    'Oprit, ceilalți jucători rămân nemișcați când stau sau merg; loviturile și moartea se văd în continuare. Ușurează locurile aglomerate.',
+  'options.npcAnimations': 'Animațiile NPC',
+  'options.help.npcAnimations': 'Oprit, NPC-urile rămân nemișcate.',
 } satisfies Partial<Record<keyof typeof en, string>>;

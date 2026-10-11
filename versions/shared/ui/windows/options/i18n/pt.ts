@@ -387,4 +387,9 @@ export default {
   'options.otherPets': 'Mascotes de outros jogadores',
   'options.help.otherPets':
     'Os mascotes e o Dark Raven de outros jogadores. A montaria que alguém monta fica.',
+  'options.otherPlayerAnimations': 'Animações de outros jogadores',
+  'options.help.otherPlayerAnimations':
+    'Desligado, os outros jogadores ficam parados ao ficar de pé ou andar; golpes e mortes continuam. Alivia lugares lotados.',
+  'options.npcAnimations': 'Animações dos NPCs',
+  'options.help.npcAnimations': 'Desligado, os NPCs ficam parados.',
 } satisfies Partial<Record<keyof typeof en, string>>;

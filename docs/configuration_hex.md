@@ -73,22 +73,24 @@ Bit `n` counts from the first flag byte: byte `n / 8`, bit `n % 8`, lowest bit f
 | 41 | 5.1 | `minimapCorner` |
 | 42 | 5.2 | `monsterEffects` |
 | 43 | 5.3 | `muteInBackground` |
-| 44 | 5.4 | `otherGearEffects` |
-| 45 | 5.5 | `otherPets` |
-| 46 | 5.6 | `otherSkillEffects` |
-| 47 | 5.7 | `performanceReadout` |
-| 48 | 6.0 | `postProcessing` |
-| 49 | 6.1 | `propBatching` |
-| 50 | 6.2 | `questTracker` |
-| 51 | 6.3 | `quickItemActions` |
-| 52 | 6.4 | `shadows` |
-| 53 | 6.5 | `slideHelp` |
-| 54 | 6.6 | `statPointAmounts` |
-| 55 | 6.7 | `stateWarnings` |
-| 56 | 7.0 | `thirdPersonMouseLook` |
-| 57 | 7.1 | `weatherEffects` |
-| 58 | 7.2 | `whisperBeep` |
-| 59 | 7.3 | `wsadMovement` |
+| 44 | 5.4 | `npcAnimations` |
+| 45 | 5.5 | `otherGearEffects` |
+| 46 | 5.6 | `otherPets` |
+| 47 | 5.7 | `otherPlayerAnimations` |
+| 48 | 6.0 | `otherSkillEffects` |
+| 49 | 6.1 | `performanceReadout` |
+| 50 | 6.2 | `postProcessing` |
+| 51 | 6.3 | `propBatching` |
+| 52 | 6.4 | `questTracker` |
+| 53 | 6.5 | `quickItemActions` |
+| 54 | 6.6 | `shadows` |
+| 55 | 6.7 | `slideHelp` |
+| 56 | 7.0 | `statPointAmounts` |
+| 57 | 7.1 | `stateWarnings` |
+| 58 | 7.2 | `thirdPersonMouseLook` |
+| 59 | 7.3 | `weatherEffects` |
+| 60 | 7.4 | `whisperBeep` |
+| 61 | 7.5 | `wsadMovement` |
 
 ## Value settings
 

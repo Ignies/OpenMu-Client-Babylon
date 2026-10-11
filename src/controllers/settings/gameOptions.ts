@@ -269,6 +269,10 @@ export type GameOptions = {
   otherGearEffects: boolean;
   /** Other players' pets and Dark Raven (ours, a crowd option); a ridden mount stays. */
   otherPets: boolean;
+  /** Other players' looping clips, standing and walking (ours, a crowd option); off they hold still. */
+  otherPlayerAnimations: boolean;
+  /** The NPCs' looping clips (ours, a crowd option); off they hold still. */
+  npcAnimations: boolean;
   autoAttack: boolean;
   /**
    * An amount box in front of every `+` in the character info window, so a
@@ -619,6 +623,8 @@ const DEFAULTS: GameOptions = {
   otherSkillEffects: true,
   otherGearEffects: true,
   otherPets: true,
+  otherPlayerAnimations: true,
+  npcAnimations: true,
   autoAttack: false,
   statPointAmounts: true,
   whisperBeep: true,

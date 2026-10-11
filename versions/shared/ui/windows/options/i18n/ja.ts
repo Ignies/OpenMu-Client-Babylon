@@ -319,4 +319,9 @@ export default {
   'options.help.otherGearEffects': '他のプレイヤーのアイテムの輝き、オーラ、光。',
   'options.otherPets': '他プレイヤーのペット',
   'options.help.otherPets': '他のプレイヤーのペットとダークレイヴン。騎乗中の乗り物は残ります。',
+  'options.otherPlayerAnimations': '他プレイヤーのアニメーション',
+  'options.help.otherPlayerAnimations':
+    'オフにすると、他のプレイヤーは立ち止まりや歩行中に静止します。攻撃と死亡は再生されます。混雑した場所で軽くなります。',
+  'options.npcAnimations': 'NPCのアニメーション',
+  'options.help.npcAnimations': 'オフにするとNPCは静止します。',
 } satisfies Partial<Record<keyof typeof en, string>>;

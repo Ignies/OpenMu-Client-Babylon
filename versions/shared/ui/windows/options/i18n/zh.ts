@@ -315,4 +315,8 @@ export default {
   'options.help.otherGearEffects': '其他玩家物品的闪光、光环和光照。',
   'options.otherPets': '其他玩家的宠物',
   'options.help.otherPets': '其他玩家的宠物和黑鸦。正在骑乘的坐骑保留。',
+  'options.otherPlayerAnimations': '其他玩家的动画',
+  'options.help.otherPlayerAnimations': '关闭后，其他玩家站立或行走时保持静止；攻击和死亡仍会播放。可减轻人多场所的负担。',
+  'options.npcAnimations': 'NPC 动画',
+  'options.help.npcAnimations': '关闭后，NPC 保持静止。',
 } satisfies Partial<Record<keyof typeof en, string>>;
