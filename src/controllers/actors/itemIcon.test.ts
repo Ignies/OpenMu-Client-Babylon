@@ -14,13 +14,22 @@ import { TransformNode } from '@babylonjs/core/Meshes/transformNode';
 import { angleMatrixQuaternion } from '../render/renderAngles';
 import { ITEM_ICON_SCALE } from '../interface/item_icons';
 
+/** The meshes of a converted model, by texture: a Queen helm is the head, the hair and the helm. */
+const MESHES: Record<string, string[]> = {
+  'Player/HelmMale54.glb': ['Item6001_head', 'Item6001_headhair', 'Item6001_Helm'],
+};
+
 const loaded: string[] = [];
 vi.mock('../assets/modelLoader', async orig => ({
   ...(await orig<object>()),
   loadGLTF: async (path: string, world: { scene: Scene }) => {
     loaded.push(path);
     const root = new Mesh(path, world.scene);
-    new Mesh('mesh0', world.scene).parent = root;
+    for (const name of MESHES[path] ?? ['mesh0']) {
+      const mesh = new Mesh(name, world.scene);
+      mesh.parent = root;
+      mesh.metadata = { skinTexture: /head/i.test(name), diffuseTexture: { name } };
+    }
     return { mesh: root, skeleton: new Skeleton(path, path, world.scene), animationGroups: [] };
   },
 }));
@@ -71,6 +80,23 @@ describe('an item icon shot', () => {
     const node = root.getChildren()[0] as TransformNode;
     const want = angleMatrixQuaternion(270 * DEG, -10 * DEG, 0, new Quaternion());
     expect(Math.abs(Quaternion.Dot(node.rotationQuaternion ?? new Quaternion(), want))).toBeCloseTo(1, 6);
+    subject?.dispose();
+    root.dispose();
+  });
+
+  it('draws a worn part (the Queen helm, a skinned Player/ model) as the original draws a loose one', async () => {
+    const job = itemIconJob(scene, { group: 7, num: 53, lvl: 0 });
+    const root = new TransformNode('root', scene);
+    const subject = await job?.build(root);
+    expect(loaded.at(-1)).toBe('Player/HelmMale54.glb');
+    const node = root.getChildren()[0] as TransformNode;
+    const model = node.getChildren()[0] as Mesh;
+    // HideSkin: the Queen helm draws its helm mesh alone (ZzzObject.cpp:7830).
+    expect(model.getChildMeshes().map(mesh => mesh.isVisible)).toEqual([false, false, true]);
+    // ItemHeight / BodyHeight -160 brings the head-high part down to its origin (ZzzInventory.cpp:8889).
+    expect(model.position.y).toBeCloseTo(-1.6, 9);
+    // Its own skeleton, no rig.
+    expect(model.getChildMeshes()[2].skeleton).toBeNull();
     subject?.dispose();
     root.dispose();
   });

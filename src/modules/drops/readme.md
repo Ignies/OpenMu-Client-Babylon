@@ -9,6 +9,8 @@ and the loot filter for the ALT name overlay.
 - none for packets. `installNet()` in `net.ts` registers its handlers (`module.ts`, installed by `src/app/logic.ts`).
 - `DropObject`: the model class of a drop (frozen pose, zen coin pile, the fall, the shown model's
   `ItemObjectAttribute` additive and skipped meshes, ZzzObject.cpp:6153). `setPileFall(height)`.
+  What it shares with a bag icon (`ItemHeight`, `HideSkin`, the frozen pose, the mesh rules) is
+  `dressItemModel` in `controllers/actors/itemModel.ts`.
 - `dropTier(drop)`, `HIGH_DROP_LEVEL` (7) moved to `controllers/item_rules`
   (`dropTier.ts`): the drop sound controller reads them, and a controller may not import a module.
 - `dropPassesLootFilter(drop)`, `lootZenThreshold(step)`, `LOOT_ZEN_MAX`: which names the latched overlay keeps.

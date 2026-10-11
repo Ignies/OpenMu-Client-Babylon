@@ -1,8 +1,7 @@
 import { type AbstractMesh, Matrix, type Mesh, Vector3 } from '../../controllers/render/babylon/exports';
 import type { Entity, World } from '../../ecs/world';
-import { itemRestHeight, itemWornHeight } from '../../controllers/actors/itemAngle';
-import { hideSkinMeshes, hideSkinTexture } from '../../controllers/actors';
-import { itemObjectAttribute } from '../../controllers/actors/itemObjectAttribute';
+import { itemRestHeight } from '../../controllers/actors/itemAngle';
+import { dressItemModel } from '../../controllers/actors/itemModel';
 import { ModelObject } from '../../controllers/render/modelObject';
 import { zenCoinCount, zenCoinScatter, type ZenCoinOffset } from './zenPile';
 
@@ -70,19 +69,8 @@ export class DropObject extends ModelObject {
   #fallHeight = 0;
 
   async init(world: World, entity: Entity): Promise<void> {
-    this.BodyHeight = itemWornHeight(entity.droppedItem?.group ?? -1);
-    this.HideSkin = true;
-    this.FrozenPose = true;
-
     const drop = entity.droppedItem;
-    this.HideSkinTexture = drop ? hideSkinTexture(drop.group, drop.num) : null;
-    this.HideSkinMeshes = drop ? hideSkinMeshes(drop.group, drop.num) : null;
-    if (drop) {
-      const rule = itemObjectAttribute(drop.group, drop.num);
-      this.BlendMesh = rule.blendMesh;
-      this.HiddenMesh = rule.hiddenMesh;
-      this.BlendMeshLightAt = rule.blendMeshLight ?? null;
-    }
+    dressItemModel(this, drop?.group ?? -1, drop?.num ?? -1);
 
     if (drop?.isMoney) {
       this.#zenScale = entity.transform?.scale || 1;

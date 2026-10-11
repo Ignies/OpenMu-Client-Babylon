@@ -63,6 +63,11 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   place of the item's own: the Summoner's Vine and Silk pieces (`HelmElfC`...), the Rage Fighter's Leather, Scale,
   Brass and Plate (`HelmMonk`..., gloves and boots both `BootMonk`, MonkSystem.cpp:187-206) and the Dark Lord's
   Bronze, Leather, Scale, Brass and Plate helms (`MaskHelmMale`), ZzzCharacter.cpp:9579-9617.
+- `itemModel.ts`: `dressItemModel(object, group, num)`, what the original does to every loose item
+  model, on the ground or in the bag (`ItemHeight`, `HideSkin`, frozen at frame 0, the
+  `ItemObjectAttribute` mesh rules; `DropObject` and the bag icon both use it), and
+  `loadItemModel(scene, parent, group, num, file)`, such a model with no entity behind it. A worn
+  `Player/` part keeps its own file's skeleton, posed at its first frame, as a drop does.
 - `itemIcon.ts`: `itemIconJob(scene, item)`, the shot of a bag icon drawn from the item's model, and
   `liveItemIconSource(scene)`, what the app puts in the interface's live-icon slot;
   `ITEM_ICON_UNITS_PER_PIXEL`.
@@ -148,7 +153,8 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 - `deserializeAppearance.test.ts`: `isAppearanceBlank` on empty and real previews.
 - `itemAngle.test.ts`: drop scale and pose per group, worn height, the `ItemAngle` tail rows.
 - `itemIcon.test.ts`: the shot covers the item's squares at the original's item depth, loads the
-  item's own model under the root at its scale and angle; no shot for an item with no model.
+  item's own model under the root at its scale and angle; a worn part (the Queen helm) draws only its
+  helm mesh, comes down by `ItemHeight` and keeps its own skeleton; no shot for an item with no model.
 - `npcModelTable.test.ts`: every row names a file in `public/game-assets` and has a scale > 0; the
   tables behave as plain objects and read the folders when asked.
 - `trapModels.test.ts`: every (map, trap) pair names an `Object<world+1>` model that exists.

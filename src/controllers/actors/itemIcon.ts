@@ -1,9 +1,8 @@
 import { Quaternion, type Scene } from '../render/babylon/exports';
-import type { Item, World } from '../../ecs/world';
-import { ModelObject } from '../render/modelObject';
+import type { Item } from '../../ecs/world';
 import { angleMatrixQuaternion } from '../render/renderAngles';
 import { iconShots, type IconShotJob } from '../render/iconShot';
-import { loadGLTF } from '../assets/modelLoader';
+import { loadItemModel } from './itemModel';
 import { ITEM_ICON_SCALE, ITEM_ICON_SCALE_DEFAULT, type LiveItemIconSource } from '../interface/item_icons';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 
@@ -52,15 +51,7 @@ export function itemIconJob(scene: Scene, item: Item): IconShotJob | null {
       top: 0,
     },
     build: async root => {
-      const object = new ModelObject(scene, root);
-      object.FrozenPose = true;
-      object.CastsShadow = false;
-      try {
-        object.load(await loadGLTF(file, { scene } as World));
-      } catch (error) {
-        object.dispose();
-        throw error;
-      }
+      const object = await loadItemModel(scene, root, item.group, item.num, file);
       // MU eye space (x right, y up, the item 200 units out) on the root's Babylon x, z, y.
       const node = object.node;
       node.position.set(DEFAULT_ANCHOR[0] * width * unit, -DEPTH * M, -DEFAULT_ANCHOR[1] * height * unit);
