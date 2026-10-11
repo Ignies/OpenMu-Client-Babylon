@@ -141,7 +141,12 @@ plugin they do nothing. A client sends E8 only for a loaded module that calls `s
 phase 5 a world's modules are the ones its `server.json` lists, so a world without our plugin (which
 lists none) never gets one.
 
-What the lead must still build and check (the C# could not be compiled here):
+Built and checked on 2026-10-11 (Docker Desktop, munique/openmu:0.9.10, the installer's e2e stack on this machine):
+`docker build -t mu-openmu:local openmu` compiles every plugin (no errors; 20 MSB3277 warnings, version conflicts
+between OpenMU's own assemblies); all five plugin types are active in `config."PlugInConfiguration"`; the probe
+frame below, sent twice from a GM character in Lorencia, logged "Module packet for "probe" dropped" once and the
+player stayed connected; an escrow request with a junk token got `C1 2F E7 02 01 01` (status 1, bad token) and
+the player stayed connected. The checklist as it was written:
 
 - `mu update` (or `docker build -t mu-openmu:local openmu`): the four new files compile against the
   image's assemblies. They use only public OpenMU types: `IPacketHandlerPlugIn`,
