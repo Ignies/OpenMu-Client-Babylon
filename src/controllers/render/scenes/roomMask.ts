@@ -16,6 +16,7 @@ import {
 } from '../babylon/exports';
 import { devQuery } from '@/core/devSeams';
 import { EFFECT_MASK_SAMPLER, effectMask } from './effectMask';
+import { upscaleScale } from './upscale';
 import type { LightingTier } from '../../lighting/lightingQuality';
 import type { RoomVolume } from '../../lighting/profiles';
 
@@ -364,6 +365,22 @@ function takeKeyedMatter(
   };
 }
 
+/**
+ * Keep the depth map the frame's size. The renderer sizes it once, at the drawing buffer it was made at
+ * (depthRenderer.js:84); after a window or render-scale resize its upscaled depth put the front wall's
+ * depth on the floor beside it, which the mask blacked.
+ */
+function fitDepthMap(scene: Scene, own: DepthRenderer | null): void {
+  const map = own?.getDepthMap();
+  if (!map) return;
+  // `sceneRenderSize` without its object: this runs every tick.
+  const engine = scene.getEngine();
+  const scale = upscaleScale();
+  const width = Math.max(1, (engine.getRenderWidth(true) * scale) | 0);
+  const height = Math.max(1, (engine.getRenderHeight(true) * scale) | 0);
+  if (map.getRenderWidth() !== width || map.getRenderHeight() !== height) map.resize({ width, height });
+}
+
 function createPass(scene: Scene, camera: ArcRotateCamera): Runtime {
   registerShader();
 
@@ -465,6 +482,8 @@ export function syncRoomMask(
     if (!want) return { changed: true, live: false };
   }
 
+  if (runtime) fitDepthMap(scene, runtime.ownDepth);
+
   if (runtime && upstreamChanged) {
     // Re-order, not rebuild. The AO and the haze attach at the end of the
     // camera's list when they are built, so the mask has to move behind them
@@ -483,6 +502,7 @@ export function syncRoomMask(
   if (runtime) return { changed: false, live: true };
 
   runtime = createPass(scene, camera);
+  fitDepthMap(scene, runtime.ownDepth);
 
   return { changed: true, live: true };
 }
