@@ -89,6 +89,8 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `pbrDerive.test.ts`: `flipRows`, flat normal and emissive mask of `derivePbrMaps`.
 - `propBatchLight.test.ts`: `ChunkLight` re-packs match a whole-chunk re-pack on every tier.
 - `propBatchRules.test.ts`: `batchExclusion`, `chunkOf`, placement and instance matrices.
+- `objectShadow.test.ts`: the shadow fold, run as JS: a body folds as `CalcShadowPosition`, a tall
+  object's top by 5 tiles at most.
 - `propBatches.test.ts`: batches built and disposed twice over one cached model leave its buffers whole.
 - `renderAngles.test.ts`: `angleMatrixQuaternion` against the original's `AngleMatrix`, and a
   placed record with both pitch and roll drawn by it, by its node and by its batched placement.
@@ -143,6 +145,10 @@ There is no `index.ts` facade; other folders import the modules directly.
   direction slot was removed: it doubled shadows near braziers and broke indoors. `SHADOW_DILATE`
   (3 units) closes the hairline gaps between rigid body parts once flattened. `meshCasts` once
   dropped every alpha-blended mesh, which left a thin, naked shadow; now that rule is map objects only.
+  The fold (`SHADOW_FOLD`) is the original's `CalcShadowPosition`, which divides by the vertex's height
+  under the 40-tile light: a tall map object (the original shadows none) had its top thrown tens of
+  tiles into long black streaks. The divisor stays 10 tiles off zero and the move within 5 tiles; a body
+  (anything under `SHADOW_FADE_END`) folds exactly as the original.
 - `modelObject.ts`: `BLOB_SHADOW_MAX_FOOTPRINT` (4 tiles): on cliffs and walls the projection flattens
   onto the rock's own face and leans several tiles; their shading is already baked.
 - `babylon/compileWait.ts`: Babylon waits for a program with 1875 checks 16 ms apart (`Effect._checkIsReady`),
