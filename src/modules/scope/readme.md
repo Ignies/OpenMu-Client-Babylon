@@ -42,13 +42,14 @@ players, plus their moves and equipment changes. The entities live in the ECS wo
 - `AddCharacterToScopeExtended`: one player, extended appearance plus effect ids.
 - `AddTransformedCharactersToScope` (0x45): players wearing a monster skin.
 - `MapObjectOutOfScope`: objects leave view.
-- `ObjectMoved`: instant move to a tile; stops any walk.
+- `ObjectMoved`: instant move to a tile; stops any walk. The tile lands at once and the body is
+  drawn sliding in over 15 ticks (`JumpTime`, WSclient.cpp:2147; `ecs/systems/positionSlideSystem.ts`).
 - `ObjectWalked`: walk target for another object (the hero's own walk is ignored).
 - `AppearanceChanged` / `AppearanceChangedExtended`: one equipment slot of a player changed.
 
 ## Depends on / used by
 - uses: `economy` (shop titles), `controllers/item_rules/itemSerializer`,
-  `core/inventoryConstants`, `controllers/actors`, `ecs/systems/teleportSystem`,
+  `core/inventoryConstants`, `controllers/actors`, `ecs/systems/teleportSystem`, `ecs/systems/positionSlideSystem`,
   `versions/shared/skills/skillVisuals` (`playSummonArrival`).
 - used by: `src/app/logic.ts` (import and `spawnPlayer` re-export), `src/app/offline.ts`,
   `ecs/systems/characterSelectSystem.ts`. `warp/warpScopeHold.ts` holds these packets back while

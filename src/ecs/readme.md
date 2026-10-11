@@ -16,7 +16,8 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
   mobx, so controllers, content and windows read it without reaching the app.
 - A few systems export helpers other code reads (`isHeroUnderRoof`, `mayBeCeilingPiece` in `roofDetection.ts`,
   `isTeleporting` / `teleportMountAlpha` in `teleportSystem.ts`, `autoGetItem` in `itemPickupSystem.ts`: Space walks
-  to the first drawn item under three tiles, `AutoGetItem`, NewUIHotKey.cpp:455).
+  to the first drawn item under three tiles, `AutoGetItem`, NewUIHotKey.cpp:455; `startPositionSlide` in
+  `positionSlideSystem.ts`, called by `modules/scope/net.ts` on `ObjectMoved`).
 
 ## How it works
 - A system is a factory `(world) => { update?(dt) }` in `systems/`. `createWorld.ts` lists every
@@ -67,6 +68,9 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
   cut step's destination tile. `autoQuiver` puts the next quiver in when the server takes the empty
   one, only where the server and the player allow it, and never one the player lifted. On Enhanced
   (`swingFill`) a clip quicker than the time between swings slows after its blow to end with it.
+- `systems/positionSlideSystem.test.ts`: `ObjectMoved` lands the tile at once and draws the body a
+  fifth closer each 25 fps tick, on the tile after 15 with its tile-centre offset back
+  (`PushingCharacter`), on every preset and at any distance.
 - `systems/itemPickupSystem.test.ts`: the pickup request marks the drop `pickupAsked`; Space takes the
   first drawn item under three tiles, not the nearest.
 - `systems/gmMark.test.ts`: the GM buff or the hero's operator status asks for the Webzen mark, cloaking hides it.

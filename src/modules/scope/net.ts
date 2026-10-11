@@ -18,6 +18,7 @@ import { characterSkinBody } from '@/controllers/actors/skinBody';
 import { classWorldScale } from '@/controllers/actors/characterScale';
 import { createAttributeSystem } from '@/core/attributeSystem';
 import { deferLeave, noteScopeEntry } from '@/ecs/systems/teleportSystem';
+import { startPositionSlide } from '@/ecs/systems/positionSlideSystem';
 import { isFemaleClass } from '@/controllers/actors/mapPlayerNetClassToModelClass';
 import { isKnownObjectType, resolveModelFactory } from '@/controllers/actors/modelFactoryPerId';
 import { playSummonArrival } from '@versions/shared/skills/skillVisuals';
@@ -560,9 +561,11 @@ export function installNet(): void {
       );
     }
 
+    const { x, y, z } = obj.transform.pos;
     obj.transform.pos.x = p.PositionX;
     obj.transform.pos.z = p.PositionY;
     obj.transform.pos.y = world.getTerrainHeight(p.PositionX, p.PositionY);
+    startPositionSlide(obj, x, y, z);
 
     if (obj.playerMoveTo) {
       obj.playerMoveTo.point.x = p.PositionX;
