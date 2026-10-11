@@ -36,4 +36,7 @@ export default {
   'fidelity.noticeLinks': '서버 공지의 링크',
   'fidelity.noticeLinks.hint':
     '서버 공지의 웹 주소가 밑줄 친 링크가 되어 새 탭에서 열립니다. 클래식: 원본처럼 일반 텍스트.',
+  'fidelity.cameraKeepsView': '이동 후에도 카메라 유지',
+  'fidelity.cameraKeepsView.hint':
+    '순간이동하거나 맵을 바꿔도 카메라의 확대, 회전, 기울기가 그대로 유지되며, 시점을 움직인 동안 카메라 초기화 버튼이 표시됩니다. 클래식: 원본처럼 맵이 바뀔 때마다 카메라가 초기화됩니다.',
 } satisfies Partial<Record<keyof typeof en, string>>;

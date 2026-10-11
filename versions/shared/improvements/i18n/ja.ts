@@ -36,4 +36,7 @@ export default {
   'fidelity.noticeLinks': 'サーバー告知のリンク',
   'fidelity.noticeLinks.hint':
     'サーバー告知のWebアドレスが下線付きリンクになり、新しいタブで開きます。クラシック: オリジナル通りのただの文字。',
+  'fidelity.cameraKeepsView': 'ワープ後もカメラを維持',
+  'fidelity.cameraKeepsView.hint':
+    'ワープやマップ移動の後もカメラのズーム・回転・傾きがそのまま残り、視点を動かしている間は「カメラをリセット」ボタンが表示されます。クラシック: オリジナル通り、マップが変わるたびにカメラがリセットされます。',
 } satisfies Partial<Record<keyof typeof en, string>>;

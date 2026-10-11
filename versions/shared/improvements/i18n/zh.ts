@@ -36,4 +36,7 @@ export default {
   'fidelity.noticeLinks': '服务器公告中的链接',
   'fidelity.noticeLinks.hint':
     '服务器公告中的网址显示为带下划线的链接，在新标签页中打开。经典：与原版相同的纯文本。',
+  'fidelity.cameraKeepsView': '传送后保持镜头',
+  'fidelity.cameraKeepsView.hint':
+    '传送或切换地图时，镜头的缩放、旋转和倾斜保持不变；视角被移动时会显示“重置镜头”按钮。经典：与原版相同，每次切换地图都会重置镜头。',
 } satisfies Partial<Record<keyof typeof en, string>>;

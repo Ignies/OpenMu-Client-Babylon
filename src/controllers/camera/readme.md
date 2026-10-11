@@ -11,6 +11,7 @@ per-map overrides and this client's extra zoom steps, drag and first-person mous
 - `earthQuake(deg)`: an effect's `EarthQuake`, set every tick the shake runs (Rageful Blow,
   Earthshake).
 - `isFirstPerson()`, `showHeroBody()`.
+- `cameraView` (MobX, `moved`) and `resetCamera()`: the `camera_reset` HUD button (`cameraKeepsView`).
 - `aimX`, `aimY`, `isMouseLookActive`, `releaseMouseLook` (`mouseLook.ts`): every pick runs its
   pointer coordinates through `aimX` / `aimY` (pointer input, cursor, walk click, rest objects).
 - `recipes.ts` constants: the FOV range is mirrored in `settings/gameOptions.ts` and read by the
@@ -24,7 +25,10 @@ per-map overrides and this client's extra zoom steps, drag and first-person mous
 - Ctrl+wheel steps the distance ladder (`DISTANCE_BY_LEVEL`, `SetViewPortLevel`
   SceneCommon.cpp:237-253); Insert / Delete rotate the heading; pitch 48.5, vertical FOV 30 unless
   the FOV slider says otherwise. Distance eases by a third per 25 fps frame. Home belongs to the MU
-  Helper, so the frame resets on warp instead.
+  Helper, so the frame resets on warp instead (WSclient.cpp:600).
+- `cameraKeepsView` (an Enhanced improvement, `versions/shared/improvements/`): a warp keeps the
+  level, heading and tilt, except onto a map that pins its distance (`layers.ts`). `cameraView.moved`
+  is true while the view is off the opening frame, and `resetCamera()` goes back to it.
 - Ctrl + middle drag is this client's addition: left / right turns the heading, up / down pitches.
 - The ladder keeps the original's five distances (1000-1400) and adds steps on both sides: below
   1000 it blends toward an eye-level shot, the innermost step is first person (the hero's body is
@@ -49,9 +53,10 @@ Hides the hero's meshes with `isVisible` (reversible, unlike `HiddenMesh`), so w
 name plates, effect anchors and picking still work. Only meshes it hid are shown again.
 
 ## Depends on / used by
-- uses: `core/eventBus`, `render/babylon`, `settings` (`GameOptions`).
+- uses: `core/eventBus`, `render/babylon`, `settings` (`GameOptions`), `fidelity` (`isOn`).
 - used by: `ecs/systems` (camera follow, cursor, pointer input, player controller, rest object),
-  the game cursor component, skills that shake the screen, the options window.
+  the game cursor component, skills that shake the screen, the options window, the `camera_reset`
+  HUD element.
 
 ## Change it
 - a map's camera override: copy `_template.ts` to `<map>.ts`, fill `worlds`, `distance`,
@@ -60,4 +65,5 @@ name plates, effect anchors and picking still work. Only meshes it hid are shown
 - a zoom step, speed or angle: `recipes.ts`. Keep the five ported distances exact.
 
 ## Tests
-- None in this folder.
+- `view.test.ts`: a warp keeps the turn on Enhanced and resets it on Classic and onto a pinned
+  map; the reset goes back to the opening frame.

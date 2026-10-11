@@ -36,4 +36,7 @@ export default {
   'fidelity.noticeLinks': 'Link negli avvisi del server',
   'fidelity.noticeLinks.hint':
     'Gli indirizzi web negli avvisi del server sono link sottolineati che aprono una nuova scheda. Classica: testo semplice, come nell’originale.',
+  'fidelity.cameraKeepsView': 'Telecamera mantenuta tra le mappe',
+  'fidelity.cameraKeepsView.hint':
+    'Zoom, rotazione e inclinazione della telecamera restano uguali quando ti teletrasporti o cambi mappa, e un pulsante Reimposta telecamera appare finché la visuale è spostata. Classica: ogni cambio di mappa reimposta la telecamera, come nell’originale.',
 } satisfies Partial<Record<keyof typeof en, string>>;

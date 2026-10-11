@@ -36,4 +36,7 @@ export default {
   'fidelity.noticeLinks': 'Liens dans les annonces du serveur',
   'fidelity.noticeLinks.hint':
     'Les adresses web des annonces du serveur sont des liens soulignés qui ouvrent un nouvel onglet. Classique : texte simple, comme dans l’original.',
+  'fidelity.cameraKeepsView': 'Caméra conservée entre les cartes',
+  'fidelity.cameraKeepsView.hint':
+    'Le zoom, la rotation et l’inclinaison de la caméra restent les mêmes quand vous vous téléportez ou changez de carte, et un bouton Réinitialiser la caméra apparaît tant que la vue est déplacée. Classique : chaque changement de carte réinitialise la caméra, comme dans l’original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

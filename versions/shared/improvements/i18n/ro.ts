@@ -36,4 +36,7 @@ export default {
   'fidelity.noticeLinks': 'Linkuri în anunțurile serverului',
   'fidelity.noticeLinks.hint':
     'Adresele web din anunțurile serverului sunt linkuri subliniate care se deschid într-o filă nouă. Clasică: text simplu, ca în original.',
+  'fidelity.cameraKeepsView': 'Camera păstrată între hărți',
+  'fidelity.cameraKeepsView.hint':
+    'Zoomul, rotirea și înclinarea camerei rămân la fel când te teleportezi sau schimbi harta, iar un buton Resetează camera apare cât timp vederea este mutată. Clasică: fiecare schimbare de hartă resetează camera, ca în original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

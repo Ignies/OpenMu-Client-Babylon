@@ -33,6 +33,9 @@ const en = {
   'fidelity.noticeLinks': 'Links in server notices',
   'fidelity.noticeLinks.hint':
     'Web addresses in the server notices are underlined links that open a new tab. Classic: plain text, as in the original.',
+  'fidelity.cameraKeepsView': 'Camera kept across warps',
+  'fidelity.cameraKeepsView.hint':
+    'Your camera zoom, turn and tilt stay as they are when you warp or change maps, and a Reset camera button shows while the view is moved. Classic: every map change resets the camera, as in the original.',
 };
 
 export default en;

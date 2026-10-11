@@ -36,4 +36,7 @@ export default {
   'fidelity.noticeLinks': 'Liên kết trong thông báo máy chủ',
   'fidelity.noticeLinks.hint':
     'Địa chỉ web trong thông báo máy chủ là liên kết gạch chân, mở trong thẻ mới. Cổ điển: văn bản thường, như bản gốc.',
+  'fidelity.cameraKeepsView': 'Giữ góc máy khi dịch chuyển',
+  'fidelity.cameraKeepsView.hint':
+    'Mức thu phóng, góc xoay và độ nghiêng của máy quay được giữ nguyên khi bạn dịch chuyển hoặc đổi bản đồ, và nút Đặt lại máy quay hiện ra khi góc nhìn bị thay đổi. Cổ điển: mỗi lần đổi bản đồ máy quay được đặt lại, như bản gốc.',
 } satisfies Partial<Record<keyof typeof en, string>>;

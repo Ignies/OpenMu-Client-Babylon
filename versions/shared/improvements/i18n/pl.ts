@@ -36,4 +36,7 @@ export default {
   'fidelity.noticeLinks': 'Linki w ogłoszeniach serwera',
   'fidelity.noticeLinks.hint':
     'Adresy WWW w ogłoszeniach serwera są podkreślonymi linkami otwieranymi w nowej karcie. Klasyczne: zwykły tekst, jak w oryginale.',
+  'fidelity.cameraKeepsView': 'Kamera zachowana po teleportacji',
+  'fidelity.cameraKeepsView.hint':
+    'Przybliżenie, obrót i nachylenie kamery zostają takie same po teleportacji lub zmianie mapy, a przycisk Resetuj kamerę pojawia się, gdy widok jest przesunięty. Klasyczne: każda zmiana mapy resetuje kamerę, jak w oryginale.',
 } satisfies Partial<Record<keyof typeof en, string>>;

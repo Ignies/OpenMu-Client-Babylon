@@ -36,4 +36,7 @@ export default {
   'fidelity.noticeLinks': 'Links in Servermeldungen',
   'fidelity.noticeLinks.hint':
     'Webadressen in den Servermeldungen sind unterstrichene Links, die einen neuen Tab öffnen. Klassisch: einfacher Text, wie im Original.',
+  'fidelity.cameraKeepsView': 'Kamera bleibt beim Kartenwechsel',
+  'fidelity.cameraKeepsView.hint':
+    'Zoom, Drehung und Neigung der Kamera bleiben erhalten, wenn du dich teleportierst oder die Karte wechselst, und eine Schaltfläche „Kamera zurücksetzen“ erscheint, solange die Ansicht verstellt ist. Klassisch: Jeder Kartenwechsel setzt die Kamera zurück, wie im Original.',
 } satisfies Partial<Record<keyof typeof en, string>>;
