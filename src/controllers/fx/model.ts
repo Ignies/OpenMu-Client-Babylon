@@ -300,7 +300,7 @@ export function muAngle(angle: readonly [number, number, number], out: Quaternio
  * luminance(sheet)`), so `darkCardGain` can saturate the silhouette on the
  * graded tiers, where a partial subtraction is flattened by the tone curve.
  */
-export function subtractMaterial(scene: Scene, tex: Texture | null, owned: StandardMaterial[]): StandardMaterial {
+function subtractMaterial(scene: Scene, tex: Texture | null, owned: StandardMaterial[]): StandardMaterial {
   const mat = new StandardMaterial('fxModelMinus', scene);
   mat.diffuseColor.set(0, 0, 0);
   mat.specularColor.set(0, 0, 0);
@@ -322,7 +322,7 @@ export function subtractMaterial(scene: Scene, tex: Texture | null, owned: Stand
 }
 
 /** `rearAt`: the mesh's bounds in the node's own frame, then the shift that seats it. */
-export function reseat(node: TransformNode, root: AbstractMesh, rearAt: number): void {
+function reseat(node: TransformNode, root: AbstractMesh, rearAt: number): void {
   node.computeWorldMatrix(true);
   const toNode = node.getWorldMatrix().clone().invert();
   const min = new Vector3(Infinity, Infinity, Infinity);
