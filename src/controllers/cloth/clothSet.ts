@@ -51,6 +51,8 @@ export class ClothSet implements ClothAnchor {
   private readonly bones: (Matrix | null)[] = [];
   private ready = false;
   private torn = false;
+  /** In the clock's list. */
+  listed = false;
 
   constructor(
     readonly scene: Scene,
@@ -227,7 +229,8 @@ let clockMs = 0;
 let gustyWorld = false;
 
 function activate(set: ClothSet): void {
-  if (active.includes(set)) return;
+  if (set.listed) return;
+  set.listed = true;
   active.push(set);
   const scene = set.scene;
   if (observed === scene) return;
@@ -242,8 +245,9 @@ function activate(set: ClothSet): void {
 }
 
 function deactivate(set: ClothSet): void {
-  const i = active.indexOf(set);
-  if (i >= 0) active.splice(i, 1);
+  if (!set.listed) return;
+  set.listed = false;
+  active.splice(active.indexOf(set), 1);
 }
 
 /** The frame's time, from the world's systems; `gusty` is the login scene's wind (`WorldActive == 55`). */

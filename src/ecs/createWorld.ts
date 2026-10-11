@@ -63,6 +63,7 @@ import { QuestSystem } from './systems/questSystem';
 import { PetSystem } from './systems/petSystem';
 import { TeleportSystem } from './systems/teleportSystem';
 import { GuildFlagSystem } from './systems/guildFlagSystem';
+import { ClothSystem } from './systems/clothSystem';
 import { perfOverlayVisible, recordSystemTime } from '../controllers/render/perfOverlay';
 
 const factories: ISystemFactory[] = [
@@ -170,6 +171,8 @@ const factories: ISystemFactory[] = [
   MapDoorSystem,
   CeilingHideSystem,
   RenderSystem,
+  // After RenderSystem (this frame's OutOfView): names the cloths the render that follows steps.
+  ClothSystem,
   SceneReadySystem,
 ];
 

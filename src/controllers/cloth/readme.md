@@ -46,7 +46,7 @@ knows how a cloth moves and draws, never who wears which one (the wearers' conte
 
 ## Depends on / used by
 - uses: `render` (the Babylon exports, the blob shadow material), `assets` (`getDataTexture`).
-- used by: the wearers, once wired (`actors`).
+- used by: `actors` (`PlayerObject.Cloth`), `ecs/systems/clothSystem.ts` (the clock and the wearers).
 
 ## Change it
 - a new wearer or cloth: a spec in its content; nothing here changes.

@@ -22,11 +22,12 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
 - A system is a factory `(world) => { update?(dt) }` in `systems/`. `createWorld.ts` lists every
   factory in `factories`; the list order is the run order, and the comments next to entries say
   why one must run before another (input before attack, animation before pets, movement before the
-  screen projection, `RenderSystem` second to last).
+  screen projection, `RenderSystem` near the end with `ClothSystem` after it).
 - `updateSystems(dt)` runs them in that order. With the perf overlay open (Shift+Ctrl+Alt+P) it
   also times each system (`recordSystemTime`).
 - Controllers with per-frame work are stepped from their system: `EffectSystem` ->
-  `effects.update`, `AttackSystem` -> `combat.update`, `WeatherSystem` -> `weather.update`.
+  `effects.update`, `AttackSystem` -> `combat.update`, `WeatherSystem` -> `weather.update`,
+  `ClothSystem` -> `cloth.update` (and each character's cloths, named by `cloaksFor`).
 - `World.byNetId` indexes every entity with `netId` + `transform`, kept by the query's add / remove
   hooks. The newest add wins; removing one entity of a shared id falls back to the survivor.
 - The terrain readers on `World` are stubs until `loadMapIntoScene` binds them to the loaded map.
@@ -52,6 +53,9 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
   helm and in the Chaos Castle skin, and back on when the helm allows it (SetCharacterScale, ZzzCharacter.cpp:12114-12128);
   the class's own models (Monk sets, Dark Lord masks); a held item's `ItemObjectAttribute` mesh rules; a glove weapon
   skinned to the body.
+- `systems/clothSystem.test.ts`: each player body hangs what the wearers' rule names, the Chaos Castle flag,
+  no cloth stepped or drawn while cloaked or unseen, held under stun or sleep, and the cloth's shadow while a
+  link object (wing slot, held weapon, Imp) is drawn.
 - `systems/animationSystem.test.ts`: the hero and a player with no reported speeds take the hero's
   attack and magic speed; another player with speeds from the scope packet keeps its own.
 - `systems/deathSystem.test.ts`: Chaos Castle bomb sounds on odd ticks 15..25, the pit scream,
