@@ -55,6 +55,7 @@ One folder per in-game window. A window draws; its state and actions belong to i
 | `session_stats` | session_stats (440) | what this sitting earned, time to next level | session |
 | `debug_menu` | debug_menu (470) | offline debug window, tabs from `modules/` | gm, Session.isOffline |
 | `gm_panel` | gm_panel (480) | game master panel; sends chat commands | gm, social, chat |
+| `credits` | - | the server list's Credit screen (`CCreditWin`): illustrations, the `credit.bmd` staff roll, logo, deco; no `window.ts`, drawn by `src/app/App.tsx` | servers |
 | `options` | - | options window; no `window.ts`, drawn by `src/app/App.tsx` | options and more |
 | `_shared` | - | `nearby_players.ts`: `useNearbyPlayers` for party and guild | social |
 

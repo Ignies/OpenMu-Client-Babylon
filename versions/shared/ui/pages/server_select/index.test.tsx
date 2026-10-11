@@ -18,7 +18,8 @@ const { ServersPage } = await import('.');
 
 // CLoginMainWin (LoginMainWin.cpp:23-50): the Menu button at the bottom left of the server list.
 describe('the server list', () => {
-  it('carries the login screen Menu button', () => {
-    expect(renderToStaticMarkup(<ServersPage />)).toContain('data-file="server_menu_b_all.OZT"');
+  it('carries the login screen Menu and Credit buttons and the deco', () => {
+    const html = renderToStaticMarkup(<ServersPage />);
+    for (const file of ['server_menu_b_all.OZT', 'server_credit_b_all.OZT', 'deco.OZT']) expect(html, file).toContain(`data-file="${file}"`);
   });
 });

@@ -33,6 +33,20 @@
   left: 30px;
   bottom: calc(5.5% + 11px);
   height: 30px;
+
+  // Credit at the other end, 30 px in from the right; the deco hangs 105 left and 59 up of it.
+  &.credit {
+    left: auto;
+    right: 30px;
+    width: 54px;
+  }
+
+  .login-main-deco {
+    position: absolute;
+    left: -105px;
+    top: -59px;
+    pointer-events: none;
+  }
 }
 
 // `Session.connectionLost`: the game server dropped us and we are back here.

@@ -17,6 +17,7 @@ import { DECO, GROUP_BASE_Y, GROUP_BTN_HEIGHT, GROUP_BTN_WIDTH, LEFT_GROUP_MAX, 
 import { TEXT_COLOR } from '@/controllers/interface/components/mu_text';
 import { MuWindows } from '@/controllers/interface';
 import { PREGAME_MENU } from '@/ecs/systems/keyboardInputSystem';
+import { openCredits } from '../../windows/credits';
 
 type Server = { ServerId: number; LoadPercentage: number };
 
@@ -245,7 +246,7 @@ const leftGroups = groups.slice(0, LEFT_GROUP_MAX);
         )}
       </div>
 
-      {/* CLoginMainWin: Menu shows CSysMenuWin (LoginMainWin.cpp:81-89); its Credit button is not ported. */}
+      {/* CLoginMainWin (LoginMainWin.cpp:23-97): Menu shows CSysMenuWin, Credit CCreditWin, the deco under Credit. */}
       <div className="login-main-bar">
         <MuButton
           file="server_menu_b_all.OZT"
@@ -254,6 +255,10 @@ const leftGroups = groups.slice(0, LEFT_GROUP_MAX);
           frames={{ up: 0, active: 1, down: 2 }}
           onClick={() => MuWindows.setOpen(PREGAME_MENU, true)}
         />
+      </div>
+      <div className="login-main-bar credit">
+        <MuSpriteFrame file="deco.OZT" width={189} height={103} className="login-main-deco" />
+        <MuButton file="server_credit_b_all.OZT" width={54} height={30} frames={{ up: 0, active: 1, down: 2 }} onClick={openCredits} />
       </div>
     </div>
   );
