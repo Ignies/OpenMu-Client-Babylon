@@ -322,4 +322,6 @@ export default {
   'options.quality.low': '低',
   'options.skillVisualBudget': '限制技能特效',
   'options.help.skillVisualBudget': '适用于攻速极快和人多的场合：每个角色每秒最多10个技能特效，其他所有玩家合计每秒最多40个。命中和数字仍会显示。',
+  'options.dropDrawCap': '限制地面物品',
+  'options.help.dropDrawCap': '为掉落率极高的服务器，地面物品最多只绘制最近的150个。其余的在进入最近范围后显示。',
 } satisfies Partial<Record<keyof typeof en, string>>;

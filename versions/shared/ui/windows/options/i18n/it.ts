@@ -400,4 +400,7 @@ export default {
   'options.skillVisualBudget': 'Limita gli effetti delle abilità',
   'options.help.skillVisualBudget':
     'Per attaccanti molto veloci e folle: al massimo 10 effetti di abilità al secondo per personaggio e 40 per tutti gli altri giocatori insieme. Colpi e numeri restano.',
+  'options.dropDrawCap': 'Limita gli oggetti a terra',
+  'options.help.dropDrawCap':
+    'Disegna al massimo i 150 oggetti a terra più vicini, per server con drop molto alti. Gli altri appaiono quando sono tra i più vicini.',
 } satisfies Partial<Record<keyof typeof en, string>>;

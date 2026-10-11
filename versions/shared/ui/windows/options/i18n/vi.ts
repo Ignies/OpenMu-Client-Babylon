@@ -386,4 +386,7 @@ export default {
   'options.skillVisualBudget': 'Giới hạn hiệu ứng kỹ năng',
   'options.help.skillVisualBudget':
     'Cho người đánh rất nhanh và đám đông: tối đa 10 hiệu ứng kỹ năng mỗi giây cho mỗi nhân vật và 40 cho tất cả người chơi khác cộng lại. Đòn đánh và con số vẫn hiện.',
+  'options.dropDrawCap': 'Giới hạn vật phẩm trên mặt đất',
+  'options.help.dropDrawCap':
+    'Chỉ vẽ tối đa 150 vật phẩm gần nhất trên mặt đất, cho máy chủ có tỉ lệ rơi rất cao. Số còn lại hiện khi chúng nằm trong nhóm gần nhất.',
 } satisfies Partial<Record<keyof typeof en, string>>;

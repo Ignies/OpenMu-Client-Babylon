@@ -424,6 +424,9 @@ const en = {
   'options.skillVisualBudget': 'Limit skill effects',
   'options.help.skillVisualBudget':
     'For very fast attackers and crowds: at most 10 skill effects a second per character and 40 for all other players together. Hits and numbers still show.',
+  'options.dropDrawCap': 'Limit items on the ground',
+  'options.help.dropDrawCap':
+    'Draws at most the 150 nearest items on the ground, for servers with very high drop rates. The rest show once they are among the nearest.',
 };
 
 export default en;

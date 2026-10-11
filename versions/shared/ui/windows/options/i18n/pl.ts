@@ -393,4 +393,7 @@ export default {
   'options.skillVisualBudget': 'Ogranicz efekty umiejętności',
   'options.help.skillVisualBudget':
     'Dla bardzo szybkich atakujących i tłumów: najwyżej 10 efektów umiejętności na sekundę na postać i 40 dla wszystkich innych graczy razem. Trafienia i liczby nadal widać.',
+  'options.dropDrawCap': 'Ogranicz przedmioty na ziemi',
+  'options.help.dropDrawCap':
+    'Rysuje najwyżej 150 najbliższych przedmiotów na ziemi, dla serwerów z bardzo wysokim dropem. Reszta pojawia się, gdy znajdzie się wśród najbliższych.',
 } satisfies Partial<Record<keyof typeof en, string>>;

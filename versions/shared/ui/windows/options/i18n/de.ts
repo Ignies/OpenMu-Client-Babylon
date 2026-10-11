@@ -429,4 +429,7 @@ export default {
   'options.skillVisualBudget': 'Fertigkeitseffekte begrenzen',
   'options.help.skillVisualBudget':
     'Für sehr schnelle Angreifer und Menschenmengen: höchstens 10 Fertigkeitseffekte pro Sekunde je Figur und 40 für alle anderen Spieler zusammen. Treffer und Zahlen bleiben.',
+  'options.dropDrawCap': 'Gegenstände am Boden begrenzen',
+  'options.help.dropDrawCap':
+    'Zeichnet höchstens die 150 nächsten Gegenstände am Boden, für Server mit sehr hohen Dropraten. Der Rest erscheint, sobald er zu den nächsten gehört.',
 } satisfies Partial<Record<keyof typeof en, string>>;

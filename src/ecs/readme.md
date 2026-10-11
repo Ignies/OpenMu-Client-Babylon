@@ -25,6 +25,8 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
   `otherPets` is off; a ridden mount stays), `animationsHeld` (`animationHoldSystem` holds other players'
   or the NPCs' looping clips still through `ModelObject.setAnimationsHeld` while `otherPlayerAnimations` /
   `npcAnimations` is off; swings and deaths still play). The hero and the monsters are never thinned.
+  `calculateVisibilitySystem.ts` `capDrawnDrops`: with `dropDrawCap` on (off by default) only the nearest
+  `MAX_DRAWN_DROPS` (150) ground items stay visible; the rest are hidden and looked at again in 0.25 s.
 
 ## How it works
 - A system is a factory `(world) => { update?(dt) }` in `systems/`. `createWorld.ts` lists every
@@ -91,6 +93,8 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
   first drawn item under three tiles, not the nearest.
 - `systems/gmMark.test.ts`: the GM buff or the hero's operator status asks for the Webzen mark, cloaking hides it.
 - `systems/npcTalkSystem.test.ts`: the Gateway Machine is talked to from 5.5 tiles with no free tile beside it.
+- `systems/calculateVisibilitySystem.test.ts`: the ground item cap leaves a normal pile alone and hides the
+  farthest past it.
 - `systems/othersShown.test.ts`: the crowd options hide only other players' gear effects and pets, never a
   ridden mount, the hero's or a monster's; hold other players' and the NPCs' clips, never the hero, a monster or a trap.
 - `systems/playerControllerSystem.test.ts`: a ground click calls off a standing cast, except while the

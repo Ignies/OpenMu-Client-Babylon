@@ -278,6 +278,8 @@ export type GameOptions = {
    * cast per caster every 0.1 s (longer for a heavy skill) and 40 a second for all other players.
    */
   skillVisualBudget: boolean;
+  /** At most `MAX_DRAWN_DROPS` (150) ground items drawn, the nearest (ours, a crowd option). */
+  dropDrawCap: boolean;
   autoAttack: boolean;
   /**
    * An amount box in front of every `+` in the character info window, so a
@@ -631,6 +633,7 @@ const DEFAULTS: GameOptions = {
   otherPlayerAnimations: true,
   npcAnimations: true,
   skillVisualBudget: false,
+  dropDrawCap: false,
   autoAttack: false,
   statPointAmounts: true,
   whisperBeep: true,

@@ -434,4 +434,7 @@ export default {
   'options.skillVisualBudget': 'Limitar efectos de habilidades',
   'options.help.skillVisualBudget':
     'Para atacantes muy rápidos y multitudes: como mucho 10 efectos de habilidades por segundo por personaje y 40 para todos los demás jugadores juntos. Los golpes y números se siguen viendo.',
+  'options.dropDrawCap': 'Limitar objetos en el suelo',
+  'options.help.dropDrawCap':
+    'Dibuja como mucho los 150 objetos del suelo más cercanos, para servidores con drops muy altos. El resto aparece cuando está entre los más cercanos.',
 } satisfies Partial<Record<keyof typeof en, string>>;

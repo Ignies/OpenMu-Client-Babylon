@@ -571,6 +571,7 @@ export const CATEGORIES: Category[] = [
               toggle('otherPlayerAnimations'),
               toggle('npcAnimations'),
               toggle('skillVisualBudget'),
+              toggle('dropDrawCap'),
             ],
           },
         ],
