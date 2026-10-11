@@ -3,7 +3,7 @@
  */
 import { CharacterClassNumber } from '../../core/types';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
-import { skillDefinition, type SkillDefinition } from '@versions/shared/skills/skillsDatabase';
+import { masterRoot, skillDefinition, type SkillDefinition } from '@versions/shared/skills/skillsDatabase';
 import { TW_SAFEZONE } from '../../controllers/terrain/consts';
 import type { Item } from '../../ecs/world';
 import type { SkillLayer } from './layer';
@@ -120,6 +120,15 @@ function handGrants(item: Item | null, num: number): boolean {
   return ItemsDatabase.getItem(item.group, item.num)?.Skill === num;
 }
 
+/**
+ * `IsNonWeaponSkillOrIsSkillEquipped` (CSItemOption.cpp:602-640): a skill whose base skill a weapon
+ * carries (a Strengthener or Mastery through its chain) needs that weapon, with its skill, in hand.
+ */
+export function weaponSkillEquipped(num: number): boolean {
+  const base = masterRoot(num);
+  return !isWeaponSkill(base) || handGrants(Hero.leftHandSlot, base) || handGrants(Hero.rightHandSlot, base);
+}
+
 /** The classes a skill's `classes` expression admits. */
 function skillClasses(def: SkillDefinition): ReadonlySet<CharacterClassNumber> {
   const out = new Set<CharacterClassNumber>();
@@ -146,13 +155,7 @@ export function skillUsability(num: number): SkillUsability {
   if (!learned && !skillClasses(def).has(pd.charClass)) blocks.push('class');
   if (def.level > 0 && pd.level < def.level) blocks.push('level');
   if (def.energy > 0 && pd.eng < def.energy) blocks.push('energy');
-  if (
-    isWeaponSkill(num) &&
-    !handGrants(pd.leftHandSlot, num) &&
-    !handGrants(pd.rightHandSlot, num)
-  ) {
-    blocks.push('weapon');
-  }
+  if (!weaponSkillEquipped(num)) blocks.push('weapon');
   const requirementsMet = blocks.length === 0;
 
   if (def.mana > 0 && pd.currentMP < def.mana) blocks.push('mana');

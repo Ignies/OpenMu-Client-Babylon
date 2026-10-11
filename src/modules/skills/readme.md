@@ -82,6 +82,7 @@ hotbar share.
   Nightmare in Kanturu 3rd); anyone else the plain one.
 - `objectEffects.test.ts`: the bar takes the hero's effect with no world; a map change's reset is
   followed by the held looks drawn again.
+- `usability.test.ts`: a Strengthener or Mastery of a weapon skill needs the weapon of its base skill.
 - `state.test.ts`: active master skills sit on the bar; a Strengthener takes its base skill's hot key
   and selection.
 - `masterTree.test.ts`: the tree reads the Season 6 skill table: a node's icon cell and its base
@@ -117,4 +118,6 @@ starts empty, `registerSkills` fills it.
 ### usability.ts
 `skillRequirementsMet` is the static rule (class, level, energy, weapon) that greys the icon
 (`bCantSkill`); `canUseSkill` adds mana, AG, the running delay and the safe zone. Pure readers over
-MobX state: no `update`, no `reset`.
+MobX state: no `update`, no `reset`. The weapon rule (`weaponSkillEquipped`, also the master tree's
+equipment gate) is `IsNonWeaponSkillOrIsSkillEquipped`: it looks at the base skill at the end of a
+master chain (`masterRoot`), so Triple Shot Strengthener and Mastery both need the bow.
