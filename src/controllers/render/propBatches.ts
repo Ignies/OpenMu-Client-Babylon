@@ -275,6 +275,11 @@ function shareGeometry(src: Mesh, mesh: Mesh): void {
     const buffer = source.getVertexBuffer(kind);
     if (!buffer) continue;
 
+    // A reference of its own, as the index buffer's: the view releases it on dispose, and without
+    // it the first chunk to go freed the cached model's buffer, which the next clone drew torn.
+    const data = buffer.getBuffer();
+    if (data) data.references++;
+
     const view = new VertexBuffer(engine, buffer.getWrapperBuffer(), kind, {
       updatable: buffer.isUpdatable(),
       postponeInternalCreation: true,

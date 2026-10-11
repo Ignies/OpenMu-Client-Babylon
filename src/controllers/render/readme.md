@@ -47,7 +47,10 @@ There is no `index.ts` facade; other folders import the modules directly.
   Map objects also drop still clips (`staticClips.ts`) and mark themselves static CSM casters.
 - `textureScript.ts` reads a texture name's `_R/_H/_S/_N/_DC/_DT` suffix for the model loader.
 - `propBatches.ts` draws map scenery as thin instances, one mesh per type, submesh and 32-tile chunk
-  (`propBatchRules.ts`); one real `ModelObject` per type is the never-drawn prototype.
+  (`propBatchRules.ts`); one real `ModelObject` per type is the never-drawn prototype. A chunk mesh
+  draws the cached model's GPU buffers with a reference of its own on each (`shareGeometry`): without
+  it the first chunk disposed freed them, and the next clone of that model (a same-folder map such as
+  the Chaos Castle floors, a lighting-tier rebuild, the batching toggle) drew a recycled buffer, torn.
 - The look director (`lighting/director.ts`) syncs the passes each tick in this order: shadows,
   upscale, effect mask, AO, ink outline, hull outline, speed lines, haze, room mask, sun shafts,
   tone map, firefly guard, then the post chain (`moveToEnd` when a pass ahead was rebuilt).
@@ -86,6 +89,7 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `pbrDerive.test.ts`: `flipRows`, flat normal and emissive mask of `derivePbrMaps`.
 - `propBatchLight.test.ts`: `ChunkLight` re-packs match a whole-chunk re-pack on every tier.
 - `propBatchRules.test.ts`: `batchExclusion`, `chunkOf`, placement and instance matrices.
+- `propBatches.test.ts`: batches built and disposed twice over one cached model leave its buffers whole.
 - `renderAngles.test.ts`: `angleMatrixQuaternion` against the original's `AngleMatrix`, and a
   placed record with both pitch and roll drawn by it, by its node and by its batched placement.
 - `renderingStyle.test.ts`: style readers, tier gating, the material snapshot and toon binds.
