@@ -41,9 +41,10 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   posed, swung and lit holding), `shownGear(e, map)` (the gear its item glow comes off),
   `wearsChaosCastleSkin(e, map)`, type `Gear`. Inside Chaos Castle every player holds the castle's
   weapons, all +0 (`ChangeChaosCastleUnit`, CSChaosCastle.cpp:130-170); range and ammo stay its own.
-- `PlayerObject.Cloth`, `MonsterObject.Cloth`: the body's physics cloths (`o->m_pCloth`, a `controllers/cloth` `ClothSet`).
-  `cloaks.ts`: `registerCloaks(rule)` (the wearers' content hands its rule in at boot), `cloaksFor(wearer, set)`
-  (the rule builds, destroys and draws on the body's set as `RenderCharacter` does), types `CloakWearer`,
+- `PlayerObject.Cloth`, `MonsterObject.Cloth`: the body's physics cloths (`o->m_pCloth`, a `controllers/cloth` `ClothSet`);
+  `PlayerObject.PantsCloth`: the pants part's (`BodyPart[BODYPART_PANTS].m_pCloth`, made of the `Pants` part's meshes),
+  dropped with `Cloth`. `cloaks.ts`: `registerCloaks(rule)` (the wearers' content hands its rule in at boot),
+  `cloaksFor(wearer, set, pants)` (the rule builds, destroys and draws on the body's sets as `RenderCharacter` does), types `CloakWearer`,
   `CloakSet`, `CloakRule`; `ecs/systems/clothSystem.ts` asks it every frame.
 - `wings.ts`: `wingSpec`, `isWingItem`, `wingBone`, `isFastWing`, `WING_GROUP`, `HELPER_GROUP`,
   `WING_BONE`, `CAPE_BONE`, wing index constants (`WING_OF_ELF`, `CAPE_OF_LORD`, ...).

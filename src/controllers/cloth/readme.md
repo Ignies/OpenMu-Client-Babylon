@@ -17,7 +17,8 @@ cloth moves and draws, never who wears which one (the wearers' content names the
   (`DeleteCloth`); each frame the wearer's rule `draw`s the slots its loop reaches after `undraw()`, once a
   `Move2` call (`holds` false: a caller that steps it under stun too), and `setLight` gives the `CloakLight`.
   `shown`, `held` (stun or sleep: `Move2(0, 5)`) and `castsShadow` are set every frame by the wearer's
-  system; `size`, `cloth(s)`, `mesh(s)`, `draws(s)`, `drawn(s)` read it.
+  system; `size`, `cloth(s)`, `mesh(s)`, `draws(s)`, `drawn(s)` read it. `partner`: the set dropped with this
+  one (`DeleteCloth` takes a body's cloths and its parts' together, ZzzCharacter.cpp:3070-3115).
 - `cloth`: the facade (`Controller`); its `update(map, dt)` advances the 25 Hz clock.
 - `runClothFrame()`: the frame's ticks and draws; the scene calls it before its first camera renders.
 - `PhysicsCloth`: the simulator alone (tests, readers).
@@ -73,7 +74,7 @@ cloth moves and draws, never who wears which one (the wearers' content names the
 ## Depends on / used by
 - uses: `render` (the Babylon exports, the blob shadow material), `assets` (`getDataTexture`), `fx`
   (`HeldSprites`), `fidelity` (`isOn`).
-- used by: `actors` (`PlayerObject.Cloth`, `MonsterObject.Cloth`), `ecs/systems/clothSystem.ts` (the clock
+- used by: `actors` (`PlayerObject.Cloth` and `PantsCloth`, `MonsterObject.Cloth`), `ecs/systems/clothSystem.ts` (the clock
   and the wearers).
 
 ## Change it
@@ -91,7 +92,8 @@ cloth moves and draws, never who wears which one (the wearers' content names the
   destroyed and torn, an undrawn cloth lying where it was built with its shadow, nothing past `count`, a stale
   cloth tearing when stepped again far off, a hidden wearer, the shadow clone, and the cost of 20 caped players
   (logged); the weld, the grid's corners and UVs, a mesh cloth written into its mesh in the bone's frame, the
-  mesh's own geometry, waiting for the mesh and dropping with it, a grid over a mesh, the draw count and the hold.
+  mesh's own geometry, waiting for the mesh and dropping with it, a grid over a mesh, the draw count and the hold,
+  and a partner dropped with its set.
 - `clothSkin.test.ts`: the shipped GLBs of the mesh cloths, welded back into their BMD meshes vertex for vertex and
   triangle for triangle (the Magic Skeleton's, the Divine Pants'), and the soul pants' grids in their mesh 2.
 

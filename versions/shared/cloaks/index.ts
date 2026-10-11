@@ -15,6 +15,7 @@ import { DARK_LORD_SKIRT, DARK_LORD_SKIRT_BUILT, LORD_EMPEROR_SKIRT, LORD_EMPERO
 import { teamLight } from './team_cloak';
 import { DEATH_KING, DEATH_KING_ROBE, NIGHTMARE, NIGHTMARE_ROBE, isDoppelganger } from './monster_robes';
 import { MAGIC_SKELETON_CLOTH, isMagicSkeleton } from './magic_skeleton';
+import { pantsCloth } from './soul_pants';
 import { CAPE_OF_FIGHTER_CLOTH, CAPE_OF_OVERRULE_CLOTH, CAPE_OF_OVERRULE_STRAPS, isCapeOfFighter, isCapeOfOverrule } from './cape_of_fighter';
 
 const WHITE: Rgb = [1, 1, 1];
@@ -100,13 +101,34 @@ function drawSet(w: CloakWearer, base: BaseClass, team: boolean, set: CloakSet):
 }
 
 /**
+ * The pants part's cloth (`RenderPartObject`, ZzzObject.cpp:10608-10680): built once, stepped in the parts' pass
+ * and again in the shadow pass (ZzzCharacter.cpp:8605-8612, :9651), never held; other pants drop it with the
+ * body's set (`DeleteCloth(NULL, o, p)`). A ring's body draws no part, so nothing happens to it.
+ */
+function wearPants(w: CloakWearer, pants: CloakSet): void {
+  if (w.skin !== null) return;
+  const spec = pantsCloth(w.pants);
+  if (!spec) {
+    if (pants.built) pants.drop();
+    return;
+  }
+  if (!pants.built) {
+    pants.build(0, spec);
+    pants.count = 1;
+  }
+  pants.draw(0, false);
+  if (w.shadowPass) pants.draw(0, false);
+}
+
+/**
  * `bCloak` (ZzzCharacter.cpp:9162-9246): on the player rig the Magic Gladiator (the class itself,
  * `c->Class == CLASS_DARK`), every Dark Lord and Rage Fighter; the Death King and the Nightmare; never a
  * Doppelganger nor inside Chaos Castle; and any player a team colour puts in one, unless in a monster's body.
  * The set is built once, then only its skirt changes; out of a cloak it stays as it was, undrawn.
  */
-export function cloaks(w: CloakWearer, set: CloakSet): Rgb {
+export function cloaks(w: CloakWearer, set: CloakSet, pants: CloakSet | null): Rgb {
   if (tearsSet(w)) set.drop();
+  if (pants) wearPants(w, pants);
   if (isMagicSkeleton(w.monster)) {
     // Its own case before bCloak (ZzzCharacter.cpp:8512-8533): built once, `Move2(0.005f, 5)` every frame.
     if (!set.built) {

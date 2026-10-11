@@ -1,7 +1,8 @@
 import { cloth, type ClothSet } from '../../controllers/cloth';
 import { cloaksFor, type CloakWearer } from '../../controllers/actors/cloaks';
 import { heldWeapons } from '../../controllers/actors';
-import { inChaosCastle } from '../../controllers/actors/locomotion';
+import { inChaosCastle, inHellas } from '../../controllers/actors/locomotion';
+import { ENUM_WORLD } from '../../core/types';
 import { MonsterObject } from '../../controllers/actors/monsterObject';
 import { isPlayerBody } from '../../controllers/actors/playerObject';
 import { characterSkinParts } from '../../controllers/actors/transformedBody';
@@ -14,6 +15,8 @@ import type { Entity, ISystemFactory, Item, World } from '../world';
 const CLOAKING = 18;
 const STUN = 61;
 const SLEEP = 72;
+/** The shadow pass opens at half alpha (ZzzCharacter.cpp:8590). */
+const SHADOW_ALPHA = 0.5;
 
 /** The part file a rig-worn skin draws, by skin number, read once (`characterSkinParts` builds its table per call). */
 const skinParts = new Map<number, string | null>();
@@ -57,15 +60,20 @@ function clothSystem(world: World) {
     guild: null,
     monster: null,
     rig: false,
+    pants: null,
+    shadowPass: false,
   };
 
-  /** One body's frame: the rule on its set, then what the set needs to step and draw. */
-  function step(e: Entity, model: ModelObject, set: ClothSet, castle: boolean, mapIndex: number): void {
+  /** One body's frame: the rule on its sets, then what they need to step and draw. */
+  function step(e: Entity, model: ModelObject, set: ClothSet, pants: ClothSet | null, castle: boolean, mapIndex: number): void {
     set.undraw();
-    set.setLight(cloaksFor(wearer, set));
-    if (!set.built) return;
+    pants?.undraw();
+    set.setLight(cloaksFor(wearer, set, pants));
     const buffs = e.buffs;
-    set.shown = model.Ready && !model.OutOfView && e.visibility?.state !== 'hidden' && !buffs?.has(CLOAKING);
+    const shown = model.Ready && !model.OutOfView && e.visibility?.state !== 'hidden' && !buffs?.has(CLOAKING);
+    if (pants?.built) pants.shown = shown;
+    if (!set.built) return;
+    set.shown = shown;
     set.held = !!buffs && (buffs.has(STUN) || buffs.has(SLEEP));
     // The cloth's shadow is drawn by every link object's RenderLinkObject (ZzzCharacter.cpp:8433-8446): the wing
     // slot and the Imp outside Chaos Castle, the held weapons anywhere; a body off the player rig has none.
@@ -84,6 +92,8 @@ function clothSystem(world: World) {
       cloth.update?.(world.mapIndex, dt);
       const castle = inChaosCastle(world.mapIndex);
       wearer.chaosCastle = castle;
+      // Neither Icarus nor Kalima runs the character shadow pass (ZzzCharacter.cpp:8592-8593).
+      const shadowWorld = world.mapIndex !== ENUM_WORLD.WD_10ICARUS && !inHellas(world.mapIndex);
       for (const e of characters) {
         const model = e.modelObject;
         const set = clothOf(model);
@@ -103,7 +113,10 @@ function clothSystem(world: World) {
         // A player-rig monster's own number; a player in a monster's body is that monster (CreateMonster).
         wearer.monster = rig ? (e.npcType ?? null) : (e.skin ?? null);
         wearer.rig = rig;
-        step(e, model, set, castle, world.mapIndex);
+        // The parts' pass and, on a mount out of town or under half alpha, no shadow pass (:8590-8612).
+        wearer.pants = rig ? (model.Pants.gltf?.mesh.name ?? null) : null;
+        wearer.shadowPass = rig && shadowWorld && model.Alpha >= SHADOW_ALPHA && model.Pants.ClassicShadow;
+        step(e, model, set, rig ? model.PantsCloth : null, castle, world.mapIndex);
       }
       for (const e of monsters) {
         if (e.charAppearance) continue;
@@ -118,7 +131,9 @@ function clothSystem(world: World) {
         wearer.guild = null;
         wearer.monster = e.npcType;
         wearer.rig = isPlayerBody(model);
-        step(e, model, set, castle, world.mapIndex);
+        wearer.pants = null;
+        wearer.shadowPass = false;
+        step(e, model, set, null, castle, world.mapIndex);
       }
     },
   };

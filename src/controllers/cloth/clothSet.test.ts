@@ -500,3 +500,24 @@ describe('a cloth of the model\'s own mesh (CPhysicsClothMesh, PhysicsManager.cp
     for (const s of [set, held, free]) s.dispose();
   });
 });
+
+describe('a body\'s cloths and its parts\' (DeleteCloth, ZzzCharacter.cpp:3070-3115)', () => {
+  it('drops its partner with it, dropped or torn', () => {
+    const rig = body();
+    const own = new ClothSet(scene, rig);
+    const part = new ClothSet(scene, rig);
+    own.partner = part;
+    part.partner = own;
+    hang(own, [CAPE]);
+    part.build(0, ROBE);
+    tick();
+    // Only the drawn cape tears when the body jumps far; the part's undrawn robe goes with it.
+    rig.node.position.x += 100;
+    tick();
+    expect([own.built, part.built]).toEqual([false, false]);
+    hang(part, [ROBE]);
+    part.drop();
+    expect(part.built).toBe(false);
+    for (const s of [own, part]) s.dispose();
+  });
+});

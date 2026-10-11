@@ -26,7 +26,7 @@ const PCT_ELASTIC_HALLOWEEN = 0x4000;
 export const PCT_ELASTIC_RAGE_L = 0x8000;
 export const PCT_ELASTIC_RAGE_R = 0xc000;
 const PCT_MASK_ELASTIC_EXT = 0xe000;
-const PCT_OPT_CORRECTEDFORCE = 0x20000000;
+export const PCT_OPT_CORRECTEDFORCE = 0x20000000;
 export const PCT_MASK_LIGHT = 0x40000000;
 
 // St_PhysicsLink styles (PhysicsManager.h:152-155).

@@ -73,6 +73,8 @@ export class ClothSet implements ClothAnchor {
   count = 0;
   /** `m_pCloth != NULL`: built, until `drop`. */
   built = false;
+  /** The set that goes with this one: `DeleteCloth` takes a body's cloths and its parts' together (ZzzCharacter.cpp:3070-3115). */
+  partner: ClothSet | null = null;
 
   private readonly slots: (Worn | null)[] = [];
   private light: Rgb = [1, 1, 1];
@@ -135,8 +137,13 @@ export class ClothSet implements ClothAnchor {
     for (let s = 0; s < this.slots.length; s++) this.slots[s]?.mesh.setLight(light);
   }
 
-  /** `DeleteCloth`: every cloth goes; the wearer's rule builds the set anew. */
+  /** `DeleteCloth`: every cloth goes, the partner's too; the wearers' rule builds them anew. */
   drop(): void {
+    this.clear();
+    this.partner?.clear();
+  }
+
+  private clear(): void {
     for (let s = 0; s < this.slots.length; s++) this.slots[s]?.mesh.dispose();
     this.slots.length = 0;
     this.built = false;

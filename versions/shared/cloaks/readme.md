@@ -5,17 +5,18 @@ the capes, the Dark Lord's hair and skirt, the Magic Gladiator's robe, the team 
 (simulation, drawing, shadow) is the `cloth` controller; this folder only names the specs.
 
 ## Public API
-- `cloaks(wearer, set)` (`index.ts`): the rule, handed to `registerCloaks` when the folder loads
+- `cloaks(wearer, set, pants)` (`index.ts`): the rule, handed to `registerCloaks` when the folder loads
   (`app/boot.tsx` imports it). On the wearer's set it does what `RenderCharacter` does: builds the set
   once (`Create` per slot, `m_byNumCloth`), makes the skirt follow the armour, draws the slots its loop
-  reaches, and returns the `CloakLight`.
+  reaches, and returns the `CloakLight`; on the pants part's set, what `RenderPartObject` does.
 - One file per use: `cape_of_lord.ts` (the Cape of Lord and the Mantle of Monarch's cape and straps),
   `cape_of_fighter.ts` (the Cape of Fighter and the Cape of Overrule's cape and straps), `robe.ts` (the
   Magic Gladiator's robe, msword03 under the Wing of Ruin), `dark_lord_hair.ts` (the Dark Lord's two
   strands of hair), `dark_lord_skirt.ts` (his skirt over the class's own body), `team_cloak.ts` (the duel
   and Battle Soccer colours, `teamLight`), `delete_cloth.ts` (the wing changes that reset the set, `tearsSet`),
   `monster_robes.ts` (the Death King's and the Nightmare's robes, `isDoppelganger`), `magic_skeleton.ts` (the
-  Magic Skeletons' cape, a mesh of their body made cloth).
+  Magic Skeletons' cape, a mesh of their body made cloth), `soul_pants.ts` (the pants that are cloth,
+  `pantsCloth`).
 
 ## How it works
 - `bCloak` (:9162-9186): on the player rig the Magic Gladiator class itself (`c->Class == CLASS_DARK`, so
@@ -61,6 +62,16 @@ the capes, the Dark Lord's hair and skirt, the Magic Gladiator's robe, the team 
   have their own case before `bCloak` (ZzzCharacter.cpp:8502-8539): mesh 2 of the body (`bsh02.tga`) made cloth
   (`CPhysicsClothMesh`), pinned on bone 18, heavy, two spheres on that bone; built once, stepped every frame,
   stun or not.
+- The pants part (`RenderPartObject`, ZzzObject.cpp:10608-10680), keyed on the model drawn (`Type`, the part's
+  file): the Grand Soul Pants (`t_PantMale19`) a 5 x 8 grid on bone 17 drawn as the part's mesh 2
+  (`PCT_OPT_MESHPROG`), the Dark Soul Pants (`PantMale23`) a 7 x 5 one, the Divine Pants (`PantMaleTest20`, the
+  model `ZzzOpenData.cpp:174-181` loads for them) mesh 3 made cloth on bone 2 with five spheres down the legs. It
+  is built once and stepped each time the part is drawn, stun or not: in the parts' pass and again in the shadow
+  pass (ZzzCharacter.cpp:8590-8612, :9651; not on a Uniria or Dinorant out of town, under half alpha, in Icarus
+  or Kalima). Other pants drop it with the body's set (`DeleteCloth(NULL, o, p)`, :10675-10678), as a tear of
+  either does; under a ring's body no part is drawn and it is left alone. The original keeps the old cloth when
+  one soul pants is swapped straight for another (drawing it over the new mesh); here the new part's mesh takes
+  the set with it.
 - A ring's body worn on the rig (`o->SubType`, the wearer's `skin`): the Illusion Temple's two
   (`illusionist`, `unitedsoldier`) skip every cloth (:9958-9961); any other hides the Magic Gladiator's
   robe but the skeleton rings' (`CheckDarkCloak`, ChangeRingManager.cpp:31-49, 95-101).
@@ -77,5 +88,5 @@ the capes, the Dark Lord's hair and skirt, the Magic Gladiator's robe, the team 
 
 ## Tests
 - `cloaks.test.ts`: each use's specs against the original's numbers, and who wears them (the two monsters,
-  no Doppelganger, the seven Magic Skeletons).
+  no Doppelganger, the seven Magic Skeletons, the three pants by their model, twice in the shadow pass).
 - `team_cloak.test.ts`: the duel and Battle Soccer colours, who they put a cloak on, and what it is.

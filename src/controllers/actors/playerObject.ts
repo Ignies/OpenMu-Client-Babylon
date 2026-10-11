@@ -31,7 +31,7 @@ import { chooseIdleAction, isPhoenixSoulStar } from './weaponClass';
 import { isFemaleClass } from './mapPlayerNetClassToModelClass';
 import { playerPlaySpeed } from '../anim/playSpeed';
 import type { ShatterDeath } from '../fx/deathVisuals';
-import { ClothSet } from '../cloth';
+import { ClothSet, type ClothBody } from '../cloth';
 
 /** `MODEL_WEBZEN_MARK`: `Data\Skill\MuSign` (ZzzOpenData.cpp:4343). */
 const GM_MARK_MODEL = 'Skill/musign.glb';
@@ -103,6 +103,8 @@ export class PlayerObject extends ModelObject {
   gmMarkOn = false;
   /** The physics cloths on this body (`o->m_pCloth`): capes, robes, hair; `ecs/systems/clothSystem.ts` names them. */
   readonly Cloth: ClothSet;
+  /** The pants part's (`BodyPart[BODYPART_PANTS].m_pCloth`): its meshes `Pants`', on this rig; dropped with `Cloth`. */
+  readonly PantsCloth: ClothSet;
 
   IsInteractable = false;
 
@@ -139,6 +141,9 @@ export class PlayerObject extends ModelObject {
     this.GmMark.BodyShine.tint.set(1, 0.5, 0);
     this.GmMark.BodyShine.chromeOnly = true;
     this.Cloth = new ClothSet(scene, this);
+    this.PantsCloth = new ClothSet(scene, pantsBody(this));
+    this.Cloth.partner = this.PantsCloth;
+    this.PantsCloth.partner = this.Cloth;
 
     this.HelmMask.NodeNamePrefix = 'HelmMask_';
     this.Helm.NodeNamePrefix = 'Helm_';
@@ -580,6 +585,7 @@ export class PlayerObject extends ModelObject {
     // Not children (their own roots), so the base does not reach them.
     this.GmMark.dispose();
     this.Cloth.dispose();
+    this.PantsCloth.dispose();
     super.dispose();
   }
 
@@ -594,6 +600,17 @@ export class PlayerObject extends ModelObject {
 }
 
 const PLAYER_SHADOW_MIN_ALPHA = 0.5;
+
+/** What the pants' cloth hangs on: the character (`o`, its bones and turn) and the part's meshes (`iBMDType`). */
+function pantsBody(player: PlayerObject): ClothBody {
+  return {
+    node: player.node,
+    get gltf() {
+      return player.gltf;
+    },
+    getMesh: index => player.Pants.getMesh(index),
+  };
+}
 
 const BOW_GROUP = 4;
 const LAST_BOW = 32;
