@@ -864,11 +864,12 @@ export class ModelObject {
     const prevAction = this.CurrentAction;
     if (prevAction === actionIndex) return;
 
-    if (prevAction !== -1) {
-      const prevAnimationGroup = this.gltf.animationGroups[prevAction];
-      if (prevAnimationGroup) {
-        prevAnimationGroup.stop();
-      }
+    // Every other running clip, not only the previous action's: a player rig starts with CurrentAction
+    // at another action, so the clip 0 loadGLTF plays went on posing it under every action. Only the
+    // clips cloned so far are walked (lazyAnimationGroups.ts).
+    const animationGroup = this.gltf.animationGroups[actionIndex];
+    for (const group of this.gltf.animationGroups) {
+      if (group !== animationGroup && group.isStarted) group.stop();
     }
 
     this.CurrentAction = actionIndex;
@@ -876,7 +877,6 @@ export class ModelObject {
     this.ActionIterationWasFinished = false;
     this.actionSerial++;
 
-    const animationGroup = this.gltf.animationGroups[actionIndex];
     if (animationGroup) {
       this.startGroup(animationGroup, actionIndex, loop);
       // A clip started while off screen must not run; one-shots are exempt

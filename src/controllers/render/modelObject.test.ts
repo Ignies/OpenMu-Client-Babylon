@@ -50,6 +50,18 @@ describe('a model whose clips are cloned on first play', () => {
     clip?.onAnimationGroupEndObservable.notifyObservers(clip);
     expect(object.ActionIterationWasFinished).toBe(true);
   });
+
+  it('stops the clip 0 the loader started when the first action is not clip 0', () => {
+    const object = new ModelObject(scene);
+    const gltf = rig();
+    // loadGLTF plays clip 0; a player rig starts with CurrentAction at another action (PlayerObject).
+    gltf.animationGroups[0]?.play(true);
+    object.load(gltf);
+    object.CurrentAction = 1;
+    object.playAction(2);
+    expect(gltf.animationGroups[0]?.isStarted).toBe(false);
+    expect(gltf.animationGroups[2]?.isStarted).toBe(true);
+  });
 });
 
 const at = (seconds: number) => ({ TotalGameTime: { TotalSeconds: seconds } }) as Parameters<ModelObject['Update']>[0];

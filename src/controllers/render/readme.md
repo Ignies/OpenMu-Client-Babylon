@@ -83,7 +83,7 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `meshAnimation.test.ts`: `meshAnimationFor` reads the map row per world.
 - `modelObject.test.ts`: a model whose clips are cloned on first play reads every clip's keys at load
   without cloning one, and a clip cloned later reports its end; `BlendMesh -2` and a pulsing `BlendMeshLightAt`;
-  a part unlinked from its bone goes back under its owner.
+  a part unlinked from its bone goes back under its owner; an action stops every other running clip, the loader's clip 0 too.
 - `versions/shared/contentRows.golden.test.ts`: every map's mesh animations, sampled over time.
 - `pbrMaps.test.ts`: `textureSourceName` reads the pack's remembered name mid-swap.
 - `pbrDerive.test.ts`: `flipRows`, flat normal and emissive mask of `derivePbrMaps`.
