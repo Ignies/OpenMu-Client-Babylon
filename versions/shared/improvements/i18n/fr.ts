@@ -39,4 +39,7 @@ export default {
   'fidelity.cameraKeepsView': 'Caméra conservée entre les cartes',
   'fidelity.cameraKeepsView.hint':
     'Le zoom, la rotation et l’inclinaison de la caméra restent les mêmes quand vous vous téléportez ou changez de carte, et un bouton Réinitialiser la caméra apparaît tant que la vue est déplacée. Classique : chaque changement de carte réinitialise la caméra, comme dans l’original.',
+  'fidelity.swingFill': 'Les coups remplissent le temps entre eux',
+  'fidelity.swingFill.hint':
+    'Avec une vitesse d’attaque élevée, la fin de votre coup après l’impact est jouée plus lentement pour durer jusqu’au coup suivant, au lieu que le héros se fige entre deux. Les coups touchent au même moment. Classique : le coup finit tôt et le héros reste immobile, comme dans l’original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

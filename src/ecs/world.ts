@@ -212,6 +212,11 @@ export type Entity = Partial<{
      * Absent until the first swing.
      */
     swordCount?: number;
+    /**
+     * `swingFill` (Enhanced): the hero's swing clip after its blow plays at `scale`, so it ends as
+     * the next swing may start; only while the clip started as `serial` (`actionSerial`) runs.
+     */
+    swingFill?: { serial: number; scale: number };
   };
   monsterAnimation: {
     action: MonsterActionType;

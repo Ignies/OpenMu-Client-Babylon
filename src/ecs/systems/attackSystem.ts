@@ -31,6 +31,7 @@ import { t } from '../../i18n';
 import { heldWeapons } from '../../controllers/actors';
 import { serverSetting } from '../../modules/servers/serverManifest';
 import { GameOptions } from '../../controllers/settings';
+import { isOn } from '../../controllers/fidelity';
 
 /**
  * Left-click basic attack (`Action()` MOVEMENT_ATTACK, ZzzInterface.cpp:3283-3356):
@@ -357,10 +358,12 @@ export const AttackSystem: ISystemFactory = world => {
       // request at the hit key instead (its server.json, modules/servers/serverManifest.ts).
       const held = serverSetting('heldHitRequest');
       if (!held) sendHit();
+      let fill = 0;
       const hitDelay = combat.startAttack(action, playSpeed, () => {
         // CreateArrows() at AttackStage's hit key: the bow lets go here.
         playBowShotVisual(world.scene, playerEntity, target);
         if (held) sendHit();
+        if (fill > 0 && model) anim.swingFill = { serial: model.actionSerial, scale: fill };
       }, clipSeconds);
       combat.consumeInputGate();
 
@@ -371,6 +374,10 @@ export const AttackSystem: ISystemFactory = world => {
         hitDelay,
         serverMinAttackInterval(playerEntity.attributeSystem?.getValue('attackSpeed') ?? 0)
       );
+      // `swingFill` (Enhanced): after the blow the clip slows to end as the next swing may start.
+      if (clipSeconds && clipSeconds < attackCooldown && isOn('swingFill')) {
+        fill = (clipSeconds - hitDelay) / (attackCooldown - hitDelay);
+      }
     },
   };
 };

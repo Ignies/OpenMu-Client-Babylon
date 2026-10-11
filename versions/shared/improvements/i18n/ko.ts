@@ -39,4 +39,7 @@ export default {
   'fidelity.cameraKeepsView': '이동 후에도 카메라 유지',
   'fidelity.cameraKeepsView.hint':
     '순간이동하거나 맵을 바꿔도 카메라의 확대, 회전, 기울기가 그대로 유지되며, 시점을 움직인 동안 카메라 초기화 버튼이 표시됩니다. 클래식: 원본처럼 맵이 바뀔 때마다 카메라가 초기화됩니다.',
+  'fidelity.swingFill': '공격 동작이 사이 시간을 채움',
+  'fidelity.swingFill.hint':
+    '공격 속도가 빠를 때 타격 이후의 공격 동작을 느리게 재생해 다음 공격까지 이어지게 하여, 그 사이에 캐릭터가 멈춰 서지 않게 합니다. 타격 시점은 같습니다. 클래식: 원본처럼 동작이 일찍 끝나고 캐릭터가 서 있습니다.',
 } satisfies Partial<Record<keyof typeof en, string>>;

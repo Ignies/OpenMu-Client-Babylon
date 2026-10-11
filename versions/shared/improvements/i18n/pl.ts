@@ -39,4 +39,7 @@ export default {
   'fidelity.cameraKeepsView': 'Kamera zachowana po teleportacji',
   'fidelity.cameraKeepsView.hint':
     'Przybliżenie, obrót i nachylenie kamery zostają takie same po teleportacji lub zmianie mapy, a przycisk Resetuj kamerę pojawia się, gdy widok jest przesunięty. Klasyczne: każda zmiana mapy resetuje kamerę, jak w oryginale.',
+  'fidelity.swingFill': 'Ciosy wypełniają czas między nimi',
+  'fidelity.swingFill.hint':
+    'Przy dużej szybkości ataku część ciosu po trafieniu jest odtwarzana wolniej, aby trwała do następnego ciosu, zamiast bohater zastygał pomiędzy. Trafienia padają w tej samej chwili. Klasyczne: cios kończy się wcześnie, a bohater stoi, jak w oryginale.',
 } satisfies Partial<Record<keyof typeof en, string>>;

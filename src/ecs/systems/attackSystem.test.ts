@@ -21,6 +21,8 @@ const { Session } = await import('../../modules/session');
 const { Hero } = await import('../../modules/hero');
 const { Bag } = await import('../../modules/inventory');
 const { setGameOption } = await import('../../controllers/settings');
+const { combat } = await import('../../controllers/combat');
+const { FIDELITY_CLASSIC, FIDELITY_DEFAULT, setFidelityChoice } = await import('../../controllers/fidelity');
 const { HitRequestPacket } = await import('@versions/shared/packets/ClientToServerPackets');
 
 const hands = { leftHand: null, rightHand: null, wings: null, pet: null, charClass: 16 };
@@ -123,5 +125,55 @@ describe('the automatic quiver', () => {
   it('leaves alone a quiver the player took out of the hand', () => {
     setGameOption('autoQuiver', true);
     expect(runOut(53, true)).toEqual([]);
+  });
+});
+
+describe('a swing quicker than the time between swings (swingFill)', () => {
+  /** One bare-handed swing whose clip lasts `clip` seconds; its `swingFill` once the blow lands, and the blow's delay. */
+  function swing(clip: number) {
+    const hero = {
+      localPlayer: true,
+      transform: { pos: new Vector3(100.5, 0, 100.5), rot: new Vector3(), scale: 1 },
+      charAppearance: hands,
+      pathfinding: { path: null },
+      playerAnimation: { action: 0, swordCount: 0 },
+      attributeSystem: { isAboveZero: () => false, getValue: () => 0 },
+      modelObject: { AnimationSpeed: 0, actionSerial: 7, actionPlaySpeed: () => undefined, restartAction: () => {}, getActionDuration: () => clip },
+    } as unknown as Entity;
+    const monster = {
+      netId: 7,
+      npcType: 3,
+      worldIndex: 0,
+      transform: { pos: new Vector3(101.5, 0, 100.5), rot: new Vector3(), scale: 1 },
+    } as unknown as Entity;
+    const world = { mapIndex: 0, playerEntity: hero, attackTarget: monster, castRequest: null, getTerrainFlag: () => 0 } as unknown as World;
+    vi.spyOn(Hero, 'sendWalkStop').mockImplementation(() => {});
+    vi.spyOn(Session, 'sendToGS').mockImplementation(() => {});
+    const started = vi.spyOn(combat, 'startAttack');
+
+    const system = AttackSystem(world);
+    system.update?.(0.04);
+    world.attackTarget = null;
+    for (let i = 0; i < 25; i++) system.update?.(0.04);
+
+    const hitDelay = started.mock.results[0].value as number;
+    vi.restoreAllMocks();
+    return { fill: hero.playerAnimation?.swingFill, hitDelay };
+  }
+
+  afterEach(() => setFidelityChoice(FIDELITY_DEFAULT, {}));
+
+  it('slows the clip after its blow so it ends as the next swing may start, on Enhanced', () => {
+    const { fill, hitDelay } = swing(0.4);
+    // No agility: OpenMU's 450 ms with the 10% margin (serverMinAttackInterval).
+    const interval = 0.495;
+    expect(fill?.serial).toBe(7);
+    expect(fill?.scale).toBeCloseTo((0.4 - hitDelay) / (interval - hitDelay));
+  });
+
+  it('leaves the clip alone on Classic, and a clip that already fills the time', () => {
+    expect(swing(0.6).fill).toBeUndefined();
+    setFidelityChoice(FIDELITY_CLASSIC, {});
+    expect(swing(0.4).fill).toBeUndefined();
   });
 });

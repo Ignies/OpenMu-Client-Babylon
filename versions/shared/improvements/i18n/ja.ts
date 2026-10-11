@@ -39,4 +39,7 @@ export default {
   'fidelity.cameraKeepsView': 'ワープ後もカメラを維持',
   'fidelity.cameraKeepsView.hint':
     'ワープやマップ移動の後もカメラのズーム・回転・傾きがそのまま残り、視点を動かしている間は「カメラをリセット」ボタンが表示されます。クラシック: オリジナル通り、マップが変わるたびにカメラがリセットされます。',
+  'fidelity.swingFill': '攻撃モーションが間を埋める',
+  'fidelity.swingFill.hint':
+    '攻撃速度が速いとき、命中後の攻撃モーションをゆっくり再生して次の攻撃まで続け、その間にキャラクターが止まらないようにします。命中のタイミングは変わりません。クラシック: オリジナル通り、モーションが早く終わってキャラクターは立ち止まります。',
 } satisfies Partial<Record<keyof typeof en, string>>;

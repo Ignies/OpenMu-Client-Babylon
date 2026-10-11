@@ -39,4 +39,7 @@ export default {
   'fidelity.cameraKeepsView': 'Kamera bleibt beim Kartenwechsel',
   'fidelity.cameraKeepsView.hint':
     'Zoom, Drehung und Neigung der Kamera bleiben erhalten, wenn du dich teleportierst oder die Karte wechselst, und eine Schaltfläche „Kamera zurücksetzen“ erscheint, solange die Ansicht verstellt ist. Klassisch: Jeder Kartenwechsel setzt die Kamera zurück, wie im Original.',
+  'fidelity.swingFill': 'Schläge füllen die Zeit dazwischen',
+  'fidelity.swingFill.hint':
+    'Bei hohem Angriffstempo läuft der Teil deines Schlags nach dem Treffer langsamer, sodass er bis zum nächsten Schlag dauert, statt dass der Held dazwischen erstarrt. Treffer landen im selben Moment. Klassisch: Der Schlag endet früh und der Held steht still, wie im Original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

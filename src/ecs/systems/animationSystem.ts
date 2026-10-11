@@ -516,10 +516,14 @@ export const AnimationSystem: ISystemFactory = world => {
         // A clip already playing takes its per-frame slowdown straight into the running group; a Freeze or
         // Cold slows the walk and run, so it bites mid-run.
         const slow = debuffSlowsClip(action) ? debuffSlow(entity.buffs) : 1;
+        // `swingFill`: the hero's swing after its blow, set by attackSystem for that clip only.
+        const fill = playerAnimation.swingFill;
+        const filled = fill?.serial === playerObject.actionSerial ? fill.scale : 1;
         if (playerObject.CurrentAction === action) {
           playerObject.setAnimationSpeed(
             speed *
               slow *
+              filled *
               playerFrameSpeedScale(
                 action,
                 playerObject.actionFrame(),

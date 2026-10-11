@@ -24,6 +24,7 @@ asks `isOn('<id>')`. Classic turns them all off and runs the original.
 | `roofFade` | Enhanced | `ecs/systems/ceilingHideSystem.ts` | roofs stay drawn (the only object fade is Chaos Castle's) |
 | `requestTimeout` | Enhanced | `modules/social/requestTimeout.ts`, wired by `party/net.ts`, `trade/net.ts`, `events/duel.ts` | a trade, party or duel prompt stays until clicked |
 | `cameraKeepsView` | Enhanced | `controllers/camera/index.ts` (`warpCompleted`, `cameraView`), `ui/hud/camera_reset` | every world change resets the camera level, heading and tilt (WSclient.cpp:600); no reset button |
+| `swingFill` | Enhanced | `ecs/systems/attackSystem.ts` (sets `playerAnimation.swingFill` at the blow), `animationSystem.ts` (applies it) | the swing clip plays at the attack speed's rate to its end and the hero stands until the next swing (ZzzCharacter.cpp:812); the blow and the hit request keep their time either way |
 | `noticeLinks` | Enhanced | `modules/chat/notices.ts` (`create`), `ui/hud/notices/index.tsx` | a notice is plain text, markup and all, cut in two past 256 px (ZzzInterface.cpp:491-603) |
 
 - The file's comment cites the original and names the site; the site keeps the original path when
