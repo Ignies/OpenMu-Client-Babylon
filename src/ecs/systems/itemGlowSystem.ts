@@ -101,7 +101,9 @@ function auraAnchor(e: Entity, lamp: Lamp, out: Vector3): void {
 }
 
 type Tracked = {
-  signature: string;
+  /** The item-effect options and gear (`gearKeyChanged`) the lamp was last checked against. */
+  options: string;
+  key: number[];
   lamp: Lamp | null;
   stamped: boolean;
   /** An excellent item is here: keep a sparkle alive (re-spawned after a map reset). */
@@ -121,11 +123,34 @@ function anyExcellent(app: Gear): boolean {
   );
 }
 
-function itemSignature(item: Item | null | undefined): string {
-  if (!item) return '-';
-  return `${item.group}:${item.num}:${item.lvl ?? 0}:${item.isExcellent ? 1 : 0}:${
-    item.isAncient ? 1 : 0
-  }:${item.socketCount ?? 0}`;
+/** One number for what the lamp reads off a piece (-1 = empty slot). */
+function itemKey(item: Item | null | undefined): number {
+  if (!item) return -1;
+  const flags = (item.isExcellent ? 1 : 0) + (item.isAncient ? 2 : 0) + (item.socketCount ?? 0) * 4;
+  return ((item.group * 1024 + item.num) * 64 + (item.lvl ?? 0)) * 64 + flags;
+}
+
+function keySlot(key: number[], at: number, value: number): boolean {
+  if (key[at] === value) return false;
+  key[at] = value;
+  return true;
+}
+
+/** Writes this gear's key in place (no per-frame string); true when it changed. */
+export function gearKeyChanged(key: number[], app: Gear, applied: number, gearOn: boolean): boolean {
+  // Bitwise | so every slot is written even after the first change.
+  return (
+    (+keySlot(key, 0, applied) |
+      +keySlot(key, 1, gearOn ? 1 : 0) |
+      +keySlot(key, 2, itemKey(app.leftHand)) |
+      +keySlot(key, 3, itemKey(app.rightHand)) |
+      +keySlot(key, 4, itemKey(app.helm)) |
+      +keySlot(key, 5, itemKey(app.armor)) |
+      +keySlot(key, 6, itemKey(app.pants)) |
+      +keySlot(key, 7, itemKey(app.gloves)) |
+      +keySlot(key, 8, itemKey(app.boots))) !==
+    0
+  );
 }
 
 function stampMeshes(part: ModelObject, item: Item | null | undefined, ground = false): void {
@@ -207,7 +232,7 @@ export const ItemGlowSystem: ISystemFactory = world => {
   function stateOf(e: Entity): Tracked {
     let state = tracked.get(e);
     if (!state) {
-      state = { signature: '', lamp: null, stamped: false, sparkleWanted: false, sparkle: null };
+      state = { options: '', key: [], lamp: null, stamped: false, sparkleWanted: false, sparkle: null };
       tracked.set(e, state);
     }
     return state;
@@ -318,27 +343,9 @@ export const ItemGlowSystem: ISystemFactory = world => {
         // items, so it is re-examined whenever those items are put on the
         // model, not only when they come out different - re-applying the same
         // gear is exactly what a warp does.
-        const signature =
-          options +
-          (gearEffects ? '|' : '|off|') +
-          (charAppearance.applied ?? 0) +
-          '|' +
-          itemSignature(app.leftHand) +
-          '|' +
-          itemSignature(app.rightHand) +
-          '|' +
-          itemSignature(app.helm) +
-          '|' +
-          itemSignature(app.armor) +
-          '|' +
-          itemSignature(app.pants) +
-          '|' +
-          itemSignature(app.gloves) +
-          '|' +
-          itemSignature(app.boots);
-
-        if (signature !== state.signature) {
-          state.signature = signature;
+        const gearChanged = gearKeyChanged(state.key, app, charAppearance.applied ?? 0, gearEffects);
+        if (gearChanged || options !== state.options) {
+          state.options = options;
           state.sparkleWanted = gearEffects && anyExcellent(app);
 
           // This list is in AURA_SLOTS order: the winner's index names the
