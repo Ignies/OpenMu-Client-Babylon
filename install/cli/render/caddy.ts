@@ -1,6 +1,7 @@
 // The Caddyfile: static client and register site, routes to every service, HTTPS in domain mode.
 import type { Config } from '../config';
 import { HOSTS, PORTS } from '../stack';
+import { MODULES_PATH } from './manifest';
 
 const CLIENT_ROOT = '/srv/client';
 const REGISTER_ROOT = '/srv/register';
@@ -13,9 +14,15 @@ function apiRoutes(): string {
   ].join('\n');
 }
 
-/** server.json, readable from any page: a client served elsewhere fetches it next to the proxy. */
+/**
+ * server.json and the modules it lists, readable from any page: a client served elsewhere fetches them
+ * next to the proxy. A module is pinned by its hash, so its file needs no cache rule.
+ */
 function manifestRoute(): string {
-  return `\thandle /server.json {\n\t\troot * ${CLIENT_ROOT}\n\t\theader Access-Control-Allow-Origin *\n\t\theader Cache-Control no-cache\n\t\tfile_server\n\t}`;
+  return [
+    `\thandle /server.json {\n\t\troot * ${CLIENT_ROOT}\n\t\theader Access-Control-Allow-Origin *\n\t\theader Cache-Control no-cache\n\t\tfile_server\n\t}`,
+    `\thandle ${MODULES_PATH}* {\n\t\troot * ${CLIENT_ROOT}\n\t\theader Access-Control-Allow-Origin *\n\t\tfile_server\n\t}`,
+  ].join('\n');
 }
 
 /** The proxy's host: server.json, then the websocket for everything else. */

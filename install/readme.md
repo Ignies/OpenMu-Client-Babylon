@@ -45,6 +45,7 @@ relies on that.
   stack.env         what Compose interpolates (paths, OpenMU image, database password, client build args)
   env/<service>.env each service's environment, rendered from mu.env
   Caddyfile, serverlist.md, server.json
+  modules/          streamed modules: <name>.js and its <name>.json, served at /server-modules/
   openmu/           OpenMU's repository at the release we run
   backups/<time>/   openmu.dump, roles.sql, data/ (every SQLite file), mu.env; the last 10 are kept
   logs/             build and update logs
@@ -93,7 +94,7 @@ everything the stack reads is rendered from `mu.env`, so `mu config` can change 
   origin, so a client loaded from another site reads it too:
 
   ```json
-  { "version": 1, "settings": { "heldHitRequest": false }, "modulesOff": [], "loginTokens": true }
+  { "version": 1, "settings": { "heldHitRequest": false }, "modulesOff": [], "loginTokens": true, "modules": [] }
   ```
 
   `heldHitRequest` (`mu config` > Features, `MU_HELD_HIT_REQUEST` in `mu.env`, default off) sends a
@@ -133,6 +134,15 @@ everything the stack reads is rendered from `mu.env`, so `mu config` can change 
   with "remember" ticked keeps a token instead of the password (Enhanced and Ultra). The tokens live
   in the `mu_plugins` schema of OpenMU's database, so `mu backup` (the database dump) carries them.
 
+  `modules` (the `modules` folder of the state folder, empty by default) lists the modules this world
+  streams to its players ([docs/module_streaming.md](../docs/module_streaming.md)). Put each module's
+  built file there as `<name>.js` with a `<name>.json` beside it: `{ "id": "example", "version":
+  "1.0.0", "api": "^1.1" }`, plus `"signature"` for a module the client's publisher signed
+  (`tools/modules/sign.ts`). Every save (`mu config`, `mu update`) hashes the files and writes the list;
+  a file without a valid description is left out with a warning. Caddy serves the folder at
+  `/server-modules/` next to `server.json`, to any origin. A signed module runs in the page; any other
+  runs in a sandbox once each player allows it.
+
 ## Change it
 
 - a new question: `cli/commands/questions.ts` (+ a field in `cli/config.ts`, + where it renders).
@@ -147,8 +157,8 @@ everything the stack reads is rendered from `mu.env`, so `mu config` can change 
 - `cli/config.test.ts`: config round trip, answer checks, secrets.
 - `cli/render/render.test.ts`: service env (secrets only where used, proxy pinned, trusted proxy),
   Caddyfile (both modes, admin login, route order), server list, compose interpolation,
-  `server.json` (default, the setting, the modules off, accepted by the client's parser, served on
-  both hosts).
+  `server.json` (default, the setting, the modules off, the modules folder, accepted by the client's
+  parser, served on both hosts with the module files).
 - `cli/backup.test.ts`: role filtering, backup names.
 - End to end, with Docker: `MU_STATE=<scratch folder> bun install/cli/e2e.ts` (build, start, check;
   then `backup`, `down`). It refuses to run without `MU_STATE`, so it never touches a real install.

@@ -67,7 +67,8 @@ connect server's own list (`Servers.serverList`) is filled by `session/net.ts`.
   `record` (keeps the token), tokens (text round trip, per name, dropped on a rename), and the
   passwords an older client saved wiped on load (`mu_accounts` and the legacy blob), names kept.
 - `serverServices.test.ts`: register, shop and market URLs for domain and address worlds.
-- `serverManifest.test.ts`: parsing (valid, unknown keys, wrong version, wrong types, `loginTokens`),
+- `serverManifest.test.ts`: parsing (valid, unknown keys, wrong version, wrong types, `loginTokens`,
+  `modules` and each way an entry is dropped),
   the URL, the fallback on missing / unreachable / invalid, tokens offered only where the world says
   so, the per-server cache, the fetch on enter.
 - `registerRules.test.ts`: `validateSignup` order and the password charset.
@@ -128,7 +129,14 @@ connect server's own list (`Servers.serverList`) is filled by `session/net.ts`.
   `{ "version": 1, "settings": { "heldHitRequest": false }, "modulesOff": [] }`.
 - `modulesOff` names the optional client modules the world turns off (ids from
   `src/modules/modules.ts`): `moduleOn` answers false for them and their windows hide
-  (`../readme.md`). `modules` stays free for the streamed module list (phase 5).
+  (`../readme.md`).
+- `modules` lists the modules the world streams (phase 5 of
+  [docs/module_streaming.md](../../../docs/module_streaming.md)): `[{ id, version, api, url, sha256,
+  signature? }]`, at most 32. `id` a module id (`_api/contract.ts` `MODULE_ID`), `version` a plain
+  `1.2.3`, `api` the range it needs (checked when it loads), `url` http or https, absolute or relative
+  to the manifest, `sha256` lowercase hex, `signature` 64 bytes in base64url. A malformed entry, a
+  repeated id, one claiming `core` or one past 32 is left out and named in `modulesDropped` (the
+  streamer shows a notice), never run; the rest of the document still applies. Missing means none.
 - `loginTokens: true` says the world issues login tokens (our OpenMU plugin, `openmu/readme.md`);
   missing means it does not, and the client then never sends a token request or a token login
   (`serverOffersLoginTokens`). The installer always writes it (the plugin is in every image it

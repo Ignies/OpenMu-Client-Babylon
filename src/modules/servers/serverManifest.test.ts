@@ -49,6 +49,8 @@ describe('parseServerManifest', () => {
       settings: { ...ORIGINAL_SETTINGS, heldHitRequest: true },
       modulesOff: [],
       loginTokens: false,
+      modules: [],
+      modulesDropped: [],
     });
     expect(parseServerManifest({ version: 1, settings: { retryLoginWhenConnected: true } })?.settings).toEqual({
       ...ORIGINAL_SETTINGS,
@@ -60,11 +62,18 @@ describe('parseServerManifest', () => {
     expect(parseServerManifest({ version: 1, settings: {} })?.settings).toEqual(ORIGINAL_SETTINGS);
   });
 
-  // A newer server may know settings, and list modules, that this client does not.
+  // A newer server may know settings that this client does not.
   it('skips unknown keys', () => {
     expect(
-      parseServerManifest({ version: 1, modules: [], settings: { heldHitRequest: true, somethingNew: 3 } })
-    ).toEqual({ version: 1, settings: { ...ORIGINAL_SETTINGS, heldHitRequest: true }, modulesOff: [], loginTokens: false });
+      parseServerManifest({ version: 1, somethingNew: [], settings: { heldHitRequest: true, somethingNew: 3 } })
+    ).toEqual({
+      version: 1,
+      settings: { ...ORIGINAL_SETTINGS, heldHitRequest: true },
+      modulesOff: [],
+      loginTokens: false,
+      modules: [],
+      modulesDropped: [],
+    });
   });
 
   it('refuses another version', () => {
@@ -96,6 +105,60 @@ describe('parseServerManifest', () => {
     expect(parseServerManifest({ version: 1, settings: {} })?.loginTokens).toBe(false);
     expect(parseServerManifest({ version: 1, settings: {}, loginTokens: 'yes' })).toBeNull();
     expect(parseServerManifest({ version: 1, settings: {}, loginTokens: 1 })).toBeNull();
+  });
+
+  describe('modules (streamed, phase 5)', () => {
+    const sha = 'a'.repeat(64);
+    const signature = `${'A'.repeat(85)}w`;
+    const entry = { id: 'example', version: '1.0.0', api: '^1.1', url: '/server-modules/example.js', sha256: sha };
+    const read = (modules: unknown) => parseServerManifest({ version: 1, settings: {}, modules });
+
+    it('lists none when the world says nothing', () => {
+      expect(parseServerManifest({ version: 1, settings: {} })).toMatchObject({ modules: [], modulesDropped: [] });
+    });
+
+    it('reads each entry, signed or not', () => {
+      expect(read([entry, { ...entry, id: 'signed', url: 'https://cdn.example.com/s.js', signature }])).toMatchObject({
+        modules: [entry, { ...entry, id: 'signed', url: 'https://cdn.example.com/s.js', signature }],
+        modulesDropped: [],
+      });
+    });
+
+    it('drops a malformed entry and names it, keeping the rest and the document', () => {
+      const bad = [
+        { ...entry, id: 'no_sha', sha256: 'A'.repeat(64) },
+        { ...entry, id: 'short_sha', sha256: 'a'.repeat(63) },
+        { ...entry, id: 'bad_version', version: '1.0' },
+        { ...entry, id: 'lead_zero', version: '01.0.0' },
+        { ...entry, id: 'no_api', api: '' },
+        { ...entry, id: 'long_api', api: 'x'.repeat(65) },
+        { ...entry, id: 'ftp', url: 'ftp://example.com/x.js' },
+        { ...entry, id: 'script', url: 'javascript:alert(1)' },
+        { ...entry, id: 'no_url', url: undefined },
+        { ...entry, id: 'bad_signature', signature: 'abc' },
+        { ...entry, id: 'num_signature', signature: 1 },
+        { ...entry, id: 'claims_core', core: true },
+        { ...entry, id: 'Upper' },
+        'example',
+      ];
+      const manifest = read([entry, ...bad, entry]);
+      expect(manifest?.modules).toEqual([entry]);
+      expect(manifest?.modulesDropped).toEqual([
+        'no_sha', 'short_sha', 'bad_version', 'lead_zero', 'no_api', 'long_api', 'ftp', 'script', 'no_url',
+        'bad_signature', 'num_signature', 'claims_core', '#13', '#14', 'example',
+      ]);
+      expect(manifest?.settings).toEqual(ORIGINAL_SETTINGS);
+    });
+
+    it('keeps at most 32', () => {
+      const many = Array.from({ length: 33 }, (_, i) => ({ ...entry, id: `m${i}` }));
+      expect(read(many)).toMatchObject({ modulesDropped: ['m32'] });
+      expect(read(many)?.modules).toHaveLength(32);
+    });
+
+    it('drops everything when modules is not a list', () => {
+      expect(read({ example: entry })).toMatchObject({ modules: [], modulesDropped: ['modules'] });
+    });
   });
 
   it('refuses the whole document when a known setting has the wrong type', () => {

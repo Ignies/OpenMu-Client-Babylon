@@ -4,7 +4,8 @@ import { parseAllowTargets } from '../../../proxy/allowTargets';
 import { caddyfile, publicPorts } from './caddy';
 import { allowTargets, clientBuildArgs, databaseUrl, openmuImage, serviceEnv, stackEnv } from './env';
 import { serverList } from './serverList';
-import { serverManifest } from './manifest';
+import { createHash } from 'node:crypto';
+import { moduleEntries, serverManifest } from './manifest';
 import { ORIGINAL_SETTINGS, parseServerManifest } from '../../../src/modules/servers/serverManifest';
 import { WEB_IP } from '../stack';
 
@@ -91,7 +92,7 @@ describe('client build', () => {
 
 describe('server.json', () => {
   it('holds the original behaviour by default, and offers login tokens: the plugin is in every image', () => {
-    expect(JSON.parse(serverManifest(domain))).toEqual({ version: 1, settings: ORIGINAL_SETTINGS, modulesOff: [], loginTokens: true });
+    expect(JSON.parse(serverManifest(domain))).toEqual({ version: 1, settings: ORIGINAL_SETTINGS, modulesOff: [], loginTokens: true, modules: [] });
     expect(parseServerManifest(JSON.parse(serverManifest(domain)))?.loginTokens).toBe(true);
   });
 
@@ -118,6 +119,47 @@ describe('server.json', () => {
 
   it('is served next to the client and the proxy, to any origin', () => {
     const route = 'handle /server.json {\n\t\troot * /srv/client\n\t\theader Access-Control-Allow-Origin *';
+    for (const [c, sites] of [[domain, ['play.example.com {', 'ws.example.com {']], [ip, [':80 {', ':3000 {']]] as const) {
+      const text = caddyfile(c);
+      for (const site of sites) {
+        const start = text.indexOf(site);
+        expect(text.slice(start, text.indexOf('\n}\n', start)), site).toContain(route);
+      }
+    }
+  });
+
+  it('lists the modules of the modules folder, as the client reads them', () => {
+    const bytes = new TextEncoder().encode('export default {};');
+    const sha256 = createHash('sha256').update(bytes).digest('hex');
+    const signature = `${'A'.repeat(85)}w`;
+    const found = moduleEntries([
+      { file: 'example.js', bytes, meta: { id: 'example', version: '1.0.0', api: '^1.1', signature } },
+      { file: 'plain.js', bytes, meta: { id: 'plain', version: '0.2.0', api: '^1.1' } },
+    ]);
+    expect(found.errors).toEqual([]);
+    expect(found.modules).toEqual([
+      { id: 'example', version: '1.0.0', api: '^1.1', url: '/server-modules/example.js', sha256, signature },
+      { id: 'plain', version: '0.2.0', api: '^1.1', url: '/server-modules/plain.js', sha256 },
+    ]);
+    const parsed = parseServerManifest(JSON.parse(serverManifest(domain, found.modules)));
+    expect(parsed?.modules).toEqual(found.modules);
+    expect(parsed?.modulesDropped).toEqual([]);
+  });
+
+  it('names a module file whose description is missing or wrong, and leaves it out', () => {
+    const bytes = new Uint8Array(1);
+    const found = moduleEntries([
+      { file: 'nometa.js', bytes, meta: undefined },
+      { file: 'bad.js', bytes, meta: { id: 'Bad', version: '1.0.0', api: '^1.1' } },
+      { file: 'core.js', bytes, meta: { id: 'core_one', version: '1.0.0', api: '^1.1', core: true } },
+      { file: 'two words.js', bytes, meta: { id: 'two', version: '1.0.0', api: '^1.1' } },
+    ]);
+    expect(found.modules).toEqual([]);
+    expect(found.errors.map(e => e.file)).toEqual(['nometa.js', 'bad.js', 'core.js', 'two words.js']);
+  });
+
+  it('serves the module files next to server.json, to any origin', () => {
+    const route = 'handle /server-modules/* {\n\t\troot * /srv/client\n\t\theader Access-Control-Allow-Origin *';
     for (const [c, sites] of [[domain, ['play.example.com {', 'ws.example.com {']], [ip, [':80 {', ':3000 {']]] as const) {
       const text = caddyfile(c);
       for (const site of sites) {

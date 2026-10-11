@@ -23,6 +23,8 @@ export const files = (p: Paths) => ({
   caddyfile: join(p.state, 'Caddyfile'),
   serverList: join(p.state, 'serverlist.md'),
   serverManifest: join(p.state, 'server.json'),
+  /** The streamed modules: `<name>.js` and its `<name>.json` (install/readme.md). */
+  modules: join(p.state, 'modules'),
   serviceEnv: (service: string) => join(p.state, 'env', `${service}.env`),
   openmuCompose: join(p.openmu, 'deploy', 'all-in-one', 'docker-compose.yml'),
   compose: join(p.repo, 'install', 'stack', 'compose.yml'),
