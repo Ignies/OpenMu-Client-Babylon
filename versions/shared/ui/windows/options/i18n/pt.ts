@@ -393,4 +393,7 @@ export default {
   'options.npcAnimations': 'Animações dos NPCs',
   'options.help.npcAnimations': 'Desligado, os NPCs ficam parados.',
   'options.quality.low': 'Baixa',
+  'options.skillVisualBudget': 'Limitar efeitos de habilidades',
+  'options.help.skillVisualBudget':
+    'Para atacantes muito rápidos e multidões: no máximo 10 efeitos de habilidade por segundo por personagem e 40 para todos os outros jogadores juntos. Golpes e números continuam.',
 } satisfies Partial<Record<keyof typeof en, string>>;

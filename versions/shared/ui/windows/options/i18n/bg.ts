@@ -376,4 +376,7 @@ export default {
   'options.npcAnimations': 'Анимации на NPC',
   'options.help.npcAnimations': 'Изключено, NPC героите застиват.',
   'options.quality.low': 'Ниско',
+  'options.skillVisualBudget': 'Ограничи ефектите от умения',
+  'options.help.skillVisualBudget':
+    'За много бързи нападатели и тълпи: най-много 10 ефекта от умения в секунда на герой и 40 общо за всички други играчи. Ударите и числата се виждат.',
 } satisfies Partial<Record<keyof typeof en, string>>;

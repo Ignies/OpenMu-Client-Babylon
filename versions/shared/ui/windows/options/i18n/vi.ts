@@ -383,4 +383,7 @@ export default {
   'options.npcAnimations': 'Hoạt ảnh NPC',
   'options.help.npcAnimations': 'Tắt thì NPC đứng yên.',
   'options.quality.low': 'Thấp',
+  'options.skillVisualBudget': 'Giới hạn hiệu ứng kỹ năng',
+  'options.help.skillVisualBudget':
+    'Cho người đánh rất nhanh và đám đông: tối đa 10 hiệu ứng kỹ năng mỗi giây cho mỗi nhân vật và 40 cho tất cả người chơi khác cộng lại. Đòn đánh và con số vẫn hiện.',
 } satisfies Partial<Record<keyof typeof en, string>>;

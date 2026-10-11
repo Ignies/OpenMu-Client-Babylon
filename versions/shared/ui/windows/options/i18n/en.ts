@@ -421,6 +421,9 @@ const en = {
   'options.npcAnimations': 'NPC animations',
   'options.help.npcAnimations': 'Off, the NPCs hold still.',
   'options.quality.low': 'Low',
+  'options.skillVisualBudget': 'Limit skill effects',
+  'options.help.skillVisualBudget':
+    'For very fast attackers and crowds: at most 10 skill effects a second per character and 40 for all other players together. Hits and numbers still show.',
 };
 
 export default en;

@@ -431,4 +431,7 @@ export default {
   'options.npcAnimations': 'Animaciones de NPC',
   'options.help.npcAnimations': 'Apagado, los NPC quedan quietos.',
   'options.quality.low': 'Baja',
+  'options.skillVisualBudget': 'Limitar efectos de habilidades',
+  'options.help.skillVisualBudget':
+    'Para atacantes muy rápidos y multitudes: como mucho 10 efectos de habilidades por segundo por personaje y 40 para todos los demás jugadores juntos. Los golpes y números se siguen viendo.',
 } satisfies Partial<Record<keyof typeof en, string>>;

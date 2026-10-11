@@ -273,6 +273,11 @@ export type GameOptions = {
   otherPlayerAnimations: boolean;
   /** The NPCs' looping clips (ours, a crowd option); off they hold still. */
   npcAnimations: boolean;
+  /**
+   * The skill visual budget (ours, a crowd option, `controllers/skills/castBudget.ts`): one drawn
+   * cast per caster every 0.1 s (longer for a heavy skill) and 40 a second for all other players.
+   */
+  skillVisualBudget: boolean;
   autoAttack: boolean;
   /**
    * An amount box in front of every `+` in the character info window, so a
@@ -625,6 +630,7 @@ const DEFAULTS: GameOptions = {
   otherPets: true,
   otherPlayerAnimations: true,
   npcAnimations: true,
+  skillVisualBudget: false,
   autoAttack: false,
   statPointAmounts: true,
   whisperBeep: true,

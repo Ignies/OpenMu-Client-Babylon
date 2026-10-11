@@ -426,4 +426,7 @@ export default {
   'options.npcAnimations': 'NPC-Animationen',
   'options.help.npcAnimations': 'Aus stehen die NPCs still.',
   'options.quality.low': 'Niedrig',
+  'options.skillVisualBudget': 'Fertigkeitseffekte begrenzen',
+  'options.help.skillVisualBudget':
+    'Für sehr schnelle Angreifer und Menschenmengen: höchstens 10 Fertigkeitseffekte pro Sekunde je Figur und 40 für alle anderen Spieler zusammen. Treffer und Zahlen bleiben.',
 } satisfies Partial<Record<keyof typeof en, string>>;

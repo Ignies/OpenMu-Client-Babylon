@@ -399,4 +399,7 @@ export default {
   'options.npcAnimations': 'Animațiile NPC',
   'options.help.npcAnimations': 'Oprit, NPC-urile rămân nemișcate.',
   'options.quality.low': 'Scăzută',
+  'options.skillVisualBudget': 'Limitează efectele abilităților',
+  'options.help.skillVisualBudget':
+    'Pentru atacatori foarte rapizi și mulțimi: cel mult 10 efecte de abilități pe secundă pe personaj și 40 pentru toți ceilalți jucători împreună. Loviturile și numerele rămân.',
 } satisfies Partial<Record<keyof typeof en, string>>;

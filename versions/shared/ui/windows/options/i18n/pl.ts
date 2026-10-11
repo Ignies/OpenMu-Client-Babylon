@@ -390,4 +390,7 @@ export default {
   'options.npcAnimations': 'Animacje NPC',
   'options.help.npcAnimations': 'Wyłączone: NPC stoją nieruchomo.',
   'options.quality.low': 'Niska',
+  'options.skillVisualBudget': 'Ogranicz efekty umiejętności',
+  'options.help.skillVisualBudget':
+    'Dla bardzo szybkich atakujących i tłumów: najwyżej 10 efektów umiejętności na sekundę na postać i 40 dla wszystkich innych graczy razem. Trafienia i liczby nadal widać.',
 } satisfies Partial<Record<keyof typeof en, string>>;

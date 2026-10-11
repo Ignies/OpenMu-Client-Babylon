@@ -566,7 +566,12 @@ export const CATEGORIES: Category[] = [
           },
           {
             titleKey: 'options.section.performance',
-            rows: [toggle('propBatching'), toggle('otherPlayerAnimations'), toggle('npcAnimations')],
+            rows: [
+              toggle('propBatching'),
+              toggle('otherPlayerAnimations'),
+              toggle('npcAnimations'),
+              toggle('skillVisualBudget'),
+            ],
           },
         ],
       },

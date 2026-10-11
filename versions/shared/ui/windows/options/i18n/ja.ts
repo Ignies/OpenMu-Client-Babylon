@@ -325,4 +325,7 @@ export default {
   'options.npcAnimations': 'NPCのアニメーション',
   'options.help.npcAnimations': 'オフにするとNPCは静止します。',
   'options.quality.low': '低',
+  'options.skillVisualBudget': 'スキルエフェクトを制限',
+  'options.help.skillVisualBudget':
+    '非常に速い攻撃や人混み向け：キャラクターごとに毎秒最大10、他のプレイヤー全体で毎秒最大40のスキルエフェクト。ヒットと数値は表示されます。',
 } satisfies Partial<Record<keyof typeof en, string>>;

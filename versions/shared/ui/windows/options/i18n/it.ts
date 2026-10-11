@@ -397,4 +397,7 @@ export default {
   'options.npcAnimations': 'Animazioni degli NPC',
   'options.help.npcAnimations': 'Spento, gli NPC restano fermi.',
   'options.quality.low': 'Bassa',
+  'options.skillVisualBudget': 'Limita gli effetti delle abilità',
+  'options.help.skillVisualBudget':
+    'Per attaccanti molto veloci e folle: al massimo 10 effetti di abilità al secondo per personaggio e 40 per tutti gli altri giocatori insieme. Colpi e numeri restano.',
 } satisfies Partial<Record<keyof typeof en, string>>;

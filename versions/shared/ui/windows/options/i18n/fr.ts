@@ -391,4 +391,7 @@ export default {
   'options.npcAnimations': 'Animations des PNJ',
   'options.help.npcAnimations': 'Désactivé, les PNJ restent figés.',
   'options.quality.low': 'Basse',
+  'options.skillVisualBudget': 'Limiter les effets de compétences',
+  'options.help.skillVisualBudget':
+    'Pour les attaquants très rapides et les foules : au plus 10 effets de compétences par seconde par personnage et 40 pour tous les autres joueurs ensemble. Les coups et les chiffres restent.',
 } satisfies Partial<Record<keyof typeof en, string>>;

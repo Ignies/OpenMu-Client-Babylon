@@ -365,4 +365,7 @@ export default {
   'options.npcAnimations': 'แอนิเมชันของ NPC',
   'options.help.npcAnimations': 'ปิดไว้ NPC จะหยุดนิ่ง',
   'options.quality.low': 'ต่ำ',
+  'options.skillVisualBudget': 'จำกัดเอฟเฟกต์สกิล',
+  'options.help.skillVisualBudget':
+    'สำหรับการโจมตีที่เร็วมากและฝูงชน: เอฟเฟกต์สกิลไม่เกิน 10 ต่อวินาทีต่อตัวละคร และไม่เกิน 40 สำหรับผู้เล่นอื่นทั้งหมดรวมกัน การโจมตีและตัวเลขยังแสดงอยู่',
 } satisfies Partial<Record<keyof typeof en, string>>;

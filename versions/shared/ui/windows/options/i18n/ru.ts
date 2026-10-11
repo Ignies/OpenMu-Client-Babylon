@@ -422,4 +422,7 @@ export default {
   'options.npcAnimations': 'Анимации NPC',
   'options.help.npcAnimations': 'Выключено - NPC замирают.',
   'options.quality.low': 'Низкое',
+  'options.skillVisualBudget': 'Ограничить эффекты умений',
+  'options.help.skillVisualBudget':
+    'Для очень быстрых атак и толп: не больше 10 эффектов умений в секунду на персонажа и 40 на всех остальных игроков вместе. Удары и цифры видны по-прежнему.',
 } satisfies Partial<Record<keyof typeof en, string>>;
