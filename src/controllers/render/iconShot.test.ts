@@ -27,6 +27,8 @@ async function frames(n: number): Promise<void> {
   for (let i = 0; i < n; i++) {
     scene.render();
     for (let k = 0; k < 5; k++) await Promise.resolve();
+    // And a macrotask: Babylon imports a material's shader source on its first compile.
+    await new Promise(resolve => setTimeout(resolve, 0));
   }
 }
 
