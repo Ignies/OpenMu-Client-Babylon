@@ -10,7 +10,10 @@ hotbar share.
 - `skills` (`index.ts`): the facade. `update(map, dt)` / `reset()` step every layer. Readers `activeBuffs`,
   `hasBuff`, `buffRemaining`, `cooldown`, `usability`, `requirementsMet`, `canUse`, master ones
   (`masterLevel`, `masterExpPercent`, `masterTree`, `masterLearnBlock`, ...). Commands
-  `startCooldown(num)`, `loadMasterTree()`, `learnMasterSkill(num)`.
+  `startCooldown(num)`, `loadMasterTree()`, `learnMasterSkill(num)`, and the buff bar's right click:
+  `buffCancelSkill(effect)` (Infinity Arrow 6 -> 77, Expansion of Wizardry 82 -> 233, NewUIBuffWindow.cpp:240-253)
+  and `cancelBuff(skill)` (`MagicEffectCancelRequest` with the base skill and the hero, as the original sends
+  it; OpenMU's `MagicEffectCancelHandlerPlugIn` takes those numbers).
 - `skillCasting.ts`: `TELEPORT`, `TELEPORT_ALLY`, `isTeleportSkill`, `isAreaSkill`, `isSelfCastable`,
   `chooseSkillAction`, `advancesSwordCount`, `rotationByte256`, `isHotbarSkill`, `skillIconCell`.
 - `cooldowns.ts`: `skillCooldowns`, `onCooldownTick(listener)`, `skillDelaySeconds(num)`.
@@ -89,7 +92,8 @@ hotbar share.
   Nightmare in Kanturu 3rd); anyone else the plain one.
 - `objectEffects.test.ts`: the bar takes the hero's effect with no world; a map change's reset is
   followed by the held looks drawn again; OpenMU's master buff numbers arrive as their base effect, and the
-  catalogue (`magicEffects.ts`, `recipes.ts`) names none of them.
+  catalogue (`magicEffects.ts`, `recipes.ts`) names none of them; an item effect (0x2D) shows with its time.
+- `buffCancel.test.ts`: which bar effects a right click cancels, and the cancel request.
 - `usability.test.ts`: a Strengthener or Mastery of a weapon skill needs the weapon of its base skill.
 - `state.test.ts`: active master skills sit on the bar; a Strengthener takes its base skill's hot key
   and selection.

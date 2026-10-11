@@ -234,4 +234,5 @@ export default {
   'msgWin.confirmMix': '%s\n아이템을 조합하시겠습니까?',
   'msgWin.exitCountdown': '{seconds}초 후에 게임을 종료합니다.',
   'msgWin.confirmModule': '이 월드가 모듈 {id} {version}을(를) 실행하려고 합니다.\n게임과 분리되어 실행되며 계정을 읽을 수 없습니다.\n허용할까요?',
+  'msgWin.cancelBuff': '%s\n취소하시겠습니까?',
 } satisfies Partial<Record<keyof typeof en, string>>;

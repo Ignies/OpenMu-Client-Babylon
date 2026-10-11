@@ -16,6 +16,8 @@ import type { SkillLayer } from './layer';
 import { buffRecipe, type BuffKind } from './recipes';
 import { HeroSkills } from './state';
 import { Hero } from '../hero';
+import { Session } from '../session';
+import { MagicEffectCancelRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
 
 // ---- 1. tuning -------------------------------------------------------------
 
@@ -87,6 +89,21 @@ export function activeBuffs(): ActiveBuff[] {
     else buffs.unshift(entry);
   }
   return buffs.concat(debuffs);
+}
+
+/** eBuff_InfinityArrow and eBuff_SwellOfMagicPower: the only effects a right click cancels, by their skill (NewUIBuffWindow.cpp:240-253). */
+const CANCEL_SKILL: Readonly<Record<number, number>> = { 6: 77, 82: 233 };
+
+export function buffCancelSkill(effectId: number): number | null {
+  return CANCEL_SKILL[effectId] ?? null;
+}
+
+/** The cancel box's Ok (NewUICommonMessageBox.cpp:1524-1533): the base skill and the hero. */
+export function cancelBuff(skill: number): void {
+  const packet = MagicEffectCancelRequestPacket.createPacket();
+  packet.SkillId = skill;
+  packet.PlayerId = Hero.playerId ?? 0;
+  Session.sendToGS(packet.buffer);
 }
 
 /** Whether the hero currently carries this effect. */
