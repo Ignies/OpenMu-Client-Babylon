@@ -20,7 +20,7 @@ export function domain(value: string): string | undefined {
   if (!/^(?=.{4,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(value.toLowerCase())) {
     return 'Enter a domain like example.com (no https://, no play.).';
   }
-  if (/^(play|ws|api|register|admin)\./i.test(value)) return 'Enter the bare domain; play., ws., api., register. and admin. are added for you.';
+  if (/^(play|ws|api|register|admin|mail)\./i.test(value)) return 'Enter the bare domain; play., ws., api., register., admin. (and mail.) are added for you.';
 }
 
 export function ipv4(value: string): string | undefined {
@@ -30,6 +30,13 @@ export function ipv4(value: string): string | undefined {
 
 export function email(value: string): string | undefined {
   if (!/^[^\s@'"]+@[^\s@'"]+\.[^\s@'"]+$/.test(value)) return 'Enter an e-mail address (for certificate notices).';
+}
+
+/** A mailbox of the hosted mail server: a plain local part at this server's domain (`|` would break the accounts file). */
+export function mailbox(value: string, domain: string): string | undefined {
+  const [local, host, ...rest] = value.split('@');
+  if (rest.length || !local || !/^[A-Za-z0-9._+-]{1,64}$/.test(local)) return `Enter an address like bob@${domain}.`;
+  if (host?.toLowerCase() !== domain.toLowerCase()) return `The mailbox must end in @${domain}.`;
 }
 
 /** Server list fields are split on `:` and wrapped in `[...]`. */

@@ -25,6 +25,9 @@ export const files = (p: Paths) => ({
   serverManifest: join(p.state, 'server.json'),
   /** The streamed modules: `<name>.js` and its `<name>.json` (install/readme.md). */
   modules: join(p.state, 'modules'),
+  /** The mail server's config folder (mounted at /tmp/docker-mailserver): mailboxes, DKIM keys. */
+  mail: join(p.state, 'mail'),
+  mailAccounts: join(p.state, 'mail', 'postfix-accounts.cf'),
   serviceEnv: (service: string) => join(p.state, 'env', `${service}.env`),
   openmuCompose: join(p.openmu, 'deploy', 'all-in-one', 'docker-compose.yml'),
   compose: join(p.repo, 'install', 'stack', 'compose.yml'),

@@ -13,6 +13,8 @@ import { saveState } from '../state';
 import { stamp } from '../backup';
 import { ui, pc } from '../ui';
 import { newSecret } from '../validate';
+import { adminMailbox, mailHost, mailOn } from '../render/mail';
+import { ensureDkim, printMailDns } from './mail';
 import { ask, askGm, type Group } from './questions';
 
 export async function preflight(): Promise<void> {
@@ -62,6 +64,7 @@ export async function createGm(stack: Stack, gm: { login: string; password: stri
 
 export async function finish(stack: Stack): Promise<void> {
   const c = stack.config;
+  if (mailOn(c)) await ui.task('Making the mail server\'s DKIM key', () => ensureDkim(stack));
   await ui.task('Starting everything', () => stack.up());
   const results = await ui.task('Checking every service', async () => {
     const until = Date.now() + 120_000;
@@ -82,12 +85,14 @@ export async function finish(stack: Stack): Promise<void> {
     [
       `Play:         ${pc.cyan(clientOrigin(c))}`,
       `Admin panel:  ${pc.cyan(admin)}  (login ${c.adminUser})`,
+      ...(mailOn(c) ? [`Webmail:      ${pc.cyan(`https://${mailHost(c)}`)}  (login ${adminMailbox(c)})`] : []),
       `Settings:     ${stack.paths.state}`,
       '',
-      `Manage it with ${pc.bold('mu')}: mu status, mu update, mu config, mu logs, mu backup`,
+      `Manage it with ${pc.bold('mu')}: mu status, mu update, mu config, mu logs, mu backup${mailOn(c) ? ', mu mail' : ''}`,
     ].join('\n'),
     'Your server is up',
   );
+  if (mailOn(c)) printMailDns(c, stack.paths);
 }
 
 export async function install(p: Paths): Promise<void> {

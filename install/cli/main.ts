@@ -4,6 +4,8 @@ import { loadConfig } from './state';
 import { ui, pc } from './ui';
 import { install } from './commands/install';
 import { adopt } from './commands/adopt';
+import { mail } from './commands/mail';
+import { mailOn } from './render/mail';
 import { backupNow, configure, logs, restoreBackup, status, uninstall, update } from './commands/manage';
 
 const HELP = `mu [command]
@@ -14,12 +16,13 @@ const HELP = `mu [command]
   config       change address, passwords, features or the OpenMU version
   status       what is running and answering
   logs [svc]   follow the logs (proxy, openmu-startup, cashshop, ...)
-  backup       back up the database and all service data
+  backup       back up the database, all service data and the mail server
   restore [d]  put a backup back
+  mail [...]   the mail server: add, remove or passwd <address>, list, dns
   uninstall    remove the server (data kept unless you say otherwise)`;
 
 const p = paths();
-const [command, arg] = process.argv.slice(2);
+const [command, arg, arg2] = process.argv.slice(2);
 const config = loadConfig(p);
 
 async function needsConfig() {
@@ -43,6 +46,7 @@ async function menu(): Promise<string> {
     { value: 'logs', label: 'Logs' },
     { value: 'backup', label: 'Back up now' },
     { value: 'restore', label: 'Restore a backup' },
+    ...(mailOn(config) ? [{ value: 'mail', label: 'Mail', hint: 'mailboxes, DNS records' }] : []),
     { value: 'uninstall', label: 'Uninstall' },
   ]);
 }
@@ -74,6 +78,9 @@ try {
       break;
     case 'restore':
       await restoreBackup(await needsConfig(), p, arg);
+      break;
+    case 'mail':
+      await mail(await needsConfig(), p, arg, arg2);
       break;
     case 'uninstall':
       await uninstall(await needsConfig(), p);

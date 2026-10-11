@@ -1,6 +1,7 @@
 // The Caddyfile: static client and register site, routes to every service, HTTPS in domain mode.
 import type { Config } from '../config';
 import { HOSTS, PORTS } from '../stack';
+import { MAIL_PORTS, mailHost, mailOn } from './mail';
 import { MODULES_PATH } from './manifest';
 
 const CLIENT_ROOT = '/srv/client';
@@ -64,6 +65,8 @@ export function caddyfile(c: Config): string {
       block(`ws.${d}`, proxySite()),
       block(`register.${d}`, registerSite()),
       block(`admin.${d}`, adminSite(c)),
+      // Let's Encrypt only, so the mail server finds the certificate at a known path (mail.ts certFiles).
+      ...(mailOn(c) ? [block(mailHost(c), `\ttls {\n\t\tissuer acme\n\t}\n\treverse_proxy ${HOSTS.webmail}:${PORTS.webmail}`)] : []),
     ].join('\n');
   }
   return [
@@ -77,5 +80,6 @@ export function caddyfile(c: Config): string {
 
 /** Ports the firewall opens. SSH stays open so the installer never locks you out. */
 export function publicPorts(c: Config): number[] {
-  return c.mode === 'domain' ? [22, 80, 443] : [22, 80, PORTS.proxy, PORTS.registerSite, PORTS.admin];
+  if (c.mode !== 'domain') return [22, 80, PORTS.proxy, PORTS.registerSite, PORTS.admin];
+  return [22, 80, 443, ...(mailOn(c) ? MAIL_PORTS : [])];
 }

@@ -4,6 +4,7 @@ import { dirname, join } from 'node:path';
 import { configToEnv, envToConfig, parseEnvFile, toEnvFile, type Config } from './config';
 import { files, isWindows, type Paths } from './paths';
 import { caddyfile } from './render/caddy';
+import { adminMailbox, mailOn, setMailbox } from './render/mail';
 import { serviceEnv, stackEnv } from './render/env';
 import { moduleEntries, serverManifest, type ModuleEntry } from './render/manifest';
 import { ui } from './ui';
@@ -51,4 +52,17 @@ export function saveState(c: Config, p: Paths): void {
   write(f.caddyfile, caddyfile(c));
   write(f.serverList, serverList(c));
   write(f.serverManifest, serverManifest(c, readModules(f.modules)));
+  // The folder must exist for the bind mount; the admin mailbox follows the config, other mailboxes stay (`mu mail`).
+  mkdirSync(f.mail, { recursive: true, mode: 0o700 });
+  if (mailOn(c) && c.mailAdminHash) write(f.mailAccounts, setMailbox(readMailAccounts(p), adminMailbox(c), c.mailAdminHash), true);
+}
+
+export function readMailAccounts(p: Paths): string {
+  const file = files(p).mailAccounts;
+  return existsSync(file) ? readFileSync(file, 'utf8') : '';
+}
+
+/** The mail server notices the change by itself (its change detector), no restart. */
+export function writeMailAccounts(p: Paths, text: string): void {
+  write(files(p).mailAccounts, text, true);
 }

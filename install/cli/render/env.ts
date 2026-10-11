@@ -2,6 +2,7 @@
 import { clientOrigin, type Config } from '../config';
 import { DATA, HOSTS, PORTS, WEB_IP, type Service } from '../stack';
 import { moduleSigningKey } from '../validate';
+import { mailHost, mailserverEnv, webmailEnv } from './mail';
 
 type Env = Record<string, string>;
 const onOff = (v: boolean) => (v ? 'on' : 'off');
@@ -89,6 +90,9 @@ export function serviceEnv(c: Config): Partial<Record<Service, Env>> {
       OPS_DB_PATH: DATA.ops,
       RATE_DB_PATH: DATA.register,
     },
+    // Rendered with mail off too: compose reads every service's env file.
+    mailserver: mailserverEnv(c),
+    webmail: webmailEnv(c),
   };
 }
 
@@ -104,6 +108,7 @@ export function stackEnv(c: Config, paths: { repo: string; state: string }): Env
     MU_STATE: paths.state,
     OPENMU_IMAGE: openmuImage(c),
     POSTGRES_PASSWORD: c.postgresPassword,
+    MU_MAIL_HOST: mailHost(c),
     ...clientBuildArgs(c),
   };
 }

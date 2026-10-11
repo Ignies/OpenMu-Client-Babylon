@@ -2,13 +2,14 @@
 import type { Config } from '../config';
 import { run } from '../exec';
 import { OPENMU_MAIN, openmuSourceKind } from '../openmu';
+import { adminMailbox, certEmailKind, dnsNote, dnsRecords, withCertEmail, type CertEmail } from '../render/mail';
 import { ui, pc } from '../ui';
 import * as check from '../validate';
 
 export type Group = 'address' | 'listing' | 'passwords' | 'features' | 'openmu';
 
 export const GROUPS: { value: Group; label: string; hint: string }[] = [
-  { value: 'address', label: 'Address', hint: 'domain or IP, certificate e-mail' },
+  { value: 'address', label: 'Address', hint: 'domain or IP, certificate e-mail, mail server' },
   { value: 'listing', label: 'Server list entry', hint: 'name, description, language' },
   { value: 'passwords', label: 'Passwords', hint: 'database, admin panel' },
   { value: 'features', label: 'Features', hint: 'band, map ping, weather, shop delivery, marketplace fees, hit timing' },
@@ -30,10 +31,11 @@ export async function ask(c: Config, group: Group): Promise<Config> {
       ], c.mode);
       if (next.mode === 'domain') {
         next.domain = (await ui.text('Domain', { initial: c.domain, placeholder: 'example.com', validate: check.domain })).toLowerCase();
-        ui.note(['play', 'ws', 'register', 'api', 'admin'].map(s => `${s}.${next.domain}`).join('\n'), 'Point these DNS A records at this server');
-        next.email = (await ui.text('E-mail for certificate notices (optional, blank for none)', { initial: c.email, validate: v => (v.trim() ? check.email(v.trim()) : undefined) })).trim();
+        Object.assign(next, await askCertEmail(c, next));
+        ui.note(dnsNote(dnsRecords(next)), 'Add these DNS records (A records point at this server)');
       } else {
         next.publicIp = await ui.text('Public IP address', { initial: c.publicIp || (await publicIp()), validate: check.ipv4 });
+        next.mail = false;
       }
       break;
     }
@@ -81,6 +83,34 @@ export async function ask(c: Config, group: Group): Promise<Config> {
     }
   }
   return next;
+}
+
+const MAIL_WARNING = [
+  'Many VPS providers block port 25 until you ask them to open it.',
+  'Mail from a new server lands in spam unless PTR, SPF, DKIM and DMARC are all set (the records follow).',
+  'Running a mail server is your responsibility: abuse, spam and delivery problems are yours to handle.',
+].join('\n');
+
+/** The certificate e-mail: none, an address the owner has, or a mail server here whose admin mailbox gets the notices. */
+async function askCertEmail(c: Config, next: Config): Promise<Config> {
+  const kind = await ui.select('E-mail for certificate notices', [
+    { value: 'none', label: 'None', hint: 'certificates still work; no expiry warnings' },
+    { value: 'own', label: 'An address I already have' },
+    { value: 'host', label: `Host a mail server here (admin@${next.domain})`, hint: `webmail at mail.${next.domain}; needs port 25 open` },
+  ] as { value: CertEmail; label: string; hint?: string }[], certEmailKind(c));
+  if (kind === 'own') {
+    const own = await ui.text('E-mail address', { initial: c.mail ? '' : c.email, validate: v => check.email(v.trim()) });
+    return withCertEmail(next, 'own', own);
+  }
+  if (kind === 'none') return withCertEmail(next, 'none');
+  ui.note(MAIL_WARNING, 'Before you host mail');
+  const out = withCertEmail(next, 'host');
+  const keep = out.mailAdminHash && c.mail && c.domain === next.domain && !(await ui.confirm(`Change the password of ${adminMailbox(out)}?`, false));
+  if (!keep) {
+    ui.info(`Mailbox password: ${pc.dim(check.PASSWORD_RULE)}`);
+    out.mailAdminHash = await Bun.password.hash(await ui.password(`Password for ${adminMailbox(out)} (webmail login)`, v => check.password(v, 'admin')), { algorithm: 'bcrypt', cost: 12 });
+  }
+  return out;
 }
 
 /** The game GM account: MU logins are 4-10 letters or digits, passwords 4-10 printable characters. */

@@ -59,6 +59,14 @@ describe('config file', () => {
     expect(envToConfig({}).modulesOff).toBe('');
   });
 
+  it('stores the mail server as MU_MAIL and its admin mailbox hash as MU_MAIL_ADMIN_HASH, off unless set', () => {
+    const env = configToEnv({ ...config, mail: true, mailAdminHash: '$2b$12$x' });
+    expect(env.MU_MAIL).toBe('on');
+    expect(env.MU_MAIL_ADMIN_HASH).toBe('$2b$12$x');
+    expect(envToConfig({}).mail).toBe(false);
+    expect(envToConfig({}).mailAdminHash).toBe('');
+  });
+
   it('fills what an older file does not have from the defaults', () => {
     expect(envToConfig({ MU_DOMAIN: 'old.net' })).toEqual({ ...DEFAULTS, domain: 'old.net' });
   });
@@ -85,6 +93,7 @@ describe('answers', () => {
     expect(check.domain('mu.example.co.uk')).toBeUndefined();
     expect(check.domain('https://example.com')).toBeDefined();
     expect(check.domain('play.example.com')).toMatch(/bare/);
+    expect(check.domain('mail.example.com')).toMatch(/bare/);
   });
 
   it('checks the rest', () => {
@@ -96,6 +105,15 @@ describe('answers', () => {
     expect(check.login('a')).toBeDefined();
     expect(check.listField('My MU')).toBeUndefined();
     expect(check.listField('a:b')).toBeDefined();
+  });
+
+  it('wants a mailbox on the server\'s own domain', () => {
+    expect(check.mailbox('bob@example.com', 'example.com')).toBeUndefined();
+    expect(check.mailbox('Bob.Smith@Example.com', 'example.com')).toBeUndefined();
+    expect(check.mailbox('bob@other.net', 'example.com')).toMatch(/@example\.com/);
+    expect(check.mailbox('bo b@example.com', 'example.com')).toBeDefined();
+    expect(check.mailbox('bob|x@example.com', 'example.com')).toBeDefined();
+    expect(check.mailbox('bob', 'example.com')).toBeDefined();
   });
 
   it('makes secrets that are safe in every file they land in', () => {

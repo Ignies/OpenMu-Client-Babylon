@@ -30,11 +30,13 @@ checked out at the release tag) with `stack/compose.yml` layered over it.
 | proxy | `stack/services.Dockerfile` | shares OpenMU's network namespace; band, ping, weather, presence, tracker |
 | register, cashshop, marketplace, ops | same image, other command | |
 | web | `stack/web.Dockerfile` (client + register site) on Caddy | the only published ports |
+| mailserver, webmail | `mailserver/docker-mailserver:16.0.1`, `roundcube/roundcubemail:1.7.4-apache` | optional, profile `mail` ([Mail server](#mail-server)) |
 
 OpenMU's nginx is switched off (profile `openmu-nginx`); Caddy serves the client, routes to every
 service, gets HTTPS certificates in domain mode (the certificate e-mail is optional) and asks for the
 admin panel login. Only the web
-container publishes ports: 80/443 (domain mode) or 80, 3000, 8080, 8081 (IP mode, `stack/compose.ip.yml`).
+container publishes ports: 80/443 (domain mode) or 80, 3000, 8080, 8081 (IP mode, `stack/compose.ip.yml`),
+plus the mail server's 25, 465, 587 and 993 when it is on.
 Postgres, presence and the OpenMU game ports are never reachable from outside; the cash shop gate
 relies on that.
 
@@ -47,10 +49,12 @@ relies on that.
   env/<service>.env each service's environment, rendered from mu.env
   Caddyfile, serverlist.md, server.json
   modules/          streamed modules: <name>.js and its <name>.json, served at /server-modules/
+  mail/             the mail server's config: postfix-accounts.cf (bcrypt hashes), opendkim/ (DKIM keys)
   openmu/           OpenMU's repository at the release we run
-  backups/<time>/   openmu.dump, roles.sql, data/ (every SQLite file), mu.env; the last 10 are kept
+  backups/<time>/   openmu.dump, roles.sql, data/ (every SQLite file), mail.tar.gz (with mail on), mu.env; the last 10 are kept
   logs/             build and update logs
-Docker volumes: mu_dbdata (Postgres), mu_data (/data in the Bun services), mu_openmu-logs, mu_caddy-*
+Docker volumes: mu_dbdata (Postgres), mu_data (/data in the Bun services), mu_openmu-logs, mu_caddy-*,
+mu_mail-data, mu_mail-state, mu_mail-logs, mu_webmail-db (mail only)
 ```
 
 `mu` itself is `/usr/local/bin/mu` (Windows: `mu.cmd` next to `bun.exe`).
@@ -61,9 +65,9 @@ Docker volumes: mu_dbdata (Postgres), mu_data (/data in the Bun services), mu_op
 get.sh / get.ps1          clone, then install.*
 install.sh / install.ps1  Docker, Bun, then the CLI
 cli/main.ts               commands and the menu
-cli/commands/             install, adopt, manage (config, update, status, logs, backup, restore, uninstall), questions
+cli/commands/             install, adopt, manage (config, update, status, logs, backup, restore, uninstall), mail, questions
 cli/config.ts             the config and its env-file form       cli/validate.ts   answer checks, secrets
-cli/render/               env files, Caddyfile, server list, server.json: pure functions, tested
+cli/render/               env files, Caddyfile, server list, server.json, mail: pure functions, tested
 cli/stack.ts              names, ports, subnet (mirrors stack/compose.yml)
 cli/state.ts              writes everything in the state folder   cli/paths.ts      where things live
 cli/docker.ts             every docker call                       cli/compose.ts    the compose command line
@@ -151,6 +155,50 @@ everything the stack reads is rendered from `mu.env`, so `mu config` can change 
   key (48 and 64 bytes); a 32-byte private seed looks the same as a public key, so never paste from the
   private key file. Empty: every streamed module runs sandboxed.
 
+## Mail server
+
+Optional, off by default, domain mode only. The certificate e-mail question (install, or `mu config`
+> Address) offers: none, an address you already have, or **host a mail server here**. The last
+creates the mailbox `admin@<domain>` (its password is asked and stored only as a bcrypt hash,
+`MU_MAIL_ADMIN_HASH`), uses it as the certificate e-mail and sets `MU_MAIL=on`. The register service
+sends no mail, so nothing else uses it.
+
+- **Webmail**: `https://mail.<domain>` (Roundcube), log in as `admin@<domain>` or `admin`. IMAP
+  `mail.<domain>:993`, SMTP submission `mail.<domain>:587` (STARTTLS) or `:465` (TLS), for any mail app.
+- **Stack**: docker-mailserver (Postfix, Dovecot, OpenDKIM, OpenDMARC) and Roundcube under the Compose
+  profile `mail`, which `mu` passes only when mail is on. Turning it off in `mu config` removes both
+  containers and keeps their volumes.
+- **TLS**: Caddy gets the certificate for `mail.<domain>` (the webmail site, Let's Encrypt only) and the
+  mail server reads it from Caddy's volume (`SSL_TYPE=manual`; it reloads on renewal). One ACME client,
+  no second fight over port 80. Until that certificate exists (DNS not in place yet) the mail server
+  waits and `mu status` shows the IMAPS check DOWN.
+- **Mailboxes**: `mu mail add|remove|passwd <address>`, `mu mail list` (or `mu mail` for a menu). They
+  live in `mail/postfix-accounts.cf` of the state folder as `address|{BLF-CRYPT}<bcrypt>`; the mail server
+  notices a change by itself. Removing a mailbox keeps its stored mail in the volume.
+- **Backup**: `mu backup` adds `mail.tar.gz` (`/var/mail`, `/var/mail-state` and the config folder with
+  the accounts and DKIM keys); `mu restore` puts it back.
+
+### DNS records
+
+`mu mail dns` prints them with your values (also shown at the end of the install and by `mu status`);
+it makes the DKIM key first if there is none yet.
+
+| type | name | value |
+|---|---|---|
+| A | `mail.<domain>` | this server's IP (with the other A records) |
+| MX | `<domain>` | `10 mail.<domain>` |
+| TXT | `<domain>` | `v=spf1 mx -all` |
+| TXT | `mail._domainkey.<domain>` | `v=DKIM1; h=sha256; k=rsa; p=...` (the generated key) |
+| TXT | `_dmarc.<domain>` | `v=DMARC1; p=quarantine; rua=mailto:admin@<domain>` |
+| PTR | this server's IP | `mail.<domain>`: set at your VPS provider, not at the DNS host |
+
+### Before you turn it on
+
+- Many VPS providers block port 25 (in and out) until you ask them to open it. Without it no mail
+  arrives or leaves; webmail still opens.
+- Mail from a new server lands in spam unless PTR, SPF, DKIM and DMARC are all in place.
+- Running a mail server is your responsibility: abuse reports, blocklists and delivery problems are yours.
+
 ## Change it
 
 - a new question: `cli/commands/questions.ts` (+ a field in `cli/config.ts`, + where it renders).
@@ -167,6 +215,9 @@ everything the stack reads is rendered from `mu.env`, so `mu config` can change 
   Caddyfile (both modes, admin login, route order), server list, compose interpolation,
   `server.json` (default, the setting, the modules off, the modules folder, accepted by the client's
   parser, served on both hosts with the module files), the module signing key reaching the client build.
+- `cli/render/mail.test.ts`: the mail switch and the certificate e-mail choice, the mail site, ports,
+  profile and env, the compose services (pinned, profile, volumes), the DNS records, the DKIM key file,
+  the accounts file, the mail backup and restore commands.
 - `cli/backup.test.ts`: role filtering, backup names.
 - End to end, with Docker: `MU_STATE=<scratch folder> bun install/cli/e2e.ts` (build, start, check;
   then `backup`, `down`). It refuses to run without `MU_STATE`, so it never touches a real install.
@@ -186,3 +237,5 @@ everything the stack reads is rendered from `mu.env`, so `mu config` can change 
 | OpenMU did not start in time | `mu logs openmu-startup` |
 | a service DOWN in `mu status` | `mu logs <service>` |
 | HTTPS not working | DNS A records for play., ws., register., api., admin. must point here; `mu logs web` |
+| mail does not arrive or leave | port 25 open at the VPS provider; `mu mail dns` records in place; `mu logs mailserver` |
+| Mail server (IMAPS) DOWN | Caddy has no certificate for mail.<domain> yet: its A record; `mu logs web` |
