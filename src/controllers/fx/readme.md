@@ -98,7 +98,9 @@ shared pools, textures and particle recipes other folders reuse.
 ## Tests
 - `boids.test.ts`: a bird, a fish and an invasion dragon cast the Classic shadow from the ground at 0.2, not on the cascades.
 - `layers.test.ts`: no shroud layer (Evil Spirit, its only spawner, draws none).
-- `effectParticles.test.ts`: no particle is made while the page is hidden; `KIND_REACH` covers every particle kind, and the view gate of
+- `effectParticles.test.ts`: no particle is made while the page is hidden; `spawnParticle` reads its position, turn
+  and light before it returns, while its sheet loads and once it has, so a caller may rewrite one scratch object
+  for every spawn; `KIND_REACH` covers every particle kind, and the view gate of
   `ParticleEmitter` / `BonedParticleEmitter` (spawns only when a sprite could reach the frustum);
   a pushed particle on a turned or tilted object goes where MovePosition turns its velocity
   (ZzzAI.cpp:148-156), from `spawnParticle` and from an emitter handed the node's rotation, and

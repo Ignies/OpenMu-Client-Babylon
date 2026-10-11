@@ -13,7 +13,6 @@ import {
   CHAOS_CASTLE_OUTER_RING,
   type TileRect,
 } from './spec';
-import { reportLoadFailure } from '@/controllers/assets';
 
 /**
  * The shrinking arena: `g_currentCastleLevel` + `SetActionObject(world, 1,
@@ -76,6 +75,8 @@ const CRACK_SMOKE_ODDS = 4;
 const CRACK_SMOKE = 'smoke60';
 const CRACK_SMOKE_SCALE = 2;
 const WHITE = [1, 1, 1] as const;
+/** Where a puff is made, rewritten for each (`spawnParticle` reads it before returning). */
+const puffAt = { x: 0, y: 0, z: 0 };
 
 // ---- 2. state + readers ----------------------------------------------------
 
@@ -168,17 +169,11 @@ function puffCrack(crack: Crack): void {
   if (!world) return;
 
   const along = Math.random();
-  const x = crack.alongX ? crack.x + along : crack.x;
-  const z = crack.alongX ? crack.z : crack.z + along;
+  puffAt.x = crack.alongX ? crack.x + along : crack.x;
+  puffAt.z = crack.alongX ? crack.z : crack.z + along;
+  puffAt.y = world.getTerrainHeight(puffAt.x, puffAt.z);
 
-  void spawnParticle(
-    world.scene,
-    CRACK_SMOKE,
-    { x, y: world.getTerrainHeight(x, z), z },
-    NO_TURN,
-    CRACK_SMOKE_SCALE,
-    WHITE
-  ).catch(reportLoadFailure(`particle ${CRACK_SMOKE}`));
+  void spawnParticle(world.scene, CRACK_SMOKE, puffAt, NO_TURN, CRACK_SMOKE_SCALE, WHITE);
 }
 
 /** The ring is down: hidden for good, and its floor gone with it. */

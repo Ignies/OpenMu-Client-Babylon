@@ -1334,9 +1334,11 @@ function release(p: Particle) {
 
 /**
  * `turn` is the node's own rotation, MU's `Angle` mirrored (`NodeTurn`); it is turned back here, so the
- * tick turns the velocity as MovePosition does (ZzzAI.cpp:148-156).
+ * tick turns the velocity as MovePosition does (ZzzAI.cpp:148-156). `position`, `turn` and `light` are
+ * read before it returns, so a caller may rewrite one scratch object for every spawn. Only a sheet's
+ * first spawns wait for it to load (the promise, its failure reported); the rest are made at once.
  */
-export async function spawnParticle(
+export function spawnParticle(
   target: Scene,
   kindName: KindName,
   position: { x: number; y: number; z: number },
@@ -1344,14 +1346,38 @@ export async function spawnParticle(
   scale: number,
   light: readonly [number, number, number],
   jitter = 0
-): Promise<void> {
+): Promise<void> | undefined {
   // The tick runs on drawn frames: made while hidden, these would all play at once on return.
   if (pageHidden()) return;
   const kind = KINDS[kindName] as ParticleKind;
 
-  const pool = await getPool(target, kind.texture, kind.blend);
-  if (!pool) return;
+  const pool = pools.get(poolKey(kind.texture, kind.blend));
+  if (pool) {
+    makeParticle(target, pool, kind, position, turn, scale, light, jitter);
+    return;
+  }
 
+  const at = { x: position.x, y: position.y, z: position.z };
+  const turned = { x: turn.x, y: turn.y, z: turn.z };
+  const lit = [light[0], light[1], light[2]] as const;
+
+  return getPool(target, kind.texture, kind.blend)
+    .then(loaded => {
+      if (loaded) makeParticle(target, loaded, kind, at, turned, scale, lit, jitter);
+    })
+    .catch(reportLoadFailure(`particle ${kindName}`));
+}
+
+function makeParticle(
+  target: Scene,
+  pool: Pool,
+  kind: ParticleKind,
+  position: { x: number; y: number; z: number },
+  turn: NodeTurn,
+  scale: number,
+  light: readonly [number, number, number],
+  jitter: number
+): void {
   const sprite = acquire(pool);
   if (!sprite) return;
 
@@ -1542,7 +1568,7 @@ export class ParticleEmitter {
             this.scale * (emission.scale ?? 1),
             light,
             emission.jitter
-          ).catch(reportLoadFailure(`particle ${kind}`));
+          );
         }
       }
     }
@@ -1564,6 +1590,8 @@ export type BonedEmission = {
 export class BonedParticleEmitter {
   #due = 0;
   #tick = 0;
+  /** A raised point's spawn position, rewritten for each (`spawnParticle` reads it before returning). */
+  readonly #raised = { x: 0, y: 0, z: 0 };
 
   #reach: { base: number; perScale: number }[];
 
@@ -1591,9 +1619,13 @@ export class BonedParticleEmitter {
         }
 
         const base = point.node.getAbsolutePosition();
-        const position = point.offsetY
-          ? { x: base.x, y: base.y + point.offsetY, z: base.z }
-          : base;
+        let position = base;
+        if (point.offsetY) {
+          position = this.#raised;
+          position.x = base.x;
+          position.y = base.y + point.offsetY;
+          position.z = base.z;
+        }
 
         const scale =
           typeof point.scale === 'function' ? point.scale() : point.scale;
@@ -1614,9 +1646,7 @@ export class BonedParticleEmitter {
           const kind =
             point.kinds[Math.floor(Math.random() * point.kinds.length)];
 
-          void spawnParticle(this.target, kind, position, NO_TURN, scale, light).catch(
-            reportLoadFailure(`particle ${kind}`)
-          );
+          void spawnParticle(this.target, kind, position, NO_TURN, scale, light);
         }
       }
     }

@@ -192,6 +192,43 @@ describe('a hidden page', () => {
   });
 });
 
+describe('spawnParticle', () => {
+  // The map callers hand every spawn one scratch position, turn and light, rewritten for the next spawn.
+  it('reads its position, turn and light before it returns, while its sheet loads and once it has', async () => {
+    const original = Math.random;
+    // `spark03_24` pushes (2, 2, 2) a tick at this roll and draws in the light it is made with.
+    Math.random = () => 0.9;
+    try {
+      const at = { x: 1, y: 2, z: 3 };
+      const turn = { x: 0, y: 0, z: 0 };
+      const light: [number, number, number] = [0.2, 0.4, 0.6];
+      const spawnThenRewrite = (x: number, yaw: number, red: number) => {
+        const made = spawnParticle(scene, 'spark03_24', at, turn, 1, light);
+        at.x = x;
+        turn.y = yaw;
+        light[0] = red;
+        return made;
+      };
+      // The first two wait for the sheet, the last two find it loaded.
+      await Promise.all([spawnThenRewrite(5, Math.PI, 0.8), spawnThenRewrite(9, 0, 0)]);
+      spawnThenRewrite(1, Math.PI, 0.2);
+      spawnThenRewrite(0, 0, 1);
+      tick?.();
+      const drawn = fakes.sprites.map(s => [s.position.x, s.position.y, s.position.z, s.color.r]);
+      expect(drawn).toEqual(
+        [
+          [1.02, 2.02, 3.02, 0.2],
+          [4.98, 2.02, 2.98, 0.8],
+          [9.02, 2.02, 3.02, 0],
+          [0.98, 2.02, 2.98, 0.2],
+        ].map(row => row.map(v => expect.closeTo(v)))
+      );
+    } finally {
+      Math.random = original;
+    }
+  });
+});
+
 describe('KIND_REACH', () => {
   /** Farthest the particle's sprite gets from its spawn point over its life. */
   async function farthest(kind: KindName, scale: number, random: () => number, turn: NodeTurn) {

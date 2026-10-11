@@ -51,15 +51,22 @@ const rand = (n: number) => Math.floor(Math.random() * n);
 
 /**
  * `RenderObjectVisual`'s mist colours (:558-616, :672-683): one `fLumi` roll
- * per spawn - `rand() % 10 * step + base` - times a fixed tint.
+ * per spawn - `rand() % 10 * step + base` - times a fixed tint, into one kept
+ * colour (`spawnParticle` reads it before returning).
  */
-const mist =
-  (r: number, g: number, b: number, step: number, base: number) =>
-  (): readonly [number, number, number] => {
+const mist = (r: number, g: number, b: number, step: number, base: number) => {
+  const light: [number, number, number] = [0, 0, 0];
+
+  return (): readonly [number, number, number] => {
     const lumi = rand(10) * step + base;
 
-    return [r * lumi, g * lumi, b * lumi];
+    light[0] = r * lumi;
+    light[1] = g * lumi;
+    light[2] = b * lumi;
+
+    return light;
   };
+};
 
 /** The same where the original writes the tint as bytes over 256. */
 const tint256 = (r: number, g: number, b: number, step: number, base: number) =>
