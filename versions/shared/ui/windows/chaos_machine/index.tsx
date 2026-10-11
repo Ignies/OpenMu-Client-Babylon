@@ -18,7 +18,6 @@ import { itemLevelName } from '@/controllers/item_rules';
 import { itemBaseName } from '@versions/shared/items/itemsDatabase';
 import { ItemGrid } from '../../components/item_grid';
 import { QuickItemActions } from '@/modules/inventory/quickItemActions';
-import { uiClick } from '@/controllers/sound/sfx';
 import {
   CARD_TEXT_LINE,
   CARD_TEXT_Y,
@@ -316,7 +315,7 @@ const MixMenu = observer(() => {
       activeColor={TEXT_COLOR.white}
       label={label}
       labelStyle={{ fontSize: 11 }}
-      onClick={uiClick(onClick)}
+      onClick={onClick}
       style={{ position: 'absolute', left: (MSGBOX_WIDTH - MENU_BUTTON_WIDTH) / 2, top }}
     />
   );
@@ -347,7 +346,7 @@ const MixMenu = observer(() => {
           activeColor={TEXT_COLOR.white}
           label={t('chaos.menu.close')}
           labelStyle={{ fontSize: 11 }}
-          onClick={uiClick(() => Economy.cancelMixMenu())}
+          onClick={() => Economy.cancelMixMenu()}
           style={{ position: 'absolute', left: (MSGBOX_WIDTH - MENU_CLOSE_WIDTH) / 2, top: msgBoxHeight(MENU_LINES) - MENU_CLOSE_BOTTOM }}
         />
       </MsgBoxFrame>

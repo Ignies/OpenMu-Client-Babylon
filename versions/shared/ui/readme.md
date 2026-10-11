@@ -21,7 +21,8 @@ Shared by every game version; a version replaces a window by id.
 ## How it works
 The world page (`pages/world`) draws `windowsIn('world')` under the HUD and `windowsIn('hud')` in
 stacking order (`src/controllers/interface/windows.ts`). Each window still decides itself whether it is
-open (`MuWindows`, or a module's own window flag).
+open (`MuWindows`, or a module's own window flag). `MuButton` plays the click itself: a handler handed to
+it plays none (`muButtonClick.test.ts` reads every `.tsx` here for one wrapped in `uiClick`).
 
 ## Depends on / used by
 - uses: `src/controllers/interface` (registry, shared widgets), the modules' doors for state.
