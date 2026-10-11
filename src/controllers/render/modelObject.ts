@@ -672,6 +672,15 @@ export class ModelObject {
   ClassicShadow = true;
 
   /**
+   * The Classic shadow folds from the ground under the object, not its own origin: the original sets
+   * `BodyOrigin` to the terrain height first (ZzzObject.cpp:1050-1053, GOBoid.cpp:1594-1596, :1637-1639).
+   */
+  ShadowFromGround = false;
+
+  /** The sun cascades take it, with `CastsShadow`; off for what has the Classic shadow alone (the boids). */
+  CascadeShadow = true;
+
+  /**
    * Whether snow may settle on this object (controllers/weather/snowCaps.ts). Set by
    * MapTileObject on the maps snow settles on; every mesh carries it as
    * `metadata.snowCap` for the item material to bind against.
@@ -1192,7 +1201,7 @@ export class ModelObject {
       // item effect reads the same in the open and in a shadow.
       mesh.receiveShadows = this.IsMapObject;
       mesh.metadata.csmCaster =
-        this.CastsShadow && !this.Lights?.emitsLight;
+        this.CastsShadow && this.CascadeShadow && !this.Lights?.emitsLight;
 
       // A map object's shadow is already in the lightmap; the cascades read
       // this to keep it out of the shadow map (controllers/render/shadows.ts).
@@ -1624,7 +1633,8 @@ export class ModelObject {
         this._node,
         this.rootObject.node,
         slot,
-        this.ShadowBlendMeshCasts
+        this.ShadowBlendMeshCasts,
+        this.ShadowFromGround
       );
 
       if (!shadow) {

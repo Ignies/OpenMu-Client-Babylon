@@ -142,4 +142,15 @@ describe('the Classic blob shadow', () => {
 
     expect([shadowed('character'), shadowed('scenery'), shadowed('statue')]).toEqual([true, false, true]);
   });
+
+  // BodyOrigin set to the terrain height before RenderBodyShadow (ZzzObject.cpp:1050-1053, GOBoid.cpp:1594-1596).
+  it('folds from the ground under the object when it asks to', () => {
+    const boid = new ModelObject(scene);
+    boid.ShadowFromGround = true;
+    boid.load(box('boid'));
+    const plain = new ModelObject(scene);
+    plain.load(box('plain'));
+    const fromGround = (name: string) => scene.getMeshByName(`${name}_shadow0`)?.metadata?.shadowFromGround;
+    expect([fromGround('boid'), fromGround('plain')]).toEqual([true, false]);
+  });
 });

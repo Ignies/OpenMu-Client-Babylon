@@ -88,7 +88,7 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `modelObject.test.ts`: a model whose clips are cloned on first play reads every clip's keys at load
   without cloning one, and a clip cloned later reports its end; `BlendMesh -2` and a pulsing `BlendMeshLightAt`;
   a part unlinked from its bone goes back under its owner; an action stops every other running clip, the loader's clip 0 too;
-  a character casts the blob, a map object only with `MapShadow`.
+  a character casts the blob, a map object only with `MapShadow`; `ShadowFromGround` marks the clone.
 - `versions/shared/contentRows.golden.test.ts`: every map's mesh animations, sampled over time.
 - `pbrMaps.test.ts`: `textureSourceName` reads the pack's remembered name mid-swap.
 - `pbrDerive.test.ts`: `flipRows`, flat normal and emissive mask of `derivePbrMaps`.
@@ -155,7 +155,9 @@ There is no `index.ts` facade; other folders import the modules directly.
   whose case calls `RenderBodyShadow` (`MapShadow`: Blood Castle 28/29, Valley of Loren 50/83/85). Every
   map object once cast one, with a size gate to keep flowers and cliffs out. `ClassicShadow` turns a
   character's or part's blob off where the original draws none (a cape's model), read every frame; the
-  cascades still take it (`CastsShadow`).
+  cascades still take it (`CastsShadow`). `ShadowFromGround` folds from the terrain under the origin
+  (the shader's `shadowGround`), as the original does for the boids; `CascadeShadow` keeps a caster off
+  the cascades (the boids, which have the Classic shadow alone).
   The fold (`SHADOW_FOLD`) is the original's `CalcShadowPosition`, which divides by the vertex's height
   under the 40-tile light, with no limit: the tallest monsters it shadows (Selupan's highest key is 26
   tiles up, the Hydra 16, the golden dragons 9) streak as they do there. A clamp once kept every vertex

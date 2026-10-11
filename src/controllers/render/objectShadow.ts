@@ -145,6 +145,8 @@ function createShadowMaterial(scene: Scene, slot: number): CustomMaterial {
   // reproduces the old hardcoded +X formula exactly.
   material.AddUniform('shadowSunDir', 'vec2', undefined);
   material.AddUniform('terrainHeightMap', 'sampler2D', undefined);
+  // 1: fold from the ground under the origin, not the origin (`ShadowFromGround`).
+  material.AddUniform('shadowGround', 'float', undefined);
 
   // The silhouette dilation (SHADOW_DILATE) needs the caster's normals, and
   // nothing else in this pass does - `disableLighting` is on, there is no
@@ -197,6 +199,13 @@ function createShadowMaterial(scene: Scene, slot: number): CustomMaterial {
     #else
       vec3 shadowOriginI = shadowOrigin.xyz;
     #endif
+
+    // BodyOrigin on the terrain under the caster (ZzzObject.cpp:1050-1053, GOBoid.cpp:1594-1596).
+    shadowOriginI.y = mix(
+      shadowOriginI.y,
+      texture2D(terrainHeightMap, (shadowOriginI.xz + 0.5) / ${TERRAIN_SIZE}.0).r * shadowParams.w,
+      shadowGround
+    );
 
     vec3 shadowRel = worldPos.xyz - shadowOriginI;
 
@@ -310,6 +319,7 @@ function createShadowMaterial(scene: Scene, slot: number): CustomMaterial {
       }
     }
     effect.setFloat2('shadowSunDir', axisX, axisZ);
+    effect.setFloat('shadowGround', mesh.metadata?.shadowFromGround ? 1 : 0);
 
     effect.setTexture('terrainHeightMap', heightMap);
   });
@@ -406,18 +416,20 @@ blobShadowRefresh.fn = invalidateShadowState;
  * One projected blob for `slot`, or null when this caster has nothing to
  * project. Built on demand - every clone is a full copy of the caster's
  * submesh hierarchy and a second set of draw calls, so on a tier where the
- * slot never activates it should never exist. `blendMeshCasts`: see `meshCasts`.
+ * slot never activates it should never exist. `blendMeshCasts`: see `meshCasts`; `fromGround`: the
+ * caster's `ShadowFromGround`.
  */
 export function createObjectShadow(
   root: AbstractMesh,
   parent: TransformNode,
   originNode: TransformNode,
   slot: number,
-  blendMeshCasts: boolean
+  blendMeshCasts: boolean,
+  fromGround = false
 ): AbstractMesh | null {
   if (!(root instanceof Mesh)) return null;
 
-  return createOneShadow(root, parent, originNode, slot, blendMeshCasts);
+  return createOneShadow(root, parent, originNode, slot, blendMeshCasts, fromGround);
 }
 
 /**
@@ -440,7 +452,8 @@ function createOneShadow(
   parent: TransformNode,
   originNode: TransformNode,
   slot: number,
-  blendMeshCasts: boolean
+  blendMeshCasts: boolean,
+  fromGround: boolean
 ): AbstractMesh | null {
   // Decide on the caster before paying for a clone: a model whose meshes are
   // all hidden or blend cards has nothing to cast.
@@ -476,6 +489,7 @@ function createOneShadow(
     mesh.metadata = {
       SkipBoundingBox: true,
       shadowOriginNode: originNode,
+      shadowFromGround: fromGround,
       diffuseTexture: casterTexture,
     };
 
