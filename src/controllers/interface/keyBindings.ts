@@ -11,6 +11,7 @@ const KEYS_STORAGE_KEY = 'mu_keys';
  */
 export type KeyAction =
   | 'minimap'
+  | 'windowMenu'
   | 'emoteMenu'
   | 'inventory'
   | 'characterInfo'
@@ -38,6 +39,7 @@ export type KeyBindings = Record<KeyAction, string>;
 /** What the Keys tab calls each action - text keys, printed with `t()`. */
 export const KEY_ACTION_LABEL_KEYS: Record<KeyAction, TextKey> = {
   minimap: 'keys.minimap',
+  windowMenu: 'keys.windowMenu',
   emoteMenu: 'keys.emoteMenu',
   inventory: 'keys.inventory',
   characterInfo: 'keys.characterInfo',
@@ -65,6 +67,8 @@ const KEY_ACTIONS = Object.keys(KEY_ACTION_LABEL_KEYS) as KeyAction[];
 
 const DEFAULTS: KeyBindings = {
   minimap: 'Tab',
+  // `IsPress('U')` toggles `CNewUIWindowMenu` (NewUIHotKey.cpp:243-247).
+  windowMenu: 'KeyU',
   emoteMenu: 'Backquote',
   inventory: 'KeyI',
   characterInfo: 'KeyC',
@@ -87,7 +91,8 @@ const DEFAULTS: KeyBindings = {
   muHelperConfig: 'End',
   // No original analog: the arrange run is this client's own.
   hideUi: 'KeyH',
-  sessionStats: 'KeyU',
+  // Ours: F6, a key no handler of the original reads (NewUIHotKey.cpp, ZzzInterface.cpp).
+  sessionStats: 'F6',
   sortInventory: 'KeyS',
   targetNearest: 'KeyN',
   replyWhisper: 'KeyY',
@@ -163,6 +168,9 @@ function readStored(name: string): Partial<KeyBindings> | null {
   }
 }
 
+/** Defaults that moved: a saved profile still holding the old one takes the new (the session panel left U). */
+const MOVED_DEFAULTS: Partial<KeyBindings> = { sessionStats: 'KeyU' };
+
 function load(): KeyBindings {
   // The character's own set if it has one, else the shared one.
   const parsed = (profile ? readStored(profile) : null) ?? readStored('');
@@ -172,7 +180,7 @@ function load(): KeyBindings {
     const loaded = { ...DEFAULTS };
     for (const action of KEY_ACTIONS) {
       const code = parsed[action];
-      if (typeof code === 'string' && code && !RESERVED.has(code)) {
+      if (typeof code === 'string' && code && !RESERVED.has(code) && MOVED_DEFAULTS[action] !== code) {
         loaded[action] = code;
       }
     }

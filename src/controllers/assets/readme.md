@@ -58,6 +58,8 @@ imports the modules below directly (baselined in `tools/checks`).
   (`mu/itemOptionFiles.ts`, on the door): the Jewel of Harmony, socket and 380 option tables.
 - `mixRecipes()`, `loadMixRecipes(bytes)`, `MIX_TYPES` and `MixRecipe`, `MixSource`, `MixRateToken`
   (`mu/mixFile.ts`, on the door): the chaos machine recipes, loaded on first ask.
+- `creditLines()`, `loadCredits(bytes)`, `parseCredits(bytes)`, `CreditLine` (`mu/creditFile.ts`, on the door):
+  `Local/credit.bmd`, the staff roll of the credits screen (400 class and name records, one Bux pass).
 - `globalText(id)`, `loadGlobalText(bytes)` (`mu/globalTextFile.ts`, on the door): the pack's `Text.bmd`
   lines, for what the data files name by number.
 
@@ -138,6 +140,7 @@ imports the modules below directly (baselined in `tools/checks`).
 - `mu/itemSetFile.ts` is tested through `controllers/item_rules/ancientSets.test.ts` and the
   tooltip test, which read the real files.
 - `mu/mixFile.ts` is tested through `modules/chaos_mix/mixRecipes.test.ts` on the real `Mix.bmd`.
+- `mu/creditFile.ts` is tested through `versions/shared/ui/windows/credits/index.test.tsx` on the real `credit.bmd`.
 
 ## Notes
 

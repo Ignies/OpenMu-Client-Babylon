@@ -19,12 +19,14 @@ import { playUiSound } from '../../controllers/sound/ui';
 /**
  * The three ways out of a session: `CSystemMenuMsgBox`'s Exit Game, Select
  * Server and Switch Character (NewUICustomMessageBox.cpp:2386-2470). Escape in
- * the world opens that menu (`menuOpen`); they also sit in the Options window's
- * footer, which Escape opens on the server list and the character screen.
+ * the world opens that menu (`menuOpen`); on the server list and the character
+ * screen `CSysMenuWin` (versions/shared/ui/windows/system_menu/pregame.tsx) has
+ * Exit Game and, on the character screen, Select Server.
  *
- * The wire side is the original's and nothing more: `SendLogOut(0|2|1)`, and
- * the screen only changes once the server has answered (`ReceiveLogOut`) - it
- * is the side that decides when the character is safely out of the world.
+ * The wire side is the original's and nothing more: `SendLogOut(0|2|1)` from the
+ * world, and Select Server's `SendLogOut(2)` from the character screen too
+ * (SysMenuWin.cpp:121-131); the screen only changes once the server has answered
+ * (`ReceiveLogOut`) - it is the side that decides when the character is safely out.
  * The timeout is the one thing the original has no need for: a browser socket
  * can go quiet without ever closing, and a player who asked to leave must not
  * be stuck in a world they have already left.
@@ -103,8 +105,9 @@ export const SessionExit = new (class _SessionExit {
     }
 
     // Nobody to ask: offline, or a screen the server does not think of us as
-    // playing on. The transition is ours to make.
-    if (Session.isOffline || !inWorld()) {
+    // playing on, except Select Server on the character screen. The transition is ours.
+    const asks = inWorld() || (kind === 'servers' && AppState.uiState === UIState.Characters);
+    if (Session.isOffline || !asks) {
       this.leave(kind);
       return;
     }
@@ -203,37 +206,25 @@ export const SessionExit = new (class _SessionExit {
  * first.
  *
  * In the world that is `CSystemMenuMsgBox` (NewUIHotKey.cpp:124). The server
- * list and the character screen open Options instead of their own `CSysMenuWin`
- * (UIMng.cpp:692-705, not ported); the login window keeps Escape for its Cancel.
+ * list and the character screen have their own `CSysMenuWin` (UIMng.cpp:692-705,
+ * `openPregameMenu` in ecs/systems/keyboardInputSystem.ts).
  */
 export function openSystemMenu(): boolean {
-  const screen = AppState.uiState;
-  if (
-    screen !== UIState.World &&
-    screen !== UIState.Servers &&
-    screen !== UIState.Characters
-  ) {
-    return false;
-  }
+  if (AppState.uiState !== UIState.World) return false;
   if (MuWindows.isOpen('options') || SessionExit.menuOpen || MsgBox.msgWin) return false;
-  // The world's overlays only gate it in the world, as UIMng.cpp:698 checks
-  // none of them: a request still up when the character left is reset only on
-  // the next select, and would hold Escape dead on these screens until then.
   if (
-    screen === UIState.World &&
-    (MuWindows.isOpen('minimap') ||
-      quests.anyWindowOpen ||
-      Economy.prompt ||
-      Social.anyRequest ||
-      Messenger.friendRequest)
+    MuWindows.isOpen('minimap') ||
+    quests.anyWindowOpen ||
+    Economy.prompt ||
+    Social.anyRequest ||
+    Messenger.friendRequest
   ) {
     return false;
   }
 
   runInAction(() => {
-    if (screen === UIState.World) SessionExit.menuOpen = true;
-    else MuWindows.setOpen('options', true);
+    SessionExit.menuOpen = true;
   });
-  playUiSound('click'); // NewUIHotKey.cpp:125, UIMng.cpp:703
+  playUiSound('click'); // NewUIHotKey.cpp:125
   return true;
 }

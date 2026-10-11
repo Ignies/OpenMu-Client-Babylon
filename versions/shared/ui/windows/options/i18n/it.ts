@@ -365,16 +365,9 @@ export default {
     'La lingua dell’interfaccia, delle missioni, dei dialoghi con i PNG e dei nomi di mostri e oggetti.',
   'options.help.englishItemNames':
     'Tiene i nomi degli oggetti in inglese con qualsiasi lingua, come nelle guide e nei listini prezzi.',
-  'options.help.exitGame': 'Chiude la sessione e torna al menu principale.',
-  'options.help.selectServer': 'Chiude la sessione e torna alla lista dei server.',
-  'options.help.switchCharacter':
-    'Torna alla scelta del personaggio, senza chiudere la sessione.',
   'options.exitGame': 'Esci dal gioco',
   'options.selectServer': 'Scegli server',
   'options.switchCharacter': 'Cambia personaggio',
-  'exit.confirmQuit': 'Vuoi uscire dal gioco e tornare al menu principale?',
-  'exit.confirmServers': 'Vuoi uscire dal gioco e tornare alla scelta del server?',
-  'exit.confirmCharacters': 'Vuoi uscire dal gioco e tornare alla scelta del personaggio?',
   'options.performanceReadout': 'Dati prestazioni',
   'options.page.fidelity': 'Fedeltà',
   'options.fidelity': 'Fedeltà',

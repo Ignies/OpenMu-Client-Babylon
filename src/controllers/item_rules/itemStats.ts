@@ -183,20 +183,14 @@ export function isScepter(def: ItemDef): boolean {
   return def.group === ItemGroup.Mace && def.index >= 8 && def.index !== 16;
 }
 
-/** Fairy / Heaven / Satan wings (ITEM_WING..ITEM_WINGS_OF_SATAN) + Wing of Curse. */
+/** Fairy / Heaven / Satan wings (ITEM_WING..ITEM_WINGS_OF_SATAN) + Wing of Curse (12/41). */
 export function isFirstWing(def: ItemDef): boolean {
-  return (
-    def.group === ItemGroup.Wing &&
-    (def.index <= 2 || def.index === 41 || def.index === 42)
-  );
+  return def.group === ItemGroup.Wing && (def.index <= 2 || def.index === 41);
 }
 
-/** Spirits / Soul / Dragon / Darkness wings + Wings of Despair. */
+/** Spirits / Soul / Dragon / Darkness wings + Wings of Despair (12/42). */
 export function isSecondWing(def: ItemDef): boolean {
-  return (
-    def.group === ItemGroup.Wing &&
-    ((def.index >= 3 && def.index <= 6) || def.index === 41)
-  );
+  return def.group === ItemGroup.Wing && ((def.index >= 3 && def.index <= 6) || def.index === 42);
 }
 
 /** Storm / Eternal / Illusion / Ruin / Cape of Emperor / Wing of Dimension / Cape of Overrule. */
@@ -255,10 +249,11 @@ export function isWing(def: ItemDef): boolean {
   );
 }
 
+/** `ITEM_RING_OF_ICE` up to the Pendant of Lighting (13/8-11) and 13/20-24 (`CalcPartType`, ZzzInfomation.cpp:1082-1090). */
 export function isRing(def: ItemDef): boolean {
   return (
     def.group === ItemGroup.Helper &&
-    ((def.index >= 8 && def.index <= 12) || (def.index >= 20 && def.index <= 24))
+    ((def.index >= 8 && def.index <= 11) || (def.index >= 20 && def.index <= 24))
   );
 }
 

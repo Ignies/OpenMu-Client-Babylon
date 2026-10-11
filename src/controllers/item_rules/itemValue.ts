@@ -3,10 +3,6 @@ import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import {
   ItemGroup,
   calcMaxDurability,
-  isCapeOfFighter,
-  isCapeOfLord,
-  isFirstWing,
-  isThirdWing,
   itemDef,
   type ItemDef,
 } from './itemStats';
@@ -43,6 +39,9 @@ function rawColumns(def: ItemDef): { zen: number; value: number } {
 
 /** `Level2` bonus for +5…+15 items (the `switch (Level)` table). */
 const LEVEL_BONUS = [0, 0, 0, 0, 0, 4, 10, 25, 45, 65, 95, 135, 185, 245, 305, 365];
+
+/** The wings `ItemValue` prices from 40,000,000: up to 12/6, Storm to Dimension (12/36-43) and the Cape of Overrule. */
+const onWingScale = (index: number) => index <= 6 || (index >= 36 && index <= 43) || index === 50;
 
 /** `AT_IMPROVE_DAMAGE` & co: +4/+8/+12/+16 option tiers. */
 function optionMultiplier(value: number): number {
@@ -172,20 +171,14 @@ export function itemValue(item: Item, goldType: GoldType): number {
     return gold;
   } else if (value > 0) {
     gold = idiv(value * value * 10, 12);
-  } else if (
-    (group === ItemGroup.Wing &&
-      index > 2 &&
-      !isThirdWing(def) &&
-      !isCapeOfFighter(def)) ||
-    group === ItemGroup.Helper ||
-    group === ItemGroup.Etc
-  ) {
-    // Second wings, orbs, rings / pendants, scrolls: 100 + Level2³.
+  } else if ((group === ItemGroup.Wing && !onWingScale(index)) || group === ItemGroup.Helper || group === ItemGroup.Etc) {
+    // Orbs, seeds, the Cape of Fighter, rings / pendants, scrolls: 100 + Level2³ (ZzzInfomation.cpp:1867-1871).
     gold = 100 + level2 * level2 * level2;
   } else {
     level2 += LEVEL_BONUS[Math.min(level, 15)];
 
-    if (isFirstWing(def) || isCapeOfLord(def) || isThirdWing(def)) {
+    // The Cape of Lord is in the original's list too, but group 13 took the branch above.
+    if (group === ItemGroup.Wing) {
       gold = 40000000 + (40 + level2) * level2 * level2 * 11;
     } else {
       gold = 100 + idiv((40 + level2) * level2 * level2, 8);
@@ -217,8 +210,8 @@ export function itemValue(item: Item, goldType: GoldType): number {
   if (goldType === 2) gold = roundGold(gold);
   if (goldType) gold = idiv(gold, 3);
 
-  // Selling a worn item pays less: the repair share comes off (goldType 1).
-  if (goldType === 1 && hasDurability(def)) {
+  // Selling a worn item pays less: the repair share comes off (goldType 1, ZzzInfomation.cpp:2114-2190).
+  if (goldType === 1 && !keepsSellPrice(group, index)) {
     const max = calcMaxDurability(
       def,
       level,
@@ -237,13 +230,29 @@ export function itemValue(item: Item, goldType: GoldType): number {
   return roundGold(gold);
 }
 
-/** Weapons, armour, shields and wings wear out; the rest is exempt. */
-function hasDurability(def: ItemDef): boolean {
-  if (def.group <= ItemGroup.Boots) return true;
-  if (def.group === ItemGroup.Wing) return def.index <= 6 || isThirdWing(def) || isCapeOfFighter(def);
-  if (isCapeOfLord(def)) return true;
-  return false;
+const range = (from: number, to: number) => Array.from({ length: to - from + 1 }, (_, i) => from + i);
+const isAmmo = (group: number, index: number) => group === ItemGroup.Bow && (index === 7 || index === 15);
+/** The orbs and the Jewel of Chaos, `ITEM_ORB_OF_TWISTING_SLASH..ITEM_ORB_OF_DEATH_STAB`. */
+const isOrb = (group: number, index: number) => group === ItemGroup.Wing && index >= 7 && index <= 19;
+
+/** `ItemValue`'s `goto EXIT_CALCULATE` helpers: no repair share comes off their price (the Fenrir parts, 32-37, on a sale). */
+const FULL_PRICE_HELPERS = new Set([7, 10, 11, ...range(14, 20), 29, ...range(32, 37), ...range(49, 51), 64, 65, 76, 80, ...range(109, 115), 122, 123, ...range(128, 134)]);
+
+function keepsSellPrice(group: number, index: number): boolean {
+  if (group >= ItemGroup.Potion || isAmmo(group, index) || isOrb(group, index)) return true;
+  if (group === ItemGroup.Wing) return index >= 130 && index <= 135;
+  return group === ItemGroup.Helper && FULL_PRICE_HELPERS.has(index);
 }
+
+/**
+ * `IsRepairBan`'s helpers (ZzzInventory.cpp:7485-7552): the old pets and mounts, the transformation
+ * rings, the quest and event items, the Fenrir parts, the cash shop's (`IsPartChargeItem`) and the wing
+ * charms (`ITEM_TYPE_CHARM_MIXWING`, 83-93).
+ */
+const REPAIR_BANNED_HELPERS = new Set([
+  ...range(0, 5), 7, 10, 11, ...range(14, 20), 29, ...range(32, 51), ...range(54, 76), 80, 81, 82,
+  ...range(83, 94), ...range(103, 107), ...range(109, 115), 122, 123, ...range(125, 127),
+]);
 
 /** `CalcRepairCost`; `selfRepair` is the +150% inventory-button rate. */
 export function repairCost(item: Item, selfRepair: boolean): number {
@@ -300,22 +309,8 @@ export function isRepairBanned(item: Item): boolean {
   if (!def) return true;
 
   const { group, index } = def;
-
-  if (group >= ItemGroup.Potion) return true;
-  if (group === ItemGroup.Bow && (index === 7 || index === 15)) return true; // bolts / arrows
-  if (group === ItemGroup.Wing) return !hasDurability(def); // orbs, chaos
-  if (group === ItemGroup.Helper) {
-    if (index <= 3) return true; // guardian angel .. Dinorant
-    if (index === 4 || index === 5) return true; // Dark Horse / Raven
-    if (index === 7) return true; // contract
-    if (index === 10) return true; // Transformation Ring
-    if (index === 11) return true; // Life Stone
-    if (index >= 14 && index <= 19) return true; // Loch's Feather .. Weapon of Archangel
-    if (index === 38) return true; // Moonstone Pendant
-    return !hasDurability(def) && !(index >= 8 && index <= 13) && !(index >= 20 && index <= 28);
-  }
-
-  return false;
+  if (group >= ItemGroup.Potion || isAmmo(group, index) || isOrb(group, index)) return true;
+  return group === ItemGroup.Helper && REPAIR_BANNED_HELPERS.has(index);
 }
 
 /** Items with durability below their maximum (`RepairAllGold`). */

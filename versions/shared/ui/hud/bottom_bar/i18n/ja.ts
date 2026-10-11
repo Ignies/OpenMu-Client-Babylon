@@ -7,7 +7,7 @@ export default {
   'bottomBar.characterInfo': 'キャラクター情報',
   'bottomBar.inventory': 'インベントリ',
   'bottomBar.friendList': 'フレンドリスト',
-  'bottomBar.options': 'オプション',
+  'bottomBar.menu': 'メニュー',
   'bottomBar.noSkill': 'スキルなし（右クリック＝通常攻撃）',
   'bottomBar.emptySlot': '[{key}] 空き',
   'bottomBar.itemSlot': '{name} [{key}]',

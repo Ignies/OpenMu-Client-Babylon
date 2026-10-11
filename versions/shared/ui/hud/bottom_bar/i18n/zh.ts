@@ -7,7 +7,7 @@ export default {
   'bottomBar.characterInfo': '角色信息',
   'bottomBar.inventory': '背包',
   'bottomBar.friendList': '好友列表',
-  'bottomBar.options': '选项',
+  'bottomBar.menu': '菜单',
   'bottomBar.noSkill': '无技能（右键＝普通攻击）',
   'bottomBar.emptySlot': '[{key}] 空',
   'bottomBar.itemSlot': '{name} [{key}]',

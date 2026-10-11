@@ -1,0 +1,96 @@
+@import (reference) '@/controllers/interface/components/mu_text/style.less';
+
+// `CCreditWin`: a full screen of its own (`SetBgAlpha(255)`), over the server list and its windows.
+.credits-window {
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+  background: #000;
+  pointer-events: auto;
+  user-select: none;
+  .mu-font();
+
+  .credits-stage {
+    position: absolute;
+    width: 640px;
+    height: 480px;
+    transform-origin: 0 0;
+  }
+
+  .credits-art,
+  .credits-illustration {
+    position: absolute;
+    pointer-events: none;
+  }
+
+  // `AnimationIllust`: 2 s in, 22 s shown, 2 s out.
+  .credits-illustration {
+    &.in {
+      animation: credits-fade-in 2s linear forwards;
+    }
+    &.out {
+      animation: credits-fade-out 2s linear forwards;
+    }
+  }
+
+  // The bold roll font, centred in its box; departments and teams bright grey, names bright yellow.
+  .credits-line {
+    position: absolute;
+    left: 0;
+    width: 640px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: bold;
+    color: rgb(226, 226, 226);
+    white-space: nowrap;
+  }
+
+  .credits-name {
+    color: rgb(255, 238, 193);
+  }
+
+  // `CRW_SPR_TXT_HIDE0..2`: black bars over the rows, faded off and on (`AnimationText`).
+  .credits-mask {
+    position: absolute;
+    left: 0;
+    width: 640px;
+    background: #000;
+    opacity: 1;
+    &.clear {
+      opacity: 0;
+    }
+    &.fade-off {
+      animation: credits-fade-out 1s linear forwards;
+    }
+    &.fade-on {
+      animation: credits-fade-in 1s linear forwards;
+    }
+  }
+
+  // The deco at the right edge, its bottom on the 527/600 line (`SetPosition`), and the close button on it.
+  .credits-deco {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% * 73 / 600);
+    width: 189px;
+    height: 103px;
+  }
+}
+
+@keyframes credits-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes credits-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}

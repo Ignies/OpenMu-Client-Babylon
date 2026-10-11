@@ -24,6 +24,7 @@ import {
   MAIN_FRAME_BUTTONS,
   MAIN_FRAME_BUTTON_FRAMES,
   MAIN_FRAME_BUTTON_HEIGHT,
+  MAIN_FRAME_BUTTON_PRESSED_FRAMES,
   MAIN_FRAME_BUTTON_WIDTH,
 } from './mainFrameButtons';
 import { isKey } from '@/controllers/interface/keyBindings';
@@ -212,16 +213,18 @@ const ConsumableItems = () => {
   );
 };
 
-const BarButton = ({
+const BarButton = observer(({
   index,
   file,
   title,
   onClick,
+  pressed,
 }: {
   index: number;
   file: string;
   title: string;
   onClick?: () => void;
+  pressed: () => boolean;
 }) => (
   <div
     className="bar-button"
@@ -232,11 +235,11 @@ const BarButton = ({
       file={file}
       width={BUTTON_WIDTH}
       height={BUTTON_HEIGHT}
-      frames={BUTTON_FRAMES}
+      frames={pressed() ? MAIN_FRAME_BUTTON_PRESSED_FRAMES : BUTTON_FRAMES}
       onClick={onClick}
     />
   </div>
-);
+));
 
 /** The 4 px strip is too thin to aim at; the hover area reaches past it. */
 const EXP_HOVER_PAD = 4;
@@ -830,6 +833,7 @@ export const BottomBar = observer(() => {
           file={button.file}
           title={t(button.titleKey)}
           onClick={button.toggle}
+          pressed={button.pressed}
         />
       ))}
 

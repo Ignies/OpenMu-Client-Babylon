@@ -7,7 +7,7 @@ export default {
   'bottomBar.characterInfo': 'Informacje o postaci',
   'bottomBar.inventory': 'Ekwipunek',
   'bottomBar.friendList': 'Lista znajomych',
-  'bottomBar.options': 'Opcje',
+  'bottomBar.menu': 'Menu',
   'bottomBar.noSkill': 'Brak umiejętności (prawy klik = atak)',
   'bottomBar.emptySlot': '[{key}] puste',
   'bottomBar.itemSlot': '{name} [{key}]',

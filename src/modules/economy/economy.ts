@@ -177,6 +177,8 @@ export const Economy = new (class _Economy {
   seedMenu: 'master' | 'researcher' | null = null;
   /** The socket picked in the seed researcher's list (`m_SocketListBox`), -1 for none. */
   mixSocket = -1;
+  /** `CreateOkMessageBox` after a refused mix: the level line it shows, or null. */
+  mixNotice: TextKey | null = null;
   /** `g_nChaosTaxRate`: the castle's chaos machine tax, from `ReceiveTaxInfo` type 1 (WSclient.cpp:11303-11306). */
   chaosTaxRate = 0;
 
@@ -240,6 +242,7 @@ export const Economy = new (class _Economy {
       mixResult: observable,
       seedMenu: observable,
       mixSocket: observable,
+      mixNotice: observable,
       chaosTaxRate: observable,
       mixSockets: computed,
       tradeOpen: observable,
@@ -279,6 +282,7 @@ export const Economy = new (class _Economy {
     this.mixMenuOpen = false;
     this.seedMenu = null;
     this.mixSocket = -1;
+    this.mixNotice = null;
     this.closeTradeState();
     this.myShopOpen = false;
     this.myShopItems = emptyGrid(PERSONAL_SHOP_SLOTS);
@@ -756,27 +760,29 @@ export const Economy = new (class _Economy {
       return;
     }
 
-    // The emptied tray after a failed mix (WSclient.cpp:1750-1754); a mix the
-    // machine refused (zen, level, wrong items) is silent.
+    // The emptied tray after a failed mix (WSclient.cpp:1750-1754).
     if (result === E.Failed) {
       playUiSound('mix');
       playUiSound('mixFailed');
+      Social.errorMessage(t(card ? 'chaos.cardFailed' : 'chaos.failed'));
+      return;
     }
 
-    const reason: Partial<Record<ItemCraftingResultCraftingResultEnum, TextKey>> = {
-      [E.Failed]: card ? 'chaos.cardFailed' : 'chaos.failed',
-      [E.NotEnoughMoney]: 'chaos.notEnoughZen',
-      [E.TooManyItems]: 'chaos.tooManyItems',
-      [E.CharacterLevelTooLow]: 'chaos.levelTooLow',
-      [E.LackingMixItems]: 'chaos.lackingItems',
-      [E.IncorrectMixItems]: 'chaos.incorrectItems',
-      [E.InvalidItemLevel]: 'chaos.invalidItemLevel',
-      [E.CharacterClassTooLow]: 'chaos.classTooLow',
-      [E.IncorrectBloodCastleItems]: 'chaos.bloodCastleItems',
-      [E.NotEnoughMoneyForBloodCastle]: 'chaos.bloodCastleZen',
-    };
+    // The refusals (WSclient.cpp:6795-6831): short zen says so, 4 and 9 open an OK box with the
+    // Devil Square and Cloak level lines (GlobalText 649 / 689), every other code is silent.
+    if (ready) Social.errorMessage(t('chaos.notEnoughZen'));
+    else if (result === E.CharacterLevelTooLow || result === E.CharacterClassTooLow) {
+      runInAction(() => {
+        this.mixNotice = result === E.CharacterLevelTooLow ? 'chaos.devilSquareLevel' : 'chaos.cloakLevel';
+      });
+    }
+  }
 
-    Social.errorMessage(t(reason[result] ?? 'chaos.failed'));
+  /** The OK box's OK (or Escape). */
+  closeMixNotice(): void {
+    runInAction(() => {
+      this.mixNotice = null;
+    });
   }
 
   // =========================================================================

@@ -7,7 +7,7 @@ export default {
   'bottomBar.characterInfo': 'ข้อมูลตัวละคร',
   'bottomBar.inventory': 'กระเป๋า',
   'bottomBar.friendList': 'รายชื่อเพื่อน',
-  'bottomBar.options': 'ตัวเลือก',
+  'bottomBar.menu': 'เมนู',
   'bottomBar.noSkill': 'ไม่มีสกิล (คลิกขวา = โจมตี)',
   'bottomBar.emptySlot': '[{key}] ว่าง',
   'bottomBar.itemSlot': '{name} [{key}]',

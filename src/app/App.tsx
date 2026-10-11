@@ -12,6 +12,7 @@ import { playOffline } from './offline';
 import { LoadingScreen } from '../controllers/loading/classic';
 import { OptionsWindow } from '@versions/shared/ui/windows/options';
 import { PregameSystemMenu } from '@versions/shared/ui/windows/system_menu/pregame';
+import { CreditsWindow } from '@versions/shared/ui/windows/credits';
 import { GameCursor } from '../controllers/interface/components/game_cursor';
 import { ReconnectOverlay } from '@versions/shared/ui/components/reconnect_overlay';
 
@@ -67,6 +68,7 @@ export const App = observer(() => {
       <CurrentPage />
       <OptionsWindow />
       <PregameSystemMenu />
+      <CreditsWindow />
       {}
       <LoadingScreen hidden={onPreloader} />
       {}

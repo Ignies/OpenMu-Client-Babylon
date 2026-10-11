@@ -5,7 +5,7 @@ const en = {
   'bottomBar.characterInfo': 'Character Information',
   'bottomBar.inventory': 'Inventory',
   'bottomBar.friendList': 'Friend List',
-  'bottomBar.options': 'Options',
+  'bottomBar.menu': 'Menu',
   'bottomBar.noSkill': 'No skill (right click = attack)',
   'bottomBar.emptySlot': '[{key}] empty',
   'bottomBar.itemSlot': '{name} [{key}]',

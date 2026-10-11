@@ -70,7 +70,10 @@ windows themselves are content in `versions/shared/ui/` (see
   from `RenderObjectScreen` (ZzzInventory.cpp:9308-10090). Do not edit. Which icon files exist is
   `assets/itemIconManifest.ts` (`tools/itemIconManifest.ts`).
 - `keyBindings.ts`: each action maps to a `KeyboardEvent.code`, stored in localStorage per
-  character (`setKeyProfile`), rebound from the Options Keys tab.
+  character (`setKeyProfile`), rebound from the Options Keys tab. The defaults are the original's
+  keys; our own windows take keys no handler of the original reads (`NewUIHotKey.cpp`,
+  `ZzzInterface.cpp`): the session panel is F6, since U is the window menu. `MOVED_DEFAULTS` moves a
+  saved profile off a default that changed.
 - Dependency direction (a controller never imports a module): what read module state left. The
   skill icon and tooltip, `emoji_text` and `reconnect_overlay` went up to
   `versions/shared/ui/components/`; `stateWarnings.ts` to `modules/hero/`, `pageTitle.ts` to
@@ -113,6 +116,7 @@ windows themselves are content in `versions/shared/ui/` (see
 
 ## Tests
 - `browserHotkeys.test.ts`: which chords are blocked, Cmd as Ctrl, fields, devtools, F12.
+- `keyBindings.test.ts`: U is the window menu, the session panel F6, a saved profile moved off U.
 - `hudFormat.test.ts`: experience percent and grouping, durations, dashes before data.
 - `nameTags.test.ts`: hero state messages, self-defence parsing, PK colours, outlaw body light.
 - `screenPositionBus.test.ts`: the frame-end listener runs once per pass.

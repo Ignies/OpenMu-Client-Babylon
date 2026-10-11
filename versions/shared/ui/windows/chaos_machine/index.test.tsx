@@ -30,3 +30,17 @@ describe("the goblin's menu", () => {
     expect(menu).toContain('data-file="newui_Message_03.OZT"');
   });
 });
+
+// CreateOkMessageBox after refusal 4 (WSclient.cpp:6812-6815): it outlives the tray.
+describe('a refused mix level box', () => {
+  it('shows the Devil Square line with an OK, the tray closed or not', () => {
+    runInAction(() => {
+      Economy.mixOpen = false;
+      Economy.mixNotice = 'chaos.devilSquareLevel';
+    });
+    const html = renderToStaticMarkup(<ChaosMachine />);
+    expect(html).toContain('Must be over level 10 to combine the invitation to Devil Square.');
+    expect(html).toContain('data-file="newui_button_ok.OZT"');
+    Economy.closeMixNotice();
+  });
+});
