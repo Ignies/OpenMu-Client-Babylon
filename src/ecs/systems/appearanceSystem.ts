@@ -8,6 +8,7 @@ import { applyWeaponAttachments } from '../../controllers/actors/weaponAttachmen
 import { isBook, swordformGlovesModel } from '../../controllers/actors/weaponClass';
 import type { ISystemFactory, Item } from '../world';
 import { settle } from '../../controllers/assets';
+import { syncGmMark } from './gmMark';
 
 function loadPart(
   part: Item | null,
@@ -81,6 +82,8 @@ export const AppearanceSystem: ISystemFactory = world => {
         const { charAppearance, modelObject, visibility, attributeSystem } =
           entity;
         if (visibility.state === 'hidden') continue;
+        // The Webzen mark follows buffs, not the equipment (gmMark.ts).
+        if (modelObject.Ready && isPlayerBody(modelObject)) syncGmMark(entity, modelObject);
         if (!charAppearance.changed) continue;
         if (!modelObject.Ready) continue;
         // A character wearing a whole monster has no equipment sockets to

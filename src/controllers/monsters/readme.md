@@ -9,7 +9,8 @@ its own folder in `versions/shared/monsters/<name>/` and uses this controller.
   `Name`, as readers always got it.
 - NPC fields (`npc.ts`): `hidden`, `npcModel` (`NpcModel`), `gear` (`NpcGear`, `NpcItem`; its `pk`),
   `transformed` (`NpcTransform`), `trap` (`NpcTrap`), `voice` (`NpcVoice`), `globalVoice`
-  (`NpcGlobalVoice`, `NpcGlobalCue`).
+  (`NpcGlobalVoice`, `NpcGlobalCue`); `talkRange` (tiles, straight line: talked to from there instead of from a
+  tile beside it, `ecs/systems/npcTalkSystem.ts`; the Kanturu Gateway Machine, ZzzInterface.cpp:3215).
 - Sound fields, read by `sound/packetSounds.ts`: `quietCasts` (skills whose cast sound the type
   never plays; also on a body, `MonsterModelDef.quietCasts`), `teleport` (`MonsterTeleport`: its
   own teleport sound on one world), `appearSound` and `summonSound` (`MonsterSound`: its spawn

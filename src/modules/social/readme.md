@@ -12,7 +12,7 @@ Also the guild mark (emblem) codec. It has no packet handlers of its own; the ne
   chat input and log state (`chatLines`, `visibleChatLines`, `whisperTarget`, `setWhisperTarget`,
   `openChatInput`, `toggle`, `scrollChatLog`, ...).
 - party: `partyMembers`, `inParty`, `isPartyLeader`, `partyInvite`, `partyRespond`, `partyKick`,
-  `partyLeave`, `requestPartyList`, `setPartyMembers`, `removePartyMember`, `setPartyHealth`.
+  `partyLeave`, `requestPartyList`, `setPartyMembers` (a blank name keeps the slot's previous one), `removePartyMember`, `setPartyHealth`.
 - guild: `myGuild`, `guildMembers`, `allianceGuilds`, `guildWar`, `battleSoccer`, the request and dialog
   fields, `guildJoin`, `guildJoinRespond`, `promptGuildKick` / `confirmGuildKick`, `guildCreate`, `guildAssignRole`,
   `guildRelationRequestSend`, `guildRelationRespond`, `removeAllianceGuild`, `guildWarRespond`, `requestGuildList`, `requestAllianceList`.

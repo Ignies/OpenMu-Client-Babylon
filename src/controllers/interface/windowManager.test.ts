@@ -14,3 +14,20 @@ describe('MuWindows open state', () => {
     expect(seen).toEqual([false, true, false]);
   });
 });
+
+// HideAll (NewUISystem.cpp:1608), run on a map change (WSclient.cpp:2285).
+describe('MuWindows.closeAll', () => {
+  it('runs every stacked closer and drops every open flag', () => {
+    const closed: string[] = [];
+    MuWindows.setOpen('inventory', true);
+    MuWindows.register('vault', undefined, () => void closed.push('vault'));
+    MuWindows.register('chat', undefined, () => false);
+    MuWindows.register('trade', undefined, () => void closed.push('trade'));
+
+    MuWindows.closeAll();
+
+    expect(closed).toEqual(['trade', 'vault']);
+    expect(MuWindows.isOpen('inventory')).toBe(false);
+    for (const id of ['vault', 'chat', 'trade']) MuWindows.unregister(id);
+  });
+});

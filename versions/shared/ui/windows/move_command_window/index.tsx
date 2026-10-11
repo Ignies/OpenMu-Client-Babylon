@@ -226,6 +226,8 @@ export const MoveCommandWindow = observer(() => {
     height: HEIGHT,
     // `UpdateKeyEvent`: Escape closes it with SOUND_CLICK01.
     onClose: () => {
+      // Already shut by `MuWindows.closeAll` (HideAll plays no click).
+      if (!MuWindows.isOpen('move_command')) return;
       closeMoveWindow();
       playUiSound('click');
     },

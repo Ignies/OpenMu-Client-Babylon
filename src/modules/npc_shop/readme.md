@@ -25,6 +25,10 @@ talk in flight with the merchant window's state and actions (`Merchant`).
   and closes itself when the inventory closes. The app hands the game cursor the repair mode
   (`setRepairCursor`, `boot.tsx`).
 - Bulk buy and the sell confirmation are `QuickItemActions` ([../inventory/readme.md](../inventory/readme.md)).
+- A walk (`heroWalked`) is the original's `UpdateSendMoveInterface` (NewUISystem.cpp:2025): it cancels
+  the trade, closes the vault, both personal shop windows and the four NPC entry windows
+  (`events.closeEntryWindows`), and the merchant, vault and trade take the inventory with them. The
+  quest windows close in their own listeners; the chaos machine stays open.
 
 ## Packets
 - `NpcWindowResponse`: opens the window the NPC stands for (click + window sounds, WSclient.cpp:6563-6564).
@@ -44,4 +48,4 @@ talk in flight with the merchant window's state and actions (`Merchant`).
 - merchant buy / sell / repair rules: the matching `Merchant` methods (`state.ts`); prices in `controllers/item_rules/itemValue.ts`.
 
 ## Tests
-- none yet.
+- `net.test.ts`: what a walk closes, and that the chaos machine stays.

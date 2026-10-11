@@ -522,6 +522,8 @@ export const Inventory = observer(() => {
       className={`inventory${Merchant.repairMode ? ' repair-mode' : ''}`}
       column={MuWindows.isOpen('character_info') ? 1 : 0}
       onClose={() => {
+        // Already shut by `MuWindows.closeAll` (HideAll plays no click).
+        if (!MuWindows.isOpen('inventory')) return;
         MuWindows.setOpen('inventory', false);
         // Escape (NewUIMyInventory.cpp:582).
         playUiSound('click');

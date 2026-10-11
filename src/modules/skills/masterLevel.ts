@@ -3,7 +3,11 @@
  */
 import { observable, runInAction } from 'mobx';
 import { Hero } from '@/modules/hero';
-import { masterExperienceActive } from '../hero/characterStats';
+import { isMasterClass, masterExperienceActive } from '../hero/characterStats';
+import { Ecs } from '../../ecs/current';
+import { t } from '@/i18n';
+import { Social } from '../social/social';
+import { showMasterLevelUp } from './masterLevelUpLook';
 
 import { EventBus } from '../../core/eventBus';
 import {
@@ -104,6 +108,10 @@ export function setMasterLevelUpPoints(points: number): void {
 }
 
 function levelUp(p: { MasterLevel: number; CurrentMasterPoints: number }): void {
+  // Receive_Master_LevelUp (WSclient.cpp:8218-8224): what was left to the level, said before the next one is set.
+  const left = state.experienceOfNextLevel - state.experience;
+  if (left > 0) Social.systemMessage(t('notify.masterExpGained', { amount: left }));
+
   runInAction(() => {
     state.level = p.MasterLevel;
     state.levelUpPoints = p.CurrentMasterPoints;
@@ -116,6 +124,11 @@ function levelUp(p: { MasterLevel: number; CurrentMasterPoints: number }): void 
       state.experienceOfNextLevel = masterLevelBaseExperience(p.MasterLevel + 1);
     }
   });
+
+  // :8227-8236: a master class gets the flare swirl.
+  const world = Ecs.world;
+  const hero = world?.playerEntity;
+  if (world && hero && isMasterClass(Hero.charClass)) showMasterLevelUp(world.scene, hero);
 }
 
 function gained(p: { AddedExperience: number }): void {

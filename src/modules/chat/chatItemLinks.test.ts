@@ -10,6 +10,7 @@ import {
   scanItemLinks,
   stripItemLinks,
   uniqueLinkLabel,
+  freshDraft,
   wireToLabels,
 } from './chatItemLinks';
 import { ChatLineType, classifyInboundChat } from './chat';
@@ -129,5 +130,22 @@ describe('labels in the chat box', () => {
     const back = wireToLabels(`wts ${token}`);
     expect(back.text).toBe('wts [Excellent Kris +7]');
     expect(back.links.get('[Excellent Kris +7]')).toBe(token);
+  });
+});
+
+// CNewUIChatInputBox: OpenningProcess empties the field (NewUIChatInputBox.cpp:794) and a sent
+// line leaves it empty (:571), so the box never shows the last line again.
+describe('freshDraft', () => {
+  it('starts empty', () => {
+    const draft = freshDraft(null);
+    expect(draft.text).toBe('');
+    expect(draft.links.size).toBe(0);
+  });
+
+  it('starts with the Alt+clicked link', () => {
+    const token = itemLinkToken(KRIS);
+    const draft = freshDraft({ label: '[Kris]', token });
+    expect(draft.text).toBe('[Kris]');
+    expect(draft.links.get('[Kris]')).toBe(token);
   });
 });

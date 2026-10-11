@@ -183,6 +183,18 @@ export const MuWindows = new (class _MuWindows {
     return false;
   }
 
+  /**
+   * `HideAll` (NewUISystem.cpp:1608): every open flag drops, then every stacked window's
+   * closer runs, top to bottom (what `Hide` runs: a trade cancel, the vault's close packet).
+   */
+  closeAll(): void {
+    const stacked = [...this.order].reverse();
+    runInAction(() => {
+      for (const id of Object.keys(this.open)) this.open[id] = false;
+    });
+    for (const id of stacked) this.closers.get(id)?.();
+  }
+
   // ---- placement ----------------------------------------------------------
 
   moveTo(id: string, x: number, y: number): void {

@@ -33,6 +33,8 @@ export default {
   'notify.pointNotAdded': 'Non è stato possibile assegnare il punto',
   'notify.levelUp': 'Livello {level}',
   'notify.masterLevelUp': 'Livello di maestria {level}',
+  'notify.expGained': 'Esperienza ottenuta: {amount}',
+  'notify.masterExpGained': 'Esperienza di maestria ottenuta: {amount}',
   'notify.fruitAdd': '{stat} +{points} (frutto)',
   'notify.fruitRemove': '{stat} -{points} (frutto)',
   'notify.fruitNoEffect': 'Il frutto non ha avuto effetto',

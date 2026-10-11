@@ -7,6 +7,7 @@ import { loadWorldMinimap, type WorldMinimap } from '@/controllers/terrain/minim
 import { MinimapMarkerKind, type MinimapMarker } from '@/controllers/terrain/minimapData';
 import { useMuSprite } from '@/controllers/interface/components/mu_sprite';
 import { MuButton } from '@/controllers/interface/components/mu_button';
+import { mapRotation } from './rotation';
 
 /**
  * What the sheet and the corner panel share: the art, the marker tables and
@@ -14,8 +15,32 @@ import { MuButton } from '@/controllers/interface/components/mu_button';
  * 640x480 UI space; each view scales them its own way.
  */
 
-export const MAP_ROTATION = 45;
 export const TERRAIN_SIZE = 256;
+
+/** `mapRotation()`, followed every frame while `active`: the camera control turns the view. */
+export function useMapRotation(active: boolean): number {
+  const [deg, setDeg] = useState(mapRotation);
+
+  useEffect(() => {
+    if (!active) return;
+
+    let frame = 0;
+    let last = NaN;
+    const tick = () => {
+      const next = mapRotation();
+      if (!(Math.abs(next - last) <= 0.5)) {
+        last = next;
+        setDeg(next);
+      }
+      frame = requestAnimationFrame(tick);
+    };
+
+    tick();
+    return () => cancelAnimationFrame(frame);
+  }, [active]);
+
+  return deg;
+}
 
 export const NPC_SIZE = 15;
 const PORTAL_SIZE = 30;
@@ -245,11 +270,11 @@ export const isPanned = (pan: MapPan): boolean => pan.u !== 0 || pan.v !== 0;
 
 /**
  * A pointer moved `sx, sy` screen pixels with the picture in hand: undo the
- * view's CSS scale, then the 45° spin, and the tile under the fixed centre
+ * view's CSS scale, then the map's turn, and the tile under the fixed centre
  * went the other way.
  */
-function dragToPan(sx: number, sy: number, mapSize: number, scale: number): MapPan {
-  const rad = (MAP_ROTATION * Math.PI) / 180;
+function dragToPan(sx: number, sy: number, mapSize: number, scale: number, rotation: number): MapPan {
+  const rad = (rotation * Math.PI) / 180;
   const px = sx / scale;
   const py = sy / scale;
   const mu = px * Math.cos(rad) + py * Math.sin(rad);
@@ -268,6 +293,7 @@ function dragToPan(sx: number, sy: number, mapSize: number, scale: number): MapP
 export function useMapDrag(
   mapSize: number,
   scale: number,
+  rotation: number,
   setPan: React.Dispatch<React.SetStateAction<MapPan>>
 ): {
   dragging: boolean;
@@ -297,7 +323,7 @@ export function useMapDrag(
       onPointerMove: e => {
         const h = held.current;
         if (!h || h.id !== e.pointerId) return;
-        const d = dragToPan(e.clientX - h.x, e.clientY - h.y, mapSize, scale);
+        const d = dragToPan(e.clientX - h.x, e.clientY - h.y, mapSize, scale, rotation);
         h.x = e.clientX;
         h.y = e.clientY;
         setPan(p => ({ u: p.u + d.u, v: p.v + d.v }));

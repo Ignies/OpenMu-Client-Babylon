@@ -18,10 +18,9 @@ import { playUiSound } from '../../controllers/sound/ui';
 
 /**
  * The three ways out of a session: `CSystemMenuMsgBox`'s Exit Game, Select
- * Server and Switch Character (NewUICustomMessageBox.cpp:2386-2470). The
- * original opens that menu with Escape; here they sit in the Options window's
- * footer on every page, and Escape on a clear screen opens it - the same key,
- * one window fewer.
+ * Server and Switch Character (NewUICustomMessageBox.cpp:2386-2470). Escape in
+ * the world opens that menu (`menuOpen`); they also sit in the Options window's
+ * footer, which Escape opens on the server list and the character screen.
  *
  * The wire side is the original's and nothing more: `SendLogOut(0|2|1)`, and
  * the screen only changes once the server has answered (`ReceiveLogOut`) - it
@@ -57,6 +56,13 @@ function inWorld(): boolean {
 export const SessionExit = new (class _SessionExit {
   /** The exit waiting for the server's answer, or null. */
   pending: ExitKind | null = null;
+
+  /** `CSystemMenuMsgBox` is up: Exit Game, Select Server, Switch Character, Option, Cancel. */
+  menuOpen = false;
+
+  closeMenu(): void {
+    this.menuOpen = false;
+  }
 
   private timer: ReturnType<typeof setTimeout> | null = null;
 
@@ -137,6 +143,7 @@ export const SessionExit = new (class _SessionExit {
     // behind the pre-game screens is not a map it stands on.
     Ecs.world?.removeHero();
     runInAction(() => {
+      this.menuOpen = false;
       MuWindows.setOpen('options', false);
       // The sheet is the world's; left open, it holds Escape on the screens
       // after (keyboardInputSystem.ts:84).
@@ -187,8 +194,9 @@ export const SessionExit = new (class _SessionExit {
  * pops up, the amount prompts, the quest windows. Escape belongs to them
  * first.
  *
- * The server list and the character screen open it too (UIMng.cpp:692-705);
- * the login window keeps Escape for its Cancel.
+ * In the world that is `CSystemMenuMsgBox` (NewUIHotKey.cpp:124). The server
+ * list and the character screen open Options instead of their own `CSysMenuWin`
+ * (UIMng.cpp:692-705, not ported); the login window keeps Escape for its Cancel.
  */
 export function openSystemMenu(): boolean {
   const screen = AppState.uiState;
@@ -199,7 +207,7 @@ export function openSystemMenu(): boolean {
   ) {
     return false;
   }
-  if (MuWindows.isOpen('options') || MsgBox.msgWin) return false;
+  if (MuWindows.isOpen('options') || SessionExit.menuOpen || MsgBox.msgWin) return false;
   // The world's overlays only gate it in the world, as UIMng.cpp:698 checks
   // none of them: a request still up when the character left is reset only on
   // the next select, and would hold Escape dead on these screens until then.
@@ -215,7 +223,8 @@ export function openSystemMenu(): boolean {
   }
 
   runInAction(() => {
-    MuWindows.setOpen('options', true);
+    if (screen === UIState.World) SessionExit.menuOpen = true;
+    else MuWindows.setOpen('options', true);
   });
   playUiSound('click'); // NewUIHotKey.cpp:125, UIMng.cpp:703
   return true;

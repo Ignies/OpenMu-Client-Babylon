@@ -198,27 +198,39 @@ class Events {
    * Chaos Castle prompt comes from a ticket, not an NPC.
    */
   closeAll(): void {
-    // The Titus duel-watch window is an NPC window too: OpenMU pushes
-    // `DuelStatus` only while the dialog is open, so closing it must send
-    // `CloseNpcRequest` to stop the loop (`ClosingProcess`, NewUIDuelWatchWindow.cpp).
-    const npcWindowOpen =
-      bloodCastleWindow().open ||
-      devilSquareWindow().open ||
-      duelWatchWindow().open ||
-      doppelgangerWindow().open ||
-      // The Gateway Machine is an NPC too: OpenMU holds the character in
-      // NpcDialogOpened until CloseNpcRequest arrives, and the 0xD1 handlers
-      // check that assignment.
-      kanturuDialog().open;
-    closeBloodCastle();
-    closeDevilSquare();
+    // The Gateway Machine is an NPC too: OpenMU holds the character in
+    // NpcDialogOpened until CloseNpcRequest arrives, and the 0xD1 handlers
+    // check that assignment.
+    const gateway = kanturuDialog().open;
     closeChaosCastlePrompt();
-    closeDuelWatch();
-    closeDoppelganger();
     // The Golden Archer dialog closes with its own packet (EventChipExitDialog).
     closeGoldenArcher();
     closeKanturu();
-    if (!npcWindowOpen) return;
+    if (!this.closeEntryWindows() && gateway) this.closeNpcTalk();
+  }
+
+  /**
+   * The four NPC entry windows, which a walk closes too (`UpdateSendMoveInterface`,
+   * NewUISystem.cpp:2025); the Kanturu gateway and the Golden Archer stay. True when one was open.
+   */
+  closeEntryWindows(): boolean {
+    // The Titus duel-watch window is an NPC window too: OpenMU pushes
+    // `DuelStatus` only while the dialog is open, so closing it must send
+    // `CloseNpcRequest` to stop the loop (`ClosingProcess`, NewUIDuelWatchWindow.cpp).
+    const open =
+      bloodCastleWindow().open ||
+      devilSquareWindow().open ||
+      duelWatchWindow().open ||
+      doppelgangerWindow().open;
+    closeBloodCastle();
+    closeDevilSquare();
+    closeDuelWatch();
+    closeDoppelganger();
+    if (open) this.closeNpcTalk();
+    return open;
+  }
+
+  private closeNpcTalk(): void {
     if (!Session.isOffline) {
       Session.sendToGS(CloseNpcRequestPacket.createPacket().buffer);
     }

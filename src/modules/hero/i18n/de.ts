@@ -33,6 +33,8 @@ export default {
   'notify.pointNotAdded': 'Der Punkt konnte nicht vergeben werden',
   'notify.levelUp': 'Level {level}',
   'notify.masterLevelUp': 'Meisterlevel {level}',
+  'notify.expGained': '{amount} Erfahrung erhalten',
+  'notify.masterExpGained': '{amount} Meister-Erfahrung erhalten',
   'notify.fruitAdd': '{stat} +{points} (Frucht)',
   'notify.fruitRemove': '{stat} -{points} (Frucht)',
   'notify.fruitNoEffect': 'Die Frucht hatte keine Wirkung',

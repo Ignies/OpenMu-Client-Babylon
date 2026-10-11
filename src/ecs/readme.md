@@ -15,7 +15,8 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
 - `Ecs.world` (`current.ts`): the live world, null until boot sets it. Observable; imports only
   mobx, so controllers, content and windows read it without reaching the app.
 - A few systems export helpers other code reads (`isHeroUnderRoof`, `mayBeCeilingPiece` in `roofDetection.ts`,
-  `isTeleporting` / `teleportMountAlpha` in `teleportSystem.ts`).
+  `isTeleporting` / `teleportMountAlpha` in `teleportSystem.ts`, `autoGetItem` in `itemPickupSystem.ts`: Space walks
+  to the first drawn item under three tiles, `AutoGetItem`, NewUIHotKey.cpp:455).
 
 ## How it works
 - A system is a factory `(world) => { update?(dt) }` in `systems/`. `createWorld.ts` lists every
@@ -60,7 +61,10 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
 - `systems/ceilingHideSystem.test.ts`: the roof over the hero fades on Enhanced, stays drawn but
   detected on Classic, and comes back when `roofFade` is turned off.
 - `systems/attackSystem.test.ts`: a swing sends the walk stop (`LetHeroStop`) before its hit.
-- `systems/itemPickupSystem.test.ts`: the pickup request marks the drop `pickupAsked`.
+- `systems/itemPickupSystem.test.ts`: the pickup request marks the drop `pickupAsked`; Space takes the
+  first drawn item under three tiles, not the nearest.
+- `systems/gmMark.test.ts`: the GM buff or the hero's operator status asks for the Webzen mark, cloaking hides it.
+- `systems/npcTalkSystem.test.ts`: the Gateway Machine is talked to from 5.5 tiles with no free tile beside it.
 - `systems/playerControllerSystem.test.ts`: a ground click calls off a standing cast, except while the
   right button is held.
 - `systems/skillCastSystem.test.ts`: Dark Side's follow-up blows draw on each target the server

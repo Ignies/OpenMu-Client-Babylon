@@ -3,7 +3,9 @@ import { Bag } from '../../modules/inventory';
 import { Drops } from '../../modules/drops';
 import { QuickItemActions } from '../../modules/inventory/quickItemActions';
 import { pickGround } from '../../controllers/terrain/terrainPick';
-import type { Entity, ISystemFactory } from '../world';
+import { bottomBarScreenHeight } from '../../controllers/interface/components/mu_window';
+import { EventBus } from '../../core/eventBus';
+import type { Entity, ISystemFactory, World } from '../world';
 
 /**
  * MOVEMENT_GET (ZzzInterface.cpp:3543-3575): clicking a drop - its model or
@@ -15,8 +17,43 @@ import type { Entity, ISystemFactory } from '../world';
 const PICKUP_RANGE = 1;
 /** Seconds between path refreshes while approaching (the drop never moves). */
 const APPROACH_INTERVAL = 0.4;
+/** `AutoGetItem`'s reach: under 300 units, three tiles (NewUIHotKey.cpp:472). */
+const AUTO_GET_RANGE = 3;
+
+/**
+ * `CNewUIHotKey::AutoGetItem` (NewUIHotKey.cpp:455-490): the first live, drawn item under three
+ * tiles from the hero, in the client's own order (not the nearest), becomes the MOVEMENT_GET
+ * target. True when one did.
+ */
+export function autoGetItem(world: World): boolean {
+  const hero = world.playerEntity?.transform?.pos;
+  if (!hero) return false;
+  for (const e of world.netObjsQuery.entities) {
+    if (!e.droppedItem || e.objOutOfScope || e.visibility?.state !== 'visible') continue;
+    if (e.worldIndex !== undefined && e.worldIndex !== world.mapIndex) continue;
+    const p = e.transform.pos;
+    if (Math.hypot(p.x - hero.x, p.y - hero.y, p.z - hero.z) < AUTO_GET_RANGE) {
+      world.pickupTarget = e;
+      return true;
+    }
+  }
+  return false;
+}
 
 export const ItemPickupSystem: ISystemFactory = world => {
+  // Space (NewUIHotKey.cpp:150): no carried item, the pointer off the bottom bar; a focused field
+  // never broadcasts the key (keyboardInputSystem.ts).
+  let pointerY = -1;
+  // No window under the tests' node.
+  if (typeof window !== 'undefined') {
+    window.addEventListener('pointermove', e => (pointerY = e.clientY), { passive: true });
+  }
+  EventBus.on('keyPressed', code => {
+    if (code !== 'Space' || Bag.pickedItem) return;
+    if (pointerY >= window.innerHeight - bottomBarScreenHeight()) return;
+    autoGetItem(world);
+  });
+
   world.scene.onPointerObservable.add(event => {
     if (event.type !== PointerEventTypes.POINTERDOWN) return;
     if (event.event.button !== 0) return;

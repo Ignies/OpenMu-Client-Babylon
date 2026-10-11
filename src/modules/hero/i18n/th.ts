@@ -33,6 +33,8 @@ export default {
   'notify.pointNotAdded': 'เพิ่มแต้มไม่สำเร็จ',
   'notify.levelUp': 'เลเวล {level}',
   'notify.masterLevelUp': 'เลเวลมาสเตอร์ {level}',
+  'notify.expGained': 'ได้รับค่าประสบการณ์ {amount}',
+  'notify.masterExpGained': 'ได้รับค่าประสบการณ์มาสเตอร์ {amount}',
   'notify.fruitAdd': '{stat} +{points} (ผลไม้)',
   'notify.fruitRemove': '{stat} -{points} (ผลไม้)',
   'notify.fruitNoEffect': 'ผลไม้ไม่มีผล',

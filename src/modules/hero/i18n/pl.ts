@@ -32,6 +32,8 @@ export default {
   'notify.pointNotAdded': 'Nie udało się dodać punktu',
   'notify.levelUp': 'Poziom {level}',
   'notify.masterLevelUp': 'Master Level {level}',
+  'notify.expGained': 'Zdobyto {amount} doświadczenia',
+  'notify.masterExpGained': 'Zdobyto {amount} doświadczenia Master',
   'notify.fruitAdd': '{stat} +{points} (owoc)',
   'notify.fruitRemove': '{stat} -{points} (owoc)',
   'notify.fruitNoEffect': 'Owoc nie zadziałał',

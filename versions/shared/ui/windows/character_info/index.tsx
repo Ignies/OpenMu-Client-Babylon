@@ -586,6 +586,8 @@ export const CharacterInfo = observer(() => {
       column={0}
       label={t('characterInfo.title')}
       onClose={() => {
+        // Already shut by `MuWindows.closeAll` (HideAll plays no click).
+        if (!MuWindows.isOpen('character_info')) return;
         MuWindows.setOpen('character_info', false);
         // Escape (NewUICharacterInfoWindow.cpp:227).
         playUiSound('click');

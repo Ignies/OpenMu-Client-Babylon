@@ -33,6 +33,8 @@ export default {
   'notify.pointNotAdded': 'Punctul nu a putut fi adăugat',
   'notify.levelUp': 'Nivel {level}',
   'notify.masterLevelUp': 'Nivel de maestru {level}',
+  'notify.expGained': 'Experiență obținută: {amount}',
+  'notify.masterExpGained': 'Experiență de maestru obținută: {amount}',
   'notify.fruitAdd': '{stat} +{points} (fruct)',
   'notify.fruitRemove': '{stat} -{points} (fruct)',
   'notify.fruitNoEffect': 'Fructul nu a avut efect',

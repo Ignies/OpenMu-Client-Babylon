@@ -46,6 +46,7 @@ One folder per in-game window. A window draws; its state and actions belong to i
 | `chat_room` | chat_room (320) | chat server rooms, one tab per room | chat, friends |
 | `social_prompts` | social_prompts (330) | yes/no boxes for party, guild, war, alliance, friend | social, friends |
 | `economy_prompts` | trade_prompt (340), economy_prompts (350) | trade request; zen, pin and price prompts | economy, items, inventory |
+| `system_menu` | system_menu (365) | Escape's five-button box in the world (`CSystemMenuMsgBox`) | session |
 | `events` | events (400) | event entry windows, Chaos Castle prompt, timers, results | events, items |
 | `balgass_entry` | balgass_entry (410) | third class quest entry boxes | quests |
 | `duel` | duel (430) | challenge prompt, score, channels, spectators, winner | events (duel), chat |
@@ -75,6 +76,7 @@ controller, and the HUD elements in `../hud`.
 
 ## Tests
 - `../windowModules.test.ts`: every `module:` names an optional module.
-- `gm_panel/commands.test.ts`: every command the panel names resolves against the catalogue.
+- `gm_panel/commands.test.ts`: every command the panel names resolves against the catalogue.
+- `master_skills/layout.test.ts`: the sheet centred at any interface scale, the node tip placed inside its node.
 - `options/search.test.ts`: the options search text normalising and matching.
 - `trade/index.test.tsx`: the partner grid stays live under the pointer (tooltips), only its clicks are swallowed.

@@ -8,7 +8,9 @@ select, create and delete actions (`CharSelect`).
 - `characterSlotPosition(slot)` / `characterSlotAngle(slot)`: where each of the five slots stands
   and faces.
 - `CHARACTER_CAMERA_POSITION`, `characterCameraTarget()`: the line-up camera.
-- `characterSelectView`: observable `{ zoomedOn }`, the name the right-click close-up is on.
+- `characterSelectView`: observable `{ zoomedOn, connectRequests }`: the name the right-click close-up is on,
+  and the double clicks on the focused character the page answers like Connect (CharacterScene.cpp:214).
+- `doubleClicks()`: `CInput`'s double click (a press within 500 ms of a single one), fed every left press.
 - `createCharacterSelectBackdrop(scene)`: the backdrop card; returns `{ dispose() }`.
 - `CharSelect` (`state.ts`, through `index.ts`, the door): `charactersList`, `loadingCharactersList`,
   `focusedChar`, `creationUnlockFlags`, the create form (`newCharName`, `newCharClass`,
@@ -59,4 +61,4 @@ select, create and delete actions (`CharSelect`).
 - change the list or focus handling: the pages above.
 
 ## Tests
-- none yet.
+- `characterSelect.test.ts`: the double-click timing.

@@ -36,12 +36,9 @@ export function installNet(): void {
         healthStep: -1,
       }))
     );
-    if (!wasInParty && Social.inParty) {
-      Social.systemMessage(t('party.joined'));
-      runInAction(() => {
-        Social.partyWindowEnabled = true;
-      });
-    }
+    // ReceivePartyList (WSclient.cpp:7367) opens no window: the always-on list
+    // (`versions/shared/ui/hud/party_list`) shows the members.
+    if (!wasInParty && Social.inParty) Social.systemMessage(t('party.joined'));
   });
 
   EventBus.on('RemovePartyMember', packet => {

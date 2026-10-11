@@ -81,6 +81,7 @@ hotbar share.
   Nightmare in Kanturu 3rd); anyone else the plain one.
 - `state.test.ts`: active master skills sit on the bar; a Strengthener takes its base skill's hot key
   and selection.
+- `masterLevelUpLook.test.ts`: a flare head starts on the spot, swirls out and closes on the body; twenty joints.
 - `masterTree.test.ts`: the tree reads the Season 6 skill table: a node's icon cell and its base
   skill gate (`CheckBeforeSkill`).
 - `versions/shared/skills/skillTables.golden.test.ts` snapshots `SKILL_DELAY_MS`.
@@ -96,7 +97,10 @@ plain map pushed to `onCooldownTick` once a frame, which the hotbar paints into 
 ### masterLevel.ts
 `Master_Level_Data` (`nMLevel`, `lMasterLevel_Experince`, `lNext_MasterLevel_Experince`, `nMLevelUpMPoint`).
 Fed by `MasterStatsUpdate` (F3 50, on entering the game), `MasterCharacterLevelUpdate` (F3 51),
-`ExperienceGained` (C3 16, only in master progression) and `MasterSkillLevelUpdate`'s points (via `masterTree.ts`).
+`ExperienceGained` (C3 16, only in master progression) and `MasterSkillLevelUpdate`'s points (via `masterTree.ts`).
+A master level-up says what was left to the level and, for a master class, plays the flare swirl of
+`masterLevelUpLook.ts` (`Receive_Master_LevelUp`, WSclient.cpp:8218-8236): one BITMAP_FLARE joint of subtype 45 and
+nineteen of 46, spawned through the fx facade (`effects.spawn`), and subtype 45's change-up pop at its end.
 ### masterTree.ts
 `ensureMasterTreeData` loads once, under `Data/`: `Local/MasterSkillTreeData.bmd` (512 BUX records of 24
 bytes, `_MASTER_SKILLTREE_DATA`, plus a 4-byte `GenerateCheckSum2` trailer), `Local/<lang>/MasterSkillTooltip_<lang>.bmd`

@@ -78,15 +78,11 @@ export function installNet(): void {
     const rotation = packet.byteLength > 9 ? packet.getUint8(9) : undefined;
 
     if (p.IsMapChange) {
-      // HideAll on warp: the merchant stays behind.
-      Merchant.closeNpcShop();
-      // `ReceiveMapChange` (WSclient.cpp:622): the notice stack and the minimap
-      // sheet do not survive a warp.
+      // `HideAll` (ReceiveTeleport, WSclient.cpp:2285): every window closes, the
+      // merchant and the minimap sheet with them. The notice stack goes too.
+      MuWindows.closeAll();
       Notices.clear();
       SlideHelp.clear();
-      runInAction(() => {
-        MuWindows.setOpen('minimap', false);
-      });
       // The soccer scoreboard does not survive a warp off the stadium.
       if (p.MapNumber !== ENUM_WORLD.WD_6STADIUM) {
         runInAction(() => {

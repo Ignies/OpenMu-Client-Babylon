@@ -1,5 +1,6 @@
 import {
   BoundingBox,
+  Matrix,
   Vector3,
   type Scene,
   type TransformNode,
@@ -30,6 +31,16 @@ import { chooseIdleAction, isPhoenixSoulStar } from './weaponClass';
 import { isFemaleClass } from './mapPlayerNetClassToModelClass';
 import { playerPlaySpeed } from '../anim/playSpeed';
 import type { ShatterDeath } from '../fx/deathVisuals';
+
+/** `MODEL_WEBZEN_MARK`: `Data\Skill\MuSign` (ZzzOpenData.cpp:4343). */
+const GM_MARK_MODEL = 'Skill/musign.glb';
+/** `CSParts(MODEL_WEBZEN_MARK, 20, false, 70, -5, 0)` (CSParts.cpp:46): head bone 20, cm as metres. */
+const GM_MARK_BONE = 20;
+const GM_MARK_OFFSET = new Vector3(0.7, -0.05, 0);
+/** `m_pObj.Velocity` (CSParts.cpp:25): the mark's own clip, keys per tick. */
+const GM_MARK_SPEED = 0.5;
+const toBody = new Matrix();
+const boneToBody = new Matrix();
 
 export class PlayerObject extends ModelObject {
   /**
@@ -82,6 +93,13 @@ export class PlayerObject extends ModelObject {
   readonly QuestItem: ModelObject;
   /** `c->Helper` when it is link-rendered on the body (the Imp / Satan). */
   readonly Pet: ModelObject;
+  /**
+   * The Webzen mark over a game master (`PARTS_WEBZEN`, CSParts.cpp:28-46). Its own root, so it
+   * carries its own chrome pass, and not on a bone: `CSParts::IRender` puts it at bone 20 plus
+   * the offset and turns it with the character (CSParts.cpp:186-212). `gmMarkOn` is the request.
+   */
+  readonly GmMark: ModelObject;
+  gmMarkOn = false;
 
   IsInteractable = false;
 
@@ -108,6 +126,15 @@ export class PlayerObject extends ModelObject {
     this.Wings = new WingObject(scene, this.node);
     this.QuestItem = new ModelObject(scene, this.node);
     this.Pet = new ModelObject(scene, this.node);
+    this.GmMark = new ModelObject(scene, this.node);
+    this.GmMark.NodeNamePrefix = 'GmMark_';
+    this.GmMark.SkipBoundingBox = true;
+    this.GmMark.CastsShadow = false;
+    this.GmMark.FixedLight = true;
+    this.GmMark.AnimationSpeed = GM_MARK_SPEED;
+    // ZzzObject.cpp:1558-1564: the lit model, then RENDER_BRIGHT | RENDER_CHROME in (1, 0.5, 0).
+    this.GmMark.BodyShine.tint.set(1, 0.5, 0);
+    this.GmMark.BodyShine.chromeOnly = true;
 
     this.HelmMask.NodeNamePrefix = 'HelmMask_';
     this.Helm.NodeNamePrefix = 'Helm_';
@@ -302,6 +329,33 @@ export class PlayerObject extends ModelObject {
     }
   }
 
+  /** Puts on (or takes off) the Webzen mark (`CreatePartsFactory` / `DeleteParts`, CSParts.cpp). */
+  async setGmMarkAsync(on: boolean) {
+    this.gmMarkOn = on;
+    if (!on) {
+      this.GmMark.Unload();
+      return;
+    }
+
+    const world = Ecs.world;
+    if (!world) return;
+    const seq = ++this.GmMark.loadSeq;
+    const gltf = await loadGLTF(GM_MARK_MODEL, world);
+    if (seq !== this.GmMark.loadSeq) return;
+    this.GmMark.load(gltf);
+    for (const mesh of this.GmMark.getMeshes()) mesh.isPickable = false;
+  }
+
+  /** `CSParts::IRender`: bone 20's transform of the offset, in the body's frame, so it turns with the body. */
+  private placeGmMark(gameTime: World['gameTime']) {
+    const bone = this.gltf?.skeleton?.bones[GM_MARK_BONE + 1]?.getTransformNode();
+    if (!bone) return;
+    this.node.getWorldMatrix().invertToRef(toBody);
+    bone.getWorldMatrix().multiplyToRef(toBody, boneToBody);
+    Vector3.TransformCoordinatesToRef(GM_MARK_OFFSET, boneToBody, this.GmMark.node.position);
+    this.GmMark.Update(gameTime);
+  }
+
   /**
    * Starts the idle clip a player-rig NPC stands in. The factories used to
    * assign `CurrentAction` without playing it, which left the model on the
@@ -485,6 +539,14 @@ export class PlayerObject extends ModelObject {
     for (const child of this.Children) {
       child.Update(gameTime);
     }
+
+    if (this.GmMark.Ready) this.placeGmMark(gameTime);
+  }
+
+  dispose(): void {
+    // Not a child (its own root), so the base does not reach it.
+    this.GmMark.dispose();
+    super.dispose();
   }
 
   Draw(gameTime: World['gameTime']): void {
