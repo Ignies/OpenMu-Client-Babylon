@@ -55,4 +55,7 @@ export default {
     'Футбольные часы на табло',
   'fidelity.soccerBoardClock.hint':
     'Время Battle Soccer показывается часами на табло вместо строки в центре экрана. Классика: оставшееся время пишется в центре экрана, как в оригинале.',
+  'fidelity.enhancedSkillEffects': 'Улучшенные эффекты умений',
+  'fidelity.enhancedSkillEffects.hint':
+    'Некоторые умения рисуются в нашем собственном виде, например рой Evil Spirit с дымом и мглой. Также опция Эффекты умений. Классика: каждое умение рисуется как в оригинале.',
 } satisfies Partial<Record<keyof typeof en, string>>;

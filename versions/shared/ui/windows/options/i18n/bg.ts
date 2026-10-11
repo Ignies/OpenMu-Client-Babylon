@@ -389,4 +389,9 @@ export default {
   'options.effectShedding': 'По-малко ефекти при забавяне',
   'options.help.effectShedding':
     'Докато кадрите остават доста под целта (ограничението на FPS или 60), рисува по-малко ефекти от уменията на другите играчи в тълпа. Твоите винаги се виждат.',
+  'options.skillEffects': 'Ефекти на уменията',
+  'options.skillEffects.original': 'Оригинални',
+  'options.skillEffects.enhanced': 'Подобрени',
+  'options.help.skillEffects':
+    'Оригинални рисува всяко умение като оригиналния клиент. Подобрени връща нашия собствен вид на някои умения, например роя на Evil Spirit. Същият превключвател като Подобрени ефекти на уменията в страницата Вярност.',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -55,4 +55,7 @@ export default {
     'Футболен часовник на таблото',
   'fidelity.soccerBoardClock.hint':
     'Времето на Battle Soccer се показва като часовник на таблото вместо като ред в средата на екрана. Класическо: оставащото време се изписва в средата на екрана, както в оригинала.',
+  'fidelity.enhancedSkillEffects': 'Подобрени ефекти на уменията',
+  'fidelity.enhancedSkillEffects.hint':
+    'Някои умения се рисуват с нашия собствен вид, например роят на Evil Spirit с дима и мрака му. Също опцията Ефекти на уменията. Класическо: всяко умение се рисува като в оригинала.',
 } satisfies Partial<Record<keyof typeof en, string>>;

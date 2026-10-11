@@ -55,4 +55,7 @@ export default {
     'Ceasul de fotbal pe tabelă',
   'fidelity.soccerBoardClock.hint':
     'Timpul Battle Soccer apare ca un ceas pe tabela de scor în loc de un rând în mijlocul ecranului. Clasică: timpul rămas este scris în mijlocul ecranului, ca în original.',
+  'fidelity.enhancedSkillEffects': 'Efecte ale abilităților îmbunătățite',
+  'fidelity.enhancedSkillEffects.hint':
+    'Unele abilități se desenează cu aspectul nostru, cum ar fi roiul Evil Spirit cu fumul și umbra lui. Și opțiunea Efectele abilităților. Clasică: fiecare abilitate se desenează ca în original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

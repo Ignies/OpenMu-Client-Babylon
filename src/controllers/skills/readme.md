@@ -18,7 +18,8 @@ themselves are content in `versions/shared/skills/` (see [docs/content.md](../..
   `arcHit`, `steelHit`, `explosion`, `scorch`, `burn`, `magicGround`, ...), travel (`bolt`, `arrow`),
   `fanArrows` (`every`: one arrow at a time, Multi-Shot), `onCurseLanding`, `weaponsOf(e)` (`c->Weapon`: the castle's weapons inside Chaos
   Castle, `actors.heldWeapons`), units (`ticks`, `cm`, `perTick`, `TICK`); the release: `onRelease(c, fn, rule?)`,
-  `afterRelease(step, rule?)`, `ReleaseRule`, `NO_KEY`, `afterHeroRelease(fn)`.
+  `afterRelease(step, rule?)`, `ReleaseRule`, `NO_KEY`, `afterHeroRelease(fn)`; the Skill effects branch: `tiered(original, enhanced)`
+  (a step picking at each cast) and `enhancedSkillFx()` (the `enhancedSkillEffects` improvement, ours; Classic is `original`).
 - Dispatch, used by modules and ECS systems through `versions/shared/skills/skillVisuals.ts`:
   `playTargetedSkillVisual`, `playAreaSkillVisual`, `playBowShotVisual`, `setBuffVisual`,
   `clearBuffVisuals`, `playBuffHits`, `skillVisualFor`, `baseSkill`, `fallbackFor`.

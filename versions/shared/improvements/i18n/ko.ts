@@ -55,4 +55,7 @@ export default {
     '점수판의 축구 시계',
   'fidelity.soccerBoardClock.hint':
     '배틀 사커 시간을 화면 가운데 줄 대신 점수판의 시계로 표시합니다. 클래식: 남은 시간이 화면 가운데에 표시됩니다(원작과 같음).',
+  'fidelity.enhancedSkillEffects': '향상된 스킬 효과',
+  'fidelity.enhancedSkillEffects.hint':
+    '일부 스킬을 우리만의 모습으로 그립니다(연기와 장막이 있는 Evil Spirit의 무리 등). 스킬 효과 옵션과 같습니다. 클래식: 모든 스킬을 원본대로 그립니다.',
 } satisfies Partial<Record<keyof typeof en, string>>;

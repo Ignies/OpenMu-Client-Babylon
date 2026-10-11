@@ -435,4 +435,9 @@ export default {
   'options.effectShedding': 'Меньше эффектов при тормозах',
   'options.help.effectShedding':
     'Пока частота кадров заметно ниже цели (ограничение FPS или 60), в толпе рисуется меньше эффектов умений других игроков. Ваши видны всегда.',
+  'options.skillEffects': 'Эффекты умений',
+  'options.skillEffects.original': 'Оригинальные',
+  'options.skillEffects.enhanced': 'Улучшенные',
+  'options.help.skillEffects':
+    'Оригинальные рисует каждое умение как оригинальный клиент. Улучшенные возвращает наш собственный вид некоторых умений, например рой Evil Spirit. Тот же переключатель, что и Улучшенные эффекты умений на странице Точность.',
 } satisfies Partial<Record<keyof typeof en, string>>;

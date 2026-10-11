@@ -4,12 +4,14 @@ import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
 import { Scene } from '@babylonjs/core/scene';
 import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 import { effects } from '@/controllers/fx';
+import { fxTicks, setFxTicks } from '@/controllers/fx/core';
 import { ENUM_WORLD } from '@/core/types';
 import { lighting } from '@/controllers/lighting';
 import type { Entity } from '@/ecs/world';
 import { GameOptions } from '@/controllers/settings/gameOptions';
 import { LIGHTING_QUALITY_MAX } from '@/controllers/lighting/lightingQuality';
 import { combat } from '@/controllers/combat';
+import { FIDELITY_CLASSIC, FIDELITY_DEFAULT, setFidelityChoice } from '@/controllers/fidelity';
 import {
   clearBuffVisuals,
   playAreaSkillVisual,
@@ -21,6 +23,8 @@ import {
 
 // Characterization net for the skill split: what every skill id spawns and lights,
 // recorded headless. A change in this snapshot means a skill now looks different.
+// Each skill id is pinned on both Skill effects branches: Original (Classic) and Enhanced (ours, 'same' when
+// the skill has one look).
 
 vi.hoisted(() => {
   const g = globalThis as Record<string, unknown>;
@@ -103,23 +107,46 @@ describe('skill visuals golden trace', () => {
     expect(skillVisualCount()).toMatchSnapshot();
   });
 
+  function castBoth(id: number): { targeted: unknown[]; area: unknown[] } {
+    const caster = entity(100, 100, 1);
+    const target = entity(103, 104, 2);
+    const targeted: unknown[] = [];
+    const area: unknown[] = [];
+    // Classic (0) and the top tier, where `enhanced` rows take over.
+    for (const tier of [0, LIGHTING_QUALITY_MAX]) {
+      GameOptions.lightingQuality = tier;
+      targeted.push(...run(id, () => playTargetedSkillVisual(scene, id, caster, target)));
+      area.push(...run(id, () => playAreaSkillVisual(scene, id, caster, { x: 103, y: 104 }, () => 0, target)));
+    }
+    return { targeted, area };
+  }
+
+  const line = ({ targeted, area }: { targeted: unknown[]; area: unknown[] }) => {
+    const count = (t: unknown[], k: string) => t.filter(e => (e as unknown[])[0] === k).length;
+    const hash = createHash('sha1').update(JSON.stringify({ targeted, area })).digest('hex').slice(0, 16);
+    return `${count(targeted, 'spawn')}/${count(area, 'spawn')} spawns, ${count(targeted, 'light')}/${count(area, 'light')} lights, ${hash}`;
+  };
+
   for (let id = 0; id <= 620; id++) {
     it(`skill ${id}`, () => {
-      const caster = entity(100, 100, 1);
-      const target = entity(103, 104, 2);
-      const targeted: unknown[] = [];
-      const area: unknown[] = [];
-      // Classic (0) and the top tier, where `enhanced` rows take over.
-      for (const tier of [0, LIGHTING_QUALITY_MAX]) {
-        GameOptions.lightingQuality = tier;
-        targeted.push(...run(id, () => playTargetedSkillVisual(scene, id, caster, target)));
-        area.push(...run(id, () => playAreaSkillVisual(scene, id, caster, { x: 103, y: 104 }, () => 0, target)));
+      // Both branches start on the same tick, and the next id starts where Original left off.
+      const start = fxTicks();
+      let original: ReturnType<typeof castBoth>;
+      try {
+        setFidelityChoice(FIDELITY_CLASSIC, {});
+        original = castBoth(id);
+      } finally {
+        setFidelityChoice(FIDELITY_DEFAULT, {});
       }
-      const full = { targeted, area };
-      if (process.env.GOLDEN_FULL) return expect(full).toMatchSnapshot();
-      const count = (t: unknown[], k: string) => t.filter(e => (e as unknown[])[0] === k).length;
-      const hash = createHash('sha1').update(JSON.stringify(full)).digest('hex').slice(0, 16);
-      expect(`${count(targeted, 'spawn')}/${count(area, 'spawn')} spawns, ${count(targeted, 'light')}/${count(area, 'light')} lights, ${hash}`).toMatchSnapshot();
+      const end = fxTicks();
+      setFxTicks(start);
+      const enhanced = castBoth(id);
+      setFxTicks(end);
+      if (process.env.GOLDEN_FULL) return expect({ original, enhanced }).toMatchSnapshot();
+      const a = line(original);
+      const b = line(enhanced);
+      expect(a).toMatchSnapshot();
+      expect(b === a ? 'enhanced: same' : `enhanced: ${b}`).toMatchSnapshot();
     });
   }
 

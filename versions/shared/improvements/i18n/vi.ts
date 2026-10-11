@@ -55,4 +55,7 @@ export default {
     'Đồng hồ bóng đá trên bảng tỉ số',
   'fidelity.soccerBoardClock.hint':
     'Thời gian Battle Soccer hiện thành đồng hồ trên bảng tỉ số thay vì một dòng giữa màn hình. Cổ điển: thời gian còn lại được ghi ở giữa màn hình, như bản gốc.',
+  'fidelity.enhancedSkillEffects': 'Hiệu ứng kỹ năng nâng cao',
+  'fidelity.enhancedSkillEffects.hint':
+    'Một số kỹ năng được vẽ với diện mạo riêng của chúng tôi, như bầy linh hồn của Evil Spirit cùng khói và màn tối. Cũng là tùy chọn Hiệu ứng kỹ năng. Cổ điển: mọi kỹ năng được vẽ như bản gốc.',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -55,4 +55,7 @@ export default {
     'サッカーの時計をスコアボードに',
   'fidelity.soccerBoardClock.hint':
     'バトルサッカーの時間を画面中央の行ではなく、スコアボード上の時計で表示します。クラシック: 残り時間は画面中央に表示されます（オリジナルどおり）。',
+  'fidelity.enhancedSkillEffects': '強化スキルエフェクト',
+  'fidelity.enhancedSkillEffects.hint':
+    '一部のスキルを独自の見た目で描きます(煙と暗幕を伴うEvil Spiritの群れなど)。「スキルエフェクト」オプションと同じです。クラシック: すべてのスキルをオリジナル通りに描きます。',
 } satisfies Partial<Record<keyof typeof en, string>>;

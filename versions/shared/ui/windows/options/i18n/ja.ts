@@ -336,4 +336,9 @@ export default {
   'options.effectShedding': '重いときはエフェクトを減らす',
   'options.help.effectShedding':
     'フレームレートが目標（FPS上限、または60）を大きく下回っている間、人混みで他のプレイヤーのスキルエフェクトを減らします。自分のものは常に表示されます。',
+  'options.skillEffects': 'スキルエフェクト',
+  'options.skillEffects.original': 'オリジナル',
+  'options.skillEffects.enhanced': '強化',
+  'options.help.skillEffects':
+    'オリジナルはすべてのスキルを元のクライアント通りに描きます。強化は一部のスキルに独自の見た目を戻します(Evil Spiritの群れなど)。再現度ページの「強化スキルエフェクト」と同じ切り替えです。',
 } satisfies Partial<Record<keyof typeof en, string>>;

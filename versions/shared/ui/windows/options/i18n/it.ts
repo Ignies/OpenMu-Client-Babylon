@@ -410,4 +410,9 @@ export default {
   'options.effectShedding': 'Meno effetti se rallenta',
   'options.help.effectShedding':
     "Finché i fotogrammi restano ben sotto l'obiettivo (il limite FPS, o 60), disegna meno effetti delle abilità degli altri giocatori nella folla. I tuoi si vedono sempre.",
+  'options.skillEffects': 'Effetti delle abilità',
+  'options.skillEffects.original': 'Originali',
+  'options.skillEffects.enhanced': 'Migliorati',
+  'options.help.skillEffects':
+    'Originali disegna ogni abilità come il client originale. Migliorati riporta il nostro aspetto per alcune abilità, come lo sciame di Evil Spirit. Lo stesso interruttore di Effetti delle abilità migliorati nella pagina Fedeltà.',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -378,4 +378,9 @@ export default {
   'options.effectShedding': 'ลดเอฟเฟกต์เมื่อช้า',
   'options.help.effectShedding':
     'ขณะที่เฟรมเรตต่ำกว่าเป้าหมายมาก (ขีดจำกัด FPS หรือ 60) จะวาดเอฟเฟกต์สกิลของผู้เล่นอื่นในฝูงชนน้อยลง ของคุณจะแสดงเสมอ',
+  'options.skillEffects': 'เอฟเฟกต์สกิล',
+  'options.skillEffects.original': 'ดั้งเดิม',
+  'options.skillEffects.enhanced': 'ปรับปรุง',
+  'options.help.skillEffects':
+    'ดั้งเดิมวาดทุกสกิลตามไคลเอนต์ต้นฉบับ ปรับปรุงนำรูปลักษณ์ของเรากลับมาให้บางสกิล เช่น ฝูงวิญญาณของ Evil Spirit เป็นสวิตช์เดียวกับเอฟเฟกต์สกิลแบบปรับปรุงในหน้าความเที่ยงตรง',
 } satisfies Partial<Record<keyof typeof en, string>>;

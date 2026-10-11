@@ -55,4 +55,7 @@ export default {
     'นาฬิกาฟุตบอลบนกระดานคะแนน',
   'fidelity.soccerBoardClock.hint':
     'แสดงเวลาของ Battle Soccer เป็นนาฬิกาบนกระดานคะแนนแทนบรรทัดกลางจอ คลาสสิก: เวลาที่เหลือจะแสดงกลางจอ เหมือนต้นฉบับ',
+  'fidelity.enhancedSkillEffects': 'เอฟเฟกต์สกิลแบบปรับปรุง',
+  'fidelity.enhancedSkillEffects.hint':
+    'บางสกิลวาดด้วยรูปลักษณ์ของเรา เช่น ฝูงวิญญาณของ Evil Spirit พร้อมควันและม่านมืด เป็นตัวเลือกเดียวกับเอฟเฟกต์สกิล คลาสสิก: ทุกสกิลวาดตามต้นฉบับ',
 } satisfies Partial<Record<keyof typeof en, string>>;

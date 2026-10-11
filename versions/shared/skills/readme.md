@@ -68,9 +68,11 @@ _shared.ts                      helpers for several classes
 - a skill file never imports another skill's folder.
 
 ## Tests
-- `skillVisuals.golden.test.ts`: runs ids 0-620 targeted and area (classic and max lighting),
+- `skillVisuals.golden.test.ts`: runs ids 0-620 targeted and area (classic and max lighting) on both Skill
+  effects branches (Original, then Enhanced from the same tick: `enhanced: same` when the skill has one look),
   buff looks 0-160 and bow shots for launchers 0-30 headless with seeded random; snapshots the
   spawn and light counts and a hash.
+- `tiered.test.ts`: `tiered` runs the original on Classic and ours on Enhanced.
 - `skillTables.golden.test.ts`: per id 0-700, the light, sound, clip (per mount, gender, map),
   cast target, step-in and delay it resolves to.
 - `skillRules.golden.test.ts`: per id 0-700, the clip `chooseSkillAction` picks over hands,

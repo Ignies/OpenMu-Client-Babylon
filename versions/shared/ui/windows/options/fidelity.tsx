@@ -7,8 +7,8 @@ import {
   withImprovement,
 } from '@/controllers/fidelity';
 import { GameOptions, setGameOption } from '@/controllers/settings';
-import { t } from '@/i18n';
-import { Checkbox, FitText } from './controls';
+import { t, type TextKey } from '@/i18n';
+import { Checkbox, FitText, Stepper } from './controls';
 import type { Row, Section } from './catalogue';
 import { LIGHTING_QUALITY_LABEL_KEYS } from '@/controllers/lighting/lightingQuality';
 
@@ -37,11 +37,12 @@ function applyFidelity(level: number): void {
   setGameOption('fidelityOverrides', {});
 }
 
+export function setImprovement(id: string, on: boolean): void {
+  setGameOption('fidelityOverrides', withImprovement(id, on, GameOptions.fidelity, GameOptions.fidelityOverrides));
+}
+
 export function toggleImprovement(id: string): void {
-  setGameOption(
-    'fidelityOverrides',
-    withImprovement(id, !improvementChecked(id), GameOptions.fidelity, GameOptions.fidelityOverrides)
-  );
+  setImprovement(id, !improvementChecked(id));
 }
 
 export function fidelitySections(): Section[] {
@@ -84,3 +85,13 @@ export const FidelityPresets = observer(({ width }: { width: number }) => {
 export const ImprovementCheck = observer(({ id }: { id: string }) => (
   <Checkbox checked={improvementChecked(id)} />
 ));
+
+/** The same switch as a choice: the first text is off, the second on. */
+export const ImprovementChoice = observer(
+  ({ id, texts, disabled, width }: { id: string; texts: readonly [TextKey, TextKey]; disabled: boolean; width: number }) => {
+    const value = improvementChecked(id) ? 1 : 0;
+    return (
+      <Stepper value={value} min={0} max={1} text={t(texts[value])} disabled={disabled} width={width} onChange={v => setImprovement(id, v === 1)} />
+    );
+  }
+);

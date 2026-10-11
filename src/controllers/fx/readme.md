@@ -10,7 +10,7 @@ shared pools, textures and particle recipes other folders reuse.
   `update(map, dt)` and `reset()` are for the game loop. `register(layer)` and `layersFor(map)`
   exist but nothing calls them. Also re-exports `EffectHandle`, `EffectLayer`, `DEAD_HANDLE`,
   `delay`, `fxNow`.
-- `core.ts`: the effects clock (`delay(seconds, fn)`, `fxNow()`), units (`TICK` = 1/25 s, `CM`),
+- `core.ts`: the effects clock (`delay(seconds, fn)`, `fxNow()`; `fxTicks` / `setFxTicks` for the skill golden, which replays a cast on both Skill effects branches from one tick), units (`TICK` = 1/25 s, `CM`),
   `RGB`, `PointSource` (`followEntity`, `fixedPoint`, `pointSource`), entity helpers (`entityPos`,
   `entityYaw`, `bonePos`, `boneLocalPos`, `entityGone`, `inWindow`), `ParticleRecipe`, light gains
   (`lightCardGain`, `darkCardGain`, `spriteLevel`), `EFFECT_RENDERING_GROUP`, `keepDepthForEffects`.

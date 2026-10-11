@@ -55,4 +55,7 @@ export default {
     'Orologio del calcio sul tabellone',
   'fidelity.soccerBoardClock.hint':
     'Il tempo del Battle Soccer appare come un orologio sul tabellone invece che come una riga al centro dello schermo. Classica: il tempo rimanente è scritto al centro dello schermo, come nell’originale.',
+  'fidelity.enhancedSkillEffects': 'Effetti delle abilità migliorati',
+  'fidelity.enhancedSkillEffects.hint':
+    'Alcune abilità si disegnano con il nostro aspetto, come lo sciame di Evil Spirit con il suo fumo e la sua ombra. Anche l\'opzione Effetti delle abilità. Classica: ogni abilità si disegna come nell\'originale.',
 } satisfies Partial<Record<keyof typeof en, string>>;

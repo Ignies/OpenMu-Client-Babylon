@@ -55,4 +55,7 @@ export default {
     'Zegar piłkarski na tablicy',
   'fidelity.soccerBoardClock.hint':
     'Czas Battle Soccer jest pokazywany jako zegar na tablicy wyników zamiast wiersza na środku ekranu. Klasyczne: pozostały czas jest wypisany na środku ekranu, jak w oryginale.',
+  'fidelity.enhancedSkillEffects': 'Ulepszone efekty umiejętności',
+  'fidelity.enhancedSkillEffects.hint':
+    'Niektóre umiejętności są rysowane w naszym własnym wyglądzie, na przykład rój Evil Spirit z dymem i całunem. Także opcja Efekty umiejętności. Klasyczne: każda umiejętność wygląda jak w oryginale.',
 } satisfies Partial<Record<keyof typeof en, string>>;

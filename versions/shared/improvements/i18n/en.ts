@@ -52,6 +52,9 @@ const en = {
     'Soccer clock on the board',
   'fidelity.soccerBoardClock.hint':
     'The Battle Soccer time shows as a clock on the scoreboard instead of a line in the middle of the screen. Classic: the remaining time is written in the middle of the screen, as in the original.',
+  'fidelity.enhancedSkillEffects': 'Enhanced skill effects',
+  'fidelity.enhancedSkillEffects.hint':
+    'Some skills draw with our own looks, such as the Evil Spirit swarm with its smoke and shroud. Also the Skill effects option. Classic: every skill draws as in the original.',
 };
 
 export default en;

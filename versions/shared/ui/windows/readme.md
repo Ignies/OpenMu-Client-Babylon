@@ -74,7 +74,8 @@ controller, and the HUD elements in `../hud`.
 - change or add a window's words: its `i18n/en.ts` and every other `<code>.ts` there
   ([docs/how_to/add_text.md](../../../../docs/how_to/add_text.md)).
 - the Options window's Fidelity page builds its checks from the improvement registry
-  (`options/fidelity.tsx`); a new improvement needs no row there.
+  (`options/fidelity.tsx`); a new improvement needs no row there. An improvement row with `choice` shows the same
+  switch as a two-way choice on another page (Skill effects, by Item effects); its page's Restore defaults skips it.
 - the quality presets (`options/presets.ts`): Low (ours, every cost off, 75% scale, the crowd options off)
   then Classic / Enhanced / Ultra; leaving Low gives the keys only it touches their defaults back. These
   are graphics presets, not the Fidelity ones.

@@ -412,4 +412,9 @@ export default {
   'options.effectShedding': 'Mai puține efecte când merge greu',
   'options.help.effectShedding':
     'Cât timp cadrele rămân mult sub țintă (limita FPS sau 60), desenează mai puține efecte ale abilităților altor jucători în mulțime. Ale tale se văd mereu.',
+  'options.skillEffects': 'Efectele abilităților',
+  'options.skillEffects.original': 'Originale',
+  'options.skillEffects.enhanced': 'Îmbunătățite',
+  'options.help.skillEffects':
+    'Originale desenează fiecare abilitate ca clientul original. Îmbunătățite readuce aspectul nostru pentru unele abilități, cum ar fi roiul Evil Spirit. Același comutator ca Efecte ale abilităților îmbunătățite din pagina Fidelitate.',
 } satisfies Partial<Record<keyof typeof en, string>>;

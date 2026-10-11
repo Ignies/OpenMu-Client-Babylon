@@ -396,4 +396,9 @@ export default {
   'options.effectShedding': 'Ít hiệu ứng hơn khi chậm',
   'options.help.effectShedding':
     'Khi tốc độ khung hình thấp hơn nhiều so với mục tiêu (giới hạn FPS, hoặc 60), vẽ ít hiệu ứng kỹ năng của người chơi khác trong đám đông hơn. Của bạn luôn hiện.',
+  'options.skillEffects': 'Hiệu ứng kỹ năng',
+  'options.skillEffects.original': 'Nguyên bản',
+  'options.skillEffects.enhanced': 'Nâng cao',
+  'options.help.skillEffects':
+    'Nguyên bản vẽ mọi kỹ năng như client gốc. Nâng cao mang lại diện mạo riêng của chúng tôi cho một số kỹ năng, như bầy linh hồn của Evil Spirit. Cùng công tắc với Hiệu ứng kỹ năng nâng cao ở trang Độ trung thực.',
 } satisfies Partial<Record<keyof typeof en, string>>;
