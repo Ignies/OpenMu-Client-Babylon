@@ -17,6 +17,7 @@ export {
   PCT_SHORT_SHOULDER,
   PCT_STICKED,
   PhysicsCloth,
+  type ClothMeshSpec,
   type ClothSpec,
 } from './physicsCloth';
 export { ClothSet, runClothFrame, type ClothBody } from './clothSet';

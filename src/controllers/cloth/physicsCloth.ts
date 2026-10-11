@@ -1,8 +1,9 @@
 /**
  * `CPhysicsCloth` (Engine/Physics/PhysicsManager.cpp:295-946): a grid of vertices whose top row is pinned
- * to a bone, held together by links and pushed by gravity, wind and collision spheres. Everything is in
- * MU world centimetres, z up; the host turns its bones into that (`ClothAnchor`). One `move2` call is one
- * 25 Hz frame of the original, where `FPS_ANIMATION_FACTOR` is 1.
+ * to a bone, held together by links and pushed by gravity, wind and collision spheres; and
+ * `CPhysicsClothMesh` (:948-1209), the same made of a model's own mesh. Everything is in MU world
+ * centimetres, z up; the host turns its bones into that (`ClothAnchor`). One `move2` call is one 25 Hz
+ * frame of the original, where `FPS_ANIMATION_FACTOR` is 1.
  */
 
 // The PCT_* flags (PhysicsManager.h:115-150) a cloth is created with.
@@ -38,10 +39,20 @@ const RATE_SHORT_SHOULDER = 0.6;
 const GRAVITY_MASS = 9.8 * 0.0025;
 const INV_MASS = 400;
 
-/** One cloth: `CPhysicsCloth::Create`'s arguments plus its `SetWindMinMax` and `AddCollisionSphere` calls. */
-export type ClothSpec = {
-  /** `iBone`: the bone the top row hangs from. */
+/** What every cloth has: its bone, its `PCT_*` flags, its `SetWindMinMax` and `AddCollisionSphere` calls. */
+type ClothBase = {
+  /** `iBone`: the bone the top row hangs from, or whose vertices a mesh cloth pins. */
   readonly bone: number;
+  /** `dwType`: the PCT_* flags. */
+  readonly flags: number;
+  /** `SetWindMinMax(min, max)`, the rubber2 gusts in hundredths; 1, 1 when never set (:321-322). */
+  readonly wind?: readonly [number, number];
+  /** `AddCollisionSphere(x, y, z, radius, bone)`. */
+  readonly spheres?: readonly (readonly [number, number, number, number, number])[];
+};
+
+/** One cloth: `CPhysicsCloth::Create`'s arguments plus its `SetWindMinMax` and `AddCollisionSphere` calls. */
+export type ClothSpec = ClothBase & {
   /** `fxPos, fyPos, fzPos`: where on the bone the top row sits. */
   readonly at: readonly [number, number, number];
   /** `iNumHor, iNumVer`. */
@@ -51,12 +62,29 @@ export type ClothSpec = {
   /** `iTexFront, iTexBack` as `Data/` paths. */
   readonly front: string;
   readonly back: string;
-  /** `dwType`: the PCT_* flags. */
-  readonly flags: number;
-  /** `SetWindMinMax(min, max)`, the rubber2 gusts in hundredths; 1, 1 when never set (:321-322). */
-  readonly wind?: readonly [number, number];
-  /** `AddCollisionSphere(x, y, z, radius, bone)`. */
-  readonly spheres?: readonly (readonly [number, number, number, number, number])[];
+  /**
+   * `CPhysicsClothMesh::Create`'s grid form (`PCT_OPT_MESHPROG`, :1045-1096): the grid drawn as this mesh of the
+   * model, its triangles and UVs laid over the grid, in the model's own texture rather than `front` and `back`.
+   */
+  readonly mesh?: number;
+};
+
+/** `CPhysicsClothMesh::Create(o, iMesh, iBone, dwType)` (:964-1043): mesh `mesh` of the model made cloth. */
+export type ClothMeshSpec = ClothBase & { readonly mesh: number };
+
+export type AnyClothSpec = ClothSpec | ClothMeshSpec;
+
+/** A grid cloth, drawn as itself or (`mesh`) over a mesh of the model. */
+export const isGridSpec = (spec: AnyClothSpec): spec is ClothSpec => 'grid' in spec;
+
+/** A mesh as `CPhysicsClothMesh::Create` reads it: each vertex's bone and place on it, and the triangles. */
+export type ClothMeshShape = {
+  /** `Vertex_t::Node`. */
+  readonly nodes: Int32Array;
+  /** `Vertex_t::Position`: MU centimetres in its bone's frame, three a vertex. */
+  readonly local: Float64Array;
+  /** `Triangle_t::VertexIndex`, three a triangle. */
+  readonly triangles: Int32Array;
 };
 
 /** The body a cloth hangs on, in MU world centimetres. Written into `out[at..at+2]`. */
@@ -98,7 +126,7 @@ export function windGain(key: number): number {
   return steps === 0 ? 0 : steps + 2;
 }
 
-/** One pass's links: the two vertices and the rest length (`m_fDistance[1]`, the floor is 0.8 of it). */
+/** One pass's links: the two vertices and the rest length (`m_fDistance[1]`; the floor is `near` of it). */
 type Links = { readonly a: Int32Array; readonly b: Int32Array; readonly far: Float64Array; count: number };
 
 const links = (n: number): Links => ({ a: new Int32Array(n), b: new Int32Array(n), far: new Float64Array(n), count: 0 });
@@ -110,6 +138,7 @@ function addLink(list: Links, a: number, b: number, far: number): void {
 }
 
 export class PhysicsCloth {
+  /** `m_iNumHor, m_iNumVer`: 0 on a mesh cloth, whose `Create` never sets them. */
   readonly hor: number;
   readonly ver: number;
   readonly count: number;
@@ -125,25 +154,41 @@ export class PhysicsCloth {
   private readonly shifts: Int32Array;
   private readonly fixed: Uint8Array;
   /** The links by what each pass does with them, in `Create`'s order: `PLS_SPRING`, `PLS_LOOSEDISTANCE`, `PLS_STRICTDISTANCE`. */
-  private readonly springs: Links;
-  private readonly loose: Links;
-  private readonly strict: Links;
+  readonly springs: Links;
+  readonly loose: Links;
+  readonly strict: Links;
+  /** `m_fDistance[0]` over `m_fDistance[1]`: 0.8 on a grid, 0.5 on a mesh (:458, :1026). */
+  private readonly near: number;
   private readonly centers: Float64Array;
   private wind = 0;
 
-  constructor(readonly spec: ClothSpec) {
-    const [hor, ver] = spec.grid;
-    this.hor = hor;
-    this.ver = ver;
-    this.count = hor * ver;
+  constructor(
+    readonly spec: AnyClothSpec,
+    /** A mesh cloth's mesh. */
+    private readonly shape: ClothMeshShape | null = null
+  ) {
+    if (isGridSpec(spec)) {
+      const [hor, ver] = spec.grid;
+      this.hor = hor;
+      this.ver = ver;
+      this.count = hor * ver;
+      // What `Create` makes (PhysicsManager.cpp:449-478): down, across, the down and (from the third row) up diagonals.
+      this.linkCount = hor * (ver - 1) + (hor - 1) * ver + (hor - 1) * (ver - 1) + (hor - 1) * Math.max(0, ver - 2);
+      this.near = 0.8;
+    } else {
+      if (!shape) throw new Error('a mesh cloth needs its mesh');
+      this.hor = this.ver = 0;
+      this.count = shape.nodes.length;
+      // `NumTriangles * 3 * 2`: each edge and at most one link across it (:991).
+      this.linkCount = (shape.triangles.length / 3) * 6;
+      this.near = 0.5;
+    }
     this.pos = new Float64Array(this.count * 3);
     this.vel = new Float64Array(this.count * 3);
     this.force = new Float64Array(this.count * 3);
     this.shift = new Float64Array(this.count * 3);
     this.shifts = new Int32Array(this.count);
     this.fixed = new Uint8Array(this.count);
-    // What `Create` makes (PhysicsManager.cpp:449-478): down, across, the down and (from the third row) up diagonals.
-    this.linkCount = hor * (ver - 1) + (hor - 1) * ver + (hor - 1) * (ver - 1) + (hor - 1) * Math.max(0, ver - 2);
     this.springs = links(this.linkCount);
     this.loose = links(this.linkCount);
     this.strict = links(this.linkCount);
@@ -152,7 +197,18 @@ export class PhysicsCloth {
 
   /** `CPhysicsCloth::Create` (PhysicsManager.cpp:325-482): the grid laid out on the body, its links, its pins. */
   create(anchor: ClothAnchor): void {
-    const { hor, ver, spec, pos } = this;
+    this.vel.fill(0);
+    this.force.fill(0);
+    this.shift.fill(0);
+    this.shifts.fill(0);
+    this.fixed.fill(0);
+    this.springs.count = this.loose.count = this.strict.count = 0;
+    const spec = this.spec;
+    if (!isGridSpec(spec)) {
+      this.layMesh(anchor, this.shape as ClothMeshShape);
+      return;
+    }
+    const { hor, ver, pos } = this;
     const flags = spec.flags;
     const [width, height] = spec.size;
     const unitH = height / (ver - 1);
@@ -185,16 +241,10 @@ export class PhysicsCloth {
         anchor.bodyPoint(spec.bone, x, y, z, pos, 3 * (hor * j + i));
       }
     }
-    this.vel.fill(0);
-    this.force.fill(0);
-    this.shift.fill(0);
-    this.shifts.fill(0);
-    this.fixed.fill(0);
 
     const rubber = (flags & PCT_MASK_ELASTIC) === PCT_RUBBER;
     const vertical = rubber ? 0 : PLS_STRICTDISTANCE;
     const cross = rubber ? 0 : PLS_LOOSEDISTANCE;
-    this.springs.count = this.loose.count = this.strict.count = 0;
     for (let j = 0; j < ver; j++) {
       for (let i = 0; i < hor; i++) {
         const v = hor * j + i;
@@ -209,18 +259,61 @@ export class PhysicsCloth {
     this.pin(anchor, true);
   }
 
-  /** `SetLink` at the two vertices' distance now, 0.8 of it the loose floor. A strict pass only takes links below the pins. */
-  private link(a: number, b: number, style: number): void {
+  /**
+   * `CPhysicsClothMesh::Create` (:998-1040): each vertex where its bone puts it (`VertexTransform`), pinned on the
+   * cloth's bone; a link along each triangle edge, loose when its ends are over 10 apart in x, and one from the
+   * far corner to the far corner of the triangle across the edge (`FindMatchVertex`, never vertex 0; `FindInLink`).
+   */
+  private layMesh(anchor: ClothAnchor, shape: ClothMeshShape): void {
+    const { pos, fixed, springs } = this;
+    const { nodes, local, triangles } = shape;
+    for (let v = 0; v < this.count; v++) {
+      anchor.bonePoint(nodes[v], local[3 * v], local[3 * v + 1], local[3 * v + 2], pos, 3 * v);
+      fixed[v] = nodes[v] === this.spec.bone ? 1 : 0;
+    }
+    for (let t = 0; t < triangles.length; t += 3) {
+      for (let i = 0; i < 3; i++) {
+        const v1 = triangles[t + i];
+        const v2 = triangles[t + ((i + 1) % 3)];
+        const v3 = triangles[t + ((i + 2) % 3)];
+        const style = PLS_SPRING | (Math.abs(pos[3 * v1] - pos[3 * v2]) > 10 ? PLS_LOOSEDISTANCE : PLS_STRICTDISTANCE);
+        const d = this.link(v1, v2, style);
+        const match = matchVertex(triangles, v1, v2, v3);
+        if (match <= 0 || this.distance(v3, match) >= d * 1.2) continue;
+        let linked = false;
+        for (let l = 0; l < springs.count && !linked; l++) linked = springs.a[l] === v3 && springs.b[l] === match;
+        if (!linked) this.link(v3, match, style);
+      }
+    }
+  }
+
+  private distance(a: number, b: number): number {
     const p = this.pos;
-    const d = length(p[3 * a] - p[3 * b], p[3 * a + 1] - p[3 * b + 1], p[3 * a + 2] - p[3 * b + 2]);
+    return length(p[3 * a] - p[3 * b], p[3 * a + 1] - p[3 * b + 1], p[3 * a + 2] - p[3 * b + 2]);
+  }
+
+  /** `SetLink` at the two vertices' distance now, `near` of it the floor. A strict pass only takes links below the pins. */
+  private link(a: number, b: number, style: number): number {
+    const d = this.distance(a, b);
     if (style & PLS_SPRING) addLink(this.springs, a, b, d);
     if (style & PLS_LOOSEDISTANCE) addLink(this.loose, a, b, d);
     if (style & PLS_STRICTDISTANCE && b >= this.hor) addLink(this.strict, a, b, d);
+    return d;
   }
 
-  /** `SetFixedVertices` (PhysicsManager.cpp:500-558): the top row on the bone, turned into its frame as (z, -y, x). */
+  /**
+   * `SetFixedVertices` (PhysicsManager.cpp:500-558): the top row on the bone, turned into its frame as (z, -y, x).
+   * A mesh cloth's (:1131-1156): its vertices on the bone, where the bone puts them this frame.
+   */
   private pin(anchor: ClothAnchor, atCreate: boolean): void {
     const { hor, spec, pos } = this;
+    if (!isGridSpec(spec)) {
+      const { nodes, local } = this.shape as ClothMeshShape;
+      for (let v = 0; v < this.count; v++) {
+        if (nodes[v] === spec.bone) anchor.bonePoint(spec.bone, local[3 * v], local[3 * v + 1], local[3 * v + 2], pos, 3 * v);
+      }
+      return;
+    }
     const flags = spec.flags;
     let width = spec.size[0];
     if ((flags & PCT_MASK_SHAPE_EXT) === PCT_SHORT_SHOULDER) width *= RATE_SHORT_SHOULDER;
@@ -265,43 +358,49 @@ export class PhysicsCloth {
     return this.preventFromStretching(anchor);
   }
 
-  /** `InitForces` and `UpdateForce` (:627-635, :50-108): wind gusting around a seed vertex, damping, gravity. */
+  /**
+   * `InitForces` and `UpdateForce` (:627-635, :50-108): wind gusting around a seed vertex, damping, gravity. A mesh
+   * cloth gusts every vertex alike, `abs(iSeed % 10)` steps from the seed (:1179-1193).
+   */
   private initForces(windX: number, windY: number, worldTime: number): void {
-    const { hor, ver, force, vel, fixed } = this;
+    const { hor, count, force, vel, fixed } = this;
     const flags = this.spec.flags;
     const wind = this.wind;
-    const seed = (Math.trunc(worldTime / 400) * 101) % this.count;
-    const seedI = seed % hor;
-    const seedJ = Math.trunc(seed / hor);
+    const seed = (Math.trunc(worldTime / 400) * 101) % count;
+    const seedI = hor === 0 ? 0 : seed % hor;
+    const seedJ = hor === 0 ? 0 : Math.trunc(seed / hor);
+    const meshGain = windGain(seed % 10);
     const elastic = flags & PCT_MASK_ELASTIC;
     const ext = flags & PCT_MASK_ELASTIC_EXT;
     const fall = GRAVITY_MASS * ((flags & PCT_HEAVY) !== 0 ? 180 : 100);
-    for (let j = 0, v = 0; j < ver; j++) {
-      for (let i = 0; i < hor; i++, v++) {
-        const k = 3 * v;
-        if (fixed[v]) {
-          force[k] = force[k + 1] = force[k + 2] = 0;
-          continue;
-        }
-        const gain = windGain(Math.abs(seedI - i) + Math.abs(seedJ - j));
-        let fx = gain * windX - vel[k] * 0.01;
-        const fy = gain * windY - vel[k + 1] * 0.01;
-        let fz = -vel[k + 2] * 0.01;
-        if (elastic === PCT_RUBBER) fz += gain * (wind + 0.1);
-        else if (elastic === PCT_RUBBER2) fz += gain * wind;
-        if (ext === PCT_ELASTIC_HALLOWEEN) {
-          fx += -(gain * wind * 0.5);
-          fz += gain * (wind + 0.1) * 0.5 * Math.sin(worldTime * 0.003) * 5;
-          fz -= GRAVITY_MASS * 50;
-        } else if (ext === PCT_ELASTIC_RAGE_L) {
-          fx += -(gain * wind * 0.8);
-        } else if (ext === PCT_ELASTIC_RAGE_R) {
-          fx -= -(gain * wind * 0.8);
-        }
-        force[k] = fx;
-        force[k + 1] = fy;
-        force[k + 2] = fz - fall;
+    for (let v = 0, i = 0, j = 0; v < count; v++) {
+      const k = 3 * v;
+      const gain = hor === 0 ? meshGain : windGain(Math.abs(seedI - i) + Math.abs(seedJ - j));
+      if (++i === hor) {
+        i = 0;
+        j++;
       }
+      if (fixed[v]) {
+        force[k] = force[k + 1] = force[k + 2] = 0;
+        continue;
+      }
+      let fx = gain * windX - vel[k] * 0.01;
+      const fy = gain * windY - vel[k + 1] * 0.01;
+      let fz = -vel[k + 2] * 0.01;
+      if (elastic === PCT_RUBBER) fz += gain * (wind + 0.1);
+      else if (elastic === PCT_RUBBER2) fz += gain * wind;
+      if (ext === PCT_ELASTIC_HALLOWEEN) {
+        fx += -(gain * wind * 0.5);
+        fz += gain * (wind + 0.1) * 0.5 * Math.sin(worldTime * 0.003) * 5;
+        fz -= GRAVITY_MASS * 50;
+      } else if (ext === PCT_ELASTIC_RAGE_L) {
+        fx += -(gain * wind * 0.8);
+      } else if (ext === PCT_ELASTIC_RAGE_R) {
+        fx -= -(gain * wind * 0.8);
+      }
+      force[k] = fx;
+      force[k + 1] = fy;
+      force[k + 2] = fz - fall;
     }
   }
 
@@ -381,7 +480,8 @@ export class PhysicsCloth {
       shifts[a]++;
       shifts[b]++;
     }
-    this.applyShifts();
+    // Over the m_iNumVer x m_iNumHor grid (:729-736): no vertex of a mesh cloth, whose moves wait for a sphere pass.
+    if (this.hor > 0) this.applyShifts();
 
     // KeepLength (:149-176): the lower end of a strict link pulled back within it, one link after another.
     for (let l = 0; l < strict.count; l++) {
@@ -393,7 +493,7 @@ export class PhysicsCloth {
       const dy = pos[kv + 1] - pos[kt + 1];
       const dz = pos[kv + 2] - pos[kt + 2];
       const rest = strict.far[l];
-      const floor = rest * 0.8;
+      const floor = rest * this.near;
       const squared = dx * dx + dy * dy + dz * dz;
       if (squared <= rest * rest && squared >= floor * floor) continue;
       const d = Math.max(0.001, Math.sqrt(squared));
@@ -452,4 +552,15 @@ export class PhysicsCloth {
       shifts[v] = 0;
     }
   }
+}
+
+/** `FindMatchVertex` (:1098-1116): the far corner of a triangle that runs the edge `v1, v2` the other way, else -1. */
+function matchVertex(triangles: Int32Array, v1: number, v2: number, v3: number): number {
+  for (let t = 0; t < triangles.length; t += 3) {
+    for (let i = 0; i < 3; i++) {
+      const c3 = triangles[t + ((i + 2) % 3)];
+      if (v1 === triangles[t + ((i + 1) % 3)] && v2 === triangles[t + i] && v3 !== c3) return c3;
+    }
+  }
+  return -1;
 }

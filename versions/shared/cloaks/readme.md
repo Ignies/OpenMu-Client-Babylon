@@ -14,7 +14,8 @@ the capes, the Dark Lord's hair and skirt, the Magic Gladiator's robe, the team 
   Magic Gladiator's robe, msword03 under the Wing of Ruin), `dark_lord_hair.ts` (the Dark Lord's two
   strands of hair), `dark_lord_skirt.ts` (his skirt over the class's own body), `team_cloak.ts` (the duel
   and Battle Soccer colours, `teamLight`), `delete_cloth.ts` (the wing changes that reset the set, `tearsSet`),
-  `monster_robes.ts` (the Death King's and the Nightmare's robes, `isDoppelganger`).
+  `monster_robes.ts` (the Death King's and the Nightmare's robes, `isDoppelganger`), `magic_skeleton.ts` (the
+  Magic Skeletons' cape, a mesh of their body made cloth).
 
 ## How it works
 - `bCloak` (:9162-9186): on the player rig the Magic Gladiator class itself (`c->Class == CLASS_DARK`, so
@@ -56,6 +57,10 @@ the capes, the Dark Lord's hair and skirt, the Magic Gladiator's robe, the team 
   Both sit in the class-less branch, so a Dark Lord in either body still wears his own set.
 - The rest (:9837-9846): slot 0 the robe, `Player\Robe01.jpg` in front and `Robe02.jpg` behind, opaque and
   culled, or `Item\msword03.tga` under the Wing of Ruin; worn by the Magic Gladiator whatever the wing.
+- The Magic Skeletons 1-7 (monsters 89, 95, 112, 118, 124, 130, 143; not 433, whom the switch does not name)
+  have their own case before `bCloak` (ZzzCharacter.cpp:8502-8539): mesh 2 of the body (`bsh02.tga`) made cloth
+  (`CPhysicsClothMesh`), pinned on bone 18, heavy, two spheres on that bone; built once, stepped every frame,
+  stun or not.
 - A ring's body worn on the rig (`o->SubType`, the wearer's `skin`): the Illusion Temple's two
   (`illusionist`, `unitedsoldier`) skip every cloth (:9958-9961); any other hides the Magic Gladiator's
   robe but the skeleton rings' (`CheckDarkCloak`, ChangeRingManager.cpp:31-49, 95-101).
@@ -72,5 +77,5 @@ the capes, the Dark Lord's hair and skirt, the Magic Gladiator's robe, the team 
 
 ## Tests
 - `cloaks.test.ts`: each use's specs against the original's numbers, and who wears them (the two monsters,
-  no Doppelganger).
+  no Doppelganger, the seven Magic Skeletons).
 - `team_cloak.test.ts`: the duel and Battle Soccer colours, who they put a cloak on, and what it is.

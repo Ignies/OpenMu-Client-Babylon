@@ -18,6 +18,7 @@ import {
   PCT_RUBBER2,
   PCT_SHORT_SHOULDER,
   PCT_STICKED,
+  type ClothMeshSpec,
   type ClothSpec,
 } from '@/controllers/cloth';
 import { CharacterClassNumber as C } from '@/core/types';
@@ -35,9 +36,11 @@ class FakeSet implements CloakSet {
   count = 0;
   readonly specs: (ClothSpec | null)[] = [];
   readonly drawn = new Set<number>();
+  /** Whether each slot's last draw passes the stun hold. */
+  readonly holds = new Map<number, boolean>();
   drops = 0;
-  build(slot: number, spec: ClothSpec) {
-    this.specs[slot] = spec;
+  build(slot: number, spec: ClothSpec | ClothMeshSpec) {
+    this.specs[slot] = spec as ClothSpec;
     this.built = true;
   }
   destroy(slot: number) {
@@ -46,8 +49,10 @@ class FakeSet implements CloakSet {
   has(slot: number) {
     return !!this.specs[slot];
   }
-  draw(slot: number) {
-    if (this.specs[slot]) this.drawn.add(slot);
+  draw(slot: number, holds = true) {
+    if (!this.specs[slot]) return;
+    this.drawn.add(slot);
+    this.holds.set(slot, holds);
   }
   drop() {
     this.drops++;
@@ -388,5 +393,28 @@ describe('the two monsters that wear one (ZzzCharacter.cpp:9173-9176, :9826-9836
     expect(wear({ charClass: C.MagicGladiator, monster: 529 }).set.built).toBe(false);
     expect(wear({ charClass: C.MagicGladiator, monster: 539 }).set.built).toBe(false);
     expect(wear({ charClass: C.MagicGladiator, monster: 540 }).set.built).toBe(true);
+  });
+});
+
+describe('the Magic Skeletons\' cape (ZzzCharacter.cpp:8502-8539)', () => {
+  const skeleton = (monster: number) => wear({ charClass: C.DarkWizard, monster, rig: false });
+
+  it('makes mesh 2 of the body cloth, pinned on bone 18, heavy, two spheres on that bone, stepped through any stun', () => {
+    const { out, set } = skeleton(89);
+    const cape: ClothMeshSpec = {
+      mesh: 2,
+      bone: 18,
+      flags: PCT_HEAVY,
+      spheres: [
+        [0, 0, 0, 50, 18],
+        [0, -20, 0, 30, 18],
+      ],
+    };
+    expect([set.count, out[0], set.holds.get(0)]).toEqual([1, cape, false]);
+  });
+
+  it('is the seven Magic Skeletons\' alone (MONSTER_MAGIC_SKELETON_1 to _7)', () => {
+    expect([89, 95, 112, 118, 124, 130, 143].map(m => skeleton(m).set.built)).toEqual([true, true, true, true, true, true, true]);
+    expect([88, 90, 433].map(m => skeleton(m).set.built)).toEqual([false, false, false]);
   });
 });

@@ -14,6 +14,7 @@ import { DARK_LORD_HAIR } from './dark_lord_hair';
 import { DARK_LORD_SKIRT, DARK_LORD_SKIRT_BUILT, LORD_EMPEROR_SKIRT, LORD_EMPEROR_SKIRT_BUILT } from './dark_lord_skirt';
 import { teamLight } from './team_cloak';
 import { DEATH_KING, DEATH_KING_ROBE, NIGHTMARE, NIGHTMARE_ROBE, isDoppelganger } from './monster_robes';
+import { MAGIC_SKELETON_CLOTH, isMagicSkeleton } from './magic_skeleton';
 import { CAPE_OF_FIGHTER_CLOTH, CAPE_OF_OVERRULE_CLOTH, CAPE_OF_OVERRULE_STRAPS, isCapeOfFighter, isCapeOfOverrule } from './cape_of_fighter';
 
 const WHITE: Rgb = [1, 1, 1];
@@ -106,6 +107,14 @@ function drawSet(w: CloakWearer, base: BaseClass, team: boolean, set: CloakSet):
  */
 export function cloaks(w: CloakWearer, set: CloakSet): Rgb {
   if (tearsSet(w)) set.drop();
+  if (isMagicSkeleton(w.monster)) {
+    // Its own case before bCloak (ZzzCharacter.cpp:8512-8533): built once, `Move2(0.005f, 5)` every frame.
+    if (!set.built) {
+      set.build(0, MAGIC_SKELETON_CLOTH);
+      set.count = 1;
+    }
+    set.draw(0, false);
+  }
   const base = getBaseClass(w.charClass);
   const team = w.monster === null ? teamLight(w) : null;
   const gladiator = w.charClass === CharacterClassNumber.MagicGladiator;

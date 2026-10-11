@@ -11,6 +11,8 @@ import {
   stepClothWind,
   windGain,
   type ClothAnchor,
+  type ClothMeshShape,
+  type ClothMeshSpec,
   type ClothSpec,
 } from './physicsCloth';
 
@@ -223,5 +225,88 @@ describe('CPhysicsCloth::Move2', () => {
     const away = (cloth: PhysicsCloth) => Math.hypot(...vertex(cloth, 7).map((c, k) => c - center[k]));
     expect(away(plain)).toBeLessThan(20);
     expect(away(sphere)).toBeGreaterThan(away(plain) + 2);
+  });
+});
+
+/**
+ * A quad of two triangles: vertices 0 and 1 on the pinned bone 18, 20 apart across, 2 and 3 on bone 5, 10
+ * below them. The test anchor turns a bone point (x, y, z) into the world's (z, -y, x).
+ */
+const QUAD: ClothMeshShape = {
+  nodes: Int32Array.from([18, 18, 5, 5]),
+  local: Float64Array.from([0, 0, 0, 0, 0, 20, -10, 0, 0, -10, 0, 20]),
+  triangles: Int32Array.from([0, 1, 2, 2, 1, 3]),
+};
+const MESH: ClothMeshSpec = { mesh: 2, bone: 18, flags: PCT_HEAVY };
+
+/** A link list as vertex pairs. */
+const pairs = (links: { a: Int32Array; b: Int32Array; count: number }) =>
+  Array.from({ length: links.count }, (_, l) => [links.a[l], links.b[l]]);
+
+describe('CPhysicsClothMesh::Create (PhysicsManager.cpp:964-1043)', () => {
+  it('lays each vertex where its bone puts it and pins the ones on the cloth\'s bone', () => {
+    const cloth = new PhysicsCloth(MESH, QUAD);
+    cloth.create(anchorAt([100, 0, 0]));
+    expect([0, 1, 2, 3].map(v => vertex(cloth, v))).toEqual([
+      [100, 0, 0],
+      [120, 0, 0],
+      [100, 0, -10],
+      [120, 0, -10],
+    ]);
+    // Up to six links a triangle (`NumTriangles * 3 * 2`).
+    expect([cloth.count, cloth.linkCount]).toEqual([4, 12]);
+  });
+
+  it('links every triangle edge, and across to the next triangle\'s far corner, never vertex 0 (FindMatchVertex `> 0`)', () => {
+    const cloth = new PhysicsCloth(MESH, QUAD);
+    cloth.create(anchorAt([0, 0, 0]));
+    // Edge (1, 2) finds triangle (2, 1, 3): its corner 3 is linked to 0. Edge (2, 1) finds corner 0: never linked.
+    expect(pairs(cloth.springs)).toEqual([[0, 1], [1, 2], [0, 3], [2, 0], [2, 1], [1, 3], [3, 2]]);
+    // Ends more than 10 apart in x are loose, the rest strict (:1016-1024); the cross link takes its edge's kind.
+    expect(pairs(cloth.loose)).toEqual([[0, 1], [1, 2], [0, 3], [2, 1], [3, 2]]);
+    expect(pairs(cloth.strict)).toEqual([[2, 0], [1, 3]]);
+  });
+
+  it('keeps a strict link between half and all of its length (`fDist * 0.5f`), the loose ones waiting on a collision pass', () => {
+    const cloth = new PhysicsCloth(MESH, QUAD);
+    const anchor = anchorAt([0, 0, 0]);
+    cloth.create(anchor);
+    // The pins drop 6, 4 over 2 and 3. A strict link moves its second vertex (`pVertex2->KeepLength`): (1, 3)
+    // pushes 3 back to 5 under the pin, (2, 0) the pin, which stays. With no sphere, the loose moves never land.
+    anchor.at[2] = -6;
+    expect(cloth.move2(anchor, 0, 1, 0)).toBe(true);
+    expect([vertex(cloth, 1), vertex(cloth, 2), vertex(cloth, 3)]).toEqual([
+      [20, 0, -6],
+      [0, 0, -10],
+      [20, 0, -11],
+    ]);
+    expect(cloth.move2(anchor, 0, 1, 0)).toBe(true);
+    expect(vertex(cloth, 2)).toEqual([0, 0, -10]);
+    // A sphere's pass (here touching nothing) lands them, averaged, one step late (ProcessCollision, :925-946).
+    const spheres = new PhysicsCloth({ ...MESH, spheres: [[0, 0, 0, 1, 18]] }, QUAD);
+    spheres.create(anchorAt([0, 0, 0]));
+    spheres.move2(anchor, 0, 1, 0);
+    expect(vertex(spheres, 2)).toEqual([0, 0, -10]);
+    spheres.move2(anchor, 0, 1, 0);
+    expect(vertex(spheres, 2)).not.toEqual([0, 0, -10]);
+  });
+
+  it('gusts every vertex alike, `abs(iSeed % 10)` steps from the seed (CPhysicsClothMesh::InitForces, :1179-1193)', () => {
+    setClothWind(0.5);
+    const cloth = new PhysicsCloth(MESH, QUAD);
+    const anchor = anchorAt([0, 0, 0], [0, 1]);
+    cloth.create(anchor);
+    // WorldTime 1200: seed 3 * 101 % 4 = 3, a gain of 4 on both free vertices: 4 * 0.5 * 400 * 0.005.
+    cloth.move2(anchor, 0.005, 1, 1200);
+    expect([cloth.vel[3 * 2 + 1], cloth.vel[3 * 3 + 1]].map(v => +v.toFixed(6))).toEqual([4, 4]);
+    expect([cloth.vel[1], cloth.vel[4]]).toEqual([0, 0]);
+  });
+
+  it('tears when a strict link stretches past 20 times its length', () => {
+    const cloth = new PhysicsCloth(MESH, QUAD);
+    const anchor = anchorAt([0, 0, 0]);
+    cloth.create(anchor);
+    anchor.at[2] = 1000;
+    expect(cloth.move2(anchor, 0, 1, 0)).toBe(false);
   });
 });
