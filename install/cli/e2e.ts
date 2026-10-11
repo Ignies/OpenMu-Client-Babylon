@@ -11,7 +11,7 @@ import { checks, waitForOpenMu, type Check } from './health';
 import { loginCheck } from './loginCheck';
 import { checkoutOpenMu } from './openmu';
 import { paths } from './paths';
-import { PORTS } from './stack';
+import { HOSTS, PORTS } from './stack';
 import { loadConfig, saveState } from './state';
 import { newSecret } from './validate';
 
@@ -67,6 +67,10 @@ if (all || step === 'check') {
     url: `ws://127.0.0.1:${PORTS.proxy}/?host=127.0.0.1&port=${PORTS.firstGame}`,
     ...GM,
     logsSince: async since => (await stack.compose(['logs', '--no-color', '--since', since, 'openmu-startup'])).out,
+    ticket: async nonce => {
+      const r = await stack.exec('web', ['wget', '-qO-', `http://${HOSTS.openmu}:${PORTS.presence}/ticket/${nonce}`]);
+      return r.code === 0 ? ((JSON.parse(r.out) as { account?: string }).account ?? null) : null;
+    },
   });
   report(game, 'FAIL');
 }

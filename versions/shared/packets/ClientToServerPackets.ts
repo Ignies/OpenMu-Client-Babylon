@@ -11481,6 +11481,138 @@ export class MarketplaceEscrowRequestPacket {
     }
 }
 }
+export class LoginTokenRequestPacket {
+  buffer!: DataView;
+  static readonly Name = `LoginTokenRequest`;
+  static readonly HeaderType = `C1HeaderWithSubCode`;
+  static readonly HeaderCode = 0xC1;
+  static readonly Direction = 'ClientToServer';
+  static readonly SentWhen = `After a password login, at the character list, on a world whose server.json offers login tokens, when the player ticked "remember".`;
+  static readonly CausedReaction = `Our OpenMU plugin issues a login token for the account (at most one per connection) and answers with a LoginTokenAnswer.`;
+  static readonly Length = 4;
+  static readonly LengthSize = 1;
+  static readonly DataOffset = 2;
+  static readonly Code = 0xE7;
+  static readonly SubCode = 0x03;
+
+  static getRequiredSize(dataSize:number){
+    return LoginTokenRequestPacket.DataOffset + 1 + 1 + dataSize;
+  }
+
+  constructor(buffer?: DataView){
+    buffer && (this.buffer = buffer);
+  }
+
+  writeHeader(){
+    const b = this.buffer;
+    b.setUint8(0, LoginTokenRequestPacket.HeaderCode);
+    b.setUint8(LoginTokenRequestPacket.DataOffset, LoginTokenRequestPacket.Code);
+  b.setUint8(LoginTokenRequestPacket.DataOffset + 1, LoginTokenRequestPacket.SubCode);
+    return this;
+  }
+
+  writeLength(l: number|undefined = LoginTokenRequestPacket.Length){
+    const b = this.buffer;
+    l = l ?? b.byteLength;
+    b.setUint8(1, l);
+    return this;
+  }
+
+  static createPacket(requiredSize: number = 4): LoginTokenRequestPacket {
+    const p = new LoginTokenRequestPacket();
+    p.buffer = new DataView(new ArrayBuffer(requiredSize));
+    p.writeHeader();
+    p.writeLength();
+    return p;
+  }
+}
+export class TokenLoginPacket {
+  buffer!: DataView;
+  static readonly Name = `TokenLogin`;
+  static readonly HeaderType = `C3HeaderWithSubCode`;
+  static readonly HeaderCode = 0xC3;
+  static readonly Direction = 'ClientToServer';
+  static readonly SentWhen = `Instead of the login (LoginShortPassword), when the client keeps a login token for the account on this world.`;
+  static readonly CausedReaction = `Our OpenMU plugin checks the token and logs the account in the way OpenMU's own login does, answering with a LoginResponse. On success it replaces the token with a new one and sends it in a LoginTokenAnswer.`;
+  static readonly Length = 51;
+  static readonly LengthSize = 1;
+  static readonly DataOffset = 2;
+  static readonly Code = 0xE7;
+  static readonly SubCode = 0x05;
+
+  static getRequiredSize(dataSize:number){
+    return TokenLoginPacket.DataOffset + 1 + 1 + dataSize;
+  }
+
+  constructor(buffer?: DataView){
+    buffer && (this.buffer = buffer);
+  }
+
+  writeHeader(){
+    const b = this.buffer;
+    b.setUint8(0, TokenLoginPacket.HeaderCode);
+    b.setUint8(TokenLoginPacket.DataOffset, TokenLoginPacket.Code);
+  b.setUint8(TokenLoginPacket.DataOffset + 1, TokenLoginPacket.SubCode);
+    return this;
+  }
+
+  writeLength(l: number|undefined = TokenLoginPacket.Length){
+    const b = this.buffer;
+    l = l ?? b.byteLength;
+    b.setUint8(1, l);
+    return this;
+  }
+
+  static createPacket(requiredSize: number = 51): TokenLoginPacket {
+    const p = new TokenLoginPacket();
+    p.buffer = new DataView(new ArrayBuffer(requiredSize));
+    p.writeHeader();
+    p.writeLength();
+    return p;
+  }
+  get Username(){
+    const to = 14;
+    const i = 4;
+              
+    return new DataView(this.buffer.buffer.slice(i,to));
+  }
+  setUsername(data: ArrayLike<number>, count = 10){
+    if (data.length !== count) throw new Error(`data.length must be ${count}`);
+    const from = 4;
+
+    for (let i = 0; i < data.length; i++) {
+      this.buffer.setUint8(from + i, data[i]);
+    }
+}
+  get Token(){
+    const to = 46;
+    const i = 14;
+              
+    return new DataView(this.buffer.buffer.slice(i,to));
+  }
+  setToken(data: ArrayLike<number>, count = 32){
+    if (data.length !== count) throw new Error(`data.length must be ${count}`);
+    const from = 14;
+
+    for (let i = 0; i < data.length; i++) {
+      this.buffer.setUint8(from + i, data[i]);
+    }
+}
+  get ClientVersion(){
+    const to = 51;
+    const i = 46;
+              
+    return new DataView(this.buffer.buffer.slice(i,to));
+  }
+  setClientVersion(data: ArrayLike<number>, count = 5){
+    if (data.length !== count) throw new Error(`data.length must be ${count}`);
+    const from = 46;
+
+    for (let i = 0; i < data.length; i++) {
+      this.buffer.setUint8(from + i, data[i]);
+    }
+}
+}
 
 export const ClientToServerPackets = [
   PingPacket,
@@ -11678,5 +11810,7 @@ export const ClientToServerPackets = [
   DuelChannelJoinRequestPacket,
   DuelChannelQuitRequestPacket,
   ChatCommandListRequestPacket,
-  MarketplaceEscrowRequestPacket
+  MarketplaceEscrowRequestPacket,
+  LoginTokenRequestPacket,
+  TokenLoginPacket
 ] as const;

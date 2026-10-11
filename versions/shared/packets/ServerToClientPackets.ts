@@ -22635,6 +22635,76 @@ export class MarketplaceEscrowResultPacket {
     }
 }
 }
+export enum LoginTokenAnswerLoginTokenStatusEnum {
+    Ok = 0,
+Refused = 1,
+Failed = 2
+  }export class LoginTokenAnswerPacket {
+  buffer!: DataView;
+  static readonly Name = `LoginTokenAnswer`;
+  static readonly HeaderType = `C1HeaderWithSubCode`;
+  static readonly HeaderCode = 0xC1;
+  static readonly Direction = 'ServerToClient';
+  static readonly SentWhen = `After a LoginTokenRequest, and after a TokenLogin that logged the account in (right behind its LoginResponse).`;
+  static readonly CausedReaction = `The client keeps the token for the account on this world, in place of any it had, when the player ticked "remember".`;
+  static readonly Length = 37;
+  static readonly LengthSize = 1;
+  static readonly DataOffset = 2;
+  static readonly Code = 0xE7;
+  static readonly SubCode = 0x04;
+
+  static getRequiredSize(dataSize:number){
+    return LoginTokenAnswerPacket.DataOffset + 1 + 1 + dataSize;
+  }
+
+  constructor(buffer?: DataView){
+    buffer && (this.buffer = buffer);
+  }
+
+  writeHeader(){
+    const b = this.buffer;
+    b.setUint8(0, LoginTokenAnswerPacket.HeaderCode);
+    b.setUint8(LoginTokenAnswerPacket.DataOffset, LoginTokenAnswerPacket.Code);
+  b.setUint8(LoginTokenAnswerPacket.DataOffset + 1, LoginTokenAnswerPacket.SubCode);
+    return this;
+  }
+
+  writeLength(l: number|undefined = LoginTokenAnswerPacket.Length){
+    const b = this.buffer;
+    l = l ?? b.byteLength;
+    b.setUint8(1, l);
+    return this;
+  }
+
+  static createPacket(requiredSize: number = 37): LoginTokenAnswerPacket {
+    const p = new LoginTokenAnswerPacket();
+    p.buffer = new DataView(new ArrayBuffer(requiredSize));
+    p.writeHeader();
+    p.writeLength();
+    return p;
+  }
+  get Status():LoginTokenAnswerLoginTokenStatusEnum{
+    return GetByteValue(this.buffer.getUint8(4), 8, 0);
+  }
+  set Status(value: LoginTokenAnswerLoginTokenStatusEnum){
+    const oldValue = this.Status;
+    this.buffer.setUint8(4, SetByteValue(oldValue, value, 8, 0));
+  }
+  get Token(){
+    const to = 37;
+    const i = 5;
+              
+    return new DataView(this.buffer.buffer.slice(i,to));
+  }
+  setToken(data: ArrayLike<number>, count = 32){
+    if (data.length !== count) throw new Error(`data.length must be ${count}`);
+    const from = 5;
+
+    for (let i = 0; i < data.length; i++) {
+      this.buffer.setUint8(from + i, data[i]);
+    }
+}
+}
 export enum KanturuStateInfoStateTypeEnum {
     None = 0,
 Standby = 1,
@@ -23366,6 +23436,7 @@ export const ServerToClientPackets = [
   CrywolfBossMonsterInfoPacket,
   CrywolfBenefitPacket,
   MarketplaceEscrowResultPacket,
+  LoginTokenAnswerPacket,
   KanturuStateInfoPacket,
   KanturuEnterResultPacket,
   KanturuStateChangePacket,

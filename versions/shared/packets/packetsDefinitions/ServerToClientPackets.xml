@@ -12742,6 +12742,54 @@
     </Packet>
     <Packet>
       <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>E7</Code>
+      <SubCode>04</SubCode>
+      <Name>LoginTokenAnswer</Name>
+      <Length>37</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>After a LoginTokenRequest, and after a TokenLogin that logged the account in (right behind its LoginResponse).</SentWhen>
+      <CausedReaction>The client keeps the token for the account on this world, in place of any it had, when the player ticked "remember".</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Enum</Type>
+          <TypeName>LoginTokenStatus</TypeName>
+          <Name>Status</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>Binary</Type>
+          <Name>Token</Name>
+          <Description>The new token when the status is Ok; zeros otherwise.</Description>
+          <Length>32</Length>
+        </Field>
+      </Fields>
+      <Enums>
+        <Enum>
+          <Name>LoginTokenStatus</Name>
+          <Description>How a token request ended.</Description>
+          <Values>
+            <EnumValue>
+              <Name>Ok</Name>
+              <Description>A token was issued.</Description>
+              <Value>0</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Refused</Name>
+              <Description>Not logged in, a template account, or a token was already issued on this connection.</Description>
+              <Value>1</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Failed</Name>
+              <Description>The server could not store the token.</Description>
+              <Value>2</Value>
+            </EnumValue>
+          </Values>
+        </Enum>
+      </Enums>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
       <Code>D1</Code>
       <SubCode>00</SubCode>
       <Name>KanturuStateInfo</Name>

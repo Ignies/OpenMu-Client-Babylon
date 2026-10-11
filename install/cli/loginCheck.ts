@@ -4,12 +4,16 @@ import {
   CharacterListPacket,
   LoginResponseLoginResultEnum,
   LoginResponsePacket,
+  LoginTokenAnswerLoginTokenStatusEnum,
+  LoginTokenAnswerPacket,
 } from '../../versions/shared/packets/ServerToClientPackets';
 import {
   CreateCharacterPacket,
   LoginShortPasswordPacket,
+  LoginTokenRequestPacket,
   RequestCharacterListPacket,
   SelectCharacterPacket,
+  TokenLoginPacket,
 } from '../../versions/shared/packets/ClientToServerPackets';
 import { SimpleModulusDecryptor, SimpleModulusEncryptor, SimpleModulusKeys } from '../../src/controllers/net/encryption/simpleModulus';
 import { Xor32Encryptor } from '../../src/controllers/net/encryption/xor32';
@@ -125,11 +129,13 @@ export type LoginCheckTarget = {
   password: string;
   /** OpenMU's log lines since a time (ISO). */
   logsSince: (since: string) => Promise<string>;
+  /** The account the proxy's presence names for a socket that carried this session nonce (the cash shop's ticket). */
+  ticket: (nonce: string) => Promise<string | null>;
 };
 
 /** Dials the game server and waits for its greeting (`GameServerEntered`, C1 F1 00). */
-async function connect(target: LoginCheckTarget): Promise<GameClient> {
-  const client = await GameClient.open(target.url);
+async function connect(target: LoginCheckTarget, nonce?: string): Promise<GameClient> {
+  const client = await GameClient.open(nonce ? `${target.url}&session=${nonce}` : target.url);
   await client.next(p => is(p, 0xf1, 0x00), 'GameServerEntered');
   return client;
 }
@@ -146,6 +152,29 @@ function passwordLogin(login: string, password: string): Uint8Array {
   p.setClientVersion(gameVersion.clientVersionBytes);
   p.setClientSerial(gameVersion.serialBytes);
   return bytesOf(p);
+}
+
+/** The token login packet (E7 05), sent instead of the password login. */
+function tokenLogin(login: string, token: Uint8Array): Uint8Array {
+  const name = stringToBytes(login, 10);
+  Xor3Byte(name);
+  const p = TokenLoginPacket.createPacket();
+  p.setUsername(name, name.length);
+  p.setToken(token, token.length);
+  p.setClientVersion(gameVersion.clientVersionBytes);
+  return bytesOf(p);
+}
+
+/** The token in the next token answer (E7 04); anything but Ok fails the step. */
+async function tokenAnswer(client: GameClient): Promise<Uint8Array> {
+  const answer = new LoginTokenAnswerPacket(new DataView((await client.next(p => is(p, 0xe7, 0x04), 'LoginTokenAnswer')).buffer));
+  if (answer.Status !== LoginTokenAnswerLoginTokenStatusEnum.Ok) throw new Error(`token answer ${LoginTokenAnswerLoginTokenStatusEnum[answer.Status]}`);
+  return new Uint8Array(answer.Token.buffer);
+}
+
+async function expectLogin(client: GameClient, packet: Uint8Array, expected: LoginResponseLoginResultEnum): Promise<void> {
+  const result = await login(client, packet);
+  if (result !== expected) throw new Error(`answered ${LoginResponseLoginResultEnum[result]}`);
 }
 
 /** The login result, retried while the server still holds the previous connection's session. */
@@ -215,10 +244,10 @@ class Line {
     return this.current;
   }
 
-  /** Drops the connection there is, if any, and dials a new one. */
-  async redial(): Promise<GameClient> {
+  /** Drops the connection there is, if any, and dials a new one (carrying a session nonce, as the client's game socket does). */
+  async redial(nonce?: string): Promise<GameClient> {
     this.close();
-    this.current = await connect(this.target);
+    this.current = await connect(this.target, nonce);
     return this.current;
   }
 
@@ -237,15 +266,21 @@ export async function loginCheck(target: LoginCheckTarget): Promise<Check[]> {
   const worldModule = `e2e_world_${suffix}`;
   const line = new Line(target);
   let names: string[] = [];
+  let first: Uint8Array = new Uint8Array(0);
+  let second: Uint8Array = new Uint8Array(0);
+  const nonce = Array.from(crypto.getRandomValues(new Uint8Array(16)), hex).join('');
 
   try {
     return await runSteps([
       ['password login', async () => {
-        const result = await login(await line.redial(), passwordLogin(target.login, target.password));
-        if (result !== LoginResponseLoginResultEnum.Okay) throw new Error(`answered ${LoginResponseLoginResultEnum[result]}`);
+        await expectLogin(await line.redial(), passwordLogin(target.login, target.password), LoginResponseLoginResultEnum.Okay);
       }],
       ['character list', async () => {
         names = await characterNames(line.client);
+      }],
+      ['token request at the character list', async () => {
+        line.client.send(bytesOf(LoginTokenRequestPacket.createPacket()));
+        first = await tokenAnswer(line.client);
       }],
       ['module packet before the world is dropped unread', async () => {
         line.client.send(encodeModuleFrame(lobbyModule, Uint8Array.of(1)));
@@ -255,6 +290,27 @@ export async function loginCheck(target: LoginCheckTarget): Promise<Check[]> {
         const logs = await target.logsSince(since);
         if (!logs.includes(worldModule)) throw new Error(`the frame sent in the world never reached the handler (${worldModule})`);
         if (logs.includes(lobbyModule)) throw new Error(`the frame sent at the character list was read (${lobbyModule})`);
+      }],
+      ['token login after a reconnect reaches the character list', async () => {
+        await expectLogin(await line.redial(nonce), tokenLogin(target.login, first), LoginResponseLoginResultEnum.Okay);
+        second = await tokenAnswer(line.client);
+        if (Bun.deepEquals(first, second)) throw new Error('the token was not replaced');
+        await characterNames(line.client);
+      }],
+      ['the proxy names the token login for the cash shop', async () => {
+        const account = await target.ticket(nonce);
+        if (account !== target.login) throw new Error(`the ticket route answered ${account}`);
+      }],
+      ['the replaced token is refused', async () => {
+        await expectLogin(await line.redial(), tokenLogin(target.login, first), LoginResponseLoginResultEnum.InvalidPassword);
+      }],
+      ['a junk token is refused', async () => {
+        const junk = crypto.getRandomValues(new Uint8Array(32));
+        await expectLogin(line.client, tokenLogin(target.login, junk), LoginResponseLoginResultEnum.InvalidPassword);
+      }],
+      ['the new token logs in', async () => {
+        await expectLogin(line.client, tokenLogin(target.login, second), LoginResponseLoginResultEnum.Okay);
+        await tokenAnswer(line.client);
       }],
     ]);
   } finally {

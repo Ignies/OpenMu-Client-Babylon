@@ -148,8 +148,11 @@ everything the stack reads is rendered from `mu.env`, so `mu config` can change 
 - End to end, with Docker: `MU_STATE=<scratch folder> bun install/cli/e2e.ts` (build, start, check;
   then `backup`, `down`). It refuses to run without `MU_STATE`, so it never touches a real install.
   Its `check` also plays the game through the proxy as the test GM (`cli/loginCheck.ts`, with the
-  client's packet classes and encryption): password login, the character list, and a module packet
-  (0xE8) sent at the character list dropped unread while one sent in the world reaches the handler.
+  client's packet classes and encryption): password login, the character list, a login token
+  (E7 03/04), a module packet (0xE8) sent at the character list dropped unread while one sent in the
+  world reaches the handler, then after a reconnect a token login (E7 05) reaching the character
+  list with the token replaced, the proxy naming that socket for the cash shop, the replaced token
+  and a junk one refused, and the new token logging in.
 
 ## Troubleshooting
 
