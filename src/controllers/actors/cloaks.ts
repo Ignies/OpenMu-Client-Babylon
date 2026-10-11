@@ -1,4 +1,4 @@
-import type { ClothSpec, Rgb } from '../cloth';
+import type { ClothSet, Rgb } from '../cloth';
 import type { CharacterClassNumber } from '../../core/types';
 import type { Item } from '../../ecs/world';
 
@@ -21,8 +21,14 @@ export type CloakWearer = {
   guild: number | null;
 };
 
-/** Fills `out` with the cloths to hang by slot (`m_pCloth[i]`, null where none is drawn) and returns their `CloakLight`. */
-export type CloakRule = (wearer: CloakWearer, out: (ClothSpec | null)[]) => Rgb;
+/** What the rule does to a wearer's set: the original's `m_pCloth` array, `m_byNumCloth` and the loop's draws. */
+export type CloakSet = Pick<ClothSet, 'built' | 'count' | 'has' | 'build' | 'destroy' | 'draw' | 'drop'>;
+
+/**
+ * Builds, destroys and draws the wearer's cloths this frame as `RenderCharacter` does, and returns their
+ * `CloakLight`. The set's draws were cleared before; a cloth left undrawn is not stepped.
+ */
+export type CloakRule = (wearer: CloakWearer, set: CloakSet) => Rgb;
 
 const NONE: Rgb = [1, 1, 1];
 let rule: CloakRule = () => NONE;
@@ -32,8 +38,7 @@ export function registerCloaks(cloaks: CloakRule): void {
   rule = cloaks;
 }
 
-/** The cloths `wearer` hangs now, into `out` (emptied first), and their light. */
-export function cloaksFor(wearer: CloakWearer, out: (ClothSpec | null)[]): Rgb {
-  out.length = 0;
-  return rule(wearer, out);
+/** This frame's cloths of `wearer` on `set`, and their light. */
+export function cloaksFor(wearer: CloakWearer, set: CloakSet): Rgb {
+  return rule(wearer, set);
 }

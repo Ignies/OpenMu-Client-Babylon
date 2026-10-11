@@ -9,9 +9,11 @@ knows how a cloth moves and draws, never who wears which one (the wearers' conte
   `Data/` bitmaps, `PCT_*` flags) plus its `SetWindMinMax` and `AddCollisionSphere` calls. The `PCT_*`
   flags are the original's (PhysicsManager.h:115-150).
 - `ClothSet(scene, body)`: one wearer's cloths (`o->m_pCloth`) on a `ClothBody` (a model object's node and
-  rig). `wear(specs, light)` hangs a spec per slot in `CloakLight`, keeping the cloths whose spec stayed;
-  `drop()` is `DeleteCloth`; `shown`, `held` (stun or sleep: `Move2(0, 5)`) and `castsShadow` are set
-  every frame by the wearer's system; `size`, `cloth(s)`, `mesh(s)` read it.
+  rig), the original's array: `build(slot, spec)` (`Create`), `destroy(slot)`, `has(slot)`, `count`
+  (`m_byNumCloth`), `built` (`m_pCloth`), `drop()` (`DeleteCloth`); each frame the wearer's rule `draw`s the
+  slots its loop reaches after `undraw()`, and `setLight` gives the `CloakLight`. `shown`, `held` (stun or
+  sleep: `Move2(0, 5)`) and `castsShadow` are set every frame by the wearer's system; `size`, `cloth(s)`,
+  `mesh(s)`, `drawn(s)` read it.
 - `cloth`: the facade (`Controller`); its `update(map, dt)` advances the 25 Hz clock.
 - `runClothFrame()`: the frame's ticks and draws; the scene calls it before its first camera renders.
 - `PhysicsCloth`: the simulator alone (tests, readers).
@@ -28,7 +30,7 @@ knows how a cloth moves and draws, never who wears which one (the wearers' conte
   -0.2..1), then each cloth runs `Move2(0.005, 5)`: forces (the gust around a seed vertex that moves every
   400 ms, damping, gravity 2.45 or 4.41 heavy), the stretched springs, the pins, an Euler step, then
   `PreventFromStretching` (the spheres, the loose links averaged, the strict vertical links one by one).
-  A link past 20 times its length tears the cloth: the set drops them all and the next `wear` rebuilds.
+  A link past 20 times its length tears the cloth: the set drops them all and the wearer's rule builds anew.
 - The clock is stepped by the world's systems (`cloth.update`) and spent in
   `scene.onBeforeCameraRenderObservable` (once a frame): there the render id has moved on, so the
   bones read this frame's clips. A hidden set neither steps nor draws (the original only moves a
@@ -42,8 +44,10 @@ knows how a cloth moves and draws, never who wears which one (the wearers' conte
   (`sin(WorldTime * 0.001) * 0.1 + 0.4`, :810-816) and each vertex carries a `BITMAP_LIGHT` sprite (`flare01`,
   `HeldSprites`) whose scale and light come from the original loop's outer index (:784-804, `lightSprite`).
 - The Classic shadow is `RenderBodyShadow` with the cloth (ZzzBMD.cpp:2642-2710): every quad on the
-  ground, untextured, folded from the wearer. A clone of the front mesh shares its buffers under the
-  blob material, made the first time the set casts one. The keyed and opaque cloths are cascade
+  ground, untextured, folded from the wearer. It lays every built cloth below `count`, drawn or not: a
+  cloth the loop skips is neither stepped nor drawn, and its shadow stays where it was built or last
+  stepped, which never moves (a Dark Lord with a weapon and no cape). A clone of the front mesh shares its
+  buffers under the blob material, made the first time the set casts one. The keyed and opaque cloths are cascade
   casters on the graded tiers.
 
 ## Depends on / used by
@@ -61,8 +65,9 @@ knows how a cloth moves and draws, never who wears which one (the wearers' conte
   gust gains, gravity, settling, the shared and rubber2 winds, following the bone, tearing, the held
   step and the spheres.
 - `clothSet.test.ts`: the faces (indices, UVs, materials per draw mode, the tint, the in-place buffer), the
-  `PCT_MASK_LIGHT` pulse and lights, the wind direction from the body's turn, the pins on a rig's bone, the carry between ticks, slots kept and
-  torn, a hidden wearer, the shadow clone, and the cost of 20 caped players (logged).
+  `PCT_MASK_LIGHT` pulse and lights, the wind direction from the body's turn, the pins on a rig's bone, the carry between ticks, cloths kept,
+  destroyed and torn, an undrawn cloth lying where it was built with its shadow, nothing past `count`, a stale
+  cloth tearing when stepped again far off, a hidden wearer, the shadow clone, and the cost of 20 caped players (logged).
 
 ## Notes
 - Not ported: `CPhysicsClothMesh` (a cloth built from a model's mesh, ZzzObject.cpp:10626-10640) and

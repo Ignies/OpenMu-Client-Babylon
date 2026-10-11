@@ -1,5 +1,5 @@
-import { registerCloaks, type CloakWearer } from '@/controllers/actors/cloaks';
-import type { ClothSpec, Rgb } from '@/controllers/cloth';
+import { registerCloaks, type CloakSet, type CloakWearer } from '@/controllers/actors/cloaks';
+import type { Rgb } from '@/controllers/cloth';
 import { BaseClass, CharacterClassNumber, getBaseClass } from '@/core/types';
 import {
   CAPE_OF_LORD_CLOTH,
@@ -10,7 +10,7 @@ import {
 } from './cape_of_lord';
 import { robeFor } from './robe';
 import { DARK_LORD_HAIR } from './dark_lord_hair';
-import { DARK_LORD_SKIRT, LORD_EMPEROR_SKIRT, MANTLE_SKIRT } from './dark_lord_skirt';
+import { DARK_LORD_SKIRT, DARK_LORD_SKIRT_BUILT, LORD_EMPEROR_SKIRT, LORD_EMPEROR_SKIRT_BUILT } from './dark_lord_skirt';
 import { teamLight } from './team_cloak';
 import { CAPE_OF_FIGHTER_CLOTH, CAPE_OF_OVERRULE_CLOTH, CAPE_OF_OVERRULE_STRAPS, isCapeOfFighter, isCapeOfOverrule } from './cape_of_fighter';
 
@@ -21,51 +21,104 @@ const TEMPLE_BODIES: ReadonlySet<string> = new Set(['illusionist.glb', 'unitedso
 /** The skeleton rings' bodies, the only rig skins `CheckDarkCloak` leaves the robe on (ChangeRingManager.cpp:31-49). */
 const SKELETON_BODY = /^Skeleton0[123]\.glb$/;
 
+/** The Dark Lord's own body under no armour (`MODEL_BODY_ARMOR + SKIN_CLASS_DARK_LORD` / `_LORDEMPEROR`), else null. */
+function ownBody(w: CloakWearer): 'lord' | 'emperor' | null {
+  if (w.armor !== null) return null;
+  return w.charClass === CharacterClassNumber.LordEmperor ? 'emperor' : 'lord';
+}
+
 /**
- * The Dark Lord's cloths (ZzzCharacter.cpp:9693-9776, drawn by :9926-9942): 0 and 1 the hair and 3 the skirt over
- * the class's own body, all gone under a ring's body (CheckDarkLordHair); 2 the cape, 4 and 5 the Mantle's straps.
+ * The Dark Lord's set (ZzzCharacter.cpp:9693-9776): 0 and 1 the hair, 2 the cape (built whatever the wing),
+ * 3 the skirt over his own body, 4 and 5 the Mantle's straps; 6 cloths under the Mantle, else 3.
  */
-function darkLord(w: CloakWearer, team: boolean, out: (ClothSpec | null)[]): void {
+function buildDarkLord(w: CloakWearer, set: CloakSet): void {
   const mantle = isMantleOfMonarch(w.wing);
-  if (w.skin === null) {
-    out[0] = DARK_LORD_HAIR[0];
-    out[1] = DARK_LORD_HAIR[1];
-    const emperor = w.charClass === CharacterClassNumber.LordEmperor;
-    if (w.armor === null) out[3] = mantle ? (emperor ? null : MANTLE_SKIRT) : emperor ? LORD_EMPEROR_SKIRT : DARK_LORD_SKIRT;
-  }
-  // The cape is built whatever the wing, and drawn with a cape or a team colour (:9930).
-  out[2] = mantle ? MANTLE_OF_MONARCH_CLOTH : isCapeOfLord(w.wing) || team ? CAPE_OF_LORD_CLOTH : null;
+  set.build(0, DARK_LORD_HAIR[0]);
+  set.build(1, DARK_LORD_HAIR[1]);
+  set.build(2, mantle ? MANTLE_OF_MONARCH_CLOTH : CAPE_OF_LORD_CLOTH);
+  const body = ownBody(w);
+  if (body !== null) set.build(3, body === 'emperor' ? LORD_EMPEROR_SKIRT_BUILT : DARK_LORD_SKIRT_BUILT);
   if (mantle) {
-    out[4] = MANTLE_OF_MONARCH_STRAPS[0];
-    out[5] = MANTLE_OF_MONARCH_STRAPS[1];
+    set.build(4, MANTLE_OF_MONARCH_STRAPS[0]);
+    set.build(5, MANTLE_OF_MONARCH_STRAPS[1]);
+  }
+  set.count = mantle ? 6 : 3;
+}
+
+/**
+ * The skirt follows the armour once the set stands (:9852-9920), branch for branch: with 3 cloths it is made
+ * again (and counted), with 4 torn off; under the Mantle (6) anything but the Dark Lord's own body tears it.
+ */
+function followArmour(w: CloakWearer, set: CloakSet): void {
+  const body = ownBody(w);
+  if (body === null && set.count === 4) {
+    set.destroy(3);
+    set.count = 3;
+  } else if (body !== null && set.count === 3) {
+    set.build(3, body === 'emperor' ? LORD_EMPEROR_SKIRT : DARK_LORD_SKIRT);
+    set.count = 4;
+  } else if (body !== 'lord' && set.count === 6) {
+    if (set.has(3)) set.destroy(3);
+  } else if (body === 'lord' && set.count === 6 && !set.has(3)) {
+    set.build(3, DARK_LORD_SKIRT);
   }
 }
 
-/** The Rage Fighter's cloths (:9777-9824, drawn by :9943-9951): 0 the cape, 1 and 2 the Overrule's straps. */
-function rageFighter(w: CloakWearer, team: boolean, out: (ClothSpec | null)[]): void {
+/** The Rage Fighter's set (:9777-9824): 0 the cape, 1 and 2 the Overrule's straps. */
+function buildRageFighter(w: CloakWearer, set: CloakSet): void {
   const overrule = isCapeOfOverrule(w.wing);
-  // Drawn with a cape or a team colour (:9945).
-  out[0] = overrule ? CAPE_OF_OVERRULE_CLOTH : isCapeOfFighter(w.wing) || team ? CAPE_OF_FIGHTER_CLOTH : null;
+  set.build(0, overrule ? CAPE_OF_OVERRULE_CLOTH : CAPE_OF_FIGHTER_CLOTH);
   if (overrule) {
-    out[1] = CAPE_OF_OVERRULE_STRAPS[0];
-    out[2] = CAPE_OF_OVERRULE_STRAPS[1];
+    set.build(1, CAPE_OF_OVERRULE_STRAPS[0]);
+    set.build(2, CAPE_OF_OVERRULE_STRAPS[1]);
+  }
+  set.count = overrule ? 3 : 1;
+}
+
+/**
+ * The loop over the set (:9926-9983): the Dark Lord's cape only with a cape or a team colour, his hair and skirt
+ * gone under a ring's body (`CheckDarkLordHair`); the Rage Fighter's cape likewise; the Magic Gladiator's robe
+ * gone under a ring's body but the skeletons' (`CheckDarkCloak`); nothing in the Illusion Temple's.
+ */
+function drawSet(w: CloakWearer, base: BaseClass, team: boolean, set: CloakSet): void {
+  if (w.skin !== null && TEMPLE_BODIES.has(w.skin)) return;
+  const ring = w.skin !== null;
+  const darkCloak = w.charClass === CharacterClassNumber.MagicGladiator && w.skin !== null && !SKELETON_BODY.test(w.skin);
+  for (let i = 0; i < set.count; i++) {
+    if (!set.has(i)) continue;
+    if (base === BaseClass.DarkLord) {
+      if (i === 2 && !team && !isCapeOfLord(w.wing) && !isMantleOfMonarch(w.wing)) continue;
+      if ((i <= 1 || i === 3) && ring) continue;
+    }
+    if (base === BaseClass.RageFighter && i === 0 && !team && !isCapeOfFighter(w.wing) && !isCapeOfOverrule(w.wing)) continue;
+    if (i === 0 && darkCloak) continue;
+    set.draw(i);
   }
 }
 
 /**
  * `bCloak` (ZzzCharacter.cpp:9162-9246): the Magic Gladiator (the class itself, `c->Class == CLASS_DARK`),
- * every Dark Lord and Rage Fighter, never inside Chaos Castle; and anyone a team colour puts in one.
+ * every Dark Lord and Rage Fighter, never inside Chaos Castle; and anyone a team colour puts in one. The set
+ * is built once, then only its skirt changes; out of a cloak it stays as it was, undrawn.
  */
-export function cloaks(w: CloakWearer, out: (ClothSpec | null)[]): Rgb {
+export function cloaks(w: CloakWearer, set: CloakSet): Rgb {
   const base = getBaseClass(w.charClass);
-  const gladiator = w.charClass === CharacterClassNumber.MagicGladiator;
   const team = teamLight(w);
+  const gladiator = w.charClass === CharacterClassNumber.MagicGladiator;
   const cloak = ((gladiator || base === BaseClass.DarkLord || base === BaseClass.RageFighter) && !w.chaosCastle) || team !== null;
-  if (!cloak || (w.skin !== null && TEMPLE_BODIES.has(w.skin))) return WHITE;
-  if (base === BaseClass.DarkLord) darkLord(w, team !== null, out);
-  else if (base === BaseClass.RageFighter) rageFighter(w, team !== null, out);
-  // The rest wear the robe (:9837-9846); a ring's body hides the Magic Gladiator's (CheckDarkCloak, :9953).
-  else if (!gladiator || w.skin === null || SKELETON_BODY.test(w.skin)) out[0] = robeFor(w.wing);
+  if (!cloak) return WHITE;
+  if (!set.built) {
+    if (base === BaseClass.DarkLord) buildDarkLord(w, set);
+    else if (base === BaseClass.RageFighter) buildRageFighter(w, set);
+    else {
+      // Everyone else (:9837-9846).
+      set.build(0, robeFor(w.wing));
+      set.count = 1;
+    }
+  } else if (base === BaseClass.DarkLord) {
+    followArmour(w, set);
+  }
+  drawSet(w, base, team !== null, set);
   return team ?? WHITE;
 }
 

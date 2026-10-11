@@ -42,8 +42,9 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   `wearsChaosCastleSkin(e, map)`, type `Gear`. Inside Chaos Castle every player holds the castle's
   weapons, all +0 (`ChangeChaosCastleUnit`, CSChaosCastle.cpp:130-170); range and ammo stay its own.
 - `PlayerObject.Cloth`: the body's physics cloths (`o->m_pCloth`, a `controllers/cloth` `ClothSet`).
-  `cloaks.ts`: `registerCloaks(rule)` (the wearers' content hands its rule in at boot), `cloaksFor(wearer, out)`,
-  types `CloakWearer`, `CloakRule`; `ecs/systems/clothSystem.ts` asks it every frame.
+  `cloaks.ts`: `registerCloaks(rule)` (the wearers' content hands its rule in at boot), `cloaksFor(wearer, set)`
+  (the rule builds, destroys and draws on the body's set as `RenderCharacter` does), types `CloakWearer`,
+  `CloakSet`, `CloakRule`; `ecs/systems/clothSystem.ts` asks it every frame.
 - `wings.ts`: `wingSpec`, `isWingItem`, `wingBone`, `isFastWing`, `WING_GROUP`, `HELPER_GROUP`,
   `WING_BONE`, `CAPE_BONE`, wing index constants (`WING_OF_ELF`, `CAPE_OF_LORD`, ...).
 - `locomotion.ts`: `RUN_THRESHOLD`, `FENRIR_RUN_DELAY`, `RUN_UNITS_PER_SECOND`, `canAccumulateRun`,
@@ -214,6 +215,7 @@ Mantle of Monarch and Cape of Overrule keep their model and add cloth.
   class's own body); the duel and Battle Soccer colours, which cloak anyone (`team_cloak.ts`).
 - Not yet: the two monsters that wear one, the Death King (Player/Robe03.tga, :9826-9832) and the
   Nightmare (a `PCT_CYLINDER` robe on bone 2, :9833-9836).
-- Not ported: `DeleteCloth` on a cape change (WSclient.cpp:2474-2491) resets every cloth of the set; here
-  only the changed slot is rebuilt. Body parts carry a mesh cloth of their own too (`CPhysicsClothMesh`,
+- The set is built once and walked as the original walks it: a cloth it skips stays built, unstepped, and
+  lays its shadow where it was left. Not ported: `DeleteCloth` on a cape change (WSclient.cpp:2474-2491),
+  which resets every cloth of the set. Body parts carry a mesh cloth of their own too (`CPhysicsClothMesh`,
   ZzzObject.cpp:10626-10640), a separate port.

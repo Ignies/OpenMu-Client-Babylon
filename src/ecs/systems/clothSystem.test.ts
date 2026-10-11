@@ -26,9 +26,14 @@ afterAll(() => engine.dispose());
 const CAPE: ClothSpec = { bone: 19, at: [0, 8, 10], grid: [3, 3], size: [10, 10], front: 'a', back: 'a', flags: 0 };
 /** What the rule saw last. */
 let seen: CloakWearer | null = null;
-registerCloaks((w, out) => {
+registerCloaks((w, set) => {
   seen = { ...w };
-  if (w.wing && !w.chaosCastle) out[2] = CAPE;
+  if (!w.wing || w.chaosCastle) return [1, 1, 1];
+  if (!set.built) {
+    set.build(2, CAPE);
+    set.count = 3;
+  }
+  set.draw(2);
   return [1, 0.2, 0];
 });
 
@@ -55,9 +60,10 @@ describe('ClothSystem', () => {
     const p = player({ wings: { group: 13, num: 30 } });
     const set = run(p);
     expect(seen).toEqual({ charClass: C.DarkLord, wing: { group: 13, num: 30 }, armor: null, skin: null, chaosCastle: false, netId: null, hero: false, guild: null });
-    expect([set.size, set.cloth(2)?.spec]).toEqual([1, CAPE]);
+    expect([set.size, set.cloth(2)?.spec, set.drawn(2)]).toEqual([1, CAPE, true]);
+    // Undrawn the next frame the rule names nothing; the set stays as built.
     p.charAppearance.wings = null;
-    expect(run(p).size).toBe(0);
+    expect([run(p).drawn(2), run(p).size]).toEqual([false, 1]);
   });
 
   it('tells the rule who the body is: its id, the hero or not, its guild', () => {
@@ -98,8 +104,10 @@ describe('ClothSystem', () => {
   });
 
   it('casts the cloth shadow while a link object is drawn: the wing slot, a held weapon or the Imp (ZzzCharacter.cpp:8433-8446)', () => {
-    registerCloaks((_w, out) => {
-      out[2] = CAPE;
+    registerCloaks((_w, set) => {
+      if (!set.built) set.build(2, CAPE);
+      set.count = 3;
+      set.draw(2);
       return [1, 1, 1];
     });
     const p = player();

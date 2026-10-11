@@ -25,15 +25,20 @@ type Worn = {
   readonly cloth: PhysicsCloth;
   readonly mesh: ClothMesh;
   created: boolean;
+  /** Stepped and drawn this frame: the original's loop reached its `Move2` and `Render`. */
+  drawn: boolean;
   /** The anchor bone's world at the last tick, inverted; times the bone now, the carry until the next. */
   readonly sinceTick: Matrix;
   readonly carry: Matrix;
 };
 
+const IDENTITY = Matrix.Identity();
+
 /**
- * One wearer's cloths (`o->m_pCloth`, `m_byNumCloth` of them), stepped on the original's 25 Hz tick and
- * drawn every frame. A slot keeps its cloth while `wear` names the same spec; a new spec builds a new
- * cloth on the next tick (`Create`), and a torn one drops them all (`DeleteCloth`).
+ * One wearer's cloths (`o->m_pCloth`), stepped on the original's 25 Hz tick and drawn every frame. The
+ * wearer's rule builds and destroys cloths by slot (`Create`, `Destroy`), sets `count` (`m_byNumCloth`)
+ * and names each frame the slots it draws; a torn cloth drops them all (`DeleteCloth`). Every built cloth
+ * below `count` lays the Classic shadow, the ones not drawn where they were left (ZzzBMD.cpp:2648-2710).
  */
 export class ClothSet implements ClothAnchor {
   windX = 0;
@@ -44,6 +49,10 @@ export class ClothSet implements ClothAnchor {
   held = false;
   /** Whether the Classic shadow is drawn (RenderLinkObject's cloth case, ZzzCharacter.cpp:8433-8446). */
   castsShadow = false;
+  /** `m_byNumCloth`: the slots the loop walks and the shadow lays. */
+  count = 0;
+  /** `m_pCloth != NULL`: built, until `drop`. */
+  built = false;
 
   private readonly slots: (Worn | null)[] = [];
   private light: Rgb = [1, 1, 1];
@@ -59,51 +68,73 @@ export class ClothSet implements ClothAnchor {
     private readonly body: ClothBody
   ) {}
 
-  /** The specs to hang now, by slot (null leaves a slot empty), in `CloakLight`. */
-  wear(specs: readonly (ClothSpec | null)[], light: Rgb): void {
-    this.light = light;
-    const n = Math.max(specs.length, this.slots.length);
-    let any = false;
-    for (let s = 0; s < n; s++) {
-      const spec = specs[s] ?? null;
-      let worn = this.slots[s] ?? null;
-      if (worn?.spec !== spec) {
-        worn?.mesh.dispose();
-        worn = spec ? this.make(spec) : null;
-        this.slots[s] = worn;
-      }
-      if (worn) {
-        worn.mesh.setLight(light);
-        any = true;
-      }
-    }
-    if (any) activate(this);
-    else deactivate(this);
+  /** `pCloth[slot].Create`: a new cloth from `spec`, laid on the body on the next tick. */
+  build(slot: number, spec: ClothSpec): void {
+    this.slots[slot]?.mesh.dispose();
+    this.slots[slot] = this.make(spec);
+    this.built = true;
+    activate(this);
   }
 
-  /** `DeleteCloth`: every cloth goes; the next `wear` builds them anew. */
-  drop(): void {
+  /** `pCloth[slot].Destroy`. */
+  destroy(slot: number): void {
+    this.slots[slot]?.mesh.dispose();
+    this.slots[slot] = null;
+  }
+
+  /** `pCloth[slot].GetOwner() != NULL`. */
+  has(slot: number): boolean {
+    return !!this.slots[slot];
+  }
+
+  /** Steps and draws `slot` this frame. */
+  draw(slot: number): void {
+    const worn = this.slots[slot];
+    if (worn) worn.drawn = true;
+  }
+
+  /** Forgets the frame's draws: the wearer's rule names them anew each frame. */
+  undraw(): void {
     for (let s = 0; s < this.slots.length; s++) {
-      this.slots[s]?.mesh.dispose();
-      this.slots[s] = null;
+      const worn = this.slots[s];
+      if (worn) worn.drawn = false;
     }
+  }
+
+  /** `CloakLight`: white, or the duel / soccer team colour (ZzzCharacter.cpp:9188-9246). */
+  setLight(light: Rgb): void {
+    if (light[0] === this.light[0] && light[1] === this.light[1] && light[2] === this.light[2]) return;
+    this.light = light;
+    for (let s = 0; s < this.slots.length; s++) this.slots[s]?.mesh.setLight(light);
+  }
+
+  /** `DeleteCloth`: every cloth goes; the wearer's rule builds the set anew. */
+  drop(): void {
+    for (let s = 0; s < this.slots.length; s++) this.slots[s]?.mesh.dispose();
+    this.slots.length = 0;
+    this.built = false;
+    this.count = 0;
     deactivate(this);
   }
 
-  /** How many cloths hang (`m_byNumCloth`). */
+  /** How many cloths are built. */
   get size(): number {
     let n = 0;
     for (let s = 0; s < this.slots.length; s++) if (this.slots[s]) n++;
     return n;
   }
 
-  /** The cloth in slot `s`, and its mesh. */
+  /** The cloth in slot `s`, its mesh, and whether it is drawn this frame. */
   cloth(s: number): PhysicsCloth | null {
     return this.slots[s]?.cloth ?? null;
   }
 
   mesh(s: number): ClothMesh | null {
     return this.slots[s]?.mesh ?? null;
+  }
+
+  drawn(s: number): boolean {
+    return !!this.slots[s]?.drawn;
   }
 
   dispose(): void {
@@ -116,6 +147,7 @@ export class ClothSet implements ClothAnchor {
       cloth: new PhysicsCloth(spec),
       mesh: new ClothMesh(this.scene, spec, this.light, this.body.node),
       created: false,
+      drawn: false,
       sinceTick: new Matrix(),
       carry: new Matrix(),
     };
@@ -140,13 +172,13 @@ export class ClothSet implements ClothAnchor {
     out[at + 2] = (world.y + m[13]) * CM;
   }
 
-  /** This frame's bones and wind direction; hides the cloths while the rig is not in or the set is hidden. */
+  /** This frame's bones and wind direction; hides everything while the rig is not in or the set is hidden. */
   begin(): void {
     const skeleton = this.body.gltf?.skeleton;
     this.ready = this.shown && !!skeleton;
     this.torn = false;
     if (!this.shown || !skeleton) {
-      for (let s = 0; s < this.slots.length; s++) this.slots[s]?.mesh.setEnabled(false);
+      for (let s = 0; s < this.slots.length; s++) this.slots[s]?.mesh.show(false, false);
       return;
     }
     this.bones.fill(null);
@@ -167,7 +199,7 @@ export class ClothSet implements ClothAnchor {
     this.windY = world.z / length;
   }
 
-  /** One 25 Hz frame for every cloth; a torn one marks the set to drop. */
+  /** One 25 Hz frame: each new cloth laid on the body (`Create`), the drawn ones stepped; a torn one drops the set. */
   tick(time: number, gusty: boolean): void {
     if (!this.ready || this.torn) return;
     for (let s = 0; s < this.slots.length; s++) {
@@ -176,7 +208,10 @@ export class ClothSet implements ClothAnchor {
       if (!worn.created) {
         worn.cloth.create(this);
         worn.created = true;
+        // Built but not drawn: it lies where Create laid it.
+        if (!worn.drawn) worn.mesh.write(worn.cloth.pos);
       }
+      if (!worn.drawn) continue;
       if (!worn.cloth.move2(this, this.held ? 0 : STEP, SUB_STEPS, time, gusty)) {
         this.torn = true;
         return;
@@ -194,15 +229,21 @@ export class ClothSet implements ClothAnchor {
     for (let s = 0; s < this.slots.length; s++) {
       const worn = this.slots[s];
       if (!worn || !worn.created) continue;
+      const laid = this.castsShadow && s < this.count;
+      if (!worn.drawn) {
+        // Not stepped: its last positions stay where they were left, and its shadow with them.
+        worn.mesh.show(false, laid);
+        if (laid) worn.mesh.setWorld(IDENTITY);
+        continue;
+      }
       const bone = this.bones[worn.spec.bone] ?? this.body.node.getWorldMatrix();
       if (ticked) {
         worn.mesh.write(worn.cloth.pos);
         bone.invertToRef(worn.sinceTick);
       }
       worn.sinceTick.multiplyToRef(bone, worn.carry);
+      worn.mesh.show(true, laid);
       worn.mesh.setWorld(worn.carry);
-      worn.mesh.setEnabled(true);
-      worn.mesh.setShadow(this.castsShadow);
     }
   }
 }

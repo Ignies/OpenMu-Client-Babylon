@@ -5,7 +5,7 @@ vi.hoisted(() => {
   g.location ??= { href: 'http://localhost/', search: '', hostname: 'localhost', protocol: 'http:' };
 });
 
-import { cloaksFor, type CloakWearer } from '@/controllers/actors/cloaks';
+import { cloaksFor, type CloakSet, type CloakWearer } from '@/controllers/actors/cloaks';
 import {
   PCT_CURVED,
   PCT_ELASTIC_RAGE_L,
@@ -26,12 +26,50 @@ import './index';
 const CAPE_OF_LORD: Item = { group: 13, num: 30 };
 const MANTLE_OF_MONARCH: Item = { group: 12, num: 40 };
 const WINGS_OF_SATAN: Item = { group: 12, num: 2 };
+const LEATHER_ARMOR: Item = { group: 8, num: 5 };
 
-function wear(over: Partial<CloakWearer>) {
-  const out: (ClothSpec | null)[] = [];
-  const light = cloaksFor({ charClass: C.DarkLord, wing: null, armor: null, skin: null, chaosCastle: false, netId: null, hero: false, guild: null, ...over }, out);
-  return { out, light };
+/** A wearer's set as the rule sees it: what is built in each slot, the count, the frame's draws. */
+class FakeSet implements CloakSet {
+  built = false;
+  count = 0;
+  readonly specs: (ClothSpec | null)[] = [];
+  readonly drawn = new Set<number>();
+  build(slot: number, spec: ClothSpec) {
+    this.specs[slot] = spec;
+    this.built = true;
+  }
+  destroy(slot: number) {
+    this.specs[slot] = null;
+  }
+  has(slot: number) {
+    return !!this.specs[slot];
+  }
+  draw(slot: number) {
+    if (this.specs[slot]) this.drawn.add(slot);
+  }
+  drop() {
+    this.specs.length = 0;
+    this.built = false;
+    this.count = 0;
+  }
 }
+
+/** `frames` frames of the rule on one set (two: the skirt settles); `out` is what the last one draws, by slot. */
+function run(w: CloakWearer, frames: number, set = new FakeSet()) {
+  let light: readonly number[] = [];
+  for (let f = 0; f < frames; f++) {
+    set.drawn.clear();
+    light = cloaksFor(w, set);
+  }
+  const out = Array.from({ length: set.specs.length }, (_, i) => (set.drawn.has(i) ? (set.specs[i] ?? null) : null));
+  return { out, light, set };
+}
+
+const wearer = (over: Partial<CloakWearer>): CloakWearer => ({
+  charClass: C.DarkLord, wing: null, armor: null, skin: null, chaosCastle: false, netId: null, hero: false, guild: null, ...over,
+});
+
+const wear = (over: Partial<CloakWearer>, frames = 2) => run(wearer(over), frames);
 
 describe('the Cape of Lord (ZzzCharacter.cpp:9733-9741, drawn by :9930)', () => {
   it('hangs the Dark Lord\'s cloth 2 from the neck: DarklordRobe.tga, 10 x 10 over 180 x 180, keyed, four back spheres', () => {
@@ -210,7 +248,6 @@ describe('the Dark Lord\'s hair (ZzzCharacter.cpp:9707-9715)', () => {
   });
 });
 
-const LEATHER_ARMOR: Item = { group: 8, num: 5 };
 
 describe('the Dark Lord\'s skirt (ZzzCharacter.cpp:9752-9761, :9852-9920)', () => {
   // What a set settles to: the frame after it is built, the skirt is made again at (0, 8, -5) with
@@ -239,5 +276,35 @@ describe('the Dark Lord\'s skirt (ZzzCharacter.cpp:9752-9761, :9852-9920)', () =
   it('under the Mantle of Monarch keeps the one the set was built with, sticked at (0, 10, -5); a Lord Emperor loses it (:9888-9896)', () => {
     expect(wear({ wing: MANTLE_OF_MONARCH }).out[3]).toEqual({ ...skirt('Player/kaa.OZT'), at: [0, 10, -5], flags: PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_SHORT_SHOULDER });
     expect(wear({ charClass: C.LordEmperor, wing: MANTLE_OF_MONARCH }).out[3] ?? null).toBeNull();
+  });
+});
+
+describe('the set as RenderCharacter builds it and walks it (ZzzCharacter.cpp:9689-9985)', () => {
+  it('builds the Dark Lord\'s cape whatever the wing and walks past it undrawn without one', () => {
+    const { set } = wear({}, 1);
+    expect([set.count, set.specs[2]?.front, set.drawn.has(2)]).toEqual([3, 'Player/DarklordRobe.OZT', false]);
+  });
+
+  it('builds the skirt with the set, uncounted, and makes it again counted the next frame (:9752-9761, :9866-9876)', () => {
+    const first = wear({}, 1);
+    expect([first.set.count, first.set.specs[3]?.at, first.out[3] ?? null]).toEqual([3, [0, 10, -5], null]);
+    const second = run(wearer({}), 1, first.set);
+    expect([second.set.count, second.out[3]?.at]).toEqual([4, [0, 8, -5]]);
+    // Armour on tears it off and uncounts it; off again, it is made again.
+    run(wearer({ armor: LEATHER_ARMOR }), 1, second.set);
+    expect([second.set.count, second.set.has(3)]).toEqual([3, false]);
+    expect(run(wearer({}), 1, second.set).out[3]?.at).toEqual([0, 8, -5]);
+  });
+
+  it('under the Mantle makes a skirt only once the armour comes off, then at (0, 8, -5) (:9897-9908)', () => {
+    const { set } = wear({ wing: MANTLE_OF_MONARCH, armor: LEATHER_ARMOR });
+    expect([set.count, set.has(3)]).toEqual([6, false]);
+    expect(run(wearer({ wing: MANTLE_OF_MONARCH }), 1, set).out[3]?.at).toEqual([0, 8, -5]);
+  });
+
+  it('keeps a set out of a cloak as it was, undrawn: the Magic Gladiator walking into Chaos Castle', () => {
+    const { set } = wear({ charClass: C.MagicGladiator });
+    const after = run(wearer({ charClass: C.MagicGladiator, chaosCastle: true }), 1, set);
+    expect([after.set.built, after.set.specs[0]?.front, after.out.filter(Boolean)]).toEqual([true, 'Player/Robe01.OZJ', []]);
   });
 });

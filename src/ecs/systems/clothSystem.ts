@@ -1,4 +1,4 @@
-import { cloth, type ClothSpec } from '../../controllers/cloth';
+import { cloth } from '../../controllers/cloth';
 import { cloaksFor, type CloakWearer } from '../../controllers/actors/cloaks';
 import { heldWeapons } from '../../controllers/actors';
 import { inChaosCastle } from '../../controllers/actors/locomotion';
@@ -26,13 +26,12 @@ function skinPart(skin: number | undefined): string | null {
 const linked = (item: Item | null | undefined): boolean => !!item && !isBook(item) && !isSwordformGloves(item);
 
 /**
- * Every character's physics cloths, each frame: the wearers' content names them (`cloaksFor`), the set
- * on the body hangs them, and the cloth clock moves on. A cloaked or unseen body moves none (the original
+ * Every character's physics cloths, each frame: the wearers' content builds and draws them on the body's
+ * set (`cloaksFor`), and the cloth clock moves on. A cloaked or unseen body moves none (the original
  * only steps a rendered character's cloth); stun and sleep hold them (`Move2(0, 5)`, ZzzCharacter.cpp:9963-9968).
  */
 function clothSystem(world: World) {
   const query = world.with('charAppearance', 'modelObject');
-  const specs: (ClothSpec | null)[] = [];
   const wearer: CloakWearer = { charClass: 0, wing: null, armor: null, skin: null, chaosCastle: false, netId: null, hero: false, guild: null };
 
   return {
@@ -52,10 +51,10 @@ function clothSystem(world: World) {
         wearer.netId = e.netId ?? null;
         wearer.hero = !!e.localPlayer;
         wearer.guild = e.guild?.id ?? null;
-        const light = cloaksFor(wearer, specs);
         const set = model.Cloth;
-        set.wear(specs, light);
-        if (set.size === 0) continue;
+        set.undraw();
+        set.setLight(cloaksFor(wearer, set));
+        if (!set.built) continue;
         const buffs = e.buffs;
         set.shown = model.Ready && !model.OutOfView && e.visibility?.state !== 'hidden' && !buffs?.has(CLOAKING);
         set.held = !!buffs && (buffs.has(STUN) || buffs.has(SLEEP));

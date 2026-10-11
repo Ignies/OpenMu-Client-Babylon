@@ -91,6 +91,17 @@ const pos = (set: ClothSet, s: number) => {
   return cloth.pos;
 };
 
+/** Builds and draws a spec per slot (null leaves one empty), as a wearer's rule does. */
+function hang(set: ClothSet, specs: readonly (ClothSpec | null)[], light: readonly [number, number, number] = [1, 1, 1]) {
+  specs.forEach((spec, slot) => {
+    if (!spec) return;
+    set.build(slot, spec);
+    set.draw(slot);
+  });
+  set.count = specs.length;
+  set.setLight(light);
+}
+
 /** 25 Hz frames, one tick each. */
 function tick(frames = 1) {
   for (let i = 0; i < frames; i++) frame(0.04);
@@ -134,7 +145,7 @@ describe('the cloth faces (CPhysicsCloth::RenderFace, PhysicsManager.cpp:832-886
 
   it('pulses a PCT_MASK_LIGHT cloth in its own light, added, whatever the CloakLight (:784-816)', () => {
     const set = new ClothSet(scene, body());
-    set.wear([{ ...CAPE, flags: PCT_MASK_LIGHT }], [1, 0.2, 0]);
+    hang(set, [{ ...CAPE, flags: PCT_MASK_LIGHT }], [1, 0.2, 0]);
     tick();
     const material = meshOf(set, 0).faces[0].material as unknown as { alphaMode: number; emissiveColor: { r: number; b: number } };
     expect(material.alphaMode).toBe(Constants.ALPHA_ONEONE);
@@ -158,7 +169,7 @@ describe('the cloth faces (CPhysicsCloth::RenderFace, PhysicsManager.cpp:832-886
       [1.4, 0.1, true, 0],
     ]);
     const set = new ClothSet(scene, body());
-    set.wear([{ ...CAPE, grid: [6, 5], flags: PCT_MASK_LIGHT }], [1, 1, 1]);
+    hang(set, [{ ...CAPE, grid: [6, 5], flags: PCT_MASK_LIGHT }], [1, 1, 1]);
     tick();
     const last = () => spriteUpdate.mock.calls[spriteUpdate.mock.calls.length - 1];
     expect(last()[0]).toBe(true);
@@ -183,7 +194,7 @@ describe('a wearer\'s cloths (o->m_pCloth)', () => {
   it('blows the wind behind the body, along its Angle[2] (PhysicsManager.cpp:609-610)', () => {
     for (const yaw of [0, 90, 225]) {
       const set = new ClothSet(scene, body(yaw));
-      set.wear([CAPE], [1, 1, 1]);
+      hang(set, [CAPE], [1, 1, 1]);
       tick();
       const a = ((180 + yaw) * Math.PI) / 180;
       expect(set.windX).toBeCloseTo(Math.sin(a));
@@ -196,7 +207,7 @@ describe('a wearer\'s cloths (o->m_pCloth)', () => {
     const rig = body();
     rig.node.position.set(10, 0, 20);
     const set = new ClothSet(scene, rig);
-    set.wear([null, null, CAPE], [1, 1, 1]);
+    hang(set, [null, null, CAPE], [1, 1, 1]);
     expect(set.size).toBe(1);
     tick();
     const pins = pos(set, 2);
@@ -209,7 +220,7 @@ describe('a wearer\'s cloths (o->m_pCloth)', () => {
   it('carries the drawn cloth with its bone between two ticks', () => {
     const rig = body();
     const set = new ClothSet(scene, rig);
-    set.wear([CAPE], [1, 1, 1]);
+    hang(set, [CAPE], [1, 1, 1]);
     tick();
     rig.node.position.x += 0.5;
     frame(0.01);
@@ -217,26 +228,64 @@ describe('a wearer\'s cloths (o->m_pCloth)', () => {
     set.dispose();
   });
 
-  it('keeps a slot whose spec stayed and drops them all when one tears, as a warp does (DeleteCloth)', () => {
+  it('keeps the cloths it is not told to destroy and drops them all when one tears, as a warp does (DeleteCloth)', () => {
     const rig = body();
     const set = new ClothSet(scene, rig);
-    set.wear([CAPE, ROBE], [1, 1, 1]);
+    hang(set, [CAPE, ROBE], [1, 1, 1]);
     tick(2);
     const kept = set.cloth(0);
-    set.wear([CAPE, null], [1, 1, 1]);
-    expect([set.cloth(0), set.size]).toEqual([kept, 1]);
+    set.destroy(1);
+    expect([set.cloth(0), set.size, set.has(1)]).toEqual([kept, 1, false]);
     rig.node.position.x += 100;
     tick();
-    expect(set.size).toBe(0);
-    set.wear([CAPE], [1, 1, 1]);
+    expect([set.size, set.built, set.count]).toEqual([0, false, 0]);
+    hang(set, [CAPE], [1, 1, 1]);
     tick();
     expect(set.cloth(0)).not.toBe(kept);
     set.dispose();
   });
 
+  it('lays a built cloth it does not draw where Create left it, and its shadow there (ZzzBMD.cpp:2648-2710)', () => {
+    const rig = body();
+    const set = new ClothSet(scene, rig);
+    set.castsShadow = true;
+    hang(set, [CAPE, null, null]);
+    set.build(2, ROBE);
+    tick();
+    const laid = Float64Array.from(pos(set, 2));
+    rig.node.position.x += 0.5;
+    tick(3);
+    // Never stepped: it stays where it was built, its faces hidden, its shadow on the ground under it.
+    expect(pos(set, 2)).toEqual(laid);
+    const robe = meshOf(set, 2);
+    const shadow = scene.getMeshByName(`${robe.faces[0].name}_shadow`) as Mesh;
+    expect([robe.faces[0].isEnabled(), shadow.isEnabled()]).toEqual([false, true]);
+    expect(shadow.getWorldMatrix().isIdentity()).toBe(true);
+    set.dispose();
+  });
+
+  it('lays nothing of a cloth past m_byNumCloth, and tears a stale cloth stepped again far from where it was left', () => {
+    const rig = body();
+    const set = new ClothSet(scene, rig);
+    set.castsShadow = true;
+    hang(set, [CAPE]);
+    set.build(1, ROBE);
+    tick();
+    const robe = meshOf(set, 1);
+    expect(scene.getMeshByName(`${robe.faces[0].name}_shadow`)).toBeNull();
+    // Slot 1 counted, but stepped again only after the body walked far off: the strict links give.
+    set.count = 2;
+    rig.node.position.x += 100;
+    tick();
+    set.draw(1);
+    tick();
+    expect(set.built).toBe(false);
+    set.dispose();
+  });
+
   it('neither steps nor draws a hidden wearer', () => {
     const set = new ClothSet(scene, body());
-    set.wear([CAPE], [1, 1, 1]);
+    hang(set, [CAPE], [1, 1, 1]);
     tick();
     const before = Float64Array.from(pos(set, 0));
     set.shown = false;
@@ -250,7 +299,7 @@ describe('a wearer\'s cloths (o->m_pCloth)', () => {
     const rig = body();
     const set = new ClothSet(scene, rig);
     set.castsShadow = true;
-    set.wear([CAPE], [1, 1, 1]);
+    hang(set, [CAPE], [1, 1, 1]);
     tick();
     const face = meshOf(set, 0).faces[0];
     const shadow = scene.getMeshByName(`${face.name}_shadow`) as Mesh;
@@ -275,7 +324,7 @@ describe('the cost of 20 caped players', () => {
       rig.node.position.set(i % 5, 0, Math.floor(i / 5));
       const set = new ClothSet(scene, rig);
       set.castsShadow = true;
-      set.wear([cape], [1, 1, 1]);
+      hang(set, [cape], [1, 1, 1]);
       return set;
     });
     tick(25);

@@ -19,14 +19,51 @@ vi.mock('@/modules/guild', () => ({ GuildMarks: state.marks }));
 const { cloaksFor } = await import('@/controllers/actors/cloaks');
 await import('./index');
 type Wearer = Parameters<typeof cloaksFor>[0];
+type CloakSet = Parameters<typeof cloaksFor>[1];
 
 const RED = [1, 0.2, 0];
 const BLUE = [0, 0.2, 1];
 
+/** A wearer's set as the rule sees it: what is built in each slot, the count, the frame's draws. */
+class FakeSet implements CloakSet {
+  built = false;
+  count = 0;
+  readonly specs: (ClothSpec | null)[] = [];
+  readonly drawn = new Set<number>();
+  build(slot: number, spec: ClothSpec) {
+    this.specs[slot] = spec;
+    this.built = true;
+  }
+  destroy(slot: number) {
+    this.specs[slot] = null;
+  }
+  has(slot: number) {
+    return !!this.specs[slot];
+  }
+  draw(slot: number) {
+    if (this.specs[slot]) this.drawn.add(slot);
+  }
+  drop() {
+    this.specs.length = 0;
+    this.built = false;
+    this.count = 0;
+  }
+}
+
+/** `frames` frames of the rule on one set (two: the skirt settles); `out` is what the last one draws, by slot. */
+function run(w: Wearer, frames: number, set = new FakeSet()) {
+  let light: readonly number[] = [];
+  for (let f = 0; f < frames; f++) {
+    set.drawn.clear();
+    light = cloaksFor(w, set);
+  }
+  const out = Array.from({ length: set.specs.length }, (_, i) => (set.drawn.has(i) ? (set.specs[i] ?? null) : null));
+  return { out, light, set };
+}
+
 function wear(over: Partial<Wearer>) {
-  const out: (ClothSpec | null)[] = [];
-  const light = cloaksFor({ charClass: C.DarkKnight, wing: null, armor: null, skin: null, chaosCastle: false, netId: 7, hero: false, guild: null, ...over }, out);
-  return { out, light, fronts: out.map(s => s?.front ?? null) };
+  const { out, light } = run({ charClass: C.DarkKnight, wing: null, armor: null, skin: null, chaosCastle: false, netId: 7, hero: false, guild: null, ...over }, 2);
+  return { out, light, fronts: out.filter(Boolean).map(s => s?.front ?? null) };
 }
 
 beforeEach(() => {

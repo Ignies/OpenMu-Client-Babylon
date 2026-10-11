@@ -131,6 +131,7 @@ export class ClothMesh {
   private light: Rgb;
   private shadow: Mesh | null = null;
   private shadowOn = false;
+  private facesOn = false;
   /** A `PCT_MASK_LIGHT` cloth's lights, one on each vertex, and where each is this frame. */
   private readonly sprites: HeldSprites | null = null;
   private readonly spots: Vector3[] = [];
@@ -211,7 +212,7 @@ export class ClothMesh {
   setWorld(world: Matrix): void {
     for (let f = 0; f < this.faces.length; f++) this.faces[f].freezeWorldMatrix(world);
     this.shadow?.freezeWorldMatrix(world);
-    if (!this.sprites) return;
+    if (!this.sprites || !this.facesOn) return;
     const p = this.positions;
     for (let k = 0; k < this.spots.length; k++) {
       Vector3.TransformCoordinatesFromFloatsToRef(p[3 * k], p[3 * k + 1], p[3 * k + 2], world, this.spots[k]);
@@ -229,11 +230,13 @@ export class ClothMesh {
     }
   }
 
-  setEnabled(on: boolean): void {
-    for (let f = 0; f < this.faces.length; f++) this.faces[f].setEnabled(on);
-    if (on) return;
-    this.setShadow(false);
-    this.sprites?.update(false, this.look);
+  /** The faces (and a light cloth's sprites) and the Classic shadow, each on or off. */
+  show(faces: boolean, shadow: boolean): void {
+    this.setShadow(shadow);
+    if (faces === this.facesOn) return;
+    this.facesOn = faces;
+    for (let f = 0; f < this.faces.length; f++) this.faces[f].setEnabled(faces);
+    if (!faces) this.sprites?.update(false, this.look);
   }
 
   /**
