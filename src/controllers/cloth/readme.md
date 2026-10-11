@@ -54,7 +54,8 @@ knows how a cloth moves and draws, never who wears which one (the wearers' conte
 ## Depends on / used by
 - uses: `render` (the Babylon exports, the blob shadow material), `assets` (`getDataTexture`), `fx`
   (`HeldSprites`), `fidelity` (`isOn`).
-- used by: `actors` (`PlayerObject.Cloth`), `ecs/systems/clothSystem.ts` (the clock and the wearers).
+- used by: `actors` (`PlayerObject.Cloth`, `MonsterObject.Cloth`), `ecs/systems/clothSystem.ts` (the clock
+  and the wearers).
 
 ## Change it
 - a new wearer or cloth: a spec in its content; nothing here changes.
@@ -71,5 +72,19 @@ knows how a cloth moves and draws, never who wears which one (the wearers' conte
   cloth tearing when stepped again far off, a hidden wearer, the shadow clone, and the cost of 20 caped players (logged).
 
 ## Notes
-- Not ported: `CPhysicsClothMesh` (a cloth built from a model's mesh, ZzzObject.cpp:10626-10640) and
-  `CPhysicsManager`'s own cloth list, which nothing fills.
+- Not ported: `CPhysicsManager`'s own cloth list, which nothing fills, and `CPhysicsClothMesh`
+  (PhysicsManager.cpp:948-1209), a cloth made of a model's own mesh. Its users:
+  - the Magic Skeletons 1-7 (monsters 89-143): mesh 2 of the body, pinned to bone 18, `PCT_HEAVY`, two
+    spheres (ZzzCharacter.cpp:8502-8539);
+  - the Divine Pants: mesh 3 of the part, pinned to bone 2, `PCT_OPT_CORRECTEDFORCE | PCT_HEAVY`, five
+    spheres (ZzzObject.cpp:10637-10646);
+  - the Grand Soul and Dark Soul Pants (`PCT_OPT_MESHPROG`): a 5x8 / 7x5 grid on bone 17 whose layout
+    overwrites mesh 2 of the part, triangles and UVs (:10610-10680; ZzzOpenData.cpp:304-308 runs it once at load).
+- What it needs: the GLB submesh's vertices with their bone (`Node`, from `JOINTS_0`); the pinned ones
+  (`Node == bone`) skinned on the CPU each tick; links from the triangles (each edge, loose when the ends are
+  over 10 apart in x, plus the far corner of the next triangle, `FindMatchVertex` / `FindInLink`); a
+  `PhysicsCloth` that takes those vertices and links instead of its grid (its `PCT_OPT_CORRECTEDFORCE` step is
+  already here) and the mesh's force seed (`InitForces`); a plain copy of the submesh drawn with the part's
+  own material (light, level, excellent pass) from the cloth's positions while the skinned one is hidden; for
+  `MESHPROG`, that copy rebuilt as the grid. The pants' cloth belongs to the body part (`p->m_pCloth`, torn by
+  `DeleteCloth(NULL, o, p)` when the part changes), so the part loader must own a set per part.

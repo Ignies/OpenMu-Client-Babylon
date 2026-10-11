@@ -219,4 +219,4 @@ Mantle of Monarch and Cape of Overrule keep their model and add cloth.
 - The set is built once and walked as the original walks it: a cloth it skips stays built, unstepped, and
   lays its shadow where it was left; a cape change resets the whole set as `DeleteCloth` does (WSclient.cpp:2474-2491,
   NewUIMyInventory.cpp:1050-1083). Body parts carry a mesh cloth of their own too (`CPhysicsClothMesh`,
-  ZzzObject.cpp:10626-10640), a separate port.
+  ZzzObject.cpp:10610-10680), as do the Magic Skeletons: not ported, see `controllers/cloth/readme.md`.
