@@ -45,4 +45,7 @@ export default {
   'fidelity.drawnClothShadows': 'Ombres de tissu nettes',
   'fidelity.drawnClothShadows.hint':
     'Seuls les capes, robes et cheveux qu’un personnage montre projettent une ombre. Classique : un tissu que le personnage ne montre plus laisse son ombre là où il est resté, comme dans l’original.',
+  'fidelity.teleportLandsEarly': 'Téléportation immédiate',
+  'fidelity.teleportLandsEarly.hint':
+    'Votre propre Téléportation vous pose sur la case dès que vous avez disparu, sans attendre la réponse du serveur. Classique : vous restez effacé sur l’ancienne case jusqu’à la réponse du serveur, comme dans l’original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -45,4 +45,7 @@ export default {
   'fidelity.drawnClothShadows': 'Umbre ordonate ale țesăturilor',
   'fidelity.drawnClothShadows.hint':
     'Doar pelerinele, robele și părul pe care un personaj le arată aruncă umbră. Clasică: o țesătură pe care personajul nu o mai arată își lasă umbra acolo unde a rămas, ca în original.',
+  'fidelity.teleportLandsEarly': 'Teleportarea aterizează imediat',
+  'fidelity.teleportLandsEarly.hint':
+    'Propria ta Teleportare te așază pe pătrat imediat ce dispari, fără să aștepte răspunsul serverului. Clasică: rămâi dispărut pe pătratul vechi până răspunde serverul, ca în original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

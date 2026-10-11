@@ -45,4 +45,7 @@ export default {
   'fidelity.drawnClothShadows': 'Sombras de tecido organizadas',
   'fidelity.drawnClothShadows.hint':
     'Só as capas, túnicas e cabelos que um personagem mostra projetam sombra. Clássica: um tecido que o personagem já não mostra continua deixando sua sombra onde ficou, como no original.',
+  'fidelity.teleportLandsEarly': 'Teleporte chega na hora',
+  'fidelity.teleportLandsEarly.hint':
+    'Seu próprio Teleporte te coloca na casa assim que você some, sem esperar a resposta do servidor. Clássica: você fica sumido na casa anterior até o servidor responder, como no original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

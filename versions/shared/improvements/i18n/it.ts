@@ -45,4 +45,7 @@ export default {
   'fidelity.drawnClothShadows': 'Ombre dei tessuti ordinate',
   'fidelity.drawnClothShadows.hint':
     'Solo i mantelli, le tuniche e i capelli che un personaggio mostra proiettano un’ombra. Classica: un tessuto che il personaggio non mostra più lascia la sua ombra dove è rimasto, come nell’originale.',
+  'fidelity.teleportLandsEarly': 'Teletrasporto immediato',
+  'fidelity.teleportLandsEarly.hint':
+    'Il tuo Teletrasporto ti porta sulla casella appena svanisci, senza attendere la risposta del server. Classica: resti svanito sulla vecchia casella finché il server non risponde, come nell’originale.',
 } satisfies Partial<Record<keyof typeof en, string>>;

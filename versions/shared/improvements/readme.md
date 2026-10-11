@@ -27,6 +27,7 @@ asks `isOn('<id>')`. Classic turns them all off and runs the original.
 | `swingFill` | Enhanced | `ecs/systems/attackSystem.ts` (sets `playerAnimation.swingFill` at the blow), `animationSystem.ts` (applies it) | the swing clip plays at the attack speed's rate to its end and the hero stands until the next swing (ZzzCharacter.cpp:812); the blow and the hit request keep their time either way |
 | `noticeLinks` | Enhanced | `modules/chat/notices.ts` (`create`), `ui/hud/notices/index.tsx` | a notice is plain text, markup and all, cut in two past 256 px (ZzzInterface.cpp:491-603) |
 | `drawnClothShadows` | Enhanced | `controllers/cloth/clothSet.ts` (`runClothFrame`) | every built cloth below `m_byNumCloth` lays its shadow, a skipped one where it was left (ZzzBMD.cpp:2648-2710) |
+| `teleportLandsEarly` | Enhanced | `ecs/systems/teleportSystem.ts` (lands him once faded), `modules/warp/net.ts` (the answer moves nothing) | the hero stays faded on the old square until the server's answer places him and plays End (`ReceiveTeleport`, WSclient.cpp:2157-2197) |
 
 - The file's comment cites the original and names the site; the site keeps the original path when
   `isOn` is false.
@@ -62,3 +63,5 @@ asks `isOn('<id>')`. Classic turns them all off and runs the original.
   them stays.
 - `controllers/cloth/clothSet.test.ts`: on Classic a built cloth the loop skips lays its shadow where it was
   left; `drawnClothShadows` leaves it out and keeps the drawn cloth's.
+- `ecs/systems/teleportSystem.test.ts`: on Classic the hero's Teleport waits faded for the server's
+  answer, then lands and plays End; `teleportLandsEarly` lands him first and the answer moves nothing.

@@ -45,4 +45,7 @@ export default {
   'fidelity.drawnClothShadows': '깔끔한 천 그림자',
   'fidelity.drawnClothShadows.hint':
     '캐릭터가 보여 주는 망토, 로브, 머리카락만 그림자를 드리웁니다. 클래식: 더 이상 보이지 않는 천도 남겨진 자리에 그림자를 계속 드리웁니다(원작과 같음).',
+  'fidelity.teleportLandsEarly': '텔레포트 즉시 착지',
+  'fidelity.teleportLandsEarly.hint':
+    '내 텔레포트가 사라지는 즉시 서버 응답을 기다리지 않고 목표 칸에 착지합니다. 클래식: 서버가 응답할 때까지 원래 칸에서 사라진 채로 기다립니다(원작과 같음).',
 } satisfies Partial<Record<keyof typeof en, string>>;

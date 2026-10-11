@@ -45,4 +45,7 @@ export default {
   'fidelity.drawnClothShadows': 'Aufgeräumte Stoffschatten',
   'fidelity.drawnClothShadows.hint':
     'Nur Umhänge, Roben und Haare, die eine Figur zeigt, werfen einen Schatten. Klassisch: Ein Stoff, den die Figur nicht mehr zeigt, wirft seinen Schatten weiter dort, wo er zurückblieb, wie im Original.',
+  'fidelity.teleportLandsEarly': 'Teleport landet sofort',
+  'fidelity.teleportLandsEarly.hint':
+    'Dein eigener Teleport setzt dich auf das Feld, sobald du ausgeblendet bist, ohne auf die Antwort des Servers zu warten. Klassisch: Du bleibst ausgeblendet auf dem alten Feld, bis der Server antwortet, wie im Original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

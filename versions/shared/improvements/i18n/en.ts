@@ -42,6 +42,9 @@ const en = {
   'fidelity.drawnClothShadows': 'Tidy cloth shadows',
   'fidelity.drawnClothShadows.hint':
     'Only the capes, robes and hair a character shows cast a shadow. Classic: a cloth the character no longer shows still lays its shadow where it was left, as in the original.',
+  'fidelity.teleportLandsEarly': 'Teleport lands at once',
+  'fidelity.teleportLandsEarly.hint':
+    'Your own Teleport lands on the square as soon as you fade out, without waiting for the server to answer. Classic: you stay faded on the old square until the server answers, as in the original.',
 };
 
 export default en;

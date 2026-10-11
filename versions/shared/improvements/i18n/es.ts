@@ -45,4 +45,7 @@ export default {
   'fidelity.drawnClothShadows': 'Sombras de tela ordenadas',
   'fidelity.drawnClothShadows.hint':
     'Solo las capas, túnicas y cabellos que muestra un personaje proyectan sombra. Clásica: una tela que el personaje ya no muestra sigue dejando su sombra donde quedó, como en el original.',
+  'fidelity.teleportLandsEarly': 'Teleport aterriza al instante',
+  'fidelity.teleportLandsEarly.hint':
+    'Tu propio Teleport te deja en la casilla en cuanto te desvaneces, sin esperar la respuesta del servidor. Clásica: te quedas desvanecido en la casilla anterior hasta que el servidor responde, como en el original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

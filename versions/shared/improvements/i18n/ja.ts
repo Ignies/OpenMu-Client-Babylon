@@ -45,4 +45,7 @@ export default {
   'fidelity.drawnClothShadows': '布の影を整理',
   'fidelity.drawnClothShadows.hint':
     'キャラクターが見せているマント、ローブ、髪だけが影を落とします。クラシック: 見えなくなった布も、残された場所に影を落とし続けます（オリジナルどおり）。',
+  'fidelity.teleportLandsEarly': 'テレポートを即時に着地',
+  'fidelity.teleportLandsEarly.hint':
+    '自分のテレポートは、姿が消えた時点でサーバーの応答を待たずに目的のマスへ着地します。クラシック: サーバーが応答するまで元のマスで消えたまま待ちます（オリジナルどおり）。',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -22,6 +22,7 @@ import { applyObjectEffect } from '../skills/objectEffects';
 import { convertDirectionToAngle } from '@/core/turnAngle';
 import { cancelTeleport, endTeleport } from '@/ecs/systems/teleportSystem';
 import { devQuery } from '@/core/devSeams';
+import { isOn } from '@/controllers/fidelity';
 import { holdForWarpScope } from './warpScopeHold';
 import { runInAction } from 'mobx';
 
@@ -105,18 +106,18 @@ export function installNet(): void {
     const playerPos = playerEntity.transform.pos;
     const onSquare = Math.floor(playerPos.x) === pos.x && Math.floor(playerPos.z) === pos.y;
 
-    // The server's late answer to the hero's own teleport (OpenMU sends it 1.8 s
-    // after the request): he already stands there, so nothing moves, turns or
-    // stops. Only a hero knocked off the square since is put back on it.
-    if (verdict === 'confirm') {
+    // `teleportLandsEarly`: the server's late answer to the hero's own teleport
+    // (OpenMU sends it 1.8 s after the request) finds him there already, so
+    // nothing moves, turns or stops unless he was knocked off the square since.
+    if (verdict === 'confirm' && isOn('teleportLandsEarly')) {
       if (!onSquare) placeHero(world, playerEntity, pos);
       return;
     }
 
-    // Refused, or moved by someone else (Teleport Ally, a GM): Flag 0 of
-    // `ReceiveTeleport` (WSclient.cpp:2193-2197, 2300-2304) - position, angle,
-    // `CreateTeleportEnd` and the hero stops. No UI is closed: that is the
-    // map-change branch only (2199-2295).
+    // Flag 0 of `ReceiveTeleport` (WSclient.cpp:2193-2197, 2300-2304): the answer
+    // to his own teleport, a refusal or a move by someone else (Teleport Ally, a GM)
+    // - position, angle, `CreateTeleportEnd` and the hero stops. No UI is closed:
+    // that is the map-change branch only (2199-2295).
     placeHero(world, playerEntity, pos);
     if (rotation !== undefined) playerEntity.transform.rot.y = convertDirectionToAngle(rotation);
     world.attackTarget = null;

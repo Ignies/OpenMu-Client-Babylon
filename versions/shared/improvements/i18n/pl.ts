@@ -45,4 +45,7 @@ export default {
   'fidelity.drawnClothShadows': 'Uporządkowane cienie tkanin',
   'fidelity.drawnClothShadows.hint':
     'Cień rzucają tylko peleryny, szaty i włosy, które postać pokazuje. Klasyczne: tkanina, której postać już nie pokazuje, nadal rzuca cień tam, gdzie została, jak w oryginale.',
+  'fidelity.teleportLandsEarly': 'Teleport ląduje od razu',
+  'fidelity.teleportLandsEarly.hint':
+    'Twój Teleport stawia cię na polu, gdy tylko znikniesz, bez czekania na odpowiedź serwera. Klasyczne: pozostajesz niewidoczny na starym polu, aż serwer odpowie, jak w oryginale.',
 } satisfies Partial<Record<keyof typeof en, string>>;

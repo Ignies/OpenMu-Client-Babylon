@@ -45,4 +45,7 @@ export default {
   'fidelity.drawnClothShadows': 'Bóng vải gọn gàng',
   'fidelity.drawnClothShadows.hint':
     'Chỉ áo choàng, áo dài và tóc mà nhân vật đang hiện mới đổ bóng. Cổ điển: tấm vải nhân vật không còn hiện vẫn để lại bóng ở chỗ nó bị bỏ lại, như bản gốc.',
+  'fidelity.teleportLandsEarly': 'Dịch chuyển đáp ngay',
+  'fidelity.teleportLandsEarly.hint':
+    'Dịch chuyển của bạn đặt bạn xuống ô đích ngay khi bạn mờ đi, không chờ máy chủ trả lời. Cổ điển: bạn mờ đi và đứng ở ô cũ cho đến khi máy chủ trả lời, như bản gốc.',
 } satisfies Partial<Record<keyof typeof en, string>>;

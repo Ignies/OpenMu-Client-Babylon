@@ -45,4 +45,6 @@ export default {
   'fidelity.drawnClothShadows': '整洁的布料阴影',
   'fidelity.drawnClothShadows.hint':
     '只有角色显示的披风、长袍和头发会投下阴影。经典：角色不再显示的布料仍会在原处留下阴影，与原版相同。',
+  'fidelity.teleportLandsEarly': '传送立即落地',
+  'fidelity.teleportLandsEarly.hint': '你自己的传送在身影消失后立即落到目标格，不等服务器回应。经典：在服务器回应前，你一直隐身停在原来的格子上，与原版相同。',
 } satisfies Partial<Record<keyof typeof en, string>>;

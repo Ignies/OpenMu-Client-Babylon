@@ -214,8 +214,8 @@ export const SkillCastSystem: ISystemFactory = world => {
    * server would refuse it (`AT_SKILL_TELEPORT`, ClassAttack.cpp:1479-1549;
    * WizardTeleportAction.cs). The original stops the hero and drops his
    * target (NewUIMainFrameWindow.cpp:1950-1956, `SetPlayerStop` on the
-   * reply); the Begin fades him out here and teleportSystem lands him on the
-   * square without waiting for the server's late `MapChanged`.
+   * reply); the Begin fades him out here and the server's `MapChanged` lands
+   * him (`teleportLandsEarly`: teleportSystem lands him without waiting).
    *
    * Teleport Ally (15): a party member pulled onto a free square next to the
    * caster (ClassAttack.cpp:1407-1479).
