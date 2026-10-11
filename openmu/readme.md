@@ -84,7 +84,8 @@ web client's saved login, so no password is kept in a browser.
   `mu update` (or `docker build -t mu-openmu:local openmu`).
 - another OpenMU version: `mu config` > OpenMU version. The DLL is recompiled against that image, so
   an API change shows up as a build error, not at run time.
-- a database newer than the last release: `mu config` > OpenMU source at a commit; OpenMU's own
+- a database newer than the last release: `mu config` > OpenMU version > the latest main branch (each
+  `mu update` takes OpenMU's newest commit) or a fixed commit or tag; OpenMU's own
   `src/Startup/Dockerfile` builds the base image.
 
 ## Tests

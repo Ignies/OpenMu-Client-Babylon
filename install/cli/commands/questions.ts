@@ -1,6 +1,7 @@
 // The questions, grouped so install asks all of them and `mu config` asks one group.
 import type { Config } from '../config';
 import { run } from '../exec';
+import { OPENMU_MAIN, openmuSourceKind } from '../openmu';
 import { ui, pc } from '../ui';
 import * as check from '../validate';
 
@@ -30,7 +31,7 @@ export async function ask(c: Config, group: Group): Promise<Config> {
       if (next.mode === 'domain') {
         next.domain = (await ui.text('Domain', { initial: c.domain, placeholder: 'example.com', validate: check.domain })).toLowerCase();
         ui.note(['play', 'ws', 'register', 'api', 'admin'].map(s => `${s}.${next.domain}`).join('\n'), 'Point these DNS A records at this server');
-        next.email = await ui.text('E-mail for certificate notices', { initial: c.email, validate: check.email });
+        next.email = (await ui.text('E-mail for certificate notices (optional, blank for none)', { initial: c.email, validate: v => (v.trim() ? check.email(v.trim()) : undefined) })).trim();
       } else {
         next.publicIp = await ui.text('Public IP address', { initial: c.publicIp || (await publicIp()), validate: check.ipv4 });
       }
@@ -65,9 +66,12 @@ export async function ask(c: Config, group: Group): Promise<Config> {
     case 'openmu': {
       const source = await ui.select('Which OpenMU?', [
         { value: 'release', label: 'An official release', hint: 'munique/openmu image' },
+        { value: 'main', label: 'The latest main branch on GitHub', hint: `built from source; mu update follows it (${OPENMU_MAIN})` },
         { value: 'source', label: 'OpenMU source at a commit or tag', hint: 'built with OpenMU\'s own Dockerfile; for a database newer than the last release' },
-      ], c.openmuSourceRef ? 'source' : 'release');
-      if (source === 'release') {
+      ], openmuSourceKind(c));
+      if (source === 'main') {
+        next.openmuSourceRef = OPENMU_MAIN;
+      } else if (source === 'release') {
         next.openmuSourceRef = '';
         next.openmuVersion = await ui.text('Release', { initial: c.openmuVersion, validate: v => (/^\d+\.\d+\.\d+$/.test(v) ? undefined : 'Like 0.9.10.') });
       } else {

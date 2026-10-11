@@ -8,6 +8,15 @@ import type { Paths } from './paths';
 
 const OPENMU_REPO = 'https://github.com/MUnique/OpenMU.git';
 
+/** OpenMU's default branch: as a source ref, every checkout (and `mu update`) takes its newest commit. */
+export const OPENMU_MAIN = 'master';
+
+/** Which of the three choices a config holds: a release, the main branch, or a fixed commit or tag. */
+export function openmuSourceKind(c: Pick<Config, 'openmuSourceRef'>): 'release' | 'main' | 'source' {
+  if (!c.openmuSourceRef) return 'release';
+  return c.openmuSourceRef === OPENMU_MAIN ? 'main' : 'source';
+}
+
 const git = (p: Paths, ...args: string[]) => must('git', ['-C', p.openmu, ...args]);
 
 /** Checks out the ref the config names (release tag, or the source ref), fetching only that. */
