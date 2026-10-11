@@ -183,6 +183,7 @@ const EquipmentSlot = observer(
     height,
     sprite,
     item,
+    spin,
     onHover,
   }: {
     slot: number;
@@ -192,6 +193,8 @@ const EquipmentSlot = observer(
     height: number;
     sprite: string;
     item: Item | null;
+    /** Under the cursor with nothing held: it turns (RenderItem3D's `Select`). */
+    spin: boolean;
     onHover: (info: HoverInfo | null) => void;
   }) => {
     const picked = Bag.pickedItem;
@@ -245,7 +248,7 @@ const EquipmentSlot = observer(
         />
         {!!item && (
           <span className="equipment-slot-item">
-            <ItemIcon item={item} />
+            <ItemIcon item={item} spin={spin} />
           </span>
         )}
       </div>
@@ -552,6 +555,7 @@ export const Inventory = observer(() => {
           key={info.slot}
           {...info}
           item={playerData.items[info.slot] ?? null}
+          spin={!picked && hover?.slot === info.slot}
           onHover={setHover}
         />
       ))}
@@ -606,7 +610,7 @@ export const Inventory = observer(() => {
               height: entry.h * SQUARE,
             }}
           >
-            <ItemIcon item={entry.item} />
+            <ItemIcon item={entry.item} spin={!picked && hover?.item === entry.item} />
             {stackCount(entry.item) > 1 && (
               <span className="stack">{stackCount(entry.item)}</span>
             )}

@@ -28,6 +28,7 @@ asks `isOn('<id>')`. Classic turns them all off and runs the original.
 | `noticeLinks` | Enhanced | `modules/chat/notices.ts` (`create`), `ui/hud/notices/index.tsx` | a notice is plain text, markup and all, cut in two past 256 px (ZzzInterface.cpp:491-603) |
 | `drawnClothShadows` | Enhanced | `controllers/cloth/clothSet.ts` (`runClothFrame`) | every built cloth below `m_byNumCloth` lays its shadow, a skipped one where it was left (ZzzBMD.cpp:2648-2710) |
 | `loginTokens` | Enhanced | `modules/session/state.ts` (`keepsLoginTokens`, `savedToken`), on a world whose `server.json` has `loginTokens` | the password is typed each time; "remember" keeps the name only (no password is ever stored, on any preset) |
+| `teleportLandsEarly` | Enhanced | `ecs/systems/teleportSystem.ts` (lands him once faded), `modules/warp/net.ts` (the answer moves nothing) | the hero stays faded on the old square until the server's answer places him and plays End (`ReceiveTeleport`, WSclient.cpp:2157-2197) |
 
 - The file's comment cites the original and names the site; the site keeps the original path when
   `isOn` is false.
@@ -65,3 +66,5 @@ asks `isOn('<id>')`. Classic turns them all off and runs the original.
   left; `drawnClothShadows` leaves it out and keeps the drawn cloth's.
 - `modules/session/net.test.ts` ("login tokens"): on Classic no token is asked for and a saved one is
   never sent; the password field is the only way in.
+- `ecs/systems/teleportSystem.test.ts`: on Classic the hero's Teleport waits faded for the server's
+  answer, then lands and plays End; `teleportLandsEarly` lands him first and the answer moves nothing.

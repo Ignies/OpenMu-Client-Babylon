@@ -48,4 +48,7 @@ export default {
   'fidelity.loginTokens': 'Accessi salvati',
   'fidelity.loginTokens.hint':
     'Nei mondi che lo offrono, «Ricordami» conserva un token di accesso al posto della password, così l’accesso successivo non la chiede. Classica: scrivi la password ogni volta, come nell’originale.',
+  'fidelity.teleportLandsEarly': 'Teletrasporto immediato',
+  'fidelity.teleportLandsEarly.hint':
+    'Il tuo Teletrasporto ti porta sulla casella appena svanisci, senza attendere la risposta del server. Classica: resti svanito sulla vecchia casella finché il server non risponde, come nell’originale.',
 } satisfies Partial<Record<keyof typeof en, string>>;

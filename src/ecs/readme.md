@@ -166,7 +166,8 @@ the rest, so pathing and the server never see the slide.
   the server's skill animation `CreateTeleportBegin` (WSclient.cpp:4320-4331) and its answer is
   `ReceiveTeleport` (`JumpTime = 0`, `CreateTeleportEnd`, WSclient.cpp:2157-2197), never 0x15; OpenMU
   answers a teleport with `MapChanged` and sends the teleporter no `ObjectMoved` (`ObjectMovedPlugIn`,
-  MoveType.Teleport). This client lands its own hero before the answer (`teleportSystem.ts`).
+  MoveType.Teleport). The hero waits for it as in the original; the `teleportLandsEarly` improvement
+  lands him before it (`teleportSystem.ts`).
 
 ### dropMotionSystem.ts
 A fresh drop starts 180 cm up with `Gravity = 20` cm/tick, `Gravity -= 6` a tick, tumbling until

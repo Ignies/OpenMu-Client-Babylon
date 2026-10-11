@@ -48,4 +48,7 @@ export default {
   'fidelity.loginTokens': 'Logins salvos',
   'fidelity.loginTokens.hint':
     'Nos mundos que oferecem, "Lembrar de mim" guarda um token de acesso no lugar da sua senha, e o próximo login não pede senha. Clássica: você digita a senha toda vez, como no original.',
+  'fidelity.teleportLandsEarly': 'Teleporte chega na hora',
+  'fidelity.teleportLandsEarly.hint':
+    'Seu próprio Teleporte te coloca na casa assim que você some, sem esperar a resposta do servidor. Clássica: você fica sumido na casa anterior até o servidor responder, como no original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

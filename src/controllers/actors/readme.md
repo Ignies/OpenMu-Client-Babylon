@@ -65,11 +65,14 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   Bronze, Leather, Scale, Brass and Plate helms (`MaskHelmMale`), ZzzCharacter.cpp:9579-9617.
 - `itemModel.ts`: `dressItemModel(object, group, num)`, what the original does to every loose item
   model, on the ground or in the bag (`ItemHeight`, `HideSkin`, frozen at frame 0, the
-  `ItemObjectAttribute` mesh rules; `DropObject` and the bag icon both use it), and
+  `ItemObjectAttribute` mesh rules, and `RenderPartObjectBody`'s seed colours: a seed in its element's
+  colour with Chrome01 added, a seed sphere so but for its mesh 1, ZzzObject.cpp:8067-8121; `DropObject`
+  and the bag icon both use it), and
   `loadItemModel(scene, parent, group, num, file)`, such a model with no entity behind it. A worn
   `Player/` part keeps its own file's skeleton, posed at its first frame, as a drop does.
 - `itemIcon.ts`: `itemIconJob(scene, item)`, the shot of a bag icon drawn from the item's model, and
-  `liveItemIconSource(scene)`, what the app puts in the interface's live-icon slot;
+  `liveItemIconSource(scene)` / `liveItemSpinSource(scene)`, what the app puts in the interface's
+  live-icon and spin slots;
   `ITEM_ICON_UNITS_PER_PIXEL`.
 
 ## How it works
@@ -120,11 +123,14 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   is `ITEM_ICON_UNITS_PER_PIXEL` units there. The shot covers the item's squares (20 pixels each),
   places the model at its anchor in them plus its offset, turns it and sets its body height as
   `RenderObjectScreen` does (`interface/item_icons/itemIconPose.ts`, two-handed by `isTwoHanded`, the
-  inventory width proxy) and scales it by `itemIconScale.ts`; its meshes carry the item's
+  item's own `TwoHand`) and scales it by `itemIconScale.ts`; its meshes carry the item's
   `itemVisualTier` as worn gear does (the level and excellent passes, RenderPartObject at the item's
-  level and options, ZzzInventory.cpp:9699); `render/iconShot.ts` draws it once. A picture is kept
-  per look (group, number, level, excellent, ancient) for the session: a changed item-effects
-  option shows on new looks only.
+  level and options, ZzzInventory.cpp:9699); `render/iconShot.ts` draws it once. The item under the
+  cursor (nothing held) turns: `Angle[1] = WorldTime * 0.45f` (ZzzInventory.cpp:8856-8859), its other
+  angles kept, drawn every frame by the shot's spin onto the icon's canvas, pack icons too. A picture is kept
+  per look (group, number, level, excellent, ancient) until the item-effects option (or the effect
+  limit) changes: `liveItemIconSource` then forgets the shots and the interface's pictures, and every
+  look is drawn again.
 
 ## Depends on / used by
 - uses: `render` (`ModelObject`, bone links), `assets`, `anim`, `fx`, `item_fx`, `lighting`,
@@ -156,12 +162,18 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   players and NPCs keep theirs, no armour glow in the castle.
 - `approachPath.test.ts`: walk truncation at range, distance along the sent path, stall capping.
 - `deserializeAppearance.test.ts`: `isAppearanceBlank` on empty and real previews.
+- `itemModel.test.ts`: the seeds and seed spheres dressed in their element's colour with Chrome01 (a sphere
+  but its mesh 1), every other item unshone.
+- `weaponClass.test.ts`: `isTwoHanded` is the item's own `TwoHand` (the wide staffs two-handed, Legendary
+  Staff on one-handed), matching `Item_eng.bmd` on every weapon row it has.
 - `itemAngle.test.ts`: drop scale and pose per group, worn height, the `ItemAngle` tail rows.
 - `itemIcon.test.ts`: the shot covers the item's squares at the original's item depth, loads the
   item's own model under the root at its scale and angle; a worn part (the Queen helm) draws only its
   helm mesh, comes down by `ItemHeight` and keeps its own skeleton; the anchor plus offset (the Lucky
   Penny), a weapon's hands (Mace of the King), the Heart +0's swapped model and scale, the level and
-  excellent tier on every mesh and one key per look; no shot for an item with no model.
+  excellent tier on every mesh and one key per look; no shot for an item with no model; the hover
+  turn at 0.45 degrees a millisecond, written into the node's own quaternion; a changed item-effects
+  option forgets the shots and asks every look again.
 - `npcModelTable.test.ts`: every row names a file in `public/game-assets` and has a scale > 0; the
   tables behave as plain objects and read the folders when asked.
 - `trapModels.test.ts`: every (map, trap) pair names an `Object<world+1>` model that exists.
@@ -185,6 +197,7 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 - `wingObject.test.ts`: the Wing of Ruin layer (a `Data/` bitmap, `getDataTexture`) is read top-down like
   the GLB textures it shares the UVs of, and is drawn on a model whose meshes sit under its model node; a wing
   casts the Classic shadow, its blend card too, a cape's model none (its cloth does).
+- `wings.test.ts`: every wake, sprite and pass light hands back one kept colour, still at its own time.
 - Also from `controllers/item_rules/`: `portedItems`, `questItemLink`, `weaponAttack` tests.
 
 ## Notes

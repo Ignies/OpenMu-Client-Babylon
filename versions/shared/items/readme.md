@@ -27,8 +27,9 @@ petItems.ts           pet and mount item numbers in group 13 (PET_GROUP, DARK_HO
   and the registry. Field names are the original table's, so every reader keeps working.
 - The files came from the Season 6 `Item.txt`: `tools/convertItemTXTtoJson.ts` writes them,
   `tools/addRageFighterColumn.ts` and `tools/syncItemRequirements.ts` run after it (all three go
-  through `tools/itemFiles.ts`), then `tools/syncItemClasses.ts` sets every class block to the original
-  `Item_eng.bmd`'s (`item_rules/itemClasses.test.ts` checks each row). A file's name is the item's name in snake_case, plus `_<index>`
+  through `tools/itemFiles.ts`), then `tools/syncItemClasses.ts` sets every class block and the
+  `TwoHand` flag (written only where it is 1) to the original `Item_eng.bmd`'s
+  (`item_rules/itemClasses.test.ts` and `actors/weaponClass.test.ts` check each row). A file's name is the item's name in snake_case, plus `_<index>`
   when two items of a group share a name.
 - `szModelFolder` + `szModelName` is the model the original loads for the item (`ZzzOpenData.cpp`
   `AccessModel`), where `Item.txt` names a later season's file: Merlin Staff is `Item/Staff_33`
@@ -37,7 +38,8 @@ petItems.ts           pet and mount item numbers in group 13 (PET_GROUP, DARK_HO
   (`tools/assetCase.test.ts`). For a new item it has no model for, the converter writes
   `Item/rollofpaper.glb` (`tools/convertItemTXTtoJson.ts`), the scrolls' own model: the seed spheres
   12/101-129 kept that stand-in until they took their level's `s30_sphere0<level + 1>`
-  (ZzzOpenData.cpp:871-875).
+  (ZzzOpenData.cpp:871-875), the fireworks (14/63) until `GM01` and the compressed Bless and Soul
+  (12/30, 12/31) until `Jewel01` / `Jewel02` (:957-958, :984).
 - `launcher_arrows.ts` is handed to the skills controller by `versions/shared/skills/index.ts`
   (`registerLauncherArrows`). A launcher with no row shoots the plain steel arrow.
 

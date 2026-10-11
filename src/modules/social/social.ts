@@ -136,8 +136,6 @@ type SoccerScore = {
   blueTeam: string;
   redGoals: number;
   blueGoals: number;
-  /** GuildSoccerTimeUpdate (F3 22): remaining seconds, -1 until the first tick. */
-  seconds: number;
 };
 
 /** A yes/no question from another player (party invite, guild join). */
@@ -235,6 +233,8 @@ export const Social = new (class _Social {
   guildWar: GuildWar | null = null;
   /** The Battle Soccer scoreboard: null while no match runs on the stadium. */
   battleSoccer: SoccerScore | null = null;
+  /** GuildSoccerTimeUpdate (F3 22): seconds left, -1 until the first tick; kept apart from the board (`g_wtMatchTimeLeft`). */
+  soccerSeconds = -1;
   /** GuildWarRequest: another master asks for a war, yes/no. */
   guildWarRequest: { guildName: string; soccer: boolean } | null = null;
   /** GuildRelationshipRequest: an alliance / hostility offer, yes/no. */
@@ -303,6 +303,7 @@ export const Social = new (class _Social {
       allianceGuilds: observable,
       guildWar: observable,
       battleSoccer: observable,
+      soccerSeconds: observable,
       guildWarRequest: observable,
       guildRelationRequest: observable,
       guildMasterDialog: observable,
@@ -339,6 +340,7 @@ export const Social = new (class _Social {
     this.allianceGuilds = [];
     this.guildWar = null;
     this.battleSoccer = null;
+    this.soccerSeconds = -1;
     this.guildWarRequest = null;
     this.guildRelationRequest = null;
     this.guildMasterDialog = false;

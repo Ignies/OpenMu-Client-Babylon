@@ -51,6 +51,14 @@ const FOG_BASE_EASE = 2.5;
 
 type Underworld = NonNullable<LookProfile['underworld']>;
 
+/** The underworld drawn, its density after the dev seam: `shown.underworld` when live, rewritten each sync. */
+const shownUnderworld: { -readonly [K in keyof Underworld]: Underworld[K] } = {
+  top: 0,
+  density: 0,
+  falloff: 1,
+  color: [0, 0, 0],
+};
+
 const shown = {
   color: [0, 0, 0] as [number, number, number],
   start: 0,
@@ -340,8 +348,15 @@ export function syncHeightFog(
   // both the A/B for what it is worth and the dial for how hard it bites.
   const uwDensity = uwDev ?? underworld?.density ?? 0;
 
-  shown.underworld =
-    underworld && uwDensity > 0 ? { ...underworld, density: uwDensity } : null;
+  if (underworld && uwDensity > 0) {
+    shownUnderworld.top = underworld.top;
+    shownUnderworld.density = uwDensity;
+    shownUnderworld.falloff = underworld.falloff;
+    shownUnderworld.color = underworld.color;
+    shown.underworld = shownUnderworld;
+  } else {
+    shown.underworld = null;
+  }
 
   uwLinear[0] = shown.underworld?.color[0] ?? 0;
   uwLinear[1] = shown.underworld?.color[1] ?? 0;

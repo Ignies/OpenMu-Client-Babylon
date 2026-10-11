@@ -48,4 +48,7 @@ export default {
   'fidelity.loginTokens': 'Zapisane logowania',
   'fidelity.loginTokens.hint':
     'Na światach, które to oferują, „Zapamiętaj mnie” przechowuje token logowania zamiast hasła, więc kolejne logowanie nie wymaga hasła. Klasyczne: hasło wpisujesz za każdym razem, jak w oryginale.',
+  'fidelity.teleportLandsEarly': 'Teleport ląduje od razu',
+  'fidelity.teleportLandsEarly.hint':
+    'Twój Teleport stawia cię na polu, gdy tylko znikniesz, bez czekania na odpowiedź serwera. Klasyczne: pozostajesz niewidoczny na starym polu, aż serwer odpowie, jak w oryginale.',
 } satisfies Partial<Record<keyof typeof en, string>>;

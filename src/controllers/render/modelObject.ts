@@ -653,6 +653,12 @@ export class ModelObject {
   ShineMesh = -1;
 
   /**
+   * The meshes carrying `BodyShine` are lit by its tint, not the body's light: the original sets
+   * `b->BodyLight` to the colour before the tinted passes (a seed, ZzzObject.cpp:8067-8121).
+   */
+  ShineLight = false;
+
+  /**
    * Keeps `Light` at whatever the model set, instead of the terrain light
    * under it (renderSystem). The original's Fenrir branch opens with
    * `b->BodyLight = 1,1,1` and never reads `o->Light`, so the wolf is the
@@ -1203,9 +1209,10 @@ export class ModelObject {
       mesh.metadata.SkipBoundingBox =
         this.SkipBoundingBox || mesh.metadata.hiddenByScript === true;
 
-      mesh.metadata.bodyLight = bodyLight;
-      mesh.metadata.bodyShine =
-        this.ShineMesh >= 0 && mesh !== shineMesh ? undefined : bodyShine;
+      const shines = this.ShineMesh < 0 || mesh === shineMesh;
+      mesh.metadata.shineLit = this.ShineLight && shines;
+      mesh.metadata.bodyLight = mesh.metadata.shineLit ? bodyShine.tint : bodyLight;
+      mesh.metadata.bodyShine = shines ? bodyShine : undefined;
       mesh.metadata.snowCap = this.SnowCap;
 
       // Only the map receives the cascades. The original lights a character,
@@ -1812,21 +1819,6 @@ export class ModelObject {
         }
       }
     }
-  }
-
-  Draw(_gameTime: World['gameTime']): void {
-    if (!this.Visible) return;
-
-    // The base DrawMesh is a no-op hook; only walk (and allocate) the mesh
-    // list for subclasses that actually override it (HouseWallObject flicker).
-    if (this.DrawMesh === ModelObject.prototype.DrawMesh) return;
-
-    const meshes = this.getMeshes();
-    for (let i = 0; i < meshes.length; i++) this.DrawMesh(i);
-  }
-
-  DrawMesh(mesh: Int): void {
-    if (this.HiddenMesh === mesh || this.bodyHidden) return;
   }
 
   /**

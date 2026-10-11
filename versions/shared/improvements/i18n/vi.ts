@@ -48,4 +48,7 @@ export default {
   'fidelity.loginTokens': 'Đăng nhập đã lưu',
   'fidelity.loginTokens.hint':
     'Ở các thế giới hỗ trợ, "Ghi nhớ" giữ một mã đăng nhập thay cho mật khẩu, nên lần đăng nhập sau không cần mật khẩu. Cổ điển: nhập mật khẩu mỗi lần, như bản gốc.',
+  'fidelity.teleportLandsEarly': 'Dịch chuyển đáp ngay',
+  'fidelity.teleportLandsEarly.hint':
+    'Dịch chuyển của bạn đặt bạn xuống ô đích ngay khi bạn mờ đi, không chờ máy chủ trả lời. Cổ điển: bạn mờ đi và đứng ở ô cũ cho đến khi máy chủ trả lời, như bản gốc.',
 } satisfies Partial<Record<keyof typeof en, string>>;

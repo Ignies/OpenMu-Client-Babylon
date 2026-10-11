@@ -1,6 +1,8 @@
 import type { LightEmitter } from '@/controllers/lighting';
 import { isOn } from '@/controllers/fidelity';
+import type { MeshAnimations } from '@/controllers/render';
 import { createFire } from '../shared/lights';
+import { rollTenths } from '../shared/meshAnimation';
 
 /**
  * Devias (`WD_2DEVIAS`, `World3`/`Object3`), the plain-data half. Devias has
@@ -25,6 +27,11 @@ export const DEVIAS_BLEND_MESHES: Readonly<Record<number, number>> = {
   54: 1,
   56: 1,
   78: 3,
+};
+
+/** `MoveObject`: 78 rolls its blend mesh's light every frame (ZzzObject.cpp:3858-3860). */
+export const DEVIAS_MESH_ANIMATIONS: MeshAnimations = {
+  78: { mesh: 3, kind: 'blend', light: rollTenths(4, 4) },
 };
 
 /**

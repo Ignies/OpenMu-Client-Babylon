@@ -582,15 +582,6 @@ export class PlayerObject extends ModelObject {
     this.Cloth.dispose();
     super.dispose();
   }
-
-  Draw(gameTime: World['gameTime']): void {
-    super.Draw(gameTime);
-
-    // Update all children
-    for (const child of this.Children) {
-      child.Draw(gameTime);
-    }
-  }
 }
 
 const PLAYER_SHADOW_MIN_ALPHA = 0.5;

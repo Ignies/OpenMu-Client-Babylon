@@ -17,8 +17,8 @@ import {
  * `CNewUIBattleSoccerScore` (NewUIBattleSoccerScore.cpp) - the Battle Soccer
  * scoreboard: `newui_Figure_ground` 131x70 at (509, 359), a goals / mark /
  * name row per team at (30, 33) and 22 px lower, red team in (255,60,0) and
- * blue in (0,150,255) on black(128). The remaining match time
- * (GuildSoccerTimeUpdate) is the clock line the figure's head area holds.
+ * blue in (0,150,255) on black(128). The clock line (`Social.soccerSeconds`) is
+ * ours: the original draws F3 22 at the screen centre (RenderTournamentInterface).
  */
 
 const PANEL = { x: 509, y: 359, width: 131, height: 70 };
@@ -115,10 +115,10 @@ export const SoccerScoreHud = observer(() => {
         transform: `scale(${scale})`,
       }}
     >
-      {match.seconds >= 0 && (
+      {Social.soccerSeconds >= 0 && (
         <MuText
           face="bold"
-          text={clock(match.seconds)}
+          text={clock(Social.soccerSeconds)}
           color={CLOCK_COLOR}
           background={TEXT_BG}
           className="soccer-clock"

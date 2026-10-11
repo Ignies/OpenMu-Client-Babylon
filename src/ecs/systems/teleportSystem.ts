@@ -6,6 +6,7 @@ import { COMBAT_BUS } from '../../controllers/sound/combatSounds';
 import { playSfx } from '../../controllers/sound/sfx';
 import type { Sounds } from '../../controllers/sound/recipes';
 import type { Tile } from '../../modules/warp/teleportRules';
+import { isOn } from '../../controllers/fidelity';
 
 /**
  * The body side of Teleport and Teleport Ally: `CreateTeleportBegin` /
@@ -15,9 +16,9 @@ import type { Tile } from '../../modules/warp/teleportRules';
  * frame 5, flashes at the new square and fades the body back in. A mount
  * fades with its rider (petSystem reads `teleportMountAlpha`).
  *
- * The hero does not wait for the server: his own Begin fades at the original
- * rate and lands him on the target once he is gone or after
- * HERO_MOVE_AFTER, whichever comes first, then plays End there.
+ * The hero waits faded for the server's answer (warp/net.ts plays End there).
+ * With `teleportLandsEarly` his own Begin lands him on the target once he is
+ * gone or after HERO_MOVE_AFTER, whichever comes first, then plays End there.
  */
 
 const TICKS_PER_SECOND = 25;
@@ -28,9 +29,8 @@ const HERO_EXTRA_FADE_PER_TICK = 0.1;
 /** A mount loses 0.1 a tick while its rider is BEGIN/TELEPORT, and is back at 1 otherwise (GOBoid.cpp:189-197). */
 const MOUNT_FADE_PER_TICK = 0.1;
 /**
- * The original holds the hero on the old square until the server answers. Here
- * he lands as soon as the fade is done or after this long: at the original's
- * 0.15 a tick he is at a quarter alpha by then, and the jump reads as instant.
+ * `teleportLandsEarly`: he lands as soon as the fade is done or after this long;
+ * at the original's 0.15 a tick he is at a quarter alpha by then.
  */
 const HERO_MOVE_AFTER = 0.2;
 /** `o->Alpha >= 0.7f`: no new Teleport and no walk below it (ClassAttack.cpp:1514, ZzzInterface.cpp:3080). */
@@ -229,6 +229,7 @@ export const TeleportSystem: ISystemFactory = world => {
       clock += dt;
       if (fades.size === 0) return;
       const ticks = dt * TICKS_PER_SECOND;
+      const landEarly = isOn('teleportLandsEarly');
 
       for (const [e, f] of fades) {
         if (!world.has(e) || e.dying) {
@@ -248,7 +249,7 @@ export const TeleportSystem: ISystemFactory = world => {
         if (f.phase === 'begin') {
           f.alpha = Math.max(0, f.alpha - f.outPerTick * ticks);
           f.mountAlpha = Math.max(0, f.mountAlpha - MOUNT_FADE_PER_TICK * ticks);
-          if (f.move && (f.alpha <= 0 || f.t >= HERO_MOVE_AFTER)) {
+          if (f.move && landEarly && (f.alpha <= 0 || f.t >= HERO_MOVE_AFTER)) {
             land(world, e, f);
           } else if (f.alpha <= 0) {
             f.phase = 'hidden';

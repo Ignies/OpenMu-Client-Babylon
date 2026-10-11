@@ -13,7 +13,8 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `babylon/spriteLinear.ts`: `installSpriteLinearDecode()` (called by `fx/core.ts`).
 - `babylon/compileWait.ts`: `pauseCompileWaitWhileHidden()` (called by `createEngine`).
 - `modelObject.ts`: `ModelObject`, the base class of every drawn model (actors, map objects, npcs,
-  drops, pets); `PartPose`, `BodyShine`, `HIDDEN_MESH_ALL`, `BLEND_MESH_ALL`.
+  drops, pets); `PartPose`, `BodyShine` (with `ShineMesh` and `ShineLight`, the shine mesh lit by
+  the shine's tint), `HIDDEN_MESH_ALL`, `BLEND_MESH_ALL`.
 - `scenes/testScene.ts`: `TestScene`, the game's `Scene` with its camera, highlight layer and look.
 - `sceneLook.ts`: `setAreaMood`, `requestGlowProbe`, `updateSceneLook` (glow layer, areas).
 - `scenes/<pass>.ts`: `sync<Pass>` / `dispose<Pass>` and `createPostChain`, called by
@@ -38,7 +39,9 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `configFingerprint.ts`: `configFingerprintLines()` and friends, every game option packed into a hex
   string for the perf overlay.
 - `iconShot.ts`: `iconShots(scene).shoot(job)`, a one-shot picture of a model as an image URL (the bag
-  icons the pack has no file for), `ICON_LAYER`, `iconPixels`.
+  icons the pack has no file for); `iconShots(scene).spin(job, paint)`, the same model turned and drawn
+  every frame until stopped (the item under the cursor); `forget()`, the kept pictures dropped;
+  `ICON_LAYER`, `iconPixels`.
 
 ## How it works
 - `ModelObject.load(gltf)` puts a GLB under the object's node with the BMD to Babylon basis change
@@ -68,7 +71,10 @@ There is no `index.ts` facade; other folders import the modules directly.
   shadow flags (the original's `Light = 1,1,1`, `LightEnable` off, ZzzInventory.cpp:9682-9699), then an
   orthographic camera and a target of their own draw them once after the frame (`onAfterRender`,
   only while a job waits), at most one per frame. The target is read back, encoded as a PNG object
-  URL, cached by the job's key and everything is freed.
+  URL, cached by the job's key and everything is freed. A spin keeps its root, camera and target
+  until stopped and, every frame after the render, turns the model (`job.turn`), draws it, reads it
+  synchronously into a kept buffer and hands `paint` one kept straight-alpha array: no allocation per
+  frame. One spin at a time: a new one stops the last.
 
 ## Depends on / used by
 - uses: `assets` (model loader, texture packs), `lighting`, `terrain`, `maps`, `item_fx`, `anim`,
@@ -94,17 +100,22 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `configFingerprint.test.ts`: `configuration_hex.md` matches the options, the layout and lengths,
   the number bias round trip, and the pack digest.
 - `frameSnapshot.test.ts`: fills once per frame and per scene, refills after a throw.
-- `iconShot.test.ts`: at most one shot per frame and no observer once idle; one build per key; the
+- `iconShot.test.ts`: at most one shot per frame and no observer once idle; one build per key, again
+  after `forget`; the
   subject, root, camera and target freed; the main camera never sees the subject; flat lit, no fog,
-  no caster flag; a failed build answers null; the bounded wait for readiness; `iconPixels` (row flip,
-  straight alpha over the clear, the display curve on a linear buffer). NullEngine draws no pixels,
-  so what a picture looks like is checked in a browser.
+  no caster flag, but a mesh lit by its own shine keeps its light; a failed build answers null; the bounded wait for readiness; `iconPixels` (row flip,
+  straight alpha over the clear, the display curve on a linear buffer, a kept buffer rewritten whole);
+  the spin draws one turned picture a frame into one kept buffer, one item at a time, and frees all of
+  it when stopped, before its model is in too. NullEngine draws no pixels, so what a picture looks
+  like is checked in a browser.
 - `meshAnimation.test.ts`: `meshAnimationFor` reads the map row per world.
 - `modelObject.test.ts`: a model whose clips are cloned on first play reads every clip's keys at load
   without cloning one, and a clip cloned later reports its end; `BlendMesh -2` and a pulsing `BlendMeshLightAt`;
+  `ShineLight` lights the shine mesh by the tint;
   a part unlinked from its bone goes back under its owner; an action stops every other running clip, the loader's clip 0 too;
   a character casts the blob, a map object only with `MapShadow`; `ShadowFromGround` marks the clone;
-  `ShadowMeshes` keeps the other meshes out; the clone carries `ShadowAlpha` and draws from `ShadowMinAlpha`.
+  `ShadowMeshes` keeps the other meshes out; the clone carries `ShadowAlpha` and draws from `ShadowMinAlpha`;
+  no per-frame `Draw` / `DrawMesh` hook is left.
 - `versions/shared/contentRows.golden.test.ts`: every map's mesh animations, sampled over time.
 - `pbrMaps.test.ts`: `textureSourceName` reads the pack's remembered name mid-swap.
 - `pbrDerive.test.ts`: `flipRows`, flat normal and emissive mask of `derivePbrMaps`.
@@ -116,7 +127,8 @@ There is no `index.ts` facade; other folders import the modules directly.
   batched caster's shadow folds from the ground when it asks to (`ShadowFromGround`).
 - `renderAngles.test.ts`: `angleMatrixQuaternion` against the original's `AngleMatrix`, and a
   placed record with both pitch and roll drawn by it, by its node and by its batched placement.
-- `renderingStyle.test.ts`: style readers, tier gating, the material snapshot and toon binds.
+- `renderingStyle.test.ts`: style readers, tier gating, the material snapshot and toon binds; the
+  cinematic trim is one kept object.
 - `renderScale.test.ts`: slider steps, `clampRenderScale`, `applyRenderScale` on the device ratio.
 - `staticClips.test.ts`: still animation detection and `settleStillAnimations`.
 - `viewPlanes.test.ts`: `viewDepth`, matching `BoundingSphere.isInFrustum`.
@@ -129,7 +141,8 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `scenes/gbufferFormats.test.ts`: R32F depth and RGBA16F normals, defaults otherwise.
 - `scenes/highlightMask.test.ts`: bone boxes, screen rects and hover mask selection; a skinned part
   is kept only when its posed bone boxes reach the lit box.
-- `scenes/roomMask.test.ts`: the room mask's depth map follows a resize on the next tick.
+- `scenes/roomMask.test.ts`: the room mask's depth map follows a resize on the next tick; its answer is
+  one kept object.
 - `scenes/sunShafts.test.ts`: the shaft pass leaves and rejoins the chain with the sun.
 
 ## Notes

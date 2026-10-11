@@ -615,6 +615,12 @@ describe('Anime 2.0', () => {
     expect(animeFilmBoost()).toEqual({ bloom: 0, chromatic: 0, grain: 0 });
   });
 
+  // The post chain reads it every tick (postChain.ts): one kept answer, not a fresh object a call.
+  it('hands the cinematic trim back in one kept object', () => {
+    tuned();
+    expect(animeFilmBoost()).toBe(animeFilmBoost());
+  });
+
   it('asks for speed lines only on its own style', () => {
     tuned();
     setGameOption('animeSpeedLines', 0);

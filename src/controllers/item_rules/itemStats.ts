@@ -144,9 +144,8 @@ export function itemDef(group: number, index: number): ItemDef | null {
       'Wind',
       'Water',
     ].map(column => num(raw, column)),
-    // Item.bmd's TwoHand flag is not in Item.txt; every two-handed weapon
-    // in the table is two squares wide and no one-hander is.
-    twoHand: group <= ItemGroup.Staff && width >= 2,
+    // Item.bmd's TwoHand (`ItemAttribute[].TwoHand`), as the item files carry it.
+    twoHand: raw.TwoHand === 1,
     modelFolder: String(raw.szModelFolder ?? ''),
     modelName: String(raw.szModelName ?? ''),
   };

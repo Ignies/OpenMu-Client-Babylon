@@ -6,6 +6,7 @@ import {
   LORENCIA_TERRAIN,
   LORENCIA_EFFECT_ONLY_TYPES,
   LORENCIA_EMISSIONS,
+  LORENCIA_MESH_ANIMATIONS,
 } from './spec';
 import { LORENCIA_SOUND } from './sound';
 import { LORENCIA_LIGHTING } from './lighting';
@@ -51,6 +52,7 @@ export const lorenciaLayer: MapLayer = {
   blendMeshes: LORENCIA_BLEND_MESHES,
   effectOnly: LORENCIA_EFFECT_ONLY_TYPES,
   emissions: LORENCIA_EMISSIONS,
+  render: { meshAnimations: LORENCIA_MESH_ANIMATIONS },
   // What flies here (`MoveBoids`, GOBoid.cpp:1304-1346).
   fx: { boids: 'bird' },
   sound: LORENCIA_SOUND,

@@ -48,4 +48,7 @@ export default {
   'fidelity.loginTokens': 'Connexions enregistrées',
   'fidelity.loginTokens.hint':
     'Sur les mondes qui le proposent, « Se souvenir de moi » garde un jeton de connexion au lieu de votre mot de passe : la connexion suivante ne le demande pas. Classique : vous tapez le mot de passe à chaque fois, comme dans l’original.',
+  'fidelity.teleportLandsEarly': 'Téléportation immédiate',
+  'fidelity.teleportLandsEarly.hint':
+    'Votre propre Téléportation vous pose sur la case dès que vous avez disparu, sans attendre la réponse du serveur. Classique : vous restez effacé sur l’ancienne case jusqu’à la réponse du serveur, comme dans l’original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

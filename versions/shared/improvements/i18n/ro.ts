@@ -48,4 +48,7 @@ export default {
   'fidelity.loginTokens': 'Autentificări salvate',
   'fidelity.loginTokens.hint':
     'Pe lumile care o oferă, „Ține-mă minte” păstrează un token de autentificare în locul parolei, așa că următoarea autentificare nu cere parola. Clasică: scrii parola de fiecare dată, ca în original.',
+  'fidelity.teleportLandsEarly': 'Teleportarea aterizează imediat',
+  'fidelity.teleportLandsEarly.hint':
+    'Propria ta Teleportare te așază pe pătrat imediat ce dispari, fără să aștepte răspunsul serverului. Clasică: rămâi dispărut pe pătratul vechi până răspunde serverul, ca în original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

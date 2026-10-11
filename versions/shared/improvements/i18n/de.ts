@@ -48,4 +48,7 @@ export default {
   'fidelity.loginTokens': 'Gespeicherte Anmeldungen',
   'fidelity.loginTokens.hint':
     'Auf Welten, die es anbieten, behält „Angemeldet bleiben“ ein Anmelde-Token statt deines Passworts, sodass die nächste Anmeldung kein Passwort braucht. Klassisch: Du gibst das Passwort jedes Mal ein, wie im Original.',
+  'fidelity.teleportLandsEarly': 'Teleport landet sofort',
+  'fidelity.teleportLandsEarly.hint':
+    'Dein eigener Teleport setzt dich auf das Feld, sobald du ausgeblendet bist, ohne auf die Antwort des Servers zu warten. Klassisch: Du bleibst ausgeblendet auf dem alten Feld, bis der Server antwortet, wie im Original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

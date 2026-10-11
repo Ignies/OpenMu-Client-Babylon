@@ -48,4 +48,6 @@ export default {
   'fidelity.loginTokens': '保存登录',
   'fidelity.loginTokens.hint':
     '在支持的世界中，“记住我”会保存登录令牌而不是密码，下次登录无需输入密码。经典：每次都要输入密码，与原版一致。',
+  'fidelity.teleportLandsEarly': '传送立即落地',
+  'fidelity.teleportLandsEarly.hint': '你自己的传送在身影消失后立即落到目标格，不等服务器回应。经典：在服务器回应前，你一直隐身停在原来的格子上，与原版相同。',
 } satisfies Partial<Record<keyof typeof en, string>>;

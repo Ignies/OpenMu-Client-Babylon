@@ -85,6 +85,21 @@ describe('a blend mesh', () => {
     for (const mesh of gltf.mesh.getChildMeshes()) expect(mesh.metadata.brightMesh).toBe(true);
   });
 
+  // A seed sphere: `BodyLight` set to its colour before the tinted passes, mesh 1 drawn first at the body's (ZzzObject.cpp:8094-8121).
+  it('lights the shine mesh by the shine with ShineLight, the others by the body', () => {
+    const object = new ModelObject(scene);
+    object.BodyShine.tint.set(0.9, 0.1, 0.2);
+    object.ShineLight = true;
+    object.ShineMesh = 0;
+    const gltf = body(2);
+    object.load(gltf);
+    const [tinted, plain] = gltf.mesh.getChildMeshes();
+    expect(tinted.metadata.bodyLight).toBe(object.BodyShine.tint);
+    expect(tinted.metadata.shineLit).toBe(true);
+    expect(plain.metadata.bodyLight).toBe(object.Light);
+    expect(plain.metadata.shineLit).toBeFalsy();
+  });
+
   it('re-reads BlendMeshLight every frame off WorldTime when it pulses', () => {
     const object = new ModelObject(scene);
     object.BlendMesh = 1;
@@ -179,5 +194,13 @@ describe('the Classic blob shadow', () => {
     plain.load(box('plain'));
     const fromGround = (name: string) => scene.getMeshByName(`${name}_shadow0`)?.metadata?.shadowFromGround;
     expect([fromGround('boid'), fromGround('plain')]).toEqual([true, false]);
+  });
+});
+
+// The `Draw` / `DrawMesh` hook outlived its last override (HouseWallObject's old flicker): nothing to call per frame.
+describe('the per-frame draw hook', () => {
+  it('is gone', () => {
+    expect('Draw' in ModelObject.prototype).toBe(false);
+    expect('DrawMesh' in ModelObject.prototype).toBe(false);
   });
 });

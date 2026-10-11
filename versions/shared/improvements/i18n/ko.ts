@@ -48,4 +48,7 @@ export default {
   'fidelity.loginTokens': '로그인 저장',
   'fidelity.loginTokens.hint':
     '지원하는 월드에서는 "로그인 정보 저장"이 비밀번호 대신 로그인 토큰을 저장해 다음 로그인에 비밀번호가 필요 없습니다. 클래식: 원작처럼 매번 비밀번호를 입력합니다.',
+  'fidelity.teleportLandsEarly': '텔레포트 즉시 착지',
+  'fidelity.teleportLandsEarly.hint':
+    '내 텔레포트가 사라지는 즉시 서버 응답을 기다리지 않고 목표 칸에 착지합니다. 클래식: 서버가 응답할 때까지 원래 칸에서 사라진 채로 기다립니다(원작과 같음).',
 } satisfies Partial<Record<keyof typeof en, string>>;

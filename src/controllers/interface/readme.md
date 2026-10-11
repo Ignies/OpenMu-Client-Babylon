@@ -67,10 +67,11 @@ windows themselves are content in `versions/shared/ui/` (see
 - `ui_stage`: one observer on the canvas rect scales the 640x480 stage (`ConvertX` /
   `ConvertY`); `mu_text` maps the original's four GDI Tahoma faces (Winmain.cpp:1251-1254).
 - `item_icons/`: the generated fit table (`tools/itemIconFit.ts`) and the per-item inventory scale
-  from `RenderObjectScreen` (ZzzInventory.cpp:9308-10090). Do not edit. Which icon files exist is
+  from `RenderObjectScreen` (ZzzInventory.cpp:8906-9674). Do not edit. Which icon files exist is
   `assets/itemIconManifest.ts` (`tools/itemIconManifest.ts`).
   `liveItemIcon.ts` (on `item_icons/index.ts`): the slot `item_icon` asks for an icon the pack has no
-  file for (`liveItemIcon(item)`, observable, asked once per look); the app fills it at boot
+  file for (`liveItemIcon(item)`, observable, asked once per look until `forgetLiveItemIcons()`, which
+  the app's source calls when the item-effects option changes); the app fills it at boot
   (`setLiveItemIcons`) with `actors/itemIcon.ts`, which draws the model as `RenderItem3D` does. The
   interface never reaches the scene. The live picture is framed like the original's square, so it
   takes no fit.
@@ -80,8 +81,12 @@ windows themselves are content in `versions/shared/ui/` (see
   (ZzzInventory.cpp:7653-9026), `RenderItem3D`'s anchor in the squares (:9712-10056) and the model
   the bag swaps in for the Heart and Rena levels (the only swaps of items the pack has no file for;
   the rest are pack icons). The rows keep the original's order and line numbers; branches that can
-  never match an item are left out (the file head lists them). The gamble boxes (13/71-75) spin
-  in the original while not hovered; a still picture keeps their 180.
+  never match an item are left out (the file head lists them). The item under the cursor turns
+  (`spinLiveItemIcon(item, canvas, ready)`, the slot the app fills with `setLiveItemSpin`): `item_icon`
+  takes `spin` from the bag, its equipment sockets and the shared item grid while nothing is held, and
+  lays a canvas over the still picture, which goes once the first turned one is drawn. The gamble
+  boxes (13/71-75) also spin in the original while not hovered; a still picture keeps their 180, as
+  one live target is the cost.
 - `keyBindings.ts`: each action maps to a `KeyboardEvent.code`, stored in localStorage per
   character (`setKeyProfile`), rebound from the Options Keys tab. The defaults are the original's
   keys; our own windows take keys no handler of the original reads (`NewUIHotKey.cpp`,
@@ -140,11 +145,15 @@ windows themselves are content in `versions/shared/ui/` (see
 - `components/item_tooltip/placement.test.ts`: tooltip and compare-pair placement.
 - `itemTooltip.test.ts`: tooltip lines and name colours against `RenderItemInfo`: ancient sets, pets, harmony,
   sockets, 380 options, wings, the Horn of Fenrir, stack counts.
-- `item_icons/itemIconFit.test.ts`: every Box of Luck level and the newer icons have a fit entry.
+- `item_icons/itemIconFit.test.ts`: every Box of Luck level and the newer icons have a fit entry; the
+  scale table cites the chain where the original has it.
 - `item_icons/itemIconPose.test.ts`: a test per rule group against the original's numbers: weapons
   (hands, the Kris, the sticks, bows, books, shields, the after-switch), armour (the Queen set's default
   and body heights, the lucky sets, named pieces), wings, orbs, seeds and packed jewels, helpers (the
   360 range, the second chain over the first), potions and scrolls (the Heart and Rena levels and
   their models, angle-less branches, the chocolate boxes, refine stones, parchments) and the anchors.
 - `item_icons/liveItemIcon.test.ts`: nothing asked while the slot is empty; one ask per look, the URL
-  reaching an observer; the look key; a failed draw answers null once.
+  reaching an observer; the look key; every look asked again after `forgetLiveItemIcons`; a failed draw
+  answers null once; the spin slot hands the look,
+  the canvas and its stop through.
+- `components/item_icon/index.test.tsx`: a hovered icon holds the spin canvas over its still picture.

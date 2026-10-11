@@ -20,8 +20,8 @@ import {
  * base class and pose flag, every mount and swing count, with `rand()` fixed. Pinned before the
  * player clip data moved to one file per action; update on purpose.
  */
-const POSE_HASH = '9fa7485f0b102dc1a0b6ec5305e71b428cab26c78e23b9096aa09471891c2eef';
-const ATTACK_HASH = 'fbffd2a5b011333dc3b8e75d534045842548f40d42ccd4a8ef382b3722d68e60';
+const POSE_HASH = '7c0b2e555199447df5f31a66e02e8a85fb0b3425fdb3b862dfcad9b48cded760';
+const ATTACK_HASH = '5f39ff4af0ebaba3f23778f3f0db76c6c0b978c01f7b5404838853067755ee22';
 
 const item = (group: number, num: number): Item => ({ group, num, lvl: 0 }) as Item;
 const ITEMS: (Item | null)[] = [

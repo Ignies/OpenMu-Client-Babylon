@@ -48,4 +48,7 @@ export default {
   'fidelity.loginTokens': 'ログインの保存',
   'fidelity.loginTokens.hint':
     '対応するワールドでは「ログイン情報を保存」がパスワードの代わりにログイン用トークンを保存し、次回はパスワードなしでログインできます。クラシック: 原作どおり毎回パスワードを入力します。',
+  'fidelity.teleportLandsEarly': 'テレポートを即時に着地',
+  'fidelity.teleportLandsEarly.hint':
+    '自分のテレポートは、姿が消えた時点でサーバーの応答を待たずに目的のマスへ着地します。クラシック: サーバーが応答するまで元のマスで消えたまま待ちます（オリジナルどおり）。',
 } satisfies Partial<Record<keyof typeof en, string>>;

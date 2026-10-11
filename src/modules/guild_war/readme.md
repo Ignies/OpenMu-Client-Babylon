@@ -30,8 +30,10 @@ has the handlers. Plain guild membership is in [../guild/readme.md](../guild/rea
 - `GuildWarRequestResult`: the answer to the hero's war request.
 - `GuildWarDeclared`: the war starts; sets `Social.guildWar`.
 - `GuildWarScoreUpdate`: own and enemy score.
-- `GuildSoccerScoreUpdate` (F3 23): team names and goals; 255 as the first score hides the board.
-- `GuildSoccerTimeUpdate` (F3 22): remaining seconds.
+- `GuildSoccerScoreUpdate` (F3 23): team names and goals; 255 as the first score hides the board;
+  every score sets off the fireworks on the hero's square (`fx/firecrackerRise.ts`, WSclient.cpp:8172-8179).
+- `GuildSoccerTimeUpdate` (F3 22): remaining seconds, `Social.soccerSeconds`. Kept while the board is
+  hidden and cleared with the war, as `g_wtMatchTimeLeft` (`ReceiveWTTimeLeft`, WSclient.cpp:10947-10952, :7822).
 - `GuildWarEnded`: won, lost or cancelled; clears the war.
 - `GuildRelationshipRequest` (0xE5): an alliance or hostility offer.
 - `GuildRelationshipChangeResult`: success or the error reason.
@@ -40,7 +42,7 @@ has the handlers. Plain guild membership is in [../guild/readme.md](../guild/rea
 
 ## Depends on / used by
 - uses: `social/social.ts`, `chat/chat.ts` (`cleanName`), `scope/objects.ts` (`playerNameById`)
-  (`playerNameById`), `guild` (`GuildMarks`), `src/i18n`.
+  (`playerNameById`), `guild` (`GuildMarks`), `src/i18n`, `controllers/fx/firecrackerRise.ts`, `ecs/current`.
 - used by: `src/app/logic.ts`. The state is drawn by `versions/shared/ui/hud/soccer_score/`,
   `hud/name_tags/`, `windows/guild/` (alliance tab) and `windows/social_prompts/` (war and
   relationship yes/no). `chat/commands.ts` sends relationship requests.
@@ -53,4 +55,5 @@ has the handlers. Plain guild membership is in [../guild/readme.md](../guild/rea
 - change the scoreboard: `versions/shared/ui/hud/soccer_score/index.tsx`.
 
 ## Tests
-- `net.test.ts`: a soccer score shows the board, a first score of 255 clears it.
+- `net.test.ts`: a soccer score shows the board, a first score of 255 clears it; the time survives the hidden board
+  and goes with the war; every score, the hiding one too, sets off the fireworks on the hero's square.

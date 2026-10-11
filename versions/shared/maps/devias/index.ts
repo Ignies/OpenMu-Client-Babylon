@@ -10,6 +10,7 @@ import {
 } from './rooms';
 import {
   DEVIAS_BLEND_MESHES,
+  DEVIAS_MESH_ANIMATIONS,
 } from './spec';
 import { DEVIAS_SOUND } from './sound';
 import { DEVIAS_LIGHTING } from './lighting';
@@ -50,6 +51,7 @@ export const deviasLayer: MapLayer = {
   snow: SNOW,
   rooms: DEVIAS_ROOMS,
   blendMeshes: DEVIAS_BLEND_MESHES,
+  render: { meshAnimations: DEVIAS_MESH_ANIMATIONS },
   sound: DEVIAS_SOUND,
   lighting: DEVIAS_LIGHTING,
   // Dust in the lit interiors while the hero stands in one (ours).

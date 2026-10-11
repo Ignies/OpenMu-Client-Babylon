@@ -30,9 +30,11 @@ in `requests.ts`, through `index.ts` (the door).
   until the first scope packet lands plus 250 ms, or 2 s on an empty map. `module.ts` installs it
   (`installScopeHold`) before the net; warp installs before `session`, so its `wsClosed` release
   runs before the session's.
-- Same-map `MapChanged`: `teleportGate.onMapChanged` returns `confirm` (the answer to the hero's
-  own teleport, about 1.8 s late; nothing moves unless he was knocked off) or `refused` / `unasked`
-  (put back on the square and stopped, `ReceiveTeleport` Flag 0, `WSclient.cpp:2193-2197`).
+- Same-map `MapChanged`: `ReceiveTeleport` Flag 0 (`WSclient.cpp:2193-2197`): the hero is put on
+  the square, turned, stopped and plays Teleport End. `teleportGate.onMapChanged` tells `confirm`
+  (the answer to his own teleport, about 1.8 s late) from `refused` / `unasked`; with the
+  `teleportLandsEarly` improvement he landed already, so a `confirm` moves nothing unless he was
+  knocked off the square.
 - `teleportRules.ts` is Store-free. Refusal order: safe zone, effects (Stone, Stun, Sleep, Freeze2,
   Earth Binds), held item, pending teleport, 3 s after a map change (`ClassAttack.cpp:1524`),
   square range, blocked square (`ClassAttack.cpp:1516-1519` plus OpenMU's walk map). Teleport Ally
@@ -64,3 +66,5 @@ in `requests.ts`, through `index.ts` (the door).
 - `teleportRules.test.ts`: `TeleportGate` verdicts and timeout, `teleportRefusal` cases,
   `pickAllySquare`, `aimAlongFacing`.
 - `mapChanges.test.ts`: `onMapChanged` calls back with the new map until unsubscribed.
+- `ecs/systems/teleportSystem.test.ts`: the server's answer lands the waiting hero on Classic and
+  moves nothing after an early landing.

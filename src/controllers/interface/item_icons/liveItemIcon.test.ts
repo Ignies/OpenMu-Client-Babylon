@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { autorun } from 'mobx';
-import { liveItemIcon, liveItemIconKey, setLiveItemIcons } from '.';
+import { forgetLiveItemIcons, liveItemIcon, liveItemIconKey, setLiveItemIcons, setLiveItemSpin, spinLiveItemIcon } from '.';
 
 const settle = async () => {
   for (let i = 0; i < 5; i++) await Promise.resolve();
@@ -32,6 +32,17 @@ describe('the live item icon slot', () => {
     expect(liveItemIconKey({ group: 7, num: 53, isAncient: true })).toBe('7_53_0_a');
   });
 
+  it('asks every look again once forgotten, and drops the pictures it had', async () => {
+    const source = vi.fn(async () => 'blob:x');
+    setLiveItemIcons(source);
+    liveItemIcon({ group: 14, num: 13, lvl: 0 });
+    await settle();
+    expect(liveItemIcon({ group: 14, num: 13, lvl: 0 })).toBe('blob:x');
+    forgetLiveItemIcons();
+    expect(liveItemIcon({ group: 14, num: 13, lvl: 0 })).toBeNull();
+    expect(source).toHaveBeenCalledTimes(2);
+  });
+
   it('answers null when the source fails, without asking again', async () => {
     const source = vi.fn(async () => {
       throw new Error('no model');
@@ -41,5 +52,27 @@ describe('the live item icon slot', () => {
     await settle();
     expect(liveItemIcon({ group: 13, num: 95, lvl: 0 })).toBeNull();
     expect(source).toHaveBeenCalledTimes(1);
+  });
+});
+
+// RenderObjectScreen turns the item under the cursor every frame (ZzzInventory.cpp:8856-8859).
+describe('the live item spin slot', () => {
+  const canvas = {} as HTMLCanvasElement;
+
+  it('spins nothing while the app has not filled it', () => {
+    setLiveItemSpin(null);
+    expect(spinLiveItemIcon({ group: 14, num: 15, lvl: 0 }, canvas, () => {})).toBeNull();
+  });
+
+  it('hands the source the look and the canvas, and its stop back', () => {
+    const stop = vi.fn();
+    const source = vi.fn(() => stop);
+    setLiveItemSpin(source);
+    const ready = () => {};
+    const got = spinLiveItemIcon({ group: 7, num: 53, lvl: 9, isExcellent: true, durability: 3 } as never, canvas, ready);
+    expect(source).toHaveBeenCalledWith({ group: 7, num: 53, lvl: 9, isExcellent: true, isAncient: undefined }, canvas, ready);
+    got?.();
+    expect(stop).toHaveBeenCalledTimes(1);
+    setLiveItemSpin(null);
   });
 });

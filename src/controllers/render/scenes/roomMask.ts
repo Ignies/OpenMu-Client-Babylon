@@ -459,12 +459,21 @@ function disposeRoomMask(): void {
   runtime = null;
 }
 
+/** `syncRoomMask`'s answer, rewritten each call. */
+const answer = { changed: false, live: false };
+
+function answered(changed: boolean, live: boolean): Readonly<typeof answer> {
+  answer.changed = changed;
+  answer.live = live;
+  return answer;
+}
+
 /**
  * Build or tear down the pass to match the tier and the active room. Returns
  * whether the chain changed (the director re-orders the post chain) and
- * whether the pass is live. `upstreamChanged` says the AO or the haze were
- * rebuilt this tick: the pass then re-attaches to stay behind them, keeping
- * the depth renderer and the readiness gate it already has.
+ * whether the pass is live, in one kept object. `upstreamChanged` says the AO
+ * or the haze were rebuilt this tick: the pass then re-attaches to stay behind
+ * them, keeping the depth renderer and the readiness gate it already has.
  */
 export function syncRoomMask(
   scene: Scene,
@@ -472,14 +481,14 @@ export function syncRoomMask(
   tier: LightingTier | null,
   volume: RoomVolume | null,
   upstreamChanged: boolean
-): { changed: boolean; live: boolean } {
+): Readonly<typeof answer> {
   shown = volume;
 
   const want = tier !== null && volume !== null && !forcedOff;
 
   if (runtime && (!want || runtime.scene !== scene || runtime.camera !== camera)) {
     disposeRoomMask();
-    if (!want) return { changed: true, live: false };
+    if (!want) return answered(true, false);
   }
 
   if (runtime) fitDepthMap(scene, runtime.ownDepth);
@@ -495,16 +504,16 @@ export function syncRoomMask(
     runtime.camera.detachPostProcess(runtime.pass);
     runtime.camera.attachPostProcess(runtime.pass);
 
-    return { changed: true, live: true };
+    return answered(true, true);
   }
 
-  if (!want) return { changed: false, live: false };
-  if (runtime) return { changed: false, live: true };
+  if (!want) return answered(false, false);
+  if (runtime) return answered(false, true);
 
   runtime = createPass(scene, camera);
   fitDepthMap(scene, runtime.ownDepth);
 
-  return { changed: true, live: true };
+  return answered(true, true);
 }
 
 export function roomMaskActive(): boolean {

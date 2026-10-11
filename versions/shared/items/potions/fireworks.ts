@@ -14,5 +14,5 @@ export default defineItem({
   Valor: 0,
   ItemLvl: 0,
   szModelFolder: 'Item/',
-  szModelName: 'rollofpaper.glb',
+  szModelName: 'GM01.glb',
 });

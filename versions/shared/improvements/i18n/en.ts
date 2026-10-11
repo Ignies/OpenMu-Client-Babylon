@@ -45,6 +45,9 @@ const en = {
   'fidelity.loginTokens': 'Saved logins',
   'fidelity.loginTokens.hint':
     'On worlds that offer it, "Remember me" keeps a sign-in token instead of your password, so the next login needs no password. Classic: you type the password every time, as in the original.',
+  'fidelity.teleportLandsEarly': 'Teleport lands at once',
+  'fidelity.teleportLandsEarly.hint':
+    'Your own Teleport lands on the square as soon as you fade out, without waiting for the server to answer. Classic: you stay faded on the old square until the server answers, as in the original.',
 };
 
 export default en;

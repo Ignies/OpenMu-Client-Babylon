@@ -30,7 +30,8 @@ shared pools, textures and particle recipes other folders reuse.
   - `effectTexture.ts`: `loadEffectTexture` (the shared effect texture cache).
   - `moveTargetEffect.ts`: `TerrainDecal`, `MoveTargetEffect` (the click-to-move marker).
   - `ambientParticles.ts` `createAmbientSystem`, `boids.ts` `boidsFor` / `boidFactoryFor`,
-    `bursts.ts` `playBurst`, `fireworks.ts` `spawnFireworks`, `impactVisuals.ts` `spawnHitImpact`,
+    `bursts.ts` `playBurst`, `fireworks.ts` `spawnFireworks`, `firecrackerRise.ts` `spawnFirecrackerRise`
+    (the Battle Soccer score's rockets), `impactVisuals.ts` `spawnHitImpact`,
     `bloodDecals.ts` `BloodDecals`, `deathVisuals.ts` `shatterDeathFor` / `skeletonShatter` /
     `spawnBomb` (`explosion` false: the sparks alone, `CreateBomb(p, false)`) / `spawnCrystalShards`, `itemAura.ts` `createItemAura`, `itemCrackle.ts`
     `createItemCrackle`, `monsterGlow.ts` `monsterGlowFor` / `glowMonster`, `monsterVisuals.ts`
@@ -98,6 +99,9 @@ shared pools, textures and particle recipes other folders reuse.
 ## Tests
 - `boids.test.ts`: a bird, a fish and an invasion dragon cast the Classic shadow from the ground at 0.2, not on the cascades.
 - `layers.test.ts`: no shroud layer (Evil Spirit, its only spawner, draws none).
+- `firecrackerRise.test.ts`: the soccer score's fireworks fire on a fifth tick one time in three, climb 12 ticks
+  from the square's centre at a flat 100 cm and burst into 80 sparks with the firecracker sound, coloured by
+  their rolls and turned for their sub.
 - `effectParticles.test.ts`: no particle is made while the page is hidden; `spawnParticle` reads its position, turn
   and light before it returns, while its sheet loads and once it has, so a caller may rewrite one scratch object
   for every spawn; `KIND_REACH` covers every particle kind, and the view gate of

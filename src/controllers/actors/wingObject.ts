@@ -30,6 +30,8 @@ import {
 } from './wings';
 
 const DARK = [0, 0, 0] as const;
+/** A pass with no light of its own: white. */
+const WHITE = [1, 1, 1] as const;
 
 /** flare01 is 64 px; the thunder's halo is `CreateSprite(BITMAP_LIGHT, ..., 2.0f)`. */
 const THUNDER_HALO_TILES = (64 * 2) / 100;
@@ -389,7 +391,7 @@ export class WingObject extends ModelObject {
     const coverage = auraOn ? 1 : darkCardGain(scene);
 
     for (const { pass, mesh, light, target } of this.#passes) {
-      const [r, g, b] = pass.light?.(timeMs) ?? [1, 1, 1];
+      const [r, g, b] = pass.light?.(timeMs) ?? WHITE;
       light.set(r, g, b);
       if (pass.u) this.UvScroll.u = pass.u(timeMs);
       if (target?.metadata) target.metadata.cardGain = cardGain;

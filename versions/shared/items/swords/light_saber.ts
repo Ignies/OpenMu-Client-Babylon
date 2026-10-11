@@ -7,6 +7,7 @@ export default defineItem({
   Skill: 22,
   X: 2,
   Y: 4,
+  TwoHand: 1,
   Serial: 1,
   Option: 1,
   Drop: 1,

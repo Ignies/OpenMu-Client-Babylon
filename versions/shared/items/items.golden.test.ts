@@ -6,7 +6,7 @@ import { items } from './all';
  * The item files are the old items.json split one per item. This hash is that table's, in (group, index)
  * order, so any change to an item's data shows here: update it on purpose, in the same commit.
  */
-const ITEMS_HASH = '8ade1042c5ed65a036bf5066e114d47d51f3ef586e51c0e9195acd1a5feb3f4a';
+const ITEMS_HASH = '3fead1832bf8437df8dbd5a9ed4c3ce3369bb5a608ba3d4ae7d1bee8b210d19d';
 
 describe('item files', () => {
   it('hold every item, unchanged', () => {
@@ -19,6 +19,13 @@ describe('item files', () => {
     for (let index = 100; index <= 129; index++) {
       expect(items.get(12, index)?.szModelName).toBe(`s30_sphere0${Math.floor((index - 100) / 6) + 1}.glb`);
     }
+  });
+
+  // AccessModel: MODEL_FIRECRACKER is GM01, the compressed Bless and Soul Jewel01 / Jewel02 (ZzzOpenData.cpp:957-958, :984).
+  it('draw the fireworks and the compressed jewels with the models the original loads', () => {
+    expect(items.get(14, 63)?.szModelName).toBe('GM01.glb');
+    expect(items.get(12, 30)?.szModelName).toBe('Jewel01.glb');
+    expect(items.get(12, 31)?.szModelName).toBe('Jewel02.glb');
   });
 
   it('look items up by group and index', () => {

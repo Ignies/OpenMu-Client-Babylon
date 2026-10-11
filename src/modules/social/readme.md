@@ -14,7 +14,7 @@ Also the guild mark (emblem) codec. It has no packet handlers of its own; the ne
 - party: `partyMembers`, `inParty`, `isPartyLeader`, `partyInvite`, `partyRespond`, `setPartyReply` /
   `autoAnswerParty` (`/re on|off|auto`, ours: `GameOptions.partyInviteReply`), `partyKick`,
   `partyLeave`, `requestPartyList`, `setPartyMembers` (a blank name keeps the slot's previous one), `removePartyMember`, `setPartyHealth`.
-- guild: `myGuild`, `guildMembers`, `allianceGuilds`, `guildWar`, `battleSoccer`, the request and dialog
+- guild: `myGuild`, `guildMembers`, `allianceGuilds`, `guildWar`, `battleSoccer`, `soccerSeconds`, the request and dialog
   fields, `guildJoin`, `guildJoinRespond`, `promptGuildKick` / `confirmGuildKick`, `guildCreate`, `guildAssignRole`,
   `guildRelationRequestSend`, `guildRelationRespond`, `removeAllianceGuild`, `guildWarRespond`, `requestGuildList`, `requestAllianceList`.
 - `Social.guildTeamOf(id)`, `Social.guildRelationOf(id)`: colour and relation of another player's guild.

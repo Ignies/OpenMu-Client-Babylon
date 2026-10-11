@@ -83,6 +83,10 @@ export const TONE_MAPPER_NAMES = ['none', 'standard', 'aces', 'neutral'] as cons
 
 export type ToneMapperName = (typeof TONE_MAPPER_NAMES)[number];
 
+/** The live-pass names of the tone mappers and curves, built once rather than every tick. */
+const TONE_MAPPER_PASSES = TONE_MAPPER_NAMES.map(name => `toneMapper:${name}`);
+const TONE_CURVE_PASSES = TONE_MAP_CURVES.map(name => `toneMapper:${name}`);
+
 const PIPELINE_NAME = 'postChain';
 
 /** Babylon's internal effect table, in the order the pipeline adds them. */
@@ -210,8 +214,8 @@ export function createPostChain(
     const toneMapper = graded && !filmic ? look.toneMapper : 0;
     ip.toneMappingEnabled = toneMapper > 0;
     ip.toneMappingType = TONE_MAPPING_TYPES[toneMapper];
-    if (toneMapper > 0) live.push(`toneMapper:${TONE_MAPPER_NAMES[toneMapper]}`);
-    if (filmic) live.push(`toneMapper:${TONE_MAP_CURVES[look.toneMapper]}`);
+    if (toneMapper > 0) live.push(TONE_MAPPER_PASSES[toneMapper]);
+    if (filmic) live.push(TONE_CURVE_PASSES[look.toneMapper]);
 
     ip.contrast = 1;
 

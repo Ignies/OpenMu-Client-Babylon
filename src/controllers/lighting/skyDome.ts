@@ -170,6 +170,10 @@ let domeScene: Scene | null = null;
 
 let observed: LookDirector | null = null;
 
+/** The clear colour's decode buffers, kept: the director syncs every tick. */
+const clearBytes: [number, number, number] = [0, 0, 0];
+const clearLinear: [number, number, number] = [0, 0, 0];
+
 export function syncSkyDome(scene: Scene, look: ClearLook): void {
   domeScene = scene;
   watchDome();
@@ -180,7 +184,7 @@ export function syncSkyDome(scene: Scene, look: ClearLook): void {
   }
 
   if (look.horizon) {
-    const c = look.linear ? toLinear(look.horizon) : look.horizon;
+    const c = look.linear ? toLinear(look.horizon, clearLinear) : look.horizon;
     scene.clearColor.set(c[0], c[1], c[2], 1);
     return;
   }
@@ -190,8 +194,10 @@ export function syncSkyDome(scene: Scene, look: ClearLook): void {
   if (bytes) {
     // Display-authored like the horizon (SetWorldClearColor bytes): one decode
     // for the linear buffer, so the void lands where the map put it.
-    const c: Rgb = [bytes[0] / 256, bytes[1] / 256, bytes[2] / 256];
-    const lin = look.linear ? toLinear(c) : c;
+    clearBytes[0] = bytes[0] / 256;
+    clearBytes[1] = bytes[1] / 256;
+    clearBytes[2] = bytes[2] / 256;
+    const lin = look.linear ? toLinear(clearBytes, clearLinear) : clearBytes;
     scene.clearColor.set(lin[0], lin[1], lin[2], 1);
   } else {
     scene.clearColor.set(0, 0, 0, 1);

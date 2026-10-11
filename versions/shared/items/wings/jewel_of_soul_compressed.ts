@@ -28,5 +28,5 @@ export default defineItem({
   SUM: 1,
   RF: 0,
   szModelFolder: 'Item/',
-  szModelName: 'rollofpaper.glb',
+  szModelName: 'Jewel02.glb',
 });

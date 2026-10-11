@@ -6,6 +6,8 @@ import { t, type TextKey } from '@/i18n';
 import { cleanName } from '../chat/chat';
 import { playerNameById } from '../scope/objects';
 import { runInAction } from 'mobx';
+import { Ecs } from '@/ecs/current';
+import { spawnFirecrackerRise } from '@/controllers/fx/firecrackerRise';
 
 const GUILD_WAR_RESULTS: Record<GuildWarRequestResultRequestResultEnum, TextKey> = {
   [GuildWarRequestResultRequestResultEnum.GuildNotFound]: 'guild.warNotFound',
@@ -121,7 +123,8 @@ export function installNet(): void {
   /**
    * GuildSoccerScoreUpdate (F3 23): at the start of the match and on every
    * goal. Also reaches observers on the stadium, who have no `guildWar`. A
-   * first score of 255 hides the board and the colours (WSclient.cpp:8162-8170).
+   * first score of 255 hides the board and the colours (WSclient.cpp:8162-8170);
+   * every score sets off fireworks over the hero.
    */
   EventBus.on('GuildSoccerScoreUpdate', packet => {
     const p = new GuildSoccerScoreUpdatePacket(packet);
@@ -131,16 +134,19 @@ export function installNet(): void {
         blueTeam: cleanName(p.BlueTeamName),
         redGoals: p.RedTeamGoals,
         blueGoals: p.BlueTeamGoals,
-        seconds: Social.battleSoccer?.seconds ?? -1,
       };
     });
+    // `CreateEffect(BITMAP_FIRECRACKERRISE, ...)` on the hero's square after every score (WSclient.cpp:8172-8179).
+    const world = Ecs.world;
+    const pos = world?.playerEntity?.transform?.pos;
+    if (world && pos) spawnFirecrackerRise(world.scene, Math.floor(pos.x), Math.floor(pos.z));
   });
 
-  /** GuildSoccerTimeUpdate (F3 22): every second while the match runs. */
+  /** GuildSoccerTimeUpdate (F3 22): every second while the match runs, kept while the board is hidden (WSclient.cpp:10947-10952). */
   EventBus.on('GuildSoccerTimeUpdate', packet => {
     const p = new GuildSoccerTimeUpdatePacket(packet);
     runInAction(() => {
-      if (Social.battleSoccer) Social.battleSoccer.seconds = p.Seconds;
+      Social.soccerSeconds = p.Seconds;
     });
   });
 
@@ -150,6 +156,7 @@ export function installNet(): void {
     runInAction(() => {
       Social.guildWar = null;
       Social.battleSoccer = null;
+      Social.soccerSeconds = -1;
       Social.guildWarRequest = null;
     });
     Social.systemMessage(t(GUILD_WAR_ENDINGS[p.Result] ?? 'guild.warEnded'));

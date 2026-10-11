@@ -193,8 +193,6 @@ export const RenderSystem: ISystemFactory = world => {
         }
 
 modelObject.updateLocation(v3Temp2, transform.scale, v3Temp);
-
-        modelObject.Draw(world.gameTime);
       }
     },
   };

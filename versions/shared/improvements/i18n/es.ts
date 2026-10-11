@@ -48,4 +48,7 @@ export default {
   'fidelity.loginTokens': 'Inicios de sesión guardados',
   'fidelity.loginTokens.hint':
     'En los mundos que lo ofrecen, «Recordarme» guarda una clave de acceso en lugar de tu contraseña, así el siguiente inicio de sesión no la pide. Clásica: escribes la contraseña cada vez, como en el original.',
+  'fidelity.teleportLandsEarly': 'Teleport aterriza al instante',
+  'fidelity.teleportLandsEarly.hint':
+    'Tu propio Teleport te deja en la casilla en cuanto te desvaneces, sin esperar la respuesta del servidor. Clásica: te quedas desvanecido en la casilla anterior hasta que el servidor responde, como en el original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -46,7 +46,7 @@ const CROSSBOW = item(4, 8);
 const ARROWS = item(4, 15);
 const SMALL_AXE = item(1, 0); // one-handed
 const SKULL_STAFF = item(5, 0); // one-handed
-const RESURRECTION_STAFF = item(5, 6); // two-handed
+const GORGON_STAFF = item(5, 4); // two-handed (Item.bmd's TwoHand)
 
 describe('chooseAttackAction', () => {
   it('swings bare fists with nothing equipped', () => {
@@ -107,7 +107,7 @@ describe('chooseAttackAction', () => {
     const twoHand = new Set([A.PLAYER_SKILL_WEAPON1, A.PLAYER_SKILL_WEAPON2]);
     const oneHand = new Set([A.PLAYER_ATTACK_SWORD_RIGHT1, A.PLAYER_ATTACK_SWORD_RIGHT2]);
     for (let n = 0; n < 20; n++) {
-      expect(twoHand.has(chooseAttackAction(pose(RESURRECTION_STAFF)))).toBe(true);
+      expect(twoHand.has(chooseAttackAction(pose(GORGON_STAFF)))).toBe(true);
       expect(oneHand.has(chooseAttackAction(pose(SKULL_STAFF)))).toBe(true);
     }
   });
