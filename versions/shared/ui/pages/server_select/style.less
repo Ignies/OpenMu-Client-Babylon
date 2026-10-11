@@ -27,6 +27,14 @@
   }
 }
 
+// `CLoginMainWin`: 30 px in from the left, its bottom 11 px over the 567/600 line (UIMng.cpp:265-266).
+.login-main-bar {
+  position: fixed;
+  left: 30px;
+  bottom: calc(5.5% + 11px);
+  height: 30px;
+}
+
 // `Session.connectionLost`: the game server dropped us and we are back here.
 .servers-page .servers-notice {
   position: absolute;
