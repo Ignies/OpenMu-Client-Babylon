@@ -1,5 +1,5 @@
 // Ported from RenderObjectScreen (ZzzInventory.cpp:9308-10090) - do not edit.
-// 664 of 667 item types; the rest fall back to
+// 671 of 674 item types; the rest fall back to
 // ITEM_ICON_SCALE_DEFAULT (the three Archangel weapons, which the original
 // draws through a separate multi-model path).
 //
@@ -674,4 +674,11 @@ export const ITEM_ICON_SCALE: Readonly<Record<string, number>> = {
   '15_27': 0.0023,
   '15_28': 0.0025,
   '15_29': 0.0025,
+  '15_30': 0.0023,
+  '15_31': 0.0023,
+  '15_32': 0.0023,
+  '15_33': 0.0023,
+  '15_34': 0.0023,
+  '15_35': 0.0023,
+  '15_36': 0.0023,
 };
