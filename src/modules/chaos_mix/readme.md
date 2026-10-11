@@ -45,7 +45,8 @@ in the `Economy` store ([../economy/readme.md](../economy/readme.md)); this fold
 
 ## Packets
 - `ItemCraftingResult`: a success or a failure empties the tray (a success then holds the result); a refusal leaves it; `Economy.craftingResult`
-  plays the sounds and prints the reason.
+  plays the sounds and prints the reason. Every answer but short zen (2, 0x0B) finishes the mix (`MIX_FINISHED`): the
+  button and the tray stay locked until the window is opened again (WSclient.cpp:6795-6831).
 - `CraftingDialogClosed075`: the server closed the window; closes it without sending a close back.
 
 ## Depends on / used by

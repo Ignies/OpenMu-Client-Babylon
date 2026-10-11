@@ -171,8 +171,8 @@ export const Economy = new (class _Economy {
   mixMenuOpen = false;
   /** `MIX_REQUESTED`: the request is out, both grids are locked. */
   mixPending = false;
-  /** `MIX_FINISHED`: what the last attempt did, for the result line. */
-  mixResult: 'success' | 'failed' | null = null;
+  /** `MIX_FINISHED`: what the last attempt did; the window stays locked until it is opened again. */
+  mixResult: 'success' | 'failed' | 'refused' | null = null;
   /** `CSeedMasterMenuMsgBox` / `CSeedInvestigatorMenuMsgBox`: the seed NPC's menu, before its tray. */
   seedMenu: 'master' | 'researcher' | null = null;
   /** The socket picked in the seed researcher's list (`m_SocketListBox`), -1 for none. */
@@ -729,10 +729,12 @@ export const Economy = new (class _Economy {
     // Only a mix the machine tried empties the tray; a refusal (zen, level, wrong
     // items) leaves the items in (ReceiveMixExtended, WSclient.cpp:6796-6831).
     const tried = result === E.Success || result === E.Failed;
+    // Short zen (2, 0x0B) is MIX_READY; every other refusal is MIX_FINISHED (WSclient.cpp:6795-6831).
+    const ready = result === E.NotEnoughMoney || result === E.NotEnoughMoneyForBloodCastle;
 
     runInAction(() => {
       this.mixPending = false;
-      this.mixResult = tried ? (result === E.Success ? 'success' : 'failed') : null;
+      this.mixResult = tried ? (result === E.Success ? 'success' : 'failed') : ready ? null : 'refused';
       if (!tried) return;
       this.mixItems = emptyGrid(MIX_SLOTS);
       if (result === E.Success && item) this.mixItems[0] = item;

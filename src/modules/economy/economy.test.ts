@@ -30,14 +30,26 @@ const fillTray = () =>
   });
 
 // ReceiveMixExtended (WSclient.cpp:6796-6831): only a success replaces the tray, and a failed
-// mix is emptied by the server's list (:1750-1754); a refusal leaves the items where they are.
+// mix is emptied by the server's list (:1750-1754); a refusal leaves the items where they are and
+// finishes the mix (MIX_FINISHED) unless it was the zen (MIX_READY).
 describe('Economy.craftingResult', () => {
-  it('keeps the tray when the machine refuses the mix', () => {
-    fillTray();
-    Economy.craftingResult(E.IncorrectMixItems, null);
-    expect(Economy.mixItems[0]).toMatchObject({ group: 12, id: 15 });
-    expect(Economy.mixPending).toBe(false);
-    expect(Economy.mixResult).toBeNull();
+  it('keeps the tray but locks the window when the machine refuses the mix', () => {
+    for (const refusal of [E.TooManyItems, E.CharacterLevelTooLow, E.LackingMixItems, E.IncorrectMixItems, E.InvalidItemLevel, E.CharacterClassTooLow, E.IncorrectBloodCastleItems]) {
+      fillTray();
+      Economy.craftingResult(refusal, null);
+      expect(Economy.mixItems[0]).toMatchObject({ group: 12, id: 15 });
+      expect(Economy.mixPending).toBe(false);
+      expect(Economy.mixResult, String(refusal)).toBe('refused');
+      expect(Economy.mixAccepts(jewel)).toBe(false);
+    }
+  });
+
+  it('leaves the window ready when the zen was short', () => {
+    for (const refusal of [E.NotEnoughMoney, E.NotEnoughMoneyForBloodCastle]) {
+      fillTray();
+      Economy.craftingResult(refusal, null);
+      expect(Economy.mixResult).toBeNull();
+    }
   });
 
   it('empties the tray on a failed mix', () => {
