@@ -10,6 +10,8 @@ export type ItemRecord = {
   Skill: number;
   X: number;
   Y: number;
+  /** Item.bmd's `TwoHand` (`ItemAttribute[].TwoHand`, ZzzInfomation.cpp:1106): 1 for a two-handed weapon, absent otherwise. */
+  TwoHand?: number;
   Serial: number;
   Drop: number;
   szModelFolder: string;

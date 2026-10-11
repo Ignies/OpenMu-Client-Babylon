@@ -133,29 +133,9 @@ export function equippedBowType(
   return null;
 }
 
-/**
- * `ItemAttribute[].TwoHand` is not in items.json; the inventory width is the
- * reliable proxy for swords/axes/maces (two-handers are 2 wide), spears are
- * always two-handed, and staffs switch at Legendary Staff (index 5) - the
- * summoner sticks/books are one-handed.
- */
+/** `ItemAttribute[Type].TwoHand`, Item.bmd's flag the item files carry (ZzzCharacter.cpp:357, ZzzInventory.cpp:7808). */
 export function isTwoHanded(item: Item): boolean {
-  switch (item.group) {
-    case GROUP_SWORD:
-    case GROUP_AXE:
-    case GROUP_MACE: {
-      const def = ItemsDatabase.getItem(item.group, item.num);
-      return (def?.X ?? 1) >= 2;
-    }
-    case GROUP_SPEAR:
-      return true;
-    case GROUP_STAFF:
-      return item.num >= 5 && item.num < MISTERY_STICK;
-    case GROUP_BOW:
-      return !isAmmo(item);
-    default:
-      return false;
-  }
+  return ItemsDatabase.getItem(item.group, item.num)?.TwoHand === 1;
 }
 
 /**

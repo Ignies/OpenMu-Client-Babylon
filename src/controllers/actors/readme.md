@@ -121,7 +121,7 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   is `ITEM_ICON_UNITS_PER_PIXEL` units there. The shot covers the item's squares (20 pixels each),
   places the model at its anchor in them plus its offset, turns it and sets its body height as
   `RenderObjectScreen` does (`interface/item_icons/itemIconPose.ts`, two-handed by `isTwoHanded`, the
-  inventory width proxy) and scales it by `itemIconScale.ts`; its meshes carry the item's
+  item's own `TwoHand`) and scales it by `itemIconScale.ts`; its meshes carry the item's
   `itemVisualTier` as worn gear does (the level and excellent passes, RenderPartObject at the item's
   level and options, ZzzInventory.cpp:9699); `render/iconShot.ts` draws it once. The item under the
   cursor (nothing held) turns: `Angle[1] = WorldTime * 0.45f` (ZzzInventory.cpp:8856-8859), its other
@@ -160,6 +160,8 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   players and NPCs keep theirs, no armour glow in the castle.
 - `approachPath.test.ts`: walk truncation at range, distance along the sent path, stall capping.
 - `deserializeAppearance.test.ts`: `isAppearanceBlank` on empty and real previews.
+- `weaponClass.test.ts`: `isTwoHanded` is the item's own `TwoHand` (the wide staffs two-handed, Legendary
+  Staff on one-handed), matching `Item_eng.bmd` on every weapon row it has.
 - `itemAngle.test.ts`: drop scale and pose per group, worn height, the `ItemAngle` tail rows.
 - `itemIcon.test.ts`: the shot covers the item's squares at the original's item depth, loads the
   item's own model under the root at its scale and angle; a worn part (the Queen helm) draws only its

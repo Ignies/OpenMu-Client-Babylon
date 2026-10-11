@@ -27,8 +27,9 @@ petItems.ts           pet and mount item numbers in group 13 (PET_GROUP, DARK_HO
   and the registry. Field names are the original table's, so every reader keeps working.
 - The files came from the Season 6 `Item.txt`: `tools/convertItemTXTtoJson.ts` writes them,
   `tools/addRageFighterColumn.ts` and `tools/syncItemRequirements.ts` run after it (all three go
-  through `tools/itemFiles.ts`), then `tools/syncItemClasses.ts` sets every class block to the original
-  `Item_eng.bmd`'s (`item_rules/itemClasses.test.ts` checks each row). A file's name is the item's name in snake_case, plus `_<index>`
+  through `tools/itemFiles.ts`), then `tools/syncItemClasses.ts` sets every class block and the
+  `TwoHand` flag (written only where it is 1) to the original `Item_eng.bmd`'s
+  (`item_rules/itemClasses.test.ts` and `actors/weaponClass.test.ts` check each row). A file's name is the item's name in snake_case, plus `_<index>`
   when two items of a group share a name.
 - `szModelFolder` + `szModelName` is the model the original loads for the item (`ZzzOpenData.cpp`
   `AccessModel`), where `Item.txt` names a later season's file: Merlin Staff is `Item/Staff_33`
