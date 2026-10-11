@@ -4,7 +4,7 @@ import { DEFAULTS, type Config } from '../config';
 import { composeArgs } from '../compose';
 import { caddyfile, publicPorts } from './caddy';
 import { serviceEnv, stackEnv } from './env';
-import { adminMailbox, certEmailKind, certFiles, dnsNote, dnsRecords, mailHost, mailOn, mailboxes, removeMailbox, setMailbox, withCertEmail } from './mail';
+import { MAIL_ARCHIVE, MAIL_DIRS, adminMailbox, certEmailKind, certFiles, dkimFile, dkimRecord, dnsNote, dnsRecords, mailHost, mailOn, mailBackupCommand, mailRestoreScript, mailboxes, removeMailbox, setMailbox, withCertEmail } from './mail';
 
 const base: Config = {
   ...DEFAULTS,
@@ -179,5 +179,43 @@ describe('mailboxes', () => {
     const two = setMailbox(setMailbox('', 'admin@example.com', hash), 'bob@example.com', hash);
     expect(mailboxes(removeMailbox(two, 'bob@example.com'))).toEqual(['admin@example.com']);
     expect(mailboxes('')).toEqual([]);
+  });
+});
+
+describe('DKIM key', () => {
+  // What `setup config dkim` writes (docker-mailserver 16), key shortened.
+  const txt = [
+    'mail._domainkey\tIN\tTXT\t( "v=DKIM1; h=sha256; k=rsa; "',
+    '\t  "p=MIIBIjANBgkq+HJGRD4r/"',
+    '\t  "CAKF6IvETeXKmEJcvrC1AQAB" )  ; ----- DKIM key mail for example.com',
+  ].join('\n');
+
+  it('joins the quoted parts of the key file into one TXT value', () => {
+    expect(dkimRecord(txt)).toBe('v=DKIM1; h=sha256; k=rsa; p=MIIBIjANBgkq+HJGRD4r/CAKF6IvETeXKmEJcvrC1AQAB');
+  });
+
+  it('gives nothing for a file without a key', () => {
+    expect(dkimRecord('')).toBeUndefined();
+    expect(dkimRecord('garbage')).toBeUndefined();
+  });
+
+  it('lives in the mail folder of the state folder, under the domain', () => {
+    expect(dkimFile(mail, '/etc/mu-server/mail').replace(/\\/g, '/')).toBe('/etc/mu-server/mail/opendkim/keys/example.com/mail.txt');
+  });
+});
+
+describe('mail backup', () => {
+  const compose = readFileSync(`${import.meta.dirname}/../../stack/compose.yml`, 'utf8');
+
+  it('archives every mail folder the mail server mounts', () => {
+    for (const dir of MAIL_DIRS) expect(compose).toContain(`:/${dir}`);
+    expect(mailBackupCommand()).toEqual(['tar', '-czf', `/backup/${MAIL_ARCHIVE}`, '-C', '/', ...MAIL_DIRS]);
+    expect(MAIL_DIRS).toEqual(['var/mail', 'var/mail-state', 'tmp/docker-mailserver']);
+  });
+
+  it('empties the folders before it unpacks, so a restore leaves no newer mailbox behind', () => {
+    const script = mailRestoreScript();
+    expect(script.indexOf('find /var/mail /var/mail-state /tmp/docker-mailserver -mindepth 1 -delete')).toBe(0);
+    expect(script).toContain(`tar -xzf /backup/${MAIL_ARCHIVE} -C /`);
   });
 });

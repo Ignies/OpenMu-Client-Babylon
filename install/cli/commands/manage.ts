@@ -11,6 +11,7 @@ import { mailOn } from '../render/mail';
 import { saveState } from '../state';
 import { ui, pc } from '../ui';
 import { buildAll, logFile, preflight } from './install';
+import { ensureDkim, printMailDns } from './mail';
 import { GROUPS, ask } from './questions';
 
 /** Changes that are baked into the client or OpenMU image need a rebuild; the rest only a restart. */
@@ -33,10 +34,12 @@ export async function configure(c: Config, p: Paths): Promise<void> {
   // Turned off: its containers go (the old config still names the profile); the mail volumes stay.
   if (mailOn(c) && !mailOn(next)) await new Stack(c, p).compose(['rm', '-sf', 'mailserver', 'webmail']);
   if (needsBuild(c, next)) await buildAll(stack, logFile(p, 'config'));
+  if (mailOn(next)) await ui.task('Checking the mail server\'s DKIM key', () => ensureDkim(stack));
   await ui.task('Applying', async () => {
     await stack.up();
     await stack.compose(['restart', 'web']);
   });
+  if (mailOn(next) && !mailOn(c)) printMailDns(next, p);
   ui.outro('Saved and applied.');
 }
 
@@ -86,6 +89,7 @@ export async function status(c: Config, p: Paths): Promise<void> {
   ui.note(states.map(s => `${s.state === 'running' ? pc.green('running') : pc.red(s.state.padEnd(7))}  ${s.service}${s.health ? pc.dim(` (${s.health})`) : ''}`).join('\n') || 'Nothing is running.', 'Containers');
   const results = await checks(stack);
   ui.note(results.map(r => `${r.ok ? pc.green('ok  ') : pc.red('DOWN')}  ${r.name}`).join('\n'), 'Services');
+  if (mailOn(c)) printMailDns(c, p);
 }
 
 export async function logs(c: Config, p: Paths, service?: string): Promise<void> {

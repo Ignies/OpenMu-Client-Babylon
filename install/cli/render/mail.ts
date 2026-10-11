@@ -1,4 +1,5 @@
 // The optional mail server (docker-mailserver) and webmail (Roundcube) at mail.<domain>: switch, env, mailboxes.
+import { join } from 'node:path';
 import type { Config } from '../config';
 import { PORTS } from '../stack';
 
@@ -82,7 +83,7 @@ export function dnsRecords(c: Config, dkim?: string): DnsRecord[] {
     { type: 'A', name: host, value: 'this server' },
     { type: 'MX', name: d, value: `10 ${host}` },
     { type: 'TXT', name: d, value: 'v=spf1 mx -all' },
-    { type: 'TXT', name: `mail._domainkey.${d}`, value: dkim ?? '(the DKIM key is not made yet: the mail server makes it on its first start)' },
+    { type: 'TXT', name: `mail._domainkey.${d}`, value: dkim ?? '(the key is not made yet: `mu mail dns` makes and prints it)' },
     { type: 'TXT', name: `_dmarc.${d}`, value: `v=DMARC1; p=quarantine; rua=mailto:${adminMailbox(c)}` },
     { type: 'PTR', name: "this server's IP", value: host },
   ];
@@ -91,6 +92,29 @@ export function dnsRecords(c: Config, dkim?: string): DnsRecord[] {
 export function dnsNote(rows: DnsRecord[]): string {
   const width = Math.max(...rows.map(r => r.name.length)) + 2;
   return rows.map(r => `${r.type.padEnd(5)} ${r.name.padEnd(width)}${r.value}`).join('\n');
+}
+
+/** Where docker-mailserver's `setup config dkim` leaves the public key (selector `mail`), in the state folder. */
+export function dkimFile(c: Config, mailDir: string): string {
+  return join(mailDir, 'opendkim', 'keys', c.domain, 'mail.txt');
+}
+
+/** The key file is a zone-file line split into quoted parts; the TXT value is the parts joined. */
+export function dkimRecord(text: string): string | undefined {
+  const value = [...text.matchAll(/"([^"]*)"/g)].map(m => m[1]).join('');
+  return value.includes('p=') ? value : undefined;
+}
+
+/** What `mu backup` keeps of the mail server: mailboxes, its state (queue, spam data), accounts and DKIM keys. */
+export const MAIL_DIRS = ['var/mail', 'var/mail-state', 'tmp/docker-mailserver'];
+export const MAIL_ARCHIVE = 'mail.tar.gz';
+
+export function mailBackupCommand(): string[] {
+  return ['tar', '-czf', `/backup/${MAIL_ARCHIVE}`, '-C', '/', ...MAIL_DIRS];
+}
+
+export function mailRestoreScript(): string {
+  return `find ${MAIL_DIRS.map(d => `/${d}`).join(' ')} -mindepth 1 -delete && tar -xzf /backup/${MAIL_ARCHIVE} -C /`;
 }
 
 /** `postfix-accounts.cf`: one `address|{BLF-CRYPT}<bcrypt>` line per mailbox (Dovecot checks bcrypt itself). */

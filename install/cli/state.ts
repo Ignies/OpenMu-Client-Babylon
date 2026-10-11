@@ -57,7 +57,12 @@ export function saveState(c: Config, p: Paths): void {
   if (mailOn(c) && c.mailAdminHash) write(f.mailAccounts, setMailbox(readMailAccounts(p), adminMailbox(c), c.mailAdminHash), true);
 }
 
-function readMailAccounts(p: Paths): string {
+export function readMailAccounts(p: Paths): string {
   const file = files(p).mailAccounts;
   return existsSync(file) ? readFileSync(file, 'utf8') : '';
+}
+
+/** The mail server notices the change by itself (its change detector), no restart. */
+export function writeMailAccounts(p: Paths, text: string): void {
+  write(files(p).mailAccounts, text, true);
 }

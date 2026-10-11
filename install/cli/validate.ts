@@ -32,6 +32,13 @@ export function email(value: string): string | undefined {
   if (!/^[^\s@'"]+@[^\s@'"]+\.[^\s@'"]+$/.test(value)) return 'Enter an e-mail address (for certificate notices).';
 }
 
+/** A mailbox of the hosted mail server: a plain local part at this server's domain (`|` would break the accounts file). */
+export function mailbox(value: string, domain: string): string | undefined {
+  const [local, host, ...rest] = value.split('@');
+  if (rest.length || !local || !/^[A-Za-z0-9._+-]{1,64}$/.test(local)) return `Enter an address like bob@${domain}.`;
+  if (host?.toLowerCase() !== domain.toLowerCase()) return `The mailbox must end in @${domain}.`;
+}
+
 /** Server list fields are split on `:` and wrapped in `[...]`. */
 export function listField(value: string): string | undefined {
   if (!value.trim()) return 'This cannot be empty.';

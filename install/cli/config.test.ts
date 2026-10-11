@@ -107,6 +107,15 @@ describe('answers', () => {
     expect(check.listField('a:b')).toBeDefined();
   });
 
+  it('wants a mailbox on the server\'s own domain', () => {
+    expect(check.mailbox('bob@example.com', 'example.com')).toBeUndefined();
+    expect(check.mailbox('Bob.Smith@Example.com', 'example.com')).toBeUndefined();
+    expect(check.mailbox('bob@other.net', 'example.com')).toMatch(/@example\.com/);
+    expect(check.mailbox('bo b@example.com', 'example.com')).toBeDefined();
+    expect(check.mailbox('bob|x@example.com', 'example.com')).toBeDefined();
+    expect(check.mailbox('bob', 'example.com')).toBeDefined();
+  });
+
   it('makes secrets that are safe in every file they land in', () => {
     const a = check.newSecret();
     expect(a).toMatch(/^[A-Za-z0-9_-]{43}$/);
