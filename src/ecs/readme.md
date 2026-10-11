@@ -73,7 +73,7 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
   A swing waits while the server slides the hero in.
 - `systems/positionSlideSystem.test.ts`: `ObjectMoved` lands the tile at once and draws the body a
   fifth closer each 25 fps tick, on the tile after 15 with its tile-centre offset back
-  (`PushingCharacter`), on every preset and at any distance; the hero counts as sliding for the 15
+  (`PushingCharacter`), on every preset and at any distance, stopped on arrival; the hero counts as sliding for the 15
   ticks even without moving; Chaos Castle's corner, stop and walk-off; the Crust's 0.07 and stop,
   and its walk as a slide (any other monster walks its path); the ball's kick (sparks, sound, hop, roll).
 - `systems/itemPickupSystem.test.ts`: the pickup request marks the drop `pickupAsked`; Space takes the
@@ -156,8 +156,12 @@ the rest, so pathing and the server never see the slide.
 - The Crust walks by the same slide (`startWalkSlide`, `ReceiveMoveCharacter`, WSclient.cpp:2093-2101):
   `ObjectWalked` puts it on the target tile, turns it to the tile (`CreateAngle`), plays its walk clip
   (`SetPlayerWalk`; the animation system keeps it while it slides) and slides it there at 0.07.
-- Not ported: the `SetPlayerStop` `ReceiveMovePosition` itself makes on arrival (it would cut the
-  hero's own Teleport clips, which this client plays ahead of the server).
+- `ReceiveMovePosition` stops the body on arrival (`SetPlayerStop`, WSclient.cpp:2153). No Teleport
+  clip meets it, in the original or here: the cast plays `SetPlayerTeleport` (ClassAttack.cpp:1547),
+  the server's skill animation `CreateTeleportBegin` (WSclient.cpp:4320-4331) and its answer is
+  `ReceiveTeleport` (`JumpTime = 0`, `CreateTeleportEnd`, WSclient.cpp:2157-2197), never 0x15; OpenMU
+  answers a teleport with `MapChanged` and sends the teleporter no `ObjectMoved` (`ObjectMovedPlugIn`,
+  MoveType.Teleport). This client lands its own hero before the answer (`teleportSystem.ts`).
 
 ### dropMotionSystem.ts
 A fresh drop starts 180 cm up with `Gravity = 20` cm/tick, `Gravity -= 6` a tick, tumbling until

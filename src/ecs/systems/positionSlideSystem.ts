@@ -13,7 +13,8 @@ import { Ecs } from '../current';
  * The server's instant move (`ObjectMoved`, C1 15) slides the body in. `ReceiveMovePosition` sets
  * `JumpTime = 1` (WSclient.cpp:2127-2153) and `PushingCharacter` (ZzzCharacter.cpp:3144-3203) moves
  * the body a share of the way to the new tile every 25 fps tick, on the ground, for 15 ticks, then
- * puts it there. The position lands at once here; `transform.posOffset` carries what is left.
+ * puts it there, the body stopped on arrival. The position lands at once here; `transform.posOffset`
+ * carries what is left.
  * Chaos Castle aims at the tile's corner and stops the body there; the hero takes no input and no
  * gate while sliding (`isSliding`). The ball's hop and roll are at the end. Readme: "Notes".
  */
@@ -90,6 +91,9 @@ export function startPositionSlide(body: Entity, x: number, y: number, z: number
   const t = body.transform;
   if (!t) return;
   if (body.ball) kick(body.ball, t, x, y, z);
+  // `SetPlayerStop` on arrival (WSclient.cpp:2153). A teleport never comes this way: its answer is
+  // `ReceiveTeleport` (OpenMU's MapChanged), so its clips are not cut.
+  stop(body);
   slide(body, t, x, y, z);
 }
 

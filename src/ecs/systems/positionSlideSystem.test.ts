@@ -100,6 +100,17 @@ describe("the server's instant move", () => {
     expect(centre.x).toBe(0.5);
   });
 
+  it('stops the body on arrival (SetPlayerStop, WSclient.cpp:2153)', () => {
+    const playerAnimation = { action: PlayerAction.PLAYER_ATTACK_FIST, run: 40 };
+    standing({ playerAnimation } as Partial<Entity>);
+    moveTo(101, 100);
+    expect(playerAnimation).toEqual({ action: PlayerAction.PLAYER_STOP_MALE, run: 0 });
+    const monsterAnimation = { action: MonsterActionType.Attack1 };
+    standing({ npcType: 3, monsterAnimation } as Partial<Entity>, 0, false);
+    moveTo(101, 100);
+    expect(monsterAnimation.action).toBe(MonsterActionType.Stop1);
+  });
+
   it('slides on Classic too, whatever the distance', () => {
     setFidelityChoice(FIDELITY_CLASSIC, {});
     const { t } = standing();
