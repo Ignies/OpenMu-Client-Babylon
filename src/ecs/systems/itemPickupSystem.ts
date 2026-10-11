@@ -71,6 +71,9 @@ export const ItemPickupSystem: ISystemFactory = world => {
       return;
     }
 
+    // `MoveHero` returns while the server slides the hero in (`JumpTime > 0`): the click is lost.
+    if (isSliding(world.playerEntity)) return;
+
     const target = world.currentPointerTarget;
     if (!target?.droppedItem) {
       // Clicking anything else (monster, NPC, ground) gives up the pickup.

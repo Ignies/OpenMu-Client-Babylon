@@ -80,7 +80,7 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
 - `systems/gmMark.test.ts`: the GM buff or the hero's operator status asks for the Webzen mark, cloaking hides it.
 - `systems/npcTalkSystem.test.ts`: the Gateway Machine is talked to from 5.5 tiles with no free tile beside it.
 - `systems/playerControllerSystem.test.ts`: a ground click calls off a standing cast, except while the
-  right button is held.
+  right button is held; a click while the server slides the hero in is lost, walk and attack alike.
 - `systems/skillCastSystem.test.ts`: a cast that cuts a walk stops it on the path's next node.
   Dark Side's follow-up blows draw on each target the server named and send nothing; with nothing selected it is cast where the hero stands, target key 0.
   A bow skill with no arrows in hand reloads the next quiver instead of shooting, and is dropped
@@ -144,7 +144,10 @@ the rest, so pathing and the server never see the slide.
   `MovePath` starts from where the body is drawn).
 - `JumpTime > 0` holds the hero: `MoveHero` returns and the gate check waits (ZzzInterface.cpp:2679),
   so the walk (`playerControllerSystem`), swing, cast, talk, pickup and rest systems and the gate
-  system skip their turn while `isSliding(hero)`. A request made meanwhile waits rather than drops.
+  system skip their turn while `isSliding(hero)`. A click that lands meanwhile is lost, as the
+  original never reads it (the pointer, walk, pickup, talk and rest click handlers drop it, and a
+  walk asked for then is thrown away); held buttons and keys go on after, and an attack or cast
+  already under way resumes.
 - The ball (`MonsterDef.ball`, entity `ball`): every tick it falls 6 cm onto a floor 30 cm up and
   bounces at 0.4, which never quite settles, and rolls by `Direction` fading 0.8 a tick. A kick
   sets `Gravity = 20`, a roll of 400 degrees per tile moved, SOUND_MENU01 and `CreateBomb` sparks

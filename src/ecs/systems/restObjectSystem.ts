@@ -75,6 +75,8 @@ export const RestObjectSystem: ISystemFactory = world => {
   scene.onPointerObservable.add(ev => {
     if (ev.type !== PointerEventTypes.POINTERDOWN) return;
     if (!world.playerEntity) return;
+    // `MoveHero` returns while the server slides the hero in (`JumpTime > 0`): the click is lost.
+    if (isSliding(world.playerEntity)) return;
     // Something selectable (NPC, monster, drop) under the cursor takes the
     // click; the bench / wall behind it must not steal it into a lean.
     if (world.currentPointerTarget) return;

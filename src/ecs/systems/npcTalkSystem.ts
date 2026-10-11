@@ -77,6 +77,8 @@ export const NpcTalkSystem: ISystemFactory = world => {
     if (event.event.button !== 0) return;
 
     if (Bag.pendingItemMove || Bag.pickedItem) return;
+    // `MoveHero` returns while the server slides the hero in (`JumpTime > 0`): the click is lost.
+    if (isSliding(world.playerEntity)) return;
 
     const target = world.currentPointerTarget;
     if (!target || !isTalkableNpc(target) || Merchant.npcShop) {
