@@ -36,4 +36,7 @@ export default {
   'fidelity.noticeLinks': 'Liên kết trong thông báo máy chủ',
   'fidelity.noticeLinks.hint':
     'Địa chỉ web trong thông báo máy chủ là liên kết gạch chân, mở trong thẻ mới. Cổ điển: văn bản thường, như bản gốc.',
+  'fidelity.drawnClothShadows': 'Bóng vải gọn gàng',
+  'fidelity.drawnClothShadows.hint':
+    'Chỉ áo choàng, áo dài và tóc mà nhân vật đang hiện mới đổ bóng. Cổ điển: tấm vải nhân vật không còn hiện vẫn để lại bóng ở chỗ nó bị bỏ lại, như bản gốc.',
 } satisfies Partial<Record<keyof typeof en, string>>;

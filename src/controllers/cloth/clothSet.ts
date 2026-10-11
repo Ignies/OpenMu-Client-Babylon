@@ -1,6 +1,7 @@
 import { Matrix, Vector3, type Scene, type Skeleton, type TransformNode } from '../render/babylon/exports';
 import { PhysicsCloth, stepClothWind, type ClothAnchor, type ClothSpec } from './physicsCloth';
 import { ClothMesh, pulseClothLights, type Rgb } from './clothMesh';
+import { isOn } from '../fidelity';
 
 /** The original's 25 Hz frame: one `Move2` a tick. */
 const TICK = 1 / 25;
@@ -33,6 +34,9 @@ type Worn = {
 };
 
 const IDENTITY = Matrix.Identity();
+
+/** Whether a built cloth the frame does not draw still lays its shadow: Classic; `drawnClothShadows` leaves it out. */
+let strayShadows = true;
 
 /**
  * One wearer's cloths (`o->m_pCloth`), stepped on the original's 25 Hz tick and drawn every frame. The
@@ -231,9 +235,10 @@ export class ClothSet implements ClothAnchor {
       if (!worn || !worn.created) continue;
       const laid = this.castsShadow && s < this.count;
       if (!worn.drawn) {
-        // Not stepped: its last positions stay where they were left, and its shadow with them.
-        worn.mesh.show(false, laid);
-        if (laid) worn.mesh.setWorld(IDENTITY);
+        // Not stepped: its last positions stay where they were left, and on Classic its shadow with them.
+        const stray = laid && strayShadows;
+        worn.mesh.show(false, stray);
+        if (stray) worn.mesh.setWorld(IDENTITY);
         continue;
       }
       const bone = this.bones[worn.spec.bone] ?? this.body.node.getWorldMatrix();
@@ -302,6 +307,7 @@ export function advanceClothClock(dt: number, gusty: boolean): void {
 export function runClothFrame(): void {
   const ticks = Math.floor(debt / TICK);
   debt -= ticks * TICK;
+  strayShadows = !isOn('drawnClothShadows');
   // A copy: a torn set leaves `active` in `end`.
   sets.length = 0;
   for (let i = 0; i < active.length; i++) sets.push(active[i]);

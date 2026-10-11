@@ -36,4 +36,7 @@ export default {
   'fidelity.noticeLinks': 'Links nos avisos do servidor',
   'fidelity.noticeLinks.hint':
     'Endereços web nos avisos do servidor viram links sublinhados que abrem outra aba. Clássica: texto simples, como no original.',
+  'fidelity.drawnClothShadows': 'Sombras de tecido organizadas',
+  'fidelity.drawnClothShadows.hint':
+    'Só as capas, túnicas e cabelos que um personagem mostra projetam sombra. Clássica: um tecido que o personagem já não mostra continua deixando sua sombra onde ficou, como no original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

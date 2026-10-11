@@ -46,13 +46,14 @@ knows how a cloth moves and draws, never who wears which one (the wearers' conte
 - The Classic shadow is `RenderBodyShadow` with the cloth (ZzzBMD.cpp:2642-2710): every quad on the
   ground, untextured, folded from the wearer. It lays every built cloth below `count`, drawn or not: a
   cloth the loop skips is neither stepped nor drawn, and its shadow stays where it was built or last
-  stepped, which never moves (a Dark Lord with a weapon and no cape). A clone of the front mesh shares its
+  stepped, which never moves (a Dark Lord with a weapon and no cape); the `drawnClothShadows` improvement
+  (Enhanced, Ultra) leaves those out, read once a frame in `runClothFrame`. A clone of the front mesh shares its
   buffers under the blob material, made the first time the set casts one. The keyed and opaque cloths are cascade
   casters on the graded tiers.
 
 ## Depends on / used by
 - uses: `render` (the Babylon exports, the blob shadow material), `assets` (`getDataTexture`), `fx`
-  (`HeldSprites`).
+  (`HeldSprites`), `fidelity` (`isOn`).
 - used by: `actors` (`PlayerObject.Cloth`), `ecs/systems/clothSystem.ts` (the clock and the wearers).
 
 ## Change it

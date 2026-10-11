@@ -33,6 +33,9 @@ const en = {
   'fidelity.noticeLinks': 'Links in server notices',
   'fidelity.noticeLinks.hint':
     'Web addresses in the server notices are underlined links that open a new tab. Classic: plain text, as in the original.',
+  'fidelity.drawnClothShadows': 'Tidy cloth shadows',
+  'fidelity.drawnClothShadows.hint':
+    'Only the capes, robes and hair a character shows cast a shadow. Classic: a cloth the character no longer shows still lays its shadow where it was left, as in the original.',
 };
 
 export default en;

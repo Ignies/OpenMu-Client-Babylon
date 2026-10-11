@@ -36,4 +36,7 @@ export default {
   'fidelity.noticeLinks': 'Linkuri în anunțurile serverului',
   'fidelity.noticeLinks.hint':
     'Adresele web din anunțurile serverului sunt linkuri subliniate care se deschid într-o filă nouă. Clasică: text simplu, ca în original.',
+  'fidelity.drawnClothShadows': 'Umbre ordonate ale țesăturilor',
+  'fidelity.drawnClothShadows.hint':
+    'Doar pelerinele, robele și părul pe care un personaj le arată aruncă umbră. Clasică: o țesătură pe care personajul nu o mai arată își lasă umbra acolo unde a rămas, ca în original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

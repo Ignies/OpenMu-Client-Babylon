@@ -24,6 +24,7 @@ asks `isOn('<id>')`. Classic turns them all off and runs the original.
 | `roofFade` | Enhanced | `ecs/systems/ceilingHideSystem.ts` | roofs stay drawn (the only object fade is Chaos Castle's) |
 | `requestTimeout` | Enhanced | `modules/social/requestTimeout.ts`, wired by `party/net.ts`, `trade/net.ts`, `events/duel.ts` | a trade, party or duel prompt stays until clicked |
 | `noticeLinks` | Enhanced | `modules/chat/notices.ts` (`create`), `ui/hud/notices/index.tsx` | a notice is plain text, markup and all, cut in two past 256 px (ZzzInterface.cpp:491-603) |
+| `drawnClothShadows` | Enhanced | `controllers/cloth/clothSet.ts` (`runClothFrame`) | every built cloth below `m_byNumCloth` lays its shadow, a skipped one where it was left (ZzzBMD.cpp:2648-2710) |
 
 - The file's comment cites the original and names the site; the site keeps the original path when
   `isOn` is false.
@@ -57,3 +58,5 @@ asks `isOn('<id>')`. Classic turns them all off and runs the original.
   `maps/bloodcastle/candelabraObject.test.ts`, `maps/stadium/brazierObject.test.ts`: the flares,
   fires and ground lights the original never draws are gone on Classic, the original's light under
   them stays.
+- `controllers/cloth/clothSet.test.ts`: on Classic a built cloth the loop skips lays its shadow where it was
+  left; `drawnClothShadows` leaves it out and keeps the drawn cloth's.

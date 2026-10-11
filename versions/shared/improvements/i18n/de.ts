@@ -36,4 +36,7 @@ export default {
   'fidelity.noticeLinks': 'Links in Servermeldungen',
   'fidelity.noticeLinks.hint':
     'Webadressen in den Servermeldungen sind unterstrichene Links, die einen neuen Tab öffnen. Klassisch: einfacher Text, wie im Original.',
+  'fidelity.drawnClothShadows': 'Aufgeräumte Stoffschatten',
+  'fidelity.drawnClothShadows.hint':
+    'Nur Umhänge, Roben und Haare, die eine Figur zeigt, werfen einen Schatten. Klassisch: Ein Stoff, den die Figur nicht mehr zeigt, wirft seinen Schatten weiter dort, wo er zurückblieb, wie im Original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

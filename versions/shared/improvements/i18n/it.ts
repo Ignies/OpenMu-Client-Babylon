@@ -36,4 +36,7 @@ export default {
   'fidelity.noticeLinks': 'Link negli avvisi del server',
   'fidelity.noticeLinks.hint':
     'Gli indirizzi web negli avvisi del server sono link sottolineati che aprono una nuova scheda. Classica: testo semplice, come nell’originale.',
+  'fidelity.drawnClothShadows': 'Ombre dei tessuti ordinate',
+  'fidelity.drawnClothShadows.hint':
+    'Solo i mantelli, le tuniche e i capelli che un personaggio mostra proiettano un’ombra. Classica: un tessuto che il personaggio non mostra più lascia la sua ombra dove è rimasto, come nell’originale.',
 } satisfies Partial<Record<keyof typeof en, string>>;

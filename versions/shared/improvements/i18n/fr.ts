@@ -36,4 +36,7 @@ export default {
   'fidelity.noticeLinks': 'Liens dans les annonces du serveur',
   'fidelity.noticeLinks.hint':
     'Les adresses web des annonces du serveur sont des liens soulignés qui ouvrent un nouvel onglet. Classique : texte simple, comme dans l’original.',
+  'fidelity.drawnClothShadows': 'Ombres de tissu nettes',
+  'fidelity.drawnClothShadows.hint':
+    'Seuls les capes, robes et cheveux qu’un personnage montre projettent une ombre. Classique : un tissu que le personnage ne montre plus laisse son ombre là où il est resté, comme dans l’original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

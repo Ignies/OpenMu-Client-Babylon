@@ -36,4 +36,7 @@ export default {
   'fidelity.noticeLinks': 'ลิงก์ในประกาศของเซิร์ฟเวอร์',
   'fidelity.noticeLinks.hint':
     'ที่อยู่เว็บในประกาศของเซิร์ฟเวอร์เป็นลิงก์ขีดเส้นใต้ที่เปิดในแท็บใหม่ คลาสสิก: ข้อความธรรมดาเหมือนต้นฉบับ',
+  'fidelity.drawnClothShadows': 'เงาผ้าที่เรียบร้อย',
+  'fidelity.drawnClothShadows.hint':
+    'มีเพียงผ้าคลุม เสื้อคลุม และผมที่ตัวละครแสดงอยู่เท่านั้นที่ทอดเงา คลาสสิก: ผ้าที่ตัวละครไม่ได้แสดงแล้วยังคงทิ้งเงาไว้ตรงที่มันค้างอยู่ เหมือนต้นฉบับ',
 } satisfies Partial<Record<keyof typeof en, string>>;

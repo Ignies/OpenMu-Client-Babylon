@@ -230,6 +230,11 @@ export class ClothMesh {
     }
   }
 
+  /** The Classic shadow's mesh, once made. */
+  get shadowMesh(): Mesh | null {
+    return this.shadow;
+  }
+
   /** The faces (and a light cloth's sprites) and the Classic shadow, each on or off. */
   show(faces: boolean, shadow: boolean): void {
     this.setShadow(shadow);

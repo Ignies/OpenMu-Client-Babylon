@@ -18,6 +18,7 @@ import { getShadowMaterial } from '../render/objectShadow';
 import { cloth, ClothSet, PCT_CURVED, PCT_HEAVY, PCT_MASK_ALPHA, PCT_MASK_BLEND, PCT_MASK_LIGHT, PCT_SHORT_SHOULDER, runClothFrame, type ClothSpec } from './index';
 import { ClothMesh, lightSprite } from './clothMesh';
 import { HeldSprites, type HeldLook } from '../fx/effectParticles';
+import { FIDELITY_CLASSIC, FIDELITY_DEFAULT, setFidelityChoice } from '../fidelity';
 
 const engine = new NullEngine();
 const scene = new Scene(engine);
@@ -245,7 +246,8 @@ describe('a wearer\'s cloths (o->m_pCloth)', () => {
     set.dispose();
   });
 
-  it('lays a built cloth it does not draw where Create left it, and its shadow there (ZzzBMD.cpp:2648-2710)', () => {
+  it('lays a built cloth it does not draw where Create left it, and on Classic its shadow there (ZzzBMD.cpp:2648-2710)', () => {
+    setFidelityChoice(FIDELITY_CLASSIC, {});
     const rig = body();
     const set = new ClothSet(scene, rig);
     set.castsShadow = true;
@@ -258,9 +260,13 @@ describe('a wearer\'s cloths (o->m_pCloth)', () => {
     // Never stepped: it stays where it was built, its faces hidden, its shadow on the ground under it.
     expect(pos(set, 2)).toEqual(laid);
     const robe = meshOf(set, 2);
-    const shadow = scene.getMeshByName(`${robe.faces[0].name}_shadow`) as Mesh;
+    const shadow = robe.shadowMesh as Mesh;
     expect([robe.faces[0].isEnabled(), shadow.isEnabled()]).toEqual([false, true]);
     expect(shadow.getWorldMatrix().isIdentity()).toBe(true);
+    // drawnClothShadows (Enhanced) leaves it out; the drawn cape keeps its own.
+    setFidelityChoice(FIDELITY_DEFAULT, {});
+    tick();
+    expect([shadow.isEnabled(), meshOf(set, 0).shadowMesh?.isEnabled()]).toEqual([false, true]);
     set.dispose();
   });
 
@@ -272,7 +278,7 @@ describe('a wearer\'s cloths (o->m_pCloth)', () => {
     set.build(1, ROBE);
     tick();
     const robe = meshOf(set, 1);
-    expect(scene.getMeshByName(`${robe.faces[0].name}_shadow`)).toBeNull();
+    expect(robe.shadowMesh).toBeNull();
     // Slot 1 counted, but stepped again only after the body walked far off: the strict links give.
     set.count = 2;
     rig.node.position.x += 100;
@@ -302,7 +308,7 @@ describe('a wearer\'s cloths (o->m_pCloth)', () => {
     hang(set, [CAPE], [1, 1, 1]);
     tick();
     const face = meshOf(set, 0).faces[0];
-    const shadow = scene.getMeshByName(`${face.name}_shadow`) as Mesh;
+    const shadow = meshOf(set, 0).shadowMesh as Mesh;
     expect(shadow.material).toBe(getShadowMaterial(scene, 0));
     expect(shadow.getVertexBuffer(VertexBuffer.PositionKind)).toBe(face.getVertexBuffer(VertexBuffer.PositionKind));
     expect([shadow.metadata.shadowOriginNode, shadow.metadata.diffuseTexture]).toEqual([rig.node, undefined]);

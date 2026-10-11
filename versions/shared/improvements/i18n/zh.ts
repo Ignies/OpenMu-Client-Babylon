@@ -36,4 +36,7 @@ export default {
   'fidelity.noticeLinks': '服务器公告中的链接',
   'fidelity.noticeLinks.hint':
     '服务器公告中的网址显示为带下划线的链接，在新标签页中打开。经典：与原版相同的纯文本。',
+  'fidelity.drawnClothShadows': '整洁的布料阴影',
+  'fidelity.drawnClothShadows.hint':
+    '只有角色显示的披风、长袍和头发会投下阴影。经典：角色不再显示的布料仍会在原处留下阴影，与原版相同。',
 } satisfies Partial<Record<keyof typeof en, string>>;

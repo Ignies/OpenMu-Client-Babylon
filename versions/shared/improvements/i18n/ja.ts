@@ -36,4 +36,7 @@ export default {
   'fidelity.noticeLinks': 'サーバー告知のリンク',
   'fidelity.noticeLinks.hint':
     'サーバー告知のWebアドレスが下線付きリンクになり、新しいタブで開きます。クラシック: オリジナル通りのただの文字。',
+  'fidelity.drawnClothShadows': '布の影を整理',
+  'fidelity.drawnClothShadows.hint':
+    'キャラクターが見せているマント、ローブ、髪だけが影を落とします。クラシック: 見えなくなった布も、残された場所に影を落とし続けます（オリジナルどおり）。',
 } satisfies Partial<Record<keyof typeof en, string>>;

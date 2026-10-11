@@ -36,4 +36,7 @@ export default {
   'fidelity.noticeLinks': 'Linki w ogłoszeniach serwera',
   'fidelity.noticeLinks.hint':
     'Adresy WWW w ogłoszeniach serwera są podkreślonymi linkami otwieranymi w nowej karcie. Klasyczne: zwykły tekst, jak w oryginale.',
+  'fidelity.drawnClothShadows': 'Uporządkowane cienie tkanin',
+  'fidelity.drawnClothShadows.hint':
+    'Cień rzucają tylko peleryny, szaty i włosy, które postać pokazuje. Klasyczne: tkanina, której postać już nie pokazuje, nadal rzuca cień tam, gdzie została, jak w oryginale.',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -36,4 +36,7 @@ export default {
   'fidelity.noticeLinks': '서버 공지의 링크',
   'fidelity.noticeLinks.hint':
     '서버 공지의 웹 주소가 밑줄 친 링크가 되어 새 탭에서 열립니다. 클래식: 원본처럼 일반 텍스트.',
+  'fidelity.drawnClothShadows': '깔끔한 천 그림자',
+  'fidelity.drawnClothShadows.hint':
+    '캐릭터가 보여 주는 망토, 로브, 머리카락만 그림자를 드리웁니다. 클래식: 더 이상 보이지 않는 천도 남겨진 자리에 그림자를 계속 드리웁니다(원작과 같음).',
 } satisfies Partial<Record<keyof typeof en, string>>;
