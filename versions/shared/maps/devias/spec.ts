@@ -12,7 +12,7 @@ import { rollTenths } from '../shared/meshAnimation';
  */
 
 /**
- * CreateObject, ZzzObject.cpp:4643-4651 (World 3 / Object3).
+ * CreateObject, ZzzObject.cpp:4624-4677 (World 3 / Object3).
  *
  * 19 is the aurora curtain that hangs over the ravines - 136 of them on the
  * map, five tiles up. The original puts it in the same `BlendMesh = 0` case
