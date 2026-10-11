@@ -43,6 +43,8 @@ export default {
   'muHelper.pickExtra': 'Oggetti extra:',
   'muHelper.itemName': "Nome dell'oggetto",
   'muHelper.addItem': 'Aggiungi',
+  'muHelper.itemFilters': 'Filtri (+Luck +Opt 12)',
+  'muHelper.itemFilters.hint': 'Le parole con + filtrano l’oggetto: +Luck, +Skill, +Exc, +Anc, +Opt o +Opt 12, +9 per il livello. Le voci possono essere più lunghe; questo browser conserva il testo intero. Spento: l’originale, parte del nome.',
   'muHelper.removeItem': 'Togli',
   'muHelper.pickSkill': "Scegli un'abilità",
   'muHelper.noSkills': 'Nessuna abilità utilizzabile appresa',

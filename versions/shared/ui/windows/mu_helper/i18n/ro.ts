@@ -43,6 +43,8 @@ export default {
   'muHelper.pickExtra': 'Obiecte suplimentare:',
   'muHelper.itemName': 'Numele obiectului',
   'muHelper.addItem': 'Adaugă',
+  'muHelper.itemFilters': 'Filtre (+Luck +Opt 12)',
+  'muHelper.itemFilters.hint': 'Cuvintele cu + filtrează obiectul: +Luck, +Skill, +Exc, +Anc, +Opt sau +Opt 12, +9 pentru nivel. Intrările pot fi mai lungi; acest browser păstrează textul întreg. Oprit: originalul, o parte din nume.',
   'muHelper.removeItem': 'Șterge',
   'muHelper.pickSkill': 'Alege o abilitate',
   'muHelper.noSkills': 'Nu ai învățat abilități utilizabile',

@@ -43,6 +43,8 @@ export default {
   'muHelper.pickExtra': 'ไอเทมเพิ่มเติม:',
   'muHelper.itemName': 'ชื่อไอเทม',
   'muHelper.addItem': 'เพิ่ม',
+  'muHelper.itemFilters': 'ตัวกรอง (+Luck +Opt 12)',
+  'muHelper.itemFilters.hint': 'คำที่ขึ้นต้นด้วย + ใช้กรองไอเทม: +Luck, +Skill, +Exc, +Anc, +Opt หรือ +Opt 12, +9 สำหรับเลเวล รายการยาวขึ้นได้ เบราว์เซอร์นี้เก็บข้อความเต็ม ปิด: แบบต้นฉบับ ส่วนหนึ่งของชื่อ',
   'muHelper.removeItem': 'ลบ',
   'muHelper.pickSkill': 'เลือกสกิล',
   'muHelper.noSkills': 'ยังไม่ได้เรียนสกิลที่ใช้ได้',

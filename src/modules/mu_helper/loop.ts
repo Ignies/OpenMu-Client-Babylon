@@ -12,6 +12,8 @@ import { isAttackableEntity } from '../../ecs/systems/attackSystem';
 import type { Entity, World } from '../../ecs/world';
 import { ensureMuHelperWatching, MuHelperState, MuHelper } from './state';
 import type { MuHelperConfig } from './config';
+import { matchesFilteredItem } from './itemFilters';
+import { GameOptions } from '@/controllers/settings';
 
 /**
  * The MU Helper automation loop, ported from `CMuHelper` (MuHelper.cpp). It
@@ -341,9 +343,14 @@ function shouldObtain(config: MuHelperConfig, e: Entity): boolean {
   if (config.pickExcellent && drop.item?.isExcellent) return true;
 
   if (config.pickExtraItems && def) {
-    const name = def.name.toLowerCase();
-    if (config.extraItems.some(entry => name.includes(entry.toLowerCase()))) {
-      return true;
+    // The player's item filters (ours, itemFilters.ts); off is the original's name match.
+    if (GameOptions.helperItemFilters) {
+      if (matchesFilteredItem(config.extraItems, def.name, drop.item)) return true;
+    } else {
+      const name = def.name.toLowerCase();
+      if (config.extraItems.some(entry => name.includes(entry.toLowerCase()))) {
+        return true;
+      }
     }
   }
 

@@ -43,6 +43,8 @@ export default {
   'muHelper.pickExtra': '其他物品：',
   'muHelper.itemName': '物品名称',
   'muHelper.addItem': '添加',
+  'muHelper.itemFilters': '过滤 (+Luck +Opt 12)',
+  'muHelper.itemFilters.hint': '以 + 开头的词用于筛选物品：+Luck、+Skill、+Exc、+Anc、+Opt 或 +Opt 12，等级用 +9。条目可以更长，完整文本保存在此浏览器中。关闭：与原版相同，匹配名称的一部分。',
   'muHelper.removeItem': '移除',
   'muHelper.pickSkill': '选择技能',
   'muHelper.noSkills': '没有学会可用的技能',

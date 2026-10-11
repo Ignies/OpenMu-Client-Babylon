@@ -10,6 +10,8 @@ the two server packets, with its running state and the raw config blob (`MuHelpe
   `ensureMuHelperWatching()` (`state.ts`): the live config, the window's draft and its buttons.
 - `MuHelperConfig`, `DarkRavenMode`, `MAX_HUNTING_RANGE`, `MAX_OBTAINING_RANGE`, `MAX_EXTRA_ITEMS`,
   `MAX_EXTRA_ITEM_CHARS` (`config.ts`): what the window edits.
+- `matchesFilteredItem`, `restoreExtraItems`, `MAX_FILTERED_ITEM_CHARS` (`itemFilters.ts`): the
+  player's item filters.
 
 ## How it works
 - `MuHelper` (`state.ts`, through `index.ts`, the door): `active`, `lastMoneyConsumed`,
@@ -34,6 +36,12 @@ the two server packets, with its running state and the raw config blob (`MuHelpe
   helper never goes for it again, as the original takes it off its list (`DeleteItem`, MuHelper.cpp:1252).
 - Switching it off clears `world.castRequest`, `attackTarget` and `pickupTarget`, so the hero does not
   keep walking to the monster or drop it was on.
+- Item filters (`itemFilters.ts`, ours): with the player's `GameOptions.helperItemFilters` (a check
+  under Extra items, off by default) the `+` words of an extra item are filters (+Luck, +Skill, +Exc,
+  +Anc, +Opt / +Opt 12, +9) and an entry may be 40 characters. The blob keeps 14 of each, so
+  `state.ts` keeps the typed list per character in localStorage (`mu_helper_items:<name>`) and puts
+  it back over the cut slots on every decode. Off, the loop matches as the original (a part of the
+  name, `ShouldObtainItem`).
 - Resume (`resume.ts`, ours): a socket drop that starts the automatic reconnect stops the helper,
   as the server's ended with the old session. Where the world's `server.json` sets
   `muHelperAfterReconnect`, it is asked to start again (`toggleMuHelper`) 3 s after the resume is
@@ -66,5 +74,8 @@ the two server packets, with its running state and the raw config blob (`MuHelpe
 - `loop.test.ts`, `state.test.ts`: nothing runs or starts while the module is off. `loop.test.ts`: switching
   it off lets go of its cast, swing and pickup; a buff is checked by skill number and a skill
   `BuffTarget` does not list is never cast; a drop already asked for is left alone.
+- `itemFilters.test.ts`: each filter, and the whole text put back over the cut slots. `loop.test.ts`:
+  extra items match by name only until the filters are on. `state.test.ts`: the typed text survives
+  a save only with the filters on.
 - `resume.test.ts`: a drop stops it; after the resume it stays off by default and is asked for again
   only where the world allows it and only when it was running.

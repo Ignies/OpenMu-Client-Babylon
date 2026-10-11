@@ -416,6 +416,12 @@ export type GameOptions = {
    */
   englishItemNames: boolean;
   /**
+   * MU Helper extra items (ours): `+` words are filters (+Luck +Skill +Exc +Anc +Opt N +level)
+   * and an entry may run past the 14 characters the server keeps (`modules/mu_helper`). Off is
+   * the original: a name the item's name contains.
+   */
+  helperItemFilters: boolean;
+  /**
    * 0 Classic (the original client, 1:1) / 1 Enhanced / 2 Ultra: which deliberate
    * improvements run (`controllers/fidelity`).
    */
@@ -618,6 +624,7 @@ const DEFAULTS: GameOptions = {
   eventTimers: true,
   questTracker: true,
   englishItemNames: false,
+  helperItemFilters: false,
   fidelity: FIDELITY_DEFAULT,
   fidelityOverrides: {},
 };

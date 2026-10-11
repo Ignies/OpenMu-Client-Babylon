@@ -4,12 +4,16 @@ import { Ecs } from '@/ecs/current';
 import { addNotification } from '../chat';
 import { Session } from '../session';
 import { moduleOn } from '../module';
+import { Hero } from '../hero';
+import { GameOptions } from '@/controllers/settings';
+import { LocalStorage } from '@/core/localStorage';
+import { restoreExtraItems } from './itemFilters';
 import {
   MuHelperSaveDataRequestPacket,
   MuHelperStatusChangeRequestPacket,
 } from '@versions/shared/packets/ClientToServerPackets';
 import {
-  decodeMuHelperConfig,
+  decodeMuHelperConfig as decodeBlob,
   defaultMuHelperConfig,
   encodeMuHelperConfig,
   type MuHelperConfig,
@@ -110,6 +114,25 @@ export const MuHelperState = observable({
   draft: defaultMuHelperConfig() as MuHelperConfig,
 });
 
+/** The extra items as typed, per character, for the item filters: the blob keeps 14 characters. */
+const typedItemsKey = () => `mu_helper_items:${Hero.name}`;
+
+function typedItems(): string[] {
+  try {
+    const list: unknown = JSON.parse(LocalStorage.load(typedItemsKey()) ?? '[]');
+    return Array.isArray(list) ? list.filter((x): x is string => typeof x === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
+/** The blob's config; with the player's item filters on, each extra item's whole text put back. */
+function decodeMuHelperConfig(blob: Uint8Array): MuHelperConfig {
+  const config = decodeBlob(blob);
+  if (GameOptions.helperItemFilters) config.extraItems = restoreExtraItems(config.extraItems, typedItems());
+  return config;
+}
+
 /** Canonical clone: what survives the wire is what the copy holds. */
 function cloneConfig(config: MuHelperConfig): MuHelperConfig {
   return decodeMuHelperConfig(encodeMuHelperConfig(config));
@@ -158,6 +181,7 @@ export function resetMuHelperDraft(): void {
  * Offline the config only applies locally.
  */
 export function saveMuHelperConfig(): void {
+  if (GameOptions.helperItemFilters) LocalStorage.save(typedItemsKey(), JSON.stringify(MuHelperState.draft.extraItems));
   const blob = encodeMuHelperConfig(MuHelperState.draft);
   runInAction(() => {
     MuHelperState.config = decodeMuHelperConfig(blob);

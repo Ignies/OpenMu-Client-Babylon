@@ -41,6 +41,9 @@ const en = {
   'muHelper.pickExtra': 'Extra items:',
   'muHelper.itemName': 'Item name',
   'muHelper.addItem': 'Add',
+  /** The player's item filters (ours, `GameOptions.helperItemFilters`). */
+  'muHelper.itemFilters': 'Filters (+Luck +Opt 12)',
+  'muHelper.itemFilters.hint': 'Words starting with + filter the item: +Luck, +Skill, +Exc, +Anc, +Opt or +Opt 12, +9 for the level. Entries may be longer; this browser keeps the whole text. Off: the original, part of the name.',
   'muHelper.removeItem': 'Remove',
   'muHelper.pickSkill': 'Pick a skill',
   'muHelper.noSkills': 'No usable skills learned',
