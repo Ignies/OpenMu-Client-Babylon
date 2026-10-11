@@ -432,4 +432,7 @@ export default {
   'options.fpsUnlimited': 'Без ограничения',
   'options.help.fpsLimit':
     'Ограничивает число кадров в секунду. Меньше - меньше нагрузка на процессор, видеокарту и батарею; без ограничения - по монитору.',
+  'options.effectShedding': 'Меньше эффектов при тормозах',
+  'options.help.effectShedding':
+    'Пока частота кадров заметно ниже цели (ограничение FPS или 60), в толпе рисуется меньше эффектов умений других игроков. Ваши видны всегда.',
 } satisfies Partial<Record<keyof typeof en, string>>;

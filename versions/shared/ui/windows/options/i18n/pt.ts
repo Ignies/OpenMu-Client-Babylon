@@ -403,4 +403,7 @@ export default {
   'options.fpsUnlimited': 'Sem limite',
   'options.help.fpsLimit':
     'Limita quantos quadros por segundo são desenhados. Menos usa menos CPU, GPU e bateria; sem limite segue o monitor.',
+  'options.effectShedding': 'Menos efeitos quando lento',
+  'options.help.effectShedding':
+    'Enquanto os quadros ficam bem abaixo do alvo (o limite de FPS, ou 60), desenha menos efeitos de habilidades de outros jogadores na multidão. Os seus sempre aparecem.',
 } satisfies Partial<Record<keyof typeof en, string>>;

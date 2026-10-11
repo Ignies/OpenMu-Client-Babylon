@@ -29,7 +29,8 @@ There is no `index.ts` facade; other folders import the modules directly.
   steps and readers for the Options window, the materials and boot).
 - `fpsLimit.ts` (ours, the FPS limit option): `FPS_LIMIT_STEPS` / `_MAX`, `fpsLimitForStep`, `FramePacer`,
   `framePacer` (boot's render loop asks `due(now, limit)`; its `fps` counts drawn frames, which the perf
-  readout and overlay show).
+  readout and overlay show). `loadShed.ts` (ours, the `effectShedding` option): `shedLevel(now)`, `nextShedLevel`,
+  `ShedLevel`, read by `skills/castBudget.ts`.
 - `pbrMaps.ts`: `pbrMapsFor`, `pbrMapsIfReady`, `textureSourceName`; `readPackLabelsWith(reader)`, the
   texture pack's remembered names, which `textureSourceName` asks first (set by `assets/modelLoader.ts`).
 - `index.ts`: the types below, `ModelObject` (the pets controller extends it) and `HIDDEN_MESH_ALL` for
@@ -104,6 +105,8 @@ There is no `index.ts` facade; other folders import the modules directly.
   the number bias round trip, and the pack digest.
 - `fpsLimit.test.ts`: uncapped draws every frame; a cap holds on a faster monitor, averages a rate it does
   not divide, drops nothing at the refresh rate; `fps` measures the frames let through.
+- `loadShed.test.ts`: the levels against the target, the way back one step at a time, no reading changes
+  nothing, read at most twice a second.
 - `frameSnapshot.test.ts`: fills once per frame and per scene, refills after a throw.
 - `iconShot.test.ts`: at most one shot per frame and no observer once idle; one build per key, again
   after `forget`; the
@@ -190,6 +193,9 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `fpsLimit.ts`: a cap skips whole animation frames (nothing runs; the next drawn frame gets the whole dt),
   carrying the due time forward so 45 on 60 Hz averages right, with 1 ms of slack so a cap equal to the
   refresh rate drops nothing. Off (step 0) is the browser rate the client always ran at.
+- `loadShed.ts`: level 1 under 2/3 of the target frame rate (the FPS limit, 60 uncapped), 2 under 2/5,
+  from `framePacer.fps` re-read twice a second; a level is left over 0.85 / 0.55 of the target, one step a
+  reading, so a crowd at the edge does not flicker.
 - `objectShadow.ts`: `SHADOW_ALPHA_CUTOFF` is 0.1, not the caster's 0.25, because MU's TGAs carry
   partial alpha across whole surfaces (capes, visors) and 0.25 punched holes in the shadow. The torch
   direction slot was removed: it doubled shadows near braziers and broke indoors. `SHADOW_DILATE`

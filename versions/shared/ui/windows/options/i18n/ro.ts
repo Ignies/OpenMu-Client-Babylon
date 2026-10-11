@@ -409,4 +409,7 @@ export default {
   'options.fpsUnlimited': 'Nelimitat',
   'options.help.fpsLimit':
     'Limitează câte cadre pe secundă se desenează. Mai puțin folosește mai puțin procesorul, placa video și bateria; Nelimitat urmează monitorul.',
+  'options.effectShedding': 'Mai puține efecte când merge greu',
+  'options.help.effectShedding':
+    'Cât timp cadrele rămân mult sub țintă (limita FPS sau 60), desenează mai puține efecte ale abilităților altor jucători în mulțime. Ale tale se văd mereu.',
 } satisfies Partial<Record<keyof typeof en, string>>;

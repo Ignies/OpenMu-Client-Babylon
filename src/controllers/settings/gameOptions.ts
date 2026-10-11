@@ -284,6 +284,11 @@ export type GameOptions = {
   skillVisualBudget: boolean;
   /** At most `MAX_DRAWN_DROPS` (150) ground items drawn, the nearest (ours, a crowd option). */
   dropDrawCap: boolean;
+  /**
+   * Thin other players' skill visuals while the drawn frame rate stays under its target (ours, a
+   * crowd option, `controllers/render/loadShed.ts`): their shared budget halves, then quarters.
+   */
+  effectShedding: boolean;
   autoAttack: boolean;
   /**
    * An amount box in front of every `+` in the character info window, so a
@@ -640,6 +645,7 @@ const DEFAULTS: GameOptions = {
   npcAnimations: true,
   skillVisualBudget: false,
   dropDrawCap: false,
+  effectShedding: false,
   autoAttack: false,
   statPointAmounts: true,
   whisperBeep: true,

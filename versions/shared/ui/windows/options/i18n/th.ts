@@ -375,4 +375,7 @@ export default {
   'options.fpsUnlimited': 'ไม่จำกัด',
   'options.help.fpsLimit':
     'จำกัดจำนวนเฟรมที่วาดต่อวินาที ค่าต่ำใช้ CPU, GPU และแบตเตอรี่น้อยลง ไม่จำกัดจะตามจอภาพ',
+  'options.effectShedding': 'ลดเอฟเฟกต์เมื่อช้า',
+  'options.help.effectShedding':
+    'ขณะที่เฟรมเรตต่ำกว่าเป้าหมายมาก (ขีดจำกัด FPS หรือ 60) จะวาดเอฟเฟกต์สกิลของผู้เล่นอื่นในฝูงชนน้อยลง ของคุณจะแสดงเสมอ',
 } satisfies Partial<Record<keyof typeof en, string>>;

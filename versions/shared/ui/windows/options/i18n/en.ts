@@ -431,6 +431,9 @@ const en = {
   'options.fpsUnlimited': 'Unlimited',
   'options.help.fpsLimit':
     'Caps how many frames a second are drawn. Lower uses less CPU, GPU and battery; Unlimited follows the monitor.',
+  'options.effectShedding': 'Fewer effects when slow',
+  'options.help.effectShedding':
+    "While the frame rate stays well under its target (the FPS limit, or 60), draws fewer of other players' skill effects in a crowd. Yours always show.",
 };
 
 export default en;

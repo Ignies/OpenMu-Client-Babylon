@@ -576,6 +576,7 @@ export const CATEGORIES: Category[] = [
               toggle('npcAnimations'),
               toggle('skillVisualBudget'),
               toggle('dropDrawCap'),
+              toggle('effectShedding'),
             ],
           },
         ],

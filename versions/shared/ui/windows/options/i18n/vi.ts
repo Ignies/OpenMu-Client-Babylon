@@ -393,4 +393,7 @@ export default {
   'options.fpsUnlimited': 'Không giới hạn',
   'options.help.fpsLimit':
     'Giới hạn số khung hình vẽ mỗi giây. Thấp hơn dùng ít CPU, GPU và pin hơn; Không giới hạn theo màn hình.',
+  'options.effectShedding': 'Ít hiệu ứng hơn khi chậm',
+  'options.help.effectShedding':
+    'Khi tốc độ khung hình thấp hơn nhiều so với mục tiêu (giới hạn FPS, hoặc 60), vẽ ít hiệu ứng kỹ năng của người chơi khác trong đám đông hơn. Của bạn luôn hiện.',
 } satisfies Partial<Record<keyof typeof en, string>>;

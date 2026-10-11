@@ -79,6 +79,9 @@ themselves are content in `versions/shared/skills/` (see [docs/content.md](../..
   default), one caster's casts are drawn at most every `CASTER_GAP_MS` (100 ms, 10 a second: past any
   normal attack speed) or its skill's `heavyVisualGap` (Chaotic Diseier 0.25 s, its smoke piles up), and
   other players' together at most `OTHERS_PER_SECOND` (40) a second; the hero is out of that count.
+  With `effectShedding` on (off by default) that shared budget for other players holds even with the
+  budget off and is halved / quartered while `render/loadShed.ts` reads level 1 / 2. Only a crowd ever
+  reaches it, so a normal map is never thinned.
 
 ## Depends on / used by
 - uses: fx (`effects.spawn`), lighting, combat, sound and weather (`scorch`, `burn`) controllers,
@@ -104,7 +107,8 @@ themselves are content in `versions/shared/skills/` (see [docs/content.md](../..
   `registerSkills` (or `combat/skillRules.ts` for combat fields); never test a skill number there.
 
 ## Tests
-`castBudget.test.ts`: which casts are drawn, the per-caster gap, a heavy skill's gap, the crowd's budget. The tests in `versions/shared/skills/` cover the rest
+`castBudget.test.ts`: which casts are drawn, the per-caster gap, a heavy skill's gap, the crowd's budget,
+the shed crowd budget. The tests in `versions/shared/skills/` cover the rest
 (`releaseTiming.test.ts` for the release):
 - `skillVisuals.golden.test.ts`: what every skill id spawns on cast, area, bow shot and buff.
 - `skillTables.golden.test.ts`: what every id resolves to for light, sound, clip, target,

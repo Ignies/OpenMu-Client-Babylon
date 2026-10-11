@@ -441,4 +441,7 @@ export default {
   'options.fpsUnlimited': 'Sin límite',
   'options.help.fpsLimit':
     'Limita cuántos cuadros por segundo se dibujan. Menos usa menos CPU, GPU y batería; sin límite sigue al monitor.',
+  'options.effectShedding': 'Menos efectos si va lento',
+  'options.help.effectShedding':
+    'Mientras los FPS se quedan bastante por debajo de su objetivo (el límite de FPS, o 60), dibuja menos efectos de habilidades de otros jugadores en una multitud. Los tuyos siempre se ven.',
 } satisfies Partial<Record<keyof typeof en, string>>;

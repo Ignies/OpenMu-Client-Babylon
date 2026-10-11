@@ -400,4 +400,7 @@ export default {
   'options.fpsUnlimited': 'Bez limitu',
   'options.help.fpsLimit':
     'Ogranicza liczbę klatek rysowanych na sekundę. Mniej oszczędza procesor, kartę graficzną i baterię; bez limitu podąża za monitorem.',
+  'options.effectShedding': 'Mniej efektów przy spowolnieniu',
+  'options.help.effectShedding':
+    'Dopóki liczba klatek jest wyraźnie poniżej celu (limit FPS albo 60), rysuje mniej efektów umiejętności innych graczy w tłumie. Twoje są zawsze widoczne.',
 } satisfies Partial<Record<keyof typeof en, string>>;

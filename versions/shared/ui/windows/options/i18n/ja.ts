@@ -333,4 +333,7 @@ export default {
   'options.fpsLimit': 'FPS上限',
   'options.fpsUnlimited': '無制限',
   'options.help.fpsLimit': '1秒間に描画するフレーム数を制限します。低いほどCPU、GPU、バッテリーの消費が減ります。無制限はモニターに従います。',
+  'options.effectShedding': '重いときはエフェクトを減らす',
+  'options.help.effectShedding':
+    'フレームレートが目標（FPS上限、または60）を大きく下回っている間、人混みで他のプレイヤーのスキルエフェクトを減らします。自分のものは常に表示されます。',
 } satisfies Partial<Record<keyof typeof en, string>>;

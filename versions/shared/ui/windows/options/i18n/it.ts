@@ -407,4 +407,7 @@ export default {
   'options.fpsUnlimited': 'Illimitato',
   'options.help.fpsLimit':
     'Limita quanti fotogrammi al secondo vengono disegnati. Meno usa meno CPU, GPU e batteria; Illimitato segue il monitor.',
+  'options.effectShedding': 'Meno effetti se rallenta',
+  'options.help.effectShedding':
+    "Finché i fotogrammi restano ben sotto l'obiettivo (il limite FPS, o 60), disegna meno effetti delle abilità degli altri giocatori nella folla. I tuoi si vedono sempre.",
 } satisfies Partial<Record<keyof typeof en, string>>;

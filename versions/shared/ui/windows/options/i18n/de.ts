@@ -436,4 +436,7 @@ export default {
   'options.fpsUnlimited': 'Unbegrenzt',
   'options.help.fpsLimit':
     'Begrenzt, wie viele Bilder pro Sekunde gezeichnet werden. Weniger schont CPU, GPU und Akku; Unbegrenzt folgt dem Monitor.',
+  'options.effectShedding': 'Weniger Effekte bei Ruckeln',
+  'options.help.effectShedding':
+    'Solange die Bildrate deutlich unter ihrem Ziel bleibt (FPS-Grenze oder 60), werden in einer Menge weniger Fertigkeitseffekte anderer Spieler gezeichnet. Deine bleiben immer.',
 } satisfies Partial<Record<keyof typeof en, string>>;

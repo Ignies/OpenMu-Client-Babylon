@@ -401,4 +401,7 @@ export default {
   'options.fpsUnlimited': 'Illimité',
   'options.help.fpsLimit':
     "Limite le nombre d'images dessinées par seconde. Moins économise le processeur, la carte graphique et la batterie ; Illimité suit l'écran.",
+  'options.effectShedding': "Moins d'effets en cas de lenteur",
+  'options.help.effectShedding':
+    "Tant que les images par seconde restent bien sous leur cible (la limite d'IPS, ou 60), affiche moins d'effets de compétences des autres joueurs dans une foule. Les vôtres restent visibles.",
 } satisfies Partial<Record<keyof typeof en, string>>;

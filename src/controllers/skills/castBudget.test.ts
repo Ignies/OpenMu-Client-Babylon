@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { defaultGameOption, setGameOption } from '@/controllers/settings';
 import type { Entity } from '@/ecs/world';
+import { framePacer } from '@/controllers/render/fpsLimit';
 import { CASTER_GAP_MS, HEAVY_VISUAL_GAP, OTHERS_PER_SECOND, castIsDrawn } from './castBudget';
 
 const hero = (): Entity => ({ localPlayer: true, playerAnimation: {} as Entity['playerAnimation'] });
@@ -68,5 +69,34 @@ describe('the skill visual budget', () => {
     expect(crowd.filter(p => castIsDrawn(p, 0, t)).length).toBe(OTHERS_PER_SECOND);
     expect(castIsDrawn(hero(), 0, t)).toBe(true);
     expect(castIsDrawn(other(), 0, t + 1000)).toBe(true);
+  });
+});
+
+describe('load shedding', () => {
+  afterEach(() => {
+    setGameOption('effectShedding', defaultGameOption('effectShedding'));
+    framePacer.fps = 0;
+  });
+
+  it('thins the crowd budget while the frames are slow, never the hero', () => {
+    setGameOption('effectShedding', true);
+    framePacer.fps = 10;
+    const t = later();
+    const crowd = Array.from({ length: 100 }, other);
+    expect(crowd.filter(p => castIsDrawn(p, 0, t)).length).toBe(OTHERS_PER_SECOND / 4);
+    expect(castIsDrawn(hero(), 0, t)).toBe(true);
+  });
+
+  it('leaves everything alone while the frames keep up, or while it is off', () => {
+    framePacer.fps = 10;
+    let t = later();
+    expect(Array.from({ length: 100 }, other).filter(p => castIsDrawn(p, 0, t)).length).toBe(100);
+    setGameOption('effectShedding', true);
+    framePacer.fps = 60;
+    // A level eases off one step per reading: let two readings pass.
+    castIsDrawn(other(), 0, later());
+    castIsDrawn(other(), 0, later());
+    t = later();
+    expect(Array.from({ length: 100 }, other).filter(p => castIsDrawn(p, 0, t)).length).toBe(100);
   });
 });

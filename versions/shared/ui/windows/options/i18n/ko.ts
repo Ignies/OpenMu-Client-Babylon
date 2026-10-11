@@ -336,4 +336,7 @@ export default {
   'options.fpsLimit': 'FPS 제한',
   'options.fpsUnlimited': '제한 없음',
   'options.help.fpsLimit': '초당 그리는 프레임 수를 제한합니다. 낮을수록 CPU, GPU, 배터리를 덜 씁니다. 제한 없음은 모니터를 따릅니다.',
+  'options.effectShedding': '느릴 때 효과 줄이기',
+  'options.help.effectShedding':
+    '프레임이 목표(FPS 제한 또는 60)보다 크게 낮은 동안 군중 속 다른 플레이어의 스킬 효과를 덜 그립니다. 내 것은 항상 보입니다.',
 } satisfies Partial<Record<keyof typeof en, string>>;

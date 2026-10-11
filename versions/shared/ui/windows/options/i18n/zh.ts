@@ -327,4 +327,6 @@ export default {
   'options.fpsLimit': '帧率上限',
   'options.fpsUnlimited': '无限制',
   'options.help.fpsLimit': '限制每秒绘制的帧数。越低越省CPU、GPU和电量；无限制则跟随显示器。',
+  'options.effectShedding': '卡顿时减少特效',
+  'options.help.effectShedding': '当帧率持续明显低于目标（帧率上限或60）时，在人群中少画其他玩家的技能特效。你自己的始终显示。',
 } satisfies Partial<Record<keyof typeof en, string>>;
