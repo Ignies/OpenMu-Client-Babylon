@@ -8,4 +8,5 @@ export default {
   'resume.done': '다시 접속했습니다',
   'resume.failed': '재접속하지 못했습니다',
   'resume.cancelled': '재접속을 취소했습니다',
+  'login.closingOldSession': '계정이 아직 접속 중입니다. 이전 세션을 닫고 다시 시도하는 중...',
 } satisfies Partial<Record<keyof typeof en, string>>;

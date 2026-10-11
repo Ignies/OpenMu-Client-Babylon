@@ -8,4 +8,5 @@ export default {
   'resume.done': 'Отново на линия',
   'resume.failed': 'Неуспешно свързване наново',
   'resume.cancelled': 'Свързването наново е отказано',
+  'login.closingOldSession': 'Акаунтът още е в играта: затваряне на старата сесия и нов опит...',
 } satisfies Partial<Record<keyof typeof en, string>>;

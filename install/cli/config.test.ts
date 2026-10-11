@@ -32,6 +32,12 @@ describe('config file', () => {
     expect(envToConfig({}).heldHitRequest).toBe(false);
   });
 
+  it('stores the login retry as MU_RETRY_LOGIN_WHEN_CONNECTED, off unless set', () => {
+    expect(configToEnv({ ...config, retryLoginWhenConnected: true }).MU_RETRY_LOGIN_WHEN_CONNECTED).toBe('on');
+    expect(envToConfig({ MU_RETRY_LOGIN_WHEN_CONNECTED: 'on' }).retryLoginWhenConnected).toBe(true);
+    expect(envToConfig({}).retryLoginWhenConnected).toBe(false);
+  });
+
   it('stores the modules turned off as MU_MODULES_OFF, none unless set', () => {
     expect(configToEnv({ ...config, modulesOff: 'events,band' }).MU_MODULES_OFF).toBe('events,band');
     expect(envToConfig({}).modulesOff).toBe('');

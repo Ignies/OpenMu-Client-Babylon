@@ -45,8 +45,12 @@ describe('parseServerManifest', () => {
   it('reads a version 1 document', () => {
     expect(parseServerManifest({ version: 1, settings: { heldHitRequest: true } })).toEqual({
       version: 1,
-      settings: { heldHitRequest: true },
+      settings: { ...ORIGINAL_SETTINGS, heldHitRequest: true },
       modulesOff: [],
+    });
+    expect(parseServerManifest({ version: 1, settings: { retryLoginWhenConnected: true } })?.settings).toEqual({
+      ...ORIGINAL_SETTINGS,
+      retryLoginWhenConnected: true,
     });
   });
 
@@ -58,7 +62,7 @@ describe('parseServerManifest', () => {
   it('skips unknown keys', () => {
     expect(
       parseServerManifest({ version: 1, modules: [], settings: { heldHitRequest: true, somethingNew: 3 } })
-    ).toEqual({ version: 1, settings: { heldHitRequest: true }, modulesOff: [] });
+    ).toEqual({ version: 1, settings: { ...ORIGINAL_SETTINGS, heldHitRequest: true }, modulesOff: [] });
   });
 
   it('refuses another version', () => {
@@ -87,6 +91,7 @@ describe('parseServerManifest', () => {
   it('refuses the whole document when a known setting has the wrong type', () => {
     expect(parseServerManifest({ version: 1, settings: { heldHitRequest: 'true' } })).toBeNull();
     expect(parseServerManifest({ version: 1, settings: { heldHitRequest: 1 } })).toBeNull();
+    expect(parseServerManifest({ version: 1, settings: { retryLoginWhenConnected: 'yes' } })).toBeNull();
   });
 });
 

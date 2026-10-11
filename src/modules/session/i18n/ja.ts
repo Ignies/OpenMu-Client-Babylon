@@ -8,4 +8,5 @@ export default {
   'resume.done': 'オンラインに戻りました',
   'resume.failed': '再接続できませんでした',
   'resume.cancelled': '再接続を中止しました',
+  'login.closingOldSession': 'アカウントがまだ接続中です。古いセッションを閉じて再試行しています...',
 } satisfies Partial<Record<keyof typeof en, string>>;

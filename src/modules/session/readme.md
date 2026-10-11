@@ -11,7 +11,7 @@ the client-to-server encryption, the login fields and the offline flag.
   `switchToMapServer(...)`, `sendServerChangeAuthentication(characterName)`, `onSocketLost(socket)`,
   `playOnline()` (back to the server list), `cancelLogin()` (the login Cancel, `LoginWin.cpp:416`), `lastGameServer`, `resumeHook`, `connectionLost`; the
   login fields `username`, `password`, `rememberLogin`, `loginProcessing`, `loginError`,
-  `loadAccount(id?, force?)`, `saveLoginData()`, `loginRequest(user, password)`; the proxy side
+  `loadAccount(id?, force?)`, `saveLoginData()`, `loginRequest(user, password)`, `retryLogin()`; the proxy side
   frames `sendBandFrame` / `sendPingFrame`.
 - `SessionExit.request(kind)` / `SessionExit.available(kind)`: Exit Game, Select Server, Switch
   Character (`kind` is `'quit' | 'servers' | 'characters'`).
@@ -51,14 +51,16 @@ the client-to-server encryption, the login fields and the offline flag.
 - `ServerListResponse`: fills `Servers.serverList`.
 - `ConnectionInfo`: connects to the game server it names.
 - `GameServerEntered`: sets the player id; map-server switch and resume take over here.
-- `LoginResponse`: character list on success, error on the form otherwise.
+- `LoginResponse`: character list on success, error on the form otherwise. "Account already connected"
+  sends the same login again (3 times, 2.5 s apart) where the world's `server.json` sets
+  `retryLoginWhenConnected`; the original only shows it.
 - `LogoutResponse`: hands the type to `SessionExit.onResponse`.
 - `ChangeMapServerInfo` (`WSclient.cpp:10328`): moves to another game server; port 0 cancels.
 - `wsClosed` (bus event): closes the NPC shop and quest windows, then `Session.onSocketLost`.
 - Outgoing: `LogOut` (from `SessionExit.request`).
 
 ## Depends on / used by
-- uses: `controllers/interface/uiState.ts`, `servers` (`serverConfig.ts`, `serverAccounts.ts`, `Servers`), `hero`,
+- uses: `controllers/interface/uiState.ts`, `servers` (`serverConfig.ts`, `serverAccounts.ts`, `serverManifest.ts`, `Servers`), `hero`,
   `character_select`, `npc_shop`, `quests`, `economy`, `social`, `friends/messenger`,
   `controllers/settings`, `controllers/sound`, `controllers/interface/browserHotkeys`.
 - used by: `src/app/logic.ts`, `src/app/boot.tsx`, `hero/net.ts` (`remember`, `finish`),
@@ -75,6 +77,8 @@ the client-to-server encryption, the login fields and the offline flag.
 - `state.test.ts`: `sendToGS` sends only the bytes its DataView covers (a view into a larger buffer, as a module's
   packet can be); `cancelLogin` goes back to the server list and keeps the fields.
 - `sessionExit.test.ts`: Escape in the world opens the system menu, once, not Options.
+- `net.test.ts`: "account already connected" shows the refusal by default and retries only where the
+  world asks, then gives up; leaving the login drops a pending retry.
 - the login flow is covered by the listener order golden (`src/app/listenerOrder.golden.test.ts`).
 
 ## Notes
