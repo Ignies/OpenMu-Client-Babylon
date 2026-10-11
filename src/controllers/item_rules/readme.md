@@ -38,6 +38,9 @@ the table would import itself.
 - `isOptionWing(group, num)`, `wingOptionKind(item)`, `wingOptions(item)` (`wingOptions.ts`): the wing options
   (`CalcWingOptions`) and the kind of a wing's additional option (`OptionType`, ZzzInfomation.cpp:1236-1442).
 - `skillMana(num)`: a skill's mana, for tooltip lines that name it.
+- `hasSpecial(item, def)` (`itemSpecials.ts`): `SpecialNum > 0` after `SetItemAttributes` (any skill, luck,
+  option or excellent line, by the item kinds that take each), which turns a name blue; `optionSpecials`
+  is what the option level adds, by kind.
 
 ## How it works
 - `itemSerializer.ts` reads level, luck, skill, option level, excellent, ancient and socket bytes. On wings

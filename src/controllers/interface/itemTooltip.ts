@@ -30,6 +30,7 @@ import {
   ancientSetOf,
   harmonyOf,
   hasGuardianOption,
+  hasSpecial,
   isOptionWing,
   setOptionLines,
   skillMana,
@@ -141,7 +142,8 @@ class Lines {
 
 /** The first block of `RenderItemInfo`: which colour the name line takes. */
 function nameColor(item: Item, def: ItemDef, level: number): TooltipColor {
-  const optionLevel = item.optionLevel ?? 0;
+  // SpecialNum > 0: any skill, luck, option or excellent line (ZzzInventory.cpp:2148-2152).
+  const special = hasSpecial(item, def);
 
   if (isFenrir(def)) return 'blue';
   if (isJewel(def) || isWeaponOfArchangel(def)) return 'yellow';
@@ -150,12 +152,12 @@ function nameColor(item: Item, def: ItemDef, level: number): TooltipColor {
   if ((item.socketCount ?? 0) > 0) return 'violet';
   if (isWing(def)) {
     if (level >= 7) return 'yellow';
-    return optionLevel > 0 ? 'blue' : 'white';
+    return special ? 'blue' : 'white';
   }
   // Every excellent option is a Special, so excellent is always green (ZzzInventory.cpp:2140).
   if (item.isExcellent) return 'green';
   if (level >= 7) return 'yellow';
-  return optionLevel > 0 ? 'blue' : 'white';
+  return special ? 'blue' : 'white';
 }
 
 /** The colour the tooltip's name line takes, for anything else that names the item. */

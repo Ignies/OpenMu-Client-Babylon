@@ -11,6 +11,17 @@ describe('the tooltip name colour', () => {
     expect(itemNameColor({ group: 0, num: 0, isExcellent: true, excellentFlags: 1 })).toBe('green');
     expect(itemNameColor({ group: 0, num: 0, lvl: 9, isExcellent: true, excellentFlags: 1 })).toBe('green');
   });
+
+  // SpecialNum > 0 (ZzzInventory.cpp:2148-2152): any skill, luck or option line, as SetItemAttributes counts them.
+  it('is blue for skill or luck alone, not for a flag the item cannot carry', () => {
+    expect(itemNameColor({ group: 0, num: 5, hasSkill: true })).toBe('blue');
+    expect(itemNameColor({ group: 0, num: 0, hasSkill: true })).toBe('white');
+    expect(itemNameColor({ group: 0, num: 0, luck: true })).toBe('blue');
+    expect(itemNameColor({ group: 4, num: 15, luck: true })).toBe('white');
+    expect(itemNameColor({ group: 12, num: 3, luck: true })).toBe('blue');
+    expect(itemNameColor({ group: 12, num: 3, optionLevel: 1, wingOptionKind: 1 })).toBe('white');
+    expect(itemNameColor({ group: 13, num: 8, optionLevel: 1 })).toBe('blue');
+  });
 });
 
 const KNIGHT: HeroStats = { level: 400, str: 1000, agi: 1000, vit: 1000, ene: 1000, cmd: 0, baseClass: 1, stepClass: 2 };
