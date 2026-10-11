@@ -24,7 +24,7 @@ await import('@versions/shared/skills/skillVisuals');
 const { EventBus } = await import('@/core/eventBus');
 const { Ecs } = await import('@/ecs/current');
 const { installNet } = await import('@/modules/scope/net');
-const { ObjectMovedPacket } = await import('@versions/shared/packets/ServerToClientPackets');
+const { ObjectMovedPacket, ObjectWalkedPacket } = await import('@versions/shared/packets/ServerToClientPackets');
 const { FIDELITY_CLASSIC, FIDELITY_DEFAULT, setFidelityChoice } = await import('@/controllers/fidelity');
 const { ENUM_WORLD } = await import('@/core/types');
 const { MonsterActionType, PlayerAction } = await import('@versions/shared/objects/enum');
@@ -63,6 +63,15 @@ function moveTo(x: number, y: number): void {
   p.PositionX = x;
   p.PositionY = y;
   EventBus.emit('ObjectMoved', p.buffer);
+}
+
+/** Object 9 walks to (x, y) (`ObjectWalked`, C1 D4). */
+function walkTo(x: number, y: number): void {
+  const p = ObjectWalkedPacket.createPacket(9);
+  p.ObjectId = 9;
+  p.TargetX = x;
+  p.TargetY = y;
+  EventBus.emit('ObjectWalked', p.buffer);
 }
 
 const ticks = (system: ReturnType<typeof PositionSlideSystem>, n: number) => {
@@ -138,6 +147,30 @@ describe("the server's instant move", () => {
     ticks(system, 14);
     expect(t.posOffset).toBeUndefined();
     expect(monsterAnimation.action).toBe(MonsterActionType.Stop1);
+  });
+
+  it('walks a Crust by sliding too: on the tile at once, facing it, walking, stopped on it (ReceiveMoveCharacter)', () => {
+    const monsterAnimation = { action: MonsterActionType.Stop1 };
+    const playerMoveTo = { point: { x: 0, y: 0 }, handled: true };
+    const { t, system } = standing({ npcType: 71, monsterAnimation, playerMoveTo } as Partial<Entity>, 0, false);
+    walkTo(103, 100);
+    expect(t.pos.x).toBe(103);
+    expect(playerMoveTo.handled).toBe(true);
+    expect(monsterAnimation.action).toBe(MonsterActionType.Walk);
+    // CreateAngle toward the new tile: east.
+    expect(t.rot.y).toBeCloseTo(Math.PI / 2);
+    system.update?.(TICK);
+    expect(t.posOffset?.x).toBeCloseTo(-3 * 0.93);
+    ticks(system, 14);
+    expect(monsterAnimation.action).toBe(MonsterActionType.Stop1);
+  });
+
+  it('walks any other monster along its path', () => {
+    const playerMoveTo = { point: { x: 0, y: 0 }, handled: true };
+    const { t } = standing({ npcType: 3, monsterAnimation: { action: 0 }, playerMoveTo } as Partial<Entity>, 0, false);
+    walkTo(103, 100);
+    expect(playerMoveTo).toEqual({ point: { x: 103, y: 100 }, handled: false });
+    expect(t.pos.x).toBe(100);
   });
 
   it('kicks the ball: sparks, SOUND_MENU01, a hop off its 30 cm floor and a roll that fades', () => {

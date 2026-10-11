@@ -46,7 +46,8 @@ players, plus their moves and equipment changes. The entities live in the ECS wo
   drawn sliding in over 15 ticks, the hero taking no input meanwhile, and a ball is kicked
   (`JumpTime`, WSclient.cpp:2127-2153; `ecs/systems/positionSlideSystem.ts`). `addNpcToScope` gives a
   `MonsterDef.ball` type its `ball` component.
-- `ObjectWalked`: walk target for another object (the hero's own walk is ignored).
+- `ObjectWalked`: walk target for another object (the hero's own walk is ignored); a body whose file
+  says its walk slides (the Crust) slides to the tile instead (`startWalkSlide`).
 - `AppearanceChanged` / `AppearanceChangedExtended`: one equipment slot of a player changed.
 
 ## Depends on / used by

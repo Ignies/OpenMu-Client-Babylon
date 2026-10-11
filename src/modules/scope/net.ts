@@ -18,7 +18,7 @@ import { characterSkinBody } from '@/controllers/actors/skinBody';
 import { classWorldScale } from '@/controllers/actors/characterScale';
 import { createAttributeSystem } from '@/core/attributeSystem';
 import { deferLeave, noteScopeEntry } from '@/ecs/systems/teleportSystem';
-import { startPositionSlide } from '@/ecs/systems/positionSlideSystem';
+import { startPositionSlide, startWalkSlide } from '@/ecs/systems/positionSlideSystem';
 import { isFemaleClass } from '@/controllers/actors/mapPlayerNetClassToModelClass';
 import { isKnownObjectType, resolveModelFactory } from '@/controllers/actors/modelFactoryPerId';
 import { playSummonArrival } from '@versions/shared/skills/skillVisuals';
@@ -598,6 +598,8 @@ export function installNet(): void {
 
     if (obj.localPlayer) return;
     if (isDeadMonster(obj)) return;
+    // MODEL_CRUST walks by sliding (`JumpTime`, WSclient.cpp:2093-2101).
+    if (startWalkSlide(obj, p.TargetX, p.TargetY)) return;
 
     if (obj.playerMoveTo) {
       obj.playerMoveTo.handled = false;

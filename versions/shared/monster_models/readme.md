@@ -27,8 +27,9 @@ all.ts      finds every file (glob in the client and tests, from disk in the Bun
   `m_bRenderShadow = false`: the Swamp's, Karutan's, Raklion's giants, the PK field assassins, the Blade
   Hunter, the Twin Tail, the Totem Golem, the Dark Ghost), `'never'` has none (the Maya hands). Read by
   `controllers/actors` `npcClassicShadow` / `npcShadowOnDeath`.
-- `slide`: `PushingCharacter`'s own speed for the body when the server moves it, and a stop on the
-  tile (the Crust: 0.07, ZzzCharacter.cpp:3147-3150, :3185). Read by `ecs/systems/positionSlideSystem.ts`.
+- `slide`: `PushingCharacter`'s own speed for the body when the server moves it, a stop on the tile,
+  and `walks`: it walks by that slide too (the Crust: 0.07, ZzzCharacter.cpp:3147-3150, :3185;
+  WSclient.cpp:2093-2101). Read by `ecs/systems/positionSlideSystem.ts`.
 - `versions/shared/monsters/all.ts` loads this folder, and each version's core module loads that.
 
 ## Change it

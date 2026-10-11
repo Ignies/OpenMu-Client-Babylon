@@ -6,6 +6,7 @@ import { inChaosCastle } from '../../controllers/actors/locomotion';
 import { spawnBomb } from '../../controllers/fx/deathVisuals';
 import { playUiSound } from '../../controllers/sound/sfx';
 import { MonsterActionType, PlayerAction } from '@versions/shared/objects/enum';
+import { createAngleDeg } from '../../core/turnAngle';
 import { Ecs } from '../current';
 
 /**
@@ -80,12 +81,38 @@ function kick(ball: NonNullable<Entity['ball']>, t: NonNullable<Entity['transfor
   spawnBomb(scene, bombAt, false);
 }
 
-/** `body` was just put on its tile from (x, y, z): draw it sliding there. */
+/** The body file's own slide rule, if it has one (the Crust's). */
+const ownSlide = (body: Entity) =>
+  body.npcType === undefined ? undefined : monsterModelRegistry.get(monsterRegistry.model(body.npcType)?.type ?? -1)?.slide;
+
+/** `body` was just put on its tile by the server (`ObjectMoved`) from (x, y, z): draw it sliding there. */
 export function startPositionSlide(body: Entity, x: number, y: number, z: number): void {
   const t = body.transform;
   if (!t) return;
   if (body.ball) kick(body.ball, t, x, y, z);
+  slide(body, t, x, y, z);
+}
 
+/**
+ * `ReceiveMoveCharacter`'s MODEL_CRUST branch (WSclient.cpp:2093-2101): a body whose file says its walk
+ * slides is put on the target tile, faces it (`CreateAngle`), plays its walk clip and slides there.
+ * False for every other body, which walks its path.
+ */
+export function startWalkSlide(body: Entity, tx: number, ty: number): boolean {
+  const t = body.transform;
+  const world = Ecs.world;
+  if (!t || !world || !ownSlide(body)?.walks) return false;
+  const { x, y, z } = t.pos;
+  t.rot.y = createAngleDeg(x + (t.posOffset?.x ?? 0), z + (t.posOffset?.z ?? 0), tx, ty) * RAD;
+  t.pos.x = tx;
+  t.pos.z = ty;
+  t.pos.y = world.getTerrainHeight(tx, ty);
+  slide(body, t, x, y, z);
+  if (body.monsterAnimation) body.monsterAnimation.action = MonsterActionType.Walk;
+  return true;
+}
+
+function slide(body: Entity, t: NonNullable<Entity['transform']>, x: number, y: number, z: number): void {
   // A slide still running (or a parked corner) carries on from where the body is drawn.
   const running = slides.get(body);
   const base = running ? running.base : t.posOffset;
@@ -97,7 +124,7 @@ export function startPositionSlide(body: Entity, x: number, y: number, z: number
   };
   const world = Ecs.world;
   const corner = !!world && inChaosCastle(world.mapIndex);
-  const own = body.npcType === undefined ? undefined : monsterModelRegistry.get(monsterRegistry.model(body.npcType)?.type ?? -1)?.slide;
+  const own = ownSlide(body);
   const goalX = corner ? 0 : (base?.x ?? 0);
   const goalZ = corner ? 0 : (base?.z ?? 0);
   slides.set(body, {

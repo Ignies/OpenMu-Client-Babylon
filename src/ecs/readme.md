@@ -55,7 +55,8 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
   the class's own models (Monk sets, Dark Lord masks); a held item's `ItemObjectAttribute` mesh rules; a glove weapon
   skinned to the body.
 - `systems/animationSystem.test.ts`: the hero and a player with no reported speeds take the hero's
-  attack and magic speed; another player with speeds from the scope packet keeps its own.
+  attack and magic speed; another player with speeds from the scope packet keeps its own; a monster
+  sliding in its walk clip (the Crust) keeps it until the slide ends.
 - `systems/deathSystem.test.ts`: Chaos Castle bomb sounds on odd ticks 15..25, the pit scream,
   no sound off the Blood Castle bridge, the skill knock and Nova motes, the Dead counter in whole
   ticks at 25 fps, the Die clip at Dead 15 (less the hero's blow wait), the fade from the kill, the
@@ -73,8 +74,8 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
 - `systems/positionSlideSystem.test.ts`: `ObjectMoved` lands the tile at once and draws the body a
   fifth closer each 25 fps tick, on the tile after 15 with its tile-centre offset back
   (`PushingCharacter`), on every preset and at any distance; the hero counts as sliding for the 15
-  ticks even without moving; Chaos Castle's corner, stop and walk-off; the Crust's 0.07 and stop;
-  the ball's kick (sparks, sound, hop, roll).
+  ticks even without moving; Chaos Castle's corner, stop and walk-off; the Crust's 0.07 and stop,
+  and its walk as a slide (any other monster walks its path); the ball's kick (sparks, sound, hop, roll).
 - `systems/itemPickupSystem.test.ts`: the pickup request marks the drop `pickupAsked`; Space takes the
   first drawn item under three tiles, not the nearest.
 - `systems/gmMark.test.ts`: the GM buff or the hero's operator status asks for the Webzen mark, cloaking hides it.
@@ -152,9 +153,11 @@ the rest, so pathing and the server never see the slide.
   bounces at 0.4, which never quite settles, and rolls by `Direction` fading 0.8 a tick. A kick
   sets `Gravity = 20`, a roll of 400 degrees per tile moved, SOUND_MENU01 and `CreateBomb` sparks
   80 cm over where it was drawn. Its height is the model's `HoverHeight`.
+- The Crust walks by the same slide (`startWalkSlide`, `ReceiveMoveCharacter`, WSclient.cpp:2093-2101):
+  `ObjectWalked` puts it on the target tile, turns it to the tile (`CreateAngle`), plays its walk clip
+  (`SetPlayerWalk`; the animation system keeps it while it slides) and slides it there at 0.07.
 - Not ported: the `SetPlayerStop` `ReceiveMovePosition` itself makes on arrival (it would cut the
-  hero's own Teleport clips, which this client plays ahead of the server), and the Crust's walk,
-  which the original also slides (`JumpTime` in `ReceiveMoveCharacter`, WSclient.cpp:2093-2101).
+  hero's own Teleport clips, which this client plays ahead of the server).
 
 ### dropMotionSystem.ts
 A fresh drop starts 180 cm up with `Gravity = 20` cm/tick, `Gravity -= 6` a tick, tumbling until

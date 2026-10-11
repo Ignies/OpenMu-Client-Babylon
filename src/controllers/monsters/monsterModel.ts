@@ -26,9 +26,10 @@ export type MonsterModelDef = {
   classicShadow?: 'alive' | 'never';
   /**
    * `PushingCharacter`'s own rule for this body when the server moves it: the share of the way a tick
-   * covers (0.2 for every other body) and a stop (`SetPlayerStop`) on the tile (ZzzCharacter.cpp:3146-3150, :3185).
+   * covers (0.2 for every other body), a stop (`SetPlayerStop`) on the tile (ZzzCharacter.cpp:3146-3150,
+   * :3185), and `walks`: its walk is such a slide too (`ReceiveMoveCharacter`, WSclient.cpp:2093-2101).
    */
-  slide?: { readonly speed: number; readonly stops: true };
+  slide?: { readonly speed: number; readonly stops: true; readonly walks?: true };
 };
 
 /** A monster body file's default export. */

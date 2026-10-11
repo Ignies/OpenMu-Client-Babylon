@@ -62,3 +62,33 @@ describe('player clip speeds', () => {
     expect(speedsOf(other)).toEqual([20, 30]);
   });
 });
+
+// A Crust walks by sliding (`SetPlayerWalk` + `JumpTime`, WSclient.cpp:2093-2101): no velocity, but its walk clip.
+describe('a monster sliding in its walk clip', () => {
+  it('keeps walking until the slide ends', async () => {
+    const { MonsterActionType } = await import('@versions/shared/objects/enum');
+    const { PositionSlideSystem, startPositionSlide } = await import('./positionSlideSystem');
+    const monster = {
+      npcType: 71,
+      monsterAnimation: { action: MonsterActionType.Walk },
+      movement: { velocity: { x: 0, y: 0 } },
+      modelObject: { Ready: true, actionPlaySpeed: () => 0.3, playAction: () => {} },
+      transform: { pos: { x: 103, y: 0, z: 100 } },
+    };
+    const world = {
+      with: (...c: string[]) => (c.includes('monsterAnimation') ? [monster] : []),
+      mapIndex: 0,
+      getTerrainFlag: () => 0,
+      getTerrainHeight: () => 0,
+    } as unknown as World;
+    const animate = AnimationSystem(world);
+    const slide = PositionSlideSystem(world);
+    startPositionSlide(monster as never, 100, 0, 100);
+    monster.monsterAnimation.action = MonsterActionType.Walk;
+    animate.update?.(1 / 25);
+    expect(monster.monsterAnimation.action).toBe(MonsterActionType.Walk);
+    for (let i = 0; i < 15; i++) slide.update?.(1 / 25);
+    animate.update?.(1 / 25);
+    expect(monster.monsterAnimation.action).toBe(MonsterActionType.Stop1);
+  });
+});
