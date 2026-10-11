@@ -1,5 +1,6 @@
 import type { Scene } from '../render/babylon/exports';
 import { devQueryNumber } from '../../core/devSeams';
+import { Ecs } from '../../ecs/current';
 import { registerPointLightEmitter } from './pointLightPool';
 import {
   registerTerrainLight,
@@ -17,9 +18,18 @@ export type LightPulse = {
   speed: number;
   amount: number;
   base: number;
-  /** Milliseconds added to the clock - lamps that pulse out of step. */
+  /** Milliseconds added to the world clock - lamps that pulse out of step. */
   phase?: number;
 };
+
+/**
+ * `(sin((WorldTime + phase) * speed) + 1) * amount + base`: the original's `WorldTime` (ZzzAI.cpp:728), one
+ * clock for every light, so a light keeps step with the card it rides and with every lamp placed earlier.
+ */
+const pulseAt = (p: LightPulse) =>
+  (Math.sin(((Ecs.world?.gameTime.TotalGameTime.TotalSeconds ?? 0) * 1000 + (p.phase ?? 0)) * p.speed) + 1) *
+    p.amount +
+  p.base;
 
 /**
  * A colour that is not a constant: the callback writes the current linear
@@ -53,7 +63,7 @@ export type LightRecipe = {
    * hundred of them do not all twitch at once.
    */
   readonly flickerSmoothing?: number;
-  /** Smooth sine on the luminosity: `(sin(ms * speed) + 1) * amount + base`. */
+  /** Smooth sine on the luminosity, on the world clock (`pulseAt`). */
   readonly pulse?: LightPulse;
   /** Random jitter of the point light's position, in tiles. */
   readonly wander?: number;
@@ -203,7 +213,7 @@ export class LightSource {
     this.#lumi = recipe.flicker
       ? (recipe.flicker.min + recipe.flicker.max) / 2
       : recipe.pulse
-        ? recipe.pulse.base + recipe.pulse.amount
+        ? pulseAt(recipe.pulse)
         : 1;
 
     // First frame at the attack's starting value, so a zero-attack flash is
@@ -350,12 +360,7 @@ export class LightSource {
       this.#lumi +=
         (target - this.#lumi) * (recipe.flickerSmoothing ?? FLICKER_SMOOTHING);
     } else if (recipe.pulse) {
-      const p = recipe.pulse;
-
-      this.#lumi =
-        (Math.sin((this.#age * 1000 + (p.phase ?? 0)) * p.speed) + 1) *
-          p.amount +
-        p.base;
+      this.#lumi = pulseAt(recipe.pulse);
     }
 
     const e = this.#envelope();

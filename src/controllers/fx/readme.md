@@ -98,7 +98,9 @@ shared pools, textures and particle recipes other folders reuse.
 ## Tests
 - `boids.test.ts`: a bird, a fish and an invasion dragon cast the Classic shadow from the ground at 0.2, not on the cascades.
 - `layers.test.ts`: no shroud layer (Evil Spirit, its only spawner, draws none).
-- `effectParticles.test.ts`: no particle is made while the page is hidden; `KIND_REACH` covers every particle kind, and the view gate of
+- `effectParticles.test.ts`: no particle is made while the page is hidden; `spawnParticle` reads its position, turn
+  and light before it returns, while its sheet loads and once it has, so a caller may rewrite one scratch object
+  for every spawn; `KIND_REACH` covers every particle kind, and the view gate of
   `ParticleEmitter` / `BonedParticleEmitter` (spawns only when a sprite could reach the frustum);
   a pushed particle on a turned or tilted object goes where MovePosition turns its velocity
   (ZzzAI.cpp:148-156), from `spawnParticle` and from an emitter handed the node's rotation, and
@@ -126,6 +128,8 @@ shared pools, textures and particle recipes other folders reuse.
   `cloud10` (SubType 10) drifts twice its push from up to 200 off and darkens 0.01 a tick to 0.15,
   fading past 300 and gone past 500, `cloud11` (SubType 11) drifts the same in its own light, turning,
   and `fireRed` (`BITMAP_FIRE_RED`, firered.jpg) shoots up steady for 20 ticks.
+- `monsterGlow.test.ts`: `RenderLight` breathes on the world's clock, so two monsters that came apart
+  breathe alike, in step with their floor light.
 - `core.test.ts`: a flickering tint makes a bounded number of additive materials, each within half
   a 1/128 step of the colour asked for; a burst emits nothing while the page is hidden.
 - `modelClones.test.ts`: a `model`, `linkedModel` or spirit skull clone leaves no mesh, skeleton or

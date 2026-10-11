@@ -498,6 +498,9 @@ export class MoveTargetEffect {
   #yaw = 0;
   /** `#yaw` as the node turn the sparks take. */
   readonly #turn = { x: 0, y: 0, z: 0 };
+
+  /** Where a spark is made, 110 cm over the marker, rewritten for each. */
+  readonly #sparkAt = { x: 0, y: 0, z: 0 };
   #lifeTime = 0;
   #blendMeshLight = 1;
   #sparkDue = 0;
@@ -614,21 +617,14 @@ export class MoveTargetEffect {
     this.#sparkDue += f;
     if (this.#sparkDue > 4) this.#sparkDue = 4;
 
+    const at = this.#sparkAt;
+    at.x = this.#position.x;
+    at.y = this.#position.y + 110 / TILE_CM;
+    at.z = this.#position.z;
+
     while (this.#sparkDue >= 1) {
       this.#sparkDue -= 1;
-
-      void spawnParticle(
-        this.#world.scene,
-        'spark03_24',
-        {
-          x: this.#position.x,
-          y: this.#position.y + 110 / TILE_CM,
-          z: this.#position.z,
-        },
-        this.#turn,
-        1,
-        ORANGE
-      ).catch(reportLoadFailure('particle spark03_24'));
+      void spawnParticle(this.#world.scene, 'spark03_24', at, this.#turn, 1, ORANGE);
     }
 
     const marker = Math.trunc(this.#lifeTime);

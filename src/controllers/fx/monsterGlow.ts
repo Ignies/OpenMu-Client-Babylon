@@ -13,6 +13,7 @@ import {
 import { TILE_CM } from '../terrain/consts';
 import { downloadDataFile } from '@/controllers/assets/mu';
 import type { Entity } from '../../ecs/world';
+import { Ecs } from '../../ecs/current';
 import { boneLocalPos, entityGone, spriteLevel } from './core';
 import { TEX } from './recipes';
 import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
@@ -25,7 +26,7 @@ const OZJ_HEADER_SIZE = 24;
 /** Sprites one manager holds. A Shadow takes 39; a map full of them fits. */
 const MAX_SPRITES_PER_MANAGER = 1024;
 
-/** `RenderLight`'s breathing, in radians per second (`WorldTime` is ms). */
+/** `RenderLight`'s breathing on the world clock, in radians per second (`WorldTime` is ms, ZzzAI.cpp:728). */
 const BREATH_SPEED = 0.002 * 1000;
 
 /** ...and its shape: `sin(t) * 0.3 + 0.7`, so 0.4 at the trough. */
@@ -311,7 +312,6 @@ type LiveGlow = {
   readonly glow: MonsterGlow;
   readonly sprites: GlowSprite[];
   readonly rgb: readonly [number, number, number];
-  clock: number;
   stopped: boolean;
 };
 
@@ -352,8 +352,9 @@ const tmpLocal = new Vector3();
 const tmpWorld = new Vector3();
 
 function place(g: LiveGlow): void {
+  const seconds = Ecs.world?.gameTime.TotalGameTime.TotalSeconds ?? 0;
   const lumi = g.glow.breathe
-    ? Math.sin(g.clock * BREATH_SPEED) * BREATH_AMOUNT + (g.glow.breathBase ?? BREATH_BASE)
+    ? Math.sin(seconds * BREATH_SPEED) * BREATH_AMOUNT + (g.glow.breathBase ?? BREATH_BASE)
     : (g.glow.luminosity ?? 1);
 
   const [r, gr, b] = g.rgb;
@@ -426,7 +427,6 @@ export function glowMonster(
     glow,
     sprites,
     rgb: glow.colour ?? RENDER_LIGHT_RGB,
-    clock: 0,
     stopped: false,
   };
 
@@ -443,7 +443,7 @@ export function glowMonster(
   };
 }
 
-function update(_map: number, dt: number): void {
+function update(): void {
   for (const g of live) {
     if (g.stopped || entityGone(g.entity)) {
       drop(g);
@@ -451,7 +451,6 @@ function update(_map: number, dt: number): void {
       continue;
     }
 
-    g.clock += dt;
     place(g);
   }
 }

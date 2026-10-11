@@ -3,12 +3,9 @@ import { KIND_REACH, spawnParticle } from '@/controllers/fx/effectParticles';
 import { viewDepth } from '@/controllers/render/viewPlanes';
 import type { Scene } from '@/controllers/render/babylon/exports';
 import type { Entity, World } from '@/ecs/world';
-import { reportLoadFailure } from '@/controllers/assets';
 import { BALGAS_TIMER_PUFFS, type TimerPuff } from './spec';
 
 const TICKS_PER_SECOND = 25;
-
-const onFailure = reportLoadFailure('particle balgas smoke');
 
 const coin = () => Math.random() < 0.5;
 
@@ -72,7 +69,7 @@ export class BalgasSmokeObject extends MapTileObject {
     for (const puff of pair) {
       if (puff.coin && !coin()) continue;
       const scale = this.node.scaling.x * (puff.scale ?? 1);
-      void spawnParticle(scene, puff.kind, this.node.position, this.node.rotation, scale, WHITE).catch(onFailure);
+      void spawnParticle(scene, puff.kind, this.node.position, this.node.rotation, scale, WHITE);
     }
   }
 }

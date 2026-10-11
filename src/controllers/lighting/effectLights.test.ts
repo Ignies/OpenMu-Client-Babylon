@@ -51,10 +51,13 @@ vi.mock('../render/babylon/exports', () => {
 });
 vi.mock('./director', () => ({ lookDirector: () => null }));
 vi.mock('../fx/core', () => ({ EFFECT_RENDERING_GROUP: 1, keepDepthForEffects: () => {} }));
+vi.mock('./pointLightPool', () => ({ registerPointLightEmitter: () => () => {} }));
+vi.mock('../terrain/terrainDynamicLight', () => ({ registerTerrainLight: () => () => {} }));
 // The sheet a manager is built from: its blob URL names the bytes' source.
 vi.spyOn(URL, 'createObjectURL').mockImplementation(() => asked[asked.length - 1]);
 
 const { createEffectLight, createMovableFlare } = await import('./effectLights');
+const { LightSource, tickLightSources } = await import('./lightSource');
 
 const at = { x: 0, y: 0, z: 0 };
 const lastSprite = () => sprites[sprites.length - 1];
@@ -162,9 +165,11 @@ describe('flare cards', () => {
     const grow = { speed: 0.002, amount: 1, base: 0.8 };
     await createEffectLight(scene, { scale: 7, color: [0.8, 0.4, 0.2], texture: 'spark1', unscaled: true, grow }, at, 1);
     const card = lastSprite();
-    step(Math.PI / 2 / 0.002);
+    worldAt(Math.PI / 2 / 0.002);
+    step(16);
     expect(card.width).toBeCloseTo(0.32 * 7 * 2.8);
-    step(Math.PI / 0.002);
+    worldAt((Math.PI * 1.5) / 0.002);
+    step(16);
     expect([card.width, card.height]).toEqual([0.32 * 7 * 0.8, 0.32 * 7 * 0.8].map(v => expect.closeTo(v)));
   });
 
@@ -174,10 +179,42 @@ describe('flare cards', () => {
     const pulse = { speed: 0.0004, amount: 0.4, base: 0, abs: true };
     await createEffectLight(scene, { scale: 2, color: [1.3, 1.3, 1.9], pulse, unscaled: true }, at, 1);
     const card = lastSprite() as unknown as { color: { r: number; b: number } };
-    step((Math.PI * 1.5) / 0.0004);
+    worldAt((Math.PI * 1.5) / 0.0004);
+    step(16);
     expect([card.color.r, card.color.b]).toEqual([0.52, 0.76].map(v => expect.closeTo(v)));
-    step(Math.PI / 2 / 0.0004);
+    worldAt((Math.PI * 2) / 0.0004);
+    step(16);
     expect(card.color.r).toBeCloseTo(0);
+  });
+
+  // A card and the ground under it breathe on `sinf(WorldTime * k)` (GM_Kanturu_1st.cpp:179, ZzzObject.cpp:4060), the
+  // world's clock (ZzzAI.cpp:728), not their own age: two placed apart breathe alike, each card in step with its light.
+  it('breathe a card and its ground light on the world clock, alike however far apart they were placed', async () => {
+    const { scene, step } = clockedScene();
+    const pulse = { speed: 0.002, amount: 0.3, base: 0.4 };
+    const color = [1, 1, 1] as const;
+    const place = async () => {
+      await createEffectLight(scene, { scale: 1, color, pulse }, at, 1);
+      const card = lastSprite() as unknown as { color: { r: number } };
+      return { card, light: LightSource.attach(scene, { color, range: 3, pulse }, { position: { ...at } }) };
+    };
+    const frame = (ms: number) => {
+      step(ms);
+      tickLightSources(ms / 1000);
+    };
+    worldAt(1000);
+    const first = await place();
+    worldAt(1700);
+    frame(700);
+    worldAt(9000);
+    const second = await place();
+    worldAt(9400);
+    frame(400);
+    const lumi = (Math.sin(9400 * 0.002) + 1) * 0.3 + 0.4;
+    const lit = [first.card, second.card, first.light, second.light].map(o => o.color.r);
+    expect(lit).toEqual(Array(4).fill(expect.closeTo(lumi)));
+    first.light.dispose();
+    second.light.dispose();
   });
 
   // Kanturu 3's Shiny02 cards turn `(int)(WorldTime / 2) % 360` degrees (GM_Kanturu_3rd.cpp:270): the world's clock, whole degrees.
@@ -231,7 +268,8 @@ describe('flare cards', () => {
     const card = lastSprite();
     expect(drawnFrom[drawnFrom.length - 1]).toBe('Effect/Shiny02.OZJ');
     expect([card.width, card.height]).toEqual([0.64, 1.28].map(v => expect.closeTo(v)));
-    step(Math.PI / 2 / 0.002);
+    worldAt(Math.PI / 2 / 0.002);
+    step(16);
     expect([card.width, card.height]).toEqual([0.96, 1.92].map(v => expect.closeTo(v)));
     const flare = await createMovableFlare(scene, 1, [1, 1, 1], 'shiny1');
     flare?.setScale(0.5);

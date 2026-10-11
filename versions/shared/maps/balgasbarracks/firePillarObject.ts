@@ -3,7 +3,6 @@ import { KIND_REACH, spawnParticle } from '@/controllers/fx/effectParticles';
 import { viewDepth } from '@/controllers/render/viewPlanes';
 import type { Scene } from '@/controllers/render/babylon/exports';
 import type { Entity, World } from '@/ecs/world';
-import { reportLoadFailure } from '@/controllers/assets';
 
 /** `BITMAP_FIRE_RED`'s life as an effect (EffectRegistry.cpp:66). */
 const EFFECT_LIFE = 40;
@@ -15,8 +14,6 @@ const EFFECT_SCALE = 0.9;
 const FIRE_LIGHT: readonly [number, number, number] = [1, 0.4, 0.4];
 
 const TICKS_PER_SECOND = 25;
-
-const onFailure = reportLoadFailure('particle fireRed');
 
 /**
  * Balgass 92 (Refuge ×5), the volcano's fire pillar (GM3rdChangeUp.cpp:239-252): while
@@ -62,7 +59,7 @@ export class BalgasFirePillarObject extends MapTileObject {
       this.#due -= 1;
 
       for (let i = 0; i < this.#alive; i++) {
-        void spawnParticle(scene, 'fireRed', at, this.node.rotation, EFFECT_SCALE, FIRE_LIGHT).catch(onFailure);
+        void spawnParticle(scene, 'fireRed', at, this.node.rotation, EFFECT_SCALE, FIRE_LIGHT);
       }
 
       const made = inView && crest ? 2 : 0;

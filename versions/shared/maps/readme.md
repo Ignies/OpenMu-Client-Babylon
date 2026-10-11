@@ -128,6 +128,8 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   Loren 77 and 84 are operate boxes the map draws (`valleyofloren/operateObject.ts`).
 - `bloodcastle/lampObject.test.ts`: the throne-room lamp's flare is `BITMAP_FLARE` too;
   `bloodcastle/candelabraObject.test.ts`: the candelabra's seven flares are 0.5 on any object scale.
+- `lorencia/houseWallObject.test.ts`: House Wall 02's window (122, BlendMesh 4) takes a fresh `(rand() % 4 + 4) * 0.1`
+  every frame (ZzzObject.cpp:3752-3754); the other walls stay steady.
 - `lampFlares.test.ts`, `lorencia/candleObject.test.ts`, `devias/candleObject.test.ts`: what the original
   never draws is the `lampFlares` improvement, gone on Classic: the flares of Lorencia 90 and 150, Devias
   66 and the candelabra, Elbeland 61 and Lost Tower 23 (the light under them kept), the candle wick

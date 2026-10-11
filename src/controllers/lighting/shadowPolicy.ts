@@ -32,10 +32,13 @@ export type ShadowCasters = ShadowPolicy['casters'];
  */
 const PCSS_LIGHT_SIZE = 0.04;
 
-function unit(d: readonly [number, number, number]): [number, number, number] {
+function unit(d: readonly [number, number, number], out: [number, number, number] = [0, 0, 0]): [number, number, number] {
   const n = 1 / Math.hypot(d[0], d[1], d[2]);
 
-  return [d[0] * n, d[1] * n, d[2] * n];
+  out[0] = d[0] * n;
+  out[1] = d[1] * n;
+  out[2] = d[2] * n;
+  return out;
 }
 
 /** Classic: the rig never moves, so the blobs keep the lean they always had. */
@@ -46,15 +49,20 @@ export const CLASSIC_SHADOW_POLICY: ShadowPolicy = {
   casters: 'all',
 };
 
+/** A policy the caller keeps and `shadowPolicyFor` rewrites. */
+export type KeptShadowPolicy = {
+  -readonly [K in keyof ShadowPolicy]: K extends 'direction' ? [number, number, number] : ShadowPolicy[K];
+};
+
 export function shadowPolicyFor(
   profile: LookProfile,
   pcss: boolean,
-  casters: ShadowCasters
+  casters: ShadowCasters,
+  out: KeptShadowPolicy = { direction: [0, 0, 0], strength: 0, softness: 1, casters }
 ): ShadowPolicy {
-  return {
-    direction: unit(sunDirectionOf(profile.sun)),
-    strength: profile.sun.share,
-    softness: pcss ? PCSS_LIGHT_SIZE : 1,
-    casters,
-  };
+  unit(sunDirectionOf(profile.sun, out.direction), out.direction);
+  out.strength = profile.sun.share;
+  out.softness = pcss ? PCSS_LIGHT_SIZE : 1;
+  out.casters = casters;
+  return out;
 }
