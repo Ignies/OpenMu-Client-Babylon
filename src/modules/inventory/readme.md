@@ -44,6 +44,10 @@ items themselves are the hero's (`Hero.items`, `Hero.money`).
   the yes/no needs `GameOptions.confirmValuableItems`.
 - Jewels: `jewelTargetError` mirrors `ApplyJewels` (NewUIMyInventory.cpp:1546); the server has the last word.
 - Hotkeys: a slot holds an item kind, not an item (`CNewUIItemHotKey`, NewUIMainFrameWindow.cpp:929-1320).
+- Automatic mana potion (`autoMana.ts`, ours): where the world's `server.json` sets `autoManaPotion`
+  and the player's option of that name is on, mana under a tenth drinks the potion the unbound W
+  key would (`findHotkeyItem`, the same `consumeItemRequest`), at most once a second, alive and in
+  the world. The original never drinks by itself, so both default off.
 
 ## Packets
 - `CharacterInventory`: the full bag, emptied first (WSclient.cpp:1672-1683); slots past `FirstStoreItemSlotIndex` go to `Economy.myShopItems`.
@@ -56,7 +60,7 @@ items themselves are the hero's (`Hero.items`, `Hero.money`).
 ## Depends on / used by
 - uses: `session` (sending), `hero` (the items), `skills` (`HeroSkills`, learning from a scroll),
   `controllers/item_rules` (`ItemSerializer`, `itemDef`, `dropTier`), `economy` (`Economy`, which reads
-  `Bag` back), `controllers/settings`,
+  `Bag` back), `controllers/settings`, `servers/serverManifest.ts` (`autoManaPotion`),
   `controllers/sound`, `controllers/net/roundTrip`, `controllers/assets/itemIconPack`, `src/i18n`.
 - used by: `src/app/logic.ts` (net), `npc_shop`, `economy`, `personal_shop`, `controllers/item_rules/itemCompare.ts`, `hero`, `mu_helper`,
   `warp`, `scope`, `marketplace`, `cashshop/server/fulfilment.ts`, ecs systems (attack, pickup, keyboard).
@@ -78,3 +82,5 @@ items themselves are the hero's (`Hero.items`, `Hero.money`).
 - `itemStorage.test.ts`: `storageBan` returns a translated refusal per storage.
 - `itemHotkeys.test.ts`: which slots a version lets Ctrl+key or a drop bind.
 - `net.test.ts`: `CharacterInventory` empties the bag and the stall before filling them.
+- `autoMana.test.ts`: low mana drinks the W key's mana potion once a second, and nothing happens
+  where the server or the player has not turned it on, for a dead hero or with no potion.

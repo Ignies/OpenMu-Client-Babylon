@@ -17,6 +17,8 @@ type ServerSettings = {
   readonly retryLoginWhenConnected: boolean;
   /** Ask for the MU Helper again after an automatic reconnect when it was running (ours: the original has no resume). */
   readonly muHelperAfterReconnect: boolean;
+  /** Drink a mana potion from the bag when mana runs low (ours: the original never drinks by itself). */
+  readonly autoManaPotion: boolean;
 };
 
 type ServerManifest = {
@@ -32,6 +34,7 @@ export const ORIGINAL_SETTINGS: ServerSettings = {
   heldHitRequest: false,
   retryLoginWhenConnected: false,
   muHelperAfterReconnect: false,
+  autoManaPotion: false,
 };
 
 const MODULE_ID = /^[a-z][a-z0-9_]{0,31}$/;
@@ -42,6 +45,7 @@ const SETTING_TYPES: { readonly [K in keyof ServerSettings]: 'boolean' } = {
   heldHitRequest: 'boolean',
   retryLoginWhenConnected: 'boolean',
   muHelperAfterReconnect: 'boolean',
+  autoManaPotion: 'boolean',
 };
 
 const CACHE_KEY = 'mu_server_manifests';

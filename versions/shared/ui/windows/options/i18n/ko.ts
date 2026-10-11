@@ -310,4 +310,7 @@ export default {
   'options.help.fidelity':
     '클래식은 원작 클라이언트 그대로입니다. 향상과 울트라는 아래 개선 사항을 켭니다. 하나라도 바꾸면 사용자 지정이 됩니다.',
   'options.section.improvements': '개선 사항',
+  'options.autoManaPotion': '마나 물약 자동 사용',
+  'options.help.autoManaPotion': '마나가 10분의 1 아래로 떨어지면 가방에서 가장 큰 마나 물약을 마십니다(초당 최대 1개). 허용하는 서버에서만.',
+  'options.needs.server': '이 서버에서는 허용되지 않습니다.',
 } satisfies Partial<Record<keyof typeof en, string>>;

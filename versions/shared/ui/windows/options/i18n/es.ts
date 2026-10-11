@@ -410,4 +410,8 @@ export default {
   'options.help.fidelity':
     'Clásica es el cliente original, tal cual. Mejorada y Ultra activan las mejoras de abajo; si cambias una, el preajuste pasa a Personalizada.',
   'options.section.improvements': 'Mejoras',
+  'options.autoManaPotion': 'Poción de maná automática',
+  'options.help.autoManaPotion':
+    'Bebe la poción de maná más grande de tu inventario cuando el maná baja de una décima parte, como mucho una por segundo. Solo en servidores que lo permiten.',
+  'options.needs.server': 'Este servidor no lo permite.',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -111,6 +111,11 @@ everything the stack reads is rendered from `mu.env`, so `mu config` can change 
   drop. Off, it stays off until the player starts it. Your botting policy: it keeps an AFK
   helper hunting through a dropped connection.
 
+  `autoManaPotion` (`mu config` > Features, `MU_AUTO_MANA_POTION`, default off) lets a player
+  turn on the client's automatic mana potion (Options > Game): under a tenth of the mana it drinks
+  the biggest mana potion in the bag, at most one a second, the same request the W key sends. Off,
+  the player's option does nothing, as in the original. Gameplay automation: your call.
+
   `modulesOff` (`mu config` > Features, `MU_MODULES_OFF` in `mu.env`, comma separated, default
   none) lists the optional client modules this world does without: their windows hide for its
   players. `band` is added by itself when the band relay is off. The ids are the folders of

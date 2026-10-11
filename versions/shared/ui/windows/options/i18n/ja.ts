@@ -308,4 +308,7 @@ export default {
   'options.help.fidelity':
     'クラシックはオリジナルのクライアントそのままです。強化とウルトラは下の改善をオンにします。どれかを変えるとカスタムになります。',
   'options.section.improvements': '改善',
+  'options.autoManaPotion': 'マナポーション自動使用',
+  'options.help.autoManaPotion': 'マナが10分の1を下回ると、バッグ内で一番大きいマナポーションを飲みます(最大1秒に1本)。許可しているサーバーでのみ。',
+  'options.needs.server': 'このサーバーでは許可されていません。',
 } satisfies Partial<Record<keyof typeof en, string>>;

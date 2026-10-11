@@ -31,6 +31,8 @@ export type Config = {
   retryLoginWhenConnected: boolean;
   /** `server.json`: start the MU Helper again after an automatic reconnect if it was running (off = never). */
   muHelperAfterReconnect: boolean;
+  /** `server.json`: players may have a mana potion drunk by itself when mana runs low (off = never). */
+  autoManaPotion: boolean;
   /** Optional client modules this world turns off, comma separated (`server.json` `modulesOff`). */
   modulesOff: string;
 };
@@ -61,6 +63,7 @@ const KEYS: Record<keyof Config, string> = {
   heldHitRequest: 'MU_HELD_HIT_REQUEST',
   retryLoginWhenConnected: 'MU_RETRY_LOGIN_WHEN_CONNECTED',
   muHelperAfterReconnect: 'MU_HELPER_AFTER_RECONNECT',
+  autoManaPotion: 'MU_AUTO_MANA_POTION',
   modulesOff: 'MU_MODULES_OFF',
 };
 
@@ -90,6 +93,7 @@ export const DEFAULTS: Config = {
   heldHitRequest: false,
   retryLoginWhenConnected: false,
   muHelperAfterReconnect: false,
+  autoManaPotion: false,
   modulesOff: '',
 };
 

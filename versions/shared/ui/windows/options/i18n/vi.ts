@@ -361,4 +361,8 @@ export default {
   'options.help.fidelity':
     'Cổ điển là client gốc, y nguyên. Nâng cao và Ultra bật các cải tiến bên dưới; đổi một mục thì thiết lập thành Tùy chỉnh.',
   'options.section.improvements': 'Cải tiến',
+  'options.autoManaPotion': 'Tự uống bình mana',
+  'options.help.autoManaPotion':
+    'Uống bình mana lớn nhất trong túi khi mana xuống dưới một phần mười, tối đa một bình mỗi giây. Chỉ trên máy chủ cho phép.',
+  'options.needs.server': 'Máy chủ này không cho phép.',
 } satisfies Partial<Record<keyof typeof en, string>>;

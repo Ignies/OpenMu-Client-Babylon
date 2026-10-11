@@ -75,6 +75,9 @@ controller, and the HUD elements in `../hud`.
   ([docs/how_to/add_text.md](../../../../docs/how_to/add_text.md)).
 - the Options window's Fidelity page builds its checks from the improvement registry
   (`options/fidelity.tsx`); a new improvement needs no row there.
+- an option that only works where the world's `server.json` allows it: give its row
+  `needs: [needServer('<setting>')]` (`options/gating.ts`); it is greyed with "This server does not
+  allow it" elsewhere. The code that acts still checks `serverSetting` itself.
 - one version draws it differently: export it in `windows` from `versions/<id>/ui` with the same id.
 
 ## Tests
@@ -82,4 +85,6 @@ controller, and the HUD elements in `../hud`.
 - `gm_panel/commands.test.ts`: every command the panel names resolves against the catalogue.
 - `master_skills/layout.test.ts`: the sheet centred at any interface scale, the node tip placed inside its node.
 - `options/search.test.ts`: the options search text normalising and matching.
+- `options/catalogue.test.ts`: the party invitations row; the automation rows are greyed where the
+  server does not allow them.
 - `trade/index.test.tsx`: the partner grid stays live under the pointer (tooltips), only its clicks are swallowed.

@@ -405,4 +405,8 @@ export default {
   'options.help.fidelity':
     'Klassisch ist exakt der Original-Client. Verbessert und Ultra schalten die Verbesserungen unten ein; änderst du eine, steht die Vorgabe auf Eigene.',
   'options.section.improvements': 'Verbesserungen',
+  'options.autoManaPotion': 'Automatischer Manatrank',
+  'options.help.autoManaPotion':
+    'Trinkt den größten Manatrank aus deinem Inventar, wenn dein Mana unter ein Zehntel fällt, höchstens einen pro Sekunde. Nur auf Servern, die es erlauben.',
+  'options.needs.server': 'Dieser Server erlaubt das nicht.',
 } satisfies Partial<Record<keyof typeof en, string>>;

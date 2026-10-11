@@ -304,4 +304,7 @@ export default {
   'options.help.fidelity':
     '经典即原版客户端，完全一致。增强和极致会开启下方的改进；改动任意一项即变为自定义。',
   'options.section.improvements': '改进',
+  'options.autoManaPotion': '自动喝法力药水',
+  'options.help.autoManaPotion': '法力低于十分之一时，喝下背包里最大的法力药水，每秒最多一瓶。仅限允许此功能的服务器。',
+  'options.needs.server': '此服务器不允许。',
 } satisfies Partial<Record<keyof typeof en, string>>;

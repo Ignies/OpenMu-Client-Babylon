@@ -375,4 +375,8 @@ export default {
   'options.help.fidelity':
     'Classica è il client originale, identico. Migliorata e Ultra attivano i miglioramenti qui sotto; cambiane uno e il preset diventa Personalizzata.',
   'options.section.improvements': 'Miglioramenti',
+  'options.autoManaPotion': 'Pozione di mana automatica',
+  'options.help.autoManaPotion':
+    'Beve la pozione di mana più grande dello zaino quando il mana scende sotto un decimo, al massimo una al secondo. Solo sui server che lo consentono.',
+  'options.needs.server': 'Questo server non lo consente.',
 } satisfies Partial<Record<keyof typeof en, string>>;

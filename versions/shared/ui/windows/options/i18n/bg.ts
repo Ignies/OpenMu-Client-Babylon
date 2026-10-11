@@ -355,4 +355,8 @@ export default {
   'options.help.fidelity':
     'Класическо е точно оригиналният клиент. Подобрено и Ултра включват подобренията по-долу; промените ли едно, наборът става Собствен.',
   'options.section.improvements': 'Подобрения',
+  'options.autoManaPotion': 'Автоматична отвара за мана',
+  'options.help.autoManaPotion':
+    'Изпива най-голямата отвара за мана в чантата, когато маната падне под една десета, най-много по една в секунда. Само на сървъри, които го позволяват.',
+  'options.needs.server': 'Този сървър не го позволява.',
 } satisfies Partial<Record<keyof typeof en, string>>;

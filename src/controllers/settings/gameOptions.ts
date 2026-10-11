@@ -391,6 +391,12 @@ export type GameOptions = {
    */
   confirmValuableItems: boolean;
   /**
+   * Under a tenth of the mana, drink the mana potion the W key would (ours,
+   * `modules/inventory/autoMana.ts`). Only where the world's `server.json`
+   * sets `autoManaPotion`; the original never drinks by itself.
+   */
+  autoManaPotion: boolean;
+  /**
    * A small corner readout with the frame rate, the frame time and the last
    * measured server round trip (`controllers/net/roundTrip.ts`). Off is the HUD exactly
    * as it was; the `performanceReadout` key action toggles it too.
@@ -631,6 +637,7 @@ const DEFAULTS: GameOptions = {
   minimapCorner: true,
   quickItemActions: true,
   confirmValuableItems: true,
+  autoManaPotion: false,
   performanceReadout: false,
   compareTooltips: 2,
   eventTimers: true,

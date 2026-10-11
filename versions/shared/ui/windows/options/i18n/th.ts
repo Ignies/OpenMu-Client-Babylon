@@ -345,4 +345,8 @@ export default {
   'options.help.fidelity':
     'คลาสสิกคือไคลเอนต์ต้นฉบับทุกอย่าง ปรับปรุงและอัลตราเปิดการปรับปรุงด้านล่าง เปลี่ยนรายการใดก็จะเป็นแบบกำหนดเอง',
   'options.section.improvements': 'การปรับปรุง',
+  'options.autoManaPotion': 'ดื่มยามานาอัตโนมัติ',
+  'options.help.autoManaPotion':
+    'ดื่มยามานาขวดใหญ่ที่สุดในกระเป๋าเมื่อมานาเหลือต่ำกว่าหนึ่งในสิบ สูงสุดวินาทีละหนึ่งขวด เฉพาะเซิร์ฟเวอร์ที่อนุญาต',
+  'options.needs.server': 'เซิร์ฟเวอร์นี้ไม่อนุญาต',
 } satisfies Partial<Record<keyof typeof en, string>>;

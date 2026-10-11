@@ -16,7 +16,10 @@ import {
   renderingStyle,
   type RenderingStyle,
 } from '@/controllers/render/renderingStyle';
+import { serverSetting } from '@/modules/servers/serverManifest';
 import { i18n, t, type TextKey } from '@/i18n';
+
+type ServerKey = Parameters<typeof serverSetting>[0];
 
 type BoolKey = {
   [K in keyof GameOptionsType]: GameOptionsType[K] extends boolean ? K : never;
@@ -49,13 +52,16 @@ export type Need =
   | { kind: 'glow' }
   /** The FSR entry pass carries the samples when post is off. */
   | { kind: 'msaa' }
-  | { kind: 'notEnglish' };
+  | { kind: 'notEnglish' }
+  /** Big-impact behaviour the world's `server.json` must allow (off on the original). */
+  | { kind: 'server'; key: ServerKey };
 
 export const needOn = (key: BoolKey): Need => ({ kind: 'on', key });
 export const needAbove = (key: NumberKey): Need => ({ kind: 'above', key });
 export const NEED_TIER: Need = { kind: 'tier' };
 export const NEED_POST: Need = needOn('postProcessing');
 export const needStyle = (cap: StyleCap): Need => ({ kind: 'style', cap });
+export const needServer = (key: ServerKey): Need => ({ kind: 'server', key });
 
 /** Why a row does nothing, and which row would change that. */
 export type Blocker = {
@@ -195,6 +201,9 @@ function blockerOfNeed(need: Need): Blocker | null {
       return i18n.current.code !== 'en'
         ? null
         : { text: 'options.needs.english', params: {}, target: 'language' };
+
+    case 'server':
+      return serverSetting(need.key) ? null : { text: 'options.needs.server', params: {}, target: null };
   }
 }
 

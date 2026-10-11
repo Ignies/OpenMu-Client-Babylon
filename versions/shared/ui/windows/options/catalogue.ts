@@ -75,6 +75,7 @@ import {
   NEED_TIER,
   needAbove,
   needOn,
+  needServer,
   needStyle,
   type Need,
 } from './gating';
@@ -314,6 +315,8 @@ export const CATEGORIES: Category[] = [
             rows: [
               toggle('quickItemActions'),
               toggle('confirmValuableItems'),
+              // Gameplay automation (ours): only where the world's server.json allows it.
+              toggle('autoManaPotion', { needs: [needServer('autoManaPotion')] }),
               choice('compareTooltips', COMPARE_TOOLTIP_MAX, named(COMPARE_TOOLTIP_LABEL_KEYS)),
             ],
           },

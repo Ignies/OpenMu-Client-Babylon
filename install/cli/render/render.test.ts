@@ -103,12 +103,13 @@ describe('server.json', () => {
     expect(JSON.parse(serverManifest({ ...domain, heldHitRequest: true })).settings.heldHitRequest).toBe(true);
     expect(JSON.parse(serverManifest({ ...domain, retryLoginWhenConnected: true })).settings.retryLoginWhenConnected).toBe(true);
     expect(JSON.parse(serverManifest({ ...domain, muHelperAfterReconnect: true })).settings.muHelperAfterReconnect).toBe(true);
+    expect(JSON.parse(serverManifest({ ...domain, autoManaPotion: true })).settings.autoManaPotion).toBe(true);
   });
 
   // The client is the reader: what the installer writes must pass its strict check.
   it('is what the client accepts', () => {
     for (const on of [false, true]) {
-      const settings = { heldHitRequest: on, retryLoginWhenConnected: on, muHelperAfterReconnect: on };
+      const settings = { heldHitRequest: on, retryLoginWhenConnected: on, muHelperAfterReconnect: on, autoManaPotion: on };
       expect(parseServerManifest(JSON.parse(serverManifest({ ...domain, ...settings })))?.settings).toEqual(settings);
     }
   });

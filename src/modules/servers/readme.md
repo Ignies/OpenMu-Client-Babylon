@@ -48,7 +48,8 @@ connect server's own list (`Servers.serverList`) is filled by `session/net.ts`.
   `marketplace/api.ts`, `gm/admin/feed.ts`,
   `pageTitle.ts`, `chat/chatRooms.ts` (the chat socket's address), the pages
   `versions/shared/ui/pages/preloader/`, `pages/server_select/`, `pages/login/` and
-  `pages/character_select/CharMakeWin.tsx`, and `register/`.
+  `pages/character_select/CharMakeWin.tsx`, and `register/`; `serverSetting` also by
+  `inventory/autoMana.ts` and the Options window's `options/gating.ts`.
 
 ## Change it
 - add a profile field: `ServerProfile` and `sanitizeProfile` in `serverConfig.ts`.
@@ -139,3 +140,6 @@ connect server's own list (`Servers.serverList`) is filled by `session/net.ts`.
 - `muHelperAfterReconnect`: after the automatic reconnect (`session/sessionResume.ts`) the client
   asks for the MU Helper again when it was running at the drop (`mu_helper/resume.ts`). Keeping an
   AFK helper going is botting policy, so the server decides; off, it stays off.
+- `autoManaPotion`: lets the player's `autoManaPotion` option drink a mana potion by itself when
+  the mana runs low (`inventory/autoMana.ts`); the original never drinks by itself. Off (the
+  original), the option is greyed and does nothing.

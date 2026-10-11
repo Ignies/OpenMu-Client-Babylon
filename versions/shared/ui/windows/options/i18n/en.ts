@@ -401,6 +401,10 @@ const en = {
   'options.help.fidelity':
     'Classic is the original client, exactly. Enhanced and Ultra turn on the improvements below; change one and the preset reads Custom.',
   'options.section.improvements': 'Improvements',
+  'options.autoManaPotion': 'Automatic mana potion',
+  'options.help.autoManaPotion':
+    'Drinks the biggest mana potion in your bag when your mana falls under a tenth, at most one a second. Only on servers that allow it.',
+  'options.needs.server': 'This server does not allow it.',
 };
 
 export default en;

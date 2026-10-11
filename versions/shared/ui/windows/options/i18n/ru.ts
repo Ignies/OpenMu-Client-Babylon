@@ -401,4 +401,8 @@ export default {
   'options.help.fidelity':
     'Классика - это в точности оригинальный клиент. Улучшенное и Ультра включают улучшения ниже; измените любое, и набор станет Своим.',
   'options.section.improvements': 'Улучшения',
+  'options.autoManaPotion': 'Автоматическое зелье маны',
+  'options.help.autoManaPotion':
+    'Выпивает самое большое зелье маны из сумки, когда мана падает ниже десятой части, не чаще одного в секунду. Только на серверах, которые это разрешают.',
+  'options.needs.server': 'Этот сервер это не разрешает.',
 } satisfies Partial<Record<keyof typeof en, string>>;
