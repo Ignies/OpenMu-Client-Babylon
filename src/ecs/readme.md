@@ -63,7 +63,8 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
 - `systems/attackSystem.test.ts`: a swing sends the walk stop (`LetHeroStop`) before its hit.
 - `systems/itemPickupSystem.test.ts`: the pickup request marks the drop `pickupAsked`; Space takes the
   first drawn item under three tiles, not the nearest.
-- `systems/gmMark.test.ts`: the GM buff or the hero's operator status asks for the Webzen mark, cloaking hides it.
+- `systems/gmMark.test.ts`: the GM buff or the hero's operator status asks for the Webzen mark, cloaking hides it.
+- `systems/npcTalkSystem.test.ts`: the Gateway Machine is talked to from 5.5 tiles with no free tile beside it.
 - `systems/playerControllerSystem.test.ts`: a ground click calls off a standing cast, except while the
   right button is held.
 - `systems/skillCastSystem.test.ts`: Dark Side's follow-up blows draw on each target the server

@@ -52,6 +52,8 @@ export type MonsterDef = {
   hidden?: boolean;
   /** An NPC drawn from its own model file instead of a monster model. */
   npcModel?: NpcModel;
+  /** Talked to from this many tiles away (straight line), instead of from a tile beside it. */
+  talkRange?: number;
   /** A player-rig NPC in a fixed kit. */
   gear?: NpcGear;
   /** A player rig whose whole body is one part file. */
