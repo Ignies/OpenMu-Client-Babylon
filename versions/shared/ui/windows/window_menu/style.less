@@ -1,0 +1,35 @@
+@import (reference) '@/controllers/interface/components/mu_text/style.less';
+
+// `CNewUIWindowMenu`: every coordinate lives in the component.
+.window-menu {
+  position: absolute;
+  z-index: 1000;
+  transform-origin: 0 0;
+  pointer-events: auto;
+  user-select: none;
+  .mu-font();
+  font-size: 11px;
+
+  .window-menu-art {
+    position: absolute;
+    left: 0;
+    top: 0;
+    pointer-events: none;
+  }
+
+  // RenderTexts: white, the hovered row yellow, centred in the 112 px.
+  .window-menu-row {
+    position: absolute;
+    left: 0;
+    width: 112px;
+    height: 20px;
+    text-align: center;
+    color: #ffffff;
+    cursor: pointer;
+    text-shadow: 1px 1px 0 #000;
+
+    &.selected {
+      color: #ffff00;
+    }
+  }
+}

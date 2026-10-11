@@ -7,7 +7,7 @@ export default {
   'bottomBar.characterInfo': 'Данни за героя',
   'bottomBar.inventory': 'Раница',
   'bottomBar.friendList': 'Списък с приятели',
-  'bottomBar.options': 'Настройки',
+  'bottomBar.menu': 'Меню',
   'bottomBar.noSkill': 'Няма умение (десен бутон = атака)',
   'bottomBar.emptySlot': '[{key}] празно',
   'bottomBar.itemSlot': '{name} [{key}]',

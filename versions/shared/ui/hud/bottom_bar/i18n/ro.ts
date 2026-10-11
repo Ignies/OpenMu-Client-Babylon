@@ -7,7 +7,7 @@ export default {
   'bottomBar.characterInfo': 'Informații despre personaj',
   'bottomBar.inventory': 'Inventar',
   'bottomBar.friendList': 'Lista de prieteni',
-  'bottomBar.options': 'Opțiuni',
+  'bottomBar.menu': 'Meniu',
   'bottomBar.noSkill': 'Nicio abilitate (clic dreapta = atac)',
   'bottomBar.emptySlot': '[{key}] gol',
   'bottomBar.itemSlot': '{name} [{key}]',

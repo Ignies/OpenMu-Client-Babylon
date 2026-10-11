@@ -42,11 +42,12 @@ export const MAIN_FRAME_BUTTONS: readonly MainFrameButton[] = [
     titleKey: 'bottomBar.friendList',
     toggle: () => Messenger.toggleWindow(),
   },
+  // `m_BtnWindow` toggles `CNewUIWindowMenu` (NewUIMainFrameWindow.cpp:866-868), GlobalText 1744.
   {
     file: 'partCharge1/newui_menu_Bt04.OZJ',
-    titleKey: 'bottomBar.options',
+    titleKey: 'bottomBar.menu',
     toggle: () => {
-      MuWindows.setOpen('options', !MuWindows.isOpen('options'));
+      MuWindows.setOpen('window_menu', !MuWindows.isOpen('window_menu'));
     },
   },
 ];

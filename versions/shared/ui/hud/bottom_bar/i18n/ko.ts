@@ -7,7 +7,7 @@ export default {
   'bottomBar.characterInfo': '캐릭터 정보',
   'bottomBar.inventory': '인벤토리',
   'bottomBar.friendList': '친구 목록',
-  'bottomBar.options': '옵션',
+  'bottomBar.menu': '메뉴',
   'bottomBar.noSkill': '스킬 없음(오른쪽 클릭 = 공격)',
   'bottomBar.emptySlot': '[{key}] 비어 있음',
   'bottomBar.itemSlot': '{name} [{key}]',

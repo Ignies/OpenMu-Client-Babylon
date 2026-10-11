@@ -7,7 +7,7 @@ export default {
   'bottomBar.characterInfo': 'Thông tin nhân vật',
   'bottomBar.inventory': 'Hành trang',
   'bottomBar.friendList': 'Danh sách bạn bè',
-  'bottomBar.options': 'Tùy chọn',
+  'bottomBar.menu': 'Menu',
   'bottomBar.noSkill': 'Không có kỹ năng (chuột phải = tấn công)',
   'bottomBar.emptySlot': '[{key}] trống',
   'bottomBar.itemSlot': '{name} [{key}]',
