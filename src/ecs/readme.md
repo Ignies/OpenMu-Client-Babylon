@@ -62,15 +62,16 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
 - `systems/restObjectRay.test.ts`: the rest-object picking ray matches `scene.pick`.
 - `systems/ceilingHideSystem.test.ts`: the roof over the hero fades on Enhanced, stays drawn but
   detected on Classic, and comes back when `roofFade` is turned off.
-- `systems/attackSystem.test.ts`: a swing sends the walk stop (`LetHeroStop`) before its hit.
+- `systems/attackSystem.test.ts`: a swing sends the walk stop (`LetHeroStop`) before its hit, on the
+  cut step's destination tile.
 - `systems/itemPickupSystem.test.ts`: the pickup request marks the drop `pickupAsked`; Space takes the
   first drawn item under three tiles, not the nearest.
 - `systems/gmMark.test.ts`: the GM buff or the hero's operator status asks for the Webzen mark, cloaking hides it.
 - `systems/npcTalkSystem.test.ts`: the Gateway Machine is talked to from 5.5 tiles with no free tile beside it.
 - `systems/playerControllerSystem.test.ts`: a ground click calls off a standing cast, except while the
   right button is held.
-- `systems/skillCastSystem.test.ts`: Dark Side's follow-up blows draw on each target the server
-  named and send nothing; with nothing selected it is cast where the hero stands, target key 0.
+- `systems/skillCastSystem.test.ts`: a cast that cuts a walk stops it on the path's next node.
+  Dark Side's follow-up blows draw on each target the server named and send nothing; with nothing selected it is cast where the hero stands, target key 0.
   A bow skill with no arrows in hand reloads the next quiver instead of shooting, and is dropped
   when the bag has none (`CheckArrow`). Heal and the other `playerOrSelf` casts are cancelled with a
   monster selected and land on the caster with nothing selected.

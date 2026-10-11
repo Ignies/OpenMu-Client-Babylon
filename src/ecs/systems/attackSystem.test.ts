@@ -49,7 +49,8 @@ describe('a melee swing', () => {
     AttackSystem(world).update?.(0.04);
 
     expect(sent).toEqual(['stop', 'hit']);
-    expect(stop).toHaveBeenCalledWith(100.5, 100.5, hero.transform?.rot.y);
+    // Mid-step the hero's tile is the step's destination, the path's next node (ZzzAI.cpp:556-562).
+    expect(stop).toHaveBeenCalledWith(101, 100, hero.transform?.rot.y);
     vi.restoreAllMocks();
   });
 });

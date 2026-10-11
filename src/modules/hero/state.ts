@@ -360,7 +360,8 @@ class HeroState {
    * walker where the client stopped. Without it the server keeps walking the
    * path it was already handed while the client stands still casting, and
    * rubber-bands the hero onto its own position once the two drift past the
-   * 5-tile tolerance.
+   * 5-tile tolerance. `Hero->PositionX/Y` is the step's destination mid-step (ZzzAI.cpp:556-562):
+   * a caller that cut a walk passes the path's next node, OpenMU's `StopWalkAtAsync` point.
    */
   sendWalkStop(x: number, y: number, rotYRadians: number): void {
     const packet = WalkRequestPacket.createPacket(6);
