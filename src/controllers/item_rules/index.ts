@@ -15,6 +15,7 @@ export { archangelWeapon, dropModelProxy } from './dropModelProxy';
 export { ancientSetOf, setOptionLines, wornSetPieces } from './ancientSets';
 export type { SetOptionLine } from './ancientSets';
 export { harmonyOf, hasGuardianOption, isSocketItem, socketBonusOf, socketsOf } from './itemOptions';
-export { hasSpecial } from './itemSpecials';
+export { hasSpecial, optionSpecials } from './itemSpecials';
+export type { OptionSpecial } from './itemSpecials';
 export { isOptionWing, wingOptionKind, wingOptions } from './wingOptions';
 export type { WingOption, WingOptionKind } from './wingOptions';

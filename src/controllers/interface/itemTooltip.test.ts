@@ -153,6 +153,35 @@ describe.skipIf(NO_OPTIONS)('the extra options in the tooltip', () => {
   });
 });
 
+// The option level's line by item kind (ZzzInfomation.cpp:1166-1240, GetSpecialOptionText, ZzzInventory.cpp:5094-5134).
+describe('an option level line', () => {
+  const text = (item: Item) => lines({ durability: 50, ...item }).map(l => l.text);
+
+  it('reads as the Horn of Dinorant bits', () => {
+    expect(text({ group: 13, num: 3, optionLevel: 7 })).toEqual(
+      expect.arrayContaining(['Absorb 5% additional damage', 'Max AG +50 increased', 'Increase Attacking(Wizardry)speed +5'])
+    );
+    expect(text({ group: 13, num: 3, optionLevel: 2 }).filter(l => l.includes('additional') || l.includes('Max AG'))).toEqual(['Max AG +50 increased']);
+  });
+
+  it('is HP recovery on rings and pendants, max mana on the Ring of Magic, max AG on the Pendant of Ability', () => {
+    expect(text({ group: 13, num: 8, optionLevel: 2 })).toContain('Automatic HP recovery 2%');
+    expect(text({ group: 13, num: 13, optionLevel: 3 })).toContain('Automatic HP recovery 3%');
+    expect(text({ group: 13, num: 24, optionLevel: 3 })).toContain('Max mana increased by 3%');
+    expect(text({ group: 13, num: 28, optionLevel: 3 })).toContain('Max AG increased by 3%');
+  });
+
+  it('is defense rate on shields and curse on the Summoner books', () => {
+    expect(text({ group: 6, num: 0, optionLevel: 2 })).toContain('Additional defense rate +10');
+    expect(text({ group: 5, num: 21, optionLevel: 1 })).toContain('Additional Curse +4');
+  });
+
+  it('adds wizardry on the Magic Gladiator swords', () => {
+    const blade = text({ group: 0, num: 31, optionLevel: 1 });
+    expect(blade.indexOf('Additional Wizardry +4')).toBe(blade.indexOf('Additional Damage +4') + 1);
+  });
+});
+
 // CalcWingOptions (ZzzInfomation.cpp:855-940) and the wing option kinds (:1236-1442).
 describe('a wing tooltip', () => {
   it('lists its wing options before skill and luck, and is never excellent', () => {

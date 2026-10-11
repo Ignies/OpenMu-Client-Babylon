@@ -31,16 +31,15 @@ import {
   harmonyOf,
   hasGuardianOption,
   hasSpecial,
-  isOptionWing,
+  optionSpecials,
   setOptionLines,
   skillMana,
   socketBonusOf,
   socketsOf,
-  wingOptionKind,
   wingOptions,
   wornSetPieces,
+  type OptionSpecial,
   type WingOption,
-  type WingOptionKind,
 } from '@/controllers/item_rules';
 import { itemBaseName } from '@versions/shared/items/itemsDatabase';
 import { itemLevelName } from '@/controllers/item_rules';
@@ -677,14 +676,14 @@ function equipmentLines(
     out.add(t('item.luckCritical'), 'blue');
   }
 
-  const wingKind = isOptionWing(def.group, def.index) ? wingOptionKind(item) : undefined;
-  if (optionLevel > 0 && wingKind !== undefined) {
-    if (wingKind) out.add(t(WING_KIND_TEXT[wingKind], { value: wingKind === 'life' ? optionLevel : optionLevel * 4 }), 'blue');
-  } else if (optionLevel > 0) {
-    const bonus = optionLevel * 4;
-    if (isStaff(def)) out.add(t('item.additionalWizardry', { value: bonus }), 'blue');
-    else if (isWeapon(def)) out.add(t('item.additionalDamage', { value: bonus }), 'blue');
-    else out.add(t('item.additionalDefense', { value: bonus }), 'blue');
+  for (const { kind, value } of optionSpecials(item, def)) {
+    // Loch's Feather to the Invisibility Cloak print no HP recovery (ZzzInventory.cpp:1897).
+    if (kind === 'life' && def.group === ItemGroup.Helper && def.index >= 14 && def.index <= 18) continue;
+    out.add(t(OPTION_TEXT[kind], { value }), 'blue');
+    // The Magic Gladiator swords also name it as wizardry (ZzzInventory.cpp:5119-5131).
+    if (kind === 'damage' && def.group === ItemGroup.Sword && MG_SWORDS.includes(def.index)) {
+      out.add(t('item.additionalWizardry', { value }), 'blue');
+    }
   }
 
   if (excellentFlags > 0) {
@@ -706,14 +705,23 @@ const WING_OPTION_TEXT: Readonly<Record<WingOption, TextKey>> = {
   fullMana: 'item.wing.fullMana',
 };
 
-/** A wing's additional option by its kind (`AT_LIFE_REGENERATION`, `AT_IMPROVE_*`). */
-const WING_KIND_TEXT: Readonly<Record<WingOptionKind, TextKey>> = {
+/** The option level's line by its `AT_*` kind (`GetSpecialOptionText`, ZzzInventory.cpp:1883-2010). */
+const OPTION_TEXT: Readonly<Record<OptionSpecial, TextKey>> = {
   life: 'item.wing.hpRecovery',
   damage: 'item.additionalDamage',
   wizardry: 'item.additionalWizardry',
   curse: 'item.additionalCurse',
   defense: 'item.additionalDefense',
+  defenseRate: 'item.additionalDefenseRate',
+  maxMana: 'item.maxManaPercent',
+  maxAg: 'item.maxAgPercent',
+  absorb: 'item.absorbAdditional',
+  agMax: 'item.wing.maxAg',
+  attackSpeed: 'item.attackSpeedUp',
 };
+
+/** `ITEM_DARK_REIGN_BLADE`, `ITEM_EXPLOSION_BLADE`, `ITEM_SWORD_DANCER`, `ITEM_IMPERIAL_SWORD`, `ITEM_RUNE_BLADE`. */
+const MG_SWORDS: readonly number[] = [21, 23, 25, 28, 31];
 
 /** `AT_SKILL_PLASMA_STORM_FENRIR`. */
 const PLASMA_STORM = 76;
