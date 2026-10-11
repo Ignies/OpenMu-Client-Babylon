@@ -62,6 +62,16 @@ export function npcSpawnScale(factory: typeof ModelObject, type = -1, world = -1
   return grow && type >= grow.from && type <= grow.to ? own + grow.add : own;
 }
 
+/** `KIND_TRAP` (DetermineMonsterObjectKind, ZzzCharacter.cpp:13138-13141): no trap casts a Classic shadow. */
+const TRAP_KIND_FIRST = 100;
+const TRAP_KIND_LAST = 110;
+
+/** Whether `RenderCharacter` draws this NPC type's shadow (ZzzCharacter.cpp:8662-8668). */
+export function npcClassicShadow(typeNumber: number): boolean {
+  if (typeNumber >= TRAP_KIND_FIRST && typeNumber <= TRAP_KIND_LAST) return false;
+  return monsterRegistry.def(typeNumber)?.classicShadow !== false;
+}
+
 export function isKnownObjectType(typeNumber: number): boolean {
   if (registeredModelClass(typeNumber) !== undefined || hasMonsterModel(typeNumber)) return true;
   const def = monsterRegistry.def(typeNumber);

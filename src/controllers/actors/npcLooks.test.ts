@@ -128,6 +128,13 @@ describe('NPC looks from the original client', () => {
     scene.getEngine().dispose();
   });
 
+  // RenderCharacter skips these monsters and every trap (KIND_TRAP, 100-110) in its shadow pass (ZzzCharacter.cpp:8662-8668, :13138-13141).
+  it('the monsters and traps the original casts no shadow for', () => {
+    const none = [22, 25, 42, 59, 63, 152, 242, 100, 104, 105, 106];
+    expect(none.filter(type => m.npcClassicShadow(type))).toEqual([]);
+    expect([3, 26, 153].filter(type => m.npcClassicShadow(type))).toEqual([3, 26, 153]);
+  });
+
   // `Models[MODEL_GAMBLE_NPC_MOSS].Actions[0..5].PlaySpeed = 0.33f` (ZzzCharacter.cpp:14512-14515, :14855-14858).
   it('Moss and Zyro play their six clips at 0.33', () => {
     const scene = new Scene(new NullEngine());

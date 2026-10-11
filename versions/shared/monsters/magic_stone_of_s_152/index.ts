@@ -3,6 +3,8 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 152,
   Name: 'Magic stone of %s',
+  // RenderCharacter casts it no shadow (ZzzCharacter.cpp:8662-8668).
+  classicShadow: false,
   maxHealth: 50,
   // Kalima gate: all seven share `MODEL_WARCRAFT` (Skill/HellGate) and show its key 10 for good: they spawn
   // on frame 10 and stop on frame 8 with key 10 still the prior key (ZzzCharacter.cpp:13333-13334, :3737-3740).

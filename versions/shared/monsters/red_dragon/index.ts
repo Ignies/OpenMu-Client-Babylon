@@ -3,6 +3,8 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 42,
   Name: 'Red Dragon',
+  // RenderCharacter casts it no shadow (ZzzCharacter.cpp:8662-8668).
+  classicShadow: false,
   maxHealth: 50000,
   model: { type: 31, scale: 1.3 },
   stats: {

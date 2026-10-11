@@ -50,6 +50,8 @@ export type MonsterDef = {
   subType?: number;
   /** Spawned but never drawn (`Object.Visible = false`): the actors controller loads no model. */
   hidden?: boolean;
+  /** No Classic shadow: `RenderCharacter` skips it in the shadow pass. The cascades still take it. */
+  classicShadow?: false;
   /** An NPC drawn from its own model file instead of a monster model. */
   npcModel?: NpcModel;
   /** Talked to from this many tiles away (straight line), instead of from a tile beside it. */

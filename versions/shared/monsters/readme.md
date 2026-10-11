@@ -68,6 +68,9 @@ In game the name a player reads is the language pack's in either case (`monsterD
 | `transformed: { dir, part, scale? }` | a player rig whose body is one part file |
 | none | the Bull Fighter, as the original's default |
 
+- `classicShadow: false`: the original's shadow pass skips it (Ice Monster, Ice Queen, Red Dragon,
+  Zaikan, Deathvim Knight, Elf Lala and the first Kalima gate, ZzzCharacter.cpp:8662-8668); no trap
+  (100-110) casts one either. The cascades still take them.
 - A scale is written only where the original's case sets one; without it the type spawns at 0.9,
   CreateCharacterPointer's default (ZzzCharacter.cpp:11699), as do the classes that set none.
   `npcModel.clipSpeeds` are the `Models[].Actions[].PlaySpeed` a case writes (Moss and Zyro, 0.33);
