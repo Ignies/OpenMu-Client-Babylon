@@ -135,8 +135,8 @@ export type PostChain = {
   moveToEnd(): void;
   /** The pipeline's MSAA, once the camera's chain is final. */
   syncSamples(): void;
-  /** Names of the passes live right now, in chain order. */
-  passes(): string[];
+  /** Names of the passes live right now, in chain order: the chain's own list, rewritten by `set`. */
+  passes(): readonly string[];
 };
 
 export function createPostChain(
@@ -281,5 +281,5 @@ export function createPostChain(
     pipeline.samples = sceneTargetSamples(camera, firstPass());
   };
 
-  return { pipeline, set, moveToEnd, syncSamples, passes: () => [...live] };
+  return { pipeline, set, moveToEnd, syncSamples, passes: () => live };
 }

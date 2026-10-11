@@ -310,18 +310,27 @@ export function applyArea(base: LookProfile, area: AreaLook): LookProfile {
 
 const DEG = Math.PI / 180;
 
-/** Unit direction the light travels, Babylon Y-up, from azimuth / elevation. */
-export function sunDirectionOf(sun: LookProfile['sun']): [number, number, number] {
+/** Unit direction the light travels, Babylon Y-up, from azimuth / elevation; into `out` when given. */
+export function sunDirectionOf(
+  sun: LookProfile['sun'],
+  out: [number, number, number] = [0, 0, 0]
+): [number, number, number] {
   const az = sun.azimuthDeg * DEG;
   const el = sun.elevationDeg * DEG;
   const c = Math.cos(el);
 
-  return [-Math.sin(az) * c, -Math.sin(el), -Math.cos(az) * c];
+  out[0] = -Math.sin(az) * c;
+  out[1] = -Math.sin(el);
+  out[2] = -Math.cos(az) * c;
+  return out;
 }
 
-/** sRGB display value to linear, per channel. */
-export function toLinear(c: Rgb): [number, number, number] {
-  return [c[0] ** 2.2, c[1] ** 2.2, c[2] ** 2.2];
+/** sRGB display value to linear, per channel; into `out` when given (it may be `c`). */
+export function toLinear(c: Rgb, out: [number, number, number] = [0, 0, 0]): [number, number, number] {
+  out[0] = c[0] ** 2.2;
+  out[1] = c[1] ** 2.2;
+  out[2] = c[2] ** 2.2;
+  return out;
 }
 
 /**
@@ -365,11 +374,10 @@ export function omenProfile(name: OmenLookName): OmenLook {
 const BALANCE_MIN = 0.94;
 const BALANCE_MAX = 1.06;
 
-/** The map's balance with an omen's laid over it, kept inside the range. */
-export function composeBalance(base: Rgb, omen: Rgb): Rgb {
-  return [
-    Math.min(BALANCE_MAX, Math.max(BALANCE_MIN, base[0] * omen[0])),
-    Math.min(BALANCE_MAX, Math.max(BALANCE_MIN, base[1] * omen[1])),
-    Math.min(BALANCE_MAX, Math.max(BALANCE_MIN, base[2] * omen[2])),
-  ];
+/** The map's balance with an omen's laid over it, kept inside the range; into `out` when given. */
+export function composeBalance(base: Rgb, omen: Rgb, out: [number, number, number] = [0, 0, 0]): Rgb {
+  out[0] = Math.min(BALANCE_MAX, Math.max(BALANCE_MIN, base[0] * omen[0]));
+  out[1] = Math.min(BALANCE_MAX, Math.max(BALANCE_MIN, base[1] * omen[1]));
+  out[2] = Math.min(BALANCE_MAX, Math.max(BALANCE_MIN, base[2] * omen[2]));
+  return out;
 }

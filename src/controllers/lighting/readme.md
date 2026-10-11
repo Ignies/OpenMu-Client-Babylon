@@ -110,6 +110,9 @@ policy. It knows how to light something, never which skill or item asks for it.
 
 ## Tests
 - `clouds.test.ts`: cloud uniform values for a clock, scroll wrapping, the sun step, binding.
+- `director.test.ts`: what the look director hands every writer and publishes, frame by frame over a
+  scripted run (tiers, a room fading in and out, an omen, post off, a map change), pinned as one hash;
+  the tick hands the writers and the readers the same kept objects every frame.
 - `lightingQuality.test.ts`: `sceneTargetSamples` (MSAA per pass, Classic at one sample).
 - `recipes.test.ts`: `effectLight` hue, reach and gain ceiling, minimum range.
 - `characters.test.ts`: a steady carried glow (Poison Shadow), one that breathes, and the Scorpion's per-frame flicker.
