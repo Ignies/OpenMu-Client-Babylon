@@ -6,8 +6,9 @@ import type { Item } from '../../ecs/world';
 export type CloakWearer = {
   /** `c->Class`. */
   charClass: CharacterClassNumber;
-  /** `c->Wing`: the wing slot's item. */
+  /** `c->Wing`: the wing slot's item, and what it held the frame before (a change may `DeleteCloth`). */
   wing: Item | null;
+  wingBefore: Item | null;
   /** The armour slot's item; null is the class's own body (`MODEL_BODY_ARMOR + skin`). */
   armor: Item | null;
   /** A transformation worn on the rig (`o->SubType`, a ring's body): its part file, else null. */

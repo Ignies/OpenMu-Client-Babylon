@@ -34,6 +34,7 @@ class FakeSet implements CloakSet {
   count = 0;
   readonly specs: (ClothSpec | null)[] = [];
   readonly drawn = new Set<number>();
+  drops = 0;
   build(slot: number, spec: ClothSpec) {
     this.specs[slot] = spec;
     this.built = true;
@@ -48,6 +49,7 @@ class FakeSet implements CloakSet {
     if (this.specs[slot]) this.drawn.add(slot);
   }
   drop() {
+    this.drops++;
     this.specs.length = 0;
     this.built = false;
     this.count = 0;
@@ -66,7 +68,7 @@ function run(w: CloakWearer, frames: number, set = new FakeSet()) {
 }
 
 const wearer = (over: Partial<CloakWearer>): CloakWearer => ({
-  charClass: C.DarkLord, wing: null, armor: null, skin: null, chaosCastle: false, netId: null, hero: false, guild: null, ...over,
+  charClass: C.DarkLord, wing: null, wingBefore: over.wing ?? null, armor: null, skin: null, chaosCastle: false, netId: null, hero: false, guild: null, ...over,
 });
 
 const wear = (over: Partial<CloakWearer>, frames = 2) => run(wearer(over), frames);
@@ -306,5 +308,37 @@ describe('the set as RenderCharacter builds it and walks it (ZzzCharacter.cpp:96
     const { set } = wear({ charClass: C.MagicGladiator });
     const after = run(wearer({ charClass: C.MagicGladiator, chaosCastle: true }), 1, set);
     expect([after.set.built, after.set.specs[0]?.front, after.out.filter(Boolean)]).toEqual([true, 'Player/Robe01.OZJ', []]);
+  });
+});
+
+describe('DeleteCloth on a cape change', () => {
+  const WING_OF_RUIN_ITEM: Item = { group: 12, num: 39 };
+  const WING_OF_DIMENSION: Item = { group: 12, num: 43 };
+  /** A set built under `from`, then a frame with the wing changed to `to`: the drops. */
+  const change = (charClass: C, from: Item | null, to: Item | null, hero: boolean) => {
+    const { set } = wear({ charClass, wing: from, hero });
+    run(wearer({ charClass, wing: to, wingBefore: from, hero }), 1, set);
+    return set.drops;
+  };
+
+  it('resets the hero\'s set when a cloth wing goes on or comes off (NewUIMyInventory.cpp:1050-1083)', () => {
+    expect(change(C.DarkLord, null, CAPE_OF_LORD, true)).toBe(1);
+    expect(change(C.DarkLord, CAPE_OF_LORD, null, true)).toBe(1);
+    expect(change(C.MagicGladiator, WING_OF_RUIN_ITEM, WING_OF_DIMENSION, true)).toBe(1);
+    expect(change(C.MagicGladiator, WINGS_OF_SATAN, WING_OF_DIMENSION, true)).toBe(0);
+  });
+
+  it('resets another player\'s set on the new wing, or the old one taken off (WSclient.cpp:2474-2491)', () => {
+    expect(change(C.RageFighter, null, { group: 12, num: 49 }, false)).toBe(1);
+    expect(change(C.RageFighter, { group: 12, num: 50 }, null, false)).toBe(1);
+    // A cloth wing swapped for a plain one: the packet tests the new wing only, so the Ruin robe stays.
+    expect(change(C.MagicGladiator, WING_OF_RUIN_ITEM, WING_OF_DIMENSION, false)).toBe(0);
+    expect(change(C.DarkLord, MANTLE_OF_MONARCH, CAPE_OF_LORD, false)).toBe(1);
+  });
+
+  it('builds the set anew the same frame, its cape after the new wing', () => {
+    const { set } = wear({ wing: CAPE_OF_LORD, hero: true });
+    const after = run(wearer({ wing: MANTLE_OF_MONARCH, wingBefore: CAPE_OF_LORD, hero: true }), 1, set);
+    expect([after.set.count, after.out[2]?.front, after.out[4]?.front]).toEqual([6, 'Item/dl_redwings02.OZT', 'Item/dl_redwings03.OZT']);
   });
 });

@@ -13,7 +13,7 @@ the capes, the Dark Lord's hair and skirt, the Magic Gladiator's robe, the team 
   `cape_of_fighter.ts` (the Cape of Fighter and the Cape of Overrule's cape and straps), `robe.ts` (the
   Magic Gladiator's robe, msword03 under the Wing of Ruin), `dark_lord_hair.ts` (the Dark Lord's two
   strands of hair), `dark_lord_skirt.ts` (his skirt over the class's own body), `team_cloak.ts` (the duel
-  and Battle Soccer colours, `teamLight`).
+  and Battle Soccer colours, `teamLight`), `delete_cloth.ts` (the wing changes that reset the set, `tearsSet`).
 
 ## How it works
 - `bCloak` (:9162-9186): the Magic Gladiator class itself (`c->Class == CLASS_DARK`, so not the Duel
@@ -30,6 +30,10 @@ the capes, the Dark Lord's hair and skirt, the Magic Gladiator's robe, the team 
   shadow is still laid where it was left (`AddClothesShadowTriangles` walks every built cloth below
   `m_byNumCloth`, ZzzBMD.cpp:2648-2710): a Dark Lord with a weapon and no cape lays a cape's shadow where
   his set was built, which never moves. Out of a cloak the set stays as it was, undrawn.
+- `DeleteCloth` on a wing change resets the set, which the rule builds anew the same frame: for the hero
+  when a cloth wing (the Wing of Ruin, a cape, the Mantle) goes on or comes off (NewUIMyInventory.cpp:1050-1083),
+  for another player when the new wing is one, or the old one as the slot empties (WSclient.cpp:2474-2491), so
+  a Magic Gladiator swapping the Wing of Ruin straight for another wing keeps its msword03 robe.
 - Dark Lord (:9693-9776): slots 0 and 1 the hair on the head bone (`Monster\iui06.jpg`, rubber2 strands in
   their own gusts: the first a pulsing light with a sprite on each vertex, the second added), gone under a
   ring's body (`CheckDarkLordHair`); slot 2 the cape, drawn with the Cape of Lord (`Player\DarklordRobe.tga`) or the

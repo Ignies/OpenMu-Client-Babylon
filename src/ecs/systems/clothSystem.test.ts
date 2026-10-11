@@ -50,8 +50,14 @@ function player(look: Partial<{ wings: Item | null; leftHand: Item | null; pet: 
   return { modelObject, charAppearance, visibility: { state: 'visible' as string }, buffs: new Set<number>() };
 }
 
+/** One system per player and map, kept across frames as the world keeps it. */
+const systems = new WeakMap<object, Map<number, ReturnType<typeof ClothSystem>>>();
 function run(p: ReturnType<typeof player>, mapIndex = 0) {
-  ClothSystem({ with: () => [p], mapIndex } as unknown as World).update?.(0.04);
+  let byMap = systems.get(p);
+  if (!byMap) systems.set(p, (byMap = new Map()));
+  let system = byMap.get(mapIndex);
+  if (!system) byMap.set(mapIndex, (system = ClothSystem({ with: () => [p], mapIndex } as unknown as World)));
+  system.update?.(0.04);
   return p.modelObject.Cloth;
 }
 
@@ -59,11 +65,11 @@ describe('ClothSystem', () => {
   it('hangs on each player body what the wearers\' rule names, in its light', () => {
     const p = player({ wings: { group: 13, num: 30 } });
     const set = run(p);
-    expect(seen).toEqual({ charClass: C.DarkLord, wing: { group: 13, num: 30 }, armor: null, skin: null, chaosCastle: false, netId: null, hero: false, guild: null });
+    expect(seen).toEqual({ charClass: C.DarkLord, wing: { group: 13, num: 30 }, wingBefore: { group: 13, num: 30 }, armor: null, skin: null, chaosCastle: false, netId: null, hero: false, guild: null });
     expect([set.size, set.cloth(2)?.spec, set.drawn(2)]).toEqual([1, CAPE, true]);
     // Undrawn the next frame the rule names nothing; the set stays as built.
     p.charAppearance.wings = null;
-    expect([run(p).drawn(2), run(p).size]).toEqual([false, 1]);
+    expect([run(p).drawn(2), seen?.wingBefore, run(p).size, seen?.wingBefore]).toEqual([false, { group: 13, num: 30 }, 1, null]);
   });
 
   it('tells the rule who the body is: its id, the hero or not, its guild', () => {

@@ -216,6 +216,6 @@ Mantle of Monarch and Cape of Overrule keep their model and add cloth.
 - Not yet: the two monsters that wear one, the Death King (Player/Robe03.tga, :9826-9832) and the
   Nightmare (a `PCT_CYLINDER` robe on bone 2, :9833-9836).
 - The set is built once and walked as the original walks it: a cloth it skips stays built, unstepped, and
-  lays its shadow where it was left. Not ported: `DeleteCloth` on a cape change (WSclient.cpp:2474-2491),
-  which resets every cloth of the set. Body parts carry a mesh cloth of their own too (`CPhysicsClothMesh`,
+  lays its shadow where it was left; a cape change resets the whole set as `DeleteCloth` does (WSclient.cpp:2474-2491,
+  NewUIMyInventory.cpp:1050-1083). Body parts carry a mesh cloth of their own too (`CPhysicsClothMesh`,
   ZzzObject.cpp:10626-10640), a separate port.

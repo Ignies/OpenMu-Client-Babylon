@@ -6,7 +6,7 @@ import { isPlayerBody } from '../../controllers/actors/playerObject';
 import { characterSkinParts } from '../../controllers/actors/transformedBody';
 import { isBook, isSwordformGloves } from '../../controllers/actors/weaponClass';
 import { petSpec } from '@/controllers/pets';
-import type { ISystemFactory, Item, World } from '../world';
+import type { Entity, ISystemFactory, Item, World } from '../world';
 
 /** `eBuff_Cloaking`, `eDeBuff_Stun`, `eDeBuff_Sleep` (`eBuffState`, _enum.h). */
 const CLOAKING = 18;
@@ -32,7 +32,9 @@ const linked = (item: Item | null | undefined): boolean => !!item && !isBook(ite
  */
 function clothSystem(world: World) {
   const query = world.with('charAppearance', 'modelObject');
-  const wearer: CloakWearer = { charClass: 0, wing: null, armor: null, skin: null, chaosCastle: false, netId: null, hero: false, guild: null };
+  /** Each character's wing the frame before. */
+  const wings = new WeakMap<Entity, Item | null>();
+  const wearer: CloakWearer = { charClass: 0, wing: null, wingBefore: null, armor: null, skin: null, chaosCastle: false, netId: null, hero: false, guild: null };
 
   return {
     update: (dt: number) => {
@@ -45,6 +47,9 @@ function clothSystem(world: World) {
         const look = e.charAppearance;
         wearer.charClass = look.charClass;
         wearer.wing = look.wings;
+        const before = wings.get(e);
+        wearer.wingBefore = before === undefined ? look.wings : before;
+        wings.set(e, look.wings);
         wearer.armor = look.armor;
         wearer.skin = skinPart(e.skin);
         wearer.chaosCastle = castle;

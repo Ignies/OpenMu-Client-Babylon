@@ -9,6 +9,7 @@ import {
   isMantleOfMonarch,
 } from './cape_of_lord';
 import { robeFor } from './robe';
+import { tearsSet } from './delete_cloth';
 import { DARK_LORD_HAIR } from './dark_lord_hair';
 import { DARK_LORD_SKIRT, DARK_LORD_SKIRT_BUILT, LORD_EMPEROR_SKIRT, LORD_EMPEROR_SKIRT_BUILT } from './dark_lord_skirt';
 import { teamLight } from './team_cloak';
@@ -102,6 +103,7 @@ function drawSet(w: CloakWearer, base: BaseClass, team: boolean, set: CloakSet):
  * is built once, then only its skirt changes; out of a cloak it stays as it was, undrawn.
  */
 export function cloaks(w: CloakWearer, set: CloakSet): Rgb {
+  if (tearsSet(w)) set.drop();
   const base = getBaseClass(w.charClass);
   const team = teamLight(w);
   const gladiator = w.charClass === CharacterClassNumber.MagicGladiator;
