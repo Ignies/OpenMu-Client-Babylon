@@ -65,7 +65,9 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   Bronze, Leather, Scale, Brass and Plate helms (`MaskHelmMale`), ZzzCharacter.cpp:9579-9617.
 - `itemModel.ts`: `dressItemModel(object, group, num)`, what the original does to every loose item
   model, on the ground or in the bag (`ItemHeight`, `HideSkin`, frozen at frame 0, the
-  `ItemObjectAttribute` mesh rules; `DropObject` and the bag icon both use it), and
+  `ItemObjectAttribute` mesh rules, and `RenderPartObjectBody`'s seed colours: a seed in its element's
+  colour with Chrome01 added, a seed sphere so but for its mesh 1, ZzzObject.cpp:8067-8121; `DropObject`
+  and the bag icon both use it), and
   `loadItemModel(scene, parent, group, num, file)`, such a model with no entity behind it. A worn
   `Player/` part keeps its own file's skeleton, posed at its first frame, as a drop does.
 - `itemIcon.ts`: `itemIconJob(scene, item)`, the shot of a bag icon drawn from the item's model, and
@@ -160,6 +162,8 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   players and NPCs keep theirs, no armour glow in the castle.
 - `approachPath.test.ts`: walk truncation at range, distance along the sent path, stall capping.
 - `deserializeAppearance.test.ts`: `isAppearanceBlank` on empty and real previews.
+- `itemModel.test.ts`: the seeds and seed spheres dressed in their element's colour with Chrome01 (a sphere
+  but its mesh 1), every other item unshone.
 - `weaponClass.test.ts`: `isTwoHanded` is the item's own `TwoHand` (the wide staffs two-handed, Legendary
   Staff on one-handed), matching `Item_eng.bmd` on every weapon row it has.
 - `itemAngle.test.ts`: drop scale and pose per group, worn height, the `ItemAngle` tail rows.

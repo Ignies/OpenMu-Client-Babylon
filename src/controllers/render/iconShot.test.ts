@@ -180,6 +180,30 @@ describe('the one-shot icon render', () => {
     expect(seen).toEqual([{ flat: true, brightKept: true, light: [1, 1, 1], fog: false, caster: false }]);
   });
 
+  // RenderPartObjectBody sets a seed's BodyLight to its colour over the bag's 1, 1, 1 (ZzzObject.cpp:8067-8090).
+  it('keeps the light of a mesh lit by its own shine', async () => {
+    const colour = new Vector3(0.9, 0.1, 0.2);
+    const seen: unknown[] = [];
+    const render = vi.spyOn(RenderTargetTexture.prototype, 'render').mockImplementation(function (this: RenderTargetTexture) {
+      seen.push((this.renderList ?? [])[0].metadata.bodyLight);
+    });
+    const { shots: s } = shots();
+    const done = s.shoot({
+      key: 'seed',
+      view: VIEW,
+      build: async root => {
+        const seed = CreateBox('seed', { size: 0.1 }, scene);
+        seed.metadata = { bodyLight: colour, shineLit: true };
+        seed.parent = root;
+        return { dispose: () => seed.dispose() };
+      },
+    });
+    await frames(4);
+    await done;
+    render.mockRestore();
+    expect(seen).toEqual([colour]);
+  });
+
   it('answers null when the subject cannot be built, and goes on with the next', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const log = { built: [] as string[], disposed: [] as string[] };

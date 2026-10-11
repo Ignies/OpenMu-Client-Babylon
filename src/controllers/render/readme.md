@@ -13,7 +13,8 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `babylon/spriteLinear.ts`: `installSpriteLinearDecode()` (called by `fx/core.ts`).
 - `babylon/compileWait.ts`: `pauseCompileWaitWhileHidden()` (called by `createEngine`).
 - `modelObject.ts`: `ModelObject`, the base class of every drawn model (actors, map objects, npcs,
-  drops, pets); `PartPose`, `BodyShine`, `HIDDEN_MESH_ALL`, `BLEND_MESH_ALL`.
+  drops, pets); `PartPose`, `BodyShine` (with `ShineMesh` and `ShineLight`, the shine mesh lit by
+  the shine's tint), `HIDDEN_MESH_ALL`, `BLEND_MESH_ALL`.
 - `scenes/testScene.ts`: `TestScene`, the game's `Scene` with its camera, highlight layer and look.
 - `sceneLook.ts`: `setAreaMood`, `requestGlowProbe`, `updateSceneLook` (glow layer, areas).
 - `scenes/<pass>.ts`: `sync<Pass>` / `dispose<Pass>` and `createPostChain`, called by
@@ -102,7 +103,7 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `iconShot.test.ts`: at most one shot per frame and no observer once idle; one build per key, again
   after `forget`; the
   subject, root, camera and target freed; the main camera never sees the subject; flat lit, no fog,
-  no caster flag; a failed build answers null; the bounded wait for readiness; `iconPixels` (row flip,
+  no caster flag, but a mesh lit by its own shine keeps its light; a failed build answers null; the bounded wait for readiness; `iconPixels` (row flip,
   straight alpha over the clear, the display curve on a linear buffer, a kept buffer rewritten whole);
   the spin draws one turned picture a frame into one kept buffer, one item at a time, and frees all of
   it when stopped, before its model is in too. NullEngine draws no pixels, so what a picture looks
@@ -110,6 +111,7 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `meshAnimation.test.ts`: `meshAnimationFor` reads the map row per world.
 - `modelObject.test.ts`: a model whose clips are cloned on first play reads every clip's keys at load
   without cloning one, and a clip cloned later reports its end; `BlendMesh -2` and a pulsing `BlendMeshLightAt`;
+  `ShineLight` lights the shine mesh by the tint;
   a part unlinked from its bone goes back under its owner; an action stops every other running clip, the loader's clip 0 too;
   a character casts the blob, a map object only with `MapShadow`; `ShadowFromGround` marks the clone;
   `ShadowMeshes` keeps the other meshes out; the clone carries `ShadowAlpha` and draws from `ShadowMinAlpha`;

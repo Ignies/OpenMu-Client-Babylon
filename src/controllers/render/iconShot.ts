@@ -237,7 +237,8 @@ export function createIconShots(scene: Scene, io: IconShotIo = BROWSER_IO): Icon
       mesh.metadata ??= {};
       mesh.metadata.csmCaster = false;
       mesh.metadata.depthOccluder = false;
-      mesh.metadata.bodyLight = WHITE;
+      // A mesh lit by its own shine keeps it: the item's own colour over the bag's white.
+      if (!mesh.metadata.shineLit) mesh.metadata.bodyLight = WHITE;
       if (!mesh.metadata.brightMesh) {
         const flat = getFlatLitVariant(scene, mesh);
         if (flat) mesh.material = flat;

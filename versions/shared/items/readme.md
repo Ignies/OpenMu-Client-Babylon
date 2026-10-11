@@ -38,7 +38,8 @@ petItems.ts           pet and mount item numbers in group 13 (PET_GROUP, DARK_HO
   (`tools/assetCase.test.ts`). For a new item it has no model for, the converter writes
   `Item/rollofpaper.glb` (`tools/convertItemTXTtoJson.ts`), the scrolls' own model: the seed spheres
   12/101-129 kept that stand-in until they took their level's `s30_sphere0<level + 1>`
-  (ZzzOpenData.cpp:871-875).
+  (ZzzOpenData.cpp:871-875), the fireworks (14/63) until `GM01` and the compressed Bless and Soul
+  (12/30, 12/31) until `Jewel01` / `Jewel02` (:957-958, :984).
 - `launcher_arrows.ts` is handed to the skills controller by `versions/shared/skills/index.ts`
   (`registerLauncherArrows`). A launcher with no row shoots the plain steel arrow.
 
