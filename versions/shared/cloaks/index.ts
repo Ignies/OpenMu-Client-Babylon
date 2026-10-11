@@ -8,9 +8,15 @@ import {
   isCapeOfLord,
   isMantleOfMonarch,
 } from './cape_of_lord';
+import { robeFor } from './robe';
 import { CAPE_OF_FIGHTER_CLOTH, CAPE_OF_OVERRULE_CLOTH, CAPE_OF_OVERRULE_STRAPS, isCapeOfFighter, isCapeOfOverrule } from './cape_of_fighter';
 
 const WHITE: Rgb = [1, 1, 1];
+
+/** The Illusion Temple's two bodies (`MODEL_CURSEDTEMPLE_*_PLAYER`): every cloth skipped (:9958-9961). */
+const TEMPLE_BODIES: ReadonlySet<string> = new Set(['illusionist.glb', 'unitedsoldier.glb']);
+/** The skeleton rings' bodies, the only rig skins `CheckDarkCloak` leaves the robe on (ChangeRingManager.cpp:31-49). */
+const SKELETON_BODY = /^Skeleton0[123]\.glb$/;
 
 /** The Dark Lord's cloths (ZzzCharacter.cpp:9693-9776, drawn by :9926-9942): 2 the cape, 4 and 5 the Mantle's straps. */
 function darkLord(w: CloakWearer, out: (ClothSpec | null)[]): void {
@@ -39,8 +45,11 @@ function rageFighter(w: CloakWearer, out: (ClothSpec | null)[]): void {
 export function cloaks(w: CloakWearer, out: (ClothSpec | null)[]): Rgb {
   const base = getBaseClass(w.charClass);
   const cloak = (w.charClass === CharacterClassNumber.MagicGladiator || base === BaseClass.DarkLord || base === BaseClass.RageFighter) && !w.chaosCastle;
-  if (cloak && base === BaseClass.DarkLord) darkLord(w, out);
-  else if (cloak && base === BaseClass.RageFighter) rageFighter(w, out);
+  if (!cloak || (w.skin !== null && TEMPLE_BODIES.has(w.skin))) return WHITE;
+  if (base === BaseClass.DarkLord) darkLord(w, out);
+  else if (base === BaseClass.RageFighter) rageFighter(w, out);
+  // The rest wear the robe (:9837-9846); a ring's body hides the Magic Gladiator's (CheckDarkCloak, :9953).
+  else if (w.skin === null || SKELETON_BODY.test(w.skin)) out[0] = robeFor(w.wing);
   return WHITE;
 }
 

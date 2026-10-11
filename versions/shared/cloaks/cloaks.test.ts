@@ -11,7 +11,7 @@ const WINGS_OF_SATAN: Item = { group: 12, num: 2 };
 
 function wear(over: Partial<CloakWearer>) {
   const out: (ClothSpec | null)[] = [];
-  const light = cloaksFor({ charClass: C.DarkLord, wing: null, chaosCastle: false, ...over }, out);
+  const light = cloaksFor({ charClass: C.DarkLord, wing: null, skin: null, chaosCastle: false, ...over }, out);
   return { out, light };
 }
 
@@ -104,5 +104,49 @@ describe('the Cape of Overrule (:9783-9790, :9808-9817)', () => {
       [[25, 15, 2], [2, 5], [12, 180], 'Item/monk_manto01.OZT', PCT_ELASTIC_RAGE_L | PCT_MASK_ALPHA, [[0, -15, -20, 35, 2], [0, 0, 0, 45, 17]]],
       [[-25, 15, 2], [2, 5], [12, 180], 'Item/monk_manto01.OZT', PCT_ELASTIC_RAGE_R | PCT_MASK_ALPHA, [[0, -15, -20, 35, 2], [0, 0, 0, 50, 17]]],
     ]);
+  });
+});
+
+const WING_OF_RUIN: Item = { group: 12, num: 39 };
+
+describe('the Magic Gladiator\'s robe (ZzzCharacter.cpp:9837-9846)', () => {
+  it('hangs cloth 0 from the neck: Robe01.jpg in front, Robe02.jpg behind, 75 x 120, heavy and opaque', () => {
+    const { out } = wear({ charClass: C.MagicGladiator });
+    expect(out[0]).toEqual({
+      bone: 19,
+      at: [0, 10, 0],
+      grid: [10, 10],
+      size: [75, 120],
+      front: 'Player/Robe01.OZJ',
+      back: 'Player/Robe02.OZJ',
+      flags: PCT_CURVED | PCT_SHORT_SHOULDER | PCT_HEAVY,
+    });
+    expect(out.filter(Boolean)).toHaveLength(1);
+    // Any wing but the Wing of Ruin keeps it.
+    expect(wear({ charClass: C.MagicGladiator, wing: WINGS_OF_SATAN }).out[0]).toBe(out[0]);
+  });
+
+  it('turns into msword03.tga under the Wing of Ruin, 120 x 120 and keyed', () => {
+    expect(wear({ charClass: C.MagicGladiator, wing: WING_OF_RUIN }).out[0]).toEqual({
+      bone: 19,
+      at: [0, 15, 0],
+      grid: [10, 10],
+      size: [120, 120],
+      front: 'Item/msword03.OZT',
+      back: 'Item/msword03.OZT',
+      flags: PCT_CURVED | PCT_SHORT_SHOULDER | PCT_HEAVY | PCT_MASK_ALPHA,
+    });
+  });
+
+  it('is the class\'s alone: the Duel Master has none (`c->Class == CLASS_DARK`, :9164)', () => {
+    expect(wear({ charClass: C.DuelMaster }).out.filter(Boolean)).toEqual([]);
+  });
+
+  it('goes under a ring\'s body but the skeletons\' (CheckDarkCloak), and every cloth goes in the Illusion Temple\'s (:9953-9961)', () => {
+    const robe = (skin: string | null) => wear({ charClass: C.MagicGladiator, skin }).out.filter(Boolean).length;
+    expect(['Skeleton01.glb', 'Skeleton02.glb', 'Skeleton03.glb'].map(robe)).toEqual([1, 1, 1]);
+    expect(['youngza.glb', 'jack.glb', 'santa.glb', 'panda.glb', 'trans_skeleton.glb'].map(robe)).toEqual([0, 0, 0, 0, 0]);
+    expect(['illusionist.glb', 'unitedsoldier.glb'].map(robe)).toEqual([0, 0]);
+    expect(wear({ charClass: C.RageFighter, wing: CAPE_OF_FIGHTER, skin: 'unitedsoldier.glb' }).out.filter(Boolean)).toEqual([]);
   });
 });

@@ -3,6 +3,7 @@ import { cloaksFor, type CloakWearer } from '../../controllers/actors/cloaks';
 import { heldWeapons } from '../../controllers/actors';
 import { inChaosCastle } from '../../controllers/actors/locomotion';
 import { isPlayerBody } from '../../controllers/actors/playerObject';
+import { characterSkinParts } from '../../controllers/actors/transformedBody';
 import { isBook, isSwordformGloves } from '../../controllers/actors/weaponClass';
 import { petSpec } from '@/controllers/pets';
 import type { ISystemFactory, Item, World } from '../world';
@@ -11,6 +12,15 @@ import type { ISystemFactory, Item, World } from '../world';
 const CLOAKING = 18;
 const STUN = 61;
 const SLEEP = 72;
+
+/** The part file a rig-worn skin draws, by skin number, read once (`characterSkinParts` builds its table per call). */
+const skinParts = new Map<number, string | null>();
+function skinPart(skin: number | undefined): string | null {
+  if (skin === undefined) return null;
+  let part = skinParts.get(skin);
+  if (part === undefined) skinParts.set(skin, (part = characterSkinParts()[skin]?.[1] ?? null));
+  return part;
+}
 
 /** A held item `RenderLinkObject` draws (books return before it, glove weapons have their own pass). */
 const linked = (item: Item | null | undefined): boolean => !!item && !isBook(item) && !isSwordformGloves(item);
@@ -23,7 +33,7 @@ const linked = (item: Item | null | undefined): boolean => !!item && !isBook(ite
 function clothSystem(world: World) {
   const query = world.with('charAppearance', 'modelObject');
   const specs: (ClothSpec | null)[] = [];
-  const wearer: CloakWearer = { charClass: 0, wing: null, chaosCastle: false };
+  const wearer: CloakWearer = { charClass: 0, wing: null, skin: null, chaosCastle: false };
 
   return {
     update: (dt: number) => {
@@ -36,6 +46,7 @@ function clothSystem(world: World) {
         const look = e.charAppearance;
         wearer.charClass = look.charClass;
         wearer.wing = look.wings;
+        wearer.skin = skinPart(e.skin);
         wearer.chaosCastle = castle;
         const light = cloaksFor(wearer, specs);
         const set = model.Cloth;

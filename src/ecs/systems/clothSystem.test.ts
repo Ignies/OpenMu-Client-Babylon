@@ -54,10 +54,16 @@ describe('ClothSystem', () => {
   it('hangs on each player body what the wearers\' rule names, in its light', () => {
     const p = player({ wings: { group: 13, num: 30 } });
     const set = run(p);
-    expect(seen).toEqual({ charClass: C.DarkLord, wing: { group: 13, num: 30 }, chaosCastle: false });
+    expect(seen).toEqual({ charClass: C.DarkLord, wing: { group: 13, num: 30 }, skin: null, chaosCastle: false });
     expect([set.size, set.cloth(2)?.spec]).toEqual([1, CAPE]);
     p.charAppearance.wings = null;
     expect(run(p).size).toBe(0);
+  });
+
+  it('tells the rule the body a ring puts on the rig, by its part file', () => {
+    const p = { ...player(), skin: 14 };
+    run(p);
+    expect(seen?.skin).toBe('Skeleton01.glb');
   });
 
   it('tells the rule when the body is inside Chaos Castle', () => {
