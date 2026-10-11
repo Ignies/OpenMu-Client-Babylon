@@ -28,5 +28,5 @@ export default defineItem({
   SUM: 1,
   RF: 1,
   szModelFolder: 'Item/',
-  szModelName: 'rollofpaper.glb',
+  szModelName: 's30_sphere01.glb',
 });

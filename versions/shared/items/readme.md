@@ -34,7 +34,10 @@ petItems.ts           pet and mount item numbers in group 13 (PET_GROUP, DARK_HO
   `AccessModel`), where `Item.txt` names a later season's file: Merlin Staff is `Item/Staff_33`
   (`:1116`), not `summonsprit`; the Queen set (index 53) is `Player/<Part>Male54` (`:268-280`), not
   `<Part>Mail_succubus`. The converter keeps these names on a rerun. Every one must be converted
-  (`tools/assetCase.test.ts`).
+  (`tools/assetCase.test.ts`). For a new item it has no model for, the converter writes
+  `Item/rollofpaper.glb` (`tools/convertItemTXTtoJson.ts`), the scrolls' own model: the seed spheres
+  12/101-129 kept that stand-in until they took their level's `s30_sphere0<level + 1>`
+  (ZzzOpenData.cpp:871-875).
 - `launcher_arrows.ts` is handed to the skills controller by `versions/shared/skills/index.ts`
   (`registerLauncherArrows`). A launcher with no row shoots the plain steel arrow.
 
@@ -49,4 +52,5 @@ petItems.ts           pet and mount item numbers in group 13 (PET_GROUP, DARK_HO
 - new launcher arrow: add a row to `LAUNCHER_ARROWS` keyed by the launcher's item index.
 
 ## Tests
-- `items.golden.test.ts`: every item, unchanged (a hash of the whole list); update it on purpose.
+- `items.golden.test.ts`: every item, unchanged (a hash of the whole list); update it on purpose. The
+  seed spheres' models by level.
