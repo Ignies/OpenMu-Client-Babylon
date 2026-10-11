@@ -94,6 +94,6 @@ the hero is a walk the client failed to stop; no walk at all means the server mo
 - `stateWarnings.test.ts`: the no healing potions warning counts healing potions only.
 - `state.test.ts`: `Hero` keeps no tile of its own.
 - `wideStats.test.ts`: the 16-bit pool fields count until the 32-bit pools arrive, then not.
-- `characterStats.test.ts`: the pet bonuses on damage, wizardry, curse and defense.
+- `characterStats.test.ts`: the pet bonuses on damage, wizardry, curse and defense.
 - `experience_gained.test.ts`: a kill share feeds normal or master experience and says so in the system log;
   a master level-up swirls the twenty flare joints.

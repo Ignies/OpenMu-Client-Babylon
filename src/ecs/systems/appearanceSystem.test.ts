@@ -13,7 +13,7 @@ vi.mock('../../controllers/actors', () => ({
 vi.mock('../../controllers/actors/playerObject', () => ({ isPlayerBody: () => true }));
 vi.mock('../../controllers/actors/weaponAttachment', () => ({ applyWeaponAttachments: () => {} }));
 vi.mock('../../controllers/actors/weaponClass', () => ({ isBook: () => false, swordformGlovesModel: () => null }));
-vi.mock('../../controllers/assets', () => ({ settle: (p: unknown) => p }));
+vi.mock('../../controllers/assets', () => ({ settle: (p: unknown) => p }));
 vi.mock('./gmMark', () => ({ syncGmMark: () => {} }));
 
 const CHAOS_CASTLE = 18;
