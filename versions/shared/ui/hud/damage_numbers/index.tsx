@@ -9,6 +9,7 @@ import {
   usePositionOnScreen,
 } from '@/controllers/interface/hooks';
 import { useMuSprite } from '@/controllers/interface/components/mu_sprite';
+import { pageHidden } from '@/core/utils';
 
 const FONT_FILE = 'FontTest.OZT';
 
@@ -94,9 +95,11 @@ type Spawn = {
   height: number;
 };
 
-function spawnsFor(event: Events['objectDamaged'], onSelf: boolean): Spawn[] {
+export function spawnsFor(event: Events['objectDamaged'], onSelf: boolean): Spawn[] {
   const { healthDamage, shieldDamage, kind, isDouble, isTriple } = event;
   const spawns: Spawn[] = [];
+  // A hidden page draws nothing: these would all rise together when it shows (the original's run out unseen).
+  if (pageHidden()) return spawns;
 
   if (healthDamage === 0) {
     spawns.push({

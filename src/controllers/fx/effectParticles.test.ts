@@ -179,6 +179,19 @@ afterEach(() => {
   deltaMs = 40;
 });
 
+describe('a hidden page', () => {
+  // The sprites only tick on a drawn frame: made while hidden, they would all play at once on return.
+  it('spawns no particle', async () => {
+    vi.stubGlobal('document', { hidden: true });
+    try {
+      await spawnParticle(scene, 'fire1', { x: 0, y: 0, z: 0 }, NO_TURN, 1, [1, 1, 1]);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+    expect(fakes.sprites).toHaveLength(0);
+  });
+});
+
 describe('KIND_REACH', () => {
   /** Farthest the particle's sprite gets from its spawn point over its life. */
   async function farthest(kind: KindName, scale: number, random: () => number, turn: NodeTurn) {

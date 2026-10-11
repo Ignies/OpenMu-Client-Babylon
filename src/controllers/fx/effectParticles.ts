@@ -10,6 +10,7 @@ import { downloadDataFile, hasDataFile, loadMuSprite } from '@/controllers/asset
 import { maps } from '../maps';
 import { EFFECT_RENDERING_GROUP, darkCardGain, keepDepthForEffects, spriteLevel } from './core';
 import { devQuery, devQueryNumber } from '../../core/devSeams';
+import { pageHidden } from '../../core/utils';
 import { viewDepth } from '../render/viewPlanes';
 import { reportLoadFailure } from '../assets';
 
@@ -1344,6 +1345,8 @@ export async function spawnParticle(
   light: readonly [number, number, number],
   jitter = 0
 ): Promise<void> {
+  // The tick runs on drawn frames: made while hidden, these would all play at once on return.
+  if (pageHidden()) return;
   const kind = KINDS[kindName] as ParticleKind;
 
   const pool = await getPool(target, kind.texture, kind.blend);

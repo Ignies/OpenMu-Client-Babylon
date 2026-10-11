@@ -1,8 +1,9 @@
-import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
 import { Scene } from '@babylonjs/core/scene';
 import { Texture } from '@babylonjs/core/Materials/Textures/texture';
-import { additiveMaterial, disposePools } from './core';
+import { Vector3 } from '@babylonjs/core/Maths/math.vector';
+import { additiveMaterial, disposePools, emitBurst, particleSystemFor, type ParticleRecipe } from './core';
 
 vi.hoisted(() => {
   const g = globalThis as Record<string, unknown>;
@@ -19,6 +20,21 @@ afterAll(() => {
   disposePools();
   scene.dispose();
   engine.dispose();
+});
+
+describe('a particle burst', () => {
+  const recipe: ParticleRecipe = { texture: 'Effect/flare01.OZJ', colour: [1, 1, 1], size: 1, life: 1 };
+  afterEach(() => vi.unstubAllGlobals());
+
+  // Particles only age on a drawn frame: queued while hidden, they would all burst out on return.
+  it('emits nothing while the page is hidden', () => {
+    vi.stubGlobal('document', { hidden: true });
+    emitBurst(scene, recipe, new Vector3(), 10);
+    expect(particleSystemFor(scene, recipe).manualEmitCount).toBeLessThanOrEqual(0);
+    vi.stubGlobal('document', { hidden: false });
+    emitBurst(scene, recipe, new Vector3(), 10);
+    expect(particleSystemFor(scene, recipe).manualEmitCount).toBe(10);
+  });
 });
 
 describe('additiveMaterial', () => {

@@ -49,6 +49,8 @@ Always-on interface elements, one folder per element, same shape as a window. Re
 
 ## Tests
 - `bottom_bar/belt.test.tsx`: the bar draws the potion slots the version has (four, three, none).
+- `damage_numbers/index.test.tsx`: no number is made while the page is hidden (they would all rise
+  together when it shows).
 - `low_health_overlay/heartbeat.test.ts`: the heartbeat beats back to back while due, and books
   no next beat once it is not.
 - `name_tags/tagSync.test.ts`: the tag layout matches the measuring pass and pushes overlapping
