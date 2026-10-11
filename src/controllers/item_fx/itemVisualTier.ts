@@ -6,6 +6,7 @@ import {
   legacyRenderLevel,
 } from './itemEffectMode';
 import { legacyItemColours, type LegacyItemColours } from './itemLegacyEffects';
+import { itemDrawLevel } from './itemDrawLevel';
 
 /** Improved emissive scale while the legacy passes are also drawn ("Both"). */
 const BOTH_SCALE = 0.65;
@@ -105,10 +106,12 @@ function glowTierOf(level: number): ItemGlowTier {
 
 const tierCache = new Map<string, ItemVisualTier>();
 
-/** Level (+0…+15), excellent, ancient and socket count → visual tier. */
-export function itemVisualTier(item: Item | null | undefined): ItemVisualTier {
+/**
+ * Level (+0…+15), excellent, ancient and socket count → visual tier. The level is the one the item is
+ * drawn at (`itemDrawLevel`); `ground` for a drop, whose model the original may swap by level.
+ */
+export function itemVisualTier(item: Item | null | undefined, ground = false): ItemVisualTier {
   const rawLevel = Math.max(0, Math.min(15, item?.lvl ?? 0));
-  const level = capItemLevel(rawLevel);
   const isExcellent = item?.isExcellent === true;
   // Ancient sets and sockets are later additions; a version without them has
   // no such item, so neither pass may draw (versions/<id> `features`).
@@ -119,6 +122,7 @@ export function itemVisualTier(item: Item | null | undefined): ItemVisualTier {
     : 0;
   const group = item?.group ?? -1;
   const num = item?.num ?? -1;
+  const level = capItemLevel(itemDrawLevel(group, num, rawLevel, ground));
 
   const key = `${group}:${num}|${level}|${isExcellent ? 1 : 0}|${
     isAncient ? 1 : 0

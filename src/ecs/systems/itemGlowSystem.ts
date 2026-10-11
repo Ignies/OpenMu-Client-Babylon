@@ -127,8 +127,8 @@ function itemSignature(item: Item | null | undefined): string {
   }:${item.socketCount ?? 0}`;
 }
 
-function stampMeshes(part: ModelObject, item: Item | null | undefined): void {
-  const tier = itemVisualTier(item);
+function stampMeshes(part: ModelObject, item: Item | null | undefined, ground = false): void {
+  const tier = itemVisualTier(item, ground);
   // A tier stamp is what wakes the GlowLayer up (sceneLook's layer gate).
   if (item && tier.active) requestGlowProbe();
   for (const mesh of part.getMeshes(true)) {
@@ -286,9 +286,9 @@ export const ItemGlowSystem: ISystemFactory = world => {
         if (state.stamped && !restamp) continue;
         if (!modelObject.Ready) continue;
 
-        const tier = itemVisualTier(droppedItem.item);
+        const tier = itemVisualTier(droppedItem.item, true);
         state.sparkleWanted = tier.isExcellent;
-        stampMeshes(modelObject, droppedItem.item);
+        stampMeshes(modelObject, droppedItem.item, true);
 
         snuff(state);
         if (lampsOn && wantsLamp(tier)) {
