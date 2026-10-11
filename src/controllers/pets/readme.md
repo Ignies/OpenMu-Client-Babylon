@@ -17,6 +17,9 @@ pets module (`src/modules/pets`) keeps the pet packets; the item numbers are
 ## How it works
 - `PETS` in `pets.ts` maps item number to `PetSpec`. Fenrir is one item with four looks picked by
   its option bits (`GetFenrirType`, `ZzzCharacter.cpp:98-108`).
+- A spec's `classicShadow` is the shadow `Draw_RenderObject` draws: the Dark Horse's mesh 8, every Fenrir,
+  the Dark Raven from the ground; the horns, the angel, the imp and the followers draw none. The cascades
+  take every pet as before.
 - `ecs/systems/petSystem.ts` spawns and moves the pets from these specs; `actors/playerObject.ts`
   renders the imp on bone 34; `animationSystem.ts` and `combat/skillClips.ts` pick rider clips from
   `mountKind`.
@@ -39,7 +42,8 @@ pets module (`src/modules/pets`) keeps the pet packets; the item numbers are
 - change the Fenrir look: `FENRIRS` and `fenrirShine` in `pets.ts`.
 
 ## Tests
-- none of its own; `actors/weaponClass.golden.test.ts` pins the rider clips per `MountKind`.
+- `pets.test.ts`: the Classic shadow of each pet (`classicShadow`).
+- `actors/weaponClass.golden.test.ts` pins the rider clips per `MountKind`.
 
 ## Notes
 

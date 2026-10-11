@@ -143,6 +143,16 @@ describe('the Classic blob shadow', () => {
     expect([shadowed('character'), shadowed('scenery'), shadowed('statue')]).toEqual([true, false, true]);
   });
 
+  // RenderBodyShadow's mesh range: only those meshes cast (the Dark Horse's, ZzzObject.cpp:790).
+  it('takes only the meshes it names into the shadow', () => {
+    const horse = new ModelObject(scene);
+    horse.ShadowMeshes = [1];
+    const gltf = body(3);
+    for (const mesh of gltf.mesh.getChildMeshes()) mesh.metadata = {};
+    horse.load(gltf);
+    expect(gltf.mesh.getChildMeshes().map(mesh => mesh.metadata.shadowSkip === true)).toEqual([true, false, true]);
+  });
+
   // BodyOrigin set to the terrain height before RenderBodyShadow (ZzzObject.cpp:1050-1053, GOBoid.cpp:1594-1596).
   it('folds from the ground under the object when it asks to', () => {
     const boid = new ModelObject(scene);

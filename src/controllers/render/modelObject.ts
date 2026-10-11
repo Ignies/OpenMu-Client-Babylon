@@ -475,6 +475,9 @@ export class ModelObject {
    */
   ShadowHiddenMesh = -1;
 
+  /** `RenderBodyShadow`'s mesh range: only these meshes cast (the Dark Horse's, ZzzObject.cpp:790). null = all. */
+  ShadowMeshes: readonly number[] | null = null;
+
   /**
    * `Models[type].StreamMesh` (ZzzBMD.cpp:990-1001): this mesh is drawn
    * textured but *unlit* - flat `BodyLight` instead of the per-vertex terrain
@@ -1545,7 +1548,18 @@ export class ModelObject {
 
   /** `ShadowHiddenMesh`: the flag `objectShadow.meshCasts` reads. */
   private applyShadowHiddenMesh() {
-    if (this.ShadowHiddenMesh < 0 || !this.gltf) return;
+    if (!this.gltf) return;
+
+    const only = this.ShadowMeshes;
+    if (only) {
+      const meshes = this.gltf.mesh.getChildMeshes(false);
+      for (let i = 0; i < meshes.length; i++) {
+        meshes[i].metadata ??= {};
+        if (!only.includes(i)) meshes[i].metadata.shadowSkip = true;
+      }
+    }
+
+    if (this.ShadowHiddenMesh < 0) return;
 
     const mesh = this.getMesh(this.ShadowHiddenMesh);
 
