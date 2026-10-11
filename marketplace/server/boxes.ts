@@ -36,6 +36,8 @@ export const NO_BOX: BoxState = { exists: false, money: 0, item: null };
 /** What the service needs from Postgres; tests hand in a map instead. */
 export interface Boxes {
   state(boxId: string): Promise<BoxState>;
+  /** Whether the character named is on the account, both spelt as OpenMU stores them. */
+  ownsCharacter(account: string, character: string): Promise<boolean>;
 }
 
 type BoxRow = {
@@ -89,6 +91,15 @@ export function postgresBoxes(url = DATABASE_URL): PostgresBoxes {
             }
           : null,
       };
+    },
+
+    async ownsCharacter(account: string, character: string): Promise<boolean> {
+      const rows = await sql`
+        SELECT 1 FROM data."Character" c
+        JOIN data."Account" a ON a."Id" = c."AccountId"
+        WHERE a."LoginName" = ${account} AND c."Name" = ${character}
+        LIMIT 1`;
+      return rows.length > 0;
     },
 
     async unowned() {

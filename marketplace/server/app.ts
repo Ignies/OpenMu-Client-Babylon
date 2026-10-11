@@ -386,6 +386,11 @@ export function createApp(deps: AppDeps): App {
         if (typeof character !== 'string' || !NAME_RE.test(character)) {
           return json({ error: 'Log in to a character first.' }, 400, cors);
         }
+        // No game server checks an advert, so the service asks OpenMU whose character it names:
+        // otherwise one could send buyers to whisper somebody else.
+        if (!(await boxes.ownsCharacter(auth.account, character))) {
+          return json({ error: 'That character is not on your account.' }, 403, cors);
+        }
         const slot = Number(body.slot);
         if (!Number.isInteger(slot) || slot < FIRST_BAG_SLOT || slot > LAST_BAG_SLOT) {
           return json({ error: 'That item is not in your bag.' }, 400, cors);

@@ -27,9 +27,10 @@ plugin ([../../../openmu/readme.md](../../../openmu/readme.md)).
 - The catalogue shows only rows the service calls `active` (`catalogue.ts`); the player's own rows
   in every state are on the My Listings tab.
 - Adverts to negotiate (ours): an item put up with no price and no escrow (`/offers`, the service's
-  `offers.ts`). It stays in the seller's bag; the advert names the character, never the account, and
-  lives three days (ten per account, one per bag slot). It is a row with `negotiate`, price 0, sorted
-  after any price; Whisper (`negotiate`) closes the window and opens the chat on a whisper to the
+  `offers.ts`). It stays in the seller's bag; the advert names the character, never the account (the
+  service checks in OpenMU's database that the character is on the caller's account), and lives
+  three days (ten per account, one per bag slot). It is a row with `negotiate`, price 0, sorted after
+  any price; Whisper (`negotiate`) closes the window and opens the chat on a whisper to the
   seller with the item linked (`gameBridge.ts`), and the deal is a trade in game, where both sides
   see the real item. A service from before the adverts answers 404 and the listings still load.
 - In a dev build (`APP_STAGE === 'dev'`) the store seeds fixtures (`mockListings.ts`); if the

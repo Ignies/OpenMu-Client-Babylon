@@ -30,8 +30,14 @@ const live = new Set<string>(['alice', 'bob', 'carol']);
 /** The service clock; starts at the real time so the tickets minted from it are live. */
 let clock = Date.now();
 
+/** OpenMU's characters by name, with the account each is on (`Alt` is alice's second one). */
+const accountOf = new Map([['alice', 'alice'], ['bob', 'bob'], ['carol', 'carol'], ['Alt', 'alice']]);
+
 const app = createApp({
-  boxes: { state: async id => boxes.get(id) ?? gone },
+  boxes: {
+    state: async id => boxes.get(id) ?? gone,
+    ownsCharacter: async (account, character) => accountOf.get(character) === account,
+  },
   secret: new TextEncoder().encode('escrow-secret'),
   listingFee: 100,
   commissionPercent: 5,
@@ -413,7 +419,7 @@ describe('reading', () => {
  */
 describe('a commit body without the page session', () => {
   const strict = createApp({
-    boxes: { state: async id => boxes.get(id) ?? gone },
+    boxes: { state: async id => boxes.get(id) ?? gone, ownsCharacter: async () => true },
     secret: new TextEncoder().encode('escrow-secret'),
     listingFee: 100,
     commissionPercent: 5,
@@ -492,6 +498,19 @@ describe('adverts to negotiate', () => {
     expect((await browseAs('alice')).map(o => o.id)).toEqual([second.body.offer.id]);
 
     expect((await advertise('dave', 20)).status).toBe(403);
+  });
+
+  // The character is the one field the browser names; OpenMU says whose it is.
+  test('names only a character on the seller\'s own account, as OpenMU spells it', async () => {
+    const alt = await call<{ offer: Advert }>('POST', '/offers', { ...as('alice'), character: 'Alt', slot: 15, item, category: 'weapons' });
+    expect(alt.status).toBe(201);
+    expect(alt.body.offer.sellerCharacter).toBe('Alt');
+
+    for (const character of ['bob', 'ALT', 'nobody']) {
+      const refused = await call<{ error: string }>('POST', '/offers', { ...as('alice'), character, slot: 16, item, category: 'weapons' });
+      expect(refused.status, character).toBe(403);
+    }
+    expect((await browseAs('bob')).map(o => o.sellerCharacter)).toEqual(['Alt']);
   });
 
   test('caps the adverts per account', async () => {
