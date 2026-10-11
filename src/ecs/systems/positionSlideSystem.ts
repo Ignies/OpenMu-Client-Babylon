@@ -49,7 +49,6 @@ export function startPositionSlide(body: Entity, x: number, y: number, z: number
   t.posOffset = offset;
 }
 
-// eslint-disable-next-line mobx/missing-observer -- a system factory, not a React component
 export const PositionSlideSystem: ISystemFactory = world => {
   function update(dt: number): void {
     for (const [body, s] of slides) {
