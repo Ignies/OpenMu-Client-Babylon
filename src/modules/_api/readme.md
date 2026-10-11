@@ -40,6 +40,8 @@ Not a module: no `module.ts`, like `_shared/`.
 - `download.ts` (streaming, phase 5): `prepareModules(entries, dropped, manifestUrl, { store, fetch })`
   gives `{ ready, notices }`; `cacheStore(open, origin)` (Cache Storage), `memoryStore()`,
   `sha256Hex(bytes)`, `MAX_MODULE_BYTES`; types `ModuleStore`, `StreamNotice`, `ReadyModule`.
+- `signature.ts`: `isFirstParty(entry, publicKey?)`, `signedText(entry)` (`id|version|sha256`),
+  `MODULE_SIGNING_KEY` (the build's `VITE_MODULE_SIGNING_KEY`), `toBase64Url` / `fromBase64Url`.
 - `i18n/`: the notices a skipped module shows (`moduleStream.*`).
 
 ## How it works
@@ -120,6 +122,14 @@ Phase 5 of [docs/module_streaming.md](../../../docs/module_streaming.md): the mo
   `<origin>/__mu_modules/<sha256>`, a URL nothing serves. A cached copy is hashed again on every read
   and downloaded again when it no longer matches. A page without Cache Storage (plain http, where
   browsers do not offer it) or a cache that fails keeps the modules in memory until the page reloads.
+- First party (`signature.ts`): `signature` is the owner's ed25519 signature over the text
+  `id|version|sha256`, checked with WebCrypto against `VITE_MODULE_SIGNING_KEY` (32 raw bytes,
+  base64url), built into the client. The signed text names the hash, and the bytes are checked against
+  the hash before anything loads, so the signature covers the file; signing the text rather than the
+  bytes also binds the id and the version, so a server cannot relabel a signed module under another
+  id or pass an old version off as a new one. No key built in, a key that is not 32 bytes, a browser
+  without ed25519, no signature or a bad one: not first party (the module is then third party).
+  Signing: `tools/modules/sign.ts`, outside the repository's reach.
 
 ## Depends on / used by
 - uses: `controllers/interface` (`keyBindings`, `windows`, `windowManager`, `module_window`), `i18n`,
@@ -169,3 +179,6 @@ Phase 5 of [docs/module_streaming.md](../../../docs/module_streaming.md): the mo
   answering (and a cached copy that no longer matches), a hash mismatch, an API range this client
   cannot serve (no download), a failed or oversized download, the manifest's dropped entries, list
   order past a skipped module; `cacheStore` by hash and a failing Cache Storage.
+- `signature.test.ts`: with a throwaway key pair made in memory: a good signature, a changed id,
+  version or hash, another key, none or a broken one, no key built in or a bad one; base64url.
+  `tools/modules/sign.test.ts` signs with node's crypto and checks with this client's `isFirstParty`.
