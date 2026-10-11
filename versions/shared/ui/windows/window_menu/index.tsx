@@ -5,7 +5,7 @@ import { observer } from 'mobx-react-lite';
 import { t, type TextKey } from '@/i18n';
 import { MuWindows } from '@/controllers/interface';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
-import { useWindowStackEntry } from '@/controllers/interface/components/mu_window';
+import { bottomBarScreenHeight, useWindowStackEntry } from '@/controllers/interface/components/mu_window';
 import { UI_STAGE_HEIGHT, UI_STAGE_WIDTH, useUiViewport } from '@/controllers/interface/components/ui_stage';
 import { playUiSound } from '@/controllers/sound/sfx';
 import { useEventBus } from '@/controllers/interface/hooks';
@@ -88,37 +88,42 @@ export const WindowMenu = observer(() => {
   const top = (height - UI_STAGE_HEIGHT * scale) / 2 + Y * scale;
 
   return (
-    <div
-      className="window-menu"
-      style={{ left, top, width: WIDTH, height: HEIGHT, transform: `scale(${scale})` }}
-      onPointerLeave={() => setSelected(-1)}
-    >
-      <MuSpriteFrame file="newui_msgbox_back.OZJ" width={WIDTH} height={HEIGHT} className="window-menu-art" />
-      <MuSpriteFrame file="newui_commamd01.OZT" width={WIDTH} height={45} className="window-menu-art" />
-      {Array.from({ length: MIDDLE_COUNT }, (_, i) => (
-        <MuSpriteFrame key={i} file="newui_commamd02.OZT" width={WIDTH} height={15} className="window-menu-art" style={{ top: 45 + i * 15 }} />
-      ))}
-      <MuSpriteFrame file="newui_commamd03.OZT" width={WIDTH} height={45} className="window-menu-art" style={{ top: BOTTOM_Y }} />
-      {LABELS.slice(1).map((_, i) => (
-        <MuSpriteFrame key={i} file="newui_commamd_Line.OZJ" width={82} height={2} className="window-menu-art" style={{ left: 15, top: 33 + i * ROW }} />
-      ))}
-      {selected >= 0 && (
-        <>
-          <MuSpriteFrame file="newui_arrow(L).OZT" width={6} height={9} className="window-menu-art" style={{ left: 16, top: ROW + selected * ROW }} />
-          <MuSpriteFrame file="newui_arrow(R).OZT" width={6} height={9} className="window-menu-art" style={{ left: 90, top: ROW + selected * ROW }} />
-        </>
-      )}
-      {LABELS.map((key, i) => (
-        <div
-          key={key}
-          className={`window-menu-row${selected === i ? ' selected' : ''}`}
-          style={{ top: ROW + i * ROW }}
-          onPointerEnter={() => setSelected(i)}
-          onClick={() => chooseWindowMenu(i)}
-        >
-          <span className="window-menu-label">{t(key)}</span>
-        </div>
-      ))}
-    </div>
+    <>
+      {/* `UpdateMouseEvent` returns false whatever the cursor is on: no click reaches the world or a
+          window under it while the menu is up; the main frame, drawn above (depth 10.6), still takes its own. */}
+      <div className="window-menu-shield" style={{ bottom: bottomBarScreenHeight() }} onContextMenu={e => e.preventDefault()} />
+      <div
+        className="window-menu"
+        style={{ left, top, width: WIDTH, height: HEIGHT, transform: `scale(${scale})` }}
+        onPointerLeave={() => setSelected(-1)}
+      >
+        <MuSpriteFrame file="newui_msgbox_back.OZJ" width={WIDTH} height={HEIGHT} className="window-menu-art" />
+        <MuSpriteFrame file="newui_commamd01.OZT" width={WIDTH} height={45} className="window-menu-art" />
+        {Array.from({ length: MIDDLE_COUNT }, (_, i) => (
+          <MuSpriteFrame key={i} file="newui_commamd02.OZT" width={WIDTH} height={15} className="window-menu-art" style={{ top: 45 + i * 15 }} />
+        ))}
+        <MuSpriteFrame file="newui_commamd03.OZT" width={WIDTH} height={45} className="window-menu-art" style={{ top: BOTTOM_Y }} />
+        {LABELS.slice(1).map((_, i) => (
+          <MuSpriteFrame key={i} file="newui_commamd_Line.OZJ" width={82} height={2} className="window-menu-art" style={{ left: 15, top: 33 + i * ROW }} />
+        ))}
+        {selected >= 0 && (
+          <>
+            <MuSpriteFrame file="newui_arrow(L).OZT" width={6} height={9} className="window-menu-art" style={{ left: 16, top: ROW + selected * ROW }} />
+            <MuSpriteFrame file="newui_arrow(R).OZT" width={6} height={9} className="window-menu-art" style={{ left: 90, top: ROW + selected * ROW }} />
+          </>
+        )}
+        {LABELS.map((key, i) => (
+          <div
+            key={key}
+            className={`window-menu-row${selected === i ? ' selected' : ''}`}
+            style={{ top: ROW + i * ROW }}
+            onPointerEnter={() => setSelected(i)}
+            onClick={() => chooseWindowMenu(i)}
+          >
+            <span className="window-menu-label">{t(key)}</span>
+          </div>
+        ))}
+      </div>
+    </>
   );
 });

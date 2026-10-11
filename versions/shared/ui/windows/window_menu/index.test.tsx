@@ -27,6 +27,19 @@ describe('the window menu', () => {
     expect(MuWindows.isOpen(WINDOW_MENU)).toBe(false);
   });
 
+  // SetBtnState(MAINFRAME_BTN_WINDOW, true) while it is up (NewUISystem.cpp:945-949, :1427-1430), and
+  // UpdateMouseEvent consumes every click under the main frame (NewUIWindowMenu.cpp:110-113).
+  it('keeps the main frame button pressed and shields the world while it is up', () => {
+    runInAction(() => MuWindows.setOpen(WINDOW_MENU, true));
+    expect(MAIN_FRAME_BUTTONS[4].pressed()).toBe(true);
+    expect(renderToStaticMarkup(<WindowMenu />)).toContain('window-menu-shield');
+    runInAction(() => MuWindows.setOpen(WINDOW_MENU, false));
+    expect(MAIN_FRAME_BUTTONS[4].pressed()).toBe(false);
+    runInAction(() => MuWindows.setOpen('inventory', true));
+    expect(MAIN_FRAME_BUTTONS[2].pressed()).toBe(true);
+    runInAction(() => MuWindows.setOpen('inventory', false));
+  });
+
   // UpdateMouseEvent (NewUIWindowMenu.cpp:60-110).
   it('opens the system menu, the guild and the map, closing itself; Move leaves it up', () => {
     const open = () => runInAction(() => MuWindows.setOpen(WINDOW_MENU, true));

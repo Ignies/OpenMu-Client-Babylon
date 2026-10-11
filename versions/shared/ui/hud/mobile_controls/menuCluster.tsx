@@ -39,7 +39,7 @@ export const MenuCluster = observer(() => {
             <ScaledFrame
               file={button.file}
               y={
-                (pressed ? MAIN_FRAME_BUTTON_FRAMES.down : MAIN_FRAME_BUTTON_FRAMES.up) *
+                (pressed || button.pressed() ? MAIN_FRAME_BUTTON_FRAMES.down : MAIN_FRAME_BUTTON_FRAMES.up) *
                 MAIN_FRAME_BUTTON_HEIGHT
               }
               width={MAIN_FRAME_BUTTON_WIDTH}

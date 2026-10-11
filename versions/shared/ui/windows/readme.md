@@ -47,7 +47,7 @@ One folder per in-game window. A window draws; its state and actions belong to i
 | `social_prompts` | social_prompts (330) | yes/no boxes for party, guild, war, alliance, friend | social, friends |
 | `economy_prompts` | trade_prompt (340), economy_prompts (350) | trade request; zen, pin and price prompts | economy, items, inventory |
 | `system_menu` | system_menu (365) | Escape's five-button box in the world (`CSystemMenuMsgBox`); `pregame.tsx`, the server list's and character screen's `CSysMenuWin` (drawn by `src/app/App.tsx`, opened by Escape, `openPregameMenu` in `ecs/systems/keyboardInputSystem.ts`, and the character screen's Menu button) | session |
-| `window_menu` | window_menu (362) | the main frame's fifth button (`CNewUIWindowMenu`): System, Help, Guild, Move, Map, Gens Info; Help and Gens do nothing yet | session, social |
+| `window_menu` | window_menu (362) | the main frame's fifth button and U (`CNewUIWindowMenu`): System, Help, Guild, Move, Map, Gens Info; Help and Gens do nothing yet. While up it shields every click above the main frame, whose button stays pressed (`pressed` in `hud/bottom_bar/mainFrameButtons.ts`) | session, social |
 | `events` | events (400) | event entry windows, Chaos Castle prompt, timers, results | events, items |
 | `balgass_entry` | balgass_entry (410) | third class quest entry boxes | quests |
 | `lahap` | lahap (415) | Lahap's jewel combination boxes (`CGemIntegration*MsgBox`) | chaos_mix |
