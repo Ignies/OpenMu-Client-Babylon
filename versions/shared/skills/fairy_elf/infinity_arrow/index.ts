@@ -1,7 +1,8 @@
 import { defineSkill } from '@/controllers/skills/define';
 import { RGBS, TEX } from '@/controllers/fx/recipes';
 import { ICE_MOTES } from '../_shared';
-import { flash, particles, seq } from '@/controllers/skills/visuals';
+import { flash, particles, seq, tiered } from '@/controllers/skills/visuals';
+import { infinityArrowRings } from './rings';
 
 import { A } from '@/controllers/combat/recipes';
 
@@ -10,8 +11,9 @@ export default defineSkill({
   name: "Infinity Arrow",
   // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
   lookAliases: [441],
-  // 77 Infinity Arrow: blue flash; aura persists via BUFF_VISUALS.
-  visual: { impact: seq(flash(TEX.flareBlue, RGBS.ice, 1.4, 0.6), particles({ recipe: ICE_MOTES, count: 16, height: 0.6 })) },
+  // 77 Infinity Arrow: MODEL_INFINITY_ARROW at the caster and its rings (WSclient.cpp:4882-4888, ./rings.ts).
+  // Skill effects: Enhanced keeps ours, a blue flash with ice motes.
+  visual: { impact: tiered(infinityArrowRings, seq(flash(TEX.flareBlue, RGBS.ice, 1.4, 0.6), particles({ recipe: ICE_MOTES, count: 16, height: 0.6 }))) },
   // 76 Plasma Storm: SOUND_FENRIR_SKILL plays with the bolts 14 ticks later (skillVisuals plasmaStorm).
   sound: 'Sound/infinityArrow', // Infinity Arrow
   delayMs: 200, // Infinity Arrow
