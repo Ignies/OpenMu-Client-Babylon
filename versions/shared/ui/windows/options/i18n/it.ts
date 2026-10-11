@@ -410,4 +410,15 @@ export default {
   'options.effectShedding': 'Meno effetti se rallenta',
   'options.help.effectShedding':
     "Finché i fotogrammi restano ben sotto l'obiettivo (il limite FPS, o 60), disegna meno effetti delle abilità degli altri giocatori nella folla. I tuoi si vedono sempre.",
+  'options.page.modules': 'Moduli',
+  'options.modules.title': 'Moduli trasmessi',
+  'options.help.modules': 'I moduli che questo mondo ti invia. Uno isolato funziona solo col tuo consenso; Dimentica cancella la tua risposta e la prossima volta che entri nel mondo ti verrà chiesto di nuovo.',
+  'options.modules.none': 'Questo mondo non invia moduli.',
+  'options.modules.firstParty': 'Ufficiale',
+  'options.modules.sandboxed': 'Isolato',
+  'options.modules.allowed': 'Consentito',
+  'options.modules.refused': 'Rifiutato',
+  'options.modules.notAsked': 'Non chiesto',
+  'options.modules.notNeeded': 'Non serve',
+  'options.modules.forget': 'Dimentica',
 } satisfies Partial<Record<keyof typeof en, string>>;

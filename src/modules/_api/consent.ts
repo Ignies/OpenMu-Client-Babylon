@@ -34,3 +34,18 @@ export async function askConsent(
   LocalStorage.save(KEY, JSON.stringify(book));
   return answer;
 }
+
+/** The stored answer for this module version on this world, or undefined when none is (the options window). */
+export function storedConsent(world: string, { id, version }: { id: string; version: string }): boolean | undefined {
+  const stored = read()[world]?.[`${id}@${version}`];
+  return typeof stored === 'boolean' ? stored : undefined;
+}
+
+/** Forgets the answer: the next entry into this world asks again. */
+export function forgetConsent(world: string, { id, version }: { id: string; version: string }): void {
+  const book = read();
+  if (!book[world]) return;
+  delete book[world][`${id}@${version}`];
+  if (!Object.keys(book[world]).length) delete book[world];
+  LocalStorage.save(KEY, JSON.stringify(book));
+}

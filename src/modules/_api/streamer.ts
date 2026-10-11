@@ -28,15 +28,22 @@ export type StreamerDeps = {
   inWorld(): Promise<void>;
   isBuiltIn(id: string): boolean;
   notify(notice: StreamNotice): void;
+  /** Called when `modules()` or `world()` changes (the options window follows it). */
+  changed?(): void;
 };
 
 type Loaded = { entry: StreamedModuleEntry; firstParty: boolean; unload(): void };
+
+/** One module of the current world's list, as the options window shows it. */
+export type ModuleStatus = { id: string; version: string; firstParty: boolean; loaded: boolean };
 
 const isDef = (v: unknown): v is StreamedDef =>
   typeof v === 'object' && v !== null && typeof (v as StreamedDef).install === 'function';
 
 export function createStreamer(deps: StreamerDeps) {
   const loaded = new Map<string, Loaded>();
+  /** The current world's modules that got as far as loading, in list order. */
+  const status = new Map<string, ModuleStatus>();
   let world: string | null = null;
   /** Bumped by every enter and leave: work started for an older one stops. */
   let generation = 0;
@@ -100,7 +107,20 @@ export function createStreamer(deps: StreamerDeps) {
   async function load(ready: ReadyModule, worldId: string, gen: number): Promise<Loaded | null> {
     const id = ready.entry.id;
     if (deps.isBuiltIn(id)) return notice('moduleStream.builtIn', id), null;
-    return (await deps.firstParty(ready.entry)) ? inProcess(ready, gen) : sandboxed(ready, worldId, gen);
+    const firstParty = await deps.firstParty(ready.entry);
+    const l = firstParty ? await inProcess(ready, gen) : await sandboxed(ready, worldId, gen);
+    if (gen === generation) {
+      status.set(id, { id, version: ready.entry.version, firstParty, loaded: !!l });
+      deps.changed?.();
+    }
+    return l;
+  }
+
+  /** Forgets every module (another world, or none). */
+  function clear(): void {
+    for (const id of [...loaded.keys()]) unload(id);
+    status.clear();
+    deps.changed?.();
   }
 
   return {
@@ -111,7 +131,7 @@ export function createStreamer(deps: StreamerDeps) {
     async enter(worldId: string, manifestUrl: string, entries: readonly StreamedModuleEntry[], dropped: readonly string[]): Promise<void> {
       const gen = ++generation;
       if (worldId !== world) {
-        for (const id of [...loaded.keys()]) unload(id);
+        clear();
         world = worldId;
       }
       const { ready, notices } = await deps.prepare(entries, dropped, manifestUrl);
@@ -119,6 +139,9 @@ export function createStreamer(deps: StreamerDeps) {
       notices.forEach(deps.notify);
       for (const [id, l] of [...loaded]) {
         if (!ready.some(r => r.entry.id === id && r.entry.sha256 === l.entry.sha256)) unload(id);
+      }
+      for (const id of [...status.keys()]) {
+        if (!ready.some(r => r.entry.id === id) && status.delete(id)) deps.changed?.();
       }
       if (!ready.length) return;
       await deps.inWorld();
@@ -136,8 +159,14 @@ export function createStreamer(deps: StreamerDeps) {
     leave(): void {
       generation++;
       world = null;
-      for (const id of [...loaded.keys()]) unload(id);
+      clear();
     },
+
+    /** The world whose modules these are, or null outside any. */
+    world: () => world,
+
+    /** The current world's modules that got as far as loading (refused ones are left out). */
+    modules: (): ModuleStatus[] => [...status.values()],
 
     loaded: () => [...loaded.values()].map(({ entry, firstParty }) => ({ id: entry.id, version: entry.version, firstParty })),
   };

@@ -123,7 +123,7 @@ export type ButtonRow = RowBase & {
 };
 
 type WidgetRow = RowBase & {
-  kind: 'presets' | 'language' | 'texturePack' | 'fullscreen' | 'fidelity';
+  kind: 'presets' | 'language' | 'texturePack' | 'fullscreen' | 'fidelity' | 'modules';
 };
 
 /** One registered improvement's check (`controllers/fidelity`). */
@@ -839,6 +839,22 @@ export const CATEGORIES: Category[] = [
                 helpKey: 'options.help.language',
               },
               toggle('englishItemNames', { needs: [{ kind: 'notEnglish' }] }),
+            ],
+          },
+        ],
+      },
+      // Ours: the current world's streamed modules and their consent (src/modules/_api, "Streaming").
+      {
+        id: 'modules',
+        labelKey: 'options.page.modules',
+        sections: [
+          {
+            rows: [
+              {
+                kind: 'modules',
+                labelKey: 'options.modules.title',
+                helpKey: 'options.help.modules',
+              },
             ],
           },
         ],

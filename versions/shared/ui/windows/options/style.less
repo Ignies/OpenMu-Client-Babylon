@@ -587,3 +587,40 @@
     text-shadow: @shadow;
   }
 }
+
+// The Modules page (modules.tsx): one line per streamed module, Forget beside its consent.
+.options-window-page {
+  .options-modules {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .options-module {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .options-module-text {
+    flex: 1;
+    min-width: 0;
+    font-size: 11px;
+    color: @text;
+    text-shadow: @shadow;
+  }
+
+  .options-module-name {
+    color: @gold;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .options-module-state,
+  .options-modules-none {
+    color: @gold-dim;
+    font-size: 11px;
+    text-shadow: @shadow;
+  }
+}

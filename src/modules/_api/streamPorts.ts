@@ -1,7 +1,7 @@
 // The streamer's side of the page (readme.md, "Streaming"): Cache Storage, the frames, the consent box,
 // the notices, and when the hero enters and leaves a world. Needs a browser; the logic is `streamer.ts`.
 import { createElement, useLayoutEffect, useRef, type ComponentType } from 'react';
-import { reaction, when } from 'mobx';
+import { observable, reaction, runInAction, when } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { t } from '@/i18n';
 import { AppState, UIState } from '@/controllers/interface/uiState';
@@ -11,9 +11,9 @@ import { onModulesListed, type StreamedModuleEntry } from '../servers/serverMani
 import { moduleHost } from './ports';
 import { cacheStore, memoryStore, prepareModules } from './download';
 import { isFirstParty } from './signature';
-import { askConsent } from './consent';
+import { askConsent, forgetConsent, storedConsent } from './consent';
 import { handOverPort, sandboxFrame, sandboxPage } from './sandbox';
-import { createStreamer, type Frame } from './streamer';
+import { createStreamer, type Frame, type ModuleStatus } from './streamer';
 
 /** How long a frame may take to load its page before the module counts as failed. */
 const FRAME_LOAD_MS = 10_000;
@@ -129,6 +129,11 @@ export function installModuleStreaming(isBuiltIn: (id: string) => boolean): () =
     inWorld: () => when(() => AppState.uiState === UIState.World),
     isBuiltIn,
     notify: ({ key, params }) => addNotification(t(key, params), 'error'),
+    changed: () =>
+      runInAction(() => {
+        StreamedModules.world = streamer.world();
+        StreamedModules.list = streamer.modules();
+      }),
   });
   const offList = onModulesListed((world, url, modules, dropped) => void streamer.enter(world, url, modules, dropped));
   const offLeave = reaction(
@@ -142,4 +147,25 @@ export function installModuleStreaming(isBuiltIn: (id: string) => boolean): () =
     offLeave();
     streamer.leave();
   };
+}
+
+/** The current world's streamed modules, for the options window (observable). */
+export const StreamedModules = observable({
+  world: null as string | null,
+  list: [] as ModuleStatus[],
+  /** Bumped when a stored consent is forgotten: the answers live in localStorage. */
+  revision: 0,
+});
+
+/** The player's stored answer for a module of the current world, or undefined (first party, never asked, forgotten). */
+export function moduleConsent(m: { id: string; version: string }): boolean | undefined {
+  void StreamedModules.revision;
+  return StreamedModules.world ? storedConsent(StreamedModules.world, m) : undefined;
+}
+
+/** Forgets the answer for a module of the current world: the next entry asks again. */
+export function forgetModuleConsent(m: { id: string; version: string }): void {
+  if (!StreamedModules.world) return;
+  forgetConsent(StreamedModules.world, m);
+  runInAction(() => StreamedModules.revision++);
 }

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { askConsent } from './consent';
+import { askConsent, forgetConsent, storedConsent } from './consent';
 
 const entry = { id: 'third', version: '1.0.0' };
 
@@ -45,5 +45,31 @@ describe('askConsent', () => {
     expect(await askConsent('list:7', entry, prompt)).toBe(true);
     expect(await askConsent('list:7', entry, prompt)).toBe(true);
     expect(prompt).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('storedConsent and forgetConsent', () => {
+  let data: Map<string, string>;
+  beforeEach(() => {
+    data = new Map();
+    vi.stubGlobal('localStorage', {
+      getItem: (k: string) => data.get(k) ?? null,
+      setItem: (k: string, v: string) => void data.set(k, v),
+      removeItem: (k: string) => void data.delete(k),
+    });
+  });
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('reads the stored answer, and forgetting it makes the next entry ask again', async () => {
+    expect(storedConsent('list:7', entry)).toBeUndefined();
+    await askConsent('list:7', entry, async () => false);
+    await askConsent('list:8', entry, async () => true);
+    expect(storedConsent('list:7', entry)).toBe(false);
+    forgetConsent('list:7', entry);
+    expect(storedConsent('list:7', entry)).toBeUndefined();
+    expect(storedConsent('list:8', entry)).toBe(true);
+    const prompt = vi.fn(async () => true);
+    expect(await askConsent('list:7', entry, prompt)).toBe(true);
+    expect(prompt).toHaveBeenCalledTimes(1);
   });
 });

@@ -339,4 +339,15 @@ export default {
   'options.effectShedding': '느릴 때 효과 줄이기',
   'options.help.effectShedding':
     '프레임이 목표(FPS 제한 또는 60)보다 크게 낮은 동안 군중 속 다른 플레이어의 스킬 효과를 덜 그립니다. 내 것은 항상 보입니다.',
+  'options.page.modules': '모듈',
+  'options.modules.title': '전송 모듈',
+  'options.help.modules': '이 월드가 보내는 모듈입니다. 샌드박스 모듈은 동의한 경우에만 실행됩니다. 잊기를 누르면 답이 지워지고 다음에 월드에 들어올 때 다시 묻습니다.',
+  'options.modules.none': '이 월드는 모듈을 보내지 않습니다.',
+  'options.modules.firstParty': '공식',
+  'options.modules.sandboxed': '샌드박스',
+  'options.modules.allowed': '허용',
+  'options.modules.refused': '거부',
+  'options.modules.notAsked': '묻지 않음',
+  'options.modules.notNeeded': '필요 없음',
+  'options.modules.forget': '잊기',
 } satisfies Partial<Record<keyof typeof en, string>>;

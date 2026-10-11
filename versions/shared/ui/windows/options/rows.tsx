@@ -22,6 +22,7 @@ import {
 } from './presets';
 import { LanguageSelect } from './languageSelect';
 import { TexturePackSelect } from './texturePackSelect';
+import { ModulesList } from './modules';
 import { blockerOf, type Blocker } from './gating';
 import { rowId, type ButtonRow, type Row } from './catalogue';
 import { Checkbox, FitText, OptionsButton, Slider, Stepper } from './controls';
@@ -188,6 +189,9 @@ const Control = observer(
             bare
           />
         );
+
+      case 'modules':
+        return <ModulesList />;
 
       case 'texturePack':
         return (

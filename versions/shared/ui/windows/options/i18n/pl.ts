@@ -403,4 +403,15 @@ export default {
   'options.effectShedding': 'Mniej efektów przy spowolnieniu',
   'options.help.effectShedding':
     'Dopóki liczba klatek jest wyraźnie poniżej celu (limit FPS albo 60), rysuje mniej efektów umiejętności innych graczy w tłumie. Twoje są zawsze widoczne.',
+  'options.page.modules': 'Moduły',
+  'options.modules.title': 'Moduły przesyłane',
+  'options.help.modules': 'Moduły, które ten świat ci przesyła. Moduł w piaskownicy działa tylko za twoją zgodą; Zapomnij usuwa odpowiedź, więc przy następnym wejściu do świata zostaniesz zapytany ponownie.',
+  'options.modules.none': 'Ten świat nie przesyła modułów.',
+  'options.modules.firstParty': 'Oficjalny',
+  'options.modules.sandboxed': 'Piaskownica',
+  'options.modules.allowed': 'Dozwolony',
+  'options.modules.refused': 'Odrzucony',
+  'options.modules.notAsked': 'Nie pytano',
+  'options.modules.notNeeded': 'Niepotrzebna',
+  'options.modules.forget': 'Zapomnij',
 } satisfies Partial<Record<keyof typeof en, string>>;

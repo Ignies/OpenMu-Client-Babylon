@@ -238,3 +238,23 @@ describe('the streamer', () => {
     expect(s.notices).toEqual([]);
   });
 });
+
+describe('what the streamer tells the options window', () => {
+  it('lists the world\'s modules: how each runs and whether it loaded, and says when that changes', async () => {
+    const changed = vi.fn();
+    const s = await setup({ first: moduleCode('first'), third: moduleCode('third') }, { changed });
+    s.consent.mockResolvedValue(false);
+    await s.streamer.enter(WORLD, MANIFEST, [await s.entry('first', true), await s.entry('third', false)], []);
+    expect(s.streamer.world()).toBe(WORLD);
+    expect(s.streamer.modules()).toEqual([
+      { id: 'first', version: '1.0.0', firstParty: true, loaded: true },
+      { id: 'third', version: '1.0.0', firstParty: false, loaded: false },
+    ]);
+    expect(changed).toHaveBeenCalled();
+    changed.mockClear();
+    s.streamer.leave();
+    expect(s.streamer.world()).toBeNull();
+    expect(s.streamer.modules()).toEqual([]);
+    expect(changed).toHaveBeenCalled();
+  });
+});

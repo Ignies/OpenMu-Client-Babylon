@@ -336,4 +336,15 @@ export default {
   'options.effectShedding': '重いときはエフェクトを減らす',
   'options.help.effectShedding':
     'フレームレートが目標（FPS上限、または60）を大きく下回っている間、人混みで他のプレイヤーのスキルエフェクトを減らします。自分のものは常に表示されます。',
+  'options.page.modules': 'モジュール',
+  'options.modules.title': '配信モジュール',
+  'options.help.modules': 'このワールドが配信するモジュールです。サンドボックスのモジュールは同意した場合のみ動きます。「忘れる」で回答を消すと、次にワールドへ入ったときに再び確認されます。',
+  'options.modules.none': 'このワールドはモジュールを配信していません。',
+  'options.modules.firstParty': '公式',
+  'options.modules.sandboxed': 'サンドボックス',
+  'options.modules.allowed': '許可',
+  'options.modules.refused': '拒否',
+  'options.modules.notAsked': '未確認',
+  'options.modules.notNeeded': '不要',
+  'options.modules.forget': '忘れる',
 } satisfies Partial<Record<keyof typeof en, string>>;

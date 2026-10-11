@@ -439,4 +439,15 @@ export default {
   'options.effectShedding': 'Weniger Effekte bei Ruckeln',
   'options.help.effectShedding':
     'Solange die Bildrate deutlich unter ihrem Ziel bleibt (FPS-Grenze oder 60), werden in einer Menge weniger Fertigkeitseffekte anderer Spieler gezeichnet. Deine bleiben immer.',
+  'options.page.modules': 'Module',
+  'options.modules.title': 'Gestreamte Module',
+  'options.help.modules': 'Die Module, die diese Welt dir sendet. Ein Modul in der Sandbox läuft nur mit deiner Zustimmung; Vergessen löscht deine Antwort, beim nächsten Betreten der Welt wirst du erneut gefragt.',
+  'options.modules.none': 'Diese Welt sendet keine Module.',
+  'options.modules.firstParty': 'Erstanbieter',
+  'options.modules.sandboxed': 'Sandbox',
+  'options.modules.allowed': 'Erlaubt',
+  'options.modules.refused': 'Abgelehnt',
+  'options.modules.notAsked': 'Nicht gefragt',
+  'options.modules.notNeeded': 'Nicht nötig',
+  'options.modules.forget': 'Vergessen',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -444,4 +444,15 @@ export default {
   'options.effectShedding': 'Menos efectos si va lento',
   'options.help.effectShedding':
     'Mientras los FPS se quedan bastante por debajo de su objetivo (el límite de FPS, o 60), dibuja menos efectos de habilidades de otros jugadores en una multitud. Los tuyos siempre se ven.',
+  'options.page.modules': 'Módulos',
+  'options.modules.title': 'Módulos transmitidos',
+  'options.help.modules': 'Los módulos que este mundo te envía. Uno aislado solo se ejecuta con tu permiso; Olvidar borra tu respuesta y la próxima vez que entres al mundo se te preguntará de nuevo.',
+  'options.modules.none': 'Este mundo no envía módulos.',
+  'options.modules.firstParty': 'Propio',
+  'options.modules.sandboxed': 'Aislado',
+  'options.modules.allowed': 'Permitido',
+  'options.modules.refused': 'Rechazado',
+  'options.modules.notAsked': 'Sin preguntar',
+  'options.modules.notNeeded': 'No hace falta',
+  'options.modules.forget': 'Olvidar',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -43,11 +43,12 @@ Not a module: no `module.ts`, like `_shared/`.
   `sha256Hex(bytes)`, `MAX_MODULE_BYTES`; types `ModuleStore`, `StreamNotice`, `ReadyModule`.
 - `signature.ts`: `isFirstParty(entry, publicKey?)`, `signedText(entry)` (`id|version|sha256`),
   `MODULE_SIGNING_KEY` (the build's `VITE_MODULE_SIGNING_KEY`), `toBase64Url` / `fromBase64Url`.
-- `streamer.ts`: `createStreamer(deps)` gives `{ enter(world, manifestUrl, entries, dropped), leave(),
-  loaded() }`; types `StreamerDeps`, `Frame`, `Streamer`.
+- `streamer.ts`: `createStreamer(deps)` gives `{ enter(world, manifestUrl, entries, dropped), leave(), world(), modules(),
+  loaded() }`; types `StreamerDeps`, `Frame`, `Streamer`, `ModuleStatus`.
 - `streamPorts.ts`: `installModuleStreaming(isBuiltIn)` (the real deps and the wiring; returns the
-  uninstall).
-- `consent.ts`: `askConsent(world, entry, prompt)`.
+  uninstall); `StreamedModules` (observable: the world and its `modules()`), `moduleConsent(m)`,
+  `forgetModuleConsent(m)` for the options window's Modules page.
+- `consent.ts`: `askConsent(world, entry, prompt)`, `storedConsent(world, entry)`, `forgetConsent(world, entry)`.
 - `streamed.ts` (imports only `contract.ts` and `guest.ts`): `defineStreamedModule({ api, install })`,
   a streamed module's default export; type `StreamedModule`.
 - `i18n/`: the notices a skipped module shows (`moduleStream.*`).
@@ -159,6 +160,10 @@ Phase 5 of [docs/module_streaming.md](../../../docs/module_streaming.md): the mo
   window's content area is a slot the frame is placed over while the window is open (moving an
   iframe in the page would reload it). Unloading removes the frame, stops the serving and disposes.
   Every refusal is a notice; nothing of a refused module runs.
+- Options > Interface > Modules (`versions/shared/ui/windows/options/modules.tsx`) lists the current
+  world's modules that got as far as loading (`modules()`, mirrored in `StreamedModules` through the
+  streamer's `changed`): version, first party or sandboxed, the stored consent. Forget clears that
+  answer, so the next entry into the world asks again; a module already running stays until then.
 - The file format (`streamed.ts`): an ES module whose default export is `defineStreamedModule({ api,
   install })`. `install(api, where)` awaits every call, so the same code runs in process and over
   messages; `where` is `'page'` (a window may `draw` a component) or `'frame'` (its own document is

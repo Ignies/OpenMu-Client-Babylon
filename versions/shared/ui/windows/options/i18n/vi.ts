@@ -396,4 +396,15 @@ export default {
   'options.effectShedding': 'Ít hiệu ứng hơn khi chậm',
   'options.help.effectShedding':
     'Khi tốc độ khung hình thấp hơn nhiều so với mục tiêu (giới hạn FPS, hoặc 60), vẽ ít hiệu ứng kỹ năng của người chơi khác trong đám đông hơn. Của bạn luôn hiện.',
+  'options.page.modules': 'Mô-đun',
+  'options.modules.title': 'Mô-đun được gửi',
+  'options.help.modules': 'Các mô-đun thế giới này gửi cho bạn. Mô-đun hộp cát chỉ chạy khi bạn đồng ý; Quên sẽ xóa câu trả lời, lần sau vào thế giới bạn sẽ được hỏi lại.',
+  'options.modules.none': 'Thế giới này không gửi mô-đun nào.',
+  'options.modules.firstParty': 'Chính thức',
+  'options.modules.sandboxed': 'Hộp cát',
+  'options.modules.allowed': 'Đã cho phép',
+  'options.modules.refused': 'Đã từ chối',
+  'options.modules.notAsked': 'Chưa hỏi',
+  'options.modules.notNeeded': 'Không cần',
+  'options.modules.forget': 'Quên',
 } satisfies Partial<Record<keyof typeof en, string>>;

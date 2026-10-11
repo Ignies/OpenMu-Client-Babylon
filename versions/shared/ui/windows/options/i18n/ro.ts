@@ -412,4 +412,15 @@ export default {
   'options.effectShedding': 'Mai puține efecte când merge greu',
   'options.help.effectShedding':
     'Cât timp cadrele rămân mult sub țintă (limita FPS sau 60), desenează mai puține efecte ale abilităților altor jucători în mulțime. Ale tale se văd mereu.',
+  'options.page.modules': 'Module',
+  'options.modules.title': 'Module transmise',
+  'options.help.modules': 'Modulele pe care ți le trimite această lume. Unul izolat rulează doar cu acordul tău; Uită îți șterge răspunsul, iar la următoarea intrare în lume vei fi întrebat din nou.',
+  'options.modules.none': 'Această lume nu trimite module.',
+  'options.modules.firstParty': 'Oficial',
+  'options.modules.sandboxed': 'Izolat',
+  'options.modules.allowed': 'Permis',
+  'options.modules.refused': 'Refuzat',
+  'options.modules.notAsked': 'Neîntrebat',
+  'options.modules.notNeeded': 'Nu e nevoie',
+  'options.modules.forget': 'Uită',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -435,4 +435,15 @@ export default {
   'options.effectShedding': 'Меньше эффектов при тормозах',
   'options.help.effectShedding':
     'Пока частота кадров заметно ниже цели (ограничение FPS или 60), в толпе рисуется меньше эффектов умений других игроков. Ваши видны всегда.',
+  'options.page.modules': 'Модули',
+  'options.modules.title': 'Загружаемые модули',
+  'options.help.modules': 'Модули, которые присылает этот мир. Модуль в песочнице работает только с вашего согласия; «Забыть» стирает ответ, и при следующем входе в мир вас спросят снова.',
+  'options.modules.none': 'Этот мир не присылает модулей.',
+  'options.modules.firstParty': 'Официальный',
+  'options.modules.sandboxed': 'В песочнице',
+  'options.modules.allowed': 'Разрешён',
+  'options.modules.refused': 'Отклонён',
+  'options.modules.notAsked': 'Не спрашивали',
+  'options.modules.notNeeded': 'Не нужно',
+  'options.modules.forget': 'Забыть',
 } satisfies Partial<Record<keyof typeof en, string>>;

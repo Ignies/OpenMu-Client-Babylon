@@ -434,6 +434,17 @@ const en = {
   'options.effectShedding': 'Fewer effects when slow',
   'options.help.effectShedding':
     "While the frame rate stays well under its target (the FPS limit, or 60), draws fewer of other players' skill effects in a crowd. Yours always show.",
+  'options.page.modules': 'Modules',
+  'options.modules.title': 'Streamed modules',
+  'options.help.modules': 'The modules this world streams to you. A sandboxed one runs only with your consent; Forget clears your answer, so the next time you enter the world you are asked again.',
+  'options.modules.none': 'This world streams no modules.',
+  'options.modules.firstParty': 'First party',
+  'options.modules.sandboxed': 'Sandboxed',
+  'options.modules.allowed': 'Allowed',
+  'options.modules.refused': 'Refused',
+  'options.modules.notAsked': 'Not asked',
+  'options.modules.notNeeded': 'Not needed',
+  'options.modules.forget': 'Forget',
 };
 
 export default en;
