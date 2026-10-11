@@ -6,7 +6,7 @@
  "@typescript-eslint/no-unnecessary-type-constraint": 2,
  "@typescript-eslint/no-unused-expressions": 19,
  "@typescript-eslint/no-wrapper-object-types": 1,
- "mobx/missing-observer": 218,
+ "mobx/missing-observer": 217,
  "no-case-declarations": 1,
  "no-console": 44,
  "no-control-regex": 1,
