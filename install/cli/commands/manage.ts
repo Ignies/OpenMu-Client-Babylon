@@ -7,6 +7,7 @@ import { Stack } from '../docker';
 import { must, run } from '../exec';
 import { checks } from '../health';
 import { isWindows, type Paths } from '../paths';
+import { mailOn } from '../render/mail';
 import { saveState } from '../state';
 import { ui, pc } from '../ui';
 import { buildAll, logFile, preflight } from './install';
@@ -29,6 +30,8 @@ export async function configure(c: Config, p: Paths): Promise<void> {
     if (r.code !== 0) throw new Error(`Could not change the database password: ${r.err}`);
   }
   saveState(next, p);
+  // Turned off: its containers go (the old config still names the profile); the mail volumes stay.
+  if (mailOn(c) && !mailOn(next)) await new Stack(c, p).compose(['rm', '-sf', 'mailserver', 'webmail']);
   if (needsBuild(c, next)) await buildAll(stack, logFile(p, 'config'));
   await ui.task('Applying', async () => {
     await stack.up();

@@ -120,6 +120,47 @@ services:
       default:
         ipv4_address: 172.30.77.10
 
+  # The optional mail server and webmail (`mu config` > Address): nothing below starts without the mail profile.
+  mailserver:
+    image: mailserver/docker-mailserver:16.0.1
+    profiles: [mail]
+    container_name: mu-mailserver
+    hostname: ${MU_MAIL_HOST}
+    restart: unless-stopped
+    env_file: ${MU_STATE}/env/mailserver.env
+    # Waits for the certificate Caddy gets for mail.<domain>; healthy while it waits, so `up --wait` is not stuck on DNS.
+    command: ["sh", "-c", "until [ -f \"$$SSL_CERT_PATH\" ]; do sleep 15; done; exec supervisord -c /etc/supervisor/supervisord.conf"]
+    healthcheck:
+      test: ["CMD-SHELL", "[ ! -f \"$$SSL_CERT_PATH\" ] || dms-healthcheck"]
+      start_period: 60s
+    ports:
+      - "25:25"
+      - "465:465"
+      - "587:587"
+      - "993:993"
+    volumes:
+      - mail-data:/var/mail
+      - mail-state:/var/mail-state
+      - mail-logs:/var/log/mail
+      - ${MU_STATE}/mail:/tmp/docker-mailserver
+      - caddy-data:/caddy:ro
+    stop_grace_period: 1m
+    networks:
+      default:
+        # The webmail dials the public name, so the certificate matches.
+        aliases:
+          - ${MU_MAIL_HOST}
+
+  webmail:
+    image: roundcube/roundcubemail:1.7.4-apache
+    profiles: [mail]
+    container_name: mu-webmail
+    restart: unless-stopped
+    env_file: ${MU_STATE}/env/webmail.env
+    volumes:
+      - webmail-db:/var/roundcube/db
+    depends_on: [mailserver]
+
 networks:
   default:
     ipam:
@@ -131,3 +172,7 @@ volumes:
   openmu-logs:
   caddy-data:
   caddy-config:
+  mail-data:
+  mail-state:
+  mail-logs:
+  webmail-db:

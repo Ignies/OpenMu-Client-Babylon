@@ -20,7 +20,7 @@ export function domain(value: string): string | undefined {
   if (!/^(?=.{4,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(value.toLowerCase())) {
     return 'Enter a domain like example.com (no https://, no play.).';
   }
-  if (/^(play|ws|api|register|admin)\./i.test(value)) return 'Enter the bare domain; play., ws., api., register. and admin. are added for you.';
+  if (/^(play|ws|api|register|admin|mail)\./i.test(value)) return 'Enter the bare domain; play., ws., api., register., admin. (and mail.) are added for you.';
 }
 
 export function ipv4(value: string): string | undefined {

@@ -59,6 +59,14 @@ describe('config file', () => {
     expect(envToConfig({}).modulesOff).toBe('');
   });
 
+  it('stores the mail server as MU_MAIL and its admin mailbox hash as MU_MAIL_ADMIN_HASH, off unless set', () => {
+    const env = configToEnv({ ...config, mail: true, mailAdminHash: '$2b$12$x' });
+    expect(env.MU_MAIL).toBe('on');
+    expect(env.MU_MAIL_ADMIN_HASH).toBe('$2b$12$x');
+    expect(envToConfig({}).mail).toBe(false);
+    expect(envToConfig({}).mailAdminHash).toBe('');
+  });
+
   it('fills what an older file does not have from the defaults', () => {
     expect(envToConfig({ MU_DOMAIN: 'old.net' })).toEqual({ ...DEFAULTS, domain: 'old.net' });
   });
@@ -85,6 +93,7 @@ describe('answers', () => {
     expect(check.domain('mu.example.co.uk')).toBeUndefined();
     expect(check.domain('https://example.com')).toBeDefined();
     expect(check.domain('play.example.com')).toMatch(/bare/);
+    expect(check.domain('mail.example.com')).toMatch(/bare/);
   });
 
   it('checks the rest', () => {
