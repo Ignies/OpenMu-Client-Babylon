@@ -234,4 +234,5 @@ export default {
   'item.pieces': '{count} / {max}',
   'msgWin.confirmMix': '%s\nДа комбинирам ли предметите?',
   'msgWin.exitCountdown': 'Ще излезете от играта след {seconds} секунди.',
+  'msgWin.confirmModule': 'Този свят иска да стартира модула {id} {version}.\nТой работи отделно от играта и не може да чете профилите ти.\nДа го разреша ли?',
 } satisfies Partial<Record<keyof typeof en, string>>;

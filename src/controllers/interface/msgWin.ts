@@ -24,6 +24,7 @@ export enum MsgWinCode {
   ConfirmAddPoints = 'MESSAGE_CONFIRM_ADD_POINTS',
   ConfirmMix = 'MESSAGE_CONFIRM_MIX',
   GameEndCountdown = 'MESSAGE_GAME_END_COUNTDOWN',
+  ConfirmModule = 'MESSAGE_CONFIRM_MODULE',
 }
 
 type MsgWinMessage = {
@@ -102,6 +103,12 @@ export const MSG_WIN_MESSAGES: Record<MsgWinCode, MsgWinMessage> = {
     type: MsgWinType.None,
     textId: 380,
     textKey: 'msgWin.exitCountdown',
+  },
+  // Ours: a world's third-party module asks to run (src/modules/_api, "Streaming").
+  [MsgWinCode.ConfirmModule]: {
+    type: MsgWinType.Both,
+    textId: -1,
+    textKey: 'msgWin.confirmModule',
   },
 };
 

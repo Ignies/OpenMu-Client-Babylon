@@ -6,6 +6,7 @@ import { defineModule, installModules, moduleOn } from '../module';
 import {
   ORIGINAL_SETTINGS,
   loadServerManifest,
+  onModulesListed,
   parseServerManifest,
   resetServerManifests,
   serverOffersLoginTokens,
@@ -209,6 +210,22 @@ describe('the server settings', () => {
     serve('{"version":1,"settings":{}}');
     await loadServerManifest(listed);
     expect(moduleOn('manifest_events')).toBe(true);
+  });
+
+  it('hands the fetched module list to the streamer, and an empty one when the fetch fails', async () => {
+    const heard: unknown[] = [];
+    const off = onModulesListed((world, url, modules, dropped) => heard.push([world, url, modules, dropped]));
+    const entry = { id: 'example', version: '1.0.0', api: '^1.1', url: 'example.js', sha256: 'a'.repeat(64) };
+    serve(JSON.stringify({ version: 1, settings: {}, modules: [entry, { id: 'bad' }] }));
+    await loadServerManifest(listed);
+    serve('gone', 404);
+    await loadServerManifest(listed);
+    off();
+    await loadServerManifest(listed);
+    expect(heard).toEqual([
+      [listed.id, 'https://ws.ignies.net/server.json', [entry], ['bad']],
+      [listed.id, 'https://ws.ignies.net/server.json', [], []],
+    ]);
   });
 
   it('offers login tokens only where the world says so', async () => {

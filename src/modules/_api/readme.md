@@ -36,12 +36,19 @@ Not a module: no `module.ts`, like `_shared/`.
 - `dispatcher.ts`: `serveModule(port, api)`, the client's end; returns the stop.
 - `guest.ts`: `connectModule(port)`, the module's end: a `RemoteModuleApi`.
 - `sandbox.ts`: `sandboxFrame(source)` (the iframe's attributes), `handOverPort(frameWindow)`,
-  `HAND_OVER`.
+  `HAND_OVER`, `sandboxPage(code)` (the page a downloaded module runs in).
 - `download.ts` (streaming, phase 5): `prepareModules(entries, dropped, manifestUrl, { store, fetch })`
   gives `{ ready, notices }`; `cacheStore(open, origin)` (Cache Storage), `memoryStore()`,
   `sha256Hex(bytes)`, `MAX_MODULE_BYTES`; types `ModuleStore`, `StreamNotice`, `ReadyModule`.
 - `signature.ts`: `isFirstParty(entry, publicKey?)`, `signedText(entry)` (`id|version|sha256`),
   `MODULE_SIGNING_KEY` (the build's `VITE_MODULE_SIGNING_KEY`), `toBase64Url` / `fromBase64Url`.
+- `streamer.ts`: `createStreamer(deps)` gives `{ enter(world, manifestUrl, entries, dropped), leave(),
+  loaded() }`; types `StreamerDeps`, `Frame`, `Streamer`.
+- `streamPorts.ts`: `installModuleStreaming(isBuiltIn)` (the real deps and the wiring; returns the
+  uninstall).
+- `consent.ts`: `askConsent(world, entry, prompt)`.
+- `streamed.ts` (imports only `contract.ts` and `guest.ts`): `defineStreamedModule({ api, install })`,
+  a streamed module's default export; type `StreamedModule`.
 - `i18n/`: the notices a skipped module shows (`moduleStream.*`).
 
 ## How it works
@@ -65,8 +72,8 @@ Not a module: no `module.ts`, like `_shared/`.
   `Session.sendToGS` for a module's frames. Nothing subscribes before a module asks, so the built-in
   listeners are unchanged.
 - `src/app/logic.ts` hands `moduleHost.api` to `installModules` and then calls
-  `installModuleRouter()` (the wiring). It cannot live in `module.ts`: every module imports that
-  file, and `module.ts` -> `ports.ts` -> `hero` -> `session` -> `servers/serverConfig` ->
+  `installModuleRouter()` and `installModuleStreaming(isBuiltIn)` (the wiring). It cannot live in
+  `module.ts`: every module imports that file, and `module.ts` -> `ports.ts` -> `hero` -> `session` -> `servers/serverConfig` ->
   `servers/serverManifest` -> `module.ts` would be a cycle. Built-in modules ignore the API they get.
 - Messages: calls `{ v, id, call, args }`, answers `{ id, result }` or `{ id, error }`, events
   `{ event: 'mapChange', data: { map } }` and `{ event: 'packet', data: { payload } }`. Over the wire
@@ -82,8 +89,9 @@ Not a module: no `module.ts`, like `_shared/`.
   `referrerpolicy="no-referrer"`. `handOverPort` posts `HAND_OVER` with the module's end of a fresh
   `MessageChannel` to the frame's window (`'*'`: an opaque origin has no name; the window is the
   target) and returns the client's end for `serveModule`. The module's page takes `ports[0]` of
-  that message and calls `connectModule`. Mounting the frame in the world page is phase 5.
-- No `eval`, `new Function` or dynamic `import()` of a URL here: loading code is phase 5.
+  that message and calls `connectModule` (`sandboxPage` does it for a streamed module).
+- No `eval` or `new Function` anywhere; code loads only in `streamPorts.ts` (a first-party module's
+  checked bytes through a `blob:` URL) and inside a frame (`sandboxPage`).
 
 ### Packets
 - The wire (`packetWire.ts`): `C1 len E8 idLength id payload`, or `C2 lenHigh lenLow E8 idLength id
@@ -130,9 +138,33 @@ Phase 5 of [docs/module_streaming.md](../../../docs/module_streaming.md): the mo
   id or pass an old version off as a new one. No key built in, a key that is not 32 bytes, a browser
   without ed25519, no signature or a bad one: not first party (the module is then third party).
   Signing: `tools/modules/sign.ts`, outside the repository's reach.
+- When (`streamPorts.ts`): `servers/serverManifest.ts` hands each world's list to the streamer as its
+  fetch answers (`onModulesListed`; a failed fetch lists none, a cached copy never loads code). The
+  download starts at once; loading waits for the hero to be in the world (`UIState.World`), where the
+  consent box can show and the server reads module packets. Going back to the server choice
+  (`UIState.Servers` or `Preloader`) unloads everything; the character list does not. A new list
+  for the same world keeps an unchanged module (same id and hash), unloads a removed or changed one
+  and loads a new one; another world starts over. Work begun for a list that is no longer current
+  stops (a generation counter), so a slow download never loads into the wrong world.
+- Loading (`streamer.ts`), in list order: an id a built-in module has is refused. First party: the
+  checked bytes run in the page as a module (`import()` of a `blob:` URL); its default export must
+  have `install`, may not claim `core` and must ask for an API range this client serves; `install`
+  gets `moduleHost.api(id)`. One that throws is disposed (its windows and listeners taken back).
+  Third party: the player's consent first (`consent.ts`: asked once per world per module version,
+  Yes and No remembered in localStorage under `mu_module_consent`; a box that went without an answer
+  is asked again next time), then its frame (`sandboxPage` in a `sandbox="allow-scripts"` iframe in a
+  fixed layer over the game), served by `serveModule`. A window it registers draws the frame: the
+  window's content area is a slot the frame is placed over while the window is open (moving an
+  iframe in the page would reload it). Unloading removes the frame, stops the serving and disposes.
+  Every refusal is a notice; nothing of a refused module runs.
+- The file format (`streamed.ts`): an ES module whose default export is `defineStreamedModule({ api,
+  install })`. `install` awaits every call, so the same code runs in process and over messages; the
+  export carries `connect` (`guest.ts`), which the frame's page calls with its port. A module bundles
+  `streamed.ts` and what it imports into one file.
 
 ## Depends on / used by
-- uses: `controllers/interface` (`keyBindings`, `windows`, `windowManager`, `module_window`), `i18n`,
+- uses: `controllers/interface` (`keyBindings`, `windows`, `windowManager`, `module_window`, `msgWin`,
+  `uiState`), `i18n`, `core/localStorage`, `chat/notify` (the notices),
   `controllers/sound`, `controllers/fx`, `controllers/render/babylon/exports`, `ecs/current`,
   `core/eventBus` (the `ModulePacket` event), the `hero`, `session` and `warp` doors, `servers` (the
   streamed entry type). `contract.ts`,
@@ -182,3 +214,11 @@ Phase 5 of [docs/module_streaming.md](../../../docs/module_streaming.md): the mo
 - `signature.test.ts`: with a throwaway key pair made in memory: a good signature, a changed id,
   version or hash, another key, none or a broken one, no key built in or a bad one; base64url.
   `tools/modules/sign.test.ts` signs with node's crypto and checks with this client's `isFirstParty`.
+- `streamer.test.ts`: over a recording game, modules served by a fake fetch, a throwaway key and a
+  fake frame (the module's code over a real `MessageChannel`): signed in process without asking,
+  unsigned in its frame after consent (its window drawing the frame), a bad signature or no key built
+  in as third party, consent refused, `core` and a built-in's name refused, a failing install taken
+  back, the download's notices, leaving (windows, listeners and frames gone), a new list (kept,
+  reloaded, dropped), another world, leaving before the hero is in the world, a world that lists none.
+- `consent.test.ts`: once per world and version, both answers remembered, an unanswered box asked
+  again, no storage.

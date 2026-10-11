@@ -213,6 +213,18 @@ async function fetchManifest(url: string): Promise<ServerManifest | null> {
   }
 }
 
+type ModulesListener = (world: string, manifestUrl: string, modules: readonly StreamedModuleEntry[], dropped: readonly string[]) => void;
+const modulesListeners = new Set<ModulesListener>();
+
+/**
+ * Runs `fn` with each world's module list as its fetch answers (`_api/streamPorts.ts`, the streamer);
+ * a failed fetch lists none. The cached copy never does: code loads only from a fresh list. Returns the end.
+ */
+export function onModulesListed(fn: ModulesListener): () => void {
+  modulesListeners.add(fn);
+  return () => void modulesListeners.delete(fn);
+}
+
 /**
  * Fetches the world's manifest and puts it in force for that world. Until it answers, the cached
  * copy (if any) applies; a failed fetch drops the cache and leaves the original behaviour.
@@ -223,6 +235,7 @@ export async function loadServerManifest(
   const url = serverManifestUrl(profile);
   if (!url) {
     setServerModulesOff([]);
+    for (const fn of modulesListeners) fn(profile.id, '', [], []);
     return ORIGINAL_SETTINGS;
   }
 
@@ -235,6 +248,7 @@ export async function loadServerManifest(
   current.set(url, inForce(manifest));
   setServerModulesOff(manifest?.modulesOff ?? []);
   writeCache(url, manifest);
+  for (const fn of modulesListeners) fn(profile.id, url, manifest?.modules ?? [], manifest?.modulesDropped ?? []);
 
   return inForce(manifest).settings;
 }

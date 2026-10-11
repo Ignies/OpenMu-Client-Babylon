@@ -23,7 +23,8 @@ connect server's own list (`Servers.serverList`) is filled by `session/net.ts`.
 - `registerUrl()`, `registerApiUrl()`, `marketApiUrl()`, `serverManifestUrl()`.
 - `serverSetting(key)`: one setting of the world being played (`ServerSettings`, defaults
   `ORIGINAL_SETTINGS`); `serverOffersLoginTokens()`; `loadServerManifest(profile)`, `parseServerManifest(raw)`.
-  `onWorldEntered(fn)`: runs on `markPlayed`.
+  `onWorldEntered(fn)`: runs on `markPlayed`. `onModulesListed(fn)`: each world's streamed module list as
+  its fetch answers (`_api/streamPorts.ts`); type `StreamedModuleEntry`.
 - `validateSignup(signup)` and the length limits (`registerRules.ts`); `isReservedName(name)`.
 - `watchPageTitle()` (`pageTitle.ts`, was `controllers/interface/`): the one writer of `document.title`,
   the world's name from the character list on; `boot.tsx` starts it.

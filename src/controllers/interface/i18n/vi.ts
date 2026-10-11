@@ -228,4 +228,5 @@ export default {
   'item.pieces': '{count} / {max}',
   'msgWin.confirmMix': '%s\nBạn muốn kết hợp vật phẩm?',
   'msgWin.exitCountdown': 'Bạn sẽ thoát game sau {seconds} giây.',
+  'msgWin.confirmModule': 'Thế giới này muốn chạy mô-đun {id} {version}.\nNó chạy tách khỏi trò chơi và không đọc được tài khoản của bạn.\nCho phép?',
 } satisfies Partial<Record<keyof typeof en, string>>;

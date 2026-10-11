@@ -233,4 +233,5 @@ export default {
   'item.pieces': '{count} / {max}',
   'msgWin.confirmMix': '%s\n要合成道具吗？',
   'msgWin.exitCountdown': '{seconds}秒后退出游戏。',
+  'msgWin.confirmModule': '此世界想要运行模块 {id} {version}。\n它与游戏隔离运行，无法读取你的账号。\n允许吗？',
 } satisfies Partial<Record<keyof typeof en, string>>;
