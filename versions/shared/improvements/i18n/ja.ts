@@ -42,4 +42,7 @@ export default {
   'fidelity.swingFill': '攻撃モーションが間を埋める',
   'fidelity.swingFill.hint':
     '攻撃速度が速いとき、命中後の攻撃モーションをゆっくり再生して次の攻撃まで続け、その間にキャラクターが止まらないようにします。命中のタイミングは変わりません。クラシック: オリジナル通り、モーションが早く終わってキャラクターは立ち止まります。',
+  'fidelity.drawnClothShadows': '布の影を整理',
+  'fidelity.drawnClothShadows.hint':
+    'キャラクターが見せているマント、ローブ、髪だけが影を落とします。クラシック: 見えなくなった布も、残された場所に影を落とし続けます（オリジナルどおり）。',
 } satisfies Partial<Record<keyof typeof en, string>>;

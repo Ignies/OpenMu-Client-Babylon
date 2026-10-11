@@ -42,4 +42,7 @@ export default {
   'fidelity.swingFill': 'Les coups remplissent le temps entre eux',
   'fidelity.swingFill.hint':
     'Avec une vitesse d’attaque élevée, la fin de votre coup après l’impact est jouée plus lentement pour durer jusqu’au coup suivant, au lieu que le héros se fige entre deux. Les coups touchent au même moment. Classique : le coup finit tôt et le héros reste immobile, comme dans l’original.',
+  'fidelity.drawnClothShadows': 'Ombres de tissu nettes',
+  'fidelity.drawnClothShadows.hint':
+    'Seuls les capes, robes et cheveux qu’un personnage montre projettent une ombre. Classique : un tissu que le personnage ne montre plus laisse son ombre là où il est resté, comme dans l’original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

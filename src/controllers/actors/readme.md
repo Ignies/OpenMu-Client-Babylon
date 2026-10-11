@@ -41,6 +41,10 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   posed, swung and lit holding), `shownGear(e, map)` (the gear its item glow comes off),
   `wearsChaosCastleSkin(e, map)`, type `Gear`. Inside Chaos Castle every player holds the castle's
   weapons, all +0 (`ChangeChaosCastleUnit`, CSChaosCastle.cpp:130-170); range and ammo stay its own.
+- `PlayerObject.Cloth`, `MonsterObject.Cloth`: the body's physics cloths (`o->m_pCloth`, a `controllers/cloth` `ClothSet`).
+  `cloaks.ts`: `registerCloaks(rule)` (the wearers' content hands its rule in at boot), `cloaksFor(wearer, set)`
+  (the rule builds, destroys and draws on the body's set as `RenderCharacter` does), types `CloakWearer`,
+  `CloakSet`, `CloakRule`; `ecs/systems/clothSystem.ts` asks it every frame.
 - `wings.ts`: `wingSpec`, `isWingItem`, `wingBone`, `isFastWing`, `WING_GROUP`, `HELPER_GROUP`,
   `WING_BONE`, `CAPE_BONE`, wing index constants (`WING_OF_ELF`, `CAPE_OF_LORD`, ...).
 - `locomotion.ts`: `RUN_THRESHOLD`, `FENRIR_RUN_DELAY`, `RUN_UNITS_PER_SECOND`, `canAccumulateRun`,
@@ -152,10 +156,11 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   Cape of Overrule keep theirs; the Classic shadow is the body parts and the hand weapons, none for a Uniria
   or Dinorant rider out of town, no weapon in town, no bow or crossbow (`setClassicShadows`, set each frame
   by `ecs/systems/animationSystem.ts`; NPC types by `applyNpcShadow` when their model is made), drawn from half
-  alpha (a monster from 0.3).
+  alpha (a monster from 0.3); `player.glb`'s cape bone 19 turned as the cloth's `SetFixedVertices` expects
+  (x up, -y behind, z across) with the body facing -y.
 - `wingObject.test.ts`: the Wing of Ruin layer (a `Data/` bitmap, `getDataTexture`) is read top-down like
   the GLB textures it shares the UVs of, and is drawn on a model whose meshes sit under its model node; a wing
-  casts the Classic shadow, its blend card too, a cape's model none (its cloth would).
+  casts the Classic shadow, its blend card too, a cape's model none (its cloth does).
 - Also from `controllers/item_rules/`: `portedItems`, `questItemLink`, `weaponAttack` tests.
 
 ## Notes
@@ -191,29 +196,27 @@ never draw with HideSkin, so the name test alone gives the same drops.
 never reads them: the Wings of Soul / Dragon `BlendMeshLight` sines (ZzzObject.cpp:9816-9822) and
 the Wings of Spirits `Scale = 0.5` (:5277), both written to the shared `g_ItemObject[Type]`.
 
-### Capes and the cloth (not ported)
+### Capes and the cloth
 The Cape of Lord (13/30, DarkLordRobe) and Cape of Fighter (12/49, Wing50) draw no model on a character
 (`clothOnly`): `RenderLinkObject` skips them (ZzzCharacter.cpp:7004-7011); they are the cloth alone. The
-Mantle of Monarch and Cape of Overrule keep their model and add cloth. What porting `CPhysicsCloth` needs:
-- The cloth (Engine/Physics/PhysicsManager.cpp:304-955): a grid of `iNumHor` x `iNumVer` vertices (gravity
-  9.8, mass 0.0025, the manager's wind), its top row pinned each frame to bone `iBone` plus an offset
-  (`SetFixedVertices`), links kept by `PreventFromStretching`, collision spheres on bones, stepped with
-  `Move2(0.005, 5)` a frame (0 while stunned or asleep), drawn two-sided with a front and a back texture in
-  `CloakLight` (white, or the duel / soccer team colour). The `PCT_*` flags pick the shape (flat, curved,
-  sticked, short shoulder, cylinder), the stretch (cotton, rubber, rubber2, the Overrule straps' rage L/R),
-  the weight (heavy), the blend (opaque, alpha, additive, light mask) and the hair option.
-- Who wears it (`bCloak`, ZzzCharacter.cpp:9162-9240): the Magic Gladiator (`CLASS_DARK`), Dark Lord and
-  Rage Fighter as players (not transformed, not in Chaos Castle or Doppelganger), the Death King and the
-  Nightmare, and anyone a duel or a soccer match colours. Built once (:9689-9850), dropped when the wing
-  slot changes (`DeleteCloth`, WSclient.cpp:2474-2491); the Dark Lord's skirt follows his armour (:9852-9925).
-- Dark Lord (:9693-9776): cloths 0 and 1 are his hair (bone 20, Monster/iui06.jpg, `PCT_OPT_HAIR`), 2 the cape
-  (bone 19, 10x10; Item/dl_redwings02.tga 180x180 under the Mantle, else Player/DarklordRobe.tga, drawn only
-  with the Cape of Lord or the Mantle or a team colour, :9930), 3 the skirt under the class armour (bone 18,
-  Player/kaa.tga or dark3chima3.tga), 4 and 5 the Mantle's straps (Item/dl_redwings03.tga).
-- Rage Fighter (:9777-9824): cloth 0 the cape (bone 19, 180x170, Item/NCcape.tga, Item/monke_manto.TGA under
-  the Overrule; drawn only with a cape or a team colour, :9945), 1 and 2 the Overrule straps
-  (Item/monk_manto01.TGA).
-- The rest (:9825-9850): the Death King (Player/Robe03.tga), the Nightmare (a cylinder), else Item/msword03.tga
-  under the Wing of Ruin or Player/Robe01.jpg / Robe02.jpg.
-- The cloth casts the body shadow (`RenderBodyShadow` with `m_pCloth`, :8433-8440). Body parts carry a mesh
-  cloth of their own too (`CPhysicsClothMesh`, ZzzObject.cpp:10626-10640), a separate port.
+Mantle of Monarch and Cape of Overrule keep their model and add cloth.
+- The cloth is `controllers/cloth` (`CPhysicsCloth`, its 25 Hz step, drawing and Classic shadow);
+  `PlayerObject.Cloth` / `MonsterObject.Cloth` hang a wearer's set on the body, `ecs/systems/clothSystem.ts` asks the wearers' rule
+  (`cloaksFor`, filled by `versions/shared/cloaks`) every frame, and draws the cloth's shadow while a link
+  object is drawn (RenderLinkObject's cloth case, :8433-8446).
+- Who wears it (`bCloak`, :9162-9240): the Magic Gladiator (`CLASS_DARK`), Dark Lord and Rage Fighter as
+  players (not transformed into a monster body, not in Chaos Castle), the Death King and the Nightmare, never a
+  Doppelganger (529-539, :9177-9180), and any player a duel or a soccer match colours.
+- Ported: the Dark Lord's cape (cloth 2) under the Cape of Lord and the Mantle of Monarch, with the Mantle's
+  straps (cloths 4 and 5); the Rage Fighter's cape (cloth 0) under the Cape of Fighter and the Cape of
+  Overrule, with the Overrule's straps (cloths 1 and 2); the Magic Gladiator's robe (cloth 0,
+  Player/Robe01.jpg / Robe02.jpg, Item/msword03.tga under the Wing of Ruin); the Dark Lord's hair (cloths 0
+  and 1, bone 20, Monster/iui06.jpg) and skirt (cloth 3, bone 18, Player/kaa.tga or dark3chima3.tga over the
+  class's own body); the duel and Battle Soccer colours, which cloak anyone (`team_cloak.ts`); the Death King's
+  robe (Player/Robe03.tga, :9826-9832) and the Nightmare's (a `PCT_CYLINDER` robe on bone 2, :9833-9836).
+- Left out: a team colour on a player in a monster's body. The original hangs its class's cloths on that
+  monster's bones (bone 19 is a different bone on every body); here it wears none.
+- The set is built once and walked as the original walks it: a cloth it skips stays built, unstepped, and
+  lays its shadow where it was left; a cape change resets the whole set as `DeleteCloth` does (WSclient.cpp:2474-2491,
+  NewUIMyInventory.cpp:1050-1083). Body parts carry a mesh cloth of their own too (`CPhysicsClothMesh`,
+  ZzzObject.cpp:10610-10680), as do the Magic Skeletons: not ported, see `controllers/cloth/readme.md`.

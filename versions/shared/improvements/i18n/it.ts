@@ -42,4 +42,7 @@ export default {
   'fidelity.swingFill': 'I colpi riempiono il tempo tra uno e l’altro',
   'fidelity.swingFill.hint':
     'Con un’alta velocità d’attacco, la parte del colpo dopo l’impatto viene riprodotta più lenta per durare fino al colpo successivo, invece di lasciare l’eroe fermo nel mezzo. I colpi arrivano nello stesso momento. Classica: il colpo finisce presto e l’eroe resta fermo, come nell’originale.',
+  'fidelity.drawnClothShadows': 'Ombre dei tessuti ordinate',
+  'fidelity.drawnClothShadows.hint':
+    'Solo i mantelli, le tuniche e i capelli che un personaggio mostra proiettano un’ombra. Classica: un tessuto che il personaggio non mostra più lascia la sua ombra dove è rimasto, come nell’originale.',
 } satisfies Partial<Record<keyof typeof en, string>>;

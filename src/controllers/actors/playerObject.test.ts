@@ -56,3 +56,41 @@ describe('the Classic shadow of a character', () => {
     expect([player.ShadowMinAlpha, player.Armor.ShadowMinAlpha, player.Weapon1.ShadowMinAlpha]).toEqual([0.5, 0.5, 0.5]);
   });
 });
+
+// The cloth reads the rig's bones in the BMD frames the original's matrices use (SetFixedVertices' (z, -y, x)).
+describe('the player rig the cloth hangs on', () => {
+  it('turns the cape bone 19 with its x up, its -y behind and its z across, the body facing -y', async () => {
+    const { readFileSync } = await import('fs');
+    const { SceneLoader } = await import('@babylonjs/core/Loading/sceneLoader');
+    await import('@babylonjs/loaders/glTF/2.0/index');
+    const { Quaternion, Vector3 } = await import('../render/babylon/exports');
+    const bytes = readFileSync('public/game-assets/Player/player.glb');
+    const rig = await SceneLoader.LoadAssetContainerAsync('', `data:;base64,${bytes.toString('base64')}`, scene, null, '.glb');
+    rig.addAllToScene();
+    // ModelObject.load's basis change on the model root.
+    const root = rig.meshes[0];
+    root.scaling.set(1, -1, 1);
+    root.rotationQuaternion = Quaternion.FromEulerAngles(-Math.PI / 2, 0, 0);
+    const idle = rig.animationGroups[1];
+    idle.start(false, 1);
+    idle.goToFrame(idle.from);
+    idle.pause();
+    const bone = (i: number) => {
+      const node = rig.transformNodes.find(n => n.name.startsWith(`bone_${i}_`));
+      if (!node) throw new Error(`no bone ${i}`);
+      return node;
+    };
+    for (const node of [root, ...rig.transformNodes]) node.computeWorldMatrix(true);
+    const world = bone(19).getWorldMatrix();
+    const axis = (x: number, y: number, z: number) => Vector3.TransformNormal(new Vector3(x, y, z), world).asArray().map(v => Math.round(v) + 0);
+    // Scene axes: y up, MU's y is the scene's z.
+    expect([axis(1, 0, 0), axis(0, -1, 0), axis(0, 0, 1)]).toEqual([
+      [0, 1, 0],
+      [0, 0, 1],
+      [1, 0, 0],
+    ]);
+    // The toes point the other way: the body faces -y (MU), the wind blows behind it.
+    expect(bone(6).getAbsolutePosition().z).toBeLessThan(bone(5).getAbsolutePosition().z);
+    rig.dispose();
+  }, 60_000);
+});

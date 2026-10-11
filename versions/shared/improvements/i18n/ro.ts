@@ -42,4 +42,7 @@ export default {
   'fidelity.swingFill': 'Loviturile umplu timpul dintre ele',
   'fidelity.swingFill.hint':
     'La viteză mare de atac, partea loviturii de după impact rulează mai lent ca să dureze până la următoarea lovitură, în loc ca eroul să înghețe între ele. Loviturile ating în același moment. Clasică: lovitura se termină devreme și eroul stă pe loc, ca în original.',
+  'fidelity.drawnClothShadows': 'Umbre ordonate ale țesăturilor',
+  'fidelity.drawnClothShadows.hint':
+    'Doar pelerinele, robele și părul pe care un personaj le arată aruncă umbră. Clasică: o țesătură pe care personajul nu o mai arată își lasă umbra acolo unde a rămas, ca în original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

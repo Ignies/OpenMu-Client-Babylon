@@ -7,6 +7,8 @@ import '../controllers/interface/root.less';
 import './logic';
 // Content model classes register here, at boot, where no controller can reach (controllers import no content).
 import '@versions/shared/monsters/models';
+// ...and the wearers' cloths (capes, robes, hair) hand their rule to the actors.
+import '@versions/shared/cloaks';
 import { playOffline } from './offline';
 import { Hero } from '../modules/hero';
 import { Session } from '../modules/session';

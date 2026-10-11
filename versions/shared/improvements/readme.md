@@ -26,6 +26,7 @@ asks `isOn('<id>')`. Classic turns them all off and runs the original.
 | `cameraKeepsView` | Enhanced | `controllers/camera/index.ts` (`warpCompleted`, `cameraView`), `ui/hud/camera_reset` | every world change resets the camera level, heading and tilt (WSclient.cpp:600); no reset button |
 | `swingFill` | Enhanced | `ecs/systems/attackSystem.ts` (sets `playerAnimation.swingFill` at the blow), `animationSystem.ts` (applies it) | the swing clip plays at the attack speed's rate to its end and the hero stands until the next swing (ZzzCharacter.cpp:812); the blow and the hit request keep their time either way |
 | `noticeLinks` | Enhanced | `modules/chat/notices.ts` (`create`), `ui/hud/notices/index.tsx` | a notice is plain text, markup and all, cut in two past 256 px (ZzzInterface.cpp:491-603) |
+| `drawnClothShadows` | Enhanced | `controllers/cloth/clothSet.ts` (`runClothFrame`) | every built cloth below `m_byNumCloth` lays its shadow, a skipped one where it was left (ZzzBMD.cpp:2648-2710) |
 
 - The file's comment cites the original and names the site; the site keeps the original path when
   `isOn` is false.
@@ -59,3 +60,5 @@ asks `isOn('<id>')`. Classic turns them all off and runs the original.
   `maps/bloodcastle/candelabraObject.test.ts`, `maps/stadium/brazierObject.test.ts`: the flares,
   fires and ground lights the original never draws are gone on Classic, the original's light under
   them stays.
+- `controllers/cloth/clothSet.test.ts`: on Classic a built cloth the loop skips lays its shadow where it was
+  left; `drawnClothShadows` leaves it out and keeps the drawn cloth's.

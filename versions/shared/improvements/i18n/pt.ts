@@ -42,4 +42,7 @@ export default {
   'fidelity.swingFill': 'Golpes preenchem o tempo entre eles',
   'fidelity.swingFill.hint':
     'Com velocidade de ataque alta, a parte do golpe depois do impacto toca mais devagar para durar até o próximo golpe, em vez de o herói ficar parado no meio. Os golpes acertam no mesmo momento. Clássica: o golpe acaba cedo e o herói fica parado, como no original.',
+  'fidelity.drawnClothShadows': 'Sombras de tecido organizadas',
+  'fidelity.drawnClothShadows.hint':
+    'Só as capas, túnicas e cabelos que um personagem mostra projetam sombra. Clássica: um tecido que o personagem já não mostra continua deixando sua sombra onde ficou, como no original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

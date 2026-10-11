@@ -42,4 +42,7 @@ export default {
   'fidelity.swingFill': '공격 동작이 사이 시간을 채움',
   'fidelity.swingFill.hint':
     '공격 속도가 빠를 때 타격 이후의 공격 동작을 느리게 재생해 다음 공격까지 이어지게 하여, 그 사이에 캐릭터가 멈춰 서지 않게 합니다. 타격 시점은 같습니다. 클래식: 원본처럼 동작이 일찍 끝나고 캐릭터가 서 있습니다.',
+  'fidelity.drawnClothShadows': '깔끔한 천 그림자',
+  'fidelity.drawnClothShadows.hint':
+    '캐릭터가 보여 주는 망토, 로브, 머리카락만 그림자를 드리웁니다. 클래식: 더 이상 보이지 않는 천도 남겨진 자리에 그림자를 계속 드리웁니다(원작과 같음).',
 } satisfies Partial<Record<keyof typeof en, string>>;

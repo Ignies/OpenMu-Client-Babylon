@@ -2,6 +2,8 @@ import type { Entity, World } from '../../ecs/world';
 import { ModelObject } from '../render/modelObject';
 import { monsterBlendMeshFor, type MonsterBlendMesh } from './monsterBlendMesh';
 import { monsterModelTypeOf } from '../anim/playSpeed';
+import { ClothSet } from '../cloth';
+import type { Scene, TransformNode } from '../render/babylon/exports';
 
 /** MU vertical units → world units (`TERRAIN_SCALE` is 100). */
 const MU_UNIT = 1 / 100;
@@ -24,6 +26,20 @@ export class MonsterObject extends ModelObject {
   #entity: Entity | null = null;
   #bobTimer = 0;
   #blendMesh: MonsterBlendMesh | undefined;
+
+  /** The physics cloths on this body (`o->m_pCloth`): the Death King's and the Nightmare's (`ecs/systems/clothSystem.ts`). */
+  readonly Cloth: ClothSet;
+
+  constructor(scene: Scene, parent?: TransformNode) {
+    super(scene, parent);
+    this.Cloth = new ClothSet(scene, this);
+  }
+
+  dispose(): void {
+    // Its own roots, which the base does not reach.
+    this.Cloth.dispose();
+    super.dispose();
+  }
 
   async init(_world: World, entity: Entity): Promise<void> {
     this.#entity = entity;

@@ -37,6 +37,7 @@ controllers/       generic services; controllers.ts starts them, controller.ts i
   anim/            clip choice and play speed
   assets/          data folder, downloads, BMD, texture packs (texturePacks.ts)
   camera/          camera layers (mouse look, Battle Castle, PK field)
+  cloth/           the physics cloth (CPhysicsCloth): capes, robes, hair on the 25 Hz tick
   combat/          attack timing, ranges, cast targets, skill hook slots (skillHooks.ts)
   fidelity/        Classic / Enhanced / Ultra: the improvement registry and isOn(id)
   fx/              effects.spawn and every effect layer (sprites, particles, models, joints...)
@@ -78,6 +79,7 @@ shared/            content any version can load
   maps/<map>/               one folder per map: spec, create, object classes
   monsters/<name>/          one folder per monster or npc: data (index.ts), model.ts when it has a look of its own
   monster_models/<body>.ts  what follows a monster body: voices, clip speeds, quiet casts, shatter
+  cloaks/<use>.ts           the characters' physics cloths: capes, robes, hair, team cloaks (registerCloaks)
   animations/<action>.ts    one file per player clip (defineAnimation); monster swings and casts
   items/<group>/<item>.ts   one file per item (defineItem); launcher arrows
   improvements/             one file per deliberate improvement over the original (Fidelity option)

@@ -42,4 +42,7 @@ export default {
   'fidelity.swingFill': '攻击动作填满出手间隔',
   'fidelity.swingFill.hint':
     '攻击速度很快时，命中后的攻击动作放慢播放，一直持续到下一次出手，而不是让角色在中间停住。命中的时机不变。经典：与原版相同，动作提早结束，角色原地站着。',
+  'fidelity.drawnClothShadows': '整洁的布料阴影',
+  'fidelity.drawnClothShadows.hint':
+    '只有角色显示的披风、长袍和头发会投下阴影。经典：角色不再显示的布料仍会在原处留下阴影，与原版相同。',
 } satisfies Partial<Record<keyof typeof en, string>>;

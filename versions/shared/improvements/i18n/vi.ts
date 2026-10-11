@@ -42,4 +42,7 @@ export default {
   'fidelity.swingFill': 'Đòn đánh lấp khoảng giữa các đòn',
   'fidelity.swingFill.hint':
     'Khi tốc độ đánh cao, phần đòn đánh sau khi trúng sẽ chạy chậm lại để kéo dài đến đòn tiếp theo, thay vì nhân vật đứng yên ở giữa. Đòn trúng vẫn vào đúng lúc. Cổ điển: đòn đánh kết thúc sớm và nhân vật đứng yên, như bản gốc.',
+  'fidelity.drawnClothShadows': 'Bóng vải gọn gàng',
+  'fidelity.drawnClothShadows.hint':
+    'Chỉ áo choàng, áo dài và tóc mà nhân vật đang hiện mới đổ bóng. Cổ điển: tấm vải nhân vật không còn hiện vẫn để lại bóng ở chỗ nó bị bỏ lại, như bản gốc.',
 } satisfies Partial<Record<keyof typeof en, string>>;

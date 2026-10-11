@@ -120,12 +120,13 @@ export function installNet(): void {
 
   /**
    * GuildSoccerScoreUpdate (F3 23): at the start of the match and on every
-   * goal. Also reaches observers on the stadium, who have no `guildWar`.
+   * goal. Also reaches observers on the stadium, who have no `guildWar`. A
+   * first score of 255 hides the board and the colours (WSclient.cpp:8162-8170).
    */
   EventBus.on('GuildSoccerScoreUpdate', packet => {
     const p = new GuildSoccerScoreUpdatePacket(packet);
     runInAction(() => {
-      Social.battleSoccer = {
+      Social.battleSoccer = p.RedTeamGoals === 255 ? null : {
         redTeam: cleanName(p.RedTeamName),
         blueTeam: cleanName(p.BlueTeamName),
         redGoals: p.RedTeamGoals,

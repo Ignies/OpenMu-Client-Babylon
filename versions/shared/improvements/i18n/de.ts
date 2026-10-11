@@ -42,4 +42,7 @@ export default {
   'fidelity.swingFill': 'Schläge füllen die Zeit dazwischen',
   'fidelity.swingFill.hint':
     'Bei hohem Angriffstempo läuft der Teil deines Schlags nach dem Treffer langsamer, sodass er bis zum nächsten Schlag dauert, statt dass der Held dazwischen erstarrt. Treffer landen im selben Moment. Klassisch: Der Schlag endet früh und der Held steht still, wie im Original.',
+  'fidelity.drawnClothShadows': 'Aufgeräumte Stoffschatten',
+  'fidelity.drawnClothShadows.hint':
+    'Nur Umhänge, Roben und Haare, die eine Figur zeigt, werfen einen Schatten. Klassisch: Ein Stoff, den die Figur nicht mehr zeigt, wirft seinen Schatten weiter dort, wo er zurückblieb, wie im Original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

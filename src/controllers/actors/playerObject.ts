@@ -31,6 +31,7 @@ import { chooseIdleAction, isPhoenixSoulStar } from './weaponClass';
 import { isFemaleClass } from './mapPlayerNetClassToModelClass';
 import { playerPlaySpeed } from '../anim/playSpeed';
 import type { ShatterDeath } from '../fx/deathVisuals';
+import { ClothSet } from '../cloth';
 
 /** `MODEL_WEBZEN_MARK`: `Data\Skill\MuSign` (ZzzOpenData.cpp:4343). */
 const GM_MARK_MODEL = 'Skill/musign.glb';
@@ -100,6 +101,8 @@ export class PlayerObject extends ModelObject {
    */
   readonly GmMark: ModelObject;
   gmMarkOn = false;
+  /** The physics cloths on this body (`o->m_pCloth`): capes, robes, hair; `ecs/systems/clothSystem.ts` names them. */
+  readonly Cloth: ClothSet;
 
   IsInteractable = false;
 
@@ -135,6 +138,7 @@ export class PlayerObject extends ModelObject {
     // ZzzObject.cpp:1558-1564: the lit model, then RENDER_BRIGHT | RENDER_CHROME in (1, 0.5, 0).
     this.GmMark.BodyShine.tint.set(1, 0.5, 0);
     this.GmMark.BodyShine.chromeOnly = true;
+    this.Cloth = new ClothSet(scene, this);
 
     this.HelmMask.NodeNamePrefix = 'HelmMask_';
     this.Helm.NodeNamePrefix = 'Helm_';
@@ -573,8 +577,9 @@ export class PlayerObject extends ModelObject {
   }
 
   dispose(): void {
-    // Not a child (its own root), so the base does not reach it.
+    // Not children (their own roots), so the base does not reach them.
     this.GmMark.dispose();
+    this.Cloth.dispose();
     super.dispose();
   }
 

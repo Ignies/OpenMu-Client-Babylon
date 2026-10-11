@@ -39,6 +39,9 @@ const en = {
   'fidelity.swingFill': 'Swings fill the time between hits',
   'fidelity.swingFill.hint':
     'At a high attack speed, the part of your swing after the blow plays slower so it lasts until the next swing, instead of the hero freezing in between. Hits land at the same moment. Classic: the swing ends early and the hero stands still, as in the original.',
+  'fidelity.drawnClothShadows': 'Tidy cloth shadows',
+  'fidelity.drawnClothShadows.hint':
+    'Only the capes, robes and hair a character shows cast a shadow. Classic: a cloth the character no longer shows still lays its shadow where it was left, as in the original.',
 };
 
 export default en;

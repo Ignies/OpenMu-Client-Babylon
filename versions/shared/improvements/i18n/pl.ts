@@ -42,4 +42,7 @@ export default {
   'fidelity.swingFill': 'Ciosy wypełniają czas między nimi',
   'fidelity.swingFill.hint':
     'Przy dużej szybkości ataku część ciosu po trafieniu jest odtwarzana wolniej, aby trwała do następnego ciosu, zamiast bohater zastygał pomiędzy. Trafienia padają w tej samej chwili. Klasyczne: cios kończy się wcześnie, a bohater stoi, jak w oryginale.',
+  'fidelity.drawnClothShadows': 'Uporządkowane cienie tkanin',
+  'fidelity.drawnClothShadows.hint':
+    'Cień rzucają tylko peleryny, szaty i włosy, które postać pokazuje. Klasyczne: tkanina, której postać już nie pokazuje, nadal rzuca cień tam, gdzie została, jak w oryginale.',
 } satisfies Partial<Record<keyof typeof en, string>>;

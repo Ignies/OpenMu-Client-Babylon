@@ -28,8 +28,8 @@ export const WINGS_OF_DARKNESS = 6;
 export const WING_OF_STORM = 36;
 const WING_OF_ETERNAL = 37;
 const WING_OF_ILLUSION = 38;
-const WING_OF_RUIN = 39;
-const CAPE_OF_EMPEROR = 40;
+export const WING_OF_RUIN = 39;
+export const CAPE_OF_EMPEROR = 40;
 const WING_OF_CURSE = 41;
 const WINGS_OF_DESPAIR = 42;
 export const WING_OF_DIMENSION = 43;
@@ -116,7 +116,7 @@ export type WingSpec = {
   readonly cape?: 'emperor' | 'overrule';
   /**
    * No model on the character: `RenderLinkObject` skips the Cape of Lord and Cape of Fighter
-   * (ZzzCharacter.cpp:7004-7011), which are the `CPhysicsCloth` alone (not ported, actors/readme.md).
+   * (ZzzCharacter.cpp:7004-7011), which are the `CPhysicsCloth` alone (`versions/shared/cloaks`).
    */
   readonly clothOnly?: true;
   /**
@@ -245,7 +245,7 @@ const WINGS: Readonly<Record<number, WingSpec>> = {
   [WINGS_OF_DESPAIR]: { blendMesh: -1, passes: [{ mesh: 1, kind: 'chrome' }] },
   [WING_OF_DIMENSION]: { blendMesh: -1, passes: [{ mesh: 1, kind: 'chrome' }] },
   // The Rage Fighter's capes: Cape of Fighter is the cloth alone, Cape of Overrule a model on
-  // bone 19 (ZzzCharacter.cpp:6708-6714) with cloth beside it. The cloth (:9777-9824) is not drawn.
+  // bone 19 (ZzzCharacter.cpp:6708-6714) with cloth beside it (:9777-9824, `versions/shared/cloaks`).
   [CAPE_OF_FIGHTER]: { blendMesh: -1, clothOnly: true },
   [CAPE_OF_OVERRULE]: { blendMesh: -1, cape: 'overrule' },
 };

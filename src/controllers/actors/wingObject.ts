@@ -79,8 +79,8 @@ export class WingObject extends ModelObject {
 
   /**
    * `RenderLinkObject` draws every wing's shadow with `RenderBodyShadow()`, which skips no mesh, so the
-   * blend card casts too (ZzzCharacter.cpp:8404-8447). A cape casts its cloth's (not ported), so its model
-   * has no Classic shadow (`prepare`).
+   * blend card casts too (ZzzCharacter.cpp:8404-8447). A cape casts its cloth's (`controllers/cloth`),
+   * so its model has no Classic shadow (`prepare`).
    */
   ShadowBlendMeshCasts = true;
 
