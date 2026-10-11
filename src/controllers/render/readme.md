@@ -22,7 +22,7 @@ There is no `index.ts` facade; other folders import the modules directly.
   (`registerTerrainMaterial`, `terrainCsmDefines`, `terrainCsmGlsl`, `bindTerrainCsm`).
 - `propBatches.ts`: `propBatchingActive`, `propBatchExclusion`, `addPropToBatch`,
   `flushPropBatches`, `updatePropBatches`, `disposePropBatches`.
-- `objectShadow.ts`: `setShadowWorld`, `invalidateShadowState`.
+- `objectShadow.ts`: `setShadowWorld` (the shadowless worlds and the lean, `shadowLean`), `invalidateShadowState`.
 - options: `materialQuality.ts`, `renderingStyle.ts`, `renderScale.ts`, `renderDistance.ts` (slider
   steps and readers for the Options window, the materials and boot).
 - `pbrMaps.ts`: `pbrMapsFor`, `pbrMapsIfReady`, `textureSourceName`; `readPackLabelsWith(reader)`, the
@@ -95,7 +95,7 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `propBatchLight.test.ts`: `ChunkLight` re-packs match a whole-chunk re-pack on every tier.
 - `propBatchRules.test.ts`: `batchExclusion`, `chunkOf`, placement and instance matrices.
 - `objectShadow.test.ts`: the shadow fold, run as JS: every vertex folds as `CalcShadowPosition`, a tall
-  one too; Icarus and Kalima draw no shadow.
+  one too; Icarus and Kalima draw no shadow; the lean is 25 tiles in Valley of Loren, 20 elsewhere.
 - `propBatches.test.ts`: batches built and disposed twice over one cached model leave its buffers whole.
 - `renderAngles.test.ts`: `angleMatrixQuaternion` against the original's `AngleMatrix`, and a
   placed record with both pitch and roll drawn by it, by its node and by its batched placement.

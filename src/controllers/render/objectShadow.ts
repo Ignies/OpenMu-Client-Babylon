@@ -22,7 +22,9 @@ import {
 } from '../terrain/terrainHeightMap';
 
 
+/** `RenderBodyShadow`'s sx: 2500 in Battle Castle, 2000 elsewhere (ZzzBMD.cpp:2784). */
 const SHADOW_SX = 2000 / TILE_CM;
+const BATTLE_CASTLE_SHADOW_SX = 2500 / TILE_CM;
 const SHADOW_SY = 4000 / TILE_CM;
 
 const GROUND_OFFSET = 5 / TILE_CM;
@@ -296,7 +298,7 @@ function createShadowMaterial(scene: Scene, slot: number): CustomMaterial {
 
     effect.setFloat4(
       'shadowParams',
-      SHADOW_SX,
+      shadowSX,
       SHADOW_SY,
       GROUND_OFFSET,
       TERRAIN_HEIGHT_SCALE
@@ -365,6 +367,12 @@ const SHADOWLESS_WORLDS: ReadonlySet<ENUM_WORLD> = new Set([
 ]);
 
 let shadowsAllowed = true;
+let shadowSX = SHADOW_SX;
+
+/** The projection's sx on this world, in tiles. */
+export function shadowLean(): number {
+  return shadowSX;
+}
 
 /**
  * Called on every map change. Kept as a set-on-load flag rather than a lookup
@@ -372,6 +380,8 @@ let shadowsAllowed = true;
  * answer only ever changes when the world does.
  */
 export function setShadowWorld(world: ENUM_WORLD): void {
+  shadowSX = world === ENUM_WORLD.WD_30BATTLECASTLE ? BATTLE_CASTLE_SHADOW_SX : SHADOW_SX;
+
   const next = !SHADOWLESS_WORLDS.has(world);
 
   if (next === shadowsAllowed) return;

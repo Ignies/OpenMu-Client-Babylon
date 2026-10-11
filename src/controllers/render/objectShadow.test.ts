@@ -5,8 +5,16 @@ vi.hoisted(() => {
   g.location ??= { href: 'http://localhost/', search: '', hostname: 'localhost', protocol: 'http:' };
 });
 
-const { SHADOW_FOLD, blobShadowsActive, setShadowWorld } = await import('./objectShadow');
+const { SHADOW_FOLD, blobShadowsActive, setShadowWorld, shadowLean } = await import('./objectShadow');
 const { ENUM_WORLD } = await import('../../core/types');
+
+// RenderBodyShadow's sx: 2500 in Battle Castle, 2000 elsewhere (ZzzBMD.cpp:2784).
+describe('the shadow lean', () => {
+  it('is 25 tiles in Valley of Loren and 20 elsewhere', () => {
+    const lean = (world: number) => (setShadowWorld(world), shadowLean());
+    expect([lean(ENUM_WORLD.WD_30BATTLECASTLE), lean(ENUM_WORLD.WD_0LORENCIA)]).toEqual([25, 20]);
+  });
+});
 
 // Kalima draws no shadow at all: InHellas() in RenderCharacter (ZzzCharacter.cpp:8590) and RenderPartObjectEffect (ZzzObject.cpp:9378).
 describe('the worlds with no shadow', () => {
