@@ -249,10 +249,11 @@ export function isWing(def: ItemDef): boolean {
   );
 }
 
+/** `ITEM_RING_OF_ICE` up to the Pendant of Lighting (13/8-11) and 13/20-24 (`CalcPartType`, ZzzInfomation.cpp:1082-1090). */
 export function isRing(def: ItemDef): boolean {
   return (
     def.group === ItemGroup.Helper &&
-    ((def.index >= 8 && def.index <= 12) || (def.index >= 20 && def.index <= 24))
+    ((def.index >= 8 && def.index <= 11) || (def.index >= 20 && def.index <= 24))
   );
 }
 

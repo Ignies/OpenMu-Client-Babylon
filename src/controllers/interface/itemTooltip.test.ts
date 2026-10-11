@@ -153,6 +153,15 @@ describe.skipIf(NO_OPTIONS)('the extra options in the tooltip', () => {
   });
 });
 
+// CalcExcellentOptions (ZzzInfomation.cpp:944-1010): the Pendant of Lighting (13/12) takes the weapon list only.
+describe('an excellent Pendant of Lighting', () => {
+  it('lists its excellent option once, as a pendant', () => {
+    const text = lines({ group: 13, num: 12, durability: 50, isExcellent: true, excellentFlags: 0x20 }).map(l => l.text);
+    expect(text.filter(l => l === 'Excellent Damage Rate +10%')).toHaveLength(1);
+    expect(text).not.toContain('Increase Maximum Life +4%');
+  });
+});
+
 // The option level's line by item kind (ZzzInfomation.cpp:1166-1240, GetSpecialOptionText, ZzzInventory.cpp:5094-5134).
 describe('an option level line', () => {
   const text = (item: Item) => lines({ durability: 50, ...item }).map(l => l.text);
