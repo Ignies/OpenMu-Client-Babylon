@@ -8,8 +8,8 @@ its listeners in `install`, and a world turns optional modules off in its `serve
 ## The problem with running a server's code in the client
 
 The client is one web origin (`play.ignies.net`). Everything that origin stores is readable by any
-script running in it: the saved accounts of every world (`ServerAccounts`, plain text in
-localStorage today), the cash shop and marketplace sessions, the settings. A module downloaded from
+script running in it: the saved accounts of every world (`ServerAccounts`: names and, since phase 6,
+login tokens; passwords in plain text before), the cash shop and marketplace sessions, the settings. A module downloaded from
 server B and loaded into that origin can read all of it, send packets as the player, and stay
 loaded until the page reloads. Consent, hash pinning and "only while connected" do not change
 that: once a script runs in the origin, nothing can unload it or keep it out of storage.
@@ -48,8 +48,8 @@ After a password login the server issues a token (random, stored hashed by the s
 bound to one account on one world), the client keeps the token instead of the password, and the next
 login sends the token. The issuer is an OpenMU plugin, so tokens are checked where the account
 lives; a proxy that stored passwords to replay them would keep reversible passwords on the server,
-which OpenMU itself does not. Worlds without the plugin keep today's behaviour, but the client
-stops remembering their passwords by default.
+which OpenMU itself does not. Worlds without the plugin keep the name only: the client stores no
+password for any world.
 
 **Phase 5: streaming.** `server.json` gains `modules`: `[{ id, version, api, url, sha256,
 signature? }]`. On entering a world the client compares it with what it has, asks consent for
@@ -65,7 +65,7 @@ range does not match is skipped with a notice, never run.
    (never in CI); only its public half is built into the client. Needed from phase 5 on.
 4. The order is 3, 4, 6, then 5.
 
-Phases 3 and 4 are built (below); phase 6 is next. Nothing of phases 5 and 6 is built yet.
+Phases 3, 4 and 6 are built (below); phase 5 is next.
 
 ## Phase 3: built (2026-10-06)
 
@@ -162,3 +162,60 @@ the player stayed connected. The checklist as it was written:
 - When the first module ships: its `[PlugIn]` class implementing `IModulePacketPlugIn` (with its own
   `[Guid]`) receives the payload, and its answer through `IModulePacketViewPlugIn` reaches the
   module's `onPacket` in the client (and `moduleRouter.dropped` stays 0).
+
+Since 2026-10-11 the handler drops every module frame until the player's character is in the world
+(the login, the character list, a disconnect): a module belongs to a character in the world. The
+states inside the world (a trade, an NPC dialog, dead) still count as in it. The installer's e2e
+check proves both sides: a frame sent at the character list is never read, one sent in the world is.
+
+## Phase 6: built (2026-10-11)
+
+Saved logins are per-world tokens; no password is written to browser storage any more.
+
+The wire, in our packet group 0xE7 (01 and 02 are the marketplace escrow; definitions in
+`versions/shared/packets/packetsDefinitions/*.xml`, generated like OpenMU's own):
+
+| packet | header | layout | when |
+|---|---|---|---|
+| 03 `LoginTokenRequest` | C1 | `C1 04 E7 03` | client, at the character list after a password login, where tokens are kept |
+| 04 `LoginTokenAnswer` | C1 | `C1 25 E7 04 status(1) token(32)` | server: after 03, and right behind the login result of a token login (the replacement) |
+| 05 `TokenLogin` | C3 | `C3 33 E7 05 account(10, Xor3) token(32) clientVersion(5)` | client, at the login window, instead of F1 01 |
+
+Status 0 is Ok, 1 Refused (not logged in, a template account, or a token already issued on this
+connection), 2 Failed (not stored). 05 is a C3 like the login: OpenMU decrypts SimpleModulus before
+any handler, and a handler that expects encryption drops a C1 copy (`PacketHandlerPlugInContainer`),
+so a token is wrapped exactly as a password is (Xor32 and SimpleModulus, then the proxy's wss in
+domain mode). The account name sits where the login has it, so the proxy's presence (the cash
+shop's ticket) names a token login's socket the same way. A token login answers with the normal
+login result (F1 01), so nothing after it changes.
+
+The server half (`openmu/plugins/GameLogic/LoginTokens`, [openmu/readme.md](../openmu/readme.md)):
+
+- A token is 32 random bytes. The table `mu_plugins.login_token` in OpenMU's database keeps its
+  SHA-256, the account id, the issue time and a SHA-256 of the account's password hash at issue, so a
+  password change voids every token of the account. Created at start when missing (the "Login Token
+  Upkeep" periodic task, which also drops expired tokens hourly); OpenMU's database dump, and so
+  `mu backup`, carries it. A token works 30 days; an account keeps at most 10 (one per browser).
+- The token login follows OpenMU's `LoginAction` (v0.9.10): the token in place of the password
+  (refused as a wrong password), the ban states, the state machine, an offline session's handover,
+  the login server and its "already connected" answers, then the login result and the client
+  version. The one difference: `LoginAction` holds the state machine's lock across the login
+  server call through a context whose `Allowed` only OpenMU can set; the plugin checks the
+  transition first and makes it last, and undoes the login server's entry if the transition then
+  fails. Each token login replaces the token (the old one stops working at once).
+
+The client half: `src/modules/servers/serverAccounts.ts` stores the name and, on a world whose
+`server.json` says `loginTokens: true` (the installer writes it, the plugin being in every image it
+builds), the token, under the improvement `loginTokens` (Enhanced and Ultra; Classic types the
+password each time, as the original). Passwords an older client saved (`mu_accounts`, the legacy
+`_mu_key` blob) are wiped on load, names kept. `Session` (`src/modules/session/state.ts`) sends
+05 when the password field is empty and a token is saved, asks for one (03) after a password login,
+keeps each 04, and drops a refused token, the login window then asking for the password with the
+name filled. The password stays in memory only, for the session's own reconnects; a session that
+logged in with a token reconnects with the token it holds.
+
+Live proof: the installer's e2e `check` (`install/cli/loginCheck.ts`) plays the protocol with the
+client's own code: password login as the test GM, token request, reconnect, token login reaching the
+character list with the token replaced, the proxy naming that socket, the replaced token and a junk
+one refused, the new token logging in. A password change (the same password hashed again) was
+checked by hand to void the account's tokens.
