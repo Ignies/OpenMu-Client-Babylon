@@ -161,8 +161,8 @@ type Dome = {
 let dome: Dome | null = null;
 
 /**
- * The inverted dome under the world, for a map whose ground has holes (`LookProfile.underworld`,
- * Devias' ravines). Geometry rather than a screen-space mask; why in readme.md.
+ * The inverted dome under the world on every map with a dome, black below the horizon or the
+ * underworld's colour (Devias' ravines). Geometry rather than a screen-space mask; why in readme.md.
  */
 let floor: Dome | null = null;
 
@@ -289,9 +289,7 @@ function syncFloorMesh(
 ): void {
   // `?uw=0` takes the floor down with the fog it belongs to, so the A/B is
   // the whole feature and not half of it.
-  const under = uwDev === 0 ? undefined : profileFor(state.world).underworld;
-
-  if (!under) {
+  if (uwDev === 0) {
     disposeSkyFloor();
     return;
   }
@@ -302,11 +300,19 @@ function syncFloorMesh(
 
   floor ??= createFloor(scene);
 
-  const c = linearBufferActive(scene) ? toLinear(under.color) : under.color;
+  const deep = floorDeepFor(state.world);
+  const c = linearBufferActive(scene) ? toLinear(deep) : deep;
 
   floor.material.setArray3('horizon', [horizon[0], horizon[1], horizon[2]]);
   floor.material.setArray3('deep', [c[0], c[1], c[2]]);
   floor.material.setArray2('floorBand', [FLOOR_NEAR, FLOOR_FAR]);
+}
+
+const BLACK: Rgb = [0, 0, 0];
+
+/** What the dome's lower half ends in: the underworld's colour, else black, as the original clears its void (SceneManager.cpp:420). */
+export function floorDeepFor(world: LookState['world']): Rgb {
+  return profileFor(world).underworld?.color ?? BLACK;
 }
 
 /** The sky the dome is drawing, for the per-frame cloud binding. */

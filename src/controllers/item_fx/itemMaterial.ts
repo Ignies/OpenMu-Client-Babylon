@@ -1037,16 +1037,15 @@ function bindBodyLight(effect: Effect, mesh: AbstractMesh, uniform: string) {
   }
 }
 
+/** At once, not on the scene's next ready: that may never come, and the mesh drew the placeholder. */
 function trackTime(scene: Scene, onReady: (now: () => number) => void) {
   let time = 0;
 
-  scene.onReadyObservable.addOnce(() => {
-    scene.onBeforeRenderObservable.add(() => {
-      time += scene.getEngine()!.getDeltaTime()! / 1000;
-    });
-
-    onReady(() => time);
+  scene.onBeforeRenderObservable.add(() => {
+    time += scene.getEngine()!.getDeltaTime()! / 1000;
   });
+
+  onReady(() => time);
 }
 
 /**
