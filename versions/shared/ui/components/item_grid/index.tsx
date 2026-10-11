@@ -202,11 +202,14 @@ const GridItem = memo(function GridItem({
   price,
   marked,
   dimmed,
+  spin,
 }: {
   entry: Placed;
   price: number | undefined;
   marked: boolean;
   dimmed: boolean;
+  /** Under the cursor with nothing held: it turns (RenderItem3D's `Select`). */
+  spin: boolean;
 }) {
   return (
     <div
@@ -218,7 +221,7 @@ const GridItem = memo(function GridItem({
         height: entry.h * SQUARE,
       }}
     >
-      <ItemIcon item={entry.item} />
+      <ItemIcon item={entry.item} spin={spin} />
       {price !== undefined && (
         <span className={`mu-grid-price${price > 0 ? '' : ' unset'}`}>
           {price > 0 ? price.toLocaleString('en-US') : '?'}
@@ -561,6 +564,7 @@ export const ItemGrid = observer(
               price={priceOf?.(entry.square)}
               marked={marked?.(entry.square) ?? false}
               dimmed={dimmed?.(entry.item) ?? false}
+              spin={!picked && hoveredEntry === entry}
             />
           ))}
 

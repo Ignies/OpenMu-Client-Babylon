@@ -38,7 +38,8 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `configFingerprint.ts`: `configFingerprintLines()` and friends, every game option packed into a hex
   string for the perf overlay.
 - `iconShot.ts`: `iconShots(scene).shoot(job)`, a one-shot picture of a model as an image URL (the bag
-  icons the pack has no file for), `ICON_LAYER`, `iconPixels`.
+  icons the pack has no file for); `iconShots(scene).spin(job, paint)`, the same model turned and drawn
+  every frame until stopped (the item under the cursor); `ICON_LAYER`, `iconPixels`.
 
 ## How it works
 - `ModelObject.load(gltf)` puts a GLB under the object's node with the BMD to Babylon basis change
@@ -68,7 +69,10 @@ There is no `index.ts` facade; other folders import the modules directly.
   shadow flags (the original's `Light = 1,1,1`, `LightEnable` off, ZzzInventory.cpp:9682-9699), then an
   orthographic camera and a target of their own draw them once after the frame (`onAfterRender`,
   only while a job waits), at most one per frame. The target is read back, encoded as a PNG object
-  URL, cached by the job's key and everything is freed.
+  URL, cached by the job's key and everything is freed. A spin keeps its root, camera and target
+  until stopped and, every frame after the render, turns the model (`job.turn`), draws it, reads it
+  synchronously into a kept buffer and hands `paint` one kept straight-alpha array: no allocation per
+  frame. One spin at a time: a new one stops the last.
 
 ## Depends on / used by
 - uses: `assets` (model loader, texture packs), `lighting`, `terrain`, `maps`, `item_fx`, `anim`,
@@ -97,8 +101,10 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `iconShot.test.ts`: at most one shot per frame and no observer once idle; one build per key; the
   subject, root, camera and target freed; the main camera never sees the subject; flat lit, no fog,
   no caster flag; a failed build answers null; the bounded wait for readiness; `iconPixels` (row flip,
-  straight alpha over the clear, the display curve on a linear buffer). NullEngine draws no pixels,
-  so what a picture looks like is checked in a browser.
+  straight alpha over the clear, the display curve on a linear buffer, a kept buffer rewritten whole);
+  the spin draws one turned picture a frame into one kept buffer, one item at a time, and frees all of
+  it when stopped, before its model is in too. NullEngine draws no pixels, so what a picture looks
+  like is checked in a browser.
 - `meshAnimation.test.ts`: `meshAnimationFor` reads the map row per world.
 - `modelObject.test.ts`: a model whose clips are cloned on first play reads every clip's keys at load
   without cloning one, and a clip cloned later reports its end; `BlendMesh -2` and a pulsing `BlendMeshLightAt`;

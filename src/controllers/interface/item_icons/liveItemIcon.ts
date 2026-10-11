@@ -23,6 +23,25 @@ export function liveItemIconKey(item: Item): string {
   return `${item.group}_${item.num}_${item.lvl ?? 0}${item.isExcellent ? '_e' : ''}${item.isAncient ? '_a' : ''}`;
 }
 
+/**
+ * Turns the item's model on `canvas` every frame until the returned stop is called, `ready` on its
+ * first picture (the item under the cursor, `Select` in RenderObjectScreen, ZzzInventory.cpp:8856-8859).
+ */
+export type LiveItemSpinSource = (item: Item, canvas: HTMLCanvasElement, ready: () => void) => () => void;
+
+let spinSource: LiveItemSpinSource | null = null;
+
+export function setLiveItemSpin(next: LiveItemSpinSource | null): void {
+  spinSource = next;
+}
+
+/** Spins the item's look on `canvas`; null while the app has not filled the slot. */
+export function spinLiveItemIcon(item: Item, canvas: HTMLCanvasElement, ready: () => void): (() => void) | null {
+  if (!spinSource) return null;
+  const { group, num, lvl, isExcellent, isAncient } = item;
+  return spinSource({ group, num, lvl, isExcellent, isAncient }, canvas, ready);
+}
+
 /** The item's live icon once drawn, else null; the first read asks for it. Observable. */
 export function liveItemIcon(item: Item): string | null {
   const key = liveItemIconKey(item);

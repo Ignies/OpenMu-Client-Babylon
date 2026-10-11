@@ -102,6 +102,22 @@ describe('an item icon shot', () => {
     root.dispose();
   });
 
+  // `if (1 == Select) ObjectSelect.Angle[1] = WorldTime * 0.45f` (ZzzInventory.cpp:8856-8859).
+  it('turns it about its second angle at 0.45 degrees a millisecond while hovered, its others kept', async () => {
+    const job = itemIconJob(scene, { group: 14, num: 21, lvl: 0 });
+    const root = new TransformNode('root', scene);
+    const subject = await job?.build(root);
+    const node = root.getChildren()[0] as TransformNode;
+    const kept = node.rotationQuaternion;
+    job?.turn?.(200);
+    const want = angleMatrixQuaternion(270 * DEG, 90 * DEG, 0, new Quaternion());
+    expect(Math.abs(Quaternion.Dot(node.rotationQuaternion ?? new Quaternion(), want))).toBeCloseTo(1, 6);
+    // Written into the node's own quaternion: nothing made per frame.
+    expect(node.rotationQuaternion).toBe(kept);
+    subject?.dispose();
+    root.dispose();
+  });
+
   it('places the model at the original\'s anchor in the squares plus its offset (the Lucky Penny, 1 x 1)', async () => {
     const job = itemIconJob(scene, { group: 14, num: 100, lvl: 0 });
     const root = new TransformNode('root', scene);

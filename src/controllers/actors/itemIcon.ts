@@ -5,7 +5,13 @@ import { iconShots, type IconShotJob } from '../render/iconShot';
 import { loadItemModel } from './itemModel';
 import { isTwoHanded } from './weaponClass';
 import { itemVisualTier } from '../item_fx/itemVisualTier';
-import { ITEM_ICON_SCALE, ITEM_ICON_SCALE_DEFAULT, itemIconPose, type LiveItemIconSource } from '../interface/item_icons';
+import {
+  ITEM_ICON_SCALE,
+  ITEM_ICON_SCALE_DEFAULT,
+  itemIconPose,
+  type LiveItemIconSource,
+  type LiveItemSpinSource,
+} from '../interface/item_icons';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 
 /**
@@ -26,6 +32,8 @@ export const ITEM_ICON_UNITS_PER_PIXEL = (DEPTH * Math.tan(((1 / 2) * Math.PI) /
 const DEG = Math.PI / 180;
 /** Metres per MU unit: the models and the scene are in metres. */
 const M = 1 / 100;
+/** `if (1 == Select) ObjectSelect.Angle[1] = WorldTime * 0.45f` (ZzzInventory.cpp:8856-8859): degrees a millisecond. */
+const HOVER_SPIN = 0.45;
 
 /** The shot of `item`'s icon, or null when it has no model (Gladiator's Glory, 13/95). */
 export function itemIconJob(scene: Scene, item: Item): IconShotJob | null {
@@ -39,6 +47,7 @@ export function itemIconJob(scene: Scene, item: Item): IconShotJob | null {
   const height = (def.Y || 1) * SQUARE;
   const unit = ITEM_ICON_UNITS_PER_PIXEL * M;
   const { angle, offset, anchor } = pose;
+  let turned: Quaternion | null = null;
 
   return {
     key: `${key}_${item.lvl ?? 0}${item.isExcellent ? '_e' : ''}${item.isAncient ? '_a' : ''}`,
@@ -57,6 +66,7 @@ export function itemIconJob(scene: Scene, item: Item): IconShotJob | null {
       const node = object.node;
       node.position.set(anchor[0] * width * unit + offset[0] * M, (offset[2] - DEPTH) * M, -anchor[1] * height * unit + offset[1] * M);
       node.rotationQuaternion = angleMatrixQuaternion(angle[0] * DEG, angle[1] * DEG, angle[2] * DEG, new Quaternion());
+      turned = node.rotationQuaternion;
       node.scaling.setAll(scale);
       // Drawn at its level and options, as worn (RenderPartObject, ZzzInventory.cpp:9699).
       const tier = itemVisualTier(item);
@@ -68,6 +78,10 @@ export function itemIconJob(scene: Scene, item: Item): IconShotJob | null {
       }
       return object;
     },
+    // The hovered item: its second angle replaced by the clock, the others kept.
+    turn: ms => {
+      if (turned) angleMatrixQuaternion(angle[0] * DEG, ((ms * HOVER_SPIN) % 360) * DEG, angle[2] * DEG, turned);
+    },
   };
 }
 
@@ -76,5 +90,26 @@ export function liveItemIconSource(scene: Scene): LiveItemIconSource {
   return async item => {
     const job = itemIconJob(scene, item);
     return job ? iconShots(scene).shoot(job) : null;
+  };
+}
+
+/** What fills the interface's spin slot: the hovered item turned on its canvas every frame. */
+export function liveItemSpinSource(scene: Scene): LiveItemSpinSource {
+  return (item, canvas, ready) => {
+    const job = itemIconJob(scene, item);
+    const context = job && canvas.getContext('2d');
+    if (!job || !context) return () => {};
+    const { width, height } = job.view;
+    canvas.width = width;
+    canvas.height = height;
+    let image: ImageData | null = null;
+    return iconShots(scene).spin(job, pixels => {
+      // The spin hands the same buffer every frame: one ImageData over it.
+      if (!image) {
+        image = new ImageData(pixels, width, height);
+        ready();
+      }
+      context.putImageData(image, 0, 0);
+    });
   };
 }

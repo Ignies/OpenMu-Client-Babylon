@@ -69,7 +69,8 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   `loadItemModel(scene, parent, group, num, file)`, such a model with no entity behind it. A worn
   `Player/` part keeps its own file's skeleton, posed at its first frame, as a drop does.
 - `itemIcon.ts`: `itemIconJob(scene, item)`, the shot of a bag icon drawn from the item's model, and
-  `liveItemIconSource(scene)`, what the app puts in the interface's live-icon slot;
+  `liveItemIconSource(scene)` / `liveItemSpinSource(scene)`, what the app puts in the interface's
+  live-icon and spin slots;
   `ITEM_ICON_UNITS_PER_PIXEL`.
 
 ## How it works
@@ -122,7 +123,9 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   `RenderObjectScreen` does (`interface/item_icons/itemIconPose.ts`, two-handed by `isTwoHanded`, the
   inventory width proxy) and scales it by `itemIconScale.ts`; its meshes carry the item's
   `itemVisualTier` as worn gear does (the level and excellent passes, RenderPartObject at the item's
-  level and options, ZzzInventory.cpp:9699); `render/iconShot.ts` draws it once. A picture is kept
+  level and options, ZzzInventory.cpp:9699); `render/iconShot.ts` draws it once. The item under the
+  cursor (nothing held) turns: `Angle[1] = WorldTime * 0.45f` (ZzzInventory.cpp:8856-8859), its other
+  angles kept, drawn every frame by the shot's spin onto the icon's canvas, pack icons too. A picture is kept
   per look (group, number, level, excellent, ancient) for the session: a changed item-effects
   option shows on new looks only.
 
@@ -161,7 +164,8 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   item's own model under the root at its scale and angle; a worn part (the Queen helm) draws only its
   helm mesh, comes down by `ItemHeight` and keeps its own skeleton; the anchor plus offset (the Lucky
   Penny), a weapon's hands (Mace of the King), the Heart +0's swapped model and scale, the level and
-  excellent tier on every mesh and one key per look; no shot for an item with no model.
+  excellent tier on every mesh and one key per look; no shot for an item with no model; the hover
+  turn at 0.45 degrees a millisecond, written into the node's own quaternion.
 - `npcModelTable.test.ts`: every row names a file in `public/game-assets` and has a scale > 0; the
   tables behave as plain objects and read the folders when asked.
 - `trapModels.test.ts`: every (map, trap) pair names an `Object<world+1>` model that exists.

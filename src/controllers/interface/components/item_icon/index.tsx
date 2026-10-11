@@ -1,9 +1,9 @@
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useRef, useState, type ReactNode } from 'react';
 import { observer } from 'mobx-react-lite';
 import type { Item } from '@/ecs/world';
 import { itemIconKey, itemIconPackChain } from '@/controllers/assets/itemIconPack';
 import { ITEM_ICON_FIT } from '@/controllers/interface/item_icons/itemIconFit';
-import { liveItemIcon } from '@/controllers/interface/item_icons/liveItemIcon';
+import { liveItemIcon, liveItemIconKey, spinLiveItemIcon } from '@/controllers/interface/item_icons/liveItemIcon';
 import { itemLevelLook } from '@/controllers/item_rules';
 
 /**
@@ -34,9 +34,40 @@ function fitTransform(item: Item): string | undefined {
   return `scale(${zoom}) translate(${dx * 100}%, ${dy * 100}%)`;
 }
 
+/** The turning picture covers the item's squares, as the live still does. */
+const SPIN_STYLE = { position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain' } as const;
+
+/**
+ * The item under the cursor turning on a canvas (`Select` in RenderObjectScreen,
+ * ZzzInventory.cpp:8856-8859); the still picture shows until the first turned one is drawn.
+ */
+const Spin = observer(function Spin({ item, still }: { item: Item; still: ReactNode }) {
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const [ready, setReady] = useState(false);
+  const look = liveItemIconKey(item);
+  useEffect(() => {
+    const target = canvas.current;
+    if (!target) return undefined;
+    const stop = spinLiveItemIcon(item, target, () => setReady(true));
+    return () => {
+      stop?.();
+      setReady(false);
+    };
+    // The look is what the picture depends on; the item object may be rebuilt by a refresh.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [look]);
+  return (
+    <>
+      {!ready && still}
+      <canvas ref={canvas} className="item-icon" style={SPIN_STYLE} />
+    </>
+  );
+});
+
 /**
  * An item's icon from the pre-rendered pack (itemIconPack.ts), or drawn from its model when the
- * pack has no file for it (`item_icons/liveItemIcon.ts`; already framed, so no fit).
+ * pack has no file for it (`item_icons/liveItemIcon.ts`; already framed, so no fit). `spin`: the
+ * item is under the cursor, so its model turns over the still picture.
  *
  * An observer leaf taking the item itself: only the fields the file name
  * depends on (`itemIconKey`) are read here, so a durability tick or an
@@ -45,7 +76,7 @@ function fitTransform(item: Item): string | undefined {
  * subscribed the whole grid to all fourteen fields of every item.)
  */
 export const ItemIcon = memo(
-  observer(function ItemIcon({ item }: { item: Item }) {
+  observer(function ItemIcon({ item, spin = false }: { item: Item; spin?: boolean }) {
     const key = itemIconKey(item);
     /** Which URL of the pack chain is showing; past the end = no file at all. */
     const [fallbackStep, setFallbackStep] = useState(0);
@@ -53,32 +84,42 @@ export const ItemIcon = memo(
       setFallbackStep(0);
     }, [key]);
     const chain = itemIconPackChain(item);
-
-    if (fallbackStep >= chain.length) {
-      // No pack file: the original draws every icon from the model, so draw this one.
-      const live = liveItemIcon(item);
-      if (live) {
-        return <img src={live} className="item-icon" alt="" draggable={false} decoding="async" />;
-      }
-      return (
-        <div
-          className="item-icon item-icon-missing"
-          title={`item ${item.group}/${item.num}`}
-        />
-      );
-    }
-
-    return (
-      <img
-        src={chain[fallbackStep]}
-        className="item-icon"
-        style={{ transform: fitTransform(item) }}
-        alt=""
-        draggable={false}
-        decoding="async"
-        {...IMG_PRIORITY}
-        onError={() => setFallbackStep(step => step + 1)}
-      />
-    );
+    const still = stillIcon(item, chain, fallbackStep, setFallbackStep);
+    return spin ? <Spin item={item} still={still} /> : still;
   })
 );
+
+/** The still picture: the pack's file, else the live one drawn from the model, else an empty square. */
+function stillIcon(
+  item: Item,
+  chain: readonly string[],
+  fallbackStep: number,
+  setFallbackStep: (next: (step: number) => number) => void
+): ReactNode {
+  if (fallbackStep >= chain.length) {
+    // No pack file: the original draws every icon from the model, so draw this one.
+    const live = liveItemIcon(item);
+    if (live) {
+      return <img src={live} className="item-icon" alt="" draggable={false} decoding="async" />;
+    }
+    return (
+      <div
+        className="item-icon item-icon-missing"
+        title={`item ${item.group}/${item.num}`}
+      />
+    );
+  }
+
+  return (
+    <img
+      src={chain[fallbackStep]}
+      className="item-icon"
+      style={{ transform: fitTransform(item) }}
+      alt=""
+      draggable={false}
+      decoding="async"
+      {...IMG_PRIORITY}
+      onError={() => setFallbackStep(step => step + 1)}
+    />
+  );
+}

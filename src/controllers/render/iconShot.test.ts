@@ -50,7 +50,8 @@ function boxJob(key: string, log: { built: string[]; disposed: string[] }): Icon
 function shots() {
   const read = vi.fn(async (_rtt: RenderTargetTexture, view: typeof VIEW) => new Uint8Array(view.width * view.height * 4));
   const encode = vi.fn(async (_pixels: Uint8ClampedArray, w: number, h: number) => `blob:${w}x${h}`);
-  return { shots: createIconShots(scene, { read, encode }), read, encode };
+  const readNow = vi.fn((_rtt: RenderTargetTexture, _view: typeof VIEW, out: Uint8Array) => void out.fill(255));
+  return { shots: createIconShots(scene, { read, encode, readNow }), read, encode, readNow };
 }
 
 describe('the one-shot icon render', () => {
@@ -196,6 +197,83 @@ describe('the one-shot icon render', () => {
   });
 });
 
+// `if (1 == Select) ObjectSelect.Angle[1] = WorldTime * 0.45f` (ZzzInventory.cpp:8856-8859): the item under the
+// cursor turns every frame.
+describe('the hover spin', () => {
+  /** A box job that records the times it is turned to. */
+  function spinJob(key: string, log: { built: string[]; disposed: string[] }, turns: number[]): IconShotJob {
+    return { ...boxJob(key, log), turn: ms => void turns.push(ms) };
+  }
+
+  it('draws one turned picture a frame into one kept buffer, and frees everything when stopped', async () => {
+    const log = { built: [] as string[], disposed: [] as string[] };
+    const turns: number[] = [];
+    const painted: Uint8ClampedArray[] = [];
+    const cameras = scene.cameras.length;
+    const textures = scene.textures.length;
+    // Babylon drops a removed observer on the next task: let the earlier tests' go first.
+    await new Promise(resolve => setTimeout(resolve, 0));
+    const idle = scene.onAfterRenderObservable.observers.length;
+    const { shots: s, readNow } = shots();
+    const stop = s.spin(spinJob('spin', log, turns), pixels => void painted.push(pixels));
+    const perFrame: number[] = [];
+    for (let i = 0; i < 12; i++) {
+      const before = painted.length;
+      await frames(1);
+      perFrame.push(painted.length - before);
+    }
+    // Every frame once it is ready (the shaders may take a few), never twice in one.
+    expect(Math.max(...perFrame)).toBe(1);
+    expect(perFrame.slice(perFrame.indexOf(1))).not.toContain(0);
+    expect(readNow).toHaveBeenCalledTimes(painted.length);
+    expect(new Set(painted).size).toBe(1);
+    expect(new Set(readNow.mock.calls.map(call => call[2])).size).toBe(1);
+    expect(turns).toHaveLength(painted.length);
+    expect([...turns].sort((a, b) => a - b)).toEqual(turns);
+    // The read is turned into straight alpha, top-down, as the still picture is.
+    expect([...painted[0].subarray(0, 4)]).toEqual([255, 255, 255, 255]);
+
+    stop();
+    const drawn = painted.length;
+    await frames(3);
+    expect(painted).toHaveLength(drawn);
+    expect(log.disposed).toEqual(['spin']);
+    expect(scene.cameras.length).toBe(cameras);
+    expect(scene.textures.length).toBe(textures);
+    await new Promise(resolve => setTimeout(resolve, 0));
+    expect(scene.onAfterRenderObservable.observers.length).toBe(idle);
+  });
+
+  it('spins one item at a time', async () => {
+    const log = { built: [] as string[], disposed: [] as string[] };
+    const { shots: s } = shots();
+    const first: Uint8ClampedArray[] = [];
+    const second: Uint8ClampedArray[] = [];
+    s.spin(spinJob('first', log, []), pixels => void first.push(pixels));
+    await frames(4);
+    const stop = s.spin(spinJob('second', log, []), pixels => void second.push(pixels));
+    const firstDrawn = first.length;
+    await frames(8);
+    expect(first).toHaveLength(firstDrawn);
+    expect(second.length).toBeGreaterThan(0);
+    expect(log.disposed).toEqual(['first']);
+    stop();
+    expect(log.disposed).toEqual(['first', 'second']);
+  });
+
+  it('draws nothing and keeps nothing when stopped before its model is in', async () => {
+    const log = { built: [] as string[], disposed: [] as string[] };
+    const nodes = scene.transformNodes.length;
+    const { shots: s } = shots();
+    const painted: Uint8ClampedArray[] = [];
+    s.spin(spinJob('early', log, []), pixels => void painted.push(pixels))();
+    await frames(3);
+    expect(painted).toEqual([]);
+    expect(log.disposed).toEqual(['early']);
+    expect(scene.transformNodes.length).toBe(nodes);
+  });
+});
+
 describe('iconPixels', () => {
   it('turns the bottom-up read into top-down rows', () => {
     // 1 x 2: bottom row red, top row green, both opaque.
@@ -207,6 +285,12 @@ describe('iconPixels', () => {
     // Additive drew colour and left the cleared alpha at 0; the blended pixel is premultiplied.
     const read = new Uint8Array([200, 100, 0, 0, 64, 32, 0, 128]);
     expect([...iconPixels(read, 2, 1, false)]).toEqual([255, 128, 0, 200, 128, 64, 0, 128]);
+  });
+
+  it('rewrites a kept buffer whole, the cleared pixels too', () => {
+    const out = new Uint8ClampedArray(8).fill(9);
+    expect(iconPixels(new Uint8Array([255, 0, 0, 255, 0, 0, 0, 0]), 2, 1, false, out)).toBe(out);
+    expect([...out]).toEqual([255, 0, 0, 255, 0, 0, 0, 0]);
   });
 
   it('encodes a linear frame buffer to the display curve first', () => {
