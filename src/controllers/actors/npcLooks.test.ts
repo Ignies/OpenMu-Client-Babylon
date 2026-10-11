@@ -135,6 +135,18 @@ describe('NPC looks from the original client', () => {
     expect([3, 26, 153].filter(type => m.npcClassicShadow(type))).toEqual([3, 26, 153]);
   });
 
+  // `o->Alpha >= 0.3f` opens a monster's shadow pass (ZzzCharacter.cpp:8673); a player-rig NPC takes the player's.
+  it('a monster draws its shadow from 0.3 alpha', () => {
+    const scene = new Scene(new NullEngine());
+    const monster = new (m.resolveModelFactory(3))(scene);
+    m.applyNpcShadow(monster, 3);
+    expect([monster.ShadowMinAlpha, monster.ClassicShadow]).toEqual([0.3, true]);
+    const queen = new (m.resolveModelFactory(25))(scene);
+    m.applyNpcShadow(queen, 25);
+    expect(queen.ClassicShadow).toBe(false);
+    scene.getEngine().dispose();
+  });
+
   // `m_bRenderShadow = false` at creation (ZzzCharacter.cpp:13584-14730, w_CursedTemple.cpp:170 and the
   // GMBattleCastle, GMDoppelGanger1, GMEmpireGuardian1/4, GM_Kanturu_2nd, GM_Raklion cases), and every frame on
   // the Maya hands (GM_Kanturu_3rd.cpp:1091, :1154).

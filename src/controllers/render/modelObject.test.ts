@@ -143,6 +143,23 @@ describe('the Classic blob shadow', () => {
     expect([shadowed('character'), shadowed('scenery'), shadowed('statue')]).toEqual([true, false, true]);
   });
 
+  // RenderBodyShadow's alpha (GOBoid.cpp:1591-1593) and the body alpha the pass starts at (ZzzCharacter.cpp:8588, :8673).
+  it('carries its own shadow strength, and draws it from its own body alpha', () => {
+    const faint = new ModelObject(scene);
+    faint.ShadowAlpha = 0.2;
+    faint.ShadowMinAlpha = 0.5;
+    faint.load(box('faint'));
+    const plain = new ModelObject(scene);
+    plain.load(box('solid'));
+    const clone = (name: string) => scene.getMeshByName(`${name}_shadow0`);
+    expect([clone('faint')?.metadata?.shadowAlpha, clone('solid')?.metadata?.shadowAlpha]).toEqual([0.2, 1]);
+    faint.setAlpha(0.6);
+    plain.setAlpha(0.6);
+    expect([clone('faint')?.isEnabled(false), clone('solid')?.isEnabled(false)]).toEqual([true, false]);
+    faint.setAlpha(0.4);
+    expect(clone('faint')?.isEnabled(false)).toBe(false);
+  });
+
   // RenderBodyShadow's mesh range: only those meshes cast (the Dark Horse's, ZzzObject.cpp:790).
   it('takes only the meshes it names into the shadow', () => {
     const horse = new ModelObject(scene);

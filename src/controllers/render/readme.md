@@ -90,7 +90,7 @@ There is no `index.ts` facade; other folders import the modules directly.
   without cloning one, and a clip cloned later reports its end; `BlendMesh -2` and a pulsing `BlendMeshLightAt`;
   a part unlinked from its bone goes back under its owner; an action stops every other running clip, the loader's clip 0 too;
   a character casts the blob, a map object only with `MapShadow`; `ShadowFromGround` marks the clone;
-  `ShadowMeshes` keeps the other meshes out.
+  `ShadowMeshes` keeps the other meshes out; the clone carries `ShadowAlpha` and draws from `ShadowMinAlpha`.
 - `versions/shared/contentRows.golden.test.ts`: every map's mesh animations, sampled over time.
 - `pbrMaps.test.ts`: `textureSourceName` reads the pack's remembered name mid-swap.
 - `pbrDerive.test.ts`: `flipRows`, flat normal and emissive mask of `derivePbrMaps`.
@@ -159,7 +159,10 @@ There is no `index.ts` facade; other folders import the modules directly.
   map object once cast one, with a size gate to keep flowers and cliffs out. `ClassicShadow` turns a
   character's or part's blob off where the original draws none (a cape's model), read every frame; the
   cascades still take it (`CastsShadow`). `ShadowFromGround` folds from the terrain under the origin
-  (the shader's `shadowGround`), as the original does for the boids and the Blood Castle statues; `CascadeShadow` keeps a caster off
+  (the shader's `shadowGround`), as the original does for the boids and the Blood Castle statues;
+  `ShadowAlpha` is the caster's share of `SHADOW_ALPHA` (the shader's `shadowStrength`, set per mesh at bind:
+  one material for every caster), and `ShadowMinAlpha` the body alpha its shadow starts at (a player 0.5, a
+  monster 0.3, `syncShadowEnabled`); `CascadeShadow` keeps a caster off
   the cascades (the boids, which have the Classic shadow alone).
   The fold (`SHADOW_FOLD`) is the original's `CalcShadowPosition`, which divides by the vertex's height
   under the 40-tile light, with no limit: the tallest monsters it shadows (Selupan's highest key is 26

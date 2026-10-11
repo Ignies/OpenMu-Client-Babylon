@@ -151,7 +151,8 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 - `playerObject.test.ts`: the Cape of Lord and Cape of Fighter load no model (cloth only); the Mantle of Monarch and
   Cape of Overrule keep theirs; the Classic shadow is the body parts and the hand weapons, none for a Uniria
   or Dinorant rider out of town, no weapon in town, no bow or crossbow (`setClassicShadows`, set each frame
-  by `ecs/systems/animationSystem.ts`; NPC types by `npcClassicShadow` when their model is made).
+  by `ecs/systems/animationSystem.ts`; NPC types by `applyNpcShadow` when their model is made), drawn from half
+  alpha (a monster from 0.3).
 - `wingObject.test.ts`: the Wing of Ruin layer (a `Data/` bitmap, `getDataTexture`) is read top-down like
   the GLB textures it shares the UVs of, and is drawn on a model whose meshes sit under its model node; a wing
   casts the Classic shadow, its blend card too, a cape's model none (its cloth would).

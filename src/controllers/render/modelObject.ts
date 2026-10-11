@@ -683,6 +683,15 @@ export class ModelObject {
   /** The sun cascades take it, with `CastsShadow`; off for what has the Classic shadow alone (the boids). */
   CascadeShadow = true;
 
+  /** The Classic shadow's strength, a share of the one Classic value: `RenderBodyShadow`'s alpha (boids 0.2). */
+  ShadowAlpha = 1;
+
+  /**
+   * The body alpha from which its Classic shadow is drawn: 0.5 for a player, 0.3 for a monster
+   * (ZzzCharacter.cpp:8588, :8673); the rest only when solid.
+   */
+  ShadowMinAlpha = 1;
+
   /**
    * Whether snow may settle on this object (controllers/weather/snowCaps.ts). Set by
    * MapTileObject on the maps snow settles on; every mesh carries it as
@@ -1647,8 +1656,7 @@ export class ModelObject {
         this._node,
         this.rootObject.node,
         slot,
-        this.ShadowBlendMeshCasts,
-        this.ShadowFromGround
+        this
       );
 
       if (!shadow) {
@@ -1676,7 +1684,7 @@ export class ModelObject {
   private syncShadowEnabled(): void {
     if (this._shadows.length === 0) return;
 
-    const visible = !this.OutOfView && this.Alpha >= 1 && this.ClassicShadow;
+    const visible = !this.OutOfView && this.Alpha >= this.ShadowMinAlpha && this.ClassicShadow;
     const serial = shadowStateVersion();
 
     if (visible === this._shadowsVisible && serial === this._shadowsSerial) {

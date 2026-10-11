@@ -49,4 +49,10 @@ describe('the Classic shadow of a character', () => {
     player.setClassicShadows(true, false, sword, null);
     expect([player.ClassicShadow, ...flags(player)]).toEqual([false, false, false, false, false, false, false]);
   });
+
+  // `o->Alpha >= 0.5f` opens the player's shadow pass (ZzzCharacter.cpp:8588).
+  it('is drawn from half alpha', () => {
+    const player = new PlayerObject(scene, new TransformNode('player', scene));
+    expect([player.ShadowMinAlpha, player.Armor.ShadowMinAlpha, player.Weapon1.ShadowMinAlpha]).toEqual([0.5, 0.5, 0.5]);
+  });
 });

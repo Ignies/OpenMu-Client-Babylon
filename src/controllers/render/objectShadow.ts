@@ -149,6 +149,8 @@ function createShadowMaterial(scene: Scene, slot: number): CustomMaterial {
   material.AddUniform('terrainHeightMap', 'sampler2D', undefined);
   // 1: fold from the ground under the origin, not the origin (`ShadowFromGround`).
   material.AddUniform('shadowGround', 'float', undefined);
+  // The caster's share of SHADOW_ALPHA (`ShadowAlpha`).
+  material.AddUniform('shadowStrength', 'float', undefined);
 
   // The silhouette dilation (SHADOW_DILATE) needs the caster's normals, and
   // nothing else in this pass does - `disableLighting` is on, there is no
@@ -258,7 +260,7 @@ function createShadowMaterial(scene: Scene, slot: number): CustomMaterial {
     // little bit of everything is the one that reads as too thin. The original
     // samples no texture here at all: every triangle it keeps lands solid 50%
     // black, and overlaps do not deepen it (the stencil above).
-    color.a = ${SHADOW_ALPHA.toFixed(3)};
+    color.a = ${SHADOW_ALPHA.toFixed(3)} * shadowStrength;
 
     color.a *= 1.0 - smoothstep(
       ${SHADOW_FADE_START.toFixed(4)},
@@ -322,6 +324,7 @@ function createShadowMaterial(scene: Scene, slot: number): CustomMaterial {
     }
     effect.setFloat2('shadowSunDir', axisX, axisZ);
     effect.setFloat('shadowGround', mesh.metadata?.shadowFromGround ? 1 : 0);
+    effect.setFloat('shadowStrength', mesh.metadata?.shadowAlpha ?? 1);
 
     effect.setTexture('terrainHeightMap', heightMap);
   });
@@ -436,21 +439,26 @@ blobShadowRefresh.fn = invalidateShadowState;
  * One projected blob for `slot`, or null when this caster has nothing to
  * project. Built on demand - every clone is a full copy of the caster's
  * submesh hierarchy and a second set of draw calls, so on a tier where the
- * slot never activates it should never exist. `blendMeshCasts`: see `meshCasts`; `fromGround`: the
- * caster's `ShadowFromGround`.
+ * slot never activates it should never exist. `caster`: the owner's shadow settings (`ModelObject`).
  */
 export function createObjectShadow(
   root: AbstractMesh,
   parent: TransformNode,
   originNode: TransformNode,
   slot: number,
-  blendMeshCasts: boolean,
-  fromGround = false
+  caster: ShadowCaster
 ): AbstractMesh | null {
   if (!(root instanceof Mesh)) return null;
 
-  return createOneShadow(root, parent, originNode, slot, blendMeshCasts, fromGround);
+  return createOneShadow(root, parent, originNode, slot, caster);
 }
+
+/** What a clone takes from its caster: see `meshCasts` and `ModelObject`'s fields of the same names. */
+type ShadowCaster = {
+  readonly ShadowBlendMeshCasts: boolean;
+  readonly ShadowFromGround: boolean;
+  readonly ShadowAlpha: number;
+};
 
 /**
  * Whether a caster's mesh is in the silhouette. `AddMeshShadowTriangles`
@@ -472,9 +480,9 @@ function createOneShadow(
   parent: TransformNode,
   originNode: TransformNode,
   slot: number,
-  blendMeshCasts: boolean,
-  fromGround: boolean
+  caster: ShadowCaster
 ): AbstractMesh | null {
+  const blendMeshCasts = caster.ShadowBlendMeshCasts;
   // Decide on the caster before paying for a clone: a model whose meshes are
   // all hidden or blend cards has nothing to cast.
   const casts = [root, ...root.getChildMeshes(false)].some(
@@ -509,7 +517,8 @@ function createOneShadow(
     mesh.metadata = {
       SkipBoundingBox: true,
       shadowOriginNode: originNode,
-      shadowFromGround: fromGround,
+      shadowFromGround: caster.ShadowFromGround,
+      shadowAlpha: caster.ShadowAlpha,
       diffuseTexture: casterTexture,
     };
 

@@ -20,7 +20,7 @@ describe('a boid', () => {
     for (const spec of specs) {
       if (!spec) continue;
       const boid = new (boidFactoryFor(spec, spec.models[0]))(scene);
-      expect([boid.CastsShadow, boid.ClassicShadow, boid.ShadowFromGround, boid.CascadeShadow]).toEqual([true, true, true, false]);
+      expect([boid.CastsShadow, boid.ClassicShadow, boid.ShadowFromGround, boid.CascadeShadow, boid.ShadowAlpha]).toEqual([true, true, true, false, 0.2]);
     }
     scene.getEngine().dispose();
   });

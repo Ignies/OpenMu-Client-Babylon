@@ -150,6 +150,12 @@ export class PlayerObject extends ModelObject {
     this.QuestItem.NodeNamePrefix = 'QuestItem_';
     this.Pet.NodeNamePrefix = 'Pet_';
 
+    // The player's shadow pass opens at half alpha (ZzzCharacter.cpp:8588).
+    this.ShadowMinAlpha = PLAYER_SHADOW_MIN_ALPHA;
+    for (const part of [this.HelmMask, this.Helm, this.Armor, this.Pants, this.Gloves, this.Boots, this.Weapon1, this.Weapon2]) {
+      part.ShadowMinAlpha = PLAYER_SHADOW_MIN_ALPHA;
+    }
+
     // Never in RenderCharacter's shadow pass, which draws BodyPart[] and Weapon[] alone (ZzzCharacter.cpp:8590-8628).
     this.PhoenixWing1.ClassicShadow = false;
     this.PhoenixWing2.ClassicShadow = false;
@@ -581,6 +587,8 @@ export class PlayerObject extends ModelObject {
     }
   }
 }
+
+const PLAYER_SHADOW_MIN_ALPHA = 0.5;
 
 const BOW_GROUP = 4;
 const LAST_BOW = 32;

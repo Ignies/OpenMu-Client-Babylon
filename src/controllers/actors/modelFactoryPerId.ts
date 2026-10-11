@@ -76,6 +76,16 @@ export function npcClassicShadow(typeNumber: number): boolean {
   return monsterRegistry.def(typeNumber)?.classicShadow !== false && bodyShadow(typeNumber) !== 'never';
 }
 
+/** A monster's shadow pass opens at alpha 0.3 (ZzzCharacter.cpp:8673). */
+const MONSTER_SHADOW_MIN_ALPHA = 0.3;
+
+/** An NPC model's Classic shadow at creation: whether it has one, and from which body alpha. */
+export function applyNpcShadow(model: ModelObject, typeNumber: number): void {
+  model.ClassicShadow = npcClassicShadow(typeNumber);
+  // A player-rig NPC takes the player's pass (PlayerObject).
+  if (model.ShadowMinAlpha >= 1) model.ShadowMinAlpha = MONSTER_SHADOW_MIN_ALPHA;
+}
+
 /** Whether it keeps its Classic shadow once it dies (the bodies whose Die branch drops it). */
 export function npcShadowOnDeath(typeNumber: number): boolean {
   return monsterRegistry.def(typeNumber)?.classicShadow !== 'alive' && bodyShadow(typeNumber) !== 'alive';
