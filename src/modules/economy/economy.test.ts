@@ -59,6 +59,21 @@ describe('Economy.craftingResult', () => {
     expect(Economy.mixResult).toBe('failed');
   });
 
+  // ReceiveMixExtended's MIXTYPE_CHAOS_CARD lines: GlobalText 2113 / 2112 with 2265 (WSclient.cpp:6731-6734, :6781-6784).
+  it('names the Chaos Card combination in its result lines', () => {
+    const said = vi.spyOn(Social, 'systemMessage').mockImplementation(() => undefined);
+    const warned = vi.spyOn(Social, 'errorMessage');
+    runInAction(() => (Economy.mixInventoryType = MIX_TYPE.chaosCard));
+    fillTray();
+    Economy.craftingResult(E.Success, { group: 14, id: 0 } as unknown as Item);
+    const success = said.mock.lastCall;
+    fillTray();
+    Economy.craftingResult(E.Failed, null);
+    runInAction(() => (Economy.mixInventoryType = MIX_TYPE.regular));
+    expect(success).toEqual(['Chaos card combination was successful.']);
+    expect(warned).toHaveBeenLastCalledWith('Chaos card combination has failed.');
+  });
+
   it('puts the result in the tray on a success', () => {
     fillTray();
     const wings = { group: 12, id: 0 } as unknown as Item;

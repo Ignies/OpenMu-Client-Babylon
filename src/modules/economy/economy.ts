@@ -740,12 +740,14 @@ export const Economy = new (class _Economy {
       if (result === E.Success && item) this.mixItems[0] = item;
     });
 
-    // ReceiveMixExtended (WSclient.cpp:6705-6795): the seed researcher's trays print no result line.
+    // ReceiveMixExtended (WSclient.cpp:6705-6795): the seed researcher's trays print no result line,
+    // the Chaos Card Master names its combination (GlobalText 2113 / 2112 with 2265).
     const socketMix = this.mixInventoryType === MIX_TYPE.attachSocket || this.mixInventoryType === MIX_TYPE.detachSocket;
+    const card = this.mixInventoryType === MIX_TYPE.chaosCard;
     if (result === E.Success) {
       playUiSound('mix');
       playUiSound('jewel');
-      if (!socketMix) Social.systemMessage(t('chaos.succeeded'));
+      if (!socketMix) Social.systemMessage(t(card ? 'chaos.cardSucceeded' : 'chaos.succeeded'));
       return;
     }
     if (result === E.Failed && socketMix) {
@@ -762,7 +764,7 @@ export const Economy = new (class _Economy {
     }
 
     const reason: Partial<Record<ItemCraftingResultCraftingResultEnum, TextKey>> = {
-      [E.Failed]: 'chaos.failed',
+      [E.Failed]: card ? 'chaos.cardFailed' : 'chaos.failed',
       [E.NotEnoughMoney]: 'chaos.notEnoughZen',
       [E.TooManyItems]: 'chaos.tooManyItems',
       [E.CharacterLevelTooLow]: 'chaos.levelTooLow',

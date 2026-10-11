@@ -25,6 +25,8 @@ const en = {
   'personalShop.notEnoughZen': 'You do not have enough Zen.',
   'chaos.succeeded': 'The combination succeeded.',
   'chaos.failed': 'The combination failed.',
+  'chaos.cardSucceeded': 'Chaos card combination was successful.',
+  'chaos.cardFailed': 'Chaos card combination has failed.',
   'chaos.takeItemsOut': 'Take your items out of the chaos machine first.',
   'chaos.putItemsIn': 'Put the items to combine into the chaos machine.',
   'chaos.notEnoughZen': 'Not enough Zen for the combination.',

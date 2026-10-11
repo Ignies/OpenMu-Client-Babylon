@@ -27,6 +27,8 @@ export default {
   'personalShop.notEnoughZen': 'Bạn không có đủ Zen.',
   'chaos.succeeded': 'Kết hợp thành công.',
   'chaos.failed': 'Kết hợp thất bại.',
+  'chaos.cardSucceeded': 'Kết hợp Thẻ Hỗn Mang thành công.',
+  'chaos.cardFailed': 'Kết hợp Thẻ Hỗn Mang thất bại.',
   'chaos.takeItemsOut': 'Hãy lấy vật phẩm ra khỏi Chaos Machine trước.',
   'chaos.putItemsIn': 'Hãy đặt các vật phẩm cần kết hợp vào Chaos Machine.',
   'chaos.notEnoughZen': 'Không đủ Zen để kết hợp.',

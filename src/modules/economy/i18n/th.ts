@@ -27,6 +27,8 @@ export default {
   'personalShop.notEnoughZen': 'เซนของคุณไม่พอ',
   'chaos.succeeded': 'การผสมสำเร็จ',
   'chaos.failed': 'การผสมล้มเหลว',
+  'chaos.cardSucceeded': 'การผสมการ์ดเคออสสำเร็จ',
+  'chaos.cardFailed': 'การผสมการ์ดเคออสล้มเหลว',
   'chaos.takeItemsOut': 'เอาไอเทมออกจากเครื่องเคออสก่อน',
   'chaos.putItemsIn': 'ใส่ไอเทมที่จะผสมลงในเครื่องเคออส',
   'chaos.notEnoughZen': 'เซนไม่พอสำหรับการผสม',

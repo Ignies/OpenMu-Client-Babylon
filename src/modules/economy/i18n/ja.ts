@@ -27,6 +27,8 @@ export default {
   'personalShop.notEnoughZen': 'Zen が足りません。',
   'chaos.succeeded': '合成に成功しました。',
   'chaos.failed': '合成に失敗しました。',
+  'chaos.cardSucceeded': 'カオスカード合成に成功しました。',
+  'chaos.cardFailed': 'カオスカード合成に失敗しました。',
   'chaos.takeItemsOut': '先にアイテムをカオスマシンから取り出してください。',
   'chaos.putItemsIn': '組み合わせるアイテムをカオスマシンに入れてください。',
   'chaos.notEnoughZen': '組合に必要な Zen が足りません。',

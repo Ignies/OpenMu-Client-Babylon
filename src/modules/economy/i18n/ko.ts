@@ -27,6 +27,8 @@ export default {
   'personalShop.notEnoughZen': '젠이 부족합니다.',
   'chaos.succeeded': '조합에 성공했습니다.',
   'chaos.failed': '조합에 실패했습니다.',
+  'chaos.cardSucceeded': '카오스 카드 조합에 성공했습니다.',
+  'chaos.cardFailed': '카오스 카드 조합에 실패했습니다.',
   'chaos.takeItemsOut': '먼저 카오스 머신에서 아이템을 꺼내세요.',
   'chaos.putItemsIn': '조합할 아이템을 카오스 머신에 넣으세요.',
   'chaos.notEnoughZen': '조합에 필요한 젠이 부족합니다.',
