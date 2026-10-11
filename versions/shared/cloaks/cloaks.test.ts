@@ -84,7 +84,7 @@ function run(w: CloakWearer, frames: number, set = new FakeSet(), pants: FakeSet
 }
 
 const wearer = (over: Partial<CloakWearer>): CloakWearer => ({
-  charClass: C.DarkLord, wing: null, wingBefore: over.wing ?? null, armor: null, skin: null, chaosCastle: false, netId: null, hero: false, guild: null, monster: null, rig: true, pants: null, shadowPass: false, ...over,
+  charClass: C.DarkLord, wing: null, wingBefore: over.wing ?? null, armor: null, skin: null, chaosCastle: false, netId: null, hero: false, guild: null, monster: null, rig: true, pants: null, shadowPass: false, fading: false, ...over,
 });
 
 const wear = (over: Partial<CloakWearer>, frames = 2) => run(wearer(over), frames);
@@ -590,5 +590,12 @@ describe('the cloths of a ring\'s body on a player (RenderPartObjectBody, ZzzObj
     expect([fighter.set.count, fighter.out[0]?.front, fighter.set.draws]).toEqual([1, 'Monster/iui02.OZT', 2]);
     // The Illusion Temple's bodies skip every cloth of the loop (:9958-9961).
     expect(body('unitedsoldier.glb', { charClass: C.RageFighter, wing: CAPE_OF_FIGHTER }).set.draws).toBe(1);
+  });
+});
+
+describe('the death fade (DeadCharacter\'s DeleteCloth every frame, ZzzCharacter.cpp:3233-3251)', () => {
+  it('keeps the Dark Lord\'s set as it is built from nothing: the skirt is never made again while the body fades', () => {
+    const { set } = wear({ fading: true }, 3);
+    expect([set.count, set.specs[3]?.at, set.specs[3]?.flags]).toEqual([3, [0, 10, -5], PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_SHORT_SHOULDER]);
   });
 });

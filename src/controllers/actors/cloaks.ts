@@ -28,6 +28,8 @@ export type CloakWearer = {
   pants: string | null;
   /** `RenderCharacter`'s shadow pass runs, drawing the parts a second time (:8590-8612). */
   shadowPass: boolean;
+  /** The body fades out dead: `DeadCharacter` deletes its cloths every frame (:3233-3251), so its sets are always new. */
+  fading: boolean;
 };
 
 /** What the rule does to a wearer's set: the original's `m_pCloth` array, `m_byNumCloth` and the loop's draws. */

@@ -18,7 +18,9 @@ cloth moves and draws, never who wears which one (the wearers' content names the
   `Move2` call (`holds` false: a caller that steps it under stun too), and `setLight` gives the `CloakLight`.
   `shown`, `held` (stun or sleep: `Move2(0, 5)`) and `castsShadow` are set every frame by the wearer's
   system; `size`, `cloth(s)`, `mesh(s)`, `draws(s)`, `drawn(s)` read it. `partner`: the set dropped with this
-  one (`DeleteCloth` takes a body's cloths and its parts' together, ZzzCharacter.cpp:3070-3115).
+  one (`DeleteCloth` takes a body's cloths and its parts' together, ZzzCharacter.cpp:3070-3115). `fading`: the
+  body fades out dead, its cloths deleted and built again every 25 Hz frame (`DeadCharacter`, :3233-3251): each
+  tick lays every cloth anew (`Create`, then its `Move2`), with no allocation; between ticks nothing changes.
 - `cloth`: the facade (`Controller`); its `update(map, dt)` advances the 25 Hz clock.
 - `runClothFrame()`: the frame's ticks and draws; the scene calls it before its first camera renders.
 - `PhysicsCloth`: the simulator alone (tests, readers).
@@ -93,7 +95,7 @@ cloth moves and draws, never who wears which one (the wearers' content names the
   cloth tearing when stepped again far off, a hidden wearer, the shadow clone, and the cost of 20 caped players
   (logged); the weld, the grid's corners and UVs, a mesh cloth written into its mesh in the bone's frame, the
   mesh's own geometry, waiting for the mesh and dropping with it, a grid over a mesh, the draw count and the hold,
-  and a partner dropped with its set.
+  a partner dropped with its set, and a fading set laid anew each tick, as one built that tick, and left between.
 - `clothSkin.test.ts`: the shipped GLBs of the mesh cloths, welded back into their BMD meshes vertex for vertex and
   triangle for triangle (the Magic Skeleton's, the Divine Pants'), and the soul pants' grids in their mesh 2.
 

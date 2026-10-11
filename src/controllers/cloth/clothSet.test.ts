@@ -521,3 +521,22 @@ describe('a body\'s cloths and its parts\' (DeleteCloth, ZzzCharacter.cpp:3070-3
     for (const s of [own, part]) s.dispose();
   });
 });
+
+describe('the death fade (DeadCharacter\'s DeleteCloth, ZzzCharacter.cpp:3233-3251)', () => {
+  it('lays every cloth anew on each 25 Hz tick while the body fades, as a set built from nothing, and leaves it between ticks', () => {
+    const rig = body();
+    const fading = new ClothSet(scene, rig);
+    hang(fading, [CAPE, ROBE]);
+    tick(10);
+    fading.fading = true;
+    const swung = Float64Array.from(pos(fading, 0));
+    frame(0.01);
+    expect(pos(fading, 0)).toEqual(swung);
+    // The tick that comes: Create and one Move2, the same as a set built that tick.
+    const fresh = new ClothSet(scene, rig);
+    hang(fresh, [CAPE, ROBE]);
+    frame(0.03);
+    expect([pos(fading, 0), pos(fading, 1)]).toEqual([pos(fresh, 0), pos(fresh, 1)]);
+    for (const s of [fading, fresh]) s.dispose();
+  });
+});

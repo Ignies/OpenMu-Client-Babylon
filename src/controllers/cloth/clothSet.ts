@@ -67,6 +67,8 @@ export class ClothSet implements ClothAnchor {
   shown = true;
   /** `Move2(0, 5)` under stun or sleep: the pins follow, nothing falls. */
   held = false;
+  /** The body fades out dead: `DeadCharacter`'s `DeleteCloth` every 25 Hz frame, so each tick lays every cloth anew. */
+  fading = false;
   /** Whether the Classic shadow is drawn (RenderLinkObject's cloth case, ZzzCharacter.cpp:8433-8446). */
   castsShadow = false;
   /** `m_byNumCloth`: the slots the loop walks and the shadow lays. */
@@ -256,12 +258,16 @@ export class ClothSet implements ClothAnchor {
     this.windY = world.z / length;
   }
 
-  /** One 25 Hz frame: each new cloth laid on the body (`Create`), the drawn ones stepped; a torn one drops the set. */
+  /**
+   * One 25 Hz frame: each new cloth laid on the body (`Create`), the drawn ones stepped; a torn one drops the set.
+   * Fading, every cloth is new each tick: deleted and built again as the wearer's rule builds it (ZzzCharacter.cpp:3251).
+   */
   tick(time: number, gusty: boolean): void {
     if (!this.ready || this.torn) return;
     for (let s = 0; s < this.slots.length; s++) {
       const worn = this.slots[s];
       if (!worn) continue;
+      if (this.fading) worn.created = false;
       if (!worn.created) {
         worn.cloth.create(this);
         worn.created = true;

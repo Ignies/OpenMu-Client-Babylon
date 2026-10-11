@@ -62,10 +62,20 @@ function clothSystem(world: World) {
     rig: false,
     pants: null,
     shadowPass: false,
+    fading: false,
   };
 
-  /** One body's frame: the rule on its sets, then what they need to step and draw. */
+  /**
+   * One body's frame: the rule on its sets, then what they need to step and draw. Once a dead body fades (`c->Rot`
+   * past 1) `DeadCharacter` deletes its cloths every frame (ZzzCharacter.cpp:3233-3251): the sets drop as the fade
+   * begins, the rule builds them from nothing, and every tick after lays them anew.
+   */
   function step(e: Entity, model: ModelObject, set: ClothSet, pants: ClothSet | null, castle: boolean, mapIndex: number): void {
+    const fading = !!e.dying && e.dying.rot >= 1;
+    if (fading && !set.fading) set.drop();
+    set.fading = fading;
+    if (pants) pants.fading = fading;
+    wearer.fading = fading;
     set.undraw();
     pants?.undraw();
     set.setLight(cloaksFor(wearer, set, pants));

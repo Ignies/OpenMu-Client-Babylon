@@ -36,6 +36,10 @@ the capes, the Dark Lord's hair and skirt, the Magic Gladiator's robe, the team 
   shadow is still laid where it was left (`AddClothesShadowTriangles` walks every built cloth below
   `m_byNumCloth`, ZzzBMD.cpp:2648-2710): a Dark Lord with a weapon and no cape lays a cape's shadow where
   his set was built, which never moves. Out of a cloak the set stays as it was, undrawn.
+- A dead body fading out (`c->Rot` past 1) loses its cloths every frame (`DeadCharacter`, ZzzCharacter.cpp:3233-3251)
+  and `RenderCharacter` builds them again from nothing: the system drops the sets as the fade begins, every tick
+  lays each cloth anew (the `cloth` controller's `fading`), and the rule, told `fading`, never makes the Dark Lord's
+  skirt again: the set stays as built, the skirt sticked at (0, 10, -5).
 - `DeleteCloth` on a wing change resets the set, which the rule builds anew the same frame: for the hero
   when a cloth wing (the Wing of Ruin, a cape, the Mantle) goes on or comes off (NewUIMyInventory.cpp:1050-1083),
   for another player when the new wing is one, or the old one as the slot empties (WSclient.cpp:2474-2491), so
@@ -100,7 +104,7 @@ the capes, the Dark Lord's hair and skirt, the Magic Gladiator's robe, the team 
 ## Tests
 - `cloaks.test.ts`: each use's specs against the original's numbers, and who wears them (the two monsters,
   no Doppelganger, the seven Magic Skeletons, the three pants by their model, twice in the shadow pass, the Crusts,
-  Fred, the four ring bodies on a player and the class loop over them).
+  Fred, the four ring bodies on a player and the class loop over them, the skirt left as built while fading).
 
 ## Notes
 - Not ported: the Dark Phoenix's hair (ZzzCharacter.cpp:8904-8920), which hangs on the bones of its second body

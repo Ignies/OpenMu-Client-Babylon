@@ -67,7 +67,7 @@ describe('ClothSystem', () => {
   it('hangs on each player body what the wearers\' rule names, in its light', () => {
     const p = player({ wings: { group: 13, num: 30 } });
     const set = run(p);
-    expect(seen).toEqual({ charClass: C.DarkLord, wing: { group: 13, num: 30 }, wingBefore: { group: 13, num: 30 }, armor: null, skin: null, chaosCastle: false, netId: null, hero: false, guild: null, monster: null, rig: true, pants: null, shadowPass: true });
+    expect(seen).toEqual({ charClass: C.DarkLord, wing: { group: 13, num: 30 }, wingBefore: { group: 13, num: 30 }, armor: null, skin: null, chaosCastle: false, netId: null, hero: false, guild: null, monster: null, rig: true, pants: null, shadowPass: true, fading: false });
     expect([set.size, set.cloth(2)?.spec, set.drawn(2)]).toEqual([1, CAPE, true]);
     // Undrawn the next frame the rule names nothing; the set stays as built.
     p.charAppearance.wings = null;
@@ -118,6 +118,18 @@ describe('ClothSystem', () => {
     PantsCloth.build(0, CAPE);
     Cloth.drop();
     expect(PantsCloth.built).toBe(false);
+  });
+
+  it('fades a dying body\'s sets once its Rot passes 1, dropped as the fade begins (DeadCharacter, ZzzCharacter.cpp:3233-3251)', () => {
+    const p = { ...player({ wings: { group: 13, num: 30 } }), dying: { rot: 0.5 } };
+    const set = run(p);
+    const drop = vi.spyOn(set, 'drop');
+    expect([set.fading, p.modelObject.PantsCloth.fading, seen?.fading]).toEqual([false, false, false]);
+    p.dying.rot = 1.02;
+    run(p);
+    expect([set.fading, p.modelObject.PantsCloth.fading, seen?.fading, drop.mock.calls.length, set.built]).toEqual([true, true, true, 1, true]);
+    run(p);
+    expect(drop.mock.calls.length).toBe(1);
   });
 
   it('tells the rule when the body is inside Chaos Castle', () => {

@@ -164,7 +164,8 @@ export function cloaks(w: CloakWearer, set: CloakSet, pants: CloakSet | null): R
       set.build(0, w.monster === DEATH_KING ? DEATH_KING_ROBE : w.monster === NIGHTMARE ? NIGHTMARE_ROBE : robeFor(w.wing));
       set.count = 1;
     }
-  } else if (base === BaseClass.DarkLord) {
+  } else if (base === BaseClass.DarkLord && !w.fading) {
+    // A fading body's set is new every frame (DeleteCloth, :3251): it never gets this far.
     followArmour(w, set);
   }
   drawSet(w, base, team !== null, set);
