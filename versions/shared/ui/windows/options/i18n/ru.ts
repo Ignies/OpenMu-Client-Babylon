@@ -391,17 +391,9 @@ export default {
     'Язык интерфейса, заданий, диалогов NPC, названий монстров и предметов.',
   'options.help.englishItemNames':
     'Оставляет названия предметов на английском при любом языке, как в гайдах и прайс-листах.',
-  'options.help.exitGame': 'Выходит из аккаунта и возвращает в главное меню.',
-  'options.help.selectServer':
-    'Выходит из аккаунта и возвращает к списку серверов.',
-  'options.help.switchCharacter':
-    'Возвращает к выбору персонажа без выхода из аккаунта.',
   'options.exitGame': 'Выйти из игры',
   'options.selectServer': 'Выбор сервера',
   'options.switchCharacter': 'Смена персонажа',
-  'exit.confirmQuit': 'Выйти из игры и вернуться в главное меню?',
-  'exit.confirmServers': 'Выйти из игры и вернуться к выбору сервера?',
-  'exit.confirmCharacters': 'Выйти из игры и вернуться к выбору персонажа?',
   'options.performanceReadout': 'Показатели работы',
   'options.page.fidelity': 'Точность',
   'options.fidelity': 'Точность',

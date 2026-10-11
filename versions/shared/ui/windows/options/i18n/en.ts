@@ -389,18 +389,11 @@ const en = {
     'The language of the interface, quests, NPC dialogue, and monster and item names.',
   'options.help.englishItemNames':
     'Keeps item names in English whatever the language, to match guides and price lists.',
-  'options.help.exitGame': 'Signs out and goes back to the start menu.',
-  'options.help.selectServer': 'Signs out and goes back to the server list.',
-  'options.help.switchCharacter':
-    'Goes back to character selection, still signed in.',
 
   // The system menu's three ways out (GlobalText 381 / 382 / 383).
   'options.exitGame': 'Exit Game',
   'options.selectServer': 'Select Server',
   'options.switchCharacter': 'Switch Character',
-  'exit.confirmQuit': 'Leave the game and go back to the main menu?',
-  'exit.confirmServers': 'Leave the game and go back to server selection?',
-  'exit.confirmCharacters': 'Leave the game and go back to character selection?',
   'options.performanceReadout': 'Performance readout',
   'options.page.fidelity': 'Fidelity',
   'options.fidelity': 'Fidelity',

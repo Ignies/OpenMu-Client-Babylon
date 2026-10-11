@@ -395,17 +395,9 @@ export default {
     'Die Sprache von Oberfläche, Quests, NPC-Dialogen sowie Monster- und Gegenstandsnamen.',
   'options.help.englishItemNames':
     'Lässt Gegenstandsnamen in jeder Sprache auf Englisch, passend zu Guides und Preislisten.',
-  'options.help.exitGame': 'Meldet dich ab und führt zum Hauptmenü zurück.',
-  'options.help.selectServer':
-    'Meldet dich ab und führt zur Serverauswahl zurück.',
-  'options.help.switchCharacter':
-    'Führt zur Charakterauswahl zurück, ohne dich abzumelden.',
   'options.exitGame': 'Spiel beenden',
   'options.selectServer': 'Server wählen',
   'options.switchCharacter': 'Charakter wechseln',
-  'exit.confirmQuit': 'Das Spiel verlassen und zum Hauptmenü zurückkehren?',
-  'exit.confirmServers': 'Das Spiel verlassen und zur Serverauswahl zurückkehren?',
-  'exit.confirmCharacters': 'Das Spiel verlassen und zur Charakterauswahl zurückkehren?',
   'options.performanceReadout': 'Leistungsanzeige',
   'options.page.fidelity': 'Originaltreue',
   'options.fidelity': 'Originaltreue',

@@ -400,17 +400,9 @@ export default {
     'El idioma de la interfaz, las misiones, los diálogos de los PNJ y los nombres de monstruos y objetos.',
   'options.help.englishItemNames':
     'Mantiene los nombres de los objetos en inglés sea cual sea el idioma, para que coincidan con guías y listas de precios.',
-  'options.help.exitGame': 'Cierra la sesión y vuelve al menú principal.',
-  'options.help.selectServer':
-    'Cierra la sesión y vuelve a la lista de servidores.',
-  'options.help.switchCharacter':
-    'Vuelve a la selección de personaje sin cerrar la sesión.',
   'options.exitGame': 'Salir del juego',
   'options.selectServer': 'Elegir servidor',
   'options.switchCharacter': 'Cambiar de personaje',
-  'exit.confirmQuit': '¿Salir del juego y volver al menú principal?',
-  'exit.confirmServers': '¿Salir del juego y volver a la selección de servidor?',
-  'exit.confirmCharacters': '¿Salir del juego y volver a la selección de personaje?',
   'options.performanceReadout': 'Datos de rendimiento',
   'options.page.fidelity': 'Fidelidad',
   'options.fidelity': 'Fidelidad',

@@ -16,9 +16,10 @@ the client-to-server encryption, the login fields and the offline flag.
 - `SessionExit.request(kind)` / `SessionExit.available(kind)`: Exit Game, Select Server, Switch
   Character (`kind` is `'quit' | 'servers' | 'characters'`). `onBeforeLogOut(fn)`: runs just before
   the LogOut goes out (mu_helper's `TriggerStop`, which this module may not import).
-- `openSystemMenu()`: Escape on a clear screen opens the system menu in the world
-  (`SessionExit.menuOpen`, `closeMenu()`; drawn by `versions/shared/ui/windows/system_menu`) and the
-  Options window on the server list and the character screen; returns true when it did.
+- `openSystemMenu()`: Escape on a clear screen in the world opens the system menu
+  (`SessionExit.menuOpen`, `closeMenu()`; drawn by `versions/shared/ui/windows/system_menu`); returns true
+  when it did. The server list and the character screen have their own `CSysMenuWin` (`openPregameMenu`,
+  `ecs/systems/keyboardInputSystem.ts`; `system_menu/pregame.tsx`).
 - `SessionResume`: the auto-reconnect state machine. `begin()`, `retry()`,
   `giveUp(reason)`, `remember(name)`, `finish()`, plus `attempt`, `step`, `active` for the overlay and
   `resumed` (a count of resumes that got back in, which `mu_helper/resume.ts` reacts to).
@@ -33,8 +34,9 @@ the client-to-server encryption, the login fields and the offline flag.
 - `sessionExit.ts` ports `CSystemMenuMsgBox` (`NewUICustomMessageBox.cpp:2386-2470`): it sends
   `LogOut` with type 0/2/1 and only changes screen when `LogoutResponse` arrives (or after a 5 s
   timeout). The server may also send `LogoutResponse` unprompted; its type decides where we land.
-  Escape in the world opens the five-button box (`NewUIHotKey.cpp:124`); the server and character
-  screens open Options, as their own `CSysMenuWin` (`UIMng.cpp:692-705`) is not ported.
+  Escape in the world opens the five-button box (`NewUIHotKey.cpp:124`). `CSysMenuWin`'s Select Server
+  sends `LogOut(2)` from the character screen too (SysMenuWin.cpp:121-131; OpenMU's `LogoutAction`
+  answers it outside the world); its Exit Game leaves without asking, as the original closes the game.
 - `sessionResume.ts`: when a game-server socket drops while a character is in the world (and the
   `autoReconnect` option is on), it redials `Session.lastGameServer`, sends the same login and selects
   the same character, with backoff 1, 2, 4, 8, 15 s. `boot.tsx` wires it as `Session.resumeHook`.
@@ -78,7 +80,8 @@ the client-to-server encryption, the login fields and the offline flag.
 ## Tests
 - `state.test.ts`: `sendToGS` sends only the bytes its DataView covers (a view into a larger buffer, as a module's
   packet can be); `cancelLogin` goes back to the server list and keeps the fields.
-- `sessionExit.test.ts`: Escape in the world opens the system menu, once, not Options.
+- `sessionExit.test.ts`: Escape in the world opens the system menu, once, not Options, and nothing off the world;
+  Select Server on the character screen sends `LogOut(2)` and leaves on the answer.
 - `net.test.ts`: "account already connected" shows the refusal by default and retries only where the
   world asks, then gives up; leaving the login drops a pending retry.
 - the login flow is covered by the listener order golden (`src/app/listenerOrder.golden.test.ts`).
