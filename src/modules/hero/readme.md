@@ -13,8 +13,8 @@ other folders share.
   `attackSpeedOf` / `magicSpeedOf(cls, agility)`, `deriveCharacterStats(input)` (damage, defense,
   rates and wizardry for the character info window), with the pet's share: the gold Fenrir, Demon,
   Skeleton and Imp on damage, wizardry and curse, Panda and Unicorn +50 defense
-  (NewUICharacterInfoWindow.cpp:707-737, :954-959, :1296-1326, :1424-1442). The transformation
-  rings of the same blocks are not added yet.
+  (NewUICharacterInfoWindow.cpp:707-737, :954-959, :1296-1326, :1424-1442), after the best worn
+  transformation ring: Christmas 20 (not on curse), Panda 30, Skeleton 40 (:680-704, :1259-1294, :1395-1418).
 - `emotes.ts`: `EMOTES`, `EMOTE_RINGS`, `emoteById(id)`, `matchEmoteWord(text)` (the chat words that fire
   an emote, `CheckChatText`), `genderedEmoteAction`, type `EmoteId`.
 - `statAllocation.ts`: `StatAllocation.start(stat, amount)` / `cancel()`, `run`, `running`, `isRunning(stat)`.
@@ -94,6 +94,6 @@ the hero is a walk the client failed to stop; no walk at all means the server mo
 - `stateWarnings.test.ts`: the no healing potions warning counts healing potions only.
 - `state.test.ts`: `Hero` keeps no tile of its own.
 - `wideStats.test.ts`: the 16-bit pool fields count until the 32-bit pools arrive, then not.
-- `characterStats.test.ts`: the pet bonuses on damage, wizardry, curse and defense.
+- `characterStats.test.ts`: the pet and transformation ring bonuses on damage, wizardry, curse and defense.
 - `experience_gained.test.ts`: a kill share feeds normal or master experience and says so in the system log;
   a master level-up swirls the twenty flare joints.

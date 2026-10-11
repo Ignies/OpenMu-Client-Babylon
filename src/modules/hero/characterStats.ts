@@ -588,13 +588,28 @@ function withPet<T extends Range>(range: T, pet: Item | null, kind: 'damage' | '
   return { ...range, min: min + Math.trunc(min * rate), max: max + Math.trunc(max * rate) };
 }
 
+/** The Christmas, Panda and Skeleton transformation rings: the best one worn adds this much. */
+const RING_BONUS: Readonly<Record<number, number>> = { 41: 20, 76: 30, 122: 40 };
+
+/** A damage range after the rings (NewUICharacterInfoWindow.cpp:680-704, :1259-1294, :1395-1418); curse skips the Christmas ring. */
+function withRing<T extends Range>(range: T, items: CharacterStatsInput['items'], kind: 'damage' | 'wizardry' | 'curse'): T {
+  let bonus = 0;
+  for (const slot of [InventoryConstants.Ring1Slot, InventoryConstants.Ring2Slot]) {
+    const ring = equipped(items, slot);
+    if (ring?.group !== GROUP_HELPER || (kind === 'curse' && ring.num === 41)) continue;
+    bonus = Math.max(bonus, RING_BONUS[ring.num] ?? 0);
+  }
+  return bonus ? { ...range, min: range.min + bonus, max: range.max + bonus } : range;
+}
+
 export function deriveCharacterStats(input: CharacterStatsInput): DerivedStats {
   const base = getBaseClass(input.charClass);
 
-  const pet = equipped(input.items, InventoryConstants.PetSlot);
-  const damage = withPet(calculateDamage(input, base), pet, 'damage', input.level);
-  const wizardry = withPet(calculateWizardry(input), pet, 'wizardry', input.level);
-  const curse = withPet({ min: Math.trunc(input.energy / 9), max: Math.trunc(input.energy / 4) }, pet, 'curse', input.level);
+  const { items, level } = input;
+  const pet = equipped(items, InventoryConstants.PetSlot);
+  const damage = withPet(withRing(calculateDamage(input, base), items, 'damage'), pet, 'damage', level);
+  const wizardry = withPet(withRing(calculateWizardry(input), items, 'wizardry'), pet, 'wizardry', level);
+  const curse = withPet(withRing({ min: Math.trunc(input.energy / 9), max: Math.trunc(input.energy / 4) }, items, 'curse'), pet, 'curse', level);
   // The Panda and the Unicorn add 50 defense.
   const petDefense = pet?.group === GROUP_HELPER && (pet.num === PET.panda || pet.num === PET.unicorn) ? 50 : 0;
 
