@@ -236,7 +236,7 @@ export default {
   'options.help.blockBrowserKeys':
     'Blokuje w grze skróty przeglądarki, takie jak F5 i powiększanie, oraz pyta przed zamknięciem karty.',
   'options.help.presets':
-    'Ustawia Oświetlenie, Materiały, Szczegóły i całą stronę Obraz na jeden pasujący poziom.',
+    'Ustawia Oświetlenie, Materiały, Szczegóły i całą stronę Obraz na jeden pasujący poziom. Niska dodatkowo wyłącza wszystko, co obciąża, łącznie z tłumem, i renderuje w 75%, dla słabszych komputerów.',
   'options.help.lightingQuality':
     'Klasyczne to oryginalny wygląd. Ulepszone dodaje cienie od słońca, miękkie cieniowanie i mgiełkę; Ultra je wyostrza.',
   'options.help.materialQuality':

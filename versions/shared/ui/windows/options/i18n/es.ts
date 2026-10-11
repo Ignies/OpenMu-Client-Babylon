@@ -252,7 +252,7 @@ export default {
   'options.help.blockBrowserKeys':
     'Evita que atajos del navegador como F5 o el zoom actúen durante la partida y pide confirmación antes de cerrar la pestaña.',
   'options.help.presets':
-    'Ajusta Iluminación, Materiales, Detalle y toda la página Imagen a un mismo nivel.',
+    'Ajusta Iluminación, Materiales, Detalle y toda la página Imagen a un mismo nivel. Baja además apaga todo lo costoso, multitudes incluidas, y dibuja al 75 %, para equipos lentos.',
   'options.help.lightingQuality':
     'Clásica es el aspecto original. Mejorada añade sombras del sol, sombreado suave y bruma; Ultra los hace más nítidos.',
   'options.help.materialQuality':

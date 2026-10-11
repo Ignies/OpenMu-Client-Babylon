@@ -584,8 +584,10 @@ function prepareMeshes(
  * The bytes of one GLB, taken through the asset transport so the build's gzip
  * sidecar is used when there is one (`controllers/assets/compressedAssets.ts`), then
  * handed to Babylon as a file rather than a URL. These GLBs carry their own
- * textures, so nothing is resolved against the root URL and the loader only
- * needs the name for its `.glb` extension.
+ * textures, so nothing is resolved against the root URL; but Babylon names each
+ * embedded image `data:<root><file name>#image<n>` and shares textures engine-wide
+ * by that name, so the root is the model's folder: with an empty one,
+ * `Object74/Object98.glb` and `Object75/Object98.glb` shared their textures.
  */
 async function loadContainerBytes(
   filePath: string,
@@ -594,7 +596,7 @@ async function loadContainerBytes(
 ): Promise<AssetContainer> {
   const parse = (bytes: Uint8Array) =>
     SceneLoader.LoadAssetContainerAsync(
-      '',
+      filePath.slice(0, filePath.lastIndexOf('/') + 1),
       new File([bytes as BlobPart], fileName, { type: 'model/gltf-binary' }),
       scene,
       null,

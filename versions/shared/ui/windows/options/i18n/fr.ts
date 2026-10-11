@@ -237,7 +237,7 @@ export default {
     'La souris oriente la vue à tout niveau de zoom, pas seulement en vue subjective.',
   'options.help.blockBrowserKeys':
     'Bloque en jeu les raccourcis du navigateur comme F5 et le zoom, et demande confirmation avant de fermer l’onglet.',
-  'options.help.presets': 'Règle Éclairage, Matériaux, Détail et toute la page Image sur un même niveau.',
+  'options.help.presets': 'Règle Éclairage, Matériaux, Détail et toute la page Image sur un même niveau. Basse coupe en plus tout ce qui est coûteux, foules comprises, et affiche à 75 %, pour les machines lentes.',
   'options.help.lightingQuality':
     'Classique reprend le rendu original. Améliorée ajoute les ombres du soleil, un ombrage doux et de la brume ; Ultra les affine.',
   'options.help.materialQuality':

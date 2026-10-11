@@ -128,3 +128,18 @@ describe('evictUnusedContainers', () => {
     expect(count('Sword01.glb')).toBe(1);
   });
 });
+
+describe('loadGLTF texture identity', () => {
+  it('hands Babylon each model folder as the root, so same-named GLBs in two folders never share a texture', async () => {
+    const roots: string[] = [];
+    const spy = vi.mocked(SceneLoader.LoadAssetContainerAsync);
+    const before = spy.mock.calls.length;
+    await loadGLTF('Object74/Object98.glb', world);
+    await loadGLTF('Object75/Object98.glb', world);
+    for (const call of spy.mock.calls.slice(before)) roots.push(call[0] as string);
+    expect(roots).toHaveLength(2);
+    expect(roots[0]).not.toBe(roots[1]);
+    expect(roots[0]).toMatch(/Object74\/$/);
+    expect(roots[1]).toMatch(/Object75\/$/);
+  });
+});

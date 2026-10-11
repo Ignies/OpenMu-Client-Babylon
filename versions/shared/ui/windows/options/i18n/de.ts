@@ -252,7 +252,7 @@ export default {
   'options.help.blockBrowserKeys':
     'Blockiert Browser-Tastenkürzel wie F5 und Zoom im Spiel und fragt nach, bevor der Tab geschlossen wird.',
   'options.help.presets':
-    'Stellt Beleuchtung, Materialien, Detail und alles auf der Seite Bild auf eine passende Stufe.',
+    'Stellt Beleuchtung, Materialien, Detail und alles auf der Seite Bild auf eine passende Stufe. Niedrig schaltet zudem alles Aufwendige ab, Menschenmengen eingeschlossen, und rendert mit 75 %, für langsame Rechner.',
   'options.help.lightingQuality':
     'Klassisch ist der Originallook. Verbessert bringt Sonnenschatten, weiche Schattierung und Dunst, Ultra schärft sie.',
   'options.help.materialQuality':

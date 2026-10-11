@@ -220,7 +220,7 @@ export default {
     'W, A, S, D로 캐릭터가 걷고, 1인칭에서는 마우스로 시점을 돌립니다. 이 네 키에 있던 단축키는 Ctrl과 함께 누르세요.',
   'options.help.thirdPersonMouseLook': '1인칭뿐 아니라 확대/축소 정도와 상관없이 마우스로 시점을 돌립니다.',
   'options.help.blockBrowserKeys': '게임 중 F5나 확대/축소 같은 브라우저 단축키를 막고, 탭을 닫기 전에 확인합니다.',
-  'options.help.presets': '조명, 재질, 디테일은 물론 화질 페이지 전체를 같은 수준으로 한 번에 맞춥니다.',
+  'options.help.presets': '조명, 재질, 디테일은 물론 화질 페이지 전체를 같은 수준으로 한 번에 맞춥니다. 낮음은 군중 관련을 포함해 부담이 큰 옵션을 모두 끄고 75%로 렌더링합니다. 느린 PC용입니다.',
   'options.help.lightingQuality':
     '클래식은 원작 그대로입니다. 향상은 햇빛 그림자, 부드러운 음영, 안개를 더하고, 울트라는 이를 더 선명하게 합니다.',
   'options.help.materialQuality': '요철과 광택이 있는 사실적인 표면입니다. 끄거나, 캐릭터와 장비에만, 또는 모든 것에 적용합니다.',

@@ -103,7 +103,7 @@ the table would import itself.
 - `itemRequirements.test.ts`: strength per option level, wing and pet level requirements.
 - `itemCompare.test.ts`: which worn item is compared, and the green / red deltas on the tooltip.
 - `itemLevelLook.test.ts`: Box of Luck / Box of Kundun names and icons.
-- `dropModelProxy.test.ts`: Box of Kundun / Box of Luck models, medals, chocolate boxes, Rena, quest items.
+- `dropModelProxy.test.ts`: Box of Kundun / Box of Luck models, medals, chocolate boxes, Rena, quest items, Ale, Life Stone, Loch's Feather, Wizards Ring.
 - `archangelWeapons.test.ts`: Divine weapon and Weapon of Archangel names, colours and icons.
 - `portedItems.test.ts`: MuMain items and capes (tests `controllers/actors/wings.ts`, appearance).
 - `ancientSets.test.ts`: set lookup by discriminator, worn piece count, which options light.
