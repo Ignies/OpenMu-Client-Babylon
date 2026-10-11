@@ -101,6 +101,42 @@ describe('an item icon shot', () => {
     root.dispose();
   });
 
+  it('places the model at the original\'s anchor in the squares plus its offset (the Lucky Penny, 1 x 1)', async () => {
+    const job = itemIconJob(scene, { group: 14, num: 100, lvl: 0 });
+    const root = new TransformNode('root', scene);
+    const subject = await job?.build(root);
+    const node = root.getChildren()[0] as TransformNode;
+    const unit = ITEM_ICON_UNITS_PER_PIXEL * M;
+    // RenderItem3D (0.49, 0.28) of 20 x 20 bag pixels, then Position += (0.01, -0.05) (:8483-8488).
+    expect(node.position.x).toBeCloseTo(0.49 * 20 * unit + 0.01 * M, 9);
+    expect(node.position.z).toBeCloseTo(-0.28 * 20 * unit - 0.05 * M, 9);
+    const want = angleMatrixQuaternion(0, 0, 0, new Quaternion());
+    expect(Math.abs(Quaternion.Dot(node.rotationQuaternion ?? new Quaternion(), want))).toBeCloseTo(1, 6);
+    subject?.dispose();
+    root.dispose();
+  });
+
+  it('turns a weapon by its hands (Mace of the King, one-handed)', async () => {
+    const job = itemIconJob(scene, { group: 2, num: 22, lvl: 0 });
+    const root = new TransformNode('root', scene);
+    const subject = await job?.build(root);
+    const node = root.getChildren()[0] as TransformNode;
+    const want = angleMatrixQuaternion(180 * DEG, 270 * DEG, 15 * DEG, new Quaternion());
+    expect(Math.abs(Quaternion.Dot(node.rotationQuaternion ?? new Quaternion(), want))).toBeCloseTo(1, 6);
+    subject?.dispose();
+    root.dispose();
+  });
+
+  it('draws the model the bag swaps in for a level, at its scale (the Heart +0 is MODEL_EVENT)', async () => {
+    const job = itemIconJob(scene, { group: 14, num: 12, lvl: 0 });
+    const root = new TransformNode('root', scene);
+    const subject = await job?.build(root);
+    expect(loaded.at(-1)).toBe('Item/Event02.glb');
+    expect((root.getChildren()[0] as TransformNode).scaling.x).toBeCloseTo(0.0025, 9);
+    subject?.dispose();
+    root.dispose();
+  });
+
   it('has no shot for an item with no model (Gladiator\'s Glory, 13/95)', () => {
     expect(itemIconJob(scene, { group: 13, num: 95, lvl: 0 })).toBeNull();
   });

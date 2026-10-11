@@ -31,7 +31,7 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 - `deserializeAppearance.ts`: `deserializeAppearance`, `deserializeAppearanceExtended`,
   `APPEARANCE_EXTENDED_LENGTH`, `classFromAppearance`, `emptyAppearance`, `withAppearanceClass`,
   `isAppearanceBlank`, `itemLevelFromGlow`.
-- `weaponClass.ts`: `GROUP_*`, item tests (`isWeaponItem`, `isBow`, `isCrossbow`, `isBook`,
+- `weaponClass.ts`: `GROUP_*`, item tests (`isWeaponItem`, `isTwoHanded`, `isBow`, `isCrossbow`, `isBook`,
   `equippedBowType`, `swordformGlovesModel`), clip pickers (`chooseIdleAction`, `chooseWalkAction`,
   `chooseRunAction`, `chooseFenrir*Action`, `chooseAttackAction`, `chooseHighBowAttackAction`,
   `isSocialAction`), types `CharacterPose`, `AttackPose`, `Hands`.
@@ -118,8 +118,9 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   (ZzzInventory.cpp:9707): the original's item camera has an identity view, a 1 degree field over
   the 640 x 480 screen and puts the item 200 units out (0.1 of `RENDER_ITEMVIEW_FAR`), so a bag pixel
   is `ITEM_ICON_UNITS_PER_PIXEL` units there. The shot covers the item's squares (20 pixels each),
-  places the model at its anchor in them and turns and scales it as `RenderObjectScreen` does;
-  `render/iconShot.ts` draws it once.
+  places the model at its anchor in them plus its offset, turns it and sets its body height as
+  `RenderObjectScreen` does (`interface/item_icons/itemIconPose.ts`, two-handed by `isTwoHanded`, the
+  inventory width proxy) and scales it by `itemIconScale.ts`; `render/iconShot.ts` draws it once.
 
 ## Depends on / used by
 - uses: `render` (`ModelObject`, bone links), `assets`, `anim`, `fx`, `item_fx`, `lighting`,
@@ -154,7 +155,9 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 - `itemAngle.test.ts`: drop scale and pose per group, worn height, the `ItemAngle` tail rows.
 - `itemIcon.test.ts`: the shot covers the item's squares at the original's item depth, loads the
   item's own model under the root at its scale and angle; a worn part (the Queen helm) draws only its
-  helm mesh, comes down by `ItemHeight` and keeps its own skeleton; no shot for an item with no model.
+  helm mesh, comes down by `ItemHeight` and keeps its own skeleton; the anchor plus offset (the Lucky
+  Penny), a weapon's hands (Mace of the King), the Heart +0's swapped model and scale; no shot for an
+  item with no model.
 - `npcModelTable.test.ts`: every row names a file in `public/game-assets` and has a scale > 0; the
   tables behave as plain objects and read the folders when asked.
 - `trapModels.test.ts`: every (map, trap) pair names an `Object<world+1>` model that exists.

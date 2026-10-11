@@ -3,7 +3,8 @@ import type { Item } from '../../ecs/world';
 import { angleMatrixQuaternion } from '../render/renderAngles';
 import { iconShots, type IconShotJob } from '../render/iconShot';
 import { loadItemModel } from './itemModel';
-import { ITEM_ICON_SCALE, ITEM_ICON_SCALE_DEFAULT, type LiveItemIconSource } from '../interface/item_icons';
+import { isTwoHanded } from './weaponClass';
+import { ITEM_ICON_SCALE, ITEM_ICON_SCALE_DEFAULT, itemIconPose, type LiveItemIconSource } from '../interface/item_icons';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 
 /**
@@ -25,20 +26,18 @@ const DEG = Math.PI / 180;
 /** Metres per MU unit: the models and the scene are in metres. */
 const M = 1 / 100;
 
-/** The original's pose for a bag item that no branch of RenderObjectScreen names (ZzzInventory.cpp:8322-8325, 10046-10050). */
-const DEFAULT_ANGLE = [270, -10, 0] as const;
-const DEFAULT_ANCHOR = [0.5, 0.6] as const;
-
 /** The shot of `item`'s icon, or null when it has no model (Gladiator's Glory, 13/95). */
 export function itemIconJob(scene: Scene, item: Item): IconShotJob | null {
   const def = ItemsDatabase.getItem(item.group, item.num);
   if (!def?.szModelName.endsWith('.glb')) return null;
-  const file = def.szModelFolder + def.szModelName;
   const key = `${item.group}_${item.num}`;
+  const pose = itemIconPose(item.group, item.num, item.lvl ?? 0, isTwoHanded(item));
+  const file = pose.model?.file ?? def.szModelFolder + def.szModelName;
+  const scale = pose.model?.scale ?? ITEM_ICON_SCALE[key] ?? ITEM_ICON_SCALE_DEFAULT;
   const width = (def.X || 1) * SQUARE;
   const height = (def.Y || 1) * SQUARE;
   const unit = ITEM_ICON_UNITS_PER_PIXEL * M;
-  const scale = ITEM_ICON_SCALE[key] ?? ITEM_ICON_SCALE_DEFAULT;
+  const { angle, offset, anchor } = pose;
 
   return {
     key: `${key}_${item.lvl ?? 0}${item.isExcellent ? '_e' : ''}${item.isAncient ? '_a' : ''}`,
@@ -51,11 +50,12 @@ export function itemIconJob(scene: Scene, item: Item): IconShotJob | null {
       top: 0,
     },
     build: async root => {
-      const object = await loadItemModel(scene, root, item.group, item.num, file);
-      // MU eye space (x right, y up, the item 200 units out) on the root's Babylon x, z, y.
+      const object = await loadItemModel(scene, root, item.group, item.num, file, pose.bodyHeight * M);
+      // MU eye space (x right, y up, the item 200 units out) on the root's Babylon x, z, y: the
+      // anchor in the squares (RenderItem3D), then RenderObjectScreen's offset.
       const node = object.node;
-      node.position.set(DEFAULT_ANCHOR[0] * width * unit, -DEPTH * M, -DEFAULT_ANCHOR[1] * height * unit);
-      node.rotationQuaternion = angleMatrixQuaternion(DEFAULT_ANGLE[0] * DEG, DEFAULT_ANGLE[1] * DEG, DEFAULT_ANGLE[2] * DEG, new Quaternion());
+      node.position.set(anchor[0] * width * unit + offset[0] * M, (offset[2] - DEPTH) * M, -anchor[1] * height * unit + offset[1] * M);
+      node.rotationQuaternion = angleMatrixQuaternion(angle[0] * DEG, angle[1] * DEG, angle[2] * DEG, new Quaternion());
       node.scaling.setAll(scale);
       return object;
     },

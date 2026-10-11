@@ -25,11 +25,20 @@ export function dressItemModel(object: ModelObject, group: number, num: number):
 
 /**
  * An item's model with no entity behind it (a bag icon): dressed as above, under `parent`, casting
- * nothing. A worn part (`Player/`) keeps the skeleton of its own file, posed at its first frame.
+ * nothing, at `bodyHeight` when the caller has its own (the bag's, world units). A worn part
+ * (`Player/`) keeps the skeleton of its own file, posed at its first frame.
  */
-export async function loadItemModel(scene: Scene, parent: TransformNode, group: number, num: number, file: string): Promise<ModelObject> {
+export async function loadItemModel(
+  scene: Scene,
+  parent: TransformNode,
+  group: number,
+  num: number,
+  file: string,
+  bodyHeight?: number
+): Promise<ModelObject> {
   const object = new ModelObject(scene, parent);
   dressItemModel(object, group, num);
+  if (bodyHeight !== undefined) object.BodyHeight = bodyHeight;
   object.CastsShadow = false;
   try {
     object.load(await loadGLTF(file, { scene }));
