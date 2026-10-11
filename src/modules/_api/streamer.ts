@@ -3,7 +3,7 @@
 import type { ComponentType } from 'react';
 import type { StreamedModuleEntry } from '../servers/serverManifest';
 import { MODULE_API_VERSION, canServe } from './contract';
-import { serveModule } from './dispatcher';
+import { SANDBOX_LIMITS, serveModule } from './dispatcher';
 import type { ModuleHost } from './host';
 import type { PortLike } from './protocol';
 import type { ReadyModule, StreamNotice } from './download';
@@ -84,7 +84,8 @@ export function createStreamer(deps: StreamerDeps) {
     }
     const api = deps.host.api(id);
     // The module's frame is its window: a window it registers draws the frame.
-    const stop = serveModule(frame.port, { ...api, registerWindow: w => api.registerWindow({ ...w, draw: frame.slot }) });
+    const wrapped = { ...api, registerWindow: (w: Parameters<typeof api.registerWindow>[0]) => api.registerWindow({ ...w, draw: frame.slot }) };
+    const stop = serveModule(frame.port, wrapped, { ...SANDBOX_LIMITS, now: () => performance.now() });
     return {
       entry,
       firstParty: false,

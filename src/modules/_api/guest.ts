@@ -3,7 +3,10 @@
 import type { RemoteModuleApi } from './contract';
 import { PROTOCOL_VERSION, fromBase64, toBase64, type CallArgs, type CallName, type CallResult, type PortLike } from './protocol';
 
-type Pending = { resolve(result: unknown): void; reject(error: Error): void };
+type Pending = { resolve(result: unknown): void; reject(error: Error): void; timer: ReturnType<typeof setTimeout> };
+
+/** How long a call waits for the client's answer before it fails. */
+export const GUEST_TIMEOUT_MS = 10_000;
 
 /** The module API over `port` (its end of the channel the client handed over). */
 export function connectModule(port: PortLike): RemoteModuleApi {
@@ -26,6 +29,7 @@ export function connectModule(port: PortLike): RemoteModuleApi {
     const p = pending.get(data.id);
     if (!p) return;
     pending.delete(data.id);
+    clearTimeout(p.timer);
     if ('error' in data) p.reject(new Error(String(data.error)));
     else p.resolve(data.result);
   };
@@ -33,7 +37,12 @@ export function connectModule(port: PortLike): RemoteModuleApi {
   function call<K extends CallName>(name: K, args: CallArgs[K]): Promise<CallResult<K>> {
     return new Promise((resolve, reject) => {
       const id = next++;
-      pending.set(id, { resolve: resolve as (result: unknown) => void, reject });
+      // A call nobody answers fails instead of waiting forever (a client that stopped serving it).
+      const timer = setTimeout(() => {
+        pending.delete(id);
+        reject(new Error(`${name}: no answer in ${GUEST_TIMEOUT_MS / 1000} s`));
+      }, GUEST_TIMEOUT_MS);
+      pending.set(id, { resolve: resolve as (result: unknown) => void, reject, timer });
       port.postMessage({ v: PROTOCOL_VERSION, id, call: name, args });
     });
   }

@@ -33,8 +33,9 @@ Not a module: no `module.ts`, like `_shared/`.
 - `protocol.ts`: the message wire. `PROTOCOL_VERSION`, `MAX_MESSAGE_SIZE`, `readCall(data)`, the
   message types, `PortLike` (`{ postMessage, onmessage }`, a `MessagePort`), and `toBase64` /
   `fromBase64` for packet payloads.
-- `dispatcher.ts`: `serveModule(port, api)`, the client's end; returns the stop.
-- `guest.ts`: `connectModule(port)`, the module's end: a `RemoteModuleApi`.
+- `dispatcher.ts`: `serveModule(port, api, limits?)`, the client's end; returns the stop.
+  `SANDBOX_LIMITS`, type `Limits`.
+- `guest.ts`: `connectModule(port)`, the module's end: a `RemoteModuleApi`; `GUEST_TIMEOUT_MS`.
 - `sandbox.ts`: `sandboxFrame(source)` (the iframe's attributes), `handOverPort(frameWindow)`,
   `HAND_OVER`, `sandboxPage(code)` (the page a downloaded module runs in).
 - `download.ts` (streaming, phase 5): `prepareModules(entries, dropped, manifestUrl, { store, fetch })`
@@ -73,8 +74,9 @@ Not a module: no `module.ts`, like `_shared/`.
   listeners are unchanged.
 - `src/app/logic.ts` hands `moduleHost.api` to `installModules` and then calls
   `installModuleRouter()` and `installModuleStreaming(isBuiltIn)` (the wiring). It cannot live in
-  `module.ts`: every module imports that file, and `module.ts` -> `ports.ts` -> `hero` -> `session` -> `servers/serverConfig` ->
-  `servers/serverManifest` -> `module.ts` would be a cycle. Built-in modules ignore the API they get.
+  `module.ts`: every module imports that file, and `module.ts` -> `ports.ts` -> `hero` -> `session`
+  -> `servers/serverConfig` -> `servers/serverManifest` -> `module.ts` would be a cycle. Built-in
+  modules ignore the API they get.
 - Messages: calls `{ v, id, call, args }`, answers `{ id, result }` or `{ id, error }`, events
   `{ event: 'mapChange', data: { map } }` and `{ event: 'packet', data: { payload } }`. Over the wire
   `onMapChange` and `onPacket` are subscribes and `offMapChange` / `offPacket` their ends; the guest
@@ -162,6 +164,22 @@ Phase 5 of [docs/module_streaming.md](../../../docs/module_streaming.md): the mo
   export carries `connect` (`guest.ts`), which the frame's page calls with its port. A module bundles
   `streamed.ts` and what it imports into one file.
 
+### Limits
+A third-party module is served with `SANDBOX_LIMITS` (`dispatcher.ts`, on top of the host's rules
+and the 64 K message cap); a first-party one, like a built-in, has none. Numbers a normal module
+never reaches; a call over one is refused with an error, nothing else happens:
+- windows: 1. Its frame is its one surface, so a second window could only show the same frame; the
+  same window id again replaces it.
+- text: 4000 entries (each language and key counted once, a key registered again is not new) and
+  1000 characters a line. A module with 15 languages of 250 lines fits.
+- calls: 100 a second, 200 at once (a token bucket). Checked before the message is read, so a flood
+  costs no more than its refusals. A window polling `hero()` every frame at 60 fps stays under it.
+- packets: 30 a second, 60 at once, on top of the call rate: what reaches the server.
+- listeners: one map and one packet subscription per module, however often it subscribes (over
+  messages a subscribe is a flag, not a new listener).
+- the guest (`guest.ts`): a call with no answer in `GUEST_TIMEOUT_MS` (10 s) fails with
+  `<call>: no answer in 10 s`, so a module whose client stopped serving it is not left waiting.
+
 ## Depends on / used by
 - uses: `controllers/interface` (`keyBindings`, `windows`, `windowManager`, `module_window`, `msgWin`,
   `uiState`), `i18n`, `core/localStorage`, `chat/notify` (the notices),
@@ -216,9 +234,12 @@ Phase 5 of [docs/module_streaming.md](../../../docs/module_streaming.md): the mo
   `tools/modules/sign.test.ts` signs with node's crypto and checks with this client's `isFirstParty`.
 - `streamer.test.ts`: over a recording game, modules served by a fake fetch, a throwaway key and a
   fake frame (the module's code over a real `MessageChannel`): signed in process without asking,
-  unsigned in its frame after consent (its window drawing the frame), a bad signature or no key built
-  in as third party, consent refused, `core` and a built-in's name refused, a failing install taken
+  unsigned in its frame after consent (its window drawing the frame) and under the sandbox limits, a
+  bad signature or no key built in as third party, consent refused, `core` and a built-in's name refused, a failing install taken
   back, the download's notices, leaving (windows, listeners and frames gone), a new list (kept,
   reloaded, dropped), another world, leaving before the hero is in the world, a world that lists none.
+- `limits.test.ts`: the numbers pinned, one window, the text caps, the call and packet rates on a
+  test clock, one subscription however often, no limits unless asked; the guest's timeout and a call
+  answered in time.
 - `consent.test.ts`: once per world and version, both answers remembered, an unanswered box asked
   again, no storage.

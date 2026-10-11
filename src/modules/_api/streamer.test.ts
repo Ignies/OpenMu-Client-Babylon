@@ -119,6 +119,19 @@ describe('the streamer', () => {
     expect(s.streamer.loaded()).toEqual([{ id: 'third', version: '1.0.0', firstParty: false }]);
   });
 
+  it('serves a third-party module under the sandbox limits, a first-party one without', async () => {
+    const two = (id: string) => `export default { async install(api) {
+      await api.registerText('en', { '${id}.t': 'T' });
+      await api.registerWindow({ id: 'a', title: '${id}.t' });
+      await Promise.resolve(api.registerWindow({ id: 'b', title: '${id}.t' })).catch(e => globalThis.__p5log.push(e.message));
+    } };`;
+    const s = await setup({ boxed: two('boxed'), trusted: two('trusted') });
+    await s.streamer.enter(WORLD, MANIFEST, [await s.entry('boxed', false), await s.entry('trusted', true)], []);
+    await settle();
+    expect(log).toEqual(['window limit: 1']);
+    expect(s.calls.filter(c => c[0] === 'addWindow').map(c => c[1])).toEqual(['boxed:a', 'trusted:a', 'trusted:b']);
+  });
+
   it('treats a bad signature, or a client built without a key, as third party', async () => {
     const s = await setup({ forged: moduleCode('forged') });
     const e = await s.entry('forged', true);
