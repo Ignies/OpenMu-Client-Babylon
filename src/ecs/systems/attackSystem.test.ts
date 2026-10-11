@@ -24,6 +24,7 @@ const { setGameOption } = await import('../../controllers/settings');
 const { combat } = await import('../../controllers/combat');
 const { FIDELITY_CLASSIC, FIDELITY_DEFAULT, setFidelityChoice } = await import('../../controllers/fidelity');
 const { HitRequestPacket } = await import('@versions/shared/packets/ClientToServerPackets');
+const { PositionSlideSystem, startPositionSlide } = await import('./positionSlideSystem');
 
 const hands = { leftHand: null, rightHand: null, wings: null, pet: null, charClass: 16 };
 
@@ -175,5 +176,40 @@ describe('a swing quicker than the time between swings (swingFill)', () => {
     expect(swing(0.6).fill).toBeUndefined();
     setFidelityChoice(FIDELITY_CLASSIC, {});
     expect(swing(0.4).fill).toBeUndefined();
+  });
+});
+
+describe('a swing while the server slides the hero in', () => {
+  it('waits for the slide to end (MoveHero returns while JumpTime > 0)', () => {
+    const hero = {
+      localPlayer: true,
+      transform: { pos: new Vector3(100.5, 0, 100.5), rot: new Vector3(), scale: 1 },
+      charAppearance: hands,
+      pathfinding: { path: null },
+      playerAnimation: { action: 0, swordCount: 0 },
+      attributeSystem: { isAboveZero: () => false, getValue: () => 0 },
+    } as unknown as Entity;
+    const monster = {
+      netId: 7,
+      npcType: 3,
+      worldIndex: 0,
+      transform: { pos: new Vector3(101.5, 0, 100.5), rot: new Vector3(), scale: 1 },
+    } as unknown as Entity;
+    const world = { mapIndex: 0, playerEntity: hero, attackTarget: monster, castRequest: null, getTerrainFlag: () => 0, getTerrainHeight: () => 0, with: () => [] } as unknown as World;
+    const hits: number[] = [];
+    vi.spyOn(Hero, 'sendWalkStop').mockImplementation(() => {});
+    vi.spyOn(Session, 'sendToGS').mockImplementation(buffer => {
+      if (buffer.getUint8(2) === HitRequestPacket.Code) hits.push(1);
+    });
+
+    startPositionSlide(hero, 100.5, 0, 100.5);
+    const swings = AttackSystem(world);
+    const slide = PositionSlideSystem(world);
+    swings.update?.(0.04);
+    expect(hits).toEqual([]);
+    for (let i = 0; i < 15; i++) slide.update?.(1 / 25);
+    swings.update?.(0.04);
+    expect(hits).toEqual([1]);
+    vi.restoreAllMocks();
   });
 });

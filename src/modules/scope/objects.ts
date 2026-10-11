@@ -12,6 +12,7 @@ import { isKnownObjectType, npcSpawnScale, resolveModelFactory } from '@/control
 import { npcClassOf, npcHeroStateOf } from '@/controllers/actors/playerObject';
 import { monsterDisplayName, monsterMaxHealth } from '@versions/shared/monsters/monstersDatabase';
 import { playSfx } from '@/controllers/sound/sfx';
+import { monsterRegistry } from '@/controllers/monsters';
 import { clearBuffVisuals } from '@versions/shared/skills/skillVisuals';
 import { setObjectEffect } from '@/modules/skills/objectEffects';
 
@@ -124,6 +125,9 @@ export function addNpcToScope(world: World, npc: ScopeNpc) {
   });
 
   if (owner) world.addComponent(npcEntity, 'summonedBy', owner);
+  if (monsterRegistry.def(npc.TypeNumber)?.ball) {
+    world.addComponent(npcEntity, 'ball', { height: 0, gravity: 0, spinX: 0, spinZ: 0, ticks: 0 });
+  }
   // `c->PK` of an outlaw NPC: the render system draws its body red (ZzzCharacter.cpp:9988-9991).
   const heroState = npcHeroStateOf(modelFactory);
   if (heroState !== null) world.addComponent(npcEntity, 'heroState', heroState);

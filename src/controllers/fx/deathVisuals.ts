@@ -139,8 +139,10 @@ const BOMB_LIGHT: RGB = [0.7, 0.7, 0.7];
 const BOMB_CARD_TILES = 2.56;
 const BOMB_CARD_SECONDS = 0.8;
 
-export function spawnBomb(scene: Scene, at: Vector3): void {
+export function spawnBomb(scene: Scene, at: Vector3, explosion = true): void {
   effects.spawn('particles', scene, at, { recipe: BOMB_SPARKS, count: BOMB_SPARK_COUNT });
+  // `CreateBomb(p, false)` (the soccer ball's kick): the sparks without the card.
+  if (!explosion) return;
   effects.spawn('sprite', scene, at, {
     texture: TEX.explosion,
     colour: BOMB_LIGHT,

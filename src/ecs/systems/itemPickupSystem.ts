@@ -6,6 +6,7 @@ import { pickGround } from '../../controllers/terrain/terrainPick';
 import { bottomBarScreenHeight } from '../../controllers/interface/components/mu_window';
 import { EventBus } from '../../core/eventBus';
 import type { Entity, ISystemFactory, World } from '../world';
+import { isSliding } from './positionSlideSystem';
 
 /**
  * MOVEMENT_GET (ZzzInterface.cpp:3543-3575): clicking a drop - its model or
@@ -105,6 +106,8 @@ export const ItemPickupSystem: ISystemFactory = world => {
         world.pickupTarget = null;
         return;
       }
+      // `MoveHero` waits out the server's slide (`JumpTime > 0`).
+      if (isSliding(playerEntity)) return;
 
       const playerPos = playerEntity.transform.pos;
       const targetPos = target.transform!.pos;

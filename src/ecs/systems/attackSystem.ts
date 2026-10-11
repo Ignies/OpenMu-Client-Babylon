@@ -32,6 +32,7 @@ import { heldWeapons } from '../../controllers/actors';
 import { serverSetting } from '../../modules/servers/serverManifest';
 import { GameOptions } from '../../controllers/settings';
 import { isOn } from '../../controllers/fidelity';
+import { isSliding } from './positionSlideSystem';
 
 /**
  * Left-click basic attack (`Action()` MOVEMENT_ATTACK, ZzzInterface.cpp:3283-3356):
@@ -220,6 +221,9 @@ export const AttackSystem: ISystemFactory = world => {
         reloadAmmo(playerEntity.charAppearance);
       }
       lastAmmo = ammo;
+
+      // `MoveHero` returns while the server's move slides the hero in (`JumpTime > 0`): no swing.
+      if (isSliding(playerEntity)) return;
 
       const target = world.attackTarget;
       if (!target) {

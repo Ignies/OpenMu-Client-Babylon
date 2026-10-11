@@ -6,6 +6,7 @@ import { quests } from '../../modules/quests';
 import { monsterRegistry } from '../../controllers/monsters';
 import type { Entity, ISystemFactory } from '../world';
 import { isNpcOrTrapType } from './attackSystem';
+import { isSliding } from './positionSlideSystem';
 
 /**
  * MOVEMENT_TALK (ZzzInterface.cpp:7681-7700, 3576-3620): clicking an NPC
@@ -124,6 +125,8 @@ export const NpcTalkSystem: ISystemFactory = world => {
         approachTarget = null;
         return;
       }
+      // `MoveHero` waits out the server's slide (`JumpTime > 0`).
+      if (isSliding(playerEntity)) return;
 
       if (approachTarget !== target) {
         approachTarget = target;

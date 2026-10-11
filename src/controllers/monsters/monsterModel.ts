@@ -24,6 +24,11 @@ export type MonsterModelDef = {
   speedScale?: number;
   /** The Classic shadow: `'alive'` until the body dies (`m_bRenderShadow = false` in its Die branch), `'never'` none. */
   classicShadow?: 'alive' | 'never';
+  /**
+   * `PushingCharacter`'s own rule for this body when the server moves it: the share of the way a tick
+   * covers (0.2 for every other body) and a stop (`SetPlayerStop`) on the tile (ZzzCharacter.cpp:3146-3150, :3185).
+   */
+  slide?: { readonly speed: number; readonly stops: true };
 };
 
 /** A monster body file's default export. */

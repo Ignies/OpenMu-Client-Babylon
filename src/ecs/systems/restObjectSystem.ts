@@ -20,6 +20,7 @@ import { sound } from '../../controllers/sound';
 import { Hero } from '../../modules/hero';
 import { Session } from '../../modules/session';
 import type { ISystemFactory } from '../world';
+import { isSliding } from './positionSlideSystem';
 
 /** `?autoPick=1`: the old full scene pick, read only for its ray. */
 const AUTO_POINTER_PICK = devQuery('autoPick') === '1';
@@ -148,6 +149,8 @@ export const RestObjectSystem: ISystemFactory = world => {
       }
 
       if (!pending) return;
+      // `MoveHero` waits out the server's slide (`JumpTime > 0`).
+      if (isSliding(playerEntity)) return;
 
       const moveTo = playerEntity.playerMoveTo;
 

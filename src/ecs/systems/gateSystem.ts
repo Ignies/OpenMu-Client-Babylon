@@ -5,6 +5,7 @@ import { Loading } from '../../controllers/loading';
 import { findEntranceGateAt, loadGates, type Gate } from '@/controllers/assets/mu';
 import { EventBus } from '../../core/eventBus';
 import { prefetchWorldTerrain } from '../../controllers/assets/prefetchWorld';
+import { isSliding } from './positionSlideSystem';
 
 export const GateSystem: ISystemFactory = world => {
   let allGates: readonly Gate[] | null = null;
@@ -35,6 +36,8 @@ export const GateSystem: ISystemFactory = world => {
 
       const playerEntity = world.playerEntity;
       if (!playerEntity) return;
+      // `Hero->JumpTime == 0` (ZzzInterface.cpp:2679): no gate while the server's move slides him in.
+      if (isSliding(playerEntity)) return;
 
       const map = playerEntity.worldIndex;
       if (map === undefined) return;

@@ -6,7 +6,7 @@ these follow the body, not the type; a type points at its body with `model.type`
 folder.
 
 ```
-<body>.ts   export default defineMonsterModel({ type, name, voices, subType9Voices?, clipSpeeds?, speedScale?, classicShadow? })
+<body>.ts   export default defineMonsterModel({ type, name, voices, subType9Voices?, clipSpeeds?, speedScale?, classicShadow?, slide? })
 all.ts      finds every file (glob in the client and tests, from disk in the Bun servers)
 ```
 
@@ -27,6 +27,8 @@ all.ts      finds every file (glob in the client and tests, from disk in the Bun
   `m_bRenderShadow = false`: the Swamp's, Karutan's, Raklion's giants, the PK field assassins, the Blade
   Hunter, the Twin Tail, the Totem Golem, the Dark Ghost), `'never'` has none (the Maya hands). Read by
   `controllers/actors` `npcClassicShadow` / `npcShadowOnDeath`.
+- `slide`: `PushingCharacter`'s own speed for the body when the server moves it, and a stop on the
+  tile (the Crust: 0.07, ZzzCharacter.cpp:3147-3150, :3185). Read by `ecs/systems/positionSlideSystem.ts`.
 - `versions/shared/monsters/all.ts` loads this folder, and each version's core module loads that.
 
 ## Change it

@@ -59,6 +59,7 @@ import { tierIndex } from '../../controllers/lighting/lightingQuality';
 import { lighting } from '../../controllers/lighting';
 import { isPlayerAttackAction } from '../../controllers/anim/playerActionMapper';
 import { heldWeapons } from '../../controllers/actors';
+import { isSliding } from './positionSlideSystem';
 
 /** The first lighting tier that draws the improved looks (controllers/skills/visuals.ts). */
 const ENHANCED_TIER = 1;
@@ -431,6 +432,9 @@ export const SkillCastSystem: ISystemFactory = world => {
       }
 
       drainPendingStep(hero, dt);
+
+      // `MoveHero` returns while the server's move slides the hero in (`JumpTime > 0`): the cast waits.
+      if (isSliding(hero)) return;
 
       // Standing on a safe zone tile: no skill goes out at all, whatever the
       // gesture was - `if (c->SafeZone) break` out of the AT_SKILL_* branches

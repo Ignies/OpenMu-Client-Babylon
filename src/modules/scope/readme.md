@@ -43,7 +43,9 @@ players, plus their moves and equipment changes. The entities live in the ECS wo
 - `AddTransformedCharactersToScope` (0x45): players wearing a monster skin.
 - `MapObjectOutOfScope`: objects leave view.
 - `ObjectMoved`: instant move to a tile; stops any walk. The tile lands at once and the body is
-  drawn sliding in over 15 ticks (`JumpTime`, WSclient.cpp:2147; `ecs/systems/positionSlideSystem.ts`).
+  drawn sliding in over 15 ticks, the hero taking no input meanwhile, and a ball is kicked
+  (`JumpTime`, WSclient.cpp:2127-2153; `ecs/systems/positionSlideSystem.ts`). `addNpcToScope` gives a
+  `MonsterDef.ball` type its `ball` component.
 - `ObjectWalked`: walk target for another object (the hero's own walk is ignored).
 - `AppearanceChanged` / `AppearanceChangedExtended`: one equipment slot of a player changed.
 

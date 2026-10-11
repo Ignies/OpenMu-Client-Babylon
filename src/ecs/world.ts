@@ -218,6 +218,12 @@ export type Entity = Partial<{
      */
     swingFill?: { serial: number; scale: number };
   };
+  /**
+   * A `MonsterDef.ball` body (the Battle Soccer ball): `PushingCharacter`'s MODEL_BALL lines - its
+   * height over the 30 cm floor and `Gravity` (cm, cm a tick), its roll (`Direction[0]`, `[1]`,
+   * degrees a tick) and the part of a 25 fps tick not yet stepped. `positionSlideSystem.ts`.
+   */
+  ball: { height: number; gravity: number; spinX: number; spinZ: number; ticks: number };
   monsterAnimation: {
     action: MonsterActionType;
   };

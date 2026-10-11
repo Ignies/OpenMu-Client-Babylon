@@ -13,6 +13,7 @@ import { aimX, aimY } from '../../controllers/camera';
 import { Commands } from '../../modules/chat/commands';
 import { teleportGate } from '../../modules/warp/teleportRules';
 import { teleportBusy } from './teleportSystem';
+import { isSliding } from './positionSlideSystem';
 import { pickGround } from '../../controllers/terrain/terrainPick';
 
 const MOVE_DELAY = 0.25;
@@ -293,7 +294,8 @@ export const PlayerControllerSystem: ISystemFactory = world => {
         // any step taken before that.
         if (
           localPlayer &&
-          (teleportBusy(entity) || teleportGate.isPending(performance.now() / 1000))
+          // `MoveHero` takes nothing while the server's move slides the hero in (`JumpTime`).
+          (teleportBusy(entity) || isSliding(entity) || teleportGate.isPending(performance.now() / 1000))
         ) {
           continue;
         }
