@@ -64,6 +64,8 @@ export type IconShots = {
    * until the returned stop is called. A new spin stops the one before.
    */
   spin(job: IconShotJob, paint: (pixels: Uint8ClampedArray) => void): () => void;
+  /** Drops every kept picture: the next shoot of a key draws it again. */
+  forget(): void;
 };
 
 /** The engine's synchronous read (`engine.readTexture.js`): `readPixels` wraps it in a promise a call. */
@@ -295,6 +297,10 @@ export function createIconShots(scene: Scene, io: IconShotIo = BROWSER_IO): Icon
       cache.set(job.key, pending);
       next();
       return pending;
+    },
+
+    forget() {
+      cache.clear();
     },
 
     spin(job, paint) {

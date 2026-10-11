@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { autorun } from 'mobx';
-import { liveItemIcon, liveItemIconKey, setLiveItemIcons, setLiveItemSpin, spinLiveItemIcon } from '.';
+import { forgetLiveItemIcons, liveItemIcon, liveItemIconKey, setLiveItemIcons, setLiveItemSpin, spinLiveItemIcon } from '.';
 
 const settle = async () => {
   for (let i = 0; i < 5; i++) await Promise.resolve();
@@ -30,6 +30,17 @@ describe('the live item icon slot', () => {
   it('keys by everything the picture depends on, and nothing else', () => {
     expect(liveItemIconKey({ group: 7, num: 53, lvl: 9, isExcellent: true, durability: 3 } as never)).toBe('7_53_9_e');
     expect(liveItemIconKey({ group: 7, num: 53, isAncient: true })).toBe('7_53_0_a');
+  });
+
+  it('asks every look again once forgotten, and drops the pictures it had', async () => {
+    const source = vi.fn(async () => 'blob:x');
+    setLiveItemIcons(source);
+    liveItemIcon({ group: 14, num: 13, lvl: 0 });
+    await settle();
+    expect(liveItemIcon({ group: 14, num: 13, lvl: 0 })).toBe('blob:x');
+    forgetLiveItemIcons();
+    expect(liveItemIcon({ group: 14, num: 13, lvl: 0 })).toBeNull();
+    expect(source).toHaveBeenCalledTimes(2);
   });
 
   it('answers null when the source fails, without asking again', async () => {

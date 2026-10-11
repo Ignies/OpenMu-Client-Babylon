@@ -39,7 +39,8 @@ There is no `index.ts` facade; other folders import the modules directly.
   string for the perf overlay.
 - `iconShot.ts`: `iconShots(scene).shoot(job)`, a one-shot picture of a model as an image URL (the bag
   icons the pack has no file for); `iconShots(scene).spin(job, paint)`, the same model turned and drawn
-  every frame until stopped (the item under the cursor); `ICON_LAYER`, `iconPixels`.
+  every frame until stopped (the item under the cursor); `forget()`, the kept pictures dropped;
+  `ICON_LAYER`, `iconPixels`.
 
 ## How it works
 - `ModelObject.load(gltf)` puts a GLB under the object's node with the BMD to Babylon basis change
@@ -98,7 +99,8 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `configFingerprint.test.ts`: `configuration_hex.md` matches the options, the layout and lengths,
   the number bias round trip, and the pack digest.
 - `frameSnapshot.test.ts`: fills once per frame and per scene, refills after a throw.
-- `iconShot.test.ts`: at most one shot per frame and no observer once idle; one build per key; the
+- `iconShot.test.ts`: at most one shot per frame and no observer once idle; one build per key, again
+  after `forget`; the
   subject, root, camera and target freed; the main camera never sees the subject; flat lit, no fog,
   no caster flag; a failed build answers null; the bounded wait for readiness; `iconPixels` (row flip,
   straight alpha over the clear, the display curve on a linear buffer, a kept buffer rewritten whole);

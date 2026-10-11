@@ -126,8 +126,9 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   level and options, ZzzInventory.cpp:9699); `render/iconShot.ts` draws it once. The item under the
   cursor (nothing held) turns: `Angle[1] = WorldTime * 0.45f` (ZzzInventory.cpp:8856-8859), its other
   angles kept, drawn every frame by the shot's spin onto the icon's canvas, pack icons too. A picture is kept
-  per look (group, number, level, excellent, ancient) for the session: a changed item-effects
-  option shows on new looks only.
+  per look (group, number, level, excellent, ancient) until the item-effects option (or the effect
+  limit) changes: `liveItemIconSource` then forgets the shots and the interface's pictures, and every
+  look is drawn again.
 
 ## Depends on / used by
 - uses: `render` (`ModelObject`, bone links), `assets`, `anim`, `fx`, `item_fx`, `lighting`,
@@ -165,7 +166,8 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   helm mesh, comes down by `ItemHeight` and keeps its own skeleton; the anchor plus offset (the Lucky
   Penny), a weapon's hands (Mace of the King), the Heart +0's swapped model and scale, the level and
   excellent tier on every mesh and one key per look; no shot for an item with no model; the hover
-  turn at 0.45 degrees a millisecond, written into the node's own quaternion.
+  turn at 0.45 degrees a millisecond, written into the node's own quaternion; a changed item-effects
+  option forgets the shots and asks every look again.
 - `npcModelTable.test.ts`: every row names a file in `public/game-assets` and has a scale > 0; the
   tables behave as plain objects and read the folders when asked.
 - `trapModels.test.ts`: every (map, trap) pair names an `Object<world+1>` model that exists.

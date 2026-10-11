@@ -13,7 +13,9 @@ import { Quaternion } from '@babylonjs/core/Maths/math.vector';
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode';
 import { angleMatrixQuaternion } from '../render/renderAngles';
 import type { ModelObject } from '../render/modelObject';
-import { ITEM_ICON_SCALE } from '../interface/item_icons';
+import { ITEM_ICON_SCALE, liveItemIcon, setLiveItemIcons } from '../interface/item_icons';
+import { GameOptions, setGameOption } from '../settings';
+import { iconShots } from '../render/iconShot';
 
 /** The meshes of a converted model, by texture: a Queen helm is the head, the hair and the helm. */
 const MESHES: Record<string, string[]> = {
@@ -35,7 +37,7 @@ vi.mock('../assets/modelLoader', async orig => ({
   },
 }));
 
-import { itemIconJob, ITEM_ICON_UNITS_PER_PIXEL } from './itemIcon';
+import { itemIconJob, ITEM_ICON_UNITS_PER_PIXEL, liveItemIconSource } from './itemIcon';
 
 const engine = new NullEngine();
 const scene = new Scene(engine);
@@ -182,5 +184,25 @@ describe('an item icon shot', () => {
 
   it('has no shot for an item with no model (Gladiator\'s Glory, 13/95)', () => {
     expect(itemIconJob(scene, { group: 13, num: 95, lvl: 0 })).toBeNull();
+  });
+});
+
+// The tint is drawn into the picture (RenderPartObject at the item's level, ZzzInventory.cpp:9699).
+describe('the live icon pictures', () => {
+  it('are all drawn again when the item-effects option changes', async () => {
+    const was = GameOptions.itemEffects;
+    liveItemIconSource(scene);
+    const forget = vi.spyOn(iconShots(scene), 'forget');
+    const asked = vi.fn(async () => 'blob:x');
+    setLiveItemIcons(asked);
+    liveItemIcon({ group: 12, num: 26, lvl: 9 });
+    for (let i = 0; i < 5; i++) await Promise.resolve();
+    setGameOption('itemEffects', was === 1 ? 2 : 1);
+    liveItemIcon({ group: 12, num: 26, lvl: 9 });
+    expect(asked).toHaveBeenCalledTimes(2);
+    expect(forget).toHaveBeenCalledTimes(1);
+    setGameOption('itemEffects', was);
+    setLiveItemIcons(null);
+    forget.mockRestore();
   });
 });

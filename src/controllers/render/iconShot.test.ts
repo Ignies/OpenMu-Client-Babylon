@@ -93,6 +93,20 @@ describe('the one-shot icon render', () => {
     expect(read).toHaveBeenCalledTimes(1);
   });
 
+  it('draws a key again once its pictures are forgotten (a changed item-effects option)', async () => {
+    const log = { built: [] as string[], disposed: [] as string[] };
+    const { shots: s } = shots();
+    const first = s.shoot(boxJob('again', log));
+    await frames(4);
+    await first;
+    s.forget();
+    const second = s.shoot(boxJob('again', log));
+    expect(second).not.toBe(first);
+    await frames(4);
+    expect(await second).toBe('blob:4x2');
+    expect(log.built).toEqual(['again', 'again']);
+  });
+
   it('frees the subject, its root, the camera and the target after the shot', async () => {
     const log = { built: [] as string[], disposed: [] as string[] };
     const cameras = scene.cameras.length;

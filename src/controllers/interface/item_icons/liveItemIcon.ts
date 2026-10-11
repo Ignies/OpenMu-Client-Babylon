@@ -42,6 +42,12 @@ export function spinLiveItemIcon(item: Item, canvas: HTMLCanvasElement, ready: (
   return spinSource({ group, num, lvl, isExcellent, isAncient }, canvas, ready);
 }
 
+/** Drops every picture: the next read of each look asks for it again (a changed item-effects option). */
+export function forgetLiveItemIcons(): void {
+  asked.clear();
+  runInAction(() => urls.clear());
+}
+
 /** The item's live icon once drawn, else null; the first read asks for it. Observable. */
 export function liveItemIcon(item: Item): string | null {
   const key = liveItemIconKey(item);

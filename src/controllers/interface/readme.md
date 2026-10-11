@@ -70,7 +70,8 @@ windows themselves are content in `versions/shared/ui/` (see
   from `RenderObjectScreen` (ZzzInventory.cpp:9308-10090). Do not edit. Which icon files exist is
   `assets/itemIconManifest.ts` (`tools/itemIconManifest.ts`).
   `liveItemIcon.ts` (on `item_icons/index.ts`): the slot `item_icon` asks for an icon the pack has no
-  file for (`liveItemIcon(item)`, observable, asked once per look); the app fills it at boot
+  file for (`liveItemIcon(item)`, observable, asked once per look until `forgetLiveItemIcons()`, which
+  the app's source calls when the item-effects option changes); the app fills it at boot
   (`setLiveItemIcons`) with `actors/itemIcon.ts`, which draws the model as `RenderItem3D` does. The
   interface never reaches the scene. The live picture is framed like the original's square, so it
   takes no fit.
@@ -151,6 +152,7 @@ windows themselves are content in `versions/shared/ui/` (see
   360 range, the second chain over the first), potions and scrolls (the Heart and Rena levels and
   their models, angle-less branches, the chocolate boxes, refine stones, parchments) and the anchors.
 - `item_icons/liveItemIcon.test.ts`: nothing asked while the slot is empty; one ask per look, the URL
-  reaching an observer; the look key; a failed draw answers null once; the spin slot hands the look,
+  reaching an observer; the look key; every look asked again after `forgetLiveItemIcons`; a failed draw
+  answers null once; the spin slot hands the look,
   the canvas and its stop through.
 - `components/item_icon/index.test.tsx`: a hovered icon holds the spin canvas over its still picture.

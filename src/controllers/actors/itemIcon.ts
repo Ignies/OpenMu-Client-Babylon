@@ -1,3 +1,4 @@
+import { reaction } from 'mobx';
 import { Quaternion, type Scene } from '../render/babylon/exports';
 import type { Item } from '../../ecs/world';
 import { angleMatrixQuaternion } from '../render/renderAngles';
@@ -5,7 +6,9 @@ import { iconShots, type IconShotJob } from '../render/iconShot';
 import { loadItemModel } from './itemModel';
 import { isTwoHanded } from './weaponClass';
 import { itemVisualTier } from '../item_fx/itemVisualTier';
+import { itemEffectSignature } from '../item_fx/itemEffectMode';
 import {
+  forgetLiveItemIcons,
   ITEM_ICON_SCALE,
   ITEM_ICON_SCALE_DEFAULT,
   itemIconPose,
@@ -85,8 +88,15 @@ export function itemIconJob(scene: Scene, item: Item): IconShotJob | null {
   };
 }
 
-/** What fills the interface's live-icon slot: the scene's shot queue, one picture per look. */
+/**
+ * What fills the interface's live-icon slot: the scene's shot queue, one picture per look. The
+ * tint is drawn into the picture, so a changed item-effects option draws every look again.
+ */
 export function liveItemIconSource(scene: Scene): LiveItemIconSource {
+  reaction(itemEffectSignature, () => {
+    iconShots(scene).forget();
+    forgetLiveItemIcons();
+  });
   return async item => {
     const job = itemIconJob(scene, item);
     return job ? iconShots(scene).shoot(job) : null;
