@@ -44,12 +44,36 @@ describe('Economy.craftingResult', () => {
     }
   });
 
-  it('leaves the window ready when the zen was short', () => {
+  it('leaves the window ready when the zen was short, and says so', () => {
+    const warned = vi.spyOn(Social, 'errorMessage');
     for (const refusal of [E.NotEnoughMoney, E.NotEnoughMoneyForBloodCastle]) {
       fillTray();
       Economy.craftingResult(refusal, null);
       expect(Economy.mixResult).toBeNull();
+      expect(warned).toHaveBeenLastCalledWith('Not enough Zen to combine items');
     }
+  });
+
+  // ReceiveMixExtended (WSclient.cpp:6800-6831): 4 and 9 are OK boxes, the rest prints nothing.
+  it('answers a refusal with no line, or the level box for 4 and 9', () => {
+    const warned = vi.spyOn(Social, 'errorMessage');
+    warned.mockClear();
+    Economy.closeMixNotice();
+    for (const refusal of [E.TooManyItems, E.LackingMixItems, E.IncorrectMixItems, E.InvalidItemLevel, E.IncorrectBloodCastleItems]) {
+      fillTray();
+      Economy.craftingResult(refusal, null);
+    }
+    expect(warned).not.toHaveBeenCalled();
+    expect(Economy.mixNotice).toBeNull();
+    fillTray();
+    Economy.craftingResult(E.CharacterLevelTooLow, null);
+    expect(Economy.mixNotice).toBe('chaos.devilSquareLevel');
+    fillTray();
+    Economy.craftingResult(E.CharacterClassTooLow, null);
+    expect(Economy.mixNotice).toBe('chaos.cloakLevel');
+    Economy.closeMixNotice();
+    expect(Economy.mixNotice).toBeNull();
+    expect(warned).not.toHaveBeenCalled();
   });
 
   it('empties the tray on a failed mix', () => {

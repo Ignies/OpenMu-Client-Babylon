@@ -2,6 +2,9 @@ import { MuWindows } from '@/controllers/interface/windowManager';
 import './style.less';
 import { t, type TextKey } from '@/i18n';
 import { observer } from 'mobx-react-lite';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { playUiSound } from '@/controllers/sound/sfx';
+import { isTypingInField } from '@/ecs/systems/keyboardInputSystem';
 import { Bag } from '@/modules/inventory';
 import { Economy, MIX_TYPE } from '@/modules/economy/economy';
 import { StorageKind } from '@/modules/inventory/itemStorage';
@@ -362,8 +365,63 @@ const MixMenu = observer(() => {
  * `ItemCraftingResult` and lands in the tray, where it has to be dragged out before the window will
  * close (`ClosingProcess`).
  */
+/** `CNewUICommonMessageBox` (OK) at y 100: the text from 35, 180 wide, a slice per line past two; OK 50 off the bottom. */
+const NOTICE = { top: 100, textTop: 35, textWidth: 180, line: 15, button: { width: 54, height: 30 }, bottom: 50 };
+
+/** `CreateOkMessageBox` after a refused mix (WSclient.cpp:6812-6820); OK and Escape close it with a click. */
+const MixNotice = observer(({ text }: { text: string }) => {
+  const textRef = useRef<HTMLDivElement>(null);
+  const [lines, setLines] = useState(2);
+  useLayoutEffect(() => {
+    const height = textRef.current?.scrollHeight;
+    if (height) setLines(Math.max(1, Math.round(height / NOTICE.line)));
+  }, [text]);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape' || e.isComposing || isTypingInField()) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.repeat) return;
+      playUiSound('click');
+      Economy.closeMixNotice();
+    };
+    window.addEventListener('keydown', onKey, true);
+    return () => window.removeEventListener('keydown', onKey, true);
+  }, []);
+  const middle = Math.max(0, lines - 2);
+  return (
+    <div className="chaos-menu-layer" data-no-drag="true">
+      <MsgBoxFrame lines={middle} className="chaos-menu" style={{ top: NOTICE.top }}>
+        <div
+          ref={textRef}
+          className="chaos-menu-line"
+          style={{ left: (MSGBOX_WIDTH - NOTICE.textWidth) / 2, width: NOTICE.textWidth, top: NOTICE.textTop, lineHeight: `${NOTICE.line}px` }}
+        >
+          {text}
+        </div>
+        <MuButton
+          file="newui_button_ok.OZT"
+          width={NOTICE.button.width}
+          height={NOTICE.button.height}
+          frames={{ up: 0, active: 1, down: 2 }}
+          onClick={() => Economy.closeMixNotice()}
+          style={{ position: 'absolute', left: (MSGBOX_WIDTH - NOTICE.button.width) / 2, top: msgBoxHeight(middle) - NOTICE.bottom }}
+        />
+      </MsgBoxFrame>
+    </div>
+  );
+});
+
 export const ChaosMachine = observer(() => {
-  if (!Economy.mixOpen) return Economy.seedMenu ? <SeedMenu npc={Economy.seedMenu} /> : null;
+  const notice = Economy.mixNotice && <MixNotice text={t(Economy.mixNotice)} />;
+  if (!Economy.mixOpen) {
+    return (
+      <>
+        {Economy.seedMenu && <SeedMenu npc={Economy.seedMenu} />}
+        {notice}
+      </>
+    );
+  }
 
   const picked = Bag.pickedItem;
   const type = Economy.mixInventoryType;
@@ -429,6 +487,7 @@ export const ChaosMachine = observer(() => {
         </div>
       </MuItemWindow>
       {Economy.mixMenuOpen && <MixMenu />}
+      {notice}
     </>
   );
 });

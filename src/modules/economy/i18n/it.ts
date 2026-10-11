@@ -34,16 +34,8 @@ export default {
   'chaos.takeItemsOut': 'Togli prima i tuoi oggetti dalla Chaos Machine.',
   'chaos.putItemsIn': 'Metti nella Chaos Machine gli oggetti da combinare.',
   'chaos.notEnoughZen': 'Zen insufficiente per la combinazione.',
-  'chaos.tooManyItems': 'Troppi oggetti nella Chaos Machine.',
-  'chaos.levelTooLow':
-    'Il tuo livello è troppo basso per questa combinazione.',
-  'chaos.lackingItems': 'Mancano degli oggetti per questa combinazione.',
-  'chaos.incorrectItems': 'Questi oggetti non si combinano così.',
-  'chaos.invalidItemLevel':
-    "Il livello dell'oggetto non va bene per questa combinazione.",
-  'chaos.classTooLow': 'La tua classe non può fare questa combinazione.',
-  'chaos.bloodCastleItems': 'Gli oggetti di Blood Castle non sono corretti.',
-  'chaos.bloodCastleZen': "Zen insufficiente per l'invito.",
+  'chaos.devilSquareLevel': "Devi superare il livello 10 per combinare l'invito al Devil Square.",
+  'chaos.cloakLevel': 'Devi superare il livello 15 per combinare un Mantello dell’invisibilità.',
   'notify.wrongVaultPin': 'PIN del deposito errato',
   'notify.unlockBeforePin': 'Sblocca il deposito prima di cambiarne il PIN',
   'notify.wrongPassword': 'Password dell’account errata',

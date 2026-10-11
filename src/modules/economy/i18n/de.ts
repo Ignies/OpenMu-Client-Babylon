@@ -37,16 +37,8 @@ export default {
   'chaos.putItemsIn':
     'Lege die zu kombinierenden Gegenstände in die Chaos Machine.',
   'chaos.notEnoughZen': 'Nicht genug Zen für die Kombination.',
-  'chaos.tooManyItems': 'Zu viele Gegenstände in der Chaos Machine.',
-  'chaos.levelTooLow': 'Dein Level ist zu niedrig für diese Kombination.',
-  'chaos.lackingItems': 'Für diese Kombination fehlen Gegenstände.',
-  'chaos.incorrectItems':
-    'Diese Gegenstände lassen sich so nicht kombinieren.',
-  'chaos.invalidItemLevel':
-    'Das Item-Level passt nicht zu dieser Kombination.',
-  'chaos.classTooLow': 'Deine Klasse kann diese Kombination nicht machen.',
-  'chaos.bloodCastleItems': 'Die Blood-Castle-Gegenstände stimmen nicht.',
-  'chaos.bloodCastleZen': 'Nicht genug Zen für die Einladung.',
+  'chaos.devilSquareLevel': 'Für die Einladung zum Devil Square musst du über Level 10 sein.',
+  'chaos.cloakLevel': 'Für einen Umhang der Unsichtbarkeit musst du über Level 15 sein.',
   'notify.wrongVaultPin': 'Falsche Lager-PIN',
   'notify.unlockBeforePin': 'Entsperre das Lager, bevor du die PIN änderst',
   'notify.wrongPassword': 'Falsches Kontopasswort',

@@ -33,16 +33,8 @@ export default {
   'chaos.takeItemsOut': 'Retirez d’abord vos objets de la Chaos Machine.',
   'chaos.putItemsIn': 'Placez dans la Chaos Machine les objets à combiner.',
   'chaos.notEnoughZen': 'Pas assez de Zen pour la combinaison.',
-  'chaos.tooManyItems': 'Trop d’objets dans la Chaos Machine.',
-  'chaos.levelTooLow': 'Votre niveau est trop bas pour cette combinaison.',
-  'chaos.lackingItems': 'Il manque des objets pour cette combinaison.',
-  'chaos.incorrectItems': 'Ces objets ne se combinent pas ainsi.',
-  'chaos.invalidItemLevel':
-    'Le niveau de l’objet ne convient pas à cette combinaison.',
-  'chaos.classTooLow': 'Votre classe ne peut pas faire cette combinaison.',
-  'chaos.bloodCastleItems':
-    'Les objets de Blood Castle ne sont pas corrects.',
-  'chaos.bloodCastleZen': 'Pas assez de Zen pour l’invitation.',
+  'chaos.devilSquareLevel': "Il faut dépasser le niveau 10 pour combiner l'invitation au Devil Square.",
+  'chaos.cloakLevel': "Il faut dépasser le niveau 15 pour combiner une Cape d'invisibilité.",
   'notify.wrongVaultPin': 'Code du coffre incorrect',
   'notify.unlockBeforePin': 'Déverrouillez le coffre avant d’en changer le code',
   'notify.wrongPassword': 'Mot de passe du compte incorrect',
