@@ -8,7 +8,8 @@ the capes, the Dark Lord's hair and skirt, the Magic Gladiator's robe, the team 
 - `cloaks(wearer, out)` (`index.ts`): the rule, handed to `registerCloaks` when the folder loads
   (`app/boot.tsx` imports it). It fills `out` with a spec per cloth slot (`m_pCloth[i]`, null where the
   original draws none) and returns the `CloakLight`.
-- One file per use: `cape_of_lord.ts` (the Cape of Lord and the Mantle of Monarch's cape and straps).
+- One file per use: `cape_of_lord.ts` (the Cape of Lord and the Mantle of Monarch's cape and straps),
+  `cape_of_fighter.ts` (the Cape of Fighter and the Cape of Overrule's cape and straps).
 
 ## How it works
 - `bCloak` (:9162-9186): the Magic Gladiator class itself (`c->Class == CLASS_DARK`, so not the Duel
@@ -19,7 +20,10 @@ the capes, the Dark Lord's hair and skirt, the Magic Gladiator's robe, the team 
   and comes back built fresh, which is what the original's stale cloth tearing and rebuilding gives.
 - Dark Lord (:9693-9776): slot 2 the cape, drawn with the Cape of Lord (`Player\DarklordRobe.tga`) or the
   Mantle of Monarch (`Item\dl_redwings02.tga`, heavy, plus its straps in slots 4 and 5,
-  `Item\dl_redwings03.tga`). Neither cape has a texture per item level: `Render` ignores the level.
+  `Item\dl_redwings03.tga`). No cape has a texture per item level: `Render` ignores the level.
+- Rage Fighter (:9777-9824): slot 0 the cape, drawn with the Cape of Fighter (`Item\NCcape.tga`) or the
+  Cape of Overrule (`Item\monke_manto.TGA`, plus its straps in slots 1 and 2, `Item\monk_manto01.TGA`,
+  blown out to each side by `PCT_ELASTIC_RAGE_L` / `_R`).
 
 ## Depends on / used by
 - uses: `@/controllers/cloth` (specs, `PCT_*`), `@/controllers/actors` (`registerCloaks`, the wing numbers),
