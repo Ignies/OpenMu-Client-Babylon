@@ -125,6 +125,8 @@ export class GameClient {
 export type LoginCheckTarget = {
   /** The proxy's websocket, dialling the first game server. */
   url: string;
+  /** The world's server.json, where the client reads it (next to the proxy). */
+  manifestUrl: string;
   login: string;
   password: string;
   /** OpenMU's log lines since a time (ISO). */
@@ -272,6 +274,10 @@ export async function loginCheck(target: LoginCheckTarget): Promise<Check[]> {
 
   try {
     return await runSteps([
+      ['server.json offers login tokens', async () => {
+        const manifest = (await (await fetch(target.manifestUrl)).json()) as { loginTokens?: unknown };
+        if (manifest.loginTokens !== true) throw new Error(`loginTokens is ${String(manifest.loginTokens)}`);
+      }],
       ['password login', async () => {
         await expectLogin(await line.redial(), passwordLogin(target.login, target.password), LoginResponseLoginResultEnum.Okay);
       }],

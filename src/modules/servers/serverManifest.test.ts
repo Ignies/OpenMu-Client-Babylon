@@ -8,6 +8,7 @@ import {
   loadServerManifest,
   parseServerManifest,
   resetServerManifests,
+  serverOffersLoginTokens,
   serverSetting,
 } from './serverManifest';
 
@@ -47,6 +48,7 @@ describe('parseServerManifest', () => {
       version: 1,
       settings: { ...ORIGINAL_SETTINGS, heldHitRequest: true },
       modulesOff: [],
+      loginTokens: false,
     });
     expect(parseServerManifest({ version: 1, settings: { retryLoginWhenConnected: true } })?.settings).toEqual({
       ...ORIGINAL_SETTINGS,
@@ -62,7 +64,7 @@ describe('parseServerManifest', () => {
   it('skips unknown keys', () => {
     expect(
       parseServerManifest({ version: 1, modules: [], settings: { heldHitRequest: true, somethingNew: 3 } })
-    ).toEqual({ version: 1, settings: { ...ORIGINAL_SETTINGS, heldHitRequest: true }, modulesOff: [] });
+    ).toEqual({ version: 1, settings: { ...ORIGINAL_SETTINGS, heldHitRequest: true }, modulesOff: [], loginTokens: false });
   });
 
   it('refuses another version', () => {
@@ -86,6 +88,14 @@ describe('parseServerManifest', () => {
     for (const modulesOff of ['events', [1], ['Events'], ['no spaces'], many]) {
       expect(parseServerManifest({ version: 1, settings: {}, modulesOff }), JSON.stringify(modulesOff)).toBeNull();
     }
+  });
+
+  it('reads whether the world issues login tokens, off when it does not say', () => {
+    expect(parseServerManifest({ version: 1, settings: {}, loginTokens: true })?.loginTokens).toBe(true);
+    expect(parseServerManifest({ version: 1, settings: {}, loginTokens: false })?.loginTokens).toBe(false);
+    expect(parseServerManifest({ version: 1, settings: {} })?.loginTokens).toBe(false);
+    expect(parseServerManifest({ version: 1, settings: {}, loginTokens: 'yes' })).toBeNull();
+    expect(parseServerManifest({ version: 1, settings: {}, loginTokens: 1 })).toBeNull();
   });
 
   it('refuses the whole document when a known setting has the wrong type', () => {
@@ -136,6 +146,16 @@ describe('the server settings', () => {
     serve('{"version":1,"settings":{}}');
     await loadServerManifest(listed);
     expect(moduleOn('manifest_events')).toBe(true);
+  });
+
+  it('offers login tokens only where the world says so', async () => {
+    expect(serverOffersLoginTokens()).toBe(false);
+    serve('{"version":1,"settings":{},"loginTokens":true}');
+    await loadServerManifest(listed);
+    expect(serverOffersLoginTokens()).toBe(true);
+    serve('not found', 404);
+    await loadServerManifest(listed);
+    expect(serverOffersLoginTokens()).toBe(false);
   });
 
   it('keeps the original behaviour when the manifest is missing, unreachable or invalid', async () => {

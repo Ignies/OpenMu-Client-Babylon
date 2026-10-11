@@ -65,6 +65,7 @@ if (all || step === 'check') {
   // The game itself, as a client plays it: logins and what our plugins do with a session's packets.
   const game = await loginCheck({
     url: `ws://127.0.0.1:${PORTS.proxy}/?host=127.0.0.1&port=${PORTS.firstGame}`,
+    manifestUrl: `http://127.0.0.1:${PORTS.proxy}/server.json`,
     ...GM,
     logsSince: async since => (await stack.compose(['logs', '--no-color', '--since', since, 'openmu-startup'])).out,
     ticket: async nonce => {
