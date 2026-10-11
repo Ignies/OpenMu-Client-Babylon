@@ -427,6 +427,10 @@ const en = {
   'options.dropDrawCap': 'Limit items on the ground',
   'options.help.dropDrawCap':
     'Draws at most the 150 nearest items on the ground, for servers with very high drop rates. The rest show once they are among the nearest.',
+  'options.fpsLimit': 'FPS limit',
+  'options.fpsUnlimited': 'Unlimited',
+  'options.help.fpsLimit':
+    'Caps how many frames a second are drawn. Lower uses less CPU, GPU and battery; Unlimited follows the monitor.',
 };
 
 export default en;

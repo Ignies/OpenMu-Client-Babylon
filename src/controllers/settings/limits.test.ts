@@ -3,6 +3,7 @@ import { defaultGameOption, optionsFrom } from './gameOptions';
 import { CAMERA_FOV_DEG, CAMERA_FOV_MAX_DEG, CAMERA_FOV_MIN_DEG } from '../camera/recipes';
 import { RENDER_DISTANCE_MAX } from '../render/renderDistance';
 import { RENDER_SCALE_STEP_MAX } from '../render/renderScale';
+import { FPS_LIMIT_MAX } from '../render/fpsLimit';
 import {
   LOW_VITAL_DEFAULT_PERCENT,
   LOW_VITAL_MAX_PERCENT,
@@ -25,6 +26,11 @@ describe('settings limits match their owners', () => {
   it('render distance and render scale', () => {
     expect(range('renderDistance')).toEqual([0, RENDER_DISTANCE_MAX]);
     expect(range('renderScale')).toEqual([0, RENDER_SCALE_STEP_MAX]);
+  });
+
+  it('FPS limit', () => {
+    expect(defaultGameOption('fpsLimit')).toBe(0);
+    expect(range('fpsLimit')).toEqual([0, FPS_LIMIT_MAX]);
   });
 
   it('low health and mana thresholds', () => {

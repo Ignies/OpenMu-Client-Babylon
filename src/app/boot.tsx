@@ -55,6 +55,7 @@ import {
   preloadWorldSprites,
 } from '../controllers/assets/preloadSprites';
 import { installPerfOverlay, recordFrame } from '../controllers/render/perfOverlay';
+import { fpsLimitForStep, framePacer } from '../controllers/render/fpsLimit';
 import { csmCacheStats } from '@/controllers/render/shadows';
 import { refreshServerList } from '../modules/servers/serverList';
 import { ensureCacheWorker } from '../controllers/assets/assetDownload';
@@ -334,6 +335,8 @@ function runFrame(now: number, draw: boolean): void {
 engine.runRenderLoop(() => {
   const now = performance.now();
   noteDrawnFrame(now);
+  // The FPS limit: a skipped animation frame runs nothing; the next drawn one gets the whole dt.
+  if (!framePacer.due(now, fpsLimitForStep(GameOptions.fpsLimit))) return;
   runFrame(now, true);
 });
 

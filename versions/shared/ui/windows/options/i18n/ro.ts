@@ -405,4 +405,8 @@ export default {
   'options.dropDrawCap': 'Limitează obiectele de pe jos',
   'options.help.dropDrawCap':
     'Desenează cel mult cele mai apropiate 150 de obiecte de pe jos, pentru servere cu drop foarte mare. Restul apar când ajung printre cele mai apropiate.',
+  'options.fpsLimit': 'Limită FPS',
+  'options.fpsUnlimited': 'Nelimitat',
+  'options.help.fpsLimit':
+    'Limitează câte cadre pe secundă se desenează. Mai puțin folosește mai puțin procesorul, placa video și bateria; Nelimitat urmează monitorul.',
 } satisfies Partial<Record<keyof typeof en, string>>;

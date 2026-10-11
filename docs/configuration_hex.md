@@ -16,12 +16,12 @@ Format version: **1**
 | 0 | 1 | Format version. Anything else means a different table. |
 | 1 | 1 | Number of flag bytes that follow (currently 8). |
 | 2 | 8 | The on/off settings, one bit each, first in bit 0 of the first byte. |
-| 10 | 1 | Number of value bytes that follow (currently 55). |
-| 11 | 55 | The numeric settings, one byte each, each stored as value + 128. |
-| 66 | 2 | Language, two ASCII letters (`65 73` is `es`). |
-| 68 | 2 | Texture pack digest, `0000` when the original textures are in use. |
+| 10 | 1 | Number of value bytes that follow (currently 56). |
+| 11 | 56 | The numeric settings, one byte each, each stored as value + 128. |
+| 67 | 2 | Language, two ASCII letters (`65 73` is `es`). |
+| 69 | 2 | Texture pack digest, `0000` when the original textures are in use. |
 
-Total: **70 bytes**, 140 hex characters.
+Total: **71 bytes**, 142 hex characters.
 
 ## On/off settings
 
@@ -124,37 +124,38 @@ Each is one byte; subtract 128 to get the value. Index 0 is the first byte after
 | 21 | `effectsVolume` |
 | 22 | `fidelity` |
 | 23 | `filmGrain` |
-| 24 | `glow` |
-| 25 | `grassDensity` |
-| 26 | `instrumentsVolume` |
-| 27 | `itemEffects` |
-| 28 | `lightingQuality` |
-| 29 | `linePlacement` |
-| 30 | `lineStrength` |
-| 31 | `lineWidth` |
-| 32 | `lootZen` |
-| 33 | `lowHealthPercent` |
-| 34 | `lowManaPercent` |
-| 35 | `materialDetail` |
-| 36 | `materialQuality` |
-| 37 | `monsterVolume` |
-| 38 | `msaa` |
-| 39 | `musicVolume` |
-| 40 | `partyInviteReply` |
-| 41 | `renderDistance` |
-| 42 | `renderScale` |
-| 43 | `renderingStyle` |
-| 44 | `shadeSteps` |
-| 45 | `sharpness` |
-| 46 | `stepsVolume` |
-| 47 | `styleStrength` |
-| 48 | `sunShafts` |
-| 49 | `toneMapper` |
-| 50 | `uiScale` |
-| 51 | `uiVolume` |
-| 52 | `upscale` |
-| 53 | `vignette` |
-| 54 | `volume` |
+| 24 | `fpsLimit` |
+| 25 | `glow` |
+| 26 | `grassDensity` |
+| 27 | `instrumentsVolume` |
+| 28 | `itemEffects` |
+| 29 | `lightingQuality` |
+| 30 | `linePlacement` |
+| 31 | `lineStrength` |
+| 32 | `lineWidth` |
+| 33 | `lootZen` |
+| 34 | `lowHealthPercent` |
+| 35 | `lowManaPercent` |
+| 36 | `materialDetail` |
+| 37 | `materialQuality` |
+| 38 | `monsterVolume` |
+| 39 | `msaa` |
+| 40 | `musicVolume` |
+| 41 | `partyInviteReply` |
+| 42 | `renderDistance` |
+| 43 | `renderScale` |
+| 44 | `renderingStyle` |
+| 45 | `shadeSteps` |
+| 46 | `sharpness` |
+| 47 | `stepsVolume` |
+| 48 | `styleStrength` |
+| 49 | `sunShafts` |
+| 50 | `toneMapper` |
+| 51 | `uiScale` |
+| 52 | `uiVolume` |
+| 53 | `upscale` |
+| 54 | `vignette` |
+| 55 | `volume` |
 
 ## Worked example
 

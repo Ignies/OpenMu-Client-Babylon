@@ -18,6 +18,8 @@ const CAMERA_FOV = { deg: 30, min: 20, max: 60 } as const;
 const RENDER_DISTANCE_TOP = 9;
 /** `RENDER_SCALE_STEP_MAX` (controllers/render/renderScale.ts). */
 const RENDER_SCALE_TOP = 5;
+/** `FPS_LIMIT_MAX` (controllers/render/fpsLimit.ts). */
+const FPS_LIMIT_TOP = 6;
 /** `LOW_VITAL_MIN/MAX/DEFAULT_PERCENT` (modules/hero/lowVitals.ts). */
 const LOW_VITAL = { min: 10, max: 50, default: 30 } as const;
 
@@ -69,6 +71,8 @@ export type GameOptions = {
    * to native (controllers/render/renderScale.ts).
    */
   renderScale: number;
+  /** Frame-rate cap (ours), an index into `FPS_LIMIT_STEPS` (`controllers/render/fpsLimit.ts`); 0 uncapped. */
+  fpsLimit: number;
   /**
    * How a reduced `renderScale` is presented: 0 hands the small drawing
    * buffer to the browser and lets it stretch the canvas, 1 draws the world
@@ -536,6 +540,7 @@ const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
   chromatic: [0, 9],
   sharpness: [0, 9],
   renderScale: [0, RENDER_SCALE_TOP],
+  fpsLimit: [0, FPS_LIMIT_TOP],
   upscale: [0, 1],
   vignette: [0, 9],
   sunShafts: [0, 9],
@@ -571,6 +576,7 @@ const DEFAULTS: GameOptions = {
   chromatic: 0,
   sharpness: 2,
   renderScale: 0,
+  fpsLimit: 0,
   upscale: 1,
   vignette: 0,
   sunShafts: 3,

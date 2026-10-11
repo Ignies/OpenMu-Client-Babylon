@@ -396,4 +396,8 @@ export default {
   'options.dropDrawCap': 'Ogranicz przedmioty na ziemi',
   'options.help.dropDrawCap':
     'Rysuje najwyżej 150 najbliższych przedmiotów na ziemi, dla serwerów z bardzo wysokim dropem. Reszta pojawia się, gdy znajdzie się wśród najbliższych.',
+  'options.fpsLimit': 'Limit FPS',
+  'options.fpsUnlimited': 'Bez limitu',
+  'options.help.fpsLimit':
+    'Ogranicza liczbę klatek rysowanych na sekundę. Mniej oszczędza procesor, kartę graficzną i baterię; bez limitu podąża za monitorem.',
 } satisfies Partial<Record<keyof typeof en, string>>;

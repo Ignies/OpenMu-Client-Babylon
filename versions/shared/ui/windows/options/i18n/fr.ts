@@ -397,4 +397,8 @@ export default {
   'options.dropDrawCap': 'Limiter les objets au sol',
   'options.help.dropDrawCap':
     "Affiche au plus les 150 objets au sol les plus proches, pour les serveurs aux taux de drop très élevés. Les autres apparaissent dès qu'ils sont parmi les plus proches.",
+  'options.fpsLimit': "Limite d'IPS",
+  'options.fpsUnlimited': 'Illimité',
+  'options.help.fpsLimit':
+    "Limite le nombre d'images dessinées par seconde. Moins économise le processeur, la carte graphique et la batterie ; Illimité suit l'écran.",
 } satisfies Partial<Record<keyof typeof en, string>>;

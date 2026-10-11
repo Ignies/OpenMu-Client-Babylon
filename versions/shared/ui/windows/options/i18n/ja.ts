@@ -330,4 +330,7 @@ export default {
     '非常に速い攻撃や人混み向け：キャラクターごとに毎秒最大10、他のプレイヤー全体で毎秒最大40のスキルエフェクト。ヒットと数値は表示されます。',
   'options.dropDrawCap': '地面のアイテムを制限',
   'options.help.dropDrawCap': 'ドロップ率が非常に高いサーバー向けに、地面のアイテムは近い順に最大150個まで表示します。残りは近くなると表示されます。',
+  'options.fpsLimit': 'FPS上限',
+  'options.fpsUnlimited': '無制限',
+  'options.help.fpsLimit': '1秒間に描画するフレーム数を制限します。低いほどCPU、GPU、バッテリーの消費が減ります。無制限はモニターに従います。',
 } satisfies Partial<Record<keyof typeof en, string>>;

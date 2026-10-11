@@ -432,4 +432,8 @@ export default {
   'options.dropDrawCap': 'Gegenstände am Boden begrenzen',
   'options.help.dropDrawCap':
     'Zeichnet höchstens die 150 nächsten Gegenstände am Boden, für Server mit sehr hohen Dropraten. Der Rest erscheint, sobald er zu den nächsten gehört.',
+  'options.fpsLimit': 'FPS-Grenze',
+  'options.fpsUnlimited': 'Unbegrenzt',
+  'options.help.fpsLimit':
+    'Begrenzt, wie viele Bilder pro Sekunde gezeichnet werden. Weniger schont CPU, GPU und Akku; Unbegrenzt folgt dem Monitor.',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -399,4 +399,8 @@ export default {
   'options.dropDrawCap': 'Limitar itens no chão',
   'options.help.dropDrawCap':
     'Desenha no máximo os 150 itens do chão mais próximos, para servidores com drop muito alto. O resto aparece quando fica entre os mais próximos.',
+  'options.fpsLimit': 'Limite de FPS',
+  'options.fpsUnlimited': 'Sem limite',
+  'options.help.fpsLimit':
+    'Limita quantos quadros por segundo são desenhados. Menos usa menos CPU, GPU e bateria; sem limite segue o monitor.',
 } satisfies Partial<Record<keyof typeof en, string>>;

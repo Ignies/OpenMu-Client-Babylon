@@ -333,4 +333,7 @@ export default {
     '매우 빠른 공격과 군중을 위해: 캐릭터당 초당 최대 10개, 다른 플레이어 전체 초당 최대 40개의 스킬 효과. 타격과 숫자는 그대로 보입니다.',
   'options.dropDrawCap': '바닥 아이템 제한',
   'options.help.dropDrawCap': '드롭률이 매우 높은 서버를 위해 바닥 아이템을 가까운 순으로 최대 150개까지 그립니다. 나머지는 가까워지면 보입니다.',
+  'options.fpsLimit': 'FPS 제한',
+  'options.fpsUnlimited': '제한 없음',
+  'options.help.fpsLimit': '초당 그리는 프레임 수를 제한합니다. 낮을수록 CPU, GPU, 배터리를 덜 씁니다. 제한 없음은 모니터를 따릅니다.',
 } satisfies Partial<Record<keyof typeof en, string>>;

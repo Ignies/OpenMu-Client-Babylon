@@ -403,4 +403,8 @@ export default {
   'options.dropDrawCap': 'Limita gli oggetti a terra',
   'options.help.dropDrawCap':
     'Disegna al massimo i 150 oggetti a terra più vicini, per server con drop molto alti. Gli altri appaiono quando sono tra i più vicini.',
+  'options.fpsLimit': 'Limite FPS',
+  'options.fpsUnlimited': 'Illimitato',
+  'options.help.fpsLimit':
+    'Limita quanti fotogrammi al secondo vengono disegnati. Meno usa meno CPU, GPU e batteria; Illimitato segue il monitor.',
 } satisfies Partial<Record<keyof typeof en, string>>;

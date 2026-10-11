@@ -389,4 +389,8 @@ export default {
   'options.dropDrawCap': 'Giới hạn vật phẩm trên mặt đất',
   'options.help.dropDrawCap':
     'Chỉ vẽ tối đa 150 vật phẩm gần nhất trên mặt đất, cho máy chủ có tỉ lệ rơi rất cao. Số còn lại hiện khi chúng nằm trong nhóm gần nhất.',
+  'options.fpsLimit': 'Giới hạn FPS',
+  'options.fpsUnlimited': 'Không giới hạn',
+  'options.help.fpsLimit':
+    'Giới hạn số khung hình vẽ mỗi giây. Thấp hơn dùng ít CPU, GPU và pin hơn; Không giới hạn theo màn hình.',
 } satisfies Partial<Record<keyof typeof en, string>>;

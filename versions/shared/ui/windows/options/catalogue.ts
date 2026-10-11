@@ -58,6 +58,7 @@ import {
   RENDER_SCALE_STEP_MAX,
   renderScaleForStep,
 } from '@/controllers/render/renderScale';
+import { FPS_LIMIT_MAX, fpsLimitForStep } from '@/controllers/render/fpsLimit';
 import { LOOT_ZEN_MAX, lootZenThreshold } from '@/modules/drops/lootFilter';
 import { CHAT_EMOJI_SIZE_LABEL_KEYS, CHAT_EMOJI_SIZE_MAX } from '@/modules/chat/chatEmojis';
 import { BUS_VOLUME_MAX } from '@/controllers/sound/buses';
@@ -518,6 +519,9 @@ export const CATEGORIES: Category[] = [
               choice('anisotropy', ANISOTROPY_MAX, times(ANISOTROPY_STEPS), {
                 needs: [NEED_TIER],
               }),
+              choice('fpsLimit', FPS_LIMIT_MAX, v =>
+                v > 0 ? `${fpsLimitForStep(v)} FPS` : t('options.fpsUnlimited')
+              ),
             ],
           },
         ],

@@ -437,4 +437,8 @@ export default {
   'options.dropDrawCap': 'Limitar objetos en el suelo',
   'options.help.dropDrawCap':
     'Dibuja como mucho los 150 objetos del suelo más cercanos, para servidores con drops muy altos. El resto aparece cuando está entre los más cercanos.',
+  'options.fpsLimit': 'Límite de FPS',
+  'options.fpsUnlimited': 'Sin límite',
+  'options.help.fpsLimit':
+    'Limita cuántos cuadros por segundo se dibujan. Menos usa menos CPU, GPU y batería; sin límite sigue al monitor.',
 } satisfies Partial<Record<keyof typeof en, string>>;

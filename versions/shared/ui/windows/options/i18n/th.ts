@@ -371,4 +371,8 @@ export default {
   'options.dropDrawCap': 'จำกัดไอเทมบนพื้น',
   'options.help.dropDrawCap':
     'แสดงไอเทมบนพื้นที่ใกล้ที่สุดไม่เกิน 150 ชิ้น สำหรับเซิร์ฟเวอร์ที่ดรอปสูงมาก ที่เหลือจะแสดงเมื่ออยู่ในกลุ่มที่ใกล้ที่สุด',
+  'options.fpsLimit': 'จำกัด FPS',
+  'options.fpsUnlimited': 'ไม่จำกัด',
+  'options.help.fpsLimit':
+    'จำกัดจำนวนเฟรมที่วาดต่อวินาที ค่าต่ำใช้ CPU, GPU และแบตเตอรี่น้อยลง ไม่จำกัดจะตามจอภาพ',
 } satisfies Partial<Record<keyof typeof en, string>>;

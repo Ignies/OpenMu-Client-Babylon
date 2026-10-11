@@ -382,4 +382,8 @@ export default {
   'options.dropDrawCap': 'Ограничи предметите на земята',
   'options.help.dropDrawCap':
     'Рисува най-много 150-те най-близки предмета на земята, за сървъри с много висок дроп. Останалите се появяват, когато са сред най-близките.',
+  'options.fpsLimit': 'Ограничение на FPS',
+  'options.fpsUnlimited': 'Без ограничение',
+  'options.help.fpsLimit':
+    'Ограничава колко кадъра в секунда се рисуват. По-ниско пести процесор, видеокарта и батерия; без ограничение следва монитора.',
 } satisfies Partial<Record<keyof typeof en, string>>;
