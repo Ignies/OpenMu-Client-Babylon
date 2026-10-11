@@ -34,6 +34,10 @@ the two server packets, with its running state and the raw config blob (`MuHelpe
   helper never goes for it again, as the original takes it off its list (`DeleteItem`, MuHelper.cpp:1252).
 - Switching it off clears `world.castRequest`, `attackTarget` and `pickupTarget`, so the hero does not
   keep walking to the monster or drop it was on.
+- Resume (`resume.ts`, ours): a socket drop that starts the automatic reconnect stops the helper,
+  as the server's ended with the old session. Where the world's `server.json` sets
+  `muHelperAfterReconnect`, it is asked to start again (`toggleMuHelper`) 3 s after the resume is
+  back in, if it was running at the drop.
 
 ## Packets
 - `MuHelperStatusUpdate` (BF 51): starts or pauses the helper; reports the zen it cost.
@@ -41,7 +45,7 @@ the two server packets, with its running state and the raw config blob (`MuHelpe
 - outgoing: `MuHelperSaveDataRequest` (`state.ts`), `MuHelperStatusChangeRequest` (`MuHelper.toggleMuHelper`).
 
 ## Depends on / used by
-- uses: `session`, `hero`, `skills`, `pets`, `inventory` (item use), `npc_shop` (repair),
+- uses: `session` (`Session`, `SessionResume`), `servers/serverManifest.ts`, `hero`, `skills`, `pets`, `inventory` (item use), `npc_shop` (repair),
   `social/social.ts` (`partyMembers` for party buffs and heals),
   `controllers/item_rules/itemStats.ts`, `core/inventoryConstants.ts`, `ecs/systems/attackSystem.ts`
   (`isAttackableEntity`).
@@ -62,3 +66,5 @@ the two server packets, with its running state and the raw config blob (`MuHelpe
 - `loop.test.ts`, `state.test.ts`: nothing runs or starts while the module is off. `loop.test.ts`: switching
   it off lets go of its cast, swing and pickup; a buff is checked by skill number and a skill
   `BuffTarget` does not list is never cast; a drop already asked for is left alone.
+- `resume.test.ts`: a drop stops it; after the resume it stays off by default and is asked for again
+  only where the world allows it and only when it was running.

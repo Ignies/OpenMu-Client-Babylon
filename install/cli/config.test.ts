@@ -38,6 +38,11 @@ describe('config file', () => {
     expect(envToConfig({}).retryLoginWhenConnected).toBe(false);
   });
 
+  it('stores the MU Helper restart as MU_HELPER_AFTER_RECONNECT, off unless set', () => {
+    expect(configToEnv({ ...config, muHelperAfterReconnect: true }).MU_HELPER_AFTER_RECONNECT).toBe('on');
+    expect(envToConfig({}).muHelperAfterReconnect).toBe(false);
+  });
+
   it('stores the modules turned off as MU_MODULES_OFF, none unless set', () => {
     expect(configToEnv({ ...config, modulesOff: 'events,band' }).MU_MODULES_OFF).toBe('events,band');
     expect(envToConfig({}).modulesOff).toBe('');

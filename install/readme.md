@@ -106,6 +106,11 @@ everything the stack reads is rendered from `mu.env`, so `mu config` can change 
   refusal. Turn it on only if your server closes the old session on that refusal: otherwise the
   retries are refused too.
 
+  `muHelperAfterReconnect` (`mu config` > Features, `MU_HELPER_AFTER_RECONNECT`, default off)
+  asks for the MU Helper again after the client's automatic reconnect when it was running at the
+  drop. Off, it stays off until the player starts it. Your botting policy: it keeps an AFK
+  helper hunting through a dropped connection.
+
   `modulesOff` (`mu config` > Features, `MU_MODULES_OFF` in `mu.env`, comma separated, default
   none) lists the optional client modules this world does without: their windows hide for its
   players. `band` is added by itself when the band relay is off. The ids are the folders of

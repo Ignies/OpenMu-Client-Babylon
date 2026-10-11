@@ -92,6 +92,7 @@ describe('parseServerManifest', () => {
     expect(parseServerManifest({ version: 1, settings: { heldHitRequest: 'true' } })).toBeNull();
     expect(parseServerManifest({ version: 1, settings: { heldHitRequest: 1 } })).toBeNull();
     expect(parseServerManifest({ version: 1, settings: { retryLoginWhenConnected: 'yes' } })).toBeNull();
+    expect(parseServerManifest({ version: 1, settings: { muHelperAfterReconnect: 1 } })).toBeNull();
   });
 });
 

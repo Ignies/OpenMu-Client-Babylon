@@ -18,8 +18,9 @@ the client-to-server encryption, the login fields and the offline flag.
 - `openSystemMenu()`: Escape on a clear screen opens the system menu in the world
   (`SessionExit.menuOpen`, `closeMenu()`; drawn by `versions/shared/ui/windows/system_menu`) and the
   Options window on the server list and the character screen; returns true when it did.
-- `SessionResume`: the auto-reconnect state machine. `begin()`, `retry()`, `giveUp(reason)`,
-  `remember(name)`, `finish()`, plus `attempt`, `step`, `active` for the overlay.
+- `SessionResume`: the auto-reconnect state machine. `begin()`, `retry()`,
+  `giveUp(reason)`, `remember(name)`, `finish()`, plus `attempt`, `step`, `active` for the overlay and
+  `resumed` (a count of resumes that got back in, which `mu_helper/resume.ts` reacts to).
 - `SessionStats`: exp, kills and zen since the last reset, with per-hour rates and `msToLevel`.
   `watch()`, `tick()`, `reset()`.
 
@@ -63,7 +64,7 @@ the client-to-server encryption, the login fields and the offline flag.
 - uses: `controllers/interface/uiState.ts`, `servers` (`serverConfig.ts`, `serverAccounts.ts`, `serverManifest.ts`, `Servers`), `hero`,
   `character_select`, `npc_shop`, `quests`, `economy`, `social`, `friends/messenger`,
   `controllers/settings`, `controllers/sound`, `controllers/interface/browserHotkeys`.
-- used by: `src/app/logic.ts`, `src/app/boot.tsx`, `hero/net.ts` (`remember`, `finish`),
+- used by: `src/app/logic.ts`, `src/app/boot.tsx`, `hero/net.ts` (`remember`, `finish`), `mu_helper/resume.ts` (`resumed`),
   `ecs/systems/keyboardInputSystem.ts`, `versions/shared/ui/components/reconnect_overlay`.
 - windows: `versions/shared/ui/windows/options/` (exit buttons), `windows/session_stats/`,
   `hud/bottom_bar/` (`expTooltip.tsx`, `index.tsx`).

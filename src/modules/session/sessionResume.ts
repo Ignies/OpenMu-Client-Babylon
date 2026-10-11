@@ -19,6 +19,8 @@ export const SessionResume = new (class _SessionResume {
   /** 0 while idle; the attempt being made otherwise. */
   attempt = 0;
   step: Step = 'idle';
+  /** Resumes that brought the character back (`finish`), for modules that pick up after one. */
+  resumed = 0;
 
   private character = '';
   private timer: ReturnType<typeof setTimeout> | null = null;
@@ -147,6 +149,7 @@ export const SessionResume = new (class _SessionResume {
   finish(): void {
     if (!this.active) return;
     this.stop();
+    this.resumed++;
     addNotification(t('resume.done'));
   }
 

@@ -136,3 +136,6 @@ connect server's own list (`Servers.serverList`) is filled by `session/net.ts`.
 - `retryLoginWhenConnected`: on "account already connected" the client sends the same login again,
   3 times 2.5 s apart (`session/net.ts`, `Session.retryLogin`); the original only shows the refusal.
   It helps only where the server drops the old session on that refusal, so the server decides.
+- `muHelperAfterReconnect`: after the automatic reconnect (`session/sessionResume.ts`) the client
+  asks for the MU Helper again when it was running at the drop (`mu_helper/resume.ts`). Keeping an
+  AFK helper going is botting policy, so the server decides; off, it stays off.

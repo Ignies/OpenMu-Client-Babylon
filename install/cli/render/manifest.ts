@@ -13,7 +13,11 @@ export function manifestModulesOff(c: Config): string[] {
 export function serverManifest(c: Config): string {
   const manifest = {
     version: MANIFEST_VERSION,
-    settings: { heldHitRequest: c.heldHitRequest, retryLoginWhenConnected: c.retryLoginWhenConnected },
+    settings: {
+      heldHitRequest: c.heldHitRequest,
+      retryLoginWhenConnected: c.retryLoginWhenConnected,
+      muHelperAfterReconnect: c.muHelperAfterReconnect,
+    },
     modulesOff: manifestModulesOff(c),
   };
   return `${JSON.stringify(manifest, null, 2)}\n`;

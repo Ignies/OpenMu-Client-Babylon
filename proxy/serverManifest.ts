@@ -20,6 +20,7 @@ export function serverManifest(env: Env = process.env) {
     settings: {
       heldHitRequest: env.MU_HELD_HIT_REQUEST === 'on',
       retryLoginWhenConnected: env.MU_RETRY_LOGIN_WHEN_CONNECTED === 'on',
+      muHelperAfterReconnect: env.MU_HELPER_AFTER_RECONNECT === 'on',
     },
     modulesOff: modulesOff(env),
   };
