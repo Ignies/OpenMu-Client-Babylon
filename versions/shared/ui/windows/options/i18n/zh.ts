@@ -215,7 +215,7 @@ export default {
   'options.help.wsadMovement': '用 W、A、S、D 控制角色行走，第一人称下用鼠标转动视角。这四个键原有的快捷键需加按 Ctrl。',
   'options.help.thirdPersonMouseLook': '任何缩放距离下都用鼠标转动视角，不再仅限第一人称。',
   'options.help.blockBrowserKeys': '游戏中屏蔽 F5、缩放等浏览器快捷键，并在关闭标签页前询问。',
-  'options.help.presets': '把光照、材质、细节和整个图像页统一设为相匹配的等级。',
+  'options.help.presets': '把光照、材质、细节和整个图像页统一设为相匹配的等级。“低”还会关闭所有耗费性能的选项（包括人群相关），并以 75% 渲染，适合低配电脑。',
   'options.help.lightingQuality': '经典为原版画面。增强加入阳光阴影、柔和明暗和雾气；极致让这些效果更精细。',
   'options.help.materialQuality': '带有凹凸和光泽的写实表面：关闭、用于角色和装备，或用于全部。',
   'options.help.materialDetail': '写实材质中凹凸起伏、金属光泽和地面纹理的显现程度。',

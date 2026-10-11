@@ -242,7 +242,7 @@ export default {
   'options.help.blockBrowserKeys':
     'Durante il gioco blocca le scorciatoie del browser come F5 e lo zoom, e chiede conferma prima di chiudere la scheda.',
   'options.help.presets':
-    'Porta Illuminazione, Materiali, Dettaglio e tutta la pagina Immagine a un unico livello coerente.',
+    'Porta Illuminazione, Materiali, Dettaglio e tutta la pagina Immagine a un unico livello coerente. Bassa spegne inoltre tutto ciò che pesa, folle comprese, e disegna al 75%, per i computer lenti.',
   'options.help.lightingQuality':
     'Classica è l’aspetto originale. Migliorata aggiunge ombre del sole, ombreggiatura morbida e foschia; Ultra le rende più nitide.',
   'options.help.materialQuality':

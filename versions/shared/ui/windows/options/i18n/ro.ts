@@ -242,7 +242,7 @@ export default {
   'options.help.blockBrowserKeys':
     'În timpul jocului, blochează scurtăturile browserului, ca F5 și zoomul, și întreabă înainte să se închidă fila.',
   'options.help.presets':
-    'Setează Iluminare, Materiale, Detaliu și toată pagina Imagine la același nivel.',
+    'Setează Iluminare, Materiale, Detaliu și toată pagina Imagine la același nivel. Scăzută oprește în plus tot ce consumă, inclusiv mulțimile, și randează la 75%, pentru calculatoare lente.',
   'options.help.lightingQuality':
     'Clasică e aspectul original. Îmbunătățită adaugă umbre de la soare, umbrire fină și ceață; Ultra le face mai clare.',
   'options.help.materialQuality':
