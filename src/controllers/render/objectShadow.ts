@@ -22,7 +22,9 @@ import {
 } from '../terrain/terrainHeightMap';
 
 
+/** `RenderBodyShadow`'s sx: 2500 in Battle Castle, 2000 elsewhere (ZzzBMD.cpp:2784). */
 const SHADOW_SX = 2000 / TILE_CM;
+const BATTLE_CASTLE_SHADOW_SX = 2500 / TILE_CM;
 const SHADOW_SY = 4000 / TILE_CM;
 
 const GROUND_OFFSET = 5 / TILE_CM;
@@ -59,18 +61,11 @@ const SHADOW_FADE_START = 250 / TILE_CM;
 const SHADOW_FADE_END = 600 / TILE_CM;
 
 /**
- * The most the fold may move a vertex along the lean axis. It divides by the vertex's height under the
- * light (`SHADOW_SY`), so a tall caster's top was thrown tens of tiles and its triangles drew long black
- * streaks; up to SHADOW_FADE_END a vertex folds under four. Not in the original (see the readme).
- */
-const SHADOW_MAX_FOLD = 500 / TILE_CM;
-
-/**
  * The perspective fold along the lean axis, `CalcShadowPosition`'s `x += z * (x + sx) / (z - sy)`
- * (ZzzBMD.cpp:2620-2638), kept off its singularity: the divisor a quarter of the light's height from
- * it, the move within SHADOW_MAX_FOLD. GLSL that also reads as JS (`objectShadow.test.ts`).
+ * (ZzzBMD.cpp:2620-2638), with no limit: a tall caster streaks as in the original. GLSL that also reads as
+ * JS (`objectShadow.test.ts`).
  */
-export const SHADOW_FOLD = `clamp(shadowY * (shadowA + shadowSX) / min(shadowY - shadowSY, -0.25 * shadowSY), -${SHADOW_MAX_FOLD.toFixed(4)}, ${SHADOW_MAX_FOLD.toFixed(4)})`;
+export const SHADOW_FOLD = 'shadowY * (shadowA + shadowSX) / (shadowY - shadowSY)';
 
 /**
  * How far the silhouette is pushed out along its horizontal normal before it is
@@ -152,6 +147,10 @@ function createShadowMaterial(scene: Scene, slot: number): CustomMaterial {
   // reproduces the old hardcoded +X formula exactly.
   material.AddUniform('shadowSunDir', 'vec2', undefined);
   material.AddUniform('terrainHeightMap', 'sampler2D', undefined);
+  // 1: fold from the ground under the origin, not the origin (`ShadowFromGround`).
+  material.AddUniform('shadowGround', 'float', undefined);
+  // The caster's share of SHADOW_ALPHA (`ShadowAlpha`).
+  material.AddUniform('shadowStrength', 'float', undefined);
 
   // The silhouette dilation (SHADOW_DILATE) needs the caster's normals, and
   // nothing else in this pass does - `disableLighting` is on, there is no
@@ -205,6 +204,13 @@ function createShadowMaterial(scene: Scene, slot: number): CustomMaterial {
       vec3 shadowOriginI = shadowOrigin.xyz;
     #endif
 
+    // BodyOrigin on the terrain under the caster (ZzzObject.cpp:1050-1053, GOBoid.cpp:1594-1596).
+    shadowOriginI.y = mix(
+      shadowOriginI.y,
+      texture2D(terrainHeightMap, (shadowOriginI.xz + 0.5) / ${TERRAIN_SIZE}.0).r * shadowParams.w,
+      shadowGround
+    );
+
     vec3 shadowRel = worldPos.xyz - shadowOriginI;
 
     float shadowCasterY = worldPos.y;
@@ -254,7 +260,7 @@ function createShadowMaterial(scene: Scene, slot: number): CustomMaterial {
     // little bit of everything is the one that reads as too thin. The original
     // samples no texture here at all: every triangle it keeps lands solid 50%
     // black, and overlaps do not deepen it (the stencil above).
-    color.a = ${SHADOW_ALPHA.toFixed(3)};
+    color.a = ${SHADOW_ALPHA.toFixed(3)} * shadowStrength;
 
     color.a *= 1.0 - smoothstep(
       ${SHADOW_FADE_START.toFixed(4)},
@@ -294,7 +300,7 @@ function createShadowMaterial(scene: Scene, slot: number): CustomMaterial {
 
     effect.setFloat4(
       'shadowParams',
-      SHADOW_SX,
+      shadowSX,
       SHADOW_SY,
       GROUND_OFFSET,
       TERRAIN_HEIGHT_SCALE
@@ -317,6 +323,8 @@ function createShadowMaterial(scene: Scene, slot: number): CustomMaterial {
       }
     }
     effect.setFloat2('shadowSunDir', axisX, axisZ);
+    effect.setFloat('shadowGround', mesh.metadata?.shadowFromGround ? 1 : 0);
+    effect.setFloat('shadowStrength', mesh.metadata?.shadowAlpha ?? 1);
 
     effect.setTexture('terrainHeightMap', heightMap);
   });
@@ -362,6 +370,12 @@ const SHADOWLESS_WORLDS: ReadonlySet<ENUM_WORLD> = new Set([
 ]);
 
 let shadowsAllowed = true;
+let shadowSX = SHADOW_SX;
+
+/** The projection's sx on this world, in tiles. */
+export function shadowLean(): number {
+  return shadowSX;
+}
 
 /**
  * Called on every map change. Kept as a set-on-load flag rather than a lookup
@@ -369,6 +383,8 @@ let shadowsAllowed = true;
  * answer only ever changes when the world does.
  */
 export function setShadowWorld(world: ENUM_WORLD): void {
+  shadowSX = world === ENUM_WORLD.WD_30BATTLECASTLE ? BATTLE_CASTLE_SHADOW_SX : SHADOW_SX;
+
   const next = !SHADOWLESS_WORLDS.has(world);
 
   if (next === shadowsAllowed) return;
@@ -387,7 +403,17 @@ export function setShadowWorld(world: ENUM_WORLD): void {
  * the scene rather than only the tier that happens to be running.
  */
 export function blobShadowsActive(): boolean {
-  return shadowsAllowed && GameOptions.shadows && !csmActive();
+  return shadowsAllowed && !sceneDark && GameOptions.shadows && !csmActive();
+}
+
+/** A scene that draws no shadow while it lasts: the Kanturu Maya scene (set by the events module). */
+let sceneDark = false;
+
+/** Turns that scene on or off; cheap to call every frame. */
+export function setShadowlessScene(on: boolean): void {
+  if (on === sceneDark) return;
+  sceneDark = on;
+  invalidateShadowState();
 }
 
 /**
@@ -413,19 +439,26 @@ blobShadowRefresh.fn = invalidateShadowState;
  * One projected blob for `slot`, or null when this caster has nothing to
  * project. Built on demand - every clone is a full copy of the caster's
  * submesh hierarchy and a second set of draw calls, so on a tier where the
- * slot never activates it should never exist. `blendMeshCasts`: see `meshCasts`.
+ * slot never activates it should never exist. `caster`: the owner's shadow settings (`ModelObject`).
  */
 export function createObjectShadow(
   root: AbstractMesh,
   parent: TransformNode,
   originNode: TransformNode,
   slot: number,
-  blendMeshCasts: boolean
+  caster: ShadowCaster
 ): AbstractMesh | null {
   if (!(root instanceof Mesh)) return null;
 
-  return createOneShadow(root, parent, originNode, slot, blendMeshCasts);
+  return createOneShadow(root, parent, originNode, slot, caster);
 }
+
+/** What a clone takes from its caster: see `meshCasts` and `ModelObject`'s fields of the same names. */
+type ShadowCaster = {
+  readonly ShadowBlendMeshCasts: boolean;
+  readonly ShadowFromGround: boolean;
+  readonly ShadowAlpha: number;
+};
 
 /**
  * Whether a caster's mesh is in the silhouette. `AddMeshShadowTriangles`
@@ -447,8 +480,9 @@ function createOneShadow(
   parent: TransformNode,
   originNode: TransformNode,
   slot: number,
-  blendMeshCasts: boolean
+  caster: ShadowCaster
 ): AbstractMesh | null {
+  const blendMeshCasts = caster.ShadowBlendMeshCasts;
   // Decide on the caster before paying for a clone: a model whose meshes are
   // all hidden or blend cards has nothing to cast.
   const casts = [root, ...root.getChildMeshes(false)].some(
@@ -483,6 +517,8 @@ function createOneShadow(
     mesh.metadata = {
       SkipBoundingBox: true,
       shadowOriginNode: originNode,
+      shadowFromGround: caster.ShadowFromGround,
+      shadowAlpha: caster.ShadowAlpha,
       diffuseTexture: casterTexture,
     };
 

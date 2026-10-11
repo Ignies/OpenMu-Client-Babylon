@@ -15,9 +15,6 @@ export default {
   'fidelity.loginChandeliers': 'Горящие люстры при входе',
   'fidelity.loginChandeliers.hint':
     'Люстры на экране входа горят. Классика: они потушены, как в оригинале.',
-  'fidelity.wingShadows': 'Тени крыльев',
-  'fidelity.wingShadows.hint':
-    'Крылья отбрасывают тень. Классика: без тени, как в оригинале.',
   'fidelity.torchCrackle': 'Звук факелов',
   'fidelity.torchCrackle.hint':
     'Горящие факелы потрескивают, когда вы рядом. Классика: факелы беззвучны.',

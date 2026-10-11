@@ -475,6 +475,9 @@ export class ModelObject {
    */
   ShadowHiddenMesh = -1;
 
+  /** `RenderBodyShadow`'s mesh range: only these meshes cast (the Dark Horse's, ZzzObject.cpp:790). null = all. */
+  ShadowMeshes: readonly number[] | null = null;
+
   /**
    * `Models[type].StreamMesh` (ZzzBMD.cpp:990-1001): this mesh is drawn
    * textured but *unlit* - flat `BodyLight` instead of the per-vertex terrain
@@ -664,6 +667,30 @@ export class ModelObject {
    * ZzzObject.cpp:1041-1057). Any other map object has no Classic blob; the cascades read `CastsShadow`.
    */
   MapShadow = false;
+
+  /**
+   * Characters and their parts: off while the original draws no shadow for this body (a cape's model,
+   * whose cloth casts instead). Read every frame; the cascades read `CastsShadow` alone.
+   */
+  ClassicShadow = true;
+
+  /**
+   * The Classic shadow folds from the ground under the object, not its own origin: the original sets
+   * `BodyOrigin` to the terrain height first (ZzzObject.cpp:1050-1053, GOBoid.cpp:1594-1596, :1637-1639).
+   */
+  ShadowFromGround = false;
+
+  /** The sun cascades take it, with `CastsShadow`; off for what has the Classic shadow alone (the boids). */
+  CascadeShadow = true;
+
+  /** The Classic shadow's strength, a share of the one Classic value: `RenderBodyShadow`'s alpha (boids 0.2). */
+  ShadowAlpha = 1;
+
+  /**
+   * The body alpha from which its Classic shadow is drawn: 0.5 for a player, 0.3 for a monster
+   * (ZzzCharacter.cpp:8588, :8673); the rest only when solid.
+   */
+  ShadowMinAlpha = 1;
 
   /**
    * Whether snow may settle on this object (controllers/weather/snowCaps.ts). Set by
@@ -1186,7 +1213,7 @@ export class ModelObject {
       // item effect reads the same in the open and in a shadow.
       mesh.receiveShadows = this.IsMapObject;
       mesh.metadata.csmCaster =
-        this.CastsShadow && !this.Lights?.emitsLight;
+        this.CastsShadow && this.CascadeShadow && !this.Lights?.emitsLight;
 
       // A map object's shadow is already in the lightmap; the cascades read
       // this to keep it out of the shadow map (controllers/render/shadows.ts).
@@ -1530,7 +1557,18 @@ export class ModelObject {
 
   /** `ShadowHiddenMesh`: the flag `objectShadow.meshCasts` reads. */
   private applyShadowHiddenMesh() {
-    if (this.ShadowHiddenMesh < 0 || !this.gltf) return;
+    if (!this.gltf) return;
+
+    const only = this.ShadowMeshes;
+    if (only) {
+      const meshes = this.gltf.mesh.getChildMeshes(false);
+      for (let i = 0; i < meshes.length; i++) {
+        meshes[i].metadata ??= {};
+        if (!only.includes(i)) meshes[i].metadata.shadowSkip = true;
+      }
+    }
+
+    if (this.ShadowHiddenMesh < 0) return;
 
     const mesh = this.getMesh(this.ShadowHiddenMesh);
 
@@ -1611,14 +1649,14 @@ export class ModelObject {
 
     for (let slot = 0; slot < this._shadows.length; slot++) {
       if (this._shadows[slot] || this._shadowSlotsBarren[slot]) continue;
-      if (!blobShadowsActive() || !this._castsBlobShadow) continue;
+      if (!blobShadowsActive() || !this._castsBlobShadow || !this.ClassicShadow) continue;
 
       const shadow = createObjectShadow(
         this.gltf!.mesh,
         this._node,
         this.rootObject.node,
         slot,
-        this.ShadowBlendMeshCasts
+        this
       );
 
       if (!shadow) {
@@ -1646,7 +1684,7 @@ export class ModelObject {
   private syncShadowEnabled(): void {
     if (this._shadows.length === 0) return;
 
-    const visible = !this.OutOfView && this.Alpha >= 1;
+    const visible = !this.OutOfView && this.Alpha >= this.ShadowMinAlpha && this.ClassicShadow;
     const serial = shadowStateVersion();
 
     if (visible === this._shadowsVisible && serial === this._shadowsSerial) {

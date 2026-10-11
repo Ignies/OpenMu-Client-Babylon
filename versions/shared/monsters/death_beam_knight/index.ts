@@ -4,6 +4,8 @@ import { DEATH_BEAM_KNIGHT_WINGS } from './bodyFx';
 export default defineMonster({
   Numb: 63,
   Name: 'Deathvim Knight',
+  // RenderCharacter casts it no shadow (ZzzCharacter.cpp:8662-8668).
+  classicShadow: false,
   // MONSTER_DEATH_BEAM_KNIGHT: the burning wings (ZzzCharacter.cpp:5843-5922).
   bodyFx: DEATH_BEAM_KNIGHT_WINGS,
   // The fire around it takes light off the floor: AddTerrainLight(-1.3, range 3) (ZzzCharacter.cpp:5910-5911).

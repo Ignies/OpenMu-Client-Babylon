@@ -728,6 +728,7 @@ class PropBatches {
       shadow.metadata = {
         SkipBoundingBox: true,
         propBatch: true,
+        shadowFromGround: proto.ShadowFromGround,
         diffuseTexture: src.metadata?.diffuseTexture,
       };
       shadow.receiveShadows = false;

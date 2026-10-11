@@ -22,6 +22,8 @@ export type MonsterModelDef = {
   shatter?: MonsterShatter;
   /** Multiplier on Stop1..Shock (the original's per-body speed scale; Die is never scaled). */
   speedScale?: number;
+  /** The Classic shadow: `'alive'` until the body dies (`m_bRenderShadow = false` in its Die branch), `'never'` none. */
+  classicShadow?: 'alive' | 'never';
 };
 
 /** A monster body file's default export. */

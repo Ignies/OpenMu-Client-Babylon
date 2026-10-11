@@ -48,7 +48,7 @@ import {
   isSwimWorld,
 } from '../../controllers/actors/locomotion';
 import { isWingItem } from '../../controllers/actors/wings';
-import { isRidingMount, petSpec } from '@/controllers/pets';
+import { isRidingMount, mountKind, petSpec } from '@/controllers/pets';
 import { Hero } from '../../modules/hero';
 import { heldWeapons } from '../../controllers/actors';
 import { isOn } from '../../controllers/fidelity';
@@ -409,6 +409,17 @@ export const AnimationSystem: ISystemFactory = world => {
               bindBack
             );
           }
+        }
+
+        // The Classic shadow's rider, safe-zone and bow rules (PlayerObject.setClassicShadows).
+        if ((modelObject as PlayerObject).Weapon1) {
+          const mounted = mountKind(hands?.pet, inSafeZone);
+          (modelObject as PlayerObject).setClassicShadows(
+            mounted === 'uniria' || mounted === 'dinorant',
+            inSafeZone,
+            hands?.leftHand,
+            hands?.rightHand
+          );
         }
 
         // Dead or about to die: c->Movement = false, no stop/walk re-evaluation.

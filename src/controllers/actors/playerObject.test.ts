@@ -31,3 +31,28 @@ describe('the wing slot', () => {
     expect(load.mock.calls.map(call => call[2])).toEqual(['DarkLordRobe02.glb', 'Wing51.glb']);
   });
 });
+
+// RenderCharacter's shadow pass draws BodyPart[] and Weapon[] alone: none for a Uniria or Dinorant rider out
+// of a safe zone, no weapon in a safe zone, never a bow or crossbow (ZzzCharacter.cpp:8590-8628).
+describe('the Classic shadow of a character', () => {
+  const sword = { group: 0, num: 0 };
+  const bow = { group: 4, num: 3 };
+  const flags = (player: PlayerObject) =>
+    [player.Armor, player.Weapon1, player.Weapon2, player.PhoenixWing1, player.Pet, player.QuestItem].map(o => o.ClassicShadow);
+
+  it('falls from the body and the hand weapons, and never from the rest', () => {
+    const player = new PlayerObject(scene, new TransformNode('player', scene));
+    player.setClassicShadows(false, false, sword, bow);
+    expect(flags(player)).toEqual([true, true, false, false, false, false]);
+    player.setClassicShadows(false, true, sword, null);
+    expect(flags(player)).toEqual([true, false, false, false, false, false]);
+    player.setClassicShadows(true, false, sword, null);
+    expect([player.ClassicShadow, ...flags(player)]).toEqual([false, false, false, false, false, false, false]);
+  });
+
+  // `o->Alpha >= 0.5f` opens the player's shadow pass (ZzzCharacter.cpp:8588).
+  it('is drawn from half alpha', () => {
+    const player = new PlayerObject(scene, new TransformNode('player', scene));
+    expect([player.ShadowMinAlpha, player.Armor.ShadowMinAlpha, player.Weapon1.ShadowMinAlpha]).toEqual([0.5, 0.5, 0.5]);
+  });
+});

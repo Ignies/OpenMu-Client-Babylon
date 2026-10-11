@@ -4,6 +4,8 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 477,
   Name: 'Transformed Snowman',
+  // Its Die branch drops the shadow (ZzzObject.cpp:1826-1833).
+  classicShadow: 'alive',
   // Xmas 2008 transformed snowman (ZzzCharacter.cpp:14496-14501).
   npcModel: { file: '/Item/xmas/snowman', scale: 1.3 },
   // `PlayMonsterSoundGlobal`, also for the Snowman ring's skin (ZzzCharacter.cpp:15167-15189). Its death

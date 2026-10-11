@@ -3,6 +3,8 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 216,
   Name: 'Crown',
+  // Created with `m_bRenderShadow = false` (GMBattleCastle.cpp:1307).
+  classicShadow: false,
   maxHealth: 50,
   // Castle Siege (GMBattleCastle.cpp:1286-1381).
   npcModel: { file: 'NpcCrown' },

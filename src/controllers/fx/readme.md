@@ -96,6 +96,7 @@ shared pools, textures and particle recipes other folders reuse.
 - change one skill's look: its file in `versions/shared/skills/`, not here.
 
 ## Tests
+- `boids.test.ts`: a bird, a fish and an invasion dragon cast the Classic shadow from the ground at 0.2, not on the cascades.
 - `layers.test.ts`: no shroud layer (Evil Spirit, its only spawner, draws none).
 - `effectParticles.test.ts`: no particle is made while the page is hidden; `KIND_REACH` covers every particle kind, and the view gate of
   `ParticleEmitter` / `BonedParticleEmitter` (spawns only when a sprite could reach the frustum);
@@ -194,6 +195,9 @@ a soft wake. Driven by `ecs/systems/bandSystem.ts`, one spawn per hit.
 `controllers/pets/pets.ts` and `ecs/systems/petSystem.ts`; `Boids[]` (birds, bats, butterflies, crows,
 fish) is here; each map names its species (`fx: { boids }` on the entry, `MapFx`). Each boid plays its own call sound (GOBoid.cpp:1481-1501). The ground crawlers
 (GOBoid.cpp:1690-1745) are not ported yet. `MAX_BOIDS` is 13, not the original array size of 40.
+Every boid and fish casts the Classic shadow from the ground under it (`ShadowFromGround`, GOBoid.cpp:1585-1600,
+:1630-1640) at alpha 0.2 (`ShadowAlpha`, a share of the Classic value) and none on the cascades. The
+eagle's 0 or 1 (GOBoid.cpp:1591-1593) has no boid here to carry it.
 
 ### cards.ts
 Per-tick rules: velocity decaying by a factor, scale growing by a step or factor, light that decays

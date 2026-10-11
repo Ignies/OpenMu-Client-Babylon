@@ -3,6 +3,8 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 242,
   Name: 'Elf Lala',
+  // RenderCharacter casts it no shadow (ZzzCharacter.cpp:8662-8668).
+  classicShadow: false,
   maxHealth: 50,
   npcModel: { file: 'ElfWizard01' },
   // MODEL_ELF_WIZARD: `rand_fps_check(256)` (ZzzCharacter.cpp:6085).

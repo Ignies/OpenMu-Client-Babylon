@@ -4,6 +4,8 @@ import { bone } from '../_shared/bodyFx';
 export default defineMonster({
   Numb: 59,
   Name: 'Zaikan',
+  // RenderCharacter casts it no shadow (ZzzCharacter.cpp:8662-8668).
+  classicShadow: false,
   // `SubType 1` (ZzzCharacter.cpp:13752): `BITMAP_FIRE` on bones 6 and 13 every tick (:5961-5972).
   bodyFx: [bone(1, 'firePuff', 6), bone(1, 'firePuff', 13)],
   // The fire around it takes light off the floor: AddTerrainLight(-1.3, range 3) (SubType 1, ZzzCharacter.cpp:5968-5969).

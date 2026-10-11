@@ -6,7 +6,7 @@ these follow the body, not the type; a type points at its body with `model.type`
 folder.
 
 ```
-<body>.ts   export default defineMonsterModel({ type, name, voices, subType9Voices?, clipSpeeds?, speedScale? })
+<body>.ts   export default defineMonsterModel({ type, name, voices, subType9Voices?, clipSpeeds?, speedScale?, classicShadow? })
 all.ts      finds every file (glob in the client and tests, from disk in the Bun servers)
 ```
 
@@ -23,6 +23,10 @@ all.ts      finds every file (glob in the client and tests, from disk in the Bun
   folder says `subType: 9`).
 - `clipSpeeds` (by `MonsterActionType`) and `speedScale` (Stop1..Shock only): the per-body lines of
   `OpenMonsterModel` (ZzzOpenData.cpp:2380-2440) over the shared defaults in `anim/playSpeed.ts`.
+- `classicShadow`: `'alive'` drops the Classic shadow when the body dies (its Die branch's
+  `m_bRenderShadow = false`: the Swamp's, Karutan's, Raklion's giants, the PK field assassins, the Blade
+  Hunter, the Twin Tail, the Totem Golem, the Dark Ghost), `'never'` has none (the Maya hands). Read by
+  `controllers/actors` `npcClassicShadow` / `npcShadowOnDeath`.
 - `versions/shared/monsters/all.ts` loads this folder, and each version's core module loads that.
 
 ## Change it

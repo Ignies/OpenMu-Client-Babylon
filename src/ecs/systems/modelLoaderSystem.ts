@@ -3,6 +3,7 @@ import { MapPlayerNetClassToModelClass } from '../../controllers/actors/mapPlaye
 import { getModel, loadGLTF } from '../../controllers/assets/modelLoader';
 import { ModelObject } from '../../controllers/render/modelObject';
 import { PlayerObject } from '../../controllers/actors/playerObject';
+import { applyNpcShadow } from '../../controllers/actors/modelFactoryPerId';
 import { MapObjectLights } from '../../controllers/lighting/mapObjectLightAdapter';
 import { blendMeshFor } from '../../controllers/render/blendMeshes';
 import { toRenderAngles } from '../../controllers/render/renderAngles';
@@ -88,6 +89,7 @@ function createModelObject(
 
   const modelObject = entity.modelObject as any as ModelObject;
   modelObject.WorldIndex = entity.worldIndex;
+  if (entity.npcType !== undefined) applyNpcShadow(modelObject, entity.npcType);
   if (modelId !== undefined) {
     modelObject.Type = modelId;
     // `modelId` is set by `createObjects` and by nothing else, so it is the

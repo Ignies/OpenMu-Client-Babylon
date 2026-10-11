@@ -15,6 +15,7 @@ vi.hoisted(() => {
 const { World } = await import('@/ecs/world');
 const { ModelObject } = await import('./modelObject');
 const { addPropToBatch, disposePropBatches, flushPropBatches, propBatchStats } = await import('./propBatches');
+const { GameOptions } = await import('@/controllers/settings');
 
 const engine = new NullEngine();
 const scene = new Scene(engine);
@@ -64,5 +65,27 @@ describe('the prop batches', () => {
     // The next map clones the same cached model and batches it again.
     await visit(world);
     whole();
+  });
+
+  // The Blood Castle statues: shadowed from the terrain under them (ZzzObject.cpp:1050-1053).
+  it("fold a batched caster's shadow from the ground when it asks to", async () => {
+    class GroundStatue extends Statue {
+      MapShadow = true;
+      ShadowFromGround = true;
+    }
+    // The batched blob is Classic's alone.
+    const tier = GameOptions.lightingQuality;
+    GameOptions.lightingQuality = 0;
+    const world = new World(scene as never);
+    const entity = world.add({ worldIndex: world.mapIndex, transform: { pos: new Vector3(30, 0, 30), rot: Vector3.Zero(), scale: 1 }, modelId: 8 });
+    addPropToBatch(world, entity, GroundStatue);
+    await Promise.resolve();
+    flushPropBatches(world);
+    const shadows = scene.meshes.filter(mesh => mesh.name.includes('_pbShadow8_'));
+    const fromGround = shadows.map(mesh => mesh.metadata?.shadowFromGround);
+    disposePropBatches();
+    GameOptions.lightingQuality = tier;
+    expect(fromGround.length).toBeGreaterThan(0);
+    expect(fromGround.every(flag => flag === true)).toBe(true);
   });
 });

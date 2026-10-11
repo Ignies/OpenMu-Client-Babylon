@@ -22,6 +22,8 @@ vi.mock('../../controllers/fx/deathVisuals', () => ({
 const spawn = vi.fn();
 vi.mock('../../controllers/fx', () => ({ effects: { spawn: (...args: unknown[]) => spawn(...args) } }));
 vi.mock('../../controllers/sound/combatSounds', () => ({ COMBAT_BUS: 'combat' }));
+// Type 999 loses its Classic shadow when it dies.
+vi.mock('../../controllers/actors/modelFactoryPerId', () => ({ npcShadowOnDeath: (type: number) => type !== 999 }));
 vi.mock('../../controllers/fx/bloodDecals', () => ({
   BloodDecals: class {
     spawn() {}
@@ -173,11 +175,12 @@ describe('the Dead counter', () => {
 });
 
 /** A monster killed on an open map, its model loaded; `held` as `ObjectGotKilled` would mark it. */
-function slain(held = 0) {
+function slain(held = 0, npcType = 3) {
   const body = {
     ...corpse(),
+    npcType,
     monsterAnimation: { action: MonsterActionType.Stop1 },
-    modelObject: { Ready: true, Light: { x: 1, y: 1, z: 1 }, setAlpha: vi.fn() },
+    modelObject: { Ready: true, Light: { x: 1, y: 1, z: 1 }, setAlpha: vi.fn(), ClassicShadow: true },
   };
   body.dying.held = held;
   const world = {
@@ -209,6 +212,17 @@ describe('the Die clip', () => {
     // The original sends the hit on the click; this client holds it to the blow (combat attackTiming).
     expect(dieTick(5)).toBe(9);
     expect(dieTick(20)).toBe(1);
+  });
+
+  // The Die branch's `m_bRenderShadow = false` (GMSwampOfQuiet.cpp:859 and its kind).
+  it('takes the Classic shadow off a body that loses it in death, and leaves the rest', () => {
+    const { body, system } = slain(0, 999);
+    const other = slain();
+    for (let i = 0; i < 20; i++) {
+      system.update?.(TICK);
+      other.system.update?.(TICK);
+    }
+    expect([body.modelObject.ClassicShadow, other.body.modelObject.ClassicShadow]).toEqual([false, true]);
   });
 
   it('fades from the kill, Rot += 0.02 a tick from Dead = 1 (ZzzCharacter.cpp:3215-3237)', () => {

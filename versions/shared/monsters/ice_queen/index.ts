@@ -3,6 +3,8 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 25,
   Name: 'Ice Queen',
+  // RenderCharacter casts it no shadow (ZzzCharacter.cpp:8662-8668).
+  classicShadow: false,
   maxHealth: 4000,
   model: { type: 18, scale: 1.1 },
   stats: {

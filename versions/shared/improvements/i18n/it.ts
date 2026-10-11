@@ -15,9 +15,6 @@ export default {
   'fidelity.loginChandeliers': 'Lampadari accesi al login',
   'fidelity.loginChandeliers.hint':
     'I lampadari della schermata di accesso sono accesi. Classica: sono spenti, come nell\'originale.',
-  'fidelity.wingShadows': 'Ombre delle ali',
-  'fidelity.wingShadows.hint':
-    'Le ali proiettano un\'ombra. Classica: nessuna ombra, come nell\'originale.',
   'fidelity.torchCrackle': 'Suono delle torce',
   'fidelity.torchCrackle.hint':
     'Le torce accese crepitano quando sei vicino. Classica: le torce sono silenziose.',

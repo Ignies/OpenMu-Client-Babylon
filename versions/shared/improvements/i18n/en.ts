@@ -13,8 +13,6 @@ const en = {
   'fidelity.loginChandeliers': 'Lit login chandeliers',
   'fidelity.loginChandeliers.hint':
     'The chandeliers on the login screen burn. Classic: they are cold, as in the original.',
-  'fidelity.wingShadows': 'Wing shadows',
-  'fidelity.wingShadows.hint': 'Wings cast a shadow. Classic: no shadow, as in the original.',
   'fidelity.torchCrackle': 'Torch sounds',
   'fidelity.torchCrackle.hint': 'Burning torches crackle when you are near. Classic: torches are silent.',
   'fidelity.loginWallTorches': 'Burning login wall torches',

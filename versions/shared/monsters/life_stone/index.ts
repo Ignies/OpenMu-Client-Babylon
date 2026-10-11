@@ -3,6 +3,8 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 278,
   Name: 'Life Stone',
+  // Created with `m_bRenderShadow = false` (GMBattleCastle.cpp:1408).
+  classicShadow: false,
   maxHealth: 15000,
   model: { type: 86, scale: 1 },
   stats: {

@@ -15,9 +15,6 @@ export default {
   'fidelity.loginChandeliers': 'Zapalone żyrandole przy logowaniu',
   'fidelity.loginChandeliers.hint':
     'Żyrandole na ekranie logowania płoną. Klasyczne: są zgaszone, jak w oryginale.',
-  'fidelity.wingShadows': 'Cienie skrzydeł',
-  'fidelity.wingShadows.hint':
-    'Skrzydła rzucają cień. Klasyczne: bez cienia, jak w oryginale.',
   'fidelity.torchCrackle': 'Odgłos pochodni',
   'fidelity.torchCrackle.hint':
     'Płonące pochodnie trzaskają, gdy jesteś blisko. Klasyczne: pochodnie są ciche.',

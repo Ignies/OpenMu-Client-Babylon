@@ -9,7 +9,7 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   and set `NpcClass`, `NpcAlwaysFly`, `NpcHeroState`, `DeathShatter`), `isPlayerBody`, `npcClassOf`,
   `npcHeroStateOf` (a geared NPC's `pk`: `modules/scope/objects.ts` gives the entity that `heroState`, so the
   render system draws an outlaw's red body, ZzzCharacter.cpp:9988-9991);
-  `MonsterObject`; `OperateBoxObject`, `LeanBoxObject` (invisible click targets for maps).
+  `MonsterObject`; `OperateBoxObject`, `LeanBoxObject` (invisible click targets for maps; `Drawn` keeps the model on screen).
 - `resolveModelFactory(type)`, `isKnownObjectType(type)` (`modelFactoryPerId.ts`): registered
   classes first, then the engine default the type's monster folder asks for.
 - `registerModelClass(types, Class)` (`modelClasses.ts`): content's own model classes.
@@ -143,15 +143,19 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   shared classes) and the NPC tables, as hashes; update them on purpose. It runs the real model
   classes under Node.
 - `npcLooks.test.ts`: NPCs drawn as the original builds them (Hanzo's scale, the 0.9 default and who sets its own, the plain-model NPCs,
-  Zyro, the Cursed Wizard's kit, the plate helpers, the Kalima gates held on key 10), each with its
-  ZzzCharacter.cpp lines.
+  Zyro, the Cursed Wizard's kit, the plate helpers, the Kalima gates held on key 10, the monsters, traps
+  and NPCs that cast no Classic shadow and the ones that lose it in death), each with its source lines.
 - `skinTexture.test.ts`: skin / hair / level and hide texture names, and the case of each test.
 - `classPartModel.test.ts`: the Monk, mask and ElfC models per class, and that each file ships.
 - `weaponAttachment.test.ts`: a glove weapon on no bone and with no clip of its own, in the hands and in town.
 - `playerObject.test.ts`: the Cape of Lord and Cape of Fighter load no model (cloth only); the Mantle of Monarch and
-  Cape of Overrule keep theirs.
+  Cape of Overrule keep theirs; the Classic shadow is the body parts and the hand weapons, none for a Uniria
+  or Dinorant rider out of town, no weapon in town, no bow or crossbow (`setClassicShadows`, set each frame
+  by `ecs/systems/animationSystem.ts`; NPC types by `applyNpcShadow` when their model is made), drawn from half
+  alpha (a monster from 0.3).
 - `wingObject.test.ts`: the Wing of Ruin layer (a `Data/` bitmap, `getDataTexture`) is read top-down like
-  the GLB textures it shares the UVs of, and is drawn on a model whose meshes sit under its model node.
+  the GLB textures it shares the UVs of, and is drawn on a model whose meshes sit under its model node; a wing
+  casts the Classic shadow, its blend card too, a cape's model none (its cloth would).
 - Also from `controllers/item_rules/`: `portedItems`, `questItemLink`, `weaponAttack` tests.
 
 ## Notes

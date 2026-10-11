@@ -15,9 +15,6 @@ export default {
   'fidelity.loginChandeliers': 'Candelabros encendidos en el inicio',
   'fidelity.loginChandeliers.hint':
     'Los candelabros de la pantalla de inicio de sesión arden. Clásica: están apagados, como en el original.',
-  'fidelity.wingShadows': 'Sombras de las alas',
-  'fidelity.wingShadows.hint':
-    'Las alas proyectan sombra. Clásica: sin sombra, como en el original.',
   'fidelity.torchCrackle': 'Sonido de antorchas',
   'fidelity.torchCrackle.hint':
     'Las antorchas encendidas crepitan cuando estás cerca. Clásica: las antorchas no suenan.',

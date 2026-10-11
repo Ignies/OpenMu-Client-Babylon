@@ -128,6 +128,42 @@ describe('NPC looks from the original client', () => {
     scene.getEngine().dispose();
   });
 
+  // RenderCharacter skips these monsters and every trap (KIND_TRAP, 100-110) in its shadow pass (ZzzCharacter.cpp:8662-8668, :13138-13141).
+  it('the monsters and traps the original casts no shadow for', () => {
+    const none = [22, 25, 42, 59, 63, 152, 242, 100, 104, 105, 106];
+    expect(none.filter(type => m.npcClassicShadow(type))).toEqual([]);
+    expect([3, 26, 153].filter(type => m.npcClassicShadow(type))).toEqual([3, 26, 153]);
+  });
+
+  // `o->Alpha >= 0.3f` opens a monster's shadow pass (ZzzCharacter.cpp:8673); a player-rig NPC takes the player's.
+  it('a monster draws its shadow from 0.3 alpha', () => {
+    const scene = new Scene(new NullEngine());
+    const monster = new (m.resolveModelFactory(3))(scene);
+    m.applyNpcShadow(monster, 3);
+    expect([monster.ShadowMinAlpha, monster.ClassicShadow]).toEqual([0.3, true]);
+    const queen = new (m.resolveModelFactory(25))(scene);
+    m.applyNpcShadow(queen, 25);
+    expect(queen.ClassicShadow).toBe(false);
+    scene.getEngine().dispose();
+  });
+
+  // `m_bRenderShadow = false` at creation (ZzzCharacter.cpp:13584-14730, w_CursedTemple.cpp:170 and the
+  // GMBattleCastle, GMDoppelGanger1, GMEmpireGuardian1/4, GM_Kanturu_2nd, GM_Raklion cases), and every frame on
+  // the Maya hands (GM_Kanturu_3rd.cpp:1091, :1154).
+  it('the NPCs the original creates with no shadow', () => {
+    const none = [70, 368, 379, 408, 451, 380, 215, 216, 221, 222, 277, 278, 283, 285, 288, 533, 524, 525, 526, 527, 528, 367, 460, 461, 462, 362, 363];
+    expect(none.filter(type => m.npcClassicShadow(type))).toEqual([]);
+  });
+
+  // The Die branch sets `m_bRenderShadow = false` (GMEmpireGuardian2.cpp:945, GMKarutan1.cpp:461, :534,
+  // GMNewTown.cpp:1057, GMSwampOfQuiet.cpp:859-1207, GM_Kanturu_1st.cpp:986, GM_Kanturu_2nd.cpp:996,
+  // GM_PK_Field.cpp:701, GM_Raklion.cpp:1830, :2086, ZzzObject.cpp:1833).
+  it('the monsters that lose their shadow when they die', () => {
+    const alive = [515, 575, 576, 423, 444, 445, 446, 561, 559, 354, 498, 359, 486, 487, 488, 456, 563, 477];
+    expect(alive.filter(type => m.npcShadowOnDeath(type) || !m.npcClassicShadow(type))).toEqual([]);
+    expect(m.npcShadowOnDeath(3)).toBe(true);
+  });
+
   // `Models[MODEL_GAMBLE_NPC_MOSS].Actions[0..5].PlaySpeed = 0.33f` (ZzzCharacter.cpp:14512-14515, :14855-14858).
   it('Moss and Zyro play their six clips at 0.33', () => {
     const scene = new Scene(new NullEngine());

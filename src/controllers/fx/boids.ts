@@ -288,7 +288,10 @@ export function boidFactoryFor(spec: BoidSpec, model: string): typeof ModelObjec
       BoidModel.OverrideScale = spec.scale;
     }
 
-    CastsShadow = false;
+    // Shadowed from the ground under it at alpha 0.2, on Classic alone (GOBoid.cpp:1585-1600, :1630-1640).
+    ShadowFromGround = true;
+    CascadeShadow = false;
+    ShadowAlpha = 0.2;
 
     #entity: Entity | null = null;
     #eyes: (MovableFlare | null)[] = [];

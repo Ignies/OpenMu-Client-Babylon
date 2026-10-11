@@ -22,7 +22,8 @@ There is no `index.ts` facade; other folders import the modules directly.
   (`registerTerrainMaterial`, `terrainCsmDefines`, `terrainCsmGlsl`, `bindTerrainCsm`).
 - `propBatches.ts`: `propBatchingActive`, `propBatchExclusion`, `addPropToBatch`,
   `flushPropBatches`, `updatePropBatches`, `disposePropBatches`.
-- `objectShadow.ts`: `setShadowWorld`, `invalidateShadowState`.
+- `objectShadow.ts`: `setShadowWorld` (the shadowless worlds and the lean, `shadowLean`), `setShadowlessScene`
+  (the Kanturu Maya scene, from `modules/events`), `invalidateShadowState`.
 - options: `materialQuality.ts`, `renderingStyle.ts`, `renderScale.ts`, `renderDistance.ts` (slider
   steps and readers for the Options window, the materials and boot).
 - `pbrMaps.ts`: `pbrMapsFor`, `pbrMapsIfReady`, `textureSourceName`; `readPackLabelsWith(reader)`, the
@@ -88,15 +89,17 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `modelObject.test.ts`: a model whose clips are cloned on first play reads every clip's keys at load
   without cloning one, and a clip cloned later reports its end; `BlendMesh -2` and a pulsing `BlendMeshLightAt`;
   a part unlinked from its bone goes back under its owner; an action stops every other running clip, the loader's clip 0 too;
-  a character casts the blob, a map object only with `MapShadow`.
+  a character casts the blob, a map object only with `MapShadow`; `ShadowFromGround` marks the clone;
+  `ShadowMeshes` keeps the other meshes out; the clone carries `ShadowAlpha` and draws from `ShadowMinAlpha`.
 - `versions/shared/contentRows.golden.test.ts`: every map's mesh animations, sampled over time.
 - `pbrMaps.test.ts`: `textureSourceName` reads the pack's remembered name mid-swap.
 - `pbrDerive.test.ts`: `flipRows`, flat normal and emissive mask of `derivePbrMaps`.
 - `propBatchLight.test.ts`: `ChunkLight` re-packs match a whole-chunk re-pack on every tier.
 - `propBatchRules.test.ts`: `batchExclusion`, `chunkOf`, placement and instance matrices.
-- `objectShadow.test.ts`: the shadow fold, run as JS: a body folds as `CalcShadowPosition`, a tall
-  object's top by 5 tiles at most; Icarus and Kalima draw no shadow.
-- `propBatches.test.ts`: batches built and disposed twice over one cached model leave its buffers whole.
+- `objectShadow.test.ts`: the shadow fold, run as JS: every vertex folds as `CalcShadowPosition`, a tall
+  one too; Icarus and Kalima draw no shadow; the lean is 25 tiles in Valley of Loren, 20 elsewhere.
+- `propBatches.test.ts`: batches built and disposed twice over one cached model leave its buffers whole; a
+  batched caster's shadow folds from the ground when it asks to (`ShadowFromGround`).
 - `renderAngles.test.ts`: `angleMatrixQuaternion` against the original's `AngleMatrix`, and a
   placed record with both pitch and roll drawn by it, by its node and by its batched placement.
 - `renderingStyle.test.ts`: style readers, tier gating, the material snapshot and toon binds.
@@ -152,14 +155,19 @@ There is no `index.ts` facade; other folders import the modules directly.
   (3 units) closes the hairline gaps between rigid body parts once flattened. `meshCasts` once
   dropped every alpha-blended mesh, which left a thin, naked shadow.
   Classic shadows what the original does: characters and their parts, and of the map objects only those
-  whose case calls `RenderBodyShadow` (`MapShadow`: Blood Castle 28/29, Valley of Loren 50/83/85). Every
-  map object once cast one, with a size gate to keep flowers and cliffs out.
+  whose case calls `RenderBodyShadow` (`MapShadow`: Blood Castle 28/29, Valley of Loren 50/83/84/85). Every
+  map object once cast one, with a size gate to keep flowers and cliffs out. `ClassicShadow` turns a
+  character's or part's blob off where the original draws none (a cape's model), read every frame; the
+  cascades still take it (`CastsShadow`). `ShadowFromGround` folds from the terrain under the origin
+  (the shader's `shadowGround`), as the original does for the boids and the Blood Castle statues;
+  `ShadowAlpha` is the caster's share of `SHADOW_ALPHA` (the shader's `shadowStrength`, set per mesh at bind:
+  one material for every caster), and `ShadowMinAlpha` the body alpha its shadow starts at (a player 0.5, a
+  monster 0.3, `syncShadowEnabled`); `CascadeShadow` keeps a caster off
+  the cascades (the boids, which have the Classic shadow alone).
   The fold (`SHADOW_FOLD`) is the original's `CalcShadowPosition`, which divides by the vertex's height
-  under the 40-tile light: a tall map object had its top thrown tens of tiles into long black streaks.
-  The divisor stays 10 tiles off zero and the move within 5 tiles; a body (anything under
-  `SHADOW_FADE_END`) folds exactly as the original. The original has no clamp, and it still moves the
-  tops of the tallest monsters it shadows (Selupan's highest key is 26 tiles up, the Hydra 16, the
-  golden dragons 9): there the original streaks.
+  under the 40-tile light, with no limit: the tallest monsters it shadows (Selupan's highest key is 26
+  tiles up, the Hydra 16, the golden dragons 9) streak as they do there. A clamp once kept every vertex
+  within 5 tiles, from when every map object cast.
 - `babylon/compileWait.ts`: Babylon waits for a program with 1875 checks 16 ms apart (`Effect._checkIsReady`),
   a count, not a time. A hidden page runs them once a second or slower and the GPU does not compile
   for it, so a long AFK ran the count out and the materials came back black. The countdown stops

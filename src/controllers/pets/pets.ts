@@ -138,6 +138,11 @@ export type PetSpec = {
    * place of the original's grey sphere map. See `fenrirShine`.
    */
   readonly improvedRim?: readonly [number, number, number];
+  /**
+   * The Classic shadow `Draw_RenderObject` draws for it; none without (the horns, the angel, the imp and the
+   * followers). `meshes`: the mesh range it takes; `fromGround`: `BodyOrigin` on the terrain first.
+   */
+  readonly classicShadow?: { readonly meshes?: readonly number[]; readonly fromGround?: boolean };
 };
 
 const PETS: Readonly<Record<number, PetSpec>> = {
@@ -174,6 +179,8 @@ const PETS: Readonly<Record<number, PetSpec>> = {
     scale: 1,
     riderClips: 'horse',
     moveAction: 1,
+    // RenderBodyShadow(-1, -1, 8, 9): mesh 8, the end not drawn (ZzzObject.cpp:790, ZzzBMD.cpp:2718).
+    classicShadow: { meshes: [8] },
   },
   // `CSPetDarkSpirit` (CSPetSystem.cpp:291-303): the Dark Raven is worn in
   // the *left hand*, not the pet slot - a world object flying a boid orbit
@@ -184,6 +191,8 @@ const PETS: Readonly<Record<number, PetSpec>> = {
     scale: 0.7,
     playSpeed: 0.4,
     flyRange: 150,
+    // Shadowed from the terrain under it (ZzzObject.cpp:977-986).
+    classicShadow: { fromGround: true },
   },
 
   // The six followers. Scale, blend mesh and clip speed are `Data/Local/
@@ -330,6 +339,8 @@ function fenrirSpec(
     shineMesh,
     improvedRim,
     fullBright: true,
+    // ZzzObject.cpp:850-858.
+    classicShadow: {},
   };
 }
 
@@ -516,6 +527,10 @@ export function petFactoryFor(spec: PetSpec): typeof ModelObject {
     static {
       PetModel.OverrideScale = spec.scale;
     }
+
+    ClassicShadow = spec.classicShadow !== undefined;
+    ShadowMeshes = spec.classicShadow?.meshes ?? null;
+    ShadowFromGround = spec.classicShadow?.fromGround ?? false;
 
     async init(world: World, _entity: Entity) {
       if (spec.blendMesh !== undefined) this.BlendMesh = spec.blendMesh;

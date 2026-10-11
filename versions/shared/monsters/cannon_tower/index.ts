@@ -3,6 +3,8 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 288,
   Name: 'Cannon Tower',
+  // Created with `m_bRenderShadow = false` (GMBattleCastle.cpp:1472).
+  classicShadow: false,
   maxHealth: 50,
   model: { type: 79, scale: 1 },
   stats: {

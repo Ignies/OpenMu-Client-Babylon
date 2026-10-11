@@ -124,7 +124,8 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   breathing on their bones, Kanturu 70 and the Tarkan braziers on their sine, and Tarkan 4, which has
   no model, white at range 3 on the same sine.
 - `shadowCasters.test.ts`: the only map objects with a Classic shadow are Blood Castle 28 and 29 (mesh 2
-  left out) and Valley of Loren 50, 83 and 85, the ones whose case calls `RenderBodyShadow`.
+  left out, folded from the ground under them) and Valley of Loren 50, 83, 84 and 85, the ones whose case calls `RenderBodyShadow`; Valley of
+  Loren 77 and 84 are operate boxes the map draws (`valleyofloren/operateObject.ts`).
 - `bloodcastle/lampObject.test.ts`: the throne-room lamp's flare is `BITMAP_FLARE` too;
   `bloodcastle/candelabraObject.test.ts`: the candelabra's seven flares are 0.5 on any object scale.
 - `lampFlares.test.ts`, `lorencia/candleObject.test.ts`, `devias/candleObject.test.ts`: what the original

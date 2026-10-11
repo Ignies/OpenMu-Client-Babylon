@@ -150,6 +150,18 @@ export class PlayerObject extends ModelObject {
     this.QuestItem.NodeNamePrefix = 'QuestItem_';
     this.Pet.NodeNamePrefix = 'Pet_';
 
+    // The player's shadow pass opens at half alpha (ZzzCharacter.cpp:8588).
+    this.ShadowMinAlpha = PLAYER_SHADOW_MIN_ALPHA;
+    for (const part of [this.HelmMask, this.Helm, this.Armor, this.Pants, this.Gloves, this.Boots, this.Weapon1, this.Weapon2]) {
+      part.ShadowMinAlpha = PLAYER_SHADOW_MIN_ALPHA;
+    }
+
+    // Never in RenderCharacter's shadow pass, which draws BodyPart[] and Weapon[] alone (ZzzCharacter.cpp:8590-8628).
+    this.PhoenixWing1.ClassicShadow = false;
+    this.PhoenixWing2.ClassicShadow = false;
+    this.QuestItem.ClassicShadow = false;
+    this.Pet.ClassicShadow = false;
+
     const objs = [
       this.HelmMask,
       this.Helm,
@@ -532,6 +544,23 @@ export class PlayerObject extends ModelObject {
     }
   }
 
+  /**
+   * `RenderCharacter`'s shadow pass (ZzzCharacter.cpp:8590-8628): none for a Uniria or Dinorant rider out of a
+   * safe zone, no weapon in a safe zone, never a bow or crossbow (`MODEL_SHORT_BOW` to `MODEL_BOW + 32`).
+   */
+  setClassicShadows(rider: boolean, inSafeZone: boolean, weapon1: Item | null | undefined, weapon2: Item | null | undefined): void {
+    const body = !rider;
+    this.ClassicShadow = body;
+    this.HelmMask.ClassicShadow = body;
+    this.Helm.ClassicShadow = body;
+    this.Armor.ClassicShadow = body;
+    this.Pants.ClassicShadow = body;
+    this.Gloves.ClassicShadow = body;
+    this.Boots.ClassicShadow = body;
+    this.Weapon1.ClassicShadow = body && !inSafeZone && !isBowOrCrossbow(weapon1);
+    this.Weapon2.ClassicShadow = body && !inSafeZone && !isBowOrCrossbow(weapon2);
+  }
+
   Update(gameTime: World['gameTime']): void {
     super.Update(gameTime);
 
@@ -558,6 +587,13 @@ export class PlayerObject extends ModelObject {
     }
   }
 }
+
+const PLAYER_SHADOW_MIN_ALPHA = 0.5;
+
+const BOW_GROUP = 4;
+const LAST_BOW = 32;
+
+const isBowOrCrossbow = (item: Item | null | undefined): boolean => item?.group === BOW_GROUP && item.num <= LAST_BOW;
 
 /** The class a player-rig NPC factory poses as, if it declares one. */
 export function npcClassOf(

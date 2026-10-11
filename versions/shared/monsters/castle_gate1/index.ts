@@ -3,6 +3,8 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 277,
   Name: 'Castle Gate1',
+  // Created with `m_bRenderShadow = false` (GMBattleCastle.cpp:1398).
+  classicShadow: false,
   maxHealth: 50,
   model: { type: 73, scale: 1 },
   stats: {
