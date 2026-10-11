@@ -153,12 +153,37 @@ describe.skipIf(NO_OPTIONS)('the extra options in the tooltip', () => {
   });
 });
 
+// GetSpecialOptionText's excellent lines, GlobalText 622-635 (ZzzInventory.cpp:1912-1951).
+describe('the excellent option lines', () => {
+  const text = (item: Item) => lines({ durability: 50, isExcellent: true, excellentFlags: 0x3f, ...item }).map(l => l.text);
+
+  it('read as Text.bmd words them', () => {
+    expect(text({ group: 0, num: 1 })).toEqual(expect.arrayContaining([
+      'Excellent Damage rate +10%',
+      'Increase Damage +level/20',
+      'Increase Damage +2%',
+      'Increase Attacking(Wizardry)speed +7',
+      'Increases acquisition rate of Life after hunting monsters +life/8',
+      'Increases acquisition rate of Mana after hunting monsters +Mana/8',
+    ]));
+    expect(text({ group: 5, num: 1 })).toEqual(expect.arrayContaining(['Increase Wizardry Dmg +level/20', 'Increase Wizardry Dmg +2%']));
+    expect(text({ group: 8, num: 1 })).toEqual(expect.arrayContaining([
+      'Increase Max HP +4%',
+      'Increase Max Mana +4%',
+      'Damage Decrease +4%',
+      'Reflect Damage +5%',
+      'Defense success rate +10%',
+      'Increases acquisition rate of Zen after hunting monsters +30%',
+    ]));
+  });
+});
+
 // CalcExcellentOptions (ZzzInfomation.cpp:944-1010): the Pendant of Lighting (13/12) takes the weapon list only.
 describe('an excellent Pendant of Lighting', () => {
   it('lists its excellent option once, as a pendant', () => {
     const text = lines({ group: 13, num: 12, durability: 50, isExcellent: true, excellentFlags: 0x20 }).map(l => l.text);
-    expect(text.filter(l => l === 'Excellent Damage Rate +10%')).toHaveLength(1);
-    expect(text).not.toContain('Increase Maximum Life +4%');
+    expect(text.filter(l => l === 'Excellent Damage rate +10%')).toHaveLength(1);
+    expect(text).not.toContain('Increase Max HP +4%');
   });
 });
 
@@ -182,12 +207,12 @@ describe('an option level line', () => {
 
   it('is defense rate on shields and curse on the Summoner books', () => {
     expect(text({ group: 6, num: 0, optionLevel: 2 })).toContain('Additional defense rate +10');
-    expect(text({ group: 5, num: 21, optionLevel: 1 })).toContain('Additional Curse +4');
+    expect(text({ group: 5, num: 21, optionLevel: 1 })).toContain('Additional Curse Spell +4');
   });
 
   it('adds wizardry on the Magic Gladiator swords', () => {
     const blade = text({ group: 0, num: 31, optionLevel: 1 });
-    expect(blade.indexOf('Additional Wizardry +4')).toBe(blade.indexOf('Additional Damage +4') + 1);
+    expect(blade.indexOf('Additional Wizardry Dmg +4')).toBe(blade.indexOf('Additional Dmg +4') + 1);
   });
 });
 
@@ -206,10 +231,10 @@ describe('a wing tooltip', () => {
   it('names the additional option by its kind', () => {
     const storm = (kind: number) => lines({ group: 12, num: 36, durability: 200, optionLevel: 2, wingOptionKind: kind }).map(l => l.text);
     expect(storm(0)).toContain('Automatic HP recovery 2%');
-    expect(storm(2)).toContain('Additional Defense +8');
-    expect(storm(3)).toContain('Additional Damage +8');
-    expect(lines({ group: 12, num: 1, durability: 200, optionLevel: 1 }).map(l => l.text)).toContain('Additional Wizardry +4');
-    expect(lines({ group: 12, num: 43, durability: 200, optionLevel: 1, wingOptionKind: 2 }).map(l => l.text)).toContain('Additional Curse +4');
+    expect(storm(2)).toContain('Additional defense +8');
+    expect(storm(3)).toContain('Additional Dmg +8');
+    expect(lines({ group: 12, num: 1, durability: 200, optionLevel: 1 }).map(l => l.text)).toContain('Additional Wizardry Dmg +4');
+    expect(lines({ group: 12, num: 43, durability: 200, optionLevel: 1, wingOptionKind: 2 }).map(l => l.text)).toContain('Additional Curse Spell +4');
   });
 
   // GlobalText[579] (ZzzInventory.cpp:4213, :4260, :4303); the capes carry no such line (:4500-4508).

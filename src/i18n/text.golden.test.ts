@@ -35,21 +35,21 @@ describe('text golden', () => {
 
     expect(KEYS.length).toBe(2486);
     expect(hashes).toEqual({
-      en: '26178244261c8a3f',
-      bg: '7ffc0030d9e39e33',
-      zh: '7611308c5b1248c3',
-      fr: '0a12310e878ed59f',
-      de: 'af848f0220dee9e1',
-      it: '23b7a7ca8f8bd66d',
-      ja: '1d168b8900dd1500',
-      ko: 'f3bad5e52e0c0f1c',
-      pl: '9257956c82348ab2',
-      pt: '008a0f7133c0f604',
-      ro: 'ea53692b3ad2ba8d',
-      ru: 'd13a62dd260eb2b7',
-      es: '051980abd43c1410',
-      th: 'f944bf108fe83b08',
-      vi: '7eb539d7f5ca4cd5',
+      en: '0394fc10c282c356',
+      bg: 'deb57dbd8ed14491',
+      zh: '1ef29392024fa2b2',
+      fr: 'c747a1ce8ec5dc94',
+      de: '4d28a2799f251067',
+      it: 'e57cb67bb3662bcc',
+      ja: '8554adb8bac6a3cd',
+      ko: '607149aabe6c6ae7',
+      pl: 'ad940b9b007d0161',
+      pt: '2001a58c9b9619fa',
+      ro: '5356e8d117a55334',
+      ru: 'edd53b4ef85c4b9b',
+      es: 'c67331545b8bfadc',
+      th: '79fd03b8a0798b0a',
+      vi: '4b322ce0c9cc6983',
     });
   });
 });

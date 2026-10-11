@@ -196,7 +196,7 @@ export function itemDisplayName(item: Item): string {
 }
 
 /** `CalcExcellentOptions` order and `GetSpecialOptionText` wording. */
-function excellentLines(out: Lines, def: ItemDef, flags: number, heroLevel: number) {
+function excellentLines(out: Lines, def: ItemDef, flags: number) {
   const armorLike = isShield(def) || isArmorPart(def) || isRing(def);
   const weaponLike = isWeapon(def) || isPendant(def);
 
@@ -217,12 +217,7 @@ function excellentLines(out: Lines, def: ItemDef, flags: number, heroLevel: numb
     const kind = t(magic ? 'item.kind.wizardry' : 'item.kind.damage');
 
     if (flags & 0x20) out.add(t('item.exc.excellentDamage'), 'blue');
-    if (flags & 0x10) {
-      out.add(
-        t('item.exc.perLevel', { kind, value: Math.trunc(heroLevel / 20) }),
-        'blue'
-      );
-    }
+    if (flags & 0x10) out.add(t('item.exc.perLevel', { kind }), 'blue');
     if (flags & 0x08) out.add(t('item.exc.percent', { kind }), 'blue');
     if (flags & 0x04) out.add(t('item.exc.speed'), 'blue');
     if (flags & 0x02) out.add(t('item.exc.life'), 'blue');
@@ -431,7 +426,7 @@ const WEAPON_OF_ARCHANGEL_STATS: readonly {
  * ZzzInventory.cpp:3487-3560): a quest item, the reward it is worth, and the
  * Divine weapon it stands for - with no durability line.
  */
-function weaponOfArchangelLines(out: Lines, level: number, hero: HeroStats) {
+function weaponOfArchangelLines(out: Lines, level: number) {
   out.add(t('item.questItem'));
   out.add(t('item.archangelReward'), 'darkRed');
 
@@ -461,7 +456,7 @@ function weaponOfArchangelLines(out: Lines, level: number, hero: HeroStats) {
   }
 
   const kind = t(stats.skill === undefined ? 'item.kind.wizardry' : 'item.kind.damage');
-  out.add(t('item.exc.perLevel', { kind, value: Math.trunc(hero.level / 20) }), 'blue');
+  out.add(t('item.exc.perLevel', { kind }), 'blue');
   out.add(t('item.exc.percent', { kind }), 'blue');
   out.add(t('item.exc.excellentDamage'), 'blue');
   out.add(t('item.exc.speed'), 'blue');
@@ -493,7 +488,7 @@ export function buildItemTooltip(
   out.blank();
 
   if (isWeaponOfArchangel(def)) {
-    weaponOfArchangelLines(out, level, hero);
+    weaponOfArchangelLines(out, level);
     return { lines: trimBlanks(out.list), usable: true };
   }
 
@@ -687,7 +682,7 @@ function equipmentLines(
   }
 
   if (excellentFlags > 0) {
-    excellentLines(out, def, excellentFlags, hero.level);
+    excellentLines(out, def, excellentFlags);
   }
 
   fenrirLines(out, def, item, hero);
