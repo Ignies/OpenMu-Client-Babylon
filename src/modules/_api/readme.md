@@ -37,6 +37,10 @@ Not a module: no `module.ts`, like `_shared/`.
 - `guest.ts`: `connectModule(port)`, the module's end: a `RemoteModuleApi`.
 - `sandbox.ts`: `sandboxFrame(source)` (the iframe's attributes), `handOverPort(frameWindow)`,
   `HAND_OVER`.
+- `download.ts` (streaming, phase 5): `prepareModules(entries, dropped, manifestUrl, { store, fetch })`
+  gives `{ ready, notices }`; `cacheStore(open, origin)` (Cache Storage), `memoryStore()`,
+  `sha256Hex(bytes)`, `MAX_MODULE_BYTES`; types `ModuleStore`, `StreamNotice`, `ReadyModule`.
+- `i18n/`: the notices a skipped module shows (`moduleStream.*`).
 
 ## How it works
 - One host per client (`moduleHost`), one API object per module id, the same until `dispose(id)`.
@@ -103,10 +107,25 @@ Not a module: no `module.ts`, like `_shared/`.
   one it cannot read in `dropped.malformed`. Nothing throws. The server half is the module packet
   handler in `openmu/plugins/` ([openmu/readme.md](../../../openmu/readme.md)).
 
+### Streaming
+Phase 5 of [docs/module_streaming.md](../../../docs/module_streaming.md): the modules a world's
+`server.json` lists (`modules`, `servers/serverManifest.ts`).
+- Before anything loads (`download.ts`), each entry in list order: its API range (`canServe`; one
+  this client cannot serve is never downloaded), then the cache, then a download, then the hash. The
+  file's address is resolved against the manifest's URL, fetched without cookies or referrer, with a
+  30 s timeout and at most `MAX_MODULE_BYTES` (4 MB). Bytes that do not match `sha256` are dropped,
+  never cached. Each failure, and each entry the manifest itself dropped, becomes a notice
+  (`moduleStream.*`) and the module is skipped; the others go on.
+- The cache is Cache Storage (`cacheStore`), one entry per hash under
+  `<origin>/__mu_modules/<sha256>`, a URL nothing serves. A cached copy is hashed again on every read
+  and downloaded again when it no longer matches. A page without Cache Storage (plain http, where
+  browsers do not offer it) or a cache that fails keeps the modules in memory until the page reloads.
+
 ## Depends on / used by
 - uses: `controllers/interface` (`keyBindings`, `windows`, `windowManager`, `module_window`), `i18n`,
   `controllers/sound`, `controllers/fx`, `controllers/render/babylon/exports`, `ecs/current`,
-  `core/eventBus` (the `ModulePacket` event), the `hero`, `session` and `warp` doors. `contract.ts`,
+  `core/eventBus` (the `ModulePacket` event), the `hero`, `session` and `warp` doors, `servers` (the
+  streamed entry type). `contract.ts`,
   `packetWire.ts`, `protocol.ts` and `guest.ts` import nothing of the game.
 - used by: `../module.ts` (`canServe`, the `InProcessApi` type), `src/app/logic.ts` (`moduleHost`,
   `installModuleRouter`), `versions/season6/packets/modulePacket.test.ts` (the code).
@@ -146,3 +165,7 @@ Not a module: no `module.ts`, like `_shared/`.
 - `sandbox.test.ts`: the frame's attributes pinned, the port hand-over.
 - `example.test.ts`: a module that uses nothing but the API, run in process and over messages:
   both make the same calls on the game and hear the same map changes and packets.
+- `download.test.ts`: a download next to the manifest kept by hash, an absolute address, the cache
+  answering (and a cached copy that no longer matches), a hash mismatch, an API range this client
+  cannot serve (no download), a failed or oversized download, the manifest's dropped entries, list
+  order past a skipped module; `cacheStore` by hash and a failing Cache Storage.
