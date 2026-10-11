@@ -2,6 +2,7 @@ import { type AbstractMesh, Matrix, type Mesh, Vector3 } from '../../controllers
 import type { Entity, World } from '../../ecs/world';
 import { itemRestHeight, itemWornHeight } from '../../controllers/actors/itemAngle';
 import { hideSkinMeshes, hideSkinTexture } from '../../controllers/actors';
+import { itemObjectAttribute } from '../../controllers/actors/itemObjectAttribute';
 import { ModelObject } from '../../controllers/render/modelObject';
 import { zenCoinCount, zenCoinScatter, type ZenCoinOffset } from './zenPile';
 
@@ -52,6 +53,8 @@ type PileCoin = { x: number; y: number; z: number; lag: number };
  * - `o->AnimationFrame` is never advanced, so the model is frozen.
  * - zen is drawn as a pile: `RenderZen` scatters coins around the drop before
  *   the drop itself is drawn at the centre (`modules/drops/zenPile.ts`).
+ * - `ItemObjectAttribute` gives the shown model its additive and skipped meshes
+ *   (`CreateItemDrop`, ZzzObject.cpp:6153).
  */
 export class DropObject extends ModelObject {
   /** `ItemObjectAttribute` sets `EnableShadow = false` (ZzzObject.cpp:5160): a ground item draws no shadow. */
@@ -74,6 +77,12 @@ export class DropObject extends ModelObject {
     const drop = entity.droppedItem;
     this.HideSkinTexture = drop ? hideSkinTexture(drop.group, drop.num) : null;
     this.HideSkinMeshes = drop ? hideSkinMeshes(drop.group, drop.num) : null;
+    if (drop) {
+      const rule = itemObjectAttribute(drop.group, drop.num);
+      this.BlendMesh = rule.blendMesh;
+      this.HiddenMesh = rule.hiddenMesh;
+      this.BlendMeshLightAt = rule.blendMeshLight ?? null;
+    }
 
     if (drop?.isMoney) {
       this.#zenScale = entity.transform?.scale || 1;

@@ -147,3 +147,22 @@ describe('a dropped item', () => {
     expect(object.getMeshes().map(mesh => mesh.metadata.csmCaster)).toEqual([false]);
   });
 });
+
+// CreateItemDrop runs ItemObjectAttribute on the model it shows (ZzzObject.cpp:6153, :5155-5292).
+describe("a drop's ItemObjectAttribute mesh rules", () => {
+  it('draws the Blade mesh 1 additive and skips the Rune Blade mesh 2', async () => {
+    const blade = await drop(0, 5, ['a', 'b']);
+    expect(blade.getMesh(1)?.metadata.brightMesh).toBe(true);
+    expect(blade.getMesh(0)?.metadata.brightMesh).toBeUndefined();
+    const rune = await drop(0, 31, ['a', 'b', 'c']);
+    expect(rune.HiddenMesh).toBe(2);
+  });
+
+  it('pulses the Saint Crossbow, every mesh additive, and lights Wings of Elf mesh 0', async () => {
+    const crossbow = await drop(4, 16, ['a', 'b']);
+    expect(crossbow.BlendMesh).toBe(-2);
+    expect(crossbow.BlendMeshLightAt).not.toBeNull();
+    expect((await drop(12, 0, ['a'])).BlendMesh).toBe(0);
+    expect((await drop(13, 0, ['a'])).BlendMesh).toBe(1);
+  });
+});

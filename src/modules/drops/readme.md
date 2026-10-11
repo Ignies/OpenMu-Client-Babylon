@@ -7,7 +7,8 @@ and the loot filter for the ALT name overlay.
 - `Drops` (`state.ts`, through `index.ts`, the door): `showDropNames`, `toggleDropNames()` (ALT),
   `pickupItemRequest(netId)`.
 - none for packets. `installNet()` in `net.ts` registers its handlers (`module.ts`, installed by `src/app/logic.ts`).
-- `DropObject`: the model class of a drop (frozen pose, zen coin pile, the fall). `setPileFall(height)`.
+- `DropObject`: the model class of a drop (frozen pose, zen coin pile, the fall, the shown model's
+  `ItemObjectAttribute` additive and skipped meshes, ZzzObject.cpp:6153). `setPileFall(height)`.
 - `dropTier(drop)`, `HIGH_DROP_LEVEL` (7) moved to `controllers/item_rules`
   (`dropTier.ts`): the drop sound controller reads them, and a controller may not import a module.
 - `dropPassesLootFilter(drop)`, `lootZenThreshold(step)`, `LOOT_ZEN_MAX`: which names the latched overlay keeps.
@@ -60,6 +61,6 @@ and the loot filter for the ALT name overlay.
 - `zenPile.test.ts`: coin count by amount, scatter inside the radius and over the disc, same pile per seed.
 - `dropObject.test.ts`: a dropped armour / pants with a HideSkin bitmap draws mesh 0 with it, alpha-tested;
   every other part keeps its own textures; the parts that draw only some meshes, with real texture names;
-  a drop casts no shadow (`ItemObjectAttribute`, ZzzObject.cpp:5160).
+  a drop casts no shadow (`ItemObjectAttribute`, ZzzObject.cpp:5160); its additive and skipped meshes.
 - `net.test.ts`: the ground label marks skill, option and luck in the original order; the Horn of Dinorant knight skill;
   an ancient piece's set name (reads the real set files).
