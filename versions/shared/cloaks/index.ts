@@ -13,6 +13,7 @@ import { tearsSet } from './delete_cloth';
 import { DARK_LORD_HAIR } from './dark_lord_hair';
 import { DARK_LORD_SKIRT, DARK_LORD_SKIRT_BUILT, LORD_EMPEROR_SKIRT, LORD_EMPEROR_SKIRT_BUILT } from './dark_lord_skirt';
 import { teamLight } from './team_cloak';
+import { DEATH_KING, DEATH_KING_ROBE, NIGHTMARE, NIGHTMARE_ROBE, isDoppelganger } from './monster_robes';
 import { CAPE_OF_FIGHTER_CLOTH, CAPE_OF_OVERRULE_CLOTH, CAPE_OF_OVERRULE_STRAPS, isCapeOfFighter, isCapeOfOverrule } from './cape_of_fighter';
 
 const WHITE: Rgb = [1, 1, 1];
@@ -98,23 +99,26 @@ function drawSet(w: CloakWearer, base: BaseClass, team: boolean, set: CloakSet):
 }
 
 /**
- * `bCloak` (ZzzCharacter.cpp:9162-9246): the Magic Gladiator (the class itself, `c->Class == CLASS_DARK`),
- * every Dark Lord and Rage Fighter, never inside Chaos Castle; and anyone a team colour puts in one. The set
- * is built once, then only its skirt changes; out of a cloak it stays as it was, undrawn.
+ * `bCloak` (ZzzCharacter.cpp:9162-9246): on the player rig the Magic Gladiator (the class itself,
+ * `c->Class == CLASS_DARK`), every Dark Lord and Rage Fighter; the Death King and the Nightmare; never a
+ * Doppelganger nor inside Chaos Castle; and any player a team colour puts in one, unless in a monster's body.
+ * The set is built once, then only its skirt changes; out of a cloak it stays as it was, undrawn.
  */
 export function cloaks(w: CloakWearer, set: CloakSet): Rgb {
   if (tearsSet(w)) set.drop();
   const base = getBaseClass(w.charClass);
-  const team = teamLight(w);
+  const team = w.monster === null ? teamLight(w) : null;
   const gladiator = w.charClass === CharacterClassNumber.MagicGladiator;
-  const cloak = ((gladiator || base === BaseClass.DarkLord || base === BaseClass.RageFighter) && !w.chaosCastle) || team !== null;
+  const byClass = w.rig && (gladiator || base === BaseClass.DarkLord || base === BaseClass.RageFighter);
+  const own = (byClass || w.monster === DEATH_KING || w.monster === NIGHTMARE) && !isDoppelganger(w.monster);
+  const cloak = (own && !w.chaosCastle) || team !== null;
   if (!cloak) return WHITE;
   if (!set.built) {
     if (base === BaseClass.DarkLord) buildDarkLord(w, set);
     else if (base === BaseClass.RageFighter) buildRageFighter(w, set);
     else {
-      // Everyone else (:9837-9846).
-      set.build(0, robeFor(w.wing));
+      // Everyone else (:9825-9846).
+      set.build(0, w.monster === DEATH_KING ? DEATH_KING_ROBE : w.monster === NIGHTMARE ? NIGHTMARE_ROBE : robeFor(w.wing));
       set.count = 1;
     }
   } else if (base === BaseClass.DarkLord) {

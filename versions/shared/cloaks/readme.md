@@ -13,18 +13,21 @@ the capes, the Dark Lord's hair and skirt, the Magic Gladiator's robe, the team 
   `cape_of_fighter.ts` (the Cape of Fighter and the Cape of Overrule's cape and straps), `robe.ts` (the
   Magic Gladiator's robe, msword03 under the Wing of Ruin), `dark_lord_hair.ts` (the Dark Lord's two
   strands of hair), `dark_lord_skirt.ts` (his skirt over the class's own body), `team_cloak.ts` (the duel
-  and Battle Soccer colours, `teamLight`), `delete_cloth.ts` (the wing changes that reset the set, `tearsSet`).
+  and Battle Soccer colours, `teamLight`), `delete_cloth.ts` (the wing changes that reset the set, `tearsSet`),
+  `monster_robes.ts` (the Death King's and the Nightmare's robes, `isDoppelganger`).
 
 ## How it works
-- `bCloak` (:9162-9186): the Magic Gladiator class itself (`c->Class == CLASS_DARK`, so not the Duel
-  Master), every Dark Lord and Rage Fighter; never in Chaos Castle. A body worn as a whole monster is no
-  `MODEL_PLAYER` and wears none (`ClothSystem` skips it).
+- `bCloak` (:9162-9186): on the player rig the Magic Gladiator class itself (`c->Class == CLASS_DARK`, so
+  not the Duel Master), every Dark Lord and Rage Fighter; the Death King (55) and the Nightmare (361); never a
+  Doppelganger (529-539, whose Dark Lord and Magic Gladiator copies are on the rig) and never in Chaos Castle.
+  A player worn as a whole monster is no `MODEL_PLAYER` and wears none, unless that monster is one of the two.
 - A team colour (:9188-9246) puts a cloak on anyone, Chaos Castle or not, and tints every cloth it wears
   (`CloakLight`; the hair's light keeps its own pulse). Battle Soccer: the hero's guild and the guild it
   plays by the hero's team, then the two teams the score names, red and blue (`SoccerObserver` is set by
   every score, for players and watchers alike). A duel only while the hero fights it: the enemy red, the
   hero blue; a spectator's duel is never enabled. A Dark Lord or a Rage Fighter then wears his cape
-  without the item, anyone else the robe.
+  without the item, anyone else the robe. A player in a monster's body is left out: the original hangs its
+  class's cloths on that monster's bones.
 - Slots are the original's indices. A cloth the loop skips (`continue`, :9926-9983) stays built and is
   neither stepped nor drawn; stepped again after the body moved far, it tears and the set is rebuilt. Its
   shadow is still laid where it was left (`AddClothesShadowTriangles` walks every built cloth below
@@ -48,6 +51,9 @@ the capes, the Dark Lord's hair and skirt, the Magic Gladiator's robe, the team 
 - Rage Fighter (:9777-9824): slot 0 the cape, drawn with the Cape of Fighter (`Item\NCcape.tga`) or the
   Cape of Overrule (`Item\monke_manto.TGA`, plus its straps in slots 1 and 2, `Item\monk_manto01.TGA`,
   blown out to each side by `PCT_ELASTIC_RAGE_L` / `_R`).
+- The Death King (:9826-9832): slot 0 `Player\Robe03.tga` on the neck, keyed, with spheres on the back and the
+  head. The Nightmare (:9833-9836): a `PCT_CYLINDER` of `Monster\nightmare_cloth.tga` round its bone 2.
+  Both sit in the class-less branch, so a Dark Lord in either body still wears his own set.
 - The rest (:9837-9846): slot 0 the robe, `Player\Robe01.jpg` in front and `Robe02.jpg` behind, opaque and
   culled, or `Item\msword03.tga` under the Wing of Ruin; worn by the Magic Gladiator whatever the wing.
 - A ring's body worn on the rig (`o->SubType`, the wearer's `skin`): the Illusion Temple's two
@@ -65,5 +71,6 @@ the capes, the Dark Lord's hair and skirt, the Magic Gladiator's robe, the team 
   ZzzCharacter.cpp lines.
 
 ## Tests
-- `cloaks.test.ts`: each use's specs against the original's numbers, and who wears them.
+- `cloaks.test.ts`: each use's specs against the original's numbers, and who wears them (the two monsters,
+  no Doppelganger).
 - `team_cloak.test.ts`: the duel and Battle Soccer colours, who they put a cloak on, and what it is.

@@ -53,7 +53,8 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
   helm and in the Chaos Castle skin, and back on when the helm allows it (SetCharacterScale, ZzzCharacter.cpp:12114-12128);
   the class's own models (Monk sets, Dark Lord masks); a held item's `ItemObjectAttribute` mesh rules; a glove weapon
   skinned to the body.
-- `systems/clothSystem.test.ts`: each player body hangs what the wearers' rule names, the Chaos Castle flag,
+- `systems/clothSystem.test.ts`: each player body hangs what the wearers' rule names, the monsters too (the
+  Nightmare off the rig, the Death King on it, a player in a monster's body as that monster), the Chaos Castle flag,
   no cloth stepped or drawn while cloaked or unseen, held under stun or sleep, and the cloth's shadow while a
   link object (wing slot, held weapon, Imp) is drawn.
 - `systems/animationSystem.test.ts`: the hero and a player with no reported speeds take the hero's

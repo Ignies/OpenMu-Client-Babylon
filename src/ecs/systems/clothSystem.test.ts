@@ -13,6 +13,7 @@ import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
 import { Scene } from '@babylonjs/core/scene';
 import { TransformNode } from '../../controllers/render/babylon/exports';
 import { PlayerObject } from '../../controllers/actors/playerObject';
+import { MonsterObject } from '../../controllers/actors/monsterObject';
 import { registerCloaks, type CloakWearer } from '../../controllers/actors/cloaks';
 import type { ClothSpec } from '../../controllers/cloth';
 import { CharacterClassNumber as C } from '../../core/types';
@@ -65,7 +66,7 @@ describe('ClothSystem', () => {
   it('hangs on each player body what the wearers\' rule names, in its light', () => {
     const p = player({ wings: { group: 13, num: 30 } });
     const set = run(p);
-    expect(seen).toEqual({ charClass: C.DarkLord, wing: { group: 13, num: 30 }, wingBefore: { group: 13, num: 30 }, armor: null, skin: null, chaosCastle: false, netId: null, hero: false, guild: null });
+    expect(seen).toEqual({ charClass: C.DarkLord, wing: { group: 13, num: 30 }, wingBefore: { group: 13, num: 30 }, armor: null, skin: null, chaosCastle: false, netId: null, hero: false, guild: null, monster: null, rig: true });
     expect([set.size, set.cloth(2)?.spec, set.drawn(2)]).toEqual([1, CAPE, true]);
     // Undrawn the next frame the rule names nothing; the set stays as built.
     p.charAppearance.wings = null;
@@ -129,5 +130,36 @@ describe('ClothSystem', () => {
     p.charAppearance.leftHand = null;
     p.charAppearance.pet = { group: 13, num: 1 };
     expect(run(p).castsShadow).toBe(true);
+  });
+});
+
+describe('ClothSystem and the monsters', () => {
+  it('tells the rule which monster a body is, the Nightmare on its own skeleton (ZzzCharacter.cpp:9173-9176)', () => {
+    registerCloaks((w, set) => {
+      seen = { ...w };
+      if (w.monster === 361 && !set.built) {
+        set.build(0, CAPE);
+        set.count = 1;
+      }
+      if (set.built) set.draw(0);
+      return [1, 1, 1];
+    });
+    const modelObject = new MonsterObject(scene, new TransformNode('nightmare', scene));
+    modelObject.Ready = true;
+    const nightmare = { npcType: 361, netId: 9, modelObject, visibility: { state: 'visible' }, buffs: new Set<number>() };
+    const other = { npcType: 3, modelObject: new MonsterObject(scene, new TransformNode('spider', scene)) };
+    ClothSystem({ with: (...keys: string[]) => (keys.includes('npcType') ? [nightmare, other] : []), mapIndex: 0 } as unknown as World).update?.(0.04);
+    expect([modelObject.Cloth.built, modelObject.Cloth.drawn(0), other.modelObject.Cloth.built]).toEqual([true, true, false]);
+    expect([seen?.monster, seen?.rig, seen?.hero, seen?.guild]).toEqual([3, false, false, null]);
+  });
+
+  it('tells it the monster of a player-rig monster and of a player in a monster\'s body', () => {
+    const deathKing = { ...player(), npcType: 55 };
+    run(deathKing);
+    expect([seen?.monster, seen?.rig]).toEqual([55, true]);
+    const body = new MonsterObject(scene, new TransformNode('skinned', scene));
+    const skinned = { ...player(), modelObject: body, skin: 361 };
+    ClothSystem({ with: (...keys: string[]) => (keys.includes('charAppearance') ? [skinned] : []), mapIndex: 0 } as unknown as World).update?.(0.04);
+    expect([seen?.monster, seen?.rig, seen?.skin]).toEqual([361, false, null]);
   });
 });

@@ -8,6 +8,7 @@ vi.hoisted(() => {
 import { cloaksFor, type CloakSet, type CloakWearer } from '@/controllers/actors/cloaks';
 import {
   PCT_CURVED,
+  PCT_CYLINDER,
   PCT_ELASTIC_RAGE_L,
   PCT_ELASTIC_RAGE_R,
   PCT_HEAVY,
@@ -68,7 +69,7 @@ function run(w: CloakWearer, frames: number, set = new FakeSet()) {
 }
 
 const wearer = (over: Partial<CloakWearer>): CloakWearer => ({
-  charClass: C.DarkLord, wing: null, wingBefore: over.wing ?? null, armor: null, skin: null, chaosCastle: false, netId: null, hero: false, guild: null, ...over,
+  charClass: C.DarkLord, wing: null, wingBefore: over.wing ?? null, armor: null, skin: null, chaosCastle: false, netId: null, hero: false, guild: null, monster: null, rig: true, ...over,
 });
 
 const wear = (over: Partial<CloakWearer>, frames = 2) => run(wearer(over), frames);
@@ -340,5 +341,52 @@ describe('DeleteCloth on a cape change', () => {
     const { set } = wear({ wing: CAPE_OF_LORD, hero: true });
     const after = run(wearer({ wing: MANTLE_OF_MONARCH, wingBefore: CAPE_OF_LORD, hero: true }), 1, set);
     expect([after.set.count, after.out[2]?.front, after.out[4]?.front]).toEqual([6, 'Item/dl_redwings02.OZT', 'Item/dl_redwings03.OZT']);
+  });
+});
+
+describe('the two monsters that wear one (ZzzCharacter.cpp:9173-9176, :9826-9836)', () => {
+  it('robes the Death King, a skeleton on the player rig, in Robe03.tga, keyed, with three spheres', () => {
+    const { out, set } = wear({ charClass: C.DarkKnight, monster: 55 });
+    expect([set.count, out[0]]).toEqual([
+      1,
+      {
+        bone: 19,
+        at: [0, 10, 0],
+        grid: [10, 10],
+        size: [55, 140],
+        front: 'Player/Robe03.OZT',
+        back: 'Player/Robe03.OZT',
+        flags: PCT_CURVED | PCT_MASK_ALPHA,
+        spheres: [
+          [-10, -10, -10, 35, 17],
+          [10, -10, -10, 35, 17],
+          [0, -10, -40, 50, 19],
+        ],
+      },
+    ]);
+  });
+
+  it('wraps the Nightmare in a cylinder of nightmare_cloth.tga round its bone 2', () => {
+    expect(wear({ charClass: C.DarkWizard, monster: 361, rig: false }).out[0]).toEqual({
+      bone: 2,
+      at: [0, 0, 0],
+      grid: [6, 6],
+      size: [180, 100],
+      front: 'Monster/nightmare_cloth.OZT',
+      back: 'Monster/nightmare_cloth.OZT',
+      flags: PCT_CYLINDER | PCT_MASK_ALPHA,
+    });
+  });
+
+  it('dresses no other monster, and no class in a monster\'s body (`o->Type == MODEL_PLAYER`, :9164-9171)', () => {
+    expect(wear({ charClass: C.DarkWizard, monster: 56 }).set.built).toBe(false);
+    expect(wear({ wing: CAPE_OF_LORD, rig: false }).set.built).toBe(false);
+  });
+
+  it('dresses no Doppelganger, though the Dark Lord and the Magic Gladiator copies are on the rig (:9177-9180)', () => {
+    expect(wear({ wing: CAPE_OF_LORD, monster: 538 }).set.built).toBe(false);
+    expect(wear({ charClass: C.MagicGladiator, monster: 529 }).set.built).toBe(false);
+    expect(wear({ charClass: C.MagicGladiator, monster: 539 }).set.built).toBe(false);
+    expect(wear({ charClass: C.MagicGladiator, monster: 540 }).set.built).toBe(true);
   });
 });

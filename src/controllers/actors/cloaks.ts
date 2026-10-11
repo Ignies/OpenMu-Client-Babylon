@@ -20,6 +20,10 @@ export type CloakWearer = {
   hero: boolean;
   /** `c->GuildMarkIndex`: the guild id, whose name Battle Soccer colours (:9190-9232). */
   guild: number | null;
+  /** `c->MonsterIndex`: the monster this body is (a monster, or a player in a monster's body), else null. */
+  monster: number | null;
+  /** `o->Type == MODEL_PLAYER`: a body on the player rig, which a class cloak needs (:9164-9171). */
+  rig: boolean;
 };
 
 /** What the rule does to a wearer's set: the original's `m_pCloth` array, `m_byNumCloth` and the loop's draws. */

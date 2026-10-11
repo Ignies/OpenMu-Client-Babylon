@@ -62,7 +62,7 @@ function run(w: Wearer, frames: number, set = new FakeSet()) {
 }
 
 function wear(over: Partial<Wearer>) {
-  const { out, light } = run({ charClass: C.DarkKnight, wing: null, wingBefore: null, armor: null, skin: null, chaosCastle: false, netId: 7, hero: false, guild: null, ...over }, 2);
+  const { out, light } = run({ charClass: C.DarkKnight, wing: null, wingBefore: null, armor: null, skin: null, chaosCastle: false, netId: 7, hero: false, guild: null, monster: null, rig: true, ...over }, 2);
   return { out, light, fronts: out.filter(Boolean).map(s => s?.front ?? null) };
 }
 
@@ -98,6 +98,11 @@ describe('the duel colours (ZzzCharacter.cpp:9234-9246)', () => {
     state.enemy = 7;
     expect(wear({ skin: 'panda.glb' }).fronts).toEqual(['Player/Robe01.OZJ']);
     expect(wear({ charClass: C.MagicGladiator, skin: 'panda.glb' }).fronts).toEqual([]);
+  });
+
+  it('cloaks no duelist in a monster\'s body (the original hangs its class\'s cloths on the monster\'s bones)', () => {
+    state.enemy = 7;
+    expect(wear({ monster: 7, rig: false })).toMatchObject({ light: [1, 1, 1], fronts: [] });
   });
 });
 
