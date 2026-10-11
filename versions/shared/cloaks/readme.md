@@ -27,6 +27,9 @@ the capes, the Dark Lord's hair and skirt, the Magic Gladiator's robe, the team 
 - Slots are the original's indices, so a cloth keeps its swing while its spec stays. A cloth the
   original builds but skips drawing (`continue`, :9926-9983) is null here: it is not simulated either,
   and comes back built fresh, which is what the original's stale cloth tearing and rebuilding gives.
+  Nor does it cast a shadow. The original's cloth shadow walks every built cloth, skipped ones too
+  (`AddClothesShadowTriangles`, ZzzBMD.cpp:2648-2710): a Dark Lord with a weapon and no cape lays a cape's
+  shadow where his set was built, which never moves. That stray shadow is not ported.
 - Dark Lord (:9693-9776): slots 0 and 1 the hair on the head bone (`Monster\iui06.jpg`, rubber2 strands in
   their own gusts: the first a pulsing light with a sprite on each vertex, the second added), gone under a
   ring's body (`CheckDarkLordHair`); slot 2 the cape, drawn with the Cape of Lord (`Player\DarklordRobe.tga`) or the
