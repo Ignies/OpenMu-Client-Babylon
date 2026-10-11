@@ -5,6 +5,7 @@ import { caddyfile, publicPorts } from './caddy';
 import { allowTargets, clientBuildArgs, databaseUrl, openmuImage, serviceEnv, stackEnv } from './env';
 import { serverList } from './serverList';
 import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { moduleEntries, serverManifest } from './manifest';
 import { ORIGINAL_SETTINGS, parseServerManifest } from '../../../src/modules/servers/serverManifest';
 import { WEB_IP } from '../stack';
@@ -205,5 +206,29 @@ describe('caddyfile', () => {
   it('opens only what is served', () => {
     expect(publicPorts(domain)).toEqual([22, 80, 443]);
     expect(publicPorts(ip)).not.toContain(5432);
+  });
+});
+
+describe('module signing key', () => {
+  const key = 'dBiwQYOyK0b7jW4OwHVEdTC0hjNXr2honOh7qknnH14';
+
+  it('reaches the client build as VITE_MODULE_SIGNING_KEY, empty when none is set', () => {
+    for (const c of [domain, ip]) {
+      expect(clientBuildArgs({ ...c, moduleSigningKey: key }).VITE_MODULE_SIGNING_KEY).toBe(key);
+      expect(clientBuildArgs(c).VITE_MODULE_SIGNING_KEY).toBe('');
+    }
+    expect(stackEnv({ ...domain, moduleSigningKey: key }, { repo: '/opt/mu', state: '/etc/mu-server' }).VITE_MODULE_SIGNING_KEY).toBe(key);
+  });
+
+  it('never bakes in a key that is not a public key', () => {
+    expect(clientBuildArgs({ ...domain, moduleSigningKey: `${key}${key}` }).VITE_MODULE_SIGNING_KEY).toBe('');
+  });
+
+  it('is passed by compose and the web Dockerfile to the client build', () => {
+    const stack = `${import.meta.dirname}/../../stack`;
+    expect(readFileSync(`${stack}/compose.yml`, 'utf8')).toContain('VITE_MODULE_SIGNING_KEY: ${VITE_MODULE_SIGNING_KEY}');
+    const docker = readFileSync(`${stack}/web.Dockerfile`, 'utf8');
+    expect(docker).toMatch(/ARG [^\n]*VITE_MODULE_SIGNING_KEY/);
+    expect(docker).toMatch(/VITE_MODULE_SIGNING_KEY="\$VITE_MODULE_SIGNING_KEY" bun run build\b/);
   });
 });

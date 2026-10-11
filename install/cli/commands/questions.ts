@@ -60,6 +60,7 @@ export async function ask(c: Config, group: Group): Promise<Config> {
       next.autoManaPotion = await ui.confirm('Let players turn on drinking a mana potion by itself when mana runs low? (off = the original; gameplay automation)', c.autoManaPotion);
       next.autoQuiver = await ui.confirm('Let players turn on putting the next quiver in as soon as one runs out? (off = the original reloads at the next shot; gameplay automation)', c.autoQuiver);
       next.modulesOff = await ui.text('Client modules to turn off (comma separated, like events,marketplace; blank for none)', { initial: c.modulesOff, validate: v => (/^\s*([a-z_]+\s*(,\s*[a-z_]+\s*)*)?$/.test(v) ? undefined : 'Module names separated by commas.') });
+      next.moduleSigningKey = (await ui.text('Public key that signs your first-party streamed modules (tools/modules/sign.ts pubkey; blank: every module runs sandboxed)', { initial: c.moduleSigningKey, validate: v => check.moduleSigningKey(v.trim()) })).trim();
       break;
     case 'openmu': {
       const source = await ui.select('Which OpenMU?', [

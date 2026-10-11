@@ -143,6 +143,13 @@ everything the stack reads is rendered from `mu.env`, so `mu config` can change 
   `/server-modules/` next to `server.json`, to any origin. A signed module runs in the page; any other
   runs in a sandbox once each player allows it.
 
+  `MU_MODULE_SIGNING_KEY` (`mu config` > Features, empty by default) is the public key whose
+  signatures make a module first party: 32 raw bytes in base64url, what `tools/modules/sign.ts pubkey`
+  prints. It is baked into the client build (`VITE_MODULE_SIGNING_KEY`, a build argument of the web
+  image), so changing it rebuilds the client. The prompt refuses PEM text and the lengths of a private
+  key (48 and 64 bytes); a 32-byte private seed looks the same as a public key, so never paste from the
+  private key file. Empty: every streamed module runs sandboxed.
+
 ## Change it
 
 - a new question: `cli/commands/questions.ts` (+ a field in `cli/config.ts`, + where it renders).
@@ -154,11 +161,11 @@ everything the stack reads is rendered from `mu.env`, so `mu config` can change 
 
 ## Tests
 
-- `cli/config.test.ts`: config round trip, answer checks, secrets.
+- `cli/config.test.ts`: config round trip, answer checks, secrets, the module signing key (public only).
 - `cli/render/render.test.ts`: service env (secrets only where used, proxy pinned, trusted proxy),
   Caddyfile (both modes, admin login, route order), server list, compose interpolation,
   `server.json` (default, the setting, the modules off, the modules folder, accepted by the client's
-  parser, served on both hosts with the module files).
+  parser, served on both hosts with the module files), the module signing key reaching the client build.
 - `cli/backup.test.ts`: role filtering, backup names.
 - End to end, with Docker: `MU_STATE=<scratch folder> bun install/cli/e2e.ts` (build, start, check;
   then `backup`, `down`). It refuses to run without `MU_STATE`, so it never touches a real install.

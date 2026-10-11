@@ -1,6 +1,7 @@
 // Per-service environment, rendered from the config. Secrets go only to the services that use them.
 import { clientOrigin, type Config } from '../config';
 import { DATA, HOSTS, PORTS, WEB_IP, type Service } from '../stack';
+import { moduleSigningKey } from '../validate';
 
 type Env = Record<string, string>;
 const onOff = (v: boolean) => (v ? 'on' : 'off');
@@ -109,6 +110,10 @@ export function stackEnv(c: Config, paths: { repo: string; state: string }): Env
 
 /** Build arguments for the client and register images: the server's own defaults baked in. */
 export function clientBuildArgs(c: Config): Env {
+  return { ...siteBuildArgs(c), VITE_MODULE_SIGNING_KEY: moduleSigningKey(c.moduleSigningKey) ? '' : c.moduleSigningKey };
+}
+
+function siteBuildArgs(c: Config): Env {
   if (c.mode === 'domain') {
     return {
       VITE_WS_HOST: `wss://ws.${c.domain}`,

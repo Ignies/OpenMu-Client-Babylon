@@ -37,6 +37,8 @@ export type Config = {
   autoQuiver: boolean;
   /** Optional client modules this world turns off, comma separated (`server.json` `modulesOff`). */
   modulesOff: string;
+  /** The owner's ed25519 public key (base64url) baked into the client: modules it signed run in the page. Empty: none. */
+  moduleSigningKey: string;
 };
 
 const KEYS: Record<keyof Config, string> = {
@@ -68,6 +70,7 @@ const KEYS: Record<keyof Config, string> = {
   autoManaPotion: 'MU_AUTO_MANA_POTION',
   autoQuiver: 'MU_AUTO_QUIVER',
   modulesOff: 'MU_MODULES_OFF',
+  moduleSigningKey: 'MU_MODULE_SIGNING_KEY',
 };
 
 export const DEFAULTS: Config = {
@@ -99,6 +102,7 @@ export const DEFAULTS: Config = {
   autoManaPotion: false,
   autoQuiver: false,
   modulesOff: '',
+  moduleSigningKey: '',
 };
 
 /** Where players open the client. */

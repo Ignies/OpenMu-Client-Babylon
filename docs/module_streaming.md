@@ -270,7 +270,9 @@ server. `tools/modules/sign.ts` refuses a key path inside the repository.
    -algorithm ed25519 -out mu-modules.pem` makes the same kind of key; `sign.ts pubkey <key>` prints its
    public half.) Keep the PEM offline, with a backup.
 2. Build the client with that public key: `VITE_MODULE_SIGNING_KEY=<public key>` in the build's
-   environment. It is public; without it, every module runs as third party.
+   environment. It is public; without it, every module runs as third party. A server the installer
+   runs takes it as `MU_MODULE_SIGNING_KEY` (`mu config` > Features), which it passes to the web
+   image's build ([install/readme.md](../install/readme.md)).
 3. For each module release: build it to one file, then `bun tools/modules/sign.ts sign <key.pem>
    <module.js> --id <id> --version <x.y.z> --api <range>`, which writes `<module>.json` (id, version,
    api, signature) beside it. Copy both files into a server's modules folder and save the config

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { generateKeyPairSync } from 'node:crypto';
 import { DEFAULTS, clientOrigin, configToEnv, envToConfig, parseEnvFile, toEnvFile, type Config } from './config';
 import * as check from './validate';
 
@@ -101,5 +102,33 @@ describe('answers', () => {
     const a = check.newSecret();
     expect(a).toMatch(/^[A-Za-z0-9_-]{43}$/);
     expect(check.newSecret()).not.toBe(a);
+  });
+});
+
+describe('module signing key', () => {
+  // A throwaway pair: only its public half belongs in the config.
+  const pair = generateKeyPairSync('ed25519');
+  const publicKey = String(pair.publicKey.export({ format: 'jwk' }).x);
+  const privateKey = String(pair.privateKey.export({ format: 'jwk' }).d);
+
+  it('stores it as MU_MODULE_SIGNING_KEY, empty unless set', () => {
+    expect(configToEnv({ ...config, moduleSigningKey: publicKey }).MU_MODULE_SIGNING_KEY).toBe(publicKey);
+    expect(envToConfig({ MU_MODULE_SIGNING_KEY: publicKey }).moduleSigningKey).toBe(publicKey);
+    expect(envToConfig({}).moduleSigningKey).toBe('');
+  });
+
+  it('takes an ed25519 public key (32 raw bytes, base64url) or nothing', () => {
+    expect(check.moduleSigningKey(publicKey)).toBeUndefined();
+    expect(check.moduleSigningKey('')).toBeUndefined();
+  });
+
+  it('refuses a private key, a key pair, PEM text and anything that is not 32 bytes', () => {
+    const keyPair = Buffer.from(privateKey + publicKey, 'base64url').toString('base64url');
+    const pem = pair.privateKey.export({ type: 'pkcs8', format: 'pem' }).toString();
+    expect(check.moduleSigningKey(keyPair)).toMatch(/private/);
+    expect(check.moduleSigningKey(pem)).toMatch(/private/);
+    expect(check.moduleSigningKey(publicKey.slice(0, 40))).toMatch(/32 bytes/);
+    expect(check.moduleSigningKey(`${publicKey}==`)).toMatch(/base64url/);
+    expect(check.moduleSigningKey(publicKey.replace(/./, '+'))).toMatch(/base64url/);
   });
 });
