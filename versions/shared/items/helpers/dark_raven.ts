@@ -26,7 +26,7 @@ export default defineItem({
   'Elf/ME': 1,
   MG: 1,
   DL: 1,
-  SUM: 1,
+  SUM: 0,
   RF: 0,
   szModelFolder: 'Item/',
   szModelName: 'spiritbill.glb',

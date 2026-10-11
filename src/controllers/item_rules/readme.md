@@ -93,8 +93,8 @@ the table would import itself.
 ## Tests
 - `itemSerializer.test.ts`: round trips (plain, +13 luck skill, excellent, ancient, sockets, pets, number > 255);
   wing options and kind, the Fenrir variant.
-- `itemClasses.test.ts`: the Rage Fighter class column and unrestricted items; the Summoner gear and wings,
-  the Rapier and the 3rd wings against `Data/Local/Eng/item_eng.bmd`'s class columns.
+- `itemClasses.test.ts`: the Rage Fighter class column and unrestricted items; every row's class block
+  against `Data/Local/Eng/item_eng.bmd`'s.
 - `itemRequirements.test.ts`: strength per option level, wing and pet level requirements.
 - `itemCompare.test.ts`: which worn item is compared, and the green / red deltas on the tooltip.
 - `itemLevelLook.test.ts`: Box of Luck / Box of Kundun names and icons.

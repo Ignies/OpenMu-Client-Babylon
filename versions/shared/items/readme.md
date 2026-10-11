@@ -27,7 +27,8 @@ petItems.ts           pet and mount item numbers in group 13 (PET_GROUP, DARK_HO
   and the registry. Field names are the original table's, so every reader keeps working.
 - The files came from the Season 6 `Item.txt`: `tools/convertItemTXTtoJson.ts` writes them,
   `tools/addRageFighterColumn.ts` and `tools/syncItemRequirements.ts` run after it (all three go
-  through `tools/itemFiles.ts`). A file's name is the item's name in snake_case, plus `_<index>`
+  through `tools/itemFiles.ts`), then `tools/syncItemClasses.ts` sets every class block to the original
+  `Item_eng.bmd`'s (`item_rules/itemClasses.test.ts` checks each row). A file's name is the item's name in snake_case, plus `_<index>`
   when two items of a group share a name.
 - `szModelFolder` + `szModelName` is the model the original loads for the item (`ZzzOpenData.cpp`
   `AccessModel`), where `Item.txt` names a later season's file: Merlin Staff is `Item/Staff_33`
@@ -44,7 +45,7 @@ petItems.ts           pet and mount item numbers in group 13 (PET_GROUP, DARK_HO
 
 ## Change it
 - change an item: edit its file. Add one: add a file in its group folder.
-- regenerate from a new `Item.txt`: `tools/convertItemTXTtoJson.ts`, then the two follow-up tools.
+- regenerate from a new `Item.txt`: `tools/convertItemTXTtoJson.ts`, then the three follow-up tools.
 - new launcher arrow: add a row to `LAUNCHER_ARROWS` keyed by the launcher's item index.
 
 ## Tests

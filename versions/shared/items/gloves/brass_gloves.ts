@@ -28,7 +28,7 @@ export default defineItem({
   MG: 1,
   DL: 0,
   SUM: 0,
-  RF: 1,
+  RF: 0,
   szModelFolder: 'Player/',
   szModelName: 'GloveMale09.glb',
 });

@@ -26,7 +26,7 @@ export default defineItem({
   MG: 1,
   DL: 1,
   SUM: 1,
-  RF: 0,
+  RF: 1,
   szModelFolder: 'Item/',
   szModelName: 's30_sphere01.glb',
 });
