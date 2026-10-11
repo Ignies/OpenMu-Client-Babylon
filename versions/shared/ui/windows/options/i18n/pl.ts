@@ -389,4 +389,5 @@ export default {
     'Wyłączone: inni gracze stoją nieruchomo, gdy stoją lub idą; ciosy i śmierć nadal widać. Odciąża zatłoczone miejsca.',
   'options.npcAnimations': 'Animacje NPC',
   'options.help.npcAnimations': 'Wyłączone: NPC stoją nieruchomo.',
+  'options.quality.low': 'Niska',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -364,4 +364,5 @@ export default {
     'ปิดไว้ ผู้เล่นอื่นจะหยุดนิ่งขณะยืนหรือเดิน การโจมตีและการตายยังแสดงอยู่ ช่วยลดภาระในที่คนเยอะ',
   'options.npcAnimations': 'แอนิเมชันของ NPC',
   'options.help.npcAnimations': 'ปิดไว้ NPC จะหยุดนิ่ง',
+  'options.quality.low': 'ต่ำ',
 } satisfies Partial<Record<keyof typeof en, string>>;

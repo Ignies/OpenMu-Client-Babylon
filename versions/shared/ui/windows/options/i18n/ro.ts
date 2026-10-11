@@ -398,4 +398,5 @@ export default {
     'Oprit, ceilalți jucători rămân nemișcați când stau sau merg; loviturile și moartea se văd în continuare. Ușurează locurile aglomerate.',
   'options.npcAnimations': 'Animațiile NPC',
   'options.help.npcAnimations': 'Oprit, NPC-urile rămân nemișcate.',
+  'options.quality.low': 'Scăzută',
 } satisfies Partial<Record<keyof typeof en, string>>;

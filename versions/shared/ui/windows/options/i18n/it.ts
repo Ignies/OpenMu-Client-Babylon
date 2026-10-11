@@ -396,4 +396,5 @@ export default {
     'Spento, gli altri giocatori restano fermi da in piedi o camminando; colpi e morti si vedono ancora. Alleggerisce i luoghi affollati.',
   'options.npcAnimations': 'Animazioni degli NPC',
   'options.help.npcAnimations': 'Spento, gli NPC restano fermi.',
+  'options.quality.low': 'Bassa',
 } satisfies Partial<Record<keyof typeof en, string>>;

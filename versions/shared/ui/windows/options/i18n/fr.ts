@@ -390,4 +390,5 @@ export default {
     "Désactivé, les autres joueurs restent figés à l'arrêt ou en marchant ; leurs coups et leurs morts se jouent encore. Allège les lieux bondés.",
   'options.npcAnimations': 'Animations des PNJ',
   'options.help.npcAnimations': 'Désactivé, les PNJ restent figés.',
+  'options.quality.low': 'Basse',
 } satisfies Partial<Record<keyof typeof en, string>>;

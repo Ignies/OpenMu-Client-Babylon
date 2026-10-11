@@ -421,4 +421,5 @@ export default {
     'Выключено - другие игроки замирают, стоя или при ходьбе; удары и смерть видны по-прежнему. Легче в людных местах.',
   'options.npcAnimations': 'Анимации NPC',
   'options.help.npcAnimations': 'Выключено - NPC замирают.',
+  'options.quality.low': 'Низкое',
 } satisfies Partial<Record<keyof typeof en, string>>;

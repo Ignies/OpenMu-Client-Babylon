@@ -425,4 +425,5 @@ export default {
     'Aus stehen andere Spieler im Stand und beim Gehen still; Schläge und Tode laufen weiter. Spart Arbeit an vollen Orten.',
   'options.npcAnimations': 'NPC-Animationen',
   'options.help.npcAnimations': 'Aus stehen die NPCs still.',
+  'options.quality.low': 'Niedrig',
 } satisfies Partial<Record<keyof typeof en, string>>;

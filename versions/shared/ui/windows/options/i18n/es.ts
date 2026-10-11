@@ -430,4 +430,5 @@ export default {
     'Apagado, los otros jugadores quedan quietos al estar parados o caminar; sus golpes y muertes se siguen viendo. Ahorra trabajo en zonas llenas.',
   'options.npcAnimations': 'Animaciones de NPC',
   'options.help.npcAnimations': 'Apagado, los NPC quedan quietos.',
+  'options.quality.low': 'Baja',
 } satisfies Partial<Record<keyof typeof en, string>>;

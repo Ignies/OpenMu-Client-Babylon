@@ -327,4 +327,5 @@ export default {
     '끄면 다른 플레이어가 서 있거나 걸을 때 멈춰 있습니다. 공격과 죽음은 그대로 재생됩니다. 붐비는 곳에서 부담이 줄어듭니다.',
   'options.npcAnimations': 'NPC 애니메이션',
   'options.help.npcAnimations': '끄면 NPC가 멈춰 있습니다.',
+  'options.quality.low': '낮음',
 } satisfies Partial<Record<keyof typeof en, string>>;

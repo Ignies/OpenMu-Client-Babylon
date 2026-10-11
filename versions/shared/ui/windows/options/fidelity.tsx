@@ -10,7 +10,7 @@ import { GameOptions, setGameOption } from '@/controllers/settings';
 import { t } from '@/i18n';
 import { Checkbox, FitText } from './controls';
 import type { Row, Section } from './catalogue';
-import { TIER_PRESET_LABEL_KEYS } from './presets';
+import { LIGHTING_QUALITY_LABEL_KEYS } from '@/controllers/lighting/lightingQuality';
 
 /**
  * The Fidelity page: the preset (Classic / Enhanced / Ultra) and one check per registered
@@ -19,8 +19,8 @@ import { TIER_PRESET_LABEL_KEYS } from './presets';
 
 const PRESET_GAP = 4;
 
-/** The presets share the quality tier names. */
-const PRESET_LABEL_KEYS = TIER_PRESET_LABEL_KEYS;
+/** The presets share the quality tier names (not the quality presets' Low). */
+const PRESET_LABEL_KEYS = LIGHTING_QUALITY_LABEL_KEYS;
 
 /** Reads the observable options, so an observer redraws when they change. */
 export function fidelityCustom(): boolean {

@@ -324,4 +324,5 @@ export default {
     'オフにすると、他のプレイヤーは立ち止まりや歩行中に静止します。攻撃と死亡は再生されます。混雑した場所で軽くなります。',
   'options.npcAnimations': 'NPCのアニメーション',
   'options.help.npcAnimations': 'オフにするとNPCは静止します。',
+  'options.quality.low': '低',
 } satisfies Partial<Record<keyof typeof en, string>>;

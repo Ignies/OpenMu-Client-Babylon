@@ -392,4 +392,5 @@ export default {
     'Desligado, os outros jogadores ficam parados ao ficar de pé ou andar; golpes e mortes continuam. Alivia lugares lotados.',
   'options.npcAnimations': 'Animações dos NPCs',
   'options.help.npcAnimations': 'Desligado, os NPCs ficam parados.',
+  'options.quality.low': 'Baixa',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -375,4 +375,5 @@ export default {
     'Изключено, другите играчи застиват, докато стоят или вървят; ударите и смъртта им се виждат. Пести работа на многолюдни места.',
   'options.npcAnimations': 'Анимации на NPC',
   'options.help.npcAnimations': 'Изключено, NPC героите застиват.',
+  'options.quality.low': 'Ниско',
 } satisfies Partial<Record<keyof typeof en, string>>;

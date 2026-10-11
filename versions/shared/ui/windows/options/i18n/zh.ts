@@ -319,4 +319,5 @@ export default {
   'options.help.otherPlayerAnimations': '关闭后，其他玩家站立或行走时保持静止；攻击和死亡仍会播放。可减轻人多场所的负担。',
   'options.npcAnimations': 'NPC 动画',
   'options.help.npcAnimations': '关闭后，NPC 保持静止。',
+  'options.quality.low': '低',
 } satisfies Partial<Record<keyof typeof en, string>>;

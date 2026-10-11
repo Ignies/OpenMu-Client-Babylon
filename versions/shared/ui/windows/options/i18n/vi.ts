@@ -382,4 +382,5 @@ export default {
     'Tắt thì người chơi khác đứng yên khi đứng hoặc đi; đòn đánh và cái chết vẫn hiện. Nhẹ hơn ở nơi đông người.',
   'options.npcAnimations': 'Hoạt ảnh NPC',
   'options.help.npcAnimations': 'Tắt thì NPC đứng yên.',
+  'options.quality.low': 'Thấp',
 } satisfies Partial<Record<keyof typeof en, string>>;

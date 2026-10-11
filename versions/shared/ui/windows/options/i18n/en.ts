@@ -420,6 +420,7 @@ const en = {
     'Off, other players hold still while standing or walking; their blows and deaths still play. Saves work in crowded places.',
   'options.npcAnimations': 'NPC animations',
   'options.help.npcAnimations': 'Off, the NPCs hold still.',
+  'options.quality.low': 'Low',
 };
 
 export default en;
