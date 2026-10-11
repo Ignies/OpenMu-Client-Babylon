@@ -3,6 +3,7 @@ import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
 import { Scene } from '@babylonjs/core/scene';
 import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 import { effects } from '@/controllers/fx';
+import { lighting } from '@/controllers/lighting';
 import { MODEL } from '@/controllers/fx/recipes';
 import { ENUM_WORLD } from '@/core/types';
 import type { Entity } from '@/ecs/world';
@@ -46,6 +47,19 @@ function cast(id: number): [string, Record<string, unknown>][] {
 // AT_SKILL_INFINITY_ARROW: MODEL_INFINITY_ARROW at the caster, which makes arrowsre01 (drawing only its flare joints)
 // and the rings arrowsre02-05 (WSclient.cpp:4882-4888, ZzzEffect.cpp:435-457).
 describe('Infinity Arrow', () => {
+  // Each flare joint's white AddTerrainLight (ZzzEffectJoint.cpp:6013-6015): one light per bone it sends joints from.
+  it('lights the ground under its flare joints on Classic only', () => {
+    const lit = vi.spyOn(lighting, 'skillBody');
+    setFidelityChoice(FIDELITY_CLASSIC, {});
+    cast(77);
+    expect(lit.mock.calls.filter(([, skill, body]) => skill === 77 && body === 'flare')).toHaveLength(8);
+    lit.mockClear();
+    setFidelityChoice(FIDELITY_DEFAULT, {});
+    cast(77);
+    expect(lit).not.toHaveBeenCalled();
+    lit.mockRestore();
+  });
+
   it('makes the original rings on Classic', () => {
     setFidelityChoice(FIDELITY_CLASSIC, {});
     for (const id of [77, 441]) {

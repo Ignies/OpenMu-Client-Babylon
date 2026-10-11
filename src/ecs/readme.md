@@ -96,7 +96,8 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
 - `systems/npcTalkSystem.test.ts`: the Gateway Machine is talked to from 5.5 tiles with no free tile beside it.
 - `systems/calculateVisibilitySystem.test.ts`: the ground item cap leaves a normal pile alone and hides the
   farthest past it.
-- `systems/itemGlowSystem.test.ts`: the gear key changes only with what the lamp reads (level, excellent, ancient,
+- `systems/itemGlowSystem.test.ts`: the bolts in a hand turn gold while Infinity Arrow holds, on Skill effects: Original
+  only. The gear key changes only with what the lamp reads (level, excellent, ancient,
   sockets, slot, re-apply, gear effects); it is written in place, no string per character per frame.
 - `systems/modelLoaderSystem.test.ts`: `selectNearest` puts the nearest pending models first without a sort.
 - `systems/othersShown.test.ts`: the crowd options hide only other players' gear effects and pets, never a
@@ -232,7 +233,8 @@ re-stamps when the item-effects option or level cap changes; `item_fx/itemMateri
 `render/sceneLook.ts` read it. Improved look only: +9..+15 gear and drops get a lamp
 (`controllers/lighting/items.ts`), an aura and a crackle. Both looks: excellent items throw the
 `CreateShiny` glints (`controllers/fx/itemSparkle.ts`). This system picks which entity is lit and
-moves the lamp with the wearer.
+moves the lamp with the wearer. On Skill effects: Original it paints a hand's bolts or arrows gold with chrome while
+Infinity Arrow holds (`controllers/actors/ammoGold.ts`), again when the part's model reloads.
 
 ### petSystem.ts
 Pets that live in the world, not on the wearer's skeleton (GOBoid.cpp:66-680):

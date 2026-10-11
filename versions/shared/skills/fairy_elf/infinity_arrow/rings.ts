@@ -3,6 +3,7 @@ import { bonePos, entityGone, fxNow, TICK, type PointSource, type RGB } from '@/
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { cm, facing, ticks, type SkillContext, type Step } from '@/controllers/skills/visuals';
 import { effects } from '@/controllers/fx';
+import { lighting } from '@/controllers/lighting';
 import type { Entity } from '@/ecs/world';
 
 /**
@@ -25,6 +26,8 @@ const JOINT_TICKS = 35;
 const JOINT_TAILS = 8;
 const JOINT_LIGHT: RGB = [1, 0.5, 0.3];
 const JOINT_WIDTH = cm(20);
+/** Infinity Arrow's light row: each joint's white AddTerrainLight (ZzzEffectJoint.cpp:6013-6015), one light per bone on its newest joint. */
+const SKILL = 77;
 /** Enough hidden mesh slots for arrowsre01: it draws nothing. */
 const HIDDEN = Array.from({ length: 8 }, () => ({ draw: 'hide' as const }));
 
@@ -83,6 +86,16 @@ function flareJoints(c: SkillContext, at: Vector3): void {
   const yaw = Math.atan2(facing(c).x, facing(c).z);
   const p = new Vector3();
   let sent = 0;
+  const heads: (PointSource | null)[] = JOINT_BONES.map(() => null);
+  const lit = new Vector3();
+  heads.forEach((_, k) =>
+    lighting.skillBody(c.scene, SKILL, 'flare', out => {
+      (heads[k] ?? target)(lit);
+      out.x = lit.x;
+      out.y = lit.y;
+      out.z = lit.z;
+    })
+  );
   effects.spawn('summon', c.scene, at, {
     model: MODEL.infinityArrow[0],
     seconds: ticks(RING_TICKS),
@@ -94,10 +107,11 @@ function flareJoints(c: SkillContext, at: Vector3): void {
       const tick = Math.floor(t + 1e-6);
       if (!body.loaded || tick < sent) return;
       sent = tick + 1;
-      for (const bone of JOINT_BONES) {
-        if (!body.bone(bone, p)) continue;
+      JOINT_BONES.forEach((bone, k) => {
+        if (!body.bone(bone, p)) return;
+        const head = (heads[k] = jointHead(p, yaw, target));
         effects.spawn('joint', c.scene, p.clone(), {
-          head: jointHead(p, yaw, target),
+          head,
           maxTails: JOINT_TAILS,
           width: JOINT_WIDTH,
           colour: JOINT_LIGHT,
@@ -105,7 +119,7 @@ function flareJoints(c: SkillContext, at: Vector3): void {
           seconds: ticks(JOINT_TICKS),
           intensity: jointLight,
         });
-      }
+      });
     },
   });
 }
