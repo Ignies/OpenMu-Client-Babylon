@@ -37,6 +37,7 @@ controllers/       generic services; controllers.ts starts them, controller.ts i
   anim/            clip choice and play speed
   assets/          data folder, downloads, BMD, texture packs (texturePacks.ts)
   camera/          camera layers (mouse look, Battle Castle, PK field)
+  cloth/           the physics cloth (CPhysicsCloth): capes, robes, hair on the 25 Hz tick
   combat/          attack timing, ranges, cast targets, skill hook slots (skillHooks.ts)
   fidelity/        Classic / Enhanced / Ultra: the improvement registry and isOn(id)
   fx/              effects.spawn and every effect layer (sprites, particles, models, joints...)

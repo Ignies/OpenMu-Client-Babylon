@@ -16,6 +16,7 @@ spawn an effect, time a swing), never which skill, item or window does it. The f
 | [actors](actors/readme.md) | player, monster and npc model objects, wings, weapons on the body | modules |
 | [anim](anim/readme.md) | clip choice and play speed | modules |
 | [assets](assets/readme.md) | data folder, downloads, BMD, texture packs | modules |
+| [cloth](cloth/readme.md) | the physics cloth: capes, robes, hair, on the 25 Hz tick | `cloth`, `ClothSet` |
 | [camera](camera/readme.md) | camera layers (mouse look, Battle Castle, PK field) | `index.ts` functions |
 | [combat](combat/readme.md) | attack timing, ranges, cast targets, skill hook slots | `combat` |
 | [fidelity](fidelity/readme.md) | Classic / Enhanced / Ultra, the improvement registry, `isOn(id)` | `index.ts` functions |
