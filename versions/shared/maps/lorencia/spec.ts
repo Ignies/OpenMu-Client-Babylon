@@ -3,6 +3,8 @@ import type { LightEmitter } from '@/controllers/lighting';
 import { isOn } from '@/controllers/fidelity';
 import { createFire } from '../shared/lights';
 import type { MapTerrain } from '@/controllers/terrain';
+import type { MeshAnimations } from '@/controllers/render';
+import { rollTenths, saw } from '../shared/meshAnimation';
 import {
   MODEL_CANDLE,
   MODEL_FURNITURE01,
@@ -28,6 +30,17 @@ export const LORENCIA_BLEND_MESHES: Readonly<Record<number, number>> = {
   98: 2,
   90: 1,
   150: 1,
+};
+
+/**
+ * `MoveObject`'s writes to those blend meshes (ZzzObject.cpp:3742-3790): House 03 and the bonfire
+ * flicker a fresh roll every frame, House 04 and 05 scroll down. House Wall 02's is its class's.
+ */
+export const LORENCIA_MESH_ANIMATIONS: MeshAnimations = {
+  117: { mesh: 4, kind: 'blend', light: rollTenths(4, 4) },
+  118: { mesh: 8, kind: 'blend', v: saw(1000, 0.001) },
+  119: { mesh: 2, kind: 'blend', v: saw(1000, 0.001) },
+  52: { mesh: 1, kind: 'blend', light: rollTenths(6, 4) },
 };
 
 /** The three chimney / vent types drawn as smoke only. */

@@ -1,27 +1,11 @@
 import { ModelObject } from '@/controllers/render/modelObject';
-import { BlendState, MODEL_HOUSE01 } from '../../objects/enum';
-import { getMaterial } from '@/controllers/assets/modelLoader';
-import { World } from '@/ecs/world';
+import { MODEL_HOUSE01 } from '../../objects/enum';
 
+/** Houses 01-05: their blend meshes and `MoveObject`'s writes to them are the map's tables (`spec.ts`). */
 export class HouseObject extends ModelObject {
   static Batchable = true;
 
-  async init(world: World) {
-    // LightEnabled = true;
+  async init() {
     await this.loadSpecificModelWithDynamicID(MODEL_HOUSE01, 'House');
-
-    const idx = this.Type - MODEL_HOUSE01 + 1;
-
-    if (idx === 3) {
-      const m = this.getMesh(4);
-      if (m) {
-        m.material = getMaterial(world.scene, true, 2, BlendState.ALPHA_ADD);
-      }
-    } else if (idx === 4) {
-      const m = this.getMesh(8);
-      if (m) {
-        m.material = getMaterial(world.scene, true, 2, BlendState.ALPHA_ADD);
-      }
-    }
   }
 }

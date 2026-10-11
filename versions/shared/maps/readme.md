@@ -13,7 +13,8 @@ One folder per map. Each folder exports one `MapLayer` (the contract in
 - `shared/sound.ts` (`WIND`, `smallLoop` / `largeLoop`, `outsideSafeZone`, the monster hook
   shorthands `hookWalk` / `hookOnce` / `hookPlay` / `oneChannel`), `shared/looks.ts` (`OPEN_SKY`,
   `KANTURU_SKY`, `DESERT_SKY`, `GRADED_HAZE`, `sun`...), `shared/lights.ts` (`createFire`),
-  `shared/terrain.ts` (`sit`, `pose`, `healing`): plain building blocks the map rows share.
+  `shared/terrain.ts` (`sit`, `pose`, `healing`), `shared/meshAnimation.ts` (`saw`, `sawUp`, `perTick`,
+  `rollTenths`): plain building blocks the map rows share.
 
 ## How it works
 - A `MapLayer` is mostly data: `name` (= folder name), `worlds` it serves, `assetWorld` when the
@@ -130,6 +131,11 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   `bloodcastle/candelabraObject.test.ts`: the candelabra's seven flares are 0.5 on any object scale.
 - `lorencia/houseWallObject.test.ts`: House Wall 02's window (122, BlendMesh 4) takes a fresh `(rand() % 4 + 4) * 0.1`
   every frame (ZzzObject.cpp:3752-3754); the other walls stay steady.
+- `lorencia/spec.test.ts`, `devias/spec.test.ts`: `MoveObject`'s blend mesh rows (`render.meshAnimations`):
+  House 03 (117) and Devias 78 roll `(rand() % 4 + 4) * 0.1`, the bonfire (52) `(rand() % 6 + 4) * 0.1`, House 04
+  and 05 (118, 119) scroll V down a texture a second (ZzzObject.cpp:3747-3753, :3788, :3860). A row takes its type
+  out of the prop batch, so the other houses stay batched; `lorencia/houseObject.test.ts`: the houses leave
+  their blend mesh to that shared path.
 - `lampFlares.test.ts`, `lorencia/candleObject.test.ts`, `devias/candleObject.test.ts`: what the original
   never draws is the `lampFlares` improvement, gone on Classic: the flares of Lorencia 90 and 150, Devias
   66 and the candelabra, Elbeland 61 and Lost Tower 23 (the light under them kept), the candle wick

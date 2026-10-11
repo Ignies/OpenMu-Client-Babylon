@@ -28,7 +28,7 @@ import './skills';
  * must not move with them. Update on purpose only.
  */
 const HASHES = {
-  meshAnimations: '1b476ef173e2f8c626fa96b9887eb406a352b5d6c63e51d9c2c94289ed15f2de',
+  meshAnimations: 'fb34c349228a0f03b2eb6125d59ad9fadd30669896b65e63c2fd1697e3366029',
   footsteps: 'bc29165166ef34d17ea6a9608e886848c69712c0208812d9e4e2949a459e312b',
   deathBurst: 'baf4b07991baf76832a9ae71199d6a35ca39b6aaf1644e9f353257ccbe82c432',
   ambient: '41300460968ce59b12238edc77287ba84361b0631534c0cb77a0eee3f3b8a5c3',
@@ -58,6 +58,8 @@ const hash = (v: unknown) => createHash('sha256').update(JSON.stringify(v ?? nul
 
 describe('content rows', () => {
   it('mesh animations', () => {
+    // The flickers roll `rand()` every frame: one fixed draw keeps the rows comparable.
+    vi.spyOn(Math, 'random').mockReturnValue(0.5);
     const rows = WORLDS.map(w =>
       OBJECT_TYPES.map(t => {
         const a = meshAnimationFor(w, t);

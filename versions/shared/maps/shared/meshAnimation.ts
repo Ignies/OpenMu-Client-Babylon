@@ -1,6 +1,6 @@
 /**
  * Building blocks for a map's `render.meshAnimations` rows (`MoveObject`'s
- * `o->BlendMeshTexCoordU/V` writes), as functions of milliseconds.
+ * `o->BlendMeshTexCoordU/V` and `o->BlendMeshLight` writes), as functions of milliseconds.
  */
 
 /** `-(WorldTime % period * rate)`: a scroll that runs down and wraps. */
@@ -17,3 +17,6 @@ export const sawUp = (period: number, rate: number) => (t: number) =>
  * to the texture.
  */
 export const perTick = (k: number) => (t: number) => ((t * k) / 40) % 1;
+
+/** `(float)(rand() % n + from) * 0.1f`: a fresh light in tenths every frame. */
+export const rollTenths = (n: number, from: number) => () => (Math.floor(Math.random() * n) + from) * 0.1;
