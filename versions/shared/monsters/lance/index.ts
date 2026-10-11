@@ -1,0 +1,36 @@
+import { defineMonster } from '@/controllers/monsters';
+
+export default defineMonster({
+  Numb: 100,
+  Name: 'Lance',
+  maxHealth: 1000,
+  // MONSTER_LANCE_TRAP (ZzzCharacter.cpp:14273).
+  trap: { object: 39, shadow: true },
+  stats: {
+    Rate: 1,
+    Level: 80,
+    HP: 1000,
+    MP: 0,
+    MinDmg: 100,
+    MaxDmg: 110,
+    Def: 0,
+    MagDef: 0,
+    AttackSuccess: 400,
+    Move: 500,
+    AttType: 0,
+    Range: 0,
+    View: 4,
+    MoveSpeed: 1,
+    AttSpeed: 500,
+    Regen: 1000,
+    Attri: 3,
+    ItemR: 1,
+    MoneyR: 200,
+    MaxI: 10,
+    ResWind: 0,
+    ResPois: 0,
+    ResIce: 0,
+    ResWater: 0,
+    ResFire: 0,
+  },
+});

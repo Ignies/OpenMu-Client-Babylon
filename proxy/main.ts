@@ -2,8 +2,8 @@ import type { Server, ServerWebSocket, Socket } from "bun";
 import { CLEAR, currentWeather, weatherForced, weatherPacket, weatherSlotSeconds, type WeatherState } from "./weather";
 import { ConnectionPresence, PRESENCE_HOST, PRESENCE_PORT, startPresenceServer } from "./presence";
 import { parseAllowTargets, targetAllowed, type ReservedTarget } from "./allowTargets";
-import { SESSION_NONCE_RE } from "../src/common/sessionNonce";
-import { ADMIN_STREAM_PATH, type RefusalReason } from "../src/common/adminProtocol";
+import { SESSION_NONCE_RE } from "../src/controllers/net/sessionNonce";
+import { ADMIN_STREAM_PATH, type RefusalReason } from "../src/controllers/net/protocols/adminProtocol";
 import { Tracker } from "./track/tracker";
 import type { TrackedSession } from "./track/session";
 import { AdminHub, type AdminSocket } from "./track/admin";
@@ -11,9 +11,10 @@ import { MemoryJournal, type Journal } from "./track/journal";
 import { DEFAULT_TRACK_DB, SqliteJournal } from "./track/store";
 import { startDemo } from "./track/demo";
 import { BandHub, type BandPeer } from "./band/hub";
-import { isBandFrame } from "../src/common/bandProtocol";
+import { isBandFrame } from "../src/controllers/net/protocols/bandProtocol";
 import { PingHub, type PingPeer } from "./ping/hub";
-import { isPingFrame } from "../src/common/pingProtocol";
+import { isPingFrame } from "../src/controllers/net/protocols/pingProtocol";
+import { SERVER_MANIFEST_PATH, serverManifestResponse } from "./serverManifest";
 
 const PORT = process.env.PORT || "3000";
 const HOSTNAME = process.env.HOSTNAME || '0.0.0.0';
@@ -318,6 +319,8 @@ Bun.serve<WebSocketData>({
     const url = new URL(req.url);
     const searchParams = url.searchParams;
 
+    if (url.pathname === SERVER_MANIFEST_PATH && req.method === "GET") return serverManifestResponse();
+
     if (url.pathname === ADMIN_STREAM_PATH) {
       if (!hub) return new Response("tracking is off", { status: 404 });
 
@@ -358,7 +361,7 @@ Bun.serve<WebSocketData>({
       return new Response("target not allowed", { status: 403 });
     }
 
-    // The page's session nonce (src/common/sessionNonce.ts), which lets the
+    // The page's session nonce (src/controllers/net/sessionNonce.ts), which lets the
     // cash shop put an account to this socket through the presence server's
     // /ticket/<nonce>. Absent or malformed is not a refusal: it only means
     // this socket can never be named by ticket, and the game must connect
@@ -458,8 +461,8 @@ Bun.serve<WebSocketData>({
           open(socket) {
             relay.data.tcpSocket = socket;
           },
-          close(socket) { },
-          drain(socket) { },
+          close() { },
+          drain() { },
           error(socket, error) {
             console.log(`tcp error:`, error);
             relay.data.tcpSocket = undefined;
@@ -477,11 +480,11 @@ Bun.serve<WebSocketData>({
             // also what the client's address fallback keys off.
             relay.close();
           }, // connection failed
-          end(socket) {
+          end() {
             relay.data.tcpSocket = undefined;
             relay.close();
           }, // connection closed by server
-          timeout(socket) { }, // connection timed out
+          timeout() { }, // connection timed out
         },
       });
     },
@@ -526,7 +529,7 @@ Bun.serve<WebSocketData>({
         }
       }
     },
-    close(ws, code, message) {
+    close(ws) {
       if (ws.data.kind === "admin") {
         if (ws.data.socket && hub) hub.detach(ws.data.socket);
         return;

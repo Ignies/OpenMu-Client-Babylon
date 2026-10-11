@@ -1,9 +1,9 @@
-import { readFileSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { i18n } from './index';
 import { SPANISH_ITEM_NAMES } from './itemNames';
 import { spanishLayer } from './spanish';
-import { localisedItemName, parseItemNames } from '../libs/mu/itemNameFile';
+import { localisedItemName, parseItemNames } from '../controllers/assets/mu/itemNameFile';
 
 /**
  * These names replace records of a file nothing else in the tree reads, so a
@@ -16,10 +16,12 @@ import { localisedItemName, parseItemNames } from '../libs/mu/itemNameFile';
 const GROUP_STRIDE = 512;
 const RECORDS = 8192;
 
+const PACK = new URL('../../Data/Local/Spn/item_spn.bmd', import.meta.url);
+// Data/ is not checked out everywhere (worktrees, CI without assets).
+const NO_PACK = !existsSync(PACK);
+
 const packed = () => {
-  const bytes = readFileSync(
-    new URL('../../Data/Local/Spn/item_spn.bmd', import.meta.url)
-  );
+  const bytes = readFileSync(PACK);
   return parseItemNames(new Uint8Array(bytes));
 };
 
@@ -45,7 +47,7 @@ describe('Spanish item names', () => {
     expect(bad).toEqual([]);
   });
 
-  it('changes every record it names', () => {
+  it.skipIf(NO_PACK)('changes every record it names', () => {
     const names = packed();
     const noop = Object.entries(SPANISH_ITEM_NAMES).filter(
       ([key, name]) => (names.get(code(key)) ?? '') === name
@@ -53,7 +55,7 @@ describe('Spanish item names', () => {
     expect(noop).toEqual([]);
   });
 
-  it('leaves no scroll called "Rollo"', () => {
+  it.skipIf(NO_PACK)('leaves no scroll called "Rollo"', () => {
     const names = packed();
     for (const [key, name] of Object.entries(SPANISH_ITEM_NAMES)) {
       names.set(code(key), name);

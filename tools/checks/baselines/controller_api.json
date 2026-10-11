@@ -1,0 +1,4 @@
+[
+ "src/app/logic.ts -> src/controllers/assets/mu/npcNameFile.ts",
+ "src/app/logic.ts -> src/controllers/net/protocols/chatWire.ts"
+]

@@ -1,0 +1,39 @@
+import { defineMonster } from '@/controllers/monsters';
+
+export default defineMonster({
+  Numb: 46,
+  Name: 'Vepar',
+  // Ours: one lightning2 light in each hand.
+  light: { kind: 'carried', range: 3, height: 0.8, color: 'lightning' },
+  // Its Energy Ball (17) ends with no SOUND_MAGIC (ZzzCharacter.cpp:5087-5122).
+  quietCasts: [17],
+  maxHealth: 2800,
+  model: { type: 34, scale: 1 },
+  stats: {
+    Rate: 1,
+    Level: 45,
+    HP: 2800,
+    MP: 0,
+    MinDmg: 135,
+    MaxDmg: 145,
+    Def: 70,
+    MagDef: 0,
+    AttackSuccess: 225,
+    Move: 58,
+    AttType: 3,
+    Range: 17,
+    View: 4,
+    MoveSpeed: 7,
+    AttSpeed: 400,
+    Regen: 1600,
+    Attri: 8,
+    ItemR: 2,
+    MoneyR: 185,
+    MaxI: 14,
+    ResWind: 3,
+    ResPois: 0,
+    ResIce: 2,
+    ResWater: 2,
+    ResFire: 3,
+  },
+});

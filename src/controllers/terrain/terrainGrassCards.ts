@@ -1,0 +1,170 @@
+import { RawTexture, Texture, type Scene } from '../render/babylon/exports';
+import { decodeTGA } from '@/controllers/assets/mu';
+import { fetchTerrainFile } from '../assets/prefetchWorld';
+import { hasAssetFile } from '../assets/resolveUrlToDataFolder';
+
+/**
+ * The map's grass cards (`TileGrass01/02/03.OZT`, `BITMAP_MAPGRASS + layer1`, ZzzLodTerrain.cpp:1620):
+ * a slot grows grass only if the world ships its card, and the blade takes its colour from it.
+ */
+
+/** `BITMAP_MAPGRASS + layer1` reaches these three, and no more. */
+export const GRASS_CARD_SLOTS = 3;
+
+/** Rows in the ramp, per slot. The cards are 64 tall. */
+const RAMP_ROWS = 64;
+
+/**
+ * A texel this transparent is a gap between tufts, not grass; letting it into
+ * the average pulls the whole ramp toward whatever the card's dead space
+ * happens to be.
+ */
+const ALPHA_FLOOR = 8;
+
+export type GrassCards = {
+  /** Splat layer-1 values that grow grass on this map. Empty = none. */
+  readonly slots: ReadonlySet<number>;
+  /**
+   * `GRASS_CARD_SLOTS` wide, `RAMP_ROWS` tall: the card's alpha-weighted mean
+   * colour per row, so x picks the slot and y is the height up the blade.
+   * Null when the map has no cards at all.
+   */
+  readonly ramp: Texture | null;
+};
+
+const NO_GRASS_CARDS: GrassCards = { slots: new Set(), ramp: null };
+
+/**
+ * The card reduced to one colour per row.
+ *
+ * Sampling the card directly would be closer to the original still, but a
+ * blade is one to three pixels wide and the card is mostly gaps: a strip
+ * through it lands in dead space as often as on a tuft. The alpha-weighted
+ * row mean is the colour the eye reads off that row of the card anyway, and
+ * it carries the authored root-to-tip gradient, which is the part that
+ * matters.
+ */
+function rampRows(pixels: Uint8ClampedArray, width: number, height: number) {
+  // Every source row first, with the weight that produced it.
+  const srcWeight = new Float32Array(height);
+  const src = new Float32Array(height * 3);
+
+  for (let y = 0; y < height; y++) {
+    let weight = 0;
+    let sr = 0;
+    let sg = 0;
+    let sb = 0;
+
+    for (let x = 0; x < width; x++) {
+      const i = (y * width + x) * 4;
+      const a = pixels[i + 3];
+
+      if (a < ALPHA_FLOOR) continue;
+
+      const w = a / 255;
+      weight += w;
+      sr += pixels[i] * w;
+      sg += pixels[i + 1] * w;
+      sb += pixels[i + 2] * w;
+    }
+
+    srcWeight[y] = weight;
+
+    if (weight > 0) {
+      src[y * 3] = sr / weight;
+      src[y * 3 + 1] = sg / weight;
+      src[y * 3 + 2] = sb / weight;
+    }
+  }
+
+  // The tufts do not fill the card: the top rows of every one of these
+  // textures are empty, and sampling the full height straight through gave
+  // every blade a black tip - invisible against Lorencia's dark olive grass
+  // and a black streak against Devias' snow. The blade's 0..1 is stretched
+  // over the band the art actually occupies instead.
+  let top = 0;
+  let bottom = height - 1;
+
+  while (top < height && srcWeight[top] <= 0) top++;
+  while (bottom > top && srcWeight[bottom] <= 0) bottom--;
+
+  const rows = new Float32Array(RAMP_ROWS * 3);
+
+  if (top >= height) return rows;
+
+  for (let r = 0; r < RAMP_ROWS; r++) {
+    // v = 0 is the blade's root, which is the *bottom* of the card.
+    const t = r / (RAMP_ROWS - 1);
+    const y = Math.round(bottom - t * (bottom - top));
+
+    rows[r * 3] = src[y * 3];
+    rows[r * 3 + 1] = src[y * 3 + 1];
+    rows[r * 3 + 2] = src[y * 3 + 2];
+  }
+
+  return rows;
+}
+
+/**
+ * Fetch and reduce whatever cards this world ships. A slot whose file is
+ * missing is simply absent from `slots` - the same answer the original's
+ * `FindTexture` null gives, reached the same way.
+ */
+export async function loadGrassCards(
+  scene: Scene,
+  worldNum: number
+): Promise<GrassCards> {
+  const slots = new Set<number>();
+  const bytes = new Uint8Array(GRASS_CARD_SLOTS * RAMP_ROWS * 4);
+
+  await Promise.all(
+    Array.from({ length: GRASS_CARD_SLOTS }, async (_, slot) => {
+      const name = `World${worldNum}/TileGrass0${slot + 1}.OZT`;
+      // A card the version lacks is the same "no grass here", without asking.
+      if (!hasAssetFile(name)) return;
+
+      let rows: Float32Array;
+
+      try {
+        // OZT is a TGA behind a 4-byte header, like everywhere else.
+        const file = await fetchTerrainFile(name);
+        const card = decodeTGA(name, file.slice(4));
+
+        rows = rampRows(card.pixels, card.width, card.height);
+      } catch {
+        // No card: this slot grows nothing on this map. Not an error - it is
+        // how the original says "no grass here" (Dungeon says it three times).
+        return;
+      }
+
+      slots.add(slot);
+
+      for (let r = 0; r < RAMP_ROWS; r++) {
+        const i = (r * GRASS_CARD_SLOTS + slot) * 4;
+
+        bytes[i] = rows[r * 3];
+        bytes[i + 1] = rows[r * 3 + 1];
+        bytes[i + 2] = rows[r * 3 + 2];
+        bytes[i + 3] = 255;
+      }
+    })
+  );
+
+  if (!slots.size) return NO_GRASS_CARDS;
+
+  const ramp = RawTexture.CreateRGBATexture(
+    bytes,
+    GRASS_CARD_SLOTS,
+    RAMP_ROWS,
+    scene,
+    false,
+    false,
+    Texture.BILINEAR_SAMPLINGMODE
+  );
+
+  ramp.name = 'terrainGrassRamp';
+  ramp.wrapU = Texture.CLAMP_ADDRESSMODE;
+  ramp.wrapV = Texture.CLAMP_ADDRESSMODE;
+
+  return { slots, ramp };
+}

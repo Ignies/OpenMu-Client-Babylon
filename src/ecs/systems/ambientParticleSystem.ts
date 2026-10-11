@@ -1,131 +1,46 @@
-import { isHeroUnderRoof } from './ceilingHideSystem';
-import { inBloodCastle } from '../../common/locomotion';
-import { ENUM_WORLD } from '../../common';
+import { isHeroUnderRoof } from './roofDetection';
+import { inBloodCastle } from '../../controllers/actors/locomotion';
+import type { ENUM_WORLD } from '@/core/types';
 import {
   createAmbientSystem,
   type AmbientRecipe,
   type AmbientSystem,
-} from '../../common/ambientParticles';
+} from '../../controllers/fx/ambientParticles';
 import {
   ATLANS_BUBBLES,
   ATLANS_DRIFT,
   BLOOD_CASTLE_MOTES,
   DEVIAS_SNOW,
   DEVIAS_SNOW_BIG,
-  HEARTH_DUST,
-  HOUSE_HEARTH_DUST,
-  LORENCIA_LEAVES,
-  NORIA_PETALS,
+  LEAF_RECIPES,
   RAIN,
   SNOWFALL_MAPS,
-  TAVERN_DUST,
   UNDERWATER_MAPS,
-} from '../../weather/ambientWeather';
-import { maps } from '../../maps';
-import { ambientStrengthAt } from '../../weather/ambientSchedule';
-import {
-  DEVIAS_EAST_HEARTH_HOUSE,
-  DEVIAS_READING_ROOM,
-  DEVIAS_TAVERN,
-  DEVIAS_WEST_HEARTH_HOUSE,
-  type Room,
-} from '../../maps/devias/rooms';
-import { serverNow } from '../../common/serverTime';
-import { lookDirector } from '../../lighting/director';
-import { roomMaskActive } from '../../scenes/roomMask';
-import { roomClipAvailable, setRoomWeatherClip } from '../../weather/roomClip';
-import { Vector3 } from '../../libs/babylon/exports';
-import { GameOptions } from '../../common/gameOptions';
-import { rainStrength, rainTarget } from '../../weather/rainState';
+  allDustRooms,
+  ambientLeavesFor,
+} from '../../controllers/weather/ambientWeather';
+import { maps } from '../../controllers/maps';
+import { ambientStrengthAt } from '../../controllers/weather/ambientSchedule';
+import type { Room } from '../../controllers/maps';
+import { serverNow } from '../../controllers/net/serverTime';
+import { lookDirector } from '../../controllers/lighting/director';
+import { roomMaskActive } from '@/controllers/render/scenes';
+import { roomClipAvailable, setRoomWeatherClip } from '../../controllers/weather/roomClip';
+import { Vector3 } from '../../controllers/render/babylon/exports';
+import { GameOptions } from '@/controllers/settings';
+import { rainStrength, rainTarget } from '../../controllers/weather/rainState';
 import type { ISystemFactory } from '../world';
 
 /**
- * Ambient particles: decides each frame which of the weather /
- * leaf / dust recipes should be alive for the current map, weather and
- * area, creates or disposes them to match, and drags the hero-relative
- * ones along with the hero (the original's `MoveLeaves` spawned every
- * leaf around `Hero->Object.Position`).
- *
- *  - Lorencia: falling leaves (`CreateLorenciaLeaf`). Noria takes the same
- *    numbers (`CreateAtlanseLeaf`) on its own petal; see `NORIA_PETALS`.
- *  - Atlans: marine snow drifting on the current, and bubbles rising off the
- *    seabed. The original runs Atlans through the leaf path with Lorencia's
- *    numbers (`CreateAtlanseLeaf`), but on World8's own round sprite and
- *    additive; see `ATLANS_DRIFT`.
- *  - Devias: snow (`CreateDeviasSnow`).
- *  - Blood Castle: embers drifting up around the hero
- *    (`MoveObjectOnEffect`'s `InBloodCastle` branch).
- *  - Rain on any outdoor map while `WeatherStatusUpdate` reports weather 1
- *    (the original only rained on event maps; the packet is OpenMU's way
- *    of switching it, so we honour it everywhere the sky is visible).
- *  - Lorencia tavern, Devias tavern and reading room: golden dust while the
- *    hero stands inside the room footprint (`ROOMS`, the same boxes the
- *    map modules register as `interactiveArea` entities).
- *
- * Sky weather is no longer switched off at a room's door. It keeps falling on
- * the world outside and is clipped per particle to what the room's openings
- * actually show (`weather/roomClip.ts`), which is the same rule the room mask
- * draws the rest of the frame by: from a tavern you watch the snow through
- * the doorway and none of it lands on the floor. Only a roof with no measured
- * volume behind it - Classic tier, an arch, a shed - still turns it off.
- *
- * Nothing here switches. A slot that stops being eligible - the hero ducks
- * under a roof, walks out of the tavern, the option goes off - only has its
- * emit rate *ramped* down to zero (`AmbientSystem.update`), and the recipe is
- * not disposed until the last particle it emitted has died. Becoming eligible
- * is the same in reverse: the system is created at rate zero and thickens up.
- * Disposing a live emitter is a pop - every leaf in the air vanishes in one
- * frame - so it is kept for the one case where the particles belong to a world
- * we are no longer standing in: a map change.
- *
- * Eligibility (map / area / option) only says a recipe *may* run. A recipe
- * carrying a `schedule` then asks the shared clock how hard it blows right
- * now (`ambientSchedule.ts`): leaves and snow come in gusts and squalls with
- * calm in between, rolled from `serverNow()` so every client on the map sees
- * the same weather at the same second. Rain is left unscheduled - the server
- * already drives it through `WeatherStatusUpdate` - and so is interior dust,
- * which is a property of the room rather than of the weather.
+ * Ambient particles per map, weather and room (the original's `MoveLeaves`,
+ * `CreateLorenciaLeaf`, `CreateDeviasSnow`). See ecs/readme.md.
  */
-
-/** Weather byte that means rain (assumed - see the weather notes). */
-
 
 // Maps with a sky (rain may fall) are declared per map as `MapLayer.outdoor`
 // and read through `maps.isOutdoor(map)`.
 
-/**
- * What falls out of the sky on the two maps that shed anything, each on its
- * own `<WorldName>/leaf01` (MapManager.cpp:1474-1476): Lorencia's dandelion
- * puffs, Noria's pink petals.
- */
-const LEAF_RECIPES: readonly { map: ENUM_WORLD; recipe: AmbientRecipe }[] = [
-  { map: ENUM_WORLD.WD_0LORENCIA, recipe: LORENCIA_LEAVES },
-  { map: ENUM_WORLD.WD_3NORIA, recipe: NORIA_PETALS },
-];
-
-/** Lorencia pub floor, matching the interactive area in loadMapIntoScene. */
-const LORENCIA_TAVERN: Room = {
-  min: { x: 120, y: 120 },
-  max: { x: 129, y: 136 },
-  centre: { x: 124.5, z: 128 },
-};
-
-/** Dust rooms: the recipe runs while the hero stands inside the footprint. */
-const ROOMS: { map: ENUM_WORLD; room: Room; recipe: AmbientRecipe }[] = [
-  { map: ENUM_WORLD.WD_0LORENCIA, room: LORENCIA_TAVERN, recipe: TAVERN_DUST },
-  { map: ENUM_WORLD.WD_2DEVIAS, room: DEVIAS_TAVERN, recipe: HEARTH_DUST },
-  { map: ENUM_WORLD.WD_2DEVIAS, room: DEVIAS_READING_ROOM, recipe: TAVERN_DUST },
-  {
-    map: ENUM_WORLD.WD_2DEVIAS,
-    room: DEVIAS_WEST_HEARTH_HOUSE,
-    recipe: HOUSE_HEARTH_DUST,
-  },
-  {
-    map: ENUM_WORLD.WD_2DEVIAS,
-    room: DEVIAS_EAST_HEARTH_HOUSE,
-    recipe: HOUSE_HEARTH_DUST,
-  },
-];
+// What the air carries (`MapWeather.leaves`, read through `ambientLeavesFor`) and the dust rooms
+// (`MapWeather.dust`, `allDustRooms`) are each map's own rows.
 
 type Slot = {
   recipe: AmbientRecipe;
@@ -150,11 +65,11 @@ export const AmbientParticleSystem: ISystemFactory = world => {
 
   const slots: Slot[] = [
     ...LEAF_RECIPES.map(
-      ({ map: leafMap, recipe }): Slot => ({
+      (recipe): Slot => ({
         recipe,
         followHero: true,
         active: (map, indoors) =>
-          GameOptions.ambientParticles && !indoors && map === leafMap,
+          GameOptions.ambientParticles && !indoors && ambientLeavesFor(map) === recipe,
       })
     ),
     // Atlans, and any other map declaring `MapLayer.underwater`. Both run
@@ -206,8 +121,8 @@ export const AmbientParticleSystem: ISystemFactory = world => {
         (rainTarget(map) > 0 || rainStrength() > 0),
       strength: () => rainStrength(),
     },
-    ...ROOMS.map(
-      ({ map, room, recipe }): Slot => ({
+    ...allDustRooms().map(
+      ({ world: map, room, recipe }): Slot => ({
         recipe,
         followHero: false,
         room,
@@ -279,7 +194,7 @@ export const AmbientParticleSystem: ISystemFactory = world => {
       const tavern = inTavern();
 
       // A room the mask is drawing keeps its own weather out, per particle
-      // (weather/roomClip.ts), so the shower goes on falling in the world
+      // (controllers/weather/roomClip.ts), so the shower goes on falling in the world
       // outside and is seen through the doorway. Without one - Classic tier,
       // or a roof nobody measured a volume for - there is nothing to clip
       // against and the old rule stands: under a roof, no sky weather.
@@ -290,7 +205,7 @@ export const AmbientParticleSystem: ISystemFactory = world => {
       const camera = scene.activeCamera?.globalPosition;
       setRoomWeatherClip(room, camera ?? ORIGIN);
 
-      // A ceiling hidden by CeilingHideSystem still keeps the weather out.
+      // A roof over the hero keeps the weather out (roofDetection.ts), faded or not.
       const indoors = (tavern || isHeroUnderRoof()) && room === null;
 
       heroPos.copyFrom(hero.transform.pos as Vector3);

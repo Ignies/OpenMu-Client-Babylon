@@ -20,20 +20,21 @@
  * Camera: `LoginScene.cpp:61` `WALK_PATHS`, driven by `MoveCamera` (:241)
  * through `MoveCharacterCamera(origin 0,0,0, position, angle)` at FOV 45.
  */
-import type { ArcRotateCamera } from '../../../../src/libs/babylon/exports';
-import { Texture, Vector3 } from '../../../../src/libs/babylon/exports';
-import { ModelObject } from '../../../../src/common/modelObject';
-import { loadGLTF } from '../../../../src/common/modelLoader';
-import { toRadians } from '../../../../src/common/utils';
-import type { World } from '../../../../src/ecs/world';
+import type { ArcRotateCamera } from '@/controllers/render/babylon/exports';
+import { Texture, Vector3 } from '@/controllers/render/babylon/exports';
+import { ModelObject } from '@/controllers/render/modelObject';
+import { loadGLTF } from '@/controllers/assets/modelLoader';
+import { toRadians } from '@/controllers/assets/download';
+import { reportLoadFailure } from '@/controllers/assets';
+import type { World } from '@/ecs/world';
 import type {
   PregamePhase,
   PregameScene,
-} from '../../../../src/version/uiContract';
+} from '@/version/uiContract';
 
 const MU_SCALE = 100;
 
-/** MU is Z-up, Babylon Y-up (`common/characterSelect.ts`). */
+/** MU is Z-up, Babylon Y-up (`modules/character_select/characterSelect.ts`). */
 function fromMu(x: number, y: number, z: number): Vector3 {
   return new Vector3(x / MU_SCALE, z / MU_SCALE, y / MU_SCALE);
 }
@@ -211,7 +212,7 @@ export function createShipScene(world: World): PregameScene {
 
         if (texture) scrolling.push(texture);
       }
-    });
+    }).catch(reportLoadFailure(piece.file));
   }
 
   const target = new Vector3(0, 0, 0);

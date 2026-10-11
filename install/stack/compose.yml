@@ -1,0 +1,131 @@
+# Layered over OpenMU's own deploy/all-in-one/docker-compose.yml (the installer passes both, OpenMU's first).
+# Run through `mu`, which renders ${MU_STATE} first: see install/readme.md. Names and ports mirror install/cli/stack.ts.
+name: mu
+
+x-service: &service
+  image: mu-services:local
+  pull_policy: never
+  restart: unless-stopped
+  volumes:
+    - data:/data
+
+services:
+  # OpenMU's services, adjusted: our password, nothing published, no nginx (Caddy serves and guards everything).
+  database:
+    container_name: mu-database
+    # OpenMU's compose says `postgres` (latest, 18 today); pinned so a new major never meets an old data folder.
+    image: postgres:18
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports: !reset []
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d openmu"]
+      interval: 5s
+      retries: 30
+
+  openmu-startup:
+    container_name: mu-openmu
+    image: mu-openmu:local
+    pull_policy: never
+    build:
+      context: ${MU_REPO}/openmu
+      args:
+        OPENMU_IMAGE: ${OPENMU_IMAGE}
+    restart: unless-stopped
+    env_file: ${MU_STATE}/env/openmu.env
+    ports: !reset []
+    # Replaces OpenMU's .htpasswd mount: Caddy guards the admin panel instead of nginx.
+    volumes: !override
+      - openmu-logs:/app/logs
+    depends_on:
+      database: { condition: service_healthy }
+
+  nginx-80:
+    profiles: [openmu-nginx]
+
+  # Shares OpenMU's network namespace, so the client's 127.0.0.1:44405 / :55901+ targets reach it unchanged.
+  proxy:
+    <<: *service
+    build:
+      context: ${MU_REPO}
+      dockerfile: install/stack/services.Dockerfile
+    pull_policy: never
+    command: ["bun", "proxy/main.ts"]
+    env_file: ${MU_STATE}/env/proxy.env
+    network_mode: service:openmu-startup
+    depends_on: [openmu-startup]
+
+  register:
+    <<: *service
+    command: ["bun", "register/server/main.ts"]
+    env_file: ${MU_STATE}/env/register.env
+    depends_on:
+      database: { condition: service_healthy }
+      proxy: { condition: service_started }
+
+  cashshop:
+    <<: *service
+    command: ["bun", "cashshop/server/main.ts"]
+    env_file: ${MU_STATE}/env/cashshop.env
+    depends_on:
+      database: { condition: service_healthy }
+      proxy: { condition: service_started }
+
+  marketplace:
+    <<: *service
+    command: ["bun", "marketplace/server/main.ts"]
+    env_file: ${MU_STATE}/env/marketplace.env
+    depends_on:
+      database: { condition: service_healthy }
+      proxy: { condition: service_started }
+
+  ops:
+    <<: *service
+    command: ["bun", "ops/server/opsCli.ts", "follow"]
+    env_file: ${MU_STATE}/env/ops.env
+    volumes:
+      - data:/data
+      - openmu-logs:/openmu-logs:ro
+    depends_on: [proxy]
+
+  web:
+    image: mu-web:local
+    pull_policy: never
+    build:
+      context: ${MU_REPO}
+      dockerfile: install/stack/web.Dockerfile
+      args:
+        VITE_WS_HOST: ${VITE_WS_HOST}
+        VITE_WS_PORT: ${VITE_WS_PORT}
+        VITE_SERVER_LIST_URL: ${VITE_SERVER_LIST_URL}
+        VITE_REGISTER_URL: ${VITE_REGISTER_URL}
+        VITE_REGISTER_API: ${VITE_REGISTER_API}
+        VITE_DATA_URL_REGISTER: ${VITE_DATA_URL_REGISTER}
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - caddy-data:/data
+      - caddy-config:/config
+      - ${MU_STATE}/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ${MU_STATE}/serverlist.md:/srv/client/serverlist.md:ro
+      - ${MU_STATE}/server.json:/srv/client/server.json:ro
+    depends_on: [proxy, register, cashshop, marketplace]
+    networks:
+      default:
+        ipv4_address: 172.30.77.10
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 172.30.77.0/24
+
+volumes:
+  data:
+  openmu-logs:
+  caddy-data:
+  caddy-config:

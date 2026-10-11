@@ -1,8 +1,9 @@
 import type { ISystemFactory } from '../world';
-import { Store, UIState } from '../../store';
-import { EventBus } from '../../libs/eventBus';
-import { isStaged, sceneHeld } from '../../common/sceneGate';
-import { packRepaintsPending } from '../../common/texturePacks';
+import { Loading } from '../../controllers/loading';
+import { AppState, UIState } from '../../controllers/interface/uiState';
+import { EventBus } from '../../core/eventBus';
+import { isStaged, sceneHeld } from '../../controllers/loading/sceneGate';
+import { packRepaintsPending } from '../../controllers/assets/texturePacks';
 
 const READY_GRACE_SECONDS = 3;
 
@@ -43,7 +44,7 @@ export const SceneReadySystem: ISystemFactory = world => {
 
   const report = (value: number) => {
     reported = Math.max(reported, Math.min(value, MAX_REPORTED));
-    Store.setLoadingProgress(reported);
+    Loading.setLoadingProgress(reported);
   };
 
   EventBus.on('warpCompleted', () => {
@@ -67,7 +68,7 @@ export const SceneReadySystem: ISystemFactory = world => {
   const actorsStaged = () => {
     if (sceneHeld()) return false;
 
-    if (Store.uiState === UIState.World && !isStaged(world.playerEntity)) {
+    if (AppState.uiState === UIState.World && !isStaged(world.playerEntity)) {
       return false;
     }
 
@@ -75,8 +76,8 @@ export const SceneReadySystem: ISystemFactory = world => {
   };
 
   const finish = () => {
-    Store.setLoadingProgress(1);
-    Store.setSceneLoading(false);
+    Loading.setLoadingProgress(1);
+    Loading.setSceneLoading(false);
     readyWait = 0;
     stageWait = 0;
     waited = 0;
@@ -85,7 +86,7 @@ export const SceneReadySystem: ISystemFactory = world => {
 
   return {
     update: (deltaTime: number) => {
-      if (!Store.sceneLoading) {
+      if (!Loading.sceneLoading) {
         waited = 0;
         readyWait = 0;
         stageWait = 0;

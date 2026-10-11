@@ -1,5 +1,5 @@
 import type { ISystemFactory } from '../world';
-import { Vector3 } from '../../libs/babylon/exports';
+import { Vector3 } from '../../controllers/render/babylon/exports';
 
 const v3Temp = Vector3.Zero();
 

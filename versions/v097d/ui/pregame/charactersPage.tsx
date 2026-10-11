@@ -5,22 +5,21 @@
  * Deferred, and stated in the PR: the 3D actors on the deck, and character
  * creation. The actors need `world.terrain`, which a set-piece backdrop does
  * not have (`RenderSystem` and `ModelLoaderSystem` both bail on it), so the
- * roster is the list rather than five figures to click; creation is the
- * `Card01..04` / `Face01..04` carousel, a screen of its own.
+ * roster is the shared `CharacterList` drawn as rows rather than five figures
+ * to click; creation is the `Card01..04` / `Face01..04` carousel, a screen of
+ * its own.
  */
 import { observer } from 'mobx-react-lite';
-import { useEffect, useState } from 'react';
-import { runInAction } from 'mobx';
-import { t } from '../../../../src/i18n';
-import { uiClick } from '../../../../src/libs/sfx';
-import { Store } from '../../../../src/store';
-import { useEventBus } from '../../../../src/hooks/useEventBus';
+import { useState } from 'react';
+import { t } from '@/i18n';
+import { CharSelect } from '@/modules/character_select';
 import {
-  CharacterFocusedPacket,
-  CharacterListPacket,
-} from '../../../../src/common/packets/ServerToClientPackets';
-import { MuSpriteFrame } from '../../../../src/ui/components/muSprite';
-import { MuButton } from '../../../../src/ui/components/muButton';
+  CharacterList,
+  listStatus,
+  selectedCharacter,
+} from '../../../shared/ui/pages/character_select/character_list';
+import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
+import { MuButton } from '@/controllers/interface/components/mu_button';
 import './style.less';
 
 const PLATE = { file: 'Data/Logo/0New_Account01.OZT', width: 256, height: 256 };
@@ -49,26 +48,15 @@ export const V097dCharactersPage = observer(() => {
   const [deleting, setDeleting] = useState(false);
   const [code, setCode] = useState('');
 
-  useEffect(() => {
-    Store.refreshCharactersListRequest();
-  }, []);
-
-  useEventBus('CharacterList', bytes => {
-    const p = new CharacterListPacket(bytes);
-    const characters = p.getCharacters();
-
-    runInAction(() => {
-      Store.loadingCharactersList = false;
-      Store.charactersList = characters;
-      Store.creationUnlockFlags = p.UnlockFlags;
-    });
-  });
-
-  useEventBus('CharacterFocused', bytes => {
-    Store.focusedChar = new CharacterFocusedPacket(bytes).CharacterName;
-  });
-
-  const selected = Store.charactersList.find(c => c.Name === Store.focusedChar);
+  const selected = selectedCharacter(CharSelect.charactersList, CharSelect.focusedChar);
+  const status = listStatus(
+    {
+      loading: CharSelect.loadingCharactersList,
+      count: CharSelect.charactersList.length,
+      selected: !!selected,
+    },
+    'empty'
+  );
 
   return (
     <div className="v097d-characters-page">
@@ -78,41 +66,15 @@ export const V097dCharactersPage = observer(() => {
           width={PLATE.width}
           height={PLATE.height}
         >
-          {Store.loadingCharactersList && (
+          {status === 'loading' && (
             <p className="v097d-characters-note">{t('characters.loading')}</p>
           )}
 
-          {!Store.loadingCharactersList &&
-            Store.charactersList.length === 0 && (
-              <p className="v097d-characters-note">{t('characters.select')}</p>
-            )}
+          {status === 'select' && (
+            <p className="v097d-characters-note">{t('characters.select')}</p>
+          )}
 
-          {Store.charactersList.map((character, index) => (
-            <button
-              key={character.Name}
-              type="button"
-              className={
-                character.Name === Store.focusedChar
-                  ? 'v097d-characters-row is-selected'
-                  : 'v097d-characters-row'
-              }
-              style={{
-                left: ROW.x,
-                top: ROW.y + index * ROW.height,
-                width: ROW.width,
-                height: ROW.height,
-              }}
-              onClick={uiClick(() => {
-                Store.focusedChar = character.Name;
-                Store.focusCharacterRequest(character.Name);
-              })}
-            >
-              <span>{character.Name}</span>
-              <span className="v097d-characters-level">
-                {`Lv ${character.Level}`}
-              </span>
-            </button>
-          ))}
+          <CharacterList source={CharSelect} look="rows" row={ROW} />
 
           {deleting && (
             <MuSpriteFrame
@@ -149,7 +111,7 @@ export const V097dCharactersPage = observer(() => {
           activeColor={ACTIVE_COLOR}
           disabled={!selected}
           onClick={() => {
-            if (selected) Store.selectCharacterRequest(selected.Name);
+            if (selected) CharSelect.selectCharacterRequest(selected.Name);
           }}
           style={{ position: 'absolute', left: CONNECT.x, top: CONNECT.y }}
         />
@@ -171,7 +133,7 @@ export const V097dCharactersPage = observer(() => {
               return;
             }
 
-            Store.deleteCharacterRequest(selected.Name, code);
+            CharSelect.deleteCharacterRequest(selected.Name, code);
             setDeleting(false);
             setCode('');
           }}

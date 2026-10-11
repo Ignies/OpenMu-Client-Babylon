@@ -86,7 +86,7 @@ const FOLDERS: Record<string, string> = {
   bul: 'Bul', chi: 'Chi', jpn: 'Jpn', kor: 'Kor', tha: 'Tha', pol: 'Pol', vie: 'Vie',
 };
 
-export function readOzt(path: string): Image {
+function readOzt(path: string): Image {
   const t = new Uint8Array(readFileSync(path)).subarray(OZT_HEADER);
   const head = new DataView(t.buffer, t.byteOffset, TGA_HEADER);
   const w = head.getUint16(12, true);
@@ -108,7 +108,7 @@ export function readOzt(path: string): Image {
   return { w, h, rgba };
 }
 
-export function writeOzt(path: string, { w, h, rgba }: Image): void {
+function writeOzt(path: string, { w, h, rgba }: Image): void {
   const out = new Uint8Array(OZT_HEADER + TGA_HEADER + w * h * 4 + TGA_FOOTER);
   const t = out.subarray(OZT_HEADER);
   const head = new DataView(t.buffer, t.byteOffset, TGA_HEADER);
@@ -190,7 +190,7 @@ type Job = {
  */
 const ROSE = 'MapNameAddStrife.OZT';
 
-export function buildBanners(only: string | null): void {
+function buildBanners(only: string | null): void {
   const banners = JSON.parse(
     readFileSync(resolve(HERE, 'packs', 'banners.json'), 'utf8')
   ) as Record<string, Record<string, string>>;

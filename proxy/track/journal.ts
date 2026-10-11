@@ -1,4 +1,4 @@
-import type { LogQuery, TrackEvent } from '../../src/common/adminProtocol';
+import type { LogQuery, TrackEvent } from '../../src/controllers/net/protocols/adminProtocol';
 
 /**
  * Where journal lines go and come back from. The SQLite one (`store.ts`)
@@ -12,8 +12,8 @@ export interface Journal {
   close(): void;
 }
 
-export const DEFAULT_LOG_LIMIT = 100;
-export const MAX_LOG_LIMIT = 500;
+const DEFAULT_LOG_LIMIT = 100;
+const MAX_LOG_LIMIT = 500;
 
 export function clampLimit(limit: number | undefined): number {
   if (!limit || !Number.isFinite(limit)) return DEFAULT_LOG_LIMIT;

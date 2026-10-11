@@ -1,42 +1,49 @@
-// Builds `assets-index.json`: what the pre-download screen offers, and what
-// each group costs.
+// Builds the pre-download indexes: what the screen offers, and what each group
+// costs. One per game version, named after its converted tree
+// (`assetsIndexUrl`): `assets-index.json` for Season 6, `assets-index-v097d.json`
+// for 0.97d.
 //
 //   bun run tools/assetsIndex.ts                 (over dist/, after the build)
-//   bun run tools/assetsIndex.ts --root dist --out dist/assets-index.json
+//   bun run tools/assetsIndex.ts --root dist
 //
 // Runs LAST in the build, after `compress-assets`, because the number that
 // matters to a player is what crosses the wire and that is the `.gz` sidecar
 // wherever one exists. A GLB is 329 MB on disk and 93 MB gzipped; quoting the
 // disk size would talk people out of the cheapest group in the game.
 //
-// The map groups come from `src/maps/layers.ts` rather than from a list here,
-// so there is one owner of "which asset folder does this map use" - the event
-// castles all share a folder (`worldAssets.ts`), and a second copy of that
-// rule here would rot.
+// The map groups come from `versions/shared/maps/layers.ts` rather than from a
+// list here, so there is one owner of "which asset folder does this map use" -
+// the event castles all share a folder (`worldAssets.ts`), and a second copy of
+// that rule here would rot.
+//
+// A version that borrows (`data.borrows`, 0.97d) lists each file at the url it
+// reads it from: its own file where it ships one, the lender's otherwise, never
+// both, and nothing it lacks; nor the lender's sound for a key it plays its own
+// file for (`data.sounds`). The resolvers are the client's own (`assetUrl`,
+// `dataUrl`), so the index cannot disagree with what the game asks for. Its map
+// groups are its own worlds (`data.worlds`), not every one the lender holds.
 
 import { existsSync, readdirSync, statSync, writeFileSync } from 'fs';
 import { join, relative, resolve, sep } from 'path';
-import { COMPRESSED_EXTENSIONS, COMPRESSED_SUFFIX } from '../src/common/compressedAssets';
-import { MAP_LAYERS } from '../src/maps/layers';
+import { COMPRESSED_EXTENSIONS, COMPRESSED_SUFFIX } from '../src/controllers/assets/compressedAssets';
+import { dataUrl } from '../src/controllers/assets/mu/dataFolder';
+import { assetsIndexUrl, assetUrl } from '../src/controllers/assets/resolveUrlToDataFolder';
+import { SOUND_FILES } from '../src/controllers/sound/recipes';
+import type { VersionData } from '../src/version/contract';
+import { season6Data } from '../versions/season6/data';
+import { MAP_LAYERS } from '../versions/shared/maps/layers';
+import { v097dData } from '../versions/v097d/data';
 
-function arg(name: string, fallback: string): string {
-  const i = process.argv.indexOf(name);
-  return i >= 0 && process.argv[i + 1] ? process.argv[i + 1] : fallback;
-}
-
-const ROOT = resolve(import.meta.dir, '..');
-const TREE = resolve(ROOT, arg('--root', 'dist'));
-const OUT = resolve(ROOT, arg('--out', join(arg('--root', 'dist'), 'assets-index.json')));
-
-if (!existsSync(TREE)) {
-  console.error(`assetsIndex: ${TREE} does not exist; run the build first`);
-  process.exit(1);
-}
+/** Every version the client carries (`versions/registry.ts`), each with its own index. */
+export const INDEXED_VERSIONS: readonly { id: string; data: VersionData }[] = [
+  { id: 'season6', data: season6Data },
+  { id: 'v097d', data: v097dData },
+];
 
 const slash = (p: string) => p.split(sep).join('/');
 
 type Entry = { name: string; bytes: number; gz: number | null };
-type Group = {
+export type Group = {
   id: string;
   /** `core` is never optional; the rest the player chooses. */
   kind: 'core' | 'monsters' | 'audio' | 'icons' | 'map';
@@ -50,15 +57,22 @@ type Group = {
   dirs: [string, [string, number][]][];
 };
 
+/** A served tree under the build root: converted assets, an original `Data/`, or the item icons. */
+type Tree = { url: string; kind: 'assets' | 'data' | 'items'; reads: (rel: string) => string };
+
+/** The folder under the build root a tree url names (`./game-assets/`), or null for another origin. */
+function folderOf(url: string): string | null {
+  return /^[a-z]+:/i.test(url) ? null : url.replace(/^\.?\/+/, '').replace(/\/+$/, '');
+}
+
 /** Files that exist in the tree but the client never asks for. */
-function ignored(rel: string): boolean {
+function ignored(tree: Tree, rel: string): boolean {
   const lower = rel.toLowerCase();
   if (lower.endsWith(COMPRESSED_SUFFIX)) return true; // counted with its source
-  if (lower.endsWith('assets-index.json')) return true;
+  if (/assets-index[^/]*\.json$/.test(lower)) return true;
   // The converter leaves the intermediate images beside the GLBs it baked
   // them into; nothing loads them.
-  if (/^game-assets\/.*\.(jpg|jpeg|tga)$/.test(lower)) return true;
-  return false;
+  return tree.kind === 'assets' && /\.(jpg|jpeg|tga)$/.test(lower);
 }
 
 function walk(dir: string): string[] {
@@ -100,116 +114,152 @@ const pretty = (name: string) => name.charAt(0).toUpperCase() + name.slice(1);
 
 const CORE_FOLDERS = new Set(['Player', 'Item', 'NPC', 'Effect', 'Skill', 'Instrument', 'Logo']);
 
-/** Which group a tree-relative path belongs to, or null to leave it out. */
-function groupOf(rel: string): { id: string; kind: Group['kind']; world?: number } | null {
-  const parts = rel.split('/');
+/** Which group a tree-relative path belongs to. */
+function groupOf(tree: Tree, rel: string): { id: string; kind: Group['kind']; world?: number } {
+  if (tree.kind === 'items') return { id: 'icons', kind: 'icons' };
 
-  if (parts[0] === 'items') return { id: 'icons', kind: 'icons' };
-
-  if (parts[0] === 'game-assets') {
-    const folder = parts[1] ?? '';
+  const folder = rel.split('/')[0];
+  if (tree.kind === 'assets') {
     if (folder === 'Music' || folder === 'Sound') return { id: 'audio', kind: 'audio' };
     if (folder === 'Monster') return { id: 'monsters', kind: 'monsters' };
     if (CORE_FOLDERS.has(folder)) return { id: 'core', kind: 'core' };
-    const world = /^(?:World|Object)(\d+)$/.exec(folder);
+    const world = /^(?:World|Object)(\d+)$/i.exec(folder);
     if (world) return { id: `map:${world[1]}`, kind: 'map', world: Number(world[1]) };
     return { id: 'core', kind: 'core' };
   }
 
-  if (parts[0] === 'Data') {
-    // A map's minimap lives in the original tree, not the converted one.
-    const world = /^World(\d+)$/.exec(parts[1] ?? '');
-    if (world) return { id: `map:${world[1]}`, kind: 'map', world: Number(world[1]) };
-    return { id: 'core', kind: 'core' };
-  }
-
-  // packs/ is offered through the pack picker, which already has its sizes.
-  return null;
+  // A map's minimap lives in the original tree, not the converted one. A folder is a
+  // world in any case: the original reads them on Windows (Data/world55 is World55).
+  const world = /^World(\d+)$/i.exec(folder);
+  if (world) return { id: `map:${world[1]}`, kind: 'map', world: Number(world[1]) };
+  return { id: 'core', kind: 'core' };
 }
 
-const groups = new Map<string, Group>();
-
-function nameFor(id: string, kind: Group['kind'], world?: number): string {
+function nameFor(kind: Group['kind'], world?: number): string {
   if (kind === 'map') {
     const names = worldNames.get(world!) ?? [];
     return names.length ? names.map(pretty).join(' / ') : `World ${world}`;
   }
-  return { core: 'Core', monsters: 'Monsters', audio: 'Music and sounds', icons: 'Item icons' }[
-    kind
-  ]!;
+  return { core: 'Core', monsters: 'Monsters', audio: 'Music and sounds', icons: 'Item icons' }[kind]!;
 }
 
-let skipped = 0;
+const soundFile = (file: string) => file.replace(/^[./]+/, '').toLowerCase();
 
-for (const top of ['game-assets', 'items', 'Data']) {
-  const base = join(TREE, top);
-  for (const abs of walk(base)) {
-    const rel = slash(relative(TREE, abs));
-    if (ignored(rel)) continue;
+/** Catalogue files a version never plays: every key that named them plays its own file (`data.sounds`). */
+function replacedSounds(data: VersionData): Set<string> {
+  const own = data.sounds ?? {};
+  const played = new Set([
+    ...Object.entries(SOUND_FILES).filter(([key]) => !own[key]).map(([, file]) => soundFile(file)),
+    ...Object.values(own).map(soundFile),
+  ]);
+  return new Set(Object.keys(own).flatMap(key => (SOUND_FILES[key] ? [soundFile(SOUND_FILES[key])] : [])).filter(f => !played.has(f)));
+}
 
-    const where = groupOf(rel);
-    if (!where) {
-      skipped++;
+/** The trees a version reads (its own, then the ones it borrows from), in walking order. */
+function treesOf(data: VersionData): Tree[] {
+  const trees: Tree[] = [];
+  const replaced = replacedSounds(data);
+  for (const url of [data.assets, data.borrows?.assets]) {
+    if (url) trees.push({ url, kind: 'assets', reads: rel => (replaced.has(rel.toLowerCase()) ? '' : assetUrl(data, rel)) });
+  }
+  // packs/ is offered through the pack picker, which already has its sizes.
+  trees.push({ url: './items/', kind: 'items', reads: rel => `./items/${rel}` });
+  for (const url of [data.folder, data.borrows?.folder]) {
+    if (url) trees.push({ url, kind: 'data', reads: rel => dataUrl(data, rel) });
+  }
+  return trees;
+}
+
+/** One version's index over a built tree (`dist/`). */
+export function buildAssetsIndex(root: string, data: VersionData): { sidecars: boolean; groups: Group[] } {
+  const groups = new Map<string, Group>();
+  const worlds = new Set(data.worlds);
+
+  for (const tree of treesOf(data)) {
+    const folder = folderOf(tree.url);
+    if (folder === null) continue;
+
+    for (const abs of walk(join(root, folder))) {
+      const rel = slash(relative(join(root, folder), abs));
+      // Kept only where the version reads it from this very tree.
+      if (ignored(tree, rel) || tree.reads(rel) !== tree.url + rel) continue;
+
+      const where = groupOf(tree, rel);
+      // A world the version does not have (`data.worlds`), though a lender's tree holds it.
+      if (where.world !== undefined && !worlds.has(where.world)) continue;
+      let group = groups.get(where.id);
+      if (!group) {
+        group = {
+          id: where.id,
+          kind: where.kind,
+          name: nameFor(where.kind, where.world),
+          world: where.world,
+          files: 0,
+          bytes: 0,
+          transfer: 0,
+          dirs: [],
+        };
+        groups.set(where.id, group);
+      }
+
+      const entry = measure(abs, rel);
+      const dir = `./${folder}/${rel.slice(0, rel.length - entry.name.length)}`;
+      let bucket = group.dirs.find(d => d[0] === dir);
+      if (!bucket) {
+        bucket = [dir, []];
+        group.dirs.push(bucket);
+      }
+      bucket[1].push([entry.name, entry.bytes]);
+      group.files++;
+      group.bytes += entry.bytes;
+      group.transfer += entry.gz ?? entry.bytes;
+    }
+  }
+
+  const ordered = [...groups.values()].sort((a, b) => {
+    const rank = (g: Group) => ['core', 'monsters', 'audio', 'icons', 'map'].indexOf(g.kind);
+    return rank(a) - rank(b) || (a.world ?? 0) - (b.world ?? 0);
+  });
+  for (const g of ordered) g.dirs.sort((a, b) => a[0].localeCompare(b[0]));
+
+  // Whether this deployment ships gzip sidecars. The client still reads its
+  // own latch; this is so the screen can quote the right total before any
+  // asset has been read.
+  return { sidecars: ordered.some(g => g.transfer < g.bytes), groups: ordered };
+}
+
+function main(): void {
+  const i = process.argv.indexOf('--root');
+  const ROOT = resolve(import.meta.dir, '..');
+  const TREE = resolve(ROOT, i >= 0 && process.argv[i + 1] ? process.argv[i + 1] : 'dist');
+
+  if (!existsSync(TREE)) {
+    console.error(`assetsIndex: ${TREE} does not exist; run the build first`);
+    process.exit(1);
+  }
+
+  const mb = (n: number) => `${(n / 1048576).toFixed(1)} MB`;
+  for (const { id, data } of INDEXED_VERSIONS) {
+    const file = folderOf(assetsIndexUrl(data));
+    if (file === null) {
+      console.log(`assetsIndex: ${id} serves its assets from another origin; no index`);
       continue;
     }
 
-    let group = groups.get(where.id);
-    if (!group) {
-      group = {
-        id: where.id,
-        kind: where.kind,
-        name: nameFor(where.id, where.kind, where.world),
-        world: where.world,
-        files: 0,
-        bytes: 0,
-        transfer: 0,
-        dirs: [],
-      };
-      groups.set(where.id, group);
-    }
+    const { sidecars, groups } = buildAssetsIndex(TREE, data);
+    const out = join(TREE, file);
+    writeFileSync(out, JSON.stringify({ built: new Date().toISOString(), sidecars, groups }));
 
-    const entry = measure(abs, rel);
-    const dir = './' + rel.slice(0, rel.length - entry.name.length);
-    let bucket = group.dirs.find(d => d[0] === dir);
-    if (!bucket) {
-      bucket = [dir, []];
-      group.dirs.push(bucket);
+    console.log(`assetsIndex: ${id} over ${TREE}${sidecars ? '' : '  (no gzip sidecars found)'}`);
+    for (const g of groups) {
+      console.log(
+        `  ${g.id.padEnd(12)} ${String(g.files).padStart(5)} files  ${mb(g.bytes).padStart(9)} on disk  ${mb(g.transfer).padStart(9)} over the wire   ${g.name}`
+      );
     }
-    bucket[1].push([entry.name, entry.bytes]);
-    group.files++;
-    group.bytes += entry.bytes;
-    group.transfer += entry.gz ?? entry.bytes;
+    const total = groups.reduce((n, g) => n + g.transfer, 0);
+    console.log(`  ${''.padEnd(12)} ${String(groups.reduce((n, g) => n + g.files, 0)).padStart(5)} files  ${''.padStart(9)}          ${mb(total).padStart(9)} total`);
+    console.log(`wrote ${slash(relative(ROOT, out))}`);
   }
 }
 
-const sidecars = [...groups.values()].some(g => g.transfer < g.bytes);
-
-const ordered = [...groups.values()].sort((a, b) => {
-  const rank = (g: Group) => ['core', 'monsters', 'audio', 'icons', 'map'].indexOf(g.kind);
-  return rank(a) - rank(b) || (a.world ?? 0) - (b.world ?? 0);
-});
-for (const g of ordered) g.dirs.sort((a, b) => a[0].localeCompare(b[0]));
-
-writeFileSync(
-  OUT,
-  JSON.stringify({
-    built: new Date().toISOString(),
-    // Whether this deployment ships gzip sidecars. The client still reads its
-    // own latch; this is so the screen can quote the right total before any
-    // asset has been read.
-    sidecars,
-    groups: ordered,
-  })
-);
-
-const mb = (n: number) => `${(n / 1048576).toFixed(1)} MB`;
-console.log(`assetsIndex: ${TREE}${sidecars ? '' : '  (no gzip sidecars found)'}`);
-for (const g of ordered) {
-  console.log(
-    `  ${g.id.padEnd(12)} ${String(g.files).padStart(5)} files  ${mb(g.bytes).padStart(9)} on disk  ${mb(g.transfer).padStart(9)} over the wire   ${g.name}`
-  );
-}
-const total = ordered.reduce((n, g) => n + g.transfer, 0);
-console.log(`  ${''.padEnd(12)} ${String(ordered.reduce((n, g) => n + g.files, 0)).padStart(5)} files  ${''.padStart(9)}          ${mb(total).padStart(9)} total`);
-if (skipped) console.log(`  (${skipped} files outside any group)`);
-console.log(`wrote ${slash(relative(ROOT, OUT))}`);
+if (import.meta.main) main();

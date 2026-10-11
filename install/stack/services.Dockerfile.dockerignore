@@ -1,0 +1,15 @@
+**
+!package.json
+!bun.lock
+!tsconfig.json
+!src/**
+!versions/**
+!proxy/**
+!register/server/**
+!cashshop/server/**
+!marketplace/server/**
+!ops/server/**
+!tools/sqliteMigrate.ts
+!tools/sqliteBackup.ts
+**/*.test.ts
+**/node_modules

@@ -4,36 +4,20 @@ import {
   Vector3,
   type Observer,
   type Scene,
-} from '../../libs/babylon/exports';
-import { PlayerAction, ServerPlayerActionType } from '../../common/objects/enum';
+} from '../../controllers/render/babylon/exports';
+import { PlayerAction, ServerPlayerActionType } from '@versions/shared/objects/enum';
 import {
   approachAngle,
   rotationByteOf,
   signedAngleDelta,
-} from '../../common/turnAngle';
-import { Store } from '../../store';
+} from '../../core/turnAngle';
+import { Hero } from '../../modules/hero';
+import { Session } from '../../modules/session';
 import type { Entity, ISystemFactory } from '../world';
 
 /**
  * Head look-at-mouse + idle turn-to-mouse, from ZzzInterface.cpp:7386-7498
- * and ZzzCharacter.cpp:5504-5513 / ZzzBMD.cpp:83-96.
- *
- * - The hero's head yaw follows the cursor (clamped to ±60°), pitch follows
- *   the cursor height; it keeps doing so while leaning or sitting (only the
- *   *body* turn is suppressed then). Disabled while auto-attacking a target.
- * - Other players glance around randomly (±64° / ±16°, roughly every 32 ticks).
- * - Both are smoothed with TurnAngle2(…, FarAngle × 0.2) per tick.
- * - After ~40 idle ticks the hero's body turns to the cursor and AT_STAND1 is
- *   sent so other clients see the new facing.
- *
- * The original derives the cursor yaw with `CreateAngle(...) + 315` in its own
- * screen/yaw convention; here the yaw is solved from the camera projection
- * instead (hero + unit X / unit Z projected to screen, cursor vector expressed
- * in that basis), so it is exact for any camera.
- *
- * The bone override has to run *after* Babylon evaluated the animation groups
- * (they overwrite the head bone's rotation every frame), hence the
- * onAfterAnimationsObservable hook.
+ * and ZzzCharacter.cpp:5504-5513 / ZzzBMD.cpp:83-96. See ecs/readme.md.
  */
 
 const DEG = Math.PI / 180;
@@ -216,8 +200,8 @@ export const HeadTrackingSystem: ISystemFactory = world => {
               const wanted = cursor.yaw;
               if (rotationByteOf(e.transform.rot.y) !== rotationByteOf(wanted)) {
                 e.transform.rot.y = wanted;
-                if (!Store.isOffline) {
-                  Store.sendAnimationRequest(
+                if (!Session.isOffline) {
+                  Hero.sendAnimationRequest(
                     rotationByteOf(wanted),
                     ServerPlayerActionType.Stand1
                   );

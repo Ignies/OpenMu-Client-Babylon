@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BandSub, decodeRelayFrame, encodeBatch, stampPerformer } from '../../../src/common/bandProtocol';
+import { BandSub, decodeRelayFrame, encodeBatch, stampPerformer } from '@/controllers/net/protocols/bandProtocol';
 import { BandRelayPacket } from './bandRelay';
 
 describe('BandRelayPacket', () => {

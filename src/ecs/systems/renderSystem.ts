@@ -1,16 +1,16 @@
-import { Plane, Vector3 } from '../../libs/babylon/exports';
+import { Plane, Vector3 } from '../../controllers/render/babylon/exports';
 import { ISystemFactory } from '../world';
-import { toRenderAngles } from '../../common/renderAngles';
-import { publishViewPlanes } from '../../common/viewPlanes';
-import { ENUM_WORLD } from '../../common/types';
-import { weather } from '../../weather';
-import { debuffBodyLight, debuffBrightBody } from '../../common/debuffBody';
-import { outlawBodyLight } from '../../common/nameTags';
+import { toRenderAngles } from '../../controllers/render/renderAngles';
+import { publishViewPlanes } from '../../controllers/render/viewPlanes';
+import { ENUM_WORLD } from '../../core/types';
+import { weather } from '../../controllers/weather';
+import { debuffBodyLight, debuffBrightBody } from '../../controllers/actors/debuffBody';
+import { outlawBodyLight } from '../../controllers/interface/nameTags';
 import {
   applyOutlawLook,
   OUTLAW_ULTRA_LIGHT,
   outlawUltraActive,
-} from '../../common/outlawLook';
+} from '../../controllers/actors/outlawLook';
 
 const v3Temp = Vector3.Zero();
 const v3Temp2 = Vector3.Zero();
@@ -67,13 +67,11 @@ export const RenderSystem: ISystemFactory = world => {
   }
 
   return {
-    update: dt => {
+    update: () => {
       const map = world.mapIndex;
 
       const terrain = world.terrain;
       if (!terrain) return;
-
-      const extraHeight = terrain.extraHeight;
 
       // Built from the previous `scene.render()`. One frame of lag is fine:
       // this only pauses looping clips, hides blob shadows and gates the map
@@ -195,8 +193,6 @@ export const RenderSystem: ISystemFactory = world => {
         }
 
 modelObject.updateLocation(v3Temp2, transform.scale, v3Temp);
-
-        modelObject.Draw(world.gameTime);
       }
     },
   };

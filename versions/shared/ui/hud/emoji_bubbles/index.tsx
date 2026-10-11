@@ -1,0 +1,125 @@
+import './style.less';
+import { useEffect, useMemo, useRef } from 'react';
+import type { With } from 'miniplex';
+import { Ecs } from '@/ecs/current';
+import { useRenderId } from '@/controllers/interface/hooks';
+import { onScreenPosition } from '@/controllers/interface/screenPositionBus';
+import {
+  BUBBLE_FADE_SECONDS,
+  emojiBubbleById,
+} from '@/modules/chat/emojiBubbles';
+import type { Entity } from '@/ecs/world';
+
+type BubbleEntity = With<Entity, 'emojiBubble' | 'screenPosition'>;
+
+const OFF_SCREEN = 'translate(-10000px, -10000px)';
+
+const PICTURE = { width: 44, height: 44 };
+
+/**
+ * A character's emoji bubble (`modules/chat/emojiBubbles.ts`).
+ *
+ * Both placements ride their own projected world anchor - over the head, or
+ * on the shoulder `EmojiBubbleSystem` picks as the one facing the camera.
+ * Position and fade are driven straight from the
+ * per-frame screen-position callback - no React re-render per frame, only a
+ * transform write, the same way the name tags and guild marks work.
+ */
+const EmojiBubble = ({ entity }: { entity: BubbleEntity }) => {
+  const ref = useRef<HTMLDivElement>(null);
+
+  const bubble = entity.emojiBubble;
+  const def = bubble.id ? emojiBubbleById(bubble.id) : null;
+  const isSide = bubble.isSide;
+
+  useEffect(() => {
+    const element = ref.current;
+    if (element) element.style.transform = OFF_SCREEN;
+
+    return onScreenPosition(entity, () => {
+      const el = ref.current;
+      if (!el) return;
+
+      const current = entity.emojiBubble;
+      if (!current) return;
+
+      // Both placements ride their own projected world anchor, so the bubble
+      // keeps its distance from the body as the camera zooms.
+      if (!current.onScreen) {
+        el.style.transform = OFF_SCREEN;
+        return;
+      }
+
+      el.style.transform = `translate(${Math.round(
+        current.screenX
+      )}px, ${Math.round(current.screenY)}px)`;
+
+      // Fade over the tail of the lifetime; the pop-in is a CSS animation.
+      el.style.opacity =
+        current.life < BUBBLE_FADE_SECONDS
+          ? Math.max(0, current.life / BUBBLE_FADE_SECONDS).toFixed(2)
+          : '1';
+    });
+  }, [entity, isSide]);
+
+  return (
+    <div ref={ref} className={`emoji-bubble ${isSide ? 'side' : 'head'}`}>
+      {def || bubble.glyph ? (
+        <span className="glyph">{def ? def.glyph : bubble.glyph}</span>
+      ) : (
+        <img
+          className="glyph picture"
+          src={bubble.picture ?? ''}
+          alt=""
+          draggable={false}
+          // `#root img` is sized 100% by the app stylesheet.
+          style={PICTURE}
+        />
+      )}
+    </div>
+  );
+};
+
+const entityIds = new WeakMap<object, number>();
+let nextEntityId = 1;
+
+function keyOf(entity: Entity): number {
+  let id = entityIds.get(entity);
+  if (id === undefined) {
+    id = nextEntityId++;
+    entityIds.set(entity, id);
+  }
+  return id;
+}
+
+export const EmojiBubbles = () => {
+  const world = Ecs.world!;
+  const { refresh } = useRenderId();
+
+  const query = useMemo(
+    () => world.with('emojiBubble', 'screenPosition'),
+    [world]
+  );
+
+  useEffect(() => {
+    const added = query.onEntityAdded.subscribe(refresh);
+    const removed = query.onEntityRemoved.subscribe(refresh);
+    return () => {
+      added();
+      removed();
+    };
+  }, [query]);
+
+  return (
+    <div className="emoji-bubbles">
+      {query.entities.map(entity => (
+        // The serial in the key remounts on a re-trigger, which is what
+        // replays the pop-in animation and swaps the glyph.
+        <EmojiBubble
+          key={`${keyOf(entity)}_${entity.emojiBubble.serial}`}
+          entity={entity as BubbleEntity}
+        />
+      ))}
+    </div>
+  );
+};

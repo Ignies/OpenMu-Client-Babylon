@@ -1,0 +1,36 @@
+import { defineMonster } from '@/controllers/monsters';
+
+export default defineMonster({
+  Numb: 204,
+  Name: 'Wolf Statue',
+  maxHealth: 50,
+  // Crywolf statue (ZzzCharacter.cpp:14260).
+  npcModel: { file: '/Object35/Object82' },
+  stats: {
+    Rate: 1,
+    Level: 2,
+    HP: 50,
+    MP: 0,
+    MinDmg: 15,
+    MaxDmg: 30,
+    Def: 70,
+    MagDef: 20,
+    AttackSuccess: 10,
+    Move: 30,
+    AttType: 0,
+    Range: 0,
+    View: 0,
+    MoveSpeed: 0,
+    AttSpeed: 0,
+    Regen: 0,
+    Attri: 0,
+    ItemR: 0,
+    MoneyR: 0,
+    MaxI: 0,
+    ResWind: 0,
+    ResPois: 0,
+    ResIce: 0,
+    ResWater: 0,
+    ResFire: 0,
+  },
+});

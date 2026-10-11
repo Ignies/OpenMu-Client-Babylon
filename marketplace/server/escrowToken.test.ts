@@ -1,6 +1,6 @@
 import { createHmac } from 'node:crypto';
 import { describe, expect, it } from 'bun:test';
-import { bytesToGuid, readInt64LE } from '../../src/common/escrowWire';
+import { bytesToGuid, readInt64LE } from '../../src/controllers/net/protocols/escrowWire';
 import { mintEscrowToken } from './escrowToken';
 
 const secret = new TextEncoder().encode('s3cret');

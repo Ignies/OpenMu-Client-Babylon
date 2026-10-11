@@ -1,0 +1,31 @@
+/**
+ * Bootstrap: resolve the game version, then boot the app.
+ *
+ * The version comes from the active server profile's tag (the persisted
+ * selection; `versionIdForTag` defaults to season6), its body from a
+ * dynamic import (versions/registry.ts) - one build carries every version,
+ * the page loads one. The awaits are the async boundary: `app/boot.tsx` and the
+ * whole app graph behind it read `gameVersion` at module scope, so they are
+ * imported only after it is assigned.
+ */
+import { ServerConfig } from '../modules/servers/serverConfig';
+import { loadGameVersion, versionIdForTag } from '../version';
+// Imported for its one side effect: the `mu-mobile` root class has to be on
+// the document before the first paint, or a phone flashes the desktop rules.
+import '../controllers/interface/mobile';
+import { watchInstallState } from '../modules/options/pwaInstall';
+
+// The browser offers the install once, early, and takes the offer back if
+// nobody catches it. Listening here rather than when the options window
+// mounts is what lets that window install the app at any point afterwards.
+watchInstallState();
+
+async function bootstrap() {
+  await loadGameVersion(versionIdForTag(ServerConfig.active.version));
+  await import('./boot');
+}
+
+bootstrap().catch(e => {
+  console.error('boot failed:', e);
+  throw e;
+});

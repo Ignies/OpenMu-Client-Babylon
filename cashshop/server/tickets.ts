@@ -1,6 +1,6 @@
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import { loadGateConfig } from './gate';
-import { SESSION_NONCE_RE } from '../../src/common/sessionNonce';
+import { SESSION_NONCE_RE } from '../../src/controllers/net/sessionNonce';
 
 /**
  * Who is asking: the ticket that gives a shop request its account.

@@ -1,0 +1,133 @@
+import { Vector3 } from '../render/babylon/exports';
+import { EventBus } from '../../core/eventBus';
+import { Ecs } from '../../ecs/current';
+import { effects } from '../fx';
+import { followEntity } from '../fx/core';
+import { TRAIL_ANCHOR, pingLiveFor } from '../fx/ping';
+import {
+  PING_VERSION,
+  PingSub,
+  decodeRelayFrame,
+  encodePoint,
+  type PingPoint,
+} from './protocols/pingProtocol';
+
+/**
+ * The map ping's one wire listener, and the one place a ping is asked for.
+ * Inbound: the proxy's `PingRelay` frames (C1 FB) - a player in scope
+ * pointed somewhere, or the relay's hello. Outbound: `requestPing`, called
+ * by the gesture in `PointerInputSystem`, which sends the point and draws
+ * the pointer locally in the same breath - waiting for the round trip would
+ * put a visible lag on the player's own gesture.
+ *
+ * Installed once from `app/logic.ts`. It decides whether a ping happens; it
+ * draws nothing itself - `controllers/fx/ping.ts` owns every pointer on screen.
+ */
+
+/** Tiles above the terrain the marker's own point sits at; the decal drapes from there. */
+const MARKER_HEIGHT = 0.05;
+
+/** The hero's own pointer key before the server hands out an object id. Never a real id. */
+const SELF_OWNER = -1;
+
+/** What the ping reads from the session and the hero, handed in by `installPingNet`. */
+export type PingLink = {
+  /** The hero's object id; undefined until the server names it. */
+  selfId(): number | undefined;
+  offline(): boolean;
+  /** The game socket, for the relay hello. */
+  socket(): WebSocket | undefined;
+  send(frame: Uint8Array): void;
+};
+
+/** Until installed: offline, so a ping is still drawn for the player and sent nowhere. */
+let link: PingLink = { selfId: () => undefined, offline: () => true, socket: () => undefined, send: () => {} };
+
+let installed = false;
+let available = false;
+let helloSocket: WebSocket | null = null;
+
+function targetOf(point: PingPoint): Vector3 | null {
+  const world = Ecs.world;
+  if (!world) return null;
+  const y = world.getTerrainHeight(point.x, point.z);
+  if (!Number.isFinite(y)) return null;
+  return new Vector3(point.x, y + MARKER_HEIGHT, point.z);
+}
+
+/**
+ * The gesture's one entry point: point at `(x, z)` in world tiles. Refused
+ * while this player's own pointer is still live, which is the rule the proxy
+ * enforces too - so a refusal here is the honest client staying inside it,
+ * not an error. Returns whether a pointer was dropped.
+ */
+export function requestPing(x: number, z: number): boolean {
+  const world = Ecs.world;
+  if (!world) return false;
+  // Offline, and until the server names this hero, there is no object id -
+  // but the pointer is still the player's own to see, so it is keyed by
+  // `SELF_OWNER`, which no relayed id can be.
+  const self = link.selfId() ?? SELF_OWNER;
+  if (pingLiveFor(self)) return false;
+
+  const at = targetOf({ x, z });
+  if (!at) return false;
+
+  const hero = world.playerEntity;
+  effects.spawn('ping', world.scene, at, {
+    ownerId: self,
+    owner: hero ? followEntity(hero, TRAIL_ANCHOR) : undefined,
+  });
+
+  // Offline, or through a proxy without the relay, the pointer is still the
+  // player's own to see; it simply reaches nobody.
+  if (available && !link.offline()) link.send(encodePoint({ x, z }));
+  return true;
+}
+
+export function installPingNet(next: PingLink): void {
+  if (installed) return;
+  installed = true;
+  link = next;
+
+  // The hello arrives on the game socket. Availability is tied to that
+  // socket, not to "a socket closed": the connect-server socket is shut
+  // after the game socket opens, and its close can land after the hello.
+  EventBus.on('wsClosed', ({ socket }) => {
+    if (socket !== helloSocket) return;
+    helloSocket = null;
+    available = false;
+  });
+
+  EventBus.on('PingRelay', view => {
+    const msg = decodeRelayFrame(new Uint8Array(view.buffer, view.byteOffset, view.byteLength));
+    if (!msg) return;
+
+    if (msg.sub === PingSub.Hello) {
+      helloSocket = link.socket() ?? null;
+      available = msg.version === PING_VERSION;
+      console.info(`ping: relay hello, version ${msg.version} (this client speaks ${PING_VERSION})`);
+      return;
+    }
+
+    // The sender drew their own pointer on the gesture; the relay never
+    // echoes it back, so anything wearing this client's id is a stray.
+    if (msg.senderId === (link.selfId() ?? -1)) return;
+
+    const world = Ecs.world;
+    if (!world) return;
+
+    // A trail has to start at a body: a ping from someone this client cannot
+    // see is dropped rather than drawn hanging in the air.
+    const owner = world.getByNetId(msg.senderId);
+    if (!owner || owner.objOutOfScope) return;
+
+    const at = targetOf(msg.point);
+    if (!at) return;
+
+    effects.spawn('ping', world.scene, at, {
+      ownerId: msg.senderId,
+      owner: followEntity(owner, TRAIL_ANCHOR),
+    });
+  });
+}

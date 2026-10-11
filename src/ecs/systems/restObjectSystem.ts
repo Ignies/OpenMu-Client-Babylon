@@ -3,22 +3,24 @@ import {
   PointerEventTypes,
   Ray,
   Vector3,
-} from '../../libs/babylon/exports';
+} from '../../controllers/render/babylon/exports';
 import {
   PlayerAction,
   ServerPlayerActionType,
-} from '../../common/objects/enum';
-import { resolveGenderedAction } from '../../common/playerActionMapper';
-import { TWFlags } from '../../common/terrain/consts';
-import { devQuery } from '../../common/devSeams';
+} from '@versions/shared/objects/enum';
+import { resolveGenderedAction } from '../../controllers/anim/playerActionMapper';
+import { TWFlags } from '../../controllers/terrain/consts';
+import { devQuery } from '../../core/devSeams';
 import {
   findRestObject,
   type RestKind,
-} from '../../libs/mu/restObjects';
-import { aimX, aimY } from '../../camera';
-import { sound } from '../../sound';
-import { Store } from '../../store';
+} from '../../controllers/terrain/restObjects';
+import { aimX, aimY } from '../../controllers/camera';
+import { sound } from '../../controllers/sound';
+import { Hero } from '../../modules/hero';
+import { Session } from '../../modules/session';
 import type { ISystemFactory } from '../world';
+import { isSliding } from './positionSlideSystem';
 
 /** `?autoPick=1`: the old full scene pick, read only for its ray. */
 const AUTO_POINTER_PICK = devQuery('autoPick') === '1';
@@ -73,6 +75,8 @@ export const RestObjectSystem: ISystemFactory = world => {
   scene.onPointerObservable.add(ev => {
     if (ev.type !== PointerEventTypes.POINTERDOWN) return;
     if (!world.playerEntity) return;
+    // `MoveHero` returns while the server slides the hero in (`JumpTime > 0`): the click is lost.
+    if (isSliding(world.playerEntity)) return;
     // Something selectable (NPC, monster, drop) under the cursor takes the
     // click; the bench / wall behind it must not steal it into a lean.
     if (world.currentPointerTarget) return;
@@ -147,6 +151,8 @@ export const RestObjectSystem: ISystemFactory = world => {
       }
 
       if (!pending) return;
+      // `MoveHero` waits out the server's slide (`JumpTime > 0`).
+      if (isSliding(playerEntity)) return;
 
       const moveTo = playerEntity.playerMoveTo;
 
@@ -211,8 +217,8 @@ if (done.useObjectAngle) {
         isFemale
       );
 
-      if (!Store.isOffline) {
-        Store.sendAnimationRequest(
+      if (!Session.isOffline) {
+        Hero.sendAnimationRequest(
           rotationByte(playerEntity.transform.rot.y),
           SERVER_ACTION[done.kind]
         );

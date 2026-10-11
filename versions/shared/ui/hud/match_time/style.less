@@ -1,0 +1,24 @@
+// RenderTournamentInterface: the match time, centred at y = 350 of the 640x480 layout.
+.match-time {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+
+  .match-time-line {
+    position: relative;
+    white-space: nowrap;
+
+    .mu-text {
+      white-space: nowrap;
+    }
+
+    .match-time-front {
+      position: absolute;
+      left: 1px;
+      top: 1px;
+    }
+  }
+}

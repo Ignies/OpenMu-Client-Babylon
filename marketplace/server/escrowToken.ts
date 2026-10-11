@@ -4,7 +4,7 @@ import {
   guidToBytes,
   writeInt64LE,
   type EscrowOperationName,
-} from '../../src/common/escrowWire';
+} from '../../src/controllers/net/protocols/escrowWire';
 
 /**
  * Tokens the game server's escrow plugin acts on. The service mints one per
@@ -17,7 +17,7 @@ import {
  *   character(n) hmac-sha256(32)
  */
 
-export const TOKEN_VERSION = 1;
+const TOKEN_VERSION = 1;
 export const TOKEN_TTL_S = Number(process.env.MARKETPLACE_ESCROW_TOKEN_TTL_S ?? 120);
 const MAX_NAME = 10;
 const ASCII_NAME_RE = /^[A-Za-z0-9]{1,10}$/;

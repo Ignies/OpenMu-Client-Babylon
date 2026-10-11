@@ -1,14 +1,14 @@
-import { TILE_CM, TWFlags } from '../../common/terrain/consts';
-import { isFlagInBinaryMask } from '../../common/utils';
-import { InventoryConstants } from '../../common/inventoryConstants';
-import { Store } from '../../store';
-import { BaseClass, getBaseClass } from '../../common/characterStats';
-import { isSwimWorld } from '../../common/locomotion';
-import { isFastWing } from '../../common/wings';
-import { isRidingMount } from '../../common/pets';
+import { TILE_CM, TWFlags } from '../../controllers/terrain/consts';
+import { isFlagInBinaryMask } from '../../controllers/assets/download';
+import { InventoryConstants } from '@/core/inventoryConstants';
+import { Hero } from '../../modules/hero';
+import { BaseClass, getBaseClass } from '../../modules/hero/characterStats';
+import { isSwimWorld } from '../../controllers/actors/locomotion';
+import { isFastWing } from '../../controllers/actors/wings';
+import { isRidingMount } from '@/controllers/pets';
 import type { Entity, ISystemFactory } from '../world';
-import { distanceAlongPath } from '../../common/approachPath';
-import { debuffSlow } from '../../common/debuffBody';
+import { distanceAlongPath } from '../../controllers/actors/approachPath';
+import { debuffSlow } from '../../controllers/actors/debuffBody';
 
 /**
  * OpenMU walks every object by wall-clock time: each step takes
@@ -51,14 +51,14 @@ const HORN_OF_FENRIR = 37;
  * run clip - OpenMU has no free run for the Dark Knight.
  */
 function runningMovementSpeed(entity: Entity, world: number): number {
-  const items = Store.playerData.items;
+  const items = Hero.items;
   const app = entity.charAppearance;
   const local = !!entity.localPlayer;
   const boots = local ? items[InventoryConstants.BootsSlot] : app?.boots;
   const gloves = local ? items[InventoryConstants.GlovesSlot] : app?.gloves;
   const wings = local ? items[InventoryConstants.WingsSlot] : app?.wings;
   const pet = local ? items[InventoryConstants.PetSlot] : app?.pet;
-  const cls = local ? Store.playerData.charClass : app?.charClass;
+  const cls = local ? Hero.charClass : app?.charClass;
 
   let speed = 0;
   if (cls !== undefined) {
@@ -120,19 +120,10 @@ export const MoveAlongPathSystem: ISystemFactory = world => {
           entity;
 
         if (localPlayer) {
-          // Both setters are MobX actions: writing an unchanged value still
-          // runs the action (and its reaction pass) every frame, so only the
-          // tile the hero stands on - not its float position - is mirrored,
-          // and only when it moved.
-          const tileX = ~~transform.pos.x;
-          const tileY = ~~transform.pos.z;
-          const playerData = Store.playerData;
-          if (playerData.x !== tileX || playerData.y !== tileY) {
-            playerData.setPosition(tileX, tileY);
-          }
-
-          const flag = world.getTerrainFlag(tileX, tileY);
-          if (playerData.tileFlag !== flag) playerData.setTileFlag(flag);
+          // A MobX action: writing an unchanged value still runs it (and its
+          // reaction pass), so the flag of the hero's tile is mirrored only when it changes.
+          const flag = world.getTerrainFlag(~~transform.pos.x, ~~transform.pos.z);
+          if (Hero.tileFlag !== flag) Hero.setTileFlag(flag);
         }
 
         let speed: number;

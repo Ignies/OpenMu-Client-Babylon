@@ -7,7 +7,7 @@
  *
  * One class for every sub: `SubCode` and `Length` are left undefined so the
  * dispatcher's last fallback matches any sub at any length, and
- * `src/common/bandProtocol.ts` reads the body. Per-sub classes would be
+ * `controllers/net/protocols/bandProtocol.ts` reads the body. Per-sub classes would be
  * nine names, nine listeners and nine "unhandled packet" warnings.
  */
 export class BandRelayPacket {

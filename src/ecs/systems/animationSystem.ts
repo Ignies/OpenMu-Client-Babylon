@@ -1,10 +1,10 @@
 import type { AnimationGroup } from '@babylonjs/core/Animations/animationGroup';
-import { MonsterActionType, PlayerAction } from '../../common/objects/enum';
+import { MonsterActionType, PlayerAction } from '@versions/shared/objects/enum';
 import type { ISystemFactory } from '../world';
-import { isPlayerBody, type PlayerObject } from '../../common/playerObject';
-import { isOneShotPlayerAction } from '../../common/playerActionMapper';
-import { monsterClipFor } from '../../common/transformedBody';
-import type { ModelObject } from '../../common/modelObject';
+import { isPlayerBody, type PlayerObject } from '../../controllers/actors/playerObject';
+import { isOneShotPlayerAction, isRestAction } from '../../controllers/anim/playerActionMapper';
+import { monsterClipFor } from '../../controllers/actors/transformedBody';
+import type { ModelObject } from '../../controllers/render/modelObject';
 import {
   chooseFenrirIdleAction,
   chooseFenrirRunAction,
@@ -17,13 +17,13 @@ import {
   isWeaponItem,
   type CharacterPose,
   type Hands,
-} from '../../common/weaponClass';
+} from '../../controllers/actors/weaponClass';
 import {
   applyWeaponAttachments,
   applyWeaponPoses,
-} from '../../common/weaponAttachment';
-import { TWFlags } from '../../common/terrain/consts';
-import { isFlagInBinaryMask } from '../../common/utils';
+} from '../../controllers/actors/weaponAttachment';
+import { TWFlags } from '../../controllers/terrain/consts';
+import { isFlagInBinaryMask } from '../../controllers/assets/download';
 import {
   monsterModelTypeOf,
   monsterPlaySpeed,
@@ -31,11 +31,11 @@ import {
   debuffSlowsClip,
   playerPlaySpeed,
   wingsPlaySpeed,
-} from '../../common/playSpeed';
-import { debuffSlow } from '../../common/debuffBody';
-import { attackSpeedOf, magicSpeedOf } from '../../common/characterStats';
-import { BaseClass, getBaseClass } from '../../common/characterStats';
-import { isFemaleClass } from '../../common/mapPlayerNetClassToModelClass';
+} from '../../controllers/anim/playSpeed';
+import { debuffSlow } from '../../controllers/actors/debuffBody';
+import { attackSpeedOf, magicSpeedOf } from '../../modules/hero/characterStats';
+import { BaseClass, getBaseClass } from '../../modules/hero/characterStats';
+import { isFemaleClass } from '../../controllers/actors/mapPlayerNetClassToModelClass';
 import {
   FENRIR_RUN_DELAY,
   RUN_THRESHOLD,
@@ -46,15 +46,17 @@ import {
   inBloodCastle,
   inChaosCastle,
   isSwimWorld,
-} from '../../common/locomotion';
-import { isWingItem } from '../../common/wings';
-import { heldWeapons } from '../../common/chaosCastleUnit';
-import { isRidingMount, petSpec } from '../../common/pets';
-import { Store } from '../../store';
+} from '../../controllers/actors/locomotion';
+import { isWingItem } from '../../controllers/actors/wings';
+import { isRidingMount, mountKind, petSpec } from '@/controllers/pets';
+import { Hero } from '../../modules/hero';
+import { heldWeapons } from '../../controllers/actors';
+import { isOn } from '../../controllers/fidelity';
+import { isSliding } from './positionSlideSystem';
 
-// Clip rates come from the original's PlaySpeed tables (common/playSpeed.ts);
+// Clip rates come from the original's PlaySpeed tables (controllers/anim/playSpeed.ts);
 // attack/cast rates additionally scale with the attackSpeed/magicSpeed
-// attributes (agility / class divisor, plus nothing else yet).
+// attributes: the hero's (SetAttackSpeed), or another player's own from the scope packet.
 // Death (delay, Die clip, corpse, fade, despawn) is owned by DeathSystem.
 
 const MONSTER_ONE_SHOT_ACTIONS = new Set<MonsterActionType>([
@@ -271,9 +273,9 @@ export const AnimationSystem: ISystemFactory = world => {
   let lastRunTick = performance.now();
 
   return {
-    update: dt => {
+    update: () => {
       // c->Run is a wall-clock walk-up (the original counts real frames at
-      // its own FPS). The render dt is clamped to 0.1 s in main.tsx, so under
+      // its own FPS). The render dt is clamped to 0.1 s in app/main.tsx, so under
       // 10 fps the walker (already on wall-clock time) runs while this
       // counter would still say "walking" - use the real elapsed time, capped
       // so a stalled tab does not jump straight to running.
@@ -284,6 +286,11 @@ export const AnimationSystem: ISystemFactory = world => {
       const swimWorld = isSwimWorld(mapIndex);
       const chaosCastle = inChaosCastle(mapIndex);
       const bloodCastle = inBloodCastle(mapIndex);
+      // Server-computed speeds (CurrentStatsExtended) win over the client-side agility formula.
+      const pd = Hero;
+      const heroAttackSpeed = pd.attackSpeed ?? attackSpeedOf(pd.charClass, pd.agi);
+      const heroMagicSpeed = pd.magicSpeed ?? magicSpeedOf(pd.charClass, pd.agi);
+      const ownSpeeds = isOn('otherPlayersOwnSpeed');
 
       for (const entity of playersQuery) {
         const { playerAnimation, movement, attributeSystem, modelObject } = entity;
@@ -302,19 +309,11 @@ export const AnimationSystem: ISystemFactory = world => {
           );
         }
 
-        if (entity.localPlayer) {
-          // Server-computed speeds (CurrentStatsExtended) win over the
-          // client-side agility formula once they have arrived.
-          const pd = Store.playerData;
-          attributeSystem.setValue(
-            'attackSpeed',
-            pd.attackSpeed ?? attackSpeedOf(pd.charClass, pd.agi)
-          );
-          attributeSystem.setValue(
-            'magicSpeed',
-            pd.magicSpeed ?? magicSpeedOf(pd.charClass, pd.agi)
-          );
-        }
+        // The original plays every body at the hero's speeds (one MODEL_PLAYER table, ZzzCharacter.cpp:812-1028);
+        // another player with speeds from the scope packet plays at its own (controllers/anim/readme.md).
+        const own = entity.localPlayer || !ownSpeeds ? undefined : entity.speeds;
+        attributeSystem.setValue('attackSpeed', own?.attack ?? heroAttackSpeed);
+        attributeSystem.setValue('magicSpeed', own?.magic ?? heroMagicSpeed);
 
         const inSafeZone = attributeSystem.isAboveZero('inSafeZone');
         const hands = entity.charAppearance;
@@ -362,7 +361,7 @@ export const AnimationSystem: ISystemFactory = world => {
           // whose Run stays 0, so a patrol is always PLAYER_WALK_*.
           entity.npcType === undefined &&
           canAccumulateRun(
-            hands?.charClass ?? Store.playerData.charClass,
+            hands?.charClass ?? Hero.charClass,
             hands?.boots,
             hands?.gloves,
             mapIndex,
@@ -413,6 +412,17 @@ export const AnimationSystem: ISystemFactory = world => {
           }
         }
 
+        // The Classic shadow's rider, safe-zone and bow rules (PlayerObject.setClassicShadows).
+        if ((modelObject as PlayerObject).Weapon1) {
+          const mounted = mountKind(hands?.pet, inSafeZone);
+          (modelObject as PlayerObject).setClassicShadows(
+            mounted === 'uniria' || mounted === 'dinorant',
+            inSafeZone,
+            hands?.leftHand,
+            hands?.rightHand
+          );
+        }
+
         // Dead or about to die: c->Movement = false, no stop/walk re-evaluation.
         if (playerAnimation.action === PlayerAction.PLAYER_DIE1 || entity.dying) continue;
 
@@ -435,20 +445,14 @@ export const AnimationSystem: ISystemFactory = world => {
           }
         }
 
-        if (
-          playerAnimation.action >= PlayerAction.PLAYER_SIT1 &&
-          playerAnimation.action <= PlayerAction.PLAYER_POSE_FEMALE1 &&
-          !moving
-        ) {
-          continue;
-        }
+        if (isRestAction(playerAnimation.action) && !moving) continue;
 
         const npcClass =
           entity.npcType !== undefined
             ? ((modelObject.constructor as typeof PlayerObject).NpcClass ?? undefined)
             : undefined;
         const charClass =
-          npcClass ?? hands?.charClass ?? Store.playerData.charClass;
+          npcClass ?? hands?.charClass ?? Hero.charClass;
 
         playerAnimation.action = calculateAnimation({
           pose: {
@@ -498,7 +502,7 @@ export const AnimationSystem: ISystemFactory = world => {
         const action = playerAnimation.action;
         const attrs = entity.attributeSystem;
         const baseClass = getBaseClass(
-          entity.charAppearance?.charClass ?? Store.playerData.charClass
+          entity.charAppearance?.charClass ?? Hero.charClass
         );
         const isRageFighter = baseClass === BaseClass.RageFighter;
 
@@ -513,10 +517,14 @@ export const AnimationSystem: ISystemFactory = world => {
         // A clip already playing takes its per-frame slowdown straight into the running group; a Freeze or
         // Cold slows the walk and run, so it bites mid-run.
         const slow = debuffSlowsClip(action) ? debuffSlow(entity.buffs) : 1;
+        // `swingFill`: the hero's swing after its blow, set by attackSystem for that clip only.
+        const fill = playerAnimation.swingFill;
+        const filled = fill?.serial === playerObject.actionSerial ? fill.scale : 1;
         if (playerObject.CurrentAction === action) {
           playerObject.setAnimationSpeed(
             speed *
               slow *
+              filled *
               playerFrameSpeedScale(
                 action,
                 playerObject.actionFrame(),
@@ -602,9 +610,10 @@ export const AnimationSystem: ISystemFactory = world => {
         const isMoving = movement.velocity.x !== 0 || movement.velocity.y !== 0;
         if (isMoving && !MONSTER_ONE_SHOT_ACTIONS.has(monsterAnimation.action)) {
           monsterAnimation.action = MonsterActionType.Walk;
-        } else if (!isMoving && monsterAnimation.action === MonsterActionType.Walk) {
+        } else if (!isMoving && monsterAnimation.action === MonsterActionType.Walk && !isSliding(entity)) {
           // Path consumed: the original returns to MONSTER01_STOP1 when the
           // walk ends (MoveHumen); the server never sends a "stop" animation.
+          // A Crust walks by sliding instead and stops when the slide does.
           monsterAnimation.action = MonsterActionType.Stop1;
         }
 

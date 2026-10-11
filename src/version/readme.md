@@ -1,0 +1,72 @@
+# version
+
+The seam between the engine and a game version: the `GameVersion` contract, the UI contract, and
+the loader that resolves which version this page runs. See [../../docs/versions.md](../../docs/versions.md).
+
+## Public API
+- `gameVersion`, `versionPackets` (`index.ts`): the loaded version and its packet lists. Read
+  everywhere, often at module scope.
+- `loadGameVersion(id)`: loads a version's core (contract data + packets). Called by
+  `app/main.tsx` before the app graph is imported, and by `testSetup.ts`.
+- `versionIdForTag(tag)`, `versionByTag(tag)`, `versionTags()`: map a server list tag (`S6EP3`)
+  to a registry entry, case-insensitive; no tag or an unknown tag means `DEFAULT_VERSION_ID`.
+- `loadVersionUi()` / `versionUi()`: the version's UI module, loaded on first use / or `null`
+  until it has loaded.
+- `ensureActiveVersion(tag)`: `true` when the loaded version plays `tag`, else reloads the page.
+- Types: `GameVersion`, `VersionData`, `VersionFeatures`, `VersionProtocol`, `VersionEncryption`,
+  `MiniGame`, `ItemHotkeys` (`contract.ts`); `VersionUi`, `PregameUi`, `PregameBackdrop`,
+  `PregameScene` (`uiContract.ts`).
+
+## How it works
+- `contract.ts` is everything a version may differ in: OpenMU identity, client version / serial
+  bytes, packet set and `variantRank`, encryption keys (SimpleModulus, Xor32, Xor3), data URLs, its
+  worlds and an optional file `inventory`, `features` flags, `modulesOff` and `miniGames`. Base code reads
+  these and never compares a version id.
+- `features`: what the version's server knows. Each flag has a reader: `masterSkills` (the master
+  tree), `socketItems` / `ancientItems` (item visuals), `darkLord`, `magicGladiator`, `summoner`,
+  `rageFighter` (the create window offers only those). `itemHotkeys` is not a flag but the bottom
+  bar's potion slots: how many (Q, W, E, R in order) and whether they bind (`canBindItemHotkey`).
+- `modulesOff`: the optional modules (`src/modules/modules.ts` ids, the words of a world's
+  `server.json` `modulesOff`) the version's server never has; `src/app/logic.ts` never installs them.
+- `miniGames`: the timed events the version's client has (`MiniGame`); the HUD schedule rows
+  (`modules/events/schedule.ts`) draw and poll only these.
+- `data.worlds`: the `World<n>` / `Object<n>` folder numbers the version ships (Season 6 every one
+  a map entry reads, not World6 or World55/56 which nothing reads; 0.97d World1-12). The pre-download index (`tools/assetsIndex.ts`) offers only those map groups,
+  though a borrowed tree holds more.
+- `data.inventory` lists every file a period `Data/` tree ships. Base code asks for Season 6 files
+  a period tree lacks; with the list, loaders draw nothing instead of logging misses. Season 6
+  omits it.
+- `data.borrows` names another version's served tree (Season 6's) and the converted files this
+  version ships itself (`ownAssets`); every other converted file is read from the borrowed tree, so
+  a byte-identical source is never committed twice, except what it `lacks` (a grass card its world
+  never had stays absent). `borrows.folderPaths` does the same for the original `Data/` tree: a path
+  the `inventory` lacks under one of them is read from `borrows.folder`. `data.gates` is the
+  `gate.bmd` record layout of a tree that is not Season 6's. `data.sounds` maps a sound key to the file the
+  version ships for it. Season 6 omits both.
+- `uiContract.ts` is types only, so `versions/registry.ts` can name it without importing app code.
+  A version's `ui/` module may import app code because it is only loaded after boot.
+- A pre-game backdrop is either `world` (warp to login worlds, Season 6) or `scene` (a set piece
+  built in the scene, 0.97d's ship).
+- Switching to a world of another version is a page reload (`ensureActiveVersion`): module-scope
+  captures of `gameVersion` exist across the app. The selection is persisted first, so the reload
+  cannot loop.
+
+## Depends on / used by
+- uses: `versions/registry.ts`; types from `core/types`, `ecs/world`, `controllers/interface/windows`.
+- used by: `app/` (main, App, store), `controllers/assets` loaders, `controllers/net/packets.ts`,
+  `controllers/item_fx`, modules `servers`, `mu_helper`, `events` (the schedule rows) and
+  `inventory` (the potion slots), `ecs/systems/loginSceneSystem.ts`, `versions/registry.ts`,
+  every `versions/<id>/`, some shared windows and `tools/assetsIndex.ts` (the data roots).
+
+## Change it
+- something a version can differ in: add a field to `GameVersion` (or a flag to `VersionFeatures`)
+  in `contract.ts`, fill it in every `versions/<id>/index.ts` (and `versions/_template/`), read
+  it from `gameVersion` in base code.
+- a new per-version screen: add it to `VersionUi` in `uiContract.ts`; every version exports it
+  (a version without it exports a component that renders nothing).
+- add a version: [../../docs/versions.md](../../docs/versions.md) "Adding a version".
+
+## Tests
+- No tests here. `testSetup.ts` is the vitest setup file (`vite.config.ts`): it loads the default
+  version and forces `navigator.language` to `en-US` for every test.
+  `versions/registry.test.ts` checks every registry entry loads.

@@ -1,0 +1,42 @@
+import { describe, expect, it } from 'vitest';
+import { isHideTexture, isSkinOrHairTexture } from './skinTexture';
+
+describe('isSkinOrHairTexture', () => {
+  it('catches the skin, level and hair textures the body parts carry', () => {
+    // The three that put a head inside a dropped helm: HelmMale06 paints the
+    // face with skin_barbarian_01, MaskHelmMale06 with level_man02 and hair_R.
+    expect(isSkinOrHairTexture('skin_barbarian_01')).toBe(true);
+    expect(isSkinOrHairTexture('level_man02')).toBe(true);
+    expect(isSkinOrHairTexture('hair_R')).toBe(true);
+  });
+
+  // LoadData.cpp:84-86 tests lower-case `ski` and `hair` byte by byte; only `level` ignores case.
+  it('reads ski and hair in lower case only, level in any case', () => {
+    expect(isSkinOrHairTexture('skinClass301')).toBe(true);
+    expect(isSkinOrHairTexture('LevelClass207')).toBe(true);
+    expect(isSkinOrHairTexture('SkinClass106_upper')).toBe(false);
+    expect(isSkinOrHairTexture('Skinclass106_hair')).toBe(false);
+    expect(isSkinOrHairTexture('SKIN_01')).toBe(false);
+    expect(isSkinOrHairTexture('Hair_R')).toBe(false);
+  });
+
+  it('leaves the armour and helmet textures alone', () => {
+    expect(isSkinOrHairTexture('head_07')).toBe(false);
+    expect(isSkinOrHairTexture('upper_07_m')).toBe(false);
+    expect(isSkinOrHairTexture('hide_m')).toBe(false);
+    expect(isSkinOrHairTexture('Sword01')).toBe(false);
+  });
+});
+
+describe('isHideTexture', () => {
+  it('catches the hide slot whatever extension the BMD names', () => {
+    expect(isHideTexture('hide')).toBe(true);
+    expect(isHideTexture('hide_m')).toBe(true);
+    expect(isHideTexture('HIDE')).toBe(true);
+  });
+
+  it('leaves a name that only starts the same way alone', () => {
+    expect(isHideTexture('hi_light')).toBe(false);
+    expect(isHideTexture('shield02')).toBe(false);
+  });
+});

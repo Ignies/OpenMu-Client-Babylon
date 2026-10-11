@@ -1,0 +1,37 @@
+import { defineSkill } from '@/controllers/skills/define';
+import { Step, burn, scorch, seq } from '@/controllers/skills/visuals';
+import { Vector3 } from '@/controllers/render/babylon/exports';
+import { delay } from '@/controllers/fx/core';
+import { effects } from '@/controllers/fx';
+
+import { flame } from '@/controllers/lighting/recipes';
+
+/**
+ * `n` fire pillars (controllers/fx/pillar.ts): the first on the point, the rest scattered `radius` tiles
+ * around it a third to the full way out, `every` seconds apart, each on its own ground height.
+ */
+const firePillars = (n: number, radius: number, every: number): Step => (at, c) => {
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2 + Math.random() * (Math.PI / n);
+    const r = i === 0 ? 0 : radius * (0.55 + Math.random() * 0.45);
+    const p = new Vector3(at.x + Math.cos(a) * r, at.y, at.z + Math.sin(a) * r);
+    if (i === 0) effects.spawn('pillar', c.scene, p, {});
+    else delay(i * every, () => effects.spawn('pillar', c.scene, p, {}));
+  }
+};
+
+export default defineSkill({
+  id: 5,
+  name: "Flame",
+  // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
+  lookAliases: [378],
+  // Master numbers cast, heard, lit and drawn as this skill (the original names them in its `case`).
+  masterAliases: [483],
+  // 5 Flame: the renewed look - fire pillars out of molten rock around the point (controllers/fx/pillar.ts), in place
+  // of the BITMAP_FLAME sub0 LT 40 tongue column the original stacked at SkillXY (ZzzCharacter.cpp:4485).
+  visual: { area: seq(firePillars(3, 1.4, 0.1), scorch(1.5), burn(1.2)) },
+  sound: 'Sound/sFlame', // Flame
+  // Flame: BITMAP_FLAME range 3 while the column burns (:8649). Wider and redder here: the
+  // pillars stand on molten rock and the ground around them pools red in the renewed look.
+  light: { area: { ...flame(3.5, 1.9, { gain: 1.5, floorGain: 1.3, release: 0.6 }), color: [1, 0.42, 0.14] } },
+});

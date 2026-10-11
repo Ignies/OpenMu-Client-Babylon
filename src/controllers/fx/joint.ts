@@ -1,0 +1,1036 @@
+/**
+ * Joint: a glowing ribbon, a bolt between two ends or a trail behind a moving head
+ * (`CreateJoint(BITMAP_JOINT_*)`, ZzzEffectJoint.cpp; textured as `RenderJoints`, :7036).
+ * One GreasedLine per joint. See fx/readme.md.
+ */
+import {
+  Color3,
+  Constants,
+  CreateGreasedLine,
+  GreasedLineMeshMaterialType,
+  Material,
+  StandardMaterial,
+  Texture,
+  Vector3,
+  VertexBuffer,
+  type GreasedLineMesh,
+  type IGreasedLineMaterial,
+  type Scene,
+} from '../render/babylon/exports';
+import { clampAlpha } from './clampAlpha';
+import { Ecs } from '../../ecs/current';
+import type { TestScene } from '../render/scenes/testScene';
+import {
+  LiveList,
+  acquireCard,
+  additiveMaterial,
+  darkCardGain,
+  darkRibbonSheet,
+  effectTexture,
+  fadeOut,
+  fxNow,
+  hash,
+  lightCardGain,
+  luma,
+  pointSource,
+  releaseCard,
+  type Card,
+  type EffectBlend,
+  type PointSource,
+  type RGB,
+} from './core';
+import { addEffectGlow, releaseEffectGlow } from './glow';
+import { releaseGreasedLineMaterial } from './greasedLineRelease';
+import { RGBS } from './recipes';
+import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
+import { reportLoadFailure } from '../assets';
+
+// ---- 1. tuning -------------------------------------------------------------
+
+/** A lightning joint lives 10 ticks. */
+const DEFAULT_SECONDS = 0.4;
+
+/** Segments per bolt: the C++ joints are 10–16 points. */
+const DEFAULT_SEGMENTS = 12;
+
+/** Trail segments when none given: JOINT_SPIRIT's MaxTails 6. */
+const DEFAULT_TAILS = 6;
+
+/** Ribbon width in tiles (no size attenuation). */
+const DEFAULT_WIDTH = 0.06;
+
+/** Sideways noise per segment as a fraction of the bolt's length. */
+const DEFAULT_JITTER = 0.08;
+
+/** How often the noise re-rolls: every 2 ticks. */
+const REROLL_SECONDS = 0.08;
+
+/** A trail records its head this often: once a tick, like the original. */
+const TAIL_SAMPLE_SECONDS = 0.04;
+
+/** Fork slot count; each fork is a shorter bolt off a random middle segment. */
+const MAX_FORKS = 3;
+
+/** `taper`: width at the very nose, and how far along the ribbon it reaches full. */
+const NOSE_WIDTH = 0.5;
+const NOSE_SPAN = 0.12;
+
+/** `taper`: the tail falloff exponent. Under 1 holds the body wide and points the last stretch. */
+const TAIL_FALLOFF = 0.55;
+
+/** Where an inactive line is parked. */
+const PARKED_Y = -1000;
+
+/** Steering wander damping per tick: the original's `Direction *= 0.6 / 0.8`. */
+const WANDER_DAMP_PITCH = 0.6;
+const WANDER_DAMP_YAW = 0.8;
+
+/** Pitch forced when a steered head leaves its terrain band (`Angle[0] = ±5`). */
+const BAND_ESCAPE_PITCH = (5 * Math.PI) / 180;
+
+// ---- 2. state + readers ----------------------------------------------------
+
+export interface JointOptions {
+  /** Bolt: the far end. Omitted = trail mode (`head` or `velocity`). */
+  to?: Vector3 | PointSource;
+  /** Bolt: move the near end too (default: fixed at `at`). */
+  from?: PointSource;
+  /** Trail: a driven head (a bone, an orbit); the tail is where it has been. */
+  head?: PointSource;
+  /** Trail: a free head leaving `at` at this many tiles/s (C++ `Velocity`). */
+  velocity?: number;
+  /** Trail: the free head's direction (unit-ish; default: +z). */
+  heading?: Vector3;
+  /** Trail: radians/s the free head's yaw turns (the original's per-tick `Angle` step). */
+  turn?: number;
+  /** Trail: tiles/s² pulling the free head down. */
+  gravity?: number;
+  /**
+   * Trail: steer like JOINT_SPIRIT sub0 (ZzzEffectJoint.cpp:3732-3772) - per
+   * tick, home the heading on `seek` by up to `seekRate` radians
+   * (MoveHumming's 10°/frame), kick damped angular velocities with uniform
+   * impulses in ±`wander.pitch` / ±`wander.yaw` (the ±3.2°/±12.8° rolls,
+   * damped ×0.6/×0.8), and keep the head `band` tiles above the terrain (an
+   * excursion zeroes the pitch momentum and pitches 5° back in). Wins over
+   * `turn`/`gravity`.
+   */
+  steer?: {
+    seek?: PointSource;
+    seekRate?: number;
+    wander?: { pitch: number; yaw: number };
+    band?: { floor: number; ceiling: number };
+  };
+  /**
+   * Trail: the head's position, once a tick - the per-frame `CreateEffect`
+   * stamp at a joint's head (Evil Spirit's MODEL_LASER). Read-only: copy it,
+   * never keep it.
+   */
+  trace?: (head: Vector3) => void;
+  /** Trail: the head's position every frame, for things that ride it (a second ribbon, the head's model). */
+  track?: (head: Vector3) => void;
+  /** Fade fraction at end of life (default 0.3). Evil Spirit's `Light = LifeTime * 0.1` is 10/49. */
+  fadeTail?: number;
+  /** A 0..1 brightness at `t` seconds alive, in place of `fadeTail` and the bolt's flicker (a per-tick `Light *= …`). */
+  intensity?: (t: number) => number;
+  /**
+   * A caller-built polyline instead of a head or two ends: called once a tick
+   * with the point buffer (`maxTails + 1` points, oldest first), it writes its
+   * points and returns how many it wrote; the slots past them collapse onto
+   * the last. The sheet's U runs up from the oldest point, so it stays put on
+   * the path while the path grows (the tile-mapped tails, ZzzEffectJoint.cpp:7077-7116).
+   */
+  polyline?: (points: number[]) => number;
+  /** Trail: fade in over this fraction of the life (JOINT_SPIRIT sub24's `(160 - LifeTime) / 15`). Default 0. */
+  fadeIn?: number;
+  /** Trail: segments kept behind the head (C++ `MaxTails`). */
+  maxTails?: number;
+  /**
+   * Trail: stop recording the history after this many seconds, so the ribbon keeps its shape instead of
+   * shrinking onto a head that stopped - the original's CreateTail only while `LifeTime > 16` (BITMAP_LIGHT
+   * sub0, ZzzEffectJoint.cpp:6456). Default: records for the whole life.
+   */
+  sampleFor?: number;
+  /**
+   * Narrow the ribbon toward its ends instead of cutting it off square: a
+   * rounded nose and a tail that comes to a point. A constant-width ribbon is
+   * what the original draws, and on a short trail it reads as a rectangular
+   * plank sliding about rather than as something alive.
+   */
+  taper?: boolean | TaperShape;
+  /** Dark ribbon: the most its coverage gain may reach, whatever the map's dark gain asks for. */
+  maxCover?: number;
+  /** Trail: a side-to-side wave travelling down the ribbon (a serpent's body). Needs `smooth`. */
+  wave?: { amplitude: number; cycles: number; speed: number; phase?: number };
+  /** Trail: draw each tick-long segment as this many curve pieces, so a steered ribbon bends instead of kinking. */
+  smooth?: number;
+  colour?: RGB;
+  /** Lifetime; `Infinity` lives until `stop()` / `until` (the original's LT 999999). */
+  seconds?: number;
+  /** Ribbon width in tiles (C++ `Scale`). */
+  width?: number;
+  /** Bolt: points between the ends. */
+  segments?: number;
+  /** Bolt: sideways noise as a fraction of length; 0 = a straight beam. */
+  jitter?: number;
+  /** Bolt: side branches, 0…3. */
+  forks?: number;
+  /**
+   * Bolt: lays the `segments + 1` points itself instead of the jittered
+   * straight line - a walk like JOINT_THUNDER's MoveHumming steps
+   * (ZzzEffectJoint.cpp:4767-5020). Called at every re-roll, for each of `pairs` too.
+   */
+  path?: (from: Vector3, to: Vector3, out: number[], segments: number) => void;
+  /** Bolt: seconds between re-rolls (default two ticks). */
+  reroll?: number;
+  /** Bolt: drawn at its full light, without the flicker (`pairs` too). */
+  steady?: boolean;
+  /** Tiles above both points. */
+  height?: number;
+  /**
+   * `add` (default) is `EnableAlphaBlend`; `subtract` is
+   * `EnableAlphaBlendMinus` (`dst × (1 − src)`, ZzzOpenglUtil.cpp:444) - the
+   * dark ribbons of `RENDER_TYPE_ALPHA_BLEND_MINUS` joints (Evil Spirit's
+   * JOINT_SPIRIT sub0, ZzzEffectJoint.cpp:602).
+   */
+  blend?: EffectBlend;
+  /**
+   * `Effect/Joint*` sheet run along the ribbon (recipes.ts `TEX.joint*`) -
+   * the original's `BindTexture(o->Type)` per joint. Without it the ribbon is
+   * a flat band of `colour`.
+   */
+  texture?: string;
+  /** U lengths of the sheet along the ribbon (JOINT_THUNDER maps 2). */
+  textureRepeats?: number;
+  /** U scroll in sheet lengths/s (`Light -= Scroll`, thunder only: 1). */
+  textureScroll?: number;
+  /** Ends it early when true (the wearer left, the charge released). */
+  until?: () => boolean;
+  /** Draw over everything: `DisableDepthTest` around the joint (JOINT_HEALING sub8, ZzzEffectJoint.cpp:7021-7024). */
+  onTop?: boolean;
+  /**
+   * Trail: the body the ribbon belongs to. Every tick the whole history is
+   * shifted by this point's displacement before the head is sampled - the
+   * original's `Tails -= old TargetPosition; += new` on the MODEL_SPEARSKILL
+   * aura joints (ZzzEffectJoint.cpp:4463), so a ribbon is rigid with its
+   * wearer instead of streaking out behind a walk.
+   */
+  anchor?: PointSource;
+  /**
+   * Trail: a segment longer than this (tiles) is not drawn - `RenderJoints`'
+   * `distSq > 60 * 60` cull (:7108), which keeps a ribbon whose head jumped (a
+   * bone that just loaded, a warp) from drawing a line across the map.
+   */
+  maxSegment?: number;
+  /**
+   * Trail: cards riding the history - the `CreateSprite(BITMAP_FLARE_BLUE, …)`
+   * at the middle tail of the aura joints (:7136) and on every tail of the
+   * JOINT_HEALING sub9 ones (:7176). `count` cards sit at evenly spaced slots
+   * (1 = the middle one). `fadeAbove` dims a card by one per tile it sits
+   * above `anchor + fadeAbove` (the original's `Light - (z - (target + 50)) / 100`).
+   */
+  sprites?: { texture: string; colour: RGB; size: number; count?: number; fadeAbove?: number };
+  /** Narrow the whole ribbon linearly to nothing over its life (the original's `Scale = LifeTime * k`). */
+  shrink?: boolean;
+  /** Bolt: the chance a re-roll leaves it dark until the next (a bolt respawned on a `rand_fps_check(2)`). */
+  blink?: number;
+  /**
+   * Bolt: many independent bolts, one per pair of ends, drawn as one mesh and re-pointed together - a whole
+   * skeleton's worth of bone-to-parent arcs for one draw. `blink` hides the whole set.
+   */
+  pairs?: readonly { from: PointSource; to: PointSource }[];
+  /** Trail: re-point the ribbon only when its history steps (once a tick), not every frame - a long, slow ribbon. */
+  tickPoints?: boolean;
+  /**
+   * Many trails whose history is a known curve, drawn as one mesh and re-pointed once a tick: `fill(k, j, out)`
+   * writes point `j` (0 = head, up to `maxTails`) of trail `k` and returns its width multiplier, 0 for a trail
+   * not drawn this tick. Seventy of Death Stab's drill flares for one draw.
+   */
+  paths?: { count: number; fill: (k: number, j: number, out: Vector3) => number };
+}
+
+const live = new LiveList();
+
+const a = new Vector3();
+const b = new Vector3();
+const p = new Vector3();
+const side = new Vector3();
+const up = new Vector3(0, 1, 0);
+let seed = 0;
+
+function fillLine(points: number[], from: Vector3, to: Vector3, segments: number, jitter: number, s: number): void {
+  to.subtractToRef(from, p);
+  const len = p.length() || 1;
+  Vector3.CrossToRef(p, up, side);
+  side.normalize();
+  for (let i = 0; i <= segments; i++) {
+    const t = i / segments;
+    const k = Math.sin(t * Math.PI) * jitter * len;
+    const jx = (hash(s + i * 1.37) - 0.5) * 2 * k;
+    const jy = (hash(s + i * 2.71) - 0.5) * 2 * k;
+    const o = i * 3;
+    points[o] = from.x + p.x * t + side.x * jx;
+    points[o + 1] = from.y + p.y * t + jy;
+    points[o + 2] = from.z + p.z * t + side.z * jx;
+  }
+}
+
+function park(points: number[]): void {
+  for (let i = 0; i < points.length; i += 3) {
+    points[i] = 0;
+    points[i + 1] = PARKED_Y;
+    points[i + 2] = 0;
+  }
+}
+
+export interface Line {
+  mesh: GreasedLineMesh;
+  /** Set the ribbon's fade 0…1 (the original's `Alpha` on the tail quads). */
+  fade(vis: number): void;
+  /** Step the thunder scroll; a no-op without `textureScroll`. */
+  scroll(): void;
+  /** Set the ribbon's width as a fraction of its own (`shrink`). */
+  narrow(k: number): void;
+}
+
+/**
+ * The U along the ribbon per point slot - the original's
+ * `(NumTails − j) / (MaxTails − 1)`: the head end at `repeats`, the oldest
+ * tail at 0 (ZzzEffectJoint.cpp:7036). Four floats per point, matching the
+ * two side vertices GreasedLine builds per point; explicit because the
+ * auto-UVs divide by the line's *initial* length, and every joint here is
+ * born with all points on one spot.
+ */
+function rampUVs(lines: number[][], repeats: number, ascending = false): number[] {
+  const uvs: number[] = [];
+  for (const line of lines) {
+    const points = line.length / 3;
+    for (let i = 0; i < points; i++) {
+      const u = (ascending ? i / (points - 1) : 1 - i / (points - 1)) * repeats;
+      uvs.push(u, 0, u, 1);
+    }
+  }
+  return uvs;
+}
+
+/**
+ * `taper`'s width multipliers, two per point (lower, upper). Point 0 is the
+ * head (`spawnTrail` shifts the history down from slot 0), so the nose is
+ * rounded off over the first tenth and the rest falls to a point at the tail.
+ */
+export interface TaperShape {
+  /** Width at the head, and how far along it reaches full. */
+  nose?: number;
+  span?: number;
+  /** Fraction of the length held at full width before the tail starts to narrow. */
+  hold?: number;
+  /** Tail falloff exponent. */
+  falloff?: number;
+}
+
+function taperWidths(lines: number[][], shape: TaperShape): number[] {
+  const noseWidth = shape.nose ?? NOSE_WIDTH;
+  const span = shape.span ?? NOSE_SPAN;
+  const hold = shape.hold ?? 0;
+  const falloff = shape.falloff ?? TAIL_FALLOFF;
+  const widths: number[] = [];
+  for (const line of lines) {
+    const points = line.length / 3;
+    for (let i = 0; i < points; i++) {
+      const s = points > 1 ? i / (points - 1) : 0;
+      const nose = Math.min(1, noseWidth + s * (1 - noseWidth) / span);
+      const w = nose * Math.pow(1 - Math.max(0, s - hold) / (1 - hold), falloff);
+      widths.push(w, w);
+    }
+  }
+  return widths;
+}
+
+/** One ribbon mesh for `lines`; `widths` (two per point, x `width`) overrides `opts.taper`'s. rays.ts draws a burst through it. */
+export function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number, opts: JointOptions, widths?: number[]): Line {
+  const blend = opts.blend ?? 'add';
+  const sheetFile = opts.texture;
+  const textured = !!sheetFile;
+  const repeats = opts.textureRepeats ?? 1;
+  const dark = blend === 'subtract' && textured;
+  const alphaMode = dark
+    ? Constants.ALPHA_COMBINE
+    : blend === 'subtract'
+      ? Constants.ALPHA_SUBTRACT
+      : Constants.ALPHA_ADD;
+  const mesh = CreateGreasedLine(
+    'fxJoint',
+    {
+      points: lines,
+      updatable: true,
+      ...(textured ? { uvs: rampUVs(lines, repeats, !!opts.polyline) } : {}),
+      ...(widths ? { widths } : opts.taper ? { widths: taperWidths(lines, opts.taper === true ? {} : opts.taper) } : {}),
+    },
+    {
+      // With a texture the colour rides in `emissiveColor` below - the plugin's
+      // own colour would *replace* the sampled texel (COLOR_MODE_SET).
+      ...(textured ? {} : { color: new Color3(colour[0], colour[1], colour[2]) }),
+      width,
+      sizeAttenuation: false,
+      materialType: textured
+        ? GreasedLineMeshMaterialType.MATERIAL_TYPE_STANDARD
+        : GreasedLineMeshMaterialType.MATERIAL_TYPE_SIMPLE,
+    },
+    scene
+  ) as GreasedLineMesh;
+  mesh.isPickable = false;
+  mesh.doNotSyncBoundingInfo = true;
+  mesh.alwaysSelectAsActiveMesh = true;
+  // A bright ribbon is emissive art and joins the effect mask.
+  mesh.metadata = { brightMesh: alphaMode === Constants.ALPHA_ADD };
+
+  // The length-cutoff uniform lives on the greased-line side of either
+  // material type; it is a reveal, not a fade, so it only gates load state.
+  const glMat = mesh.greasedLineMaterial as IGreasedLineMaterial | undefined;
+  let sheet: Texture | null = null;
+  let fade: (vis: number) => void;
+
+  if (sheetFile) {
+    // The plugin defaults to white + COLOR_MODE_SET when no color is given,
+    // overwriting the shaded texel with a flat band; null keeps ours.
+    if (glMat) glMat.color = null;
+    // The sheet × `Light` under the joint's blend - the same Standard set-up
+    // as core.ts `additiveMaterial` (texel × emissive tint, lighting off).
+    // A dark ribbon instead draws black with the sheet as its coverage, for
+    // the reason model.ts `subtractMaterial` gives: coverage is the only
+    // channel a gain can push past the sheet's own levels.
+    const std = mesh.material as StandardMaterial;
+    const gain = dark ? Math.min(opts.maxCover ?? Infinity, luma(colour) * darkCardGain(scene)) : lightCardGain(scene);
+    // One dirty pass for the whole set-up: each dirtying setter walks every mesh in the scene, and a
+    // burst of forty sparks paid that walk hundreds of times in one frame.
+    std.blockDirtyMechanism = true;
+    std.diffuseColor.set(0, 0, 0);
+    std.specularColor.set(0, 0, 0);
+    std.ambientColor.set(0, 0, 0);
+    std.emissiveColor.set(dark ? 0 : colour[0] * gain, dark ? 0 : colour[1] * gain, dark ? 0 : colour[2] * gain);
+    std.alpha = dark ? gain : 1;
+    if (dark) clampAlpha(std);
+    std.disableLighting = true;
+    std.alphaMode = alphaMode;
+    std.transparencyMode = Material.MATERIAL_ALPHABLEND;
+    std.backFaceCulling = false;
+    std.disableDepthWrite = true;
+    if (opts.onTop) std.depthFunction = Constants.ALWAYS;
+    std.fogEnabled = false;
+    std.blockDirtyMechanism = false;
+    // Hold the line unseen until the sheet is in - a texture-less Standard
+    // ribbon is exactly the solid band this is here to remove.
+    if (glMat) glMat.visibility = -1;
+    // A dark ribbon covers with the sheet's luminance, faded out at its two sides.
+    void (dark ? darkRibbonSheet(scene, sheetFile) : effectTexture(scene, sheetFile)).then(tex => {
+      if (mesh.isDisposed()) return;
+      // Thunder scrolls and tiles along U (loaded GL_REPEAT in the original);
+      // the shared texture's wrap only matters to other joints of the same
+      // sheet, which want the same thing.
+      if (repeats !== 1 || opts.textureScroll) tex.wrapU = Texture.WRAP_ADDRESSMODE;
+      if (opts.textureScroll && opts.textureScroll !== 1) tex = scrollSheet(tex, opts.textureScroll);
+      sheet = tex;
+      if (dark) {
+        std.opacityTexture = tex;
+      } else {
+        std.diffuseTexture = tex;
+      }
+      if (glMat) glMat.visibility = 1;
+    }).catch(reportLoadFailure(sheetFile));
+    // A real brightness fade: the emissive tint toward black fades a bright
+    // ribbon out, the coverage toward zero a dark one.
+    fade = dark
+      ? vis => (std.alpha = gain * vis)
+      : vis => std.emissiveColor.set(colour[0] * gain * vis, colour[1] * gain * vis, colour[2] * gain * vis);
+  } else {
+    const std = mesh.material;
+    if (std) {
+      std.alpha = 0.99;
+      std.alphaMode = alphaMode;
+      std.disableDepthWrite = true;
+      std.backFaceCulling = false;
+    }
+    // The simple material has no per-fragment alpha; the length cutoff is
+    // the closest thing to the original's die-out.
+    fade = vis => {
+      if (glMat) glMat.visibility = vis;
+    };
+  }
+
+  // The item halo layer draws every active mesh and would rasterise the
+  // ribbon into its map for nothing (no tier, no trim); the ribbon's halo is
+  // the effects layer's.
+  (scene as TestScene).look?.glow.addExcludedMesh(mesh);
+
+  // A subtractive ribbon darkens what is behind it; blooming it would re-add
+  // the light it just took away.
+  if (blend !== 'subtract') addEffectGlow(scene, mesh);
+
+  const scrollRate = opts.textureScroll ?? 0;
+  return {
+    mesh,
+    fade,
+    narrow: k => {
+      if (glMat) glMat.width = width * k;
+    },
+    scroll:
+      scrollRate > 0
+        ? () => {
+            // The original's global `WorldTime % 1000 * 0.001` - every thunder
+            // joint writes the same value, so sharing the texture is safe.
+            if (sheet) sheet.uOffset = -((fxNow() * scrollRate) % 1);
+          }
+        : () => {},
+  };
+}
+
+/**
+ * A sheet scrolled at a rate other than 1: `uOffset` lives on the texture and
+ * every joint of one rate writes the same value, so each extra rate draws off
+ * its own clone of the shared sheet (the same image underneath).
+ */
+const scrollSheets = new Map<Texture, Map<number, Texture>>();
+
+function scrollSheet(tex: Texture, rate: number): Texture {
+  let rates = scrollSheets.get(tex);
+  if (!rates) {
+    const made = new Map<number, Texture>();
+    rates = made;
+    scrollSheets.set(tex, made);
+    tex.onDisposeObservable.addOnce(() => {
+      for (const clone of made.values()) clone.dispose();
+      scrollSheets.delete(tex);
+    });
+  }
+  let clone = rates.get(rate);
+  if (!clone) {
+    clone = tex.clone();
+    clone.wrapU = Texture.WRAP_ADDRESSMODE;
+    rates.set(rate, clone);
+  }
+  return clone;
+}
+
+export function disposeLine(scene: Scene, line: Line, lines: number[][]): void {
+  const mesh = line.mesh;
+  for (const l of lines) park(l);
+  releaseEffectGlow(mesh);
+  (scene as TestScene).look?.glow.removeExcludedMesh(mesh);
+  // Never dispose the shared empty-colours texture, and never through the
+  // public `colorsTexture` setter - greasedLineRelease.ts documents both traps.
+  releaseGreasedLineMaterial(mesh);
+  mesh.dispose();
+}
+
+/** A bolt between two ends (the original shape of this entry). */
+function spawnBolt(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle {
+  const colour = opts.colour ?? RGBS.arc;
+  const seconds = opts.seconds ?? DEFAULT_SECONDS;
+  const segments = opts.segments ?? DEFAULT_SEGMENTS;
+  const jitter = opts.jitter ?? DEFAULT_JITTER;
+  const forks = Math.min(MAX_FORKS, opts.forks ?? 0);
+  const height = opts.height ?? 0;
+  const near = opts.from ?? pointSource(at);
+  const far = pointSource(opts.to ?? at);
+
+  const lines: number[][] = [];
+  for (let i = 0; i < 1 + forks; i++) lines.push(new Array<number>((segments + 1) * 3).fill(0));
+  const line = makeLine(scene, lines, colour, opts.width ?? DEFAULT_WIDTH, opts);
+  const mesh = line.mesh;
+
+  let t = 0;
+  const reroll = opts.reroll ?? REROLL_SECONDS;
+  const blink = opts.blink ?? 0;
+  let dark = false;
+  let sinceRoll = reroll;
+  let s = seed++ * 7.13;
+  const forkFrom = new Vector3();
+  const forkTo = new Vector3();
+
+  return live.push({
+    update(dt) {
+      t += dt;
+      const prog = t / seconds;
+      if (prog >= 1 || opts.until?.()) return false;
+      sinceRoll += dt;
+      near(a);
+      far(b);
+      a.y += height;
+      b.y += height;
+      if (sinceRoll >= reroll) {
+        sinceRoll = 0;
+        s += 3.3;
+        dark = blink > 0 && Math.random() < blink;
+        if (opts.path) opts.path(a, b, lines[0], segments);
+        else fillLine(lines[0], a, b, segments, jitter, s);
+        for (let f = 1; f <= forks; f++) {
+          const at = 0.3 + hash(s + f) * 0.4;
+          const o = Math.floor(at * segments) * 3;
+          forkFrom.set(lines[0][o], lines[0][o + 1], lines[0][o + 2]);
+          const len = Vector3.Distance(a, b) * 0.35;
+          forkTo.set(
+            forkFrom.x + (hash(s + f * 1.1) - 0.5) * 2 * len,
+            forkFrom.y + (hash(s + f * 1.3) - 0.8) * len,
+            forkFrom.z + (hash(s + f * 1.7) - 0.5) * 2 * len
+          );
+          fillLine(lines[f], forkFrom, forkTo, segments, jitter * 1.5, s + f * 11);
+        }
+        mesh.setPoints(lines);
+      }
+      line.scroll();
+      line.fade(dark ? 0 : opts.intensity ? opts.intensity(t) : fadeOut(prog, opts.fadeTail ?? 0.3) * (opts.steady ? 1 : 0.6 + 0.4 * hash(t * 97)));
+      if (opts.shrink) line.narrow(1 - prog);
+      return true;
+    },
+    release() {
+      disposeLine(scene, line, lines);
+    },
+  });
+}
+
+/** `pairs`: every bolt of the set in one mesh, re-pointed together each re-roll. */
+function spawnBoltSet(scene: Scene, opts: JointOptions): EffectHandle {
+  const pairs = opts.pairs!;
+  const colour = opts.colour ?? RGBS.arc;
+  const seconds = opts.seconds ?? DEFAULT_SECONDS;
+  const segments = opts.segments ?? DEFAULT_SEGMENTS;
+  const jitter = opts.jitter ?? DEFAULT_JITTER;
+  const height = opts.height ?? 0;
+  const reroll = opts.reroll ?? REROLL_SECONDS;
+  const blink = opts.blink ?? 0;
+  const lines: number[][] = pairs.map(() => new Array<number>((segments + 1) * 3).fill(0));
+  for (const l of lines) park(l);
+  const line = makeLine(scene, lines, colour, opts.width ?? DEFAULT_WIDTH, opts);
+  const mesh = line.mesh;
+  let t = 0;
+  let sinceRoll = reroll;
+  let dark = false;
+  let s = seed++ * 7.13;
+  return live.push({
+    update(dt) {
+      t += dt;
+      const prog = t / seconds;
+      if (prog >= 1 || opts.until?.()) return false;
+      sinceRoll += dt;
+      if (sinceRoll >= reroll) {
+        sinceRoll = 0;
+        s += 3.3;
+        dark = blink > 0 && Math.random() < blink;
+        for (let i = 0; i < pairs.length; i++) {
+          pairs[i].from(a);
+          pairs[i].to(b);
+          a.y += height;
+          b.y += height;
+          if (opts.path) opts.path(a, b, lines[i], segments);
+          else fillLine(lines[i], a, b, segments, jitter, s + i * 5.1);
+        }
+        mesh.setPoints(lines);
+      }
+      line.scroll();
+      line.fade(dark ? 0 : fadeOut(prog, opts.fadeTail ?? 0.3) * (opts.steady ? 1 : 0.6 + 0.4 * hash(t * 97)));
+      return true;
+    },
+    release() {
+      disposeLine(scene, line, lines);
+    },
+  });
+}
+
+/** `paths`: every trail of the set in one mesh, its points and widths written by the caller once a tick. */
+function spawnPathSet(scene: Scene, opts: JointOptions): EffectHandle {
+  const paths = opts.paths!;
+  const seconds = opts.seconds ?? DEFAULT_SECONDS;
+  const points = Math.max(1, opts.maxTails ?? DEFAULT_TAILS) + 1;
+  const lines: number[][] = [];
+  for (let k = 0; k < paths.count; k++) lines.push(new Array<number>(points * 3).fill(0));
+  for (const l of lines) park(l);
+  const widths = new Array<number>(paths.count * points * 2).fill(0);
+  const line = makeLine(scene, lines, opts.colour ?? RGBS.arc, opts.width ?? DEFAULT_WIDTH, opts, widths);
+  const mesh = line.mesh;
+  // GreasedLineMesh._setPoints copies the whole uv table once per line (7 ms for 140 lines): drop it, write the ramp after.
+  const uvs = opts.texture ? new Float32Array(rampUVs(lines, opts.textureRepeats ?? 1)) : null;
+  if (uvs) (mesh as unknown as { _options: { uvs?: number[] } })._options.uvs = undefined;
+  let t = 0;
+  let sinceSample = TAIL_SAMPLE_SECONDS;
+  return live.push({
+    update(dt) {
+      t += dt;
+      const prog = t / seconds;
+      if (prog >= 1 || opts.until?.()) return false;
+      sinceSample += dt;
+      if (sinceSample >= TAIL_SAMPLE_SECONDS) {
+        sinceSample = 0;
+        for (let k = 0; k < paths.count; k++) {
+          const l = lines[k];
+          for (let j = 0; j < points; j++) {
+            const w = paths.fill(k, j, p);
+            l[j * 3] = p.x;
+            l[j * 3 + 1] = p.y;
+            l[j * 3 + 2] = p.z;
+            const o = (k * points + j) * 2;
+            widths[o] = w;
+            widths[o + 1] = w;
+          }
+        }
+        mesh.widths = widths;
+        mesh.setPoints(lines);
+        if (uvs) mesh.updateVerticesData(VertexBuffer.UVKind, uvs);
+      }
+      line.scroll();
+      line.fade(fadeOut(prog, opts.fadeTail ?? 0.3));
+      return true;
+    },
+    release() {
+      disposeLine(scene, line, lines);
+    },
+  });
+}
+
+/** A head with its last `maxTails` positions behind it (C++ Velocity / MaxTails). */
+function spawnTrail(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle {
+  const colour = opts.colour ?? RGBS.arc;
+  const seconds = opts.seconds ?? DEFAULT_SECONDS;
+  const tails = Math.max(1, opts.maxTails ?? DEFAULT_TAILS);
+  const height = opts.height ?? 0;
+  const velocity = opts.velocity ?? 0;
+  const turn = opts.turn ?? 0;
+  const gravity = opts.gravity ?? 0;
+  const steer = opts.steer;
+  const heading = opts.heading ? opts.heading.clone().normalize() : new Vector3(0, 0, 1);
+  let yaw = Math.atan2(heading.x, heading.z);
+  let pitch = Math.asin(Math.max(-1, Math.min(1, heading.y)));
+  let vy = velocity * Math.sin(pitch);
+  // Wander momentum, radians per tick (the original's `Direction[0]`/`[2]`).
+  let wanderPitch = 0;
+  let wanderYaw = 0;
+  const seekPoint = new Vector3();
+
+  const head = new Vector3(at.x, at.y + height, at.z);
+  if (opts.head) {
+    opts.head(head);
+    head.y += height;
+  }
+  const line = new Array<number>((tails + 1) * 3).fill(0);
+  for (let i = 0; i <= tails; i++) {
+    line[i * 3] = head.x;
+    line[i * 3 + 1] = head.y;
+    line[i * 3 + 2] = head.z;
+  }
+  const lines = [line];
+
+  // The body the history rides (`anchor`), and the copy of it that is drawn
+  // when over-long segments are culled - the history itself stays whole.
+  const anchor = opts.anchor;
+  const anchorNow = new Vector3();
+  const anchorLast = new Vector3();
+  if (anchor) anchor(anchorLast);
+  const maxSeg = opts.maxSegment ?? Infinity;
+  const sampleFor = opts.sampleFor ?? Infinity;
+  const cullLine = Number.isFinite(maxSeg) ? line.slice() : line;
+  const smooth = Math.max(1, Math.round(opts.smooth ?? 1));
+  const drawLine = smooth > 1 ? new Array<number>((tails * smooth + 1) * 3).fill(0) : cullLine;
+  if (smooth > 1) resampleCurve(cullLine, drawLine, smooth);
+  const waveScratch = opts.wave ? drawLine.slice() : [];
+  const drawLines = drawLine === line ? lines : [drawLine];
+  const ribbon = makeLine(scene, drawLines, colour, opts.width ?? DEFAULT_WIDTH, opts);
+  const mesh = ribbon.mesh;
+  const spriteCards: Card[] = [];
+  const spriteSlots: number[] = [];
+  if (opts.sprites) {
+    const s = opts.sprites;
+    const n = Math.max(1, s.count ?? 1);
+    const m = additiveMaterial(scene, s.texture, s.colour);
+    for (let i = 0; i < n; i++) {
+      spriteCards.push(acquireCard(scene, m));
+      // One card sits at the middle slot; several spread from the head to the tail.
+      spriteSlots.push(n === 1 ? Math.floor(tails / 2) : Math.round((i * tails) / (n - 1)));
+    }
+  }
+
+  let t = 0;
+  let sinceSample = 0;
+
+  return live.push({
+    update(dt) {
+      t += dt;
+      const prog = t / seconds;
+      if (prog >= 1 || opts.until?.()) return false;
+      if (anchor) {
+        anchor(anchorNow);
+        const dx = anchorNow.x - anchorLast.x;
+        const dy = anchorNow.y - anchorLast.y;
+        const dz = anchorNow.z - anchorLast.z;
+        if (dx !== 0 || dy !== 0 || dz !== 0) {
+          for (let i = 0; i < line.length; i += 3) {
+            line[i] += dx;
+            line[i + 1] += dy;
+            line[i + 2] += dz;
+          }
+          anchorLast.copyFrom(anchorNow);
+        }
+      }
+      if (opts.head) {
+        opts.head(head);
+        head.y += height;
+      } else if (steer) {
+        // Flight from the live angles; the angles themselves step at tick
+        // cadence below, like the original's 25 Hz frames.
+        const flat = velocity * Math.cos(pitch);
+        head.x += Math.sin(yaw) * flat * dt;
+        head.z += Math.cos(yaw) * flat * dt;
+        head.y += velocity * Math.sin(pitch) * dt;
+      } else {
+        yaw += turn * dt;
+        const flat = velocity * Math.cos(pitch);
+        vy -= gravity * dt;
+        head.x += Math.sin(yaw) * flat * dt;
+        head.z += Math.cos(yaw) * flat * dt;
+        head.y += vy * dt;
+      }
+      sinceSample += dt;
+      const stepped = sinceSample >= TAIL_SAMPLE_SECONDS && t <= sampleFor;
+      if (stepped) {
+        sinceSample = 0;
+        if (steer) {
+          if (steer.seek) {
+            // MoveHumming: turn toward the target by at most `seekRate`.
+            steer.seek(seekPoint);
+            const dx = seekPoint.x - head.x;
+            const dy = seekPoint.y - head.y;
+            const dz = seekPoint.z - head.z;
+            const rate = steer.seekRate ?? (10 * Math.PI) / 180;
+            const dYaw = Math.atan2(dx, dz) - yaw;
+            yaw += Math.max(-rate, Math.min(rate, Math.atan2(Math.sin(dYaw), Math.cos(dYaw))));
+            const dPitch = Math.atan2(dy, Math.hypot(dx, dz) || 1) - pitch;
+            pitch += Math.max(-rate, Math.min(rate, dPitch));
+          }
+          const w = steer.wander;
+          if (w) {
+            wanderPitch += (Math.random() * 2 - 1) * w.pitch;
+            wanderYaw += (Math.random() * 2 - 1) * w.yaw;
+            pitch += wanderPitch;
+            yaw += wanderYaw;
+            wanderPitch *= WANDER_DAMP_PITCH;
+            wanderYaw *= WANDER_DAMP_YAW;
+          }
+          const band = steer.band;
+          if (band) {
+            // -9999 until the map's height data is in; skip the clamp then.
+            const ground = Ecs.world?.getTerrainHeight(head.x, head.z) ?? -9999;
+            if (ground > -9000) {
+              if (head.y < ground + band.floor) {
+                wanderPitch = 0;
+                pitch = BAND_ESCAPE_PITCH;
+              } else if (head.y > ground + band.ceiling) {
+                wanderPitch = 0;
+                pitch = -BAND_ESCAPE_PITCH;
+              }
+            }
+          }
+        }
+        // Shift the history back one slot; slot 0 is the head.
+        line.copyWithin(3, 0, tails * 3);
+        opts.trace?.(head);
+      }
+      // A ribbon whose history is frozen and whose head stopped has nothing new to upload.
+      const held = t > sampleFor && !anchor && !opts.wave && head.x === line[0] && head.y === line[1] && head.z === line[2];
+      line[0] = head.x;
+      line[1] = head.y;
+      line[2] = head.z;
+      opts.track?.(head);
+      if (held) {
+        // Points unchanged since the last upload.
+      } else if (cullLine !== line) {
+        // Copy the history, collapsing an over-long segment onto its newer end so it draws as nothing.
+        const maxSq = maxSeg * maxSeg;
+        cullLine[0] = line[0];
+        cullLine[1] = line[1];
+        cullLine[2] = line[2];
+        for (let i = 3; i < line.length; i += 3) {
+          const ex = line[i] - line[i - 3];
+          const ey = line[i + 1] - line[i - 2];
+          const ez = line[i + 2] - line[i - 1];
+          const long = ex * ex + ey * ey + ez * ez > maxSq;
+          cullLine[i] = long ? cullLine[i - 3] : line[i];
+          cullLine[i + 1] = long ? cullLine[i - 2] : line[i + 1];
+          cullLine[i + 2] = long ? cullLine[i - 1] : line[i + 2];
+        }
+      }
+      if (!held) {
+        if (smooth > 1) resampleCurve(cullLine, drawLine, smooth);
+        if (opts.wave && drawLine !== line) waveLine(drawLine, waveScratch, opts.wave, t);
+        if (stepped || !opts.tickPoints) mesh.setPoints(drawLines);
+      }
+      ribbon.scroll();
+      const vis = (opts.intensity ? opts.intensity(t) : fadeOut(prog, opts.fadeTail ?? 0.3)) * (opts.fadeIn ? Math.min(1, prog / opts.fadeIn) : 1);
+      ribbon.fade(vis);
+      if (opts.shrink) ribbon.narrow(1 - prog);
+      if (spriteCards.length) {
+        const s = opts.sprites!;
+        for (let i = 0; i < spriteCards.length; i++) {
+          const o = spriteSlots[i] * smooth * 3;
+          const c = spriteCards[i];
+          c.position.set(drawLine[o], drawLine[o + 1], drawLine[o + 2]);
+          c.scaling.setAll(s.size);
+          let v = vis;
+          if (s.fadeAbove !== undefined && anchor) v *= Math.max(0, 1 - Math.max(0, drawLine[o + 1] - (anchorNow.y + s.fadeAbove)));
+          c.visibility = v;
+        }
+      }
+      return true;
+    },
+    release() {
+      for (const c of spriteCards) releaseCard(scene, c);
+      spriteCards.length = 0;
+      disposeLine(scene, ribbon, drawLines);
+    },
+  });
+}
+
+/** A polyline the caller rebuilds once a tick (`polyline`); segments over `maxSegment` are not drawn. */
+function spawnPolyline(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle {
+  const colour = opts.colour ?? RGBS.arc;
+  const seconds = opts.seconds ?? DEFAULT_SECONDS;
+  const tails = Math.max(1, opts.maxTails ?? DEFAULT_TAILS);
+  const tail = opts.fadeTail ?? 0.3;
+  const maxSq = (opts.maxSegment ?? Infinity) ** 2;
+  const line = new Array<number>((tails + 1) * 3);
+  for (let i = 0; i < line.length; i += 3) {
+    line[i] = at.x;
+    line[i + 1] = at.y;
+    line[i + 2] = at.z;
+  }
+  const lines = [line];
+  const ribbon = makeLine(scene, lines, colour, opts.width ?? DEFAULT_WIDTH, opts);
+  const mesh = ribbon.mesh;
+  const build = opts.polyline!;
+  let t = 0;
+  let sinceSample = TAIL_SAMPLE_SECONDS;
+
+  return live.push({
+    update(dt) {
+      t += dt;
+      if (t >= seconds || opts.until?.()) return false;
+      sinceSample += dt;
+      if (sinceSample >= TAIL_SAMPLE_SECONDS) {
+        sinceSample = 0;
+        const n = Math.max(1, Math.min(tails + 1, build(line)));
+        // An over-long segment collapses onto its older end, so it draws as nothing.
+        for (let i = 3; i < n * 3; i += 3) {
+          const ex = line[i] - line[i - 3];
+          const ey = line[i + 1] - line[i - 2];
+          const ez = line[i + 2] - line[i - 1];
+          if (ex * ex + ey * ey + ez * ez > maxSq) {
+            line[i - 3] = line[i];
+            line[i - 2] = line[i + 1];
+            line[i - 1] = line[i + 2];
+          }
+        }
+        const e = (n - 1) * 3;
+        for (let i = n * 3; i < line.length; i += 3) {
+          line[i] = line[e];
+          line[i + 1] = line[e + 1];
+          line[i + 2] = line[e + 2];
+        }
+        mesh.setPoints(lines);
+      }
+      ribbon.scroll();
+      ribbon.fade(opts.intensity ? opts.intensity(t) : fadeOut(t / seconds, tail));
+      return true;
+    },
+    release() {
+      disposeLine(scene, ribbon, lines);
+    },
+  });
+}
+
+/** Catmull-Rom through `src`'s points into `out`, `steps` pieces per segment, ends clamped. */
+function resampleCurve(src: number[], out: number[], steps: number): void {
+  const n = src.length / 3;
+  let o = 0;
+  for (let i = 0; i < n - 1; i++) {
+    const a = Math.max(0, i - 1) * 3;
+    const b = i * 3;
+    const c = (i + 1) * 3;
+    const d = Math.min(n - 1, i + 2) * 3;
+    for (let k = 0; k < steps; k++) {
+      const t = k / steps;
+      const t2 = t * t;
+      const t3 = t2 * t;
+      for (let j = 0; j < 3; j++) {
+        const p0 = src[a + j];
+        const p1 = src[b + j];
+        const p2 = src[c + j];
+        const p3 = src[d + j];
+        out[o++] = 0.5 * (2 * p1 + (p2 - p0) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 + (3 * p1 - p0 - 3 * p2 + p3) * t3);
+      }
+    }
+  }
+  const e = (n - 1) * 3;
+  out[o] = src[e];
+  out[o + 1] = src[e + 1];
+  out[o + 2] = src[e + 2];
+}
+
+/**
+ * Sway `line` sideways (flat, across its own heading) by a wave travelling from
+ * head to tail. The head stays on its path; the sway grows in over the neck.
+ */
+function waveLine(line: number[], scratch: number[], wave: NonNullable<JointOptions['wave']>, t: number): void {
+  const n = line.length / 3;
+  if (n < 3) return;
+  for (let i = 0; i < line.length; i++) scratch[i] = line[i];
+  for (let p = 1; p < n; p++) {
+    const s = p / (n - 1);
+    const a = (Math.min(n - 1, p + 1)) * 3;
+    const b = (p - 1) * 3;
+    const tx = scratch[a] - scratch[b];
+    const tz = scratch[a + 2] - scratch[b + 2];
+    const len = Math.hypot(tx, tz);
+    if (len < 1e-5) continue;
+    const neck = Math.min(1, s / 0.2);
+    const off = wave.amplitude * neck * neck * (3 - 2 * neck) * Math.sin(Math.PI * 2 * wave.cycles * s - t * wave.speed + (wave.phase ?? 0));
+    line[p * 3] = scratch[p * 3] - (tz / len) * off;
+    line[p * 3 + 2] = scratch[p * 3 + 2] + (tx / len) * off;
+  }
+}
+
+/** Spawn helper other entries call directly (aura's orbit ribbons). */
+export function spawnJoint(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle {
+  if (opts.pairs) return spawnBoltSet(scene, opts);
+  if (opts.paths) return spawnPathSet(scene, opts);
+  if (opts.polyline) return spawnPolyline(scene, at, opts);
+  return opts.head || opts.velocity !== undefined ? spawnTrail(scene, at, opts) : spawnBolt(scene, at, opts);
+}
+
+/**
+ * The most joints alive at once: the original's `Joints[MAX_JOINTS]` (Core/Globals/_define.h:504).
+ * CreateJoint makes none when every slot is live (ZzzEffectJoint.cpp:76). A set counts once.
+ */
+export const MAX_JOINTS = 500;
+
+/** How many joints are running (debug). */
+export function jointCount(): number {
+  return live.size;
+}
+
+function spawn(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle {
+  if (live.size >= MAX_JOINTS) return DEAD_HANDLE;
+  return spawnJoint(scene, at, opts);
+}
+
+function update(_map: number, dt: number): void {
+  live.update(dt);
+}
+
+function reset(): void {
+  live.clear();
+}
+
+// ---- 3. the layer ----------------------------------------------------------
+
+export const jointLayer: EffectLayer<JointOptions, 'joint'> = {
+  name: 'joint',
+  update,
+  reset,
+  spawn,
+};

@@ -2,16 +2,16 @@ import type { ISystemFactory } from '../world';
 import {
   updateTerrainDynamicLight,
   uploadTerrainLightDelta,
-} from '../../common/terrainDynamicLight';
+} from '../../controllers/terrain/terrainDynamicLight';
 import {
   pointLightPoolHeldTerrain,
   updatePointLightPool,
-} from '../../common/pointLightPool';
-import { lightingTier } from '../../common/lightingQuality';
-import { lighting } from '../../lighting';
-import { GameOptions } from '../../common/gameOptions';
-import { updateSceneLook } from '../../scenes/sceneLook';
-import { lookDirector } from '../../lighting/director';
+} from '../../controllers/lighting/pointLightPool';
+import { lightingTier } from '../../controllers/lighting/lightingQuality';
+import { lighting } from '../../controllers/lighting';
+import { GameOptions } from '@/controllers/settings';
+import { updateSceneLook } from '../../controllers/render/sceneLook';
+import { lookDirector } from '../../controllers/lighting/director';
 
 /**
  * The lighting layer's per-frame call site: the look director composes the

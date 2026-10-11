@@ -1,7 +1,7 @@
-import { Store } from '../../store';
-import { GUILD_FLAG_BONE, GuildFlag, isThunderHawkArmor } from '../../common/guildFlag';
-import { isEmptyGuildMark } from '../../common/guildMark';
-import { inChaosCastle } from '../../common/locomotion';
+import { GuildMarks } from '../../modules/guild';
+import { GUILD_FLAG_BONE, GuildFlag, isThunderHawkArmor } from '../../controllers/actors/guildFlag';
+import { isEmptyGuildMark } from '../../core/guildMark';
+import { inChaosCastle } from '../../controllers/actors/locomotion';
 import type { Entity, ISystemFactory } from '../world';
 
 /**
@@ -32,7 +32,7 @@ export const GuildFlagSystem: ISystemFactory = world => {
 
       for (const entity of query) {
         const model = entity.modelObject;
-        const guild = Store.guilds.get(entity.guild.id);
+        const guild = GuildMarks.get(entity.guild.id);
         const logo = guild?.logo;
         const wanted =
           !castle &&

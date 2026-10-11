@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { Xor32Encryptor } from '../../src/common/encryption/xor32';
+import { Xor32Encryptor } from '../../src/controllers/net/encryption/xor32';
 import {
   PING_LIMITS,
   PingSub,
   decodeRelayFrame,
   encodePoint,
   type PingRelayMessage,
-} from '../../src/common/pingProtocol';
+} from '../../src/controllers/net/protocols/pingProtocol';
 import { TrackedSession } from '../track/session';
 import { WireEncoder } from '../track/wire';
 import {

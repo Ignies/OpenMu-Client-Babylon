@@ -1,0 +1,38 @@
+import { defineMonster } from '@/controllers/monsters';
+import { BALI_FX } from './bodyFx';
+
+export default defineMonster({
+  Numb: 150,
+  Name: 'Bali',
+  // MODEL_BALI: see `bodyFx.ts`.
+  bodyFx: BALI_FX,
+  maxHealth: 5000,
+  model: { type: 32, scale: 0.12 },
+  stats: {
+    Rate: 1,
+    Level: 52,
+    HP: 7000,
+    MP: 0,
+    MinDmg: 165,
+    MaxDmg: 170,
+    Def: 100,
+    MagDef: 0,
+    AttackSuccess: 260,
+    Move: 75,
+    AttType: 3,
+    Range: 0,
+    View: 1,
+    MoveSpeed: 7,
+    AttSpeed: 400,
+    Regen: 1600,
+    Attri: 100,
+    ItemR: 2,
+    MoneyR: 160,
+    MaxI: 10,
+    ResWind: 3,
+    ResPois: 0,
+    ResIce: 6,
+    ResWater: 6,
+    ResFire: 6,
+  },
+});

@@ -1,0 +1,53 @@
+import { ENUM_WORLD } from '@/core/types';
+import type { MapLayer } from '@/controllers/maps/layer';
+import { ROCK04_TILES } from '../recipes';
+import { endGatewayTurn } from './gateway';
+import {
+  KANTURU2_BLEND_MESHES,
+  KANTURU2_EFFECT_ONLY_TYPES,
+  KANTURU2_EMISSIONS,
+  KANTURU2_MESH_ANIMATIONS,
+} from './spec';
+import { KANTURU_2ND_SOUND } from './sound';
+import { KANTURU_2ND_LIGHTING } from './lighting';
+import { sit } from '../shared/terrain';
+
+/**
+ * Kanturu Relics (World39 / Object39) - the map entry: identity and the per-world data the
+ * renderer, the terrain loader, the weather and the sound tables read.
+ * The object classes and the setup function are in `create.ts`, loaded on demand.
+ */
+
+// ---- 1. data ---------------------------------------------------------------
+
+const WORLDS: readonly ENUM_WORLD[] = [
+  ENUM_WORLD.WD_38KANTURU_2ND,
+];
+
+// World39: Rock01-04 only.
+const TILES = ROCK04_TILES;
+
+// OpenMU's spawn gate (VersionSeasonSix/Gates.cs, the `isSpawnGate: true` row), centred.
+const SPAWN = { x: 76, y: 105 } as const;
+
+// ---- 2. state + readers ----------------------------------------------------
+// The objects' state lives in what `create` binds; the Gateway Machine's
+// turn sound is `gateway.ts`, ended by a map change.
+
+// ---- 3. the layer ----------------------------------------------------------
+
+export const kanturu2Layer: MapLayer = {
+  name: 'kanturu2',
+  worlds: WORLDS,
+  tiles: TILES,
+  spawn: SPAWN,
+  blendMeshes: KANTURU2_BLEND_MESHES,
+  effectOnly: KANTURU2_EFFECT_ONLY_TYPES,
+  emissions: KANTURU2_EMISSIONS,
+  render: { meshAnimations: KANTURU2_MESH_ANIMATIONS },
+  sound: KANTURU_2ND_SOUND,
+  lighting: KANTURU_2ND_LIGHTING,
+  terrain: { rest: { 3: sit(false) } },
+  create: world => import('./create').then(m => m.createKanturu2(world)),
+  reset: endGatewayTurn,
+};

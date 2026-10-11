@@ -1,16 +1,16 @@
-import { Vector3, type Scene } from '../../libs/babylon/exports';
-import { EventBus } from '../../libs/eventBus';
-import { playBurst, type BurstKind } from '../../effects/bursts';
-import { playUiSound } from '../../sound/ui';
-import { TerrainDecal } from '../../common/moveTargetEffect';
-import { dropTier, type DropTier } from '../../common/dropTier';
-import { lighting } from '../../lighting';
+import { Vector3, type Scene } from '../../controllers/render/babylon/exports';
+import { EventBus } from '../../core/eventBus';
+import { playBurst, type BurstKind } from '../../controllers/fx/bursts';
+import { playUiSound } from '../../controllers/sound/ui';
+import { TerrainDecal } from '../../controllers/fx/moveTargetEffect';
+import { dropTier, type DropTier } from '@/controllers/item_rules';
+import { lighting } from '../../controllers/lighting';
 import type { Entity, ISystemFactory } from '../world';
 
 /**
  * Renders server-driven object effects:
  *  - `objectEffect` events (ShowEffect / ShowSwirl / level-up) → particle bursts
- *    at the object (effects/bursts.ts).
+ *    at the object (controllers/fx/bursts.ts).
  *  - dropped items: a soft ground glow under excellent / high-level drops so
  *    valuable loot reads from a distance (tier colours from dropTier.ts).
  */

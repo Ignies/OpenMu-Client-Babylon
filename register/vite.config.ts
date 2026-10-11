@@ -18,6 +18,12 @@ const repoRoot = fileURLToPath(new URL('..', import.meta.url));
 export default defineConfig({
   root,
   base: './',
+  resolve: {
+    alias: [
+      { find: /^@\//, replacement: fileURLToPath(new URL('../src/', import.meta.url)) },
+      { find: /^@versions\//, replacement: fileURLToPath(new URL('../versions/', import.meta.url)) },
+    ],
+  },
   build: {
     target: 'es2022',
     outDir: fileURLToPath(new URL('../dist-register', import.meta.url)),

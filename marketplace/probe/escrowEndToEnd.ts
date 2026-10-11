@@ -18,7 +18,7 @@ import {
   buildEscrowRequest,
   parseEscrowResult,
   type EscrowResult,
-} from '../../src/common/escrowWire';
+} from '../../src/controllers/net/protocols/escrowWire';
 
 const GAME_HOST = '127.0.0.1';
 const GAME_PORT = Number(process.env.GAME_PORT ?? 55901);

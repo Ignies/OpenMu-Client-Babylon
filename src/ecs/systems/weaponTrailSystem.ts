@@ -1,18 +1,18 @@
-import { Vector3 } from '../../libs/babylon/exports';
+import { Vector3 } from '../../controllers/render/babylon/exports';
 import type { ISystemFactory } from '../world';
-import { effects } from '../../effects';
-import { boneLocalPos } from '../../effects/core';
-import { weaponBlurFor, type WeaponBlurRow } from '../../common/weaponBlur';
-import { heldWeapons } from '../../common/chaosCastleUnit';
+import { effects } from '../../controllers/fx';
+import { boneLocalPos } from '../../controllers/fx/core';
+import { weaponBlurFor, type WeaponBlurRow } from '../../controllers/item_fx/weaponBlur';
 import {
   isPlayerAttackAction,
   isPlayerSkillAction,
-} from '../../common/playerActionMapper';
-import { PVP_MURDERER2, PVP_NEUTRAL } from '../../common/nameTags';
-import { tierIndex } from '../../common/lightingQuality';
-import { lighting } from '../../lighting';
+} from '../../controllers/anim/playerActionMapper';
+import { PVP_MURDERER2, PVP_NEUTRAL } from '../../controllers/interface/nameTags';
+import { tierIndex } from '../../controllers/lighting/lightingQuality';
+import { lighting } from '../../controllers/lighting';
+import { heldWeapons } from '../../controllers/actors';
 
-/** The first lighting tier that draws the improved looks (common/skillVisuals.ts). */
+/** The first lighting tier that draws the improved looks (controllers/skills/visuals.ts). */
 const ENHANCED_TIER = 1;
 const swingTmp = new Vector3();
 
@@ -23,7 +23,7 @@ const swingTmp = new Vector3();
  * drawn as one strip. Here the sampling is the `blur` primitive's; this
  * system is the **consumer** that notices a clip (re)start (`actionSerial`,
  * the way CombatSfxSystem does for sounds), looks the swing up in
- * `common/weaponBlur.ts` and spawns the trail once the clip reaches the
+ * `controllers/item_fx/weaponBlur.ts` and spawns the trail once the clip reaches the
  * start key. The trail ends itself when the clip does or is replaced.
  *
  * Per frame: one integer compare per character, one `actionFrame()` for a
@@ -58,7 +58,8 @@ export const WeaponTrailSystem: ISystemFactory = world => {
           const action = model.CurrentAction;
           swing.row =
             isPlayerAttackAction(action) || isPlayerSkillAction(action)
-              ? weaponBlurFor(heldWeapons(e, world.mapIndex), action, (e.heroState ?? PVP_NEUTRAL) >= PVP_MURDERER2)
+              ? // The murderer blur reads a player's c->Level; a red NPC (heroState from its gear) never sets it.
+                weaponBlurFor(heldWeapons(e, world.mapIndex), action, e.npcType === undefined && (e.heroState ?? PVP_NEUTRAL) >= PVP_MURDERER2)
               : null;
         }
         const row = swing.row;

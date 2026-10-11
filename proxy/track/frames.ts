@@ -1,9 +1,9 @@
 import {
   SimpleModulusDecryptor,
   SimpleModulusKeys,
-} from '../../src/common/encryption/simpleModulus';
-import { Xor32Decryptor } from '../../src/common/encryption/xor32';
-import { getPacketSize, getSizeOfPacketType } from '../../src/common/wireUtils';
+} from '../../src/controllers/net/encryption/simpleModulus';
+import { Xor32Decryptor } from '../../src/controllers/net/encryption/xor32';
+import { getPacketSize, getSizeOfPacketType } from '../../src/controllers/net/wireUtils';
 import { gameVersion } from '../../versions/season6';
 
 /**

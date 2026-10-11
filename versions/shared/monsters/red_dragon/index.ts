@@ -1,0 +1,37 @@
+import { defineMonster } from '@/controllers/monsters';
+
+export default defineMonster({
+  Numb: 42,
+  Name: 'Red Dragon',
+  // RenderCharacter casts it no shadow (ZzzCharacter.cpp:8662-8668).
+  classicShadow: false,
+  maxHealth: 50000,
+  model: { type: 31, scale: 1.3 },
+  stats: {
+    Rate: 1,
+    Level: 147,
+    HP: 50000,
+    MP: 0,
+    MinDmg: 2000,
+    MaxDmg: 2500,
+    Def: 1500,
+    MagDef: 0,
+    AttackSuccess: 3000,
+    Move: 2000,
+    AttType: 3,
+    Range: 150,
+    View: 15,
+    MoveSpeed: 10,
+    AttSpeed: 800,
+    Regen: 2000,
+    Attri: 3600,
+    ItemR: 2,
+    MoneyR: 100,
+    MaxI: 0,
+    ResWind: 4,
+    ResPois: 0,
+    ResIce: 100,
+    ResWater: 254,
+    ResFire: 100,
+  },
+});

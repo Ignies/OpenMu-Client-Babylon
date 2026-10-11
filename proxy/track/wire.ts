@@ -1,8 +1,8 @@
 import {
   SimpleModulusEncryptor,
   SimpleModulusKeys,
-} from '../../src/common/encryption/simpleModulus';
-import { Xor32Encryptor } from '../../src/common/encryption/xor32';
+} from '../../src/controllers/net/encryption/simpleModulus';
+import { Xor32Encryptor } from '../../src/controllers/net/encryption/xor32';
 import { gameVersion } from '../../versions/season6';
 
 /**

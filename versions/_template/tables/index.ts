@@ -7,14 +7,14 @@
  *             -> `tables/items.json`, wrapped in an `ItemsDatabase`-shaped class
  * - skills:   regenerate `SKILL_DEFINITIONS` from
  *             `OpenMU/src/Persistence/Initialization/<ver>/SkillsInitializer.cs`
- * - monsters: `<ver>/Monsters/*.cs` -> `monsters.json`
+ * - monsters: `<ver>/Monsters/*.cs` -> the monster folders
  * - jewels:   the jewel rules that exist in that version (`jewelUpgrade.ts` shape)
  * - NPC ids / shops / gates: `<ver>/Maps/*.cs`, that version's `gate.bmd`
  *
  * Keep the export names: the base imports the version's tables by these names.
  */
-export { ItemsDatabase } from '../../../src/common/itemsDatabase';
-export { SKILL_DEFINITIONS, skillDefinition } from '../../../src/common/skillsDatabase';
-export type { SkillDefinition } from '../../../src/common/skillsDatabase';
-export { MonstersDatabase } from '../../../src/common/monstersDatabase';
-export * as jewelRules from '../../../src/common/jewelUpgrade';
+export { ItemsDatabase } from '../../shared/items/itemsDatabase';
+export { SKILL_DEFINITIONS, skillDefinition } from '../../shared/skills/skillsDatabase';
+export type { SkillDefinition } from '../../shared/skills/skillsDatabase';
+export { MonstersDatabase } from '../../shared/monsters/monstersDatabase';
+export * as jewelRules from '@/modules/inventory/jewelUpgrade';

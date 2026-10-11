@@ -1,0 +1,36 @@
+import { defineMonster } from '@/controllers/monsters';
+
+export default defineMonster({
+  Numb: 104,
+  Name: 'Trap',
+  maxHealth: 50,
+  // MONSTER_TRAP, Castle Siege: `m_bRenderShadow = false` (GMBattleCastle.cpp:1285-1289).
+  trap: { object: 11, shadow: false },
+  stats: {
+    Rate: 1,
+    Level: 2,
+    HP: 50,
+    MP: 0,
+    MinDmg: 500,
+    MaxDmg: 600,
+    Def: 0,
+    MagDef: 0,
+    AttackSuccess: 800,
+    Move: 30,
+    AttType: 0,
+    Range: 50,
+    View: 0,
+    MoveSpeed: 1,
+    AttSpeed: 0,
+    Regen: 1000,
+    Attri: 0,
+    ItemR: 0,
+    MoneyR: 0,
+    MaxI: 0,
+    ResWind: 0,
+    ResPois: 0,
+    ResIce: 0,
+    ResWater: 0,
+    ResFire: 0,
+  },
+});

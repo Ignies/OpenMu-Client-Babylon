@@ -1,38 +1,71 @@
 import { describe, expect, it } from 'vitest';
-import { EN_TEXT, type TextKey } from './recipes';
 import { LANGUAGE_LAYERS } from './layers';
+import { builtInText, type TextSource } from './sources';
+import { textProblems } from './coverage';
 
 /**
- * A language that falls behind the catalogue still compiles - `strings` is
- * `Partial`, on purpose, so adding a key never breaks a language file - and
- * on screen it just quietly shows English. That is easy to ship by accident,
- * so the gap is a test failure rather than a dev-console warning.
+ * Every built-in owner (`<owner>/i18n/`) has an `en.ts` and translates every
+ * one of its keys in every language, keeping every `{hole}` and `%` spec. A
+ * missing line would only show English on screen, which is easy to ship by
+ * accident. Streamed modules need only English and are not checked here.
  */
 
-const KEYS = Object.keys(EN_TEXT) as TextKey[];
+const FILES = builtInText();
+const CODES = LANGUAGE_LAYERS.map(l => l.code);
 
-describe('language coverage', () => {
-  for (const layer of LANGUAGE_LAYERS) {
-    it(`${layer.name} translates every key`, () => {
-      const missing = KEYS.filter(key => layer.strings[key] === undefined);
-      expect(missing).toEqual([]);
-    });
+describe('text coverage', () => {
+  it('finds the built-in text', () => {
+    expect(FILES.filter(f => f.code === 'en').length).toBeGreaterThan(50);
+  });
 
-    it(`${layer.name} keeps every placeholder`, () => {
-      const holes = (text: string) =>
-        (text.match(/\{\w+\}/g) ?? []).slice().sort().join(',');
-      // `%d` / `%s` / `%%`: the original client's own format strings, spliced
-      // by their call sites, so a dropped one is a crash rather than a typo.
-      const specs = (text: string) =>
-        (text.match(/%(?:%|\d*\.?\d*[a-zA-Z]|I64d)/g) ?? []).join(',');
+  it('every owner translates every key in every language', () => {
+    expect(textProblems(FILES, CODES)).toEqual([]);
+  });
+});
 
-      const broken = KEYS.filter(key => {
-        const line = layer.strings[key];
-        if (line === undefined) return false;
-        return holes(line) !== holes(EN_TEXT[key]) || specs(line) !== specs(EN_TEXT[key]);
-      });
+describe('coverage rules', () => {
+  const file = (owner: string, code: string, strings: Record<string, string>): TextSource => ({
+    path: `${owner}/i18n/${code}.ts`,
+    owner,
+    code,
+    strings,
+  });
 
-      expect(broken).toEqual([]);
-    });
-  }
+  it('flags a missing language file, a missing line and a stray key', () => {
+    const files = [
+      file('a', 'en', { 'a.one': 'One', 'a.two': 'Two' }),
+      file('a', 'fr', { 'a.one': 'Un', 'a.three': 'Trois' }),
+    ];
+    expect(textProblems(files, ['en', 'fr', 'de'])).toEqual([
+      'a/i18n/fr.ts misses a.two',
+      'a/i18n/fr.ts has a.three, which a/i18n/en.ts does not',
+      'a/i18n/de.ts is missing',
+    ]);
+  });
+
+  it('flags a dropped placeholder or format spec', () => {
+    const files = [
+      file('a', 'en', { 'a.hi': 'Hi {name}', 'a.n': '%d left' }),
+      file('a', 'fr', { 'a.hi': 'Salut', 'a.n': '%s restants' }),
+    ];
+    expect(textProblems(files, ['en', 'fr'])).toEqual([
+      'a/i18n/fr.ts a.hi does not keep the placeholders of English',
+      'a/i18n/fr.ts a.n does not keep the placeholders of English',
+    ]);
+  });
+
+  it('flags a key owned twice, an owner without English and an unknown language', () => {
+    const files = [
+      file('a', 'en', { 'x.one': 'One' }),
+      file('b', 'en', { 'x.one': 'One' }),
+      file('c', 'fr', { 'c.one': 'Un' }),
+      file('a', 'xx', { 'x.one': 'One' }),
+    ];
+    expect(textProblems(files, ['en'])).toEqual([
+      'x.one is owned by both a and b',
+      'c/i18n has no en.ts',
+      'c/i18n/fr.ts is not a language in layers.ts',
+      'a/i18n/xx.ts is not a language in layers.ts',
+    ]);
+  });
 });

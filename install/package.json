@@ -1,0 +1,12 @@
+{
+  "name": "mu-server-installer",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "bun cli/main.ts"
+  },
+  "dependencies": {
+    "@clack/prompts": "1.8.1",
+    "picocolors": "1.1.1"
+  }
+}

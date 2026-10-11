@@ -1,7 +1,8 @@
-import { inBloodCastle } from '../../common/locomotion';
-import type { PlayerObject } from '../../common/playerObject';
-import { bloodCastleQuestItem } from '../../events/bloodCastle';
+import { inBloodCastle } from '../../controllers/actors/locomotion';
+import type { PlayerObject } from '../../controllers/actors/playerObject';
+import { bloodCastleQuestItem } from '../../modules/events/bloodCastle';
 import type { Entity, ISystemFactory } from '../world';
+import { settle } from '../../controllers/assets';
 
 /**
  * The Blood Castle quest weapon on its carrier's back.
@@ -10,7 +11,7 @@ import type { Entity, ISystemFactory } from '../world';
  * weapons it is in every running-state packet, and the original writes it to
  * `c->EtcPart`; `RenderCharacter` then hangs the model off back bone 47 while
  * the map is a castle floor (ZzzCharacter.cpp:15367-15391). Here the state
- * lives in `events/bloodCastle.ts` and this is the one place that turns it
+ * lives in `modules/events/bloodCastle.ts` and this is the one place that turns it
  * into a part - it cannot ride `AppearanceSystem`, which only runs when the
  * character's own equipment changed, and the carrier's does not.
  *
@@ -56,7 +57,7 @@ export const QuestItemSystem: ISystemFactory = world => {
 
       carrier = owner;
       carriedLevel = held.level;
-      void (owner.modelObject as PlayerObject).setQuestItemAsync(held.level);
+      void settle((owner.modelObject as PlayerObject).setQuestItemAsync(held.level), 'quest item');
     },
   };
 };

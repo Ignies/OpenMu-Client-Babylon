@@ -1,5 +1,5 @@
 import type { ISystemFactory } from '../world';
-import { weather } from '../../weather';
+import { weather } from '../../controllers/weather';
 
 /**
  * The weather layer's per-frame call site : steps

@@ -1,0 +1,79 @@
+import { ENUM_WORLD } from '@/core/types';
+import type { MapLayer } from '@/controllers/maps/layer';
+import { FULL_TILES } from '../recipes';
+import {
+  DEVIAS_EAST_HEARTH_HOUSE,
+  DEVIAS_READING_ROOM,
+  DEVIAS_ROOMS,
+  DEVIAS_TAVERN,
+  DEVIAS_WEST_HEARTH_HOUSE,
+} from './rooms';
+import {
+  DEVIAS_BLEND_MESHES,
+  DEVIAS_MESH_ANIMATIONS,
+} from './spec';
+import { DEVIAS_SOUND } from './sound';
+import { DEVIAS_LIGHTING } from './lighting';
+import { pose, sit } from '../shared/terrain';
+
+/**
+ * Devias (World3 / Object3) - the map entry: identity and the per-world data the
+ * renderer, the terrain loader, the weather and the sound tables read.
+ * The object classes and the setup function are in `create.ts`, loaded on demand.
+ */
+
+// ---- 1. data ---------------------------------------------------------------
+
+const WORLDS: readonly ENUM_WORLD[] = [
+  ENUM_WORLD.WD_2DEVIAS,
+];
+
+// OpenMU's spawn gate (VersionSeasonSix/Gates.cs, the `isSpawnGate: true` row), centred.
+const SPAWN = { x: 219, y: 24 } as const;
+
+// Open sky: rain falls here when the weather byte says so.
+const OUTDOOR = true;
+
+// `CreateDeviasSnow` gates on the world alone: the sky belongs to snow.
+const SNOW = true;
+
+// ---- 2. state + readers ----------------------------------------------------
+// None: the map's runtime state lives in the objects `create` binds.
+
+// ---- 3. the layer ----------------------------------------------------------
+
+export const deviasLayer: MapLayer = {
+  name: 'devias',
+  worlds: WORLDS,
+  tiles: FULL_TILES,
+  spawn: SPAWN,
+  outdoor: OUTDOOR,
+  snow: SNOW,
+  rooms: DEVIAS_ROOMS,
+  blendMeshes: DEVIAS_BLEND_MESHES,
+  render: { meshAnimations: DEVIAS_MESH_ANIMATIONS },
+  sound: DEVIAS_SOUND,
+  lighting: DEVIAS_LIGHTING,
+  // Dust in the lit interiors while the hero stands in one (ours).
+  weather: {
+    dust: [
+      { room: DEVIAS_TAVERN, dust: 'hearth' },
+      { room: DEVIAS_READING_ROOM, dust: 'tavern' },
+      { room: DEVIAS_WEST_HEARTH_HOUSE, dust: 'houseHearth' },
+      { room: DEVIAS_EAST_HEARTH_HOUSE, dust: 'houseHearth' },
+    ],
+  },
+  terrain: {
+    rest: {
+      22: sit(true),
+      25: sit(true),
+      40: sit(true),
+      45: sit(false),
+      55: sit(true),
+      73: sit(false),
+      91: pose(true),
+    },
+    leanCursor: [91],
+  },
+  create: world => import('./create').then(m => m.createDevias(world)),
+};

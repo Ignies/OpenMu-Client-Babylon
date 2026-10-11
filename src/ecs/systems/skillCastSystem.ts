@@ -1,6 +1,8 @@
 import type { Entity, ISystemFactory } from '../world';
-import { Store } from '../../store';
-import { applyPlayerActionSpeed, serverMinAttackInterval } from '../../common/playSpeed';
+import { Bag } from '../../modules/inventory';
+import { Hero } from '../../modules/hero';
+import { Session } from '../../modules/session';
+import { applyPlayerActionSpeed, serverMinAttackInterval } from '../../controllers/anim/playSpeed';
 import {
   AreaSkillPacket,
   EnterGateRequestPacket,
@@ -9,8 +11,8 @@ import {
   InstantMoveRequestPacket,
   TargetedSkillPacket,
   TeleportTargetPacket,
-} from '../../common/packets/ClientToServerPackets';
-import { skillDefinition, type SkillDefinition } from '../../common/skillsDatabase';
+} from '@versions/shared/packets/ClientToServerPackets';
+import { skillDefinition, type SkillDefinition } from '@versions/shared/skills/skillsDatabase';
 import {
   advancesSwordCount,
   chooseSkillAction,
@@ -19,44 +21,47 @@ import {
   isTeleportSkill,
   rotationByte256,
   TELEPORT,
-} from '../../common/skillCasting';
+} from '../../modules/skills/skillCasting';
 import {
   inSquareRange,
   pickAllySquare,
   teleportGate,
   teleportRefusal,
   TELEPORT_PREVENTING_EFFECTS,
-} from '../../common/teleportRules';
+} from '../../modules/warp/teleportRules';
 import { beginTeleport, endTeleport, teleportBusy } from './teleportSystem';
-import { Social } from '../../social';
+import { Social } from '../../modules/social/social';
 import {
   isAttackableEntity,
   isAttackablePlayer,
   isOtherPlayer,
+  reloadAmmo,
 } from './attackSystem';
-import { isFemaleClass } from '../../common/mapPlayerNetClassToModelClass';
-import { getBaseClass } from '../../common/characterStats';
-import { isWingItem } from '../../common/wings';
-import { heldWeapons } from '../../common/chaosCastleUnit';
-import type { AttackPose } from '../../common/weaponClass';
-import { mountKind } from '../../common/pets';
-import { heroCastSound, playCombat, playSkill } from '../../sound/combat';
-import { skills } from '../../skills';
-import { combat } from '../../combat';
-import { SKILL_DEFENSE, SKILL_NOVA, SKILL_NOVA_BEGIN } from '../../combat/recipes';
-import { CONSECUTIVE_ATTACK_KEY } from '../../combat/skillMovement';
-import { castsInPlace, castsOnSelfOnly } from '../../combat/castTargets';
-import { PlayerAction } from '../../common/objects/enum';
-import type { CastContext } from '../../combat';
-import { Vector3 } from '../../libs/babylon/exports';
-import { effects } from '../../effects';
-import { boneLocalPos } from '../../effects/core';
-import { hasWarriorGlint, warriorGlint, warriorGlintStar, WARRIOR_GLINT_BONE, WARRIOR_GLINT_TIP } from '../../common/weaponBlur';
-import { tierIndex } from '../../common/lightingQuality';
-import { lighting } from '../../lighting';
-import { isPlayerAttackAction } from '../../common/playerActionMapper';
+import { isFemaleClass } from '../../controllers/actors/mapPlayerNetClassToModelClass';
+import { getBaseClass } from '../../modules/hero/characterStats';
+import { isWingItem } from '../../controllers/actors/wings';
+import type { AttackPose } from '../../controllers/actors/weaponClass';
+import { mountKind } from '@/controllers/pets';
+import { clipCastSound, heroCastSound, playCombat, playSkill } from '../../controllers/sound/combat';
+import { skills, HeroSkills } from '../../modules/skills';
+import { combat } from '../../controllers/combat';
 
-/** The first lighting tier that draws the improved looks (common/skillVisuals.ts). */
+import { CONSECUTIVE_ATTACK_KEY } from '../../controllers/combat/skillMovement';
+import { castsInPlace, castsOnPlayersOnly, castsOnSelfOnly } from '../../controllers/combat/castTargets';
+import { PlayerAction } from '@versions/shared/objects/enum';
+import type { CastContext } from '../../controllers/combat';
+import { Vector3 } from '../../controllers/render/babylon/exports';
+import { effects } from '../../controllers/fx';
+import { boneLocalPos } from '../../controllers/fx/core';
+import { warriorGlint, warriorGlintStar, WARRIOR_GLINT_BONE, WARRIOR_GLINT_TIP } from '../../controllers/item_fx/weaponBlur';
+import { hasWarriorGlint } from '../../controllers/skills';
+import { tierIndex } from '../../controllers/lighting/lightingQuality';
+import { lighting } from '../../controllers/lighting';
+import { isPlayerAttackAction } from '../../controllers/anim/playerActionMapper';
+import { heldWeapons } from '../../controllers/actors';
+import { isSliding } from './positionSlideSystem';
+
+/** The first lighting tier that draws the improved looks (controllers/skills/visuals.ts). */
 const ENHANCED_TIER = 1;
 const glintTmp = new Vector3();
 
@@ -68,7 +73,8 @@ const glintTmp = new Vector3();
  * repeats the cast once the clip has played through.
  *
  * Timing and wire specials come from the `combat` layer: the per-skill clip
- * (through `chooseSkillAction`), the Nova hold (58 on press, 40 on release),
+ * (through `chooseSkillAction`), the Nova hold (its begin skill on press, the
+ * release on release, both named by Nova's file),
  * Dark Side's 0x4B/0x4A pair with its follow-up blows, and the 0xDB
  * `AreaSkillHit` for skills whose hits the client names. Re-use delays and
  * usability are the `skills` layer's verdict.
@@ -126,7 +132,7 @@ export const SkillCastSystem: ISystemFactory = world => {
    * active world, for Rider's flying variant.
    */
   function castContext(hero: Entity): CastContext {
-    const cls = hero.charAppearance?.charClass ?? Store.playerData.charClass;
+    const cls = hero.charAppearance?.charClass ?? Hero.charClass;
     const inSafeZone = !!hero.attributeSystem?.isAboveZero('inSafeZone');
     return {
       mount: mountKind(hero.charAppearance?.pet, inSafeZone),
@@ -142,7 +148,7 @@ export const SkillCastSystem: ISystemFactory = world => {
     const inSafeZone = !!hero.attributeSystem?.isAboveZero('inSafeZone');
     return {
       hands: heldWeapons(hero, world.mapIndex),
-      baseClass: getBaseClass(hands?.charClass ?? Store.playerData.charClass),
+      baseClass: getBaseClass(hands?.charClass ?? Hero.charClass),
       swordCount: hero.playerAnimation?.swordCount ?? 0,
       wings: isWingItem(hands?.wings),
       mount: mountKind(hands?.pet, inSafeZone),
@@ -188,28 +194,19 @@ export const SkillCastSystem: ISystemFactory = world => {
   }
 
   function sendTargeted(skill: number, targetId: number): void {
-    if (Store.isOffline) return;
+    if (Session.isOffline) return;
     const packet = TargetedSkillPacket.createPacket();
     packet.SkillId = skill;
     packet.TargetId = targetId;
-    Store.sendToGS(packet.buffer);
+    Session.sendToGS(packet.buffer);
   }
 
   function sendRageAttack(skill: number, targetId: number): void {
-    if (Store.isOffline) return;
+    if (Session.isOffline) return;
     const packet = RageAttackRequestPacket.createPacket();
     packet.SkillId = skill;
     packet.TargetId = targetId;
-    Store.sendToGS(packet.buffer);
-  }
-
-  /** Dark Side: one 0x4A per extra target as the follow-up blows come round. */
-  function drainDarkSide(): void {
-    for (;;) {
-      const id = combat.nextDarkSideHit();
-      if (id < 0) return;
-      sendRageAttack(combat.darkSidePendingSkill, id);
-    }
+    Session.sendToGS(packet.buffer);
   }
 
   /**
@@ -217,8 +214,8 @@ export const SkillCastSystem: ISystemFactory = world => {
    * server would refuse it (`AT_SKILL_TELEPORT`, ClassAttack.cpp:1479-1549;
    * WizardTeleportAction.cs). The original stops the hero and drops his
    * target (NewUIMainFrameWindow.cpp:1950-1956, `SetPlayerStop` on the
-   * reply); the Begin fades him out here and teleportSystem lands him on the
-   * square without waiting for the server's late `MapChanged`.
+   * reply); the Begin fades him out here and the server's `MapChanged` lands
+   * him (`teleportLandsEarly`: teleportSystem lands him without waiting).
    *
    * Teleport Ally (15): a party member pulled onto a free square next to the
    * caster (ClassAttack.cpp:1407-1479).
@@ -247,13 +244,13 @@ export const SkillCastSystem: ISystemFactory = world => {
         flag: world.getTerrainFlag(to.x, to.y),
         heroInSafeZone: inSafeZone,
         disabled,
-        holdingItem: !!Store.pickedItem,
+        holdingItem: !!Bag.pickedItem,
         busy: teleportGate.isPending(now) || teleportBusy(hero),
         sinceMapChange: teleportGate.sinceMapChange(now),
       });
       if (refusal) return false;
     } else {
-      if (inSafeZone || Store.pickedItem || !isPartyAlly(target, hero)) return false;
+      if (inSafeZone || Bag.pickedItem || !isPartyAlly(target, hero)) return false;
       const mate = target!;
       const allyPos = mate.transform!.pos;
       if (
@@ -278,11 +275,12 @@ export const SkillCastSystem: ISystemFactory = world => {
     world.castApproach = null;
     world.pickupTarget = null;
     const pathfinding = hero.pathfinding!;
-    if (pathfinding.path && pathfinding.path.length > 0) {
+    const next = pathfinding.path?.[0];
+    if (next) {
       pathfinding.path = null;
       pathfinding.from = { x: from.x, y: from.y };
       pathfinding.to = { x: from.x, y: from.y };
-      Store.sendWalkStop(heroPos.x, heroPos.z, hero.transform!.rot.y);
+      Hero.sendWalkStop(next.x, next.y, hero.transform!.rot.y);
     }
 
     if (ally) {
@@ -295,12 +293,12 @@ export const SkillCastSystem: ISystemFactory = world => {
         target!.playerAnimation.action = PlayerAction.PLAYER_SKILL_TELEPORT;
         target!.modelObject?.restartAction();
       }
-      if (!Store.isOffline) {
+      if (!Session.isOffline) {
         const packet = TeleportTargetPacket.createPacket();
         packet.TargetId = target!.netId!;
         packet.TeleportTargetX = to.x;
         packet.TeleportTargetY = to.y;
-        Store.sendToGS(packet.buffer);
+        Session.sendToGS(packet.buffer);
       }
       // What the caster's reply would draw (`CreateTeleportEnd(so)`, WSclient.cpp:4312-4316):
       // OpenMU names the ally as both caster and target instead, so the caster's half is drawn here.
@@ -314,12 +312,12 @@ export const SkillCastSystem: ISystemFactory = world => {
     const dz = to.y - heroPos.z;
     if (dx * dx + dz * dz > 0.01) hero.transform!.rot.y = Math.atan2(dz, dx) + Math.PI / 2;
 
-    if (!Store.isOffline) {
+    if (!Session.isOffline) {
       const packet = EnterGateRequestPacket.createPacket();
       packet.GateNumber = 0;
       packet.TeleportTargetX = to.x;
       packet.TeleportTargetY = to.y;
-      Store.sendToGS(packet.buffer);
+      Session.sendToGS(packet.buffer);
     }
     teleportGate.begin(from, to, now);
     beginTeleport(hero, def.num, { move: to });
@@ -362,11 +360,11 @@ export const SkillCastSystem: ISystemFactory = world => {
     const x = ~~to.x;
     const y = ~~to.y;
     if (!world.isWalkable(x, y)) return;
-    if (!Store.isOffline) {
+    if (!Session.isOffline) {
       const packet = InstantMoveRequestPacket.createPacket();
       packet.TargetX = x;
       packet.TargetY = y;
-      Store.sendToGS(packet.buffer);
+      Session.sendToGS(packet.buffer);
     }
     const pos = hero.transform!.pos;
     pos.x = x;
@@ -404,7 +402,7 @@ export const SkillCastSystem: ISystemFactory = world => {
 
   /** 0xDB: name the attackable objects inside the area around (x, y). */
   function sendAreaHit(def: SkillDefinition, x: number, y: number): void {
-    if (Store.isOffline || !combat.needsAreaHit(def)) return;
+    if (Session.isOffline || !combat.needsAreaHit(def)) return;
     const radius = combat.areaHitRadius(def);
     const ids: number[] = [];
     for (const e of world.netObjsQuery.entities) {
@@ -414,7 +412,7 @@ export const SkillCastSystem: ISystemFactory = world => {
       if (dx * dx + dz * dz <= radius * radius) ids.push(e.netId!);
     }
     const packet = combat.buildAreaHit(def.num, x, y, ids);
-    if (packet) Store.sendToGS(packet.buffer);
+    if (packet) Session.sendToGS(packet.buffer);
   }
 
   return {
@@ -433,8 +431,10 @@ export const SkillCastSystem: ISystemFactory = world => {
         return;
       }
 
-      drainDarkSide();
       drainPendingStep(hero, dt);
+
+      // `MoveHero` returns while the server's move slides the hero in (`JumpTime > 0`): the cast waits.
+      if (isSliding(hero)) return;
 
       // Standing on a safe zone tile: no skill goes out at all, whatever the
       // gesture was - `if (c->SafeZone) break` out of the AT_SKILL_* branches
@@ -454,13 +454,14 @@ export const SkillCastSystem: ISystemFactory = world => {
       // while charging → AT_SKILL_NOVA at the selected target (`SkillKeyPush`).
       if (combat.novaCharging && (!world.rightPointerPressed || world.pointerPressed)) {
         combat.releaseNova();
-        const def = skillDefinition(SKILL_NOVA);
+        const nova = combat.novaSkill;
+        const def = skillDefinition(nova);
         const target = req?.target ?? null;
         const targetId =
           target && isAttackableEntity(world, target) && target.netId !== undefined
             ? target.netId
-            : (Store.playerId ?? 0);
-        sendTargeted(SKILL_NOVA, targetId);
+            : (Hero.playerId ?? 0);
+        sendTargeted(nova, targetId);
         if (def) {
           const duration = playClip(hero, clipFor(hero, def));
           cooldown = Math.max(
@@ -486,7 +487,7 @@ export const SkillCastSystem: ISystemFactory = world => {
 
       if (!req) return;
 
-      const def = skillDefinition(Store.currentSkill);
+      const def = skillDefinition(HeroSkills.currentSkill);
       if (!def) {
         // No skill selected: the right button behaves like a plain attack
         // click, and another player is only swung at with Ctrl held.
@@ -515,13 +516,20 @@ export const SkillCastSystem: ISystemFactory = world => {
       if (combat.novaCharging) {
         const model = hero.modelObject;
         if (model?.ActionIterationWasFinished) {
-          const beginDef = skillDefinition(SKILL_NOVA_BEGIN);
+          const beginDef = skillDefinition(combat.novaBeginSkill);
           if (beginDef) playClip(hero, clipFor(hero, beginDef));
         }
         return;
       }
 
       if (cooldown > 0) return;
+
+      // `CheckArrow()` (SkillCast.cpp:580-590, :1189): a bow skill with no ammunition in hand puts
+      // the next quiver in and goes out once it is there; with none in the bag it is dropped.
+      if (combat.checksArrows(def.num) && !combat.hasAmmo(hero.charAppearance)) {
+        if (!reloadAmmo(hero.charAppearance)) world.castRequest = null;
+        return;
+      }
 
       // ---- Teleport: a one-shot at the square under the cursor.
       if (isTeleportSkill(def.num)) {
@@ -531,6 +539,13 @@ export const SkillCastSystem: ISystemFactory = world => {
             hero.modelObject?.getActionDuration(PlayerAction.PLAYER_SKILL_TELEPORT) ?? 0;
           cooldown = duration > 0 ? duration : FALLBACK_CAST_COOLDOWN;
         }
+        world.castRequest = null;
+        return;
+      }
+
+      // Heal, Greater Damage / Defense, Soul Barrier: a monster or NPC selected cancels the cast
+      // (`Attacking = -1`, ClassAttack.cpp:162-167, :1158).
+      if (castsOnPlayersOnly(def) && req.target?.npcType !== undefined) {
         world.castRequest = null;
         return;
       }
@@ -571,10 +586,13 @@ export const SkillCastSystem: ISystemFactory = world => {
       if (castsOnSelfOnly(def)) target = hero;
       else if (!area && !target && isSelfCastable(def)) target = hero;
 
+      // Dark Side goes out with nothing selected too, where the hero stands and with no turn
+      // (SkillCast.cpp:881-895, :1047-1049; CheckTarget needs only the cursor on the ground).
+      const here = inPlace || (!target && combat.isDarkSide(def.num) && !!req.point);
       const heroPos = hero.transform.pos;
       let tx: number | undefined;
       let ty: number | undefined;
-      if (inPlace) {
+      if (here) {
         tx = heroPos.x;
         ty = heroPos.z;
       } else if (target) {
@@ -588,14 +606,14 @@ export const SkillCastSystem: ISystemFactory = world => {
       }
 
       // ---- Nova: the press starts the charge on the hero, no target needed.
-      if (def.num === SKILL_NOVA) {
-        const beginDef = skillDefinition(SKILL_NOVA_BEGIN) ?? def;
-        if (!skills.canUse(SKILL_NOVA) || !combat.beginNova()) {
+      if (def.num === combat.novaSkill) {
+        const beginDef = skillDefinition(combat.novaBeginSkill) ?? def;
+        if (!skills.canUse(def.num) || !combat.beginNova()) {
           world.castRequest = null;
           return;
         }
-        skills.startCooldown(SKILL_NOVA);
-        sendTargeted(SKILL_NOVA_BEGIN, Store.playerId ?? 0);
+        skills.startCooldown(def.num);
+        sendTargeted(combat.novaBeginSkill, Hero.playerId ?? 0);
         playClip(hero, clipFor(hero, beginDef));
         return;
       }
@@ -631,9 +649,10 @@ export const SkillCastSystem: ISystemFactory = world => {
 
       // `LetHeroStop()` (ZzzInterface.cpp:1935): every cast drops the path
       // first, so a skill is never taken mid-stride.
+      // Mid-step the hero's tile is the step's destination, the path's next node (ZzzAI.cpp:556-562).
       const { pathfinding } = hero;
-      const wasWalking = !!pathfinding.path && pathfinding.path.length > 0;
-      if (wasWalking) {
+      const next = pathfinding.path?.[0];
+      if (next) {
         pathfinding.path = null;
         pathfinding.from = { x: ~~heroPos.x, y: ~~heroPos.z };
         pathfinding.to = { x: ~~heroPos.x, y: ~~heroPos.z };
@@ -645,7 +664,7 @@ export const SkillCastSystem: ISystemFactory = world => {
         hero.modelObject &&
         !hero.modelObject.ActionIterationWasFinished &&
         combat.clipHoldsFacing(hero.modelObject.CurrentAction);
-      if (!inPlace && target !== hero && dist > 0.01 && !heldClip) {
+      if (!here && target !== hero && dist > 0.01 && !heldClip) {
         hero.transform.rot.y = Math.atan2(dz, dx) + Math.PI / 2;
       }
       // The stop is a packet, not just a dropped path. The server is still
@@ -653,7 +672,7 @@ export const SkillCastSystem: ISystemFactory = world => {
       // onto the target's tile - while the hero stands here casting, and once
       // the two are more than 5 tiles apart it resynchronises us onto its own
       // position with an ObjectMoved.
-      if (wasWalking) Store.sendWalkStop(heroPos.x, heroPos.z, hero.transform.rot.y);
+      if (next) Hero.sendWalkStop(next.x, next.y, hero.transform.rot.y);
 
       // Mana / AG / re-use delay / requirements are gated client-side first
       // (the skill layer's verdict; the server re-checks everything).
@@ -663,22 +682,22 @@ export const SkillCastSystem: ISystemFactory = world => {
       }
       skills.startCooldown(def.num);
 
-      if (!Store.isOffline) {
-        if (!area && !target) {
+      if (!Session.isOffline) {
+        if (combat.isDarkSide(def.num)) {
+          // Dark Side: 0x4B asks the server for the targets, 0x4A lands the first blow; with nothing
+          // selected the key is 0 and the server picks them (SkillCast.cpp:881-895; OpenMU RageSkillAttackAction).
+          const targetId = target?.netId ?? 0;
+          const range = RageAttackRangeRequestPacket.createPacket();
+          range.SkillId = def.num;
+          range.TargetId = targetId;
+          Session.sendToGS(range.buffer);
+          sendRageAttack(def.num, targetId);
+          combat.beginDarkSide(def.num, targetId);
+        } else if (!area && !target) {
           // Forced cast with nothing near the cursor: the clip whiffs
           // toward the ground point and nothing goes on the wire. The hero
           // key must not stand in here - a targeted packet naming the
           // caster lands the skill on the character, not at the cursor.
-        } else if (combat.isDarkSide(def.num)) {
-          // Dark Side: 0x4B asks the server for the targets, 0x4A lands the
-          // first blow (ZzzInterface.cpp:2841-2842).
-          const targetId = target?.netId ?? Store.playerId ?? 0;
-          const range = RageAttackRangeRequestPacket.createPacket();
-          range.SkillId = def.num;
-          range.TargetId = targetId;
-          Store.sendToGS(range.buffer);
-          sendRageAttack(def.num, targetId);
-          combat.beginDarkSide(def.num, targetId);
         } else if (area) {
           const packet = AreaSkillPacket.createPacket();
           packet.SkillId = def.num;
@@ -686,14 +705,14 @@ export const SkillCastSystem: ISystemFactory = world => {
           packet.TargetY = ~~ty;
           packet.Rotation = rotationByte256(hero.transform.rot.y);
           packet.ExtraTargetId = target?.netId ?? NO_EXTRA_TARGET;
-          Store.sendToGS(packet.buffer);
+          Session.sendToGS(packet.buffer);
           sendAreaHit(def, ~~tx, ~~ty);
         } else {
-          sendTargeted(def.num, target!.netId ?? Store.playerId ?? 0);
+          sendTargeted(def.num, target!.netId ?? Hero.playerId ?? 0);
         }
       }
 
-      // Where the cast puts the caster (`combat/skillMovement`): the contact
+      // Where the cast puts the caster (`controllers/combat/skillMovement`): the contact
       // skills close the last tile themselves, either now or partway through
       // the clip.
       // The step closes the last tile, not the whole gap: `SendAttackPacket`
@@ -722,9 +741,11 @@ export const SkillCastSystem: ISystemFactory = world => {
         };
       }
 
-      // ExecuteSkill plays the skill's sound as the cast starts (Fire Scream's only at its spawn); a Dark Horse rider's guard has none.
-      const horseGuard = def.num === SKILL_DEFENSE && castContext(hero).mount === 'horse';
-      if (!horseGuard) playCombat(heroCastSound(def.num), hero.transform.pos);
+      // ExecuteSkill plays the skill's sound as the cast starts (Fire Scream's only at its spawn); a cast
+      // its skill makes quiet on this mount (a Dark Horse rider's guard) has none.
+      if (!combat.castQuietOn(def.num, castContext(hero).mount)) {
+        playCombat(clipCastSound(def.num, action) ?? heroCastSound(def.num, !!target && target !== hero), hero.transform.pos);
+      }
 
       cooldown = Math.max(
         duration > 0 ? duration : FALLBACK_CAST_COOLDOWN,

@@ -6,17 +6,17 @@ import {
   PublicChatMessagePacket,
   RequestCharacterListPacket,
   SelectCharacterPacket,
-} from '../../src/common/packets/ClientToServerPackets';
-import { CharacterClassNumber } from '../../src/common/types';
+} from '../../versions/shared/packets/ClientToServerPackets';
+import { CharacterClassNumber } from '../../src/core/types';
 import {
   CharacterCreationSuccessfulPacket,
   CharacterInformationPacket,
   CharacterListPacket,
   LoginResponseLoginResultEnum,
   LoginResponsePacket,
-} from '../../src/common/packets/ServerToClientPackets';
-import { Xor3Byte } from '../../src/common/encryption/xor3';
-import { stringToBytes } from '../../src/common/wireUtils';
+} from '../../versions/shared/packets/ServerToClientPackets';
+import { Xor3Byte } from '../../src/controllers/net/encryption/xor3';
+import { stringToBytes } from '../../src/controllers/net/wireUtils';
 import { gameVersion } from '../../versions/season6';
 import { BotConnection, type Frame } from './connection';
 
@@ -58,9 +58,9 @@ export function view(frame: Frame): DataView {
   );
 }
 
-export type CharacterEntry = ReturnType<CharacterListPacket['getCharacters']>[number];
+type CharacterEntry = ReturnType<CharacterListPacket['getCharacters']>[number];
 
-export type BotIdentity = {
+type BotIdentity = {
   account: string;
   password: string;
   /** Which character to play. Defaults to the lowest slot. */

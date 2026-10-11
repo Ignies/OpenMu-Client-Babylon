@@ -1,0 +1,38 @@
+import { defineMonster } from '@/controllers/monsters';
+import { dieSand, walkSand } from '../_shared/bodyFx';
+
+export default defineMonster({
+  Numb: 83,
+  Name: 'Golden wheel',
+  // MODEL_GOLDEN_WHEEL: sand walking and dying (ZzzCharacter.cpp:5980-5984).
+  bodyFx: [walkSand, dieSand],
+  maxHealth: 15000,
+  model: { type: 41, scale: 1.4 },
+  stats: {
+    Rate: 1,
+    Level: 77,
+    HP: 15000,
+    MP: 0,
+    MinDmg: 320,
+    MaxDmg: 360,
+    Def: 230,
+    MagDef: 0,
+    AttackSuccess: 385,
+    Move: 160,
+    AttType: 3,
+    Range: 0,
+    View: 4,
+    MoveSpeed: 7,
+    AttSpeed: 400,
+    Regen: 1400,
+    Attri: 70,
+    ItemR: 2,
+    MoneyR: 180,
+    MaxI: 30,
+    ResWind: 3,
+    ResPois: 0,
+    ResIce: 9,
+    ResWater: 7,
+    ResFire: 9,
+  },
+});

@@ -1,0 +1,15 @@
+import { defineSkill } from '@/controllers/skills/define';
+import { IRON_DEFENSE } from '../../_shared';
+
+import { A } from '@/controllers/combat/recipes';
+import { MOUNTED_HAND } from '../../_shared';
+
+import { IRON_DEFENSE_LIGHT } from '../../_shared';
+
+export default defineSkill({
+  id: 521,
+  name: "Iron Defense",
+  visual: IRON_DEFENSE,
+  clip: { ground: A.PLAYER_SKILL_HAND1, ...MOUNTED_HAND }, // Iron Defense
+  light: IRON_DEFENSE_LIGHT,
+});

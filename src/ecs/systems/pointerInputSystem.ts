@@ -4,16 +4,17 @@ import {
   PointerEventTypes,
   Ray,
   Vector3,
-} from '../../libs/babylon/exports';
+} from '../../controllers/render/babylon/exports';
 import type { EntityTypeFromQuery, ISystemFactory } from '../world';
 import { canAttackPlayer, isAttackableEntity } from './attackSystem';
-import { isMobileDevice } from '../../common/mobile';
-import { Commands } from '../../commands';
-import { Store } from '../../store';
-import { TELEPORT_ALLY } from '../../common/skillCasting';
-import { aimX, aimY } from '../../camera';
-import { requestPing } from '../../ping/pingNet';
-import { pickGround } from '../../libs/mu/terrainPick';
+import { isMobileDevice } from '../../controllers/interface/mobile';
+import { Commands } from '../../modules/chat/commands';
+import { HeroSkills } from '../../modules/skills';
+import { TELEPORT_ALLY } from '../../modules/skills/skillCasting';
+import { aimX, aimY } from '../../controllers/camera';
+import { requestPing } from '../../controllers/net/pingNet';
+import { pickGround } from '../../controllers/terrain/terrainPick';
+import { isSliding } from './positionSlideSystem';
 
 const COLOR_RED = new Color3(1, 0, 0);
 
@@ -213,7 +214,7 @@ export const PointerInputSystem: ISystemFactory = world => {
         ev.type === PointerEventTypes.POINTERDOWN &&
         !ev.event.ctrlKey &&
         !pvp &&
-        Store.currentSkill !== TELEPORT_ALLY &&
+        HeroSkills.currentSkill !== TELEPORT_ALLY &&
         Commands.openQuickOn(hovered, ev.event.clientX, ev.event.clientY)
       ) {
         return;
@@ -222,6 +223,8 @@ export const PointerInputSystem: ISystemFactory = world => {
       // every move while held so the cast follows the cursor.
       if (ev.type === PointerEventTypes.POINTERDOWN) {
         world.rightPointerPressed = true;
+        // `MoveHero` returns while the server slides the hero in (`JumpTime > 0`): the click is lost.
+        if (isSliding(world.playerEntity)) return;
         // A cast of the hero's own ends the follow (ZzzInterface.cpp:6812).
         Commands.stopFollowing();
       } else if (ev.type === PointerEventTypes.POINTERUP) {
@@ -255,6 +258,8 @@ export const PointerInputSystem: ISystemFactory = world => {
 
     if (ev.type === PointerEventTypes.POINTERDOWN) {
       world.pointerPressed = true;
+      // `MoveHero` returns while the server slides the hero in (`JumpTime > 0`): the click is lost.
+      if (isSliding(world.playerEntity)) return;
       // `MoveHero` (ZzzInterface.cpp:7535): a click of the hero's own -
       // ground, monster, NPC or drop - ends the follow.
       Commands.stopFollowing();

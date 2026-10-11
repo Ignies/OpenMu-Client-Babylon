@@ -1,57 +1,33 @@
-import { Vector3 } from '../../libs/babylon/exports';
-import { MonsterActionType, PlayerAction } from '../../common/objects/enum';
-import { isPlayerAttackAction } from '../../common/playerActionMapper';
-import { BloodDecals } from '../../common/bloodDecals';
-import { shatterDeathFor, spawnBomb } from '../../common/deathVisuals';
-import { monsterModelTypeOf } from '../../common/playSpeed';
-import { inBloodCastle, inChaosCastle } from '../../common/locomotion';
-import { TW_ACTION, TW_NOGROUND } from '../../common/terrain/consts';
-import { playSfx } from '../../libs/sfx';
-import { COMBAT_BUS } from '../../common/combatSounds';
-import { effects } from '../../effects';
-import { bonePos, entityYaw, type RGB } from '../../effects/core';
-import { NOVA_DEATH_MOTES } from '../../effects/recipes';
-import { SKILL_COMBO, SKILL_NOVA } from '../../combat/recipes';
+import { Vector3 } from '../../controllers/render/babylon/exports';
+import { MonsterActionType, PlayerAction } from '@versions/shared/objects/enum';
+import { BloodDecals } from '../../controllers/fx/bloodDecals';
+import { shatterDeathFor, spawnBomb } from '../../controllers/fx/deathVisuals';
+import { monsterModelTypeOf } from '../../controllers/anim/playSpeed';
+import { inBloodCastle, inChaosCastle } from '../../controllers/actors/locomotion';
+import { TW_ACTION, TW_NOGROUND } from '../../controllers/terrain/consts';
+import { playSfx } from '../../controllers/sound/sfx';
+import { COMBAT_BUS } from '../../controllers/sound/combatSounds';
+import { entityYaw, type RGB } from '../../controllers/fx/core';
+import { combat } from '../../controllers/combat';
 import type { DeathMotion, Entity, ISystemFactory } from '../world';
-import type { PlayerObject } from '../../common/playerObject';
+import type { PlayerObject } from '../../controllers/actors/playerObject';
+import { npcShadowOnDeath } from '../../controllers/actors/modelFactoryPerId';
 
 /**
  * DeadCharacter / SetPlayerDie / the Dead counter (ZzzCharacter.cpp:3105,
- * 1372, 3958; WSclient.cpp:5370, 5489):
- *
- * 1. Kill packet: Dead = 1, movement stops. If the hero landed the blow the
- *    Die clip waits for the swing to connect (AttackFlag = ATTACK_DIE), with
- *    the generic 15-tick fallback; anyone else's kill dies at once. A Nova /
- *    Combo kill or a castle death also starts a body motion.
- * 2. Die clip plays once and holds; two blood splats under the head bone.
- *    **Special deaths** (`common/deathVisuals.ts`): Death Cow / Stone Golem /
- *    Ice Monster burst into pieces instead - the body vanishes at once.
- * 3. Rot += 0.02/tick from the kill. At Rot >= 1 (2 s) alpha fades to 0
- *    over the next 2 s while the body sinks 0.4 cm per tick.
- * 4. Body motion, render-only (`dying.offset` / `dying.pitch`):
- *    - Nova / Combo (:3173-3193): for 15 ticks the corpse slides toward the
- *      killer, 40…54 cm/tick decelerating; a Nova death also throws blue
- *      BITMAP_LIGHT motes from random bones for 30 ticks.
- *    - Blood Castle bridge edge / Chaos Castle pit (`FallingStartCharacter`,
- *      WSclient.cpp:5440; `FallingCharacter`, :3014): the body tips over and
- *      falls off, sideways on the bridge, straight down in the pit (with a
- *      `SOUND_CHAOS_FALLING` scream). Chaos Castle corpses also pop `CreateBomb`s,
- *      each with its eExplosion, on odd ticks 15…25 (:3145-3168).
- * 5. Alpha < 0.01: everyone but the hero is removed. The hero stays until
- *    the respawn packet clears the state.
+ * 1372, 3958, 3014, 3145-3193; WSclient.cpp:5370, 5440, 5489). See ecs/readme.md.
  */
 
 const TICKS_PER_SECOND = 25;
-const DIE_FALLBACK_TICKS = 15;
+/** `c->Dead >= 15` -> SetPlayerDie (ZzzCharacter.cpp:4074-4080): Dead starts at 1, so 14 ticks after the kill. */
+const DIE_TICKS = 14;
 const ROT_PER_TICK = 0.02;
 const SINK_PER_TICK = 0.4 / 100; // 0.4 in the original's cm units
 const HEAD_BONE = 20;
-/** Fraction of the swing clip at which the blow is taken to connect (AttackFrame). */
-const SWING_HIT_FRACTION = 0.5;
 const CM = 1 / 100;
 const DEG = Math.PI / 180;
 
-// ---- Nova / Combo knock (ZzzCharacter.cpp:3173-3193, WSclient.cpp:5527-5546)
+// ---- the skill knock (Nova, Combo: ZzzCharacter.cpp:3173-3193, WSclient.cpp:5527-5546)
 /** `c->Dead < 15`: ticks the slide lasts. */
 const KNOCK_TICKS = 15;
 /** `Direction[1] = rand() % 15 + 40` cm/tick. */
@@ -61,10 +37,6 @@ const KNOCK_SPEED_CM_SPAN = 15;
 const KNOCK_DECEL_MIN = 1.0;
 const KNOCK_DECEL_SPAN = 0.5;
 const KNOCK_DECEL_PER_TICK = 1;
-/** `c->Dead <= 30`: ticks the Nova motes fall from the body, 10 a tick from bones 0…31. */
-const NOVA_GLOW_TICKS = 30;
-const NOVA_MOTES_PER_TICK = 10;
-const NOVA_BONES = 32;
 
 // ---- castle falls (WSclient.cpp:5440-5487, ZzzCharacter.cpp:3014-3032)
 /** `Gravity = rand() % 10 + 10` (cm, the initial hop up). */
@@ -101,25 +73,11 @@ const PIT_SCREAM = 'Sound/pMaleScream';
 const PIT_SCREAM_CHANNELS = 1;
 
 const tmpHead = new Vector3();
-const tmpBone = new Vector3();
 const tmpBomb = new Vector3();
 
 export const DeathSystem: ISystemFactory = world => {
   const query = world.with('dying', 'modelObject', 'transform');
   let blood: BloodDecals | null = null;
-
-  function heroSwingConnected(): boolean {
-    const hero = world.playerEntity;
-    if (!hero) return true;
-    const action = hero.playerAnimation.action;
-    if (!isPlayerAttackAction(action)) return true;
-    const model = hero.modelObject;
-    if (!model || model.CurrentAction !== action) return true;
-    return (
-      model.ActionIterationWasFinished ||
-      model.actionProgress() >= SWING_HIT_FRACTION
-    );
-  }
 
   /** Body origin in map-local tiles (what `o->Position` is to an effect). */
   function bodyOrigin(e: Entity, out: Vector3): Vector3 {
@@ -168,7 +126,8 @@ export const DeathSystem: ISystemFactory = world => {
       };
     }
     if (inBloodCastle(map) || inChaosCastle(map)) return undefined;
-    if (d.skill === SKILL_NOVA || d.skill === SKILL_COMBO) {
+    // A skill whose kill knocks the body back (its file's `kill.knock`).
+    if (combat.skillKill(d.skill)?.knock) {
       // Face the killer (`CreateAngle2D(o->Position, to->Position)`); the
       // slide runs along that heading. Without the killer in scope: own yaw.
       const killer = world.getByNetId(d.killerNetId);
@@ -217,15 +176,6 @@ export const DeathSystem: ISystemFactory = world => {
     d.offset.y = m.height * CM;
   }
 
-  function novaGlow(e: Entity, ticks: number): void {
-    const count = Math.round(NOVA_MOTES_PER_TICK * ticks);
-    for (let i = 0; i < count; i++) {
-      bonePos(e, Math.floor(Math.random() * NOVA_BONES), tmpBone);
-      tmpBone.x -= world.mapParent.position.x;
-      tmpBone.z -= world.mapParent.position.z;
-      effects.spawn('particles', world.scene, tmpBone, { recipe: NOVA_DEATH_MOTES, count: 1 });
-    }
-  }
 
   function chaosBombs(e: Entity, tickBefore: number, tickAfter: number): void {
     const start = e.dying!.motion?.kind === 'fall' ? BOMB_START_TICK_FALLING : BOMB_START_TICK;
@@ -244,6 +194,9 @@ export const DeathSystem: ISystemFactory = world => {
   function startDie(e: Entity) {
     const d = e.dying!;
     const model = e.modelObject!;
+
+    // A Die branch's `m_bRenderShadow = false` (GMSwampOfQuiet.cpp:859 and its kind).
+    if (e.npcType !== undefined && !npcShadowOnDeath(e.npcType)) model.ClassicShadow = false;
 
     // SetPlayerDie's switch: a shatter death replaces the Die clip and the
     // blood - the body is gone (`o->Live = false`) and the pieces fly.
@@ -296,9 +249,10 @@ export const DeathSystem: ISystemFactory = world => {
       for (const e of query) {
         const d = e.dying;
         const model = e.modelObject;
-        const tickBefore = d.time * TICKS_PER_SECOND;
-        d.time += dt;
-        const tickAfter = d.time * TICKS_PER_SECOND;
+        // `c->Dead += FPS_ANIMATION_FACTOR` (ZzzCharacter.cpp:4076): whole ticks at 25 fps, no float drift.
+        const tickBefore = d.time;
+        d.time += ticks;
+        const tickAfter = d.time;
 
         // ReceiveDie's motion setup runs on the kill tick, before the Die clip.
         if (tickBefore === 0) d.motion = startMotion(e);
@@ -307,17 +261,17 @@ export const DeathSystem: ISystemFactory = world => {
             stepMotion(e, d.motion, tick);
           }
         }
-        if (d.skill === SKILL_NOVA && tickAfter <= NOVA_GLOW_TICKS && !d.shattered) {
-          novaGlow(e, ticks);
-        }
+        // What the killing skill draws on the body while it dies (Nova's glow).
+        combat.skillKill(d.skill)?.dying?.(e, ticks, tickAfter, world);
         if (inChaosCastle(world.mapIndex)) chaosBombs(e, tickBefore, tickAfter);
 
+        // DeadCharacter's `c->Rot += 0.02` runs from the kill on, Die clip or not (ZzzCharacter.cpp:3215-3229).
+        d.rot += ROT_PER_TICK * ticks;
+
         if (!d.started) {
-          const waitForHero = d.killedByHero && !heroSwingConnected();
-          if (
-            model.Ready &&
-            (!waitForHero || d.time * TICKS_PER_SECOND >= DIE_FALLBACK_TICKS)
-          ) {
+          // A Blood Castle bridge fall dies at once (`m_bActionStart`, :4081-4084); `held` is the hero's blow wait.
+          const bridgeFall = d.motion?.kind === 'fall' && inBloodCastle(world.mapIndex);
+          if (model.Ready && d.time >= (bridgeFall ? 0 : DIE_TICKS - d.held)) {
             d.started = true;
             startDie(e);
           }
@@ -332,7 +286,6 @@ export const DeathSystem: ISystemFactory = world => {
           continue;
         }
 
-        d.rot += ROT_PER_TICK * ticks;
         if (d.rot >= 1) {
           d.alpha = Math.max(0, 1 - (d.rot - 1));
           model.setAlpha(d.alpha);

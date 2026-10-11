@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Our OpenMU plugins, compiled against the assemblies of the OpenMU image they run in. See ../readme.md. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>MUnique.OpenMU.MuPlugins</AssemblyName>
+    <RootNamespace>MUnique.OpenMU</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <OpenMuDir Condition="'$(OpenMuDir)' == ''">/openmu</OpenMuDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <Reference Include="$(OpenMuDir)/MUnique.OpenMU.*.dll" Private="false" />
+    <Reference Include="$(OpenMuDir)/Nito.*.dll" Private="false" />
+    <!-- The login token table (GameLogic/LoginTokens): OpenMU's own Postgres driver, and EF for its connection settings. -->
+    <Reference Include="$(OpenMuDir)/Npgsql.dll" Private="false" />
+    <Reference Include="$(OpenMuDir)/Microsoft.EntityFrameworkCore.dll" Private="false" />
+    <PackageReference Include="Serilog.Formatting.Compact" Version="3.0.0" />
+    <Using Include="System.ComponentModel.DataAnnotations" />
+  </ItemGroup>
+</Project>

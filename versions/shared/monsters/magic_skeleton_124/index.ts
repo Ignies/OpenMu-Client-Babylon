@@ -1,0 +1,37 @@
+import { defineMonster } from '@/controllers/monsters';
+
+export default defineMonster({
+  Numb: 124,
+  Name: 'Spirit Sorcerer',
+  // Its Energy Ball (17) ends with no SOUND_MAGIC (ZzzCharacter.cpp:5087-5122).
+  quietCasts: [17],
+  maxHealth: 55000,
+  model: { type: 62, scale: 1.2 },
+  stats: {
+    Rate: 1,
+    Level: 90,
+    HP: 32000,
+    MP: 0,
+    MinDmg: 400,
+    MaxDmg: 460,
+    Def: 450,
+    MagDef: 0,
+    AttackSuccess: 720,
+    Move: 260,
+    AttType: 4,
+    Range: 150,
+    View: 4,
+    MoveSpeed: 6,
+    AttSpeed: 400,
+    Regen: 1800,
+    Attri: 10,
+    ItemR: 2,
+    MoneyR: 150,
+    MaxI: 50,
+    ResWind: 4,
+    ResPois: 0,
+    ResIce: 8,
+    ResWater: 8,
+    ResFire: 8,
+  },
+});

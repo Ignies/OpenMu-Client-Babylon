@@ -1,37 +1,62 @@
-import { ItemsDatabase } from '../../common/itemsDatabase';
-import { itemVisualTier } from '../../common/itemVisualTier';
-import { heldWeapons, wearsChaosCastleSkin } from '../../common/chaosCastleUnit';
-import type { ModelObject } from '../../common/modelObject';
-import { isPlayerBody, type PlayerObject } from '../../common/playerObject';
-import { applyWeaponAttachments } from '../../common/weaponAttachment';
-import { isBook, swordformGlovesModel } from '../../common/weaponClass';
+import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
+import { itemVisualTier } from '../../controllers/item_fx/itemVisualTier';
+import { heldWeapons, wearsChaosCastleSkin } from '../../controllers/actors';
+import { showsClassHead } from '../../controllers/actors/openHelm';
+import { classPartModel } from '../../controllers/actors/classPartModel';
+import { itemObjectAttribute } from '../../controllers/actors/itemObjectAttribute';
+import type { ModelObject } from '../../controllers/render/modelObject';
+import { isPlayerBody, type PlayerObject } from '../../controllers/actors/playerObject';
+import { applyWeaponAttachments } from '../../controllers/actors/weaponAttachment';
+import { isBook, isSwordformGloves, swordformGlovesModel } from '../../controllers/actors/weaponClass';
+import type { CharacterClassNumber } from '../../core/types';
 import type { ISystemFactory, Item } from '../world';
+import { settle } from '../../controllers/assets';
+import { syncGmMark } from './gmMark';
 
 function loadPart(
   part: Item | null,
   playerObject: PlayerObject,
   socket: ModelObject,
   /** Weapon slot, when this socket is one: picks the worn glove model. */
-  slot?: 0 | 1
+  slot?: 0 | 1,
+  /** The wearer's class, for an armour piece: picks the class's own model. */
+  charClass?: CharacterClassNumber
 ) {
   if (!part) return;
   const item = ItemsDatabase.getItem(part.group, part.num);
 
   if (!item) return;
 
+  if (slot !== undefined) {
+    // `RenderLinkObject` runs `ItemObjectAttribute` on every held item (ZzzCharacter.cpp:6648).
+    const rule = itemObjectAttribute(part.group, part.num);
+    socket.BlendMesh = rule.blendMesh;
+    socket.HiddenMesh = rule.hiddenMesh;
+    socket.BlendMeshLightAt = rule.blendMeshLight ?? null;
+    // A glove weapon is a body part on the wearer's own bones (`RenderSwordformGloves`,
+    // MonkSystem.cpp:248-252): skinned to the rig when it loads, linked to no bone.
+    socket.LinkParent = isSwordformGloves(part);
+  }
+
   // A Rage Fighter glove weapon is worn as a left/right pair of its own
   // (`RenderSwordformGloves`, MonkSystem.cpp:248); the model items.json names
-  // is the one the inventory draws.
+  // is the one the inventory draws. Some classes wear an armour piece as a model of their own.
   const worn =
-    (slot !== undefined && swordformGlovesModel(part, slot)) || item.szModelName;
+    (slot !== undefined && swordformGlovesModel(part, slot)) ||
+    (charClass !== undefined && classPartModel(part, charClass)) ||
+    item.szModelName;
 
-  playerObject.loadPartAsync(
-    item.szModelFolder,
-    socket,
-    worn,
-    part.lvl,
-    part.isExcellent,
-    itemVisualTier(part)
+  // A model that fails to load leaves the slot as it was.
+  void settle(
+    playerObject.loadPartAsync(
+      item.szModelFolder,
+      socket,
+      worn,
+      part.lvl,
+      part.isExcellent,
+      itemVisualTier(part)
+    ),
+    item.szModelFolder + worn
   );
 
   return true;
@@ -46,21 +71,20 @@ function loadPart(
  */
 const CHAOS_CASTLE_BODY = 'Angel.glb';
 
-/** Bodies wearing it, so the class head goes back on once out of the castle. */
-const inCastleSkin = new WeakSet<PlayerObject>();
+/** Bodies whose class head is off (the castle skin, a closed helm), so it goes back on when the helm allows. */
+const headless = new WeakSet<PlayerObject>();
 
 function wearChaosCastleSkin(playerObject: PlayerObject) {
-  inCastleSkin.add(playerObject);
+  headless.add(playerObject);
 
   playerObject.Helm.Unload();
   playerObject.HelmMask.Unload();
   playerObject.Pants.Unload();
   playerObject.Gloves.Unload();
   playerObject.Boots.Unload();
-  void playerObject.loadPartAsync(
-    'Player/',
-    playerObject.Armor,
-    CHAOS_CASTLE_BODY
+  void settle(
+    playerObject.loadPartAsync('Player/', playerObject.Armor, CHAOS_CASTLE_BODY),
+    `Player/${CHAOS_CASTLE_BODY}`
   );
 
   void playerObject.setWingsAsync(null);
@@ -76,10 +100,12 @@ export const AppearanceSystem: ISystemFactory = world => {
         const { charAppearance, modelObject, visibility, attributeSystem } =
           entity;
         if (visibility.state === 'hidden') continue;
+        // The Webzen mark follows buffs, not the equipment (gmMark.ts).
+        if (modelObject.Ready && isPlayerBody(modelObject)) syncGmMark(entity, modelObject);
         if (!charAppearance.changed) continue;
         if (!modelObject.Ready) continue;
         // A character wearing a whole monster has no equipment sockets to
-        // dress: the skin is the body (`common/transformedBody.ts`).
+        // dress: the skin is the body (`controllers/actors/transformedBody.ts`).
         if (!isPlayerBody(modelObject)) continue;
 
         const playerObject = modelObject as PlayerObject;
@@ -87,27 +113,32 @@ export const AppearanceSystem: ISystemFactory = world => {
         if (wearsChaosCastleSkin(entity, world.mapIndex)) {
           wearChaosCastleSkin(playerObject);
         } else {
-          if (inCastleSkin.delete(playerObject)) {
-            void playerObject.setDefaultHelm();
+          // The class head only bare-headed or under an open helm (SetCharacterScale, ZzzCharacter.cpp:12114-12128).
+          if (!showsClassHead(charAppearance.helm)) {
+            playerObject.Helm.Unload();
+            headless.add(playerObject);
+          } else if (headless.delete(playerObject)) {
+            void settle(playerObject.setDefaultHelm(), 'Player/HelmClass');
           }
 
-          loadPart(charAppearance.helm, playerObject, playerObject.HelmMask) ||
+          const { charClass } = charAppearance;
+          loadPart(charAppearance.helm, playerObject, playerObject.HelmMask, undefined, charClass) ||
             playerObject.setDefaultMask();
-          loadPart(charAppearance.armor, playerObject, playerObject.Armor) ||
-            playerObject.setDefaultArmor();
-          loadPart(charAppearance.pants, playerObject, playerObject.Pants) ||
-            playerObject.setDefaultPants();
-          loadPart(charAppearance.gloves, playerObject, playerObject.Gloves) ||
-            playerObject.setDefaultGloves();
-          loadPart(charAppearance.boots, playerObject, playerObject.Boots) ||
-            playerObject.setDefaultBoots();
+          loadPart(charAppearance.armor, playerObject, playerObject.Armor, undefined, charClass) ||
+            void settle(playerObject.setDefaultArmor(), 'Player/ArmorClass');
+          loadPart(charAppearance.pants, playerObject, playerObject.Pants, undefined, charClass) ||
+            void settle(playerObject.setDefaultPants(), 'Player/PantClass');
+          loadPart(charAppearance.gloves, playerObject, playerObject.Gloves, undefined, charClass) ||
+            void settle(playerObject.setDefaultGloves(), 'Player/GloveClass');
+          loadPart(charAppearance.boots, playerObject, playerObject.Boots, undefined, charClass) ||
+            void settle(playerObject.setDefaultBoots(), 'Player/BootClass');
 
           // c->Wing and the body-linked half of c->Helper. Both need their own
           // loader: the wing decides its bone (back vs cape) and blend mesh
           // before load, and the pet models live under Player/ rather than at
           // the Item/ path items.json carries for the horn items.
-          void playerObject.setWingsAsync(charAppearance.wings);
-          void playerObject.setBodyPetAsync(charAppearance.pet);
+          void settle(playerObject.setWingsAsync(charAppearance.wings), 'wings');
+          void settle(playerObject.setBodyPetAsync(charAppearance.pet), 'pet');
         }
 
         const held = heldWeapons(entity, world.mapIndex) ?? charAppearance;
@@ -119,8 +150,8 @@ export const AppearanceSystem: ISystemFactory = world => {
           playerObject.Weapon1.Unload();
         loadPart(offHand, playerObject, playerObject.Weapon2, 1) ||
           playerObject.Weapon2.Unload();
-        void playerObject.setPhoenixWingAsync(0, mainHand);
-        void playerObject.setPhoenixWingAsync(1, offHand);
+        void settle(playerObject.setPhoenixWingAsync(0, mainHand), 'phoenix wing');
+        void settle(playerObject.setPhoenixWingAsync(1, offHand), 'phoenix wing');
 
         if (attributeSystem) {
           // Kept for consumers of the flag; reset properly on unequip and

@@ -1,0 +1,36 @@
+import { defineMonster } from '@/controllers/monsters';
+
+export default defineMonster({
+  Numb: 21,
+  Name: 'Assassin',
+  maxHealth: 800,
+  model: { type: 14, scale: 0.95 },
+  appearSound: { sound: 'Sound/mAssassin1', channels: 1 }, // AppearMonster, WSclient.cpp:2848-2853
+  stats: {
+    Rate: 1,
+    Level: 26,
+    HP: 800,
+    MP: 0,
+    MinDmg: 95,
+    MaxDmg: 100,
+    Def: 33,
+    MagDef: 0,
+    AttackSuccess: 130,
+    Move: 33,
+    AttType: 2,
+    Range: 0,
+    View: 1,
+    MoveSpeed: 7,
+    AttSpeed: 400,
+    Regen: 2000,
+    Attri: 10,
+    ItemR: 2,
+    MoneyR: 180,
+    MaxI: 14,
+    ResWind: 6,
+    ResPois: 0,
+    ResIce: 0,
+    ResWater: 0,
+    ResFire: 0,
+  },
+});

@@ -1,4 +1,4 @@
-import { Xor32Decryptor } from '../../src/common/encryption/xor32';
+import { Xor32Decryptor } from '../../src/controllers/net/encryption/xor32';
 import { gameVersion as preSeason6 } from '../../versions/v097d';
 import {
   PING_LIMITS,
@@ -6,7 +6,7 @@ import {
   encodeHello,
   stampSender,
   type PingClientMessage,
-} from '../../src/common/pingProtocol';
+} from '../../src/controllers/net/protocols/pingProtocol';
 import type { TrackedSession } from '../track/session';
 
 /**
@@ -29,13 +29,13 @@ export interface PingPeer {
   send(frame: Uint8Array): number;
 }
 
-export type PingHubOptions = {
+type PingHubOptions = {
   now?: () => number;
   maxReceivers?: number;
   log?: (line: string) => void;
 };
 
-export type PingStats = {
+type PingStats = {
   peers: number;
   pings: number;
   framesSent: number;

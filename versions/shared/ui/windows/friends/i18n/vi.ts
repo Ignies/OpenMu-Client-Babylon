@@ -1,0 +1,36 @@
+/** Vietnamese text of the `friends` window. */
+
+import type en from './en';
+
+export default {
+  'friends.title': 'Danh sách bạn bè',
+  'friends.tab.friends': 'Bạn bè',
+  'friends.tab.letters': 'Thư',
+  'friends.empty': 'Danh sách bạn bè của bạn trống.',
+  'friends.lettersEmpty': 'Hộp thư của bạn trống.',
+  'friends.namePlaceholder': 'Tên nhân vật',
+  'friends.server': 'Máy chủ {server}',
+  'friends.letter': 'Thư',
+  'friends.openingLetter': 'Đang mở thư...',
+  'friends.writeLetter': 'Viết thư',
+  'friends.count': 'Bạn bè ({count}/{max})',
+  'friends.lettersCount': 'Thư ({count}/{max})',
+  'friends.unread': ' {count} mới',
+  'friends.add': 'Thêm',
+  'friends.talk': 'Trò chuyện',
+  'friends.letterButton': 'Thư',
+  'friends.delete': 'Xóa',
+  'friends.hide': 'Ẩn',
+  'friends.write': 'Viết',
+  'friends.read': 'Đọc',
+  'friends.reply': 'Trả lời',
+  'friends.from': 'Từ {sender} · {time}',
+  'friends.to': 'Tới',
+  'friends.subject': 'Tiêu đề',
+  'friends.replyPrefix': 'Re: {subject}',
+  'friends.tab.rooms': 'Chat',
+  'friends.roomsEmpty': 'Không có phòng chat nào đang mở.',
+  'friends.roomsCount': 'Phòng chat ({count})',
+  'friends.roomAlert': 'Mới',
+  'friends.open': 'Mở',
+} satisfies Partial<Record<keyof typeof en, string>>;

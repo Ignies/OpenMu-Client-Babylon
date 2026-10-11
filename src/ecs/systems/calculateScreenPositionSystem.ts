@@ -1,9 +1,9 @@
-import { Matrix, Vector2, Vector3 } from '../../libs/babylon/exports';
+import { Matrix, Vector2, Vector3 } from '../../controllers/render/babylon/exports';
 import {
   clearScreenPositionListeners,
   emitScreenPosition,
   emitScreenPositionFrameEnd,
-} from '../../libs/screenPositionBus';
+} from '../../controllers/interface/screenPositionBus';
 import { Entity, ISystemFactory } from '../world';
 
 const DIST = 10;

@@ -1,0 +1,111 @@
+import type { Emission } from '@/controllers/fx/effectParticles';
+import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
+import { isOn } from '@/controllers/fidelity';
+
+/**
+ * Land of Trials (`WD_31HUNTING_GROUND`, `World32`/`Object32`), the plain-data
+ * half. Nothing here may import the scene.
+ *
+ * EncTerrain32.obj places 7789 objects of 57 types - the densest map in the
+ * data. The bulk is scenery with no code behind it: 13 (x1126,
+ * `grass011.OZT`), 12 (x663, `hugerock02`), 24 (x535, `HugeRock03`), 48
+ * (x466, `galdae02`) and 54 (x416, `magma_R`). `Object32` ships exactly the
+ * 57 models the map indexes, so nothing here fails to load.
+ *
+ * The C++ is GMHuntingGround.cpp: `CreateHuntingGroundObject` (:30-44),
+ * `MoveHuntingGroundObject` (:45-118), `RenderHuntingGroundObjectVisual`
+ * (:120-160) and `RenderHuntingGroundObjectMesh` (:161-200). The last one is
+ * the only part that needs classes - see `create.ts`.
+ */
+
+/** `CreateHuntingGroundObject` sets no blend mesh. */
+export const LAND_OF_TRIALS_BLEND_MESHES: Readonly<Record<number, number>> = {};
+
+/**
+ * `MoveHuntingGroundObject`: `HiddenMesh = -2` on
+ *
+ *  - **1** (x57), **44** (x67), **45** (x68) (:55-90): butterfly spawners -
+ *    every ~1 s (`timeGetTime() % 1024 < 10`) a `MODEL_BUTTERFLY01` effect
+ *    model of SubType 0/1/2. No effect-model system here; they stay empty
+ *    markers.
+ *  - **3** (x298) and **53** (x318) (:91-94): `BITMAP_WATERFALL_3` SubType 3
+ *    mist wisps and `BITMAP_SMOKE` SubType 22, both from
+ *    `RenderHuntingGroundObjectVisual`.
+ *  - **42** (x55) (:101-108): the brazier - red terrain light, see
+ *    `LAND_OF_TRIALS_LIGHTS`.
+ */
+export const LAND_OF_TRIALS_EFFECT_ONLY_TYPES: readonly number[] = [
+  1, 3, 42, 44, 45, 53,
+];
+
+/**
+ * Types 3 and 53 (`RenderHuntingGroundObjectVisual` :129-142). Both are
+ * `rand_fps_check(3)`, i.e. `every: 3`; they are halved to 6 because there
+ * are 616 of the two between them and the densest 32-tile window holds 18
+ * and 33. `smoke21` is the generic slow puff and `waterfall5_9` the only
+ * falling kind - the mist wisp of `WATERFALL_3` SubType 3 rises, so the
+ * substitution is the weaker of the two.
+ */
+export const LAND_OF_TRIALS_EMISSIONS: Partial<
+  Record<number, readonly Emission[]>
+> = {
+  3: [{ kinds: ['waterfall5_9'], every: 6, scale: 0.4 }],
+  53: [{ kinds: ['smoke21'], every: 6 }],
+};
+
+/** Ours (`lampFlares`, none on Classic): the original hides the brazier and draws nothing there (:101-108). */
+const BRAZIER_FIRE: readonly Emission[] = [{ kinds: ['fire1', 'fire3'], every: 3, jitter: 6 }];
+
+/**
+ * Type 42 (x55), `MoveHuntingGroundObject` :101-108:
+ * `L = (rand%4+3) * 0.1; AddTerrainLight(x, y, (0.9L, 0.2L, 0.1L), 3)` -
+ * a deep-red brazier, hidden mesh, no sprite. Type 49 (x18),
+ * `RenderHuntingGroundObjectVisual` :143-156: two red `BITMAP_LIGHT` sprites
+ * at bone 3 + (0, -10, 0), sized `sin(WorldTime * 0.002) * 0.42 + 1.08` and
+ * 0.5 with no `* o->Scale` - the statue's orb; no terrain light. Bone 3 swings
+ * 12 across and the cards sit at the middle. A grey `BITMAP_SHINY + 1`, 1.2,
+ * turns to a fresh `rand() % 360` degrees every frame (:154).
+ *
+ * The 42 point light is ours (the original has no dynamic lights); 55 of them
+ * in the open at range 3, at most 6 in a 32-tile window, is well under the
+ * pool. So is its fire (`BRAZIER_FIRE`).
+ */
+export const LAND_OF_TRIALS_LIGHTS: Partial<
+  Record<number, readonly LightEmitter[]>
+> = {
+  42: [
+    {
+      pointRange: 5,
+      terrain: {
+        range: 3,
+        color: [0.9, 0.2, 0.1],
+        flicker: { min: 0.3, max: 0.6, steps: 4 },
+      },
+      get emissions() {
+        return isOn('lampFlares') ? BRAZIER_FIRE : undefined;
+      },
+    },
+  ],
+  49: [
+    {
+      offset: [-2, -82, 232],
+      bone: true,
+      sprite: {
+        scale: 1,
+        color: [1, 0, 0],
+        grow: { speed: 0.002, amount: 0.42, base: 0.66 },
+        unscaled: true,
+      },
+    },
+    {
+      offset: [-2, -82, 232],
+      bone: true,
+      sprite: { scale: 0.5, color: [1, 0, 0], unscaled: true },
+    },
+    {
+      offset: [-2, -82, 232],
+      bone: true,
+      sprite: { scale: 1.2, color: [0.3, 0.3, 0.3], texture: 'shiny1', unscaled: true, randomAngle: true },
+    },
+  ],
+};

@@ -17,8 +17,14 @@
  * - packetSet           which XML variants `packets/` was generated from 
  * - features            what that server version implements (Persistence/Initialization/<ver>/*)
  */
-import { asciiBytes, type GameVersion } from '../../src/version/contract';
+import { asciiBytes, type GameVersion } from '@/version/contract';
 import { templateData } from './data';
+// The shared monsters (and their bodies) this version spawns; a version with its own adds its folders.
+import '../shared/monsters/all';
+// The player clips and monster swing / cast rules, registered with the anim controller.
+import '../shared/animations/all';
+// The deliberate improvements over the original, registered with the fidelity controller.
+import '../shared/improvements/all';
 
 // Keep this export: the registry's load() hands the base game the packet
 // lists through it. Never import app code from this file - it evaluates
@@ -71,15 +77,14 @@ export const gameVersion: GameVersion = {
     masterSkills: false,
     socketItems: false,
     ancientItems: false,
-    harmonyJewel: false,
     darkLord: false,
     magicGladiator: false,
     summoner: false,
     rageFighter: false,
-    muHelper: false,
-    itemHotkeys: false,
-    cashShop: false,
-    events: false,
-    questDialogs: false,
+    itemHotkeys: { slots: 0, bindable: false },
   },
+  // TODO: the optional modules (`src/modules/modules.ts` ids) its server has no counterpart for.
+  modulesOff: [],
+  // TODO: the scheduled mini-games its client has (Blood Castle, Devil Square, Chaos Castle).
+  miniGames: [],
 };

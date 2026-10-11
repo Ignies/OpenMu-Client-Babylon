@@ -1,0 +1,37 @@
+import { defineMonster } from '@/controllers/monsters';
+
+export default defineMonster({
+  Numb: 73,
+  Name: 'Drakan',
+  // Its Energy Ball (17) ends with no SOUND_MAGIC (ZzzCharacter.cpp:5087-5122).
+  quietCasts: [17],
+  maxHealth: 29000,
+  model: { type: 54, scale: 0.8 },
+  stats: {
+    Rate: 1,
+    Level: 86,
+    HP: 29000,
+    MP: 0,
+    MinDmg: 425,
+    MaxDmg: 480,
+    Def: 305,
+    MagDef: 0,
+    AttackSuccess: 570,
+    Move: 210,
+    AttType: 3,
+    Range: 150,
+    View: 5,
+    MoveSpeed: 5,
+    AttSpeed: 400,
+    Regen: 1400,
+    Attri: 20,
+    ItemR: 2,
+    MoneyR: 160,
+    MaxI: 14,
+    ResWind: 3,
+    ResPois: 0,
+    ResIce: 12,
+    ResWater: 12,
+    ResFire: 13,
+  },
+});

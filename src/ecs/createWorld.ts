@@ -3,7 +3,9 @@ import { World, type ISystemFactory } from './world';
 import { PathfindingSystem } from './systems/pathfindingSystem';
 import { PlayerControllerSystem } from './systems/playerControllerSystem';
 import { MoveAlongPathSystem } from './systems/moveAlongPathSystem';
+import { PositionSlideSystem } from './systems/positionSlideSystem';
 import { AnimationSystem } from './systems/animationSystem';
+import { AnimationHoldSystem } from './systems/animationHoldSystem';
 import { CombatSfxSystem } from './systems/combatSfxSystem';
 import { WeaponTrailSystem } from './systems/weaponTrailSystem';
 import { ImpactEffectSystem } from './systems/impactEffectSystem';
@@ -32,7 +34,7 @@ import { MonsterGlowSystem } from './systems/monsterGlowSystem';
 import { MonsterVisualSystem } from './systems/monsterVisualSystem';
 import { DrawDebugSystem } from './systems/drawDebugSystem';
 import { HighlightSystem } from './systems/highlightSystem';
-import type { TestScene } from '../scenes/testScene';
+import type { TestScene } from '../controllers/render/scenes/testScene';
 import { PointerInputSystem } from './systems/pointerInputSystem';
 import { KeyboardInputSystem } from './systems/keyboardInputSystem';
 import { InteractiveAreaSystem } from './systems/interactiveAreaSystem';
@@ -63,7 +65,8 @@ import { QuestSystem } from './systems/questSystem';
 import { PetSystem } from './systems/petSystem';
 import { TeleportSystem } from './systems/teleportSystem';
 import { GuildFlagSystem } from './systems/guildFlagSystem';
-import { perfOverlayVisible, recordSystemTime } from '../libs/perfOverlay';
+import { ClothSystem } from './systems/clothSystem';
+import { perfOverlayVisible, recordSystemTime } from '../controllers/render/perfOverlay';
 
 const factories: ISystemFactory[] = [
   CharacterSelectSystem,
@@ -99,6 +102,8 @@ const factories: ISystemFactory[] = [
   CalculateVisibilitySystem,
   NetworkSystem,
   MoveAlongPathSystem,
+  // The server's instant move slides in (PushingCharacter); render-only posOffset.
+  PositionSlideSystem,
   HighlightSystem,
   DeathSystem,
   AnimationSystem,
@@ -119,14 +124,16 @@ const factories: ISystemFactory[] = [
   // After AnimationSystem + AppearanceSystem: mounts follow this frame's
   // rider pose, and the angel needs its owner's safe-zone flag.
   PetSystem,
+  // After AppearanceSystem: parts put on this frame are held with their body.
+  AnimationHoldSystem,
   // After AnimationSystem: the shoulder flag reads this frame's bone 26 pose.
   GuildFlagSystem,
   ItemGlowSystem,
-  // Light layer: NPCs/monsters with a CHARACTER_LIGHTS row carry a light.
+  // Light layer: NPCs/monsters whose folder sets `light` carry a light.
   CharacterLightSystem,
   // ...and the ones with a MONSTER_GLOWS row carry their own glow cards.
   MonsterGlowSystem,
-  // ...and the ones with a MONSTER_VISUALS row draw their dust, breath and fire.
+  // ...and the ones whose folder sets `bodyFx` draw their dust, breath and fire.
   MonsterVisualSystem,
   CameraFollowSystem,
   // Weather layer: the rain ramp, the settled snow, the wetness - stepped
@@ -170,6 +177,8 @@ const factories: ISystemFactory[] = [
   MapDoorSystem,
   CeilingHideSystem,
   RenderSystem,
+  // After RenderSystem (this frame's OutOfView): names the cloths the render that follows steps.
+  ClothSystem,
   SceneReadySystem,
 ];
 

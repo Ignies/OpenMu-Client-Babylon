@@ -1,21 +1,38 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ENUM_WORLD } from '../../common/types';
-import { TW_ACTION, TW_NOGROUND } from '../../common/terrain/consts';
+import { ENUM_WORLD } from '../../core/types';
+import { MonsterActionType } from '@versions/shared/objects/enum';
+import { TW_ACTION, TW_NOGROUND } from '../../controllers/terrain/consts';
 import type { World } from '../world';
 
+vi.hoisted(() => {
+  const g = globalThis as Record<string, unknown>;
+  g.location ??= { href: 'http://localhost/', search: '', hostname: 'localhost', protocol: 'http:' };
+});
+
 const playSfx = vi.fn((..._args: unknown[]) => 1000);
-vi.mock('../../libs/sfx', () => ({
+vi.mock('../../controllers/sound/sfx', () => ({
   playSfx: (...args: unknown[]) => playSfx(...args),
 }));
 // These three reach the store through the effects layer / combat sounds.
 const spawnBomb = vi.fn();
-vi.mock('../../common/deathVisuals', () => ({
+vi.mock('../../controllers/fx/deathVisuals', () => ({
   shatterDeathFor: () => undefined,
   spawnBomb: (...args: unknown[]) => spawnBomb(...args),
 }));
-vi.mock('../../effects', () => ({ effects: { spawn: () => {} } }));
-vi.mock('../../common/combatSounds', () => ({ COMBAT_BUS: 'combat' }));
+const spawn = vi.fn();
+vi.mock('../../controllers/fx', () => ({ effects: { spawn: (...args: unknown[]) => spawn(...args) } }));
+vi.mock('../../controllers/sound/combatSounds', () => ({ COMBAT_BUS: 'combat' }));
+// Type 999 loses its Classic shadow when it dies.
+vi.mock('../../controllers/actors/modelFactoryPerId', () => ({ npcShadowOnDeath: (type: number) => type !== 999 }));
+vi.mock('../../controllers/fx/bloodDecals', () => ({
+  BloodDecals: class {
+    spawn() {}
+    update() {}
+  },
+}));
 
+// What a kill does to the body is the killing skill's (`kill` in its file): load the skills first.
+await import('@versions/shared/skills/skillVisuals');
 const { DeathSystem } = await import('./deathSystem');
 
 const TICK = 1 / 25;
@@ -34,6 +51,7 @@ function corpse() {
       shattered: false,
       offset: { x: 0, y: 0, z: 0 },
       pitch: 0,
+      held: 0,
     },
     // Not ready: the Die clip never starts, only the kill-tick motion and the bombs run.
     modelObject: { Ready: false },
@@ -92,5 +110,126 @@ describe('Chaos Castle death sounds', () => {
 
     expect(playSfx).not.toHaveBeenCalled();
     expect(spawnBomb).not.toHaveBeenCalled();
+  });
+});
+
+/** A body killed on an open map by `skill`, its killer standing three tiles east. */
+function killedBy(skill: number) {
+  const body = corpse();
+  body.dying.skill = skill;
+  body.dying.killerNetId = 7;
+  const killer = { transform: { pos: { x: 33.5, y: 0, z: 90.5 } } };
+  const world = {
+    mapIndex: ENUM_WORLD.WD_0LORENCIA,
+    scene: {},
+    mapParent: { position: { x: 0, z: 0 } },
+    getTerrainFlag: () => 0,
+    getByNetId: (id: number) => (id === 7 ? killer : undefined),
+    with: () => [body],
+  };
+  return { body, system: DeathSystem(world as unknown as World) };
+}
+
+describe('skill deaths', () => {
+  beforeEach(() => spawn.mockClear());
+
+  it('Nova and Combo slide the body along the line to the killer for 15 ticks', () => {
+    for (const skill of [40, 59]) {
+      const { body, system } = killedBy(skill);
+      for (let i = 0; i < 40; i++) system.update!(TICK);
+      expect(body.dying.offset.x).toBeGreaterThan(0.5);
+      expect(Math.abs(body.dying.offset.z)).toBeLessThan(1e-9);
+    }
+  });
+
+  it('every other skill leaves the body where it fell', () => {
+    for (const skill of [0, 9, 41, 58, 392]) {
+      const { body, system } = killedBy(skill);
+      for (let i = 0; i < 40; i++) system.update!(TICK);
+      expect(body.dying.offset).toEqual({ x: 0, y: 0, z: 0 });
+    }
+  });
+
+  it('Nova sheds ten motes a tick while the Dead counter is <= 30, nothing else does', () => {
+    const nova = killedBy(40);
+    for (let i = 0; i < 40; i++) nova.system.update!(TICK);
+    // 30 frames at 25 fps: Dead runs 1..30 under the `<= 30` check (ZzzCharacter.cpp:3297, 4076).
+    expect(spawn.mock.calls.length).toBe(300);
+    expect(spawn.mock.calls.every(c => c[0] === 'particles')).toBe(true);
+    spawn.mockClear();
+    const combo = killedBy(59);
+    for (let i = 0; i < 40; i++) combo.system.update!(TICK);
+    expect(spawn).not.toHaveBeenCalled();
+  });
+});
+
+describe('the Dead counter', () => {
+  it('counts whole ticks at 25 fps, like `c->Dead += FPS_ANIMATION_FACTOR`', async () => {
+    const { combat } = await import('../../controllers/combat');
+    const seen: number[] = [];
+    combat.registerSkill(9001, { kill: { dying: (_body, _ticks, dead) => void seen.push(dead) } });
+    const { system } = killedBy(9001);
+    for (let i = 0; i < 40; i++) system.update!(TICK);
+    expect(seen).toEqual(Array.from({ length: 40 }, (_, i) => i + 1));
+  });
+});
+
+/** A monster killed on an open map, its model loaded; `held` as `ObjectGotKilled` would mark it. */
+function slain(held = 0, npcType = 3) {
+  const body = {
+    ...corpse(),
+    npcType,
+    monsterAnimation: { action: MonsterActionType.Stop1 },
+    modelObject: { Ready: true, Light: { x: 1, y: 1, z: 1 }, setAlpha: vi.fn(), ClassicShadow: true },
+  };
+  body.dying.held = held;
+  const world = {
+    mapIndex: ENUM_WORLD.WD_0LORENCIA,
+    scene: {},
+    getTerrainFlag: () => 0,
+    getByNetId: () => undefined,
+    with: () => [body],
+  };
+  return { body, system: DeathSystem(world as unknown as World) };
+}
+
+/** The tick the Die clip starts on. */
+function dieTick(held = 0): number {
+  const { body, system } = slain(held);
+  for (let tick = 1; tick <= 40; tick++) {
+    system.update!(TICK);
+    if (body.monsterAnimation.action === MonsterActionType.Die) return tick;
+  }
+  return -1;
+}
+
+describe('the Die clip', () => {
+  it('starts when Dead reaches 15, 14 ticks after the kill (ZzzCharacter.cpp:4074-4080)', () => {
+    expect(dieTick()).toBe(14);
+  });
+
+  it("counts from the swing's start when the hero's request waited for the blow", () => {
+    // The original sends the hit on the click; this client holds it to the blow (combat attackTiming).
+    expect(dieTick(5)).toBe(9);
+    expect(dieTick(20)).toBe(1);
+  });
+
+  // The Die branch's `m_bRenderShadow = false` (GMSwampOfQuiet.cpp:859 and its kind).
+  it('takes the Classic shadow off a body that loses it in death, and leaves the rest', () => {
+    const { body, system } = slain(0, 999);
+    const other = slain();
+    for (let i = 0; i < 20; i++) {
+      system.update?.(TICK);
+      other.system.update?.(TICK);
+    }
+    expect([body.modelObject.ClassicShadow, other.body.modelObject.ClassicShadow]).toEqual([false, true]);
+  });
+
+  it('fades from the kill, Rot += 0.02 a tick from Dead = 1 (ZzzCharacter.cpp:3215-3237)', () => {
+    const { body, system } = slain();
+    for (let i = 0; i < 49; i++) system.update!(TICK);
+    expect(body.dying.alpha).toBe(1);
+    for (let i = 0; i < 3; i++) system.update!(TICK);
+    expect(body.dying.alpha).toBeLessThan(1);
   });
 });

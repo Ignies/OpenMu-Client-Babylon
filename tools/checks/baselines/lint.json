@@ -1,0 +1,20 @@
+{
+ "@typescript-eslint/ban-ts-comment": 8,
+ "@typescript-eslint/no-explicit-any": 71,
+ "@typescript-eslint/no-non-null-assertion": 410,
+ "@typescript-eslint/no-this-alias": 2,
+ "@typescript-eslint/no-unnecessary-type-constraint": 2,
+ "@typescript-eslint/no-unused-expressions": 19,
+ "@typescript-eslint/no-wrapper-object-types": 1,
+ "mobx/missing-observer": 153,
+ "no-case-declarations": 1,
+ "no-console": 44,
+ "no-control-regex": 1,
+ "no-empty": 5,
+ "no-var": 22,
+ "prefer-const": 15,
+ "react-hooks/exhaustive-deps": 16,
+ "react-hooks/refs": 11,
+ "react-hooks/rules-of-hooks": 4,
+ "react-hooks/set-state-in-effect": 2
+}

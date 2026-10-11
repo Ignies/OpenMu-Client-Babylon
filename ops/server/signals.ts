@@ -25,9 +25,9 @@
  * `character` name the property to read for each.
  */
 
-export type Severity = 'hard' | 'soft';
+type Severity = 'hard' | 'soft';
 
-export type Signal = {
+type Signal = {
   /** Short stable id, used by the panel and by any filter. */
   id: string;
   /** What a person calls this check. */
@@ -43,7 +43,7 @@ export type Signal = {
  * Template -> signal. Templates copied verbatim from OpenMU
  * (`src/GameLogic/PlayerActions/**`, `src/GameLogic/SkillHitValidator.cs`).
  */
-export const SIGNALS: Readonly<Record<string, Signal>> = {
+const SIGNALS: Readonly<Record<string, Signal>> = {
   'Probably Hacker - player {Player} is attacking in stunned state': {
     id: 'attack-stunned',
     label: 'Attacked while stunned',
@@ -178,7 +178,7 @@ export const SIGNALS: Readonly<Record<string, Signal>> = {
  * (`LogWarning($"...")`), so the "template" Serilog records is the finished
  * sentence with the numbers already in it. Matched by prefix instead.
  */
-export const SIGNAL_PREFIXES: readonly (readonly [string, Signal])[] = [
+const SIGNAL_PREFIXES: readonly (readonly [string, Signal])[] = [
   [
     'Animation count out of sync - hacker?',
     { id: 'animation-count-desync', label: 'Animation count out of sync', severity: 'soft' },

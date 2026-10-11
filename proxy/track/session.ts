@@ -26,7 +26,7 @@ import {
   ServerMessagePacket,
   TradeFinishedPacket,
   TradeRequestAnswerPacket,
-} from '../../src/common/packets/ServerToClientPackets';
+} from '../../versions/shared/packets/ServerToClientPackets';
 import {
   AreaSkillPacket,
   ConsumeItemRequestPacket,
@@ -53,16 +53,15 @@ import {
   WalkRequestPacket,
   WarpCommandRequestPacket,
   WhisperMessagePacket,
-} from '../../src/common/packets/ClientToServerPackets';
+} from '../../versions/shared/packets/ClientToServerPackets';
 import {
   className,
   heroStateName,
   type EventKind,
   type TrackEvent,
   type TrackedPlayer,
-} from '../../src/common/adminProtocol';
-import { Xor3Byte } from '../../src/common/encryption/xor3';
-import { fromChatWire } from '../../src/common/chatWire';
+} from '../../src/controllers/net/protocols/adminProtocol';
+import { Xor3Byte } from '../../src/controllers/net/encryption/xor3';
 import { FrameReader, type Frame } from './frames';
 import { itemName, mapName, monsterName, storageName } from './names';
 
@@ -80,7 +79,7 @@ import { itemName, mapName, monsterName, storageName } from './names';
  * it frames the client's own encoders built and read the events back.
  */
 
-export type SessionSink = {
+type SessionSink = {
   event(session: TrackedSession, event: TrackEvent): void;
   /** A field of the snapshot other than the position changed. */
   change(session: TrackedSession): void;
@@ -190,7 +189,6 @@ export class TrackedSession {
   private selectAmbiguous = false;
   private pendingPickupAt = 0;
   private pendingDrop: { at: number; x: number; y: number } | null = null;
-  private pendingBuyAt = 0;
   private pendingSell: { at: number; slot: number } | null = null;
   private lastWalkEventAt = 0;
   private lastAttack = { target: -1, at: 0 };
@@ -684,7 +682,6 @@ export class TrackedSession {
 
   private onItemBought(p: ItemBoughtPacket): void {
     const name = itemName(bytesOf(p.ItemData as DataView));
-    this.pendingBuyAt = 0;
     this.emit('buy', `bought ${name}`, { item: name, slot: p.InventorySlot });
   }
 
@@ -780,12 +777,12 @@ export class TrackedSession {
         return;
       }
       case 0x00:
-        this.onChat(fromChatWire(withoutPadding(new PublicChatMessagePacket(view).Message)).trim());
+        this.onChat(withoutPadding(new PublicChatMessagePacket(view).Message).trim());
         return;
       case 0x02: {
         const p = new WhisperMessagePacket(view);
         const to = cleanName(p.ReceiverName);
-        const text = fromChatWire(withoutPadding(p.Message)).trim();
+        const text = withoutPadding(p.Message).trim();
         this.emit(
           'whisper',
           this.whispers ? `whispered to ${to}: ${text}` : `whispered to ${to}`,
@@ -821,9 +818,6 @@ export class TrackedSession {
         this.emit('npc', `talked to ${npc?.name ?? 'an NPC'}`, { npc: npc?.name ?? null });
         return;
       }
-      case 0x32:
-        this.pendingBuyAt = this.now();
-        return;
       case 0x33:
         this.pendingSell = { at: this.now(), slot: new SellItemToNpcRequestPacket(view).ItemSlot };
         return;

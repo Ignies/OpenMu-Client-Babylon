@@ -1,0 +1,61 @@
+import { defineMonster } from '@/controllers/monsters';
+
+export default defineMonster({
+  Numb: 70,
+  Name: 'Queen Rainer',
+  // Created with `m_bRenderShadow = false` (ZzzCharacter.cpp:13584).
+  classicShadow: false,
+  // MODEL_QUEEN_RAINER: fourteen thunder joints between her bones (ZzzCharacter.cpp:5767-5824).
+  bodyFx: [
+    {
+      kind: 'bolts',
+      pairs: [
+        [2, 3],
+        [3, 4],
+        [4, 5],
+        [2, 10],
+        [10, 11],
+        [2, 18],
+        [18, 22],
+        [22, 23],
+        [23, 24],
+        [24, 25],
+        [18, 31],
+        [31, 32],
+        [32, 33],
+        [33, 34],
+      ],
+    },
+  ],
+  // Its Energy Ball (17) ends with no SOUND_MAGIC (ZzzCharacter.cpp:5087-5122).
+  quietCasts: [17],
+  maxHealth: 19000,
+  model: { type: 51, scale: 1.3 },
+  stats: {
+    Rate: 1,
+    Level: 79,
+    HP: 19000,
+    MP: 0,
+    MinDmg: 305,
+    MaxDmg: 350,
+    Def: 230,
+    MagDef: 0,
+    AttackSuccess: 475,
+    Move: 160,
+    AttType: 3,
+    Range: 17,
+    View: 3,
+    MoveSpeed: 5,
+    AttSpeed: 400,
+    Regen: 1400,
+    Attri: 10,
+    ItemR: 2,
+    MoneyR: 160,
+    MaxI: 14,
+    ResWind: 3,
+    ResPois: 0,
+    ResIce: 9,
+    ResWater: 11,
+    ResFire: 12,
+  },
+});

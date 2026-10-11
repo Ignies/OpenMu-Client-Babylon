@@ -9,29 +9,31 @@ import {
   Scene,
   StandardMaterial,
   Vector3,
-} from '../../libs/babylon/exports';
+} from '../../controllers/render/babylon/exports';
 import type { Entity, ISystemFactory } from '../world';
-import { Store, UIState } from '../../store';
-import { ENUM_WORLD } from '../../common';
-import { spawnPlayer } from '../../logic';
-import { deserializeAppearance } from '../../common/deserializeAppearance';
+import { CharSelect } from '../../modules/character_select';
+import { AppState, UIState } from '../../controllers/interface/uiState';
+import { ENUM_WORLD } from '@/core/types';
+import { spawnPlayer } from '../../modules/scope/net';
+import { deserializeAppearance } from '../../controllers/actors/deserializeAppearance';
 import { runInAction } from 'mobx';
 import {
   characterSelectView,
   characterSlotAngle,
   characterSlotPosition,
-} from '../../common/characterSelect';
-import { setSceneHold } from '../../common/sceneGate';
-import { createCharacterSelectBackdrop } from '../../common/characterSelectBackdrop';
-import { PlayerAction } from '../../common/objects/enum';
-import { genderedEmoteAction } from '../../common/emotes';
-import { isRidingMount } from '../../common/pets';
+  doubleClicks,
+} from '../../modules/character_select/characterSelect';
+import { setSceneHold } from '../../controllers/loading/sceneGate';
+import { createCharacterSelectBackdrop } from '../../modules/character_select/characterSelectBackdrop';
+import { PlayerAction } from '@versions/shared/objects/enum';
+import { genderedEmoteAction } from '../../modules/hero/emotes';
+import { isRidingMount } from '@/controllers/pets';
 import {
   registerPointLightEmitter,
   type PointLightEmitter,
-} from '../../common/pointLightPool';
-import { PRIORITY_EFFECT } from '../../lighting/lightSource';
-import type { TerrainLightColor } from '../../common/terrainDynamicLight';
+} from '../../controllers/lighting/pointLightPool';
+import { PRIORITY_EFFECT } from '../../controllers/lighting/lightSource';
+import type { TerrainLightColor } from '../../controllers/terrain/terrainDynamicLight';
 
 type CircleVisual = {
   mesh: Mesh;
@@ -132,7 +134,7 @@ function createSelectionCircleTexture(scene: Scene): DynamicTexture {
   return tex;
 }
 
-/** This system's name on the loading gate (`common/sceneGate.ts`). */
+/** This system's name on the loading gate (`controllers/loading/sceneGate.ts`). */
 const GATE = 'characterSelect';
 
 /** Opacity the ring settles at once its character has the focus. */
@@ -195,9 +197,9 @@ export const CharacterSelectSystem: ISystemFactory = world => {
 
   /**
    * The focused character's key light. It takes a slot from the shared pool
-   * (`common/pointLightPool.ts`) instead of adding a `PointLight` of its own:
+   * (`controllers/lighting/pointLightPool.ts`) instead of adding a `PointLight` of its own:
    * every object material in the scene is compiled with `2 + budget` light
-   * slots (`common/lightingQuality.ts`), and Babylon fills a mesh's
+   * slots (`controllers/lighting/lightingQuality.ts`), and Babylon fills a mesh's
    * `lightSources` from layer masks, never from range - so a light outside
    * the pool is a shader recompile plus a slot that every object pixel in the
    * scene evaluates, reached or not. On Classic the budget is 0 by design
@@ -395,7 +397,7 @@ export const CharacterSelectSystem: ISystemFactory = world => {
     // not reload and flash black; torn down when the screen is left.
     backdrop ??= createCharacterSelectBackdrop(world.scene);
 
-    for (const character of Store.charactersList) {
+    for (const character of CharSelect.charactersList) {
       const position = characterSlotPosition(character.SlotIndex);
 
       if (!position) continue;
@@ -482,9 +484,11 @@ export const CharacterSelectSystem: ISystemFactory = world => {
   // Input
   // -------------------------------------------------------------------------
 
+  const isDoubleClick = doubleClicks();
+
   world.scene.onPointerObservable.add(event => {
     if (event.type !== PointerEventTypes.POINTERDOWN) return;
-    if (Store.uiState !== UIState.Characters) return;
+    if (AppState.uiState !== UIState.Characters) return;
 
     const target = world.currentPointerTarget;
     const hovered = target && spawned.includes(target) ? target.objectNameInWorld : null;
@@ -501,27 +505,33 @@ export const CharacterSelectSystem: ISystemFactory = world => {
 
     // Left click selects; middle does nothing here.
     if (event.event.button !== 0) return;
+    const double = isDoubleClick(performance.now());
 
     if (!target || !hovered) return;
 
     const name = target.objectNameInWorld;
     if (!name) return;
 
-    if (name === Store.focusedChar) {
+    if (name === CharSelect.focusedChar) {
+      // A double click on it connects (CharacterScene.cpp:214-223); the page runs Connect.
+      if (double) {
+        runInAction(() => characterSelectView.connectRequests++);
+        return;
+      }
       // Re-trigger greeting on click even if already focused
       playGreeting(target);
       return;
     }
 
-    Store.focusedChar = name;
+    CharSelect.focusedChar = name;
 
-    Store.focusCharacterRequest(name);
+    CharSelect.focusCharacterRequest(name);
   });
 
   return {
     update: (deltaTime: number) => {
       const staged =
-        Store.uiState === UIState.Characters &&
+        AppState.uiState === UIState.Characters &&
         world.mapIndex === ENUM_WORLD.WD_74NEW_CHARACTER_SCENE &&
         !!world.terrain;
 
@@ -533,11 +543,11 @@ export const CharacterSelectSystem: ISystemFactory = world => {
         // has to wait for it: the terrain lands first and the character list
         // is still in flight, and without this hold the gate lifted on an
         // empty scene with the characters walking in behind it.
-        setSceneHold(GATE, Store.uiState === UIState.Characters);
+        setSceneHold(GATE, AppState.uiState === UIState.Characters);
         return;
       }
 
-      const key = Store.charactersList
+      const key = CharSelect.charactersList
         .map(c => `${c.SlotIndex}:${c.Name}:${c.Level}`)
         .join('|');
 
@@ -548,13 +558,13 @@ export const CharacterSelectSystem: ISystemFactory = world => {
 
       // Spawned: from here the models are counted by the ready check like
       // every other one in the scene.
-      setSceneHold(GATE, Store.loadingCharactersList);
+      setSceneHold(GATE, CharSelect.loadingCharactersList);
 
       // -----------------------------------------------------------------
       // Character selection greeting animation
       // -----------------------------------------------------------------
 
-      const focused = Store.focusedChar;
+      const focused = CharSelect.focusedChar;
 
       if (focused !== lastFocusedChar) {
         // Return previously selected character to idle.

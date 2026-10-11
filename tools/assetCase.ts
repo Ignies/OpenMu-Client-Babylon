@@ -1,11 +1,10 @@
-import {
-  MONSTER_MODEL_TABLE,
-  monsterModelFile,
-} from '../src/common/monsters/monsterModelTable';
+import { monsterModelFile } from '../src/controllers/actors/monsterModelTable';
+import { monsters } from '../versions/shared/monsters/all';
+import { items } from '../versions/shared/items/all';
 import {
   NPC_MODEL_TABLE,
   npcModelFile,
-} from '../src/common/npcs/npcModelTable';
+} from '../src/controllers/actors/npcModelTable';
 
 /**
  * The original `Data/` tree spells one model family three ways -
@@ -23,13 +22,20 @@ import {
 /** Paths the client builds from a table, keyed by their lower-case form. */
 const FROM_TABLES = new Map<string, string>();
 
-for (const entry of Object.values(MONSTER_MODEL_TABLE)) {
-  const path = monsterModelFile(entry[0]);
+for (const def of monsters.all()) {
+  if (!def.model) continue;
+  const path = monsterModelFile(def.model.type);
   FROM_TABLES.set(path.toLowerCase(), path);
 }
 
 for (const entry of Object.values(NPC_MODEL_TABLE)) {
   const path = npcModelFile(entry[0]);
+  FROM_TABLES.set(path.toLowerCase(), path);
+}
+
+for (const item of items.all()) {
+  if (item.szModelFolder === 'Empty') continue;
+  const path = item.szModelFolder + item.szModelName;
   FROM_TABLES.set(path.toLowerCase(), path);
 }
 

@@ -1,0 +1,37 @@
+import { defineMonster } from '@/controllers/monsters';
+
+export default defineMonster({
+  Numb: 293,
+  Name: 'Queen Bee',
+  // Its Energy Ball (17) ends with no SOUND_MAGIC (ZzzCharacter.cpp:5087-5122).
+  quietCasts: [17],
+  maxHealth: 25000,
+  model: { type: 84, scale: 1.4 },
+  stats: {
+    Rate: 1,
+    Level: 84,
+    HP: 25000,
+    MP: 0,
+    MinDmg: 375,
+    MaxDmg: 425,
+    Def: 275,
+    MagDef: 0,
+    AttackSuccess: 830,
+    Move: 190,
+    AttType: 3,
+    Range: 17,
+    View: 4,
+    MoveSpeed: 6,
+    AttSpeed: 500,
+    Regen: 2000,
+    Attri: 10,
+    ItemR: 2,
+    MoneyR: 160,
+    MaxI: 30,
+    ResWind: 3,
+    ResPois: 0,
+    ResIce: 27,
+    ResWater: 27,
+    ResFire: 27,
+  },
+});

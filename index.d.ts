@@ -42,5 +42,7 @@ declare module '*.wav?url' {
 }
 
 declare const APP_VERSION: string;
+/** One per build (vite.config.ts): the asset cache worker is registered with it. */
+declare const BUILD_ID: string;
 declare const APP_STAGE: 'dev' | 'prod' | 'cprod';
 declare const QA_ENABLED: string | undefined;

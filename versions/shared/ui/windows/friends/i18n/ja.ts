@@ -1,0 +1,36 @@
+/** Japanese text of the `friends` window. */
+
+import type en from './en';
+
+export default {
+  'friends.title': 'フレンドリスト',
+  'friends.tab.friends': 'フレンド',
+  'friends.tab.letters': '手紙',
+  'friends.empty': 'フレンドリストは空です。',
+  'friends.lettersEmpty': '受信箱は空です。',
+  'friends.namePlaceholder': 'キャラクター名',
+  'friends.server': 'サーバー {server}',
+  'friends.letter': '手紙',
+  'friends.openingLetter': '手紙を開いています...',
+  'friends.writeLetter': '手紙を書く',
+  'friends.count': 'フレンド（{count}/{max}）',
+  'friends.lettersCount': '手紙（{count}/{max}）',
+  'friends.unread': ' 新着 {count} 件',
+  'friends.add': '追加',
+  'friends.talk': 'ささやく',
+  'friends.letterButton': '手紙',
+  'friends.delete': '削除',
+  'friends.hide': '非表示',
+  'friends.write': '書く',
+  'friends.read': '読む',
+  'friends.reply': '返信',
+  'friends.from': '差出人 {sender} · {time}',
+  'friends.to': '宛先',
+  'friends.subject': '件名',
+  'friends.replyPrefix': 'Re: {subject}',
+  'friends.tab.rooms': 'チャット',
+  'friends.roomsEmpty': '開いているチャットルームはありません。',
+  'friends.roomsCount': 'チャットルーム（{count}）',
+  'friends.roomAlert': '新着',
+  'friends.open': '開く',
+} satisfies Partial<Record<keyof typeof en, string>>;

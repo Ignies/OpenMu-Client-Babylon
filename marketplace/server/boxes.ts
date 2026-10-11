@@ -16,7 +16,7 @@ import postgres from 'postgres';
 export const DATABASE_URL =
   process.env.DATABASE_URL || 'postgres://postgres:admin@127.0.0.1:5432/openmu';
 
-export type BoxItem = {
+type BoxItem = {
   id: string;
   group: number;
   number: number;
@@ -36,6 +36,8 @@ export const NO_BOX: BoxState = { exists: false, money: 0, item: null };
 /** What the service needs from Postgres; tests hand in a map instead. */
 export interface Boxes {
   state(boxId: string): Promise<BoxState>;
+  /** Whether the character named is on the account, both spelt as OpenMU stores them. */
+  ownsCharacter(account: string, character: string): Promise<boolean>;
 }
 
 type BoxRow = {
@@ -47,7 +49,7 @@ type BoxRow = {
   durability: number | null;
 };
 
-export type PostgresBoxes = Boxes & {
+type PostgresBoxes = Boxes & {
   sql: ReturnType<typeof postgres>;
   /** Boxes in Postgres that nothing owns, for the audit. */
   unowned(): Promise<{ id: string; money: number; items: number }[]>;
@@ -89,6 +91,15 @@ export function postgresBoxes(url = DATABASE_URL): PostgresBoxes {
             }
           : null,
       };
+    },
+
+    async ownsCharacter(account: string, character: string): Promise<boolean> {
+      const rows = await sql`
+        SELECT 1 FROM data."Character" c
+        JOIN data."Account" a ON a."Id" = c."AccountId"
+        WHERE a."LoginName" = ${account} AND c."Name" = ${character}
+        LIMIT 1`;
+      return rows.length > 0;
     },
 
     async unowned() {

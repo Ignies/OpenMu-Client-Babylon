@@ -28,7 +28,7 @@ import { fileURLToPath } from 'url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..');
-export const PACKS_DIR = join(HERE, 'packs');
+const PACKS_DIR = join(HERE, 'packs');
 const LOCAL = join(ROOT, 'Data', 'Local');
 const ENG = join(LOCAL, 'Eng');
 
@@ -46,7 +46,7 @@ function bux(buffer: Uint8Array): void {
  * is the order the original reads a file in. Our readers do not verify it; it
  * is written so the file is a drop-in for the original client too.
  */
-export function checksum2(buffer: Uint8Array, key: number): number {
+function checksum2(buffer: Uint8Array, key: number): number {
   const view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
   let result = (key << 9) >>> 0;
 

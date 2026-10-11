@@ -1,0 +1,180 @@
+// `CNewUIMixInventory::RenderFrame`: the title and tax lines, then the recipe text on its dark
+// plates (`SetBgColor(40, 40, 40, 128)`), coloured as the original colours each line.
+.chaos-machine {
+  font-size: 11px;
+
+  .window-title {
+    position: absolute;
+    left: 15px;
+    width: 160px;
+    text-align: center;
+    font-weight: bold;
+    color: #dcdcdc;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .chaos-tax {
+    position: absolute;
+    left: 15px;
+    width: 160px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 10px;
+    color: #dcdcdc;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .head-close {
+    position: absolute;
+    cursor: pointer;
+  }
+
+  .chaos-line {
+    position: absolute;
+    font-size: 10px;
+    line-height: 10px;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .chaos-sources {
+    position: absolute;
+    font-size: 10px;
+    pointer-events: none;
+  }
+
+  .chaos-plate {
+    width: fit-content;
+    max-width: 100%;
+    background-color: #28282880;
+    text-shadow: 1px 1px 0 #000;
+    overflow-wrap: anywhere;
+
+    // Red while no recipe matches, yellow once one does (255,48,48 / 255,255,48).
+    &.missing {
+      color: #ff3030;
+    }
+
+    &.ready {
+      color: #ffff30;
+    }
+
+    // The empty-tray hint, the improper lines and the recipe text (255,50,20).
+    &.warn {
+      color: #ff3214;
+    }
+
+    // The success rate and the zen (210,230,255); the prediction (220,220,220).
+    &.info {
+      color: #d2e6ff;
+    }
+
+    &.note {
+      color: #dcdcdc;
+    }
+  }
+
+  .chaos-gap {
+    height: 15px;
+  }
+
+  // `RenderMixDescriptions` for the Chaos Card Master.
+  .chaos-card-warning {
+    text-align: center;
+    color: #ff2814;
+    white-space: normal;
+  }
+
+  .chaos-card-note {
+    color: #ffffff;
+    white-space: normal;
+  }
+
+  // `RenderMixDescriptions` for the seed researcher: the label (200,200,200) and `CUISocketListBox`,
+  // black at 40% under (230,220,200) lines; the picked one black on white.
+  .chaos-socket-label {
+    text-align: center;
+    color: #c8c8c8;
+  }
+
+  .chaos-socket-list {
+    position: absolute;
+    overflow-y: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+    pointer-events: auto;
+
+    .chaos-socket-line {
+      color: #e6dcc8;
+      white-space: nowrap;
+      overflow: hidden;
+      cursor: pointer;
+
+      &.picked {
+        color: #000000;
+        background-color: #ffffff;
+      }
+    }
+  }
+
+  .window-button {
+    position: absolute;
+
+    .button-tooltip {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-top: 2px;
+      padding: 1px 4px;
+      background-color: #000000cc;
+      border: 1px solid #6a6a6a;
+      color: #fff;
+      font-size: 10px;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    &:hover .button-tooltip {
+      display: block;
+    }
+  }
+}
+
+// `CChaosMixMenuMsgBox`: centred across the screen, 60 from the top.
+.chaos-menu-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  pointer-events: auto;
+  user-select: none;
+
+  .chaos-menu {
+    position: relative;
+    flex: none;
+    font-size: 11px;
+  }
+
+  .chaos-menu-title {
+    position: absolute;
+    text-align: center;
+    font-weight: bold;
+    color: #ff8000;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  // The seed NPCs' title is white (RenderTexts, NewUICustomMessageBox.cpp:6455-6462).
+  .seed-menu-title {
+    color: #ffffff;
+  }
+
+  .chaos-menu-line {
+    position: absolute;
+    text-align: center;
+    color: #ffffff;
+    text-shadow: 1px 1px 0 #000;
+  }
+}

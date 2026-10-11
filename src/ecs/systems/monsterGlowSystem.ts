@@ -1,15 +1,15 @@
 import type { Entity, ISystemFactory } from '../world';
-import { glowMonster, monsterGlowFor } from '../../effects/monsterGlow';
-import type { EffectHandle } from '../../effects';
+import { glowMonster, monsterGlowFor } from '../../controllers/fx/monsterGlow';
+import type { EffectHandle } from '../../controllers/fx';
 
 /**
  * Consumer of the effects layer's `monsterGlow` entry: walks the entities
  * that have an `npcType` and gives the ones its table names their own body
  * glow - and their eyes - once the model is posed, drops it when they die
- * or leave. Owns no visual state - `effects/monsterGlow.ts` does.
+ * or leave. Owns no visual state - `controllers/fx/monsterGlow.ts` does.
  *
  * The light these monsters throw on the floor is a separate seam entirely:
- * `CharacterLightSystem` reads `lighting/characters.ts`, which carries the
+ * `CharacterLightSystem` reads `controllers/lighting/characters.ts`, which carries the
  * matching rows.
  */
 export const MonsterGlowSystem: ISystemFactory = world => {

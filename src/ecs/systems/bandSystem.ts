@@ -1,30 +1,31 @@
-import { Vector3 } from '../../libs/babylon/exports';
-import { angleLinkMatrix } from '../../common/boneLink';
-import { devQuery, devQueryNumbers } from '../../common/devSeams';
-import type { BmdLink } from '../../common/boneLink';
-import { instrumentById, instrumentParts, isInstrumentId, type InstrumentPart } from '../../common/instruments';
-import { loadGLTF } from '../../common/modelLoader';
-import { ModelObject } from '../../common/modelObject';
-import type { PlayerAction } from '../../common/objects/enum';
-import { isStandingIdle } from '../../common/playerActionMapper';
-import type { PlayerObject } from '../../common/playerObject';
+import { Vector3 } from '../../controllers/render/babylon/exports';
+import { angleLinkMatrix } from '../../controllers/render/boneLink';
+import { devQuery, devQueryNumbers } from '../../core/devSeams';
+import type { BmdLink } from '../../controllers/render/boneLink';
+import { instrumentById, instrumentParts, isInstrumentId, type InstrumentPart } from '../../modules/band/instruments';
+import { loadGLTF } from '../../controllers/assets/modelLoader';
+import { reportLoadFailure } from '../../controllers/assets';
+import { ModelObject } from '../../controllers/render/modelObject';
+import type { PlayerAction } from '@versions/shared/objects/enum';
+import { isStandingIdle } from '../../controllers/anim/playerActionMapper';
+import type { PlayerObject } from '../../controllers/actors/playerObject';
 import {
   performanceEnded,
   refused,
   takenOut,
-} from '../../common/band';
-import { instrumentClip } from '../../common/band/instrumentClip';
-import { startPerforming, stopPerforming } from '../../common/band/performing';
-import { audioNow, dropPerformer, setPerformerPosition } from '../../sound/instruments';
-import { effects } from '../../effects';
-import { entityYaw } from '../../effects/core';
-import { playUiSound } from '../../libs/sfx';
+} from '../../modules/band/music';
+import { instrumentClip } from '../../modules/band/music/instrumentClip';
+import { startPerforming, stopPerforming } from '../../modules/band/music/performing';
+import { audioNow, dropPerformer, setPerformerPosition } from '../../controllers/sound/instruments';
+import { effects } from '../../controllers/fx';
+import { entityYaw } from '../../controllers/fx/core';
+import { playUiSound } from '../../controllers/sound/sfx';
 import type { Entity, ISystemFactory } from '../world';
 
 /**
  * Performers: the hero with an instrument out, and every player in scope the
  * proxy says is playing. Gives them the row's pose - a few frames copied out
- * of an emote, looped (`band/instrumentClip.ts`) - hangs the model on the
+ * of an emote, looped (`modules/band/music/instrumentClip.ts`) - hangs the model on the
  * hand bone, and ends the performance the moment they step, get hit into
  * another clip, or die.
  *
@@ -102,7 +103,7 @@ export const BandSystem: ISystemFactory = world => {
         mesh.metadata ??= {};
         mesh.metadata.timeOffset = 0;
       }
-    });
+    }).catch(reportLoadFailure(part.model));
     return model;
   }
 
@@ -245,7 +246,7 @@ export const BandSystem: ISystemFactory = world => {
         if (clip >= 0) e.playerAnimation.action = clip as PlayerAction;
 
         // Every hit whose time has come floats a note up from the instrument
-        // (effects/bandNotes.ts); the pose itself only sways. A chord's notes
+        // (controllers/fx/bandNotes.ts); the pose itself only sways. A chord's notes
         // land together, and one of them is the strum.
         const hits = p.hits;
         while (hits.length && hits[0].when <= now + dt) {

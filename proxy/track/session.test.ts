@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { TrackEvent } from '../../src/common/adminProtocol';
+import type { TrackEvent } from '../../src/controllers/net/protocols/adminProtocol';
 import { TrackedSession, type SessionOptions } from './session';
 import { WireEncoder } from './wire';
 import {

@@ -5,7 +5,7 @@
  * `VITE_DATA_URL`; convert its models / terrain / sounds with the scripts in
  * `tools/` into `public/game-assets-<id>/`.
  */
-import type { VersionData } from '../../../src/version/contract';
+import type { VersionData } from '@/version/contract';
 
 function withTrailingSlash(url: string): string {
   return url.endsWith('/') ? url : `${url}/`;
@@ -15,4 +15,6 @@ export const templateData: VersionData = {
   folder: withTrailingSlash(import.meta.env.VITE_DATA_URL || './Data-TODO/'),
   assets: './game-assets-TODO/',
   locale: 'Eng',
+  // TODO: the World<n> / Object<n> folder numbers this version ships.
+  worlds: [],
 };

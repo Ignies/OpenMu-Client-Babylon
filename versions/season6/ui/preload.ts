@@ -1,22 +1,21 @@
 /**
  * Season 6 sprite preloads: the sheets to decode up front, in two waves.
  *
- * The lists moved here from `libs/mu/preloadSprites.ts` unchanged - the
+ * The lists moved here from `controllers/assets/preloadSprites.ts` unchanged - the
  * loader still owns when and how, the version owns which files. A period
  * tree shares almost no interface file names with this one, which is why
  * this is version property (versions/v097d/ui/preload.ts).
  */
-import { CURSOR_SPRITES } from '../../../src/ui/components/gameCursor/cursors';
-import { MU_WINDOW_SPRITES } from '../../../src/ui/components/muWindow';
-import { INVENTORY_SPRITES } from '../../../src/ui/pages/worldPage/components/inventory/layout';
-import { NPC_SHOP_SPRITES } from '../../../src/ui/pages/worldPage/components/npcShop/layout';
-import { CHARACTER_INFO_SPRITES } from '../../../src/ui/pages/worldPage/components/characterInfo/layout';
-import { VAULT_SPRITES } from '../../../src/ui/pages/worldPage/components/vault/layout';
-import { CHAOS_MACHINE_SPRITES } from '../../../src/ui/pages/worldPage/components/chaosMachine/layout';
-import { TRADE_SPRITES } from '../../../src/ui/pages/worldPage/components/trade/layout';
-import { PERSONAL_SHOP_SPRITES } from '../../../src/ui/pages/worldPage/components/personalShop/layout';
-import { CASH_SHOP_SPRITES } from '../../../src/ui/pages/worldPage/components/cashShop/layout';
-import type { VersionPreload } from '../../../src/version/uiContract';
+import { CURSOR_SPRITES } from '@/controllers/interface/components/game_cursor';
+import { MU_WINDOW_SPRITES } from '@/controllers/interface/components/mu_window';
+import { INVENTORY_SPRITES } from '../../shared/ui/windows/inventory/layout';
+import { NPC_SHOP_SPRITES } from '../../shared/ui/windows/npc_shop/layout';
+import { CHARACTER_INFO_SPRITES } from '../../shared/ui/windows/character_info/layout';
+import { VAULT_SPRITES } from '../../shared/ui/windows/vault/layout';
+import { CHAOS_MACHINE_SPRITES } from '../../shared/ui/windows/chaos_machine/layout';
+import { TRADE_SPRITES } from '../../shared/ui/windows/trade/layout';
+import { PERSONAL_SHOP_SPRITES } from '../../shared/ui/windows/personal_shop/layout';
+import type { VersionPreload } from '@/version/uiContract';
 
 const PREGAME_SPRITES = [
   ...CURSOR_SPRITES,
@@ -48,6 +47,7 @@ const PREGAME_SPRITES = [
   'cha_id.OZT',
 
   'op1_stone.OZJ',
+  'op1_back1.OZT',
   'op1_back2.OZT',
   'op1_back3.OZJ',
   'op1_back4.OZJ',
@@ -146,6 +146,8 @@ const HUD_SPRITES = [
   'mini_map_ui_npc.OZT',
   'mini_map_ui_party.OZT',
   'mini_map_ui_portal.OZT',
+  'newui_Party_Back.OZT',
+  'newui_Party_HpBar.OZJ',
   'newui_Party_Lifebar01.OZJ',
   'newui_Party_Lifebar02.OZJ',
   'newui_Party_X.OZT',
@@ -209,7 +211,6 @@ const WORLD_SPRITES = [
     ...CHAOS_MACHINE_SPRITES,
     ...TRADE_SPRITES,
     ...PERSONAL_SHOP_SPRITES,
-    ...CASH_SHOP_SPRITES,
     ...HUD_SPRITES,
   ]),
 ];

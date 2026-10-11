@@ -1,0 +1,38 @@
+import { defineMonster } from '@/controllers/monsters';
+import { dieSand } from '../_shared/bodyFx';
+
+export default defineMonster({
+  Numb: 7,
+  Name: 'Giant',
+  // MODEL_GIANT: the sand cloud when it falls (ZzzCharacter.cpp:6177).
+  bodyFx: [dieSand],
+  maxHealth: 400,
+  model: { type: 5, scale: 1.6 },
+  stats: {
+    Rate: 1,
+    Level: 17,
+    HP: 400,
+    MP: 0,
+    MinDmg: 57,
+    MaxDmg: 62,
+    Def: 18,
+    MagDef: 0,
+    AttackSuccess: 80,
+    Move: 18,
+    AttType: 2,
+    Range: 0,
+    View: 2,
+    MoveSpeed: 3,
+    AttSpeed: 400,
+    Regen: 2200,
+    Attri: 10,
+    ItemR: 2,
+    MoneyR: 150,
+    MaxI: 12,
+    ResWind: 6,
+    ResPois: 0,
+    ResIce: 0,
+    ResWater: 0,
+    ResFire: 0,
+  },
+});

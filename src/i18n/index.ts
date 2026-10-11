@@ -6,13 +6,14 @@
  * MobX observable, so every `observer` component that renders a `t()` string
  * re-renders the moment the language changes - no reload, no remount.
  *
- * Holds no strings of its own: the entries in `layers.ts` own those, and
- * `recipes.ts` owns English.
+ * Holds no strings of its own: every owner keeps its text in `i18n/<code>.ts`
+ * next to its code (see readme.md), and `registry.ts` collects it.
  */
 
 import { makeAutoObservable, runInAction } from 'mobx';
-import { LocalStorage } from '../libs/localStorage';
-import { EN_TEXT, type TextKey } from './recipes';
+import { LocalStorage } from '../core/localStorage';
+import { ENGLISH, SOURCE_CODE, lineOf, onTextRegistered, registerText } from './registry';
+import { builtInText } from './sources';
 import type { LanguageDataPack, LanguageLayer } from './layer';
 import type { PackRepairs } from './packRepairs';
 import type { ItemNameFixes } from './itemNames';
@@ -22,7 +23,22 @@ import { LANGUAGE_LAYERS } from './layers';
 const LANGUAGE_KEY = 'mu_language';
 
 /** The one language that is always complete - the fallback for every other. */
-const FALLBACK_CODE = 'en';
+const FALLBACK_CODE = SOURCE_CODE;
+
+/**
+ * Every owner's English table, by declaration merging: each owner's
+ * `i18n/en.ts` adds itself (`'src/modules/party': typeof en`), so a misspelled
+ * key does not compile and no central key list is kept by hand.
+ */
+export interface TextOwners {
+  'src/i18n/text': typeof import('./text/en').default;
+}
+
+/** Every built-in key: the union of all owners' English keys. */
+export type TextKey = { [O in keyof TextOwners]: keyof TextOwners[O] }[keyof TextOwners] & string;
+
+// Built-in text: every owner's files, registered once at load.
+for (const file of builtInText()) registerText(file.code, file.strings);
 
 type Params = Record<string, string | number>;
 
@@ -91,8 +107,12 @@ class I18n {
   /** The active BCP-47 code. Observable - this is what redraws the UI. */
   private code: string;
 
+  /** Bumped by every `registerText`, so text that arrives late redraws too. */
+  private revision = 0;
+
   constructor() {
     this.code = load(this.layers);
+    onTextRegistered(() => runInAction(() => this.revision++));
 
     // `t` and `translated` stay plain methods: MobX runs an action untracked,
     // and a `t()` that did not register a dependency would leave every string
@@ -129,7 +149,7 @@ class I18n {
 
   /**
    * The `Data/Local/<folder>/` pack for the active language, or null when the
-   * original never shipped one - `libs/mu/localData.ts` then reads `Eng`.
+   * original never shipped one - `controllers/assets/mu/localData.ts` then reads `Eng`.
    */
   get dataPack(): LanguageDataPack | null {
     return this.current.dataPack ?? null;
@@ -164,13 +184,15 @@ class I18n {
    * kept from the original client are spliced by their own call sites.
    */
   t(key: TextKey, params?: Params): string {
-    const line = this.current.strings[key] ?? EN_TEXT[key];
+    void this.revision;
+    const line = lineOf(this.current.code, key) ?? ENGLISH[key] ?? key;
     return fill(line, params);
   }
 
   /** Has this language actually translated the key, or is English showing? */
   translated(key: TextKey): boolean {
-    return this.current.strings[key] !== undefined;
+    void this.revision;
+    return lineOf(this.current.code, key) !== undefined;
   }
 
   // ---- commands ----------------------------------------------------------
@@ -224,11 +246,11 @@ export const i18n = new I18n();
 // Dev only: a language that has fallen behind the catalogue shows English for
 // the keys it is missing, which is easy to miss on screen. Say so once.
 if (import.meta.env?.DEV) {
-  const keys = Object.keys(EN_TEXT) as TextKey[];
+  const keys = Object.keys(ENGLISH);
 
   for (const layer of LANGUAGE_LAYERS) {
     if (layer.code === FALLBACK_CODE) continue;
-    const missing = keys.filter(key => layer.strings[key] === undefined);
+    const missing = keys.filter(key => lineOf(layer.code, key) === undefined);
     if (missing.length) {
       console.warn(
         `[i18n] ${layer.name} is missing ${missing.length} of ${keys.length} keys ` +
@@ -268,5 +290,15 @@ export function textTable<T extends Record<string, TextKey>>(
   return out;
 }
 
+/**
+ * `registerText(code, strings)`: adds or replaces lines of one language at run
+ * time (a streamed module's text). Only English is required; other languages
+ * fall back to it line by line, and an unknown key shows as itself.
+ */
+export { registerText };
+
+/** The English line of every key: the key list and the fallback. Live. */
+export const EN_TEXT = ENGLISH as Readonly<Record<TextKey, string>>;
+
 export type { LanguageLayer, FlagRegion } from './layer';
-export type { TextKey } from './recipes';
+export type { TextStrings } from './registry';

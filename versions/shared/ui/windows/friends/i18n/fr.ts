@@ -1,0 +1,36 @@
+/** French text of the `friends` window. */
+
+import type en from './en';
+
+export default {
+  'friends.title': 'Liste d’amis',
+  'friends.tab.friends': 'Amis',
+  'friends.tab.letters': 'Lettres',
+  'friends.empty': 'Votre liste d’amis est vide.',
+  'friends.lettersEmpty': 'Votre boîte aux lettres est vide.',
+  'friends.namePlaceholder': 'Nom du personnage',
+  'friends.server': 'Serveur {server}',
+  'friends.letter': 'Lettre',
+  'friends.openingLetter': 'Ouverture de la lettre...',
+  'friends.writeLetter': 'Écrire une lettre',
+  'friends.count': 'Amis ({count}/{max})',
+  'friends.lettersCount': 'Lettres ({count}/{max})',
+  'friends.unread': ' {count} nouvelles',
+  'friends.add': 'Ajouter',
+  'friends.talk': 'Parler',
+  'friends.letterButton': 'Lettre',
+  'friends.delete': 'Supprimer',
+  'friends.hide': 'Masquer',
+  'friends.write': 'Écrire',
+  'friends.read': 'Lire',
+  'friends.reply': 'Répondre',
+  'friends.from': 'De {sender} · {time}',
+  'friends.to': 'À',
+  'friends.subject': 'Objet',
+  'friends.replyPrefix': 'Re : {subject}',
+  'friends.tab.rooms': 'Chat',
+  'friends.roomsEmpty': 'Aucun salon de discussion ouvert.',
+  'friends.roomsCount': 'Salons ({count})',
+  'friends.roomAlert': 'Nouveau',
+  'friends.open': 'Ouvrir',
+} satisfies Partial<Record<keyof typeof en, string>>;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { AdminServerMessage, TrackEvent } from '../../src/common/adminProtocol';
+import type { AdminServerMessage, TrackEvent } from '../../src/controllers/net/protocols/adminProtocol';
 import { AdminHub, type AdminSocket } from './admin';
 import { MemoryJournal } from './journal';
 import { Tracker } from './tracker';

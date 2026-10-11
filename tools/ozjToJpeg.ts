@@ -20,7 +20,7 @@ for (const ozjFileName of glob.scanSync(DATA_FOLDER)) {
   try {
     //remove old file
     unlinkSync(jpgFilePath);
-  } catch (e) {}
+  } catch {}
 
   const jpgFile = Bun.file(jpgFilePath);
   const writer = jpgFile.writer();

@@ -1,5 +1,5 @@
 import type { ISystemFactory } from '../world';
-import { sound } from '../../sound';
+import { sound } from '../../controllers/sound';
 
 /**
  * The sound layer's per-frame call site : attaches the

@@ -1,0 +1,8 @@
+import { defineMonster } from '@/controllers/monsters';
+
+export default defineMonster({
+  Numb: 442,
+  Name: 'Sapi-Duo',
+  maxHealth: 39500,
+  model: { type: 137, scale: 1 },
+});

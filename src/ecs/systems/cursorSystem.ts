@@ -3,14 +3,14 @@ import {
   PointerEventTypes,
   Ray,
   Vector3,
-} from '../../libs/babylon/exports';
-import { TWFlags } from '../../common/terrain/consts';
-import { isFlagInBinaryMask } from '../../common/utils';
-import { aimX, aimY } from '../../camera';
-import { LEAN_CURSOR_OBJECTS, findRestObject } from '../../libs/mu/restObjects';
-import { pickGround } from '../../libs/mu/terrainPick';
-import { Store } from '../../store';
-import type { CursorHover } from '../../ui/components/gameCursor/cursors';
+} from '../../controllers/render/babylon/exports';
+import { TWFlags } from '../../controllers/terrain/consts';
+import { isFlagInBinaryMask } from '../../controllers/assets/download';
+import { aimX, aimY } from '../../controllers/camera';
+import { leanCursorObjects, findRestObject } from '../../controllers/terrain/restObjects';
+import { pickGround } from '../../controllers/terrain/terrainPick';
+import { Bag } from '../../modules/inventory';
+import type { CursorHover } from '@/controllers/interface/components/game_cursor';
 import type { Entity, ISystemFactory, World } from '../world';
 import { isAttackableEntity, isNpcOrTrapType } from './attackSystem';
 
@@ -82,7 +82,7 @@ export const CursorSystem: ISystemFactory = world => {
         continue;
       }
 
-      return LEAN_CURSOR_OBJECTS[world.mapIndex]?.has(e.modelId)
+      return leanCursorObjects(world.mapIndex)?.has(e.modelId)
         ? 'lean'
         : 'sit';
     }
@@ -94,7 +94,7 @@ export const CursorSystem: ISystemFactory = world => {
     const target = world.currentPointerTarget;
 
     if (target) {
-      if (target.droppedItem) return Store.pickedItem ? null : 'get';
+      if (target.droppedItem) return Bag.pickedItem ? null : 'get';
       if (isNpcEntity(target)) return 'talk';
       if (isAttackableEntity(world, target)) return 'attack';
 

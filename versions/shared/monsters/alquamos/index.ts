@@ -1,0 +1,37 @@
+import { defineMonster } from '@/controllers/monsters';
+
+export default defineMonster({
+  Numb: 69,
+  Name: 'Aquamos',
+  // Its Energy Ball (17) ends with no SOUND_MAGIC (ZzzCharacter.cpp:5087-5122).
+  quietCasts: [17],
+  maxHealth: 11500,
+  model: { type: 50, scale: 1 },
+  stats: {
+    Rate: 1,
+    Level: 67,
+    HP: 11500,
+    MP: 0,
+    MinDmg: 255,
+    MaxDmg: 290,
+    Def: 195,
+    MagDef: 0,
+    AttackSuccess: 385,
+    Move: 125,
+    AttType: 3,
+    Range: 17,
+    View: 5,
+    MoveSpeed: 5,
+    AttSpeed: 400,
+    Regen: 1400,
+    Attri: 10,
+    ItemR: 2,
+    MoneyR: 160,
+    MaxI: 14,
+    ResWind: 3,
+    ResPois: 0,
+    ResIce: 9,
+    ResWater: 9,
+    ResFire: 11,
+  },
+});

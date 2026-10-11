@@ -1,5 +1,5 @@
-import { ENUM_WORLD } from '../../common/types';
-import { GameOptions } from '../../common/gameOptions';
+import { ENUM_WORLD } from '../../core/types';
+import { GameOptions } from '@/controllers/settings';
 import {
   FADE_STEPS,
   FULL_STEPS,
@@ -10,59 +10,21 @@ import {
   warmFootprints,
   type PrintKind,
   type PrintLane,
-} from '../../weather/footprints';
-import { trackFor, type TrackRecipe } from '../../weather/recipes';
-import { monsterModelTypeOf } from '../../common/playSpeed';
-import { weather } from '../../weather';
-import { isTileOpen } from '../../libs/mu/terrainMask';
-import { onSnowGround } from '../../weather/snowSink';
-import { SNOW_GROUND_MAPS } from '../../weather/snowCover';
-import { RUN_THRESHOLD } from '../../common/locomotion';
-import { ploughSnowTrail } from '../../weather/snowTrail';
+} from '../../controllers/weather/footprints';
+import { trackFor, type TrackRecipe } from '../../controllers/weather/recipes';
+import { monsterModelTypeOf } from '../../controllers/anim/playSpeed';
+import { weather } from '../../controllers/weather';
+import { isTileOpen } from '../../controllers/terrain/terrainMask';
+import { onSnowGround } from '../../controllers/weather/snowSink';
+import { SNOW_GROUND_MAPS } from '../../controllers/weather/snowCover';
+import { RUN_THRESHOLD } from '../../controllers/actors/locomotion';
+import { ploughSnowTrail } from '../../controllers/weather/snowTrail';
 import type { Entity, ISystemFactory } from '../world';
 import { isTeleporting } from './teleportSystem';
 
 /**
- * Lays the tracks down (`footprints.ts`) and runs the drying boot.
- *
- * Two different things wear the same shapes:
- *
- *  - **Wet prints.** The water is on the *boot*, not on the ground, so these
- *    keep appearing after the walker has left the puddle and - the whole point
- *    - keep appearing **indoors**. Walking wet feet into the tavern and leaving
- *    a trail across the floorboards is the behaviour worth having.
- *  - **Snow prints.** The snow is on the *ground*, so these need settled cover
- *    under the foot and stop dead at a doorway. A run of them is the trail.
- *
- * ### Everything that walks, not just the hero
- *
- * This was hero-only by design, and the design was a budget: a pool of 64
- * prints is about sixteen tiles of trail, and one busy square would have
- * emptied it into a mess of overlapping stamps. Three things pay for the
- * change.
- *
- *  - The hero has a **ring of their own** (`PrintLane`), at exactly the size
- *    they had. Nothing anyone else does can evict the trail leading away from
- *    where you are standing.
- *  - Only walkers **near the hero** are laid at all (`PRINT_RANGE`), and only
- *    so many of them at once (`MAX_WALKERS`). A print half a screen away is a
- *    few pixels; a print off the screen is nothing at all.
- *  - The long trail is not decals anyway. It is the ploughed channel in
- *    `snowTrail.ts`, a world-space depth map that the terrain shader folds
- *    into the snow's own relief - that has no pool to empty and is what
- *    actually reads from a distance.
- *
- * ### Different feet leave different marks
- *
- * What a thing presses into the snow is its own (`weather/recipes.ts`): a
- * humanoid leaves boot prints, a hound leaves four pads in two pairs, a spider
- * leaves a line of pricks with clean snow between them, a worm leaves one
- * unbroken groove and no prints at all, and anything off the ground - a Budge
- * Dragon hovering, a wraith, a Dinorant rider - leaves the snow exactly as it
- * found it. The recipe decides the silhouette, the size, the stride, the
- * stance, whether there are two feet or four, how hard it presses and how wide
- * a channel its body ploughs; this file decides *when*, and does it once for
- * everyone.
+ * Lays the tracks down (`footprints.ts`) and runs the drying boot, for every
+ * walker near the hero. See ecs/readme.md.
  */
 
 // ---- what a walker is ------------------------------------------------------
@@ -101,27 +63,8 @@ const MAX_WALKERS = 16;
 const HOVERING = 0.05;
 
 /**
- * The two gaits, and the two reference looks they produce (`improved_2.jpg`
- * for the walk, `improved.jpg` for the run).
- *
- * **Walking** through dense snow the boot never clears the surface: each step
- * ploughs on from the last, and what is left is one continuous trench with
- * broken, shouldered walls, the individual prints only readable as deeper
- * pockets inside it. So the walk lays a wide, strong drag under the whole
- * track and keeps a short stride so the pockets run together.
- *
- * **Running** the leg lifts clear between footfalls: the stride is longer,
- * each print is a separate deep punch with untouched snow between, there is
- * no trough at all, and the push-off throws far more snow. Keyed on the
- * original's `c->Run` accumulator (`playerAnimation.run`), which is what
- * swaps the run clips in, so the prints change gait when the animation does.
- *
- * These are **multipliers on the recipe**, not absolute numbers, and that is
- * what lets one gait table serve a hero, a yeti and a spider. Against the
- * `boot` recipe they reproduce the tuned hero exactly: stride 0.5 and 0.78,
- * press 0.28 and 0.4, and so on down. Only players have a `run` accumulator,
- * so everything else walks - which is right anyway, since a charging hound
- * lays prints by the tile and not by the second.
+ * The two gaits (keyed on `c->Run`), as multipliers on the walker's recipe.
+ * See ecs/readme.md.
  */
 const GAIT = {
   walk: {
@@ -200,32 +143,8 @@ function newWalker(x: number, z: number): Walker {
 // ---- tuning ----------------------------------------------------------------
 
 /**
- * Tiles walked between footfalls, and how far apart the two feet are, both now
- * per creature in `weather/recipes.ts`. The reasoning that set the hero's is
- * kept here, because it is about the *system* and not about boots.
- *
- * `stride` is ALSO how far the newest print can be behind the walker, and that
- * is the number that matters most for how the trail reads. A print is laid the
- * instant the accumulator crosses it and not again until the next one, so when
- * someone stops walking the last print is, on average, half a stride back -
- * and at the moment they stop, up to a full one. That lag is what keeps
- * reading as "the prints are too far from the boots"; it is not an offset that
- * can be corrected, because at the moment of placement the print IS under the
- * foot. The only lever is to place them more often.
- *
- * It is ALSO, and this is the binding constraint, what makes the trail read as
- * a walk. Feet alternate, so consecutive prints must be separated along the
- * track by MORE than a print is long. At 0.34 against a print 0.573 long they
- * overlapped by 0.23 and the trail read as rows of PAIRS rather than as left,
- * right, left - which is not a matter of taste, it is the gait being wrong.
- * Shortening the PRINT is what buys room for both, which is why
- * `FOOTPRINT_TUNING.length` came down at the same time.
- *
- * `side` is the distance from the WALKER'S CENTRE to the print, so it has to
- * match where that creature's feet actually are - and a person's stance is
- * narrow. At 0.24 the two tracks were 0.48 tiles apart, roughly a third of the
- * figure's own height, so the near print landed visibly outside the near boot
- * and the trail straddled the character instead of running under them.
+ * Stride and side spacing are per creature in `controllers/weather/recipes.ts`; why the
+ * hero's values are what they are is in ecs/readme.md.
  */
 
 /** Settled cover needed before a foot leaves a mark in it. */
@@ -335,7 +254,7 @@ export const FootprintSystem: ISystemFactory = world => {
       // Asked of the PATCH under the foot, not of the map. The first cut
       // read `inPuddles()` - "has the ground pooled anywhere" - so once the
       // streets were wet the boot recharged on every outdoor step and never
-      // dried. Water is where the shader draws it (weather/puddleUnderfoot).
+      // dried. Water is where the shader draws it (controllers/weather/puddleUnderfoot).
       // A half-drawn edge charges the sole part way: a boot that clipped the
       // rim of a puddle is damp, not soaked.
       const open = isTileOpen(x, z);
@@ -477,7 +396,7 @@ export const FootprintSystem: ISystemFactory = world => {
 
       if (gap <= DRAG_MAX_GAP) {
         // Into the trail depth map, not a decal: the channel is one
-        // continuous shape in the snow's own relief (weather/snowTrail.ts).
+        // continuous shape in the snow's own relief (controllers/weather/snowTrail.ts).
         // Scaled by how far past the threshold the cover is, so the trail
         // fades in with the snow rather than switching on.
         ploughSnowTrail(
@@ -599,7 +518,7 @@ export const FootprintSystem: ISystemFactory = world => {
    *
    *     muTracks()
    *
-   * A wrong row in `weather/recipes.ts` fails **silently** - a creature
+   * A wrong row in `controllers/weather/recipes.ts` fails **silently** - a creature
    * classified `none` or `slide` simply leaves nothing, which is
    * indistinguishable from the whole feature being broken, and Devias' Worm
    * cost an afternoon of guessing at a screenshot before that was obvious.

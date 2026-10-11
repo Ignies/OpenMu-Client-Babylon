@@ -3,51 +3,92 @@
 
 # Open Mu Client Babylon
 One Client to rule them all.
-## Main server selection screen:
-https://github.com/user-attachments/assets/3e5d8266-ea30-4f6a-990d-44006c4b6639
-
-## Character movement + combat:
-https://github.com/user-attachments/assets/94b1529d-322d-4655-9fef-e48d447796f0
-
-## Guild creation:
-https://github.com/user-attachments/assets/ed5daea2-f9fd-4370-a884-442dfa20843a
-
-## Translation system:
-https://github.com/user-attachments/assets/fb16b2db-ec7a-4060-bf26-f0d8cf7d95be
-
-## Item upgrades and new effects:
-https://github.com/user-attachments/assets/465fa86a-1a7b-4c26-9794-aba5297c5e19
-
-## Emote wheel:
-https://github.com/user-attachments/assets/35c67fab-1c7c-4c41-b5a0-97cc0c90fd6a
-
 
 Client for OpenMU made in BabylonJS based of afrokick's JSClient, the client is being developed to work with any version available and connect on the go to different servers either stored in this repo's serverlist.md or added manually to the list.
 
-
 Current working ~somewhat version is S6EP3; 0.97d ships beside it (tag V097D) and more are to be added down the line.
 
-## Installing
+## Installing your own server
 
-Needs [Docker Desktop](https://www.docker.com/products/docker-desktop/) and
-[Bun](https://bun.sh) ≥ 1.0. You can use Docker to run the project with the command `docker compose up --build` to start and compile the project.
+One command sets up everything: OpenMU (installed the OpenMU way, with our plugin added), the
+websocket proxy with the band system, map ping and weather, account signup, cash shop,
+marketplace, the admin panel and this client. It asks you a few questions and does the rest.
 
-### 1. The server
+### What you need
+
+- A server (VPS) with **Ubuntu 22.04+ / Debian 12+** (or Rocky/Alma 9), at least **4 GB RAM** and
+  **30 GB disk**. Windows 10/11 or Server 2022 also works (see below).
+- **Optional:** a domain name. With one, players get HTTPS on `play.<your-domain>`. Without one,
+  the server runs on its IP address (fine for testing).
+
+### Step 1: connect to your server
+
+From your own computer, open a terminal (Windows: PowerShell) and log in:
 
 ```bash
-git clone https://github.com/MUnique/OpenMU.git
-cd OpenMU/deploy/all-in-one
+ssh root@YOUR.SERVER.IP
 ```
 
-To use the official docker image of OpenMU, run:
+### Step 2: run the installer
+
+Copy this line, paste it into the SSH window and press Enter:
 
 ```bash
-docker compose up -d --no-build
+curl -fsSL https://raw.githubusercontent.com/Ignies/OpenMu-Client-Babylon/main/install/get.sh | sudo bash
 ```
 
-OpenMU's admin panel comes up on <http://localhost:80>. Create an account there before logging in.
+It installs Git, Docker and Bun if they are missing, downloads this repository and starts the
+installer.
 
-### 2. The client
+### Step 3: answer the questions
+
+- **Address:** your domain (for example `example.com`) or the server's IP. With a domain, create the
+  DNS **A records** the installer lists (`play.`, `ws.`, `register.`, `api.`, `admin.`) pointing at
+  your server's IP.
+- **Passwords:** you create them (database, admin panel, Game Master account). **Write them down.**
+- **Features:** band system, map ping, weather, cash shop delivery, marketplace fees. The defaults
+  are fine.
+
+The first build takes 10 to 20 minutes. When it finishes, it prints the addresses to open.
+
+### Step 4: play
+
+Open `https://play.<your-domain>` (or `http://YOUR.SERVER.IP`), create an account and log in.
+
+### Afterwards: the `mu` command
+
+| Command | What it does |
+|---|---|
+| `mu` | Menu with everything below |
+| `mu update` | Backs up, downloads the latest changes from GitHub, rebuilds, restarts. Rolls back if something fails |
+| `mu config` | Change domain, passwords, features or the OpenMU version |
+| `mu status` | Is everything running? |
+| `mu logs` | Live logs (`mu logs proxy`, `mu logs openmu-startup`...) |
+| `mu backup` / `mu restore` | Save or bring back the database and all service data |
+| `mu adopt` | Move an existing hand-made OpenMU server into this setup |
+
+### Windows server
+
+Open **PowerShell as Administrator** and run:
+
+```powershell
+irm https://raw.githubusercontent.com/Ignies/OpenMu-Client-Babylon/main/install/get.ps1 | iex
+```
+
+It installs Docker Desktop if needed. If Docker Desktop asks for a restart, restart and run the
+same line again; it continues where it stopped.
+
+### Already cloned the repository?
+
+From the repository folder: `sudo bash install/install.sh` (Linux) or `install\install.ps1`
+(Windows, as Administrator).
+
+More detail, file layout and troubleshooting: [install/readme.md](install/readme.md).
+
+## Developing the client
+
+Needs [Bun](https://bun.sh) and an OpenMU server to connect to (the installer above, or OpenMU's
+own [all-in-one compose](https://github.com/MUnique/OpenMU/tree/master/deploy/all-in-one)).
 
 ```bash
 bun install
@@ -56,12 +97,8 @@ bun run proxy      # ws<->tcp bridge, in a second shell
 ```
 
 The proxy is not optional: a browser cannot open a TCP socket, so every packet to OpenMU goes
-through it. Run it next to the client.
-
-The proxy also carries the band system (instruments played live): those frames never reach
-OpenMU, the proxy relays them to the players who can see the performer. `BAND=off` disables
-it, `BAND_MAX_PERFORMERS` (16) and `BAND_MAX_RECEIVERS` (48) cap it, and it needs `TRACK`
-on. It logs a `band: {...}` stats line once a minute when something happened.
+through it. It also carries the band system (`BAND=off` disables it, `BAND_MAX_PERFORMERS` (16)
+and `BAND_MAX_RECEIVERS` (48) cap it, it needs `TRACK` on).
 
 **No server, no Docker?** `bun run dev` and open <http://localhost:5173/offline> for the
 single-player offline demo.
@@ -110,7 +147,7 @@ single-player offline demo.
      [ Schedule ]: Ambient weather squalls on a timed schedule per map.
 
 [▓▓▓▓▓▓▓▓░░] Items & Inventory (8/10):
-     [ Data ]: items.json database, wire serializer, group/index lookup.
+     [ Data ]: one file per item, wire serializer, group/index lookup.
      [ Display ]: Icon pack + manifest, tooltips, stat rolls, computed value, visual
                   tier, legacy effect flags, rest pose/angle/height on the ground.
      [ Systems ]: Jewel upgrade, durability, hotkeys, drop tiers, glow/aura/crackle/
@@ -183,7 +220,7 @@ single-player offline demo.
 [▓▓▓▓▓▓▓░░░] NPCs & Monsters (7/10):
      [ NPCs ]: ~20 bespoke (Baz, Hanzo, Leo, Lumen, Pasi, Zyro, Trainer, Golden
                Archer, Chaos Card Master, guards, girl, man) + geared/plate/generic.
-     [ Monsters ]: monsters.json + model table; 5 bespoke (Budge Dragon, Hound,
+     [ Monsters ]: one folder per monster + model table; 5 bespoke (Budge Dragon, Hound,
                    Skeleton Warrior, Spider) + generic fallback.
      [ Gap ]: Most monsters run through genericMonster rather than bespoke behaviour.
 
@@ -199,10 +236,11 @@ single-player offline demo.
                    features split, _template folder ready.
      [ Shipped ]: season6 and 0.97d, selected at runtime: versions/registry.ts picks the
                   version per server-list entry (or ?version=), one build carries both.
-                  0.97d brings its own encryption, packet-variant ranking, feature flags
-                  and asset tree (Data-v097d + converted Lorencia).
+                  0.97d brings its own encryption, packet-variant ranking, feature flags,
+                  modulesOff, gate table and asset tree (Data-v097d + only the worlds,
+                  models and sounds whose source differs; the rest is Season 6's).
      [ Gap ]: Outbound packets are still the Season 6 layouts, the window chrome is
-              still Season 6 art, and 11 of the 12 0.97d worlds are unconverted.
+              still Season 6 art, and 0.97d's World6 (Exile) has no map entry.
 ```
 
 

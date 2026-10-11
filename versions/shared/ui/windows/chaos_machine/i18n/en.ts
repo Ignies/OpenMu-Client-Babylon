@@ -1,0 +1,71 @@
+/** English text of the `chaos_machine` window. See src/i18n/readme.md. */
+
+const en = {
+  'chaos.combine': 'Combine',
+
+  'chaos.regular': 'Regular Combination',
+  'chaos.weapon': 'Chaos Weapon Combination',
+  'chaos.option': 'Item option combination',
+  'chaos.card': 'Chaos card combination',
+  'chaos.taxRate': 'Tax rate: {rate}% (changed in real-time)',
+  'chaos.successRate': 'Combination success rate: {rate}%',
+  'chaos.requiredZen': 'Required zen: {taxed}({zen})',
+  'chaos.requiredZenPotion': 'Required zen for potion: {taxed}({zen})',
+  'chaos.prediction': 'Assembly prediction: {name}',
+  'chaos.uploadItems': 'Please upload the assembly items.',
+  'chaos.improper': 'Improper items for combination',
+  'chaos.kind.380': '380 Level item',
+  'chaos.kind.equipment': 'Equipment item',
+  'chaos.kind.weapon': 'Weapon item',
+  'chaos.kind.defense': 'Defense item',
+  'chaos.kind.basicWing': 'Basic wing',
+  'chaos.kind.secondWing': '2nd Wing',
+  'chaos.kind.chaosWeapon': 'Chaos weapon',
+  'chaos.kind.seed': 'Seed',
+  'chaos.kind.sphere': 'Sphere',
+  'chaos.kind.seedSphere': 'Seed Sphere',
+  'chaos.word.quantity': 'Quantity',
+  'chaos.word.maximum': 'Maximum',
+  'chaos.word.minimum': 'Minimum',
+  'chaos.word.option': 'Option',
+  'chaos.word.rateIncrease': 'Rate increase',
+  'chaos.prefix.excellent': 'Excellent',
+  'chaos.prefix.set': 'Set',
+  'chaos.prefix.improve': 'Improve',
+  'chaos.prefix.socket': 'Socket',
+  'chaos.menu.title': 'Select method of combination',
+  'chaos.menu.regular1': "Wings(7 types), Fruit, Devil's Invitation",
+  'chaos.menu.regular2': 'Dinorant, +10, +15 items, Cloak of Invisibility',
+  'chaos.menu.regular3': "Fenrir's Horn, Scroll of Blood, Condor's Feather",
+  'chaos.menu.weapon1': 'Chaos Dragon Axe, Chaos Lightning Staff',
+  'chaos.menu.weapon2': 'Chaos Nature Bow',
+  'chaos.menu.close': 'Close',
+  'chaosCard.warning': 'Warning',
+  'chaosCard.once': 'Combinations can be used once at a time',
+  'chaosCard.space': 'More than 2x4 space in inventory is needed.',
+  'chaosCard.special': 'You can achieve special items with combinations.',
+  'chaos.extraction': 'Extraction',
+  'chaos.assembly': 'Assembly',
+  'chaos.application': 'Application',
+  'chaos.destruction': 'Destruction',
+  'chaos.selectApplicable': 'Select applicable socket',
+  'chaos.selectDestructibleSocket': 'Select destructible socket',
+  'seed.master': 'Seed Master',
+  'seed.master1': 'Extract the seed or the seed sphere',
+  'seed.master2': 'You may assembly them together.',
+  'seed.researcher': 'Seed researcher',
+  'seed.researcher1': 'Either apply the seed sphere',
+  'seed.researcher2': 'or destroy the seed sphere accordingly.',
+  'seed.extract': 'Seed Extraction',
+  'seed.sphere': 'Seed Sphere Assembly',
+  'seed.apply': 'Seed sphere application',
+  'seed.destroy': 'Seed sphere destruction',
+};
+
+export default en;
+
+declare module '@/i18n' {
+  interface TextOwners {
+    'versions/shared/ui/windows/chaos_machine': typeof en;
+  }
+}

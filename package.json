@@ -19,7 +19,7 @@
     "ops-ingest": "bun run ops/server/opsCli.ts ingest",
     "ops-follow": "bun run ops/server/opsCli.ts follow",
     "cashshop-orders": "bun run cashshop/server/ordersCli.ts",
-    "generate": "bun run src/common/packets/generate.ts",
+    "generate": "bun run versions/shared/packets/generate.ts",
     "test": "vitest run",
     "tsc": "tsc --noEmit",
     "lint": "eslint . --max-warnings=100000",
@@ -29,7 +29,10 @@
     "marketplace-api": "bun run --watch marketplace/server/main.ts",
     "marketplace-serve": "bun run marketplace/server/main.ts",
     "marketplace-audit": "bun run marketplace/server/boxAuditCli.ts",
-    "test:server": "bun test ./marketplace/server/"
+    "test:server": "bun test ./marketplace/server/",
+    "check": "bun tools/checks/index.ts",
+    "check:lint": "eslint . -f json | bun tools/checks/lintRatchet.ts",
+    "check:commits": "bun tools/checks/commits.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9",

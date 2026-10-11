@@ -1,0 +1,452 @@
+import { disposeGrassField } from './terrainGrass';
+import { ENUM_WORLD } from '@/core/types';
+import type { World } from '../../ecs/world';
+import { Loading } from '../loading';
+import { maps } from '../maps';
+// Side effect: the `ChangeTerrainAttributes` packet → `world.setTerrainFlags`.
+import './terrainAttributeUpdates';
+import {
+  disposePreparedTerrain,
+  getTerrainData,
+  prepareTerrain,
+  type PreparedTerrain,
+} from './getTerrainData';
+import { applyMapObjectFixups } from './mapObjectFixups';
+import { evictContainers } from '../assets/modelLoader';
+import { assetWorldNum } from '../assets/worldAssets';
+import { Vector3 } from '../render/babylon/exports';
+import { toRadians } from '../assets/download';
+import { MapTileObject } from './mapTileObject';
+import {
+  addPropToBatch,
+  disposePropBatches,
+  propBatchExclusion,
+  propBatchingActive,
+  propTypeCarriesLight,
+} from '../render/propBatches';
+import { LightCarrier } from '../lighting/lightCarrier';
+import { placesObject, type MapObjectRecord } from './objectRecords';
+import { EventBus } from '../../core/eventBus';
+import { DISABLE_OBJECTS_LOADING } from './consts';
+import { evictWorldMinimaps, prefetchWorldMinimap } from './minimap';
+import { resetTerrainMask } from './terrainMask';
+import { setShadowWorld } from '../render/objectShadow';
+import { lookDirector } from '../lighting/director';
+
+/** Bumped per warp request; a load whose serial is stale abandons its work. */
+let warpSerial = 0;
+
+/**
+ * A warp the server ordered has already moved the character on its side, so a
+ * load that fails cannot simply be dropped: the client would keep standing on
+ * the map it was told to leave while every object the server sends belongs to
+ * the new one. Leaving Chaos Castle is the case that shows it - the arena has
+ * collapsed by then, so what is left on screen is an empty floor. These are
+ * the delays before each further attempt.
+ */
+const WARP_RETRY_DELAYS_MS = [400, 1200, 3000] as const;
+
+/**
+ * The map whose terrain and entities are actually in the scene - the map the
+ * next load has to tear down. `world.mapIndex` is the newest destination and
+ * runs ahead of this while a load is in flight.
+ */
+let sceneMap = ENUM_WORLD.WD_55LOGINSCENE;
+
+/**
+ * Loads run strictly one at a time. Two warps used to run concurrently (a
+ * second `MapChanged` while the first was still downloading): the second
+ * computed its "old map" from the optimistic `world.mapIndex`, so the map
+ * really on screen was never unloaded, and the first load finished anyway,
+ * overwriting the terrain and tagging its objects with the wrong map.
+ */
+let loadQueue: Promise<void> = Promise.resolve();
+
+/** The records of the map on screen, kept for `reloadMapObjects`. */
+let sceneObjects: MapObjectRecord[] = [];
+let mapChangeHook: () => void = () => {};
+
+/** Registers what runs when the map changes, before the new terrain loads. Set once at boot. */
+export function onMapChange(fn: () => void): void {
+  mapChangeHook = fn;
+}
+
+let heroPlacedHook: () => void = () => {};
+
+/** Registers what runs once the hero stands on the new map (its gear is put on again). Set once at boot. */
+export function onHeroPlaced(fn: () => void): void {
+  heroPlacedHook = fn;
+}
+let sceneWorld: World | null = null;
+
+/**
+ * The map's own setup: the look director takes the map (its profile, and
+ * with it the clear colour - `SetWorldClearColor` bytes on Classic,
+ * SceneManager.cpp:336-365), then the entry's `create` - which binds the
+ * map's object classes into `MapTileObjects` and adds whatever entities the
+ * map owns. Every per-map decision lives on the entry
+ * (`versions/shared/maps/<name>/index.ts`); nothing here tests the world number.
+ */
+async function loadWorld(world: World) {
+  if (!world.terrain) return;
+
+  lookDirector()?.setMap(world.mapIndex);
+
+  await maps.create(world);
+}
+
+function createObjects(world: World, objs: MapObjectRecord[]) {
+  const batching = propBatchingActive();
+
+  for (const data of objs) {
+    if (!placesObject(data)) continue;
+
+    // AngleMatrix is Rz·Ry·Rx in a Z-up right-handed frame; our model-root
+    // mirror means every axis is negated on the way in. Pitch/roll are
+    // negated here, yaw stays MU-positive and is flipped by toRenderAngles
+    // (see controllers/render/renderAngles.ts). Previously only yaw was negated, which
+    // mirrored every tilted object (fences, signs, rocks, ramps). Babylon's Euler rolls
+    // before it pitches, so a record with both (4795 in all) turns by `AngleMatrix`
+    // itself: `ModelObject.updateLocation`, `placementMatrix`, the light offsets.
+    const angles = new Vector3(
+      -toRadians(data.rot.x),
+      toRadians(data.rot.z),
+      -toRadians(data.rot.y)
+    );
+
+    const pos = new Vector3(
+      data.pos.x / world.terrainScale,
+      data.pos.z / world.terrainScale,
+      data.pos.y / world.terrainScale
+    );
+
+    const modelFactory = world.terrain!.MapTileObjects[data.id] || MapTileObject;
+
+    // Scenery the batches can draw gets no model factory and no visibility
+    // radius: the per-object systems never see it (controllers/render/propBatches.ts).
+    if (batching && propBatchExclusion(world, data.id, modelFactory) === null) {
+      // A lit type keeps the per-object path for its light alone: a
+      // `LightCarrier` (no model) under the same radius and loader, so the
+      // lamp comes and goes with the hero exactly as it did.
+      const carrier = propTypeCarriesLight(world, data.id)
+        ? {
+            modelFactory: LightCarrier,
+            visibility: {
+              state: 'hidden' as const,
+              lastChecked: Math.random() * 0.2,
+            },
+          }
+        : {};
+
+      const entity = world.add({
+        worldIndex: world.mapIndex,
+        transform: {
+          pos,
+          rot: angles,
+          scale: data.scale,
+        },
+        modelId: data.id,
+        propBatch: { type: data.id, chunk: 0 },
+        ...carrier,
+      });
+
+      addPropToBatch(world, entity, modelFactory);
+      continue;
+    }
+
+    world.add({
+      worldIndex: world.mapIndex,
+      transform: {
+        pos,
+        rot: angles,
+        scale: data.scale,
+      },
+      modelId: data.id,
+      modelFactory,
+      visibility: {
+        state: 'hidden',
+        // Spread over the first 0.2 s so the 9 000 distance checks - and the
+        // model instantiations they trigger - do not all land in one frame,
+        // and stay staggered afterwards (CalculateVisibilitySystem re-arms
+        // each entity relative to its own check).
+        lastChecked: Math.random() * 0.2,
+      },
+    });
+  }
+}
+
+function unloadMap(world: World, oldMap: ENUM_WORLD, newMap: ENUM_WORLD) {
+  // A copy: `world.remove` mutates the live query while it is iterated,
+  // which skipped every other entity of the map just left.
+  const entities = [...world.with('worldIndex')];
+
+  for (const e of entities) {
+    if (e === world.playerEntity) continue;
+    if (e.worldIndex === oldMap) {
+      world.remove(e);
+      e.onDispose?.();
+      e.modelObject?.dispose();
+    }
+  }
+
+  // Before the prototypes' folder is evicted below: the chunks share their
+  // geometry.
+  disposePropBatches();
+
+  if (world.terrain) {
+    // Before the ground it stands on: the field holds the tile array the old
+    // material is about to dispose.
+    disposeGrassField();
+    world.terrain.mesh.material?.dispose(true, true);
+    world.terrain.mesh.dispose(false, true);
+    world.terrain = null;
+  }
+
+  // The old map's own GLBs (`Object<n>/`) have no user left; shared folders
+  // are not touched here (unused monster and NPC models go in app/lifecycle.ts).
+  // Blood Castle floors share one folder, so a same-folder warp keeps everything.
+  const oldAssets = assetWorldNum(oldMap);
+  if (oldAssets !== assetWorldNum(newMap)) {
+    // Keys are `./game-assets/Object4/Object40.glb`; the leading slash keeps
+    // `Object4/` from matching `Object14/`.
+    evictContainers(`/Object${oldAssets}/`);
+  }
+}
+
+/**
+ * A warp whose terrain cannot be loaded (a missing world folder, a corrupt
+ * file, the dev server answering HTML) leaves the client on the map it was
+ * on, out of the loading screen, with the failure logged - not on a loading
+ * screen forever with a half-torn scene behind it. That is where it waits,
+ * never where it stops: the destination is retried on a short backoff so the
+ * client ends up where the server has already put the character.
+ */
+function failWarp(
+  world: World,
+  map: ENUM_WORLD,
+  oldMap: ENUM_WORLD,
+  error: unknown,
+  pos?: { x: number; y: number },
+  attempt = 0
+) {
+  console.error(`Could not load world ${map}; staying on ${oldMap}:`, error);
+  world.mapIndex = oldMap;
+  setShadowWorld(oldMap);
+  Loading.setSceneLoading(false);
+  EventBus.emit('warpFailed', { map, error });
+
+  const delay = WARP_RETRY_DELAYS_MS[attempt];
+  if (delay === undefined) return;
+
+  setTimeout(() => {
+    // A warp of its own since, or the map arrived some other way: that one
+    // owns the scene now.
+    if (world.mapIndex !== oldMap || sceneMap === map) return;
+    loadMapIntoScene(world, map, pos, attempt + 1);
+  }, delay);
+}
+
+/**
+ * Rebuild the map's objects in place - every record back through
+ * `createObjects` under the current options. The scenery batching toggle
+ * changes which path a record takes, and that is decided at creation.
+ */
+export function reloadMapObjects(): Promise<void> {
+  loadQueue = loadQueue.then(() => {
+    const world = sceneWorld;
+    if (!world || !world.terrain || world.mapIndex !== sceneMap) return;
+
+    // A copy: `world.remove` mutates the live query while it is iterated.
+    for (const e of [...world.with('modelId', 'worldIndex')]) {
+      if (e.worldIndex !== sceneMap) continue;
+      world.remove(e);
+      e.modelObject?.dispose();
+    }
+
+    disposePropBatches();
+
+    createObjects(world, sceneObjects);
+  });
+
+  return loadQueue;
+}
+
+export function loadMapIntoScene(
+  world: World,
+  map: ENUM_WORLD,
+  pos?: { x: number; y: number },
+  attempt = 0
+): Promise<void> {
+  const serial = ++warpSerial;
+
+  // Here, not in `runLoad`: the load is queued behind a microtask, while the
+  // packet the warp came from is dispatched in a loop that drains the whole
+  // received frame first. Everything the server puts in scope in that frame -
+  // the players and NPCs already standing on the map we are being placed on -
+  // would otherwise be stamped with the map we are leaving, and swept by this
+  // load's `unloadMap`. The scene teardown keys off `sceneMap`, not this, so
+  // running ahead is what this field is for.
+  world.mapIndex = map;
+
+  loadQueue = loadQueue
+    .then(() => runLoad(world, map, pos, serial, attempt))
+    // Unexpected failures (a map entry's `create`, object creation) used to
+    // be unhandled rejections that also left the loading screen up: same
+    // recovery as a failed terrain build.
+    .catch(error => failWarp(world, map, sceneMap, error, pos, attempt));
+  return loadQueue;
+}
+
+async function runLoad(
+  world: World,
+  map: ENUM_WORLD,
+  pos: { x: number; y: number } | undefined,
+  serial: number,
+  attempt: number
+) {
+  // Superseded while queued: the newest request does the whole job itself,
+  // and already owns `world.mapIndex`.
+  if (serial !== warpSerial) return;
+
+  const oldMap = sceneMap;
+
+  // Before anything loads: a shadowless world (Icarus) must not build blob
+  // clones for the objects it is about to create.
+  setShadowWorld(map);
+
+  if (oldMap !== map) {
+    // Download and parse first, while the old map is still whole: every
+    // failure that can be recovered from happens here.
+    let prepared: PreparedTerrain;
+    try {
+      prepared = await prepareTerrain(world.scene, map);
+    } catch (error) {
+      if (serial === warpSerial) failWarp(world, map, oldMap, error, pos, attempt);
+      return;
+    }
+
+    // Another warp was requested while this one downloaded; it owns the
+    // scene now.
+    if (serial !== warpSerial) {
+      disposePreparedTerrain(prepared);
+      return;
+    }
+
+    unloadMap(world, oldMap, map);
+
+    // Controllers and features drop everything that belonged to the old map (app/lifecycle.ts).
+    mapChangeHook();
+    // Before the new map's terrain material binds the mask: otherwise the
+    // first frames of a snow map would be masked by the last map's roofs.
+    resetTerrainMask();
+
+    let built: Awaited<ReturnType<typeof getTerrainData>>;
+    try {
+      built = await getTerrainData(world, map, prepared);
+    } catch (error) {
+      // The old map is already gone; the client is at least out of the
+      // loading screen and can be warped again.
+      failWarp(world, map, oldMap, error, pos, attempt);
+      return;
+    }
+
+    // Superseded during the terrain build: nothing of this map has reached
+    // the world yet, so only the build's own mesh has to go. The newer load
+    // starts from the already torn-down scene.
+    if (serial !== warpSerial) {
+      built.terrain.material?.dispose(true, true);
+      built.terrain.dispose(false, true);
+      return;
+    }
+
+    const {
+      objects,
+      terrain,
+      picker,
+      RequestTerrainHeight,
+      IsWalkable,
+      RequestTerrainFlag,
+      SetTerrainFlags,
+      DetachGround,
+      GetTerrainTile,
+      GetTerrainLayers,
+      RequestTerrainLight,
+    } = built;
+
+    world.getTerrainHeight = RequestTerrainHeight;
+    world.isWalkable = IsWalkable;
+    world.getTerrainFlag = RequestTerrainFlag;
+    world.setTerrainFlags = SetTerrainFlags;
+    world.detachGround = DetachGround;
+    world.getTerrainTile = GetTerrainTile;
+    world.getTerrainLayers = GetTerrainLayers;
+    world.getTerrainLight = RequestTerrainLight;
+
+    // `CNewUIMiniMap::LoadImages` runs on map change. The 4 MB mini_map.ozt
+    // is only fetched into the HTTP cache here; the TGA decode (a long task
+    // on the warp's critical path) waits for the first TAB, and the maps
+    // left behind release theirs.
+    evictWorldMinimaps(map);
+    prefetchWorldMinimap(map);
+
+    // A map whose ground is never drawn keeps the mesh for its height field
+    // only (`MapTerrain.hidden`: Icarus).
+    if (maps.layerFor(map)?.terrain?.hidden) {
+      terrain.isVisible = false;
+    }
+
+    world.terrain = {
+      mesh: terrain,
+      picker,
+      MapTileObjects: new Array(256).fill(MapTileObject),
+      extraHeight: 0,
+    };
+
+    await loadWorld(world);
+
+    const filteredObjects = objects;
+
+    applyMapObjectFixups(map, filteredObjects);
+
+    sceneObjects = filteredObjects;
+    sceneWorld = world;
+
+    if (!DISABLE_OBJECTS_LOADING) createObjects(world, filteredObjects);
+  }
+
+  sceneMap = map;
+
+  // A newer warp was requested while this map's own setup ran: it owns the
+  // hero's position and the ready handshake, and tears this scene down once
+  // its files are in. Saying the warp completed here would send the server's
+  // `ClientReadyAfterMapChange` for the wrong map.
+  if (serial !== warpSerial) return;
+
+  if (world.playerEntity) {
+    world.playerEntity.worldIndex = map;
+    const playerPos = world.playerEntity.transform.pos;
+
+    if (pos) {
+      playerPos.x = pos.x;
+      playerPos.z = pos.y;
+    } else {
+      const spawn = maps.spawn(map);
+
+      if (spawn) {
+        playerPos.x = spawn.x;
+        playerPos.z = spawn.y;
+      }
+    }
+
+    playerPos.y = world.getTerrainHeight(playerPos.x, playerPos.z);
+
+    const { pathfinding } = world.playerEntity;
+    pathfinding.path = null;
+    pathfinding.from = { x: playerPos.x, y: playerPos.z };
+    pathfinding.to = { x: playerPos.x, y: playerPos.z };
+
+    heroPlacedHook();
+  }
+
+  EventBus.emit('warpCompleted', { map });
+}

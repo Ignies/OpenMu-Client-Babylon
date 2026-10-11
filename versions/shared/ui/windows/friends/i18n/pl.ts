@@ -1,0 +1,36 @@
+/** Polish text of the `friends` window. */
+
+import type en from './en';
+
+export default {
+  'friends.title': 'Lista znajomych',
+  'friends.tab.friends': 'Znajomi',
+  'friends.tab.letters': 'Listy',
+  'friends.empty': 'Twoja lista znajomych jest pusta.',
+  'friends.lettersEmpty': 'Twoja skrzynka na listy jest pusta.',
+  'friends.namePlaceholder': 'Nazwa postaci',
+  'friends.server': 'Serwer {server}',
+  'friends.letter': 'List',
+  'friends.openingLetter': 'Otwieranie listu...',
+  'friends.writeLetter': 'Napisz list',
+  'friends.count': 'Znajomi ({count}/{max})',
+  'friends.lettersCount': 'Listy ({count}/{max})',
+  'friends.unread': ' Nowe: {count}',
+  'friends.add': 'Dodaj',
+  'friends.talk': 'Rozmowa',
+  'friends.letterButton': 'List',
+  'friends.delete': 'Usuń',
+  'friends.hide': 'Ukryj',
+  'friends.write': 'Napisz',
+  'friends.read': 'Czytaj',
+  'friends.reply': 'Odpowiedz',
+  'friends.from': 'Od: {sender} · {time}',
+  'friends.to': 'Do',
+  'friends.subject': 'Temat',
+  'friends.replyPrefix': 'Re: {subject}',
+  'friends.tab.rooms': 'Czat',
+  'friends.roomsEmpty': 'Brak otwartych pokojów czatu.',
+  'friends.roomsCount': 'Pokoje czatu ({count})',
+  'friends.roomAlert': 'Nowe',
+  'friends.open': 'Otwórz',
+} satisfies Partial<Record<keyof typeof en, string>>;

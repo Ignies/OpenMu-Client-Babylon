@@ -9,7 +9,7 @@ import {
   ObjectGotKilledPacket,
   RespawnAfterDeathPacket,
   ServerMessagePacket,
-} from '../../src/common/packets/ServerToClientPackets';
+} from '../../versions/shared/packets/ServerToClientPackets';
 import {
   HitRequestPacket,
   PickupItemRequestPacket,
@@ -17,7 +17,7 @@ import {
   SelectCharacterPacket,
   WalkRequestPacket,
   WhisperMessagePacket,
-} from '../../src/common/packets/ClientToServerPackets';
+} from '../../versions/shared/packets/ClientToServerPackets';
 import { nameBytes, packetBytes, rawFrame } from './wire';
 
 /**
@@ -79,7 +79,7 @@ export function characterInformation(info: CharacterInfo): Uint8Array {
   return packetBytes(p);
 }
 
-export type ScopedNpc = { id: number; type: number; x: number; y: number };
+type ScopedNpc = { id: number; type: number; x: number; y: number };
 
 /** `AddNpcsToScope` (C2 13): 10 bytes per NPC from byte 5. */
 export function npcsInScope(npcs: ScopedNpc[]): Uint8Array {
@@ -90,7 +90,7 @@ export function npcsInScope(npcs: ScopedNpc[]): Uint8Array {
   return rawFrame(0xc2, body);
 }
 
-export type ScopedPlayer = { id: number; name: string; x: number; y: number };
+type ScopedPlayer = { id: number; name: string; x: number; y: number };
 
 /** `AddCharactersToScope` (C2 12): 36 bytes per character from byte 5, no effects. */
 export function playersInScope(players: ScopedPlayer[]): Uint8Array {

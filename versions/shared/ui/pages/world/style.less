@@ -1,0 +1,32 @@
+.world-page {
+  display: grid;
+  place-content: center;
+  position: absolute;
+  inset: 0;
+
+  .hud {
+    position: absolute;
+    inset: 0;
+
+    .money {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+    }
+
+    .coords {
+      position: absolute;
+      top: 2rem;
+      left: 1rem;
+    }
+
+    // The windows are absolutely placed by `MuItemWindow`, which anchors them
+    // above the main frame at the right edge - the original's `640 - 190, 0`
+    // in a screen that is not 640x480 - or at wherever they were dragged.
+  }
+
+  .world-objects {
+    position: absolute;
+    inset: 0;
+  }
+}

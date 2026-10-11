@@ -7,7 +7,7 @@
  *
  * One class for both subs: `SubCode` and `Length` are left undefined so the
  * dispatcher's last fallback matches any sub at any length, and
- * `src/common/pingProtocol.ts` reads the body.
+ * `controllers/net/protocols/pingProtocol.ts` reads the body.
  */
 export class PingRelayPacket {
   buffer!: DataView;

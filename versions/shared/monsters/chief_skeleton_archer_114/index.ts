@@ -1,0 +1,36 @@
+import { defineMonster } from '@/controllers/monsters';
+
+export default defineMonster({
+  Numb: 114,
+  Name: 'Orc Archer',
+  maxHealth: 20000,
+  model: { type: 46, scale: 1.1 },
+  appearSound: { sound: 'Sound/mOrcCapAttack1', channels: 2 }, // AppearMonster, WSclient.cpp:2862-2868
+  stats: {
+    Rate: 1,
+    Level: 72,
+    HP: 9500,
+    MP: 0,
+    MinDmg: 200,
+    MaxDmg: 240,
+    Def: 170,
+    MagDef: 0,
+    AttackSuccess: 380,
+    Move: 110,
+    AttType: 3,
+    Range: 0,
+    View: 5,
+    MoveSpeed: 7,
+    AttSpeed: 400,
+    Regen: 1600,
+    Attri: 10,
+    ItemR: 2,
+    MoneyR: 300,
+    MaxI: 200,
+    ResWind: 3,
+    ResPois: 0,
+    ResIce: 4,
+    ResWater: 4,
+    ResFire: 4,
+  },
+});

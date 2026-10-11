@@ -3,8 +3,14 @@
  * OpenMU default (`-version:season6`, `Persistence/Initialization/VersionSeasonSix`).
  * Everything the base game did before the version seam existed lives here.
  */
-import { asciiBytes, type GameVersion } from '../../src/version/contract';
+import { asciiBytes, type GameVersion } from '@/version/contract';
 import { season6Data } from './data';
+// The shared monsters (and their bodies) this version spawns, registered with the monsters controller.
+import '../shared/monsters/all';
+// The player clips and monster swing / cast rules, registered with the anim controller.
+import '../shared/animations/all';
+// The deliberate improvements over the original, registered with the fidelity controller.
+import '../shared/improvements/all';
 
 // The packet lists ride along in the version chunk; UI does not (it reaches
 // app code and loads through the registry's loadUi, after this module).
@@ -55,15 +61,12 @@ export const gameVersion: GameVersion = {
     masterSkills: true,
     socketItems: true,
     ancientItems: true,
-    harmonyJewel: true,
     darkLord: true,
     magicGladiator: true,
     summoner: true,
     rageFighter: true,
-    muHelper: true,
-    itemHotkeys: true,
-    cashShop: true,
-    events: true,
-    questDialogs: true,
+    itemHotkeys: { slots: 4, bindable: true },
   },
+  modulesOff: [],
+  miniGames: ['bloodCastle', 'devilSquare', 'chaosCastle'],
 };

@@ -1,4 +1,4 @@
-import { Xor32Decryptor } from '../../src/common/encryption/xor32';
+import { Xor32Decryptor } from '../../src/controllers/net/encryption/xor32';
 import { gameVersion as preSeason6 } from '../../versions/v097d';
 import {
   BAND_LIMITS,
@@ -15,7 +15,7 @@ import {
   encodeStopNotice,
   stampPerformer,
   type BandClientMessage,
-} from '../../src/common/bandProtocol';
+} from '../../src/controllers/net/protocols/bandProtocol';
 import type { TrackedSession } from '../track/session';
 import { SlidingWindow } from './window';
 
@@ -42,7 +42,7 @@ export interface BandPeer {
   send(frame: Uint8Array): number;
 }
 
-export type BandHubOptions = {
+type BandHubOptions = {
   now?: () => number;
   maxPerformers?: number;
   maxPerformersPerMap?: number;
@@ -50,7 +50,7 @@ export type BandHubOptions = {
   log?: (line: string) => void;
 };
 
-export type BandStats = {
+type BandStats = {
   performers: number;
   members: number;
   batchesIn: number;

@@ -1,4 +1,4 @@
-import { Vector3, type IVector3Like } from '../../libs/babylon/exports';
+import { Vector3, type IVector3Like } from '../../controllers/render/babylon/exports';
 import {
   FADE_IN,
   FADE_OUT,
@@ -9,13 +9,13 @@ import {
   boidFactoryFor,
   boidsFor,
   type BoidSpec,
-} from '../../common/boids';
-import { GameOptions } from '../../common/gameOptions';
-import { effects } from '../../effects';
-import { FIRE_PUFF, TEX } from '../../effects/recipes';
-import { invasionEvent } from '../../events/invasion';
-import { playSfx } from '../../libs/sfx';
-import { TW_SAFEZONE } from '../../common/terrain/consts';
+} from '../../controllers/fx/boids';
+import { GameOptions } from '@/controllers/settings';
+import { effects } from '../../controllers/fx';
+import { FIRE_PUFF, TEX } from '../../controllers/fx/recipes';
+import { invasionEvent } from '../../modules/events/invasion';
+import { playSfx } from '../../controllers/sound/sfx';
+import { TW_SAFEZONE } from '../../controllers/terrain/consts';
 import type { Entity, ISystemFactory } from '../world';
 
 /**
@@ -27,11 +27,9 @@ import type { Entity, ISystemFactory } from '../world';
  * the per-frame steps are per 25 Hz tick scaled by the frame's own delta -
  * the same `FPS_ANIMATION_FACTOR` the original multiplies through.
  *
- * The species and where each one flies are in `common/boids.ts`.
+ * The species and where each one flies are in `controllers/fx/boids.ts`.
  */
 
-/** Spawn box around the hero: `rand()%1024 - 512` in x and y. */
-const SPAWN_SPREAD = 512 * MU_UNIT;
 /** `RequestTerrainHeight(...) + rand()%200 + 150`. */
 const SPAWN_RISE_MIN = 150 * MU_UNIT;
 const SPAWN_RISE_SPAN = 200 * MU_UNIT;

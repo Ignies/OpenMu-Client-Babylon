@@ -1,0 +1,36 @@
+/** Chinese text of the `friends` window. */
+
+import type en from './en';
+
+export default {
+  'friends.title': '好友列表',
+  'friends.tab.friends': '好友',
+  'friends.tab.letters': '信件',
+  'friends.empty': '你的好友列表是空的。',
+  'friends.lettersEmpty': '你的信箱是空的。',
+  'friends.namePlaceholder': '角色名',
+  'friends.server': '服务器 {server}',
+  'friends.letter': '信件',
+  'friends.openingLetter': '正在打开信件...',
+  'friends.writeLetter': '写信',
+  'friends.count': '好友（{count}/{max}）',
+  'friends.lettersCount': '信件（{count}/{max}）',
+  'friends.unread': ' {count} 封新信',
+  'friends.add': '添加',
+  'friends.talk': '密语',
+  'friends.letterButton': '写信',
+  'friends.delete': '删除',
+  'friends.hide': '隐身',
+  'friends.write': '写信',
+  'friends.read': '阅读',
+  'friends.reply': '回复',
+  'friends.from': '来自 {sender} · {time}',
+  'friends.to': '收件人',
+  'friends.subject': '主题',
+  'friends.replyPrefix': '回复：{subject}',
+  'friends.tab.rooms': '聊天',
+  'friends.roomsEmpty': '没有开启的聊天室。',
+  'friends.roomsCount': '聊天室（{count}）',
+  'friends.roomAlert': '新',
+  'friends.open': '打开',
+} satisfies Partial<Record<keyof typeof en, string>>;

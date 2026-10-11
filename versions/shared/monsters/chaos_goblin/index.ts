@@ -1,0 +1,39 @@
+import { defineMonster } from '@/controllers/monsters';
+
+export default defineMonster({
+  Numb: 238,
+  Name: 'Chaos Goblin',
+  // Ours: a held flare.
+  light: { kind: 'carried', range: 2 },
+  maxHealth: 50,
+  npcModel: { file: 'MixNpc01' },
+  // MODEL_MIX_NPC: `rand_fps_check(64)` (ZzzCharacter.cpp:6081).
+  voice: { sound: 'Sound/nMix', oneIn: 64 },
+  stats: {
+    Rate: 1,
+    Level: 2,
+    HP: 50,
+    MP: 0,
+    MinDmg: 15,
+    MaxDmg: 30,
+    Def: 70,
+    MagDef: 20,
+    AttackSuccess: 10,
+    Move: 30,
+    AttType: 0,
+    Range: 0,
+    View: 0,
+    MoveSpeed: 5,
+    AttSpeed: 400,
+    Regen: 1500,
+    Attri: 10,
+    ItemR: 0,
+    MoneyR: 200,
+    MaxI: 10,
+    ResWind: 0,
+    ResPois: 0,
+    ResIce: 0,
+    ResWater: 0,
+    ResFire: 0,
+  },
+});

@@ -1,0 +1,38 @@
+import { defineMonster } from '@/controllers/monsters';
+import { BULL_SNORT } from '../_shared/bodyFx';
+
+export default defineMonster({
+  Numb: 4,
+  Name: 'Bull Fighter',
+  // MODEL_BULL_FIGHTER's snort (ZzzCharacter.cpp:6189-6205).
+  bodyFx: BULL_SNORT,
+  maxHealth: 190,
+  model: { type: 0, scale: 1.15 },
+  stats: {
+    Rate: 1,
+    Level: 12,
+    HP: 190,
+    MP: 0,
+    MinDmg: 31,
+    MaxDmg: 36,
+    Def: 12,
+    MagDef: 0,
+    AttackSuccess: 50,
+    Move: 12,
+    AttType: 3,
+    Range: 0,
+    View: 1,
+    MoveSpeed: 4,
+    AttSpeed: 400,
+    Regen: 1400,
+    Attri: 10,
+    ItemR: 2,
+    MoneyR: 140,
+    MaxI: 12,
+    ResWind: 6,
+    ResPois: 0,
+    ResIce: 0,
+    ResWater: 0,
+    ResFire: 0,
+  },
+});

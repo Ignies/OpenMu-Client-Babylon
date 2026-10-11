@@ -5,7 +5,7 @@ const text = await Bun.stdin.text();
 const start = text.indexOf('[');
 const results = JSON.parse(text.slice(start)) as {
   filePath: string;
-  messages: { ruleId: string | null; severity: number }[];
+  messages: { ruleId: string | null; severity: number; fatal?: boolean }[];
 }[];
 
 const byRule = new Map<string, { errors: number; warnings: number }>();
@@ -13,7 +13,7 @@ let files = 0;
 for (const file of results) {
   if (file.messages.length) files++;
   for (const m of file.messages) {
-    const key = m.ruleId ?? '(parse error)';
+    const key = m.ruleId ?? (m.fatal ? '(parse error)' : '(unused eslint-disable)');
     const row = byRule.get(key) ?? { errors: 0, warnings: 0 };
     if (m.severity === 2) row.errors++;
     else row.warnings++;

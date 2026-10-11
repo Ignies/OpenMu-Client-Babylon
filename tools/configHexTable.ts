@@ -1,8 +1,8 @@
 /**
- * Writes `configuration_hex.md` from the options that actually exist.
+ * Writes `docs/configuration_hex.md` from the options that actually exist.
  *
  * The table is generated rather than hand-kept so it cannot drift from the
- * client: `src/common/configFingerprint.test.ts` regenerates it and fails if
+ * client: `src/controllers/render/configFingerprint.test.ts` regenerates it and fails if
  * the committed file differs, which is what makes an old screenshot still
  * decodable years later.
  *
@@ -14,7 +14,7 @@ import {
   NUMBER_BIAS,
   flagFields,
   numberFields,
-} from '../src/common/configFingerprint';
+} from '../src/controllers/render/configFingerprint';
 
 export function configHexTable(): string {
   const flags = flagFields();
@@ -109,7 +109,7 @@ export function configHexTable(): string {
 }
 
 if (import.meta.main) {
-  const out = new URL('../configuration_hex.md', import.meta.url).pathname;
+  const out = new URL('../docs/configuration_hex.md', import.meta.url).pathname;
   writeFileSync(out.replace(/^\/([A-Za-z]:)/, '$1'), configHexTable());
-  console.log('wrote configuration_hex.md');
+  console.log('wrote docs/configuration_hex.md');
 }

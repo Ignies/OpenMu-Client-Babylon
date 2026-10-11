@@ -1,0 +1,1084 @@
+import {
+  Color4,
+  Constants,
+  CreatePlane,
+  DynamicTexture,
+  Material,
+  Mesh,
+  ParticleSystem,
+  RawTexture,
+  StandardMaterial,
+  Vector3,
+  VertexBuffer,
+  type Scene,
+  type Texture,
+} from '../render/babylon/exports';
+import { loadEffectTexture } from './effectTexture';
+import { reportLoadFailure } from '../assets';
+import { linearBufferActive } from '../lighting/lightModel';
+import { devQueryNumber } from '../../core/devSeams';
+import { pageHidden } from '../../core/utils';
+import { lookDirector } from '../lighting/director';
+import type { Entity } from '../../ecs/world';
+import type { TestScene } from '../render/scenes/testScene';
+import { addEffectGlow, disposeEffectGlow, dropEffectGlow } from './glow';
+import { disposeSoftEdgeMasks, fadeSheetEdges, fadeSheetSides, softEdgeMask } from './softEdge';
+import { installSpriteLinearDecode } from '../render/babylon/spriteLinear';
+import { useGroundFade } from './groundFade';
+import type { EffectHandle } from './layer';
+
+/**
+ * Shared plumbing for the effect entries, not an entry: `LiveList`, cached materials (MU's
+ * `EnableAlphaBlend` as `(SRC_ALPHA, ONE)`), card and particle pools, the effects clock. See fx/readme.md.
+ */
+
+// Before any sprite manager exists: every sprite user imports this module.
+installSpriteLinearDecode();
+
+/** MU's 25 Hz effect tick - the C++ counts lifetimes in these. */
+export const TICK = 1 / 25;
+
+/** One MU world unit is a centimetre; a tile is 100 of them. */
+export const CM = 1 / 100;
+
+export type RGB = readonly [number, number, number];
+
+export const WHITE: RGB = [1, 1, 1];
+
+/* ------------------------------------------------------------- live list */
+
+interface LiveEffect {
+  /** Return false to finish; `release` is then called once. */
+  update(dt: number): boolean;
+  release(): void;
+}
+
+/**
+ * An entry's running effects. `push` returns the handle the spawn hands out;
+ * `update` steps them in place (swap-remove, so a burst of endings is O(n)).
+ */
+export class LiveList {
+  readonly #live: (LiveEffect & { alive: boolean; stopped: boolean })[] = [];
+
+  get size(): number {
+    return this.#live.length;
+  }
+
+  push(fx: LiveEffect): EffectHandle {
+    const item = Object.assign(fx, { alive: true, stopped: false });
+    this.#live.push(item);
+    return {
+      get alive() {
+        return item.alive;
+      },
+      stop() {
+        item.stopped = true;
+      },
+    };
+  }
+
+  update(dt: number): void {
+    const live = this.#live;
+    for (let i = live.length - 1; i >= 0; i--) {
+      const e = live[i];
+      let alive = false;
+      if (!e.stopped) {
+        try {
+          alive = e.update(dt);
+        } catch (err) {
+          console.warn('[effects] effect threw, dropping it', err);
+        }
+      }
+      if (!alive) {
+        live[i] = live[live.length - 1];
+        live.pop();
+        e.alive = false;
+        release(e);
+      }
+    }
+  }
+
+  clear(): void {
+    for (const e of this.#live) {
+      e.alive = false;
+      release(e);
+    }
+    this.#live.length = 0;
+  }
+}
+
+/**
+ * An effect's release runs from the frame loop, and a throw there does not
+ * stop at the effect: it climbs through `effects.update` and the ECS into
+ * Babylon's render loop, which never queues another frame after an exception
+ * - the picture freezes while the socket and the audio carry on. `update`
+ * already drops a throwing effect; its release gets the same treatment.
+ */
+function release(e: LiveEffect): void {
+  try {
+    e.release();
+  } catch (err) {
+    console.warn('[effects] effect release threw', err);
+  }
+}
+
+/* ------------------------------------------------------------- positions */
+
+const ZERO_OFF = { x: 0, y: 0, z: 0 };
+
+/** World position of an entity at `height` tiles above its feet. */
+export function entityPos(e: Entity, height: number, out: Vector3): Vector3 {
+  const t = e.transform;
+  if (!t) return out.set(0, height, 0);
+  const off = t.posOffset ?? ZERO_OFF;
+  return out.set(t.pos.x + off.x, t.pos.y + height, t.pos.z + off.z);
+}
+
+/** The yaw the entity is rendered with (radians, MU convention). */
+export function entityYaw(e: Entity): number {
+  const t = e.transform;
+  return t ? (t.visualRotY ?? t.rot.y) : 0;
+}
+
+/**
+ * A skinned bone's world position, or the entity at `fallbackHeight` when
+ * the skeleton is not there (monsters, still-loading models). `bone` is the
+ * MU bone index (the GLB adds a root, hence +1 - modelObject.ts:1099).
+ */
+export function bonePos(e: Entity, bone: number, out: Vector3, fallbackHeight = 0.9): Vector3 {
+  const gltf = e.modelObject?.gltf;
+  const node = gltf?.skeleton?.bones[bone + 1]?.getTransformNode();
+  if (node && gltf && !gltf.mesh.isDisposed()) {
+    return out.copyFrom(node.getAbsolutePosition());
+  }
+  return entityPos(e, fallbackHeight, out);
+}
+
+/**
+ * A point given in a skinned bone's own frame - the original's
+ * `TransformPosition(BoneTransform[bone], p, …)`. `local` is in tiles: the
+ * GLB keeps bone frames in BMD bone space with centimetres scaled to tiles
+ * (weaponAttachment.ts). Falls back to the entity at `fallbackHeight`.
+ */
+export function boneLocalPos(
+  e: Entity,
+  bone: number,
+  local: Vector3,
+  out: Vector3,
+  fallbackHeight = 0.9
+): Vector3 {
+  const gltf = e.modelObject?.gltf;
+  const node = gltf?.skeleton?.bones[bone + 1]?.getTransformNode();
+  if (node && gltf && !gltf.mesh.isDisposed()) {
+    Vector3.TransformCoordinatesToRef(local, node.getWorldMatrix(), out);
+    return out;
+  }
+  return entityPos(e, fallbackHeight, out);
+}
+
+/**
+ * `AnimationFrame` inside `[from, to)` now, or the window was stepped over
+ * since the last tick - a one-key window on a fast clip is easy to miss
+ * between two frames.
+ */
+export function inWindow(
+  prev: number,
+  cur: number,
+  from: number,
+  to: number
+): boolean {
+  if (cur >= from && cur < to) return true;
+  return prev >= 0 && prev < from && cur >= to;
+}
+
+/** True once the entity has left the world (despawned, out of scope, disposed). */
+export function entityGone(e: Entity): boolean {
+  if (!e.transform) return true;
+  if (e.objOutOfScope) return true;
+  const mesh = e.modelObject?.gltf?.mesh;
+  return !!mesh && mesh.isDisposed();
+}
+
+/** A moving point: writes into `out` and returns it. */
+export type PointSource = (out: Vector3) => Vector3;
+
+export function followEntity(e: Entity, height: number): PointSource {
+  return out => entityPos(e, height, out);
+}
+
+export function fixedPoint(p: Vector3): PointSource {
+  const v = p.clone();
+  return out => out.copyFrom(v);
+}
+
+export function pointSource(p: Vector3 | PointSource): PointSource {
+  return p instanceof Vector3 ? fixedPoint(p) : p;
+}
+
+/* --------------------------------------------------------------- textures */
+
+/** `Effect/…` or `Skill/…` file under Data/, shared through the cache. */
+export function effectTexture(scene: Scene, file: string): Promise<Texture> {
+  return loadEffectTexture(scene, file);
+}
+
+const ribbonSheets = new Map<string, Promise<Texture>>();
+
+/**
+ * A dark ribbon's coverage: the sheet as white with its luminance for alpha, faded to nothing
+ * at the ribbon's two sides. JointSpirit01 is bright along its top and bottom rows (0.15-0.3),
+ * which a dark ribbon's gain turned into a hard line down each side of Evil Spirit's bodies.
+ * A canvas texture, filled in the same frame the sheet arrives, that a joint can still clone
+ * to scroll.
+ */
+export function darkRibbonSheet(scene: Scene, file: string): Promise<Texture> {
+  let pending = ribbonSheets.get(file);
+  if (pending) return pending;
+  pending = (async () => {
+    const tex = await effectTexture(scene, file);
+    const bitmap = await createImageBitmap(await (await fetch(tex.url ?? '')).blob());
+    const out = new DynamicTexture(`fx:ribbon:${file}`, { width: bitmap.width, height: bitmap.height }, scene, true);
+    const ctx = out.getContext() as unknown as CanvasRenderingContext2D;
+    ctx.drawImage(bitmap, 0, 0);
+    const img = ctx.getImageData(0, 0, bitmap.width, bitmap.height);
+    const d = img.data;
+    for (let i = 0; i < d.length; i += 4) {
+      d[i + 3] = 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2];
+      d[i] = d[i + 1] = d[i + 2] = 255;
+    }
+    fadeSheetSides(d, bitmap.width, bitmap.height);
+    ctx.putImageData(img, 0, 0);
+    out.update();
+    out.hasAlpha = true;
+    out.wrapU = tex.wrapU;
+    out.wrapV = tex.wrapV;
+    return out;
+  })();
+  ribbonSheets.set(file, pending);
+  return pending;
+}
+
+/* -------------------------------------------------------------- materials */
+
+const materials = new Map<Scene, Map<string, StandardMaterial>>();
+
+/** A cached material's tint is rounded to 1/128: under one 8-bit level, and a flicker stays a bounded set of materials. */
+const TINT_STEPS = 128;
+
+/**
+ * Effects draw after every group-0 mesh, the alpha-keyed ones included.
+ * Babylon draws sprites and particles before the transparent queue, and an
+ * alpha-tested mesh in that queue writes depth, so a flame in group 0 was
+ * painted over by the fireplace behind it. Group 1 keeps group 0's depth
+ * (`setRenderingAutoClearDepthStencil` below), so the cards still hide
+ * behind what is in front of them.
+ */
+export const EFFECT_RENDERING_GROUP = 1;
+
+export function keepDepthForEffects(scene: Scene): void {
+  scene.setRenderingAutoClearDepthStencil(EFFECT_RENDERING_GROUP, false);
+}
+
+/**
+ * How much of the map's level a dark card takes as coverage. Full level
+ * saturates the whole sheet into a flat slab and loses the art's own shading;
+ * this is the measured point where the silhouette reads as black on a graded
+ * frame and still keeps its internal detail (2026-09-07 sweep, 1 / 0.75 /
+ * 0.55 / 0.35). Dev seam: `?darkgain=`.
+ */
+const DARK_COVERAGE = 0.7;
+
+/** The map's level, `2^ev` (controllers/lighting/director `keyGain`). 1 on Classic. */
+function mapKey(): number {
+  return lookDirector()?.state().keyGain ?? 1;
+}
+
+/** Rec709 luma of an effect tint - what a greyscale `Light` carries. */
+export function luma(c: RGB): number {
+  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+}
+
+/**
+ * The multiplier an emissive card's tint takes so it lands at `keyGain` x its
+ * authored value in the buffer: effect art is light and follows the map's
+ * level like the torches. The material's colour is decoded
+ * once downstream when the buffer is linear, so the gain enters pre-decoded
+ * there. 1 on Classic.
+ *
+ * This used to be the fire family's alone, on the reading that a flame is
+ * light and a flare is "authored art at its authored value". The art is
+ * authored *display-referred* though - these are the original client's
+ * sheets, drawn into a frame whose lit ground sat near 1 - and on the graded
+ * tiers the buffer is scene-referred, so that same ground sits at `keyGain`
+ * and a card at its authored value lands a stop or two *under* what it is
+ * drawn over. A lightning bolt went from a blown white core to a pale line
+ * the moment post processing came on, and so did every other skill
+ * (2026-09-07). Alpha art - blood, smoke, a scorch - is matter, not light,
+ * and keeps its authored value on every tier.
+ */
+export function lightCardGain(scene: Scene): number {
+  const gain = mapKey();
+  return linearBufferActive(scene) ? gain ** (1 / 2.2) : gain;
+}
+
+/**
+ * The same rule for `RENDER_DARK`. A subtraction removes a *fraction of the
+ * frame*, and the original applied it to a display buffer; on a scene-referred
+ * one that fraction is worth far less by the time the tone curve has
+ * compressed what is left, so the coverage takes the map's level too.
+ *
+ * Unlike the light gain this one is **not** gated on the buffer. It was, and
+ * that made a dark effect a different effect either side of the post
+ * processing switch - the point of the switch is the grade, not the art
+ * (2026-09-07). Coverage is alpha and alpha is never decoded, so no 1/2.2
+ * here either; the two tiers differ only in the frame the same silhouette
+ * lands on, and on a graded frame that reads blacker because the surround is
+ * not clipped to white.
+ */
+export function darkCardGain(_scene: Scene): number {
+  // Never under 1: the sheet's own levels are what the art was drawn at, and
+  // Classic composites in the buffer it was drawn for. The map's level only
+  // ever lifts a dark card above that, never below.
+  return Math.max(1, mapKey() * (devQueryNumber('darkgain') ?? DARK_COVERAGE));
+}
+
+/**
+ * The level a sprite colour takes on the graded tiers: the map's key, so it
+ * lands where a card lands through `lightCardGain`. The decode itself is the
+ * sprite shader's (controllers/render/babylon/spriteLinear.ts), as it is a material's, so
+ * the texel and the colour go linear together and the tone pass can take the
+ * product back out (effects_composite §2). Classic: the colour as given. In
+ * place, returns `c`.
+ */
+export function spriteLevel(scene: Scene, c: Color4): Color4 {
+  if (!linearBufferActive(scene)) return c;
+  const k = mapKey();
+  c.r *= k;
+  c.g *= k;
+  c.b *= k;
+  return c;
+}
+
+/** MU's two effect blends: `EnableAlphaBlend` (ONE, ONE) and `EnableAlphaBlendMinus` (ZERO, ONE_MINUS_SRC_COLOR). */
+export type EffectBlend = 'add' | 'subtract';
+
+/**
+ * The additive blend the cards and skill meshes use: `(SRC_ALPHA, ONE)`.
+ * The original's `EnableAlphaBlend` is `(ONE, ONE)` and it fades an effect
+ * by scaling `glColor3fv(Light × Alpha)` - the colour toward black. Under
+ * `(ONE, ONE)` Babylon's `mesh.visibility` never reaches the framebuffer
+ * (the alpha is simply dropped), so every fade was a no-op and `sprite`
+ * shrank its card instead. `(SRC_ALPHA, ONE)` with an opaque sheet is the
+ * same maths - `src × visibility + dst` - and lets `visibility` be the
+ * original's `Alpha` .
+ */
+const ADDITIVE_ALPHA_MODE = Constants.ALPHA_ADD;
+
+/**
+ * Unlit material tinted `colour` (the original's `glColor3fv(Light)` on an
+ * `EnableAlphaBlend` quad). Cached per (texture, colour, blend). JPG effect
+ * sheets are black where they are transparent, and with (ONE, ONE) black adds
+ * nothing - so no alpha channel is needed. The sheet rides in `diffuseTexture`
+ * with the tint in `emissiveColor`: the Standard fragment is
+ * `clamp(diffuseBase·diffuseColor + emissiveColor + ambient) × diffuseTexel`,
+ * and with lighting off `diffuseBase` is 0, so the texel is *multiplied* by
+ * the tint like `glColor3fv`. (The sheet as `emissiveTexture` is *added* to
+ * `emissiveColor` instead - the tint filled the card's black and every flash
+ * was a solid tinted square, 2026-08-30.) `subtract` is
+ * `EnableAlphaBlendMinus` (ZzzOpenglUtil.cpp:444, `dest × (1 − src)`,
+ * Babylon's ALPHA_SUBTRACT): the dark trail a levelled character's sword
+ * leaves in `RenderBlurs`. `soft` fades each cell of the sheet (`true`: the
+ * whole sheet) to nothing before its edge; `'card'` is the wider falloff for a
+ * sheet whose art runs to its quad's border (softEdge.ts).
+ */
+export function additiveMaterial(
+  scene: Scene,
+  texture: string | Texture,
+  colour: RGB,
+  blend: EffectBlend = 'add',
+  soft?: SheetCells | true | 'card'
+): StandardMaterial {
+  let byKey = materials.get(scene);
+  if (!byKey) {
+    byKey = new Map();
+    materials.set(scene, byKey);
+  }
+  const gain = (blend === 'add' ? lightCardGain(scene) : 1) * TINT_STEPS;
+  const r = Math.round(colour[0] * gain);
+  const g = Math.round(colour[1] * gain);
+  const b = Math.round(colour[2] * gain);
+  const texKey = typeof texture === 'string' ? texture : `#${texture.uniqueId}`;
+  const softKey = soft === 'card' ? '|softCard' : soft === true ? '|soft' : soft ? `|soft${soft.w}x${soft.h}` : '';
+  const key = `${texKey}|${r},${g},${b}|${blend}${softKey}`;
+  let m = byKey.get(key);
+  if (m) return m;
+
+  const mat = new StandardMaterial(`fx:${key}`, scene);
+  mat.diffuseColor.set(0, 0, 0);
+  mat.specularColor.set(0, 0, 0);
+  mat.ambientColor.set(0, 0, 0);
+  mat.emissiveColor.set(r / TINT_STEPS, g / TINT_STEPS, b / TINT_STEPS);
+  mat.disableLighting = true;
+  mat.alphaMode = blend === 'subtract' ? Constants.ALPHA_SUBTRACT : ADDITIVE_ALPHA_MODE;
+  mat.transparencyMode = Material.MATERIAL_ALPHABLEND;
+  mat.backFaceCulling = false;
+  mat.disableDepthWrite = true;
+  mat.fogEnabled = false;
+  // A whole-card mask needs no size; a per-cell one waits for the sheet's.
+  if (soft === true || soft === 'card') mat.opacityTexture = softEdgeMask(scene, 1, 1, soft === 'card');
+
+  if (typeof texture === 'string') {
+    void effectTexture(scene, texture).then(tex => {
+      if (materials.get(scene)?.get(key) !== mat) return; // pools were reset meanwhile
+      if (typeof soft === 'object') {
+        // Before the diffuse: the sprite shows a card once its diffuse is in.
+        const size = tex.getBaseSize();
+        const cols = Math.max(1, Math.floor(size.width / soft.w));
+        const rows = Math.max(1, Math.floor(size.height / soft.h));
+        mat.opacityTexture = softEdgeMask(scene, cols, rows);
+      }
+      mat.diffuseTexture = tex;
+    }).catch(reportLoadFailure(texture));
+  } else {
+    // A texture somebody else owns (a skill model's, from the GLB cache):
+    // referenced, never disposed - `disposePools` drops the material only.
+    mat.diffuseTexture = texture;
+  }
+
+  byKey.set(key, mat);
+  m = mat;
+  return m;
+}
+
+/* ---------------------------------------------------------------- cards */
+
+/** A pooled quad; unit-sized, so `scaling` is the edge in tiles. */
+export type Card = Mesh;
+
+/**
+ * A sheet drawn one cell at a time - the original's
+ * `RenderSprite(…, Frame % 4 * 0.25, Frame / 4 * 0.25, 0.25, 0.25)` on
+ * BITMAP_EXPLOTION. `w`/`h` are the cell size in texels, `count` how many
+ * cells hold frames (Explotion01 is 4×4 but only the first 10 are drawn - the
+ * rest of the sheet is solid white, which is what a card showing the whole
+ * sheet used to look like).
+ */
+export interface SheetCells {
+  w: number;
+  h: number;
+  count: number;
+}
+
+/** The original's `+ 0.005f` / `- 0.01f` UV guard against the next cell bleeding in. */
+const CELL_INSET = 0.005;
+const WHOLE_SHEET_UVS = [0, 0, 1, 0, 1, 1, 0, 1];
+
+const cardPool = new Map<Scene, Card[]>();
+
+let cardSeq = 0;
+
+/**
+ * A pooled card. `group` is the rendering group it draws in: the effects
+ * group by default, group 0 for a card that is a solid object rather than a
+ * glow - an alpha-tested one belongs with the world, where it writes depth
+ * and lands in the G-buffer, which is what puts an ink line around it.
+ * Always set, never only on creation: the pool is shared.
+ */
+export function acquireCard(
+  scene: Scene,
+  material: StandardMaterial,
+  billboard = true,
+  group = EFFECT_RENDERING_GROUP
+): Card {
+  let pool = cardPool.get(scene);
+  if (!pool) {
+    pool = [];
+    cardPool.set(scene, pool);
+  }
+  let card = pool.pop();
+  if (!card) {
+    card = CreatePlane(`fxCard${cardSeq++}`, { size: 1, updatable: true }, scene);
+    card.isPickable = false;
+    card.alwaysSelectAsActiveMesh = true;
+    card.receiveShadows = false;
+    card.doNotSyncBoundingInfo = true;
+    keepDepthForEffects(scene);
+    // Not the item halo layer: it draws every active mesh and a card carries
+    // no tier, so it would cost a draw to contribute nothing. The card's own
+    // halo is the effects layer's (glow.ts).
+    (scene as TestScene).look?.glow.addExcludedMesh(card);
+  }
+  card.material = material;
+  card.renderingGroupId = group;
+  // A card in the world's group is matter: it goes into the G-buffer, so the
+  // haze and the AO read its own depth rather than whatever stands behind it
+  // (which washed a note out to the colour of the distance), and the ink pass
+  // has an edge to draw. An effect card stays out of it - it is light.
+  card.metadata ??= {};
+  card.metadata.depthOccluder = group === 0;
+  // Emissive art joins the effect mask, the same rule as the halo below.
+  card.metadata.brightMesh = group !== 0 && material.alphaMode === ADDITIVE_ALPHA_MODE;
+  // ... which needs its bounds to be real: the G-buffer's own reach test
+  // measures from the bounding sphere, and a pooled card never syncs one, so
+  // it reads as a card at the map's origin and is dropped every frame.
+  card.doNotSyncBoundingInfo = group !== 0;
+  card.billboardMode = billboard ? Mesh.BILLBOARDMODE_ALL : Mesh.BILLBOARDMODE_NONE;
+  card.rotationQuaternion = null;
+  card.rotation.setAll(0);
+  card.scaling.setAll(1);
+  card.visibility = 1;
+  card.setEnabled(true);
+  // Emissive art is light and blooms; a RENDER_DARK card removes light and a
+  // halo would add back what it just took.
+  if (material.alphaMode === ADDITIVE_ALPHA_MODE) addEffectGlow(scene, card);
+  else dropEffectGlow(card);
+  return card;
+}
+
+export function releaseCard(scene: Scene, card: Card): void {
+  card.setEnabled(false);
+  card.parent = null;
+  dropEffectGlow(card);
+  if (card.metadata?.cellUvs) {
+    card.updateVerticesData(VertexBuffer.UVKind, WHOLE_SHEET_UVS);
+    card.metadata.cellUvs = false;
+  }
+  cardPool.get(scene)?.push(card);
+}
+
+/**
+ * Point a card's UVs at cell `frame` of its material's sheet - row-major from
+ * the top-left, like the original's `Frame % 4`, `Frame / 4`. The columns
+ * come from the loaded sheet's size, so this returns false (and leaves the
+ * card alone) until the texture is ready; call it again next frame.
+ */
+export function setCardCell(card: Card, cells: SheetCells, frame: number): boolean {
+  const tex = (card.material as StandardMaterial | null)?.diffuseTexture;
+  if (!tex?.isReady()) return false;
+  const size = tex.getBaseSize();
+  if (!size.width || !size.height) return false;
+  const cols = Math.max(1, Math.floor(size.width / cells.w));
+  const rows = Math.max(1, Math.floor(size.height / cells.h));
+  const col = frame % cols;
+  const row = Math.floor(frame / cols);
+  const u0 = col / cols + CELL_INSET;
+  const u1 = (col + 1) / cols - CELL_INSET;
+  // Effect textures load with invertY, so v = 0 is the sheet's bottom edge.
+  const v1 = 1 - row / rows - CELL_INSET;
+  const v0 = 1 - (row + 1) / rows + CELL_INSET;
+  card.updateVerticesData(VertexBuffer.UVKind, [u0, v0, u1, v0, u1, v1, u0, v1]);
+  card.metadata ??= {};
+  card.metadata.cellUvs = true;
+  return true;
+}
+
+/* -------------------------------------------------------------- particles */
+
+export interface ParticleRecipe {
+  texture: string;
+  colour: RGB;
+  /** Colour the particle dies to (default: same hue, faded). */
+  colourEnd?: RGB;
+  /** Card edge in tiles. */
+  size: number;
+  sizeJitter?: number;
+  /** Seconds. */
+  life: number;
+  lifeJitter?: number;
+  /** Emit box half extents around the emitter (tiles). */
+  box?: readonly [number, number, number];
+  /** Direction range. */
+  dir1?: readonly [number, number, number];
+  dir2?: readonly [number, number, number];
+  /** Tiles per second. */
+  power?: number;
+  powerJitter?: number;
+  /** Tiles per second squared, +up. */
+  gravity?: number;
+  /** Radians per second, ± */
+  spin?: number;
+  /** Animation-sheet cells when the texture is a strip. */
+  cells?: { w: number; h: number; count: number };
+  /** Size factor at death (1 = constant). */
+  endScale?: number;
+  /** Size factor keys over the life, `[progress, factor]`, in place of `endScale`. */
+  sizeKeys?: readonly (readonly [number, number])[];
+  capacity?: number;
+  /**
+   * Additive (MU default) or standard alpha (smoke). `dark` is `EnableAlphaBlendMinus`: black with the
+   * sheet's luminance as coverage, `luma(colour) x darkCardGain` (a JPG sheet, like the dark cards).
+   */
+  blend?: 'add' | 'alpha' | 'dark';
+  /**
+   * Brightness (or coverage) keys over the life, `[progress, level]`. Default `[0, 1], [0.6, 0.8], [1, 0]`;
+   * a particle the original leaves at full light and kills (BITMAP_LIGHT+2) holds 1 to the end.
+   */
+  fade?: readonly (readonly [number, number])[];
+  /** Draw each card stretched along its flight, this many times longer than wide (a JOINT_SPARK streak). */
+  stretch?: number;
+  /** With `aimed`: each card's length follows its own speed, `stretch` at full power (one tick of travel). */
+  stretchBySpeed?: boolean;
+  /** An `emitBurst` direction wins over `dir1`/`dir2`, which then only jitter it (per-spark headings). */
+  aimed?: boolean;
+  /** Additive only: fade to nothing over this many tiles above the burst's ground (groundFade.ts). */
+  groundFade?: number;
+  /** With `alpha`: the peak opacity (default 1), for a sheet whose alpha is fuller than the art it stands in for. */
+  alpha?: number;
+  /**
+   * Fade the sheet to nothing towards its border (each cell's, with `cells`): a sheet whose art runs
+   * off the card - smoke02's alpha is up to 0.48 on its outermost texels - shows its square otherwise.
+   */
+  softEdge?: boolean;
+  /** Life fraction by which the particle has stopped moving, easing out from its launch (a `Velocity *= k` burst). */
+  settle?: number;
+  /** Born at rotation 0 instead of a random one (`o->Rotation` left at CreateParticle's 0). */
+  upright?: boolean;
+  /**
+   * `life`, `power` and `gravity` in real seconds. Babylon's default `updateSpeed` 0.01 ages a particle
+   * 0.6 s a second, so a recipe without this runs 1.67x slow.
+   */
+  realSeconds?: boolean;
+}
+
+const systems = new Map<Scene, Map<string, ParticleSystem>>();
+/** Recipe identity → system, so a table row's burst never re-stringifies its recipe; a flame's system is keyed with its gain. */
+const systemsByRecipe = new Map<Scene, WeakMap<ParticleRecipe, { ps: ParticleSystem; gain: number }>>();
+
+/**
+ * Where the next manually emitted particles start. `emitBurst` / `Emitter`
+ * used to write `ps.emitter` and bump `manualEmitCount`: two spawns of one
+ * recipe in the same frame (a hit's sparks and its blood, three arrows'
+ * trails, every `scatter(every = 0)`) left only the last position, and the
+ * whole frame's particles came out of it . The emissions
+ * of a frame now queue their positions and `startPositionFunction` hands
+ * them out in order as the system flushes `manualEmitCount`.
+ */
+interface PendingEmit {
+  x: number;
+  y: number;
+  z: number;
+  n: number;
+  /** `aimed` recipes: the heading these particles leave along (unit), when `hasDir`. */
+  dx: number;
+  dy: number;
+  dz: number;
+  hasDir: boolean;
+}
+interface EmitQueue {
+  q: PendingEmit[];
+  head: number;
+  len: number;
+}
+const emitQueues = new WeakMap<ParticleSystem, EmitQueue>();
+
+function queueEmit(ps: ParticleSystem, at: Vector3, n: number, dir?: Vector3): void {
+  // Particles age only on a drawn frame: queued while hidden, they would all burst out on return.
+  if (pageHidden()) return;
+  let s = emitQueues.get(ps);
+  if (!s) {
+    s = { q: [], head: 0, len: 0 };
+    emitQueues.set(ps, s);
+  }
+  // Babylon zeroes `manualEmitCount` when it flushes; nothing pending means
+  // last frame's queue is spent (or was dropped at capacity) - start over.
+  if (ps.manualEmitCount <= 0) {
+    s.head = 0;
+    s.len = 0;
+  }
+  let p = s.q[s.len];
+  if (!p) {
+    p = { x: 0, y: 0, z: 0, n: 0, dx: 0, dy: 0, dz: 0, hasDir: false };
+    s.q.push(p);
+  }
+  p.x = at.x;
+  p.y = at.y;
+  p.z = at.z;
+  p.n = n;
+  p.hasDir = !!dir;
+  if (dir) {
+    p.dx = dir.x;
+    p.dy = dir.y;
+    p.dz = dir.z;
+  }
+  s.len++;
+  (ps.emitter as Vector3).copyFrom(at);
+  ps.manualEmitCount = Math.max(ps.manualEmitCount, 0) + n;
+}
+
+/** The queue entry the particle being created came from - read by `nextStartDirection` right after. */
+let lastEmit: PendingEmit | null = null;
+
+function nextStartPosition(ps: ParticleSystem, out: Vector3): void {
+  const s = emitQueues.get(ps);
+  const min = ps.minEmitBox;
+  const max = ps.maxEmitBox;
+  let x: number;
+  let y: number;
+  let z: number;
+  lastEmit = null;
+  if (s && s.head < s.len) {
+    const p = s.q[s.head];
+    lastEmit = p;
+    if (--p.n <= 0) s.head++;
+    x = p.x;
+    y = p.y;
+    z = p.z;
+  } else {
+    const e = ps.emitter as Vector3;
+    x = e.x;
+    y = e.y;
+    z = e.z;
+  }
+  out.set(
+    x + lerp(min.x, max.x, Math.random()),
+    y + lerp(min.y, max.y, Math.random()),
+    z + lerp(min.z, max.z, Math.random())
+  );
+}
+
+/** `aimed` recipes: the queued heading plus the recipe's `dir1..dir2` as jitter; without one, the recipe's range. */
+function nextStartDirection(ps: ParticleSystem, out: Vector3): void {
+  const d1 = ps.direction1;
+  const d2 = ps.direction2;
+  const e = lastEmit;
+  out.set(lerp(d1.x, d2.x, Math.random()), lerp(d1.y, d2.y, Math.random()), lerp(d1.z, d2.z, Math.random()));
+  if (e?.hasDir) {
+    out.x += e.dx;
+    out.y += e.dy;
+    out.z += e.dz;
+  }
+}
+
+export function particleSystemFor(scene: Scene, r: ParticleRecipe): ParticleSystem {
+  let byRecipe = systemsByRecipe.get(scene);
+  if (!byRecipe) {
+    byRecipe = new WeakMap();
+    systemsByRecipe.set(scene, byRecipe);
+  }
+  const gain = r.blend === 'alpha' ? 1 : r.blend === 'dark' ? darkCardGain(scene) : lightCardGain(scene);
+  const known = byRecipe.get(r);
+  if (known && known.gain === gain) return known.ps;
+
+  let map = systems.get(scene);
+  if (!map) {
+    map = new Map();
+    systems.set(scene, map);
+  }
+  // An inline `{ ...recipe }` spread is a new identity with an old shape.
+  const k = gain === 1 ? JSON.stringify(r) : `${JSON.stringify(r)}|g${gain.toFixed(3)}`;
+  let ps = map.get(k);
+  if (ps) {
+    byRecipe.set(r, { ps, gain });
+    return ps;
+  }
+
+  ps = new ParticleSystem(`fx:${r.texture}`, r.capacity ?? 256, scene);
+  ps.emitter = Vector3.Zero();
+  ps.isLocal = false;
+  ps.forceDepthWrite = false;
+  ps.renderingGroupId = EFFECT_RENDERING_GROUP;
+  keepDepthForEffects(scene);
+  // BLENDMODE_ADD is (SRC_ALPHA, ONE): the colour × alpha is added, so the
+  // gradients below fade a sprite toward black under it.
+  ps.blendMode =
+    r.blend === 'alpha' || r.blend === 'dark' ? ParticleSystem.BLENDMODE_STANDARD : ParticleSystem.BLENDMODE_ADD;
+
+  // The fade: an additive sprite dies by its colour going to black (the
+  // original's `Light × LifeTime / n`), an alpha one by its alpha. The
+  // start / mid / end keys carry the same 1 → 0.8 → 0 curve either way.
+  const c = r.colour;
+  const e = r.colourEnd ?? c;
+  const peak = r.alpha ?? 1;
+  const key = (rgb: RGB, k: number): Color4 =>
+    r.blend === 'alpha'
+      ? new Color4(rgb[0], rgb[1], rgb[2], k * peak)
+      : r.blend === 'dark'
+        ? new Color4(0, 0, 0, Math.min(1, luma(rgb) * gain * k))
+        : new Color4(rgb[0] * k * gain, rgb[1] * k * gain, rgb[2] * k * gain, 1);
+  const start = key(c, 1);
+  ps.color1 = start;
+  ps.color2 = start.scale(0.85);
+  ps.colorDead = key(e, 0);
+  if (r.fade) {
+    for (const [at, level] of r.fade) ps.addColorGradient(at, key([lerp(c[0], e[0], at), lerp(c[1], e[1], at), lerp(c[2], e[2], at)], level));
+  } else {
+    ps.addColorGradient(0, start);
+    ps.addColorGradient(0.6, key(e, 0.8));
+    ps.addColorGradient(1, key(e, 0));
+  }
+
+  const sj = r.sizeJitter ?? 0.25;
+  ps.minSize = r.size * (1 - sj);
+  ps.maxSize = r.size * (1 + sj);
+  if (r.sizeKeys) {
+    for (const [at, f] of r.sizeKeys) ps.addSizeGradient(at, ps.minSize * f, ps.maxSize * f);
+  } else if (r.endScale !== undefined) {
+    // A size gradient *replaces* minSize/maxSize (thinParticleSystem
+    // `_createParticle`: `particle.size = gradient.getFactor()`), so the
+    // keys must carry the real size range - `(0, 1) → (1, endScale)` was born
+    // one tile wide and grew to `endScale` tiles.
+    ps.addSizeGradient(0, ps.minSize, ps.maxSize);
+    ps.addSizeGradient(1, ps.minSize * r.endScale, ps.maxSize * r.endScale);
+  }
+  const lj = r.lifeJitter ?? 0.3;
+  ps.minLifeTime = r.life * (1 - lj);
+  ps.maxLifeTime = r.life;
+
+  const b = r.box ?? [0.05, 0.05, 0.05];
+  ps.minEmitBox = new Vector3(-b[0], -b[1], -b[2]);
+  ps.maxEmitBox = new Vector3(b[0], b[1], b[2]);
+  const d1 = r.dir1 ?? [-1, -1, -1];
+  const d2 = r.dir2 ?? [1, 1, 1];
+  ps.direction1 = new Vector3(d1[0], d1[1], d1[2]);
+  ps.direction2 = new Vector3(d2[0], d2[1], d2[2]);
+  const p = r.power ?? 1;
+  const pj = r.powerJitter ?? 0.4;
+  // A speed-stretched card rolls its own speed in the direction function, where its length is set to match.
+  ps.minEmitPower = r.stretchBySpeed ? p : p * (1 - pj);
+  ps.maxEmitPower = p;
+  ps.gravity = new Vector3(0, r.gravity ?? 0, 0);
+  const spin = r.spin ?? 0;
+  ps.minAngularSpeed = -spin;
+  ps.maxAngularSpeed = spin;
+  ps.minInitialRotation = 0;
+  ps.maxInitialRotation = r.upright ? 0 : Math.PI * 2;
+  if (r.settle !== undefined) {
+    ps.addDragGradient(0, 0);
+    ps.addDragGradient(r.settle, 1);
+    ps.addDragGradient(1, 1);
+  }
+
+  if (r.cells) {
+    ps.isAnimationSheetEnabled = true;
+    ps.spriteCellWidth = r.cells.w;
+    ps.spriteCellHeight = r.cells.h;
+    ps.startSpriteCellID = 0;
+    ps.endSpriteCellID = r.cells.count - 1;
+    ps.spriteCellLoop = true;
+    ps.spriteRandomStartCell = true;
+  }
+
+  if (r.realSeconds) ps.updateSpeed = 1 / 60;
+
+  ps.emitRate = 0;
+  ps.manualEmitCount = 0;
+
+  const created = ps;
+  created.startPositionFunction = (_world, position) => nextStartPosition(created, position);
+  if (r.aimed && r.stretchBySpeed && r.stretch) {
+    const stretch = r.stretch;
+    // Babylon sets a particle's direction before its scale, so the range written here is this card's alone.
+    created.startDirectionFunction = (_world, direction) => {
+      nextStartDirection(created, direction);
+      const f = 1 - pj * Math.random();
+      direction.scaleInPlace(f);
+      created.minScaleX = created.maxScaleX = stretch * f;
+    };
+  } else if (r.aimed) created.startDirectionFunction = (_world, direction) => nextStartDirection(created, direction);
+  if (r.stretch) {
+    // Stretched cards align their local Y with the flight; a quarter turn puts the sheet's long U axis there.
+    ps.billboardMode = ParticleSystem.BILLBOARDMODE_STRETCHED;
+    ps.minScaleX = ps.maxScaleX = r.stretch;
+    ps.minInitialRotation = ps.maxInitialRotation = Math.PI / 2;
+    ps.minAngularSpeed = ps.maxAngularSpeed = 0;
+  }
+  void effectTexture(scene, r.texture).then(tex => {
+    if (systems.get(scene)?.get(k) !== created) return;
+    if (r.blend !== 'dark' && !r.softEdge) {
+      created.particleTexture = tex;
+      return;
+    }
+    void particleSheet(scene, tex, r).then(own => {
+      if (systems.get(scene)?.get(k) === created) created.particleTexture = own;
+    }).catch(reportLoadFailure(r.texture));
+  }).catch(reportLoadFailure(r.texture));
+
+  if (r.groundFade) useGroundFade(ps, r.groundFade);
+  ps.start();
+  map.set(k, ps);
+  byRecipe.set(r, { ps, gain });
+  return ps;
+}
+
+const sheetTextures = new Map<string, Promise<Texture>>();
+
+/**
+ * A sheet as the particle shader needs it, built once per sheet and shape. A `dark` recipe's
+ * sheet is white with its luminance for alpha, what a dark particle covers with: the particle
+ * shader has no `getAlphaFromRGB`, so a JPG sheet drew as solid black cards. A `softEdge` one
+ * has its alpha faded towards the border.
+ */
+function particleSheet(scene: Scene, tex: Texture, r: ParticleRecipe): Promise<Texture> {
+  const dark = r.blend === 'dark';
+  const cells = r.softEdge ? r.cells : undefined;
+  const key = `${r.texture}${dark ? '|luma' : ''}${r.softEdge ? `|soft${cells ? `${cells.w}x${cells.h}` : ''}` : ''}`;
+  let pending = sheetTextures.get(key);
+  if (pending) return pending;
+  pending = (async () => {
+    const bitmap = await createImageBitmap(await (await fetch(tex.url ?? '')).blob());
+    const canvas = document.createElement('canvas');
+    canvas.width = bitmap.width;
+    canvas.height = bitmap.height;
+    const ctx = canvas.getContext('2d')!;
+    ctx.drawImage(bitmap, 0, 0);
+    const img = ctx.getImageData(0, 0, bitmap.width, bitmap.height);
+    const d = img.data;
+    if (dark) {
+      for (let i = 0; i < d.length; i += 4) {
+        d[i + 3] = 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2];
+        d[i] = 255;
+        d[i + 1] = 255;
+        d[i + 2] = 255;
+      }
+    }
+    if (r.softEdge) fadeSheetEdges(d, bitmap.width, bitmap.height, cells?.w, cells?.h);
+    const out = RawTexture.CreateRGBATexture(d, bitmap.width, bitmap.height, scene, true, true, Constants.TEXTURE_TRILINEAR_SAMPLINGMODE);
+    out.hasAlpha = true;
+    return out;
+  })();
+  sheetTextures.set(key, pending);
+  return pending;
+}
+
+/** One burst of `count` particles at `at`; `dir` is their heading for an `aimed` recipe. */
+export function emitBurst(scene: Scene, r: ParticleRecipe, at: Vector3, count: number, dir?: Vector3): void {
+  queueEmit(particleSystemFor(scene, r), at, count, dir);
+}
+
+/**
+ * A continuous emitter that follows a moving point for as long as the
+ * caller drives it. Shares the recipe's system, so several trails of one
+ * kind (three arrows, a volley) cost one draw.
+ */
+export class Emitter {
+  #acc = 0;
+  readonly #ps: ParticleSystem;
+  constructor(scene: Scene, r: ParticleRecipe, readonly rate: number) {
+    this.#ps = particleSystemFor(scene, r);
+  }
+  /** Emit `rate` particles per second at `at`; call every frame. */
+  tick(at: Vector3, dt: number, rate = this.rate): void {
+    this.#acc += rate * dt;
+    const n = this.#acc | 0;
+    if (n <= 0) return;
+    this.#acc -= n;
+    queueEmit(this.#ps, at, n);
+  }
+}
+
+/* ------------------------------------------------------------------ clock */
+
+/**
+ * The effects clock: seconds of `effects.update` so far. Everything that
+ * sequences a skill - a step after a delay, a point flying along the facing,
+ * a ribbon spiralling up - reads this, never `performance.now()` or
+ * `setTimeout`: it stops when the game does, and `effects.reset()` cancels
+ * every pending step so a warp or a death mid-cast leaves nothing to land
+ * on the next map .
+ */
+/** Counted in 25 Hz ticks like `c->AttackTime += FPS_ANIMATION_FACTOR` (ZzzCharacter.cpp:4136): whole numbers at 25 fps. */
+let tickClock = 0;
+
+interface Timer extends LiveEffect {
+  /** The tick it fires on. */
+  due: number;
+  fn: () => void;
+}
+
+const timers = new LiveList();
+
+/** Seconds on the effects clock. */
+export function fxNow(): number {
+  return tickClock * TICK;
+}
+
+/** `seconds` in ticks; a whole tick count (`ticks(14)` = 0.56 s) stays whole, not 14.000000000000002. */
+function toTicks(seconds: number): number {
+  const t = seconds / TICK;
+  const whole = Math.round(t);
+  return Math.abs(t - whole) < 1e-6 ? whole : t;
+}
+
+/** Run `fn` once `seconds` of effects time have passed. `stop()` cancels it. */
+export function delay(seconds: number, fn: () => void): EffectHandle {
+  const timer: Timer = {
+    due: tickClock + toTicks(seconds),
+    fn,
+    update() {
+      if (tickClock < this.due) return true;
+      this.fn();
+      return false;
+    },
+    release() {},
+  };
+  return timers.push(timer);
+}
+
+/** Advance the clock and fire what is due. The facade calls it before the layers step. */
+export function stepClock(dt: number): void {
+  tickClock += dt / TICK;
+  timers.update(dt);
+}
+
+/** The clock in ticks, and setting it back: the skill golden replays one cast on both Skill effects branches from the same tick. */
+export function fxTicks(): number {
+  return tickClock;
+}
+export function setFxTicks(ticks: number): void {
+  tickClock = ticks;
+}
+
+/** Drop every pending `delay`. The facade's reset. */
+export function clearTimers(): void {
+  timers.clear();
+}
+
+/* ------------------------------------------------------------------ reset */
+
+/** Dispose every shared pool (materials, cards, particle systems). The facade's reset. */
+export function disposePools(): void {
+  // The halo draws the pooled meshes, so it goes with them.
+  disposeEffectGlow();
+  // Not the textures - a card's comes from loadEffectTexture's cache, a
+  // skill mesh's from the GLB cache; both are shared with the map.
+  for (const byKey of materials.values()) for (const m of byKey.values()) m.dispose(false, false);
+  materials.clear();
+  disposeSoftEdgeMasks();
+  for (const pool of cardPool.values()) for (const c of pool) c.dispose(false, false);
+  cardPool.clear();
+  for (const map of systems.values()) for (const ps of map.values()) ps.dispose(false);
+  systems.clear();
+  // A sheet that never loaded has nothing to dispose; its failure was reported where it was asked for.
+  for (const t of sheetTextures.values()) void t.then(tex => tex.dispose(), () => {});
+  sheetTextures.clear();
+  for (const t of ribbonSheets.values()) void t.then(tex => tex.dispose(), () => {});
+  ribbonSheets.clear();
+  systemsByRecipe.clear();
+}
+
+/* ------------------------------------------------------------------ misc */
+
+export const tmpA = new Vector3();
+
+export function lerp(a: number, b: number, t: number): number {
+  return a + (b - a) * t;
+}
+
+export function clamp01(t: number): number {
+  return t < 0 ? 0 : t > 1 ? 1 : t;
+}
+
+/** 1 → 0 over the last `tail` fraction of a 0…1 progress. */
+export function fadeOut(progress: number, tail = 0.35): number {
+  return clamp01((1 - progress) / tail);
+}
+
+/** Deterministic 0…1 noise per seed - jitter without `Math.random` churn. */
+export function hash(n: number): number {
+  const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
+  return x - Math.floor(x);
+}
+
+export function scaleRGB(c: RGB, k: number): RGB {
+  return [c[0] * k, c[1] * k, c[2] * k];
+}

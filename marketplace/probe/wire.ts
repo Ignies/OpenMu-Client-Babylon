@@ -2,9 +2,9 @@ import {
   SimpleModulusDecryptor,
   SimpleModulusEncryptor,
   SimpleModulusKeys,
-} from '../../src/common/encryption/simpleModulus';
-import { Xor32Encryptor } from '../../src/common/encryption/xor32';
-import { getPacketSize, getSizeOfPacketType } from '../../src/common/wireUtils';
+} from '../../src/controllers/net/encryption/simpleModulus';
+import { Xor32Encryptor } from '../../src/controllers/net/encryption/xor32';
+import { getPacketSize, getSizeOfPacketType } from '../../src/controllers/net/wireUtils';
 import { gameVersion } from '../../versions/season6';
 
 /**
@@ -26,7 +26,7 @@ import { gameVersion } from '../../versions/season6';
 export const HEADERS = new Set([0xc1, 0xc2, 0xc3, 0xc4]);
 
 /** Above this the packet is encrypted; below it, plain. */
-export const ENCRYPTED_FROM = 0xc3;
+const ENCRYPTED_FROM = 0xc3;
 
 export class BotCrypto {
   private readonly encryptor = new SimpleModulusEncryptor();

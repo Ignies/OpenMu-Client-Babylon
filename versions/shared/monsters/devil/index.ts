@@ -1,0 +1,37 @@
+import { defineMonster } from '@/controllers/monsters';
+
+export default defineMonster({
+  Numb: 37,
+  Name: 'Devil',
+  // Its Energy Ball (17) ends with no SOUND_MAGIC (ZzzCharacter.cpp:5087-5122).
+  quietCasts: [17],
+  maxHealth: 5000,
+  model: { type: 26, scale: 1.1 },
+  stats: {
+    Rate: 1,
+    Level: 60,
+    HP: 5000,
+    MP: 0,
+    MinDmg: 180,
+    MaxDmg: 195,
+    Def: 115,
+    MagDef: 0,
+    AttackSuccess: 300,
+    Move: 88,
+    AttType: 3,
+    Range: 3,
+    View: 4,
+    MoveSpeed: 7,
+    AttSpeed: 400,
+    Regen: 2000,
+    Attri: 10,
+    ItemR: 2,
+    MoneyR: 200,
+    MaxI: 14,
+    ResWind: 3,
+    ResPois: 0,
+    ResIce: 5,
+    ResWater: 5,
+    ResFire: 5,
+  },
+});

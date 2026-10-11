@@ -1,0 +1,27 @@
+import { defineItem } from '@/controllers/items';
+
+export default defineItem({
+  Group: 15,
+  Index: 25,
+  ItemSlot: -1,
+  Skill: 0,
+  X: 1,
+  Y: 2,
+  Serial: 1,
+  Opt: 1,
+  Drop: 1,
+  ItemName: 'Scroll of Magic Speed Up',
+  Lvl: 40,
+  ReqLvl: 0,
+  Energy: 185,
+  Zen: 3928,
+  'DW/SM': 1,
+  'DK/BK': 0,
+  'Elf/ME': 0,
+  MG: 0,
+  DL: 0,
+  SUM: 1,
+  RF: 0,
+  szModelFolder: 'Item/',
+  szModelName: 'rollofpaper.glb',
+});

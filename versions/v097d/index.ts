@@ -11,8 +11,14 @@
  * a client that logs in as ClientVersion(0, 97) is answered with a distinct
  * packet mix (see variantRank).
  */
-import { asciiBytes, type GameVersion } from '../../src/version/contract';
+import { asciiBytes, type GameVersion } from '@/version/contract';
 import { v097dData } from './data';
+// The shared monsters (and their bodies) this version spawns, registered with the monsters controller.
+import '../shared/monsters/all';
+// The player clips and monster swing / cast rules, registered with the anim controller.
+import '../shared/animations/all';
+// The deliberate improvements over the original, registered with the fidelity controller.
+import '../shared/improvements/all';
 
 // The packet lists ride along in the version chunk; UI does not (it reaches
 // app code and loads through the registry's loadUi, after this module).
@@ -125,8 +131,6 @@ export const gameVersion: GameVersion = {
     // Version095d's option types are Option / Luck / Excellent only, and the
     // client ships no ItemSetOption.bmd.
     ancientItems: false,
-    // Harmony and refine stones are Season 3.
-    harmonyJewel: false,
     // OpenMU's ShowCharacterListPlugIn095: "0.95 doesn't support dark lord
     // (number 16) and newer classes yet".
     darkLord: false,
@@ -136,18 +140,18 @@ export const gameVersion: GameVersion = {
     // Summoner is Season 3, Rage Fighter Season 5.
     summoner: false,
     rageFighter: false,
-    // MU Helper is Season 6 Episode 3.
-    muHelper: false,
-    // The consumable belt row and the cash shop are Season 6; the 0.97d
-    // client's 97-file Interface set has neither.
-    itemHotkeys: false,
-    cashShop: false,
-    // Devil Square: the client has World10, OpenMU Version095d runs
-    // DevilSquareInitializer. Blood Castle has the map (World12) but no
-    // server side yet; Chaos Castle does not exist in 0.97d.
-    events: true,
-    // The flag means the Season 6 quest windows (Quest_eng.bmd). 0.97d has
-    // the legacy chain instead (Local/Quest.bmd, OpenMU NpcWindow.LegacyQuest).
-    questDialogs: false,
+    // Q / W / E only, fixed to healing, mana and antidote: its Menu02 art has
+    // those three slots and its key help (Local/Text.bmd 130-134) binds only
+    // skills with Ctrl. Season 6 added R and the binding.
+    itemHotkeys: { slots: 3, bindable: false },
   },
+  // MU Helper is Season 6 Episode 3. `events` stays: the client has World10
+  // and OpenMU Version095d runs DevilSquareInitializer (Blood Castle has its
+  // map, World12, but no server side yet; Chaos Castle is not in 0.97d).
+  // `quests` stays: it carries the legacy chain 0.97d has (Local/Quest.bmd,
+  // OpenMU NpcWindow.LegacyQuest); its Season 6 windows are never fed.
+  modulesOff: ['mu_helper'],
+  // Its NpcName table has Blood Castle's Archangel (232, 233) and Devil Square's
+  // Charon (237); no Chaos Castle monster (162-173) and no World19.
+  miniGames: ['bloodCastle', 'devilSquare'],
 };

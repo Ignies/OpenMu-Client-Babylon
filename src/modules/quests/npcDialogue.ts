@@ -1,0 +1,341 @@
+import { t, type TextKey } from '../../i18n';
+/** The Season 6 NPC dialogue - `CNewUINPCDialogue` (NewUINPCDialogue.cpp) on
+ * `CQuestMng`'s `NPCDialogue.bmd` pages. Answer codes: readme.md "Notes". */
+import { observable, reaction, runInAction } from 'mobx';
+import {
+  AvailableQuestsRequestPacket,
+  CloseNpcRequestPacket,
+  GensJoinRequestPacket,
+  GensLeaveRequestPacket,
+  GensRewardRequestPacket,
+  GensTypeEnum,
+  NpcBuffRequestPacket,
+} from '@versions/shared/packets/ClientToServerPackets';
+import { AvailableQuestsPacket, QuestStepInfoPacket } from '@versions/shared/packets/ServerToClientPackets';
+import type { ENUM_WORLD } from '../../core/types';
+import { monsterDisplayName } from '@versions/shared/monsters/monstersDatabase';
+import { EventBus } from '../../core/eventBus';
+import { playUiSound } from '../../controllers/sound/sfx';
+import { Merchant } from '../npc_shop';
+import { Hero } from '../hero';
+import { Session } from '../session';
+import type { QuestLayer } from './layer';
+import {
+  npcDialogueEntry,
+  questDataReady,
+  questWordLines,
+  questWords,
+} from './questData';
+import { offeredQuests, questKeyGroup, questKeyNumber, selectQuest, setDialogueOpenReader } from './questLog';
+
+// ---- 1. tuning -------------------------------------------------------------
+
+/** `GetNPCDlgAnswerResult` values above this are requests, not pages. */
+const LAST_PAGE_RESULT = 900;
+/** The page `SetContents(999)` shows for an unknown result ("NPC dialog script error!"). */
+const ERROR_PAGE = 999;
+/** `LOWORD(dwQuestIndex) == 0x00FF` (QuestMng.cpp:270): the server refused the selected quest. */
+const STEP_NUMBER_UNAVAILABLE = 0x00ff;
+
+/** QuestWords the list mode uses: 1501 "Select a quest.", 1502 none available, 1007 "Go back.". */
+const WORDS_SELECT_QUEST = 1501;
+const WORDS_NO_QUEST = 1502;
+const WORDS_GO_BACK = 1007;
+/** Fallbacks for a Data copy without those words. */
+const TEXT_SELECT_QUEST: TextKey = 'quest.dialogue.select';
+const TEXT_NO_QUEST: TextKey = 'quest.dialogue.none';
+const TEXT_GO_BACK: TextKey = 'quest.dialogue.goBack';
+/** A NPC the table has no page for (OpenMU opens the dialogue for every `NpcDialog` NPC). */
+const TEXT_DEFAULT_WORDS: TextKey = 'quest.dialogue.words';
+const TEXT_DEFAULT_QUEST: TextKey = 'quest.dialogue.accept';
+
+/** The Gens stewards (543 Duprian, 544 Vanert): the only NPCs that show contribution. */
+const GENS_NPCS: ReadonlySet<number> = new Set([543, 544]);
+
+/** `ProcessSelTextResult` request codes. */
+const RESULT = {
+  questList: 901,
+  buff: 902,
+  joinDuprian: 903,
+  joinVanert: 904,
+  leaveGens: 905,
+  rewardDuprian: 906,
+  rewardVanert: 907,
+} as const;
+
+// ---- 2. state + readers ----------------------------------------------------
+
+/** One clickable line of the lower half (`m_aszSelTexts` + its result). */
+type NpcDialogueAnswer = {
+  text: string;
+  /** Page or request code; in list mode the quest key, or -1 for "Go back". */
+  result: number;
+};
+
+const state = observable({
+  open: false,
+  /** `g_QuestMng.m_nNPCIndex`. */
+  npcNumber: 0,
+  /** `m_dwCurDlgIndex`. */
+  page: 0,
+  /** `m_aszNPCWords`, unwrapped: the window wraps to its width. */
+  npcLines: [] as string[],
+  answers: [] as NpcDialogueAnswer[],
+  /** `m_bQuestListMode`: the lower half lists the NPC's quests. */
+  questListMode: false,
+  /** `m_dwContributePoint` (Gens stewards only). */
+  contribution: 0,
+  /** `m_bCanClick`: false while a request is out. */
+  busy: false,
+});
+
+export function npcDialogueOpen(): boolean {
+  return state.open;
+}
+
+/** `g_QuestMng.GetNPCName()`. */
+export function npcDialogueNpcName(): string {
+  return monsterDisplayName(state.npcNumber, `NPC ${state.npcNumber}`);
+}
+
+export function npcDialogueLines(): readonly string[] {
+  return state.npcLines;
+}
+
+export function npcDialogueAnswers(): readonly NpcDialogueAnswer[] {
+  return state.answers;
+}
+
+export function npcDialogueBusy(): boolean {
+  return state.busy;
+}
+
+/** Gens contribution to draw under the name; null unless a steward. */
+export function npcDialogueContribution(): number | null {
+  return GENS_NPCS.has(state.npcNumber) ? state.contribution : null;
+}
+
+// ---- commands ----------------------------------------------------------------
+
+function send(buffer: DataView): boolean {
+  if (Session.isOffline) return false;
+  Session.sendToGS(buffer);
+  return true;
+}
+
+/** `SetContents(page)`: the page's words and answers. */
+function setContents(page: number): void {
+  const entry = npcDialogueEntry(state.npcNumber, page);
+  const lines = entry ? questWordLines(entry.npcWords) : [];
+  const answers: NpcDialogueAnswer[] = entry
+    ? entry.answers.map((a, i) => ({ text: `${i + 1}. ${questWords(a.words) ?? ''}`, result: a.result }))
+    : [];
+
+  runInAction(() => {
+    state.page = page;
+    state.questListMode = false;
+    state.busy = false;
+    if (entry) {
+      state.npcLines = lines;
+      state.answers = answers;
+    } else {
+      // No page for this NPC in the table: the one thing OpenMU can answer.
+      state.npcLines = [t(TEXT_DEFAULT_WORDS)];
+      state.answers = [
+        { text: `1. ${t(TEXT_DEFAULT_QUEST)}`, result: RESULT.questList },
+      ];
+    }
+  });
+}
+
+/**
+ * Same reason as `legacyQuests.ts`: the page is copied out of the tables, and
+ * a language change fetches new ones. Redraw the open page from them.
+ */
+reaction(
+  () => questDataReady(),
+  ready => {
+    if (ready && state.open && !state.questListMode) setContents(state.page);
+  }
+);
+
+/**
+ * `ReceiveNPCDlgUIStart` → `Show(INTERFACE_NPC_DIALOGUE)` → `ProcessOpening`:
+ * page 0 of this NPC. A second `OpenNpcDialog` while open is ignored.
+ */
+export function openNpcDialogue(npcNumber: number, contribution = 0): void {
+  if (state.open) return;
+  runInAction(() => {
+    state.npcNumber = npcNumber;
+    state.contribution = contribution;
+    state.open = true;
+  });
+  setContents(0);
+  playUiSound('window');
+}
+
+/** `ProcessClosing`: hide, tell the server (`SendCloseNpcRequest`). */
+function endNpcDialogue(): void {
+  runInAction(() => {
+    state.open = false;
+    state.questListMode = false;
+    state.busy = false;
+    state.contribution = 0;
+  });
+  send(CloseNpcRequestPacket.createPacket().buffer);
+  Merchant.dropNpcTalk();
+}
+
+export function closeNpcDialogue(): void {
+  if (!state.open) return;
+  endNpcDialogue();
+  playUiSound('click');
+}
+
+/** Hide without the close request: another NPC window took the talk over. */
+function hideNpcDialogue(): void {
+  if (!state.open) return;
+  runInAction(() => {
+    state.open = false;
+    state.questListMode = false;
+    state.busy = false;
+  });
+}
+
+function sendBusy(packet: DataView): void {
+  if (send(packet)) {
+    runInAction(() => {
+      state.busy = true;
+    });
+  }
+}
+
+/** `ProcessSelTextResult`: the hero clicked answer `index`. */
+export function answerNpcDialogue(index: number): void {
+  if (!state.open || state.busy) return;
+  const answer = state.answers[index];
+  if (!answer) return;
+  playUiSound('click');
+
+  if (state.questListMode) {
+    if (answer.result < 0) {
+      setContents(0);
+      return;
+    }
+    runInAction(() => {
+      state.busy = true;
+    });
+    selectQuest(questKeyNumber(answer.result), questKeyGroup(answer.result));
+    return;
+  }
+
+  const result = answer.result;
+  if (result <= LAST_PAGE_RESULT) {
+    setContents(result);
+    return;
+  }
+  switch (result) {
+    case RESULT.questList:
+      sendBusy(AvailableQuestsRequestPacket.createPacket().buffer);
+      break;
+    case RESULT.buff:
+      send(NpcBuffRequestPacket.createPacket().buffer);
+      closeNpcDialogue();
+      break;
+    case RESULT.joinDuprian:
+    case RESULT.joinVanert: {
+      const packet = GensJoinRequestPacket.createPacket();
+      packet.GensType = result === RESULT.joinDuprian ? GensTypeEnum.Duprian : GensTypeEnum.Vanert;
+      sendBusy(packet.buffer);
+      break;
+    }
+    case RESULT.leaveGens:
+      sendBusy(GensLeaveRequestPacket.createPacket().buffer);
+      break;
+    case RESULT.rewardDuprian:
+    case RESULT.rewardVanert: {
+      const packet = GensRewardRequestPacket.createPacket();
+      packet.GensType = result === RESULT.rewardDuprian ? GensTypeEnum.Duprian : GensTypeEnum.Vanert;
+      sendBusy(packet.buffer);
+      break;
+    }
+    default:
+      setContents(ERROR_PAGE);
+  }
+}
+
+// ---- packet → state ----------------------------------------------------------
+
+/** Registers the NPC dialogue's listeners; the quests module installs it (module.ts). */
+export function installNpcDialogue(): void {
+  setDialogueOpenReader(npcDialogueOpen);
+
+  /**
+   * `ProcessQuestListReceive`: while the dialogue is up the NPC's list goes
+   * into it - words 1501 / 1502 above, "[Q]subject" lines and "Go back." below.
+   */
+  EventBus.on('AvailableQuests', packet => {
+    if (!state.open) return;
+    const quests = offeredQuests(new AvailableQuestsPacket(packet));
+    const answers: NpcDialogueAnswer[] = quests.map((q, i) => ({
+      text: `${i + 1}. [Q]${q.subject}`,
+      result: q.key,
+    }));
+    answers.push({
+      text: `${answers.length + 1}. ${questWords(WORDS_GO_BACK) ?? t(TEXT_GO_BACK)}`,
+      result: -1,
+    });
+    const words =
+      quests.length > 0
+        ? (questWords(WORDS_SELECT_QUEST) ?? t(TEXT_SELECT_QUEST))
+        : (questWords(WORDS_NO_QUEST) ?? t(TEXT_NO_QUEST));
+
+    runInAction(() => {
+      state.questListMode = true;
+      state.npcLines = [words];
+      state.answers = answers;
+      state.busy = false;
+    });
+  });
+
+  // The step / progress windows replace the dialogue (`CNewUISystem` shows one
+  // NPC interface at a time); a refused step (step 0xFF) just re-enables the list.
+  EventBus.on('QuestStepInfo', packet => {
+    const p = new QuestStepInfoPacket(packet);
+    if (p.QuestStepNumber === STEP_NUMBER_UNAVAILABLE) {
+      runInAction(() => {
+        state.busy = false;
+      });
+      return;
+    }
+    hideNpcDialogue();
+  });
+  EventBus.on('QuestProgress', hideNpcDialogue);
+
+  // `HideAll` at the start of a talk; the talk already sent the close request.
+  EventBus.on('npcTalkStarted', hideNpcDialogue);
+  EventBus.on('heroWalked', () => {
+    if (state.open) endNpcDialogue();
+  });
+
+  // OpenMU resends the character information on a bulk stat add or a reset;
+  // only a different hero closes the dialogue.
+  let heroName: string | null = null;
+  EventBus.on('CharacterInformation', () => {
+    if (Hero.name === heroName) return;
+    heroName = Hero.name;
+    hideNpcDialogue();
+  });
+}
+
+function reset(): void {
+  hideNpcDialogue();
+}
+
+function update(_map: ENUM_WORLD, _dt: number): void {
+  // Pages resolve from the tables on demand; nothing ticks here.
+}
+
+// ---- 3. the layer ----------------------------------------------------------
+
+export const npcDialogueLayer: QuestLayer = { name: 'npcDialogue', update, reset };

@@ -3,11 +3,13 @@ import {
   Matrix,
   Mesh,
   StandardMaterial,
-} from '../../libs/babylon/exports';
+} from '../../controllers/render/babylon/exports';
 import type { ISystemFactory, World } from '../world';
-import { TERRAIN_SIZE } from '../../common/terrain/consts';
-import { DEBUG_PATHFINDING } from '../../consts';
-import { EventBus } from '../../libs/eventBus';
+import { TERRAIN_SIZE } from '../../controllers/terrain/consts';
+import { EventBus } from '../../core/eventBus';
+
+/** Dev switch: draw the tiles of each path the hero walks. */
+const DEBUG_PATHFINDING = false;
 
 export const PathfindingSystem: ISystemFactory = world => {
   const query = world.with('pathfinding');

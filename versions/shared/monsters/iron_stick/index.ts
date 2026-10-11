@@ -1,0 +1,36 @@
+import { defineMonster } from '@/controllers/monsters';
+
+export default defineMonster({
+  Numb: 101,
+  Name: 'Iron Stick',
+  maxHealth: 1000,
+  // MONSTER_IRON_STICK_TRAP (ZzzCharacter.cpp:14276).
+  trap: { object: 40, shadow: true },
+  stats: {
+    Rate: 1,
+    Level: 80,
+    HP: 1000,
+    MP: 0,
+    MinDmg: 110,
+    MaxDmg: 130,
+    Def: 0,
+    MagDef: 0,
+    AttackSuccess: 400,
+    Move: 500,
+    AttType: 0,
+    Range: 0,
+    View: 0,
+    MoveSpeed: 1,
+    AttSpeed: 500,
+    Regen: 1000,
+    Attri: 3,
+    ItemR: 1,
+    MoneyR: 200,
+    MaxI: 10,
+    ResWind: 0,
+    ResPois: 0,
+    ResIce: 0,
+    ResWater: 0,
+    ResFire: 0,
+  },
+});

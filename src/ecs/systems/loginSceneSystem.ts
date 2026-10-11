@@ -1,23 +1,24 @@
 import { runInAction } from 'mobx';
 import type { ISystemFactory } from '../world';
-import { Store, UIState } from '../../store';
-import { ENUM_WORLD } from '../../common';
-import { EventBus } from '../../libs/eventBus';
-import { Vector3, type ArcRotateCamera } from '../../libs/babylon/exports';
+import { CharSelect } from '../../modules/character_select';
+import { AppState, UIState } from '../../controllers/interface/uiState';
+import { ENUM_WORLD } from '@/core/types';
+import { EventBus } from '../../core/eventBus';
+import { Vector3, type ArcRotateCamera } from '../../controllers/render/babylon/exports';
 import {
   loadCameraWalkScript,
   type CameraWaypoint,
-} from '../../libs/mu/cameraWalkScript';
+} from '../../controllers/terrain/cameraWalkScript';
 import {
   CHARACTER_CAMERA_POSITION,
   characterCameraTarget,
   characterSelectView,
   characterSlotPosition,
-} from '../../common/characterSelect';
-import { prefetchWorldTerrain } from '../../libs/mu/prefetchWorld';
-import { warmWorldObjects } from '../../libs/mu/warmWorld';
-import { LOGIN_SCENE_ABSENT_MODELS } from '../../maps/loginscene/spec';
-import { pregameLoad } from '../../common/pregameLoad';
+} from '../../modules/character_select/characterSelect';
+import { prefetchWorldTerrain } from '../../controllers/assets/prefetchWorld';
+import { warmWorldObjects } from '../../controllers/assets/warmWorld';
+import { LOGIN_SCENE_ABSENT_MODELS } from '@versions/shared/maps/loginscene/spec';
+import { pregameLoad } from '../../controllers/loading/pregameLoad';
 import { loadVersionUi, versionUi } from '../../version';
 import type {
   PregameBackdrop,
@@ -326,7 +327,7 @@ export const LoginSceneSystem: ISystemFactory = world => {
       }
 
       const plan = backdropPlan;
-      const phase = plan ? phaseFor(Store.uiState) : null;
+      const phase = plan ? phaseFor(AppState.uiState) : null;
 
       // Leaving the line-up drops the close-up, so it never greets a return.
       if (phase !== 'characters') {
@@ -416,7 +417,7 @@ export const LoginSceneSystem: ISystemFactory = world => {
 
       camera.fov = CHARACTER_FOV;
 
-      const zoomedOn = Store.charactersList.find(
+      const zoomedOn = CharSelect.charactersList.find(
         c => c.Name === characterSelectView.zoomedOn
       );
       const slot = zoomedOn ? characterSlotPosition(zoomedOn.SlotIndex) : null;

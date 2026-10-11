@@ -1,4 +1,4 @@
-@import (reference) '../../../../src/ui/components/muText/style.less';
+@import (reference) '@/controllers/interface/components/mu_text/style.less';
 
 // The 0.97d pre-game plates. Authored at fixed pixel sizes like every MU
 // window: positioned, never stretched or reflowed.
@@ -112,7 +112,8 @@
     text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
   }
 
-  .v097d-characters-row {
+  // The shared `CharacterList` rows (versions/shared/ui/pages/character_select/character_list).
+  .char-list-row {
     position: absolute;
     display: flex;
     align-items: center;
@@ -135,7 +136,7 @@
     }
   }
 
-  .v097d-characters-level {
+  .char-list-level {
     font-size: 10px;
   }
 

@@ -1,0 +1,38 @@
+import { defineMonster } from '@/controllers/monsters';
+import { dieSand, walkSand } from '../_shared/bodyFx';
+
+export default defineMonster({
+  Numb: 58,
+  Name: 'Tantallos',
+  // MODEL_TANTALLOS `SubType 0`: sand walking and dying (ZzzCharacter.cpp:5975-5978).
+  bodyFx: [walkSand, dieSand],
+  maxHealth: 22000,
+  model: { type: 42, scale: 1.8 },
+  stats: {
+    Rate: 1,
+    Level: 83,
+    HP: 22000,
+    MP: 0,
+    MinDmg: 335,
+    MaxDmg: 385,
+    Def: 250,
+    MagDef: 0,
+    AttackSuccess: 500,
+    Move: 175,
+    AttType: 3,
+    Range: 150,
+    View: 2,
+    MoveSpeed: 7,
+    AttSpeed: 400,
+    Regen: 1400,
+    Attri: 20,
+    ItemR: 2,
+    MoneyR: 160,
+    MaxI: 30,
+    ResWind: 3,
+    ResPois: 0,
+    ResIce: 9,
+    ResWater: 9,
+    ResFire: 9,
+  },
+});

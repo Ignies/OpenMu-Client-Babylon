@@ -1,0 +1,8 @@
+**/node_modules
+.git
+.worktrees
+dist
+dist-register
+install/node_modules
+references
+**/*.test.ts

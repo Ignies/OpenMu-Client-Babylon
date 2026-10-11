@@ -1,28 +1,32 @@
-import type { EmoteId } from '../common/emotes';
-import type { EmojiBubbleId } from '../common/emojiBubbles';
-import type { ChatEmojiBubble } from '../common/chatEmojis';
-import type { InstrumentId } from '../common/instruments';
-import type { BandHit } from '../common/band/performing';
-import type { GuildMemberRoleEnum } from '../common/packets/ServerToClientPackets';
+import type { EmoteId } from '../modules/hero/emotes';
+import type { EmojiBubbleId } from '../modules/chat/emojiBubbles';
+import type { ChatEmojiBubble } from '../modules/chat/chatEmojis';
+import type { InstrumentId } from '../modules/band/instruments';
+import type { BandHit } from '../modules/band/music/performing';
+import type { GuildMemberRoleEnum } from '@versions/shared/packets/ServerToClientPackets';
 import { type Bucket, type With, World as ECSWorld } from 'miniplex';
-import type { IVector2Like, IVector3Like, Mesh } from '../libs/babylon/exports';
-import type { ModelObject } from '../common/modelObject';
-import type { MonsterActionType, PlayerAction } from '../common/objects/enum';
-import type { PetFollow, PetSpec } from '../common/pets';
-import type { MUAttributeSystem } from '../libs/attributeSystem';
-import type { TerrainPicker } from '../libs/mu/terrainPick';
-import { TransformNode } from '../libs/babylon/exports';
-import { createPathfinding } from '../libs/pathfinding';
-import { CharacterClassNumber, ENUM_WORLD } from '../common';
-import { TILE_CM } from '../common/terrain/consts';
+import type {
+  IVector2Like,
+  IVector3Like,
+  Mesh,
+  HighlightLayer,
+} from '../controllers/render/babylon/exports';
+import type { ModelObject } from '../controllers/render/modelObject';
+import type { MonsterActionType, PlayerAction } from '@versions/shared/objects/enum';
+import type { PetFollow, PetSpec } from '@/controllers/pets';
+import type { MUAttributeSystem } from '../core/attributeSystem';
+import type { TerrainPicker } from '../controllers/terrain/terrainPick';
 import {
+  TransformNode,
   Color3,
   Vector3,
   Viewport,
-} from '../libs/babylon/exports';
-import type { HighlightLayer } from '../libs/babylon/exports';
-import type { TestScene } from '../scenes/testScene';
-import type { CursorHover } from '../ui/components/gameCursor/cursors';
+} from '../controllers/render/babylon/exports';
+import { createPathfinding } from '../core/pathfinding';
+import { CharacterClassNumber, ENUM_WORLD } from '@/core/types';
+import { TILE_CM } from '../controllers/terrain/consts';
+import type { TestScene } from '../controllers/render/scenes/testScene';
+import type { CursorHover } from '@/controllers/interface/components/game_cursor';
 
 export type EntityTypeFromQuery<TB extends Bucket<any> = Bucket<any>> =
   TB extends Bucket<infer T> ? T : never;
@@ -30,7 +34,7 @@ export type EntityTypeFromQuery<TB extends Bucket<any> = Bucket<any>> =
 /** An entity the server named: it has a `netId` and, like every scoped object, a `transform`. */
 export type NetEntity = With<Entity, 'netId' | 'transform'>;
 
-export type BandRequest =
+type BandRequest =
   | { kind: 'takeOut'; instrument: InstrumentId }
   | { kind: 'putAway' };
 
@@ -57,7 +61,7 @@ export type Item = {
   socketCount?: number;
   /** Socket bytes 7-11 as sent (option number, 0xFE = empty slot). */
   sockets?: number[];
-  /** Socket bonus / 380 option byte 6. */
+  /** Byte 6: the Jewel of Harmony option (high nibble) and level, or a socket item's bonus option. */
   socketBonus?: number;
   hasSkill?: boolean;
   /** Luck: +5% critical, +25% Jewel of Soul (byte 1, bit 2). */
@@ -66,6 +70,10 @@ export type Item = {
   optionLevel?: number;
   /** Excellent option bits 0-5 of byte 3 (CalcExcellentOptions order). */
   excellentFlags?: number;
+  /** Wings and capes: the wing option bits 0-3 of byte 3 (`CalcWingOptions`). */
+  wingOptions?: number;
+  /** Wings and capes: `OptionType`, the kind of the additional option (byte 3 bits 4-5). */
+  wingOptionKind?: number;
   /** Ancient set discriminator (byte 4 bits 0-1) and +5/+10 bonus level (bits 2-3). */
   ancientDiscriminator?: number;
   ancientBonusLevel?: number;
@@ -135,7 +143,7 @@ export type Entity = Partial<{
   modelObject: ModelObject;
   modelFactory: typeof ModelObject;
   /**
-   * The record is drawn by a prop batch (`common/propBatches.ts`) and never
+   * The record is drawn by a prop batch (`controllers/render/propBatches.ts`) and never
    * gets a `modelObject` of its own: which type's batch, and which chunk.
    */
   propBatch: { type: number; chunk: number };
@@ -143,7 +151,7 @@ export type Entity = Partial<{
   /**
    * Playing an instrument (the band system): the held pose, the model in the
    * hand and the hits still to twitch on. `BandSystem` owns it; the facade in
-   * `common/band` adds and removes it through `common/band/performing.ts`.
+   * `modules/band/music` adds and removes it through `modules/band/music/performing.ts`.
    */
   performing: {
     instrument: InstrumentId;
@@ -193,7 +201,7 @@ export type Entity = Partial<{
     /**
      * `c->Run` (ZzzCharacter.cpp:159, :387-408): 0…40, climbing 25 per second
      * while the character walks outside a safe zone and its class/boots allow
-     * it. At 40 the run clips take over. See common/locomotion.ts.
+     * it. At 40 the run clips take over. See controllers/actors/locomotion.ts.
      */
     run: number;
     /**
@@ -204,7 +212,18 @@ export type Entity = Partial<{
      * Absent until the first swing.
      */
     swordCount?: number;
+    /**
+     * `swingFill` (Enhanced): the hero's swing clip after its blow plays at `scale`, so it ends as
+     * the next swing may start; only while the clip started as `serial` (`actionSerial`) runs.
+     */
+    swingFill?: { serial: number; scale: number };
   };
+  /**
+   * A `MonsterDef.ball` body (the Battle Soccer ball): `PushingCharacter`'s MODEL_BALL lines - its
+   * height over the 30 cm floor and `Gravity` (cm, cm a tick), its roll (`Direction[0]`, `[1]`,
+   * degrees a tick) and the part of a 25 fps tick not yet stepped. `positionSlideSystem.ts`.
+   */
+  ball: { height: number; gravity: number; spinX: number; spinZ: number; ticks: number };
   monsterAnimation: {
     action: MonsterActionType;
   };
@@ -214,7 +233,7 @@ export type Entity = Partial<{
    * fade + sink and the final despawn.
    */
   dying: {
-    /** Seconds since the kill packet arrived. */
+    /** 25 Hz ticks since the kill packet: the original's `c->Dead` counter (ZzzCharacter.cpp:4076). */
     time: number;
     /** Die clip started (SetPlayerDie ran). */
     started: boolean;
@@ -224,8 +243,10 @@ export type Entity = Partial<{
     alpha: number;
     /** World-unit drop applied while fading (0.4 cm per tick in the original). */
     sink: number;
-    /** The hero landed the killing blow: the death waits for the swing to connect. */
+    /** The hero landed the killing blow. */
     killedByHero: boolean;
+    /** Ticks the hero's hit request waited for its blow: the Die clip's 14 ticks count from the swing's start. */
+    held: number;
     /** ObjectGotKilled `SkillId` (`c->m_byDieType`, WSclient.cpp:5504): Nova / Combo pick the knock-up. */
     skill: number;
     /** ObjectGotKilled `KillerId` (the `TKey` a Nova / Combo victim turns to face, :5537-5546). */
@@ -243,6 +264,8 @@ export type Entity = Partial<{
     motion?: DeathMotion;
   };
   attributeSystem: MUAttributeSystem;
+  /** Another player's own attack and magic speed, from the extended scope packet (AnimationSystem). */
+  speeds: { attack: number; magic: number };
   /** HeroStateChanged: PK / hero status byte of a player (name tint later). */
   heroState: number;
   /** Active MagicEffectStatus effect ids on this object (everyone in scope). */
@@ -260,7 +283,7 @@ export type Entity = Partial<{
   };
   /**
    * A short-lived emoji over (or beside) a character - see
-   * `common/emojiBubbles.ts`. `EmojiBubbleSystem` owns the lifetime and the
+   * `modules/chat/emojiBubbles.ts`. `EmojiBubbleSystem` owns the lifetime and the
    * side anchor, `CalculateScreenPositionSystem` projects that anchor, and
    * the `EmojiBubbles` overlay draws it.
    */
@@ -306,7 +329,7 @@ export type Entity = Partial<{
     /** `LifeTime[0..1]` in ticks. */
     life: [number, number];
   };
-  /** AssignCharacterToGuild: the guild a player belongs to (name via Store.guilds). */
+  /** AssignCharacterToGuild: the guild a player belongs to (name via GuildMarks). */
   guild: {
     id: number;
     role: GuildMemberRoleEnum;
@@ -378,7 +401,7 @@ export type Entity = Partial<{
     /**
      * A follower pet (`PetObject`): how it holds station on its owner, the
      * `PlaySpeed` of its one clip, and the seconds its body light pulses
-     * over when it has one. See `PetFollow` in common/pets.ts.
+     * over when it has one. See `PetFollow` in controllers/pets/pets.ts.
      */
     follow?: PetFollow;
     followSpeed?: number;
@@ -401,7 +424,7 @@ export type Entity = Partial<{
     };
   };
   /**
-   * `Boids[]` - the ambient wildlife (`common/boids.ts`, GOBoid.cpp). Created
+   * `Boids[]` - the ambient wildlife (`controllers/fx/boids.ts`, GOBoid.cpp). Created
    * and driven by BoidSystem; it has no server presence and nothing else
    * reads it.
    */
@@ -461,12 +484,14 @@ export type Entity = Partial<{
     /** `ITEM_GROUP_*` and the index inside it: what `ItemAngle` poses the drop by. */
     group: number;
     num: number;
+    /** A pickup request went out for it: the MU Helper does not go for it again (`DeleteItem`). */
+    pickupAsked?: boolean;
   };
   onDispose?: () => void;
 }>;
 
 export class World extends ECSWorld<Entity> {
-  /** Centimetres per tile (the original's `TERRAIN_SCALE`); see `common/terrain/consts.ts`. */
+  /** Centimetres per tile (the original's `TERRAIN_SCALE`); see `controllers/terrain/consts.ts`. */
   readonly terrainScale = TILE_CM;
 
   viewport = new Viewport(0, 0, 1, 1);
@@ -633,15 +658,15 @@ export class World extends ECSWorld<Entity> {
     this.mapParent = new TransformNode('mapParent', scene);
   }
 
-  getTerrainHeight(x: number, y: number): number {
+  getTerrainHeight(_x: number, _y: number): number {
     return -9999;
   }
 
-  isWalkable(x: number, y: number): boolean {
+  isWalkable(_x: number, _y: number): boolean {
     return true;
   }
 
-  getTerrainFlag(x: number, y: number): number {
+  getTerrainFlag(_x: number, _y: number): number {
     return 0;
   }
 
@@ -651,12 +676,12 @@ export class World extends ECSWorld<Entity> {
    * current terrain's attribute array; a no-op until a map is loaded.
    */
   setTerrainFlags(
-    x: number,
-    y: number,
-    w: number,
-    h: number,
-    flag: number,
-    set: boolean
+    _x: number,
+    _y: number,
+    _w: number,
+    _h: number,
+    _flag: number,
+    _set: boolean
   ): void {}
 
   /**
@@ -666,12 +691,12 @@ export class World extends ECSWorld<Entity> {
    * a map is loaded.
    */
   detachGround(
-    rects: readonly (readonly [x: number, y: number, w: number, h: number])[]
+    _rects: readonly (readonly [x: number, y: number, w: number, h: number])[]
   ): Mesh | null {
     return null;
   }
 
-  getTerrainTile(x: number, y: number): number {
+  getTerrainTile(_x: number, _y: number): number {
     return 0;
   }
 
@@ -688,7 +713,7 @@ export class World extends ECSWorld<Entity> {
     out.alpha = 0;
   }
 
-  getTerrainLight(x: number, y: number): IVector3Like {
+  getTerrainLight(_x: number, _y: number): IVector3Like {
     return Vector3.OneReadOnly;
   }
 }
@@ -698,3 +723,22 @@ export class World extends ECSWorld<Entity> {
 // type identity for instanceof-free checks), forking the ECS.
 const hot = (import.meta as { hot?: { decline(): void } }).hot;
 if (hot) hot.decline();
+
+// The bus events that carry an entity (core/eventBus/events.ts).
+declare module '@/core/eventBus/events' {
+  interface EventMap {
+    objectDamaged: {
+      entity: With<Entity, 'transform' | 'screenPosition'>;
+      healthDamage: number;
+      shieldDamage: number;
+      kind: number;
+      isDouble: boolean;
+      isTriple: boolean;
+    };
+    /** Server asked to show an effect on an object (level-up beam, shield potion/lost). */
+    objectEffect: {
+      entity: With<Entity, 'transform'>;
+      effect: 'levelUp' | 'shieldPotion' | 'shieldLost' | 'swirl';
+    };
+  }
+}

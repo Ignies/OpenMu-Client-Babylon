@@ -7,9 +7,10 @@ import { canonicalAssetPath, expectedModelPaths } from './assetCase';
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const ASSETS = join(ROOT, 'public/game-assets');
 const SRC = join(ROOT, 'src');
+const CODE_ROOTS = [SRC, join(ROOT, 'versions')];
 
 /**
- * NPC 68 (monster model 49) has no row in `monsters.json` and `Data/` ships no
+ * NPC 68 (monster model 49) has no row in the monster table and `Data/` ships no
  * `Monster50.bmd`, so nothing can spawn it. An unreachable table row, not a
  * missing conversion.
  */
@@ -27,12 +28,15 @@ function filesUnder(dir: string, base = dir): string[] {
 
 const onDisk = new Map(filesUnder(ASSETS).map(f => [f.toLowerCase(), f]));
 
-/** Quoted `<folder>/<name>.glb` literals in the client. */
+/**
+ * Quoted `<folder>/<name>.glb` literals in the client; tests are not the client and may use stand-in names,
+ * and a version's own-file list (`versions/<id>/data/assets.ts`) names files rather than asking for them.
+ */
 function glbLiteralsInSource(): string[] {
   const found = new Set<string>();
-  for (const file of filesUnder(SRC)) {
-    if (!/\.tsx?$/.test(file)) continue;
-    const text = readFileSync(join(SRC, file), 'utf8');
+  for (const root of CODE_ROOTS) for (const file of filesUnder(root)) {
+    if (!/\.tsx?$/.test(file) || /\.test\.tsx?$/.test(file) || /\/data\/assets\.ts$/.test(file)) continue;
+    const text = readFileSync(join(root, file), 'utf8');
     for (const [, path] of text.matchAll(
       /['"]([A-Za-z0-9_-]+\/[A-Za-z0-9_/-]+\.glb)['"]/g
     )) {
@@ -44,7 +48,7 @@ function glbLiteralsInSource(): string[] {
 
 function soundCatalogue(): string[] {
   const json = JSON.parse(
-    readFileSync(join(SRC, 'sound/recipes.json'), 'utf8')
+    readFileSync(join(SRC, 'controllers/sound/recipes.json'), 'utf8')
   ) as Record<string, string>;
   return [...new Set(Object.values(json))].sort();
 }

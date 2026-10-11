@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ENUM_WORLD } from '../../common/types';
+import { ENUM_WORLD } from '../../core/types';
 import type { World } from '../world';
 
 const playSfx = vi.fn((..._args: unknown[]) => 1300);
-vi.mock('../../libs/sfx', () => ({
+vi.mock('../../controllers/sound/sfx', () => ({
   playSfx: (...args: unknown[]) => playSfx(...args),
 }));
 

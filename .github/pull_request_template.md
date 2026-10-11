@@ -12,10 +12,11 @@
 
 ## Testing
 
-* [ ] Build passes
-* [ ] TypeScript check passes
-* [ ] ESLint passes
-* [ ] Tests pass
+* [ ] A test shows the change (written before the code)
+* [ ] Build, TypeScript and tests pass
+* [ ] `bun run check` and `bun run check:lint` pass (no baseline grew)
+* [ ] The folder's `readme.md` still describes it
+* [ ] Ported logic cites the original source (file:line)
 * [ ] Tested in-game
 
 ## Visual changes

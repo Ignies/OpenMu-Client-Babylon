@@ -1,0 +1,37 @@
+import { defineMonster } from '@/controllers/monsters';
+
+export default defineMonster({
+  Numb: 77,
+  Name: 'Phoenix of Darkness',
+  // Its Energy Ball (17) ends with no SOUND_MAGIC (ZzzCharacter.cpp:5087-5122).
+  quietCasts: [17],
+  maxHealth: 95000,
+  model: { type: 55, scale: 1 },
+  stats: {
+    Rate: 1,
+    Level: 113,
+    HP: 95000,
+    MP: 0,
+    MinDmg: 950,
+    MaxDmg: 1000,
+    Def: 600,
+    MagDef: 0,
+    AttackSuccess: 900,
+    Move: 350,
+    AttType: 1,
+    Range: 150,
+    View: 6,
+    MoveSpeed: 7,
+    AttSpeed: 400,
+    Regen: 1500,
+    Attri: 150,
+    ItemR: 2,
+    MoneyR: 120,
+    MaxI: 14,
+    ResWind: 4,
+    ResPois: 0,
+    ResIce: 30,
+    ResWater: 30,
+    ResFire: 35,
+  },
+});

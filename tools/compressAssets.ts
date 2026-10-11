@@ -28,7 +28,7 @@ import { join, resolve } from 'path';
 import {
   COMPRESSED_EXTENSIONS,
   COMPRESSED_SUFFIX,
-} from '../src/common/compressedAssets';
+} from '../src/controllers/assets/compressedAssets';
 
 function arg(name: string, fallback: string): string {
   const i = process.argv.indexOf(name);

@@ -1,12 +1,12 @@
-import { Vector3, type ArcRotateCamera } from '../../libs/babylon/exports';
+import { Vector3, type ArcRotateCamera } from '../../controllers/render/babylon/exports';
 import type { ISystemFactory } from '../world';
-import { Store, UIState } from '../../store';
+import { AppState, UIState } from '../../controllers/interface/uiState';
 import {
   installCameraControl,
   releaseMouseLook,
   showHeroBody,
   updateGameCamera,
-} from '../../camera';
+} from '../../controllers/camera';
 
 const v3Temp = Vector3.Zero();
 
@@ -17,7 +17,7 @@ export const CameraFollowSystem: ISystemFactory = world => {
   // the module captures is the constructor's.
   installCameraControl(
     scene.defaultCamera,
-    () => Store.uiState === UIState.World
+    () => AppState.uiState === UIState.World
   );
 
   return {
@@ -42,7 +42,7 @@ export const CameraFollowSystem: ISystemFactory = world => {
       camera.target.copyFrom(v3Temp);
 
       // The login/character screens keep their own camera (loginSceneSystem).
-      if (Store.uiState !== UIState.World) {
+      if (AppState.uiState !== UIState.World) {
         // Leaving the world with the camera zoomed into the hero's head would
         // strand the body hidden - and the pointer locked.
         showHeroBody();

@@ -4,48 +4,34 @@ import {
   setItemGlowClock,
   strongestTierOf,
   type ItemVisualTier,
-} from '../../common/itemVisualTier';
+} from '../../controllers/item_fx/itemVisualTier';
 import {
   improvedItemEffectsOn,
   itemEffectSignature,
-} from '../../common/itemEffectMode';
-import type { PlayerObject } from '../../common/playerObject';
-import { shownGear, type Gear } from '../../common/chaosCastleUnit';
-import type { ModelObject } from '../../common/modelObject';
+} from '../../controllers/item_fx/itemEffectMode';
+import type { PlayerObject } from '../../controllers/actors/playerObject';
+import type { ModelObject } from '../../controllers/render/modelObject';
 import {
   createItemAura,
   type ItemAura,
   type ItemAuraKind,
   type ItemAuraSlot,
-} from '../../effects/itemAura';
-import { createItemCrackle, type ItemCrackle } from '../../effects/itemCrackle';
-import type { ItemSparkleKind } from '../../effects/itemSparkle';
-import { effects, type EffectHandle } from '../../effects';
-import { bonePos, entityGone, entityPos, entityYaw, followEntity, tmpA } from '../../effects/core';
-import type { Vector3 } from '../../libs/babylon/exports';
-import { requestGlowProbe } from '../../scenes/sceneLook';
-import { EventBus } from '../../libs/eventBus';
-import { itemSelfLight, lightItem, type ItemLampKind } from '../../lighting/items';
-import type { LightSource } from '../../lighting/lightSource';
+} from '../../controllers/fx/itemAura';
+import { createItemCrackle, type ItemCrackle } from '../../controllers/fx/itemCrackle';
+import type { ItemSparkleKind } from '../../controllers/fx/itemSparkle';
+import { effects, type EffectHandle } from '../../controllers/fx';
+import { bonePos, entityGone, entityPos, entityYaw, followEntity, tmpA } from '../../controllers/fx/core';
+import type { Vector3 } from '../../controllers/render/babylon/exports';
+import { requestGlowProbe } from '../../controllers/render/sceneLook';
+import { EventBus } from '../../core/eventBus';
+import { itemSelfLight, lightItem, type ItemLampKind } from '../../controllers/lighting/items';
+import type { LightSource } from '../../controllers/lighting/lightSource';
+import { shownGear, type Gear } from '../../controllers/actors';
+import { gearEffectsShown } from './othersShown';
 
 /**
- * Item glow.
- *
- *  - Stamps `metadata.itemTier` on item meshes once their model is in
- *    (`PlayerObject.loadPartAsync` does the first stamp for gear; this system
- *    re-stamps everything when the item-effects option or the level cap
- *    changes, because tiers are baked per option state). itemMaterial.ts
- *    (legacy passes) and the GlowLayer selector in sceneLook.ts read it.
- *  - Improved look only: +9…+15 gear gets a lamp - one light source from the
- *    lighting layer's `items` entry, following the body - plus an aura and a
- *    crackle (effects/). Dropped +9…+15 items do the same, static.
- *  - Both looks: an excellent item - worn or on the ground - throws the
- *    `CreateShiny` star glints (`effects/itemSparkle.ts`), on the body for a
- *    wearer, beside and above the drop for a drop.
- *
- * This system decides *which* entity is lit and keeps the lamp's position on
- * the wearer; the light itself (range, colour, priority, the terrain stain)
- * is `src/lighting/items.ts`.
+ * Item glow: tier stamps, the +9..+15 lamp / aura / crackle and the excellent
+ * `CreateShiny` glints, worn or dropped. See ecs/readme.md.
  */
 
 type Lamp = {
@@ -115,7 +101,9 @@ function auraAnchor(e: Entity, lamp: Lamp, out: Vector3): void {
 }
 
 type Tracked = {
-  signature: string;
+  /** The item-effect options and gear (`gearKeyChanged`) the lamp was last checked against. */
+  options: string;
+  key: number[];
   lamp: Lamp | null;
   stamped: boolean;
   /** An excellent item is here: keep a sparkle alive (re-spawned after a map reset). */
@@ -135,15 +123,38 @@ function anyExcellent(app: Gear): boolean {
   );
 }
 
-function itemSignature(item: Item | null | undefined): string {
-  if (!item) return '-';
-  return `${item.group}:${item.num}:${item.lvl ?? 0}:${item.isExcellent ? 1 : 0}:${
-    item.isAncient ? 1 : 0
-  }:${item.socketCount ?? 0}`;
+/** One number for what the lamp reads off a piece (-1 = empty slot). */
+function itemKey(item: Item | null | undefined): number {
+  if (!item) return -1;
+  const flags = (item.isExcellent ? 1 : 0) + (item.isAncient ? 2 : 0) + (item.socketCount ?? 0) * 4;
+  return ((item.group * 1024 + item.num) * 64 + (item.lvl ?? 0)) * 64 + flags;
 }
 
-function stampMeshes(part: ModelObject, item: Item | null | undefined): void {
-  const tier = itemVisualTier(item);
+function keySlot(key: number[], at: number, value: number): boolean {
+  if (key[at] === value) return false;
+  key[at] = value;
+  return true;
+}
+
+/** Writes this gear's key in place (no per-frame string); true when it changed. */
+export function gearKeyChanged(key: number[], app: Gear, applied: number, gearOn: boolean): boolean {
+  // Bitwise | so every slot is written even after the first change.
+  return (
+    (+keySlot(key, 0, applied) |
+      +keySlot(key, 1, gearOn ? 1 : 0) |
+      +keySlot(key, 2, itemKey(app.leftHand)) |
+      +keySlot(key, 3, itemKey(app.rightHand)) |
+      +keySlot(key, 4, itemKey(app.helm)) |
+      +keySlot(key, 5, itemKey(app.armor)) |
+      +keySlot(key, 6, itemKey(app.pants)) |
+      +keySlot(key, 7, itemKey(app.gloves)) |
+      +keySlot(key, 8, itemKey(app.boots))) !==
+    0
+  );
+}
+
+function stampMeshes(part: ModelObject, item: Item | null | undefined, ground = false): void {
+  const tier = itemVisualTier(item, ground);
   // A tier stamp is what wakes the GlowLayer up (sceneLook's layer gate).
   if (item && tier.active) requestGlowProbe();
   for (const mesh of part.getMeshes(true)) {
@@ -221,7 +232,7 @@ export const ItemGlowSystem: ISystemFactory = world => {
   function stateOf(e: Entity): Tracked {
     let state = tracked.get(e);
     if (!state) {
-      state = { signature: '', lamp: null, stamped: false, sparkleWanted: false, sparkle: null };
+      state = { options: '', key: [], lamp: null, stamped: false, sparkleWanted: false, sparkle: null };
       tracked.set(e, state);
     }
     return state;
@@ -301,9 +312,9 @@ export const ItemGlowSystem: ISystemFactory = world => {
         if (state.stamped && !restamp) continue;
         if (!modelObject.Ready) continue;
 
-        const tier = itemVisualTier(droppedItem.item);
+        const tier = itemVisualTier(droppedItem.item, true);
         state.sparkleWanted = tier.isExcellent;
-        stampMeshes(modelObject, droppedItem.item);
+        stampMeshes(modelObject, droppedItem.item, true);
 
         snuff(state);
         if (lampsOn && wantsLamp(tier)) {
@@ -326,33 +337,16 @@ export const ItemGlowSystem: ISystemFactory = world => {
         const state = stateOf(e);
         const { charAppearance, modelObject, transform } = e;
         const app = shownGear(e, world.mapIndex) ?? charAppearance;
+        const gearEffects = gearEffectsShown(e);
 
         // The apply counter leads: the lamp belongs to this character's
         // items, so it is re-examined whenever those items are put on the
         // model, not only when they come out different - re-applying the same
         // gear is exactly what a warp does.
-        const signature =
-          options +
-          '|' +
-          (charAppearance.applied ?? 0) +
-          '|' +
-          itemSignature(app.leftHand) +
-          '|' +
-          itemSignature(app.rightHand) +
-          '|' +
-          itemSignature(app.helm) +
-          '|' +
-          itemSignature(app.armor) +
-          '|' +
-          itemSignature(app.pants) +
-          '|' +
-          itemSignature(app.gloves) +
-          '|' +
-          itemSignature(app.boots);
-
-        if (signature !== state.signature) {
-          state.signature = signature;
-          state.sparkleWanted = anyExcellent(app);
+        const gearChanged = gearKeyChanged(state.key, app, charAppearance.applied ?? 0, gearEffects);
+        if (gearChanged || options !== state.options) {
+          state.options = options;
+          state.sparkleWanted = gearEffects && anyExcellent(app);
 
           // This list is in AURA_SLOTS order: the winner's index names the
           // piece the aura comes off.
@@ -382,6 +376,7 @@ export const ItemGlowSystem: ISystemFactory = world => {
           // renders WHITE - see the note above.
           const stale =
             restamp ||
+            !gearEffects ||
             !state.lamp ||
             state.lamp.tier !== tier ||
             state.lamp.auraSlot !== slot ||
@@ -395,7 +390,7 @@ export const ItemGlowSystem: ISystemFactory = world => {
               stampPlayer(modelObject as PlayerObject, app);
             }
 
-            if (lampsOn && wantsLamp(tier)) {
+            if (lampsOn && gearEffects && wantsLamp(tier)) {
               state.lamp = lightLamp(
                 tier,
                 transform.pos.x,

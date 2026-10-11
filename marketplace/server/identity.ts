@@ -1,5 +1,5 @@
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
-import { SESSION_NONCE_RE } from '../../src/common/sessionNonce';
+import { SESSION_NONCE_RE } from '../../src/controllers/net/sessionNonce';
 
 /**
  * Who is asking.

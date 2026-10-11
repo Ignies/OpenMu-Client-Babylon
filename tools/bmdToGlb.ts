@@ -1,5 +1,5 @@
 import { Document, Node, NodeIO, type Skin } from '@gltf-transform/core';
-import { BMD, BMDReader, BMDTextureBone } from '../src/common/BMD';
+import { BMD, BMDReader, BMDTextureBone } from '../src/controllers/assets/bmd';
 import { Glob } from 'bun';
 import { readdirSync } from 'fs';
 import {
@@ -15,6 +15,7 @@ import { decodeTga } from '@lunapaint/tga-codec';
 import { PNG } from 'pngjs';
 import { BMD_EXT, DATA_FOLDER, OUTPUT_FOLDER } from './shared';
 import { canonicalAssetPath } from './assetCase';
+import { locksPositions } from './bmdKeys';
 
 async function tga2png(file: Buffer) {
   const tga = await decodeTga(new Uint8Array(file));
@@ -284,22 +285,6 @@ const convertVec3 = (v: { x: number; y: number; z: number }) => v;
 
 type Quaternion = { x: number; y: number; z: number; w: number };
 
-function quatMultiply(a: Quaternion, b: Quaternion): Quaternion {
-  return {
-    w: a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z,
-    x: a.w * b.x + a.x * b.w + a.y * b.z - a.z * b.y,
-    y: a.w * b.y - a.x * b.z + a.y * b.w + a.z * b.x,
-    z: a.w * b.z + a.x * b.y - a.y * b.x + a.z * b.w,
-  };
-}
-
-function quatInvert(q: Quaternion): Quaternion {
-  return { x: -q.x, y: -q.y, z: -q.z, w: q.w };
-}
-
-const TRANSFORM_Q: Quaternion = { x: 0.5, y: -0.5, z: 0.5, w: -0.5 };
-const TRANSFORM_Q_INV: Quaternion = quatInvert(TRANSFORM_Q);
-
 function convertQuaternion(q: Quaternion): Quaternion {
   return q;
 }
@@ -441,9 +426,7 @@ async function convertBMDToGLTF(bmd: BMD, outputFilename: string) {
   const fileName = outputFilename.split('/').at(-1)!.split('.')[0];
 
   const doc = new Document();
-  const webpExtension = doc
-    .createExtension(EXTTextureWebP as any)
-    .setRequired(true);
+  doc.createExtension(EXTTextureWebP as any).setRequired(true);
 
   const buffer = doc.createBuffer();
   const scene = doc.createScene('mainScene');
@@ -508,6 +491,12 @@ async function convertBMDToGLTF(bmd: BMD, outputFilename: string) {
 
       if (action.NumAnimationKeys === 0) continue;
 
+      const lockPositions = locksPositions(
+        outputFilename.slice(OUTPUT_FOLDER.length),
+        actionIndex,
+        action.LockPositions
+      );
+
       const animation = doc.createAnimation(
         `${fileName}_action_${actionIndex}`
       );
@@ -529,7 +518,7 @@ async function convertBMDToGLTF(bmd: BMD, outputFilename: string) {
       // adds one motionless interval to every cycle: the legs hold while the
       // character keeps sliding, and the cycle runs 1/(N-1) too long.
       const keyCount =
-        action.LockPositions && action.NumAnimationKeys > 1
+        lockPositions && action.NumAnimationKeys > 1
           ? action.NumAnimationKeys - 1
           : action.NumAnimationKeys;
 
@@ -549,8 +538,6 @@ async function convertBMDToGLTF(bmd: BMD, outputFilename: string) {
         .setType('SCALAR')
         .setArray(new Float32Array(times))
         .setBuffer(buffer);
-
-      const lockPositions = action.LockPositions;
 
       for (let boneIndex = 0; boneIndex < bmd.Bones.length; boneIndex++) {
         const bone = bmd.Bones[boneIndex];
@@ -897,7 +884,7 @@ async function processFile(rawRelInputFilePath: string) {
     // in the header): Player/player.bmd
     // and the NPC/Girl01|Man01|Female01 rigs, whose geometry ships in the
     // *Head/*Upper/*Lower part files and is composed at runtime (see
-    // src/common/npcs/lumen.ts), plus animation-only companions such as
+    // versions/shared/monsters/lumen_the_barmaid/model.ts), plus animation-only companions such as
     // NPC/songkoani.bmd (for songko.bmd) or Monster/condra_7_cone_left.bmd.
     // Logged so a 0-mesh GLB is never again mistaken for a converter bug -
     // but a *new* name appearing in this list is worth a look.

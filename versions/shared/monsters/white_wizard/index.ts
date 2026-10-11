@@ -1,0 +1,37 @@
+import { defineMonster } from '@/controllers/monsters';
+
+export default defineMonster({
+  Numb: 135,
+  Name: 'White Wizard',
+  // MODEL_CURSED_KING: a blood pointer within ±14 cm, one tick in five (ZzzCharacter.cpp:5826-5833).
+  bodyFx: [{ kind: 'blood', every: 5, scatterCm: (10 * 100) / 70 }],
+  maxHealth: 26000,
+  model: { type: 48, scale: 1.7 },
+  stats: {
+    Rate: 1,
+    Level: 87,
+    HP: 26000,
+    MP: 0,
+    MinDmg: 370,
+    MaxDmg: 410,
+    Def: 400,
+    MagDef: 0,
+    AttackSuccess: 550,
+    Move: 200,
+    AttType: 4,
+    Range: 3,
+    View: 5,
+    MoveSpeed: 6,
+    AttSpeed: 400,
+    Regen: 2200,
+    Attri: 10,
+    ItemR: 2,
+    MoneyR: 150,
+    MaxI: 50,
+    ResWind: 4,
+    ResPois: 0,
+    ResIce: 15,
+    ResWater: 15,
+    ResFire: 20,
+  },
+});

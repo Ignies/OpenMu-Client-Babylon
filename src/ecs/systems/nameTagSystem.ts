@@ -1,7 +1,7 @@
-import { EventBus } from '../../libs/eventBus';
+import { EventBus } from '../../core/eventBus';
 import type { Entity, ISystemFactory, World } from '../world';
 import { isNpcOrTrapType } from './attackSystem';
-import { Economy } from '../../economy';
+import { Economy } from '../../modules/economy/economy';
 import {
   bubbleLifetime,
   CHAT_LIFETIME,
@@ -10,7 +10,7 @@ import {
   ID_LIFE_CREATE,
   ID_LIFE_REFRESH,
   TICKS_PER_SECOND,
-} from '../../common/nameTags';
+} from '../../controllers/interface/nameTags';
 
 /**
  * The original's name balloons - `CreateChat` / `AddChat` / `MoveChat`

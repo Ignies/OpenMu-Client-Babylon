@@ -1,0 +1,206 @@
+import type { ENUM_WORLD } from '../../core/types';
+import type { World } from '../../ecs/world';
+import type { Emission } from '../fx/effectParticles';
+import type { MapSound } from '../sound';
+import type { MapLighting } from '../lighting';
+import type { MapWeather } from '../weather';
+import type { MapTerrain } from '../terrain';
+import type { MapRender } from '../render';
+import type { MapFx } from '../fx';
+import type { MapActors } from '../actors';
+
+/**
+ * The contract every map entry implements. One folder per map,
+ * `versions/shared/maps/<name>/index.ts` exports one `<name>Layer`, listed once in
+ * `layers.ts`. Copy `_template.ts` for the recipe.
+ *
+ * A map entry is mostly *data*: which `ENUM_WORLD` values it serves, which
+ * `Data/World<n>` folder it draws, its tile slots, its offline spawn, its sky
+ * kind and the per-object-type tables (`blendMeshes`, `effectOnly`,
+ * `emissions`) the renderer reads. The one piece of behaviour, `create`,
+ * loads the map's object classes on demand - see the field.
+ *
+ * The convention's common core is `name` / `maps?` / `update?` / `reset?`. A
+ * map entry has no per-frame step, and "maps" would be the set of worlds it
+ * *is*, so the field is spelled `worlds` here; `reset?` keeps its meaning.
+ */
+export interface MapLayer {
+  /** Unique camelCase, identical to the folder name. */
+  readonly name: string;
+
+  /**
+   * The `ENUM_WORLD` values this entry serves. Most maps are one world; the
+   * event maps are a range of server instances on one art set (Blood Castle
+   * 11…17 + 52, Chaos Castle 18…23 + 53, Kalima 24…29 + 36, Illusion Temple
+   * 45…50, Devil Square 9 + 32). A world appears in exactly one entry.
+   */
+  readonly worlds: readonly ENUM_WORLD[];
+
+  /**
+   * The `Data/World<n>` / `Data/Object<n>` folder number, when it is not the
+   * default `world + 1` (`CMapManager::LoadWorld`, MapManager.cpp:1206-1225):
+   * every Blood Castle floor draws `World12`, every Chaos Castle `World19`,
+   * every Kalima floor `World25`, every Illusion Temple level `World47`, and
+   * Devil Square 5-7 (map 32) folds into `World10`.
+   */
+  readonly assetWorld?: number;
+
+  /**
+   * Tile textures by slot - 0 Grass01, 1 Grass02, 2 Ground01, 3 Ground02,
+   * 4 Ground03, 5 Water01, 6 Wood01, 7 Rock01 … 13 Rock07 - the list
+   * `LoadWorld` (MapManager.cpp:1362-1420) binds from `World<n>`. A slot the
+   * folder cannot fill (missing file, or a `.tga` the OZJ-only loader cannot
+   * read) names a tile the folder *does* have, so the indices
+   * `EncTerrain<n>.map` uses stay put. `recipes.ts` has the common shapes.
+   */
+  readonly tiles: readonly string[];
+
+  /**
+   * The `AlphaTile*.Tga` slot: "no ground here" (`LoadWorld`, `RenderFace` ZzzLodTerrain.cpp:1394-1435).
+   * Its `tiles` entry is never drawn but must exist. See readme.md.
+   */
+  readonly cutoutTile?: number;
+
+  /** Where the offline hero lands, in tiles. Omit = keep the current position. */
+  readonly spawn?: Spawn;
+
+  /**
+   * Has a sky: rain may fall here when the weather byte says so. Interiors,
+   * caves and towers omit it. Read by the rain slot in
+   * `ecs/systems/ambientParticleSystem.ts`.
+   */
+  readonly outdoor?: boolean;
+
+  /**
+   * Rain falls out of that sky. Defaults to `outdoor`; declare it false where
+   * the map has a sky that stays dry whatever the weather byte reads. Read
+   * through `maps.canRain`.
+   */
+  readonly rain?: boolean;
+
+  /**
+   * The sky belongs to snow: rain never falls here however the weather byte
+   * reads (`CreateDeviasSnow` gates on the world alone), objects carry snow
+   * caps, footsteps read as snow. Read through `controllers/weather/ambientWeather.ts`'s
+   * `SNOW_MAPS`.
+   */
+  readonly snow?: boolean;
+
+  /**
+   * Snow actually falls out of that snow sky. Defaults to `snow`; declare it
+   * false where the climate is snow but the air is clear, and the map keeps
+   * rain off without a fall of its own - nor anything a fall leaves behind,
+   * since the cover, the caps and the prints all hang off it. Read through
+   * `controllers/weather/ambientWeather.ts`'s `SNOWFALL_MAPS` and `controllers/weather/snowCover.ts`'s
+   * `SNOW_GROUND_MAPS`.
+   */
+  readonly snowfall?: boolean;
+
+  /**
+   * The map is under water: rain never falls here however the weather byte
+   * reads, and the ambient particles are the sea's (marine snow on the
+   * current, bubbles off the seabed) rather than leaves. Read through
+   * `controllers/weather/ambientWeather.ts`'s `UNDERWATER_MAPS`.
+   *
+   * Orthogonal to `outdoor`, which stays true for Atlans: there is a surface
+   * far above it and god-rays coming through, it is just not a sky anything
+   * can fall out of.
+   */
+  readonly underwater?: boolean;
+
+  /**
+   * Desert: it does not rain here whatever the weather byte reads. The third
+   * climate after `snow` and `underwater`, and the plainest of them - the
+   * sky is clear because the map's whole look is built on air with nothing
+   * in it (Tarkan runs fog density 0.01 over a sand horizon, clouds 0.06).
+   *
+   * More faithful than the alternative, too: the original rains on seven
+   * named maps and Tarkan is not one of them - it does not appear in
+   * ZzzEffectFireLeave.cpp at all.
+   */
+  readonly desert?: boolean;
+
+  /**
+   * `SetWorldClearColor` (SceneManager.cpp:336-365) as the original's 0…255
+   * bytes; omit for black. Applied by `loadMapIntoScene` before `create`.
+   */
+  readonly clearColor?: readonly [number, number, number];
+
+  /** Lit interiors, when the map enumerates any (Devias). */
+  readonly rooms?: readonly Room[];
+
+  /**
+   * Object type → mesh index drawn additively (`CreateObject`'s `BlendMesh`
+   * assignments by world, e.g. ZzzObject.cpp:4548-4610). Read by `controllers/render/blendMeshes.ts`.
+   */
+  readonly blendMeshes?: Readonly<Record<number, number>>;
+
+  /**
+   * Object types that are an emitter and nothing else - the model is never
+   * drawn, only its `emissions`. Read by `controllers/render/effectOnlyObjects.ts`.
+   */
+  readonly effectOnly?: readonly number[];
+
+  /** Object type → particle emissions. Read by `controllers/fx/effectParticles.ts`. */
+  readonly emissions?: Partial<Record<number, readonly Emission[]>>;
+
+  // ---- the map's own rows, one field per controller -----------------------
+  // Each controller owns its field's type and reads it through `maps.rowFor`
+  // at run time, never at module load. Omit a field for "nothing here".
+
+  /** Beds, one-shots, music, object loops, monster cues. The sound controller's. */
+  readonly sound?: MapSound;
+
+  /** Look profile, room looks, map-object lights. The lighting controller's. */
+  readonly lighting?: MapLighting;
+
+  /** Rain that ignores the packet, wet ground, leaves. The weather controller's. */
+  readonly weather?: MapWeather;
+
+  /** Ground overlays, water, rest objects, grass. The terrain controller's. */
+  readonly terrain?: MapTerrain;
+
+  /** Per-frame mesh writes (UV scrolls, blend-mesh light). The render controller's. */
+  readonly render?: MapRender;
+
+  /** Ambient wildlife (boids). The fx controller's. */
+  readonly fx?: MapFx;
+
+  /** What the map does to characters at spawn (Blood Castle's bigger line). The actors controller's. */
+  readonly actors?: MapActors;
+
+  /**
+   * Bind this map's object classes into `world.terrain.MapTileObjects` and
+   * add whatever entities the map owns. Runs once per warp, after the terrain
+   * exists and before the objects are created.
+   *
+   * Written as `world => import('./create').then(m => m.createX(world))`:
+   * the classes extend `ModelObject`, and `ModelObject`'s own imports read
+   * this system's tables, so a static import here would be an import cycle
+   * that resolves to a TDZ crash depending on who loads first. The dynamic
+   * import breaks it and gives each map its own chunk as a side effect.
+   */
+  create?(world: World): Promise<void>;
+
+  /** Map changed: drop anything belonging to the world just left. */
+  reset?(): void;
+}
+
+/**
+ * A row that differs between the worlds one entry serves (the Empire
+ * Guardian days, the login scenes). A world left out has no row.
+ */
+export type ByWorld<T> = { readonly byWorld: Readonly<Partial<Record<number, T>>> };
+
+/** One row for every world the entry serves, or one per world. */
+export type PerWorld<T> = T | ByWorld<T>;
+
+/** A tile position on the 256×256 grid. */
+export type Spawn = { readonly x: number; readonly y: number };
+
+/** An interior footprint in tiles, with the point its ambience centres on. */
+export type Room = {
+  readonly min: { readonly x: number; readonly y: number };
+  readonly max: { readonly x: number; readonly y: number };
+  readonly centre: { readonly x: number; readonly z: number };
+};

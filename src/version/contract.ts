@@ -3,7 +3,7 @@
  * reads to learn which MU / OpenMU version it is talking to. One folder per
  * version under `versions/<id>/` exports it as `gameVersion` from `index.ts`,
  * listed in `versions/registry.ts` and loaded at runtime by the bootstrap
- * (src/main.tsx -> src/version/index.ts `loadGameVersion`).
+ * (app/main.tsx -> src/version/index.ts `loadGameVersion`).
  *
  * Base code never says `if (version === ...)`: it reads `features.*` and the
  * protocol / data fields below. Everything a version can differ in must be a
@@ -16,7 +16,7 @@
 export type GameVersionId = string;
 
 /** The 12-number list `SimpleModulusKeys.Create*Keys` takes: 4 modulus, 4 crypt, 4 xor. */
-export type SimpleModulusKeyList = readonly number[];
+type SimpleModulusKeyList = readonly number[];
 
 export interface VersionEncryption {
   /**
@@ -63,6 +63,11 @@ export interface VersionData {
   /** `Data/Local/<locale>/` subfolder used for language tables. */
   readonly locale: string;
   /**
+   * The `World<n>` / `Object<n>` folder numbers this version ships. The
+   * pre-download index offers a map group only for these (`tools/assetsIndex.ts`).
+   */
+  readonly worlds: readonly number[];
+  /**
    * Every path `folder` contains, lower-cased and relative to it. A period
    * tree is a subset of the Season 6 one, so base code routinely asks it for
    * files it never shipped - Season 6 window chrome, post-0.97 effect
@@ -74,6 +79,65 @@ export interface VersionData {
    * always done.
    */
   readonly inventory?: ReadonlySet<string>;
+  /**
+   * Another version's trees, served beside this one, that it reads instead of
+   * shipping a byte-identical copy. Omit it and every request stays on
+   * `assets`, which is what Season 6 does.
+   */
+  readonly borrows?: VersionBorrows;
+  /**
+   * Sound keys whose file this version ships itself, relative to `assets`
+   * (`'Sound/aTower': 'Sound/aTower.wav'`). Every other key plays the shared
+   * catalogue's file (`controllers/sound/recipes.json`).
+   */
+  readonly sounds?: Readonly<Record<string, string>>;
+  /** How this tree's `gate.bmd` lays out a record, when it is not Season 6's (`gates.ts`). */
+  readonly gates?: GateLayout;
+}
+
+/** One field of a `gate.bmd` record: its byte offset, and 1 for a BYTE or 2 for a WORD. */
+export interface GateField {
+  readonly at: number;
+  readonly bytes: 1 | 2;
+}
+
+/**
+ * `GATE_ATTRIBUTE` as one client's `gate.bmd` stores it: `records` of `size`
+ * bytes, each Bux-encoded, Flag / Map / x1 / y1 / x2 / y2 in bytes 0-5 and
+ * the rest where these say.
+ */
+export interface GateLayout {
+  readonly records: number;
+  readonly size: number;
+  readonly target: GateField;
+  readonly angle: GateField;
+  readonly level: GateField;
+  /** Absent from trees older than the field: reads as 0. */
+  readonly maxLevel?: GateField;
+}
+
+export interface VersionBorrows {
+  /** The other converted tree (`./game-assets/`). Trailing slash. */
+  readonly assets: string;
+  /**
+   * Every file this version's own `assets` holds, lower-cased and relative to
+   * it. A converted file not listed comes from `borrows.assets`.
+   */
+  readonly ownAssets: ReadonlySet<string>;
+  /**
+   * Converted files the borrowed tree has and this version's own source does
+   * not, where the absence means something (a world without a grass card
+   * grows no grass in that slot). They are never borrowed.
+   */
+  readonly lacks?: ReadonlySet<string>;
+  /** The other original `Data/` tree (`./Data/`). Trailing slash. */
+  readonly folder?: string;
+  /**
+   * Lower-cased paths, or folder prefixes ending in `/`, under `folder` that
+   * this version reads from there when its own `inventory` lacks them: files
+   * its source has byte-identically, or art it borrows on purpose.
+   */
+  readonly folderPaths?: readonly string[];
 }
 
 /**
@@ -88,24 +152,28 @@ export interface VersionFeatures {
   readonly socketItems: boolean;
   /** Ancient sets (0.97+). */
   readonly ancientItems: boolean;
-  /** Harmony jewel + refine stones (S3+). */
-  readonly harmonyJewel: boolean;
-  /** Dark Lord / Magic Gladiator character classes (0.97 / 0.99+). */
+  /**
+   * The character classes after the first three: the create window offers
+   * only those the version has (Dark Lord, Magic Gladiator: 0.99 / 0.97;
+   * Summoner, Rage Fighter: S3 / S5).
+   */
   readonly darkLord: boolean;
   readonly magicGladiator: boolean;
-  /** Summoner / Rage Fighter (S3 / S5+). */
   readonly summoner: boolean;
   readonly rageFighter: boolean;
-  /** MU Helper (S6 E3, OpenMU `MuHelper`). */
-  readonly muHelper: boolean;
-  /** Item hotkeys / consumable belt row (S6). */
-  readonly itemHotkeys: boolean;
-  /** Cash shop / in-game shop banner (S6). */
-  readonly cashShop: boolean;
-  /** Blood Castle / Devil Square / Chaos Castle event windows. */
-  readonly events: boolean;
-  /** Quest system with the S6 NPC dialogue windows (`Quest_eng.bmd`). */
-  readonly questDialogs: boolean;
+  /** The potion slots on the bottom bar (`CNewUIItemHotKey`). */
+  readonly itemHotkeys: ItemHotkeys;
+}
+
+/**
+ * The bottom bar's potion slots, keyed Q, W, E, R in that order. Unbound, they
+ * reach for healing, mana, antidote and shield potions.
+ */
+export interface ItemHotkeys {
+  /** How many the bar draws and answers the key of: Season 6 four, 0.97d three. */
+  readonly slots: number;
+  /** A slot takes another potion (Ctrl+key over the inventory, a drop on the slot): Season 6. */
+  readonly bindable: boolean;
 }
 
 export interface GameVersion {
@@ -114,7 +182,7 @@ export interface GameVersion {
   readonly label: string;
   /**
    * The token a published server line puts first to say which client it wants
-   * (`[S6EP3:Name:…](…)`) - see `common/serverList.ts`. A field rather than
+   * (`[S6EP3:Name:…](…)`) - see `modules/servers/serverList.ts`. A field rather than
    * something derived from `openMu`, because a version that is not a season
    * and an episode still has to name itself in one short word.
    *
@@ -139,7 +207,21 @@ export interface GameVersion {
   readonly protocol: VersionProtocol;
   readonly data: VersionData;
   readonly features: VersionFeatures;
+  /**
+   * The optional gameplay modules this version's server never has, in the
+   * words a world's `server.json` `modulesOff` uses (`mu_helper`). They are
+   * never installed, so no listener of theirs runs and their windows hide.
+   */
+  readonly modulesOff: readonly string[];
+  /**
+   * The scheduled mini-games this version's client has: the HUD times and
+   * polls only these (`modules/events/schedule.ts`).
+   */
+  readonly miniGames: readonly MiniGame[];
 }
+
+/** A mini-game OpenMU opens on a timetable (`MiniGameOpeningState`). */
+export type MiniGame = 'bloodCastle' | 'devilSquare' | 'chaosCastle';
 
 export function asciiBytes(s: string): number[] {
   return Array.from(s, ch => ch.charCodeAt(0));

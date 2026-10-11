@@ -1,9 +1,12 @@
-import { PointerEventTypes } from '../../libs/babylon/exports';
-import { Store } from '../../store';
-import { events } from '../../events';
-import { quests } from '../../quests';
+import { PointerEventTypes } from '../../controllers/render/babylon/exports';
+import { Merchant } from '../../modules/npc_shop';
+import { Bag } from '../../modules/inventory';
+import { events } from '../../modules/events';
+import { quests } from '../../modules/quests';
+import { monsterRegistry } from '../../controllers/monsters';
 import type { Entity, ISystemFactory } from '../world';
 import { isNpcOrTrapType } from './attackSystem';
+import { isSliding } from './positionSlideSystem';
 
 /**
  * MOVEMENT_TALK (ZzzInterface.cpp:7681-7700, 3576-3620): clicking an NPC
@@ -19,7 +22,7 @@ const TALK_RANGE = 2;
 const APPROACH_INTERVAL = 0.4;
 
 /** Talkable NPC: a non-monster with a server id that is not a trap. */
-export function isTalkableNpc(e: Entity): boolean {
+function isTalkableNpc(e: Entity): boolean {
   const type = e.npcType;
   if (type === undefined || e.netId === undefined || e.localPlayer) return false;
   if (type >= 100 && type <= 110) return false; // traps
@@ -33,7 +36,8 @@ const TERRAIN_MAX = 255;
  * to the NPC's own tile is empty and the hero would never arrive. Approach
  * the nearest walkable tile within TALK_RANGE of the NPC instead (the attack
  * approach cuts its path at weapon reach the same way, `truncatePathForAttack`).
- * `excluded` holds tiles a previous search could not reach.
+ * `excluded` holds tiles a previous search could not reach. An NPC with a
+ * `talkRange` is approached to any tile inside that circle instead.
  */
 function findApproachTile(
   world: Parameters<ISystemFactory>[0],
@@ -41,12 +45,15 @@ function findApproachTile(
   npcY: number,
   heroX: number,
   heroY: number,
-  excluded: Set<number>
+  excluded: Set<number>,
+  reach: number | undefined
 ): { x: number; y: number } | null {
+  const ring = reach === undefined ? TALK_RANGE : Math.floor(reach);
   let best: { x: number; y: number } | null = null;
   let bestDist = Infinity;
-  for (let dx = -TALK_RANGE; dx <= TALK_RANGE; dx++) {
-    for (let dy = -TALK_RANGE; dy <= TALK_RANGE; dy++) {
+  for (let dx = -ring; dx <= ring; dx++) {
+    for (let dy = -ring; dy <= ring; dy++) {
+      if (reach !== undefined && dx * dx + dy * dy > reach * reach) continue;
       const x = npcX + dx;
       const y = npcY + dy;
       if (x < 0 || y < 0 || x > TERRAIN_MAX || y > TERRAIN_MAX) continue;
@@ -69,10 +76,12 @@ export const NpcTalkSystem: ISystemFactory = world => {
     if (event.type !== PointerEventTypes.POINTERDOWN) return;
     if (event.event.button !== 0) return;
 
-    if (Store.pendingItemMove || Store.pickedItem) return;
+    if (Bag.pendingItemMove || Bag.pickedItem) return;
+    // `MoveHero` returns while the server slides the hero in (`JumpTime > 0`): the click is lost.
+    if (isSliding(world.playerEntity)) return;
 
     const target = world.currentPointerTarget;
-    if (!target || !isTalkableNpc(target) || Store.npcShop) {
+    if (!target || !isTalkableNpc(target) || Merchant.npcShop) {
       // Clicking anything else (monster, drop, ground) gives up the talk.
       world.talkTarget = null;
       return;
@@ -118,6 +127,8 @@ export const NpcTalkSystem: ISystemFactory = world => {
         approachTarget = null;
         return;
       }
+      // `MoveHero` waits out the server's slide (`JumpTime > 0`).
+      if (isSliding(playerEntity)) return;
 
       if (approachTarget !== target) {
         approachTarget = target;
@@ -137,12 +148,20 @@ export const NpcTalkSystem: ISystemFactory = world => {
 
       const dx = Math.abs(npcX - heroX);
       const dz = Math.abs(npcY - heroY);
+      // The Kanturu Gateway Machine is talked to from 550 units, straight line
+      // (ZzzInterface.cpp:3215-3233): its folder's `talkRange`.
+      const reach =
+        target.npcType === undefined ? undefined : monsterRegistry.def(target.npcType)?.talkRange;
+      const inReach =
+        reach === undefined
+          ? Math.max(dx, dz) <= TALK_RANGE
+          : Math.hypot(targetPos.x - playerPos.x, targetPos.z - playerPos.z) <= reach;
 
       // Out of reach: walk to a tile next to the NPC. Already in reach (the
       // hero stands beside the NPC, or the path ended early inside the
       // range) falls through to the talk request without moving.
-      if (Math.max(dx, dz) > TALK_RANGE) {
-        // The A* (`libs/astar.ts`) never returns an empty path for an
+      if (!inReach) {
+        // The A* (`core/astar.ts`) never returns an empty path for an
         // unreachable goal: it hands back the path to the *closest* node. So
         // "unreachable" is a calculated path whose last node is not the tile
         // asked for (an empty path counts too) - a tile behind a merchant's
@@ -164,7 +183,7 @@ export const NpcTalkSystem: ISystemFactory = world => {
         if (approachDelay > 0) return;
         approachDelay = APPROACH_INTERVAL;
 
-        const tile = findApproachTile(world, npcX, npcY, heroX, heroY, unreachable);
+        const tile = findApproachTile(world, npcX, npcY, heroX, heroY, unreachable, reach);
         if (!tile) {
           // No way to get next to the NPC (blocked in): give up like a
           // cancelled walk instead of re-requesting forever.
@@ -202,7 +221,7 @@ export const NpcTalkSystem: ISystemFactory = world => {
       // An event NPC (the Crywolf statue) never opens a server window.
       if (events.useNpc(npc)) return;
       if (quests.useNpc(npc)) return;
-      Store.talkToNpc(npc);
+      Merchant.talkToNpc(npc);
     },
   };
 };

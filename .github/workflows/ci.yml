@@ -1,5 +1,8 @@
 name: CI
 
+# Every check an agent or developer runs locally (see AGENTS.md and docs/ci.md).
+# Jobs run in parallel; the code-only ones skip the asset folders.
+
 on:
   push:
     branches:
@@ -12,63 +15,124 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  BUN_VERSION: "1.4.2"
+
 jobs:
 
   build:
     name: Build
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: "1.4.2"
-
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-
-      - name: Build
-        run: bun run build
-
+          bun-version: ${{ env.BUN_VERSION }}
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - name: Register app build
+        run: bun run build:register
 
   typescript:
     name: TypeScript
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - uses: actions/checkout@v4
         with:
-          bun-version: "1.4.2"
-
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-
-      - name: TypeScript check
-        run: bun run tsc
-
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /*
+            !/Data/
+            !/Data-v097d/
+            !/public/
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+      - run: bun install --frozen-lockfile
+      - run: bun install --frozen-lockfile --cwd install
+      - run: bun run tsc
 
   tests:
     name: Tests
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: "1.4.2"
-
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-
-      - name: Run tests
+          bun-version: ${{ env.BUN_VERSION }}
+      - run: bun install --frozen-lockfile
+      - run: bun install --frozen-lockfile --cwd install
+      - name: Client and tools (vitest, includes the skill golden tests)
         run: bun run test
+      - name: Marketplace service (bun test)
+        run: bun run test:server
+
+  lint:
+    name: Lint ratchet
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /*
+            !/Data/
+            !/Data-v097d/
+            !/public/
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+      - run: bun install --frozen-lockfile
+      - name: ESLint counts may not rise (tools/checks/baselines/lint.json)
+        run: bun run check:lint
+
+  structure:
+    name: Structure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /*
+            !/Data/
+            !/Data-v097d/
+            !/public/
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+      - run: bun install --frozen-lockfile
+      - name: Dependency direction, readmes, doc names, no em-dash
+        run: bun run check
+      - name: Baselines only shrink
+        if: github.event_name == 'pull_request'
+        run: bun tools/checks/baselineGuard.ts origin/${{ github.base_ref }}
+      - name: Commit messages
+        if: github.event_name == 'pull_request'
+        run: bun tools/checks/commits.ts origin/${{ github.base_ref }}
+
+  installer:
+    name: Installer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /*
+            !/Data/
+            !/Data-v097d/
+            !/public/
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+      - name: Bootstrap scripts (shellcheck)
+        run: shellcheck install/get.sh install/install.sh
+      - run: bun install --frozen-lockfile --cwd install
+      - name: Compose files merge with OpenMU's own (docker compose config)
+        run: MU_STATE="$RUNNER_TEMP/mu" bun install/cli/e2e.ts config

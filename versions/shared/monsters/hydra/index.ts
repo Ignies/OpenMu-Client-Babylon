@@ -1,0 +1,37 @@
+import { defineMonster } from '@/controllers/monsters';
+
+export default defineMonster({
+  Numb: 49,
+  Name: 'Hydra',
+  // Ours: the big lightning2 flare over the head of a boss.
+  light: { kind: 'carried', range: 4, height: 1.2, color: 'lightning' },
+  maxHealth: 19000,
+  model: { type: 37, scale: 1 },
+  stats: {
+    Rate: 1,
+    Level: 74,
+    HP: 19000,
+    MP: 0,
+    MinDmg: 250,
+    MaxDmg: 310,
+    Def: 200,
+    MagDef: 0,
+    AttackSuccess: 430,
+    Move: 125,
+    AttType: 3,
+    Range: 150,
+    View: 4,
+    MoveSpeed: 7,
+    AttSpeed: 400,
+    Regen: 1400,
+    Attri: 150,
+    ItemR: 2,
+    MoneyR: 175,
+    MaxI: 14,
+    ResWind: 3,
+    ResPois: 0,
+    ResIce: 12,
+    ResWater: 12,
+    ResFire: 12,
+  },
+});

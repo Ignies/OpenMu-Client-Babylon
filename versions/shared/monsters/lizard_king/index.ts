@@ -1,0 +1,37 @@
+import { defineMonster } from '@/controllers/monsters';
+
+export default defineMonster({
+  Numb: 48,
+  Name: 'Lizard King',
+  // Ours: four burning spikes.
+  light: { kind: 'carried', range: 3, height: 0.9 },
+  maxHealth: 9000,
+  model: { type: 36, scale: 1.4 },
+  stats: {
+    Rate: 1,
+    Level: 70,
+    HP: 9000,
+    MP: 0,
+    MinDmg: 240,
+    MaxDmg: 270,
+    Def: 180,
+    MagDef: 0,
+    AttackSuccess: 350,
+    Move: 115,
+    AttType: 3,
+    Range: 3,
+    View: 3,
+    MoveSpeed: 7,
+    AttSpeed: 400,
+    Regen: 1600,
+    Attri: 15,
+    ItemR: 2,
+    MoneyR: 175,
+    MaxI: 14,
+    ResWind: 3,
+    ResPois: 0,
+    ResIce: 7,
+    ResWater: 7,
+    ResFire: 7,
+  },
+});

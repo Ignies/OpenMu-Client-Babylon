@@ -1,5 +1,5 @@
 import type { ISystemFactory } from '../world';
-import { events } from '../../events';
+import { events } from '../../modules/events';
 
 /**
  * The events layer's per-frame call site : steps the

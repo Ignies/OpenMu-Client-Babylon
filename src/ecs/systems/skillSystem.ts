@@ -1,5 +1,5 @@
 import type { ISystemFactory } from '../world';
-import { skills } from '../../skills';
+import { skills } from '../../modules/skills';
 
 /**
  * The skill layer's per-frame call site : steps `skills`

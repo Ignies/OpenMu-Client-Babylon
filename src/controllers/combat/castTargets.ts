@@ -1,0 +1,88 @@
+/**
+ * Who a cast is aimed at (the key the original puts in `SendRequestMagic`).
+ * Readers only. See controllers/combat/readme.md.
+ */
+import type { SkillDefinition } from '@versions/shared/skills/skillsDatabase';
+import type { CombatLayer } from './layer';
+
+// ---- 1. tuning -------------------------------------------------------------
+
+/** Where a cast goes when the button is pressed. */
+export type CastTarget =
+  /** `HeroKey`, always - a selection on screen is ignored. */
+  | 'self'
+  /** The selected party member, or the caster when nothing suitable is picked. */
+  | 'allyOrSelf'
+  /** A selected player, or the caster with nothing selected; a monster or NPC selected cancels it. */
+  | 'playerOrSelf'
+  /** The selected object; the cast does not happen without one. */
+  | 'enemy'
+  /** No target at all: an area cast on the caster's own tile, the selection ignored. */
+  | 'inPlace';
+
+/**
+ * Skills whose rule the original names in its switches, by skill number. Each
+ * skill's own file sets `target` (registerSkills fills this table); the rows
+ * here have no skill file. Rules: 'self' = sent with HeroKey whatever is
+ * selected; 'allyOrSelf' = the selected party member, else the caster; 'playerOrSelf' = the
+ * same, but a monster or NPC selected cancels the cast (ClassAttack.cpp:162-167, :1158);
+ * 'enemy' = refused without a live selection (Sleep, ClassAttack.cpp:1694-1735);
+ * 'inPlace' = at the hero's own tile with no target key (SkillCast.cpp:722-741).
+ */
+export const SKILL_TARGETS: Partial<Record<number, CastTarget>> = {
+  37: 'self',
+  205: 'self',
+  206: 'self',
+  207: 'self',
+  208: 'self',
+  209: 'self', // the Halloween event skills
+};
+
+// ---- 2. state + readers ----------------------------------------------------
+
+/**
+ * Where the cast goes. Anything the original does not name explicitly falls
+ * back to the skill table's own shape: a buff / regeneration / summon with
+ * no named rule is cast on the caster, everything else on the selection.
+ */
+export function castTarget(def: SkillDefinition): CastTarget {
+  const own = SKILL_TARGETS[def.num];
+  if (own) return own;
+  if (
+    def.type === 'Buff' ||
+    def.type === 'Regeneration' ||
+    def.type === 'SummonMonster' ||
+    def.type === 'PassiveBoost' ||
+    def.target === 'ImplicitParty' ||
+    def.target === 'ImplicitPlayer'
+  ) {
+    return 'allyOrSelf';
+  }
+  return 'enemy';
+}
+
+/** Whether a cast with nothing suitable selected lands on the caster. */
+export function castsOnSelf(def: SkillDefinition): boolean {
+  return castTarget(def) !== 'enemy';
+}
+
+/** Whether the cast is an area cast on the caster's own tile, with no target at all. */
+export function castsInPlace(def: SkillDefinition): boolean {
+  return castTarget(def) === 'inPlace';
+}
+
+/** Whether a monster or NPC selected cancels the cast (`Attacking = -1`). */
+export function castsOnPlayersOnly(def: SkillDefinition): boolean {
+  return castTarget(def) === 'playerOrSelf';
+}
+
+/** Whether the selection is ignored outright (`HeroKey`, always). */
+export function castsOnSelfOnly(def: SkillDefinition): boolean {
+  return castTarget(def) === 'self';
+}
+
+// ---- 3. the layer ----------------------------------------------------------
+
+export const castTargetsLayer: CombatLayer = {
+  name: 'castTargets',
+};

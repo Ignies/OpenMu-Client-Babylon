@@ -1,36 +1,46 @@
-import type { Entity, ISystemFactory } from '../world';
-import { Store } from '../../store';
-import { applyPlayerActionSpeed, serverMinAttackInterval } from '../../common/playSpeed';
-import { HitRequestPacket } from '../../common/packets/ClientToServerPackets';
+import type { Entity, ISystemFactory, Item } from '../world';
+import { Bag } from '../../modules/inventory';
+import { HeroSkills } from '../../modules/skills';
+import { Hero } from '../../modules/hero';
+import { Session } from '../../modules/session';
+import { addNotification } from '../../modules/chat';
+import { Ecs } from '../current';
+import { applyPlayerActionSpeed, serverMinAttackInterval } from '../../controllers/anim/playSpeed';
+import { HitRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
 import {
   MonsterActionType,
   ServerPlayerActionType,
-} from '../../common/objects/enum';
-import { TWFlags } from '../../common/terrain/consts';
-import { isFlagInBinaryMask } from '../../common/utils';
-import { chooseAttackAction } from '../../common/weaponClass';
-import { heldWeapons } from '../../common/chaosCastleUnit';
-import { getBaseClass } from '../../common/characterStats';
-import { isWingItem } from '../../common/wings';
-import { mountKind } from '../../common/pets';
-import { playBowShotVisual } from '../../common/skillVisuals';
-import { combat } from '../../combat';
-import { MOUSE_UPDATE_SECONDS_MAX } from '../../combat/inputGate';
-import { skillDefinition } from '../../common/skillsDatabase';
-import { truncatePathWithinRange } from '../../common/approachPath';
-import { isHostilePlayer } from '../../combat/playerTarget';
-import { duelEnemyId } from '../../events/duel';
-import { ammoReload, type Hands } from '../../combat/weaponRange';
-import { InventoryConstants } from '../../common/inventoryConstants';
-import { StorageKind } from '../../common/itemStorage';
+} from '@versions/shared/objects/enum';
+import { TWFlags } from '../../controllers/terrain/consts';
+import { isFlagInBinaryMask } from '../../controllers/assets/download';
+import { chooseAttackAction } from '../../controllers/actors/weaponClass';
+import { getBaseClass } from '../../modules/hero/characterStats';
+import { isWingItem } from '../../controllers/actors/wings';
+import { mountKind } from '@/controllers/pets';
+import { playBowShotVisual } from '@versions/shared/skills/skillVisuals';
+import { combat } from '../../controllers/combat';
+import { MOUSE_UPDATE_SECONDS_MAX } from '../../controllers/combat/inputGate';
+import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
+import { truncatePathWithinRange } from '../../controllers/actors/approachPath';
+import { isHostilePlayer } from '../../controllers/combat/playerTarget';
+import { duelEnemyId } from '../../modules/events/duel';
+import { ammoInHand, ammoReload, type Hands } from '../../controllers/combat/weaponRange';
+import { InventoryConstants } from '@/core/inventoryConstants';
+import { StorageKind } from '../../modules/inventory/itemStorage';
 import { t } from '../../i18n';
+import { heldWeapons } from '../../controllers/actors';
+import { serverSetting } from '../../modules/servers/serverManifest';
+import { GameOptions } from '../../controllers/settings';
+import { isOn } from '../../controllers/fidelity';
+import { isSliding } from './positionSlideSystem';
 
 /**
  * Left-click basic attack (`Action()` MOVEMENT_ATTACK, ZzzInterface.cpp:3283-3356):
  * walk into the weapon's reach, face the target, restart the swing clip and
  * latch the hit. Timing comes from the `combat` layer - the 0.24 s input
- * gate, the `AttackTime` latch that sends `HitRequest` at the clip's hit
- * key, the reach per weapon and the archer's ammunition check. This is
+ * gate, the `AttackTime` latch at the clip's hit key (where `HitRequest`
+ * goes when the server's `heldHitRequest` asks; else on the click), the
+ * reach per weapon and the archer's ammunition check. This is
  * also the one place `combat.update` is stepped: it runs before
  * SkillCastSystem, so both read a fresh frame.
  */
@@ -44,7 +54,7 @@ export function truncatePathForAttack(
     path,
     ~~target.transform!.pos.x,
     ~~target.transform!.pos.z,
-    combat.attackRange(Store.world?.playerEntity?.charAppearance)
+    combat.attackRange(Ecs.world?.playerEntity?.charAppearance)
   );
 }
 
@@ -58,28 +68,28 @@ let lastReload = { from: -1, at: 0 };
  * `ReloadArrow()`: move the next quiver from the bag into the empty hand, the
  * same move a drag sends. True while the swing should wait for it.
  */
-function reloadAmmo(hands: Hands): boolean {
-  if (Store.pendingItemMove) return true;
-  if (Store.pickedItem) return false;
+export function reloadAmmo(hands: Hands): boolean {
+  if (Bag.pendingItemMove) return true;
+  if (Bag.pickedItem) return false;
 
   const reload = ammoReload(
     hands,
-    Store.itemsOfStorage(StorageKind.Inventory),
+    Bag.itemsOfStorage(StorageKind.Inventory),
     InventoryConstants.EquippableSlotsCount,
     InventoryConstants.LeftHandSlot,
     InventoryConstants.RightHandSlot
   );
   if (!reload) return false;
   if (reload.from < 0) {
-    Store.addNotification(t('notify.noMoreArrows'), 'error');
+    addNotification(t('notify.noMoreArrows'), 'error');
     return false;
   }
 
   const now = performance.now();
   if (reload.from === lastReload.from && now - lastReload.at < RELOAD_RETRY_MS) return false;
   lastReload = { from: reload.from, at: now };
-  if (!Store.moveItemToSquare(StorageKind.Inventory, reload.from, reload.to)) return false;
-  Store.addNotification(t('notify.arrowsReloaded'));
+  if (!Bag.moveItemToSquare(StorageKind.Inventory, reload.from, reload.to)) return false;
+  addNotification(t('notify.arrowsReloaded'));
   return true;
 }
 
@@ -162,7 +172,7 @@ export function isAttackablePlayer(
 /**
  * `CheckAttack` on another player, in full: `isAttackablePlayer` plus the
  * rule that makes them fair game - the duel, their PK state, or Ctrl held
- * (`combat/playerTarget`). What both click paths test.
+ * (`controllers/combat/playerTarget`). What both click paths test.
  */
 export function canAttackPlayer(
   world: Parameters<ISystemFactory>[0],
@@ -184,6 +194,10 @@ export const AttackSystem: ISystemFactory = world => {
   let attackCooldown = 0;
   let approachDelay = 0;
   let alternateSwing = false;
+  /** Last frame's item in the hand opposite the launcher. */
+  let lastAmmo: Item | null = null;
+  // The step's destination when the walk was cut, the hero's tile until he walks again (ZzzAI.cpp:556-562).
+  let stopTile: { x: number; y: number } | null = null;
 
   return {
     update: dt => {
@@ -200,8 +214,22 @@ export const AttackSystem: ISystemFactory = world => {
         return;
       }
 
+      // `autoQuiver` (ours, where the world allows it): the next quiver goes in as the server takes
+      // the empty one, not at the next shot's CheckArrow. `reloadAmmo` skips one the player lifted.
+      const ammo = ammoInHand(playerEntity.charAppearance);
+      if (lastAmmo && !ammo && GameOptions.autoQuiver && serverSetting('autoQuiver')) {
+        reloadAmmo(playerEntity.charAppearance);
+      }
+      lastAmmo = ammo;
+
+      // `MoveHero` returns while the server's move slides the hero in (`JumpTime > 0`): no swing.
+      if (isSliding(playerEntity)) return;
+
       const target = world.attackTarget;
-      if (!target) return;
+      if (!target) {
+        stopTile = null;
+        return;
+      }
 
       if (
         (!isAttackableEntity(world, target) && !isAttackablePlayer(world, target)) ||
@@ -218,7 +246,7 @@ export const AttackSystem: ISystemFactory = world => {
       // `playerMoveTo` every frame and drag the hero onto what he is casting
       // at. The target stays selected (the health bar, head tracking and the
       // mobile skill pad all read it); only the walk and the swing yield.
-      if (world.castRequest && skillDefinition(Store.currentSkill)) return;
+      if (world.castRequest && skillDefinition(HeroSkills.currentSkill)) return;
 
       const hands = playerEntity.charAppearance;
       const playerPos = playerEntity.transform.pos;
@@ -260,12 +288,14 @@ export const AttackSystem: ISystemFactory = world => {
           moveTo.point.y = targetPos.z;
           moveTo.handled = false;
           moveTo.sendToServer = true;
+          stopTile = null;
         }
         return;
       }
 
       const { pathfinding } = playerEntity;
       if (pathfinding.path && pathfinding.path.length > 0) {
+        stopTile = { x: pathfinding.path[0].x, y: pathfinding.path[0].y };
         pathfinding.path = null;
         pathfinding.from = { x: ~~playerPos.x, y: ~~playerPos.z };
         pathfinding.to = { x: ~~playerPos.x, y: ~~playerPos.z };
@@ -285,7 +315,7 @@ export const AttackSystem: ISystemFactory = world => {
       const swordCount = anim.swordCount ?? 0;
       const action = chooseAttackAction({
         hands: heldWeapons(playerEntity, world.mapIndex),
-        baseClass: getBaseClass(hands?.charClass ?? Store.playerData.charClass),
+        baseClass: getBaseClass(hands?.charClass ?? Hero.charClass),
         swordCount,
         wings: isWingItem(hands?.wings),
         mount: mountKind(
@@ -310,19 +340,34 @@ export const AttackSystem: ISystemFactory = world => {
       }
       anim.action = action;
 
-      // The blow lands at the clip's hit key: latch the HitRequest there. The
-      // clip length is the fallback - the request never outlives the clip.
+      // The blow lands at the clip's hit key (a held HitRequest goes there).
+      // The clip length is the fallback - the request never outlives the clip.
       const playSpeed = model?.AnimationSpeed ?? 0;
       const clipSeconds = model?.getActionDuration(action) || undefined;
-      const hitDelay = combat.startAttack(action, playSpeed, () => {
-        // CreateArrows() at AttackStage's hit key: the bow lets go here.
-        playBowShotVisual(world.scene, playerEntity, target);
+      const sendHit = () => {
         if (target.dying || target.objOutOfScope || target.netId === undefined) return;
         const packet = HitRequestPacket.createPacket();
         packet.TargetId = target.netId;
         packet.AttackAnimation = attackAnimation;
         packet.LookingDirection = lookingDirection;
-        Store.sendToGS(packet.buffer);
+        Session.sendToGS(packet.buffer);
+      };
+      // `LetHeroStop()` (ZzzInterface.cpp:1299): every swing tells the server the tile and facing
+      // first, which parks its walker when the swing cut a walk (else it walks on and snaps us back).
+      // A step's destination is never more than a tile away on either axis; past that the hero was moved.
+      const tile =
+        stopTile && Math.abs(stopTile.x - playerPos.x) <= 1 && Math.abs(stopTile.y - playerPos.z) <= 1 ? stopTile : null;
+      Hero.sendWalkStop(tile?.x ?? playerPos.x, tile?.y ?? playerPos.z, playerEntity.transform.rot.y);
+      // The original sends on the click (ZzzInterface.cpp:3355); a server may ask for the
+      // request at the hit key instead (its server.json, modules/servers/serverManifest.ts).
+      const held = serverSetting('heldHitRequest');
+      if (!held) sendHit();
+      let fill = 0;
+      const hitDelay = combat.startAttack(action, playSpeed, () => {
+        // CreateArrows() at AttackStage's hit key: the bow lets go here.
+        playBowShotVisual(world.scene, playerEntity, target);
+        if (held) sendHit();
+        if (fill > 0 && model) anim.swingFill = { serial: model.actionSerial, scale: fill };
       }, clipSeconds);
       combat.consumeInputGate();
 
@@ -333,6 +378,10 @@ export const AttackSystem: ISystemFactory = world => {
         hitDelay,
         serverMinAttackInterval(playerEntity.attributeSystem?.getValue('attackSpeed') ?? 0)
       );
+      // `swingFill` (Enhanced): after the blow the clip slows to end as the next swing may start.
+      if (clipSeconds && clipSeconds < attackCooldown && isOn('swingFill')) {
+        fill = (clipSeconds - hitDelay) / (attackCooldown - hitDelay);
+      }
     },
   };
 };

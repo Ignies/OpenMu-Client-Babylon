@@ -1,0 +1,38 @@
+import { defineMonster } from '@/controllers/monsters';
+import { APPEAR_TICKS } from '../_shared/bodyFx';
+
+export default defineMonster({
+  Numb: 54,
+  Name: 'Golden Solider',
+  // `c->Appear = 60` on arrival (WSclient.cpp:2856, ZzzCharacter.cpp:5639-5652).
+  bodyFx: [{ kind: 'appear', ticks: APPEAR_TICKS }],
+  maxHealth: 5000,
+  model: { type: 40, scale: 1.1 },
+  stats: {
+    Rate: 1,
+    Level: 46,
+    HP: 5000,
+    MP: 0,
+    MinDmg: 140,
+    MaxDmg: 150,
+    Def: 75,
+    MagDef: 0,
+    AttackSuccess: 230,
+    Move: 64,
+    AttType: 3,
+    Range: 0,
+    View: 5,
+    MoveSpeed: 7,
+    AttSpeed: 400,
+    Regen: 1800,
+    Attri: 20,
+    ItemR: 2,
+    MoneyR: 200,
+    MaxI: 14,
+    ResWind: 3,
+    ResPois: 0,
+    ResIce: 3,
+    ResWater: 3,
+    ResFire: 3,
+  },
+});

@@ -32,7 +32,7 @@ import type { Sql } from 'postgres';
  * looks like an exception - the port probe's timeout - is argued at `tcpProbe`.
  */
 
-export type SignalName = 'presence' | 'writeRecency' | 'personalStore' | 'portProbe';
+type SignalName = 'presence' | 'writeRecency' | 'personalStore' | 'portProbe';
 
 export interface SignalResult {
   name: SignalName;
@@ -51,7 +51,7 @@ export interface GateVerdict {
   checkedAt: number;
 }
 
-export interface GateConfig {
+interface GateConfig {
   presenceUrl: string;
   /** How long after the last socket closed before a write is allowed. */
   offlineCooldownMs: number;
@@ -105,7 +105,7 @@ export function loadGateConfig(env: Record<string, string | undefined> = process
  * shows exactly what the worker will use, and there is no second identifier
  * whitelist to relax by accident.
  */
-export interface TableSpec {
+interface TableSpec {
   schema: string;
   /** One name, or candidates best first. */
   table: string | string[];
@@ -215,7 +215,7 @@ const TABLES = {
   },
 } satisfies Record<string, TableSpec>;
 
-export type TableName = keyof typeof TABLES;
+type TableName = keyof typeof TABLES;
 
 type Columns<K extends TableName> = Record<keyof (typeof TABLES)[K]['columns'], string>;
 
@@ -694,7 +694,7 @@ function describe(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-export type ProbeOutcome = 'open' | 'closed' | 'inconclusive';
+type ProbeOutcome = 'open' | 'closed' | 'inconclusive';
 
 /**
  * Dials the port once. Three answers, and only two of them say anything
@@ -732,7 +732,7 @@ export type ProbeOutcome = 'open' | 'closed' | 'inconclusive';
  * included, and that would make the typo above read as a closed port. Node's
  * socket keeps the real code.
  */
-export function tcpProbe(
+function tcpProbe(
   host: string,
   port: number,
   timeoutMs: number

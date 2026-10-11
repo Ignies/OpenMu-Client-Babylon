@@ -1,0 +1,37 @@
+import { defineMonster } from '@/controllers/monsters';
+
+export default defineMonster({
+  Numb: 25,
+  Name: 'Ice Queen',
+  // RenderCharacter casts it no shadow (ZzzCharacter.cpp:8662-8668).
+  classicShadow: false,
+  maxHealth: 4000,
+  model: { type: 18, scale: 1.1 },
+  stats: {
+    Rate: 1,
+    Level: 52,
+    HP: 4000,
+    MP: 0,
+    MinDmg: 155,
+    MaxDmg: 165,
+    Def: 90,
+    MagDef: 0,
+    AttackSuccess: 260,
+    Move: 76,
+    AttType: 3,
+    Range: 11,
+    View: 4,
+    MoveSpeed: 7,
+    AttSpeed: 400,
+    Regen: 1400,
+    Attri: 50,
+    ItemR: 2,
+    MoneyR: 180,
+    MaxI: 14,
+    ResWind: 3,
+    ResPois: 0,
+    ResIce: 4,
+    ResWater: 5,
+    ResFire: 4,
+  },
+});

@@ -7,7 +7,7 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { describe, expect, it } from 'vitest';
-import { parseMinimapData } from '../src/common/minimapData';
+import { parseMinimapData } from '../src/controllers/terrain/minimapData';
 import { encoderFor } from './localPacks.ts';
 import { patchTable, TABLES } from './packTexts.ts';
 

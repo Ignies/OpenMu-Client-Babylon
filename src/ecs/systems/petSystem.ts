@@ -1,23 +1,21 @@
-import { Vector3 } from '../../libs/babylon/exports';
+import { Vector3 } from '../../controllers/render/babylon/exports';
+import { DARK_HORSE, DARK_RAVEN, PET_GROUP } from '@versions/shared/items/petItems';
 import {
-  DARK_HORSE,
-  DARK_RAVEN,
   FENRIR_ACTION_RUN,
   FENRIR_ACTION_SKILL,
   FENRIR_ACTION_WALK,
   MOUNT_ACTION_MOVE,
   MOUNT_ACTION_STAND,
-  PET_GROUP,
   fenrirMountAction,
   fenrirShine,
   petFactoryFor,
   petSpec,
   type PetFollow,
   type PetSpec,
-} from '../../common/pets';
-import { createAngleDeg, turnAngle } from '../../common/turnAngle';
-import { inChaosCastle } from '../../common/locomotion';
-import { effects } from '../../effects';
+} from '@/controllers/pets';
+import { createAngleDeg, turnAngle } from '../../core/turnAngle';
+import { inChaosCastle } from '../../controllers/actors/locomotion';
+import { effects } from '../../controllers/fx';
 import {
   boneLocalPos,
   bonePos,
@@ -26,53 +24,20 @@ import {
   entityPos,
   fxNow,
   inWindow,
-} from '../../effects/core';
-import { FOOT_THUNDER_FRAMES, MODEL, RGBS, TEX } from '../../effects/recipes';
-import { Store } from '../../store';
-import { PlayerAction } from '../../common/objects/enum';
-import { RIDER_FLY_WORLDS } from '../../combat/recipes';
-import { playUiSound } from '../../sound/ui';
-import { playSfx } from '../../sound/listener';
+} from '../../controllers/fx/core';
+import { FOOT_THUNDER_FRAMES, MODEL, RGBS, TEX } from '../../controllers/fx/recipes';
+import { Drops } from '../../modules/drops';
+import { PlayerAction } from '@versions/shared/objects/enum';
+import { RIDER_FLY_WORLDS } from '../../controllers/combat/recipes';
+import { playUiSound } from '../../controllers/sound/ui';
+import { playSfx } from '../../controllers/sound/listener';
 import type { Entity, ISystemFactory, Item } from '../world';
 import { teleportMountAlpha } from './teleportSystem';
+import { petShown } from './othersShown';
 
 /**
- * `Mounts[]` - the pet objects that live in the world rather than on the
- * wearer's skeleton (GOBoid.cpp:66-680).
- *
- *  - **Guardian Angel**: a boid. It drifts on a heading it re-rolls roughly
- *    every 32 ticks, turns back towards its owner once it is more than
- *    `FlyRange` away, and is nudged to stay between 100 and 200 units above
- *    the owner's feet.
- *  - **Uniria / Dinorant**: pinned to the rider's position and yaw, standing
- *    (action 0) or moving (action 2). A Dinorant drops 30 units below the
- *    rider, who is lifted the same 30 off the terrain (AnimationSystem).
- *
- * Only the *mounts* fade out inside a safe zone (`o->Alpha = 0`, the branch
- * each rideable type opens with - GOBoid.cpp:182, :323, :497). MODEL_HELPER
- * has no such branch (:604-621): the angel keeps flying, in town too. None
- * of them are created in Chaos Castle (`CreateMountSub`:68). The Imp is *not*
- * here: it is link-rendered on the owner's bone 34 (`PlayerObject.Pet`).
- *
- *  - **Dark Raven** (`CSPetDarkSpirit`, CSPetSystem.cpp:291-610): worn in the
- *    *left hand*, so it gets its own slot beside the helper pet. It circles
- *    its owner ~250 units up (350 over a Dark Horse, FlyRange 150) and, in a
- *    safe zone, lands beside the owner's shoulder instead of fading out.
- *    The perch is an approximation: the original glues it to bone 37, which
- *    a world object here cannot reach.
- *
- *  - **Followers** (`PetObject`, w_BasePet.cpp): the Demon, the Spirit of
- *    Guardian, Rudolph, the Panda, the Pet Unicorn and the Pet Skeleton.
- *    Each stands off its owner at a fixed height and crawls after him; none
- *    of them is ridden, fades in town, or plays more than one clip. Four of
- *    them also fetch zen dropped near their owner (`errand`), which is the
- *    whole point of a Panda.
- *
- *  - **Dark Horse / Fenrir**: pinned like the horns. The horse walks on
- *    clip 1; a Fenrir mirrors its rider's `PLAYER_FENRIR_*` clip family
- *    (`fenrirMountAction`, MoveMount GOBoid.cpp:200-266) and carries the
- *    eye / jaw glow and the variant-coloured body lightning of
- *    ZzzObject.cpp:855-895.
+ * `Mounts[]` and world pets: angel, horns, raven, followers, horse, Fenrir
+ * (GOBoid.cpp:66-680, CSPetSystem.cpp:291-610, w_BasePet.cpp). See ecs/readme.md.
  */
 
 const MU_UNIT = 1 / 100;
@@ -687,7 +652,7 @@ export const PetSystem: ISystemFactory = world => {
         if (owner.localPlayer && collect.sent >= PICKUP_GAP) {
           collect.sent = 0;
           if (!world.pickupTarget) {
-            Store.pickupItemRequest(collect.target!.netId!);
+            Drops.pickupItemRequest(collect.target!.netId!);
           }
         }
 
@@ -1119,7 +1084,7 @@ export const PetSystem: ISystemFactory = world => {
         const wanted = chaosCastle ? null : owner.charAppearance.pet;
         const spec = petSpec(wanted);
         // The Imp is not a world object - PlayerObject.Pet carries it.
-        const wantsActor = spec && spec.kind !== 'imp' ? wanted : null;
+        const wantsActor = spec && spec.kind !== 'imp' && petShown(owner, spec.kind) ? wanted : null;
 
         if (stale(spawned.get(owner), wantsActor, map)) {
           despawn(owner, false);
@@ -1127,7 +1092,7 @@ export const PetSystem: ISystemFactory = world => {
         }
 
         // The raven rides the left-hand slot, beside whatever the pet slot holds.
-        const raven = chaosCastle
+        const raven = chaosCastle || !petShown(owner, 'raven')
           ? null
           : ravenOf(owner.charAppearance.leftHand);
         if (stale(spawnedRaven.get(owner), raven, map)) {

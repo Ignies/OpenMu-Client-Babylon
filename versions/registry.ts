@@ -14,8 +14,8 @@
  * after `load()` resolved; version UI reaches app code, which is why it
  * sits behind the separate `loadUi()`.
  */
-import type { GameVersion, GameVersionId } from '../src/version/contract';
-import type { VersionUi } from '../src/version/uiContract';
+import type { GameVersion, GameVersionId } from '@/version/contract';
+import type { VersionUi } from '@/version/uiContract';
 
 /**
  * The three packet lists a version exports. Typed against the season6 set
@@ -30,7 +30,7 @@ export type VersionPackets = {
 };
 
 /** What `versions/<id>/index.ts` exports. */
-export type VersionModule = {
+type VersionModule = {
   gameVersion: GameVersion;
   packets: VersionPackets;
 };

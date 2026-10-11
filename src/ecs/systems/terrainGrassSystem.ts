@@ -1,5 +1,5 @@
-import type { ArcRotateCamera } from '../../libs/babylon/exports';
-import { grassFieldForFrame, type GrassActor } from '../../libs/mu/terrainGrass';
+import type { ArcRotateCamera } from '../../controllers/render/babylon/exports';
+import { grassFieldForFrame, type GrassActor } from '../../controllers/terrain/terrainGrass';
 import type { Entity, ISystemFactory } from '../world';
 
 /**
@@ -18,23 +18,8 @@ import type { Entity, ISystemFactory } from '../world';
  */
 export const TerrainGrassSystem: ISystemFactory = world => {
   /**
-   * Who can be in the grass, and nothing else.
-   *
-   * This was `world.with('transform')` - every entity that has a position.
-   * On Lorencia that is 2875 of them, 412 within actor range, and 406 of
-   * those were static map props: rocks, barrels, fence posts. The press
-   * budget is four, so it went to the hero and three pieces of scenery, and
-   * because the nearest rock changes as the hero walks, each new one stamped
-   * a fresh full-life press that evicted the hero's fading breadcrumbs. Two
-   * symptoms, one cause: grass lying flat under nothing visible, and no body
-   * ever leaving a path. The ambient birds were in there too, pushing the
-   * field aside from six tiles up.
-   *
-   * A creature is one the server names (`netId`), the local hero, one of the
-   * offline maps' own NPCs, or a pet. Nothing else has feet. Four buckets
-   * rather than one query filtered per frame: miniplex maintains these
-   * incrementally, so the cost is the handful of bodies on the map and not a
-   * sweep of every prop on it.
+   * Who can be in the grass: server objects, the hero, offline NPCs and pets,
+   * as four incremental queries. See ecs/readme.md.
    */
   const groups = [
     world.with('transform', 'netId'),

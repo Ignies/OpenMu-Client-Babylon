@@ -1,11 +1,12 @@
 import { With } from 'miniplex';
-import { MapPlayerNetClassToModelClass } from '../../common/mapPlayerNetClassToModelClass';
-import { getModel, loadGLTF } from '../../common/modelLoader';
-import { ModelObject } from '../../common/modelObject';
-import { PlayerObject } from '../../common/playerObject';
-import { MapObjectLights } from '../../common/mapObjectLights';
-import { blendMeshFor } from '../../common/blendMeshes';
-import { toRenderAngles } from '../../common/renderAngles';
+import { MapPlayerNetClassToModelClass } from '../../controllers/actors/mapPlayerNetClassToModelClass';
+import { getModel, loadGLTF } from '../../controllers/assets/modelLoader';
+import { ModelObject } from '../../controllers/render/modelObject';
+import { PlayerObject } from '../../controllers/actors/playerObject';
+import { applyNpcShadow } from '../../controllers/actors/modelFactoryPerId';
+import { MapObjectLights } from '../../controllers/lighting/mapObjectLightAdapter';
+import { blendMeshFor } from '../../controllers/render/blendMeshes';
+import { toRenderAngles } from '../../controllers/render/renderAngles';
 import {
   Color3,
   CreateBox,
@@ -13,7 +14,7 @@ import {
   StandardMaterial,
   type Skeleton,
   Vector3,
-} from '../../libs/babylon/exports';
+} from '../../controllers/render/babylon/exports';
 import { Entity, ISystemFactory, World } from '../world';
 
 const v3Temp = { x: 0, y: 0, z: 0 };
@@ -77,7 +78,6 @@ function createModelObject(
   world: World,
   entity: With<Entity, 'modelFactory' | 'worldIndex' | 'transform'>
 ) {
-  const terrainScale = world.terrainScale;
   const transform = entity.transform;
   const modelId = entity.modelId;
 
@@ -89,6 +89,7 @@ function createModelObject(
 
   const modelObject = entity.modelObject as any as ModelObject;
   modelObject.WorldIndex = entity.worldIndex;
+  if (entity.npcType !== undefined) applyNpcShadow(modelObject, entity.npcType);
   if (modelId !== undefined) {
     modelObject.Type = modelId;
     // `modelId` is set by `createObjects` and by nothing else, so it is the
@@ -152,7 +153,8 @@ function createModelObject(
   modelObject
     .init(world, entity)
     .then(() => {
-      if (modelObject.gltf || modelObject.Ready) {
+      // Disposed while loading (a boid that flew off, an object that left scope): nothing failed.
+      if (modelObject.gltf || modelObject.Ready || modelObject.disposed) {
         return;
       }
       if (!entity.modelObject) {
@@ -203,6 +205,19 @@ type Pending = {
 /** `nearby` entities queue behind every `visible` one whatever their distance. */
 const NEARBY_PENALTY = 1e6;
 
+/** Moves the `k` lowest priorities of `list[0..n)` to the front in order; sorts in place, no allocation. */
+export function selectNearest(list: { priority: number }[], n: number, k: number): void {
+  for (let i = 0; i < k; i++) {
+    let best = i;
+    for (let j = i + 1; j < n; j++) {
+      if (list[j].priority < list[best].priority) best = j;
+    }
+    const swap = list[i];
+    list[i] = list[best];
+    list[best] = swap;
+  }
+}
+
 export const ModelLoaderSystem: ISystemFactory = world => {
   const query = world.with(
     'modelFactory',
@@ -220,7 +235,8 @@ export const ModelLoaderSystem: ISystemFactory = world => {
 
       const hero = world.playerEntity?.transform.pos;
 
-      pending.length = 0;
+      // A pool that only grows: slots are rewritten, not pushed, every frame.
+      let n = 0;
 
       for (const entity of query) {
         const visibility = entity.visibility;
@@ -234,13 +250,10 @@ export const ModelLoaderSystem: ISystemFactory = world => {
                 ? (pos.x - hero.x) * (pos.x - hero.x) +
                   (pos.z - hero.z) * (pos.z - hero.z)
                 : 0;
-              pending.push({
-                entity,
-                priority:
-                  visibility.state === 'nearby'
-                    ? distance + NEARBY_PENALTY
-                    : distance,
-              });
+              const slot = (pending[n++] ??= { entity, priority: 0 });
+              slot.entity = entity;
+              slot.priority =
+                visibility.state === 'nearby' ? distance + NEARBY_PENALTY : distance;
             }
             break;
           }
@@ -254,13 +267,11 @@ export const ModelLoaderSystem: ISystemFactory = world => {
         }
       }
 
-      if (pending.length === 0) return;
+      if (n === 0) return;
 
-      if (pending.length > MODELS_PER_FRAME) {
-        pending.sort((a, b) => a.priority - b.priority);
-      }
+      const count = Math.min(n, MODELS_PER_FRAME);
+      if (n > MODELS_PER_FRAME) selectNearest(pending, n, count);
 
-      const count = Math.min(pending.length, MODELS_PER_FRAME);
       for (let i = 0; i < count; i++) {
         createModelObject(world, pending[i].entity);
       }

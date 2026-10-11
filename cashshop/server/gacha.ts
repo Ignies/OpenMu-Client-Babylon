@@ -1,5 +1,5 @@
-import items from '../../src/common/items.json';
-import { hasItemIconFile } from '../../src/common/itemIconPack';
+import { items as itemFiles } from '../../versions/shared/items/all';
+import { hasItemIconFile } from '../../src/controllers/assets/itemIconFiles';
 
 /**
  * The gacha roll: a random armour piece, +0 to +12, usually plain and now and
@@ -42,7 +42,7 @@ const GROUP_LABEL: Record<number, string> = {
   11: 'Boots',
 };
 
-export interface PoolEntry {
+interface PoolEntry {
   group: number;
   num: number;
   name: string;
@@ -63,7 +63,7 @@ export interface PoolEntry {
  * (`Orders.grantableRoll`), rolling again on a miss - so a paid roll is never
  * one the game cannot hand over.
  */
-export const GACHA_POOL: PoolEntry[] = (items as unknown as ItemRow[])
+export const GACHA_POOL: PoolEntry[] = (itemFiles.all() as unknown as ItemRow[])
   .filter(row => ARMOUR_GROUPS.includes(row.Group))
   .filter(row => typeof row.ItemName === 'string' && row.ItemName.length > 0)
   .filter(row => hasItemIconFile(row.Group, row.Index, 15, '_e'))
@@ -82,7 +82,7 @@ export const GACHA_POOL: PoolEntry[] = (items as unknown as ItemRow[])
  * them a given definition actually offers comes from its own
  * `PossibleItemOptions` at fulfilment; these are the labels the reveal shows.
  */
-export const EXCELLENT_OPTIONS = [
+const EXCELLENT_OPTIONS = [
   'Increase Zen after hunt +40%',
   'Defense success rate +10%',
   'Reflect damage +5%',
@@ -93,7 +93,7 @@ export const EXCELLENT_OPTIONS = [
 
 export type Tier = 'common' | 'rare' | 'epic' | 'legendary';
 
-export interface TierSpec {
+interface TierSpec {
   tier: Tier;
   /** Per 1000 pulls. */
   weight: number;
@@ -118,7 +118,7 @@ export interface TierSpec {
  * nowhere else - and only with the replay contract in mind, because every
  * committed seed replays through whatever is written here.
  */
-export const TIERS: TierSpec[] = [
+const TIERS: TierSpec[] = [
   { tier: 'common', weight: 700, levels: [0, 4], excellent: false, options: [0, 0] },
   { tier: 'rare', weight: 235, levels: [5, 9], excellent: false, options: [0, 0] },
   { tier: 'epic', weight: 60, levels: [3, 9], excellent: true, options: [1, 2] },
@@ -188,7 +188,7 @@ export function newSeed(): number {
  * The draw order is the replay contract, and every draw consumes exactly one
  * number from the generator whether or not its result is used:
  *
- *   1. the pool entry, uniform over GACHA_POOL in items.json order;
+ *   1. the pool entry, uniform over GACHA_POOL in (group, index) order;
  *   2. the tier, weighted by TIERS;
  *   3. the level, uniform over the tier's range;
  *   4. the option count, uniform over the tier's range - a plain tier's range

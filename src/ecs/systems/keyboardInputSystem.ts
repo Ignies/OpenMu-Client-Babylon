@@ -1,14 +1,16 @@
-import { EventBus } from '../../libs/eventBus';
-import { Store } from '../../store';
+import { EventBus } from '../../core/eventBus';
+import { MsgBox } from '../../controllers/interface';
 import {
   isCapturingKey,
   isKey,
   WALK_KEY_CODES,
-} from '../../common/keyBindings';
-import { GameOptions } from '../../common/gameOptions';
-import { ITEM_HOTKEY_CODES } from '../../common/itemHotkeys';
-import { MuWindows } from '../../ui/components/muWindow/windowState';
-import { openSystemMenu } from '../../common/sessionExit';
+} from '../../controllers/interface/keyBindings';
+import { GameOptions } from '@/controllers/settings';
+import { ITEM_HOTKEY_CODES } from '../../modules/inventory/itemHotkeys';
+import { MuWindows } from '../../controllers/interface/windowManager';
+import { openSystemMenu } from '../../modules/session/sessionExit';
+import { AppState, UIState } from '../../controllers/interface/uiState';
+import { playUiSound } from '../../controllers/sound/sfx';
 import type { ISystemFactory } from '../world';
 
 /** Keys the page would scroll on; kept from doing so while playing. */
@@ -31,6 +33,22 @@ function hasPageSelection(): boolean {
 
 /** The focused element takes characters, so nothing here is a hot key. */
 export const isTypingInField = (): boolean => isTextField(document.activeElement);
+
+/** The pre-game `CSysMenuWin` (versions/shared/ui/windows/system_menu/pregame.tsx). */
+export const PREGAME_MENU = 'sys_menu';
+
+/**
+ * `CUIMng::Update` (UIMng.cpp:691-705): Escape on the server list or the character screen shows
+ * `CSysMenuWin` when no message box or Options is up; the window stack hides it again.
+ */
+export function openPregameMenu(): boolean {
+  const screen = AppState.uiState;
+  if (screen !== UIState.Servers && screen !== UIState.Characters) return false;
+  if (MsgBox.msgWin || MuWindows.isOpen('options') || MuWindows.isOpen(PREGAME_MENU)) return false;
+  MuWindows.setOpen(PREGAME_MENU, true);
+  playUiSound('click');
+  return true;
+}
 
 /**
  * The one keyboard dispatcher. Every keydown goes through here before any
@@ -69,7 +87,7 @@ export const KeyboardInputSystem: ISystemFactory = world => {
       // Ctrl+W is the browser's own and cannot be taken back from here.
       if (
         e.ctrlKey &&
-        Store.inventoryEnabled &&
+        MuWindows.isOpen('inventory') &&
         ITEM_HOTKEY_CODES.includes(e.code)
       ) {
         e.preventDefault();
@@ -83,7 +101,7 @@ export const KeyboardInputSystem: ISystemFactory = world => {
     // field closes itself (chat, prompts) rather than the windows behind it.
     if (typing) return;
     // `CMsgWin` is modal: while it is up it owns Enter and Escape.
-    if (Store.msgWin) return;
+    if (MsgBox.msgWin) return;
     // Ctrl+C over text selected in the chat log is the browser's copy, not
     // the Character window's C.
     if ((e.ctrlKey || e.metaKey) && e.code === 'KeyC' && hasPageSelection()) return;
@@ -95,7 +113,7 @@ export const KeyboardInputSystem: ISystemFactory = world => {
     }
     // `NewUIHotKey.cpp:131`: while the minimap sheet is up only its own key
     // (and Escape, which closes it) get through to the windows.
-    if (Store.minimapEnabled) {
+    if (MuWindows.isOpen('minimap')) {
       if (!isKey('minimap', e.code) && e.code !== 'Escape') return;
     } else if (e.code === 'Escape' && !pressedKeys.has('Escape')) {
       // Escape closes the top window only. A window without a closer of its
@@ -106,7 +124,7 @@ export const KeyboardInputSystem: ISystemFactory = world => {
       }
       // Nothing left to close, so Escape means the system menu, as it does
       // in the original.
-      if (openSystemMenu()) {
+      if (openPregameMenu() || openSystemMenu()) {
         pressedKeys.add(e.code);
         return;
       }

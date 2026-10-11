@@ -1,0 +1,36 @@
+import { defineMonster } from '@/controllers/monsters';
+
+export default defineMonster({
+  Numb: 44,
+  Name: 'Golden Dragon',
+  maxHealth: 15000,
+  model: { type: 31, scale: 0.9 },
+  appearSound: { sound: 'Sound/mBullAttack1', channels: 2 }, // AppearMonster, WSclient.cpp:2842-2847
+  stats: {
+    Rate: 1,
+    Level: 60,
+    HP: 15000,
+    MP: 0,
+    MinDmg: 190,
+    MaxDmg: 210,
+    Def: 120,
+    MagDef: 0,
+    AttackSuccess: 300,
+    Move: 88,
+    AttType: 3,
+    Range: 150,
+    View: 2,
+    MoveSpeed: 7,
+    AttSpeed: 400,
+    Regen: 1800,
+    Attri: 100,
+    ItemR: 2,
+    MoneyR: 50,
+    MaxI: 10,
+    ResWind: 0,
+    ResPois: 0,
+    ResIce: 9,
+    ResWater: 7,
+    ResFire: 9,
+  },
+});

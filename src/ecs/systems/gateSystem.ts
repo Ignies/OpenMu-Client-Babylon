@@ -1,8 +1,11 @@
 import type { ISystemFactory } from '../world';
-import { Store } from '../../store';
-import { findEntranceGateAt, loadGates, type Gate } from '../../libs/mu/gates';
-import { EventBus } from '../../libs/eventBus';
-import { prefetchWorldTerrain } from '../../libs/mu/prefetchWorld';
+import { enterGateRequest } from '../../modules/warp';
+import { Session } from '../../modules/session';
+import { Loading } from '../../controllers/loading';
+import { findEntranceGateAt, loadGates, type Gate } from '@/controllers/assets/mu';
+import { EventBus } from '../../core/eventBus';
+import { prefetchWorldTerrain } from '../../controllers/assets/prefetchWorld';
+import { isSliding } from './positionSlideSystem';
 
 export const GateSystem: ISystemFactory = world => {
   let allGates: readonly Gate[] | null = null;
@@ -26,13 +29,15 @@ export const GateSystem: ISystemFactory = world => {
   return {
     update: () => {
       if (!allGates) return;
-      if (Store.isOffline) return;
+      if (Session.isOffline) return;
       // A warp is in flight: the hero's position is the old map's until the
       // new terrain is up, and a second EnterGate on top of it double-warps.
-      if (Store.sceneLoading) return;
+      if (Loading.sceneLoading) return;
 
       const playerEntity = world.playerEntity;
       if (!playerEntity) return;
+      // `Hero->JumpTime == 0` (ZzzInterface.cpp:2679): no gate while the server's move slides him in.
+      if (isSliding(playerEntity)) return;
 
       const map = playerEntity.worldIndex;
       if (map === undefined) return;
@@ -67,7 +72,7 @@ export const GateSystem: ISystemFactory = world => {
       const exit = allGates[gate.target];
       if (exit && exit.map !== map) prefetchWorldTerrain(exit.map);
 
-      Store.enterGateRequest(gate.index);
+      enterGateRequest(gate.index);
     },
   };
 };

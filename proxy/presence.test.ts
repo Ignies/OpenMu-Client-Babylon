@@ -7,12 +7,13 @@ import {
   sessionAccount,
   unidentifiedConnections,
 } from './presence';
-import { SimpleModulusEncryptor, SimpleModulusKeys } from '../src/common/encryption/simpleModulus';
-import { Xor32Encryptor } from '../src/common/encryption/xor32';
-import { Xor3Byte } from '../src/common/encryption/xor3';
-import { stringToBytes } from '../src/common/wireUtils';
-import { SESSION_NONCE_RE, sessionNonce } from '../src/common/sessionNonce';
+import { SimpleModulusEncryptor, SimpleModulusKeys } from '../src/controllers/net/encryption/simpleModulus';
+import { Xor32Encryptor } from '../src/controllers/net/encryption/xor32';
+import { Xor3Byte } from '../src/controllers/net/encryption/xor3';
+import { stringToBytes } from '../src/controllers/net/wireUtils';
+import { SESSION_NONCE_RE, sessionNonce } from '../src/controllers/net/sessionNonce';
 import { gameVersion } from '../versions/season6';
+import { TokenLoginPacket } from '../versions/shared/packets/ClientToServerPackets';
 
 /**
  * The sniffer is only worth anything if it reads a frame the real client
@@ -48,6 +49,17 @@ function loginFrame(encryptor: SimpleModulusEncryptor, xor32: Xor32Encryptor, na
   packet.set(stringToBytes('k1Pk2jcET48mxL3b', 16), 33);
 
   return encryptor.Encrypt(xor32.Encrypt(packet));
+}
+
+/** The token login (C3 E7 05), which the client sends instead of the login when it keeps a token. */
+function tokenLoginFrame(encryptor: SimpleModulusEncryptor, xor32: Xor32Encryptor, name: string): Uint8Array {
+  const p = TokenLoginPacket.createPacket();
+  const username = stringToBytes(name, 10);
+  Xor3Byte(username);
+  p.setUsername(username, 10);
+  p.setToken(new Uint8Array(32).fill(7), 32);
+  p.setClientVersion(stringToBytes('10404', 5), 5);
+  return encryptor.Encrypt(xor32.Encrypt(new Uint8Array(p.buffer.buffer)));
 }
 
 /** Any other C3 the client might send first, so the packet counter has to line up. */
@@ -96,6 +108,21 @@ describe('login sniffing', () => {
     expect(lookup('testuser').online).toBe(true);
 
     connection.close();
+  });
+
+  it('reads the name out of a token login as well, under the same rule', () => {
+    const accepted = new ConnectionPresence();
+    expect(accepted.feed(tokenLoginFrame(clientEncryptor(), new Xor32Encryptor(), 'tokenuser'))).toBe('tokenuser');
+    expect(accepted.loginName).toBeNull();
+    expect(accepted.feedFromServer(LOGIN_OKAY)).toBe('tokenuser');
+    expect(lookup('tokenuser').online).toBe(true);
+    accepted.close();
+
+    const refused = new ConnectionPresence();
+    refused.feed(tokenLoginFrame(clientEncryptor(), new Xor32Encryptor(), 'tokenuser'));
+    expect(refused.feedFromServer(LOGIN_WRONG_PASSWORD)).toBeNull();
+    expect(lookup('tokenuser').online).toBe(false);
+    refused.close();
   });
 
   it('names nobody when a second login is in flight as the answer arrives', () => {

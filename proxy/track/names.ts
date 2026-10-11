@@ -1,19 +1,19 @@
-import monsters from '../../src/common/monsters.json';
-import items from '../../src/common/items.json';
-import { mapName as gmMapName } from '../../src/common/gmMaps';
+import { monsters } from '../../versions/shared/monsters/all';
+import { items as itemFiles } from '../../versions/shared/items/all';
+import { mapName as gmMapName } from '../../src/modules/gm/gmMaps';
 
 /**
  * The names a journal line needs, from the tables the client already ships.
- * Read straight off the JSON rather than through `ItemsDatabase` /
+ * Read straight off the item and monster files rather than through `ItemsDatabase` /
  * `MonstersDatabase`: those reach for the language packs, and the proxy has
  * no Data folder to read them from.
  */
 
 const MONSTER_NAMES = new Map<number, string>();
-for (const monster of monsters) MONSTER_NAMES.set(monster.Numb, monster.Name);
+for (const monster of monsters.all()) MONSTER_NAMES.set(monster.Numb, monster.Name);
 
 const ITEM_NAMES = new Map<number, string>();
-for (const item of items) ITEM_NAMES.set(item.Group * 512 + item.Index, item.ItemName);
+for (const item of itemFiles.all()) ITEM_NAMES.set(item.Group * 512 + item.Index, item.ItemName);
 
 export function monsterName(type: number): string {
   return MONSTER_NAMES.get(type) ?? `Monster ${type}`;

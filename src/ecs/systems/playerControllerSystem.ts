@@ -1,18 +1,20 @@
 import {
   PointerEventTypes,
   type ArcRotateCamera,
-} from '../../libs/babylon/exports';
+} from '../../controllers/render/babylon/exports';
 import type { ISystemFactory, World } from '../world';
-import { Store, UIState } from '../../store';
-import { isMobileDevice } from '../../common/mobile';
-import { MoveTargetEffect } from '../../common/moveTargetEffect';
-import { GameOptions } from '../../common/gameOptions';
-import { WALK_KEYS } from '../../common/keyBindings';
-import { aimX, aimY } from '../../camera';
-import { Commands } from '../../commands';
-import { teleportGate } from '../../common/teleportRules';
+import { Bag } from '../../modules/inventory';
+import { AppState, UIState } from '../../controllers/interface/uiState';
+import { isMobileDevice } from '../../controllers/interface/mobile';
+import { MoveTargetEffect } from '../../controllers/fx/moveTargetEffect';
+import { GameOptions } from '@/controllers/settings';
+import { WALK_KEYS } from '../../controllers/interface/keyBindings';
+import { aimX, aimY } from '../../controllers/camera';
+import { Commands } from '../../modules/chat/commands';
+import { teleportGate } from '../../modules/warp/teleportRules';
 import { teleportBusy } from './teleportSystem';
-import { pickGround } from '../../libs/mu/terrainPick';
+import { isSliding } from './positionSlideSystem';
+import { pickGround } from '../../controllers/terrain/terrainPick';
 
 const MOVE_DELAY = 0.25;
 
@@ -66,7 +68,8 @@ export const PlayerControllerSystem: ISystemFactory = world => {
 
     // Left button only, the same button `pointerInputSystem` walks on: the
     // middle one belongs to the camera and the right one casts.
-    if (ev.type === PointerEventTypes.POINTERDOWN && ev.event.button === 0) {
+    // A press while the server slides the hero in is lost, as `MoveHero` returns then (`JumpTime > 0`).
+    if (ev.type === PointerEventTypes.POINTERDOWN && ev.event.button === 0 && !isSliding(world.playerEntity)) {
       pressPending = true;
     }
   });
@@ -82,7 +85,7 @@ export const PlayerControllerSystem: ISystemFactory = world => {
 
     if (world.currentPointerTarget) return;
 
-    if (Store.pickedItem) return;
+    if (Bag.pickedItem) return;
 
     const point = pickGround(world, aimX(lastClientX), aimY(lastClientY));
 
@@ -103,12 +106,11 @@ export const PlayerControllerSystem: ISystemFactory = world => {
     world.attackTarget = null;
     world.pickupTarget = null;
     world.talkTarget = null;
-    // Touch only: a skill fired from the mobile pad leaves a cast standing
-    // while the hero walks into range, the way a held right button does. With
-    // no button to let go of, a tap on the ground is how it is called off. On
-    // a mouse the right-drag repeat re-arms `castRequest` on every move event,
-    // so clearing it there would fight the desktop repeat cast.
-    if (isMobileDevice()) world.castRequest = null;
+    // A skill fired at something out of range leaves a cast standing while the hero walks into
+    // range; a ground click calls it off, as MOVEMENT_MOVE replaces MOVEMENT_SKILL
+    // (ZzzInterface.cpp:3285). Not while the right button is held: its drag repeat re-arms the
+    // cast on every move.
+    if (isMobileDevice() || !world.rightPointerPressed) world.castRequest = null;
   }
 
   /** The tile step the walk is currently aimed along; 0,0 when idle. */
@@ -180,7 +182,7 @@ export const PlayerControllerSystem: ISystemFactory = world => {
       camera &&
       // Dead until the server respawns us, the same gate the click walk has.
       !playerEntity.dying &&
-      Store.uiState === UIState.World
+      AppState.uiState === UIState.World
     ) {
       const keys = world.keyboardInput.pressedKeys;
 
@@ -267,7 +269,9 @@ export const PlayerControllerSystem: ISystemFactory = world => {
 
       moveTarget.update(dt);
 
-      const steering = keyboardWalk(dt);
+      // `MoveHero` takes nothing while the server slides the hero in; held keys and buttons go on after.
+      const held = isSliding(world.playerEntity);
+      const steering = !held && keyboardWalk(dt);
 
       // A press that is still down repeats the walk on the throttle; a press
       // already released walks once. Either way the throttle holds - a tap
@@ -276,7 +280,7 @@ export const PlayerControllerSystem: ISystemFactory = world => {
         // The keys steer; a click made while they are held is not a walk
         // waiting to happen once they are let go.
         pressPending = false;
-      } else if (world.pointerPressed || pressPending) {
+      } else if (!held && (world.pointerPressed || pressPending)) {
         if (delay <= 0) {
           delay = MOVE_DELAY;
           pressPending = false;
@@ -287,6 +291,11 @@ export const PlayerControllerSystem: ISystemFactory = world => {
       for (const entity of query) {
         const { playerMoveTo, transform, pathfinding, localPlayer } = entity;
         if (playerMoveTo.handled) continue;
+        // Asked for while the server slides the hero in: lost, as `MoveHero` returns (`JumpTime > 0`).
+        if (localPlayer && isSliding(entity)) {
+          playerMoveTo.handled = true;
+          continue;
+        }
         // A walk asked for mid-teleport waits for it: the original holds the
         // hero until he is back above 0.7 alpha (ZzzInterface.cpp:3080), and
         // OpenMU puts him back on the target square when it answers, undoing

@@ -1,8 +1,8 @@
-import { SimpleModulusDecryptor } from "../src/common/encryption/simpleModulus";
-import { Xor32Decryptor } from "../src/common/encryption/xor32";
-import { Xor3Byte } from "../src/common/encryption/xor3";
-import { getPacketSize, getSizeOfPacketType } from "../src/common/wireUtils";
-import { SESSION_NONCE_RE } from "../src/common/sessionNonce";
+import { SimpleModulusDecryptor } from "../src/controllers/net/encryption/simpleModulus";
+import { Xor32Decryptor } from "../src/controllers/net/encryption/xor32";
+import { Xor3Byte } from "../src/controllers/net/encryption/xor3";
+import { getPacketSize, getSizeOfPacketType } from "../src/controllers/net/wireUtils";
+import { SESSION_NONCE_RE } from "../src/controllers/net/sessionNonce";
 
 /**
  * Who is connected right now, answered on loopback.
@@ -35,7 +35,7 @@ import { SESSION_NONCE_RE } from "../src/common/sessionNonce";
  * `/ticket/<nonce>` is strictly more sensitive than `/presence/<account>`.
  * Presence says whether a name is playing, which anyone standing next to the
  * player could tell. The ticket route turns a nonce the browser chose for
- * itself (src/common/sessionNonce.ts, sent on the socket URL by
+ * itself (src/controllers/net/sessionNonce.ts, sent on the socket URL by
  * `createSocket`) into the account that logged in over it, and the cash shop
  * signs that answer into a bearer ticket: whoever can reach this server with
  * a nonce in hand is that account in the shop. Loopback-only is not tidiness
@@ -62,6 +62,12 @@ const MAX_SNIFF_BYTES = Number(process.env.PRESENCE_SNIFF_LIMIT ?? 65536);
  */
 const LOGIN_CODE = 0xf1;
 const LOGIN_SUB_CODE = 0x01;
+/**
+ * The token login (our OpenMU plugin, `openmu/readme.md`): C3 E7 05, the name at the same offset and Xor3-encoded
+ * like the login's. The server answers it with the same `LoginResponse`.
+ */
+const TOKEN_LOGIN_CODE = 0xe7;
+const TOKEN_LOGIN_SUB_CODE = 0x05;
 /** `LoginResponseLoginResultEnum.Okay`; every other value is a refusal. */
 const LOGIN_OKAY = 0x01;
 /** `[C1, 05, F1, 01, result]`. */
@@ -358,8 +364,10 @@ export class ConnectionPresence {
     const codeIndex = getSizeOfPacketType(packet[0]);
 
     if (packet.length < codeIndex + 2) return null;
-    if (packet[codeIndex] !== LOGIN_CODE) return null;
-    if (packet[codeIndex + 1] !== LOGIN_SUB_CODE) return null;
+    const code = packet[codeIndex];
+    const sub = packet[codeIndex + 1];
+    const isLogin = (code === LOGIN_CODE && sub === LOGIN_SUB_CODE) || (code === TOKEN_LOGIN_CODE && sub === TOKEN_LOGIN_SUB_CODE);
+    if (!isLogin) return null;
     if (packet.length < NAME_OFFSET + NAME_LENGTH) return null;
 
     const name = packet.slice(NAME_OFFSET, NAME_OFFSET + NAME_LENGTH);

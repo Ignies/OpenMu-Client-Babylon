@@ -1,0 +1,23 @@
+// Old entry point, kept so importers stay unchanged. Loads every shared skill.
+import './index';
+export type { SkillContext } from '@/controllers/skills/visuals';
+export type { Step } from '@/controllers/skills/visuals';
+export type { Travel } from '@/controllers/skills/visuals';
+export type { SkillVisual } from '@/controllers/skills/visuals';
+export { playChainLightningHop } from './summoner/chain_lightning';
+export { playTeleportFlash } from './dark_wizard/teleport';
+export { playBuffHits } from '@/controllers/skills/visuals';
+export { playSummonArrival } from './_shared';
+export { SKILL_VISUALS } from '@/controllers/skills/visuals';
+export { fallbackFor } from '@/controllers/skills/visuals';
+export { baseSkill } from '@/controllers/skills/visuals';
+export { skillVisualFor } from '@/controllers/skills/visuals';
+export { skillVisualCount } from '@/controllers/skills/visuals';
+export { playTargetedSkillVisual } from '@/controllers/skills/visuals';
+export { playAreaSkillVisual } from '@/controllers/skills/visuals';
+export { playBowShotVisual } from '@/controllers/skills/visuals';
+export { afterHeroRelease } from '@/controllers/skills/visuals';
+export { BUFF_VISUALS } from '@/controllers/skills/visuals';
+export { setBuffVisual } from '@/controllers/skills/visuals';
+export { clearBuffVisuals } from '@/controllers/skills/visuals';
+export { refreshBuffVisuals } from '@/controllers/skills/visuals';

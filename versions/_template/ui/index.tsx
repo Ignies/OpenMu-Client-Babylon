@@ -6,17 +6,17 @@
  *   (below), and its `gameVersion.features.*` flag goes false so the
  *   consumer stops asking for it;
  * - a window that *differs* is a sibling file here that composes the shared
- *   primitives from `src/ui/components/`, never a fork of them;
+ *   primitives from `src/controllers/interface/components/`, never a fork of them;
  * - a window that is the same is a re-export of the base one.
  *
  * This module may import app code: it is only ever loaded from inside the
  * running app (`loadVersionUi`), never from the boot path. The version's
  * `index.ts` may not.
  */
-import { ENUM_WORLD } from '../../../src/common/types';
-import { LoginPage } from '../../../src/ui/pages/loginPage';
-import { CharactersPage } from '../../../src/ui/pages/charactersPage';
-import type { PregameUi } from '../../../src/version/uiContract';
+import { ENUM_WORLD } from '@/core/types';
+import { LoginPage } from '../../shared/ui/pages/login';
+import { CharactersPage } from '../../shared/ui/pages/character_select';
+import type { PregameUi } from '@/version/uiContract';
 import { templatePreload } from './preload';
 
 export const pregame: PregameUi = {

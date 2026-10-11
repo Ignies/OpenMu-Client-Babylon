@@ -1,0 +1,44 @@
+import { ENUM_WORLD } from '@/core/types';
+import type { World } from '@/ecs/world';
+import { PlaySpeedObject, bindAbsentModels } from '../shared/objectVariants';
+import { EmpireGuardian4WallTorchObject } from '../empireguardian4/wallTorchObject';
+
+/**
+ * Fortress of Imperial Guardian (`WD_69EMPIREGUARDIAN1 … 4`, `World70…73`).
+ * One module for the four days, the way Blood Castle is one for its floors.
+ *
+ * `CreateObject` (GMEmpireGuardian1.cpp:45-66 and the three copies): 129-132
+ * normalise their yaw and cache it as `HeadAngle` (used by the event's
+ * turning statues), 115/117 get `SubType = 100`, day 4's 10 gets a random
+ * `SubType` countdown that restarts its animation. `MoveObject`: the play
+ * speed multipliers - 20 at 2x, 122-124 at 3x, 128 at 6x, 36 at 0.02, 64 at
+ * 0.64 (0.44 on day 3) - and the hidden list in `spec.ts`. `RenderObjectVisual`
+ * case 37 is day 4's wall torch (GMEmpireGuardian1.cpp:1621-1632, 2.cpp:607-618,
+ * 3.cpp:796-807); EncTerrain70-72 place none, the binding keeps the source.
+ *
+ * Not built: the event itself (gates, bosses, `RenderFrontSideVisual`), the
+ * days 1-3 ambience (`ImperialGuardianFort_out1/2/3`, picked by the weather
+ * byte of the 0xF7 0x02 enter result, which the client does not receive -
+ * day 4's `_in` bed is in `empireguardian4/sound.ts`), `CreateRain` on days 1-3
+ * (the leaves slot - days 1-3 are `outdoor` on their entry so the weather
+ * layer's rain can fall). `Music/ImperialGuardianFort` on all four.
+ */
+export async function createEmpireGuardian(world: World) {
+  const terrain = world.terrain;
+  if (!terrain) return;
+
+  const tiles = terrain.MapTileObjects;
+  const day3 = world.mapIndex === ENUM_WORLD.WD_71EMPIREGUARDIAN3;
+
+  // `fSpeed *= 2/3/6` over the default 0.16.
+  tiles[20] = PlaySpeedObject.at(0.32);
+  tiles[122] = PlaySpeedObject.at(0.48);
+  tiles[123] = PlaySpeedObject.at(0.48);
+  tiles[124] = PlaySpeedObject.at(0.48);
+  tiles[128] = PlaySpeedObject.at(0.96);
+  tiles[36] = PlaySpeedObject.at(0.02);
+  tiles[64] = PlaySpeedObject.at(day3 ? 0.44 : 0.64);
+  tiles[37] = EmpireGuardian4WallTorchObject;
+  // Day 1 places 95 (x3) and 126 (x1); no day ships Object96/127.bmd (LoadData.cpp:22-49).
+  bindAbsentModels(tiles, [95, 126]);
+}

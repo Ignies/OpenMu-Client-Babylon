@@ -1,7 +1,7 @@
 import type { Sql, TransactionSql } from 'postgres';
-import { InventoryConstants } from '../../src/common/inventoryConstants';
-import { findFreeSlot, type Footprint } from '../../src/common/inventoryFit';
-import { JEWEL_OF_CHAOS } from '../../src/common/jewelUpgrade';
+import { InventoryConstants } from '../../src/core/inventoryConstants';
+import { findFreeSlot, type Footprint } from '../../src/modules/inventory/inventoryFit';
+import { JEWEL_OF_CHAOS } from '../../src/modules/inventory/jewelUpgrade';
 import { productById, type Product } from './catalog';
 import {
   audit,
@@ -59,7 +59,7 @@ import {
 
 /* ------------------------------------------------------------------ config */
 
-export interface FulfilmentConfig {
+interface FulfilmentConfig {
   /** Whether anything is ever written. Off is a rehearsal with the real gate and reads. */
   fulfil: boolean;
   /** How often the queue is looked at. Every look costs a gate check per account with orders. */
