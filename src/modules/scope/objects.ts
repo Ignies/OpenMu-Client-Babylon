@@ -13,6 +13,7 @@ import { npcClassOf, npcHeroStateOf } from '@/controllers/actors/playerObject';
 import { monsterDisplayName, monsterMaxHealth } from '@versions/shared/monsters/monstersDatabase';
 import { playSfx } from '@/controllers/sound/sfx';
 import { clearBuffVisuals } from '@versions/shared/skills/skillVisuals';
+import { setObjectEffect } from '@/modules/skills/objectEffects';
 
 /** MoveSpeed 10 x REFERENCE_FPS 25 / 100 units per tile (ZzzCharacter.cpp:11530). */
 const MONSTER_WALK_TILES_PER_SECOND = 2.5;
@@ -27,6 +28,8 @@ type ScopeNpc = {
   Rotation: number;
   /** AddSummonedMonstersToScope only: name of the summoning player. */
   OwnerCharacterName?: string;
+  /** The buffs it enters view with. */
+  Effects?: readonly { Id: number }[];
 };
 
 /**
@@ -153,6 +156,9 @@ export function addNpcToScope(world: World, npc: ScopeNpc) {
   const monsterHP = monsterMaxHealth(npc.TypeNumber);
   npcEntity.attributeSystem.setValue('maxHealth', monsterHP);
   npcEntity.attributeSystem.setValue('currentHealth', monsterHP);
+
+  // RegisterBuff per listed buff (WSclient.cpp:2958-2964, summons :3085-3088).
+  for (const effect of npc.Effects ?? []) setObjectEffect(id, effect.Id, true);
 
   resumeWalkIntoScope(
     npcEntity,

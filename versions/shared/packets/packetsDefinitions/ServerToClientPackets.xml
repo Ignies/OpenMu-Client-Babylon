@@ -733,7 +733,6 @@
         <Structure>
           <Name>NpcData</Name>
           <Description>Contains the data of an NPC.</Description>
-          <Length>10</Length>
           <Fields>
             <Field>
               <Index>0</Index>
@@ -776,7 +775,26 @@
               <Index>9</Index>
               <Type>Byte</Type>
               <Name>EffectCount</Name>
-              <Description>Defines the number of effects which would be sent after this field. This is currently not supported.</Description>
+              <Description>Defines the number of effects which are sent after this field (ReceiveCreateMonsterViewport reads them).</Description>
+            </Field>
+            <Field>
+              <Index>10</Index>
+              <Type>Structure[]</Type>
+              <TypeName>EffectId</TypeName>
+              <Name>Effects</Name>
+              <ItemCountField>EffectCount</ItemCountField>
+            </Field>
+          </Fields>
+        </Structure>
+        <Structure>
+          <Name>EffectId</Name>
+          <Description>Contains the id of a magic effect.</Description>
+          <Length>1</Length>
+          <Fields>
+            <Field>
+              <Index>0</Index>
+              <Type>Byte</Type>
+              <Name>Id</Name>
             </Field>
           </Fields>
         </Structure>

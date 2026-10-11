@@ -10,7 +10,9 @@ connect server.
 
 ## How it works
 - `packetsDefinitions/*.xml` is a copy of OpenMU's
-  `src/Network/Packets/{ServerToClient,ClientToServer,ConnectServer}/*.xml`.
+  `src/Network/Packets/{ServerToClient,ClientToServer,ConnectServer}/*.xml`, with one change:
+  `AddNpcsToScope`'s `NpcData` carries its effect list after `EffectCount`, as the original reads it
+  (WSclient.cpp:2958-2964, :3059); OpenMU's fixed 10 bytes misread every NPC after one with effects.
 - `bun run generate` runs `generate.ts`. It reads each XML with `HTMLRewriter`, builds the matching
   `.ts` file in memory and writes it over the old one (no index: `src/controllers/net/packets.ts`
   picks the active version's set). A class keeps only the read helpers (`_readString`, `_readDataView`) its getters call and a file only
