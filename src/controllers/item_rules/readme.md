@@ -60,7 +60,9 @@ the table would import itself.
   (`ZzzInfomation.cpp`) and `CalcMaxDurability` (ZzzInventory.cpp:1549) over `itemDef`, which hides the
   per-group column names of the item files (`Strength`/`Str`, `Durability`/`Dur`, ...).
 - `itemValue.ts` ports `ItemValue` (ZzzInfomation.cpp:1457), `CalcRepairCost` (ZzzInventory.cpp:1201) and
-  `IsSellingBan` / `IsRepairBan` (ZzzInventory.cpp:7812/7887). The server has the final say on prices.
+  `IsSellingBan` / `IsRepairBan` (ZzzInventory.cpp:7812/7887). The server has the final say on prices. A sale
+  loses the repair share of anything but `ItemValue`'s `goto EXIT_CALCULATE` items (`keepsSellPrice`), and
+  `IsRepairBan` is its own list: no item kind is guessed from durability.
 - Strength requirements follow OpenMU (four per option level), not the original's `Option3 * 5`.
 - `itemLevelLook.ts`: Box of Luck by level, Box of Kundun, Weapon of Archangel, Scroll of the Emperor +1 and
   Broken Sword +1 get their own name and icon (`GetItemName`, ZzzInventory.cpp:1418-1445, 1593-1609).
@@ -105,6 +107,8 @@ the table would import itself.
 - `archangelWeapons.test.ts`: Divine weapon and Weapon of Archangel names, colours and icons.
 - `portedItems.test.ts`: MuMain items and capes (tests `controllers/actors/wings.ts`, appearance).
 - `ancientSets.test.ts`: set lookup by discriminator, worn piece count, which options light.
+- `repair.test.ts`: `IsRepairBan` (every wing repaired; orbs, chaos, arrows, old pets, event helpers not), a worn
+  Wings of Despair's repair price, the repair share off a worn item's sale but for `ItemValue`'s exceptions.
 - `wingTiers.test.ts`: the Wing of Curse a first wing, the Wings of Despair a second one (tooltip, defense), and
   `ItemValue`'s wing scale (every wing to 12/6, 12/36-43, 12/50).
 - `dropLabel.test.ts`: ground name colours by level and option, the item sets, jewels, level models, sets.
