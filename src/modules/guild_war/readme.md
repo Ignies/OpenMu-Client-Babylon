@@ -17,7 +17,8 @@ has the handlers. Plain guild membership is in [../guild/readme.md](../guild/rea
   over heads (`GuildTeam`, `WSclient.cpp:221`). `GuildWarEnded` clears the war, the soccer board
   and any pending request (`InitGuildWar`).
 - Battle Soccer: `Social.battleSoccer` holds the team names, goals and remaining seconds. Observers
-  on the stadium get it too, without a `guildWar`.
+  on the stadium get it too, without a `guildWar`. A score whose first goals byte is 255 clears it: the
+  board hides and the team colours stop (`SoccerObserver = false`, WSclient.cpp:8162-8170).
 - Alliance and hostility: an offer sets `Social.guildRelationRequest`. A successful change clears
   `GuildMarks` (the alliance name over heads changed) and re-reads the guild list, and the
   alliance list when that tab is open. Error texts follow GlobalText 1313 / 1326-1333.
@@ -29,7 +30,7 @@ has the handlers. Plain guild membership is in [../guild/readme.md](../guild/rea
 - `GuildWarRequestResult`: the answer to the hero's war request.
 - `GuildWarDeclared`: the war starts; sets `Social.guildWar`.
 - `GuildWarScoreUpdate`: own and enemy score.
-- `GuildSoccerScoreUpdate` (F3 23): team names and goals.
+- `GuildSoccerScoreUpdate` (F3 23): team names and goals; 255 as the first score hides the board.
 - `GuildSoccerTimeUpdate` (F3 22): remaining seconds.
 - `GuildWarEnded`: won, lost or cancelled; clears the war.
 - `GuildRelationshipRequest` (0xE5): an alliance or hostility offer.
@@ -52,4 +53,4 @@ has the handlers. Plain guild membership is in [../guild/readme.md](../guild/rea
 - change the scoreboard: `versions/shared/ui/hud/soccer_score/index.tsx`.
 
 ## Tests
-- none yet.
+- `net.test.ts`: a soccer score shows the board, a first score of 255 clears it.
