@@ -55,6 +55,16 @@ _shared.ts                      helpers for several classes
   `rage_fighter`, plus `monsters` (monster-only skills) and `common` (every class or none).
 - `defineSkill` fields are listed in [docs/content.md](../../../docs/content.md).
 
+## Skill effects: Original / Enhanced
+The `enhancedSkillEffects` improvement (also the Options window's Skill effects choice). Classic and
+Original draw the original; Enhanced draws our look where we made one. A skill picks its branch in
+one place, `tiered(original, enhanced)` (or `enhancedSkillFx()`) from `@/controllers/skills/visuals`.
+A pure bug fix (timing, bone, leak, crash) stays on both branches.
+
+| skill | Original (cite) | Enhanced (ours) | restored from |
+|---|---|---|---|
+| Evil Spirit (9, 385, 487) | four JOINT_SPIRIT pairs homing on the caster, a MODEL_LASER skull on each wide one (ZzzCharacter.cpp:4584-4604) | eight spirits orbiting the skill's reach in two waves (`fx/spiritSwarm.ts`), a smoke trail behind each and the screen shroud (`fx/shroud.ts`); one trail and shroud per caster while they last, at most 2 shrouds on screen | 7b8e0acfc, ffc2dcdec, 872baefa9 |
+
 ## Depends on / used by
 - uses: `@/controllers/skills`, `fx`, `lighting`, `sound`, `combat`, `render`; `../items/launcher_arrows`
 - used by: `src/modules/{combat,skills,scope,_shared}`, `src/ecs/systems` (through

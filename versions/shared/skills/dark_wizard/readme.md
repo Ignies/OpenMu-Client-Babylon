@@ -27,7 +27,7 @@ Dark Wizard skills, one folder per skill. Rules for skill folders: [../readme.md
 | `teleport` | 6 | spark column at the old square and at the new one |
 | `ice` | 7, 389 str | ice crystal and small shards at the target's feet |
 | `twister` | 8 | a storm walks the caster's facing with smoke, bolts and stones |
-| `evil_spirit` | 9 | four pairs of spirit ribbons homing round the caster |
+| `evil_spirit` | 9 | four pairs of spirit ribbons homing round the caster; Enhanced (`swarm.ts`, ours): eight spirits orbiting the reach, a smoke trail and the screen shroud, one trail and shroud per caster at a time |
 | `hellfire` | 10, 388 str | a leap; the ground circle opens when the wizard lands |
 | `power_wave` | 11 | a wave sheet slides from the caster toward and past the target |
 | `aqua_beam` | 12 | a laser beam along the facing |
@@ -64,4 +64,5 @@ Dark Wizard skills, one folder per skill. Rules for skill folders: [../readme.md
 ## Tests
 - Covered by the golden tests in `../` (`skillVisuals.golden.test.ts`, `skillTables.golden.test.ts`).
 - `evil_spirit/index.test.ts`: Evil Spirit (and its master rows) flies four JOINT_SPIRIT pairs (widths 80
-  and 20) homing on the caster, a MODEL_LASER skull on each wide one (`ZzzCharacter.cpp:4584-4604`).
+  and 20) homing on the caster, a MODEL_LASER skull on each wide one (`ZzzCharacter.cpp:4584-4604`); on Enhanced
+  our swarm, trail and shroud, one trail and shroud per caster while they last.
