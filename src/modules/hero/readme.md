@@ -15,6 +15,11 @@ other folders share.
   Skeleton and Imp on damage, wizardry and curse, Panda and Unicorn +50 defense
   (NewUICharacterInfoWindow.cpp:707-737, :954-959, :1296-1326, :1424-1442), after the best worn
   transformation ring: Christmas 20 (not on curse), Panda 30, Skeleton 40 (:680-704, :1259-1294, :1395-1418).
+  Before those, the lit ancient set options (`PlusSpecial` / `PlusSpecialLevel`: min / max damage, damage by
+  strength or agility, attack rate, defense, defense by agility or vitality, shield defense %, wizardry by energy)
+  and the socket bonuses (`m_StatusBonus`) when the window passes the set and socket tables
+  (ZzzInfomation.cpp:2745-2812, :3005-3035, :3127-3129, :3248, :3361-3381). The stats the sets and sockets add
+  (`AddStrength` and the rest) are not shown or used yet.
 - `emotes.ts`: `EMOTES`, `EMOTE_RINGS`, `emoteById(id)`, `matchEmoteWord(text)` (the chat words that fire
   an emote, `CheckChatText`), `genderedEmoteAction`, type `EmoteId`.
 - `statAllocation.ts`: `StatAllocation.start(stat, amount)` / `cancel()`, `run`, `running`, `isRunning(stat)`.

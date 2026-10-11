@@ -3,6 +3,8 @@ import { BaseClass, CharacterClassNumber, getBaseClass } from '../../core/types'
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { InventoryConstants } from '@/core/inventoryConstants';
 import type { Item } from '../../ecs/world';
+import { activeSetOptions, classOf, socketStatusBonus, type SetOptionLine, type SocketStatusBonus } from '@/controllers/item_rules';
+import type { ItemOptionTables, ItemSetTables } from '@/controllers/assets';
 
 export enum StatType {
   Strength = 0,
@@ -217,6 +219,13 @@ type CharacterStatsInput = {
   energy: number;
   leadership: number;
   items: (Item | null)[];
+  /** The ancient set and socket tables; without them no set or socket bonus is added. */
+  sets?: ItemSetTables | null;
+  options?: ItemOptionTables | null;
+  /** What a socket value per level, life or mana reads. */
+  masterLevel?: number;
+  maxLife?: number;
+  maxMana?: number;
 };
 
 /**
@@ -276,7 +285,8 @@ function equipped(items: (Item | null)[], slot: number): Item | null {
 
 function calculateDamage(
   input: CharacterStatsInput,
-  base: BaseClass
+  base: BaseClass,
+  flat: Range
 ): { min: number; max: number; dualWield: boolean } {
   const { strength, agility, energy, vitality, items } = input;
 
@@ -351,7 +361,13 @@ function calculateDamage(
     maxLeft += damage.max;
   }
 
-let min: number;
+  // The set and socket damage reach both hands (ZzzInfomation.cpp:2745-2767, :2809-2812).
+  minRight += flat.min;
+  minLeft += flat.min;
+  maxRight += flat.max;
+  maxLeft += flat.max;
+
+  let min: number;
   let max: number;
 
   if (!!weaponRight && isCrossbow(weaponRight)) {
@@ -602,13 +618,48 @@ function withRing<T extends Range>(range: T, items: CharacterStatsInput['items']
   return bonus ? { ...range, min: range.min + bonus, max: range.max + bonus } : range;
 }
 
+/** `AT_SET_OPTION_*` past `AT_SET_OPTION_IMPROVE_STRENGTH` (_enum.h:3408-3442) that the window reads. */
+const SET = { attackMin: 5, attackMax: 6, attackRate: 9, defense: 10, shieldDefense: 22, byStr: 24, byAgi: 25, defenseByAgi: 26, defenseByVit: 27, magicByEne: 28 } as const;
+
+/** `CSItemOption::PlusSpecial` (CSItemOption.cpp:477-485): the lit values of one option, summed. */
+function setSum(lines: readonly SetOptionLine[], option: number): number {
+  let sum = 0;
+  for (const line of lines) if (line.option === option) sum += line.value;
+  return sum;
+}
+
+/** `PlusSpecialLevel` (CSItemOption.cpp:497-523): the summed percent of `source`, once per lit option. */
+function setByStat(lines: readonly SetOptionLine[], option: number, source: number): number {
+  const count = lines.filter(line => line.option === option).length;
+  return Math.trunc((source * setSum(lines, option)) / 100) * count;
+}
+
+/** `Defense` after the sets and sockets (ZzzInfomation.cpp:3361-3381). */
+function withSetDefense(defense: number, input: CharacterStatsInput, lines: readonly SetOptionLine[], socket: SocketStatusBonus): number {
+  defense += setSum(lines, SET.defense) + setByStat(lines, SET.defenseByAgi, input.agility) + setByStat(lines, SET.defenseByVit, input.vitality);
+  const shield = equipped(input.items, InventoryConstants.RightHandSlot);
+  if (shield && isShield(shield)) defense += Math.trunc((defense * setSum(lines, SET.shieldDefense)) / 100);
+  defense += socket.defense;
+  if (shield) defense += Math.trunc(itemDefense(shield) * socket.shieldDefense * 0.01);
+  return defense;
+}
+
 export function deriveCharacterStats(input: CharacterStatsInput): DerivedStats {
   const base = getBaseClass(input.charClass);
 
   const { items, level } = input;
+  const { base: baseClass, step } = classOf(input.charClass);
+  const hero = { level, str: input.strength, agi: input.agility, vit: input.vitality, ene: input.energy, cmd: input.leadership, baseClass, stepClass: step };
+  const lines = input.sets ? activeSetOptions(items, hero, input.sets) : [];
+  const socket = socketStatusBonus(items, { level, masterLevel: input.masterLevel, maxLife: input.maxLife, maxMana: input.maxMana }, input.options ?? null);
+  const setDamage = setByStat(lines, SET.byAgi, input.agility) + setByStat(lines, SET.byStr, input.strength);
+  const flat = { min: setSum(lines, SET.attackMin) + setDamage + socket.damageMin, max: setSum(lines, SET.attackMax) + setDamage + socket.damageMax };
   const pet = equipped(items, InventoryConstants.PetSlot);
-  const damage = withPet(withRing(calculateDamage(input, base), items, 'damage'), pet, 'damage', level);
-  const wizardry = withPet(withRing(calculateWizardry(input), items, 'wizardry'), pet, 'wizardry', level);
+  const damage = withPet(withRing(calculateDamage(input, base, flat), items, 'damage'), pet, 'damage', level);
+  // CalculateMagicDamage (ZzzInfomation.cpp:3005-3035).
+  const magic = calculateWizardry(input);
+  const magicBonus = setByStat(lines, SET.magicByEne, input.energy) + socket.skillDamage + socket.magicPower;
+  const wizardry = withPet(withRing({ ...magic, min: magic.min + magicBonus, max: magic.max + magicBonus }, items, 'wizardry'), pet, 'wizardry', level);
   const curse = withPet(withRing({ min: Math.trunc(input.energy / 9), max: Math.trunc(input.energy / 4) }, items, 'curse'), pet, 'curse', level);
   // The Panda and the Unicorn add 50 defense.
   const petDefense = pet?.group === GROUP_HELPER && (pet.num === PET.panda || pet.num === PET.unicorn) ? 50 : 0;
@@ -619,10 +670,10 @@ export function deriveCharacterStats(input: CharacterStatsInput): DerivedStats {
     damageMin: damage.min,
     damageMax: damage.max,
     dualWield: damage.dualWield,
-    attackRate: calculateAttackRate(input, base),
+    attackRate: calculateAttackRate(input, base) + setSum(lines, SET.attackRate) + socket.attackRate,
     attackRatePvp: calculateAttackRatePvp(input, base),
-    defense: calculateDefense(input, base) + petDefense,
-    defenseRate: calculateDefenseRate(input, base),
+    defense: withSetDefense(calculateDefense(input, base), input, lines, socket) + petDefense,
+    defenseRate: Math.trunc(calculateDefenseRate(input, base) * socket.defenseRate),
     defenseRatePvp: calculateDefenseRatePvp(input, base),
     wizardryMin: wizardry.min,
     wizardryMax: wizardry.max,

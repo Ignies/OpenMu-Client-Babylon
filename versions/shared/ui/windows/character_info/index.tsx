@@ -8,6 +8,8 @@ import { useEffect, useRef, useState } from 'react';
 import { EventBus } from '@/core/eventBus';
 import { useEventBus } from '@/controllers/interface/hooks';
 import { Hero } from '@/modules/hero';
+import { skills } from '@/modules/skills';
+import { itemOptionTables, itemSetTables } from '@/controllers/assets';
 import { MsgBox } from '@/controllers/interface';
 import { GameOptions } from '@/controllers/settings';
 import { StatAllocation } from '@/modules/hero/statAllocation';
@@ -413,6 +415,11 @@ export const CharacterInfo = observer(() => {
     energy: playerData.eng,
     leadership: playerData.leadership,
     items: playerData.items,
+    sets: itemSetTables(),
+    options: itemOptionTables(),
+    masterLevel: skills.masterLevel,
+    maxLife: playerData.maxHP,
+    maxMana: playerData.maxMP,
   });
 
   const strengthDetails: DetailLine[] = [];
