@@ -1,6 +1,8 @@
 // Public API of the item rules controller: code outside this folder imports from here.
 
-export { DROP_TIER_COLOURS, HIGH_DROP_LEVEL, dropTier } from './dropTier';
+export { HIGH_DROP_LEVEL, dropTier } from './dropTier';
+export { dropLabel } from './dropLabel';
+export type { DropLabel } from './dropLabel';
 export type { DropTier } from './dropTier';
 export { equipDestination, isEquipable } from './equipSlots';
 export { goldColor } from './goldColor';

@@ -22,7 +22,9 @@ the table would import itself.
 - `comparedItem(item, worn, hero)`, `compareTooltipsOn(shift)`, `CompareTooltips`,
   `COMPARE_TOOLTIP_LABEL_KEYS`, `COMPARE_TOOLTIP_MAX`: the second tooltip.
 - `equipSlots(item)` (inner), `isEquipable(slot, item)`, `equipDestination(item, worn)`: worn slots.
-- `dropTier(drop)`, `DROP_TIER_COLOURS`, `HIGH_DROP_LEVEL`: a drop's name colour and glow tier.
+- `dropTier(drop)`, `HIGH_DROP_LEVEL`: a drop's glow tier. `dropLabel(drop)` (`dropLabel.ts`): its ground name's colour,
+  bold face and set box, as `BuildGroundItemLabelDescriptor` draws it (ZzzInventory.cpp:6280-6663): the white,
+  yellow and orange item sets, jewels, the models some levels show, then level and option tints.
 - `learnableSkill(item)` (`skillItems.ts`, with `learnableSkillNumber`): the skill an orb, scroll or
   crystal teaches.
 - `dropModelProxy(group, num, lvl)`, `archangelWeapon(level)` (`dropModelProxy.ts`, was `modules/drops`):
@@ -100,6 +102,7 @@ the table would import itself.
 - `archangelWeapons.test.ts`: Divine weapon and Weapon of Archangel names, colours and icons.
 - `portedItems.test.ts`: MuMain items and capes (tests `controllers/actors/wings.ts`, appearance).
 - `ancientSets.test.ts`: set lookup by discriminator, worn piece count, which options light.
+- `dropLabel.test.ts`: ground name colours by level and option, the item sets, jewels, level models, sets.
 - `bundlesAndParchments.test.ts`: the packed jewels 12/136-143 and the Rage Fighter parchments 15/30-36 exist,
   with Item.bmd's names, the original's models and the skills the parchments teach.
 - `questItemLink.test.ts`: the Blood Castle weapon on the back (tests `controllers/actors/weaponAttachment.ts`).

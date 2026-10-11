@@ -8,7 +8,7 @@ and the loot filter for the ALT name overlay.
   `pickupItemRequest(netId)`.
 - none for packets. `installNet()` in `net.ts` registers its handlers (`module.ts`, installed by `src/app/logic.ts`).
 - `DropObject`: the model class of a drop (frozen pose, zen coin pile, the fall). `setPileFall(height)`.
-- `dropTier(drop)`, `DROP_TIER_COLOURS`, `HIGH_DROP_LEVEL` (7) moved to `controllers/item_rules`
+- `dropTier(drop)`, `HIGH_DROP_LEVEL` (7) moved to `controllers/item_rules`
   (`dropTier.ts`): the drop sound controller reads them, and a controller may not import a module.
 - `dropPassesLootFilter(drop)`, `lootZenThreshold(step)`, `LOOT_ZEN_MAX`: which names the latched overlay keeps.
 
@@ -54,7 +54,7 @@ and the loot filter for the ALT name overlay.
 ## Change it
 - a drop that shows another model at some level: `controllers/item_rules/dropModelProxy.ts` (and `controllers/item_rules/itemLevelLook.ts` for its name).
 - how a zen pile looks: `zenPile.ts` (count, spread) and `DropObject` (coin height, fall).
-- name colours or the "high" level: `controllers/item_rules/dropTier.ts`. Loot filter rules: `lootFilter.ts`.
+- name colours: `controllers/item_rules/dropLabel.ts`; the "high" level: `dropTier.ts`. Loot filter rules: `lootFilter.ts`.
 
 ## Tests
 - `zenPile.test.ts`: coin count by amount, scatter inside the radius and over the disc, same pile per seed.

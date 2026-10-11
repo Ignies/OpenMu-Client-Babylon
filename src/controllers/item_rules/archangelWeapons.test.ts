@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildItemTooltip, itemDisplayName, itemNameColor } from '../interface/itemTooltip';
-import { DROP_TIER_COLOURS, dropTier } from './dropTier';
+import { dropTier } from './dropTier';
+import { dropLabel } from './dropLabel';
 import { itemIconPackChain } from '../assets/itemIconPack';
 import type { HeroStats } from './itemStats';
 
@@ -24,7 +25,7 @@ describe('the Divine weapons of the Archangel', () => {
     for (const [group, num] of DIVINE) {
       const tier = dropTier({ item: { group, num } } as Parameters<typeof dropTier>[0]);
       expect(tier).toBe('archangel');
-      expect(DROP_TIER_COLOURS[tier]).toBe('#ff1aff');
+      expect(dropLabel({ item: { group, num } } as Parameters<typeof dropLabel>[0]).colour).toBe('#ff19ff');
     }
   });
 
@@ -64,7 +65,6 @@ describe('the Weapon of Archangel', () => {
   });
 
   it('lies on the ground in the Divine weapons\' purple', () => {
-    const tier = dropTier({ item: weapon(2) } as Parameters<typeof dropTier>[0]);
-    expect(DROP_TIER_COLOURS[tier]).toBe('#ff1aff');
+    expect(dropLabel({ item: weapon(2) } as Parameters<typeof dropLabel>[0]).colour).toBe('#ff19ff');
   });
 });
