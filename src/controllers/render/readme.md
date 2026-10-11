@@ -94,8 +94,8 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `pbrDerive.test.ts`: `flipRows`, flat normal and emissive mask of `derivePbrMaps`.
 - `propBatchLight.test.ts`: `ChunkLight` re-packs match a whole-chunk re-pack on every tier.
 - `propBatchRules.test.ts`: `batchExclusion`, `chunkOf`, placement and instance matrices.
-- `objectShadow.test.ts`: the shadow fold, run as JS: a body folds as `CalcShadowPosition`, a tall
-  object's top by 5 tiles at most; Icarus and Kalima draw no shadow.
+- `objectShadow.test.ts`: the shadow fold, run as JS: every vertex folds as `CalcShadowPosition`, a tall
+  one too; Icarus and Kalima draw no shadow.
 - `propBatches.test.ts`: batches built and disposed twice over one cached model leave its buffers whole.
 - `renderAngles.test.ts`: `angleMatrixQuaternion` against the original's `AngleMatrix`, and a
   placed record with both pitch and roll drawn by it, by its node and by its batched placement.
@@ -157,11 +157,9 @@ There is no `index.ts` facade; other folders import the modules directly.
   character's or part's blob off where the original draws none (a cape's model), read every frame; the
   cascades still take it (`CastsShadow`).
   The fold (`SHADOW_FOLD`) is the original's `CalcShadowPosition`, which divides by the vertex's height
-  under the 40-tile light: a tall map object had its top thrown tens of tiles into long black streaks.
-  The divisor stays 10 tiles off zero and the move within 5 tiles; a body (anything under
-  `SHADOW_FADE_END`) folds exactly as the original. The original has no clamp, and it still moves the
-  tops of the tallest monsters it shadows (Selupan's highest key is 26 tiles up, the Hydra 16, the
-  golden dragons 9): there the original streaks.
+  under the 40-tile light, with no limit: the tallest monsters it shadows (Selupan's highest key is 26
+  tiles up, the Hydra 16, the golden dragons 9) streak as they do there. A clamp once kept every vertex
+  within 5 tiles, from when every map object cast.
 - `babylon/compileWait.ts`: Babylon waits for a program with 1875 checks 16 ms apart (`Effect._checkIsReady`),
   a count, not a time. A hidden page runs them once a second or slower and the GPU does not compile
   for it, so a long AFK ran the count out and the materials came back black. The countdown stops

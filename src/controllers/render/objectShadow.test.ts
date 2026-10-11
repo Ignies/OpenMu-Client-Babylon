@@ -20,24 +20,17 @@ describe('the worlds with no shadow', () => {
 const SX = 20;
 const SY = 40;
 
-/** The vertex shader's fold, run as JS: its GLSL reads the same with these two helpers. */
+/** The vertex shader's fold, run as JS: its GLSL reads the same. */
 function fold(shadowY: number, shadowA: number): number {
-  const min = Math.min;
-  const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), hi);
-  return new Function('min', 'clamp', 'shadowY', 'shadowA', 'shadowSX', 'shadowSY', `return ${SHADOW_FOLD};`)(min, clamp, shadowY, shadowA, SX, SY);
+  return new Function('shadowY', 'shadowA', 'shadowSX', 'shadowSY', `return ${SHADOW_FOLD};`)(shadowY, shadowA, SX, SY);
 }
 
 // CalcShadowPosition: x += z * (x + sx) / (z - sy), sx 2000, sy 4000 (ZzzBMD.cpp:2620-2638).
 describe('the Classic shadow fold', () => {
-  it('folds a body as the original does', () => {
-    for (const [y, a] of [[0.5, 0.3], [3, -0.4], [6, 1]]) {
+  // No limit: a tall caster's top streaks as far as the original throws it (Selupan's reaches 26 tiles up).
+  it('folds every vertex as the original does, a tall one too', () => {
+    for (const [y, a] of [[0.5, 0.3], [3, -0.4], [6, 1], [26, 0.5], [35, -1]]) {
       expect(fold(y, a)).toBeCloseTo((y * (a + SX)) / (y - SY), 5);
-    }
-  });
-
-  it('throws no vertex of a tall object more than five tiles', () => {
-    for (const y of [25, 39.9, 40, 45, 120]) {
-      expect(Math.abs(fold(y, 0.5))).toBeLessThanOrEqual(5);
     }
   });
 });
