@@ -232,4 +232,5 @@ export default {
   'item.count': 'Număr de obiecte: {count}',
   'item.pieces': '{count} / {max}',
   'msgWin.confirmMix': '%s\nCombini obiectele?',
+  'msgWin.exitCountdown': 'Vei ieși din joc în {seconds} secunde.',
 } satisfies Partial<Record<keyof typeof en, string>>;

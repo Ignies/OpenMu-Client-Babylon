@@ -226,4 +226,5 @@ export default {
   'item.count': 'Số lượng: {count}',
   'item.pieces': '{count} / {max}',
   'msgWin.confirmMix': '%s\nBạn muốn kết hợp vật phẩm?',
+  'msgWin.exitCountdown': 'Bạn sẽ thoát game sau {seconds} giây.',
 } satisfies Partial<Record<keyof typeof en, string>>;

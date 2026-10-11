@@ -231,4 +231,5 @@ export default {
   'item.count': 'จำนวนไอเทม: {count}',
   'item.pieces': '{count} / {max}',
   'msgWin.confirmMix': '%s\nต้องการผสมไอเทมหรือไม่?',
+  'msgWin.exitCountdown': 'จะออกจากเกมใน {seconds} วินาที',
 } satisfies Partial<Record<keyof typeof en, string>>;

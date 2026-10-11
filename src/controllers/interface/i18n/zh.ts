@@ -231,4 +231,5 @@ export default {
   'item.count': '物品数量: {count}',
   'item.pieces': '{count} / {max}',
   'msgWin.confirmMix': '%s\n要合成道具吗？',
+  'msgWin.exitCountdown': '{seconds}秒后退出游戏。',
 } satisfies Partial<Record<keyof typeof en, string>>;

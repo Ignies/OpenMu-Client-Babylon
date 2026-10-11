@@ -23,6 +23,7 @@ export enum MsgWinCode {
   ConfirmDropItem = 'MESSAGE_CONFIRM_DROP_ITEM',
   ConfirmAddPoints = 'MESSAGE_CONFIRM_ADD_POINTS',
   ConfirmMix = 'MESSAGE_CONFIRM_MIX',
+  GameEndCountdown = 'MESSAGE_GAME_END_COUNTDOWN',
 }
 
 type MsgWinMessage = {
@@ -95,6 +96,12 @@ export const MSG_WIN_MESSAGES: Record<MsgWinCode, MsgWinMessage> = {
     type: MsgWinType.Both,
     textId: 539,
     textKey: 'msgWin.confirmMix',
+  },
+  // `CSysMenuWin`'s Exit Game: no button, the seconds left (MsgWin.cpp:310-315).
+  [MsgWinCode.GameEndCountdown]: {
+    type: MsgWinType.None,
+    textId: 380,
+    textKey: 'msgWin.exitCountdown',
   },
 };
 

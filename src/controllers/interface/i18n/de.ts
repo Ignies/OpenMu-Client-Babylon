@@ -232,4 +232,5 @@ export default {
   'item.count': 'Anzahl: {count}',
   'item.pieces': '{count} / {max}',
   'msgWin.confirmMix': '%s\nGegenstände kombinieren?',
+  'msgWin.exitCountdown': 'Du verlässt das Spiel in {seconds} Sekunden.',
 } satisfies Partial<Record<keyof typeof en, string>>;

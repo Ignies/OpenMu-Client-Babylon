@@ -9,6 +9,8 @@ import { GameOptions } from '@/controllers/settings';
 import { ITEM_HOTKEY_CODES } from '../../modules/inventory/itemHotkeys';
 import { MuWindows } from '../../controllers/interface/windowManager';
 import { openSystemMenu } from '../../modules/session/sessionExit';
+import { AppState, UIState } from '../../controllers/interface/uiState';
+import { playUiSound } from '../../controllers/sound/sfx';
 import type { ISystemFactory } from '../world';
 
 /** Keys the page would scroll on; kept from doing so while playing. */
@@ -31,6 +33,22 @@ function hasPageSelection(): boolean {
 
 /** The focused element takes characters, so nothing here is a hot key. */
 export const isTypingInField = (): boolean => isTextField(document.activeElement);
+
+/** The pre-game `CSysMenuWin` (versions/shared/ui/windows/system_menu/pregame.tsx). */
+export const PREGAME_MENU = 'sys_menu';
+
+/**
+ * `CUIMng::Update` (UIMng.cpp:691-705): Escape on the server list or the character screen shows
+ * `CSysMenuWin` when no message box or Options is up; the window stack hides it again.
+ */
+export function openPregameMenu(): boolean {
+  const screen = AppState.uiState;
+  if (screen !== UIState.Servers && screen !== UIState.Characters) return false;
+  if (MsgBox.msgWin || MuWindows.isOpen('options') || MuWindows.isOpen(PREGAME_MENU)) return false;
+  MuWindows.setOpen(PREGAME_MENU, true);
+  playUiSound('click');
+  return true;
+}
 
 /**
  * The one keyboard dispatcher. Every keydown goes through here before any
@@ -106,7 +124,7 @@ export const KeyboardInputSystem: ISystemFactory = world => {
       }
       // Nothing left to close, so Escape means the system menu, as it does
       // in the original.
-      if (openSystemMenu()) {
+      if (openPregameMenu() || openSystemMenu()) {
         pressedKeys.add(e.code);
         return;
       }

@@ -231,4 +231,5 @@ export default {
   'item.count': '아이템 개수: {count}',
   'item.pieces': '{count} / {max}',
   'msgWin.confirmMix': '%s\n아이템을 조합하시겠습니까?',
+  'msgWin.exitCountdown': '{seconds}초 후에 게임을 종료합니다.',
 } satisfies Partial<Record<keyof typeof en, string>>;

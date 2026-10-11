@@ -27,7 +27,6 @@ import {
   setKeyBinding,
   type KeyAction,
 } from '@/controllers/interface/keyBindings';
-import { SessionExit, type ExitKind } from '@/modules/session/sessionExit';
 import { EN_TEXT, t, type TextKey } from '@/i18n';
 import { applyTierPreset, type TierPreset } from './presets';
 import {
@@ -81,44 +80,14 @@ const DEFAULTS_WIDTH = 96;
 
 const FOOTER_Y = WIN_HEIGHT - 47;
 const FOOTER_X = 24;
-const EXIT_WIDTH = 116;
-const EXIT_GAP = 6;
 const CLOSE_WIDTH = 108;
 
 const FLASH_MS = 1400;
 
-/** The ways out, in the footer: whichever the game can take right now. */
-const EXITS: { exit: ExitKind; labelKey: TextKey; helpKey: TextKey }[] = [
-  {
-    exit: 'characters',
-    labelKey: 'options.switchCharacter',
-    helpKey: 'options.help.switchCharacter',
-  },
-  {
-    exit: 'servers',
-    labelKey: 'options.selectServer',
-    helpKey: 'options.help.selectServer',
-  },
-  { exit: 'quit', labelKey: 'options.exitGame', helpKey: 'options.help.exitGame' },
-];
-
-const CONFIRM_TEXT: Record<ExitKind, TextKey> = {
-  quit: 'exit.confirmQuit',
-  servers: 'exit.confirmServers',
-  characters: 'exit.confirmCharacters',
-};
-
-/**
- * The page the window reopens on, for this session. The ways out sit in the
- * footer on every page, so reopening where the player left off costs
- * nothing - Escape still reaches Exit game in one press.
- */
+/** The page the window reopens on, for this session. */
 let lastPage: Page = ALL_PAGES[0];
 
-type Hovered =
-  | { kind: 'row'; row: Row }
-  | { kind: 'exit'; labelKey: TextKey; helpKey: TextKey }
-  | null;
+type Hovered = { kind: 'row'; row: Row } | null;
 
 type Match = { page: Page; rows: Row[] };
 
@@ -158,10 +127,7 @@ const HelpStrip = observer(({ hovered, page }: { hovered: Hovered; page: Page | 
   let blocker: Blocker | null = null;
   let applies: TextKey | undefined;
 
-  if (hovered?.kind === 'exit') {
-    title = t(hovered.labelKey);
-    body = t(hovered.helpKey);
-  } else if (hovered?.kind === 'row') {
+  if (hovered?.kind === 'row') {
     const { row } = hovered;
     title = t(row.labelKey);
     body = t(helpKeyOf(row));
@@ -204,7 +170,6 @@ export const OptionsWindow = observer(() => {
 
   // Key being rebound: the next key press goes to it instead of the game.
   const [capturing, setCapturing] = useState<KeyAction | null>(null);
-  const [confirming, setConfirming] = useState<ExitKind | null>(null);
   const [confirmingDefaults, setConfirmingDefaults] = useState(false);
   const [notice, setNotice] = useState<TextKey | null>(null);
 
@@ -251,7 +216,6 @@ export const OptionsWindow = observer(() => {
   useEffect(() => {
     if (MuWindows.isOpen('options')) return;
     setCapturing(null);
-    setConfirming(null);
     setConfirmingDefaults(false);
     setNotice(null);
     setQuery('');
@@ -531,21 +495,6 @@ export const OptionsWindow = observer(() => {
         />
         <HelpStrip hovered={hovered} page={searching ? null : page} />
 
-        {EXITS.filter(entry => SessionExit.available(entry.exit)).map((entry, i) => (
-          <OptionsButton
-            key={entry.exit}
-            label={t(entry.labelKey)}
-            width={EXIT_WIDTH}
-            onHover={() =>
-              setHovered({ kind: 'exit', labelKey: entry.labelKey, helpKey: entry.helpKey })
-            }
-            onClick={() => {
-              setCapturing(null);
-              setConfirming(entry.exit);
-            }}
-            style={{ left: FOOTER_X + i * (EXIT_WIDTH + EXIT_GAP), top: FOOTER_Y }}
-          />
-        ))}
         <OptionsButton
           label={t('common.close')}
           width={CLOSE_WIDTH}
@@ -557,16 +506,6 @@ export const OptionsWindow = observer(() => {
 
         <MuResizeGrip id={WINDOW_ID} width={WIN_WIDTH} />
       </div>
-
-      {confirming && (
-        <ConfirmBox
-          text={t(CONFIRM_TEXT[confirming])}
-          onAnswer={yes => {
-            setConfirming(null);
-            if (yes) SessionExit.request(confirming);
-          }}
-        />
-      )}
 
       {confirmingDefaults && (
         <ConfirmBox

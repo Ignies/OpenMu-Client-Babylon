@@ -233,6 +233,7 @@ const en = {
   'item.count': 'Number of items: {count}',
   'item.pieces': '{count} / {max}',
   'msgWin.confirmMix': '%s\nDo you want to combine your items?',
+  'msgWin.exitCountdown': 'You will exit game in {seconds} seconds.',
 };
 
 export default en;
