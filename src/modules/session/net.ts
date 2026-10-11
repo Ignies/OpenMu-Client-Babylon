@@ -100,6 +100,7 @@ export function installNet(): void {
 
   EventBus.on('LoginResponse', bytes => {
     const p = new LoginResponsePacket(bytes);
+    Session.loginAnswered();
 
     runInAction(() => {
       Session.loginProcessing = false;

@@ -211,7 +211,8 @@ password each time, as the original). Passwords an older client saved (`mu_accou
 `_mu_key` blob) are wiped on load, names kept. `Session` (`src/modules/session/state.ts`) sends
 05 when the password field is empty and a token is saved, asks for one (03) after a password login,
 keeps each 04, and drops a refused token, the login window then asking for the password with the
-name filled. The password stays in memory only, for the session's own reconnects; a session that
+name filled; a token login with no answer in 10 s is given up the same way (a `server.json` that
+offers tokens without the plugin behind it). The password stays in memory only, for the session's own reconnects; a session that
 logged in with a token reconnects with the token it holds.
 
 Live proof: the installer's e2e `check` (`install/cli/loginCheck.ts`) plays the protocol with the

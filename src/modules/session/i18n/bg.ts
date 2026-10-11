@@ -10,4 +10,5 @@ export default {
   'resume.cancelled': 'Свързването наново е отказано',
   'login.closingOldSession': 'Акаунтът още е в играта: затваряне на старата сесия и нов опит...',
   'login.tokenRefused': 'Запазеният вход е изтекъл. Въведи паролата си.',
+  'login.tokenUnanswered': 'Сървърът не отговори на запазения вход. Въведи паролата си.',
 } satisfies Partial<Record<keyof typeof en, string>>;

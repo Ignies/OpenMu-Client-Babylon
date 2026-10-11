@@ -123,6 +123,7 @@ describe('login tokens', () => {
   });
 
   afterEach(() => {
+    vi.useRealTimers();
     vi.restoreAllMocks();
     ServerAccounts.forget(listed.id);
     ServerConfig.setListed([]);
@@ -202,6 +203,58 @@ describe('login tokens', () => {
     expect(AppState.uiState).toBe(UIState.Login);
     expect(Session.username).toBe('hero');
     expect(Session.canSubmitLogin).toBe(false);
+  });
+
+  it('gives up on a token login nobody answers: drops the token, asks for the password', () => {
+    vi.useFakeTimers();
+    vi.spyOn(Session, 'sendToGS').mockImplementation(() => undefined);
+    ServerAccounts.record(listed.id, { username: 'hero', remember: true });
+    ServerAccounts.saveToken(listed.id, 'hero', tokenToText(TOKEN));
+    AppState.uiState = UIState.Login;
+    Session.loginProcessing = true;
+
+    Session.submitLogin();
+    vi.advanceTimersByTime(9_999);
+    expect(ServerAccounts.tokenOf(listed.id, 'hero')).toBe(tokenToText(TOKEN));
+    vi.advanceTimersByTime(1);
+
+    expect(ServerAccounts.tokenOf(listed.id, 'hero')).toBe('');
+    expect(Session.loginProcessing).toBe(false);
+    expect(Session.loginError).toBe(t('login.tokenUnanswered'));
+    expect(AppState.uiState).toBe(UIState.Login);
+    expect(Session.username).toBe('hero');
+    expect(Session.canSubmitLogin).toBe(false);
+  });
+
+  it('stops waiting once the token login is answered, or the socket is closed', () => {
+    vi.useFakeTimers();
+    vi.spyOn(Session, 'sendToGS').mockImplementation(() => undefined);
+    ServerAccounts.record(listed.id, { username: 'hero', remember: true });
+    ServerAccounts.saveToken(listed.id, 'hero', tokenToText(TOKEN));
+
+    Session.submitLogin();
+    EventBus.emit('LoginResponse', refused(LoginResponseLoginResultEnum.AccountBlocked));
+    vi.advanceTimersByTime(30_000);
+    expect(ServerAccounts.tokenOf(listed.id, 'hero')).toBe(tokenToText(TOKEN));
+
+    Session.submitLogin();
+    Session.disconnectFromGameServer();
+    vi.advanceTimersByTime(30_000);
+    expect(ServerAccounts.tokenOf(listed.id, 'hero')).toBe(tokenToText(TOKEN));
+  });
+
+  it('never waits on a password login', () => {
+    vi.useFakeTimers();
+    vi.spyOn(Session, 'sendToGS').mockImplementation(() => undefined);
+    ServerAccounts.record(listed.id, { username: 'hero', remember: true });
+    ServerAccounts.saveToken(listed.id, 'hero', tokenToText(TOKEN));
+    Session.loginError = undefined;
+
+    Session.loginRequest('hero', 'secret');
+    vi.advanceTimersByTime(30_000);
+
+    expect(Session.loginError).toBeUndefined();
+    expect(ServerAccounts.tokenOf(listed.id, 'hero')).toBe(tokenToText(TOKEN));
   });
 
   it('logs in again with the token after a drop when the session typed no password', () => {

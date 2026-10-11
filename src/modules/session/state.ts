@@ -37,6 +37,13 @@ const GS_ANSWER_TIMEOUT = 4000;
 const LOGIN_RETRIES = 3;
 const LOGIN_RETRY_MS = 2500;
 
+/**
+ * How long a token login waits for its LoginResponse before the saved login is given up and the password
+ * asked for: a world whose server.json offers tokens without our plugin never answers E7 05. The client
+ * has no login wait of its own (the original waits on a password login for as long as it takes).
+ */
+const TOKEN_LOGIN_ANSWER_MS = 10_000;
+
 /** `ServerChangeAuthentication`'s XOR3 name fields are 12 bytes each. */
 const SERVER_CHANGE_NAME_LENGTH = 12;
 
@@ -256,6 +263,27 @@ export const Session = new (class {
     if (!this.lastLogin.token && this.keepsLoginTokens) this.sendToGS(LoginTokenRequestPacket.createPacket().buffer);
   }
 
+  /** Any LoginResponse arrived: a token login is not waiting for one any more. */
+  loginAnswered(): void {
+    if (this.tokenLoginTimer) clearTimeout(this.tokenLoginTimer);
+    this.tokenLoginTimer = null;
+  }
+
+  /**
+   * No answer to a token login (`TOKEN_LOGIN_ANSWER_MS`): the world's saved token is dropped and the
+   * login window asks for the password, the name still filled.
+   */
+  private giveUpTokenLogin(): void {
+    this.tokenLoginTimer = null;
+    this.sessionToken = null;
+    ServerAccounts.saveToken(ServerConfig.activeId, this.lastLogin.username, '');
+    runInAction(() => {
+      this.loginProcessing = false;
+      this.loginError = t('login.tokenUnanswered');
+      AppState.uiState = UIState.Login;
+    });
+  }
+
   /**
    * The server refused the last login. Returns true when it was a token login refused as a wrong
    * password: the token is dropped, and the player types the password, the name still filled.
@@ -458,6 +486,9 @@ export const Session = new (class {
 
   private loginRetryTimer: ReturnType<typeof setTimeout> | null = null;
 
+  /** Running while a token login waits for its answer (`giveUpTokenLogin`). */
+  private tokenLoginTimer: ReturnType<typeof setTimeout> | null = null;
+
   loginRequest(username: string, password: string) {
     this.cancelLoginRetry();
     this.lastLogin = { username, password, token: null, retries: 0 };
@@ -489,9 +520,11 @@ export const Session = new (class {
     return true;
   }
 
+  /** Drops a pending login retry, and a token login's wait: a new login, or the socket gone. */
   private cancelLoginRetry(): void {
     if (this.loginRetryTimer) clearTimeout(this.loginRetryTimer);
     this.loginRetryTimer = null;
+    this.loginAnswered();
   }
 
   private sendLogin(username: string, password: string) {
@@ -522,6 +555,8 @@ export const Session = new (class {
     packet.setClientVersion(gameVersion.clientVersionBytes);
 
     this.sendToGS(packet.buffer);
+    this.loginAnswered();
+    this.tokenLoginTimer = setTimeout(() => this.giveUpTokenLogin(), TOKEN_LOGIN_ANSWER_MS);
   }
 
   /**

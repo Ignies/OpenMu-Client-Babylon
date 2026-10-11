@@ -10,4 +10,5 @@ export default {
   'resume.cancelled': 'Neuverbindung abgebrochen',
   'login.closingOldSession': 'Konto noch verbunden: alte Sitzung wird geschlossen, neuer Versuch...',
   'login.tokenRefused': 'Deine gespeicherte Anmeldung ist abgelaufen. Gib dein Passwort ein.',
+  'login.tokenUnanswered': 'Der Server hat auf die gespeicherte Anmeldung nicht geantwortet. Gib dein Passwort ein.',
 } satisfies Partial<Record<keyof typeof en, string>>;

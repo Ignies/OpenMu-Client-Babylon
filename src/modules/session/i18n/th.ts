@@ -10,4 +10,5 @@ export default {
   'resume.cancelled': 'ยกเลิกการเชื่อมต่อใหม่',
   'login.closingOldSession': 'บัญชียังเชื่อมต่ออยู่: กำลังปิดเซสชันเก่าและลองใหม่...',
   'login.tokenRefused': 'การเข้าสู่ระบบที่บันทึกไว้หมดอายุแล้ว กรอกรหัสผ่าน',
+  'login.tokenUnanswered': 'เซิร์ฟเวอร์ไม่ตอบการเข้าสู่ระบบที่บันทึกไว้ กรอกรหัสผ่าน',
 } satisfies Partial<Record<keyof typeof en, string>>;

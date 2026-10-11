@@ -15,7 +15,7 @@ the client-to-server encryption, the login fields and the offline flag.
   login tokens: `submitLogin()` / `canSubmitLogin` (the login window's OK: the password typed, or the
   saved token when the field is empty), `savedToken`, `keepsLoginTokens`, `tokenLoginRequest(user,
   token)`, `resumeLogin()` / `canResumeLogin`, `onLoginAccepted()`, `onLoginRefusedToken(invalid)`,
-  `keepLoginToken(token)`; the proxy side frames `sendBandFrame` / `sendPingFrame`.
+  `keepLoginToken(token)`, `loginAnswered()`; the proxy side frames `sendBandFrame` / `sendPingFrame`.
 - `SessionExit.request(kind)` / `SessionExit.available(kind)`: Exit Game, Select Server, Switch
   Character (`kind` is `'quit' | 'servers' | 'characters'`). `onBeforeLogOut(fn)`: runs just before
   the LogOut goes out (mu_helper's `TriggerStop`, which this module may not import).
@@ -49,7 +49,9 @@ the client-to-server encryption, the login fields and the offline flag.
   server hands out (E7 04) is saved for the account (`servers/serverAccounts.ts`). The next login sends
   the token (E7 05) when the password field is empty; the server answers it with the usual
   `LoginResponse` and sends the replacement token behind it. A token refused as a wrong password is
-  dropped and the form asks for the password, the name still filled. The password is never stored:
+  dropped and the form asks for the password, the name still filled; so is one that gets no answer in
+  10 s (`TOKEN_LOGIN_ANSWER_MS`: a world whose `server.json` offers tokens without our plugin; the
+  client has no other login wait). The password is never stored:
   `loadAccount` leaves the field empty, and what was typed stays in memory for this session's
   reconnects. Classic types the password each time.
 - `state.ts` sends every packet: Xor32 on all, SimpleModulus on C3/C4 once a game server is dialled.
@@ -101,8 +103,9 @@ the client-to-server encryption, the login fields and the offline flag.
   world asks, then gives up; leaving the login drops a pending retry. Login tokens: a password login
   asks for one and keeps it (never the password); none on Classic, on a world without tokens or with
   "remember" off; an empty password field sends the saved token and keeps its replacement; Classic never
-  sends one; a refused token is dropped and the form asks for the password; a session that logged in
-  with a token reconnects with the newest.
+  sends one; a refused token is dropped and the form asks for the password, and so is one unanswered
+  for 10 s (fake timers; an answer or a closed socket stops the wait, a password login has none); a
+  session that logged in with a token reconnects with the newest.
 - the login flow is covered by the listener order golden (`src/app/listenerOrder.golden.test.ts`).
 
 ## Notes

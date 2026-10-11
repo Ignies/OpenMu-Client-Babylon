@@ -10,4 +10,5 @@ export default {
   'resume.cancelled': '再接続を中止しました',
   'login.closingOldSession': 'アカウントがまだ接続中です。古いセッションを閉じて再試行しています...',
   'login.tokenRefused': '保存したログインの有効期限が切れました。パスワードを入力してください。',
+  'login.tokenUnanswered': 'サーバーが保存したログインに応答しませんでした。パスワードを入力してください。',
 } satisfies Partial<Record<keyof typeof en, string>>;
