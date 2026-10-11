@@ -63,6 +63,9 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   place of the item's own: the Summoner's Vine and Silk pieces (`HelmElfC`...), the Rage Fighter's Leather, Scale,
   Brass and Plate (`HelmMonk`..., gloves and boots both `BootMonk`, MonkSystem.cpp:187-206) and the Dark Lord's
   Bronze, Leather, Scale, Brass and Plate helms (`MaskHelmMale`), ZzzCharacter.cpp:9579-9617.
+- `itemIcon.ts`: `itemIconJob(scene, item)`, the shot of a bag icon drawn from the item's model, and
+  `liveItemIconSource(scene)`, what the app puts in the interface's live-icon slot;
+  `ITEM_ICON_UNITS_PER_PIXEL`.
 
 ## How it works
 - A spawned object's class comes from `resolveModelFactory(type)`, called by
@@ -106,6 +109,12 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 - A transformation skin (`characterSkinBody`) is either a part file worn on the player rig in place
   of the armor (`transformedBodyFactory`, ZzzCharacter.cpp:9345-9440) or a whole monster model that
   plays monster clips (`monsterClipFor`, WSclient.cpp:2760-2800).
+- A bag icon the pack has no file for (`itemIcon.ts`) is drawn as `RenderItem3D` draws every icon
+  (ZzzInventory.cpp:9707): the original's item camera has an identity view, a 1 degree field over
+  the 640 x 480 screen and puts the item 200 units out (0.1 of `RENDER_ITEMVIEW_FAR`), so a bag pixel
+  is `ITEM_ICON_UNITS_PER_PIXEL` units there. The shot covers the item's squares (20 pixels each),
+  places the model at its anchor in them and turns and scales it as `RenderObjectScreen` does;
+  `render/iconShot.ts` draws it once.
 
 ## Depends on / used by
 - uses: `render` (`ModelObject`, bone links), `assets`, `anim`, `fx`, `item_fx`, `lighting`,
@@ -138,6 +147,8 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 - `approachPath.test.ts`: walk truncation at range, distance along the sent path, stall capping.
 - `deserializeAppearance.test.ts`: `isAppearanceBlank` on empty and real previews.
 - `itemAngle.test.ts`: drop scale and pose per group, worn height, the `ItemAngle` tail rows.
+- `itemIcon.test.ts`: the shot covers the item's squares at the original's item depth, loads the
+  item's own model under the root at its scale and angle; no shot for an item with no model.
 - `npcModelTable.test.ts`: every row names a file in `public/game-assets` and has a scale > 0; the
   tables behave as plain objects and read the folders when asked.
 - `trapModels.test.ts`: every (map, trap) pair names an `Object<world+1>` model that exists.

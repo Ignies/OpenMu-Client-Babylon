@@ -69,6 +69,11 @@ windows themselves are content in `versions/shared/ui/` (see
 - `item_icons/`: the generated fit table (`tools/itemIconFit.ts`) and the per-item inventory scale
   from `RenderObjectScreen` (ZzzInventory.cpp:9308-10090). Do not edit. Which icon files exist is
   `assets/itemIconManifest.ts` (`tools/itemIconManifest.ts`).
+  `liveItemIcon.ts` (on `item_icons/index.ts`): the slot `item_icon` asks for an icon the pack has no
+  file for (`liveItemIcon(item)`, observable, asked once per look); the app fills it at boot
+  (`setLiveItemIcons`) with `actors/itemIcon.ts`, which draws the model as `RenderItem3D` does. The
+  interface never reaches the scene. The live picture is framed like the original's square, so it
+  takes no fit.
 - `keyBindings.ts`: each action maps to a `KeyboardEvent.code`, stored in localStorage per
   character (`setKeyProfile`), rebound from the Options Keys tab. The defaults are the original's
   keys; our own windows take keys no handler of the original reads (`NewUIHotKey.cpp`,
@@ -128,3 +133,5 @@ windows themselves are content in `versions/shared/ui/` (see
 - `itemTooltip.test.ts`: tooltip lines and name colours against `RenderItemInfo`: ancient sets, pets, harmony,
   sockets, 380 options, wings, the Horn of Fenrir, stack counts.
 - `item_icons/itemIconFit.test.ts`: every Box of Luck level and the newer icons have a fit entry.
+- `item_icons/liveItemIcon.test.ts`: nothing asked while the slot is empty; one ask per look, the URL
+  reaching an observer; the look key; a failed draw answers null once.
