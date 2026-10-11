@@ -3,6 +3,8 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 70,
   Name: 'Queen Rainer',
+  // Created with `m_bRenderShadow = false` (ZzzCharacter.cpp:13584).
+  classicShadow: false,
   // MODEL_QUEEN_RAINER: fourteen thunder joints between her bones (ZzzCharacter.cpp:5767-5824).
   bodyFx: [
     {

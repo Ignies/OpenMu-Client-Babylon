@@ -3,6 +3,8 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 222,
   Name: 'Slingshot Defend',
+  // Created with `m_bRenderShadow = false` (GMBattleCastle.cpp:1367).
+  classicShadow: false,
   maxHealth: 50,
   // Castle Siege (GMBattleCastle.cpp:1286-1381).
   npcModel: { file: 'Model_Npc_Catapult_Def', scale: 0.8 },

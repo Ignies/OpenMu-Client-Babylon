@@ -3,6 +3,8 @@ import { defineMonster } from '@/controllers/monsters';
 export default defineMonster({
   Numb: 283,
   Name: 'Guardian Statue',
+  // Created with `m_bRenderShadow = false` (GMBattleCastle.cpp:1422).
+  classicShadow: false,
   maxHealth: 50,
   model: { type: 74, scale: 1 },
   stats: {

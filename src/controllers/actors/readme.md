@@ -143,8 +143,8 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   shared classes) and the NPC tables, as hashes; update them on purpose. It runs the real model
   classes under Node.
 - `npcLooks.test.ts`: NPCs drawn as the original builds them (Hanzo's scale, the 0.9 default and who sets its own, the plain-model NPCs,
-  Zyro, the Cursed Wizard's kit, the plate helpers, the Kalima gates held on key 10, the monsters and traps
-  that cast no Classic shadow), each with its ZzzCharacter.cpp lines.
+  Zyro, the Cursed Wizard's kit, the plate helpers, the Kalima gates held on key 10, the monsters, traps
+  and NPCs that cast no Classic shadow and the ones that lose it in death), each with its source lines.
 - `skinTexture.test.ts`: skin / hair / level and hide texture names, and the case of each test.
 - `classPartModel.test.ts`: the Monk, mask and ElfC models per class, and that each file ships.
 - `weaponAttachment.test.ts`: a glove weapon on no bone and with no clip of its own, in the hands and in town.

@@ -11,6 +11,7 @@ import { entityYaw, type RGB } from '../../controllers/fx/core';
 import { combat } from '../../controllers/combat';
 import type { DeathMotion, Entity, ISystemFactory } from '../world';
 import type { PlayerObject } from '../../controllers/actors/playerObject';
+import { npcShadowOnDeath } from '../../controllers/actors/modelFactoryPerId';
 
 /**
  * DeadCharacter / SetPlayerDie / the Dead counter (ZzzCharacter.cpp:3105,
@@ -193,6 +194,9 @@ export const DeathSystem: ISystemFactory = world => {
   function startDie(e: Entity) {
     const d = e.dying!;
     const model = e.modelObject!;
+
+    // A Die branch's `m_bRenderShadow = false` (GMSwampOfQuiet.cpp:859 and its kind).
+    if (e.npcType !== undefined && !npcShadowOnDeath(e.npcType)) model.ClassicShadow = false;
 
     // SetPlayerDie's switch: a shatter death replaces the Die clip and the
     // blood - the body is gone (`o->Live = false`) and the pieces fly.

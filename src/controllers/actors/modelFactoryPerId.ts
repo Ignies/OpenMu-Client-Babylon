@@ -1,5 +1,5 @@
 import type { Entity, World } from '@/ecs/world';
-import { monsterRegistry, type NpcModel } from '@/controllers/monsters';
+import { monsterModelRegistry, monsterRegistry, type NpcModel } from '@/controllers/monsters';
 import { loadGLTF } from '@/controllers/assets';
 import { maps } from '@/controllers/maps';
 import { monsterFactoryFor } from './genericMonster';
@@ -66,10 +66,19 @@ export function npcSpawnScale(factory: typeof ModelObject, type = -1, world = -1
 const TRAP_KIND_FIRST = 100;
 const TRAP_KIND_LAST = 110;
 
+/** The Classic shadow its monster body asks for, if it has one. */
+const bodyShadow = (typeNumber: number) =>
+  hasMonsterModel(typeNumber) ? monsterModelRegistry.get(monsterModelTypeOfNpc(typeNumber))?.classicShadow : undefined;
+
 /** Whether `RenderCharacter` draws this NPC type's shadow (ZzzCharacter.cpp:8662-8668). */
 export function npcClassicShadow(typeNumber: number): boolean {
   if (typeNumber >= TRAP_KIND_FIRST && typeNumber <= TRAP_KIND_LAST) return false;
-  return monsterRegistry.def(typeNumber)?.classicShadow !== false;
+  return monsterRegistry.def(typeNumber)?.classicShadow !== false && bodyShadow(typeNumber) !== 'never';
+}
+
+/** Whether it keeps its Classic shadow once it dies (the bodies whose Die branch drops it). */
+export function npcShadowOnDeath(typeNumber: number): boolean {
+  return monsterRegistry.def(typeNumber)?.classicShadow !== 'alive' && bodyShadow(typeNumber) !== 'alive';
 }
 
 export function isKnownObjectType(typeNumber: number): boolean {

@@ -56,7 +56,8 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
   attack and magic speed; another player with speeds from the scope packet keeps its own.
 - `systems/deathSystem.test.ts`: Chaos Castle bomb sounds on odd ticks 15..25, the pit scream,
   no sound off the Blood Castle bridge, the skill knock and Nova motes, the Dead counter in whole
-  ticks at 25 fps, the Die clip at Dead 15 (less the hero's blow wait), the fade from the kill.
+  ticks at 25 fps, the Die clip at Dead 15 (less the hero's blow wait), the fade from the kill, the
+  Classic shadow off a body that loses it in death.
 - `systems/mapDoorSystem.test.ts`: Devias door creaks (repeat while the hero stays, stop out of
   range, one per wave, retry when a creak did not start).
 - `systems/restObjectRay.test.ts`: the rest-object picking ray matches `scene.pick`.
