@@ -427,8 +427,8 @@ export type GameOptions = {
    */
   helperItemFilters: boolean;
   /**
-   * Party invitations (ours, the `/re on|off|auto` chat command): 0 ask, the original's prompt /
-   * 1 decline / 2 accept on their own (`modules/social`, `autoAnswerParty`).
+   * Party invitations (ours, the `/re on|off|auto` chat command and Options > General > Party): 0 ask,
+   * the original's prompt / 1 decline / 2 accept on their own (`modules/social`, `autoAnswerParty`).
    */
   partyInviteReply: number;
   /**

@@ -39,6 +39,10 @@ export default {
   'options.hearInstruments': 'Słysz instrumenty innych graczy',
   'options.dropSoundFilter': 'Tylko łupy poniżej',
   'options.statPointAmounts': 'Dodawaj punkty hurtowo',
+  'options.partyInviteReply': 'Zaproszenia do drużyny',
+  'options.partyInviteReply.ask': 'Pytaj',
+  'options.partyInviteReply.decline': 'Odrzucaj',
+  'options.partyInviteReply.accept': 'Przyjmuj',
   'options.whisperBeep': 'Sygnał przy szepcie',
   'options.slideHelp': 'Przewijane ogłoszenia',
   'options.cameraControl': 'Sterowanie kamerą',
@@ -151,6 +155,7 @@ export default {
   'options.page.volume': 'Głośność',
   'options.page.screen': 'Ekran',
   'options.section.character': 'Postać',
+  'options.section.party': 'Drużyna',
   'options.section.notices': 'Powiadomienia',
   'options.section.movement': 'Ruch',
   'options.section.keyboard': 'Klawiatura',
@@ -192,6 +197,8 @@ export default {
     'Pokazuje noszony przedmiot obok wskazanego, z oznaczeniem lepszych i gorszych linii.',
   'options.help.statPointAmounts':
     'Dodaje pole ilości obok każdego + w oknie postaci, aby dodać wiele punktów naraz.',
+  'options.help.partyInviteReply':
+    'Co robi zaproszenie do drużyny: pyta, jak w oryginale, albo jest samo odrzucane lub przyjmowane. Komendy /re on, /re off i /re auto ustawiają to samo.',
   'options.help.autoReconnect':
     'Jeśli połączenie zerwie się w trakcie gry, loguje cię ponownie na tę samą postać.',
   'options.help.dropTooltips':

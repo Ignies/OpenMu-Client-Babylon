@@ -39,6 +39,10 @@ export default {
   'options.hearInstruments': 'Nghe nhạc cụ của người chơi khác',
   'options.dropSoundFilter': 'Chỉ các đồ rơi dưới đây',
   'options.statPointAmounts': 'Cộng điểm hàng loạt',
+  'options.partyInviteReply': 'Lời mời tổ đội',
+  'options.partyInviteReply.ask': 'Hỏi',
+  'options.partyInviteReply.decline': 'Từ chối',
+  'options.partyInviteReply.accept': 'Chấp nhận',
   'options.whisperBeep': 'Âm báo khi có tin nhắn riêng',
   'options.slideHelp': 'Thông báo chạy chữ',
   'options.cameraControl': 'Điều khiển camera',
@@ -151,6 +155,7 @@ export default {
   'options.page.volume': 'Âm lượng',
   'options.page.screen': 'Màn hình',
   'options.section.character': 'Nhân vật',
+  'options.section.party': 'Tổ đội',
   'options.section.notices': 'Thông báo',
   'options.section.movement': 'Di chuyển',
   'options.section.keyboard': 'Bàn phím',
@@ -192,6 +197,8 @@ export default {
     'Hiện vật phẩm bạn đang mặc cạnh vật phẩm được trỏ vào, đánh dấu dòng tốt hơn và kém hơn.',
   'options.help.statPointAmounts':
     'Thêm ô nhập số lượng cạnh mỗi dấu + trong Thông tin nhân vật, để cộng nhiều điểm cùng lúc.',
+  'options.help.partyInviteReply':
+    'Lời mời tổ đội sẽ làm gì: hỏi như bản gốc, hoặc tự từ chối hay chấp nhận. Các lệnh chat /re on, /re off và /re auto chỉnh cùng cài đặt này.',
   'options.help.autoReconnect':
     'Nếu mất kết nối khi đang chơi, tự đăng nhập lại vào đúng nhân vật đó.',
   'options.help.dropTooltips': 'Để con trỏ trên vật phẩm dưới đất để xem đầy đủ chi tiết.',

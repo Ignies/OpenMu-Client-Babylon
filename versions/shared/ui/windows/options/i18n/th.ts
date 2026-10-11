@@ -39,6 +39,10 @@ export default {
   'options.hearInstruments': 'ได้ยินเครื่องดนตรีของผู้เล่นอื่น',
   'options.dropSoundFilter': 'เฉพาะรายการด้านล่าง',
   'options.statPointAmounts': 'เพิ่มแต้มทีละหลายจุด',
+  'options.partyInviteReply': 'คำเชิญปาร์ตี้',
+  'options.partyInviteReply.ask': 'ถามก่อน',
+  'options.partyInviteReply.decline': 'ปฏิเสธ',
+  'options.partyInviteReply.accept': 'ตอบรับ',
   'options.whisperBeep': 'เสียงเตือนเมื่อได้รับข้อความกระซิบ',
   'options.slideHelp': 'ประกาศแบบเลื่อน',
   'options.cameraControl': 'ควบคุมกล้อง',
@@ -151,6 +155,7 @@ export default {
   'options.page.volume': 'ระดับเสียง',
   'options.page.screen': 'หน้าจอ',
   'options.section.character': 'ตัวละคร',
+  'options.section.party': 'ปาร์ตี้',
   'options.section.notices': 'การแจ้งเตือน',
   'options.section.movement': 'การเคลื่อนที่',
   'options.section.keyboard': 'คีย์บอร์ด',
@@ -192,6 +197,8 @@ export default {
     'แสดงไอเทมที่สวมใส่อยู่ข้างไอเทมที่ชี้ พร้อมทำเครื่องหมายค่าที่ดีกว่าและแย่กว่า',
   'options.help.statPointAmounts':
     'เพิ่มช่องจำนวนข้างปุ่ม + แต่ละปุ่มในหน้าต่างตัวละคร เพื่อเพิ่มแต้มทีละหลายจุด',
+  'options.help.partyInviteReply':
+    'คำเชิญปาร์ตี้จะทำอย่างไร: ถามก่อนเหมือนต้นฉบับ หรือปฏิเสธหรือตอบรับเอง คำสั่งแชต /re on, /re off และ /re auto ตั้งค่าเดียวกัน',
   'options.help.autoReconnect':
     'หากการเชื่อมต่อหลุดระหว่างเล่น จะเข้าสู่ระบบกลับไปที่ตัวละครเดิมให้อัตโนมัติ',
   'options.help.dropTooltips': 'วางเคอร์เซอร์ค้างไว้ที่ไอเทมบนพื้นเพื่อดูรายละเอียดทั้งหมด',

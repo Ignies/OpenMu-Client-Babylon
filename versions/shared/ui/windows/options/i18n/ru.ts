@@ -39,6 +39,10 @@ export default {
   'options.hearInstruments': 'Слышать инструменты других игроков',
   'options.dropSoundFilter': 'Только то, что ниже',
   'options.statPointAmounts': 'Добавлять очки пачкой',
+  'options.partyInviteReply': 'Приглашения в группу',
+  'options.partyInviteReply.ask': 'Спрашивать',
+  'options.partyInviteReply.decline': 'Отклонять',
+  'options.partyInviteReply.accept': 'Принимать',
   'options.whisperBeep': 'Звук при получении шёпота',
   'options.slideHelp': 'Бегущая строка объявлений',
   'options.cameraControl': 'Управление камерой',
@@ -151,6 +155,7 @@ export default {
   'options.page.volume': 'Громкость',
   'options.page.screen': 'Экран',
   'options.section.character': 'Персонаж',
+  'options.section.party': 'Группа',
   'options.section.notices': 'Уведомления',
   'options.section.movement': 'Движение',
   'options.section.keyboard': 'Клавиатура',
@@ -199,6 +204,8 @@ export default {
     'Показывает надетый предмет рядом с предметом под курсором и отмечает, какие строки лучше, а какие хуже.',
   'options.help.statPointAmounts':
     'Добавляет поле количества рядом с каждым + в окне «Персонаж», чтобы вкладывать много очков сразу.',
+  'options.help.partyInviteReply':
+    'Что делать с приглашением в группу: спрашивать, как в оригинале, или самому отклонять либо принимать его. Команды /re on, /re off и /re auto меняют то же самое.',
   'options.help.autoReconnect':
     'При обрыве связи во время игры заново входит тем же персонажем.',
   'options.help.dropTooltips':

@@ -39,6 +39,10 @@ export default {
   'options.hearInstruments': 'Ascolta gli strumenti degli altri giocatori',
   'options.dropSoundFilter': 'Solo quelli qui sotto',
   'options.statPointAmounts': 'Aggiungi punti in blocco',
+  'options.partyInviteReply': 'Inviti al gruppo',
+  'options.partyInviteReply.ask': 'Chiedi',
+  'options.partyInviteReply.decline': 'Rifiuta',
+  'options.partyInviteReply.accept': 'Accetta',
   'options.whisperBeep': 'Bip quando ricevi un sussurro',
   'options.slideHelp': 'Annunci scorrevoli',
   'options.cameraControl': 'Controllo camera',
@@ -152,6 +156,7 @@ export default {
   'options.page.volume': 'Volumi',
   'options.page.screen': 'Schermo',
   'options.section.character': 'Personaggio',
+  'options.section.party': 'Gruppo',
   'options.section.notices': 'Notifiche',
   'options.section.movement': 'Movimento',
   'options.section.keyboard': 'Tastiera',
@@ -196,6 +201,8 @@ export default {
     'Mostra l’oggetto che indossi accanto a quello sotto il cursore, con le righe migliori e peggiori evidenziate.',
   'options.help.statPointAmounts':
     'Aggiunge un campo quantità accanto a ogni + nella finestra Personaggio, per assegnare più punti in una volta.',
+  'options.help.partyInviteReply':
+    'Cosa fa un invito al gruppo: chiedere, come nell’originale, oppure rifiutarlo o accettarlo da solo. I comandi /re on, /re off e /re auto impostano la stessa cosa.',
   'options.help.autoReconnect':
     'Se la connessione cade mentre giochi, ti fa rientrare con lo stesso personaggio.',
   'options.help.dropTooltips':

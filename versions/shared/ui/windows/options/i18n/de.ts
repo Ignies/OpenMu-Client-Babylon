@@ -39,6 +39,10 @@ export default {
   'options.hearInstruments': 'Instrumente anderer Spieler hören',
   'options.dropSoundFilter': 'Nur die Funde unten',
   'options.statPointAmounts': 'Punkte gebündelt vergeben',
+  'options.partyInviteReply': 'Gruppeneinladungen',
+  'options.partyInviteReply.ask': 'Fragen',
+  'options.partyInviteReply.decline': 'Ablehnen',
+  'options.partyInviteReply.accept': 'Annehmen',
   'options.whisperBeep': 'Signalton beim Flüstern',
   'options.slideHelp': 'Ankündigungs-Laufband',
   'options.cameraControl': 'Kamerasteuerung',
@@ -152,6 +156,7 @@ export default {
   'options.page.volume': 'Lautstärke',
   'options.page.screen': 'Bildschirm',
   'options.section.character': 'Charakter',
+  'options.section.party': 'Gruppe',
   'options.section.notices': 'Meldungen',
   'options.section.movement': 'Bewegung',
   'options.section.keyboard': 'Tastatur',
@@ -199,6 +204,8 @@ export default {
     'Zeigt neben dem Gegenstand unter dem Zeiger dein getragenes Gegenstück und markiert bessere und schlechtere Werte.',
   'options.help.statPointAmounts':
     'Fügt neben jedem + im Charakterfenster ein Mengenfeld hinzu, um viele Punkte auf einmal zu vergeben.',
+  'options.help.partyInviteReply':
+    'Was eine Gruppeneinladung tut: fragen, wie im Original, oder sie von selbst ablehnen oder annehmen. Die Chatbefehle /re on, /re off und /re auto stellen dasselbe ein.',
   'options.help.autoReconnect':
     'Reißt beim Spielen die Verbindung ab, wirst du automatisch mit demselben Charakter wieder angemeldet.',
   'options.help.dropTooltips':

@@ -39,6 +39,10 @@ export default {
   'options.hearInstruments': 'Чувай инструментите на другите играчи',
   'options.dropSoundFilter': 'Само паданията по-долу',
   'options.statPointAmounts': 'Добавяне на точки наведнъж',
+  'options.partyInviteReply': 'Покани за група',
+  'options.partyInviteReply.ask': 'Питай',
+  'options.partyInviteReply.decline': 'Откажи',
+  'options.partyInviteReply.accept': 'Приеми',
   'options.whisperBeep': 'Звук при получен шепот',
   'options.slideHelp': 'Бягащи съобщения',
   'options.cameraControl': 'Управление на камерата',
@@ -151,6 +155,7 @@ export default {
   'options.page.volume': 'Сила на звука',
   'options.page.screen': 'Екран',
   'options.section.character': 'Герой',
+  'options.section.party': 'Група',
   'options.section.notices': 'Известия',
   'options.section.movement': 'Движение',
   'options.section.keyboard': 'Клавиатура',
@@ -192,6 +197,8 @@ export default {
     'Показва носения предмет до посочения и отбелязва кои редове са по-добри и кои по-лоши.',
   'options.help.statPointAmounts':
     'Добавя поле за количество до всеки + в прозореца Герой, за да слагаш много точки наведнъж.',
+  'options.help.partyInviteReply':
+    'Какво става с покана за група: да пита, както в оригинала, или да я отказва или приема сама. Командите /re on, /re off и /re auto променят същото.',
   'options.help.autoReconnect': 'Ако връзката прекъсне по време на игра, те вписва отново със същия герой.',
   'options.help.dropTooltips': 'Задръж курсора над предмет на земята, за да видиш всичките му данни.',
   'options.help.lootFilter':

@@ -39,6 +39,10 @@ export default {
   'options.hearInstruments': 'Auzi instrumentele celorlalți jucători',
   'options.dropSoundFilter': 'Doar ce este mai jos',
   'options.statPointAmounts': 'Adaugă puncte în bloc',
+  'options.partyInviteReply': 'Invitații în grup',
+  'options.partyInviteReply.ask': 'Întreabă',
+  'options.partyInviteReply.decline': 'Refuză',
+  'options.partyInviteReply.accept': 'Acceptă',
   'options.whisperBeep': 'Sunet la primirea unei șoapte',
   'options.slideHelp': 'Anunțuri defilante',
   'options.cameraControl': 'Control cameră',
@@ -153,6 +157,7 @@ export default {
   'options.page.volume': 'Volum',
   'options.page.screen': 'Ecran',
   'options.section.character': 'Personaj',
+  'options.section.party': 'Grup',
   'options.section.notices': 'Notificări',
   'options.section.movement': 'Deplasare',
   'options.section.keyboard': 'Tastatură',
@@ -196,6 +201,8 @@ export default {
     'Arată obiectul echipat lângă cel de sub cursor, cu liniile mai bune și mai slabe marcate.',
   'options.help.statPointAmounts':
     'Adaugă o casetă de cantitate lângă fiecare + din fereastra Personaj, ca să pui mai multe puncte deodată.',
+  'options.help.partyInviteReply':
+    'Ce face o invitație în grup: întreabă, ca în original, sau e refuzată ori acceptată singură. Comenzile /re on, /re off și /re auto setează același lucru.',
   'options.help.autoReconnect':
     'Dacă pică conexiunea în timp ce joci, te reconectează la același personaj.',
   'options.help.dropTooltips':

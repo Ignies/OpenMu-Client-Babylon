@@ -17,7 +17,8 @@ Party packets from the game server. The party state and the party actions live i
 ## Packets
 - `PartyRequest`: someone invites the hero; sets `Social.partyRequest`, then `Social.autoAnswerParty()`
   answers it when the player typed `/re off` (decline) or `/re auto` (accept); `/re on`, the
-  default, keeps the original's prompt (`GameOptions.partyInviteReply`, ours).
+  default, keeps the original's prompt (`GameOptions.partyInviteReply`, ours; also the Options row
+  Game > General > Party).
 - `PartyList`: the full member list (name, map, position, health).
 - `RemovePartyMember`: removes one member; the hero's own index clears the list.
 - `PartyHealthUpdate`: each member's health in tenths.

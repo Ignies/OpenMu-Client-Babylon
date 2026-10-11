@@ -39,6 +39,10 @@ export default {
   'options.hearInstruments': 'Entendre les instruments des autres joueurs',
   'options.dropSoundFilter': 'Uniquement ce qui suit',
   'options.statPointAmounts': 'Ajouter les points par lot',
+  'options.partyInviteReply': 'Invitations de groupe',
+  'options.partyInviteReply.ask': 'Demander',
+  'options.partyInviteReply.decline': 'Refuser',
+  'options.partyInviteReply.accept': 'Accepter',
   'options.whisperBeep': 'Bip à la réception d’un chuchotement',
   'options.slideHelp': 'Annonces défilantes',
   'options.cameraControl': 'Contrôle de la caméra',
@@ -152,6 +156,7 @@ export default {
   'options.page.volume': 'Volumes',
   'options.page.screen': 'Écran',
   'options.section.character': 'Personnage',
+  'options.section.party': 'Groupe',
   'options.section.notices': 'Notifications',
   'options.section.movement': 'Déplacement',
   'options.section.keyboard': 'Clavier',
@@ -194,6 +199,8 @@ export default {
     'Affiche l’objet que vous portez à côté de celui survolé, en signalant les lignes meilleures ou moins bonnes.',
   'options.help.statPointAmounts':
     'Ajoute un champ de quantité à côté de chaque + dans la fenêtre Personnage, pour attribuer plusieurs points d’un coup.',
+  'options.help.partyInviteReply':
+    'Ce que fait une invitation de groupe : demander, comme dans l’original, ou la refuser ou l’accepter d’elle-même. Les commandes /re on, /re off et /re auto règlent la même chose.',
   'options.help.autoReconnect':
     'Vous reconnecte au même personnage si la connexion est coupée pendant la partie.',
   'options.help.dropTooltips': 'Laissez le curseur sur un objet au sol pour voir tous ses détails.',

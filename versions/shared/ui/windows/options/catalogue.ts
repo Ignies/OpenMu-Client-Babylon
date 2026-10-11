@@ -174,6 +174,13 @@ export function helpKeyOf(row: Row): TextKey {
 const off = (value: number) => (value === 0 ? t('common.off') : `${value}`);
 const plain = (value: number) => `${value}`;
 const percent = (value: number) => `${value}%`;
+/** `partyInviteReply`: 0 ask (the original's prompt), 1 decline, 2 accept. */
+const PARTY_INVITE_REPLY_LABEL_KEYS: readonly TextKey[] = [
+  'options.partyInviteReply.ask',
+  'options.partyInviteReply.decline',
+  'options.partyInviteReply.accept',
+];
+
 const named =
   (keys: readonly TextKey[] | Record<number, TextKey>) => (value: number) => {
     const key = (keys as Record<number, TextKey>)[value];
@@ -312,6 +319,11 @@ export const CATEGORIES: Category[] = [
           {
             titleKey: 'options.section.character',
             rows: [toggle('statPointAmounts')],
+          },
+          {
+            titleKey: 'options.section.party',
+            // Ours, the same setting as the `/re on|off|auto` chat command; ask is the classic prompt.
+            rows: [choice('partyInviteReply', 2, named(PARTY_INVITE_REPLY_LABEL_KEYS))],
           },
           {
             titleKey: 'options.section.connection',
