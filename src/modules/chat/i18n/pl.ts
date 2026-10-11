@@ -41,6 +41,7 @@ export default {
   'cmd.whisper': 'Szepnij do gracza pod kursorem',
   'cmd.addfriend': 'Dodaj gracza pod kursorem do znajomych',
   'cmd.follow': 'Idź za graczem pod kursorem',
+  'cmd.re': 'Zaproszenia do drużyny: on pyta, off odrzuca, auto przyjmuje',
   'cmd.post': 'Krzyknij do wszystkich na serwerze',
   'cmd.help': 'Pomoc serwera do polecenia',
   'cmd.list': 'Lista poleceń serwera',

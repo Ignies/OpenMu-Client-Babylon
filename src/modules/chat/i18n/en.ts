@@ -39,6 +39,7 @@ const en = {
   'cmd.whisper': 'Whisper to the player under the cursor',
   'cmd.addfriend': 'Add the player under the cursor to your friend list',
   'cmd.follow': 'Walk after the player under the cursor',
+  'cmd.re': 'Party invitations: on asks, off declines, auto accepts',
   'cmd.post': 'Shout to everyone on the server',
   'cmd.help': 'Server help for a command',
   'cmd.list': 'List the server commands',

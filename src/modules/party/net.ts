@@ -19,6 +19,8 @@ export function installNet(): void {
         requesterName: playerNameById(requesterId),
       };
     });
+    // `/re off|auto` (ours) answers it here; the default keeps the prompt.
+    Social.autoAnswerParty();
   });
 
   EventBus.on('PartyList', packet => {

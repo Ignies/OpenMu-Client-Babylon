@@ -16,12 +16,12 @@ Format version: **1**
 | 0 | 1 | Format version. Anything else means a different table. |
 | 1 | 1 | Number of flag bytes that follow (currently 7). |
 | 2 | 7 | The on/off settings, one bit each, first in bit 0 of the first byte. |
-| 9 | 1 | Number of value bytes that follow (currently 54). |
-| 10 | 54 | The numeric settings, one byte each, each stored as value + 128. |
-| 64 | 2 | Language, two ASCII letters (`65 73` is `es`). |
-| 66 | 2 | Texture pack digest, `0000` when the original textures are in use. |
+| 9 | 1 | Number of value bytes that follow (currently 55). |
+| 10 | 55 | The numeric settings, one byte each, each stored as value + 128. |
+| 65 | 2 | Language, two ASCII letters (`65 73` is `es`). |
+| 67 | 2 | Texture pack digest, `0000` when the original textures are in use. |
 
-Total: **68 bytes**, 136 hex characters.
+Total: **69 bytes**, 138 hex characters.
 
 ## On/off settings
 
@@ -130,20 +130,21 @@ Each is one byte; subtract 128 to get the value. Index 0 is the first byte after
 | 37 | `monsterVolume` |
 | 38 | `msaa` |
 | 39 | `musicVolume` |
-| 40 | `renderDistance` |
-| 41 | `renderScale` |
-| 42 | `renderingStyle` |
-| 43 | `shadeSteps` |
-| 44 | `sharpness` |
-| 45 | `stepsVolume` |
-| 46 | `styleStrength` |
-| 47 | `sunShafts` |
-| 48 | `toneMapper` |
-| 49 | `uiScale` |
-| 50 | `uiVolume` |
-| 51 | `upscale` |
-| 52 | `vignette` |
-| 53 | `volume` |
+| 40 | `partyInviteReply` |
+| 41 | `renderDistance` |
+| 42 | `renderScale` |
+| 43 | `renderingStyle` |
+| 44 | `shadeSteps` |
+| 45 | `sharpness` |
+| 46 | `stepsVolume` |
+| 47 | `styleStrength` |
+| 48 | `sunShafts` |
+| 49 | `toneMapper` |
+| 50 | `uiScale` |
+| 51 | `uiVolume` |
+| 52 | `upscale` |
+| 53 | `vignette` |
+| 54 | `volume` |
 
 ## Worked example
 

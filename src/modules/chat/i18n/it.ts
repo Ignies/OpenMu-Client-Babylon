@@ -44,6 +44,7 @@ export default {
   'cmd.whisper': 'Sussurrare al giocatore sotto il cursore',
   'cmd.addfriend': 'Aggiungere agli amici il giocatore sotto il cursore',
   'cmd.follow': 'Camminare dietro al giocatore sotto il cursore',
+  'cmd.re': 'Inviti al gruppo: on chiede, off rifiuta, auto accetta',
   'cmd.post': 'Gridare a tutto il server',
   'cmd.help': 'Aiuto del server su un comando',
   'cmd.list': 'Elencare i comandi del server',

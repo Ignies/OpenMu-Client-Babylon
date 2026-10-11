@@ -7,6 +7,12 @@ export default {
   'party.onlyLeaderInvites': 'Solo il capogruppo può invitare.',
   'party.full': 'Il gruppo è al completo.',
   'party.invitationSent': 'Invito al gruppo inviato a {name}.',
+  'party.reply.on': 'Inviti al gruppo: ti verrà chiesto.',
+  'party.reply.off': 'Inviti al gruppo: rifiutati da soli. /re on per tornare a essere interpellato.',
+  'party.reply.auto': 'Inviti al gruppo: accettati da soli. /re on per tornare a essere interpellato.',
+  'party.reply.status': 'Inviti al gruppo: /re {mode}. Usa /re on, /re off o /re auto.',
+  'party.reply.declined': 'Invito al gruppo di {name} rifiutato (/re).',
+  'party.reply.accepted': 'Invito al gruppo di {name} accettato (/re).',
   'guild.joinRequestSent': 'Richiesta di gilda inviata a {name}.',
   'guild.onlyMasterAppoints':
     'Solo il master della gilda può nominare i membri.',

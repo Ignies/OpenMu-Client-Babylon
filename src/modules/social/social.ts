@@ -38,7 +38,7 @@ import {
   matchEmojiBubbleWord,
   type EmojiBubbleId,
 } from '../chat/emojiBubbles';
-import { localCommandOf } from '../chat/chatCommands';
+import { localCommandOf, partyReplyCommand } from '../chat/chatCommands';
 import {
   chatEmojiAdvance,
   chatEmojiBubbleOf,
@@ -52,7 +52,7 @@ import { itemLinkLabel, scanItemLinks, stripItemLinks } from '../chat/chatItemLi
 import { EMOJI_CATALOG } from '../chat/emojis';
 import { clipChatText, toChatWire } from '@/controllers/net/protocols';
 import { chatTextWidth } from '../chat/chatTextWidth';
-import { GameOptions } from '@/controllers/settings';
+import { GameOptions, setGameOption } from '@/controllers/settings';
 import type { Commands } from '../chat/commands';
 import {
   CancelGuildCreationPacket,
@@ -157,6 +157,9 @@ export const INVITE_RANGE_TILES = 1;
 export const GUILD_SECURITY_CODE_MAX = 10;
 
 const SYSTEM_ROW = '';
+
+/** `/re` words by `GameOptions.partyInviteReply`: ask (the original), decline, accept. */
+const PARTY_REPLIES = ['on', 'off', 'auto'] as const;
 
 type LocalCommands = Pick<typeof Commands, 'run' | 'duelStop' | 'stopFollowingOutside'>;
 
@@ -667,6 +670,14 @@ export const Social = new (class _Social {
       return true;
     }
 
+    // `/re on|off|auto` (ours): how party invitations are answered; never sent.
+    const reply = partyReplyCommand(text);
+    if (reply !== null) {
+      this.setPartyReply(reply);
+      this.remember(this.chatHistory, text);
+      return true;
+    }
+
     // `CheckCommand` (ZzzInterface.cpp:3990): `/trade`, `/party`, `/guild`,
     // `/union`… act on the player under the cursor and are never sent.
     const local = localCommandOf(text);
@@ -828,6 +839,27 @@ export const Social = new (class _Social {
     packet.TargetPlayerId = target.netId;
     Session.sendToGS(packet.buffer);
     this.systemMessage(t('party.invitationSent', { name: target.name }));
+  }
+
+  /** `/re on|off|auto`: ask (the original), decline or accept party invitations; else the setting now. */
+  setPartyReply(word: string): void {
+    const reply = (PARTY_REPLIES as readonly string[]).indexOf(word);
+    if (reply < 0) {
+      this.systemMessage(t('party.reply.status', { mode: PARTY_REPLIES[GameOptions.partyInviteReply] }));
+      return;
+    }
+    setGameOption('partyInviteReply', reply);
+    this.systemMessage(t(`party.reply.${PARTY_REPLIES[reply]}` as const));
+  }
+
+  /** An invitation came in: `/re off` or `/re auto` answers it here instead of the prompt. */
+  autoAnswerParty(): void {
+    const request = this.partyRequest;
+    const reply = GameOptions.partyInviteReply;
+    if (!request || !reply) return;
+    const accept = reply === 2;
+    this.partyRespond(accept);
+    this.systemMessage(t(accept ? 'party.reply.accepted' : 'party.reply.declined', { name: request.requesterName }));
   }
 
   /** The `CPartyMsgBoxLayout` answer. */

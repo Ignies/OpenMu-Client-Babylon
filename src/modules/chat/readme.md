@@ -32,7 +32,8 @@ live in the `Social` store ([../social/readme.md](../social/readme.md)).
   `classifyInboundChat` picks the log type and strips it.
 - `notices.ts`: the six-line golden banner (`ZzzInterface.cpp:491-603`).
 - `commands.ts`: `CNewUICommandWindow` and the client `/command` lines of `CheckCommand`
-  (`ZzzInterface.cpp:3990`); they act on the player under the cursor and are never sent.
+  (`ZzzInterface.cpp:3990`); they act on the player under the cursor and are never sent. `/re on|off|auto`
+  (ours, `partyReplyCommand` in `chatCommands.ts`) sets how party invitations are answered; also never sent.
 - `chatRooms.ts`: rooms on OpenMU's separate ChatServer, over `controllers/net/sockets/chatRoomSocket.ts`
   (it hands the socket `servers/serverConfig.ts`'s `wsAddress()`).
 - Emojis (`:dk_love:`) and item links (`{` + 16 chars + `}`) travel as plain ASCII in the chat text.

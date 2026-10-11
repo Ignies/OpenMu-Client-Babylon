@@ -41,6 +41,7 @@ export default {
   'cmd.whisper': 'Nói riêng với người chơi dưới con trỏ',
   'cmd.addfriend': 'Thêm người chơi dưới con trỏ vào danh sách bạn bè',
   'cmd.follow': 'Đi theo người chơi dưới con trỏ',
+  'cmd.re': 'Lời mời tổ đội: on hỏi, off từ chối, auto chấp nhận',
   'cmd.post': 'Hét cho mọi người trên máy chủ',
   'cmd.help': 'Trợ giúp của máy chủ về một lệnh',
   'cmd.list': 'Liệt kê các lệnh của máy chủ',

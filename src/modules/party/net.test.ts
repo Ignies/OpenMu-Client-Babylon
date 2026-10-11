@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { runInAction } from 'mobx';
 
 vi.hoisted(() => {
@@ -12,7 +12,10 @@ const { installNet } = await import('./net');
 const { Social } = await import('../social/social');
 const { Hero } = await import('@/modules/hero');
 const { EventBus } = await import('@/core/eventBus');
-const { PartyListPacket } = await import('@versions/shared/packets/ServerToClientPackets');
+const { PartyListPacket, PartyRequestPacket } = await import('@versions/shared/packets/ServerToClientPackets');
+const { PartyInviteResponsePacket } = await import('@versions/shared/packets/ClientToServerPackets');
+const { Session } = await import('@/modules/session');
+const { GameOptions } = await import('@/controllers/settings');
 
 installNet();
 
@@ -44,5 +47,52 @@ describe('PartyList', () => {
   it('keeps a slot name an update leaves blank', () => {
     EventBus.emit('PartyList', partyList('', 'Hero'));
     expect(Social.partyMembers.map(m => m.name)).toEqual(['Leader', 'Hero']);
+  });
+});
+
+// `/re on|off|auto` (ours, `GameOptions.partyInviteReply`): on is the original's prompt.
+describe('party invitations and /re', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    GameOptions.partyInviteReply = 0;
+    runInAction(() => {
+      Social.partyRequest = null;
+    });
+  });
+
+  /** An invitation arrives: the answers sent (accepted or not), and whether the prompt is up. */
+  function invite(): { answers: boolean[]; prompt: boolean } {
+    const answers: boolean[] = [];
+    vi.spyOn(Session, 'sendToGS').mockImplementation(view => {
+      answers.push(new PartyInviteResponsePacket(view).Accepted);
+    });
+    const p = PartyRequestPacket.createPacket();
+    p.RequesterId = 7;
+    EventBus.emit('PartyRequest', p.buffer);
+    return { answers, prompt: Social.partyRequest !== null };
+  }
+
+  it('asks, as the original, by default', () => {
+    expect(invite()).toEqual({ answers: [], prompt: true });
+  });
+
+  it('declines or accepts on its own once the player says so', () => {
+    vi.spyOn(performance, 'now').mockReturnValue(1e9);
+    expect(Social.sendChat('/re off')).toBe(true);
+    expect(GameOptions.partyInviteReply).toBe(1);
+    expect(invite()).toEqual({ answers: [false], prompt: false });
+
+    vi.restoreAllMocks();
+    vi.spyOn(performance, 'now').mockReturnValue(2e9);
+    Social.sendChat('/re auto');
+    expect(invite()).toEqual({ answers: [true], prompt: false });
+  });
+
+  it('sends the command to nobody', () => {
+    vi.spyOn(performance, 'now').mockReturnValue(3e9);
+    const send = vi.spyOn(Session, 'sendToGS').mockImplementation(() => undefined);
+    Social.sendChat('/re on');
+    expect(send).not.toHaveBeenCalled();
+    expect(GameOptions.partyInviteReply).toBe(0);
   });
 });

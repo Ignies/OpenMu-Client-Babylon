@@ -422,6 +422,11 @@ export type GameOptions = {
    */
   helperItemFilters: boolean;
   /**
+   * Party invitations (ours, the `/re on|off|auto` chat command): 0 ask, the original's prompt /
+   * 1 decline / 2 accept on their own (`modules/social`, `autoAnswerParty`).
+   */
+  partyInviteReply: number;
+  /**
    * 0 Classic (the original client, 1:1) / 1 Enhanced / 2 Ultra: which deliberate
    * improvements run (`controllers/fidelity`).
    */
@@ -506,6 +511,7 @@ const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
   compareTooltips: [0, 2],
   // Literal for the same reason: `CHAT_EMOJI_SIZE_MAX`.
   chatEmojiSize: [0, 3],
+  partyInviteReply: [0, 2],
   lowHealthPercent: [LOW_VITAL.min, LOW_VITAL.max],
   lowManaPercent: [LOW_VITAL.min, LOW_VITAL.max],
   uiScale: [0, UI_SCALE_MAX],
@@ -625,6 +631,7 @@ const DEFAULTS: GameOptions = {
   questTracker: true,
   englishItemNames: false,
   helperItemFilters: false,
+  partyInviteReply: 0,
   fidelity: FIDELITY_DEFAULT,
   fidelityOverrides: {},
 };

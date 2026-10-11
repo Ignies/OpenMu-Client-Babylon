@@ -41,6 +41,7 @@ export default {
   'cmd.whisper': '对光标下的玩家密语',
   'cmd.addfriend': '把光标下的玩家加为好友',
   'cmd.follow': '跟随光标下的玩家',
+  'cmd.re': '组队邀请：on 询问，off 拒绝，auto 接受',
   'cmd.post': '向全服喊话',
   'cmd.help': '查看服务器的命令帮助',
   'cmd.list': '列出服务器命令',
