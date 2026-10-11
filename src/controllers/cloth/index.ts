@@ -5,6 +5,7 @@ import { advanceClothClock } from './clothSet';
 export {
   PCT_CURVED,
   PCT_CYLINDER,
+  PCT_ELASTIC_HALLOWEEN,
   PCT_ELASTIC_RAGE_L,
   PCT_ELASTIC_RAGE_R,
   PCT_FLAT,
@@ -15,6 +16,7 @@ export {
   PCT_OPT_CORRECTEDFORCE,
   PCT_RUBBER,
   PCT_RUBBER2,
+  PCT_SHAPE_HALLOWEEN,
   PCT_SHORT_SHOULDER,
   PCT_STICKED,
   PhysicsCloth,

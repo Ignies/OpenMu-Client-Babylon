@@ -13,9 +13,10 @@ import { tearsSet } from './delete_cloth';
 import { DARK_LORD_HAIR } from './dark_lord_hair';
 import { DARK_LORD_SKIRT, DARK_LORD_SKIRT_BUILT, LORD_EMPEROR_SKIRT, LORD_EMPEROR_SKIRT_BUILT } from './dark_lord_skirt';
 import { teamLight } from './team_cloak';
-import { DEATH_KING, DEATH_KING_ROBE, NIGHTMARE, NIGHTMARE_ROBE, isDoppelganger } from './monster_robes';
+import { DEATH_KING, DEATH_KING_ROBE, FRED, FRED_CLOTH, NIGHTMARE, NIGHTMARE_ROBE, crustRobe, isDoppelganger } from './monster_robes';
 import { MAGIC_SKELETON_CLOTH, isMagicSkeleton } from './magic_skeleton';
 import { pantsCloth } from './soul_pants';
+import { bodyCloths } from './ring_bodies';
 import { CAPE_OF_FIGHTER_CLOTH, CAPE_OF_OVERRULE_CLOTH, CAPE_OF_OVERRULE_STRAPS, isCapeOfFighter, isCapeOfOverrule } from './cape_of_fighter';
 
 const WHITE: Rgb = [1, 1, 1];
@@ -129,13 +130,24 @@ function wearPants(w: CloakWearer, pants: CloakSet): void {
 export function cloaks(w: CloakWearer, set: CloakSet, pants: CloakSet | null): Rgb {
   if (tearsSet(w)) set.drop();
   if (pants) wearPants(w, pants);
-  if (isMagicSkeleton(w.monster)) {
-    // Its own case before bCloak (ZzzCharacter.cpp:8512-8533): built once, `Move2(0.005f, 5)` every frame.
+  // The cloths a body hangs on itself before bCloak, built once and stepped each frame, stun or not: the Magic
+  // Skeletons' (ZzzCharacter.cpp:8512-8533), Fred's (`MODEL_FRED`, ZzzObject.cpp:544-561), the Crusts' (:8818-8837).
+  const itsOwn = isMagicSkeleton(w.monster) ? MAGIC_SKELETON_CLOTH : w.monster === FRED ? FRED_CLOTH : crustRobe(w.monster);
+  if (itsOwn) {
     if (!set.built) {
-      set.build(0, MAGIC_SKELETON_CLOTH);
+      set.build(0, itsOwn);
       set.count = 1;
     }
     set.draw(0, false);
+  }
+  // A ring's body worn by a player hangs its own (RenderPartObjectBody, ZzzObject.cpp:8149-8417; ZzzCharacter.cpp:9436-9505).
+  const body = w.rig && w.monster === null ? bodyCloths(w.skin) : null;
+  if (body) {
+    if (!set.built) {
+      for (let i = 0; i < body.cloths.length; i++) set.build(i, body.cloths[i]);
+      set.count = body.cloths.length;
+    }
+    if (body.drawn) for (let i = 0; i < body.cloths.length; i++) set.draw(i, body.holds);
   }
   const base = getBaseClass(w.charClass);
   const team = w.monster === null ? teamLight(w) : null;

@@ -14,9 +14,10 @@ the capes, the Dark Lord's hair and skirt, the Magic Gladiator's robe, the team 
   Magic Gladiator's robe, msword03 under the Wing of Ruin), `dark_lord_hair.ts` (the Dark Lord's two
   strands of hair), `dark_lord_skirt.ts` (his skirt over the class's own body), `team_cloak.ts` (the duel
   and Battle Soccer colours, `teamLight`), `delete_cloth.ts` (the wing changes that reset the set, `tearsSet`),
-  `monster_robes.ts` (the Death King's and the Nightmare's robes, `isDoppelganger`), `magic_skeleton.ts` (the
-  Magic Skeletons' cape, a mesh of their body made cloth), `soul_pants.ts` (the pants that are cloth,
-  `pantsCloth`).
+  `monster_robes.ts` (the Death King's and the Nightmare's robes, `isDoppelganger`, the Crusts' `crustRobe`
+  and Fred's), `magic_skeleton.ts` (the Magic Skeletons' cape, a mesh of their body made cloth),
+  `soul_pants.ts` (the pants that are cloth, `pantsCloth`), `ring_bodies.ts` (the cloths a ring's body
+  hangs on its wearer, `bodyCloths`).
 
 ## How it works
 - `bCloak` (:9162-9186): on the player rig the Magic Gladiator class itself (`c->Class == CLASS_DARK`, so
@@ -61,7 +62,17 @@ the capes, the Dark Lord's hair and skirt, the Magic Gladiator's robe, the team 
 - The Magic Skeletons 1-7 (monsters 89, 95, 112, 118, 124, 130, 143; not 433, whom the switch does not name)
   have their own case before `bCloak` (ZzzCharacter.cpp:8502-8539): mesh 2 of the body (`bsh02.tga`) made cloth
   (`CPhysicsClothMesh`), pinned on bone 18, heavy, two spheres on that bone; built once, stepped every frame,
-  stun or not.
+  stun or not. Two more monsters hang their own the same way: the Mega Crust, Alpha Crust and Omega Wing a 5 x
+  15 rubber strip 300 long from the neck (`Monster\iui02.tga`, the other two `iui03.tga`; :8818-8837) and Fred
+  (`MODEL_FRED`, monster 508) `Monster\deasuler_cloth.tga` from its bone 10 (`Draw_RenderObject`,
+  ZzzObject.cpp:540-561).
+- A ring's body worn by a player (`KIND_PLAYER`, its `RenderPartObjectBody`, ZzzObject.cpp:8149-8417) hangs its
+  own on the wearer's set, built before `bCloak` looks: the Illusion Temple's Mu Allies `skill\unitedsoldier_wing.tga`
+  (held by stun) and Illusion Sorcerer `skill\illusionistcloth.tga` (the Halloween shape and gusts), the Jack
+  O'Lantern `Monster\iui02.tga` (never held), and the game master's two strands of hair (ZzzCharacter.cpp:9464-9482),
+  built and never stepped or drawn, the loop's cloaking test sitting inside its own negation. The set being built,
+  a class's set is never made under these bodies (a Dark Lord in Jack's body has no cape); the class loop walks
+  their cloths instead, so a Rage Fighter with his cape steps Jack's robe a second time.
 - The pants part (`RenderPartObject`, ZzzObject.cpp:10608-10680), keyed on the model drawn (`Type`, the part's
   file): the Grand Soul Pants (`t_PantMale19`) a 5 x 8 grid on bone 17 drawn as the part's mesh 2
   (`PCT_OPT_MESHPROG`), the Dark Soul Pants (`PantMale23`) a 7 x 5 one, the Divine Pants (`PantMaleTest20`, the
@@ -88,5 +99,10 @@ the capes, the Dark Lord's hair and skirt, the Magic Gladiator's robe, the team 
 
 ## Tests
 - `cloaks.test.ts`: each use's specs against the original's numbers, and who wears them (the two monsters,
-  no Doppelganger, the seven Magic Skeletons, the three pants by their model, twice in the shadow pass).
+  no Doppelganger, the seven Magic Skeletons, the three pants by their model, twice in the shadow pass, the Crusts,
+  Fred, the four ring bodies on a player and the class loop over them).
+
+## Notes
+- Not ported: the Dark Phoenix's hair (ZzzCharacter.cpp:8904-8920), which hangs on the bones of its second body
+  (`o->Type++`, Monster57), a body this client does not draw yet.
 - `team_cloak.test.ts`: the duel and Battle Soccer colours, who they put a cloak on, and what it is.
