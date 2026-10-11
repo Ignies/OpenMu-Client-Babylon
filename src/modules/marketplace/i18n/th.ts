@@ -22,6 +22,7 @@ export default {
   'marketplace.bought': 'ซื้อ {name} แล้ว',
   'marketplace.cancelled': 'ถอน {name} แล้ว',
   'marketplace.listedFlash': 'ลงขาย {name} แล้ว',
+  'marketplace.negotiateListed': 'ลงประกาศ {name} แบบต่อรองแล้ว',
   'marketplace.unreachable': 'เชื่อมต่อตลาดไม่ได้',
   'marketplace.buyRefused': 'การซื้อถูกปฏิเสธ',
   'marketplace.cancelFailed': 'ถอนไม่สำเร็จ',

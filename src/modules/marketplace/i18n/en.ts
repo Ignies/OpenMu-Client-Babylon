@@ -20,6 +20,7 @@ const en = {
   'marketplace.bought': 'Bought {name}',
   'marketplace.cancelled': 'Cancelled {name}',
   'marketplace.listedFlash': 'Listed {name}',
+  'marketplace.negotiateListed': '{name} is up to negotiate',
   'marketplace.unreachable': 'The marketplace is unreachable.',
   'marketplace.buyRefused': 'That purchase was refused.',
   'marketplace.cancelFailed': 'That could not be cancelled.',

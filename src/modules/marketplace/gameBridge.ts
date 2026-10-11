@@ -5,6 +5,8 @@ import { InventoryConstants } from '@/core/inventoryConstants';
 import { buildEscrowRequest, parseEscrowResult, type EscrowResult } from '@/controllers/net/protocols';
 import { t } from '../../i18n';
 import { Marketplace, type BagEntry } from './state';
+import { Social } from '../social/social';
+import { itemLinkLabel, itemLinkToken } from '../chat/chatItemLinks';
 
 /**
  * The one place the marketplace touches the game.
@@ -118,4 +120,13 @@ export function onEscrowResultPacket(bytes: Uint8Array): void {
   waiter.resolve(result);
 }
 
-Marketplace.attach({ bridge: { send: sendEscrow } });
+Marketplace.attach({
+  bridge: { send: sendEscrow },
+  // An advert to negotiate: the chat box opens on a whisper to the seller with the item linked.
+  chat: {
+    whisperAbout(seller, item) {
+      Social.setWhisperTarget(seller);
+      Social.insertIntoChat({ label: itemLinkLabel(item), token: itemLinkToken(item) });
+    },
+  },
+});

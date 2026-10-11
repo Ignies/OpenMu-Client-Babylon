@@ -22,6 +22,7 @@ export default {
   'marketplace.bought': 'Купи {name}',
   'marketplace.cancelled': '{name} е свален',
   'marketplace.listedFlash': '{name} е пуснат за продан',
+  'marketplace.negotiateListed': '{name} е обявен за договаряне',
   'marketplace.unreachable': 'Пазарът е недостъпен.',
   'marketplace.buyRefused': 'Покупката беше отказана.',
   'marketplace.cancelFailed': 'Не можа да бъде свалено.',

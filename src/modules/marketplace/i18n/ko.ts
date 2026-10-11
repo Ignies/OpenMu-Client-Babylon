@@ -22,6 +22,7 @@ export default {
   'marketplace.bought': '{name} 구매 완료',
   'marketplace.cancelled': '{name} 등록 취소됨',
   'marketplace.listedFlash': '{name} 등록 완료',
+  'marketplace.negotiateListed': '{name}을(를) 협상 판매로 올렸습니다',
   'marketplace.unreachable': '거래소에 연결할 수 없습니다.',
   'marketplace.buyRefused': '구매가 거절되었습니다.',
   'marketplace.cancelFailed': '취소하지 못했습니다.',

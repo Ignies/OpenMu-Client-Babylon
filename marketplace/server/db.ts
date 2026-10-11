@@ -14,8 +14,8 @@ import path from 'node:path';
  * OpenMU upgrade. So what is for sale, at what price, and for whom, is kept
  * here, keyed to the boxes by id.
  *
- * Every piece of SQL lives in this file and listings.ts. The rest of the
- * service sees typed records, never rows.
+ * Every piece of SQL lives in this file, listings.ts and offers.ts. The rest
+ * of the service sees typed records, never rows.
  */
 
 /**

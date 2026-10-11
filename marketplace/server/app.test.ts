@@ -109,6 +109,7 @@ function backdate(id: string, by: number) {
 
 beforeEach(() => {
   db.run('DELETE FROM listings');
+  db.run('DELETE FROM offers');
   db.run('DELETE FROM audit');
   boxes.clear();
 });
@@ -450,5 +451,57 @@ describe('a commit body without the page session', () => {
   test('is refused on a payout too', async () => {
     expect((await post('/payout', ticketOnly('alice'))).status).toBe(403);
     expect((await post('/payout', withSession('alice'))).status).toBe(200);
+  });
+});
+
+// Items up to negotiate (ours): no price, no escrow, the buyer whispers the seller's character.
+describe('adverts to negotiate', () => {
+  const item = { group: 0, num: 5, lvl: 9 };
+  type Advert = { id: string; sellerCharacter: string; seller?: string; slot?: number; note: string };
+  const advertise = (account: string, slot: number, note?: string) =>
+    call<{ offer: Advert; error?: string }>('POST', '/offers', { ...as(account), slot, item, category: 'weapons', note });
+  const browseAs = async (account: string) =>
+    (await call<{ offers: Advert[] }>('GET', '/offers', as(account))).body.offers;
+
+  test('names the character, never the account, and only its seller takes it down', async () => {
+    const made = await advertise('alice', 14, '  for\nwings  ');
+    expect(made.status).toBe(201);
+    expect(made.body.offer).toMatchObject({ sellerCharacter: 'alice', note: 'for wings' });
+    expect(made.body.offer.seller).toBeUndefined();
+    expect(made.body.offer.slot).toBeUndefined();
+
+    const seen = await browseAs('bob');
+    expect(seen.map(o => o.id)).toEqual([made.body.offer.id]);
+    expect(seen.every(o => o.seller === undefined)).toBe(true);
+
+    expect((await call('POST', `/offers/${made.body.offer.id}/remove`, as('bob'))).status).toBe(404);
+    expect((await call('POST', `/offers/${made.body.offer.id}/remove`, as('alice'))).status).toBe(200);
+    expect(await browseAs('bob')).toEqual([]);
+  });
+
+  test('shows the seller their own adverts with their listings', async () => {
+    const made = await advertise('carol', 22);
+    const mine = await call<{ offers: Advert[] }>('GET', '/mine', as('carol'));
+    expect(mine.body.offers.map(o => o.id)).toEqual([made.body.offer.id]);
+  });
+
+  test('replaces an advert for the same bag slot, and needs a live session', async () => {
+    const first = await advertise('carol', 20);
+    const second = await advertise('carol', 20);
+    expect(first.body.offer.id).not.toBe(second.body.offer.id);
+    expect((await browseAs('alice')).map(o => o.id)).toEqual([second.body.offer.id]);
+
+    expect((await advertise('dave', 20)).status).toBe(403);
+  });
+
+  test('caps the adverts per account', async () => {
+    for (let slot = 12; slot < 22; slot++) expect((await advertise('bob', slot)).status).toBe(201);
+    expect((await advertise('bob', 30)).status).toBe(400);
+  });
+
+  test('expire after three days', async () => {
+    await advertise('bob', 30);
+    clock += 3 * 24 * 60 * 60 * 1000 + 1;
+    expect(await browseAs('alice')).toEqual([]);
   });
 });

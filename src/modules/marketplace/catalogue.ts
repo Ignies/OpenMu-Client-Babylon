@@ -1,4 +1,4 @@
-import type { ApiListing, ListingState } from './api';
+import type { ApiListing, ApiOffer, ListingState } from './api';
 import { categoryOf } from './categories';
 import type { Listing } from './mockListings';
 import type { TextKey } from '../../i18n';
@@ -33,16 +33,42 @@ function fromApi(row: ApiListing, mine: boolean): Listing {
   };
 }
 
+/** An advert to negotiate (ours) as a row: no price, no state, so it reads as on sale. */
+function fromOffer(row: ApiOffer, mine: boolean): Listing {
+  return {
+    id: `offer-${row.id}`,
+    offerId: row.id,
+    item: row.item as Listing['item'],
+    category: categoryOf(row.item as Listing['item']),
+    seller: row.sellerCharacter,
+    price: 0,
+    listedAt: row.listedAt,
+    median: 0,
+    mine: mine || undefined,
+    negotiate: true,
+    note: row.note || undefined,
+  };
+}
+
 /**
  * The catalogue plus this player's own rows. A row that appears in both -
  * the player's own active listing - is taken from the own list, so it is
- * marked as theirs and is never drawn twice.
+ * marked as theirs and is never drawn twice. Adverts to negotiate follow the
+ * same rule.
  */
-export function mergeCatalogue(catalogue: ApiListing[], own: ApiListing[]): Listing[] {
+export function mergeCatalogue(
+  catalogue: ApiListing[],
+  own: ApiListing[],
+  offers: ApiOffer[] = [],
+  ownOffers: ApiOffer[] = []
+): Listing[] {
   const ownIds = new Set(own.map(row => row.id));
+  const ownOfferIds = new Set(ownOffers.map(row => row.id));
   return [
     ...own.map(row => fromApi(row, true)),
+    ...ownOffers.map(row => fromOffer(row, true)),
     ...catalogue.filter(row => !ownIds.has(row.id)).map(row => fromApi(row, false)),
+    ...offers.filter(row => !ownOfferIds.has(row.id)).map(row => fromOffer(row, false)),
   ];
 }
 

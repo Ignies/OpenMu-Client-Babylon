@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { ApiListing, Payout } from './api';
+import type { ApiListing, ApiOffer, Payout } from './api';
 import { MarketError } from './api';
 import { displayName } from './categories';
 import type { EscrowResult, EscrowStatusName } from '../../controllers/net/protocols/escrowWire';
@@ -29,6 +29,16 @@ const listing = (state: ApiListing['state'], id = ID): ApiListing => ({
   listedAt: 1,
 });
 
+const advert = (id: string, seller: string): ApiOffer => ({
+  id,
+  sellerCharacter: seller,
+  item,
+  category: 'jewels',
+  note: '',
+  listedAt: 2,
+  expiresAt: 9,
+});
+
 const result = (
   op: EscrowResult['op'],
   status: EscrowStatusName,
@@ -47,6 +57,9 @@ function scriptedApi() {
     cancel: vi.fn(async () => ({ listing: listing('returning'), token: 'cc' as string | null })),
     payout: vi.fn(async () => ({ payouts: [] as Payout[], total: 0 })),
     settlePayout: vi.fn(async () => ({ paid: 0, remaining: 0 })),
+    offers: vi.fn(async () => ({ offers: [] as ApiOffer[] })),
+    offer: vi.fn(async () => ({ offer: advert('new', 'Tester') })),
+    removeOffer: vi.fn(async () => ({ removed: true })),
   };
   return api as typeof api & MarketApi;
 }
@@ -278,5 +291,76 @@ describe('collecting', () => {
     store.payoutOwed = 0;
     await store.collectPayout();
     expect(api.payout).not.toHaveBeenCalled();
+  });
+});
+
+// Adverts to negotiate (ours): no price, no escrow; the buyer whispers the seller's character.
+describe('to negotiate', () => {
+  async function withAdverts() {
+    api.offers.mockResolvedValue({ offers: [advert('o1', 'Seller'), advert('mine', 'Tester')] });
+    api.mine.mockResolvedValue({ listings: [], balance: 0, offers: [advert('mine', 'Tester')] } as never);
+    await store.refresh();
+  }
+
+  const advertRow = (offerId: string) => {
+    const row = store.listings.find(l => l.offerId === offerId);
+    if (!row) throw new Error(`no advert ${offerId}`);
+    return row;
+  };
+
+  it('loads adverts beside the priced listings and sorts them after any price', async () => {
+    await withAdverts();
+    expect(store.listings.filter(l => l.negotiate).map(l => l.offerId)).toEqual(['mine', 'o1']);
+    store.setSort('price-desc');
+    expect(store.matching[0].id).toBe(OTHER);
+    expect(store.matching.slice(1).every(l => l.negotiate)).toBe(true);
+  });
+
+  it('still loads the listings from a service that has no adverts', async () => {
+    api.offers.mockRejectedValue(new MarketError('HTTP 404', 404));
+    await store.refresh();
+    expect(store.problem).toBeNull();
+    expect(store.listings.map(l => l.id)).toEqual([OTHER]);
+  });
+
+  it('opens a whisper to the seller about the item instead of buying', async () => {
+    const whisperAbout = vi.fn();
+    store.attach({ chat: { whisperAbout } });
+    await withAdverts();
+    const theirs = advertRow('o1');
+    expect(store.canAfford(theirs)).toBe(true);
+
+    store.negotiate(theirs);
+    store.negotiate(advertRow('mine'));
+
+    expect(whisperAbout).toHaveBeenCalledTimes(1);
+    expect(whisperAbout).toHaveBeenCalledWith('Seller', item);
+    expect(api.claim).not.toHaveBeenCalled();
+  });
+
+  it('posts the picked item with its note, nothing leaving the bag', async () => {
+    store.pickForSale(0);
+    store.setSellNegotiate(true);
+    store.setSellNote('for\nwings');
+
+    await store.postForNegotiation();
+
+    expect(api.offer).toHaveBeenCalledWith({ character: 'Tester', slot: 20, category: 'jewels', item, note: 'for wings' });
+    expect(api.list).not.toHaveBeenCalled();
+    expect(store.tab).toBe('mine');
+    expect(store.flash).toBe(t('marketplace.negotiateListed', { name: displayName(item) }));
+  });
+
+  it('takes an own advert down through the service, not the escrow', async () => {
+    await withAdverts();
+    await store.cancelListing(advertRow('mine').id);
+    expect(api.removeOffer).toHaveBeenCalledWith('mine');
+    expect(api.cancel).not.toHaveBeenCalled();
+  });
+
+  it('leaves adverts out of the going rate', async () => {
+    await withAdverts();
+    store.pickForSale(0);
+    expect(store.comparable.every(l => !l.negotiate)).toBe(true);
   });
 });

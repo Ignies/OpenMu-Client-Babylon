@@ -22,6 +22,7 @@ export default {
   'marketplace.bought': 'Куплено: {name}',
   'marketplace.cancelled': '{name} снят с продажи',
   'marketplace.listedFlash': '{name} выставлен',
+  'marketplace.negotiateListed': '{name} выставлен для торга',
   'marketplace.unreachable': 'Рынок недоступен.',
   'marketplace.buyRefused': 'Покупка отклонена.',
   'marketplace.cancelFailed': 'Не удалось снять с продажи.',

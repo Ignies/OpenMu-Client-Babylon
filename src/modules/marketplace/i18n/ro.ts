@@ -22,6 +22,7 @@ export default {
   'marketplace.bought': 'Ai cumpărat {name}',
   'marketplace.cancelled': '{name} retras',
   'marketplace.listedFlash': '{name} publicat',
+  'marketplace.negotiateListed': '{name} este anunțat la negociere',
   'marketplace.unreachable': 'Piața nu poate fi contactată.',
   'marketplace.buyRefused': 'Cumpărarea a fost refuzată.',
   'marketplace.cancelFailed': 'Nu s-a putut retrage.',

@@ -10,6 +10,7 @@ import {
   type Liveness,
 } from './identity';
 import * as store from './listings';
+import * as offers from './offers';
 import { CLAIM_TTL_MS, PENDING_TTL_MS, RETURN_TTL_MS, verdict } from './reconcile';
 
 /**
@@ -201,6 +202,7 @@ export function createApp(deps: AppDeps): App {
   async function sweep(): Promise<number> {
     const at = now();
     sweeps += 1;
+    offers.purgeExpired(at);
     const rows = [
       ...store.inState('pending', at - PENDING_TTL_MS),
       ...store.inState('claimed', at - CLAIM_TTL_MS),
@@ -284,7 +286,11 @@ export function createApp(deps: AppDeps): App {
         if ('error' in auth) return auth.error;
 
         return json(
-          { listings: store.bySeller(auth.account), balance: store.owed(auth.account) },
+          {
+            listings: store.bySeller(auth.account),
+            balance: store.owed(auth.account),
+            offers: offers.bySeller(auth.account, now()).map(offers.publicOffer),
+          },
           200,
           cors
         );
@@ -351,6 +357,68 @@ export function createApp(deps: AppDeps): App {
           character,
         });
         return json({ listing, token }, 201, cors);
+      }
+
+      // ---- to negotiate (ours) ------------------------------------------
+      // Adverts with no price and no escrow: the buyer whispers the seller's
+      // character and they trade in game (offers.ts).
+
+      if (path === '/api/market/offers' && req.method === 'GET') {
+        if (reads.hammering(ip)) return json({ error: TOO_MANY }, 429, cors);
+
+        const auth = authenticate({}, url, cors);
+        if ('error' in auth) return auth.error;
+
+        return json({ offers: offers.browse(now()).map(offers.publicOffer) }, 200, cors);
+      }
+
+      if (path === '/api/market/offers' && req.method === 'POST') {
+        if (commits.hammering(ip)) return json({ error: TOO_MANY }, 429, cors);
+
+        const body = await readBody(req);
+        const auth = authenticate(body, url, cors);
+        if ('error' in auth) return auth.error;
+        // No token is minted, but an advert names a character: only a live session posts one.
+        const refused = await authorizeCommit(body, auth.account, cors);
+        if (refused) return refused;
+
+        const character = body.character;
+        if (typeof character !== 'string' || !NAME_RE.test(character)) {
+          return json({ error: 'Log in to a character first.' }, 400, cors);
+        }
+        const slot = Number(body.slot);
+        if (!Number.isInteger(slot) || slot < FIRST_BAG_SLOT || slot > LAST_BAG_SLOT) {
+          return json({ error: 'That item is not in your bag.' }, 400, cors);
+        }
+        const item = body.item as store.Item | undefined;
+        if (!item || typeof item.group !== 'number' || typeof item.num !== 'number' || JSON.stringify(item).length > 4000) {
+          return json({ error: 'That item is not one the marketplace can read.' }, 400, cors);
+        }
+        const category = typeof body.category === 'string' ? body.category.slice(0, 32) : 'misc';
+
+        try {
+          const offer = offers.createOffer(
+            { seller: auth.account, sellerCharacter: character, slot, item, category, note: offers.cleanNote(body.note) },
+            now()
+          );
+          return json({ offer: offers.publicOffer(offer) }, 201, cors);
+        } catch (e) {
+          return json({ error: e instanceof Error ? e.message : 'That advert was refused.' }, 400, cors);
+        }
+      }
+
+      const offerRemove = path.match(/^\/api\/market\/offers\/([\w-]+)\/remove$/);
+      if (offerRemove && req.method === 'POST') {
+        if (commits.hammering(ip)) return json({ error: TOO_MANY }, 429, cors);
+
+        const body = await readBody(req);
+        const auth = authenticate(body, url, cors);
+        if ('error' in auth) return auth.error;
+
+        if (!offers.remove(offerRemove[1], auth.account)) {
+          return json({ error: 'That advert is not yours, or it is already gone.' }, 404, cors);
+        }
+        return json({ removed: true }, 200, cors);
       }
 
       const action = path.match(/^\/api\/market\/listings\/([\w-]+)\/(settle|claim|release|cancel)$/);

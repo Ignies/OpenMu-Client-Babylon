@@ -22,6 +22,7 @@ export default {
   'marketplace.bought': '{name} を購入しました',
   'marketplace.cancelled': '{name} を取り下げました',
   'marketplace.listedFlash': '{name} を出品しました',
+  'marketplace.negotiateListed': '{name} を交渉で出品しました',
   'marketplace.unreachable': 'マーケットに接続できません。',
   'marketplace.buyRefused': '購入が拒否されました。',
   'marketplace.cancelFailed': '取り下げできませんでした。',

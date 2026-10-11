@@ -28,7 +28,19 @@ export type BagEntry = { item: Item; slot: number };
 /** The service, as the store calls it. The real one is `./api`; tests and the harness swap it. */
 export type MarketApi = Pick<
   typeof realApi,
-  'browse' | 'mine' | 'history' | 'list' | 'settle' | 'claim' | 'release' | 'cancel' | 'payout' | 'settlePayout'
+  | 'browse'
+  | 'mine'
+  | 'history'
+  | 'list'
+  | 'settle'
+  | 'claim'
+  | 'release'
+  | 'cancel'
+  | 'payout'
+  | 'settlePayout'
+  | 'offers'
+  | 'offer'
+  | 'removeOffer'
 >;
 
 /** The game, as the store needs it: a token in, the server's answer out. */
@@ -36,11 +48,21 @@ type EscrowBridge = {
   send(tokenHex: string, listingId: string): Promise<EscrowResult>;
 };
 
-export type MarketDeps = { api: MarketApi; bridge: EscrowBridge };
+/** The game's chat, for an advert to negotiate: a whisper to the seller with the item linked. */
+type ChatBridge = {
+  whisperAbout(seller: string, item: Item): void;
+};
+
+export type MarketDeps = { api: MarketApi; bridge: EscrowBridge; chat: ChatBridge };
 
 const noBridge: EscrowBridge = {
   send: () => Promise.reject(new Error(t('marketplace.notConnected'))),
 };
+
+const noChat: ChatBridge = { whisperAbout: () => {} };
+
+/** What an advert's note may hold; the service cuts to the same (`marketplace/server/offers.ts`). */
+export const NOTE_MAX = 60;
 
 /** The game server's answer, in the player's words. Null for `ok`. */
 export function escrowStatusText(status: EscrowStatusName): string | null {
@@ -111,8 +133,11 @@ export class MarketplaceStore {
   /** Sell tab: which bag entry is picked, and the price typed for it. */
   sellPick: number | null = null;
   sellPrice = '';
+  /** Sell tab (ours): put it up to negotiate instead of for a price, with an optional note. */
+  sellNegotiate = false;
+  sellNote = '';
 
-  private deps: MarketDeps = { api: realApi, bridge: noBridge };
+  private deps: MarketDeps = { api: realApi, bridge: noBridge, chat: noChat };
 
   constructor() {
     makeAutoObservable<this, 'deps'>(this, { deps: false });
@@ -199,14 +224,16 @@ export class MarketplaceStore {
     });
 
     try {
-      const [catalogue, own] = await Promise.all([
+      const [catalogue, own, adverts] = await Promise.all([
         this.deps.api.browse({ limit: 200 }),
         this.deps.api.mine(),
+        // A service from before the adverts answers 404; the listings still load.
+        this.deps.api.offers().catch(() => ({ offers: [] })),
       ]);
       runInAction(() => {
         this.mode = 'live';
         this.problem = null;
-        this.listings = mergeCatalogue(catalogue.listings, own.listings);
+        this.listings = mergeCatalogue(catalogue.listings, own.listings, adverts.offers, own.offers ?? []);
         this.payoutOwed = own.balance;
         this.loading = false;
       });
@@ -343,23 +370,25 @@ export class MarketplaceStore {
         return false;
       }
       if (this.excellentOnly && !l.item.isExcellent && !l.item.isAncient) return false;
-      if (this.affordableOnly && l.price > this.zen) return false;
+      if (this.affordableOnly && !this.canAfford(l)) return false;
       if (needle && !displayName(l.item).toLowerCase().includes(needle)) {
         if (!l.seller.toLowerCase().includes(needle)) return false;
       }
       return true;
     });
 
+    // Adverts to negotiate have no price: the price sorts put them last.
+    const priceless = (l: Listing) => (l.negotiate ? 1 : 0);
     const sorted = filtered.slice();
     switch (this.sort) {
       case 'price-asc':
-        sorted.sort((a, b) => a.price - b.price);
+        sorted.sort((a, b) => priceless(a) - priceless(b) || a.price - b.price);
         break;
       case 'price-desc':
-        sorted.sort((a, b) => b.price - a.price);
+        sorted.sort((a, b) => priceless(a) - priceless(b) || b.price - a.price);
         break;
       case 'deal':
-        sorted.sort((a, b) => a.price / a.median - b.price / b.median);
+        sorted.sort((a, b) => priceless(a) - priceless(b) || (a.negotiate ? 0 : a.price / a.median - b.price / b.median));
         break;
       default:
         sorted.sort((a, b) => b.listedAt - a.listedAt);
@@ -382,7 +411,7 @@ export class MarketplaceStore {
   }
 
   canAfford(listing: Listing): boolean {
-    return this.zen >= listing.price;
+    return !!listing.negotiate || this.zen >= listing.price;
   }
 
   askBuy(listing: Listing): void {
@@ -487,6 +516,11 @@ export class MarketplaceStore {
     if (!listing || this.busy) return;
     const name = displayName(listing.item);
 
+    if (listing.offerId && this.mode !== 'offline') {
+      await this.removeOffer(listing.offerId, name);
+      return;
+    }
+
     if (this.mode === 'offline') {
       this.listings = this.listings.filter(l => l.id !== id);
       this.flash = t('marketplace.cancelled', { name });
@@ -519,6 +553,90 @@ export class MarketplaceStore {
   pickForSale(index: number | null): void {
     this.sellPick = index;
     this.sellPrice = '';
+    this.sellNote = '';
+  }
+
+  // ---- to negotiate (ours) -----------------------------------------------
+
+  setSellNegotiate(on: boolean): void {
+    this.sellNegotiate = on;
+  }
+
+  setSellNote(value: string): void {
+    this.sellNote = value.replace(/[\r\n]+/g, ' ').slice(0, NOTE_MAX);
+  }
+
+  /**
+   * Puts the picked item up to negotiate: nothing leaves the bag and no Zen moves. The advert names
+   * the character to whisper; the deal is a trade in game, where both sides see the real item.
+   */
+  async postForNegotiation(): Promise<void> {
+    const index = this.sellPick;
+    const entry = index === null ? null : this.inventory[index];
+    if (!entry || this.busy) return;
+    const { item, slot } = entry;
+    const name = displayName(item);
+    const note = this.sellNote.trim();
+
+    if (this.mode === 'offline') {
+      this.listings = [
+        {
+          id: `offer-${Math.random().toString(36).slice(2, 7)}`,
+          offerId: 'local',
+          item,
+          category: categoryOf(item),
+          seller: this.characterName || t('marketplace.you'),
+          price: 0,
+          listedAt: Date.now(),
+          median: 0,
+          mine: true,
+          negotiate: true,
+          note: note || undefined,
+        },
+        ...this.listings,
+      ];
+      this.sellPick = null;
+      this.sellNote = '';
+      this.flash = t('marketplace.negotiateListed', { name });
+      this.setTab('mine');
+      return;
+    }
+
+    this.setBusy(true);
+    try {
+      await this.deps.api.offer({ character: this.characterName, slot, category: categoryOf(item), item, note });
+      runInAction(() => {
+        this.sellPick = null;
+        this.sellNote = '';
+        this.flash = t('marketplace.negotiateListed', { name });
+      });
+      this.setTab('mine');
+    } catch (error) {
+      this.setFlash(MarketplaceStore.errorText(error, 'marketplace.listRefused'));
+    } finally {
+      this.setBusy(false);
+    }
+    await this.refresh();
+  }
+
+  private async removeOffer(offerId: string, name: string): Promise<void> {
+    this.setBusy(true);
+    try {
+      await this.deps.api.removeOffer(offerId);
+      this.setFlash(t('marketplace.cancelled', { name }));
+    } catch (error) {
+      this.setFlash(MarketplaceStore.errorText(error, 'marketplace.cancelFailed'));
+    } finally {
+      this.setBusy(false);
+    }
+    await this.refresh();
+  }
+
+  /** Someone else's advert: the chat opens on a whisper to the seller with the item linked. */
+  negotiate(listing: Listing): void {
+    if (!listing.negotiate || listing.mine) return;
+    this.deps.chat.whisperAbout(listing.seller, listing.item);
+    this.close();
   }
 
   setSellPrice(value: string): void {
@@ -541,7 +659,7 @@ export class MarketplaceStore {
     const item = this.sellPick === null ? null : this.inventory[this.sellPick]?.item;
     if (!item) return [];
     return this.listings
-      .filter(l => isOnSale(l) && l.item.group === item.group && l.item.num === item.num)
+      .filter(l => isOnSale(l) && !l.negotiate && l.item.group === item.group && l.item.num === item.num)
       .sort((a, b) => a.price - b.price);
   }
 
