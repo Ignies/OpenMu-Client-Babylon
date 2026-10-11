@@ -11,6 +11,7 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `babylon/utils.ts`: `createEngine(canvas, aa)` (boot), `addInspectorForScene` (Shift+Ctrl+Alt+I),
   `projectWorldPositionToScreenRef`. `babylon/emptyTexture.ts`: `getEmptyTexture`.
 - `babylon/spriteLinear.ts`: `installSpriteLinearDecode()` (called by `fx/core.ts`).
+- `babylon/compileWait.ts`: `pauseCompileWaitWhileHidden()` (called by `createEngine`).
 - `modelObject.ts`: `ModelObject`, the base class of every drawn model (actors, map objects, npcs,
   drops, pets); `PartPose`, `BodyShine`, `HIDDEN_MESH_ALL`.
 - `scenes/testScene.ts`: `TestScene`, the game's `Scene` with its camera, highlight layer and look.
@@ -92,6 +93,8 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `staticClips.test.ts`: still animation detection and `settleStillAnimations`.
 - `viewPlanes.test.ts`: `viewDepth`, matching `BoundingSphere.isInFrustum`.
 - `babylon/bitmapDecode.test.ts`: decode options, bitmap closing, the install probe.
+- `babylon/compileWait.test.ts`: a compiling shader is not given up while the page is hidden; shown,
+  Babylon's 30 s wait stands and a compile error is reported at once.
 - `babylon/spriteReplay.test.ts`: `renderWithReplay` reuses the frame's upload, and when it rebuilds.
 - `scenes/csmBounds.test.ts`: the kept receiver box matches Babylon's sweep.
 - `scenes/csmCache.test.ts`: the pinned Babylon private methods, map size and margin, `isStaticCaster`.
@@ -138,6 +141,10 @@ There is no `index.ts` facade; other folders import the modules directly.
   dropped every alpha-blended mesh, which left a thin, naked shadow; now that rule is map objects only.
 - `modelObject.ts`: `BLOB_SHADOW_MAX_FOOTPRINT` (4 tiles): on cliffs and walls the projection flattens
   onto the rock's own face and leans several tiles; their shading is already baked.
+- `babylon/compileWait.ts`: Babylon waits for a program with 1875 checks 16 ms apart (`Effect._checkIsReady`),
+  a count, not a time. A hidden page runs them once a second or slower and the GPU does not compile
+  for it, so a long AFK ran the count out and the materials came back black. The countdown stops
+  while the page is hidden; the rest is Babylon's.
 - `babylon/spriteLinear.ts`: decoding sprite colour on the CPU got the level right but left the soft
   skirt display-referred, and the effect composite lifted it into a pale disc. The shader gets a
   `MU_LINEAR` define and `muLinear` uniform, read on every bind.
