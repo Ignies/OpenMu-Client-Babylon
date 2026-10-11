@@ -9,6 +9,8 @@ const en = {
   'resume.cancelled': 'Reconnection cancelled',
   /** The world retries a login refused while the account was still in the game (`retryLoginWhenConnected`). */
   'login.closingOldSession': 'Account still connected: closing the old session and trying again...',
+  /** A token login refused (expired, replaced, or the password changed): the form asks for the password. */
+  'login.tokenRefused': 'Your saved login has expired. Enter your password.',
 };
 
 export default en;

@@ -54,7 +54,7 @@ export const V097dLoginPage = observer(() => {
   const onLoginClicked = () => {
     if (Session.loginProcessing) return;
 
-    if (!Session.username || !Session.password) {
+    if (!Session.canSubmitLogin) {
       Session.loginError = t('login.enterCredentials');
       return;
     }
@@ -62,7 +62,7 @@ export const V097dLoginPage = observer(() => {
     Session.loginError = undefined;
     Session.loginProcessing = true;
 
-    Session.loginRequest(Session.username, Session.password);
+    Session.submitLogin();
   };
 
   return (
@@ -116,6 +116,7 @@ export const V097dLoginPage = observer(() => {
             <input
               className="v097d-login-input"
               type="password"
+              placeholder={Session.savedToken ? t('login.savedLogin') : undefined}
               value={Session.password}
               onChange={e => {
                 Session.password = e.target.value;

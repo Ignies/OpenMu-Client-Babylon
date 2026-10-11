@@ -27,6 +27,7 @@ asks `isOn('<id>')`. Classic turns them all off and runs the original.
 | `swingFill` | Enhanced | `ecs/systems/attackSystem.ts` (sets `playerAnimation.swingFill` at the blow), `animationSystem.ts` (applies it) | the swing clip plays at the attack speed's rate to its end and the hero stands until the next swing (ZzzCharacter.cpp:812); the blow and the hit request keep their time either way |
 | `noticeLinks` | Enhanced | `modules/chat/notices.ts` (`create`), `ui/hud/notices/index.tsx` | a notice is plain text, markup and all, cut in two past 256 px (ZzzInterface.cpp:491-603) |
 | `drawnClothShadows` | Enhanced | `controllers/cloth/clothSet.ts` (`runClothFrame`) | every built cloth below `m_byNumCloth` lays its shadow, a skipped one where it was left (ZzzBMD.cpp:2648-2710) |
+| `loginTokens` | Enhanced | `modules/session/state.ts` (`keepsLoginTokens`, `savedToken`), on a world whose `server.json` has `loginTokens` | the password is typed each time; "remember" keeps the name only (no password is ever stored, on any preset) |
 
 - The file's comment cites the original and names the site; the site keeps the original path when
   `isOn` is false.
@@ -62,3 +63,5 @@ asks `isOn('<id>')`. Classic turns them all off and runs the original.
   them stays.
 - `controllers/cloth/clothSet.test.ts`: on Classic a built cloth the loop skips lays its shadow where it was
   left; `drawnClothShadows` leaves it out and keeps the drawn cloth's.
+- `modules/session/net.test.ts` ("login tokens"): on Classic no token is asked for and a saved one is
+  never sent; the password field is the only way in.

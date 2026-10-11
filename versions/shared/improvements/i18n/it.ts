@@ -45,4 +45,7 @@ export default {
   'fidelity.drawnClothShadows': 'Ombre dei tessuti ordinate',
   'fidelity.drawnClothShadows.hint':
     'Solo i mantelli, le tuniche e i capelli che un personaggio mostra proiettano un’ombra. Classica: un tessuto che il personaggio non mostra più lascia la sua ombra dove è rimasto, come nell’originale.',
+  'fidelity.loginTokens': 'Accessi salvati',
+  'fidelity.loginTokens.hint':
+    'Nei mondi che lo offrono, «Ricordami» conserva un token di accesso al posto della password, così l’accesso successivo non la chiede. Classica: scrivi la password ogni volta, come nell’originale.',
 } satisfies Partial<Record<keyof typeof en, string>>;

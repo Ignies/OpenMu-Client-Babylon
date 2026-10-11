@@ -9,4 +9,5 @@ export default {
   'resume.failed': '재접속하지 못했습니다',
   'resume.cancelled': '재접속을 취소했습니다',
   'login.closingOldSession': '계정이 아직 접속 중입니다. 이전 세션을 닫고 다시 시도하는 중...',
+  'login.tokenRefused': '저장된 로그인이 만료되었습니다. 비밀번호를 입력하세요.',
 } satisfies Partial<Record<keyof typeof en, string>>;

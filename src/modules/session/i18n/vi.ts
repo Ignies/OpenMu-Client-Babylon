@@ -9,4 +9,5 @@ export default {
   'resume.failed': 'Không thể kết nối lại',
   'resume.cancelled': 'Đã hủy kết nối lại',
   'login.closingOldSession': 'Tài khoản vẫn đang kết nối: đang đóng phiên cũ và thử lại...',
+  'login.tokenRefused': 'Đăng nhập đã lưu đã hết hạn. Hãy nhập mật khẩu.',
 } satisfies Partial<Record<keyof typeof en, string>>;

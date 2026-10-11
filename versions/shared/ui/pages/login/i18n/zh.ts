@@ -20,4 +20,5 @@ export default {
   'register.unreachable': '无法连接到服务器。',
   'register.failed': '注册失败（{status}）。',
   'register.created': '账号已创建，现在可以登录了。',
+  'login.savedLogin': '已保存',
 } satisfies Partial<Record<keyof typeof en, string>>;

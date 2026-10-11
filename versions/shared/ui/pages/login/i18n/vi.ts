@@ -18,4 +18,5 @@ export default {
   'register.unreachable': 'Không thể kết nối tới máy chủ.',
   'register.failed': 'Đăng ký thất bại ({status}).',
   'register.created': 'Đã tạo tài khoản. Bạn có thể đăng nhập ngay.',
+  'login.savedLogin': 'Đã lưu',
 } satisfies Partial<Record<keyof typeof en, string>>;

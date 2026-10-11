@@ -45,4 +45,7 @@ export default {
   'fidelity.drawnClothShadows': 'Uporządkowane cienie tkanin',
   'fidelity.drawnClothShadows.hint':
     'Cień rzucają tylko peleryny, szaty i włosy, które postać pokazuje. Klasyczne: tkanina, której postać już nie pokazuje, nadal rzuca cień tam, gdzie została, jak w oryginale.',
+  'fidelity.loginTokens': 'Zapisane logowania',
+  'fidelity.loginTokens.hint':
+    'Na światach, które to oferują, „Zapamiętaj mnie” przechowuje token logowania zamiast hasła, więc kolejne logowanie nie wymaga hasła. Klasyczne: hasło wpisujesz za każdym razem, jak w oryginale.',
 } satisfies Partial<Record<keyof typeof en, string>>;

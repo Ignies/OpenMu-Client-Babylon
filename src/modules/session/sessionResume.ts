@@ -40,7 +40,7 @@ export const SessionResume = new (class _SessionResume {
   private get resumable(): boolean {
     if (!GameOptions.autoReconnect) return false;
     if (Session.isOffline) return false;
-    if (!Session.username || !Session.password) return false;
+    if (!Session.canResumeLogin) return false;
     if (!Session.lastGameServer) return false;
     // Only a character that was in the world: anything earlier is a screen
     // the player is already looking at, and can act on themselves.
@@ -120,7 +120,7 @@ export const SessionResume = new (class _SessionResume {
     runInAction(() => {
       this.step = 'logging-in';
     });
-    Session.loginRequest(Session.username, Session.password);
+    Session.resumeLogin();
     return true;
   }
 

@@ -9,4 +9,5 @@ export default {
   'resume.failed': 'Riconnessione non riuscita',
   'resume.cancelled': 'Riconnessione annullata',
   'login.closingOldSession': 'Account ancora connesso: chiusura della vecchia sessione e nuovo tentativo...',
+  'login.tokenRefused': 'L’accesso salvato è scaduto. Inserisci la password.',
 } satisfies Partial<Record<keyof typeof en, string>>;

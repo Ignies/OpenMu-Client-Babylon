@@ -45,4 +45,7 @@ export default {
   'fidelity.drawnClothShadows': 'Sombras de tela ordenadas',
   'fidelity.drawnClothShadows.hint':
     'Solo las capas, túnicas y cabellos que muestra un personaje proyectan sombra. Clásica: una tela que el personaje ya no muestra sigue dejando su sombra donde quedó, como en el original.',
+  'fidelity.loginTokens': 'Inicios de sesión guardados',
+  'fidelity.loginTokens.hint':
+    'En los mundos que lo ofrecen, «Recordarme» guarda una clave de acceso en lugar de tu contraseña, así el siguiente inicio de sesión no la pide. Clásica: escribes la contraseña cada vez, como en el original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

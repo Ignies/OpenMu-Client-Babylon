@@ -45,4 +45,7 @@ export default {
   'fidelity.drawnClothShadows': 'Bóng vải gọn gàng',
   'fidelity.drawnClothShadows.hint':
     'Chỉ áo choàng, áo dài và tóc mà nhân vật đang hiện mới đổ bóng. Cổ điển: tấm vải nhân vật không còn hiện vẫn để lại bóng ở chỗ nó bị bỏ lại, như bản gốc.',
+  'fidelity.loginTokens': 'Đăng nhập đã lưu',
+  'fidelity.loginTokens.hint':
+    'Ở các thế giới hỗ trợ, "Ghi nhớ" giữ một mã đăng nhập thay cho mật khẩu, nên lần đăng nhập sau không cần mật khẩu. Cổ điển: nhập mật khẩu mỗi lần, như bản gốc.',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -9,4 +9,5 @@ export default {
   'resume.failed': 'Não foi possível reconectar',
   'resume.cancelled': 'Reconexão cancelada',
   'login.closingOldSession': 'Conta ainda conectada: fechando a sessão anterior e tentando de novo...',
+  'login.tokenRefused': 'Seu login salvo expirou. Digite sua senha.',
 } satisfies Partial<Record<keyof typeof en, string>>;

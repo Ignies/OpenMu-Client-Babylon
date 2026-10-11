@@ -45,4 +45,7 @@ export default {
   'fidelity.drawnClothShadows': 'Aufgeräumte Stoffschatten',
   'fidelity.drawnClothShadows.hint':
     'Nur Umhänge, Roben und Haare, die eine Figur zeigt, werfen einen Schatten. Klassisch: Ein Stoff, den die Figur nicht mehr zeigt, wirft seinen Schatten weiter dort, wo er zurückblieb, wie im Original.',
+  'fidelity.loginTokens': 'Gespeicherte Anmeldungen',
+  'fidelity.loginTokens.hint':
+    'Auf Welten, die es anbieten, behält „Angemeldet bleiben“ ein Anmelde-Token statt deines Passworts, sodass die nächste Anmeldung kein Passwort braucht. Klassisch: Du gibst das Passwort jedes Mal ein, wie im Original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

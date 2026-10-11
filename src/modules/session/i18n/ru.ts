@@ -9,4 +9,5 @@ export default {
   'resume.failed': 'Не удалось переподключиться',
   'resume.cancelled': 'Переподключение отменено',
   'login.closingOldSession': 'Аккаунт всё ещё в игре: закрываем старую сессию и пробуем снова...',
+  'login.tokenRefused': 'Сохранённый вход устарел. Введите пароль.',
 } satisfies Partial<Record<keyof typeof en, string>>;

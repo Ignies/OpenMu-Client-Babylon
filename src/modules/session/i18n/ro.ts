@@ -9,4 +9,5 @@ export default {
   'resume.failed': 'Reconectarea a eșuat',
   'resume.cancelled': 'Reconectare anulată',
   'login.closingOldSession': 'Contul este încă conectat: se închide sesiunea veche și se reîncearcă...',
+  'login.tokenRefused': 'Autentificarea salvată a expirat. Introdu parola.',
 } satisfies Partial<Record<keyof typeof en, string>>;

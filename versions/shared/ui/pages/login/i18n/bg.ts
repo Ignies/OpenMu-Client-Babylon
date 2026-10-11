@@ -20,4 +20,5 @@ export default {
   'register.unreachable': 'Няма връзка със сървъра.',
   'register.failed': 'Регистрацията се провали ({status}).',
   'register.created': 'Акаунтът е създаден. Вече можеш да влезеш.',
+  'login.savedLogin': 'Запазен вход',
 } satisfies Partial<Record<keyof typeof en, string>>;

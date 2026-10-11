@@ -3,7 +3,8 @@ import { LocalStorage } from '../../core/localStorage';
 import { ServerConfig, URL_PROFILE_ID, onWorldRekeyed } from './serverConfig';
 
 /** The saved accounts of each world (keyed by profile id) and which one the login window fills.
- * Plain text in localStorage, as the original stored them. Details: readme.md. */
+ * The name, as the original kept it, and on a world that issues them a login token; never a password.
+ * Details: readme.md. */
 
 const ACCOUNTS_KEY = 'mu_accounts';
 
@@ -11,7 +12,10 @@ const ACCOUNTS_KEY = 'mu_accounts';
 export const MAX_USERNAME_LENGTH = 10;
 export const MAX_PASSWORD_LENGTH = 10;
 
-/** The pre-rework blob (the old Store's `CONFIG_KEY`), read once to migrate. */
+/** A login token as stored: the 32 bytes of our OpenMU plugin's token, base64. */
+const TOKEN_TEXT = /^[A-Za-z0-9+/]{43}=$/;
+
+/** The pre-rework blob (the old Store's `CONFIG_KEY`): its name is migrated once, its password wiped. */
 const LEGACY_KEY = '_mu_key';
 
 /** What the tab has room for, and more mules than anyone runs from one browser. */
@@ -21,8 +25,9 @@ type ServerAccount = {
   /** Stable key within its world; `ServerConfig` ids are the world's key. */
   id: string;
   username: string;
-  password: string;
-  /** Off stores neither field, and is remembered so the box stays unticked. */
+  /** The world's login token for this account (`tokenToText`), or empty. */
+  token: string;
+  /** Off keeps no token, and is remembered so the box stays unticked. */
   remember: boolean;
   /** Epoch ms of the last login the server accepted, or 0 for never. */
   lastLoginAt: number;
@@ -37,7 +42,7 @@ type WorldAccounts = {
 const EMPTY_ACCOUNT: ServerAccount = {
   id: '',
   username: '',
-  password: '',
+  token: '',
   remember: true,
   lastLoginAt: 0,
 };
@@ -46,6 +51,18 @@ const NO_ACCOUNTS: WorldAccounts = { accounts: [], activeId: '' };
 
 const clamp = (value: unknown, max: number) =>
   typeof value === 'string' ? value.slice(0, max) : '';
+
+const cleanToken = (value: unknown) => (typeof value === 'string' && TOKEN_TEXT.test(value) ? value : '');
+
+/** A token's bytes as stored. */
+export function tokenToText(token: Uint8Array): string {
+  return btoa(String.fromCharCode(...token));
+}
+
+/** A stored token's bytes, or null for an empty or broken one. */
+export function tokenFromText(text: string): Uint8Array | null {
+  return cleanToken(text) ? Uint8Array.from(atob(text), c => c.charCodeAt(0)) : null;
+}
 
 let counter = 0;
 
@@ -57,38 +74,36 @@ function newId(): string {
 
 /**
  * What actually goes to disk. A row exists because the player put it there, so
- * "remember" is about the secret rather than about the row: off keeps the name
- * in the list and drops the password, and Delete is how a row goes away.
+ * "remember" is about the token rather than about the row: off keeps the name
+ * in the list and drops the token, and Delete is how a row goes away.
  */
 function stored(account: ServerAccount): ServerAccount {
+  const username = clamp(account.username, MAX_USERNAME_LENGTH);
+
   return {
     id: account.id,
-    username: clamp(account.username, MAX_USERNAME_LENGTH),
-    password: account.remember
-      ? clamp(account.password, MAX_PASSWORD_LENGTH)
-      : '',
+    username,
+    // A token with no name to go with it is not a login anyone can use.
+    token: account.remember && username ? cleanToken(account.token) : '',
     remember: account.remember,
     lastLoginAt: account.lastLoginAt,
   };
 }
 
 /** A row that says nothing is dropped rather than kept as an empty line. */
-const worthKeeping = (account: ServerAccount) =>
-  !!account.username || !!account.password || account.lastLoginAt > 0;
+const worthKeeping = (account: ServerAccount) => !!account.username || account.lastLoginAt > 0;
 
 function fromStorage(raw: unknown): ServerAccount | null {
   if (!raw || typeof raw !== 'object') return null;
 
+  // A `password` an older client stored is not read: the next save leaves it out.
   const data = raw as Partial<ServerAccount>;
-  const username = clamp(data.username, MAX_USERNAME_LENGTH);
   const at = Number(data.lastLoginAt);
 
   return stored({
     id: clamp(data.id, 40) || newId(),
-    username,
-    // A stored password with no name to go with it is not a login anyone can
-    // use; half-typed fields on screen are the store's business, not disk's.
-    password: username ? clamp(data.password, MAX_PASSWORD_LENGTH) : '',
+    username: data.username ?? '',
+    token: data.token ?? '',
     remember: data.remember !== false,
     lastLoginAt: Number.isFinite(at) && at > 0 ? at : 0,
   });
@@ -123,43 +138,48 @@ function worldFromStorage(raw: unknown): WorldAccounts | null {
 }
 
 /**
- * The one account the pre-rework client had, moved to the world it was most
- * likely typed on: the last one actually entered, or failing that the selected
- * one. Run once, and the legacy blob's credential keys are cleared afterwards
- * so the old global login cannot come back on a later launch.
+ * The pre-rework client's one login, taken out of its blob on every load: the
+ * credential keys are cleared, so a password it saved does not outlive this
+ * launch, and the name comes back for a first migration.
  */
-function migrateLegacy(): Record<string, WorldAccounts> {
+function takeLegacyAccount(): ServerAccount | null {
   try {
     const raw = LocalStorage.load(LEGACY_KEY);
 
-    if (!raw) return {};
+    if (!raw) return null;
 
     const data = JSON.parse(raw) as Record<string, unknown>;
-    const account = fromStorage({
-      username: data.username,
-      password: data.password,
-      remember: data.rememberLogin !== false,
-    });
+
+    if (!('username' in data || 'password' in data || 'rememberLogin' in data)) return null;
+
+    const account = fromStorage({ username: data.username, remember: data.rememberLogin !== false });
 
     delete data.username;
     delete data.password;
     delete data.rememberLogin;
     LocalStorage.save(LEGACY_KEY, JSON.stringify(data));
 
-    if (!account || !worthKeeping(account)) return {};
-
-    const id = ServerConfig.lastPlayedId || ServerConfig.activeId;
-
-    return id ? { [id]: { accounts: [account], activeId: account.id } } : {};
+    return account && worthKeeping(account) ? account : null;
   } catch {
-    return {};
+    return null;
   }
 }
 
-function load(): Record<string, WorldAccounts> {
+/**
+ * The book on disk. The pre-rework account moves to the world it was most
+ * likely typed on (the last one entered, else the selected one) when there is
+ * no book yet. A book an older client wrote with passwords in it is written
+ * again at once without them (`wipe`).
+ */
+function load(): { book: Record<string, WorldAccounts>; wipe: boolean } {
+  const legacy = takeLegacyAccount();
   const raw = LocalStorage.load(ACCOUNTS_KEY);
 
-  if (!raw) return migrateLegacy();
+  if (!raw) {
+    const id = ServerConfig.lastPlayedId || ServerConfig.activeId;
+
+    return { book: legacy && id ? { [id]: { accounts: [legacy], activeId: legacy.id } } : {}, wipe: false };
+  }
 
   try {
     const data = JSON.parse(raw) as Record<string, unknown>;
@@ -171,18 +191,22 @@ function load(): Record<string, WorldAccounts> {
       if (world) book[id] = world;
     }
 
-    return book;
+    return { book, wipe: raw.includes('"password"') };
   } catch {
-    return {};
+    return { book: {}, wipe: false };
   }
 }
 
-class ServerAccountsStore {
+/** Exported for tests, which load a store from a storage of their own; the app uses `ServerAccounts`. */
+export class ServerAccountsStore {
   private book: Record<string, WorldAccounts> = {};
 
   constructor() {
-    this.book = load();
+    const { book, wipe } = load();
+
+    this.book = book;
     makeAutoObservable(this);
+    if (wipe) this.save();
   }
 
   /** Every account saved for that world, in the order they were added. */
@@ -263,7 +287,10 @@ class ServerAccountsStore {
 
     if (!world || at < 0) return;
 
-    const next = stored({ ...world.accounts[at], ...patch, id: accountId });
+    const was = world.accounts[at];
+    // A token belongs to the account it was issued to: a renamed row keeps none.
+    const renamed = patch.username !== undefined && patch.username !== was.username;
+    const next = stored({ ...was, ...patch, ...(renamed && { token: patch.token ?? '' }), id: accountId });
 
     runInAction(() => {
       world.accounts[at] = next;
@@ -293,6 +320,21 @@ class ServerAccountsStore {
     this.save();
   }
 
+  /** The token kept for that name on that world, or empty. */
+  tokenOf(worldId: string, username: string): string {
+    return this.list(worldId).find(a => !!username && a.username === username)?.token ?? '';
+  }
+
+  /**
+   * A token for the account of that name (empty to drop it). Kept only while
+   * the account remembers its login; a name the world has no row for is skipped.
+   */
+  saveToken(worldId: string, username: string, token: string): void {
+    const account = this.list(worldId).find(a => !!username && a.username === username);
+
+    if (account) this.update(worldId, account.id, { token });
+  }
+
   /**
    * The login a server just accepted. It updates the account of that name when
    * the world already has one and adds it when it does not, so logging in with
@@ -300,7 +342,7 @@ class ServerAccountsStore {
    */
   record(
     worldId: string,
-    login: { username: string; password: string; remember: boolean }
+    login: { username: string; remember: boolean }
   ): void {
     if (!this.savable(worldId) || !login.username) return;
 
@@ -308,7 +350,6 @@ class ServerAccountsStore {
     const existing = this.list(worldId).find(a => a.username === name);
     const patch = {
       username: name,
-      password: login.password,
       remember: login.remember,
       lastLoginAt: Date.now(),
     };

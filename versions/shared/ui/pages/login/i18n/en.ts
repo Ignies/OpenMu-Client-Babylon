@@ -21,6 +21,8 @@ const en = {
   'register.unreachable': 'Could not reach the server.',
   'register.failed': 'Registration failed ({status}).',
   'register.created': 'Account created. You can log in now.',
+  /** The password field's placeholder when the saved login will be sent instead. Short: the field is narrow. */
+  'login.savedLogin': 'Saved login',
 };
 
 export default en;
