@@ -239,7 +239,7 @@ export default {
   'options.help.blockBrowserKeys':
     'Bloqueia atalhos do navegador, como F5 e zoom, durante o jogo e pede confirmação antes de fechar a aba.',
   'options.help.presets':
-    'Ajusta Iluminação, Materiais, Detalhe e toda a página Imagem para um mesmo nível.',
+    'Ajusta Iluminação, Materiais, Detalhe e toda a página Imagem para um mesmo nível. Baixa também desliga tudo o que pesa, multidões incluídas, e desenha a 75%, para máquinas lentas.',
   'options.help.lightingQuality':
     'Clássica é o visual original. Melhorada adiciona sombras do sol, sombreamento suave e névoa; Ultra deixa tudo mais nítido.',
   'options.help.materialQuality':

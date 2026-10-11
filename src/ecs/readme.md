@@ -96,6 +96,9 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
 - `systems/npcTalkSystem.test.ts`: the Gateway Machine is talked to from 5.5 tiles with no free tile beside it.
 - `systems/calculateVisibilitySystem.test.ts`: the ground item cap leaves a normal pile alone and hides the
   farthest past it.
+- `systems/itemGlowSystem.test.ts`: the gear key changes only with what the lamp reads (level, excellent, ancient,
+  sockets, slot, re-apply, gear effects); it is written in place, no string per character per frame.
+- `systems/modelLoaderSystem.test.ts`: `selectNearest` puts the nearest pending models first without a sort.
 - `systems/othersShown.test.ts`: the crowd options hide only other players' gear effects and pets, never a
   ridden mount, the hero's or a monster's; hold other players' and the NPCs' clips, never the hero, a monster or a trap.
 - `systems/playerControllerSystem.test.ts`: a ground click calls off a standing cast, except while the

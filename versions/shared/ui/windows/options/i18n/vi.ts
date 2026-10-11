@@ -235,7 +235,7 @@ export default {
   'options.help.blockBrowserKeys':
     'Chặn các phím tắt trình duyệt như F5 và thu phóng khi đang chơi, và hỏi trước khi đóng tab.',
   'options.help.presets':
-    'Đặt Ánh sáng, Chất liệu, Chi tiết và toàn bộ trang Hình ảnh về cùng một mức.',
+    'Đặt Ánh sáng, Chất liệu, Chi tiết và toàn bộ trang Hình ảnh về cùng một mức. Thấp còn tắt mọi thứ tốn tài nguyên, kể cả đám đông, và vẽ ở 75%, cho máy yếu.',
   'options.help.lightingQuality':
     'Cổ điển là giao diện gốc. Nâng cao thêm bóng mặt trời, đổ bóng mềm và sương mù; Ultra làm chúng sắc nét hơn.',
   'options.help.materialQuality':

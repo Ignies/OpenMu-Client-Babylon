@@ -251,7 +251,7 @@ const en = {
   'options.help.blockBrowserKeys':
     'Stops browser shortcuts like F5 and zoom mid-game, and asks before the tab closes.',
   'options.help.presets':
-    'Sets Lighting, Materials, Detail and the whole Image page to one matching level.',
+    'Sets Lighting, Materials, Detail and the whole Image page to one matching level. Low also turns off everything costly, crowds included, and renders at 75%, for slow machines.',
   'options.help.lightingQuality':
     'Classic is the original look. Enhanced adds sun shadows, soft shading and haze; Ultra sharpens them.',
   'options.help.materialQuality':

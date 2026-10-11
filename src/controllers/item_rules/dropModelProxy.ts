@@ -1,5 +1,5 @@
 /**
- * `CreateItem`'s per-level model swap (ZzzObject.cpp:6056-6116): a few wire
+ * `CreateItem`'s per-level model swap (ZzzObject.cpp:6013-6137): a few wire
  * items are shown on the ground as another model, picked by the item's
  * level. The swap replaces `o->Type` outright in the original, so the pose
  * (`ItemAngle`) follows the shown model too - a Weapon of Archangel lies
@@ -66,6 +66,7 @@ export function archangelWeapon(level: number): readonly [number, number] {
   return ARCHANGEL_WEAPONS[level] ?? ARCHANGEL_WEAPONS[0];
 }
 
+const ALE = 9;
 const BOX_OF_LUCK = 11;
 const RENA = 21;
 const PINK_CHOCOLATE_BOX = 32;
@@ -115,8 +116,38 @@ function potionProxy(num: number, lvl: number): DropModelProxy | null {
       pose: { angle: [115, 75, 8], scale: 0.4 },
     };
   }
+  // Ale +1 is `MODEL_EVENT + 7`, Beer02 (ZzzObject.cpp:6121-6129, ZzzOpenData.cpp:970, pose :5786).
+  if (num === ALE && lvl === 1) {
+    return { group: ItemGroup.Potion, num, modelFilePath: 'Item/Beer02.glb', pose: { angle: [0, 0, 45], scale: 0.8 } };
+  }
   return lvl === 1 ? (QUEST_LEVEL_ONE[num] ?? null) : null;
 }
+
+/** `Vector(0, 0, -45)` and `ItemObjectAttribute`'s 0.8: a model ItemAngle has no branch for. */
+const DEFAULT_POSE = { angle: [0, 0, -45], scale: 0.8 } as const;
+
+const LIFE_STONE = 11;
+const LOCHS_FEATHER = 14;
+
+/**
+ * Level 1 Life Stone / Loch's Feather: `MODEL_EVENT + 18` LifeStoneItem and
+ * `+ 16` DarkLordSleeve (ZzzObject.cpp:6130-6137, ZzzOpenData.cpp:735/1016),
+ * posed by ItemAngle's `+ 16` branch (ZzzObject.cpp:5762); `+ 18` has none.
+ */
+const HELPER_LEVEL_ONE: Record<number, DropModelProxy> = {
+  [LIFE_STONE]: {
+    group: ItemGroup.Helper,
+    num: LIFE_STONE,
+    modelFilePath: 'Item/LifestoneItem.glb',
+    pose: DEFAULT_POSE,
+  },
+  [LOCHS_FEATHER]: {
+    group: ItemGroup.Helper,
+    num: LOCHS_FEATHER,
+    modelFilePath: 'Item/DarkLordSleeve.glb',
+    pose: { angle: [0, 0, 45], scale: 0.5 },
+  },
+};
 
 export function dropModelProxy(
   group: number,
@@ -133,12 +164,14 @@ export function dropModelProxy(
     return { group: g, num: n, modelFilePath: item.szModelFolder + item.szModelName };
   }
 
-  // Wizards Ring: level 0 keeps its own MagicRing row; 1-3 are the Ring of
-  // Lord event rings, `MODEL_EVENT + 14` (ZzzObject.cpp:6103-6116), a model
-  // that is no item row of its own. The ring pose stays.
-  if (num === WIZARDS_RING && lvl >= 1 && lvl <= 3) {
-    return { group, num, modelFilePath: 'Item/RingOfLordEvent00.glb' };
+  // Wizards Ring: level 0 is `MODEL_EVENT + 15` (MagicRing00, the row's own
+  // model), 1-3 the Ring of Lord event rings, `MODEL_EVENT + 14`
+  // (ZzzObject.cpp:6107-6120). ItemAngle has no branch for either.
+  if (num === WIZARDS_RING) {
+    if (lvl === 0) return { group, num, modelFilePath: 'Item/MagicRing00.glb', pose: DEFAULT_POSE };
+    if (lvl <= 3) return { group, num, modelFilePath: 'Item/RingOfLordEvent00.glb' };
+    return null;
   }
 
-  return null;
+  return lvl === 1 ? (HELPER_LEVEL_ONE[num] ?? null) : null;
 }
