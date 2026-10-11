@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { t, type TextKey } from '@/i18n';
 import { legPoint, ROUTE, tourAt, type StopNeed } from './mapTour';
-import { loadCredits, type Credit } from './contributors';
+import { loadCredits, type Credit } from '@/modules/credits';
 import {
   foundVillages,
   roadSoFar,

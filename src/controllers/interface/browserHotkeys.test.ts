@@ -61,6 +61,11 @@ describe('isBrowserChord', () => {
     expect(isBrowserChord(chord({ code: 'F12' }), false)).toBe(false);
   });
 
+  it('keeps Ctrl+F8, the credits window, from the browser even in a field', () => {
+    expect(isBrowserChord(ctrl('F8'), false)).toBe(true);
+    expect(isBrowserChord(ctrl('F8'), true)).toBe(true);
+  });
+
   it('blocks history navigation and the address bar', () => {
     expect(isBrowserChord(chord({ code: 'ArrowLeft', altKey: true }), false)).toBe(true);
     expect(isBrowserChord(chord({ code: 'KeyD', altKey: true }), false)).toBe(true);

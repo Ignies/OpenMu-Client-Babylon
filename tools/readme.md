@@ -34,6 +34,7 @@ and how to run it.
 - `checks/`: structure checks and their baselines, the lint ratchet, the commit message rules
   ([docs/ci.md](../docs/ci.md)). `lintCounts.ts`: `bun run lint:count`. `checks/graph.test.ts`
   pins the cycle finder and the type-only import rule the cycle check stands on.
+- `checks/credits.ts`: the protected credits (AGENTS.md, "Credits") are all there; `credits.test.ts` pins it.
 - `checks/distLogs.ts`: `bun tools/checks/distLogs.ts [dist]` after a build fails on any `console.log` /
   `console.debug` / `console.trace` call left in the bundle (vite.config.ts strips them, `esbuild.pure`;
   warnings, errors and info stay). `checks/productionLogs.test.ts` checks the config itself, no build needed.

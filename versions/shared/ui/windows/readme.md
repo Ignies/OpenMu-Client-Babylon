@@ -57,6 +57,7 @@ One folder per in-game window. A window draws; its state and actions belong to i
 | `gm_panel` | gm_panel (480) | game master panel; sends chat commands | gm, social, chat |
 | `credits` | - | the server list's Credit screen (`CCreditWin`): illustrations, the `credit.bmd` staff roll, logo, deco; no `window.ts`, drawn by `src/app/App.tsx` | servers |
 | `options` | - | options window; no `window.ts`, drawn by `src/app/App.tsx` | options and more |
+| `project_credits` | - | the project credits (hidden, Ctrl+F8 on every page): the special thanks, contributors with commits, bug reporters with reports, playtesters, from GitHub; no `window.ts`, drawn by `src/app/App.tsx` | credits |
 | `_shared` | - | `nearby_players.ts`: `useNearbyPlayers` for party and guild | social |
 
 Other ids in the same stack: msg_window (360) and picked_item (500) from the interface
@@ -94,3 +95,4 @@ controller, and the HUD elements in `../hud`.
 - `options/catalogue.test.ts`: the party invitations row; the automation rows are greyed where the
   server does not allow them.
 - `trade/index.test.tsx`: the partner grid stays live under the pointer (tooltips), only its clicks are swallowed.
+- `project_credits/index.test.tsx`: the credit groups, the names with their counts, the closed and open window.

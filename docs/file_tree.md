@@ -57,8 +57,9 @@ controllers/       generic services; controllers.ts starts them, controller.ts i
   weather/         rain and snow
 modules/           gameplay modules; each has net.ts (packets in), its state and actions (state.ts)
                    and its door (index.ts)
-  band chaos_mix character_select chat combat drops economy events friends gm guild guild_war
-  hero inventory marketplace mu_helper npc_shop options party personal_shop pets quests
+  band chaos_mix character_select chat combat credits (the GitHub credits) drops economy events
+  friends gm guild guild_war hero inventory marketplace mu_helper npc_shop options party
+  personal_shop pets quests
   scope (objects in view) servers session skills social trade vault warp world (weather, fireworks)
   _shared/         helpers more than one module net uses
   _api/            the module API: contract, in-process host, message binding, sandbox frame, streaming

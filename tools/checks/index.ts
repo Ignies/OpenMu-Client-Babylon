@@ -4,6 +4,7 @@ import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from '
 import { posix } from 'path';
 import { cycles, importGraph, runtimeSpecifiers, trackedFiles } from './graph';
 import { RULES, edgeKey } from './rules';
+import { creditsProblems } from './credits';
 
 const update = process.argv.includes('--update');
 const BASE = 'tools/checks/baselines';
@@ -127,6 +128,9 @@ function baseline(name: string, current: string[]): string[] {
   }
   fail('doc links that lead nowhere (fix the path)', broken);
 }
+
+// 9. The project credits (Ctrl+F8) and their notices stay: LICENSE, "Additional condition" (credits.ts).
+fail('protected credits (see AGENTS.md, "Credits")', creditsProblems(f => (existsSync(f) ? readFileSync(f, 'utf8') : null)));
 
 if (failures.length) {
   console.error(failures.join('\n\n'));

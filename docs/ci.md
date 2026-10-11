@@ -31,6 +31,9 @@ run locally:
   may load `src/version/index.ts`, `src/app/`, Babylon or React at run time.
 - **Doc links lead somewhere:** a relative link in any `.md` names a file or folder that exists
   (links in code spans and fences are examples; `serverlist.md` is data).
+- **Protected credits** (`tools/checks/credits.ts`): the Ctrl+F8 credits window, its binding, the
+  loader's GitHub sources, the notices in those files and AGENTS.md, and LICENSE's additional
+  condition are all present ([AGENTS.md](../AGENTS.md), "Credits").
 
 ## Baselines
 
