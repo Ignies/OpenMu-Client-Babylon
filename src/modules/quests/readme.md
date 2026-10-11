@@ -44,7 +44,11 @@ with its own MobX state, behind the `quests` facade (`index.ts`).
 - Outgoing: `LegacyQuestStateRequest`, `LegacyQuestStateSetRequest`, `QuestSelectRequest`,
   `QuestProceedRequest`, `QuestCompletionRequest`, `QuestCancelRequest`, `QuestStateRequest`,
   `ActiveQuestListRequest`, `EventQuestStateListRequest`, `AvailableQuestsRequest`, `NpcBuffRequest`,
-  `Gens*Request`, `EnterOnWerewolfRequest`, `EnterOnGatekeeperRequest`, `CloseNpcRequest`.
+  `Gens*Request`, `EnterOnWerewolfRequest`, `EnterOnGatekeeperRequest`, `CloseNpcRequest`, and
+  `QuestClientActionRequest`: `quests.clientAction(key)` from the character window (`CHARACTER_WINDOW_QUEST`,
+  0x10009) and the inventory (`INVENTORY_QUEST`, 0x1000F) as they open, once per request the server showed
+  (`QuestProgress` / `QuestState`), while the quest runs (NewUICharacterInfoWindow.cpp:1636-1644,
+  NewUIMyInventory.cpp:821-828); OpenMU marks the quest's client action done (`QuestClientActionHandlerPlugIn`).
 
 ## When it is off
 `quests` is optional (`module.ts`): a server may run without it. Off, none of the listeners above
@@ -74,6 +78,8 @@ requests go unanswered). No bubbles show: they wait for the quest list.
 
 ## Tests
 - `objectives.test.ts`: objective text, counts capped at the target, done check, empty and unknown conditions.
+- `questClientAction.test.ts`: the window-opening quest action goes out once, only for a running quest
+  whose request was shown.
 - `../switchOff.test.ts`: installing registers the listeners and loading does not; off, its packets
   keep only the other modules' listeners.
 

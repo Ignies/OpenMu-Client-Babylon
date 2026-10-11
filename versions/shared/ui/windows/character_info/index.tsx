@@ -9,6 +9,7 @@ import { EventBus } from '@/core/eventBus';
 import { useEventBus } from '@/controllers/interface/hooks';
 import { Hero } from '@/modules/hero';
 import { skills } from '@/modules/skills';
+import { CHARACTER_WINDOW_QUEST, quests } from '@/modules/quests';
 import { itemOptionTables, itemSetTables } from '@/controllers/assets';
 import { MsgBox } from '@/controllers/interface';
 import { GameOptions } from '@/controllers/settings';
@@ -393,7 +394,11 @@ export const CharacterInfo = observer(() => {
   // A run belongs to the open window: closing it is one of the stops, and it
   // takes the question with it.
   useEffect(() => {
-    if (open) return;
+    // OpenningProcess (NewUICharacterInfoWindow.cpp:1636-1644).
+    if (open) {
+      quests.clientAction(CHARACTER_WINDOW_QUEST);
+      return;
+    }
     StatAllocation.cancel();
     if (asking()) MsgBox.closeMsgWin();
   }, [open]);
