@@ -51,4 +51,8 @@ export default {
   'fidelity.teleportLandsEarly': 'เทเลพอร์ตลงทันที',
   'fidelity.teleportLandsEarly.hint':
     'เทเลพอร์ตของคุณจะพาไปยังช่องเป้าหมายทันทีที่ร่างจางหาย โดยไม่รอการตอบกลับจากเซิร์ฟเวอร์ คลาสสิก: คุณจะจางหายอยู่ที่ช่องเดิมจนกว่าเซิร์ฟเวอร์จะตอบกลับ เหมือนต้นฉบับ',
+  'fidelity.soccerBoardClock':
+    'นาฬิกาฟุตบอลบนกระดานคะแนน',
+  'fidelity.soccerBoardClock.hint':
+    'แสดงเวลาของ Battle Soccer เป็นนาฬิกาบนกระดานคะแนนแทนบรรทัดกลางจอ คลาสสิก: เวลาที่เหลือจะแสดงกลางจอ เหมือนต้นฉบับ',
 } satisfies Partial<Record<keyof typeof en, string>>;

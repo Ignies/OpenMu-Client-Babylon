@@ -51,4 +51,8 @@ export default {
   'fidelity.teleportLandsEarly': 'Teleport ląduje od razu',
   'fidelity.teleportLandsEarly.hint':
     'Twój Teleport stawia cię na polu, gdy tylko znikniesz, bez czekania na odpowiedź serwera. Klasyczne: pozostajesz niewidoczny na starym polu, aż serwer odpowie, jak w oryginale.',
+  'fidelity.soccerBoardClock':
+    'Zegar piłkarski na tablicy',
+  'fidelity.soccerBoardClock.hint':
+    'Czas Battle Soccer jest pokazywany jako zegar na tablicy wyników zamiast wiersza na środku ekranu. Klasyczne: pozostały czas jest wypisany na środku ekranu, jak w oryginale.',
 } satisfies Partial<Record<keyof typeof en, string>>;

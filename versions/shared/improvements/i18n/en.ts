@@ -48,6 +48,10 @@ const en = {
   'fidelity.teleportLandsEarly': 'Teleport lands at once',
   'fidelity.teleportLandsEarly.hint':
     'Your own Teleport lands on the square as soon as you fade out, without waiting for the server to answer. Classic: you stay faded on the old square until the server answers, as in the original.',
+  'fidelity.soccerBoardClock':
+    'Soccer clock on the board',
+  'fidelity.soccerBoardClock.hint':
+    'The Battle Soccer time shows as a clock on the scoreboard instead of a line in the middle of the screen. Classic: the remaining time is written in the middle of the screen, as in the original.',
 };
 
 export default en;

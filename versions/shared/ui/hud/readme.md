@@ -29,7 +29,8 @@ Always-on interface elements, one folder per element, same shape as a window. Re
 | `buff_bar` | buff_bar (hud, 60) | the hero's buffs and debuffs with tooltips | skills |
 | `bottom_bar` | bottom_bar (hud, 70) | main frame: orbs, potion slots (as many as `features.itemHotkeys.slots`), skill hotkeys and fan, exp bar | Hero, skills, inventory |
 | `chat` | chat (hud, 230) | chat input box and chat log | chat, social, options |
-| `soccer_score` | soccer_score (hud, 420) | Battle Soccer scoreboard and clock | GuildMarks, social |
+| `soccer_score` | soccer_score (hud, 420) | Battle Soccer scoreboard (its clock line is `soccerBoardClock`) | GuildMarks, social, options |
+| `match_time` | match_time (hud, 425) | the soccer time at the screen centre (`RenderTournamentInterface`); off with `soccerBoardClock` | social, options |
 | `minimap` | minimap (hud, 450) | full world map on TAB and the corner minimap, turned by the camera heading (`rotation.ts`: the original's 45 degrees counter-clockwise) | Ecs.world, hero, options, social |
 | `camera_reset` | camera_reset (hud, 455) | Reset camera while the view is off the map's frame (ours, `cameraKeepsView`); left of the corner minimap and the party list | camera, social, options |
 | `mobile_controls` | mobile_controls (hud, 490) | touch HUD: move button, skill pad, menu cluster | AppState, hero, skills, warp, social |
@@ -57,5 +58,7 @@ Always-on interface elements, one folder per element, same shape as a window. Re
 - `party_list/rows.test.ts`: which members are found on screen, and the name colours.
 - `low_health_overlay/heartbeat.test.ts`: the heartbeat beats back to back while due, and books
   no next beat once it is not.
+- `match_time/index.test.tsx`: the original's centre line on Classic (red, yellow under a minute, none
+  at 0 or past ten minutes); `soccerBoardClock` puts the clock on the board instead.
 - `name_tags/tagSync.test.ts`: the tag layout matches the measuring pass and pushes overlapping
   slots apart.

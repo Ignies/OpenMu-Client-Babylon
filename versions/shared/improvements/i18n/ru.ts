@@ -51,4 +51,8 @@ export default {
   'fidelity.teleportLandsEarly': 'Телепорт срабатывает сразу',
   'fidelity.teleportLandsEarly.hint':
     'Ваш Телепорт переносит вас на клетку, как только вы исчезли, не дожидаясь ответа сервера. Классика: вы остаётесь невидимым на старой клетке, пока сервер не ответит, как в оригинале.',
+  'fidelity.soccerBoardClock':
+    'Футбольные часы на табло',
+  'fidelity.soccerBoardClock.hint':
+    'Время Battle Soccer показывается часами на табло вместо строки в центре экрана. Классика: оставшееся время пишется в центре экрана, как в оригинале.',
 } satisfies Partial<Record<keyof typeof en, string>>;

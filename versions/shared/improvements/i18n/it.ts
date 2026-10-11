@@ -51,4 +51,8 @@ export default {
   'fidelity.teleportLandsEarly': 'Teletrasporto immediato',
   'fidelity.teleportLandsEarly.hint':
     'Il tuo Teletrasporto ti porta sulla casella appena svanisci, senza attendere la risposta del server. Classica: resti svanito sulla vecchia casella finché il server non risponde, come nell’originale.',
+  'fidelity.soccerBoardClock':
+    'Orologio del calcio sul tabellone',
+  'fidelity.soccerBoardClock.hint':
+    'Il tempo del Battle Soccer appare come un orologio sul tabellone invece che come una riga al centro dello schermo. Classica: il tempo rimanente è scritto al centro dello schermo, come nell’originale.',
 } satisfies Partial<Record<keyof typeof en, string>>;

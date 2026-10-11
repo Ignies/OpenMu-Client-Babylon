@@ -7,6 +7,7 @@ import { ENUM_WORLD } from '@/core/types';
 import { guildMarkDataUrl } from '@/core/guildMark';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuText } from '@/controllers/interface/components/mu_text';
+import { isOn } from '@/controllers/fidelity';
 import {
   useUiStageScale,
   UI_STAGE_HEIGHT,
@@ -18,7 +19,7 @@ import {
  * scoreboard: `newui_Figure_ground` 131x70 at (509, 359), a goals / mark /
  * name row per team at (30, 33) and 22 px lower, red team in (255,60,0) and
  * blue in (0,150,255) on black(128). The clock line (`Social.soccerSeconds`) is
- * ours: the original draws F3 22 at the screen centre (RenderTournamentInterface).
+ * soccerBoardClock: the original draws F3 22 at the screen centre (`../match_time`).
  */
 
 const PANEL = { x: 509, y: 359, width: 131, height: 70 };
@@ -115,7 +116,7 @@ export const SoccerScoreHud = observer(() => {
         transform: `scale(${scale})`,
       }}
     >
-      {Social.soccerSeconds >= 0 && (
+      {Social.soccerSeconds >= 0 && isOn('soccerBoardClock') && (
         <MuText
           face="bold"
           text={clock(Social.soccerSeconds)}
