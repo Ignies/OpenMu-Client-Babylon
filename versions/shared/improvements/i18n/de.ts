@@ -36,4 +36,7 @@ export default {
   'fidelity.requestTimeout': 'Anfragen verfallen nach 20 s',
   'fidelity.requestTimeout.hint':
     'Eine Handels-, Gruppen- oder Duellanfrage, die du liegen lässt, wird nach 20 Sekunden abgelehnt. Klassisch: Sie wartet, bis du antwortest.',
+  'fidelity.noticeLinks': 'Links in Servermeldungen',
+  'fidelity.noticeLinks.hint':
+    'Webadressen in den Servermeldungen sind unterstrichene Links, die einen neuen Tab öffnen. Klassisch: einfacher Text, wie im Original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -36,4 +36,7 @@ export default {
   'fidelity.requestTimeout': 'คำขอหมดอายุใน 20 วินาที',
   'fidelity.requestTimeout.hint':
     'คำขอแลกเปลี่ยน ปาร์ตี้ หรือดวลที่ไม่ได้ตอบจะถูกปฏิเสธหลัง 20 วินาที คลาสสิก: รอจนกว่าคุณจะตอบ',
+  'fidelity.noticeLinks': 'ลิงก์ในประกาศของเซิร์ฟเวอร์',
+  'fidelity.noticeLinks.hint':
+    'ที่อยู่เว็บในประกาศของเซิร์ฟเวอร์เป็นลิงก์ขีดเส้นใต้ที่เปิดในแท็บใหม่ คลาสสิก: ข้อความธรรมดาเหมือนต้นฉบับ',
 } satisfies Partial<Record<keyof typeof en, string>>;

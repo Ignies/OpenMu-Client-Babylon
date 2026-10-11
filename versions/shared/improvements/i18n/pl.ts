@@ -36,4 +36,7 @@ export default {
   'fidelity.requestTimeout': 'Prośby wygasają po 20 s',
   'fidelity.requestTimeout.hint':
     'Prośba o handel, drużynę lub pojedynek bez odpowiedzi jest odrzucana po 20 sekundach. Klasyczne: czeka, aż odpowiesz.',
+  'fidelity.noticeLinks': 'Linki w ogłoszeniach serwera',
+  'fidelity.noticeLinks.hint':
+    'Adresy WWW w ogłoszeniach serwera są podkreślonymi linkami otwieranymi w nowej karcie. Klasyczne: zwykły tekst, jak w oryginale.',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -36,4 +36,7 @@ export default {
   'fidelity.requestTimeout': 'Las solicitudes vencen a los 20 s',
   'fidelity.requestTimeout.hint':
     'Una solicitud de comercio, grupo o duelo que no respondas se rechaza a los 20 segundos. Clásica: espera hasta que respondas.',
+  'fidelity.noticeLinks': 'Enlaces en los avisos del servidor',
+  'fidelity.noticeLinks.hint':
+    'Las direcciones web de los avisos del servidor son enlaces subrayados que abren otra pestaña. Clásica: texto plano, como en el original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

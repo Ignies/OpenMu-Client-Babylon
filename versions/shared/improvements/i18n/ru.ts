@@ -36,4 +36,7 @@ export default {
   'fidelity.requestTimeout': 'Запросы истекают через 20 с',
   'fidelity.requestTimeout.hint':
     'Запрос на обмен, группу или дуэль без ответа отклоняется через 20 секунд. Классика: ждёт, пока вы ответите.',
+  'fidelity.noticeLinks': 'Ссылки в объявлениях сервера',
+  'fidelity.noticeLinks.hint':
+    'Веб-адреса в объявлениях сервера становятся подчёркнутыми ссылками, открывающимися в новой вкладке. Классика: простой текст, как в оригинале.',
 } satisfies Partial<Record<keyof typeof en, string>>;

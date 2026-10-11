@@ -32,6 +32,9 @@ const en = {
   'fidelity.requestTimeout': 'Requests expire after 20 s',
   'fidelity.requestTimeout.hint':
     'A trade, party or duel request you leave alone is declined after 20 seconds. Classic: it waits until you answer.',
+  'fidelity.noticeLinks': 'Links in server notices',
+  'fidelity.noticeLinks.hint':
+    'Web addresses in the server notices are underlined links that open a new tab. Classic: plain text, as in the original.',
 };
 
 export default en;

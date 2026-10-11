@@ -36,4 +36,7 @@ export default {
   'fidelity.requestTimeout': '请求20秒后过期',
   'fidelity.requestTimeout.hint':
     '未回应的交易、组队或决斗请求会在20秒后被拒绝。经典：一直等到你回应。',
+  'fidelity.noticeLinks': '服务器公告中的链接',
+  'fidelity.noticeLinks.hint':
+    '服务器公告中的网址显示为带下划线的链接，在新标签页中打开。经典：与原版相同的纯文本。',
 } satisfies Partial<Record<keyof typeof en, string>>;

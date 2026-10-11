@@ -36,4 +36,7 @@ export default {
   'fidelity.requestTimeout': 'Заявките изтичат след 20 с',
   'fidelity.requestTimeout.hint':
     'Заявка за търговия, група или дуел, която оставите без отговор, се отказва след 20 секунди. Класическо: чака, докато отговорите.',
+  'fidelity.noticeLinks': 'Връзки в съобщенията на сървъра',
+  'fidelity.noticeLinks.hint':
+    'Уеб адресите в съобщенията на сървъра са подчертани връзки, които се отварят в нов раздел. Класическо: обикновен текст, както в оригинала.',
 } satisfies Partial<Record<keyof typeof en, string>>;

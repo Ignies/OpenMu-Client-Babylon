@@ -36,4 +36,7 @@ export default {
   'fidelity.requestTimeout': 'Pedidos expiram após 20 s',
   'fidelity.requestTimeout.hint':
     'Um pedido de troca, grupo ou duelo sem resposta é recusado após 20 segundos. Clássica: espera até você responder.',
+  'fidelity.noticeLinks': 'Links nos avisos do servidor',
+  'fidelity.noticeLinks.hint':
+    'Endereços web nos avisos do servidor viram links sublinhados que abrem outra aba. Clássica: texto simples, como no original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

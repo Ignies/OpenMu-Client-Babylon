@@ -30,7 +30,10 @@ live in the `Social` store ([../social/readme.md](../social/readme.md)).
   (`AssignChat`, `ZzzInterface.cpp:1183`), drawn by `nameTagSystem`.
 - Party / guild / alliance / gens / GM lines arrive with a prefix (`~`, `@`, `@@`, `$`, `#`);
   `classifyInboundChat` picks the log type and strips it.
-- `notices.ts`: the six-line golden banner (`ZzzInterface.cpp:491-603`).
+- `notices.ts`: the six-line golden banner (`ZzzInterface.cpp:491-603`). With the `noticeLinks`
+  improvement (ours) a line with a web address stays whole and `noticeLinks.ts` cuts it into text
+  and http(s) links for `versions/shared/ui/hud/notices` (clickable, underlined, a new tab); no other
+  markup is read.
 - `serverLines.ts`: the last blue system line, for `entryRefusalReason()` (an event entry OpenMU
   refuses with a bare `Failed` after saying why; `events/`).
 - `commands.ts`: `CNewUICommandWindow` and the client `/command` lines of `CheckCommand`
@@ -66,6 +69,8 @@ live in the `Social` store ([../social/readme.md](../social/readme.md)).
 - `chat.test.ts`: line splitting, sender prefix, PK colour, scrolling, row layout, copy, input budget.
 - `chatEmojis.test.ts`: catalog, segments, splitting, picker query and splice, recents, bubbles, shipped packs.
 - `chatItemLinks.test.ts`: link token round trip, scanning, stripping, labels in the chat box, the fresh draft.
+- `notices.test.ts`, `noticeLinks.test.ts`: the guild prefix; a link line stays whole only with
+  `noticeLinks`; anchors and bare addresses become links, nothing but http(s) does.
 - `emojiBubbles.test.ts`: tokens are ASCII, unique, avoid routing prefixes, survive the wire.
 
 ## Notes
