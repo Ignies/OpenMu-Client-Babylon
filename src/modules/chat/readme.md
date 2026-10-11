@@ -19,7 +19,8 @@ live in the `Social` store ([../social/readme.md](../social/readme.md)).
   `onConnectionInfo(info)`, `sendMessage(text)`, `leaveRoom(key)`.
 - `CHAT_COMMANDS`, `matchChatCommands(text, gm)`, `localCommandOf(text)`, `CommandKind`.
 - `EMOJI_CATALOG` (`emojis/index.ts`) and the `chatEmojis.ts` helpers (`emojiSegments`, `chatEmojiBubbleOf`, ...).
-- `itemLinkToken(item)`, `itemLinkLabel(item)`, `scanItemLinks(text)`, `labelsToWire`, `wireToLabels`.
+- `itemLinkToken(item)`, `itemLinkLabel(item)`, `scanItemLinks(text)`, `labelsToWire`, `wireToLabels`,
+  `freshDraft(insert)` (the chat box's draft on opening and after a send: empty, or the Alt+clicked link).
 - `EMOJI_BUBBLES`, `emojiBubbleById(id)`, `emojiBubbleToken(id)`, `matchEmojiBubbleWord(text)`.
 - `chatTextWidth(text)`: a line's width in log pixels (canvas, or an average without a DOM).
 
@@ -61,7 +62,7 @@ live in the `Social` store ([../social/readme.md](../social/readme.md)).
 ## Tests
 - `chat.test.ts`: line splitting, sender prefix, PK colour, scrolling, row layout, copy, input budget.
 - `chatEmojis.test.ts`: catalog, segments, splitting, picker query and splice, recents, bubbles, shipped packs.
-- `chatItemLinks.test.ts`: link token round trip, scanning, stripping, labels in the chat box.
+- `chatItemLinks.test.ts`: link token round trip, scanning, stripping, labels in the chat box, the fresh draft.
 - `emojiBubbles.test.ts`: tokens are ASCII, unique, avoid routing prefixes, survive the wire.
 
 ## Notes

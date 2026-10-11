@@ -34,6 +34,7 @@ import { EMOJI_CATALOG } from '@/modules/chat/emojis';
 import { EmojiPicker, RecentEmojis } from './emojiPicker';
 import { installItemLinkGesture } from './itemLinkGesture';
 import {
+  freshDraft,
   labelsToWire,
   uniqueLinkLabel,
   wireToLabels,
@@ -688,12 +689,14 @@ const ChatInput = observer(() => {
 
   const closePicker = useCallback(() => setPickerOpen(false), []);
 
-  useEffect(() => {
+  // Before paint, so the box never shows the previous line for a frame.
+  useLayoutEffect(() => {
     if (!open) return;
     // Opened by Alt+click on an item: the box starts with its link.
     const insert = Social.takeChatInsert();
-    links.current = new Map(insert ? [[insert.label, insert.token]] : []);
-    setText(insert?.label ?? '');
+    const draft = freshDraft(insert);
+    links.current = draft.links;
+    setText(draft.text);
     setCaret(insert?.label.length ?? 0);
     setHistoryIndex(-1);
     setTip(null);
@@ -767,6 +770,10 @@ const ChatInput = observer(() => {
       return;
     }
     Social.followChatLog();
+    // `SetText(L"")` once the line is out (NewUIChatInputBox.cpp:571).
+    const draft = freshDraft(null);
+    links.current = draft.links;
+    setText(draft.text);
     Social.closeChatInput();
   };
 

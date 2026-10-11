@@ -117,6 +117,18 @@ export function labelsToWire(text: string, links: ReadonlyMap<string, string>): 
   return wire;
 }
 
+/**
+ * The chat box's draft as it opens: empty, or the Alt+clicked item's link. `OpenningProcess`
+ * empties the field (NewUIChatInputBox.cpp:794), and a sent line leaves it empty too (:571).
+ */
+export function freshDraft(
+  insert: { label: string; token: string } | null
+): { text: string; links: Map<string, string> } {
+  return insert
+    ? { text: insert.label, links: new Map([[insert.label, insert.token]]) }
+    : { text: '', links: new Map() };
+}
+
 /** A sent line back as the chat box shows it, for the history keys. */
 export function wireToLabels(wire: string): { text: string; links: Map<string, string> } {
   const links = new Map<string, string>();
