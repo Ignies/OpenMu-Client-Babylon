@@ -9,6 +9,7 @@ import { addNotification } from '../chat';
 import { Ecs } from '../../ecs/current';
 import { effects } from '../../controllers/fx';
 import { MODEL } from '../../controllers/fx/recipes';
+import { setShadowlessScene } from '../../controllers/render/objectShadow';
 import {
   KanturuEnterRequestPacket,
   KanturuInfoRequestPacket,
@@ -584,7 +585,13 @@ function mayaRain(): void {
 
 // ---- the frame -------------------------------------------------------------
 
+/** `IsMayaScene`'s states: every one but the Nightmare fight, the open tower and the end (CKANTURUDirection.cpp:40-54). */
+const SHADOWED_STATES: ReadonlySet<KanturuState> = new Set([KanturuState.NightmareBattle, KanturuState.Tower, KanturuState.End]);
+
 function update(map: ENUM_WORLD, dt: number): void {
+  // The Maya scene draws no shadow (ZzzObject.cpp:9382, :786, :853, :978, ZzzCharacter.cpp:8405).
+  setShadowlessScene(map === EVENT_MAP && !SHADOWED_STATES.has(state.state));
+
   if (state.seconds > 0 && map === EVENT_MAP) {
     runInAction(() => {
       state.seconds = Math.max(0, state.seconds - dt);

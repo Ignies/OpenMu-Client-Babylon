@@ -400,7 +400,17 @@ export function setShadowWorld(world: ENUM_WORLD): void {
  * the scene rather than only the tier that happens to be running.
  */
 export function blobShadowsActive(): boolean {
-  return shadowsAllowed && GameOptions.shadows && !csmActive();
+  return shadowsAllowed && !sceneDark && GameOptions.shadows && !csmActive();
+}
+
+/** A scene that draws no shadow while it lasts: the Kanturu Maya scene (set by the events module). */
+let sceneDark = false;
+
+/** Turns that scene on or off; cheap to call every frame. */
+export function setShadowlessScene(on: boolean): void {
+  if (on === sceneDark) return;
+  sceneDark = on;
+  invalidateShadowState();
 }
 
 /**

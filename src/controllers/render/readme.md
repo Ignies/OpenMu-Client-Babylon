@@ -22,7 +22,8 @@ There is no `index.ts` facade; other folders import the modules directly.
   (`registerTerrainMaterial`, `terrainCsmDefines`, `terrainCsmGlsl`, `bindTerrainCsm`).
 - `propBatches.ts`: `propBatchingActive`, `propBatchExclusion`, `addPropToBatch`,
   `flushPropBatches`, `updatePropBatches`, `disposePropBatches`.
-- `objectShadow.ts`: `setShadowWorld` (the shadowless worlds and the lean, `shadowLean`), `invalidateShadowState`.
+- `objectShadow.ts`: `setShadowWorld` (the shadowless worlds and the lean, `shadowLean`), `setShadowlessScene`
+  (the Kanturu Maya scene, from `modules/events`), `invalidateShadowState`.
 - options: `materialQuality.ts`, `renderingStyle.ts`, `renderScale.ts`, `renderDistance.ts` (slider
   steps and readers for the Options window, the materials and boot).
 - `pbrMaps.ts`: `pbrMapsFor`, `pbrMapsIfReady`, `textureSourceName`; `readPackLabelsWith(reader)`, the

@@ -64,6 +64,8 @@ event is one entry file with its own MobX state and packet handlers, behind the 
 - `goldenArcher.ts`: `EventChipRegistrationResult` (opens or refreshes the Rena dialog).
 - `kanturu.ts`: `KanturuStateInfo` (opens the gateway dialog), `KanturuEnterResult`, `KanturuStateChange`,
   `KanturuMonsterUserCount`, `KanturuTimeLimit`, `KanturuBattleResult`, `KanturuMayaWideAreaAttack`.
+  Its frame turns the Classic shadows off in the tower while the state is the Maya scene (every state but
+  the Nightmare fight, the open tower and the end, `IsMayaScene`): `render/objectShadow` `setShadowlessScene`.
 - `invasion.ts`: `MapEventState` (meteors and dim sky). `matchNotices.ts`: `UpdateMiniGameState`
   (the 30 s line), `MapEventState` (dragon banner).
 
@@ -96,6 +98,7 @@ castle beds' sound gates read idle timers (no match bed plays).
 - change event texts: `recipes.ts` (`EVENT_TEXT`, with the original `GlobalText` indices).
 
 ## Tests
+- `kanturu.test.ts`: the Maya scene turns the Classic shadows off in the tower until the Nightmare fight.
 - `entryRefusal.test.ts`: a refused entry says the server's reason line, else the cloak text.
 - `duelRules.test.ts`: duel id orientation, room count, spectator list, start failure texts.
 - `scheduleClock.test.ts`: opening-state minutes to a moment, row text, countdown, poll back-off,
