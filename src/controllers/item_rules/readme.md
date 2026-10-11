@@ -49,6 +49,8 @@ the table would import itself.
   and capes the excellent byte holds the wing options (bits 0-3) and `OptionType` (bits 4-5), and the Horn
   of Fenrir keeps its variant there: neither counts as excellent. Dark Horse
   and Dark Raven keep their level in byte 2, not in the level bits. `raw` keeps the original bytes.
+  A socket item's byte 6 is its bonus option even at 0 (OpenMU sends 0xFF for none, and option 0 is the
+  physical weapons' damage bonus); other items keep it only when it is not 0.
 - `ancientSets.ts` ports `CheckItemSetOptions` / `calcSetOptionList` (CSItemOption.cpp:316-372, :839-906):
   a set lists options only with two pieces worn, one standard option per piece past the first, the
   full-set ones once complete. The worn items are checked against the hero's own stats, without what
@@ -91,7 +93,8 @@ the table would import itself.
 - what the compare tooltip measures against: `comparedItem` in `itemCompare.ts`.
 
 ## Tests
-- `itemSerializer.test.ts`: round trips (plain, +13 luck skill, excellent, ancient, sockets, pets, number > 255);
+- `itemSerializer.test.ts`: round trips (plain, +13 luck skill, excellent, ancient, sockets, pets, number > 255),
+  a socket bonus of 0;
   wing options and kind, the Fenrir variant.
 - `itemClasses.test.ts`: the Rage Fighter class column and unrestricted items; every row's class block
   against `Data/Local/Eng/item_eng.bmd`'s.
