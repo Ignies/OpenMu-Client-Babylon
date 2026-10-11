@@ -96,7 +96,7 @@ export type FlareSpec = {
 
 const RADIANS_PER_DEGREE = Math.PI / 180;
 
-/** The original's `WorldTime`: the world's clock in milliseconds, one for every card. */
+/** The original's `WorldTime` (ZzzAI.cpp:728): the world's clock in milliseconds, one for every card. */
 const worldMs = () => (Ecs.world?.gameTime.TotalGameTime.TotalSeconds ?? 0) * 1000;
 
 /** A spinning card's angle in radians at world time `ms`. */
@@ -314,14 +314,12 @@ export async function createEffectLight(
   const { pulse, grow, spin, smoothSpin, randomAngle } = spec;
 
   if (pulse || grow || spin || randomAngle) {
-    let elapsed = 0;
-
     observer = scene.onBeforeRenderObservable.add(() => {
-      elapsed += scene.getEngine().getDeltaTime();
+      const ms = worldMs();
 
-      if (pulse) paint.setLuminosity(wave(pulse, elapsed));
-      if (grow) resize(scale * wave(grow, elapsed));
-      if (spin) sprite.angle = spinAngle(spin, smoothSpin, worldMs());
+      if (pulse) paint.setLuminosity(wave(pulse, ms));
+      if (grow) resize(scale * wave(grow, ms));
+      if (spin) sprite.angle = spinAngle(spin, smoothSpin, ms);
       if (randomAngle) sprite.angle = Math.floor(Math.random() * 360) * RADIANS_PER_DEGREE;
     });
   }
