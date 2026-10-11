@@ -59,6 +59,7 @@ export default {
   'options.quickItemActions': 'Ctrl-clic mueve los objetos',
   'options.confirmValuableItems': 'Preguntar antes de tirar o vender objetos valiosos',
   'options.chatTimestamps': 'Hora en el chat',
+  'options.chatSystemMessages': 'Mensajes del sistema',
   'options.chatEmojis': 'Emojis en el chat',
   'options.chatEmojiSize': 'Tamaño de los emojis en el chat',
   'options.blockBrowserKeys': 'Bloquear atajos del navegador',
@@ -209,6 +210,8 @@ export default {
     'Los montones de Zen de esta cantidad o más muestran su nombre. Si lo desactivas, todos los montones lo muestran.',
   'options.help.chatTimestamps':
     'Muestra la hora (por ejemplo, 14:03) delante de cada línea del chat.',
+  'options.help.chatSystemMessages':
+    'Las líneas de sistema y de error en el chat; el mismo interruptor que el botón del chat, guardado entre sesiones.',
   'options.help.whisperBeep':
     'Reproduce un sonido cuando alguien te susurra.',
   'options.help.chatEmojiSize':

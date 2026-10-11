@@ -58,6 +58,7 @@ export default {
   'options.quickItemActions': 'Ctrl 点击移动物品',
   'options.confirmValuableItems': '丢弃或出售贵重物品前询问',
   'options.chatTimestamps': '聊天时间',
+  'options.chatSystemMessages': '系统消息',
   'options.chatEmojis': '聊天表情符号',
   'options.chatEmojiSize': '聊天表情符号大小',
   'options.blockBrowserKeys': '屏蔽浏览器快捷键',
@@ -188,6 +189,8 @@ export default {
   'options.help.lootOther': '其他所有物品也保留名称。',
   'options.help.lootZen': '数额达到此值的金币堆保留名称。设为“关”时所有金币堆都保留名称。',
   'options.help.chatTimestamps': '在每条聊天消息前显示时间，例如 14:03。',
+  'options.help.chatSystemMessages':
+    '聊天框中的系统和错误消息；与聊天框按钮是同一开关，跨会话保存。',
   'options.help.whisperBeep': '有人对你密语时播放提示音。',
   'options.help.chatEmojiSize': '表情符号在聊天记录中显示的大小。带表情符号的行会自动增高以容纳它；设为“小”时，每行都保持单行高度，与经典聊天记录一样。',
   'options.help.chatEmojis': '将表情符号代码（两个冒号之间的名称）显示为图片，出现在聊天中和角色头顶，并在聊天框中加入表情符号按钮。设为“关”时，代码以纯文本显示。',

@@ -328,6 +328,11 @@ export type GameOptions = {
   /** A "14:03" column in front of every chat log line. */
   chatTimestamps: boolean;
   /**
+   * System and error lines in the chat log (`m_bShowSystemMessages`), also the chat box's button;
+   * kept here so it survives a reload (ours: the original starts every session with them on).
+   */
+  chatSystemMessages: boolean;
+  /**
    * Chat emoji codes (`:dk_love:`) drawn as their pictures in the log and
    * over the speaker, plus the emoji button in the chat box (ours). Off shows
    * the codes as text.
@@ -612,6 +617,7 @@ const DEFAULTS: GameOptions = {
   lootOther: false,
   lootZen: 0,
   chatTimestamps: false,
+  chatSystemMessages: true,
   chatEmojis: true,
   chatEmojiSize: 2,
   uiScale: 3,

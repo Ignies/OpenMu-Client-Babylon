@@ -59,6 +59,7 @@ export default {
   'options.quickItemActions': 'Ctrl-clic déplace les objets',
   'options.confirmValuableItems': 'Demander avant de jeter ou vendre un objet de valeur',
   'options.chatTimestamps': 'Horodatage du chat',
+  'options.chatSystemMessages': 'Messages système',
   'options.chatEmojis': 'Emojis du chat',
   'options.chatEmojiSize': 'Taille des emojis du chat',
   'options.blockBrowserKeys': 'Bloquer les raccourcis du navigateur',
@@ -201,6 +202,8 @@ export default {
   'options.help.lootZen':
     'Les tas de Zen d’au moins ce montant gardent leur nom. Sur Non, tous les tas le gardent.',
   'options.help.chatTimestamps': 'Affiche l’heure, par exemple 14:03, devant chaque ligne du chat.',
+  'options.help.chatSystemMessages':
+    'Les lignes système et d’erreur dans le chat ; le même interrupteur que le bouton du chat, conservé d’une session à l’autre.',
   'options.help.whisperBeep': 'Émet un son quand quelqu’un vous envoie un chuchotement.',
   'options.help.chatEmojiSize':
     'La taille des emojis dans le journal du chat. Une ligne avec un emoji s’agrandit pour le contenir ; sur Petite, chaque ligne garde sa hauteur normale, comme dans le journal classique.',

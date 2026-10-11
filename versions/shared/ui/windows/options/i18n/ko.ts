@@ -58,6 +58,7 @@ export default {
   'options.quickItemActions': 'Ctrl 클릭으로 아이템 이동',
   'options.confirmValuableItems': '귀중품을 버리거나 팔기 전에 확인',
   'options.chatTimestamps': '채팅 시각 표시',
+  'options.chatSystemMessages': '시스템 메시지',
   'options.chatEmojis': '채팅 이모지 표시',
   'options.chatEmojiSize': '채팅 이모지 크기',
   'options.blockBrowserKeys': '브라우저 단축키 차단',
@@ -191,6 +192,8 @@ export default {
   'options.help.lootOther': '그 밖의 모든 아이템도 이름이 남습니다.',
   'options.help.lootZen': '이 금액 이상의 젠 더미는 이름이 남습니다. 끄면 모든 더미에 이름이 남습니다.',
   'options.help.chatTimestamps': '모든 채팅 줄 앞에 14:03 같은 시각을 표시합니다.',
+  'options.help.chatSystemMessages':
+    '채팅창의 시스템 및 오류 메시지입니다. 채팅창 버튼과 같은 설정이며 다음 접속에도 유지됩니다.',
   'options.help.whisperBeep': '누군가 귓속말을 보내면 소리로 알려 줍니다.',
   'options.help.chatEmojiSize': '대화 기록에 이모지를 얼마나 크게 그릴지 정합니다. 이모지가 있는 줄은 이모지에 맞춰 높아집니다. 작게로 두면 모든 줄이 한 줄 높이를 유지해 클래식 기록과 같습니다.',
   'options.help.chatEmojis': '이모지 코드(콜론 두 개 사이에 쓴 이름)를 채팅과 캐릭터 머리 위에 그림으로 보여 주고, 채팅창에 이모지 버튼을 추가합니다. 끄면 코드가 일반 텍스트로 표시됩니다.',

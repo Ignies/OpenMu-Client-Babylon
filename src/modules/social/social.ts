@@ -191,8 +191,6 @@ export const Social = new (class _Social {
   whisperEnabled = true;
   /** `m_bBlockWhisper`: incoming whispers are dropped. */
   blockWhisper = false;
-  /** `m_bShowSystemMessages`: system/error lines show in the log. */
-  showSystemMessages = true;
   /** `m_bShowFrame`: the log gets a frame and scrollbar while on. */
   chatLogFramed = false;
   chatLogVisible = true;
@@ -271,7 +269,7 @@ export const Social = new (class _Social {
       lastWhisperFrom: observable,
       whisperEnabled: observable,
       blockWhisper: observable,
-      showSystemMessages: observable,
+      showSystemMessages: computed,
       chatLogFramed: observable,
       chatLogVisible: observable,
       chatLogLines: observable,
@@ -528,8 +526,17 @@ export const Social = new (class _Social {
       | 'chatLogFramed'
       | 'chatLogVisible'
   ): void {
+    if (key === 'showSystemMessages') {
+      setGameOption('chatSystemMessages', !GameOptions.chatSystemMessages);
+      this.chatLogEndId = null;
+      return;
+    }
     this[key] = !this[key];
-    if (key === 'showSystemMessages') this.chatLogEndId = null;
+  }
+
+  /** `m_bShowSystemMessages`: system/error lines show in the log. Saved, shared with Options (ours). */
+  get showSystemMessages(): boolean {
+    return GameOptions.chatSystemMessages;
   }
 
   /** How tall the log draws this row (an emoji row grows with the option). */

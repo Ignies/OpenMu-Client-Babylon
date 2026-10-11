@@ -59,6 +59,7 @@ export default {
   'options.quickItemActions': 'Ctrl-clic mută obiectele',
   'options.confirmValuableItems': 'Întreabă înainte de a arunca sau vinde obiecte valoroase',
   'options.chatTimestamps': 'Ora în chat',
+  'options.chatSystemMessages': 'Mesaje de sistem',
   'options.chatEmojis': 'Emoji în chat',
   'options.chatEmojiSize': 'Mărime emoji în chat',
   'options.blockBrowserKeys': 'Blochează scurtăturile browserului',
@@ -205,6 +206,8 @@ export default {
     'Grămezile de Zen de cel puțin această sumă își păstrează numele. Pe Oprit, toate grămezile au nume.',
   'options.help.chatTimestamps':
     'Afișează ora, de exemplu 14:03, la începutul fiecărui rând din chat.',
+  'options.help.chatSystemMessages':
+    'Liniile de sistem și de eroare din chat; același comutator ca butonul din chat, păstrat între sesiuni.',
   'options.help.whisperBeep': 'Redă un sunet când cineva îți trimite o șoaptă.',
   'options.help.chatEmojiSize':
     'Cât de mari apar emoji-urile în jurnalul conversației. Un rând cu emoji crește ca să îl cuprindă; pe Mică, fiecare rând își păstrează înălțimea obișnuită, ca în jurnalul clasic.',

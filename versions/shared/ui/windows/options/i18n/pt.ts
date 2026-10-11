@@ -59,6 +59,7 @@ export default {
   'options.quickItemActions': 'Ctrl-clique move os itens',
   'options.confirmValuableItems': 'Perguntar antes de largar ou vender itens valiosos',
   'options.chatTimestamps': 'Horário no chat',
+  'options.chatSystemMessages': 'Mensagens do sistema',
   'options.chatEmojis': 'Emojis no chat',
   'options.chatEmojiSize': 'Tamanho dos emojis no chat',
   'options.blockBrowserKeys': 'Bloquear atalhos do navegador',
@@ -202,6 +203,8 @@ export default {
   'options.help.lootZen':
     'Montes de Zen a partir deste valor mostram o nome. No zero, todos os montes mostram o nome.',
   'options.help.chatTimestamps': 'Mostra a hora, como 14:03, antes de cada linha do chat.',
+  'options.help.chatSystemMessages':
+    'As linhas de sistema e de erro no chat; o mesmo interruptor do botão do chat, guardado entre sessões.',
   'options.help.whisperBeep': 'Toca um som quando alguém sussurra para você.',
   'options.help.chatEmojiSize':
     'O tamanho dos emojis no registro do chat. Uma linha com emoji cresce para caber nele; no Pequeno, cada linha mantém a altura normal, como no registro clássico.',

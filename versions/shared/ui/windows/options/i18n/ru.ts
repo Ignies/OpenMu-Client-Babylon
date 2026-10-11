@@ -58,6 +58,7 @@ export default {
   'options.quickItemActions': 'Ctrl-клик перемещает предметы',
   'options.confirmValuableItems': 'Спрашивать перед выбросом или продажей ценностей',
   'options.chatTimestamps': 'Время в чате',
+  'options.chatSystemMessages': 'Системные сообщения',
   'options.chatEmojis': 'Эмодзи в чате',
   'options.chatEmojiSize': 'Размер эмодзи в чате',
   'options.blockBrowserKeys': 'Блокировать горячие клавиши браузера',
@@ -209,6 +210,8 @@ export default {
     'Названия видны у кучек Zen от этой суммы. «Выкл.» - видны у всех кучек.',
   'options.help.chatTimestamps':
     'Показывает время, например 14:03, перед каждой строкой чата.',
+  'options.help.chatSystemMessages':
+    'Системные строки и ошибки в чате; тот же переключатель, что и кнопка в окне чата, сохраняется между сессиями.',
   'options.help.whisperBeep': 'Воспроизводит звук, когда вам приходит шёпот.',
   'options.help.chatEmojiSize':
     'Насколько крупно эмодзи рисуются в журнале чата. Строка с эмодзи растёт, чтобы оно поместилось; «Маленький» - все строки обычной высоты, как в классическом журнале.',

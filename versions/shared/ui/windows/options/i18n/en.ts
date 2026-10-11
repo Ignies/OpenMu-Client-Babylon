@@ -59,6 +59,7 @@ const en = {
   'options.quickItemActions': 'Ctrl-click moves items',
   'options.confirmValuableItems': 'Ask before dropping or selling valuables',
   'options.chatTimestamps': 'Chat timestamps',
+  'options.chatSystemMessages': 'System messages',
   'options.chatEmojis': 'Chat emojis',
   'options.chatEmojiSize': 'Chat emoji size',
   'options.blockBrowserKeys': 'Block browser shortcuts',
@@ -209,6 +210,8 @@ const en = {
     'Zen piles of at least this amount keep their name. Off keeps every pile named.',
   'options.help.chatTimestamps':
     'Shows the time, like 14:03, in front of every chat line.',
+  'options.help.chatSystemMessages':
+    'System and error lines in the chat log, the same switch as the chat box button, kept between sessions.',
   'options.help.whisperBeep': 'Plays a sound when someone whispers to you.',
   'options.help.chatEmojiSize':
     'How big emojis are drawn in the chat log. A line with an emoji grows to fit it; Small keeps every line one row tall, like the classic log.',

@@ -362,6 +362,7 @@ export const CATEGORIES: Category[] = [
             titleKey: 'options.section.chat',
             rows: [
               toggle('chatTimestamps'),
+              toggle('chatSystemMessages'),
               toggle('chatEmojis'),
               choice(
                 'chatEmojiSize',

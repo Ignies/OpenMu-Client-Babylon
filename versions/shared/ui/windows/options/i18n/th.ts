@@ -58,6 +58,7 @@ export default {
   'options.quickItemActions': 'Ctrl-คลิก เพื่อย้ายไอเทม',
   'options.confirmValuableItems': 'ถามก่อนทิ้งหรือขายของมีค่า',
   'options.chatTimestamps': 'เวลาในแชท',
+  'options.chatSystemMessages': 'ข้อความระบบ',
   'options.chatEmojis': 'อีโมจิในแชท',
   'options.chatEmojiSize': 'ขนาดอีโมจิในแชท',
   'options.blockBrowserKeys': 'บล็อกคีย์ลัดของเบราว์เซอร์',
@@ -198,6 +199,8 @@ export default {
   'options.help.lootOther': 'ไอเทมอื่นทั้งหมดจะแสดงชื่อด้วย',
   'options.help.lootZen': 'กอง Zen ที่มีอย่างน้อยเท่านี้จะแสดงชื่อ ถ้าปิด ทุกกองจะแสดงชื่อ',
   'options.help.chatTimestamps': 'แสดงเวลา เช่น 14:03 ไว้หน้าข้อความแชททุกบรรทัด',
+  'options.help.chatSystemMessages':
+    'บรรทัดระบบและข้อผิดพลาดในแชต สวิตช์เดียวกับปุ่มในกล่องแชต และจำไว้ข้ามเซสชัน',
   'options.help.whisperBeep': 'เล่นเสียงเมื่อมีคนส่งข้อความกระซิบถึงคุณ',
   'options.help.chatEmojiSize':
     'ขนาดของอีโมจิที่แสดงในบันทึกแชท บรรทัดที่มีอีโมจิจะสูงขึ้นให้พอดี ถ้าเลือก "เล็ก" ทุกบรรทัดจะสูงเท่าเดิม เหมือนบันทึกแชทแบบคลาสสิก',
