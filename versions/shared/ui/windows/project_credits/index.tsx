@@ -7,6 +7,7 @@ import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuItemWindow, MuTableFrame } from '@/controllers/interface/components/mu_window';
 import { loadCredits, type Credit } from '@/modules/credits';
 import { creditGroups, type CreditGroup } from './groups';
+import { installCreditsHotkey } from './hotkey';
 
 export { creditGroups } from './groups';
 
@@ -67,10 +68,13 @@ export const CreditsList = observer(({ list }: { list: readonly Credit[] }) => (
 ));
 
 const close = () => MuWindows.setOpen(PROJECT_CREDITS, false);
+const toggle = () => MuWindows.setOpen(PROJECT_CREDITS, !MuWindows.isOpen(PROJECT_CREDITS));
 
 export const ProjectCreditsWindow = observer(() => {
   const open = MuWindows.isOpen(PROJECT_CREDITS);
   const [list, setList] = useState<Credit[] | null>(null);
+
+  useEffect(() => installCreditsHotkey(window, toggle), []);
 
   useEffect(() => {
     if (open) void loadCredits().then(setList);
