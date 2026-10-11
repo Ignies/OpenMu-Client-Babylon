@@ -18,6 +18,7 @@ const { MuHelper } = await import('./state');
 const { installResume } = await import('./resume');
 const { Session } = await import('../session');
 const { SessionResume } = await import('../session/sessionResume');
+const { SessionExit } = await import('../session/sessionExit');
 const { Ecs } = await import('@/ecs/current');
 const { AppState, UIState } = await import('@/controllers/interface/uiState');
 const { MuHelperStatusChangeRequestPacket } = await import('@versions/shared/packets/ClientToServerPackets');
@@ -122,5 +123,43 @@ describe('the MU Helper when the session ends', () => {
 
     expect(MuHelper.active).toBe(false);
     Session.resumeHook = null;
+  });
+});
+
+// CSystemMenuMsgBox's Select Server and Switch Character send `TriggerStop` before the LogOut
+// when the helper runs (NewUICustomMessageBox.cpp:2374, 2406).
+describe('leaving through the system menu', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  /** The packets the exit sends, as code/subcode and their first data byte. */
+  function exitPackets(kind: 'servers' | 'characters', helperOn: boolean): string[] {
+    vi.useFakeTimers();
+    runInAction(() => {
+      AppState.uiState = UIState.World;
+    });
+    MuHelper.setMuHelperStatus(helperOn, 0);
+    const sent: string[] = [];
+    vi.spyOn(Session, 'sendToGS').mockImplementation(view => {
+      sent.push([view.getUint8(2), view.getUint8(3), view.getUint8(4)].map(b => b.toString(16)).join(' '));
+    });
+    SessionExit.request(kind);
+    SessionExit.onResponse(kind === 'servers' ? 2 : 1);
+    return sent;
+  }
+
+  it('asks the server to stop a running helper, then logs out', () => {
+    vi.spyOn(Session, 'connectToConnectServer').mockImplementation(() => undefined);
+    // BF 51 with PauseStatus 1 (what the helper's own off switch sends), then F1 02 with the type.
+    expect(exitPackets('servers', true)).toEqual(['bf 51 1', 'f1 2 2']);
+    expect(exitPackets('characters', true)).toEqual(['bf 51 1', 'f1 2 1']);
+  });
+
+  it('sends only the LogOut when the helper is off', () => {
+    vi.spyOn(Session, 'connectToConnectServer').mockImplementation(() => undefined);
+    expect(exitPackets('servers', false)).toEqual(['f1 2 2']);
+    expect(exitPackets('characters', false)).toEqual(['f1 2 1']);
   });
 });

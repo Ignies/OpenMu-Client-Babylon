@@ -94,8 +94,17 @@ export const MuHelper = new (class {
       addNotification(t('notify.helperSafeZone'), 'error');
       return;
     }
+    this.sendStatusChange(active);
+  }
+
+  /** `CMuHelper::TriggerStop`: ask the server to pause it; its `MuHelperStatusUpdate` answers. */
+  triggerStop() {
+    this.sendStatusChange(true);
+  }
+
+  private sendStatusChange(pause: boolean) {
     const packet = MuHelperStatusChangeRequestPacket.createPacket();
-    packet.PauseStatus = active;
+    packet.PauseStatus = pause;
     Session.sendToGS(packet.buffer);
   }
 

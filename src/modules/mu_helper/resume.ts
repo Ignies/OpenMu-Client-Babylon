@@ -1,6 +1,7 @@
 import { reaction } from 'mobx';
 import { Ecs } from '@/ecs/current';
 import { SessionResume } from '../session/sessionResume';
+import { onBeforeLogOut } from '../session/sessionExit';
 import { serverSetting } from '../servers/serverManifest';
 import { MuHelper } from './state';
 import { AppState, UIState } from '@/controllers/interface/uiState';
@@ -17,6 +18,12 @@ const RESTART_MS = 3000;
  */
 export function installResume(): void {
   let wasOn = false;
+
+  // Select Server and Switch Character stop a running helper before the LogOut
+  // (NewUICustomMessageBox.cpp:2374, 2406).
+  onBeforeLogOut(kind => {
+    if (kind !== 'quit' && MuHelper.active) MuHelper.triggerStop();
+  });
 
   // Out of the world: a warp stays in it (LoadingWorld), the resume keeps the page where it was.
   reaction(

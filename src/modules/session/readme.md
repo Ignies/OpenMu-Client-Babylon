@@ -14,7 +14,8 @@ the client-to-server encryption, the login fields and the offline flag.
   `loadAccount(id?, force?)`, `saveLoginData()`, `loginRequest(user, password)`, `retryLogin()`; the proxy side
   frames `sendBandFrame` / `sendPingFrame`.
 - `SessionExit.request(kind)` / `SessionExit.available(kind)`: Exit Game, Select Server, Switch
-  Character (`kind` is `'quit' | 'servers' | 'characters'`).
+  Character (`kind` is `'quit' | 'servers' | 'characters'`). `onBeforeLogOut(fn)`: runs just before
+  the LogOut goes out (mu_helper's `TriggerStop`, which this module may not import).
 - `openSystemMenu()`: Escape on a clear screen opens the system menu in the world
   (`SessionExit.menuOpen`, `closeMenu()`; drawn by `versions/shared/ui/windows/system_menu`) and the
   Options window on the server list and the character screen; returns true when it did.
