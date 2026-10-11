@@ -76,6 +76,18 @@ describe('Economy.craftingResult', () => {
     expect(warned).not.toHaveBeenCalled();
   });
 
+  // ReceiveMixExtended's goblin and seed lines: GlobalText 595 / 594 (WSclient.cpp:6713, :6760).
+  it('says the chaos combination succeeded or failed', () => {
+    const said = vi.spyOn(Social, 'systemMessage').mockImplementation(() => undefined);
+    const warned = vi.spyOn(Social, 'errorMessage');
+    fillTray();
+    Economy.craftingResult(E.Success, { group: 14, id: 0 } as unknown as Item);
+    expect(said).toHaveBeenLastCalledWith('Chaos combination has succeeded');
+    fillTray();
+    Economy.craftingResult(E.Failed, null);
+    expect(warned).toHaveBeenLastCalledWith('Chaos combination has failed');
+  });
+
   it('empties the tray on a failed mix', () => {
     fillTray();
     Economy.craftingResult(E.Failed, null);

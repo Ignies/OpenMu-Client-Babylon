@@ -28,8 +28,8 @@ export default {
   'personalShop.tradingBlocked': 'Der Verkäufer hat den Handel gesperrt.',
   'personalShop.purchaseFailed': 'Der Kauf ist fehlgeschlagen.',
   'personalShop.notEnoughZen': 'Du hast nicht genug Zen.',
-  'chaos.succeeded': 'Die Kombination ist geglückt.',
-  'chaos.failed': 'Die Kombination ist fehlgeschlagen.',
+  'chaos.succeeded': 'Die Chaos-Kombination ist geglückt',
+  'chaos.failed': 'Die Chaos-Kombination ist fehlgeschlagen',
   'chaos.cardSucceeded': 'Die Chaoskarten-Kombination ist geglückt.',
   'chaos.cardFailed': 'Die Chaoskarten-Kombination ist fehlgeschlagen.',
   'chaos.takeItemsOut':
