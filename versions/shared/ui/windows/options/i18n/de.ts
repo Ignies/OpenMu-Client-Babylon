@@ -412,4 +412,31 @@ export default {
   'options.autoQuiver': 'Automatischer Köcher',
   'options.help.autoQuiver':
     'Legt die nächsten Pfeile oder Bolzen aus deinem Inventar in die Hand, sobald der Köcher leer ist, statt erst beim nächsten Schuss. Nur auf Servern, die es erlauben.',
+  'options.otherSkillEffects': 'Fertigkeitseffekte anderer Spieler',
+  'options.help.otherSkillEffects':
+    'Die Effekte der Fertigkeiten anderer Spieler. Deine und die der Monster sind immer zu sehen. Aus spart Arbeit an vollen Orten.',
+  'options.otherGearEffects': 'Ausrüstungseffekte anderer Spieler',
+  'options.help.otherGearEffects': 'Funkeln, Aura und Licht der Gegenstände anderer Spieler.',
+  'options.otherPets': 'Begleiter anderer Spieler',
+  'options.help.otherPets':
+    'Begleiter und Dark Raven anderer Spieler. Ein gerittenes Reittier bleibt.',
+  'options.otherPlayerAnimations': 'Animationen anderer Spieler',
+  'options.help.otherPlayerAnimations':
+    'Aus stehen andere Spieler im Stand und beim Gehen still; Schläge und Tode laufen weiter. Spart Arbeit an vollen Orten.',
+  'options.npcAnimations': 'NPC-Animationen',
+  'options.help.npcAnimations': 'Aus stehen die NPCs still.',
+  'options.quality.low': 'Niedrig',
+  'options.skillVisualBudget': 'Fertigkeitseffekte begrenzen',
+  'options.help.skillVisualBudget':
+    'Für sehr schnelle Angreifer und Menschenmengen: höchstens 10 Fertigkeitseffekte pro Sekunde je Figur und 40 für alle anderen Spieler zusammen. Treffer und Zahlen bleiben.',
+  'options.dropDrawCap': 'Gegenstände am Boden begrenzen',
+  'options.help.dropDrawCap':
+    'Zeichnet höchstens die 150 nächsten Gegenstände am Boden, für Server mit sehr hohen Dropraten. Der Rest erscheint, sobald er zu den nächsten gehört.',
+  'options.fpsLimit': 'FPS-Grenze',
+  'options.fpsUnlimited': 'Unbegrenzt',
+  'options.help.fpsLimit':
+    'Begrenzt, wie viele Bilder pro Sekunde gezeichnet werden. Weniger schont CPU, GPU und Akku; Unbegrenzt folgt dem Monitor.',
+  'options.effectShedding': 'Weniger Effekte bei Ruckeln',
+  'options.help.effectShedding':
+    'Solange die Bildrate deutlich unter ihrem Ziel bleibt (FPS-Grenze oder 60), werden in einer Menge weniger Fertigkeitseffekte anderer Spieler gezeichnet. Deine bleiben immer.',
 } satisfies Partial<Record<keyof typeof en, string>>;

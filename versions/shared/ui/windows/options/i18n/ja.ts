@@ -313,4 +313,27 @@ export default {
   'options.needs.server': 'このサーバーでは許可されていません。',
   'options.autoQuiver': '矢筒の自動装填',
   'options.help.autoQuiver': '矢筒が尽きたら、次の射撃を待たずにバッグ内の次の矢またはボルトを手に装備します。許可しているサーバーでのみ。',
+  'options.otherSkillEffects': '他プレイヤーのスキルエフェクト',
+  'options.help.otherSkillEffects': '他のプレイヤーが使うスキルのエフェクト。自分とモンスターのものは常に表示されます。オフにすると混雑した場所で軽くなります。',
+  'options.otherGearEffects': '他プレイヤーの装備エフェクト',
+  'options.help.otherGearEffects': '他のプレイヤーのアイテムの輝き、オーラ、光。',
+  'options.otherPets': '他プレイヤーのペット',
+  'options.help.otherPets': '他のプレイヤーのペットとダークレイヴン。騎乗中の乗り物は残ります。',
+  'options.otherPlayerAnimations': '他プレイヤーのアニメーション',
+  'options.help.otherPlayerAnimations':
+    'オフにすると、他のプレイヤーは立ち止まりや歩行中に静止します。攻撃と死亡は再生されます。混雑した場所で軽くなります。',
+  'options.npcAnimations': 'NPCのアニメーション',
+  'options.help.npcAnimations': 'オフにするとNPCは静止します。',
+  'options.quality.low': '低',
+  'options.skillVisualBudget': 'スキルエフェクトを制限',
+  'options.help.skillVisualBudget':
+    '非常に速い攻撃や人混み向け：キャラクターごとに毎秒最大10、他のプレイヤー全体で毎秒最大40のスキルエフェクト。ヒットと数値は表示されます。',
+  'options.dropDrawCap': '地面のアイテムを制限',
+  'options.help.dropDrawCap': 'ドロップ率が非常に高いサーバー向けに、地面のアイテムは近い順に最大150個まで表示します。残りは近くなると表示されます。',
+  'options.fpsLimit': 'FPS上限',
+  'options.fpsUnlimited': '無制限',
+  'options.help.fpsLimit': '1秒間に描画するフレーム数を制限します。低いほどCPU、GPU、バッテリーの消費が減ります。無制限はモニターに従います。',
+  'options.effectShedding': '重いときはエフェクトを減らす',
+  'options.help.effectShedding':
+    'フレームレートが目標（FPS上限、または60）を大きく下回っている間、人混みで他のプレイヤーのスキルエフェクトを減らします。自分のものは常に表示されます。',
 } satisfies Partial<Record<keyof typeof en, string>>;

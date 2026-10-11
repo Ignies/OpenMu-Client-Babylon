@@ -33,6 +33,7 @@ import { playUiSound } from '../../controllers/sound/ui';
 import { playSfx } from '../../controllers/sound/listener';
 import type { Entity, ISystemFactory, Item } from '../world';
 import { teleportMountAlpha } from './teleportSystem';
+import { petShown } from './othersShown';
 
 /**
  * `Mounts[]` and world pets: angel, horns, raven, followers, horse, Fenrir
@@ -1083,7 +1084,7 @@ export const PetSystem: ISystemFactory = world => {
         const wanted = chaosCastle ? null : owner.charAppearance.pet;
         const spec = petSpec(wanted);
         // The Imp is not a world object - PlayerObject.Pet carries it.
-        const wantsActor = spec && spec.kind !== 'imp' ? wanted : null;
+        const wantsActor = spec && spec.kind !== 'imp' && petShown(owner, spec.kind) ? wanted : null;
 
         if (stale(spawned.get(owner), wantsActor, map)) {
           despawn(owner, false);
@@ -1091,7 +1092,7 @@ export const PetSystem: ISystemFactory = world => {
         }
 
         // The raven rides the left-hand slot, beside whatever the pet slot holds.
-        const raven = chaosCastle
+        const raven = chaosCastle || !petShown(owner, 'raven')
           ? null
           : ravenOf(owner.charAppearance.leftHand);
         if (stale(spawnedRaven.get(owner), raven, map)) {

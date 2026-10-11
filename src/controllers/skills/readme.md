@@ -22,12 +22,14 @@ themselves are content in `versions/shared/skills/` (see [docs/content.md](../..
 - Dispatch, used by modules and ECS systems through `versions/shared/skills/skillVisuals.ts`:
   `playTargetedSkillVisual`, `playAreaSkillVisual`, `playBowShotVisual`, `setBuffVisual`,
   `clearBuffVisuals`, `playBuffHits`, `skillVisualFor`, `baseSkill`, `fallbackFor`.
+- `castIsDrawn(caster, skill, now)` (`castBudget.ts`): whether a cast is drawn at all, read by the three
+  dispatches; `CASTER_GAP_MS`, `OTHERS_PER_SECOND`, `HEAVY_VISUAL_GAP` (written from `heavyVisualGap`).
 
 ## How it works
 - `registerSkills` writes `visual` into `SKILL_VISUALS`, `lookAliases` / `masterAliases` into
   `LOOK_ALIASES` (and `MASTER_BASES`, `combat/skillAliases.ts`), `light` into
   `lighting/skills.ts`, `sound` / `clipSound` / `soundOnLanding` / `silentHeroCast` / `targetSound` into
-  `sound/combat.ts`, `delayMs` into `combat/skillDelays.ts` (`SKILL_DELAY_MS`), `effect` (also under
+  `sound/combat.ts`, `delayMs` into `combat/skillDelays.ts` (`SKILL_DELAY_MS`), `heavyVisualGap` into `HEAVY_VISUAL_GAP`, `effect` (also under
   each of its `effectAliases`) into `tables.ts` (`SKILL_EFFECTS`), `cancel` into the table `cancelledEffects` reads, `buffs` /
   `buffArrivals` / `buffHits` into `BUFF_VISUALS` / `BUFF_ARRIVALS` / `BUFF_HITS`, and hands
   the combat fields (clip rules, `target`, `stepIn`, `noFlinch`, `holdsFacing`, `quietOn`,
@@ -71,6 +73,15 @@ themselves are content in `versions/shared/skills/` (see [docs/content.md](../..
 - Buff hits: `playBuffHits(scene, wearer, attacker)` runs every `BUFF_HITS` entry whose effect the
   wearer holds (Soul Barrier's shell on the hero, WSclient.cpp:3282-3291).
 - In dev builds `window.__skillVisuals.area / targeted / buff` fire a row by hand.
+- The crowd options (ours, Options > Video > World): with `otherSkillEffects` off, `castIsDrawn` leaves
+  out another player's casts and bow shots (visual and light); the blow, its damage numbers and its
+  sound still come. The hero's and the monsters' are always drawn. With `skillVisualBudget` on (off by
+  default), one caster's casts are drawn at most every `CASTER_GAP_MS` (100 ms, 10 a second: past any
+  normal attack speed) or its skill's `heavyVisualGap` (Chaotic Diseier 0.25 s, its smoke piles up), and
+  other players' together at most `OTHERS_PER_SECOND` (40) a second; the hero is out of that count.
+  With `effectShedding` on (off by default) that shared budget for other players holds even with the
+  budget off and is halved / quartered while `render/loadShed.ts` reads level 1 / 2. Only a crowd ever
+  reaches it, so a normal map is never thinned.
 
 ## Depends on / used by
 - uses: fx (`effects.spawn`), lighting, combat, sound and weather (`scorch`, `burn`) controllers,
@@ -96,8 +107,9 @@ themselves are content in `versions/shared/skills/` (see [docs/content.md](../..
   `registerSkills` (or `combat/skillRules.ts` for combat fields); never test a skill number there.
 
 ## Tests
-No tests in this folder. The tests in `versions/shared/skills/` cover it (`releaseTiming.test.ts`
-for the release):
+`castBudget.test.ts`: which casts are drawn, the per-caster gap, a heavy skill's gap, the crowd's budget,
+the shed crowd budget. The tests in `versions/shared/skills/` cover the rest
+(`releaseTiming.test.ts` for the release):
 - `skillVisuals.golden.test.ts`: what every skill id spawns on cast, area, bow shot and buff.
 - `skillTables.golden.test.ts`: what every id resolves to for light, sound, clip, target,
   step-in and delay.

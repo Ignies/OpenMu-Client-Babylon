@@ -204,3 +204,24 @@ describe('the per-frame draw hook', () => {
     expect('DrawMesh' in ModelObject.prototype).toBe(false);
   });
 });
+
+describe('a model held still (the crowd options)', () => {
+  it('pauses its looping clip, a loop started while held too, and lets a one-shot play', () => {
+    const object = new ModelObject(scene);
+    const gltf = rig();
+    object.load(gltf);
+    object.playAction(1, true);
+    object.setAnimationsHeld(true);
+    expect(gltf.animationGroups[1]?.isPlaying).toBe(false);
+
+    object.playAction(2, true);
+    expect(gltf.animationGroups[2]?.isPlaying).toBe(false);
+
+    object.playAction(0, false);
+    expect(gltf.animationGroups[0]?.isPlaying).toBe(true);
+
+    object.playAction(1, true);
+    object.setAnimationsHeld(false);
+    expect(gltf.animationGroups[1]?.isPlaying).toBe(true);
+  });
+});

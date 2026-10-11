@@ -27,6 +27,10 @@ There is no `index.ts` facade; other folders import the modules directly.
   (the Kanturu Maya scene, from `modules/events`), `invalidateShadowState`.
 - options: `materialQuality.ts`, `renderingStyle.ts`, `renderScale.ts`, `renderDistance.ts` (slider
   steps and readers for the Options window, the materials and boot).
+- `fpsLimit.ts` (ours, the FPS limit option): `FPS_LIMIT_STEPS` / `_MAX`, `fpsLimitForStep`, `FramePacer`,
+  `framePacer` (boot's render loop asks `due(now, limit)`; its `fps` counts drawn frames, which the perf
+  readout and overlay show). `loadShed.ts` (ours, the `effectShedding` option): `shedLevel(now)`, `nextShedLevel`,
+  `ShedLevel`, read by `skills/castBudget.ts`.
 - `pbrMaps.ts`: `pbrMapsFor`, `pbrMapsIfReady`, `textureSourceName`; `readPackLabelsWith(reader)`, the
   texture pack's remembered names, which `textureSourceName` asks first (set by `assets/modelLoader.ts`).
 - `index.ts`: the types below, `ModelObject` (the pets controller extends it) and `HIDDEN_MESH_ALL` for
@@ -99,6 +103,10 @@ There is no `index.ts` facade; other folders import the modules directly.
 ## Tests
 - `configFingerprint.test.ts`: `configuration_hex.md` matches the options, the layout and lengths,
   the number bias round trip, and the pack digest.
+- `fpsLimit.test.ts`: uncapped draws every frame; a cap holds on a faster monitor, averages a rate it does
+  not divide, drops nothing at the refresh rate; `fps` measures the frames let through.
+- `loadShed.test.ts`: the levels against the target, the way back one step at a time, no reading changes
+  nothing, read at most twice a second.
 - `frameSnapshot.test.ts`: fills once per frame and per scene, refills after a throw.
 - `iconShot.test.ts`: at most one shot per frame and no observer once idle; one build per key, again
   after `forget`; the
@@ -115,7 +123,8 @@ There is no `index.ts` facade; other folders import the modules directly.
   a part unlinked from its bone goes back under its owner; an action stops every other running clip, the loader's clip 0 too;
   a character casts the blob, a map object only with `MapShadow`; `ShadowFromGround` marks the clone;
   `ShadowMeshes` keeps the other meshes out; the clone carries `ShadowAlpha` and draws from `ShadowMinAlpha`;
-  no per-frame `Draw` / `DrawMesh` hook is left.
+  no per-frame `Draw` / `DrawMesh` hook is left; `setAnimationsHeld` (the crowd options) pauses the looping clip,
+  a loop started while held too, and lets a one-shot play.
 - `versions/shared/contentRows.golden.test.ts`: every map's mesh animations, sampled over time.
 - `pbrMaps.test.ts`: `textureSourceName` reads the pack's remembered name mid-swap.
 - `pbrDerive.test.ts`: `flipRows`, flat normal and emissive mask of `derivePbrMaps`.
@@ -181,6 +190,12 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `renderScale.ts`: helps integrated GPUs (Radeon 610M at the Lorencia spawn: 15 fps at 1, 29 at 0.6);
   a discrete card is CPU bound and gains nothing. `resize` keeps the scale across monitors because
   Babylon multiplies the level by the device ratio change.
+- `fpsLimit.ts`: a cap skips whole animation frames (nothing runs; the next drawn frame gets the whole dt),
+  carrying the due time forward so 45 on 60 Hz averages right, with 1 ms of slack so a cap equal to the
+  refresh rate drops nothing. Off (step 0) is the browser rate the client always ran at.
+- `loadShed.ts`: level 1 under 2/3 of the target frame rate (the FPS limit, 60 uncapped), 2 under 2/5,
+  from `framePacer.fps` re-read twice a second; a level is left over 0.85 / 0.55 of the target, one step a
+  reading, so a crowd at the edge does not flicker.
 - `objectShadow.ts`: `SHADOW_ALPHA_CUTOFF` is 0.1, not the caster's 0.25, because MU's TGAs carry
   partial alpha across whole surfaces (capes, visors) and 0.25 punched holes in the shadow. The torch
   direction slot was removed: it doubled shadows near braziers and broke indoors. `SHADOW_DILATE`

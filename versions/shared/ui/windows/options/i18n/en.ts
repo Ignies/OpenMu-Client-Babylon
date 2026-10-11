@@ -408,6 +408,32 @@ const en = {
   'options.autoQuiver': 'Automatic quiver',
   'options.help.autoQuiver':
     'Puts the next arrows or bolts from your bag in your hand as soon as the quiver runs out, instead of at your next shot. Only on servers that allow it.',
+  'options.otherSkillEffects': "Other players' skill effects",
+  'options.help.otherSkillEffects':
+    "The effects of skills other players cast. Yours and the monsters' always show. Off saves work in crowded places.",
+  'options.otherGearEffects': "Other players' gear effects",
+  'options.help.otherGearEffects': "The sparkle, aura and light of other players' items.",
+  'options.otherPets': "Other players' pets",
+  'options.help.otherPets': "Other players' pets and Dark Raven. A mount someone rides stays.",
+  'options.otherPlayerAnimations': "Other players' animations",
+  'options.help.otherPlayerAnimations':
+    'Off, other players hold still while standing or walking; their blows and deaths still play. Saves work in crowded places.',
+  'options.npcAnimations': 'NPC animations',
+  'options.help.npcAnimations': 'Off, the NPCs hold still.',
+  'options.quality.low': 'Low',
+  'options.skillVisualBudget': 'Limit skill effects',
+  'options.help.skillVisualBudget':
+    'For very fast attackers and crowds: at most 10 skill effects a second per character and 40 for all other players together. Hits and numbers still show.',
+  'options.dropDrawCap': 'Limit items on the ground',
+  'options.help.dropDrawCap':
+    'Draws at most the 150 nearest items on the ground, for servers with very high drop rates. The rest show once they are among the nearest.',
+  'options.fpsLimit': 'FPS limit',
+  'options.fpsUnlimited': 'Unlimited',
+  'options.help.fpsLimit':
+    'Caps how many frames a second are drawn. Lower uses less CPU, GPU and battery; Unlimited follows the monitor.',
+  'options.effectShedding': 'Fewer effects when slow',
+  'options.help.effectShedding':
+    "While the frame rate stays well under its target (the FPS limit, or 60), draws fewer of other players' skill effects in a crowd. Yours always show.",
 };
 
 export default en;

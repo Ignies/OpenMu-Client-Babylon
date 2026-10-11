@@ -377,4 +377,31 @@ export default {
   'options.autoQuiver': 'Carquois automatique',
   'options.help.autoQuiver':
     'Met en main les flèches ou carreaux suivants de votre sac dès que le carquois est vide, au lieu de votre prochain tir. Seulement sur les serveurs qui l’autorisent.',
+  'options.otherSkillEffects': 'Effets des compétences des autres joueurs',
+  'options.help.otherSkillEffects':
+    'Les effets des compétences des autres joueurs. Les vôtres et ceux des monstres restent visibles. Désactivé, allège les lieux bondés.',
+  'options.otherGearEffects': "Effets de l'équipement des autres joueurs",
+  'options.help.otherGearEffects': "L'éclat, l'aura et la lumière des objets des autres joueurs.",
+  'options.otherPets': 'Familiers des autres joueurs',
+  'options.help.otherPets':
+    'Les familiers et le Dark Raven des autres joueurs. Une monture chevauchée reste.',
+  'options.otherPlayerAnimations': 'Animations des autres joueurs',
+  'options.help.otherPlayerAnimations':
+    "Désactivé, les autres joueurs restent figés à l'arrêt ou en marchant ; leurs coups et leurs morts se jouent encore. Allège les lieux bondés.",
+  'options.npcAnimations': 'Animations des PNJ',
+  'options.help.npcAnimations': 'Désactivé, les PNJ restent figés.',
+  'options.quality.low': 'Basse',
+  'options.skillVisualBudget': 'Limiter les effets de compétences',
+  'options.help.skillVisualBudget':
+    'Pour les attaquants très rapides et les foules : au plus 10 effets de compétences par seconde par personnage et 40 pour tous les autres joueurs ensemble. Les coups et les chiffres restent.',
+  'options.dropDrawCap': 'Limiter les objets au sol',
+  'options.help.dropDrawCap':
+    "Affiche au plus les 150 objets au sol les plus proches, pour les serveurs aux taux de drop très élevés. Les autres apparaissent dès qu'ils sont parmi les plus proches.",
+  'options.fpsLimit': "Limite d'IPS",
+  'options.fpsUnlimited': 'Illimité',
+  'options.help.fpsLimit':
+    "Limite le nombre d'images dessinées par seconde. Moins économise le processeur, la carte graphique et la batterie ; Illimité suit l'écran.",
+  'options.effectShedding': "Moins d'effets en cas de lenteur",
+  'options.help.effectShedding':
+    "Tant que les images par seconde restent bien sous leur cible (la limite d'IPS, ou 60), affiche moins d'effets de compétences des autres joueurs dans une foule. Les vôtres restent visibles.",
 } satisfies Partial<Record<keyof typeof en, string>>;

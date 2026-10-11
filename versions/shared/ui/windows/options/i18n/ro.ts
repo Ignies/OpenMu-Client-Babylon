@@ -386,4 +386,30 @@ export default {
   'options.autoQuiver': 'Tolbă automată',
   'options.help.autoQuiver':
     'Pune în mână următoarele săgeți sau bolțuri din rucsac imediat ce tolba se golește, nu la următoarea tragere. Doar pe serverele care permit.',
+  'options.otherSkillEffects': 'Efectele abilităților altor jucători',
+  'options.help.otherSkillEffects':
+    'Efectele abilităților altor jucători. Ale tale și ale monștrilor se văd mereu. Oprit ușurează locurile aglomerate.',
+  'options.otherGearEffects': 'Efectele echipamentului altor jucători',
+  'options.help.otherGearEffects': 'Sclipirea, aura și lumina obiectelor altor jucători.',
+  'options.otherPets': 'Animalele altor jucători',
+  'options.help.otherPets': 'Animalele și Dark Raven ale altor jucători. Animalul călărit rămâne.',
+  'options.otherPlayerAnimations': 'Animațiile altor jucători',
+  'options.help.otherPlayerAnimations':
+    'Oprit, ceilalți jucători rămân nemișcați când stau sau merg; loviturile și moartea se văd în continuare. Ușurează locurile aglomerate.',
+  'options.npcAnimations': 'Animațiile NPC',
+  'options.help.npcAnimations': 'Oprit, NPC-urile rămân nemișcate.',
+  'options.quality.low': 'Scăzută',
+  'options.skillVisualBudget': 'Limitează efectele abilităților',
+  'options.help.skillVisualBudget':
+    'Pentru atacatori foarte rapizi și mulțimi: cel mult 10 efecte de abilități pe secundă pe personaj și 40 pentru toți ceilalți jucători împreună. Loviturile și numerele rămân.',
+  'options.dropDrawCap': 'Limitează obiectele de pe jos',
+  'options.help.dropDrawCap':
+    'Desenează cel mult cele mai apropiate 150 de obiecte de pe jos, pentru servere cu drop foarte mare. Restul apar când ajung printre cele mai apropiate.',
+  'options.fpsLimit': 'Limită FPS',
+  'options.fpsUnlimited': 'Nelimitat',
+  'options.help.fpsLimit':
+    'Limitează câte cadre pe secundă se desenează. Mai puțin folosește mai puțin procesorul, placa video și bateria; Nelimitat urmează monitorul.',
+  'options.effectShedding': 'Mai puține efecte când merge greu',
+  'options.help.effectShedding':
+    'Cât timp cadrele rămân mult sub țintă (limita FPS sau 60), desenează mai puține efecte ale abilităților altor jucători în mulțime. Ale tale se văd mereu.',
 } satisfies Partial<Record<keyof typeof en, string>>;

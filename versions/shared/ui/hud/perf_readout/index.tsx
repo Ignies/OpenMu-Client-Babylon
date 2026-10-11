@@ -5,6 +5,7 @@ import { GameOptions, setGameOption } from '@/controllers/settings';
 import { formatRoundTrip } from '@/controllers/interface/hudFormat';
 import { isKey } from '@/controllers/interface/keyBindings';
 import { NetStats } from '@/controllers/net/roundTrip';
+import { framePacer } from '@/controllers/render/fpsLimit';
 import { Ecs } from '@/ecs/current';
 import { useEventBus } from '@/controllers/interface/hooks';
 import { MuText } from '@/controllers/interface/components/mu_text';
@@ -44,8 +45,9 @@ function read(): Reading {
   if (!engine) return { ...EMPTY, roundTripMs: NetStats.roundTripMs };
 
   return {
-    fps: engine.getFps(),
-    frameMs: engine.getDeltaTime(),
+    // The frames drawn, not the engine's count of animation frames (they differ under an FPS limit).
+    fps: framePacer.fps,
+    frameMs: framePacer.fps > 0 ? 1000 / framePacer.fps : engine.getDeltaTime(),
     roundTripMs: NetStats.roundTripMs,
   };
 }

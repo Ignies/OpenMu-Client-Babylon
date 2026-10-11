@@ -376,4 +376,31 @@ export default {
   'options.autoQuiver': 'Automatyczny kołczan',
   'options.help.autoQuiver':
     'Wkłada do ręki kolejne strzały lub bełty z plecaka, gdy tylko kołczan się skończy, zamiast przy następnym strzale. Tylko na serwerach, które na to pozwalają.',
+  'options.otherSkillEffects': 'Efekty umiejętności innych graczy',
+  'options.help.otherSkillEffects':
+    'Efekty umiejętności innych graczy. Twoje i potworów są zawsze widoczne. Wyłączone odciąża zatłoczone miejsca.',
+  'options.otherGearEffects': 'Efekty ekwipunku innych graczy',
+  'options.help.otherGearEffects': 'Błysk, aura i światło przedmiotów innych graczy.',
+  'options.otherPets': 'Zwierzaki innych graczy',
+  'options.help.otherPets':
+    'Zwierzaki i Dark Raven innych graczy. Wierzchowiec, na którym ktoś jedzie, zostaje.',
+  'options.otherPlayerAnimations': 'Animacje innych graczy',
+  'options.help.otherPlayerAnimations':
+    'Wyłączone: inni gracze stoją nieruchomo, gdy stoją lub idą; ciosy i śmierć nadal widać. Odciąża zatłoczone miejsca.',
+  'options.npcAnimations': 'Animacje NPC',
+  'options.help.npcAnimations': 'Wyłączone: NPC stoją nieruchomo.',
+  'options.quality.low': 'Niska',
+  'options.skillVisualBudget': 'Ogranicz efekty umiejętności',
+  'options.help.skillVisualBudget':
+    'Dla bardzo szybkich atakujących i tłumów: najwyżej 10 efektów umiejętności na sekundę na postać i 40 dla wszystkich innych graczy razem. Trafienia i liczby nadal widać.',
+  'options.dropDrawCap': 'Ogranicz przedmioty na ziemi',
+  'options.help.dropDrawCap':
+    'Rysuje najwyżej 150 najbliższych przedmiotów na ziemi, dla serwerów z bardzo wysokim dropem. Reszta pojawia się, gdy znajdzie się wśród najbliższych.',
+  'options.fpsLimit': 'Limit FPS',
+  'options.fpsUnlimited': 'Bez limitu',
+  'options.help.fpsLimit':
+    'Ogranicza liczbę klatek rysowanych na sekundę. Mniej oszczędza procesor, kartę graficzną i baterię; bez limitu podąża za monitorem.',
+  'options.effectShedding': 'Mniej efektów przy spowolnieniu',
+  'options.help.effectShedding':
+    'Dopóki liczba klatek jest wyraźnie poniżej celu (limit FPS albo 60), rysuje mniej efektów umiejętności innych graczy w tłumie. Twoje są zawsze widoczne.',
 } satisfies Partial<Record<keyof typeof en, string>>;

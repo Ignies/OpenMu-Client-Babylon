@@ -4,6 +4,7 @@ import { combat, MASTER_BASES, SKILL_DELAY_MS } from '../combat';
 import { SKILL_LIGHTS } from '../lighting/skills';
 import { LANDING_SOUNDS, SILENT_HERO_CASTS, SKILL_CLIP_SOUNDS, SKILL_SOUNDS, SKILL_TARGET_SOUNDS } from '../sound/combat';
 import { SKILL_EFFECTS } from './tables';
+import { HEAVY_VISUAL_GAP } from './castBudget';
 import type { SkillCancel, SkillDef } from './define';
 import type { Entity } from '@/ecs/world';
 import type { Scene } from '../render/babylon/exports';
@@ -33,6 +34,7 @@ export function registerSkills(defs: readonly SkillDef[]): void {
     if (d.effect !== undefined) for (const id of [d.id, ...(d.effectAliases ?? [])]) SKILL_EFFECTS[id] = d.effect;
     if (d.cancel) SKILL_CANCELS[d.id] = d.cancel;
     if (d.warriorGlint) WARRIOR_GLINTS[d.id] = d.warriorGlint;
+    if (d.heavyVisualGap) HEAVY_VISUAL_GAP[d.id] = d.heavyVisualGap;
     Object.assign(BUFF_VISUALS, d.buffs);
     Object.assign(BUFF_ARRIVALS, d.buffArrivals);
     Object.assign(BUFF_HITS, d.buffHits);

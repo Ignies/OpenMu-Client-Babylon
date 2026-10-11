@@ -379,4 +379,31 @@ export default {
   'options.autoQuiver': 'Aljava automática',
   'options.help.autoQuiver':
     'Coloca na sua mão as próximas flechas ou virotes da bolsa assim que a aljava acaba, em vez de no próximo disparo. Só em servidores que permitem.',
+  'options.otherSkillEffects': 'Efeitos de habilidades de outros jogadores',
+  'options.help.otherSkillEffects':
+    'Os efeitos das habilidades de outros jogadores. Os seus e os dos monstros sempre aparecem. Desligado alivia lugares lotados.',
+  'options.otherGearEffects': 'Efeitos do equipamento de outros jogadores',
+  'options.help.otherGearEffects': 'O brilho, a aura e a luz dos itens de outros jogadores.',
+  'options.otherPets': 'Mascotes de outros jogadores',
+  'options.help.otherPets':
+    'Os mascotes e o Dark Raven de outros jogadores. A montaria que alguém monta fica.',
+  'options.otherPlayerAnimations': 'Animações de outros jogadores',
+  'options.help.otherPlayerAnimations':
+    'Desligado, os outros jogadores ficam parados ao ficar de pé ou andar; golpes e mortes continuam. Alivia lugares lotados.',
+  'options.npcAnimations': 'Animações dos NPCs',
+  'options.help.npcAnimations': 'Desligado, os NPCs ficam parados.',
+  'options.quality.low': 'Baixa',
+  'options.skillVisualBudget': 'Limitar efeitos de habilidades',
+  'options.help.skillVisualBudget':
+    'Para atacantes muito rápidos e multidões: no máximo 10 efeitos de habilidade por segundo por personagem e 40 para todos os outros jogadores juntos. Golpes e números continuam.',
+  'options.dropDrawCap': 'Limitar itens no chão',
+  'options.help.dropDrawCap':
+    'Desenha no máximo os 150 itens do chão mais próximos, para servidores com drop muito alto. O resto aparece quando fica entre os mais próximos.',
+  'options.fpsLimit': 'Limite de FPS',
+  'options.fpsUnlimited': 'Sem limite',
+  'options.help.fpsLimit':
+    'Limita quantos quadros por segundo são desenhados. Menos usa menos CPU, GPU e bateria; sem limite segue o monitor.',
+  'options.effectShedding': 'Menos efeitos quando lento',
+  'options.help.effectShedding':
+    'Enquanto os quadros ficam bem abaixo do alvo (o limite de FPS, ou 60), desenha menos efeitos de habilidades de outros jogadores na multidão. Os seus sempre aparecem.',
 } satisfies Partial<Record<keyof typeof en, string>>;

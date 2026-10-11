@@ -257,4 +257,6 @@ export default defineSkill({
   // 237 Gigantic Storm plays gigantic_storm from its row, at the clip key (ZzzCharacter.cpp:4777).
   sound: 'Sound/caotic', // Chaotic Diseier
   clip: { ground: A.PLAYER_ATTACK_STRIKE, ...MOUNTED_STRIKE }, // Chaotic Diseier
+  // Ours, only with the skill visual budget on: its smoke outlives a very fast caster's rate and piles up.
+  heavyVisualGap: 0.25,
 });

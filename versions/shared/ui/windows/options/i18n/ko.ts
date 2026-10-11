@@ -315,4 +315,28 @@ export default {
   'options.needs.server': '이 서버에서는 허용되지 않습니다.',
   'options.autoQuiver': '화살통 자동 장전',
   'options.help.autoQuiver': '화살통이 비면 다음 사격을 기다리지 않고 가방의 다음 화살이나 볼트를 바로 손에 장착합니다. 허용하는 서버에서만.',
+  'options.otherSkillEffects': '다른 플레이어의 스킬 효과',
+  'options.help.otherSkillEffects':
+    '다른 플레이어가 쓰는 스킬의 효과. 내 것과 몬스터의 것은 항상 보입니다. 끄면 붐비는 곳에서 부담이 줄어듭니다.',
+  'options.otherGearEffects': '다른 플레이어의 장비 효과',
+  'options.help.otherGearEffects': '다른 플레이어 아이템의 반짝임, 오라, 빛.',
+  'options.otherPets': '다른 플레이어의 펫',
+  'options.help.otherPets': '다른 플레이어의 펫과 다크 레이븐. 타고 있는 탈것은 남습니다.',
+  'options.otherPlayerAnimations': '다른 플레이어의 애니메이션',
+  'options.help.otherPlayerAnimations':
+    '끄면 다른 플레이어가 서 있거나 걸을 때 멈춰 있습니다. 공격과 죽음은 그대로 재생됩니다. 붐비는 곳에서 부담이 줄어듭니다.',
+  'options.npcAnimations': 'NPC 애니메이션',
+  'options.help.npcAnimations': '끄면 NPC가 멈춰 있습니다.',
+  'options.quality.low': '낮음',
+  'options.skillVisualBudget': '스킬 효과 제한',
+  'options.help.skillVisualBudget':
+    '매우 빠른 공격과 군중을 위해: 캐릭터당 초당 최대 10개, 다른 플레이어 전체 초당 최대 40개의 스킬 효과. 타격과 숫자는 그대로 보입니다.',
+  'options.dropDrawCap': '바닥 아이템 제한',
+  'options.help.dropDrawCap': '드롭률이 매우 높은 서버를 위해 바닥 아이템을 가까운 순으로 최대 150개까지 그립니다. 나머지는 가까워지면 보입니다.',
+  'options.fpsLimit': 'FPS 제한',
+  'options.fpsUnlimited': '제한 없음',
+  'options.help.fpsLimit': '초당 그리는 프레임 수를 제한합니다. 낮을수록 CPU, GPU, 배터리를 덜 씁니다. 제한 없음은 모니터를 따릅니다.',
+  'options.effectShedding': '느릴 때 효과 줄이기',
+  'options.help.effectShedding':
+    '프레임이 목표(FPS 제한 또는 60)보다 크게 낮은 동안 군중 속 다른 플레이어의 스킬 효과를 덜 그립니다. 내 것은 항상 보입니다.',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -582,6 +582,8 @@ export class ModelObject {
    * `CalculateVisibilitySystem`'s 32-tile radius is behind the camera.
    */
   OutOfView = false;
+  /** A crowd option holds this model's looping clips still, the way `OutOfView` does (`setAnimationsHeld`). */
+  AnimationsHeld = false;
   Visible = true;
   /** o->Alpha: per-mesh visibility of this model and its bone-linked children. */
   Alpha = 1;
@@ -923,7 +925,7 @@ export class ModelObject {
       this.startGroup(animationGroup, actionIndex, loop);
       // A clip started while off screen must not run; one-shots are exempt
       // (see applyAnimationPause).
-      if (loop && this.OutOfView) animationGroup.pause();
+      if (loop && (this.OutOfView || this.AnimationsHeld)) animationGroup.pause();
     }
   }
 
@@ -1061,6 +1063,15 @@ export class ModelObject {
     }
   }
 
+  /** Holds (or frees) the looping clips of this model and its parts; parts put on later follow on the next call. */
+  setAnimationsHeld(on: boolean): void {
+    if (on !== this.AnimationsHeld) {
+      this.AnimationsHeld = on;
+      this.applyAnimationPause(on || this.OutOfView);
+    }
+    for (const child of this.Children) child.setAnimationsHeld(on);
+  }
+
   /** Frames outside the frustum before the clips are actually paused. */
   private static readonly OUT_OF_VIEW_GRACE = 3;
 
@@ -1114,7 +1125,7 @@ export class ModelObject {
     if (out === this.OutOfView) return;
 
     this.OutOfView = out;
-    this.applyAnimationPause(out);
+    this.applyAnimationPause(out || this.AnimationsHeld);
     this.syncShadowEnabled();
 
     for (const child of this.Children) child.setOutOfView(out);

@@ -77,6 +77,8 @@ export interface SkillDef {
   readonly combat?: { readonly layer?: CombatLayer; readonly hooks?: CombatHooks };
   /** UseSkillWarrior's cast glint on the blade: always, or only from a mount (Impale). */
   readonly warriorGlint?: true | 'mounted';
+  /** Ours: with the skill visual budget on, at least this many seconds between one caster's drawn casts (`castBudget.ts`). */
+  readonly heavyVisualGap?: number;
   /** The MagicEffect the skill applies; `MagicEffectCancelled` names the skill, not the effect. */
   readonly effect?: number;
   /**

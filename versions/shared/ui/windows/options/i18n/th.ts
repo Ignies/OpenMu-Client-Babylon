@@ -352,4 +352,30 @@ export default {
   'options.autoQuiver': 'เติมกระบอกธนูอัตโนมัติ',
   'options.help.autoQuiver':
     'ใส่ลูกธนูหรือลูกดอกชุดถัดไปจากกระเป๋าเข้ามือทันทีที่กระบอกธนูหมด แทนที่จะรอยิงครั้งถัดไป เฉพาะเซิร์ฟเวอร์ที่อนุญาต',
+  'options.otherSkillEffects': 'เอฟเฟกต์สกิลของผู้เล่นอื่น',
+  'options.help.otherSkillEffects':
+    'เอฟเฟกต์ของสกิลที่ผู้เล่นอื่นใช้ ของคุณและของมอนสเตอร์จะแสดงเสมอ ปิดไว้ช่วยลดภาระในที่คนเยอะ',
+  'options.otherGearEffects': 'เอฟเฟกต์อุปกรณ์ของผู้เล่นอื่น',
+  'options.help.otherGearEffects': 'ประกาย ออร่า และแสงของไอเทมของผู้เล่นอื่น',
+  'options.otherPets': 'สัตว์เลี้ยงของผู้เล่นอื่น',
+  'options.help.otherPets': 'สัตว์เลี้ยงและ Dark Raven ของผู้เล่นอื่น พาหนะที่มีคนขี่อยู่จะยังแสดง',
+  'options.otherPlayerAnimations': 'แอนิเมชันของผู้เล่นอื่น',
+  'options.help.otherPlayerAnimations':
+    'ปิดไว้ ผู้เล่นอื่นจะหยุดนิ่งขณะยืนหรือเดิน การโจมตีและการตายยังแสดงอยู่ ช่วยลดภาระในที่คนเยอะ',
+  'options.npcAnimations': 'แอนิเมชันของ NPC',
+  'options.help.npcAnimations': 'ปิดไว้ NPC จะหยุดนิ่ง',
+  'options.quality.low': 'ต่ำ',
+  'options.skillVisualBudget': 'จำกัดเอฟเฟกต์สกิล',
+  'options.help.skillVisualBudget':
+    'สำหรับการโจมตีที่เร็วมากและฝูงชน: เอฟเฟกต์สกิลไม่เกิน 10 ต่อวินาทีต่อตัวละคร และไม่เกิน 40 สำหรับผู้เล่นอื่นทั้งหมดรวมกัน การโจมตีและตัวเลขยังแสดงอยู่',
+  'options.dropDrawCap': 'จำกัดไอเทมบนพื้น',
+  'options.help.dropDrawCap':
+    'แสดงไอเทมบนพื้นที่ใกล้ที่สุดไม่เกิน 150 ชิ้น สำหรับเซิร์ฟเวอร์ที่ดรอปสูงมาก ที่เหลือจะแสดงเมื่ออยู่ในกลุ่มที่ใกล้ที่สุด',
+  'options.fpsLimit': 'จำกัด FPS',
+  'options.fpsUnlimited': 'ไม่จำกัด',
+  'options.help.fpsLimit':
+    'จำกัดจำนวนเฟรมที่วาดต่อวินาที ค่าต่ำใช้ CPU, GPU และแบตเตอรี่น้อยลง ไม่จำกัดจะตามจอภาพ',
+  'options.effectShedding': 'ลดเอฟเฟกต์เมื่อช้า',
+  'options.help.effectShedding':
+    'ขณะที่เฟรมเรตต่ำกว่าเป้าหมายมาก (ขีดจำกัด FPS หรือ 60) จะวาดเอฟเฟกต์สกิลของผู้เล่นอื่นในฝูงชนน้อยลง ของคุณจะแสดงเสมอ',
 } satisfies Partial<Record<keyof typeof en, string>>;

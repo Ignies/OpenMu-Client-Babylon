@@ -417,4 +417,31 @@ export default {
   'options.autoQuiver': 'Carcaj automático',
   'options.help.autoQuiver':
     'Pone en tu mano las siguientes flechas o virotes del inventario en cuanto se acaba el carcaj, en vez de en tu próximo disparo. Solo en servidores que lo permiten.',
+  'options.otherSkillEffects': 'Efectos de habilidades de otros jugadores',
+  'options.help.otherSkillEffects':
+    'Los efectos de las habilidades de otros jugadores. Los tuyos y los de los monstruos siempre se ven. Apagado ahorra trabajo en zonas llenas.',
+  'options.otherGearEffects': 'Efectos del equipo de otros jugadores',
+  'options.help.otherGearEffects': 'El brillo, el aura y la luz de los objetos de otros jugadores.',
+  'options.otherPets': 'Mascotas de otros jugadores',
+  'options.help.otherPets':
+    'Las mascotas y el Dark Raven de otros jugadores. La montura que alguien monta se queda.',
+  'options.otherPlayerAnimations': 'Animaciones de otros jugadores',
+  'options.help.otherPlayerAnimations':
+    'Apagado, los otros jugadores quedan quietos al estar parados o caminar; sus golpes y muertes se siguen viendo. Ahorra trabajo en zonas llenas.',
+  'options.npcAnimations': 'Animaciones de NPC',
+  'options.help.npcAnimations': 'Apagado, los NPC quedan quietos.',
+  'options.quality.low': 'Baja',
+  'options.skillVisualBudget': 'Limitar efectos de habilidades',
+  'options.help.skillVisualBudget':
+    'Para atacantes muy rápidos y multitudes: como mucho 10 efectos de habilidades por segundo por personaje y 40 para todos los demás jugadores juntos. Los golpes y números se siguen viendo.',
+  'options.dropDrawCap': 'Limitar objetos en el suelo',
+  'options.help.dropDrawCap':
+    'Dibuja como mucho los 150 objetos del suelo más cercanos, para servidores con drops muy altos. El resto aparece cuando está entre los más cercanos.',
+  'options.fpsLimit': 'Límite de FPS',
+  'options.fpsUnlimited': 'Sin límite',
+  'options.help.fpsLimit':
+    'Limita cuántos cuadros por segundo se dibujan. Menos usa menos CPU, GPU y batería; sin límite sigue al monitor.',
+  'options.effectShedding': 'Menos efectos si va lento',
+  'options.help.effectShedding':
+    'Mientras los FPS se quedan bastante por debajo de su objetivo (el límite de FPS, o 60), dibuja menos efectos de habilidades de otros jugadores en una multitud. Los tuyos siempre se ven.',
 } satisfies Partial<Record<keyof typeof en, string>>;

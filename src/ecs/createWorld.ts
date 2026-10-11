@@ -5,6 +5,7 @@ import { PlayerControllerSystem } from './systems/playerControllerSystem';
 import { MoveAlongPathSystem } from './systems/moveAlongPathSystem';
 import { PositionSlideSystem } from './systems/positionSlideSystem';
 import { AnimationSystem } from './systems/animationSystem';
+import { AnimationHoldSystem } from './systems/animationHoldSystem';
 import { CombatSfxSystem } from './systems/combatSfxSystem';
 import { WeaponTrailSystem } from './systems/weaponTrailSystem';
 import { ImpactEffectSystem } from './systems/impactEffectSystem';
@@ -123,6 +124,8 @@ const factories: ISystemFactory[] = [
   // After AnimationSystem + AppearanceSystem: mounts follow this frame's
   // rider pose, and the angel needs its owner's safe-zone flag.
   PetSystem,
+  // After AppearanceSystem: parts put on this frame are held with their body.
+  AnimationHoldSystem,
   // After AnimationSystem: the shoulder flag reads this frame's bone 26 pose.
   GuildFlagSystem,
   ItemGlowSystem,

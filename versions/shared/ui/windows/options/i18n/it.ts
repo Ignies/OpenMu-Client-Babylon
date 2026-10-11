@@ -382,4 +382,32 @@ export default {
   'options.autoQuiver': 'Faretra automatica',
   'options.help.autoQuiver':
     'Mette in mano le frecce o i dardi successivi dello zaino appena la faretra si esaurisce, invece che al tiro successivo. Solo sui server che lo consentono.',
+  'options.otherSkillEffects': 'Effetti delle abilità degli altri giocatori',
+  'options.help.otherSkillEffects':
+    'Gli effetti delle abilità degli altri giocatori. I tuoi e quelli dei mostri si vedono sempre. Spento alleggerisce i luoghi affollati.',
+  'options.otherGearEffects': "Effetti dell'equipaggiamento degli altri giocatori",
+  'options.help.otherGearEffects':
+    "Il luccichio, l'aura e la luce degli oggetti degli altri giocatori.",
+  'options.otherPets': 'Animali degli altri giocatori',
+  'options.help.otherPets':
+    'Gli animali e il Dark Raven degli altri giocatori. Una cavalcatura montata resta.',
+  'options.otherPlayerAnimations': 'Animazioni degli altri giocatori',
+  'options.help.otherPlayerAnimations':
+    'Spento, gli altri giocatori restano fermi da in piedi o camminando; colpi e morti si vedono ancora. Alleggerisce i luoghi affollati.',
+  'options.npcAnimations': 'Animazioni degli NPC',
+  'options.help.npcAnimations': 'Spento, gli NPC restano fermi.',
+  'options.quality.low': 'Bassa',
+  'options.skillVisualBudget': 'Limita gli effetti delle abilità',
+  'options.help.skillVisualBudget':
+    'Per attaccanti molto veloci e folle: al massimo 10 effetti di abilità al secondo per personaggio e 40 per tutti gli altri giocatori insieme. Colpi e numeri restano.',
+  'options.dropDrawCap': 'Limita gli oggetti a terra',
+  'options.help.dropDrawCap':
+    'Disegna al massimo i 150 oggetti a terra più vicini, per server con drop molto alti. Gli altri appaiono quando sono tra i più vicini.',
+  'options.fpsLimit': 'Limite FPS',
+  'options.fpsUnlimited': 'Illimitato',
+  'options.help.fpsLimit':
+    'Limita quanti fotogrammi al secondo vengono disegnati. Meno usa meno CPU, GPU e batteria; Illimitato segue il monitor.',
+  'options.effectShedding': 'Meno effetti se rallenta',
+  'options.help.effectShedding':
+    "Finché i fotogrammi restano ben sotto l'obiettivo (il limite FPS, o 60), disegna meno effetti delle abilità degli altri giocatori nella folla. I tuoi si vedono sempre.",
 } satisfies Partial<Record<keyof typeof en, string>>;

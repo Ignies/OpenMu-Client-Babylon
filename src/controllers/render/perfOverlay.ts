@@ -7,6 +7,7 @@ import { upscaleActive } from './scenes/upscale';
 import { texturePacks } from '../assets/texturePacks';
 import { propBatchStats } from './propBatches';
 import { configFingerprintLines } from './configFingerprint';
+import { framePacer } from './fpsLimit';
 
 /**
  * Render-budget overlay. Shift+Ctrl+Alt+P toggles it.
@@ -611,8 +612,6 @@ function settingsLine(): string {
 }
 
 function render(scene: Scene): void {
-  const engine = scene.getEngine();
-
   const slowest = [...systemMs.entries()]
     .sort((a, b) => b[1] - a[1])
     .slice(0, SYSTEM_ROWS);
@@ -636,7 +635,7 @@ function render(scene: Scene): void {
 
   const lines = [
     ...gpuLines(scene),
-    `fps        ${engine.getFps().toFixed(0)}`,
+    `fps        ${framePacer.fps.toFixed(0)}`,
     `frame      ${frameMs.toFixed(2)} ms`,
     `cpu        ${cpuMs.toFixed(2)} ms   ecs ${updateMs.toFixed(2)} ms`,
     gpuMsLine(),

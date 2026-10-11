@@ -368,4 +368,32 @@ export default {
   'options.autoQuiver': 'Tự thay ống tên',
   'options.help.autoQuiver':
     'Lắp ngay bó tên hoặc tên nỏ tiếp theo trong túi vào tay khi ống tên hết, thay vì đợi lần bắn sau. Chỉ trên máy chủ cho phép.',
+  'options.otherSkillEffects': 'Hiệu ứng kỹ năng của người chơi khác',
+  'options.help.otherSkillEffects':
+    'Hiệu ứng kỹ năng của người chơi khác. Của bạn và của quái vật luôn hiện. Tắt để nhẹ hơn ở nơi đông người.',
+  'options.otherGearEffects': 'Hiệu ứng trang bị của người chơi khác',
+  'options.help.otherGearEffects':
+    'Ánh lấp lánh, hào quang và ánh sáng của vật phẩm người chơi khác.',
+  'options.otherPets': 'Thú cưng của người chơi khác',
+  'options.help.otherPets':
+    'Thú cưng và Dark Raven của người chơi khác. Thú cưỡi đang được cưỡi vẫn hiện.',
+  'options.otherPlayerAnimations': 'Hoạt ảnh của người chơi khác',
+  'options.help.otherPlayerAnimations':
+    'Tắt thì người chơi khác đứng yên khi đứng hoặc đi; đòn đánh và cái chết vẫn hiện. Nhẹ hơn ở nơi đông người.',
+  'options.npcAnimations': 'Hoạt ảnh NPC',
+  'options.help.npcAnimations': 'Tắt thì NPC đứng yên.',
+  'options.quality.low': 'Thấp',
+  'options.skillVisualBudget': 'Giới hạn hiệu ứng kỹ năng',
+  'options.help.skillVisualBudget':
+    'Cho người đánh rất nhanh và đám đông: tối đa 10 hiệu ứng kỹ năng mỗi giây cho mỗi nhân vật và 40 cho tất cả người chơi khác cộng lại. Đòn đánh và con số vẫn hiện.',
+  'options.dropDrawCap': 'Giới hạn vật phẩm trên mặt đất',
+  'options.help.dropDrawCap':
+    'Chỉ vẽ tối đa 150 vật phẩm gần nhất trên mặt đất, cho máy chủ có tỉ lệ rơi rất cao. Số còn lại hiện khi chúng nằm trong nhóm gần nhất.',
+  'options.fpsLimit': 'Giới hạn FPS',
+  'options.fpsUnlimited': 'Không giới hạn',
+  'options.help.fpsLimit':
+    'Giới hạn số khung hình vẽ mỗi giây. Thấp hơn dùng ít CPU, GPU và pin hơn; Không giới hạn theo màn hình.',
+  'options.effectShedding': 'Ít hiệu ứng hơn khi chậm',
+  'options.help.effectShedding':
+    'Khi tốc độ khung hình thấp hơn nhiều so với mục tiêu (giới hạn FPS, hoặc 60), vẽ ít hiệu ứng kỹ năng của người chơi khác trong đám đông hơn. Của bạn luôn hiện.',
 } satisfies Partial<Record<keyof typeof en, string>>;

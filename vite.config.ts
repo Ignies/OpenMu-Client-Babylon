@@ -19,12 +19,20 @@ const buildManifest = (): Plugin => ({
   },
 });
 
+/**
+ * Calls the build minifies away (ours): debug logging, some of it once per packet, which an open
+ * console keeps alive with every object it logged. Warnings, errors and info stay.
+ * tools/checks/productionLogs.test.ts checks it; tools/checks/distLogs.ts checks a built dist/.
+ */
+const DEBUG_LOGS = ['console.log', 'console.debug', 'console.trace'];
+
 // Game versions are selected at runtime (versions/registry.ts, loaded by
 // src/app/main.tsx before the app boots); one build carries all of them.
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   base: './',
   plugins: [buildManifest()],
+  esbuild: command === 'build' ? { pure: DEBUG_LOGS } : undefined,
   resolve: { alias },
   /**
    * The two services the UI talks to, each its own process. Proxied here so
@@ -94,4 +102,4 @@ export default defineConfig({
     // `bun test` instead (`bun run test:server`).
     exclude: ['**/node_modules/**', '**/dist/**', 'marketplace/server/**'],
   },
-});
+}));
