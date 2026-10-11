@@ -36,4 +36,10 @@ export default {
   'fidelity.noticeLinks': 'Enlaces en los avisos del servidor',
   'fidelity.noticeLinks.hint':
     'Las direcciones web de los avisos del servidor son enlaces subrayados que abren otra pestaña. Clásica: texto plano, como en el original.',
+  'fidelity.cameraKeepsView': 'La cámara se mantiene al viajar',
+  'fidelity.cameraKeepsView.hint':
+    'El zoom, el giro y la inclinación de la cámara se mantienen al teletransportarte o cambiar de mapa, y aparece un botón Restablecer cámara mientras la vista está movida. Clásica: cada cambio de mapa restablece la cámara, como en el original.',
+  'fidelity.swingFill': 'Los golpes llenan el tiempo entre ellos',
+  'fidelity.swingFill.hint':
+    'Con mucha velocidad de ataque, la parte del golpe después del impacto se reproduce más lenta para durar hasta el siguiente golpe, en vez de que el héroe se quede quieto entre medio. Los golpes aciertan en el mismo momento. Clásica: el golpe termina antes y el héroe se queda quieto, como en el original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

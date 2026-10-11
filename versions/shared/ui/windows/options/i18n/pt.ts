@@ -372,4 +372,11 @@ export default {
   'options.help.fidelity':
     'Clássica é o cliente original, exatamente. Melhorada e Ultra ligam as melhorias abaixo; mude uma e a predefinição vira Personalizada.',
   'options.section.improvements': 'Melhorias',
+  'options.autoManaPotion': 'Poção de mana automática',
+  'options.help.autoManaPotion':
+    'Bebe a maior poção de mana da sua bolsa quando a mana cai abaixo de um décimo, no máximo uma por segundo. Só em servidores que permitem.',
+  'options.needs.server': 'Este servidor não permite.',
+  'options.autoQuiver': 'Aljava automática',
+  'options.help.autoQuiver':
+    'Coloca na sua mão as próximas flechas ou virotes da bolsa assim que a aljava acaba, em vez de no próximo disparo. Só em servidores que permitem.',
 } satisfies Partial<Record<keyof typeof en, string>>;

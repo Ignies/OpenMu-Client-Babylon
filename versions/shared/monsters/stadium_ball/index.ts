@@ -7,6 +7,8 @@ export default defineMonster({
   // Soccer ball (ZzzCharacter.cpp:14015-14021). Its `BlendMesh = 2` (the additive panel)
   // is not modelled.
   npcModel: { file: '/Skill/Ball01', scale: 1.8 },
+  // MODEL_BALL: rests 30 cm up, and a kick (the server's ObjectMoved) hops, rolls and sparks it.
+  ball: true,
   stats: {
     Rate: 1,
     Level: 12,

@@ -3,9 +3,11 @@
  * SceneCommon.cpp), behind the `cameraControl` option. See controllers/camera/readme.md.
  */
 
+import { observable, runInAction } from 'mobx';
 import type { ENUM_WORLD } from '../../core/types';
 import type { ArcRotateCamera, TransformNode } from '../render/babylon/exports';
 import { GameOptions } from '@/controllers/settings';
+import { isOn } from '@/controllers/fidelity';
 import { EventBus } from '../../core/eventBus';
 import type { CameraLayer } from './layer';
 import { CAMERA_LAYERS } from './layers';
@@ -72,6 +74,28 @@ let pitchOffsetDeg = 0;
 
 /** `CameraDistance`, original units, eased toward the level's target. */
 let distance = DISTANCE_BY_LEVEL[DEFAULT_CAMERA_LEVEL];
+
+/** The level the current map opened on, which a reset goes back to. */
+let openingLevel = DEFAULT_CAMERA_LEVEL;
+
+/** `cameraKeepsView`: the view is zoomed, turned or tilted off the map's opening frame. */
+export const cameraView = observable({ moved: false });
+
+/** Back to the map's opening frame: its level, the default heading, no tilt. */
+export function resetCamera(): void {
+  level = openingLevel;
+  headingDeg = DEFAULT_HEADING_DEG;
+  pitchOffsetDeg = 0;
+}
+
+function syncMoved(): void {
+  const turn = Math.abs(((((headingDeg - DEFAULT_HEADING_DEG) % 360) + 540) % 360) - 180);
+  const moved =
+    GameOptions.cameraControl &&
+    isOn('cameraKeepsView') &&
+    (level !== openingLevel || Math.abs(pitchOffsetDeg) > 0.5 || turn > 0.5);
+  if (moved !== cameraView.moved) runInAction(() => (cameraView.moved = moved));
+}
 
 let wroteCamera = false;
 
@@ -274,10 +298,11 @@ export function installCameraControl(
 
   // World change resets the level (WSclient.cpp:600); heading, pitch and
   // distance snap with it so the new map opens on its own default frame.
+  // `cameraKeepsView` keeps the player's view unless the map pins a distance.
   EventBus.on('warpCompleted', ({ map }) => {
-    level = openingLevelFor(map);
-    headingDeg = DEFAULT_HEADING_DEG;
-    pitchOffsetDeg = 0;
+    openingLevel = openingLevelFor(map);
+    if (isOn('cameraKeepsView') && byWorld.get(map)?.distance === undefined) return;
+    resetCamera();
     distance = DISTANCE_BY_LEVEL[level];
   });
 }
@@ -354,6 +379,7 @@ export function updateGameCamera(
   if (isMouseLookActive() && !canMouseLook()) releaseMouseLook();
 
   if (!GameOptions.cameraControl) {
+    syncMoved();
     camera.beta -= quakeBeta;
     if (wroteCamera && classic) {
       camera.alpha = classic.alpha;
@@ -375,6 +401,7 @@ export function updateGameCamera(
   if (pressedKeys.has('Insert')) headingDeg += step;
   if (pressedKeys.has('Delete')) headingDeg -= step;
   headingDeg = ((headingDeg % 360) + 360) % 360 - 360;
+  syncMoved();
 
   const layer = byWorld.get(world);
   const target = DISTANCE_BY_LEVEL[level];

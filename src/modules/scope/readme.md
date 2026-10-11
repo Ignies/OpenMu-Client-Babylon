@@ -42,13 +42,17 @@ players, plus their moves and equipment changes. The entities live in the ECS wo
 - `AddCharacterToScopeExtended`: one player, extended appearance plus effect ids.
 - `AddTransformedCharactersToScope` (0x45): players wearing a monster skin.
 - `MapObjectOutOfScope`: objects leave view.
-- `ObjectMoved`: instant move to a tile; stops any walk.
-- `ObjectWalked`: walk target for another object (the hero's own walk is ignored).
+- `ObjectMoved`: instant move to a tile; stops any walk and the body (`SetPlayerStop`). The tile lands
+  at once and the body is drawn sliding in over 15 ticks, the hero taking no input meanwhile, and a ball is kicked
+  (`JumpTime`, WSclient.cpp:2127-2153; `ecs/systems/positionSlideSystem.ts`). `addNpcToScope` gives a
+  `MonsterDef.ball` type its `ball` component.
+- `ObjectWalked`: walk target for another object (the hero's own walk is ignored); a body whose file
+  says its walk slides (the Crust) slides to the tile instead (`startWalkSlide`).
 - `AppearanceChanged` / `AppearanceChangedExtended`: one equipment slot of a player changed.
 
 ## Depends on / used by
 - uses: `economy` (shop titles), `controllers/item_rules/itemSerializer`,
-  `core/inventoryConstants`, `controllers/actors`, `ecs/systems/teleportSystem`,
+  `core/inventoryConstants`, `controllers/actors`, `ecs/systems/teleportSystem`, `ecs/systems/positionSlideSystem`,
   `versions/shared/skills/skillVisuals` (`playSummonArrival`).
 - used by: `src/app/logic.ts` (import and `spawnPlayer` re-export), `src/app/offline.ts`,
   `ecs/systems/characterSelectSystem.ts`. `warp/warpScopeHold.ts` holds these packets back while

@@ -212,7 +212,18 @@ export type Entity = Partial<{
      * Absent until the first swing.
      */
     swordCount?: number;
+    /**
+     * `swingFill` (Enhanced): the hero's swing clip after its blow plays at `scale`, so it ends as
+     * the next swing may start; only while the clip started as `serial` (`actionSerial`) runs.
+     */
+    swingFill?: { serial: number; scale: number };
   };
+  /**
+   * A `MonsterDef.ball` body (the Battle Soccer ball): `PushingCharacter`'s MODEL_BALL lines - its
+   * height over the 30 cm floor and `Gravity` (cm, cm a tick), its roll (`Direction[0]`, `[1]`,
+   * degrees a tick) and the part of a 25 fps tick not yet stepped. `positionSlideSystem.ts`.
+   */
+  ball: { height: number; gravity: number; spinX: number; spinZ: number; ticks: number };
   monsterAnimation: {
     action: MonsterActionType;
   };

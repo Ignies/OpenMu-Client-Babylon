@@ -43,6 +43,16 @@ describe('config file', () => {
     expect(envToConfig({}).muHelperAfterReconnect).toBe(false);
   });
 
+  it('stores the automatic mana potion as MU_AUTO_MANA_POTION, off unless set', () => {
+    expect(configToEnv({ ...config, autoManaPotion: true }).MU_AUTO_MANA_POTION).toBe('on');
+    expect(envToConfig({}).autoManaPotion).toBe(false);
+  });
+
+  it('stores the automatic quiver as MU_AUTO_QUIVER, off unless set', () => {
+    expect(configToEnv({ ...config, autoQuiver: true }).MU_AUTO_QUIVER).toBe('on');
+    expect(envToConfig({}).autoQuiver).toBe(false);
+  });
+
   it('stores the modules turned off as MU_MODULES_OFF, none unless set', () => {
     expect(configToEnv({ ...config, modulesOff: 'events,band' }).MU_MODULES_OFF).toBe('events,band');
     expect(envToConfig({}).modulesOff).toBe('');

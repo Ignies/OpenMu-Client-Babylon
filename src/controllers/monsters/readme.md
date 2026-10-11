@@ -21,6 +21,9 @@ its own folder in `versions/shared/monsters/<name>/` and uses this controller.
   shared pieces in `versions/shared/monsters/_shared/bodyFx.ts`); on a body,
   `MonsterModelDef.shatter` (`MonsterShatter`, read by `fx/deathVisuals.ts`); `worldScale` (its
   `Object.Scale` on given worlds, read by the actors controller's `npcSpawnScale`).
+- Movement fields, read by `ecs/systems/positionSlideSystem.ts`: `ball` (the Battle Soccer ball's
+  `MODEL_BALL` hop, roll and kick; `scope/objects.ts` gives it the `ball` component) and, on a body,
+  `MonsterModelDef.slide` (its own speed and stop when the server moves it, and a walk that slides: the Crust).
 - `defineMonster(def)`: a monster folder's default export.
 - `MonsterRegistry`: `get(numb)` (the table row or null), `def(numb)`, `model(numb)`,
   `maxHealth(numb)`, `having(field)` (every type that sets a field, with its value), `all()`, `add`

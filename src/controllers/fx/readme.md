@@ -32,7 +32,7 @@ shared pools, textures and particle recipes other folders reuse.
   - `ambientParticles.ts` `createAmbientSystem`, `boids.ts` `boidsFor` / `boidFactoryFor`,
     `bursts.ts` `playBurst`, `fireworks.ts` `spawnFireworks`, `impactVisuals.ts` `spawnHitImpact`,
     `bloodDecals.ts` `BloodDecals`, `deathVisuals.ts` `shatterDeathFor` / `skeletonShatter` /
-    `spawnBomb` / `spawnCrystalShards`, `itemAura.ts` `createItemAura`, `itemCrackle.ts`
+    `spawnBomb` (`explosion` false: the sparks alone, `CreateBomb(p, false)`) / `spawnCrystalShards`, `itemAura.ts` `createItemAura`, `itemCrackle.ts`
     `createItemCrackle`, `monsterGlow.ts` `monsterGlowFor` / `glowMonster`, `monsterVisuals.ts`
     `monsterVisualFor` / `visualMonster`, `ping.ts` `pingLiveFor` / `TRAIL_ANCHOR`.
 

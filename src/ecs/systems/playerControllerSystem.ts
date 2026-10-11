@@ -13,6 +13,7 @@ import { aimX, aimY } from '../../controllers/camera';
 import { Commands } from '../../modules/chat/commands';
 import { teleportGate } from '../../modules/warp/teleportRules';
 import { teleportBusy } from './teleportSystem';
+import { isSliding } from './positionSlideSystem';
 import { pickGround } from '../../controllers/terrain/terrainPick';
 
 const MOVE_DELAY = 0.25;
@@ -67,7 +68,8 @@ export const PlayerControllerSystem: ISystemFactory = world => {
 
     // Left button only, the same button `pointerInputSystem` walks on: the
     // middle one belongs to the camera and the right one casts.
-    if (ev.type === PointerEventTypes.POINTERDOWN && ev.event.button === 0) {
+    // A press while the server slides the hero in is lost, as `MoveHero` returns then (`JumpTime > 0`).
+    if (ev.type === PointerEventTypes.POINTERDOWN && ev.event.button === 0 && !isSliding(world.playerEntity)) {
       pressPending = true;
     }
   });
@@ -267,7 +269,9 @@ export const PlayerControllerSystem: ISystemFactory = world => {
 
       moveTarget.update(dt);
 
-      const steering = keyboardWalk(dt);
+      // `MoveHero` takes nothing while the server slides the hero in; held keys and buttons go on after.
+      const held = isSliding(world.playerEntity);
+      const steering = !held && keyboardWalk(dt);
 
       // A press that is still down repeats the walk on the throttle; a press
       // already released walks once. Either way the throttle holds - a tap
@@ -276,7 +280,7 @@ export const PlayerControllerSystem: ISystemFactory = world => {
         // The keys steer; a click made while they are held is not a walk
         // waiting to happen once they are let go.
         pressPending = false;
-      } else if (world.pointerPressed || pressPending) {
+      } else if (!held && (world.pointerPressed || pressPending)) {
         if (delay <= 0) {
           delay = MOVE_DELAY;
           pressPending = false;
@@ -287,6 +291,11 @@ export const PlayerControllerSystem: ISystemFactory = world => {
       for (const entity of query) {
         const { playerMoveTo, transform, pathfinding, localPlayer } = entity;
         if (playerMoveTo.handled) continue;
+        // Asked for while the server slides the hero in: lost, as `MoveHero` returns (`JumpTime > 0`).
+        if (localPlayer && isSliding(entity)) {
+          playerMoveTo.handled = true;
+          continue;
+        }
         // A walk asked for mid-teleport waits for it: the original holds the
         // hero until he is back above 0.7 alpha (ZzzInterface.cpp:3080), and
         // OpenMU puts him back on the target square when it answers, undoing

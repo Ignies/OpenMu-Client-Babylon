@@ -51,6 +51,11 @@ export default tseslint.config(
     rules: { 'no-console': 'off' },
   },
   {
+    // An ECS system is a PascalCase factory, never a React component: the rule only misreads them.
+    files: ['src/ecs/systems/**'],
+    rules: { 'mobx/missing-observer': 'off' },
+  },
+  {
     // Content loaders: a Vite glob in the client, a synchronous `require` under Bun (servers and tools),
     // where there is no glob. See versions/shared/items/all.ts.
     files: ['versions/shared/*/all.ts', 'tools/itemFiles.ts', 'tools/monsterFiles.ts'],

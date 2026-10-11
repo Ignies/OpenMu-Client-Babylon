@@ -36,4 +36,10 @@ export default {
   'fidelity.noticeLinks': '服务器公告中的链接',
   'fidelity.noticeLinks.hint':
     '服务器公告中的网址显示为带下划线的链接，在新标签页中打开。经典：与原版相同的纯文本。',
+  'fidelity.cameraKeepsView': '传送后保持镜头',
+  'fidelity.cameraKeepsView.hint':
+    '传送或切换地图时，镜头的缩放、旋转和倾斜保持不变；视角被移动时会显示“重置镜头”按钮。经典：与原版相同，每次切换地图都会重置镜头。',
+  'fidelity.swingFill': '攻击动作填满出手间隔',
+  'fidelity.swingFill.hint':
+    '攻击速度很快时，命中后的攻击动作放慢播放，一直持续到下一次出手，而不是让角色在中间停住。命中的时机不变。经典：与原版相同，动作提早结束，角色原地站着。',
 } satisfies Partial<Record<keyof typeof en, string>>;

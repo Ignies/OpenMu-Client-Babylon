@@ -308,4 +308,9 @@ export default {
   'options.help.fidelity':
     'クラシックはオリジナルのクライアントそのままです。強化とウルトラは下の改善をオンにします。どれかを変えるとカスタムになります。',
   'options.section.improvements': '改善',
+  'options.autoManaPotion': 'マナポーション自動使用',
+  'options.help.autoManaPotion': 'マナが10分の1を下回ると、バッグ内で一番大きいマナポーションを飲みます(最大1秒に1本)。許可しているサーバーでのみ。',
+  'options.needs.server': 'このサーバーでは許可されていません。',
+  'options.autoQuiver': '矢筒の自動装填',
+  'options.help.autoQuiver': '矢筒が尽きたら、次の射撃を待たずにバッグ内の次の矢またはボルトを手に装備します。許可しているサーバーでのみ。',
 } satisfies Partial<Record<keyof typeof en, string>>;

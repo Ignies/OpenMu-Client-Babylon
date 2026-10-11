@@ -9,6 +9,10 @@ describe('the proxy server.json', () => {
     expect(serverManifest({}).settings.retryLoginWhenConnected).toBe(false);
     expect(serverManifest({ MU_RETRY_LOGIN_WHEN_CONNECTED: 'on' }).settings.retryLoginWhenConnected).toBe(true);
     expect(serverManifest({ MU_HELPER_AFTER_RECONNECT: 'on' }).settings.muHelperAfterReconnect).toBe(true);
+    expect(serverManifest({}).settings.autoQuiver).toBe(false);
+    expect(serverManifest({ MU_AUTO_QUIVER: 'on' }).settings.autoQuiver).toBe(true);
+    expect(serverManifest({}).settings.autoManaPotion).toBe(false);
+    expect(serverManifest({ MU_AUTO_MANA_POTION: 'on' }).settings.autoManaPotion).toBe(true);
   });
 
   it('turns off the modules MU_MODULES_OFF lists, and band when the relay is off', () => {

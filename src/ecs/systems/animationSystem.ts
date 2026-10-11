@@ -52,6 +52,7 @@ import { isRidingMount, mountKind, petSpec } from '@/controllers/pets';
 import { Hero } from '../../modules/hero';
 import { heldWeapons } from '../../controllers/actors';
 import { isOn } from '../../controllers/fidelity';
+import { isSliding } from './positionSlideSystem';
 
 // Clip rates come from the original's PlaySpeed tables (controllers/anim/playSpeed.ts);
 // attack/cast rates additionally scale with the attackSpeed/magicSpeed
@@ -516,10 +517,14 @@ export const AnimationSystem: ISystemFactory = world => {
         // A clip already playing takes its per-frame slowdown straight into the running group; a Freeze or
         // Cold slows the walk and run, so it bites mid-run.
         const slow = debuffSlowsClip(action) ? debuffSlow(entity.buffs) : 1;
+        // `swingFill`: the hero's swing after its blow, set by attackSystem for that clip only.
+        const fill = playerAnimation.swingFill;
+        const filled = fill?.serial === playerObject.actionSerial ? fill.scale : 1;
         if (playerObject.CurrentAction === action) {
           playerObject.setAnimationSpeed(
             speed *
               slow *
+              filled *
               playerFrameSpeedScale(
                 action,
                 playerObject.actionFrame(),
@@ -605,9 +610,10 @@ export const AnimationSystem: ISystemFactory = world => {
         const isMoving = movement.velocity.x !== 0 || movement.velocity.y !== 0;
         if (isMoving && !MONSTER_ONE_SHOT_ACTIONS.has(monsterAnimation.action)) {
           monsterAnimation.action = MonsterActionType.Walk;
-        } else if (!isMoving && monsterAnimation.action === MonsterActionType.Walk) {
+        } else if (!isMoving && monsterAnimation.action === MonsterActionType.Walk && !isSliding(entity)) {
           // Path consumed: the original returns to MONSTER01_STOP1 when the
           // walk ends (MoveHumen); the server never sends a "stop" animation.
+          // A Crust walks by sliding instead and stops when the slide does.
           monsterAnimation.action = MonsterActionType.Stop1;
         }
 

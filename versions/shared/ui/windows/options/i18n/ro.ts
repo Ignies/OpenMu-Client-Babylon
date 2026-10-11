@@ -379,4 +379,11 @@ export default {
   'options.help.fidelity':
     'Clasică este clientul original, exact. Îmbunătățită și Ultra pornesc îmbunătățirile de mai jos; schimbă una și presetarea devine Personalizată.',
   'options.section.improvements': 'Îmbunătățiri',
+  'options.autoManaPotion': 'Poțiune de mana automată',
+  'options.help.autoManaPotion':
+    'Bea cea mai mare poțiune de mana din rucsac când mana scade sub o zecime, cel mult una pe secundă. Doar pe serverele care permit.',
+  'options.needs.server': 'Acest server nu permite.',
+  'options.autoQuiver': 'Tolbă automată',
+  'options.help.autoQuiver':
+    'Pune în mână următoarele săgeți sau bolțuri din rucsac imediat ce tolba se golește, nu la următoarea tragere. Doar pe serverele care permit.',
 } satisfies Partial<Record<keyof typeof en, string>>;

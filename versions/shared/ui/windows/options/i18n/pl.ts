@@ -369,4 +369,11 @@ export default {
   'options.help.fidelity':
     'Klasyczne to dokładnie oryginalny klient. Ulepszone i Ultra włączają ulepszenia poniżej; zmień jedno, a ustawienie stanie się Własne.',
   'options.section.improvements': 'Ulepszenia',
+  'options.autoManaPotion': 'Automatyczna mikstura many',
+  'options.help.autoManaPotion':
+    'Wypija największą miksturę many z plecaka, gdy mana spadnie poniżej jednej dziesiątej, najwyżej jedną na sekundę. Tylko na serwerach, które na to pozwalają.',
+  'options.needs.server': 'Ten serwer na to nie pozwala.',
+  'options.autoQuiver': 'Automatyczny kołczan',
+  'options.help.autoQuiver':
+    'Wkłada do ręki kolejne strzały lub bełty z plecaka, gdy tylko kołczan się skończy, zamiast przy następnym strzale. Tylko na serwerach, które na to pozwalają.',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -62,6 +62,13 @@ export function equippedLauncher(hands: Hands): Item | null {
   return null;
 }
 
+/** What the hand opposite the launcher holds; null without a launcher. */
+export function ammoInHand(hands: Hands): Item | null {
+  const launcher = equippedLauncher(hands);
+  if (!launcher || !hands) return null;
+  return launcher === hands.leftHand ? hands.rightHand : hands.leftHand;
+}
+
 /** Reach of a basic attack with these hands, in tiles. */
 export function attackRange(hands: Hands): number {
   if (equippedLauncher(hands)) return RANGED_RANGE;

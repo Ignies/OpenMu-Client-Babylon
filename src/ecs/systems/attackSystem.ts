@@ -1,4 +1,4 @@
-import type { Entity, ISystemFactory } from '../world';
+import type { Entity, ISystemFactory, Item } from '../world';
 import { Bag } from '../../modules/inventory';
 import { HeroSkills } from '../../modules/skills';
 import { Hero } from '../../modules/hero';
@@ -24,12 +24,15 @@ import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
 import { truncatePathWithinRange } from '../../controllers/actors/approachPath';
 import { isHostilePlayer } from '../../controllers/combat/playerTarget';
 import { duelEnemyId } from '../../modules/events/duel';
-import { ammoReload, type Hands } from '../../controllers/combat/weaponRange';
+import { ammoInHand, ammoReload, type Hands } from '../../controllers/combat/weaponRange';
 import { InventoryConstants } from '@/core/inventoryConstants';
 import { StorageKind } from '../../modules/inventory/itemStorage';
 import { t } from '../../i18n';
 import { heldWeapons } from '../../controllers/actors';
 import { serverSetting } from '../../modules/servers/serverManifest';
+import { GameOptions } from '../../controllers/settings';
+import { isOn } from '../../controllers/fidelity';
+import { isSliding } from './positionSlideSystem';
 
 /**
  * Left-click basic attack (`Action()` MOVEMENT_ATTACK, ZzzInterface.cpp:3283-3356):
@@ -191,6 +194,8 @@ export const AttackSystem: ISystemFactory = world => {
   let attackCooldown = 0;
   let approachDelay = 0;
   let alternateSwing = false;
+  /** Last frame's item in the hand opposite the launcher. */
+  let lastAmmo: Item | null = null;
   // The step's destination when the walk was cut, the hero's tile until he walks again (ZzzAI.cpp:556-562).
   let stopTile: { x: number; y: number } | null = null;
 
@@ -208,6 +213,17 @@ export const AttackSystem: ISystemFactory = world => {
         combat.cancelAttack(); // Hero->Dead > 0: a swing in flight never lands
         return;
       }
+
+      // `autoQuiver` (ours, where the world allows it): the next quiver goes in as the server takes
+      // the empty one, not at the next shot's CheckArrow. `reloadAmmo` skips one the player lifted.
+      const ammo = ammoInHand(playerEntity.charAppearance);
+      if (lastAmmo && !ammo && GameOptions.autoQuiver && serverSetting('autoQuiver')) {
+        reloadAmmo(playerEntity.charAppearance);
+      }
+      lastAmmo = ammo;
+
+      // `MoveHero` returns while the server's move slides the hero in (`JumpTime > 0`): no swing.
+      if (isSliding(playerEntity)) return;
 
       const target = world.attackTarget;
       if (!target) {
@@ -346,10 +362,12 @@ export const AttackSystem: ISystemFactory = world => {
       // request at the hit key instead (its server.json, modules/servers/serverManifest.ts).
       const held = serverSetting('heldHitRequest');
       if (!held) sendHit();
+      let fill = 0;
       const hitDelay = combat.startAttack(action, playSpeed, () => {
         // CreateArrows() at AttackStage's hit key: the bow lets go here.
         playBowShotVisual(world.scene, playerEntity, target);
         if (held) sendHit();
+        if (fill > 0 && model) anim.swingFill = { serial: model.actionSerial, scale: fill };
       }, clipSeconds);
       combat.consumeInputGate();
 
@@ -360,6 +378,10 @@ export const AttackSystem: ISystemFactory = world => {
         hitDelay,
         serverMinAttackInterval(playerEntity.attributeSystem?.getValue('attackSpeed') ?? 0)
       );
+      // `swingFill` (Enhanced): after the blow the clip slows to end as the next swing may start.
+      if (clipSeconds && clipSeconds < attackCooldown && isOn('swingFill')) {
+        fill = (clipSeconds - hitDelay) / (attackCooldown - hitDelay);
+      }
     },
   };
 };

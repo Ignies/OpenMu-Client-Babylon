@@ -361,4 +361,11 @@ export default {
   'options.help.fidelity':
     'Cổ điển là client gốc, y nguyên. Nâng cao và Ultra bật các cải tiến bên dưới; đổi một mục thì thiết lập thành Tùy chỉnh.',
   'options.section.improvements': 'Cải tiến',
+  'options.autoManaPotion': 'Tự uống bình mana',
+  'options.help.autoManaPotion':
+    'Uống bình mana lớn nhất trong túi khi mana xuống dưới một phần mười, tối đa một bình mỗi giây. Chỉ trên máy chủ cho phép.',
+  'options.needs.server': 'Máy chủ này không cho phép.',
+  'options.autoQuiver': 'Tự thay ống tên',
+  'options.help.autoQuiver':
+    'Lắp ngay bó tên hoặc tên nỏ tiếp theo trong túi vào tay khi ống tên hết, thay vì đợi lần bắn sau. Chỉ trên máy chủ cho phép.',
 } satisfies Partial<Record<keyof typeof en, string>>;

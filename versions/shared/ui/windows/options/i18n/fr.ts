@@ -370,4 +370,11 @@ export default {
   'options.help.fidelity':
     'Classique est le client d\'origine, à l\'identique. Améliorée et Ultra activent les améliorations ci-dessous ; changez-en une et le préréglage devient Personnalisée.',
   'options.section.improvements': 'Améliorations',
+  'options.autoManaPotion': 'Potion de mana automatique',
+  'options.help.autoManaPotion':
+    'Boit la plus grande potion de mana de votre sac quand votre mana passe sous un dixième, au plus une par seconde. Seulement sur les serveurs qui l’autorisent.',
+  'options.needs.server': 'Ce serveur ne l’autorise pas.',
+  'options.autoQuiver': 'Carquois automatique',
+  'options.help.autoQuiver':
+    'Met en main les flèches ou carreaux suivants de votre sac dès que le carquois est vide, au lieu de votre prochain tir. Seulement sur les serveurs qui l’autorisent.',
 } satisfies Partial<Record<keyof typeof en, string>>;

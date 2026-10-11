@@ -16,7 +16,9 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
   mobx, so controllers, content and windows read it without reaching the app.
 - A few systems export helpers other code reads (`isHeroUnderRoof`, `mayBeCeilingPiece` in `roofDetection.ts`,
   `isTeleporting` / `teleportMountAlpha` in `teleportSystem.ts`, `autoGetItem` in `itemPickupSystem.ts`: Space walks
-  to the first drawn item under three tiles, `AutoGetItem`, NewUIHotKey.cpp:455).
+  to the first drawn item under three tiles, `AutoGetItem`, NewUIHotKey.cpp:455; `startPositionSlide` /
+  `isSliding` in `positionSlideSystem.ts`: `modules/scope/net.ts` starts one on `ObjectMoved`, and the
+  attack, cast, talk, pickup, rest, walk and gate systems wait while the hero slides).
 
 ## How it works
 - A system is a factory `(world) => { update?(dt) }` in `systems/`. `createWorld.ts` lists every
@@ -53,7 +55,8 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
   the class's own models (Monk sets, Dark Lord masks); a held item's `ItemObjectAttribute` mesh rules; a glove weapon
   skinned to the body.
 - `systems/animationSystem.test.ts`: the hero and a player with no reported speeds take the hero's
-  attack and magic speed; another player with speeds from the scope packet keeps its own.
+  attack and magic speed; another player with speeds from the scope packet keeps its own; a monster
+  sliding in its walk clip (the Crust) keeps it until the slide ends.
 - `systems/deathSystem.test.ts`: Chaos Castle bomb sounds on odd ticks 15..25, the pit scream,
   no sound off the Blood Castle bridge, the skill knock and Nova motes, the Dead counter in whole
   ticks at 25 fps, the Die clip at Dead 15 (less the hero's blow wait), the fade from the kill, the
@@ -64,13 +67,21 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
 - `systems/ceilingHideSystem.test.ts`: the roof over the hero fades on Enhanced, stays drawn but
   detected on Classic, and comes back when `roofFade` is turned off.
 - `systems/attackSystem.test.ts`: a swing sends the walk stop (`LetHeroStop`) before its hit, on the
-  cut step's destination tile.
+  cut step's destination tile. `autoQuiver` puts the next quiver in when the server takes the empty
+  one, only where the server and the player allow it, and never one the player lifted. On Enhanced
+  (`swingFill`) a clip quicker than the time between swings slows after its blow to end with it.
+  A swing waits while the server slides the hero in.
+- `systems/positionSlideSystem.test.ts`: `ObjectMoved` lands the tile at once and draws the body a
+  fifth closer each 25 fps tick, on the tile after 15 with its tile-centre offset back
+  (`PushingCharacter`), on every preset and at any distance, stopped on arrival; the hero counts as sliding for the 15
+  ticks even without moving; Chaos Castle's corner, stop and walk-off; the Crust's 0.07 and stop,
+  and its walk as a slide (any other monster walks its path); the ball's kick (sparks, sound, hop, roll).
 - `systems/itemPickupSystem.test.ts`: the pickup request marks the drop `pickupAsked`; Space takes the
   first drawn item under three tiles, not the nearest.
 - `systems/gmMark.test.ts`: the GM buff or the hero's operator status asks for the Webzen mark, cloaking hides it.
 - `systems/npcTalkSystem.test.ts`: the Gateway Machine is talked to from 5.5 tiles with no free tile beside it.
 - `systems/playerControllerSystem.test.ts`: a ground click calls off a standing cast, except while the
-  right button is held.
+  right button is held; a click while the server slides the hero in is lost, walk and attack alike.
 - `systems/skillCastSystem.test.ts`: a cast that cuts a walk stops it on the path's next node.
   Dark Side's follow-up blows draw on each target the server named and send nothing; with nothing selected it is cast where the hero stands, target key 0.
   A bow skill with no arrows in hand reloads the next quiver instead of shooting, and is dropped
@@ -121,6 +132,36 @@ the fade is the `roofFade` improvement, not in the original.
    throws blue motes); Blood Castle bridge and Chaos Castle pit deaths fall off
    (`FallingCharacter`), Chaos Castle corpses pop `CreateBomb`s on odd ticks 15-25.
 5. Alpha < 0.01: the entity is removed, except the hero, who waits for the respawn packet.
+
+### positionSlideSystem.ts
+`ReceiveMovePosition` (WSclient.cpp:2127-2153) sets `JumpTime = 1` for every `ObjectMoved`, and
+`PushingCharacter` (ZzzCharacter.cpp:3144-3203) runs it: 15 ticks of `Position += (goal - Position)
+* Speed`, then the body is put on its tile. Here the position lands at once and `posOffset` carries
+the rest, so pathing and the server never see the slide.
+- `Speed` 0.2; a body file's `slide` sets its own (the Crust: 0.07) and a stop on the tile.
+- On the ground: the height follows the terrain under the drawn body. Chaos Castle aims at the
+  tile corner instead of its centre, keeps its height and ends with `SetPlayerStop`; the body is
+  left on the corner, and its first tile of walking fades it back to the centre (the original's
+  `MovePath` starts from where the body is drawn).
+- `JumpTime > 0` holds the hero: `MoveHero` returns and the gate check waits (ZzzInterface.cpp:2679),
+  so the walk (`playerControllerSystem`), swing, cast, talk, pickup and rest systems and the gate
+  system skip their turn while `isSliding(hero)`. A click that lands meanwhile is lost, as the
+  original never reads it (the pointer, walk, pickup, talk and rest click handlers drop it, and a
+  walk asked for then is thrown away); held buttons and keys go on after, and an attack or cast
+  already under way resumes.
+- The ball (`MonsterDef.ball`, entity `ball`): every tick it falls 6 cm onto a floor 30 cm up and
+  bounces at 0.4, which never quite settles, and rolls by `Direction` fading 0.8 a tick. A kick
+  sets `Gravity = 20`, a roll of 400 degrees per tile moved, SOUND_MENU01 and `CreateBomb` sparks
+  80 cm over where it was drawn. Its height is the model's `HoverHeight`.
+- The Crust walks by the same slide (`startWalkSlide`, `ReceiveMoveCharacter`, WSclient.cpp:2093-2101):
+  `ObjectWalked` puts it on the target tile, turns it to the tile (`CreateAngle`), plays its walk clip
+  (`SetPlayerWalk`; the animation system keeps it while it slides) and slides it there at 0.07.
+- `ReceiveMovePosition` stops the body on arrival (`SetPlayerStop`, WSclient.cpp:2153). No Teleport
+  clip meets it, in the original or here: the cast plays `SetPlayerTeleport` (ClassAttack.cpp:1547),
+  the server's skill animation `CreateTeleportBegin` (WSclient.cpp:4320-4331) and its answer is
+  `ReceiveTeleport` (`JumpTime = 0`, `CreateTeleportEnd`, WSclient.cpp:2157-2197), never 0x15; OpenMU
+  answers a teleport with `MapChanged` and sends the teleporter no `ObjectMoved` (`ObjectMovedPlugIn`,
+  MoveType.Teleport). This client lands its own hero before the answer (`teleportSystem.ts`).
 
 ### dropMotionSystem.ts
 A fresh drop starts 180 cm up with `Gravity = 20` cm/tick, `Gravity -= 6` a tick, tumbling until

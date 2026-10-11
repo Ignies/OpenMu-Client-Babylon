@@ -36,4 +36,10 @@ export default {
   'fidelity.noticeLinks': 'Links nos avisos do servidor',
   'fidelity.noticeLinks.hint':
     'Endereços web nos avisos do servidor viram links sublinhados que abrem outra aba. Clássica: texto simples, como no original.',
+  'fidelity.cameraKeepsView': 'Câmera mantida entre mapas',
+  'fidelity.cameraKeepsView.hint':
+    'O zoom, o giro e a inclinação da câmera continuam iguais quando você se teleporta ou muda de mapa, e um botão Redefinir câmera aparece enquanto a visão estiver movida. Clássica: cada troca de mapa redefine a câmera, como no original.',
+  'fidelity.swingFill': 'Golpes preenchem o tempo entre eles',
+  'fidelity.swingFill.hint':
+    'Com velocidade de ataque alta, a parte do golpe depois do impacto toca mais devagar para durar até o próximo golpe, em vez de o herói ficar parado no meio. Os golpes acertam no mesmo momento. Clássica: o golpe acaba cedo e o herói fica parado, como no original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

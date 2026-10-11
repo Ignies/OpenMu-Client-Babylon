@@ -3,6 +3,7 @@ import { t } from '@/i18n';
 
 vi.stubGlobal('location', { search: '', hostname: 'localhost', href: 'http://localhost/' });
 const { CATEGORIES } = await import('./catalogue');
+const { blockerOf } = await import('./gating');
 
 const rows = CATEGORIES.flatMap(c => c.pages.flatMap(p => p.sections.flatMap(s => s.rows)));
 
@@ -17,5 +18,16 @@ describe('the party invitations row', () => {
       t('options.partyInviteReply.decline'),
       t('options.partyInviteReply.accept'),
     ]);
+  });
+});
+
+// Gameplay automation is the world's to allow (`server.json`): greyed and inert on the original.
+describe('the automation rows', () => {
+  it('do nothing where the server does not allow them', () => {
+    for (const key of ['autoManaPotion', 'autoQuiver']) {
+      const row = rows.find(r => 'key' in r && r.key === key);
+      if (!row || row.kind !== 'toggle') throw new Error(`no ${key} toggle row`);
+      expect(blockerOf(row.needs)?.text, key).toBe('options.needs.server');
+    }
   });
 });

@@ -375,4 +375,11 @@ export default {
   'options.help.fidelity':
     'Classica è il client originale, identico. Migliorata e Ultra attivano i miglioramenti qui sotto; cambiane uno e il preset diventa Personalizzata.',
   'options.section.improvements': 'Miglioramenti',
+  'options.autoManaPotion': 'Pozione di mana automatica',
+  'options.help.autoManaPotion':
+    'Beve la pozione di mana più grande dello zaino quando il mana scende sotto un decimo, al massimo una al secondo. Solo sui server che lo consentono.',
+  'options.needs.server': 'Questo server non lo consente.',
+  'options.autoQuiver': 'Faretra automatica',
+  'options.help.autoQuiver':
+    'Mette in mano le frecce o i dardi successivi dello zaino appena la faretra si esaurisce, invece che al tiro successivo. Solo sui server che lo consentono.',
 } satisfies Partial<Record<keyof typeof en, string>>;
