@@ -50,7 +50,9 @@ Always-on interface elements, one folder per element, same shape as a window. Re
 
 ## Tests
 - `bottom_bar/belt.test.tsx`: the bar draws the potion slots the version has (four, three, none).
-- `minimap/rotation.test.ts`: the map turn (the camera heading, -45 with no world) and the marker turn.
+- `damage_numbers/index.test.tsx`: no number is made while the page is hidden (they would all rise
+  together when it shows).
+- `minimap/rotation.test.ts`: the map turn (the camera heading, -45 with no world) and the marker turn.
 - `party_list/rows.test.ts`: which members are found on screen, and the name colours.
 - `low_health_overlay/heartbeat.test.ts`: the heartbeat beats back to back while due, and books
   no next beat once it is not.

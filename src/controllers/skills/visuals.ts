@@ -715,8 +715,8 @@ const GREEN_KNOT: SpearJoints = { count: 5, width: 0.2, colour: [0.4, 0.8, 0.2],
  * on a body while the effect holds (WSclient.cpp InsertBuffPhysicalEffect
  * :15466, the per-frame block ZzzCharacter.cpp:10770-10990). The green knot
  * of 1 / 2 / 3 is one shared set (SHARED_LOOKS). An id with no row has no
- * body look in the original either; the mastery ids OpenMU sends on their
- * own (135, 138, 139, 148, 153-155) take their base effect's look.
+ * body look in the original either; the mastery ids OpenMU numbers on their
+ * own arrive as their base effect (modules/skills/objectEffects.ts).
  */
 export const BUFF_VISUALS: Partial<Record<number, BuffLook>> = {};
 
@@ -783,6 +783,14 @@ export function setBuffVisual(scene: Scene, entity: Entity, effectId: number, ac
     const on = active || shared.ids.some(id => entity.buffs?.has(id));
     keepLook(scene, entity, shared.key, on ? shared.look : null);
   }
+}
+
+/** Command: draw again every look `entity` holds (a map reset ended them), without the arrival work. */
+export function refreshBuffVisuals(scene: Scene, entity: Entity): void {
+  const held = entity.buffs;
+  if (!held) return;
+  for (const id of held) keepLook(scene, entity, id, BUFF_VISUALS[id] ?? null);
+  for (const shared of SHARED_LOOKS) if (shared.ids.some(id => held.has(id))) keepLook(scene, entity, shared.key, shared.look);
 }
 
 /** Drop every buff look on an entity that left (despawn, out of scope). */

@@ -159,15 +159,9 @@ export const OURFORCES_GROUND: GroundGlow = { texture: TEX.flareRed, colour: RGB
 
 /** eBuff_Cloaking (_enum.h:3913). */
 const CLOAKING = 18;
-/** The Ourforces buffs, each with the master ones that count as it: Ignore Defense, Increase Health, Increase Block (magicEffects.ts). */
-const OURFORCES: readonly (readonly number[])[] = [[129], [130, 155], [131, 153, 154]];
-const BLOCK_UP = OURFORCES[2];
-
-function holds(e: Entity, ids: readonly number[]): boolean {
-  const buffs = e.buffs;
-  if (buffs) for (const id of ids) if (buffs.has(id)) return true;
-  return false;
-}
+/** The Ourforces buffs: Ignore Defense, Increase Health, Increase Block (their master rows arrive as them, modules/skills/objectEffects.ts). */
+const OURFORCES: readonly number[] = [129, 130, 131];
+const BLOCK_UP = 131;
 
 /**
  * The BITMAP_LIGHT_RED riding `e`, one for each Ourforces buff it holds (WSclient.cpp:15662-15678). Each one's move rolls for
@@ -175,7 +169,7 @@ function holds(e: Entity, ids: readonly number[]): boolean {
  */
 function lightReds(e: Entity): number {
   let n = 0;
-  for (const ids of OURFORCES) if (holds(e, ids)) n++;
+  for (const id of OURFORCES) if (e.buffs?.has(id)) n++;
   return n;
 }
 
@@ -259,7 +253,7 @@ const windForceMirror = (scene: Scene, e: Entity): { alive: boolean } =>
     model: MODEL.windForceMirror,
     seconds: ticks(50),
     follow: followEntity(e, 0),
-    until: () => entityGone(e) || !holds(e, BLOCK_UP),
+    until: () => entityGone(e) || !e.buffs?.has(BLOCK_UP),
     // Degrees a ms of WorldTime as radians a second; MU's yaw turns the other way.
     spin: -0.4 * 1000 * DEG,
     scaleAt: t => Math.min(1.5, 1.015 ** movesAt(t)),

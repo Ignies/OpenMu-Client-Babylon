@@ -21,7 +21,7 @@ import { HeroSkills } from './state';
 import { Hero } from '../hero';
 import { Session } from '../session';
 import type { SkillLayer } from './layer';
-import { isWeaponSkill, skillRequirementsMet } from './usability';
+import { weaponSkillEquipped } from './usability';
 import { masterLevelUpPoints, setMasterLevelUpPoints } from './masterLevel';
 
 // ---- 1. tuning -------------------------------------------------------------
@@ -453,14 +453,9 @@ function masterBaseSkillMet(entry: MasterTreeEntry): boolean {
   return HeroSkills.skills.some(s => s.number === brand);
 }
 
-/**
- * `IsNonWeaponSkillOrIsSkillEquipped`: a strengthener of a weapon skill
- * needs that weapon in hand.
- */
+/** `IsNonWeaponSkillOrIsSkillEquipped` on the node's skill: its base skill's weapon in hand (NewUIMasterLevel.cpp:618). */
 function masterEquipmentMet(entry: MasterTreeEntry): boolean {
-  const brand = skillAttributes[entry.skill]?.brand ?? 0;
-  if (!brand || !isWeaponSkill(brand)) return true;
-  return skillRequirementsMet(brand);
+  return weaponSkillEquipped(entry.skill);
 }
 
 /** `RenderIcon`'s colour test: every gate but the point cost passes. */

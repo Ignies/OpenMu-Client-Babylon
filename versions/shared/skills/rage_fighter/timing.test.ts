@@ -1408,8 +1408,8 @@ describe('The Ourforces buff looks: BITMAP_LIGHT_RED on the buffed body, by sub 
     return { aura, spawns, draws };
   }
 
-  it('Increase Health (130, 155): sub0, the 17-bone glow and two flare01_red decals 3.5 across under the body, breathing 0.2-0.7 (ZzzEffect.cpp:9563-9583)', () => {
-    for (const effect of [130, 155]) {
+  it('Increase Health (130): sub0, the 17-bone glow and two flare01_red decals 3.5 across under the body, breathing 0.2-0.7 (ZzzEffect.cpp:9563-9583)', () => {
+    for (const effect of [130]) {
       const { aura } = look(effect, 1);
       const ground = aura.groundGlow as { texture: string; size: number; count: number; breathe: (t: number) => number };
       expect(aura.boneGlow).toBeDefined();
@@ -1438,9 +1438,7 @@ describe('The Ourforces buff looks: BITMAP_LIGHT_RED on the buffed body, by sub 
       return [1, 2, 3].map(t => smokes.filter(d => d.tick === t).length);
     };
     expect(made([130])).toEqual([2, 4, 6]);
-    expect(made([155, 131])).toEqual([3, 6, 9]);
-    // A master buff counts as its base, not on its own.
-    expect(made([130, 155])).toEqual([2, 4, 6]);
+    expect(made([130, 131])).toEqual([3, 6, 9]);
   });
 
   it('none while the body is cloaked, and again once it is not (MoveHandlers.cpp:9657-9658)', () => {
@@ -1450,7 +1448,7 @@ describe('The Ourforces buff looks: BITMAP_LIGHT_RED on the buffed body, by sub 
     expect([2, 30, 31, 32, 39, 40, 41].map(t => smokes.filter(d => d.tick === t).length)).toEqual([2, 2, 1, 0, 0, 1, 2]);
   });
 
-  it('Increase Block (131, 153, 154): sub2, no glow; one tick in 70 a MODEL_WINDFOCE_MIRROR while none is up (MoveHandlers.cpp:9624-9636, :9675-9692)', () => {
+  it('Increase Block (131): sub2, no glow; one tick in 70 a MODEL_WINDFOCE_MIRROR while none is up (MoveHandlers.cpp:9624-9636, :9675-9692)', () => {
     // rand() % 70 == 7 every tick: one mirror, then none while it lives.
     const random = vi.spyOn(Math, 'random').mockReturnValue(7.5 / 70);
     const { aura, spawns } = look(131);
@@ -1462,7 +1460,6 @@ describe('The Ourforces buff looks: BITMAP_LIGHT_RED on the buffed body, by sub 
     // LifeTime 50; Light (0.6, 0.6, 1) x 6, keeping 0.9 a tick; Scale x1.015 a tick to 1.5; turning WorldTime x 0.4 degrees.
     expect([Math.round(seconds * 25), colour, scaleAt(2 / 25), scaleAt(40 / 25), blendLight(2 / 25)]).toEqual([50, [0.6, 0.6, 1], expect.closeTo(1.015 ** 2), 1.5, expect.closeTo(6 * 0.81)]);
     expect(spin).toBeCloseTo((-400 * Math.PI) / 180);
-    for (const effect of [153, 154]) expect(look(effect, 1).aura.pulse).toBeDefined();
   });
 
   it('each BITMAP_LIGHT_RED on an Increase Block body rolls for the mirror (MoveHandlers.cpp:9617-9636)', () => {

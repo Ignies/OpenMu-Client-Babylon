@@ -6,6 +6,7 @@ import { sound } from '@/controllers/sound';
 import { maps } from '@/controllers/maps';
 import { events } from '@/modules/events';
 import { skills } from '@/modules/skills';
+import { redrawBuffLooks } from '@/modules/skills/objectEffects';
 import { quests } from '@/modules/quests';
 import { evictUnusedContainers } from '@/controllers/assets';
 import { disposeSignPlates } from '@versions/shared/objects/signs/signPlates';
@@ -21,11 +22,14 @@ const releaseUnused = {
   },
 };
 
+/** Right after `effects`: the buff looks it ended, on the bodies the new map keeps. */
+const buffLooks = { reset: redrawBuffLooks };
+
 /**
  * What a map change resets, in this exact order (unchanged from the original
  * inline sequence in loadMapIntoScene). Why each one resets: see app/readme.md.
  */
-const MAP_RESET: readonly { reset(): void }[] = [weather, lighting, effects, events, skills, combat, quests, sound, maps, releaseUnused];
+const MAP_RESET: readonly { reset(): void }[] = [weather, lighting, effects, buffLooks, events, skills, combat, quests, sound, maps, releaseUnused];
 
 export function resetForMapChange(): void {
   for (const r of MAP_RESET) r.reset();

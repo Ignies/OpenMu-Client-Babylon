@@ -63,6 +63,8 @@ export default defineConfig({
   },
   define: {
     APP_VERSION: JSON.stringify(process.env.npm_package_version),
+    // One per build: the asset cache worker is registered with it (public/sw.js).
+    BUILD_ID: JSON.stringify(process.env.GITHUB_SHA?.slice(0, 12) || Date.now().toString(36)),
     APP_STAGE: JSON.stringify(process.env.APP_ENV || 'unk'),
     QA_ENABLED: JSON.stringify(process.env.QA ? 'true' : ''),
     'import.meta.env.QA_ENABLED': JSON.stringify(

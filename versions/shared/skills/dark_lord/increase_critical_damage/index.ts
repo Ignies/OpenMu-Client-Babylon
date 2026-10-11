@@ -185,9 +185,8 @@ export default defineSkill({
   // link bone and SOUND_CRITICAL (ZzzCharacter.cpp:4366-4383). The lasting look is BUFF_VISUALS[5].
   visual: { impact: critCast, area: critCast, enhanced: { impact: critCastOf(true), area: critCastOf(true) } },
   buffs: {
-    // 5 Critical Damage Increase (148 its mastery): the weapon helices every 1.2 s (critPulse).
+    // 5 Critical Damage Increase (OpenMU's 148 arrives as 5): the weapon helices every 1.2 s (critPulse).
     5: (e, s) => ({ pulse: { every: 1.2, fire: () => critPulse(s, e) } }),
-    148: (e, s) => ({ pulse: { every: 1.2, fire: () => critPulse(s, e) } }),
   },
   clip: { ground: A.PLAYER_SKILL_HAND1, ...MOUNTED_HAND }, // Increase Critical Damage
   // Increase Critical Damage (511 / 515 / 517 / 522 through the aliases), Removal Buff, Iron Defense: graded tiers only.

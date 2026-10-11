@@ -63,3 +63,5 @@ Dark Wizard skills, one folder per skill. Rules for skill folders: [../readme.md
 
 ## Tests
 - Covered by the golden tests in `../` (`skillVisuals.golden.test.ts`, `skillTables.golden.test.ts`).
+- `evil_spirit/index.test.ts`: Evil Spirit (and its master rows) draws its spirits with no smoke trail and no
+  screen shroud (`ZzzCharacter.cpp:4584-4604`).

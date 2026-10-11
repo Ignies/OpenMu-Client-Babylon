@@ -59,6 +59,20 @@ const SHADOW_FADE_START = 250 / TILE_CM;
 const SHADOW_FADE_END = 600 / TILE_CM;
 
 /**
+ * The most the fold may move a vertex along the lean axis. It divides by the vertex's height under the
+ * light (`SHADOW_SY`), so a tall map object's top - which the original never shadows - was thrown tens
+ * of tiles and its triangles drew long black streaks; up to SHADOW_FADE_END a vertex folds under four.
+ */
+const SHADOW_MAX_FOLD = 500 / TILE_CM;
+
+/**
+ * The perspective fold along the lean axis, `CalcShadowPosition`'s `x += z * (x + sx) / (z - sy)`
+ * (ZzzBMD.cpp:2620-2638), kept off its singularity: the divisor a quarter of the light's height from
+ * it, the move within SHADOW_MAX_FOLD. GLSL that also reads as JS (`objectShadow.test.ts`).
+ */
+export const SHADOW_FOLD = `clamp(shadowY * (shadowA + shadowSX) / min(shadowY - shadowSY, -0.25 * shadowSY), -${SHADOW_MAX_FOLD.toFixed(4)}, ${SHADOW_MAX_FOLD.toFixed(4)})`;
+
+/**
  * How far the silhouette is pushed out along its horizontal normal before it is
  * projected, so the seams between rigid body parts close.
  */
@@ -193,8 +207,6 @@ function createShadowMaterial(scene: Scene, slot: number): CustomMaterial {
 
     vec3 shadowRel = worldPos.xyz - shadowOriginI;
 
-    float shadowDenom = min(shadowRel.y - shadowParams.y, -0.001);
-
     float shadowCasterY = worldPos.y;
 
     // The original's projection folds the caster along a single horizontal
@@ -207,7 +219,10 @@ function createShadowMaterial(scene: Scene, slot: number): CustomMaterial {
     float shadowA = dot(shadowRel.xz, shadowSunDir);
     float shadowB = dot(shadowRel.xz, shadowAcross);
 
-    shadowA += (shadowRel.y * (shadowA + shadowParams.x)) / shadowDenom;
+    float shadowY = shadowRel.y;
+    float shadowSX = shadowParams.x;
+    float shadowSY = shadowParams.y;
+    shadowA += ${SHADOW_FOLD};
 
     worldPos.x = shadowOriginI.x
       + shadowSunDir.x * shadowA + shadowAcross.x * shadowB;

@@ -10,13 +10,15 @@ players, plus their moves and equipment changes. The entities live in the ECS wo
   `ecs/systems/characterSelectSystem.ts`.
 
 ## How it works
-- Every add first removes any entity with the same net id (`removeNetObject`), then builds a new one.
+- Every add first removes any entity with the same net id (`removeNetObject`, which also ends its buff
+  looks: `UnRegisterBuff`, `WSclient.cpp:3175-3180`), then builds a new one.
   Ids are masked with `0x7fff`; for summons bit 15 is the create flag that plays the arrival
   (`WSclient.cpp:3113-3117`).
 - NPCs, monsters and summons go through `addNpcToScope` in `objects.ts`, which also keeps a mid-walk
   entry walking, removes objects and names players and summons for other modules (party, guild, drops).
 - Players: `addCharacterToScope` spawns with `spawnPlayer`, places them on the terrain, copies the
-  PK state (`WSclient.cpp:804`), buffs and the visible equipment. The hero gets `localPlayer`
+  PK state (`WSclient.cpp:804`), buffs with their looks (`applyObjectEffect`, `RegisterBuff`) and the
+  visible equipment. The hero gets `localPlayer`
   (and `isGm`, attack and magic speed from the packet); other players get `interactable`
   (`ZzzInterface.cpp:8110`) and, from the extended packet, their own `speeds` for their clips.
 - Transformed players (`AddTransformedCharactersToScope`, 0x45): skin 0 is a normal player; the
@@ -53,4 +55,5 @@ players, plus their moves and equipment changes. The entities live in the ECS wo
 - show a new equipment slot on other players: `applyAppearanceChange` in `net.ts`.
 
 ## Tests
-- none yet.
+- `net.test.ts`: a player entering view wears its effects' looks; re-adding the body ends the old ones;
+  OpenMU's own master buff numbers are listed as their base effect.

@@ -14,6 +14,8 @@ export type NpcModel = {
   readonly scale?: number;
   /** Clip `PlaySpeed` by `MonsterActionType` its case writes into the model (`Models[].Actions[]`). */
   readonly clipSpeeds?: Readonly<Partial<Record<number, number>>>;
+  /** The `AnimationFrame` of clip 0 the original leaves it on: drawn still there, no clip ever runs. */
+  readonly holdFrame?: number;
 };
 
 /** An item an NPC wears or carries, by items.json (group, index). */

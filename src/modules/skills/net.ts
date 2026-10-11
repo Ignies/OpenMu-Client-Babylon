@@ -4,10 +4,9 @@ import { Entity, World } from '@/ecs/world';
 import { EventBus } from '@/core/eventBus';
 import { cancelledEffects } from '@/controllers/skills';
 import { HeroSkills } from './state';
-import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
 import { TELEPORT } from './skillCasting';
-import { applyObjectEffect } from './objectEffects';
+import { setObjectEffect } from './objectEffects';
 import { playCastAnimation } from '../combat/clips';
 import { beginTeleport, endTeleport, justArrived } from '@/ecs/systems/teleportSystem';
 import { playAreaSkillVisual, playChainLightningHop } from '@versions/shared/skills/skillVisuals';
@@ -92,15 +91,6 @@ function objectOnTile(world: World, except: Entity, x: number, y: number): Entit
     }
   }
   return best;
-}
-
-function setObjectEffect(objectId: number, effectId: number, active: boolean) {
-  const world = Ecs.world;
-  if (!world) return;
-  const maskedId = objectId & 0x7fff;
-  if (maskedId === Hero.playerId) HeroSkills.setBuff(effectId, active);
-  const obj = world.getByNetId(maskedId);
-  if (obj) applyObjectEffect(obj, effectId, active);
 }
 
 /** Registers this module's packet listeners (see ../module.ts). */

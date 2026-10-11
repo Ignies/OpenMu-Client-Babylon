@@ -18,7 +18,7 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 - Monster models from each monster's folder (through the monsters controller): `monsterModelFile`,
   `monsterModelTypeOfNpc`, `monsterScaleOf`, `monsterHiddenMesh`, `hasMonsterModel`;
   `monsterFactoryFor` (`genericMonster.ts`), the class every monster without its own uses.
-- NPC defaults: `npcFactoryFor(file, scale?, clipSpeeds?)`, `trapFactoryFor`, `HiddenNpc`,
+- NPC defaults: `npcFactoryFor(file, scale?, clipSpeeds?, holdFrame?)`, `trapFactoryFor`, `HiddenNpc`,
   `npcSpawnScale(factory, type, world)` (`modelFactoryPerId.ts`), `MapActors` (`mapActors.ts`, the
   map's `actors` row); `gearedNpcFactory(gear)`,
   `transformedNpcFactory(dir, part, scale?)` (`playerNpc.ts`); `CHARACTER_DEFAULT_SCALE`
@@ -130,11 +130,14 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 - `npcModelTable.test.ts`: every row names a file in `public/game-assets` and has a scale > 0; the
   tables behave as plain objects and read the folders when asked.
 - `trapModels.test.ts`: every (map, trap) pair names an `Object<world+1>` model that exists.
+- `trapNpc.test.ts`: a trap on a map without the object it borrows (the laser trap in Kanturu Relics,
+  no Object52 there in the original either) stands ready with no body instead of the missing-model box.
 - `resolveModel.golden.test.ts`: what every type 0..600 is drawn with (class, scale, base, kit,
   shared classes) and the NPC tables, as hashes; update them on purpose. It runs the real model
   classes under Node.
 - `npcLooks.test.ts`: NPCs drawn as the original builds them (Hanzo's scale, the 0.9 default and who sets its own, the plain-model NPCs,
-  Zyro, the Cursed Wizard's kit, the plate helpers), each with its ZzzCharacter.cpp lines.
+  Zyro, the Cursed Wizard's kit, the plate helpers, the Kalima gates held on frame 8), each with its
+  ZzzCharacter.cpp lines.
 - `skinTexture.test.ts`: skin / hair / level and hide texture names, and the case of each test.
 - `wingObject.test.ts`: the Wing of Ruin layer (a `Data/` bitmap, `getDataTexture`) is read top-down like
   the GLB textures it shares the UVs of, and is drawn on a model whose meshes sit under its model node.

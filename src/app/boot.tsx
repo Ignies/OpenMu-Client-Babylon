@@ -55,6 +55,7 @@ import { csmCacheStats } from '@/controllers/render/shadows';
 import { refreshServerList } from '../modules/servers/serverList';
 import { ensureCacheWorker } from '../controllers/assets/assetDownload';
 import { sceneCovered } from '../controllers/render/sceneCover';
+import { installBackgroundTick, noteDrawnFrame } from './backgroundTick';
 
 if (APP_STAGE === 'dev' || QA_ENABLED) {
   import('@babylonjs/core/Legacy/legacy');
@@ -271,9 +272,8 @@ const COVERED_RENDER_EVERY = 6;
 let coveredFrames = 0;
 
 let lastTime = performance.now();
-engine.runRenderLoop(() => {
-  const now = performance.now();
-
+/** One frame: the logic always, the draw only on a frame the browser gave (`draw`). */
+function runFrame(now: number, draw: boolean): void {
   const frameMs = now - lastTime;
   const deltaTime = Math.min(frameMs / 1000, MAX_FRAME_DELTA);
   // Advanced before the frame runs, so a frame that throws is not replayed
@@ -286,6 +286,12 @@ engine.runRenderLoop(() => {
     const updateStarted = performance.now();
     updateSystems(deltaTime);
     const updateEnded = performance.now();
+
+    if (!draw) {
+      // The clips still advance (swing and cast timing read them); nothing is drawn.
+      scene.animate();
+      return;
+    }
 
     const idle = sceneCovered() && !Loading.sceneLoading;
 
@@ -311,6 +317,20 @@ engine.runRenderLoop(() => {
       frameErrorsSinceLog = 0;
     }
   }
+}
+
+engine.runRenderLoop(() => {
+  const now = performance.now();
+  noteDrawnFrame(now);
+  runFrame(now, true);
+});
+
+// No frames from the browser (a hidden tab, a minimised window): the logic goes on from a worker
+// tick, never the draw (app/backgroundTick.ts). beginFrame measures the step map objects read.
+installBackgroundTick(now => {
+  engine.beginFrame();
+  runFrame(now, false);
+  engine.endFrame();
 });
 
 const onResize = () => engine.resize();

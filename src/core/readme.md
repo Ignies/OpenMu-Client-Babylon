@@ -29,7 +29,8 @@ pathfinding. Nothing here knows about a skill, a window or a map.
   the item rules controller, every module and the cash shop server share it.
 - `devQuery`, `devQueryNumber`, `devVitalPercent` (`devSeams.ts`): URL seams, `null` outside dev.
 - `LocalStorage` (`localStorage.ts`): `localStorage` access that never throws.
-- `Rand` (`rand.ts`), `MathUtils.AngleQuaternion` (`mathUtils.ts`), `wait` (`utils.ts`).
+- `Rand` (`rand.ts`), `MathUtils.AngleQuaternion` (`mathUtils.ts`), `wait` and `pageHidden` (the browser
+  draws no frame: a background tab, a minimised window) (`utils.ts`).
 - `BurstLimit`, `clientIp`, `bucketFor`, `isLoopback` (`rateLimit.ts`): request limits for the bun
   services (`register/`, `cashshop/`, `marketplace/`), not the client.
 

@@ -40,6 +40,8 @@ shared pools, textures and particle recipes other folders reuse.
 - `layers.ts` holds `EFFECT_LAYERS`, the only list of entries. Each entry is one file exporting an
   `EffectLayer` (`layer.ts`): `name`, optional `update(map, dt)` and `reset()`, and `spawn`.
   `EffectName` and `EffectOptions<N>` are derived from that tuple, so `spawn` is type checked.
+- While the page is hidden no particle is made (`emitBurst` / `Emitter` and `spawnParticle`): both
+  only age on a drawn frame, so the ones made meanwhile would all play at once on return.
 - `effects.update` runs once a frame from `ecs/systems/effectSystem.ts`: it steps the clock first
   (`stepClock`, so a `delay` that comes due spawns this frame), then every entry in list order.
   Order matters: `projectile`, `debris` and `feathers` move points that `model` reads; `aura`
@@ -94,7 +96,7 @@ shared pools, textures and particle recipes other folders reuse.
 - change one skill's look: its file in `versions/shared/skills/`, not here.
 
 ## Tests
-- `effectParticles.test.ts`: `KIND_REACH` covers every particle kind, and the view gate of
+- `effectParticles.test.ts`: no particle is made while the page is hidden; `KIND_REACH` covers every particle kind, and the view gate of
   `ParticleEmitter` / `BonedParticleEmitter` (spawns only when a sprite could reach the frustum);
   a pushed particle on a turned or tilted object goes where MovePosition turns its velocity
   (ZzzAI.cpp:148-156), from `spawnParticle` and from an emitter handed the node's rotation, and
@@ -123,7 +125,7 @@ shared pools, textures and particle recipes other folders reuse.
   fading past 300 and gone past 500, `cloud11` (SubType 11) drifts the same in its own light, turning,
   and `fireRed` (`BITMAP_FIRE_RED`, firered.jpg) shoots up steady for 20 ticks.
 - `core.test.ts`: a flickering tint makes a bounded number of additive materials, each within half
-  a 1/128 step of the colour asked for.
+  a 1/128 step of the colour asked for; a burst emits nothing while the page is hidden.
 - `modelClones.test.ts`: a `model`, `linkedModel` or spirit skull clone leaves no mesh, skeleton or
   clip behind when it ends (a `model` clone once the pool is emptied), also when it loads after the
   end; a `model` spawn after one ended reuses its clone, shown once dressed.

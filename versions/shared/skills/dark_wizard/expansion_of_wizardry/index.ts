@@ -219,10 +219,8 @@ export default defineSkill({
   // 233 Expansion of Wizardry (380 / 383 alias): see swellOfMagic. Enhanced adds the old mote burst.
   visual: { impact: swellOfMagic, area: swellOfMagic, enhanced: { impact: swellEnhanced, area: swellEnhanced } },
   buffs: {
-    // 0x52 Wiz Enhance / Swell of Magic Power (138 / 139 its strengthener and mastery): every bone glows violet, a rune on the hands every 6 s.
+    // 0x52 Wiz Enhance / Swell of Magic Power (OpenMU's 138 / 139 arrive as it): every bone glows violet, a rune on the hands every 6 s.
     82: swellBuff,
-    138: swellBuff,
-    139: swellBuff,
   },
   sound: 'Sound/SwellofMagicPower', // Expansion of Wizardry
   clip: { ground: A.PLAYER_SKILL_SWELL_OF_MP }, // Expansion of Wizardry (WSclient.cpp:4562)

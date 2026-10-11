@@ -12,6 +12,7 @@ import { isKnownObjectType, npcSpawnScale, resolveModelFactory } from '@/control
 import { npcClassOf, npcHeroStateOf } from '@/controllers/actors/playerObject';
 import { monsterDisplayName, monsterMaxHealth } from '@versions/shared/monsters/monstersDatabase';
 import { playSfx } from '@/controllers/sound/sfx';
+import { clearBuffVisuals } from '@versions/shared/skills/skillVisuals';
 
 /** MoveSpeed 10 x REFERENCE_FPS 25 / 100 units per tile (ZzzCharacter.cpp:11530). */
 const MONSTER_WALK_TILES_PER_SECOND = 2.5;
@@ -167,6 +168,8 @@ export function removeNetObject(world: World, netId: number) {
   // The index holds the newest entity for an id; a stale one that shared it
   // surfaces again once the newer entry is gone, so loop until none is left.
   for (let entity = world.getByNetId(netId); entity; entity = world.getByNetId(netId)) {
+    // Its buff looks go with it (UnRegisterBuff per buff, WSclient.cpp:3175-3180).
+    clearBuffVisuals(entity);
     world.remove(entity);
     entity.onDispose?.();
     entity.modelObject?.dispose();

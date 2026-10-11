@@ -20,3 +20,4 @@ export { afterHeroRelease } from '@/controllers/skills/visuals';
 export { BUFF_VISUALS } from '@/controllers/skills/visuals';
 export { setBuffVisual } from '@/controllers/skills/visuals';
 export { clearBuffVisuals } from '@/controllers/skills/visuals';
+export { refreshBuffVisuals } from '@/controllers/skills/visuals';

@@ -3,6 +3,10 @@ import { monsterRegistry } from '@/controllers/monsters';
 import { CharacterClassNumber } from '@/core/types';
 import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
 import { Scene } from '@babylonjs/core/scene';
+import { Mesh } from '@babylonjs/core/Meshes/mesh';
+import { Animation } from '@babylonjs/core/Animations/animation';
+import { AnimationGroup } from '@babylonjs/core/Animations/animationGroup';
+import { Skeleton } from '@babylonjs/core/Bones/skeleton';
 
 /** NPCs drawn as the original client draws them, checked on the class `resolveModelFactory` hands out. */
 async function load() {
@@ -97,6 +101,29 @@ describe('NPC looks from the original client', () => {
     const speeds = { 0: 0.33, 1: 0.33, 2: 0.33, 3: 0.33, 4: 0.33, 5: 0.33 };
     expect(m.resolveModelFactory(568)).toBe(m.npcFactoryFor('gambler_moss', 0.8, speeds));
     expect(m.resolveModelFactory(568)).toBe(m.resolveModelFactory(492));
+  });
+
+  // MODEL_WARCRAFT (HellGate, one clip of 11 keys) spawns on frame 10; at its clip's end EtcStopAnimationSetting
+  // sets action 1, which it has not, so PlayAnimation stops advancing and AnimationFrame stays the 8 it is
+  // given (ZzzCharacter.cpp:13333-13334, :3504-3506, :3737-3740; ZzzBMD.cpp:742).
+  it('the Kalima gates hold their portal on frame 8, never playing the clip', () => {
+    const scene = new Scene(new NullEngine());
+    for (let type = 152; type <= 158; type++) {
+      const gate = new (m.resolveModelFactory(type))(scene);
+      const root = new Mesh('gate', scene);
+      const opening = new Animation('open', 'position.x', 25, Animation.ANIMATIONTYPE_FLOAT);
+      opening.setKeys(Array.from({ length: 11 }, (_, k) => ({ frame: 5 * k, value: k })));
+      const clip = new AnimationGroup('hellgate_action_0', scene);
+      clip.addTargetedAnimation(opening, root);
+      // loadGLTF hands every model out with clip 0 looping.
+      clip.start(true);
+      gate.load({ mesh: root, skeleton: new Skeleton('gate', 'gate', scene), animationGroups: [clip] });
+      // The monster loop asks for Stop1 every frame.
+      gate.playAction(0, true);
+      expect(clip.isPlaying).toBe(false);
+      expect(clip.animatables[0]?.masterFrame).toBe(40);
+    }
+    scene.getEngine().dispose();
   });
 
   // `Models[MODEL_GAMBLE_NPC_MOSS].Actions[0..5].PlaySpeed = 0.33f` (ZzzCharacter.cpp:14512-14515, :14855-14858).

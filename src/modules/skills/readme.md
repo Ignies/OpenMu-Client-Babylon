@@ -47,8 +47,11 @@ hotbar share.
 ## Packets
 - `SkillListUpdate`, `SkillAdded`, `SkillRemoved` (F3 11): one handler; the count byte (0xFE add,
   0xFF remove) picks the shape, then `HeroSkills.setSkillList` / `addSkill` / `removeSkill`.
-- `MagicEffectStatus`: sets an effect on the object (`objectEffects.ts`, also used by warp); the hero's
-  also goes to `HeroSkills.setBuff`.
+- `MagicEffectStatus`: `setObjectEffect` (`objectEffects.ts`, also every scope add's effect list) sets the
+  effect on the object; the hero's also goes to `HeroSkills.setBuff`, first, so the bar takes it while no
+  world is up (a warp). OpenMU's own numbers for seven master buffs (135, 138, 139, 148, 153-155) arrive as
+  the base effect the original knows them by (`OPENMU_MASTER_EFFECTS`), so the MU Helper sees them up.
+  `redrawBuffLooks` (same file) draws the held looks again after a map change ends them (`app/lifecycle.ts`).
 - `MagicEffectCancelled`: `cancelledEffects` (skills controller): the skill's `cancel` hook, then its effect (`SKILL_EFFECTS`, `controllers/skills/tables.ts`, filled from
   each skill's `effect`) and clears it.
 - `AreaSkillAnimation`: turns the caster, plays the cast clip and the area visual.
@@ -79,6 +82,9 @@ hotbar share.
 ## Tests
 - `teleportSound.test.ts`: a monster teleporting plays its own sound only on its map (the
   Nightmare in Kanturu 3rd); anyone else the plain one.
+- `objectEffects.test.ts`: the bar takes the hero's effect with no world; a map change's reset is
+  followed by the held looks drawn again; OpenMU's master buff numbers arrive as their base effect.
+- `usability.test.ts`: a Strengthener or Mastery of a weapon skill needs the weapon of its base skill.
 - `state.test.ts`: active master skills sit on the bar; a Strengthener takes its base skill's hot key
   and selection.
 - `masterLevelUpLook.test.ts`: a flare head starts on the spot, swirls out and closes on the body; twenty joints.
@@ -97,7 +103,7 @@ plain map pushed to `onCooldownTick` once a frame, which the hotbar paints into 
 ### masterLevel.ts
 `Master_Level_Data` (`nMLevel`, `lMasterLevel_Experince`, `lNext_MasterLevel_Experince`, `nMLevelUpMPoint`).
 Fed by `MasterStatsUpdate` (F3 50, on entering the game), `MasterCharacterLevelUpdate` (F3 51),
-`ExperienceGained` (C3 16, only in master progression) and `MasterSkillLevelUpdate`'s points (via `masterTree.ts`).
+`ExperienceGained` (C3 16, only in master progression) and `MasterSkillLevelUpdate`'s points (via `masterTree.ts`).
 A master level-up says what was left to the level and, for a master class, plays the flare swirl of
 `masterLevelUpLook.ts` (`Receive_Master_LevelUp`, WSclient.cpp:8218-8236): one BITMAP_FLARE joint of subtype 45 and
 nineteen of 46, spawned through the fx facade (`effects.spawn`), and subtype 45's change-up pop at its end.
@@ -110,7 +116,8 @@ bytes, `SKILL_ATTRIBUTE_FILE_LEGACY`; icon, use type, base skill), the table the
 Season 6 master skills (330 is a passive there), so its icons and base skills were wrong.
 A wrong path returns the SPA fallback page, not a 404, hence the range checks.
 ### recipes.ts
-OpenMU's `MagicEffectNumber` is the original's `eBuffState` (`_enum.h`), the record index of
+OpenMU's `MagicEffectNumber` is the original's `eBuffState` (`_enum.h`; the seven master numbers above
+excepted, which arrive as their base), the record index of
 `Data/Local/BuffEffect.bmd` (`w_BuffScriptLoader.cpp`) and the icon index of `newui_statusicon*.jpg`.
 `kind` is `s_BuffClassType`. Names: language pack (`buffNameFile.ts`), then catalogue, then enum name.
 Delays are `Skill.bmd` `Delay` (offset 44, ms); `SKILL_DELAY_MS` (`controllers/combat/skillDelays.ts`)
@@ -118,4 +125,6 @@ starts empty, `registerSkills` fills it.
 ### usability.ts
 `skillRequirementsMet` is the static rule (class, level, energy, weapon) that greys the icon
 (`bCantSkill`); `canUseSkill` adds mana, AG, the running delay and the safe zone. Pure readers over
-MobX state: no `update`, no `reset`.
+MobX state: no `update`, no `reset`. The weapon rule (`weaponSkillEquipped`, also the master tree's
+equipment gate) is `IsNonWeaponSkillOrIsSkillEquipped`: it looks at the base skill at the end of a
+master chain (`masterRoot`), so Triple Shot Strengthener and Mastery both need the bow.

@@ -17,6 +17,7 @@ import { loadEffectTexture } from './effectTexture';
 import { reportLoadFailure } from '../assets';
 import { linearBufferActive } from '../lighting/lightModel';
 import { devQueryNumber } from '../../core/devSeams';
+import { pageHidden } from '../../core/utils';
 import { lookDirector } from '../lighting/director';
 import type { Entity } from '../../ecs/world';
 import type { TestScene } from '../render/scenes/testScene';
@@ -671,6 +672,8 @@ interface EmitQueue {
 const emitQueues = new WeakMap<ParticleSystem, EmitQueue>();
 
 function queueEmit(ps: ParticleSystem, at: Vector3, n: number, dir?: Vector3): void {
+  // Particles age only on a drawn frame: queued while hidden, they would all burst out on return.
+  if (pageHidden()) return;
   let s = emitQueues.get(ps);
   if (!s) {
     s = { q: [], head: 0, len: 0 };

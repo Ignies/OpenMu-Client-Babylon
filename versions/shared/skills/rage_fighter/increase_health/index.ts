@@ -12,9 +12,8 @@ export default defineSkill({
   // RageCreateEffect at the caster (MonkSystem.cpp:1157-1184): BITMAP_SWORD_EFFECT_MONO sub1, MODEL_WINDFOCE sub4.
   visual: { cast: ourforcesCast({ flash: [0.5, 0.28, 1], wave: [0.7, 0.5, 1], ring: [1, 0.35, 1], cloud: [0.8, 0.4, 1], pillar: [0.85, 0.2, 1], magic: [0.78, 0.2, 1] }) },
   buffs: {
-    // 130 (155 its Strengthener): BITMAP_LIGHT_RED sub0, the glow on 17 bones and the red decals under the body (WSclient.cpp:15668-15672).
+    // 130 (OpenMU's 155 arrives as it): BITMAP_LIGHT_RED sub0, the glow on 17 bones and the red decals under the body (WSclient.cpp:15668-15672).
     130: () => ({ boneGlow: OURFORCES_GLOW, groundGlow: OURFORCES_GROUND }),
-    155: () => ({ boneGlow: OURFORCES_GLOW, groundGlow: OURFORCES_GROUND }),
   },
   sound: 'Sound/Ragefighter/Rage_Buff_2', // default; at cast the sound follows the clip toss (clipSound)
   clip: partyBuffClip,

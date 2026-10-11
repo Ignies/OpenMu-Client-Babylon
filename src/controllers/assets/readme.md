@@ -121,6 +121,8 @@ imports the modules below directly (baselined in `tools/checks`).
 - `loadFailure.test.ts`: one warning per file, a different file warns again, `settle` passes a
   value through and turns a failure into `undefined`.
 - `assetDownload.test.ts`: `urlsOf`, Core cannot be unticked, transfer totals.
+- `cacheWorker.test.ts`: `public/sw.js` run against an in-memory cache: a new build drops what another
+  downloaded (the music kept), its own build keeps it, an asset it does not hold is revalidated once.
 - `compressedAssets.test.ts`: sidecar only for listed extensions, gzip or host-unwrapped bytes,
   plain fallback, giving up after failures, SPA fallback treated as missing.
 - `ktx2Pixels.test.ts`: KTX2 detection and top-mip decode.
@@ -139,6 +141,9 @@ imports the modules below directly (baselined in `tools/checks`).
 The player picks groups on the pre-game screen and they are fetched into the service worker cache.
 Each version reads its own index (`assetsIndexUrl`), which lists a borrowed file at the lender's url,
 so a file both versions read is cached once.
+The worker is registered as `sw.js?build=<BUILD_ID>` (one per build, `vite.config.ts`): a deploy installs a new
+worker, which drops what another build downloaded (a file changed under the same name stayed the old one
+for good, the music excepted) and asks the server once, per worker, about each asset it does not hold.
 `settleSidecars(gate.bmd)` runs before the first fetch: the client picks plain or `.gz` URLs once,
 so a download that ran earlier would warm the wrong URLs. Sizes shown are transfer sizes (the model
 set is 329 MB on disk, 93 MB gzipped).
