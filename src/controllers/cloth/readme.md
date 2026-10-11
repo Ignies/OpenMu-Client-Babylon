@@ -38,14 +38,17 @@ knows how a cloth moves and draws, never who wears which one (the wearers' conte
   carries it by the anchor bone's move since that tick (`inverse(bone at tick) x bone now`). The faces
   are unlit, texel times `CloakLight`: `PCT_MASK_BLIT` opaque and culled (each side its own bitmap),
   `PCT_MASK_ALPHA` keyed at 0.25 and blended, both sides drawn, `PCT_MASK_BLEND` and `PCT_MASK_LIGHT`
-  added (ONE, ONE) with no depth write.
+  added (ONE, ONE) with no depth write. A `PCT_MASK_LIGHT` cloth's faces pulse in their own light
+  (`sin(WorldTime * 0.001) * 0.1 + 0.4`, :810-816) and each vertex carries a `BITMAP_LIGHT` sprite (`flare01`,
+  `HeldSprites`) whose scale and light come from the original loop's outer index (:784-804, `lightSprite`).
 - The Classic shadow is `RenderBodyShadow` with the cloth (ZzzBMD.cpp:2642-2710): every quad on the
   ground, untextured, folded from the wearer. A clone of the front mesh shares its buffers under the
   blob material, made the first time the set casts one. The keyed and opaque cloths are cascade
   casters on the graded tiers.
 
 ## Depends on / used by
-- uses: `render` (the Babylon exports, the blob shadow material), `assets` (`getDataTexture`).
+- uses: `render` (the Babylon exports, the blob shadow material), `assets` (`getDataTexture`), `fx`
+  (`HeldSprites`).
 - used by: `actors` (`PlayerObject.Cloth`), `ecs/systems/clothSystem.ts` (the clock and the wearers).
 
 ## Change it
@@ -58,11 +61,9 @@ knows how a cloth moves and draws, never who wears which one (the wearers' conte
   gust gains, gravity, settling, the shared and rubber2 winds, following the bone, tearing, the held
   step and the spheres.
 - `clothSet.test.ts`: the faces (indices, UVs, materials per draw mode, the tint, the in-place buffer), the
-  wind direction from the body's turn, the pins on a rig's bone, the carry between ticks, slots kept and
+  `PCT_MASK_LIGHT` pulse and lights, the wind direction from the body's turn, the pins on a rig's bone, the carry between ticks, slots kept and
   torn, a hidden wearer, the shadow clone, and the cost of 20 caped players (logged).
 
 ## Notes
-- A `PCT_MASK_LIGHT` cloth's faces pulse in their own light (`sin(WorldTime * 0.001) * 0.1 + 0.4`, :810-816,
-  `pulseClothLights`); its per-vertex `BITMAP_LIGHT` sprites (:784-804) are not ported yet.
 - Not ported: `CPhysicsClothMesh` (a cloth built from a model's mesh, ZzzObject.cpp:10626-10640) and
   `CPhysicsManager`'s own cloth list, which nothing fills.

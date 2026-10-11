@@ -269,6 +269,6 @@ export function runClothFrame(): void {
     stepClothWind();
     for (let i = 0; i < sets.length; i++) sets[i].tick(clockMs, gustyWorld);
   }
-  for (let i = 0; i < sets.length; i++) sets[i].end(ticks > 0);
   pulseClothLights(clockMs);
+  for (let i = 0; i < sets.length; i++) sets[i].end(ticks > 0);
 }

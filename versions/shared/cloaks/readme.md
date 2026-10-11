@@ -10,7 +10,8 @@ the capes, the Dark Lord's hair and skirt, the Magic Gladiator's robe, the team 
   original draws none) and returns the `CloakLight`.
 - One file per use: `cape_of_lord.ts` (the Cape of Lord and the Mantle of Monarch's cape and straps),
   `cape_of_fighter.ts` (the Cape of Fighter and the Cape of Overrule's cape and straps), `robe.ts` (the
-  Magic Gladiator's robe, msword03 under the Wing of Ruin).
+  Magic Gladiator's robe, msword03 under the Wing of Ruin), `dark_lord_hair.ts` (the Dark Lord's two
+  strands of hair).
 
 ## How it works
 - `bCloak` (:9162-9186): the Magic Gladiator class itself (`c->Class == CLASS_DARK`, so not the Duel
@@ -19,7 +20,9 @@ the capes, the Dark Lord's hair and skirt, the Magic Gladiator's robe, the team 
 - Slots are the original's indices, so a cloth keeps its swing while its spec stays. A cloth the
   original builds but skips drawing (`continue`, :9926-9983) is null here: it is not simulated either,
   and comes back built fresh, which is what the original's stale cloth tearing and rebuilding gives.
-- Dark Lord (:9693-9776): slot 2 the cape, drawn with the Cape of Lord (`Player\DarklordRobe.tga`) or the
+- Dark Lord (:9693-9776): slots 0 and 1 the hair on the head bone (`Monster\iui06.jpg`, rubber2 strands in
+  their own gusts: the first a pulsing light with a sprite on each vertex, the second added), gone under a
+  ring's body (`CheckDarkLordHair`); slot 2 the cape, drawn with the Cape of Lord (`Player\DarklordRobe.tga`) or the
   Mantle of Monarch (`Item\dl_redwings02.tga`, heavy, plus its straps in slots 4 and 5,
   `Item\dl_redwings03.tga`). No cape has a texture per item level: `Render` ignores the level.
 - Rage Fighter (:9777-9824): slot 0 the cape, drawn with the Cape of Fighter (`Item\NCcape.tga`) or the

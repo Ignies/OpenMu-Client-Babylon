@@ -13,6 +13,7 @@ import {
   type TransformNode,
 } from '../render/babylon/exports';
 import { getDataTexture } from '../assets/modelLoader';
+import { HeldSprites, type HeldLook, type HeldPoint } from '../fx/effectParticles';
 import { blobShadowsActive, getShadowMaterial } from '../render/objectShadow';
 import { PCT_MASK_ALPHA, PCT_MASK_BLEND, PCT_MASK_DRAW, PCT_MASK_LIGHT, type ClothSpec } from './physicsCloth';
 
@@ -38,10 +39,25 @@ const materials = new WeakMap<Scene, Map<string, StandardMaterial>>();
 /** The `PCT_MASK_LIGHT` materials, their colour `sin(WorldTime * 0.001) * 0.1 + 0.4` (:810-816). */
 const pulsing: StandardMaterial[] = [];
 
-/** Every `PCT_MASK_LIGHT` face's colour at `ms` (the clock's WorldTime). */
+/** `Lum` of `Render`'s light, this frame. */
+let pulse = 0.4;
+
+/** Every `PCT_MASK_LIGHT` face's colour, and its lights', at `ms` (the clock's WorldTime). */
 export function pulseClothLights(ms: number): void {
-  const lum = Math.sin(ms * 0.001) * 0.1 + 0.4;
-  for (let i = 0; i < pulsing.length; i++) pulsing[i].emissiveColor.set(lum, lum, lum);
+  pulse = Math.sin(ms * 0.001) * 0.1 + 0.4;
+  for (let i = 0; i < pulsing.length; i++) pulsing[i].emissiveColor.set(pulse, pulse, pulse);
+}
+
+/**
+ * `Render`'s light loop (:791-802), `CreateSprite(BITMAP_LIGHT, vertex k, i * 0.2 + 0.4, Lum * (hor - i) / 5)`:
+ * sprite k sits on vertex k, but its scale and light come from the loop's outer index, `k / ver`.
+ */
+export function lightSprite(k: number, hor: number, ver: number, lum: number, out: HeldLook): void {
+  const i = Math.floor(k / ver);
+  const light = (lum * (hor - i)) / 5;
+  out.scale = i * 0.2 + 0.4;
+  out.r = out.g = out.b = light;
+  out.rotation = 0;
 }
 
 function clothMaterial(scene: Scene, texture: string, mode: DrawMode, light: Rgb): StandardMaterial {
@@ -115,6 +131,10 @@ export class ClothMesh {
   private light: Rgb;
   private shadow: Mesh | null = null;
   private shadowOn = false;
+  /** A `PCT_MASK_LIGHT` cloth's lights, one on each vertex, and where each is this frame. */
+  private readonly sprites: HeldSprites | null = null;
+  private readonly spots: Vector3[] = [];
+  private readonly look: (k: number, out: HeldLook) => void = () => {};
 
   constructor(
     private readonly scene: Scene,
@@ -153,6 +173,16 @@ export class ClothMesh {
       mesh.setEnabled(false);
       this.faces.push(mesh);
     }
+    if (this.mode === 'pulse') {
+      const points: HeldPoint[] = [];
+      for (let k = 0; k < hor * ver; k++) {
+        const spot = new Vector3();
+        this.spots.push(spot);
+        points.push({ node: { getAbsolutePosition: () => spot }, texture: 'flare01', blend: 'add' });
+      }
+      this.sprites = new HeldSprites(scene, points);
+      this.look = (k, out) => lightSprite(k, hor, ver, pulse, out);
+    }
   }
 
   /** The cloth's vertices (MU world centimetres) into the vertex buffer, as world tiles. */
@@ -181,6 +211,12 @@ export class ClothMesh {
   setWorld(world: Matrix): void {
     for (let f = 0; f < this.faces.length; f++) this.faces[f].freezeWorldMatrix(world);
     this.shadow?.freezeWorldMatrix(world);
+    if (!this.sprites) return;
+    const p = this.positions;
+    for (let k = 0; k < this.spots.length; k++) {
+      Vector3.TransformCoordinatesFromFloatsToRef(p[3 * k], p[3 * k + 1], p[3 * k + 2], world, this.spots[k]);
+    }
+    this.sprites.update(true, this.look);
   }
 
   /** `CloakLight`: white, or the duel / soccer team colour (ZzzCharacter.cpp:9188-9246). */
@@ -195,7 +231,9 @@ export class ClothMesh {
 
   setEnabled(on: boolean): void {
     for (let f = 0; f < this.faces.length; f++) this.faces[f].setEnabled(on);
-    if (!on) this.setShadow(false);
+    if (on) return;
+    this.setShadow(false);
+    this.sprites?.update(false, this.look);
   }
 
   /**
@@ -227,6 +265,7 @@ export class ClothMesh {
   }
 
   dispose(): void {
+    this.sprites?.dispose();
     this.shadow?.dispose(false, false);
     for (const mesh of this.faces) mesh.dispose(false, false);
     this.faces.length = 0;

@@ -16,11 +16,14 @@ import { Scene } from '@babylonjs/core/scene';
 import { Bone, Constants, Material, Matrix, Skeleton, StandardMaterial, TransformNode, VertexBuffer, type Mesh } from '../render/babylon/exports';
 import { getShadowMaterial } from '../render/objectShadow';
 import { cloth, ClothSet, PCT_CURVED, PCT_HEAVY, PCT_MASK_ALPHA, PCT_MASK_BLEND, PCT_MASK_LIGHT, PCT_SHORT_SHOULDER, runClothFrame, type ClothSpec } from './index';
-import { ClothMesh } from './clothMesh';
+import { ClothMesh, lightSprite } from './clothMesh';
+import { HeldSprites, type HeldLook } from '../fx/effectParticles';
 
 const engine = new NullEngine();
 const scene = new Scene(engine);
 afterAll(() => engine.dispose());
+// The light sprites' sheet is never fetched here; what they are asked to draw is read off the spy.
+const spriteUpdate = vi.spyOn(HeldSprites.prototype, 'update').mockImplementation(() => {});
 
 /** MU (x, y, z) to the scene's (x, z, y): the loader's basis change every model root carries. */
 const SWAP = Matrix.FromValues(1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1);
@@ -138,6 +141,32 @@ describe('the cloth faces (CPhysicsCloth::RenderFace, PhysicsManager.cpp:832-886
     expect(material.emissiveColor.r).toBeGreaterThanOrEqual(0.3);
     expect(material.emissiveColor.r).toBeLessThanOrEqual(0.5);
     expect(material.emissiveColor.b).toBe(material.emissiveColor.r);
+    set.dispose();
+  });
+
+  it('lights every vertex of a PCT_MASK_LIGHT cloth: the loop\'s outer index sets the scale and dims the light (:784-804)', () => {
+    const look: HeldLook = { scale: 0, r: 0, g: 0, b: 0, rotation: 9 };
+    // A 6 x 5 cloth: sprite k sits on vertex k, its outer index k / 5.
+    const at = (k: number) => {
+      lightSprite(k, 6, 5, 0.5, look);
+      return [+look.scale.toFixed(3), +look.r.toFixed(3), look.g === look.r && look.b === look.r, look.rotation];
+    };
+    expect([at(0), at(4), at(5), at(29)]).toEqual([
+      [0.4, 0.6, true, 0],
+      [0.4, 0.6, true, 0],
+      [0.6, 0.5, true, 0],
+      [1.4, 0.1, true, 0],
+    ]);
+    const set = new ClothSet(scene, body());
+    set.wear([{ ...CAPE, grid: [6, 5], flags: PCT_MASK_LIGHT }], [1, 1, 1]);
+    tick();
+    const last = () => spriteUpdate.mock.calls[spriteUpdate.mock.calls.length - 1];
+    expect(last()[0]).toBe(true);
+    last()[1](29, look);
+    expect(look.scale).toBeCloseTo(1.4);
+    set.shown = false;
+    tick();
+    expect(last()[0]).toBe(false);
     set.dispose();
   });
 

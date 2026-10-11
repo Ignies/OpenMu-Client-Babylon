@@ -1,6 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import { cloaksFor, type CloakWearer } from '@/controllers/actors/cloaks';
-import { PCT_CURVED, PCT_ELASTIC_RAGE_L, PCT_ELASTIC_RAGE_R, PCT_HEAVY, PCT_MASK_ALPHA, PCT_SHORT_SHOULDER, type ClothSpec } from '@/controllers/cloth';
+import {
+  PCT_CURVED,
+  PCT_ELASTIC_RAGE_L,
+  PCT_ELASTIC_RAGE_R,
+  PCT_HEAVY,
+  PCT_MASK_ALPHA,
+  PCT_MASK_BLEND,
+  PCT_MASK_LIGHT,
+  PCT_RUBBER2,
+  PCT_SHORT_SHOULDER,
+  type ClothSpec,
+} from '@/controllers/cloth';
 import { CharacterClassNumber as C } from '@/core/types';
 import type { Item } from '@/ecs/world';
 import './index';
@@ -148,5 +159,46 @@ describe('the Magic Gladiator\'s robe (ZzzCharacter.cpp:9837-9846)', () => {
     expect(['youngza.glb', 'jack.glb', 'santa.glb', 'panda.glb', 'trans_skeleton.glb'].map(robe)).toEqual([0, 0, 0, 0, 0]);
     expect(['illusionist.glb', 'unitedsoldier.glb'].map(robe)).toEqual([0, 0]);
     expect(wear({ charClass: C.RageFighter, wing: CAPE_OF_FIGHTER, skin: 'unitedsoldier.glb' }).out.filter(Boolean)).toEqual([]);
+  });
+});
+
+/** The hair's spheres, the upper back (ZzzCharacter.cpp:9709-9710). */
+const HAIR_BACK = [
+  [-10, 20, 20, 27, 17],
+  [10, 20, 20, 27, 17],
+];
+
+describe('the Dark Lord\'s hair (ZzzCharacter.cpp:9707-9715)', () => {
+  it('hangs cloths 0 and 1 from the head: iui06.jpg, a pulsing light and an added strand, each in its own gusts', () => {
+    const { out } = wear({});
+    expect(out[0]).toEqual({
+      bone: 20,
+      at: [0, 0, 20],
+      grid: [6, 5],
+      size: [30, 70],
+      front: 'Monster/iui06.OZJ',
+      back: 'Monster/iui06.OZJ',
+      flags: PCT_CURVED | PCT_RUBBER2 | PCT_MASK_LIGHT | PCT_SHORT_SHOULDER,
+      wind: [10, 50],
+      spheres: HAIR_BACK,
+    });
+    expect(out[1]).toEqual({
+      bone: 20,
+      at: [0, 5, 18],
+      grid: [5, 5],
+      size: [30, 70],
+      front: 'Monster/iui06.OZJ',
+      back: 'Monster/iui06.OZJ',
+      flags: PCT_CURVED | PCT_RUBBER2 | PCT_MASK_BLEND | PCT_SHORT_SHOULDER,
+      wind: [8, 40],
+      spheres: HAIR_BACK,
+    });
+  });
+
+  it('is on every Dark Lord whatever he wears, and goes under any ring\'s body (CheckDarkLordHair, :9934-9937)', () => {
+    expect(wear({ charClass: C.LordEmperor, wing: CAPE_OF_LORD }).out.slice(0, 2)).toEqual(wear({}).out.slice(0, 2));
+    expect(['Skeleton01.glb', 'youngza.glb', 'panda.glb'].map(skin => wear({ skin }).out.slice(0, 2).filter(Boolean))).toEqual([[], [], []]);
+    // The cape stays on under a ring's body.
+    expect(wear({ wing: CAPE_OF_LORD, skin: 'jack.glb' }).out[2]).toBe(wear({ wing: CAPE_OF_LORD }).out[2]);
   });
 });
