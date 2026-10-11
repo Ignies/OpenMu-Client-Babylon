@@ -29,8 +29,10 @@ the capes, the Dark Lord's hair and skirt, the Magic Gladiator's robe, the team 
   plays by the hero's team, then the two teams the score names, red and blue (`SoccerObserver` is set by
   every score, for players and watchers alike, and cleared by a first score of 255). A duel only while the hero fights it: the enemy red, the
   hero blue; a spectator's duel is never enabled. A Dark Lord or a Rage Fighter then wears his cape
-  without the item, anyone else the robe. A player in a monster's body is left out: the original hangs its
-  class's cloths on that monster's bones.
+  without the item, anyone else the robe. A player in a monster's body (`CreateMonster`, WSclient.cpp:2760-2796)
+  is no exception: his class's set is built on that body (the Death King's or the Nightmare's robe in theirs) and
+  hangs on its bones, the monster's own numbers (`BoneTransform[20]` of a body with fewer bones is past its array in
+  the original; here such a cloth hangs on the body's root).
 - Slots are the original's indices. A cloth the loop skips (`continue`, :9926-9983) stays built and is
   neither stepped nor drawn; stepped again after the body moved far, it tears and the set is rebuilt. Its
   shadow is still laid where it was left (`AddClothesShadowTriangles` walks every built cloth below

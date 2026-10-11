@@ -124,8 +124,9 @@ function wearPants(w: CloakWearer, pants: CloakSet): void {
 /**
  * `bCloak` (ZzzCharacter.cpp:9162-9246): on the player rig the Magic Gladiator (the class itself,
  * `c->Class == CLASS_DARK`), every Dark Lord and Rage Fighter; the Death King and the Nightmare; never a
- * Doppelganger nor inside Chaos Castle; and any player a team colour puts in one, unless in a monster's body.
- * The set is built once, then only its skirt changes; out of a cloak it stays as it was, undrawn.
+ * Doppelganger nor inside Chaos Castle; and any player a team colour puts in one, in a monster's body too (his
+ * class's cloths on that body's bones). The set is built once, then only its skirt changes; out of a cloak it
+ * stays as it was, undrawn.
  */
 export function cloaks(w: CloakWearer, set: CloakSet, pants: CloakSet | null): Rgb {
   if (tearsSet(w)) set.drop();
@@ -150,7 +151,7 @@ export function cloaks(w: CloakWearer, set: CloakSet, pants: CloakSet | null): R
     if (body.drawn) for (let i = 0; i < body.cloths.length; i++) set.draw(i, body.holds);
   }
   const base = getBaseClass(w.charClass);
-  const team = w.monster === null ? teamLight(w) : null;
+  const team = teamLight(w);
   const gladiator = w.charClass === CharacterClassNumber.MagicGladiator;
   const byClass = w.rig && (gladiator || base === BaseClass.DarkLord || base === BaseClass.RageFighter);
   const own = (byClass || w.monster === DEATH_KING || w.monster === NIGHTMARE) && !isDoppelganger(w.monster);
