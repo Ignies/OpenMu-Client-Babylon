@@ -37,3 +37,16 @@ describe('the credits check', () => {
     expect(creditsProblems(reader({ ...real, LICENSE: plain })).join('\n')).toContain('LICENSE');
   });
 });
+
+describe('the contributor mark check', () => {
+  it('fails when the halo and aura stop being drawn', () => {
+    const system = 'src/ecs/systems/appearanceSystem.ts';
+    const bare = real[system].replace(/syncContributorMark\(entity/g, 'void (entity');
+    expect(creditsProblems(reader({ ...real, [system]: bare })).join('\n')).toContain('contributor mark');
+  });
+
+  it('fails when the mark is not in the license', () => {
+    const plain = real.LICENSE.replace(/halo/g, 'hat');
+    expect(creditsProblems(reader({ ...real, LICENSE: plain })).join('\n')).toContain('LICENSE');
+  });
+});

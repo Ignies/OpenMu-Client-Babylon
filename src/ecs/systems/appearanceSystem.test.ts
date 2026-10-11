@@ -19,6 +19,7 @@ vi.mock('../../controllers/actors/weaponClass', () => ({
 }));
 vi.mock('../../controllers/assets', () => ({ settle: (p: unknown) => p }));
 vi.mock('./gmMark', () => ({ syncGmMark: () => {} }));
+vi.mock('./contributorMark', () => ({ syncContributorMark: () => {} }));
 
 const CHAOS_CASTLE = 18;
 const { AppearanceSystem } = await import('./appearanceSystem');
