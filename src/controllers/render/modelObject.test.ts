@@ -2,6 +2,7 @@ import { afterAll, describe, expect, it, vi } from 'vitest';
 import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
 import { Scene } from '@babylonjs/core/scene';
 import { Mesh } from '@babylonjs/core/Meshes/mesh';
+import { CreateBox } from '@babylonjs/core/Meshes/Builders/boxBuilder';
 import { Skeleton } from '@babylonjs/core/Bones/skeleton';
 import { Bone } from '@babylonjs/core/Bones/bone';
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode';
@@ -114,5 +115,31 @@ describe('a part linked to a bone', () => {
     expect(part.node.position.length()).toBe(0);
     expect(part.node.rotationQuaternion === null).toBe(true);
     expect(part.node.scaling.asArray()).toEqual([1, 1, 1]);
+  });
+});
+
+describe('the Classic blob shadow', () => {
+  /** A 2-tile box under its own root, named so its shadow clone can be found. */
+  function box(name: string) {
+    const root = new Mesh(name, scene);
+    CreateBox(`${name}_body`, { size: 2 }, scene).parent = root;
+    return { mesh: root, skeleton: new Skeleton(name, name, scene), animationGroups: [] as AnimationGroup[] };
+  }
+  const shadowed = (name: string) => scene.getMeshByName(`${name}_shadow0`) !== null;
+
+  it('is cast by a character, and by a map object only when the original shadows it (ZzzObject.cpp:1041-1057)', () => {
+    const character = new ModelObject(scene);
+    character.load(box('character'));
+
+    const scenery = new ModelObject(scene);
+    scenery.IsMapObject = true;
+    scenery.load(box('scenery'));
+
+    const statue = new ModelObject(scene);
+    statue.IsMapObject = true;
+    statue.MapShadow = true;
+    statue.load(box('statue'));
+
+    expect([shadowed('character'), shadowed('scenery'), shadowed('statue')]).toEqual([true, false, true]);
   });
 });

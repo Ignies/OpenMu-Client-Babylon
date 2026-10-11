@@ -27,13 +27,6 @@ export const MAGIC_EFFECTS: Record<number, MagicEffectInfo> = {
   130: { nameKey: 'buff.increaseHealth', short: 'HP+', kind: 'buff' },
   131: { nameKey: 'buff.increaseBlock', short: 'BLK', kind: 'buff' },
   132: { nameKey: 'buff.decreaseBlock', short: 'BLK-', kind: 'debuff' },
-  135: { nameKey: 'buff.fortitudeProficiency', short: 'HP+', kind: 'buff' },
-  138: { nameKey: 'buff.wizardryStrengthener', short: 'WIZ', kind: 'buff' },
-  139: { nameKey: 'buff.wizardryMastery', short: 'WIZ', kind: 'buff' },
-  148: { nameKey: 'buff.criticalMastery', short: 'CRIT', kind: 'buff' },
-  153: { nameKey: 'buff.blockPowerUp', short: 'BLK', kind: 'buff' },
-  154: { nameKey: 'buff.blockMastery', short: 'BLK', kind: 'buff' },
-  155: { nameKey: 'buff.healthStrengthener', short: 'HP+', kind: 'buff' },
   200: { nameKey: 'buff.shieldSkill', short: 'SHLD', kind: 'buff' },
   201: { nameKey: 'buff.alcohol', short: 'ALE', kind: 'buff' },
 };

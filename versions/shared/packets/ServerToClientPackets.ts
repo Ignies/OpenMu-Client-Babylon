@@ -969,6 +969,10 @@ export class AddNpcsToScopePacket {
   TargetPositionY: Byte;
   Rotation: Byte;
   EffectCount: Byte;
+  Effects: {
+  Id: Byte;
+
+}[];
 
 }[]{
     const b = this.buffer;
@@ -987,6 +991,17 @@ export class AddNpcsToScopePacket {
       const TargetPositionY = b.getUint8(NPCs_StartOffset + 7);
       const Rotation = GetByteValue(b.getUint8(NPCs_StartOffset + 8), 4, 4);
       const EffectCount = b.getUint8(NPCs_StartOffset + 9);
+const Effects_count = EffectCount;
+    const Effects: any[] = new Array(Effects_count);
+    
+    let Effects_StartOffset = NPCs_StartOffset + 10;
+    for (let i = 0; i < Effects_count; i++) {
+      const Id = b.getUint8(Effects_StartOffset + 0);
+      Effects[i] = {
+        Id
+      };
+      Effects_StartOffset += 1;
+    }
       NPCs[i] = {
         Id,
         TypeNumber,
@@ -995,9 +1010,10 @@ export class AddNpcsToScopePacket {
         TargetPositionX,
         TargetPositionY,
         Rotation,
-        EffectCount
+        EffectCount,
+        Effects
       };
-      NPCs_StartOffset += 10;
+      NPCs_StartOffset += 10 + EffectCount * 1;
     }
     
     return NPCs;

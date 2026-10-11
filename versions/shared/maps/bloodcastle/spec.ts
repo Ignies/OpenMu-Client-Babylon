@@ -79,6 +79,9 @@ export const BLOOD_CASTLE_CANDELABRA_TYPE = 11;
 /** The throne-room lamp (x4) with one breathing flare on bone 3. */
 export const BLOOD_CASTLE_LAMP_TYPE = 13;
 
+/** The two statue types, the map's only shadowed objects (ZzzObject.cpp:1041-1057). */
+export const BLOOD_CASTLE_STATUE_TYPES: readonly number[] = [28, 29];
+
 /**
  * `AddTerrainAttributeRange(13, 70, 3, 6, TW_NOGROUND, false)`
  * (ZzzObject.cpp:139): the moat the gate lies down over. EncTerrain12.att

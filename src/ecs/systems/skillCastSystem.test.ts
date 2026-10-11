@@ -38,6 +38,7 @@ const { combat } = await import('../../controllers/combat');
 const { effects } = await import('../../controllers/fx');
 const { TEX } = await import('../../controllers/fx/recipes');
 const { Session } = await import('../../modules/session');
+const { Hero } = await import('../../modules/hero');
 const { HeroSkills, skills } = await import('../../modules/skills');
 const { AreaSkillPacket, RageAttackRangeRequestPacket, RageAttackRequestPacket, TargetedSkillPacket } = await import('@versions/shared/packets/ClientToServerPackets');
 const { Bag } = await import('../../modules/inventory');
@@ -157,6 +158,48 @@ describe('Dark Side with nothing selected', () => {
     // No walk to the cursor and no turn: the Dark Side case sets no Angle (SkillCast.cpp:881-895).
     expect(world.castApproach).toBeNull();
     expect(hero.transform?.rot.y).toBe(0);
+  });
+});
+
+describe('a cast that cuts a walk', () => {
+  // LetHeroStop sends Hero->PositionX/Y, which mid-step is the step's destination (ZzzInterface.cpp:1070-1077, ZzzAI.cpp:556-562).
+  it("stops the server walk on the path's next node", () => {
+    const hero = {
+      ...body(1, 100.4, 100),
+      localPlayer: true,
+      pathfinding: { path: [{ x: 101, y: 100 }, { x: 102, y: 100 }] },
+      playerAnimation: { action: PlayerAction.PLAYER_STOP_MALE },
+      modelObject: {
+        CurrentAction: PlayerAction.PLAYER_STOP_MALE,
+        AnimationSpeed: 0.3,
+        ActionIterationWasFinished: true,
+        actionPlaySpeed: () => undefined,
+        restartAction: () => {},
+        getActionDuration: () => 1,
+      },
+    } as unknown as Entity;
+    const world = {
+      scene,
+      mapIndex: 0,
+      playerEntity: hero,
+      castRequest: { target: null, point: { x: 102, y: 101 }, forced: false },
+      rightPointerPressed: false,
+      getByNetId: () => undefined,
+      getTerrainFlag: () => 0,
+    } as unknown as World;
+    store.world = world;
+    HeroSkills.currentSkill = 9;
+    vi.spyOn(skills, 'canUse').mockReturnValue(true);
+    vi.spyOn(skills, 'startCooldown').mockReturnValue(true);
+    vi.spyOn(Session, 'sendToGS').mockImplementation(() => {});
+    const stop = vi.spyOn(Hero, 'sendWalkStop').mockImplementation(() => {});
+
+    SkillCastSystem(world).update?.(TICK);
+    combat.reset();
+    HeroSkills.currentSkill = -1;
+
+    expect(stop.mock.calls.map(([x, y]) => [x, y])).toEqual([[101, 100]]);
+    vi.restoreAllMocks();
   });
 });
 

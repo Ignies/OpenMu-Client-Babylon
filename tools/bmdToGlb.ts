@@ -15,6 +15,7 @@ import { decodeTga } from '@lunapaint/tga-codec';
 import { PNG } from 'pngjs';
 import { BMD_EXT, DATA_FOLDER, OUTPUT_FOLDER } from './shared';
 import { canonicalAssetPath } from './assetCase';
+import { locksPositions } from './bmdKeys';
 
 async function tga2png(file: Buffer) {
   const tga = await decodeTga(new Uint8Array(file));
@@ -490,6 +491,12 @@ async function convertBMDToGLTF(bmd: BMD, outputFilename: string) {
 
       if (action.NumAnimationKeys === 0) continue;
 
+      const lockPositions = locksPositions(
+        outputFilename.slice(OUTPUT_FOLDER.length),
+        actionIndex,
+        action.LockPositions
+      );
+
       const animation = doc.createAnimation(
         `${fileName}_action_${actionIndex}`
       );
@@ -511,7 +518,7 @@ async function convertBMDToGLTF(bmd: BMD, outputFilename: string) {
       // adds one motionless interval to every cycle: the legs hold while the
       // character keeps sliding, and the cycle runs 1/(N-1) too long.
       const keyCount =
-        action.LockPositions && action.NumAnimationKeys > 1
+        lockPositions && action.NumAnimationKeys > 1
           ? action.NumAnimationKeys - 1
           : action.NumAnimationKeys;
 
@@ -531,8 +538,6 @@ async function convertBMDToGLTF(bmd: BMD, outputFilename: string) {
         .setType('SCALAR')
         .setArray(new Float32Array(times))
         .setBuffer(buffer);
-
-      const lockPositions = action.LockPositions;
 
       for (let boneIndex = 0; boneIndex < bmd.Bones.length; boneIndex++) {
         const bone = bmd.Bones[boneIndex];

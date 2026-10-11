@@ -35,8 +35,8 @@ players, plus their moves and equipment changes. The entities live in the ECS wo
 
 ## Packets
 - `CharacterInformation` / `CharacterInformationExtended`: the hero is created on join if there is none.
-- `AddNpcsToScope`: NPCs and monsters enter view.
-- `AddSummonedMonstersToScope` (0x1F): a player's summons, with the owner's name.
+- `AddNpcsToScope`: NPCs and monsters enter view, each with its buffs (10 bytes and the buff list).
+- `AddSummonedMonstersToScope` (0x1F): a player's summons, with the owner's name and buffs.
 - `SummonHealthUpdate` (F3 20, `ReceiveSummonLife`): health percent of the hero's own summon.
 - `AddCharactersToScope`: players, classic appearance layout.
 - `AddCharacterToScopeExtended`: one player, extended appearance plus effect ids.
@@ -61,5 +61,6 @@ players, plus their moves and equipment changes. The entities live in the ECS wo
 
 ## Tests
 - `net.test.ts`: a player entering view wears its effects' looks; re-adding the body ends the old ones;
-  OpenMU's own master buff numbers are listed as their base effect.
+  the NPCs after one with buffs read right, its buffs registered; OpenMU's own master buff numbers are
+  listed as their base effect.
 - `heroOnJoin.test.ts`: the hero created on join at the character information position, and left alone when it exists.

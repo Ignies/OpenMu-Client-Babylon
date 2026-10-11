@@ -105,8 +105,10 @@ describe('NPC looks from the original client', () => {
 
   // MODEL_WARCRAFT (HellGate, one clip of 11 keys) spawns on frame 10; at its clip's end EtcStopAnimationSetting
   // sets action 1, which it has not, so PlayAnimation stops advancing and AnimationFrame stays the 8 it is
-  // given (ZzzCharacter.cpp:13333-13334, :3504-3506, :3737-3740; ZzzBMD.cpp:742).
-  it('the Kalima gates hold their portal on frame 8, never playing the clip', () => {
+  // given (ZzzCharacter.cpp:13333-13334, :3504-3506, :3737-3740; ZzzBMD.cpp:742). The pose drawn blends the
+  // prior key into the current one by the fraction, 0 at 8.0, and the prior key is the 10 it left
+  // (ZzzBMD.cpp:146-149, :259-264): key 10 is all it ever shows.
+  it('the Kalima gates hold their portal on key 10, never playing the clip', () => {
     const scene = new Scene(new NullEngine());
     for (let type = 152; type <= 158; type++) {
       const gate = new (m.resolveModelFactory(type))(scene);
@@ -121,7 +123,7 @@ describe('NPC looks from the original client', () => {
       // The monster loop asks for Stop1 every frame.
       gate.playAction(0, true);
       expect(clip.isPlaying).toBe(false);
-      expect(clip.animatables[0]?.masterFrame).toBe(40);
+      expect(clip.animatables[0]?.masterFrame).toBe(50);
     }
     scene.getEngine().dispose();
   });

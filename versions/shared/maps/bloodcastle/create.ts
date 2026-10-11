@@ -1,6 +1,7 @@
 import type { World } from '@/ecs/world';
 import { BloodCastleCandelabraObject } from './candelabraObject';
 import { BloodCastleLampObject } from './lampObject';
+import { BloodCastleStatueObject } from './statueObject';
 import {
   BloodCastleBridgeObject,
   BloodCastleGateObject,
@@ -11,6 +12,7 @@ import {
   BLOOD_CASTLE_CANDELABRA_TYPE,
   BLOOD_CASTLE_GATE_TYPE,
   BLOOD_CASTLE_LAMP_TYPE,
+  BLOOD_CASTLE_STATUE_TYPES,
 } from './spec';
 
 /**
@@ -28,10 +30,8 @@ import {
  *    watches for.
  *  - 37 smoke vents: `spec.ts` emissions.
  *  - 28/29 (`RenderObject`, ZzzObject.cpp:1041-1057): two statue types drawn
- *    normally and then *again* as a flat black shadow with `HiddenMesh = 2`.
- *    **Not reproduced** - the blob shadow every map object already gets is
- *    the same idea, and a second projected copy of a 4-mesh statue is not
- *    worth a render path of its own.
+ *    normally and then shadowed with `HiddenMesh = 2` - `statueObject.ts`,
+ *    the map's only Classic shadows.
  *  - The hero's flare motes (`MoveObjectOnEffect`'s `InBloodCastle` branch,
  *    ZzzObject.cpp:4315-4330: a `BITMAP_FLARE` every fourth tick in a 9x9 tile
  *    box around the player, 2.5-3 tiles up) are a hero-relative ambient, so
@@ -64,5 +64,8 @@ export async function createBloodCastle(world: World) {
   tiles[BLOOD_CASTLE_GATE_TYPE] = BloodCastleGateObject;
   for (const type of BLOOD_CASTLE_BRIDGE_TYPES) {
     tiles[type] = BloodCastleBridgeObject;
+  }
+  for (const type of BLOOD_CASTLE_STATUE_TYPES) {
+    tiles[type] = BloodCastleStatueObject;
   }
 }

@@ -191,6 +191,8 @@ export const AttackSystem: ISystemFactory = world => {
   let attackCooldown = 0;
   let approachDelay = 0;
   let alternateSwing = false;
+  // The step's destination when the walk was cut, the hero's tile until he walks again (ZzzAI.cpp:556-562).
+  let stopTile: { x: number; y: number } | null = null;
 
   return {
     update: dt => {
@@ -208,7 +210,10 @@ export const AttackSystem: ISystemFactory = world => {
       }
 
       const target = world.attackTarget;
-      if (!target) return;
+      if (!target) {
+        stopTile = null;
+        return;
+      }
 
       if (
         (!isAttackableEntity(world, target) && !isAttackablePlayer(world, target)) ||
@@ -267,12 +272,14 @@ export const AttackSystem: ISystemFactory = world => {
           moveTo.point.y = targetPos.z;
           moveTo.handled = false;
           moveTo.sendToServer = true;
+          stopTile = null;
         }
         return;
       }
 
       const { pathfinding } = playerEntity;
       if (pathfinding.path && pathfinding.path.length > 0) {
+        stopTile = { x: pathfinding.path[0].x, y: pathfinding.path[0].y };
         pathfinding.path = null;
         pathfinding.from = { x: ~~playerPos.x, y: ~~playerPos.z };
         pathfinding.to = { x: ~~playerPos.x, y: ~~playerPos.z };
@@ -331,7 +338,10 @@ export const AttackSystem: ISystemFactory = world => {
       };
       // `LetHeroStop()` (ZzzInterface.cpp:1299): every swing tells the server the tile and facing
       // first, which parks its walker when the swing cut a walk (else it walks on and snaps us back).
-      Hero.sendWalkStop(playerPos.x, playerPos.z, playerEntity.transform.rot.y);
+      // A step's destination is never more than a tile away on either axis; past that the hero was moved.
+      const tile =
+        stopTile && Math.abs(stopTile.x - playerPos.x) <= 1 && Math.abs(stopTile.y - playerPos.z) <= 1 ? stopTile : null;
+      Hero.sendWalkStop(tile?.x ?? playerPos.x, tile?.y ?? playerPos.z, playerEntity.transform.rot.y);
       // The original sends on the click (ZzzInterface.cpp:3355); a server may ask for the
       // request at the hit key instead (its server.json, modules/servers/serverManifest.ts).
       const held = serverSetting('heldHitRequest');

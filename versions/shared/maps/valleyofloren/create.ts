@@ -4,7 +4,7 @@ import { SignObject } from '../../objects/signs/signObject';
 import { signTypes } from '../../objects/signs/signLabels';
 import { OperateBoxObject } from '@/controllers/actors/operateBoxObject';
 import type { World } from '@/ecs/world';
-import { bindAbsentModels } from '../shared/objectVariants';
+import { ShadowCasterObject, bindAbsentModels } from '../shared/objectVariants';
 
 /**
  * Valley of Loren (`WD_30BATTLECASTLE`, `World31`/`Object31`) - the Castle
@@ -42,6 +42,10 @@ export async function createValleyOfLoren(world: World) {
   // The notice boards. What each one says is versions/shared/objects/signs/signLabels.ts.
   prefetchSignPlates(`Object${assetWorldNum(world.mapIndex)}/`);
   for (const type of signTypes(world.mapIndex)) tiles[type] = SignObject;
+
+  // The map's only Classic shadows, drawn outside a siege (GMBattleCastle.cpp:1219-1228). 84,
+  // also in that case, is an operate box here and draws no body.
+  for (const type of [50, 83, 85]) tiles[type] = ShadowCasterObject;
 
   // 35 (x1) has no Object36.bmd in `Object31` (LoadData.cpp:22-49): no body.
   bindAbsentModels(tiles, [35]);

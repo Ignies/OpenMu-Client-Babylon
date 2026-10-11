@@ -6,7 +6,9 @@ and how to run it.
 ## Asset conversion (original `Data/` -> what the browser loads)
 - `bmdToGlb.ts`: models (`.bmd`) to `public/game-assets/**.glb`; `shared.ts` names the source tree
   (`MU_DATA`, `GLB_OUTPUT` for another version's tree: convert into a scratch folder and keep only
-  what differs from Season 6's, `versions/v097d/readme.md`).
+  what differs from Season 6's, `versions/v097d/readme.md`). A `LockPositions` action drops its last
+  key, a loop-closing copy of key 0, unless the original clears the flag at load (`bmdKeys.ts`: the
+  Kalima gate, `bmdKeys.test.ts`).
 - `ozjToJpeg.ts`, `oztToTga.ts`, `pack-textures.ts`, `texturePacker.ts`: textures and sprite sheets.
 - `copyData.ts`, `compressAssets.ts`, `assetsIndex.ts`: the production build's `dist/Data`, gzip
   sidecars and the pre-download indexes (`bun run build` runs all three). `assetsIndex.ts` writes

@@ -78,6 +78,14 @@ export class PlaySpeedObject extends MapTileObject {
 }
 
 /**
+ * A map object the original shadows: its case calls `RenderBodyShadow` (Blood Castle 28/29,
+ * Valley of Loren 50/83-85). No other map object casts a Classic blob (`ModelObject.MapShadow`).
+ */
+export class ShadowCasterObject extends MapTileObject {
+  MapShadow = true;
+}
+
+/**
  * A type the `.obj` places but `Data/Object<n>` has no model for. The
  * original registers models lazily (`AccessModel`, MapManager.cpp:1122) and
  * simply never opens the absent file, so the record becomes an object that

@@ -402,9 +402,8 @@ export class ModelObject {
   /**
    * Set for the props that come out of the map's object list, and for nothing
    * else - `modelId` is assigned in `createObjects` alone. Characters, NPCs,
-   * monsters, items and UI models all leave it false, which is what keeps the
-   * blob-shadow size gate off them: a small monster still needs its shadow,
-   * a ground flower does not.
+   * monsters, items and UI models all leave it false; a map object casts the
+   * Classic blob only with `MapShadow`.
    */
   IsMapObject = false;
   WorldIndex: ENUM_WORLD = ENUM_WORLD.WD_0LORENCIA;
@@ -659,6 +658,12 @@ export class ModelObject {
   FixedLight = false;
 
   CastsShadow = true;
+
+  /**
+   * Map objects only: the original draws this one's shadow (its case calls `RenderBodyShadow`,
+   * ZzzObject.cpp:1041-1057). Any other map object has no Classic blob; the cascades read `CastsShadow`.
+   */
+  MapShadow = false;
 
   /**
    * Whether snow may settle on this object (controllers/weather/snowCaps.ts). Set by
@@ -1583,72 +1588,11 @@ export class ModelObject {
     }
   }
 
-  /**
-   * Below this height, in tiles, a map object gets no blob shadow.
-   *
-   * A blob is a full clone of the caster's submesh hierarchy plus its own
-   * draw call, and Noria places 9399 objects - 2336 of them ground flowers
-   * about a third of a tile tall. The shadow of a thing that short is a
-   * smudge under a thing already touching the ground: it costs a mesh and a
-   * draw call to change nothing on screen. Lorencia is 2154 objects and never
-   * made this hurt; the foliage maps are where an eager per-object clone stops
-   * being affordable.
-   *
-   * Characters are exempt - see `_castsBlobShadow`.
-   */
-  static BLOB_SHADOW_MIN_HEIGHT = 0.75;
-
-  /**
-   * Above this footprint (tiles) a map object gets no blob shadow: MU's
-   * `CalcShadowPosition` was made for characters and smears on cliffs and walls.
-   */
-  static BLOB_SHADOW_MAX_FOOTPRINT = 4;
-
-  /** Cached result of the size gate; the model's size never changes. */
-  private _blobShadowWorthIt: boolean | null = null;
-
-  /**
-   * `true` when the caster is tall enough for its blob to read, and not so
-   * wide that it is scenery. Measured off the bind-pose bounds under the
-   * node's own scale, so a scaled-down instance of a tall model is judged on
-   * what it actually is.
-   */
-  private get _blobShadowIsVisible(): boolean {
-    if (this._blobShadowWorthIt !== null) return this._blobShadowWorthIt;
-
-    const root = this.gltf?.mesh;
-    if (!root) return false;
-
-    let height = 0;
-    let footprint = 0;
-
-    for (const mesh of root.getChildMeshes(false)) {
-      if (mesh.getTotalVertices() === 0) continue;
-      const box = mesh.getBoundingInfo().boundingBox;
-      height = Math.max(height, box.maximum.y - box.minimum.y);
-      footprint = Math.max(
-        footprint,
-        box.maximum.x - box.minimum.x,
-        box.maximum.z - box.minimum.z
-      );
-    }
-
-    const scale = Math.abs(this._node.scaling.x);
-
-    this._blobShadowWorthIt =
-      height * scale >= ModelObject.BLOB_SHADOW_MIN_HEIGHT &&
-      footprint * scale <= ModelObject.BLOB_SHADOW_MAX_FOOTPRINT;
-
-    return this._blobShadowWorthIt;
-  }
-
   /** Whether this model is allowed a shadow clone at all (see attachShadow). */
   private get _castsBlobShadow(): boolean {
     if (!this.CastsShadow || this.Lights?.emitsLight || !this.gltf) return false;
 
-    // Only map objects are size-gated. A small monster still needs its
-    // shadow; a ground flower does not.
-    return !this.IsMapObject || this._blobShadowIsVisible;
+    return !this.IsMapObject || this.MapShadow;
   }
 
   /**
@@ -1674,10 +1618,7 @@ export class ModelObject {
         this._node,
         this.rootObject.node,
         slot,
-        {
-          blendMesh: this.ShadowBlendMeshCasts,
-          keyed: !this.IsMapObject,
-        }
+        this.ShadowBlendMeshCasts
       );
 
       if (!shadow) {

@@ -274,11 +274,12 @@ export const SkillCastSystem: ISystemFactory = world => {
     world.castApproach = null;
     world.pickupTarget = null;
     const pathfinding = hero.pathfinding!;
-    if (pathfinding.path && pathfinding.path.length > 0) {
+    const next = pathfinding.path?.[0];
+    if (next) {
       pathfinding.path = null;
       pathfinding.from = { x: from.x, y: from.y };
       pathfinding.to = { x: from.x, y: from.y };
-      Hero.sendWalkStop(heroPos.x, heroPos.z, hero.transform!.rot.y);
+      Hero.sendWalkStop(next.x, next.y, hero.transform!.rot.y);
     }
 
     if (ally) {
@@ -644,9 +645,10 @@ export const SkillCastSystem: ISystemFactory = world => {
 
       // `LetHeroStop()` (ZzzInterface.cpp:1935): every cast drops the path
       // first, so a skill is never taken mid-stride.
+      // Mid-step the hero's tile is the step's destination, the path's next node (ZzzAI.cpp:556-562).
       const { pathfinding } = hero;
-      const wasWalking = !!pathfinding.path && pathfinding.path.length > 0;
-      if (wasWalking) {
+      const next = pathfinding.path?.[0];
+      if (next) {
         pathfinding.path = null;
         pathfinding.from = { x: ~~heroPos.x, y: ~~heroPos.z };
         pathfinding.to = { x: ~~heroPos.x, y: ~~heroPos.z };
@@ -666,7 +668,7 @@ export const SkillCastSystem: ISystemFactory = world => {
       // onto the target's tile - while the hero stands here casting, and once
       // the two are more than 5 tiles apart it resynchronises us onto its own
       // position with an ObjectMoved.
-      if (wasWalking) Hero.sendWalkStop(heroPos.x, heroPos.z, hero.transform.rot.y);
+      if (next) Hero.sendWalkStop(next.x, next.y, hero.transform.rot.y);
 
       // Mana / AG / re-use delay / requirements are gated client-side first
       // (the skill layer's verdict; the server re-checks everything).

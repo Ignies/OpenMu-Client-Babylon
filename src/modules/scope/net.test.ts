@@ -17,7 +17,7 @@ const { EventBus } = await import('@/core/eventBus');
 const { effects } = await import('@/controllers/fx');
 const { Hero } = await import('@/modules/hero');
 const { installNet } = await import('./net');
-const { AddCharacterToScopeExtendedPacket } = await import('@versions/shared/packets/ServerToClientPackets');
+const { AddCharacterToScopeExtendedPacket, AddNpcsToScopePacket } = await import('@versions/shared/packets/ServerToClientPackets');
 
 installNet();
 
@@ -38,7 +38,7 @@ function enterView(id: number, effectIds: number[]): void {
   EventBus.emit('AddCharacterToScopeExtended', p.buffer);
 }
 
-describe('buff looks on a player in view', () => {
+describe('buff looks on an object in view', () => {
   let engine: InstanceType<typeof NullEngine>;
   const auras: EffectHandle[] = [];
 
@@ -79,6 +79,28 @@ describe('buff looks on a player in view', () => {
     expect(old.some(a => a.alive)).toBe(false);
     expect(auras.length).toBeGreaterThan(0);
     expect(auras.every(a => a.alive)).toBe(true);
+  });
+
+  // ReceiveCreateMonsterViewport: each NPC is 10 bytes and its buff list, each buff registered (WSclient.cpp:2924-2965, :3059).
+  it('reads the NPCs after one that enters view with buffs, and registers them', () => {
+    const npcs = [
+      { id: 20, type: 2, effects: [1, 2] },
+      { id: 21, type: 3, effects: [] },
+    ];
+    const p = AddNpcsToScopePacket.createPacket(5 + npcs.reduce((n, npc) => n + 10 + npc.effects.length, 0));
+    p.NpcCount = npcs.length;
+    let at = 5;
+    for (const npc of npcs) {
+      p.buffer.setUint16(at, npc.id);
+      p.buffer.setUint16(at + 2, npc.type);
+      for (const k of [4, 5, 6, 7]) p.buffer.setUint8(at + k, 100);
+      p.buffer.setUint8(at + 9, npc.effects.length);
+      npc.effects.forEach((e, i) => p.buffer.setUint8(at + 10 + i, e));
+      at += 10 + npc.effects.length;
+    }
+    EventBus.emit('AddNpcsToScope', p.buffer);
+    expect(Ecs.world?.getByNetId(21)?.npcType).toBe(3);
+    expect([...(Ecs.world?.getByNetId(20)?.buffs ?? [])]).toEqual([1, 2]);
   });
 
   // OpenMU numbers seven master buffs on its own; the original knows each by its base (SkillsInitializer.cs:84-90).

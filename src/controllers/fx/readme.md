@@ -96,6 +96,7 @@ shared pools, textures and particle recipes other folders reuse.
 - change one skill's look: its file in `versions/shared/skills/`, not here.
 
 ## Tests
+- `layers.test.ts`: no shroud layer (Evil Spirit, its only spawner, draws none).
 - `effectParticles.test.ts`: no particle is made while the page is hidden; `KIND_REACH` covers every particle kind, and the view gate of
   `ParticleEmitter` / `BonedParticleEmitter` (spawns only when a sprite could reach the frustum);
   a pushed particle on a turned or tilted object goes where MovePosition turns its velocity
@@ -248,16 +249,11 @@ pillars, tails, ticked strips, summons, homing, linked models) with their own ma
 follows the Glow slider up to `FX_GLOW_MAX_INTENSITY`; intensity is 0 without post processing.
 Only emissive art joins. `disposePools` disposes it on map change.
 
-### greasedLineInPlace.ts
-`setPoints` allocates new arrays and GPU buffers every call. This keeps one updatable buffer per
-attribute and rewrites positions and prev / next neighbours. Length counters are written once as
-index ratios; side signs, UVs, widths and indices stay from the first build.
-
 ### greasedLineRelease.ts
 `GreasedLineSimpleMaterial.dispose()` disposes the shared `EmptyColorsTexture` without nulling the
 static, which silently stops every other GreasedLine from rendering. The public `colorsTexture`
 setter throws on null, and a throw from a release froze the render loop (the Drain Life "hang"),
-so the private `_colorsTexture` is cleared first. Used by `joint.ts`, `itemCrackle.ts`, `spiritSwarm.ts`.
+so the private `_colorsTexture` is cleared first. Used by `joint.ts`, `itemCrackle.ts`.
 
 ### homing.ts
 Each joint starts `radius` out on the upper half sphere, gains `accel` a tick (`Velocity += 4`),
@@ -325,17 +321,6 @@ after `MAX_FLIGHT_SECONDS`. `onArrive` is how the skill fires its impact.
 Every ray is one line of a single GreasedLine (`joint.ts` `makeLine`), so a burst is one mesh and
 one draw instead of forty. Rays share one brightness (born on one tick, decaying together); a
 finished ray collapses onto its head.
-
-### shroud.ts
-Churning smoke that thickens from a clear middle outward, coverage over black (not subtraction,
-see `model.ts` `subtractMaterial`). The card faces the camera, ignores depth and draws first among
-transparent effects. Finished cards and materials are kept for the next cast.
-
-### spiritSwarm.ts
-Each spirit: a dark body, two braided wisps, a spine and a skull. Bodies and wisps share one
-ribbon mesh, spines another, skulls are thin instances; ribbons move in place
-(`greasedLineInPlace.ts`). Followers ride the head where it was a frame ago. Finished waves wait in
-a pool. Spawned by `versions/shared/skills/dark_wizard/evil_spirit`.
 
 ### summon.ts
 Each mesh is drawn bright, textured at `Alpha`, both, or hidden, in its own light; the clip is

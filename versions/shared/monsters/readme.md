@@ -73,8 +73,10 @@ In game the name a player reads is the language pack's in either case (`monsterD
   `npcModel.clipSpeeds` are the `Models[].Actions[].PlaySpeed` a case writes (Moss and Zyro, 0.33);
   the animation system reads them through the model's `actionPlaySpeed`. `npcModel.holdFrame` draws
   it still on that key of clip 0 and never runs a clip: the Kalima gates (152-158) spawn on frame 10,
-  play to the clip's end and stay on frame 8 (ZzzCharacter.cpp:13326-13334, :3504-3506, :3737-3740);
-  ours stand on 8 from the start, skipping that first third of a second.
+  play to the clip's end and stay on frame 8 (ZzzCharacter.cpp:13326-13334, :3504-3506, :3737-3740),
+  but `BMD::Animation` blends the prior key into the current one by the fraction (ZzzBMD.cpp:146-149,
+  :259-264): the prior key stays 10 and 8.0 has none, so key 10, the doors open at 90 degrees, is all
+  the original ever shows. Ours hold key 10 (the converter keeps it, `tools/bmdKeys.ts`).
 
 - What it sounds like, besides its monster body's voices: `voice` (a town noise,
   `MoveCharacterVisual`) and `globalVoice` (`PlayMonsterSoundGlobal`, also heard from a player
