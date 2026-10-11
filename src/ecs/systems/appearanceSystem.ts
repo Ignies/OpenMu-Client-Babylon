@@ -2,10 +2,13 @@ import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { itemVisualTier } from '../../controllers/item_fx/itemVisualTier';
 import { heldWeapons, wearsChaosCastleSkin } from '../../controllers/actors';
 import { showsClassHead } from '../../controllers/actors/openHelm';
+import { classPartModel } from '../../controllers/actors/classPartModel';
+import { itemObjectAttribute } from '../../controllers/actors/itemObjectAttribute';
 import type { ModelObject } from '../../controllers/render/modelObject';
 import { isPlayerBody, type PlayerObject } from '../../controllers/actors/playerObject';
 import { applyWeaponAttachments } from '../../controllers/actors/weaponAttachment';
-import { isBook, swordformGlovesModel } from '../../controllers/actors/weaponClass';
+import { isBook, isSwordformGloves, swordformGlovesModel } from '../../controllers/actors/weaponClass';
+import type { CharacterClassNumber } from '../../core/types';
 import type { ISystemFactory, Item } from '../world';
 import { settle } from '../../controllers/assets';
 import { syncGmMark } from './gmMark';
@@ -15,18 +18,33 @@ function loadPart(
   playerObject: PlayerObject,
   socket: ModelObject,
   /** Weapon slot, when this socket is one: picks the worn glove model. */
-  slot?: 0 | 1
+  slot?: 0 | 1,
+  /** The wearer's class, for an armour piece: picks the class's own model. */
+  charClass?: CharacterClassNumber
 ) {
   if (!part) return;
   const item = ItemsDatabase.getItem(part.group, part.num);
 
   if (!item) return;
 
+  if (slot !== undefined) {
+    // `RenderLinkObject` runs `ItemObjectAttribute` on every held item (ZzzCharacter.cpp:6648).
+    const rule = itemObjectAttribute(part.group, part.num);
+    socket.BlendMesh = rule.blendMesh;
+    socket.HiddenMesh = rule.hiddenMesh;
+    socket.BlendMeshLightAt = rule.blendMeshLight ?? null;
+    // A glove weapon is a body part on the wearer's own bones (`RenderSwordformGloves`,
+    // MonkSystem.cpp:248-252): skinned to the rig when it loads, linked to no bone.
+    socket.LinkParent = isSwordformGloves(part);
+  }
+
   // A Rage Fighter glove weapon is worn as a left/right pair of its own
   // (`RenderSwordformGloves`, MonkSystem.cpp:248); the model items.json names
-  // is the one the inventory draws.
+  // is the one the inventory draws. Some classes wear an armour piece as a model of their own.
   const worn =
-    (slot !== undefined && swordformGlovesModel(part, slot)) || item.szModelName;
+    (slot !== undefined && swordformGlovesModel(part, slot)) ||
+    (charClass !== undefined && classPartModel(part, charClass)) ||
+    item.szModelName;
 
   // A model that fails to load leaves the slot as it was.
   void settle(
@@ -103,15 +121,16 @@ export const AppearanceSystem: ISystemFactory = world => {
             void settle(playerObject.setDefaultHelm(), 'Player/HelmClass');
           }
 
-          loadPart(charAppearance.helm, playerObject, playerObject.HelmMask) ||
+          const { charClass } = charAppearance;
+          loadPart(charAppearance.helm, playerObject, playerObject.HelmMask, undefined, charClass) ||
             playerObject.setDefaultMask();
-          loadPart(charAppearance.armor, playerObject, playerObject.Armor) ||
+          loadPart(charAppearance.armor, playerObject, playerObject.Armor, undefined, charClass) ||
             void settle(playerObject.setDefaultArmor(), 'Player/ArmorClass');
-          loadPart(charAppearance.pants, playerObject, playerObject.Pants) ||
+          loadPart(charAppearance.pants, playerObject, playerObject.Pants, undefined, charClass) ||
             void settle(playerObject.setDefaultPants(), 'Player/PantClass');
-          loadPart(charAppearance.gloves, playerObject, playerObject.Gloves) ||
+          loadPart(charAppearance.gloves, playerObject, playerObject.Gloves, undefined, charClass) ||
             void settle(playerObject.setDefaultGloves(), 'Player/GloveClass');
-          loadPart(charAppearance.boots, playerObject, playerObject.Boots) ||
+          loadPart(charAppearance.boots, playerObject, playerObject.Boots, undefined, charClass) ||
             void settle(playerObject.setDefaultBoots(), 'Player/BootClass');
 
           // c->Wing and the body-linked half of c->Helper. Both need their own

@@ -318,6 +318,9 @@ function fixSkinnedLocalBounds(mesh: AbstractMesh): void {
  */
 export const HIDDEN_MESH_ALL = -2;
 
+/** `o->BlendMesh = -2`: every mesh additive (`BlendMesh <= -2`, ZzzBMD.cpp:2022). */
+export const BLEND_MESH_ALL = -2;
+
 /**
  * The additive shine passes a body carries (`ModelObject.BodyShine`), read
  * per mesh by the item material.
@@ -448,6 +451,15 @@ export class ModelObject {
   BlendMesh = NO_BLEND_MESH;
 
   BlendMeshLight = 1;
+
+  /**
+   * `o->BlendMeshLight` re-read every frame off `WorldTime` (ms), written to the blend meshes;
+   * a held weapon's `ItemObjectAttribute` pulse (ZzzObject.cpp:5196). Null = `BlendMeshLight`.
+   */
+  BlendMeshLightAt: ((ms: number) => number) | null = null;
+
+  /** The meshes `applyBlendMesh` drew additive, for `BlendMeshLightAt`. */
+  #blendMeshes: AbstractMesh[] = [];
 
   /**
    * `RenderMesh(n, RENDER_TEXTURE | RENDER_BRIGHT)` after `RenderBody`: the
@@ -685,6 +697,14 @@ export class ModelObject {
     if (link) this.BoneLinkMatrix.copyFrom(link);
     else Matrix.IdentityToRef(this.BoneLinkMatrix);
     this._linkedBone = -1;
+    // Unlinked, the part goes back under its owner as built, or the bone it left still poses it.
+    if (bone < 0 && this._boneSocket && this._node.parent === this._boneSocket) {
+      this._node.parent = this.Parent?.node ?? null;
+      this._node.position.setAll(0);
+      this._node.rotationQuaternion = null;
+      this._node.rotation.setAll(0);
+      this._node.scaling.setAll(1);
+    }
   }
 
   /**
@@ -1512,7 +1532,13 @@ export class ModelObject {
   }
 
   private applyBlendMesh() {
-    if (this.BlendMesh < 0 || !this.gltf) return;
+    this.#blendMeshes.length = 0;
+    if (!this.gltf) return;
+    if (this.BlendMesh === BLEND_MESH_ALL) {
+      for (const mesh of this.gltf.mesh.getChildMeshes(false)) this.applyBlendMeshTo(mesh);
+      return;
+    }
+    if (this.BlendMesh < 0) return;
 
     const mesh = this.getMesh(this.BlendMesh);
 
@@ -1522,7 +1548,11 @@ export class ModelObject {
       );
       return;
     }
+    this.applyBlendMeshTo(mesh);
+  }
 
+  private applyBlendMeshTo(mesh: AbstractMesh) {
+    this.#blendMeshes.push(mesh);
     mesh.material = getMaterial(
       mesh.getScene(),
       false,
@@ -1761,6 +1791,11 @@ export class ModelObject {
     // and the early-out above already skips it off screen - the uniform is
     // only read while the mesh is drawn.
     this.updateMeshAnimation(gameTime.TotalGameTime.TotalSeconds * 1000);
+
+    if (this.BlendMeshLightAt) {
+      const light = this.BlendMeshLightAt(gameTime.TotalGameTime.TotalSeconds * 1000);
+      for (let i = 0; i < this.#blendMeshes.length; i++) this.#blendMeshes[i].metadata.blendMeshLight = light;
+    }
 
     this.Lights?.update();
 

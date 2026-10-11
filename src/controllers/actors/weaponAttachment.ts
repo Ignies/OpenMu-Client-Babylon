@@ -21,6 +21,7 @@ import {
   isCrossbow,
   isShield,
   isPhoenixSoulStar,
+  isSwordformGloves,
   isWeaponItem,
   PHOENIX_SOUL_STAR,
   type Hands,
@@ -311,14 +312,20 @@ export function applyWeaponAttachments(
     rageFighter && RAGE_FIGHTER_COMMON.has(`${item.group}:${item.num}`);
 
   // Slot 0 (appearance "leftHand") → Weapon1 → right hand (bRightHandItem).
-  if (stowed(main, hands, bindBack)) {
+  // A glove weapon is on no bone, in the hands or "on the back": both passes draw it on the
+  // body skeleton (RenderSwordformGloves, ZzzCharacter.cpp:10167, :15349; appearanceSystem.ts).
+  if (isSwordformGloves(main)) {
+    player.Weapon1.setBoneLink(-1);
+  } else if (stowed(main, hands, bindBack)) {
     player.Weapon1.setBoneLink(BACK_BONE, backLink(main, false, rageCommon(main)));
   } else {
     player.Weapon1.setBoneLink(RIGHT_HAND_BONE);
   }
 
   // Slot 1 (appearance "rightHand") → Weapon2 → left hand.
-  if (stowed(off, hands, bindBack)) {
+  if (isSwordformGloves(off)) {
+    player.Weapon2.setBoneLink(-1);
+  } else if (stowed(off, hands, bindBack)) {
     player.Weapon2.setBoneLink(BACK_BONE, backLink(off, true, rageCommon(off)));
   } else {
     player.Weapon2.setBoneLink(LEFT_HAND_BONE);
@@ -341,7 +348,8 @@ export function applyWeaponPoses(
   const off = hands && isWeaponItem(hands.rightHand) ? hands.rightHand : null;
 
   const poseFor = (item: Item | null) => {
-    if (!item) return null;
+    // A glove weapon is posed by the body it is skinned to.
+    if (!item || isSwordformGloves(item)) return null;
     if (stowed(item, hands, bindBack)) return backPose(item);
     return handPose(item, action, playerSpeed);
   };

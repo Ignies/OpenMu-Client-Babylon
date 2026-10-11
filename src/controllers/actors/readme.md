@@ -55,6 +55,10 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   bitmap a dropped part draws mesh 0 with, and the only meshes it draws, `RenderPartObjectBody`'s
   HideSkin branches, ZzzObject.cpp:7614-8908); `traceHeroInstantMove`.
 - `openHelm.ts`: `showsClassHead(helm)`, whether the class head is drawn under that helm (below).
+- `classPartModel.ts`: `classPartModel(part, charClass)`, the `Player/` model a class wears for an armour piece in
+  place of the item's own: the Summoner's Vine and Silk pieces (`HelmElfC`...), the Rage Fighter's Leather, Scale,
+  Brass and Plate (`HelmMonk`..., gloves and boots both `BootMonk`, MonkSystem.cpp:187-206) and the Dark Lord's
+  Bronze, Leather, Scale, Brass and Plate helms (`MaskHelmMale`), ZzzCharacter.cpp:9579-9617.
 
 ## How it works
 - A spawned object's class comes from `resolveModelFactory(type)`, called by
@@ -73,8 +77,11 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 - `PlayerObject` loads `Player/player.glb` (a rig with no meshes) and hangs every part on it as a
   child `ModelObject`: helm, mask, armor, pants, gloves, boots, two weapons, two Phoenix wings,
   wings, quest item and pet. Weapons link to bones 33 / 42 (ZzzCharacter.cpp:11849-11850), wings
-  and the quest item to 47, capes with a link matrix to 19. `ecs/systems/appearanceSystem.ts`
-  fills the sockets; `animationSystem.ts` picks clips with `weaponClass.ts` / `locomotion.ts` and
+  and the quest item to 47, capes with a link matrix to 19. A Rage Fighter glove weapon is the
+  exception: its worn model is skinned to the rig like an armour piece and linked to no bone, in the
+  hands and in town (`RenderSwordformGloves`, MonkSystem.cpp:248-252). `ecs/systems/appearanceSystem.ts`
+  fills the sockets and gives a held weapon its `ItemObjectAttribute` mesh rules (ZzzCharacter.cpp:6648);
+  `animationSystem.ts` picks clips with `weaponClass.ts` / `locomotion.ts` and
   calls `applyWeaponPoses` every frame.
 - `GmMark` is the Webzen mark (`PARTS_WEBZEN`, `Skill/musign.glb`, CSParts.cpp:28-46) a game master
   wears: `setGmMarkAsync(on)` (driven by `ecs/systems/gmMark.ts` from `AppearanceSystem`: the GM buff 28 or the hero's
@@ -136,6 +143,8 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 - `npcLooks.test.ts`: NPCs drawn as the original builds them (Hanzo's scale, the 0.9 default and who sets its own, the plain-model NPCs,
   Zyro, the Cursed Wizard's kit, the plate helpers), each with its ZzzCharacter.cpp lines.
 - `skinTexture.test.ts`: skin / hair / level and hide texture names, and the case of each test.
+- `classPartModel.test.ts`: the Monk, mask and ElfC models per class, and that each file ships.
+- `weaponAttachment.test.ts`: a glove weapon on no bone and with no clip of its own, in the hands and in town.
 - `wingObject.test.ts`: the Wing of Ruin layer (a `Data/` bitmap, `getDataTexture`) is read top-down like
   the GLB textures it shares the UVs of, and is drawn on a model whose meshes sit under its model node.
 - Also from `controllers/item_rules/`: `portedItems`, `questItemLink`, `weaponAttack` tests.

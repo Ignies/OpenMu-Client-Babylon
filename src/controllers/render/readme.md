@@ -12,7 +12,7 @@ There is no `index.ts` facade; other folders import the modules directly.
   `projectWorldPositionToScreenRef`. `babylon/emptyTexture.ts`: `getEmptyTexture`.
 - `babylon/spriteLinear.ts`: `installSpriteLinearDecode()` (called by `fx/core.ts`).
 - `modelObject.ts`: `ModelObject`, the base class of every drawn model (actors, map objects, npcs,
-  drops, pets); `PartPose`, `BodyShine`, `HIDDEN_MESH_ALL`.
+  drops, pets); `PartPose`, `BodyShine`, `HIDDEN_MESH_ALL`, `BLEND_MESH_ALL`.
 - `scenes/testScene.ts`: `TestScene`, the game's `Scene` with its camera, highlight layer and look.
 - `sceneLook.ts`: `setAreaMood`, `requestGlowProbe`, `updateSceneLook` (glow layer, areas).
 - `scenes/<pass>.ts`: `sync<Pass>` / `dispose<Pass>` and `createPostChain`, called by
@@ -40,6 +40,9 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `ModelObject.load(gltf)` puts a GLB under the object's node with the BMD to Babylon basis change
   (`scaling (1,-1,1)`, `rotX(-90)`), sets per-mesh metadata (body light, shine, shadow flags) and
   applies `BlendMesh`, `BrightMesh`, `HiddenMesh`, `HideSkin`, mesh animations and the blob shadow.
+  `BlendMesh = -2` (`BLEND_MESH_ALL`) draws every mesh additive (ZzzBMD.cpp:2022), and `BlendMeshLightAt`, when
+  set, rewrites the blend meshes' `BlendMeshLight` each frame off `WorldTime` (a held weapon's pulse).
+  `setBoneLink(-1)` puts a bone-linked part back under its owner's node, as built.
   Under `HideSkin`, `HideSkinTexture` (a `Data/` path) is the bitmap mesh 0 is drawn with instead of its
   own, alpha-tested (ZzzObject.cpp:7774-7790), and `HideSkinMeshes` the only meshes drawn; a drop sets
   both from `actors/skinTexture.ts`.
@@ -79,7 +82,8 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `frameSnapshot.test.ts`: fills once per frame and per scene, refills after a throw.
 - `meshAnimation.test.ts`: `meshAnimationFor` reads the map row per world.
 - `modelObject.test.ts`: a model whose clips are cloned on first play reads every clip's keys at load
-  without cloning one, and a clip cloned later reports its end.
+  without cloning one, and a clip cloned later reports its end; `BlendMesh -2` and a pulsing `BlendMeshLightAt`;
+  a part unlinked from its bone goes back under its owner.
 - `versions/shared/contentRows.golden.test.ts`: every map's mesh animations, sampled over time.
 - `pbrMaps.test.ts`: `textureSourceName` reads the pack's remembered name mid-swap.
 - `pbrDerive.test.ts`: `flipRows`, flat normal and emissive mask of `derivePbrMaps`.
