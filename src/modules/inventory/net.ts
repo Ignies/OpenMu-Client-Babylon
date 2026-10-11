@@ -177,7 +177,13 @@ export function installNet(): void {
 
       if (item.raw && item.raw.length > 2) item.raw[2] = p.Durability;
     });
+    // ReceiveDurability (WSclient.cpp:7164-7167): a use answered.
+    if (p.ByConsumption) Bag.useAnswered();
   });
+
+  // ReceiveHelperItem (WSclient.cpp:7172-7193): the Ale or Potion of Soul timer only changes the ping's attack
+  // speed and the hero's unused light there; what shows is the use answered.
+  EventBus.on('ConsumeItemWithEffect', () => Bag.useAnswered());
 
   EventBus.on('InventoryMoneyUpdate', packet => {
     const p = new InventoryMoneyUpdatePacket(packet);

@@ -55,4 +55,5 @@ export default {
   'buff.shieldSkill': 'Kỹ năng khiên',
   'buff.alcohol': 'Rượu',
   'buff.unnamed': 'Hiệu ứng {number}',
+  'buff.npcBlessing': 'Sát thương và phòng thủ tăng nhờ lời chúc phúc.',
 } satisfies Partial<Record<keyof typeof en, string>>;

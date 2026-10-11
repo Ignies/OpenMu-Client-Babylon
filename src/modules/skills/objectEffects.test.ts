@@ -23,7 +23,9 @@ const { applyObjectEffect, redrawBuffLooks } = await import('./objectEffects');
 const { MAGIC_EFFECTS } = await import('./magicEffects');
 const { buffRecipe } = await import('./recipes');
 const { t } = await import('@/i18n');
-const { MagicEffectStatusPacket } = await import('@versions/shared/packets/ServerToClientPackets');
+const { EffectItemConsumptionPacket, MagicEffectStatusPacket } = await import('@versions/shared/packets/ServerToClientPackets');
+const { buffRemaining, buffsLayer } = await import('./buffs');
+const { Social } = await import('../social/social');
 
 installNet();
 
@@ -69,6 +71,47 @@ describe('the buff bar', () => {
       expect(MAGIC_EFFECTS[openmu]).toBeUndefined();
       expect(buffRecipe(openmu).name).toBe(t('buff.unnamed', { number: openmu }));
     }
+  });
+});
+
+// ReceiveBuffState (WSclient.cpp:10254-10275): an item's effect on the hero, with its time; any other action removes it.
+describe('an effect item consumed (0x2D EffectItemConsumption)', () => {
+  const consumed = (effect: number, action: number, seconds: number) => {
+    const p = EffectItemConsumptionPacket.createPacket();
+    p.Origin = 1;
+    p.Type = 2;
+    p.Action = action;
+    p.RemainingSeconds = seconds;
+    p.MagicEffectNumber = effect;
+    EventBus.emit('EffectItemConsumption', p.buffer);
+  };
+
+  it('puts the icon on the bar with the time the server sent, counting down', () => {
+    runInAction(() => {
+      Ecs.world = null;
+      Hero.playerId = 1;
+      HeroSkills.buffs = [];
+    });
+    consumed(46, 0, 1800);
+    expect(HeroSkills.buffs).toEqual([46]);
+    buffsLayer.update?.(0 as never, 10);
+    expect(buffRemaining(46)).toBe(1790);
+  });
+
+  it('takes the icon off for a remove or a replace', () => {
+    consumed(46, 1, 0);
+    expect(HeroSkills.buffs).toEqual([]);
+    consumed(47, 0, 60);
+    consumed(47, 2, 60);
+    expect(HeroSkills.buffs).toEqual([]);
+    expect(buffRemaining(47)).toBeNull();
+  });
+
+  it("says the NPC's blessing in the system log (eBuff_HelpNpc)", () => {
+    const said = vi.spyOn(Social, 'systemMessage').mockImplementation(() => {});
+    consumed(3, 0, 60);
+    expect(said).toHaveBeenCalledWith(t('buff.npcBlessing'));
+    said.mockRestore();
   });
 });
 

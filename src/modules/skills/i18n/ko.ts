@@ -57,4 +57,5 @@ export default {
   'buff.shieldSkill': '방패 스킬',
   'buff.alcohol': '취기',
   'buff.unnamed': '효과 {number}',
+  'buff.npcBlessing': '축복으로 공격력과 방어력이 증가했습니다.',
 } satisfies Partial<Record<keyof typeof en, string>>;

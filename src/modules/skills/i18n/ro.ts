@@ -59,4 +59,5 @@ export default {
   'buff.shieldSkill': 'Abilitatea de scut',
   'buff.alcohol': 'Alcool',
   'buff.unnamed': 'Efect {number}',
+  'buff.npcBlessing': 'Daunele și apărarea au crescut printr-o binecuvântare.',
 } satisfies Partial<Record<keyof typeof en, string>>;

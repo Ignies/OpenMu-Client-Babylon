@@ -57,4 +57,5 @@ export default {
   'buff.shieldSkill': '护盾技能',
   'buff.alcohol': '醉酒',
   'buff.unnamed': '效果 {number}',
+  'buff.npcBlessing': '祝福使攻击力和防御力提升。',
 } satisfies Partial<Record<keyof typeof en, string>>;

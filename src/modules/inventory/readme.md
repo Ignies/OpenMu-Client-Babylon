@@ -55,7 +55,11 @@ items themselves are the hero's (`Hero.items`, `Hero.money`).
 - `ItemMoveRequestFailed`: rolls the move back.
 - `ItemAddedToInventory`: one slot set, with the pickup sound (WSclient.cpp:5727-5734). `ItemRemoved`: one slot cleared.
 - `InventoryItemUpgraded` / `ItemConsumptionFailed`: the result of a jewel or a consume.
-- `ItemDurabilityChanged`, `InventoryMoneyUpdate`: durability of one slot, zen in the bag.
+- `ItemDurabilityChanged`, `InventoryMoneyUpdate`: durability of one slot, zen in the bag. A durability change
+  `ByConsumption` answers a use: the 300 ms use lock ends at once (`Bag.useAnswered`, `EnableUse = 0`,
+  WSclient.cpp:7164-7167).
+- `ConsumeItemWithEffect` (0x29, Ale, Potion of Soul): answers a use the same way (WSclient.cpp:7190). Its
+  timer only changed the ping's attack speed and an unused hero light in the original, so nothing else shows.
 
 ## Depends on / used by
 - uses: `session` (sending), `hero` (the items), `skills` (`HeroSkills`, learning from a scroll),

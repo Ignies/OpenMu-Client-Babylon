@@ -59,4 +59,5 @@ export default {
   'buff.shieldSkill': 'Habilidade de escudo',
   'buff.alcohol': 'Álcool',
   'buff.unnamed': 'Efeito {number}',
+  'buff.npcBlessing': 'Dano e defesa aumentados com uma bênção.',
 } satisfies Partial<Record<keyof typeof en, string>>;

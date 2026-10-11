@@ -9,6 +9,8 @@ vi.mock('@/ecs/systems/teleportSystem', () => ({
 vi.mock('@/modules/hero', () => ({ Hero: {} }));
 vi.mock('./state', () => ({ HeroSkills: {} }));
 vi.mock('./objectEffects', () => ({ applyObjectEffect: vi.fn() }));
+vi.mock('./buffs', () => ({ setBuffTime: vi.fn() }));
+vi.mock('../social/social', () => ({ Social: {} }));
 vi.mock('../combat/clips', () => ({ playCastAnimation: vi.fn() }));
 vi.mock('@versions/shared/skills/skillVisuals', () => ({
   playAreaSkillVisual: vi.fn(),
