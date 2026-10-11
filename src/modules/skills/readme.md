@@ -83,7 +83,8 @@ hotbar share.
 - `teleportSound.test.ts`: a monster teleporting plays its own sound only on its map (the
   Nightmare in Kanturu 3rd); anyone else the plain one.
 - `objectEffects.test.ts`: the bar takes the hero's effect with no world; a map change's reset is
-  followed by the held looks drawn again; OpenMU's master buff numbers arrive as their base effect.
+  followed by the held looks drawn again; OpenMU's master buff numbers arrive as their base effect, and the
+  catalogue (`magicEffects.ts`, `recipes.ts`) names none of them.
 - `usability.test.ts`: a Strengthener or Mastery of a weapon skill needs the weapon of its base skill.
 - `state.test.ts`: active master skills sit on the bar; a Strengthener takes its base skill's hot key
   and selection.

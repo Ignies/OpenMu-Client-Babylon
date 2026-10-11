@@ -96,6 +96,7 @@ shared pools, textures and particle recipes other folders reuse.
 - change one skill's look: its file in `versions/shared/skills/`, not here.
 
 ## Tests
+- `layers.test.ts`: no shroud layer (Evil Spirit, its only spawner, draws none).
 - `effectParticles.test.ts`: no particle is made while the page is hidden; `KIND_REACH` covers every particle kind, and the view gate of
   `ParticleEmitter` / `BonedParticleEmitter` (spawns only when a sprite could reach the frustum);
   a pushed particle on a turned or tilted object goes where MovePosition turns its velocity
@@ -320,11 +321,6 @@ after `MAX_FLIGHT_SECONDS`. `onArrive` is how the skill fires its impact.
 Every ray is one line of a single GreasedLine (`joint.ts` `makeLine`), so a burst is one mesh and
 one draw instead of forty. Rays share one brightness (born on one tick, decaying together); a
 finished ray collapses onto its head.
-
-### shroud.ts
-Churning smoke that thickens from a clear middle outward, coverage over black (not subtraction,
-see `model.ts` `subtractMaterial`). The card faces the camera, ignores depth and draws first among
-transparent effects. Finished cards and materials are kept for the next cast.
 
 ### summon.ts
 Each mesh is drawn bright, textured at `Alpha`, both, or hidden, in its own light; the clip is

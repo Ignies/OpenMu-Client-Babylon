@@ -20,6 +20,9 @@ const { Hero } = await import('@/modules/hero');
 const { HeroSkills } = await import('./state');
 const { installNet } = await import('./net');
 const { applyObjectEffect, redrawBuffLooks } = await import('./objectEffects');
+const { MAGIC_EFFECTS } = await import('./magicEffects');
+const { buffRecipe } = await import('./recipes');
+const { t } = await import('@/i18n');
 const { MagicEffectStatusPacket } = await import('@versions/shared/packets/ServerToClientPackets');
 
 installNet();
@@ -58,6 +61,13 @@ describe('the buff bar', () => {
       expect(HeroSkills.buffs).toEqual([base]);
       effectStatus(1, openmu, false);
       expect(HeroSkills.buffs).toEqual([]);
+    }
+  });
+
+  it('names none of those numbers in its catalogue: they never reach it', () => {
+    for (const [openmu] of OPENMU_MASTER) {
+      expect(MAGIC_EFFECTS[openmu]).toBeUndefined();
+      expect(buffRecipe(openmu).name).toBe(t('buff.unnamed', { number: openmu }));
     }
   });
 });

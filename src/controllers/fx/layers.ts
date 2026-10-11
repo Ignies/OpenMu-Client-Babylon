@@ -8,7 +8,6 @@ import { modelLayer } from './model';
 import { stampsLayer } from './stamps';
 import { linkedModelLayer } from './linkedModel';
 import { columnLayer } from './column';
-import { shroudLayer } from './shroud';
 import { pillarLayer } from './pillar';
 import { jointLayer } from './joint';
 import { raysLayer } from './rays';
@@ -53,7 +52,6 @@ export const EFFECT_LAYERS = [
   cardsLayer,
   particlesLayer,
   columnLayer,
-  shroudLayer, // one card over the view; the spawner's other effects draw over it
   pillarLayer, // its own meshes and the shared pools
   auraLayer, // drives the heads of the orbit ribbons it spawned through joint, so before it
   jointLayer, // reads aura's ribbon heads
