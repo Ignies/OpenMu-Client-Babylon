@@ -139,7 +139,9 @@ const trapCache = new Map<number, typeof ModelObject>();
  * with whatever `Data/Object<world+1>/Object<index+1>.bmd` the map it stands
  * on happens to hold - the spike row in Dungeon and the floor grate in Lost
  * Tower are the same three lines of client code. 105 (the Kanturu canon) is a
- * real NPC model and is not a trap here.
+ * real NPC model and is not a trap here. A map without that object (Kanturu
+ * Relics has no Object52 for its laser traps) leaves the original's model slot
+ * empty and the trap draws nothing, not the missing-model box.
  */
 function trapFactoryFor(npcType: number, modelIndex: number, castsShadow: boolean): typeof ModelObject {
   const cached = trapCache.get(npcType);
@@ -152,7 +154,12 @@ function trapFactoryFor(npcType: number, modelIndex: number, castsShadow: boolea
       const dir = this.objectDir;
       const file = `${dir}Object${(modelIndex + 1).toString().padStart(2, '0')}.glb`;
 
-      this.load(await loadGLTF(file, world));
+      try {
+        this.load(await loadGLTF(file, world));
+      } catch (error) {
+        console.warn(`Trap ${npcType}: no ${file} on this map, drawn as nothing:`, error);
+        this.Ready = true;
+      }
     }
   }
 

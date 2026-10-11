@@ -125,6 +125,8 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 - `npcModelTable.test.ts`: every row names a file in `public/game-assets` and has a scale > 0; the
   tables behave as plain objects and read the folders when asked.
 - `trapModels.test.ts`: every (map, trap) pair names an `Object<world+1>` model that exists.
+- `trapNpc.test.ts`: a trap on a map without the object it borrows (the laser trap in Kanturu Relics,
+  no Object52 there in the original either) stands ready with no body instead of the missing-model box.
 - `resolveModel.golden.test.ts`: what every type 0..600 is drawn with (class, scale, base, kit,
   shared classes) and the NPC tables, as hashes; update them on purpose. It runs the real model
   classes under Node.
