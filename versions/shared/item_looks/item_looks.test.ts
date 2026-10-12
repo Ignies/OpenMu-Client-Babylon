@@ -268,3 +268,27 @@ describe('the staffs', () => {
     });
   });
 });
+
+describe('the bows', () => {
+  it('Sylph Wind Bow: unlit, with Chrome06 swept across it (ZzzObject.cpp:7576-7599)', () => {
+    const s = r((T % 4000) * 0.0002 - 0.3);
+    expect(look(4, 21)).toEqual({
+      drawn: undefined,
+      passes: [
+        { mesh: 0, kind: 'unlit' },
+        { mesh: 0, kind: 'add', texture: 'Effect/Chrome06.OZJ', clamp: true, u: s, v: s },
+      ],
+    });
+  });
+
+  it('Albatross Bow: mesh 1 additive only, mesh 2 again and its own art by CHROME5 at half (:7649-7656)', () => {
+    expect(look(4, 22)).toEqual({
+      drawn: undefined,
+      passes: [
+        { mesh: 1, kind: 'bright' },
+        { mesh: 2, kind: 'add' },
+        { mesh: 2, kind: 'add', map: 'chrome5', gain: 0.5 },
+      ],
+    });
+  });
+});
