@@ -529,7 +529,8 @@ function calculateDefenseRate(
       break;
   }
 
-  const left = equipped(items, InventoryConstants.LeftHandSlot);
+  // EQUIPMENT_WEAPON_LEFT is slot 1, our RightHandSlot (ZzzInfomation.cpp:3222).
+  const left = equipped(items, InventoryConstants.RightHandSlot);
   if (left) blocking += itemBlocking(left);
 
   return blocking;
