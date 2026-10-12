@@ -9,7 +9,7 @@ the client-to-server encryption, the login fields and the offline flag.
   packet the client sends), `isOffline`, `gsSocket` / `csSocket`, `connectToConnectServer()`,
   `connectToGameServer(host, port, fallback?)`, `disconnectFrom...()`, `onGameServerReached()`,
   `switchToMapServer(...)`, `sendServerChangeAuthentication(characterName)`, `onSocketLost(socket)`,
-  `playOnline()` (back to the server list), `cancelLogin()` (the login Cancel, `LoginWin.cpp:416`), `lastGameServer`, `resumeHook`, `connectionLost`; the
+  `playOnline()` (back to the server list; a direct login: the login, `servers/directLogin.ts`), `cancelLogin()` (the login Cancel, `LoginWin.cpp:416`), `lastGameServer`, `resumeHook`, `connectionLost`; the
   login fields `username`, `password`, `rememberLogin`, `loginProcessing`, `loginError`,
   `loadAccount(id?, force?)`, `saveLoginData()`, `loginRequest(user, password)`, `retryLogin()`; the
   login tokens: `submitLogin()` / `canSubmitLogin` (the login window's OK: the password typed, or the
@@ -65,8 +65,8 @@ the client-to-server encryption, the login fields and the offline flag.
   (`closeNpcShop` on a lost socket).
 
 ## Packets
-- `Hello`: requests the server list (once).
-- `ServerListResponse`: fills `Servers.serverList`.
+- `Hello`: requests the server list (once; every time for a direct login).
+- `ServerListResponse`: fills `Servers.serverList`; a direct login waiting on the login asks for its first channel.
 - `ConnectionInfo`: connects to the game server it names.
 - `GameServerEntered`: sets the player id; map-server switch and resume take over here.
 - `LoginResponse`: character list on success (after a password login, a token request where tokens

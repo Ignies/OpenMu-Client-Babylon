@@ -99,7 +99,7 @@ everything the stack reads is rendered from `mu.env`, so `mu config` can change 
   origin, so a client loaded from another site reads it too:
 
   ```json
-  { "version": 1, "settings": { "heldHitRequest": false }, "modulesOff": [], "loginTokens": true, "modules": [] }
+  { "version": 1, "settings": { "heldHitRequest": false }, "modulesOff": [], "loginTokens": true, "directLogin": false, "modules": [] }
   ```
 
   `heldHitRequest` (`mu config` > Features, `MU_HELD_HIT_REQUEST` in `mu.env`, default off) sends a
@@ -138,6 +138,13 @@ everything the stack reads is rendered from `mu.env`, so `mu config` can change 
   plugin does (`openmu/readme.md`), and it is in every OpenMU image the installer builds. A client
   with "remember" ticked keeps a token instead of the password (Enhanced and Ultra). The tokens live
   in the `mu_plugins` schema of OpenMU's database, so `mu backup` (the database dump) carries them.
+
+  `directLogin` (`mu config` > Server list entry, `MU_DIRECT_LOGIN`, default off) makes the client
+  served here open straight on this server's login: no worlds list, no game server picker (it takes
+  the first channel), and logout, Select Server and a lost connection come back to the login. The
+  client reads it at boot from its own site's `/server.json` and takes the world from the
+  `serverlist.md` beside it; a client loaded from another site ignores it, and a missing or broken
+  file means the worlds list as before. Changing it needs no rebuild.
 
   `modules` (the `modules` folder of the state folder, empty by default) lists the modules this world
   streams to its players ([docs/module_streaming.md](../docs/module_streaming.md)). Put each module's
@@ -213,7 +220,7 @@ it makes the DKIM key first if there is none yet.
 - `cli/config.test.ts`: config round trip, answer checks, secrets, the module signing key (public only).
 - `cli/render/render.test.ts`: service env (secrets only where used, proxy pinned, trusted proxy),
   Caddyfile (both modes, admin login, route order), server list, compose interpolation,
-  `server.json` (default, the setting, the modules off, the modules folder, accepted by the client's
+  `server.json` (default, the setting, the direct login, the modules off, the modules folder, accepted by the client's
   parser, served on both hosts with the module files), the module signing key reaching the client build.
 - `cli/render/mail.test.ts`: the mail switch and the certificate e-mail choice, the mail site, ports,
   profile and env, the compose services (pinned, profile, volumes), the DNS records, the DKIM key file,

@@ -466,6 +466,9 @@ class ServerConfigStore {
   /** Set by `?cs=`/`?ws=`: wins over the selection, is never saved. */
   readonly urlProfile: ServerProfile | null;
 
+  /** The installer's direct login (`directLogin.ts`): the one world, over everything else; never saved. */
+  pinned: ServerProfile | null = null;
+
   constructor() {
     const saved = load();
     const { profile, selectId } = urlOverride(saved);
@@ -484,6 +487,7 @@ class ServerConfigStore {
    * one you keep going back to should not be on page three.
    */
   get all(): ServerProfile[] {
+    if (this.pinned) return [this.pinned];
     const rows = [...this.profiles, ...this.listed];
     const at = rows.findIndex(p => p.id === this.lastPlayedId);
 
@@ -504,6 +508,7 @@ class ServerConfigStore {
   /** The profile every connection is made from. */
   get active(): ServerProfile {
     return (
+      this.pinned ??
       this.urlProfile ??
       this.all.find(p => p.id === this.activeId) ??
       this.all[0] ??
@@ -672,6 +677,12 @@ class ServerConfigStore {
       }
     });
     this.save();
+  }
+
+  /** Direct login: `world` becomes the only world, and the selected one, for this launch. */
+  pin(world: ServerProfile): void {
+    this.pinned = world;
+    this.activeId = world.id;
   }
 
   reset(): void {
