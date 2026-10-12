@@ -29,7 +29,7 @@ clip is one file in `versions/shared/animations/` that says its own speed, flags
   `monsterSkillSwing` (0x69 `ReceiveMonsterSkill`: `c->MonsterSkill`, read and spent by the Aida, Swamp,
   Raklion and Empire Guardian hooks; Selupan keeps his; a guardian boss's Berserker raises `rage`, its
   `m_bCurrentIsRage_*`, which the rage look drops; Dark Ghost keeps 51 / 52 for its AttackEffect), `NO_MONSTER_SKILL`,
-  `monsterCastAttacks`, `monsterCastRewinds`, `playableMonsterClip`, `isMonsterSwingClip`,
+  `monsterCastAttacks`, `monsterCastRewinds`, `monsterCastStartsAttack`, `playableMonsterClip`, `isMonsterSwingClip`,
   `monsterFlinches` (WSclient.cpp:3380-3386), `KEEP_CLIP`.
 
 ## How it works

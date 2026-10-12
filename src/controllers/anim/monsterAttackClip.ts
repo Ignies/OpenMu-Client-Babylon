@@ -298,6 +298,11 @@ export function monsterCastAttacks(skill: number): boolean {
   return clip === 'attack' || clip === 'attackHeld';
 }
 
+/** Whether a monster's 0x19 of that skill starts AttackTime, so AttackEffect runs (ZzzCharacter.cpp:4132-4137). */
+export function monsterCastStartsAttack(skill: number): boolean {
+  return monsterCastOf(skill)?.attackTime !== false;
+}
+
 function castAction(state: MonsterAttackState, skill: number, input: MonsterAttackInput): number {
   const clip = monsterCastOf(skill)?.clip;
   if (clip === 'attack' || clip === 'attackHeld') return monsterAttack(state, input);

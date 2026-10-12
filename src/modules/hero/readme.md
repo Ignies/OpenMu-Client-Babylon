@@ -18,16 +18,18 @@ other folders share.
   Before those, the lit ancient set options (`PlusSpecial` / `PlusSpecialLevel`: min / max damage, damage by
   strength or agility, attack rate, defense, defense by agility or vitality, shield defense %, wizardry by energy)
   and the socket bonuses (`m_StatusBonus`) when the window passes the set and socket tables
-  (ZzzInfomation.cpp:2745-2812, :3005-3035, :3127-3129, :3248, :3361-3381). The stats the sets and sockets add
-  (`AddStrength` and the rest) are not shown or used yet. The shield's blocking and its +5 per option level
+  (ZzzInfomation.cpp:2745-2812, :3005-3035, :3127-3129, :3248, :3361-3381). The stats the worn items add
+  (`AddStrength` and the rest, `withWornStats`) count only in `IsRequireEquipItem`; they are not shown or used in the formulas yet. The shield's blocking and its +5 per option level
   lose the `CalcDurabilityPercent` share, and the excellent "defense success rate" on the shield, each armour
   piece and each ring adds 10% in turn, when `IsRequireEquipItem` passes (:3223-3246).
   Wizardry is energy plus the items' wizardry options only (`CalculateMagicDamage`, :2848-3001): the wing's,
   the right weapon's (a magic sword's damage option), the left weapon's, the staff and pendant excellent
   level / 20 and 2%, the Wizard's Ring 10%, each counted only when `IsRequireEquipItem` passes. As in the
   original, anything in the left hand adds the right weapon's option a second time (:2950-2979).
-  The window's magic rate (`staffRate`) is the staff's or magic sword's `MagicPower`, worn by the `MagicDur`
-  share (NewUICharacterInfoWindow.cpp:1336-1352).
+  The window's wizardry line reads the selected skill (`magicSkill`, `GetMagicSkillDamage`, CharacterManager.cpp:341-370):
+  its Damage on the minimum and 1.5 times it on the maximum, the set's magic power percent and skill attack (not the
+  set mastery rows); the summoner's curse skills read the plain values. The magic rate (`staffRate`) is that maximum
+  times the staff's or magic sword's `MagicPower` percent, worn by the `MagicDur` share (NewUICharacterInfoWindow.cpp:1226-1352).
 - `emotes.ts`: `EMOTES`, `EMOTE_RINGS`, `emoteById(id)`, `matchEmoteWord(text)` (the chat words that fire
   an emote, `CheckChatText`), `genderedEmoteAction`, type `EmoteId`.
 - `statAllocation.ts`: `StatAllocation.start(stat, amount)` / `cancel()`, `run`, `running`, `isRunning(stat)`.

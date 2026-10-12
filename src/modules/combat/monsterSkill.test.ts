@@ -21,7 +21,7 @@ vi.mock('@/ecs/current', () => ({
 await import('@versions/shared/skills/skillVisuals');
 const { installNet } = await import('./net');
 const { EventBus } = await import('@/core/eventBus');
-const { MonsterSkillAnimationPacket, ObjectAnimationPacket } = await import('@versions/shared/packets/ServerToClientPackets');
+const { MonsterSkillAnimationPacket, ObjectAnimationPacket, SkillAnimationPacket } = await import('@versions/shared/packets/ServerToClientPackets');
 const { effects } = await import('@/controllers/fx');
 const { lighting } = await import('@/controllers/lighting');
 const { TEX } = await import('@/controllers/fx/recipes');
@@ -134,6 +134,28 @@ describe('MonsterSkillAnimation (C1 69, ReceiveMonsterSkill, WSclient.cpp:4091-4
     stepClock(1);
     expect([(ghost.monsterAnimation as { action: A }).action, named('projectile').length]).toEqual([A.Attack2, 14]);
     (store.world as { playerEntity: Entity | null }).playerEntity = null;
+    onMap(72);
+  });
+
+  // ReceiveMagic starts AttackTime for most skills (WSclient.cpp:4131-5130), so AttackEffect runs the map's hook too.
+  it("draws Dark Ghost's attack effect on a 0x19 cast that starts AttackTime", () => {
+    onMap(70);
+    const cast = (skill: number) => {
+      const p = SkillAnimationPacket.createPacket();
+      p.SkillId = skill;
+      p.PlayerId = GHOST;
+      p.TargetId = TARGET;
+      EventBus.emit('SkillAnimation', p.buffer);
+    };
+    (ghost.monsterAnimation as { action: A }).action = A.Stop1;
+    monsterAttackState(ghost).monsterSkill = 51;
+    cast(9);
+    expect(named('column').length).toBe(1);
+    // AT_SKILL_DECAY's case starts no AttackTime.
+    spawned.length = 0;
+    monsterAttackState(ghost).monsterSkill = 51;
+    cast(38);
+    expect(named('column').length).toBe(0);
     onMap(72);
   });
 

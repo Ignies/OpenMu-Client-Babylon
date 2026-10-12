@@ -11,7 +11,7 @@ export interface MonsterSkillDef {
   readonly worlds?: readonly number[];
   /** By 0x69 skill: what the hook that picks the clip draws (SetCurrentActionMonster, SetBossMonsterAction). */
   readonly looks?: Readonly<Record<number, MonsterSkillLook>>;
-  /** After any swing, 0x18 or 0x69: the map's AttackEffectMonster, which reads the clip and `c->MonsterSkill`. */
+  /** After any swing (0x18, 0x69, or a 0x19 that starts AttackTime): the map's AttackEffectMonster, which reads the clip and `c->MonsterSkill`. */
   readonly attack?: MonsterSkillLook;
 }
 
