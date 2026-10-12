@@ -19,7 +19,8 @@ import { aimX, aimY } from '../../controllers/camera';
 import { sound } from '../../controllers/sound';
 import { Hero } from '../../modules/hero';
 import { Session } from '../../modules/session';
-import type { ISystemFactory } from '../world';
+import { mountKind } from '../../controllers/pets';
+import type { ISystemFactory, World } from '../world';
 import { isSliding } from './positionSlideSystem';
 
 /** `?autoPick=1`: the old full scene pick, read only for its ray. */
@@ -44,6 +45,43 @@ function rotationByte(rotYRadians: number): number {
   return Math.floor(((deg + 22.5) / 360) * 8 + 1) % 8;
 }
 
+/** A rest the hero walks to: the tile, the pose and the facing it ends in. */
+export interface RestTarget {
+  x: number;
+  y: number;
+  kind: RestKind;
+  useObjectAngle: boolean;
+  angle: number;
+}
+
+/**
+ * `Action`'s MOVEMENT_OPERATE arrival (ZzzInterface.cpp:3447-3593): within a tile of the
+ * target, a healing spot plays at once; a pose or seat first parks the server's walker on
+ * the target tile with the new facing, and a seat is refused on a mount outside town.
+ */
+export function arriveAtRest(hero: NonNullable<World['playerEntity']>, done: RestTarget): void {
+  const px = ~~hero.transform.pos.x;
+  const py = ~~hero.transform.pos.z;
+  if (Math.max(Math.abs(px - done.x), Math.abs(py - done.y)) > 1) return;
+
+  if (done.useObjectAngle) hero.transform.rot.y = done.angle;
+
+  if (done.kind !== 'healing') {
+    if (!Session.isOffline) Hero.sendWalkStop(done.x, done.y, hero.transform.rot.y);
+    const inSafeZone = hero.attributeSystem.isAboveZero('inSafeZone');
+    if (done.kind === 'sit' && mountKind(hero.charAppearance?.pet, inSafeZone) !== null) return;
+  }
+
+  const isFemale = hero.attributeSystem.isAboveZero('isFemale');
+  hero.playerAnimation.action = resolveGenderedAction(CLIENT_ACTION[done.kind], isFemale);
+
+  if (!Session.isOffline) {
+    Hero.sendAnimationRequest(rotationByte(hero.transform.rot.y), SERVER_ACTION[done.kind]);
+  }
+
+  if (done.kind !== 'healing') sound.play('Sound/pDropItem');
+}
+
 export const RestObjectSystem: ISystemFactory = world => {
   const scene = world.scene;
 
@@ -58,13 +96,7 @@ export const RestObjectSystem: ISystemFactory = world => {
   const tmpRay = new Ray(Vector3.Zero(), Vector3.Up(), Number.MAX_VALUE);
   const identity = Matrix.Identity();
 
-  let pending: {
-    x: number;
-    y: number;
-    kind: RestKind;
-    useObjectAngle: boolean;
-    angle: number;
-  } | null = null;
+  let pending: RestTarget | null = null;
 
   let clickedThisFrame = false;
 
@@ -198,35 +230,11 @@ export const RestObjectSystem: ISystemFactory = world => {
       const velocity = playerEntity.movement?.velocity;
       if (velocity && (velocity.x !== 0 || velocity.y !== 0)) return;
 
-      const px = ~~playerEntity.transform.pos.x;
-      const py = ~~playerEntity.transform.pos.z;
-
       const done = pending;
       pending = null;
       issuedPoint = null;
 
-      if (Math.max(Math.abs(px - done.x), Math.abs(py - done.y)) > 1) return;
-
-if (done.useObjectAngle) {
-        playerEntity.transform.rot.y = done.angle;
-      }
-
-      const isFemale = playerEntity.attributeSystem.isAboveZero('isFemale');
-      playerEntity.playerAnimation.action = resolveGenderedAction(
-        CLIENT_ACTION[done.kind],
-        isFemale
-      );
-
-      if (!Session.isOffline) {
-        Hero.sendAnimationRequest(
-          rotationByte(playerEntity.transform.rot.y),
-          SERVER_ACTION[done.kind]
-        );
-      }
-
-      if (done.kind !== 'healing') {
-        sound.play('Sound/pDropItem');
-      }
+      arriveAtRest(playerEntity, done);
     },
   };
 };
