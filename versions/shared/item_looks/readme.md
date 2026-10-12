@@ -33,8 +33,12 @@ index.ts    finds every file (glob) and hands them to item_fx's registerItemLook
   `wing` are the same on the phoenix wing the item carries (the Phoenix Soul Star's, MonkSystem.cpp:245).
   `emit` are what it creates there that outlives the frame (CreateParticle, CreateJoint: the running
   sparks, the Sword Breaker's drops, the Frost Mace's frost): run each drawn frame at a bone's world point
-  with the wearer (action, safe zone, facing, map) and the frame's length; each rolls its own `rand_fps_check(n)`
-  as `Math.random() * n < dt * 25`.
+  (and a point in its frame, cm, when one is named) with the wearer (action, safe zone, facing, map) and the
+  frame's length; each rolls its own `rand_fps_check(n)` as `Math.random() * n < dt * 25`.
+  The energy trails of the Imperial Sword, Grand Viper, Imperial Staff and Deadly Staff (`energyTrail` in
+  `imperial_sword.ts`) are BITMAP_JOINT_ENERGY SubType 17 / 47, a new one a tick, each living 12 ticks with
+  its head on the weapon's point. The original never sets their MaxTails (ZzzEffectJoint.cpp:254-263), so it
+  reads whatever the joint slot held before; we use 8, what its other eye-following trails (18-33) set (:292-325).
   `ecs/systems/weaponSpriteSystem.ts` draws them (`actors/weaponSprites.ts`).
 - The passes and sprites are the original's, drawn while the Item effects option draws the original passes
   (Legacy, Both); Off and Improved draw the plain model, as before.

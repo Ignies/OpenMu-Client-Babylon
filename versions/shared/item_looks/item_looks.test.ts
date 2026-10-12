@@ -1042,3 +1042,42 @@ describe('the held weapons\' emitters', () => {
     expect(itemHeldEmitters(2, 16)?.map(e => e.bone)).toEqual([24]);
   });
 });
+
+// BITMAP_JOINT_ENERGY SubType 17 (47 on EyeRight) set where the weapon's head was: LifeTime 12, a new one a tick,
+// following it (ZzzEffectJoint.cpp:254-263, :3086-3117); light from :463, :473.
+describe('the held weapons\' energy trails', () => {
+  const scene = {} as Scene;
+  function trails(group: number, num: number) {
+    const at = new Vector3(1, 2, 3);
+    const spawn = vi.spyOn(effects, 'spawn').mockImplementation(() => ({ alive: false, stop() {} }) as never);
+    for (const e of itemHeldEmitters(group, num) ?? []) e.emit(scene, at, { action: 0, safeZone: false, yaw: 0, map: 0 }, 1);
+    const joints = spawn.mock.calls.filter(c => c[0] === 'joint').map(c => c[3] as Record<string, unknown> & { head: (out: Vector3) => Vector3 });
+    spawn.mockRestore();
+    // The head follows the weapon's point as it moves.
+    at.set(4, 5, 6);
+    const heads = joints.map(j => j.head(new Vector3()).asArray());
+    return { joints: joints.map(({ head: _head, ...rest }) => rest), heads };
+  }
+  const trail = (colour: number[], width: number) => ({ maxTails: 8, width, colour, seconds: 12 / 25, texture: 'Effect/JointEnergy01.OZJ', fadeTail: 0 });
+
+  it('Imperial Sword: a violet trail 25 cm wide off Zx01 (bone 8), eight tails long (:7806-7813)', () => {
+    const { joints, heads } = trails(0, 28);
+    expect(joints).toEqual([trail([0.8, 0.2, 1], 0.25)]);
+    expect(heads).toEqual([[4, 5, 6]]);
+    expect(itemHeldEmitters(0, 28)?.map(e => [e.bone, e.offset])).toEqual([[8, undefined]]);
+  });
+
+  it('Grand Viper Staff: a violet trail 30 cm wide off the head 170 cm down bone 0 (:7180-7190)', () => {
+    expect(trails(5, 12).joints).toEqual([trail([0.8, 0.2, 1], 0.3)]);
+    expect(itemHeldEmitters(5, 12)?.find(e => e.offset)).toMatchObject({ bone: 0, offset: [0, -170, 0] });
+  });
+
+  it('Imperial Staff: a violet trail 30 cm wide off its head (bone 5) (:8056-8064)', () => {
+    expect(trails(5, 31).joints).toEqual([trail([0.8, 0.2, 1], 0.3)]);
+  });
+
+  it('Deadly Staff: a red trail 25 cm wide off Red02 (bone 3) (:8027-8033)', () => {
+    expect(trails(5, 30).joints).toEqual([trail([0.9, 0, 0], 0.25)]);
+    expect(itemHeldEmitters(5, 30)?.map(e => e.bone)).toEqual([3]);
+  });
+});

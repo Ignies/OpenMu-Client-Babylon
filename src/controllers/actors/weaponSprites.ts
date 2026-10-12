@@ -50,7 +50,11 @@ export class WeaponSprites {
       if (offset && typeof offset !== 'function') node.position.set(offset[0] * CM, offset[1] * CM, offset[2] * CM);
       return node;
     });
-    this.#emitAt = emitters.map(emitter => at(emitter.bone));
+    this.#emitAt = emitters.map(({ bone, offset }) => {
+      const node = at(bone);
+      if (offset) node.position.set(offset[0] * CM, offset[1] * CM, offset[2] * CM);
+      return node;
+    });
     this.#sprites = new HeldSprites(
       scene,
       this.nodes.map((node, i) => ({ node, texture: specs[i].texture, blend: 'add' as const }))
