@@ -11,7 +11,8 @@ original client's item passes, the item glow tiers and the weapon swing trails.
 - `itemDrawLevel.ts`: `itemDrawLevel(group, num, level, ground)`, the level an item is drawn at.
 - `itemLooks.ts`: `defineItemLook`, `registerItemLooks` (content's `versions/shared/item_looks/`,
   at boot), `itemBodyPasses(group, num)` (the `MeshPassSet` a model takes, shown while
-  `legacyItemEffectsOn()`), types `ItemLook`, `MeshPass`.
+  `legacyItemEffectsOn()`), `itemHeldSprites(group, num)` (the sprites a carried weapon draws),
+  `fixedLight`, `CHROME01`, types `ItemLook`, `MeshPass`, `HeldSprite`, `LookLight`.
 - `itemVisualTier.ts`: `itemVisualTier(item, ground)` (cached descriptor), `strongestTierOf(items)` /
   `strongestTier(items)`, `setItemGlowClock` / `itemGlowClock`, `itemEmissiveAt`, `itemHaloAt`,
   `itemLightColorAt`, type `ItemVisualTier`.

@@ -46,11 +46,18 @@ type TextureKey =
   | 'flare01Red'
   | 'fi01'
   | 'fi02'
-  | 'fireRed';
+  | 'fireRed'
+  | 'impact03'
+  | 'impact01'
+  | 'shiny02'
+  | 'shiny05'
+  | 'lightmarks'
+  | 'pinLight'
+  | 'waterfall4';
 
 const TEXTURES: Record<
   TextureKey,
-  { file: string; size: number; frames?: number }
+  { file: string; size: number; frames?: number; height?: number }
 > = {
   smoke: { file: 'Effect/smoke01.OZJ', size: 64 },
   cloud: { file: 'Effect/clouds.OZJ', size: 256 },
@@ -74,6 +81,14 @@ const TEXTURES: Record<
   fi01: { file: 'Effect/fi01.OZJ', size: 128 },
   fi02: { file: 'Effect/fi02.OZT', size: 256 },
   fireRed: { file: 'Effect/firered.OZJ', size: 64 },
+  // The held weapons' sprites (ZzzCharacter.cpp:7027-8386); `height` where the sheet is not square.
+  impact03: { file: 'Object9/Impack03.OZJ', size: 64 },
+  impact01: { file: 'Effect/impack01.OZJ', size: 64 },
+  shiny02: { file: 'Effect/Shiny02.OZJ', size: 32, height: 64 },
+  shiny05: { file: 'Effect/shiny05.OZJ', size: 64 },
+  lightmarks: { file: 'Effect/lightmarks.ozj', size: 128 },
+  pinLight: { file: 'Effect/pin_lights.OZJ', size: 16, height: 128 },
+  waterfall4: { file: 'Effect/waterFall4.OZJ', size: 64 },
 };
 
 /**
@@ -1120,6 +1135,8 @@ export function emissionsFor(
 type Pool = {
   manager: SpriteManager;
   pixelSize: number;
+  /** Height over width: `RenderSprite` draws the bitmap at its own size (zzzeffectsprite.cpp:73-75). */
+  aspect: number;
   frames: number;
   free: Sprite[];
   /** A `dark` sheet's brightest texel, which its alpha was stretched from. */
@@ -1186,7 +1203,7 @@ async function getPool(
 
   if (!inFlight) {
     inFlight = (async () => {
-      const { file, size } = TEXTURES[texture];
+      const { file, size, height = size } = TEXTURES[texture];
 
       // A sheet this version never shipped: no pool, no particles, and no
       // fetch per emission for the rest of the session (`hasDataFile`).
@@ -1200,7 +1217,7 @@ async function getPool(
         `effectParticles_${key}`,
         sheet.url,
         POOL_SIZE,
-        { width: size, height: size },
+        { width: size, height },
         target
       );
 
@@ -1226,6 +1243,7 @@ async function getPool(
       const pool: Pool = {
         manager,
         pixelSize: size,
+        aspect: height / size,
         frames: TEXTURES[texture].frames ?? 1,
         free: [],
         cover: sheet.cover,
@@ -1656,7 +1674,19 @@ export class BonedParticleEmitter {
 }
 
 /** A sheet a held sprite can be drawn with. */
-export type HeldTexture = 'clud64' | 'flare01' | 'flare01Red' | 'flareBlue';
+export type HeldTexture =
+  | 'clud64'
+  | 'flare01'
+  | 'flare01Red'
+  | 'flareBlue'
+  | 'impact03'
+  | 'impact01'
+  | 'shiny02'
+  | 'shiny05'
+  | 'lightmarks'
+  | 'pinLight'
+  | 'waterfall2'
+  | 'waterfall4';
 
 /** One sprite riding a node: `CreateSprite`'s sheet and SubType blend. */
 export type HeldPoint = {
@@ -1738,7 +1768,7 @@ export class HeldSprites {
 
       const size = (pool.pixelSize * out.scale) / TILE_CM;
       sprite.width = size;
-      sprite.height = size;
+      sprite.height = size * pool.aspect;
       sprite.angle = (out.rotation * Math.PI) / 180;
 
       // RenderSprite packs the light a byte a channel, held in 0..1 (ZzzOpenglUtil.cpp:918-933, RenderUtils.h:8-18).

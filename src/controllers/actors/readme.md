@@ -75,6 +75,10 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   `DropObject` and the bag icon both use it), and
   `loadItemModel(scene, parent, group, num, file)`, such a model with no entity behind it. A worn
   `Player/` part keeps its own file's skeleton, posed at its first frame, as a drop does.
+- `weaponSprites.ts`: `WeaponSprites`, a held weapon's `RenderLinkObject` sprites (an item look's
+  `held`) bound to its loaded model: a node per sprite under its bone (the root without a skeleton) at
+  its point in cm, drawn by `fx` `HeldSprites` while the weapon is; `ecs/systems/weaponSpriteSystem.ts`
+  makes one per hand and rebuilds it when the hand's model changes.
 - `itemIcon.ts`: `itemIconJob(scene, item)`, the shot of a bag icon drawn from the item's model, and
   `liveItemIconSource(scene)` / `liveItemSpinSource(scene)`, what the app puts in the interface's
   live-icon and spin slots;
@@ -169,6 +173,9 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 - `chaosCastleUnit.test.ts`: the castle's weapons per class, own weapons elsewhere, transformed
   players and NPCs keep theirs, no armour glow in the castle.
 - `approachPath.test.ts`: walk truncation at range, distance along the sent path, stall capping.
+- `weaponSprites.test.ts`: a held weapon's sprites ride their bone at their point in cm, read scale, light
+  and rotation off WorldTime and the wearer's light, move a jittering point only while drawn, and fall back
+  on the root without a skeleton (`ecs/systems/weaponSpriteSystem.test.ts`: one per hand, rebuilt with the model).
 - `deserializeAppearance.test.ts`: `isAppearanceBlank` on empty and real previews.
 - `itemModel.test.ts`: the seeds and seed spheres dressed in their element's colour with Chrome01 (a sphere
   but its mesh 1), the Fireworks' mesh 0 at a fixed full light and mesh 1 red with Chrome01, every other
