@@ -299,7 +299,8 @@ type DerivedStats = {
   dualWield: boolean;
   wizardryMin: number;
   wizardryMax: number;
-  staffRate: number;
+  /** Null without a staff or a magic sword in the right hand; "(+0)" still prints with one (:1336-1353). */
+  staffRate: number | null;
   curseMin: number;
   curseMax: number;
   /** Null without a book in the left hand: the line then has no "(+N)". */
@@ -656,7 +657,8 @@ function ringMagicPercent(ring: Item | null, input: CharacterStatsInput): number
 function calculateWizardry(input: CharacterStatsInput): {
   min: number;
   max: number;
-  percent: number;
+  /** Null without a staff or a magic sword in the right hand: the line then has no "(+N)". */
+  percent: number | null;
 } {
   const { energy, items } = input;
   const range = { min: Math.trunc(energy / 9), max: Math.trunc(energy / 4) };
@@ -706,8 +708,9 @@ function calculateWizardry(input: CharacterStatsInput): {
   }
 
   // The window's magic percent: a staff's or a magic sword's, worn by the MagicDur share (NewUICharacterInfoWindow.cpp:1336-1351).
-  const power = right && (isStaff(right) || rightKind(right, num => MAGIC_SWORDS.has(num)) === 'damage') ? Math.fround(itemMagicPower(right) / 100) : 0;
-  const magicPercent = right ? Math.fround(power - Math.fround(power * durabilityPercent(right, false, true))) : 0;
+  if (!right || !(isStaff(right) || rightKind(right, num => MAGIC_SWORDS.has(num)) === 'damage')) return { ...range, percent: null };
+  const power = Math.fround(itemMagicPower(right) / 100);
+  const magicPercent = Math.fround(power - Math.fround(power * durabilityPercent(right, false, true)));
   return { ...range, percent: magicPercent };
 }
 
@@ -800,6 +803,8 @@ function magicSkillDamage(range: Range, skill: CharacterStatsInput['magicSkill']
 }
 
 /** The helpers the character window reads (NewUICharacterInfoWindow.cpp:707-737, :954-959). */
+/** ITEM_ELITE_TRANSFER_SKELETON_RING, ITEM_HELPER + 39 (_enum.h:2742). */
+const ELITE_SKELETON_RING = 39;
 const PET = { imp: 1, fenrir: 37, demon: 64, panda: 80, unicorn: 106, skeleton: 123 } as const;
 /** The gold Fenrir's option bit. */
 const FENRIR_GOLD = 0x04;
@@ -888,6 +893,12 @@ export function deriveCharacterStats(bare: CharacterStatsInput): DerivedStats {
   const curse = withPet(withRing(calculateCurse(input), items, 'curse'), pet, 'curse', level);
   // The Panda and the Unicorn add 50 defense.
   const petDefense = pet?.group === GROUP_HELPER && (pet.num === PET.panda || pet.num === PET.unicorn) ? 50 : 0;
+  // The elite skeleton ring in either hand adds a tenth, harmony included (NewUICharacterInfoWindow.cpp:946-952).
+  const defense = withSetDefense(calculateDefense(input, base), input, lines, socket) + harmony.defense;
+  const eliteRing = [InventoryConstants.Ring1Slot, InventoryConstants.Ring2Slot].some(slot => {
+    const ring = equipped(items, slot);
+    return ring?.group === GROUP_HELPER && ring.num === ELITE_SKELETON_RING;
+  });
 
   return {
     attackSpeed: attackSpeedOf(bare.charClass, bare.agility),
@@ -898,7 +909,7 @@ export function deriveCharacterStats(bare: CharacterStatsInput): DerivedStats {
     attackRate: calculateAttackRate(input, base) + setSum(lines, SET.attackRate) + socket.attackRate,
     attackRatePvp: calculateAttackRatePvp(input, base),
     attackRatePvpBonus: harmony.attackRate,
-    defense: withSetDefense(calculateDefense(input, base), input, lines, socket) + harmony.defense + petDefense,
+    defense: defense + (eliteRing ? Math.trunc(defense / 10) : 0) + petDefense,
     harmonyDefense: harmony.defense,
     defenseRate: Math.trunc(calculateDefenseRate(input, base) * socket.defenseRate),
     defenseRatePvp: calculateDefenseRatePvp(input, base),
@@ -906,7 +917,7 @@ export function deriveCharacterStats(bare: CharacterStatsInput): DerivedStats {
     wizardryMin: wizardry.min + maxMg,
     wizardryMax: wizardry.max + maxMg,
     // (int)((iMagicDamageMaxInitial + maxMg) * magicPercent) (:1352).
-    staffRate: Math.trunc(Math.fround((skilled.max + maxMg) * magic.percent)),
+    staffRate: magic.percent === null ? null : Math.trunc(Math.fround((skilled.max + maxMg) * magic.percent)),
     curseMin: curse.min,
     curseMax: curse.max,
     curseRate: curseRate(input, curse.max),

@@ -111,7 +111,14 @@ describe('the character window wizardry with a staff', () => {
   it("takes the Ancient Staff's magic power from the right hand (slot 0), not from slot 1", () => {
     // 38% of the 112 maximum.
     expect(held(0)).toBe(42);
-    expect(held(1)).toBe(0);
+    expect(held(1)).toBeNull();
+  });
+
+  // The line keeps its "(+N)" while a staff is held, "(+0)" included (:1336-1353).
+  it('reads 0, not null, for a staff whose rate truncates to nothing', () => {
+    const items: (Item | null)[] = new Array(12).fill(null);
+    items[0] = { group: 5, num: 0, durability: 20 };
+    expect(deriveCharacterStats({ charClass: CharacterClassNumber.DarkWizard, level: 1, strength: 18, agility: 18, vitality: 15, energy: 20, leadership: 0, items }).staffRate).toBe(0);
   });
 
   // NewUICharacterInfoWindow.cpp:1336-1352: the magic swords too, worn by the MagicDur share.
@@ -125,7 +132,7 @@ describe('the character window wizardry with a staff', () => {
   it('reads the Rune Blade, Explosion Blade, Sword Dancer, Dark Reign Blade and Imperial Sword', () => {
     expect(rate({ group: 0, num: 31, durability: 93 })).toBe(58);
     for (const num of [21, 23, 25, 28]) expect(rate({ group: 0, num, durability: 90 })).toBeGreaterThan(0);
-    expect(rate({ group: 0, num: 26, durability: 90 })).toBe(0);
+    expect(rate({ group: 0, num: 26, durability: 90 })).toBeNull();
   });
 
   it("loses half of the Legendary Staff's rate below 20% of its MagicDur", () => {
@@ -195,7 +202,7 @@ describe('the wizardry of a held staff', () => {
     const plain = harmonized({ 0: staff({ lvl: 2 }) }, 600, null);
     const lit = harmonized({ 0: staff({ lvl: 2, socketBonus: 0x12 }) });
     expect(lit).toMatchObject({ wizardryMin: plain.wizardryMin + 10, wizardryMax: plain.wizardryMax + 10 });
-    expect(lit.staffRate).toBeGreaterThan(plain.staffRate);
+    expect(lit.staffRate).toBeGreaterThan(plain.staffRate ?? 0);
     expect(harmonized({ 0: staff({ lvl: 1, socketBonus: 0x12 }) }).wizardryMin).toBe(harmonized({ 0: staff({ lvl: 1 }) }).wizardryMin);
   });
 
@@ -345,6 +352,15 @@ describe('the character window with harmony and 380 options', () => {
     const lit = knight({ 0: kris(), 1: kris(), 3: armour({ socketBonus: 0x14 }) });
     expect(lit).toMatchObject({ defense: plain.defense + 64, harmonyDefense: 64 });
     expect(plain.harmonyDefense).toBe(0);
+  });
+
+  // iChangeRingAddDefense = (t_adjdef + maxdefense) / 10 with either ring, before the Panda's 50 (:946-957).
+  it('adds a tenth of the defense, harmony included, for the elite skeleton ring', () => {
+    const ring = { group: 13, num: 39, durability: 255 };
+    const lit = knight({ 0: kris(), 1: kris(), 3: armour({ socketBonus: 0x14 }) });
+    expect(knight({ 0: kris(), 1: kris(), 3: armour(), 11: ring }).defense).toBe(plain.defense + Math.trunc(plain.defense / 10));
+    expect(knight({ 0: kris(), 1: kris(), 3: armour({ socketBonus: 0x14 }), 10: ring }).defense).toBe(lit.defense + Math.trunc(lit.defense / 10));
+    expect(knight({ 0: kris(), 1: kris(), 3: armour(), 8: helper(80), 10: ring }).defense).toBe(plain.defense + Math.trunc(plain.defense / 10) + 50);
   });
 });
 
