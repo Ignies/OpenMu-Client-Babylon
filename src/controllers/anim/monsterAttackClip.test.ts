@@ -299,6 +299,16 @@ describe('monsterSkillSwing (0x69)', () => {
     expect(defender.rage).toBe(false);
   });
 
+  it('Empire Guardian: Dark Ghost keeps 51 and 52 for its AttackEffect and spends any other (GMEmpireGuardian2.cpp:1099-1121)', () => {
+    const ghost = fresh();
+    cast(ghost, 52, 70, 515);
+    expect(ghost.monsterSkill).toBe(52);
+    expect(monsterAttack(ghost, input(70, 515))).toBe(A.Attack2);
+    cast(ghost, 47, 70, 515);
+    expect(ghost.monsterSkill).toBe(0xffff);
+    expect(monsterAttack(ghost, input(70, 515))).toBe(A.Attack1);
+  });
+
   it('Empire Guardian: the shared list on every map, each map its own (GMEmpireGuardian1-3)', () => {
     expect(cast(fresh(), 52, 71, 506)).toBe(A.Attack3);
     expect(cast(fresh(), 49, 69, 513)).toBe(A.Appear);

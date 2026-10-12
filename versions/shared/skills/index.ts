@@ -15,6 +15,6 @@ const SHARED_SKILLS: readonly SkillDef[] = Object.values(files)
 
 registerSkills(SHARED_SKILLS);
 // A monster's 0x69 looks (`defineMonsterSkill`), by the monsters whose map hook draws them.
-registerMonsterSkills(Object.values(files).flatMap(m => (m.default && 'looks' in m.default ? [m.default] : [])));
+registerMonsterSkills(Object.values(files).flatMap(m => (m.default && 'monsters' in m.default ? [m.default] : [])));
 registerBuffLooks(commonBuffLooks);
 registerLauncherArrows(LAUNCHER_ARROWS);

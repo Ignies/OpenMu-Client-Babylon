@@ -2,7 +2,7 @@ import { defineSkill } from '@/controllers/skills/define';
 import { FIRE_SPARKS, RGBS, TEX } from '@/controllers/fx/recipes';
 import { FIRE_BALL_EMBERS, FireBallLook, atRelease, fireBallFlight, groundFlare, lavaChips, perTickRoll, placeBodyLight, releaseSound, softExplosion } from '../_shared';
 import { type ParticleRecipe, type RGB } from '@/controllers/fx/core';
-import { Step, burn, cm, explosion, particles, ring, scorch, sprite } from '@/controllers/skills/visuals';
+import { type SkillContext, Step, burn, cm, explosion, particles, ring, scorch, sprite } from '@/controllers/skills/visuals';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { playCombat } from '@/controllers/sound/combat';
 
@@ -62,9 +62,14 @@ const METEOR_DUST: ParticleRecipe = {
 const meteor = (landing: Step, look?: FireBallLook): Step =>
   atRelease((feet, c) => {
     releaseSound('Sound/eMeteorite')(feet, c);
-    const from = new Vector3(feet.x + cm(130 + Math.random() * 32), feet.y + cm(400), feet.z);
-    fireBallFlight(c, 2, from, feet, { scale: 1 + Math.random() * 0.7, tail: perTickRoll(0.4, 4, 0.1), alongPath: true, ...look }, p => landing(p, c));
+    fall(feet, c, landing, look);
   });
+
+/** MODEL_FIRE sub0 falling on `feet`, then `landing` where it lands. */
+function fall(feet: Vector3, c: SkillContext, landing: Step, look?: FireBallLook): void {
+  const from = new Vector3(feet.x + cm(130 + Math.random() * 32), feet.y + cm(400), feet.z);
+  fireBallFlight(c, 2, from, feet, { scale: 1 + Math.random() * 0.7, tail: perTickRoll(0.4, 4, 0.1), alongPath: true, ...look }, p => landing(p, c));
+}
 
 /** The meteor's landing: 6 chips and one untinted BITMAP_EXPLOTION 80 cm up, which plays SOUND_EXPLOTION01 (ZzzEffectParticle.cpp:2466-2485). */
 const meteorLanding = (tint: RGB = RGBS.white): Step => (p, c) => {
@@ -72,6 +77,9 @@ const meteorLanding = (tint: RGB = RGBS.white): Step => (p, c) => {
   lavaChips(6)(p, c);
   playCombat('Sound/eExplosion', p);
 };
+
+/** A bare `CreateEffect(MODEL_FIRE, feet)` and its landing, no cast and no sound of its own (Dark Ghost's fire). */
+export const dropMeteor: Step = (feet, c) => fall(feet, c, meteorLanding());
 
 /** The meteor's glow card and embers in flight. */
 const METEOR_LOOK: FireBallLook = { glow: { texture: TEX.flare, colour: [1, 0.45, 0.12], size: 1.5, spin: 3 }, embers: FIRE_BALL_EMBERS };

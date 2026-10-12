@@ -161,3 +161,39 @@ export const litBlow = (chips: ParticleRecipe): Step => (at, c) =>
  * at `1 - i / (MaxTails - 1)`: a joint still filling starts at slot `MaxTails - 1 - NumTails`, the slots before it closed on its head.
  */
 export const tailOfSlot = (i: number, numTails: number, maxTails: number): number => Math.max(0, i - (maxTails - 1 - numTails));
+
+/** One BITMAP_FLARE sub2: its spot, LifeTime 25-74 and first `Direction[2]` 35-54 (ZzzEffectJoint.cpp:1786-1798). */
+export interface RisingFlare {
+  x: number;
+  z: number;
+  life: number;
+  rise: number;
+}
+
+export const risingFlare = (x: number, z: number): RisingFlare => ({ x, z, life: 25 + Math.floor(Math.random() * 50), rise: 35 + Math.floor(Math.random() * 20) });
+
+/**
+ * BITMAP_FLARE sub2 joints from `floor`: Flare.jpg, white, width 40, 20 tails, still until LT 25, then up
+ * `Direction[2] + 5` a tick (ZzzEffectJoint.cpp:5455-5462). `age` is the ticks each has moved (below 0: not born).
+ */
+export function risingFlares(scene: Scene, flares: readonly RisingFlare[], floor: number, age: () => number, seconds: number): void {
+  effects.spawn('joint', scene, Vector3.Zero(), {
+    paths: {
+      count: flares.length,
+      fill: (k, j, out) => {
+        const fl = flares[k];
+        const a = age();
+        if (a < 0 || a > fl.life) return 0;
+        const r = Math.min(26, Math.max(0, a - tailOfSlot(j, Math.min(20, a + 1), 20) - (fl.life - 25)));
+        out.set(fl.x, floor + cm(r * fl.rise + 2.5 * r * (r + 1)), fl.z);
+        return 1;
+      },
+    },
+    maxTails: 19,
+    seconds,
+    width: cm(40),
+    fadeTail: 0,
+    colour: RGBS.white,
+    texture: TEX.flareBig,
+  });
+}

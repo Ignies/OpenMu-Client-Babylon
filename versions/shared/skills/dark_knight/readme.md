@@ -37,7 +37,7 @@ Dark Knight skills, one folder per skill. Rules for skill folders: [../readme.md
 - sword blow steps: `atSwordBlow`, `swordSpark`, `litBlow`, `strikeOn`;
 - the wielded weapon and its scale and light: `wieldedWeapon`, `itemScale`, `ITEM_LIGHT`;
 - joint sparks: `JOINT_SPARKS`, `JOINT_SPARKS_HD`, `SPARK_CHIPS_HD`, `jointSpark`, `sparkHeading`;
-- helpers: `rand`, `muAngles`, `terrainLevel` (from `../_shared.ts`), `sayAt`, `tailOfSlot`, `DRILL_EMITTER_TICKS`.
+- helpers: `rand`, `muAngles`, `terrainLevel` (from `../_shared.ts`), `sayAt`, `tailOfSlot`, `DRILL_EMITTER_TICKS`; `risingFlare` / `risingFlares` (BITMAP_FLARE sub2: Swell Life's column, Selupan's cure).
 
 ## Depends on / used by
 - uses: `../_shared.ts`, `@/controllers/{skills,fx,lighting,sound,combat}`
