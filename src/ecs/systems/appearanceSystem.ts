@@ -12,7 +12,7 @@ import type { CharacterClassNumber } from '../../core/types';
 import type { ISystemFactory, Item } from '../world';
 import { settle } from '../../controllers/assets';
 import { syncGmMark } from './gmMark';
-import { syncContributorMark } from './contributorMark';
+import { syncCreditsAccent } from './creditsAccent';
 
 function loadPart(
   part: Item | null,
@@ -100,8 +100,8 @@ export const AppearanceSystem: ISystemFactory = world => {
       for (const entity of query) {
         const { charAppearance, modelObject, visibility, attributeSystem } =
           entity;
-        // The credits' contributor halo and aura, hidden with the body (contributorMark.ts).
-        if (modelObject.Ready && isPlayerBody(modelObject)) syncContributorMark(entity, modelObject, visibility.state !== 'hidden');
+        // The credits (creditsAccent.ts).
+        if (modelObject.Ready && isPlayerBody(modelObject)) syncCreditsAccent(entity, modelObject, visibility.state !== 'hidden');
         if (visibility.state === 'hidden') continue;
         // The Webzen mark follows buffs, not the equipment (gmMark.ts).
         if (modelObject.Ready && isPlayerBody(modelObject)) syncGmMark(entity, modelObject);
