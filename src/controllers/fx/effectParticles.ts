@@ -32,6 +32,8 @@ type TextureKey =
   | 'fireHik1'
   | 'fireHik2'
   | 'fireHik3'
+  | 'fireHik1Mono'
+  | 'fireHik2Mono'
   | 'fireHik3Mono'
   | 'waterfall1'
   | 'waterfall2'
@@ -78,6 +80,8 @@ const TEXTURES: Record<
   fireHik1: { file: 'Effect/firehik01.OZJ', size: 64 },
   fireHik2: { file: 'Effect/firehik02.OZJ', size: 64 },
   fireHik3: { file: 'Effect/firehik03.OZJ', size: 64 },
+  fireHik1Mono: { file: 'Effect/firehik_mono01.OZJ', size: 64 },
+  fireHik2Mono: { file: 'Effect/firehik_mono02.OZJ', size: 64 },
   fireHik3Mono: { file: 'Effect/firehik_mono03.OZJ', size: 64 },
   waterfall1: { file: 'Effect/waterFall1.OZJ', size: 64 },
   waterfall2: { file: 'Effect/waterFall2.OZJ', size: 64 },
@@ -152,6 +156,11 @@ type Particle = {
   sx: number;
   sy: number;
   sz: number;
+  /** What it rides (`o->Target`), in tiles, and where that was last tick (cm): it moves as far as that does. */
+  anchor: Anchor | null;
+  ax: number;
+  ay: number;
+  az: number;
   lr: number;
   lg: number;
   lb: number;
@@ -184,6 +193,9 @@ const plainColor = (p: Particle, out: Color4) => out.set(p.lr, p.lg, p.lb, 1);
 export type NodeTurn = Readonly<{ x: number; y: number; z: number }>;
 
 export const NO_TURN: NodeTurn = { x: 0, y: 0, z: 0 };
+
+/** A point a particle rides, in tiles, rewritten in place by its owner. */
+export type Anchor = Readonly<{ x: number; y: number; z: number }>;
 
 /** `AngleMatrix` (ZzzMathLib.cpp:185-212) of the MU `Angle` the node's turn stands for. */
 function turnWith(p: Particle, turn: NodeTurn): void {
@@ -671,6 +683,130 @@ function shiny6Kind(texture: TextureKey): ParticleKind {
     update(p, f) {
       p.scale -= 0.01 * f;
       p.rotation -= 5 * f;
+    },
+    color: plainColor,
+  };
+}
+
+/**
+ * A mono fire jet: 8 ticks, `(rand() % 42 + 12) * 0.01 * Scale` big, `rand() % 360` turned, alpha up 0.2-0.3 a tick
+ * to 1 and down 0.1 below `fadeBelow` ticks left, in its light times alpha. A tick it grows 0.08-0.1 (more in its
+ * last 3), turns 5 degrees and moves 8 cm along `(0, -1, 0)` turned by its object's Angle, which the tick's
+ * MovePosition does here.
+ */
+function fireJetKind(texture: TextureKey, fadeBelow: number): ParticleKind {
+  return {
+    texture,
+    blend: 'add',
+    init(p, scale) {
+      p.lifeTime = 8;
+      p.scale = (rand(42) + 12) * 0.01 * scale;
+      p.rotation = rand(360);
+      p.alpha = 0;
+      p.vy = -8;
+      p.lr = p.lg = p.lb = 0;
+    },
+    update(p, f) {
+      if (p.lifeTime < fadeBelow) p.alpha -= f * 0.1;
+      else if (p.alpha < 1) p.alpha += f * (rand(2) + 2) * 0.1;
+      else p.alpha = 1;
+      if (p.alpha < 0.1) {
+        p.live = false;
+        return;
+      }
+      p.lr = p.tr * p.alpha;
+      p.lg = p.tg * p.alpha;
+      p.lb = p.tb * p.alpha;
+      p.scale += (rand(3) + 8) * 0.01 * f;
+      if (p.lifeTime < 3) p.scale += (10 - p.lifeTime) * 0.02 * f;
+      p.rotation += 5 * f;
+    },
+    color: plainColor,
+  };
+}
+
+/**
+ * `BITMAP_SMOKE + 3` SubType 3 / 4 (ZzzEffectParticle.cpp:1743-1764): `Scale * (rand() % 64 + 64) * 0.02` big,
+ * `rand() % 360` turned, up to 125 cm aside and `rand() % 45` under, `(rand() % 100 - 50) * 0.1` Gravity, white
+ * whatever its light. A tick it keeps 1/1.012 of its light (gone at 0.05), grows 0.01, turns Gravity / 2 and rises
+ * |Gravity| (:5938-5962); drawn subtracted (:9118-9121).
+ */
+function smoke3Kind(texture: TextureKey, life: number): ParticleKind {
+  return {
+    texture,
+    blend: 'subtract',
+    init(p, scale) {
+      p.lifeTime = life;
+      p.scale = scale * (rand(64) + 64) * 0.02;
+      p.rotation = rand(360);
+      p.px += rand(250) - 125;
+      p.py += rand(250) - 125;
+      p.pz -= rand(45);
+      p.gravity = (rand(100) - 50) * 0.1;
+      p.lr = p.lg = p.lb = 1;
+    },
+    update(p, f) {
+      if (p.lr <= 0.05) {
+        p.live = false;
+        return;
+      }
+      const keep = Math.pow(1 / 1.012, f);
+      p.lr *= keep;
+      p.lg *= keep;
+      p.lb *= keep;
+      p.scale += 0.01 * f;
+      p.rotation += (p.gravity / 2) * f;
+      if (p.gravity <= 0) p.gravity = -p.gravity;
+      p.pz += p.gravity * f;
+    },
+    color: plainColor,
+  };
+}
+
+/** The first card's rolls, which the other two of one `BITMAP_WATERFALL_4` take. */
+const orbitRolls = { scale: 0.1, rotation: 0, distance: 5, timer: 0 };
+
+/**
+ * `BITMAP_WATERFALL_4` (ZzzEffect.cpp:5819-5826): 80 ticks, `rand() % 20 * 0.01 + 0.1` big, `rand() % 360` turned,
+ * `rand() % 10 + 5` out and `rand() % 360` radians round. A tick it goes 2.1 out, 0.1 round and 0.7 degrees on, keeps
+ * 0.95 of its light, and each of its three cards sits on its own circle about where it was made
+ * (MoveHandlers.cpp:9093-9133).
+ */
+function waterfallOrbitKind(plane: 0 | 1 | 2): ParticleKind {
+  return {
+    texture: 'waterfall4',
+    blend: 'add',
+    init(p) {
+      const r = orbitRolls;
+      if (plane === 0) {
+        r.scale = rand(20) * 0.01 + 0.1;
+        r.rotation = rand(360);
+        r.distance = rand(10) + 5;
+        r.timer = rand(360);
+      }
+      p.lifeTime = 80;
+      p.scale = r.scale;
+      p.rotation = r.rotation;
+      p.sx = p.px;
+      p.sy = p.py;
+      p.sz = p.pz;
+      // Distance and Timer ride in the unused gravity and alpha.
+      p.gravity = r.distance;
+      p.alpha = r.timer;
+    },
+    update(p, f) {
+      p.alpha += 0.1 * f;
+      p.gravity += 2.1 * f;
+      p.rotation += 0.7 * f;
+      const keep = Math.pow(0.95, f);
+      p.lr *= keep;
+      p.lg *= keep;
+      p.lb *= keep;
+      const c = Math.cos(p.alpha) * p.gravity;
+      const s = Math.sin(p.alpha) * p.gravity;
+      p.px = p.sx + (plane === 0 ? c : plane === 1 ? s : 0);
+      p.py = p.sy + (plane === 0 ? 0 : plane === 1 ? c : s);
+      p.pz = p.sz + (plane === 0 ? s : plane === 1 ? 0 : c);
     },
     color: plainColor,
   };
@@ -1447,6 +1583,83 @@ const KINDS = {
    */
   shiny6_1: shiny6Kind('shiny05'),
   light6_1: shiny6Kind('flare01'),
+
+  /**
+   * Medusa's hand fires: `BITMAP_FIRE_HIK1_MONO` SubType 4, `HIK2_MONO` 8 and `HIK3_MONO` 5 (ZzzEffectParticle.cpp:1885,
+   * :364, :1972; :6251, :4481, :6480). Made on the monster's turn and riding it (`fireJetKind`).
+   */
+  fireMono1_4: fireJetKind('fireHik1Mono', 5),
+  fireMono2_8: fireJetKind('fireHik2Mono', 5),
+  fireMono3_5: fireJetKind('fireHik3Mono', 4),
+
+  /**
+   * `BITMAP_WATERFALL_4` SubType 15, the Dark Ghost's attack drops: 20 ticks, `rand() % 100 / 100 * 2` Gravity,
+   * `(rand() % 10 + 10) * 0.02 + Scale` big, `rand() % 360` turned, set +-20 cm aside and 50 under. A tick it sinks
+   * Gravity, which loses 0.05, shrinks 0.05 and keeps 1/1.1 of its light (ZzzEffectParticle.cpp:3716-3726, :8663-8674).
+   */
+  waterfall4_15: {
+    texture: 'waterfall4',
+    blend: 'add',
+    init(p, scale) {
+      p.lifeTime = 20;
+      p.gravity = (rand(100) / 100) * 2;
+      p.scale = (rand(10) + 10) * 0.02 + scale;
+      p.rotation = rand(360);
+      p.px += rand(40) - 20;
+      p.py += rand(40) - 20;
+      p.pz -= 50;
+    },
+    update(p, f) {
+      p.pz -= p.gravity * f;
+      p.gravity -= 0.05 * f;
+      p.scale -= 0.05 * f;
+      const keep = Math.pow(1 / 1.1, f);
+      p.lr *= keep;
+      p.lg *= keep;
+      p.lb *= keep;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
+
+  /**
+   * `BITMAP_WATERFALL_3` SubType 6, the Maya hands' death drops: made as SubType 5 (20 ticks, `rand() % 100 / 100 * 2`
+   * Gravity, `(rand() % 10 + 10) * 0.02 + Scale` big, +-20 cm aside and 50 under); a tick it rises Gravity, which gains
+   * 0.05, and keeps 1/1.1 of its light (ZzzEffectParticle.cpp:3644-3653, :8577-8588).
+   */
+  waterfall3_6: {
+    texture: 'waterfall3',
+    blend: 'add',
+    init(p, scale) {
+      p.lifeTime = 20;
+      p.gravity = (rand(100) / 100) * 2;
+      p.scale = (rand(10) + 10) * 0.02 + scale;
+      p.rotation = rand(360);
+      p.px += rand(40) - 20;
+      p.py += rand(40) - 20;
+      p.pz -= 50;
+    },
+    update(p, f) {
+      p.pz += p.gravity * f;
+      p.gravity += 0.05 * f;
+      const keep = Math.pow(1 / 1.1, f);
+      p.lr *= keep;
+      p.lg *= keep;
+      p.lb *= keep;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
+
+  /** `BITMAP_SMOKE + 3` SubType 3 (clud64, 60 ticks) and 4 (waterFall3, 30): the Maya hands' dark palm smoke (`smoke3Kind`). */
+  smoke3_3: smoke3Kind('clud64', 60),
+  smoke3_4: smoke3Kind('waterfall3', 30),
+
+  /** `BITMAP_SMOKE` SubType 39, which has no case of its own: CreateParticle's two still ticks at its Scale (:58-86). */
+  smoke39: { texture: 'smoke', blend: 'add', init() {}, update() {}, color: plainColor } satisfies ParticleKind,
+
+  /** `BITMAP_WATERFALL_4`'s three cards, each on its own circle (`waterfallOrbitKind`). */
+  waterfall4Orbit0: waterfallOrbitKind(0),
+  waterfall4Orbit1: waterfallOrbitKind(1),
+  waterfall4Orbit2: waterfallOrbitKind(2),
 } satisfies Record<string, ParticleKind>;
 
 export type KindName = keyof typeof KINDS;
@@ -1651,6 +1864,7 @@ function ensureTicking(target: Scene) {
         }
 
         p.kind.update(p, f, worldTimeMs);
+        if (p.anchor) ride(p, p.anchor);
       }
 
       if (!p.live || p.scale <= 0) {
@@ -1684,6 +1898,22 @@ function ensureTicking(target: Scene) {
   });
 }
 
+/** `VectorSubtract(Position, StartPosition)`, then `StartPosition = Target->Position` and add it back (:4325-4328). */
+function ride(p: Particle, a: Anchor): void {
+  const dx = a.x * TILE_CM - p.ax;
+  const dy = a.z * TILE_CM - p.ay;
+  const dz = a.y * TILE_CM - p.az;
+  p.ax += dx;
+  p.ay += dy;
+  p.az += dz;
+  p.px += dx;
+  p.py += dy;
+  p.pz += dz;
+  p.sx += dx;
+  p.sy += dy;
+  p.sz += dz;
+}
+
 const releasePools = new Map<Sprite, Pool>();
 
 function release(p: Particle) {
@@ -1706,7 +1936,8 @@ export function spawnParticle(
   turn: NodeTurn,
   scale: number,
   light: readonly [number, number, number],
-  jitter = 0
+  jitter = 0,
+  anchor: Anchor | null = null
 ): Promise<void> | undefined {
   // The tick runs on drawn frames: made while hidden, these would all play at once on return.
   if (pageHidden()) return;
@@ -1714,7 +1945,7 @@ export function spawnParticle(
 
   const pool = pools.get(poolKey(kind.texture, kind.blend));
   if (pool) {
-    makeParticle(target, pool, kind, position, turn, scale, light, jitter);
+    makeParticle(target, pool, kind, position, turn, scale, light, jitter, anchor);
     return;
   }
 
@@ -1724,7 +1955,7 @@ export function spawnParticle(
 
   return getPool(target, kind.texture, kind.blend)
     .then(loaded => {
-      if (loaded) makeParticle(target, loaded, kind, at, turned, scale, lit, jitter);
+      if (loaded) makeParticle(target, loaded, kind, at, turned, scale, lit, jitter, anchor);
     })
     .catch(reportLoadFailure(`particle ${kindName}`));
 }
@@ -1737,7 +1968,8 @@ function makeParticle(
   turn: NodeTurn,
   scale: number,
   light: readonly [number, number, number],
-  jitter: number
+  jitter: number,
+  anchor: Anchor | null
 ): void {
   const sprite = acquire(pool);
   if (!sprite) return;
@@ -1775,6 +2007,10 @@ function makeParticle(
     sx: 0,
     sy: 0,
     sz: 0,
+    anchor,
+    ax: anchor ? anchor.x * TILE_CM : 0,
+    ay: anchor ? anchor.z * TILE_CM : 0,
+    az: anchor ? anchor.y * TILE_CM : 0,
     lr: light[0],
     lg: light[1],
     lb: light[2],
@@ -1855,6 +2091,17 @@ export const KIND_REACH: Record<KindName, Reach> = {
   spark1_14: { travel: 1.75, base: 0.19, perScale: 0.23 },
   shiny6_1: { travel: 0.44, base: 0.14, perScale: 0 },
   light6_1: { travel: 0.44, base: 0.14, perScale: 0 },
+  fireMono1_4: { travel: 0.65, base: 0.62, perScale: 0.25 },
+  fireMono2_8: { travel: 0.65, base: 0.62, perScale: 0.25 },
+  fireMono3_5: { travel: 0.65, base: 0.62, perScale: 0.25 },
+  waterfall4Orbit0: { travel: 1.85, base: 0.14, perScale: 0 },
+  waterfall4Orbit1: { travel: 1.85, base: 0.14, perScale: 0 },
+  waterfall4Orbit2: { travel: 1.85, base: 0.14, perScale: 0 },
+  waterfall4_15: { travel: 0.86, base: 0.18, perScale: 0.46 },
+  smoke39: { travel: 0, base: 0, perScale: 0.46 },
+  waterfall3_6: { travel: 0.58, base: 0.18, perScale: 0.46 },
+  smoke3_3: { travel: 3.5, base: 0.28, perScale: 1.15 },
+  smoke3_4: { travel: 2.3, base: 0.14, perScale: 1.15 },
 };
 
 /** The reach of a spawn picking any of `kinds`, as one base plus a per-scale slope. */

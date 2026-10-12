@@ -1,5 +1,5 @@
 import type { BodyCardSpot, MonsterBodyFx } from '@/controllers/monsters';
-import { cards } from '../_shared/bodyFx';
+import { blur, cards } from '../_shared/bodyFx';
 
 /** `fLumi2 = (sinf(WorldTime * 0.004f) + 1) * 0.2f` on a card's `Scale`: 0.2 is in each spot's scale. */
 const SWELL = { speed: 0.004, amount: 0.2 };
@@ -9,8 +9,8 @@ const spot = (bone: number, card: BodyCardSpot['card'], scale: number, spin?: nu
 
 /**
  * MODEL_SELUPAN: RenderMonsterVisual's cards (GM_Raklion.cpp:2003-2049), lit `base + fLumi1` on
- * each channel. Not here yet: the bone 69-73 weapon blur (:1983-1998), the BITMAP_SPARK + 1 on bone 71
- * (:2042) and the mesh passes of RenderMonsterObjectMesh (:1504-1560).
+ * each channel, and the always-on bone 69-73 weapon blur (:1977-1998). His mesh passes are in `index.ts`.
+ * Not here yet: the BITMAP_SPARK + 1 on bone 71 (:2042).
  */
 export const SELUPAN_FX: MonsterBodyFx = [
   cards(
@@ -40,4 +40,5 @@ export const SELUPAN_FX: MonsterBodyFx = [
   cards([0.1, 0.2, 1], [spot(71, 'eventCloud', 0.6, -0.1), spot(71, 'eventCloud', 0.4, -0.2)], {
     lift: { speed: 0.004, amount: 0.1, base: 0.1 },
   }),
+  blur(69, 73, [1, 1.2, 2], 'blur01'),
 ];

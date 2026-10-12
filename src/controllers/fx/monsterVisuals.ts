@@ -14,12 +14,14 @@ import {
   emitBurst,
   entityGone,
   entityPos,
+  entityYaw,
   inWindow,
   type ParticleRecipe,
   type PointSource,
   type RGB,
 } from './core';
 import { spawnDebris } from './debris';
+import { blurLayer } from './blur';
 import { spawnJoint } from './joint';
 import { spawnRing } from './ring';
 import { spawnSprite } from './sprite';
@@ -40,6 +42,7 @@ import {
 import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
 import {
   monsterRegistry,
+  type BodyBlurSheet,
   type BodyCard,
   type BodyFxEmitter,
   type BodyFxGate,
@@ -122,6 +125,8 @@ const PARTICLES: Readonly<Record<BodyParticle, ParticleRecipe>> = {
   sandSmokeBurst: SAND_SMOKE_BURST,
 };
 
+const BLUR_SHEETS: Readonly<Record<BodyBlurSheet, string>> = { blur01: TEX.blur, blur02: TEX.blur2 };
+
 const TEXTURES: Readonly<Record<BodyTexture, string>> = {
   flare: TEX.flare,
   magicGround2: TEX.magicGround2,
@@ -140,6 +145,8 @@ const CARDS: Readonly<Record<BodyCard, GlowTexture>> = {
   flareRed: 'flareRed',
   flare2: 'flare2',
   eventCloud: 'eventCloud',
+  hole: 'hole',
+  lightning2: 'halo',
 };
 
 const PUFFS: Readonly<Record<BodyPuff, KindName>> = {
@@ -155,13 +162,28 @@ const PUFFS: Readonly<Record<BodyPuff, KindName>> = {
   smokeLine2: 'smokeLine2',
   smokeLine3: 'smokeLine3',
   trueFire: 'trueFire',
+  fireMono1_4: 'fireMono1_4',
+  fireMono2_8: 'fireMono2_8',
+  fireMono3_5: 'fireMono3_5',
+  waterfall4Orbit0: 'waterfall4Orbit0',
+  waterfall4Orbit1: 'waterfall4Orbit1',
+  waterfall4Orbit2: 'waterfall4Orbit2',
+  waterfall4_15: 'waterfall4_15',
+  smoke39: 'smoke39',
+  spark1_11: 'spark1_11',
+  waterfall3_6: 'waterfall3_6',
+  smoke3_3: 'smoke3_3',
+  smoke3_4: 'smoke3_4',
 };
 
 type CardsRow = Extract<BodyFxEmitter, { kind: 'cards' }>;
 
 /** A `cards` row as the glow entry draws it: each spot its own sheet, scale and offset (cm to tiles). */
-function cardGlow(em: CardsRow): MonsterGlow {
+function cardGlow(em: CardsRow, e: Entity, roar: Roar): MonsterGlow {
+  const gate = em.gate;
   return {
+    when: gate && (gate.action || gate.frames) ? () => shownNow(e, gate) : undefined,
+    scaleBy: em.roar ? () => roar.value : undefined,
     bones: [],
     spots: em.spots.map(s => ({
       bone: s.bone,
@@ -253,7 +275,11 @@ const live = new LiveList();
 
 const tmp = new Vector3();
 const tmpLocal = new Vector3();
+/** A spark's heading: `spawnJoint` copies it, so one serves them all. */
+const sparkHeading = new Vector3();
 const ZERO_CM: Cm3 = [0, 0, 0];
+/** An `origin` puff's one spot. */
+const ORIGIN: readonly number[] = [0];
 
 const scatter = (v: number) => (Math.random() * 2 - 1) * v;
 
@@ -281,6 +307,7 @@ function open(gate: Gate | undefined, f: Frame): boolean {
   if (!gate) return true;
   if (gate.alive && !f.alive) return false;
   if (gate.buff !== undefined && !f.buffs?.has(gate.buff)) return false;
+  if (gate.when && !gate.when()) return false;
   if (
     gate.action &&
     (f.action === undefined || !gate.action.includes(f.action))
@@ -295,13 +322,61 @@ function open(gate: Gate | undefined, f: Frame): boolean {
   return true;
 }
 
+/** A row's offset in cm as a point in tiles, made once with the row. */
+function tiles(cm: Cm3 | undefined): Vector3 {
+  return cm ? new Vector3(cm[0] / TILE_CM, cm[1] / TILE_CM, cm[2] / TILE_CM) : new Vector3();
+}
+
+/** A cards gate as it stands this frame: the action and frame now, no crossing. */
+function shownNow(e: Entity, gate: Gate): boolean {
+  const model = e.modelObject;
+  const action = e.monsterAnimation?.action ?? (model?.CurrentAction as A | undefined);
+  if (gate.alive && e.dying) return false;
+  if (gate.action && (action === undefined || !gate.action.includes(action))) return false;
+  if (!gate.frames) return true;
+  const frame = model?.actionFrame() ?? 0;
+  for (const [a, b] of gate.frames) if (inWindow(-1, frame, a, b)) return true;
+  return false;
+}
+
+/** The Shock roar's `o->PKKey`, `o->Skill` and the `fRoar` they make. */
+type Roar = { pk: number; skill: number; value: number };
+
+/** One tick of the roar (GMHellas.cpp:1596-1622): `fRoar` is 1 out of Shock. */
+function stepRoar(r: Roar, action: A | undefined, frame: number): void {
+  if (action !== A.Shock) {
+    r.pk = 0;
+    r.value = 1;
+    return;
+  }
+  if (frame > 10 && r.pk > 10) r.pk -= 1;
+  else if (frame > 4) r.pk += 1;
+  else r.pk = 10;
+  if ((frame > 4 && frame < 6) || (frame > 8 && frame < 10)) {
+    if (frame < 5 || (frame > 8 && frame < 9)) r.skill += 3;
+    else if (r.skill > 3) r.skill -= 3;
+  } else r.skill = 0;
+  r.value = (r.pk + r.skill) * 0.15;
+}
+
+/** The emitting monster's `fRoar`, for its `roar` puffs. */
+let roarNow = 1;
+
+/** The monster's `Angle` as a node turn: a push of `(0, -1, 0)` goes the way it faces (`entityYaw`). */
+const facingTurn = { x: 0, y: 0, z: 0 };
+
+function facing(e: Entity): typeof facingTurn {
+  facingTurn.y = -entityYaw(e);
+  return facingTurn;
+}
+
 function boneCount(e: Entity): number {
   // The GLB adds a root above the MU bones (core.ts bonePos).
   return Math.max(0, (e.modelObject?.gltf?.skeleton?.bones.length ?? 0) - 1);
 }
 
-/** One tick of one emitter, the 1/every roll already won. */
-function emit(scene: Scene, e: Entity, em: Emitter, f: Frame): void {
+/** One tick of one emitter, the 1/every roll already won. `rides`: the row's kept anchors (`ride`). */
+function emit(scene: Scene, e: Entity, em: Emitter, f: Frame, rides?: readonly Vector3[]): void {
   switch (em.kind) {
     case 'body': {
       if (!open(em.gate, f)) return;
@@ -391,11 +466,7 @@ function emit(scene: Scene, e: Entity, em: Emitter, f: Frame): void {
         // the original's y is horizontal and z is up.
         const fwd = Math.cos(pitch);
         const up = Math.sin(pitch);
-        const heading = new Vector3(
-          -fwd * Math.sin(yaw),
-          up,
-          fwd * Math.cos(yaw)
-        );
+        const heading = sparkHeading.set(-fwd * Math.sin(yaw), up, fwd * Math.cos(yaw));
         spawnJoint(scene, tmp, {
           velocity:
             SPARK_VELOCITY[0] +
@@ -416,15 +487,20 @@ function emit(scene: Scene, e: Entity, em: Emitter, f: Frame): void {
     case 'puff': {
       if (!open(em.gate, f)) return;
       const local = em.local ?? ZERO_CM;
-      for (const at of em.bones) {
+      const turn = em.turned ? facing(e) : NO_TURN;
+      const spots = em.origin ? ORIGIN : em.bones;
+      const n = em.pick ?? spots.length;
+      for (let b = 0; b < n; b++) {
         if (em.rollEach && Math.random() >= 1 / em.every) continue;
         tmpLocal.set(local[0] / TILE_CM, local[1] / TILE_CM, local[2] / TILE_CM);
-        boneLocalPos(e, at, tmpLocal, tmp);
+        if (em.origin) entityPos(e, 0, tmp);
+        else boneLocalPos(e, em.pick ? spots[Math.floor(Math.random() * spots.length)] : spots[b], tmpLocal, tmp);
+        const anchor = rides ? rides[em.ride === 'bone' ? b : 0] : undefined;
         for (let i = 0; i < em.particles.length; i++) {
           const p = em.particles[i];
           const name = typeof p === 'string' ? p : p[Math.floor(Math.random() * p.length)];
-          const scale = em.scales?.[i] ?? em.scale ?? 1;
-          void spawnParticle(scene, PUFFS[name], tmp, NO_TURN, scale, em.colour, em.jitterCm);
+          const scale = (em.scales?.[i] ?? em.scale ?? 1) * (em.roar ? roarNow : 1);
+          void spawnParticle(scene, PUFFS[name], tmp, turn, scale, em.colour, em.jitterCm, anchor);
         }
       }
       return;
@@ -432,7 +508,8 @@ function emit(scene: Scene, e: Entity, em: Emitter, f: Frame): void {
     case 'bolts':
     case 'cards':
     case 'trail':
-      // Spawned once at start; nothing per tick.
+    case 'blur':
+      // Spawned once at start, or by the row's own state (`blur`); nothing per tick here.
       return;
   }
 }
@@ -457,21 +534,45 @@ export function visualMonster(
   const children: EffectHandle[] = [];
   /** The ones that end with its life (`gate.alive`). */
   const mortal: EffectHandle[] = [];
+  /** By row: the points a riding puff's particles follow, one a body or one a bone, kept where they are. */
+  const rides = row.map(em =>
+    em.kind === 'puff' && em.ride ? (em.ride === 'bone' ? em.bones : [0]).map(() => new Vector3()) : undefined
+  );
+
+  const roar: Roar = { pk: 0, skill: 0, value: 1 };
+  const roars = row.some(em => (em.kind === 'cards' || em.kind === 'puff') && em.roar);
+
+  /** By row: a `blur` row's live trail and its two points in tiles. */
+  const blurs = row.map(em => (em.kind === 'blur' ? { live: DEAD_HANDLE, from: tiles(em.fromLocal), to: tiles(em.toLocal) } : undefined));
+  const swing = (em: Extract<Emitter, { kind: 'blur' }>, b: { live: EffectHandle; from: Vector3; to: Vector3 }) => {
+    const gate = em.gate;
+    b.live = blurLayer.spawn(scene, tmp, {
+      follow: out => boneLocalPos(e, em.to, b.to, out),
+      base: out => boneLocalPos(e, em.from, b.from, out),
+      texture: BLUR_SHEETS[em.sheet],
+      colour: em.colour,
+      tickHistory: true,
+      seconds: Infinity,
+      until: () => stopped || entityGone(e) || (gate !== undefined && !shownNow(e, gate)),
+    });
+  };
 
   for (const em of row) {
     if (em.kind === 'cards') {
-      const card = glowMonster(scene, e, cardGlow(em));
+      const card = glowMonster(scene, e, cardGlow(em, e, roar));
       children.push(card);
       if (em.gate?.alive) mortal.push(card);
       continue;
     }
     if (em.kind === 'trail') {
+      const gate = em.gate;
       const ribbon = spawnJoint(scene, bonePos(e, em.bone, tmp), {
+        intensity: gate && (gate.action || gate.frames) ? () => (shownNow(e, gate) ? 1 : 0) : undefined,
         head: boneSource(e, em.bone),
         maxTails: em.maxTails,
         width: em.widthCm / TILE_CM,
         colour: em.colour,
-        texture: em.ribbon === 'flare' ? TEX.flareBig : TEX.jointLaser,
+        texture: em.ribbon === 'flare' ? TEX.flareBig : em.ribbon === 'spark' ? TEX.spark3 : TEX.jointLaser,
         seconds: Infinity,
         fadeTail: 0,
         until: () => stopped || entityGone(e),
@@ -542,6 +643,14 @@ export function visualMonster(
         mortal.length = 0;
       }
 
+      for (let r = 0; r < row.length; r++) {
+        const em = row[r];
+        const points = rides[r];
+        if (!points || em.kind !== 'puff') continue;
+        if (em.ride === 'body') entityPos(e, 0, points[0]);
+        else for (let b = 0; b < points.length; b++) bonePos(e, em.bones[b], points[b]);
+      }
+
       bank += dt;
       let due = 0;
       while (bank >= TICK && due < MAX_TICKS_PER_FRAME) {
@@ -567,7 +676,10 @@ export function visualMonster(
 
       for (let t = 0; t < due; t++) {
         ticks++;
-        for (const em of row) {
+        if (roars) stepRoar(roar, f.action, frame);
+        roarNow = roar.value;
+        for (let r = 0; r < row.length; r++) {
+          const em = row[r];
           if (em.kind === 'appear') {
             if (ticks <= em.ticks) emit(scene, e, em, f);
             continue;
@@ -584,13 +696,19 @@ export function visualMonster(
               emit(scene, e, em, f);
             continue;
           }
-          if ((em.kind === 'puff' && em.rollEach) || Math.random() < 1 / em.every) emit(scene, e, em, f);
+          if (em.kind === 'blur') {
+            const b = blurs[r];
+            if (b && !b.live.alive && open(em.gate, f)) swing(em, b);
+            continue;
+          }
+          if ((em.kind === 'puff' && em.rollEach) || Math.random() < 1 / em.every) emit(scene, e, em, f, rides[r]);
         }
       }
       return true;
     },
     release() {
       stopped = true;
+      for (const b of blurs) b?.live.stop();
       for (const c of children) c.stop();
       children.length = 0;
     },

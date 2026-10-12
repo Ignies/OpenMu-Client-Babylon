@@ -1,5 +1,6 @@
-import type { BodyCard, BodyFxEmitter, BodyParticle, BodyPuff, BodyTexture } from '@/controllers/monsters';
+import type { BodyBlurSheet, BodyCard, BodyFxEmitter, BodyParticle, BodyPuff, BodyTexture } from '@/controllers/monsters';
 import { MonsterActionType as A } from '../../objects/enum';
+import { lookState } from '@/controllers/monsters';
 
 /**
  * Building blocks the monster folders' `bodyFx` rows share (`MoveCharacterVisual`,
@@ -167,4 +168,45 @@ export const napinFires = (light: RGB, fire: RGB): readonly BodyFxEmitter[] => [
   cards(light, [...spotsOn([10, 61, 72, 21], 'light', 4), ...spotsOn([122, 116], 'light', 1)]),
   puff(1, [10, 61, 72, 21], [['fire1', 'fire2', 'fire3']], fire, { scale: 1.2, jitterCm: 10 }),
   puff(1, [122, 116], [['fire1', 'fire2', 'fire3']], fire, { scale: 0.7, jitterCm: 5 }),
+];
+
+type BlurRow = Extract<BodyFxEmitter, { kind: 'blur' }>;
+
+/** `CreateBlur` from one bone point to another while the gate is open (a RenderObject swing loop). */
+export const blur = (
+  from: number,
+  to: number,
+  colour: RGB,
+  sheet: BodyBlurSheet,
+  extra: Partial<BlurRow> = {}
+): BodyFxEmitter => ({ kind: 'blur', from, to, colour, sheet, ...extra });
+
+/**
+ * A Sapi's claws through Attack1 / Attack2 in its frame window: CreateBlur Type 0 from bone 42 to each of 34, 35,
+ * 38, 39 and 43, each its own SubType (GMSwampOfQuiet.cpp:620-795).
+ */
+export const sapiClaws = (colour: RGB, frames: readonly [number, number], from = 42, to = [34, 35, 38, 39, 43]): BodyFxEmitter[] =>
+  to.map(b => blur(from, b, colour, 'blur01', { gate: { action: [A.Attack1, A.Attack2], frames: [frames] } }));
+
+// ---- the Maya hands (GM_Kanturu_3rd.cpp MoveMonsterVisual) ----
+
+/** `KANTURU_MAYA_DIRECTION_MAYA3` (_enum.h:3734): the hands' death and Stop2 looks turn on it. */
+const MAYA3 = 14;
+
+/**
+ * A Maya hand's Move visual (:879-937): dying before MAYA3, five WATERFALL_3 SubType 6 at Scale 2 a tick at
+ * `BoneTransform[rand() % 45]` in (0.4, 0.6, 1); in Stop2 from MAYA3 on, a SMOKE + 3 SubType 3 at 1.5 and a SubType 4
+ * at 0.8 a tick at the palm. Not here: the dying hand's BlendMesh -2.
+ */
+export const mayaHandMoves = (palm: number, local: Cm3): BodyFxEmitter[] => [
+  puff(1, Array.from({ length: 45 }, (_, i) => i), ['waterfall3_6'], [0.4, 0.6, 1], {
+    pick: 5,
+    scale: 2,
+    gate: { action: [A.Die], when: () => lookState('kanturuMaya') < MAYA3 },
+  }),
+  puff(1, [palm], ['smoke3_3', 'smoke3_4'], [1, 1, 1], {
+    local,
+    scales: [1.5, 0.8],
+    gate: { action: [A.Stop2], when: () => lookState('kanturuMaya') >= MAYA3 },
+  }),
 ];

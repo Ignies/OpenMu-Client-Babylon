@@ -1,4 +1,5 @@
 import type { MeshAnimation } from '../render/meshAnimation';
+import type { ModelObject } from '../render/modelObject';
 import { MonsterActionType } from '@versions/shared/objects/enum';
 import { monsterRegistry } from '../monsters';
 
@@ -106,6 +107,22 @@ const MONSTER_BLEND_MESHES: Partial<Record<number, MonsterBlendMesh>> = {
   // Life Stone 278: mesh 3 (GMBattleCastle.cpp:1409).
   86: still(3),
 };
+
+/** The parts of a model a type's own look writes before `load()`. */
+type LookTarget = Pick<ModelObject, 'MeshPasses' | 'FixedLight' | 'Light'>;
+
+/**
+ * A type's own `RenderMonster` look (its folder's `passes` and `bodyLight`): the passes unless the class set its
+ * own, and the light its case sets, held there instead of the floor's (renderSystem reads `FixedLight`).
+ */
+export function applyMonsterLook(model: LookTarget, npcType: number | undefined): void {
+  const def = npcType === undefined ? undefined : monsterRegistry.def(npcType);
+  if (def?.passes && !model.MeshPasses) model.MeshPasses = def.passes;
+  if (def?.bodyLight) {
+    model.FixedLight = true;
+    model.Light.set(def.bodyLight[0], def.bodyLight[1], def.bodyLight[2]);
+  }
+}
 
 /** A type's own blend mesh (its folder's `blendMesh`), else its body's. */
 export function blendMeshOf(npcType: number | undefined, modelType: number): MonsterBlendMesh | undefined {

@@ -1,12 +1,12 @@
 import type { MonsterBodyFx } from '@/controllers/monsters';
-import { cards, spot as finger, trail } from '../_shared/bodyFx';
+import { cards, mayaHandMoves, spot as finger, trail } from '../_shared/bodyFx';
 
 const ALIVE = { alive: true } as const;
 
 /**
  * MODEL_MAYA_HAND_LEFT: the SubType 18-21 and 27 ribbons on MoveEye(5, 11, 17, 29, 23)'s bones
  * (GM_Kanturu_3rd.cpp:707-743, :1091) and the blue finger cards (:1093-1144), none once it dies
- * (:1088). Not here yet: the die and Stop2 effects of the Move visual (:879-907).
+ * (:1088), and the die and Stop2 effects of the Move visual off bone 24 (:879-907).
  */
 export const LEFT_HAND_FX: MonsterBodyFx = [
   ...[11, 5, 29, 17, 23].map(bone => trail(bone, 15, 8, [0.8, 0.5, 1], { gate: ALIVE })),
@@ -27,4 +27,5 @@ export const LEFT_HAND_FX: MonsterBodyFx = [
     ],
     { gate: ALIVE }
   ),
+  ...mayaHandMoves(24, [0, -50, 0]),
 ];

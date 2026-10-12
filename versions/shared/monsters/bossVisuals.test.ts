@@ -33,6 +33,8 @@ describe('boss bodies', () => {
         '67:lightRed@0.4 1,1,1',
         '69:lightRed@0.4 1,1,1',
         '70:lightRed@0.4 1,1,1',
+        '19:hole@0.2 1,1,1',
+        '31:hole@0.2 1,1,1',
       ].sort()
     );
     // MoveEye(34, 35) feeds the SubType 55 / 56 eye ribbons; SubType 57 rides bones 67 and 70 with 15 tails.
@@ -40,6 +42,37 @@ describe('boss bodies', () => {
     const [neck, die] = rows(561, 'puff');
     expect(neck).toMatchObject({ every: 6, bones: [5], particles: ['smoke50', ['smokeLine1', 'smokeLine2', 'smokeLine3']], colour: [0.25, 1, 0] });
     expect(die).toMatchObject({ every: 3, bones: [0, 5, 124], particles: ['smoke1', 'smoke1'], gate: { action: [A.Die] } });
+  });
+
+  // MoveMonsterVisual's Attack1 / Attack2 past frame 2: at bones 19 and 31, (10, 5, 0) out, a mono fire a tick
+  // and a second on half of them, turned with her and riding her, and the BITMAP_HOLE card (:544-576); a
+  // BITMAP_WATERFALL_4 on bone 68 one tick in two (:1082-1085).
+  it('fires Medusa\'s hands through her attacks and waters bone 68', () => {
+    const attack = { action: [A.Attack1, A.Attack2], frames: [[3, Infinity]] };
+    const jets = ['fireMono1_4', 'fireMono2_8', 'fireMono3_5'];
+    const [, , first, second, water] = rows(561, 'puff');
+    for (const r of [first, second]) {
+      expect(r).toMatchObject({ bones: [19, 31], local: [10, 5, 0], particles: [jets], colour: [0, 1, 0.5], scale: 1.5 });
+      expect(r).toMatchObject({ turned: true, ride: 'body', gate: attack });
+    }
+    expect([first.every, second.every, second.rollEach]).toEqual([1, 2, true]);
+    expect(water).toMatchObject({
+      every: 2,
+      bones: [68],
+      particles: ['waterfall4Orbit0', 'waterfall4Orbit1', 'waterfall4Orbit2'],
+      colour: [0.9, 1, 0.9],
+      ride: 'bone',
+    });
+    const hole = rows(561, 'cards').find(r => r.spots[0].card === 'hole');
+    expect(hole).toMatchObject({
+      spots: [
+        { bone: 19, card: 'hole', scale: 0.2, local: [10, 5, 0] },
+        { bone: 31, card: 'hole', scale: 0.2, local: [10, 5, 0] },
+      ],
+      colour: [1, 1, 1],
+      swell: { speed: 0.005, amount: 0.1 },
+      gate: attack,
+    });
   });
 });
 
@@ -52,8 +85,71 @@ describe('Kundun', () => {
     expect(bone100).toMatchObject({ every: 2, bones: [100], particles: ['smoke13'], gate: { alive: true } });
     const [eyes, flare] = rows(275, 'cards');
     expect(eyes).toMatchObject({ colour: [1, 0, 0], pulse: { speed: 0.003, amount: 0.2, base: 0.8 }, gate: { alive: true } });
-    expect(cards(275)).toEqual(['8:energy@0.4 1,0,0', '9:energy@0.4 1,0,0', '100:flareBlue@1.2 1,1,1']);
+    expect(cards(275)).toEqual(['8:energy@0.4 1,0,0', '9:energy@0.4 1,0,0', '100:flareBlue@1.2 1,1,1', '100:flareRed@1.2 1,1,1']);
     expect(flare).toMatchObject({ swell: { speed: 0.001, amount: 0.3 }, gate: { alive: true } });
+  });
+
+  // The Shock roar: a red flare over the blue one at `(1.2 + sin * 0.3) * fRoar`, and the bone 100 smoke at
+  // `fRoar` (GMHellas.cpp:1596-1626).
+  it('roars red through Shock and swells his bone 100 smoke', () => {
+    const roar = rows(275, 'cards').find(r => r.spots[0].card === 'flareRed');
+    expect(roar).toMatchObject({
+      spots: [{ bone: 100, card: 'flareRed', scale: 1.2 }],
+      colour: [1, 1, 1],
+      swell: { speed: 0.001, amount: 0.3 },
+      roar: true,
+      gate: { alive: true, action: [A.Shock] },
+    });
+    expect(rows(275, 'puff')[1]).toMatchObject({ bones: [100], particles: ['smoke13'], roar: true });
+  });
+});
+
+describe("Selupan's body", () => {
+  // RenderMonster's MODEL_SELUPAN (GM_Raklion.cpp:1504-1549): mesh 3 bright twice, mesh 5 bright on its own scroll,
+  // Chrome02 over mesh 4 by CHROME4, and serufanarm_R four times over mesh 0 at `(sinf(WorldTime * 0.002f) + 1) * 0.5`.
+  it('draws his RenderMonster passes', () => {
+    const set = monsters.def(459)?.passes;
+    const shape = set?.passes.map(p => [p.mesh, p.kind, p.map ?? '', p.texture ?? ''].join(' '));
+    expect(shape).toEqual([
+      '3 bright  ',
+      '5 bright  ',
+      '4 add chrome4 Effect/Chrome02.OZJ',
+      '0 add  Monster/serufanarm_R.OZJ',
+      '0 add  Monster/serufanarm_R.OZJ',
+      '0 add  Monster/serufanarm_R.OZJ',
+      '0 add  Monster/serufanarm_R.OZJ',
+      '3 add  ',
+    ]);
+    const [, scroll, , arm] = set?.passes ?? [];
+    expect([scroll?.u?.(12345), scroll?.v?.(12345)]).toEqual([2345 * 0.0002, 2345 * 0.0002]);
+    expect(arm?.gain?.(1000)).toBeCloseTo((Math.sin(2) + 1) * 0.5);
+    expect(arm?.clamp).toBe(true);
+  });
+});
+
+/** Every blur as `from(local)>to(local) sheet light [gate]`. */
+const blurs = (numb: number) =>
+  rows(numb, 'blur').map(b => {
+    const at = (bone: number, local?: readonly number[]) => (local ? `${bone}(${local.join(',')})` : `${bone}`);
+    const gate = b.gate ? ` ${b.gate.action?.join('/')}${b.gate.frames ? ` ${b.gate.frames.map(w => w.join('-')).join(',')}` : ''}` : '';
+    return `${at(b.from, b.fromLocal)}>${at(b.to, b.toLocal)} ${b.sheet} ${b.colour.join(',')}${gate}`;
+  });
+
+describe('the swing blurs', () => {
+  // The RenderObject / RenderMonsterVisual CreateBlur loops: Nightmare (GM_Kanturu_3rd.cpp:961-988), Selupan and the
+  // Iron Knights (GM_Raklion.cpp:1977-1998, :1851-1873, :2104-2126), the Dark Elf on his weapon's LinkBone 33
+  // (GMCrywolf1st.cpp:1254-1282, ZzzCharacter.cpp:12069), the Sapis' claws (GMSwampOfQuiet.cpp:620-795).
+  it("trail the bosses' blades and the Sapis' claws", () => {
+    expect(blurs(361)).toEqual([`32(10,0,0)>38(10,-10,0) blur02 1,1,1 ${A.Attack1}/${A.Attack4} 0-5.9`]);
+    expect(blurs(459)).toEqual(['69>73 blur01 1,1.2,2']);
+    for (const knight of [458, 565]) expect(blurs(knight)).toEqual(['35>36 blur02 1,1.2,2']);
+    for (const elf of [340, 440]) expect(blurs(elf)).toEqual([`33(0,0,-60)>33(0,0,-150) blur02 1,1,1 ${A.Attack1}/${A.Attack2}`]);
+    const claws = (from: number, to: number[], light: string, frames: string) =>
+      to.map(b => `${from}>${b} blur01 ${light} ${A.Attack1}/${A.Attack2} ${frames}`);
+    const hand = [34, 35, 38, 39, 43];
+    for (const sapi of [441, 557, 560]) expect(blurs(sapi)).toEqual(claws(42, hand, '1,0.6,0.1', '6-7.6'));
+    expect(blurs(442)).toEqual(claws(42, hand, '2,0,0', '6-7'));
+    expect(blurs(443)).toEqual([...claws(42, hand, '0.3,0.7,1', '5-10'), ...claws(75, [76, 79, 80, 83, 84], '0.3,0.7,1', '5-10')]);
   });
 });
 
@@ -88,6 +184,47 @@ describe('Selupan', () => {
   });
 });
 
+/** A pass as `mesh kind map texture` and the light it writes from a grey body. */
+const passRows = (numb: number) =>
+  (monsters.def(numb)?.passes?.passes ?? []).map(p => {
+    const out = { x: 0, y: 0, z: 0, set(x: number, y: number, z: number) { Object.assign(out, { x, y, z }); } };
+    p.light?.(0, { x: 0.5, y: 0.5, z: 0.5 } as never, out as never);
+    const light = p.light ? ` @${[out.x, out.y, out.z].join(',')}` : '';
+    return `${p.mesh} ${p.kind} ${p.map ?? ''} ${p.texture ?? ''}${light}`.replace(/ +/g, ' ').trim();
+  });
+
+describe("Erohim's body", () => {
+  // RenderMonster's MODEL_EROHIM (GMHuntingGround.cpp:885-920): Chrome01 over mesh 4 at (1, 0.5, 0) and over 0, 1
+  // and 3 at (0.75, 0.65, 0.5), and bossmap1_R over mesh 0 in that light at `sinf(WorldTime * 0.0012f) * 0.3 + 0.6`.
+  it('chromes his meshes in his own tints', () => {
+    expect(passRows(295)).toEqual([
+      '4 add chrome Effect/Chrome01.OZJ @1,0.5,0',
+      '0 add chrome Effect/Chrome01.OZJ @0.75,0.65,0.5',
+      '1 add chrome Effect/Chrome01.OZJ @0.75,0.65,0.5',
+      '3 add chrome Effect/Chrome01.OZJ @0.75,0.65,0.5',
+      '0 add Monster/bossmap1_R.OZJ @0.75,0.65,0.5',
+    ]);
+    const pattern = monsters.def(295)?.passes?.passes[4];
+    expect(pattern?.gain?.(1000)).toBeCloseTo(Math.sin(1.2) * 0.3 + 0.6);
+    expect(pattern?.clamp).toBe(true);
+  });
+});
+
+describe('the Imperial Guardian bodies', () => {
+  // RenderMonster's MODEL_RAYMOND, MODEL_LUCAS (GMEmpireGuardian1.cpp:1831-1866) and MODEL_DARK_GHOST
+  // (GMEmpireGuardian2.cpp:833-847).
+  it('give Raymond his sword pass and chrome, Lucas his chrome and the Dark Ghost his bright mesh 3', () => {
+    // raymond_sword_R over mesh 1 in BodyLight[0] * 3 grey at `(sinf(WorldTime * 0.003f) + 1) * 0.5`.
+    expect(passRows(506)).toEqual(['1 add Effect/raymond_sword_R.OZJ @1.5,1.5,1.5', '3 add chrome Effect/Chrome01.OZJ']);
+    expect(monsters.def(506)?.passes?.passes[0].gain?.(1000)).toBeCloseTo((Math.sin(3) + 1) * 0.5);
+    expect(passRows(507)).toEqual(['3 add chrome Effect/Chrome01.OZJ']);
+    expect(monsters.def(507)?.passes?.drawn).toEqual([0, 1, 2, 3, 4]);
+    expect(passRows(515)).toEqual(['3 bright']);
+    expect(monsters.def(515)?.passes?.passes[0].gain?.(0)).toBe(0.5);
+    expect(monsters.def(515)?.passes?.drawn).toEqual([0, 1, 2, 3]);
+  });
+});
+
 describe('Erohim', () => {
   // RenderHuntingGroundMonsterVisual's MODEL_EROHIM (GMHuntingGround.cpp:672-712): two red lights on each eye, and
   // through Attack2 a true fire and a smoke from the left hand. Monster82_LHand is not his bone, so the fire is a
@@ -102,12 +239,38 @@ describe('Erohim', () => {
   });
 });
 
+describe("Balgass's body", () => {
+  // RenderMonster's MODEL_BALGASS (GMCrywolf1st.cpp:1425-1436): BodyLight (1, 1, 1), and every mesh lit and again
+  // RENDER_CHROME2 | RENDER_BRIGHT in BITMAP_CHROME3 (Chrome03, GL_CLAMP_TO_EDGE).
+  it('is drawn at full light with Chrome03 over every mesh', () => {
+    const balgass = monsters.def(349);
+    expect(balgass?.bodyLight).toEqual([1, 1, 1]);
+    expect(balgass?.passes).toEqual({ passes: [{ mesh: -1, kind: 'add', map: 'chrome2', texture: 'Effect/Chrome03.OZJ', clamp: true }] });
+  });
+});
+
 describe('Balgass', () => {
   // CreateJoint(BITMAP_JOINT_ENERGY, SubType 2 / 3, Scale 30) at his creation (GMCrywolf1st.cpp:674-675) on
   // MoveEye(9, 10)'s eyes (:802): 20 tails on the left (bone 10), 8 on the right (bone 9), in SubType 2 / 3's
   // purple (ZzzEffectJoint.cpp:458-459).
   it('runs his two purple eye ribbons', () => {
     expect(trails(349)).toEqual(['10 30cm x20 0.5,0.1,1', '9 30cm x8 0.5,0.1,1']);
+  });
+
+  // SubType 2 / 3's head: a BITMAP_LIGHTNING + 1 SubType 0 a tick, Scale 0.15, living two ticks, in `0.5 + Luminosity *
+  // (0.25, 0.01, 1)` (ZzzEffectJoint.cpp:3200-3205, ZzzEffectParticle.cpp:230-262): blue held at 1, red within 0.08 of 0.7.
+  it('lays a lightning card at each ribbon head', () => {
+    expect(cards(349)).toEqual([10, 10, 9, 9].map(b => `${b}:lightning2@0.15 0.7,0.51,1`));
+  });
+});
+
+describe("Nightmare's death", () => {
+  // MoveMonsterVisual's Die from frame 3: two SMOKE + 3 SubType 3 at Scale 1.5 from Body_Bone13 (bone 63) a tick
+  // (GM_Kanturu_3rd.cpp:865-869).
+  it('smokes dark from bone 63 as he falls', () => {
+    expect(rows(361, 'puff')).toEqual([
+      expect.objectContaining({ every: 1, bones: [63], particles: ['smoke3_3', 'smoke3_3'], scale: 1.5, gate: { action: [A.Die], frames: [[3, Infinity]] } }),
+    ]);
   });
 });
 
@@ -130,6 +293,24 @@ describe('Nightmare', () => {
       '39 3,0,0', '39 3,0,0', '40 3,0,0', '40 3,0,0', '9 0,-2,0', '10 4,-4,0',
     ]);
     expect(rows(361, 'cards')[0].gate?.alive).toBe(true);
+  });
+});
+
+describe("the Maya hands' death and Stop2", () => {
+  // MoveMonsterVisual (GM_Kanturu_3rd.cpp:879-937): dying before the MAYA3 direction state, five WATERFALL_3 SubType 6
+  // at Scale 2 a tick at `BoneTransform[rand() % 45]`; in Stop2 from MAYA3 on, a SMOKE + 3 SubType 3 at 1.5 and a
+  // SubType 4 at 0.8 a tick off the palm (left bone 24 at (0, -50, 0), right bone 12 at (50, 0, 0)).
+  it('drop their blue drops as they die and smoke from the palm in Stop2', () => {
+    for (const [numb, palm, local] of [
+      [362, 24, [0, -50, 0]],
+      [363, 12, [50, 0, 0]],
+    ] as const) {
+      const [die, stop] = rows(numb, 'puff');
+      expect(die).toMatchObject({ every: 1, particles: ['waterfall3_6'], pick: 5, scale: 2, colour: [0.4, 0.6, 1], gate: { action: [A.Die] } });
+      expect(die.bones).toEqual(Array.from({ length: 45 }, (_, i) => i));
+      expect(stop).toMatchObject({ every: 1, bones: [palm], local, particles: ['smoke3_3', 'smoke3_4'], scales: [1.5, 0.8], gate: { action: [A.Stop2] } });
+      expect([typeof die.gate?.when, typeof stop.gate?.when]).toEqual(['function', 'function']);
+    }
   });
 });
 
@@ -187,9 +368,17 @@ describe('the Imperial Guardian bosses', () => {
   // ZzzEffectJoint.cpp:328-337), and the flare02 card each lays at its head, its size and light
   // `sinf(WorldTime * 0.002f) * 0.1f + 0.2f` (ZzzEffectJoint.cpp:3220-3226).
   it('run Fred eye ribbons with their flares', () => {
-    expect(trails(508)).toEqual(['15 10cm x10 0.7,0.7,1', '14 10cm x10 0.7,0.7,1']);
+    expect(trails(508).slice(0, 2)).toEqual(['15 10cm x10 0.7,0.7,1', '14 10cm x10 0.7,0.7,1']);
     expect(cards(508)).toEqual(['15:flare2@0.2 0.7,0.7,1', '14:flare2@0.2 0.7,0.7,1']);
     expect(rows(508, 'cards')[0]).toMatchObject({ pulse: { speed: 0.002, amount: 0.1, base: 0.2 }, swell: { speed: 0.002, amount: 0.1 } });
+  });
+
+  // The four SubType 54 ribbons on node_blade01-04 (bones 71-74, MoveEye(14, 15, 71, 72, 73, 74)): Scale 100, Spark03,
+  // 30 tails laid two a tick (CreateTail's Blur, ZzzEffectJoint.cpp:2855-2900), so 15 ticks long, drawn only in
+  // Attack1 (:6995) (GMEmpireGuardian1.cpp:112-116, ZzzEffectJoint.cpp:394-413).
+  it("run Fred's four blade ribbons through Attack1", () => {
+    expect(trails(508).slice(2)).toEqual([71, 72, 73, 74].map(b => `${b} 100cm x15 0.7,0.7,1`));
+    for (const r of rows(508, 'trail').slice(2)) expect(r).toMatchObject({ ribbon: 'spark', gate: { action: [A.Attack1] } });
   });
 
   // MODEL_HAMMERIZE (GMEmpireGuardian2.cpp:864-876): blue lights on bones 21 and 38, swinging on
@@ -207,8 +396,23 @@ describe('the Imperial Guardian bosses', () => {
       ...[93, 100, 47, 54].map(b => `${b}:light@3 0.1,0.6,1`),
       ...[92, 99, 46, 53, 95, 88, 42, 49].map(b => `${b}:light@1 0.1,1,0.2`),
       ...[80, 34].map(b => `${b}:light@3 0.1,1,0.3`),
+      // SubType 22 / 23's head: a BITMAP_LIGHTNING + 1 SubType 4 a tick, Scale 0.25, living two ticks (ZzzEffectJoint.cpp:3213-3218,
+      // ZzzEffectParticle.cpp:230-262): two cards a head in `sinf(WorldTime * 0.002f) * 0.2f + 0.8f`.
+      ...[34, 34, 80, 80].map(b => `${b}:lightning2@0.25 1,1,1`),
     ]);
-    expect(rows(515, 'cards').map(r => r.pulse)).toEqual(Array(3).fill({ speed: 0.08, amount: 0.15, base: 0.85 }));
+    expect(rows(515, 'cards')[3].pulse).toEqual({ speed: 0.002, amount: 0.2, base: 0.8 });
+  });
+
+  // Through Attack1 / Attack2 a WATERFALL_4 SubType 15 at Scale 2 and two SPARK + 1 SubType 13 (SubType 11's spark) on
+  // its Angle from bones 80 and 34, a tick (:925-940); through Die to frame 3, five SMOKE SubType 39 at its feet (:942-950).
+  it("throws the Dark Ghost's attack sparks and death smoke", () => {
+    const attack = { action: [A.Attack1, A.Attack2] };
+    const [water, sparks, smoke] = rows(515, 'puff');
+    expect(water).toMatchObject({ every: 1, bones: [80, 34], particles: ['waterfall4_15'], scale: 2, colour: [0.3, 1, 0.8], gate: attack });
+    expect(sparks).toMatchObject({ every: 1, bones: [80, 34], particles: ['spark1_11', 'spark1_11'], colour: [0, 0.4, 0], turned: true, gate: attack });
+    expect(smoke).toMatchObject({ every: 1, origin: true, particles: Array(5).fill('smoke39'), colour: [0.1, 1, 0.2] });
+    expect(smoke.gate).toEqual({ action: [A.Die], frames: [[0, 3]] });
+    expect(rows(515, 'cards').slice(0, 3).map(r => r.pulse)).toEqual(Array(3).fill({ speed: 0.08, amount: 0.15, base: 0.85 }));
   });
 });
 
