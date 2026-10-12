@@ -93,6 +93,7 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
 - `systems/itemPickupSystem.test.ts`: the pickup request marks the drop `pickupAsked`; Space takes the
   first drawn item under three tiles, not the nearest.
 - `systems/gmMark.test.ts`: the GM buff or the hero's operator status asks for the Webzen mark, cloaking hides it.
+- `systems/headTrackingSystem.test.ts`: a NaN head angle (a zero-sized canvas in a hidden tab) falls back to the rest pose.
 - `systems/creditsAccent.test.ts`: who the credits module draws for (the hero by the hero's name), never a
   monster, NPC or cloaked character.
 - `systems/npcTalkSystem.test.ts`: the Gateway Machine is talked to from 5.5 tiles with no free tile beside it.

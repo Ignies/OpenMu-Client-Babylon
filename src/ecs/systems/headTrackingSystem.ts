@@ -71,6 +71,11 @@ function yawOf(dx: number, dz: number): number {
 
 type CursorInfo = { yaw: number; mouseY: number; canvasH: number };
 
+/** A NaN (a zero-sized canvas in a hidden tab) would stick in the eased angle and blank the head bone for good. */
+export function finiteAngle(v: number): number {
+  return Number.isFinite(v) ? v : 0;
+}
+
 export const HeadTrackingSystem: ISystemFactory = world => {
   const scene: Scene = world.scene;
   const players = world.with('playerAnimation', 'modelObject', 'transform');
@@ -97,6 +102,7 @@ export const HeadTrackingSystem: ISystemFactory = world => {
     const cssH = canvas?.clientHeight || renderH;
     const mouseX = (scene.pointerX * renderW) / cssW;
     const mouseY = (scene.pointerY * renderH) / cssH;
+    if (!Number.isFinite(mouseX) || !Number.isFinite(mouseY)) return null;
 
     const t = e.transform!;
     const mp = world.mapParent.position;
@@ -219,9 +225,10 @@ export const HeadTrackingSystem: ISystemFactory = world => {
           }
         }
 
-        h.targetYaw = Math.max(-HEAD_YAW_LIMIT, Math.min(HEAD_YAW_LIMIT, h.targetYaw));
-        h.yaw = signedAngleDelta(0, approachAngle(h.yaw, h.targetYaw, HEAD_TURN_FRACTION, dt));
-        h.pitch = signedAngleDelta(0, approachAngle(h.pitch, h.targetPitch, HEAD_TURN_FRACTION, dt));
+        h.targetYaw = finiteAngle(Math.max(-HEAD_YAW_LIMIT, Math.min(HEAD_YAW_LIMIT, h.targetYaw)));
+        h.targetPitch = finiteAngle(h.targetPitch);
+        h.yaw = finiteAngle(signedAngleDelta(0, approachAngle(finiteAngle(h.yaw), h.targetYaw, HEAD_TURN_FRACTION, dt)));
+        h.pitch = finiteAngle(signedAngleDelta(0, approachAngle(finiteAngle(h.pitch), h.targetPitch, HEAD_TURN_FRACTION, dt)));
       }
     },
   };
