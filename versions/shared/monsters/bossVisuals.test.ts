@@ -101,3 +101,12 @@ describe('Erohim', () => {
     ]);
   });
 });
+
+describe('Balgass', () => {
+  // CreateJoint(BITMAP_JOINT_ENERGY, SubType 2 / 3, Scale 30) at his creation (GMCrywolf1st.cpp:674-675) on
+  // MoveEye(9, 10)'s eyes (:802): 20 tails on the left (bone 10), 8 on the right (bone 9), in SubType 2 / 3's
+  // purple (ZzzEffectJoint.cpp:458-459).
+  it('runs his two purple eye ribbons', () => {
+    expect(trails(349)).toEqual(['10 30cm x20 0.5,0.1,1', '9 30cm x8 0.5,0.1,1']);
+  });
+});
