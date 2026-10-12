@@ -552,12 +552,14 @@ export function visualMonster(
       continue;
     }
     if (em.kind === 'trail') {
+      const gate = em.gate;
       const ribbon = spawnJoint(scene, bonePos(e, em.bone, tmp), {
+        intensity: gate && (gate.action || gate.frames) ? () => (shownNow(e, gate) ? 1 : 0) : undefined,
         head: boneSource(e, em.bone),
         maxTails: em.maxTails,
         width: em.widthCm / TILE_CM,
         colour: em.colour,
-        texture: em.ribbon === 'flare' ? TEX.flareBig : TEX.jointLaser,
+        texture: em.ribbon === 'flare' ? TEX.flareBig : em.ribbon === 'spark' ? TEX.spark3 : TEX.jointLaser,
         seconds: Infinity,
         fadeTail: 0,
         until: () => stopped || entityGone(e),

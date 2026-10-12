@@ -28,8 +28,11 @@ export type BodyCard =
 /** The sheets a `blur` can draw: CreateBlur's `Type` 0 (BITMAP_BLUR, blur01) or 3 (BITMAP_BLUR2, blur02). */
 export type BodyBlurSheet = 'blur01' | 'blur02';
 
-/** The sheets a `trail` can run: BITMAP_JOINT_ENERGY (JointLaser01) or BITMAP_FLARE (its SubType 28-33 TexType). */
-export type BodyRibbon = 'jointEnergy' | 'flare';
+/**
+ * The sheets a `trail` can run: BITMAP_JOINT_ENERGY (JointLaser01), BITMAP_FLARE (its SubType 28-33 TexType) or
+ * BITMAP_SPARK + 1 (Spark03, SubType 54's).
+ */
+export type BodyRibbon = 'jointEnergy' | 'flare' | 'spark';
 
 /** The original's own particles a `puff` can name (`fx/effectParticles.ts` kinds, by `BITMAP_*` and SubType). */
 export type BodyPuff =
@@ -195,7 +198,8 @@ export type BodyFxEmitter =
       readonly maxTails: number;
       readonly colour: RGB;
       readonly ribbon?: BodyRibbon;
-      readonly gate?: { readonly alive: true };
+      /** `alive`: ended once it dies; `action` / `frames`: recorded all along, drawn only then. */
+      readonly gate?: Pick<BodyFxGate, 'alive' | 'action' | 'frames'>;
     }
   | {
       /**

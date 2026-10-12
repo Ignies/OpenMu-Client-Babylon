@@ -145,7 +145,8 @@ shared pools, textures and particle recipes other folders reuse.
   from the world clock, a lifted one (Selupan's) adds the swing to its light and turns on that clock;
   `scaleBy` times a card's size every frame.
 - `monsterVisuals.test.ts`: a `cards` row hangs each spot on the glow entry with its own sheet, scale
-  and offset; a `trail` runs a ribbon from its bone, a gated one ending when the monster dies; a `puff`
+  and offset; a `trail` runs a ribbon from its bone, a gated one ending when the monster dies and one gated on an
+  action drawn only in it (Fred's blades, Spark03); a `puff`
   makes one of its particles at its bone, and one gated on a buff puffs only under it, each bone rolling
   its own chance with `rollEach`; each particle of a puff takes its own scale, and the jitter; a `turned`
   puff takes the monster's facing and a `ride` one hands its particles one kept point a body or a bone; a

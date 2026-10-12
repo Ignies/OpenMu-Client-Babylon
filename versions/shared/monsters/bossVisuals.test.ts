@@ -256,6 +256,7 @@ describe('Balgass', () => {
   it('runs his two purple eye ribbons', () => {
     expect(trails(349)).toEqual(['10 30cm x20 0.5,0.1,1', '9 30cm x8 0.5,0.1,1']);
   });
+
 });
 
 describe('Nightmare', () => {
@@ -334,9 +335,17 @@ describe('the Imperial Guardian bosses', () => {
   // ZzzEffectJoint.cpp:328-337), and the flare02 card each lays at its head, its size and light
   // `sinf(WorldTime * 0.002f) * 0.1f + 0.2f` (ZzzEffectJoint.cpp:3220-3226).
   it('run Fred eye ribbons with their flares', () => {
-    expect(trails(508)).toEqual(['15 10cm x10 0.7,0.7,1', '14 10cm x10 0.7,0.7,1']);
+    expect(trails(508).slice(0, 2)).toEqual(['15 10cm x10 0.7,0.7,1', '14 10cm x10 0.7,0.7,1']);
     expect(cards(508)).toEqual(['15:flare2@0.2 0.7,0.7,1', '14:flare2@0.2 0.7,0.7,1']);
     expect(rows(508, 'cards')[0]).toMatchObject({ pulse: { speed: 0.002, amount: 0.1, base: 0.2 }, swell: { speed: 0.002, amount: 0.1 } });
+  });
+
+  // The four SubType 54 ribbons on node_blade01-04 (bones 71-74, MoveEye(14, 15, 71, 72, 73, 74)): Scale 100, Spark03,
+  // 30 tails laid two a tick (CreateTail's Blur, ZzzEffectJoint.cpp:2855-2900), so 15 ticks long, drawn only in
+  // Attack1 (:6995) (GMEmpireGuardian1.cpp:112-116, ZzzEffectJoint.cpp:394-413).
+  it("run Fred's four blade ribbons through Attack1", () => {
+    expect(trails(508).slice(2)).toEqual([71, 72, 73, 74].map(b => `${b} 100cm x15 0.7,0.7,1`));
+    for (const r of rows(508, 'trail').slice(2)) expect(r).toMatchObject({ ribbon: 'spark', gate: { action: [A.Attack1] } });
   });
 
   // MODEL_HAMMERIZE (GMEmpireGuardian2.cpp:864-876): blue lights on bones 21 and 38, swinging on
@@ -355,7 +364,7 @@ describe('the Imperial Guardian bosses', () => {
       ...[92, 99, 46, 53, 95, 88, 42, 49].map(b => `${b}:light@1 0.1,1,0.2`),
       ...[80, 34].map(b => `${b}:light@3 0.1,1,0.3`),
     ]);
-    expect(rows(515, 'cards').map(r => r.pulse)).toEqual(Array(3).fill({ speed: 0.08, amount: 0.15, base: 0.85 }));
+    expect(rows(515, 'cards').slice(0, 3).map(r => r.pulse)).toEqual(Array(3).fill({ speed: 0.08, amount: 0.15, base: 0.85 }));
   });
 });
 

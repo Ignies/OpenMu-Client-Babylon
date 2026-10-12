@@ -132,9 +132,17 @@ describe('monster body rows', () => {
       [
         { kind: 'trail', bone: 67, widthCm: 10, maxTails: 15, colour: [0.1, 0.6, 0.3] },
         { kind: 'trail', bone: 9, widthCm: 10, maxTails: 8, colour: [0.8, 0.5, 1], ribbon: 'flare', gate: { alive: true } },
+        { kind: 'trail', bone: 71, widthCm: 100, maxTails: 15, colour: [0.7, 0.7, 1], ribbon: 'spark', gate: { action: [3] } },
       ] as never
     );
-    const [kept, gated] = calls.joints;
+    const [kept, gated, blade] = calls.joints;
+    // Fred's blade ribbons record all along and are drawn only in Attack1 (ZzzEffectJoint.cpp:6995).
+    expect(blade.opts.texture).toBe('Effect/Spark03.OZJ');
+    const shown = blade.opts.intensity as (t: number) => number;
+    expect(shown(0)).toBe(0);
+    (e as unknown as { monsterAnimation: { action: number } }).monsterAnimation.action = 3;
+    expect(shown(0)).toBe(1);
+    expect(kept.opts.intensity).toBeUndefined();
     expect(kept.opts).toMatchObject({ maxTails: 15, width: 0.1, colour: [0.1, 0.6, 0.3], texture: 'Effect/JointLaser01.OZJ', seconds: Infinity });
     expect(gated.opts).toMatchObject({ maxTails: 8, texture: 'Effect/Flare.OZJ' });
     const head = { set: vi.fn() };
