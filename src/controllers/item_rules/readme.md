@@ -31,12 +31,15 @@ the table would import itself.
   the model a drop is shown as (`CreateItem`, ZzzObject.cpp:6056-6116), and the Divine weapon a Weapon of
   Archangel is drawn as; `actors/playerObject.ts` reads the second.
 - `goldColor(amount)`: the colour of a zen amount (`getGoldColor`, ZzzInventory.cpp:1094-1110).
-- `ancientSetOf(item)`, `wornSetPieces(set, worn, hero)`, `setOptionLines(set, pieces)`, `activeSetOptions(worn, hero)`, `SetOptionLine`
-  (`ancientSets.ts`): an ancient piece's set and which of its options the worn pieces light
+- `ancientSetOf(item)`, `wornSetPieces(set, worn, hero)`, `setOptionLines(set, pieces)`, `activeSetOptions(worn, hero)`, `SetOptionLine`,
+  `wornStatBonus(worn)`, `withWornStats(hero, worn)`, `WornStats` (`ancientSets.ts`): an ancient piece's set, which of
+  its options the worn pieces light, and the stats they add for the requirement checks
   (`CSItemOption`, from `assets/mu/itemSetFile.ts`).
 - `isSocketItem(group, num)`, `hasGuardianOption(item)`, `harmonyOf(item)`, `socketsOf(item)`, `socketBonusOf(item)`
   (`itemOptions.ts`): the 380 flag (byte 5 bit 3, read from `raw`), the harmony option or socket bonus
   (byte 6) and the socket seeds (byte % 50, sphere level byte / 50 + 1), as `CreateItem` reads them.
+  `harmonyKindOf(group)`, `harmonyBonus(item, tables)`, `harmonyNeedCut(item, tables)`: the harmony option's value once
+  the item's level reaches the option's, and the strength / agility it takes off the needs (`GetStrengthenCapability`).
 - `socketOptionValue(type, value, maxima)`, `socketStatusBonus(worn, maxima)`, `SocketMaxima`, `SocketStatusBonus`
   (`socketBonus.ts`): one socket value (`CalcSocketOptionValue`) and what every worn seed and mix bonus adds to the
   character window (`CalcSocketStatusBonus`, SocketSystem.cpp:476-570), by the option's `SOPT_*` / `SBOPT_*` id.
@@ -56,8 +59,11 @@ the table would import itself.
   physical weapons' damage bonus); other items keep it only when it is not 0.
 - `ancientSets.ts` ports `CheckItemSetOptions` / `calcSetOptionList` (CSItemOption.cpp:316-372, :839-906):
   a set lists options only with two pieces worn, one standard option per piece past the first, the
-  full-set ones once complete. The worn items are checked against the hero's own stats, without what
-  the sets add (the original's first pass). `ItemDef.attType` is Item.bmd's `AttType` (the item files'
+  full-set ones once complete. The worn items are checked against the hero's stats plus `wornStatBonus`
+  (`AddStrength` and the rest, `getAllAddState` :666-740): each piece's ancient +5 / +10 and the strength to
+  charisma set options of a durability-only first count. MuMain compares the relative option number against
+  the absolute enum in `AddStatsBySetOptions`, so it never adds them; the intended relative 0-4 is ported. The
+  socket stats are left out: the last `CheckItemSetOptions` overwrites them (:834). `ItemDef.attType` is Item.bmd's `AttType` (the item files'
   `Type`), the stat an ancient piece's bonus raises.
 - `itemStats.ts` ports `CalcDamageMin/Max`, `CalcMagicPower`, `CalcDefense`, `CalcRequirements`
   (`ZzzInfomation.cpp`) and `CalcMaxDurability` (ZzzInventory.cpp:1549) over `itemDef`, which hides the
@@ -109,7 +115,7 @@ the table would import itself.
 - `dropModelProxy.test.ts`: Box of Kundun / Box of Luck models, medals, chocolate boxes, Rena, quest items, Ale, Life Stone, Loch's Feather, Wizards Ring.
 - `archangelWeapons.test.ts`: Divine weapon and Weapon of Archangel names, colours and icons.
 - `portedItems.test.ts`: MuMain items and capes (tests `controllers/actors/wings.ts`, appearance).
-- `ancientSets.test.ts`: set lookup by discriminator, worn piece count, which options light.
+- `ancientSets.test.ts`: set lookup by discriminator, worn piece count, which options light, the stats worn items add.
 - `repair.test.ts`: `IsRepairBan` (every wing repaired; orbs, chaos, arrows, old pets, event helpers not), a worn
   Wings of Despair's repair price, the repair share off a worn item's sale but for `ItemValue`'s exceptions.
 - `wingTiers.test.ts`: the Wing of Curse a first wing, the Wings of Despair a second one (tooltip, defense), and

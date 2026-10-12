@@ -47,3 +47,24 @@ describe('the legacy item passes', () => {
     expect(passes(true)).toContain('vec3 lit = muBodyLight.rgb;');
   });
 });
+
+describe('the scroll materials\' look-ups', () => {
+  it('read RENDER_METAL\'s by the normal, Shiny01 at (z * 0.5 + 0.2, y * 0.5 + 0.5) (ZzzBMD.cpp:1642-1646)', () => {
+    const diffuse = (createItemMaterial(scene, false, true, true) as unknown as { CustomParts: { Fragment_Custom_Diffuse: string } }).CustomParts
+      .Fragment_Custom_Diffuse;
+    expect(diffuse).toContain('} else if (muMap == 8) {\n          muUv = vec2(n.z * 0.5 + 0.2, n.y * 0.5 + 0.5);');
+  });
+
+  it('read RENDER_CHROME2\'s at ((z + x) * 0.8 + wave2 * 2, y + x + wave2 * 3) (ZzzBMD.cpp:1598-1602)', () => {
+    const diffuse = (createItemMaterial(scene, false, true, true) as unknown as { CustomParts: { Fragment_Custom_Diffuse: string } }).CustomParts
+      .Fragment_Custom_Diffuse;
+    expect(diffuse).toContain('} else if (muMap == 2) {\n          muUv = vec2((n.z + n.x) * 0.8 + wave2 * 2.0, n.y + n.x + wave2 * 3.0);');
+  });
+});
+
+describe('the flat-lit material', () => {
+  it('draws the texel at BodyLight, as RenderMesh with LightEnable off colours it (ZzzBMD.cpp:1740-1745)', () => {
+    const fog = (createItemMaterial(scene, false, true, true) as unknown as { CustomParts: { Fragment_Before_Fog: string } }).CustomParts.Fragment_Before_Fog;
+    expect(fog).toContain('color.rgb = baseColor.rgb * vDiffuseColor.rgb * muBodyLight.rgb;');
+  });
+});

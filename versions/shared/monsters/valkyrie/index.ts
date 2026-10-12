@@ -4,6 +4,8 @@ export default defineMonster({
   Numb: 47,
   Name: 'Valkyrie',
   maxHealth: 3200,
+  // MONSTER_VALKYRIE's mesh 0 (ZzzCharacter.cpp:13803); the Silver Valkyrie has none.
+  blendMesh: { mesh: 0 },
   model: { type: 35, scale: 1.1 },
   stats: {
     Rate: 1,

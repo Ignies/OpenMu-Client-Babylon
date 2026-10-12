@@ -15,10 +15,9 @@ import { registerModelClass } from '@/controllers/actors';
 
 // [NpcInfo(349, "Balgass")] - MODEL_BALGASS at Scale 2.0
 // (GMCrywolf1st.cpp:667-677). His voice (MapManager.cpp:224-230, played per
-// action at :1618-1652) is in controllers/sound/monsters.ts. Not ported: the
-// BITMAP_JOINT_ENERGY mesh wraps (:674-675) and the per-mesh
-// RENDER_CHROME2 overlay (:1423-1436) - no mesh-wrap ribbon or monster
-// chrome pass exists.
+// action at :1618-1652) is in controllers/sound/monsters.ts; his eye ribbons
+// (:674-675) are his folder's `bodyFx`, his full light and Chrome03 pass (:1423-1436)
+// its `bodyLight` and `passes`.
 const NPC_TYPE = 349;
 
 /** MONSTER_MODEL_BALGASS. */

@@ -3,12 +3,12 @@ import { DEG } from '../../_shared';
 import { type Entity } from '@/ecs/world';
 import { delay, entityGone, entityPos, fxNow, type ParticleRecipe, type PointSource, type RGB } from '@/controllers/fx/core';
 import { PlayerAction } from '@versions/shared/objects/enum';
-import { RGBS, TEX } from '@/controllers/fx/recipes';
+import { TEX } from '@/controllers/fx/recipes';
 import { SkillContext, Step, TICK, baseSkill, cm, currentSkill, ticks } from '@/controllers/skills/visuals';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
-import { rand, sayAt, sparkHeading, tailOfSlot } from '../_shared';
+import { rand, risingFlare, risingFlares, sayAt, sparkHeading } from '../_shared';
 
 import { A } from '@/controllers/combat/recipes';
 
@@ -17,13 +17,6 @@ import { effectLight } from '@/controllers/lighting/recipes';
 /** JOINT_SPIRIT sub2's life, tails and speed (ZzzEffectJoint.cpp:668-679, :3935-3945): 21 moves, Velocity 50 then +5 a move. */
 const SPIRIT_MOVES = 21;
 const spiritReach = (m: number): number => cm(50 * m + 2.5 * m * (m - 1));
-/** One BITMAP_FLARE sub2 of the Swell Life column: its spot under the feet, LifeTime and first `Direction[2]`. */
-interface RisingFlare {
-  x: number;
-  z: number;
-  life: number;
-  rise: number;
-}
 /** Swell Life casts a caster has pending: a packet restarts `AttackTime`, so only the latest one bursts. */
 const swellLifePending = new WeakMap<Entity, number>();
 
@@ -85,28 +78,9 @@ function swellLifeBurst(c: SkillContext, hd = false): void {
       })
     );
   }
-  const flares: RisingFlare[] = headings.map(() => ({ x: origin.x + rand(-1, 1), z: origin.z + rand(-1, 1), life: 25 + Math.floor(Math.random() * 50), rise: 35 + Math.floor(Math.random() * 20) }));
-  const floor = origin.y - 2;
-  effects.spawn('joint', c.scene, Vector3.Zero(), {
-    paths: {
-      count: flares.length,
-      fill: (k, j, out) => {
-        const fl = flares[k];
-        // Born on the joint's second move; moves once a tick from the next.
-        const age = moves() - 2;
-        if (age < 0 || age > fl.life) return 0;
-        const r = Math.min(26, Math.max(0, age - tailOfSlot(j, Math.min(20, age + 1), 20) - (fl.life - 25)));
-        out.set(fl.x, floor + cm(r * fl.rise + 2.5 * r * (r + 1)), fl.z);
-        return 1;
-      },
-    },
-    maxTails: 19,
-    seconds: ticks(2 + 75),
-    width: cm(40),
-    fadeTail: 0,
-    colour: RGBS.white,
-    texture: TEX.flareBig,
-  });
+  // Born on the joint's second move; moves once a tick from the next.
+  const flares = headings.map(() => risingFlare(origin.x + rand(-1, 1), origin.z + rand(-1, 1)));
+  risingFlares(c.scene, flares, origin.y - 2, () => moves() - 2, ticks(2 + 75));
   const pulse = (t: number): number => {
     const lifeTime = 39 - Math.floor(t / TICK + 1e-3);
     return lifeTime < 5 ? 1 - (5 - lifeTime) * 0.2 : Math.sin((60 - lifeTime) * 0.05) + 0.5;

@@ -1,5 +1,6 @@
-import type { BodyFxEmitter, BodyParticle, BodyTexture } from '@/controllers/monsters';
+import type { BodyBlurSheet, BodyCard, BodyFxEmitter, BodyParticle, BodyPuff, BodyTexture } from '@/controllers/monsters';
 import { MonsterActionType as A } from '../../objects/enum';
+import { lookState } from '@/controllers/monsters';
 
 /**
  * Building blocks the monster folders' `bodyFx` rows share (`MoveCharacterVisual`,
@@ -94,5 +95,118 @@ export const BULL_SNORT: readonly BodyFxEmitter[] = [
         [5, 6],
       ],
     },
+  }),
+];
+
+type CardsRow = Extract<BodyFxEmitter, { kind: 'cards' }>;
+type PuffRow = Extract<BodyFxEmitter, { kind: 'puff' }>;
+
+/** `CreateSprite(BITMAP_*, bone + local, scale, Light, o)` for each spot, in one light. */
+export const cards = (colour: RGB, spots: CardsRow['spots'], extra: Partial<CardsRow> = {}): BodyFxEmitter => ({
+  kind: 'cards',
+  spots,
+  colour,
+  ...extra,
+});
+
+/** The same sheet at the same scale on several bones. */
+export const spotsOn = (bones: readonly number[], card: BodyCard, scale: number, local?: Cm3): CardsRow['spots'] =>
+  bones.map(b => ({ bone: b, card, scale, local }));
+
+/** A JOINT_ENERGY ribbon riding a bone: `Scale` cm wide, `MaxTails` long. */
+export const trail = (
+  at: number,
+  widthCm: number,
+  maxTails: number,
+  colour: RGB,
+  extra: Partial<Extract<BodyFxEmitter, { kind: 'trail' }>> = {}
+): BodyFxEmitter => ({ kind: 'trail', bone: at, widthCm, maxTails, colour, ...extra });
+
+/** `BITMAP_SMOKELINE1 + rand() % 3`: one of the three sheets. */
+export const SMOKE_LINES: readonly BodyPuff[] = ['smokeLine1', 'smokeLine2', 'smokeLine3'];
+
+export const puff = (
+  every: number,
+  bonesAt: readonly number[],
+  particles: PuffRow['particles'],
+  colour: RGB,
+  extra: Partial<PuffRow> = {}
+): BodyFxEmitter => ({ kind: 'puff', every, bones: bonesAt, particles, colour, ...extra });
+
+/** One card: `CreateSprite(sheet, TransformPosition(bone, local), scale, Light, o)`. */
+export const spot = (bone: number, card: BodyCard, scale: number, local?: Cm3): CardsRow['spots'][number] =>
+  local ? { bone, card, scale, local } : { bone, card, scale };
+
+/** `eBuff_Berserker` (81): the Imperial Guardian bosses' rage. */
+const BERSERKER = 81;
+
+/** `for (i < NumBones) if (i % 5 == 0)`: every fifth bone of a body of `numBones`. */
+const fifthBones = (numBones: number): number[] => Array.from({ length: Math.ceil(numBones / 5) }, (_, i) => i * 5);
+
+/**
+ * An Imperial Guardian boss under `eBuff_Berserker`: every fifth bone, each its own `rand() % 6`, a
+ * `BITMAP_SMOKE` SubType 50 and a smoke line in red (GMEmpireGuardian1.cpp:2093-2108, GMEmpireGuardian2.cpp:877,
+ * GMEmpireGuardian3.cpp:1082, GMEmpireGuardian4.cpp:1183, :1313).
+ */
+export const rageSmoke = (numBones: number): BodyFxEmitter =>
+  puff(6, fifthBones(numBones), ['smoke50', SMOKE_LINES], [1, 0.1, 0.1], { rollEach: true, gate: { buff: BERSERKER } });
+
+// ---- the Swamp of Quiet line (GMSwampOfQuiet.cpp RenderMonsterVisual) ----
+
+/** The Sapis and the Sapi Queen: two BITMAP_LIGHT cards on bone 15 (:812-840, :1136-1146). */
+export const sapiLight = (colour: RGB): BodyFxEmitter => cards(colour, spotsOn([15, 15], 'light', 2));
+
+/** The Shadows: SMOKE 50 and a smoke line from six bones, each its own `rand() % 6` (:842-950, :1190-1199). */
+export const shadowSmoke = (colour: RGB, scales: readonly [number, number] = [1, 1]): BodyFxEmitter =>
+  puff(6, [11, 15, 34, 21, 25, 39], ['smoke50', SMOKE_LINES], colour, { rollEach: true, scales });
+
+/**
+ * The Blaze and Ice Napins: BITMAP_LIGHT on bones 10, 61, 72, 21 (Scale 4) and 122, 116 (1) and, about
+ * each, one of BITMAP_FIRE_HIK1, BITMAP_FIRE_CURSEDLICH SubType 4 or BITMAP_FIRE_HIK3 a tick (:1002-1043, :1147-1188).
+ */
+export const napinFires = (light: RGB, fire: RGB): readonly BodyFxEmitter[] => [
+  cards(light, [...spotsOn([10, 61, 72, 21], 'light', 4), ...spotsOn([122, 116], 'light', 1)]),
+  puff(1, [10, 61, 72, 21], [['fire1', 'fire2', 'fire3']], fire, { scale: 1.2, jitterCm: 10 }),
+  puff(1, [122, 116], [['fire1', 'fire2', 'fire3']], fire, { scale: 0.7, jitterCm: 5 }),
+];
+
+type BlurRow = Extract<BodyFxEmitter, { kind: 'blur' }>;
+
+/** `CreateBlur` from one bone point to another while the gate is open (a RenderObject swing loop). */
+export const blur = (
+  from: number,
+  to: number,
+  colour: RGB,
+  sheet: BodyBlurSheet,
+  extra: Partial<BlurRow> = {}
+): BodyFxEmitter => ({ kind: 'blur', from, to, colour, sheet, ...extra });
+
+/**
+ * A Sapi's claws through Attack1 / Attack2 in its frame window: CreateBlur Type 0 from bone 42 to each of 34, 35,
+ * 38, 39 and 43, each its own SubType (GMSwampOfQuiet.cpp:620-795).
+ */
+export const sapiClaws = (colour: RGB, frames: readonly [number, number], from = 42, to = [34, 35, 38, 39, 43]): BodyFxEmitter[] =>
+  to.map(b => blur(from, b, colour, 'blur01', { gate: { action: [A.Attack1, A.Attack2], frames: [frames] } }));
+
+// ---- the Maya hands (GM_Kanturu_3rd.cpp MoveMonsterVisual) ----
+
+/** `KANTURU_MAYA_DIRECTION_MAYA3` (_enum.h:3734): the hands' death and Stop2 looks turn on it. */
+const MAYA3 = 14;
+
+/**
+ * A Maya hand's Move visual (:879-937): dying before MAYA3, five WATERFALL_3 SubType 6 at Scale 2 a tick at
+ * `BoneTransform[rand() % 45]` in (0.4, 0.6, 1); in Stop2 from MAYA3 on, a SMOKE + 3 SubType 3 at 1.5 and a SubType 4
+ * at 0.8 a tick at the palm. Not here: the dying hand's BlendMesh -2.
+ */
+export const mayaHandMoves = (palm: number, local: Cm3): BodyFxEmitter[] => [
+  puff(1, Array.from({ length: 45 }, (_, i) => i), ['waterfall3_6'], [0.4, 0.6, 1], {
+    pick: 5,
+    scale: 2,
+    gate: { action: [A.Die], when: () => lookState('kanturuMaya') < MAYA3 },
+  }),
+  puff(1, [palm], ['smoke3_3', 'smoke3_4'], [1, 1, 1], {
+    local,
+    scales: [1.5, 0.8],
+    gate: { action: [A.Stop2], when: () => lookState('kanturuMaya') >= MAYA3 },
   }),
 ];

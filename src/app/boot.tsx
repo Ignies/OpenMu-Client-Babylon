@@ -9,6 +9,8 @@ import './logic';
 import '@versions/shared/monsters/models';
 // ...and the wearers' cloths (capes, robes, hair) hand their rule to the actors.
 import '@versions/shared/cloaks';
+// ...and the items' own looks (their RenderPartObjectBody passes) to item_fx.
+import '@versions/shared/item_looks';
 import { playOffline } from './offline';
 import { Hero } from '../modules/hero';
 import { Session } from '../modules/session';

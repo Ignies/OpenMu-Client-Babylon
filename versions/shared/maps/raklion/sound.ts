@@ -36,7 +36,7 @@ export const RAKLION: VoiceSet = oneChannel({
   149: IRON_KNIGHT,
   // SELUPAN - the Appear crack is `CGM_Raklion::MoveMonsterVisual` (:647).
   // Appear is only his 0x69 skill 37 (:2482); his word / cure lines on skills 38-40
-  // (:2486-2515) and the event-staged rage line are not played yet.
+  // (:2486-2515) are skills/monsters/selupan/'s; the event-staged rage line is not played yet.
   150: [
     { on: ATTACK_1_2, play: 'Sound/w58w59/Selupan_attack1' },
     { on: [A.Attack3], play: 'Sound/w58w59/Selupan_attack2' },

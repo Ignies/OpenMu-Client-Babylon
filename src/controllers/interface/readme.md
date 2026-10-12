@@ -54,7 +54,9 @@ windows themselves are content in `versions/shared/ui/` (see
   centred on the cursor, below the cursor art, flipped above, inside the viewport).
   An ancient piece carries its set name, its stat bonus line (`RenderDefaultOptionText`) and the set
   block (`RenderSetOptionListInItem`); the caller hands in the worn items and whether the item sits
-  in the bag (`TooltipExtras`), since this controller cannot read the hero. The 380 option, Jewel of
+  in the bag (`TooltipExtras`), since this controller cannot read the hero. The requirement lines and
+  `usable` add the stats the worn items give (`withWornStats`, ZzzInventory.cpp:4816-4927) and take the harmony and
+  socket seed 38/39 cuts off the strength and agility needs, those lines yellow once cut (:4787-4870). The 380 option, Jewel of
   Harmony and socket blocks read `assets/mu/itemOptionFiles.ts`; a socket value of the level / life /
   mana kind needs the hero's master level and maximums, also from `TooltipExtras`. Wings list their wing
   options before skill and luck and name the additional option by its kind; the Horn of Fenrir is

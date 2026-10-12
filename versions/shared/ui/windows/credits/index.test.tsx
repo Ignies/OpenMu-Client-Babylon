@@ -22,10 +22,12 @@ const { MuWindows } = await import('@/controllers/interface');
 const { AppState, UIState } = await import('@/controllers/interface/uiState');
 
 const FILE = 'Data/Local/credit.bmd';
+const HAS_FILE = existsSync(FILE);
 
 // CCreditWin::LoadText (CreditWin.cpp:370-400) and SetTextIndex (:402-433).
-describe.skipIf(!existsSync(FILE))('the staff roll', () => {
-  const lines = parseCredits(new Uint8Array(readFileSync(FILE)));
+// A skipped describe still runs its body at collection: the file is read only when it is there.
+describe.skipIf(!HAS_FILE)('the staff roll', () => {
+  const lines = HAS_FILE ? parseCredits(new Uint8Array(readFileSync(FILE))) : [];
 
   it('reads credit.bmd as class and name records', () => {
     expect(lines).toHaveLength(400);
@@ -52,7 +54,7 @@ describe('the end of the roll', () => {
   });
 });
 
-describe.skipIf(!existsSync(FILE))('CCreditWin', () => {
+describe.skipIf(!HAS_FILE)('CCreditWin', () => {
   it('draws the illustrations, the logo, the roll and the deco with its close button on the server list', () => {
     loadCredits(new Uint8Array(readFileSync(FILE)));
     runInAction(() => {

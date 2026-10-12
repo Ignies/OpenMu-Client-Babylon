@@ -224,6 +224,9 @@ export class PlayerObject extends ModelObject {
     this.Weapon1.ParentBoneLink = RIGHT_HAND_BONE;
     this.Weapon2.LinkParent = false;
     this.Weapon2.ParentBoneLink = LEFT_HAND_BONE;
+    // RenderLinkObject draws what it links with `b->LightEnable = false` (ZzzCharacter.cpp:6651-6652):
+    // the hand weapons, their phoenix wings, c->Wing (wings, capes), the Imp, the quest weapon.
+    for (const part of [this.Weapon1, this.Weapon2, this.PhoenixWing1, this.PhoenixWing2, this.Wings, this.Pet, this.QuestItem]) part.Unlit = true;
 
     for (const slot of [0, 1] as const) {
       const wing = slot === 0 ? this.PhoenixWing1 : this.PhoenixWing2;

@@ -22,6 +22,7 @@ vi.mock('./gmMark', () => ({ syncGmMark: () => {} }));
 vi.mock('./creditsAccent', () => ({ syncCreditsAccent: () => {} }));
 
 const CHAOS_CASTLE = 18;
+const { defineItemLook, itemBodyPasses, registerItemLooks } = await import('../../controllers/item_fx/itemLooks');
 const { AppearanceSystem } = await import('./appearanceSystem');
 
 /** A player body whose class head starts on, as PlayerObject.init leaves it. */
@@ -29,6 +30,7 @@ function body() {
   const socket = () => ({
     on: false, model: '', BlendMesh: -1, HiddenMesh: -1, LinkParent: false,
     BlendMeshLightAt: null as ((ms: number) => number) | null,
+    MeshPasses: null as unknown,
     Unload() { this.on = false; },
   });
   const b = {
@@ -159,6 +161,32 @@ describe('a held item', () => {
     update(elf);
     expect(elf.modelObject.Weapon1.BlendMesh).toBe(-1);
     expect(elf.modelObject.Weapon1.BlendMeshLightAt).toBeNull();
+  });
+
+  // RenderPartObjectBody's branch for the model runs on a held weapon and a worn piece alike (ZzzObject.cpp:10137).
+  it("and a worn piece take their item look's passes", () => {
+    registerItemLooks([defineItemLook({ items: [[0, 31], [8, 23]], body: { passes: [{ mesh: 0, kind: 'add' }] } })]);
+    const knight = player(1);
+    knight.charAppearance.rightHand = { group: 0, num: 31 };
+    knight.charAppearance.armor = { group: 8, num: 23 } as never;
+    update(knight);
+    expect(knight.modelObject.Weapon2.MeshPasses).toBe(itemBodyPasses(0, 31));
+    expect(knight.modelObject.Armor.MeshPasses).toBe(itemBodyPasses(8, 23));
+    expect(itemBodyPasses(0, 31)).not.toBeNull();
+
+    knight.charAppearance.rightHand = { group: 0, num: 0 };
+    update(knight);
+    expect(knight.modelObject.Weapon2.MeshPasses).toBeNull();
+
+    // Taken off, the class's own body goes on in the same socket, and in Chaos Castle the castle's skin.
+    knight.charAppearance.armor = null;
+    update(knight);
+    expect(knight.modelObject.Armor.MeshPasses).toBeNull();
+    knight.charAppearance.armor = { group: 8, num: 23 } as never;
+    update(knight);
+    map = CHAOS_CASTLE;
+    update(knight);
+    expect(knight.modelObject.Armor.MeshPasses).toBeNull();
   });
 
   it('rides the body skeleton when it is a glove weapon (RenderSwordformGloves, MonkSystem.cpp:248)', () => {

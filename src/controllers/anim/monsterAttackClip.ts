@@ -24,6 +24,8 @@ export interface MonsterAttackState {
   skillClearsAt: number;
   /** `c->MonsterSkill`, a WORD: 0 at creation, set by 0x69, NO_MONSTER_SKILL once a hook spends it. */
   monsterSkill: number;
+  /** `m_bCurrentIsRage_*`: a guardian boss spent its Berserker; its next visual frame draws the rage and clears it. */
+  rage: boolean;
 }
 
 export interface MonsterAttackInput {
@@ -47,7 +49,7 @@ const states = new WeakMap<object, MonsterAttackState>();
 export function monsterAttackState(owner: object): MonsterAttackState {
   let state = states.get(owner);
   if (!state) {
-    state = { swordCount: 0, skill: 0, skillClearsAt: Infinity, monsterSkill: 0 };
+    state = { swordCount: 0, skill: 0, skillClearsAt: Infinity, monsterSkill: 0, rage: false };
     states.set(owner, state);
   }
   return state;
@@ -72,11 +74,13 @@ const MONSTER_MODEL_BATTLE_GUARD2 = 77;
 const MONSTER_MAYA = 364;
 const MONSTER_SELUPAN = 459;
 const MONSTER_LUCAS = 507;
+/** Dark Ghost keeps 51 / 52 for its AttackEffect: its case falls through without `MonsterSkill = -1` (GMEmpireGuardian2.cpp:1099-1121). */
+const MONSTER_DARK_GHOST = 515;
 
 // The monsters each hook hands to CheckMonsterSkill.
 const AIDA_CHECKED = new Set([304, 305, 309, 549, 550]);
 /** `c->MonsterSkill = -1`. */
-const NO_MONSTER_SKILL = 0xffff;
+export const NO_MONSTER_SKILL = 0xffff;
 /** ReceiveMonsterSkill swings only for `ATMON_SKILL_BIGIN < skill < ATMON_SKILL_END` (_enum.h:3291-3346). */
 const ATMON_SKILL_END = 78;
 /** ATMON_SKILL_EMPIREGUARDIAN_BERSERKER: the boss's rage. */
@@ -142,10 +146,13 @@ const EMPIRE_GUARDIAN_MAP_SKILLS: Readonly<Record<number, Readonly<Record<number
   },
 };
 
-/** A hook's `switch (c->MonsterSkill)`: the clip for it, spending it unless `keep` says otherwise. */
-function skillClip(state: MonsterAttackState, clips: SkillClips, otherwise: number, keep: 'spend' | 'keepOthers' | 'keep' = 'spend'): number {
+/**
+ * A hook's `switch (c->MonsterSkill)`: the clip for it, spending it unless `keep` says otherwise (`keepOwn`: its
+ * own skills stay for AttackEffect, any other is spent).
+ */
+function skillClip(state: MonsterAttackState, clips: SkillClips, otherwise: number, keep: 'spend' | 'keepOthers' | 'keepOwn' | 'keep' = 'spend'): number {
   const clip = clips[state.monsterSkill];
-  if (keep === 'spend' || (keep === 'keepOthers' && clip !== undefined)) state.monsterSkill = NO_MONSTER_SKILL;
+  if (keep === 'spend' || (keep === 'keepOthers' && clip !== undefined) || (keep === 'keepOwn' && clip === undefined)) state.monsterSkill = NO_MONSTER_SKILL;
   return clip ?? otherwise;
 }
 
@@ -217,7 +224,8 @@ function hookedAttack(state: MonsterAttackState, input: MonsterAttackInput): num
   }
   if (world >= W.WD_69EMPIREGUARDIAN1 && world <= W.WD_72EMPIREGUARDIAN4) {
     const clips = EMPIRE_GUARDIAN_SKILLS[monster] ?? EMPIRE_GUARDIAN_MAP_SKILLS[world]?.[monster];
-    if (clips) return skillClip(state, clips, A.Attack1);
+    if (clips && state.monsterSkill === BERSERKER && clips[BERSERKER] !== undefined) state.rage = true;
+    if (clips) return skillClip(state, clips, A.Attack1, monster === MONSTER_DARK_GHOST ? 'keepOwn' : 'spend');
   }
   if (world === W.WD_79UNITEDMARKETPLACE && monster === MONSTER_LUCAS) return KEEP_CLIP;
 
@@ -288,6 +296,11 @@ export function monsterMagic(state: MonsterAttackState): number {
 export function monsterCastAttacks(skill: number): boolean {
   const clip = monsterCastOf(skill)?.clip;
   return clip === 'attack' || clip === 'attackHeld';
+}
+
+/** Whether a monster's 0x19 of that skill starts AttackTime, so AttackEffect runs (ZzzCharacter.cpp:4132-4137). */
+export function monsterCastStartsAttack(skill: number): boolean {
+  return monsterCastOf(skill)?.attackTime !== false;
 }
 
 function castAction(state: MonsterAttackState, skill: number, input: MonsterAttackInput): number {

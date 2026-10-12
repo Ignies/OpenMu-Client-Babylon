@@ -18,9 +18,33 @@ other folders share.
   Before those, the lit ancient set options (`PlusSpecial` / `PlusSpecialLevel`: min / max damage, damage by
   strength or agility, attack rate, defense, defense by agility or vitality, shield defense %, wizardry by energy)
   and the socket bonuses (`m_StatusBonus`) when the window passes the set and socket tables
-  (ZzzInfomation.cpp:2745-2812, :3005-3035, :3127-3129, :3248, :3361-3381). The stats the sets and sockets add
-  (`AddStrength` and the rest) are not shown or used yet. The shield's blocking and its +5 per option level
-  lose the `CalcDurabilityPercent` share, and the excellent "defense success rate" adds 10% (:3223-3236).
+  (ZzzInfomation.cpp:2745-2812, :3005-3035, :3127-3129, :3248, :3361-3381). The stats the worn items add
+  (`AddStrength` and the rest, `wornStatBonus`) count in `IsRequireEquipItem` and every formula (`totals`, also the
+  window's skill damage lines and rows, which turn blue while `added` has some, NewUICharacterInfoWindow.cpp:463-475);
+  the attack and magic speeds keep the base agility. The shield's blocking and its +5 per option level
+  lose the `CalcDurabilityPercent` share, and the excellent "defense success rate" on the shield, each armour
+  piece and each ring adds 10% in turn, when `IsRequireEquipItem` passes (:3223-3246).
+  Wizardry is energy plus the items' wizardry options only (`CalculateMagicDamage`, :2848-3001): the wing's,
+  the right weapon's (a magic sword's damage option), the left weapon's, the staff and pendant excellent
+  level / 20 and 2%, the Wizard's Ring 10%, each counted only when `IsRequireEquipItem` passes. As in the
+  original, anything in the left hand adds the right weapon's option a second time (:2950-2979).
+  The window's wizardry line reads the selected skill (`magicSkill`, `GetMagicSkillDamage`, CharacterManager.cpp:341-370):
+  its Damage on the minimum and 1.5 times it on the maximum, the set's magic power percent and skill attack; the
+  summoner's curse skills read the plain values. The set mastery rows (`PlusMastery`, options 29-35) are left out: no
+  Season 6 set carries an option above 23. The line then adds `maxMg`, the worn staffs' Jewel of Harmony magic power
+  (:1241-1256). The magic rate (`staffRate`) is the skill maximum plus `maxMg` times the staff's or magic sword's
+  `MagicPower` percent, worn by the `MagicDur` share (NewUICharacterInfoWindow.cpp:1226-1352). `IsRequireEquipItem`
+  takes the harmony strength and agility cut off the needs (ZzzInfomation.cpp:2246-2259).
+  The curse line is `CalculateCurseDamage` (ZzzInfomation.cpp:3045-3104): energy, the wing's and the left hand's curse
+  options worn by durability, the left hand's excellent level / 20 and 2%; then `GetCurseSkillDamage` adds a curse
+  skill's Damage (CharacterManager.cpp:373-390). A book in the left hand prints its worn magic power on the line's
+  maximum (`curseRate`, NewUICharacterInfoWindow.cpp:1449-1460), "(+0)" included; without a book it is null and the
+  line has no "(+N)" (GlobalText 1694, else 1693).
+  The window's own harmony and 380 sums (`windowHarmony`, NewUICharacterInfoWindow.cpp:554-668, :928-942): the two
+  hands' harmony attack power on the damage line, their harmony attack rate plus the 380 attack as the PvP attack rate's
+  "(+N)" (`attackRatePvpBonus`), the armour's harmony defense rate plus the 380 defense as the PvP defense rate's
+  (`defenseRatePvpBonus`), and the armour's harmony defense on `defense` (`harmonyDefense`, which the full set's
+  "(+N)" leaves out, :1009).
 - `emotes.ts`: `EMOTES`, `EMOTE_RINGS`, `emoteById(id)`, `matchEmoteWord(text)` (the chat words that fire
   an emote, `CheckChatText`), `genderedEmoteAction`, type `EmoteId`.
 - `statAllocation.ts`: `StatAllocation.start(stat, amount)` / `cancel()`, `run`, `running`, `isRunning(stat)`.

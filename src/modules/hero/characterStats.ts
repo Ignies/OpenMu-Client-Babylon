@@ -3,7 +3,7 @@ import { BaseClass, CharacterClassNumber, getBaseClass } from '../../core/types'
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { InventoryConstants } from '@/core/inventoryConstants';
 import type { Item } from '../../ecs/world';
-import { activeSetOptions, classOf, socketStatusBonus, type SetOptionLine, type SocketStatusBonus } from '@/controllers/item_rules';
+import { activeSetOptions, classCanUse, wornStatBonus, classOf, harmonyBonus, harmonyNeedCut, hasGuardianOption, itemDef, periodExpired, itemStats, optionSpecials, socketStatusBonus, type OptionSpecial, type SetOptionLine, type SocketStatusBonus } from '@/controllers/item_rules';
 import type { ItemOptionTables, ItemSetTables } from '@/controllers/assets';
 
 export enum StatType {
@@ -77,12 +77,18 @@ function firstSet(config: ItemConfig, ...names: string[]): number {
   return 0;
 }
 
+const GROUP_SWORD = 0;
 const GROUP_MACE = 2;
 const GROUP_BOW = 4;
 const GROUP_STAFF = 5;
 const GROUP_SHIELD = 6;
+const GROUP_BOOTS = 11;
 const GROUP_WING = 12;
 const GROUP_HELPER = 13;
+
+/** ITEM_BOLT and ITEM_ARROWS, ITEM_BOW + 7 and + 15 (_enum.h:2268, :2276). */
+const BOLT = 7;
+const ARROWS = 15;
 
 function isBow(item: Item): boolean {
   return item.group === GROUP_BOW && item.num <= 6;
@@ -184,14 +190,17 @@ function itemBlocking(item: Item): number {
   return blocking;
 }
 
-/** `CalcDurabilityPercent` (ZzzInfomation.cpp:2440-2485): how much of a stat a worn item loses. */
-function durabilityPercent(item: Item): number {
+/**
+ * `CalcDurabilityPercent` (ZzzInfomation.cpp:2440-2485): how much of a stat a worn item loses; a wing passes no
+ * excellent bits, the window's magic rate reads `MagicDur`.
+ */
+function durabilityPercent(item: Item, wing = false, magic = false): number {
   const config = configOf(item);
   if (!config || item.durability === undefined) return 0;
   const level = item.lvl ?? 0;
-  let max = firstSet(config, 'Dur', 'Durability') + Math.min(level, 4) + Math.max(0, level - 4) * 2;
-  if ((item.ancientDiscriminator ?? 0) > 0) max += 20;
-  else if ((item.excellentFlags ?? 0) & 63) max += 15;
+  let max = (magic ? field(config, 'MagicDur') : firstSet(config, 'Dur', 'Durability')) + Math.min(level, 4) + Math.max(0, level - 4) * 2;
+  if (!wing && (item.ancientDiscriminator ?? 0) > 0) max += 20;
+  else if (!wing && (item.excellentFlags ?? 0) & 63) max += 15;
   const worn = 1 - item.durability / max;
   return worn > 0.8 ? 0.5 : worn > 0.7 ? 0.3 : worn > 0.5 ? 0.2 : 0;
 }
@@ -238,6 +247,8 @@ type CharacterStatsInput = {
   masterLevel?: number;
   maxLife?: number;
   maxMana?: number;
+  /** The selected skill (`Hero->CurrentSkill`) and its `SkillAttribute` Damage, for the wizardry line. */
+  magicSkill?: { number: number; damage: number } | null;
 };
 
 /**
@@ -273,6 +284,16 @@ export function magicSpeedOf(cls: CharacterClassNumber, agility: number): number
   return Math.trunc(agility / MAGIC_SPEED_DIVISOR[getBaseClass(cls)]);
 }
 
+/** The window's attack speed line: the server's value when it sent one, MagicSpeed for the wizard and summoner (NewUICharacterInfoWindow.cpp:1039-1040). */
+export function windowAttackSpeed(
+  cls: CharacterClassNumber,
+  stats: { attackSpeed: number; magicSpeed: number },
+  server: { attack: number | null; magic: number | null }
+): number {
+  const base = getBaseClass(cls);
+  return base === BaseClass.Wizard || base === BaseClass.Summoner ? server.magic ?? stats.magicSpeed : server.attack ?? stats.attackSpeed;
+}
+
 type DerivedStats = {
   attackSpeed: number;
   magicSpeed: number;
@@ -280,15 +301,31 @@ type DerivedStats = {
   damageMax: number;
   attackRate: number;
   attackRatePvp: number;
+  /** The PvP attack rate's "(+N)": harmony attack rate and the 380 attack. */
+  attackRatePvpBonus: number;
   defense: number;
+  /** The harmony defense inside `defense`, which the full set's "(+N)" leaves out. */
+  harmonyDefense: number;
   defenseRate: number;
   defenseRatePvp: number;
-  dualWield: boolean;
+  /** The PvP defense rate's "(+N)": harmony defense rate and the 380 defense. */
+  defenseRatePvpBonus: number;
+  /** `GetAttackDamage`'s return: the damage line prints blue (NewUICharacterInfoWindow.cpp:765). */
+  damageBlue: boolean;
+  /** The detail line the worn pet prints magenta, null for none. */
+  petEvent: 'attackSpeed' | 'hp' | null;
   wizardryMin: number;
   wizardryMax: number;
-  staffRate: number;
+  /** Null without a staff or a magic sword in the right hand; "(+0)" still prints with one (:1336-1353). */
+  staffRate: number | null;
   curseMin: number;
   curseMax: number;
+  /** Null without a book in the left hand: the line then has no "(+N)". */
+  curseRate: number | null;
+  /** Strength + AddStrength and the rest: what the window's skill damage lines read. */
+  totals: { str: number; agi: number; vit: number; ene: number; cmd: number };
+  /** AddStrength and the rest: a row prints in blue while its stat has some (NewUICharacterInfoWindow.cpp:463-475). */
+  added: { str: number; agi: number; vit: number; ene: number; cmd: number };
 };
 
 function equipped(items: (Item | null)[], slot: number): Item | null {
@@ -299,7 +336,7 @@ function calculateDamage(
   input: CharacterStatsInput,
   base: BaseClass,
   flat: Range
-): { min: number; max: number; dualWield: boolean } {
+): { min: number; max: number; blue: boolean } {
   const { strength, agility, energy, vitality, items } = input;
 
   const weaponRight = equipped(items, InventoryConstants.LeftHandSlot);
@@ -396,7 +433,8 @@ function calculateDamage(
     max = maxRight;
   }
 
-  let dualWield = false;
+  // GetAttackDamage's `Alpha` (ZzzInventory.cpp:5937-5966).
+  let blue = false;
 
   const bothHands = !!weaponRight && !!weaponLeft;
 
@@ -406,9 +444,14 @@ function calculateDamage(
       weaponRight!.group <= GROUP_STAFF &&
       weaponLeft!.group <= GROUP_STAFF
     ) {
-      dualWield = true;
+      blue = true;
       min = Math.trunc((minRight * 55) / 100) + Math.trunc((minLeft * 55) / 100);
       max = Math.trunc((maxRight * 55) / 100) + Math.trunc((maxLeft * 55) / 100);
+    }
+  } else if (base === BaseClass.Elf) {
+    // A bow or crossbow with +1 or better arrows or bolts in the other hand.
+    if (weaponRight?.group === GROUP_BOW && weaponLeft?.group === GROUP_BOW) {
+      blue = (weaponLeft.num === BOLT && (weaponLeft.lvl ?? 0) >= 1) || (weaponRight.num === ARROWS && (weaponRight.lvl ?? 0) >= 1);
     }
   } else if (base === BaseClass.RageFighter) {
     if (
@@ -416,13 +459,13 @@ function calculateDamage(
       weaponRight!.group <= GROUP_MACE &&
       weaponLeft!.group <= GROUP_MACE
     ) {
-      dualWield = true;
+      blue = true;
       min = Math.trunc(((minRight + minLeft) * 60) / 100);
       max = Math.trunc(((maxRight + maxLeft) * 65) / 100);
     }
   }
 
-  return { min, max, dualWield };
+  return { min, max, blue };
 }
 
 function calculateAttackRate(
@@ -543,17 +586,26 @@ function calculateDefenseRate(
 
   // EQUIPMENT_WEAPON_LEFT is slot 1, our RightHandSlot (ZzzInfomation.cpp:3222).
   const left = equipped(items, InventoryConstants.RightHandSlot);
-  if (!left || left.durability === 0) return blocking;
-
-  // The item's blocking and its +5 per option level both lose the durability percent (ZzzInfomation.cpp:3223-3236).
-  const percent = durabilityPercent(left);
-  const item = itemBlocking(left);
-  const option = isShield(left) ? (left.optionLevel ?? 0) * 5 : 0;
-  blocking += item - Math.trunc(item * percent) + option - Math.trunc(option * percent);
-  // AT_IMPROVE_BLOCKING_PERCENT, excellent bit 1 on a shield (CalcExcellentOptions, ZzzInfomation.cpp:966-969).
-  if (isShield(left) && ((left.excellentFlags ?? 0) >> 1) & 1) blocking += Math.trunc((blocking * 10) / 100);
-
+  if (left && left.durability !== 0) {
+    // The item's blocking and its +5 per option level both lose the durability percent (ZzzInfomation.cpp:3223-3236).
+    const percent = durabilityPercent(left);
+    const item = itemBlocking(left);
+    const option = special(left, 'defenseRate', input);
+    blocking += item - Math.trunc(item * percent) + option - Math.trunc(option * percent);
+  }
+  // Then +10% per piece with AT_IMPROVE_BLOCKING_PERCENT (:3237-3246).
+  const { RightHandSlot, HelmSlot, ArmorSlot, PantsSlot, GlovesSlot, BootsSlot, Ring1Slot, Ring2Slot } = InventoryConstants;
+  for (const slot of [RightHandSlot, HelmSlot, ArmorSlot, PantsSlot, GlovesSlot, BootsSlot, Ring2Slot, Ring1Slot]) {
+    if (blockingPercent(equipped(items, slot), input)) blocking += Math.trunc((blocking * 10) / 100);
+  }
   return blocking;
+}
+
+/** Excellent bit 1 on a shield, an armour piece or a ring (CalcExcellentOptions, ZzzInfomation.cpp:946-969), its needs met. */
+function blockingPercent(item: Item | null, input: CharacterStatsInput): boolean {
+  if (!item || item.durability === 0 || !(((item.excellentFlags ?? 0) >> 1) & 1)) return false;
+  const takes = (item.group >= GROUP_SHIELD && item.group <= GROUP_BOOTS) || (item.group === GROUP_HELPER && [8, 9, 21, 22, 23, 24].includes(item.num));
+  return takes && requiresMet(item, input);
 }
 
 function calculateDefenseRatePvp(
@@ -579,32 +631,204 @@ function calculateDefenseRatePvp(
   }
 }
 
+/** The swords whose damage option reaches wizardry (ZzzInfomation.cpp:2888-2894). */
+const MAGIC_SWORDS: ReadonlySet<number> = new Set([21, 23, 25, 28, 31]);
+const IMPERIAL_SWORD = 28;
+
+/** `IsRequireEquipItem` (ZzzInfomation.cpp:2209-2285): an item's options count only when the hero meets its needs. */
+function requiresMet(item: Item, input: CharacterStatsInput): boolean {
+  const stats = itemStats(item);
+  if (!stats) return false;
+  const { base, step } = classOf(input.charClass);
+  // The stats already carry AddStrength and the rest (ZzzInfomation.cpp:2237-2241).
+  const hero = { level: input.level, str: input.strength, agi: input.agility, vit: input.vitality, ene: input.energy, cmd: input.leadership, baseClass: base, stepClass: step };
+  const columns = stats.def.classes;
+  // The Magic Gladiator wears what both the wizard and the knight can (:2222-2225).
+  if (!classCanUse(stats.def, hero) && !(base === 3 && columns[0] && columns[1] && !columns[3])) return false;
+  // The harmony strength and agility cut (:2246-2259).
+  const cut = harmonyNeedCut(item, input.options);
+  return stats.reqLvl <= hero.level && stats.reqStr - cut.str <= hero.str && stats.reqAgi - cut.agi <= hero.agi && stats.reqEne <= hero.ene && stats.reqVit <= hero.vit && stats.reqCmd <= hero.cmd;
+}
+
+/** `PlusSpecial` (ZzzInfomation.cpp:2286-2300) of one option level kind. */
+function special(item: Item | null, kind: OptionSpecial, input: CharacterStatsInput): number {
+  if (!item || item.durability === 0 || !requiresMet(item, input)) return 0;
+  const def = itemDef(item.group, item.num);
+  let sum = 0;
+  if (def) for (const line of optionSpecials(item, def)) if (line.kind === kind) sum += line.value;
+  return sum;
+}
+
+/** The excellent wizardry bits of a staff or a magic pendant (CalcExcellentOptions, ZzzInfomation.cpp:979-995). */
+function magicExcellent(item: Item | null, input: CharacterStatsInput): { level: number; percent: number } {
+  const none = { level: 0, percent: 0 };
+  if (!item || item.durability === 0) return none;
+  const magic = item.group === GROUP_STAFF || (item.group === GROUP_HELPER && [12, 25, 27].includes(item.num));
+  if (!magic || !requiresMet(item, input)) return none;
+  const flags = item.excellentFlags ?? 0;
+  return { level: (flags >> 4) & 1 ? Math.trunc(input.level / 20) : 0, percent: (flags >> 3) & 1 ? 2 : 0 };
+}
+
+/** `AT_IMPROVE_MAGIC_PERCENT` of the Wizard's Ring +0 / +3 and item 13/107 (ZzzInfomation.cpp:1023-1050). */
+function ringMagicPercent(ring: Item | null, input: CharacterStatsInput): number {
+  if (ring?.group !== GROUP_HELPER || ring.durability === 0 || !requiresMet(ring, input)) return 0;
+  if (ring.num === 20 && [0, 3].includes(ring.lvl ?? 0)) return 10;
+  return ring.num === 107 ? 15 : 0;
+}
+
+/** `CalculateMagicDamage` (ZzzInfomation.cpp:2848-3001): energy, then the items' wizardry options, worn by durability. */
 function calculateWizardry(input: CharacterStatsInput): {
   min: number;
   max: number;
-  rate: number;
+  /** Null without a staff or a magic sword in the right hand: the line then has no "(+N)". */
+  percent: number | null;
 } {
   const { energy, items } = input;
-
-  let min = Math.trunc(energy / 9);
-  let max = Math.trunc(energy / 4);
-  let rate = 0;
+  const range = { min: Math.trunc(energy / 9), max: Math.trunc(energy / 4) };
+  const add = (value: number) => {
+    range.min += value;
+    range.max += value;
+  };
+  const percent = (rate: number) => {
+    range.min += Math.trunc((range.min * rate) / 100);
+    range.max += Math.trunc((range.max * rate) / 100);
+  };
+  const excellent = (item: Item | null) => {
+    const bits = magicExcellent(item, input);
+    add(bits.level);
+    if (bits.percent) percent(bits.percent);
+  };
+  const worn = (value: number, item: Item, wing = false) => value - Math.trunc(value * durabilityPercent(item, wing));
+  const base = getBaseClass(input.charClass);
 
   // pWeaponRight is EQUIPMENT_WEAPON_RIGHT, slot 0, our LeftHandSlot (NewUICharacterInfoWindow.cpp:509, :1346).
   const right = equipped(items, InventoryConstants.LeftHandSlot);
+  const left = equipped(items, InventoryConstants.RightHandSlot);
+  const wing = equipped(items, InventoryConstants.WingsSlot);
+  const rightKind = (item: Item | null, swords: (num: number) => boolean): OptionSpecial =>
+    item?.group === GROUP_SWORD && swords(item.num) ? 'damage' : 'wizardry';
 
-  if (right && isStaff(right)) {
-    const damage = itemDamage(right);
-    min += damage.min;
-    max += damage.max;
-    rate = itemMagicPower(right);
+  if (wing) add(worn(special(wing, 'wizardry', input), wing, true));
+  if (right && right.durability !== 0) {
+    add(worn(special(right, rightKind(right, num => MAGIC_SWORDS.has(num)), input), right));
+    excellent(right);
+  }
+  const magicLeft = left && left.durability !== 0 && base !== BaseClass.Summoner;
+  // A weapon in the left hand: its own option (:2914-2947).
+  if (magicLeft && left.group <= GROUP_STAFF) {
+    if (base !== BaseClass.MagicGladiator) add(worn(special(left, rightKind(left, num => num === IMPERIAL_SWORD), input), left));
+    excellent(left);
+  }
+  // Anything in the left hand: the right weapon's option again, worn by the left item (:2950-2979).
+  if (magicLeft) {
+    if (base !== BaseClass.MagicGladiator) add(worn(special(right, rightKind(right, num => num === IMPERIAL_SWORD), input), left));
+    excellent(left);
+  }
+  excellent(equipped(items, InventoryConstants.PendantSlot));
+  for (const slot of [InventoryConstants.Ring1Slot, InventoryConstants.Ring2Slot]) {
+    const rate = ringMagicPercent(equipped(items, slot), input);
+    if (rate) percent(rate);
   }
 
-  return { min, max, rate };
+  // The window's magic percent: a staff's or a magic sword's, worn by the MagicDur share (NewUICharacterInfoWindow.cpp:1336-1351).
+  if (!right || !(isStaff(right) || rightKind(right, num => MAGIC_SWORDS.has(num)) === 'damage')) return { ...range, percent: null };
+  const power = Math.fround(itemMagicPower(right) / 100);
+  const magicPercent = Math.fround(power - Math.fround(power * durabilityPercent(right, false, true)));
+  return { ...range, percent: magicPercent };
+}
+
+/**
+ * The window's harmony (`GetStrengthenCapability`, UIJewelHarmony.cpp:244-323) and 380 sums (NewUICharacterInfoWindow.cpp):
+ * `maxMg` from every staff (:1241-1256); the hands' attack power and attack rate (:554-610); the armour's defense rate
+ * (:612-629) and defense (:928-942); the 380 attack and defense (:631-668).
+ */
+function windowHarmony(input: CharacterStatsInput) {
+  const sum = { magic: 0, min: 0, max: 0, attackRate: 0, defenseRate: 0, defense: 0 };
+  input.items.slice(0, 12).forEach((item, slot) => {
+    if (!item) return;
+    const bonus = harmonyBonus(item, input.options);
+    const value = bonus?.value ?? 0;
+    const hand = slot < 2;
+    if (bonus?.kind === 0 && hand) {
+      if (bonus.option === 1 || bonus.option === 5) sum.min += value;
+      if (bonus.option === 2 || bonus.option === 5) sum.max += value;
+      if (bonus.option === 8) sum.attackRate += value;
+    } else if (bonus?.kind === 1) {
+      if (bonus.option === 1) sum.magic += value;
+      if (bonus.option === 7 && hand) sum.attackRate += value;
+    } else if (bonus?.kind === 2) {
+      if (bonus.option === 1) sum.defense += value;
+      if (bonus.option === 6) sum.defenseRate += value;
+    }
+    if (!hasGuardianOption(item)) return;
+    for (const [option, add] of input.options?.addOptions[item.group * 512 + item.num] ?? []) {
+      if (option === 1) sum.attackRate += add;
+      if (option === 3) sum.defenseRate += add;
+    }
+  });
+  return sum;
+}
+
+/** The summoner's curse skills, AT_SKILL_SUMMON_EXPLOSION and AT_SKILL_SUMMON_REQUIEM (_enum.h:436-437). */
+const SUMMON_CURSES = new Set([223, 224]);
+
+/**
+ * `CalculateCurseDamage` (ZzzInfomation.cpp:3045-3104): energy, the wing's and the left hand's curse options worn by
+ * durability, the left hand's excellent wizardry bits; then `GetCurseSkillDamage` (CharacterManager.cpp:373-390).
+ */
+function calculateCurse(input: CharacterStatsInput): Range {
+  const range = { min: Math.trunc(input.energy / 9), max: Math.trunc(input.energy / 4) };
+  const add = (value: number) => {
+    range.min += value;
+    range.max += value;
+  };
+  const wing = equipped(input.items, InventoryConstants.WingsSlot);
+  if (wing) add(special(wing, 'curse', input) - Math.trunc(special(wing, 'curse', input) * durabilityPercent(wing, true)));
+  // EQUIPMENT_WEAPON_LEFT, slot 1.
+  const left = equipped(input.items, InventoryConstants.RightHandSlot);
+  if (left && left.durability !== 0) {
+    const option = special(left, 'curse', input);
+    add(option - Math.trunc(option * durabilityPercent(left)));
+    const bits = magicExcellent(left, input);
+    add(bits.level);
+    if (bits.percent) {
+      range.min += Math.trunc((range.min * bits.percent) / 100);
+      range.max += Math.trunc((range.max * bits.percent) / 100);
+    }
+  }
+  const skill = input.magicSkill;
+  if (!skill || !SUMMON_CURSES.has(skill.number)) return range;
+  return { min: range.min + skill.damage, max: range.max + skill.damage + Math.trunc(skill.damage / 2) };
+}
+
+/** The books, ITEM_BOOK_OF_SAHAMUTT to ITEM_STAFF + 29: their magic power is the curse rate (NewUICharacterInfoWindow.cpp:1449-1460); null without one. */
+function curseRate(input: CharacterStatsInput, max: number): number | null {
+  const left = equipped(input.items, InventoryConstants.RightHandSlot);
+  if (left?.group !== GROUP_STAFF || left.num < 21 || left.num > 29) return null;
+  const power = Math.fround(itemMagicPower(left) / 100);
+  return Math.trunc(Math.fround(max * Math.fround(power - Math.fround(power * durabilityPercent(left, false, true)))));
+}
+
+/** `GetMagicSkillDamage` (CharacterManager.cpp:341-370) of the selected skill; no Season 6 set has a mastery row (option 29-35). */
+function magicSkillDamage(range: Range, skill: CharacterStatsInput['magicSkill'], lines: readonly SetOptionLine[]): Range {
+  if (skill && SUMMON_CURSES.has(skill.number)) return range;
+  const damage = skill?.damage ?? 0;
+  let min = range.min + damage;
+  let max = range.max + damage + Math.trunc(damage / 2);
+  const power = setSum(lines, SET.magicPower);
+  if (power) {
+    const ratio = Math.fround(1 + Math.fround(power / 100));
+    min = Math.trunc(Math.fround(min * ratio));
+    max = Math.trunc(Math.fround(max * ratio));
+  }
+  const attack = setSum(lines, SET.skillAttack);
+  return { min: min + attack, max: max + attack };
 }
 
 /** The helpers the character window reads (NewUICharacterInfoWindow.cpp:707-737, :954-959). */
-const PET = { imp: 1, fenrir: 37, demon: 64, panda: 80, unicorn: 106, skeleton: 123 } as const;
+/** ITEM_ELITE_TRANSFER_SKELETON_RING, ITEM_HELPER + 39 (_enum.h:2742). */
+const ELITE_SKELETON_RING = 39;
+const PET = { imp: 1, fenrir: 37, demon: 64, guardian: 65, panda: 80, unicorn: 106, skeleton: 123 } as const;
 /** The gold Fenrir's option bit. */
 const FENRIR_GOLD = 0x04;
 
@@ -626,6 +850,16 @@ function withPet<T extends Range>(range: T, pet: Item | null, kind: 'damage' | '
   return { ...range, min: min + Math.trunc(min * rate), max: max + Math.trunc(max * rate) };
 }
 
+/**
+ * The Demon and the Skeleton turn the attack speed line magenta, the Spirit of Guardian the HP line, worn with
+ * durability, needs met and not expired (NewUICharacterInfoWindow.cpp:1058-1068, :1144-1153).
+ */
+function petEvent(pet: Item | null, input: CharacterStatsInput): DerivedStats['petEvent'] {
+  if (pet?.group !== GROUP_HELPER || pet.durability === 0 || !requiresMet(pet, input) || periodExpired(pet)) return null;
+  if (pet.num === PET.demon || pet.num === PET.skeleton) return 'attackSpeed';
+  return pet.num === PET.guardian ? 'hp' : null;
+}
+
 /** The Christmas, Panda and Skeleton transformation rings: the best one worn adds this much. */
 const RING_BONUS: Readonly<Record<number, number>> = { 41: 20, 76: 30, 122: 40 };
 
@@ -641,7 +875,7 @@ function withRing<T extends Range>(range: T, items: CharacterStatsInput['items']
 }
 
 /** `AT_SET_OPTION_*` past `AT_SET_OPTION_IMPROVE_STRENGTH` (_enum.h:3408-3442) that the window reads. */
-const SET = { attackMin: 5, attackMax: 6, attackRate: 9, defense: 10, shieldDefense: 22, byStr: 24, byAgi: 25, defenseByAgi: 26, defenseByVit: 27, magicByEne: 28 } as const;
+const SET = { attackMin: 5, attackMax: 6, magicPower: 7, attackRate: 9, defense: 10, skillAttack: 19, shieldDefense: 22, byStr: 24, byAgi: 25, defenseByAgi: 26, defenseByVit: 27, magicByEne: 28 } as const;
 
 /** `CSItemOption::PlusSpecial` (CSItemOption.cpp:477-485): the lit values of one option, summed. */
 function setSum(lines: readonly SetOptionLine[], option: number): number {
@@ -666,12 +900,15 @@ function withSetDefense(defense: number, input: CharacterStatsInput, lines: read
   return defense;
 }
 
-export function deriveCharacterStats(input: CharacterStatsInput): DerivedStats {
-  const base = getBaseClass(input.charClass);
+export function deriveCharacterStats(bare: CharacterStatsInput): DerivedStats {
+  const base = getBaseClass(bare.charClass);
 
-  const { items, level } = input;
-  const { base: baseClass, step } = classOf(input.charClass);
-  const hero = { level, str: input.strength, agi: input.agility, vit: input.vitality, ene: input.energy, cmd: input.leadership, baseClass, stepClass: step };
+  const { items, level } = bare;
+  const { base: baseClass, step } = classOf(bare.charClass);
+  const hero = { level, str: bare.strength, agi: bare.agility, vit: bare.vitality, ene: bare.energy, cmd: bare.leadership, baseClass, stepClass: step };
+  // Every formula and requirement check reads Strength + AddStrength and the rest (ZzzInfomation.cpp:2550-2553, :2851, :3108-3110).
+  const add = wornStatBonus(items, bare.sets ?? null);
+  const input = { ...bare, strength: bare.strength + add.str, agility: bare.agility + add.agi, vitality: bare.vitality + add.vit, energy: bare.energy + add.ene, leadership: bare.leadership + add.cmd };
   const lines = input.sets ? activeSetOptions(items, hero, input.sets) : [];
   const socket = socketStatusBonus(items, { level, masterLevel: input.masterLevel, maxLife: input.maxLife, maxMana: input.maxMana }, input.options ?? null);
   const setDamage = setByStat(lines, SET.byAgi, input.agility) + setByStat(lines, SET.byStr, input.strength);
@@ -681,27 +918,45 @@ export function deriveCharacterStats(input: CharacterStatsInput): DerivedStats {
   // CalculateMagicDamage (ZzzInfomation.cpp:3005-3035).
   const magic = calculateWizardry(input);
   const magicBonus = setByStat(lines, SET.magicByEne, input.energy) + socket.skillDamage + socket.magicPower;
-  const wizardry = withPet(withRing({ ...magic, min: magic.min + magicBonus, max: magic.max + magicBonus }, items, 'wizardry'), pet, 'wizardry', level);
-  const curse = withPet(withRing({ min: Math.trunc(input.energy / 9), max: Math.trunc(input.energy / 4) }, items, 'curse'), pet, 'curse', level);
+  // The window's line reads the selected skill's damage (NewUICharacterInfoWindow.cpp:1226-1230).
+  const skilled = magicSkillDamage({ min: magic.min + magicBonus, max: magic.max + magicBonus }, input.magicSkill, lines);
+  const wizardry = withPet(withRing(skilled, items, 'wizardry'), pet, 'wizardry', level);
+  const harmony = windowHarmony(input);
+  const maxMg = harmony.magic;
+  const curse = withPet(withRing(calculateCurse(input), items, 'curse'), pet, 'curse', level);
   // The Panda and the Unicorn add 50 defense.
   const petDefense = pet?.group === GROUP_HELPER && (pet.num === PET.panda || pet.num === PET.unicorn) ? 50 : 0;
+  // The elite skeleton ring in either hand adds a tenth, harmony included (NewUICharacterInfoWindow.cpp:946-952).
+  const defense = withSetDefense(calculateDefense(input, base), input, lines, socket) + harmony.defense;
+  const eliteRing = [InventoryConstants.Ring1Slot, InventoryConstants.Ring2Slot].some(slot => {
+    const ring = equipped(items, slot);
+    return ring?.group === GROUP_HELPER && ring.num === ELITE_SKELETON_RING;
+  });
 
   return {
-    attackSpeed: attackSpeedOf(input.charClass, input.agility),
-    magicSpeed: magicSpeedOf(input.charClass, input.agility),
-    damageMin: damage.min,
-    damageMax: damage.max,
-    dualWield: damage.dualWield,
+    attackSpeed: attackSpeedOf(bare.charClass, bare.agility),
+    magicSpeed: magicSpeedOf(bare.charClass, bare.agility),
+    damageMin: damage.min + harmony.min,
+    damageMax: damage.max + harmony.max,
+    damageBlue: damage.blue,
+    petEvent: petEvent(pet, input),
     attackRate: calculateAttackRate(input, base) + setSum(lines, SET.attackRate) + socket.attackRate,
     attackRatePvp: calculateAttackRatePvp(input, base),
-    defense: withSetDefense(calculateDefense(input, base), input, lines, socket) + petDefense,
+    attackRatePvpBonus: harmony.attackRate,
+    defense: defense + (eliteRing ? Math.trunc(defense / 10) : 0) + petDefense,
+    harmonyDefense: harmony.defense,
     defenseRate: Math.trunc(calculateDefenseRate(input, base) * socket.defenseRate),
     defenseRatePvp: calculateDefenseRatePvp(input, base),
-    wizardryMin: wizardry.min,
-    wizardryMax: wizardry.max,
-    staffRate: wizardry.rate,
+    defenseRatePvpBonus: harmony.defenseRate,
+    wizardryMin: wizardry.min + maxMg,
+    wizardryMax: wizardry.max + maxMg,
+    // (int)((iMagicDamageMaxInitial + maxMg) * magicPercent) (:1352).
+    staffRate: magic.percent === null ? null : Math.trunc(Math.fround((skilled.max + maxMg) * magic.percent)),
     curseMin: curse.min,
     curseMax: curse.max,
+    curseRate: curseRate(input, curse.max),
+    totals: { str: input.strength, agi: input.agility, vit: input.vitality, ene: input.energy, cmd: input.leadership },
+    added: { str: add.str, agi: add.agi, vit: add.vit, ene: add.ene, cmd: add.cmd },
   };
 }
 

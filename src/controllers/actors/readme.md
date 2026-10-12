@@ -69,12 +69,16 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   Bronze, Leather, Scale, Brass and Plate helms (`MaskHelmMale`), ZzzCharacter.cpp:9579-9617.
 - `itemModel.ts`: `dressItemModel(object, group, num)`, what the original does to every loose item
   model, on the ground or in the bag (`ItemHeight`, `HideSkin`, frozen at frame 0, the
-  `ItemObjectAttribute` mesh rules, and `RenderPartObjectBody`'s seed colours: a seed in its element's
+  `ItemObjectAttribute` mesh rules, its item look's passes (`item_fx/itemLooks.ts`), and `RenderPartObjectBody`'s seed colours: a seed in its element's
   colour with Chrome01 added, a seed sphere so but for its mesh 1, ZzzObject.cpp:8067-8121; the
   Fireworks' own pass, mesh 0 at full light and mesh 1 red with Chrome01, ZzzObject.cpp:9602-9620;
   `DropObject` and the bag icon both use it), and
   `loadItemModel(scene, parent, group, num, file)`, such a model with no entity behind it. A worn
   `Player/` part keeps its own file's skeleton, posed at its first frame, as a drop does.
+- `weaponSprites.ts`: `WeaponSprites`, a held weapon's `RenderLinkObject` sprites (an item look's
+  `held`) bound to its loaded model: a node per sprite under its bone (the root without a skeleton) at
+  its point in cm, drawn by `fx` `HeldSprites` while the weapon is; `ecs/systems/weaponSpriteSystem.ts`
+  makes one per hand (and per phoenix wing, an item look's `wing`) and rebuilds it when the model changes.
 - `itemIcon.ts`: `itemIconJob(scene, item)`, the shot of a bag icon drawn from the item's model, and
   `liveItemIconSource(scene)` / `liveItemSpinSource(scene)`, what the app puts in the interface's
   live-icon and spin slots;
@@ -166,9 +170,14 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 
 ## Tests
 - `ammoGold.test.ts`: only bolts and arrows turn gold, only while Infinity Arrow holds, and give back their light after.
+- `monsterBlendMesh.test.ts`: the mesh each monster model's case draws additive, the Crust's U scroll, and a
+  type's own mesh over its body's; a type's own passes and fixed body light (`applyMonsterLook`).
 - `chaosCastleUnit.test.ts`: the castle's weapons per class, own weapons elsewhere, transformed
   players and NPCs keep theirs, no armour glow in the castle.
 - `approachPath.test.ts`: walk truncation at range, distance along the sent path, stall capping.
+- `weaponSprites.test.ts`: a held weapon's sprites ride their bone at their point in cm, read scale, light
+  and rotation off WorldTime and the wearer's light, move a jittering point only while drawn, and fall back
+  on the root without a skeleton (`ecs/systems/weaponSpriteSystem.test.ts`: one per hand, rebuilt with the model).
 - `deserializeAppearance.test.ts`: `isAppearanceBlank` on empty and real previews.
 - `itemModel.test.ts`: the seeds and seed spheres dressed in their element's colour with Chrome01 (a sphere
   but its mesh 1), the Fireworks' mesh 0 at a fixed full light and mesh 1 red with Chrome01, every other
@@ -219,10 +228,14 @@ ancient passes, wings and the pet. Reading only the item numbers is what once le
 effects and wings off. Hands carry no excellent or ancient bit in this layout.
 
 ### monsterBlendMesh.ts
-Keyed by monster model type. `MonsterObject.load` sets `BlendMesh` / `BlendMeshLight` unless the
-class set its own, and binds the per-tick writes with `bindMeshAnimation`. Crust, Balrog and Devil
-are left out on purpose: their `BlendMeshTexCoord` writes (ZzzCharacter.cpp:5818, :6012, :6015) land
-on `BlendMesh = -1` and draw nothing (ZzzBMD.cpp:1847).
+Keyed by monster model type; a type's own `blendMesh` (the Valkyrie, the Chaos Goblin and Elf Lala) wins
+(`blendMeshOf`), and a plain-model NPC (`npcFactoryFor`) takes that one too. `MonsterObject.load` sets `BlendMesh` / `BlendMeshLight` unless the
+class set its own, and binds the per-tick writes with `bindMeshAnimation`. `applyMonsterLook` then hands the model
+its folder's `passes` (unless the class set its own) and holds a `bodyLight` with `FixedLight`. Balrog and Devil are left
+out on purpose: their `BlendMeshTexCoord` writes (ZzzCharacter.cpp:6012, :6015) land on `BlendMesh = -1`
+and draw nothing (ZzzBMD.cpp:1847). Every Crust case sets mesh 1 (:13607, :14902), so its U scroll
+(:5818) shows. The Death Angel's mesh 1 and the Necron's mesh 3 (GMHellas.cpp:797, :877) name meshes
+their bodies lack, so they have no row.
 
 ### weaponAttachment.ts
 In the hands the weapon frame is the hand bone, no matrix (Link=false, ZzzCharacter.cpp:9961). On

@@ -56,9 +56,24 @@ const GLOW_TEXTURES = {
   flare: { file: TEX.flare, px: [64, 64] },
   /** BITMAP_SHINY+3 (eye01, 32x16): `RenderEye`'s glowing eye (:8463). */
   eye: { file: TEX.eye, px: [32, 16] },
+  /** BITMAP_LIGHT_RED (flare01_red), BITMAP_LIGHTMARKS, BITMAP_SHOCK_WAVE, BITMAP_ENERGY (Thunder01). */
+  lightRed: { file: TEX.flareRed, px: [64, 64] },
+  lightMarks: { file: TEX.lightMarks, px: [128, 128] },
+  shockWave: { file: TEX.shockwave, px: [128, 128] },
+  energy: { file: TEX.thunder, px: [64, 64] },
+  /** BITMAP_FLARE_BLUE (flareBlue), BITMAP_FLARE_RED (flareRed). */
+  flareBlue: { file: TEX.flareBlue, px: [64, 64] },
+  flareRed: { file: TEX.redFlare, px: [64, 64] },
+  /** BITMAP_FLARE+1 (flare02). */
+  flare2: { file: TEX.flare2, px: [64, 64] },
+  /** BITMAP_HOLE (Hole). */
+  hole: { file: TEX.hole, px: [64, 64] },
+  /** BITMAP_SHINY+6 (shiny05), BITMAP_EVENT_CLOUD (clouds2). */
+  shiny6: { file: TEX.shiny5, px: [64, 64] },
+  eventCloud: { file: TEX.eventCloud, px: [256, 256] },
 } as const;
 
-type GlowTexture = keyof typeof GLOW_TEXTURES;
+export type GlowTexture = keyof typeof GLOW_TEXTURES;
 
 /**
  * `CreateSprite`'s `SubType` picks the blend (zzzeffectsprite.cpp:151-166):
@@ -76,12 +91,31 @@ type GlowCard = {
   readonly blend?: GlowBlend;
 };
 
-type MonsterGlow = {
+export type MonsterGlow = {
   /**
    * MU bone indices the cards hang on, or `'body'` for the Shadow's "every
    * bone that is not a dummy" walk.
    */
   readonly bones: readonly number[] | 'body';
+  /** Cards each on a bone of its own, at an offset of its own (tiles): the hand-written `CreateSprite` runs. */
+  readonly spots?: readonly {
+    readonly bone: number;
+    readonly tex: GlowTexture;
+    readonly scale: number;
+    readonly local?: readonly [number, number, number];
+    /** Degrees a `WorldTime` ms the card turns (`CreateSprite`'s `Rotation`). */
+    readonly spin?: number;
+  }[];
+  /** `sin(WorldTime * liftSpeed) * liftAmount + liftBase` added to each channel of the light. */
+  readonly liftSpeed?: number;
+  readonly liftAmount?: number;
+  readonly liftBase?: number;
+  /** The breath's speed in radians per `WorldTime` ms and its swing: `RenderLight` 0.002 and 0.3. */
+  readonly breathSpeed?: number;
+  readonly breathAmount?: number;
+  /** A `Scale` that swings `sin(WorldTime * swellSpeed) * swellAmount` about its own. */
+  readonly swellSpeed?: number;
+  readonly swellAmount?: number;
   /** Bone ranges `'body'` leaves out, inclusive (:11109-11112). */
   readonly skip?: readonly (readonly [number, number])[];
   /** Offset in the bone's own frame, tiles (the original's `x, y, z` / 100). */
@@ -97,6 +131,10 @@ type MonsterGlow = {
   readonly breathBase?: number;
   /** Fixed luminosity when `breathe` is false (the case's `Luminosity`). */
   readonly luminosity?: number;
+  /** Drawn only while this holds. */
+  readonly when?: () => boolean;
+  /** Each card's `Scale` (with its swell) times this, read every frame. */
+  readonly scaleBy?: () => number;
 };
 
 /**
@@ -316,8 +354,11 @@ type GlowSprite = {
   readonly tex: GlowTexture;
   readonly scale: number;
   readonly blend: GlowBlend;
+  readonly spin?: number;
   sprite: Sprite | null;
 };
+
+const NO_OFFSET = [0, 0, 0] as const;
 
 type LiveGlow = {
   readonly scene: Scene;
@@ -367,11 +408,19 @@ const tmpWorld = new Vector3();
 function place(g: LiveGlow): void {
   const seconds = Ecs.world?.gameTime.TotalGameTime.TotalSeconds ?? 0;
   const lumi = g.glow.breathe
-    ? Math.sin(seconds * BREATH_SPEED) * BREATH_AMOUNT + (g.glow.breathBase ?? BREATH_BASE)
+    ? Math.sin(seconds * (g.glow.breathSpeed !== undefined ? g.glow.breathSpeed * 1000 : BREATH_SPEED)) *
+        (g.glow.breathAmount ?? BREATH_AMOUNT) +
+      (g.glow.breathBase ?? BREATH_BASE)
     : (g.glow.luminosity ?? 1);
 
-  const [r, gr, b] = g.rgb;
-  const hidden = g.entity.modelObject?.OutOfView === true;
+  const lift = g.glow.liftAmount
+    ? Math.sin(seconds * (g.glow.liftSpeed ?? 0) * 1000) * g.glow.liftAmount + (g.glow.liftBase ?? 0)
+    : 0;
+  const r = (g.rgb[0] + lift) * lumi;
+  const gr = (g.rgb[1] + lift) * lumi;
+  const b = (g.rgb[2] + lift) * lumi;
+  const hidden = g.entity.modelObject?.OutOfView === true || (g.glow.when !== undefined && !g.glow.when());
+  const swell = g.glow.swellAmount ? Math.sin(seconds * (g.glow.swellSpeed ?? 0) * 1000) * g.glow.swellAmount : 0;
 
   for (const s of g.sprites) {
     let sprite = s.sprite;
@@ -385,18 +434,26 @@ function place(g: LiveGlow): void {
       sprite.isPickable = false;
       sprite.width = (px[0] * s.scale) / TILE_CM;
       sprite.height = (px[1] * s.scale) / TILE_CM;
-      sprite.color = spriteLevel(g.scene, new Color4(r * lumi, gr * lumi, b * lumi, 1));
+      sprite.color = spriteLevel(g.scene, new Color4(r, gr, b, 1));
       s.sprite = sprite;
     }
 
     sprite.isVisible = !hidden;
     if (hidden) continue;
 
-    const [lx, ly, lz] = s.local ?? g.glow.local ?? [0, 0, 0];
+    if (swell || g.glow.scaleBy) {
+      const { px } = GLOW_TEXTURES[s.tex];
+      const size = (s.scale + swell) * (g.glow.scaleBy?.() ?? 1);
+      sprite.width = (px[0] * size) / TILE_CM;
+      sprite.height = (px[1] * size) / TILE_CM;
+    }
+    if (s.spin) sprite.angle = (seconds * 1000 * s.spin * Math.PI) / 180;
+
+    const [lx, ly, lz] = s.local ?? g.glow.local ?? NO_OFFSET;
     tmpLocal.set(lx, ly, lz);
     boneLocalPos(g.entity, s.bone, tmpLocal, tmpWorld);
     sprite.position.copyFrom(tmpWorld);
-    spriteLevel(g.scene, sprite.color.set(r * lumi, gr * lumi, b * lumi, 1));
+    spriteLevel(g.scene, sprite.color.set(r, gr, b, 1));
   }
 }
 
@@ -418,9 +475,10 @@ export function glowMonster(
   glow: MonsterGlow
 ): EffectHandle {
   const bones = bonesOf(glow, entity);
-  if (!bones.length) return DEAD_HANDLE;
-
   const sprites: GlowSprite[] = [];
+  for (const s of glow.spots ?? []) {
+    sprites.push({ bone: s.bone, local: s.local, tex: s.tex, scale: s.scale, blend: 'add', spin: s.spin, sprite: null });
+  }
   bones.forEach((bone, i) => {
     for (const card of glow.cards) {
       sprites.push({
@@ -433,6 +491,7 @@ export function glowMonster(
       });
     }
   });
+  if (!sprites.length) return DEAD_HANDLE;
 
   const g: LiveGlow = {
     scene,

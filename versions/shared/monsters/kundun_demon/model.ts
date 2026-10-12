@@ -10,7 +10,8 @@ import { registerModelClass } from '@/controllers/actors';
 // Staff of Kundun in the off hand (GMHellas.cpp:913-923). The staff waits on
 // the monster-rig weapon work (see monsterModelTable.ts); the play-speed
 // table (ZzzOpenData.cpp:2404-2409) is already in playSpeed.ts and his voice
-// (:3587-3592) in controllers/sound/monsters.ts.
+// (:3587-3592) in controllers/sound/monsters.ts. Meshes 1-6 take a RENDER_CHROME |
+// RENDER_BRIGHT pass in BodyLight (0.4, 0.4, 0.3) (GMHellas.cpp:2081-2091).
 const NPC_TYPE = 275;
 
 /** MONSTER_MODEL_ILLUSION_OF_KUNDUN. */
@@ -28,6 +29,9 @@ export class Kundun extends MonsterObject {
   async init(world: World, entity: Entity) {
     await super.init(world, entity);
 
+    this.BodyShine.tint.set(0.4, 0.4, 0.3);
+    this.BodyShine.chromeOnly = true;
+    this.ShineMeshes = [1, 2, 3, 4, 5, 6];
     this.load(await loadGLTF(monsterModelFile(MODEL_TYPE), world));
   }
 

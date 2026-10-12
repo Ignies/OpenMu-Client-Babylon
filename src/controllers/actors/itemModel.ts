@@ -3,13 +3,14 @@ import { ModelObject } from '../render/modelObject';
 import { loadGLTF } from '../assets/modelLoader';
 import { itemWornHeight } from './itemAngle';
 import { itemObjectAttribute } from './itemObjectAttribute';
+import { itemBodyPasses } from '../item_fx/itemLooks';
 import { hideSkinMeshes, hideSkinTexture } from './skinTexture';
 
 /**
  * What the original does to an item model it draws loose, on the ground (`RenderItems`,
  * ZzzObject.cpp:6403-6421) or in the bag (`RenderObjectScreen`, ZzzInventory.cpp:8861-8905): a worn
  * part is brought down by `ItemHeight`, drawn with `HideSkin` and frozen at frame 0, and the model
- * takes its `ItemObjectAttribute` mesh rules.
+ * takes its `ItemObjectAttribute` mesh rules and its own `RenderPartObjectBody` passes.
  */
 export function dressItemModel(object: ModelObject, group: number, num: number): void {
   object.BodyHeight = itemWornHeight(group);
@@ -21,6 +22,7 @@ export function dressItemModel(object: ModelObject, group: number, num: number):
   object.BlendMesh = rule.blendMesh;
   object.HiddenMesh = rule.hiddenMesh;
   object.BlendMeshLightAt = rule.blendMeshLight ?? null;
+  object.MeshPasses = itemBodyPasses(group, num);
   dressSeed(object, group, num);
   if (group === 14 && num === 63) dressFireworks(object);
 }

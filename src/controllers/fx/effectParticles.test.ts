@@ -1052,3 +1052,238 @@ describe('BonedParticleEmitter view gate', () => {
     expect(spawned).toBe(0);
   });
 });
+
+describe('the held weapons\' particles (RenderLinkObject, ZzzCharacter.cpp:7765-7927)', () => {
+  it('waterFall4 SubType 12: 4-5 ticks, size and light keeping 0.92 a tick (ZzzEffectParticle.cpp:3611-3621, :8626-8634)', async () => {
+    // roll 0.5: lives rand() % 2 - 1 + 5 = 5 ticks, its size Scale + 0 jitter.
+    const sprite = await play('waterfall4Glint', 0.5, 0.5, 2);
+    expect(sprite.width).toBeCloseTo((64 * 0.5 * 0.92 ** 2) / 100);
+    expect(sprite.color.g).toBeCloseTo(0.4 * 0.92 ** 2);
+    disposeEffectParticles();
+    expect((await play('waterfall4Glint', 0.5, 0.5, 4)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('waterfall4Glint', 0.5, 0.5, 5)).isVisible).toBe(false);
+  });
+
+  it('Clud64 SubType 9: 40 ticks sinking about 1.2 cm a tick (ZzzEffectParticle.cpp:1043-1055)', async () => {
+    const sprite = await play('frostCloud', 0.4, 0.5, 10);
+    expect(sprite.position.y).toBeCloseTo(-0.12);
+    disposeEffectParticles();
+    expect((await play('frostSmoke', 0.4, 0.5, 39)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('frostSmoke', 0.4, 0.5, 40)).isVisible).toBe(false);
+  });
+
+  it('MODEL_STAR_SHINE: dark while it grows for ten ticks, lit for ten, then gone from sight (ZzzEffect.cpp:8322-8345)', async () => {
+    const growing = await play('starShine', 0.22, 0.5, 5);
+    expect(growing.color.r).toBe(0);
+    disposeEffectParticles();
+    const lit = await play('starShine', 0.22, 0.5, 15);
+    expect(lit.color.r).toBeCloseTo(Math.min(1, 0.2 * 1.1 ** 10));
+    expect(lit.width).toBeCloseTo((16 * 0.22 * 1.1 ** 10) / 100);
+    disposeEffectParticles();
+    expect((await play('starShine', 0.22, 0.5, 25)).color.r).toBe(0);
+  });
+});
+
+describe('the bosses smokes (ZzzEffectParticle.cpp:1327, :1500, :1767; :5361, :5683, :5963)', () => {
+  const rgb = (s: FakeSprite) => [s.color.r, s.color.g, s.color.b].map(c => c.toFixed(3));
+
+  // SubType 50 steps `(rand() % 3 + 2) * 0.1` toward half its light, past it for a tick, and rises 1.6-3.1 a tick.
+  it('smoke50 fades in to half its light and rises', async () => {
+    const sprite = await play('smoke50', 1, 0.5, 3);
+    expect(rgb(sprite)).toEqual(['0.100', '0.200', '0.300']);
+    expect(sprite.position.y).toBeCloseTo(0.072);
+  });
+
+  // SMOKELINE SubType 0 steps `(rand() % 5 + 2) * 0.1` toward 0.7 of its light.
+  it('smokeLine1 fades in to 0.7 of its light on its own sheet', async () => {
+    const sprite = await play('smokeLine1', 1, 0.5, 3);
+    expect(rgb(sprite)).toEqual(['0.140', '0.280', '0.420']);
+    expect(fakes.files).toContain('Effect/smokelines01.OZJ');
+  });
+
+  // SubType 1 is `(0.5L, L, 0.8L)` at `L = LifeTime / 50` whatever light it is made with.
+  it('smoke1 is green whatever its light', async () => {
+    const sprite = await play('smoke1', 1, 0.5, 10);
+    expect(rgb(sprite)).toEqual(['0.400', '0.800', '0.640']);
+  });
+});
+
+describe('the held weapons\' sparks and shine (RenderLinkObject, ZzzCharacter.cpp:7077-8344)', () => {
+  it('Spark03 SubType 11: 30 ticks, pushed (-4..3, 0..3, 0..3) cm a tick, its light 1/1.05 and its size 0.04 less a tick (ZzzEffectParticle.cpp:2196-2204, :6704-6713)', async () => {
+    // roll 0.5: pushed (0, 2, 2), sized rand() % 5 / 10 + 1 = 1.2 whatever it is made with.
+    const sprite = await play('spark1_11', 0.8, 0.5, 5);
+    expect([sprite.position.x, sprite.position.y, sprite.position.z].map(n => +n.toFixed(4))).toEqual([0, 0.1, 0.1]);
+    expect(sprite.width).toBeCloseTo((32 * (1.2 - 0.2)) / 100);
+    expect(sprite.color.g).toBeCloseTo(0.4 / 1.05 ** 5);
+    disposeEffectParticles();
+    expect((await play('spark1_11', 0.8, 0.5, 29)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('spark1_11', 0.8, 0.5, 30)).isVisible).toBe(false);
+  });
+
+  it('Spark03 SubType 14: one in two pushed (-4..-1, 0..3, 0..3) and sized 0.4-0.8, the rest a 2-tick dot at its own scale (:2216-2226, :6724-6733)', async () => {
+    // roll 0.4: its rand_fps_check(2) passes, pushed (-3, 1, 1), sized 0.6, 0.01 less a tick.
+    const sprite = await play('spark1_14', 0.05, 0.4, 10);
+    expect([sprite.position.x, sprite.position.z].map(n => +n.toFixed(4))).toEqual([-0.3, 0.1]);
+    expect(sprite.width).toBeCloseTo((32 * 0.5) / 100);
+    disposeEffectParticles();
+    // roll 0.6: it fails: LifeTime 2, the scale it was made with, still.
+    expect((await play('spark1_14', 0.05, 0.6, 1)).width).toBeCloseTo((32 * 0.04) / 100);
+    disposeEffectParticles();
+    expect((await play('spark1_14', 0.05, 0.6, 2)).isVisible).toBe(false);
+  });
+
+  it('Shiny+6 SubType 1: shiny05 and a flare as one, 0.3, up to 25 cm off, 10-12 ticks, 0.01 smaller and 5 degrees back a tick (:2718-2727, :7368-7372, :9301-9304)', async () => {
+    const original = Math.random;
+    try {
+      // The flare takes the shine's rolls, whatever it rolls itself.
+      Math.random = () => 0.9;
+      await spawnParticle(scene, 'shiny6_1', { x: 0, y: 0, z: 0 }, NO_TURN, 1, [0.4, 0.6, 0.9]);
+      Math.random = () => 0.1;
+      await spawnParticle(scene, 'light6_1', { x: 0, y: 0, z: 0 }, NO_TURN, 1, [0.4, 0.6, 0.9]);
+    } finally {
+      Math.random = original;
+    }
+    const [shine, flare] = fakes.sprites.slice(-2);
+    for (let n = 0; n < 4; n++) tick?.();
+    for (const s of [shine, flare]) {
+      // rand() % 50 - 25 = 20 cm on each axis, rand() % 20 - 10 = 8 degrees.
+      expect([s.position.x, s.position.y, s.position.z].map(n => +n.toFixed(4))).toEqual([0.2, 0.2, 0.2]);
+      expect(s.width).toBeCloseTo((64 * 0.26) / 100);
+      expect(s.angle).toBeCloseTo(((8 - 20) * Math.PI) / 180);
+    }
+    // rand() % 3 + 10 = 12 ticks for both.
+    for (let n = 4; n < 12; n++) tick?.();
+    expect([shine.isVisible, flare.isVisible]).toEqual([false, false]);
+  });
+});
+
+describe('Medusa\'s hand fires and bone 68 waterfall (GMSwampOfQuiet.cpp:544-578, :1082-1085)', () => {
+  // A turn of -yaw is a monster facing yaw (`facing` in monsterVisuals.ts): yaw PI/2 faces +x.
+  const east = { x: 0, y: -Math.PI / 2, z: 0 };
+
+  it('FIRE_HIK1_MONO SubType 4: 8 ticks, 0.12-0.54 of its scale, 8 cm a tick along the facing, growing (ZzzEffectParticle.cpp:1885-1894, :6251-6289)', async () => {
+    // roll 0.5: (21 + 12) * 0.01 * 1.5 big, then 0.09 more a tick; alpha 0.3 a tick up from 0.
+    const sprite = await play('fireMono1_4', 1.5, 0.5, 3, east);
+    expect([sprite.position.x, sprite.position.z].map(n => +n.toFixed(4) + 0)).toEqual([0.24, 0]);
+    expect(sprite.width).toBeCloseTo((64 * (0.495 + 0.27)) / 100);
+    expect(sprite.color.r).toBeCloseTo(0.2 * 0.9);
+    expect(fakes.files).toContain('Effect/firehik_mono01.OZJ');
+    disposeEffectParticles();
+    expect((await play('fireMono1_4', 1.5, 0.5, 7)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('fireMono1_4', 1.5, 0.5, 8)).isVisible).toBe(false);
+  });
+
+  it('FIRE_HIK2_MONO SubType 8 and FIRE_HIK3_MONO SubType 5 are the same jet on their own sheets (:364-374, :1972-1982)', async () => {
+    for (const kind of ['fireMono2_8', 'fireMono3_5'] as const) {
+      expect((await play(kind, 1.5, 0.5, 3, east)).position.x).toBeCloseTo(0.24);
+      disposeEffectParticles();
+    }
+    expect(fakes.files).toEqual(expect.arrayContaining(['Effect/firehik_mono02.OZJ', 'Effect/firehik_mono03.OZJ']));
+  });
+
+  it('WATERFALL_4: three cards on one set of rolls circle the point, 2.1 cm out and 0.1 round a tick, 0.95 of the light, 80 ticks (ZzzEffect.cpp:5819-5826, MoveHandlers.cpp:9093-9133)', async () => {
+    const original = Math.random;
+    try {
+      Math.random = () => 0.5;
+      await spawnParticle(scene, 'waterfall4Orbit0', { x: 0, y: 0, z: 0 }, NO_TURN, 1, [0.9, 1, 0.9]);
+      // The other two take the first one's rolls, whatever they roll.
+      Math.random = () => 0.1;
+      await spawnParticle(scene, 'waterfall4Orbit1', { x: 0, y: 0, z: 0 }, NO_TURN, 1, [0.9, 1, 0.9]);
+      await spawnParticle(scene, 'waterfall4Orbit2', { x: 0, y: 0, z: 0 }, NO_TURN, 1, [0.9, 1, 0.9]);
+    } finally {
+      Math.random = original;
+    }
+    const cards = fakes.sprites.slice(-3);
+    tick?.();
+    tick?.();
+    // Timer rand() % 360 = 180 radians, Distance rand() % 10 + 5 = 10 cm; scale rand() % 20 * 0.01 + 0.1.
+    const t = 180.2;
+    const d = 14.2 / 100;
+    const at = (s: FakeSprite) => [s.position.x, s.position.y, s.position.z].map(n => +n.toFixed(4));
+    const round = (v: number[]) => v.map(n => +n.toFixed(4));
+    // MU (x, y, z) is drawn at (x, z, y).
+    expect(at(cards[0])).toEqual(round([Math.cos(t) * d, Math.sin(t) * d, 0]));
+    expect(at(cards[1])).toEqual(round([Math.sin(t) * d, 0, Math.cos(t) * d]));
+    expect(at(cards[2])).toEqual(round([0, Math.cos(t) * d, Math.sin(t) * d]));
+    for (const s of cards) {
+      expect(s.width).toBeCloseTo((64 * 0.2) / 100);
+      expect(s.color.g).toBeCloseTo(0.95 ** 2);
+      expect(s.angle).toBeCloseTo(((180 + 1.4) * Math.PI) / 180);
+    }
+    for (let n = 2; n < 80; n++) tick?.();
+    expect(cards.map(s => s.isVisible)).toEqual([false, false, false]);
+  });
+
+  it('a particle made with an anchor moves as far as the anchor does (`VectorSubtract(Position, StartPosition)`, :4325-4328)', async () => {
+    const anchor = { x: 0, y: 0, z: 0 };
+    const original = Math.random;
+    Math.random = () => 0.5;
+    try {
+      await spawnParticle(scene, 'waterfall4Orbit1', { x: 0, y: 0, z: 0 }, NO_TURN, 1, [1, 1, 1], 0, anchor);
+    } finally {
+      Math.random = original;
+    }
+    const card = fakes.sprites[fakes.sprites.length - 1];
+    tick?.();
+    const before = card.position.x;
+    anchor.x = 2;
+    anchor.y = 1;
+    tick?.();
+    const t = 180.2;
+    expect(card.position.x - before).toBeCloseTo(2 + Math.sin(t) * 0.142 - Math.sin(t - 0.1) * 0.121);
+    expect(card.position.y).toBeCloseTo(1);
+  });
+});
+
+describe("the Dark Ghost's attack and death particles (GMEmpireGuardian2.cpp:925-955)", () => {
+  // roll 0.5: Gravity 1, Scale (5 + 10) * 0.02 + 2, set (0, 0, -50) off; a tick it sinks Gravity, which loses 0.05,
+  // shrinks 0.05 and keeps 1/1.1 of its light; 20 ticks.
+  it('WATERFALL_4 SubType 15 drops from 50 cm under its spot, shrinking and dimming (ZzzEffectParticle.cpp:3716-3726, :8663-8674)', async () => {
+    const sprite = await play('waterfall4_15', 2, 0.5, 2);
+    expect(sprite.position.y).toBeCloseTo((-50 - 1 - 0.95) / 100);
+    expect(sprite.width).toBeCloseTo((64 * (2.3 - 0.1)) / 100);
+    expect(sprite.color.g).toBeCloseTo(0.4 / 1.1 ** 2);
+    expect(fakes.files).toContain('Effect/waterFall4.OZJ');
+    disposeEffectParticles();
+    expect((await play('waterfall4_15', 2, 0.5, 20)).isVisible).toBe(false);
+  });
+
+  // No SubType 39 case: CreateParticle's own defaults, two ticks at its Scale and light, still (:58-86).
+  it('SMOKE SubType 39 is a still smoke01 card for two ticks', async () => {
+    const sprite = await play('smoke39', 1, 0.5, 1);
+    expect([sprite.position.x, sprite.position.y, sprite.width]).toEqual([0, 0, 0.64]);
+    expect(sprite.color.g).toBeCloseTo(0.4);
+    disposeEffectParticles();
+    expect((await play('smoke39', 1, 0.5, 2)).isVisible).toBe(false);
+  });
+});
+
+describe("the Maya hands' death and Stop2 particles (GM_Kanturu_3rd.cpp:880-930)", () => {
+  // roll 0.5: Gravity 1, (5 + 10) * 0.02 + Scale big, 50 cm under its spot; a tick it rises Gravity, which gains 0.05.
+  it('WATERFALL_3 SubType 6 rises from 50 cm under its spot, dimming 1.1 a tick (ZzzEffectParticle.cpp:3644-3653, :8577-8588)', async () => {
+    const sprite = await play('waterfall3_6', 2, 0.5, 2);
+    expect(sprite.position.y).toBeCloseTo((-50 + 1 + 1.05) / 100);
+    expect(sprite.width).toBeCloseTo((64 * 2.3) / 100);
+    expect(sprite.color.g).toBeCloseTo(0.4 / 1.1 ** 2);
+    expect(fakes.files).toContain('Effect/waterFall3.OZJ');
+  });
+
+  // roll 0.5: Scale * (32 + 64) * 0.02, up to 125 cm aside and rand() % 45 under, Gravity 0; white whatever its light,
+  // 1/1.012 of it a tick, 0.01 bigger; drawn subtracted.
+  it('SMOKE + 3 SubType 3 is a dark clud64 puff, SubType 4 the same on waterFall3 for half as long (:1743-1764, :5938-5962, :9118-9121)', async () => {
+    const cloud = await play('smoke3_3', 1.5, 0.5, 2);
+    expect(cloud.position.y).toBeCloseTo(-22 / 100);
+    expect(cloud.width).toBeCloseTo((64 * (2.88 + 0.02)) / 100);
+    expect(cloud.color.g).toBeCloseTo(1 / 1.012 ** 2);
+    expect(cloud.manager.blendMode).toBe(3);
+    expect(fakes.files).toContain('Effect/clud64.OZJ');
+    disposeEffectParticles();
+    expect((await play('smoke3_4', 0.8, 0.5, 29)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('smoke3_4', 0.8, 0.5, 30)).isVisible).toBe(false);
+  });
+});

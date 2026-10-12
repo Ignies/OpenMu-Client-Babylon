@@ -8,6 +8,7 @@ import { AnimationSystem } from './systems/animationSystem';
 import { AnimationHoldSystem } from './systems/animationHoldSystem';
 import { CombatSfxSystem } from './systems/combatSfxSystem';
 import { WeaponTrailSystem } from './systems/weaponTrailSystem';
+import { WeaponSpriteSystem } from './systems/weaponSpriteSystem';
 import { ImpactEffectSystem } from './systems/impactEffectSystem';
 import { DropMotionSystem } from './systems/dropMotionSystem';
 import { DeathSystem } from './systems/deathSystem';
@@ -128,6 +129,8 @@ const factories: ISystemFactory[] = [
   AnimationHoldSystem,
   // After AnimationSystem: the shoulder flag reads this frame's bone 26 pose.
   GuildFlagSystem,
+  // After AppearanceSystem: a held weapon's sprites ride the model the hand holds this frame.
+  WeaponSpriteSystem,
   ItemGlowSystem,
   // Light layer: NPCs/monsters whose folder sets `light` carry a light.
   CharacterLightSystem,

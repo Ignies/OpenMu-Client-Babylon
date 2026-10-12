@@ -96,9 +96,9 @@ In game the name a player reads is the language pack's in either case (`monsterD
 | `hound/`, `budge_dragon/`, `spider/` | Hound (1), Budge Dragon (2, bobs while walking), Spider (3) |
 | `death_gorgon/` | Death Gorgon (35): the Gorgon at level 2, burning body |
 | `balgass/` | Balgass (349), Crywolf boss |
-| `kundun_demon/` | Kundun (275), with a fast-forwarded death clip |
-| `selupan/` | Selupan (459), Raklion boss |
-| `gayion_the_gladiator/` | Gaion Kharein (504), Imperial Guardian boss: his five swords on their bones by action (`swords.ts`), mesh 2 bright blue and the jewel and edge sprites on each sword's bones, and the swords his attacks throw at the hero (`flights.ts` paths, `thrown.ts`: SubType 1 and 3 flights, the curved swords' shadows, the blue ground light, the throw sounds). Not ported: Attack2's sword-force trails, fire and thunder joints; Attack3's flare joint and landing (crater, stones, shock waves, quake, sounds); the SubType 11 / 12 return to the hand; Attack4's main sword and flame strike; the rage inferno on Appear. His 0x69 skills pick Attack1-4 and the Berserker's Appear (`controllers/anim/monsterAttackClip.ts`, GMEmpireGuardian4.cpp:1399-1440) |
+| `kundun_demon/` | Kundun (275), with a fast-forwarded death clip and chrome on meshes 1-6 |
+| `selupan/` | Selupan (459), Raklion boss; his 0x69 looks are `skills/monsters/selupan/` |
+| `gayion_the_gladiator/` | Gaion Kharein (504), Imperial Guardian boss: his five swords on their bones by action (`swords.ts`), mesh 2 bright blue and the jewel and edge sprites on each sword's bones, and the swords his attacks throw at the hero (`flights.ts` paths, `thrown.ts`: SubType 1 and 3 flights, the curved swords' shadows, the blue ground light, the throw sounds). Not ported: Attack2's sword-force trails, fire and thunder joints; Attack3's flare joint and landing (crater, stones, shock waves, quake, sounds); the SubType 11 / 12 return to the hand; Attack4's main sword and flame strike. His Berserker's rage (CreateInferno and two MODEL_CIRCLE sub4) is `skills/monsters/empire_guardian_rage/`, as for the other seven guardian bosses. His 0x69 skills pick Attack1-4 and the Berserker's Appear (`controllers/anim/monsterAttackClip.ts`, GMEmpireGuardian4.cpp:1399-1440) |
 | `_blood_castle/` | Castle Gate (131) and Statue of Saint (132-134) |
 | `_golden_line/` | the golden invasion line, with extra additive body passes |
 | `_skeleton_line/` | Skeleton Warrior, Archer, Elite, Death King, Death Bone: player-rig monsters |
@@ -132,5 +132,10 @@ tables list. A plain NPC model at a fixed scale needs no class: `npcModel` is en
   `Data/` is there).
 - `models.test.ts`: every registration names a class its file defines; the set of types with a
   class of their own.
+- `bossVisuals.test.ts`: the bosses' `RenderMonsterVisual` rows (cards, ribbons, smokes) as their
+  map files write them: Medusa (with her attack fires, hole cards and bone 68 waterfall), Kundun (with his Shock roar), Selupan, Erohim, Balgass, Nightmare (with his death smoke), the Maya hands (with their death and Stop2 effects), the
+  Imperial Guardian bosses' rage smoke, Lucas, Fred (with his blade ribbons), Hammerize and the Dark Ghost (with his attack and death particles); and the Swamp of
+  Quiet line (the Sapis, the Shadows, the Napins); the swing blurs (Nightmare, Selupan, the Iron Knights, the Dark
+  Elf, the Sapis' claws); and the `RenderMonster` mesh passes (Balgass, Selupan, Erohim, Raymond, Lucas, the Dark Ghost).
 - `src/controllers/actors/resolveModel.golden.test.ts`: what every type 0..600 is drawn with, and
   the NPC tables; `src/controllers/sound/npcVoices.test.ts`: the voices.

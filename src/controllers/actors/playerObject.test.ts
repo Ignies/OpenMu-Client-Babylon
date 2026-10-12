@@ -57,6 +57,20 @@ describe('the Classic shadow of a character', () => {
   });
 });
 
+describe('the parts RenderLinkObject draws', () => {
+  it('are unlit: the hand weapons and the phoenix wings, not the worn parts (ZzzCharacter.cpp:6651-6652)', () => {
+    const player = new PlayerObject(scene, new TransformNode('player', scene));
+    const parts = [player.Weapon1, player.Weapon2, player.PhoenixWing1, player.PhoenixWing2, player.Armor, player.Helm];
+    expect(parts.map(p => p.Unlit)).toEqual([true, true, true, true, false, false]);
+  });
+
+  // c->Wing (wings and capes, :15400-15430), the Imp (:15433-15455), the Archangel quest weapon (:15367-15391).
+  it('are unlit: the wings and capes, the Imp and the quest weapon too, not the cloth or the GM mark', () => {
+    const player = new PlayerObject(scene, new TransformNode('player', scene));
+    expect([player.Wings, player.Pet, player.QuestItem, player.GmMark].map(p => p.Unlit)).toEqual([true, true, true, false]);
+  });
+});
+
 // The cloth reads the rig's bones in the BMD frames the original's matrices use (SetFixedVertices' (z, -y, x)).
 describe('the player rig the cloth hangs on', () => {
   it('turns the cape bone 19 with its x up, its -y behind and its z across, the body facing -y', async () => {

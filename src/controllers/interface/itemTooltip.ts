@@ -28,6 +28,7 @@ import {
 } from '@/controllers/item_rules';
 import {
   ancientSetOf,
+  harmonyNeedCut,
   harmonyOf,
   hasGuardianOption,
   hasSpecial,
@@ -38,6 +39,7 @@ import {
   socketOptionValue,
   socketsOf,
   wingOptions,
+  withWornStats,
   wornSetPieces,
   type OptionSpecial,
   type WingOption,
@@ -271,9 +273,11 @@ function requirementLine(
   labelKey: TextKey,
   required: number,
   have: number,
-  before?: number
+  before?: number,
+  cut = 0
 ) {
   if (!required) return;
+  required -= cut;
   const label = t(labelKey);
   const line = t('item.required', { label, value: required });
   const delta = statDelta(required, before, true);
@@ -281,8 +285,25 @@ function requirementLine(
     out.add(line, 'red', false, delta);
     out.add(t('item.moreNeeded', { value: required - have }), 'red');
   } else {
-    out.add(line, 'white', false, delta);
+    out.add(line, cut ? 'yellow' : 'white', false, delta);
   }
+}
+
+/**
+ * What comes off the strength and agility needs (ZzzInventory.cpp:4787-4812, NewUIMyInventory.cpp:288-318): the
+ * harmony cut and the socket seeds 38 and 39 (Season 6's SocketItem table has neither, so they give 0).
+ */
+function requirementCut(item: Item, hero: HeroStats, extras?: SocketMaxima): { str: number; agi: number } {
+  const tables = itemOptionTables();
+  const cut = harmonyNeedCut(item, tables);
+  for (const socket of socketsOf(item)) {
+    const info = socket && (socket.seed === 38 || socket.seed === 39) ? tables?.sockets[0][socket.seed] : null;
+    if (!socket || !info) continue;
+    const value = socketOptionValue(info.type, info.values[socket.level - 1] ?? 0, { ...extras, level: hero.level });
+    if (socket.seed === 38) cut.str += value;
+    else cut.agi += value;
+  }
+  return cut;
 }
 
 /** `RequireClass` (ZzzInventory.cpp:604). */
@@ -493,18 +514,21 @@ export function buildItemTooltip(
     return { lines: trimBlanks(out.list), usable: true };
   }
 
+  // The requirement lines read Strength + AddStrength and the rest (ZzzInventory.cpp:4816-4927).
+  const have = extras ? withWornStats(hero, extras.worn) : hero;
+  const cut = requirementCut(item, hero, extras);
   petLines(out, def);
-  equipmentLines(out, item, stats, hero, worn);
+  equipmentLines(out, item, stats, have, worn, cut);
   setOptionBlock(out, item, hero, extras);
   socketLines(out, item, hero, extras);
 
   const requirementsFail =
-    hero.level < stats.reqLvl ||
-    hero.str < stats.reqStr ||
-    hero.agi < stats.reqAgi ||
-    hero.vit < stats.reqVit ||
-    hero.ene < stats.reqEne ||
-    hero.cmd < stats.reqCmd;
+    have.level < stats.reqLvl ||
+    have.str < stats.reqStr - cut.str ||
+    have.agi < stats.reqAgi - cut.agi ||
+    have.vit < stats.reqVit ||
+    have.ene < stats.reqEne ||
+    have.cmd < stats.reqCmd;
 
   return {
     lines: trimBlanks(out.list),
@@ -517,7 +541,8 @@ function equipmentLines(
   item: Item,
   stats: ItemStats,
   hero: HeroStats,
-  worn: ItemStats | null = null
+  worn: ItemStats | null = null,
+  cut = { str: 0, agi: 0 }
 ) {
   const { def, level, isExcellent } = stats;
 
@@ -606,8 +631,8 @@ function equipmentLines(
   });
 
   requirementLine(out, 'common.level', stats.reqLvl, hero.level, worn?.reqLvl);
-  requirementLine(out, 'stat.strength', stats.reqStr, hero.str, worn?.reqStr);
-  requirementLine(out, 'stat.agility', stats.reqAgi, hero.agi, worn?.reqAgi);
+  requirementLine(out, 'stat.strength', stats.reqStr, hero.str, worn?.reqStr, cut.str);
+  requirementLine(out, 'stat.agility', stats.reqAgi, hero.agi, worn?.reqAgi, cut.agi);
   requirementLine(out, 'stat.vitality', stats.reqVit, hero.vit, worn?.reqVit);
   requirementLine(out, 'stat.energy', stats.reqEne, hero.ene, worn?.reqEne);
   requirementLine(out, 'stat.command', stats.reqCmd, hero.cmd, worn?.reqCmd);
@@ -817,7 +842,7 @@ function setOptionBlock(out: Lines, item: Item, hero: HeroStats, ancient?: Toolt
   out.blank();
   out.add(t('item.setInfo'), 'yellow');
   out.blank();
-  const pieces = ancient ? wornSetPieces(set, ancient.worn, hero) : 0;
+  const pieces = ancient ? wornSetPieces(set, ancient.worn, withWornStats(hero, ancient.worn)) : 0;
   for (const line of setOptionLines(set, pieces)) {
     const key = SET_OPTION_TEXT[line.option];
     if (!key) continue;

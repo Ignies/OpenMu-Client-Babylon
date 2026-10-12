@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { ItemSet, ItemSetTables } from '../assets/mu';
-import { ancientSetOf, setOptionLines, wornSetPieces } from './ancientSets';
-import type { HeroStats } from './itemStats';
+import { activeSetOptions, ancientSetOf, setOptionLines, wornSetPieces, wornStatBonus } from './ancientSets';
+import { itemStats, type HeroStats } from './itemStats';
 
 const none = { option: 0xff, value: 0xff };
 const opt = (option: number, value: number) => ({ option, value });
@@ -38,5 +38,25 @@ describe('ancient set options', () => {
   it('counts the worn pieces with durability left (CheckItemSetOptions)', () => {
     expect(wornSetPieces(SET, [null, null, piece(7), piece(8), piece(9)], HERO, TABLES)).toBe(3);
     expect(wornSetPieces(SET, [null, null, piece(7), { ...piece(8), durability: 0 }], HERO, TABLES)).toBe(1);
+  });
+});
+
+// getAllAddState (CSItemOption.cpp:666-698): each worn piece's AncientBonusOption * 5 on its AttType, then
+// AddStatsBySetOptions (:701-740) on the sets CheckItemSetOptions' first pass counts by durability alone (:796-834).
+describe('the stats worn items add', () => {
+  const NO_STATS = { str: 0, agi: 0, ene: 0, vit: 0, cmd: 0 };
+
+  it("adds each piece's ancient bonus and the set's stat options, counted without requirements", () => {
+    expect(wornStatBonus([null, null, piece(7), piece(8)], TABLES)).toEqual({ ...NO_STATS, str: 10 });
+    // Leather is AttType 4: vitality.
+    expect(wornStatBonus([null, null, { ...piece(7), ancientBonusLevel: 2 }], TABLES)).toEqual({ ...NO_STATS, vit: 10 });
+    expect(wornStatBonus([null, null, { ...piece(7), ancientBonusLevel: 2, durability: 0 }], TABLES)).toEqual(NO_STATS);
+  });
+
+  it("meets the set pieces' requirements with those stats (CheckItemSetOptions :836-861)", () => {
+    const worn = [null, null, piece(7), piece(8), piece(9)];
+    const need = Math.max(...worn.map(p => (p ? itemStats(p)?.reqStr ?? 0 : 0)));
+    expect(activeSetOptions(worn, { ...HERO, str: need - 10 }, TABLES)).toHaveLength(3);
+    expect(activeSetOptions(worn, { ...HERO, str: need - 11 }, TABLES)).not.toHaveLength(3);
   });
 });

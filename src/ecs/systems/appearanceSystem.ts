@@ -1,5 +1,6 @@
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { itemVisualTier } from '../../controllers/item_fx/itemVisualTier';
+import { itemBodyPasses } from '../../controllers/item_fx/itemLooks';
 import { heldWeapons, wearsChaosCastleSkin } from '../../controllers/actors';
 import { showsClassHead } from '../../controllers/actors/openHelm';
 import { classPartModel } from '../../controllers/actors/classPartModel';
@@ -23,6 +24,8 @@ function loadPart(
   /** The wearer's class, for an armour piece: picks the class's own model. */
   charClass?: CharacterClassNumber
 ) {
+  // The model's own RenderPartObjectBody branch, worn or held (ZzzObject.cpp:10137); none on the class's own body.
+  socket.MeshPasses = part ? itemBodyPasses(part.group, part.num) : null;
   if (!part) return;
   const item = ItemsDatabase.getItem(part.group, part.num);
 
@@ -83,6 +86,7 @@ function wearChaosCastleSkin(playerObject: PlayerObject) {
   playerObject.Pants.Unload();
   playerObject.Gloves.Unload();
   playerObject.Boots.Unload();
+  playerObject.Armor.MeshPasses = null;
   void settle(
     playerObject.loadPartAsync('Player/', playerObject.Armor, CHAOS_CASTLE_BODY),
     `Player/${CHAOS_CASTLE_BODY}`

@@ -41,7 +41,7 @@ describe('packetSounds', () => {
   });
 
   it('runs the meteorite storm only while a Flame of Evil cast keeps the AttackTime going', () => {
-    const state = { swordCount: 0, skill: 0, skillClearsAt: Infinity, monsterSkill: 0 };
+    const state = { swordCount: 0, skill: 0, skillClearsAt: Infinity, monsterSkill: 0, rage: false };
     // A bare swing (0x18) starts AttackTime but sets no skill: no storm.
     monsterSwing(state, trapInput(0));
     expect(meteoriteStormRunning(103, state, 0)).toBe(false);

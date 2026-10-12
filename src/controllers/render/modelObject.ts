@@ -18,11 +18,13 @@ import {
   getScrollVariant,
   loadGLTF,
   setMeshFadeBlend,
+  setMeshUnlit,
 } from '../assets/modelLoader';
 import { animationGroupSource, forEachAnimationGroup } from '../assets/lazyAnimationGroups';
 import { NO_BLEND_MESH } from './blendMeshes';
 import { renderAnglesQuaternion } from './renderAngles';
 import { meshAnimationFor, type MeshAnimation } from './meshAnimation';
+import { MeshPasses, type MeshPassSet } from './meshPasses';
 import { BlendState } from '@versions/shared/objects/enum';
 import { Ecs } from '../../ecs/current';
 import { settleStillAnimations } from './staticClips';
@@ -32,6 +34,7 @@ import {
   shadowReceiversChanged,
 } from './scenes/csmBounds';
 import type { MapObjectLights } from '../lighting/mapObjectLightAdapter';
+import { lightingTier } from '../lighting/lightingQuality';
 
 /** Rotation half of C⁻¹, the inverse of the model-root basis change applied in load(). */
 const DEFAULT_BONE_LINK_ROTATION = Quaternion.FromEulerAngles(
@@ -486,8 +489,22 @@ export class ModelObject {
    */
   StreamMesh = -1;
 
+  /**
+   * `b->LightEnable = false`: RenderLinkObject draws a carried weapon at flat BodyLight (ZzzCharacter.cpp:6651-6652).
+   * On Classic the lit meshes take their flat-lit twin; the tiers above keep the scene's light.
+   */
+  Unlit = false;
+  #unlitOn: boolean | null = null;
+
   /** Live `BlendMeshTexCoordU/V`, shared by reference with the mesh metadata. */
   readonly UvScroll = { u: 0, v: 0 };
+
+  /**
+   * The model's own `RenderPartObjectBody` branch (ZzzObject.cpp:6890-8920): passes drawn over or in
+   * place of its lit meshes (`meshPasses.ts`, an item's look). Read by `load()`. Null = none.
+   */
+  MeshPasses: MeshPassSet | null = null;
+  #meshPasses: MeshPasses | null = null;
 
   #meshAnimation: MeshAnimation | null = null;
   #animatedMesh: AbstractMesh | null = null;
@@ -653,6 +670,9 @@ export class ModelObject {
    * single mesh rather than the whole body. -1 = the whole body.
    */
   ShineMesh = -1;
+
+  /** Several meshes `BodyShine` is drawn over instead, when set (Kundun's 1-6). */
+  ShineMeshes: readonly number[] | null = null;
 
   /**
    * The meshes carrying `BodyShine` are lit by its tint, not the body's light: the original sets
@@ -1220,7 +1240,9 @@ export class ModelObject {
       mesh.metadata.SkipBoundingBox =
         this.SkipBoundingBox || mesh.metadata.hiddenByScript === true;
 
-      const shines = this.ShineMesh < 0 || mesh === shineMesh;
+      const shines = this.ShineMeshes
+        ? this.ShineMeshes.some(i => this._frustumMeshes[i] === mesh)
+        : this.ShineMesh < 0 || mesh === shineMesh;
       mesh.metadata.shineLit = this.ShineLight && shines;
       mesh.metadata.bodyLight = mesh.metadata.shineLit ? bodyShine.tint : bodyLight;
       mesh.metadata.bodyShine = shines ? bodyShine : undefined;
@@ -1265,6 +1287,8 @@ export class ModelObject {
 
     this.applyShadowHiddenMesh();
 
+    this.applyMeshPasses();
+
     this.attachShadow();
 
     // A part loaded while already stowed (spawn in a safe zone) freezes now;
@@ -1281,7 +1305,18 @@ export class ModelObject {
       shadowReceiversChanged();
     }
 
+    this.#unlitOn = null;
+    this.syncUnlit();
+
     this.Ready = true;
+  }
+
+  /** Puts the lit meshes on their flat-lit twin while `Unlit` holds on Classic, and back when it stops. */
+  syncUnlit(): void {
+    const on = this.Unlit && lightingTier() === null;
+    if (on === this.#unlitOn || !this.gltf) return;
+    this.#unlitOn = on;
+    for (const mesh of this.gltf.mesh.getChildMeshes(false)) setMeshUnlit(mesh, on);
   }
 
   /**
@@ -1573,6 +1608,18 @@ export class ModelObject {
     }
   }
 
+  /** `MeshPasses` bound to the meshes just loaded, drawn as at time 0 until the first Update. */
+  private applyMeshPasses() {
+    const set = this.MeshPasses;
+    this.#meshPasses = set && this.gltf ? new MeshPasses(set, this.gltf.mesh.getChildMeshes(false), this.rootObject.Light) : null;
+    this.#meshPasses?.update(0);
+  }
+
+  /** Advances the `MeshPasses` to `ms` (`WorldTime`): Update calls it, and a bag icon's spin. */
+  updateMeshPasses(ms: number): void {
+    this.#meshPasses?.update(ms);
+  }
+
   /** `ShadowHiddenMesh`: the flag `objectShadow.meshCasts` reads. */
   private applyShadowHiddenMesh() {
     if (!this.gltf) return;
@@ -1792,6 +1839,8 @@ export class ModelObject {
     // and the early-out above already skips it off screen - the uniform is
     // only read while the mesh is drawn.
     this.updateMeshAnimation(gameTime.TotalGameTime.TotalSeconds * 1000);
+    this.#meshPasses?.update(gameTime.TotalGameTime.TotalSeconds * 1000);
+    if (this.Unlit || this.#unlitOn) this.syncUnlit();
 
     if (this.BlendMeshLightAt) {
       const light = this.BlendMeshLightAt(gameTime.TotalGameTime.TotalSeconds * 1000);

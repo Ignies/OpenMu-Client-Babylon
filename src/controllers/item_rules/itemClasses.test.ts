@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs';
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import {
   CLASS_COLUMNS,
   classCanUse,
@@ -119,7 +119,11 @@ const bmdClasses = (bytes: Uint8Array, group: number, index: number) => {
 // The item files took their class block from Item.txt and a server table (Summoner gear open to the
 // Dark Wizard, 3rd wings as 2nd-class items, no Rage Fighter on the items everyone uses).
 describe.skipIf(!existsSync(ITEM_BMD))('the class columns', () => {
-  const bytes = new Uint8Array(readFileSync(ITEM_BMD));
+  // skipIf still runs this body to collect the tests: read the file once they run.
+  let bytes = new Uint8Array();
+  beforeAll(() => {
+    bytes = new Uint8Array(readFileSync(ITEM_BMD));
+  });
   // A record with no name is a row Item.bmd does not have.
   const named = (group: number, index: number) => (bytes[(group * 512 + index) * 84] ^ 0xfc) !== 0;
 

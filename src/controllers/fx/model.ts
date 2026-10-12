@@ -28,6 +28,7 @@ import {
   type Texture,
 } from '../render/babylon/exports';
 import { angleMatrixQuaternion } from '../render/renderAngles';
+import { MeshPasses, type MeshPassSet } from '../render/meshPasses';
 import { clampAlpha } from './clampAlpha';
 import { chromeMaterial, disposeChromeMaterials } from './chrome';
 import { getMaterial, loadGLTF, type LoadedModel } from '../assets/modelLoader';
@@ -249,9 +250,17 @@ export interface ModelOptions {
    * switches the solid meshes to the blended variant of the same material. `blendMesh` / `hiddenMesh` /
    * `blendMeshLight` are the item's `ItemObjectAttribute` mesh rules (controllers/actors/itemObjectAttribute.ts):
    * that mesh (-2 every mesh) additive at `BodyLight x BlendMeshLight(ms)` and deaf to `alpha`, as
-   * RenderMesh draws it (ZzzBMD.cpp:2022-2036, :2099), and that mesh skipped.
+   * RenderMesh draws it (ZzzBMD.cpp:2022-2036, :2099), and that mesh skipped. `passes` is the item's own
+   * `RenderPartObjectBody` branch (an item look's body, render/meshPasses.ts), drawn over it.
    */
-  native?: { light: RGB; stamp?: Record<string, unknown>; blendMesh?: number; hiddenMesh?: number; blendMeshLight?: (ms: number) => number };
+  native?: {
+    light: RGB;
+    stamp?: Record<string, unknown>;
+    blendMesh?: number;
+    hiddenMesh?: number;
+    blendMeshLight?: (ms: number) => number;
+    passes?: MeshPassSet | null;
+  };
 }
 
 export interface ModelHandle extends EffectHandle {
@@ -388,6 +397,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
 
   const native = opts.native;
   const nativeLight = new Vector3(1, 1, 1);
+  let nativePasses: MeshPasses | null = null;
 
   const node = new TransformNode('fxModel', scene);
   node.rotationQuaternion = opts.angle ? muAngle(opts.angle, new Quaternion()) : null;
@@ -482,6 +492,12 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
               mesh.material = getMaterial(scene, false, Material.MATERIAL_ALPHABLEND, BlendState.ALPHA_COMBINE, false, false, mesh.metadata.characterAsset === true);
             }
           });
+          // The pass clones hang under the clone's nodes: the pool drops them with it (modelPool.ts).
+          if (native.passes) {
+            nativePasses = new MeshPasses(native.passes, gltf.mesh.getChildMeshes(false), nativeLight);
+            nativePasses.update(fxNow() * 1000);
+            meshes.push(...nativePasses.meshes);
+          }
           clip = gltf.animationGroups[0] ?? null;
           meshes.push(gltf.mesh);
           gltf.mesh.setEnabled(true);
@@ -638,6 +654,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
         const light = world.getTerrainLight(tmp.x, tmp.z);
         nativeLight.set(light.x + native.light[0], light.y + native.light[1], light.z + native.light[2]);
       }
+      nativePasses?.update(fxNow() * 1000);
       for (const cp of copyNodes) {
         cp.node.position.set(cp.at.x + node.position.x - start.x, cp.at.y + height + node.position.y - start.y, cp.at.z + node.position.z - start.z);
         cp.node.rotation.y = cp.yaw;

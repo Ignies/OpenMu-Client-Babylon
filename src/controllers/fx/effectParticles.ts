@@ -32,6 +32,8 @@ type TextureKey =
   | 'fireHik1'
   | 'fireHik2'
   | 'fireHik3'
+  | 'fireHik1Mono'
+  | 'fireHik2Mono'
   | 'fireHik3Mono'
   | 'waterfall1'
   | 'waterfall2'
@@ -46,11 +48,30 @@ type TextureKey =
   | 'flare01Red'
   | 'fi01'
   | 'fi02'
-  | 'fireRed';
+  | 'fireRed'
+  | 'impact03'
+  | 'impact01'
+  | 'shiny02'
+  | 'shiny05'
+  | 'lightmarks'
+  | 'pinLight'
+  | 'waterfall4'
+  | 'shiny03'
+  | 'magicGround1'
+  | 'shockWave'
+  | 'flare'
+  | 'flareRed'
+  | 'lightningMega1'
+  | 'lightningMega2'
+  | 'lightningMega3'
+  | 'shiny01'
+  | 'smokeLine1'
+  | 'smokeLine2'
+  | 'smokeLine3';
 
 const TEXTURES: Record<
   TextureKey,
-  { file: string; size: number; frames?: number }
+  { file: string; size: number; frames?: number; height?: number }
 > = {
   smoke: { file: 'Effect/smoke01.OZJ', size: 64 },
   cloud: { file: 'Effect/clouds.OZJ', size: 256 },
@@ -59,6 +80,8 @@ const TEXTURES: Record<
   fireHik1: { file: 'Effect/firehik01.OZJ', size: 64 },
   fireHik2: { file: 'Effect/firehik02.OZJ', size: 64 },
   fireHik3: { file: 'Effect/firehik03.OZJ', size: 64 },
+  fireHik1Mono: { file: 'Effect/firehik_mono01.OZJ', size: 64 },
+  fireHik2Mono: { file: 'Effect/firehik_mono02.OZJ', size: 64 },
   fireHik3Mono: { file: 'Effect/firehik_mono03.OZJ', size: 64 },
   waterfall1: { file: 'Effect/waterFall1.OZJ', size: 64 },
   waterfall2: { file: 'Effect/waterFall2.OZJ', size: 64 },
@@ -74,6 +97,26 @@ const TEXTURES: Record<
   fi01: { file: 'Effect/fi01.OZJ', size: 128 },
   fi02: { file: 'Effect/fi02.OZT', size: 256 },
   fireRed: { file: 'Effect/firered.OZJ', size: 64 },
+  // The held weapons' sprites (ZzzCharacter.cpp:7027-8386); `height` where the sheet is not square.
+  impact03: { file: 'Object9/Impack03.OZJ', size: 64 },
+  impact01: { file: 'Effect/impack01.OZJ', size: 64 },
+  shiny02: { file: 'Effect/Shiny02.OZJ', size: 32, height: 64 },
+  shiny05: { file: 'Effect/shiny05.OZJ', size: 64 },
+  lightmarks: { file: 'Effect/lightmarks.ozj', size: 128 },
+  pinLight: { file: 'Effect/pin_lights.OZJ', size: 16, height: 128 },
+  waterfall4: { file: 'Effect/waterFall4.OZJ', size: 64 },
+  shiny03: { file: 'Effect/Shiny03.OZJ', size: 128, height: 16 },
+  magicGround1: { file: 'Effect/Magic_Ground1.OZJ', size: 128 },
+  shockWave: { file: 'Effect/Shockwave.OZJ', size: 128 },
+  flare: { file: 'Effect/Flare.OZJ', size: 64 },
+  flareRed: { file: 'Effect/flareRed.OZJ', size: 64 },
+  lightningMega1: { file: 'Effect/lighting_mega01.OZJ', size: 128 },
+  lightningMega2: { file: 'Effect/lighting_mega02.OZJ', size: 128 },
+  lightningMega3: { file: 'Effect/lighting_mega03.OZJ', size: 128 },
+  shiny01: { file: 'Effect/Shiny01.OZJ', size: 16 },
+  smokeLine1: { file: 'Effect/smokelines01.OZJ', size: 64 },
+  smokeLine2: { file: 'Effect/smokelines02.OZJ', size: 64 },
+  smokeLine3: { file: 'Effect/smokelines03.OZJ', size: 64 },
 };
 
 /**
@@ -113,6 +156,11 @@ type Particle = {
   sx: number;
   sy: number;
   sz: number;
+  /** What it rides (`o->Target`), in tiles, and where that was last tick (cm): it moves as far as that does. */
+  anchor: Anchor | null;
+  ax: number;
+  ay: number;
+  az: number;
   lr: number;
   lg: number;
   lb: number;
@@ -145,6 +193,9 @@ const plainColor = (p: Particle, out: Color4) => out.set(p.lr, p.lg, p.lb, 1);
 export type NodeTurn = Readonly<{ x: number; y: number; z: number }>;
 
 export const NO_TURN: NodeTurn = { x: 0, y: 0, z: 0 };
+
+/** A point a particle rides, in tiles, rewritten in place by its owner. */
+export type Anchor = Readonly<{ x: number; y: number; z: number }>;
 
 /** `AngleMatrix` (ZzzMathLib.cpp:185-212) of the MU `Angle` the node's turn stands for. */
 function turnWith(p: Particle, turn: NodeTurn): void {
@@ -516,6 +567,260 @@ function puffMove(p: Particle, f: number, fade: number): void {
   p.rotation += (1 + rand(2)) * f;
 }
 
+/** `BITMAP_CLUD64` SubType 9 on `texture` (it swaps in BITMAP_SMOKE one time in two): see `frostCloud`. */
+function frostKind(texture: TextureKey): ParticleKind {
+  const jitter = (base: number) => base + (rand(20) - 10) * 0.002;
+  return {
+    texture,
+    blend: 'add',
+    init(p, scale) {
+      p.lifeTime = 40;
+      p.scale = scale + ((rand(20) - 10) / 2) * ((scale * 0.1) / 2);
+      p.rotation = rand(360);
+      p.vx = (rand(20) - 10) * 0.03;
+      p.vy = (rand(20) - 10) * 0.03;
+      p.vz = -(1.2 + (rand(20) - 10) * 0.025);
+    },
+    update(p, f) {
+      p.scale *= Math.pow(jitter(0.98), f);
+      p.lr *= Math.pow(jitter(0.95), f);
+      p.lg *= Math.pow(jitter(0.95), f);
+      p.lb *= Math.pow(jitter(0.95), f);
+    },
+    color: plainColor,
+  };
+}
+
+/** `AngleMatrix` of a particle's own MU `Angle` `(a0, 0, a2)` in degrees, which MovePosition turns its velocity by. */
+const ownTurn = { x: 0, y: 0, z: 0 };
+function turnMu(p: Particle, a0: number, a2: number): void {
+  ownTurn.x = (-a0 * Math.PI) / 180;
+  ownTurn.y = (-a2 * Math.PI) / 180;
+  turnWith(p, ownTurn);
+}
+
+type RampOptions = {
+  readonly life: number;
+  /** `(rand() % a + b) * 0.01 * Scale`, the same for the rise `* 0.1` and the fade-in step. */
+  readonly scale: readonly [number, number];
+  readonly gravity: readonly [number, number];
+  readonly rise: readonly [number, number];
+  readonly peak: number;
+  readonly grow: () => number;
+};
+
+/**
+ * The smokes that fade in to `peak` of their light, out over their last 10 ticks, and rise. Only one on
+ * its way out is cut below 0.1: the fade-in starts at 0 and steps by a frame-scaled amount (see `fireKind`).
+ */
+function rampKind(texture: TextureKey, o: RampOptions): ParticleKind {
+  return {
+    texture,
+    blend: 'add',
+    init(p, scale) {
+      p.lifeTime = o.life;
+      p.scale = (rand(o.scale[0]) + o.scale[1]) * 0.01 * scale;
+      p.rotation = rand(360);
+      p.gravity = (rand(o.gravity[0]) + o.gravity[1]) * 0.1;
+      p.alpha = 0;
+      p.lr = p.lg = p.lb = 0;
+    },
+    update(p, f) {
+      if (p.lifeTime < 10) {
+        p.alpha -= 0.1 * f;
+        if (p.alpha < 0.1) {
+          p.live = false;
+          return;
+        }
+      } else if (p.alpha < o.peak) {
+        p.alpha += (rand(o.rise[0]) + o.rise[1]) * 0.1 * f;
+      } else {
+        p.alpha = o.peak;
+      }
+      p.lr = p.tr * p.alpha;
+      p.lg = p.tg * p.alpha;
+      p.lb = p.tb * p.alpha;
+      p.scale += o.grow() * f;
+      p.pz += p.gravity * f;
+    },
+    color: plainColor,
+  };
+}
+
+/** The light 1/1.05 a tick and the size `shrink` less (Spark03 SubType 11, 13, 14). */
+function sparkFade(p: Particle, f: number, shrink: number): void {
+  const keep = Math.pow(1 / 1.05, f);
+  p.lr *= keep;
+  p.lg *= keep;
+  p.lb *= keep;
+  p.scale -= shrink * f;
+}
+
+/** The shine's rolls, which its BITMAP_LIGHT sheet takes when it is made next. */
+const shiny6Rolls = { x: 0, y: 0, z: 0, life: 10, rotation: 0 };
+
+function shiny6Kind(texture: TextureKey): ParticleKind {
+  const shine = texture === 'shiny05';
+  return {
+    texture,
+    blend: 'add',
+    init(p) {
+      const r = shiny6Rolls;
+      if (shine) {
+        r.life = rand(3) + 10;
+        r.x = rand(50) - 25;
+        r.y = rand(50) - 25;
+        r.z = rand(50) - 25;
+        r.rotation = rand(20) - 10;
+      }
+      p.lifeTime = r.life;
+      p.scale = 0.3;
+      p.px += r.x;
+      p.py += r.y;
+      p.pz += r.z;
+      p.rotation = r.rotation;
+    },
+    update(p, f) {
+      p.scale -= 0.01 * f;
+      p.rotation -= 5 * f;
+    },
+    color: plainColor,
+  };
+}
+
+/**
+ * A mono fire jet: 8 ticks, `(rand() % 42 + 12) * 0.01 * Scale` big, `rand() % 360` turned, alpha up 0.2-0.3 a tick
+ * to 1 and down 0.1 below `fadeBelow` ticks left, in its light times alpha. A tick it grows 0.08-0.1 (more in its
+ * last 3), turns 5 degrees and moves 8 cm along `(0, -1, 0)` turned by its object's Angle, which the tick's
+ * MovePosition does here.
+ */
+function fireJetKind(texture: TextureKey, fadeBelow: number): ParticleKind {
+  return {
+    texture,
+    blend: 'add',
+    init(p, scale) {
+      p.lifeTime = 8;
+      p.scale = (rand(42) + 12) * 0.01 * scale;
+      p.rotation = rand(360);
+      p.alpha = 0;
+      p.vy = -8;
+      p.lr = p.lg = p.lb = 0;
+    },
+    update(p, f) {
+      if (p.lifeTime < fadeBelow) p.alpha -= f * 0.1;
+      else if (p.alpha < 1) p.alpha += f * (rand(2) + 2) * 0.1;
+      else p.alpha = 1;
+      if (p.alpha < 0.1) {
+        p.live = false;
+        return;
+      }
+      p.lr = p.tr * p.alpha;
+      p.lg = p.tg * p.alpha;
+      p.lb = p.tb * p.alpha;
+      p.scale += (rand(3) + 8) * 0.01 * f;
+      if (p.lifeTime < 3) p.scale += (10 - p.lifeTime) * 0.02 * f;
+      p.rotation += 5 * f;
+    },
+    color: plainColor,
+  };
+}
+
+/**
+ * `BITMAP_SMOKE + 3` SubType 3 / 4 (ZzzEffectParticle.cpp:1743-1764): `Scale * (rand() % 64 + 64) * 0.02` big,
+ * `rand() % 360` turned, up to 125 cm aside and `rand() % 45` under, `(rand() % 100 - 50) * 0.1` Gravity, white
+ * whatever its light. A tick it keeps 1/1.012 of its light (gone at 0.05), grows 0.01, turns Gravity / 2 and rises
+ * |Gravity| (:5938-5962); drawn subtracted (:9118-9121).
+ */
+function smoke3Kind(texture: TextureKey, life: number): ParticleKind {
+  return {
+    texture,
+    blend: 'subtract',
+    init(p, scale) {
+      p.lifeTime = life;
+      p.scale = scale * (rand(64) + 64) * 0.02;
+      p.rotation = rand(360);
+      p.px += rand(250) - 125;
+      p.py += rand(250) - 125;
+      p.pz -= rand(45);
+      p.gravity = (rand(100) - 50) * 0.1;
+      p.lr = p.lg = p.lb = 1;
+    },
+    update(p, f) {
+      if (p.lr <= 0.05) {
+        p.live = false;
+        return;
+      }
+      const keep = Math.pow(1 / 1.012, f);
+      p.lr *= keep;
+      p.lg *= keep;
+      p.lb *= keep;
+      p.scale += 0.01 * f;
+      p.rotation += (p.gravity / 2) * f;
+      if (p.gravity <= 0) p.gravity = -p.gravity;
+      p.pz += p.gravity * f;
+    },
+    color: plainColor,
+  };
+}
+
+/** The first card's rolls, which the other two of one `BITMAP_WATERFALL_4` take. */
+const orbitRolls = { scale: 0.1, rotation: 0, distance: 5, timer: 0 };
+
+/**
+ * `BITMAP_WATERFALL_4` (ZzzEffect.cpp:5819-5826): 80 ticks, `rand() % 20 * 0.01 + 0.1` big, `rand() % 360` turned,
+ * `rand() % 10 + 5` out and `rand() % 360` radians round. A tick it goes 2.1 out, 0.1 round and 0.7 degrees on, keeps
+ * 0.95 of its light, and each of its three cards sits on its own circle about where it was made
+ * (MoveHandlers.cpp:9093-9133).
+ */
+function waterfallOrbitKind(plane: 0 | 1 | 2): ParticleKind {
+  return {
+    texture: 'waterfall4',
+    blend: 'add',
+    init(p) {
+      const r = orbitRolls;
+      if (plane === 0) {
+        r.scale = rand(20) * 0.01 + 0.1;
+        r.rotation = rand(360);
+        r.distance = rand(10) + 5;
+        r.timer = rand(360);
+      }
+      p.lifeTime = 80;
+      p.scale = r.scale;
+      p.rotation = r.rotation;
+      p.sx = p.px;
+      p.sy = p.py;
+      p.sz = p.pz;
+      // Distance and Timer ride in the unused gravity and alpha.
+      p.gravity = r.distance;
+      p.alpha = r.timer;
+    },
+    update(p, f) {
+      p.alpha += 0.1 * f;
+      p.gravity += 2.1 * f;
+      p.rotation += 0.7 * f;
+      const keep = Math.pow(0.95, f);
+      p.lr *= keep;
+      p.lg *= keep;
+      p.lb *= keep;
+      const c = Math.cos(p.alpha) * p.gravity;
+      const s = Math.sin(p.alpha) * p.gravity;
+      p.px = p.sx + (plane === 0 ? c : plane === 1 ? s : 0);
+      p.py = p.sy + (plane === 0 ? 0 : plane === 1 ? c : s);
+      p.pz = p.sz + (plane === 0 ? s : plane === 1 ? 0 : c);
+    },
+    color: plainColor,
+  };
+}
+
+const SMOKE_LINE: RampOptions = {
+  life: 35,
+  scale: [96, 96],
+  gravity: [16, 12],
+  peak: 0.7,
+  rise: [5, 2],
+  grow: () => (rand(3) + 6) * 0.01,
+};
+
 const KINDS = {
   fire1: fireKind('fireHik1', {
     lifeBase: 27,
@@ -707,6 +1012,85 @@ const KINDS = {
     },
     color: plainColor,
   } satisfies ParticleKind,
+
+  /**
+   * `BITMAP_SMOKE` SubType 1 (53, 56): 50 ticks, made up to 32 off and 32-95 above, turned a random
+   * `(±45, 0, 0-360)` and pushed 40-47 back along it, the push losing 0.6 a tick; it grows 0.05 a tick
+   * and is `(0.5L, L, 0.8L)` at `L = LifeTime / 50` whatever light it is made with, additive
+   * (ZzzEffectParticle.cpp:1327-1337, :5361-5366).
+   */
+  smoke1: {
+    texture: 'smoke',
+    blend: 'add',
+    init(p) {
+      p.lifeTime = 50;
+      p.scale = (rand(32) + 80) * 0.01;
+      p.px += rand(64) - 32;
+      p.py += rand(64) - 32;
+      p.pz += rand(64) + 32;
+      turnMu(p, rand(90) - 45, rand(360));
+      p.vy = -(rand(8) + 40);
+    },
+    update(p, f) {
+      const luminosity = p.lifeTime / 50;
+      p.lr = luminosity * 0.5;
+      p.lg = luminosity;
+      p.lb = luminosity * 0.8;
+      const keep = Math.pow(0.4, f);
+      p.vy *= keep;
+      p.scale += 0.05 * f;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
+
+  /**
+   * `BITMAP_SMOKE` SubType 17, Kundun's bone smoke: 12 ticks, `Scale * (rand() % 32 + 8) * 0.01`; it
+   * rises faster by 0.2 a tick, grows 0.05 and is its light times `LifeTime / 8`, dark while that is
+   * over 1 (`1 - L`), additive (ZzzEffectParticle.cpp:1168-1174, :5344-5351).
+   */
+  smoke17: {
+    texture: 'smoke',
+    blend: 'add',
+    init(p, scale) {
+      p.lifeTime = 12;
+      p.scale = scale * (rand(32) + 8) * 0.01;
+      p.rotation = rand(360);
+    },
+    update(p, f) {
+      let luminosity = p.lifeTime / 8;
+      if (luminosity > 1) luminosity = 1 - luminosity;
+      p.lr = p.tr * luminosity;
+      p.lg = p.tg * luminosity;
+      p.lb = p.tb * luminosity;
+      p.gravity += 0.2 * f;
+      p.pz += p.gravity * f;
+      p.scale += 0.05 * f;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
+
+  /**
+   * `BITMAP_SMOKE` SubType 50: 20 ticks, `(rand() % 32 + 32) * 0.01 * Scale`, rising 1.6-3.1 a tick and
+   * growing 0.02; it fades in to half its light and out over its last 10 (ZzzEffectParticle.cpp:1500-1507,
+   * :5683-5701).
+   */
+  smoke50: rampKind('smoke', {
+    life: 20,
+    scale: [32, 32],
+    gravity: [16, 16],
+    peak: 0.5,
+    rise: [3, 2],
+    grow: () => 0.02,
+  }),
+
+  /**
+   * `BITMAP_SMOKELINE1..3` SubType 0: 35 ticks, `(rand() % 96 + 96) * 0.01 * Scale`, rising 1.2-2.7 a
+   * tick and growing 0.06-0.08; it fades in to 0.7 of its light and out over its last 10
+   * (ZzzEffectParticle.cpp:1767-1786, :5963-5986).
+   */
+  smokeLine1: rampKind('smokeLine1', SMOKE_LINE),
+  smokeLine2: rampKind('smokeLine2', SMOKE_LINE),
+  smokeLine3: rampKind('smokeLine3', SMOKE_LINE),
 
   /**
    * `BITMAP_SMOKE` SubType 13, the Balgass lava vents' glow: sized `(rand() % 64 + 64) * 0.01` whatever
@@ -1091,6 +1475,191 @@ const KINDS = {
     },
     color: plainColor,
   } satisfies ParticleKind,
+
+  /**
+   * `BITMAP_WATERFALL_4` SubType 12, the Sword Breaker's drops: 4-5 ticks, `rand() % 360` turned, its size
+   * jittered by up to 75%, set +-10 cm off; a tick it turns `WorldTime % 360 * 0.01`, and its size and light
+   * keep 0.92 (ZzzEffectParticle.cpp:3611-3621, :8626-8634).
+   */
+  waterfall4Glint: {
+    texture: 'waterfall4',
+    blend: 'add',
+    init(p, scale) {
+      p.rotation = rand(360);
+      p.lifeTime = rand(2) - 1 + 5;
+      p.scale = scale + ((rand(20) - 10) / 2) * ((scale * 0.3) / 2);
+      p.px += rand(20) - 10;
+      p.py += rand(20) - 10;
+      p.pz += rand(20) - 10;
+    },
+    update(p, f, worldTimeMs) {
+      p.rotation += (Math.floor(worldTimeMs) % 360) * 0.01 * f;
+      const keep = Math.pow(0.92, f);
+      p.scale *= keep;
+      p.lr *= keep;
+      p.lg *= keep;
+      p.lb *= keep;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
+
+  /**
+   * `BITMAP_CLUD64` SubType 9, the Frost Mace's frost (one in two drawn with smoke01, `frostSmoke`): 40 ticks,
+   * sinking 1.2 cm a tick and drifting, its size keeping about 0.98 a tick and its light 0.95
+   * (ZzzEffectParticle.cpp:1043-1055, :5205-5213).
+   */
+  frostCloud: frostKind('clud64'),
+  frostSmoke: frostKind('smoke'),
+
+  /**
+   * `MODEL_STAR_SHINE` SubType 0, the Frost Mace's twinkle: 30 ticks; growing 1.1 a tick for ten, drawn as a
+   * Shiny01 sprite at a random turn for the next ten, then shrinking unseen (ZzzEffect.cpp:4680-4690, :8322-8345).
+   */
+  starShine: {
+    texture: 'shiny01',
+    blend: 'add',
+    init(p) {
+      p.lifeTime = 30;
+      p.rotation = rand(360);
+    },
+    update(p, f) {
+      // The ticks are counted as the original counts them, before this one's decrement.
+      if (p.lifeTime >= 10 && p.lifeTime < 20) return;
+      const k = Math.pow(p.lifeTime >= 20 ? 1.1 : 0.9, f);
+      p.scale *= k;
+      p.lr *= k;
+      p.lg *= k;
+      p.lb *= k;
+    },
+    color(p, out) {
+      const shown = p.lifeTime >= 10 && p.lifeTime < 20 ? 1 : 0;
+      out.set(p.lr * shown, p.lg * shown, p.lb * shown, 1);
+    },
+  } satisfies ParticleKind,
+
+  /**
+   * `BITMAP_SPARK + 1` SubType 11, the Sylph Wind's and the staffs' sparks: whatever its scale, sized
+   * `rand() % 5 / 10 + 1` and pushed `(rand() % 8 - 4, rand() % 4, rand() % 4)` cm a tick on its object's Angle;
+   * 30 ticks, its light 1/1.05 and its size 0.04 less a tick (ZzzEffectParticle.cpp:2196-2204, :6704-6713).
+   */
+  spark1_11: {
+    texture: 'spark03',
+    blend: 'add',
+    init(p) {
+      p.vx = rand(8) - 4;
+      p.vy = rand(4);
+      p.vz = rand(4);
+      p.lifeTime = 30;
+      p.scale = rand(5) / 10 + 1;
+    },
+    update: (p, f) => sparkFade(p, f, 0.04),
+    color: plainColor,
+  } satisfies ParticleKind,
+
+  /**
+   * SubType 14, the Albatross's: on its own `rand_fps_check(2)` pushed `(rand() % 4 - 4, rand() % 4, rand() % 4)`,
+   * sized 0.4-0.8 and 30 ticks; else the 2-tick dot CreateParticle leaves at its scale. Its size 0.01 less a
+   * tick (:2216-2226, :6724-6733).
+   */
+  spark1_14: {
+    texture: 'spark03',
+    blend: 'add',
+    init(p) {
+      if (Math.random() * 2 >= 1) return;
+      p.vx = rand(4) - 4;
+      p.vy = rand(4);
+      p.vz = rand(4);
+      p.lifeTime = 30;
+      p.scale = rand(5) / 10 + 0.4;
+    },
+    update: (p, f) => sparkFade(p, f, 0.01),
+    color: plainColor,
+  } satisfies ParticleKind,
+
+  /**
+   * `BITMAP_SHINY + 6` SubType 1, the Stryker's shine: 0.3, up to 25 cm off, `rand() % 20 - 10` degrees, 10-12
+   * ticks, 0.01 smaller and 5 degrees back a tick (:2718-2727, :7368-7372). Drawn as shiny05 and BITMAP_LIGHT
+   * at once (:9301-9304): `light6_1` is the second sheet, on the rolls the shine made just before it.
+   */
+  shiny6_1: shiny6Kind('shiny05'),
+  light6_1: shiny6Kind('flare01'),
+
+  /**
+   * Medusa's hand fires: `BITMAP_FIRE_HIK1_MONO` SubType 4, `HIK2_MONO` 8 and `HIK3_MONO` 5 (ZzzEffectParticle.cpp:1885,
+   * :364, :1972; :6251, :4481, :6480). Made on the monster's turn and riding it (`fireJetKind`).
+   */
+  fireMono1_4: fireJetKind('fireHik1Mono', 5),
+  fireMono2_8: fireJetKind('fireHik2Mono', 5),
+  fireMono3_5: fireJetKind('fireHik3Mono', 4),
+
+  /**
+   * `BITMAP_WATERFALL_4` SubType 15, the Dark Ghost's attack drops: 20 ticks, `rand() % 100 / 100 * 2` Gravity,
+   * `(rand() % 10 + 10) * 0.02 + Scale` big, `rand() % 360` turned, set +-20 cm aside and 50 under. A tick it sinks
+   * Gravity, which loses 0.05, shrinks 0.05 and keeps 1/1.1 of its light (ZzzEffectParticle.cpp:3716-3726, :8663-8674).
+   */
+  waterfall4_15: {
+    texture: 'waterfall4',
+    blend: 'add',
+    init(p, scale) {
+      p.lifeTime = 20;
+      p.gravity = (rand(100) / 100) * 2;
+      p.scale = (rand(10) + 10) * 0.02 + scale;
+      p.rotation = rand(360);
+      p.px += rand(40) - 20;
+      p.py += rand(40) - 20;
+      p.pz -= 50;
+    },
+    update(p, f) {
+      p.pz -= p.gravity * f;
+      p.gravity -= 0.05 * f;
+      p.scale -= 0.05 * f;
+      const keep = Math.pow(1 / 1.1, f);
+      p.lr *= keep;
+      p.lg *= keep;
+      p.lb *= keep;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
+
+  /**
+   * `BITMAP_WATERFALL_3` SubType 6, the Maya hands' death drops: made as SubType 5 (20 ticks, `rand() % 100 / 100 * 2`
+   * Gravity, `(rand() % 10 + 10) * 0.02 + Scale` big, +-20 cm aside and 50 under); a tick it rises Gravity, which gains
+   * 0.05, and keeps 1/1.1 of its light (ZzzEffectParticle.cpp:3644-3653, :8577-8588).
+   */
+  waterfall3_6: {
+    texture: 'waterfall3',
+    blend: 'add',
+    init(p, scale) {
+      p.lifeTime = 20;
+      p.gravity = (rand(100) / 100) * 2;
+      p.scale = (rand(10) + 10) * 0.02 + scale;
+      p.rotation = rand(360);
+      p.px += rand(40) - 20;
+      p.py += rand(40) - 20;
+      p.pz -= 50;
+    },
+    update(p, f) {
+      p.pz += p.gravity * f;
+      p.gravity += 0.05 * f;
+      const keep = Math.pow(1 / 1.1, f);
+      p.lr *= keep;
+      p.lg *= keep;
+      p.lb *= keep;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
+
+  /** `BITMAP_SMOKE + 3` SubType 3 (clud64, 60 ticks) and 4 (waterFall3, 30): the Maya hands' dark palm smoke (`smoke3Kind`). */
+  smoke3_3: smoke3Kind('clud64', 60),
+  smoke3_4: smoke3Kind('waterfall3', 30),
+
+  /** `BITMAP_SMOKE` SubType 39, which has no case of its own: CreateParticle's two still ticks at its Scale (:58-86). */
+  smoke39: { texture: 'smoke', blend: 'add', init() {}, update() {}, color: plainColor } satisfies ParticleKind,
+
+  /** `BITMAP_WATERFALL_4`'s three cards, each on its own circle (`waterfallOrbitKind`). */
+  waterfall4Orbit0: waterfallOrbitKind(0),
+  waterfall4Orbit1: waterfallOrbitKind(1),
+  waterfall4Orbit2: waterfallOrbitKind(2),
 } satisfies Record<string, ParticleKind>;
 
 export type KindName = keyof typeof KINDS;
@@ -1120,6 +1689,8 @@ export function emissionsFor(
 type Pool = {
   manager: SpriteManager;
   pixelSize: number;
+  /** Height over width: `RenderSprite` draws the bitmap at its own size (zzzeffectsprite.cpp:73-75). */
+  aspect: number;
   frames: number;
   free: Sprite[];
   /** A `dark` sheet's brightest texel, which its alpha was stretched from. */
@@ -1186,7 +1757,7 @@ async function getPool(
 
   if (!inFlight) {
     inFlight = (async () => {
-      const { file, size } = TEXTURES[texture];
+      const { file, size, height = size } = TEXTURES[texture];
 
       // A sheet this version never shipped: no pool, no particles, and no
       // fetch per emission for the rest of the session (`hasDataFile`).
@@ -1200,7 +1771,7 @@ async function getPool(
         `effectParticles_${key}`,
         sheet.url,
         POOL_SIZE,
-        { width: size, height: size },
+        { width: size, height },
         target
       );
 
@@ -1226,6 +1797,7 @@ async function getPool(
       const pool: Pool = {
         manager,
         pixelSize: size,
+        aspect: height / size,
         frames: TEXTURES[texture].frames ?? 1,
         free: [],
         cover: sheet.cover,
@@ -1292,6 +1864,7 @@ function ensureTicking(target: Scene) {
         }
 
         p.kind.update(p, f, worldTimeMs);
+        if (p.anchor) ride(p, p.anchor);
       }
 
       if (!p.live || p.scale <= 0) {
@@ -1325,6 +1898,22 @@ function ensureTicking(target: Scene) {
   });
 }
 
+/** `VectorSubtract(Position, StartPosition)`, then `StartPosition = Target->Position` and add it back (:4325-4328). */
+function ride(p: Particle, a: Anchor): void {
+  const dx = a.x * TILE_CM - p.ax;
+  const dy = a.z * TILE_CM - p.ay;
+  const dz = a.y * TILE_CM - p.az;
+  p.ax += dx;
+  p.ay += dy;
+  p.az += dz;
+  p.px += dx;
+  p.py += dy;
+  p.pz += dz;
+  p.sx += dx;
+  p.sy += dy;
+  p.sz += dz;
+}
+
 const releasePools = new Map<Sprite, Pool>();
 
 function release(p: Particle) {
@@ -1347,7 +1936,8 @@ export function spawnParticle(
   turn: NodeTurn,
   scale: number,
   light: readonly [number, number, number],
-  jitter = 0
+  jitter = 0,
+  anchor: Anchor | null = null
 ): Promise<void> | undefined {
   // The tick runs on drawn frames: made while hidden, these would all play at once on return.
   if (pageHidden()) return;
@@ -1355,7 +1945,7 @@ export function spawnParticle(
 
   const pool = pools.get(poolKey(kind.texture, kind.blend));
   if (pool) {
-    makeParticle(target, pool, kind, position, turn, scale, light, jitter);
+    makeParticle(target, pool, kind, position, turn, scale, light, jitter, anchor);
     return;
   }
 
@@ -1365,7 +1955,7 @@ export function spawnParticle(
 
   return getPool(target, kind.texture, kind.blend)
     .then(loaded => {
-      if (loaded) makeParticle(target, loaded, kind, at, turned, scale, lit, jitter);
+      if (loaded) makeParticle(target, loaded, kind, at, turned, scale, lit, jitter, anchor);
     })
     .catch(reportLoadFailure(`particle ${kindName}`));
 }
@@ -1378,7 +1968,8 @@ function makeParticle(
   turn: NodeTurn,
   scale: number,
   light: readonly [number, number, number],
-  jitter: number
+  jitter: number,
+  anchor: Anchor | null
 ): void {
   const sprite = acquire(pool);
   if (!sprite) return;
@@ -1416,6 +2007,10 @@ function makeParticle(
     sx: 0,
     sy: 0,
     sz: 0,
+    anchor,
+    ax: anchor ? anchor.x * TILE_CM : 0,
+    ay: anchor ? anchor.z * TILE_CM : 0,
+    az: anchor ? anchor.y * TILE_CM : 0,
     lr: light[0],
     lg: light[1],
     lb: light[2],
@@ -1465,6 +2060,12 @@ export const KIND_REACH: Record<KindName, Reach> = {
   fireRed: { travel: 6.2, base: 0, perScale: 0.58 },
   smoke0: { travel: 0.55, base: 0.72, perScale: 0 },
   smoke13: { travel: 0, base: 1.4, perScale: 0 },
+  smoke1: { travel: 1.85, base: 1.64, perScale: 0 },
+  smoke17: { travel: 0.17, base: 0.28, perScale: 0.18 },
+  smoke50: { travel: 0.63, base: 0.19, perScale: 0.29 },
+  smokeLine1: { travel: 0.95, base: 1.28, perScale: 0.87 },
+  smokeLine2: { travel: 0.95, base: 1.28, perScale: 0.87 },
+  smokeLine3: { travel: 0.95, base: 1.28, perScale: 0.87 },
   smoke2: { travel: 3.4, base: 0.58, perScale: 0 },
   smoke65: { travel: 0.75, base: 0, perScale: 0.29 },
   cloud21: { travel: 1.75, base: 0, perScale: 3.61 },
@@ -1482,6 +2083,25 @@ export const KIND_REACH: Record<KindName, Reach> = {
   light15: { travel: 4.45, base: 0, perScale: 0.62 },
   wingFlareBlue: { travel: 0, base: 0, perScale: 0.46 },
   wingCloud: { travel: 0, base: 0, perScale: 0.46 },
+  waterfall4Glint: { travel: 0.18, base: 0, perScale: 0.8 },
+  frostCloud: { travel: 0.75, base: 0, perScale: 0.5 },
+  frostSmoke: { travel: 0.75, base: 0, perScale: 0.5 },
+  starShine: { travel: 0, base: 0, perScale: 0.3 },
+  spark1_11: { travel: 1.75, base: 0.32, perScale: 0 },
+  spark1_14: { travel: 1.75, base: 0.19, perScale: 0.23 },
+  shiny6_1: { travel: 0.44, base: 0.14, perScale: 0 },
+  light6_1: { travel: 0.44, base: 0.14, perScale: 0 },
+  fireMono1_4: { travel: 0.65, base: 0.62, perScale: 0.25 },
+  fireMono2_8: { travel: 0.65, base: 0.62, perScale: 0.25 },
+  fireMono3_5: { travel: 0.65, base: 0.62, perScale: 0.25 },
+  waterfall4Orbit0: { travel: 1.85, base: 0.14, perScale: 0 },
+  waterfall4Orbit1: { travel: 1.85, base: 0.14, perScale: 0 },
+  waterfall4Orbit2: { travel: 1.85, base: 0.14, perScale: 0 },
+  waterfall4_15: { travel: 0.86, base: 0.18, perScale: 0.46 },
+  smoke39: { travel: 0, base: 0, perScale: 0.46 },
+  waterfall3_6: { travel: 0.58, base: 0.18, perScale: 0.46 },
+  smoke3_3: { travel: 3.5, base: 0.28, perScale: 1.15 },
+  smoke3_4: { travel: 2.3, base: 0.14, perScale: 1.15 },
 };
 
 /** The reach of a spawn picking any of `kinds`, as one base plus a per-scale slope. */
@@ -1656,7 +2276,28 @@ export class BonedParticleEmitter {
 }
 
 /** A sheet a held sprite can be drawn with. */
-export type HeldTexture = 'clud64' | 'flare01' | 'flare01Red' | 'flareBlue';
+export type HeldTexture =
+  | 'clud64'
+  | 'flare01'
+  | 'flare01Red'
+  | 'flareBlue'
+  | 'impact03'
+  | 'impact01'
+  | 'shiny02'
+  | 'shiny05'
+  | 'lightmarks'
+  | 'pinLight'
+  | 'waterfall2'
+  | 'waterfall4'
+  | 'spark03'
+  | 'shiny03'
+  | 'magicGround1'
+  | 'shockWave'
+  | 'flare'
+  | 'flareRed'
+  | 'lightningMega1'
+  | 'lightningMega2'
+  | 'lightningMega3';
 
 /** One sprite riding a node: `CreateSprite`'s sheet and SubType blend. */
 export type HeldPoint = {
@@ -1738,7 +2379,7 @@ export class HeldSprites {
 
       const size = (pool.pixelSize * out.scale) / TILE_CM;
       sprite.width = size;
-      sprite.height = size;
+      sprite.height = size * pool.aspect;
       sprite.angle = (out.rotation * Math.PI) / 180;
 
       // RenderSprite packs the light a byte a channel, held in 0..1 (ZzzOpenglUtil.cpp:918-933, RenderUtils.h:8-18).

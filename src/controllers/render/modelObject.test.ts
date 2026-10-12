@@ -100,6 +100,16 @@ describe('a blend mesh', () => {
     expect(plain.metadata.shineLit).toBeFalsy();
   });
 
+  // Kundun redraws meshes 1-6 with RENDER_CHROME | RENDER_BRIGHT, never mesh 0 (GMHellas.cpp:2085-2091).
+  it('carries the shine on each of ShineMeshes and on no other', () => {
+    const object = new ModelObject(scene);
+    object.BodyShine.tint.set(0.4, 0.4, 0.3);
+    object.ShineMeshes = [1, 2];
+    const gltf = body(4);
+    object.load(gltf);
+    expect(gltf.mesh.getChildMeshes().map(m => m.metadata.bodyShine === object.BodyShine)).toEqual([false, true, true, false]);
+  });
+
   it('re-reads BlendMeshLight every frame off WorldTime when it pulses', () => {
     const object = new ModelObject(scene);
     object.BlendMesh = 1;
@@ -223,5 +233,31 @@ describe('a model held still (the crowd options)', () => {
     object.playAction(1, true);
     object.setAnimationsHeld(false);
     expect(gltf.animationGroups[1]?.isPlaying).toBe(true);
+  });
+});
+
+describe('a model drawn with LightEnable off (RenderLinkObject, ZzzCharacter.cpp:6651-6652)', () => {
+  it('moves its lit meshes onto the flat-lit twin on Classic and back on the tiers above; a glow card stays', async () => {
+    const { getMaterial } = await import('../assets/modelLoader');
+    const { GameOptions } = await import('@/controllers/settings');
+    const tier = GameOptions.lightingQuality;
+    const root = new Mesh('weapon', scene);
+    const blade = CreateBox('node_0', { size: 1 }, scene);
+    const glow = CreateBox('node_1', { size: 1 }, scene);
+    blade.parent = glow.parent = root;
+    const lit = getMaterial(scene, true, 0, 0);
+    const card = getMaterial(scene, false, 2, 1, true);
+    blade.material = lit;
+    glow.material = card;
+    const object = new ModelObject(scene);
+    object.Unlit = true;
+    GameOptions.lightingQuality = 0;
+    object.load({ mesh: root, skeleton: new Skeleton('weapon', 'weapon', scene), animationGroups: [] });
+    expect(blade.material).toBe(getMaterial(scene, true, 0, 0, false, true));
+    expect(glow.material).toBe(card);
+    GameOptions.lightingQuality = 1;
+    object.syncUnlit();
+    expect(blade.material).toBe(lit);
+    GameOptions.lightingQuality = tier;
   });
 });

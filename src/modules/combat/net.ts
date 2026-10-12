@@ -16,8 +16,9 @@ import { isDeadMonster } from '../scope/objects';
 import { convertDirectionToAngle } from '@/core/turnAngle';
 import { chooseAttackAction, isWeaponItem } from '@/controllers/actors/weaponClass';
 import { combat } from '@/controllers/combat';
-import { delay } from '@/controllers/fx/core';
-import { isMonsterSwingClip, monsterAttackState, monsterFlinches, monsterSkillSwing, monsterSwing } from '@/controllers/anim/monsterAttackClip';
+import { delay, entityYaw } from '@/controllers/fx/core';
+import { monsterAttackLook, monsterSkillLook } from '@/controllers/skills';
+import { isMonsterSwingClip, monsterAttackState, monsterCastStartsAttack, monsterFlinches, monsterSkillSwing, monsterSwing } from '@/controllers/anim/monsterAttackClip';
 import { isPlayerBody } from '@/controllers/actors/playerObject';
 import { isTeleportSkill } from '../skills/skillCasting';
 import { meteoriteStormRunning, santaActionSound } from '@/controllers/sound/packetSounds';
@@ -331,6 +332,8 @@ export function installNet(): void {
         const storming = meteoriteStormRunning(input.monster, state, input.now);
         setMonsterClip(obj, monsterSwing(state, input), true);
         playTrapSounds(obj, input, true, storming);
+        // AttackEffect on the swing's AttackTime: the map's own for this monster, aimed at the hero (TargetCharacter = HeroIndex).
+        monsterAttackLook(input.monster, world.mapIndex)?.({ scene: world.scene, caster: obj, target: world.playerEntity ?? null, yaw: entityYaw(obj) });
       } else {
         if (
           obj.monsterAnimation.action === monsterAction &&
@@ -398,13 +401,18 @@ export function installNet(): void {
     const world = Ecs.world;
     const caster = world?.getByNetId(p.AttackerId);
     const target = world?.getByNetId(p.TargetId);
-    if (!caster || !target) return;
+    if (!world || !caster || !target) return;
     lastAttacker = caster;
     if (!caster.monsterAnimation || isDeadMonster(caster)) return;
     const clip = monsterSkillSwing(monsterAttackState(caster), p.SkillNumber, attackInputOf(caster));
     if (clip === undefined) return;
     faceTarget(caster, target);
     setMonsterClip(caster, clip, true);
+    // What the map hook draws for it (the guardian bosses' rage, Selupan's words), then its AttackEffect (Dark Ghost's fire).
+    const monster = monsterNumberOf(caster);
+    const look = { scene: world.scene, caster, target, yaw: entityYaw(caster) };
+    monsterSkillLook(monster, p.SkillNumber, world.mapIndex)?.(look);
+    monsterAttackLook(monster, world.mapIndex)?.(look);
   });
 
   EventBus.on('SkillAnimation', packet => {
@@ -435,6 +443,10 @@ export function installNet(): void {
     if (combat.observeDarkSideMagic(p.SkillId, caster, target)) return;
     // AT_SKILL_DRAGON_ROAR: a hit, with no SetAction or cast sound (WSclient.cpp:5130-5143).
     if (!combat.magicIsHit(p.SkillId)) playCastAnimation(caster, p.SkillId, false);
+    // A monster's cast that starts AttackTime runs the map's AttackEffect at its target; none without one (WSclient.cpp:4158-4159).
+    if (target && caster.monsterAnimation && !isDeadMonster(caster) && monsterCastStartsAttack(p.SkillId)) {
+      monsterAttackLook(monsterNumberOf(caster), world.mapIndex)?.({ scene: world.scene, caster, target, yaw: entityYaw(caster) });
+    }
     playTargetedSkillVisual(world.scene, p.SkillId, caster, target);
   });
 
