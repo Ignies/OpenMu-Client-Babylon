@@ -575,7 +575,7 @@ const UNCLAMP = `
 `;
 
 const FLAT_LIT_OVERRIDE = `
-  color.rgb = baseColor.rgb * vDiffuseColor.rgb;
+  color.rgb = baseColor.rgb * vDiffuseColor.rgb * ${BODY_LIGHT_UNIFORM}.rgb;
 `;
 
 /**

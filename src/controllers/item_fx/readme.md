@@ -66,7 +66,8 @@ original client's item passes, the item glow tiers and the weapon swing trails.
   (`DETAIL_UNIFORM`). Roughness is left alone; scaling it would make surfaces shinier.
 - Flat-lit variants (a bag icon, `render/iconShot.ts`): the excellent redraw is vertex lit in the
   original, and a bag item's vertex light is its BodyLight (`LightEnable` off), so `lit` is BodyLight
-  there instead of the scene's lambert sum.
+  there instead of the scene's lambert sum. The texel itself is drawn at BodyLight too (`FLAT_LIT_OVERRIDE`):
+  `RenderMesh` colours an unlit mesh by it (ZzzBMD.cpp:1740-1745); before, the flat pass ignored it.
 - Half-lambert (`MU_WRAP`): the original shades `dot*0.8 + 0.4`, clamped >= 0.2. It is added to
   the light sum as `sun x (wrap(dot) - max(dot, 0)) x shadow`, constants divided by 1.2 so a
   sun-facing face is unchanged. The sun's shadow factor is recovered from Babylon's aggregate as

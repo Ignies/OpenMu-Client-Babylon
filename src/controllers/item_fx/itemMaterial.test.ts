@@ -55,3 +55,10 @@ describe('the scroll materials\' look-ups', () => {
     expect(diffuse).toContain('} else if (muMap == 8) {\n          muUv = vec2(n.z * 0.5 + 0.2, n.y * 0.5 + 0.5);');
   });
 });
+
+describe('the flat-lit material', () => {
+  it('draws the texel at BodyLight, as RenderMesh with LightEnable off colours it (ZzzBMD.cpp:1740-1745)', () => {
+    const fog = (createItemMaterial(scene, false, true, true) as unknown as { CustomParts: { Fragment_Before_Fog: string } }).CustomParts.Fragment_Before_Fog;
+    expect(fog).toContain('color.rgb = baseColor.rgb * vDiffuseColor.rgb * muBodyLight.rgb;');
+  });
+});
