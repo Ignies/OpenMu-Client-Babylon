@@ -130,7 +130,7 @@ const PARTICLES: Readonly<Record<BodyParticle, ParticleRecipe>> = {
   sandSmokeBurst: SAND_SMOKE_BURST,
 };
 
-const SHARDS: Readonly<Record<BodyShard, readonly string[]>> = { brokenIce: MODEL.brokenIce };
+const SHARDS: Readonly<Record<BodyShard, readonly string[]>> = { brokenIce: MODEL.brokenIce, stone2: [MODEL.stone2] };
 
 /** `CreateEffect(BITMAP_*, p, ..., Light, SubType)` of a terrain mark, as a ring at `p` in the row's light. */
 const GROUNDS: Readonly<Record<BodyGround, (scene: Scene, at: Vector3, colour: RGB) => void>> = {
@@ -151,6 +151,33 @@ const GROUNDS: Readonly<Record<BodyGround, (scene: Scene, at: Vector3, colour: R
       alphaAt: p => (1 / 1.3) ** Math.max(0, Math.floor(p * 10) - 4),
     });
   },
+  // SubType 11: 20 ticks, Scale (rand() % 10 + 10) / 10 growing rand() % 5 / 10 a tick; SubType 12: 10 ticks from Scale
+  // 0.1, growing (LifeTime - 4) * 0.25 a tick while above 4; both 1/1.3 of their light a tick under LifeTime 6
+  // (ZzzEffect.cpp:3598-3607, MoveHandlers.cpp:5822-5833, :5877-5884).
+  shockWave11: (scene, at, colour) => {
+    let size = (Math.floor(Math.random() * 10) + 10) / 10;
+    const sizes = [size];
+    for (let i = 0; i < 20; i++) sizes.push((size += Math.floor(Math.random() * 5) / 10));
+    spawnRing(scene, at, {
+      texture: TEX.shockwave,
+      colour,
+      seconds: 20 * TICK,
+      maxScale: 10,
+      scaleAt: t => sizes[Math.min(20, Math.floor(t / TICK + 1e-3))],
+      alphaAt: p => (1 / 1.3) ** Math.max(0, Math.floor(p * 20) - 14),
+    });
+  },
+  shockWave12: (scene, at, colour) =>
+    void spawnRing(scene, at, {
+      texture: TEX.shockwave,
+      colour,
+      seconds: 10 * TICK,
+      scaleAt: t => {
+        const n = Math.min(5, Math.floor(t / TICK + 1e-3));
+        return 0.1 + 0.25 * (5 * n - (n * (n - 1)) / 2);
+      },
+      alphaAt: p => (1 / 1.3) ** Math.max(0, Math.floor(p * 10) - 4),
+    }),
 };
 
 const BLUR_SHEETS: Readonly<Record<BodyBlurSheet, string>> = { blur01: TEX.blur, blur02: TEX.blur2, motionBlur: TEX.motionBlur };
@@ -414,6 +441,15 @@ function facing(e: Entity): typeof facingTurn {
   return facingTurn;
 }
 
+/** `o->Position` plus `(0, -cm, 0)` turned by its Angle: `cm` along the way it faces. */
+function ahead(e: Entity, cm: number, out: Vector3): Vector3 {
+  const yaw = entityYaw(e);
+  entityPos(e, 0, out);
+  out.x += (Math.sin(yaw) * cm) / TILE_CM;
+  out.z -= (Math.cos(yaw) * cm) / TILE_CM;
+  return out;
+}
+
 function boneCount(e: Entity): number {
   // The GLB adds a root above the MU bones (core.ts bonePos).
   return Math.max(0, (e.modelObject?.gltf?.skeleton?.bones.length ?? 0) - 1);
@@ -553,11 +589,15 @@ function emit(scene: Scene, e: Entity, em: Emitter, f: Frame, rides?: readonly V
     case 'shards': {
       if (!open(em.gate, f)) return;
       const models = SHARDS[em.shards];
-      const puff = variant(SMOKE, em.colour);
-      for (const b of em.bones) {
-        bonePos(e, b, tmp);
+      const ice = em.shards === 'brokenIce';
+      const puff = ice ? variant(SMOKE, em.colour) : undefined;
+      const n = em.aheadCm === undefined ? em.bones.length : 1;
+      for (let s = 0; s < n; s++) {
+        if (em.aheadCm === undefined) bonePos(e, em.bones[s], tmp);
+        else ahead(e, em.aheadCm, tmp);
         for (let i = 0; i < em.count; i++) {
-          spawnDebris(scene, tmp, { model: models[Math.floor(Math.random() * models.length)], ice: true, colour: em.colour, puff });
+          const model = models[Math.floor(Math.random() * models.length)];
+          spawnDebris(scene, tmp, ice ? { model, ice, colour: em.colour, puff } : { model, count: 1, colour: em.colour });
         }
       }
       return;
@@ -567,8 +607,10 @@ function emit(scene: Scene, e: Entity, em: Emitter, f: Frame, rides?: readonly V
       return;
     case 'ground': {
       if (!open(em.gate, f)) return;
-      for (const b of em.bones) {
-        bonePos(e, b, tmp);
+      const n = em.aheadCm === undefined ? em.bones.length : 1;
+      for (let s = 0; s < n; s++) {
+        if (em.aheadCm === undefined) bonePos(e, em.bones[s], tmp);
+        else ahead(e, em.aheadCm, tmp);
         for (let i = 0; i < em.count; i++) GROUNDS[em.ground](scene, tmp, em.colour);
       }
       return;

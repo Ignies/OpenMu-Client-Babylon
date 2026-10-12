@@ -447,6 +447,26 @@ describe('monster body rows', () => {
     monsterVisualsLayer.reset?.();
   });
 
+  // The Napins' strikes (GMSwampOfQuiet.cpp:427-460, :501-531): a crater, twenty MODEL_STONE2 and shock waves made
+  // `(0, -250, 0)` turned by its Angle off its position, not at a bone.
+  it('lay a ground row and throw a shards row ahead of the monster', () => {
+    calls.rings.length = 0;
+    calls.debris.length = 0;
+    const e = { ...monster(), at: 7, transform: { rot: { y: Math.PI / 2 } } } as unknown as Entity;
+    visualMonster(scene, e, [
+      { kind: 'ground', every: 1, ground: 'shockWave11', count: 2, bones: [], aheadCm: 250, colour: [0.3, 0.2, 1] },
+      { kind: 'shards', every: 1, shards: 'stone2', count: 20, bones: [], aheadCm: 250, colour: [1, 1, 1] },
+    ] as never);
+    monsterVisualsLayer.update?.(0, 0.04);
+    expect(calls.rings.map(r => [r.at.x, r.opts.seconds])).toEqual([
+      [9.5, 20 / 25],
+      [9.5, 20 / 25],
+    ]);
+    expect(calls.debris).toHaveLength(20);
+    expect(calls.debris.every(d => d.at.x === 9.5 && d.opts.ice !== true)).toBe(true);
+    monsterVisualsLayer.reset?.();
+  });
+
   // A MoveMonsterVisual line no row draws (Nightmare's storm and laser): the content's own staging, through its gate.
   it('hand a call row the scene and the monster while its gate is open', () => {
     const runs: unknown[][] = [];

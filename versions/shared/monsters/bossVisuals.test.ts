@@ -591,6 +591,23 @@ describe('the Swamp of Quiet line', () => {
     }
   });
 
+  // The strikes: MODEL_NAPIN's Attack2 at frame 7.2, 250 cm ahead, a crater, 20 stones and two SHOCK_WAVE SubType 11;
+  // the Blaze and Ice Napins' and Medusa's Attack1 / Attack2 at 5.5, 150 cm ahead, a crater, 20 stones and a SubType 12
+  // (:427-460, :501-531, :532-581).
+  it("strike the ground in front of the Napins and Medusa", () => {
+    const strike = (numb: number) =>
+      (monsters.def(numb)?.bodyFx ?? [])
+        .filter(e => e.kind === 'ground' || e.kind === 'shards')
+        .map(e => [e.kind === 'ground' ? e.ground : e.shards, e.count, 'aheadCm' in e ? e.aheadCm : 0, e.colour.join(','), e.gate?.action?.join('/'), e.gate?.frames?.[0]?.[0]].join(' '));
+    const thunder = `${A.Attack2} 7.2`;
+    expect(strike(447)).toEqual([`crater2 1 250 1,1,1 ${thunder}`, `stone2 20 250 1,1,1 ${thunder}`, `shockWave11 2 250 0.3,0.2,1 ${thunder}`]);
+    const swing = `${A.Attack1}/${A.Attack2} 5.5`;
+    expect(strike(449)).toEqual([`crater2 1 150 1,1,1 ${swing}`, `stone2 20 150 1,1,1 ${swing}`, `shockWave12 1 150 0.5,0.1,0 ${swing}`]);
+    for (const numb of [558, 561]) {
+      expect(strike(numb)).toEqual([`crater2 1 150 0.25,0.6,0.7 ${swing}`, `stone2 20 150 1,1,1 ${swing}`, `shockWave12 1 150 0.5,0.1,0 ${swing}`]);
+    }
+  });
+
   // MODEL_GHOST_NAPIN (:990-1000): at seven bones a tick, a SMOKELINE SubType 1 and a CLUD64 SubType 6 riding him.
   it('smoke the Ghost Napin green', () => {
     expect(rows(448, 'puff')).toEqual([

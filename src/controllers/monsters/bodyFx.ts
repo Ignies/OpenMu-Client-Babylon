@@ -42,12 +42,13 @@ export type BodyRibbon = 'jointEnergy' | 'flare' | 'spark';
 
 /**
  * The terrain marks a `ground` row lays (`CreateEffect(BITMAP_*, ..., SubType)` drawn by `RenderTerrainAlphaBitmap`):
- * BITMAP_CRATER SubType 2 (cratered, 3 tiles, 40 ticks) and BITMAP_SHOCK_WAVE SubType 8 (2-3.8 tiles growing 1 a tick).
+ * BITMAP_CRATER SubType 2 (cratered, 3 tiles, 40 ticks) and BITMAP_SHOCK_WAVE SubType 8 (2-3.8 tiles growing 1 a tick),
+ * 11 (1-1.9 tiles growing 0-0.4 a tick) and 12 (from Scale 0.1, growing `(LifeTime - 4) * 0.25` a tick).
  */
-export type BodyGround = 'crater2' | 'shockWave8';
+export type BodyGround = 'crater2' | 'shockWave8' | 'shockWave11' | 'shockWave12';
 
-/** The pieces a `shards` row throws: MODEL_EFFECT_BROKEN_ICE0 + rand() % 3 (ice_stone00-02). */
-export type BodyShard = 'brokenIce';
+/** The pieces a `shards` row throws: MODEL_EFFECT_BROKEN_ICE0 + rand() % 3 (ice_stone00-02) or MODEL_STONE2. */
+export type BodyShard = 'brokenIce' | 'stone2';
 
 /** The original's own particles a `puff` can name (`fx/effectParticles.ts` kinds, by `BITMAP_*` and SubType). */
 export type BodyPuff =
@@ -294,6 +295,8 @@ export type BodyFxEmitter =
       readonly shards: BodyShard;
       readonly count: number;
       readonly bones: readonly number[];
+      /** Made once at the body origin this many cm along its facing (`(0, -ahead, 0)` turned by its Angle), not at `bones`. */
+      readonly aheadCm?: number;
       readonly colour: RGB;
       readonly gate?: BodyFxGate;
     }
@@ -304,6 +307,8 @@ export type BodyFxEmitter =
       readonly ground: BodyGround;
       readonly count: number;
       readonly bones: readonly number[];
+      /** As a `shards` row's: made ahead of the body instead of at `bones`. */
+      readonly aheadCm?: number;
       readonly colour: RGB;
       readonly gate?: BodyFxGate;
     }
