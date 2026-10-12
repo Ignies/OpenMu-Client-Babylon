@@ -30,6 +30,9 @@ const SPAWN = { x: 135, y: 131 } as const;
 const OUTDOOR = true;
 const RAIN = false;
 
+// `SetWorldClearColor` (SceneManager.cpp:431): the dark green void past the map edge.
+const CLEAR_COLOR = [10, 20, 14] as const;
+
 /** The pub floor the tavern dust hangs over, matching its interactive area (`create.ts`). */
 const TAVERN: Room = {
   min: { x: 120, y: 120 },
@@ -49,6 +52,7 @@ export const lorenciaLayer: MapLayer = {
   spawn: SPAWN,
   outdoor: OUTDOOR,
   rain: RAIN,
+  clearColor: CLEAR_COLOR,
   blendMeshes: LORENCIA_BLEND_MESHES,
   effectOnly: LORENCIA_EFFECT_ONLY_TYPES,
   emissions: LORENCIA_EMISSIONS,

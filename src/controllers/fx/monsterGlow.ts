@@ -126,6 +126,11 @@ function renderLight(
   return { bones, cards, local, breathe: true };
 }
 
+/** `CreateSprite(BITMAP_LIGHT, bone, scale, Light, o)` per scale, in a fixed light. */
+function steadyLight(bones: readonly number[], scales: readonly number[], colour: readonly [number, number, number]): MonsterGlow {
+  return { bones, cards: scales.map(scale => ({ tex: 'flare', scale })), colour, breathe: false, luminosity: 1 };
+}
+
 /**
  * Keyed by NPC/monster type number (`MonstersDatabase`). Every row is a
  * transcription; the file:line is the original's site.
@@ -198,6 +203,14 @@ export const MONSTER_GLOWS: Partial<Record<number, MonsterGlow | readonly Monste
   235: renderLight([6], [{ tex: 'flare', scale: 2.5 }]),
   // 238 Chaos Goblin (MODEL_MIX_NPC), :11031.
   238: renderLight([32], [{ tex: 'flare', scale: 1.5 }]),
+  // 465 Santa Claus (MODEL_XMAS2008_SANTA_NPC), Draw_RenderObject ZzzObject.cpp:1930-1945.
+  465: [
+    steadyLight([4], [8], [1, 0.8, 0.2]),
+    steadyLight([13], [5], [1, 0.4, 0]),
+    steadyLight([38], [2], [1, 0.8, 0.2]),
+  ],
+  // 467 Snowman (MODEL_XMAS2008_SNOWMAN_NPC), ZzzObject.cpp:1910-1922.
+  467: [steadyLight([7], [6, 4], [0.8, 0.8, 0.9]), steadyLight([34], [2], [1, 0.8, 0.2])],
 };
 
 // The golden line shares the model, and the original shares the render case

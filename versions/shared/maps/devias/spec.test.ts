@@ -16,3 +16,10 @@ describe("Devias' blend meshes (MoveObject, ZzzObject.cpp:3856-3860)", () => {
     }
   });
 });
+
+describe("Devias' clear colour (SetWorldClearColor, SceneManager.cpp:433)", () => {
+  it('is the dark navy rgb8(0, 0, 10)', async () => {
+    const { deviasLayer } = await import('./index');
+    expect(deviasLayer.clearColor).toEqual([0, 0, 10]);
+  });
+});

@@ -45,6 +45,13 @@ describe('monster folders', () => {
     expect(maya?.model).toBeUndefined();
   });
 
+  // The eight Little Santas' case writes 0.4 into clips 0, 1 and 4 and 0.5 into 2 and 3 (ZzzCharacter.cpp:14815-14828).
+  it('play the Little Santas at their own clip speeds', () => {
+    const santas = monsters.all().filter(d => d.Numb >= 468 && d.Numb <= 475);
+    expect(santas).toHaveLength(8);
+    for (const d of santas) expect(d.npcModel?.clipSpeeds).toEqual({ 0: 0.4, 1: 0.4, 2: 0.5, 3: 0.5, 4: 0.4 });
+  });
+
   it('look monsters up by number', () => {
     expect(monsters.get(0)?.Name).toBe('Bull Fighter');
     expect(monsters.maxHealth(0)).toBe(100);

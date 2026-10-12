@@ -134,7 +134,8 @@ shared pools, textures and particle recipes other folders reuse.
   fading past 300 and gone past 500, `cloud11` (SubType 11) drifts the same in its own light, turning,
   and `fireRed` (`BITMAP_FIRE_RED`, firered.jpg) shoots up steady for 20 ticks.
 - `monsterGlow.test.ts`: `RenderLight` breathes on the world's clock, so two monsters that came apart
-  breathe alike, in step with their floor light.
+  breathe alike, in step with their floor light; Santa Claus and the Snowman carry their steady
+  flare01 cards on their bones (ZzzObject.cpp:1910-1945).
 - `core.test.ts`: a flickering tint makes a bounded number of additive materials, each within half
   a 1/128 step of the colour asked for; a burst emits nothing while the page is hidden.
 - `modelClones.test.ts`: a `model`, `linkedModel` or spirit skull clone leaves no mesh, skeleton or

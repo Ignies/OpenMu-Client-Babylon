@@ -45,6 +45,21 @@ describe('the character window with a pet', () => {
   });
 });
 
+// CalculateSuccessfulBlocking reads EQUIPMENT_WEAPON_LEFT, slot 1 (ZzzInfomation.cpp:3222, _define.h:209).
+describe('the character window defense rate with a shield', () => {
+  const held = (slot: number) => {
+    const items: (Item | null)[] = new Array(12).fill(null);
+    items[slot] = { group: 6, num: 12, durability: 52 };
+    return deriveCharacterStats({ charClass: CharacterClassNumber.DarkKnight, level: 240, strength: 600, agility: 300, vitality: 100, energy: 450, leadership: 0, items }).defenseRate;
+  };
+  const bare = stats(null).defenseRate;
+
+  it("adds the Bronze Shield's blocking from the left hand (slot 1), not from slot 0", () => {
+    expect(held(1)).toBe(bare + 54 + 27 + 48);
+    expect(held(0)).toBe(bare);
+  });
+});
+
 // NewUICharacterInfoWindow.cpp:680-704 (damage), :1259-1294 (wizardry), :1395-1418 (curse).
 describe('the character window with a transformation ring', () => {
   const withRings = (rings: (Item | null)[], charClass = CharacterClassNumber.DarkKnight, pet: Item | null = null) => {
