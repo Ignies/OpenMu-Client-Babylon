@@ -602,3 +602,17 @@ describe('blend meshes of their own', () => {
     expect([47, 52, 238, 242].map(n => monsters.def(n)?.blendMesh)).toEqual([{ mesh: 0 }, undefined, { mesh: 1 }, { mesh: 1 }]);
   });
 });
+
+describe('event cues', () => {
+  // MODEL_DARK_ELF_1 (GMCrywolf1st.cpp:844-866): once Crywolf reaches START (`Dark_Elf_Check`), at bone 27 a
+  // BITMAP_CRATER SubType 2, two BITMAP_BLUE_BLUR SubType 1 and five BITMAP_SHOCK_WAVE SubType 8 in (1, 0.2, 0.2).
+  it("burst the Dark Elf's crater and shock waves when Crywolf starts", () => {
+    const fx = (monsters.def(340)?.bodyFx ?? []).filter(e => 'gate' in e && e.gate && 'cue' in e.gate);
+    expect(fx.map(e => [e.kind, 'ground' in e ? `${e.ground} x${e.count}` : 'particles' in e ? e.particles.join(',') : ''])).toEqual([
+      ['ground', 'crater2 x1'],
+      ['puff', 'blueBlur1,blueBlur1'],
+      ['ground', 'shockWave8 x5'],
+    ]);
+    expect(fx.every(e => 'bones' in e && e.bones.join() === '27' && e.gate?.cue === 'crywolfStart')).toBe(true);
+  });
+});

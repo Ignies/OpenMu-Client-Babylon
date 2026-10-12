@@ -10,6 +10,7 @@ const calls = vi.hoisted(() => ({
   blurs: [] as Record<string, unknown>[],
   particles: [] as unknown[][],
   debris: [] as { at: { x: number }; opts: Record<string, unknown> }[],
+  rings: [] as { at: { x: number }; opts: Record<string, unknown> }[],
 }));
 
 vi.mock('../render/babylon/exports', () => {
@@ -78,10 +79,16 @@ vi.mock('./blur', () => ({
     },
   },
 }));
-vi.mock('./ring', () => ({ spawnRing: () => ({ alive: true, stop() {} }) }));
+vi.mock('./ring', () => ({
+  spawnRing: (_s: unknown, at: { x: number }, opts: Record<string, unknown>) => {
+    calls.rings.push({ at: { x: at.x }, opts });
+    return { alive: true, stop() {} };
+  },
+}));
 vi.mock('./sprite', () => ({ spawnSprite: () => ({ alive: true, stop() {} }) }));
 
 const { visualMonster, monsterVisualsLayer } = await import('./monsterVisuals');
+const { cueLook } = await import('../monsters');
 
 const scene = {} as Scene;
 
@@ -437,6 +444,34 @@ describe('monster body rows', () => {
     monsterVisualsLayer.update?.(0, 0.04);
     random.mockRestore();
     expect(calls.particles.map(p => (p[2] as { x: number }).x)).toEqual([0, 9, 5]);
+    monsterVisualsLayer.reset?.();
+  });
+
+  // Dark_Elf_Check (GMCrywolf1st.cpp:120-123, :844-866): Crywolf reaching START cues one burst, which the first Dark
+  // Elf to move takes: BITMAP_CRATER SubType 2, five BITMAP_SHOCK_WAVE SubType 8 and two blue blurs at bone 27, once.
+  it('fire the cued rows once, on the body that takes the cue', () => {
+    calls.particles.length = 0;
+    calls.rings.length = 0;
+    const cue = { cue: 'crywolfStart' };
+    const row = [
+      { kind: 'ground', every: 1, ground: 'crater2', count: 1, bones: [27], colour: [1, 1, 1], gate: cue },
+      { kind: 'ground', every: 1, ground: 'shockWave8', count: 5, bones: [27], colour: [1, 0.2, 0.2], gate: cue },
+      { kind: 'puff', every: 1, particles: ['blueBlur1', 'blueBlur1'], bones: [27], colour: [1, 0.2, 0.2], gate: cue },
+    ];
+    visualMonster(scene, monster(), row as never);
+    visualMonster(scene, monster(), row as never);
+    monsterVisualsLayer.update?.(0, 0.04);
+    expect(calls.rings).toHaveLength(0);
+    cueLook('crywolfStart');
+    monsterVisualsLayer.update?.(0, 0.04);
+    monsterVisualsLayer.update?.(0, 0.04);
+    expect(calls.rings.map(r => [r.at.x, r.opts.texture])).toEqual([
+      [27, 'Effect/cratered.OZT'],
+      ...Array.from({ length: 5 }, () => [27, 'Effect/Shockwave.OZJ']),
+    ]);
+    expect(calls.rings[0].opts).toMatchObject({ seconds: 40 / 25, scale: 3, blend: 'alpha' });
+    expect(calls.rings[1].opts).toMatchObject({ seconds: 10 / 25, colour: [1, 0.2, 0.2] });
+    expect(calls.particles.map(p => p[1])).toEqual(['blueBlur1', 'blueBlur1']);
     monsterVisualsLayer.reset?.();
   });
 });

@@ -68,7 +68,8 @@ type TextureKey =
   | 'shiny01'
   | 'smokeLine1'
   | 'smokeLine2'
-  | 'smokeLine3';
+  | 'smokeLine3'
+  | 'poundingBall';
 
 const TEXTURES: Record<
   TextureKey,
@@ -119,6 +120,7 @@ const TEXTURES: Record<
   smokeLine1: { file: 'Effect/smokelines01.OZJ', size: 64 },
   smokeLine2: { file: 'Effect/smokelines02.OZJ', size: 64 },
   smokeLine3: { file: 'Effect/smokelines03.OZJ', size: 64 },
+  poundingBall: { file: 'Effect/PoundingBall.OZJ', size: 64 },
 };
 
 /**
@@ -1694,6 +1696,27 @@ const KINDS = {
   smoke3_3: smoke3Kind('clud64', 60),
   smoke3_4: smoke3Kind('waterfall3', 30),
 
+  /**
+   * `BITMAP_BLUE_BLUR` SubType 1, drawn as PoundingBall: 30 ticks, `(rand() % 64 + 64) * 0.01` big, turned, 45 cm
+   * under; a tick it rises 5, grows 0.19 and is `LifeTime / 20`, white (ZzzEffectParticle.cpp:943-950, :3985-3999).
+   */
+  blueBlur1: {
+    texture: 'poundingBall',
+    blend: 'add',
+    init(p) {
+      p.lifeTime = 30;
+      p.scale = (rand(64) + 64) * 0.01;
+      p.rotation = rand(360);
+      p.pz -= 45;
+    },
+    update(p, f) {
+      p.pz += 5 * f;
+      p.scale += 0.19 * f;
+      p.lr = p.lg = p.lb = p.lifeTime / 20;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
+
   /** `BITMAP_SMOKE` SubType 39, which has no case of its own: CreateParticle's two still ticks at its Scale (:58-86). */
   smoke39: { texture: 'smoke', blend: 'add', init() {}, update() {}, color: plainColor } satisfies ParticleKind,
 
@@ -2151,6 +2174,7 @@ export const KIND_REACH: Record<KindName, Reach> = {
   waterfall3_6: { travel: 0.58, base: 0.18, perScale: 0.46 },
   smoke3_3: { travel: 3.5, base: 0.28, perScale: 1.15 },
   smoke3_4: { travel: 2.3, base: 0.14, perScale: 1.15 },
+  blueBlur1: { travel: 1.95, base: 3, perScale: 0 },
 };
 
 /** The reach of a spawn picking any of `kinds`, as one base plus a per-scale slope. */

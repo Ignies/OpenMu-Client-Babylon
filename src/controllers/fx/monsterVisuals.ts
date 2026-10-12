@@ -43,15 +43,18 @@ import {
 import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
 import {
   monsterRegistry,
+  takeLookCue,
   type BodyBlurSheet,
   type BodyCard,
   type BodyFxEmitter,
   type BodyFxGate,
+  type BodyGround,
   type BodyParticle,
   type BodyPuff,
   type BodyShard,
   type BodyTexture,
   type MonsterBodyFx,
+  type LookCueName,
 } from '../monsters';
 
 // ---- 1. tuning -------------------------------------------------------------
@@ -129,6 +132,27 @@ const PARTICLES: Readonly<Record<BodyParticle, ParticleRecipe>> = {
 
 const SHARDS: Readonly<Record<BodyShard, readonly string[]>> = { brokenIce: MODEL.brokenIce };
 
+/** `CreateEffect(BITMAP_*, p, ..., Light, SubType)` of a terrain mark, as a ring at `p` in the row's light. */
+const GROUNDS: Readonly<Record<BodyGround, (scene: Scene, at: Vector3, colour: RGB) => void>> = {
+  // BITMAP_CRATER SubType 2: 40 ticks at 3 tiles, alpha tested; Light and Alpha are LifeTime / 10 over the last 10
+  // (ZzzEffect.cpp:4135-4140, :10054-10057, MoveHandlers.cpp:6902-6914).
+  crater2: (scene, at, colour) =>
+    void spawnRing(scene, at, { texture: TEX.crater, colour, seconds: 40 * TICK, scale: 3, blend: 'alpha', fadeTail: 0.25, fadeColour: true }),
+  // BITMAP_SHOCK_WAVE SubType 8: 10 ticks, Scale (rand() % 10 + 10) / 5 growing 1 a tick, the light 1/1.3 a tick
+  // under LifeTime 6 (ZzzEffect.cpp:3579-3583, MoveHandlers.cpp:5808-5811, :5877-5884).
+  shockWave8: (scene, at, colour) => {
+    const from = (Math.floor(Math.random() * 10) + 10) / 5;
+    spawnRing(scene, at, {
+      texture: TEX.shockwave,
+      colour,
+      seconds: 10 * TICK,
+      maxScale: 14,
+      scaleAt: t => from + t / TICK,
+      alphaAt: p => (1 / 1.3) ** Math.max(0, Math.floor(p * 10) - 4),
+    });
+  },
+};
+
 const BLUR_SHEETS: Readonly<Record<BodyBlurSheet, string>> = { blur01: TEX.blur, blur02: TEX.blur2, motionBlur: TEX.motionBlur };
 
 const TEXTURES: Readonly<Record<BodyTexture, string>> = {
@@ -187,6 +211,7 @@ const PUFFS: Readonly<Record<BodyPuff, KindName>> = {
   waterfall3_6: 'waterfall3_6',
   smoke3_3: 'smoke3_3',
   smoke3_4: 'smoke3_4',
+  blueBlur1: 'blueBlur1',
 };
 
 type CardsRow = Extract<BodyFxEmitter, { kind: 'cards' }>;
@@ -315,6 +340,8 @@ type Frame = {
   readonly prevFrame: number;
   readonly alive: boolean;
   readonly buffs: ReadonlySet<number> | undefined;
+  /** This body took its rows' cue on this tick. */
+  cued: boolean;
 };
 
 function open(gate: Gate | undefined, f: Frame): boolean {
@@ -322,6 +349,7 @@ function open(gate: Gate | undefined, f: Frame): boolean {
   if (gate.alive && !f.alive) return false;
   if (gate.buff !== undefined && !f.buffs?.has(gate.buff)) return false;
   if (gate.when && !gate.when()) return false;
+  if (gate.cue && !f.cued) return false;
   if (
     gate.action &&
     (f.action === undefined || !gate.action.includes(f.action))
@@ -533,6 +561,14 @@ function emit(scene: Scene, e: Entity, em: Emitter, f: Frame, rides?: readonly V
       }
       return;
     }
+    case 'ground': {
+      if (!open(em.gate, f)) return;
+      for (const b of em.bones) {
+        bonePos(e, b, tmp);
+        for (let i = 0; i < em.count; i++) GROUNDS[em.ground](scene, tmp, em.colour);
+      }
+      return;
+    }
     case 'bolts':
     case 'cards':
     case 'trail':
@@ -566,6 +602,10 @@ export function visualMonster(
   const rides = row.map(em =>
     em.kind === 'puff' && em.ride ? (em.ride === 'bone' ? em.bones : [0]).map(() => new Vector3()) : undefined
   );
+
+  /** The one-shot cue its rows wait on, if any (`gate.cue`). */
+  let cue: LookCueName | undefined;
+  for (const em of row) if ('gate' in em && em.gate && 'cue' in em.gate && em.gate.cue) cue = em.gate.cue;
 
   const roar: Roar = { pk: 0, skill: 0, value: 1 };
   const roars = row.some(em => (em.kind === 'cards' || em.kind === 'puff') && em.roar);
@@ -701,11 +741,13 @@ export function visualMonster(
         prevFrame,
         alive: !e.dying,
         buffs: e.buffs,
+        cued: false,
       };
       prevFrame = frame;
 
       for (let t = 0; t < due; t++) {
         ticks++;
+        f.cued = cue !== undefined && takeLookCue(cue);
         if (roars) stepRoar(roar, f.action, frame);
         roarNow = roar.value;
         for (let r = 0; r < row.length; r++) {

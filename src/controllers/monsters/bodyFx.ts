@@ -1,3 +1,5 @@
+import type { LookCueName } from './lookState';
+
 /**
  * `MonsterDef.bodyFx`: what a monster's body throws off or carries while in scope
  * (`MoveCharacterVisual`, ZzzCharacter.cpp:5583), one emitter per `CreateParticle` line. Pure
@@ -36,6 +38,12 @@ export type BodyBlurSheet = 'blur01' | 'blur02' | 'motionBlur';
  */
 export type BodyRibbon = 'jointEnergy' | 'flare' | 'spark';
 
+/**
+ * The terrain marks a `ground` row lays (`CreateEffect(BITMAP_*, ..., SubType)` drawn by `RenderTerrainAlphaBitmap`):
+ * BITMAP_CRATER SubType 2 (cratered, 3 tiles, 40 ticks) and BITMAP_SHOCK_WAVE SubType 8 (2-3.8 tiles growing 1 a tick).
+ */
+export type BodyGround = 'crater2' | 'shockWave8';
+
 /** The pieces a `shards` row throws: MODEL_EFFECT_BROKEN_ICE0 + rand() % 3 (ice_stone00-02). */
 export type BodyShard = 'brokenIce';
 
@@ -72,7 +80,8 @@ export type BodyPuff =
   | 'spark1_11'
   | 'waterfall3_6'
   | 'smoke3_3'
-  | 'smoke3_4';
+  | 'smoke3_4'
+  | 'blueBlur1';
 
 /** One `CreateSprite` on a bone: `TransformPosition(BoneTransform[bone], local)`. */
 export type BodyCardSpot = {
@@ -100,6 +109,8 @@ export type BodyFxGate = {
   readonly buff?: number;
   /** A state of the world the content reads and this controller cannot (an event's), asked each tick. */
   readonly when?: () => boolean;
+  /** Open on the one tick this body took the cue (`takeLookCue`, lookState.ts); a body's rows name one cue at most. */
+  readonly cue?: LookCueName;
 };
 
 export type BodyFxEmitter =
@@ -278,6 +289,16 @@ export type BodyFxEmitter =
       readonly kind: 'shards';
       readonly every: number;
       readonly shards: BodyShard;
+      readonly count: number;
+      readonly bones: readonly number[];
+      readonly colour: RGB;
+      readonly gate?: BodyFxGate;
+    }
+  | {
+      /** On a won roll, `count` x `CreateEffect(BITMAP_*, TransformPosition(bone), Angle, Light, SubType)` at each bone. */
+      readonly kind: 'ground';
+      readonly every: number;
+      readonly ground: BodyGround;
       readonly count: number;
       readonly bones: readonly number[];
       readonly colour: RGB;

@@ -58,7 +58,8 @@ event is one entry file with its own MobX state and packet handlers, behind the 
 - `chaosCastle.ts`: `MiniGameOpeningState` (game 4, entry prompt), `ChaosCastleEnterResult`,
   `BloodCastleState`, `MiniGameScoreTable`. Also the pillars' thunder on the castle maps.
 - `crywolf.ts`: `warpCompleted` (sends `CrywolfInfoRequest`), `CrywolfStateInfo`, `CrywolfAltarInfo`,
-  `CrywolfContractResult`, `CrywolfLeftTime`, `CrywolfBossMonsterInfo`, `CrywolfBenefit`.
+  `CrywolfContractResult`, `CrywolfLeftTime`, `CrywolfBossMonsterInfo`, `CrywolfBenefit`. A change to START cues
+  `crywolfStart` (`Dark_Elf_Check`) with the monsters controller; `reset` drops it.
 - `duel.ts`: `DuelStartRequest`, `DuelStartResult`, `DuelInit`, `DuelHealthBarInit`, `DuelScore`,
   `DuelHealthUpdate`, `DuelEnd`, `DuelFinished`, `DuelStatus`, `DuelSpectatorAdded` / `Removed` / `List`, `wsClosed`.
 - `goldenArcher.ts`: `EventChipRegistrationResult` (opens or refreshes the Rena dialog).
@@ -105,6 +106,7 @@ castle beds' sound gates read idle timers (no match bed plays).
 ## Tests
 - `kanturu.test.ts`: the Maya scene turns the Classic shadows off in the tower until the Nightmare fight; the Maya
   direction state is the detail of a Maya battle state change and 0 in the Nightmare fight.
+- `crywolf.test.ts`: a change to START cues `crywolfStart` once, and a warp drops it.
 - `raklion.test.ts`: the event state from any of the three packets, the pattern only from state 11, and the look state.
 - `entryRefusal.test.ts`: a refused entry says the server's reason line, else the cloak text.
 - `duelRules.test.ts`: duel id orientation, room count, spectator list, start failure texts.

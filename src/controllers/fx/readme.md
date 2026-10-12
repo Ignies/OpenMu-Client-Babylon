@@ -167,7 +167,8 @@ shared pools, textures and particle recipes other folders reuse.
   the body, not a bone; a `pick` puff at that many of its bones picked at random; a gate's `when` holds a row
   (a cards row too: Valam's) to a state the content reads; a puff with `colours` picks one for each spot (the Iron Knights' blue or grey); a `blur` row hands on its sheet (motion_blur for
   Type 1), its dark pass (Type 4) and its Short flag; a `shards` row throws its
-  pieces as debris at each bone.
+  pieces as debris at each bone; rows gated on a cue (`gate.cue`) fire once, on the one body that takes it,
+  and a `ground` row lays its terrain marks (the Dark Elf's crater and shock waves).
 - `core.test.ts`: a flickering tint makes a bounded number of additive materials, each within half
   a 1/128 step of the colour asked for; a burst emits nothing while the page is hidden.
 - `modelClones.test.ts`: a `model`, `linkedModel` or spirit skull clone leaves no mesh, skeleton or
@@ -370,7 +371,10 @@ row is a monster's RenderObject swing loop: a `blur` entry trail (`tickHistory`,
 two bone points, spawned when its gate opens and sampling until it closes; an ungated one (Selupan, the Iron
 Knights) runs for the monster's life. The trail's tint is the material's emissive, which Babylon clamps
 before the ramp: a light over 1 (their `(1, 1.2, 2)`) ramps from white where the original's packed vertex
-colour ramps from its own hue.
+colour ramps from its own hue. A `ground` row lays a `CreateEffect` terrain mark as a `ring` (`GROUNDS`: BITMAP_CRATER
+SubType 2, BITMAP_SHOCK_WAVE SubType 8). A body whose rows name a cue (`gate.cue`) asks `takeLookCue` once a
+tick; the rows open on the tick it got it, so one cue fires on the first body to move, as `Dark_Elf_Check` does.
+Not ported: the crater's `AddTerrainLight(-0.5)` darkening (MoveHandlers.cpp:6912).
 
 ### ping.ts
 The ring drapes the marker over the terrain and a straight joint draws the trail, near end on the
