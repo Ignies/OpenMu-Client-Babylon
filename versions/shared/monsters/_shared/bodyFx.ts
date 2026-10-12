@@ -72,7 +72,7 @@ export const haze = (colour?: RGB): BodyFxEmitter =>
 export const APPEAR_TICKS = 60;
 
 /**
- * MODEL_BULL_FIGHTER (0 Bull Fighter, 4 Elite Bull Fighter, 8 Poison Bull, 364): the snort from
+ * MODEL_BULL_FIGHTER (0 Bull Fighter, 4 Elite Bull Fighter, 8 Poison Bull): the snort from
  * bone 24, (0, -4, 0) cm, one tick in two, on Stop1 frames 15-20, Stop2 20-25 and Walk 2-3 / 5-6
  * (:6189-6205).
  */

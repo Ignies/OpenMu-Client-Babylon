@@ -60,7 +60,7 @@ In game the name a player reads is the language pack's in either case (`monsterD
 | Field / file | Drawn as |
 |---|---|
 | `model.ts` | its own class |
-| `hidden: true` | nothing (the Crywolf altars) |
+| `hidden: true` | nothing (the Crywolf altars, Maya's body 364) |
 | `trap: { object, shadow }` | the world object of the map it stands on (traps 100-106) |
 | `model: { type, scale, hiddenMesh }` | monster model `Monster/Monster<type+1>.glb` |
 | `npcModel: { file, scale?, clipSpeeds?, holdFrame? }` | `Data/NPC/<file>` (or a path off the asset root when it starts with `/`) |
