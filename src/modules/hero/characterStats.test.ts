@@ -255,6 +255,12 @@ describe('the character window with stats the worn items add', () => {
     expect(knight({ 9: pendant })).toMatchObject({ damageMin: 101, damageMax: 152, attackRate: bare.attackRate + 2 });
     expect(knight({ 9: pendant }).totals).toEqual({ str: 610, agi: 300, vit: 100, ene: 450, cmd: 0 });
   });
+
+  // The rows print Strength + AddStrength, in blue while AddStrength is not 0 (NewUICharacterInfoWindow.cpp:463-475).
+  it('keeps what the items add apart for the rows', () => {
+    expect(knight({ 9: pendant }).added).toEqual({ str: 10, agi: 0, vit: 0, ene: 0, cmd: 0 });
+    expect(knight({}).added).toEqual({ str: 0, agi: 0, vit: 0, ene: 0, cmd: 0 });
+  });
 });
 
 // CalculateCurseDamage (ZzzInfomation.cpp:3045-3104), GetCurseSkillDamage (CharacterManager.cpp:373-390) and the book's
@@ -282,7 +288,63 @@ describe('the character window curse line', () => {
 
   it("reads the left hand book's magic power on the line's maximum", () => {
     expect(curse({ 1: book({ optionLevel: 2 }) }).curseRate).toBe(27);
-    expect(curse({}).curseRate).toBe(0);
+    // No book, no rate: the line drops its "(+N)" (:1449-1461); with a book it shows even "(+0)".
+    expect(curse({}).curseRate).toBeNull();
+  });
+});
+
+// The window's own harmony (GetStrengthenCapability, UIJewelHarmony.cpp:244-323) and 380 sums: the two hands' attack power
+// on the damage line (NewUICharacterInfoWindow.cpp:554-582, :741-758), their attack rate and the 380 attack on the PvP
+// attack rate (:586-610, :631-668, :794-796), the armour's defense rate and the 380 defense on the PvP defense rate
+// (:612-629, :1073-1075), and the armour's defense on the defense line, not its "(+N)" (:928-952, :1003-1013).
+describe('the character window with harmony and 380 options', () => {
+  const steps = (from: number) => ({ name: '', values: Array.from({ length: 14 }, (_, i) => from + i) });
+  const addOptions: ItemOptionTables['addOptions'][number][] = [];
+  addOptions[0] = [[1, 7], [0, 0]];
+  addOptions[8 * 512] = [[3, 9], [0, 0]];
+  const options: ItemOptionTables = {
+    harmony: [
+      [steps(10), steps(20), null, null, steps(30), null, null, steps(40)],
+      [null, null, null, null, null, null, steps(50)],
+      [steps(60), null, null, null, null, steps(70)],
+    ],
+    sockets: [[], [], []],
+    addOptions,
+  };
+  const knight = (pieces: Record<number, Item>, tables: ItemOptionTables | null = options) => {
+    const items: (Item | null)[] = new Array(12).fill(null);
+    for (const [slot, item] of Object.entries(pieces)) items[Number(slot)] = item;
+    return deriveCharacterStats({ charClass: CharacterClassNumber.DarkKnight, level: 240, strength: 600, agility: 300, vitality: 100, energy: 450, leadership: 0, items, options: tables });
+  };
+  const kris = (more: Partial<Item> = {}): Item => ({ group: 0, num: 0, durability: 20, lvl: 5, ...more });
+  const armour = (more: Partial<Item> = {}): Item => ({ group: 8, num: 0, durability: 30, lvl: 5, ...more });
+  const plain = knight({ 0: kris(), 1: kris(), 3: armour() });
+
+  it("adds the hands' harmony minimum and maximum attack power to the damage line", () => {
+    expect(knight({ 0: kris({ socketBonus: 0x13 }), 1: kris(), 3: armour() })).toMatchObject({ damageMin: plain.damageMin + 13, damageMax: plain.damageMax });
+    expect(knight({ 0: kris(), 1: kris({ socketBonus: 0x22 }), 3: armour() })).toMatchObject({ damageMin: plain.damageMin, damageMax: plain.damageMax + 22 });
+    expect(knight({ 0: kris({ socketBonus: 0x51 }), 1: kris(), 3: armour() })).toMatchObject({ damageMin: plain.damageMin + 31, damageMax: plain.damageMax + 31 });
+    // Below the option's level the jewel gives nothing.
+    expect(knight({ 0: kris({ socketBonus: 0x16 }), 1: kris(), 3: armour() }).damageMin).toBe(plain.damageMin);
+  });
+
+  it("adds the hands' harmony attack rate and the 380 attack to the PvP attack rate's (+N)", () => {
+    expect(plain.attackRatePvpBonus).toBe(0);
+    expect(knight({ 0: kris({ socketBonus: 0x82 }) }).attackRatePvpBonus).toBe(42);
+    expect(knight({ 0: { group: 5, num: 0, durability: 20, lvl: 5, socketBonus: 0x73 } }).attackRatePvpBonus).toBe(53);
+    expect(knight({ 0: kris({ raw: [0, 0, 0, 0, 0, 0x08] }) }).attackRatePvpBonus).toBe(7);
+  });
+
+  it("adds the armour's harmony defense rate and the 380 defense to the PvP defense rate's (+N)", () => {
+    expect(plain.defenseRatePvpBonus).toBe(0);
+    expect(knight({ 3: armour({ socketBonus: 0x61 }) }).defenseRatePvpBonus).toBe(71);
+    expect(knight({ 3: armour({ raw: [0, 0, 0, 0, 0, 0x08] }) }).defenseRatePvpBonus).toBe(9);
+  });
+
+  it("adds the armour's harmony defense to the defense line and keeps it apart for the full set's (+N)", () => {
+    const lit = knight({ 0: kris(), 1: kris(), 3: armour({ socketBonus: 0x14 }) });
+    expect(lit).toMatchObject({ defense: plain.defense + 64, harmonyDefense: 64 });
+    expect(plain.harmonyDefense).toBe(0);
   });
 });
 

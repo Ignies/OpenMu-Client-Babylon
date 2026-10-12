@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs';
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import type { Item } from '@/ecs/world';
 import { itemStats, type HeroStats } from '@/controllers/item_rules';
 import { loadItemOptionTables, loadItemSetTables } from '@/controllers/assets';
@@ -37,7 +37,8 @@ const NO_DATA = !existsSync(TYPES) || !existsSync(OPTIONS);
 const warrior = (group: number, more: Partial<Item> = {}): Item => ({ group, num: 5, ancientDiscriminator: 1, isAncient: true, durability: 30, ...more });
 
 describe.skipIf(NO_DATA)('an ancient item', () => {
-  loadItemSetTables(new Uint8Array(readFileSync(TYPES)), new Uint8Array(readFileSync(OPTIONS)));
+  // skipIf still runs this body to collect the tests: load once they run.
+  beforeAll(() => loadItemSetTables(new Uint8Array(readFileSync(TYPES)), new Uint8Array(readFileSync(OPTIONS))));
 
   it('carries its set name in front of its own (GetSetItemName)', () => {
     expect(lines(warrior(8))[0].text).toBe("Warrior's Leather Armor");
@@ -135,7 +136,7 @@ const NO_OPTIONS = !existsSync(HARMONY) || !existsSync(SOCKETS) || !existsSync(A
 const raw = (bytes: Partial<Record<number, number>>) => Array.from({ length: 12 }, (_, i) => bytes[i] ?? (i >= 7 ? 0xff : 0));
 
 describe.skipIf(NO_OPTIONS)('the extra options in the tooltip', () => {
-  loadItemOptionTables(new Uint8Array(readFileSync(HARMONY)), new Uint8Array(readFileSync(SOCKETS)), new Uint8Array(readFileSync(ADD_OPTIONS)));
+  beforeAll(() => loadItemOptionTables(new Uint8Array(readFileSync(HARMONY)), new Uint8Array(readFileSync(SOCKETS)), new Uint8Array(readFileSync(ADD_OPTIONS))));
 
   // ZzzInventory.cpp:5008-5025, ItemAddOption.bmd through GetItemAddOtioninfoText.
   it('lists a 380 item option from ItemAddOption.bmd', () => {
@@ -165,6 +166,24 @@ describe.skipIf(NO_OPTIONS)('the extra options in the tooltip', () => {
     expect(text[header + 2]).toMatchObject({ text: 'Socket 2: No item application', color: 'gray' });
     expect(text[header + 3]).toMatchObject({ text: 'Bonus socket option', color: 'purple' });
     expect(text[header + 4]).toMatchObject({ text: 'Skill attack increase +11', color: 'blue' });
+  });
+
+  // ZzzInventory.cpp:4787-4870: the harmony strength / agility cut comes off the requirement lines, yellow once cut.
+  it('cuts the harmony strength and agility off the requirement lines, in yellow', () => {
+    const blade = (socketBonus?: number): Item => ({ group: 0, num: 5, lvl: 5, durability: 50, socketBonus });
+    const need = itemStats(blade()) ?? { reqStr: 0, reqAgi: 0 };
+    const requirement = (item: Item, label: string, hero = KNIGHT) => {
+      const text = buildItemTooltip(item, hero)?.lines ?? [];
+      const at = text.findIndex(l => l.text.startsWith(label));
+      return { line: text[at], next: text[at + 1] };
+    };
+    // Option 3 (strength) and 4 (agility) at level 5: 16 (JewelOfHarmonyOption_eng.bmd).
+    expect(requirement(blade(0x35), 'Required Strength').line).toMatchObject({ text: `Required Strength: ${need.reqStr - 16}`, color: 'yellow' });
+    expect(requirement(blade(0x45), 'Required Agility').line).toMatchObject({ text: `Required Agility: ${need.reqAgi - 16}`, color: 'yellow' });
+    expect(requirement(blade(), 'Required Strength').line.color).toBe('white');
+    // Short of the cut need: red, and the lacking line counts from it.
+    const weak = { ...KNIGHT, str: need.reqStr - 20 };
+    expect(requirement(blade(0x35), 'Required Strength', weak)).toMatchObject({ line: { color: 'red' }, next: { text: '(4 more needed)', color: 'red' } });
   });
 
   it('works the level-type socket option off the hero level', () => {

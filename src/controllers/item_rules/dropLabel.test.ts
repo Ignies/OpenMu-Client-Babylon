@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs';
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import type { Item } from '@/ecs/world';
 import { loadItemSetTables } from '@/controllers/assets';
 import { dropLabel } from './dropLabel';
@@ -50,7 +50,8 @@ const TYPES = 'Data/Local/itemsettype.bmd';
 const OPTIONS = 'Data/Local/Eng/itemsetoption_eng.bmd';
 
 describe.skipIf(!existsSync(TYPES) || !existsSync(OPTIONS))('an ancient ground label', () => {
-  loadItemSetTables(new Uint8Array(readFileSync(TYPES)), new Uint8Array(readFileSync(OPTIONS)));
+  // skipIf still runs this body to collect the tests: load once they run.
+  beforeAll(() => loadItemSetTables(new Uint8Array(readFileSync(TYPES)), new Uint8Array(readFileSync(OPTIONS))));
 
   it('is green and bold on the set colour', () => {
     expect(label({ group: 8, num: 5, ancientDiscriminator: 1, isAncient: true, luck: true })).toEqual({ colour: '#00ff00', bold: true, setItem: true });
