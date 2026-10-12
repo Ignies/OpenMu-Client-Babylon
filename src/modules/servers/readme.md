@@ -25,6 +25,8 @@ connect server's own list (`Servers.serverList`) is filled by `session/net.ts`.
   `ORIGINAL_SETTINGS`); `serverOffersLoginTokens()`; `loadServerManifest(profile)`, `parseServerManifest(raw)`.
   `onWorldEntered(fn)`: runs on `markPlayed`. `onModulesListed(fn)`: each world's streamed module list as
   its fetch answers (`_api/streamPorts.ts`); type `StreamedModuleEntry`.
+- `DirectLogin` (`directLogin.ts`): `checked`, `on`; `checkDirectLogin()` (`boot.tsx`), `readDirectLogin()`,
+  `directChannel(list, published)`. `ServerConfig.pin(world)` / `pinned`: the one world it opens on.
 - `validateSignup(signup)` and the length limits (`registerRules.ts`); `isReservedName(name)`.
 - `watchPageTitle()` (`pageTitle.ts`, was `controllers/interface/`): the one writer of `document.title`,
   the world's name from the character list on; `boot.tsx` starts it.
@@ -40,6 +42,9 @@ connect server's own list (`Servers.serverList`) is filled by `session/net.ts`.
 - Entering a world (`markPlayed`) fetches its `server.json` (`serverManifest.ts`); `serverSetting`
   reads the answer. The two `heldHitRequest` sites are `ecs/systems/attackSystem.ts` and
   `combat/net.ts`.
+- At boot `checkDirectLogin` reads the `server.json` served beside the client; with `directLogin: true`
+  the first world of the `serverlist.md` beside it becomes the only one and the client opens on its
+  login (Notes, directLogin.ts).
 - `ServerProbe` checks two worlds at a time, only those on screen, and reuses a verdict for 60 s.
 - `registerRules.ts` and `reservedNames.ts` are engine-free: `register/server/main.ts` and
   `register/src/registerPage.tsx` import them too.
@@ -73,6 +78,9 @@ connect server's own list (`Servers.serverList`) is filled by `session/net.ts`.
   the URL, the fallback on missing / unreachable / invalid, tokens offered only where the world says
   so, the per-server cache, the fetch on enter.
 - `registerRules.test.ts`: `validateSignup` order and the password charset.
+- `directLogin.test.ts`: the boot check (no file, off, malformed, on, on without a world), the channel
+  it takes and its names, the world pinned. `session/directLogin.test.ts`: the Servers page never
+  entered, the channel asked for, Cancel / logout / a lost connection back on the login.
 
 ## Notes
 
@@ -110,6 +118,23 @@ connect server's own list (`Servers.serverList`) is filled by `session/net.ts`.
   drops its token. The URL profile is never saved.
 - Wiped on every load: a `password` an older client saved in `mu_accounts` (the book is written
   again without it) and the legacy `_mu_key` blob's credential keys; the names stay.
+
+### directLogin.ts
+- The installer's switch (`MU_DIRECT_LOGIN`, `install/readme.md`) for a server owner who serves the
+  client for their own world only. It rides in `server.json` (`directLogin`), already served with no
+  cache on the client's own site and already parsed strictly here, so no new file or route; the
+  world comes from the `serverlist.md` served beside it, the installer's own entry. Both are read
+  relative to the page at boot, so a client built once still plays any world: a site without the
+  files, a 404 page, a wrong type or the flag off all mean the worlds list as before. The proxy-host
+  copy read on entering a world never turns it on.
+- On: `ServerConfig.pin` makes that world the only one and the selected one (over `?cs=` / `?server=`,
+  never saved), so saved accounts, login tokens and the page title key on its usual `list:` id.
+  The preloader's Start goes straight in (still the press browsers want before sound plays);
+  `Session.playOnline` opens the login instead of the server list, holds the form until the game
+  server greets, and on every connect takes the first channel of the first game server
+  (`directChannel`, what the picker shows first). Cancel, logout, Select Server and a lost
+  connection all pass through `playOnline`, so they come back to the login. Exit Game still shows
+  the preloader.
 
 ### serverProbe.ts
 - It dials the proxy exactly like `createSocket`, sends nothing, and drops the socket.
