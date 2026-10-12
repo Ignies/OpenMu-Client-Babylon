@@ -251,6 +251,8 @@ type CharacterStatsInput = {
   magicSkill?: { number: number; damage: number } | null;
   /** The hero's buff ids (`eBuffState`). */
   buffs?: readonly number[];
+  /** The item on the cursor and the equipment slot it was lifted from (`PickItem`, `SrcInventoryIndex`). */
+  picked?: { slot: number; item: Item } | null;
 };
 
 /** eBuff_Hp_up_Ourforces and eBuff_Def_up_Ourforces (_enum.h:4019-4020). */
@@ -439,13 +441,18 @@ function calculateDamage(
   let min: number;
   let max: number;
 
+  // GetAttackDamage reads a weapon dragged out of a hand as still held (ZzzInventory.cpp:5900-5911).
+  const picked = input.picked;
+  const r = picked?.slot === InventoryConstants.LeftHandSlot ? picked.item : weaponRight;
+  const l = picked?.slot === InventoryConstants.RightHandSlot ? picked.item : weaponLeft;
+
   if (!!weaponRight && isCrossbow(weaponRight)) {
     min = minRight;
     max = maxRight;
   } else if (!!weaponLeft && isBow(weaponLeft)) {
     min = minLeft;
     max = maxLeft;
-  } else if (!weaponRight || isStaff(weaponRight)) {
+  } else if (!r || isStaff(r)) {
     min = minLeft;
     max = maxLeft;
   } else {
@@ -456,29 +463,19 @@ function calculateDamage(
   // GetAttackDamage's `Alpha` (ZzzInventory.cpp:5937-5966).
   let blue = false;
 
-  const bothHands = !!weaponRight && !!weaponLeft;
-
   if (base === BaseClass.Knight || base === BaseClass.MagicGladiator) {
-    if (
-      bothHands &&
-      weaponRight!.group <= GROUP_STAFF &&
-      weaponLeft!.group <= GROUP_STAFF
-    ) {
+    if (r && l && r.group <= GROUP_STAFF && l.group <= GROUP_STAFF) {
       blue = true;
       min = Math.trunc((minRight * 55) / 100) + Math.trunc((minLeft * 55) / 100);
       max = Math.trunc((maxRight * 55) / 100) + Math.trunc((maxLeft * 55) / 100);
     }
   } else if (base === BaseClass.Elf) {
     // A bow or crossbow with +1 or better arrows or bolts in the other hand.
-    if (weaponRight?.group === GROUP_BOW && weaponLeft?.group === GROUP_BOW) {
-      blue = (weaponLeft.num === BOLT && (weaponLeft.lvl ?? 0) >= 1) || (weaponRight.num === ARROWS && (weaponRight.lvl ?? 0) >= 1);
+    if (r?.group === GROUP_BOW && l?.group === GROUP_BOW) {
+      blue = (l.num === BOLT && (l.lvl ?? 0) >= 1) || (r.num === ARROWS && (r.lvl ?? 0) >= 1);
     }
   } else if (base === BaseClass.RageFighter) {
-    if (
-      bothHands &&
-      weaponRight!.group <= GROUP_MACE &&
-      weaponLeft!.group <= GROUP_MACE
-    ) {
+    if (r && l && r.group <= GROUP_MACE && l.group <= GROUP_MACE) {
       blue = true;
       min = Math.trunc(((minRight + minLeft) * 60) / 100);
       max = Math.trunc(((maxRight + maxLeft) * 65) / 100);

@@ -114,6 +114,29 @@ describe('the character window damage line colour', () => {
     expect(held(CharacterClassNumber.FairyElf, weapon(4, 8), weapon(4, 7, 0))).toBe(false);
     expect(held(CharacterClassNumber.FairyElf, weapon(4, 15, 1), null)).toBe(false);
   });
+
+  // GetAttackDamage reads the item dragged out of a hand slot as still held (ZzzInventory.cpp:5900-5911).
+  it('stays blue while a weapon is dragged out of a hand slot, on the damage left without it', () => {
+    const dragging = (slot: number) => {
+      const items: (Item | null)[] = new Array(12).fill(null);
+      items[1 - slot] = weapon(0, 0);
+      const input = { charClass: CharacterClassNumber.DarkKnight, level: 400, strength: 1000, agility: 1000, vitality: 100, energy: 1000, leadership: 0, items };
+      return { bare: deriveCharacterStats(input), dragged: deriveCharacterStats({ ...input, picked: { slot, item: weapon(1, 0) } }) };
+    };
+    for (const slot of [0, 1]) {
+      const { bare, dragged } = dragging(slot);
+      expect(bare.damageBlue).toBe(false);
+      expect(dragged.damageBlue).toBe(true);
+      // 55% of each hand, the emptied one on strength alone (1000 / 6, 1000 / 4).
+      expect(dragged.damageMin).toBe(Math.trunc((166 * 55) / 100) + Math.trunc((bare.damageMin * 55) / 100));
+      expect(dragged.damageMax).toBe(Math.trunc((250 * 55) / 100) + Math.trunc((bare.damageMax * 55) / 100));
+    }
+    // An item dragged from elsewhere changes nothing.
+    const { bare } = dragging(0);
+    const items: (Item | null)[] = new Array(12).fill(null);
+    items[1] = weapon(0, 0);
+    expect(deriveCharacterStats({ charClass: CharacterClassNumber.DarkKnight, level: 400, strength: 1000, agility: 1000, vitality: 100, energy: 1000, leadership: 0, items, picked: { slot: 5, item: weapon(1, 0) } })).toEqual(bare);
+  });
 });
 
 // eBuff_Def_up_Ourforces: rate * (10 + (Energy - 80) / 10, at most 100) / 100 (NewUICharacterInfoWindow.cpp:966-975).

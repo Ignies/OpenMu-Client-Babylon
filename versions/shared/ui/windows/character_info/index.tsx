@@ -29,6 +29,8 @@ import {
   MuTableRule,
 } from '@/controllers/interface/components/mu_window';
 import { InventoryConstants } from '@/core/inventoryConstants';
+import { Bag } from '@/modules/inventory';
+import { StorageKind } from '@/modules/inventory/itemStorage';
 import { defenseColour, eventColour, statColour } from './buffColours';
 import { defenseText } from './lines';
 import { pkTextColour, PVP_NEUTRAL } from '@/controllers/interface/nameTags';
@@ -421,6 +423,7 @@ export const CharacterInfo = observer(() => {
 
   const base = getBaseClass(playerData.charClass);
   const buffs = HeroSkills.buffs;
+  const held = Bag.pickedItem;
 
   const stats = deriveCharacterStats({
     charClass: playerData.charClass,
@@ -438,6 +441,7 @@ export const CharacterInfo = observer(() => {
     maxMana: playerData.maxMP,
     magicSkill: { number: HeroSkills.currentSkill, damage: skillDefinition(HeroSkills.currentSkill)?.damage ?? 0 },
     buffs,
+    picked: held?.fromStorage === StorageKind.Inventory ? { slot: held.fromSlot, item: held.item } : null,
   });
 
   const strengthDetails: DetailLine[] = [];
