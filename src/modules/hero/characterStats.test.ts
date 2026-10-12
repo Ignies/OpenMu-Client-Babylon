@@ -6,6 +6,8 @@ import { itemOptionTables, itemSetTables, loadItemOptionTables, loadItemSetTable
 import { itemStats } from '@/controllers/item_rules';
 import { deriveCharacterStats, windowAttackSpeed } from './characterStats';
 
+type AddOptions = ItemOptionTables['addOptions'][number][];
+
 const PET_SLOT = 8;
 const stats = (pet: Item | null, charClass = CharacterClassNumber.DarkKnight) => {
   const items: (Item | null)[] = new Array(12).fill(null);
@@ -236,6 +238,35 @@ describe('the character window defense with items', () => {
     expect(knight(set(10))).toBe(bare + items + Math.trunc(Math.fround((bare + items) * Math.fround(0.05))));
     const nine = knight({ 6: piece(6, { lvl: 9 }) }) - bare;
     expect(knight(set(10, 9))).toBe(bare + knight(four) - bare + nine);
+  });
+});
+
+// The buffs CHARACTER_MACHINE adds through ItemAddOption's first value: the secret potions (CalculateBasicState,
+// ZzzInfomation.cpp:3465-3490), the damage scroll, Jack O'Lantern and Cherry Blossom (CalculateDamage, :2785-2830), the
+// defense scroll and Jack O'Lantern (CalculateDefense, :3335-3358); and the Santa buffs.
+describe('the character window under item buffs', () => {
+  const addOptions: AddOptions = [];
+  for (const [num, value] of [[78, 15], [79, 16], [80, 17], [74, 20], [47, 21], [87, 22], [73, 30], [48, 31]]) addOptions[14 * 512 + num] = [[1, value], [0, 0]];
+  const options = { harmony: [], sockets: [], addOptions } as unknown as ItemOptionTables;
+  const knight = (buffs: number[]) =>
+    deriveCharacterStats({ charClass: CharacterClassNumber.DarkKnight, level: 240, strength: 600, agility: 300, vitality: 100, energy: 450, leadership: 0, items: [], options, buffs });
+  const bare = knight([]);
+
+  it('adds one secret potion, strength first', () => {
+    expect(knight([50]).added.str).toBe(15);
+    expect(knight([51]).totals.agi).toBe(316);
+    expect(knight([52, 50]).added).toEqual({ str: 15, agi: 0, vit: 0, ene: 0, cmd: 0 });
+  });
+
+  it('adds the damage buffs to damage', () => {
+    for (const [buff, value] of [[46, 20], [36, 21], [80, 22], [91, 240 / 3 + 45], [94, 30]]) {
+      expect(knight([buff]).damageMin).toBe(bare.damageMin + value);
+      expect(knight([buff]).damageMax).toBe(bare.damageMax + value);
+    }
+  });
+
+  it('adds the defense buffs to defense', () => {
+    for (const [buff, value] of [[45, 30], [37, 31], [91, 240 / 5 + 50], [95, 100]]) expect(knight([buff]).defense).toBe(bare.defense + value);
   });
 });
 

@@ -266,6 +266,33 @@ function buffVitality(input: CharacterStatsInput): number {
   return Math.min(200, 30 + Math.trunc((input.energy - 132) / 10));
 }
 
+/** ItemAddOption's first value of potion `num` (ITEM_POTION + num), what the item buffs add. */
+function potionValue(input: CharacterStatsInput, num: number): number {
+  return input.options?.addOptions[14 * 512 + num]?.[0]?.[1] ?? 0;
+}
+
+/** eBuff_SecretPotion1-5 (_enum.h) by the stat they raise, ITEM_POTION + 78 to 82; only the first one counts. */
+const SECRET_POTIONS = [[50, 'str', 78], [51, 'agi', 79], [52, 'vit', 80], [53, 'ene', 81], [54, 'cmd', 82]] as const;
+
+/** `CalculateBasicState` (ZzzInfomation.cpp:3465-3503): the first secret potion and the party buff vitality. */
+function buffStats(input: CharacterStatsInput, add: Record<'str' | 'agi' | 'vit' | 'ene' | 'cmd', number>): void {
+  const potion = SECRET_POTIONS.find(([buff]) => input.buffs?.includes(buff));
+  if (potion) add[potion[1]] += potionValue(input, potion[2]);
+  add.vit += buffVitality(input);
+}
+
+/** What the item and Santa buffs add to damage (`CalculateDamage`, ZzzInfomation.cpp:2785-2830) or defense (`CalculateDefense`, :3335-3358). */
+function itemBuffs(input: CharacterStatsInput, kind: 'damage' | 'defense'): number {
+  const has = (buff: number) => input.buffs?.includes(buff) ?? false;
+  let sum = 0;
+  // eBuff_EliteScroll3, eBuff_Hellowin2, eBuff_CherryBlossom_Petal; eBuff_EliteScroll2, eBuff_Hellowin3.
+  for (const [buff, num] of kind === 'damage' ? [[46, 74], [36, 47], [80, 87]] : [[45, 73], [37, 48]]) if (has(buff)) sum += potionValue(input, num);
+  // eBuff_BlessingOfXmax, then eBuff_StrengthOfSanta or eBuff_DefenseOfSanta.
+  if (has(91)) sum += kind === 'damage' ? Math.trunc(input.level / 3) + 45 : Math.trunc(input.level / 5) + 50;
+  if (has(kind === 'damage' ? 94 : 95)) sum += kind === 'damage' ? 30 : 100;
+  return sum;
+}
+
 /** The window's party buff blocking (NewUICharacterInfoWindow.cpp:966-975): the rate times 10 + (Energy - 80) / 10 percent, at most 100. */
 function buffBlocking(input: CharacterStatsInput, rate: number): number {
   if (!input.buffs?.includes(DEF_UP_OURFORCES)) return 0;
@@ -475,7 +502,9 @@ function calculateDamage(
     else if (weaponRight.num === ARROWS && (weaponRight.lvl ?? 0) >= 1) share(left, weaponRight.lvl ?? 0);
   }
 
-  // Then the sockets (:2809-2812).
+  // Then the item buffs and the sockets (:2785-2830).
+  add(right, itemBuffs(input, 'damage'));
+  add(left, itemBuffs(input, 'damage'));
   right.min += flat.socket.min;
   right.max += flat.socket.max;
   left.min += flat.socket.min;
@@ -614,7 +643,8 @@ function calculateDefense(input: CharacterStatsInput, base: BaseClass): number {
 
   // A whole set at +10 to +15 adds 5% to 30% (:3309-3333).
   const level = equipmentLevelSet(items, base);
-  return level >= 10 ? defense + Math.trunc(Math.fround(defense * Math.fround((level - 9) * 0.05))) : defense;
+  if (level >= 10) defense += Math.trunc(Math.fround(defense * Math.fround((level - 9) * 0.05)));
+  return defense + itemBuffs(input, 'defense');
 }
 
 /** The gladiator's armours, Storm Crow to Phantom (ZzzCharacter.cpp:5456-5463). */
@@ -991,7 +1021,7 @@ export function deriveCharacterStats(bare: CharacterStatsInput): DerivedStats {
   const hero = { level, str: bare.strength, agi: bare.agility, vit: bare.vitality, ene: bare.energy, cmd: bare.leadership, baseClass, stepClass: step };
   // Every formula and requirement check reads Strength + AddStrength and the rest (ZzzInfomation.cpp:2550-2553, :2851, :3108-3110).
   const add = wornStatBonus(items, bare.sets ?? null);
-  add.vit += buffVitality(bare);
+  buffStats(bare, add);
   const input = { ...bare, strength: bare.strength + add.str, agility: bare.agility + add.agi, vitality: bare.vitality + add.vit, energy: bare.energy + add.ene, leadership: bare.leadership + add.cmd };
   const lines = input.sets ? activeSetOptions(items, hero, input.sets) : [];
   const socket = socketStatusBonus(items, { level, masterLevel: input.masterLevel, maxLife: input.maxLife, maxMana: input.maxMana }, input.options ?? null);
