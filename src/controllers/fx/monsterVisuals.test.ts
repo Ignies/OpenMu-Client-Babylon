@@ -7,6 +7,7 @@ import type { MonsterBodyFx } from '../monsters';
 const calls = vi.hoisted(() => ({
   glows: [] as unknown[],
   joints: [] as { opts: Record<string, unknown>; stop: () => void; stopped: boolean }[],
+  blurs: [] as Record<string, unknown>[],
   particles: [] as unknown[][],
 }));
 
@@ -65,6 +66,14 @@ vi.mock('./effectParticles', () => ({
     void calls.particles.push([s, kind, { x: at.x, y: at.y, z: at.z }, ...rest]),
 }));
 vi.mock('./debris', () => ({ spawnDebris: () => {} }));
+vi.mock('./blur', () => ({
+  blurLayer: {
+    spawn: (_s: unknown, _at: unknown, opts: Record<string, unknown>) => {
+      calls.blurs.push(opts);
+      return { alive: true, stop() {} };
+    },
+  },
+}));
 vi.mock('./ring', () => ({ spawnRing: () => ({ alive: true, stop() {} }) }));
 vi.mock('./sprite', () => ({ spawnSprite: () => ({ alive: true, stop() {} }) }));
 
@@ -285,6 +294,38 @@ describe('monster body rows', () => {
     const [a, b] = calls.joints.map(j => j.opts.heading as { x: number; y: number; z: number });
     expect(a).toBe(b);
     expect(a.y).toBeCloseTo(1);
+    monsterVisualsLayer.reset?.();
+  });
+
+  // The RenderObject swing loops (GM_Kanturu_3rd.cpp:961-988, GM_Raklion.cpp:1977-1998): CreateBlur from one bone
+  // point to another while the gate is open, one trail a swing that stops sampling when it closes.
+  it('run a blur between two bone points through its gate', () => {
+    calls.blurs.length = 0;
+    const e = monster();
+    const anim = (e as unknown as { monsterAnimation: { action: number } }).monsterAnimation;
+    visualMonster(scene, e, [
+      { kind: 'blur', from: 32, fromLocal: [10, 0, 0], to: 38, toLocal: [10, -10, 0], colour: [1, 1, 1], sheet: 'blur02', gate: { action: [3] } },
+      { kind: 'blur', from: 69, to: 73, colour: [1, 1.2, 2], sheet: 'blur01' },
+    ] as never);
+    monsterVisualsLayer.update?.(0, 0.04);
+    // The ungated one runs from the first tick, for good.
+    expect(calls.blurs).toHaveLength(1);
+    expect(calls.blurs[0]).toMatchObject({ texture: 'Effect/blur01.OZJ', colour: [1, 1.2, 2], tickHistory: true, seconds: Infinity });
+    anim.action = 3;
+    monsterVisualsLayer.update?.(0, 0.04);
+    monsterVisualsLayer.update?.(0, 0.04);
+    expect(calls.blurs).toHaveLength(2);
+    const swing = calls.blurs[1] as { follow: (o: unknown) => void; base: (o: unknown) => void; until: () => boolean; texture: string };
+    expect(swing.texture).toBe('Effect/blur02.OZJ');
+    const tip = { set: vi.fn() };
+    const hilt = { set: vi.fn() };
+    swing.follow(tip);
+    swing.base(hilt);
+    expect(tip.set).toHaveBeenCalledWith(38.1, -0.1, 0);
+    expect(hilt.set).toHaveBeenCalledWith(32.1, 0, 0);
+    expect(swing.until()).toBe(false);
+    anim.action = 0;
+    expect(swing.until()).toBe(true);
     monsterVisualsLayer.reset?.();
   });
 });

@@ -21,6 +21,7 @@ import {
   type RGB,
 } from './core';
 import { spawnDebris } from './debris';
+import { blurLayer } from './blur';
 import { spawnJoint } from './joint';
 import { spawnRing } from './ring';
 import { spawnSprite } from './sprite';
@@ -41,6 +42,7 @@ import {
 import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
 import {
   monsterRegistry,
+  type BodyBlurSheet,
   type BodyCard,
   type BodyFxEmitter,
   type BodyFxGate,
@@ -122,6 +124,8 @@ const PARTICLES: Readonly<Record<BodyParticle, ParticleRecipe>> = {
   sandSmoke: SAND_SMOKE,
   sandSmokeBurst: SAND_SMOKE_BURST,
 };
+
+const BLUR_SHEETS: Readonly<Record<BodyBlurSheet, string>> = { blur01: TEX.blur, blur02: TEX.blur2 };
 
 const TEXTURES: Readonly<Record<BodyTexture, string>> = {
   flare: TEX.flare,
@@ -308,6 +312,11 @@ function open(gate: Gate | undefined, f: Frame): boolean {
   return true;
 }
 
+/** A row's offset in cm as a point in tiles, made once with the row. */
+function tiles(cm: Cm3 | undefined): Vector3 {
+  return cm ? new Vector3(cm[0] / TILE_CM, cm[1] / TILE_CM, cm[2] / TILE_CM) : new Vector3();
+}
+
 /** A cards gate as it stands this frame: the action and frame now, no crossing. */
 function shownNow(e: Entity, gate: Gate): boolean {
   const model = e.modelObject;
@@ -486,7 +495,8 @@ function emit(scene: Scene, e: Entity, em: Emitter, f: Frame, rides?: readonly V
     case 'bolts':
     case 'cards':
     case 'trail':
-      // Spawned once at start; nothing per tick.
+    case 'blur':
+      // Spawned once at start, or by the row's own state (`blur`); nothing per tick here.
       return;
   }
 }
@@ -518,6 +528,21 @@ export function visualMonster(
 
   const roar: Roar = { pk: 0, skill: 0, value: 1 };
   const roars = row.some(em => (em.kind === 'cards' || em.kind === 'puff') && em.roar);
+
+  /** By row: a `blur` row's live trail and its two points in tiles. */
+  const blurs = row.map(em => (em.kind === 'blur' ? { live: DEAD_HANDLE, from: tiles(em.fromLocal), to: tiles(em.toLocal) } : undefined));
+  const swing = (em: Extract<Emitter, { kind: 'blur' }>, b: { live: EffectHandle; from: Vector3; to: Vector3 }) => {
+    const gate = em.gate;
+    b.live = blurLayer.spawn(scene, tmp, {
+      follow: out => boneLocalPos(e, em.to, b.to, out),
+      base: out => boneLocalPos(e, em.from, b.from, out),
+      texture: BLUR_SHEETS[em.sheet],
+      colour: em.colour,
+      tickHistory: true,
+      seconds: Infinity,
+      until: () => stopped || entityGone(e) || (gate !== undefined && !shownNow(e, gate)),
+    });
+  };
 
   for (const em of row) {
     if (em.kind === 'cards') {
@@ -656,6 +681,11 @@ export function visualMonster(
               emit(scene, e, em, f);
             continue;
           }
+          if (em.kind === 'blur') {
+            const b = blurs[r];
+            if (b && !b.live.alive && open(em.gate, f)) swing(em, b);
+            continue;
+          }
           if ((em.kind === 'puff' && em.rollEach) || Math.random() < 1 / em.every) emit(scene, e, em, f, rides[r]);
         }
       }
@@ -663,6 +693,7 @@ export function visualMonster(
     },
     release() {
       stopped = true;
+      for (const b of blurs) b?.live.stop();
       for (const c of children) c.stop();
       children.length = 0;
     },

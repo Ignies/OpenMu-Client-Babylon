@@ -1,5 +1,6 @@
 import type { BodyCardSpot, MonsterBodyFx } from '@/controllers/monsters';
-import { cards, trail } from '../_shared/bodyFx';
+import { MonsterActionType as A } from '../../objects/enum';
+import { blur, cards, trail } from '../_shared/bodyFx';
 
 type Cm3 = readonly [number, number, number];
 
@@ -23,7 +24,7 @@ const PURPLE = [0.8, 0.5, 1] as const;
  * (GM_Kanturu_3rd.cpp:695-701, ZzzEffectJoint.cpp:286-303, :462) and RenderKanturu3rdMonsterVisual's cards on
  * his registered bones (:1015-1076), none once he dies (:1012). Not here yet: Body_Bone13's BITMAP_FIRE + 1
  * (:1062), the windmill sparks (:1078-1080), the attack and death effects of the Move visual (:838-876) and
- * the Attack1 / Attack4 sword blur (:961-988).
+ * the Attack1 / Attack4 sword blur is the last row (:961-988).
  */
 export const NIGHTMARE_FX: MonsterBodyFx = [
   trail(10, 10, 8, PURPLE, { gate: ALIVE }),
@@ -52,4 +53,5 @@ export const NIGHTMARE_FX: MonsterBodyFx = [
     ],
     { gate: ALIVE }
   ),
+  blur(32, 38, [1, 1, 1], 'blur02', { fromLocal: [10, 0, 0], toLocal: [10, -10, 0], gate: { action: [A.Attack1, A.Attack4], frames: [[0, 5.9]] } }),
 ];

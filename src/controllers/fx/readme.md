@@ -151,7 +151,8 @@ shared pools, textures and particle recipes other folders reuse.
   puff takes the monster's facing and a `ride` one hands its particles one kept point a body or a bone; a
   cards row gated on an action is shown only in it; a `roar` row's cards and particles scale with Kundun's
   Shock roar (`PKKey` and `Skill` stepped a tick, GMHellas.cpp:1596-1622), 1 out of Shock.
-  The anvil's sparks are handed one kept heading (`spawnJoint` copies it).
+  The anvil's sparks are handed one kept heading (`spawnJoint` copies it). A `blur` row runs one trail between
+  its bone points while its gate is open, and from the first tick when it has none.
 - `core.test.ts`: a flickering tint makes a bounded number of additive materials, each within half
   a 1/128 step of the colour asked for; a burst emits nothing while the page is hidden.
 - `modelClones.test.ts`: a `model`, `linkedModel` or spirit skull clone leaves no mesh, skeleton or
@@ -349,7 +350,12 @@ cards row gated on an action or frames is a `MoveMonsterVisual` CreateSprite: th
 them (`when`). A `turned` puff is made on the monster's `Angle` (`facing`: a node turn of `-yaw`, so a
 `(0, -1, 0)` push goes the way it faces); a `ride` puff hands its particles a kept point (the body, or
 each bone) the particle tick moves them with, the original's `VectorCopy(o->Target->Position,
-o->StartPosition)`. One `Vector3` a ride, made with the monster's row and rewritten each frame.
+o->StartPosition)`. One `Vector3` a ride, made with the monster's row and rewritten each frame. A `blur`
+row is a monster's RenderObject swing loop: a `blur` entry trail (`tickHistory`, its 10 samples a tick) between
+two bone points, spawned when its gate opens and sampling until it closes; an ungated one (Selupan, the Iron
+Knights) runs for the monster's life. The trail's tint is the material's emissive, which Babylon clamps
+before the ramp: a light over 1 (their `(1, 1.2, 2)`) ramps from white where the original's packed vertex
+colour ramps from its own hue.
 
 ### ping.ts
 The ring drapes the marker over the terrain and a straight joint draws the trail, near end on the

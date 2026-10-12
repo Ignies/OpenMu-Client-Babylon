@@ -1,4 +1,4 @@
-import type { BodyCard, BodyFxEmitter, BodyParticle, BodyPuff, BodyTexture } from '@/controllers/monsters';
+import type { BodyBlurSheet, BodyCard, BodyFxEmitter, BodyParticle, BodyPuff, BodyTexture } from '@/controllers/monsters';
 import { MonsterActionType as A } from '../../objects/enum';
 
 /**
@@ -168,3 +168,21 @@ export const napinFires = (light: RGB, fire: RGB): readonly BodyFxEmitter[] => [
   puff(1, [10, 61, 72, 21], [['fire1', 'fire2', 'fire3']], fire, { scale: 1.2, jitterCm: 10 }),
   puff(1, [122, 116], [['fire1', 'fire2', 'fire3']], fire, { scale: 0.7, jitterCm: 5 }),
 ];
+
+type BlurRow = Extract<BodyFxEmitter, { kind: 'blur' }>;
+
+/** `CreateBlur` from one bone point to another while the gate is open (a RenderObject swing loop). */
+export const blur = (
+  from: number,
+  to: number,
+  colour: RGB,
+  sheet: BodyBlurSheet,
+  extra: Partial<BlurRow> = {}
+): BodyFxEmitter => ({ kind: 'blur', from, to, colour, sheet, ...extra });
+
+/**
+ * A Sapi's claws through Attack1 / Attack2 in its frame window: CreateBlur Type 0 from bone 42 to each of 34, 35,
+ * 38, 39 and 43, each its own SubType (GMSwampOfQuiet.cpp:620-795).
+ */
+export const sapiClaws = (colour: RGB, frames: readonly [number, number], from = 42, to = [34, 35, 38, 39, 43]): BodyFxEmitter[] =>
+  to.map(b => blur(from, b, colour, 'blur01', { gate: { action: [A.Attack1, A.Attack2], frames: [frames] } }));

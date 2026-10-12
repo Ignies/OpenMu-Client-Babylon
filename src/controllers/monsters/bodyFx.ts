@@ -25,6 +25,9 @@ export type BodyCard =
   | 'eventCloud'
   | 'hole';
 
+/** The sheets a `blur` can draw: CreateBlur's `Type` 0 (BITMAP_BLUR, blur01) or 3 (BITMAP_BLUR2, blur02). */
+export type BodyBlurSheet = 'blur01' | 'blur02';
+
 /** The sheets a `trail` can run: BITMAP_JOINT_ENERGY (JointLaser01) or BITMAP_FLARE (its SubType 28-33 TexType). */
 export type BodyRibbon = 'jointEnergy' | 'flare';
 
@@ -193,6 +196,21 @@ export type BodyFxEmitter =
       readonly colour: RGB;
       readonly ribbon?: BodyRibbon;
       readonly gate?: { readonly alive: true };
+    }
+  | {
+      /**
+       * `CreateBlur(c, TransformPosition(BoneTransform[from], fromLocal), TransformPosition(BoneTransform[to],
+       * toLocal), Light, Type)` every frame the gate is open, as a monster's RenderObject loop does: one swing
+       * trail, sampled 10 times a tick, that stops sampling and fades once the gate closes.
+       */
+      readonly kind: 'blur';
+      readonly from: number;
+      readonly to: number;
+      readonly fromLocal?: Cm3;
+      readonly toLocal?: Cm3;
+      readonly colour: RGB;
+      readonly sheet: BodyBlurSheet;
+      readonly gate?: BodyFxGate;
     }
   | {
       /**

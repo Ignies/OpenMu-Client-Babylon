@@ -127,6 +127,32 @@ describe("Selupan's body", () => {
   });
 });
 
+/** Every blur as `from(local)>to(local) sheet light [gate]`. */
+const blurs = (numb: number) =>
+  rows(numb, 'blur').map(b => {
+    const at = (bone: number, local?: readonly number[]) => (local ? `${bone}(${local.join(',')})` : `${bone}`);
+    const gate = b.gate ? ` ${b.gate.action?.join('/')}${b.gate.frames ? ` ${b.gate.frames.map(w => w.join('-')).join(',')}` : ''}` : '';
+    return `${at(b.from, b.fromLocal)}>${at(b.to, b.toLocal)} ${b.sheet} ${b.colour.join(',')}${gate}`;
+  });
+
+describe('the swing blurs', () => {
+  // The RenderObject / RenderMonsterVisual CreateBlur loops: Nightmare (GM_Kanturu_3rd.cpp:961-988), Selupan and the
+  // Iron Knights (GM_Raklion.cpp:1977-1998, :1851-1873, :2104-2126), the Dark Elf on his weapon's LinkBone 33
+  // (GMCrywolf1st.cpp:1254-1282, ZzzCharacter.cpp:12069), the Sapis' claws (GMSwampOfQuiet.cpp:620-795).
+  it("trail the bosses' blades and the Sapis' claws", () => {
+    expect(blurs(361)).toEqual([`32(10,0,0)>38(10,-10,0) blur02 1,1,1 ${A.Attack1}/${A.Attack4} 0-5.9`]);
+    expect(blurs(459)).toEqual(['69>73 blur01 1,1.2,2']);
+    for (const knight of [458, 565]) expect(blurs(knight)).toEqual(['35>36 blur02 1,1.2,2']);
+    for (const elf of [340, 440]) expect(blurs(elf)).toEqual([`33(0,0,-60)>33(0,0,-150) blur02 1,1,1 ${A.Attack1}/${A.Attack2}`]);
+    const claws = (from: number, to: number[], light: string, frames: string) =>
+      to.map(b => `${from}>${b} blur01 ${light} ${A.Attack1}/${A.Attack2} ${frames}`);
+    const hand = [34, 35, 38, 39, 43];
+    for (const sapi of [441, 557, 560]) expect(blurs(sapi)).toEqual(claws(42, hand, '1,0.6,0.1', '6-7.6'));
+    expect(blurs(442)).toEqual(claws(42, hand, '2,0,0', '6-7'));
+    expect(blurs(443)).toEqual([...claws(42, hand, '0.3,0.7,1', '5-10'), ...claws(75, [76, 79, 80, 83, 84], '0.3,0.7,1', '5-10')]);
+  });
+});
+
 describe('Selupan', () => {
   // RenderMonsterVisual's MODEL_SELUPAN (GM_Raklion.cpp:2003-2049): blue lights breathing in colour and size on
   // bones 9 and 70-74, some turning on the world clock.
