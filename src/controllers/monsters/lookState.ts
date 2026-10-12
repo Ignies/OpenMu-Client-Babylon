@@ -1,8 +1,8 @@
 /**
- * Event states a monster's look turns on (Kanturu's Maya direction state for the Maya hands), filled by the module
- * that owns each when it installs and read by the monster folders' rows. 0 until set.
+ * Event states a monster's look turns on (Kanturu's Maya direction state for the Maya hands, Selupan's Raklion
+ * pattern), filled by the module that owns each when it installs and read by the monster folders' rows. 0 until set.
  */
-export type LookStateName = 'kanturuMaya';
+export type LookStateName = 'kanturuMaya' | 'raklionSelupan';
 
 const readers = new Map<LookStateName, () => number>();
 

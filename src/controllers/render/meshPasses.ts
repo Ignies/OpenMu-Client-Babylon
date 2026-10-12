@@ -35,6 +35,8 @@ export type MeshPass = {
   readonly map?: UvMap;
   /** A `blend` pass's alpha. */
   readonly alpha?: number;
+  /** An `add` or `blend` pass drawn only while this holds (an event state), read every frame. Omitted = always. */
+  readonly when?: () => boolean;
 };
 
 export type MeshPassSet = {
@@ -141,6 +143,10 @@ export class MeshPasses {
     if (!on) return;
     for (let i = 0; i < this.#live.length; i++) {
       const { pass, mesh, light, scroll } = this.#live[i];
+      if (pass.when) {
+        mesh.isVisible = pass.when();
+        if (!mesh.isVisible) continue;
+      }
       if (light && pass.light) pass.light(ms, this.body, light);
       if (pass.gain) mesh.metadata.blendMeshLight = pass.gain(ms);
       if (pass.u) scroll.u = pass.u(ms);

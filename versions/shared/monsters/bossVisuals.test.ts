@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { BodyFxEmitter } from '@/controllers/monsters';
+import { setLookState, type BodyFxEmitter } from '@/controllers/monsters';
 import { MonsterActionType as A } from '../objects/enum';
 import { monsters } from './all';
 
@@ -106,7 +106,9 @@ describe('Kundun', () => {
 
 describe("Selupan's body", () => {
   // RenderMonster's MODEL_SELUPAN (GM_Raklion.cpp:1504-1549): mesh 3 bright twice, mesh 5 bright on its own scroll,
-  // Chrome02 over mesh 4 by CHROME4, and serufanarm_R four times over mesh 0 at `(sinf(WorldTime * 0.002f) + 1) * 0.5`.
+  // Chrome02 over mesh 4 by CHROME4, serufanarm_R four times over mesh 0 at `(sinf(WorldTime * 0.002f) + 1) * 0.5`,
+  // and from pattern 2 on (`m_byDetailState >= BATTLE_OF_SELUPAN_PATTERN_2`, :1537) Magic_b by CHROME6 and Chrome02 by
+  // CHROME4 over mesh 1.
   it('draws his RenderMonster passes', () => {
     const set = monsters.def(459)?.passes;
     const shape = set?.passes.map(p => [p.mesh, p.kind, p.map ?? '', p.texture ?? ''].join(' '));
@@ -118,12 +120,20 @@ describe("Selupan's body", () => {
       '0 add  Monster/serufanarm_R.OZJ',
       '0 add  Monster/serufanarm_R.OZJ',
       '0 add  Monster/serufanarm_R.OZJ',
+      '1 add chrome6 Effect/magic_b.OZJ',
+      '1 add chrome4 Effect/Chrome02.OZJ',
       '3 add  ',
     ]);
     const [, scroll, , arm] = set?.passes ?? [];
     expect([scroll?.u?.(12345), scroll?.v?.(12345)]).toEqual([2345 * 0.0002, 2345 * 0.0002]);
     expect(arm?.gain?.(1000)).toBeCloseTo((Math.sin(2) + 1) * 0.5);
     expect(arm?.clamp).toBe(true);
+    const pattern = set?.passes.slice(7, 9) ?? [];
+    let detail = 2;
+    setLookState('raklionSelupan', () => detail);
+    expect(pattern.map(p => p.when?.())).toEqual([false, false]);
+    detail = 3;
+    expect(pattern.map(p => p.when?.())).toEqual([true, true]);
   });
 });
 

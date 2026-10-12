@@ -100,4 +100,14 @@ describe('a model branch\'s mesh passes (RenderPartObjectBody)', () => {
     expect(base.map(m => m.isVisible)).toEqual([true, false, false]);
     expect(passes[0].isVisible).toBe(true);
   });
+
+  it('draws a pass with a `when` only while it holds', () => {
+    let on = false;
+    const { object, passes } = loaded({ passes: [{ mesh: 0, kind: 'add' }, { mesh: 1, kind: 'add', when: () => on }] });
+    object.Update(at(1));
+    expect(passes.map(m => m.isVisible)).toEqual([true, false]);
+    on = true;
+    object.Update(at(2));
+    expect(passes.map(m => m.isVisible)).toEqual([true, true]);
+  });
 });

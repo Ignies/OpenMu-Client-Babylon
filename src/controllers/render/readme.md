@@ -67,7 +67,8 @@ There is no `index.ts` facade; other folders import the modules directly.
   which draws the texel at full: the flat variant takes no BodyLight) or the lit blended one (`blend`, alpha
   as `coverage`). Clones skip the shadows but `unlit`. `metadata.uvMap` asks the scroll materials for a
   chrome look-up by the normal in place of the mesh UVs. `update(ms)` writes light, gain and scroll
-  without allocating and, when `shown` flips, swaps the clones and the meshes they replace.
+  without allocating and, when `shown` flips, swaps the clones and the meshes they replace. A pass with
+  `when` (an event state: Selupan's pattern) is drawn only while it holds.
 - `textureScript.ts` reads a texture name's `_R/_H/_S/_N/_DC/_DT` suffix for the model loader.
 - `propBatches.ts` draws map scenery as thin instances, one mesh per type, submesh and 32-tile chunk
   (`propBatchRules.ts`); one real `ModelObject` per type is the never-drawn prototype. A chunk mesh
@@ -128,8 +129,8 @@ There is no `index.ts` facade; other folders import the modules directly.
   like is checked in a browser.
 - `meshAnimation.test.ts`: `meshAnimationFor` reads the map row per world.
 - `meshPasses.test.ts`: an additive copy whose gain and UVs follow WorldTime, the meshes a branch skips or
-  a pass replaces, a pass's own light, a `RenderBody` pass on every drawn mesh, and the option putting the
-  model back.
+  a pass replaces, a pass's own light, a `RenderBody` pass on every drawn mesh, the option putting the
+  model back, and a pass drawn only while its `when` holds.
 - `modelObject.test.ts`: a model whose clips are cloned on first play reads every clip's keys at load
   without cloning one, and a clip cloned later reports its end; `BlendMesh -2`, before load and after (`blendAll`), and a pulsing `BlendMeshLightAt`;
   `ShineLight` lights the shine mesh by the tint; `ShineMeshes` puts the shine on those meshes only;

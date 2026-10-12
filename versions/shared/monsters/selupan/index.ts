@@ -1,4 +1,4 @@
-import { defineMonster } from '@/controllers/monsters';
+import { defineMonster, lookState } from '@/controllers/monsters';
 import { SELUPAN_FX } from './bodyFx';
 
 /** `(int)WorldTime % 10000 * 0.0002f`: mesh 5's scroll, both ways. */
@@ -13,14 +13,16 @@ const arm = {
   gain: (ms: number) => (Math.sin(ms * 0.002) + 1) * 0.5,
 } as const;
 
+/** `m_byDetailState >= BATTLE_OF_SELUPAN_PATTERN_2` (GM_Raklion.cpp:1537, GM_Raklion.h:39). */
+const pattern2 = () => lookState('raklionSelupan') >= 3;
+
 export default defineMonster({
   Numb: 459,
   Name: 'Selupan',
   maxHealth: 4800000,
   // MODEL_SELUPAN: see `bodyFx.ts`.
   bodyFx: SELUPAN_FX,
-  // RenderMonster (GM_Raklion.cpp:1504-1549). Not here: the pattern-2 Magic_b and CHROME4 passes over mesh 1
-  // (:1534-1540), which wait on the Raklion battle state (`m_byDetailState`).
+  // RenderMonster (GM_Raklion.cpp:1504-1549); the two mesh 1 passes from pattern 2 on (:1537-1543).
   passes: {
     passes: [
       { mesh: 3, kind: 'bright' },
@@ -30,6 +32,8 @@ export default defineMonster({
       arm,
       arm,
       arm,
+      { mesh: 1, kind: 'add', texture: 'Effect/magic_b.OZJ', clamp: true, map: 'chrome6', when: pattern2 },
+      { mesh: 1, kind: 'add', texture: 'Effect/Chrome02.OZJ', clamp: true, map: 'chrome4', when: pattern2 },
       { mesh: 3, kind: 'add' },
     ],
   },

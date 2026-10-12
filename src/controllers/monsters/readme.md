@@ -34,8 +34,8 @@ its own folder in `versions/shared/monsters/<name>/` and uses this controller.
 - `monsterRegistry`, `registerMonsters`; the monster bodies: `defineMonsterModel`,
   `monsterModelRegistry`, `registerMonsterModels`.
 - `lookState(name)` / `setLookState(name, read)` (`lookState.ts`): an event state a monster's look turns on, set
-  by the module that owns it when it installs (Kanturu's `kanturuMaya`) and read by the folders' rows
-  (`BodyFxGate.when`); 0 until set. The rows cannot import the module: it would load before its version.
+  by the module that owns it when it installs (Kanturu's `kanturuMaya`, Raklion's `raklionSelupan`) and read by the
+  folders' rows (`BodyFxGate.when`, `MeshPass.when`); 0 until set. The rows cannot import the module: it would load before its version.
 
 ## How it works
 - Pure data, no engine imports, so the Bun servers use it too. Sounds are keys (`string`), clip

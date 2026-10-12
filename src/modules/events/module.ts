@@ -8,6 +8,7 @@ import { installDevilSquare } from './devilSquare';
 import { installCrywolf } from './crywolf';
 import { installGoldenArcher } from './goldenArcher';
 import { installKanturu } from './kanturu';
+import { installRaklion } from './raklion';
 
 // Optional: a server may run without events (readme.md "When it is off"). A packet several entries
 // handle runs them in this order (`MiniGameOpeningState`: Blood Castle, Chaos Castle, Devil Square).
@@ -23,5 +24,6 @@ export default defineModule({
     installCrywolf();
     installGoldenArcher();
     installKanturu();
+    installRaklion();
   },
 });
