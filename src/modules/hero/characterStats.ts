@@ -281,17 +281,27 @@ function buffStats(input: CharacterStatsInput, add: Record<'str' | 'agi' | 'vit'
   add.vit += buffVitality(input);
 }
 
-/** What the item and Santa buffs add to damage (`CalculateDamage`, ZzzInfomation.cpp:2785-2830) or defense (`CalculateDefense`, :3335-3358). */
-function itemBuffs(input: CharacterStatsInput, kind: 'damage' | 'defense'): number {
+/** The scroll, Jack O'Lantern and Cherry Blossom buffs by line: [eBuff id, ITEM_POTION + n] (ZzzInfomation.cpp:2785-2806, :3009-3026, :3337-3346). */
+const ITEM_BUFFS = {
+  damage: [[46, 74], [36, 47], [80, 87]],
+  wizardry: [[47, 75], [36, 47], [80, 87]],
+  curse: [],
+  defense: [[45, 73], [37, 48]],
+} as const;
+
+/** What the item, Christmas (91) and Santa (94 strength, 95 defense) buffs add to a line (ZzzInfomation.cpp:2785-2830, :3009-3042, :3097-3103, :3337-3358). */
+function itemBuffs(input: CharacterStatsInput, kind: keyof typeof ITEM_BUFFS): number {
   const has = (buff: number) => input.buffs?.includes(buff) ?? false;
   let sum = 0;
-  // eBuff_EliteScroll3, eBuff_Hellowin2, eBuff_CherryBlossom_Petal; eBuff_EliteScroll2, eBuff_Hellowin3.
-  for (const [buff, num] of kind === 'damage' ? [[46, 74], [36, 47], [80, 87]] : [[45, 73], [37, 48]]) if (has(buff)) sum += potionValue(input, num);
-  // eBuff_BlessingOfXmax, then eBuff_StrengthOfSanta or eBuff_DefenseOfSanta.
-  if (has(91)) sum += kind === 'damage' ? Math.trunc(input.level / 3) + 45 : Math.trunc(input.level / 5) + 50;
-  if (has(kind === 'damage' ? 94 : 95)) sum += kind === 'damage' ? 30 : 100;
+  for (const [buff, num] of ITEM_BUFFS[kind]) if (has(buff)) sum += potionValue(input, num);
+  if (has(91) && kind === 'damage') sum += Math.trunc(input.level / 3) + 45;
+  if (has(91) && kind === 'defense') sum += Math.trunc(input.level / 5) + 50;
+  if (has(kind === 'defense' ? 95 : 94)) sum += kind === 'defense' ? 100 : 30;
   return sum;
 }
+
+/** eBuff_SwellOfMagicPower (_enum.h): a fifth of Energy / 9 on the wizardry minimum (ZzzInfomation.cpp:3027-3031). */
+const SWELL_OF_MAGIC_POWER = 82;
 
 /** The window's party buff blocking (NewUICharacterInfoWindow.cpp:966-975): the rate times 10 + (Energy - 80) / 10 percent, at most 100. */
 function buffBlocking(input: CharacterStatsInput, rate: number): number {
@@ -908,6 +918,7 @@ function calculateCurse(input: CharacterStatsInput): Range {
       range.max += Math.trunc((range.max * bits.percent) / 100);
     }
   }
+  add(itemBuffs(input, 'curse'));
   const skill = input.magicSkill;
   if (!skill || !SUMMON_CURSES.has(skill.number)) return range;
   return { min: range.min + skill.damage, max: range.max + skill.damage + Math.trunc(skill.damage / 2) };
@@ -1034,9 +1045,10 @@ export function deriveCharacterStats(bare: CharacterStatsInput): DerivedStats {
   const damage = withPet(withRing(calculateDamage(input, base, flat), items, 'damage'), pet, 'damage', level);
   // CalculateMagicDamage (ZzzInfomation.cpp:3005-3035).
   const magic = calculateWizardry(input);
-  const magicBonus = setByStat(lines, SET.magicByEne, input.energy) + socket.skillDamage + socket.magicPower;
+  const magicBonus = setByStat(lines, SET.magicByEne, input.energy) + itemBuffs(input, 'wizardry') + socket.skillDamage + socket.magicPower;
+  const swell = bare.buffs?.includes(SWELL_OF_MAGIC_POWER) ? Math.trunc(Math.fround(Math.trunc(bare.energy / 9) * Math.fround(0.2))) : 0;
   // The window's line reads the selected skill's damage (NewUICharacterInfoWindow.cpp:1226-1230).
-  const skilled = magicSkillDamage({ min: magic.min + magicBonus, max: magic.max + magicBonus }, input.magicSkill, lines);
+  const skilled = magicSkillDamage({ min: magic.min + magicBonus + swell, max: magic.max + magicBonus }, input.magicSkill, lines);
   const wizardry = withPet(withRing(skilled, items, 'wizardry'), pet, 'wizardry', level);
   const harmony = windowHarmony(input);
   const maxMg = harmony.magic;

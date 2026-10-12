@@ -265,6 +265,19 @@ describe('the character window under item buffs', () => {
     }
   });
 
+  // CalculateMagicDamage (:3009-3042), CalculateCurseDamage (:3097-3103).
+  it('adds the wizardry buffs to wizardry, the Swell of Magic Power a fifth of energy / 9 to its minimum, Santa to curse', () => {
+    addOptions[14 * 512 + 75] = [[1, 23], [0, 0]];
+    const wizard = (buffs: number[], charClass = CharacterClassNumber.DarkWizard) =>
+      deriveCharacterStats({ charClass, level: 240, strength: 100, agility: 100, vitality: 100, energy: 450, leadership: 0, items: [], options, buffs });
+    const plain = wizard([]);
+    for (const [buff, value] of [[47, 23], [36, 21], [80, 22], [94, 30]]) expect([wizard([buff]).wizardryMin, wizard([buff]).wizardryMax]).toEqual([plain.wizardryMin + value, plain.wizardryMax + value]);
+    expect([wizard([82]).wizardryMin, wizard([82]).wizardryMax]).toEqual([plain.wizardryMin + 10, plain.wizardryMax]);
+    const summoner = wizard([], CharacterClassNumber.Summoner);
+    expect(wizard([94], CharacterClassNumber.Summoner).curseMax).toBe(summoner.curseMax + 30);
+    expect(wizard([47], CharacterClassNumber.Summoner).curseMax).toBe(summoner.curseMax);
+  });
+
   it('adds the defense buffs to defense', () => {
     for (const [buff, value] of [[45, 30], [37, 31], [91, 240 / 5 + 50], [95, 100]]) expect(knight([buff]).defense).toBe(bare.defense + value);
   });
