@@ -33,6 +33,8 @@ describe('boss bodies', () => {
         '67:lightRed@0.4 1,1,1',
         '69:lightRed@0.4 1,1,1',
         '70:lightRed@0.4 1,1,1',
+        '19:hole@0.2 1,1,1',
+        '31:hole@0.2 1,1,1',
       ].sort()
     );
     // MoveEye(34, 35) feeds the SubType 55 / 56 eye ribbons; SubType 57 rides bones 67 and 70 with 15 tails.
@@ -40,6 +42,37 @@ describe('boss bodies', () => {
     const [neck, die] = rows(561, 'puff');
     expect(neck).toMatchObject({ every: 6, bones: [5], particles: ['smoke50', ['smokeLine1', 'smokeLine2', 'smokeLine3']], colour: [0.25, 1, 0] });
     expect(die).toMatchObject({ every: 3, bones: [0, 5, 124], particles: ['smoke1', 'smoke1'], gate: { action: [A.Die] } });
+  });
+
+  // MoveMonsterVisual's Attack1 / Attack2 past frame 2: at bones 19 and 31, (10, 5, 0) out, a mono fire a tick
+  // and a second on half of them, turned with her and riding her, and the BITMAP_HOLE card (:544-576); a
+  // BITMAP_WATERFALL_4 on bone 68 one tick in two (:1082-1085).
+  it('fires Medusa\'s hands through her attacks and waters bone 68', () => {
+    const attack = { action: [A.Attack1, A.Attack2], frames: [[3, Infinity]] };
+    const jets = ['fireMono1_4', 'fireMono2_8', 'fireMono3_5'];
+    const [, , first, second, water] = rows(561, 'puff');
+    for (const r of [first, second]) {
+      expect(r).toMatchObject({ bones: [19, 31], local: [10, 5, 0], particles: [jets], colour: [0, 1, 0.5], scale: 1.5 });
+      expect(r).toMatchObject({ turned: true, ride: 'body', gate: attack });
+    }
+    expect([first.every, second.every, second.rollEach]).toEqual([1, 2, true]);
+    expect(water).toMatchObject({
+      every: 2,
+      bones: [68],
+      particles: ['waterfall4Orbit0', 'waterfall4Orbit1', 'waterfall4Orbit2'],
+      colour: [0.9, 1, 0.9],
+      ride: 'bone',
+    });
+    const hole = rows(561, 'cards').find(r => r.spots[0].card === 'hole');
+    expect(hole).toMatchObject({
+      spots: [
+        { bone: 19, card: 'hole', scale: 0.2, local: [10, 5, 0] },
+        { bone: 31, card: 'hole', scale: 0.2, local: [10, 5, 0] },
+      ],
+      colour: [1, 1, 1],
+      swell: { speed: 0.005, amount: 0.1 },
+      gate: attack,
+    });
   });
 });
 

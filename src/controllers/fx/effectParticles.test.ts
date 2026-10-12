@@ -1159,3 +1159,82 @@ describe('the held weapons\' sparks and shine (RenderLinkObject, ZzzCharacter.cp
     expect([shine.isVisible, flare.isVisible]).toEqual([false, false]);
   });
 });
+
+describe('Medusa\'s hand fires and bone 68 waterfall (GMSwampOfQuiet.cpp:544-578, :1082-1085)', () => {
+  // A turn of -yaw is a monster facing yaw (`facing` in monsterVisuals.ts): yaw PI/2 faces +x.
+  const east = { x: 0, y: -Math.PI / 2, z: 0 };
+
+  it('FIRE_HIK1_MONO SubType 4: 8 ticks, 0.12-0.54 of its scale, 8 cm a tick along the facing, growing (ZzzEffectParticle.cpp:1885-1894, :6251-6289)', async () => {
+    // roll 0.5: (21 + 12) * 0.01 * 1.5 big, then 0.09 more a tick; alpha 0.3 a tick up from 0.
+    const sprite = await play('fireMono1_4', 1.5, 0.5, 3, east);
+    expect([sprite.position.x, sprite.position.z].map(n => +n.toFixed(4) + 0)).toEqual([0.24, 0]);
+    expect(sprite.width).toBeCloseTo((64 * (0.495 + 0.27)) / 100);
+    expect(sprite.color.r).toBeCloseTo(0.2 * 0.9);
+    expect(fakes.files).toContain('Effect/firehik_mono01.OZJ');
+    disposeEffectParticles();
+    expect((await play('fireMono1_4', 1.5, 0.5, 7)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('fireMono1_4', 1.5, 0.5, 8)).isVisible).toBe(false);
+  });
+
+  it('FIRE_HIK2_MONO SubType 8 and FIRE_HIK3_MONO SubType 5 are the same jet on their own sheets (:364-374, :1972-1982)', async () => {
+    for (const kind of ['fireMono2_8', 'fireMono3_5'] as const) {
+      expect((await play(kind, 1.5, 0.5, 3, east)).position.x).toBeCloseTo(0.24);
+      disposeEffectParticles();
+    }
+    expect(fakes.files).toEqual(expect.arrayContaining(['Effect/firehik_mono02.OZJ', 'Effect/firehik_mono03.OZJ']));
+  });
+
+  it('WATERFALL_4: three cards on one set of rolls circle the point, 2.1 cm out and 0.1 round a tick, 0.95 of the light, 80 ticks (ZzzEffect.cpp:5819-5826, MoveHandlers.cpp:9093-9133)', async () => {
+    const original = Math.random;
+    try {
+      Math.random = () => 0.5;
+      await spawnParticle(scene, 'waterfall4Orbit0', { x: 0, y: 0, z: 0 }, NO_TURN, 1, [0.9, 1, 0.9]);
+      // The other two take the first one's rolls, whatever they roll.
+      Math.random = () => 0.1;
+      await spawnParticle(scene, 'waterfall4Orbit1', { x: 0, y: 0, z: 0 }, NO_TURN, 1, [0.9, 1, 0.9]);
+      await spawnParticle(scene, 'waterfall4Orbit2', { x: 0, y: 0, z: 0 }, NO_TURN, 1, [0.9, 1, 0.9]);
+    } finally {
+      Math.random = original;
+    }
+    const cards = fakes.sprites.slice(-3);
+    tick?.();
+    tick?.();
+    // Timer rand() % 360 = 180 radians, Distance rand() % 10 + 5 = 10 cm; scale rand() % 20 * 0.01 + 0.1.
+    const t = 180.2;
+    const d = 14.2 / 100;
+    const at = (s: FakeSprite) => [s.position.x, s.position.y, s.position.z].map(n => +n.toFixed(4));
+    const round = (v: number[]) => v.map(n => +n.toFixed(4));
+    // MU (x, y, z) is drawn at (x, z, y).
+    expect(at(cards[0])).toEqual(round([Math.cos(t) * d, Math.sin(t) * d, 0]));
+    expect(at(cards[1])).toEqual(round([Math.sin(t) * d, 0, Math.cos(t) * d]));
+    expect(at(cards[2])).toEqual(round([0, Math.cos(t) * d, Math.sin(t) * d]));
+    for (const s of cards) {
+      expect(s.width).toBeCloseTo((64 * 0.2) / 100);
+      expect(s.color.g).toBeCloseTo(0.95 ** 2);
+      expect(s.angle).toBeCloseTo(((180 + 1.4) * Math.PI) / 180);
+    }
+    for (let n = 2; n < 80; n++) tick?.();
+    expect(cards.map(s => s.isVisible)).toEqual([false, false, false]);
+  });
+
+  it('a particle made with an anchor moves as far as the anchor does (`VectorSubtract(Position, StartPosition)`, :4325-4328)', async () => {
+    const anchor = { x: 0, y: 0, z: 0 };
+    const original = Math.random;
+    Math.random = () => 0.5;
+    try {
+      await spawnParticle(scene, 'waterfall4Orbit1', { x: 0, y: 0, z: 0 }, NO_TURN, 1, [1, 1, 1], 0, anchor);
+    } finally {
+      Math.random = original;
+    }
+    const card = fakes.sprites[fakes.sprites.length - 1];
+    tick?.();
+    const before = card.position.x;
+    anchor.x = 2;
+    anchor.y = 1;
+    tick?.();
+    const t = 180.2;
+    expect(card.position.x - before).toBeCloseTo(2 + Math.sin(t) * 0.142 - Math.sin(t - 0.1) * 0.121);
+    expect(card.position.y).toBeCloseTo(1);
+  });
+});

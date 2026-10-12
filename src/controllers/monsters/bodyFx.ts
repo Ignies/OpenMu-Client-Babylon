@@ -22,7 +22,8 @@ export type BodyCard =
   | 'flareBlue'
   | 'flareRed'
   | 'flare2'
-  | 'eventCloud';
+  | 'eventCloud'
+  | 'hole';
 
 /** The sheets a `trail` can run: BITMAP_JOINT_ENERGY (JointLaser01) or BITMAP_FLARE (its SubType 28-33 TexType). */
 export type BodyRibbon = 'jointEnergy' | 'flare';
@@ -40,7 +41,13 @@ export type BodyPuff =
   | 'smokeLine1'
   | 'smokeLine2'
   | 'smokeLine3'
-  | 'trueFire';
+  | 'trueFire'
+  | 'fireMono1_4'
+  | 'fireMono2_8'
+  | 'fireMono3_5'
+  | 'waterfall4Orbit0'
+  | 'waterfall4Orbit1'
+  | 'waterfall4Orbit2';
 
 /** One `CreateSprite` on a bone: `TransformPosition(BoneTransform[bone], local)`. */
 export type BodyCardSpot = {
@@ -168,7 +175,8 @@ export type BodyFxEmitter =
       readonly swell?: { readonly speed: number; readonly amount: number };
       /** `sin(WorldTime * speed) * amount + base` added to each channel of the light. */
       readonly lift?: { readonly speed: number; readonly amount: number; readonly base: number };
-      readonly gate?: { readonly alive: true };
+      /** `alive`: not drawn once it dies; `action` / `frames`: drawn only then (a `MoveMonsterVisual` CreateSprite). */
+      readonly gate?: Pick<BodyFxGate, 'alive' | 'action' | 'frames'>;
     }
   | {
       /**
@@ -202,6 +210,10 @@ export type BodyFxEmitter =
       readonly local?: Cm3;
       readonly scale?: number;
       readonly colour: RGB;
+      /** Made on the monster's `Angle`, so a push goes the way it faces. */
+      readonly turned?: true;
+      /** What the particles ride (`o->Target`): the monster's position or the bone they were made at. */
+      readonly ride?: 'body' | 'bone';
       readonly gate?: BodyFxGate;
     };
 

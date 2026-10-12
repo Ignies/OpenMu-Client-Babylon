@@ -41,6 +41,7 @@ vi.mock('./core', () => {
     emitBurst: () => {},
     entityGone: () => false,
     entityPos: (_e: unknown, _h: number, out: unknown) => out,
+    entityYaw: (e: { transform?: { rot: { y: number } } }) => e.transform?.rot.y ?? 0,
     inWindow: () => true,
   };
 });
@@ -186,5 +187,45 @@ describe('monster body rows', () => {
       ['smokeLine1', 1.1, 10],
     ]);
     monsterVisualsLayer.reset?.();
+  });
+
+  // Medusa's hand fires (GMSwampOfQuiet.cpp:544-578): made on the monster's `Angle`, so they fly the way it faces,
+  // and `VectorCopy(o->Target->Position, o->StartPosition)`: they ride it. The waterfall rides bone 68 (:1084).
+  it('turn a puff with the monster and hand it what it rides', () => {
+    calls.particles.length = 0;
+    const e = monster();
+    (e as unknown as { transform: { rot: { y: number } } }).transform = { rot: { y: 0.5 } };
+    visualMonster(scene, e, [
+      { kind: 'puff', every: 1, particles: ['fireMono1_4'], bones: [19], turned: true, ride: 'body', colour: [0, 1, 0.5] },
+      { kind: 'puff', every: 1, particles: ['waterfall4Orbit0'], bones: [68], ride: 'bone', colour: [0.9, 1, 0.9] },
+      { kind: 'puff', every: 1, particles: ['smoke50'], bones: [5], colour: [1, 1, 1] },
+    ] as never);
+    monsterVisualsLayer.update?.(0, 0.04);
+    const [fire, water, plain] = calls.particles;
+    expect(fire[3]).toEqual({ x: 0, y: -0.5, z: 0 });
+    expect(fire[7]).toBeDefined();
+    expect(water[3]).toEqual({ x: 0, y: 0, z: 0 });
+    expect(water[7]).toMatchObject({ x: 68, y: 0, z: 0 });
+    expect(plain[7]).toBeUndefined();
+    monsterVisualsLayer.update?.(0, 0.04);
+    // One kept point a ride, rewritten in place.
+    expect(calls.particles[4][7]).toBe(water[7]);
+    monsterVisualsLayer.reset?.();
+  });
+
+  // The BITMAP_HOLE card in Medusa's hands is a MoveMonsterVisual CreateSprite: drawn only in Attack1 / Attack2
+  // past their frame 2 (GMSwampOfQuiet.cpp:544-576).
+  it('show a cards row gated on an action only in it', () => {
+    calls.glows.length = 0;
+    const e = monster();
+    visualMonster(scene, e, [
+      { kind: 'cards', spots: [{ bone: 19, card: 'hole', scale: 0.2 }], colour: [1, 1, 1], gate: { action: [3, 4], frames: [[3, Infinity]] } },
+      { kind: 'cards', spots: [{ bone: 5, card: 'light', scale: 1 }], colour: [1, 1, 1] },
+    ] as never);
+    const [hole, light] = calls.glows as { when?: () => boolean }[];
+    expect(light.when).toBeUndefined();
+    expect(hole.when?.()).toBe(false);
+    (e as unknown as { monsterAnimation: { action: number } }).monsterAnimation.action = 3;
+    expect(hole.when?.()).toBe(true);
   });
 });

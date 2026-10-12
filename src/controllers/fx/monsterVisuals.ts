@@ -14,6 +14,7 @@ import {
   emitBurst,
   entityGone,
   entityPos,
+  entityYaw,
   inWindow,
   type ParticleRecipe,
   type PointSource,
@@ -140,6 +141,7 @@ const CARDS: Readonly<Record<BodyCard, GlowTexture>> = {
   flareRed: 'flareRed',
   flare2: 'flare2',
   eventCloud: 'eventCloud',
+  hole: 'hole',
 };
 
 const PUFFS: Readonly<Record<BodyPuff, KindName>> = {
@@ -155,13 +157,21 @@ const PUFFS: Readonly<Record<BodyPuff, KindName>> = {
   smokeLine2: 'smokeLine2',
   smokeLine3: 'smokeLine3',
   trueFire: 'trueFire',
+  fireMono1_4: 'fireMono1_4',
+  fireMono2_8: 'fireMono2_8',
+  fireMono3_5: 'fireMono3_5',
+  waterfall4Orbit0: 'waterfall4Orbit0',
+  waterfall4Orbit1: 'waterfall4Orbit1',
+  waterfall4Orbit2: 'waterfall4Orbit2',
 };
 
 type CardsRow = Extract<BodyFxEmitter, { kind: 'cards' }>;
 
 /** A `cards` row as the glow entry draws it: each spot its own sheet, scale and offset (cm to tiles). */
-function cardGlow(em: CardsRow): MonsterGlow {
+function cardGlow(em: CardsRow, e: Entity): MonsterGlow {
+  const gate = em.gate;
   return {
+    when: gate && (gate.action || gate.frames) ? () => shownNow(e, gate) : undefined,
     bones: [],
     spots: em.spots.map(s => ({
       bone: s.bone,
@@ -295,13 +305,33 @@ function open(gate: Gate | undefined, f: Frame): boolean {
   return true;
 }
 
+/** A cards gate as it stands this frame: the action and frame now, no crossing. */
+function shownNow(e: Entity, gate: Gate): boolean {
+  const model = e.modelObject;
+  const action = e.monsterAnimation?.action ?? (model?.CurrentAction as A | undefined);
+  if (gate.alive && e.dying) return false;
+  if (gate.action && (action === undefined || !gate.action.includes(action))) return false;
+  if (!gate.frames) return true;
+  const frame = model?.actionFrame() ?? 0;
+  for (const [a, b] of gate.frames) if (inWindow(-1, frame, a, b)) return true;
+  return false;
+}
+
+/** The monster's `Angle` as a node turn: a push of `(0, -1, 0)` goes the way it faces (`entityYaw`). */
+const facingTurn = { x: 0, y: 0, z: 0 };
+
+function facing(e: Entity): typeof facingTurn {
+  facingTurn.y = -entityYaw(e);
+  return facingTurn;
+}
+
 function boneCount(e: Entity): number {
   // The GLB adds a root above the MU bones (core.ts bonePos).
   return Math.max(0, (e.modelObject?.gltf?.skeleton?.bones.length ?? 0) - 1);
 }
 
-/** One tick of one emitter, the 1/every roll already won. */
-function emit(scene: Scene, e: Entity, em: Emitter, f: Frame): void {
+/** One tick of one emitter, the 1/every roll already won. `rides`: the row's kept anchors (`ride`). */
+function emit(scene: Scene, e: Entity, em: Emitter, f: Frame, rides?: readonly Vector3[]): void {
   switch (em.kind) {
     case 'body': {
       if (!open(em.gate, f)) return;
@@ -416,15 +446,17 @@ function emit(scene: Scene, e: Entity, em: Emitter, f: Frame): void {
     case 'puff': {
       if (!open(em.gate, f)) return;
       const local = em.local ?? ZERO_CM;
-      for (const at of em.bones) {
+      const turn = em.turned ? facing(e) : NO_TURN;
+      for (let b = 0; b < em.bones.length; b++) {
         if (em.rollEach && Math.random() >= 1 / em.every) continue;
         tmpLocal.set(local[0] / TILE_CM, local[1] / TILE_CM, local[2] / TILE_CM);
-        boneLocalPos(e, at, tmpLocal, tmp);
+        boneLocalPos(e, em.bones[b], tmpLocal, tmp);
+        const anchor = rides ? rides[em.ride === 'bone' ? b : 0] : undefined;
         for (let i = 0; i < em.particles.length; i++) {
           const p = em.particles[i];
           const name = typeof p === 'string' ? p : p[Math.floor(Math.random() * p.length)];
           const scale = em.scales?.[i] ?? em.scale ?? 1;
-          void spawnParticle(scene, PUFFS[name], tmp, NO_TURN, scale, em.colour, em.jitterCm);
+          void spawnParticle(scene, PUFFS[name], tmp, turn, scale, em.colour, em.jitterCm, anchor);
         }
       }
       return;
@@ -457,10 +489,14 @@ export function visualMonster(
   const children: EffectHandle[] = [];
   /** The ones that end with its life (`gate.alive`). */
   const mortal: EffectHandle[] = [];
+  /** By row: the points a riding puff's particles follow, one a body or one a bone, kept where they are. */
+  const rides = row.map(em =>
+    em.kind === 'puff' && em.ride ? (em.ride === 'bone' ? em.bones : [0]).map(() => new Vector3()) : undefined
+  );
 
   for (const em of row) {
     if (em.kind === 'cards') {
-      const card = glowMonster(scene, e, cardGlow(em));
+      const card = glowMonster(scene, e, cardGlow(em, e));
       children.push(card);
       if (em.gate?.alive) mortal.push(card);
       continue;
@@ -542,6 +578,14 @@ export function visualMonster(
         mortal.length = 0;
       }
 
+      for (let r = 0; r < row.length; r++) {
+        const em = row[r];
+        const points = rides[r];
+        if (!points || em.kind !== 'puff') continue;
+        if (em.ride === 'body') entityPos(e, 0, points[0]);
+        else for (let b = 0; b < points.length; b++) bonePos(e, em.bones[b], points[b]);
+      }
+
       bank += dt;
       let due = 0;
       while (bank >= TICK && due < MAX_TICKS_PER_FRAME) {
@@ -567,7 +611,8 @@ export function visualMonster(
 
       for (let t = 0; t < due; t++) {
         ticks++;
-        for (const em of row) {
+        for (let r = 0; r < row.length; r++) {
+          const em = row[r];
           if (em.kind === 'appear') {
             if (ticks <= em.ticks) emit(scene, e, em, f);
             continue;
@@ -584,7 +629,7 @@ export function visualMonster(
               emit(scene, e, em, f);
             continue;
           }
-          if ((em.kind === 'puff' && em.rollEach) || Math.random() < 1 / em.every) emit(scene, e, em, f);
+          if ((em.kind === 'puff' && em.rollEach) || Math.random() < 1 / em.every) emit(scene, e, em, f, rides[r]);
         }
       }
       return true;

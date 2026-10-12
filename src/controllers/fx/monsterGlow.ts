@@ -66,6 +66,8 @@ const GLOW_TEXTURES = {
   flareRed: { file: TEX.redFlare, px: [64, 64] },
   /** BITMAP_FLARE+1 (flare02). */
   flare2: { file: TEX.flare2, px: [64, 64] },
+  /** BITMAP_HOLE (Hole). */
+  hole: { file: TEX.hole, px: [64, 64] },
   /** BITMAP_SHINY+6 (shiny05), BITMAP_EVENT_CLOUD (clouds2). */
   shiny6: { file: TEX.shiny5, px: [64, 64] },
   eventCloud: { file: TEX.eventCloud, px: [256, 256] },
@@ -129,6 +131,8 @@ export type MonsterGlow = {
   readonly breathBase?: number;
   /** Fixed luminosity when `breathe` is false (the case's `Luminosity`). */
   readonly luminosity?: number;
+  /** Drawn only while this holds. */
+  readonly when?: () => boolean;
 };
 
 /**
@@ -413,7 +417,7 @@ function place(g: LiveGlow): void {
   const r = (g.rgb[0] + lift) * lumi;
   const gr = (g.rgb[1] + lift) * lumi;
   const b = (g.rgb[2] + lift) * lumi;
-  const hidden = g.entity.modelObject?.OutOfView === true;
+  const hidden = g.entity.modelObject?.OutOfView === true || (g.glow.when !== undefined && !g.glow.when());
   const swell = g.glow.swellAmount ? Math.sin(seconds * (g.glow.swellSpeed ?? 0) * 1000) * g.glow.swellAmount : 0;
 
   for (const s of g.sprites) {

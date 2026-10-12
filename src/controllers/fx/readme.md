@@ -135,7 +135,10 @@ shared pools, textures and particle recipes other folders reuse.
   and `fireRed` (`BITMAP_FIRE_RED`, firered.jpg) shoots up steady for 20 ticks. The bosses' smokes:
   `smoke50` (`BITMAP_SMOKE` SubType 50) fades in to half its light and rises, `smokeLine1..3`
   (`BITMAP_SMOKELINE1..3` SubType 0) to 0.7 on their own sheets, and `smoke1` (SubType 1) is green
-  whatever its light.
+  whatever its light. Medusa's: `fireMono1_4`, `fireMono2_8`, `fireMono3_5` (the mono fire jets) fly 8 cm a
+  tick along their object's facing for 8 ticks, growing; `waterfall4Orbit0..2` (`BITMAP_WATERFALL_4`'s three
+  cards, on one set of rolls) circle where they were made, 2.1 cm further out and 0.1 round a tick; a
+  particle made with an anchor moves as far as the anchor does.
 - `monsterGlow.test.ts`: `RenderLight` breathes on the world's clock, so two monsters that came apart
   breathe alike, in step with their floor light; Santa Claus and the Snowman carry their steady
   flare01 cards on their bones (ZzzObject.cpp:1910-1945); a swelling card (Kundun's) takes its size
@@ -143,7 +146,9 @@ shared pools, textures and particle recipes other folders reuse.
 - `monsterVisuals.test.ts`: a `cards` row hangs each spot on the glow entry with its own sheet, scale
   and offset; a `trail` runs a ribbon from its bone, a gated one ending when the monster dies; a `puff`
   makes one of its particles at its bone, and one gated on a buff puffs only under it, each bone rolling
-  its own chance with `rollEach`; each particle of a puff takes its own scale, and the jitter.
+  its own chance with `rollEach`; each particle of a puff takes its own scale, and the jitter; a `turned`
+  puff takes the monster's facing and a `ride` one hands its particles one kept point a body or a bone; a
+  cards row gated on an action is shown only in it.
 - `core.test.ts`: a flickering tint makes a bounded number of additive materials, each within half
   a 1/128 step of the colour asked for; a burst emits nothing while the page is hidden.
 - `modelClones.test.ts`: a `model`, `linkedModel` or spirit skull clone leaves no mesh, skeleton or
@@ -336,7 +341,12 @@ each monster folder's `bodyFx` (types in `controllers/monsters/bodyFx.ts`, share
 `TEXTURES`), once per row. The `RenderMonsterVisual` rows: `cards` (steady `CreateSprite` cards on
 bones) go to `monsterGlow` as spots, `trail` (a JOINT_ENERGY whose head rides a bone) is one joint
 for the monster's life, and `puff` spawns the original's own particles (`effectParticles.ts` kinds,
-`PUFFS`). A row gated `alive` ends when the monster dies (the original's `if (Die) return`).
+`PUFFS`). A row gated `alive` ends when the monster dies (the original's `if (Die) return`). A
+cards row gated on an action or frames is a `MoveMonsterVisual` CreateSprite: the glow hides it outside
+them (`when`). A `turned` puff is made on the monster's `Angle` (`facing`: a node turn of `-yaw`, so a
+`(0, -1, 0)` push goes the way it faces); a `ride` puff hands its particles a kept point (the body, or
+each bone) the particle tick moves them with, the original's `VectorCopy(o->Target->Position,
+o->StartPosition)`. One `Vector3` a ride, made with the monster's row and rewritten each frame.
 
 ### ping.ts
 The ring drapes the marker over the terrain and a straight joint draws the trail, near end on the
