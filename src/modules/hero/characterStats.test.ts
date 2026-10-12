@@ -240,6 +240,23 @@ describe('the character window with a transformation ring', () => {
   });
 });
 
+// The formulas read Strength + AddStrength and the rest (ZzzInfomation.cpp:2550-2553, :2851, :3051, :3108-3110, :3201, :3255-3256).
+describe('the character window with stats the worn items add', () => {
+  // A pendant with ancient bonus level 2 adds +10 to its AttType stat, strength (getAllAddState).
+  const pendant = { group: 13, num: 13, durability: 255, ancientBonusLevel: 2 };
+  const knight = (pieces: Record<number, Item>) => {
+    const items: (Item | null)[] = new Array(12).fill(null);
+    for (const [slot, item] of Object.entries(pieces)) items[Number(slot)] = item;
+    return deriveCharacterStats({ charClass: CharacterClassNumber.DarkKnight, level: 240, strength: 600, agility: 300, vitality: 100, energy: 450, leadership: 0, items });
+  };
+
+  it('reads the added strength in the damage and the attack rate', () => {
+    const bare = knight({});
+    expect(knight({ 9: pendant })).toMatchObject({ damageMin: 101, damageMax: 152, attackRate: bare.attackRate + 2 });
+    expect(knight({ 9: pendant }).totals).toEqual({ str: 610, agi: 300, vit: 100, ene: 450, cmd: 0 });
+  });
+});
+
 // CalculateCurseDamage (ZzzInfomation.cpp:3045-3104), GetCurseSkillDamage (CharacterManager.cpp:373-390) and the book's
 // curse rate on the line's maximum (NewUICharacterInfoWindow.cpp:1381-1466).
 describe('the character window curse line', () => {

@@ -512,7 +512,7 @@ export const CharacterInfo = observer(() => {
   if (base === BaseClass.RageFighter) {
     vitalityDetails.push({
       text: t('charInfo.meleeDamage', {
-        value: 50 + Math.trunc(playerData.sta / 10),
+        value: 50 + Math.trunc(stats.totals.vit / 10),
       }),
     });
   }
@@ -558,7 +558,7 @@ export const CharacterInfo = observer(() => {
   if (base === BaseClass.Knight) {
     energyDetails.push({
       text: t('charInfo.skillDamage', {
-        value: 200 + Math.trunc(playerData.eng / 10),
+        value: 200 + Math.trunc(stats.totals.ene / 10),
       }),
     });
   } else if (base === BaseClass.MagicGladiator) {
@@ -566,18 +566,18 @@ export const CharacterInfo = observer(() => {
   } else if (base === BaseClass.DarkLord) {
     energyDetails.push({
       text: t('charInfo.skillDamage', {
-        value: 200 + Math.trunc(playerData.eng / 20),
+        value: 200 + Math.trunc(stats.totals.ene / 20),
       }),
     });
   } else if (base === BaseClass.RageFighter) {
     energyDetails.push({
       text: t('charInfo.divineDamage', {
-        value: 50 + Math.trunc(playerData.eng / 10),
+        value: 50 + Math.trunc(stats.totals.ene / 10),
       }),
     });
     energyDetails.push({
       text: t('charInfo.aoeDamage', {
-        value: 100 + Math.trunc(playerData.agi / 8 + playerData.eng / 10),
+        value: 100 + Math.trunc(stats.totals.agi / 8) + Math.trunc(stats.totals.ene / 10),
       }),
     });
   }

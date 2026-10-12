@@ -3,7 +3,7 @@ import { BaseClass, CharacterClassNumber, getBaseClass } from '../../core/types'
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { InventoryConstants } from '@/core/inventoryConstants';
 import type { Item } from '../../ecs/world';
-import { activeSetOptions, classCanUse, withWornStats, classOf, harmonyBonus, harmonyNeedCut, itemDef, itemStats, optionSpecials, socketStatusBonus, type OptionSpecial, type SetOptionLine, type SocketStatusBonus } from '@/controllers/item_rules';
+import { activeSetOptions, classCanUse, wornStatBonus, classOf, harmonyBonus, harmonyNeedCut, itemDef, itemStats, optionSpecials, socketStatusBonus, type OptionSpecial, type SetOptionLine, type SocketStatusBonus } from '@/controllers/item_rules';
 import type { ItemOptionTables, ItemSetTables } from '@/controllers/assets';
 
 export enum StatType {
@@ -297,6 +297,8 @@ type DerivedStats = {
   curseMin: number;
   curseMax: number;
   curseRate: number;
+  /** Strength + AddStrength and the rest: what the window's skill damage lines read. */
+  totals: { str: number; agi: number; vit: number; ene: number; cmd: number };
 };
 
 function equipped(items: (Item | null)[], slot: number): Item | null {
@@ -605,8 +607,8 @@ function requiresMet(item: Item, input: CharacterStatsInput): boolean {
   const stats = itemStats(item);
   if (!stats) return false;
   const { base, step } = classOf(input.charClass);
-  // Strength + AddStrength and the rest (ZzzInfomation.cpp:2237-2241).
-  const hero = withWornStats({ level: input.level, str: input.strength, agi: input.agility, vit: input.vitality, ene: input.energy, cmd: input.leadership, baseClass: base, stepClass: step }, input.items, input.sets ?? null);
+  // The stats already carry AddStrength and the rest (ZzzInfomation.cpp:2237-2241).
+  const hero = { level: input.level, str: input.strength, agi: input.agility, vit: input.vitality, ene: input.energy, cmd: input.leadership, baseClass: base, stepClass: step };
   const columns = stats.def.classes;
   // The Magic Gladiator wears what both the wizard and the knight can (:2222-2225).
   if (!classCanUse(stats.def, hero) && !(base === 3 && columns[0] && columns[1] && !columns[3])) return false;
@@ -829,12 +831,15 @@ function withSetDefense(defense: number, input: CharacterStatsInput, lines: read
   return defense;
 }
 
-export function deriveCharacterStats(input: CharacterStatsInput): DerivedStats {
-  const base = getBaseClass(input.charClass);
+export function deriveCharacterStats(bare: CharacterStatsInput): DerivedStats {
+  const base = getBaseClass(bare.charClass);
 
-  const { items, level } = input;
-  const { base: baseClass, step } = classOf(input.charClass);
-  const hero = { level, str: input.strength, agi: input.agility, vit: input.vitality, ene: input.energy, cmd: input.leadership, baseClass, stepClass: step };
+  const { items, level } = bare;
+  const { base: baseClass, step } = classOf(bare.charClass);
+  const hero = { level, str: bare.strength, agi: bare.agility, vit: bare.vitality, ene: bare.energy, cmd: bare.leadership, baseClass, stepClass: step };
+  // Every formula and requirement check reads Strength + AddStrength and the rest (ZzzInfomation.cpp:2550-2553, :2851, :3108-3110).
+  const add = wornStatBonus(items, bare.sets ?? null);
+  const input = { ...bare, strength: bare.strength + add.str, agility: bare.agility + add.agi, vitality: bare.vitality + add.vit, energy: bare.energy + add.ene, leadership: bare.leadership + add.cmd };
   const lines = input.sets ? activeSetOptions(items, hero, input.sets) : [];
   const socket = socketStatusBonus(items, { level, masterLevel: input.masterLevel, maxLife: input.maxLife, maxMana: input.maxMana }, input.options ?? null);
   const setDamage = setByStat(lines, SET.byAgi, input.agility) + setByStat(lines, SET.byStr, input.strength);
@@ -853,8 +858,8 @@ export function deriveCharacterStats(input: CharacterStatsInput): DerivedStats {
   const petDefense = pet?.group === GROUP_HELPER && (pet.num === PET.panda || pet.num === PET.unicorn) ? 50 : 0;
 
   return {
-    attackSpeed: attackSpeedOf(input.charClass, input.agility),
-    magicSpeed: magicSpeedOf(input.charClass, input.agility),
+    attackSpeed: attackSpeedOf(bare.charClass, bare.agility),
+    magicSpeed: magicSpeedOf(bare.charClass, bare.agility),
     damageMin: damage.min,
     damageMax: damage.max,
     dualWield: damage.dualWield,
@@ -870,6 +875,7 @@ export function deriveCharacterStats(input: CharacterStatsInput): DerivedStats {
     curseMin: curse.min,
     curseMax: curse.max,
     curseRate: curseRate(input, curse.max),
+    totals: { str: input.strength, agi: input.agility, vit: input.vitality, ene: input.energy, cmd: input.leadership },
   };
 }
 

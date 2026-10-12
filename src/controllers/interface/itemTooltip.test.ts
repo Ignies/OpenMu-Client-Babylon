@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import type { Item } from '@/ecs/world';
-import type { HeroStats } from '@/controllers/item_rules';
+import { itemStats, type HeroStats } from '@/controllers/item_rules';
 import { loadItemOptionTables, loadItemSetTables } from '@/controllers/assets';
 import { buildItemTooltip, itemNameColor } from './itemTooltip';
 
@@ -68,6 +68,26 @@ describe.skipIf(NO_DATA)('an ancient item', () => {
   it('keeps only the header while fewer than two pieces are worn', () => {
     const text = lines(warrior(8), { worn: [], equipped: false });
     expect(text.at(-1)?.text).toBe('Set Item option info');
+  });
+});
+
+// The requirement lines read Strength + AddStrength (ZzzInventory.cpp:4816-4927): a worn ancient +5 strength counts.
+describe('the requirement lines with a worn ancient bonus', () => {
+  const sword = { group: 0, num: 5, durability: 50 };
+  const need = itemStats(sword)?.reqStr ?? 0;
+  const weak: HeroStats = { ...KNIGHT, str: need - 5 };
+  const pendant = { group: 13, num: 13, durability: 255, ancientBonusLevel: 1 };
+  const strength = (worn: (Item | null)[]) => {
+    const built = buildItemTooltip(sword, weak, null, { worn, equipped: false });
+    const at = built?.lines.findIndex(l => l.text.startsWith('Required Strength')) ?? -1;
+    return { line: built?.lines[at], next: built?.lines[at + 1], usable: built?.usable };
+  };
+
+  it('is red with the lacking line on the base strength, white with the pendant', () => {
+    expect(strength([])).toMatchObject({ line: { color: 'red' }, next: { color: 'red' }, usable: false });
+    const worn = new Array(12).fill(null);
+    worn[9] = pendant;
+    expect(strength(worn)).toMatchObject({ line: { color: 'white' }, usable: true });
   });
 });
 
