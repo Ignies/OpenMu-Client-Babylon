@@ -85,8 +85,22 @@ describe('Kundun', () => {
     expect(bone100).toMatchObject({ every: 2, bones: [100], particles: ['smoke13'], gate: { alive: true } });
     const [eyes, flare] = rows(275, 'cards');
     expect(eyes).toMatchObject({ colour: [1, 0, 0], pulse: { speed: 0.003, amount: 0.2, base: 0.8 }, gate: { alive: true } });
-    expect(cards(275)).toEqual(['8:energy@0.4 1,0,0', '9:energy@0.4 1,0,0', '100:flareBlue@1.2 1,1,1']);
+    expect(cards(275)).toEqual(['8:energy@0.4 1,0,0', '9:energy@0.4 1,0,0', '100:flareBlue@1.2 1,1,1', '100:flareRed@1.2 1,1,1']);
     expect(flare).toMatchObject({ swell: { speed: 0.001, amount: 0.3 }, gate: { alive: true } });
+  });
+
+  // The Shock roar: a red flare over the blue one at `(1.2 + sin * 0.3) * fRoar`, and the bone 100 smoke at
+  // `fRoar` (GMHellas.cpp:1596-1626).
+  it('roars red through Shock and swells his bone 100 smoke', () => {
+    const roar = rows(275, 'cards').find(r => r.spots[0].card === 'flareRed');
+    expect(roar).toMatchObject({
+      spots: [{ bone: 100, card: 'flareRed', scale: 1.2 }],
+      colour: [1, 1, 1],
+      swell: { speed: 0.001, amount: 0.3 },
+      roar: true,
+      gate: { alive: true, action: [A.Shock] },
+    });
+    expect(rows(275, 'puff')[1]).toMatchObject({ bones: [100], particles: ['smoke13'], roar: true });
   });
 });
 

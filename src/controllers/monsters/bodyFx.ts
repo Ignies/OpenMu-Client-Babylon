@@ -175,6 +175,8 @@ export type BodyFxEmitter =
       readonly swell?: { readonly speed: number; readonly amount: number };
       /** `sin(WorldTime * speed) * amount + base` added to each channel of the light. */
       readonly lift?: { readonly speed: number; readonly amount: number; readonly base: number };
+      /** Its `Scale` times the Shock roar's `fRoar` (Kundun, GMHellas.cpp:1596-1622). */
+      readonly roar?: true;
       /** `alive`: not drawn once it dies; `action` / `frames`: drawn only then (a `MoveMonsterVisual` CreateSprite). */
       readonly gate?: Pick<BodyFxGate, 'alive' | 'action' | 'frames'>;
     }
@@ -210,6 +212,8 @@ export type BodyFxEmitter =
       readonly local?: Cm3;
       readonly scale?: number;
       readonly colour: RGB;
+      /** Its `Scale` times the Shock roar's `fRoar`. */
+      readonly roar?: true;
       /** Made on the monster's `Angle`, so a push goes the way it faces. */
       readonly turned?: true;
       /** What the particles ride (`o->Target`): the monster's position or the bone they were made at. */

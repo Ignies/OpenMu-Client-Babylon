@@ -142,13 +142,15 @@ shared pools, textures and particle recipes other folders reuse.
 - `monsterGlow.test.ts`: `RenderLight` breathes on the world's clock, so two monsters that came apart
   breathe alike, in step with their floor light; Santa Claus and the Snowman carry their steady
   flare01 cards on their bones (ZzzObject.cpp:1910-1945); a swelling card (Kundun's) takes its size
-  from the world clock, a lifted one (Selupan's) adds the swing to its light and turns on that clock.
+  from the world clock, a lifted one (Selupan's) adds the swing to its light and turns on that clock;
+  `scaleBy` times a card's size every frame.
 - `monsterVisuals.test.ts`: a `cards` row hangs each spot on the glow entry with its own sheet, scale
   and offset; a `trail` runs a ribbon from its bone, a gated one ending when the monster dies; a `puff`
   makes one of its particles at its bone, and one gated on a buff puffs only under it, each bone rolling
   its own chance with `rollEach`; each particle of a puff takes its own scale, and the jitter; a `turned`
   puff takes the monster's facing and a `ride` one hands its particles one kept point a body or a bone; a
-  cards row gated on an action is shown only in it.
+  cards row gated on an action is shown only in it; a `roar` row's cards and particles scale with Kundun's
+  Shock roar (`PKKey` and `Skill` stepped a tick, GMHellas.cpp:1596-1622), 1 out of Shock.
 - `core.test.ts`: a flickering tint makes a bounded number of additive materials, each within half
   a 1/128 step of the colour asked for; a burst emits nothing while the page is hidden.
 - `modelClones.test.ts`: a `model`, `linkedModel` or spirit skull clone leaves no mesh, skeleton or

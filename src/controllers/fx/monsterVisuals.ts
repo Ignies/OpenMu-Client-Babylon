@@ -168,10 +168,11 @@ const PUFFS: Readonly<Record<BodyPuff, KindName>> = {
 type CardsRow = Extract<BodyFxEmitter, { kind: 'cards' }>;
 
 /** A `cards` row as the glow entry draws it: each spot its own sheet, scale and offset (cm to tiles). */
-function cardGlow(em: CardsRow, e: Entity): MonsterGlow {
+function cardGlow(em: CardsRow, e: Entity, roar: Roar): MonsterGlow {
   const gate = em.gate;
   return {
     when: gate && (gate.action || gate.frames) ? () => shownNow(e, gate) : undefined,
+    scaleBy: em.roar ? () => roar.value : undefined,
     bones: [],
     spots: em.spots.map(s => ({
       bone: s.bone,
@@ -317,6 +318,29 @@ function shownNow(e: Entity, gate: Gate): boolean {
   return false;
 }
 
+/** The Shock roar's `o->PKKey`, `o->Skill` and the `fRoar` they make. */
+type Roar = { pk: number; skill: number; value: number };
+
+/** One tick of the roar (GMHellas.cpp:1596-1622): `fRoar` is 1 out of Shock. */
+function stepRoar(r: Roar, action: A | undefined, frame: number): void {
+  if (action !== A.Shock) {
+    r.pk = 0;
+    r.value = 1;
+    return;
+  }
+  if (frame > 10 && r.pk > 10) r.pk -= 1;
+  else if (frame > 4) r.pk += 1;
+  else r.pk = 10;
+  if ((frame > 4 && frame < 6) || (frame > 8 && frame < 10)) {
+    if (frame < 5 || (frame > 8 && frame < 9)) r.skill += 3;
+    else if (r.skill > 3) r.skill -= 3;
+  } else r.skill = 0;
+  r.value = (r.pk + r.skill) * 0.15;
+}
+
+/** The emitting monster's `fRoar`, for its `roar` puffs. */
+let roarNow = 1;
+
 /** The monster's `Angle` as a node turn: a push of `(0, -1, 0)` goes the way it faces (`entityYaw`). */
 const facingTurn = { x: 0, y: 0, z: 0 };
 
@@ -455,7 +479,7 @@ function emit(scene: Scene, e: Entity, em: Emitter, f: Frame, rides?: readonly V
         for (let i = 0; i < em.particles.length; i++) {
           const p = em.particles[i];
           const name = typeof p === 'string' ? p : p[Math.floor(Math.random() * p.length)];
-          const scale = em.scales?.[i] ?? em.scale ?? 1;
+          const scale = (em.scales?.[i] ?? em.scale ?? 1) * (em.roar ? roarNow : 1);
           void spawnParticle(scene, PUFFS[name], tmp, turn, scale, em.colour, em.jitterCm, anchor);
         }
       }
@@ -494,9 +518,12 @@ export function visualMonster(
     em.kind === 'puff' && em.ride ? (em.ride === 'bone' ? em.bones : [0]).map(() => new Vector3()) : undefined
   );
 
+  const roar: Roar = { pk: 0, skill: 0, value: 1 };
+  const roars = row.some(em => (em.kind === 'cards' || em.kind === 'puff') && em.roar);
+
   for (const em of row) {
     if (em.kind === 'cards') {
-      const card = glowMonster(scene, e, cardGlow(em, e));
+      const card = glowMonster(scene, e, cardGlow(em, e, roar));
       children.push(card);
       if (em.gate?.alive) mortal.push(card);
       continue;
@@ -611,6 +638,8 @@ export function visualMonster(
 
       for (let t = 0; t < due; t++) {
         ticks++;
+        if (roars) stepRoar(roar, f.action, frame);
+        roarNow = roar.value;
         for (let r = 0; r < row.length; r++) {
           const em = row[r];
           if (em.kind === 'appear') {

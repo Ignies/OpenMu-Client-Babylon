@@ -228,4 +228,47 @@ describe('monster body rows', () => {
     (e as unknown as { monsterAnimation: { action: number } }).monsterAnimation.action = 3;
     expect(hole.when?.()).toBe(true);
   });
+
+  // Kundun's Shock roar (GMHellas.cpp:1596-1631): `PKKey` is 10 to frame 4, then one more a tick (one less past
+  // frame 10, down to 10); `Skill` climbs 3 a tick into frames 4-5 and 8-9 and falls 3 out of them. `fRoar` is
+  // `(PKKey + Skill) * 0.15` in Shock, 1 out of it, and scales the roar rows' cards and particles.
+  it('scale the roar rows by the Shock roar', () => {
+    calls.glows.length = 0;
+    calls.particles.length = 0;
+    const e = monster();
+    let frame = 0;
+    const anim = (e as unknown as { monsterAnimation: { action: number } }).monsterAnimation;
+    (e as unknown as { modelObject: { actionFrame: () => number } }).modelObject.actionFrame = () => frame;
+    visualMonster(scene, e, [
+      { kind: 'cards', spots: [{ bone: 100, card: 'flareRed', scale: 1.2 }], colour: [1, 1, 1], roar: true },
+      { kind: 'puff', every: 1, particles: ['smoke13'], bones: [100], colour: [1, 1, 1], roar: true },
+    ] as never);
+    const red = calls.glows[0] as { scaleBy: () => number };
+    const step = () => monsterVisualsLayer.update?.(0, 0.04);
+    step();
+    expect([red.scaleBy(), calls.particles[0][4]]).toEqual([1, 1]);
+    anim.action = 5;
+    step();
+    expect(red.scaleBy()).toBeCloseTo(1.5);
+    frame = 4.5;
+    step();
+    step();
+    // PKKey 12, Skill 6.
+    expect(red.scaleBy()).toBeCloseTo(18 * 0.15);
+    frame = 5.5;
+    step();
+    // PKKey 13, Skill 3.
+    expect(red.scaleBy()).toBeCloseTo(16 * 0.15);
+    expect(calls.particles[calls.particles.length - 1][4]).toBeCloseTo(16 * 0.15);
+    frame = 7;
+    step();
+    expect(red.scaleBy()).toBeCloseTo(14 * 0.15);
+    frame = 11;
+    step();
+    expect(red.scaleBy()).toBeCloseTo(13 * 0.15);
+    anim.action = 0;
+    step();
+    expect(red.scaleBy()).toBe(1);
+    monsterVisualsLayer.reset?.();
+  });
 });

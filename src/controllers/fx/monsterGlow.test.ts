@@ -94,6 +94,19 @@ describe('a swelling card', () => {
     expect(card.width).toBeCloseTo((64 * (1.2 + Math.sin(2500 * 0.001) * 0.3)) / 100);
     monsterGlowLayer.reset?.();
   });
+
+  // The red flare of his Shock roar: the same size times `fRoar` (GMHellas.cpp:1619).
+  it('times its size by what scales it', async () => {
+    const glow = { bones: [], spots: [{ bone: 100, tex: 'flareRed' as const, scale: 1.2 }], cards: [], colour: [1, 1, 1] as const, breathe: false, luminosity: 1, swellSpeed: 0.001, swellAmount: 0.3, scaleBy: () => 2.5 };
+    worldAt(1000);
+    sprites.length = 0;
+    glowMonster({} as Scene, monster(), glow);
+    await new Promise(resolve => setTimeout(resolve, 0));
+    monsterGlowLayer.update?.(0, 1);
+    const card = sprites[sprites.length - 1] as unknown as { width: number };
+    expect(card.width).toBeCloseTo((64 * (1.2 + Math.sin(1000 * 0.001) * 0.3) * 2.5) / 100);
+    monsterGlowLayer.reset?.();
+  });
 });
 
 describe('a lifted, turning card', () => {

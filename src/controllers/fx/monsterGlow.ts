@@ -133,6 +133,8 @@ export type MonsterGlow = {
   readonly luminosity?: number;
   /** Drawn only while this holds. */
   readonly when?: () => boolean;
+  /** Each card's `Scale` (with its swell) times this, read every frame. */
+  readonly scaleBy?: () => number;
 };
 
 /**
@@ -439,10 +441,11 @@ function place(g: LiveGlow): void {
     sprite.isVisible = !hidden;
     if (hidden) continue;
 
-    if (swell) {
+    if (swell || g.glow.scaleBy) {
       const { px } = GLOW_TEXTURES[s.tex];
-      sprite.width = (px[0] * (s.scale + swell)) / TILE_CM;
-      sprite.height = (px[1] * (s.scale + swell)) / TILE_CM;
+      const size = (s.scale + swell) * (g.glow.scaleBy?.() ?? 1);
+      sprite.width = (px[0] * size) / TILE_CM;
+      sprite.height = (px[1] * size) / TILE_CM;
     }
     if (s.spin) sprite.angle = (seconds * 1000 * s.spin * Math.PI) / 180;
 
