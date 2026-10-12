@@ -1,7 +1,7 @@
 import type { ENUM_WORLD } from '../../core/types';
 import type { SkillLayer } from './layer';
 import { SKILL_LAYERS } from './layers';
-import { activeBuffs, buffRemaining, hasBuff, type ActiveBuff } from './buffs';
+import { activeBuffs, buffCancelSkill, buffRemaining, cancelBuff, hasBuff, type ActiveBuff } from './buffs';
 import {
   skillCooldown,
   skillCooldownRemaining,
@@ -213,6 +213,16 @@ class Skills {
   /** Spend a master point: `AddMasterSkillPoint`. */
   learnMasterSkill(num: number): void {
     learnMasterSkill(num);
+  }
+
+  /** The skill whose effect a right click on the bar offers to cancel, or null. */
+  buffCancelSkill(effectId: number): number | null {
+    return buffCancelSkill(effectId);
+  }
+
+  /** `SendMagicEffectCancelRequest(skill, HeroKey)`: the server drops the effect. */
+  cancelBuff(skill: number): void {
+    cancelBuff(skill);
   }
 
 

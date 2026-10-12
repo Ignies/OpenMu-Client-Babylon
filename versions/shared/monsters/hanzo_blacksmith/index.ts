@@ -22,7 +22,7 @@ export default defineMonster({
   light: { kind: 'forge', color: [1, 0.4, 0], range: 3 },
   maxHealth: 1000,
   // MODEL_SMITH at c->Object.Scale = 0.95 (ZzzCharacter.cpp:14517-14522).
-  npcModel: { file: 'Smith01', scale: 0.95 },
+  npcModel: { file: 'Smith01', scale: 0.95, idle: { base: 0, stay: [12, 16], others: [1, 2] } },
   // MODEL_SMITH: every tick the idle clip sits in frames 5-10, so one clang per swing of the
   // hammer (ZzzCharacter.cpp:6090-6092). The sparks are controllers/fx/monsterVisuals.ts.
   voice: { sound: 'Sound/nBlackSmith', frames: [5, 10] },

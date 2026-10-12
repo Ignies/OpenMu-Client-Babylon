@@ -31,12 +31,15 @@ the table would import itself.
   the model a drop is shown as (`CreateItem`, ZzzObject.cpp:6056-6116), and the Divine weapon a Weapon of
   Archangel is drawn as; `actors/playerObject.ts` reads the second.
 - `goldColor(amount)`: the colour of a zen amount (`getGoldColor`, ZzzInventory.cpp:1094-1110).
-- `ancientSetOf(item)`, `wornSetPieces(set, worn, hero)`, `setOptionLines(set, pieces)`, `SetOptionLine`
+- `ancientSetOf(item)`, `wornSetPieces(set, worn, hero)`, `setOptionLines(set, pieces)`, `activeSetOptions(worn, hero)`, `SetOptionLine`
   (`ancientSets.ts`): an ancient piece's set and which of its options the worn pieces light
   (`CSItemOption`, from `assets/mu/itemSetFile.ts`).
 - `isSocketItem(group, num)`, `hasGuardianOption(item)`, `harmonyOf(item)`, `socketsOf(item)`, `socketBonusOf(item)`
   (`itemOptions.ts`): the 380 flag (byte 5 bit 3, read from `raw`), the harmony option or socket bonus
   (byte 6) and the socket seeds (byte % 50, sphere level byte / 50 + 1), as `CreateItem` reads them.
+- `socketOptionValue(type, value, maxima)`, `socketStatusBonus(worn, maxima)`, `SocketMaxima`, `SocketStatusBonus`
+  (`socketBonus.ts`): one socket value (`CalcSocketOptionValue`) and what every worn seed and mix bonus adds to the
+  character window (`CalcSocketStatusBonus`, SocketSystem.cpp:476-570), by the option's `SOPT_*` / `SBOPT_*` id.
 - `isOptionWing(group, num)`, `wingOptionKind(item)`, `wingOptions(item)` (`wingOptions.ts`): the wing options
   (`CalcWingOptions`) and the kind of a wing's additional option (`OptionType`, ZzzInfomation.cpp:1236-1442).
 - `skillMana(num)`: a skill's mana, for tooltip lines that name it.

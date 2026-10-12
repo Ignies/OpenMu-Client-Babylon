@@ -13,6 +13,9 @@ the Rage Fighter's Dark Side blows. This folder has only the handlers; it keeps 
 - Handlers read `Ecs.world` and write straight onto the entities (animation components,
   `attributeSystem`, `dying`). The hero's own HP on a kill goes to `Hero.currentHP`.
 - The hero is driven locally: `ObjectAnimation` for the hero is ignored, as in the original.
+- `MonsterSkillAnimation` (0x69, `ReceiveMonsterSkill`, WSclient.cpp:4091-4128) records the monster's skill;
+  one in range turns it to its target and swings it through `monsterSkillSwing`, whose map hooks pick the
+  clip. OpenMU sends it for the Imperial Guardian monsters, Selupan and the Iron Knight.
 - `lastAttacker` is the original's `AttackPlayer` (`WSclient.cpp:3596-3608`, `:4161`): who last sent an
   attack or skill animation, used for Soul Barrier's hit shell on the hero.
 - A hit plays the hit sound (`AttackEffect`, `ZzzCharacter.cpp:5250-5307`), lowers the target's health
@@ -76,5 +79,6 @@ the Rage Fighter's Dark Side blows. This folder has only the handlers; it keeps 
   naming no target asks for the skill on the hero, and its empty slots get no follow-up; a cast keeps the last targets and
   follow-ups until its 0x4B answers; another caster's 0x19 of Dark Side
   counts one of the hero's follow-ups and draws nothing.
+- `monsterSkill.test.ts`: a 0x69 turns Gaion to his target and plays his skill's clip; none without a target.
 - `skillAnimation.test.ts`: another caster's 0x19 of Dragon Roar (and its Strengthener) leaves his clip running and plays
   no cast sound, only its hit; another skill's still plays its clip.

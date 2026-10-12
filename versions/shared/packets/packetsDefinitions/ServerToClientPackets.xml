@@ -13093,6 +13093,35 @@
         </Field>
       </Fields>
     </Packet>
+    <Packet>
+      <HeaderType>C1Header</HeaderType>
+      <Code>69</Code>
+      <Name>MonsterSkillAnimation</Name>
+      <Length>10</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>A monster performs a special skill, e.g. Selupan.</SentWhen>
+      <CausedReaction>The client shows the animation of the monster skill.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>3</Index>
+          <Type>ShortBigEndian</Type>
+          <Name>SkillNumber</Name>
+          <Description>The number of the monster skill of the client, e.g. 34 to 42 for the skills of Selupan.</Description>
+        </Field>
+        <Field>
+          <Index>6</Index>
+          <Type>ShortLittleEndian</Type>
+          <Name>AttackerId</Name>
+          <Description>The id of the monster. The field is aligned to 2 bytes, because the client structure is not packed.</Description>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>ShortLittleEndian</Type>
+          <Name>TargetId</Name>
+          <Description>The id of the target. The highest bit is set, if the skill has been applied successfully.</Description>
+        </Field>
+      </Fields>
+    </Packet>
   </Packets>
   <Enums>
     <Enum>

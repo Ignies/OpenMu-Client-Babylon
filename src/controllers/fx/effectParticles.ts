@@ -43,6 +43,7 @@ type TextureKey =
   | 'fantaF'
   | 'clud64'
   | 'flare01'
+  | 'flare01Red'
   | 'fi01'
   | 'fi02'
   | 'fireRed';
@@ -69,6 +70,7 @@ const TEXTURES: Record<
   fantaF: { file: 'Effect/fantaF.OZJ', size: 64 },
   clud64: { file: 'Effect/clud64.OZJ', size: 64 },
   flare01: { file: 'Effect/flare01.OZJ', size: 64 },
+  flare01Red: { file: 'Effect/flare01_red.OZJ', size: 64 },
   fi01: { file: 'Effect/fi01.OZJ', size: 128 },
   fi02: { file: 'Effect/fi02.OZT', size: 256 },
   fireRed: { file: 'Effect/firered.OZJ', size: 64 },
@@ -1654,7 +1656,7 @@ export class BonedParticleEmitter {
 }
 
 /** A sheet a held sprite can be drawn with. */
-export type HeldTexture = 'clud64' | 'flare01' | 'flareBlue';
+export type HeldTexture = 'clud64' | 'flare01' | 'flare01Red' | 'flareBlue';
 
 /** One sprite riding a node: `CreateSprite`'s sheet and SubType blend. */
 export type HeldPoint = {

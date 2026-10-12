@@ -71,3 +71,16 @@ export function setOptionLines(set: ItemSet, pieces: number): SetOptionLine[] {
   for (const { option, value } of set.full) add(option, value, Infinity, 'full');
   return out;
 }
+
+/** The lit options of every set the hero wears (`m_SetSearchResult` after `CheckItemSetOptions`). */
+export function activeSetOptions(worn: readonly (Item | null)[], hero: HeroStats, tables: ItemSetTables | null = itemSetTables()): SetOptionLine[] {
+  const seen = new Set<ItemSet>();
+  const out: SetOptionLine[] = [];
+  for (const slot of SET_SLOTS) {
+    const set = worn[slot] ? ancientSetOf(worn[slot], tables) : null;
+    if (!set || seen.has(set)) continue;
+    seen.add(set);
+    for (const line of setOptionLines(set, wornSetPieces(set, worn, hero, tables))) if (line.active) out.push(line);
+  }
+  return out;
+}

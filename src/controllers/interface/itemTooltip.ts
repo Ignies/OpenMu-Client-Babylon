@@ -35,6 +35,7 @@ import {
   setOptionLines,
   skillMana,
   socketBonusOf,
+  socketOptionValue,
   socketsOf,
   wingOptions,
   wornSetPieces,
@@ -889,11 +890,7 @@ type SocketMaxima = Pick<TooltipExtras, 'maxLife' | 'maxMana' | 'masterLevel'>;
 
 /** `CalcSocketOptionValue` / `CalcSocketOptionValueText` (SocketSystem.cpp:141-198). */
 function socketValue(option: SocketOption, value: number, hero: HeroStats, extras?: SocketMaxima): string {
-  let amount = 0;
-  if (option.type === 1 || option.type === 2) amount = value;
-  else if (option.type === 3) amount = Math.trunc((hero.level + (extras?.masterLevel ?? 0)) / value);
-  else if (option.type === 4) amount = Math.trunc((extras?.maxLife ?? 0) / value);
-  else if (option.type === 5) amount = Math.trunc((extras?.maxMana ?? 0) / value);
+  const amount = socketOptionValue(option.type, value, { ...extras, level: hero.level });
   return option.type === 2 ? `+${amount}%` : `+${amount}`;
 }
 

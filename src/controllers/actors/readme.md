@@ -18,7 +18,9 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 - Monster models from each monster's folder (through the monsters controller): `monsterModelFile`,
   `monsterModelTypeOfNpc`, `monsterScaleOf`, `monsterHiddenMesh`, `hasMonsterModel`;
   `monsterFactoryFor` (`genericMonster.ts`), the class every monster without its own uses.
-- NPC defaults: `npcFactoryFor(file, scale?, clipSpeeds?, holdFrame?)`, `trapFactoryFor`, `HiddenNpc`,
+- NPC defaults: `npcFactoryFor(file, scale?, clipSpeeds?, holdFrame?, idle?)` (as each clip ends the model
+  rolls its next, `nextIdleAction` / `DEFAULT_IDLE_ROLL` in `npcIdle.ts`: EtcStopAnimationSetting,
+  ZzzCharacter.cpp:3546-3687, instead of looping clip 0), `trapFactoryFor`, `HiddenNpc`,
   `npcSpawnScale(factory, type, world)` (`modelFactoryPerId.ts`), `MapActors` (`mapActors.ts`, the
   map's `actors` row); `gearedNpcFactory(gear)`,
   `transformedNpcFactory(dir, part, scale?)` (`playerNpc.ts`); `CHARACTER_DEFAULT_SCALE`
@@ -106,10 +108,8 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   operator status, never while cloaked). It is its own root, not a child, so it keeps its own orange
   chrome pass (ZzzObject.cpp:1558-1564); each frame it is put at head bone 20 plus (70, -5, 0) cm and
   turned with the body, not the bone (`CSParts::IRender`).
-- `contributorMark.ts`: `ContributorMark`, the credits' contributor mark (protected, AGENTS.md "Credits"): one
-  halo ring cloned per character (shared geometry and material per scene) and one small CPU particle system
-  of soft white motes round the body. `ecs/systems/contributorMark.ts` creates it and calls `place(head, feet,
-  shown)` each frame; it is disposed with the body node.
+- `creditsAccent.ts`: `CreditsAccent`, drawn for the credits module (protected, AGENTS.md "Credits");
+  `ecs/systems/creditsAccent.ts` creates it and calls `place(head, feet, shown)` each frame.
 - The `Helm` socket is the class head and `HelmMask` the worn helm. The head is drawn bare-headed (it is then
   BODYPART_HELM) and under the open helms, Bronze, Pad, Vine to Spirit and 63, 65, 68, 70 (BODYPART_HEAD); any
   other helm hides it (`showsClassHead`, SetCharacterScale, ZzzCharacter.cpp:12114-12128). Every player is dressed
@@ -183,6 +183,8 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   excellent tier on every mesh and one key per look; no shot for an item with no model; the hover
   turn at 0.45 degrees a millisecond, written into the node's own quaternion; a changed item-effects
   option forgets the shots and asks every look again.
+- `npcIdle.test.ts`: the idle clip roll (the default, a missing clip, the folders' own cases) and a plain NPC
+  playing the rolled clip at a clip's end.
 - `npcModelTable.test.ts`: every row names a file in `public/game-assets` and has a scale > 0; the
   tables behave as plain objects and read the folders when asked.
 - `trapModels.test.ts`: every (map, trap) pair names an `Object<world+1>` model that exists.

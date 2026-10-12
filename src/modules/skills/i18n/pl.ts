@@ -55,4 +55,5 @@ export default {
   'buff.shieldSkill': 'Umiejętność tarczy',
   'buff.alcohol': 'Alkohol',
   'buff.unnamed': 'Efekt {number}',
+  'buff.npcBlessing': 'Obrażenia i obrona zwiększone dzięki błogosławieństwu.',
 } satisfies Partial<Record<keyof typeof en, string>>;

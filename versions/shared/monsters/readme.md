@@ -60,10 +60,10 @@ In game the name a player reads is the language pack's in either case (`monsterD
 | Field / file | Drawn as |
 |---|---|
 | `model.ts` | its own class |
-| `hidden: true` | nothing (the Crywolf altars) |
+| `hidden: true` | nothing (the Crywolf altars, Maya's body 364) |
 | `trap: { object, shadow }` | the world object of the map it stands on (traps 100-106) |
 | `model: { type, scale, hiddenMesh }` | monster model `Monster/Monster<type+1>.glb` |
-| `npcModel: { file, scale?, clipSpeeds?, holdFrame? }` | `Data/NPC/<file>` (or a path off the asset root when it starts with `/`) |
+| `npcModel: { file, scale?, clipSpeeds?, holdFrame?, idle? }` | `Data/NPC/<file>` (or a path off the asset root when it starts with `/`); `idle` is the clip roll its model case has in EtcStopAnimationSetting (ZzzCharacter.cpp:3546-3687), else `rand() % 2` |
 | `gear: { charClass, set, mainHand, ... }` | a player rig in one armour set plus a kit |
 | `transformed: { dir, part, scale? }` | a player rig whose body is one part file |
 | none | the Bull Fighter, as the original's default |
@@ -98,6 +98,7 @@ In game the name a player reads is the language pack's in either case (`monsterD
 | `balgass/` | Balgass (349), Crywolf boss |
 | `kundun_demon/` | Kundun (275), with a fast-forwarded death clip |
 | `selupan/` | Selupan (459), Raklion boss |
+| `gayion_the_gladiator/` | Gaion Kharein (504), Imperial Guardian boss: his five swords on their bones by action (`swords.ts`), mesh 2 bright blue and the jewel and edge sprites on each sword's bones, and the swords his attacks throw at the hero (`flights.ts` paths, `thrown.ts`: SubType 1 and 3 flights, the curved swords' shadows, the blue ground light, the throw sounds). Not ported: Attack2's sword-force trails, fire and thunder joints; Attack3's flare joint and landing (crater, stones, shock waves, quake, sounds); the SubType 11 / 12 return to the hand; Attack4's main sword and flame strike; the rage inferno on Appear. His 0x69 skills pick Attack1-4 and the Berserker's Appear (`controllers/anim/monsterAttackClip.ts`, GMEmpireGuardian4.cpp:1399-1440) |
 | `_blood_castle/` | Castle Gate (131) and Statue of Saint (132-134) |
 | `_golden_line/` | the golden invasion line, with extra additive body passes |
 | `_skeleton_line/` | Skeleton Warrior, Archer, Elite, Death King, Death Bone: player-rig monsters |

@@ -3,9 +3,9 @@
  *
  * Driven by `HeroSkills.buffs` (MagicEffectStatus 0x07 / MagicEffectCancelled,
  * `net.ts`): a MobX reaction stamps every newly present effect id with the
- * layer clock. OpenMU S6 sends no durations, so `buffRemaining` only counts
- * down for effects whose duration formula the client knows (`recipes.ts`),
- * and answers `null` otherwise.
+ * layer clock. OpenMU S6 sends a duration only for item effects (0x2D,
+ * `setBuffTime`); otherwise `buffRemaining` counts down for effects whose
+ * duration formula the client knows (`recipes.ts`) and answers `null`.
  *
  * Read by the buff bar (`versions/shared/ui/hud/buff_bar`) through `skills.activeBuffs`
  * / `skills.buffRemaining`, and by the usability rules (`usability.ts`).
@@ -16,6 +16,8 @@ import type { SkillLayer } from './layer';
 import { buffRecipe, type BuffKind } from './recipes';
 import { HeroSkills } from './state';
 import { Hero } from '../hero';
+import { Session } from '../session';
+import { MagicEffectCancelRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
 
 // ---- 1. tuning -------------------------------------------------------------
 
@@ -35,6 +37,13 @@ export interface ActiveBuff {
 let clock = 0;
 /** Effect id → clock seconds when it appeared. */
 const startedAt = new Map<number, number>();
+/** Effect id → clock seconds when it runs out, for the effects whose time the server sent (0x2D). */
+const endsAt = new Map<number, number>();
+
+/** `RegisterBuff(type, Hero, time)` (WSclient.cpp:10265): the server's remaining seconds for an effect. */
+export function setBuffTime(effectId: number, seconds: number): void {
+  endsAt.set(effectId, clock + seconds);
+}
 
 function noteBuffs(ids: readonly number[] | undefined): void {
   // Defensive: a reaction whose expression threw hands over `undefined`.
@@ -42,6 +51,9 @@ function noteBuffs(ids: readonly number[] | undefined): void {
   for (const id of ids) if (!startedAt.has(id)) startedAt.set(id, clock);
   for (const id of Array.from(startedAt.keys())) {
     if (!ids.includes(id)) startedAt.delete(id);
+  }
+  for (const id of Array.from(endsAt.keys())) {
+    if (!ids.includes(id)) endsAt.delete(id);
   }
 }
 
@@ -79,6 +91,21 @@ export function activeBuffs(): ActiveBuff[] {
   return buffs.concat(debuffs);
 }
 
+/** eBuff_InfinityArrow and eBuff_SwellOfMagicPower: the only effects a right click cancels, by their skill (NewUIBuffWindow.cpp:240-253). */
+const CANCEL_SKILL: Readonly<Record<number, number>> = { 6: 77, 82: 233 };
+
+export function buffCancelSkill(effectId: number): number | null {
+  return CANCEL_SKILL[effectId] ?? null;
+}
+
+/** The cancel box's Ok (NewUICommonMessageBox.cpp:1524-1533): the base skill and the hero. */
+export function cancelBuff(skill: number): void {
+  const packet = MagicEffectCancelRequestPacket.createPacket();
+  packet.SkillId = skill;
+  packet.PlayerId = Hero.playerId ?? 0;
+  Session.sendToGS(packet.buffer);
+}
+
 /** Whether the hero currently carries this effect. */
 export function hasBuff(effectId: number): boolean {
   return HeroSkills.buffs.includes(effectId);
@@ -89,6 +116,8 @@ export function hasBuff(effectId: number): boolean {
  * `null` when the server never told and no formula is known.
  */
 export function buffRemaining(effectId: number): number | null {
+  const end = endsAt.get(effectId);
+  if (end !== undefined) return Math.max(0, end - clock);
   const started = startedAt.get(effectId);
   const duration = buffRecipe(effectId).durationSeconds;
   if (started === undefined || !duration) return null;
@@ -106,6 +135,7 @@ function reset(): void {
   // their start stamps do too; only the clock is rebased.
   const now = clock;
   for (const [id, at] of startedAt) startedAt.set(id, at - now);
+  for (const [id, at] of endsAt) endsAt.set(id, at - now);
   clock = 0;
 }
 

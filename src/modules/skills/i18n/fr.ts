@@ -59,4 +59,5 @@ export default {
   'buff.shieldSkill': 'Compétence de bouclier',
   'buff.alcohol': 'Alcool',
   'buff.unnamed': 'Effet {number}',
+  'buff.npcBlessing': 'Dégâts et défense augmentés par une bénédiction.',
 } satisfies Partial<Record<keyof typeof en, string>>;

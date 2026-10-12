@@ -13,7 +13,9 @@ const { installNet } = await import('./net');
 const { Hero } = await import('@/modules/hero');
 const { Economy } = await import('../economy/economy');
 const { EventBus } = await import('@/core/eventBus');
-const { CharacterInventoryPacket } = await import('@versions/shared/packets/ServerToClientPackets');
+const { CharacterInventoryPacket, ConsumeItemWithEffectPacket, ItemDurabilityChangedPacket } = await import('@versions/shared/packets/ServerToClientPackets');
+const { Bag } = await import('./state');
+const { Session } = await import('../session');
 
 installNet();
 
@@ -29,5 +31,38 @@ describe('CharacterInventory', () => {
     EventBus.emit('CharacterInventory', p.buffer);
     expect(Hero.items[12]).toBeNull();
     expect(Economy.myShopItems[3]).toBeNull();
+  });
+});
+
+// EnableUse = 0 on the answer: ReceiveDurability's consumption flag (WSclient.cpp:7164-7167) and ReceiveHelperItem (:7190).
+describe('the answer to a use', () => {
+  const sent = vi.spyOn(Session, 'sendToGS').mockImplementation(() => {});
+  const use = () => {
+    sent.mockClear();
+    Bag.consumeItemRequest(20);
+    return sent.mock.calls.length;
+  };
+
+  it('lets the next use go at once after a durability change by consumption', () => {
+    runInAction(() => (Session.isOffline = false));
+    expect(use()).toBe(1);
+    expect(use()).toBe(0);
+    const p = ItemDurabilityChangedPacket.createPacket();
+    p.InventorySlot = 20;
+    p.Durability = 2;
+    p.ByConsumption = false;
+    EventBus.emit('ItemDurabilityChanged', p.buffer);
+    expect(use()).toBe(0);
+    p.ByConsumption = true;
+    EventBus.emit('ItemDurabilityChanged', p.buffer);
+    expect(use()).toBe(1);
+  });
+
+  it('lets the next use go at once after an item with an effect (Ale)', () => {
+    expect(use()).toBe(0);
+    const p = ConsumeItemWithEffectPacket.createPacket();
+    p.EffectTimeInSeconds = 60;
+    EventBus.emit('ConsumeItemWithEffect', p.buffer);
+    expect(use()).toBe(1);
   });
 });

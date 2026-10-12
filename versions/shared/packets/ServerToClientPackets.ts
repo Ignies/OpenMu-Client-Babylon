@@ -23146,6 +23146,68 @@ export class KanturuMonsterUserCountPacket {
     this.buffer.setUint8(5, SetByteValue(oldByte, value, 8, 0));
   }
 }
+export class MonsterSkillAnimationPacket {
+  buffer!: DataView;
+  static readonly Name = `MonsterSkillAnimation`;
+  static readonly HeaderType = `C1Header`;
+  static readonly HeaderCode = 0xC1;
+  static readonly Direction = 'ServerToClient';
+  static readonly SentWhen = `A monster performs a special skill, e.g. Selupan.`;
+  static readonly CausedReaction = `The client shows the animation of the monster skill.`;
+  static readonly Length = 10;
+  static readonly LengthSize = 1;
+  static readonly DataOffset = 2;
+  static readonly Code = 0x69;
+
+  static getRequiredSize(dataSize:number){
+    return MonsterSkillAnimationPacket.DataOffset + 1 + dataSize;
+  }
+
+  constructor(buffer?: DataView){
+    buffer && (this.buffer = buffer);
+  }
+
+  writeHeader(){
+    const b = this.buffer;
+    b.setUint8(0, MonsterSkillAnimationPacket.HeaderCode);
+    b.setUint8(MonsterSkillAnimationPacket.DataOffset, MonsterSkillAnimationPacket.Code);
+  
+    return this;
+  }
+
+  writeLength(l: number|undefined = MonsterSkillAnimationPacket.Length){
+    const b = this.buffer;
+    l = l ?? b.byteLength;
+    b.setUint8(1, l);
+    return this;
+  }
+
+  static createPacket(requiredSize: number = 10): MonsterSkillAnimationPacket {
+    const p = new MonsterSkillAnimationPacket();
+    p.buffer = new DataView(new ArrayBuffer(requiredSize));
+    p.writeHeader();
+    p.writeLength();
+    return p;
+  }
+  get SkillNumber(){
+    return this.buffer.getUint16(3, false);
+  }
+  set SkillNumber(value: number){
+    this.buffer.setUint16(3, value, false);
+  }
+  get AttackerId(){
+    return this.buffer.getUint16(6, true);
+  }
+  set AttackerId(value: number){
+    this.buffer.setUint16(6, value, true);
+  }
+  get TargetId(){
+    return this.buffer.getUint16(8, true);
+  }
+  set TargetId(value: number){
+    this.buffer.setUint16(8, value, true);
+  }
+}
 
 export const ServerToClientPackets = [
   GameServerEnteredPacket,
@@ -23443,5 +23505,6 @@ export const ServerToClientPackets = [
   KanturuBattleResultPacket,
   KanturuTimeLimitPacket,
   KanturuMayaWideAreaAttackPacket,
-  KanturuMonsterUserCountPacket
+  KanturuMonsterUserCountPacket,
+  MonsterSkillAnimationPacket
 ] as const;

@@ -13,6 +13,7 @@ import {
   CloseNpcRequestPacket,
   EventQuestStateListRequestPacket,
   QuestCancelRequestPacket,
+  QuestClientActionRequestPacket,
   QuestCompletionRequestPacket,
   QuestProceedRequestPacket,
   QuestSelectRequestPacket,
@@ -603,12 +604,35 @@ function cacheProgress(key: number, conditions: RawCondition[], rewards: RawRewa
 function storeProgress(p: QuestProgressPacket | QuestStatePacket): number {
   const key = questKey(p.QuestNumber, p.QuestGroup);
   cacheProgress(key, p.getConditions(), p.getRewards());
+  rewardShown.add(key);
   return key;
+}
+
+/** `SetEPRequestRewardState(key, true)`: the quests whose request / reward the server sent (WSclient.cpp:10587, :10644). */
+const rewardShown = new Set<number>();
+
+/** The quests a window's opening completes: the character window's and the inventory's. */
+export const CHARACTER_WINDOW_QUEST = 0x10009;
+export const INVENTORY_QUEST = 0x1000F;
+
+/**
+ * A window opened (NewUICharacterInfoWindow.cpp:1636-1644, NewUIMyInventory.cpp:821-828): the running
+ * quest whose request was shown sends `QuestClientActionRequest` once; the character window's also
+ * unselects the quest list.
+ */
+export function questClientAction(key: number): void {
+  if (!state.active.includes(key) || !state.progress.has(key) || !rewardShown.delete(key)) return;
+  if (key === CHARACTER_WINDOW_QUEST) runInAction(() => (state.selectedKey = 0));
+  const packet = QuestClientActionRequestPacket.createPacket();
+  packet.QuestNumber = questKeyNumber(key);
+  packet.QuestGroup = questKeyGroup(key);
+  send(packet.buffer);
 }
 
 /** Drop a quest from the lists only: `ReceiveQuestGiveUp` leaves the progress window up. */
 function removeActive(key: number): void {
   requestedStates.delete(key);
+  rewardShown.delete(key);
   cancelKillRefresh(key);
   runInAction(() => {
     const i = state.active.indexOf(key);
