@@ -143,7 +143,7 @@ shared pools, textures and particle recipes other folders reuse.
 - `monsterVisuals.test.ts`: a `cards` row hangs each spot on the glow entry with its own sheet, scale
   and offset; a `trail` runs a ribbon from its bone, a gated one ending when the monster dies; a `puff`
   makes one of its particles at its bone, and one gated on a buff puffs only under it, each bone rolling
-  its own chance with `rollEach`.
+  its own chance with `rollEach`; each particle of a puff takes its own scale, and the jitter.
 - `core.test.ts`: a flickering tint makes a bounded number of additive materials, each within half
   a 1/128 step of the colour asked for; a burst emits nothing while the page is hidden.
 - `modelClones.test.ts`: a `model`, `linkedModel` or spirit skull clone leaves no mesh, skeleton or

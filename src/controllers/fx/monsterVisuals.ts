@@ -143,6 +143,9 @@ const CARDS: Readonly<Record<BodyCard, GlowTexture>> = {
 };
 
 const PUFFS: Readonly<Record<BodyPuff, KindName>> = {
+  fire1: 'fire1',
+  fire2: 'fire2',
+  fire3: 'fire3',
   smoke1: 'smoke1',
   smoke13: 'smoke13',
   smoke17: 'smoke17',
@@ -417,9 +420,11 @@ function emit(scene: Scene, e: Entity, em: Emitter, f: Frame): void {
         if (em.rollEach && Math.random() >= 1 / em.every) continue;
         tmpLocal.set(local[0] / TILE_CM, local[1] / TILE_CM, local[2] / TILE_CM);
         boneLocalPos(e, at, tmpLocal, tmp);
-        for (const p of em.particles) {
+        for (let i = 0; i < em.particles.length; i++) {
+          const p = em.particles[i];
           const name = typeof p === 'string' ? p : p[Math.floor(Math.random() * p.length)];
-          void spawnParticle(scene, PUFFS[name], tmp, NO_TURN, em.scale ?? 1, em.colour);
+          const scale = em.scales?.[i] ?? em.scale ?? 1;
+          void spawnParticle(scene, PUFFS[name], tmp, NO_TURN, scale, em.colour, em.jitterCm);
         }
       }
       return;

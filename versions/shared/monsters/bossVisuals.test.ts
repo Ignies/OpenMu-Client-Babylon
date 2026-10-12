@@ -211,3 +211,46 @@ describe('the Imperial Guardian bosses', () => {
     expect(rows(515, 'cards').map(r => r.pulse)).toEqual(Array(3).fill({ speed: 0.08, amount: 0.15, base: 0.85 }));
   });
 });
+
+describe('the Swamp of Quiet line', () => {
+  // GMSwampOfQuiet.cpp:812-840, :1136-1146: two BITMAP_LIGHT cards on bone 15, in each one's colour.
+  it('light the Sapis and the Sapi Queen on bone 15', () => {
+    expect([441, 442, 443, 557, 560].map(cards)).toEqual([
+      ['15:light@2 1,0.6,0.1', '15:light@2 1,0.6,0.1'],
+      ['15:light@2 1,0,0', '15:light@2 1,0,0'],
+      ['15:light@2 0.2,0.7,1', '15:light@2 0.2,0.7,1'],
+      ['15:light@2 1,0.6,0.1', '15:light@2 1,0.6,0.1'],
+      ['15:light@2 1,0.6,0.1', '15:light@2 1,0.6,0.1'],
+    ]);
+  });
+
+  // :842-1238: the Shadows smoke from six bones, each its own `rand() % 6`.
+  it('smoke the Shadows from six bones', () => {
+    const smoke = (numb: number) => rows(numb, 'puff')[0];
+    for (const [numb, colour, scales] of [
+      [444, [1, 0.1, 0.1], [1, 1]],
+      [445, [0.3, 0.6, 1], [1, 1]],
+      [446, [0.5, 1, 0.5], [1.5, 1.1]],
+      [559, [1, 1, 1], [1.5, 1.1]],
+    ] as const) {
+      expect(smoke(numb), `${numb}`).toMatchObject({ every: 6, rollEach: true, bones: [11, 15, 34, 21, 25, 39], colour, scales, particles: ['smoke50', ['smokeLine1', 'smokeLine2', 'smokeLine3']] });
+    }
+  });
+
+  // MODEL_NAPIN's blue cards on eleven bones (:971-981); the Blaze and Ice Napins' lights and the fires about
+  // bones 10, 61, 72, 21 (`rand() % 20 - 10` off, Scale 1.2) and 122, 116 (`rand() % 10 - 5`, 0.7) (:1002-1043, :1147-1188).
+  it('light the Napins and fire the Blaze and Ice ones', () => {
+    expect(cards(447)).toEqual([7, 4, 5, 10, 22, 11, 23, 12, 24, 34, 39].map(b => `${b}:light@2.2 0.1,0.2,1`));
+    for (const [numb, fire] of [
+      [449, [1, 1, 1]],
+      [558, [0.25, 0.6, 0.7]],
+    ] as const) {
+      const light = numb === 449 ? '1,0.2,0' : '1,1,1';
+      expect(cards(numb)).toEqual([...[10, 61, 72, 21].map(b => `${b}:light@4 ${light}`), ...[122, 116].map(b => `${b}:light@1 ${light}`)]);
+      expect(rows(numb, 'puff')).toEqual([
+        expect.objectContaining({ every: 1, bones: [10, 61, 72, 21], particles: [['fire1', 'fire2', 'fire3']], scale: 1.2, jitterCm: 10, colour: fire }),
+        expect.objectContaining({ every: 1, bones: [122, 116], particles: [['fire1', 'fire2', 'fire3']], scale: 0.7, jitterCm: 5, colour: fire }),
+      ]);
+    }
+  });
+});

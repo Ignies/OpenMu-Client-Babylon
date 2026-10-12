@@ -149,3 +149,22 @@ const fifthBones = (numBones: number): number[] => Array.from({ length: Math.cei
  */
 export const rageSmoke = (numBones: number): BodyFxEmitter =>
   puff(6, fifthBones(numBones), ['smoke50', SMOKE_LINES], [1, 0.1, 0.1], { rollEach: true, gate: { buff: BERSERKER } });
+
+// ---- the Swamp of Quiet line (GMSwampOfQuiet.cpp RenderMonsterVisual) ----
+
+/** The Sapis and the Sapi Queen: two BITMAP_LIGHT cards on bone 15 (:812-840, :1136-1146). */
+export const sapiLight = (colour: RGB): BodyFxEmitter => cards(colour, spotsOn([15, 15], 'light', 2));
+
+/** The Shadows: SMOKE 50 and a smoke line from six bones, each its own `rand() % 6` (:842-950, :1190-1199). */
+export const shadowSmoke = (colour: RGB, scales: readonly [number, number] = [1, 1]): BodyFxEmitter =>
+  puff(6, [11, 15, 34, 21, 25, 39], ['smoke50', SMOKE_LINES], colour, { rollEach: true, scales });
+
+/**
+ * The Blaze and Ice Napins: BITMAP_LIGHT on bones 10, 61, 72, 21 (Scale 4) and 122, 116 (1) and, about
+ * each, one of BITMAP_FIRE_HIK1, BITMAP_FIRE_CURSEDLICH SubType 4 or BITMAP_FIRE_HIK3 a tick (:1002-1043, :1147-1188).
+ */
+export const napinFires = (light: RGB, fire: RGB): readonly BodyFxEmitter[] => [
+  cards(light, [...spotsOn([10, 61, 72, 21], 'light', 4), ...spotsOn([122, 116], 'light', 1)]),
+  puff(1, [10, 61, 72, 21], [['fire1', 'fire2', 'fire3']], fire, { scale: 1.2, jitterCm: 10 }),
+  puff(1, [122, 116], [['fire1', 'fire2', 'fire3']], fire, { scale: 0.7, jitterCm: 5 }),
+];

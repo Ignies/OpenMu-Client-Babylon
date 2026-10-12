@@ -29,6 +29,9 @@ export type BodyRibbon = 'jointEnergy' | 'flare';
 
 /** The original's own particles a `puff` can name (`fx/effectParticles.ts` kinds, by `BITMAP_*` and SubType). */
 export type BodyPuff =
+  | 'fire1'
+  | 'fire2'
+  | 'fire3'
   | 'smoke1'
   | 'smoke13'
   | 'smoke17'
@@ -192,6 +195,10 @@ export type BodyFxEmitter =
       readonly bones: readonly number[];
       /** Each bone rolls its own 1/`every` (the `for (i < NumBones) if (rand() % 6 > 0) continue` walks). */
       readonly rollEach?: boolean;
+      /** Each entry's own `Scale`, aligned with `particles`, in place of `scale`. */
+      readonly scales?: readonly number[];
+      /** `rand() % (2x) - x` cm off the bone on each axis, a spawn. */
+      readonly jitterCm?: number;
       readonly local?: Cm3;
       readonly scale?: number;
       readonly colour: RGB;

@@ -172,4 +172,19 @@ describe('monster body rows', () => {
     expect(calls.particles.map(p => (p[2] as { x: number }).x)).toEqual([0, 10]);
     monsterVisualsLayer.reset?.();
   });
+
+  // The Shadow Look's pair (GMSwampOfQuiet.cpp:939-940): SMOKE 50 at Scale 1.5 and the smoke line at 1.1; the Blaze
+  // Napin's fires land `rand() % 20 - 10` cm off their bone (:1017-1022).
+  it('give each particle of a puff its own scale and the jitter', () => {
+    calls.particles.length = 0;
+    visualMonster(scene, monster(), [
+      { kind: 'puff', every: 1, particles: ['smoke50', 'smokeLine1'], bones: [11], scales: [1.5, 1.1], jitterCm: 10, colour: [0.5, 1, 0.5] },
+    ] as never);
+    monsterVisualsLayer.update?.(0, 0.04);
+    expect(calls.particles.map(p => [p[1], p[4], p[6]])).toEqual([
+      ['smoke50', 1.5, 10],
+      ['smokeLine1', 1.1, 10],
+    ]);
+    monsterVisualsLayer.reset?.();
+  });
 });
