@@ -129,7 +129,7 @@ const PARTICLES: Readonly<Record<BodyParticle, ParticleRecipe>> = {
 
 const SHARDS: Readonly<Record<BodyShard, readonly string[]>> = { brokenIce: MODEL.brokenIce };
 
-const BLUR_SHEETS: Readonly<Record<BodyBlurSheet, string>> = { blur01: TEX.blur, blur02: TEX.blur2 };
+const BLUR_SHEETS: Readonly<Record<BodyBlurSheet, string>> = { blur01: TEX.blur, blur02: TEX.blur2, motionBlur: TEX.motionBlur };
 
 const TEXTURES: Readonly<Record<BodyTexture, string>> = {
   flare: TEX.flare,
@@ -571,6 +571,8 @@ export function visualMonster(
       base: out => boneLocalPos(e, em.from, b.from, out),
       texture: BLUR_SHEETS[em.sheet],
       colour: em.colour,
+      blend: em.dark ? 'subtract' : 'add',
+      short: em.short,
       tickHistory: true,
       seconds: Infinity,
       until: () => stopped || entityGone(e) || (gate !== undefined && !shownNow(e, gate)),

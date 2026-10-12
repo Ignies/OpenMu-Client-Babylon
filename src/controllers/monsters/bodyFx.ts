@@ -26,8 +26,8 @@ export type BodyCard =
   | 'hole'
   | 'lightning2';
 
-/** The sheets a `blur` can draw: CreateBlur's `Type` 0 (BITMAP_BLUR, blur01) or 3 (BITMAP_BLUR2, blur02). */
-export type BodyBlurSheet = 'blur01' | 'blur02';
+/** The sheets a `blur` can draw: CreateBlur's `Type` 0 and 4 (BITMAP_BLUR, blur01), 1 (motion_blur) or 3 (BITMAP_BLUR2, blur02). */
+export type BodyBlurSheet = 'blur01' | 'blur02' | 'motionBlur';
 
 /**
  * The sheets a `trail` can run: BITMAP_JOINT_ENERGY (JointLaser01), BITMAP_FLARE (its SubType 28-33 TexType) or
@@ -229,6 +229,10 @@ export type BodyFxEmitter =
       readonly toLocal?: Cm3;
       readonly colour: RGB;
       readonly sheet: BodyBlurSheet;
+      /** CreateBlur's `Short`: it starts dropping two samples a tick at 15 ticks old, not 30. */
+      readonly short?: true;
+      /** `Type` 4: drawn darkening what is behind it (EnableAlphaBlendMinus), at its flat light. */
+      readonly dark?: true;
       readonly gate?: BodyFxGate;
     }
   | {

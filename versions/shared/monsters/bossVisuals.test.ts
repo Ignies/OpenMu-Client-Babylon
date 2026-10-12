@@ -132,7 +132,7 @@ const blurs = (numb: number) =>
   rows(numb, 'blur').map(b => {
     const at = (bone: number, local?: readonly number[]) => (local ? `${bone}(${local.join(',')})` : `${bone}`);
     const gate = b.gate ? ` ${b.gate.action?.join('/')}${b.gate.frames ? ` ${b.gate.frames.map(w => w.join('-')).join(',')}` : ''}` : '';
-    return `${at(b.from, b.fromLocal)}>${at(b.to, b.toLocal)} ${b.sheet} ${b.colour.join(',')}${gate}`;
+    return `${at(b.from, b.fromLocal)}>${at(b.to, b.toLocal)} ${b.sheet} ${b.colour.join(',')}${gate}${b.short ? ' short' : ''}${b.dark ? ' dark' : ''}`;
   });
 
 describe('the swing blurs', () => {
@@ -140,10 +140,10 @@ describe('the swing blurs', () => {
   // Iron Knights (GM_Raklion.cpp:1977-1998, :1851-1873, :2104-2126), the Dark Elf on his weapon's LinkBone 33
   // (GMCrywolf1st.cpp:1254-1282, ZzzCharacter.cpp:12069), the Sapis' claws (GMSwampOfQuiet.cpp:620-795).
   it("trail the bosses' blades and the Sapis' claws", () => {
-    expect(blurs(361)).toEqual([`32(10,0,0)>38(10,-10,0) blur02 1,1,1 ${A.Attack1}/${A.Attack4} 0-5.9`]);
+    expect(blurs(361)).toEqual([`32(10,0,0)>38(10,-10,0) blur02 1,1,1 ${A.Attack1}/${A.Attack4} 0-5.9 short`]);
     expect(blurs(459)).toEqual(['69>73 blur01 1,1.2,2']);
     for (const knight of [458, 565]) expect(blurs(knight)).toEqual(['35>36 blur02 1,1.2,2']);
-    for (const elf of [340, 440]) expect(blurs(elf)).toEqual([`33(0,0,-60)>33(0,0,-150) blur02 1,1,1 ${A.Attack1}/${A.Attack2}`]);
+    for (const elf of [340, 440]) expect(blurs(elf)).toEqual([`33(0,0,-60)>33(0,0,-150) blur02 1,1,1 ${A.Attack1}/${A.Attack2} short`]);
     const claws = (from: number, to: number[], light: string, frames: string) =>
       to.map(b => `${from}>${b} blur01 ${light} ${A.Attack1}/${A.Attack2} ${frames}`);
     const hand = [34, 35, 38, 39, 43];
@@ -182,6 +182,28 @@ describe('the Iron Knights', () => {
         { kind: 'shards', every: 1, shards: 'brokenIce', count: 6, bones: [20, 37, 45, 51], colour: [0.3, 0.5, 1], gate: { action: [A.Die], frames: [[0, 1]] } },
       ]);
     }
+  });
+});
+
+describe('the Aida and Kanturu swing blurs', () => {
+  // MoveAidaBlurEffect (GMAida.cpp:535-721), MoveKanturu1stBlurEffect (GM_Kanturu_1st.cpp:1604-1926) and
+  // Move_Kanturu2nd_BlurEffect (GM_Kanturu_2nd.cpp:1276-1380), by the model each type is drawn with.
+  it('trail each by its model', () => {
+    const atk = `${A.Attack1}/${A.Attack2}`;
+    for (const rider of [306, 550])
+      expect(blurs(rider)).toEqual([`18(20,0,0)>20(100,0,0) blur02 1,1,1 ${atk} 0-5.06 short`, `25(20,0,0)>26(100,0,0) blur02 1,1,1 ${atk} 0-5.06 short`]);
+    for (const orc of [307, 549])
+      expect(blurs(orc)).toEqual([35, 39, 43].map(b => `${b}(20,0,0)>${b + 2}(60,0,0) blur02 0.5,0.5,0 ${atk} short`));
+    expect(blurs(308)).toEqual([`26(0,0,20)>27(0,0,70) blur02 0.3,0.3,0.3 ${A.Attack1} short`]);
+    for (const satyros of [353, 497]) expect(blurs(satyros)).toEqual([`44(0,0,0)>44(0,0,-200) motionBlur 0.3,1,3.5 ${atk} 3.6-6`]);
+    for (const berserker of [350, 435, 553]) expect(blurs(berserker)).toEqual([`33(-20,0,0)>34(100,0,0) motionBlur 0.3,2,0.5 ${atk} 3.5-6.7`]);
+    expect(blurs(354)).toEqual([`55(0,0,0)>54(0,0,0) blur01 1,1.2,2 ${atk} 5.9-7.55`]);
+    for (const gigantis of [356, 434, 554]) expect(blurs(gigantis)).toEqual([`34(0,0,0)>33(0,0,0) blur01 1,1.2,2 ${atk} 3.5-5.9`]);
+    for (const genocider of [357, 555])
+      expect(blurs(genocider)).toEqual([49, 51, 50, 52].map(b => `${b}(-40,0,0)>${b}(10,0,0) blur01 1,0.2,0 ${atk} 5.5-6.9 short`));
+    for (const twin of [359, 498]) expect(blurs(twin)).toEqual([`58(-150,50,0)>59(150,-200,0) motionBlur 1,0.2,0.5 ${A.Attack1} 0-4.12`]);
+    for (const dread of [360, 439])
+      expect(blurs(dread)).toEqual([`33(0,0,0)>33(100,120,0) blur01 1,1,1 ${A.Attack1} 0-5 dark`, `33(0,0,0)>33(100,120,0) blur01 1,1,1 ${A.Attack2} 0-9 dark`]);
   });
 });
 

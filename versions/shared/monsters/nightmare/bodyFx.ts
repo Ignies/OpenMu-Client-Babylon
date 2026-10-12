@@ -53,7 +53,7 @@ export const NIGHTMARE_FX: MonsterBodyFx = [
     ],
     { gate: ALIVE }
   ),
-  blur(32, 38, [1, 1, 1], 'blur02', { fromLocal: [10, 0, 0], toLocal: [10, -10, 0], gate: { action: [A.Attack1, A.Attack4], frames: [[0, 5.9]] } }),
+  blur(32, 38, [1, 1, 1], 'blur02', { fromLocal: [10, 0, 0], toLocal: [10, -10, 0], short: true, gate: { action: [A.Attack1, A.Attack4], frames: [[0, 5.9]] } }),
   // Die from frame 3: two SMOKE + 3 SubType 3 at 1.5 from Body_Bone13 a tick.
   puff(1, [63], ['smoke3_3', 'smoke3_3'], [1, 1, 1], { scale: 1.5, gate: { action: [A.Die], frames: [[3, Infinity]] } }),
 ];

@@ -236,3 +236,82 @@ export const mayaHandMoves = (palm: number, local: Cm3): BodyFxEmitter[] => [
     gate: { action: [A.Stop2], when: () => lookState('kanturuMaya') >= MAYA3 },
   }),
 ];
+
+// ---- the Aida and Kanturu swing blurs (MoveAidaBlurEffect, MoveKanturu1stBlurEffect, Move_Kanturu2nd_BlurEffect) ----
+
+const ATTACKS = [A.Attack1, A.Attack2];
+
+/** One swing's blurs, each `from(fromLocal) > to(toLocal)` in the same light, sheet and gate. */
+const swings = (pairs: readonly (readonly [number, Cm3, number, Cm3])[], colour: RGB, sheet: BodyBlurSheet, extra: Partial<BlurRow>): BodyFxEmitter[] =>
+  pairs.map(([from, fromLocal, to, toLocal]) => blur(from, to, colour, sheet, { fromLocal, toLocal, ...extra }));
+
+/** The Death Rider and the Bloody Death Rider: Type 3, Short, to Attack frame 5.06 (GMAida.cpp:539-573, :684-720). */
+export const DEATH_RIDER_BLURS = swings(
+  [
+    [18, [20, 0, 0], 20, [100, 0, 0]],
+    [25, [20, 0, 0], 26, [100, 0, 0]],
+  ],
+  [1, 1, 1],
+  'blur02',
+  { short: true, gate: { action: ATTACKS, frames: [[0, 5.06]] } }
+);
+
+/** The Forest Orc and the Bloody Orc: Type 3, Short, through Attack1 / Attack2 (GMAida.cpp:575-612, :645-682). */
+export const ORC_BLURS = swings(
+  [
+    [35, [20, 0, 0], 37, [60, 0, 0]],
+    [39, [20, 0, 0], 41, [60, 0, 0]],
+    [43, [20, 0, 0], 45, [60, 0, 0]],
+  ],
+  [0.5, 0.5, 0],
+  'blur02',
+  { short: true, gate: { action: ATTACKS } }
+);
+
+/** The Death Tree: Type 3, Short, through Attack1 (GMAida.cpp:614-643). */
+export const DEATH_TREE_BLURS = swings([[26, [0, 0, 20], 27, [0, 0, 70]]], [0.3, 0.3, 0.3], 'blur02', {
+  short: true,
+  gate: { action: [A.Attack1] },
+});
+
+/** The Satyros: Type 1 off bone 44, Attack frames 3.6-6 (GM_Kanturu_1st.cpp:1608-1640). */
+export const SATYROS_BLURS = swings([[44, [0, 0, 0], 44, [0, 0, -200]]], [0.3, 1, 3.5], 'motionBlur', {
+  gate: { action: ATTACKS, frames: [[3.6, 6]] },
+});
+
+/** The Berserker and the Berserker Warrior: Type 1, Attack frames 3.5-6.7 (GM_Kanturu_1st.cpp:1642-1674, :1798-1834). */
+export const BERSERKER_BLURS = swings([[33, [-20, 0, 0], 34, [100, 0, 0]]], [0.3, 2, 0.5], 'motionBlur', {
+  gate: { action: ATTACKS, frames: [[3.5, 6.7]] },
+});
+
+/** The Blade Hunter: Type 0, Attack frames 5.9-7.55 (GM_Kanturu_1st.cpp:1676-1706). */
+export const BLADE_HUNTER_BLURS = swings([[55, [0, 0, 0], 54, [0, 0, 0]]], [1, 1.2, 2], 'blur01', {
+  gate: { action: ATTACKS, frames: [[5.9, 7.55]] },
+});
+
+/** The Gigantis and the Kentauros Warrior: Type 0, Attack frames 3.5-5.9 (GM_Kanturu_1st.cpp:1708-1742, :1836-1870). */
+export const GIGANTIS_BLURS = swings([[34, [0, 0, 0], 33, [0, 0, 0]]], [1, 1.2, 2], 'blur01', {
+  gate: { action: ATTACKS, frames: [[3.5, 5.9]] },
+});
+
+/**
+ * The Genocider and the Gigantis Warrior: Type 0, Short, four claws, Attack frames 5.5-6.9 (GM_Kanturu_1st.cpp:1744-1796,
+ * :1872-1924). The original lays 18 samples a tick here, not 10.
+ */
+export const GENOCIDER_BLURS = swings(
+  [49, 51, 50, 52].map(b => [b, [-40, 0, 0], b, [10, 0, 0]] as const),
+  [1, 0.2, 0],
+  'blur01',
+  { short: true, gate: { action: ATTACKS, frames: [[5.5, 6.9]] } }
+);
+
+/** The Twin Tail: Type 1, to Attack1 frame 4.12 (GM_Kanturu_2nd.cpp:1286-1309). */
+export const TWIN_TAIL_BLURS = swings([[58, [-150, 50, 0], 59, [150, -200, 0]]], [1, 0.2, 0.5], 'motionBlur', {
+  gate: { action: [A.Attack1], frames: [[0, 4.12]] },
+});
+
+/** The Dreadfear: Type 4 (dark) off bone 33, to Attack1 frame 5 and Attack2 frame 9 (GM_Kanturu_2nd.cpp:1355-1378). */
+export const DREADFEAR_BLURS = [
+  ...swings([[33, [0, 0, 0], 33, [100, 120, 0]]], [1, 1, 1], 'blur01', { dark: true, gate: { action: [A.Attack1], frames: [[0, 5]] } }),
+  ...swings([[33, [0, 0, 0], 33, [100, 120, 0]]], [1, 1, 1], 'blur01', { dark: true, gate: { action: [A.Attack2], frames: [[0, 9]] } }),
+];

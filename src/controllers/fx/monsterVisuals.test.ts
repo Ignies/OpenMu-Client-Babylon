@@ -256,6 +256,21 @@ describe('monster body rows', () => {
     monsterVisualsLayer.reset?.();
   });
 
+  // CreateBlur's Type 1 (motion_blur), its Type 4 drawn darkening (EnableAlphaBlendMinus) and its Short flag.
+  it("hand a blur its sheet, its dark pass and its Short flag", () => {
+    calls.blurs.length = 0;
+    visualMonster(scene, monster(), [
+      { kind: 'blur', from: 44, to: 44, colour: [0.3, 1, 3.5], sheet: 'motionBlur', short: true },
+      { kind: 'blur', from: 33, to: 33, colour: [1, 1, 1], sheet: 'blur01', dark: true },
+    ] as never);
+    monsterVisualsLayer.update?.(0, 0.04);
+    expect(calls.blurs.map(b => [b.texture, b.short, b.blend])).toEqual([
+      ['Effect/motion_blur.OZJ', true, 'add'],
+      ['Effect/blur01.OZJ', undefined, 'subtract'],
+    ]);
+    monsterVisualsLayer.reset?.();
+  });
+
   // The Iron Knights' death (GM_Raklion.cpp:1960-1970): at each of four bones, six MODEL_EFFECT_BROKEN_ICE0 + rand() % 3
   // in its light, SubType 0.
   it('throw a shards row of its pieces at each bone', () => {
