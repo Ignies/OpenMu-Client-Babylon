@@ -826,3 +826,43 @@ describe('the scepters\' held sprites', () => {
     ]);
   });
 });
+
+// RenderLinkObject's shield cases (ZzzCharacter.cpp).
+describe('the shields\' held sprites', () => {
+  const lum = (Math.floor(RAND * 30) + 70) * 0.005;
+
+  it('Grand Soul Shield: a blue Shiny02 and a flare of Luminosity + 1.5 off bone 1 (:7558-7565)', () => {
+    const blue = [r(lum * 0.6), r(lum * 0.6), r(lum * 2)];
+    expect(held(6, 15)).toEqual([
+      ['shiny02', 1, [15, -15, 0], 1.5, blue, 0],
+      ['flare01', 1, [15, -15, 0], r(lum + 1.5), blue, 0],
+    ]);
+  });
+
+  it('Crimson Glory: gold flares on bones 4-10, pulsing red flares on 1-3 (:8116-8143)', () => {
+    const g = r(Math.abs(Math.sin(T * 0.0005)));
+    expect(held(6, 17)).toEqual([
+      ...[4, 5, 6, 7, 8, 9, 10].map(bone => ['flare01', bone, undefined, 1.5, [0.8, 0.6, 0.2], 0]),
+      ['flareRed', 1, undefined, 0.5, [g, g, g], 0],
+      ['flareRed', 2, undefined, 0.3, [g, g, g], 0],
+      ['flareRed', 3, undefined, 0.3, [g, g, g], 0],
+    ]);
+  });
+
+  it('Salamander Shield: a red flare at bone 1 (:8144-8166)', () => {
+    expect(held(6, 18)).toEqual([['flare01', 1, undefined, 2, [0.9, 0, 0.2], 0]]);
+  });
+
+  it('Guardian Shield: pulsing violet flares on bones 1-9 (:8167-8190)', () => {
+    const l = Math.abs(Math.sin(T * 0.001)) + 0.1;
+    expect(held(6, 20)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9].map(bone => ['flare01', bone, undefined, 1.5, [r(0.8 * l), r(0.3 * l), r(0.8 * l)], 0]));
+  });
+
+  it('Cross Shield: pulsing blue flares on bones 4-7, teal on 8-13 (:8191-8220)', () => {
+    const l = Math.abs(Math.sin(T * 0.001)) + 0.1;
+    expect(held(6, 21)).toEqual([
+      ...[4, 5, 6, 7].map(bone => ['flare01', bone, undefined, 1.2, [r(0.2 * l), r(0.2 * l), r(0.8 * l)], 0]),
+      ...[8, 9, 10, 11, 12, 13].map(bone => ['flare01', bone, undefined, 1.4, [r(0.2 * l), r(0.6 * l), r(0.6 * l)], 0]),
+    ]);
+  });
+});
