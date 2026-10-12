@@ -570,7 +570,8 @@ function calculateWizardry(input: CharacterStatsInput): {
   let max = Math.trunc(energy / 4);
   let rate = 0;
 
-  const right = equipped(items, InventoryConstants.RightHandSlot);
+  // pWeaponRight is EQUIPMENT_WEAPON_RIGHT, slot 0, our LeftHandSlot (NewUICharacterInfoWindow.cpp:509, :1346).
+  const right = equipped(items, InventoryConstants.LeftHandSlot);
 
   if (right && isStaff(right)) {
     const damage = itemDamage(right);

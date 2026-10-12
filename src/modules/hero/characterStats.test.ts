@@ -60,6 +60,20 @@ describe('the character window defense rate with a shield', () => {
   });
 });
 
+// The window takes the magic percent from pWeaponRight, EQUIPMENT_WEAPON_RIGHT slot 0 (NewUICharacterInfoWindow.cpp:509, :1336-1346).
+describe('the character window wizardry with a staff', () => {
+  const held = (slot: number) => {
+    const items: (Item | null)[] = new Array(12).fill(null);
+    items[slot] = { group: 5, num: 17, durability: 81 };
+    return deriveCharacterStats({ charClass: CharacterClassNumber.DarkWizard, level: 240, strength: 600, agility: 300, vitality: 100, energy: 450, leadership: 0, items }).staffRate;
+  };
+
+  it("takes the Ancient Staff's magic power from the right hand (slot 0), not from slot 1", () => {
+    expect(held(0)).toBe(38);
+    expect(held(1)).toBe(0);
+  });
+});
+
 // NewUICharacterInfoWindow.cpp:680-704 (damage), :1259-1294 (wizardry), :1395-1418 (curse).
 describe('the character window with a transformation ring', () => {
   const withRings = (rings: (Item | null)[], charClass = CharacterClassNumber.DarkKnight, pet: Item | null = null) => {
