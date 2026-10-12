@@ -11,7 +11,17 @@ export type BodyParticle = 'bodySmoke' | 'energyChips' | 'firePuff' | 'flameLick
 export type BodyTexture = 'flare' | 'magicGround2' | 'gmAurora';
 
 /** The sheets a `cards` row can name (`CreateSprite(BITMAP_*)`). */
-export type BodyCard = 'light' | 'lightRed' | 'lightMarks' | 'shockWave' | 'shiny2' | 'energy' | 'flareBlue' | 'flareRed';
+export type BodyCard =
+  | 'light'
+  | 'lightRed'
+  | 'lightMarks'
+  | 'shockWave'
+  | 'shiny2'
+  | 'shiny6'
+  | 'energy'
+  | 'flareBlue'
+  | 'flareRed'
+  | 'eventCloud';
 
 /** The sheets a `trail` can run: BITMAP_JOINT_ENERGY (JointLaser01) or BITMAP_FLARE (its SubType 28-33 TexType). */
 export type BodyRibbon = 'jointEnergy' | 'flare';
@@ -26,6 +36,8 @@ export type BodyCardSpot = {
   /** The call's `Scale`: the sheet's pixels times this, in cm. */
   readonly scale: number;
   readonly local?: Cm3;
+  /** The call's `Rotation` as degrees a `WorldTime` ms (`(int)WorldTime * 0.08f`). */
+  readonly spin?: number;
 };
 
 /** A box in the original's centimetres: `rand() % (2x) - x` each way, `z` up. */
@@ -139,6 +151,8 @@ export type BodyFxEmitter =
       readonly pulse?: { readonly speed: number; readonly amount: number; readonly base: number };
       /** A `Scale` of `scale + sin(WorldTime * speed) * amount`. */
       readonly swell?: { readonly speed: number; readonly amount: number };
+      /** `sin(WorldTime * speed) * amount + base` added to each channel of the light. */
+      readonly lift?: { readonly speed: number; readonly amount: number; readonly base: number };
       readonly gate?: { readonly alive: true };
     }
   | {

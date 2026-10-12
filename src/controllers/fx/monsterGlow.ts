@@ -64,6 +64,9 @@ const GLOW_TEXTURES = {
   /** BITMAP_FLARE_BLUE (flareBlue), BITMAP_FLARE_RED (flareRed). */
   flareBlue: { file: TEX.flareBlue, px: [64, 64] },
   flareRed: { file: TEX.redFlare, px: [64, 64] },
+  /** BITMAP_SHINY+6 (shiny05), BITMAP_EVENT_CLOUD (clouds2). */
+  shiny6: { file: TEX.shiny5, px: [64, 64] },
+  eventCloud: { file: TEX.eventCloud, px: [256, 256] },
 } as const;
 
 export type GlowTexture = keyof typeof GLOW_TEXTURES;
@@ -91,7 +94,18 @@ export type MonsterGlow = {
    */
   readonly bones: readonly number[] | 'body';
   /** Cards each on a bone of its own, at an offset of its own (tiles): the hand-written `CreateSprite` runs. */
-  readonly spots?: readonly { readonly bone: number; readonly tex: GlowTexture; readonly scale: number; readonly local?: readonly [number, number, number] }[];
+  readonly spots?: readonly {
+    readonly bone: number;
+    readonly tex: GlowTexture;
+    readonly scale: number;
+    readonly local?: readonly [number, number, number];
+    /** Degrees a `WorldTime` ms the card turns (`CreateSprite`'s `Rotation`). */
+    readonly spin?: number;
+  }[];
+  /** `sin(WorldTime * liftSpeed) * liftAmount + liftBase` added to each channel of the light. */
+  readonly liftSpeed?: number;
+  readonly liftAmount?: number;
+  readonly liftBase?: number;
   /** The breath's speed in radians per `WorldTime` ms and its swing: `RenderLight` 0.002 and 0.3. */
   readonly breathSpeed?: number;
   readonly breathAmount?: number;
@@ -332,8 +346,11 @@ type GlowSprite = {
   readonly tex: GlowTexture;
   readonly scale: number;
   readonly blend: GlowBlend;
+  readonly spin?: number;
   sprite: Sprite | null;
 };
+
+const NO_OFFSET = [0, 0, 0] as const;
 
 type LiveGlow = {
   readonly scene: Scene;
@@ -388,7 +405,12 @@ function place(g: LiveGlow): void {
       (g.glow.breathBase ?? BREATH_BASE)
     : (g.glow.luminosity ?? 1);
 
-  const [r, gr, b] = g.rgb;
+  const lift = g.glow.liftAmount
+    ? Math.sin(seconds * (g.glow.liftSpeed ?? 0) * 1000) * g.glow.liftAmount + (g.glow.liftBase ?? 0)
+    : 0;
+  const r = (g.rgb[0] + lift) * lumi;
+  const gr = (g.rgb[1] + lift) * lumi;
+  const b = (g.rgb[2] + lift) * lumi;
   const hidden = g.entity.modelObject?.OutOfView === true;
   const swell = g.glow.swellAmount ? Math.sin(seconds * (g.glow.swellSpeed ?? 0) * 1000) * g.glow.swellAmount : 0;
 
@@ -404,7 +426,7 @@ function place(g: LiveGlow): void {
       sprite.isPickable = false;
       sprite.width = (px[0] * s.scale) / TILE_CM;
       sprite.height = (px[1] * s.scale) / TILE_CM;
-      sprite.color = spriteLevel(g.scene, new Color4(r * lumi, gr * lumi, b * lumi, 1));
+      sprite.color = spriteLevel(g.scene, new Color4(r, gr, b, 1));
       s.sprite = sprite;
     }
 
@@ -416,12 +438,13 @@ function place(g: LiveGlow): void {
       sprite.width = (px[0] * (s.scale + swell)) / TILE_CM;
       sprite.height = (px[1] * (s.scale + swell)) / TILE_CM;
     }
+    if (s.spin) sprite.angle = (seconds * 1000 * s.spin * Math.PI) / 180;
 
-    const [lx, ly, lz] = s.local ?? g.glow.local ?? [0, 0, 0];
+    const [lx, ly, lz] = s.local ?? g.glow.local ?? NO_OFFSET;
     tmpLocal.set(lx, ly, lz);
     boneLocalPos(g.entity, s.bone, tmpLocal, tmpWorld);
     sprite.position.copyFrom(tmpWorld);
-    spriteLevel(g.scene, sprite.color.set(r * lumi, gr * lumi, b * lumi, 1));
+    spriteLevel(g.scene, sprite.color.set(r, gr, b, 1));
   }
 }
 
@@ -445,7 +468,7 @@ export function glowMonster(
   const bones = bonesOf(glow, entity);
   const sprites: GlowSprite[] = [];
   for (const s of glow.spots ?? []) {
-    sprites.push({ bone: s.bone, local: s.local, tex: s.tex, scale: s.scale, blend: 'add', sprite: null });
+    sprites.push({ bone: s.bone, local: s.local, tex: s.tex, scale: s.scale, blend: 'add', spin: s.spin, sprite: null });
   }
   bones.forEach((bone, i) => {
     for (const card of glow.cards) {

@@ -138,7 +138,8 @@ shared pools, textures and particle recipes other folders reuse.
   whatever its light.
 - `monsterGlow.test.ts`: `RenderLight` breathes on the world's clock, so two monsters that came apart
   breathe alike, in step with their floor light; Santa Claus and the Snowman carry their steady
-  flare01 cards on their bones (ZzzObject.cpp:1910-1945).
+  flare01 cards on their bones (ZzzObject.cpp:1910-1945); a swelling card (Kundun's) takes its size
+  from the world clock, a lifted one (Selupan's) adds the swing to its light and turns on that clock.
 - `monsterVisuals.test.ts`: a `cards` row hangs each spot on the glow entry with its own sheet, scale
   and offset; a `trail` runs a ribbon from its bone, a gated one ending when the monster dies; a `puff`
   makes one of its particles at its bone.

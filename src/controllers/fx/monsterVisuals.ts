@@ -134,9 +134,11 @@ const CARDS: Readonly<Record<BodyCard, GlowTexture>> = {
   lightMarks: 'lightMarks',
   shockWave: 'shockWave',
   shiny2: 'wisp',
+  shiny6: 'shiny6',
   energy: 'energy',
   flareBlue: 'flareBlue',
   flareRed: 'flareRed',
+  eventCloud: 'eventCloud',
 };
 
 const PUFFS: Readonly<Record<BodyPuff, KindName>> = {
@@ -160,6 +162,7 @@ function cardGlow(em: CardsRow): MonsterGlow {
       tex: CARDS[s.card],
       scale: s.scale,
       local: s.local && [s.local[0] / TILE_CM, s.local[1] / TILE_CM, s.local[2] / TILE_CM],
+      spin: s.spin,
     })),
     cards: [],
     colour: em.colour,
@@ -169,6 +172,9 @@ function cardGlow(em: CardsRow): MonsterGlow {
     breathBase: em.pulse?.base,
     swellSpeed: em.swell?.speed,
     swellAmount: em.swell?.amount,
+    liftSpeed: em.lift?.speed,
+    liftAmount: em.lift?.amount,
+    liftBase: em.lift?.base,
     luminosity: 1,
   };
 }

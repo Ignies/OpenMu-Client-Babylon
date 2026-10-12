@@ -56,3 +56,34 @@ describe('Kundun', () => {
     expect(flare).toMatchObject({ swell: { speed: 0.001, amount: 0.3 }, gate: { alive: true } });
   });
 });
+
+describe('Selupan', () => {
+  // RenderMonsterVisual's MODEL_SELUPAN (GM_Raklion.cpp:2003-2049): blue lights breathing in colour and size on
+  // bones 9 and 70-74, some turning on the world clock.
+  it('carries his blue lights on bones 9 and 70-74', () => {
+    expect(cards(459)).toEqual([
+      '9:light@2.2 0.3,0.6,1',
+      '9:light@2.2 0.3,0.6,1',
+      '9:light@3.2 0.3,0.6,1',
+      '70:light@2.3 0.1,0.2,1',
+      '70:shiny6@2 0.1,0.2,1',
+      '74:light@2.3 0.1,0.2,1',
+      '74:shiny6@2 0.1,0.2,1',
+      '71:light@2.5 0.1,0.2,1',
+      '71:shiny2@2.5 0.1,0.2,1',
+      '71:shiny6@2.5 0.1,0.2,1',
+      '72:light@2 0.1,0.2,1',
+      '72:shiny6@1.5 0.1,0.2,1',
+      '71:eventCloud@0.6 0.1,0.2,1',
+      '71:eventCloud@0.4 0.1,0.2,1',
+    ]);
+    const [head, hands, clouds] = rows(459, 'cards');
+    expect(head).toMatchObject({ lift: { speed: 0.004, amount: 0.25, base: 0.25 }, swell: { speed: 0.004, amount: 0.2 } });
+    expect(head.spots[0].local).toEqual([0, 10, 0]);
+    expect(hands).toMatchObject({ lift: { speed: 0.004, amount: 0.1, base: 0.1 }, swell: { speed: 0.004, amount: 0.2 } });
+    expect(hands.spots.map(s => s.spin ?? 0)).toEqual([0.08, 0, 0.08, 0, 0, 0.08, 0.15, 0, 0]);
+    expect(clouds).toMatchObject({ lift: { speed: 0.004, amount: 0.1, base: 0.1 } });
+    expect(clouds.swell).toBeUndefined();
+    expect(clouds.spots.map(s => s.spin)).toEqual([-0.1, -0.2]);
+  });
+});
