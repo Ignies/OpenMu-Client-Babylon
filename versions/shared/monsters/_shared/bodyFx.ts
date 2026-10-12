@@ -198,6 +198,11 @@ export const napinFires = (light: RGB, fire: RGB): readonly BodyFxEmitter[] => [
   puff(1, [122, 116], [['fire1', 'fire2', 'fire3']], fire, { scale: 0.7, jitterCm: 5 }),
 ];
 
+/** The Ghost Napin: at seven bones a tick, a SMOKELINE SubType 1 and a CLUD64 SubType 6, riding him (:990-1000). */
+export const GHOST_NAPIN_SMOKE = puff(1, [21, 37, 65, 66, 77, 78, 79], [['smokeLine1_1', 'smokeLine2_1', 'smokeLine3_1'], 'clud64_6'], [0.4, 1, 0.4], {
+  ride: 'body',
+});
+
 type BlurRow = Extract<BodyFxEmitter, { kind: 'blur' }>;
 
 /** `CreateBlur` from one bone point to another while the gate is open (a RenderObject swing loop). */

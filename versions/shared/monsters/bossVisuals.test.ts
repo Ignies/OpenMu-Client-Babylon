@@ -569,6 +569,20 @@ describe('the Swamp of Quiet line', () => {
       ]);
     }
   });
+
+  // MODEL_GHOST_NAPIN (:990-1000): at seven bones a tick, a SMOKELINE SubType 1 and a CLUD64 SubType 6 riding him.
+  it('smoke the Ghost Napin green', () => {
+    expect(rows(448, 'puff')).toEqual([
+      {
+        kind: 'puff',
+        every: 1,
+        bones: [21, 37, 65, 66, 77, 78, 79],
+        particles: [['smokeLine1_1', 'smokeLine2_1', 'smokeLine3_1'], 'clud64_6'],
+        colour: [0.4, 1, 0.4],
+        ride: 'body',
+      },
+    ]);
+  });
 });
 
 describe('blend meshes of their own', () => {

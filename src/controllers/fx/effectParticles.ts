@@ -608,7 +608,10 @@ type RampOptions = {
   readonly gravity: readonly [number, number];
   readonly rise: readonly [number, number];
   readonly peak: number;
+  /** The size a tick; one below 0 shrinks it, and it is gone once none is left. */
   readonly grow: () => number;
+  /** The alpha lost a tick over the last 10 (default 0.1). */
+  readonly fade?: number;
 };
 
 /**
@@ -629,7 +632,7 @@ function rampKind(texture: TextureKey, o: RampOptions): ParticleKind {
     },
     update(p, f) {
       if (p.lifeTime < 10) {
-        p.alpha -= 0.1 * f;
+        p.alpha -= (o.fade ?? 0.1) * f;
         if (p.alpha < 0.1) {
           p.live = false;
           return;
@@ -643,6 +646,7 @@ function rampKind(texture: TextureKey, o: RampOptions): ParticleKind {
       p.lg = p.tg * p.alpha;
       p.lb = p.tb * p.alpha;
       p.scale += o.grow() * f;
+      if (p.scale <= 0) p.live = false;
       p.pz += p.gravity * f;
     },
     color: plainColor,
@@ -823,6 +827,7 @@ const SMOKE_LINE: RampOptions = {
   grow: () => (rand(3) + 6) * 0.01,
 };
 const SMOKE_LINE_2: RampOptions = { ...SMOKE_LINE, life: 45 };
+const SMOKE_LINE_1: RampOptions = { life: 25, scale: [50, 55], gravity: [4, 35], peak: 1, rise: [5, 2], fade: 0.2, grow: () => -(rand(10) + 10) * 0.001 };
 
 const KINDS = {
   fire1: fireKind('fireHik1', {
@@ -1121,6 +1126,12 @@ const KINDS = {
   smokeLine1_2: rampKind('smokeLine1', SMOKE_LINE_2),
   smokeLine2_2: rampKind('smokeLine2', SMOKE_LINE_2),
   smokeLine3_2: rampKind('smokeLine3', SMOKE_LINE_2),
+  /** SMOKELINE SubType 1, riding its target: 25 ticks, fading in to its whole light, shrinking (ZzzEffectParticle.cpp:1789-1798, :6004-6029). */
+  smokeLine1_1: rampKind('smokeLine1', SMOKE_LINE_1),
+  smokeLine2_1: rampKind('smokeLine2', SMOKE_LINE_1),
+  smokeLine3_1: rampKind('smokeLine3', SMOKE_LINE_1),
+  /** `BITMAP_CLUD64` SubType 6, riding its target: the same, sized 0.5-0.57 and shrinking 0.055-0.059 a tick (:1011-1020, :5143-5170). */
+  clud64_6: rampKind('clud64', { life: 25, scale: [8, 50], gravity: [10, 35], peak: 1, rise: [2, 3], fade: 0.2, grow: () => -(rand(5) + 55) * 0.001 }),
 
   /**
    * `BITMAP_SMOKE` SubType 13, the Balgass lava vents' glow: sized `(rand() % 64 + 64) * 0.01` whatever
@@ -2100,6 +2111,10 @@ export const KIND_REACH: Record<KindName, Reach> = {
   smokeLine1_2: { travel: 1.22, base: 1.65, perScale: 0.87 },
   smokeLine2_2: { travel: 1.22, base: 1.65, perScale: 0.87 },
   smokeLine3_2: { travel: 1.22, base: 1.65, perScale: 0.87 },
+  smokeLine1_1: { travel: 1, base: 0, perScale: 0.47 },
+  smokeLine2_1: { travel: 1, base: 0, perScale: 0.47 },
+  smokeLine3_1: { travel: 1, base: 0, perScale: 0.47 },
+  clud64_6: { travel: 1.15, base: 0, perScale: 0.26 },
   smoke2: { travel: 3.4, base: 0.58, perScale: 0 },
   smoke65: { travel: 0.75, base: 0, perScale: 0.29 },
   cloud21: { travel: 1.75, base: 0, perScale: 3.61 },

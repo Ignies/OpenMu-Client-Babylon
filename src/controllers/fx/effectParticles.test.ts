@@ -1116,6 +1116,23 @@ describe('the bosses smokes (ZzzEffectParticle.cpp:1327, :1500, :1767; :5361, :5
     expect((await play('fire1_3', 1.7, 0.5, 8)).isVisible).toBe(false);
   });
 
+  // The Ghost Napin's: SMOKELINE SubType 1 and CLUD64 SubType 6, 25 ticks, fading in to their whole light and out 0.2 a
+  // tick, rising 3.5-3.9 a tick and shrinking (ZzzEffectParticle.cpp:1789-1798, :6004-6029; :1011-1020, :5143-5170).
+  it('smokeLine1_1 and clud64_6 rise, shrink and fade in to their whole light', async () => {
+    const line = await play('smokeLine1_1', 1, 0.5, 5);
+    // roll 0.5: sized (25 + 55) / 100, shrinking 0.015 a tick, rising 3.7 a tick, alpha 0.4 a tick to 1.
+    expect(line.width).toBeCloseTo((64 * (0.8 - 5 * 0.015)) / 100);
+    expect(line.position.y).toBeCloseTo((5 * 3.7) / 100);
+    expect(line.color.r).toBeCloseTo(0.2);
+    disposeEffectParticles();
+    const cloud = await play('clud64_6', 1, 0.5, 5);
+    expect(cloud.width).toBeCloseTo((64 * (0.54 - 5 * 0.057)) / 100);
+    expect(cloud.position.y).toBeCloseTo((5 * 4) / 100);
+    expect(fakes.files).toContain('Effect/clud64.OZJ');
+    disposeEffectParticles();
+    expect((await play('smokeLine2_1', 1, 0.5, 26)).isVisible).toBe(false);
+  });
+
   // SubType 2 is SubType 0 living 45 ticks, not 35 (the Iron Knights' smoke lines).
   it('smokeLine1_2 is smokeLine1 living ten ticks longer', async () => {
     expect((await play('smokeLine1', 1, 0.5, 36)).isVisible).toBe(false);
