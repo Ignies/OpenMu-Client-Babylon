@@ -151,7 +151,7 @@ describe('the swords', () => {
 
   it('every other sword has none', () => {
     expect(look(0, 0)).toBeNull();
-    expect(look(0, 19)).toBeNull();
+    expect(look(0, 1)).toBeNull(); // the Archangel sword (0, 19) has its own, below
   });
 });
 
@@ -917,5 +917,72 @@ describe('the Archangel set\'s and the rest\'s held sprites', () => {
     const bones = [3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 15, 16, 17, 18, 19, 20];
     expect(held(0, 35, itemWingSprites)).toEqual(bones.map(bone => ['lightmarks', bone, undefined, size, [0.18, 0.45, 0.22], Math.floor(RAND * 360)]));
     expect(held(0, 35)).toBeNull();
+  });
+});
+
+// RenderPartObjectBody's branches past weapons1's ranges (ZzzObject.cpp).
+describe('the Archangel set, the late bows, shields and armour sets', () => {
+  const metal = { mesh: 0, kind: 'unlit', texture: 'Effect/Shiny01.OZJ', clamp: true, map: 'metal' };
+  const sweep = (v: number) => ({ mesh: 0, kind: 'add', texture: 'Effect/Chrome01.OZJ', v: r(v) });
+  const BAB2 = { texture: 'Effect/bab2.OZJ', map: 'chrome' };
+
+  it('Divine Sword of Archangel: mesh 0 RENDER_METAL (Shiny01) and a Chrome01 sweep up v, mesh 1 lit (:6979-6984)', () => {
+    expect(look(0, 19)).toEqual({ drawn: [1], passes: [metal, sweep(T * 0.0001)] });
+  });
+
+  it('Divine Staff and Crossbow of Archangel: the same metal, the sweep back down v (:6985-6996)', () => {
+    const staff = { drawn: [1], passes: [metal, sweep(-T * 0.0001)] };
+    expect(look(5, 10)).toEqual(staff);
+    expect(look(4, 18)).toEqual(staff);
+  });
+
+  it('Divine Scepter of Archangel: mesh 0 lit and the sweep down v, nothing else (:6997-7001)', () => {
+    expect(look(2, 13)).toEqual({ drawn: [0], passes: [sweep(-T * 0.0001)] });
+  });
+
+  it('Great Reign Crossbow: a violet Chrome01 sweep back along u and bab2 over mesh 0, the body lit (:7002-7012)', () => {
+    expect(look(4, 19)).toEqual({
+      drawn: undefined,
+      passes: [
+        { mesh: 0, kind: 'add', texture: 'Effect/Chrome01.OZJ', light: [r(0.8 * BODY.x), 0, r(0.8 * BODY.z)], u: r(-T * 0.0002) },
+        { mesh: 0, kind: 'add', ...BAB2 },
+      ],
+    });
+  });
+
+  it('Arrow Viper Bow: meshes 3 and 4 their own blend meshes at a pulse, the rest lit (:7860-7873)', () => {
+    const gain = r(Math.sin(T * 0.002) * 0.3 + 0.5);
+    expect(look(4, 20)).toEqual({
+      drawn: [0, 1, 2, 5, 6],
+      passes: [
+        { mesh: 3, kind: 'bright', gain },
+        { mesh: 4, kind: 'bright', gain },
+      ],
+    });
+  });
+
+  it('Crimson Glory, Salamander, Frost Barrier, Guardian and Cross shields (:7161-7191)', () => {
+    expect(look(6, 17)).toEqual({ drawn: undefined, passes: [{ mesh: 1, kind: 'add' }, { mesh: 2, kind: 'add', ...CHROME }] });
+    expect(look(6, 18)).toEqual({ drawn: undefined, passes: [{ mesh: 1, kind: 'bright' }] });
+    expect(look(6, 19)).toEqual({
+      drawn: [0],
+      passes: [
+        { mesh: 1, kind: 'bright' },
+        { mesh: 2, kind: 'bright', gain: r(Math.abs(Math.sin(T * 0.001))) },
+      ],
+    });
+    expect(look(6, 20)).toEqual({ drawn: undefined, passes: [{ mesh: 1, kind: 'add' }] });
+    expect(look(6, 21)).toEqual({ drawn: [0], passes: [{ mesh: 1, kind: 'bright', ...CHROME }, { mesh: 2, kind: 'bright' }] });
+  });
+
+  it('Storm Crow and Thunder Hawk: bab2 over the whole body, the hawk\'s in (0.85, 0.85, 1.2) of its light (:6900-6913)', () => {
+    for (const group of [8, 9, 10, 11]) {
+      expect(look(group, 15)).toEqual({ drawn: undefined, passes: [{ mesh: -1, kind: 'add', ...BAB2 }] });
+      expect(look(group, 20)).toEqual({
+        drawn: undefined,
+        passes: [{ mesh: -1, kind: 'add', ...BAB2, light: [r(BODY.x * 0.85), r(BODY.y * 0.85), r(BODY.z * 1.2)] }],
+      });
+    }
+    expect(look(7, 15)).toBeNull(); // the helms are not in the branch
   });
 });

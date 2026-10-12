@@ -47,3 +47,11 @@ describe('the legacy item passes', () => {
     expect(passes(true)).toContain('vec3 lit = muBodyLight.rgb;');
   });
 });
+
+describe('the scroll materials\' look-ups', () => {
+  it('read RENDER_METAL\'s by the normal, Shiny01 at (z * 0.5 + 0.2, y * 0.5 + 0.5) (ZzzBMD.cpp:1642-1646)', () => {
+    const diffuse = (createItemMaterial(scene, false, true, true) as unknown as { CustomParts: { Fragment_Custom_Diffuse: string } }).CustomParts
+      .Fragment_Custom_Diffuse;
+    expect(diffuse).toContain('} else if (muMap == 8) {\n          muUv = vec2(n.z * 0.5 + 0.2, n.y * 0.5 + 0.5);');
+  });
+});
