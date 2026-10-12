@@ -18,6 +18,7 @@ import {
   getScrollVariant,
   loadGLTF,
   setMeshFadeBlend,
+  setMeshUnlit,
 } from '../assets/modelLoader';
 import { animationGroupSource, forEachAnimationGroup } from '../assets/lazyAnimationGroups';
 import { NO_BLEND_MESH } from './blendMeshes';
@@ -33,6 +34,7 @@ import {
   shadowReceiversChanged,
 } from './scenes/csmBounds';
 import type { MapObjectLights } from '../lighting/mapObjectLightAdapter';
+import { lightingTier } from '../lighting/lightingQuality';
 
 /** Rotation half of C⁻¹, the inverse of the model-root basis change applied in load(). */
 const DEFAULT_BONE_LINK_ROTATION = Quaternion.FromEulerAngles(
@@ -486,6 +488,13 @@ export class ModelObject {
    * flesh curtains. -1 = none.
    */
   StreamMesh = -1;
+
+  /**
+   * `b->LightEnable = false`: RenderLinkObject draws a carried weapon at flat BodyLight (ZzzCharacter.cpp:6651-6652).
+   * On Classic the lit meshes take their flat-lit twin; the tiers above keep the scene's light.
+   */
+  Unlit = false;
+  #unlitOn: boolean | null = null;
 
   /** Live `BlendMeshTexCoordU/V`, shared by reference with the mesh metadata. */
   readonly UvScroll = { u: 0, v: 0 };
@@ -1291,7 +1300,18 @@ export class ModelObject {
       shadowReceiversChanged();
     }
 
+    this.#unlitOn = null;
+    this.syncUnlit();
+
     this.Ready = true;
+  }
+
+  /** Puts the lit meshes on their flat-lit twin while `Unlit` holds on Classic, and back when it stops. */
+  syncUnlit(): void {
+    const on = this.Unlit && lightingTier() === null;
+    if (on === this.#unlitOn || !this.gltf) return;
+    this.#unlitOn = on;
+    for (const mesh of this.gltf.mesh.getChildMeshes(false)) setMeshUnlit(mesh, on);
   }
 
   /**
@@ -1815,6 +1835,7 @@ export class ModelObject {
     // only read while the mesh is drawn.
     this.updateMeshAnimation(gameTime.TotalGameTime.TotalSeconds * 1000);
     this.#meshPasses?.update(gameTime.TotalGameTime.TotalSeconds * 1000);
+    if (this.Unlit || this.#unlitOn) this.syncUnlit();
 
     if (this.BlendMeshLightAt) {
       const light = this.BlendMeshLightAt(gameTime.TotalGameTime.TotalSeconds * 1000);

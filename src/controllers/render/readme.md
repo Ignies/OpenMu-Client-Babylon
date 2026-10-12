@@ -180,6 +180,9 @@ There is no `index.ts` facade; other folders import the modules directly.
   read at run time through `maps.rowFor`. `blend` targets the object's `BlendMesh`; `stream`
   is `Models[type].StreamMesh`, textured but unlit with flat `BodyLight` (ZzzBMD.cpp:990-1001).
   C's `-(int)WorldTime % 1000` keeps the sign, so it ramps 0 to -0.999: `-(t % 1000)`.
+- `ModelObject.Unlit`: `b->LightEnable = false`, a part RenderLinkObject draws (the hand weapons, the
+  phoenix wings; ZzzCharacter.cpp:6651-6652). On Classic its lit meshes take their flat-lit twin
+  (`assets/modelLoader.ts` `setMeshUnlit`), flat BodyLight; the tiers above keep the scene's light and PBR.
 - `pbrMaps.ts`: the derivation reads the texture's encoded bytes (`texture._buffer` or `texture.url`),
   decoded in a worker with `createImageBitmap` or the Basis transcoder for KTX2. GPU readback is
   only the last fallback: it stalls the frame (up to 450 ms on an integrated Radeon).
