@@ -20,7 +20,7 @@ its own folder in `versions/shared/monsters/<name>/` and uses this controller.
   `blendMeshOf` over the per-body table), `dyingBlendAll` (dying, every mesh additive while it holds), `passes` and `bodyLight` (its `RenderMonster` case's own mesh
   passes and the light it sets, read by the actors controller's `applyMonsterLook`), `light` (`MonsterLight`, read by `lighting/characters.ts`), `bodyFx`
   (`MonsterBodyFx`, `bodyFx.ts`: particles, cards on bones (`BodyCard`, `BodyCardSpot`), bone
-  ribbons (`BodyRibbon`), swing blurs (`BodyBlurSheet`), the original's particles (`BodyPuff`), thrown pieces (`BodyShard`) and terrain marks (`BodyGround`) by name, read by `fx/monsterVisuals.ts`;
+  ribbons (`BodyRibbon`), swing blurs (`BodyBlurSheet`), the original's particles (`BodyPuff`), thrown pieces (`BodyShard`), terrain marks (`BodyGround`) and the folder's own staging (`call`) by name, read by `fx/monsterVisuals.ts`;
   shared pieces in `versions/shared/monsters/_shared/bodyFx.ts`); on a body,
   `MonsterModelDef.shatter` (`MonsterShatter`, read by `fx/deathVisuals.ts`); `worldScale` (its
   `Object.Scale` on given worlds, read by the actors controller's `npcSpawnScale`).

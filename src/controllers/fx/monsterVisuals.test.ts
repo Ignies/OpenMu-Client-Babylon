@@ -447,6 +447,20 @@ describe('monster body rows', () => {
     monsterVisualsLayer.reset?.();
   });
 
+  // A MoveMonsterVisual line no row draws (Nightmare's storm and laser): the content's own staging, through its gate.
+  it('hand a call row the scene and the monster while its gate is open', () => {
+    const runs: unknown[][] = [];
+    const anim = { action: 0 };
+    const e = { ...monster(), monsterAnimation: anim } as unknown as Entity;
+    visualMonster(scene, e, [{ kind: 'call', every: 1, run: (s: unknown, m: unknown) => runs.push([s, m]), gate: { action: [2] } }] as never);
+    monsterVisualsLayer.update?.(0, 0.04);
+    expect(runs).toHaveLength(0);
+    anim.action = 2;
+    monsterVisualsLayer.update?.(0, 0.04);
+    expect(runs).toEqual([[scene, e]]);
+    monsterVisualsLayer.reset?.();
+  });
+
   // Dark_Elf_Check (GMCrywolf1st.cpp:120-123, :844-866): Crywolf reaching START cues one burst, which the first Dark
   // Elf to move takes: BITMAP_CRATER SubType 2, five BITMAP_SHOCK_WAVE SubType 8 and two blue blurs at bone 27, once.
   it('fire the cued rows once, on the body that takes the cue', () => {

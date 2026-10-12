@@ -382,6 +382,17 @@ describe("Nightmare's death", () => {
     expect(rows(361, 'puff')).toEqual([
       expect.objectContaining({ every: 1, bones: [63], particles: ['fire1_3'] }),
       expect.objectContaining({ every: 1, bones: [63], particles: ['smoke3_3', 'smoke3_3'], scale: 1.5, gate: { action: [A.Die], frames: [[3, Infinity]] } }),
+      expect.objectContaining({ particles: ['spark1_16'] }),
+    ]);
+  });
+
+  // RenderKanturu3rdMonsterVisual's Windmill_Bone1 (bone 47) on half the ticks while alive (GM_Kanturu_3rd.cpp:1078-1080);
+  // MoveMonsterVisual's Attack3 flares every tick and the Attack2 storm and laser at frames 5.2-5.8 (:840-862).
+  it('throws his windmill sparks and stages his Attack2 and Attack3', () => {
+    expect(rows(361, 'puff')[2]).toEqual({ kind: 'puff', every: 2, bones: [47], particles: ['spark1_16'], colour: [1, 1, 1], turned: true, gate: { alive: true } });
+    expect(rows(361, 'call').map(r => [r.every, r.gate])).toEqual([
+      [1, { action: [A.Attack3] }],
+      [1, { action: [A.Attack2], frames: [[5.2, 5.8]] }],
     ]);
   });
 

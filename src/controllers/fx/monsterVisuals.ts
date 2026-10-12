@@ -212,6 +212,7 @@ const PUFFS: Readonly<Record<BodyPuff, KindName>> = {
   smoke3_3: 'smoke3_3',
   smoke3_4: 'smoke3_4',
   blueBlur1: 'blueBlur1',
+  spark1_16: 'spark1_16',
 };
 
 type CardsRow = Extract<BodyFxEmitter, { kind: 'cards' }>;
@@ -561,6 +562,9 @@ function emit(scene: Scene, e: Entity, em: Emitter, f: Frame, rides?: readonly V
       }
       return;
     }
+    case 'call':
+      if (open(em.gate, f)) em.run(scene, e);
+      return;
     case 'ground': {
       if (!open(em.gate, f)) return;
       for (const b of em.bones) {

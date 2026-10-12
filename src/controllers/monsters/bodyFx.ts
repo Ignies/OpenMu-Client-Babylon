@@ -1,3 +1,5 @@
+import type { Scene } from '../render/babylon/exports';
+import type { Entity } from '../../ecs/world';
 import type { LookCueName } from './lookState';
 
 /**
@@ -81,7 +83,8 @@ export type BodyPuff =
   | 'waterfall3_6'
   | 'smoke3_3'
   | 'smoke3_4'
-  | 'blueBlur1';
+  | 'blueBlur1'
+  | 'spark1_16';
 
 /** One `CreateSprite` on a bone: `TransformPosition(BoneTransform[bone], local)`. */
 export type BodyCardSpot = {
@@ -302,6 +305,16 @@ export type BodyFxEmitter =
       readonly count: number;
       readonly bones: readonly number[];
       readonly colour: RGB;
+      readonly gate?: BodyFxGate;
+    }
+  | {
+      /**
+       * On a won roll, the content's own staging for a `MoveMonsterVisual` line no row above draws (Nightmare's storm,
+       * laser and flares): `run(scene, monster)`, which spawns through the fx controller itself.
+       */
+      readonly kind: 'call';
+      readonly every: number;
+      readonly run: (scene: Scene, monster: Entity) => void;
       readonly gate?: BodyFxGate;
     };
 

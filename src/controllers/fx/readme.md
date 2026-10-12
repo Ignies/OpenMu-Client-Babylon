@@ -118,7 +118,7 @@ shared pools, textures and particle recipes other folders reuse.
   `light0` (`BITMAP_LIGHT` SubType 0) rises, shrinks, glows as its scale up to 1 and drifts on half the
   particle wind (`g_vParticleWind`, walked once a tick, ZzzEffectParticle.cpp:3847-3859); `light15`
   (`BITMAP_LIGHT` SubType 15) climbs a spiral from up to `Scale * 30` off, fading in and out in the
-  light it is made with;
+  light it is made with; `spark1_16` (Nightmare's windmill sparks) falls, bounces off the terrain and falls again;
   `trueFire` (`BITMAP_TRUE_FIRE`, fantaF.jpg) takes its sideways and upward push at birth, rises,
   shrinks and fades with its life (24 ticks, `trueFire5` 20); `trueBlue` (`BITMAP_TRUE_BLUE`) is
   the same particle on fantaB.jpg; `smoke13` (`BITMAP_SMOKE` SubType 13) stays put, grows and fades
@@ -168,7 +168,8 @@ shared pools, textures and particle recipes other folders reuse.
   (a cards row too: Valam's) to a state the content reads; a puff with `colours` picks one for each spot (the Iron Knights' blue or grey); a `blur` row hands on its sheet (motion_blur for
   Type 1), its dark pass (Type 4) and its Short flag; a `shards` row throws its
   pieces as debris at each bone; rows gated on a cue (`gate.cue`) fire once, on the one body that takes it,
-  and a `ground` row lays its terrain marks (the Dark Elf's crater and shock waves).
+  and a `ground` row lays its terrain marks (the Dark Elf's crater and shock waves); a `call` row hands its content
+  function the scene and the monster while its gate is open.
 - `core.test.ts`: a flickering tint makes a bounded number of additive materials, each within half
   a 1/128 step of the colour asked for; a burst emits nothing while the page is hidden.
 - `modelClones.test.ts`: a `model`, `linkedModel` or spirit skull clone leaves no mesh, skeleton or
@@ -374,7 +375,9 @@ before the ramp: a light over 1 (their `(1, 1.2, 2)`) ramps from white where the
 colour ramps from its own hue. A `ground` row lays a `CreateEffect` terrain mark as a `ring` (`GROUNDS`: BITMAP_CRATER
 SubType 2, BITMAP_SHOCK_WAVE SubType 8). A body whose rows name a cue (`gate.cue`) asks `takeLookCue` once a
 tick; the rows open on the tick it got it, so one cue fires on the first body to move, as `Dark_Elf_Check` does.
-Not ported: the crater's `AddTerrainLight(-0.5)` darkening (MoveHandlers.cpp:6912).
+Not ported: the crater's `AddTerrainLight(-0.5)` darkening (MoveHandlers.cpp:6912). A `call` row is a
+`MoveMonsterVisual` line no row draws: its gate as any other, then the folder's own function spawns through the
+facade (Nightmare's storm, laser and flares, loaded on first use so the Bun servers never import the fx controller).
 
 ### ping.ts
 The ring drapes the marker over the terrain and a straight joint draws the trail, near end on the
