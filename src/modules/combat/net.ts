@@ -5,7 +5,7 @@ import { Entity, World } from '@/ecs/world';
 import { EventBus } from '@/core/eventBus';
 import { type MUAttributeSystem } from '@/core/attributeSystem';
 import { MonsterActionType, PlayerAction, ServerPlayerActionType } from '@versions/shared/objects/enum';
-import { ObjectAnimationPacket, ObjectGotKilledPacket, ObjectHitExtendedPacket, ObjectHitPacket, RageAttackPacket, RageAttackRangeResponsePacket, SkillAnimationPacket } from '@versions/shared/packets/ServerToClientPackets';
+import { MonsterSkillAnimationPacket, ObjectAnimationPacket, ObjectGotKilledPacket, ObjectHitExtendedPacket, ObjectHitPacket, RageAttackPacket, RageAttackRangeResponsePacket, SkillAnimationPacket } from '@versions/shared/packets/ServerToClientPackets';
 import { TargetedSkillPacket } from '@versions/shared/packets/ClientToServerPackets';
 import { Session } from '../session';
 import { ServerToClientActionMap, resolveGenderedAction } from '@/controllers/anim/playerActionMapper';
@@ -17,7 +17,7 @@ import { convertDirectionToAngle } from '@/core/turnAngle';
 import { chooseAttackAction, isWeaponItem } from '@/controllers/actors/weaponClass';
 import { combat } from '@/controllers/combat';
 import { delay } from '@/controllers/fx/core';
-import { isMonsterSwingClip, monsterAttackState, monsterFlinches, monsterSwing } from '@/controllers/anim/monsterAttackClip';
+import { isMonsterSwingClip, monsterAttackState, monsterFlinches, monsterSkillSwing, monsterSwing } from '@/controllers/anim/monsterAttackClip';
 import { isPlayerBody } from '@/controllers/actors/playerObject';
 import { isTeleportSkill } from '../skills/skillCasting';
 import { meteoriteStormRunning, santaActionSound } from '@/controllers/sound/packetSounds';
@@ -390,6 +390,21 @@ export function installNet(): void {
     }
 
     obj.transform.rot.y = convertDirectionToAngle(p.Direction);
+  });
+
+  // ReceiveMonsterSkill (WSclient.cpp:4091-4128): both ids are looked up as sent, and a missing target drops it.
+  EventBus.on('MonsterSkillAnimation', packet => {
+    const p = new MonsterSkillAnimationPacket(packet);
+    const world = Ecs.world;
+    const caster = world?.getByNetId(p.AttackerId);
+    const target = world?.getByNetId(p.TargetId);
+    if (!caster || !target) return;
+    lastAttacker = caster;
+    if (!caster.monsterAnimation || isDeadMonster(caster)) return;
+    const clip = monsterSkillSwing(monsterAttackState(caster), p.SkillNumber, attackInputOf(caster));
+    if (clip === undefined) return;
+    faceTarget(caster, target);
+    setMonsterClip(caster, clip, true);
   });
 
   EventBus.on('SkillAnimation', packet => {

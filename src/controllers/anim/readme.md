@@ -26,6 +26,8 @@ clip is one file in `versions/shared/animations/` that says its own speed, flags
 - `monsterAttackClip.ts`: the attack / cast clip of a non-player body (`SetPlayerAttack`,
   `SetPlayerMagic`, ZzzCharacter.cpp:1222-1348) with the per-map hooks: `monsterAttackState`,
   `monsterSwing` (0x18), `monsterCast` (0x19 `ReceiveMagic`), `monsterAreaCast` (0x1E),
+  `monsterSkillSwing` (0x69 `ReceiveMonsterSkill`: `c->MonsterSkill`, read and spent by the Aida, Swamp,
+  Raklion and Empire Guardian hooks; Selupan keeps his),
   `monsterCastAttacks`, `monsterCastRewinds`, `playableMonsterClip`, `isMonsterSwingClip`,
   `monsterFlinches` (WSclient.cpp:3380-3386), `KEEP_CLIP`.
 
@@ -89,7 +91,7 @@ clip is one file in `versions/shared/animations/` that says its own speed, flags
   and skill, traps included; which skills attack or rewind.
 - `animation.test.ts`, `monsterRules.test.ts`: the registries, the enum writer, the rule kinds.
 - `monsterAttackClip.test.ts`: the default swing count, `ReceiveMagic` on monsters, special
-  bodies (Bali, traps, siege guards), Kalima and every map hook, when `c->Skill` clears,
+  bodies (Bali, traps, siege guards), Kalima and every map hook, the 0x69 skill clips, when `c->Skill` clears,
   `playableMonsterClip`, `monsterFlinches`, `isMonsterSwingClip`, per-owner state.
 - `playSpeed.test.ts`: the `MagicSpeed2` steps; Dark Lord per-frame clip speeds (party teleport hold, Electric Spike
   charge, Earthshake and ride clips, command clip after key 6).
