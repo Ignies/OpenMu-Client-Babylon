@@ -191,4 +191,23 @@ describe('the Imperial Guardian bosses', () => {
     expect(cards(508)).toEqual(['15:flare2@0.2 0.7,0.7,1', '14:flare2@0.2 0.7,0.7,1']);
     expect(rows(508, 'cards')[0]).toMatchObject({ pulse: { speed: 0.002, amount: 0.1, base: 0.2 }, swell: { speed: 0.002, amount: 0.1 } });
   });
+
+  // MODEL_HAMMERIZE (GMEmpireGuardian2.cpp:864-876): blue lights on bones 21 and 38, swinging on
+  // `(sinf(WorldTime * 0.004f) + 1) * 0.25f`.
+  it('light Hammerize on bones 21 and 38', () => {
+    expect(cards(509)).toEqual(['21:light@1.75 0.1,0.4,0.8', '38:light@1.75 0.1,0.4,0.8']);
+    expect(rows(509, 'cards')[0]).toMatchObject({ lift: { speed: 0.004, amount: 0.25, base: 0.25 }, swell: { speed: 0.004, amount: 0.25 } });
+  });
+
+  // MODEL_DARK_GHOST: the SubType 22 / 23 ribbons on MoveEye(80, 34)'s eyes (GMEmpireGuardian2.cpp:96-98, :923) and
+  // the blue and green lights flickering on `(sinf(WorldTime * 0.08f) + 1) * 0.15f + 0.7f` (:897-920).
+  it('light the Dark Ghost and run his eye ribbons', () => {
+    expect(trails(515)).toEqual(['34 30cm x10 1,1,1', '80 30cm x10 1,1,1']);
+    expect(cards(515)).toEqual([
+      ...[93, 100, 47, 54].map(b => `${b}:light@3 0.1,0.6,1`),
+      ...[92, 99, 46, 53, 95, 88, 42, 49].map(b => `${b}:light@1 0.1,1,0.2`),
+      ...[80, 34].map(b => `${b}:light@3 0.1,1,0.3`),
+    ]);
+    expect(rows(515, 'cards').map(r => r.pulse)).toEqual(Array(3).fill({ speed: 0.08, amount: 0.15, base: 0.85 }));
+  });
 });

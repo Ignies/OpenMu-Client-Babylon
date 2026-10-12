@@ -134,6 +134,6 @@ tables list. A plain NPC model at a fixed scale needs no class: `npcModel` is en
   class of their own.
 - `bossVisuals.test.ts`: the bosses' `RenderMonsterVisual` rows (cards, ribbons, smokes) as their
   map files write them: Medusa, Kundun, Selupan, Erohim, Balgass, Nightmare, the Maya hands, the
-  Imperial Guardian bosses' rage smoke, Lucas and Fred.
+  Imperial Guardian bosses' rage smoke, Lucas, Fred, Hammerize and the Dark Ghost.
 - `src/controllers/actors/resolveModel.golden.test.ts`: what every type 0..600 is drawn with, and
   the NPC tables; `src/controllers/sound/npcVoices.test.ts`: the voices.
