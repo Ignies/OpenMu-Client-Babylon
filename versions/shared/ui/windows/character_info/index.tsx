@@ -40,6 +40,7 @@ import {
   getBaseClass,
   getClassName,
   getStatName,
+  isMasterClass,
   StatType,
   windowAttackSpeed,
 } from '@/modules/hero/characterStats';
@@ -775,7 +776,7 @@ export const CharacterInfo = observer(() => {
         x={QUEST_BUTTON_X}
         file={QUEST_SPRITE}
         tooltip={t(QUEST_TOOLTIP)}
-        disabled
+        onClick={() => quests.toggleLog()}
       />
       {/* `m_BtnPet` - `Toggle(INTERFACE_PET)`. */}
       <WindowButton
@@ -788,6 +789,8 @@ export const CharacterInfo = observer(() => {
         x={MASTER_BUTTON_X}
         file={MASTER_SPRITE}
         tooltip={t(MASTER_TOOLTIP)}
+        // Locked and grey below the third class (OpenningProcess, NewUICharacterInfoWindow.cpp:1616-1627).
+        disabled={!isMasterClass(playerData.charClass)}
         onClick={() => toggleMasterSkillsWindow()}
       />
     </MuItemWindow>
