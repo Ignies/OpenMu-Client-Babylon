@@ -78,3 +78,39 @@ describe('monster glows', () => {
     ]);
   });
 });
+
+describe('a swelling card', () => {
+  // Kundun's bone 100 flare: `CreateSprite(BITMAP_FLARE_BLUE, p, 1.2f + sinf(WorldTime * 0.001f) * 0.3f, ...)`
+  // (GMHellas.cpp:1621): its size, not its light, follows the world clock.
+  it('takes its size from the world clock', async () => {
+    const glow = { bones: [], spots: [{ bone: 100, tex: 'flareBlue' as const, scale: 1.2 }], cards: [], colour: [1, 1, 1] as const, breathe: false, luminosity: 1, swellSpeed: 0.001, swellAmount: 0.3 };
+    worldAt(1000);
+    sprites.length = 0;
+    glowMonster({} as Scene, monster(), glow);
+    await new Promise(resolve => setTimeout(resolve, 0));
+    worldAt(2500);
+    monsterGlowLayer.update?.(0, 1.5);
+    const card = sprites[sprites.length - 1] as unknown as { width: number };
+    expect(card.width).toBeCloseTo((64 * (1.2 + Math.sin(2500 * 0.001) * 0.3)) / 100);
+    monsterGlowLayer.reset?.();
+  });
+});
+
+describe('a lifted, turning card', () => {
+  // Selupan's lights: `Light = base + (sinf(WorldTime * 0.004f) + 1) * 0.25f` on each channel, and a card turned
+  // `WorldTime * 0.08f` degrees (GM_Raklion.cpp:2004-2023).
+  it('adds the lift to its light and turns on the world clock', async () => {
+    const glow = { bones: [], spots: [{ bone: 70, tex: 'flare' as const, scale: 2, spin: 0.08 }], cards: [], colour: [0.3, 0.6, 1] as const, breathe: false, luminosity: 1, liftSpeed: 0.004, liftAmount: 0.25, liftBase: 0.25 };
+    worldAt(1000);
+    sprites.length = 0;
+    glowMonster({} as Scene, monster(), glow);
+    await new Promise(resolve => setTimeout(resolve, 0));
+    worldAt(2000);
+    monsterGlowLayer.update?.(0, 1);
+    const card = sprites[sprites.length - 1] as unknown as { color: { r: number }; angle: number };
+    const lift = Math.sin(2000 * 0.004) * 0.25 + 0.25;
+    expect(card.color.r).toBeCloseTo(0.3 + lift);
+    expect(card.angle).toBeCloseTo(((2000 * 0.08) * Math.PI) / 180);
+    monsterGlowLayer.reset?.();
+  });
+});

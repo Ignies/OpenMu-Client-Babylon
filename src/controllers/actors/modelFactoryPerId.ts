@@ -15,6 +15,7 @@ import {
 import { ModelObject } from '../render/modelObject';
 import { registeredModelClass } from './modelClasses';
 import { npcModelFile } from './npcModelTable';
+import { blendMeshOf } from './monsterBlendMesh';
 import { gearedNpcFactory, transformedNpcFactory } from './playerNpc';
 import { DEFAULT_IDLE_ROLL, nextIdleAction } from './npcIdle';
 
@@ -134,7 +135,13 @@ export function npcFactoryFor(
       if (holdFrame !== undefined) this.PartPose = { action: 0, speed: 0, holdFrame };
     }
 
-    async init(world: World) {
+    async init(world: World, entity?: Entity) {
+      // The NPC cases' own `o->BlendMesh` (Chaos Goblin, Elf Lala, ZzzCharacter.cpp:14409, :14441).
+      const own = blendMeshOf(entity?.npcType, -1);
+      if (own) {
+        this.BlendMesh = own.mesh;
+        this.BlendMeshLight = own.light;
+      }
       this.load(await loadGLTF(path, world));
     }
 

@@ -1,0 +1,55 @@
+import type { BodyCardSpot, MonsterBodyFx } from '@/controllers/monsters';
+import { cards, trail } from '../_shared/bodyFx';
+
+type Cm3 = readonly [number, number, number];
+
+/** BITMAP_LIGHT and BITMAP_FLARE_BLUE at one registered bone, its offset on both. */
+const pair = (bone: number, light: number, flare: number, local?: Cm3): BodyCardSpot[] =>
+  local
+    ? [
+        { bone, card: 'light', scale: light, local },
+        { bone, card: 'flareBlue', scale: flare, local },
+      ]
+    : [
+        { bone, card: 'light', scale: light },
+        { bone, card: 'flareBlue', scale: flare },
+      ];
+
+const ALIVE = { alive: true } as const;
+const PURPLE = [0.8, 0.5, 1] as const;
+
+/**
+ * MODEL_DARK_SKULL_SOLDIER_5: the SubType 18-21 ribbons his creation hangs on MoveEye(9, 10, 39, 40)'s eyes
+ * (GM_Kanturu_3rd.cpp:695-701, ZzzEffectJoint.cpp:286-303, :462) and RenderKanturu3rdMonsterVisual's cards on
+ * his registered bones (:1015-1076), none once he dies (:1012). Not here yet: Body_Bone13's BITMAP_FIRE + 1
+ * (:1062), the windmill sparks (:1078-1080), the attack and death effects of the Move visual (:838-876) and
+ * the Attack1 / Attack4 sword blur (:961-988).
+ */
+export const NIGHTMARE_FX: MonsterBodyFx = [
+  trail(10, 10, 8, PURPLE, { gate: ALIVE }),
+  trail(9, 10, 8, PURPLE, { gate: ALIVE }),
+  trail(40, 10, 8, PURPLE, { gate: ALIVE }),
+  trail(39, 10, 8, PURPLE, { gate: ALIVE }),
+  cards(
+    [1, 1, 1],
+    [
+      ...pair(61, 0.3, 0.5),
+      ...pair(62, 0.3, 0.5),
+      ...pair(54, 0.3, 0.5),
+      ...pair(55, 0.3, 0.5),
+      ...pair(21, 0.3, 0.5, [5, 0, 0]),
+      ...pair(22, 0.3, 0.5, [9, 0, 0]),
+      ...pair(25, 0.4, 0.7, [6, 0, 0]),
+      ...pair(26, 0.4, 0.7),
+      ...pair(71, 0.4, 0.7),
+      ...pair(70, 0.4, 0.7),
+      ...pair(43, 0.4, 0.7, [10, 0, 0]),
+      ...pair(44, 0.4, 0.7),
+      ...pair(39, 0.3, 0.6, [3, 0, 0]),
+      ...pair(40, 0.3, 0.6, [3, 0, 0]),
+      { bone: 9, card: 'flareBlue', scale: 0.3, local: [0, -2, 0] },
+      { bone: 10, card: 'flareBlue', scale: 0.3, local: [4, -4, 0] },
+    ],
+    { gate: ALIVE }
+  ),
+];

@@ -6,7 +6,7 @@ import { MonsterModelRegistry, type MonsterModelDef } from './monsterModel';
 export { defineMonster } from './monster';
 export type { MonsterDef, MonsterLight, MonsterRow, MonsterSound, MonsterStats, MonsterTeleport } from './monster';
 export type { MonsterShatter } from './monsterModel';
-export type { BodyFxEmitter, BodyFxGate, BodyParticle, BodyTexture, MonsterBodyFx } from './bodyFx';
+export type { BodyCard, BodyCardSpot, BodyFxEmitter, BodyFxGate, BodyParticle, BodyPuff, BodyRibbon, BodyTexture, MonsterBodyFx } from './bodyFx';
 export type { NpcGear, NpcGlobalCue, NpcGlobalVoice, NpcIdleRoll, NpcItem, NpcModel, NpcTransform, NpcTrap, NpcVoice } from './npc';
 export { MonsterRegistry } from './registry';
 export { defineMonsterModel, MonsterModelRegistry } from './monsterModel';

@@ -6,6 +6,8 @@ export default defineMonster({
   // Ours: a held flare.
   light: { kind: 'carried', range: 2 },
   maxHealth: 50,
+  // MONSTER_CHAOS_GOBLIN's jewel (ZzzCharacter.cpp:14409).
+  blendMesh: { mesh: 1 },
   npcModel: { file: 'MixNpc01' },
   // MODEL_MIX_NPC: `rand_fps_check(64)` (ZzzCharacter.cpp:6081).
   voice: { sound: 'Sound/nMix', oneIn: 64 },

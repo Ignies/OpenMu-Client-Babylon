@@ -10,6 +10,49 @@ export type BodyParticle = 'bodySmoke' | 'energyChips' | 'firePuff' | 'flameLick
 /** The card textures a halo or mark can name. */
 export type BodyTexture = 'flare' | 'magicGround2' | 'gmAurora';
 
+/** The sheets a `cards` row can name (`CreateSprite(BITMAP_*)`). */
+export type BodyCard =
+  | 'light'
+  | 'lightRed'
+  | 'lightMarks'
+  | 'shockWave'
+  | 'shiny2'
+  | 'shiny6'
+  | 'energy'
+  | 'flareBlue'
+  | 'flareRed'
+  | 'flare2'
+  | 'eventCloud';
+
+/** The sheets a `trail` can run: BITMAP_JOINT_ENERGY (JointLaser01) or BITMAP_FLARE (its SubType 28-33 TexType). */
+export type BodyRibbon = 'jointEnergy' | 'flare';
+
+/** The original's own particles a `puff` can name (`fx/effectParticles.ts` kinds, by `BITMAP_*` and SubType). */
+export type BodyPuff =
+  | 'fire1'
+  | 'fire2'
+  | 'fire3'
+  | 'smoke1'
+  | 'smoke13'
+  | 'smoke17'
+  | 'smoke21'
+  | 'smoke50'
+  | 'smokeLine1'
+  | 'smokeLine2'
+  | 'smokeLine3'
+  | 'trueFire';
+
+/** One `CreateSprite` on a bone: `TransformPosition(BoneTransform[bone], local)`. */
+export type BodyCardSpot = {
+  readonly bone: number;
+  readonly card: BodyCard;
+  /** The call's `Scale`: the sheet's pixels times this, in cm. */
+  readonly scale: number;
+  readonly local?: Cm3;
+  /** The call's `Rotation` as degrees a `WorldTime` ms (`(int)WorldTime * 0.08f`). */
+  readonly spin?: number;
+};
+
 /** A box in the original's centimetres: `rand() % (2x) - x` each way, `z` up. */
 type Cm3 = readonly [number, number, number];
 type RGB = readonly [number, number, number];
@@ -21,6 +64,8 @@ export type BodyFxGate = {
   readonly frames?: readonly (readonly [number, number])[];
   /** `c->Dead == 0`. */
   readonly alive?: boolean;
+  /** `g_isCharacterBuff(o, buff)`: it carries this `eBuffState` (the Imperial Guardian bosses' Berserker, 81). */
+  readonly buff?: number;
 };
 
 export type BodyFxEmitter =
@@ -108,6 +153,55 @@ export type BodyFxEmitter =
       readonly pitch: readonly [number, number];
       readonly yaw: readonly [number, number];
       readonly chip: number;
+      readonly gate?: BodyFxGate;
+    }
+  | {
+      /**
+       * `CreateSprite` on bones every frame (`RenderMonsterVisual`): steady cards in one light,
+       * `sin(WorldTime * speed) * amount + base` when it `pulse`s. `alive`: not drawn once it dies.
+       */
+      readonly kind: 'cards';
+      readonly spots: readonly BodyCardSpot[];
+      readonly colour: RGB;
+      readonly pulse?: { readonly speed: number; readonly amount: number; readonly base: number };
+      /** A `Scale` of `scale + sin(WorldTime * speed) * amount`. */
+      readonly swell?: { readonly speed: number; readonly amount: number };
+      /** `sin(WorldTime * speed) * amount + base` added to each channel of the light. */
+      readonly lift?: { readonly speed: number; readonly amount: number; readonly base: number };
+      readonly gate?: { readonly alive: true };
+    }
+  | {
+      /**
+       * A `CreateJoint(BITMAP_JOINT_ENERGY, ...)` whose head rides a bone (`Velocity` 0, the eye and bone
+       * SubTypes, ZzzEffectJoint.cpp:415-439, :3149-3159): the ribbon is where the bone has been.
+       */
+      readonly kind: 'trail';
+      readonly bone: number;
+      /** The joint's `Scale`, its width in cm. */
+      readonly widthCm: number;
+      readonly maxTails: number;
+      readonly colour: RGB;
+      readonly ribbon?: BodyRibbon;
+      readonly gate?: { readonly alive: true };
+    }
+  | {
+      /**
+       * On a won roll, at each bone, one `CreateParticle(BITMAP_*, TransformPosition(bone, local), ..., Light,
+       * SubType, Scale)` per entry; an entry of several picks one at random (`BITMAP_SMOKELINE1 + rand() % 3`).
+       */
+      readonly kind: 'puff';
+      readonly every: number;
+      readonly particles: readonly (BodyPuff | readonly BodyPuff[])[];
+      readonly bones: readonly number[];
+      /** Each bone rolls its own 1/`every` (the `for (i < NumBones) if (rand() % 6 > 0) continue` walks). */
+      readonly rollEach?: boolean;
+      /** Each entry's own `Scale`, aligned with `particles`, in place of `scale`. */
+      readonly scales?: readonly number[];
+      /** `rand() % (2x) - x` cm off the bone on each axis, a spawn. */
+      readonly jitterCm?: number;
+      readonly local?: Cm3;
+      readonly scale?: number;
+      readonly colour: RGB;
       readonly gate?: BodyFxGate;
     };
 

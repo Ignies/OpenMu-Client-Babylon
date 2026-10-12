@@ -132,10 +132,18 @@ shared pools, textures and particle recipes other folders reuse.
   spawn scale, `cloud14` (`BITMAP_CLOUD` SubType 14) is `cloud6` at a fifth of it, subtracted,
   `cloud10` (SubType 10) drifts twice its push from up to 200 off and darkens 0.01 a tick to 0.15,
   fading past 300 and gone past 500, `cloud11` (SubType 11) drifts the same in its own light, turning,
-  and `fireRed` (`BITMAP_FIRE_RED`, firered.jpg) shoots up steady for 20 ticks.
+  and `fireRed` (`BITMAP_FIRE_RED`, firered.jpg) shoots up steady for 20 ticks. The bosses' smokes:
+  `smoke50` (`BITMAP_SMOKE` SubType 50) fades in to half its light and rises, `smokeLine1..3`
+  (`BITMAP_SMOKELINE1..3` SubType 0) to 0.7 on their own sheets, and `smoke1` (SubType 1) is green
+  whatever its light.
 - `monsterGlow.test.ts`: `RenderLight` breathes on the world's clock, so two monsters that came apart
   breathe alike, in step with their floor light; Santa Claus and the Snowman carry their steady
-  flare01 cards on their bones (ZzzObject.cpp:1910-1945).
+  flare01 cards on their bones (ZzzObject.cpp:1910-1945); a swelling card (Kundun's) takes its size
+  from the world clock, a lifted one (Selupan's) adds the swing to its light and turns on that clock.
+- `monsterVisuals.test.ts`: a `cards` row hangs each spot on the glow entry with its own sheet, scale
+  and offset; a `trail` runs a ribbon from its bone, a gated one ending when the monster dies; a `puff`
+  makes one of its particles at its bone, and one gated on a buff puffs only under it, each bone rolling
+  its own chance with `rollEach`; each particle of a puff takes its own scale, and the jitter.
 - `core.test.ts`: a flickering tint makes a bounded number of additive materials, each within half
   a 1/128 step of the colour asked for; a burst emits nothing while the page is hidden.
 - `modelClones.test.ts`: a `model`, `linkedModel` or spirit skull clone leaves no mesh, skeleton or
@@ -325,7 +333,10 @@ monster rolls the same 1/n. Spawns go into other entries' pools (`emitBurst`, `s
 `spawnRing`, `spawnDebris`, `spawnSprite`); this entry keeps only handles and banks. The rows are
 each monster folder's `bodyFx` (types in `controllers/monsters/bodyFx.ts`, shared pieces in
 `versions/shared/monsters/_shared/bodyFx.ts`); particle and texture names resolve here (`PARTICLES`,
-`TEXTURES`), once per row.
+`TEXTURES`), once per row. The `RenderMonsterVisual` rows: `cards` (steady `CreateSprite` cards on
+bones) go to `monsterGlow` as spots, `trail` (a JOINT_ENERGY whose head rides a bone) is one joint
+for the monster's life, and `puff` spawns the original's own particles (`effectParticles.ts` kinds,
+`PUFFS`). A row gated `alive` ends when the monster dies (the original's `if (Die) return`).
 
 ### ping.ts
 The ring drapes the marker over the terrain and a straight joint draws the trail, near end on the

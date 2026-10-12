@@ -1,5 +1,6 @@
 import type { MeshAnimation } from '../render/meshAnimation';
 import { MonsterActionType } from '@versions/shared/objects/enum';
+import { monsterRegistry } from '../monsters';
 
 /**
  * Monster additive body mesh by model type: `CreateMonster`
@@ -44,6 +45,9 @@ const MONSTER_MODEL_ICE_MONSTER = 15;
 const MONSTER_MODEL_DEATH_KNIGHT = 29;
 const MONSTER_MODEL_HYDRA = 37;
 
+/** A blend mesh drawn as its case leaves it: no per-tick write. */
+const still = (mesh: number): MonsterBlendMesh => ({ mesh, light: 1 });
+
 const MONSTER_BLEND_MESHES: Partial<Record<number, MonsterBlendMesh>> = {
   // Gorgon 18 / Death Gorgon 35: mesh 1 (:14051, :13903), and every tick
   // `BlendMeshLight = (rand() % 10) * 0.1f` (:6061) - the flicker.
@@ -85,7 +89,29 @@ const MONSTER_BLEND_MESHES: Partial<Record<number, MonsterBlendMesh>> = {
       }, 0),
     }),
   },
+  // Ice Queen 25: mesh 2 (:14000); Beetle Monster 28: mesh 1 (:13981).
+  18: still(2),
+  21: still(1),
+  // Tantallos 58, Zaikan 59, Golden Tantallos 82: mesh 2 (:13741, :13546).
+  42: still(2),
+  // Alquamos 69: mesh 0 (:13576).
+  50: still(0),
+  // Every Crust (Mega 71, Alpha 74, Omega Wing 301, Golden 496): mesh 1 (:13607, :14902), U scrolling a
+  // full sheet every 2.5 s (:5818).
+  52: { mesh: 1, light: 1, animate: () => ({ mesh: 1, kind: 'blend', u: saw(10000, 0.0004) }) },
+  // The Kalima line (GMHellas.cpp:780-878): the Aegis 66 and the Death and Rogue Centurions 67. The Death
+  // Angel's mesh 1 and the Necron's mesh 3 (and their breathing, :1428-1452) name meshes their bodies lack.
+  66: still(1),
+  67: still(0),
+  // Life Stone 278: mesh 3 (GMBattleCastle.cpp:1409).
+  86: still(3),
 };
+
+/** A type's own blend mesh (its folder's `blendMesh`), else its body's. */
+export function blendMeshOf(npcType: number | undefined, modelType: number): MonsterBlendMesh | undefined {
+  const own = npcType === undefined ? undefined : monsterRegistry.def(npcType)?.blendMesh;
+  return own ? { mesh: own.mesh, light: own.light ?? 1 } : monsterBlendMeshFor(modelType);
+}
 
 /** The blend mesh this monster model carries, if any. */
 export function monsterBlendMeshFor(

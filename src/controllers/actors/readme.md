@@ -170,6 +170,8 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 
 ## Tests
 - `ammoGold.test.ts`: only bolts and arrows turn gold, only while Infinity Arrow holds, and give back their light after.
+- `monsterBlendMesh.test.ts`: the mesh each monster model's case draws additive, the Crust's U scroll, and a
+  type's own mesh over its body's.
 - `chaosCastleUnit.test.ts`: the castle's weapons per class, own weapons elsewhere, transformed
   players and NPCs keep theirs, no armour glow in the castle.
 - `approachPath.test.ts`: walk truncation at range, distance along the sent path, stall capping.
@@ -226,10 +228,13 @@ ancient passes, wings and the pet. Reading only the item numbers is what once le
 effects and wings off. Hands carry no excellent or ancient bit in this layout.
 
 ### monsterBlendMesh.ts
-Keyed by monster model type. `MonsterObject.load` sets `BlendMesh` / `BlendMeshLight` unless the
-class set its own, and binds the per-tick writes with `bindMeshAnimation`. Crust, Balrog and Devil
-are left out on purpose: their `BlendMeshTexCoord` writes (ZzzCharacter.cpp:5818, :6012, :6015) land
-on `BlendMesh = -1` and draw nothing (ZzzBMD.cpp:1847).
+Keyed by monster model type; a type's own `blendMesh` (the Valkyrie, the Chaos Goblin and Elf Lala) wins
+(`blendMeshOf`), and a plain-model NPC (`npcFactoryFor`) takes that one too. `MonsterObject.load` sets `BlendMesh` / `BlendMeshLight` unless the
+class set its own, and binds the per-tick writes with `bindMeshAnimation`. Balrog and Devil are left
+out on purpose: their `BlendMeshTexCoord` writes (ZzzCharacter.cpp:6012, :6015) land on `BlendMesh = -1`
+and draw nothing (ZzzBMD.cpp:1847). Every Crust case sets mesh 1 (:13607, :14902), so its U scroll
+(:5818) shows. The Death Angel's mesh 1 and the Necron's mesh 3 (GMHellas.cpp:797, :877) name meshes
+their bodies lack, so they have no row.
 
 ### weaponAttachment.ts
 In the hands the weapon frame is the hand bone, no matrix (Link=false, ZzzCharacter.cpp:9961). On

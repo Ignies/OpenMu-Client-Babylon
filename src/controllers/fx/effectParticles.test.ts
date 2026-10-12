@@ -1085,3 +1085,27 @@ describe('the held weapons\' particles (RenderLinkObject, ZzzCharacter.cpp:7765-
     expect((await play('starShine', 0.22, 0.5, 25)).color.r).toBe(0);
   });
 });
+
+describe('the bosses smokes (ZzzEffectParticle.cpp:1327, :1500, :1767; :5361, :5683, :5963)', () => {
+  const rgb = (s: FakeSprite) => [s.color.r, s.color.g, s.color.b].map(c => c.toFixed(3));
+
+  // SubType 50 steps `(rand() % 3 + 2) * 0.1` toward half its light, past it for a tick, and rises 1.6-3.1 a tick.
+  it('smoke50 fades in to half its light and rises', async () => {
+    const sprite = await play('smoke50', 1, 0.5, 3);
+    expect(rgb(sprite)).toEqual(['0.100', '0.200', '0.300']);
+    expect(sprite.position.y).toBeCloseTo(0.072);
+  });
+
+  // SMOKELINE SubType 0 steps `(rand() % 5 + 2) * 0.1` toward 0.7 of its light.
+  it('smokeLine1 fades in to 0.7 of its light on its own sheet', async () => {
+    const sprite = await play('smokeLine1', 1, 0.5, 3);
+    expect(rgb(sprite)).toEqual(['0.140', '0.280', '0.420']);
+    expect(fakes.files).toContain('Effect/smokelines01.OZJ');
+  });
+
+  // SubType 1 is `(0.5L, L, 0.8L)` at `L = LifeTime / 50` whatever light it is made with.
+  it('smoke1 is green whatever its light', async () => {
+    const sprite = await play('smoke1', 1, 0.5, 10);
+    expect(rgb(sprite)).toEqual(['0.400', '0.800', '0.640']);
+  });
+});

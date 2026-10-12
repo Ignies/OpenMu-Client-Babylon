@@ -23,6 +23,8 @@ import { spawnDebris } from './debris';
 import { spawnJoint } from './joint';
 import { spawnRing } from './ring';
 import { spawnSprite } from './sprite';
+import { glowMonster, type GlowTexture, type MonsterGlow } from './monsterGlow';
+import { NO_TURN, spawnParticle, type KindName } from './effectParticles';
 import {
   BODY_SMOKE,
   ENERGY_CHIPS,
@@ -38,9 +40,11 @@ import {
 import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
 import {
   monsterRegistry,
+  type BodyCard,
   type BodyFxEmitter,
   type BodyFxGate,
   type BodyParticle,
+  type BodyPuff,
   type BodyTexture,
   type MonsterBodyFx,
 } from '../monsters';
@@ -124,6 +128,63 @@ const TEXTURES: Readonly<Record<BodyTexture, string>> = {
   gmAurora: TEX.gmAurora,
 };
 
+const CARDS: Readonly<Record<BodyCard, GlowTexture>> = {
+  light: 'flare',
+  lightRed: 'lightRed',
+  lightMarks: 'lightMarks',
+  shockWave: 'shockWave',
+  shiny2: 'wisp',
+  shiny6: 'shiny6',
+  energy: 'energy',
+  flareBlue: 'flareBlue',
+  flareRed: 'flareRed',
+  flare2: 'flare2',
+  eventCloud: 'eventCloud',
+};
+
+const PUFFS: Readonly<Record<BodyPuff, KindName>> = {
+  fire1: 'fire1',
+  fire2: 'fire2',
+  fire3: 'fire3',
+  smoke1: 'smoke1',
+  smoke13: 'smoke13',
+  smoke17: 'smoke17',
+  smoke21: 'smoke21',
+  smoke50: 'smoke50',
+  smokeLine1: 'smokeLine1',
+  smokeLine2: 'smokeLine2',
+  smokeLine3: 'smokeLine3',
+  trueFire: 'trueFire',
+};
+
+type CardsRow = Extract<BodyFxEmitter, { kind: 'cards' }>;
+
+/** A `cards` row as the glow entry draws it: each spot its own sheet, scale and offset (cm to tiles). */
+function cardGlow(em: CardsRow): MonsterGlow {
+  return {
+    bones: [],
+    spots: em.spots.map(s => ({
+      bone: s.bone,
+      tex: CARDS[s.card],
+      scale: s.scale,
+      local: s.local && [s.local[0] / TILE_CM, s.local[1] / TILE_CM, s.local[2] / TILE_CM],
+      spin: s.spin,
+    })),
+    cards: [],
+    colour: em.colour,
+    breathe: !!em.pulse,
+    breathSpeed: em.pulse?.speed,
+    breathAmount: em.pulse?.amount,
+    breathBase: em.pulse?.base,
+    swellSpeed: em.swell?.speed,
+    swellAmount: em.swell?.amount,
+    liftSpeed: em.lift?.speed,
+    liftAmount: em.lift?.amount,
+    liftBase: em.lift?.base,
+    luminosity: 1,
+  };
+}
+
 /** A row with its names swapped for the recipes and textures they name; keys keep their order. */
 function resolve(e: BodyFxEmitter): Emitter {
   const out: Record<string, unknown> = { ...e };
@@ -192,6 +253,7 @@ const live = new LiveList();
 
 const tmp = new Vector3();
 const tmpLocal = new Vector3();
+const ZERO_CM: Cm3 = [0, 0, 0];
 
 const scatter = (v: number) => (Math.random() * 2 - 1) * v;
 
@@ -212,11 +274,13 @@ type Frame = {
   readonly frame: number;
   readonly prevFrame: number;
   readonly alive: boolean;
+  readonly buffs: ReadonlySet<number> | undefined;
 };
 
 function open(gate: Gate | undefined, f: Frame): boolean {
   if (!gate) return true;
   if (gate.alive && !f.alive) return false;
+  if (gate.buff !== undefined && !f.buffs?.has(gate.buff)) return false;
   if (
     gate.action &&
     (f.action === undefined || !gate.action.includes(f.action))
@@ -349,7 +413,25 @@ function emit(scene: Scene, e: Entity, em: Emitter, f: Frame): void {
       }
       return;
     }
+    case 'puff': {
+      if (!open(em.gate, f)) return;
+      const local = em.local ?? ZERO_CM;
+      for (const at of em.bones) {
+        if (em.rollEach && Math.random() >= 1 / em.every) continue;
+        tmpLocal.set(local[0] / TILE_CM, local[1] / TILE_CM, local[2] / TILE_CM);
+        boneLocalPos(e, at, tmpLocal, tmp);
+        for (let i = 0; i < em.particles.length; i++) {
+          const p = em.particles[i];
+          const name = typeof p === 'string' ? p : p[Math.floor(Math.random() * p.length)];
+          const scale = em.scales?.[i] ?? em.scale ?? 1;
+          void spawnParticle(scene, PUFFS[name], tmp, NO_TURN, scale, em.colour, em.jitterCm);
+        }
+      }
+      return;
+    }
     case 'bolts':
+    case 'cards':
+    case 'trail':
       // Spawned once at start; nothing per tick.
       return;
   }
@@ -373,8 +455,31 @@ export function visualMonster(
   let prevFrame = -1;
   let stopped = false;
   const children: EffectHandle[] = [];
+  /** The ones that end with its life (`gate.alive`). */
+  const mortal: EffectHandle[] = [];
 
   for (const em of row) {
+    if (em.kind === 'cards') {
+      const card = glowMonster(scene, e, cardGlow(em));
+      children.push(card);
+      if (em.gate?.alive) mortal.push(card);
+      continue;
+    }
+    if (em.kind === 'trail') {
+      const ribbon = spawnJoint(scene, bonePos(e, em.bone, tmp), {
+        head: boneSource(e, em.bone),
+        maxTails: em.maxTails,
+        width: em.widthCm / TILE_CM,
+        colour: em.colour,
+        texture: em.ribbon === 'flare' ? TEX.flareBig : TEX.jointLaser,
+        seconds: Infinity,
+        fadeTail: 0,
+        until: () => stopped || entityGone(e),
+      });
+      children.push(ribbon);
+      if (em.gate?.alive) mortal.push(ribbon);
+      continue;
+    }
     if (em.kind === 'halo') {
       children.push(
         spawnSprite(scene, entityPos(e, em.heightCm / TILE_CM, tmp), {
@@ -432,6 +537,11 @@ export function visualMonster(
     update(dt) {
       if (entityGone(e)) return false;
 
+      if (e.dying && mortal.length) {
+        for (const h of mortal) h.stop();
+        mortal.length = 0;
+      }
+
       bank += dt;
       let due = 0;
       while (bank >= TICK && due < MAX_TICKS_PER_FRAME) {
@@ -451,6 +561,7 @@ export function visualMonster(
         frame,
         prevFrame,
         alive: !e.dying,
+        buffs: e.buffs,
       };
       prevFrame = frame;
 
@@ -461,8 +572,8 @@ export function visualMonster(
             if (ticks <= em.ticks) emit(scene, e, em, f);
             continue;
           }
-          // A mark is not re-made on a tick: it was started with the body.
-          if (em.kind === 'mark') continue;
+          // A mark, cards and a trail are not re-made on a tick: they were started with the body.
+          if (em.kind === 'mark' || em.kind === 'cards' || em.kind === 'trail') continue;
           // A halo is, but on every one of them rather than a roll.
           if (em.kind === 'halo') {
             emit(scene, e, em, f);
@@ -473,7 +584,7 @@ export function visualMonster(
               emit(scene, e, em, f);
             continue;
           }
-          if (Math.random() < 1 / em.every) emit(scene, e, em, f);
+          if ((em.kind === 'puff' && em.rollEach) || Math.random() < 1 / em.every) emit(scene, e, em, f);
         }
       }
       return true;

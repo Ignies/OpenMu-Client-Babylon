@@ -13,7 +13,7 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `babylon/spriteLinear.ts`: `installSpriteLinearDecode()` (called by `fx/core.ts`).
 - `babylon/compileWait.ts`: `pauseCompileWaitWhileHidden()` (called by `createEngine`).
 - `modelObject.ts`: `ModelObject`, the base class of every drawn model (actors, map objects, npcs,
-  drops, pets); `PartPose`, `BodyShine` (with `ShineMesh` and `ShineLight`, the shine mesh lit by
+  drops, pets); `PartPose`, `BodyShine` (with `ShineMesh` or `ShineMeshes` and `ShineLight`, the shine mesh lit by
   the shine's tint), `HIDDEN_MESH_ALL`, `BLEND_MESH_ALL`.
 - `meshPasses.ts`: `MeshPass`, `MeshPassSet`, `MeshPasses`, `UV_MAP` / `UvMap`: a model's own
   `RenderPartObjectBody` passes, set on `ModelObject.MeshPasses` before `load()` (item looks).
@@ -130,7 +130,7 @@ There is no `index.ts` facade; other folders import the modules directly.
   model back.
 - `modelObject.test.ts`: a model whose clips are cloned on first play reads every clip's keys at load
   without cloning one, and a clip cloned later reports its end; `BlendMesh -2` and a pulsing `BlendMeshLightAt`;
-  `ShineLight` lights the shine mesh by the tint;
+  `ShineLight` lights the shine mesh by the tint; `ShineMeshes` puts the shine on those meshes only;
   a part unlinked from its bone goes back under its owner; an action stops every other running clip, the loader's clip 0 too;
   a character casts the blob, a map object only with `MapShadow`; `ShadowFromGround` marks the clone;
   `ShadowMeshes` keeps the other meshes out; the clone carries `ShadowAlpha` and draws from `ShadowMinAlpha`;

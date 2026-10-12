@@ -671,6 +671,9 @@ export class ModelObject {
    */
   ShineMesh = -1;
 
+  /** Several meshes `BodyShine` is drawn over instead, when set (Kundun's 1-6). */
+  ShineMeshes: readonly number[] | null = null;
+
   /**
    * The meshes carrying `BodyShine` are lit by its tint, not the body's light: the original sets
    * `b->BodyLight` to the colour before the tinted passes (a seed, ZzzObject.cpp:8067-8121).
@@ -1237,7 +1240,9 @@ export class ModelObject {
       mesh.metadata.SkipBoundingBox =
         this.SkipBoundingBox || mesh.metadata.hiddenByScript === true;
 
-      const shines = this.ShineMesh < 0 || mesh === shineMesh;
+      const shines = this.ShineMeshes
+        ? this.ShineMeshes.some(i => this._frustumMeshes[i] === mesh)
+        : this.ShineMesh < 0 || mesh === shineMesh;
       mesh.metadata.shineLit = this.ShineLight && shines;
       mesh.metadata.bodyLight = mesh.metadata.shineLit ? bodyShine.tint : bodyLight;
       mesh.metadata.bodyShine = shines ? bodyShine : undefined;
