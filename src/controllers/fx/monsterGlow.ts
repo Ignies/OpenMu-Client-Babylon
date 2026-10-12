@@ -71,6 +71,8 @@ const GLOW_TEXTURES = {
   /** BITMAP_SHINY+6 (shiny05), BITMAP_EVENT_CLOUD (clouds2). */
   shiny6: { file: TEX.shiny5, px: [64, 64] },
   eventCloud: { file: TEX.eventCloud, px: [256, 256] },
+  /** BITMAP_BLUR (blur01): Fred's blade-head card. */
+  blur: { file: TEX.blur, px: [32, 64] },
 } as const;
 
 export type GlowTexture = keyof typeof GLOW_TEXTURES;
@@ -419,9 +421,10 @@ function place(g: LiveGlow): void {
     ? Math.sin(seconds * (g.glow.liftSpeed ?? 0) * 1000) * g.glow.liftAmount + (g.glow.liftBase ?? 0)
     : 0;
   const share = g.glow.liftChannels;
-  const r = (g.rgb[0] + lift * (share ? share[0] : 1)) * lumi;
-  const gr = (g.rgb[1] + lift * (share ? share[1] : 1)) * lumi;
-  const b = (g.rgb[2] + lift * (share ? share[2] : 1)) * lumi;
+  // A light below 0 packs to black (PackABGR).
+  const r = Math.max(0, (g.rgb[0] + lift * (share ? share[0] : 1)) * lumi);
+  const gr = Math.max(0, (g.rgb[1] + lift * (share ? share[1] : 1)) * lumi);
+  const b = Math.max(0, (g.rgb[2] + lift * (share ? share[2] : 1)) * lumi);
   const hidden = g.entity.modelObject?.OutOfView === true || (g.glow.when !== undefined && !g.glow.when());
   const swell = g.glow.swellAmount ? Math.sin(seconds * (g.glow.swellSpeed ?? 0) * 1000) * g.glow.swellAmount : 0;
 

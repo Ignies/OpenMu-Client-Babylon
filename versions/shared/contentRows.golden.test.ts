@@ -36,7 +36,7 @@ const HASHES = {
   packetSounds: 'b2ba044b23b516f77ad3d7dd87882521c6105384468e8f6e92798dfc45f26d30',
   warriorGlint: '1389fbfce19304f55df3cdc1db7fb6e86d7c4702b4625de504f1f43bd66dacfe',
   characterLights: 'b902ca420087248e66c327a109ca93da5c7ecdee74bde201beb512b28ab8b738',
-  monsterVisuals: 'a6c5a8fec858b4dea784db73e931a84d28df0d2a01ed8475a93bc60a909e8ffa',
+  monsterVisuals: '9a8cc50be764314d77adf9ae5ae3d4d0d66cf23b368ddddc83ab393fa5bf3968',
   shatterDeaths: '9ef072504d008f0ed2dda2bcc09725dac989e61bae8d6ff73b2f20b5ee6e72e1',
 };
 

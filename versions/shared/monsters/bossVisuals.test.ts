@@ -477,7 +477,7 @@ describe('the Imperial Guardian bosses', () => {
   // `sinf(WorldTime * 0.002f) * 0.1f + 0.2f` (ZzzEffectJoint.cpp:3220-3226).
   it('run Fred eye ribbons with their flares', () => {
     expect(trails(508).slice(0, 2)).toEqual(['15 10cm x10 0.7,0.7,1', '14 10cm x10 0.7,0.7,1']);
-    expect(cards(508)).toEqual(['15:flare2@0.2 0.7,0.7,1', '14:flare2@0.2 0.7,0.7,1']);
+    expect(cards(508).slice(0, 2)).toEqual(['15:flare2@0.2 0.7,0.7,1', '14:flare2@0.2 0.7,0.7,1']);
     expect(rows(508, 'cards')[0]).toMatchObject({ pulse: { speed: 0.002, amount: 0.1, base: 0.2 }, swell: { speed: 0.002, amount: 0.1 } });
   });
 
@@ -487,6 +487,10 @@ describe('the Imperial Guardian bosses', () => {
   it("run Fred's four blade ribbons through Attack1", () => {
     expect(trails(508).slice(2)).toEqual([71, 72, 73, 74].map(b => `${b} 100cm x15 0.7,0.7,1`));
     for (const r of rows(508, 'trail').slice(2)) expect(r).toMatchObject({ ribbon: 'spark', gate: { action: [A.Attack1] } });
+    // Each head lays a BITMAP_BLUR card a tick at `Luminosity = sinf(WorldTime * 0.002f) * 0.1f`, its size and its
+    // light, dark half the time (ZzzEffectJoint.cpp:3227-3231).
+    expect(cards(508).slice(2)).toEqual([71, 72, 73, 74].map(b => `${b}:blur01@0 0.7,0.7,1`));
+    expect(rows(508, 'cards')[1]).toMatchObject({ pulse: { speed: 0.002, amount: 0.1, base: 0 }, swell: { speed: 0.002, amount: 0.1 } });
   });
 
   // MODEL_HAMMERIZE (GMEmpireGuardian2.cpp:864-876): blue lights on bones 21 and 38, swinging on

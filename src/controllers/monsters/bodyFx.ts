@@ -24,7 +24,8 @@ export type BodyCard =
   | 'flare2'
   | 'eventCloud'
   | 'hole'
-  | 'lightning2';
+  | 'lightning2'
+  | 'blur01';
 
 /** The sheets a `blur` can draw: CreateBlur's `Type` 0 and 4 (BITMAP_BLUR, blur01), 1 (motion_blur) or 3 (BITMAP_BLUR2, blur02). */
 export type BodyBlurSheet = 'blur01' | 'blur02' | 'motionBlur';
