@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { t } from '@/i18n';
-import { defenseText } from './lines';
+import type { Item } from '@/ecs/world';
+import { BaseClass } from '@/modules/hero/characterStats';
+import { defenseText, fullSet } from './lines';
 
 // NewUICharacterInfoWindow.cpp:977-1017.
 describe('the defense line', () => {
@@ -21,5 +23,32 @@ describe('the defense line', () => {
     const none = { ...stats, defenseRate: 0, blockingBuff: 0 };
     expect(defenseText(none, true)).toBe(t('charInfo.defenseFull', { defense: 300, bonus: 28 }));
     expect(defenseText(none, false)).toBe(t('charInfo.defense', { defense: 300 }));
+  });
+});
+
+// bDexSuccess (NewUICharacterInfoWindow.cpp:830-901): five unbroken pieces of one set; the gladiator needs no helm and wears
+// only his own armours, the fighter needs no gloves.
+describe('the full set bonus', () => {
+  const set = (num: number, more: Record<number, Partial<Item> | null> = {}) => {
+    const items: (Item | null)[] = new Array(12).fill(null);
+    for (let slot = 2; slot <= 6; slot++) items[slot] = { group: slot + 5, num, durability: 50 };
+    for (const [slot, item] of Object.entries(more)) items[Number(slot)] = item ? { group: Number(slot) + 5, num, durability: 50, ...item } : null;
+    return items;
+  };
+
+  it('needs five pieces of one set, none broken', () => {
+    expect(fullSet(set(3), BaseClass.Knight)).toBe(true);
+    expect(fullSet(set(3, { 4: { num: 4 } }), BaseClass.Knight)).toBe(false);
+    expect(fullSet(set(3, { 2: null }), BaseClass.Knight)).toBe(false);
+    expect(fullSet(set(3, { 6: { durability: 0 } }), BaseClass.Knight)).toBe(false);
+  });
+
+  it("lets the gladiator go without a helm in his own armours, and the fighter without gloves", () => {
+    expect(fullSet(set(15, { 2: null }), BaseClass.MagicGladiator)).toBe(true);
+    expect(fullSet(set(15, { 2: { num: 1 } }), BaseClass.MagicGladiator)).toBe(true);
+    expect(fullSet(set(3, { 2: null }), BaseClass.MagicGladiator)).toBe(false);
+    expect(fullSet(set(15, { 2: { durability: 0 } }), BaseClass.MagicGladiator)).toBe(false);
+    expect(fullSet(set(59, { 5: null }), BaseClass.RageFighter)).toBe(true);
+    expect(fullSet(set(59, { 5: { num: 1 } }), BaseClass.RageFighter)).toBe(true);
   });
 });

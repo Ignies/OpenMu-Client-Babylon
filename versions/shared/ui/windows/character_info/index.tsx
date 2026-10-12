@@ -28,11 +28,10 @@ import {
   MuTableFrame,
   MuTableRule,
 } from '@/controllers/interface/components/mu_window';
-import { InventoryConstants } from '@/core/inventoryConstants';
 import { Bag } from '@/modules/inventory';
 import { StorageKind } from '@/modules/inventory/itemStorage';
 import { defenseColour, eventColour, statColour } from './buffColours';
-import { defenseText } from './lines';
+import { defenseText, fullSet } from './lines';
 import { pkTextColour, PVP_NEUTRAL } from '@/controllers/interface/nameTags';
 import {
   BaseClass,
@@ -468,29 +467,11 @@ export const CharacterInfo = observer(() => {
     });
   }
 
-  const armourSlots = [
-    InventoryConstants.HelmSlot,
-    InventoryConstants.ArmorSlot,
-    InventoryConstants.PantsSlot,
-    InventoryConstants.GlovesSlot,
-    InventoryConstants.BootsSlot,
-  ];
-
-  const fullSet = armourSlots.every(slot => {
-    if (base === BaseClass.MagicGladiator && slot === InventoryConstants.HelmSlot) {
-      return true;
-    }
-    if (base === BaseClass.RageFighter && slot === InventoryConstants.GlovesSlot) {
-      return true;
-    }
-    return !!playerData.items[slot];
-  });
-
   const agilityDetails: DetailLine[] = [];
 
   // White, magenta under the defense event buffs, blue under the party buff (NewUICharacterInfoWindow.cpp:1021-1035).
   const defenseLine = defenseColour(buffs);
-  agilityDetails.push({ color: defenseLine, text: defenseText(stats, fullSet) });
+  agilityDetails.push({ color: defenseLine, text: defenseText(stats, fullSet(playerData.items, base)) });
 
   // White, magenta under its event buffs or with the Demon or the Skeleton (NewUICharacterInfoWindow.cpp:1039-1069).
   agilityDetails.push({
