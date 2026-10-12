@@ -91,6 +91,40 @@ describe('the character window wizardry with a staff', () => {
   });
 });
 
+// CalculateMagicDamage adds the item's AT_IMPROVE_MAGIC options, not its damage (ZzzInfomation.cpp:2848-3001).
+describe('the wizardry of a held staff', () => {
+  const wizardry = (pieces: Record<number, Item>, strength = 600) => {
+    const items: (Item | null)[] = new Array(12).fill(null);
+    for (const [slot, item] of Object.entries(pieces)) items[Number(slot)] = item;
+    return deriveCharacterStats({ charClass: CharacterClassNumber.DarkWizard, level: 240, strength, agility: 300, vitality: 100, energy: 450, leadership: 0, items });
+  };
+  const staff = (more: Partial<Item> = {}): Item => ({ group: 5, num: 5, durability: 66, ...more });
+
+  it("leaves out the Legendary Staff's damage", () => {
+    expect(wizardry({ 0: staff() })).toMatchObject({ wizardryMin: 50, wizardryMax: 112 });
+  });
+
+  it('adds +4 per option level, and nothing when the staff is broken or its strength is unmet', () => {
+    expect(wizardry({ 0: staff({ optionLevel: 2 }) })).toMatchObject({ wizardryMin: 58, wizardryMax: 120 });
+    expect(wizardry({ 0: staff({ optionLevel: 2, durability: 0 }) })).toMatchObject({ wizardryMin: 50, wizardryMax: 112 });
+    expect(wizardry({ 0: staff({ optionLevel: 2 }) }, 20)).toMatchObject({ wizardryMin: 50, wizardryMax: 112 });
+  });
+
+  it('adds the excellent level / 20 and 2% wizardry', () => {
+    expect(wizardry({ 0: staff({ isExcellent: true, excellentFlags: 0x10 }) })).toMatchObject({ wizardryMin: 62, wizardryMax: 124 });
+    expect(wizardry({ 0: staff({ isExcellent: true, excellentFlags: 0x08 }) })).toMatchObject({ wizardryMin: 51, wizardryMax: 114 });
+  });
+
+  it("adds the staff's option again with anything in the left hand, as the original does (:2950-2979)", () => {
+    expect(wizardry({ 0: staff({ optionLevel: 2 }), 1: { group: 6, num: 0, durability: 22 } })).toMatchObject({ wizardryMin: 66, wizardryMax: 128 });
+  });
+
+  it("adds the Wings of Heaven's option, and a Wizard's Ring's 10%", () => {
+    expect(wizardry({ 7: { group: 12, num: 1, durability: 200, optionLevel: 1 } })).toMatchObject({ wizardryMin: 54, wizardryMax: 116 });
+    expect(wizardry({ 10: { group: 13, num: 20, durability: 30 } })).toMatchObject({ wizardryMin: 55, wizardryMax: 123 });
+  });
+});
+
 // NewUICharacterInfoWindow.cpp:680-704 (damage), :1259-1294 (wizardry), :1395-1418 (curse).
 describe('the character window with a transformation ring', () => {
   const withRings = (rings: (Item | null)[], charClass = CharacterClassNumber.DarkKnight, pet: Item | null = null) => {

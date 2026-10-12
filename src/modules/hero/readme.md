@@ -21,6 +21,10 @@ other folders share.
   (ZzzInfomation.cpp:2745-2812, :3005-3035, :3127-3129, :3248, :3361-3381). The stats the sets and sockets add
   (`AddStrength` and the rest) are not shown or used yet. The shield's blocking and its +5 per option level
   lose the `CalcDurabilityPercent` share, and the excellent "defense success rate" adds 10% (:3223-3236).
+  Wizardry is energy plus the items' wizardry options only (`CalculateMagicDamage`, :2848-3001): the wing's,
+  the right weapon's (a magic sword's damage option), the left weapon's, the staff and pendant excellent
+  level / 20 and 2%, the Wizard's Ring 10%, each counted only when `IsRequireEquipItem` passes. As in the
+  original, anything in the left hand adds the right weapon's option a second time (:2950-2979).
 - `emotes.ts`: `EMOTES`, `EMOTE_RINGS`, `emoteById(id)`, `matchEmoteWord(text)` (the chat words that fire
   an emote, `CheckChatText`), `genderedEmoteAction`, type `EmoteId`.
 - `statAllocation.ts`: `StatAllocation.start(stat, amount)` / `cancel()`, `run`, `running`, `isRunning(stat)`.
