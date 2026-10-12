@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { Vector3 } from '@/controllers/render/babylon/exports';
-import { itemBodyPasses, itemHeldSprites } from '@/controllers/item_fx/itemLooks';
+import { itemBodyPasses, itemHeldSprites, itemWingSprites } from '@/controllers/item_fx/itemLooks';
 import './index';
 
 /** A sample WorldTime (ms) and body light the passes are read at. */
@@ -33,10 +33,10 @@ const r = (n: number) => +n.toFixed(4);
  * rotation]`; `rand()` is `Math.random()`, stubbed to `RAND`.
  */
 const RAND = 0.5;
-function held(group: number, num: number) {
+function held(group: number, num: number, of = itemHeldSprites) {
   const random = vi.spyOn(Math, 'random').mockReturnValue(RAND);
   const v = new Vector3();
-  const rows = itemHeldSprites(group, num)?.map(s => {
+  const rows = of(group, num)?.map(s => {
     let point: number[] | undefined;
     if (typeof s.offset === 'function') {
       s.offset(T, v);
@@ -864,5 +864,58 @@ describe('the shields\' held sprites', () => {
       ...[4, 5, 6, 7].map(bone => ['flare01', bone, undefined, 1.2, [r(0.2 * l), r(0.2 * l), r(0.8 * l)], 0]),
       ...[8, 9, 10, 11, 12, 13].map(bone => ['flare01', bone, undefined, 1.4, [r(0.2 * l), r(0.6 * l), r(0.6 * l)], 0]),
     ]);
+  });
+});
+
+// RenderLinkObject's Archangel, Daybreak, Beuroba and phoenix wing cases (ZzzCharacter.cpp).
+describe('the Archangel set\'s and the rest\'s held sprites', () => {
+  const lum = (Math.floor(RAND * 30) + 70) * 0.005;
+  const red = [r(lum), r(lum * 0.3), r(lum * 0.1)];
+  // rand_fps_check(3) fails at RAND: the grey Shiny02 is drawn at 0 this frame.
+  const glint = (bone: number, at?: number[]) => [
+    ['shiny02', bone, at, 0, [0.4, 0.4, 0.4], Math.floor(RAND * 360)],
+    ['flare01', bone, at, 2, red, 0],
+  ];
+
+  it('Divine Sword of Archangel: a red flare and a one-in-three grey Shiny02 on bones 2-8 (:7489-7520)', () => {
+    expect(held(0, 19)).toEqual([2, 3, 4, 5, 6, 7, 8].flatMap(bone => glint(bone)));
+  });
+
+  it('Divine Staff of Archangel: ten glints in a row 40 cm off bone 0 (:7060-7076)', () => {
+    expect(held(5, 10)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9].flatMap(i => glint(0, [i * 30 - 180, -40, 0])));
+  });
+
+  it('Divine Scepter of Archangel: one glint at bone 0 (:7647-7660)', () => {
+    expect(held(2, 13)).toEqual(glint(0));
+  });
+
+  it('Daybreak: two Impack03 by bone 2, a still and a turning Shiny02, a flickering grey flare (:7224-7254)', () => {
+    const grey = [0.6, 0.6, 0.6];
+    const f = r(Math.sin(T * 0.4) * 0.25 + 0.6);
+    expect(held(0, 24)).toEqual([
+      ['impact03', 2, [0, 0, 3], 0.45, grey, 0],
+      ['impact03', 2, [0, 0, -3], 0.45, grey, 0],
+      ['shiny02', 2, undefined, 0.7, grey, 0],
+      ['shiny02', 2, undefined, r(0.5 + Math.floor(RAND * 100) / 180), grey, r(T * 0.0006 * 360)],
+      ['flare01', 2, undefined, 3, [f, f, f], 0],
+    ]);
+  });
+
+  it('Beuroba: two pink shiny05 at bones 3 and 4, a green flare at 5 (:8291-8309)', () => {
+    const pink = [0.9, 0.2, 0.7];
+    expect(held(3, 11)).toEqual([
+      ['shiny05', 3, undefined, 0.8, pink, 0],
+      ['shiny05', 3, undefined, 0.3, pink, 0],
+      ['shiny05', 4, undefined, 0.8, pink, 0],
+      ['shiny05', 4, undefined, 0.3, pink, 0],
+      ['flare01', 5, undefined, 1.5, [0.2, 0.9, 0.1], 0],
+    ]);
+  });
+
+  it('the Phoenix Soul Star\'s wing: green light marks at a random turn on bones 3-10 and 13-20 (:8386-8401)', () => {
+    const size = r(Math.floor(RAND * 30) / 300 + 0.3);
+    const bones = [3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 15, 16, 17, 18, 19, 20];
+    expect(held(0, 35, itemWingSprites)).toEqual(bones.map(bone => ['lightmarks', bone, undefined, size, [0.18, 0.45, 0.22], Math.floor(RAND * 360)]));
+    expect(held(0, 35)).toBeNull();
   });
 });

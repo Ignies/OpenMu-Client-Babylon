@@ -29,7 +29,8 @@ vi.mock('../../controllers/actors/playerObject', () => ({ isPlayerBody: () => tr
 vi.mock('../../controllers/item_fx/itemEffectMode', () => ({ legacyItemEffectsOn: () => made.on }));
 
 const { WeaponSpriteSystem } = await import('./weaponSpriteSystem');
-const { defineItemLook, itemHeldSprites, registerItemLooks } = await import('../../controllers/item_fx/itemLooks');
+const itemLooks = await import('../../controllers/item_fx/itemLooks');
+const { defineItemLook, itemHeldSprites, registerItemLooks } = itemLooks;
 
 registerItemLooks([defineItemLook({ items: [[0, 22]], held: [{ texture: 'flare01', bone: 0, scale: 1, light: [1, 1, 1] }] })]);
 
@@ -86,5 +87,19 @@ describe('the wearer a held sprite reads', () => {
     made.list.length = 0;
     WeaponSpriteSystem(world(player())).update?.(0);
     expect(made.list[0].wearers).toEqual([{ action: 18, safeZone: true }]);
+  });
+});
+
+describe('the phoenix wing\'s sprites', () => {
+  it('ride the wing model of the hand whose item names them (MODEL_SWORD_35_WING, MonkSystem.cpp:245)', () => {
+    const { itemWingSprites } = itemLooks;
+    registerItemLooks([defineItemLook({ items: [[0, 35]], wing: [{ texture: 'lightmarks', bone: 3, scale: 0.3, light: [1, 1, 1] }] })]);
+    made.list.length = 0;
+    const p = player();
+    const wing = { gltf: {} };
+    Object.assign(p.modelObject, { PhoenixWing1: wing, PhoenixWing2: { gltf: {} } });
+    p.charAppearance.leftHand = { group: 0, num: 35 };
+    WeaponSpriteSystem(world(p)).update?.(0);
+    expect(made.list.map(m => [m.model, m.specs])).toEqual([[wing, itemWingSprites(0, 35)]]);
   });
 });

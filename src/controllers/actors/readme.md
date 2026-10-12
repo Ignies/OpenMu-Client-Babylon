@@ -78,7 +78,7 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 - `weaponSprites.ts`: `WeaponSprites`, a held weapon's `RenderLinkObject` sprites (an item look's
   `held`) bound to its loaded model: a node per sprite under its bone (the root without a skeleton) at
   its point in cm, drawn by `fx` `HeldSprites` while the weapon is; `ecs/systems/weaponSpriteSystem.ts`
-  makes one per hand and rebuilds it when the hand's model changes.
+  makes one per hand (and per phoenix wing, an item look's `wing`) and rebuilds it when the model changes.
 - `itemIcon.ts`: `itemIconJob(scene, item)`, the shot of a bag icon drawn from the item's model, and
   `liveItemIconSource(scene)` / `liveItemSpinSource(scene)`, what the app puts in the interface's
   live-icon and spin slots;

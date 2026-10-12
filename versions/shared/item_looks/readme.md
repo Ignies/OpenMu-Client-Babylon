@@ -30,6 +30,7 @@ index.ts    finds every file (glob) and hands them to item_fx's registerItemLook
   rotation, each a number or a function of WorldTime (`rand()` per frame stays `Math.random()`;
   `rand_fps_check(n)` is `oneIn(n, scale)`). `when` gates a sprite on the wearer (`o->CurrentAction`,
   `c->SafeZone`): it is drawn at size 0 while the test fails.
+  `wing` are the same on the phoenix wing the item carries (the Phoenix Soul Star's, MonkSystem.cpp:245).
   `ecs/systems/weaponSpriteSystem.ts` draws them (`actors/weaponSprites.ts`).
 - The passes and sprites are the original's, drawn while the Item effects option draws the original passes
   (Legacy, Both); Off and Improved draw the plain model, as before.

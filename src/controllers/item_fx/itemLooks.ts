@@ -41,6 +41,8 @@ export type ItemLook = {
   readonly items: readonly (readonly [number, number])[];
   readonly body?: { readonly passes: readonly MeshPass[]; readonly drawn?: readonly number[] };
   readonly held?: readonly HeldSprite[];
+  /** The sprites on the phoenix wing the item carries (MODEL_SWORD_35_WING, MonkSystem.cpp:245), by its bones. */
+  readonly wing?: readonly HeldSprite[];
 };
 
 export const defineItemLook = (look: ItemLook): ItemLook => look;
@@ -97,6 +99,7 @@ export const oneIn =
 
 const bodies = new Map<number, MeshPassSet>();
 const helds = new Map<number, readonly HeldSprite[]>();
+const wings = new Map<number, readonly HeldSprite[]>();
 const key = (group: number, num: number) => group * 512 + num;
 
 /** Content's looks, handed in at boot; a later look for the same item replaces the earlier one. */
@@ -106,6 +109,7 @@ export function registerItemLooks(looks: readonly ItemLook[]): void {
     for (const [group, num] of look.items) {
       if (set) bodies.set(key(group, num), set);
       if (look.held) helds.set(key(group, num), look.held);
+      if (look.wing) wings.set(key(group, num), look.wing);
     }
   }
 }
@@ -118,4 +122,9 @@ export function itemBodyPasses(group: number, num: number): MeshPassSet | null {
 /** The sprites a character carrying the item draws on it, or null. */
 export function itemHeldSprites(group: number, num: number): readonly HeldSprite[] | null {
   return helds.get(key(group, num)) ?? null;
+}
+
+/** The sprites on the phoenix wing a character carrying the item draws, or null. */
+export function itemWingSprites(group: number, num: number): readonly HeldSprite[] | null {
+  return wings.get(key(group, num)) ?? null;
 }
