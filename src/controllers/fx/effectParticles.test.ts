@@ -1103,6 +1103,19 @@ describe('the bosses smokes (ZzzEffectParticle.cpp:1327, :1500, :1767; :5361, :5
     expect(fakes.files).toContain('Effect/smokelines01.OZJ');
   });
 
+  // BITMAP_FIRE + 1 SubType 3, Nightmare's Body_Bone13 fire: 7 ticks, pushed 3.2-3.9 a tick along its object, the push
+  // 1.05 more a tick, 0.02 more lift a tick both on its size and (x20) its rise; white at LifeTime x 0.2, held at 1.
+  it('fire1_3 grows and climbs faster each tick, white', async () => {
+    const sprite = await play('fire1_3', 1.7, 0.5, 3);
+    expect(sprite.width).toBeCloseTo((64 * (1.7 + 0.02 + 0.04 + 0.06)) / 100);
+    expect(sprite.position.y).toBeCloseTo((20 * (0.02 + 0.04 + 0.06)) / 100);
+    expect(sprite.color.r).toBe(sprite.color.b);
+    expect(sprite.color.r).toBeLessThanOrEqual(1);
+    expect(fakes.files).toContain('Effect/Fire02.OZJ');
+    disposeEffectParticles();
+    expect((await play('fire1_3', 1.7, 0.5, 8)).isVisible).toBe(false);
+  });
+
   // SubType 2 is SubType 0 living 45 ticks, not 35 (the Iron Knights' smoke lines).
   it('smokeLine1_2 is smokeLine1 living ten ticks longer', async () => {
     expect((await play('smokeLine1', 1, 0.5, 36)).isVisible).toBe(false);

@@ -28,6 +28,7 @@ type TextureKey =
   | 'smoke'
   | 'cloud'
   | 'fire01'
+  | 'fire02'
   | 'fire03'
   | 'fireHik1'
   | 'fireHik2'
@@ -76,6 +77,7 @@ const TEXTURES: Record<
   smoke: { file: 'Effect/smoke01.OZJ', size: 64 },
   cloud: { file: 'Effect/clouds.OZJ', size: 256 },
   fire01: { file: 'Effect/Fire01.OZJ', size: 64, frames: 4 },
+  fire02: { file: 'Effect/Fire02.OZJ', size: 64 },
   fire03: { file: 'Effect/Fire03.OZJ', size: 64, frames: 4 },
   fireHik1: { file: 'Effect/firehik01.OZJ', size: 64 },
   fireHik2: { file: 'Effect/firehik02.OZJ', size: 64 },
@@ -907,6 +909,29 @@ const KINDS = {
   fire0: stripFireKind('fire01'),
 
   fire0b: stripFireKind('fire03'),
+
+  /**
+   * `BITMAP_FIRE + 1` SubType 3 (Fire02.jpg, whole): 7 ticks, pushed `(rand() % 8 + 32) * 0.1` along its object; a tick
+   * the push grows 1.05, `Gravity` 0.02 more goes on its size and (x20) its rise, and it is white at `LifeTime * 0.2`
+   * (ZzzEffectParticle.cpp:514-519, :4721-4729).
+   */
+  fire1_3: {
+    texture: 'fire02',
+    blend: 'add',
+    init(p, scale) {
+      p.lifeTime = 7;
+      p.vy = -(rand(8) + 32) * 0.1;
+      p.scale = scale;
+    },
+    update(p, f) {
+      p.gravity += 0.02 * f;
+      p.scale += p.gravity * f;
+      p.vy *= 1.05 ** f;
+      p.pz += p.gravity * 20 * f;
+      p.lr = p.lg = p.lb = Math.min(1, p.lifeTime * 0.2);
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
 
   trueFire: trueFireKind('fantaF', 24),
 
@@ -2050,6 +2075,7 @@ export const KIND_REACH: Record<KindName, Reach> = {
   ember: { travel: 1, base: 0, perScale: 0.34 },
   fire0: { travel: 1.4, base: 0, perScale: 0.87 },
   fire0b: { travel: 1.4, base: 0, perScale: 0.87 },
+  fire1_3: { travel: 0.5, base: 0.4, perScale: 0.46 },
   trueFire: { travel: 1, base: 0, perScale: 0.46 },
   trueFire5: { travel: 0.85, base: 0, perScale: 0.46 },
   trueBlue: { travel: 1, base: 0, perScale: 0.46 },

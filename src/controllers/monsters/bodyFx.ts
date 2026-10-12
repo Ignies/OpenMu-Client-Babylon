@@ -54,6 +54,7 @@ export type BodyPuff =
   | 'smokeLine1_2'
   | 'smokeLine2_2'
   | 'smokeLine3_2'
+  | 'fire1_3'
   | 'trueFire'
   | 'fireMono1_4'
   | 'fireMono2_8'

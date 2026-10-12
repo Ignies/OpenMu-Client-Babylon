@@ -168,6 +168,7 @@ const PUFFS: Readonly<Record<BodyPuff, KindName>> = {
   smokeLine1_2: 'smokeLine1_2',
   smokeLine2_2: 'smokeLine2_2',
   smokeLine3_2: 'smokeLine3_2',
+  fire1_3: 'fire1_3',
   trueFire: 'trueFire',
   fireMono1_4: 'fireMono1_4',
   fireMono2_8: 'fireMono2_8',

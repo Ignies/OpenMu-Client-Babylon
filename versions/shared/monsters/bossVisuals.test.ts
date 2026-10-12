@@ -359,8 +359,15 @@ describe("Nightmare's death", () => {
   // (GM_Kanturu_3rd.cpp:865-869).
   it('smokes dark from bone 63 as he falls', () => {
     expect(rows(361, 'puff')).toEqual([
+      expect.objectContaining({ every: 1, bones: [63], particles: ['fire1_3'] }),
       expect.objectContaining({ every: 1, bones: [63], particles: ['smoke3_3', 'smoke3_3'], scale: 1.5, gate: { action: [A.Die], frames: [[3, Infinity]] } }),
     ]);
+  });
+
+  // RenderKanturu3rdMonsterVisual, alive: a BITMAP_FIRE + 1 SubType 3 at Scale 1.7 on his Angle from Body_Bone13 a tick
+  // (GM_Kanturu_3rd.cpp:1061-1062).
+  it('burns at bone 63 while he lives', () => {
+    expect(rows(361, 'puff')[0]).toEqual({ kind: 'puff', every: 1, bones: [63], particles: ['fire1_3'], colour: [1, 1, 1], scale: 1.7, turned: true, gate: { alive: true } });
   });
 });
 

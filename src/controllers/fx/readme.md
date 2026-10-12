@@ -138,7 +138,8 @@ shared pools, textures and particle recipes other folders reuse.
   fading past 300 and gone past 500, `cloud11` (SubType 11) drifts the same in its own light, turning,
   and `fireRed` (`BITMAP_FIRE_RED`, firered.jpg) shoots up steady for 20 ticks. The bosses' smokes:
   `smoke50` (`BITMAP_SMOKE` SubType 50) fades in to half its light and rises, `smokeLine1..3`
-  (`BITMAP_SMOKELINE1..3` SubType 0) to 0.7 on their own sheets, `smokeLine1_2..3_2` (SubType 2) the same over 45 ticks, not 35, and `smoke1` (SubType 1) is green
+  (`BITMAP_SMOKELINE1..3` SubType 0) to 0.7 on their own sheets, `smokeLine1_2..3_2` (SubType 2) the same over 45 ticks, not 35, `fire1_3` (`BITMAP_FIRE + 1`
+  SubType 3, Nightmare's) grows and climbs faster each tick, white, and `smoke1` (SubType 1) is green
   whatever its light. Medusa's: `fireMono1_4`, `fireMono2_8`, `fireMono3_5` (the mono fire jets) fly 8 cm a
   tick along their object's facing for 8 ticks, growing; `waterfall4Orbit0..2` (`BITMAP_WATERFALL_4`'s three
   cards, on one set of rolls) circle where they were made, 2.1 cm further out and 0.1 round a tick; a
