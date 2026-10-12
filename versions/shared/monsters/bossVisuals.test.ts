@@ -132,7 +132,7 @@ const blurs = (numb: number) =>
   rows(numb, 'blur').map(b => {
     const at = (bone: number, local?: readonly number[]) => (local ? `${bone}(${local.join(',')})` : `${bone}`);
     const gate = b.gate ? ` ${b.gate.action?.join('/')}${b.gate.frames ? ` ${b.gate.frames.map(w => w.join('-')).join(',')}` : ''}` : '';
-    return `${at(b.from, b.fromLocal)}>${at(b.to, b.toLocal)} ${b.sheet} ${b.colour.join(',')}${gate}`;
+    return `${at(b.from, b.fromLocal)}>${at(b.to, b.toLocal)} ${b.sheet} ${b.colour.join(',')}${gate}${b.short ? ' short' : ''}${b.dark ? ' dark' : ''}`;
   });
 
 describe('the swing blurs', () => {
@@ -140,16 +140,106 @@ describe('the swing blurs', () => {
   // Iron Knights (GM_Raklion.cpp:1977-1998, :1851-1873, :2104-2126), the Dark Elf on his weapon's LinkBone 33
   // (GMCrywolf1st.cpp:1254-1282, ZzzCharacter.cpp:12069), the Sapis' claws (GMSwampOfQuiet.cpp:620-795).
   it("trail the bosses' blades and the Sapis' claws", () => {
-    expect(blurs(361)).toEqual([`32(10,0,0)>38(10,-10,0) blur02 1,1,1 ${A.Attack1}/${A.Attack4} 0-5.9`]);
+    expect(blurs(361)).toEqual([`32(10,0,0)>38(10,-10,0) blur02 1,1,1 ${A.Attack1}/${A.Attack4} 0-5.9 short`]);
     expect(blurs(459)).toEqual(['69>73 blur01 1,1.2,2']);
     for (const knight of [458, 565]) expect(blurs(knight)).toEqual(['35>36 blur02 1,1.2,2']);
-    for (const elf of [340, 440]) expect(blurs(elf)).toEqual([`33(0,0,-60)>33(0,0,-150) blur02 1,1,1 ${A.Attack1}/${A.Attack2}`]);
+    for (const elf of [340, 440]) expect(blurs(elf)).toEqual([`33(0,0,-60)>33(0,0,-150) blur02 1,1,1 ${A.Attack1}/${A.Attack2} short`]);
     const claws = (from: number, to: number[], light: string, frames: string) =>
       to.map(b => `${from}>${b} blur01 ${light} ${A.Attack1}/${A.Attack2} ${frames}`);
     const hand = [34, 35, 38, 39, 43];
     for (const sapi of [441, 557, 560]) expect(blurs(sapi)).toEqual(claws(42, hand, '1,0.6,0.1', '6-7.6'));
     expect(blurs(442)).toEqual(claws(42, hand, '2,0,0', '6-7'));
     expect(blurs(443)).toEqual([...claws(42, hand, '0.3,0.7,1', '5-10'), ...claws(75, [76, 79, 80, 83, 84], '0.3,0.7,1', '5-10')]);
+  });
+});
+
+describe('the Iron Knights', () => {
+  // RenderMonsterVisual (GM_Raklion.cpp:1875-1897, :2128-2150): bones 20, 37, 45, 51 each roll `rand() % 6`, pick
+  // (0.3, 0.6, 1) two times in three or (0.8, 0.8, 0.8), and throw SMOKE SubType 50 and a SMOKELINE SubType 2 at 0.8.
+  it('smoke from four bones in blue or grey', () => {
+    const blue = [0.3, 0.6, 1];
+    for (const knight of [458, 565]) {
+      expect(rows(knight, 'puff')).toEqual([
+        {
+          kind: 'puff',
+          every: 6,
+          bones: [20, 37, 45, 51],
+          particles: ['smoke50', ['smokeLine1_2', 'smokeLine2_2', 'smokeLine3_2']],
+          scales: [1, 0.8],
+          colour: blue,
+          colours: [blue, blue, [0.8, 0.8, 0.8]],
+          rollEach: true,
+        },
+      ]);
+    }
+  });
+
+  // Dying, before Die frame 1, six MODEL_EFFECT_BROKEN_ICE0 + rand() % 3 a tick at each of the four bones in
+  // (0.3, 0.5, 1) (:1960-1970, :2213-2223).
+  it('break into ice as they die', () => {
+    for (const knight of [458, 565]) {
+      expect(rows(knight, 'shards')).toEqual([
+        { kind: 'shards', every: 1, shards: 'brokenIce', count: 6, bones: [20, 37, 45, 51], colour: [0.3, 0.5, 1], gate: { action: [A.Die], frames: [[0, 1]] } },
+      ]);
+    }
+  });
+});
+
+describe('the Aida and Kanturu swing blurs', () => {
+  // MoveAidaBlurEffect (GMAida.cpp:535-721), MoveKanturu1stBlurEffect (GM_Kanturu_1st.cpp:1604-1926) and
+  // Move_Kanturu2nd_BlurEffect (GM_Kanturu_2nd.cpp:1276-1380), by the model each type is drawn with.
+  it('trail each by its model', () => {
+    const atk = `${A.Attack1}/${A.Attack2}`;
+    for (const rider of [306, 550])
+      expect(blurs(rider)).toEqual([`18(20,0,0)>20(100,0,0) blur02 1,1,1 ${atk} 0-5.06 short`, `25(20,0,0)>26(100,0,0) blur02 1,1,1 ${atk} 0-5.06 short`]);
+    for (const orc of [307, 549])
+      expect(blurs(orc)).toEqual([35, 39, 43].map(b => `${b}(20,0,0)>${b + 2}(60,0,0) blur02 0.5,0.5,0 ${atk} short`));
+    expect(blurs(308)).toEqual([`26(0,0,20)>27(0,0,70) blur02 0.3,0.3,0.3 ${A.Attack1} short`]);
+    for (const satyros of [353, 497]) expect(blurs(satyros)).toEqual([`44(0,0,0)>44(0,0,-200) motionBlur 0.3,1,3.5 ${atk} 3.6-6`]);
+    for (const berserker of [350, 435, 553]) expect(blurs(berserker)).toEqual([`33(-20,0,0)>34(100,0,0) motionBlur 0.3,2,0.5 ${atk} 3.5-6.7`]);
+    expect(blurs(354)).toEqual([`55(0,0,0)>54(0,0,0) blur01 1,1.2,2 ${atk} 5.9-7.55`]);
+    for (const gigantis of [356, 434, 554]) expect(blurs(gigantis)).toEqual([`34(0,0,0)>33(0,0,0) blur01 1,1.2,2 ${atk} 3.5-5.9`]);
+    for (const genocider of [357, 555])
+      expect(blurs(genocider)).toEqual([49, 51, 50, 52].map(b => `${b}(-40,0,0)>${b}(10,0,0) blur01 1,0.2,0 ${atk} 5.5-6.9 short`));
+    for (const twin of [359, 498]) expect(blurs(twin)).toEqual([`58(-150,50,0)>59(150,-200,0) motionBlur 1,0.2,0.5 ${A.Attack1} 0-4.12`]);
+    for (const dread of [360, 439])
+      expect(blurs(dread)).toEqual([`33(0,0,0)>33(100,120,0) blur01 1,1,1 ${A.Attack1} 0-5 dark`, `33(0,0,0)>33(100,120,0) blur01 1,1,1 ${A.Attack2} 0-9 dark`]);
+  });
+});
+
+describe('Crywolf', () => {
+  const smoke = (numb: number) => rows(numb, 'body').map(r => `${r.every} ${r.recipe} ${r.colour?.join(',') ?? '-'} ${r.gate?.action?.join('/')}`);
+  const walk = `${A.Walk}/${A.Run}`;
+
+  // MoveCryWolf1stMonsterVisual: one SMOKE + 1 a tick in ten while walking or running, in each one's light; the
+  // Scout's and Balgass's pass none (:729-917).
+  it('smoke the walkers', () => {
+    for (const n of [318, 314, 349]) expect(smoke(n)).toEqual([`10 sandSmoke - ${walk}`]);
+    for (const n of [345, 410, 344, 436, 409]) expect(smoke(n)).toEqual([`10 sandSmoke 0.9,0.2,0.1 ${walk}`]);
+    for (const n of [341, 437, 411, 313, 315]) expect(smoke(n)).toEqual([`10 sandSmoke 1,1,1 ${walk}`]);
+  });
+
+  // MoveCryWolf1stBlurEffect (:1166-1410): the Scout, the Death Spirit, the Werewolf Hero, the Solam.
+  it('trail their swings', () => {
+    for (const n of [318, 314]) expect(blurs(n)).toEqual([12, 20].map(b => `${b}(20,0,0)>${b + 4}(60,0,0) blur02 1,1,1 ${A.Attack1} short`));
+    for (const n of [345, 410]) expect(blurs(n)).toEqual([`27(0,250,0)>27(0,0,0) blur02 0.2,1,0.4 ${A.Attack1}/${A.Attack2} short`]);
+    for (const n of [313, 315]) expect(blurs(n)).toEqual([`80(0,0,-90)>80(0,0,0) blur02 1,1,1 ${A.Attack2} short`, `82(0,0,90)>82(0,0,0) blur02 1,1,1 ${A.Attack2} short`]);
+    for (const n of [311, 317]) expect(blurs(n)).toEqual([`25(0,0,120)>25(0,0,0) blur02 1,1,1 ${A.Attack1} short`]);
+    expect(cards(315)).toEqual(['6:light@3.5 0.9,0.2,0.1']);
+  });
+
+  // RenderCryWolf1stMonsterVisual's Valam (:1948-1968), only in Crywolf and Devil Square, halved through Attack1 / 2.
+  it("light the Valam's centre and shine its ends", () => {
+    for (const n of [312, 316]) {
+      expect(cards(n)).toEqual([
+        '28:light@1 0,0.5,0.1', ...[27, 27, 29, 29].map(b => `${b}:shiny2@0.5 0.5,0.5,0.5`),
+        '28:light@0.5 0,0.5,0.1', ...[27, 27, 29, 29].map(b => `${b}:shiny2@0.25 0.5,0.5,0.5`),
+      ]);
+      const [light, , half] = rows(n, 'cards');
+      expect(light.pulse).toEqual({ speed: 0.0012, amount: 0.8, base: 1.3 });
+      expect(half.gate?.action).toEqual([A.Attack1, A.Attack2]);
+      expect(light.gate?.when?.()).toBe(false);
+    }
   });
 });
 
@@ -261,6 +351,17 @@ describe('Balgass', () => {
   // (0.25, 0.01, 1)` (ZzzEffectJoint.cpp:3200-3205, ZzzEffectParticle.cpp:230-262): blue held at 1, red within 0.08 of 0.7.
   it('lays a lightning card at each ribbon head', () => {
     expect(cards(349)).toEqual([10, 10, 9, 9].map(b => `${b}:lightning2@0.15 0.7,0.51,1`));
+    // `sinf(WorldTime * 0.002f) * 0.3f` of Luminosity is 0.075 on red and next to nothing on green.
+    expect(rows(349, 'cards')[0].lift).toEqual({ speed: 0.002, amount: 0.075, base: 0, channels: [1, 0.04, 0] });
+  });
+});
+
+describe('the all-additive deaths', () => {
+  // `o->BlendMesh = -2` dying: the Maya hands before MAYA3 (GM_Kanturu_3rd.cpp:885-897, :914-926; no Kanturu state
+  // here reads 0), the Dark Ghost always (GMEmpireGuardian2.cpp:942-944).
+  it('turn the Maya hands and the Dark Ghost bright as they die', () => {
+    expect([362, 363, 515].map(n => monsters.def(n)?.dyingBlendAll?.())).toEqual([true, true, true]);
+    expect(monsters.def(361)?.dyingBlendAll).toBeUndefined();
   });
 });
 
@@ -269,8 +370,15 @@ describe("Nightmare's death", () => {
   // (GM_Kanturu_3rd.cpp:865-869).
   it('smokes dark from bone 63 as he falls', () => {
     expect(rows(361, 'puff')).toEqual([
+      expect.objectContaining({ every: 1, bones: [63], particles: ['fire1_3'] }),
       expect.objectContaining({ every: 1, bones: [63], particles: ['smoke3_3', 'smoke3_3'], scale: 1.5, gate: { action: [A.Die], frames: [[3, Infinity]] } }),
     ]);
+  });
+
+  // RenderKanturu3rdMonsterVisual, alive: a BITMAP_FIRE + 1 SubType 3 at Scale 1.7 on his Angle from Body_Bone13 a tick
+  // (GM_Kanturu_3rd.cpp:1061-1062).
+  it('burns at bone 63 while he lives', () => {
+    expect(rows(361, 'puff')[0]).toEqual({ kind: 'puff', every: 1, bones: [63], particles: ['fire1_3'], colour: [1, 1, 1], scale: 1.7, turned: true, gate: { alive: true } });
   });
 });
 
@@ -369,7 +477,7 @@ describe('the Imperial Guardian bosses', () => {
   // `sinf(WorldTime * 0.002f) * 0.1f + 0.2f` (ZzzEffectJoint.cpp:3220-3226).
   it('run Fred eye ribbons with their flares', () => {
     expect(trails(508).slice(0, 2)).toEqual(['15 10cm x10 0.7,0.7,1', '14 10cm x10 0.7,0.7,1']);
-    expect(cards(508)).toEqual(['15:flare2@0.2 0.7,0.7,1', '14:flare2@0.2 0.7,0.7,1']);
+    expect(cards(508).slice(0, 2)).toEqual(['15:flare2@0.2 0.7,0.7,1', '14:flare2@0.2 0.7,0.7,1']);
     expect(rows(508, 'cards')[0]).toMatchObject({ pulse: { speed: 0.002, amount: 0.1, base: 0.2 }, swell: { speed: 0.002, amount: 0.1 } });
   });
 
@@ -379,6 +487,10 @@ describe('the Imperial Guardian bosses', () => {
   it("run Fred's four blade ribbons through Attack1", () => {
     expect(trails(508).slice(2)).toEqual([71, 72, 73, 74].map(b => `${b} 100cm x15 0.7,0.7,1`));
     for (const r of rows(508, 'trail').slice(2)) expect(r).toMatchObject({ ribbon: 'spark', gate: { action: [A.Attack1] } });
+    // Each head lays a BITMAP_BLUR card a tick at `Luminosity = sinf(WorldTime * 0.002f) * 0.1f`, its size and its
+    // light, dark half the time (ZzzEffectJoint.cpp:3227-3231).
+    expect(cards(508).slice(2)).toEqual([71, 72, 73, 74].map(b => `${b}:blur01@0 0.7,0.7,1`));
+    expect(rows(508, 'cards')[1]).toMatchObject({ pulse: { speed: 0.002, amount: 0.1, base: 0 }, swell: { speed: 0.002, amount: 0.1 } });
   });
 
   // MODEL_HAMMERIZE (GMEmpireGuardian2.cpp:864-876): blue lights on bones 21 and 38, swinging on
@@ -456,6 +568,20 @@ describe('the Swamp of Quiet line', () => {
         expect.objectContaining({ every: 1, bones: [122, 116], particles: [['fire1', 'fire2', 'fire3']], scale: 0.7, jitterCm: 5, colour: fire }),
       ]);
     }
+  });
+
+  // MODEL_GHOST_NAPIN (:990-1000): at seven bones a tick, a SMOKELINE SubType 1 and a CLUD64 SubType 6 riding him.
+  it('smoke the Ghost Napin green', () => {
+    expect(rows(448, 'puff')).toEqual([
+      {
+        kind: 'puff',
+        every: 1,
+        bones: [21, 37, 65, 66, 77, 78, 79],
+        particles: [['smokeLine1_1', 'smokeLine2_1', 'smokeLine3_1'], 'clud64_6'],
+        colour: [0.4, 1, 0.4],
+        ride: 'body',
+      },
+    ]);
   });
 });
 

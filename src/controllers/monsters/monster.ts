@@ -90,6 +90,8 @@ export type MonsterDef = {
    * actors controller over its per-body table (`monsterBlendMesh.ts`).
    */
   blendMesh?: { readonly mesh: number; readonly light?: number };
+  /** `o->BlendMesh = -2` once it dies while this holds: every mesh additive (the Maya hands, the Dark Ghost). */
+  dyingBlendAll?: () => boolean;
   /** Its `RenderMonster` case's own `RenderMesh` passes (render/meshPasses.ts), read by the actors controller. */
   passes?: MeshPassSet;
   /** `Vector(r, g, b, b->BodyLight)` its case sets before drawing: drawn at this light, not the floor's. */

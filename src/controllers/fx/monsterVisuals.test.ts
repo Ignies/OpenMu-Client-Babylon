@@ -9,6 +9,7 @@ const calls = vi.hoisted(() => ({
   joints: [] as { opts: Record<string, unknown>; stop: () => void; stopped: boolean }[],
   blurs: [] as Record<string, unknown>[],
   particles: [] as unknown[][],
+  debris: [] as { at: { x: number }; opts: Record<string, unknown> }[],
 }));
 
 vi.mock('../render/babylon/exports', () => {
@@ -66,7 +67,9 @@ vi.mock('./effectParticles', () => ({
   spawnParticle: (s: unknown, kind: unknown, at: { x: number; y: number; z: number }, ...rest: unknown[]) =>
     void calls.particles.push([s, kind, { x: at.x, y: at.y, z: at.z }, ...rest]),
 }));
-vi.mock('./debris', () => ({ spawnDebris: () => {} }));
+vi.mock('./debris', () => ({
+  spawnDebris: (_s: unknown, at: { x: number }, opts: Record<string, unknown>) => void calls.debris.push({ at: { x: at.x }, opts }),
+}));
 vi.mock('./blur', () => ({
   blurLayer: {
     spawn: (_s: unknown, _at: unknown, opts: Record<string, unknown>) => {
@@ -231,6 +234,60 @@ describe('monster body rows', () => {
     monsterVisualsLayer.reset?.();
   });
 
+  // The Iron Knights' smokes (GM_Raklion.cpp:1875-1897): each bone that wins its roll picks its light, (0.3, 0.6, 1)
+  // two times in three and (0.8, 0.8, 0.8) else, for both of its particles.
+  it('pick a light for each spot of a puff from its colours', () => {
+    calls.particles.length = 0;
+    const blue = [0.3, 0.6, 1];
+    const grey = [0.8, 0.8, 0.8];
+    const rolls = [0, 0.9, 0, 0.1];
+    const random = vi.spyOn(Math, 'random').mockImplementation(() => rolls.shift() ?? 0.5);
+    visualMonster(scene, monster(), [
+      { kind: 'puff', every: 1, particles: ['smoke50', 'smokeLine1_2'], bones: [20, 37], rollEach: true, colour: blue, colours: [blue, blue, grey] },
+    ] as never);
+    monsterVisualsLayer.update?.(0, 0.04);
+    random.mockRestore();
+    expect(calls.particles.map(p => [(p[2] as { x: number }).x, p[5]])).toEqual([
+      [20, grey],
+      [20, grey],
+      [37, blue],
+      [37, blue],
+    ]);
+    monsterVisualsLayer.reset?.();
+  });
+
+  // CreateBlur's Type 1 (motion_blur), its Type 4 drawn darkening (EnableAlphaBlendMinus) and its Short flag.
+  it("hand a blur its sheet, its dark pass and its Short flag", () => {
+    calls.blurs.length = 0;
+    visualMonster(scene, monster(), [
+      { kind: 'blur', from: 44, to: 44, colour: [0.3, 1, 3.5], sheet: 'motionBlur', short: true },
+      { kind: 'blur', from: 33, to: 33, colour: [1, 1, 1], sheet: 'blur01', dark: true },
+    ] as never);
+    monsterVisualsLayer.update?.(0, 0.04);
+    expect(calls.blurs.map(b => [b.texture, b.short, b.blend])).toEqual([
+      ['Effect/motion_blur.OZJ', true, 'add'],
+      ['Effect/blur01.OZJ', undefined, 'subtract'],
+    ]);
+    monsterVisualsLayer.reset?.();
+  });
+
+  // The Iron Knights' death (GM_Raklion.cpp:1960-1970): at each of four bones, six MODEL_EFFECT_BROKEN_ICE0 + rand() % 3
+  // in its light, SubType 0.
+  it('throw a shards row of its pieces at each bone', () => {
+    calls.debris.length = 0;
+    const random = vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    visualMonster(scene, monster(), [{ kind: 'shards', every: 1, shards: 'brokenIce', count: 2, bones: [20, 37], colour: [0.3, 0.5, 1] }] as never);
+    monsterVisualsLayer.update?.(0, 0.04);
+    random.mockRestore();
+    expect(calls.debris.map(d => [d.at.x, d.opts.model, d.opts.ice, d.opts.colour])).toEqual([
+      [20, 'Effect/ice_stone01.glb', true, [0.3, 0.5, 1]],
+      [20, 'Effect/ice_stone01.glb', true, [0.3, 0.5, 1]],
+      [37, 'Effect/ice_stone01.glb', true, [0.3, 0.5, 1]],
+      [37, 'Effect/ice_stone01.glb', true, [0.3, 0.5, 1]],
+    ]);
+    monsterVisualsLayer.reset?.();
+  });
+
   // The BITMAP_HOLE card in Medusa's hands is a MoveMonsterVisual CreateSprite: drawn only in Attack1 / Attack2
   // past their frame 2 (GMSwampOfQuiet.cpp:544-576).
   it('show a cards row gated on an action only in it', () => {
@@ -245,6 +302,19 @@ describe('monster body rows', () => {
     expect(hole.when?.()).toBe(false);
     (e as unknown as { monsterAnimation: { action: number } }).monsterAnimation.action = 3;
     expect(hole.when?.()).toBe(true);
+  });
+
+  // Valam's cards are RenderCryWolf1stMonsterVisual's, drawn only in Crywolf and Devil Square (GMCrywolf1st.cpp:1566-1570).
+  it("show a cards row only while its gate's own test holds", () => {
+    calls.glows.length = 0;
+    let there = false;
+    visualMonster(scene, monster(), [
+      { kind: 'cards', spots: [{ bone: 28, card: 'light', scale: 1 }], colour: [0, 0.5, 0.1], gate: { when: () => there } },
+    ] as never);
+    const [card] = calls.glows as { when?: () => boolean }[];
+    expect(card.when?.()).toBe(false);
+    there = true;
+    expect(card.when?.()).toBe(true);
   });
 
   // Kundun's Shock roar (GMHellas.cpp:1596-1631): `PKKey` is 10 to frame 4, then one more a tick (one less past

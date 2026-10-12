@@ -126,4 +126,35 @@ describe('a lifted, turning card', () => {
     expect(card.angle).toBeCloseTo(((2000 * 0.08) * Math.PI) / 180);
     monsterGlowLayer.reset?.();
   });
+
+  // Fred's blade-head card is lit `sinf(WorldTime * 0.002f) * 0.1f`: below 0 half the time, packed to black (RenderUtils.h).
+  it('holds a light that breathes below 0 at black', async () => {
+    const glow = { bones: [], spots: [{ bone: 71, tex: 'blur' as const, scale: 0 }], cards: [], colour: [0.7, 0.7, 1] as const, breathe: true, breathSpeed: 0.002, breathAmount: 0.1, breathBase: 0 };
+    worldAt(1000);
+    sprites.length = 0;
+    glowMonster({} as Scene, monster(), glow);
+    await new Promise(resolve => setTimeout(resolve, 0));
+    worldAt(2000);
+    monsterGlowLayer.update?.(0, 1);
+    const card = sprites[sprites.length - 1] as unknown as { color: { r: number; g: number; b: number } };
+    expect(Math.sin(2000 * 0.002)).toBeLessThan(0);
+    expect([card.color.r, card.color.g, card.color.b]).toEqual([0, 0, 0]);
+    monsterGlowLayer.reset?.();
+  });
+
+  // Balgass's eye cards: `0.5 + (sinf(WorldTime * 0.002f) * 0.3f + 0.8f) * (0.25, 0.01, 1)`, red wobbling 0.075 about
+  // 0.7 and blue held at 1 (GMCrywolf1st.cpp:674-675, ZzzEffectJoint.cpp:3200-3205).
+  it('lifts each channel by its own share', async () => {
+    const glow = { bones: [], spots: [{ bone: 10, tex: 'halo' as const, scale: 0.15 }], cards: [], colour: [0.7, 0.51, 1] as const, breathe: false, luminosity: 1, liftSpeed: 0.002, liftAmount: 0.075, liftChannels: [1, 0.04, 0] as const };
+    worldAt(1000);
+    sprites.length = 0;
+    glowMonster({} as Scene, monster(), glow);
+    await new Promise(resolve => setTimeout(resolve, 0));
+    worldAt(2000);
+    monsterGlowLayer.update?.(0, 1);
+    const card = sprites[sprites.length - 1] as unknown as { color: { r: number; g: number; b: number } };
+    const s = Math.sin(2000 * 0.002) * 0.075;
+    expect([card.color.r, card.color.g, card.color.b].map(c => +c.toFixed(4))).toEqual([0.7 + s, 0.51 + s * 0.04, 1].map(c => +c.toFixed(4)));
+    monsterGlowLayer.reset?.();
+  });
 });

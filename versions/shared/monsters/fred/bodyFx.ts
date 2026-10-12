@@ -9,7 +9,8 @@ const BLUE = [0.7, 0.7, 1] as const;
  * MoveEye each frame in ZzzObject.cpp:542) with the flare02 card each lays at its head (ZzzEffectJoint.cpp:3220-3226),
  * his rage smoke (GMEmpireGuardian1.cpp:2168-2186) and the four SubType 54 blade ribbons on bones 71-74 (:112-116,
  * ZzzEffectJoint.cpp:394-413), 30 tails laid two a tick (CreateTail's Blur, :2855-2900) and so 15 ticks long, drawn
- * only through Attack1 (:6995). Not here: the dim BITMAP_BLUR card at each blade head (:3227-3231). His cloth
+ * only through Attack1 (:6995), with the dim BITMAP_BLUR card each head lays a tick, `sinf(WorldTime * 0.002f) * 0.1f`
+ * its size and light (:3227-3231), dark half the time. His cloth
  * (ZzzObject.cpp:544-560) is in `versions/shared/cloaks/`.
  */
 export const FRED_FX: MonsterBodyFx = [
@@ -19,6 +20,7 @@ export const FRED_FX: MonsterBodyFx = [
     pulse: { speed: 0.002, amount: 0.1, base: 0.2 },
     swell: { speed: 0.002, amount: 0.1 },
   }),
+  cards(BLUE, spotsOn([71, 72, 73, 74], 'blur01', 0), { pulse: { speed: 0.002, amount: 0.1, base: 0 }, swell: { speed: 0.002, amount: 0.1 } }),
   rageSmoke(76),
   ...[71, 72, 73, 74].map(b => trail(b, 100, 15, BLUE, { ribbon: 'spark', gate: { action: [A.Attack1] } })),
 ];

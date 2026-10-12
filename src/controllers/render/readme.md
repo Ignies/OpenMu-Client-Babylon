@@ -54,7 +54,8 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `ModelObject.load(gltf)` puts a GLB under the object's node with the BMD to Babylon basis change
   (`scaling (1,-1,1)`, `rotX(-90)`), sets per-mesh metadata (body light, shine, shadow flags) and
   applies `BlendMesh`, `BrightMesh`, `HiddenMesh`, `HideSkin`, mesh animations and the blob shadow.
-  `BlendMesh = -2` (`BLEND_MESH_ALL`) draws every mesh additive (ZzzBMD.cpp:2022), and `BlendMeshLightAt`, when
+  `BlendMesh = -2` (`BLEND_MESH_ALL`) draws every mesh additive (ZzzBMD.cpp:2022), `blendAll()` switches to it after
+  load, and `BlendMeshLightAt`, when
   set, rewrites the blend meshes' `BlendMeshLight` each frame off `WorldTime` (a held weapon's pulse).
   `setBoneLink(-1)` puts a bone-linked part back under its owner's node, as built.
   Under `HideSkin`, `HideSkinTexture` (a `Data/` path) is the bitmap mesh 0 is drawn with instead of its
@@ -130,7 +131,7 @@ There is no `index.ts` facade; other folders import the modules directly.
   a pass replaces, a pass's own light, a `RenderBody` pass on every drawn mesh, and the option putting the
   model back.
 - `modelObject.test.ts`: a model whose clips are cloned on first play reads every clip's keys at load
-  without cloning one, and a clip cloned later reports its end; `BlendMesh -2` and a pulsing `BlendMeshLightAt`;
+  without cloning one, and a clip cloned later reports its end; `BlendMesh -2`, before load and after (`blendAll`), and a pulsing `BlendMeshLightAt`;
   `ShineLight` lights the shine mesh by the tint; `ShineMeshes` puts the shine on those meshes only;
   a part unlinked from its bone goes back under its owner; an action stops every other running clip, the loader's clip 0 too;
   a character casts the blob, a map object only with `MapShadow`; `ShadowFromGround` marks the clone;

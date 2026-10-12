@@ -12,7 +12,7 @@ const FLICKER = { pulse: { speed: 0.08, amount: 0.15, base: 0.85 } };
  * MODEL_DARK_GHOST: the SubType 22 / 23 ribbons on MoveEye(80, 34)'s eyes (GMEmpireGuardian2.cpp:96-98, :923,
  * ZzzEffectJoint.cpp:339-350) with the BITMAP_LIGHTNING + 1 SubType 4 each lays at its head a tick, living two
  * (ZzzEffectJoint.cpp:3213-3218), RenderMonsterVisual's lights (:897-920), its attack drops and sparks (:925-940)
- * and the death smoke at its feet (:946-950). Mesh 3 is in `index.ts`. Not here: the Die's BlendMesh -2, inferno
+ * and the death smoke at its feet (:946-950). Mesh 3 and the Die's BlendMesh -2 are in `index.ts`. Not here: the Die's inferno
  * and twin-tail effects (:942-960); the BITMAP_CHROME2 on bones 80 / 34 (:917) is drawn at `Target->Position -
  * StartPosition` (ZzzEffectParticle.cpp:8789-8800), by the world origin, so nothing of it shows.
  */

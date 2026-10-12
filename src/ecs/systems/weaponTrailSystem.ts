@@ -80,6 +80,7 @@ export const WeaponTrailSystem: ISystemFactory = world => {
           colour: row.colour,
           blend: row.blend,
           tickHistory: true,
+          short: true,
           seconds: model.getActionDuration(model.CurrentAction) || undefined,
           until: () =>
             model.actionSerial !== serial ||

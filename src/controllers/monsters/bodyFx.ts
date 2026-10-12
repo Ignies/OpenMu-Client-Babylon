@@ -24,16 +24,20 @@ export type BodyCard =
   | 'flare2'
   | 'eventCloud'
   | 'hole'
-  | 'lightning2';
+  | 'lightning2'
+  | 'blur01';
 
-/** The sheets a `blur` can draw: CreateBlur's `Type` 0 (BITMAP_BLUR, blur01) or 3 (BITMAP_BLUR2, blur02). */
-export type BodyBlurSheet = 'blur01' | 'blur02';
+/** The sheets a `blur` can draw: CreateBlur's `Type` 0 and 4 (BITMAP_BLUR, blur01), 1 (motion_blur) or 3 (BITMAP_BLUR2, blur02). */
+export type BodyBlurSheet = 'blur01' | 'blur02' | 'motionBlur';
 
 /**
  * The sheets a `trail` can run: BITMAP_JOINT_ENERGY (JointLaser01), BITMAP_FLARE (its SubType 28-33 TexType) or
  * BITMAP_SPARK + 1 (Spark03, SubType 54's).
  */
 export type BodyRibbon = 'jointEnergy' | 'flare' | 'spark';
+
+/** The pieces a `shards` row throws: MODEL_EFFECT_BROKEN_ICE0 + rand() % 3 (ice_stone00-02). */
+export type BodyShard = 'brokenIce';
 
 /** The original's own particles a `puff` can name (`fx/effectParticles.ts` kinds, by `BITMAP_*` and SubType). */
 export type BodyPuff =
@@ -48,6 +52,14 @@ export type BodyPuff =
   | 'smokeLine1'
   | 'smokeLine2'
   | 'smokeLine3'
+  | 'smokeLine1_2'
+  | 'smokeLine2_2'
+  | 'smokeLine3_2'
+  | 'fire1_3'
+  | 'smokeLine1_1'
+  | 'smokeLine2_1'
+  | 'smokeLine3_1'
+  | 'clud64_6'
   | 'trueFire'
   | 'fireMono1_4'
   | 'fireMono2_8'
@@ -188,12 +200,12 @@ export type BodyFxEmitter =
       readonly pulse?: { readonly speed: number; readonly amount: number; readonly base: number };
       /** A `Scale` of `scale + sin(WorldTime * speed) * amount`. */
       readonly swell?: { readonly speed: number; readonly amount: number };
-      /** `sin(WorldTime * speed) * amount + base` added to each channel of the light. */
-      readonly lift?: { readonly speed: number; readonly amount: number; readonly base: number };
+      /** `sin(WorldTime * speed) * amount + base` added to each channel of the light, times its share in `channels` (1 each when absent). */
+      readonly lift?: { readonly speed: number; readonly amount: number; readonly base: number; readonly channels?: RGB };
       /** Its `Scale` times the Shock roar's `fRoar` (Kundun, GMHellas.cpp:1596-1622). */
       readonly roar?: true;
-      /** `alive`: not drawn once it dies; `action` / `frames`: drawn only then (a `MoveMonsterVisual` CreateSprite). */
-      readonly gate?: Pick<BodyFxGate, 'alive' | 'action' | 'frames'>;
+      /** `alive`: not drawn once it dies; `action` / `frames`: drawn only then (a `MoveMonsterVisual` CreateSprite); `when`: only while it holds. */
+      readonly gate?: Pick<BodyFxGate, 'alive' | 'action' | 'frames' | 'when'>;
     }
   | {
       /**
@@ -223,6 +235,10 @@ export type BodyFxEmitter =
       readonly toLocal?: Cm3;
       readonly colour: RGB;
       readonly sheet: BodyBlurSheet;
+      /** CreateBlur's `Short`: it starts dropping two samples a tick at 15 ticks old, not 30. */
+      readonly short?: true;
+      /** `Type` 4: drawn darkening what is behind it (EnableAlphaBlendMinus), at its flat light. */
+      readonly dark?: true;
       readonly gate?: BodyFxGate;
     }
   | {
@@ -243,6 +259,8 @@ export type BodyFxEmitter =
       readonly local?: Cm3;
       readonly scale?: number;
       readonly colour: RGB;
+      /** Each spot picks its light from these at random, in place of `colour` (weight one by listing it twice). */
+      readonly colours?: readonly RGB[];
       /** Its `Scale` times the Shock roar's `fRoar`. */
       readonly roar?: true;
       /** Made on the monster's `Angle`, so a push goes the way it faces. */
@@ -253,6 +271,16 @@ export type BodyFxEmitter =
       readonly origin?: true;
       /** What the particles ride (`o->Target`): the monster's position or the bone they were made at. */
       readonly ride?: 'body' | 'bone';
+      readonly gate?: BodyFxGate;
+    }
+  | {
+      /** On a won roll, `count` x `CreateEffect(MODEL_*, TransformByObjectBone(bone), Angle, Light, 0)` at each bone. */
+      readonly kind: 'shards';
+      readonly every: number;
+      readonly shards: BodyShard;
+      readonly count: number;
+      readonly bones: readonly number[];
+      readonly colour: RGB;
       readonly gate?: BodyFxGate;
     };
 

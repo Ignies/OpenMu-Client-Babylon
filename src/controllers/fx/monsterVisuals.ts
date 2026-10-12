@@ -37,6 +37,7 @@ import {
   RGBS,
   SAND_SMOKE,
   SAND_SMOKE_BURST,
+  SMOKE,
   TEX,
 } from './recipes';
 import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
@@ -48,6 +49,7 @@ import {
   type BodyFxGate,
   type BodyParticle,
   type BodyPuff,
+  type BodyShard,
   type BodyTexture,
   type MonsterBodyFx,
 } from '../monsters';
@@ -125,7 +127,9 @@ const PARTICLES: Readonly<Record<BodyParticle, ParticleRecipe>> = {
   sandSmokeBurst: SAND_SMOKE_BURST,
 };
 
-const BLUR_SHEETS: Readonly<Record<BodyBlurSheet, string>> = { blur01: TEX.blur, blur02: TEX.blur2 };
+const SHARDS: Readonly<Record<BodyShard, readonly string[]>> = { brokenIce: MODEL.brokenIce };
+
+const BLUR_SHEETS: Readonly<Record<BodyBlurSheet, string>> = { blur01: TEX.blur, blur02: TEX.blur2, motionBlur: TEX.motionBlur };
 
 const TEXTURES: Readonly<Record<BodyTexture, string>> = {
   flare: TEX.flare,
@@ -147,6 +151,7 @@ const CARDS: Readonly<Record<BodyCard, GlowTexture>> = {
   eventCloud: 'eventCloud',
   hole: 'hole',
   lightning2: 'halo',
+  blur01: 'blur',
 };
 
 const PUFFS: Readonly<Record<BodyPuff, KindName>> = {
@@ -161,6 +166,14 @@ const PUFFS: Readonly<Record<BodyPuff, KindName>> = {
   smokeLine1: 'smokeLine1',
   smokeLine2: 'smokeLine2',
   smokeLine3: 'smokeLine3',
+  smokeLine1_2: 'smokeLine1_2',
+  smokeLine2_2: 'smokeLine2_2',
+  smokeLine3_2: 'smokeLine3_2',
+  fire1_3: 'fire1_3',
+  smokeLine1_1: 'smokeLine1_1',
+  smokeLine2_1: 'smokeLine2_1',
+  smokeLine3_1: 'smokeLine3_1',
+  clud64_6: 'clud64_6',
   trueFire: 'trueFire',
   fireMono1_4: 'fireMono1_4',
   fireMono2_8: 'fireMono2_8',
@@ -182,7 +195,7 @@ type CardsRow = Extract<BodyFxEmitter, { kind: 'cards' }>;
 function cardGlow(em: CardsRow, e: Entity, roar: Roar): MonsterGlow {
   const gate = em.gate;
   return {
-    when: gate && (gate.action || gate.frames) ? () => shownNow(e, gate) : undefined,
+    when: gate && (gate.action || gate.frames || gate.when) ? () => shownNow(e, gate) : undefined,
     scaleBy: em.roar ? () => roar.value : undefined,
     bones: [],
     spots: em.spots.map(s => ({
@@ -203,6 +216,7 @@ function cardGlow(em: CardsRow, e: Entity, roar: Roar): MonsterGlow {
     liftSpeed: em.lift?.speed,
     liftAmount: em.lift?.amount,
     liftBase: em.lift?.base,
+    liftChannels: em.lift?.channels,
     luminosity: 1,
   };
 }
@@ -332,6 +346,7 @@ function shownNow(e: Entity, gate: Gate): boolean {
   const model = e.modelObject;
   const action = e.monsterAnimation?.action ?? (model?.CurrentAction as A | undefined);
   if (gate.alive && e.dying) return false;
+  if (gate.when && !gate.when()) return false;
   if (gate.action && (action === undefined || !gate.action.includes(action))) return false;
   if (!gate.frames) return true;
   const frame = model?.actionFrame() ?? 0;
@@ -496,11 +511,24 @@ function emit(scene: Scene, e: Entity, em: Emitter, f: Frame, rides?: readonly V
         if (em.origin) entityPos(e, 0, tmp);
         else boneLocalPos(e, em.pick ? spots[Math.floor(Math.random() * spots.length)] : spots[b], tmpLocal, tmp);
         const anchor = rides ? rides[em.ride === 'bone' ? b : 0] : undefined;
+        const colour = em.colours ? em.colours[Math.floor(Math.random() * em.colours.length)] : em.colour;
         for (let i = 0; i < em.particles.length; i++) {
           const p = em.particles[i];
           const name = typeof p === 'string' ? p : p[Math.floor(Math.random() * p.length)];
           const scale = (em.scales?.[i] ?? em.scale ?? 1) * (em.roar ? roarNow : 1);
-          void spawnParticle(scene, PUFFS[name], tmp, turn, scale, em.colour, em.jitterCm, anchor);
+          void spawnParticle(scene, PUFFS[name], tmp, turn, scale, colour, em.jitterCm, anchor);
+        }
+      }
+      return;
+    }
+    case 'shards': {
+      if (!open(em.gate, f)) return;
+      const models = SHARDS[em.shards];
+      const puff = variant(SMOKE, em.colour);
+      for (const b of em.bones) {
+        bonePos(e, b, tmp);
+        for (let i = 0; i < em.count; i++) {
+          spawnDebris(scene, tmp, { model: models[Math.floor(Math.random() * models.length)], ice: true, colour: em.colour, puff });
         }
       }
       return;
@@ -551,6 +579,8 @@ export function visualMonster(
       base: out => boneLocalPos(e, em.from, b.from, out),
       texture: BLUR_SHEETS[em.sheet],
       colour: em.colour,
+      blend: em.dark ? 'subtract' : 'add',
+      short: em.short,
       tickHistory: true,
       seconds: Infinity,
       until: () => stopped || entityGone(e) || (gate !== undefined && !shownNow(e, gate)),

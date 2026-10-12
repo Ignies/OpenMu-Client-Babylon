@@ -97,6 +97,10 @@ shared pools, textures and particle recipes other folders reuse.
 - change one skill's look: its file in `versions/shared/skills/`, not here.
 
 ## Tests
+- `blur.test.ts`: a `tickHistory` trail fades a light above 1 from its own tint, clamped per channel after the
+  fade (PackABGR), and drops two samples a tick from 15 ticks old when `short`, from 30 when not (CreateBlur).
+- `debris.test.ts`: broken ice (`ice`) is thrown, tumbles, falls, bounces and fades as MODEL_EFFECT_BROKEN_ICE
+  SubType 0 moves a tick.
 - `boids.test.ts`: a bird, a fish and an invasion dragon cast the Classic shadow from the ground at 0.2, not on the cascades.
 - `layers.test.ts`: the shroud draws at most `SHROUD_MAX` cards at once.
 - `modelClones.test.ts` (spiritSwarm): a disposed rig takes its skull clones along, loaded or late.
@@ -134,7 +138,9 @@ shared pools, textures and particle recipes other folders reuse.
   fading past 300 and gone past 500, `cloud11` (SubType 11) drifts the same in its own light, turning,
   and `fireRed` (`BITMAP_FIRE_RED`, firered.jpg) shoots up steady for 20 ticks. The bosses' smokes:
   `smoke50` (`BITMAP_SMOKE` SubType 50) fades in to half its light and rises, `smokeLine1..3`
-  (`BITMAP_SMOKELINE1..3` SubType 0) to 0.7 on their own sheets, and `smoke1` (SubType 1) is green
+  (`BITMAP_SMOKELINE1..3` SubType 0) to 0.7 on their own sheets, `smokeLine1_2..3_2` (SubType 2) the same over 45 ticks, not 35, `fire1_3` (`BITMAP_FIRE + 1`
+  SubType 3, Nightmare's) grows and climbs faster each tick, white, the Ghost Napin's `smokeLine1_1..3_1`
+  (SMOKELINE SubType 1) and `clud64_6` (CLUD64 SubType 6) fade in to their whole light, rise and shrink, and `smoke1` (SubType 1) is green
   whatever its light. Medusa's: `fireMono1_4`, `fireMono2_8`, `fireMono3_5` (the mono fire jets) fly 8 cm a
   tick along their object's facing for 8 ticks, growing; `waterfall4Orbit0..2` (`BITMAP_WATERFALL_4`'s three
   cards, on one set of rolls) circle where they were made, 2.1 cm further out and 0.1 round a tick; a
@@ -147,7 +153,7 @@ shared pools, textures and particle recipes other folders reuse.
   breathe alike, in step with their floor light; Santa Claus and the Snowman carry their steady
   flare01 cards on their bones (ZzzObject.cpp:1910-1945); a swelling card (Kundun's) takes its size
   from the world clock, a lifted one (Selupan's) adds the swing to its light and turns on that clock;
-  `scaleBy` times a card's size every frame.
+  `scaleBy` times a card's size every frame; `liftChannels` gives each channel its share of the lift (Balgass's red); a light below 0 is black (Fred's blade cards).
 - `monsterVisuals.test.ts`: a `cards` row hangs each spot on the glow entry with its own sheet, scale
   and offset; a `trail` runs a ribbon from its bone, a gated one ending when the monster dies and one gated on an
   action drawn only in it (Fred's blades, Spark03); a `puff`
@@ -159,7 +165,9 @@ shared pools, textures and particle recipes other folders reuse.
   The anvil's sparks are handed one kept heading (`spawnJoint` copies it). A `blur` row runs one trail between
   its bone points while its gate is open, and from the first tick when it has none. An `origin` puff is made at
   the body, not a bone; a `pick` puff at that many of its bones picked at random; a gate's `when` holds a row
-  to a state the content reads.
+  (a cards row too: Valam's) to a state the content reads; a puff with `colours` picks one for each spot (the Iron Knights' blue or grey); a `blur` row hands on its sheet (motion_blur for
+  Type 1), its dark pass (Type 4) and its Short flag; a `shards` row throws its
+  pieces as debris at each bone.
 - `core.test.ts`: a flickering tint makes a bounded number of additive materials, each within half
   a 1/128 step of the colour asked for; a burst emits nothing while the page is hidden.
 - `modelClones.test.ts`: a `model`, `linkedModel` or spirit skull clone leaves no mesh, skeleton or

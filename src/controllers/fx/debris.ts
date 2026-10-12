@@ -71,6 +71,8 @@ interface DebrisOptions {
   blendMesh?: number;
   /** No sideways throw, straight up and down: MODEL_STONE1/2 SubType 1 (ZzzEffect.cpp:2756-2759). */
   still?: boolean;
+  /** MODEL_EFFECT_BROKEN_ICE SubType 0's own throw, tumble and fade (`spawnIce`), drawn opaque. */
+  ice?: boolean;
 }
 
 type Piece = {
@@ -97,7 +99,93 @@ function cmPerTick(v: number): number {
   return (v * CM) / TICK;
 }
 
+type Ice = { handle: ModelHandle; pos: Vector3; hx: number; hz: number; up: number; gravity: number; life: number; alpha: number; tumble: number; yaw: number };
+
+/** `rand() % n` as the original rolls it. */
+const roll = (n: number): number => Math.floor(Math.random() * n);
+
+/**
+ * MODEL_EFFECT_BROKEN_ICE SubType 0, stepped a tick (ZzzEffect.cpp:2796-2830, :7317-7354): 35-50 ticks, Scale
+ * 0.6-3, thrown `(rand() % 128 + 64) * 0.1` cm a tick along a random yaw and 25 cm up, `Gravity` 3-5 off the rise a
+ * tick; tumbling `0.5 x LifeTime` degrees a tick; on the ground the throw keeps 0.6, the rise gains `LifeTime` and
+ * the alpha loses 0.1. A BITMAP_SMOKE one tick in 30.
+ */
+function spawnIce(scene: Scene, at: Vector3, opts: DebrisOptions): EffectHandle {
+  const world = Ecs.world;
+  const colour = opts.colour ?? WHITE;
+  const pieces: Ice[] = [];
+  for (let i = 0; i < (opts.count ?? 1); i++) {
+    const pos = at.clone();
+    const life = roll(16) + 35;
+    const scale = (roll(13) + 3) * 0.2;
+    const gravity = roll(3) + 3;
+    const yaw = roll(360);
+    const speed = (roll(128) + 64) * 0.1 * CM;
+    const r = (yaw * Math.PI) / 180;
+    pieces.push({
+      pos,
+      hx: -Math.sin(r) * speed,
+      hz: Math.cos(r) * speed,
+      up: 25,
+      gravity,
+      life,
+      alpha: 1,
+      tumble: 0,
+      yaw,
+      handle: spawnModel(scene, pos, {
+        model: opts.model,
+        seconds: (life + 1) * TICK,
+        scale,
+        colour,
+        blendMesh: -1,
+        angle: [0, 0, yaw],
+        loop: false,
+        follow: out => out.copyFrom(pos),
+      }),
+    });
+  }
+  const angle: [number, number, number] = [0, 0, 0];
+  let clock = 0;
+  return live.push({
+    update(dt) {
+      clock += dt;
+      while (clock >= TICK) {
+        clock -= TICK;
+        for (const p of pieces) {
+          if (!p.handle.alive) continue;
+          p.up -= p.gravity;
+          p.pos.x += p.hx;
+          p.pos.z += p.hz;
+          p.pos.y += p.up * CM;
+          p.tumble += 0.5 * p.life;
+          const ground = world ? world.getTerrainHeight(p.pos.x, p.pos.z) : -Infinity;
+          if (p.pos.y <= ground) {
+            p.pos.y = ground;
+            p.hx *= 0.6;
+            p.hz *= 0.6;
+            p.up += p.life;
+            if (p.up < 0.5) p.up = 0;
+            p.alpha -= 0.1;
+            p.handle.setAlpha(Math.max(0, p.alpha));
+          }
+          angle[0] = angle[1] = p.tumble;
+          angle[2] = p.yaw;
+          p.handle.setAngle(angle);
+          if (opts.puff && Math.random() < 1 / 30) emitBurst(scene, opts.puff, tmp.copyFrom(p.pos), 1);
+          if (--p.life <= 0) p.handle.stop();
+        }
+      }
+      for (const p of pieces) if (p.handle.alive) return true;
+      return false;
+    },
+    release() {
+      for (const p of pieces) p.handle.stop();
+    },
+  });
+}
+
 export function spawnDebris(scene: Scene, at: Vector3, opts: DebrisOptions): EffectHandle {
+  if (opts.ice) return spawnIce(scene, at, opts);
   const world = Ecs.world;
   const count = opts.count ?? 1;
   const colour = opts.colour ?? WHITE;

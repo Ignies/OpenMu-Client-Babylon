@@ -1643,6 +1643,13 @@ export class ModelObject {
     mesh.metadata.shadowSkip = true;
   }
 
+  /** `o->BlendMesh = -2` from now on: every mesh additive (a dying Maya hand's). */
+  blendAll(): void {
+    if (this.BlendMesh === BLEND_MESH_ALL) return;
+    this.BlendMesh = BLEND_MESH_ALL;
+    this.applyBlendMesh();
+  }
+
   private applyBlendMesh() {
     this.#blendMeshes.length = 0;
     if (!this.gltf) return;

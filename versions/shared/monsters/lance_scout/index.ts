@@ -1,9 +1,12 @@
 import { defineMonster } from '@/controllers/monsters';
+import { SOLAM_BLURS } from '../_shared/bodyFx';
 
 export default defineMonster({
   Numb: 311,
   Name: 'Lance Scout',
   maxHealth: 45000,
+  // Its Crywolf visuals (`_shared/bodyFx.ts`, GMCrywolf1st.cpp).
+  bodyFx: SOLAM_BLURS,
   model: { type: 97, scale: 1.2 },
   stats: {
     Rate: 1,

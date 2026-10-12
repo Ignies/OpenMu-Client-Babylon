@@ -124,6 +124,15 @@ export function applyMonsterLook(model: LookTarget, npcType: number | undefined)
   }
 }
 
+/** A dying type's `o->BlendMesh = -2` (its folder's `dyingBlendAll`): true once it turned the model all additive. */
+export function dyingBlend(model: Pick<ModelObject, 'blendAll'>, npcType: number | undefined, dying: boolean): boolean {
+  if (!dying || npcType === undefined) return false;
+  const when = monsterRegistry.def(npcType)?.dyingBlendAll;
+  if (!when || !when()) return false;
+  model.blendAll();
+  return true;
+}
+
 /** A type's own blend mesh (its folder's `blendMesh`), else its body's. */
 export function blendMeshOf(npcType: number | undefined, modelType: number): MonsterBlendMesh | undefined {
   const own = npcType === undefined ? undefined : monsterRegistry.def(npcType)?.blendMesh;

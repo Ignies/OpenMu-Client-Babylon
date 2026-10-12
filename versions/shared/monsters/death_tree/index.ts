@@ -1,9 +1,12 @@
 import { defineMonster } from '@/controllers/monsters';
+import { DEATH_TREE_BLURS } from '../_shared/bodyFx';
 
 export default defineMonster({
   Numb: 308,
   Name: 'Death Tree',
   maxHealth: 10000,
+  // Its swing blurs, from the map file's blur effect (`_shared/bodyFx.ts`).
+  bodyFx: DEATH_TREE_BLURS,
   model: { type: 104, scale: 1.2 },
   stats: {
     Rate: 1,

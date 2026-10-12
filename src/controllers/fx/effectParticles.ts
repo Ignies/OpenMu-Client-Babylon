@@ -28,6 +28,7 @@ type TextureKey =
   | 'smoke'
   | 'cloud'
   | 'fire01'
+  | 'fire02'
   | 'fire03'
   | 'fireHik1'
   | 'fireHik2'
@@ -76,6 +77,7 @@ const TEXTURES: Record<
   smoke: { file: 'Effect/smoke01.OZJ', size: 64 },
   cloud: { file: 'Effect/clouds.OZJ', size: 256 },
   fire01: { file: 'Effect/Fire01.OZJ', size: 64, frames: 4 },
+  fire02: { file: 'Effect/Fire02.OZJ', size: 64 },
   fire03: { file: 'Effect/Fire03.OZJ', size: 64, frames: 4 },
   fireHik1: { file: 'Effect/firehik01.OZJ', size: 64 },
   fireHik2: { file: 'Effect/firehik02.OZJ', size: 64 },
@@ -606,7 +608,10 @@ type RampOptions = {
   readonly gravity: readonly [number, number];
   readonly rise: readonly [number, number];
   readonly peak: number;
+  /** The size a tick; one below 0 shrinks it, and it is gone once none is left. */
   readonly grow: () => number;
+  /** The alpha lost a tick over the last 10 (default 0.1). */
+  readonly fade?: number;
 };
 
 /**
@@ -627,7 +632,7 @@ function rampKind(texture: TextureKey, o: RampOptions): ParticleKind {
     },
     update(p, f) {
       if (p.lifeTime < 10) {
-        p.alpha -= 0.1 * f;
+        p.alpha -= (o.fade ?? 0.1) * f;
         if (p.alpha < 0.1) {
           p.live = false;
           return;
@@ -641,6 +646,7 @@ function rampKind(texture: TextureKey, o: RampOptions): ParticleKind {
       p.lg = p.tg * p.alpha;
       p.lb = p.tb * p.alpha;
       p.scale += o.grow() * f;
+      if (p.scale <= 0) p.live = false;
       p.pz += p.gravity * f;
     },
     color: plainColor,
@@ -820,6 +826,8 @@ const SMOKE_LINE: RampOptions = {
   rise: [5, 2],
   grow: () => (rand(3) + 6) * 0.01,
 };
+const SMOKE_LINE_2: RampOptions = { ...SMOKE_LINE, life: 45 };
+const SMOKE_LINE_1: RampOptions = { life: 25, scale: [50, 55], gravity: [4, 35], peak: 1, rise: [5, 2], fade: 0.2, grow: () => -(rand(10) + 10) * 0.001 };
 
 const KINDS = {
   fire1: fireKind('fireHik1', {
@@ -906,6 +914,29 @@ const KINDS = {
   fire0: stripFireKind('fire01'),
 
   fire0b: stripFireKind('fire03'),
+
+  /**
+   * `BITMAP_FIRE + 1` SubType 3 (Fire02.jpg, whole): 7 ticks, pushed `(rand() % 8 + 32) * 0.1` along its object; a tick
+   * the push grows 1.05, `Gravity` 0.02 more goes on its size and (x20) its rise, and it is white at `LifeTime * 0.2`
+   * (ZzzEffectParticle.cpp:514-519, :4721-4729).
+   */
+  fire1_3: {
+    texture: 'fire02',
+    blend: 'add',
+    init(p, scale) {
+      p.lifeTime = 7;
+      p.vy = -(rand(8) + 32) * 0.1;
+      p.scale = scale;
+    },
+    update(p, f) {
+      p.gravity += 0.02 * f;
+      p.scale += p.gravity * f;
+      p.vy *= 1.05 ** f;
+      p.pz += p.gravity * 20 * f;
+      p.lr = p.lg = p.lb = Math.min(1, p.lifeTime * 0.2);
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
 
   trueFire: trueFireKind('fantaF', 24),
 
@@ -1091,6 +1122,16 @@ const KINDS = {
   smokeLine1: rampKind('smokeLine1', SMOKE_LINE),
   smokeLine2: rampKind('smokeLine2', SMOKE_LINE),
   smokeLine3: rampKind('smokeLine3', SMOKE_LINE),
+  /** SMOKELINE SubType 2: SubType 0 living 45 ticks (ZzzEffectParticle.cpp:1801-1810, :6030-6052). */
+  smokeLine1_2: rampKind('smokeLine1', SMOKE_LINE_2),
+  smokeLine2_2: rampKind('smokeLine2', SMOKE_LINE_2),
+  smokeLine3_2: rampKind('smokeLine3', SMOKE_LINE_2),
+  /** SMOKELINE SubType 1, riding its target: 25 ticks, fading in to its whole light, shrinking (ZzzEffectParticle.cpp:1789-1798, :6004-6029). */
+  smokeLine1_1: rampKind('smokeLine1', SMOKE_LINE_1),
+  smokeLine2_1: rampKind('smokeLine2', SMOKE_LINE_1),
+  smokeLine3_1: rampKind('smokeLine3', SMOKE_LINE_1),
+  /** `BITMAP_CLUD64` SubType 6, riding its target: the same, sized 0.5-0.57 and shrinking 0.055-0.059 a tick (:1011-1020, :5143-5170). */
+  clud64_6: rampKind('clud64', { life: 25, scale: [8, 50], gravity: [10, 35], peak: 1, rise: [2, 3], fade: 0.2, grow: () => -(rand(5) + 55) * 0.001 }),
 
   /**
    * `BITMAP_SMOKE` SubType 13, the Balgass lava vents' glow: sized `(rand() % 64 + 64) * 0.01` whatever
@@ -2045,6 +2086,7 @@ export const KIND_REACH: Record<KindName, Reach> = {
   ember: { travel: 1, base: 0, perScale: 0.34 },
   fire0: { travel: 1.4, base: 0, perScale: 0.87 },
   fire0b: { travel: 1.4, base: 0, perScale: 0.87 },
+  fire1_3: { travel: 0.5, base: 0.4, perScale: 0.46 },
   trueFire: { travel: 1, base: 0, perScale: 0.46 },
   trueFire5: { travel: 0.85, base: 0, perScale: 0.46 },
   trueBlue: { travel: 1, base: 0, perScale: 0.46 },
@@ -2066,6 +2108,13 @@ export const KIND_REACH: Record<KindName, Reach> = {
   smokeLine1: { travel: 0.95, base: 1.28, perScale: 0.87 },
   smokeLine2: { travel: 0.95, base: 1.28, perScale: 0.87 },
   smokeLine3: { travel: 0.95, base: 1.28, perScale: 0.87 },
+  smokeLine1_2: { travel: 1.22, base: 1.65, perScale: 0.87 },
+  smokeLine2_2: { travel: 1.22, base: 1.65, perScale: 0.87 },
+  smokeLine3_2: { travel: 1.22, base: 1.65, perScale: 0.87 },
+  smokeLine1_1: { travel: 1, base: 0, perScale: 0.47 },
+  smokeLine2_1: { travel: 1, base: 0, perScale: 0.47 },
+  smokeLine3_1: { travel: 1, base: 0, perScale: 0.47 },
+  clud64_6: { travel: 1.15, base: 0, perScale: 0.26 },
   smoke2: { travel: 3.4, base: 0.58, perScale: 0 },
   smoke65: { travel: 0.75, base: 0, perScale: 0.29 },
   cloud21: { travel: 1.75, base: 0, perScale: 3.61 },
