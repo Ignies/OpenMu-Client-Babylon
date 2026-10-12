@@ -1,6 +1,6 @@
 import type { Entity, World } from '../../ecs/world';
 import { ModelObject } from '../render/modelObject';
-import { monsterBlendMeshFor, type MonsterBlendMesh } from './monsterBlendMesh';
+import { blendMeshOf, type MonsterBlendMesh } from './monsterBlendMesh';
 import { monsterModelTypeOf } from '../anim/playSpeed';
 import { ClothSet } from '../cloth';
 import type { Scene, TransformNode } from '../render/babylon/exports';
@@ -43,7 +43,7 @@ export class MonsterObject extends ModelObject {
 
   async init(_world: World, entity: Entity): Promise<void> {
     this.#entity = entity;
-    this.#blendMesh = monsterBlendMeshFor(monsterModelTypeOf(entity.npcType));
+    this.#blendMesh = blendMeshOf(entity.npcType, monsterModelTypeOf(entity.npcType));
   }
 
   /**

@@ -254,3 +254,11 @@ describe('the Swamp of Quiet line', () => {
     }
   });
 });
+
+describe('blend meshes of their own', () => {
+  // MONSTER_VALKYRIE (ZzzCharacter.cpp:13798-13805), not the Silver Valkyrie on the same body (:13768-13773);
+  // MONSTER_CHAOS_GOBLIN's jewel and MONSTER_ELF_LALA's wings (:14409, :14441).
+  it('give the Valkyrie, the Chaos Goblin and Elf Lala their mesh', () => {
+    expect([47, 52, 238, 242].map(n => monsters.def(n)?.blendMesh)).toEqual([{ mesh: 0 }, undefined, { mesh: 1 }, { mesh: 1 }]);
+  });
+});

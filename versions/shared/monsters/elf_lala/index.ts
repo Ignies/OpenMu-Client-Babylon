@@ -6,6 +6,8 @@ export default defineMonster({
   // RenderCharacter casts it no shadow (ZzzCharacter.cpp:8662-8668).
   classicShadow: false,
   maxHealth: 50,
+  // MONSTER_ELF_LALA's wings (ZzzCharacter.cpp:14441).
+  blendMesh: { mesh: 1 },
   npcModel: { file: 'ElfWizard01' },
   // MODEL_ELF_WIZARD: `rand_fps_check(256)` (ZzzCharacter.cpp:6085).
   voice: { sound: 'Sound/nHarp', oneIn: 256 },

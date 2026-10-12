@@ -16,7 +16,8 @@ its own folder in `versions/shared/monsters/<name>/` and uses this controller.
   own teleport sound on one world), `appearSound` and `summonSound` (`MonsterSound`: its spawn
   sound, and the one only a 0x1F spawn plays) and `stormSkill` (the skill whose AttackTime replays the
   meteorite storm).
-- Look fields: `light` (`MonsterLight`, read by `lighting/characters.ts`), `bodyFx`
+- Look fields: `blendMesh` (its own case's additive mesh, read by the actors controller's
+  `blendMeshOf` over the per-body table), `light` (`MonsterLight`, read by `lighting/characters.ts`), `bodyFx`
   (`MonsterBodyFx`, `bodyFx.ts`: particles, cards on bones (`BodyCard`, `BodyCardSpot`), bone
   ribbons (`BodyRibbon`) and the original's particles (`BodyPuff`) by name, read by `fx/monsterVisuals.ts`;
   shared pieces in `versions/shared/monsters/_shared/bodyFx.ts`); on a body,

@@ -1,5 +1,6 @@
 import type { MeshAnimation } from '../render/meshAnimation';
 import { MonsterActionType } from '@versions/shared/objects/enum';
+import { monsterRegistry } from '../monsters';
 
 /**
  * Monster additive body mesh by model type: `CreateMonster`
@@ -105,6 +106,12 @@ const MONSTER_BLEND_MESHES: Partial<Record<number, MonsterBlendMesh>> = {
   // Life Stone 278: mesh 3 (GMBattleCastle.cpp:1409).
   86: still(3),
 };
+
+/** A type's own blend mesh (its folder's `blendMesh`), else its body's. */
+export function blendMeshOf(npcType: number | undefined, modelType: number): MonsterBlendMesh | undefined {
+  const own = npcType === undefined ? undefined : monsterRegistry.def(npcType)?.blendMesh;
+  return own ? { mesh: own.mesh, light: own.light ?? 1 } : monsterBlendMeshFor(modelType);
+}
 
 /** The blend mesh this monster model carries, if any. */
 export function monsterBlendMeshFor(

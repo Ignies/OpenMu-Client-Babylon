@@ -84,6 +84,12 @@ export type MonsterDef = {
   /** What its body throws off or carries (`bodyFx.ts`; the fx controller's `monsterVisualFor`). */
   bodyFx?: MonsterBodyFx;
   /**
+   * The mesh its own case draws additive (`o->BlendMesh`, `BlendMeshLight` 1 unless given), where the
+   * type differs from others on its body (the Valkyrie, not the Silver one) or is an NPC; read by the
+   * actors controller over its per-body table (`monsterBlendMesh.ts`).
+   */
+  blendMesh?: { readonly mesh: number; readonly light?: number };
+  /**
    * `MODEL_BALL`: it rests 30 cm up and bounces there, and a server move kicks it - a hop, a roll,
    * sparks and SOUND_MENU01 (WSclient.cpp:2134-2141, ZzzCharacter.cpp:3192-3203; `ecs/systems/positionSlideSystem.ts`).
    */

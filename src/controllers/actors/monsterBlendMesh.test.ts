@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { monsterBlendMeshFor } from './monsterBlendMesh';
+import { monsterRegistry } from '../monsters';
+import { blendMeshOf, monsterBlendMeshFor } from './monsterBlendMesh';
 
 const row = (model: number) => {
   const r = monsterBlendMeshFor(model);
@@ -26,5 +27,19 @@ describe('monster blend meshes', () => {
   it('scroll the Crust', () => {
     const crust = monsterBlendMeshFor(52)?.animate?.({ CurrentAction: 0 });
     expect(crust?.u?.(1250)).toBeCloseTo(-0.5);
+  });
+
+  // MONSTER_VALKYRIE writes BlendMesh 0 and MONSTER_SILVER_VALKYRIE nothing on the same body (ZzzCharacter.cpp:13768,
+  // :13798); the NPC cases write theirs too (:14409, :14441).
+  it('take a type its own mesh over its body, the light 1 unless given', () => {
+    monsterRegistry.add([
+      { Numb: 9001, Name: 'own', blendMesh: { mesh: 0 } },
+      { Numb: 9002, Name: 'lit', blendMesh: { mesh: 1, light: 0.5 } },
+      { Numb: 9003, Name: 'body' },
+    ]);
+    expect([blendMeshOf(9001, 35)?.mesh, blendMeshOf(9001, 35)?.light]).toEqual([0, 1]);
+    expect([blendMeshOf(9002, -1)?.mesh, blendMeshOf(9002, -1)?.light]).toEqual([1, 0.5]);
+    expect(blendMeshOf(9003, 52)).toBe(monsterBlendMeshFor(52));
+    expect(blendMeshOf(9003, 35)).toBeUndefined();
   });
 });
