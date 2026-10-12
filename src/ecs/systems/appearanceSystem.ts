@@ -24,13 +24,12 @@ function loadPart(
   /** The wearer's class, for an armour piece: picks the class's own model. */
   charClass?: CharacterClassNumber
 ) {
+  // The model's own RenderPartObjectBody branch, worn or held (ZzzObject.cpp:10137); none on the class's own body.
+  socket.MeshPasses = part ? itemBodyPasses(part.group, part.num) : null;
   if (!part) return;
   const item = ItemsDatabase.getItem(part.group, part.num);
 
   if (!item) return;
-
-  // The model's own RenderPartObjectBody branch, worn or held (ZzzObject.cpp:10137).
-  socket.MeshPasses = itemBodyPasses(part.group, part.num);
 
   if (slot !== undefined) {
     // `RenderLinkObject` runs `ItemObjectAttribute` on every held item (ZzzCharacter.cpp:6648).
@@ -87,6 +86,7 @@ function wearChaosCastleSkin(playerObject: PlayerObject) {
   playerObject.Pants.Unload();
   playerObject.Gloves.Unload();
   playerObject.Boots.Unload();
+  playerObject.Armor.MeshPasses = null;
   void settle(
     playerObject.loadPartAsync('Player/', playerObject.Armor, CHAOS_CASTLE_BODY),
     `Player/${CHAOS_CASTLE_BODY}`

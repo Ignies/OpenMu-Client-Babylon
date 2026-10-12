@@ -177,6 +177,16 @@ describe('a held item', () => {
     knight.charAppearance.rightHand = { group: 0, num: 0 };
     update(knight);
     expect(knight.modelObject.Weapon2.MeshPasses).toBeNull();
+
+    // Taken off, the class's own body goes on in the same socket, and in Chaos Castle the castle's skin.
+    knight.charAppearance.armor = null;
+    update(knight);
+    expect(knight.modelObject.Armor.MeshPasses).toBeNull();
+    knight.charAppearance.armor = { group: 8, num: 23 } as never;
+    update(knight);
+    map = CHAOS_CASTLE;
+    update(knight);
+    expect(knight.modelObject.Armor.MeshPasses).toBeNull();
   });
 
   it('rides the body skeleton when it is a glove weapon (RenderSwordformGloves, MonkSystem.cpp:248)', () => {

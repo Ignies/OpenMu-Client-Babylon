@@ -292,3 +292,11 @@ describe('the bows', () => {
     });
   });
 });
+
+describe('the armour sets', () => {
+  it('Hurricane: bab2 by the chrome look-up over every drawn mesh, in a cyan off the body (ZzzObject.cpp:7566-7575)', () => {
+    const hurricane = { drawn: undefined, passes: [{ mesh: -1, kind: 'add', texture: 'Effect/bab2.OZJ', map: 'chrome', light: [r(BODY.x * 0.3), r(BODY.y * 0.8), BODY.y] }] };
+    for (const group of [8, 9, 10, 11]) expect(look(group, 23)).toEqual(hurricane);
+    expect(look(7, 23)).toBeNull(); // the branch names no helm
+  });
+});
