@@ -98,6 +98,7 @@ In game the name a player reads is the language pack's in either case (`monsterD
 | `balgass/` | Balgass (349), Crywolf boss |
 | `kundun_demon/` | Kundun (275), with a fast-forwarded death clip |
 | `selupan/` | Selupan (459), Raklion boss |
+| `gayion_the_gladiator/` | Gaion Kharein (504), Imperial Guardian boss: his five swords on their bones by action (`swords.ts`) |
 | `_blood_castle/` | Castle Gate (131) and Statue of Saint (132-134) |
 | `_golden_line/` | the golden invasion line, with extra additive body passes |
 | `_skeleton_line/` | Skeleton Warrior, Archer, Elite, Death King, Death Bone: player-rig monsters |

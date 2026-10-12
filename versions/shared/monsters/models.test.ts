@@ -8,7 +8,7 @@ import { join } from 'node:path';
  * ModelFactoryPerId map gave a class of its own.
  */
 const DIR = 'versions/shared/monsters';
-const MONSTERS = [1, 2, 3, 14, 15, 16, 35, 43, 53, 54, 55, 56, 78, 79, 80, 81, 82, 83, 131, 132, 133, 134, 275, 349, 459, 493, 494, 495, 496, 497, 498, 499, 500, 501, 502];
+const MONSTERS = [1, 2, 3, 14, 15, 16, 35, 43, 53, 54, 55, 56, 78, 79, 80, 81, 82, 83, 131, 132, 133, 134, 275, 349, 459, 493, 494, 495, 496, 497, 498, 499, 500, 501, 502, 504];
 const NPCS = [230, 232, 233, 236, 248, 250, 253, 255, 257, 258, 371, 414];
 
 const files = readdirSync(DIR)

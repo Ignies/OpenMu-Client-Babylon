@@ -7,7 +7,7 @@ import { createHash } from 'node:crypto';
  * `isKnownObjectType` knows it, and the NPC tables the generic factories read (file and scale).
  * Moving NPC content must leave these hashes alone; update them on purpose.
  */
-const RESOLVE_HASH = '0ed9f2ce1f79601590aadaa0d09e76559cf4a4d17718f954a9a5b8bb0065a5c5';
+const RESOLVE_HASH = 'd9b5215c0063d42270dec42e259969b2dc06081c4d01ea102cb3c9aa14116057';
 const TABLES_HASH = '0e27e0c3cde4e241cf2dfa54d66b3e9c8267533e17d31266b9f1e9cd8337ade8';
 
 const hash = (v: unknown) => createHash('sha256').update(JSON.stringify(v)).digest('hex');
