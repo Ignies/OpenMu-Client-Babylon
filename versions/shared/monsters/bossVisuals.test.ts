@@ -184,6 +184,21 @@ describe("Erohim's body", () => {
   });
 });
 
+describe('the Imperial Guardian bodies', () => {
+  // RenderMonster's MODEL_RAYMOND, MODEL_LUCAS (GMEmpireGuardian1.cpp:1831-1866) and MODEL_DARK_GHOST
+  // (GMEmpireGuardian2.cpp:833-847).
+  it('give Raymond his sword pass and chrome, Lucas his chrome and the Dark Ghost his bright mesh 3', () => {
+    // raymond_sword_R over mesh 1 in BodyLight[0] * 3 grey at `(sinf(WorldTime * 0.003f) + 1) * 0.5`.
+    expect(passRows(506)).toEqual(['1 add Effect/raymond_sword_R.OZJ @1.5,1.5,1.5', '3 add chrome Effect/Chrome01.OZJ']);
+    expect(monsters.def(506)?.passes?.passes[0].gain?.(1000)).toBeCloseTo((Math.sin(3) + 1) * 0.5);
+    expect(passRows(507)).toEqual(['3 add chrome Effect/Chrome01.OZJ']);
+    expect(monsters.def(507)?.passes?.drawn).toEqual([0, 1, 2, 3, 4]);
+    expect(passRows(515)).toEqual(['3 bright']);
+    expect(monsters.def(515)?.passes?.passes[0].gain?.(0)).toBe(0.5);
+    expect(monsters.def(515)?.passes?.drawn).toEqual([0, 1, 2, 3]);
+  });
+});
+
 describe('Erohim', () => {
   // RenderHuntingGroundMonsterVisual's MODEL_EROHIM (GMHuntingGround.cpp:672-712): two red lights on each eye, and
   // through Attack2 a true fire and a smoke from the left hand. Monster82_LHand is not his bone, so the fire is a
