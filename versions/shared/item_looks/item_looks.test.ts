@@ -463,4 +463,9 @@ describe('the maces\' and spears\' held sprites', () => {
     ]);
   });
 
+  it('Dragon Spear: blue flares on bones 1-8 (:7721-7730)', () => {
+    const light = [r(lum * 0.2), r(lum * 0.1), r(lum * 0.8)];
+    expect(held(3, 10)).toEqual([1, 2, 3, 4, 5, 6, 7, 8].map(bone => ['flare01', bone, undefined, 1.3, light, 0]));
+  });
+
 });
