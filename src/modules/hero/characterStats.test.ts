@@ -353,6 +353,15 @@ describe('the character window with harmony and 380 options', () => {
     expect(lit).toMatchObject({ defense: plain.defense + 64, harmonyDefense: 64 });
     expect(plain.harmonyDefense).toBe(0);
   });
+
+  // iChangeRingAddDefense = (t_adjdef + maxdefense) / 10 with either ring, before the Panda's 50 (:946-957).
+  it('adds a tenth of the defense, harmony included, for the elite skeleton ring', () => {
+    const ring = { group: 13, num: 39, durability: 255 };
+    const lit = knight({ 0: kris(), 1: kris(), 3: armour({ socketBonus: 0x14 }) });
+    expect(knight({ 0: kris(), 1: kris(), 3: armour(), 11: ring }).defense).toBe(plain.defense + Math.trunc(plain.defense / 10));
+    expect(knight({ 0: kris(), 1: kris(), 3: armour({ socketBonus: 0x14 }), 10: ring }).defense).toBe(lit.defense + Math.trunc(lit.defense / 10));
+    expect(knight({ 0: kris(), 1: kris(), 3: armour(), 8: helper(80), 10: ring }).defense).toBe(plain.defense + Math.trunc(plain.defense / 10) + 50);
+  });
 });
 
 const SET_TYPES = 'Data/Local/itemsettype.bmd';

@@ -803,6 +803,8 @@ function magicSkillDamage(range: Range, skill: CharacterStatsInput['magicSkill']
 }
 
 /** The helpers the character window reads (NewUICharacterInfoWindow.cpp:707-737, :954-959). */
+/** ITEM_ELITE_TRANSFER_SKELETON_RING, ITEM_HELPER + 39 (_enum.h:2742). */
+const ELITE_SKELETON_RING = 39;
 const PET = { imp: 1, fenrir: 37, demon: 64, panda: 80, unicorn: 106, skeleton: 123 } as const;
 /** The gold Fenrir's option bit. */
 const FENRIR_GOLD = 0x04;
@@ -891,6 +893,12 @@ export function deriveCharacterStats(bare: CharacterStatsInput): DerivedStats {
   const curse = withPet(withRing(calculateCurse(input), items, 'curse'), pet, 'curse', level);
   // The Panda and the Unicorn add 50 defense.
   const petDefense = pet?.group === GROUP_HELPER && (pet.num === PET.panda || pet.num === PET.unicorn) ? 50 : 0;
+  // The elite skeleton ring in either hand adds a tenth, harmony included (NewUICharacterInfoWindow.cpp:946-952).
+  const defense = withSetDefense(calculateDefense(input, base), input, lines, socket) + harmony.defense;
+  const eliteRing = [InventoryConstants.Ring1Slot, InventoryConstants.Ring2Slot].some(slot => {
+    const ring = equipped(items, slot);
+    return ring?.group === GROUP_HELPER && ring.num === ELITE_SKELETON_RING;
+  });
 
   return {
     attackSpeed: attackSpeedOf(bare.charClass, bare.agility),
@@ -901,7 +909,7 @@ export function deriveCharacterStats(bare: CharacterStatsInput): DerivedStats {
     attackRate: calculateAttackRate(input, base) + setSum(lines, SET.attackRate) + socket.attackRate,
     attackRatePvp: calculateAttackRatePvp(input, base),
     attackRatePvpBonus: harmony.attackRate,
-    defense: withSetDefense(calculateDefense(input, base), input, lines, socket) + harmony.defense + petDefense,
+    defense: defense + (eliteRing ? Math.trunc(defense / 10) : 0) + petDefense,
     harmonyDefense: harmony.defense,
     defenseRate: Math.trunc(calculateDefenseRate(input, base) * socket.defenseRate),
     defenseRatePvp: calculateDefenseRatePvp(input, base),
