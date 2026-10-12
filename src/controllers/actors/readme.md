@@ -106,10 +106,8 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   operator status, never while cloaked). It is its own root, not a child, so it keeps its own orange
   chrome pass (ZzzObject.cpp:1558-1564); each frame it is put at head bone 20 plus (70, -5, 0) cm and
   turned with the body, not the bone (`CSParts::IRender`).
-- `contributorMark.ts`: `ContributorMark`, the credits' contributor mark (protected, AGENTS.md "Credits"): one
-  halo ring cloned per character (shared geometry and material per scene) and one small CPU particle system
-  of soft white motes round the body. `ecs/systems/contributorMark.ts` creates it and calls `place(head, feet,
-  shown)` each frame; it is disposed with the body node.
+- `creditsAccent.ts`: `CreditsAccent`, drawn for the credits module (protected, AGENTS.md "Credits");
+  `ecs/systems/creditsAccent.ts` creates it and calls `place(head, feet, shown)` each frame.
 - The `Helm` socket is the class head and `HelmMask` the worn helm. The head is drawn bare-headed (it is then
   BODYPART_HELM) and under the open helms, Bronze, Pad, Vine to Spirit and 63, 65, 68, 70 (BODYPART_HEAD); any
   other helm hides it (`showsClassHead`, SetCharacterScale, ZzzCharacter.cpp:12114-12128). Every player is dressed

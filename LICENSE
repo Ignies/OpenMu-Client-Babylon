@@ -26,8 +26,6 @@ The in-client credits window opened with Ctrl+F8 and its contents (the
 contributor lists read from the project's Git history and GitHub, the special
 thanks and this notice) must remain present, reachable with Ctrl+F8 and
 unaltered in every copy, fork, build or deployment of the Software, in whole or
-in part. The contributor mark is part of these credits: a character whose name
-matches a contributor in those lists is drawn with an angelic halo above the
-head and a white aura around the body, and that marking must likewise remain
-present and unaltered. Removing access to the window, removing the mark or
-altering either is not permitted under this license.
+in part. The same holds for the credits module and every visual it draws for
+contributors. Removing access to the window, removing any of these visuals or
+altering any of it is not permitted under this license.
