@@ -57,14 +57,17 @@ interface BlurOptions {
   until?: () => boolean;
   /**
    * The original's history instead of one sample a frame: 10 samples a tick along the blade's
-   * path, at most 29 kept, the oldest dropped every tick (two once the trail is 15 ticks old),
+   * path, at most 29 kept, the oldest dropped every tick (two once the trail is `short` 15 or 30 ticks old),
    * an additive trail ramping from 1 at the newest sample to 1/N at the oldest
    * (ZzzCharacter.cpp:3996-4021, ZzzEffectBlurSpark.cpp:136-275).
    */
   tickHistory?: boolean;
+  /** CreateBlur's `Short`: the trail starts dropping two samples a tick at 15 ticks old, not 30. */
+  short?: boolean;
 }
 
 const live = new LiveList();
+const WHITE: RGB = [1, 1, 1];
 
 const tip = new Vector3();
 const hilt = new Vector3();
@@ -76,15 +79,19 @@ const TICK = 1 / 25;
 const TAILS = 29;
 /** CreateWeaponBlur's `inter`: samples laid over each tick of the swing. */
 const SUB_STEP = TICK / 10;
-/** CreateBlur's `Short` LifeTime: past it MoveBlurs drops two samples a tick. */
+/** CreateBlur's LifeTime, `Short` or not: past it MoveBlurs drops two samples a tick. */
 const SHORT_LIFE = 15;
+const LONG_LIFE = 30;
 
 function spawnTicked(scene: Scene, opts: BlurOptions): EffectHandle {
   const seconds = opts.seconds ?? DEFAULT_SECONDS;
   const blend = opts.blend ?? 'add';
-  const material = additiveMaterial(scene, opts.texture ?? TEX.swordBlur, opts.colour ?? RGBS.steel, blend);
+  const tint = opts.colour ?? RGBS.steel;
+  const life = opts.short ? SHORT_LIFE : LONG_LIFE;
   // RenderBlurs ramps a level-0 owner's (additive) trail and draws the dark one flat.
   const ramp = blend === 'add';
+  // A ramped trail carries its tint in the vertex colours, clamped after the fade as PackABGR does.
+  const material = additiveMaterial(scene, opts.texture ?? TEX.swordBlur, ramp ? WHITE : tint, blend);
 
   const positions = new Float32Array(TAILS * 2 * 3);
   const uvs = new Float32Array(TAILS * 2 * 2);
@@ -158,7 +165,7 @@ function spawnTicked(scene: Scene, opts: BlurOptions): EffectHandle {
       while (tickClock >= TICK) {
         tickClock -= TICK;
         age++;
-        n = Math.max(0, n - (age >= SHORT_LIFE ? 2 : 1));
+        n = Math.max(0, n - (age >= life ? 2 : 1));
       }
       if (!sampling && n < 2) return false;
 
@@ -171,8 +178,7 @@ function spawnTicked(scene: Scene, opts: BlurOptions): EffectHandle {
         uvs[j * 4 + 2] = u;
         if (colours) {
           const b = j < n ? (n - j) / n : 0;
-          colours.fill(b, j * 8, j * 8 + 3);
-          colours.fill(b, j * 8 + 4, j * 8 + 7);
+          for (let c = 0; c < 3; c++) colours[j * 8 + c] = colours[j * 8 + 4 + c] = Math.min(1, tint[c] * b);
         }
       }
       mesh.updateVerticesData(VertexBuffer.PositionKind, positions, false, false);

@@ -97,6 +97,8 @@ shared pools, textures and particle recipes other folders reuse.
 - change one skill's look: its file in `versions/shared/skills/`, not here.
 
 ## Tests
+- `blur.test.ts`: a `tickHistory` trail fades a light above 1 from its own tint, clamped per channel after the
+  fade (PackABGR), and drops two samples a tick from 15 ticks old when `short`, from 30 when not (CreateBlur).
 - `boids.test.ts`: a bird, a fish and an invasion dragon cast the Classic shadow from the ground at 0.2, not on the cascades.
 - `layers.test.ts`: the shroud draws at most `SHROUD_MAX` cards at once.
 - `modelClones.test.ts` (spiritSwarm): a disposed rig takes its skull clones along, loaded or late.
