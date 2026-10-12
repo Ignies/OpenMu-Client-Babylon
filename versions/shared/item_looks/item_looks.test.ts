@@ -431,3 +431,36 @@ describe('the swords\' held sprites', () => {
     expect(held(0, 31)).toBeNull();
   });
 });
+
+// RenderLinkObject's mace and spear cases (ZzzCharacter.cpp); `Luminosity` is rolled once a frame (:7029).
+describe('the maces\' and spears\' held sprites', () => {
+  const lum = (Math.floor(RAND * 30) + 70) * 0.005;
+
+  it('Elemental Mace: a big gold flare and a pulsing grey one on bone 1 (:7566-7575)', () => {
+    expect(held(2, 7)).toEqual([
+      ['flare01', 1, undefined, 2, [r(lum), r(lum * 0.9), 0], 0],
+      ['flare01', 1, undefined, r(Math.abs(Math.sin(T * 0.002) + 0.5)), [0.5, 0.5, 0.5], 0],
+    ]);
+  });
+
+  it('Frost Mace: shiny05 at its gems, a frost star of flare and three turning pin lights at bone 24, flares up the shaft (:7840-7927)', () => {
+    const green = [0.5, 0.8, 0.5];
+    const red = [0.9, 0.1, 0.3];
+    const frost = [0.5, 0.8, 0.6];
+    expect(held(2, 16)).toEqual([
+      ['shiny05', 11, undefined, 0.2, green, 0],
+      ['shiny05', 10, undefined, 0.2, green, 0],
+      ['shiny05', 9, undefined, 0.2, red, 0],
+      ['shiny05', 8, undefined, 0.2, red, 0],
+      ['shiny05', 1, undefined, 0.2, red, 0],
+      ['flare01', 1, undefined, 0.8, red, 0],
+      ['shiny05', 24, undefined, 0.3, frost, 0],
+      ['flare01', 24, undefined, 2, frost, 0],
+      ['pinLight', 24, undefined, 0.5, frost, Math.floor(T * 0.04) % 360],
+      ['pinLight', 24, undefined, 0.7, frost, -(Math.floor(T * 0.03) % 360)],
+      ['pinLight', 24, undefined, 0.9, frost, Math.floor(T * 0.02) % 360],
+      ...[0.2, 0.2, 0.2, 0.2, 0.3, 0.3, 0.3, 0.3, 0.3, 0.4, 0.4, 0.4].map((scale, i) => ['flare01', i + 12, undefined, scale, frost, 0]),
+    ]);
+  });
+
+});

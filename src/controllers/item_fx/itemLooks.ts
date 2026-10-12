@@ -50,6 +50,16 @@ export const fixedLight =
 /** Chrome01 on the normal look-up: RENDER_CHROME with no texture of its own (ZzzBMD.cpp:1478). */
 export const CHROME01 = { texture: 'Effect/Chrome01.OZJ', map: 'chrome' } as const;
 
+/** RenderLinkObject's `Luminosity = (rand() % 30 + 70) * 0.005f`, rolled once a frame (ZzzCharacter.cpp:7029). */
+const luminosity = { ms: -1, value: 0 };
+export function heldLuminosity(ms: number): number {
+  if (luminosity.ms !== ms) {
+    luminosity.ms = ms;
+    luminosity.value = (Math.floor(Math.random() * 30) + 70) * 0.005;
+  }
+  return luminosity.value;
+}
+
 const bodies = new Map<number, MeshPassSet>();
 const helds = new Map<number, readonly HeldSprite[]>();
 const key = (group: number, num: number) => group * 512 + num;
