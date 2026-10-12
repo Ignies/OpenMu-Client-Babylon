@@ -28,6 +28,17 @@ describe('the character window with a pet', () => {
     }
   });
 
+  // :719-733, :1305-1320, :1424-1440: the Demon and the Skeleton add nothing once expired; the Imp is not checked.
+  it('adds nothing for an expired Demon or Skeleton, still the Imp', () => {
+    const expired = { raw: [0, 0, 0, 0, 0, 0x06, 0] };
+    for (const num of [64, 123]) {
+      const with_ = stats(helper(num, expired));
+      expect([with_.damageMin, with_.damageMax, with_.wizardryMax]).toEqual([bare.damageMin, bare.damageMax, bare.wizardryMax]);
+      expect(stats(helper(num, expired), CharacterClassNumber.Summoner).curseMax).toBe(bareSummoner.curseMax);
+    }
+    expect(stats(helper(1, expired)).damageMin).toBe(bare.damageMin + Math.trunc(bare.damageMin * 0.3));
+  });
+
   it('adds the Demon and the Skeleton, not the Imp, to curse', () => {
     expect(stats(helper(64), CharacterClassNumber.Summoner).curseMax).toBe(bareSummoner.curseMax + Math.trunc(bareSummoner.curseMax * 0.4));
     expect(stats(helper(1), CharacterClassNumber.Summoner).curseMax).toBe(bareSummoner.curseMax);

@@ -836,7 +836,7 @@ type Range = { min: number; max: number };
 
 /**
  * A damage range after the pet: the gold Fenrir adds level / 12 to damage and level / 25 to
- * wizardry, then the Demon adds 40%, the Skeleton 20% and the Imp 30% (not to curse).
+ * wizardry, then the Demon adds 40%, the Skeleton 20% (both unless expired) and the Imp 30% (not to curse).
  */
 function withPet<T extends Range>(range: T, pet: Item | null, kind: 'damage' | 'wizardry' | 'curse', level: number): T {
   if (pet?.group !== GROUP_HELPER) return range;
@@ -846,7 +846,8 @@ function withPet<T extends Range>(range: T, pet: Item | null, kind: 'damage' | '
     min += flat;
     max += flat;
   }
-  const rate = pet.num === PET.demon ? 0.4 : pet.num === PET.skeleton ? 0.2 : pet.num === PET.imp && kind !== 'curse' ? 0.3 : 0;
+  const live = !periodExpired(pet);
+  const rate = pet.num === PET.demon && live ? 0.4 : pet.num === PET.skeleton && live ? 0.2 : pet.num === PET.imp && kind !== 'curse' ? 0.3 : 0;
   return { ...range, min: min + Math.trunc(min * rate), max: max + Math.trunc(max * rate) };
 }
 
