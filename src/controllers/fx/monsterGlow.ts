@@ -110,6 +110,8 @@ export type MonsterGlow = {
   readonly liftSpeed?: number;
   readonly liftAmount?: number;
   readonly liftBase?: number;
+  /** Each channel's share of the lift (default 1, 1, 1): Balgass's red wobbles, his blue holds. */
+  readonly liftChannels?: readonly [number, number, number];
   /** The breath's speed in radians per `WorldTime` ms and its swing: `RenderLight` 0.002 and 0.3. */
   readonly breathSpeed?: number;
   readonly breathAmount?: number;
@@ -416,9 +418,10 @@ function place(g: LiveGlow): void {
   const lift = g.glow.liftAmount
     ? Math.sin(seconds * (g.glow.liftSpeed ?? 0) * 1000) * g.glow.liftAmount + (g.glow.liftBase ?? 0)
     : 0;
-  const r = (g.rgb[0] + lift) * lumi;
-  const gr = (g.rgb[1] + lift) * lumi;
-  const b = (g.rgb[2] + lift) * lumi;
+  const share = g.glow.liftChannels;
+  const r = (g.rgb[0] + lift * (share ? share[0] : 1)) * lumi;
+  const gr = (g.rgb[1] + lift * (share ? share[1] : 1)) * lumi;
+  const b = (g.rgb[2] + lift * (share ? share[2] : 1)) * lumi;
   const hidden = g.entity.modelObject?.OutOfView === true || (g.glow.when !== undefined && !g.glow.when());
   const swell = g.glow.swellAmount ? Math.sin(seconds * (g.glow.swellSpeed ?? 0) * 1000) * g.glow.swellAmount : 0;
 

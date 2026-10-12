@@ -351,6 +351,8 @@ describe('Balgass', () => {
   // (0.25, 0.01, 1)` (ZzzEffectJoint.cpp:3200-3205, ZzzEffectParticle.cpp:230-262): blue held at 1, red within 0.08 of 0.7.
   it('lays a lightning card at each ribbon head', () => {
     expect(cards(349)).toEqual([10, 10, 9, 9].map(b => `${b}:lightning2@0.15 0.7,0.51,1`));
+    // `sinf(WorldTime * 0.002f) * 0.3f` of Luminosity is 0.075 on red and next to nothing on green.
+    expect(rows(349, 'cards')[0].lift).toEqual({ speed: 0.002, amount: 0.075, base: 0, channels: [1, 0.04, 0] });
   });
 });
 

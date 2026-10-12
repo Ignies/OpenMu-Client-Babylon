@@ -6,11 +6,12 @@ export default defineMonster({
   Name: 'Balgass',
   // The SubType 2 / 3 JOINT_ENERGY ribbons on MoveEye(9, 10)'s eyes (GMCrywolf1st.cpp:674-675, :802), and the
   // BITMAP_LIGHTNING + 1 SubType 0 each lays at its head a tick, living two (ZzzEffectJoint.cpp:3200-3205): two
-  // cards a head in `0.5 + Luminosity * (0.25, 0.01, 1)`, which holds blue at 1 and red within 0.08 of 0.7.
+  // cards a head in `0.5 + Luminosity * (0.25, 0.01, 1)`, `Luminosity = sinf(WorldTime * 0.002f) * 0.3f + 0.8f`: blue
+  // held at 1, red wobbling 0.075 about 0.7.
   bodyFx: [
     trail(10, 30, 20, [0.5, 0.1, 1]),
     trail(9, 30, 8, [0.5, 0.1, 1]),
-    cards([0.7, 0.51, 1], spotsOn([10, 10, 9, 9], 'lightning2', 0.15)),
+    cards([0.7, 0.51, 1], spotsOn([10, 10, 9, 9], 'lightning2', 0.15), { lift: { speed: 0.002, amount: 0.075, base: 0, channels: [1, 0.04, 0] } }),
     // Walking, its smoke (GMCrywolf1st.cpp:821-827).
     crywolfWalkSmoke(),
   ],

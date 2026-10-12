@@ -211,6 +211,7 @@ function cardGlow(em: CardsRow, e: Entity, roar: Roar): MonsterGlow {
     liftSpeed: em.lift?.speed,
     liftAmount: em.lift?.amount,
     liftBase: em.lift?.base,
+    liftChannels: em.lift?.channels,
     luminosity: 1,
   };
 }
