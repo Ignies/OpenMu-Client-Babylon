@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { t } from '@/i18n';
 import type { Item } from '@/ecs/world';
 import { BaseClass } from '@/modules/hero/characterStats';
-import { defenseText, fullSet } from './lines';
+import { defenseText, fruitPoints, fullSet } from './lines';
 
 // NewUICharacterInfoWindow.cpp:977-1017.
 describe('the defense line', () => {
@@ -50,5 +50,14 @@ describe('the full set bonus', () => {
     expect(fullSet(set(15, { 2: { durability: 0 } }), BaseClass.MagicGladiator)).toBe(false);
     expect(fullSet(set(59, { 5: null }), BaseClass.RageFighter)).toBe(true);
     expect(fullSet(set(59, { 5: { num: 1 } }), BaseClass.RageFighter)).toBe(true);
+  });
+});
+
+// RenderTableTexts (NewUICharacterInfoWindow.cpp:333-352): the fruit counts, all 0 up to level 9.
+describe('the fruit points line', () => {
+  it('prints the used and the most fruit points, the decrease ones negative, from level 10', () => {
+    expect(fruitPoints(10, { used: 3, max: 120, minusUsed: 2, minusMax: 120 })).toBe('Create 3/120 | Decrease -2/-120');
+    expect(fruitPoints(10, { used: 0, max: 120, minusUsed: 0, minusMax: 120 })).toBe('Create 0/120 | Decrease 0/-120');
+    expect(fruitPoints(9, { used: 3, max: 120, minusUsed: 2, minusMax: 120 })).toBe('Create 0/0 | Decrease 0/0');
   });
 });

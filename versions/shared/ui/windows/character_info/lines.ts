@@ -31,3 +31,9 @@ export function fullSet(items: readonly (Item | null)[], base: BaseClass): boole
   }
   return true;
 }
+
+/** The fruit points line (NewUICharacterInfoWindow.cpp:333-352): all 0 up to level 9. */
+export function fruitPoints(level: number, fruits: { used: number; max: number; minusUsed: number; minusMax: number }): string {
+  const { used, max, minusUsed, minusMax } = level > 9 ? fruits : { used: 0, max: 0, minusUsed: 0, minusMax: 0 };
+  return `Create ${used}/${max} | Decrease ${minusUsed ? -minusUsed : 0}/${minusMax ? -minusMax : 0}`;
+}

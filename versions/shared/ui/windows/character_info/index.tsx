@@ -31,7 +31,7 @@ import {
 import { Bag } from '@/modules/inventory';
 import { StorageKind } from '@/modules/inventory/itemStorage';
 import { defenseColour, eventColour, statColour } from './buffColours';
-import { defenseText, fullSet } from './lines';
+import { defenseText, fruitPoints, fullSet } from './lines';
 import { pkTextColour, PVP_NEUTRAL } from '@/controllers/interface/nameTags';
 import {
   BaseClass,
@@ -708,9 +708,12 @@ export const CharacterInfo = observer(() => {
         className="table-text thin"
         style={{ left: TABLE_TEXT_X, top: POINT_Y, color: TEXT_COLOR.cyan }}
       >
-        Create {playerData.usedFruitPoints}/{playerData.maxFruitPoints} |
-        Decrease {-playerData.usedNegativeFruitPoints}/
-        {-playerData.maxNegativeFruitPoints}
+        {fruitPoints(playerData.level, {
+          used: playerData.usedFruitPoints,
+          max: playerData.maxFruitPoints,
+          minusUsed: playerData.usedNegativeFruitPoints,
+          minusMax: playerData.maxNegativeFruitPoints,
+        })}
       </div>
 
       <StatRow
