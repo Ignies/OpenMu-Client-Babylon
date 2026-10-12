@@ -22,6 +22,8 @@ export interface MonsterAttackState {
   skill: number;
   /** When the running AttackTime zeroes `skill`; Infinity when none runs. */
   skillClearsAt: number;
+  /** `c->MonsterSkill`, a WORD: 0 at creation, set by 0x69, NO_MONSTER_SKILL once a hook spends it. */
+  monsterSkill: number;
 }
 
 export interface MonsterAttackInput {
@@ -45,7 +47,7 @@ const states = new WeakMap<object, MonsterAttackState>();
 export function monsterAttackState(owner: object): MonsterAttackState {
   let state = states.get(owner);
   if (!state) {
-    state = { swordCount: 0, skill: 0, skillClearsAt: Infinity };
+    state = { swordCount: 0, skill: 0, skillClearsAt: Infinity, monsterSkill: 0 };
     states.set(owner, state);
   }
   return state;
@@ -66,8 +68,6 @@ function ruleClip(rule: MonsterSwingDef, skill: number, random: () => number): n
 const MONSTER_MODEL_BALI = 32;
 const MONSTER_MODEL_BATTLE_GUARD1 = 76;
 const MONSTER_MODEL_BATTLE_GUARD2 = 77;
-/** Sapi Queen, Ice Napin, Shadow Master, Wolf Status. */
-const SWAMP_ATTACK1_MODELS = new Set([201, 202, 203, 204]);
 
 const MONSTER_MAYA = 364;
 const MONSTER_SELUPAN = 459;
@@ -75,8 +75,18 @@ const MONSTER_LUCAS = 507;
 
 // The monsters each hook hands to CheckMonsterSkill.
 const AIDA_CHECKED = new Set([304, 305, 309, 549, 550]);
-/** Bloody Golem, Bloody Witch Queen: Attack2 needs a 0x69 skill. */
-const AIDA_ATTACK1 = new Set([551, 552]);
+/** `c->MonsterSkill = -1`. */
+const NO_MONSTER_SKILL = 0xffff;
+/** ReceiveMonsterSkill swings only for `ATMON_SKILL_BIGIN < skill < ATMON_SKILL_END` (_enum.h:3291-3346). */
+const ATMON_SKILL_END = 78;
+/** ATMON_SKILL_EMPIREGUARDIAN_BERSERKER: the boss's rage. */
+const BERSERKER = 59;
+
+/** A hook's clip by `c->MonsterSkill`; any other skill takes the hook's `otherwise`. */
+type SkillClips = Readonly<Record<number, number>>;
+
+/** Bloody Golem, Bloody Witch Queen: Attack2 for their own skill (GMAida.cpp:1608-1636). */
+const AIDA_SKILLS: Readonly<Record<number, SkillClips>> = { 551: { 68: A.Attack2 }, 552: { 69: A.Attack2 } };
 const CRYWOLF_CHECKED = new Set([440, 340, 344, 345, 341, 349]);
 const KANTURU2_CHECKED = new Set([358, 359, 360]);
 const KANTURU3_CHECKED = new Set([361, 362, 363, MONSTER_MAYA]);
@@ -86,16 +96,58 @@ const CURSED_TEMPLE_CHECKED = new Set([388, 391, 394, 397, 400, 403]);
 /** Kentauros and the three Warriors set a clip but break without `return true`: the default wins. */
 const KANTURU1_COIN = new Set([350, 351, 352, 356, 357, 555]);
 
-/** Raklion's ice monsters and their dark kin: Attack2 needs a 0x69 skill. */
-const RAKLION_ATTACK1 = new Set([454, 455, 456, 457, 458, 562, 563, 564, 565]);
-
-// Empire Guardian: GMEmpireGuardian1 serves all four maps, then each map's own list.
-const EMPIRE_GUARDIAN_ATTACK1 = new Set([506, 507, 508, 511, 513, 518, 519]);
-const EMPIRE_GUARDIAN_MAP_ATTACK1: Readonly<Record<number, ReadonlySet<number>>> = {
-  [W.WD_70EMPIREGUARDIAN2]: new Set([509, 514, 515]),
-  [W.WD_71EMPIREGUARDIAN3]: new Set([510, 517, 516]),
-  [W.WD_72EMPIREGUARDIAN4]: new Set([504, 505]),
+/** Sapi Queen and Wolf Status, Ice Napin, Shadow Master by model (GMSwampOfQuiet.cpp:1466-1515). */
+const SWAMP_SKILLS: Readonly<Record<number, SkillClips>> = {
+  201: { 72: A.Attack2 }, 204: { 72: A.Attack2 }, 202: { 73: A.Attack2 }, 203: { 74: A.Attack2 },
 };
+
+/**
+ * Raklion's ice monsters and their dark kin: Attack2 for their own skill (GM_Raklion.cpp:2308-2454).
+ * The plain five keep a skill that is not theirs; the dark four spend any.
+ */
+const RAKLION_SKILLS: Readonly<Record<number, SkillClips>> = {
+  454: { 29: A.Attack2 }, 455: { 30: A.Attack2 }, 456: { 31: A.Attack2 }, 457: { 32: A.Attack2 }, 458: { 33: A.Attack2 },
+  562: { 75: A.Attack2 }, 563: { 76: A.Attack2 }, 565: { 32: A.Attack2 }, 564: { 77: A.Attack2 },
+};
+const RAKLION_KEEPS_OTHERS = new Set([454, 455, 456, 457, 458]);
+
+/** SetBossMonsterAction (GM_Raklion.cpp:2462-2523): Selupan never spends his skill; 41 sets no clip. */
+const SELUPAN_SKILLS: SkillClips = { 34: A.Attack2, 35: A.Attack1, 36: A.Attack3, 37: A.Appear, 41: KEEP_CLIP };
+
+// Empire Guardian: GMEmpireGuardian1 serves all four maps (:2364-2606), then each map's own
+// (GMEmpireGuardian2.cpp:1022-1145, GMEmpireGuardian3.cpp:1158-1260, GMEmpireGuardian4.cpp:1376-1480).
+const EMPIRE_GUARDIAN_SKILLS: Readonly<Record<number, SkillClips>> = {
+  506: { 60: A.Attack2, 52: A.Attack3, [BERSERKER]: A.Appear },
+  507: { 62: A.Attack2, 63: A.Attack3, [BERSERKER]: A.Appear },
+  508: { 57: A.Attack2, 58: A.Attack3, [BERSERKER]: A.Appear },
+  511: { 58: A.Attack2, 60: A.Attack3, [BERSERKER]: A.Appear },
+  513: { 47: A.Attack2, 49: A.Appear },
+  518: { 44: A.Appear, 45: A.Attack2 },
+  519: { 46: A.Attack2 },
+};
+const EMPIRE_GUARDIAN_MAP_SKILLS: Readonly<Record<number, Readonly<Record<number, SkillClips>>>> = {
+  [W.WD_70EMPIREGUARDIAN2]: {
+    509: { 60: A.Attack2, 61: A.Attack3, [BERSERKER]: A.Appear },
+    514: { 47: A.Attack2, 50: A.Appear },
+    515: { 51: A.Attack2, 52: A.Attack2 },
+  },
+  [W.WD_71EMPIREGUARDIAN3]: {
+    510: { 58: A.Attack2, 60: A.Attack3, [BERSERKER]: A.Appear },
+    517: { 54: A.Attack2, 55: A.Appear, 56: A.Attack3 },
+    516: { 47: A.Attack2, 53: A.Attack3 },
+  },
+  [W.WD_72EMPIREGUARDIAN4]: {
+    504: { 67: A.Attack1, 64: A.Attack2, 65: A.Attack3, 66: A.Attack4, [BERSERKER]: A.Appear },
+    505: { 55: A.Attack2, 61: A.Attack3, [BERSERKER]: A.Appear },
+  },
+};
+
+/** A hook's `switch (c->MonsterSkill)`: the clip for it, spending it unless `keep` says otherwise. */
+function skillClip(state: MonsterAttackState, clips: SkillClips, otherwise: number, keep: 'spend' | 'keepOthers' | 'keep' = 'spend'): number {
+  const clip = clips[state.monsterSkill];
+  if (keep === 'spend' || (keep === 'keepOthers' && clip !== undefined)) state.monsterSkill = NO_MONSTER_SKILL;
+  return clip ?? otherwise;
+}
 
 /**
  * CheckMonsterSkill (ZzzCharacter.cpp:2414). `c->MonsterSkill` is a WORD: its -1 is 0xFFFF and
@@ -130,7 +182,7 @@ function hookedAttack(state: MonsterAttackState, input: MonsterAttackInput): num
 
   if (world === W.WD_33AIDA || world === W.WD_54CHARACTERSCENE) {
     if (AIDA_CHECKED.has(monster)) return checkMonsterSkill(monster);
-    if (AIDA_ATTACK1.has(monster)) return A.Attack1;
+    if (AIDA_SKILLS[monster]) return skillClip(state, AIDA_SKILLS[monster], A.Attack1);
   }
   if ((world === W.WD_34CRYWOLF_1ST || inDevilSquare(world)) && CRYWOLF_CHECKED.has(monster)) {
     return checkMonsterSkill(monster);
@@ -154,19 +206,18 @@ function hookedAttack(state: MonsterAttackState, input: MonsterAttackInput): num
     return checkMonsterSkill(monster);
   }
   if (world === W.WD_56MAP_SWAMP_OF_QUIET) {
-    if (SWAMP_ATTACK1_MODELS.has(model)) return A.Attack1;
+    if (SWAMP_SKILLS[model]) return skillClip(state, SWAMP_SKILLS[model], A.Attack1);
   }
 
   // TheMapProcess(): only the hero's map's process runs.
   if (world === W.WD_57ICECITY || world === W.WD_58ICECITY_BOSS) {
-    if (RAKLION_ATTACK1.has(monster)) return A.Attack1;
-    // SetBossMonsterAction's else: every swing without a 0x69 skill.
-    if (monster === MONSTER_SELUPAN) return A.Attack4;
+    const ice = RAKLION_SKILLS[monster];
+    if (ice) return skillClip(state, ice, A.Attack1, RAKLION_KEEPS_OTHERS.has(monster) ? 'keepOthers' : 'spend');
+    if (monster === MONSTER_SELUPAN) return skillClip(state, SELUPAN_SKILLS, A.Attack4, 'keep');
   }
   if (world >= W.WD_69EMPIREGUARDIAN1 && world <= W.WD_72EMPIREGUARDIAN4) {
-    if (EMPIRE_GUARDIAN_ATTACK1.has(monster) || EMPIRE_GUARDIAN_MAP_ATTACK1[world]?.has(monster)) {
-      return A.Attack1;
-    }
+    const clips = EMPIRE_GUARDIAN_SKILLS[monster] ?? EMPIRE_GUARDIAN_MAP_SKILLS[world]?.[monster];
+    if (clips) return skillClip(state, clips, A.Attack1);
   }
   if (world === W.WD_79UNITEDMARKETPLACE && monster === MONSTER_LUCAS) return KEEP_CLIP;
 
@@ -213,6 +264,17 @@ export function monsterSwing(state: MonsterAttackState, input: MonsterAttackInpu
   const action = monsterAttack(state, input);
   state.skillClearsAt = input.now + ATTACK_TIME_MS;
   return action;
+}
+
+/**
+ * ReceiveMonsterSkill (0x69, WSclient.cpp:4091-4128): records `c->MonsterSkill`; a skill in range runs
+ * SetPlayerAttack, whose map hooks turn it into the monster's clip, then `AttackTime = 1`; undefined for
+ * one out of range, which neither turns nor swings the monster.
+ */
+export function monsterSkillSwing(state: MonsterAttackState, skill: number, input: MonsterAttackInput): number | undefined {
+  state.monsterSkill = skill;
+  if (skill <= 0 || skill >= ATMON_SKILL_END) return undefined;
+  return monsterSwing(state, input);
 }
 
 /** SetPlayerMagic for a character that is not MODEL_PLAYER. */

@@ -10,6 +10,7 @@ import {
   monsterCastRewinds,
   monsterFlinches,
   monsterMagic,
+  monsterSkillSwing,
   monsterSwing,
   playableMonsterClip,
   type MonsterAttackInput,
@@ -17,7 +18,7 @@ import {
 } from './monsterAttackClip';
 import { MonsterActionType as A } from '@versions/shared/objects/enum';
 
-const fresh = (): MonsterAttackState => ({ swordCount: 0, skill: 0, skillClearsAt: Infinity });
+const fresh = (): MonsterAttackState => ({ swordCount: 0, skill: 0, skillClearsAt: Infinity, monsterSkill: 0 });
 
 /** Hands out the given rolls in order; a roll nobody planned for fails the test. */
 function rolls(...values: number[]): () => number {
@@ -272,6 +273,53 @@ describe('map hooks', () => {
   it('Loren Market: Lucas keeps his clip there and swings Attack1 in Empire Guardian', () => {
     expect(monsterAttack(fresh(), input(79, 507))).toBe(KEEP_CLIP);
     expect(monsterAttack(fresh(), input(69, 507))).toBe(A.Attack1);
+  });
+});
+
+// ReceiveMonsterSkill (WSclient.cpp:4091-4128) and the hooks that read c->MonsterSkill.
+describe('monsterSkillSwing (0x69)', () => {
+  const cast = (state: MonsterAttackState, skill: number, world: number, monster: number, model = -1) =>
+    monsterSkillSwing(state, skill, input(world, monster, model));
+
+  it('Gaion: each skill its clip, Berserker on Appear, then Attack1 once the skill is spent (GMEmpireGuardian4.cpp:1399-1440)', () => {
+    const state = fresh();
+    expect([64, 65, 66, 67, 59].map(skill => cast(state, skill, 72, 504))).toEqual([A.Attack2, A.Attack3, A.Attack4, A.Attack1, A.Appear]);
+    expect(monsterAttack(state, input(72, 504))).toBe(A.Attack1);
+  });
+
+  it('Empire Guardian: the shared list on every map, each map its own (GMEmpireGuardian1-3)', () => {
+    expect(cast(fresh(), 52, 71, 506)).toBe(A.Attack3);
+    expect(cast(fresh(), 49, 69, 513)).toBe(A.Appear);
+    expect(cast(fresh(), 52, 70, 515)).toBe(A.Attack2);
+    expect(cast(fresh(), 55, 71, 517)).toBe(A.Appear);
+    expect(cast(fresh(), 61, 72, 505)).toBe(A.Attack3);
+    expect(cast(fresh(), 61, 69, 505)).toBe(A.Attack1);
+  });
+
+  it('Raklion: the ice monsters on Attack2 by their skill; Selupan keeps his (GM_Raklion.cpp:2308-2523)', () => {
+    const knight = fresh();
+    expect([cast(knight, 33, 57, 458), monsterAttack(knight, input(57, 458))]).toEqual([A.Attack2, A.Attack1]);
+    expect(cast(fresh(), 76, 57, 563)).toBe(A.Attack2);
+    const selupan = fresh();
+    expect([34, 35, 37, 38].map(skill => cast(selupan, skill, 58, 459))).toEqual([A.Attack2, A.Attack1, A.Appear, A.Attack4]);
+    expect(cast(selupan, 36, 58, 459)).toBe(A.Attack3);
+    expect(monsterAttack(selupan, input(58, 459))).toBe(A.Attack3);
+    expect(cast(selupan, 41, 58, 459)).toBe(KEEP_CLIP);
+  });
+
+  it('Aida and the Swamp of Calmness: Attack2 for their own skill (GMAida.cpp:1608-1636, GMSwampOfQuiet.cpp:1466-1515)', () => {
+    expect(cast(fresh(), 68, 33, 551)).toBe(A.Attack2);
+    expect(cast(fresh(), 73, 56, 558, 202)).toBe(A.Attack2);
+    expect(cast(fresh(), 72, 56, 560, 204)).toBe(A.Attack2);
+  });
+
+  it('records a skill out of range without a swing, and starts the AttackTime on one in range', () => {
+    const state = fresh();
+    expect(cast(state, 0, 72, 504)).toBeUndefined();
+    expect(cast(state, 78, 72, 504)).toBeUndefined();
+    expect([state.monsterSkill, state.skillClearsAt]).toEqual([78, Infinity]);
+    cast(state, 64, 72, 504);
+    expect(state.skillClearsAt).toBeLessThan(Infinity);
   });
 });
 

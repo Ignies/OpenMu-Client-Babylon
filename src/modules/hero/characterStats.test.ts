@@ -58,6 +58,37 @@ describe('the character window defense rate with a shield', () => {
     expect(held(1)).toBe(bare + 54 + 27 + 48);
     expect(held(0)).toBe(bare);
   });
+
+  // ZzzInfomation.cpp:3223-3237, CalcDurabilityPercent (:2440-2485), the +5 blocking per option level (:1207-1211).
+  const shield = (more: Partial<Item>) => {
+    const items: (Item | null)[] = new Array(12).fill(null);
+    items[1] = { group: 6, num: 12, durability: 52, ...more };
+    return deriveCharacterStats({ charClass: CharacterClassNumber.DarkKnight, level: 240, strength: 600, agility: 300, vitality: 100, energy: 450, leadership: 0, items }).defenseRate;
+  };
+
+  it('adds the option level and loses half of both when the shield is below 20% durability', () => {
+    expect(shield({ optionLevel: 2 })).toBe(bare + 129 + 10);
+    expect(shield({ optionLevel: 2, durability: 10 })).toBe(bare + 129 - 64 + 10 - 5);
+    expect(shield({ optionLevel: 2, durability: 0 })).toBe(bare);
+  });
+
+  it('adds 10% for the excellent defense success rate option', () => {
+    expect(shield({ isExcellent: true, excellentFlags: 0x02, durability: 67 })).toBe(Math.trunc((bare + 159) * 1.1));
+  });
+});
+
+// The window takes the magic percent from pWeaponRight, EQUIPMENT_WEAPON_RIGHT slot 0 (NewUICharacterInfoWindow.cpp:509, :1336-1346).
+describe('the character window wizardry with a staff', () => {
+  const held = (slot: number) => {
+    const items: (Item | null)[] = new Array(12).fill(null);
+    items[slot] = { group: 5, num: 17, durability: 81 };
+    return deriveCharacterStats({ charClass: CharacterClassNumber.DarkWizard, level: 240, strength: 600, agility: 300, vitality: 100, energy: 450, leadership: 0, items }).staffRate;
+  };
+
+  it("takes the Ancient Staff's magic power from the right hand (slot 0), not from slot 1", () => {
+    expect(held(0)).toBe(38);
+    expect(held(1)).toBe(0);
+  });
 });
 
 // NewUICharacterInfoWindow.cpp:680-704 (damage), :1259-1294 (wizardry), :1395-1418 (curse).
@@ -97,9 +128,12 @@ const NO_DATA = ![SET_TYPES, SET_OPTIONS, SOCKETS, HARMONY, ADD_OPTIONS].every(e
 // CalculateDamage / CalculateAttackRating / CalculateDefense (ZzzInfomation.cpp:2745-2812, :3127-3129, :3361-3380),
 // CalculateMagicDamage (:3005-3035), CalculateSuccessfulBlocking (:3248), CalcSocketStatusBonus (SocketSystem.cpp:476-570).
 describe.skipIf(NO_DATA)('the character window with ancient sets and sockets', () => {
+  // skipIf still runs this body to collect the tests, so the reads need their own guard.
   const read = (path: string) => new Uint8Array(readFileSync(path));
-  loadItemSetTables(read(SET_TYPES), read(SET_OPTIONS));
-  loadItemOptionTables(read(HARMONY), read(SOCKETS), read(ADD_OPTIONS));
+  if (!NO_DATA) {
+    loadItemSetTables(read(SET_TYPES), read(SET_OPTIONS));
+    loadItemOptionTables(read(HARMONY), read(SOCKETS), read(ADD_OPTIONS));
+  }
   const sets = itemSetTables();
   const options = itemOptionTables();
   const worn = (pieces: Record<number, Item>, charClass = CharacterClassNumber.DarkKnight) => {

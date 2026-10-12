@@ -19,7 +19,8 @@ other folders share.
   strength or agility, attack rate, defense, defense by agility or vitality, shield defense %, wizardry by energy)
   and the socket bonuses (`m_StatusBonus`) when the window passes the set and socket tables
   (ZzzInfomation.cpp:2745-2812, :3005-3035, :3127-3129, :3248, :3361-3381). The stats the sets and sockets add
-  (`AddStrength` and the rest) are not shown or used yet.
+  (`AddStrength` and the rest) are not shown or used yet. The shield's blocking and its +5 per option level
+  lose the `CalcDurabilityPercent` share, and the excellent "defense success rate" adds 10% (:3223-3236).
 - `emotes.ts`: `EMOTES`, `EMOTE_RINGS`, `emoteById(id)`, `matchEmoteWord(text)` (the chat words that fire
   an emote, `CheckChatText`), `genderedEmoteAction`, type `EmoteId`.
 - `statAllocation.ts`: `StatAllocation.start(stat, amount)` / `cancel()`, `run`, `running`, `isRunning(stat)`.
