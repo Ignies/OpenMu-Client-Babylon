@@ -29,6 +29,7 @@ import {
   MuTableRule,
 } from '@/controllers/interface/components/mu_window';
 import { InventoryConstants } from '@/core/inventoryConstants';
+import { eventColour, statColour } from './buffColours';
 import { pkTextColour, PVP_NEUTRAL } from '@/controllers/interface/nameTags';
 import {
   BaseClass,
@@ -149,7 +150,7 @@ const StatRow = observer(
   ({
     label,
     value,
-    added,
+    color,
     y,
     stat,
     details,
@@ -159,7 +160,8 @@ const StatRow = observer(
     label: string;
     /** Strength + AddStrength and the rest. */
     value: number;
-    added: number;
+    /** The row's colour (buffColours.ts); the stylesheet's yellow when undefined. */
+    color?: string;
     y: number;
     stat: StatType;
     details: DetailLine[];
@@ -175,8 +177,6 @@ const StatRow = observer(
     const elsewhere = run !== null && !mine;
 
     const [amount, setAmount] = useState('');
-    // Blue while the items add to the stat (NewUICharacterInfoWindow.cpp:463-475).
-    const color = added ? TEXT_COLOR.buffed : undefined;
     // MuButton hands its handler no event, and the modifier is only known at
     // the press.
     const held = useRef({ shift: false, ctrl: false });
@@ -436,6 +436,7 @@ export const CharacterInfo = observer(() => {
     magicSkill: { number: HeroSkills.currentSkill, damage: skillDefinition(HeroSkills.currentSkill)?.damage ?? 0 },
   });
 
+  const buffs = HeroSkills.buffs;
   const strengthDetails: DetailLine[] = [];
 
   const damageMin = Math.min(stats.damageMin, stats.damageMax);
@@ -448,7 +449,7 @@ export const CharacterInfo = observer(() => {
             rate: stats.attackRate,
           })
         : t('charInfo.dmg', { min: damageMin, max: stats.damageMax }),
-    color: stats.dualWield ? TEXT_COLOR.buffed : TEXT_COLOR.white,
+    color: eventColour('damage', buffs, stats.dualWield ? TEXT_COLOR.buffed : TEXT_COLOR.white),
   });
 
   if (stats.attackRatePvp > 0) {
@@ -480,8 +481,11 @@ export const CharacterInfo = observer(() => {
 
   const agilityDetails: DetailLine[] = [];
 
+  // White, or magenta under the defense event buffs (NewUICharacterInfoWindow.cpp:1021-1031).
+  const defenseColour = eventColour('defense', buffs);
   if (stats.defenseRate > 0) {
     agilityDetails.push({
+      color: defenseColour,
       text: fullSet
         ? t('charInfo.defenseRateFull', {
             defense: stats.defense,
@@ -495,6 +499,7 @@ export const CharacterInfo = observer(() => {
     });
   } else {
     agilityDetails.push({
+      color: defenseColour,
       text: fullSet
         ? t('charInfo.defenseFull', {
             defense: stats.defense,
@@ -516,6 +521,7 @@ export const CharacterInfo = observer(() => {
 
   const vitalityDetails: DetailLine[] = [
     {
+      color: eventColour('hp', buffs),
       text: t('charInfo.hp', {
         current: playerData.currentHP,
         max: playerData.maxHP,
@@ -533,6 +539,7 @@ export const CharacterInfo = observer(() => {
 
   const energyDetails: DetailLine[] = [
     {
+      color: eventColour('mana', buffs),
       text: t('charInfo.mana', {
         current: playerData.currentMP,
         max: playerData.maxMP,
@@ -546,6 +553,7 @@ export const CharacterInfo = observer(() => {
     base === BaseClass.Summoner
   ) {
     energyDetails.push({
+      color: eventColour('wizardry', buffs),
       text:
         // A staff or a magic sword always shows its rate, "(+0)" included (NewUICharacterInfoWindow.cpp:1336-1353).
         stats.staffRate !== null
@@ -595,6 +603,11 @@ export const CharacterInfo = observer(() => {
         value: 100 + Math.trunc(stats.totals.agi / 8) + Math.trunc(stats.totals.ene / 10),
       }),
     });
+  }
+
+  // A line without a colour of its own prints in the one set before it: the original sets none for them.
+  for (const lines of [strengthDetails, vitalityDetails, energyDetails]) {
+    for (let i = 1; i < lines.length; i++) lines[i].color ??= lines[i - 1].color;
   }
 
   const addProbability = fruitProbability(
@@ -731,7 +744,7 @@ export const CharacterInfo = observer(() => {
       <StatRow
         label={t('stat.short.strength')}
         value={stats.totals.str}
-        added={stats.added.str}
+        color={statColour('str', stats.added.str, buffs)}
         y={ROW_Y.strength}
         stat={StatType.Strength}
         details={strengthDetails}
@@ -740,7 +753,7 @@ export const CharacterInfo = observer(() => {
       <StatRow
         label={t('stat.short.agility')}
         value={stats.totals.agi}
-        added={stats.added.agi}
+        color={statColour('agi', stats.added.agi, buffs)}
         y={ROW_Y.agility}
         stat={StatType.Agility}
         details={agilityDetails}
@@ -748,7 +761,7 @@ export const CharacterInfo = observer(() => {
       <StatRow
         label={t('stat.short.vitality')}
         value={stats.totals.vit}
-        added={stats.added.vit}
+        color={statColour('vit', stats.added.vit, buffs)}
         y={ROW_Y.vitality}
         stat={StatType.Vitality}
         details={vitalityDetails}
@@ -756,7 +769,7 @@ export const CharacterInfo = observer(() => {
       <StatRow
         label={t('stat.short.energy')}
         value={stats.totals.ene}
-        added={stats.added.ene}
+        color={statColour('ene', stats.added.ene, buffs)}
         y={ROW_Y.energy}
         stat={StatType.Energy}
         details={energyDetails}
@@ -767,7 +780,7 @@ export const CharacterInfo = observer(() => {
         <StatRow
           label={t('stat.command')}
           value={stats.totals.cmd}
-          added={stats.added.cmd}
+          color={statColour('cmd', stats.added.cmd, buffs)}
           y={ROW_Y.leadership}
           stat={StatType.Leadership}
           details={[]}

@@ -107,6 +107,10 @@ export const TEXT_COLOR = {
   buffed: '#6496ff',
   cyan: '#4cc5fe',
   white: '#ffffff',
+  /** (255, 120, 0): a stat under its secret potion. */
+  secretPotion: '#ff7800',
+  /** (255, 0, 240): a line under a Halloween, Elite scroll or Cherry Blossom buff. */
+  event: '#ff00f0',
 } as const;
 
 export const CHARACTER_INFO_SPRITES = [
