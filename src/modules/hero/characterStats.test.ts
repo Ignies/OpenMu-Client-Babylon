@@ -283,6 +283,44 @@ describe('the character window under item buffs', () => {
   });
 });
 
+// The window's own buff lines: the NPC helper buff (3), Berserker (81) and the elf's AG buff (7) with the party
+// (NewUICharacterInfoWindow.cpp:517-552, :908-925, :1329-1335, :1387-1393).
+describe('the character window under the window buffs', () => {
+  const hero = (buffs: number[], partySize = 0, charClass = CharacterClassNumber.DarkKnight, level = 240) =>
+    deriveCharacterStats({ charClass, level, strength: 600, agility: 300, vitality: 100, energy: 450, leadership: 0, items: [], buffs, partySize });
+  const bare = hero([]);
+
+  it('adds level / 3 + 45 damage and level / 5 + 50 defense for the NPC buff, level 180 at most', () => {
+    const low = hero([], 0, CharacterClassNumber.DarkKnight, 150);
+    expect(hero([3], 0, CharacterClassNumber.DarkKnight, 150).damageMin).toBe(low.damageMin + 50 + 45);
+    expect(hero([3], 0, CharacterClassNumber.DarkKnight, 150).defense).toBe(low.defense + 30 + 50);
+    const high = hero([], 0, CharacterClassNumber.DarkKnight, 400);
+    expect(hero([3], 0, CharacterClassNumber.DarkKnight, 400).damageMax).toBe(high.damageMax + 60 + 45);
+  });
+
+  it('adds the Berserker share of strength and agility to damage and takes some defense', () => {
+    // Energy 450: int(450 / 30) / 100 = 0.15 damage, (40 - int(450 / 60)) / 100 = 0.33 defense, in float.
+    const float = (value: number, share: number, rate: number) => Math.trunc(Math.fround(value + Math.fround(share * Math.fround(rate))));
+    expect(hero([81]).damageMin).toBe(float(bare.damageMin, Math.trunc(900 / 7), 0.15));
+    expect(hero([81]).damageMax).toBe(float(bare.damageMax, Math.trunc(900 / 4), 0.15));
+    expect(hero([81]).defense).toBe(float(bare.defense, -100, 0.33));
+  });
+
+  it("adds the Berserker share of energy to wizardry after the pet, and to curse", () => {
+    const wizard = hero([], 0, CharacterClassNumber.DarkWizard);
+    expect(hero([81], 0, CharacterClassNumber.DarkWizard).wizardryMax).toBe(wizard.wizardryMax + Math.trunc(Math.trunc(450 / 4) * Math.fround(0.15)));
+    const summoner = hero([], 0, CharacterClassNumber.Summoner);
+    expect(hero([81], 0, CharacterClassNumber.Summoner).curseMin).toBe(summoner.curseMin + Math.trunc(Math.trunc(450 / 9) * Math.fround(0.15)));
+  });
+
+  it("adds agility to both attack rates under the AG buff, and in a party of 3 or more sets the PvP one to the party share", () => {
+    expect(hero([7]).attackRate).toBe(bare.attackRate + 300);
+    expect(hero([7]).attackRatePvp).toBe(bare.attackRatePvp + 300);
+    expect(hero([7], 4).attackRate).toBe(bare.attackRate + 300 + 6);
+    expect(hero([7], 4).attackRatePvp).toBe(6);
+  });
+});
+
 // CalculateSuccessfulBlocking reads EQUIPMENT_WEAPON_LEFT, slot 1 (ZzzInfomation.cpp:3222, _define.h:209).
 describe('the character window defense rate with a shield', () => {
   const held = (slot: number) => {

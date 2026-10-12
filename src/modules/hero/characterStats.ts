@@ -254,6 +254,8 @@ type CharacterStatsInput = {
   buffs?: readonly number[];
   /** The item on the cursor and the equipment slot it was lifted from (`PickItem`, `SrcInventoryIndex`). */
   picked?: { slot: number; item: Item } | null;
+  /** `PartyNumber`, the party list's count (WSclient.cpp:7375). */
+  partySize?: number;
 };
 
 /** eBuff_Hp_up_Ourforces and eBuff_Def_up_Ourforces (_enum.h:4019-4020). */
@@ -298,6 +300,57 @@ function itemBuffs(input: CharacterStatsInput, kind: keyof typeof ITEM_BUFFS): n
   if (has(91) && kind === 'defense') sum += Math.trunc(input.level / 5) + 50;
   if (has(kind === 'defense' ? 95 : 94)) sum += kind === 'defense' ? 100 : 30;
   return sum;
+}
+
+/** eBuff_HelpNpc, eBuff_AddAG and eBuff_Berserker (_enum.h). */
+const HELP_NPC = 3;
+const ADD_AG = 7;
+const BERSERKER = 81;
+
+/** `value + share * rate`, in float as the window adds it to an int. */
+const floatAdd = (value: number, share: number, rate: number) => Math.trunc(Math.fround(value + Math.fround(share * rate)));
+
+/** Berserker's rate on damage, wizardry and curse: int(Energy / 30) / 100, the base energy. */
+const berserkRate = (bare: CharacterStatsInput) => Math.fround(Math.trunc(bare.energy / 30) / 100);
+
+/**
+ * The window's buffs on a range (NewUICharacterInfoWindow.cpp:529-552, :1329-1335, :1387-1393): the NPC buff adds
+ * level / 3 + 45 to damage (level 180 at most); Berserker a share of strength + agility to damage, of energy to the rest.
+ */
+function windowBuffs<T extends Range>(range: T, input: CharacterStatsInput, bare: CharacterStatsInput, kind: 'damage' | 'magic'): T {
+  let { min, max } = range;
+  if (kind === 'damage' && input.buffs?.includes(HELP_NPC)) {
+    min += Math.trunc(Math.min(input.level, 180) / 3) + 45;
+    max += Math.trunc(Math.min(input.level, 180) / 3) + 45;
+  }
+  if (input.buffs?.includes(BERSERKER)) {
+    const source = kind === 'damage' ? input.strength + input.agility : input.energy;
+    min = floatAdd(min, Math.trunc(source / (kind === 'damage' ? 7 : 9)), berserkRate(bare));
+    max = floatAdd(max, Math.trunc(source / 4), berserkRate(bare));
+  }
+  return { ...range, min, max };
+}
+
+/** The window's buffs on defense (:908-925): the NPC buff adds level / 5 + 50, Berserker takes agility / 3 times 40 - Energy / 60 percent, 10% at least. */
+function windowDefense(defense: number, input: CharacterStatsInput, bare: CharacterStatsInput): number {
+  if (input.buffs?.includes(HELP_NPC)) defense += Math.trunc(Math.min(input.level, 180) / 5) + 50;
+  if (!input.buffs?.includes(BERSERKER)) return defense;
+  const rate = Math.max(Math.fround((40 - Math.trunc(bare.energy / 60)) / 100), Math.fround(0.1));
+  return floatAdd(defense, -Math.trunc(input.agility / 3), rate);
+}
+
+/** The AG buff (:517-528): agility on both attack rates; in a party of 3 or more a share more, and the PvP rate becomes that share. */
+function windowAttackRates(rates: { attackRate: number; attackRatePvp: number }, input: CharacterStatsInput) {
+  if (!input.buffs?.includes(ADD_AG)) return rates;
+  let attackRate = rates.attackRate + input.agility;
+  let attackRatePvp = rates.attackRatePvp + input.agility;
+  const party = input.partySize ?? 0;
+  if (party >= 3) {
+    const share = Math.trunc(Math.fround(input.agility * Math.fround((party - 2) * Math.fround(0.01))));
+    attackRate += share;
+    attackRatePvp = share;
+  }
+  return { attackRate, attackRatePvp };
 }
 
 /** eBuff_SwellOfMagicPower (_enum.h): a fifth of Energy / 9 on the wizardry minimum (ZzzInfomation.cpp:3027-3031). */
@@ -1042,21 +1095,22 @@ export function deriveCharacterStats(bare: CharacterStatsInput): DerivedStats {
     socket: { min: socket.damageMin, max: socket.damageMax },
   };
   const pet = equipped(items, InventoryConstants.PetSlot);
-  const damage = withPet(withRing(calculateDamage(input, base, flat), items, 'damage'), pet, 'damage', level);
+  const damage = withPet(withRing(windowBuffs(calculateDamage(input, base, flat), input, bare, 'damage'), items, 'damage'), pet, 'damage', level);
   // CalculateMagicDamage (ZzzInfomation.cpp:3005-3035).
   const magic = calculateWizardry(input);
   const magicBonus = setByStat(lines, SET.magicByEne, input.energy) + itemBuffs(input, 'wizardry') + socket.skillDamage + socket.magicPower;
   const swell = bare.buffs?.includes(SWELL_OF_MAGIC_POWER) ? Math.trunc(Math.fround(Math.trunc(bare.energy / 9) * Math.fround(0.2))) : 0;
   // The window's line reads the selected skill's damage (NewUICharacterInfoWindow.cpp:1226-1230).
   const skilled = magicSkillDamage({ min: magic.min + magicBonus + swell, max: magic.max + magicBonus }, input.magicSkill, lines);
-  const wizardry = withPet(withRing(skilled, items, 'wizardry'), pet, 'wizardry', level);
+  const wizardry = windowBuffs(withPet(withRing(skilled, items, 'wizardry'), pet, 'wizardry', level), input, bare, 'magic');
   const harmony = windowHarmony(input);
   const maxMg = harmony.magic;
-  const curse = withPet(withRing(calculateCurse(input), items, 'curse'), pet, 'curse', level);
+  const curse = withPet(withRing(windowBuffs(calculateCurse(input), input, bare, 'magic'), items, 'curse'), pet, 'curse', level);
   // The Panda and the Unicorn add 50 defense.
   const petDefense = pet?.group === GROUP_HELPER && (pet.num === PET.panda || pet.num === PET.unicorn) ? 50 : 0;
   // The elite skeleton ring in either hand adds a tenth, harmony included (NewUICharacterInfoWindow.cpp:946-952).
-  const defense = withSetDefense(calculateDefense(input, base), input, lines, socket) + harmony.defense;
+  const defense = windowDefense(withSetDefense(calculateDefense(input, base), input, lines, socket), input, bare) + harmony.defense;
+  const rates = windowAttackRates({ attackRate: calculateAttackRate(input, base) + setSum(lines, SET.attackRate) + socket.attackRate, attackRatePvp: calculateAttackRatePvp(input, base) }, input);
   const defenseRate = Math.trunc(calculateDefenseRate(input, base) * socket.defenseRate);
   const eliteRing = [InventoryConstants.Ring1Slot, InventoryConstants.Ring2Slot].some(slot => {
     const ring = equipped(items, slot);
@@ -1070,8 +1124,7 @@ export function deriveCharacterStats(bare: CharacterStatsInput): DerivedStats {
     damageMax: damage.max + harmony.max,
     damageBlue: damage.blue,
     petEvent: petEvent(pet, input),
-    attackRate: calculateAttackRate(input, base) + setSum(lines, SET.attackRate) + socket.attackRate,
-    attackRatePvp: calculateAttackRatePvp(input, base),
+    ...rates,
     attackRatePvpBonus: harmony.attackRate,
     defense: defense + (eliteRing ? Math.trunc(defense / 10) : 0) + petDefense,
     harmonyDefense: harmony.defense,

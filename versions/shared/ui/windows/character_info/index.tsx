@@ -29,6 +29,7 @@ import {
   MuTableRule,
 } from '@/controllers/interface/components/mu_window';
 import { Bag } from '@/modules/inventory';
+import { Social } from '@/modules/social/social';
 import { StorageKind } from '@/modules/inventory/itemStorage';
 import { defenseColour, eventColour, statColour } from './buffColours';
 import { defenseText, fruitPoints, fullSet } from './lines';
@@ -440,6 +441,7 @@ export const CharacterInfo = observer(() => {
     maxMana: playerData.maxMP,
     magicSkill: { number: HeroSkills.currentSkill, damage: skillDefinition(HeroSkills.currentSkill)?.damage ?? 0 },
     buffs,
+    partySize: Social.partyMembers.length,
     picked: held?.fromStorage === StorageKind.Inventory ? { slot: held.fromSlot, item: held.item } : null,
   });
 

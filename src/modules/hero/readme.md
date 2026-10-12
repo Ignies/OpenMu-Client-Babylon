@@ -30,7 +30,11 @@ other folders share.
   ZzzCharacter.cpp:5386-5470). Under `buffs`, the first secret potion adds its ItemAddOption value to its stat and the
   Rage Fighter's party buff its vitality (`CalculateBasicState`, :3465-3503); the damage and defense scrolls, Jack
   O'Lanterns, Cherry Blossom petal, Christmas blessing and Santa buffs add to damage, wizardry, curse and defense (:2785-2830,
-  :3009-3042, :3097-3103, :3335-3358), the Swell of Magic Power a fifth of Energy / 9 to the wizardry minimum. The shield's blocking and its +5 per option level
+  :3009-3042, :3097-3103, :3335-3358), the Swell of Magic Power a fifth of Energy / 9 to the wizardry minimum.
+  The window's own buffs (NewUICharacterInfoWindow.cpp:517-552, :908-925, :1329-1335, :1387-1393): the NPC buff adds
+  damage and defense, Berserker a share to damage, wizardry and curse and takes some defense, the AG buff adds agility
+  to both attack rates and, in a party of 3 or more (`partySize`), sets the PvP rate to the party share, as the
+  original does. The shield's blocking and its +5 per option level
   lose the `CalcDurabilityPercent` share, and the excellent "defense success rate" on the shield, each armour
   piece and each ring adds 10% in turn, when `IsRequireEquipItem` passes (:3223-3246).
   Wizardry is energy plus the items' wizardry options only (`CalculateMagicDamage`, :2848-3001): the wing's,
