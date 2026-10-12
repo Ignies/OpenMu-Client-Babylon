@@ -25,7 +25,9 @@ other folders share.
   bow formula for every bow and crossbow with durability, the wing's damage option, each unbroken weapon's damage and
   option worn by durability, the weapon and damage pendant excellent level / 20 and 2%, the Wizard's Ring 10%, the
   sets, the +1 or better arrows' share, then the sockets; `GetAttackDamage` still counts a weapon dragged out of a
-  hand (`picked`, ZzzInventory.cpp:5900-5911). The shield's blocking and its +5 per option level
+  hand (`picked`, ZzzInventory.cpp:5900-5911). Defense reads the left hand to the wing, unbroken, with the option and
+  worn by durability, then 5% to 30% for a whole +10 to +15 set (`CalculateDefense`, :3251-3333; `CheckFullSet`,
+  ZzzCharacter.cpp:5386-5470). The shield's blocking and its +5 per option level
   lose the `CalcDurabilityPercent` share, and the excellent "defense success rate" on the shield, each armour
   piece and each ring adds 10% in turn, when `IsRequireEquipItem` passes (:3223-3246).
   Wizardry is energy plus the items' wizardry options only (`CalculateMagicDamage`, :2848-3001): the wing's,

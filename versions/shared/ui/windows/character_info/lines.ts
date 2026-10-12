@@ -1,7 +1,7 @@
 import { t } from '@/i18n';
 import type { Item } from '@/ecs/world';
 import { InventoryConstants } from '@/core/inventoryConstants';
-import { BaseClass } from '@/modules/hero/characterStats';
+import { BaseClass, GLADIATOR_ARMOURS } from '@/modules/hero/characterStats';
 
 type DefenseStats = { defense: number; harmonyDefense: number; defenseRate: number; blockingBuff: number };
 
@@ -15,9 +15,6 @@ export function defenseText(stats: DefenseStats, fullSet: boolean): string {
   // The harmony defense stays out of the tenth (:996).
   return fullSet ? t('charInfo.defenseFull', { defense, bonus: Math.trunc((defense - stats.harmonyDefense) / 10) }) : t('charInfo.defense', { defense });
 }
-
-/** The gladiator's armours, Storm Crow to Phantom (NewUICharacterInfoWindow.cpp:868-876). */
-const GLADIATOR_ARMOURS: ReadonlySet<number> = new Set([15, 20, 23, 32, 37, 47, 48]);
 
 /** `bDexSuccess` (NewUICharacterInfoWindow.cpp:830-901): helm to boots unbroken and of one set; the gladiator may skip the helm, the fighter the gloves. */
 export function fullSet(items: readonly (Item | null)[], base: BaseClass): boolean {

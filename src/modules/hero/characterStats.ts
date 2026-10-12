@@ -604,23 +604,38 @@ function calculateDefense(input: CharacterStatsInput, base: BaseClass): number {
       break;
   }
 
-  const defending = [
-    InventoryConstants.LeftHandSlot,
-    InventoryConstants.RightHandSlot,
-    InventoryConstants.HelmSlot,
-    InventoryConstants.ArmorSlot,
-    InventoryConstants.PantsSlot,
-    InventoryConstants.GlovesSlot,
-    InventoryConstants.BootsSlot,
-    InventoryConstants.WingsSlot,
-  ];
-
-  for (const slot of defending) {
+  // EQUIPMENT_WEAPON_LEFT to EQUIPMENT_WING, slots 1 to 7, each with its option and worn by durability (:3287-3306).
+  for (let slot = InventoryConstants.RightHandSlot; slot <= InventoryConstants.WingsSlot; slot++) {
     const item = equipped(items, slot);
-    if (item) defense += itemDefense(item);
+    if (!item || item.durability === 0) continue;
+    const value = itemDefense(item) + special(item, 'defense', input);
+    defense += value - Math.trunc(value * durabilityPercent(item, slot === InventoryConstants.WingsSlot));
   }
 
-  return defense;
+  // A whole set at +10 to +15 adds 5% to 30% (:3309-3333).
+  const level = equipmentLevelSet(items, base);
+  return level >= 10 ? defense + Math.trunc(Math.fround(defense * Math.fround((level - 9) * 0.05))) : defense;
+}
+
+/** The gladiator's armours, Storm Crow to Phantom (ZzzCharacter.cpp:5456-5463). */
+export const GLADIATOR_ARMOURS: ReadonlySet<number> = new Set([15, 20, 23, 32, 37, 47, 48]);
+
+/**
+ * `EquipmentLevelSet` with `g_bAddDefense` (CheckFullSet, ZzzCharacter.cpp:5386-5470): the lowest level of a whole
+ * set at +9 or more, helm (the gladiator from the armour) to boots, the fighter's gloves aside; 0 otherwise.
+ */
+function equipmentLevelSet(items: (Item | null)[], base: BaseClass): number {
+  const { HelmSlot, ArmorSlot, GlovesSlot, BootsSlot } = InventoryConstants;
+  const kind = equipped(items, BootsSlot)?.num;
+  let level = 15;
+  for (let slot = base === BaseClass.MagicGladiator ? ArmorSlot : HelmSlot; slot <= BootsSlot; slot++) {
+    if (base === BaseClass.RageFighter && slot === GlovesSlot) continue;
+    const item = equipped(items, slot);
+    if (!item || item.num !== kind || (item.lvl ?? 0) < 9) return 0;
+    level = Math.min(level, item.lvl ?? 0);
+  }
+  const armour = equipped(items, ArmorSlot)?.num ?? -1;
+  return base === BaseClass.MagicGladiator && !GLADIATOR_ARMOURS.has(armour) ? 0 : level;
 }
 
 function calculateDefenseRate(

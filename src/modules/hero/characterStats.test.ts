@@ -208,6 +208,37 @@ describe('the character window damage with options', () => {
   });
 });
 
+// CalculateDefense (ZzzInfomation.cpp:3251-3322): the left hand to the wing, unbroken, with the option, worn by
+// durability; then 5% to 30% for a whole +10 to +15 set (CheckFullSet, ZzzCharacter.cpp:5386-5470).
+describe('the character window defense with items', () => {
+  const knight = (pieces: Record<number, Item>, charClass = CharacterClassNumber.DarkKnight) => {
+    const items: (Item | null)[] = new Array(12).fill(null);
+    for (const [slot, item] of Object.entries(pieces)) items[Number(slot)] = item;
+    return deriveCharacterStats({ charClass, level: 400, strength: 1000, agility: 300, vitality: 300, energy: 300, leadership: 0, items }).defense;
+  };
+  const piece = (slot: number, more: Partial<Item> = {}): Item => ({ group: slot + 5, num: 0, durability: 255, ...more });
+  const bare = knight({});
+
+  it('reads the left hand to the wing, not the right hand', () => {
+    expect(knight({ 0: { group: 6, num: 0, durability: 255 } })).toBe(bare);
+    expect(knight({ 1: { group: 6, num: 0, durability: 255 } })).toBeGreaterThan(bare);
+  });
+
+  it("adds the option's +4 per level, nothing from a broken piece", () => {
+    expect(knight({ 2: piece(2, { optionLevel: 2 }) })).toBe(knight({ 2: piece(2) }) + 8);
+    expect(knight({ 2: piece(2, { durability: 0 }) })).toBe(bare);
+  });
+
+  it('adds 5% for a whole +10 set, nothing with one piece at +9', () => {
+    const set = (level: number, boots = level) => ({ 2: piece(2, { lvl: level }), 3: piece(3, { lvl: level }), 4: piece(4, { lvl: level }), 5: piece(5, { lvl: level }), 6: piece(6, { lvl: boots }) });
+    const { 6: _boots, ...four } = set(10);
+    const items = knight(four) - bare + knight({ 6: piece(6, { lvl: 10 }) }) - bare;
+    expect(knight(set(10))).toBe(bare + items + Math.trunc(Math.fround((bare + items) * Math.fround(0.05))));
+    const nine = knight({ 6: piece(6, { lvl: 9 }) }) - bare;
+    expect(knight(set(10, 9))).toBe(bare + knight(four) - bare + nine);
+  });
+});
+
 // CalculateSuccessfulBlocking reads EQUIPMENT_WEAPON_LEFT, slot 1 (ZzzInfomation.cpp:3222, _define.h:209).
 describe('the character window defense rate with a shield', () => {
   const held = (slot: number) => {
