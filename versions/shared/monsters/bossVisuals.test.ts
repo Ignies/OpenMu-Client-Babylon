@@ -158,6 +158,32 @@ describe('Selupan', () => {
   });
 });
 
+/** A pass as `mesh kind map texture` and the light it writes from a grey body. */
+const passRows = (numb: number) =>
+  (monsters.def(numb)?.passes?.passes ?? []).map(p => {
+    const out = { x: 0, y: 0, z: 0, set(x: number, y: number, z: number) { Object.assign(out, { x, y, z }); } };
+    p.light?.(0, { x: 0.5, y: 0.5, z: 0.5 } as never, out as never);
+    const light = p.light ? ` @${[out.x, out.y, out.z].join(',')}` : '';
+    return `${p.mesh} ${p.kind} ${p.map ?? ''} ${p.texture ?? ''}${light}`.replace(/ +/g, ' ').trim();
+  });
+
+describe("Erohim's body", () => {
+  // RenderMonster's MODEL_EROHIM (GMHuntingGround.cpp:885-920): Chrome01 over mesh 4 at (1, 0.5, 0) and over 0, 1
+  // and 3 at (0.75, 0.65, 0.5), and bossmap1_R over mesh 0 in that light at `sinf(WorldTime * 0.0012f) * 0.3 + 0.6`.
+  it('chromes his meshes in his own tints', () => {
+    expect(passRows(295)).toEqual([
+      '4 add chrome Effect/Chrome01.OZJ @1,0.5,0',
+      '0 add chrome Effect/Chrome01.OZJ @0.75,0.65,0.5',
+      '1 add chrome Effect/Chrome01.OZJ @0.75,0.65,0.5',
+      '3 add chrome Effect/Chrome01.OZJ @0.75,0.65,0.5',
+      '0 add Monster/bossmap1_R.OZJ @0.75,0.65,0.5',
+    ]);
+    const pattern = monsters.def(295)?.passes?.passes[4];
+    expect(pattern?.gain?.(1000)).toBeCloseTo(Math.sin(1.2) * 0.3 + 0.6);
+    expect(pattern?.clamp).toBe(true);
+  });
+});
+
 describe('Erohim', () => {
   // RenderHuntingGroundMonsterVisual's MODEL_EROHIM (GMHuntingGround.cpp:672-712): two red lights on each eye, and
   // through Attack2 a true fire and a smoke from the left hand. Monster82_LHand is not his bone, so the fire is a

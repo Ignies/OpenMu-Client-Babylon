@@ -1,5 +1,9 @@
 import { defineMonster } from '@/controllers/monsters';
+import { CHROME01, fixedLight } from '@/controllers/item_fx/itemLooks';
 import { EROHIM_FX } from './bodyFx';
+
+/** The BodyLight his chrome over meshes 0, 1, 3 and the pattern take. */
+const GOLD = fixedLight(0.75, 0.65, 0.5);
 
 export default defineMonster({
   Numb: 295,
@@ -7,6 +11,24 @@ export default defineMonster({
   maxHealth: 3000000,
   // MODEL_EROHIM: see `bodyFx.ts`.
   bodyFx: EROHIM_FX,
+  // RenderMonster (GMHuntingGround.cpp:885-920). Not here: mesh 5's bosswing underlay, drawn lit just before its
+  // own texture (:892-895).
+  passes: {
+    passes: [
+      { mesh: 4, kind: 'add', ...CHROME01, light: fixedLight(1, 0.5, 0) },
+      { mesh: 0, kind: 'add', ...CHROME01, light: GOLD },
+      { mesh: 1, kind: 'add', ...CHROME01, light: GOLD },
+      { mesh: 3, kind: 'add', ...CHROME01, light: GOLD },
+      {
+        mesh: 0,
+        kind: 'add',
+        texture: 'Monster/bossmap1_R.OZJ',
+        clamp: true,
+        light: GOLD,
+        gain: ms => Math.sin(ms * 0.0012) * 0.3 + 0.6,
+      },
+    ],
+  },
   model: { type: 87, scale: 2 },
   stats: {
     Rate: 1,
