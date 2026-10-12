@@ -63,4 +63,18 @@ describe('monster glows', () => {
     expect(sprites.map(s => s.color.r)).toEqual(Array(4).fill(expect.closeTo(lumi)));
     monsterGlowLayer.reset?.();
   });
+
+  // Draw_RenderObject's Christmas NPCs (ZzzObject.cpp:1910-1945): steady BITMAP_LIGHT cards on their bones.
+  it('light Santa Claus on bones 4, 13 and 38 and the Snowman on 7 and 34', () => {
+    const rows = (type: number) => monsterGlowFor(type)?.map(g => [g.bones, g.cards.map(c => [c.tex, c.scale]), g.colour, g.breathe]);
+    expect(rows(465)).toEqual([
+      [[4], [['flare', 8]], [1, 0.8, 0.2], false],
+      [[13], [['flare', 5]], [1, 0.4, 0], false],
+      [[38], [['flare', 2]], [1, 0.8, 0.2], false],
+    ]);
+    expect(rows(467)).toEqual([
+      [[7], [['flare', 6], ['flare', 4]], [0.8, 0.8, 0.9], false],
+      [[34], [['flare', 2]], [1, 0.8, 0.2], false],
+    ]);
+  });
 });
