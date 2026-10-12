@@ -13,7 +13,7 @@ other folders share.
   `attackSpeedOf` / `magicSpeedOf(cls, agility)`, `deriveCharacterStats(input)` (damage, defense,
   rates and wizardry for the character info window), with the pet's share: the gold Fenrir, Demon,
   Skeleton and Imp on damage, wizardry and curse, Panda and Unicorn +50 defense
-  (NewUICharacterInfoWindow.cpp:707-737, :954-959, :1296-1326, :1424-1442), after the best worn
+  (NewUICharacterInfoWindow.cpp:707-737, :954-959, :1296-1326, :1424-1442), after the best worn unexpired
   transformation ring: Christmas 20 (not on curse), Panda 30, Skeleton 40 (:680-704, :1259-1294, :1395-1418).
   Before those, the lit ancient set options (`PlusSpecial` / `PlusSpecialLevel`: min / max damage, damage by
   strength or agility, attack rate, defense, defense by agility or vitality, shield defense %, wizardry by energy)

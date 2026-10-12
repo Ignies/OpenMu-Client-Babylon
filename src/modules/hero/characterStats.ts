@@ -951,7 +951,7 @@ function withRing<T extends Range>(range: T, items: CharacterStatsInput['items']
   let bonus = 0;
   for (const slot of [InventoryConstants.Ring1Slot, InventoryConstants.Ring2Slot]) {
     const ring = equipped(items, slot);
-    if (ring?.group !== GROUP_HELPER || (kind === 'curse' && ring.num === 41)) continue;
+    if (ring?.group !== GROUP_HELPER || periodExpired(ring) || (kind === 'curse' && ring.num === 41)) continue;
     bonus = Math.max(bonus, RING_BONUS[ring.num] ?? 0);
   }
   return bonus ? { ...range, min: range.min + bonus, max: range.max + bonus } : range;

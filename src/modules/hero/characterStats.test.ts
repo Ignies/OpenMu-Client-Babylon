@@ -435,6 +435,13 @@ describe('the character window with a transformation ring', () => {
     expect(withRings([helper(122), null], CharacterClassNumber.Summoner).curseMin).toBe(bareSummoner.curseMin + 40);
   });
 
+  it('adds nothing for an expired ring', () => {
+    const expired = { raw: [0, 0, 0, 0, 0, 0x06, 0] };
+    expect(withRings([helper(122, expired), null]).damageMin).toBe(bare.damageMin);
+    expect(withRings([helper(122, expired), helper(76)]).wizardryMax).toBe(bare.wizardryMax + 30);
+    expect(withRings([null, helper(122, expired)], CharacterClassNumber.Summoner).curseMin).toBe(bareSummoner.curseMin);
+  });
+
   it('adds the ring before the pet multiplies', () => {
     expect(withRings([helper(76), null], CharacterClassNumber.DarkKnight, helper(64)).damageMin).toBe(Math.trunc((bare.damageMin + 30) * 1.4));
   });
