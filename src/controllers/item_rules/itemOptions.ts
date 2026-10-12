@@ -1,4 +1,5 @@
 import type { Item } from '../../ecs/world';
+import type { ItemOptionTables } from '../assets/mu';
 
 /** `MAX_SOCKET_OPTION`: a socket byte is `seed + (sphere level - 1) * 50`. */
 const SOCKET_OPTIONS = 50;
@@ -33,6 +34,30 @@ export function harmonyOf(item: Item): { option: number; level: number } | null 
   const byte = item.socketBonus ?? 0;
   if (isSocketItem(item.group, item.num) || (byte & 0xf0) === 0) return null;
   return { option: byte >> 4, level: byte & 0x0f };
+}
+
+/** `GetItemType` (UIJewelHarmony.cpp:133-152): 0 weapons, 1 staffs, 2 shields and armour, -1 none. */
+export function harmonyKindOf(group: number): number {
+  return group <= 4 ? 0 : group === 5 ? 1 : group <= 11 ? 2 : -1;
+}
+
+/**
+ * `GetStrengthenCapability` (UIJewelHarmony.cpp:199-327) as its callers read it: the harmony option and its value once the
+ * item's level reaches the option's (`IsHarmonyJewelOption`: weapons 1-10, staffs and armour 1-8), null otherwise.
+ */
+export function harmonyBonus(item: Item, tables: Pick<ItemOptionTables, 'harmony'> | null | undefined): { kind: number; option: number; value: number } | null {
+  const harmony = harmonyOf(item);
+  const kind = harmonyKindOf(item.group);
+  if (!harmony || kind < 0 || harmony.option > (kind === 0 ? 10 : 8) || (item.lvl ?? 0) < harmony.level) return null;
+  return { kind, option: harmony.option, value: tables?.harmony[kind]?.[harmony.option - 1]?.values[harmony.level] ?? 0 };
+}
+
+/** `SI_NB` (UIJewelHarmony.cpp:211-243): the strength and agility a harmony option takes off the item's needs. */
+export function harmonyNeedCut(item: Item, tables: Pick<ItemOptionTables, 'harmony'> | null | undefined): { str: number; agi: number } {
+  const bonus = harmonyBonus(item, tables);
+  const str = bonus && ((bonus.kind === 0 && bonus.option === 3) || (bonus.kind === 1 && bonus.option === 2)) ? bonus.value : 0;
+  const agi = bonus && ((bonus.kind === 0 && bonus.option === 4) || (bonus.kind === 1 && bonus.option === 3)) ? bonus.value : 0;
+  return { str, agi };
 }
 
 /** Each socket's seed and sphere level, null for an empty one (`CreateItem`, NewUIItemMng.cpp:226-240). */

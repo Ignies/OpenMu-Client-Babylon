@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import type { Item } from '@/ecs/world';
 import { CharacterClassNumber } from '@/core/types';
-import { itemOptionTables, itemSetTables, loadItemOptionTables, loadItemSetTables } from '@/controllers/assets';
+import { itemOptionTables, itemSetTables, loadItemOptionTables, loadItemSetTables, type ItemOptionTables } from '@/controllers/assets';
 import { itemStats } from '@/controllers/item_rules';
 import { deriveCharacterStats } from './characterStats';
 
@@ -176,6 +176,35 @@ describe('the wizardry of a held staff', () => {
     const pendant = { group: 13, num: 13, durability: 255, ancientBonusLevel: 1 };
     expect(wizardry({ 0: staff({ optionLevel: 2 }) }, need - 5)).toMatchObject({ wizardryMin: 50 });
     expect(wizardry({ 0: staff({ optionLevel: 2 }), 9: pendant }, need - 5)).toMatchObject({ wizardryMin: 58 });
+  });
+
+  // A staff's harmony: option 1 magic power (maxMg on the line and the rate, NewUICharacterInfoWindow.cpp:1241-1256, :1352),
+  // option 2 cuts the strength IsRequireEquipItem needs (ZzzInfomation.cpp:2246-2259); each once the level reaches the option's.
+  const harmony: ItemOptionTables = {
+    harmony: [[], [{ name: 'magic', values: [6, 8, 10, 12] }, { name: 'strength', values: [10, 15, 20, 25] }], []],
+    sockets: [[], [], []],
+    addOptions: [],
+  };
+  const harmonized = (pieces: Record<number, Item>, strength = 600, options: ItemOptionTables | null = harmony) => {
+    const items: (Item | null)[] = new Array(12).fill(null);
+    for (const [slot, item] of Object.entries(pieces)) items[Number(slot)] = item;
+    return deriveCharacterStats({ charClass: CharacterClassNumber.DarkWizard, level: 240, strength, agility: 300, vitality: 100, energy: 450, leadership: 0, items, options });
+  };
+
+  it("adds a staff's harmony magic power to the wizardry line and the rate", () => {
+    const plain = harmonized({ 0: staff({ lvl: 2 }) }, 600, null);
+    const lit = harmonized({ 0: staff({ lvl: 2, socketBonus: 0x12 }) });
+    expect(lit).toMatchObject({ wizardryMin: plain.wizardryMin + 10, wizardryMax: plain.wizardryMax + 10 });
+    expect(lit.staffRate).toBeGreaterThan(plain.staffRate);
+    expect(harmonized({ 0: staff({ lvl: 1, socketBonus: 0x12 }) }).wizardryMin).toBe(harmonized({ 0: staff({ lvl: 1 }) }).wizardryMin);
+  });
+
+  it("meets the staff's strength with its harmony strength cut", () => {
+    const item = staff({ lvl: 3, optionLevel: 2 });
+    const need = itemStats(item)?.reqStr ?? 0;
+    expect(harmonized({ 0: item }, need - 25).wizardryMin).toBe(harmonized({ 0: staff({ lvl: 3 }) }, need - 25).wizardryMin);
+    const cut = harmonized({ 0: { ...item, socketBonus: 0x23 } }, need - 25).wizardryMin;
+    expect(cut).toBe(harmonized({ 0: item }).wizardryMin);
   });
 
   it("adds the Wings of Heaven's option, and a Wizard's Ring's 10%", () => {

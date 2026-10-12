@@ -16,7 +16,7 @@ export { learnableSkill } from './skillItems';
 export { archangelWeapon, dropModelProxy } from './dropModelProxy';
 export { activeSetOptions, ancientSetOf, setOptionLines, withWornStats, wornSetPieces, wornStatBonus } from './ancientSets';
 export type { SetOptionLine, WornStats } from './ancientSets';
-export { harmonyOf, hasGuardianOption, isSocketItem, socketBonusOf, socketsOf } from './itemOptions';
+export { harmonyBonus, harmonyKindOf, harmonyNeedCut, harmonyOf, hasGuardianOption, isSocketItem, socketBonusOf, socketsOf } from './itemOptions';
 export { socketOptionValue, socketStatusBonus } from './socketBonus';
 export type { SocketMaxima, SocketStatusBonus } from './socketBonus';
 export { hasSpecial, optionSpecials } from './itemSpecials';

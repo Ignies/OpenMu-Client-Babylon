@@ -3,7 +3,7 @@ import { BaseClass, CharacterClassNumber, getBaseClass } from '../../core/types'
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { InventoryConstants } from '@/core/inventoryConstants';
 import type { Item } from '../../ecs/world';
-import { activeSetOptions, classCanUse, withWornStats, classOf, itemDef, itemStats, optionSpecials, socketStatusBonus, type OptionSpecial, type SetOptionLine, type SocketStatusBonus } from '@/controllers/item_rules';
+import { activeSetOptions, classCanUse, withWornStats, classOf, harmonyBonus, harmonyNeedCut, itemDef, itemStats, optionSpecials, socketStatusBonus, type OptionSpecial, type SetOptionLine, type SocketStatusBonus } from '@/controllers/item_rules';
 import type { ItemOptionTables, ItemSetTables } from '@/controllers/assets';
 
 export enum StatType {
@@ -609,7 +609,9 @@ function requiresMet(item: Item, input: CharacterStatsInput): boolean {
   const columns = stats.def.classes;
   // The Magic Gladiator wears what both the wizard and the knight can (:2222-2225).
   if (!classCanUse(stats.def, hero) && !(base === 3 && columns[0] && columns[1] && !columns[3])) return false;
-  return stats.reqLvl <= hero.level && stats.reqStr <= hero.str && stats.reqAgi <= hero.agi && stats.reqEne <= hero.ene && stats.reqVit <= hero.vit && stats.reqCmd <= hero.cmd;
+  // The harmony strength and agility cut (:2246-2259).
+  const cut = harmonyNeedCut(item, input.options);
+  return stats.reqLvl <= hero.level && stats.reqStr - cut.str <= hero.str && stats.reqAgi - cut.agi <= hero.agi && stats.reqEne <= hero.ene && stats.reqVit <= hero.vit && stats.reqCmd <= hero.cmd;
 }
 
 /** `PlusSpecial` (ZzzInfomation.cpp:2286-2300) of one option level kind. */
@@ -697,10 +699,20 @@ function calculateWizardry(input: CharacterStatsInput): {
   return { ...range, percent: magicPercent };
 }
 
+/** `maxMg`: the worn staffs' harmony magic power, `SI_magicalpower` (NewUICharacterInfoWindow.cpp:1241-1256). */
+function harmonyMagicPower(input: CharacterStatsInput): number {
+  let sum = 0;
+  for (const item of input.items.slice(0, 12)) {
+    const bonus = item ? harmonyBonus(item, input.options) : null;
+    if (bonus?.kind === 1 && bonus.option === 1) sum += bonus.value;
+  }
+  return sum;
+}
+
 /** The summoner's curse skills, AT_SKILL_SUMMON_EXPLOSION and AT_SKILL_SUMMON_REQUIEM (_enum.h:436-437). */
 const SUMMON_CURSES = new Set([223, 224]);
 
-/** `GetMagicSkillDamage` (CharacterManager.cpp:341-370) of the selected skill; the set mastery rows are not read. */
+/** `GetMagicSkillDamage` (CharacterManager.cpp:341-370) of the selected skill; no Season 6 set has a mastery row (option 29-35). */
 function magicSkillDamage(range: Range, skill: CharacterStatsInput['magicSkill'], lines: readonly SetOptionLine[]): Range {
   if (skill && SUMMON_CURSES.has(skill.number)) return range;
   const damage = skill?.damage ?? 0;
@@ -797,6 +809,7 @@ export function deriveCharacterStats(input: CharacterStatsInput): DerivedStats {
   // The window's line reads the selected skill's damage (NewUICharacterInfoWindow.cpp:1226-1230).
   const skilled = magicSkillDamage({ min: magic.min + magicBonus, max: magic.max + magicBonus }, input.magicSkill, lines);
   const wizardry = withPet(withRing(skilled, items, 'wizardry'), pet, 'wizardry', level);
+  const maxMg = harmonyMagicPower(input);
   const curse = withPet(withRing({ min: Math.trunc(input.energy / 9), max: Math.trunc(input.energy / 4) }, items, 'curse'), pet, 'curse', level);
   // The Panda and the Unicorn add 50 defense.
   const petDefense = pet?.group === GROUP_HELPER && (pet.num === PET.panda || pet.num === PET.unicorn) ? 50 : 0;
@@ -812,10 +825,10 @@ export function deriveCharacterStats(input: CharacterStatsInput): DerivedStats {
     defense: withSetDefense(calculateDefense(input, base), input, lines, socket) + petDefense,
     defenseRate: Math.trunc(calculateDefenseRate(input, base) * socket.defenseRate),
     defenseRatePvp: calculateDefenseRatePvp(input, base),
-    wizardryMin: wizardry.min,
-    wizardryMax: wizardry.max,
+    wizardryMin: wizardry.min + maxMg,
+    wizardryMax: wizardry.max + maxMg,
     // (int)((iMagicDamageMaxInitial + maxMg) * magicPercent) (:1352).
-    staffRate: Math.trunc(Math.fround(skilled.max * magic.percent)),
+    staffRate: Math.trunc(Math.fround((skilled.max + maxMg) * magic.percent)),
     curseMin: curse.min,
     curseMax: curse.max,
   };

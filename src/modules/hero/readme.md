@@ -27,9 +27,12 @@ other folders share.
   level / 20 and 2%, the Wizard's Ring 10%, each counted only when `IsRequireEquipItem` passes. As in the
   original, anything in the left hand adds the right weapon's option a second time (:2950-2979).
   The window's wizardry line reads the selected skill (`magicSkill`, `GetMagicSkillDamage`, CharacterManager.cpp:341-370):
-  its Damage on the minimum and 1.5 times it on the maximum, the set's magic power percent and skill attack (not the
-  set mastery rows); the summoner's curse skills read the plain values. The magic rate (`staffRate`) is that maximum
-  times the staff's or magic sword's `MagicPower` percent, worn by the `MagicDur` share (NewUICharacterInfoWindow.cpp:1226-1352).
+  its Damage on the minimum and 1.5 times it on the maximum, the set's magic power percent and skill attack; the
+  summoner's curse skills read the plain values. The set mastery rows (`PlusMastery`, options 29-35) are left out: no
+  Season 6 set carries an option above 23. The line then adds `maxMg`, the worn staffs' Jewel of Harmony magic power
+  (:1241-1256). The magic rate (`staffRate`) is the skill maximum plus `maxMg` times the staff's or magic sword's
+  `MagicPower` percent, worn by the `MagicDur` share (NewUICharacterInfoWindow.cpp:1226-1352). `IsRequireEquipItem`
+  takes the harmony strength and agility cut off the needs (ZzzInfomation.cpp:2246-2259).
 - `emotes.ts`: `EMOTES`, `EMOTE_RINGS`, `emoteById(id)`, `matchEmoteWord(text)` (the chat words that fire
   an emote, `CheckChatText`), `genderedEmoteAction`, type `EmoteId`.
 - `statAllocation.ts`: `StatAllocation.start(stat, amount)` / `cancel()`, `run`, `running`, `isRunning(stat)`.
