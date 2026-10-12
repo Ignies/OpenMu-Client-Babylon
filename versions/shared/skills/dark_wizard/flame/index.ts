@@ -1,5 +1,6 @@
 import { defineSkill } from '@/controllers/skills/define';
-import { Step, burn, scorch, seq } from '@/controllers/skills/visuals';
+import { Step, TICK, burn, cm, perTick, repeat, scorch, seq, ticks, tiered } from '@/controllers/skills/visuals';
+import { MODEL } from '@/controllers/fx/recipes';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { delay } from '@/controllers/fx/core';
 import { effects } from '@/controllers/fx';
@@ -20,6 +21,17 @@ const firePillars = (n: number, radius: number, every: number): Step => (at, c) 
   }
 };
 
+/** BITMAP_FLAME sub0 (ZzzEffect.cpp:1080-1084): LT 40, six BITMAP_FLAME tongues a tick within 25 cm, each LT 20 rising
+ * 19-38 cm a tick (ZzzEffectParticle.cpp:579-583), and a MODEL_STONE1/2 one tick in 8 (MoveHandlers.cpp:1802-1814). */
+const FLAME_TICKS = 40;
+const FLAME_COLUMN = { seconds: ticks(FLAME_TICKS), radius: cm(25), rate: 6 / TICK, rise: perTick(28.7) };
+const flameColumn: Step = (at, c) => {
+  effects.spawn('column', c.scene, at, FLAME_COLUMN);
+  repeat(FLAME_TICKS, TICK, (p, cc) => {
+    if (Math.random() * 8 < 1) effects.spawn('debris', cc.scene, p, { model: Math.random() < 0.5 ? MODEL.stone : MODEL.stone2 });
+  })(at, c);
+};
+
 export default defineSkill({
   id: 5,
   name: "Flame",
@@ -27,9 +39,9 @@ export default defineSkill({
   lookAliases: [378],
   // Master numbers cast, heard, lit and drawn as this skill (the original names them in its `case`).
   masterAliases: [483],
-  // 5 Flame: the renewed look - fire pillars out of molten rock around the point (controllers/fx/pillar.ts), in place
-  // of the BITMAP_FLAME sub0 LT 40 tongue column the original stacked at SkillXY (ZzzCharacter.cpp:4485).
-  visual: { area: seq(firePillars(3, 1.4, 0.1), scorch(1.5), burn(1.2)) },
+  // 5 Flame: the original's BITMAP_FLAME sub0 tongue column at SkillXY (ZzzCharacter.cpp:4479-4485).
+  // Skill effects: Enhanced raises our fire pillars out of molten rock around the point (controllers/fx/pillar.ts).
+  visual: { area: tiered(flameColumn, seq(firePillars(3, 1.4, 0.1), scorch(1.5), burn(1.2))) },
   sound: 'Sound/sFlame', // Flame
   // Flame: BITMAP_FLAME range 3 while the column burns (:8649). Wider and redder here: the
   // pillars stand on molten rock and the ground around them pools red in the renewed look.
