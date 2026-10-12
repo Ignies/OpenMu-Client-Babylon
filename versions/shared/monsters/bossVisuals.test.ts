@@ -614,6 +614,17 @@ describe('blend meshes of their own', () => {
   });
 });
 
+describe("the Dark Ghost's death", () => {
+  // MODEL_DARK_GHOST's Die (GMEmpireGuardian2.cpp:942-960): to frame 3 a MODEL_SKILL_INFERNO SubType 9 a tick, to
+  // frame 0.2 the two MODEL_TWINTAIL_EFFECT clouds.
+  it('stages its inferno and twin-tail clouds', () => {
+    expect(rows(515, 'call').map(r => [r.every, r.gate])).toEqual([
+      [1, { action: [A.Die], frames: [[0, 3]] }],
+      [1, { action: [A.Die], frames: [[0, 0.2]] }],
+    ]);
+  });
+});
+
 describe('event cues', () => {
   // MODEL_DARK_ELF_1 (GMCrywolf1st.cpp:844-866): once Crywolf reaches START (`Dark_Elf_Check`), at bone 27 a
   // BITMAP_CRATER SubType 2, two BITMAP_BLUE_BLUR SubType 1 and five BITMAP_SHOCK_WAVE SubType 8 in (1, 0.2, 0.2).
