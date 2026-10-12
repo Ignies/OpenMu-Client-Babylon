@@ -248,7 +248,9 @@ all (bones, the Chaos Castle cracks). The tick holds each channel of a kind's
 colour in 0..1, as RenderSprite packs the light a byte a channel (ZzzOpenglUtil.cpp:918-933,
 RenderUtils.h:8-18): `smoke0` starts at `LifeTime / 8` = 2, `light0` at its scale, a torch fire at
 its light, and none of that past 1 reached the screen. `HeldSprites` holds its look the same way; no
-wing look goes past 1 today (the Wing of Storm's peak at 0.9).
+wing look goes past 1 today (the Wing of Storm's peak at 0.9). A held sprite is drawn at its sheet's own
+width and height (`RenderSprite`, zzzeffectsprite.cpp:73-75): a sheet that is not square names its
+`height` (Shiny02, pin_lights), and the pool keeps it as `aspect`.
 
 ### feathers.ts
 Jitter up to 40 cm per axis, random tumble 0..5° a tick, `Alpha` 0.6..0.8. The original drops these

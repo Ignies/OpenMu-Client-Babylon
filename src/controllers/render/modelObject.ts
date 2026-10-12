@@ -23,6 +23,7 @@ import { animationGroupSource, forEachAnimationGroup } from '../assets/lazyAnima
 import { NO_BLEND_MESH } from './blendMeshes';
 import { renderAnglesQuaternion } from './renderAngles';
 import { meshAnimationFor, type MeshAnimation } from './meshAnimation';
+import { MeshPasses, type MeshPassSet } from './meshPasses';
 import { BlendState } from '@versions/shared/objects/enum';
 import { Ecs } from '../../ecs/current';
 import { settleStillAnimations } from './staticClips';
@@ -488,6 +489,13 @@ export class ModelObject {
 
   /** Live `BlendMeshTexCoordU/V`, shared by reference with the mesh metadata. */
   readonly UvScroll = { u: 0, v: 0 };
+
+  /**
+   * The model's own `RenderPartObjectBody` branch (ZzzObject.cpp:6890-8920): passes drawn over or in
+   * place of its lit meshes (`meshPasses.ts`, an item's look). Read by `load()`. Null = none.
+   */
+  MeshPasses: MeshPassSet | null = null;
+  #meshPasses: MeshPasses | null = null;
 
   #meshAnimation: MeshAnimation | null = null;
   #animatedMesh: AbstractMesh | null = null;
@@ -1265,6 +1273,8 @@ export class ModelObject {
 
     this.applyShadowHiddenMesh();
 
+    this.applyMeshPasses();
+
     this.attachShadow();
 
     // A part loaded while already stowed (spawn in a safe zone) freezes now;
@@ -1573,6 +1583,18 @@ export class ModelObject {
     }
   }
 
+  /** `MeshPasses` bound to the meshes just loaded, drawn as at time 0 until the first Update. */
+  private applyMeshPasses() {
+    const set = this.MeshPasses;
+    this.#meshPasses = set && this.gltf ? new MeshPasses(set, this.gltf.mesh.getChildMeshes(false), this.rootObject.Light) : null;
+    this.#meshPasses?.update(0);
+  }
+
+  /** Advances the `MeshPasses` to `ms` (`WorldTime`): Update calls it, and a bag icon's spin. */
+  updateMeshPasses(ms: number): void {
+    this.#meshPasses?.update(ms);
+  }
+
   /** `ShadowHiddenMesh`: the flag `objectShadow.meshCasts` reads. */
   private applyShadowHiddenMesh() {
     if (!this.gltf) return;
@@ -1792,6 +1814,7 @@ export class ModelObject {
     // and the early-out above already skips it off screen - the uniform is
     // only read while the mesh is drawn.
     this.updateMeshAnimation(gameTime.TotalGameTime.TotalSeconds * 1000);
+    this.#meshPasses?.update(gameTime.TotalGameTime.TotalSeconds * 1000);
 
     if (this.BlendMeshLightAt) {
       const light = this.BlendMeshLightAt(gameTime.TotalGameTime.TotalSeconds * 1000);

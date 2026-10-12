@@ -1054,10 +1054,40 @@ function trackTime(scene: Scene, onReady: (now: () => number) => void) {
  */
 const UV_SCROLL_UNIFORM = 'muUvScroll';
 
+/**
+ * Per mesh (`metadata.uvMap`, render/meshPasses.ts `UV_MAP`): 0 the mesh's UVs, else one of
+ * `RenderMesh`'s chrome look-ups by the normal, which take no scroll (ZzzBMD.cpp:1600-1640).
+ */
+const UV_MAP_UNIFORM = 'muUvMap';
+
 const UV_SCROLL_RESAMPLE = `
   #ifdef DIFFUSE
-    if (${UV_SCROLL_UNIFORM}.x != 0.0 || ${UV_SCROLL_UNIFORM}.y != 0.0) {
-      baseColor = texture2D(diffuseSampler, vDiffuseUV + ${UV_SCROLL_UNIFORM});
+    {
+      vec2 muUv = vDiffuseUV + ${UV_SCROLL_UNIFORM};
+      int muMap = int(${UV_MAP_UNIFORM} + 0.5);
+      if (muMap != 0) {
+        vec3 n = vec3(normalW.x, normalW.z, normalW.y);
+        float tms = time * 1000.0;
+        float wave = mod(tms, 10000.0) * 0.0001;
+        if (muMap == 1) {
+          muUv = vec2(n.z * 0.5 + wave, n.y * 0.5 + wave * 2.0);
+        } else if (muMap == 4) {
+          vec3 l = vec3(cos(tms * 0.001), sin(tms * 0.002), 1.0);
+          float d = dot(n, l);
+          muUv = vec2(d + n.y * 0.5 + l.y * 3.0, 1.0 - d - (n.z * 0.5 + wave * 3.0));
+        } else if (muMap == 5) {
+          vec3 l = vec3(cos(tms * 0.001), sin(tms * 0.002), 1.0);
+          float d = dot(n, l);
+          muUv = vec2(d + n.y * 3.0 + l.y * 5.0, 1.0 - d - (n.z * 2.5 + wave));
+        } else if (muMap == 6) {
+          muUv = vec2((n.z + n.x) * 0.8 + (mod(tms, 5000.0) * 0.00024 - 0.4) * 2.0);
+        } else {
+          muUv = vec2((n.z + n.x) * 0.8 + tms * 0.00006);
+        }
+      }
+      if (muMap != 0 || ${UV_SCROLL_UNIFORM}.x != 0.0 || ${UV_SCROLL_UNIFORM}.y != 0.0) {
+        baseColor = texture2D(diffuseSampler, muUv);
+      }
     }
   #endif
 `;
@@ -1132,6 +1162,7 @@ ${
   `);
   if (withScroll) {
     simpleMaterial.AddUniform(UV_SCROLL_UNIFORM, 'vec2', null);
+    simpleMaterial.AddUniform(UV_MAP_UNIFORM, 'float', 0);
   }
 
   simpleMaterial.Fragment_Before_FragColor(legacyPasses({ ...STANDARD_VARS, flat: flatLit }));
@@ -1156,6 +1187,7 @@ ${bright || flatLit ? '' : sunResponseGlsl('diffuseBase', '') + UNCLAMP}${
       if (withScroll) {
         const scroll = mesh.metadata!.uvScroll as UvScroll | undefined;
         effect.setFloat2(UV_SCROLL_UNIFORM, scroll?.u ?? 0, scroll?.v ?? 0);
+        effect.setFloat(UV_MAP_UNIFORM, mesh.metadata?.uvMap ?? 0);
       }
 
       effect.setFloat4(BODY_LIGHT_UNIFORM, 1, 1, 1, mesh.visibility);
