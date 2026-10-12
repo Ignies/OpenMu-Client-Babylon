@@ -104,6 +104,29 @@ describe('Kundun', () => {
   });
 });
 
+describe("Selupan's body", () => {
+  // RenderMonster's MODEL_SELUPAN (GM_Raklion.cpp:1504-1549): mesh 3 bright twice, mesh 5 bright on its own scroll,
+  // Chrome02 over mesh 4 by CHROME4, and serufanarm_R four times over mesh 0 at `(sinf(WorldTime * 0.002f) + 1) * 0.5`.
+  it('draws his RenderMonster passes', () => {
+    const set = monsters.def(459)?.passes;
+    const shape = set?.passes.map(p => [p.mesh, p.kind, p.map ?? '', p.texture ?? ''].join(' '));
+    expect(shape).toEqual([
+      '3 bright  ',
+      '5 bright  ',
+      '4 add chrome4 Effect/Chrome02.OZJ',
+      '0 add  Monster/serufanarm_R.OZJ',
+      '0 add  Monster/serufanarm_R.OZJ',
+      '0 add  Monster/serufanarm_R.OZJ',
+      '0 add  Monster/serufanarm_R.OZJ',
+      '3 add  ',
+    ]);
+    const [, scroll, , arm] = set?.passes ?? [];
+    expect([scroll?.u?.(12345), scroll?.v?.(12345)]).toEqual([2345 * 0.0002, 2345 * 0.0002]);
+    expect(arm?.gain?.(1000)).toBeCloseTo((Math.sin(2) + 1) * 0.5);
+    expect(arm?.clamp).toBe(true);
+  });
+});
+
 describe('Selupan', () => {
   // RenderMonsterVisual's MODEL_SELUPAN (GM_Raklion.cpp:2003-2049): blue lights breathing in colour and size on
   // bones 9 and 70-74, some turning on the world clock.
