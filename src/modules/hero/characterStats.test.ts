@@ -89,6 +89,24 @@ describe('the character window wizardry with a staff', () => {
     expect(held(0)).toBe(38);
     expect(held(1)).toBe(0);
   });
+
+  // NewUICharacterInfoWindow.cpp:1336-1352: the magic swords too, worn by the MagicDur share.
+  const rate = (item: Item) => {
+    const items: (Item | null)[] = new Array(12).fill(null);
+    items[0] = item;
+    return deriveCharacterStats({ charClass: CharacterClassNumber.MagicGladiator, level: 240, strength: 600, agility: 300, vitality: 100, energy: 450, leadership: 0, items }).staffRate;
+  };
+
+  it('reads the Rune Blade, Explosion Blade, Sword Dancer, Dark Reign Blade and Imperial Sword', () => {
+    expect(rate({ group: 0, num: 31, durability: 93 })).toBe(52);
+    for (const num of [21, 23, 25, 28]) expect(rate({ group: 0, num, durability: 90 })).toBeGreaterThan(0);
+    expect(rate({ group: 0, num: 26, durability: 90 })).toBe(0);
+  });
+
+  it("loses half of the Legendary Staff's rate below 20% of its MagicDur", () => {
+    expect(rate({ group: 5, num: 5, durability: 66 })).toBe(29);
+    expect(rate({ group: 5, num: 5, durability: 10 })).toBe(15);
+  });
 });
 
 // CalculateMagicDamage adds the item's AT_IMPROVE_MAGIC options, not its damage (ZzzInfomation.cpp:2848-3001).

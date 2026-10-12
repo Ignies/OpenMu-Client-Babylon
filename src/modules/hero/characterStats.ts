@@ -185,12 +185,15 @@ function itemBlocking(item: Item): number {
   return blocking;
 }
 
-/** `CalcDurabilityPercent` (ZzzInfomation.cpp:2440-2485): how much of a stat a worn item loses; a wing passes no excellent bits. */
-function durabilityPercent(item: Item, wing = false): number {
+/**
+ * `CalcDurabilityPercent` (ZzzInfomation.cpp:2440-2485): how much of a stat a worn item loses; a wing passes no
+ * excellent bits, the window's magic rate reads `MagicDur`.
+ */
+function durabilityPercent(item: Item, wing = false, magic = false): number {
   const config = configOf(item);
   if (!config || item.durability === undefined) return 0;
   const level = item.lvl ?? 0;
-  let max = firstSet(config, 'Dur', 'Durability') + Math.min(level, 4) + Math.max(0, level - 4) * 2;
+  let max = (magic ? field(config, 'MagicDur') : firstSet(config, 'Dur', 'Durability')) + Math.min(level, 4) + Math.max(0, level - 4) * 2;
   if (!wing && (item.ancientDiscriminator ?? 0) > 0) max += 20;
   else if (!wing && (item.excellentFlags ?? 0) & 63) max += 15;
   const worn = 1 - item.durability / max;
@@ -675,7 +678,9 @@ function calculateWizardry(input: CharacterStatsInput): {
     if (rate) percent(rate);
   }
 
-  const rate = right && isStaff(right) ? itemMagicPower(right) : 0;
+  // The window's magic rate: a staff's or a magic sword's, worn by the MagicDur share (NewUICharacterInfoWindow.cpp:1336-1352).
+  const power = right && (isStaff(right) || rightKind(right, num => MAGIC_SWORDS.has(num)) === 'damage') ? itemMagicPower(right) : 0;
+  const rate = right ? power - Math.trunc(power * durabilityPercent(right, false, true)) : 0;
   return { ...range, rate };
 }
 
