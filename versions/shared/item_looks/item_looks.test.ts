@@ -1,6 +1,15 @@
 import { describe, expect, it, vi } from 'vitest';
+
+// The particles the emitters spawn are only recorded.
+const particles = vi.hoisted(() => ({ spawn: vi.fn() }));
+vi.mock('@/controllers/fx/effectParticles', async importOriginal => ({ ...(await importOriginal<object>()), spawnParticle: particles.spawn }));
 import { Vector3 } from '@/controllers/render/babylon/exports';
-import { itemBodyPasses, itemHeldSprites, itemWingSprites } from '@/controllers/item_fx/itemLooks';
+import { itemBodyPasses, itemHeldEmitters, itemHeldSprites, itemWingSprites } from '@/controllers/item_fx/itemLooks';
+import type { Scene } from '@/controllers/render/babylon/exports';
+import { effects } from '@/controllers/fx';
+import { PlayerAction } from '@versions/shared/objects/enum';
+import { JOINT_SPARKS } from '../skills/_shared';
+import { SPARK_CHIPS } from '../skills/dark_knight/_shared';
 import './index';
 
 /** A sample WorldTime (ms) and body light the passes are read at. */
@@ -425,7 +434,7 @@ describe('the swords\' held sprites', () => {
     ]);
   });
 
-  it('the Dark Reign and Rune blades draw only their running sparks, not yet ported (:7698-7720)', () => {
+  it('the Dark Reign and Rune blades draw no sprites, only their running sparks (:7698-7720)', () => {
     expect(held(0, 21)).toBeNull();
     expect(held(0, 31)).toBeNull();
   });
@@ -515,8 +524,8 @@ describe('the bows\' held sprites', () => {
       ['shiny02', 9, [10, 0, 0], 0.8, [r(l * 3), r(l), r(l)], r(turn)],
     ]);
     const star = itemHeldSprites(4, 20)?.slice(2) ?? [];
-    expect(star.map(s => s.when?.({ action: 0, safeZone: true }))).toEqual([false, false, false]);
-    expect(star.map(s => s.when?.({ action: 0, safeZone: false }))).toEqual([true, true, true]);
+    expect(star.map(s => s.when?.({ action: 0, safeZone: true, yaw: 0, map: 0 }))).toEqual([false, false, false]);
+    expect(star.map(s => s.when?.({ action: 0, safeZone: false, yaw: 0, map: 0 }))).toEqual([true, true, true]);
   });
 
   it('Stinger Bow: a grey flare on every bone 0-43 but 1 (:7970-7983)', () => {
@@ -543,9 +552,9 @@ describe('the bows\' held sprites', () => {
       ...[22, 23, 24, 25, 26, 27, 28, 29].map(bone => ['flare', bone, undefined, 0.4, green, 0]),
     ]);
     const attack = itemHeldSprites(4, 24)?.[8].when;
-    expect(attack?.({ action: 38, safeZone: false })).toBe(true); // PLAYER_ATTACK_FIST
-    expect(attack?.({ action: 155, safeZone: false })).toBe(true); // PLAYER_RIDE_SKILL
-    expect(attack?.({ action: 15, safeZone: false })).toBe(false);
+    expect(attack?.({ action: 38, safeZone: false, yaw: 0, map: 0 })).toBe(true); // PLAYER_ATTACK_FIST
+    expect(attack?.({ action: 155, safeZone: false, yaw: 0, map: 0 })).toBe(true); // PLAYER_RIDE_SKILL
+    expect(attack?.({ action: 15, safeZone: false, yaw: 0, map: 0 })).toBe(false);
   });
 
   it('Great Reign Crossbow: blue Shiny02 and flares on bones 1-5, the last flare white (:7539-7557)', () => {
@@ -984,5 +993,52 @@ describe('the Archangel set, the late bows, shields and armour sets', () => {
       });
     }
     expect(look(7, 15)).toBeNull(); // the helms are not in the branch
+  });
+});
+
+// RenderLinkObject's CreateParticle / CreateJoint calls for a carried weapon (ZzzCharacter.cpp).
+describe('the held weapons\' emitters', () => {
+  const scene = {} as Scene;
+  const at = new Vector3(1, 2, 3);
+  const wearer = (action: number, map = 0) => ({ action, safeZone: false, yaw: 0.5, map });
+  /** Runs an item's emitters once with every rand_fps_check passing (a 1 s frame) and Math.random at `roll`. */
+  function emit(group: number, num: number, w: ReturnType<typeof wearer>, roll = 0.5) {
+    const random = vi.spyOn(Math, 'random').mockReturnValue(roll);
+    const spawn = vi.spyOn(effects, 'spawn').mockImplementation(() => ({ alive: false, stop() {} }) as never);
+    // The emitters rewrite one point for every spawn, as spawnParticle allows: read it at the call.
+    const made: unknown[] = [];
+    particles.spawn.mockImplementation((_s, kind, p, _t, scale, light) => void made.push([kind, [p.x, p.y, p.z].map(r), scale, light]));
+    for (const e of itemHeldEmitters(group, num) ?? []) e.emit(scene, at, w, 1);
+    const calls = { effects: spawn.mock.calls.map(c => [c[0], (c[3] as { recipe: unknown }).recipe]), particles: made as unknown[][] };
+    spawn.mockRestore();
+    random.mockRestore();
+    return calls;
+  }
+
+  it('Sword Dancer, Dark Reign, Rune: four JOINT_SPARKs and four chips while running two-handed, not in Icarus (:7296-7316, :7698-7720)', () => {
+    const spray = [...Array(4)].flatMap(() => [
+      ['particles', JOINT_SPARKS],
+      ['particles', SPARK_CHIPS],
+    ]);
+    for (const [group, num] of [[0, 25], [0, 21], [0, 31]]) {
+      expect(emit(group, num, wearer(PlayerAction.PLAYER_RUN_TWO_HAND_SWORD_TWO)).effects).toEqual(spray);
+      expect(emit(group, num, wearer(PlayerAction.PLAYER_RUN_TWO_HAND_SWORD)).effects).toEqual([]);
+      expect(emit(group, num, wearer(PlayerAction.PLAYER_RUN_TWO_HAND_SWORD_TWO, 10)).effects).toEqual([]);
+    }
+  });
+
+  it('Sword Breaker: a green waterFall4 drop of 0.5 at each of bones 1-7 one frame in four (:7786-7795)', () => {
+    expect(emit(0, 27, wearer(0)).particles).toEqual([...Array(7)].map(() => ['waterfall4Glint', [1, 2, 3], 0.5, [0.1, 0.9, 0.1]]));
+    expect(itemHeldEmitters(0, 27)?.map(e => e.bone)).toEqual([1, 2, 3, 4, 5, 6, 7]);
+  });
+
+  it('Frost Mace: frost 15 cm under the head and a star shine up to 30 cm off it (:7871-7889)', () => {
+    // roll 0.5: the frost is clud64's other sheet (smoke01), the star at (0, 0, 0) cm off.
+    expect(emit(2, 16, wearer(0)).particles).toEqual([
+      ['frostSmoke', [1, 1.85, 3], 0.4, [0.5, 0.8, 0.8]],
+      ['starShine', [1, 2, 3], 0.22, [0.5, 0.8, 0.6]],
+    ]);
+    expect(emit(2, 16, wearer(0), 0.2).particles[0][0]).toBe('frostCloud');
+    expect(itemHeldEmitters(2, 16)?.map(e => e.bone)).toEqual([24]);
   });
 });

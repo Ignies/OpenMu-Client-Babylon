@@ -61,7 +61,8 @@ type TextureKey =
   | 'flareRed'
   | 'lightningMega1'
   | 'lightningMega2'
-  | 'lightningMega3';
+  | 'lightningMega3'
+  | 'shiny01';
 
 const TEXTURES: Record<
   TextureKey,
@@ -105,6 +106,7 @@ const TEXTURES: Record<
   lightningMega1: { file: 'Effect/lighting_mega01.OZJ', size: 128 },
   lightningMega2: { file: 'Effect/lighting_mega02.OZJ', size: 128 },
   lightningMega3: { file: 'Effect/lighting_mega03.OZJ', size: 128 },
+  shiny01: { file: 'Effect/Shiny01.OZJ', size: 16 },
 };
 
 /**
@@ -545,6 +547,30 @@ function puffMove(p: Particle, f: number, fade: number): void {
   p.scale += 0.05 * f;
   p.lr = p.lg = p.lb = p.lifeTime / fade;
   p.rotation += (1 + rand(2)) * f;
+}
+
+/** `BITMAP_CLUD64` SubType 9 on `texture` (it swaps in BITMAP_SMOKE one time in two): see `frostCloud`. */
+function frostKind(texture: TextureKey): ParticleKind {
+  const jitter = (base: number) => base + (rand(20) - 10) * 0.002;
+  return {
+    texture,
+    blend: 'add',
+    init(p, scale) {
+      p.lifeTime = 40;
+      p.scale = scale + ((rand(20) - 10) / 2) * ((scale * 0.1) / 2);
+      p.rotation = rand(360);
+      p.vx = (rand(20) - 10) * 0.03;
+      p.vy = (rand(20) - 10) * 0.03;
+      p.vz = -(1.2 + (rand(20) - 10) * 0.025);
+    },
+    update(p, f) {
+      p.scale *= Math.pow(jitter(0.98), f);
+      p.lr *= Math.pow(jitter(0.95), f);
+      p.lg *= Math.pow(jitter(0.95), f);
+      p.lb *= Math.pow(jitter(0.95), f);
+    },
+    color: plainColor,
+  };
 }
 
 const KINDS = {
@@ -1122,6 +1148,67 @@ const KINDS = {
     },
     color: plainColor,
   } satisfies ParticleKind,
+
+  /**
+   * `BITMAP_WATERFALL_4` SubType 12, the Sword Breaker's drops: 4-5 ticks, `rand() % 360` turned, its size
+   * jittered by up to 75%, set +-10 cm off; a tick it turns `WorldTime % 360 * 0.01`, and its size and light
+   * keep 0.92 (ZzzEffectParticle.cpp:3611-3621, :8626-8634).
+   */
+  waterfall4Glint: {
+    texture: 'waterfall4',
+    blend: 'add',
+    init(p, scale) {
+      p.rotation = rand(360);
+      p.lifeTime = rand(2) - 1 + 5;
+      p.scale = scale + ((rand(20) - 10) / 2) * ((scale * 0.3) / 2);
+      p.px += rand(20) - 10;
+      p.py += rand(20) - 10;
+      p.pz += rand(20) - 10;
+    },
+    update(p, f, worldTimeMs) {
+      p.rotation += (Math.floor(worldTimeMs) % 360) * 0.01 * f;
+      const keep = Math.pow(0.92, f);
+      p.scale *= keep;
+      p.lr *= keep;
+      p.lg *= keep;
+      p.lb *= keep;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
+
+  /**
+   * `BITMAP_CLUD64` SubType 9, the Frost Mace's frost (one in two drawn with smoke01, `frostSmoke`): 40 ticks,
+   * sinking 1.2 cm a tick and drifting, its size keeping about 0.98 a tick and its light 0.95
+   * (ZzzEffectParticle.cpp:1043-1055, :5205-5213).
+   */
+  frostCloud: frostKind('clud64'),
+  frostSmoke: frostKind('smoke'),
+
+  /**
+   * `MODEL_STAR_SHINE` SubType 0, the Frost Mace's twinkle: 30 ticks; growing 1.1 a tick for ten, drawn as a
+   * Shiny01 sprite at a random turn for the next ten, then shrinking unseen (ZzzEffect.cpp:4680-4690, :8322-8345).
+   */
+  starShine: {
+    texture: 'shiny01',
+    blend: 'add',
+    init(p) {
+      p.lifeTime = 30;
+      p.rotation = rand(360);
+    },
+    update(p, f) {
+      // The ticks are counted as the original counts them, before this one's decrement.
+      if (p.lifeTime >= 10 && p.lifeTime < 20) return;
+      const k = Math.pow(p.lifeTime >= 20 ? 1.1 : 0.9, f);
+      p.scale *= k;
+      p.lr *= k;
+      p.lg *= k;
+      p.lb *= k;
+    },
+    color(p, out) {
+      const shown = p.lifeTime >= 10 && p.lifeTime < 20 ? 1 : 0;
+      out.set(p.lr * shown, p.lg * shown, p.lb * shown, 1);
+    },
+  } satisfies ParticleKind,
 } satisfies Record<string, ParticleKind>;
 
 export type KindName = keyof typeof KINDS;
@@ -1516,6 +1603,10 @@ export const KIND_REACH: Record<KindName, Reach> = {
   light15: { travel: 4.45, base: 0, perScale: 0.62 },
   wingFlareBlue: { travel: 0, base: 0, perScale: 0.46 },
   wingCloud: { travel: 0, base: 0, perScale: 0.46 },
+  waterfall4Glint: { travel: 0.18, base: 0, perScale: 0.8 },
+  frostCloud: { travel: 0.75, base: 0, perScale: 0.5 },
+  frostSmoke: { travel: 0.75, base: 0, perScale: 0.5 },
+  starShine: { travel: 0, base: 0, perScale: 0.3 },
 };
 
 /** The reach of a spawn picking any of `kinds`, as one base plus a per-scale slope. */

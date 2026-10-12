@@ -31,6 +31,10 @@ index.ts    finds every file (glob) and hands them to item_fx's registerItemLook
   `rand_fps_check(n)` is `oneIn(n, scale)`). `when` gates a sprite on the wearer (`o->CurrentAction`,
   `c->SafeZone`): it is drawn at size 0 while the test fails.
   `wing` are the same on the phoenix wing the item carries (the Phoenix Soul Star's, MonkSystem.cpp:245).
+  `emit` are what it creates there that outlives the frame (CreateParticle, CreateJoint: the running
+  sparks, the Sword Breaker's drops, the Frost Mace's frost): run each drawn frame at a bone's world point
+  with the wearer (action, safe zone, facing, map) and the frame's length; each rolls its own `rand_fps_check(n)`
+  as `Math.random() * n < dt * 25`.
   `ecs/systems/weaponSpriteSystem.ts` draws them (`actors/weaponSprites.ts`).
 - The passes and sprites are the original's, drawn while the Item effects option draws the original passes
   (Legacy, Both); Off and Improved draw the plain model, as before.

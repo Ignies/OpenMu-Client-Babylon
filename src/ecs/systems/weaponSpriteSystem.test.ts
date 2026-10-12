@@ -83,10 +83,10 @@ describe('a held weapon\'s sprites', () => {
 });
 
 describe('the wearer a held sprite reads', () => {
-  it('is the character\'s action and safe-zone flag this frame (o->CurrentAction, c->SafeZone)', () => {
+  it('is the character\'s action, safe-zone flag, facing and map this frame (o->CurrentAction, c->SafeZone, o->Angle[2])', () => {
     made.list.length = 0;
     WeaponSpriteSystem(world(player())).update?.(0);
-    expect(made.list[0].wearers).toEqual([{ action: 18, safeZone: true }]);
+    expect(made.list[0].wearers).toEqual([{ action: 18, safeZone: true, yaw: 0, map: 0 }]);
   });
 });
 

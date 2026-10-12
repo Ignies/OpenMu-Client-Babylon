@@ -1052,3 +1052,36 @@ describe('BonedParticleEmitter view gate', () => {
     expect(spawned).toBe(0);
   });
 });
+
+describe('the held weapons\' particles (RenderLinkObject, ZzzCharacter.cpp:7765-7927)', () => {
+  it('waterFall4 SubType 12: 4-5 ticks, size and light keeping 0.92 a tick (ZzzEffectParticle.cpp:3611-3621, :8626-8634)', async () => {
+    // roll 0.5: lives rand() % 2 - 1 + 5 = 5 ticks, its size Scale + 0 jitter.
+    const sprite = await play('waterfall4Glint', 0.5, 0.5, 2);
+    expect(sprite.width).toBeCloseTo((64 * 0.5 * 0.92 ** 2) / 100);
+    expect(sprite.color.g).toBeCloseTo(0.4 * 0.92 ** 2);
+    disposeEffectParticles();
+    expect((await play('waterfall4Glint', 0.5, 0.5, 4)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('waterfall4Glint', 0.5, 0.5, 5)).isVisible).toBe(false);
+  });
+
+  it('Clud64 SubType 9: 40 ticks sinking about 1.2 cm a tick (ZzzEffectParticle.cpp:1043-1055)', async () => {
+    const sprite = await play('frostCloud', 0.4, 0.5, 10);
+    expect(sprite.position.y).toBeCloseTo(-0.12);
+    disposeEffectParticles();
+    expect((await play('frostSmoke', 0.4, 0.5, 39)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('frostSmoke', 0.4, 0.5, 40)).isVisible).toBe(false);
+  });
+
+  it('MODEL_STAR_SHINE: dark while it grows for ten ticks, lit for ten, then gone from sight (ZzzEffect.cpp:8322-8345)', async () => {
+    const growing = await play('starShine', 0.22, 0.5, 5);
+    expect(growing.color.r).toBe(0);
+    disposeEffectParticles();
+    const lit = await play('starShine', 0.22, 0.5, 15);
+    expect(lit.color.r).toBeCloseTo(Math.min(1, 0.2 * 1.1 ** 10));
+    expect(lit.width).toBeCloseTo((16 * 0.22 * 1.1 ** 10) / 100);
+    disposeEffectParticles();
+    expect((await play('starShine', 0.22, 0.5, 25)).color.r).toBe(0);
+  });
+});
