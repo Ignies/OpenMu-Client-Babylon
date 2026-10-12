@@ -94,3 +94,31 @@ describe('a held weapon\'s sprites (RenderLinkObject, ZzzCharacter.cpp:7027-8386
     expect(sprites.nodes[0].parent).toBe(root);
   });
 });
+
+describe('a held sprite gated on its wearer', () => {
+  it('draws at size 0 while its test fails (an action, c->SafeZone) and at its scale while it holds', () => {
+    const sprites = new WeaponSprites(scene, weapon(1), [
+      { texture: 'flare01', bone: 1, scale: 0.8, light: [1, 1, 1], when: w => !w.safeZone && w.action === 7 },
+    ]);
+    const out = look();
+    sprites.update(0, Vector3.One(), true, { action: 7, safeZone: true, yaw: 0, map: 0 });
+    sprites.look(0, out);
+    expect(out.scale).toBe(0);
+    sprites.update(0, Vector3.One(), true, { action: 7, safeZone: false, yaw: 0, map: 0 });
+    sprites.look(0, out);
+    expect(out.scale).toBe(0.8);
+  });
+});
+
+describe('a held weapon\'s emitters (CreateParticle, CreateJoint in RenderLinkObject)', () => {
+  it('run at their bone\'s world point with the wearer and the frame\'s length while the weapon is drawn', () => {
+    const object = weapon(2);
+    const calls: [number, number, number, number][] = [];
+    const sprites = new WeaponSprites(scene, object, [], [{ bone: 1, emit: (_scene, at, w, dt) => calls.push([+at.x.toFixed(4), w.action, w.yaw, dt]) }]);
+    object.node.computeWorldMatrix(true);
+    for (const node of scene.transformNodes) node.computeWorldMatrix(true);
+    sprites.update(0, Vector3.One(), true, { action: 144, safeZone: false, yaw: 1.5, map: 0 }, 0.04);
+    sprites.update(0, Vector3.One(), false, { action: 144, safeZone: false, yaw: 1.5, map: 0 }, 0.04);
+    expect(calls).toEqual([[0.2, 144, 1.5, 0.04]]); // bone 1: node 2, 0.2 along x; none while hidden
+  });
+});

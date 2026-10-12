@@ -10,6 +10,7 @@ import { TW_NOGROUND, TW_NOMOVE, TW_WATER } from '@/controllers/terrain/consts';
 import { earthQuake } from '@/controllers/camera';
 import { effects } from '@/controllers/fx';
 import { itemObjectAttribute } from '@/controllers/actors/itemObjectAttribute';
+import { itemBodyPasses } from '@/controllers/item_fx/itemLooks';
 import { lighting } from '@/controllers/lighting';
 import { Ecs } from '@/ecs/current';
 
@@ -202,7 +203,7 @@ const furyStrikeOf = (hd: boolean): Step => (_at, c) => {
       seconds: ticks(9),
       scale: itemScale(weapon),
       fadeTail: 0,
-      native: { light: ITEM_LIGHT, stamp: weapon.stamp, ...itemObjectAttribute(weapon.group, weapon.num) },
+      native: { light: ITEM_LIGHT, stamp: weapon.stamp, ...itemObjectAttribute(weapon.group, weapon.num), passes: itemBodyPasses(weapon.group, weapon.num) },
       follow: out => pathAt((fxNow() - t0) / TICK, out),
       rotate: out => muAngles(out, 80 * DEG * ((fxNow() - t0) / TICK + 1), 0, yaw0 + 330 * DEG),
     });

@@ -8,6 +8,7 @@ import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
 import { inHellas } from '@/controllers/actors/locomotion';
 import { itemObjectAttribute } from '@/controllers/actors/itemObjectAttribute';
+import { itemBodyPasses } from '@/controllers/item_fx/itemLooks';
 import { lighting } from '@/controllers/lighting';
 import { Ecs } from '@/ecs/current';
 
@@ -117,7 +118,7 @@ function wheelCopy(c: SkillContext, skill: number, yaw0: number, radius: number,
       scale: itemScale(weapon),
       alpha,
       fadeTail: 0,
-      native: { light: ITEM_LIGHT, stamp: weapon.stamp, ...itemObjectAttribute(weapon.group, weapon.num) },
+      native: { light: ITEM_LIGHT, stamp: weapon.stamp, ...itemObjectAttribute(weapon.group, weapon.num), passes: itemBodyPasses(weapon.group, weapon.num) },
       follow: out => {
         ground(out);
         out.y += 1;

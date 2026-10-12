@@ -225,3 +225,29 @@ describe('a model held still (the crowd options)', () => {
     expect(gltf.animationGroups[1]?.isPlaying).toBe(true);
   });
 });
+
+describe('a model drawn with LightEnable off (RenderLinkObject, ZzzCharacter.cpp:6651-6652)', () => {
+  it('moves its lit meshes onto the flat-lit twin on Classic and back on the tiers above; a glow card stays', async () => {
+    const { getMaterial } = await import('../assets/modelLoader');
+    const { GameOptions } = await import('@/controllers/settings');
+    const tier = GameOptions.lightingQuality;
+    const root = new Mesh('weapon', scene);
+    const blade = CreateBox('node_0', { size: 1 }, scene);
+    const glow = CreateBox('node_1', { size: 1 }, scene);
+    blade.parent = glow.parent = root;
+    const lit = getMaterial(scene, true, 0, 0);
+    const card = getMaterial(scene, false, 2, 1, true);
+    blade.material = lit;
+    glow.material = card;
+    const object = new ModelObject(scene);
+    object.Unlit = true;
+    GameOptions.lightingQuality = 0;
+    object.load({ mesh: root, skeleton: new Skeleton('weapon', 'weapon', scene), animationGroups: [] });
+    expect(blade.material).toBe(getMaterial(scene, true, 0, 0, false, true));
+    expect(glow.material).toBe(card);
+    GameOptions.lightingQuality = 1;
+    object.syncUnlit();
+    expect(blade.material).toBe(lit);
+    GameOptions.lightingQuality = tier;
+  });
+});

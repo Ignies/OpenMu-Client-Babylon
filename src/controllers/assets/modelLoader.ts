@@ -268,6 +268,20 @@ export function getFlatLitVariant(
 }
 
 /**
+ * `LightEnable` off for one mesh (`on`), or back: a lit shared material swapped for its flat-lit twin,
+ * the same blend and culling. Glow cards and meshes already flat are left; only a mesh this moved goes back.
+ */
+export function setMeshUnlit(mesh: AbstractMesh, on: boolean): void {
+  const args = materialArgs.get(mesh.material as ItemMaterial);
+  if (!args) return;
+  const [backFaceCulling, transparencyMode, alphaMode, bright, flatLit] = args;
+  if (bright || flatLit === on || (!on && !mesh.metadata?.unlitSwap)) return;
+  mesh.metadata ??= {};
+  mesh.metadata.unlitSwap = on;
+  mesh.material = getMaterial(mesh.getScene(), backFaceCulling, transparencyMode, alphaMode, false, on, mesh.metadata.characterAsset === true);
+}
+
+/**
  * The scrolling twin of whatever material a mesh already resolved to, keeping
  * its blend state and culling. Used for a `blend`-kind scroller, whose mesh
  * `applyBlendMesh` has already put on the shared additive material.

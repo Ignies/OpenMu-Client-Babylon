@@ -4,10 +4,10 @@ import type { HeldSprite } from '@/controllers/item_fx/itemLooks';
 const pulse = (ms: number) => Math.sin(ms * 0.002) * 0.35 + 0.65;
 
 /**
- * RenderLinkObject's MODEL_KNIGHT_BLADE / MODEL_BATTLE_SCEPTER case (ZzzCharacter.cpp:7661-7673), on one
+ * RenderLinkObject's MODEL_KNIGHT_BLADE case (ZzzCharacter.cpp:7661-7673), on one
  * bone: a violet flare and a grey one (a negative scale draws the sprite mirrored, the same size).
  */
-export const violetFlares = (bone: number): HeldSprite[] => [
+const violetFlares = (bone: number): HeldSprite[] => [
   {
     texture: 'flare01',
     bone,

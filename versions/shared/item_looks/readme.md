@@ -27,7 +27,14 @@ index.ts    finds every file (glob) and hands them to item_fx's registerItemLook
 - `held` are the sprites `RenderLinkObject` issues every frame for the weapon while a character
   carries it, in the hand or on the back (ZzzCharacter.cpp:7027-8386): a sheet, the weapon model's bone
   and a point in its frame (cm), a scale, a light (off the wearer's, `o->Light`, when it reads it) and a
-  rotation, each a number or a function of WorldTime (`rand()` per frame stays `Math.random()`).
+  rotation, each a number or a function of WorldTime (`rand()` per frame stays `Math.random()`;
+  `rand_fps_check(n)` is `oneIn(n, scale)`). `when` gates a sprite on the wearer (`o->CurrentAction`,
+  `c->SafeZone`): it is drawn at size 0 while the test fails.
+  `wing` are the same on the phoenix wing the item carries (the Phoenix Soul Star's, MonkSystem.cpp:245).
+  `emit` are what it creates there that outlives the frame (CreateParticle, CreateJoint: the running
+  sparks, the Sword Breaker's drops, the Frost Mace's frost): run each drawn frame at a bone's world point
+  with the wearer (action, safe zone, facing, map) and the frame's length; each rolls its own `rand_fps_check(n)`
+  as `Math.random() * n < dt * 25`.
   `ecs/systems/weaponSpriteSystem.ts` draws them (`actors/weaponSprites.ts`).
 - The passes and sprites are the original's, drawn while the Item effects option draws the original passes
   (Legacy, Both); Off and Improved draw the plain model, as before.

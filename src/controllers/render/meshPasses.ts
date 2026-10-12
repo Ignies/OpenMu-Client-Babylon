@@ -4,9 +4,9 @@ import { BlendState } from '@versions/shared/objects/enum';
 
 /**
  * A pass's texture coordinates: the mesh's own, or one of `RenderMesh`'s chrome look-ups by the normal
- * (RENDER_CHROME, CHROME4 to CHROME7; ZzzBMD.cpp:1600-1640). Read by the scroll materials (`uvMap`).
+ * (RENDER_CHROME, CHROME4 to CHROME7, RENDER_METAL; ZzzBMD.cpp:1600-1640). Read by the scroll materials (`uvMap`).
  */
-export const UV_MAP = { mesh: 0, chrome: 1, chrome4: 4, chrome5: 5, chrome6: 6, chrome7: 7 } as const;
+export const UV_MAP = { mesh: 0, chrome: 1, chrome4: 4, chrome5: 5, chrome6: 6, chrome7: 7, metal: 8 } as const;
 export type UvMap = keyof typeof UV_MAP;
 
 /**

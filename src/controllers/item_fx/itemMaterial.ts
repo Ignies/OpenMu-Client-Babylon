@@ -575,7 +575,7 @@ const UNCLAMP = `
 `;
 
 const FLAT_LIT_OVERRIDE = `
-  color.rgb = baseColor.rgb * vDiffuseColor.rgb;
+  color.rgb = baseColor.rgb * vDiffuseColor.rgb * ${BODY_LIGHT_UNIFORM}.rgb;
 `;
 
 /**
@@ -1081,6 +1081,8 @@ const UV_SCROLL_RESAMPLE = `
           muUv = vec2(d + n.y * 3.0 + l.y * 5.0, 1.0 - d - (n.z * 2.5 + wave));
         } else if (muMap == 6) {
           muUv = vec2((n.z + n.x) * 0.8 + (mod(tms, 5000.0) * 0.00024 - 0.4) * 2.0);
+        } else if (muMap == 8) {
+          muUv = vec2(n.z * 0.5 + 0.2, n.y * 0.5 + 0.5);
         } else {
           muUv = vec2((n.z + n.x) * 0.8 + tms * 0.00006);
         }

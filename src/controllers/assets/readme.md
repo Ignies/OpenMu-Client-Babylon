@@ -26,7 +26,7 @@ imports the modules below directly (baselined in `tools/checks`).
 - `modelLoader.ts`: `loadGLTF(path, { scene })` (a `World` passes as it is; a model with no entity,
   a bag icon, passes its scene), `disposeLoadedModel` (a clone with its skeleton and
   clips), `warmGLTF`, `evictContainers`, `evictUnusedContainers(folders)`, `getMaterial`,
-  `getScrollVariant`, `getFlatLitVariant`, `setMeshFadeBlend`, `syncMaterialQuality`,
+  `getScrollVariant`, `getFlatLitVariant`, `setMeshFadeBlend`, `setMeshUnlit`, `syncMaterialQuality`,
   `syncTexturePack`, `getModel`; `getDataTexture(scene, path)` (a `Data/` bitmap for a mesh drawn with
   another texture than its own, top-down like the GLBs'), `ALPHA_TEST_AND_BLEND`.
 - `lazyAnimationGroups.ts`: `lazyAnimationGroups` (the clip list `loadGLTF` hands out),

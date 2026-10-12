@@ -1,4 +1,4 @@
-import type { Vector3 } from '../render/babylon/exports';
+import type { Scene, Vector3 } from '../render/babylon/exports';
 import type { MeshPass, MeshPassSet } from '../render/meshPasses';
 import type { HeldTexture } from '../fx/effectParticles';
 import { legacyItemEffectsOn } from './itemEffectMode';
@@ -23,7 +23,25 @@ export type HeldSprite = {
   readonly light: readonly [number, number, number] | LookLight;
   /** Degrees. */
   readonly rotation?: (ms: number) => number;
+  /** Drawn only while this holds for the wearer (an action or `c->SafeZone` test); omitted = always. */
+  readonly when?: (wearer: HeldWearer) => boolean;
 };
+
+/** What a held sprite may ask of the character carrying it: `o->CurrentAction`, `c->SafeZone`, its facing, the map. */
+export type HeldWearer = { action: number; safeZone: boolean; yaw: number; map: number };
+
+/**
+ * What `RenderLinkObject` creates for a carried weapon that outlives the frame (CreateParticle, CreateJoint,
+ * CreateEffect): `emit` runs each frame the weapon is drawn, with its bone's world point (tiles), the wearer
+ * and the frame's length (s), and rolls its own `rand_fps_check`.
+ */
+export type HeldEmitter = {
+  readonly bone: number;
+  readonly emit: (scene: Scene, at: Vector3, wearer: HeldWearer, dt: number) => void;
+};
+
+/** What a carried item draws on one model: its sprites and its emitters. */
+export type HeldSet = { readonly sprites: readonly HeldSprite[]; readonly emitters: readonly HeldEmitter[] };
 
 /**
  * One item's own look beyond its model, as content declares it (`versions/shared/item_looks/`):
@@ -36,6 +54,10 @@ export type ItemLook = {
   readonly items: readonly (readonly [number, number])[];
   readonly body?: { readonly passes: readonly MeshPass[]; readonly drawn?: readonly number[] };
   readonly held?: readonly HeldSprite[];
+  /** What it creates while carried that lives on after the frame (sparks, drops, clouds). */
+  readonly emit?: readonly HeldEmitter[];
+  /** The sprites on the phoenix wing the item carries (MODEL_SWORD_35_WING, MonkSystem.cpp:245), by its bones. */
+  readonly wing?: readonly HeldSprite[];
 };
 
 export const defineItemLook = (look: ItemLook): ItemLook => look;
@@ -60,17 +82,52 @@ export function heldLuminosity(ms: number): number {
   return luminosity.value;
 }
 
+/** `Vector(Luminosity * r, Luminosity * g, Luminosity * b, Light)` on the frame's roll. */
+export const luminous =
+  (r: number, g: number, b: number): LookLight =>
+  (ms, _body, out) => {
+    const l = heldLuminosity(ms);
+    out.set(l * r, l * g, l * b);
+  };
+
+/** The frame's `rand()` rolls in [0, 1): `roll(ms, k)` is the k-th, the same for every sprite read that frame. */
+export function frameRolls(): (ms: number, k: number) => number {
+  let at = -1;
+  const values: number[] = [];
+  return (ms, k) => {
+    if (at !== ms) {
+      at = ms;
+      values.length = 0;
+    }
+    return (values[k] ??= Math.random());
+  };
+}
+
+/** `rand() % 360`, rolled each frame: a sprite's random turn. */
+export const randomTurn = (): number => Math.floor(Math.random() * 360);
+
+/** A sprite drawn at `scale` on the frames `rand_fps_check(n)` passes (one in n), else at 0. */
+export const oneIn =
+  (n: number, scale: number) =>
+  (): number =>
+    Math.random() * n < 1 ? scale : 0;
+
 const bodies = new Map<number, MeshPassSet>();
-const helds = new Map<number, readonly HeldSprite[]>();
+const helds = new Map<number, HeldSet>();
+const wings = new Map<number, HeldSet>();
 const key = (group: number, num: number) => group * 512 + num;
+const NONE: readonly never[] = [];
 
 /** Content's looks, handed in at boot; a later look for the same item replaces the earlier one. */
 export function registerItemLooks(looks: readonly ItemLook[]): void {
   for (const look of looks) {
     const set: MeshPassSet | null = look.body ? { ...look.body, shown: legacyItemEffectsOn } : null;
+    const held: HeldSet | null = look.held || look.emit ? { sprites: look.held ?? NONE, emitters: look.emit ?? NONE } : null;
+    const wing: HeldSet | null = look.wing ? { sprites: look.wing, emitters: NONE } : null;
     for (const [group, num] of look.items) {
       if (set) bodies.set(key(group, num), set);
-      if (look.held) helds.set(key(group, num), look.held);
+      if (held) helds.set(key(group, num), held);
+      if (wing) wings.set(key(group, num), wing);
     }
   }
 }
@@ -80,7 +137,29 @@ export function itemBodyPasses(group: number, num: number): MeshPassSet | null {
   return bodies.get(key(group, num)) ?? null;
 }
 
-/** The sprites a character carrying the item draws on it, or null. */
-export function itemHeldSprites(group: number, num: number): readonly HeldSprite[] | null {
+/** The sprites and emitters a character carrying the item draws on it, or null. */
+export function itemHeldSet(group: number, num: number): HeldSet | null {
   return helds.get(key(group, num)) ?? null;
+}
+
+/** The sprites a character carrying the item draws on it, or null when it draws none. */
+export function itemHeldSprites(group: number, num: number): readonly HeldSprite[] | null {
+  const sprites = helds.get(key(group, num))?.sprites;
+  return sprites?.length ? sprites : null;
+}
+
+/** The emitters a character carrying the item runs, or null. */
+export function itemHeldEmitters(group: number, num: number): readonly HeldEmitter[] | null {
+  const emitters = helds.get(key(group, num))?.emitters;
+  return emitters?.length ? emitters : null;
+}
+
+/** What a character carrying the item draws on its phoenix wing, or null. */
+export function itemWingSet(group: number, num: number): HeldSet | null {
+  return wings.get(key(group, num)) ?? null;
+}
+
+/** The sprites on the phoenix wing a character carrying the item draws, or null. */
+export function itemWingSprites(group: number, num: number): readonly HeldSprite[] | null {
+  return wings.get(key(group, num))?.sprites ?? null;
 }

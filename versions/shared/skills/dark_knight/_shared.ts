@@ -46,7 +46,7 @@ export const itemScale = (w: { group: number; num: number }): number => (w.group
 export const ITEM_LIGHT: RGB = [0.3, 0.3, 0.3];
 
 /** BITMAP_SPARK sub0 (ZzzEffectParticle.cpp): a Spark02 chip thrown up and falling, 1.6-2.8 cm; 3 cm. */
-const SPARK_CHIPS: ParticleRecipe = {
+export const SPARK_CHIPS: ParticleRecipe = {
   texture: TEX.spark2,
   colour: RGBS.white,
   size: 0.03,

@@ -11,8 +11,10 @@ original client's item passes, the item glow tiers and the weapon swing trails.
 - `itemDrawLevel.ts`: `itemDrawLevel(group, num, level, ground)`, the level an item is drawn at.
 - `itemLooks.ts`: `defineItemLook`, `registerItemLooks` (content's `versions/shared/item_looks/`,
   at boot), `itemBodyPasses(group, num)` (the `MeshPassSet` a model takes, shown while
-  `legacyItemEffectsOn()`), `itemHeldSprites(group, num)` (the sprites a carried weapon draws),
-  `fixedLight`, `CHROME01`, `heldLuminosity(ms)` (the frame's `Luminosity` roll), types `ItemLook`, `MeshPass`,
+  `legacyItemEffectsOn()`), `itemHeldSprites(group, num)` (the sprites a carried weapon draws), `itemHeldEmitters`,
+  `itemHeldSet` (its sprites and emitters), `itemWingSet` / `itemWingSprites` (on its phoenix wing),
+  `fixedLight`, `CHROME01`, `heldLuminosity(ms)` (the frame's `Luminosity` roll), `luminous`, `frameRolls`,
+  `randomTurn`, `oneIn`, types `ItemLook`, `MeshPass`, `HeldEmitter`, `HeldSet`, `HeldWearer`,
   `HeldSprite`, `LookLight`.
 - `itemVisualTier.ts`: `itemVisualTier(item, ground)` (cached descriptor), `strongestTierOf(items)` /
   `strongestTier(items)`, `setItemGlowClock` / `itemGlowClock`, `itemEmissiveAt`, `itemHaloAt`,
@@ -20,7 +22,7 @@ original client's item passes, the item glow tiers and the weapon swing trails.
 - `itemMaterial.ts`: `createItemMaterial(scene, bright, flatLit, withScroll)`,
   `createItemPbrMaterial(scene)`, `useMeshAlphaTestTexture(material)`, `packBodyLight` /
   `packBodyLightFor`, `syncPbrDetail()`, `livePbrMaterials()`, type `UvScroll`. The scroll variants
-  also read `metadata.uvMap`: a chrome look-up by the normal (RENDER_CHROME, CHROME4 to CHROME7,
+  also read `metadata.uvMap`: a chrome look-up by the normal (RENDER_CHROME, CHROME4 to CHROME7, METAL,
   ZzzBMD.cpp:1600-1640) in place of the mesh UVs, for an item look's passes.
 - `weaponBlur.ts`: `weaponBlurFor(hands, action, hasLevel)` (type `WeaponBlurRow`), the warrior
   glint (`warriorGlint`, `warriorGlintStar`, `WARRIOR_GLINT_BONE` / `_TIP`); which skills take it is
@@ -66,7 +68,8 @@ original client's item passes, the item glow tiers and the weapon swing trails.
   (`DETAIL_UNIFORM`). Roughness is left alone; scaling it would make surfaces shinier.
 - Flat-lit variants (a bag icon, `render/iconShot.ts`): the excellent redraw is vertex lit in the
   original, and a bag item's vertex light is its BodyLight (`LightEnable` off), so `lit` is BodyLight
-  there instead of the scene's lambert sum.
+  there instead of the scene's lambert sum. The texel itself is drawn at BodyLight too (`FLAT_LIT_OVERRIDE`):
+  `RenderMesh` colours an unlit mesh by it (ZzzBMD.cpp:1740-1745); before, the flat pass ignored it.
 - Half-lambert (`MU_WRAP`): the original shades `dot*0.8 + 0.4`, clamped >= 0.2. It is added to
   the light sum as `sun x (wrap(dot) - max(dot, 0)) x shadow`, constants divided by 1.2 so a
   sun-facing face is unchanged. The sun's shadow factor is recovered from Babylon's aggregate as

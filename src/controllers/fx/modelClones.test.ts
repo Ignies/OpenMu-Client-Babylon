@@ -83,6 +83,18 @@ describe('an effect model clone', () => {
     for (const m of loads.made) expectGone(m);
   });
 
+  it('model: a native item copy takes its RenderPartObjectBody passes, dropped with the clone (Twisting Slash, Rageful Blow)', async () => {
+    Object.assign(Ecs.world as World, { getTerrainLight: () => new Vector3() });
+    spawnModel(scene, new Vector3(), { model: 'Skill/sword.glb', seconds: 0.1, native: { light: [0, 0, 0], passes: { passes: [{ mesh: 0, kind: 'add' }] } } });
+    await flush();
+    modelLayer.update?.(0, 0.04);
+    const pass = scene.meshes.find(m => m.name === 'node_0_pass');
+    expect(pass?.isVisible).toBe(true);
+    for (let i = 0; i < 5; i++) modelLayer.update?.(0, 0.04);
+    expect(pass?.isDisposed()).toBe(true);
+    modelLayer.reset?.();
+  });
+
   it('model: a spawn after one ended reuses its clone, shown once dressed', async () => {
     spawnModel(scene, new Vector3(), { model: 'Skill/again.glb', seconds: 0.1 });
     await flush();
