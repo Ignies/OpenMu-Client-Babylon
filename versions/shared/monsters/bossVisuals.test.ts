@@ -149,6 +149,16 @@ describe('Erohim', () => {
   });
 });
 
+describe("Balgass's body", () => {
+  // RenderMonster's MODEL_BALGASS (GMCrywolf1st.cpp:1425-1436): BodyLight (1, 1, 1), and every mesh lit and again
+  // RENDER_CHROME2 | RENDER_BRIGHT in BITMAP_CHROME3 (Chrome03, GL_CLAMP_TO_EDGE).
+  it('is drawn at full light with Chrome03 over every mesh', () => {
+    const balgass = monsters.def(349);
+    expect(balgass?.bodyLight).toEqual([1, 1, 1]);
+    expect(balgass?.passes).toEqual({ passes: [{ mesh: -1, kind: 'add', map: 'chrome2', texture: 'Effect/Chrome03.OZJ', clamp: true }] });
+  });
+});
+
 describe('Balgass', () => {
   // CreateJoint(BITMAP_JOINT_ENERGY, SubType 2 / 3, Scale 30) at his creation (GMCrywolf1st.cpp:674-675) on
   // MoveEye(9, 10)'s eyes (:802): 20 tails on the left (bone 10), 8 on the right (bone 9), in SubType 2 / 3's

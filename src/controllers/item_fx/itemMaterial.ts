@@ -1069,8 +1069,11 @@ const UV_SCROLL_RESAMPLE = `
         vec3 n = vec3(normalW.x, normalW.z, normalW.y);
         float tms = time * 1000.0;
         float wave = mod(tms, 10000.0) * 0.0001;
+        float wave2 = mod(tms, 5000.0) * 0.00024 - 0.4;
         if (muMap == 1) {
           muUv = vec2(n.z * 0.5 + wave, n.y * 0.5 + wave * 2.0);
+        } else if (muMap == 2) {
+          muUv = vec2((n.z + n.x) * 0.8 + wave2 * 2.0, n.y + n.x + wave2 * 3.0);
         } else if (muMap == 4) {
           vec3 l = vec3(cos(tms * 0.001), sin(tms * 0.002), 1.0);
           float d = dot(n, l);
@@ -1080,7 +1083,7 @@ const UV_SCROLL_RESAMPLE = `
           float d = dot(n, l);
           muUv = vec2(d + n.y * 3.0 + l.y * 5.0, 1.0 - d - (n.z * 2.5 + wave));
         } else if (muMap == 6) {
-          muUv = vec2((n.z + n.x) * 0.8 + (mod(tms, 5000.0) * 0.00024 - 0.4) * 2.0);
+          muUv = vec2((n.z + n.x) * 0.8 + wave2 * 2.0);
         } else if (muMap == 8) {
           muUv = vec2(n.z * 0.5 + 0.2, n.y * 0.5 + 0.5);
         } else {

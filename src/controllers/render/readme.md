@@ -16,7 +16,8 @@ There is no `index.ts` facade; other folders import the modules directly.
   drops, pets); `PartPose`, `BodyShine` (with `ShineMesh` or `ShineMeshes` and `ShineLight`, the shine mesh lit by
   the shine's tint), `HIDDEN_MESH_ALL`, `BLEND_MESH_ALL`.
 - `meshPasses.ts`: `MeshPass`, `MeshPassSet`, `MeshPasses`, `UV_MAP` / `UvMap`: a model's own
-  `RenderPartObjectBody` passes, set on `ModelObject.MeshPasses` before `load()` (item looks).
+  `RenderPartObjectBody` passes, set on `ModelObject.MeshPasses` before `load()` (item looks, and a
+  monster's own `RenderMonster` passes, its folder's `passes`).
 - `scenes/testScene.ts`: `TestScene`, the game's `Scene` with its camera, highlight layer and look.
 - `sceneLook.ts`: `setAreaMood`, `requestGlowProbe`, `updateSceneLook` (glow layer, areas).
 - `scenes/<pass>.ts`: `sync<Pass>` / `dispose<Pass>` and `createPostChain`, called by

@@ -22,7 +22,7 @@ original client's item passes, the item glow tiers and the weapon swing trails.
 - `itemMaterial.ts`: `createItemMaterial(scene, bright, flatLit, withScroll)`,
   `createItemPbrMaterial(scene)`, `useMeshAlphaTestTexture(material)`, `packBodyLight` /
   `packBodyLightFor`, `syncPbrDetail()`, `livePbrMaterials()`, type `UvScroll`. The scroll variants
-  also read `metadata.uvMap`: a chrome look-up by the normal (RENDER_CHROME, CHROME4 to CHROME7, METAL,
+  also read `metadata.uvMap`: a chrome look-up by the normal (RENDER_CHROME, CHROME2, CHROME4 to CHROME7, METAL,
   ZzzBMD.cpp:1600-1640) in place of the mesh UVs, for an item look's passes.
 - `weaponBlur.ts`: `weaponBlurFor(hands, action, hasLevel)` (type `WeaponBlurRow`), the warrior
   glint (`warriorGlint`, `warriorGlintStar`, `WARRIOR_GLINT_BONE` / `_TIP`); which skills take it is
@@ -119,4 +119,5 @@ original client's item passes, the item glow tiers and the weapon swing trails.
 - `itemDrawLevel.test.ts`: the drawn level of the jewels, rings, wings, orbs, tickets, arrows and the
   ground's swapped models, every other item at its own, then the cap.
 - `itemMaterial.test.ts`: the excellent redraw takes the lit body's vertex light, and BodyLight alone
-  on a flat-lit material (a bag item, `LightEnable` off, ZzzInventory.cpp:9682).
+  on a flat-lit material (a bag item, `LightEnable` off, ZzzInventory.cpp:9682); the scroll materials' METAL and
+  CHROME2 look-ups.

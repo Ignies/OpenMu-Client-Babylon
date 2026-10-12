@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { monsterRegistry } from '../monsters';
-import { blendMeshOf, monsterBlendMeshFor } from './monsterBlendMesh';
+import { applyMonsterLook, blendMeshOf, monsterBlendMeshFor } from './monsterBlendMesh';
 
 const row = (model: number) => {
   const r = monsterBlendMeshFor(model);
@@ -42,4 +42,27 @@ describe('monster blend meshes', () => {
     expect(blendMeshOf(9003, 52)).toBe(monsterBlendMeshFor(52));
     expect(blendMeshOf(9003, 35)).toBeUndefined();
   });
+
+describe("a monster type's own look", () => {
+  // A RenderMonster case's own passes and `Vector(r, g, b, b->BodyLight)` (Balgass, GMCrywolf1st.cpp:1425-1436).
+  it('hand the model its passes and hold its light where the case sets it', () => {
+    const passes = { passes: [{ mesh: -1, kind: 'add' as const, map: 'chrome2' as const }] };
+    monsterRegistry.add([
+      { Numb: 9011, Name: 'chromed', passes, bodyLight: [1, 1, 1] },
+      { Numb: 9012, Name: 'plain' },
+    ]);
+    const model = () => ({ MeshPasses: null as unknown, FixedLight: false, Light: { set: vi.fn() } });
+    const chromed = model();
+    applyMonsterLook(chromed as never, 9011);
+    expect([chromed.MeshPasses, chromed.FixedLight]).toEqual([passes, true]);
+    expect(chromed.Light.set).toHaveBeenCalledWith(1, 1, 1);
+    const plain = model();
+    applyMonsterLook(plain as never, 9012);
+    expect([plain.MeshPasses, plain.FixedLight]).toEqual([null, false]);
+    // A class that set its own passes keeps them.
+    const own = { ...model(), MeshPasses: { passes: [] } };
+    applyMonsterLook(own as never, 9011);
+    expect(own.MeshPasses).toEqual({ passes: [] });
+  });
+});
 });

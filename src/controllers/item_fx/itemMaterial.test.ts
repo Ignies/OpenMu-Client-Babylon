@@ -54,6 +54,12 @@ describe('the scroll materials\' look-ups', () => {
       .Fragment_Custom_Diffuse;
     expect(diffuse).toContain('} else if (muMap == 8) {\n          muUv = vec2(n.z * 0.5 + 0.2, n.y * 0.5 + 0.5);');
   });
+
+  it('read RENDER_CHROME2\'s at ((z + x) * 0.8 + wave2 * 2, y + x + wave2 * 3) (ZzzBMD.cpp:1598-1602)', () => {
+    const diffuse = (createItemMaterial(scene, false, true, true) as unknown as { CustomParts: { Fragment_Custom_Diffuse: string } }).CustomParts
+      .Fragment_Custom_Diffuse;
+    expect(diffuse).toContain('} else if (muMap == 2) {\n          muUv = vec2((n.z + n.x) * 0.8 + wave2 * 2.0, n.y + n.x + wave2 * 3.0);');
+  });
 });
 
 describe('the flat-lit material', () => {

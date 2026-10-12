@@ -1,6 +1,6 @@
 import type { Entity, World } from '../../ecs/world';
 import { ModelObject } from '../render/modelObject';
-import { blendMeshOf, type MonsterBlendMesh } from './monsterBlendMesh';
+import { applyMonsterLook, blendMeshOf, type MonsterBlendMesh } from './monsterBlendMesh';
 import { monsterModelTypeOf } from '../anim/playSpeed';
 import { ClothSet } from '../cloth';
 import type { Scene, TransformNode } from '../render/babylon/exports';
@@ -58,6 +58,7 @@ export class MonsterObject extends ModelObject {
       this.BlendMesh = row.mesh;
       this.BlendMeshLight = row.light;
     }
+    applyMonsterLook(this, this.#entity?.npcType);
 
     super.load(gltf);
 

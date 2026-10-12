@@ -1,4 +1,5 @@
 import type { MonsterBodyFx } from './bodyFx';
+import type { MeshPassSet } from '../render/meshPasses';
 import type { NpcGear, NpcGlobalVoice, NpcModel, NpcTransform, NpcTrap, NpcVoice } from './npc';
 
 /** The original client's monster table row (`Monster.txt`), without the number and name. */
@@ -89,6 +90,10 @@ export type MonsterDef = {
    * actors controller over its per-body table (`monsterBlendMesh.ts`).
    */
   blendMesh?: { readonly mesh: number; readonly light?: number };
+  /** Its `RenderMonster` case's own `RenderMesh` passes (render/meshPasses.ts), read by the actors controller. */
+  passes?: MeshPassSet;
+  /** `Vector(r, g, b, b->BodyLight)` its case sets before drawing: drawn at this light, not the floor's. */
+  bodyLight?: readonly [number, number, number];
   /**
    * `MODEL_BALL`: it rests 30 cm up and bounces there, and a server move kicks it - a hop, a roll,
    * sparks and SOUND_MENU01 (WSclient.cpp:2134-2141, ZzzCharacter.cpp:3192-3203; `ecs/systems/positionSlideSystem.ts`).
