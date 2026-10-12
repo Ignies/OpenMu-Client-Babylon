@@ -8,6 +8,8 @@ const problems: string[] = [];
 for (const entry of log.split('\x1e').map(s => s.trim()).filter(Boolean)) {
   const [hash, body] = entry.split('\x1f');
   const subject = body.split('\n')[0];
+  // GitHub's own test merge of a pull request (refs/pull/N/merge) is not ours to word.
+  if (/^Merge [0-9a-f]{40} into [0-9a-f]{40}$/.test(subject)) continue;
   const where = `${hash.slice(0, 8)} "${subject}"`;
   if (subject.length > 72) problems.push(`${where}: subject longer than 72 characters`);
   if (body.includes(EM_DASH)) problems.push(`${where}: em-dash, use -`);

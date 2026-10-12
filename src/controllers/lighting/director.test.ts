@@ -18,6 +18,11 @@ const env = vi.hoisted(() => ({
   calls: [] as { name: string; args: unknown[]; snapshot: string }[],
 }));
 
+/** JSON with every number at 12 digits: `**` differs in the last bit between V8 versions (node 22 vs 24). */
+const pinned = vi.hoisted(
+  () => (value: unknown) => JSON.stringify(value, (_key, v: unknown) => (typeof v === 'number' ? +v.toPrecision(12) : v))
+);
+
 /** A writer that records what it was handed (as handed, and as it was then) and returns `out`. */
 const writer = vi.hoisted(
   () =>
@@ -25,7 +30,7 @@ const writer = vi.hoisted(
     (...args: unknown[]) => {
       // The scene and the camera are the test's own; the rest is what the director composed.
       const handed = args.filter(a => !(a && typeof a === 'object' && 'isTestHandle' in a));
-      env.calls.push({ name, args: handed, snapshot: JSON.stringify(handed) });
+      env.calls.push({ name, args: handed, snapshot: pinned(handed) });
       return out?.(...args);
     }
 );
@@ -173,7 +178,7 @@ function run() {
   const frame = (dt: number) => {
     env.calls = [];
     director.tick(dt);
-    frames.push({ calls: env.calls, state: JSON.stringify(director.state()), published });
+    frames.push({ calls: env.calls, state: pinned(director.state()), published });
   };
   const steps: (() => void)[] = [
     () => director.setMap(ENUM_WORLD.WD_0LORENCIA),
@@ -204,7 +209,7 @@ describe('the look director', () => {
       run().map(f => ({ calls: f.calls.map(c => [c.name, c.snapshot]), state: f.state, published: f.published }))
     );
     expect(createHash('sha256').update(trace).digest('hex')).toBe(
-      '4776f7466174d5f73ca739e38caf85505b1faa31a41f4018f196ba1365f0969d'
+      '31b672df3b6c307dbc4c8ed2838b15bfdd0dff73cd5a4b171142f019924c03a1'
     );
   });
 

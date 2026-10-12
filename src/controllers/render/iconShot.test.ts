@@ -30,6 +30,16 @@ async function frames(n: number): Promise<void> {
   }
 }
 
+/** Frames until the shot is in: how many microtask hops its async steps take differs between node versions. */
+async function shot<T>(done: Promise<T>): Promise<T> {
+  let settled = false;
+  const settle = () => void (settled = true);
+  void done.then(settle, settle);
+  // Past READY_FRAMES, the shot draws even if the shaders never got ready.
+  for (let i = 0; i < 200 && !settled; i++) await frames(1);
+  return done;
+}
+
 const VIEW = { width: 4, height: 2, left: 0, right: 0.4, bottom: -0.2, top: 0 };
 
 /** A job whose subject is one box under the shot's root; `disposed` counts its dispose. */
@@ -86,8 +96,7 @@ describe('the one-shot icon render', () => {
     const first = s.shoot(boxJob('same', log));
     const second = s.shoot(boxJob('same', log));
     expect(second).toBe(first);
-    await frames(4);
-    expect(await first).toBe('blob:4x2');
+    expect(await shot(first)).toBe('blob:4x2');
     expect(s.shoot(boxJob('same', log))).toBe(first);
     expect(log.built).toEqual(['same']);
     expect(read).toHaveBeenCalledTimes(1);
@@ -97,13 +106,11 @@ describe('the one-shot icon render', () => {
     const log = { built: [] as string[], disposed: [] as string[] };
     const { shots: s } = shots();
     const first = s.shoot(boxJob('again', log));
-    await frames(4);
-    await first;
+    await shot(first);
     s.forget();
     const second = s.shoot(boxJob('again', log));
     expect(second).not.toBe(first);
-    await frames(4);
-    expect(await second).toBe('blob:4x2');
+    expect(await shot(second)).toBe('blob:4x2');
     expect(log.built).toEqual(['again', 'again']);
   });
 
@@ -114,8 +121,7 @@ describe('the one-shot icon render', () => {
     const textures = scene.textures.length;
     const { shots: s } = shots();
     const done = s.shoot(boxJob('freed', log));
-    await frames(4);
-    await done;
+    await shot(done);
     expect(log.disposed).toEqual(['freed']);
     expect(scene.cameras.length).toBe(cameras);
     expect(scene.transformNodes.length).toBe(nodes);
@@ -138,8 +144,7 @@ describe('the one-shot icon render', () => {
     const log = { built: [] as string[], disposed: [] as string[] };
     const { shots: s } = shots();
     const done = s.shoot(boxJob('framed', log));
-    await frames(4);
-    await done;
+    await shot(done);
     render.mockRestore();
     expect(seen).toEqual([{ mask: ICON_LAYER, main: false, ortho: [0, 0.4, -0.2, 0], layer: ICON_LAYER }]);
   });
@@ -174,8 +179,7 @@ describe('the one-shot icon render', () => {
         return { dispose: () => { body.dispose(); card.dispose(); } };
       },
     });
-    await frames(4);
-    await done;
+    await shot(done);
     render.mockRestore();
     expect(seen).toEqual([{ flat: true, brightKept: true, light: [1, 1, 1], fog: false, caster: false }]);
   });
@@ -198,8 +202,7 @@ describe('the one-shot icon render', () => {
         return { dispose: () => seed.dispose() };
       },
     });
-    await frames(4);
-    await done;
+    await shot(done);
     render.mockRestore();
     expect(seen).toEqual([colour]);
   });
