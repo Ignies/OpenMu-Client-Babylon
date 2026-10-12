@@ -39,6 +39,11 @@ other folders share.
   skill's Damage (CharacterManager.cpp:373-390). A book in the left hand prints its worn magic power on the line's
   maximum (`curseRate`, NewUICharacterInfoWindow.cpp:1449-1460), "(+0)" included; without a book it is null and the
   line has no "(+N)" (GlobalText 1694, else 1693).
+  The window's own harmony and 380 sums (`windowHarmony`, NewUICharacterInfoWindow.cpp:554-668, :928-942): the two
+  hands' harmony attack power on the damage line, their harmony attack rate plus the 380 attack as the PvP attack rate's
+  "(+N)" (`attackRatePvpBonus`), the armour's harmony defense rate plus the 380 defense as the PvP defense rate's
+  (`defenseRatePvpBonus`), and the armour's harmony defense on `defense` (`harmonyDefense`, which the full set's
+  "(+N)" leaves out, :1009).
 - `emotes.ts`: `EMOTES`, `EMOTE_RINGS`, `emoteById(id)`, `matchEmoteWord(text)` (the chat words that fire
   an emote, `CheckChatText`), `genderedEmoteAction`, type `EmoteId`.
 - `statAllocation.ts`: `StatAllocation.start(stat, amount)` / `cancel()`, `run`, `running`, `isRunning(stat)`.

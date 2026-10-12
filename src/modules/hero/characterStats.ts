@@ -3,7 +3,7 @@ import { BaseClass, CharacterClassNumber, getBaseClass } from '../../core/types'
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { InventoryConstants } from '@/core/inventoryConstants';
 import type { Item } from '../../ecs/world';
-import { activeSetOptions, classCanUse, wornStatBonus, classOf, harmonyBonus, harmonyNeedCut, itemDef, itemStats, optionSpecials, socketStatusBonus, type OptionSpecial, type SetOptionLine, type SocketStatusBonus } from '@/controllers/item_rules';
+import { activeSetOptions, classCanUse, wornStatBonus, classOf, harmonyBonus, harmonyNeedCut, hasGuardianOption, itemDef, itemStats, optionSpecials, socketStatusBonus, type OptionSpecial, type SetOptionLine, type SocketStatusBonus } from '@/controllers/item_rules';
 import type { ItemOptionTables, ItemSetTables } from '@/controllers/assets';
 
 export enum StatType {
@@ -287,9 +287,15 @@ type DerivedStats = {
   damageMax: number;
   attackRate: number;
   attackRatePvp: number;
+  /** The PvP attack rate's "(+N)": harmony attack rate and the 380 attack. */
+  attackRatePvpBonus: number;
   defense: number;
+  /** The harmony defense inside `defense`, which the full set's "(+N)" leaves out. */
+  harmonyDefense: number;
   defenseRate: number;
   defenseRatePvp: number;
+  /** The PvP defense rate's "(+N)": harmony defense rate and the 380 defense. */
+  defenseRatePvpBonus: number;
   dualWield: boolean;
   wizardryMin: number;
   wizardryMax: number;
@@ -703,13 +709,35 @@ function calculateWizardry(input: CharacterStatsInput): {
   return { ...range, percent: magicPercent };
 }
 
-/** `maxMg`: the worn staffs' harmony magic power, `SI_magicalpower` (NewUICharacterInfoWindow.cpp:1241-1256). */
-function harmonyMagicPower(input: CharacterStatsInput): number {
-  let sum = 0;
-  for (const item of input.items.slice(0, 12)) {
-    const bonus = item ? harmonyBonus(item, input.options) : null;
-    if (bonus?.kind === 1 && bonus.option === 1) sum += bonus.value;
-  }
+/**
+ * The window's harmony (`GetStrengthenCapability`, UIJewelHarmony.cpp:244-323) and 380 sums (NewUICharacterInfoWindow.cpp):
+ * `maxMg` from every staff (:1241-1256); the hands' attack power and attack rate (:554-610); the armour's defense rate
+ * (:612-629) and defense (:928-942); the 380 attack and defense (:631-668).
+ */
+function windowHarmony(input: CharacterStatsInput) {
+  const sum = { magic: 0, min: 0, max: 0, attackRate: 0, defenseRate: 0, defense: 0 };
+  input.items.slice(0, 12).forEach((item, slot) => {
+    if (!item) return;
+    const bonus = harmonyBonus(item, input.options);
+    const value = bonus?.value ?? 0;
+    const hand = slot < 2;
+    if (bonus?.kind === 0 && hand) {
+      if (bonus.option === 1 || bonus.option === 5) sum.min += value;
+      if (bonus.option === 2 || bonus.option === 5) sum.max += value;
+      if (bonus.option === 8) sum.attackRate += value;
+    } else if (bonus?.kind === 1) {
+      if (bonus.option === 1) sum.magic += value;
+      if (bonus.option === 7 && hand) sum.attackRate += value;
+    } else if (bonus?.kind === 2) {
+      if (bonus.option === 1) sum.defense += value;
+      if (bonus.option === 6) sum.defenseRate += value;
+    }
+    if (!hasGuardianOption(item)) return;
+    for (const [option, add] of input.options?.addOptions[item.group * 512 + item.num] ?? []) {
+      if (option === 1) sum.attackRate += add;
+      if (option === 3) sum.defenseRate += add;
+    }
+  });
   return sum;
 }
 
@@ -853,7 +881,8 @@ export function deriveCharacterStats(bare: CharacterStatsInput): DerivedStats {
   // The window's line reads the selected skill's damage (NewUICharacterInfoWindow.cpp:1226-1230).
   const skilled = magicSkillDamage({ min: magic.min + magicBonus, max: magic.max + magicBonus }, input.magicSkill, lines);
   const wizardry = withPet(withRing(skilled, items, 'wizardry'), pet, 'wizardry', level);
-  const maxMg = harmonyMagicPower(input);
+  const harmony = windowHarmony(input);
+  const maxMg = harmony.magic;
   const curse = withPet(withRing(calculateCurse(input), items, 'curse'), pet, 'curse', level);
   // The Panda and the Unicorn add 50 defense.
   const petDefense = pet?.group === GROUP_HELPER && (pet.num === PET.panda || pet.num === PET.unicorn) ? 50 : 0;
@@ -861,14 +890,17 @@ export function deriveCharacterStats(bare: CharacterStatsInput): DerivedStats {
   return {
     attackSpeed: attackSpeedOf(bare.charClass, bare.agility),
     magicSpeed: magicSpeedOf(bare.charClass, bare.agility),
-    damageMin: damage.min,
-    damageMax: damage.max,
+    damageMin: damage.min + harmony.min,
+    damageMax: damage.max + harmony.max,
     dualWield: damage.dualWield,
     attackRate: calculateAttackRate(input, base) + setSum(lines, SET.attackRate) + socket.attackRate,
     attackRatePvp: calculateAttackRatePvp(input, base),
-    defense: withSetDefense(calculateDefense(input, base), input, lines, socket) + petDefense,
+    attackRatePvpBonus: harmony.attackRate,
+    defense: withSetDefense(calculateDefense(input, base), input, lines, socket) + harmony.defense + petDefense,
+    harmonyDefense: harmony.defense,
     defenseRate: Math.trunc(calculateDefenseRate(input, base) * socket.defenseRate),
     defenseRatePvp: calculateDefenseRatePvp(input, base),
+    defenseRatePvpBonus: harmony.defenseRate,
     wizardryMin: wizardry.min + maxMg,
     wizardryMax: wizardry.max + maxMg,
     // (int)((iMagicDamageMaxInitial + maxMg) * magicPercent) (:1352).

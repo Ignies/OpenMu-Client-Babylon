@@ -445,8 +445,11 @@ export const CharacterInfo = observer(() => {
   });
 
   if (stats.attackRatePvp > 0) {
+    // With harmony or 380 attack it reads "(+N)" (NewUICharacterInfoWindow.cpp:786-797).
     strengthDetails.push({
-      text: t('charInfo.attackRate', { value: stats.attackRatePvp }),
+      text: stats.attackRatePvpBonus
+        ? t('charInfo.attackRateBonus', { value: stats.attackRatePvp, bonus: stats.attackRatePvpBonus })
+        : t('charInfo.attackRate', { value: stats.attackRatePvp }),
     });
   }
 
@@ -488,15 +491,19 @@ export const CharacterInfo = observer(() => {
       text: fullSet
         ? t('charInfo.defenseFull', {
             defense: stats.defense,
-            bonus: Math.trunc(stats.defense / 10),
+            // The harmony defense stays out of it (:1009).
+            bonus: Math.trunc((stats.defense - stats.harmonyDefense) / 10),
           })
         : t('charInfo.defense', { defense: stats.defense }),
     });
   }
 
   if (stats.defenseRatePvp > 0) {
+    // With harmony or 380 defense it reads "(+N)" (:1066-1073).
     agilityDetails.push({
-      text: t('charInfo.defenseRatePvp', { value: stats.defenseRatePvp }),
+      text: stats.defenseRatePvpBonus
+        ? t('charInfo.defenseRatePvpBonus', { value: stats.defenseRatePvp, bonus: stats.defenseRatePvpBonus })
+        : t('charInfo.defenseRatePvp', { value: stats.defenseRatePvp }),
     });
   }
 
