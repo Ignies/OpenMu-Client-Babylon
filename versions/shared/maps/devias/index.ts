@@ -37,6 +37,9 @@ const OUTDOOR = true;
 // `CreateDeviasSnow` gates on the world alone: the sky belongs to snow.
 const SNOW = true;
 
+// `SetWorldClearColor` (SceneManager.cpp:433): the dark navy void past the map edge.
+const CLEAR_COLOR = [0, 0, 10] as const;
+
 // ---- 2. state + readers ----------------------------------------------------
 // None: the map's runtime state lives in the objects `create` binds.
 
@@ -49,6 +52,7 @@ export const deviasLayer: MapLayer = {
   spawn: SPAWN,
   outdoor: OUTDOOR,
   snow: SNOW,
+  clearColor: CLEAR_COLOR,
   rooms: DEVIAS_ROOMS,
   blendMeshes: DEVIAS_BLEND_MESHES,
   render: { meshAnimations: DEVIAS_MESH_ANIMATIONS },

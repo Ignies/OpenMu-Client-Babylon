@@ -40,3 +40,10 @@ describe("Lorencia's blend meshes (MoveObject, ZzzObject.cpp:3742-3790)", () => 
     }
   });
 });
+
+describe("Lorencia's clear colour (SetWorldClearColor, SceneManager.cpp:431)", () => {
+  it('is the dark green rgb8(10, 20, 14)', async () => {
+    const { lorenciaLayer } = await import('./index');
+    expect(lorenciaLayer.clearColor).toEqual([10, 20, 14]);
+  });
+});
