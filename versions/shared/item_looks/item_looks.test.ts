@@ -563,3 +563,145 @@ describe('the bows\' held sprites', () => {
     expect(held(4, 18)).toBeNull();
   });
 });
+
+// RenderLinkObject's staff cases (ZzzCharacter.cpp); every rand() reads RAND.
+describe('the staffs\' held sprites', () => {
+  const turn = r(T * 0.0006 * 360);
+
+  it('Grand Viper Staff: Spark03, a flare and two Shiny02 at the head\'s jittered point, three violet stars (:7176-7223)', () => {
+    const j = Math.floor(RAND * 60) / 20 - 1.5;
+    const at = [0, r(-170 + j), r(j)];
+    const glow = r(Math.floor(RAND * 15) / 20 + 1);
+    const l = Math.sin(T * 0.7) * 0.2 + 0.5;
+    const violet = [r(l - 0.1), 0.1, r(l - 0.1)];
+    const star = (bone: number, point: number[], big: number, small: number) => [
+      ['shiny02', bone, point, big, violet, turn],
+      ['shiny02', bone, point, small, violet, r(90 + turn)],
+    ];
+    expect(held(5, 12)).toEqual([
+      ['spark03', 0, at, r(Math.floor(RAND * 15) / 20 + 1.8), [0.4, 0.4, 0.4], 0],
+      ['flare01', 0, at, glow, [1, 0.4, 1], 0],
+      ['shiny02', 0, at, glow, [1, 0.4, 1], 0],
+      ['shiny02', 0, at, r(glow - 0.3), [1, 0.4, 1], 90],
+      ...star(2, [0, 10, 0], 1.5, 1.2),
+      ...star(1, [-40, -10, 0], 1, 0.7),
+      ...star(1, [-160, -5, 0], 1.2, 1),
+    ]);
+  });
+
+  it('Platina Staff: flares, a Shiny02 and a magic circle at bone 9, beads on 5-8 and 10-13, a star at 4, a circle at 2 (:7377-7443)', () => {
+    const f = Math.sin(T * 0.7) * 0.2 + 0.3;
+    const fs = Math.floor(RAND * 10) / 500;
+    expect(held(5, 13)).toEqual([
+      ['flare01', 9, undefined, r(0.3 + fs), [0.7, 0.7, 0.7], 0],
+      ['flare01', 9, undefined, r(4 + fs), [0.2, r(0.6 + f), 0.2], 0],
+      ['shiny02', 9, undefined, r(1.2 + Math.floor(RAND * 30) / 60), [0.4, r(0.5 + f), 0.4], r(-(T * 0.0004 * 360))],
+      ['magicGround1', 9, undefined, r(0.25 + fs), [0.6, 1, 0.6], turn],
+      ...[0, 1, 2, 3].flatMap(i => [
+        ['flare01', 5 + i, undefined, 0.2, [0.1, 0.8, 0.1], 0],
+        ['flare01', 10 + i, undefined, 0.3, [0.5, 0.5, 0.5], 0],
+      ]),
+      ['shiny02', 4, undefined, r(0.6 + fs), [0.1, 0.8, 0.1], turn],
+      ['magicGround1', 2, undefined, r(0.15 + fs), [0.6, 1, 0.6], turn],
+      ['flare01', 2, undefined, r(0.7 + fs), [0.8, 0.8, 0.8], -turn],
+      ['shiny02', 2, undefined, r(0.5 + fs), [0.1, 1, 0.1], turn],
+      ['flare01', 2, undefined, r(2 + fs), [0.2, r(0.6 + f), 0.2], 0],
+    ]);
+  });
+
+  it('Staff of Kundun: a pulsing blue flare and two counter-turned Shiny02 on bones 5, 6 and 8 (:7444-7473)', () => {
+    const l = Math.sin(T * 0.002) * 0.3 + 0.7;
+    const spin = Math.floor(RAND * 360);
+    const gem = (bone: number, flare: number, star: number) => [
+      ['flare01', bone, undefined, flare, [0, r(l * 0.5), r(l)], 0],
+      ['shiny02', bone, undefined, star, [0.5, 0.5, 0.5], spin],
+      ['shiny02', bone, undefined, star, [0.5, 0.5, 0.5], 360 - spin],
+    ];
+    expect(held(5, 11)).toEqual([...gem(5, 1, 0.5), ...gem(6, 1, 0.5), ...gem(8, 2, 1)]);
+  });
+
+  it('Deadly Staff: orange flares on bones 4-9, a pulsing red flare and shiny05 on 2 and 3 (:7998-8034)', () => {
+    const l = Math.abs(Math.sin(T * 0.001)) * 0.8 + 0.2;
+    const ember = [r(l * 0.8), r(l * 0.1), r(l * 0.3)];
+    const shine = r(Math.floor(RAND * 10) / 20 + 0.8);
+    expect(held(5, 30)).toEqual([
+      ...[0.8, 0.4, 0.8, 0.8, 2, 0.8].map((scale, i) => ['flare01', i + 4, undefined, scale, [0.8, 0.3, 0.1], 0]),
+      ...[2, 3].flatMap(bone => [
+        ['flare01', bone, undefined, 2, ember, 0],
+        ['shiny05', bone, undefined, shine, [0.8, 0.2, 0.4], 0],
+      ]),
+    ]);
+  });
+
+  it('Imperial Staff: blue flares on bones 2-4, a red flare, shiny05, two Shiny02 and Shiny03 at 5 (:8035-8071)', () => {
+    const size = r(Math.floor(RAND * 15) / 20 + 1);
+    const blue = [0.3, 0.3, 0.9];
+    const pink = [0.9, 0.3, 0.5];
+    expect(held(5, 31)).toEqual([
+      ['flare01', 2, undefined, 2, blue, 0],
+      ['flare01', 2, undefined, 2, blue, 0],
+      ['flare01', 3, undefined, 2.5, blue, 0],
+      ['flare01', 3, undefined, 2.5, blue, 0],
+      ['flare01', 4, undefined, 3, blue, 0],
+      ['flare01', 5, undefined, 2, [0.7, 0.1, 0.2], 0],
+      ['shiny05', 5, undefined, 0.8, pink, 0],
+      ['shiny02', 5, undefined, size, pink, 0],
+      ['shiny02', 5, undefined, r(size - 0.3), pink, 90],
+      ['shiny03', 5, undefined, 2, [0.7, 0.7, 0.7], 0],
+    ]);
+  });
+
+  it('Staff 32: a red shine, marks, a flare and two shock waves at bone 1, the second growing and fading (:8072-8115)', () => {
+    const frame = Math.floor(T / 40) % 76; // Timer: 0.15 up 0.01 a frame, reset past 0.9
+    const fade = 0.95 ** Math.max(0, frame - 35);
+    const red = [1, 0.1, 0.2];
+    expect(held(5, 32)).toEqual([
+      ['shiny05', 1, undefined, 0.7, red, 0],
+      ['lightmarks', 1, undefined, 0.6, red, 0],
+      ['flare01', 1, undefined, 2, red, 0],
+      ['shockWave', 1, undefined, 0.65, [0.7, 0.1, 0.6], -(Math.floor(T * 0.05) % 360)],
+      ['shockWave', 1, undefined, r(0.15 + frame * 0.01), [r(0.7 * fade), r(0.1 * fade), r(0.6 * fade)], 0],
+      ['lightmarks', 1, undefined, r(Math.floor(RAND * 5) / 25 + 0.3), [0.9, 0.5, 0.2], 0],
+      ['shiny05', 2, undefined, 0.3, [0.9, 0.7, 0.4], 0],
+      ['lightmarks', 2, undefined, 0.4, [0.9, 0.1, 0.3], 0],
+      ['shiny05', 3, undefined, 0.2, [0.9, 0.7, 0.4], 0],
+      ['lightmarks', 3, undefined, 0.3, [0.9, 0.1, 0.3], 0],
+    ]);
+  });
+
+  it('Chromatic Staff: a flare, a pulsing magic circle and a gold Shiny02 at the orb (8), small ones on beads 1-7 (:8221-8251)', () => {
+    const a = Math.abs(Math.sin(T * 0.0008));
+    const pink = [0.8, 0.1, 0.4];
+    const gold = [0.8, 0.8, 0.2];
+    expect(held(5, 33)).toEqual([
+      ['flare01', 8, undefined, 3.5, [0.9, 0.1, 0.4], 0],
+      ['magicGround1', 8, undefined, 0.3, [r(0.1 + 0.8 * a), r(0.1 * a), r(0.1 + 0.4 * a)], 0],
+      ['shiny02', 8, undefined, 1, gold, 0],
+      ...[1, 2, 3, 4, 5, 6, 7].flatMap(bone => [
+        ['flare01', bone, undefined, 0.6, pink, 0],
+        ['magicGround1', bone, undefined, 0.12, pink, 0],
+        ['shiny02', bone, undefined, 0.3, gold, 0],
+      ]),
+    ]);
+  });
+
+  it('Raven Stick: shines, pin lights and two growing magic circles at the head, shiny05 at 2 and 3 (:8252-8290)', () => {
+    const circle = (rate: number, mod: number, add: number) => {
+      const q = (Math.PI / 180) * ((Math.floor(T * rate) % mod) + add);
+      return [Math.abs(Math.sin(q + Math.PI / 2)), Math.abs(Math.sin(q)) * 0.5];
+    };
+    const [t1, s1] = circle(0.02, 90, 0);
+    const [t2, s2] = circle(0.05, 60, 30);
+    expect(held(5, 34)).toEqual([
+      ['shiny05', 1, undefined, 1.4, [0.4, 0.2, 1], 0],
+      ['flare01', 1, undefined, 1.5, [0.7, 0.1, 0.9], 0],
+      ['shiny03', 1, undefined, 1.5, [0, 0, 1], 0],
+      ['pinLight', 1, undefined, 0.7, [0.4, 0.4, 1], -(Math.floor(T * 0.04) % 360)],
+      ['pinLight', 1, undefined, 0.8, [0.4, 0.4, 1], -(Math.floor(T * 0.03) % 360)],
+      ['magicGround1', 1, undefined, r(s1), [r(0.7 * t1), r(0.1 * t1), r(0.9 * t1)], 0],
+      ['magicGround1', 1, undefined, r(s2), [r(0.1 + 0.7 * t2), r(0.1 * t2), r(0.1 + 0.3 * t2)], 0],
+      ['shiny05', 2, undefined, 0.8, [0.9, 0, 0.1], 0],
+      ['shiny05', 3, undefined, 0.6, [0.9, 0.4, 0.7], 0],
+    ]);
+  });
+});
