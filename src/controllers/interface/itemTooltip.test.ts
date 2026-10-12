@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs';
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import type { Item } from '@/ecs/world';
 import { itemStats, type HeroStats } from '@/controllers/item_rules';
 import { loadItemOptionTables, loadItemSetTables } from '@/controllers/assets';
@@ -37,7 +37,8 @@ const NO_DATA = !existsSync(TYPES) || !existsSync(OPTIONS);
 const warrior = (group: number, more: Partial<Item> = {}): Item => ({ group, num: 5, ancientDiscriminator: 1, isAncient: true, durability: 30, ...more });
 
 describe.skipIf(NO_DATA)('an ancient item', () => {
-  loadItemSetTables(new Uint8Array(readFileSync(TYPES)), new Uint8Array(readFileSync(OPTIONS)));
+  // skipIf still runs this body to collect the tests: load once they run.
+  beforeAll(() => loadItemSetTables(new Uint8Array(readFileSync(TYPES)), new Uint8Array(readFileSync(OPTIONS))));
 
   it('carries its set name in front of its own (GetSetItemName)', () => {
     expect(lines(warrior(8))[0].text).toBe("Warrior's Leather Armor");
@@ -135,7 +136,7 @@ const NO_OPTIONS = !existsSync(HARMONY) || !existsSync(SOCKETS) || !existsSync(A
 const raw = (bytes: Partial<Record<number, number>>) => Array.from({ length: 12 }, (_, i) => bytes[i] ?? (i >= 7 ? 0xff : 0));
 
 describe.skipIf(NO_OPTIONS)('the extra options in the tooltip', () => {
-  loadItemOptionTables(new Uint8Array(readFileSync(HARMONY)), new Uint8Array(readFileSync(SOCKETS)), new Uint8Array(readFileSync(ADD_OPTIONS)));
+  beforeAll(() => loadItemOptionTables(new Uint8Array(readFileSync(HARMONY)), new Uint8Array(readFileSync(SOCKETS)), new Uint8Array(readFileSync(ADD_OPTIONS))));
 
   // ZzzInventory.cpp:5008-5025, ItemAddOption.bmd through GetItemAddOtioninfoText.
   it('lists a 380 item option from ItemAddOption.bmd', () => {
