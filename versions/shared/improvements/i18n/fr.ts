@@ -58,4 +58,7 @@ export default {
   'fidelity.enhancedSkillEffects': 'Effets des compétences améliorés',
   'fidelity.enhancedSkillEffects.hint':
     'Certaines compétences sont dessinées avec notre propre rendu, comme l\'essaim d\'Evil Spirit avec sa fumée et son voile. Aussi l\'option Effets des compétences. Classique : chaque compétence est dessinée comme dans l\'original.',
+  'fidelity.restAnyWall': "S'adosser à tout mur",
+  'fidelity.restAnyWall.hint':
+    "Clique sur un mur droit ou une clôture et ton héros marche à côté et s'y adosse, comme aux points prévus. Classique : tu ne peux t'adosser qu'aux points que la carte place, comme dans l'original.",
 } satisfies Partial<Record<keyof typeof en, string>>;

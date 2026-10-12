@@ -80,6 +80,7 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
 - `systems/restObjectRay.test.ts`: the rest-object picking ray matches `scene.pick`.
 - `systems/restObjectSystem.test.ts`: arriving at a pose box or seat sends the walk stop on its tile
   with the new facing before the action (none for a healing spot); a seat on a mount outside town is refused.
+  `restAnyWall`: a click on a straight wall leans beside it on Enhanced and nowhere on Classic.
 - `systems/ceilingHideSystem.test.ts`: the roof over the hero fades on Enhanced, stays drawn but
   detected on Classic, and comes back when `roofFade` is turned off.
 - `systems/attackSystem.test.ts`: a swing sends the walk stop (`LetHeroStop`) before its hit, on the

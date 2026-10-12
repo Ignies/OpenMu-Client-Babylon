@@ -25,7 +25,8 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `shadows.ts`: `syncShadows`, `syncTerrainDefines` (the director) and the terrain's CSM hook
   (`registerTerrainMaterial`, `terrainCsmDefines`, `terrainCsmGlsl`, `bindTerrainCsm`).
 - `propBatches.ts`: `propBatchingActive`, `propBatchExclusion`, `addPropToBatch`,
-  `flushPropBatches`, `updatePropBatches`, `disposePropBatches`.
+  `flushPropBatches`, `updatePropBatches`, `disposePropBatches`; `propLocalBox(world, type, model, min, max)`, a
+  map type's box under its node from its batch or its loaded model (the wall lean measures walls with it).
 - `objectShadow.ts`: `setShadowWorld` (the shadowless worlds and the lean, `shadowLean`), `setShadowlessScene`
   (the Kanturu Maya scene, from `modules/events`), `invalidateShadowState`.
 - options: `materialQuality.ts`, `renderingStyle.ts`, `renderScale.ts`, `renderDistance.ts` (slider

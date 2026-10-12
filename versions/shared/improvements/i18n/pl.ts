@@ -58,4 +58,7 @@ export default {
   'fidelity.enhancedSkillEffects': 'Ulepszone efekty umiejętności',
   'fidelity.enhancedSkillEffects.hint':
     'Niektóre umiejętności są rysowane w naszym własnym wyglądzie, na przykład rój Evil Spirit z dymem i całunem. Także opcja Efekty umiejętności. Klasyczne: każda umiejętność wygląda jak w oryginale.',
+  'fidelity.restAnyWall': 'Opieranie o każdą ścianę',
+  'fidelity.restAnyWall.hint':
+    'Kliknij prostą ścianę lub płot, a bohater podejdzie i oprze się o nie, jak w miejscach do opierania. Klasyczny: możesz opierać się tylko w miejscach, które stawia mapa, jak w oryginale.',
 } satisfies Partial<Record<keyof typeof en, string>>;

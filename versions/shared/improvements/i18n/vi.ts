@@ -58,4 +58,7 @@ export default {
   'fidelity.enhancedSkillEffects': 'Hiệu ứng kỹ năng nâng cao',
   'fidelity.enhancedSkillEffects.hint':
     'Một số kỹ năng được vẽ với diện mạo riêng của chúng tôi, như bầy linh hồn của Evil Spirit cùng khói và màn tối. Cũng là tùy chọn Hiệu ứng kỹ năng. Cổ điển: mọi kỹ năng được vẽ như bản gốc.',
+  'fidelity.restAnyWall': 'Tựa vào mọi bức tường',
+  'fidelity.restAnyWall.hint':
+    'Nhấp vào tường thẳng hoặc hàng rào, nhân vật sẽ đi tới bên cạnh và tựa vào, như ở các điểm tựa. Cổ điển: chỉ tựa được ở các điểm bản đồ đặt sẵn, như bản gốc.',
 } satisfies Partial<Record<keyof typeof en, string>>;

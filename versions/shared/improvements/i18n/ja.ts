@@ -58,4 +58,7 @@ export default {
   'fidelity.enhancedSkillEffects': '強化スキルエフェクト',
   'fidelity.enhancedSkillEffects.hint':
     '一部のスキルを独自の見た目で描きます(煙と暗幕を伴うEvil Spiritの群れなど)。「スキルエフェクト」オプションと同じです。クラシック: すべてのスキルをオリジナル通りに描きます。',
+  'fidelity.restAnyWall': 'どの壁にももたれる',
+  'fidelity.restAnyWall.hint':
+    'まっすぐな壁や柵をクリックすると、ヒーローがその横まで歩いてもたれかかります（もたれる場所と同じ）。クラシック：オリジナルと同じく、マップに置かれた場所でしかもたれられません。',
 } satisfies Partial<Record<keyof typeof en, string>>;

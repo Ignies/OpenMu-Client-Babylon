@@ -58,4 +58,7 @@ export default {
   'fidelity.enhancedSkillEffects': 'Efecte ale abilităților îmbunătățite',
   'fidelity.enhancedSkillEffects.hint':
     'Unele abilități se desenează cu aspectul nostru, cum ar fi roiul Evil Spirit cu fumul și umbra lui. Și opțiunea Efectele abilităților. Clasică: fiecare abilitate se desenează ca în original.',
+  'fidelity.restAnyWall': 'Sprijin de orice zid',
+  'fidelity.restAnyWall.hint':
+    'Fă clic pe un zid drept sau un gard și eroul tău merge lângă el și se sprijină, ca la locurile de sprijin. Clasic: te poți sprijini doar în locurile puse de hartă, ca în original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -58,4 +58,7 @@ export default {
   'fidelity.enhancedSkillEffects': 'Efeitos de habilidades melhorados',
   'fidelity.enhancedSkillEffects.hint':
     'Algumas habilidades são desenhadas com nossa própria aparência, como o enxame do Evil Spirit com sua fumaça e sua sombra. Também a opção Efeitos de habilidades. Clássica: cada habilidade é desenhada como no original.',
+  'fidelity.restAnyWall': 'Encostar em qualquer muro',
+  'fidelity.restAnyWall.hint':
+    'Clique num muro reto ou cerca e seu herói anda até o lado e se encosta, como nos pontos de encostar. Clássico: você só pode se encostar nos pontos que o mapa coloca, como no original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

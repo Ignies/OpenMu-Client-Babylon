@@ -58,4 +58,7 @@ export default {
   'fidelity.enhancedSkillEffects': 'Efectos de habilidades mejorados',
   'fidelity.enhancedSkillEffects.hint':
     'Algunas habilidades se dibujan con nuestro propio aspecto, como el enjambre de Evil Spirit con su humo y su sombra. También la opción Efectos de habilidades. Clásica: cada habilidad se dibuja como en el original.',
+  'fidelity.restAnyWall': 'Apoyarse en cualquier muro',
+  'fidelity.restAnyWall.hint':
+    'Haz clic en un muro recto o una valla y tu héroe camina junto a él y se apoya, como en los puntos de apoyo. Clásico: solo puedes apoyarte en los puntos que pone el mapa, como en el original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

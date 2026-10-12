@@ -58,4 +58,7 @@ export default {
   'fidelity.enhancedSkillEffects': 'Effetti delle abilità migliorati',
   'fidelity.enhancedSkillEffects.hint':
     'Alcune abilità si disegnano con il nostro aspetto, come lo sciame di Evil Spirit con il suo fumo e la sua ombra. Anche l\'opzione Effetti delle abilità. Classica: ogni abilità si disegna come nell\'originale.',
+  'fidelity.restAnyWall': 'Appoggiarsi a ogni muro',
+  'fidelity.restAnyWall.hint':
+    "Fai clic su un muro dritto o una recinzione e il tuo eroe ci cammina accanto e vi si appoggia, come nei punti di appoggio. Classico: puoi appoggiarti solo nei punti che la mappa prevede, come nell'originale.",
 } satisfies Partial<Record<keyof typeof en, string>>;

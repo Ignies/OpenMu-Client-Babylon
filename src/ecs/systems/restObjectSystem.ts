@@ -20,7 +20,11 @@ import { sound } from '../../controllers/sound';
 import { Hero } from '../../modules/hero';
 import { Session } from '../../modules/session';
 import { mountKind } from '../../controllers/pets';
-import type { ISystemFactory, World } from '../world';
+import { isOn } from '../../controllers/fidelity';
+import { hitWall, isRestWall, wallStand, type LocalBox, type WallStand } from '../../controllers/terrain/restWalls';
+import { propLocalBox } from '../../controllers/render/propBatches';
+import { placementMatrix } from '../../controllers/render/propBatchRules';
+import type { Entity, ISystemFactory, World } from '../world';
 import { isSliding } from './positionSlideSystem';
 
 /** `?autoPick=1`: the old full scene pick, read only for its ray. */
@@ -82,6 +86,58 @@ export function arriveAtRest(hero: NonNullable<World['playerEntity']>, done: Res
   if (done.kind !== 'healing') sound.play('Sound/pDropItem');
 }
 
+/** A map record a wall lean may pick. */
+export type WallCandidate = Required<Pick<Entity, 'modelId' | 'transform' | 'worldIndex'>> & Pick<Entity, 'modelObject'>;
+
+/** Tiles from the hero a clicked wall may stand. */
+const WALL_REACH = 20;
+
+const wallM = new Matrix();
+const wallHit = new Vector3();
+const wallStandOut: WallStand = { x: 0, y: 0, rotY: 0 };
+
+/**
+ * `restAnyWall`: the lean a click on a straight wall asks for - the nearest wall the
+ * ray enters, the tile beside it and the facing away from it. Null on Classic.
+ */
+export function wallRestTarget(
+  world: World,
+  candidates: Iterable<WallCandidate>,
+  ray: Ray,
+  boxOf: (e: WallCandidate) => LocalBox | null
+): RestTarget | null {
+  if (!isOn('restAnyWall')) return null;
+  const hero = world.playerEntity;
+  if (!hero) return null;
+  const hx = hero.transform.pos.x;
+  const hz = hero.transform.pos.z;
+
+  let best: WallCandidate | null = null;
+  let bestBox: LocalBox | null = null;
+  let bestT = Number.POSITIVE_INFINITY;
+  for (const e of candidates) {
+    if (e.worldIndex !== world.mapIndex) continue;
+    const pos = e.transform.pos;
+    if (Math.abs(pos.x - hx) > WALL_REACH || Math.abs(pos.z - hz) > WALL_REACH) continue;
+    if (findRestObject(world.mapIndex, e.modelId)) continue;
+    const box = boxOf(e);
+    if (!box || !isRestWall(box, e.transform.scale)) continue;
+    const t = hitWall(box, placementMatrix(e.transform, wallM), ray.origin, ray.direction, wallHit);
+    if (t >= 0 && t < bestT) {
+      bestT = t;
+      best = e;
+      bestBox = box;
+    }
+  }
+  if (!best || !bestBox) return null;
+
+  hitWall(bestBox, placementMatrix(best.transform, wallM), ray.origin, ray.direction, wallHit);
+  const walkable = (x: number, y: number) => world.isWalkable(x, y);
+  if (!wallStand(bestBox, wallM, wallHit, hx, hz, walkable, wallStandOut)) return null;
+
+  return { x: wallStandOut.x, y: wallStandOut.y, kind: 'pose', useObjectAngle: true, angle: wallStandOut.rotY };
+}
+
 export const RestObjectSystem: ISystemFactory = world => {
   const scene = world.scene;
 
@@ -103,6 +159,25 @@ export const RestObjectSystem: ISystemFactory = world => {
   let issuedPoint: { x: number; y: number } | null = null;
 
   let currentMap: number | null = null;
+
+  // Each map type's box, measured once its model (or batch) has loaded.
+  const wallQuery = world.with('modelId', 'transform', 'worldIndex');
+  const wallBoxes = new Map<number, LocalBox>();
+  let wallBoxMap = -1;
+  const boxMin = new Vector3();
+  const boxMax = new Vector3();
+  const wallBox = (e: WallCandidate): LocalBox | null => {
+    if (wallBoxMap !== world.mapIndex) {
+      wallBoxes.clear();
+      wallBoxMap = world.mapIndex;
+    }
+    const known = wallBoxes.get(e.modelId);
+    if (known) return known;
+    if (!propLocalBox(world, e.modelId, e.modelObject, boxMin, boxMax)) return null;
+    const box = { min: boxMin.clone(), max: boxMax.clone() };
+    wallBoxes.set(e.modelId, box);
+    return box;
+  };
 
   scene.onPointerObservable.add(ev => {
     if (ev.type !== PointerEventTypes.POINTERDOWN) return;
@@ -133,6 +208,7 @@ export const RestObjectSystem: ISystemFactory = world => {
       );
     }
 
+    let restHit = false;
     for (const e of propsQuery) {
       if (e.worldIndex !== world.mapIndex) continue;
       if (e.visibility.state === 'hidden') continue;
@@ -147,6 +223,7 @@ export const RestObjectSystem: ISystemFactory = world => {
         continue;
       }
 
+      restHit = true;
       const tileX = ~~e.transform.pos.x;
       const tileY = ~~e.transform.pos.z;
 
@@ -166,6 +243,13 @@ export const RestObjectSystem: ISystemFactory = world => {
       };
       clickedThisFrame = true;
       break;
+    }
+    if (restHit) return;
+
+    const lean = wallRestTarget(world, wallQuery, tmpRay, wallBox);
+    if (lean) {
+      pending = lean;
+      clickedThisFrame = true;
     }
   });
 
