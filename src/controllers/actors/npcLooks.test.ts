@@ -18,6 +18,8 @@ async function load() {
 }
 
 let m: Awaited<ReturnType<typeof load>>;
+/** A folder's own idle roll (EtcStopAnimationSetting), part of the class it is drawn with. */
+const idleOf = (type: number) => monsterRegistry.def(type)?.npcModel?.idle;
 
 beforeAll(async () => {
   m = await load();
@@ -25,7 +27,7 @@ beforeAll(async () => {
 
 describe('NPC looks from the original client', () => {
   it('Hanzo the Blacksmith draws Smith01 at 0.95 (ZzzCharacter.cpp:14517-14522)', () => {
-    expect(m.resolveModelFactory(251)).toBe(m.npcFactoryFor('Smith01', 0.95));
+    expect(m.resolveModelFactory(251)).toBe(m.npcFactoryFor('Smith01', 0.95, {}, undefined, idleOf(251)));
   });
 
   // OpenNpc + CreateCharacter and nothing else (ZzzCharacter.cpp:14295-14299, :14415-14418, :14531-14535).
@@ -34,7 +36,7 @@ describe('NPC looks from the original client', () => {
     [240, 'Storage01'],
     [254, 'Wizard01'],
   ])('%i is a plain NPC model (%s) with no class of its own', (type, file) => {
-    expect(m.resolveModelFactory(type)).toBe(m.npcFactoryFor(file));
+    expect(m.resolveModelFactory(type)).toBe(m.npcFactoryFor(file, undefined, undefined, undefined, idleOf(type)));
   });
 
   // CreateCharacterPointer's `o->Scale = 0.9f` (ZzzCharacter.cpp:11699), kept by every case that sets
@@ -99,7 +101,7 @@ describe('NPC looks from the original client', () => {
 
   it('Zyro wears the Moss model at 0.8, as Moss does (ZzzCharacter.cpp:14505-14516, :14846-14860)', () => {
     const speeds = { 0: 0.33, 1: 0.33, 2: 0.33, 3: 0.33, 4: 0.33, 5: 0.33 };
-    expect(m.resolveModelFactory(568)).toBe(m.npcFactoryFor('gambler_moss', 0.8, speeds));
+    expect(m.resolveModelFactory(568)).toBe(m.npcFactoryFor('gambler_moss', 0.8, speeds, undefined, idleOf(568)));
     expect(m.resolveModelFactory(568)).toBe(m.resolveModelFactory(492));
   });
 

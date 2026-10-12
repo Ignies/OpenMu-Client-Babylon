@@ -1,5 +1,5 @@
 import type { Entity, World } from '@/ecs/world';
-import { monsterModelRegistry, monsterRegistry, type NpcModel } from '@/controllers/monsters';
+import { monsterModelRegistry, monsterRegistry, type NpcIdleRoll, type NpcModel } from '@/controllers/monsters';
 import { loadGLTF } from '@/controllers/assets';
 import { maps } from '@/controllers/maps';
 import { monsterFactoryFor } from './genericMonster';
@@ -16,6 +16,10 @@ import { ModelObject } from '../render/modelObject';
 import { registeredModelClass } from './modelClasses';
 import { npcModelFile } from './npcModelTable';
 import { gearedNpcFactory, transformedNpcFactory } from './playerNpc';
+import { DEFAULT_IDLE_ROLL, nextIdleAction } from './npcIdle';
+
+/** `MONSTER01_STOP1`: the clip the monster loop asks an idle NPC for. */
+const STOP1 = 0;
 
 // The model content draws plain NPC classes on (the render door exports it as a type only).
 export { ModelObject };
@@ -42,7 +46,7 @@ export function resolveModelFactory(typeNumber: number): typeof ModelObject {
     );
   }
 
-  if (def?.npcModel) return npcFactoryFor(def.npcModel.file, def.npcModel.scale, def.npcModel.clipSpeeds, def.npcModel.holdFrame);
+  if (def?.npcModel) return npcFactoryFor(def.npcModel.file, def.npcModel.scale, def.npcModel.clipSpeeds, def.npcModel.holdFrame, def.npcModel.idle);
 
   if (def?.gear) return gearedNpcFactory(def.gear);
 
@@ -103,15 +107,17 @@ const npcCache = new Map<string, typeof ModelObject>();
 
 /**
  * An NPC drawn from its own model file (`npcModel`), at its scale (the default 0.9 when it has none)
- * and with the clip speeds its case writes into the model; with `holdFrame`, still on that key.
+ * and with the clip speeds its case writes into the model; with `holdFrame`, still on that key. As each
+ * clip ends it rolls the next (`idle`, else `rand() % 2`: EtcStopAnimationSetting, ZzzCharacter.cpp:3546-3687).
  */
 export function npcFactoryFor(
   file: string,
   scale = CHARACTER_DEFAULT_SCALE,
   clipSpeeds: NpcModel['clipSpeeds'] = {},
-  holdFrame?: number
+  holdFrame?: number,
+  idle: NpcIdleRoll = DEFAULT_IDLE_ROLL
 ): typeof ModelObject {
-  const key = `${file}:${scale}:${JSON.stringify(clipSpeeds)}:${holdFrame}`;
+  const key = `${file}:${scale}:${JSON.stringify(clipSpeeds)}:${holdFrame}:${JSON.stringify(idle)}`;
   const cached = npcCache.get(key);
   if (cached) return cached;
 
@@ -132,9 +138,22 @@ export function npcFactoryFor(
       this.load(await loadGLTF(path, world));
     }
 
-    /** A held NPC ignores the monster loop's Stop1, which would start its clip. */
+    #idling = false;
+
+    /**
+     * A held NPC ignores the monster loop's Stop1, which would start its clip. An idle one, asked for
+     * Stop1 every frame, rolls its next clip as each one ends instead of looping clip 0.
+     */
     override playAction(actionIndex: number, loop?: boolean): void {
-      if (holdFrame === undefined) super.playAction(actionIndex, loop);
+      if (holdFrame !== undefined) return;
+      if (actionIndex !== STOP1 || !this.#idling) {
+        this.#idling = actionIndex === STOP1;
+        super.playAction(actionIndex, loop);
+        return;
+      }
+      if (!this.ActionIterationWasFinished || !this.gltf) return;
+      this.ActionIterationWasFinished = false;
+      super.playAction(nextIdleAction(idle, this.CurrentAction, this.gltf.animationGroups.length), true);
     }
   }
 

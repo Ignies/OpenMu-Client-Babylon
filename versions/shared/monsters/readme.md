@@ -63,7 +63,7 @@ In game the name a player reads is the language pack's in either case (`monsterD
 | `hidden: true` | nothing (the Crywolf altars, Maya's body 364) |
 | `trap: { object, shadow }` | the world object of the map it stands on (traps 100-106) |
 | `model: { type, scale, hiddenMesh }` | monster model `Monster/Monster<type+1>.glb` |
-| `npcModel: { file, scale?, clipSpeeds?, holdFrame? }` | `Data/NPC/<file>` (or a path off the asset root when it starts with `/`) |
+| `npcModel: { file, scale?, clipSpeeds?, holdFrame?, idle? }` | `Data/NPC/<file>` (or a path off the asset root when it starts with `/`); `idle` is the clip roll its model case has in EtcStopAnimationSetting (ZzzCharacter.cpp:3546-3687), else `rand() % 2` |
 | `gear: { charClass, set, mainHand, ... }` | a player rig in one armour set plus a kit |
 | `transformed: { dir, part, scale? }` | a player rig whose body is one part file |
 | none | the Bull Fighter, as the original's default |

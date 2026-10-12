@@ -18,7 +18,9 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 - Monster models from each monster's folder (through the monsters controller): `monsterModelFile`,
   `monsterModelTypeOfNpc`, `monsterScaleOf`, `monsterHiddenMesh`, `hasMonsterModel`;
   `monsterFactoryFor` (`genericMonster.ts`), the class every monster without its own uses.
-- NPC defaults: `npcFactoryFor(file, scale?, clipSpeeds?, holdFrame?)`, `trapFactoryFor`, `HiddenNpc`,
+- NPC defaults: `npcFactoryFor(file, scale?, clipSpeeds?, holdFrame?, idle?)` (as each clip ends the model
+  rolls its next, `nextIdleAction` / `DEFAULT_IDLE_ROLL` in `npcIdle.ts`: EtcStopAnimationSetting,
+  ZzzCharacter.cpp:3546-3687, instead of looping clip 0), `trapFactoryFor`, `HiddenNpc`,
   `npcSpawnScale(factory, type, world)` (`modelFactoryPerId.ts`), `MapActors` (`mapActors.ts`, the
   map's `actors` row); `gearedNpcFactory(gear)`,
   `transformedNpcFactory(dir, part, scale?)` (`playerNpc.ts`); `CHARACTER_DEFAULT_SCALE`
@@ -183,6 +185,8 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   excellent tier on every mesh and one key per look; no shot for an item with no model; the hover
   turn at 0.45 degrees a millisecond, written into the node's own quaternion; a changed item-effects
   option forgets the shots and asks every look again.
+- `npcIdle.test.ts`: the idle clip roll (the default, a missing clip, the folders' own cases) and a plain NPC
+  playing the rolled clip at a clip's end.
 - `npcModelTable.test.ts`: every row names a file in `public/game-assets` and has a scale > 0; the
   tables behave as plain objects and read the folders when asked.
 - `trapModels.test.ts`: every (map, trap) pair names an `Object<world+1>` model that exists.
