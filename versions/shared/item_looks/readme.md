@@ -32,5 +32,6 @@ index.ts    finds every file (glob) and hands them to item_fx's registerItemLook
 - an item's look: edit its file. A new one: a new file.
 
 ## Tests
+- `item_looks.test.ts`: every look's passes as numbers, read at one WorldTime (NullEngine draws no pixels).
 - How a pass is drawn: `controllers/render/meshPasses.test.ts`; who takes it: `actors/itemModel.test.ts`,
   `ecs/systems/appearanceSystem.test.ts`.

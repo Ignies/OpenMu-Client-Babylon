@@ -16,6 +16,16 @@ export type ItemLook = {
 
 export const defineItemLook = (look: ItemLook): ItemLook => look;
 
+/** A pass light the branch sets outright (`Vector(r, g, b, b->BodyLight)`), whatever the body's. */
+export const fixedLight =
+  (r: number, g: number, b: number): NonNullable<MeshPass['light']> =>
+  (_ms, _body, out) => {
+    out.set(r, g, b);
+  };
+
+/** Chrome01 on the normal look-up: RENDER_CHROME with no texture of its own (ZzzBMD.cpp:1478). */
+export const CHROME01 = { texture: 'Effect/Chrome01.OZJ', map: 'chrome' } as const;
+
 const bodies = new Map<number, MeshPassSet>();
 const key = (group: number, num: number) => group * 512 + num;
 
