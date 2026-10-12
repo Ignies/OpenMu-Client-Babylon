@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { generateKeyPairSync } from 'node:crypto';
 import { DEFAULTS, clientOrigin, configToEnv, envToConfig, parseEnvFile, toEnvFile, type Config } from './config';
 import * as check from './validate';
 
@@ -58,6 +59,14 @@ describe('config file', () => {
     expect(envToConfig({}).modulesOff).toBe('');
   });
 
+  it('stores the mail server as MU_MAIL and its admin mailbox hash as MU_MAIL_ADMIN_HASH, off unless set', () => {
+    const env = configToEnv({ ...config, mail: true, mailAdminHash: '$2b$12$x' });
+    expect(env.MU_MAIL).toBe('on');
+    expect(env.MU_MAIL_ADMIN_HASH).toBe('$2b$12$x');
+    expect(envToConfig({}).mail).toBe(false);
+    expect(envToConfig({}).mailAdminHash).toBe('');
+  });
+
   it('fills what an older file does not have from the defaults', () => {
     expect(envToConfig({ MU_DOMAIN: 'old.net' })).toEqual({ ...DEFAULTS, domain: 'old.net' });
   });
@@ -84,6 +93,7 @@ describe('answers', () => {
     expect(check.domain('mu.example.co.uk')).toBeUndefined();
     expect(check.domain('https://example.com')).toBeDefined();
     expect(check.domain('play.example.com')).toMatch(/bare/);
+    expect(check.domain('mail.example.com')).toMatch(/bare/);
   });
 
   it('checks the rest', () => {
@@ -97,9 +107,46 @@ describe('answers', () => {
     expect(check.listField('a:b')).toBeDefined();
   });
 
+  it('wants a mailbox on the server\'s own domain', () => {
+    expect(check.mailbox('bob@example.com', 'example.com')).toBeUndefined();
+    expect(check.mailbox('Bob.Smith@Example.com', 'example.com')).toBeUndefined();
+    expect(check.mailbox('bob@other.net', 'example.com')).toMatch(/@example\.com/);
+    expect(check.mailbox('bo b@example.com', 'example.com')).toBeDefined();
+    expect(check.mailbox('bob|x@example.com', 'example.com')).toBeDefined();
+    expect(check.mailbox('bob', 'example.com')).toBeDefined();
+  });
+
   it('makes secrets that are safe in every file they land in', () => {
     const a = check.newSecret();
     expect(a).toMatch(/^[A-Za-z0-9_-]{43}$/);
     expect(check.newSecret()).not.toBe(a);
+  });
+});
+
+describe('module signing key', () => {
+  // A throwaway pair: only its public half belongs in the config.
+  const pair = generateKeyPairSync('ed25519');
+  const publicKey = String(pair.publicKey.export({ format: 'jwk' }).x);
+  const privateKey = String(pair.privateKey.export({ format: 'jwk' }).d);
+
+  it('stores it as MU_MODULE_SIGNING_KEY, empty unless set', () => {
+    expect(configToEnv({ ...config, moduleSigningKey: publicKey }).MU_MODULE_SIGNING_KEY).toBe(publicKey);
+    expect(envToConfig({ MU_MODULE_SIGNING_KEY: publicKey }).moduleSigningKey).toBe(publicKey);
+    expect(envToConfig({}).moduleSigningKey).toBe('');
+  });
+
+  it('takes an ed25519 public key (32 raw bytes, base64url) or nothing', () => {
+    expect(check.moduleSigningKey(publicKey)).toBeUndefined();
+    expect(check.moduleSigningKey('')).toBeUndefined();
+  });
+
+  it('refuses a private key, a key pair, PEM text and anything that is not 32 bytes', () => {
+    const keyPair = Buffer.from(privateKey + publicKey, 'base64url').toString('base64url');
+    const pem = pair.privateKey.export({ type: 'pkcs8', format: 'pem' }).toString();
+    expect(check.moduleSigningKey(keyPair)).toMatch(/private/);
+    expect(check.moduleSigningKey(pem)).toMatch(/private/);
+    expect(check.moduleSigningKey(publicKey.slice(0, 40))).toMatch(/32 bytes/);
+    expect(check.moduleSigningKey(`${publicKey}==`)).toMatch(/base64url/);
+    expect(check.moduleSigningKey(publicKey.replace(/./, '+'))).toMatch(/base64url/);
   });
 });

@@ -1049,7 +1049,7 @@ exports[`skill tables golden > skill 77 1`] = `
   ],
   "delay": 200,
   "heroSound": "Sound/infinityArrow",
-  "light": "0/0 12438107cd988e1a",
+  "light": "0/0 db2dbd33cd5325ae",
   "sound": "Sound/infinityArrow",
   "stepIn": null,
   "target": "self",

@@ -341,4 +341,15 @@ export default {
   'options.skillEffects.enhanced': '強化',
   'options.help.skillEffects':
     'オリジナルはすべてのスキルを元のクライアント通りに描きます。強化は一部のスキルに独自の見た目を戻します(Evil Spiritの群れなど)。再現度ページの「強化スキルエフェクト」と同じ切り替えです。',
+  'options.page.modules': 'モジュール',
+  'options.modules.title': '配信モジュール',
+  'options.help.modules': 'このワールドが配信するモジュールです。サンドボックスのモジュールは同意した場合のみ動きます。「忘れる」で回答を消すと、次にワールドへ入ったときに再び確認されます。',
+  'options.modules.none': 'このワールドはモジュールを配信していません。',
+  'options.modules.firstParty': '公式',
+  'options.modules.sandboxed': 'サンドボックス',
+  'options.modules.allowed': '許可',
+  'options.modules.refused': '拒否',
+  'options.modules.notAsked': '未確認',
+  'options.modules.notNeeded': '不要',
+  'options.modules.forget': '忘れる',
 } satisfies Partial<Record<keyof typeof en, string>>;

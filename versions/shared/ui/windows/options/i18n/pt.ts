@@ -411,4 +411,15 @@ export default {
   'options.skillEffects.enhanced': 'Melhorados',
   'options.help.skillEffects':
     'Originais desenha cada habilidade como o cliente original. Melhorados traz de volta nossa própria aparência para algumas habilidades, como o enxame do Evil Spirit. É o mesmo interruptor que Efeitos de habilidades melhorados na página Fidelidade.',
+  'options.page.modules': 'Módulos',
+  'options.modules.title': 'Módulos transmitidos',
+  'options.help.modules': 'Os módulos que este mundo envia para você. Um isolado só roda com o seu consentimento; Esquecer apaga a sua resposta e na próxima entrada no mundo você será perguntado de novo.',
+  'options.modules.none': 'Este mundo não envia módulos.',
+  'options.modules.firstParty': 'Oficial',
+  'options.modules.sandboxed': 'Isolado',
+  'options.modules.allowed': 'Permitido',
+  'options.modules.refused': 'Recusado',
+  'options.modules.notAsked': 'Não perguntado',
+  'options.modules.notNeeded': 'Não precisa',
+  'options.modules.forget': 'Esquecer',
 } satisfies Partial<Record<keyof typeof en, string>>;

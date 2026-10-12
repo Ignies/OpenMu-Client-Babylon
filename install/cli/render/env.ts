@@ -1,6 +1,8 @@
 // Per-service environment, rendered from the config. Secrets go only to the services that use them.
 import { clientOrigin, type Config } from '../config';
 import { DATA, HOSTS, PORTS, WEB_IP, type Service } from '../stack';
+import { moduleSigningKey } from '../validate';
+import { mailHost, mailserverEnv, webmailEnv } from './mail';
 
 type Env = Record<string, string>;
 const onOff = (v: boolean) => (v ? 'on' : 'off');
@@ -88,6 +90,9 @@ export function serviceEnv(c: Config): Partial<Record<Service, Env>> {
       OPS_DB_PATH: DATA.ops,
       RATE_DB_PATH: DATA.register,
     },
+    // Rendered with mail off too: compose reads every service's env file.
+    mailserver: mailserverEnv(c),
+    webmail: webmailEnv(c),
   };
 }
 
@@ -103,12 +108,17 @@ export function stackEnv(c: Config, paths: { repo: string; state: string }): Env
     MU_STATE: paths.state,
     OPENMU_IMAGE: openmuImage(c),
     POSTGRES_PASSWORD: c.postgresPassword,
+    MU_MAIL_HOST: mailHost(c),
     ...clientBuildArgs(c),
   };
 }
 
 /** Build arguments for the client and register images: the server's own defaults baked in. */
 export function clientBuildArgs(c: Config): Env {
+  return { ...siteBuildArgs(c), VITE_MODULE_SIGNING_KEY: moduleSigningKey(c.moduleSigningKey) ? '' : c.moduleSigningKey };
+}
+
+function siteBuildArgs(c: Config): Env {
   if (c.mode === 'domain') {
     return {
       VITE_WS_HOST: `wss://ws.${c.domain}`,

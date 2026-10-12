@@ -28,6 +28,7 @@ import { itemSelfLight, lightItem, type ItemLampKind } from '../../controllers/l
 import type { LightSource } from '../../controllers/lighting/lightSource';
 import { shownGear, type Gear } from '../../controllers/actors';
 import { gearEffectsShown } from './othersShown';
+import { ammoGoldWanted, paintAmmo } from '../../controllers/actors/ammoGold';
 
 /**
  * Item glow: tier stamps, the +9..+15 lamp / aura / crackle and the excellent
@@ -109,6 +110,9 @@ type Tracked = {
   /** An excellent item is here: keep a sparkle alive (re-spawned after a map reset). */
   sparkleWanted: boolean;
   sparkle: EffectHandle | null;
+  /** Infinity Arrow's gold quiver per hand, and the model it was painted on (a reload repaints). */
+  ammoGold: [boolean, boolean];
+  ammoModel: [unknown, unknown];
 };
 
 function anyExcellent(app: Gear): boolean {
@@ -164,6 +168,15 @@ function stampMeshes(part: ModelObject, item: Item | null | undefined, ground = 
     mesh.metadata.isExcellent = tier.isExcellent;
     mesh.metadata.timeOffset = 0;
   }
+}
+
+/** Paints a hand's bolts or arrows gold while Infinity Arrow holds, when that or the model changes. */
+function keepAmmoGold(part: ModelObject, gold: boolean, state: Tracked, hand: 0 | 1): void {
+  const model = part.gltf ?? null;
+  if (state.ammoGold[hand] === gold && state.ammoModel[hand] === model) return;
+  state.ammoGold[hand] = gold;
+  state.ammoModel[hand] = model;
+  if (model) paintAmmo(part, gold);
 }
 
 /** Equipment slots and the part they load into (appearanceSystem.ts). */
@@ -232,7 +245,16 @@ export const ItemGlowSystem: ISystemFactory = world => {
   function stateOf(e: Entity): Tracked {
     let state = tracked.get(e);
     if (!state) {
-      state = { options: '', key: [], lamp: null, stamped: false, sparkleWanted: false, sparkle: null };
+      state = {
+        options: '',
+        key: [],
+        lamp: null,
+        stamped: false,
+        sparkleWanted: false,
+        sparkle: null,
+        ammoGold: [false, false],
+        ammoModel: [null, null],
+      };
       tracked.set(e, state);
     }
     return state;
@@ -402,6 +424,12 @@ export const ItemGlowSystem: ISystemFactory = world => {
               );
             }
           }
+        }
+
+        const hands = modelObject as PlayerObject;
+        if (hands.Weapon1) {
+          keepAmmoGold(hands.Weapon1, ammoGoldWanted(e.buffs, app.leftHand), state, 0);
+          keepAmmoGold(hands.Weapon2, ammoGoldWanted(e.buffs, app.rightHand), state, 1);
         }
 
         keepSparkle(e, state, 'character');

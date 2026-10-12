@@ -234,4 +234,5 @@ export default {
   'item.pieces': '{count} / {max}',
   'msgWin.confirmMix': '%s\nCombiner les objets ?',
   'msgWin.exitCountdown': 'Vous quitterez le jeu dans {seconds} secondes.',
+  'msgWin.confirmModule': 'Ce monde veut lancer le module {id} {version}.\nIl tourne à part du jeu et ne peut pas lire vos comptes.\nL\'autoriser ?',
 } satisfies Partial<Record<keyof typeof en, string>>;

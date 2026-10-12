@@ -14,6 +14,12 @@ export const PORTS = {
   gameServers: 6,
   /** IP mode only: the register site on its own port. */
   registerSite: 8081,
+  /** The webmail behind Caddy, and the mail server's public ports (the `mail` profile only). */
+  webmail: 80,
+  smtp: 25,
+  submissions: 465,
+  submission: 587,
+  imaps: 993,
 } as const;
 
 /** Service names on the Compose network; the proxy shares OpenMU's namespace, so both answer on `openmu-startup`. */
@@ -23,9 +29,13 @@ export const HOSTS = {
   register: 'register',
   cashshop: 'cashshop',
   marketplace: 'marketplace',
+  webmail: 'webmail',
 } as const;
 
-export type Service = 'database' | 'openmu' | 'proxy' | 'register' | 'cashshop' | 'marketplace' | 'ops' | 'web';
+export type Service = 'database' | 'openmu' | 'proxy' | 'register' | 'cashshop' | 'marketplace' | 'ops' | 'web' | 'mailserver' | 'webmail';
+
+/** The Compose profile the mail server and webmail run under. */
+export const MAIL_PROFILE = 'mail';
 
 /** Every service's data lives under one volume mounted at /data. */
 export const DATA = {

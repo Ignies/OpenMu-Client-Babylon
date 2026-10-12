@@ -13,16 +13,30 @@ vi.mock('../assets/mu', async importOriginal => ({
 
 import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
 import { Scene } from '@babylonjs/core/scene';
+import { FreeCamera } from '@babylonjs/core/Cameras/freeCamera';
+import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 import { createItemMaterial } from './itemMaterial';
 
 const engine = new NullEngine();
 const scene = new Scene(engine);
+new FreeCamera('camera', Vector3.Zero(), scene);
 afterAll(() => engine.dispose());
 
 /** The fragment the legacy passes are folded into. */
 const passes = (flatLit: boolean) =>
   (createItemMaterial(scene, false, flatLit, true) as unknown as { CustomParts: { Fragment_Before_FragColor: string } })
     .CustomParts.Fragment_Before_FragColor;
+
+describe('the per-mesh texture bind', () => {
+  it('is installed on a material made while the scene is not ready, as the hero wing made after the load', () => {
+    const waiting = {};
+    scene.addPendingData(waiting);
+    const material = createItemMaterial(scene, true, false);
+    scene.render();
+    expect(material.onBindObservable.observers.length).toBe(1);
+    scene.removePendingData(waiting);
+  });
+});
 
 describe('the legacy item passes', () => {
   it('redraw an excellent item by the vertex light of a lit body', () => {

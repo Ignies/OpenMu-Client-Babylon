@@ -1,6 +1,8 @@
 // The Caddyfile: static client and register site, routes to every service, HTTPS in domain mode.
 import type { Config } from '../config';
 import { HOSTS, PORTS } from '../stack';
+import { MAIL_PORTS, mailHost, mailOn } from './mail';
+import { MODULES_PATH } from './manifest';
 
 const CLIENT_ROOT = '/srv/client';
 const REGISTER_ROOT = '/srv/register';
@@ -13,9 +15,15 @@ function apiRoutes(): string {
   ].join('\n');
 }
 
-/** server.json, readable from any page: a client served elsewhere fetches it next to the proxy. */
+/**
+ * server.json and the modules it lists, readable from any page: a client served elsewhere fetches them
+ * next to the proxy. A module is pinned by its hash, so its file needs no cache rule.
+ */
 function manifestRoute(): string {
-  return `\thandle /server.json {\n\t\troot * ${CLIENT_ROOT}\n\t\theader Access-Control-Allow-Origin *\n\t\theader Cache-Control no-cache\n\t\tfile_server\n\t}`;
+  return [
+    `\thandle /server.json {\n\t\troot * ${CLIENT_ROOT}\n\t\theader Access-Control-Allow-Origin *\n\t\theader Cache-Control no-cache\n\t\tfile_server\n\t}`,
+    `\thandle ${MODULES_PATH}* {\n\t\troot * ${CLIENT_ROOT}\n\t\theader Access-Control-Allow-Origin *\n\t\tfile_server\n\t}`,
+  ].join('\n');
 }
 
 /** The proxy's host: server.json, then the websocket for everything else. */
@@ -57,6 +65,8 @@ export function caddyfile(c: Config): string {
       block(`ws.${d}`, proxySite()),
       block(`register.${d}`, registerSite()),
       block(`admin.${d}`, adminSite(c)),
+      // Let's Encrypt only, so the mail server finds the certificate at a known path (mail.ts certFiles).
+      ...(mailOn(c) ? [block(mailHost(c), `\ttls {\n\t\tissuer acme\n\t}\n\treverse_proxy ${HOSTS.webmail}:${PORTS.webmail}`)] : []),
     ].join('\n');
   }
   return [
@@ -70,5 +80,6 @@ export function caddyfile(c: Config): string {
 
 /** Ports the firewall opens. SSH stays open so the installer never locks you out. */
 export function publicPorts(c: Config): number[] {
-  return c.mode === 'domain' ? [22, 80, 443] : [22, 80, PORTS.proxy, PORTS.registerSite, PORTS.admin];
+  if (c.mode !== 'domain') return [22, 80, PORTS.proxy, PORTS.registerSite, PORTS.admin];
+  return [22, 80, 443, ...(mailOn(c) ? MAIL_PORTS : [])];
 }

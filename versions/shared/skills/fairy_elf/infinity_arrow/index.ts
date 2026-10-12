@@ -23,4 +23,7 @@ export default defineSkill({
   // what an absent mount row means here.
   clip: { ground: A.PLAYER_RUSH1 }, // Infinity Arrow
   target: 'self',
+  // Original: each flare joint's white AddTerrainLight, range 1, every move (ZzzEffectJoint.cpp:6013-6015; rings.ts),
+  // over the rings' 40 ticks of joints and the last one's 35.
+  light: { bodies: { flare: { color: [1, 1, 1], range: 1, seconds: 75 * 0.04, release: 0.1 } } },
 });

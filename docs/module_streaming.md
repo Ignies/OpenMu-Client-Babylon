@@ -65,7 +65,7 @@ range does not match is skipped with a notice, never run.
    (never in CI); only its public half is built into the client. Needed from phase 5 on.
 4. The order is 3, 4, 6, then 5.
 
-Phases 3, 4 and 6 are built (below); phase 5 is next.
+Phases 3 to 6 are built (below).
 
 ## Phase 3: built (2026-10-06)
 
@@ -93,8 +93,8 @@ All in [src/modules/_api/](../src/modules/_api/readme.md), a folder that is not 
 
 Left for phase 5, when third-party code first runs (decided 2026-10-06): caps on a sandboxed module's
 windows, listeners and calls and a rate limit (today only the 64K message cap); a timeout on the
-guest's pending calls; refusing a streamed module that claims `core`. `playEffect` and `playSound`
-stay narrow until a module needs more.
+guest's pending calls; refusing a streamed module that claims `core` (all done in phase 5, below).
+`playEffect` and `playSound` stay narrow until a module needs more.
 
 ## Phase 4: the extension code
 
@@ -220,3 +220,72 @@ client's own code: password login as the test GM, token request, reconnect, toke
 character list with the token replaced, the proxy naming that socket, the replaced token and a junk
 one refused, the new token logging in. A password change (the same password hashed again) was
 checked by hand to void the account's tokens.
+
+
+## Phase 5: built (2026-10-11)
+
+A world's `server.json` lists the modules it streams; the client downloads, checks and loads them while
+the player is on that world. Streaming is new behaviour, not a correction, and it is on whenever a world
+lists modules: a world that lists none (every world until its owner adds one) sees nothing new, so
+Classic is unchanged. Details and the code: [src/modules/_api/](../src/modules/_api/readme.md)
+("Streaming", "Limits").
+
+- The list: `modules: [{ id, version, api, url, sha256, signature? }]` (`servers/serverManifest.ts`, at
+  most 32). A malformed entry, a repeated id or one claiming `core` is dropped with a notice, never
+  the whole file. The installer writes it from its modules folder (`<state>/modules/<name>.js` with a
+  `<name>.json` description, [install/readme.md](../install/readme.md)) and Caddy serves the files at
+  `/server-modules/` next to `server.json`.
+- Before loading (`download.ts`): the API range (`canServe`; never downloaded when it fails), Cache
+  Storage by hash (memory on a plain-http page), a download of at most 4 MB in 30 s, the hash. Any
+  failure skips the module with a notice (`moduleStream.*`, every language).
+- First party (`signature.ts`): `signature` is the owner's ed25519 signature over the text
+  `id|version|sha256`, checked with WebCrypto against `VITE_MODULE_SIGNING_KEY` (the raw 32-byte
+  public key in base64url) built into the client. Why the text and not the bytes: the hash is checked
+  against the bytes first, so the signature covers the file anyway, and signing the text also binds the
+  id and the version (a server cannot relabel a signed module or pass an old version off as new). No
+  key built in: no module is first party.
+- Loading (`streamer.ts`, `streamPorts.ts`), once the hero is in the world: first party in the page
+  (the checked bytes through a `blob:` URL, `install(api, 'page')`); everything else, unsigned or badly
+  signed, in a `sandbox="allow-scripts"` iframe (`sandboxPage`) after the player's consent, asked once
+  per world per module version (a message box; both answers remembered in localStorage,
+  `mu_module_consent`). A module claiming `core` or a built-in module's id is refused. Going back to the
+  server choice unloads everything (frames removed, windows and listeners gone).
+- The limits phase 3 left (`dispatcher.ts` `SANDBOX_LIMITS`, `guest.ts`), for third-party modules only:
+  1 window (its frame is its one surface), 4000 text lines of at most 1000 characters, 100 calls a
+  second with 200 at once, 30 packets a second with 60 at once, one map and one packet subscription;
+  a guest call with no answer fails after 10 s.
+- The example (`tools/modules/example/`): a window with a line of text that sends "hello" through 0xE8
+  and plays a click (and, in its frame, shows the echo) when the answer comes back, which needs a module
+  plugin answering "example" on the server (none ships). `bun tools/modules/example/build.ts <out.js>`
+  builds it to one file; its test streams that file both ways: signed in process, unsigned in a faked
+  frame under a fake consent, the same calls.
+
+### Signing
+
+The owner's key pair is made offline, once; the private key never enters the repository, CI or a
+server. `tools/modules/sign.ts` refuses a key path inside the repository.
+
+1. `bun tools/modules/sign.ts keygen <path outside the repo>/mu-modules.pem` writes the private key
+   (PKCS#8 PEM, mode 600) and prints `VITE_MODULE_SIGNING_KEY=...`, the public key. (`openssl genpkey
+   -algorithm ed25519 -out mu-modules.pem` makes the same kind of key; `sign.ts pubkey <key>` prints its
+   public half.) Keep the PEM offline, with a backup.
+2. Build the client with that public key: `VITE_MODULE_SIGNING_KEY=<public key>` in the build's
+   environment. It is public; without it, every module runs as third party. A server the installer
+   runs takes it as `MU_MODULE_SIGNING_KEY` (`mu config` > Features), which it passes to the web
+   image's build ([install/readme.md](../install/readme.md)).
+3. For each module release: build it to one file, then `bun tools/modules/sign.ts sign <key.pem>
+   <module.js> --id <id> --version <x.y.z> --api <range>`, which writes `<module>.json` (id, version,
+   api, signature) beside it. Copy both files into a server's modules folder and save the config
+   (`mu config`); the installer hashes the file into `server.json`.
+4. A new version is a new signature (the version is signed); a changed file under the same version
+   fails its hash or signature check.
+
+### What needs a browser look
+
+Node runs the logic, not a real iframe or Cache Storage: the first live run should check that the
+sandboxed frame loads its `srcdoc` page and imports the module from its `data:` URL (an opaque origin),
+that the frame sits over its window's content area and follows a window resize (item windows do not
+move; one that does would leave the frame behind), that a first-party module imports from its `blob:`
+URL in the production build, that Cache Storage keeps a module across reloads on https, that the
+consent box shows in the world and both answers stick, and that leaving for the server choice removes
+the frame.

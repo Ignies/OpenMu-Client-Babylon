@@ -1,0 +1,33 @@
+MIT License
+
+Copyright (c) 2026 Ignies and the OpenMu-Client-Babylon contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+Additional condition
+
+The in-client credits window opened with Ctrl+F8 and its contents (the
+contributor lists read from the project's Git history and GitHub, the special
+thanks and this notice) must remain present, reachable with Ctrl+F8 and
+unaltered in every copy, fork, build or deployment of the Software, in whole or
+in part. The contributor mark is part of these credits: a character whose name
+matches a contributor in those lists is drawn with an angelic halo above the
+head and a white aura around the body, and that marking must likewise remain
+present and unaltered. Removing access to the window, removing the mark or
+altering either is not permitted under this license.

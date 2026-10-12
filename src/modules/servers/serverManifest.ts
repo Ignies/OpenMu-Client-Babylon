@@ -2,6 +2,7 @@ import { LocalStorage } from '../../core/localStorage';
 import { ServerConfig, onWorldEntered, type ServerProfile } from './serverConfig';
 import { serverManifestUrl } from './serverServices';
 import { setServerModulesOff } from '../module';
+import { MODULE_ID as STREAMED_ID } from '../_api/contract';
 
 /**
  * A world's `server.json`: what the server decides for every player on it. Fetched when the world
@@ -23,6 +24,21 @@ type ServerSettings = {
   readonly autoQuiver: boolean;
 };
 
+/** One module the world streams to its players (docs/module_streaming.md, phase 5). */
+export type StreamedModuleEntry = {
+  readonly id: string;
+  /** Semver, `1.2.3`: consent is asked again for a new version. */
+  readonly version: string;
+  /** The module API range it needs (`_api/contract.ts` `canServe`), checked before it loads. */
+  readonly api: string;
+  /** Where its file is: absolute (http or https) or relative to the manifest. */
+  readonly url: string;
+  /** SHA-256 of the file, lowercase hex: the cache key and the check. */
+  readonly sha256: string;
+  /** ed25519 over `id|version|sha256`, base64url: present on first-party modules. */
+  readonly signature?: string;
+};
+
 type ServerManifest = {
   readonly version: 1;
   readonly settings: ServerSettings;
@@ -30,6 +46,10 @@ type ServerManifest = {
   readonly modulesOff: readonly string[];
   /** The server issues login tokens (our OpenMU plugin, `openmu/readme.md`); a saved login may keep one. */
   readonly loginTokens: boolean;
+  /** The modules the world streams (phase 5); malformed entries are left out and named in `modulesDropped`. */
+  readonly modules: readonly StreamedModuleEntry[];
+  /** The entries left out of `modules`, by id (`#<index>` when the id itself is bad), for the notice. */
+  readonly modulesDropped: readonly string[];
 };
 
 /** What a manifest puts in force for its world. */
@@ -49,6 +69,11 @@ const ORIGINAL: InForce = { settings: ORIGINAL_SETTINGS, loginTokens: false };
 
 const MODULE_ID = /^[a-z][a-z0-9_]{0,31}$/;
 const MAX_MODULES_OFF = 64;
+const MAX_STREAMED = 32;
+const SEMVER = /^(0|[1-9]\d{0,5})\.(0|[1-9]\d{0,5})\.(0|[1-9]\d{0,5})$/;
+const SHA256 = /^[0-9a-f]{64}$/;
+/** 64 bytes in base64url without padding: 86 characters, the last one carrying 4 bits. */
+const SIGNATURE = /^[A-Za-z0-9_-]{85}[AQgw]$/;
 
 /** The type each known setting must have; a key not listed here is ignored. */
 const SETTING_TYPES: { readonly [K in keyof ServerSettings]: 'boolean' } = {
@@ -73,10 +98,51 @@ function parseModulesOff(raw: unknown): string[] | null {
   return [...new Set(raw as string[])];
 }
 
+const isText = (v: unknown, max: number): v is string => typeof v === 'string' && v.length > 0 && v.length <= max;
+
+/** A module's file address: http or https, absolute or relative to the manifest. */
+function isModuleUrl(url: unknown): url is string {
+  if (!isText(url, 2048)) return false;
+  try {
+    return ['http:', 'https:'].includes(new URL(url, 'https://manifest.invalid/').protocol);
+  } catch {
+    return false;
+  }
+}
+
+/** One `modules` entry, or null when anything in it is malformed. An entry claiming `core` is refused. */
+function parseStreamed(raw: unknown): StreamedModuleEntry | null {
+  if (!isObject(raw) || Object.hasOwn(raw, 'core')) return null;
+  const { id, version, api, url, sha256, signature } = raw;
+  if (typeof id !== 'string' || !STREAMED_ID.test(id)) return null;
+  if (typeof version !== 'string' || !SEMVER.test(version) || !isText(api, 64) || !isModuleUrl(url)) return null;
+  if (typeof sha256 !== 'string' || !SHA256.test(sha256)) return null;
+  if (signature !== undefined && (typeof signature !== 'string' || !SIGNATURE.test(signature))) return null;
+  return { id, version, api, url, sha256, ...(signature === undefined ? {} : { signature }) };
+}
+
+/**
+ * `modules`: a malformed entry, a repeated id and anything past 32 entries is dropped and named, never
+ * the whole document; a `modules` that is not a list drops everything.
+ */
+function parseModules(raw: unknown): Pick<ServerManifest, 'modules' | 'modulesDropped'> {
+  if (raw === undefined) return { modules: [], modulesDropped: [] };
+  if (!Array.isArray(raw)) return { modules: [], modulesDropped: ['modules'] };
+  const modules: StreamedModuleEntry[] = [];
+  const modulesDropped: string[] = [];
+  raw.forEach((item: unknown, i) => {
+    const entry = parseStreamed(item);
+    if (entry && modules.length < MAX_STREAMED && !modules.some(m => m.id === entry.id)) return void modules.push(entry);
+    const id = isObject(item) ? item.id : undefined;
+    modulesDropped.push(typeof id === 'string' && STREAMED_ID.test(id) ? id : `#${i}`);
+  });
+  return { modules, modulesDropped };
+}
+
 /**
  * A `server.json` body, or null. It must be an object with `version` 1 and a `settings` object
- * whose known keys have their type, and may carry `modulesOff` and `loginTokens`; a wrong type anywhere
- * rejects the whole document. Unknown keys are skipped: a newer server may know settings this client does not.
+ * whose known keys have their type, and may carry `modulesOff`, `loginTokens` and `modules`; a wrong
+ * type rejects the whole document, except in `modules`, where only the bad entry goes. Unknown keys are skipped: a newer server may know settings this client does not.
  */
 export function parseServerManifest(raw: unknown): ServerManifest | null {
   if (!isObject(raw) || raw.version !== SERVER_MANIFEST_VERSION || !isObject(raw.settings)) return null;
@@ -96,7 +162,13 @@ export function parseServerManifest(raw: unknown): ServerManifest | null {
   const loginTokens = raw.loginTokens ?? false;
   if (typeof loginTokens !== 'boolean') return null;
 
-  return { version: SERVER_MANIFEST_VERSION, settings: settings as ServerSettings, modulesOff, loginTokens };
+  return {
+    version: SERVER_MANIFEST_VERSION,
+    settings: settings as ServerSettings,
+    modulesOff,
+    loginTokens,
+    ...parseModules(raw.modules),
+  };
 }
 
 const inForce = (manifest: ServerManifest | null): InForce =>
@@ -141,6 +213,18 @@ async function fetchManifest(url: string): Promise<ServerManifest | null> {
   }
 }
 
+type ModulesListener = (world: string, manifestUrl: string, modules: readonly StreamedModuleEntry[], dropped: readonly string[]) => void;
+const modulesListeners = new Set<ModulesListener>();
+
+/**
+ * Runs `fn` with each world's module list as its fetch answers (`_api/streamPorts.ts`, the streamer);
+ * a failed fetch lists none. The cached copy never does: code loads only from a fresh list. Returns the end.
+ */
+export function onModulesListed(fn: ModulesListener): () => void {
+  modulesListeners.add(fn);
+  return () => void modulesListeners.delete(fn);
+}
+
 /**
  * Fetches the world's manifest and puts it in force for that world. Until it answers, the cached
  * copy (if any) applies; a failed fetch drops the cache and leaves the original behaviour.
@@ -151,6 +235,7 @@ export async function loadServerManifest(
   const url = serverManifestUrl(profile);
   if (!url) {
     setServerModulesOff([]);
+    for (const fn of modulesListeners) fn(profile.id, '', [], []);
     return ORIGINAL_SETTINGS;
   }
 
@@ -163,6 +248,7 @@ export async function loadServerManifest(
   current.set(url, inForce(manifest));
   setServerModulesOff(manifest?.modulesOff ?? []);
   writeCache(url, manifest);
+  for (const fn of modulesListeners) fn(profile.id, url, manifest?.modules ?? [], manifest?.modulesDropped ?? []);
 
   return inForce(manifest).settings;
 }

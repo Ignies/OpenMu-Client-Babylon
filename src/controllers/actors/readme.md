@@ -53,7 +53,8 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   `inBloodCastle`, `inHellas`.
 - Small helpers: `MapPlayerNetClassToModelClass`, `isFemaleClass`; `classWorldScale`;
   `truncatePathWithinRange`, `distanceAlongPath`; `debuffBodyLight`, `debuffBrightBody`,
-  `debuffSlow`; `ItemGroup`, `ItemRestPose`, `itemRestHeight`, `itemWornHeight`, `itemTumbleAxis`;
+  `debuffSlow`; `ammoGoldWanted`, `paintAmmo` (Infinity Arrow's gold, chrome bolts and arrows while the buff holds,
+  ZzzObject.cpp:8023-8030; `itemGlowSystem` paints them on both Skill effects branches); `ItemGroup`, `ItemRestPose`, `itemRestHeight`, `itemWornHeight`, `itemTumbleAxis`;
   `itemObjectAttribute(group, num)`; `GuildFlag`, `GUILD_FLAG_BONE`, `isThunderHawkArmor`;
   `applyOutlawLook`, `outlawUltraActive`, `OUTLAW_ULTRA_LIGHT`; `isSkinOrHairTexture`,
   `isHideTexture`, `hideSkinTexture(group, num)` and `hideSkinMeshes(group, num)` (on the door: the
@@ -105,6 +106,10 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   operator status, never while cloaked). It is its own root, not a child, so it keeps its own orange
   chrome pass (ZzzObject.cpp:1558-1564); each frame it is put at head bone 20 plus (70, -5, 0) cm and
   turned with the body, not the bone (`CSParts::IRender`).
+- `contributorMark.ts`: `ContributorMark`, the credits' contributor mark (protected, AGENTS.md "Credits"): one
+  halo ring cloned per character (shared geometry and material per scene) and one small CPU particle system
+  of soft white motes round the body. `ecs/systems/contributorMark.ts` creates it and calls `place(head, feet,
+  shown)` each frame; it is disposed with the body node.
 - The `Helm` socket is the class head and `HelmMask` the worn helm. The head is drawn bare-headed (it is then
   BODYPART_HELM) and under the open helms, Bronze, Pad, Vine to Spirit and 63, 65, 68, 70 (BODYPART_HEAD); any
   other helm hides it (`showsClassHead`, SetCharacterScale, ZzzCharacter.cpp:12114-12128). Every player is dressed
@@ -160,6 +165,7 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   additive or hidden mesh: `RULES` in `itemObjectAttribute.ts`.
 
 ## Tests
+- `ammoGold.test.ts`: only bolts and arrows turn gold, only while Infinity Arrow holds, and give back their light after.
 - `chaosCastleUnit.test.ts`: the castle's weapons per class, own weapons elsewhere, transformed
   players and NPCs keep theirs, no armour glow in the castle.
 - `approachPath.test.ts`: walk truncation at range, distance along the sent path, stall capping.

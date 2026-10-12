@@ -440,4 +440,15 @@ export default {
   'options.skillEffects.enhanced': 'Улучшенные',
   'options.help.skillEffects':
     'Оригинальные рисует каждое умение как оригинальный клиент. Улучшенные возвращает наш собственный вид некоторых умений, например рой Evil Spirit. Тот же переключатель, что и Улучшенные эффекты умений на странице Точность.',
+  'options.page.modules': 'Модули',
+  'options.modules.title': 'Загружаемые модули',
+  'options.help.modules': 'Модули, которые присылает этот мир. Модуль в песочнице работает только с вашего согласия; «Забыть» стирает ответ, и при следующем входе в мир вас спросят снова.',
+  'options.modules.none': 'Этот мир не присылает модулей.',
+  'options.modules.firstParty': 'Официальный',
+  'options.modules.sandboxed': 'В песочнице',
+  'options.modules.allowed': 'Разрешён',
+  'options.modules.refused': 'Отклонён',
+  'options.modules.notAsked': 'Не спрашивали',
+  'options.modules.notNeeded': 'Не нужно',
+  'options.modules.forget': 'Забыть',
 } satisfies Partial<Record<keyof typeof en, string>>;

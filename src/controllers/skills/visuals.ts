@@ -18,7 +18,7 @@ import { heldWeapons } from '@/controllers/actors';
 import { tierIndex } from '@/controllers/lighting/lightingQuality';
 import { weather } from '@/controllers/weather';
 import { castIsDrawn } from './castBudget';
-import { isOn } from '@/controllers/fidelity';
+import { enhancedSkillFx } from './effectsTier';
 
 /**
  * Skill visual engine: step DSL, dispatch, fallbacks, buff looks (see readme.md).
@@ -72,8 +72,7 @@ export const model = (o: ModelOptions): Step => (at, c) => effects.spawn('model'
 /** `model` for an effect the original keeps out of the effect cap when the hero casts it (`heroSkillEffect`). */
 export const skillModel = (o: ModelOptions): Step => (at, c) => effects.spawn('model', c.scene, at, heroSkillEffect(o, c.caster));
 export const ring = (o: RingOptions): Step => (at, c) => effects.spawn('ring', c.scene, at, o);
-/** Ours: the Skill effects selector is on Enhanced (the `enhancedSkillEffects` improvement). */
-export const enhancedSkillFx = (): boolean => isOn('enhancedSkillEffects');
+export { enhancedSkillFx };
 /** A skill's two looks: `enhanced` (ours) while `enhancedSkillFx`, else `original`; picked at each cast. */
 export const tiered = (original: Step, enhanced: Step): Step => (at, c) => (enhancedSkillFx() ? enhanced : original)(at, c);
 export const seq = (...steps: Step[]): Step => (at, c) => {

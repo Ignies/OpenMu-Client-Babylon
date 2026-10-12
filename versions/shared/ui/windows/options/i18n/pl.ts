@@ -408,4 +408,15 @@ export default {
   'options.skillEffects.enhanced': 'Ulepszone',
   'options.help.skillEffects':
     'Oryginalne rysuje każdą umiejętność jak oryginalny klient. Ulepszone przywraca nasz własny wygląd niektórych umiejętności, na przykład rój Evil Spirit. Ten sam przełącznik co Ulepszone efekty umiejętności na stronie Wierność.',
+  'options.page.modules': 'Moduły',
+  'options.modules.title': 'Moduły przesyłane',
+  'options.help.modules': 'Moduły, które ten świat ci przesyła. Moduł w piaskownicy działa tylko za twoją zgodą; Zapomnij usuwa odpowiedź, więc przy następnym wejściu do świata zostaniesz zapytany ponownie.',
+  'options.modules.none': 'Ten świat nie przesyła modułów.',
+  'options.modules.firstParty': 'Oficjalny',
+  'options.modules.sandboxed': 'Piaskownica',
+  'options.modules.allowed': 'Dozwolony',
+  'options.modules.refused': 'Odrzucony',
+  'options.modules.notAsked': 'Nie pytano',
+  'options.modules.notNeeded': 'Niepotrzebna',
+  'options.modules.forget': 'Zapomnij',
 } satisfies Partial<Record<keyof typeof en, string>>;

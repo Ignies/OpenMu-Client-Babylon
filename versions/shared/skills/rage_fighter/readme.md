@@ -24,7 +24,7 @@ folders: [../readme.md](../readme.md).
 | `increase_health` | 267, 573 str | the same in violet; on the buffed body (130, 155) the Ourforces bone glow and two red decals under it |
 | `increase_block` | 268, 569 power up, 572 mastery | the same in red, then a pale wind pillar on the caster (the hero's target on his own cast) that stands while that body holds an Ourforces buff; on the buffed body (131, 153, 154) now and then a mirror wind pillar |
 | `charge` | 269 | Rush's charge: each tick until RUSH key 5 or tick 14, 20 cm over the feet, four JOINT_SPARKs thrown back and four BITMAP_FIRE sub18 ground smokes; then MODEL_SWORD_FORCE sub2 in knightSt_blue, 100 cm up, running ahead faster each tick, growing for three ticks and leaving a copy each, then fading and spraying the same on the ground under it, lighting it |
-| `phoenix_shot` | 270 | a phoenix arrow, a fire hit and the phoenix model |
+| `phoenix_shot` | 270 | nothing, as the original (its MODEL_PHOENIX_SHOT is never made); Enhanced (ours): a phoenix arrow, a fire hit and the phoenix model |
 
 Timing follows the original's effects, not the packet: most of them read the caster's clip key
 or their own LifeTime each 25 Hz tick (`MoveHandlers.cpp`), and drop what is left when the caster
@@ -109,6 +109,7 @@ count moves on the effects clock (`eachMove`, `movesSince`), so a script made in
 - see [docs/how_to/add_skill.md](../../../../docs/how_to/add_skill.md).
 
 ## Tests
+- `phoenix_shot/index.test.ts`: nothing drawn on Classic, ours on Enhanced.
 - `timing.test.ts`: per skill, the tick each part draws or sounds at, against the clip; Dark Side's
   follow-ups against the echo, the hero's clip and AttackTime's stop at 15, the targets dropped past the fifth, and the
   hero's DarksideRendering a tick at a time (five parts a tick: the body, the afterimages, their waves and bursts, none

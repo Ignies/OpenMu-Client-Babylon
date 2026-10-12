@@ -65,6 +65,7 @@ Controllers, ECS systems and `app/boot.tsx` add theirs at runtime, after the mod
 - [character_select](character_select/readme.md): create / delete answers, line-up layout, backdrop.
 - [chat](chat/readme.md): chat packets, log model, notices, `/` commands, item links, emojis.
 - [combat](combat/readme.md): attack and skill animations, hits and kills of other objects.
+- [credits](credits/readme.md): the project credits read from GitHub, for the landing and the Ctrl+F8 window.
 - [drops](drops/readme.md): items and zen on the ground, name tiers, loot filter.
 - [economy](economy/readme.md): the `Economy` store for vault, chaos machine, trade, personal shop.
 - [events](events/readme.md): Blood Castle, Devil Square, Chaos Castle, Duel and the other events.

@@ -228,4 +228,5 @@ export default {
   'item.pieces': '{count} / {max}',
   'msgWin.confirmMix': '%s\nPołączyć przedmioty?',
   'msgWin.exitCountdown': 'Wyjdziesz z gry za {seconds} s.',
+  'msgWin.confirmModule': 'Ten świat chce uruchomić moduł {id} {version}.\nDziała oddzielnie od gry i nie może odczytać twoich kont.\nZezwolić?',
 } satisfies Partial<Record<keyof typeof en, string>>;

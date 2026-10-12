@@ -394,4 +394,15 @@ export default {
   'options.skillEffects.enhanced': 'Подобрени',
   'options.help.skillEffects':
     'Оригинални рисува всяко умение като оригиналния клиент. Подобрени връща нашия собствен вид на някои умения, например роя на Evil Spirit. Същият превключвател като Подобрени ефекти на уменията в страницата Вярност.',
+  'options.page.modules': 'Модули',
+  'options.modules.title': 'Изтеглени модули',
+  'options.help.modules': 'Модулите, които този свят ти изпраща. Модул в пясъчник работи само с твое съгласие; Забрави изтрива отговора ти и при следващото влизане в света ще бъдеш попитан отново.',
+  'options.modules.none': 'Този свят не изпраща модули.',
+  'options.modules.firstParty': 'Официален',
+  'options.modules.sandboxed': 'В пясъчник',
+  'options.modules.allowed': 'Разрешен',
+  'options.modules.refused': 'Отказан',
+  'options.modules.notAsked': 'Не е питан',
+  'options.modules.notNeeded': 'Не е нужно',
+  'options.modules.forget': 'Забрави',
 } satisfies Partial<Record<keyof typeof en, string>>;

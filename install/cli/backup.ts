@@ -1,8 +1,9 @@
-// Backups: the OpenMU database (pg_dump) and every service's SQLite file, into one dated folder.
+// Backups: the OpenMU database (pg_dump), every service's SQLite file and the mail server's data, into one dated folder.
 import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { Stack } from './docker';
 import { files } from './paths';
+import { MAIL_ARCHIVE, mailBackupCommand, mailOn, mailRestoreScript } from './render/mail';
 
 const KEEP = 10;
 const DUMP = 'openmu.dump';
@@ -37,6 +38,11 @@ export async function backup(stack: Stack, label = ''): Promise<string> {
   const copy = await stack.once('register', ['bun', 'tools/sqliteBackup.ts', '/data', '/backup'], { binds: [`${join(dir, DATA)}:/backup`] });
   if (copy.code !== 0) throw new Error(`SQLite backup failed: ${copy.err}`);
 
+  if (mailOn(stack.config)) {
+    const mail = await stack.once('mailserver', mailBackupCommand(), { binds: [`${dir}:/backup`] });
+    if (mail.code !== 0) throw new Error(`Mail backup failed: ${mail.err}`);
+  }
+
   copyFileSync(files(stack.paths).config, join(dir, 'mu.env'));
   prune(stack.paths.backups);
   return dir;
@@ -45,7 +51,7 @@ export async function backup(stack: Stack, label = ''): Promise<string> {
 /** Puts a backup back. Everything but the database stops while it happens. */
 export async function restore(stack: Stack, dir: string): Promise<void> {
   if (!existsSync(join(dir, DUMP))) throw new Error(`${dir} has no ${DUMP}.`);
-  const others = ['web', 'ops', 'marketplace', 'cashshop', 'register', 'proxy', 'openmu-startup'];
+  const others = [...(mailOn(stack.config) ? ['webmail', 'mailserver'] : []), 'web', 'ops', 'marketplace', 'cashshop', 'register', 'proxy', 'openmu-startup'];
   await stack.stop(...others);
   await stack.up('database');
 
@@ -64,6 +70,11 @@ export async function restore(stack: Stack, dir: string): Promise<void> {
     binds: [`${join(dir, DATA)}:/backup:ro`],
   });
   if (put.code !== 0) throw new Error(`Restoring the SQLite files failed: ${put.err}`);
+
+  if (mailOn(stack.config) && existsSync(join(dir, MAIL_ARCHIVE))) {
+    const mail = await stack.once('mailserver', ['sh', '-c', mailRestoreScript()], { binds: [`${dir}:/backup:ro`] });
+    if (mail.code !== 0) throw new Error(`Restoring the mail failed: ${mail.err}`);
+  }
   await stack.up();
 }
 

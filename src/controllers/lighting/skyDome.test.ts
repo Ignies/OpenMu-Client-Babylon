@@ -19,7 +19,10 @@ vi.mock('./profiles', async importOriginal => {
   };
 });
 
-const { syncSkyDome } = await import('./skyDome');
+const { floorDeepFor, syncSkyDome } = await import('./skyDome');
+const { profileFor } = await import('./profiles');
+const { ENUM_WORLD } = await import('../../core/types');
+type World = (typeof ENUM_WORLD)[keyof typeof ENUM_WORLD];
 
 // The director sets the clear colour every tick (lighting/director.ts): decoded into kept buffers.
 describe('the clear colour', () => {
@@ -34,5 +37,14 @@ describe('the clear colour', () => {
     const [horizon, bytes] = set.mock.calls;
     [0.5 ** 2.2, 0.25 ** 2.2, 1, 1].forEach((v, i) => expect(horizon[i]).toBeCloseTo(v));
     [0.5 ** 2.2, 0.25 ** 2.2, 1, 1].forEach((v, i) => expect(bytes[i]).toBeCloseTo(v));
+  });
+});
+
+// The original clears every open map's void to black or near it; Devias' floor drew it so, Kanturu showed its pale horizon.
+describe('the sky floor', () => {
+  it('is black below the horizon on every map with a sky', () => {
+    const worlds = Object.values(ENUM_WORLD).filter((w): w is World => typeof w === 'number' && !!profileFor(w).sky);
+    expect(worlds).toContain(ENUM_WORLD.WD_37KANTURU_1ST);
+    for (const world of worlds) expect([world, floorDeepFor(world)]).toEqual([world, [0, 0, 0]]);
   });
 });
