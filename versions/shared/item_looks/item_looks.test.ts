@@ -190,3 +190,16 @@ describe('the maces and scepters', () => {
     expect(look(2, 15)).toBeNull();
   });
 });
+
+describe('the spears', () => {
+  it('Dragon Spear: its hidden mesh 1 additive, scrolling (ZzzObject.cpp:7050-7054)', () => {
+    expect(look(3, 10)).toEqual({
+      drawn: undefined,
+      passes: [{ mesh: 1, kind: 'bright', u: r(T * 0.0001), v: r(T * 0.0005) }],
+    });
+  });
+
+  it('the axes have no branch of their own', () => {
+    for (let num = 0; num < 10; num++) expect(look(1, num)).toBeNull();
+  });
+});
