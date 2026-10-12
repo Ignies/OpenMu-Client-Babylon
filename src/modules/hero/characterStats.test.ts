@@ -75,6 +75,27 @@ describe('the character window defense rate with a shield', () => {
   it('adds 10% for the excellent defense success rate option', () => {
     expect(shield({ isExcellent: true, excellentFlags: 0x02, durability: 67 })).toBe(Math.trunc((bare + 159) * 1.1));
   });
+
+  // ZzzInfomation.cpp:3240-3246, PlusSpecialPercent's IsRequireEquipItem (:2302-2314).
+  const worn = (pieces: Record<number, Item>, strength = 600) => {
+    const items: (Item | null)[] = new Array(12).fill(null);
+    for (const [slot, item] of Object.entries(pieces)) items[Number(slot)] = item;
+    return deriveCharacterStats({ charClass: CharacterClassNumber.DarkKnight, level: 240, strength, agility: 300, vitality: 100, energy: 450, leadership: 0, items }).defenseRate;
+  };
+  const excellent = { isExcellent: true, excellentFlags: 0x02 };
+
+  it('adds 10% for each armour piece and ring with the defense success rate option, after the shield', () => {
+    expect(worn({ 2: { group: 7, num: 0, durability: 30, ...excellent } })).toBe(Math.trunc(bare * 1.1));
+    const both = Math.trunc(bare * 1.1);
+    expect(worn({ 2: { group: 7, num: 0, durability: 30, ...excellent }, 10: { group: 13, num: 8, durability: 30, ...excellent } })).toBe(both + Math.trunc(both / 10));
+    expect(worn({ 1: { group: 6, num: 12, durability: 52 }, 2: { group: 7, num: 0, durability: 30, ...excellent } })).toBe(Math.trunc((bare + 129) * 1.1));
+  });
+
+  it("drops a piece's options when its needs are unmet or it is broken", () => {
+    expect(worn({ 2: { group: 7, num: 0, durability: 30, ...excellent } }, 20)).toBe(bare);
+    expect(worn({ 2: { group: 7, num: 0, durability: 0, ...excellent } })).toBe(bare);
+    expect(worn({ 1: { group: 6, num: 12, durability: 52, optionLevel: 2, ...excellent } }, 20)).toBe(bare + 159);
+  });
 });
 
 // The window takes the magic percent from pWeaponRight, EQUIPMENT_WEAPON_RIGHT slot 0 (NewUICharacterInfoWindow.cpp:509, :1336-1346).

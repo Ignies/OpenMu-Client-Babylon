@@ -82,6 +82,7 @@ const GROUP_MACE = 2;
 const GROUP_BOW = 4;
 const GROUP_STAFF = 5;
 const GROUP_SHIELD = 6;
+const GROUP_BOOTS = 11;
 const GROUP_WING = 12;
 const GROUP_HELPER = 13;
 
@@ -547,17 +548,26 @@ function calculateDefenseRate(
 
   // EQUIPMENT_WEAPON_LEFT is slot 1, our RightHandSlot (ZzzInfomation.cpp:3222).
   const left = equipped(items, InventoryConstants.RightHandSlot);
-  if (!left || left.durability === 0) return blocking;
-
-  // The item's blocking and its +5 per option level both lose the durability percent (ZzzInfomation.cpp:3223-3236).
-  const percent = durabilityPercent(left);
-  const item = itemBlocking(left);
-  const option = isShield(left) ? (left.optionLevel ?? 0) * 5 : 0;
-  blocking += item - Math.trunc(item * percent) + option - Math.trunc(option * percent);
-  // AT_IMPROVE_BLOCKING_PERCENT, excellent bit 1 on a shield (CalcExcellentOptions, ZzzInfomation.cpp:966-969).
-  if (isShield(left) && ((left.excellentFlags ?? 0) >> 1) & 1) blocking += Math.trunc((blocking * 10) / 100);
-
+  if (left && left.durability !== 0) {
+    // The item's blocking and its +5 per option level both lose the durability percent (ZzzInfomation.cpp:3223-3236).
+    const percent = durabilityPercent(left);
+    const item = itemBlocking(left);
+    const option = special(left, 'defenseRate', input);
+    blocking += item - Math.trunc(item * percent) + option - Math.trunc(option * percent);
+  }
+  // Then +10% per piece with AT_IMPROVE_BLOCKING_PERCENT (:3237-3246).
+  const { RightHandSlot, HelmSlot, ArmorSlot, PantsSlot, GlovesSlot, BootsSlot, Ring1Slot, Ring2Slot } = InventoryConstants;
+  for (const slot of [RightHandSlot, HelmSlot, ArmorSlot, PantsSlot, GlovesSlot, BootsSlot, Ring2Slot, Ring1Slot]) {
+    if (blockingPercent(equipped(items, slot), input)) blocking += Math.trunc((blocking * 10) / 100);
+  }
   return blocking;
+}
+
+/** Excellent bit 1 on a shield, an armour piece or a ring (CalcExcellentOptions, ZzzInfomation.cpp:946-969), its needs met. */
+function blockingPercent(item: Item | null, input: CharacterStatsInput): boolean {
+  if (!item || item.durability === 0 || !(((item.excellentFlags ?? 0) >> 1) & 1)) return false;
+  const takes = (item.group >= GROUP_SHIELD && item.group <= GROUP_BOOTS) || (item.group === GROUP_HELPER && [8, 9, 21, 22, 23, 24].includes(item.num));
+  return takes && requiresMet(item, input);
 }
 
 function calculateDefenseRatePvp(

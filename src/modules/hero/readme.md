@@ -20,7 +20,8 @@ other folders share.
   and the socket bonuses (`m_StatusBonus`) when the window passes the set and socket tables
   (ZzzInfomation.cpp:2745-2812, :3005-3035, :3127-3129, :3248, :3361-3381). The stats the sets and sockets add
   (`AddStrength` and the rest) are not shown or used yet. The shield's blocking and its +5 per option level
-  lose the `CalcDurabilityPercent` share, and the excellent "defense success rate" adds 10% (:3223-3236).
+  lose the `CalcDurabilityPercent` share, and the excellent "defense success rate" on the shield, each armour
+  piece and each ring adds 10% in turn, when `IsRequireEquipItem` passes (:3223-3246).
   Wizardry is energy plus the items' wizardry options only (`CalculateMagicDamage`, :2848-3001): the wing's,
   the right weapon's (a magic sword's damage option), the left weapon's, the staff and pendant excellent
   level / 20 and 2%, the Wizard's Ring 10%, each counted only when `IsRequireEquipItem` passes. As in the
