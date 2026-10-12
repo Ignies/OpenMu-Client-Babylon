@@ -16,6 +16,7 @@ export default {
   'charInfo.defenseRate': 'Abwehr (Rate): {defense} ({rate})',
   'charInfo.defenseFull': 'Abwehr: {defense} (+{bonus})',
   'charInfo.defense': 'Abwehr: {defense}',
+  'charInfo.attackSpeed': 'Angriffsgeschwindigkeit: {value}',
   'charInfo.defenseRatePvp': 'Abwehrrate: {value}',
   'charInfo.defenseRatePvpBonus': 'Abwehrrate: {value} (+{bonus})',
   'charInfo.hp': 'LP: {current} / {max}',

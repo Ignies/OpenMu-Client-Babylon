@@ -3,7 +3,7 @@ import { BaseClass, CharacterClassNumber, getBaseClass } from '../../core/types'
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { InventoryConstants } from '@/core/inventoryConstants';
 import type { Item } from '../../ecs/world';
-import { activeSetOptions, classCanUse, wornStatBonus, classOf, harmonyBonus, harmonyNeedCut, hasGuardianOption, itemDef, itemStats, optionSpecials, socketStatusBonus, type OptionSpecial, type SetOptionLine, type SocketStatusBonus } from '@/controllers/item_rules';
+import { activeSetOptions, classCanUse, wornStatBonus, classOf, harmonyBonus, harmonyNeedCut, hasGuardianOption, itemDef, periodExpired, itemStats, optionSpecials, socketStatusBonus, type OptionSpecial, type SetOptionLine, type SocketStatusBonus } from '@/controllers/item_rules';
 import type { ItemOptionTables, ItemSetTables } from '@/controllers/assets';
 
 export enum StatType {
@@ -280,6 +280,16 @@ export function magicSpeedOf(cls: CharacterClassNumber, agility: number): number
   return Math.trunc(agility / MAGIC_SPEED_DIVISOR[getBaseClass(cls)]);
 }
 
+/** The window's attack speed line: the server's value when it sent one, MagicSpeed for the wizard and summoner (NewUICharacterInfoWindow.cpp:1039-1040). */
+export function windowAttackSpeed(
+  cls: CharacterClassNumber,
+  stats: { attackSpeed: number; magicSpeed: number },
+  server: { attack: number | null; magic: number | null }
+): number {
+  const base = getBaseClass(cls);
+  return base === BaseClass.Wizard || base === BaseClass.Summoner ? server.magic ?? stats.magicSpeed : server.attack ?? stats.attackSpeed;
+}
+
 type DerivedStats = {
   attackSpeed: number;
   magicSpeed: number;
@@ -297,6 +307,8 @@ type DerivedStats = {
   /** The PvP defense rate's "(+N)": harmony defense rate and the 380 defense. */
   defenseRatePvpBonus: number;
   dualWield: boolean;
+  /** The detail line the worn pet prints magenta, null for none. */
+  petEvent: 'attackSpeed' | null;
   wizardryMin: number;
   wizardryMax: number;
   /** Null without a staff or a magic sword in the right hand; "(+0)" still prints with one (:1336-1353). */
@@ -827,6 +839,12 @@ function withPet<T extends Range>(range: T, pet: Item | null, kind: 'damage' | '
   return { ...range, min: min + Math.trunc(min * rate), max: max + Math.trunc(max * rate) };
 }
 
+/** The Demon and the Skeleton turn the attack speed line magenta, worn with durability, needs met and not expired (NewUICharacterInfoWindow.cpp:1058-1068). */
+function petEvent(pet: Item | null, input: CharacterStatsInput): DerivedStats['petEvent'] {
+  if (pet?.group !== GROUP_HELPER || pet.durability === 0 || !requiresMet(pet, input) || periodExpired(pet)) return null;
+  return pet.num === PET.demon || pet.num === PET.skeleton ? 'attackSpeed' : null;
+}
+
 /** The Christmas, Panda and Skeleton transformation rings: the best one worn adds this much. */
 const RING_BONUS: Readonly<Record<number, number>> = { 41: 20, 76: 30, 122: 40 };
 
@@ -906,6 +924,7 @@ export function deriveCharacterStats(bare: CharacterStatsInput): DerivedStats {
     damageMin: damage.min + harmony.min,
     damageMax: damage.max + harmony.max,
     dualWield: damage.dualWield,
+    petEvent: petEvent(pet, input),
     attackRate: calculateAttackRate(input, base) + setSum(lines, SET.attackRate) + socket.attackRate,
     attackRatePvp: calculateAttackRatePvp(input, base),
     attackRatePvpBonus: harmony.attackRate,

@@ -16,6 +16,7 @@ export default {
   'charInfo.defenseRate': 'Защита (шанс): {defense} ({rate})',
   'charInfo.defenseFull': 'Защита: {defense} (+{bonus})',
   'charInfo.defense': 'Защита: {defense}',
+  'charInfo.attackSpeed': 'Скорость атаки: {value}',
   'charInfo.defenseRatePvp': 'Шанс защиты: {value}',
   'charInfo.defenseRatePvpBonus': 'Шанс защиты: {value} (+{bonus})',
   'charInfo.hp': 'HP: {current} / {max}',

@@ -16,6 +16,7 @@ export default {
   'charInfo.defenseRate': 'Defensa (tasa): {defense} ({rate})',
   'charInfo.defenseFull': 'Defensa: {defense} (+{bonus})',
   'charInfo.defense': 'Defensa: {defense}',
+  'charInfo.attackSpeed': 'Velocidad de ataque: {value}',
   'charInfo.defenseRatePvp': 'Tasa de defensa: {value}',
   'charInfo.defenseRatePvpBonus': 'Tasa de defensa: {value} (+{bonus})',
   'charInfo.hp': 'Vida: {current} / {max}',

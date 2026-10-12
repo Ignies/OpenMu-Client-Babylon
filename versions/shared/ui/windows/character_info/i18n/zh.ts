@@ -16,6 +16,7 @@ export default {
   'charInfo.defenseRate': '防御（成功率）：{defense}（{rate}）',
   'charInfo.defenseFull': '防御：{defense}（+{bonus}）',
   'charInfo.defense': '防御：{defense}',
+  'charInfo.attackSpeed': '攻击速度：{value}',
   'charInfo.defenseRatePvp': '防御成功率：{value}',
   'charInfo.defenseRatePvpBonus': '防御成功率：{value} (+{bonus})',
   'charInfo.hp': '生命：{current} / {max}',

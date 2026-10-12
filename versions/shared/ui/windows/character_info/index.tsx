@@ -38,6 +38,7 @@ import {
   getClassName,
   getStatName,
   StatType,
+  windowAttackSpeed,
 } from '@/modules/hero/characterStats';
 import {
   AMOUNT_DY,
@@ -509,6 +510,14 @@ export const CharacterInfo = observer(() => {
         : t('charInfo.defense', { defense: stats.defense }),
     });
   }
+
+  // White, magenta under its event buffs or with the Demon or the Skeleton (NewUICharacterInfoWindow.cpp:1039-1069).
+  agilityDetails.push({
+    color: stats.petEvent === 'attackSpeed' ? TEXT_COLOR.event : eventColour('attackSpeed', buffs),
+    text: t('charInfo.attackSpeed', {
+      value: windowAttackSpeed(playerData.charClass, stats, { attack: playerData.attackSpeed, magic: playerData.magicSpeed }),
+    }),
+  });
 
   if (stats.defenseRatePvp > 0) {
     // With harmony or 380 defense it reads "(+N)" (:1066-1073).

@@ -16,6 +16,7 @@ export default {
   'charInfo.defenseRate': 'Apărare (rată): {defense} ({rate})',
   'charInfo.defenseFull': 'Apărare: {defense} (+{bonus})',
   'charInfo.defense': 'Apărare: {defense}',
+  'charInfo.attackSpeed': 'Viteză de atac: {value}',
   'charInfo.defenseRatePvp': 'Rată de apărare: {value}',
   'charInfo.defenseRatePvpBonus': 'Rată de apărare: {value} (+{bonus})',
   'charInfo.hp': 'HP: {current} / {max}',

@@ -29,6 +29,11 @@ export function hasGuardianOption(item: Item): boolean {
   return ((item.raw?.[5] ?? 0) & 0x08) !== 0;
 }
 
+/** `bExpiredPeriod`: bit 2 of byte 5, a period item whose time ran out (NewUIItemMng.cpp:274-281). */
+export function periodExpired(item: Item): boolean {
+  return ((item.raw?.[5] ?? 0) & 0x04) !== 0;
+}
+
 /** The Jewel of Harmony option and its level, byte 6 of an item that is not a socket item. */
 export function harmonyOf(item: Item): { option: number; level: number } | null {
   const byte = item.socketBonus ?? 0;

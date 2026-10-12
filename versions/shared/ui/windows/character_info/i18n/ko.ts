@@ -16,6 +16,7 @@ export default {
   'charInfo.defenseRate': '방어력(성공률): {defense} ({rate})',
   'charInfo.defenseFull': '방어력: {defense} (+{bonus})',
   'charInfo.defense': '방어력: {defense}',
+  'charInfo.attackSpeed': '공격 속도: {value}',
   'charInfo.defenseRatePvp': '방어 성공률: {value}',
   'charInfo.defenseRatePvpBonus': '방어 성공률: {value} (+{bonus})',
   'charInfo.hp': '생명력: {current} / {max}',

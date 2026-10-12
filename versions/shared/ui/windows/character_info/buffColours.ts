@@ -7,6 +7,7 @@ const SECRET_POTION = { str: 50, agi: 51, vit: 52, ene: 53, cmd: 54 } as const;
 const EVENT_BUFFS = {
   damage: [36, 46, 80], // NewUICharacterInfoWindow.cpp:774-787
   defense: [37, 45], // :1024-1031
+  attackSpeed: [35, 44], // :1048-1056
   hp: [38, 48, 79], // :1129-1142
   mana: [39, 49, 78], // :1203-1216
   wizardry: [36, 47, 80], // :1363-1376

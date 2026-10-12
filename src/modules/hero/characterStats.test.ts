@@ -4,7 +4,7 @@ import type { Item } from '@/ecs/world';
 import { CharacterClassNumber } from '@/core/types';
 import { itemOptionTables, itemSetTables, loadItemOptionTables, loadItemSetTables, type ItemOptionTables } from '@/controllers/assets';
 import { itemStats } from '@/controllers/item_rules';
-import { deriveCharacterStats } from './characterStats';
+import { deriveCharacterStats, windowAttackSpeed } from './characterStats';
 
 const PET_SLOT = 8;
 const stats = (pet: Item | null, charClass = CharacterClassNumber.DarkKnight) => {
@@ -43,6 +43,31 @@ describe('the character window with a pet', () => {
   it('adds 50 defense for the Panda and the Unicorn', () => {
     expect(stats(helper(80)).defense).toBe(bare.defense + 50);
     expect(stats(helper(106)).defense).toBe(bare.defense + 50);
+  });
+
+  // NewUICharacterInfoWindow.cpp:1058-1068: worn with durability and its needs met.
+  it('turns the attack speed line magenta for the Demon and the Skeleton', () => {
+    expect(stats(helper(64)).petEvent).toBe('attackSpeed');
+    expect(stats(helper(123)).petEvent).toBe('attackSpeed');
+    expect(stats(helper(64, { durability: 0 })).petEvent).toBeNull();
+    expect(stats(helper(64, { raw: [0, 0, 0, 0, 0, 0x06, 0] })).petEvent).toBeNull();
+    expect(stats(helper(64, { raw: [0, 0, 0, 0, 0, 0x02, 0] })).petEvent).toBe('attackSpeed');
+    expect(stats(helper(1)).petEvent).toBeNull();
+    expect(bare.petEvent).toBeNull();
+    const items: (Item | null)[] = new Array(12).fill(null);
+    items[PET_SLOT] = helper(64);
+    const unmet = deriveCharacterStats({ charClass: CharacterClassNumber.DarkKnight, level: 0, strength: 20, agility: 20, vitality: 20, energy: 10, leadership: 0, items });
+    expect(unmet.petEvent).toBeNull();
+  });
+});
+
+// NewUICharacterInfoWindow.cpp:1039-1040: the wizard and the summoner read MagicSpeed.
+describe('the character window attack speed line', () => {
+  it("prints the server's speed, else the agility one, magic speed for the wizard and summoner", () => {
+    expect(windowAttackSpeed(CharacterClassNumber.DarkKnight, { attackSpeed: 40, magicSpeed: 20 }, { attack: 300, magic: 200 })).toBe(300);
+    expect(windowAttackSpeed(CharacterClassNumber.SoulMaster, { attackSpeed: 40, magicSpeed: 20 }, { attack: 300, magic: 200 })).toBe(200);
+    expect(windowAttackSpeed(CharacterClassNumber.Summoner, { attackSpeed: 40, magicSpeed: 20 }, { attack: null, magic: null })).toBe(20);
+    expect(windowAttackSpeed(CharacterClassNumber.FairyElf, { attackSpeed: 40, magicSpeed: 20 }, { attack: null, magic: null })).toBe(40);
   });
 });
 

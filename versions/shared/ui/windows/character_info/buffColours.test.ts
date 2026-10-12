@@ -28,6 +28,7 @@ describe('the detail lines under an event buff', () => {
     for (const id of [38, 48, 79]) expect(eventColour('hp', [id])).toBe(TEXT_COLOR.event);
     for (const id of [39, 49, 78]) expect(eventColour('mana', [id])).toBe(TEXT_COLOR.event);
     for (const id of [36, 47, 80]) expect(eventColour('wizardry', [id])).toBe(TEXT_COLOR.event);
+    for (const id of [35, 44]) expect(eventColour('attackSpeed', [id])).toBe(TEXT_COLOR.event);
   });
 
   it("keep the line's own colour under another line's buff", () => {

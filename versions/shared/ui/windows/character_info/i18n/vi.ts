@@ -15,6 +15,7 @@ export default {
   'charInfo.defenseRate': 'Phòng thủ (tỉ lệ):{defense} ({rate})',
   'charInfo.defenseFull': 'Phòng thủ: {defense} (+{bonus})',
   'charInfo.defense': 'Phòng thủ: {defense}',
+  'charInfo.attackSpeed': 'Tốc độ tấn công: {value}',
   'charInfo.defenseRatePvp': 'Tỉ lệ phòng thủ: {value}',
   'charInfo.defenseRatePvpBonus': 'Tỉ lệ phòng thủ: {value} (+{bonus})',
   'charInfo.hp': 'HP: {current} / {max}',

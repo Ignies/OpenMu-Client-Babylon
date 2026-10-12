@@ -13,6 +13,7 @@ const en = {
   'charInfo.defenseRate': 'Defense (rate):{defense} ({rate})',
   'charInfo.defenseFull': 'Defense: {defense} (+{bonus})',
   'charInfo.defense': 'Defense: {defense}',
+  'charInfo.attackSpeed': 'Attack speed: {value}',
   'charInfo.defenseRatePvp': 'Defense rate: {value}',
   'charInfo.defenseRatePvpBonus': 'Defense rate: {value} (+{bonus})',
   'charInfo.hp': 'HP: {current} / {max}',

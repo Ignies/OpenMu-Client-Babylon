@@ -16,6 +16,7 @@ export default {
   'charInfo.defenseRate': 'ป้องกัน (อัตรา): {defense} ({rate})',
   'charInfo.defenseFull': 'ป้องกัน: {defense} (+{bonus})',
   'charInfo.defense': 'ป้องกัน: {defense}',
+  'charInfo.attackSpeed': 'ความเร็วโจมตี: {value}',
   'charInfo.defenseRatePvp': 'อัตราป้องกันสำเร็จ: {value}',
   'charInfo.defenseRatePvpBonus': 'อัตราป้องกันสำเร็จ: {value} (+{bonus})',
   'charInfo.hp': 'HP: {current} / {max}',
