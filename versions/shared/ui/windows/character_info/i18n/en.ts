@@ -19,7 +19,7 @@ const en = {
   'charInfo.wizardryRate': 'Wizardry Dmg: {min}~{max} (+{rate})',
   'charInfo.wizardry': 'Wizardry Dmg: {min}~{max}',
   'charInfo.curseSpell': ' Curse Spell: {min} ~ {max}',
-  'charInfo.curseSpellRate': ' Curse Spell: {min} ~ {max} (+{rate})',
+  'charInfo.curseSpellRate': ' Curse Spell: {min} ~ {max}(+{rate})',
   'charInfo.skillDamage': 'Skill Damage: {value}%',
   'charInfo.divineDamage': 'Divine Damage (Roar, Slasher): {value}%',
   'charInfo.aoeDamage': 'AOE Damage (Dark Side): {value}%',

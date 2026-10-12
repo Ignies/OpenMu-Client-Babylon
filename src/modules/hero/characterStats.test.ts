@@ -282,7 +282,8 @@ describe('the character window curse line', () => {
 
   it("reads the left hand book's magic power on the line's maximum", () => {
     expect(curse({ 1: book({ optionLevel: 2 }) }).curseRate).toBe(27);
-    expect(curse({}).curseRate).toBe(0);
+    // No book, no rate: the line drops its "(+N)" (:1449-1461); with a book it shows even "(+0)".
+    expect(curse({}).curseRate).toBeNull();
   });
 });
 

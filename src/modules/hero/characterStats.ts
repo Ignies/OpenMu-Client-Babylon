@@ -296,7 +296,8 @@ type DerivedStats = {
   staffRate: number;
   curseMin: number;
   curseMax: number;
-  curseRate: number;
+  /** Null without a book in the left hand: the line then has no "(+N)". */
+  curseRate: number | null;
   /** Strength + AddStrength and the rest: what the window's skill damage lines read. */
   totals: { str: number; agi: number; vit: number; ene: number; cmd: number };
 };
@@ -744,10 +745,10 @@ function calculateCurse(input: CharacterStatsInput): Range {
   return { min: range.min + skill.damage, max: range.max + skill.damage + Math.trunc(skill.damage / 2) };
 }
 
-/** The books, ITEM_BOOK_OF_SAHAMUTT to ITEM_STAFF + 29: their magic power is the curse rate (NewUICharacterInfoWindow.cpp:1449-1460). */
-function curseRate(input: CharacterStatsInput, max: number): number {
+/** The books, ITEM_BOOK_OF_SAHAMUTT to ITEM_STAFF + 29: their magic power is the curse rate (NewUICharacterInfoWindow.cpp:1449-1460); null without one. */
+function curseRate(input: CharacterStatsInput, max: number): number | null {
   const left = equipped(input.items, InventoryConstants.RightHandSlot);
-  if (left?.group !== GROUP_STAFF || left.num < 21 || left.num > 29) return 0;
+  if (left?.group !== GROUP_STAFF || left.num < 21 || left.num > 29) return null;
   const power = Math.fround(itemMagicPower(left) / 100);
   return Math.trunc(Math.fround(max * Math.fround(power - Math.fround(power * durabilityPercent(left, false, true)))));
 }

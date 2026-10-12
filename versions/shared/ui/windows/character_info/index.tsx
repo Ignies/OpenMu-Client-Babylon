@@ -549,7 +549,7 @@ export const CharacterInfo = observer(() => {
   if (base === BaseClass.Summoner) {
     energyDetails.push({
       text:
-        stats.curseRate > 0
+        stats.curseRate !== null
           ? t('charInfo.curseSpellRate', { min: stats.curseMin, max: stats.curseMax, rate: stats.curseRate })
           : t('charInfo.curseSpell', { min: stats.curseMin, max: stats.curseMax }),
     });

@@ -37,7 +37,8 @@ other folders share.
   The curse line is `CalculateCurseDamage` (ZzzInfomation.cpp:3045-3104): energy, the wing's and the left hand's curse
   options worn by durability, the left hand's excellent level / 20 and 2%; then `GetCurseSkillDamage` adds a curse
   skill's Damage (CharacterManager.cpp:373-390). A book in the left hand prints its worn magic power on the line's
-  maximum (`curseRate`, NewUICharacterInfoWindow.cpp:1449-1460).
+  maximum (`curseRate`, NewUICharacterInfoWindow.cpp:1449-1460), "(+0)" included; without a book it is null and the
+  line has no "(+N)" (GlobalText 1694, else 1693).
 - `emotes.ts`: `EMOTES`, `EMOTE_RINGS`, `emoteById(id)`, `matchEmoteWord(text)` (the chat words that fire
   an emote, `CheckChatText`), `genderedEmoteAction`, type `EmoteId`.
 - `statAllocation.ts`: `StatAllocation.start(stat, amount)` / `cancel()`, `run`, `running`, `isRunning(stat)`.

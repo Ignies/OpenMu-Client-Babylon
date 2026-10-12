@@ -21,7 +21,7 @@ export default {
   'charInfo.wizardryRate': 'Sát thương phép: {min}~{max} (+{rate})',
   'charInfo.wizardry': 'Sát thương phép: {min}~{max}',
   'charInfo.curseSpell': ' Phép nguyền: {min} ~ {max}',
-  'charInfo.curseSpellRate': ' Phép nguyền: {min} ~ {max} (+{rate})',
+  'charInfo.curseSpellRate': ' Phép nguyền: {min} ~ {max}(+{rate})',
   'charInfo.skillDamage': 'Sát thương kỹ năng: {value}%',
   'charInfo.divineDamage': 'Sát thương thần thánh (Roar, Slasher): {value}%',
   'charInfo.aoeDamage': 'Sát thương diện rộng (Dark Side): {value}%',
