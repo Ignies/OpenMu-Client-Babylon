@@ -18,7 +18,7 @@ import {
 } from './monsterAttackClip';
 import { MonsterActionType as A } from '@versions/shared/objects/enum';
 
-const fresh = (): MonsterAttackState => ({ swordCount: 0, skill: 0, skillClearsAt: Infinity, monsterSkill: 0 });
+const fresh = (): MonsterAttackState => ({ swordCount: 0, skill: 0, skillClearsAt: Infinity, monsterSkill: 0, rage: false });
 
 /** Hands out the given rolls in order; a roll nobody planned for fails the test. */
 function rolls(...values: number[]): () => number {
@@ -285,6 +285,18 @@ describe('monsterSkillSwing (0x69)', () => {
     const state = fresh();
     expect([64, 65, 66, 67, 59].map(skill => cast(state, skill, 72, 504))).toEqual([A.Attack2, A.Attack3, A.Attack4, A.Attack1, A.Appear]);
     expect(monsterAttack(state, input(72, 504))).toBe(A.Attack1);
+  });
+
+  it('Empire Guardian: a boss spending its Berserker there raises its rage flag (GMEmpireGuardian1.cpp:2396-2403)', () => {
+    const raymond = fresh();
+    cast(raymond, 59, 69, 506);
+    expect(raymond.rage).toBe(true);
+    const elsewhere = fresh();
+    cast(elsewhere, 59, 0, 506);
+    expect(elsewhere.rage).toBe(false);
+    const defender = fresh();
+    cast(defender, 59, 70, 518);
+    expect(defender.rage).toBe(false);
   });
 
   it('Empire Guardian: the shared list on every map, each map its own (GMEmpireGuardian1-3)', () => {

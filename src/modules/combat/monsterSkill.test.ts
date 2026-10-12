@@ -22,6 +22,10 @@ await import('@versions/shared/skills/skillVisuals');
 const { installNet } = await import('./net');
 const { EventBus } = await import('@/core/eventBus');
 const { MonsterSkillAnimationPacket } = await import('@versions/shared/packets/ServerToClientPackets');
+const { effects } = await import('@/controllers/fx');
+const { lighting } = await import('@/controllers/lighting');
+const { TEX } = await import('@/controllers/fx/recipes');
+const { monsterAttackState } = await import('@/controllers/anim/monsterAttackClip');
 
 const GAION = 7;
 const TARGET = 5;
@@ -48,7 +52,15 @@ function monsterSkill(skill: number, targetId = TARGET): void {
   EventBus.emit('MonsterSkillAnimation', p.buffer);
 }
 
+// The looks a 0x69 draws, recorded instead of spawned.
+const spawned: [string, unknown][] = [];
+vi.spyOn(effects, 'spawn').mockImplementation(((name: string, _s: unknown, _at: unknown, opts: unknown) => {
+  spawned.push([name, opts]);
+}) as never);
+vi.spyOn(lighting, 'skillSpot').mockImplementation((() => undefined) as never);
+
 beforeEach(() => {
+  spawned.length = 0;
   clip.action = A.Stop1;
   facing.y = 0;
 });
@@ -60,6 +72,16 @@ describe('MonsterSkillAnimation (C1 69, ReceiveMonsterSkill, WSclient.cpp:4091-4
     expect(facing.y).not.toBe(0);
     monsterSkill(59);
     expect(clip.action).toBe(A.Appear);
+  });
+
+  it('draws the rage once on Berserker: CreateInferno and two MODEL_CIRCLE sub4 (GMEmpireGuardian4.cpp:440-446)', () => {
+    monsterSkill(59);
+    const flames = spawned.filter(([name, o]) => name === 'sprite' && (o as { texture?: string }).texture === TEX.flame);
+    expect([spawned.filter(([name]) => name === 'debris').length, flames.length]).toEqual([16, 144]);
+    expect(monsterAttackState(gaion).rage).toBe(false);
+    spawned.length = 0;
+    monsterSkill(65);
+    expect(spawned).toEqual([]);
   });
 
   it('does nothing when the target is not in view', () => {

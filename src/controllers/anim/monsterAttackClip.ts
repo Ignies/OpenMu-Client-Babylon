@@ -24,6 +24,8 @@ export interface MonsterAttackState {
   skillClearsAt: number;
   /** `c->MonsterSkill`, a WORD: 0 at creation, set by 0x69, NO_MONSTER_SKILL once a hook spends it. */
   monsterSkill: number;
+  /** `m_bCurrentIsRage_*`: a guardian boss spent its Berserker; its next visual frame draws the rage and clears it. */
+  rage: boolean;
 }
 
 export interface MonsterAttackInput {
@@ -47,7 +49,7 @@ const states = new WeakMap<object, MonsterAttackState>();
 export function monsterAttackState(owner: object): MonsterAttackState {
   let state = states.get(owner);
   if (!state) {
-    state = { swordCount: 0, skill: 0, skillClearsAt: Infinity, monsterSkill: 0 };
+    state = { swordCount: 0, skill: 0, skillClearsAt: Infinity, monsterSkill: 0, rage: false };
     states.set(owner, state);
   }
   return state;
@@ -217,6 +219,7 @@ function hookedAttack(state: MonsterAttackState, input: MonsterAttackInput): num
   }
   if (world >= W.WD_69EMPIREGUARDIAN1 && world <= W.WD_72EMPIREGUARDIAN4) {
     const clips = EMPIRE_GUARDIAN_SKILLS[monster] ?? EMPIRE_GUARDIAN_MAP_SKILLS[world]?.[monster];
+    if (clips && state.monsterSkill === BERSERKER && clips[BERSERKER] !== undefined) state.rage = true;
     if (clips) return skillClip(state, clips, A.Attack1);
   }
   if (world === W.WD_79UNITEDMARKETPLACE && monster === MONSTER_LUCAS) return KEEP_CLIP;

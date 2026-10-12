@@ -3,7 +3,8 @@
 Skills only monsters cast. Rules for skill folders: [../readme.md](../readme.md).
 
 ## Public API
-- Each folder's default export is a `defineSkill`, found by glob in `../index.ts`.
+- Each folder's default export is a `defineSkill`, found by glob in `../index.ts`, or a `defineMonsterSkill`
+  (the looks a monster's map hook draws for its 0x69 skill, `ATMON_SKILL_*`).
 
 ## How it works
 
@@ -17,6 +18,7 @@ Skills only monsters cast. Rules for skill folders: [../readme.md](../readme.md)
 | `potion_of_bless` | 203 | a holy flash and motes |
 | `potion_of_soul` | 204 | a soul-coloured flash and motes |
 | `doppelganger_self_explosion` | 239 | a fire hit and a wider fire shock ring |
+| `empire_guardian_rage` | 0x69 59 | the eight guardian bosses' Berserker: CreateInferno and two MODEL_CIRCLE sub4 once, while the rage flag is up |
 
 OpenMU's generic monster skill (150) is drawn as 50 through `flame_of_evil`'s `lookAliases`.
 `flame_of_evil` also owns the boss lights (meteor, blast, hellfire circle, laser).

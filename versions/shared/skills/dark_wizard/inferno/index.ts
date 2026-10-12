@@ -2,7 +2,7 @@ import { defineSkill } from '@/controllers/skills/define';
 import { HIT_SPARKS, MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
 import { entityPos, entityYaw, type ParticleRecipe, type RGB } from '@/controllers/fx/core';
 import { heroSkillEffect, type ModelOptions } from '@/controllers/fx/model';
-import { Step, burn, cm, explosion, particles, ring, scorch, seq, ticks } from '@/controllers/skills/visuals';
+import { type SkillContext, Step, burn, cm, explosion, particles, ring, scorch, seq, ticks } from '@/controllers/skills/visuals';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { dw2AtAttackTime } from '../_shared';
 import { dw2Sfx, dw2Stone, lightAt } from '../../_shared';
@@ -36,12 +36,11 @@ interface InfernoExtra {
 }
 
 /**
- * Inferno at AttackTime 15 (ZzzCharacter.cpp:4573-4577): the eight bombs, each with a stone going straight up
- * (SubType 1) and one thrown (SubType 0), then Inferno01 at the caster. No cast sound: the eight explosions play
- * SOUND_EXPLOTION01 on its one channel, one burst.
+ * CreateInferno sub0 (ZzzEffect.cpp:6435-6476) at `centre`: the eight bombs, each with a stone going straight up
+ * (SubType 1) and one thrown (SubType 0); the eight explosions play SOUND_EXPLOTION01 on its one channel, one burst.
+ * The guardian bosses' rage draws it too.
  */
-const infernoWith = (tint: RGB, extra?: InfernoExtra): Step => (_at, c) => {
-  const centre = entityPos(c.caster, 0, new Vector3());
+export function createInferno(centre: Vector3, c: SkillContext, tint: RGB = BOMB_TINT, bomb?: Step): void {
   for (let j = 0; j < INFERNO_BOMBS; j++) {
     const a = (j * Math.PI * 2) / INFERNO_BOMBS;
     // At the caster's height, as the original: CreateBomb never reads the terrain.
@@ -52,8 +51,15 @@ const infernoWith = (tint: RGB, extra?: InfernoExtra): Step => (_at, c) => {
     effects.spawn('debris', c.scene, p, { model: dw2Stone(), colour: RGBS.white, still: true });
     effects.spawn('debris', c.scene, p, { model: dw2Stone(), colour: RGBS.white });
     lighting.skillSpot(c.scene, 14, 'blast', lightAt(p));
-    extra?.bomb(p, c);
+    bomb?.(p, c);
   }
+  dw2Sfx('Sound/eExplosion', centre);
+}
+
+/** Inferno at AttackTime 15 (ZzzCharacter.cpp:4573-4577): CreateInferno, then Inferno01 at the caster. No cast sound. */
+const infernoWith = (tint: RGB, extra?: InfernoExtra): Step => (_at, c) => {
+  const centre = entityPos(c.caster, 0, new Vector3());
+  createInferno(centre, c, tint, extra?.bomb);
   const ring: ModelOptions = {
     model: MODEL.inferno,
     seconds: ticks(INFERNO_TICKS),
@@ -65,7 +71,6 @@ const infernoWith = (tint: RGB, extra?: InfernoExtra): Step => (_at, c) => {
   };
   effects.spawn('model', c.scene, centre, heroSkillEffect(ring, c.caster));
   lighting.skillSpot(c.scene, 14, 'inferno', lightAt(centre));
-  dw2Sfx('Sound/eExplosion', centre);
   extra?.centre(centre, c);
 };
 const inferno = infernoWith(BOMB_TINT);

@@ -12,6 +12,7 @@ import { isOn } from '../fidelity';
 import { BUFF_ARRIVALS, BUFF_HITS, BUFF_VISUALS, LAUNCHER_ARROWS, LOOK_ALIASES, SKILL_VISUALS, WARRIOR_GLINTS, type BuffLook } from './visuals';
 
 export { defineSkill, defineBuffLooks, type SkillCancel, type SkillDef, type Mount } from './define';
+export { defineMonsterSkill, monsterSkillLook, registerMonsterSkills, type MonsterSkillDef, type MonsterSkillLook } from './monsterSkills';
 
 const SKILL_CANCELS: Record<number, SkillCancel> = {};
 

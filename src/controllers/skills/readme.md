@@ -23,6 +23,9 @@ themselves are content in `versions/shared/skills/` (see [docs/content.md](../..
 - Dispatch, used by modules and ECS systems through `versions/shared/skills/skillVisuals.ts`:
   `playTargetedSkillVisual`, `playAreaSkillVisual`, `playBowShotVisual`, `setBuffVisual`,
   `clearBuffVisuals`, `playBuffHits`, `skillVisualFor`, `baseSkill`, `fallbackFor`.
+- `defineMonsterSkill(def)` / `registerMonsterSkills(defs)` / `monsterSkillLook(monster, skill)` (`monsterSkills.ts`):
+  what a monster's map hook draws for its 0x69 skill (`ATMON_SKILL_*`), by npc number; the combat
+  module runs the look after the clip (`MonsterSkillLook`, a function of a `SkillContext`).
 - `castIsDrawn(caster, skill, now)` (`castBudget.ts`): whether a cast is drawn at all, read by the three
   dispatches; `CASTER_GAP_MS`, `OTHERS_PER_SECOND`, `HEAVY_VISUAL_GAP` (written from `heavyVisualGap`).
 

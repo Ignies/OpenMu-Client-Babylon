@@ -56,6 +56,32 @@ function novaHead(scene: Scene, start: Vector3, yaw: number, v0: number, ribbon:
   if (ribbon) effects.spawn('joint', scene, start, { head, maxTails: 4, width: cm(60), colour, texture: TEX.jointSpirit, seconds, fadeTail: 0.5 });
 }
 
+/** JOINT_SPIRIT sub22 / sub23's BITMAP_FLAME card: white, Light (1, 1, 1) for Skill 0 (ZzzEffectJoint.cpp:3901-3908). */
+const SPIRIT_FLAME: RGB = [1, 1, 1];
+
+/**
+ * One JOINT_SPIRIT sub22 (Velocity 60) or sub23 (Velocity 10) head: LT 20, MaxTails 0 so no ribbon, and every tick
+ * a BITMAP_FLAME card of Scale + (20 - LifeTime) / 5, fading as sub6 does (ZzzEffectJoint.cpp:886-902, :3935-3942).
+ */
+function flameHead(scene: Scene, start: Vector3, yaw: number, v0: number, scale: number): void {
+  const seconds = ticks(NOVA_HEAD_TICKS);
+  const sizeAt = (p: number) => scale + (p * seconds) / TICK / 5;
+  effects.spawn('sprite', scene, start, { texture: TEX.flame, colour: SPIRIT_FLAME, size: cm(64), sizeAt, intensity: p => novaCardLight(p * seconds), seconds, follow: novaPath(start, yaw, v0), fadeTail: 0 });
+}
+
+/**
+ * MODEL_CIRCLE sub4 at `at` (ZzzEffect.cpp:2148-2153, MoveHandlers.cpp:3810-3825): hidden, and on its one tick above
+ * 44 - m_bySkillCount (0 for a monster) 36 sub22 heads at Scale 2 and 36 sub23 at Scale 1.75 from 100 cm up, 10 degrees apart.
+ */
+export function circleSpirits(scene: Scene, at: Vector3): void {
+  const start = new Vector3(at.x, at.y + NOVA_ORIGIN, at.z);
+  for (let i = 0; i < NOVA_HEADS; i++) {
+    const yaw = (i * 10 * Math.PI) / 180;
+    flameHead(scene, start, yaw, 60, 2);
+    flameHead(scene, start, yaw, 10, 1.75);
+  }
+}
+
 /** Where a head leaving `start` at `yaw`, pitched 10 degrees up, is now. */
 function novaPath(start: Vector3, yaw: number, v0: number): PointSource {
   const f = forwardOf(yaw);
