@@ -161,6 +161,9 @@ const PUFFS: Readonly<Record<BodyPuff, KindName>> = {
   smokeLine1: 'smokeLine1',
   smokeLine2: 'smokeLine2',
   smokeLine3: 'smokeLine3',
+  smokeLine1_2: 'smokeLine1_2',
+  smokeLine2_2: 'smokeLine2_2',
+  smokeLine3_2: 'smokeLine3_2',
   trueFire: 'trueFire',
   fireMono1_4: 'fireMono1_4',
   fireMono2_8: 'fireMono2_8',
@@ -496,11 +499,12 @@ function emit(scene: Scene, e: Entity, em: Emitter, f: Frame, rides?: readonly V
         if (em.origin) entityPos(e, 0, tmp);
         else boneLocalPos(e, em.pick ? spots[Math.floor(Math.random() * spots.length)] : spots[b], tmpLocal, tmp);
         const anchor = rides ? rides[em.ride === 'bone' ? b : 0] : undefined;
+        const colour = em.colours ? em.colours[Math.floor(Math.random() * em.colours.length)] : em.colour;
         for (let i = 0; i < em.particles.length; i++) {
           const p = em.particles[i];
           const name = typeof p === 'string' ? p : p[Math.floor(Math.random() * p.length)];
           const scale = (em.scales?.[i] ?? em.scale ?? 1) * (em.roar ? roarNow : 1);
-          void spawnParticle(scene, PUFFS[name], tmp, turn, scale, em.colour, em.jitterCm, anchor);
+          void spawnParticle(scene, PUFFS[name], tmp, turn, scale, colour, em.jitterCm, anchor);
         }
       }
       return;

@@ -1103,6 +1103,17 @@ describe('the bosses smokes (ZzzEffectParticle.cpp:1327, :1500, :1767; :5361, :5
     expect(fakes.files).toContain('Effect/smokelines01.OZJ');
   });
 
+  // SubType 2 is SubType 0 living 45 ticks, not 35 (the Iron Knights' smoke lines).
+  it('smokeLine1_2 is smokeLine1 living ten ticks longer', async () => {
+    expect((await play('smokeLine1', 1, 0.5, 36)).isVisible).toBe(false);
+    disposeEffectParticles();
+    const sprite = await play('smokeLine1_2', 1, 0.5, 36);
+    expect(sprite.isVisible).toBe(true);
+    expect(fakes.files).toContain('Effect/smokelines01.OZJ');
+    disposeEffectParticles();
+    expect((await play('smokeLine3_2', 1, 0.5, 46)).isVisible).toBe(false);
+  });
+
   // SubType 1 is `(0.5L, L, 0.8L)` at `L = LifeTime / 50` whatever light it is made with.
   it('smoke1 is green whatever its light', async () => {
     const sprite = await play('smoke1', 1, 0.5, 10);

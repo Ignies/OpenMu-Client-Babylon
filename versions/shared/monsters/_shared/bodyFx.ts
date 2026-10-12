@@ -151,6 +151,21 @@ const fifthBones = (numBones: number): number[] => Array.from({ length: Math.cei
 export const rageSmoke = (numBones: number): BodyFxEmitter =>
   puff(6, fifthBones(numBones), ['smoke50', SMOKE_LINES], [1, 0.1, 0.1], { rollEach: true, gate: { buff: BERSERKER } });
 
+// ---- the Iron Knights (GM_Raklion.cpp RenderMonsterVisual) ----
+
+const KNIGHT_BLUE: RGB = [0.3, 0.6, 1];
+
+/**
+ * The Iron Knight and the Dark Iron Knight: bones 20, 37, 45, 51 each roll `rand() % 6` and, in (0.3, 0.6, 1) two
+ * times in three or (0.8, 0.8, 0.8), throw SMOKE SubType 50 and a SMOKELINE SubType 2 at 0.8 (:1875-1897, :2128-2150).
+ */
+export const ironKnightSmoke = (): BodyFxEmitter =>
+  puff(6, [20, 37, 45, 51], ['smoke50', ['smokeLine1_2', 'smokeLine2_2', 'smokeLine3_2']], KNIGHT_BLUE, {
+    rollEach: true,
+    scales: [1, 0.8],
+    colours: [KNIGHT_BLUE, KNIGHT_BLUE, [0.8, 0.8, 0.8]],
+  });
+
 // ---- the Swamp of Quiet line (GMSwampOfQuiet.cpp RenderMonsterVisual) ----
 
 /** The Sapis and the Sapi Queen: two BITMAP_LIGHT cards on bone 15 (:812-840, :1136-1146). */

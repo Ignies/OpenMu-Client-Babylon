@@ -48,6 +48,9 @@ export type BodyPuff =
   | 'smokeLine1'
   | 'smokeLine2'
   | 'smokeLine3'
+  | 'smokeLine1_2'
+  | 'smokeLine2_2'
+  | 'smokeLine3_2'
   | 'trueFire'
   | 'fireMono1_4'
   | 'fireMono2_8'
@@ -243,6 +246,8 @@ export type BodyFxEmitter =
       readonly local?: Cm3;
       readonly scale?: number;
       readonly colour: RGB;
+      /** Each spot picks its light from these at random, in place of `colour` (weight one by listing it twice). */
+      readonly colours?: readonly RGB[];
       /** Its `Scale` times the Shock roar's `fRoar`. */
       readonly roar?: true;
       /** Made on the monster's `Angle`, so a push goes the way it faces. */

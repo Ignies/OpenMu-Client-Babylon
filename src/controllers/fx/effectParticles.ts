@@ -820,6 +820,7 @@ const SMOKE_LINE: RampOptions = {
   rise: [5, 2],
   grow: () => (rand(3) + 6) * 0.01,
 };
+const SMOKE_LINE_2: RampOptions = { ...SMOKE_LINE, life: 45 };
 
 const KINDS = {
   fire1: fireKind('fireHik1', {
@@ -1091,6 +1092,10 @@ const KINDS = {
   smokeLine1: rampKind('smokeLine1', SMOKE_LINE),
   smokeLine2: rampKind('smokeLine2', SMOKE_LINE),
   smokeLine3: rampKind('smokeLine3', SMOKE_LINE),
+  /** SMOKELINE SubType 2: SubType 0 living 45 ticks (ZzzEffectParticle.cpp:1801-1810, :6030-6052). */
+  smokeLine1_2: rampKind('smokeLine1', SMOKE_LINE_2),
+  smokeLine2_2: rampKind('smokeLine2', SMOKE_LINE_2),
+  smokeLine3_2: rampKind('smokeLine3', SMOKE_LINE_2),
 
   /**
    * `BITMAP_SMOKE` SubType 13, the Balgass lava vents' glow: sized `(rand() % 64 + 64) * 0.01` whatever
@@ -2066,6 +2071,9 @@ export const KIND_REACH: Record<KindName, Reach> = {
   smokeLine1: { travel: 0.95, base: 1.28, perScale: 0.87 },
   smokeLine2: { travel: 0.95, base: 1.28, perScale: 0.87 },
   smokeLine3: { travel: 0.95, base: 1.28, perScale: 0.87 },
+  smokeLine1_2: { travel: 1.22, base: 1.65, perScale: 0.87 },
+  smokeLine2_2: { travel: 1.22, base: 1.65, perScale: 0.87 },
+  smokeLine3_2: { travel: 1.22, base: 1.65, perScale: 0.87 },
   smoke2: { travel: 3.4, base: 0.58, perScale: 0 },
   smoke65: { travel: 0.75, base: 0, perScale: 0.29 },
   cloud21: { travel: 1.75, base: 0, perScale: 3.61 },

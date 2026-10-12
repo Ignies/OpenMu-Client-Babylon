@@ -153,6 +153,28 @@ describe('the swing blurs', () => {
   });
 });
 
+describe('the Iron Knights', () => {
+  // RenderMonsterVisual (GM_Raklion.cpp:1875-1897, :2128-2150): bones 20, 37, 45, 51 each roll `rand() % 6`, pick
+  // (0.3, 0.6, 1) two times in three or (0.8, 0.8, 0.8), and throw SMOKE SubType 50 and a SMOKELINE SubType 2 at 0.8.
+  it('smoke from four bones in blue or grey', () => {
+    const blue = [0.3, 0.6, 1];
+    for (const knight of [458, 565]) {
+      expect(rows(knight, 'puff')).toEqual([
+        {
+          kind: 'puff',
+          every: 6,
+          bones: [20, 37, 45, 51],
+          particles: ['smoke50', ['smokeLine1_2', 'smokeLine2_2', 'smokeLine3_2']],
+          scales: [1, 0.8],
+          colour: blue,
+          colours: [blue, blue, [0.8, 0.8, 0.8]],
+          rollEach: true,
+        },
+      ]);
+    }
+  });
+});
+
 describe('Selupan', () => {
   // RenderMonsterVisual's MODEL_SELUPAN (GM_Raklion.cpp:2003-2049): blue lights breathing in colour and size on
   // bones 9 and 70-74, some turning on the world clock.

@@ -231,6 +231,28 @@ describe('monster body rows', () => {
     monsterVisualsLayer.reset?.();
   });
 
+  // The Iron Knights' smokes (GM_Raklion.cpp:1875-1897): each bone that wins its roll picks its light, (0.3, 0.6, 1)
+  // two times in three and (0.8, 0.8, 0.8) else, for both of its particles.
+  it('pick a light for each spot of a puff from its colours', () => {
+    calls.particles.length = 0;
+    const blue = [0.3, 0.6, 1];
+    const grey = [0.8, 0.8, 0.8];
+    const rolls = [0, 0.9, 0, 0.1];
+    const random = vi.spyOn(Math, 'random').mockImplementation(() => rolls.shift() ?? 0.5);
+    visualMonster(scene, monster(), [
+      { kind: 'puff', every: 1, particles: ['smoke50', 'smokeLine1_2'], bones: [20, 37], rollEach: true, colour: blue, colours: [blue, blue, grey] },
+    ] as never);
+    monsterVisualsLayer.update?.(0, 0.04);
+    random.mockRestore();
+    expect(calls.particles.map(p => [(p[2] as { x: number }).x, p[5]])).toEqual([
+      [20, grey],
+      [20, grey],
+      [37, blue],
+      [37, blue],
+    ]);
+    monsterVisualsLayer.reset?.();
+  });
+
   // The BITMAP_HOLE card in Medusa's hands is a MoveMonsterVisual CreateSprite: drawn only in Attack1 / Attack2
   // past their frame 2 (GMSwampOfQuiet.cpp:544-576).
   it('show a cards row gated on an action only in it', () => {
