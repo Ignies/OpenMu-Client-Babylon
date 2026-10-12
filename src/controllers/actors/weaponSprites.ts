@@ -7,7 +7,7 @@ import type { HeldEmitter, HeldSprite, HeldWearer } from '../item_fx/itemLooks';
 const CM = 1 / 100;
 
 /** A wearer standing (action 0) out of a safe zone, for a caller that names none. */
-const IDLE: HeldWearer = { action: 0, safeZone: false, yaw: 0, map: -1 };
+const IDLE: HeldWearer = { action: 0, safeZone: false, yaw: 0, map: -1, frame: 0 };
 
 /**
  * A held weapon's `RenderLinkObject` sprites (ZzzCharacter.cpp:7027-8386), bound to its loaded model:
@@ -39,9 +39,9 @@ export class WeaponSprites {
     const gltf = model.gltf;
     this.#scene = scene;
     this.#meshes = gltf ? gltf.mesh.getChildMeshes(false) : [];
-    const at = (bone: number) => {
-      const node = new TransformNode('weaponSprite', scene);
-      node.parent = gltf?.skeleton?.bones[bone + 1]?.getTransformNode() ?? gltf?.mesh ?? null;
+    const at = (bone: number, name = 'weaponSprite') => {
+      const node = new TransformNode(name, scene);
+      node.parent = (bone >= 0 ? gltf?.skeleton?.bones[bone + 1]?.getTransformNode() : null) ?? gltf?.mesh ?? null;
       return node;
     };
     this.nodes = specs.map(spec => {
@@ -50,8 +50,9 @@ export class WeaponSprites {
       if (offset && typeof offset !== 'function') node.position.set(offset[0] * CM, offset[1] * CM, offset[2] * CM);
       return node;
     });
+    // Bone -1: the model's root, where RenderLinkObject links it to the hand.
     this.#emitAt = emitters.map(({ bone, offset }) => {
-      const node = at(bone);
+      const node = at(bone, 'weaponEmitter');
       if (offset) node.position.set(offset[0] * CM, offset[1] * CM, offset[2] * CM);
       return node;
     });
@@ -96,7 +97,7 @@ export class WeaponSprites {
         offset(ms, this.#scratch);
         this.nodes[i].position.set(this.#scratch.x * CM, this.#scratch.y * CM, this.#scratch.z * CM);
       }
-      for (let i = 0; i < this.emitters.length; i++) this.emitters[i].emit(this.#scene, this.#emitAt[i].getAbsolutePosition(), wearer, dt);
+      for (let i = 0; i < this.emitters.length; i++) this.emitters[i].emit(this.#scene, this.#emitAt[i].getAbsolutePosition(), wearer, dt, ms);
     }
     this.#sprites.update(visible, this.#look);
   }

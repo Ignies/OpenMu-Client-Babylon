@@ -37,7 +37,7 @@ registerItemLooks([defineItemLook({ items: [[0, 22]], held: [{ texture: 'flare01
 function player() {
   const socket = () => ({ gltf: {} as object | null });
   return {
-    modelObject: { Weapon1: socket(), Weapon2: socket(), Light: {}, CurrentAction: 18 },
+    modelObject: { Weapon1: socket(), Weapon2: socket(), Light: {}, CurrentAction: 18, actionFrame: () => 4.75 },
     attributeSystem: { isAboveZero: (key: string) => key === 'inSafeZone' },
     charAppearance: { leftHand: { group: 0, num: 22 } as { group: number; num: number } | null, rightHand: { group: 0, num: 0 } },
     visibility: { state: 'visible' },
@@ -83,10 +83,10 @@ describe('a held weapon\'s sprites', () => {
 });
 
 describe('the wearer a held sprite reads', () => {
-  it('is the character\'s action, safe-zone flag, facing and map this frame (o->CurrentAction, c->SafeZone, o->Angle[2])', () => {
+  it('is the character\'s action, safe-zone flag, facing, map and key this frame (o->CurrentAction, c->SafeZone, o->Angle[2], o->AnimationFrame)', () => {
     made.list.length = 0;
     WeaponSpriteSystem(world(player())).update?.(0);
-    expect(made.list[0].wearers).toEqual([{ action: 18, safeZone: true, yaw: 0, map: 0 }]);
+    expect(made.list[0].wearers).toEqual([{ action: 18, safeZone: true, yaw: 0, map: 0, frame: 4.75 }]);
   });
 });
 

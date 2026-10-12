@@ -27,20 +27,24 @@ export type HeldSprite = {
   readonly when?: (wearer: HeldWearer) => boolean;
 };
 
-/** What a held sprite may ask of the character carrying it: `o->CurrentAction`, `c->SafeZone`, its facing, the map. */
-export type HeldWearer = { action: number; safeZone: boolean; yaw: number; map: number };
+/**
+ * What a held sprite may ask of the character carrying it: `o->CurrentAction`, `c->SafeZone`, its facing, the map
+ * and `o->AnimationFrame` (the key into its action).
+ */
+export type HeldWearer = { action: number; safeZone: boolean; yaw: number; map: number; frame: number };
 
 /**
  * What `RenderLinkObject` creates for a carried weapon that outlives the frame (CreateParticle, CreateJoint,
  * CreateEffect): `emit` runs each frame the weapon is drawn, with its bone's world point (tiles), the wearer
- * and the frame's length (s), and rolls its own `rand_fps_check`. The point is the same object every frame
- * for one carried weapon, so what follows it (a trail's head) may keep it.
+ * the frame's length (s) and `WorldTime` (ms), and rolls its own `rand_fps_check`. The point is the same object
+ * every frame for one carried weapon, so what follows it (a trail's head) may keep it.
  */
 export type HeldEmitter = {
+  /** The weapon model's bone; -1 is its root, where it is linked to the hand. */
   readonly bone: number;
   /** A point in the bone's frame (cm), as `TransformPosition(BoneTransform[bone], p)` takes it. */
   readonly offset?: readonly [number, number, number];
-  readonly emit: (scene: Scene, at: Vector3, wearer: HeldWearer, dt: number) => void;
+  readonly emit: (scene: Scene, at: Vector3, wearer: HeldWearer, dt: number, ms: number) => void;
 };
 
 /** What a carried item draws on one model: its sprites and its emitters. */

@@ -21,8 +21,8 @@ type Sets = (group: number, num: number) => HeldSet | null;
 export const WeaponSpriteSystem: ISystemFactory = world => {
   const query = world.with('modelObject', 'charAppearance');
   const hands = new Map<Entity, Hand[]>();
-  /** The wearer the sprites read this frame (`o->CurrentAction`, `c->SafeZone`, `o->Angle[2]`, the map), reused. */
-  const wearer: HeldWearer = { action: 0, safeZone: false, yaw: 0, map: -1 };
+  /** The wearer the sprites read this frame (`o->CurrentAction`, `c->SafeZone`, `o->Angle[2]`, the map, `o->AnimationFrame`), reused. */
+  const wearer: HeldWearer = { action: 0, safeZone: false, yaw: 0, map: -1, frame: 0 };
 
   function drop(entity: Entity): void {
     for (const hand of hands.get(entity) ?? []) hand.sprites?.dispose();
@@ -62,6 +62,7 @@ export const WeaponSpriteSystem: ISystemFactory = world => {
         wearer.safeZone = entity.attributeSystem?.isAboveZero('inSafeZone') ?? false;
         wearer.yaw = entityYaw(entity);
         wearer.map = world.mapIndex;
+        wearer.frame = model.actionFrame();
         for (let i = 0; i < set.length; i++) set[i].sprites?.update(ms, model.Light, shown, wearer, dt);
       }
     },

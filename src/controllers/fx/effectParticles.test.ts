@@ -1085,3 +1085,53 @@ describe('the held weapons\' particles (RenderLinkObject, ZzzCharacter.cpp:7765-
     expect((await play('starShine', 0.22, 0.5, 25)).color.r).toBe(0);
   });
 });
+
+describe('the held weapons\' sparks and shine (RenderLinkObject, ZzzCharacter.cpp:7077-8344)', () => {
+  it('Spark03 SubType 11: 30 ticks, pushed (-4..3, 0..3, 0..3) cm a tick, its light 1/1.05 and its size 0.04 less a tick (ZzzEffectParticle.cpp:2196-2204, :6704-6713)', async () => {
+    // roll 0.5: pushed (0, 2, 2), sized rand() % 5 / 10 + 1 = 1.2 whatever it is made with.
+    const sprite = await play('spark1_11', 0.8, 0.5, 5);
+    expect([sprite.position.x, sprite.position.y, sprite.position.z].map(n => +n.toFixed(4))).toEqual([0, 0.1, 0.1]);
+    expect(sprite.width).toBeCloseTo((32 * (1.2 - 0.2)) / 100);
+    expect(sprite.color.g).toBeCloseTo(0.4 / 1.05 ** 5);
+    disposeEffectParticles();
+    expect((await play('spark1_11', 0.8, 0.5, 29)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('spark1_11', 0.8, 0.5, 30)).isVisible).toBe(false);
+  });
+
+  it('Spark03 SubType 14: one in two pushed (-4..-1, 0..3, 0..3) and sized 0.4-0.8, the rest a 2-tick dot at its own scale (:2216-2226, :6724-6733)', async () => {
+    // roll 0.4: its rand_fps_check(2) passes, pushed (-3, 1, 1), sized 0.6, 0.01 less a tick.
+    const sprite = await play('spark1_14', 0.05, 0.4, 10);
+    expect([sprite.position.x, sprite.position.z].map(n => +n.toFixed(4))).toEqual([-0.3, 0.1]);
+    expect(sprite.width).toBeCloseTo((32 * 0.5) / 100);
+    disposeEffectParticles();
+    // roll 0.6: it fails: LifeTime 2, the scale it was made with, still.
+    expect((await play('spark1_14', 0.05, 0.6, 1)).width).toBeCloseTo((32 * 0.04) / 100);
+    disposeEffectParticles();
+    expect((await play('spark1_14', 0.05, 0.6, 2)).isVisible).toBe(false);
+  });
+
+  it('Shiny+6 SubType 1: shiny05 and a flare as one, 0.3, up to 25 cm off, 10-12 ticks, 0.01 smaller and 5 degrees back a tick (:2718-2727, :7368-7372, :9301-9304)', async () => {
+    const original = Math.random;
+    try {
+      // The flare takes the shine's rolls, whatever it rolls itself.
+      Math.random = () => 0.9;
+      await spawnParticle(scene, 'shiny6_1', { x: 0, y: 0, z: 0 }, NO_TURN, 1, [0.4, 0.6, 0.9]);
+      Math.random = () => 0.1;
+      await spawnParticle(scene, 'light6_1', { x: 0, y: 0, z: 0 }, NO_TURN, 1, [0.4, 0.6, 0.9]);
+    } finally {
+      Math.random = original;
+    }
+    const [shine, flare] = fakes.sprites.slice(-2);
+    for (let n = 0; n < 4; n++) tick?.();
+    for (const s of [shine, flare]) {
+      // rand() % 50 - 25 = 20 cm on each axis, rand() % 20 - 10 = 8 degrees.
+      expect([s.position.x, s.position.y, s.position.z].map(n => +n.toFixed(4))).toEqual([0.2, 0.2, 0.2]);
+      expect(s.width).toBeCloseTo((64 * 0.26) / 100);
+      expect(s.angle).toBeCloseTo(((8 - 20) * Math.PI) / 180);
+    }
+    // rand() % 3 + 10 = 12 ticks for both.
+    for (let n = 4; n < 12; n++) tick?.();
+    expect([shine.isVisible, flare.isVisible]).toEqual([false, false]);
+  });
+});

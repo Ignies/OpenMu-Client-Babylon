@@ -31,10 +31,16 @@ index.ts    finds every file (glob) and hands them to item_fx's registerItemLook
   `rand_fps_check(n)` is `oneIn(n, scale)`). `when` gates a sprite on the wearer (`o->CurrentAction`,
   `c->SafeZone`): it is drawn at size 0 while the test fails.
   `wing` are the same on the phoenix wing the item carries (the Phoenix Soul Star's, MonkSystem.cpp:245).
-  `emit` are what it creates there that outlives the frame (CreateParticle, CreateJoint: the running
-  sparks, the Sword Breaker's drops, the Frost Mace's frost): run each drawn frame at a bone's world point
-  (and a point in its frame, cm, when one is named) with the wearer (action, safe zone, facing, map) and the
-  frame's length; each rolls its own `rand_fps_check(n)` as `Math.random() * n < dt * 25`.
+  `emit` are what it creates there that outlives the frame (CreateParticle, CreateJoint, CreateEffect: the
+  running sparks, drops, frost, fire, shine, feathers and trails): run each drawn frame at a bone's world point
+  (and a point in its frame, cm, when one is named; bone -1 is the model's root, at the hand) with the wearer
+  (action, safe zone, facing, map, `o->AnimationFrame`), the frame's length and WorldTime; each rolls its own
+  `rand_fps_check(n)` as `Math.random() * n < dt * 25`. Where the original makes several from one roll (the
+  Sylph Wind's and the Albatross's sparks) each bone rolls its own here.
+  The Chromatic Staff's moon (MODEL_MOONHARVEST_MOON SubType 2) lives one tick and is made every tick in the
+  original; here it is one model per carried staff, following the orb, stopped two ticks after the staff is
+  no longer drawn. Its light, the magic circle's pulse, is drawn as the peak colour times the red channel's curve.
+  The Stinger Bow's feathers start at the hand: the original reads vZX03 and vZx04, which it never sets.
   The energy trails of the Imperial Sword, Grand Viper, Imperial Staff and Deadly Staff (`energyTrail` in
   `imperial_sword.ts`) are BITMAP_JOINT_ENERGY SubType 17 / 47, a new one a tick, each living 12 ticks with
   its head on the weapon's point. The original never sets their MaxTails (ZzzEffectJoint.cpp:254-263), so it
