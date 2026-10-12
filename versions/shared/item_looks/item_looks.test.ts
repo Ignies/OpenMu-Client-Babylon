@@ -381,7 +381,7 @@ describe('the swords\' held sprites', () => {
     expect(rows.slice(12)).toEqual([2, 3, 4, 5, 6].map(bone => ['flare01', bone, undefined, 1.1, [r(0.8 + f2), 0.1, 0], 0]));
   });
 
-  it('Knight Blade (and the Battle Scepter): a violet flare and a grey one on bones 1 and 2 (:7661-7673)', () => {
+  it('Knight Blade: a violet flare and a grey one on bones 1 and 2 (:7661-7673)', () => {
     const l = Math.sin(T * 0.002) * 0.35 + 0.65;
     const grey = r(Math.abs(Math.sin(T * 0.002) * 0.5 + 0.4)); // a negative scale draws the sprite mirrored
     const pair = (bone: number) => [
@@ -389,7 +389,6 @@ describe('the swords\' held sprites', () => {
       ['flare01', bone, undefined, grey, [0.3, 0.3, 0.3], 0],
     ];
     expect(held(0, 20)).toEqual([...pair(1), ...pair(2)]);
-    expect(held(2, 8)).toEqual(pair(1)); // Mace09 has no bone 2
   });
 
   it('Flamberge: gold and teal flares at its gems, red light marks down the blade (:7731-7764)', () => {
@@ -702,6 +701,128 @@ describe('the staffs\' held sprites', () => {
       ['magicGround1', 1, undefined, r(s2), [r(0.1 + 0.7 * t2), r(0.1 * t2), r(0.1 + 0.3 * t2)], 0],
       ['shiny05', 2, undefined, 0.8, [0.9, 0, 0.1], 0],
       ['shiny05', 3, undefined, 0.6, [0.9, 0.4, 0.7], 0],
+    ]);
+  });
+});
+
+// RenderLinkObject's scepter cases (ZzzCharacter.cpp); every rand() reads RAND.
+describe('the scepters\' held sprites', () => {
+  const lum = (Math.floor(RAND * 30) + 70) * 0.005;
+
+  it('Soleil Scepter: two Shiny02 and a flare at the head\'s jittered point, two smaller at the tail (:7104-7128)', () => {
+    const j = Math.floor(RAND * 60) / 20 - 1.5;
+    const head = [0, r(-100 + j), r(j)];
+    const t = Math.floor(RAND * 40) / 20 - 1;
+    const tail = [0, r(100 + t), r(t)];
+    const sun = r(Math.floor(RAND * 10) / 20 + 1.4);
+    const small = r(Math.floor(RAND * 8) / 20 + 0.4);
+    const orange = [1, 0.3, 0];
+    expect(held(2, 14)).toEqual([
+      ['shiny02', 0, head, sun, orange, 0],
+      ['shiny02', 0, head, r(sun - 0.3), orange, 20],
+      ['flare01', 0, head, r(Math.floor(RAND * 10) / 20 + 1.3), orange, 0],
+      ['shiny02', 0, tail, small, orange, 0],
+      ['shiny02', 0, tail, r(small - 0.2), orange, 90],
+    ]);
+  });
+
+  it('Shining Scepter: a pulsing gold Shiny02 and flares on bones 1-3 (:7319-7343)', () => {
+    const l = Math.sin(T * 0.002) * 0.3 + 0.1;
+    expect(held(2, 15)).toEqual([
+      ['shiny02', 1, undefined, r(Math.floor(RAND * 10) / 30 + 1.7), [r(0.8 + l), r(0.5 + l), r(0.1 + l)], 0],
+      ['flare01', 1, undefined, 3, [0.7, 0.5, 0.3], 0],
+      ['flare01', 2, undefined, 1.5, [0.8, 0.6, 0.4], 0],
+      ['flare01', 3, undefined, 1.2, [0.8, 0.6, 0.4], 0],
+    ]);
+  });
+
+  it('Great Lord Scepter: a pulsing blue flare and two counter-turned Shiny02 at bone 1 (:7474-7488)', () => {
+    const l = Math.sin(T * 0.002) * 0.3 + 0.7;
+    const spin = Math.floor(RAND * 360);
+    expect(held(2, 12)).toEqual([
+      ['flare01', 1, undefined, 2, [0, r(l * 0.5), r(l)], 0],
+      ['shiny02', 1, undefined, 1, [0.5, 0.5, 0.5], spin],
+      ['shiny02', 1, undefined, 1, [0.5, 0.5, 0.5], 360 - spin],
+    ]);
+  });
+
+  it('Battle Scepter: its own case, two pulsing blue flares by bone 1 and two swinging grey Shiny02 (:7576-7593)', () => {
+    const scale = r(Math.sin(T * 0.001) + 1);
+    const blue = [r(lum * 0.2), r(lum * 0.1), r(lum * 3)];
+    const g = r(Math.sin(T * 0.001) * 0.5 + 0.5);
+    const swing = Math.sin(T * 0.01) * 360;
+    expect(held(2, 8)).toEqual([
+      ['flare01', 1, [-15, 0, 0], scale, blue, 0],
+      ['flare01', 1, [10, 0, 0], scale, blue, 0],
+      ['shiny02', 1, [10, 0, 0], 0.6, [g, g, g], r(360 - swing)],
+      ['shiny02', 1, [10, 0, 0], 0.6, [g, g, g], r(swing)],
+    ]);
+  });
+
+  it('Master Scepter: a pulsing blue flare 10 cm off bones 2-5, a turned Shiny02 with bone 4\'s (:7594-7611)', () => {
+    const l = Math.sin(T * 0.002) * 0.35 + 0.65;
+    const blue = [r(l * 0.6), r(l * 0.8), r(l)];
+    const flare = (bone: number) => ['flare01', bone, [-10, 0, 0], 1, blue, 0];
+    expect(held(2, 9)).toEqual([flare(2), flare(3), flare(4), ['shiny02', 4, [-10, 0, 0], 0.6, [0.5, 0.5, 0.5], Math.floor(RAND * 360)], flare(5)]);
+  });
+
+  it('Great Scepter: a warm flare and Shiny02 at bone 2, a blue gem swinging with the pulse along bone 1 (:7612-7630)', () => {
+    const l = Math.sin(T * 0.001) * 0.5 + 0.7;
+    const warm = [r(l), r(l * 0.8), r(l * 0.6)];
+    const at = [r(l * -10), 0, 0];
+    const spin = Math.floor(RAND * 360);
+    expect(held(2, 10)).toEqual([
+      ['flare01', 2, undefined, 1.5, warm, 0],
+      ['shiny02', 2, undefined, r(l * 0.5), warm, 0],
+      ['flare01', 1, at, 0.7, [0.6, 0.8, 1], 0],
+      ['shiny02', 1, at, 0.5, [0.6, 0.8, 1], spin],
+      ['shiny02', 1, at, 0.4, [0.6, 0.8, 1], 360 - spin],
+    ]);
+  });
+
+  it('Lord Scepter: an amber flare at bone 1, three along bone 2 with turned Shiny02 (:7631-7646)', () => {
+    const amber = [1, 0.6, 0.3];
+    expect(held(2, 11)).toEqual([
+      ['flare01', 1, undefined, 1.3, amber, 0],
+      ...[0, 1, 2].flatMap(i => [
+        ['flare01', 2, [i * 15 - 10, 0, 0], 1.3, amber, 0],
+        ['shiny02', 2, [i * 15 - 10, 0, 0], 0.4, amber, Math.floor(RAND * 360)],
+      ]),
+    ]);
+  });
+
+  it('Absolute Scepter: flares and pulsing Shiny02 at bones 3 and 4, each with a bolt on the frame\'s sheet (:7928-7969)', () => {
+    const l = Math.abs(Math.sin(T * 0.0008)) * 0.8 + 0.2;
+    const pulse = [r(l * 0.6), r(l * 0.5), r(l * 0.8)];
+    const violet = [0.6, 0.5, 0.8];
+    const spin = Math.floor(RAND * 380);
+    // At T (1234 ms) no re-roll has run: the first sheet, no offset.
+    const bolt = (bone: number, size: number) =>
+      [0, 1, 2].map(sheet => [`lightningMega${sheet + 1}`, bone, [0, 0, 0], sheet === 0 ? r(size) : 0, [0.8, 0.8, 0.8], spin]);
+    expect(held(2, 17)).toEqual([
+      ['flare01', 3, undefined, r(Math.floor(RAND * 10) / 10 + 1), violet, 0],
+      ['shiny02', 3, undefined, 0.5, pulse, 0],
+      ...bolt(3, (Math.floor(RAND * 11) - 20) / 100 + 0.5),
+      ['flare01', 4, undefined, r(Math.floor(RAND * 10) / 5 + 1.5), violet, 0],
+      ['shiny02', 4, undefined, 1, pulse, 0],
+      ...bolt(4, (Math.floor(RAND * 11) - 20) / 50 + 0.8),
+    ]);
+    // In the first 100 ms of a second it re-rolls: m_iAnimation 50 picks sheet (50 / 10) % 3 = 2.
+    const random = vi.spyOn(Math, 'random').mockReturnValue(RAND);
+    const sprites = itemHeldSprites(2, 17) ?? [];
+    const scale = (i: number) => (typeof sprites[i].scale === 'number' ? sprites[i].scale : sprites[i].scale(2050));
+    expect([2, 3, 4].map(scale).map(s => s > 0)).toEqual([false, false, true]);
+    random.mockRestore();
+  });
+
+  it('Stryker Scepter: Shiny02 and light marks at rx01 and rx02, gold ones on 2 and 3, a pulsing Flare at 4 (:8310-8344)', () => {
+    expect(held(2, 18)).toEqual([
+      ['shiny02', 5, undefined, 0.5, [0.5, 0.8, 0.9], 0],
+      ['lightmarks', 5, undefined, 1, [0.4, 0.7, 0.9], 0],
+      ['shiny02', 6, undefined, 1.1, [0.5, 0.6, 0.9], 0],
+      ['shiny02', 2, undefined, 0.5, [0.8, 0.5, 0.2], 0],
+      ['shiny02', 3, undefined, 0.5, [0.8, 0.5, 0.2], 0],
+      ['flare', 4, undefined, r(0.5 * Math.abs(Math.sin(T * 0.0015))), [1, 1, 1], 0],
     ]);
   });
 });
