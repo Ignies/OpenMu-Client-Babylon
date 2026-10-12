@@ -59,6 +59,13 @@ describe('the character window with a pet', () => {
     const unmet = deriveCharacterStats({ charClass: CharacterClassNumber.DarkKnight, level: 0, strength: 20, agility: 20, vitality: 20, energy: 10, leadership: 0, items });
     expect(unmet.petEvent).toBeNull();
   });
+
+  // NewUICharacterInfoWindow.cpp:1144-1153.
+  it('turns the HP line magenta for the Spirit of Guardian', () => {
+    expect(stats(helper(65)).petEvent).toBe('hp');
+    expect(stats(helper(65, { durability: 0 })).petEvent).toBeNull();
+    expect(stats(helper(65, { raw: [0, 0, 0, 0, 0, 0x06, 0] })).petEvent).toBeNull();
+  });
 });
 
 // NewUICharacterInfoWindow.cpp:1039-1040: the wizard and the summoner read MagicSpeed.

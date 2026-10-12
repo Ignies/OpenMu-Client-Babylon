@@ -308,7 +308,7 @@ type DerivedStats = {
   defenseRatePvpBonus: number;
   dualWield: boolean;
   /** The detail line the worn pet prints magenta, null for none. */
-  petEvent: 'attackSpeed' | null;
+  petEvent: 'attackSpeed' | 'hp' | null;
   wizardryMin: number;
   wizardryMax: number;
   /** Null without a staff or a magic sword in the right hand; "(+0)" still prints with one (:1336-1353). */
@@ -817,7 +817,7 @@ function magicSkillDamage(range: Range, skill: CharacterStatsInput['magicSkill']
 /** The helpers the character window reads (NewUICharacterInfoWindow.cpp:707-737, :954-959). */
 /** ITEM_ELITE_TRANSFER_SKELETON_RING, ITEM_HELPER + 39 (_enum.h:2742). */
 const ELITE_SKELETON_RING = 39;
-const PET = { imp: 1, fenrir: 37, demon: 64, panda: 80, unicorn: 106, skeleton: 123 } as const;
+const PET = { imp: 1, fenrir: 37, demon: 64, guardian: 65, panda: 80, unicorn: 106, skeleton: 123 } as const;
 /** The gold Fenrir's option bit. */
 const FENRIR_GOLD = 0x04;
 
@@ -839,10 +839,14 @@ function withPet<T extends Range>(range: T, pet: Item | null, kind: 'damage' | '
   return { ...range, min: min + Math.trunc(min * rate), max: max + Math.trunc(max * rate) };
 }
 
-/** The Demon and the Skeleton turn the attack speed line magenta, worn with durability, needs met and not expired (NewUICharacterInfoWindow.cpp:1058-1068). */
+/**
+ * The Demon and the Skeleton turn the attack speed line magenta, the Spirit of Guardian the HP line, worn with
+ * durability, needs met and not expired (NewUICharacterInfoWindow.cpp:1058-1068, :1144-1153).
+ */
 function petEvent(pet: Item | null, input: CharacterStatsInput): DerivedStats['petEvent'] {
   if (pet?.group !== GROUP_HELPER || pet.durability === 0 || !requiresMet(pet, input) || periodExpired(pet)) return null;
-  return pet.num === PET.demon || pet.num === PET.skeleton ? 'attackSpeed' : null;
+  if (pet.num === PET.demon || pet.num === PET.skeleton) return 'attackSpeed';
+  return pet.num === PET.guardian ? 'hp' : null;
 }
 
 /** The Christmas, Panda and Skeleton transformation rings: the best one worn adds this much. */

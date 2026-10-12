@@ -13,12 +13,21 @@ const EVENT_BUFFS = {
   wizardry: [36, 47, 80], // :1363-1376
 } as const;
 
+/** The Rage Fighter's party buffs, eBuff_Hp_up_Ourforces and eBuff_Def_up_Ourforces (_enum.h:4019-4020). */
+const HP_UP_OURFORCES = 130;
+const DEF_UP_OURFORCES = 131;
+
 export type StatKey = keyof typeof SECRET_POTION;
 
-/** A stat row: orange under its secret potion, else blue while the items add to it (:463-475). */
+/** A stat row: orange under its secret potion, else blue while the items add to it (:463-475) or, vitality, under the party buff (:1096). */
 export function statColour(stat: StatKey, added: number, buffs: readonly number[]): string | undefined {
   if (buffs.includes(SECRET_POTION[stat])) return TEXT_COLOR.secretPotion;
-  return added ? TEXT_COLOR.buffed : undefined;
+  return added || (stat === 'vit' && buffs.includes(HP_UP_OURFORCES)) ? TEXT_COLOR.buffed : undefined;
+}
+
+/** The defense line: blue under the party buff, set after the event magenta (:1024-1035). */
+export function defenseColour(buffs: readonly number[]): string | undefined {
+  return buffs.includes(DEF_UP_OURFORCES) ? TEXT_COLOR.buffed : eventColour('defense', buffs);
 }
 
 /** A detail line: magenta under one of its event buffs, else its own colour. */

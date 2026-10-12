@@ -29,7 +29,7 @@ import {
   MuTableRule,
 } from '@/controllers/interface/components/mu_window';
 import { InventoryConstants } from '@/core/inventoryConstants';
-import { eventColour, statColour } from './buffColours';
+import { defenseColour, eventColour, statColour } from './buffColours';
 import { pkTextColour, PVP_NEUTRAL } from '@/controllers/interface/nameTags';
 import {
   BaseClass,
@@ -482,11 +482,11 @@ export const CharacterInfo = observer(() => {
 
   const agilityDetails: DetailLine[] = [];
 
-  // White, or magenta under the defense event buffs (NewUICharacterInfoWindow.cpp:1021-1031).
-  const defenseColour = eventColour('defense', buffs);
+  // White, magenta under the defense event buffs, blue under the party buff (NewUICharacterInfoWindow.cpp:1021-1035).
+  const defenseLine = defenseColour(buffs);
   if (stats.defenseRate > 0) {
     agilityDetails.push({
-      color: defenseColour,
+      color: defenseLine,
       text: fullSet
         ? t('charInfo.defenseRateFull', {
             defense: stats.defense,
@@ -500,7 +500,7 @@ export const CharacterInfo = observer(() => {
     });
   } else {
     agilityDetails.push({
-      color: defenseColour,
+      color: defenseLine,
       text: fullSet
         ? t('charInfo.defenseFull', {
             defense: stats.defense,
@@ -530,7 +530,8 @@ export const CharacterInfo = observer(() => {
 
   const vitalityDetails: DetailLine[] = [
     {
-      color: eventColour('hp', buffs),
+      // The Spirit of Guardian prints it magenta too (:1144-1153).
+      color: stats.petEvent === 'hp' ? TEXT_COLOR.event : eventColour('hp', buffs),
       text: t('charInfo.hp', {
         current: playerData.currentHP,
         max: playerData.maxHP,
