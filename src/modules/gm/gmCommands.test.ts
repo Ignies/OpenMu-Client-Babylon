@@ -4,6 +4,7 @@ import {
   GM_COMMANDS,
   buildCommandLine,
   matchGmCommands,
+  needsPresence,
   type GmCommand,
 } from './gmCommands';
 
@@ -153,5 +154,23 @@ describe('matchGmCommands', () => {
 
   it('finds nothing rather than everything when there is no match', () => {
     expect(search('zzzz')).toEqual([]);
+  });
+});
+
+describe('needsPresence', () => {
+  it('holds for a command that acts where the game master stands', () => {
+    expect(needsPresence('/createmonster 3 1', true)).toBe(true);
+    expect(needsPresence('/item 0 0 13', true)).toBe(true);
+  });
+
+  it('holds for own-map coordinates only when the tile is on another map', () => {
+    expect(needsPresence('/fireworks 140 125', true)).toBe(false);
+    expect(needsPresence('/fireworks 140 125', false)).toBe(true);
+  });
+
+  it('does not hold for anything else, or a line that is no command', () => {
+    expect(needsPresence('/goldnotice hi', false)).toBe(false);
+    expect(needsPresence('/move Gm 0 1 1', false)).toBe(false);
+    expect(needsPresence('hello', false)).toBe(false);
   });
 });
