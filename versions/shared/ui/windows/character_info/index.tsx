@@ -419,6 +419,7 @@ export const CharacterInfo = observer(() => {
   }
 
   const base = getBaseClass(playerData.charClass);
+  const buffs = HeroSkills.buffs;
 
   const stats = deriveCharacterStats({
     charClass: playerData.charClass,
@@ -435,9 +436,9 @@ export const CharacterInfo = observer(() => {
     maxLife: playerData.maxHP,
     maxMana: playerData.maxMP,
     magicSkill: { number: HeroSkills.currentSkill, damage: skillDefinition(HeroSkills.currentSkill)?.damage ?? 0 },
+    buffs,
   });
 
-  const buffs = HeroSkills.buffs;
   const strengthDetails: DetailLine[] = [];
 
   const damageMin = Math.min(stats.damageMin, stats.damageMax);

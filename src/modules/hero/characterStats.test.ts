@@ -338,6 +338,17 @@ describe('the character window with stats the worn items add', () => {
     expect(knight({ 9: pendant }).added).toEqual({ str: 10, agi: 0, vit: 0, ene: 0, cmd: 0 });
     expect(knight({}).added).toEqual({ str: 0, agi: 0, vit: 0, ene: 0, cmd: 0 });
   });
+
+  // eBuff_Hp_up_Ourforces adds 30 + (Energy - 132) / 10 vitality, at most 200, from 132 energy (ZzzInfomation.cpp:3492-3503).
+  it("adds the Rage Fighter's vitality buff (130) to vitality", () => {
+    const fighter = (energy: number, buffs: number[]) =>
+      deriveCharacterStats({ charClass: CharacterClassNumber.RageFighter, level: 240, strength: 600, agility: 300, vitality: 100, energy, leadership: 0, items: [], buffs });
+    expect(fighter(450, [130]).totals.vit).toBe(100 + 30 + 31);
+    expect(fighter(450, [130]).added.vit).toBe(61);
+    expect(fighter(131, [130]).totals.vit).toBe(100);
+    expect(fighter(5000, [130]).totals.vit).toBe(300);
+    expect(fighter(450, []).totals.vit).toBe(100);
+  });
 });
 
 // CalculateCurseDamage (ZzzInfomation.cpp:3045-3104), GetCurseSkillDamage (CharacterManager.cpp:373-390) and the book's

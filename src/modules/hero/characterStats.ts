@@ -249,7 +249,18 @@ type CharacterStatsInput = {
   maxMana?: number;
   /** The selected skill (`Hero->CurrentSkill`) and its `SkillAttribute` Damage, for the wizardry line. */
   magicSkill?: { number: number; damage: number } | null;
+  /** The hero's buff ids (`eBuffState`). */
+  buffs?: readonly number[];
 };
+
+/** eBuff_Hp_up_Ourforces (_enum.h:4019). */
+const HP_UP_OURFORCES = 130;
+
+/** `CalculateBasicState`'s party buff vitality (ZzzInfomation.cpp:3492-3503): 30 + (Energy - 132) / 10 from 132 energy, at most 200. */
+function buffVitality(input: CharacterStatsInput): number {
+  if (!input.buffs?.includes(HP_UP_OURFORCES) || input.energy < 132) return 0;
+  return Math.min(200, 30 + Math.trunc((input.energy - 132) / 10));
+}
 
 /**
  * Attack/magic speed per point of agility, as configured on the OpenMU
@@ -909,6 +920,7 @@ export function deriveCharacterStats(bare: CharacterStatsInput): DerivedStats {
   const hero = { level, str: bare.strength, agi: bare.agility, vit: bare.vitality, ene: bare.energy, cmd: bare.leadership, baseClass, stepClass: step };
   // Every formula and requirement check reads Strength + AddStrength and the rest (ZzzInfomation.cpp:2550-2553, :2851, :3108-3110).
   const add = wornStatBonus(items, bare.sets ?? null);
+  add.vit += buffVitality(bare);
   const input = { ...bare, strength: bare.strength + add.str, agility: bare.agility + add.agi, vitality: bare.vitality + add.vit, energy: bare.energy + add.ene, leadership: bare.leadership + add.cmd };
   const lines = input.sets ? activeSetOptions(items, hero, input.sets) : [];
   const socket = socketStatusBonus(items, { level, masterLevel: input.masterLevel, maxLife: input.maxLife, maxMana: input.maxMana }, input.options ?? null);
