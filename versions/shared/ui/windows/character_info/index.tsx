@@ -547,7 +547,8 @@ export const CharacterInfo = observer(() => {
   ) {
     energyDetails.push({
       text:
-        stats.staffRate > 0
+        // A staff or a magic sword always shows its rate, "(+0)" included (NewUICharacterInfoWindow.cpp:1336-1353).
+        stats.staffRate !== null
           ? t('charInfo.wizardryRate', {
               min: stats.wizardryMin,
               max: stats.wizardryMax,

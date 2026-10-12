@@ -299,7 +299,8 @@ type DerivedStats = {
   dualWield: boolean;
   wizardryMin: number;
   wizardryMax: number;
-  staffRate: number;
+  /** Null without a staff or a magic sword in the right hand; "(+0)" still prints with one (:1336-1353). */
+  staffRate: number | null;
   curseMin: number;
   curseMax: number;
   /** Null without a book in the left hand: the line then has no "(+N)". */
@@ -656,7 +657,8 @@ function ringMagicPercent(ring: Item | null, input: CharacterStatsInput): number
 function calculateWizardry(input: CharacterStatsInput): {
   min: number;
   max: number;
-  percent: number;
+  /** Null without a staff or a magic sword in the right hand: the line then has no "(+N)". */
+  percent: number | null;
 } {
   const { energy, items } = input;
   const range = { min: Math.trunc(energy / 9), max: Math.trunc(energy / 4) };
@@ -706,8 +708,9 @@ function calculateWizardry(input: CharacterStatsInput): {
   }
 
   // The window's magic percent: a staff's or a magic sword's, worn by the MagicDur share (NewUICharacterInfoWindow.cpp:1336-1351).
-  const power = right && (isStaff(right) || rightKind(right, num => MAGIC_SWORDS.has(num)) === 'damage') ? Math.fround(itemMagicPower(right) / 100) : 0;
-  const magicPercent = right ? Math.fround(power - Math.fround(power * durabilityPercent(right, false, true))) : 0;
+  if (!right || !(isStaff(right) || rightKind(right, num => MAGIC_SWORDS.has(num)) === 'damage')) return { ...range, percent: null };
+  const power = Math.fround(itemMagicPower(right) / 100);
+  const magicPercent = Math.fround(power - Math.fround(power * durabilityPercent(right, false, true)));
   return { ...range, percent: magicPercent };
 }
 
@@ -906,7 +909,7 @@ export function deriveCharacterStats(bare: CharacterStatsInput): DerivedStats {
     wizardryMin: wizardry.min + maxMg,
     wizardryMax: wizardry.max + maxMg,
     // (int)((iMagicDamageMaxInitial + maxMg) * magicPercent) (:1352).
-    staffRate: Math.trunc(Math.fround((skilled.max + maxMg) * magic.percent)),
+    staffRate: magic.percent === null ? null : Math.trunc(Math.fround((skilled.max + maxMg) * magic.percent)),
     curseMin: curse.min,
     curseMax: curse.max,
     curseRate: curseRate(input, curse.max),
