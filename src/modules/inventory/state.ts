@@ -520,6 +520,11 @@ export const Bag = new (class {
     return true;
   }
 
+  /** `EnableUse = 0`: the server answered a use, so the next one may go at once. */
+  useAnswered(): void {
+    this.consumeBlockedUntil = 0;
+  }
+
   /** `InventoryItemUpgraded` (0xF3 0x14): the item at `slot` is what the server says now. */
   upgradeInventoryItem(slot: number, item: Item): void {
     runInAction(() => {

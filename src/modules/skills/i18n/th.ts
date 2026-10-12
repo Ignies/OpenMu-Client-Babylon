@@ -58,4 +58,5 @@ export default {
   'buff.shieldSkill': 'สกิลโล่',
   'buff.alcohol': 'มึนเมา',
   'buff.unnamed': 'เอฟเฟกต์ {number}',
+  'buff.npcBlessing': 'พลังโจมตีและการป้องกันเพิ่มขึ้นด้วยพร',
 } satisfies Partial<Record<keyof typeof en, string>>;

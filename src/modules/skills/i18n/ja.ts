@@ -58,4 +58,5 @@ export default {
   'buff.shieldSkill': 'シールドスキル',
   'buff.alcohol': '酔い',
   'buff.unnamed': '効果 {number}',
+  'buff.npcBlessing': '祝福により攻撃力と防御力が上昇しました。',
 } satisfies Partial<Record<keyof typeof en, string>>;

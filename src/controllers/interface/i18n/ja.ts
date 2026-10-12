@@ -234,4 +234,5 @@ export default {
   'msgWin.confirmMix': '%s\nアイテムを合成しますか？',
   'msgWin.exitCountdown': '{seconds}秒後にゲームを終了します。',
   'msgWin.confirmModule': 'このワールドはモジュール {id} {version} を実行しようとしています。\nゲームから切り離されて動き、アカウントは読めません。\n許可しますか？',
+  'msgWin.cancelBuff': '%s\n解除しますか？',
 } satisfies Partial<Record<keyof typeof en, string>>;

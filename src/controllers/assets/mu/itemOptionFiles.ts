@@ -26,6 +26,8 @@ const MAX_ITEM = 16 * 512;
 
 export type HarmonyOption = { readonly name: string; readonly values: readonly number[] };
 export type SocketOption = {
+  /** `m_iOptionID`: the `SOPT_*` / `SBOPT_*` it raises (SocketSystem.h:33-82). */
+  readonly id: number;
   readonly category: number;
   readonly name: string;
   /** `m_bOptionType`: 1 flat, 2 percent, 3 per level, 4 per max life, 5 per max mana. */
@@ -83,7 +85,7 @@ export function parseSocketOptions(bytes: Uint8Array): (SocketOption | null)[][]
       const name = repairPackText(decodeLocalText(record, 8, 64));
       const values: number[] = [];
       for (let level = 0; level < 5; level++) values.push(view.getInt32(76 + level * 4, true));
-      row.push(name ? { category: view.getInt32(4, true), name, type: record[72], values } : null);
+      row.push(name ? { id: view.getInt32(0, true), category: view.getInt32(4, true), name, type: record[72], values } : null);
     }
     out.push(row);
   }

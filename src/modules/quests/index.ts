@@ -17,6 +17,7 @@ import {
   closeQuestList,
   closeQuestProgress,
   myQuestWindowOpen,
+  questClientAction,
   questListOpen,
   questProgressOpen,
   requestActiveQuests,
@@ -29,6 +30,7 @@ import { legacyKillCount } from './killCounters';
 import { Merchant } from '../npc_shop';
 
 export type { QuestLayer } from './layer';
+export { CHARACTER_WINDOW_QUEST, INVENTORY_QUEST } from './questLog';
 
 /**
  * The quest system: the legacy Scroll-of-Emperor chain, the Season 6 quest
@@ -189,6 +191,11 @@ class Quests {
     closeQuestProgress();
     showMyQuestWindow(false);
     cancelBalgassEntry();
+  }
+
+  /** A window opened: the quest its opening completes, when the server showed its request (`questClientAction`). */
+  clientAction(key: number): void {
+    questClientAction(key);
   }
 
   /** Ask the server for every quest state again (legacy 0xA0 + S6 F6 1A). */

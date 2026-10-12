@@ -6,6 +6,8 @@ import { useUiStageScale } from '@/controllers/interface/components/ui_stage';
 import { skills, type ActiveBuff } from '@/modules/skills';
 import { BUFF_ICON_HEIGHT, BUFF_ICON_WIDTH, buffIconCell } from '@/modules/skills/recipes';
 import { t } from '@/i18n';
+import { MsgBox, MsgWinCode } from '@/controllers/interface';
+import { skillDisplayName } from '@/controllers/assets';
 
 /** `CNewUIBuffWindow::SetPos(640)`: the row starts at (220, 15). */
 const BAR_X = 220;
@@ -46,6 +48,13 @@ const BuffTip = ({ buff, x, y }: { buff: ActiveBuff; x: number; y: number }) => 
   );
 };
 
+/** A right click on Infinity Arrow or Expansion of Wizardry asks to cancel it (NewUIBuffWindow.cpp:240-253). */
+function askCancel(buff: ActiveBuff): void {
+  const skill = skills.buffCancelSkill(buff.id);
+  if (skill === null) return;
+  MsgBox.popUpMsgWin(MsgWinCode.ConfirmCancelBuff, skillDisplayName(skill) ?? buff.name, () => skills.cancelBuff(skill));
+}
+
 /**
  * `CNewUIBuffWindow`: the hero's buffs then debuffs (MagicEffectStatus 0x07)
  * as 20×28 cells of `newui_statusicon*.OZJ`, 8 to a line, 5 px apart, in the
@@ -75,6 +84,10 @@ export const BuffBar = observer(() => {
             style={style}
             onPointerEnter={() => setHovered(buff.id)}
             onPointerLeave={() => setHovered(h => (h === buff.id ? -1 : h))}
+            onContextMenu={e => {
+              e.preventDefault();
+              askCancel(buff);
+            }}
           >
             {cell ? (
               <MuSpriteFrame

@@ -16,6 +16,20 @@ export type NpcModel = {
   readonly clipSpeeds?: Readonly<Partial<Record<number, number>>>;
   /** The `AnimationFrame` of clip 0 the original leaves it on: drawn still there, no clip ever runs. */
   readonly holdFrame?: number;
+  /** Its own idle roll; without one, `rand() % 2` (EtcStopAnimationSetting's default). */
+  readonly idle?: NpcIdleRoll;
+};
+
+/**
+ * The clip an NPC model plays after one ends (`EtcStopAnimationSetting`, ZzzCharacter.cpp:3546-3687):
+ * `base` when `rand() % stay[1] < stay[0]` or the clip that ended is one of `backFrom`, else
+ * `others[0] + rand() % others[1]`.
+ */
+export type NpcIdleRoll = {
+  readonly base: number;
+  readonly stay: readonly [chance: number, of: number];
+  readonly others: readonly [first: number, count: number];
+  readonly backFrom?: readonly number[];
 };
 
 /** An item an NPC wears or carries, by items.json (group, index). */

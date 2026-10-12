@@ -57,6 +57,7 @@ const en = {
   'buff.shieldSkill': 'Shield Skill',
   'buff.alcohol': 'Alcohol',
   'buff.unnamed': 'Effect {number}',
+  'buff.npcBlessing': 'Damage and defense increased with a blessing.',
 };
 
 export default en;

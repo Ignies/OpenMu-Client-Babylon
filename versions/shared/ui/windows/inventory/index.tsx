@@ -38,6 +38,7 @@ import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuItemWindow, MuTableFrame } from '@/controllers/interface/components/mu_window';
 import { playUiSound } from '@/controllers/sound/sfx';
+import { INVENTORY_QUEST, quests } from '@/modules/quests';
 import {
   BUTTON_FRAMES,
   BUTTON_HEIGHT,
@@ -360,7 +361,13 @@ export const Inventory = observer(() => {
     return () => window.removeEventListener('pointermove', onMove);
   }, [!!picked]);
 
-  if (!MuWindows.isOpen('inventory')) {
+  const open = MuWindows.isOpen('inventory');
+  // OpenningProcess (NewUIMyInventory.cpp:821-828).
+  useEffect(() => {
+    if (open) quests.clientAction(INVENTORY_QUEST);
+  }, [open]);
+
+  if (!open) {
     return null;
   }
 

@@ -4,5 +4,5 @@ export default defineMonster({
   Numb: 416,
   Name: 'Rhea',
   // Elbeland shop NPC (GMNewTown.cpp:863-885).
-  npcModel: { file: 'rhea', scale: 1 },
+  npcModel: { file: 'rhea', scale: 1, idle: { base: 0, stay: [4, 5], others: [1, 1], backFrom: [1] } },
 });

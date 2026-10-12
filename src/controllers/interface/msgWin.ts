@@ -25,6 +25,7 @@ export enum MsgWinCode {
   ConfirmMix = 'MESSAGE_CONFIRM_MIX',
   GameEndCountdown = 'MESSAGE_GAME_END_COUNTDOWN',
   ConfirmModule = 'MESSAGE_CONFIRM_MODULE',
+  ConfirmCancelBuff = 'MESSAGE_CONFIRM_CANCEL_BUFF',
 }
 
 type MsgWinMessage = {
@@ -109,6 +110,13 @@ export const MSG_WIN_MESSAGES: Record<MsgWinCode, MsgWinMessage> = {
     type: MsgWinType.Both,
     textId: -1,
     textKey: 'msgWin.confirmModule',
+  },
+  // `CInfinityArrowCancelMsgBoxLayout` / `CBuffSwellOfMPCancelMsgBoxLayOut`: the skill's name, then
+  // "would you like to cancel" (NewUICommonMessageBox.cpp:1503-1580).
+  [MsgWinCode.ConfirmCancelBuff]: {
+    type: MsgWinType.Both,
+    textId: -1,
+    textKey: 'msgWin.cancelBuff',
   },
 };
 

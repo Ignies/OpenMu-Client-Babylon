@@ -59,4 +59,5 @@ export default {
   'buff.shieldSkill': 'Schildfertigkeit',
   'buff.alcohol': 'Alkohol',
   'buff.unnamed': 'Effekt {number}',
+  'buff.npcBlessing': 'Schaden und Verteidigung durch einen Segen erhöht.',
 } satisfies Partial<Record<keyof typeof en, string>>;

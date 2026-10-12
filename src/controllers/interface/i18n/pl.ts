@@ -229,4 +229,5 @@ export default {
   'msgWin.confirmMix': '%s\nPołączyć przedmioty?',
   'msgWin.exitCountdown': 'Wyjdziesz z gry za {seconds} s.',
   'msgWin.confirmModule': 'Ten świat chce uruchomić moduł {id} {version}.\nDziała oddzielnie od gry i nie może odczytać twoich kont.\nZezwolić?',
+  'msgWin.cancelBuff': '%s\nCzy chcesz to anulować?',
 } satisfies Partial<Record<keyof typeof en, string>>;

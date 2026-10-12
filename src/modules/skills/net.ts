@@ -1,4 +1,4 @@
-import { AreaSkillAnimationPacket, ChainLightningHitInfoPacket, MagicEffectCancelledPacket, MagicEffectStatusPacket, SkillAddedPacket, SkillListUpdatePacket, SkillRemovedPacket } from '@versions/shared/packets/ServerToClientPackets';
+import { AreaSkillAnimationPacket, ChainLightningHitInfoPacket, EffectItemConsumptionPacket, MagicEffectCancelledPacket, MagicEffectStatusPacket, SkillAddedPacket, SkillListUpdatePacket, SkillRemovedPacket } from '@versions/shared/packets/ServerToClientPackets';
 import { teleportCastSound } from '@/controllers/sound';
 import { Entity, World } from '@/ecs/world';
 import { EventBus } from '@/core/eventBus';
@@ -7,6 +7,10 @@ import { HeroSkills } from './state';
 import { Ecs } from '@/ecs/current';
 import { TELEPORT } from './skillCasting';
 import { setObjectEffect } from './objectEffects';
+import { setBuffTime } from './buffs';
+import { Hero } from '../hero';
+import { Social } from '../social/social';
+import { t as text } from '@/i18n';
 import { playCastAnimation } from '../combat/clips';
 import { beginTeleport, endTeleport, justArrived } from '@/ecs/systems/teleportSystem';
 import { playAreaSkillVisual, playChainLightningHop } from '@versions/shared/skills/skillVisuals';
@@ -93,6 +97,9 @@ function objectOnTile(world: World, except: Entity, x: number, y: number): Entit
   return best;
 }
 
+/** `eBuff_HelpNpc`: the NPC's blessing, which the system log names. */
+const HELP_NPC = 3;
+
 /** Registers this module's packet listeners (see ../module.ts). */
 export function installNet(): void {
   EventBus.on('AreaSkillAnimation', packet => {
@@ -121,6 +128,17 @@ export function installNet(): void {
   EventBus.on('MagicEffectStatus', packet => {
     const p = new MagicEffectStatusPacket(packet);
     setObjectEffect(p.PlayerId, p.EffectId, p.IsActive);
+  });
+
+  // ReceiveBuffState (WSclient.cpp:10254-10275): OpenMU sends this alone for an item's effect on the hero
+  // (DeActivateMagicEffectPlugIn.cs). Action 0 adds it with its time; any other action removes it.
+  EventBus.on('EffectItemConsumption', packet => {
+    const p = new EffectItemConsumptionPacket(packet);
+    const add = p.Action === 0;
+    if (Hero.playerId === undefined) return;
+    setObjectEffect(Hero.playerId, p.MagicEffectNumber, add);
+    if (add) setBuffTime(p.MagicEffectNumber, p.RemainingSeconds);
+    if (add && p.MagicEffectNumber === HELP_NPC) Social.systemMessage(text('buff.npcBlessing'));
   });
 
   EventBus.on('MagicEffectCancelled', packet => {
