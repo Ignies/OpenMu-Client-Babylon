@@ -22,6 +22,7 @@ export default {
   'charInfo.wizardryRate': '魔法ダメージ：{min}~{max}（+{rate}）',
   'charInfo.wizardry': '魔法ダメージ：{min}~{max}',
   'charInfo.curseSpell': ' 呪いダメージ：{min} ~ {max}',
+  'charInfo.curseSpellRate': ' 呪いダメージ：{min} ~ {max}（+{rate}）',
   'charInfo.skillDamage': 'スキルダメージ：{value}%',
   'charInfo.divineDamage': '神聖ダメージ（Roar・Slasher）：{value}%',
   'charInfo.aoeDamage': '範囲ダメージ（Dark Side）：{value}%',

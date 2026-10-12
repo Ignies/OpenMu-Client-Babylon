@@ -22,6 +22,7 @@ export default {
   'charInfo.wizardryRate': 'Магически щети: {min}~{max} (+{rate})',
   'charInfo.wizardry': 'Магически щети: {min}~{max}',
   'charInfo.curseSpell': ' Щети от проклятие: {min} ~ {max}',
+  'charInfo.curseSpellRate': ' Щети от проклятие: {min} ~ {max} (+{rate})',
   'charInfo.skillDamage': 'Щети от умения: {value}%',
   'charInfo.divineDamage': 'Божествени щети (Roar, Slasher): {value}%',
   'charInfo.aoeDamage': 'Щети в зона (Dark Side): {value}%',

@@ -22,6 +22,7 @@ export default {
   'charInfo.wizardryRate': 'Daune magice: {min}~{max} (+{rate})',
   'charInfo.wizardry': 'Daune magice: {min}~{max}',
   'charInfo.curseSpell': ' Daune de blestem: {min} ~ {max}',
+  'charInfo.curseSpellRate': ' Daune de blestem: {min} ~ {max} (+{rate})',
   'charInfo.skillDamage': 'Daunele abilității: {value}%',
   'charInfo.divineDamage': 'Daune divine (Roar, Slasher): {value}%',
   'charInfo.aoeDamage': 'Daune în zonă (Dark Side): {value}%',

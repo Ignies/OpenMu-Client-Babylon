@@ -240,6 +240,35 @@ describe('the character window with a transformation ring', () => {
   });
 });
 
+// CalculateCurseDamage (ZzzInfomation.cpp:3045-3104), GetCurseSkillDamage (CharacterManager.cpp:373-390) and the book's
+// curse rate on the line's maximum (NewUICharacterInfoWindow.cpp:1381-1466).
+describe('the character window curse line', () => {
+  const curse = (pieces: Record<number, Item>, magicSkill?: { number: number; damage: number }, charClass = CharacterClassNumber.Summoner) => {
+    const items: (Item | null)[] = new Array(12).fill(null);
+    for (const [slot, item] of Object.entries(pieces)) items[Number(slot)] = item;
+    return deriveCharacterStats({ charClass, level: 240, strength: 600, agility: 300, vitality: 100, energy: 450, leadership: 0, items, magicSkill });
+  };
+  const book = (more: Partial<Item> = {}): Item => ({ group: 5, num: 21, durability: 60, ...more });
+
+  it("adds the curse skills' damage, and only theirs", () => {
+    expect(curse({}, { number: 223, damage: 40 })).toMatchObject({ curseMin: 90, curseMax: 172 });
+    expect(curse({}, { number: 5, damage: 25 })).toMatchObject({ curseMin: 50, curseMax: 112 });
+  });
+
+  it("adds the left hand book's option and excellent wizardry bits, and the wing's curse option", () => {
+    expect(curse({ 1: book({ optionLevel: 2 }) })).toMatchObject({ curseMin: 58, curseMax: 120 });
+    expect(curse({ 0: book({ optionLevel: 2 }) })).toMatchObject({ curseMin: 50, curseMax: 112 });
+    expect(curse({ 1: book({ optionLevel: 2, durability: 0 }) })).toMatchObject({ curseMin: 50, curseMax: 112 });
+    expect(curse({ 1: book({ isExcellent: true, excellentFlags: 0x10 }) })).toMatchObject({ curseMin: 62, curseMax: 124 });
+    expect(curse({ 7: { group: 12, num: 42, durability: 255, optionLevel: 1 } }, undefined, CharacterClassNumber.BloodySummoner).curseMin).toBe(54);
+  });
+
+  it("reads the left hand book's magic power on the line's maximum", () => {
+    expect(curse({ 1: book({ optionLevel: 2 }) }).curseRate).toBe(27);
+    expect(curse({}).curseRate).toBe(0);
+  });
+});
+
 const SET_TYPES = 'Data/Local/itemsettype.bmd';
 const SET_OPTIONS = 'Data/Local/Eng/itemsetoption_eng.bmd';
 const SOCKETS = 'Data/Local/Eng/socketitem_eng.bmd';

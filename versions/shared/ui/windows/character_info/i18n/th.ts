@@ -22,6 +22,7 @@ export default {
   'charInfo.wizardryRate': 'ดาเมจเวทมนตร์: {min}~{max} (+{rate})',
   'charInfo.wizardry': 'ดาเมจเวทมนตร์: {min}~{max}',
   'charInfo.curseSpell': ' ดาเมจคำสาป: {min} ~ {max}',
+  'charInfo.curseSpellRate': ' ดาเมจคำสาป: {min} ~ {max} (+{rate})',
   'charInfo.skillDamage': 'ดาเมจสกิล: {value}%',
   'charInfo.divineDamage': 'ดาเมจศักดิ์สิทธิ์ (Roar, Slasher): {value}%',
   'charInfo.aoeDamage': 'ดาเมจเป็นพื้นที่ (Dark Side): {value}%',

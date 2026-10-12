@@ -33,6 +33,10 @@ other folders share.
   (:1241-1256). The magic rate (`staffRate`) is the skill maximum plus `maxMg` times the staff's or magic sword's
   `MagicPower` percent, worn by the `MagicDur` share (NewUICharacterInfoWindow.cpp:1226-1352). `IsRequireEquipItem`
   takes the harmony strength and agility cut off the needs (ZzzInfomation.cpp:2246-2259).
+  The curse line is `CalculateCurseDamage` (ZzzInfomation.cpp:3045-3104): energy, the wing's and the left hand's curse
+  options worn by durability, the left hand's excellent level / 20 and 2%; then `GetCurseSkillDamage` adds a curse
+  skill's Damage (CharacterManager.cpp:373-390). A book in the left hand prints its worn magic power on the line's
+  maximum (`curseRate`, NewUICharacterInfoWindow.cpp:1449-1460).
 - `emotes.ts`: `EMOTES`, `EMOTE_RINGS`, `emoteById(id)`, `matchEmoteWord(text)` (the chat words that fire
   an emote, `CheckChatText`), `genderedEmoteAction`, type `EmoteId`.
 - `statAllocation.ts`: `StatAllocation.start(stat, amount)` / `cancel()`, `run`, `running`, `isRunning(stat)`.

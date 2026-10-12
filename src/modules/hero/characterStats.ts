@@ -296,6 +296,7 @@ type DerivedStats = {
   staffRate: number;
   curseMin: number;
   curseMax: number;
+  curseRate: number;
 };
 
 function equipped(items: (Item | null)[], slot: number): Item | null {
@@ -712,6 +713,43 @@ function harmonyMagicPower(input: CharacterStatsInput): number {
 /** The summoner's curse skills, AT_SKILL_SUMMON_EXPLOSION and AT_SKILL_SUMMON_REQUIEM (_enum.h:436-437). */
 const SUMMON_CURSES = new Set([223, 224]);
 
+/**
+ * `CalculateCurseDamage` (ZzzInfomation.cpp:3045-3104): energy, the wing's and the left hand's curse options worn by
+ * durability, the left hand's excellent wizardry bits; then `GetCurseSkillDamage` (CharacterManager.cpp:373-390).
+ */
+function calculateCurse(input: CharacterStatsInput): Range {
+  const range = { min: Math.trunc(input.energy / 9), max: Math.trunc(input.energy / 4) };
+  const add = (value: number) => {
+    range.min += value;
+    range.max += value;
+  };
+  const wing = equipped(input.items, InventoryConstants.WingsSlot);
+  if (wing) add(special(wing, 'curse', input) - Math.trunc(special(wing, 'curse', input) * durabilityPercent(wing, true)));
+  // EQUIPMENT_WEAPON_LEFT, slot 1.
+  const left = equipped(input.items, InventoryConstants.RightHandSlot);
+  if (left && left.durability !== 0) {
+    const option = special(left, 'curse', input);
+    add(option - Math.trunc(option * durabilityPercent(left)));
+    const bits = magicExcellent(left, input);
+    add(bits.level);
+    if (bits.percent) {
+      range.min += Math.trunc((range.min * bits.percent) / 100);
+      range.max += Math.trunc((range.max * bits.percent) / 100);
+    }
+  }
+  const skill = input.magicSkill;
+  if (!skill || !SUMMON_CURSES.has(skill.number)) return range;
+  return { min: range.min + skill.damage, max: range.max + skill.damage + Math.trunc(skill.damage / 2) };
+}
+
+/** The books, ITEM_BOOK_OF_SAHAMUTT to ITEM_STAFF + 29: their magic power is the curse rate (NewUICharacterInfoWindow.cpp:1449-1460). */
+function curseRate(input: CharacterStatsInput, max: number): number {
+  const left = equipped(input.items, InventoryConstants.RightHandSlot);
+  if (left?.group !== GROUP_STAFF || left.num < 21 || left.num > 29) return 0;
+  const power = Math.fround(itemMagicPower(left) / 100);
+  return Math.trunc(Math.fround(max * Math.fround(power - Math.fround(power * durabilityPercent(left, false, true)))));
+}
+
 /** `GetMagicSkillDamage` (CharacterManager.cpp:341-370) of the selected skill; no Season 6 set has a mastery row (option 29-35). */
 function magicSkillDamage(range: Range, skill: CharacterStatsInput['magicSkill'], lines: readonly SetOptionLine[]): Range {
   if (skill && SUMMON_CURSES.has(skill.number)) return range;
@@ -810,7 +848,7 @@ export function deriveCharacterStats(input: CharacterStatsInput): DerivedStats {
   const skilled = magicSkillDamage({ min: magic.min + magicBonus, max: magic.max + magicBonus }, input.magicSkill, lines);
   const wizardry = withPet(withRing(skilled, items, 'wizardry'), pet, 'wizardry', level);
   const maxMg = harmonyMagicPower(input);
-  const curse = withPet(withRing({ min: Math.trunc(input.energy / 9), max: Math.trunc(input.energy / 4) }, items, 'curse'), pet, 'curse', level);
+  const curse = withPet(withRing(calculateCurse(input), items, 'curse'), pet, 'curse', level);
   // The Panda and the Unicorn add 50 defense.
   const petDefense = pet?.group === GROUP_HELPER && (pet.num === PET.panda || pet.num === PET.unicorn) ? 50 : 0;
 
@@ -831,6 +869,7 @@ export function deriveCharacterStats(input: CharacterStatsInput): DerivedStats {
     staffRate: Math.trunc(Math.fround((skilled.max + maxMg) * magic.percent)),
     curseMin: curse.min,
     curseMax: curse.max,
+    curseRate: curseRate(input, curse.max),
   };
 }
 

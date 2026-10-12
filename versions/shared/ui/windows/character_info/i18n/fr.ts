@@ -22,6 +22,7 @@ export default {
   'charInfo.wizardryRate': 'Dégâts magiques : {min}~{max} (+{rate})',
   'charInfo.wizardry': 'Dégâts magiques : {min}~{max}',
   'charInfo.curseSpell': ' Dégâts de malédiction : {min} ~ {max}',
+  'charInfo.curseSpellRate': ' Dégâts de malédiction : {min} ~ {max} (+{rate})',
   'charInfo.skillDamage': 'Dégâts de compétence : {value}%',
   'charInfo.divineDamage': 'Dégâts divins (Roar, Slasher) : {value}%',
   'charInfo.aoeDamage': 'Dégâts de zone (Dark Side) : {value}%',
