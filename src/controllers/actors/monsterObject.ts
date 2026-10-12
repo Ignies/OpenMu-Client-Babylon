@@ -1,6 +1,6 @@
 import type { Entity, World } from '../../ecs/world';
 import { ModelObject } from '../render/modelObject';
-import { applyMonsterLook, blendMeshOf, type MonsterBlendMesh } from './monsterBlendMesh';
+import { applyMonsterLook, blendMeshOf, dyingBlend, type MonsterBlendMesh } from './monsterBlendMesh';
 import { monsterModelTypeOf } from '../anim/playSpeed';
 import { ClothSet } from '../cloth';
 import type { Scene, TransformNode } from '../render/babylon/exports';
@@ -26,6 +26,7 @@ export class MonsterObject extends ModelObject {
   #entity: Entity | null = null;
   #bobTimer = 0;
   #blendMesh: MonsterBlendMesh | undefined;
+  #blendedAll = false;
 
   /** The physics cloths on this body (`o->m_pCloth`): the Death King's and the Nightmare's (`ecs/systems/clothSystem.ts`). */
   readonly Cloth: ClothSet;
@@ -67,6 +68,8 @@ export class MonsterObject extends ModelObject {
 
   Update(gameTime: World['gameTime']): void {
     super.Update(gameTime);
+
+    if (!this.#blendedAll && this.gltf) this.#blendedAll = dyingBlend(this, this.#entity?.npcType, !!this.#entity?.dying);
 
     if (!this.BobsWhileMoving) return;
 

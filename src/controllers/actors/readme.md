@@ -171,7 +171,8 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
 ## Tests
 - `ammoGold.test.ts`: only bolts and arrows turn gold, only while Infinity Arrow holds, and give back their light after.
 - `monsterBlendMesh.test.ts`: the mesh each monster model's case draws additive, the Crust's U scroll, and a
-  type's own mesh over its body's; a type's own passes and fixed body light (`applyMonsterLook`).
+  type's own mesh over its body's; a type's own passes and fixed body light (`applyMonsterLook`); a dying type turned
+  all additive once while its `dyingBlendAll` holds (`dyingBlend`).
 - `chaosCastleUnit.test.ts`: the castle's weapons per class, own weapons elsewhere, transformed
   players and NPCs keep theirs, no armour glow in the castle.
 - `approachPath.test.ts`: walk truncation at range, distance along the sent path, stall capping.
@@ -231,7 +232,8 @@ effects and wings off. Hands carry no excellent or ancient bit in this layout.
 Keyed by monster model type; a type's own `blendMesh` (the Valkyrie, the Chaos Goblin and Elf Lala) wins
 (`blendMeshOf`), and a plain-model NPC (`npcFactoryFor`) takes that one too. `MonsterObject.load` sets `BlendMesh` / `BlendMeshLight` unless the
 class set its own, and binds the per-tick writes with `bindMeshAnimation`. `applyMonsterLook` then hands the model
-its folder's `passes` (unless the class set its own) and holds a `bodyLight` with `FixedLight`. Balrog and Devil are left
+its folder's `passes` (unless the class set its own) and holds a `bodyLight` with `FixedLight`. Once it dies,
+`MonsterObject.Update` turns it all additive (`blendAll`) when its folder's `dyingBlendAll` holds (`dyingBlend`). Balrog and Devil are left
 out on purpose: their `BlendMeshTexCoord` writes (ZzzCharacter.cpp:6012, :6015) land on `BlendMesh = -1`
 and draw nothing (ZzzBMD.cpp:1847). Every Crust case sets mesh 1 (:13607, :14902), so its U scroll
 (:5818) shows. The Death Angel's mesh 1 and the Necron's mesh 3 (GMHellas.cpp:797, :877) name meshes

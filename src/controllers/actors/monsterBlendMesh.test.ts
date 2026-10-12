@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { monsterRegistry } from '../monsters';
-import { applyMonsterLook, blendMeshOf, monsterBlendMeshFor } from './monsterBlendMesh';
+import { applyMonsterLook, blendMeshOf, dyingBlend, monsterBlendMeshFor } from './monsterBlendMesh';
 
 const row = (model: number) => {
   const r = monsterBlendMeshFor(model);
@@ -8,6 +8,21 @@ const row = (model: number) => {
 };
 
 describe('monster blend meshes', () => {
+  // The Maya hands, dying before MAYA3, and the Dark Ghost, dying, draw every mesh additive (GM_Kanturu_3rd.cpp:885-897,
+  // GMEmpireGuardian2.cpp:942-944): once, while the type's test holds.
+  it('turn a dying type all additive while its test holds', () => {
+    let early = true;
+    monsterRegistry.add([{ Numb: 9010, Name: 'hand', dyingBlendAll: () => early }, { Numb: 9011, Name: 'plain' }]);
+    const model = { blendAll: vi.fn() };
+    expect(dyingBlend(model, 9010, false)).toBe(false);
+    expect(dyingBlend(model, 9011, true)).toBe(false);
+    early = false;
+    expect(dyingBlend(model, 9010, true)).toBe(false);
+    early = true;
+    expect(dyingBlend(model, 9010, true)).toBe(true);
+    expect(model.blendAll).toHaveBeenCalledTimes(1);
+  });
+
   // CreateMonster's `c->Object.BlendMesh` by model (ZzzCharacter.cpp:13576, :13607, :13741, :13981, :14000,
   // :14902; GMHellas.cpp:845, :861; GMBattleCastle.cpp:1409), `BlendMeshLight` 1 unless written (:11936).
   it('give each model the mesh its case draws additive', () => {

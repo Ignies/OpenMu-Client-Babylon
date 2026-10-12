@@ -354,6 +354,15 @@ describe('Balgass', () => {
   });
 });
 
+describe('the all-additive deaths', () => {
+  // `o->BlendMesh = -2` dying: the Maya hands before MAYA3 (GM_Kanturu_3rd.cpp:885-897, :914-926; no Kanturu state
+  // here reads 0), the Dark Ghost always (GMEmpireGuardian2.cpp:942-944).
+  it('turn the Maya hands and the Dark Ghost bright as they die', () => {
+    expect([362, 363, 515].map(n => monsters.def(n)?.dyingBlendAll?.())).toEqual([true, true, true]);
+    expect(monsters.def(361)?.dyingBlendAll).toBeUndefined();
+  });
+});
+
 describe("Nightmare's death", () => {
   // MoveMonsterVisual's Die from frame 3: two SMOKE + 3 SubType 3 at Scale 1.5 from Body_Bone13 (bone 63) a tick
   // (GM_Kanturu_3rd.cpp:865-869).

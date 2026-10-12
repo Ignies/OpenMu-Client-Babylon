@@ -85,6 +85,17 @@ describe('a blend mesh', () => {
     for (const mesh of gltf.mesh.getChildMeshes()) expect(mesh.metadata.brightMesh).toBe(true);
   });
 
+  // A dying Maya hand's or Dark Ghost's `o->BlendMesh = -2`, written once it is drawn (GM_Kanturu_3rd.cpp:887).
+  it('turns every mesh additive when told to after it loaded', () => {
+    const object = new ModelObject(scene);
+    const gltf = body(3);
+    object.load(gltf);
+    expect(gltf.mesh.getChildMeshes().some(m => m.metadata?.brightMesh)).toBe(false);
+    object.blendAll();
+    expect(object.BlendMesh).toBe(-2);
+    for (const mesh of gltf.mesh.getChildMeshes()) expect(mesh.metadata.brightMesh).toBe(true);
+  });
+
   // A seed sphere: `BodyLight` set to its colour before the tinted passes, mesh 1 drawn first at the body's (ZzzObject.cpp:8094-8121).
   it('lights the shine mesh by the shine with ShineLight, the others by the body', () => {
     const object = new ModelObject(scene);
