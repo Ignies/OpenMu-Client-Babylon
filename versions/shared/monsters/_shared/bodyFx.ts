@@ -332,13 +332,14 @@ export const GIGANTIS_BLURS = swings([[34, [0, 0, 0], 33, [0, 0, 0]]], [1, 1.2, 
 
 /**
  * The Genocider and the Gigantis Warrior: Type 0, Short, four claws, Attack frames 5.5-6.9 (GM_Kanturu_1st.cpp:1744-1796,
- * :1872-1924). The original lays 18 samples a tick here, not 10.
+ * :1872-1924), 18 samples a tick, not 10. Those run `speed / 10` apart, so the original's last eight lie ahead of the
+ * frame; ours are laid evenly over the tick's path.
  */
 export const GENOCIDER_BLURS = swings(
   [49, 51, 50, 52].map(b => [b, [-40, 0, 0], b, [10, 0, 0]] as const),
   [1, 0.2, 0],
   'blur01',
-  { short: true, gate: { action: ATTACKS, frames: [[5.5, 6.9]] } }
+  { short: true, samples: 18, gate: { action: ATTACKS, frames: [[5.5, 6.9]] } }
 );
 
 /** The Twin Tail: Type 1, to Attack1 frame 4.12 (GM_Kanturu_2nd.cpp:1286-1309). */

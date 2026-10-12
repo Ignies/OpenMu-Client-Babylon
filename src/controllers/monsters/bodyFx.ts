@@ -254,6 +254,8 @@ export type BodyFxEmitter =
       readonly short?: true;
       /** `Type` 4: drawn darkening what is behind it (EnableAlphaBlendMinus), at its flat light. */
       readonly dark?: true;
+      /** The loop's CreateBlur calls a tick, 10 when omitted (the Genocider's 18). */
+      readonly samples?: number;
       readonly gate?: BodyFxGate;
     }
   | {

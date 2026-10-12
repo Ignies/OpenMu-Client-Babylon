@@ -209,8 +209,12 @@ describe('the Aida and Kanturu swing blurs', () => {
     for (const berserker of [350, 435, 553]) expect(blurs(berserker)).toEqual([`33(-20,0,0)>34(100,0,0) motionBlur 0.3,2,0.5 ${atk} 3.5-6.7`]);
     expect(blurs(354)).toEqual([`55(0,0,0)>54(0,0,0) blur01 1,1.2,2 ${atk} 5.9-7.55`]);
     for (const gigantis of [356, 434, 554]) expect(blurs(gigantis)).toEqual([`34(0,0,0)>33(0,0,0) blur01 1,1.2,2 ${atk} 3.5-5.9`]);
-    for (const genocider of [357, 555])
+    for (const genocider of [357, 555]) {
       expect(blurs(genocider)).toEqual([49, 51, 50, 52].map(b => `${b}(-40,0,0)>${b}(10,0,0) blur01 1,0.2,0 ${atk} 5.5-6.9 short`));
+      // 18 CreateBlur calls a tick (GM_Kanturu_1st.cpp:1765, :1891); every other loop makes 10.
+      expect(rows(genocider, 'blur').map(b => b.samples)).toEqual([18, 18, 18, 18]);
+    }
+    expect(rows(354, 'blur').map(b => b.samples)).toEqual([undefined]);
     for (const twin of [359, 498]) expect(blurs(twin)).toEqual([`58(-150,50,0)>59(150,-200,0) motionBlur 1,0.2,0.5 ${A.Attack1} 0-4.12`]);
     for (const dread of [360, 439])
       expect(blurs(dread)).toEqual([`33(0,0,0)>33(100,120,0) blur01 1,1,1 ${A.Attack1} 0-5 dark`, `33(0,0,0)>33(100,120,0) blur01 1,1,1 ${A.Attack2} 0-9 dark`]);

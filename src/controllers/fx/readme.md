@@ -97,7 +97,8 @@ shared pools, textures and particle recipes other folders reuse.
 - change one skill's look: its file in `versions/shared/skills/`, not here.
 
 ## Tests
-- `blur.test.ts`: a `tickHistory` trail fades a light above 1 from its own tint, clamped per channel after the
+- `blur.test.ts`: a `tickHistory` trail lays `samplesPerTick` samples a tick (10 by default, the Genocider's 18);
+  it fades a light above 1 from its own tint, clamped per channel after the
   fade (PackABGR), and drops two samples a tick from 15 ticks old when `short`, from 30 when not (CreateBlur).
 - `debris.test.ts`: broken ice (`ice`) is thrown, tumbles, falls, bounces and fades as MODEL_EFFECT_BROKEN_ICE
   SubType 0 moves a tick.

@@ -668,6 +668,7 @@ export function visualMonster(
       blend: em.dark ? 'subtract' : 'add',
       short: em.short,
       tickHistory: true,
+      samplesPerTick: em.samples,
       seconds: Infinity,
       until: () => stopped || entityGone(e) || (gate !== undefined && !shownNow(e, gate)),
     });
