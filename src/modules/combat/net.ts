@@ -18,7 +18,7 @@ import { chooseAttackAction, isWeaponItem } from '@/controllers/actors/weaponCla
 import { combat } from '@/controllers/combat';
 import { delay, entityYaw } from '@/controllers/fx/core';
 import { monsterAttackLook, monsterSkillLook } from '@/controllers/skills';
-import { isMonsterSwingClip, monsterAttackState, monsterFlinches, monsterSkillSwing, monsterSwing } from '@/controllers/anim/monsterAttackClip';
+import { isMonsterSwingClip, monsterAttackState, monsterCastStartsAttack, monsterFlinches, monsterSkillSwing, monsterSwing } from '@/controllers/anim/monsterAttackClip';
 import { isPlayerBody } from '@/controllers/actors/playerObject';
 import { isTeleportSkill } from '../skills/skillCasting';
 import { meteoriteStormRunning, santaActionSound } from '@/controllers/sound/packetSounds';
@@ -443,6 +443,10 @@ export function installNet(): void {
     if (combat.observeDarkSideMagic(p.SkillId, caster, target)) return;
     // AT_SKILL_DRAGON_ROAR: a hit, with no SetAction or cast sound (WSclient.cpp:5130-5143).
     if (!combat.magicIsHit(p.SkillId)) playCastAnimation(caster, p.SkillId, false);
+    // A monster's cast that starts AttackTime runs the map's AttackEffect at its target; none without one (WSclient.cpp:4158-4159).
+    if (target && caster.monsterAnimation && !isDeadMonster(caster) && monsterCastStartsAttack(p.SkillId)) {
+      monsterAttackLook(monsterNumberOf(caster), world.mapIndex)?.({ scene: world.scene, caster, target, yaw: entityYaw(caster) });
+    }
     playTargetedSkillVisual(world.scene, p.SkillId, caster, target);
   });
 
