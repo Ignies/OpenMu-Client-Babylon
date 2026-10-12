@@ -132,3 +132,28 @@ describe('Nightmare', () => {
     expect(rows(361, 'cards')[0].gate?.alive).toBe(true);
   });
 });
+
+describe('the Maya hands', () => {
+  // GM_Kanturu_3rd.cpp:707-783 (the ribbons on each hand's MoveEye bones) and :1083-1226 (the cards on the fingers),
+  // none once a hand dies. The left's SubType 18-21 / 27 run JointLaser01 in purple, the right's 28-31 / 33 the
+  // flare sheet in white (ZzzEffectJoint.cpp:286-325, :462).
+  it('run the fingers ribbons and light the finger bones while alive', () => {
+    expect(trails(362)).toEqual(['11 15cm x8 0.8,0.5,1', '5 15cm x8 0.8,0.5,1', '29 15cm x8 0.8,0.5,1', '17 15cm x8 0.8,0.5,1', '23 15cm x8 0.8,0.5,1']);
+    expect(trails(363)).toEqual(['20 15cm x8 1,1,1', '5 15cm x8 1,1,1', '42 15cm x8 1,1,1', '31 15cm x8 1,1,1', '53 15cm x8 1,1,1']);
+    expect(rows(363, 'trail').every(t => t.ribbon === 'flare' && t.gate?.alive)).toBe(true);
+    expect(cards(362)).toEqual([
+      ...[7, 13, 19, 25, 31].flatMap(b => [`${b}:flareBlue@1.3 0.5,0.5,0.8`, `${b}:flareBlue@0.7 0.5,0.5,0.8`]),
+      ...[12, 18, 24, 30, 6].map(b => `${b}:flareBlue@1 0.5,0.5,0.8`),
+    ]);
+    expect(cards(363)).toEqual([
+      ...[59, 48].flatMap(b => [`${b}:flareRed@1.5 0.5,0.3,0.3`, `${b}:flareRed@0.7 0.5,0.3,0.3`]),
+      ...[11, 37, 26].flatMap(b => [`${b}:flareRed@1.3 0.5,0.3,0.3`, `${b}:flareRed@0.7 0.5,0.3,0.3`]),
+      ...[54, 43, 32, 6, 21].map(b => `${b}:flareRed@1 0.5,0.3,0.3`),
+    ]);
+    expect(rows(363, 'cards')[0].spots.map(s => (s.local ?? [0, 0, 0]).join(','))).toEqual([
+      '-2,0,4', '-10,-3,3', '-1,-2,4', '-10,-3,5', '0,0,4', '-10,0,4', '0,0,4', '-10,1,4', '6,3,3', '-5,10,5',
+      '0,0,-5', '0,0,-2', '0,0,-5', '0,0,-5', '10,-4,0',
+    ]);
+    expect([rows(362, 'cards')[0].gate?.alive, rows(363, 'cards')[0].gate?.alive]).toEqual([true, true]);
+  });
+});

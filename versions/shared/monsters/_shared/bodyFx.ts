@@ -131,3 +131,7 @@ export const puff = (
   colour: RGB,
   extra: Partial<PuffRow> = {}
 ): BodyFxEmitter => ({ kind: 'puff', every, bones: bonesAt, particles, colour, ...extra });
+
+/** One card: `CreateSprite(sheet, TransformPosition(bone, local), scale, Light, o)`. */
+export const spot = (bone: number, card: BodyCard, scale: number, local?: Cm3): CardsRow['spots'][number] =>
+  local ? { bone, card, scale, local } : { bone, card, scale };
