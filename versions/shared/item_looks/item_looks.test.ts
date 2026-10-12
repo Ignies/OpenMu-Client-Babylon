@@ -300,3 +300,10 @@ describe('the armour sets', () => {
     expect(look(7, 23)).toBeNull(); // the branch names no helm
   });
 });
+
+describe('the Dark Lord\'s pet items', () => {
+  it('Dark Horse horn: Chrome01 over every mesh in orange; Dark Raven: over mesh 0 in cyan (ZzzObject.cpp:7066-7077)', () => {
+    expect(look(13, 4)).toEqual({ drawn: undefined, passes: [{ mesh: -1, kind: 'add', ...CHROME, light: [0.8, 0.4, 0.1] }] });
+    expect(look(13, 5)).toEqual({ drawn: undefined, passes: [{ mesh: 0, kind: 'add', ...CHROME, light: [0.3, 0.8, 1] }] });
+  });
+});
