@@ -97,9 +97,12 @@ const NO_DATA = ![SET_TYPES, SET_OPTIONS, SOCKETS, HARMONY, ADD_OPTIONS].every(e
 // CalculateDamage / CalculateAttackRating / CalculateDefense (ZzzInfomation.cpp:2745-2812, :3127-3129, :3361-3380),
 // CalculateMagicDamage (:3005-3035), CalculateSuccessfulBlocking (:3248), CalcSocketStatusBonus (SocketSystem.cpp:476-570).
 describe.skipIf(NO_DATA)('the character window with ancient sets and sockets', () => {
+  // skipIf still runs this body to collect the tests, so the reads need their own guard.
   const read = (path: string) => new Uint8Array(readFileSync(path));
-  loadItemSetTables(read(SET_TYPES), read(SET_OPTIONS));
-  loadItemOptionTables(read(HARMONY), read(SOCKETS), read(ADD_OPTIONS));
+  if (!NO_DATA) {
+    loadItemSetTables(read(SET_TYPES), read(SET_OPTIONS));
+    loadItemOptionTables(read(HARMONY), read(SOCKETS), read(ADD_OPTIONS));
+  }
   const sets = itemSetTables();
   const options = itemOptionTables();
   const worn = (pieces: Record<number, Item>, charClass = CharacterClassNumber.DarkKnight) => {
