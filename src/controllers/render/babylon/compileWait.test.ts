@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { Effect } from './exports';
-import { patientCompileWait } from './compileWait';
+import { Effect, EffectFallbacks } from './exports';
+import { keepGpuSkinning, patientCompileWait } from './compileWait';
 
 type Fake = {
   ready: boolean;
@@ -101,5 +101,19 @@ describe('the shader compile wait', () => {
     };
     check(effect);
     expect(effect.errors).toHaveLength(1);
+  });
+});
+
+// Babylon's CPU skinning fallback writes skinned positions into geometry the pass clones share.
+describe('a failed skinned effect', () => {
+  it('keeps the mesh skinning on the GPU and drops the next defines instead', () => {
+    keepGpuSkinning();
+    const mesh = { computeBonesUsingShaders: true, numBoneInfluencers: 4 };
+    const fallbacks = new EffectFallbacks();
+    fallbacks.addFallback(0, 'FOG');
+    fallbacks.addCPUSkinningFallback(0, mesh as never);
+    const defines = fallbacks.reduce('#define NUM_BONE_INFLUENCERS 4\n#define FOG\n', {} as never);
+    expect(mesh.computeBonesUsingShaders).toBe(true);
+    expect(defines).toBe('#define NUM_BONE_INFLUENCERS 4\n\n');
   });
 });

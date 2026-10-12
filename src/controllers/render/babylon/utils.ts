@@ -1,7 +1,7 @@
 import { Engine, Scene } from './exports';
 import { devQuery } from '@/core/devSeams';
 import { installBitmapDecode } from './bitmapDecode';
-import { patientCompileWait } from './compileWait';
+import { keepGpuSkinning, patientCompileWait } from './compileWait';
 
 export async function addInspectorForScene(scene: Scene) {
   const switchDebugLayer = () => {
@@ -171,6 +171,7 @@ export function createEngine(
 
   deferDeletingCompilingPrograms(engine);
   patientCompileWait();
+  keepGpuSkinning();
 
   void installBitmapDecode(engine);
 

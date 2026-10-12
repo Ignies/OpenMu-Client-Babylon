@@ -206,6 +206,7 @@ export { ImageProcessingConfiguration } from '@babylonjs/core/Materials/imagePro
 export { ColorCurves } from '@babylonjs/core/Materials/colorCurves';
 export { PostProcess } from '@babylonjs/core/PostProcesses/postProcess';
 export { Effect } from '@babylonjs/core/Materials/effect';
+export { EffectFallbacks } from '@babylonjs/core/Materials/effectFallbacks';
 export { CreateLineSystem } from '@babylonjs/core/Meshes/Builders/linesBuilder';
 export { LinesMesh } from '@babylonjs/core/Meshes/linesMesh';
 export { CreateGreasedLine } from '@babylonjs/core/Meshes/Builders/greasedLineBuilder';

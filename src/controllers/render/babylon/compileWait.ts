@@ -1,4 +1,4 @@
-import { Effect } from './exports';
+import { Effect, EffectFallbacks } from './exports';
 import { pageHidden } from '../../../core/utils';
 
 /** Babylon's wait for a program: a check every 16 ms, 30 s of them (`Effect._checkIsReady`). */
@@ -16,6 +16,7 @@ type WaitingEffect = {
 };
 
 let patched = false;
+let gpuSkinningKept = false;
 
 /**
  * Babylon's wait for a compiling shader, without its give-up. Babylon counts 1875 checks and then
@@ -58,5 +59,22 @@ export function patientCompileWait(): void {
         if (ready()) clearInterval(slow);
       }, SLOW_STEP_MS);
     }, STEP_MS);
+  };
+}
+
+/**
+ * Babylon's CPU skinning fallback, off: it turns every skinned mesh on a failed effect to CPU
+ * skinning for good, writing skinned positions into geometry the pass clones share, which then
+ * skin them a second time (the wedge from the hero's hand). Bones live in a texture here, so the
+ * fallback buys nothing; a failed skinned effect drops its next defines instead.
+ */
+export function keepGpuSkinning(): void {
+  if (gpuSkinningKept) return;
+  gpuSkinningKept = true;
+
+  const proto = EffectFallbacks.prototype;
+  const add = proto.addCPUSkinningFallback;
+  proto.addCPUSkinningFallback = function (this: EffectFallbacks, rank: number) {
+    add.call(this, rank, null as never);
   };
 }
