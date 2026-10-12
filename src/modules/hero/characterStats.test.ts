@@ -75,6 +75,27 @@ describe('the character window defense rate with a shield', () => {
   it('adds 10% for the excellent defense success rate option', () => {
     expect(shield({ isExcellent: true, excellentFlags: 0x02, durability: 67 })).toBe(Math.trunc((bare + 159) * 1.1));
   });
+
+  // ZzzInfomation.cpp:3240-3246, PlusSpecialPercent's IsRequireEquipItem (:2302-2314).
+  const worn = (pieces: Record<number, Item>, strength = 600) => {
+    const items: (Item | null)[] = new Array(12).fill(null);
+    for (const [slot, item] of Object.entries(pieces)) items[Number(slot)] = item;
+    return deriveCharacterStats({ charClass: CharacterClassNumber.DarkKnight, level: 240, strength, agility: 300, vitality: 100, energy: 450, leadership: 0, items }).defenseRate;
+  };
+  const excellent = { isExcellent: true, excellentFlags: 0x02 };
+
+  it('adds 10% for each armour piece and ring with the defense success rate option, after the shield', () => {
+    expect(worn({ 2: { group: 7, num: 0, durability: 30, ...excellent } })).toBe(Math.trunc(bare * 1.1));
+    const both = Math.trunc(bare * 1.1);
+    expect(worn({ 2: { group: 7, num: 0, durability: 30, ...excellent }, 10: { group: 13, num: 8, durability: 30, ...excellent } })).toBe(both + Math.trunc(both / 10));
+    expect(worn({ 1: { group: 6, num: 12, durability: 52 }, 2: { group: 7, num: 0, durability: 30, ...excellent } })).toBe(Math.trunc((bare + 129) * 1.1));
+  });
+
+  it("drops a piece's options when its needs are unmet or it is broken", () => {
+    expect(worn({ 2: { group: 7, num: 0, durability: 30, ...excellent } }, 20)).toBe(bare);
+    expect(worn({ 2: { group: 7, num: 0, durability: 0, ...excellent } })).toBe(bare);
+    expect(worn({ 1: { group: 6, num: 12, durability: 52, optionLevel: 2, ...excellent } }, 20)).toBe(bare + 159);
+  });
 });
 
 // The window takes the magic percent from pWeaponRight, EQUIPMENT_WEAPON_RIGHT slot 0 (NewUICharacterInfoWindow.cpp:509, :1336-1346).
@@ -88,6 +109,58 @@ describe('the character window wizardry with a staff', () => {
   it("takes the Ancient Staff's magic power from the right hand (slot 0), not from slot 1", () => {
     expect(held(0)).toBe(38);
     expect(held(1)).toBe(0);
+  });
+
+  // NewUICharacterInfoWindow.cpp:1336-1352: the magic swords too, worn by the MagicDur share.
+  const rate = (item: Item) => {
+    const items: (Item | null)[] = new Array(12).fill(null);
+    items[0] = item;
+    return deriveCharacterStats({ charClass: CharacterClassNumber.MagicGladiator, level: 240, strength: 600, agility: 300, vitality: 100, energy: 450, leadership: 0, items }).staffRate;
+  };
+
+  it('reads the Rune Blade, Explosion Blade, Sword Dancer, Dark Reign Blade and Imperial Sword', () => {
+    expect(rate({ group: 0, num: 31, durability: 93 })).toBe(52);
+    for (const num of [21, 23, 25, 28]) expect(rate({ group: 0, num, durability: 90 })).toBeGreaterThan(0);
+    expect(rate({ group: 0, num: 26, durability: 90 })).toBe(0);
+  });
+
+  it("loses half of the Legendary Staff's rate below 20% of its MagicDur", () => {
+    expect(rate({ group: 5, num: 5, durability: 66 })).toBe(29);
+    expect(rate({ group: 5, num: 5, durability: 10 })).toBe(15);
+  });
+});
+
+// CalculateMagicDamage adds the item's AT_IMPROVE_MAGIC options, not its damage (ZzzInfomation.cpp:2848-3001).
+describe('the wizardry of a held staff', () => {
+  const wizardry = (pieces: Record<number, Item>, strength = 600) => {
+    const items: (Item | null)[] = new Array(12).fill(null);
+    for (const [slot, item] of Object.entries(pieces)) items[Number(slot)] = item;
+    return deriveCharacterStats({ charClass: CharacterClassNumber.DarkWizard, level: 240, strength, agility: 300, vitality: 100, energy: 450, leadership: 0, items });
+  };
+  const staff = (more: Partial<Item> = {}): Item => ({ group: 5, num: 5, durability: 66, ...more });
+
+  it("leaves out the Legendary Staff's damage", () => {
+    expect(wizardry({ 0: staff() })).toMatchObject({ wizardryMin: 50, wizardryMax: 112 });
+  });
+
+  it('adds +4 per option level, and nothing when the staff is broken or its strength is unmet', () => {
+    expect(wizardry({ 0: staff({ optionLevel: 2 }) })).toMatchObject({ wizardryMin: 58, wizardryMax: 120 });
+    expect(wizardry({ 0: staff({ optionLevel: 2, durability: 0 }) })).toMatchObject({ wizardryMin: 50, wizardryMax: 112 });
+    expect(wizardry({ 0: staff({ optionLevel: 2 }) }, 20)).toMatchObject({ wizardryMin: 50, wizardryMax: 112 });
+  });
+
+  it('adds the excellent level / 20 and 2% wizardry', () => {
+    expect(wizardry({ 0: staff({ isExcellent: true, excellentFlags: 0x10 }) })).toMatchObject({ wizardryMin: 62, wizardryMax: 124 });
+    expect(wizardry({ 0: staff({ isExcellent: true, excellentFlags: 0x08 }) })).toMatchObject({ wizardryMin: 51, wizardryMax: 114 });
+  });
+
+  it("adds the staff's option again with anything in the left hand, as the original does (:2950-2979)", () => {
+    expect(wizardry({ 0: staff({ optionLevel: 2 }), 1: { group: 6, num: 0, durability: 22 } })).toMatchObject({ wizardryMin: 66, wizardryMax: 128 });
+  });
+
+  it("adds the Wings of Heaven's option, and a Wizard's Ring's 10%", () => {
+    expect(wizardry({ 7: { group: 12, num: 1, durability: 200, optionLevel: 1 } })).toMatchObject({ wizardryMin: 54, wizardryMax: 116 });
+    expect(wizardry({ 10: { group: 13, num: 20, durability: 30 } })).toMatchObject({ wizardryMin: 55, wizardryMax: 123 });
   });
 });
 

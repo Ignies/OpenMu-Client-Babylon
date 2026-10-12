@@ -15,7 +15,9 @@ the Rage Fighter's Dark Side blows. This folder has only the handlers; it keeps 
 - The hero is driven locally: `ObjectAnimation` for the hero is ignored, as in the original.
 - `MonsterSkillAnimation` (0x69, `ReceiveMonsterSkill`, WSclient.cpp:4091-4128) records the monster's skill;
   one in range turns it to its target and swings it through `monsterSkillSwing`, whose map hooks pick the
-  clip. OpenMU sends it for the Imperial Guardian monsters, Selupan and the Iron Knight.
+  clip, then draws the skill's look and the map's AttackEffect if the monster has them (`monsterSkillLook`,
+  `monsterAttackLook`, skills controller); a monster's 0x18 swing draws that AttackEffect too, at the hero.
+  OpenMU sends it for the Imperial Guardian monsters, Selupan and the Iron Knight.
 - `lastAttacker` is the original's `AttackPlayer` (`WSclient.cpp:3596-3608`, `:4161`): who last sent an
   attack or skill animation, used for Soul Barrier's hit shell on the hero.
 - A hit plays the hit sound (`AttackEffect`, `ZzzCharacter.cpp:5250-5307`), lowers the target's health
@@ -79,6 +81,7 @@ the Rage Fighter's Dark Side blows. This folder has only the handlers; it keeps 
   naming no target asks for the skill on the hero, and its empty slots get no follow-up; a cast keeps the last targets and
   follow-ups until its 0x4B answers; another caster's 0x19 of Dark Side
   counts one of the hero's follow-ups and draws nothing.
-- `monsterSkill.test.ts`: a 0x69 turns Gaion to his target and plays his skill's clip; none without a target.
+- `monsterSkill.test.ts`: a 0x69 turns Gaion to his target and plays his skill's clip; none without a target; his
+  Berserker draws the rage once; Selupan's cure and storm on Raklion only; Dark Ghost's meteor, flame and kept rain.
 - `skillAnimation.test.ts`: another caster's 0x19 of Dragon Roar (and its Strengthener) leaves his clip running and plays
   no cast sound, only its hit; another skill's still plays its clip.

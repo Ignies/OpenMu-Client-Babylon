@@ -16,7 +16,8 @@ import { isDeadMonster } from '../scope/objects';
 import { convertDirectionToAngle } from '@/core/turnAngle';
 import { chooseAttackAction, isWeaponItem } from '@/controllers/actors/weaponClass';
 import { combat } from '@/controllers/combat';
-import { delay } from '@/controllers/fx/core';
+import { delay, entityYaw } from '@/controllers/fx/core';
+import { monsterAttackLook, monsterSkillLook } from '@/controllers/skills';
 import { isMonsterSwingClip, monsterAttackState, monsterFlinches, monsterSkillSwing, monsterSwing } from '@/controllers/anim/monsterAttackClip';
 import { isPlayerBody } from '@/controllers/actors/playerObject';
 import { isTeleportSkill } from '../skills/skillCasting';
@@ -331,6 +332,8 @@ export function installNet(): void {
         const storming = meteoriteStormRunning(input.monster, state, input.now);
         setMonsterClip(obj, monsterSwing(state, input), true);
         playTrapSounds(obj, input, true, storming);
+        // AttackEffect on the swing's AttackTime: the map's own for this monster, aimed at the hero (TargetCharacter = HeroIndex).
+        monsterAttackLook(input.monster, world.mapIndex)?.({ scene: world.scene, caster: obj, target: world.playerEntity ?? null, yaw: entityYaw(obj) });
       } else {
         if (
           obj.monsterAnimation.action === monsterAction &&
@@ -398,13 +401,18 @@ export function installNet(): void {
     const world = Ecs.world;
     const caster = world?.getByNetId(p.AttackerId);
     const target = world?.getByNetId(p.TargetId);
-    if (!caster || !target) return;
+    if (!world || !caster || !target) return;
     lastAttacker = caster;
     if (!caster.monsterAnimation || isDeadMonster(caster)) return;
     const clip = monsterSkillSwing(monsterAttackState(caster), p.SkillNumber, attackInputOf(caster));
     if (clip === undefined) return;
     faceTarget(caster, target);
     setMonsterClip(caster, clip, true);
+    // What the map hook draws for it (the guardian bosses' rage, Selupan's words), then its AttackEffect (Dark Ghost's fire).
+    const monster = monsterNumberOf(caster);
+    const look = { scene: world.scene, caster, target, yaw: entityYaw(caster) };
+    monsterSkillLook(monster, p.SkillNumber, world.mapIndex)?.(look);
+    monsterAttackLook(monster, world.mapIndex)?.(look);
   });
 
   EventBus.on('SkillAnimation', packet => {

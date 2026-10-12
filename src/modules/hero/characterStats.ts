@@ -3,7 +3,7 @@ import { BaseClass, CharacterClassNumber, getBaseClass } from '../../core/types'
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { InventoryConstants } from '@/core/inventoryConstants';
 import type { Item } from '../../ecs/world';
-import { activeSetOptions, classOf, socketStatusBonus, type SetOptionLine, type SocketStatusBonus } from '@/controllers/item_rules';
+import { activeSetOptions, classCanUse, classOf, itemDef, itemStats, optionSpecials, socketStatusBonus, type OptionSpecial, type SetOptionLine, type SocketStatusBonus } from '@/controllers/item_rules';
 import type { ItemOptionTables, ItemSetTables } from '@/controllers/assets';
 
 export enum StatType {
@@ -77,10 +77,12 @@ function firstSet(config: ItemConfig, ...names: string[]): number {
   return 0;
 }
 
+const GROUP_SWORD = 0;
 const GROUP_MACE = 2;
 const GROUP_BOW = 4;
 const GROUP_STAFF = 5;
 const GROUP_SHIELD = 6;
+const GROUP_BOOTS = 11;
 const GROUP_WING = 12;
 const GROUP_HELPER = 13;
 
@@ -184,14 +186,17 @@ function itemBlocking(item: Item): number {
   return blocking;
 }
 
-/** `CalcDurabilityPercent` (ZzzInfomation.cpp:2440-2485): how much of a stat a worn item loses. */
-function durabilityPercent(item: Item): number {
+/**
+ * `CalcDurabilityPercent` (ZzzInfomation.cpp:2440-2485): how much of a stat a worn item loses; a wing passes no
+ * excellent bits, the window's magic rate reads `MagicDur`.
+ */
+function durabilityPercent(item: Item, wing = false, magic = false): number {
   const config = configOf(item);
   if (!config || item.durability === undefined) return 0;
   const level = item.lvl ?? 0;
-  let max = firstSet(config, 'Dur', 'Durability') + Math.min(level, 4) + Math.max(0, level - 4) * 2;
-  if ((item.ancientDiscriminator ?? 0) > 0) max += 20;
-  else if ((item.excellentFlags ?? 0) & 63) max += 15;
+  let max = (magic ? field(config, 'MagicDur') : firstSet(config, 'Dur', 'Durability')) + Math.min(level, 4) + Math.max(0, level - 4) * 2;
+  if (!wing && (item.ancientDiscriminator ?? 0) > 0) max += 20;
+  else if (!wing && (item.excellentFlags ?? 0) & 63) max += 15;
   const worn = 1 - item.durability / max;
   return worn > 0.8 ? 0.5 : worn > 0.7 ? 0.3 : worn > 0.5 ? 0.2 : 0;
 }
@@ -543,17 +548,26 @@ function calculateDefenseRate(
 
   // EQUIPMENT_WEAPON_LEFT is slot 1, our RightHandSlot (ZzzInfomation.cpp:3222).
   const left = equipped(items, InventoryConstants.RightHandSlot);
-  if (!left || left.durability === 0) return blocking;
-
-  // The item's blocking and its +5 per option level both lose the durability percent (ZzzInfomation.cpp:3223-3236).
-  const percent = durabilityPercent(left);
-  const item = itemBlocking(left);
-  const option = isShield(left) ? (left.optionLevel ?? 0) * 5 : 0;
-  blocking += item - Math.trunc(item * percent) + option - Math.trunc(option * percent);
-  // AT_IMPROVE_BLOCKING_PERCENT, excellent bit 1 on a shield (CalcExcellentOptions, ZzzInfomation.cpp:966-969).
-  if (isShield(left) && ((left.excellentFlags ?? 0) >> 1) & 1) blocking += Math.trunc((blocking * 10) / 100);
-
+  if (left && left.durability !== 0) {
+    // The item's blocking and its +5 per option level both lose the durability percent (ZzzInfomation.cpp:3223-3236).
+    const percent = durabilityPercent(left);
+    const item = itemBlocking(left);
+    const option = special(left, 'defenseRate', input);
+    blocking += item - Math.trunc(item * percent) + option - Math.trunc(option * percent);
+  }
+  // Then +10% per piece with AT_IMPROVE_BLOCKING_PERCENT (:3237-3246).
+  const { RightHandSlot, HelmSlot, ArmorSlot, PantsSlot, GlovesSlot, BootsSlot, Ring1Slot, Ring2Slot } = InventoryConstants;
+  for (const slot of [RightHandSlot, HelmSlot, ArmorSlot, PantsSlot, GlovesSlot, BootsSlot, Ring2Slot, Ring1Slot]) {
+    if (blockingPercent(equipped(items, slot), input)) blocking += Math.trunc((blocking * 10) / 100);
+  }
   return blocking;
+}
+
+/** Excellent bit 1 on a shield, an armour piece or a ring (CalcExcellentOptions, ZzzInfomation.cpp:946-969), its needs met. */
+function blockingPercent(item: Item | null, input: CharacterStatsInput): boolean {
+  if (!item || item.durability === 0 || !(((item.excellentFlags ?? 0) >> 1) & 1)) return false;
+  const takes = (item.group >= GROUP_SHIELD && item.group <= GROUP_BOOTS) || (item.group === GROUP_HELPER && [8, 9, 21, 22, 23, 24].includes(item.num));
+  return takes && requiresMet(item, input);
 }
 
 function calculateDefenseRatePvp(
@@ -579,28 +593,105 @@ function calculateDefenseRatePvp(
   }
 }
 
+/** The swords whose damage option reaches wizardry (ZzzInfomation.cpp:2888-2894). */
+const MAGIC_SWORDS: ReadonlySet<number> = new Set([21, 23, 25, 28, 31]);
+const IMPERIAL_SWORD = 28;
+
+/** `IsRequireEquipItem` (ZzzInfomation.cpp:2209-2285): an item's options count only when the hero meets its needs. */
+function requiresMet(item: Item, input: CharacterStatsInput): boolean {
+  const stats = itemStats(item);
+  if (!stats) return false;
+  const { base, step } = classOf(input.charClass);
+  const hero = { level: input.level, str: input.strength, agi: input.agility, vit: input.vitality, ene: input.energy, cmd: input.leadership, baseClass: base, stepClass: step };
+  const columns = stats.def.classes;
+  // The Magic Gladiator wears what both the wizard and the knight can (:2222-2225).
+  if (!classCanUse(stats.def, hero) && !(base === 3 && columns[0] && columns[1] && !columns[3])) return false;
+  return stats.reqLvl <= hero.level && stats.reqStr <= hero.str && stats.reqAgi <= hero.agi && stats.reqEne <= hero.ene && stats.reqVit <= hero.vit && stats.reqCmd <= hero.cmd;
+}
+
+/** `PlusSpecial` (ZzzInfomation.cpp:2286-2300) of one option level kind. */
+function special(item: Item | null, kind: OptionSpecial, input: CharacterStatsInput): number {
+  if (!item || item.durability === 0 || !requiresMet(item, input)) return 0;
+  const def = itemDef(item.group, item.num);
+  let sum = 0;
+  if (def) for (const line of optionSpecials(item, def)) if (line.kind === kind) sum += line.value;
+  return sum;
+}
+
+/** The excellent wizardry bits of a staff or a magic pendant (CalcExcellentOptions, ZzzInfomation.cpp:979-995). */
+function magicExcellent(item: Item | null, input: CharacterStatsInput): { level: number; percent: number } {
+  const none = { level: 0, percent: 0 };
+  if (!item || item.durability === 0) return none;
+  const magic = item.group === GROUP_STAFF || (item.group === GROUP_HELPER && [12, 25, 27].includes(item.num));
+  if (!magic || !requiresMet(item, input)) return none;
+  const flags = item.excellentFlags ?? 0;
+  return { level: (flags >> 4) & 1 ? Math.trunc(input.level / 20) : 0, percent: (flags >> 3) & 1 ? 2 : 0 };
+}
+
+/** `AT_IMPROVE_MAGIC_PERCENT` of the Wizard's Ring +0 / +3 and item 13/107 (ZzzInfomation.cpp:1023-1050). */
+function ringMagicPercent(ring: Item | null, input: CharacterStatsInput): number {
+  if (ring?.group !== GROUP_HELPER || ring.durability === 0 || !requiresMet(ring, input)) return 0;
+  if (ring.num === 20 && [0, 3].includes(ring.lvl ?? 0)) return 10;
+  return ring.num === 107 ? 15 : 0;
+}
+
+/** `CalculateMagicDamage` (ZzzInfomation.cpp:2848-3001): energy, then the items' wizardry options, worn by durability. */
 function calculateWizardry(input: CharacterStatsInput): {
   min: number;
   max: number;
   rate: number;
 } {
   const { energy, items } = input;
-
-  let min = Math.trunc(energy / 9);
-  let max = Math.trunc(energy / 4);
-  let rate = 0;
+  const range = { min: Math.trunc(energy / 9), max: Math.trunc(energy / 4) };
+  const add = (value: number) => {
+    range.min += value;
+    range.max += value;
+  };
+  const percent = (rate: number) => {
+    range.min += Math.trunc((range.min * rate) / 100);
+    range.max += Math.trunc((range.max * rate) / 100);
+  };
+  const excellent = (item: Item | null) => {
+    const bits = magicExcellent(item, input);
+    add(bits.level);
+    if (bits.percent) percent(bits.percent);
+  };
+  const worn = (value: number, item: Item, wing = false) => value - Math.trunc(value * durabilityPercent(item, wing));
+  const base = getBaseClass(input.charClass);
 
   // pWeaponRight is EQUIPMENT_WEAPON_RIGHT, slot 0, our LeftHandSlot (NewUICharacterInfoWindow.cpp:509, :1346).
   const right = equipped(items, InventoryConstants.LeftHandSlot);
+  const left = equipped(items, InventoryConstants.RightHandSlot);
+  const wing = equipped(items, InventoryConstants.WingsSlot);
+  const rightKind = (item: Item | null, swords: (num: number) => boolean): OptionSpecial =>
+    item?.group === GROUP_SWORD && swords(item.num) ? 'damage' : 'wizardry';
 
-  if (right && isStaff(right)) {
-    const damage = itemDamage(right);
-    min += damage.min;
-    max += damage.max;
-    rate = itemMagicPower(right);
+  if (wing) add(worn(special(wing, 'wizardry', input), wing, true));
+  if (right && right.durability !== 0) {
+    add(worn(special(right, rightKind(right, num => MAGIC_SWORDS.has(num)), input), right));
+    excellent(right);
+  }
+  const magicLeft = left && left.durability !== 0 && base !== BaseClass.Summoner;
+  // A weapon in the left hand: its own option (:2914-2947).
+  if (magicLeft && left.group <= GROUP_STAFF) {
+    if (base !== BaseClass.MagicGladiator) add(worn(special(left, rightKind(left, num => num === IMPERIAL_SWORD), input), left));
+    excellent(left);
+  }
+  // Anything in the left hand: the right weapon's option again, worn by the left item (:2950-2979).
+  if (magicLeft) {
+    if (base !== BaseClass.MagicGladiator) add(worn(special(right, rightKind(right, num => num === IMPERIAL_SWORD), input), left));
+    excellent(left);
+  }
+  excellent(equipped(items, InventoryConstants.PendantSlot));
+  for (const slot of [InventoryConstants.Ring1Slot, InventoryConstants.Ring2Slot]) {
+    const rate = ringMagicPercent(equipped(items, slot), input);
+    if (rate) percent(rate);
   }
 
-  return { min, max, rate };
+  // The window's magic rate: a staff's or a magic sword's, worn by the MagicDur share (NewUICharacterInfoWindow.cpp:1336-1352).
+  const power = right && (isStaff(right) || rightKind(right, num => MAGIC_SWORDS.has(num)) === 'damage') ? itemMagicPower(right) : 0;
+  const rate = right ? power - Math.trunc(power * durabilityPercent(right, false, true)) : 0;
+  return { ...range, rate };
 }
 
 /** The helpers the character window reads (NewUICharacterInfoWindow.cpp:707-737, :954-959). */

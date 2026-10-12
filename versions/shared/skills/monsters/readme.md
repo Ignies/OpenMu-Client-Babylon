@@ -3,7 +3,8 @@
 Skills only monsters cast. Rules for skill folders: [../readme.md](../readme.md).
 
 ## Public API
-- Each folder's default export is a `defineSkill`, found by glob in `../index.ts`.
+- Each folder's default export is a `defineSkill`, found by glob in `../index.ts`, or a `defineMonsterSkill`
+  (the looks a monster's map hook draws for its 0x69 skill, `ATMON_SKILL_*`, and its AttackEffectMonster after a swing).
 
 ## How it works
 
@@ -17,6 +18,9 @@ Skills only monsters cast. Rules for skill folders: [../readme.md](../readme.md)
 | `potion_of_bless` | 203 | a holy flash and motes |
 | `potion_of_soul` | 204 | a soul-coloured flash and motes |
 | `doppelganger_self_explosion` | 239 | a fire hit and a wider fire shock ring |
+| `empire_guardian_rage` | 0x69 59 | the eight guardian bosses' Berserker: CreateInferno and two MODEL_CIRCLE sub4 once, while the rage flag is up |
+| `selupan` | 0x69 38-42, Raklion | his words (38, 40), the cure (39: rising flares, two Scale 8 ground glyphs) and the storm (42: boswind with clouds, ground bolts and stones, the summon circle). His height reset on a swing (GM_Raklion.cpp:2464-2468) is not ported: we never raise him to 1000 cm (the Raklion event state) |
+| `dark_ghost` | swings, Empire Guardian 2 | AttackEffectMonster: a meteor on the target in Attack1, a flame column on it for a kept 51, a rain of 14 meteors for a kept 52 (which its plain swings keep, as in the original) |
 
 OpenMU's generic monster skill (150) is drawn as 50 through `flame_of_evil`'s `lookAliases`.
 `flame_of_evil` also owns the boss lights (meteor, blast, hellfire circle, laser).
