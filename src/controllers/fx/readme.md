@@ -151,6 +151,7 @@ shared pools, textures and particle recipes other folders reuse.
   puff takes the monster's facing and a `ride` one hands its particles one kept point a body or a bone; a
   cards row gated on an action is shown only in it; a `roar` row's cards and particles scale with Kundun's
   Shock roar (`PKKey` and `Skill` stepped a tick, GMHellas.cpp:1596-1622), 1 out of Shock.
+  The anvil's sparks are handed one kept heading (`spawnJoint` copies it).
 - `core.test.ts`: a flickering tint makes a bounded number of additive materials, each within half
   a 1/128 step of the colour asked for; a burst emits nothing while the page is hidden.
 - `modelClones.test.ts`: a `model`, `linkedModel` or spirit skull clone leaves no mesh, skeleton or

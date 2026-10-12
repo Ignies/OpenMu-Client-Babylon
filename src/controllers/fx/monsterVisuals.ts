@@ -264,6 +264,8 @@ const live = new LiveList();
 
 const tmp = new Vector3();
 const tmpLocal = new Vector3();
+/** A spark's heading: `spawnJoint` copies it, so one serves them all. */
+const sparkHeading = new Vector3();
 const ZERO_CM: Cm3 = [0, 0, 0];
 
 const scatter = (v: number) => (Math.random() * 2 - 1) * v;
@@ -445,11 +447,7 @@ function emit(scene: Scene, e: Entity, em: Emitter, f: Frame, rides?: readonly V
         // the original's y is horizontal and z is up.
         const fwd = Math.cos(pitch);
         const up = Math.sin(pitch);
-        const heading = new Vector3(
-          -fwd * Math.sin(yaw),
-          up,
-          fwd * Math.cos(yaw)
-        );
+        const heading = sparkHeading.set(-fwd * Math.sin(yaw), up, fwd * Math.cos(yaw));
         spawnJoint(scene, tmp, {
           velocity:
             SPARK_VELOCITY[0] +

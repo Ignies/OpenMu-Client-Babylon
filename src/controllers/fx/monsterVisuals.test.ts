@@ -271,4 +271,20 @@ describe('monster body rows', () => {
     expect(red.scaleBy()).toBe(1);
     monsterVisualsLayer.reset?.();
   });
+
+  // The anvil's sparks (ZzzCharacter.cpp, the smith): `spawnJoint` copies the heading it is handed, so one kept
+  // vector serves every spark; a new one a spark was garbage every tick.
+  it('hand every spark one kept heading, aimed at its own roll', () => {
+    calls.joints.length = 0;
+    const random = vi.spyOn(Math, 'random').mockReturnValue(0);
+    visualMonster(scene, monster(), [
+      { kind: 'sparks', every: 1, tries: 2, bone: 3, pitch: [90, 90], yaw: [0, 0], chip: 0 },
+    ] as never);
+    monsterVisualsLayer.update?.(0, 0.04);
+    random.mockRestore();
+    const [a, b] = calls.joints.map(j => j.opts.heading as { x: number; y: number; z: number });
+    expect(a).toBe(b);
+    expect(a.y).toBeCloseTo(1);
+    monsterVisualsLayer.reset?.();
+  });
 });
