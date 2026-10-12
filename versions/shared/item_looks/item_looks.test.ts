@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { Vector3 } from '@/controllers/render/babylon/exports';
-import { itemBodyPasses } from '@/controllers/item_fx/itemLooks';
+import { itemBodyPasses, itemHeldSprites } from '@/controllers/item_fx/itemLooks';
 import './index';
 
 /** A sample WorldTime (ms) and body light the passes are read at. */
@@ -27,6 +27,32 @@ function look(group: number, num: number) {
 }
 
 const r = (n: number) => +n.toFixed(4);
+
+/**
+ * Every sprite a carried item draws, read at `T` on `BODY`, as `[sheet, bone, point, scale, light,
+ * rotation]`; `rand()` is `Math.random()`, stubbed to `RAND`.
+ */
+const RAND = 0.5;
+function held(group: number, num: number) {
+  const random = vi.spyOn(Math, 'random').mockReturnValue(RAND);
+  const v = new Vector3();
+  const rows = itemHeldSprites(group, num)?.map(s => {
+    let point: number[] | undefined;
+    if (typeof s.offset === 'function') {
+      s.offset(T, v);
+      point = [v.x, v.y, v.z].map(r);
+    } else point = s.offset ? [...s.offset] : undefined;
+    let light: number[];
+    if (typeof s.light === 'function') {
+      s.light(T, BODY, v);
+      light = [v.x, v.y, v.z].map(r);
+    } else light = [...s.light];
+    const scale = r(typeof s.scale === 'number' ? s.scale : s.scale(T));
+    return [s.texture, s.bone, point, scale, light, s.rotation ? r(s.rotation(T)) : 0];
+  });
+  random.mockRestore();
+  return rows ?? null;
+}
 const CHROME = { texture: 'Effect/Chrome01.OZJ', map: 'chrome' };
 
 // RenderPartObjectBody's sword branches (ZzzObject.cpp).
@@ -305,5 +331,103 @@ describe('the Dark Lord\'s pet items', () => {
   it('Dark Horse horn: Chrome01 over every mesh in orange; Dark Raven: over mesh 0 in cyan (ZzzObject.cpp:7066-7077)', () => {
     expect(look(13, 4)).toEqual({ drawn: undefined, passes: [{ mesh: -1, kind: 'add', ...CHROME, light: [0.8, 0.4, 0.1] }] });
     expect(look(13, 5)).toEqual({ drawn: undefined, passes: [{ mesh: 0, kind: 'add', ...CHROME, light: [0.3, 0.8, 1] }] });
+  });
+});
+
+// RenderLinkObject's sword cases (ZzzCharacter.cpp): the sprites a carried sword draws every frame.
+describe('the swords\' held sprites', () => {
+  it('Bone Blade: two Impack03 glints at the hilt in a flickering red (:7129-7142)', () => {
+    const f = Math.sin(T * 0.4) * 0.25 + 0.7;
+    const light = [r(f), r(f - 0.5), r(f - 0.5)];
+    expect(held(0, 22)).toEqual([
+      ['impact03', 0, [5, -22, -10], 0.75, light, 0],
+      ['impact03', 0, [-5, -22, -10], 0.75, light, 0],
+    ]);
+  });
+
+  it('Explosion Blade: two turning Shiny02 at a jittering point of bone 4 and flares down the blade (:7143-7175)', () => {
+    const jitter = r(Math.floor(RAND * 60) / 20 - 1.5);
+    const size = r(Math.floor(RAND * 30) / 20 + 1.5);
+    const turn = r(T * 0.0006 * 360);
+    const light = [0.2, 0.2, r(Math.sin(T * 0.7) * 0.2 + 0.5)];
+    const at = [0, jitter, jitter];
+    expect(held(0, 23)).toEqual([
+      ['shiny02', 4, at, size, light, turn],
+      ['shiny02', 4, at, r(size - 0.4), light, r(90 + turn)],
+      ['flare01', 4, at, 2.3, light, 0],
+      ['flare01', 4, [30, 0, 0], 2, light, 0],
+      ['flare01', 6, undefined, 2, light, 0],
+      ['flare01', 7, undefined, 2, light, 0],
+      ['flare01', 8, undefined, 1, light, 0],
+    ]);
+  });
+
+  it('Sword Dancer: a red flare and impact at bone 1, a drop running down one bone a cycle, flares on 2-6 (:7255-7318)', () => {
+    const rows = held(0, 25) ?? [];
+    const f = Math.sin(T * 0.7) * 0.2 + 0.3;
+    const f2 = Math.sin(T * 0.4) * 0.25 + 0.2;
+    expect(rows.slice(0, 2)).toEqual([
+      ['flare01', 1, undefined, 1, [1, 0.1, 0], 0],
+      ['impact01', 1, undefined, r(Math.floor(RAND * 30) / 60 + 0.2), [r(0.1 + f), 0.2, 0], r(T * 0.0006 * 360)],
+    ]);
+    // The drop: on one of bones 2-6 a cycle, 1.5 cm further down each 25 Hz frame, the rest drawn at 0.
+    const frame = Math.floor(T / 40);
+    const drop = rows.slice(2, 12);
+    const shown = drop.filter(row => (row[3] as number) > 0);
+    expect(shown).toHaveLength(2);
+    expect(shown[0]).toEqual(['waterfall4', shown[0][1], [0, ((frame % 15) + 1) * 1.5, 0], 0.7, [r(1 - f), 0, 0], 0]);
+    expect(shown[1]).toEqual(['waterfall2', shown[0][1], [0, ((frame % 15) + 1) * 1.5, 0], 0.3, [0.1, 0.1, 0.1], 0]);
+    expect(drop.map(row => row[1])).toEqual([2, 2, 3, 3, 4, 4, 5, 5, 6, 6]);
+    expect(rows.slice(12)).toEqual([2, 3, 4, 5, 6].map(bone => ['flare01', bone, undefined, 1.1, [r(0.8 + f2), 0.1, 0], 0]));
+  });
+
+  it('Knight Blade (and the Battle Scepter): a violet flare and a grey one on bones 1 and 2 (:7661-7673)', () => {
+    const l = Math.sin(T * 0.002) * 0.35 + 0.65;
+    const grey = r(Math.abs(Math.sin(T * 0.002) * 0.5 + 0.4)); // a negative scale draws the sprite mirrored
+    const pair = (bone: number) => [
+      ['flare01', bone, undefined, r(l * 0.9), [r(l * 0.43), r(l * 0.14), r(l * 0.6)], 0],
+      ['flare01', bone, undefined, grey, [0.3, 0.3, 0.3], 0],
+    ];
+    expect(held(0, 20)).toEqual([...pair(1), ...pair(2)]);
+    expect(held(2, 8)).toEqual(pair(1)); // Mace09 has no bone 2
+  });
+
+  it('Flamberge: gold and teal flares at its gems, red light marks down the blade (:7731-7764)', () => {
+    const gold = [0.8, 0.6, 0.2];
+    const teal = [0.3, 0.8, 0.7];
+    const red = [0.9, 0.1, 0.1];
+    expect(held(0, 26)).toEqual([
+      ['flare01', 11, undefined, 0.6, gold, 0],
+      ['flare01', 11, undefined, 0.6, gold, 0],
+      ['flare01', 12, undefined, 0.5, teal, 0],
+      ['flare01', 13, undefined, 0.5, teal, 0],
+      ['flare01', 12, undefined, 0.3, teal, 0],
+      ['flare01', 13, undefined, 0.3, teal, 0],
+      ...[0.8, 0.7, 0.7, 0.7, 0.6, 0.5, 0.5].map((scale, i) => ['lightmarks', i + 1, undefined, scale, red, 0]),
+    ]);
+  });
+
+  it('Sword Breaker: green light marks down the blade (:7765-7795)', () => {
+    expect(held(0, 27)).toEqual(
+      [0.6, 0.5, 0.5, 0.5, 0.4, 0.3, 0.3].map((scale, i) => ['lightmarks', i + 1, undefined, scale, [0.1, 0.9, 0.1], 0])
+    );
+  });
+
+  it('Imperial Sword: blue flares in the wearer\'s light and shiny05 on bones 8-11, blue light marks on 2-7 (:7796-7839)', () => {
+    const size = r(Math.floor(RAND * 15) / 30 + 0.5);
+    const body = [BODY.x, BODY.y, BODY.z].map(r);
+    const blue = [0.1, 0.4, 0.9];
+    expect(held(0, 28)).toEqual([
+      ...[8, 9, 10, 11].flatMap(bone => [
+        ['flareBlue', bone, undefined, 0.4, body, 0],
+        ['shiny05', bone, undefined, bone < 10 ? size : 0.4, blue, 0],
+      ]),
+      ...[1, 0.8, 0.6, 0.4, 0.2, 0.1].map((scale, i) => ['lightmarks', i + 2, undefined, scale, [0, 0.3, 0.7], 0]),
+    ]);
+  });
+
+  it('the Dark Reign and Rune blades draw only their running sparks, not yet ported (:7698-7720)', () => {
+    expect(held(0, 21)).toBeNull();
+    expect(held(0, 31)).toBeNull();
   });
 });
