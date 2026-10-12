@@ -358,7 +358,7 @@ function equipped(items: (Item | null)[], slot: number): Item | null {
 function calculateDamage(
   input: CharacterStatsInput,
   base: BaseClass,
-  flat: Range
+  flat: { set: Range; socket: Range }
 ): { min: number; max: number; blue: boolean } {
   const { strength, agility, energy, vitality, items } = input;
 
@@ -411,34 +411,77 @@ function calculateDamage(
     }
   }
 
-  let minRight = statMin;
-  let maxRight = statMax;
-  let minLeft = statMin;
-  let maxLeft = statMax;
+  const right = { min: statMin, max: statMax };
+  const left = { min: statMin, max: statMax };
+  const add = (hand: Range, value: number) => {
+    hand.min += value;
+    hand.max += value;
+  };
+  const percent = (hand: Range, rate: number) => {
+    hand.min += Math.trunc((hand.min * rate) / 100);
+    hand.max += Math.trunc((hand.max * rate) / 100);
+  };
+  const excellent = (hand: Range, item: Item | null) => {
+    const bits = excellentBits(item, input, false);
+    add(hand, bits.level);
+    if (bits.percent) percent(hand, bits.percent);
+  };
+  // A weapon's damage and option, worn by durability; a staff's goes to the left side (:2650-2711).
+  const weapon = (item: Item | null, hand: Range) => {
+    if (!item || item.durability === 0) return;
+    const worn = durabilityPercent(item);
+    const option = special(item, 'damage', input);
+    const damage = itemDamage(item);
+    const side = isStaff(item) ? left : hand;
+    side.min += damage.min + option - Math.trunc((damage.min + option) * worn);
+    side.max += damage.max + option - Math.trunc((damage.max + option) * worn);
+    excellent(hand, item);
+  };
 
-  if (weaponRight) {
-    const damage = itemDamage(weaponRight);
-
-    if (isStaff(weaponRight)) {
-      minLeft += damage.min;
-      maxLeft += damage.max;
-    } else {
-      minRight += damage.min;
-      maxRight += damage.max;
+  const wing = equipped(input.items, InventoryConstants.WingsSlot);
+  if (wing) {
+    const option = special(wing, 'damage', input);
+    const worn = option - Math.trunc(option * durabilityPercent(wing, true));
+    add(right, worn);
+    add(left, worn);
+  }
+  weapon(weaponRight, right);
+  weapon(weaponLeft, left);
+  const amulet = equipped(input.items, InventoryConstants.PendantSlot);
+  excellent(right, amulet);
+  excellent(left, amulet);
+  for (const slot of [InventoryConstants.Ring1Slot, InventoryConstants.Ring2Slot]) {
+    const rate = ringPercent(equipped(input.items, slot), input);
+    if (rate) {
+      percent(right, rate);
+      percent(left, rate);
     }
   }
 
-  if (weaponLeft) {
-    const damage = itemDamage(weaponLeft);
-    minLeft += damage.min;
-    maxLeft += damage.max;
+  // The set damage reaches both hands (ZzzInfomation.cpp:2745-2767).
+  right.min += flat.set.min;
+  right.max += flat.set.max;
+  left.min += flat.set.min;
+  left.max += flat.set.max;
+
+  // +1 or better bolts raise the crossbow, arrows the bow (:2769-2784).
+  if (weaponRight?.group === GROUP_BOW && weaponLeft?.group === GROUP_BOW) {
+    const share = (hand: Range, level: number) => {
+      const rate = Math.fround((level * 2 + 1) * Math.fround(0.01));
+      hand.min += Math.trunc(Math.fround(hand.min * rate) + 1);
+      hand.max += Math.trunc(Math.fround(hand.max * rate) + 1);
+    };
+    if (weaponLeft.num === BOLT && (weaponLeft.lvl ?? 0) >= 1) share(right, weaponLeft.lvl ?? 0);
+    else if (weaponRight.num === ARROWS && (weaponRight.lvl ?? 0) >= 1) share(left, weaponRight.lvl ?? 0);
   }
 
-  // The set and socket damage reach both hands (ZzzInfomation.cpp:2745-2767, :2809-2812).
-  minRight += flat.min;
-  minLeft += flat.min;
-  maxRight += flat.max;
-  maxLeft += flat.max;
+  // Then the sockets (:2809-2812).
+  right.min += flat.socket.min;
+  right.max += flat.socket.max;
+  left.min += flat.socket.min;
+  left.max += flat.socket.max;
+  const { min: minRight, max: maxRight } = right;
+  const { min: minLeft, max: maxLeft } = left;
 
   let min: number;
   let max: number;
@@ -679,18 +722,22 @@ function special(item: Item | null, kind: OptionSpecial, input: CharacterStatsIn
   return sum;
 }
 
-/** The excellent wizardry bits of a staff or a magic pendant (CalcExcellentOptions, ZzzInfomation.cpp:979-995). */
-function magicExcellent(item: Item | null, input: CharacterStatsInput): { level: number; percent: number } {
+/**
+ * The excellent level / 20 and 2% bits of a weapon or a pendant (CalcExcellentOptions, ZzzInfomation.cpp:971-1004):
+ * wizardry for a staff and the Lighting, Ice and Water pendants, damage for the rest.
+ */
+function excellentBits(item: Item | null, input: CharacterStatsInput, magic = true): { level: number; percent: number } {
   const none = { level: 0, percent: 0 };
   if (!item || item.durability === 0) return none;
-  const magic = item.group === GROUP_STAFF || (item.group === GROUP_HELPER && [12, 25, 27].includes(item.num));
-  if (!magic || !requiresMet(item, input)) return none;
+  const pendant = item.group === GROUP_HELPER && [12, 13, 25, 26, 27, 28].includes(item.num);
+  const magical = item.group === GROUP_STAFF || (pendant && [12, 25, 27].includes(item.num));
+  if (!(pendant || item.group <= GROUP_STAFF) || magical !== magic || !requiresMet(item, input)) return none;
   const flags = item.excellentFlags ?? 0;
   return { level: (flags >> 4) & 1 ? Math.trunc(input.level / 20) : 0, percent: (flags >> 3) & 1 ? 2 : 0 };
 }
 
-/** `AT_IMPROVE_MAGIC_PERCENT` of the Wizard's Ring +0 / +3 and item 13/107 (ZzzInfomation.cpp:1023-1050). */
-function ringMagicPercent(ring: Item | null, input: CharacterStatsInput): number {
+/** `AT_IMPROVE_MAGIC_PERCENT` and `AT_IMPROVE_DAMAGE_PERCENT` of the Wizard's Ring +0 / +3 and item 13/107 (ZzzInfomation.cpp:1023-1050). */
+function ringPercent(ring: Item | null, input: CharacterStatsInput): number {
   if (ring?.group !== GROUP_HELPER || ring.durability === 0 || !requiresMet(ring, input)) return 0;
   if (ring.num === 20 && [0, 3].includes(ring.lvl ?? 0)) return 10;
   return ring.num === 107 ? 15 : 0;
@@ -714,7 +761,7 @@ function calculateWizardry(input: CharacterStatsInput): {
     range.max += Math.trunc((range.max * rate) / 100);
   };
   const excellent = (item: Item | null) => {
-    const bits = magicExcellent(item, input);
+    const bits = excellentBits(item, input);
     add(bits.level);
     if (bits.percent) percent(bits.percent);
   };
@@ -746,7 +793,7 @@ function calculateWizardry(input: CharacterStatsInput): {
   }
   excellent(equipped(items, InventoryConstants.PendantSlot));
   for (const slot of [InventoryConstants.Ring1Slot, InventoryConstants.Ring2Slot]) {
-    const rate = ringMagicPercent(equipped(items, slot), input);
+    const rate = ringPercent(equipped(items, slot), input);
     if (rate) percent(rate);
   }
 
@@ -809,7 +856,7 @@ function calculateCurse(input: CharacterStatsInput): Range {
   if (left && left.durability !== 0) {
     const option = special(left, 'curse', input);
     add(option - Math.trunc(option * durabilityPercent(left)));
-    const bits = magicExcellent(left, input);
+    const bits = excellentBits(left, input);
     add(bits.level);
     if (bits.percent) {
       range.min += Math.trunc((range.min * bits.percent) / 100);
@@ -934,7 +981,10 @@ export function deriveCharacterStats(bare: CharacterStatsInput): DerivedStats {
   const lines = input.sets ? activeSetOptions(items, hero, input.sets) : [];
   const socket = socketStatusBonus(items, { level, masterLevel: input.masterLevel, maxLife: input.maxLife, maxMana: input.maxMana }, input.options ?? null);
   const setDamage = setByStat(lines, SET.byAgi, input.agility) + setByStat(lines, SET.byStr, input.strength);
-  const flat = { min: setSum(lines, SET.attackMin) + setDamage + socket.damageMin, max: setSum(lines, SET.attackMax) + setDamage + socket.damageMax };
+  const flat = {
+    set: { min: setSum(lines, SET.attackMin) + setDamage, max: setSum(lines, SET.attackMax) + setDamage },
+    socket: { min: socket.damageMin, max: socket.damageMax },
+  };
   const pet = equipped(items, InventoryConstants.PetSlot);
   const damage = withPet(withRing(calculateDamage(input, base, flat), items, 'damage'), pet, 'damage', level);
   // CalculateMagicDamage (ZzzInfomation.cpp:3005-3035).

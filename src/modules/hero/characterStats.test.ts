@@ -169,6 +169,45 @@ describe("the character window under the Rage Fighter's defense buff (131)", () 
   });
 });
 
+// CalculateDamage (ZzzInfomation.cpp:2629-2764): the weapons' and wing's options, durability and excellent bits, the
+// pendant, the rings and the arrows.
+describe('the character window damage with options', () => {
+  const knight = (pieces: Record<number, Item>) => {
+    const items: (Item | null)[] = new Array(12).fill(null);
+    for (const [slot, item] of Object.entries(pieces)) items[Number(slot)] = item;
+    return deriveCharacterStats({ charClass: CharacterClassNumber.DarkKnight, level: 400, strength: 1000, agility: 1000, vitality: 100, energy: 100, leadership: 0, items });
+  };
+  const kris = (more: Partial<Item> = {}): Item => ({ group: 0, num: 0, durability: 255, ...more });
+  const base = knight({ 0: kris() });
+
+  it("adds the weapon's option, nothing from a broken weapon", () => {
+    expect(knight({ 0: kris({ optionLevel: 2 }) }).damageMin).toBe(base.damageMin + 8);
+    expect(knight({ 0: kris({ durability: 0 }) }).damageMin).toBe(knight({}).damageMin);
+  });
+
+  it("adds the weapon's and the damage pendant's excellent level / 20 and 2%", () => {
+    expect(knight({ 0: kris({ excellentFlags: 0x10 }) }).damageMax).toBe(base.damageMax + 20);
+    expect(knight({ 0: kris({ excellentFlags: 0x08 }) }).damageMax).toBe(base.damageMax + Math.trunc((base.damageMax * 2) / 100));
+    expect(knight({ 0: kris(), 9: { group: 13, num: 13, durability: 255, excellentFlags: 0x10 } }).damageMax).toBe(base.damageMax + 20);
+    expect(knight({ 0: kris(), 9: { group: 13, num: 12, durability: 255, excellentFlags: 0x10 } }).damageMax).toBe(base.damageMax);
+  });
+
+  it("adds the wing's damage option and the Wizard's Ring's 10%", () => {
+    expect(knight({ 0: kris(), 7: { group: 12, num: 2, durability: 255, optionLevel: 2 } }).damageMin).toBe(base.damageMin + 8);
+    expect(knight({ 0: kris(), 10: { group: 13, num: 20, lvl: 0, durability: 255 } }).damageMin).toBe(base.damageMin + Math.trunc(base.damageMin / 10));
+  });
+
+  it('adds the +1 or better arrows share to the bow (:2769-2784)', () => {
+    const elf = (arrows: number) => {
+      const items: (Item | null)[] = new Array(12).fill(null);
+      items[1] = { group: 4, num: 0, durability: 255 };
+      items[0] = { group: 4, num: 15, lvl: arrows, durability: 255 };
+      return deriveCharacterStats({ charClass: CharacterClassNumber.FairyElf, level: 400, strength: 100, agility: 700, vitality: 100, energy: 100, leadership: 0, items }).damageMin;
+    };
+    expect(elf(2)).toBe(elf(0) + Math.trunc(Math.fround(elf(0) * Math.fround(5 * Math.fround(0.01))) + 1));
+  });
+});
+
 // CalculateSuccessfulBlocking reads EQUIPMENT_WEAPON_LEFT, slot 1 (ZzzInfomation.cpp:3222, _define.h:209).
 describe('the character window defense rate with a shield', () => {
   const held = (slot: number) => {

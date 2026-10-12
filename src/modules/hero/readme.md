@@ -21,7 +21,11 @@ other folders share.
   (ZzzInfomation.cpp:2745-2812, :3005-3035, :3127-3129, :3248, :3361-3381). The stats the worn items add
   (`AddStrength` and the rest, `wornStatBonus`) count in `IsRequireEquipItem` and every formula (`totals`, also the
   window's skill damage lines and rows, which turn blue while `added` has some, NewUICharacterInfoWindow.cpp:463-475);
-  the attack and magic speeds keep the base agility. The shield's blocking and its +5 per option level
+  the attack and magic speeds keep the base agility. Damage is `CalculateDamage` (ZzzInfomation.cpp:2540-2812): the
+  bow formula for every bow and crossbow with durability, the wing's damage option, each unbroken weapon's damage and
+  option worn by durability, the weapon and damage pendant excellent level / 20 and 2%, the Wizard's Ring 10%, the
+  sets, the +1 or better arrows' share, then the sockets; `GetAttackDamage` still counts a weapon dragged out of a
+  hand (`picked`, ZzzInventory.cpp:5900-5911). The shield's blocking and its +5 per option level
   lose the `CalcDurabilityPercent` share, and the excellent "defense success rate" on the shield, each armour
   piece and each ring adds 10% in turn, when `IsRequireEquipItem` passes (:3223-3246).
   Wizardry is energy plus the items' wizardry options only (`CalculateMagicDamage`, :2848-3001): the wing's,
