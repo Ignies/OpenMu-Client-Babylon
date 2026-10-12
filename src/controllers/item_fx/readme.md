@@ -18,7 +18,7 @@ original client's item passes, the item glow tiers and the weapon swing trails.
 - `itemMaterial.ts`: `createItemMaterial(scene, bright, flatLit, withScroll)`,
   `createItemPbrMaterial(scene)`, `useMeshAlphaTestTexture(material)`, `packBodyLight` /
   `packBodyLightFor`, `syncPbrDetail()`, `livePbrMaterials()`, type `UvScroll`. The scroll variants
-  also read `metadata.uvMap`: a chrome look-up by the normal (RENDER_CHROME, CHROME5, CHROME6, CHROME7,
+  also read `metadata.uvMap`: a chrome look-up by the normal (RENDER_CHROME, CHROME4 to CHROME7,
   ZzzBMD.cpp:1600-1640) in place of the mesh UVs, for an item look's passes.
 - `weaponBlur.ts`: `weaponBlurFor(hands, action, hasLevel)` (type `WeaponBlurRow`), the warrior
   glint (`warriorGlint`, `warriorGlintStar`, `WARRIOR_GLINT_BONE` / `_TIP`); which skills take it is

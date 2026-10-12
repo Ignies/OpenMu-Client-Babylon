@@ -203,3 +203,68 @@ describe('the spears', () => {
     for (let num = 0; num < 10; num++) expect(look(1, num)).toBeNull();
   });
 });
+
+// RenderPartObjectBody's staff branches (ZzzObject.cpp).
+describe('the staffs', () => {
+  it('Staff of Kundun: Chrome01 on mesh 1, mesh 0 again flickering, Chrome02 by CHROME4 on mesh 0 (:7906-7913)', () => {
+    expect(look(5, 11)).toEqual({
+      drawn: undefined,
+      passes: [
+        { mesh: 1, kind: 'add', ...CHROME },
+        { mesh: 0, kind: 'add', gain: r(Math.max(0, Math.sin(T * 0.005))) },
+        { mesh: 0, kind: 'add', texture: 'Effect/Chrome02.OZJ', clamp: true, map: 'chrome4' },
+      ],
+    });
+  });
+
+  it('Grand Viper Staff: unlit, with energy01 swept across it (:7576-7599)', () => {
+    const s = r((T % 2000) * 0.0002 - 0.3);
+    expect(look(5, 12)).toEqual({
+      drawn: undefined,
+      passes: [
+        { mesh: 0, kind: 'unlit' },
+        { mesh: 0, kind: 'add', texture: 'Effect/energy01.OZJ', clamp: true, u: s, v: s },
+      ],
+    });
+  });
+
+  it('Platina Staff: mesh 1 additive only, scrolling (:7657-7662)', () => {
+    expect(look(5, 13)).toEqual({
+      drawn: undefined,
+      passes: [{ mesh: 1, kind: 'bright', u: r(T * 0.0009), v: r(T * 0.0009) }],
+    });
+  });
+
+  it('the Summoner\'s Demonic and Storm Blitz sticks: mesh 1 again, the second pulsing (:7914-7924)', () => {
+    expect(look(5, 18)).toEqual({ drawn: undefined, passes: [{ mesh: 1, kind: 'add' }] });
+    expect(look(5, 19)).toEqual({
+      drawn: undefined,
+      passes: [{ mesh: 1, kind: 'add', gain: r(Math.max(0, (Math.sin(T * 0.002) + 0.5) * 0.5)) }],
+    });
+  });
+
+  it('Deadly Staff: mesh 1 again in pink (:7135-7142)', () => {
+    expect(look(5, 30)).toEqual({ drawn: undefined, passes: [{ mesh: 1, kind: 'add', light: [1, 0.5, 0.5] }] });
+  });
+
+  it('Imperial Staff: mesh 1 again, then the socket bitmap three times on mesh 0, pulsing (:7143-7152)', () => {
+    expect(look(5, 31)).toEqual({
+      drawn: undefined,
+      passes: [
+        { mesh: 1, kind: 'add' },
+        { mesh: 0, kind: 'add', texture: 'Item/soketmagic_stape02.OZJ', clamp: true, gain: r((Math.abs(Math.sin(T * 0.001)) + 0.1) * 3) },
+      ],
+    });
+  });
+
+  it('Merlin Staff: Chrome01 on mesh 0, mesh 2 again, mesh 3 twice (:7153-7160)', () => {
+    expect(look(5, 32)).toEqual({
+      drawn: undefined,
+      passes: [
+        { mesh: 0, kind: 'add', ...CHROME },
+        { mesh: 2, kind: 'add' },
+        { mesh: 3, kind: 'add', gain: 2 },
+      ],
+    });
+  });
+});

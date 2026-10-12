@@ -1071,6 +1071,10 @@ const UV_SCROLL_RESAMPLE = `
         float wave = mod(tms, 10000.0) * 0.0001;
         if (muMap == 1) {
           muUv = vec2(n.z * 0.5 + wave, n.y * 0.5 + wave * 2.0);
+        } else if (muMap == 4) {
+          vec3 l = vec3(cos(tms * 0.001), sin(tms * 0.002), 1.0);
+          float d = dot(n, l);
+          muUv = vec2(d + n.y * 0.5 + l.y * 3.0, 1.0 - d - (n.z * 0.5 + wave * 3.0));
         } else if (muMap == 5) {
           vec3 l = vec3(cos(tms * 0.001), sin(tms * 0.002), 1.0);
           float d = dot(n, l);
