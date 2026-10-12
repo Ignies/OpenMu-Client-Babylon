@@ -36,3 +36,23 @@ describe('the Kanturu Maya scene', () => {
     expect(shadowsAfter(State.MayaBattle, ENUM_WORLD.WD_0LORENCIA)).toBe(true);
   });
 });
+
+// `m_CKanturu.m_iMayaState` (CKANTURUDirection.cpp:77-102): the detail of a Maya battle state change, 0 otherwise.
+describe('the Maya direction state', () => {
+  it('is the detail while the Maya battle runs', async () => {
+    const { kanturuMayaState } = await import('./kanturu');
+    const { lookState } = await import('@/controllers/monsters');
+    const send = (state: number, detail: number) => {
+      const p = KanturuStateChangePacket.createPacket();
+      p.State = state as never;
+      p.DetailState = detail;
+      EventBus.emit('KanturuStateChange', p.buffer);
+    };
+    send(State.MayaBattle, 14);
+    expect(kanturuMayaState()).toBe(14);
+    // What the Maya hands' rows read.
+    expect(lookState('kanturuMaya')).toBe(14);
+    send(State.NightmareBattle, 3);
+    expect(kanturuMayaState()).toBe(0);
+  });
+});

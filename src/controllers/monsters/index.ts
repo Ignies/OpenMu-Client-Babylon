@@ -9,6 +9,7 @@ export type { MonsterShatter } from './monsterModel';
 export type { BodyBlurSheet, BodyCard, BodyCardSpot, BodyFxEmitter, BodyFxGate, BodyParticle, BodyPuff, BodyRibbon, BodyTexture, MonsterBodyFx } from './bodyFx';
 export type { NpcGear, NpcGlobalCue, NpcGlobalVoice, NpcIdleRoll, NpcItem, NpcModel, NpcTransform, NpcTrap, NpcVoice } from './npc';
 export { MonsterRegistry } from './registry';
+export { lookState, setLookState, type LookStateName } from './lookState';
 export { defineMonsterModel, MonsterModelRegistry } from './monsterModel';
 export type { MonsterModelDef, MonsterVoiceSlots } from './monsterModel';
 

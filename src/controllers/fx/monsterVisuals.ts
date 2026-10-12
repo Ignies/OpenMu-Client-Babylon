@@ -171,6 +171,9 @@ const PUFFS: Readonly<Record<BodyPuff, KindName>> = {
   waterfall4_15: 'waterfall4_15',
   smoke39: 'smoke39',
   spark1_11: 'spark1_11',
+  waterfall3_6: 'waterfall3_6',
+  smoke3_3: 'smoke3_3',
+  smoke3_4: 'smoke3_4',
 };
 
 type CardsRow = Extract<BodyFxEmitter, { kind: 'cards' }>;
@@ -304,6 +307,7 @@ function open(gate: Gate | undefined, f: Frame): boolean {
   if (!gate) return true;
   if (gate.alive && !f.alive) return false;
   if (gate.buff !== undefined && !f.buffs?.has(gate.buff)) return false;
+  if (gate.when && !gate.when()) return false;
   if (
     gate.action &&
     (f.action === undefined || !gate.action.includes(f.action))
@@ -485,11 +489,12 @@ function emit(scene: Scene, e: Entity, em: Emitter, f: Frame, rides?: readonly V
       const local = em.local ?? ZERO_CM;
       const turn = em.turned ? facing(e) : NO_TURN;
       const spots = em.origin ? ORIGIN : em.bones;
-      for (let b = 0; b < spots.length; b++) {
+      const n = em.pick ?? spots.length;
+      for (let b = 0; b < n; b++) {
         if (em.rollEach && Math.random() >= 1 / em.every) continue;
         tmpLocal.set(local[0] / TILE_CM, local[1] / TILE_CM, local[2] / TILE_CM);
         if (em.origin) entityPos(e, 0, tmp);
-        else boneLocalPos(e, spots[b], tmpLocal, tmp);
+        else boneLocalPos(e, em.pick ? spots[Math.floor(Math.random() * spots.length)] : spots[b], tmpLocal, tmp);
         const anchor = rides ? rides[em.ride === 'bone' ? b : 0] : undefined;
         for (let i = 0; i < em.particles.length; i++) {
           const p = em.particles[i];

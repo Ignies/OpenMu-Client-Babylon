@@ -10,6 +10,7 @@ import { Ecs } from '../../ecs/current';
 import { effects } from '../../controllers/fx';
 import { MODEL } from '../../controllers/fx/recipes';
 import { setShadowlessScene } from '../../controllers/render/objectShadow';
+import { setLookState } from '../../controllers/monsters';
 import {
   KanturuEnterRequestPacket,
   KanturuInfoRequestPacket,
@@ -296,6 +297,14 @@ function dialogText(
 }
 
 /** The entry dialog: whether it is up and the lines it draws. */
+/**
+ * `m_CKanturu.m_iMayaState` (CKANTURUDirection.cpp:77-102): the Maya battle's detail state, from the state changes,
+ * 0 outside that battle. The Maya hands' death and Stop2 looks turn on it (GM_Kanturu_3rd.cpp:883, :899).
+ */
+export function kanturuMayaState(): number {
+  return state.hudState === KanturuState.MayaBattle ? state.hudDetail : 0;
+}
+
 export function kanturuDialog(): KanturuDialog {
   const { subject, lines } = dialogText(
     state.state,
@@ -375,6 +384,8 @@ function directionCue(
 
 /** Registers Kanturu's listeners; the events module installs it (module.ts). */
 export function installKanturu(): void {
+  setLookState('kanturuMaya', kanturuMayaState);
+
   /** `ReceiveKanturu3rdInfo`: the answer to a talk, and to Refresh. */
   EventBus.on('KanturuStateInfo', packet => {
     const p = new KanturuStateInfoPacket(packet);

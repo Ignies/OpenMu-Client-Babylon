@@ -57,7 +57,10 @@ export type BodyPuff =
   | 'waterfall4Orbit2'
   | 'waterfall4_15'
   | 'smoke39'
-  | 'spark1_11';
+  | 'spark1_11'
+  | 'waterfall3_6'
+  | 'smoke3_3'
+  | 'smoke3_4';
 
 /** One `CreateSprite` on a bone: `TransformPosition(BoneTransform[bone], local)`. */
 export type BodyCardSpot = {
@@ -83,6 +86,8 @@ export type BodyFxGate = {
   readonly alive?: boolean;
   /** `g_isCharacterBuff(o, buff)`: it carries this `eBuffState` (the Imperial Guardian bosses' Berserker, 81). */
   readonly buff?: number;
+  /** A state of the world the content reads and this controller cannot (an event's), asked each tick. */
+  readonly when?: () => boolean;
 };
 
 export type BodyFxEmitter =
@@ -242,6 +247,8 @@ export type BodyFxEmitter =
       readonly roar?: true;
       /** Made on the monster's `Angle`, so a push goes the way it faces. */
       readonly turned?: true;
+      /** Made at this many of `bones` a roll, each picked at random (`BoneTransform[rand() % n]`). */
+      readonly pick?: number;
       /** Made at `o->Position` (the body origin), once a roll, instead of at `bones`. */
       readonly origin?: true;
       /** What the particles ride (`o->Target`): the monster's position or the bone they were made at. */

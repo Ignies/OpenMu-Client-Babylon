@@ -286,6 +286,24 @@ describe('Nightmare', () => {
   });
 });
 
+describe("the Maya hands' death and Stop2", () => {
+  // MoveMonsterVisual (GM_Kanturu_3rd.cpp:879-937): dying before the MAYA3 direction state, five WATERFALL_3 SubType 6
+  // at Scale 2 a tick at `BoneTransform[rand() % 45]`; in Stop2 from MAYA3 on, a SMOKE + 3 SubType 3 at 1.5 and a
+  // SubType 4 at 0.8 a tick off the palm (left bone 24 at (0, -50, 0), right bone 12 at (50, 0, 0)).
+  it('drop their blue drops as they die and smoke from the palm in Stop2', () => {
+    for (const [numb, palm, local] of [
+      [362, 24, [0, -50, 0]],
+      [363, 12, [50, 0, 0]],
+    ] as const) {
+      const [die, stop] = rows(numb, 'puff');
+      expect(die).toMatchObject({ every: 1, particles: ['waterfall3_6'], pick: 5, scale: 2, colour: [0.4, 0.6, 1], gate: { action: [A.Die] } });
+      expect(die.bones).toEqual(Array.from({ length: 45 }, (_, i) => i));
+      expect(stop).toMatchObject({ every: 1, bones: [palm], local, particles: ['smoke3_3', 'smoke3_4'], scales: [1.5, 0.8], gate: { action: [A.Stop2] } });
+      expect([typeof die.gate?.when, typeof stop.gate?.when]).toEqual(['function', 'function']);
+    }
+  });
+});
+
 describe('the Maya hands', () => {
   // GM_Kanturu_3rd.cpp:707-783 (the ribbons on each hand's MoveEye bones) and :1083-1226 (the cards on the fingers),
   // none once a hand dies. The left's SubType 18-21 / 27 run JointLaser01 in purple, the right's 28-31 / 33 the

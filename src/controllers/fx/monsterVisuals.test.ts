@@ -349,4 +349,24 @@ describe('monster body rows', () => {
     expect((calls.particles[0][2] as { x: number }).x).toBe(7);
     monsterVisualsLayer.reset?.();
   });
+
+  // The Maya hands' death drops (GM_Kanturu_3rd.cpp:889-893): five a tick at `BoneTransform[rand() % 45]`, while the
+  // Maya battle is before MAYA3 - a state of the event the content reads (`gate.when`).
+  it("pick random bones for a puff and hold it to its gate's own test", () => {
+    calls.particles.length = 0;
+    let early = false;
+    visualMonster(scene, monster(), [
+      { kind: 'puff', every: 1, particles: ['waterfall3_6'], bones: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], pick: 3, colour: [0.4, 0.6, 1], gate: { when: () => early } },
+    ] as never);
+    monsterVisualsLayer.update?.(0, 0.04);
+    expect(calls.particles).toHaveLength(0);
+    early = true;
+    // The tick's roll, then a bone for each pick.
+    const rolls = [0.5, 0.05, 0.95, 0.5];
+    const random = vi.spyOn(Math, 'random').mockImplementation(() => rolls.shift() ?? 0.5);
+    monsterVisualsLayer.update?.(0, 0.04);
+    random.mockRestore();
+    expect(calls.particles.map(p => (p[2] as { x: number }).x)).toEqual([0, 9, 5]);
+    monsterVisualsLayer.reset?.();
+  });
 });

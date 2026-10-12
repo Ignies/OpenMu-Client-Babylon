@@ -725,6 +725,44 @@ function fireJetKind(texture: TextureKey, fadeBelow: number): ParticleKind {
   };
 }
 
+/**
+ * `BITMAP_SMOKE + 3` SubType 3 / 4 (ZzzEffectParticle.cpp:1743-1764): `Scale * (rand() % 64 + 64) * 0.02` big,
+ * `rand() % 360` turned, up to 125 cm aside and `rand() % 45` under, `(rand() % 100 - 50) * 0.1` Gravity, white
+ * whatever its light. A tick it keeps 1/1.012 of its light (gone at 0.05), grows 0.01, turns Gravity / 2 and rises
+ * |Gravity| (:5938-5962); drawn subtracted (:9118-9121).
+ */
+function smoke3Kind(texture: TextureKey, life: number): ParticleKind {
+  return {
+    texture,
+    blend: 'subtract',
+    init(p, scale) {
+      p.lifeTime = life;
+      p.scale = scale * (rand(64) + 64) * 0.02;
+      p.rotation = rand(360);
+      p.px += rand(250) - 125;
+      p.py += rand(250) - 125;
+      p.pz -= rand(45);
+      p.gravity = (rand(100) - 50) * 0.1;
+      p.lr = p.lg = p.lb = 1;
+    },
+    update(p, f) {
+      if (p.lr <= 0.05) {
+        p.live = false;
+        return;
+      }
+      const keep = Math.pow(1 / 1.012, f);
+      p.lr *= keep;
+      p.lg *= keep;
+      p.lb *= keep;
+      p.scale += 0.01 * f;
+      p.rotation += (p.gravity / 2) * f;
+      if (p.gravity <= 0) p.gravity = -p.gravity;
+      p.pz += p.gravity * f;
+    },
+    color: plainColor,
+  };
+}
+
 /** The first card's rolls, which the other two of one `BITMAP_WATERFALL_4` take. */
 const orbitRolls = { scale: 0.1, rotation: 0, distance: 5, timer: 0 };
 
@@ -1583,6 +1621,38 @@ const KINDS = {
     color: plainColor,
   } satisfies ParticleKind,
 
+  /**
+   * `BITMAP_WATERFALL_3` SubType 6, the Maya hands' death drops: made as SubType 5 (20 ticks, `rand() % 100 / 100 * 2`
+   * Gravity, `(rand() % 10 + 10) * 0.02 + Scale` big, +-20 cm aside and 50 under); a tick it rises Gravity, which gains
+   * 0.05, and keeps 1/1.1 of its light (ZzzEffectParticle.cpp:3644-3653, :8577-8588).
+   */
+  waterfall3_6: {
+    texture: 'waterfall3',
+    blend: 'add',
+    init(p, scale) {
+      p.lifeTime = 20;
+      p.gravity = (rand(100) / 100) * 2;
+      p.scale = (rand(10) + 10) * 0.02 + scale;
+      p.rotation = rand(360);
+      p.px += rand(40) - 20;
+      p.py += rand(40) - 20;
+      p.pz -= 50;
+    },
+    update(p, f) {
+      p.pz += p.gravity * f;
+      p.gravity += 0.05 * f;
+      const keep = Math.pow(1 / 1.1, f);
+      p.lr *= keep;
+      p.lg *= keep;
+      p.lb *= keep;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
+
+  /** `BITMAP_SMOKE + 3` SubType 3 (clud64, 60 ticks) and 4 (waterFall3, 30): the Maya hands' dark palm smoke (`smoke3Kind`). */
+  smoke3_3: smoke3Kind('clud64', 60),
+  smoke3_4: smoke3Kind('waterfall3', 30),
+
   /** `BITMAP_SMOKE` SubType 39, which has no case of its own: CreateParticle's two still ticks at its Scale (:58-86). */
   smoke39: { texture: 'smoke', blend: 'add', init() {}, update() {}, color: plainColor } satisfies ParticleKind,
 
@@ -2029,6 +2099,9 @@ export const KIND_REACH: Record<KindName, Reach> = {
   waterfall4Orbit2: { travel: 1.85, base: 0.14, perScale: 0 },
   waterfall4_15: { travel: 0.86, base: 0.18, perScale: 0.46 },
   smoke39: { travel: 0, base: 0, perScale: 0.46 },
+  waterfall3_6: { travel: 0.58, base: 0.18, perScale: 0.46 },
+  smoke3_3: { travel: 3.5, base: 0.28, perScale: 1.15 },
+  smoke3_4: { travel: 2.3, base: 0.14, perScale: 1.15 },
 };
 
 /** The reach of a spawn picking any of `kinds`, as one base plus a per-scale slope. */

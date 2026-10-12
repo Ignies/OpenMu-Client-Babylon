@@ -1261,3 +1261,29 @@ describe("the Dark Ghost's attack and death particles (GMEmpireGuardian2.cpp:925
     expect((await play('smoke39', 1, 0.5, 2)).isVisible).toBe(false);
   });
 });
+
+describe("the Maya hands' death and Stop2 particles (GM_Kanturu_3rd.cpp:880-930)", () => {
+  // roll 0.5: Gravity 1, (5 + 10) * 0.02 + Scale big, 50 cm under its spot; a tick it rises Gravity, which gains 0.05.
+  it('WATERFALL_3 SubType 6 rises from 50 cm under its spot, dimming 1.1 a tick (ZzzEffectParticle.cpp:3644-3653, :8577-8588)', async () => {
+    const sprite = await play('waterfall3_6', 2, 0.5, 2);
+    expect(sprite.position.y).toBeCloseTo((-50 + 1 + 1.05) / 100);
+    expect(sprite.width).toBeCloseTo((64 * 2.3) / 100);
+    expect(sprite.color.g).toBeCloseTo(0.4 / 1.1 ** 2);
+    expect(fakes.files).toContain('Effect/waterFall3.OZJ');
+  });
+
+  // roll 0.5: Scale * (32 + 64) * 0.02, up to 125 cm aside and rand() % 45 under, Gravity 0; white whatever its light,
+  // 1/1.012 of it a tick, 0.01 bigger; drawn subtracted.
+  it('SMOKE + 3 SubType 3 is a dark clud64 puff, SubType 4 the same on waterFall3 for half as long (:1743-1764, :5938-5962, :9118-9121)', async () => {
+    const cloud = await play('smoke3_3', 1.5, 0.5, 2);
+    expect(cloud.position.y).toBeCloseTo(-22 / 100);
+    expect(cloud.width).toBeCloseTo((64 * (2.88 + 0.02)) / 100);
+    expect(cloud.color.g).toBeCloseTo(1 / 1.012 ** 2);
+    expect(cloud.manager.blendMode).toBe(3);
+    expect(fakes.files).toContain('Effect/clud64.OZJ');
+    disposeEffectParticles();
+    expect((await play('smoke3_4', 0.8, 0.5, 29)).isVisible).toBe(true);
+    disposeEffectParticles();
+    expect((await play('smoke3_4', 0.8, 0.5, 30)).isVisible).toBe(false);
+  });
+});
