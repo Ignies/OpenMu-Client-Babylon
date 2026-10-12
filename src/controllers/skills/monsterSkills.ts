@@ -1,3 +1,4 @@
+import { TICK, delay } from '@/controllers/fx/core';
 import type { SkillContext } from './visuals';
 
 /** What a map hook draws for a monster's swing or 0x69 skill (`ATMON_SKILL_*`); `c.target` is the swing's target. */
@@ -33,6 +34,21 @@ function defsOn(monster: number, world: number): readonly MonsterSkillDef[] {
 export function monsterSkillLook(monster: number, skill: number, world: number): MonsterSkillLook | undefined {
   for (const d of defsOn(monster, world)) if (d.looks?.[skill]) return d.looks[skill];
   return undefined;
+}
+
+/**
+ * A staged swing on `c->AttackTime` from 2 to `last`: `stage(t)` runs `t - 1` ticks from now, the tick it sees `t`,
+ * while `holds()` (the clip has not moved on; once it fails, no later stage runs). A 0x69 sets AttackTime 1 and
+ * MoveCharacter steps it before RenderMonsterVisual reads it (WSclient.cpp:4119-4121, ZzzCharacter.cpp:4132-4137).
+ */
+export function stageOnAttackTime(last: number, holds: () => boolean, stage: (t: number) => void): void {
+  let on = true;
+  for (let t = 2; t <= last; t++) {
+    delay((t - 1) * TICK, () => {
+      on &&= holds();
+      if (on) stage(t);
+    });
+  }
 }
 
 /** The map's AttackEffectMonster for this monster after a swing, if any. */

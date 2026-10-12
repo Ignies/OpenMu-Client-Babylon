@@ -23,7 +23,7 @@ const COMBO_RAYS = 60;
  * rand() % 40` (positive dives), each stepping 10 times a tick 10-19 cm along it for the first 4 ticks and
  * keeping its last 30 steps, then holding until LT 0 (ZzzEffectJoint.cpp:2421-2434, :6453-6468).
  */
-const comboBurst: Step = (at, c) => {
+export const comboBurst: Step = (at, c) => {
   // 0.9 + 0.05 n (n + 1) by tick n, stopping at tick 16 (LT 4): 14.5, 16.1 times the start.
   effects.spawn('model', c.scene, at, { model: MODEL.combo, seconds: ticks(20), scale: 0.9, grow: 16.1, growEase: 2, growUntil: 0.8, decay: COMBO_DECAY, fadeTail: 0.05, colour: RGBS.white });
   // One ribbon mesh for all sixty (controllers/fx/rays.ts): each head runs 10 steps a tick for 4 ticks and the last
