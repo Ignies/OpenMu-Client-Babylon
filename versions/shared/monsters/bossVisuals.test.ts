@@ -110,3 +110,25 @@ describe('Balgass', () => {
     expect(trails(349)).toEqual(['10 30cm x20 0.5,0.1,1', '9 30cm x8 0.5,0.1,1']);
   });
 });
+
+describe('Nightmare', () => {
+  // MODEL_DARK_SKULL_SOLDIER_5 (GM_Kanturu_3rd.cpp:666-705, :1005-1081): the SubType 18-21 ribbons on MoveEye(9, 10,
+  // 39, 40)'s eyes and the white cards on his registered bones, none of it once he dies.
+  it('runs his four eye ribbons and lights his bones while alive', () => {
+    expect(trails(361)).toEqual(['10 10cm x8 0.8,0.5,1', '9 10cm x8 0.8,0.5,1', '40 10cm x8 0.8,0.5,1', '39 10cm x8 0.8,0.5,1']);
+    expect(rows(361, 'trail').every(t => t.gate?.alive)).toBe(true);
+    expect(cards(361)).toEqual([
+      ...[61, 62, 54, 55, 21, 22].flatMap(b => [`${b}:light@0.3 1,1,1`, `${b}:flareBlue@0.5 1,1,1`]),
+      ...[25, 26, 71, 70, 43, 44].flatMap(b => [`${b}:light@0.4 1,1,1`, `${b}:flareBlue@0.7 1,1,1`]),
+      ...[39, 40].flatMap(b => [`${b}:light@0.3 1,1,1`, `${b}:flareBlue@0.6 1,1,1`]),
+      '9:flareBlue@0.3 1,1,1',
+      '10:flareBlue@0.3 1,1,1',
+    ]);
+    const [spots] = rows(361, 'cards').map(r => r.spots);
+    expect(spots.filter(s => s.local).map(s => `${s.bone} ${s.local?.join(',')}`)).toEqual([
+      '21 5,0,0', '21 5,0,0', '22 9,0,0', '22 9,0,0', '25 6,0,0', '25 6,0,0', '43 10,0,0', '43 10,0,0',
+      '39 3,0,0', '39 3,0,0', '40 3,0,0', '40 3,0,0', '9 0,-2,0', '10 4,-4,0',
+    ]);
+    expect(rows(361, 'cards')[0].gate?.alive).toBe(true);
+  });
+});
