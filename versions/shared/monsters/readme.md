@@ -98,7 +98,7 @@ In game the name a player reads is the language pack's in either case (`monsterD
 | `balgass/` | Balgass (349), Crywolf boss |
 | `kundun_demon/` | Kundun (275), with a fast-forwarded death clip |
 | `selupan/` | Selupan (459), Raklion boss |
-| `gayion_the_gladiator/` | Gaion Kharein (504), Imperial Guardian boss: his five swords on their bones by action (`swords.ts`) |
+| `gayion_the_gladiator/` | Gaion Kharein (504), Imperial Guardian boss: his five swords on their bones by action (`swords.ts`), mesh 2 bright blue and the jewel and edge sprites on each sword's bones, and the swords his attacks throw at the hero (`flights.ts` paths, `thrown.ts`: SubType 1 and 3 flights, the curved swords' shadows, the blue ground light, the throw sounds). Not ported: Attack2's sword-force trails, fire and thunder joints; Attack3's flare joint and landing (crater, stones, shock waves, quake, sounds); the SubType 11 / 12 return to the hand; Attack4's main sword and flame strike; the rage inferno on Appear. Our clip picker plays only Attack1 for him (`controllers/anim/monsterAttackClip.ts`), as the original does without a 0x69 monster skill, and the rage needs ATMON_SKILL_EMPIREGUARDIAN_BERSERKER (GMEmpireGuardian4.cpp:1424-1430) |
 | `_blood_castle/` | Castle Gate (131) and Statue of Saint (132-134) |
 | `_golden_line/` | the golden invasion line, with extra additive body passes |
 | `_skeleton_line/` | Skeleton Warrior, Archer, Elite, Death King, Death Bone: player-rig monsters |
