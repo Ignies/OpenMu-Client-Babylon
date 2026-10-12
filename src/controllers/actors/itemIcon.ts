@@ -51,6 +51,7 @@ export function itemIconJob(scene: Scene, item: Item): IconShotJob | null {
   const unit = ITEM_ICON_UNITS_PER_PIXEL * M;
   const { angle, offset, anchor } = pose;
   let turned: Quaternion | null = null;
+  let model: { updateMeshPasses(ms: number): void } | null = null;
 
   return {
     key: `${key}_${item.lvl ?? 0}${item.isExcellent ? '_e' : ''}${item.isAncient ? '_a' : ''}`,
@@ -70,6 +71,7 @@ export function itemIconJob(scene: Scene, item: Item): IconShotJob | null {
       node.position.set(anchor[0] * width * unit + offset[0] * M, (offset[2] - DEPTH) * M, -anchor[1] * height * unit + offset[1] * M);
       node.rotationQuaternion = angleMatrixQuaternion(angle[0] * DEG, angle[1] * DEG, angle[2] * DEG, new Quaternion());
       turned = node.rotationQuaternion;
+      model = object;
       node.scaling.setAll(scale);
       // Drawn at its level and options, as worn (RenderPartObject, ZzzInventory.cpp:9699).
       const tier = itemVisualTier(item);
@@ -84,6 +86,7 @@ export function itemIconJob(scene: Scene, item: Item): IconShotJob | null {
     // The hovered item: its second angle replaced by the clock, the others kept.
     turn: ms => {
       if (turned) angleMatrixQuaternion(angle[0] * DEG, ((ms * HOVER_SPIN) % 360) * DEG, angle[2] * DEG, turned);
+      model?.updateMeshPasses(ms);
     },
   };
 }

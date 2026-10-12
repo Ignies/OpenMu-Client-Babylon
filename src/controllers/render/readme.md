@@ -15,6 +15,8 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `modelObject.ts`: `ModelObject`, the base class of every drawn model (actors, map objects, npcs,
   drops, pets); `PartPose`, `BodyShine` (with `ShineMesh` and `ShineLight`, the shine mesh lit by
   the shine's tint), `HIDDEN_MESH_ALL`, `BLEND_MESH_ALL`.
+- `meshPasses.ts`: `MeshPass`, `MeshPassSet`, `MeshPasses`, `UV_MAP` / `UvMap`: a model's own
+  `RenderPartObjectBody` passes, set on `ModelObject.MeshPasses` before `load()` (item looks).
 - `scenes/testScene.ts`: `TestScene`, the game's `Scene` with its camera, highlight layer and look.
 - `sceneLook.ts`: `setAreaMood`, `requestGlowProbe`, `updateSceneLook` (glow layer, areas).
 - `scenes/<pass>.ts`: `sync<Pass>` / `dispose<Pass>` and `createPostChain`, called by
@@ -58,6 +60,12 @@ There is no `index.ts` facade; other folders import the modules directly.
   own, alpha-tested (ZzzObject.cpp:7774-7790), and `HideSkinMeshes` the only meshes drawn; a drop sets
   both from `actors/skinTexture.ts`.
   Map objects also drop still clips (`staticClips.ts`) and mark themselves static CSM casters.
+- `MeshPasses` (`meshPasses.ts`): each pass is a clone of its mesh under the same parent (indices stand),
+  hidden until shown, on the additive scroll material (`add`, `bright`), the flat-lit scroll one (`unlit`,
+  which draws the texel at full: the flat variant takes no BodyLight) or the lit blended one (`blend`, alpha
+  as `coverage`). Clones skip the shadows but `unlit`. `metadata.uvMap` asks the scroll materials for a
+  chrome look-up by the normal in place of the mesh UVs. `update(ms)` writes light, gain and scroll
+  without allocating and, when `shown` flips, swaps the clones and the meshes they replace.
 - `textureScript.ts` reads a texture name's `_R/_H/_S/_N/_DC/_DT` suffix for the model loader.
 - `propBatches.ts` draws map scenery as thin instances, one mesh per type, submesh and 32-tile chunk
   (`propBatchRules.ts`); one real `ModelObject` per type is the never-drawn prototype. A chunk mesh
@@ -117,6 +125,9 @@ There is no `index.ts` facade; other folders import the modules directly.
   it when stopped, before its model is in too. NullEngine draws no pixels, so what a picture looks
   like is checked in a browser.
 - `meshAnimation.test.ts`: `meshAnimationFor` reads the map row per world.
+- `meshPasses.test.ts`: an additive copy whose gain and UVs follow WorldTime, the meshes a branch skips or
+  a pass replaces, a pass's own light, a `RenderBody` pass on every drawn mesh, and the option putting the
+  model back.
 - `modelObject.test.ts`: a model whose clips are cloned on first play reads every clip's keys at load
   without cloning one, and a clip cloned later reports its end; `BlendMesh -2` and a pulsing `BlendMeshLightAt`;
   `ShineLight` lights the shine mesh by the tint;

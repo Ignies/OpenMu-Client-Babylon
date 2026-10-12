@@ -387,18 +387,21 @@ const dataTextures: Map<string, Texture> = new Map();
 /**
  * A bitmap of the original `Data/` tree for a mesh drawn with another texture
  * than its own (`RenderMesh`'s explicit texture, ZzzBMD.cpp:1319-1322). Top-down
- * like the GLBs' own (invertY off) and filtered with them; blank until it lands.
+ * like the GLBs' own (invertY off) and filtered with them; blank until it lands. `clamp`: loaded
+ * GL_CLAMP_TO_EDGE, as the original loads most effect bitmaps.
  */
-export function getDataTexture(scene: Scene, path: string): Texture {
-  const cached = dataTextures.get(path);
+export function getDataTexture(scene: Scene, path: string, clamp = false): Texture {
+  const key = clamp ? `${path}#clamp` : path;
+  const cached = dataTextures.get(key);
   if (cached?.getScene() === scene) return cached;
 
   const { sampling, anisotropy } = textureFiltering();
   const texture = new Texture(null, scene, false, false, sampling);
   texture.name = path;
   texture.anisotropicFilteringLevel = anisotropy;
+  if (clamp) texture.wrapU = texture.wrapV = Texture.CLAMP_ADDRESSMODE;
   loadMuSprite(path).then(sprite => texture.updateURL(sprite.url), reportLoadFailure(path));
-  dataTextures.set(path, texture);
+  dataTextures.set(key, texture);
   return texture;
 }
 

@@ -69,7 +69,7 @@ type loads. Its door is `index.ts`; older readers still import some modules dire
   Bronze, Leather, Scale, Brass and Plate helms (`MaskHelmMale`), ZzzCharacter.cpp:9579-9617.
 - `itemModel.ts`: `dressItemModel(object, group, num)`, what the original does to every loose item
   model, on the ground or in the bag (`ItemHeight`, `HideSkin`, frozen at frame 0, the
-  `ItemObjectAttribute` mesh rules, and `RenderPartObjectBody`'s seed colours: a seed in its element's
+  `ItemObjectAttribute` mesh rules, its item look's passes (`item_fx/itemLooks.ts`), and `RenderPartObjectBody`'s seed colours: a seed in its element's
   colour with Chrome01 added, a seed sphere so but for its mesh 1, ZzzObject.cpp:8067-8121; the
   Fireworks' own pass, mesh 0 at full light and mesh 1 red with Chrome01, ZzzObject.cpp:9602-9620;
   `DropObject` and the bag icon both use it), and

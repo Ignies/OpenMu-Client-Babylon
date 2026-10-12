@@ -9,6 +9,7 @@ import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
 import { Scene } from '@babylonjs/core/scene';
 import { ModelObject } from '../render/modelObject';
 import { dressItemModel } from './itemModel';
+import { defineItemLook, itemBodyPasses, registerItemLooks } from '../item_fx/itemLooks';
 
 const engine = new NullEngine();
 const scene = new Scene(engine);
@@ -40,6 +41,20 @@ describe('the seeds and seed spheres', () => {
   it('leave every other item unshone', () => {
     expect(dressed(12, 66)).toEqual({ tint: [0, 0, 0], chromeOnly: undefined, lit: false, mesh: -1 });
     expect(dressed(14, 13).tint).toEqual([0, 0, 0]);
+  });
+});
+
+// RenderPartObjectBody's branch for the model runs on a drop and a bag item too (RenderItems, ZzzObject.cpp:6403).
+describe('an item with a look of its own', () => {
+  it('draws its body passes on the ground and in the bag', () => {
+    registerItemLooks([defineItemLook({ items: [[5, 30]], body: { passes: [{ mesh: 1, kind: 'add' }] } })]);
+    const object = new ModelObject(scene);
+    dressItemModel(object, 5, 30);
+    expect(object.MeshPasses).toBe(itemBodyPasses(5, 30));
+    expect(object.MeshPasses?.passes).toEqual([{ mesh: 1, kind: 'add' }]);
+    const plain = new ModelObject(scene);
+    dressItemModel(plain, 5, 29);
+    expect(plain.MeshPasses).toBeNull();
   });
 });
 

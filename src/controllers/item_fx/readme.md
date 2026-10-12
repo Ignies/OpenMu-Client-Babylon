@@ -9,12 +9,17 @@ original client's item passes, the item glow tiers and the weapon swing trails.
   `legacyItemEffectsOn()`, `improvedItemEffectsOn()`, `legacyRenderLevel()`, `capItemLevel(level)`,
   `itemEffectSignature()`, `ITEM_EFFECT_MODE_LABEL_KEYS` / `_MAX` (the options slider).
 - `itemDrawLevel.ts`: `itemDrawLevel(group, num, level, ground)`, the level an item is drawn at.
+- `itemLooks.ts`: `defineItemLook`, `registerItemLooks` (content's `versions/shared/item_looks/`,
+  at boot), `itemBodyPasses(group, num)` (the `MeshPassSet` a model takes, shown while
+  `legacyItemEffectsOn()`), types `ItemLook`, `MeshPass`.
 - `itemVisualTier.ts`: `itemVisualTier(item, ground)` (cached descriptor), `strongestTierOf(items)` /
   `strongestTier(items)`, `setItemGlowClock` / `itemGlowClock`, `itemEmissiveAt`, `itemHaloAt`,
   `itemLightColorAt`, type `ItemVisualTier`.
 - `itemMaterial.ts`: `createItemMaterial(scene, bright, flatLit, withScroll)`,
   `createItemPbrMaterial(scene)`, `useMeshAlphaTestTexture(material)`, `packBodyLight` /
-  `packBodyLightFor`, `syncPbrDetail()`, `livePbrMaterials()`, type `UvScroll`.
+  `packBodyLightFor`, `syncPbrDetail()`, `livePbrMaterials()`, type `UvScroll`. The scroll variants
+  also read `metadata.uvMap`: a chrome look-up by the normal (RENDER_CHROME, CHROME5, CHROME6, CHROME7,
+  ZzzBMD.cpp:1600-1640) in place of the mesh UVs, for an item look's passes.
 - `weaponBlur.ts`: `weaponBlurFor(hands, action, hasLevel)` (type `WeaponBlurRow`), the warrior
   glint (`warriorGlint`, `warriorGlintStar`, `WARRIOR_GLINT_BONE` / `_TIP`); which skills take it is
   each skill's `warriorGlint` field, read through the skills controller's `hasWarriorGlint`.

@@ -1,5 +1,6 @@
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { itemVisualTier } from '../../controllers/item_fx/itemVisualTier';
+import { itemBodyPasses } from '../../controllers/item_fx/itemLooks';
 import { heldWeapons, wearsChaosCastleSkin } from '../../controllers/actors';
 import { showsClassHead } from '../../controllers/actors/openHelm';
 import { classPartModel } from '../../controllers/actors/classPartModel';
@@ -27,6 +28,9 @@ function loadPart(
   const item = ItemsDatabase.getItem(part.group, part.num);
 
   if (!item) return;
+
+  // The model's own RenderPartObjectBody branch, worn or held (ZzzObject.cpp:10137).
+  socket.MeshPasses = itemBodyPasses(part.group, part.num);
 
   if (slot !== undefined) {
     // `RenderLinkObject` runs `ItemObjectAttribute` on every held item (ZzzCharacter.cpp:6648).
