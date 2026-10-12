@@ -2,7 +2,7 @@ import { AreaSkillAnimationPacket, ChainLightningHitInfoPacket, EffectItemConsum
 import { teleportCastSound } from '@/controllers/sound';
 import { Entity, World } from '@/ecs/world';
 import { EventBus } from '@/core/eventBus';
-import { cancelledEffects } from '@/controllers/skills';
+import { cancelledEffects, monsterAttackLook } from '@/controllers/skills';
 import { HeroSkills } from './state';
 import { Ecs } from '@/ecs/current';
 import { TELEPORT } from './skillCasting';
@@ -11,7 +11,9 @@ import { setBuffTime } from './buffs';
 import { Hero } from '../hero';
 import { Social } from '../social/social';
 import { t as text } from '@/i18n';
-import { playCastAnimation } from '../combat/clips';
+import { monsterNumberOf, playCastAnimation } from '../combat/clips';
+import { isDeadMonster } from '../scope/objects';
+import { entityYaw } from '@/controllers/fx/core';
 import { beginTeleport, endTeleport, justArrived } from '@/ecs/systems/teleportSystem';
 import { playAreaSkillVisual, playChainLightningHop } from '@versions/shared/skills/skillVisuals';
 
@@ -115,6 +117,10 @@ export function installNet(): void {
       caster.transform.rot.y = (p.Rotation / 256) * Math.PI * 2;
     }
     playCastAnimation(caster, p.SkillId, true);
+    // A monster's 0x1E starts AttackTime with TargetCharacter = -1, so the map's AttackEffect runs with no target (WSclient.cpp:5558-5566).
+    if (caster.monsterAnimation && !isDeadMonster(caster)) {
+      monsterAttackLook(monsterNumberOf(caster), world.mapIndex)?.({ scene: world.scene, caster, target: null, yaw: entityYaw(caster) });
+    }
     playAreaSkillVisual(
       world.scene,
       p.SkillId,

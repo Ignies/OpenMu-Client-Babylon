@@ -25,7 +25,7 @@ themselves are content in `versions/shared/skills/` (see [docs/content.md](../..
   `clearBuffVisuals`, `playBuffHits`, `skillVisualFor`, `baseSkill`, `fallbackFor`.
 - `defineMonsterSkill(def)` / `registerMonsterSkills(defs)` / `monsterSkillLook(monster, skill, world)` /
   `monsterAttackLook(monster, world)` (`monsterSkills.ts`): what a monster's map hook draws for its 0x69 skill
-  (`ATMON_SKILL_*`) and its AttackEffectMonster after any swing or a 0x19 cast that starts AttackTime, by npc number and map; the combat module runs
+  (`ATMON_SKILL_*`) and its AttackEffectMonster after any swing, a 0x19 cast that starts AttackTime or a 0x1E area cast (no target), by npc number and map; the combat module (the skills module for 0x1E) runs
   them after the clip (`MonsterSkillLook`, a function of a `SkillContext`).
 - `castIsDrawn(caster, skill, now)` (`castBudget.ts`): whether a cast is drawn at all, read by the three
   dispatches; `CASTER_GAP_MS`, `OTHERS_PER_SECOND`, `HEAVY_VISUAL_GAP` (written from `heavyVisualGap`).
