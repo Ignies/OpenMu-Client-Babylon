@@ -30,6 +30,10 @@ server can see (packet content or timing) is not one either: it is a server sett
 3. At the site, keep the original path and read the flag:
    `import { isOn } from '@/controllers/fidelity';` then `if (isOn('myImprovement')) ...`.
    In per-frame code read it once per frame, outside loops.
+   A deviation with big impact that the world must also allow (it changes what the server grants)
+   names its `server.json` key: `server: 'myKey'` in `defineImprovement` (add the key as
+   `src/modules/servers/readme.md` says), and the site reads `serverSetting('myKey')` beside `isOn`.
+   The Options row then shows the server's refusal while the world leaves it off.
 4. Add a row to the table in `versions/shared/improvements/readme.md` and a test that the site
    runs the original on Classic (`setFidelityChoice(FIDELITY_CLASSIC, {})`, then back to
    `FIDELITY_DEFAULT` after the test).

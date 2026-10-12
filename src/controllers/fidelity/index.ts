@@ -21,6 +21,8 @@ export type Improvement = {
   readonly preset: 'enhanced' | 'ultra';
   readonly labelKey: TextKey;
   readonly hintKey: TextKey;
+  /** A `server.json` setting the world must also turn on (big-impact deviations); the site reads it too. */
+  readonly server?: string;
 };
 
 /** Per-id choices that differ from the preset; ids nothing registers are ignored. */

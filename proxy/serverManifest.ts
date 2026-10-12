@@ -23,6 +23,7 @@ export function serverManifest(env: Env = process.env) {
       muHelperAfterReconnect: env.MU_HELPER_AFTER_RECONNECT === 'on',
       autoManaPotion: env.MU_AUTO_MANA_POTION === 'on',
       autoQuiver: env.MU_AUTO_QUIVER === 'on',
+      restAnyWall: env.MU_REST_ANY_WALL === 'on',
     },
     modulesOff: modulesOff(env),
   };

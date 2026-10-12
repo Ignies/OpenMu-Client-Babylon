@@ -32,6 +32,17 @@ describe('the automation rows', () => {
   });
 });
 
+// A wall lean grants OpenMU's resting regeneration: the world's `server.json` must allow it too.
+describe('the rest against any wall row', () => {
+  it('shows the server refusal where the world does not allow it', async () => {
+    await import('@versions/shared/improvements/all');
+    const fidelity = CATEGORIES.flatMap(c => c.pages).find(p => p.id === 'fidelity');
+    const row = fidelity?.sections.flatMap(s => s.rows).find(r => r.kind === 'improvement' && r.id === 'restAnyWall');
+    if (!row || row.kind !== 'improvement') throw new Error('no restAnyWall row');
+    expect(blockerOf(row.needs)?.text).toBe('options.needs.server');
+  });
+});
+
 // Ours: the Skill effects selector is the `enhancedSkillEffects` improvement shown as a choice by Item effects.
 describe('the skill effects row', () => {
   it('sits next to Item effects as Original / Enhanced', async () => {

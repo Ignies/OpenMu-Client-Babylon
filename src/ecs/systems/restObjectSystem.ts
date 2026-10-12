@@ -21,6 +21,7 @@ import { Hero } from '../../modules/hero';
 import { Session } from '../../modules/session';
 import { mountKind } from '../../controllers/pets';
 import { isOn } from '../../controllers/fidelity';
+import { serverSetting } from '../../modules/servers/serverManifest';
 import { hitWall, isRestWall, wallStand, type LocalBox, type WallStand } from '../../controllers/terrain/restWalls';
 import { propLocalBox } from '../../controllers/render/propBatches';
 import { placementMatrix } from '../../controllers/render/propBatchRules';
@@ -98,7 +99,8 @@ const wallStandOut: WallStand = { x: 0, y: 0, rotY: 0 };
 
 /**
  * `restAnyWall`: the lean a click on a straight wall asks for - the nearest wall the
- * ray enters, the tile beside it and the facing away from it. Null on Classic.
+ * ray enters, the tile beside it and the facing away from it. Null on Classic and where the
+ * world's `server.json` does not allow it (a lean grants OpenMU's resting regeneration).
  */
 export function wallRestTarget(
   world: World,
@@ -106,7 +108,7 @@ export function wallRestTarget(
   ray: Ray,
   boxOf: (e: WallCandidate) => LocalBox | null
 ): RestTarget | null {
-  if (!isOn('restAnyWall')) return null;
+  if (!isOn('restAnyWall') || !serverSetting('restAnyWall')) return null;
   const hero = world.playerEntity;
   if (!hero) return null;
   const hx = hero.transform.pos.x;

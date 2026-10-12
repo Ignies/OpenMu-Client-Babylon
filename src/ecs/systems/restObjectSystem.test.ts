@@ -8,6 +8,13 @@ vi.hoisted(() => {
   g.location ??= { href: 'http://localhost/', search: '', hostname: 'localhost', protocol: 'http:' };
 });
 
+/** The world's `restAnyWall`, set per test; every other setting is the original's. */
+const server = vi.hoisted(() => ({ restAnyWall: true }));
+vi.mock('../../modules/servers/serverManifest', async importOriginal => ({
+  ...(await importOriginal<typeof import('../../modules/servers/serverManifest')>()),
+  serverSetting: (key: string) => (key === 'restAnyWall' ? server.restAnyWall : false),
+}));
+
 // Skills first: they keep the app import cycle in order (versions/shared/skills/readme.md).
 await import('@versions/shared/skills/skillVisuals');
 const { arriveAtRest, wallRestTarget } = await import('./restObjectSystem');
@@ -105,7 +112,10 @@ describe('resting against any wall', () => {
   const boxOf = (e: { modelId: number }) => (e.modelId === 1 ? FENCE : POST);
   const down = (x: number, z: number) => new Ray(new Vector3(x, 10, z), new Vector3(0, -1, 0));
 
-  afterEach(() => setFidelityChoice(FIDELITY_DEFAULT, {}));
+  afterEach(() => {
+    setFidelityChoice(FIDELITY_DEFAULT, {});
+    server.restAnyWall = true;
+  });
 
   it('leans beside the clicked fence, facing away from it', () => {
     const fences = [record(1, 120, 80), record(1, 125, 80)];
@@ -124,6 +134,11 @@ describe('resting against any wall', () => {
 
   it('is today\'s behaviour on Classic: a click on a fence leans nowhere', () => {
     setFidelityChoice(FIDELITY_CLASSIC, {});
+    expect(wallRestTarget(world, [record(1, 120, 80)], down(120, 80), boxOf)).toBeNull();
+  });
+
+  it('needs the world to allow it: off by default in its server.json', () => {
+    server.restAnyWall = false;
     expect(wallRestTarget(world, [record(1, 120, 80)], down(120, 80), boxOf)).toBeNull();
   });
 
