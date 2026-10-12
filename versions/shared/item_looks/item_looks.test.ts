@@ -128,3 +128,65 @@ describe('the swords', () => {
     expect(look(0, 19)).toBeNull();
   });
 });
+
+// RenderPartObjectBody's mace and scepter branches (ZzzObject.cpp).
+describe('the maces and scepters', () => {
+  it('Elemental Mace: its hidden mesh 2 additive, in a grey pulse off the body, scrolling (:7055-7065)', () => {
+    const l = r(Math.max(0, BODY.x * (Math.sin(T * 0.001) * 0.5 + 0.3)));
+    expect(look(2, 7)).toEqual({
+      drawn: undefined,
+      passes: [{ mesh: 2, kind: 'bright', light: [l, l, l], u: r(T * 0.001), v: r(-T * 0.0005) }],
+    });
+  });
+
+  it('Battle Scepter: mesh 0 again at a pulsing BlendMeshLight (:7078-7085)', () => {
+    expect(look(2, 8)).toEqual({
+      drawn: undefined,
+      passes: [{ mesh: 0, kind: 'add', gain: r(Math.max(0, Math.sin(T * 0.001) * 0.6 + 0.4)) }],
+    });
+  });
+
+  it('Master Scepter: mesh 0 again in blue, pulsing, then Chrome01 scrolling on mesh 1 (:7086-7097)', () => {
+    expect(look(2, 9)).toEqual({
+      drawn: undefined,
+      passes: [
+        { mesh: 0, kind: 'add', light: [0.1, 0.3, 1], gain: r(Math.max(0, Math.sin(T * 0.001) * 0.6 + 0.4)) },
+        { mesh: 1, kind: 'add', texture: 'Effect/Chrome01.OZJ', light: [0.6, 0.8, 1], v: r(T * 0.0003) },
+      ],
+    });
+  });
+
+  it('Great Scepter: mesh 2 additive only, scrolling (:7528-7539)', () => {
+    expect(look(2, 10)).toEqual({
+      drawn: undefined,
+      passes: [{ mesh: 2, kind: 'bright', u: r(T * 0.0005), v: r(T * 0.0005) }],
+    });
+  });
+
+  it('Lord Scepter: Chrome01 on mesh 1 (:7540-7547)', () => {
+    expect(look(2, 11)).toEqual({ drawn: undefined, passes: [{ mesh: 1, kind: 'add', ...CHROME }] });
+  });
+
+  it('Great Lord Scepter: meshes 1 and 3 again (:7925-7930)', () => {
+    expect(look(2, 12)).toEqual({ drawn: undefined, passes: [{ mesh: 1, kind: 'add' }, { mesh: 3, kind: 'add' }] });
+  });
+
+  it('Soleil Scepter: unlit, with Chrome06 swept across it (:7576-7599)', () => {
+    const s = r((T % 4000) * 0.0002 - 0.3);
+    expect(look(2, 14)).toEqual({
+      drawn: undefined,
+      passes: [
+        { mesh: 0, kind: 'unlit' },
+        { mesh: 0, kind: 'add', texture: 'Effect/Chrome06.OZJ', clamp: true, u: s, v: s },
+      ],
+    });
+  });
+
+  it('Frost Mace: mesh 1 additive only, mesh 2 again (:7128-7134)', () => {
+    expect(look(2, 16)).toEqual({ drawn: undefined, passes: [{ mesh: 1, kind: 'bright' }, { mesh: 2, kind: 'add' }] });
+  });
+
+  it('the Shining Scepter has none: its branch is the plain body (:7645-7648)', () => {
+    expect(look(2, 15)).toBeNull();
+  });
+});
