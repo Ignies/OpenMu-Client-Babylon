@@ -1,9 +1,12 @@
 import { defineMonster } from '@/controllers/monsters';
+import { WEREWOLF_HERO_BLURS, crywolfWalkSmoke, werewolfHeroHead } from '../_shared/bodyFx';
 
 export default defineMonster({
   Numb: 313,
   Name: 'Werewolf',
   maxHealth: 110000,
+  // Its Crywolf visuals (`_shared/bodyFx.ts`, GMCrywolf1st.cpp).
+  bodyFx: [...WEREWOLF_HERO_BLURS, werewolfHeroHead(), crywolfWalkSmoke([1, 1, 1])],
   model: { type: 95, scale: 1.25 },
   stats: {
     Rate: 1,

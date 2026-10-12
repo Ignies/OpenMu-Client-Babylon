@@ -12,6 +12,8 @@ export type Config = {
   serverName: string;
   serverDescription: string;
   serverLanguage: string;
+  /** The client served here opens straight on this server's login, no worlds list (`server.json` `directLogin`). */
+  directLogin: boolean;
   postgresPassword: string;
   adminUser: string;
   /** bcrypt of the admin panel password; the password itself is never stored. */
@@ -56,6 +58,7 @@ const KEYS: Record<keyof Config, string> = {
   serverName: 'MU_SERVER_NAME',
   serverDescription: 'MU_SERVER_DESCRIPTION',
   serverLanguage: 'MU_SERVER_LANGUAGE',
+  directLogin: 'MU_DIRECT_LOGIN',
   postgresPassword: 'POSTGRES_PASSWORD',
   adminUser: 'MU_ADMIN_USER',
   adminHash: 'MU_ADMIN_HASH',
@@ -90,6 +93,7 @@ export const DEFAULTS: Config = {
   serverName: 'My MU',
   serverDescription: 'Season 6 Episode 3, played in the browser',
   serverLanguage: 'en',
+  directLogin: false,
   postgresPassword: '',
   adminUser: 'admin',
   adminHash: '',

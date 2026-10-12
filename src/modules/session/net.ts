@@ -18,6 +18,8 @@ import { Session } from './state';
 import { AppState, UIState } from '@/controllers/interface/uiState';
 import { gameServerTarget } from '../servers/serverConfig';
 import { serverSetting } from '../servers/serverManifest';
+import { DirectLogin, directChannel } from '../servers/directLogin';
+import { ServerConfig } from '../servers/serverConfig';
 import { quests } from '../quests';
 import { runInAction } from 'mobx';
 import { t } from '@/i18n';
@@ -27,7 +29,8 @@ let serverListRequested = false;
 /** Registers this module's packet listeners (see ../module.ts). */
 export function installNet(): void {
   EventBus.on('Hello', () => {
-    if (serverListRequested) return;
+    // A direct login picks from a fresh list on every connect.
+    if (serverListRequested && !DirectLogin.on) return;
     serverListRequested = true;
     Servers.updateServerListRequest();
   });
@@ -55,6 +58,8 @@ export function installNet(): void {
 
     runInAction(() => {
       AppState.uiState = UIState.Login;
+      // A direct login held the form while it waited for this.
+      if (DirectLogin.on) Session.loginProcessing = false;
     });
   });
 
@@ -64,6 +69,13 @@ export function installNet(): void {
     runInAction(() => {
       Servers.serverList = servers;
     });
+    // A direct login takes the first channel, as a click on it would (servers/directLogin.ts).
+    const pick = Session.awaitingDirectChannel ? directChannel(servers, ServerConfig.active.servers ?? []) : null;
+    if (!pick) return;
+    runInAction(() => {
+      Servers.selectedServer = pick.selected;
+    });
+    Servers.getConnectionInfoRequest(pick.serverId);
   });
 
   // A socket we did not close ourselves went away: `Session.onSocketLost` ignores

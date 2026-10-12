@@ -1,9 +1,12 @@
 import { defineMonster } from '@/controllers/monsters';
+import { DEATH_RIDER_BLURS } from '../_shared/bodyFx';
 
 export default defineMonster({
   Numb: 306,
   Name: 'Death Rider',
   maxHealth: 14000,
+  // Its swing blurs, from the map file's blur effect (`_shared/bodyFx.ts`).
+  bodyFx: DEATH_RIDER_BLURS,
   model: { type: 102, scale: 1.1 },
   stats: {
     Rate: 1,

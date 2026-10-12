@@ -23,6 +23,7 @@ import { AppState, UIState } from '@/controllers/interface/uiState';
 import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH, ServerAccounts, tokenFromText, tokenToText } from '../servers/serverAccounts';
 import { connectServerAddress, ServerConfig, wsAddress } from '../servers/serverConfig';
 import { serverOffersLoginTokens } from '../servers/serverManifest';
+import { DirectLogin } from '../servers/directLogin';
 import { addNotification } from '../chat';
 
 /**
@@ -115,7 +116,9 @@ export const Session = new (class {
   isOffline = location.href.includes('offline');
 
   playOnline() {
-    AppState.uiState = UIState.Servers;
+    // Direct login (`servers/directLogin.ts`): no server list; the login waits for the first channel.
+    AppState.uiState = DirectLogin.on ? UIState.Login : UIState.Servers;
+    if (DirectLogin.on) this.loginProcessing = true;
     // The login fields belong to the world being entered, and which world that
     // is was decided on the screen this was called from.
     this.loadAccount();
@@ -129,7 +132,7 @@ export const Session = new (class {
     this.connectToConnectServer();
   }
 
-  /** `CLoginWin::CancelLogin` (LoginWin.cpp:416): back to the server list; the typed fields stay. */
+  /** `CLoginWin::CancelLogin` (LoginWin.cpp:416): back to the server list (a direct login: the login); the typed fields stay. */
   cancelLogin() {
     this.loginError = undefined;
     this.loginProcessing = false;
@@ -171,11 +174,16 @@ export const Session = new (class {
     }
     if (socket === this.csSocket) {
       this.csSocket = undefined;
-      if (AppState.uiState === UIState.Servers) {
+      if (AppState.uiState === UIState.Servers || this.awaitingDirectChannel) {
         addNotification(t('notify.serverListLost'), 'error');
         this.playOnline();
       }
     }
+  }
+
+  /** Direct login: on the login with no game server yet, so the connect server's list picks one. */
+  get awaitingDirectChannel(): boolean {
+    return DirectLogin.on && !this.gsSocket && AppState.uiState === UIState.Login;
   }
 
   /**

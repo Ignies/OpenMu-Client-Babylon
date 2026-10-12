@@ -60,6 +60,7 @@ import { installPerfOverlay, recordFrame } from '../controllers/render/perfOverl
 import { fpsLimitForStep, framePacer } from '../controllers/render/fpsLimit';
 import { csmCacheStats } from '@/controllers/render/shadows';
 import { refreshServerList } from '../modules/servers/serverList';
+import { checkDirectLogin } from '../modules/servers/directLogin';
 import { ensureCacheWorker } from '../controllers/assets/assetDownload';
 import { startBuildCheck } from './buildCheck';
 import { sceneCovered } from '../controllers/render/sceneCover';
@@ -377,6 +378,9 @@ preloadPregameSprites()
 // waits on it: it fills the picker when it lands, and the saved servers are
 // what the client uses until then - or instead, if it never lands.
 refreshServerList();
+
+// The installer's direct login: a server.json beside the client may skip the worlds list (servers/directLogin.ts).
+void checkDirectLogin();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

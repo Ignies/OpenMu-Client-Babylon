@@ -1,9 +1,12 @@
 import { defineMonster } from '@/controllers/monsters';
+import { GIGANTIS_BLURS } from '../_shared/bodyFx';
 
 export default defineMonster({
   Numb: 434,
   Name: 'Gigantis',
   maxHealth: 43000,
+  // Its swing blurs, from the map file's blur effect (`_shared/bodyFx.ts`).
+  bodyFx: GIGANTIS_BLURS,
   model: { type: 112, scale: 1.2 },
   // The old table's converter read this row one column off, the level inside the name (readme.md).
   stats: {

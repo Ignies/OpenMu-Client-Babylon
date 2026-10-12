@@ -13,6 +13,7 @@ import {
   ServerConfig,
 } from '@/modules/servers/serverConfig';
 import { ServerList } from '@/modules/servers/serverList';
+import { DirectLogin } from '@/modules/servers/directLogin';
 import { loadVersionUi, versionTags, versionUi } from '@/version';
 import type { PregameBackdrop } from '@/version/uiContract';
 import { uiClick } from '@/controllers/sound/sfx';
@@ -197,14 +198,16 @@ export const PreloaderPage = observer(({ onPlayOffline }: { onPlayOffline: () =>
   const loaded = phase !== 'loading';
   const open = phase === 'open';
   const ready = () => setPhase(p => (p === 'loading' ? 'ready' : p));
+  // Start waits for the direct login check as well: it decides what Start opens.
+  const checked = DirectLogin.checked;
 
   useEffect(() => {
-    if (!load.done) return;
+    if (!load.done || !checked) return;
 
     const timer = window.setTimeout(ready, READY_DELAY_MS);
 
     return () => window.clearTimeout(timer);
-  }, [load.done]);
+  }, [load.done, checked]);
 
   useEffect(() => {
     const timer = window.setTimeout(ready, SHOW_ANYWAY_MS);
@@ -278,7 +281,7 @@ export const PreloaderPage = observer(({ onPlayOffline }: { onPlayOffline: () =>
    * broken client rather than the wrong one.
    */
   const enter = (id = selected.id) => {
-    if (!open || ServerConfig.isEmpty || leaving) return;
+    if ((!open && !DirectLogin.on) || ServerConfig.isEmpty || leaving) return;
 
     const world = ServerConfig.all.find(w => w.id === id);
     if (world && !playableHere(world)) return;
@@ -286,6 +289,16 @@ export const PreloaderPage = observer(({ onPlayOffline }: { onPlayOffline: () =>
     ServerConfig.select(id);
     ServerConfig.markPlayed(id);
     leave(() => Session.playOnline());
+  };
+
+  /** The Start press: the worlds card, or this server's login (`servers/directLogin.ts`). */
+  const start = () => {
+    if (DirectLogin.on) {
+      sound.tryUnlock();
+      enter();
+    } else {
+      setPhase('open');
+    }
   };
 
   const offline = () => {
@@ -308,7 +321,7 @@ export const PreloaderPage = observer(({ onPlayOffline }: { onPlayOffline: () =>
 
       if (phase === 'ready' && (e.key === 'Enter' || e.key === ' ')) {
         // Any Enter is Start while Start is all there is.
-        setPhase('open');
+        start();
       } else if (e.key === 'Escape' && typing) {
         target?.blur();
       } else if (
@@ -392,7 +405,7 @@ export const PreloaderPage = observer(({ onPlayOffline }: { onPlayOffline: () =>
               type="button"
               className="ws-start anim-host"
               autoFocus
-              onClick={uiClick(() => setPhase('open'))}
+              onClick={uiClick(start)}
             >
               <Icon name="play" />
               {t('worlds.start')}
