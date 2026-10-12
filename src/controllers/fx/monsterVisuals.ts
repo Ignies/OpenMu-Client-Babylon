@@ -145,10 +145,12 @@ const PUFFS: Readonly<Record<BodyPuff, KindName>> = {
   smoke1: 'smoke1',
   smoke13: 'smoke13',
   smoke17: 'smoke17',
+  smoke21: 'smoke21',
   smoke50: 'smoke50',
   smokeLine1: 'smokeLine1',
   smokeLine2: 'smokeLine2',
   smokeLine3: 'smokeLine3',
+  trueFire: 'trueFire',
 };
 
 type CardsRow = Extract<BodyFxEmitter, { kind: 'cards' }>;

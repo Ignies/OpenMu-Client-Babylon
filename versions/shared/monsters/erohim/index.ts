@@ -1,9 +1,12 @@
 import { defineMonster } from '@/controllers/monsters';
+import { EROHIM_FX } from './bodyFx';
 
 export default defineMonster({
   Numb: 295,
   Name: 'Erohim',
   maxHealth: 3000000,
+  // MODEL_EROHIM: see `bodyFx.ts`.
+  bodyFx: EROHIM_FX,
   model: { type: 87, scale: 2 },
   stats: {
     Rate: 1,

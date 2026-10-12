@@ -87,3 +87,17 @@ describe('Selupan', () => {
     expect(clouds.spots.map(s => s.spin)).toEqual([-0.1, -0.2]);
   });
 });
+
+describe('Erohim', () => {
+  // RenderHuntingGroundMonsterVisual's MODEL_EROHIM (GMHuntingGround.cpp:672-712): two red lights on each eye, and
+  // through Attack2 a true fire and a smoke from the left hand. Monster82_LHand is not his bone, so the fire is a
+  // plain SubType 0 one (ZzzEffectParticle.cpp:8281-8298).
+  it('lights his eyes and fires his left hand through Attack2', () => {
+    expect(cards(295)).toEqual(['8:light@0.5 0.9,0.2,0.1', '8:light@0.5 0.9,0.2,0.1', '9:light@0.5 0.9,0.2,0.1', '9:light@0.5 0.9,0.2,0.1']);
+    expect(rows(295, 'cards')[0].spots[0].local).toEqual([0, -2, 0]);
+    expect(rows(295, 'puff')).toEqual([
+      expect.objectContaining({ every: 1, bones: [16], local: [0, 0, -10], particles: ['trueFire'], scale: 3, gate: { action: [A.Attack2] } }),
+      expect.objectContaining({ every: 1, bones: [16], local: [0, 0, -10], particles: ['smoke21'], scale: 2, gate: { action: [A.Attack2] } }),
+    ]);
+  });
+});

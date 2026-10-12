@@ -27,7 +27,16 @@ export type BodyCard =
 export type BodyRibbon = 'jointEnergy' | 'flare';
 
 /** The original's own particles a `puff` can name (`fx/effectParticles.ts` kinds, by `BITMAP_*` and SubType). */
-export type BodyPuff = 'smoke1' | 'smoke13' | 'smoke17' | 'smoke50' | 'smokeLine1' | 'smokeLine2' | 'smokeLine3';
+export type BodyPuff =
+  | 'smoke1'
+  | 'smoke13'
+  | 'smoke17'
+  | 'smoke21'
+  | 'smoke50'
+  | 'smokeLine1'
+  | 'smokeLine2'
+  | 'smokeLine3'
+  | 'trueFire';
 
 /** One `CreateSprite` on a bone: `TransformPosition(BoneTransform[bone], local)`. */
 export type BodyCardSpot = {
