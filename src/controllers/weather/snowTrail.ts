@@ -242,6 +242,13 @@ function decay(amount: number): void {
   painted.z1 = nz1;
 }
 
+/** The dirty columns widened to whole 4-texel groups: the first column and the width. */
+export function uploadSpan(x0: number, x1: number, size: number): [number, number] {
+  const a0 = x0 & ~3;
+  const a1 = Math.min(size - 1, x1 | 3);
+  return [a0, a1 - a0 + 1];
+}
+
 /** `texSubImage2D` of the dirty rectangle only. */
 function flush(): void {
   if (rectEmpty(dirty) || !texture || !data) return;
@@ -250,8 +257,10 @@ function flush(): void {
   const engine = texture.getScene()?.getEngine() as ThinEngine | undefined;
   if (!internal || !engine || !internal.isReady) return;
 
-  const { x0, z0, x1, z1 } = dirty;
-  const w = x1 - x0 + 1;
+  // Whole 4-texel groups: WebGL reads byte rows on 4-byte boundaries and Babylon only
+  // turns that off for a texture whose own width is not a multiple of 4.
+  const [x0, w] = uploadSpan(dirty.x0, dirty.x1, TRAIL_SIZE);
+  const { z0, z1 } = dirty;
   const h = z1 - z0 + 1;
 
   if (upload.length < w * h) upload = new Uint8Array(w * h);
