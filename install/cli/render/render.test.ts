@@ -93,7 +93,7 @@ describe('client build', () => {
 
 describe('server.json', () => {
   it('holds the original behaviour by default, and offers login tokens: the plugin is in every image', () => {
-    expect(JSON.parse(serverManifest(domain))).toEqual({ version: 1, settings: ORIGINAL_SETTINGS, modulesOff: [], loginTokens: true, modules: [] });
+    expect(JSON.parse(serverManifest(domain))).toEqual({ version: 1, settings: ORIGINAL_SETTINGS, modulesOff: [], loginTokens: true, directLogin: false, modules: [] });
     expect(parseServerManifest(JSON.parse(serverManifest(domain)))?.loginTokens).toBe(true);
   });
 
@@ -108,6 +108,13 @@ describe('server.json', () => {
     expect(JSON.parse(serverManifest({ ...domain, muHelperAfterReconnect: true })).settings.muHelperAfterReconnect).toBe(true);
     expect(JSON.parse(serverManifest({ ...domain, autoManaPotion: true })).settings.autoManaPotion).toBe(true);
     expect(JSON.parse(serverManifest({ ...domain, autoQuiver: true })).settings.autoQuiver).toBe(true);
+  });
+
+  // Read by the client served beside it, at boot (src/modules/servers/directLogin.ts).
+  it('says whether the client opens straight on this server login', () => {
+    expect(JSON.parse(serverManifest({ ...domain, directLogin: true })).directLogin).toBe(true);
+    expect(parseServerManifest(JSON.parse(serverManifest({ ...domain, directLogin: true })))?.directLogin).toBe(true);
+    expect(parseServerManifest(JSON.parse(serverManifest(domain)))?.directLogin).toBe(false);
   });
 
   // The client is the reader: what the installer writes must pass its strict check.

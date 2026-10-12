@@ -50,6 +50,7 @@ describe('parseServerManifest', () => {
       settings: { ...ORIGINAL_SETTINGS, heldHitRequest: true },
       modulesOff: [],
       loginTokens: false,
+      directLogin: false,
       modules: [],
       modulesDropped: [],
     });
@@ -72,6 +73,7 @@ describe('parseServerManifest', () => {
       settings: { ...ORIGINAL_SETTINGS, heldHitRequest: true },
       modulesOff: [],
       loginTokens: false,
+      directLogin: false,
       modules: [],
       modulesDropped: [],
     });
@@ -106,6 +108,12 @@ describe('parseServerManifest', () => {
     expect(parseServerManifest({ version: 1, settings: {} })?.loginTokens).toBe(false);
     expect(parseServerManifest({ version: 1, settings: {}, loginTokens: 'yes' })).toBeNull();
     expect(parseServerManifest({ version: 1, settings: {}, loginTokens: 1 })).toBeNull();
+  });
+
+  it('reads whether the client beside it opens straight on the login, off when it does not say', () => {
+    expect(parseServerManifest({ version: 1, settings: {}, directLogin: true })?.directLogin).toBe(true);
+    expect(parseServerManifest({ version: 1, settings: {} })?.directLogin).toBe(false);
+    expect(parseServerManifest({ version: 1, settings: {}, directLogin: 'on' })).toBeNull();
   });
 
   describe('modules (streamed, phase 5)', () => {

@@ -65,6 +65,8 @@ export function serverManifest(c: Config, modules: readonly ModuleEntry[] = []):
     modulesOff: manifestModulesOff(c),
     // Our OpenMU plugin issues them, and it is in every OpenMU image the installer builds (openmu/Dockerfile).
     loginTokens: true,
+    // The client served beside this file skips the worlds list (src/modules/servers/directLogin.ts).
+    directLogin: c.directLogin,
     // The modules folder (`<state>/modules`, state.ts): streamed to every player (docs/module_streaming.md).
     modules,
   };

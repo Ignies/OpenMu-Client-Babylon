@@ -10,7 +10,7 @@ export type Group = 'address' | 'listing' | 'passwords' | 'features' | 'openmu';
 
 export const GROUPS: { value: Group; label: string; hint: string }[] = [
   { value: 'address', label: 'Address', hint: 'domain or IP, certificate e-mail, mail server' },
-  { value: 'listing', label: 'Server list entry', hint: 'name, description, language' },
+  { value: 'listing', label: 'Server list entry', hint: 'name, description, language, direct login' },
   { value: 'passwords', label: 'Passwords', hint: 'database, admin panel' },
   { value: 'features', label: 'Features', hint: 'band, map ping, weather, shop delivery, marketplace fees, hit timing' },
   { value: 'openmu', label: 'OpenMU version', hint: 'release, or a source ref' },
@@ -43,6 +43,7 @@ export async function ask(c: Config, group: Group): Promise<Config> {
       next.serverName = await ui.text('Server name', { initial: c.serverName, validate: check.listField });
       next.serverDescription = await ui.text('Description', { initial: c.serverDescription, validate: check.listField });
       next.serverLanguage = await ui.text('Language code', { initial: c.serverLanguage, validate: v => (/^[a-z]{2}$/.test(v) ? undefined : 'Two letters, like en or es.') });
+      next.directLogin = await ui.confirm("Open straight on this server's login (hide the worlds list)?", c.directLogin);
       break;
     case 'passwords':
       ui.info(`Passwords: ${pc.dim(check.PASSWORD_RULE)}`);
