@@ -18,8 +18,8 @@ other folders share.
   Before those, the lit ancient set options (`PlusSpecial` / `PlusSpecialLevel`: min / max damage, damage by
   strength or agility, attack rate, defense, defense by agility or vitality, shield defense %, wizardry by energy)
   and the socket bonuses (`m_StatusBonus`) when the window passes the set and socket tables
-  (ZzzInfomation.cpp:2745-2812, :3005-3035, :3127-3129, :3248, :3361-3381). The stats the sets and sockets add
-  (`AddStrength` and the rest) are not shown or used yet. The shield's blocking and its +5 per option level
+  (ZzzInfomation.cpp:2745-2812, :3005-3035, :3127-3129, :3248, :3361-3381). The stats the worn items add
+  (`AddStrength` and the rest, `withWornStats`) count only in `IsRequireEquipItem`; they are not shown or used in the formulas yet. The shield's blocking and its +5 per option level
   lose the `CalcDurabilityPercent` share, and the excellent "defense success rate" on the shield, each armour
   piece and each ring adds 10% in turn, when `IsRequireEquipItem` passes (:3223-3246).
   Wizardry is energy plus the items' wizardry options only (`CalculateMagicDamage`, :2848-3001): the wing's,

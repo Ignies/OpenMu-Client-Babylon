@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import type { Item } from '@/ecs/world';
 import { CharacterClassNumber } from '@/core/types';
 import { itemOptionTables, itemSetTables, loadItemOptionTables, loadItemSetTables } from '@/controllers/assets';
+import { itemStats } from '@/controllers/item_rules';
 import { deriveCharacterStats } from './characterStats';
 
 const PET_SLOT = 8;
@@ -167,6 +168,14 @@ describe('the wizardry of a held staff', () => {
 
   it("adds the staff's option again with anything in the left hand, as the original does (:2950-2979)", () => {
     expect(wizardry({ 0: staff({ optionLevel: 2 }), 1: { group: 6, num: 0, durability: 22 } })).toMatchObject({ wizardryMin: 66, wizardryMax: 128 });
+  });
+
+  // IsRequireEquipItem reads Strength + AddStrength (ZzzInfomation.cpp:2237): a worn piece's ancient +5 strength counts.
+  it("meets the staff's strength with a worn ancient bonus", () => {
+    const need = itemStats(staff({ optionLevel: 2 }))?.reqStr ?? 0;
+    const pendant = { group: 13, num: 13, durability: 255, ancientBonusLevel: 1 };
+    expect(wizardry({ 0: staff({ optionLevel: 2 }) }, need - 5)).toMatchObject({ wizardryMin: 50 });
+    expect(wizardry({ 0: staff({ optionLevel: 2 }), 9: pendant }, need - 5)).toMatchObject({ wizardryMin: 58 });
   });
 
   it("adds the Wings of Heaven's option, and a Wizard's Ring's 10%", () => {

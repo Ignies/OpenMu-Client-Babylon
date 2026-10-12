@@ -38,6 +38,7 @@ import {
   socketOptionValue,
   socketsOf,
   wingOptions,
+  withWornStats,
   wornSetPieces,
   type OptionSpecial,
   type WingOption,
@@ -817,7 +818,7 @@ function setOptionBlock(out: Lines, item: Item, hero: HeroStats, ancient?: Toolt
   out.blank();
   out.add(t('item.setInfo'), 'yellow');
   out.blank();
-  const pieces = ancient ? wornSetPieces(set, ancient.worn, hero) : 0;
+  const pieces = ancient ? wornSetPieces(set, ancient.worn, withWornStats(hero, ancient.worn)) : 0;
   for (const line of setOptionLines(set, pieces)) {
     const key = SET_OPTION_TEXT[line.option];
     if (!key) continue;

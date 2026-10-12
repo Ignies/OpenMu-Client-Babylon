@@ -3,7 +3,7 @@ import { BaseClass, CharacterClassNumber, getBaseClass } from '../../core/types'
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { InventoryConstants } from '@/core/inventoryConstants';
 import type { Item } from '../../ecs/world';
-import { activeSetOptions, classCanUse, classOf, itemDef, itemStats, optionSpecials, socketStatusBonus, type OptionSpecial, type SetOptionLine, type SocketStatusBonus } from '@/controllers/item_rules';
+import { activeSetOptions, classCanUse, withWornStats, classOf, itemDef, itemStats, optionSpecials, socketStatusBonus, type OptionSpecial, type SetOptionLine, type SocketStatusBonus } from '@/controllers/item_rules';
 import type { ItemOptionTables, ItemSetTables } from '@/controllers/assets';
 
 export enum StatType {
@@ -604,7 +604,8 @@ function requiresMet(item: Item, input: CharacterStatsInput): boolean {
   const stats = itemStats(item);
   if (!stats) return false;
   const { base, step } = classOf(input.charClass);
-  const hero = { level: input.level, str: input.strength, agi: input.agility, vit: input.vitality, ene: input.energy, cmd: input.leadership, baseClass: base, stepClass: step };
+  // Strength + AddStrength and the rest (ZzzInfomation.cpp:2237-2241).
+  const hero = withWornStats({ level: input.level, str: input.strength, agi: input.agility, vit: input.vitality, ene: input.energy, cmd: input.leadership, baseClass: base, stepClass: step }, input.items, input.sets ?? null);
   const columns = stats.def.classes;
   // The Magic Gladiator wears what both the wizard and the knight can (:2222-2225).
   if (!classCanUse(stats.def, hero) && !(base === 3 && columns[0] && columns[1] && !columns[3])) return false;
