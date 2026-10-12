@@ -231,6 +231,14 @@ describe('the character window defense with items', () => {
     expect(knight({ 2: piece(2, { durability: 0 }) })).toBe(bare);
   });
 
+  // CalcDefense (ZzzInfomation.cpp:635-711): a level above 9 adds level - 6, the third wings and the Cape of Overrule
+  // add 4 a level.
+  it("reads the item's own defense by level as the item rules do", () => {
+    expect(knight({ 2: piece(2, { lvl: 12 }) }) - knight({ 2: piece(2, { lvl: 9 }) })).toBe(6);
+    const cape = (lvl: number) => knight({ 7: { group: 12, num: 50, lvl, durability: 255 } }, CharacterClassNumber.RageFighter);
+    expect(cape(5) - cape(0)).toBe(20);
+  });
+
   it('adds 5% for a whole +10 set, nothing with one piece at +9', () => {
     const set = (level: number, boots = level) => ({ 2: piece(2, { lvl: level }), 3: piece(3, { lvl: level }), 4: piece(4, { lvl: level }), 5: piece(5, { lvl: level }), 6: piece(6, { lvl: boots }) });
     const { 6: _boots, ...four } = set(10);

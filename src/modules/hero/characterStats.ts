@@ -83,7 +83,6 @@ const GROUP_BOW = 4;
 const GROUP_STAFF = 5;
 const GROUP_SHIELD = 6;
 const GROUP_BOOTS = 11;
-const GROUP_WING = 12;
 const GROUP_HELPER = 13;
 
 /** ITEM_BOLT and ITEM_ARROWS, ITEM_BOW + 7 and + 15 (_enum.h:2268, :2276). */
@@ -107,89 +106,14 @@ function isStaff(item: Item): boolean {
   return item.group === GROUP_STAFF;
 }
 
+/** The item's own damage, defense, blocking and magic power by level, excellent and ancient (`ItemConvert`, through the item rules). */
 function itemDamage(item: Item): { min: number; max: number } {
-  const config = configOf(item);
-  if (!config) return { min: 0, max: 0 };
-
-  const dropLevel = field(config, 'ItemLvl');
-  const level = item.lvl ?? 0;
-
-  const withBonuses = (base: number) => {
-    if (base <= 0) return 0;
-
-    let value = base;
-
-    if (item.isExcellent && dropLevel > 0) {
-      value += Math.trunc((base * 25) / dropLevel) + 5;
-    }
-
-    value += Math.min(9, level) * 3;
-    if (level > 9) value += level - 6;
-
-    return value;
-  };
-
-  return {
-    min: withBonuses(field(config, 'DmgMin')),
-    max: withBonuses(field(config, 'DmgMax')),
-  };
+  const stats = itemStats(item);
+  return { min: stats?.damageMin ?? 0, max: stats?.damageMax ?? 0 };
 }
 
-function itemDefense(item: Item): number {
-  const config = configOf(item);
-  if (!config) return 0;
-
-  const base = firstSet(config, 'Def', 'DefRate');
-  if (base <= 0) return 0;
-
-  const level = item.lvl ?? 0;
-  let defense = base;
-
-  if (isShield(item)) {
-    return defense + level;
-  }
-
-  const dropLevel = field(config, 'ItemLvl');
-  if (item.isExcellent && dropLevel > 0) {
-    defense +=
-      Math.trunc((base * 12) / dropLevel) + 4 + Math.trunc(dropLevel / 5);
-  }
-
-  return defense + Math.min(9, level) * defensePerLevel(item);
-}
-
-function defensePerLevel(item: Item): number {
-  if (item.group === GROUP_WING) {
-    if (item.num >= 3 && item.num <= 6) return 2;
-    if (item.num === 42) return 2;
-    if (item.num === 49 || item.num === 50) return 2;
-    if ((item.num >= 36 && item.num <= 40) || item.num === 43) return 4;
-  }
-
-  if (item.group === GROUP_HELPER && item.num === 30) return 2;
-
-  return 3;
-}
-
-function itemBlocking(item: Item): number {
-  const config = configOf(item);
-  if (!config) return 0;
-
-  const base = field(config, 'DefRate');
-  if (base <= 0) return 0;
-
-  const dropLevel = field(config, 'ItemLvl');
-
-  let blocking = base;
-  if (item.isExcellent && dropLevel > 0) {
-    blocking += Math.trunc((base * 25) / dropLevel) + 5;
-  }
-
-  blocking += Math.min(9, dropLevel) * 3;
-  if (dropLevel > 9) blocking += dropLevel - 6;
-
-  return blocking;
-}
+const itemDefense = (item: Item) => itemStats(item)?.defense ?? 0;
+const itemBlocking = (item: Item) => itemStats(item)?.blocking ?? 0;
 
 /**
  * `CalcDurabilityPercent` (ZzzInfomation.cpp:2440-2485): how much of a stat a worn item loses; a wing passes no
@@ -206,31 +130,7 @@ function durabilityPercent(item: Item, wing = false, magic = false): number {
   return worn > 0.8 ? 0.5 : worn > 0.7 ? 0.3 : worn > 0.5 ? 0.2 : 0;
 }
 
-function itemMagicPower(item: Item): number {
-  const config = configOf(item);
-  if (!config) return 0;
-
-  const base = field(config, 'MagicPwr');
-  if (base <= 0) return 0;
-
-  const level = item.lvl ?? 0;
-  const dropLevel = field(config, 'ItemLvl');
-
-  let power = base;
-
-  if (item.isExcellent && dropLevel > 0) {
-    power += Math.trunc((base * 25) / dropLevel) + 5;
-  }
-
-  power += Math.min(9, level) * 3;
-  if (level > 9) power += level - 6;
-
-  power = Math.trunc(power / 2);
-
-  if (item.group !== GROUP_MACE) power += level * 2;
-
-  return power;
-}
+const itemMagicPower = (item: Item) => itemStats(item)?.magicPower ?? 0;
 
 type CharacterStatsInput = {
   charClass: CharacterClassNumber;
