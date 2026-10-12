@@ -168,6 +168,24 @@ describe.skipIf(NO_OPTIONS)('the extra options in the tooltip', () => {
     expect(text[header + 4]).toMatchObject({ text: 'Skill attack increase +11', color: 'blue' });
   });
 
+  // ZzzInventory.cpp:4787-4870: the harmony strength / agility cut comes off the requirement lines, yellow once cut.
+  it('cuts the harmony strength and agility off the requirement lines, in yellow', () => {
+    const blade = (socketBonus?: number): Item => ({ group: 0, num: 5, lvl: 5, durability: 50, socketBonus });
+    const need = itemStats(blade()) ?? { reqStr: 0, reqAgi: 0 };
+    const requirement = (item: Item, label: string, hero = KNIGHT) => {
+      const text = buildItemTooltip(item, hero)?.lines ?? [];
+      const at = text.findIndex(l => l.text.startsWith(label));
+      return { line: text[at], next: text[at + 1] };
+    };
+    // Option 3 (strength) and 4 (agility) at level 5: 16 (JewelOfHarmonyOption_eng.bmd).
+    expect(requirement(blade(0x35), 'Required Strength').line).toMatchObject({ text: `Required Strength: ${need.reqStr - 16}`, color: 'yellow' });
+    expect(requirement(blade(0x45), 'Required Agility').line).toMatchObject({ text: `Required Agility: ${need.reqAgi - 16}`, color: 'yellow' });
+    expect(requirement(blade(), 'Required Strength').line.color).toBe('white');
+    // Short of the cut need: red, and the lacking line counts from it.
+    const weak = { ...KNIGHT, str: need.reqStr - 20 };
+    expect(requirement(blade(0x35), 'Required Strength', weak)).toMatchObject({ line: { color: 'red' }, next: { text: '(4 more needed)', color: 'red' } });
+  });
+
   it('works the level-type socket option off the hero level', () => {
     const text = lines({ group: 0, num: 26, durability: 50, sockets: [0], socketCount: 1 });
     expect(text.some(l => l.text === 'Socket 1: Fire((Level type)Attack/Wizardry increase +20)')).toBe(true);
