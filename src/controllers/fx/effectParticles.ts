@@ -53,7 +53,15 @@ type TextureKey =
   | 'shiny05'
   | 'lightmarks'
   | 'pinLight'
-  | 'waterfall4';
+  | 'waterfall4'
+  | 'shiny03'
+  | 'magicGround1'
+  | 'shockWave'
+  | 'flare'
+  | 'flareRed'
+  | 'lightningMega1'
+  | 'lightningMega2'
+  | 'lightningMega3';
 
 const TEXTURES: Record<
   TextureKey,
@@ -89,6 +97,14 @@ const TEXTURES: Record<
   lightmarks: { file: 'Effect/lightmarks.ozj', size: 128 },
   pinLight: { file: 'Effect/pin_lights.OZJ', size: 16, height: 128 },
   waterfall4: { file: 'Effect/waterFall4.OZJ', size: 64 },
+  shiny03: { file: 'Effect/Shiny03.OZJ', size: 128, height: 16 },
+  magicGround1: { file: 'Effect/Magic_Ground1.OZJ', size: 128 },
+  shockWave: { file: 'Effect/Shockwave.OZJ', size: 128 },
+  flare: { file: 'Effect/Flare.OZJ', size: 64 },
+  flareRed: { file: 'Effect/flareRed.OZJ', size: 64 },
+  lightningMega1: { file: 'Effect/lighting_mega01.OZJ', size: 128 },
+  lightningMega2: { file: 'Effect/lighting_mega02.OZJ', size: 128 },
+  lightningMega3: { file: 'Effect/lighting_mega03.OZJ', size: 128 },
 };
 
 /**
@@ -1686,7 +1702,16 @@ export type HeldTexture =
   | 'lightmarks'
   | 'pinLight'
   | 'waterfall2'
-  | 'waterfall4';
+  | 'waterfall4'
+  | 'spark03'
+  | 'shiny03'
+  | 'magicGround1'
+  | 'shockWave'
+  | 'flare'
+  | 'flareRed'
+  | 'lightningMega1'
+  | 'lightningMega2'
+  | 'lightningMega3';
 
 /** One sprite riding a node: `CreateSprite`'s sheet and SubType blend. */
 export type HeldPoint = {

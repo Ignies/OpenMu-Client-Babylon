@@ -469,3 +469,97 @@ describe('the maces\' and spears\' held sprites', () => {
   });
 
 });
+
+// RenderLinkObject's bow and crossbow cases (ZzzCharacter.cpp); `Luminosity` is rolled once a frame (:7029).
+describe('the bows\' held sprites', () => {
+  const lum = (Math.floor(RAND * 30) + 70) * 0.005;
+  const times = (r0: number, g: number, b: number) => [r(lum * r0), r(lum * g), r(lum * b)];
+
+  it('Tiger and Silver bows: amber Shiny02 on bones 2 and 6 (RenderBrightEffect, :7032-7059)', () => {
+    const rows = [2, 6].map(bone => ['shiny02', bone, undefined, 1, times(1, 0.6, 0.2), 0]);
+    expect(held(4, 4)).toEqual(rows);
+    expect(held(4, 5)).toEqual(rows);
+  });
+
+  it('Chaos Nature Bow: green Shiny02 on bones 13-18 (:7036-7042)', () => {
+    expect(held(4, 6)).toEqual([13, 14, 15, 16, 17, 18].map(bone => ['shiny02', bone, undefined, 1, times(0.6, 1, 0.8), 0]));
+  });
+
+  it('Celestial Bow: blue Shiny02 on bones 13-18 and 5-8 (:7043-7052)', () => {
+    expect(held(4, 17)).toEqual([13, 14, 15, 16, 17, 18, 5, 6, 7, 8].map(bone => ['shiny02', bone, undefined, 1, times(0.5, 0.5, 0.8), 0]));
+  });
+
+  it('Sylph Wind Bow: yellow flares on bones 7 and 15, three at the grip (:7077-7103)', () => {
+    expect(held(4, 21)).toEqual([
+      ['flare01', 7, undefined, 2, [0.5, 0.5, 0.1], 0],
+      ['flare01', 15, undefined, 2, [0.5, 0.5, 0.1], 0],
+      ['flare01', 0, [20, 0, 0], 0.8, [1, 1, 0.4], 0],
+      ['flare01', 0, [20, 0, 0], 1.3, [1, 1, 0.4], 0],
+      ['flare01', 0, [20, 0, 0], 2, [1, 1, 0.4], 0],
+    ]);
+  });
+
+  it('Albatross Bow: green flares on bones 10, 28, 34 and 16 (:7344-7376)', () => {
+    expect(held(4, 22)).toEqual([10, 28, 34, 16].map(bone => ['flare01', bone, undefined, 1.2, [0, 0.7, 0], 0]));
+  });
+
+  it('Arrow Viper Bow: red flares on bones 6 and 2, a turning star at bone 9 out of a safe zone (:7674-7697)', () => {
+    const scale = r((Math.sin(T * 0.001) + 1) * 0.8);
+    const red = [r(lum * 3), r(lum), r(lum)]; // RenderSprite packs it to 1
+    const l = Math.sin(T * 0.001) * 0.3 + 0.3;
+    const turn = Math.sin(T * 0.01) * 360;
+    expect(held(4, 20)).toEqual([
+      ['flare01', 6, undefined, scale, red, 0],
+      ['flare01', 2, undefined, scale, red, 0],
+      ['flare01', 9, [10, 0, 0], scale, [r(l), r(l), r(l)], 0],
+      ['shiny02', 9, [10, 0, 0], 0.8, [r(l * 3), r(l), r(l)], r(360 - turn)],
+      ['shiny02', 9, [10, 0, 0], 0.8, [r(l * 3), r(l), r(l)], r(turn)],
+    ]);
+    const star = itemHeldSprites(4, 20)?.slice(2) ?? [];
+    expect(star.map(s => s.when?.({ action: 0, safeZone: true }))).toEqual([false, false, false]);
+    expect(star.map(s => s.when?.({ action: 0, safeZone: false }))).toEqual([true, true, true]);
+  });
+
+  it('Stinger Bow: a grey flare on every bone 0-43 but 1 (:7970-7983)', () => {
+    const bones = Array.from({ length: 44 }, (_, i) => i).filter(i => i !== 1);
+    expect(held(4, 23)).toEqual(bones.map(bone => ['flare01', bone, undefined, 0.8, [0.2, 0.25, 0.3], 0]));
+  });
+
+  it('Air Lyn Bow: two flares and two pulsing shock waves on bones 7 and 11, flares on 22-29 while attacking (:8345-8385)', () => {
+    const wave = (rate: number, mod: number, add: number) => {
+      const a = (Math.PI / 180) * ((Math.floor(T * rate) % mod) + add);
+      const theta = Math.abs(Math.sin(a + Math.PI / 2));
+      return [r(Math.abs(Math.sin(a)) * 0.3), [r(0.2 * theta), r(0.8 * theta), r(0.5 * theta)]];
+    };
+    const [s1, l1] = wave(0.02, 90, 0);
+    const [s2, l2] = wave(0.05, 60, 30);
+    const green = [0.2, 0.8, 0.5];
+    expect(held(4, 24)).toEqual([
+      ...[7, 11].flatMap(bone => [
+        ['flare01', bone, undefined, 0.8, green, 0],
+        ['flare01', bone, undefined, 0.8, green, 0],
+        ['shockWave', bone, undefined, s1, l1, 0],
+        ['shockWave', bone, undefined, s2, l2, 0],
+      ]),
+      ...[22, 23, 24, 25, 26, 27, 28, 29].map(bone => ['flare', bone, undefined, 0.4, green, 0]),
+    ]);
+    const attack = itemHeldSprites(4, 24)?.[8].when;
+    expect(attack?.({ action: 38, safeZone: false })).toBe(true); // PLAYER_ATTACK_FIST
+    expect(attack?.({ action: 155, safeZone: false })).toBe(true); // PLAYER_RIDE_SKILL
+    expect(attack?.({ action: 15, safeZone: false })).toBe(false);
+  });
+
+  it('Great Reign Crossbow: blue Shiny02 and flares on bones 1-5, the last flare white (:7539-7557)', () => {
+    const blue = times(0.5, 0.5, 0.8);
+    expect(held(4, 19)).toEqual(
+      [1, 2, 3, 4, 5].flatMap(bone => [
+        ['shiny02', bone, [0, 0, 10], 1, blue, 0],
+        ['flare01', bone, [0, 0, 10], 2, bone === 5 ? [1, 1, 1] : blue, 0],
+      ])
+    );
+  });
+
+  it('the Divine Crossbow of Archangel draws none (its case is commented out, :7521-7538)', () => {
+    expect(held(4, 18)).toBeNull();
+  });
+});

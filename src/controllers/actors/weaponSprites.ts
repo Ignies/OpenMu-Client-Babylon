@@ -1,10 +1,13 @@
 import { TransformNode, Vector3, type AbstractMesh, type Scene } from '../render/babylon/exports';
 import { HeldSprites, type HeldLook } from '../fx/effectParticles';
 import type { ModelObject } from '../render/modelObject';
-import type { HeldSprite } from '../item_fx/itemLooks';
+import type { HeldSprite, HeldWearer } from '../item_fx/itemLooks';
 
 /** The original's units (cm) to the models' (tiles). */
 const CM = 1 / 100;
+
+/** A wearer standing (action 0) out of a safe zone, for a caller that names none. */
+const IDLE: HeldWearer = { action: 0, safeZone: false };
 
 /**
  * A held weapon's `RenderLinkObject` sprites (ZzzCharacter.cpp:7027-8386), bound to its loaded model:
@@ -19,6 +22,7 @@ export class WeaponSprites {
   readonly #scratch = new Vector3();
   #ms = 0;
   #body: Vector3 = Vector3.Zero();
+  #wearer: HeldWearer = IDLE;
 
   readonly #look = (i: number, out: HeldLook): void => this.look(i, out);
 
@@ -42,11 +46,11 @@ export class WeaponSprites {
     );
   }
 
-  /** Sprite `i`'s look at the last update's time and body light. */
+  /** Sprite `i`'s look at the last update's time, body light and wearer; a sprite its `when` skips is drawn at size 0. */
   look(i: number, out: HeldLook): void {
     const spec = this.specs[i];
     const ms = this.#ms;
-    out.scale = typeof spec.scale === 'number' ? spec.scale : spec.scale(ms);
+    out.scale = spec.when && !spec.when(this.#wearer) ? 0 : typeof spec.scale === 'number' ? spec.scale : spec.scale(ms);
     const light = spec.light;
     if (typeof light === 'function') {
       light(ms, this.#body, this.#scratch);
@@ -62,9 +66,10 @@ export class WeaponSprites {
   }
 
   /** Places and draws every sprite at `ms` (`WorldTime`) in the wearer's light, or hides them. */
-  update(ms: number, body: Vector3, shown: boolean): void {
+  update(ms: number, body: Vector3, shown: boolean, wearer: HeldWearer = IDLE): void {
     this.#ms = ms;
     this.#body = body;
+    this.#wearer = wearer;
     const visible = shown && this.#drawn();
     if (visible) {
       for (let i = 0; i < this.specs.length; i++) {

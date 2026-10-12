@@ -3,7 +3,7 @@ import type { ModelObject } from '../../controllers/render/modelObject';
 import { heldWeapons } from '../../controllers/actors';
 import { isPlayerBody } from '../../controllers/actors/playerObject';
 import { WeaponSprites } from '../../controllers/actors/weaponSprites';
-import { itemHeldSprites } from '../../controllers/item_fx/itemLooks';
+import { itemHeldSprites, type HeldWearer } from '../../controllers/item_fx/itemLooks';
 import { legacyItemEffectsOn } from '../../controllers/item_fx/itemEffectMode';
 
 /** One hand: the sprites bound to the model it held when they were made. */
@@ -17,6 +17,8 @@ type Hand = { sprites: WeaponSprites | null; gltf: ModelObject['gltf'] };
 export const WeaponSpriteSystem: ISystemFactory = world => {
   const query = world.with('modelObject', 'charAppearance');
   const hands = new Map<Entity, [Hand, Hand]>();
+  /** The wearer the sprites read this frame (`o->CurrentAction`, `c->SafeZone`), reused. */
+  const wearer: HeldWearer = { action: 0, safeZone: false };
 
   function drop(entity: Entity): void {
     for (const hand of hands.get(entity) ?? []) hand.sprites?.dispose();
@@ -52,8 +54,10 @@ export const WeaponSpriteSystem: ISystemFactory = world => {
         sync(pair[0], model.Weapon1, held.leftHand);
         sync(pair[1], model.Weapon2, held.rightHand);
         const shown = on && entity.visibility?.state !== 'hidden';
-        pair[0].sprites?.update(ms, model.Light, shown);
-        pair[1].sprites?.update(ms, model.Light, shown);
+        wearer.action = model.CurrentAction;
+        wearer.safeZone = entity.attributeSystem?.isAboveZero('inSafeZone') ?? false;
+        pair[0].sprites?.update(ms, model.Light, shown, wearer);
+        pair[1].sprites?.update(ms, model.Light, shown, wearer);
       }
     },
   };

@@ -23,7 +23,12 @@ export type HeldSprite = {
   readonly light: readonly [number, number, number] | LookLight;
   /** Degrees. */
   readonly rotation?: (ms: number) => number;
+  /** Drawn only while this holds for the wearer (an action or `c->SafeZone` test); omitted = always. */
+  readonly when?: (wearer: HeldWearer) => boolean;
 };
+
+/** What a held sprite may ask of the character carrying it: `o->CurrentAction`, `c->SafeZone`. */
+export type HeldWearer = { action: number; safeZone: boolean };
 
 /**
  * One item's own look beyond its model, as content declares it (`versions/shared/item_looks/`):
@@ -59,6 +64,36 @@ export function heldLuminosity(ms: number): number {
   }
   return luminosity.value;
 }
+
+/** `Vector(Luminosity * r, Luminosity * g, Luminosity * b, Light)` on the frame's roll. */
+export const luminous =
+  (r: number, g: number, b: number): LookLight =>
+  (ms, _body, out) => {
+    const l = heldLuminosity(ms);
+    out.set(l * r, l * g, l * b);
+  };
+
+/** The frame's `rand()` rolls in [0, 1): `roll(ms, k)` is the k-th, the same for every sprite read that frame. */
+export function frameRolls(): (ms: number, k: number) => number {
+  let at = -1;
+  const values: number[] = [];
+  return (ms, k) => {
+    if (at !== ms) {
+      at = ms;
+      values.length = 0;
+    }
+    return (values[k] ??= Math.random());
+  };
+}
+
+/** `rand() % 360`, rolled each frame: a sprite's random turn. */
+export const randomTurn = (): number => Math.floor(Math.random() * 360);
+
+/** A sprite drawn at `scale` on the frames `rand_fps_check(n)` passes (one in n), else at 0. */
+export const oneIn =
+  (n: number, scale: number) =>
+  (): number =>
+    Math.random() * n < 1 ? scale : 0;
 
 const bodies = new Map<number, MeshPassSet>();
 const helds = new Map<number, readonly HeldSprite[]>();

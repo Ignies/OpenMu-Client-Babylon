@@ -2,10 +2,11 @@ import { describe, expect, it, vi } from 'vitest';
 import type { World } from '../world';
 
 // The sprites class and the option are stubs; the hands, the look table and the rebuild rule are real.
-const made = vi.hoisted(() => ({ list: [] as { model: unknown; specs: unknown; shown: boolean[]; disposed: boolean }[], on: true }));
+const made = vi.hoisted(() => ({ list: [] as { model: unknown; specs: unknown; shown: boolean[]; wearers: unknown[]; disposed: boolean }[], on: true }));
 vi.mock('../../controllers/actors/weaponSprites', () => ({
   WeaponSprites: class {
     shown: boolean[] = [];
+    wearers: unknown[] = [];
     disposed = false;
     constructor(
       _scene: unknown,
@@ -14,8 +15,9 @@ vi.mock('../../controllers/actors/weaponSprites', () => ({
     ) {
       made.list.push(this);
     }
-    update(_ms: number, _body: unknown, shown: boolean) {
+    update(_ms: number, _body: unknown, shown: boolean, wearer: { action: number; safeZone: boolean }) {
       this.shown.push(shown);
+      this.wearers.push({ ...wearer });
     }
     dispose() {
       this.disposed = true;
@@ -34,7 +36,8 @@ registerItemLooks([defineItemLook({ items: [[0, 22]], held: [{ texture: 'flare01
 function player() {
   const socket = () => ({ gltf: {} as object | null });
   return {
-    modelObject: { Weapon1: socket(), Weapon2: socket(), Light: {} },
+    modelObject: { Weapon1: socket(), Weapon2: socket(), Light: {}, CurrentAction: 18 },
+    attributeSystem: { isAboveZero: (key: string) => key === 'inSafeZone' },
     charAppearance: { leftHand: { group: 0, num: 22 } as { group: number; num: number } | null, rightHand: { group: 0, num: 0 } },
     visibility: { state: 'visible' },
   };
@@ -75,5 +78,13 @@ describe('a held weapon\'s sprites', () => {
     expect(made.list[1].disposed).toBe(true);
     expect(made.list).toHaveLength(2);
     made.on = true;
+  });
+});
+
+describe('the wearer a held sprite reads', () => {
+  it('is the character\'s action and safe-zone flag this frame (o->CurrentAction, c->SafeZone)', () => {
+    made.list.length = 0;
+    WeaponSpriteSystem(world(player())).update?.(0);
+    expect(made.list[0].wearers).toEqual([{ action: 18, safeZone: true }]);
   });
 });

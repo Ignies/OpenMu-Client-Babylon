@@ -94,3 +94,18 @@ describe('a held weapon\'s sprites (RenderLinkObject, ZzzCharacter.cpp:7027-8386
     expect(sprites.nodes[0].parent).toBe(root);
   });
 });
+
+describe('a held sprite gated on its wearer', () => {
+  it('draws at size 0 while its test fails (an action, c->SafeZone) and at its scale while it holds', () => {
+    const sprites = new WeaponSprites(scene, weapon(1), [
+      { texture: 'flare01', bone: 1, scale: 0.8, light: [1, 1, 1], when: w => !w.safeZone && w.action === 7 },
+    ]);
+    const out = look();
+    sprites.update(0, Vector3.One(), true, { action: 7, safeZone: true });
+    sprites.look(0, out);
+    expect(out.scale).toBe(0);
+    sprites.update(0, Vector3.One(), true, { action: 7, safeZone: false });
+    sprites.look(0, out);
+    expect(out.scale).toBe(0.8);
+  });
+});
