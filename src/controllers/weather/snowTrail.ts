@@ -1,5 +1,10 @@
 import type { WeatherLayer } from './layer';
-import { RawTexture, Texture, type Scene } from '../render/babylon/exports';
+import {
+  Constants,
+  RawTexture,
+  Texture,
+  type Scene,
+} from '../render/babylon/exports';
 import type { ThinEngine } from '@babylonjs/core/Engines/thinEngine';
 
 /**
@@ -94,7 +99,12 @@ export function snowTrailTexture(scene: Scene): RawTexture {
     scene,
     false,
     false,
-    Texture.BILINEAR_SAMPLINGMODE
+    Texture.BILINEAR_SAMPLINGMODE,
+    // `CreateRTexture` defaults to `TEXTURETYPE_FLOAT`, but `data` and
+    // `upload` are `Uint8Array`s: without the type WebGL refuses every
+    // `updateTextureData` (`texSubImage2D: type FLOAT but ArrayBufferView
+    // not Float32Array`).
+    Constants.TEXTURETYPE_UNSIGNED_BYTE
   );
   texture.name = 'snowTrail';
   texture.wrapU = Texture.CLAMP_ADDRESSMODE;
