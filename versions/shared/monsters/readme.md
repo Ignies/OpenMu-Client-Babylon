@@ -132,5 +132,7 @@ tables list. A plain NPC model at a fixed scale needs no class: `npcModel` is en
   `Data/` is there).
 - `models.test.ts`: every registration names a class its file defines; the set of types with a
   class of their own.
+- `bossVisuals.test.ts`: the bosses' `RenderMonsterVisual` rows (cards, ribbons, smokes) as their
+  map files write them: Medusa.
 - `src/controllers/actors/resolveModel.golden.test.ts`: what every type 0..600 is drawn with, and
   the NPC tables; `src/controllers/sound/npcVoices.test.ts`: the voices.

@@ -1,4 +1,4 @@
-import type { BodyFxEmitter, BodyParticle, BodyTexture } from '@/controllers/monsters';
+import type { BodyCard, BodyFxEmitter, BodyParticle, BodyPuff, BodyTexture } from '@/controllers/monsters';
 import { MonsterActionType as A } from '../../objects/enum';
 
 /**
@@ -96,3 +96,38 @@ export const BULL_SNORT: readonly BodyFxEmitter[] = [
     },
   }),
 ];
+
+type CardsRow = Extract<BodyFxEmitter, { kind: 'cards' }>;
+type PuffRow = Extract<BodyFxEmitter, { kind: 'puff' }>;
+
+/** `CreateSprite(BITMAP_*, bone + local, scale, Light, o)` for each spot, in one light. */
+export const cards = (colour: RGB, spots: CardsRow['spots'], extra: Partial<CardsRow> = {}): BodyFxEmitter => ({
+  kind: 'cards',
+  spots,
+  colour,
+  ...extra,
+});
+
+/** The same sheet at the same scale on several bones. */
+export const spotsOn = (bones: readonly number[], card: BodyCard, scale: number, local?: Cm3): CardsRow['spots'] =>
+  bones.map(b => ({ bone: b, card, scale, local }));
+
+/** A JOINT_ENERGY ribbon riding a bone: `Scale` cm wide, `MaxTails` long. */
+export const trail = (
+  at: number,
+  widthCm: number,
+  maxTails: number,
+  colour: RGB,
+  extra: Partial<Extract<BodyFxEmitter, { kind: 'trail' }>> = {}
+): BodyFxEmitter => ({ kind: 'trail', bone: at, widthCm, maxTails, colour, ...extra });
+
+/** `BITMAP_SMOKELINE1 + rand() % 3`: one of the three sheets. */
+export const SMOKE_LINES: readonly BodyPuff[] = ['smokeLine1', 'smokeLine2', 'smokeLine3'];
+
+export const puff = (
+  every: number,
+  bonesAt: readonly number[],
+  particles: PuffRow['particles'],
+  colour: RGB,
+  extra: Partial<PuffRow> = {}
+): BodyFxEmitter => ({ kind: 'puff', every, bones: bonesAt, particles, colour, ...extra });

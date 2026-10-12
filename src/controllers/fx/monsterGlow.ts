@@ -56,9 +56,17 @@ const GLOW_TEXTURES = {
   flare: { file: TEX.flare, px: [64, 64] },
   /** BITMAP_SHINY+3 (eye01, 32x16): `RenderEye`'s glowing eye (:8463). */
   eye: { file: TEX.eye, px: [32, 16] },
+  /** BITMAP_LIGHT_RED (flare01_red), BITMAP_LIGHTMARKS, BITMAP_SHOCK_WAVE, BITMAP_ENERGY (Thunder01). */
+  lightRed: { file: TEX.flareRed, px: [64, 64] },
+  lightMarks: { file: TEX.lightMarks, px: [128, 128] },
+  shockWave: { file: TEX.shockwave, px: [128, 128] },
+  energy: { file: TEX.thunder, px: [64, 64] },
+  /** BITMAP_FLARE_BLUE (flareBlue), BITMAP_FLARE_RED (flareRed). */
+  flareBlue: { file: TEX.flareBlue, px: [64, 64] },
+  flareRed: { file: TEX.redFlare, px: [64, 64] },
 } as const;
 
-type GlowTexture = keyof typeof GLOW_TEXTURES;
+export type GlowTexture = keyof typeof GLOW_TEXTURES;
 
 /**
  * `CreateSprite`'s `SubType` picks the blend (zzzeffectsprite.cpp:151-166):
@@ -76,12 +84,17 @@ type GlowCard = {
   readonly blend?: GlowBlend;
 };
 
-type MonsterGlow = {
+export type MonsterGlow = {
   /**
    * MU bone indices the cards hang on, or `'body'` for the Shadow's "every
    * bone that is not a dummy" walk.
    */
   readonly bones: readonly number[] | 'body';
+  /** Cards each on a bone of its own, at an offset of its own (tiles): the hand-written `CreateSprite` runs. */
+  readonly spots?: readonly { readonly bone: number; readonly tex: GlowTexture; readonly scale: number; readonly local?: readonly [number, number, number] }[];
+  /** The breath's speed in radians per `WorldTime` ms and its swing: `RenderLight` 0.002 and 0.3. */
+  readonly breathSpeed?: number;
+  readonly breathAmount?: number;
   /** Bone ranges `'body'` leaves out, inclusive (:11109-11112). */
   readonly skip?: readonly (readonly [number, number])[];
   /** Offset in the bone's own frame, tiles (the original's `x, y, z` / 100). */
@@ -367,7 +380,9 @@ const tmpWorld = new Vector3();
 function place(g: LiveGlow): void {
   const seconds = Ecs.world?.gameTime.TotalGameTime.TotalSeconds ?? 0;
   const lumi = g.glow.breathe
-    ? Math.sin(seconds * BREATH_SPEED) * BREATH_AMOUNT + (g.glow.breathBase ?? BREATH_BASE)
+    ? Math.sin(seconds * (g.glow.breathSpeed !== undefined ? g.glow.breathSpeed * 1000 : BREATH_SPEED)) *
+        (g.glow.breathAmount ?? BREATH_AMOUNT) +
+      (g.glow.breathBase ?? BREATH_BASE)
     : (g.glow.luminosity ?? 1);
 
   const [r, gr, b] = g.rgb;
@@ -418,9 +433,10 @@ export function glowMonster(
   glow: MonsterGlow
 ): EffectHandle {
   const bones = bonesOf(glow, entity);
-  if (!bones.length) return DEAD_HANDLE;
-
   const sprites: GlowSprite[] = [];
+  for (const s of glow.spots ?? []) {
+    sprites.push({ bone: s.bone, local: s.local, tex: s.tex, scale: s.scale, blend: 'add', sprite: null });
+  }
   bones.forEach((bone, i) => {
     for (const card of glow.cards) {
       sprites.push({
@@ -433,6 +449,7 @@ export function glowMonster(
       });
     }
   });
+  if (!sprites.length) return DEAD_HANDLE;
 
   const g: LiveGlow = {
     scene,

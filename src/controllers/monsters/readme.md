@@ -17,7 +17,8 @@ its own folder in `versions/shared/monsters/<name>/` and uses this controller.
   sound, and the one only a 0x1F spawn plays) and `stormSkill` (the skill whose AttackTime replays the
   meteorite storm).
 - Look fields: `light` (`MonsterLight`, read by `lighting/characters.ts`), `bodyFx`
-  (`MonsterBodyFx`, `bodyFx.ts`: particles and cards by name, read by `fx/monsterVisuals.ts`;
+  (`MonsterBodyFx`, `bodyFx.ts`: particles, cards on bones (`BodyCard`, `BodyCardSpot`), bone
+  ribbons (`BodyRibbon`) and the original's particles (`BodyPuff`) by name, read by `fx/monsterVisuals.ts`;
   shared pieces in `versions/shared/monsters/_shared/bodyFx.ts`); on a body,
   `MonsterModelDef.shatter` (`MonsterShatter`, read by `fx/deathVisuals.ts`); `worldScale` (its
   `Object.Scale` on given worlds, read by the actors controller's `npcSpawnScale`).

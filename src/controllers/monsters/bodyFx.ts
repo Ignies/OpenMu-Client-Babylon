@@ -10,6 +10,24 @@ export type BodyParticle = 'bodySmoke' | 'energyChips' | 'firePuff' | 'flameLick
 /** The card textures a halo or mark can name. */
 export type BodyTexture = 'flare' | 'magicGround2' | 'gmAurora';
 
+/** The sheets a `cards` row can name (`CreateSprite(BITMAP_*)`). */
+export type BodyCard = 'light' | 'lightRed' | 'lightMarks' | 'shockWave' | 'shiny2' | 'energy' | 'flareBlue' | 'flareRed';
+
+/** The sheets a `trail` can run: BITMAP_JOINT_ENERGY (JointLaser01) or BITMAP_FLARE (its SubType 28-33 TexType). */
+export type BodyRibbon = 'jointEnergy' | 'flare';
+
+/** The original's own particles a `puff` can name (`fx/effectParticles.ts` kinds, by `BITMAP_*` and SubType). */
+export type BodyPuff = 'smoke1' | 'smoke17' | 'smoke50' | 'smokeLine1' | 'smokeLine2' | 'smokeLine3';
+
+/** One `CreateSprite` on a bone: `TransformPosition(BoneTransform[bone], local)`. */
+export type BodyCardSpot = {
+  readonly bone: number;
+  readonly card: BodyCard;
+  /** The call's `Scale`: the sheet's pixels times this, in cm. */
+  readonly scale: number;
+  readonly local?: Cm3;
+};
+
 /** A box in the original's centimetres: `rand() % (2x) - x` each way, `z` up. */
 type Cm3 = readonly [number, number, number];
 type RGB = readonly [number, number, number];
@@ -108,6 +126,45 @@ export type BodyFxEmitter =
       readonly pitch: readonly [number, number];
       readonly yaw: readonly [number, number];
       readonly chip: number;
+      readonly gate?: BodyFxGate;
+    }
+  | {
+      /**
+       * `CreateSprite` on bones every frame (`RenderMonsterVisual`): steady cards in one light,
+       * `sin(WorldTime * speed) * amount + base` when it `pulse`s. `alive`: not drawn once it dies.
+       */
+      readonly kind: 'cards';
+      readonly spots: readonly BodyCardSpot[];
+      readonly colour: RGB;
+      readonly pulse?: { readonly speed: number; readonly amount: number; readonly base: number };
+      readonly gate?: { readonly alive: true };
+    }
+  | {
+      /**
+       * A `CreateJoint(BITMAP_JOINT_ENERGY, ...)` whose head rides a bone (`Velocity` 0, the eye and bone
+       * SubTypes, ZzzEffectJoint.cpp:415-439, :3149-3159): the ribbon is where the bone has been.
+       */
+      readonly kind: 'trail';
+      readonly bone: number;
+      /** The joint's `Scale`, its width in cm. */
+      readonly widthCm: number;
+      readonly maxTails: number;
+      readonly colour: RGB;
+      readonly ribbon?: BodyRibbon;
+      readonly gate?: { readonly alive: true };
+    }
+  | {
+      /**
+       * On a won roll, at each bone, one `CreateParticle(BITMAP_*, TransformPosition(bone, local), ..., Light,
+       * SubType, Scale)` per entry; an entry of several picks one at random (`BITMAP_SMOKELINE1 + rand() % 3`).
+       */
+      readonly kind: 'puff';
+      readonly every: number;
+      readonly particles: readonly (BodyPuff | readonly BodyPuff[])[];
+      readonly bones: readonly number[];
+      readonly local?: Cm3;
+      readonly scale?: number;
+      readonly colour: RGB;
       readonly gate?: BodyFxGate;
     };
 

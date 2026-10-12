@@ -53,7 +53,10 @@ type TextureKey =
   | 'shiny05'
   | 'lightmarks'
   | 'pinLight'
-  | 'waterfall4';
+  | 'waterfall4'
+  | 'smokeLine1'
+  | 'smokeLine2'
+  | 'smokeLine3';
 
 const TEXTURES: Record<
   TextureKey,
@@ -89,6 +92,9 @@ const TEXTURES: Record<
   lightmarks: { file: 'Effect/lightmarks.ozj', size: 128 },
   pinLight: { file: 'Effect/pin_lights.OZJ', size: 16, height: 128 },
   waterfall4: { file: 'Effect/waterFall4.OZJ', size: 64 },
+  smokeLine1: { file: 'Effect/smokelines01.OZJ', size: 64 },
+  smokeLine2: { file: 'Effect/smokelines02.OZJ', size: 64 },
+  smokeLine3: { file: 'Effect/smokelines03.OZJ', size: 64 },
 };
 
 /**
@@ -531,6 +537,71 @@ function puffMove(p: Particle, f: number, fade: number): void {
   p.rotation += (1 + rand(2)) * f;
 }
 
+/** `AngleMatrix` of a particle's own MU `Angle` `(a0, 0, a2)` in degrees, which MovePosition turns its velocity by. */
+const ownTurn = { x: 0, y: 0, z: 0 };
+function turnMu(p: Particle, a0: number, a2: number): void {
+  ownTurn.x = (-a0 * Math.PI) / 180;
+  ownTurn.y = (-a2 * Math.PI) / 180;
+  turnWith(p, ownTurn);
+}
+
+type RampOptions = {
+  readonly life: number;
+  /** `(rand() % a + b) * 0.01 * Scale`, the same for the rise `* 0.1` and the fade-in step. */
+  readonly scale: readonly [number, number];
+  readonly gravity: readonly [number, number];
+  readonly rise: readonly [number, number];
+  readonly peak: number;
+  readonly grow: () => number;
+};
+
+/**
+ * The smokes that fade in to `peak` of their light, out over their last 10 ticks, and rise. Only one on
+ * its way out is cut below 0.1: the fade-in starts at 0 and steps by a frame-scaled amount (see `fireKind`).
+ */
+function rampKind(texture: TextureKey, o: RampOptions): ParticleKind {
+  return {
+    texture,
+    blend: 'add',
+    init(p, scale) {
+      p.lifeTime = o.life;
+      p.scale = (rand(o.scale[0]) + o.scale[1]) * 0.01 * scale;
+      p.rotation = rand(360);
+      p.gravity = (rand(o.gravity[0]) + o.gravity[1]) * 0.1;
+      p.alpha = 0;
+      p.lr = p.lg = p.lb = 0;
+    },
+    update(p, f) {
+      if (p.lifeTime < 10) {
+        p.alpha -= 0.1 * f;
+        if (p.alpha < 0.1) {
+          p.live = false;
+          return;
+        }
+      } else if (p.alpha < o.peak) {
+        p.alpha += (rand(o.rise[0]) + o.rise[1]) * 0.1 * f;
+      } else {
+        p.alpha = o.peak;
+      }
+      p.lr = p.tr * p.alpha;
+      p.lg = p.tg * p.alpha;
+      p.lb = p.tb * p.alpha;
+      p.scale += o.grow() * f;
+      p.pz += p.gravity * f;
+    },
+    color: plainColor,
+  };
+}
+
+const SMOKE_LINE: RampOptions = {
+  life: 35,
+  scale: [96, 96],
+  gravity: [16, 12],
+  peak: 0.7,
+  rise: [5, 2],
+  grow: () => (rand(3) + 6) * 0.01,
+};
+
 const KINDS = {
   fire1: fireKind('fireHik1', {
     lifeBase: 27,
@@ -722,6 +793,85 @@ const KINDS = {
     },
     color: plainColor,
   } satisfies ParticleKind,
+
+  /**
+   * `BITMAP_SMOKE` SubType 1 (53, 56): 50 ticks, made up to 32 off and 32-95 above, turned a random
+   * `(±45, 0, 0-360)` and pushed 40-47 back along it, the push losing 0.6 a tick; it grows 0.05 a tick
+   * and is `(0.5L, L, 0.8L)` at `L = LifeTime / 50` whatever light it is made with, additive
+   * (ZzzEffectParticle.cpp:1327-1337, :5361-5366).
+   */
+  smoke1: {
+    texture: 'smoke',
+    blend: 'add',
+    init(p) {
+      p.lifeTime = 50;
+      p.scale = (rand(32) + 80) * 0.01;
+      p.px += rand(64) - 32;
+      p.py += rand(64) - 32;
+      p.pz += rand(64) + 32;
+      turnMu(p, rand(90) - 45, rand(360));
+      p.vy = -(rand(8) + 40);
+    },
+    update(p, f) {
+      const luminosity = p.lifeTime / 50;
+      p.lr = luminosity * 0.5;
+      p.lg = luminosity;
+      p.lb = luminosity * 0.8;
+      const keep = Math.pow(0.4, f);
+      p.vy *= keep;
+      p.scale += 0.05 * f;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
+
+  /**
+   * `BITMAP_SMOKE` SubType 17, Kundun's bone smoke: 12 ticks, `Scale * (rand() % 32 + 8) * 0.01`; it
+   * rises faster by 0.2 a tick, grows 0.05 and is its light times `LifeTime / 8`, dark while that is
+   * over 1 (`1 - L`), additive (ZzzEffectParticle.cpp:1168-1174, :5344-5351).
+   */
+  smoke17: {
+    texture: 'smoke',
+    blend: 'add',
+    init(p, scale) {
+      p.lifeTime = 12;
+      p.scale = scale * (rand(32) + 8) * 0.01;
+      p.rotation = rand(360);
+    },
+    update(p, f) {
+      let luminosity = p.lifeTime / 8;
+      if (luminosity > 1) luminosity = 1 - luminosity;
+      p.lr = p.tr * luminosity;
+      p.lg = p.tg * luminosity;
+      p.lb = p.tb * luminosity;
+      p.gravity += 0.2 * f;
+      p.pz += p.gravity * f;
+      p.scale += 0.05 * f;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
+
+  /**
+   * `BITMAP_SMOKE` SubType 50: 20 ticks, `(rand() % 32 + 32) * 0.01 * Scale`, rising 1.6-3.1 a tick and
+   * growing 0.02; it fades in to half its light and out over its last 10 (ZzzEffectParticle.cpp:1500-1507,
+   * :5683-5701).
+   */
+  smoke50: rampKind('smoke', {
+    life: 20,
+    scale: [32, 32],
+    gravity: [16, 16],
+    peak: 0.5,
+    rise: [3, 2],
+    grow: () => 0.02,
+  }),
+
+  /**
+   * `BITMAP_SMOKELINE1..3` SubType 0: 35 ticks, `(rand() % 96 + 96) * 0.01 * Scale`, rising 1.2-2.7 a
+   * tick and growing 0.06-0.08; it fades in to 0.7 of its light and out over its last 10
+   * (ZzzEffectParticle.cpp:1767-1786, :5963-5986).
+   */
+  smokeLine1: rampKind('smokeLine1', SMOKE_LINE),
+  smokeLine2: rampKind('smokeLine2', SMOKE_LINE),
+  smokeLine3: rampKind('smokeLine3', SMOKE_LINE),
 
   /**
    * `BITMAP_SMOKE` SubType 13, the Balgass lava vents' glow: sized `(rand() % 64 + 64) * 0.01` whatever
@@ -1483,6 +1633,12 @@ export const KIND_REACH: Record<KindName, Reach> = {
   fireRed: { travel: 6.2, base: 0, perScale: 0.58 },
   smoke0: { travel: 0.55, base: 0.72, perScale: 0 },
   smoke13: { travel: 0, base: 1.4, perScale: 0 },
+  smoke1: { travel: 1.85, base: 1.64, perScale: 0 },
+  smoke17: { travel: 0.17, base: 0.28, perScale: 0.18 },
+  smoke50: { travel: 0.63, base: 0.19, perScale: 0.29 },
+  smokeLine1: { travel: 0.95, base: 1.28, perScale: 0.87 },
+  smokeLine2: { travel: 0.95, base: 1.28, perScale: 0.87 },
+  smokeLine3: { travel: 0.95, base: 1.28, perScale: 0.87 },
   smoke2: { travel: 3.4, base: 0.58, perScale: 0 },
   smoke65: { travel: 0.75, base: 0, perScale: 0.29 },
   cloud21: { travel: 1.75, base: 0, perScale: 3.61 },
