@@ -1,8 +1,11 @@
 import { defineMonster } from '@/controllers/monsters';
+import { KUNDUN_FX } from './bodyFx';
 
 export default defineMonster({
   Numb: 275,
   Name: 'Kundun Demon',
+  // MODEL_ILLUSION_OF_KUNDUN: see `bodyFx.ts`.
+  bodyFx: KUNDUN_FX,
   maxHealth: 140000,
   model: { type: 64, scale: 2 },
   stats: {

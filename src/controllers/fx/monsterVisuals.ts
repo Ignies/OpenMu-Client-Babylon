@@ -141,6 +141,7 @@ const CARDS: Readonly<Record<BodyCard, GlowTexture>> = {
 
 const PUFFS: Readonly<Record<BodyPuff, KindName>> = {
   smoke1: 'smoke1',
+  smoke13: 'smoke13',
   smoke17: 'smoke17',
   smoke50: 'smoke50',
   smokeLine1: 'smokeLine1',
@@ -166,6 +167,8 @@ function cardGlow(em: CardsRow): MonsterGlow {
     breathSpeed: em.pulse?.speed,
     breathAmount: em.pulse?.amount,
     breathBase: em.pulse?.base,
+    swellSpeed: em.swell?.speed,
+    swellAmount: em.swell?.amount,
     luminosity: 1,
   };
 }

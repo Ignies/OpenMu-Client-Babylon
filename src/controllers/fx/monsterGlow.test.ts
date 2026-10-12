@@ -78,3 +78,20 @@ describe('monster glows', () => {
     ]);
   });
 });
+
+describe('a swelling card', () => {
+  // Kundun's bone 100 flare: `CreateSprite(BITMAP_FLARE_BLUE, p, 1.2f + sinf(WorldTime * 0.001f) * 0.3f, ...)`
+  // (GMHellas.cpp:1621): its size, not its light, follows the world clock.
+  it('takes its size from the world clock', async () => {
+    const glow = { bones: [], spots: [{ bone: 100, tex: 'flareBlue' as const, scale: 1.2 }], cards: [], colour: [1, 1, 1] as const, breathe: false, luminosity: 1, swellSpeed: 0.001, swellAmount: 0.3 };
+    worldAt(1000);
+    sprites.length = 0;
+    glowMonster({} as Scene, monster(), glow);
+    await new Promise(resolve => setTimeout(resolve, 0));
+    worldAt(2500);
+    monsterGlowLayer.update?.(0, 1.5);
+    const card = sprites[sprites.length - 1] as unknown as { width: number };
+    expect(card.width).toBeCloseTo((64 * (1.2 + Math.sin(2500 * 0.001) * 0.3)) / 100);
+    monsterGlowLayer.reset?.();
+  });
+});

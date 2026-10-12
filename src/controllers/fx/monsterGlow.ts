@@ -95,6 +95,9 @@ export type MonsterGlow = {
   /** The breath's speed in radians per `WorldTime` ms and its swing: `RenderLight` 0.002 and 0.3. */
   readonly breathSpeed?: number;
   readonly breathAmount?: number;
+  /** A `Scale` that swings `sin(WorldTime * swellSpeed) * swellAmount` about its own. */
+  readonly swellSpeed?: number;
+  readonly swellAmount?: number;
   /** Bone ranges `'body'` leaves out, inclusive (:11109-11112). */
   readonly skip?: readonly (readonly [number, number])[];
   /** Offset in the bone's own frame, tiles (the original's `x, y, z` / 100). */
@@ -387,6 +390,7 @@ function place(g: LiveGlow): void {
 
   const [r, gr, b] = g.rgb;
   const hidden = g.entity.modelObject?.OutOfView === true;
+  const swell = g.glow.swellAmount ? Math.sin(seconds * (g.glow.swellSpeed ?? 0) * 1000) * g.glow.swellAmount : 0;
 
   for (const s of g.sprites) {
     let sprite = s.sprite;
@@ -406,6 +410,12 @@ function place(g: LiveGlow): void {
 
     sprite.isVisible = !hidden;
     if (hidden) continue;
+
+    if (swell) {
+      const { px } = GLOW_TEXTURES[s.tex];
+      sprite.width = (px[0] * (s.scale + swell)) / TILE_CM;
+      sprite.height = (px[1] * (s.scale + swell)) / TILE_CM;
+    }
 
     const [lx, ly, lz] = s.local ?? g.glow.local ?? [0, 0, 0];
     tmpLocal.set(lx, ly, lz);

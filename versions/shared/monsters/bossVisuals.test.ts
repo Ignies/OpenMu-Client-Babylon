@@ -42,3 +42,17 @@ describe('boss bodies', () => {
     expect(die).toMatchObject({ every: 3, bones: [0, 5, 124], particles: ['smoke1', 'smoke1'], gate: { action: [A.Die] } });
   });
 });
+
+describe('Kundun', () => {
+  // MODEL_ILLUSION_OF_KUNDUN: the bone 6 smoke (GMHellas.cpp:1433-1440), and while alive the red eyes, the
+  // swelling blue flare on bone 100 and its smoke (:1570-1632).
+  it('smokes from bone 6 and lights his eyes and bone 100 while alive', () => {
+    const [bone6, bone100] = rows(275, 'puff');
+    expect(bone6).toMatchObject({ every: 2, bones: [6], particles: ['smoke17'], colour: [1, 0.2, 0], local: [2, 30, 0] });
+    expect(bone100).toMatchObject({ every: 2, bones: [100], particles: ['smoke13'], gate: { alive: true } });
+    const [eyes, flare] = rows(275, 'cards');
+    expect(eyes).toMatchObject({ colour: [1, 0, 0], pulse: { speed: 0.003, amount: 0.2, base: 0.8 }, gate: { alive: true } });
+    expect(cards(275)).toEqual(['8:energy@0.4 1,0,0', '9:energy@0.4 1,0,0', '100:flareBlue@1.2 1,1,1']);
+    expect(flare).toMatchObject({ swell: { speed: 0.001, amount: 0.3 }, gate: { alive: true } });
+  });
+});

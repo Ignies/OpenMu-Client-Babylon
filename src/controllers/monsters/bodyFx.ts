@@ -17,7 +17,7 @@ export type BodyCard = 'light' | 'lightRed' | 'lightMarks' | 'shockWave' | 'shin
 export type BodyRibbon = 'jointEnergy' | 'flare';
 
 /** The original's own particles a `puff` can name (`fx/effectParticles.ts` kinds, by `BITMAP_*` and SubType). */
-export type BodyPuff = 'smoke1' | 'smoke17' | 'smoke50' | 'smokeLine1' | 'smokeLine2' | 'smokeLine3';
+export type BodyPuff = 'smoke1' | 'smoke13' | 'smoke17' | 'smoke50' | 'smokeLine1' | 'smokeLine2' | 'smokeLine3';
 
 /** One `CreateSprite` on a bone: `TransformPosition(BoneTransform[bone], local)`. */
 export type BodyCardSpot = {
@@ -137,6 +137,8 @@ export type BodyFxEmitter =
       readonly spots: readonly BodyCardSpot[];
       readonly colour: RGB;
       readonly pulse?: { readonly speed: number; readonly amount: number; readonly base: number };
+      /** A `Scale` of `scale + sin(WorldTime * speed) * amount`. */
+      readonly swell?: { readonly speed: number; readonly amount: number };
       readonly gate?: { readonly alive: true };
     }
   | {

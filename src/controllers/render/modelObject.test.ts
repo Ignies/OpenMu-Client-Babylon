@@ -100,6 +100,16 @@ describe('a blend mesh', () => {
     expect(plain.metadata.shineLit).toBeFalsy();
   });
 
+  // Kundun redraws meshes 1-6 with RENDER_CHROME | RENDER_BRIGHT, never mesh 0 (GMHellas.cpp:2085-2091).
+  it('carries the shine on each of ShineMeshes and on no other', () => {
+    const object = new ModelObject(scene);
+    object.BodyShine.tint.set(0.4, 0.4, 0.3);
+    object.ShineMeshes = [1, 2];
+    const gltf = body(4);
+    object.load(gltf);
+    expect(gltf.mesh.getChildMeshes().map(m => m.metadata.bodyShine === object.BodyShine)).toEqual([false, true, true, false]);
+  });
+
   it('re-reads BlendMeshLight every frame off WorldTime when it pulses', () => {
     const object = new ModelObject(scene);
     object.BlendMesh = 1;
