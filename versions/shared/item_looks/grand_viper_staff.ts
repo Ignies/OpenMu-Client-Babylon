@@ -1,6 +1,8 @@
 import { defineItemLook, frameRolls } from '@/controllers/item_fx/itemLooks';
 import type { HeldSprite, LookLight } from '@/controllers/item_fx/itemLooks';
 import type { Vector3 } from '@/controllers/render/babylon/exports';
+import { VIOLET, energyTrail } from './imperial_sword';
+import { spark11 } from './sylph_wind_bow';
 
 const roll = frameRolls();
 /** The head's jitter, `rand() % 60 / 20 - 1.5` on y and z; every head sprite stays at the first roll's point. */
@@ -22,9 +24,11 @@ const star = (bone: number, offset: readonly [number, number, number], big: numb
 // MODEL_GRAND_VIPER_STAFF (ZzzObject.cpp:7576-7599): mesh 0 as the StreamMesh (unlit), then again
 // additive with energy01 (BITMAP_CHROME_ENERGY) on its own UVs, swept on both axes.
 // Carried (ZzzCharacter.cpp:7176-7223): Spark03, a pink flare and two Shiny02 at a jittering point of the
-// head, three turning violet stars down the shaft; its energy trail and sparks are not ported.
+// head, three turning violet stars down the shaft; a violet energy trail and pink sparks off the head (its
+// +-1.5 cm jitter left out).
 export default defineItemLook({
   items: [[5, 12]],
+  emit: [energyTrail(0, VIOLET, 30, [0, -170, 0]), spark11(0, 1, 2, [1, 0.4, 1], [0, -170, 0])],
   body: {
     passes: [
       { mesh: 0, kind: 'unlit' },

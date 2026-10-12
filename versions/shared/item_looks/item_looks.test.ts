@@ -524,8 +524,8 @@ describe('the bows\' held sprites', () => {
       ['shiny02', 9, [10, 0, 0], 0.8, [r(l * 3), r(l), r(l)], r(turn)],
     ]);
     const star = itemHeldSprites(4, 20)?.slice(2) ?? [];
-    expect(star.map(s => s.when?.({ action: 0, safeZone: true, yaw: 0, map: 0 }))).toEqual([false, false, false]);
-    expect(star.map(s => s.when?.({ action: 0, safeZone: false, yaw: 0, map: 0 }))).toEqual([true, true, true]);
+    expect(star.map(s => s.when?.({ action: 0, safeZone: true, yaw: 0, map: 0, frame: 0 }))).toEqual([false, false, false]);
+    expect(star.map(s => s.when?.({ action: 0, safeZone: false, yaw: 0, map: 0, frame: 0 }))).toEqual([true, true, true]);
   });
 
   it('Stinger Bow: a grey flare on every bone 0-43 but 1 (:7970-7983)', () => {
@@ -552,9 +552,9 @@ describe('the bows\' held sprites', () => {
       ...[22, 23, 24, 25, 26, 27, 28, 29].map(bone => ['flare', bone, undefined, 0.4, green, 0]),
     ]);
     const attack = itemHeldSprites(4, 24)?.[8].when;
-    expect(attack?.({ action: 38, safeZone: false, yaw: 0, map: 0 })).toBe(true); // PLAYER_ATTACK_FIST
-    expect(attack?.({ action: 155, safeZone: false, yaw: 0, map: 0 })).toBe(true); // PLAYER_RIDE_SKILL
-    expect(attack?.({ action: 15, safeZone: false, yaw: 0, map: 0 })).toBe(false);
+    expect(attack?.({ action: 38, safeZone: false, yaw: 0, map: 0, frame: 0 })).toBe(true); // PLAYER_ATTACK_FIST
+    expect(attack?.({ action: 155, safeZone: false, yaw: 0, map: 0, frame: 0 })).toBe(true); // PLAYER_RIDE_SKILL
+    expect(attack?.({ action: 15, safeZone: false, yaw: 0, map: 0, frame: 0 })).toBe(false);
   });
 
   it('Great Reign Crossbow: blue Shiny02 and flares on bones 1-5, the last flare white (:7539-7557)', () => {
@@ -1000,7 +1000,7 @@ describe('the Archangel set, the late bows, shields and armour sets', () => {
 describe('the held weapons\' emitters', () => {
   const scene = {} as Scene;
   const at = new Vector3(1, 2, 3);
-  const wearer = (action: number, map = 0) => ({ action, safeZone: false, yaw: 0.5, map });
+  const wearer = (action: number, map = 0) => ({ action, safeZone: false, yaw: 0.5, map, frame: 0 });
   /** Runs an item's emitters once with every rand_fps_check passing (a 1 s frame) and Math.random at `roll`. */
   function emit(group: number, num: number, w: ReturnType<typeof wearer>, roll = 0.5) {
     const random = vi.spyOn(Math, 'random').mockReturnValue(roll);
@@ -1008,7 +1008,7 @@ describe('the held weapons\' emitters', () => {
     // The emitters rewrite one point for every spawn, as spawnParticle allows: read it at the call.
     const made: unknown[] = [];
     particles.spawn.mockImplementation((_s, kind, p, _t, scale, light) => void made.push([kind, [p.x, p.y, p.z].map(r), scale, light]));
-    for (const e of itemHeldEmitters(group, num) ?? []) e.emit(scene, at, w, 1);
+    for (const e of itemHeldEmitters(group, num) ?? []) e.emit(scene, at, w, 1, 0);
     const calls = { effects: spawn.mock.calls.map(c => [c[0], (c[3] as { recipe: unknown }).recipe]), particles: made as unknown[][] };
     spawn.mockRestore();
     random.mockRestore();
@@ -1040,5 +1040,121 @@ describe('the held weapons\' emitters', () => {
     ]);
     expect(emit(2, 16, wearer(0), 0.2).particles[0][0]).toBe('frostCloud');
     expect(itemHeldEmitters(2, 16)?.map(e => e.bone)).toEqual([24]);
+  });
+});
+
+// BITMAP_JOINT_ENERGY SubType 17 (47 on EyeRight) set where the weapon's head was: LifeTime 12, a new one a tick,
+// following it (ZzzEffectJoint.cpp:254-263, :3086-3117); light from :463, :473.
+describe('the held weapons\' energy trails', () => {
+  const scene = {} as Scene;
+  function trails(group: number, num: number) {
+    const at = new Vector3(1, 2, 3);
+    const spawn = vi.spyOn(effects, 'spawn').mockImplementation(() => ({ alive: false, stop() {} }) as never);
+    for (const e of itemHeldEmitters(group, num) ?? []) e.emit(scene, at, { action: 0, safeZone: false, yaw: 0, map: 0, frame: 0 }, 1, 0);
+    const joints = spawn.mock.calls.filter(c => c[0] === 'joint').map(c => c[3] as Record<string, unknown> & { head: (out: Vector3) => Vector3 });
+    spawn.mockRestore();
+    // The head follows the weapon's point as it moves.
+    at.set(4, 5, 6);
+    const heads = joints.map(j => j.head(new Vector3()).asArray());
+    return { joints: joints.map(({ head: _head, ...rest }) => rest), heads };
+  }
+  const trail = (colour: number[], width: number) => ({ maxTails: 8, width, colour, seconds: 12 / 25, texture: 'Effect/JointEnergy01.OZJ', fadeTail: 0 });
+
+  it('Imperial Sword: a violet trail 25 cm wide off Zx01 (bone 8), eight tails long (:7806-7813)', () => {
+    const { joints, heads } = trails(0, 28);
+    expect(joints).toEqual([trail([0.8, 0.2, 1], 0.25)]);
+    expect(heads).toEqual([[4, 5, 6]]);
+    expect(itemHeldEmitters(0, 28)?.map(e => [e.bone, e.offset])).toEqual([[8, undefined]]);
+  });
+
+  it('Grand Viper Staff: a violet trail 30 cm wide off the head 170 cm down bone 0 (:7180-7190)', () => {
+    expect(trails(5, 12).joints).toEqual([trail([0.8, 0.2, 1], 0.3)]);
+    expect(itemHeldEmitters(5, 12)?.find(e => e.offset)).toMatchObject({ bone: 0, offset: [0, -170, 0] });
+  });
+
+  it('Imperial Staff: a violet trail 30 cm wide off its head (bone 5) (:8056-8064)', () => {
+    expect(trails(5, 31).joints).toEqual([trail([0.8, 0.2, 1], 0.3)]);
+  });
+
+  it('Deadly Staff: a red trail 25 cm wide off Red02 (bone 3) (:8027-8033)', () => {
+    expect(trails(5, 30).joints).toEqual([trail([0.9, 0, 0], 0.25)]);
+    expect(itemHeldEmitters(5, 30)?.map(e => e.bone)).toEqual([3]);
+  });
+});
+
+// The rest of RenderLinkObject's CreateParticle / CreateEffect calls for those weapons (ZzzCharacter.cpp).
+describe('the held weapons\' sparks, fire, moon, shine and feathers', () => {
+  const scene = {} as Scene;
+  /** Runs an item's emitters once (a 1 s frame: every rand_fps_check passes) at `roll`; the particles with their turn. */
+  function emit(group: number, num: number, roll = 0.5, frame = 0) {
+    const at = new Vector3(1, 2, 3);
+    const random = vi.spyOn(Math, 'random').mockReturnValue(roll);
+    const spawn = vi.spyOn(effects, 'spawn').mockImplementation(() => ({ alive: true, stop() {} }) as never);
+    const made: unknown[][] = [];
+    particles.spawn.mockImplementation((_s, kind, _p, t, scale, light) => void made.push([kind, t.y, scale, [...light]]));
+    for (const e of itemHeldEmitters(group, num) ?? []) e.emit(scene, at, { action: 0, safeZone: false, yaw: 0.5, map: 0, frame }, 1, 1000);
+    const models = spawn.mock.calls.filter(c => c[0] === 'model').map(c => c[3] as Record<string, unknown>);
+    spawn.mockRestore();
+    random.mockRestore();
+    return { particles: made, models };
+  }
+  const bones = (group: number, num: number) => itemHeldEmitters(group, num)?.map(e => e.bone);
+
+  it('Sylph Wind Bow: a yellow Spark03 SubType 11 off bones 4 and 12, turned with the wearer (:7081-7088)', () => {
+    expect(emit(4, 21).particles).toEqual([
+      ['spark1_11', -0.5, 0.8, [0.8, 0.8, 0.2]],
+      ['spark1_11', -0.5, 0.8, [0.8, 0.8, 0.2]],
+    ]);
+    expect(bones(4, 21)).toEqual([4, 12]);
+  });
+
+  it('Albatross Bow: a green Spark03 SubType 14 off bones 10, 28, 34 and 16 (:7360-7374)', () => {
+    expect(emit(4, 22).particles).toEqual([...Array(4)].map(() => ['spark1_14', -0.5, 0.05, [0.3, 0.9, 0.2]]));
+    expect(bones(4, 22)).toEqual([10, 28, 34, 16]);
+  });
+
+  it('Grand Viper and Imperial Staff: a Spark03 SubType 11 of 2 at the head in its pink (:7199-7202, :8056-8060)', () => {
+    expect(emit(5, 12).particles).toEqual([['spark1_11', -0.5, 2, [1, 0.4, 1]]]);
+    expect(emit(5, 31).particles).toEqual([['spark1_11', -0.5, 2, [0.9, 0.3, 0.5]]]);
+    expect(itemHeldEmitters(5, 31)?.map(e => e.bone)).toEqual([5, 5]);
+  });
+
+  it('Salamander Shield: one of three white fires of 0.7 at Zx01 (bone 1) (:8149-8165)', () => {
+    expect(emit(6, 18, 0.1).particles).toEqual([['fire1', 0, 0.7, [1, 1, 1]]]);
+    expect(emit(6, 18, 0.5).particles).toEqual([['fire2', 0, 0.7, [1, 1, 1]]]);
+    expect(emit(6, 18, 0.9).particles).toEqual([['fire3', 0, 0.7, [1, 1, 1]]]);
+    expect(bones(6, 18)).toEqual([1]);
+  });
+
+  it('Stryker Scepter: a blue Shiny+6 SubType 1 at rx01 (bone 5) one frame in 14 (:8321-8323)', () => {
+    expect(emit(2, 18).particles).toEqual([
+      ['shiny6_1', 0, 1, [0.4, 0.6, 0.9]],
+      ['light6_1', 0, 1, [0.4, 0.6, 0.9]],
+    ]);
+    expect(bones(2, 18)).toEqual([5]);
+  });
+
+  it('Chromatic Staff: the harvest moon at 0.12 on the orb (bone 8) while carried, one model, not one a tick (:8231-8235)', () => {
+    const { models } = emit(5, 33);
+    expect(models.map(m => [m.model, m.scale])).toEqual([['Effect/chysukmoon.glb', 0.12]]);
+    expect(bones(5, 33)).toEqual([8]);
+    // The same staff drawn again: its moon is still up, no second one.
+    const at = new Vector3();
+    const spawn = vi.spyOn(effects, 'spawn').mockImplementation(() => ({ alive: true, stop() {} }) as never);
+    const [moon] = itemHeldEmitters(5, 33) ?? [];
+    const wearer = { action: 0, safeZone: false, yaw: 0, map: 0, frame: 0 };
+    moon.emit(scene, at, wearer, 0.04, 0);
+    moon.emit(scene, at, wearer, 0.04, 40);
+    expect(spawn).toHaveBeenCalledTimes(1);
+    spawn.mockRestore();
+  });
+
+  it('Stinger Bow: rand() % 3 times four grey feathers at the hand while the key is 4.5-5 (:7985-7995)', () => {
+    // roll 0.5: one round of four (SubType 0, 1, 0, 1).
+    const { models } = emit(4, 23, 0.5, 4.75);
+    expect(models.map(m => [m.model, m.colour])).toEqual([...Array(4)].map(() => ['Skill/darkwing_hetachi.glb', [0.2, 0.25, 0.3]]));
+    expect(emit(4, 23, 0.5, 3).models).toEqual([]);
+    expect(emit(4, 23, 0.1, 4.75).models).toEqual([]); // rand() % 3 = 0
+    expect(bones(4, 23)).toEqual([-1]);
   });
 });

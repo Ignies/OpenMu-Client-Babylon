@@ -635,6 +635,47 @@ function rampKind(texture: TextureKey, o: RampOptions): ParticleKind {
   };
 }
 
+/** The light 1/1.05 a tick and the size `shrink` less (Spark03 SubType 11, 13, 14). */
+function sparkFade(p: Particle, f: number, shrink: number): void {
+  const keep = Math.pow(1 / 1.05, f);
+  p.lr *= keep;
+  p.lg *= keep;
+  p.lb *= keep;
+  p.scale -= shrink * f;
+}
+
+/** The shine's rolls, which its BITMAP_LIGHT sheet takes when it is made next. */
+const shiny6Rolls = { x: 0, y: 0, z: 0, life: 10, rotation: 0 };
+
+function shiny6Kind(texture: TextureKey): ParticleKind {
+  const shine = texture === 'shiny05';
+  return {
+    texture,
+    blend: 'add',
+    init(p) {
+      const r = shiny6Rolls;
+      if (shine) {
+        r.life = rand(3) + 10;
+        r.x = rand(50) - 25;
+        r.y = rand(50) - 25;
+        r.z = rand(50) - 25;
+        r.rotation = rand(20) - 10;
+      }
+      p.lifeTime = r.life;
+      p.scale = 0.3;
+      p.px += r.x;
+      p.py += r.y;
+      p.pz += r.z;
+      p.rotation = r.rotation;
+    },
+    update(p, f) {
+      p.scale -= 0.01 * f;
+      p.rotation -= 5 * f;
+    },
+    color: plainColor,
+  };
+}
+
 const SMOKE_LINE: RampOptions = {
   life: 35,
   scale: [96, 96],
@@ -1359,6 +1400,53 @@ const KINDS = {
       out.set(p.lr * shown, p.lg * shown, p.lb * shown, 1);
     },
   } satisfies ParticleKind,
+
+  /**
+   * `BITMAP_SPARK + 1` SubType 11, the Sylph Wind's and the staffs' sparks: whatever its scale, sized
+   * `rand() % 5 / 10 + 1` and pushed `(rand() % 8 - 4, rand() % 4, rand() % 4)` cm a tick on its object's Angle;
+   * 30 ticks, its light 1/1.05 and its size 0.04 less a tick (ZzzEffectParticle.cpp:2196-2204, :6704-6713).
+   */
+  spark1_11: {
+    texture: 'spark03',
+    blend: 'add',
+    init(p) {
+      p.vx = rand(8) - 4;
+      p.vy = rand(4);
+      p.vz = rand(4);
+      p.lifeTime = 30;
+      p.scale = rand(5) / 10 + 1;
+    },
+    update: (p, f) => sparkFade(p, f, 0.04),
+    color: plainColor,
+  } satisfies ParticleKind,
+
+  /**
+   * SubType 14, the Albatross's: on its own `rand_fps_check(2)` pushed `(rand() % 4 - 4, rand() % 4, rand() % 4)`,
+   * sized 0.4-0.8 and 30 ticks; else the 2-tick dot CreateParticle leaves at its scale. Its size 0.01 less a
+   * tick (:2216-2226, :6724-6733).
+   */
+  spark1_14: {
+    texture: 'spark03',
+    blend: 'add',
+    init(p) {
+      if (Math.random() * 2 >= 1) return;
+      p.vx = rand(4) - 4;
+      p.vy = rand(4);
+      p.vz = rand(4);
+      p.lifeTime = 30;
+      p.scale = rand(5) / 10 + 0.4;
+    },
+    update: (p, f) => sparkFade(p, f, 0.01),
+    color: plainColor,
+  } satisfies ParticleKind,
+
+  /**
+   * `BITMAP_SHINY + 6` SubType 1, the Stryker's shine: 0.3, up to 25 cm off, `rand() % 20 - 10` degrees, 10-12
+   * ticks, 0.01 smaller and 5 degrees back a tick (:2718-2727, :7368-7372). Drawn as shiny05 and BITMAP_LIGHT
+   * at once (:9301-9304): `light6_1` is the second sheet, on the rolls the shine made just before it.
+   */
+  shiny6_1: shiny6Kind('shiny05'),
+  light6_1: shiny6Kind('flare01'),
 } satisfies Record<string, ParticleKind>;
 
 export type KindName = keyof typeof KINDS;
@@ -1763,6 +1851,10 @@ export const KIND_REACH: Record<KindName, Reach> = {
   frostCloud: { travel: 0.75, base: 0, perScale: 0.5 },
   frostSmoke: { travel: 0.75, base: 0, perScale: 0.5 },
   starShine: { travel: 0, base: 0, perScale: 0.3 },
+  spark1_11: { travel: 1.75, base: 0.32, perScale: 0 },
+  spark1_14: { travel: 1.75, base: 0.19, perScale: 0.23 },
+  shiny6_1: { travel: 0.44, base: 0.14, perScale: 0 },
+  light6_1: { travel: 0.44, base: 0.14, perScale: 0 },
 };
 
 /** The reach of a spawn picking any of `kinds`, as one base plus a per-scale slope. */

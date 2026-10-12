@@ -101,10 +101,10 @@ describe('a held sprite gated on its wearer', () => {
       { texture: 'flare01', bone: 1, scale: 0.8, light: [1, 1, 1], when: w => !w.safeZone && w.action === 7 },
     ]);
     const out = look();
-    sprites.update(0, Vector3.One(), true, { action: 7, safeZone: true, yaw: 0, map: 0 });
+    sprites.update(0, Vector3.One(), true, { action: 7, safeZone: true, yaw: 0, map: 0, frame: 0 });
     sprites.look(0, out);
     expect(out.scale).toBe(0);
-    sprites.update(0, Vector3.One(), true, { action: 7, safeZone: false, yaw: 0, map: 0 });
+    sprites.update(0, Vector3.One(), true, { action: 7, safeZone: false, yaw: 0, map: 0, frame: 0 });
     sprites.look(0, out);
     expect(out.scale).toBe(0.8);
   });
@@ -117,8 +117,32 @@ describe('a held weapon\'s emitters (CreateParticle, CreateJoint in RenderLinkOb
     const sprites = new WeaponSprites(scene, object, [], [{ bone: 1, emit: (_scene, at, w, dt) => calls.push([+at.x.toFixed(4), w.action, w.yaw, dt]) }]);
     object.node.computeWorldMatrix(true);
     for (const node of scene.transformNodes) node.computeWorldMatrix(true);
-    sprites.update(0, Vector3.One(), true, { action: 144, safeZone: false, yaw: 1.5, map: 0 }, 0.04);
-    sprites.update(0, Vector3.One(), false, { action: 144, safeZone: false, yaw: 1.5, map: 0 }, 0.04);
+    sprites.update(0, Vector3.One(), true, { action: 144, safeZone: false, yaw: 1.5, map: 0, frame: 0 }, 0.04);
+    sprites.update(0, Vector3.One(), false, { action: 144, safeZone: false, yaw: 1.5, map: 0, frame: 0 }, 0.04);
     expect(calls).toEqual([[0.2, 144, 1.5, 0.04]]); // bone 1: node 2, 0.2 along x; none while hidden
+  });
+
+  it('run at the model\'s root, where it is linked to the hand, for bone -1', () => {
+    const object = weapon(2);
+    const sprites = new WeaponSprites(scene, object, [], [{ bone: -1, emit: () => {} }]);
+    const node = scene.transformNodes.find(n => n.name === 'weaponEmitter' && n.parent === object.gltf?.mesh);
+    expect(node).toBeDefined();
+    sprites.dispose();
+  });
+
+  it('run at a point in their bone\'s frame (cm) when they name one, where a sprite there is drawn', () => {
+    const object = weapon(2);
+    const points: number[][] = [];
+    const round = (p: Vector3) => [p.x, p.y, p.z].map(n => +n.toFixed(4));
+    const sprites = new WeaponSprites(
+      scene,
+      object,
+      [{ texture: 'flare01', bone: 1, offset: [0, -170, 5], scale: 1, light: [1, 1, 1] }],
+      [{ bone: 1, offset: [0, -170, 5], emit: (_scene, at) => points.push(round(at)) }]
+    );
+    for (const node of scene.transformNodes) node.computeWorldMatrix(true);
+    sprites.update(0, Vector3.One(), true, undefined, 0.04);
+    expect(points).toEqual([round(sprites.nodes[0].getAbsolutePosition())]);
+    expect(Math.hypot(points[0][1], points[0][2])).toBeCloseTo(Math.hypot(1.7, 0.05)); // 170 cm off the bone
   });
 });
