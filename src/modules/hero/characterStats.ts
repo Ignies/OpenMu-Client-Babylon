@@ -90,12 +90,13 @@ const GROUP_HELPER = 13;
 const BOLT = 7;
 const ARROWS = 15;
 
+/** `IsGeneralBowItem` and `IsGeneralCrossbowItem` (CharacterManager.cpp:84-96, _enum.h:2261-2285). */
 function isBow(item: Item): boolean {
-  return item.group === GROUP_BOW && item.num <= 6;
+  return item.group === GROUP_BOW && (item.num <= 6 || item.num === 17 || (item.num >= 20 && item.num <= 24));
 }
 
 function isCrossbow(item: Item): boolean {
-  return item.group === GROUP_BOW && item.num >= 8 && item.num <= 14;
+  return item.group === GROUP_BOW && ((item.num >= 8 && item.num <= 14) || item.num === 16 || item.num === 18 || item.num === 19);
 }
 
 function isShield(item: Item): boolean {
@@ -367,9 +368,10 @@ function calculateDamage(
   let statMin = 0;
   let statMax = 0;
 
+  // A broken bow keeps the class formula (ZzzInfomation.cpp:2557).
   const usingBow =
-    (!!weaponLeft && isBow(weaponLeft)) ||
-    (!!weaponRight && isCrossbow(weaponRight));
+    (!!weaponLeft && isBow(weaponLeft) && weaponLeft.durability !== 0) ||
+    (!!weaponRight && isCrossbow(weaponRight) && weaponRight.durability !== 0);
 
   if (usingBow) {
     statMin = Math.trunc(agility / 7) + Math.trunc(strength / 14);
@@ -446,12 +448,13 @@ function calculateDamage(
   const r = picked?.slot === InventoryConstants.LeftHandSlot ? picked.item : weaponRight;
   const l = picked?.slot === InventoryConstants.RightHandSlot ? picked.item : weaponLeft;
 
-  if (!!weaponRight && isCrossbow(weaponRight)) {
-    min = minRight;
-    max = maxRight;
-  } else if (!!weaponLeft && isBow(weaponLeft)) {
+  // GetEquipedBowType looks for the bow first (CharacterManager.cpp:286-301).
+  if (!!weaponLeft && isBow(weaponLeft)) {
     min = minLeft;
     max = maxLeft;
+  } else if (!!weaponRight && isCrossbow(weaponRight)) {
+    min = minRight;
+    max = maxRight;
   } else if (!r || isStaff(r)) {
     min = minLeft;
     max = maxLeft;

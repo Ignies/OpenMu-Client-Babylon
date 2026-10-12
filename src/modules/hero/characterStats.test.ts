@@ -115,6 +115,22 @@ describe('the character window damage line colour', () => {
     expect(held(CharacterClassNumber.FairyElf, weapon(4, 15, 1), null)).toBe(false);
   });
 
+  // CalculateDamage's bow formula, agility / 7 + strength / 14, for every bow and crossbow with durability
+  // (ZzzInfomation.cpp:2557; IsGeneralBowItem and IsGeneralCrossbowItem, CharacterManager.cpp:84-96).
+  it('reads the bow formula for the later bows and crossbows too, not for a broken one', () => {
+    const strengthShare = (slot: number, num: number, durability = 255) => {
+      const of = (strength: number) => {
+        const items: (Item | null)[] = new Array(12).fill(null);
+        items[slot] = { group: 4, num, durability };
+        return deriveCharacterStats({ charClass: CharacterClassNumber.FairyElf, level: 400, strength, agility: 0, vitality: 100, energy: 100, leadership: 0, items }).damageMin;
+      };
+      return of(1400) - of(0);
+    };
+    for (const num of [17, 20, 24]) expect(strengthShare(1, num)).toBe(100);
+    for (const num of [16, 18, 19]) expect(strengthShare(0, num)).toBe(100);
+    expect(strengthShare(1, 0, 0)).toBe(200);
+  });
+
   // GetAttackDamage reads the item dragged out of a hand slot as still held (ZzzInventory.cpp:5900-5911).
   it('stays blue while a weapon is dragged out of a hand slot, on the damage left without it', () => {
     const dragging = (slot: number) => {
