@@ -134,7 +134,7 @@ tables list. A plain NPC model at a fixed scale needs no class: `npcModel` is en
   class of their own.
 - `bossVisuals.test.ts`: the bosses' `RenderMonsterVisual` rows (cards, ribbons, smokes) as their
   map files write them: Medusa (with her attack fires, hole cards and bone 68 waterfall), Kundun (with his Shock roar), Selupan, Erohim, Balgass, Nightmare, the Maya hands, the
-  Imperial Guardian bosses' rage smoke, Lucas, Fred (with his blade ribbons), Hammerize and the Dark Ghost; and the Swamp of
+  Imperial Guardian bosses' rage smoke, Lucas, Fred (with his blade ribbons), Hammerize and the Dark Ghost (with his attack and death particles); and the Swamp of
   Quiet line (the Sapis, the Shadows, the Napins); the swing blurs (Nightmare, Selupan, the Iron Knights, the Dark
   Elf, the Sapis' claws); and the `RenderMonster` mesh passes (Balgass, Selupan, Erohim, Raymond, Lucas, the Dark Ghost).
 - `src/controllers/actors/resolveModel.golden.test.ts`: what every type 0..600 is drawn with, and

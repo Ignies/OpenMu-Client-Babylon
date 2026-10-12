@@ -168,6 +168,9 @@ const PUFFS: Readonly<Record<BodyPuff, KindName>> = {
   waterfall4Orbit0: 'waterfall4Orbit0',
   waterfall4Orbit1: 'waterfall4Orbit1',
   waterfall4Orbit2: 'waterfall4Orbit2',
+  waterfall4_15: 'waterfall4_15',
+  smoke39: 'smoke39',
+  spark1_11: 'spark1_11',
 };
 
 type CardsRow = Extract<BodyFxEmitter, { kind: 'cards' }>;
@@ -272,6 +275,8 @@ const tmpLocal = new Vector3();
 /** A spark's heading: `spawnJoint` copies it, so one serves them all. */
 const sparkHeading = new Vector3();
 const ZERO_CM: Cm3 = [0, 0, 0];
+/** An `origin` puff's one spot. */
+const ORIGIN: readonly number[] = [0];
 
 const scatter = (v: number) => (Math.random() * 2 - 1) * v;
 
@@ -479,10 +484,12 @@ function emit(scene: Scene, e: Entity, em: Emitter, f: Frame, rides?: readonly V
       if (!open(em.gate, f)) return;
       const local = em.local ?? ZERO_CM;
       const turn = em.turned ? facing(e) : NO_TURN;
-      for (let b = 0; b < em.bones.length; b++) {
+      const spots = em.origin ? ORIGIN : em.bones;
+      for (let b = 0; b < spots.length; b++) {
         if (em.rollEach && Math.random() >= 1 / em.every) continue;
         tmpLocal.set(local[0] / TILE_CM, local[1] / TILE_CM, local[2] / TILE_CM);
-        boneLocalPos(e, em.bones[b], tmpLocal, tmp);
+        if (em.origin) entityPos(e, 0, tmp);
+        else boneLocalPos(e, spots[b], tmpLocal, tmp);
         const anchor = rides ? rides[em.ride === 'bone' ? b : 0] : undefined;
         for (let i = 0; i < em.particles.length; i++) {
           const p = em.particles[i];

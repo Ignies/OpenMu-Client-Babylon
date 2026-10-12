@@ -1238,3 +1238,26 @@ describe('Medusa\'s hand fires and bone 68 waterfall (GMSwampOfQuiet.cpp:544-578
     expect(card.position.y).toBeCloseTo(1);
   });
 });
+
+describe("the Dark Ghost's attack and death particles (GMEmpireGuardian2.cpp:925-955)", () => {
+  // roll 0.5: Gravity 1, Scale (5 + 10) * 0.02 + 2, set (0, 0, -50) off; a tick it sinks Gravity, which loses 0.05,
+  // shrinks 0.05 and keeps 1/1.1 of its light; 20 ticks.
+  it('WATERFALL_4 SubType 15 drops from 50 cm under its spot, shrinking and dimming (ZzzEffectParticle.cpp:3716-3726, :8663-8674)', async () => {
+    const sprite = await play('waterfall4_15', 2, 0.5, 2);
+    expect(sprite.position.y).toBeCloseTo((-50 - 1 - 0.95) / 100);
+    expect(sprite.width).toBeCloseTo((64 * (2.3 - 0.1)) / 100);
+    expect(sprite.color.g).toBeCloseTo(0.4 / 1.1 ** 2);
+    expect(fakes.files).toContain('Effect/waterFall4.OZJ');
+    disposeEffectParticles();
+    expect((await play('waterfall4_15', 2, 0.5, 20)).isVisible).toBe(false);
+  });
+
+  // No SubType 39 case: CreateParticle's own defaults, two ticks at its Scale and light, still (:58-86).
+  it('SMOKE SubType 39 is a still smoke01 card for two ticks', async () => {
+    const sprite = await play('smoke39', 1, 0.5, 1);
+    expect([sprite.position.x, sprite.position.y, sprite.width]).toEqual([0, 0, 0.64]);
+    expect(sprite.color.g).toBeCloseTo(0.4);
+    disposeEffectParticles();
+    expect((await play('smoke39', 1, 0.5, 2)).isVisible).toBe(false);
+  });
+});

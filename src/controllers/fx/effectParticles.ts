@@ -1554,6 +1554,38 @@ const KINDS = {
   fireMono2_8: fireJetKind('fireHik2Mono', 5),
   fireMono3_5: fireJetKind('fireHik3Mono', 4),
 
+  /**
+   * `BITMAP_WATERFALL_4` SubType 15, the Dark Ghost's attack drops: 20 ticks, `rand() % 100 / 100 * 2` Gravity,
+   * `(rand() % 10 + 10) * 0.02 + Scale` big, `rand() % 360` turned, set +-20 cm aside and 50 under. A tick it sinks
+   * Gravity, which loses 0.05, shrinks 0.05 and keeps 1/1.1 of its light (ZzzEffectParticle.cpp:3716-3726, :8663-8674).
+   */
+  waterfall4_15: {
+    texture: 'waterfall4',
+    blend: 'add',
+    init(p, scale) {
+      p.lifeTime = 20;
+      p.gravity = (rand(100) / 100) * 2;
+      p.scale = (rand(10) + 10) * 0.02 + scale;
+      p.rotation = rand(360);
+      p.px += rand(40) - 20;
+      p.py += rand(40) - 20;
+      p.pz -= 50;
+    },
+    update(p, f) {
+      p.pz -= p.gravity * f;
+      p.gravity -= 0.05 * f;
+      p.scale -= 0.05 * f;
+      const keep = Math.pow(1 / 1.1, f);
+      p.lr *= keep;
+      p.lg *= keep;
+      p.lb *= keep;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
+
+  /** `BITMAP_SMOKE` SubType 39, which has no case of its own: CreateParticle's two still ticks at its Scale (:58-86). */
+  smoke39: { texture: 'smoke', blend: 'add', init() {}, update() {}, color: plainColor } satisfies ParticleKind,
+
   /** `BITMAP_WATERFALL_4`'s three cards, each on its own circle (`waterfallOrbitKind`). */
   waterfall4Orbit0: waterfallOrbitKind(0),
   waterfall4Orbit1: waterfallOrbitKind(1),
@@ -1995,6 +2027,8 @@ export const KIND_REACH: Record<KindName, Reach> = {
   waterfall4Orbit0: { travel: 1.85, base: 0.14, perScale: 0 },
   waterfall4Orbit1: { travel: 1.85, base: 0.14, perScale: 0 },
   waterfall4Orbit2: { travel: 1.85, base: 0.14, perScale: 0 },
+  waterfall4_15: { travel: 0.86, base: 0.18, perScale: 0.46 },
+  smoke39: { travel: 0, base: 0, perScale: 0.46 },
 };
 
 /** The reach of a spawn picking any of `kinds`, as one base plus a per-scale slope. */

@@ -373,6 +373,17 @@ describe('the Imperial Guardian bosses', () => {
       ...[34, 34, 80, 80].map(b => `${b}:lightning2@0.25 1,1,1`),
     ]);
     expect(rows(515, 'cards')[3].pulse).toEqual({ speed: 0.002, amount: 0.2, base: 0.8 });
+  });
+
+  // Through Attack1 / Attack2 a WATERFALL_4 SubType 15 at Scale 2 and two SPARK + 1 SubType 13 (SubType 11's spark) on
+  // its Angle from bones 80 and 34, a tick (:925-940); through Die to frame 3, five SMOKE SubType 39 at its feet (:942-950).
+  it("throws the Dark Ghost's attack sparks and death smoke", () => {
+    const attack = { action: [A.Attack1, A.Attack2] };
+    const [water, sparks, smoke] = rows(515, 'puff');
+    expect(water).toMatchObject({ every: 1, bones: [80, 34], particles: ['waterfall4_15'], scale: 2, colour: [0.3, 1, 0.8], gate: attack });
+    expect(sparks).toMatchObject({ every: 1, bones: [80, 34], particles: ['spark1_11', 'spark1_11'], colour: [0, 0.4, 0], turned: true, gate: attack });
+    expect(smoke).toMatchObject({ every: 1, origin: true, particles: Array(5).fill('smoke39'), colour: [0.1, 1, 0.2] });
+    expect(smoke.gate).toEqual({ action: [A.Die], frames: [[0, 3]] });
     expect(rows(515, 'cards').slice(0, 3).map(r => r.pulse)).toEqual(Array(3).fill({ speed: 0.08, amount: 0.15, base: 0.85 }));
   });
 });

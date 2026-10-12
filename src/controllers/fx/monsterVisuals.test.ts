@@ -41,7 +41,8 @@ vi.mock('./core', () => {
       out.set(bone + local.x, local.y, local.z),
     emitBurst: () => {},
     entityGone: () => false,
-    entityPos: (_e: unknown, _h: number, out: unknown) => out,
+    entityPos: (e: { at?: number }, _h: number, out: { set(x: number, y: number, z: number): unknown }) =>
+      e.at === undefined ? out : out.set(e.at, 0, 0),
     entityYaw: (e: { transform?: { rot: { y: number } } }) => e.transform?.rot.y ?? 0,
     inWindow: () => true,
   };
@@ -334,6 +335,18 @@ describe('monster body rows', () => {
     expect(swing.until()).toBe(false);
     anim.action = 0;
     expect(swing.until()).toBe(true);
+    monsterVisualsLayer.reset?.();
+  });
+
+  // The Dark Ghost's death smoke is made at `o->Position`, not a bone (GMEmpireGuardian2.cpp:946-950).
+  it('make an origin puff at the body', () => {
+    calls.particles.length = 0;
+    const e = monster();
+    (e as unknown as { at: number }).at = 7;
+    visualMonster(scene, e, [{ kind: 'puff', every: 1, particles: ['smoke39', 'smoke39'], bones: [], origin: true, colour: [0.1, 1, 0.2] }] as never);
+    monsterVisualsLayer.update?.(0, 0.04);
+    expect(calls.particles.map(p => p[1])).toEqual(['smoke39', 'smoke39']);
+    expect((calls.particles[0][2] as { x: number }).x).toBe(7);
     monsterVisualsLayer.reset?.();
   });
 });

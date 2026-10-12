@@ -138,7 +138,9 @@ shared pools, textures and particle recipes other folders reuse.
   whatever its light. Medusa's: `fireMono1_4`, `fireMono2_8`, `fireMono3_5` (the mono fire jets) fly 8 cm a
   tick along their object's facing for 8 ticks, growing; `waterfall4Orbit0..2` (`BITMAP_WATERFALL_4`'s three
   cards, on one set of rolls) circle where they were made, 2.1 cm further out and 0.1 round a tick; a
-  particle made with an anchor moves as far as the anchor does.
+  particle made with an anchor moves as far as the anchor does. The Dark Ghost's: `waterfall4_15` (`BITMAP_WATERFALL_4`
+  SubType 15) drops from 50 cm under its spot, shrinking and dimming, 20 ticks; `smoke39` (`BITMAP_SMOKE` SubType 39,
+  no case of its own) is a still smoke01 card for two ticks.
 - `monsterGlow.test.ts`: `RenderLight` breathes on the world's clock, so two monsters that came apart
   breathe alike, in step with their floor light; Santa Claus and the Snowman carry their steady
   flare01 cards on their bones (ZzzObject.cpp:1910-1945); a swelling card (Kundun's) takes its size
@@ -153,7 +155,8 @@ shared pools, textures and particle recipes other folders reuse.
   cards row gated on an action is shown only in it; a `roar` row's cards and particles scale with Kundun's
   Shock roar (`PKKey` and `Skill` stepped a tick, GMHellas.cpp:1596-1622), 1 out of Shock.
   The anvil's sparks are handed one kept heading (`spawnJoint` copies it). A `blur` row runs one trail between
-  its bone points while its gate is open, and from the first tick when it has none.
+  its bone points while its gate is open, and from the first tick when it has none. An `origin` puff is made at
+  the body, not a bone.
 - `core.test.ts`: a flickering tint makes a bounded number of additive materials, each within half
   a 1/128 step of the colour asked for; a burst emits nothing while the page is hidden.
 - `modelClones.test.ts`: a `model`, `linkedModel` or spirit skull clone leaves no mesh, skeleton or
