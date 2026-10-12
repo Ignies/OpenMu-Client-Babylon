@@ -58,6 +58,23 @@ describe('the character window defense rate with a shield', () => {
     expect(held(1)).toBe(bare + 54 + 27 + 48);
     expect(held(0)).toBe(bare);
   });
+
+  // ZzzInfomation.cpp:3223-3237, CalcDurabilityPercent (:2440-2485), the +5 blocking per option level (:1207-1211).
+  const shield = (more: Partial<Item>) => {
+    const items: (Item | null)[] = new Array(12).fill(null);
+    items[1] = { group: 6, num: 12, durability: 52, ...more };
+    return deriveCharacterStats({ charClass: CharacterClassNumber.DarkKnight, level: 240, strength: 600, agility: 300, vitality: 100, energy: 450, leadership: 0, items }).defenseRate;
+  };
+
+  it('adds the option level and loses half of both when the shield is below 20% durability', () => {
+    expect(shield({ optionLevel: 2 })).toBe(bare + 129 + 10);
+    expect(shield({ optionLevel: 2, durability: 10 })).toBe(bare + 129 - 64 + 10 - 5);
+    expect(shield({ optionLevel: 2, durability: 0 })).toBe(bare);
+  });
+
+  it('adds 10% for the excellent defense success rate option', () => {
+    expect(shield({ isExcellent: true, excellentFlags: 0x02, durability: 67 })).toBe(Math.trunc((bare + 159) * 1.1));
+  });
 });
 
 // The window takes the magic percent from pWeaponRight, EQUIPMENT_WEAPON_RIGHT slot 0 (NewUICharacterInfoWindow.cpp:509, :1336-1346).

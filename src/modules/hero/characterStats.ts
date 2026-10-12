@@ -184,6 +184,18 @@ function itemBlocking(item: Item): number {
   return blocking;
 }
 
+/** `CalcDurabilityPercent` (ZzzInfomation.cpp:2440-2485): how much of a stat a worn item loses. */
+function durabilityPercent(item: Item): number {
+  const config = configOf(item);
+  if (!config || item.durability === undefined) return 0;
+  const level = item.lvl ?? 0;
+  let max = firstSet(config, 'Dur', 'Durability') + Math.min(level, 4) + Math.max(0, level - 4) * 2;
+  if ((item.ancientDiscriminator ?? 0) > 0) max += 20;
+  else if ((item.excellentFlags ?? 0) & 63) max += 15;
+  const worn = 1 - item.durability / max;
+  return worn > 0.8 ? 0.5 : worn > 0.7 ? 0.3 : worn > 0.5 ? 0.2 : 0;
+}
+
 function itemMagicPower(item: Item): number {
   const config = configOf(item);
   if (!config) return 0;
@@ -531,7 +543,15 @@ function calculateDefenseRate(
 
   // EQUIPMENT_WEAPON_LEFT is slot 1, our RightHandSlot (ZzzInfomation.cpp:3222).
   const left = equipped(items, InventoryConstants.RightHandSlot);
-  if (left) blocking += itemBlocking(left);
+  if (!left || left.durability === 0) return blocking;
+
+  // The item's blocking and its +5 per option level both lose the durability percent (ZzzInfomation.cpp:3223-3236).
+  const percent = durabilityPercent(left);
+  const item = itemBlocking(left);
+  const option = isShield(left) ? (left.optionLevel ?? 0) * 5 : 0;
+  blocking += item - Math.trunc(item * percent) + option - Math.trunc(option * percent);
+  // AT_IMPROVE_BLOCKING_PERCENT, excellent bit 1 on a shield (CalcExcellentOptions, ZzzInfomation.cpp:966-969).
+  if (isShield(left) && ((left.excellentFlags ?? 0) >> 1) & 1) blocking += Math.trunc((blocking * 10) / 100);
 
   return blocking;
 }
