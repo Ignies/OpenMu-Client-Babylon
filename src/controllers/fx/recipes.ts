@@ -232,6 +232,8 @@ export const MODEL = {
   bigStone2: 'Skill/BigStone02.glb',
   /** MODEL_STONE1/2 (Stone01/02.bmd): the small chips a stone skill / a breaking prop throws. */
   stone: 'Skill/Stone01.glb',
+  /** MODEL_EFFECT_BROKEN_ICE0..2 (Effect/ice_stone00-02, ZzzOpenData.cpp:4586-4591). */
+  brokenIce: ['Effect/ice_stone00.glb', 'Effect/ice_stone01.glb', 'Effect/ice_stone02.glb'] as const,
   stone2: 'Skill/Stone02.glb',
   /** MODEL_GATE / +1 (Object12): the masonry the Blood Castle gate bursts into. */
   gateChunk: 'Object12/Gate01.glb',

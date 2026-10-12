@@ -9,6 +9,7 @@ const calls = vi.hoisted(() => ({
   joints: [] as { opts: Record<string, unknown>; stop: () => void; stopped: boolean }[],
   blurs: [] as Record<string, unknown>[],
   particles: [] as unknown[][],
+  debris: [] as { at: { x: number }; opts: Record<string, unknown> }[],
 }));
 
 vi.mock('../render/babylon/exports', () => {
@@ -66,7 +67,9 @@ vi.mock('./effectParticles', () => ({
   spawnParticle: (s: unknown, kind: unknown, at: { x: number; y: number; z: number }, ...rest: unknown[]) =>
     void calls.particles.push([s, kind, { x: at.x, y: at.y, z: at.z }, ...rest]),
 }));
-vi.mock('./debris', () => ({ spawnDebris: () => {} }));
+vi.mock('./debris', () => ({
+  spawnDebris: (_s: unknown, at: { x: number }, opts: Record<string, unknown>) => void calls.debris.push({ at: { x: at.x }, opts }),
+}));
 vi.mock('./blur', () => ({
   blurLayer: {
     spawn: (_s: unknown, _at: unknown, opts: Record<string, unknown>) => {
@@ -249,6 +252,23 @@ describe('monster body rows', () => {
       [20, grey],
       [37, blue],
       [37, blue],
+    ]);
+    monsterVisualsLayer.reset?.();
+  });
+
+  // The Iron Knights' death (GM_Raklion.cpp:1960-1970): at each of four bones, six MODEL_EFFECT_BROKEN_ICE0 + rand() % 3
+  // in its light, SubType 0.
+  it('throw a shards row of its pieces at each bone', () => {
+    calls.debris.length = 0;
+    const random = vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    visualMonster(scene, monster(), [{ kind: 'shards', every: 1, shards: 'brokenIce', count: 2, bones: [20, 37], colour: [0.3, 0.5, 1] }] as never);
+    monsterVisualsLayer.update?.(0, 0.04);
+    random.mockRestore();
+    expect(calls.debris.map(d => [d.at.x, d.opts.model, d.opts.ice, d.opts.colour])).toEqual([
+      [20, 'Effect/ice_stone01.glb', true, [0.3, 0.5, 1]],
+      [20, 'Effect/ice_stone01.glb', true, [0.3, 0.5, 1]],
+      [37, 'Effect/ice_stone01.glb', true, [0.3, 0.5, 1]],
+      [37, 'Effect/ice_stone01.glb', true, [0.3, 0.5, 1]],
     ]);
     monsterVisualsLayer.reset?.();
   });

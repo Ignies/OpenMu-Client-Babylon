@@ -37,6 +37,7 @@ import {
   RGBS,
   SAND_SMOKE,
   SAND_SMOKE_BURST,
+  SMOKE,
   TEX,
 } from './recipes';
 import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
@@ -48,6 +49,7 @@ import {
   type BodyFxGate,
   type BodyParticle,
   type BodyPuff,
+  type BodyShard,
   type BodyTexture,
   type MonsterBodyFx,
 } from '../monsters';
@@ -124,6 +126,8 @@ const PARTICLES: Readonly<Record<BodyParticle, ParticleRecipe>> = {
   sandSmoke: SAND_SMOKE,
   sandSmokeBurst: SAND_SMOKE_BURST,
 };
+
+const SHARDS: Readonly<Record<BodyShard, readonly string[]>> = { brokenIce: MODEL.brokenIce };
 
 const BLUR_SHEETS: Readonly<Record<BodyBlurSheet, string>> = { blur01: TEX.blur, blur02: TEX.blur2 };
 
@@ -505,6 +509,18 @@ function emit(scene: Scene, e: Entity, em: Emitter, f: Frame, rides?: readonly V
           const name = typeof p === 'string' ? p : p[Math.floor(Math.random() * p.length)];
           const scale = (em.scales?.[i] ?? em.scale ?? 1) * (em.roar ? roarNow : 1);
           void spawnParticle(scene, PUFFS[name], tmp, turn, scale, colour, em.jitterCm, anchor);
+        }
+      }
+      return;
+    }
+    case 'shards': {
+      if (!open(em.gate, f)) return;
+      const models = SHARDS[em.shards];
+      const puff = variant(SMOKE, em.colour);
+      for (const b of em.bones) {
+        bonePos(e, b, tmp);
+        for (let i = 0; i < em.count; i++) {
+          spawnDebris(scene, tmp, { model: models[Math.floor(Math.random() * models.length)], ice: true, colour: em.colour, puff });
         }
       }
       return;

@@ -173,6 +173,16 @@ describe('the Iron Knights', () => {
       ]);
     }
   });
+
+  // Dying, before Die frame 1, six MODEL_EFFECT_BROKEN_ICE0 + rand() % 3 a tick at each of the four bones in
+  // (0.3, 0.5, 1) (:1960-1970, :2213-2223).
+  it('break into ice as they die', () => {
+    for (const knight of [458, 565]) {
+      expect(rows(knight, 'shards')).toEqual([
+        { kind: 'shards', every: 1, shards: 'brokenIce', count: 6, bones: [20, 37, 45, 51], colour: [0.3, 0.5, 1], gate: { action: [A.Die], frames: [[0, 1]] } },
+      ]);
+    }
+  });
 });
 
 describe('Selupan', () => {

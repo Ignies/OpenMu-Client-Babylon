@@ -35,6 +35,9 @@ export type BodyBlurSheet = 'blur01' | 'blur02';
  */
 export type BodyRibbon = 'jointEnergy' | 'flare' | 'spark';
 
+/** The pieces a `shards` row throws: MODEL_EFFECT_BROKEN_ICE0 + rand() % 3 (ice_stone00-02). */
+export type BodyShard = 'brokenIce';
+
 /** The original's own particles a `puff` can name (`fx/effectParticles.ts` kinds, by `BITMAP_*` and SubType). */
 export type BodyPuff =
   | 'fire1'
@@ -258,6 +261,16 @@ export type BodyFxEmitter =
       readonly origin?: true;
       /** What the particles ride (`o->Target`): the monster's position or the bone they were made at. */
       readonly ride?: 'body' | 'bone';
+      readonly gate?: BodyFxGate;
+    }
+  | {
+      /** On a won roll, `count` x `CreateEffect(MODEL_*, TransformByObjectBone(bone), Angle, Light, 0)` at each bone. */
+      readonly kind: 'shards';
+      readonly every: number;
+      readonly shards: BodyShard;
+      readonly count: number;
+      readonly bones: readonly number[];
+      readonly colour: RGB;
       readonly gate?: BodyFxGate;
     };
 

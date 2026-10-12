@@ -166,6 +166,17 @@ export const ironKnightSmoke = (): BodyFxEmitter =>
     colours: [KNIGHT_BLUE, KNIGHT_BLUE, [0.8, 0.8, 0.8]],
   });
 
+/** ...and dying, before Die frame 1, six MODEL_EFFECT_BROKEN_ICE0 + rand() % 3 a tick at each (:1960-1970, :2213-2223). */
+export const ironKnightIce = (): BodyFxEmitter => ({
+  kind: 'shards',
+  every: 1,
+  shards: 'brokenIce',
+  count: 6,
+  bones: [20, 37, 45, 51],
+  colour: [0.3, 0.5, 1],
+  gate: { action: [A.Die], frames: [[0, 1]] },
+});
+
 // ---- the Swamp of Quiet line (GMSwampOfQuiet.cpp RenderMonsterVisual) ----
 
 /** The Sapis and the Sapi Queen: two BITMAP_LIGHT cards on bone 15 (:812-840, :1136-1146). */

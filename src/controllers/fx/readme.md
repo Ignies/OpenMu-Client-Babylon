@@ -99,6 +99,8 @@ shared pools, textures and particle recipes other folders reuse.
 ## Tests
 - `blur.test.ts`: a `tickHistory` trail fades a light above 1 from its own tint, clamped per channel after the
   fade (PackABGR), and drops two samples a tick from 15 ticks old when `short`, from 30 when not (CreateBlur).
+- `debris.test.ts`: broken ice (`ice`) is thrown, tumbles, falls, bounces and fades as MODEL_EFFECT_BROKEN_ICE
+  SubType 0 moves a tick.
 - `boids.test.ts`: a bird, a fish and an invasion dragon cast the Classic shadow from the ground at 0.2, not on the cascades.
 - `layers.test.ts`: the shroud draws at most `SHROUD_MAX` cards at once.
 - `modelClones.test.ts` (spiritSwarm): a disposed rig takes its skull clones along, loaded or late.
@@ -161,7 +163,8 @@ shared pools, textures and particle recipes other folders reuse.
   The anvil's sparks are handed one kept heading (`spawnJoint` copies it). A `blur` row runs one trail between
   its bone points while its gate is open, and from the first tick when it has none. An `origin` puff is made at
   the body, not a bone; a `pick` puff at that many of its bones picked at random; a gate's `when` holds a row
-  to a state the content reads; a puff with `colours` picks one for each spot (the Iron Knights' blue or grey).
+  to a state the content reads; a puff with `colours` picks one for each spot (the Iron Knights' blue or grey); a `shards` row throws its
+  pieces as debris at each bone.
 - `core.test.ts`: a flickering tint makes a bounded number of additive materials, each within half
   a 1/128 step of the colour asked for; a burst emits nothing while the page is hidden.
 - `modelClones.test.ts`: a `model`, `linkedModel` or spirit skull clone leaves no mesh, skeleton or
