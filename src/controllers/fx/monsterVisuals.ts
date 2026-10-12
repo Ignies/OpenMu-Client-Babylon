@@ -189,7 +189,7 @@ type CardsRow = Extract<BodyFxEmitter, { kind: 'cards' }>;
 function cardGlow(em: CardsRow, e: Entity, roar: Roar): MonsterGlow {
   const gate = em.gate;
   return {
-    when: gate && (gate.action || gate.frames) ? () => shownNow(e, gate) : undefined,
+    when: gate && (gate.action || gate.frames || gate.when) ? () => shownNow(e, gate) : undefined,
     scaleBy: em.roar ? () => roar.value : undefined,
     bones: [],
     spots: em.spots.map(s => ({
@@ -339,6 +339,7 @@ function shownNow(e: Entity, gate: Gate): boolean {
   const model = e.modelObject;
   const action = e.monsterAnimation?.action ?? (model?.CurrentAction as A | undefined);
   if (gate.alive && e.dying) return false;
+  if (gate.when && !gate.when()) return false;
   if (gate.action && (action === undefined || !gate.action.includes(action))) return false;
   if (!gate.frames) return true;
   const frame = model?.actionFrame() ?? 0;

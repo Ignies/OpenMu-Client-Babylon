@@ -136,6 +136,6 @@ tables list. A plain NPC model at a fixed scale needs no class: `npcModel` is en
   map files write them: Medusa (with her attack fires, hole cards and bone 68 waterfall), Kundun (with his Shock roar), Selupan, Erohim, Balgass, Nightmare (with his death smoke), the Maya hands (with their death and Stop2 effects), the
   Imperial Guardian bosses' rage smoke, Lucas, Fred (with his blade ribbons), Hammerize and the Dark Ghost (with his attack and death particles); and the Swamp of
   Quiet line (the Sapis, the Shadows, the Napins); the Iron Knights' bone smokes and death ice; the swing blurs (Nightmare, Selupan, the Iron Knights, the Dark
-  Elf, the Sapis' claws, and by model the Aida and Kanturu swings); and the `RenderMonster` mesh passes (Balgass, Selupan, Erohim, Raymond, Lucas, the Dark Ghost).
+  Elf, the Sapis' claws, and by model the Aida and Kanturu swings); Crywolf's walk smokes, swings, the Werewolf Hero's head and the Valam's cards; and the `RenderMonster` mesh passes (Balgass, Selupan, Erohim, Raymond, Lucas, the Dark Ghost).
 - `src/controllers/actors/resolveModel.golden.test.ts`: what every type 0..600 is drawn with, and
   the NPC tables; `src/controllers/sound/npcVoices.test.ts`: the voices.

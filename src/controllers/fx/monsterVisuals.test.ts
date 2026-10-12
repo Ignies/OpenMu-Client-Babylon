@@ -304,6 +304,19 @@ describe('monster body rows', () => {
     expect(hole.when?.()).toBe(true);
   });
 
+  // Valam's cards are RenderCryWolf1stMonsterVisual's, drawn only in Crywolf and Devil Square (GMCrywolf1st.cpp:1566-1570).
+  it("show a cards row only while its gate's own test holds", () => {
+    calls.glows.length = 0;
+    let there = false;
+    visualMonster(scene, monster(), [
+      { kind: 'cards', spots: [{ bone: 28, card: 'light', scale: 1 }], colour: [0, 0.5, 0.1], gate: { when: () => there } },
+    ] as never);
+    const [card] = calls.glows as { when?: () => boolean }[];
+    expect(card.when?.()).toBe(false);
+    there = true;
+    expect(card.when?.()).toBe(true);
+  });
+
   // Kundun's Shock roar (GMHellas.cpp:1596-1631): `PKKey` is 10 to frame 4, then one more a tick (one less past
   // frame 10, down to 10); `Skill` climbs 3 a tick into frames 4-5 and 8-9 and falls 3 out of them. `fRoar` is
   // `(PKKey + Skill) * 0.15` in Shock, 1 out of it, and scales the roar rows' cards and particles.

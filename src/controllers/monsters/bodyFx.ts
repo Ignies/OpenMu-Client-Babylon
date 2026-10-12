@@ -198,8 +198,8 @@ export type BodyFxEmitter =
       readonly lift?: { readonly speed: number; readonly amount: number; readonly base: number };
       /** Its `Scale` times the Shock roar's `fRoar` (Kundun, GMHellas.cpp:1596-1622). */
       readonly roar?: true;
-      /** `alive`: not drawn once it dies; `action` / `frames`: drawn only then (a `MoveMonsterVisual` CreateSprite). */
-      readonly gate?: Pick<BodyFxGate, 'alive' | 'action' | 'frames'>;
+      /** `alive`: not drawn once it dies; `action` / `frames`: drawn only then (a `MoveMonsterVisual` CreateSprite); `when`: only while it holds. */
+      readonly gate?: Pick<BodyFxGate, 'alive' | 'action' | 'frames' | 'when'>;
     }
   | {
       /**

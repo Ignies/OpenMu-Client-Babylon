@@ -1,6 +1,8 @@
 import type { BodyBlurSheet, BodyCard, BodyFxEmitter, BodyParticle, BodyPuff, BodyTexture } from '@/controllers/monsters';
 import { MonsterActionType as A } from '../../objects/enum';
 import { lookState } from '@/controllers/monsters';
+import { Ecs } from '@/ecs/current';
+import { ENUM_WORLD } from '@/core/types';
 
 /**
  * Building blocks the monster folders' `bodyFx` rows share (`MoveCharacterVisual`,
@@ -314,4 +316,71 @@ export const TWIN_TAIL_BLURS = swings([[58, [-150, 50, 0], 59, [150, -200, 0]]],
 export const DREADFEAR_BLURS = [
   ...swings([[33, [0, 0, 0], 33, [100, 120, 0]]], [1, 1, 1], 'blur01', { dark: true, gate: { action: [A.Attack1], frames: [[0, 5]] } }),
   ...swings([[33, [0, 0, 0], 33, [100, 120, 0]]], [1, 1, 1], 'blur01', { dark: true, gate: { action: [A.Attack2], frames: [[0, 9]] } }),
+];
+
+// ---- Crywolf (GMCrywolf1st.cpp MoveCryWolf1stMonsterVisual, MoveCryWolf1stBlurEffect, RenderCryWolf1stMonsterVisual) ----
+
+/**
+ * Walking or running, one SMOKE + 1 at `o->Position` one tick in ten (:751-756 and the like). The Scout's and Balgass's
+ * pass an uninitialised `Light`: they take the smoke's own light here (no `colour`).
+ */
+export const crywolfWalkSmoke = (colour?: RGB): BodyFxEmitter =>
+  body(10, 'sandSmoke', [0, 0, 0], { ...(colour ? { colour } : {}), gate: { action: [A.Walk, A.Run] } });
+
+/** The Scout: Type 3, Short, through Attack1 (:1166-1201). */
+export const SCOUT_BLURS = swings(
+  [
+    [12, [20, 0, 0], 16, [60, 0, 0]],
+    [20, [20, 0, 0], 24, [60, 0, 0]],
+  ],
+  [1, 1, 1],
+  'blur02',
+  { short: true, gate: { action: [A.Attack1] } }
+);
+
+/** The Death Spirit: Type 3, Short, through Attack1 / Attack2 off bone 27 (:1298-1318). */
+export const DEATH_SPIRIT_BLURS = swings([[27, [0, 250, 0], 27, [0, 0, 0]]], [0.2, 1, 0.4], 'blur02', {
+  short: true,
+  gate: { action: ATTACKS },
+});
+
+/** The Werewolf Hero: Type 3, Short, through Attack2 off bones 80 and 82 (:1346-1379). */
+export const WEREWOLF_HERO_BLURS = swings(
+  [
+    [80, [0, 0, -90], 80, [0, 0, 0]],
+    [82, [0, 0, 90], 82, [0, 0, 0]],
+  ],
+  [1, 1, 1],
+  'blur02',
+  { short: true, gate: { action: [A.Attack2] } }
+);
+
+/** ...and his BITMAP_LIGHT on `Monster95_Head` (bone 6) while he lives (:880-886). */
+export const werewolfHeroHead = (): BodyFxEmitter => cards([0.9, 0.2, 0.1], spotsOn([6], 'light', 3.5), { gate: { alive: true } });
+
+/** The Solam: Type 3, Short, through Attack1 off bone 25 (:1381-1410). */
+export const SOLAM_BLURS = swings([[25, [0, 0, 120], 25, [0, 0, 0]]], [1, 1, 1], 'blur02', {
+  short: true,
+  gate: { action: [A.Attack1] },
+});
+
+/** RenderCryWolf1stMonsterVisual draws only in Crywolf and Devil Square (:1568). */
+const inCrywolf = () => {
+  const map = Ecs.world?.mapIndex;
+  return map === ENUM_WORLD.WD_34CRYWOLF_1ST || map === ENUM_WORLD.WD_9DEVILSQUARE;
+};
+
+const valamCards = (actions: readonly A[], k: number): BodyFxEmitter[] => [
+  cards([0, 0.5, 0.1], spotsOn([28], 'light', k), { pulse: { speed: 0.0012, amount: 0.8, base: 1.3 }, gate: { action: actions, when: inCrywolf } }),
+  cards([0.5, 0.5, 0.5], spotsOn([27, 27, 29, 29], 'shiny2', 0.5 * k), { gate: { action: actions, when: inCrywolf } }),
+];
+
+/**
+ * The Valam: BITMAP_LIGHT on `Monster96_Center` (bone 28) at `sinf(WorldTime * 0.0012f) * 0.8f + 1.3f` of (0, 0.5,
+ * 0.1), two BITMAP_SHINY + 1 on `Monster96_Top` and `Monster96_Bottom` (27, 29), all at half size through Attack1 /
+ * Attack2 (:1948-1968). Not here: the shiny cards' `rand() % 360` turn, rolled every frame.
+ */
+export const VALAM_CARDS: BodyFxEmitter[] = [
+  ...valamCards([A.Stop1, A.Stop2, A.Walk, A.Shock, A.Die, A.Appear, A.Attack3, A.Attack4, A.Run], 1),
+  ...valamCards(ATTACKS, 0.5),
 ];

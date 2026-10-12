@@ -1,9 +1,12 @@
 import { defineMonster } from '@/controllers/monsters';
+import { VALAM_CARDS } from '../_shared/bodyFx';
 
 export default defineMonster({
   Numb: 316,
   Name: 'Valam',
   maxHealth: 140000,
+  // Its Crywolf visuals (`_shared/bodyFx.ts`, GMCrywolf1st.cpp).
+  bodyFx: VALAM_CARDS,
   model: { type: 96, scale: 1.2 },
   stats: {
     Rate: 1,

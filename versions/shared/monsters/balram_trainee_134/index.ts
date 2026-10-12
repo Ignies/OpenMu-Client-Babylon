@@ -1,9 +1,12 @@
 import { defineMonster } from '@/controllers/monsters';
+import { crywolfWalkSmoke } from '../_shared/bodyFx';
 
 export default defineMonster({
   Numb: 436,
   Name: 'Balram (Trainee)',
   maxHealth: 90000,
+  // Its Crywolf visuals (`_shared/bodyFx.ts`, GMCrywolf1st.cpp).
+  bodyFx: [crywolfWalkSmoke([0.9, 0.2, 0.1])],
   model: { type: 91, scale: 1.25 },
   // The old table's converter read this row one column off, the level inside the name (readme.md).
   stats: {

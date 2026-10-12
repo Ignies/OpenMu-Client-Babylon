@@ -1,5 +1,5 @@
 import { defineMonster } from '@/controllers/monsters';
-import { cards, spotsOn, trail } from '../_shared/bodyFx';
+import { cards, crywolfWalkSmoke, spotsOn, trail } from '../_shared/bodyFx';
 
 export default defineMonster({
   Numb: 349,
@@ -11,6 +11,8 @@ export default defineMonster({
     trail(10, 30, 20, [0.5, 0.1, 1]),
     trail(9, 30, 8, [0.5, 0.1, 1]),
     cards([0.7, 0.51, 1], spotsOn([10, 10, 9, 9], 'lightning2', 0.15)),
+    // Walking, its smoke (GMCrywolf1st.cpp:821-827).
+    crywolfWalkSmoke(),
   ],
   // RenderMonster (GMCrywolf1st.cpp:1425-1436): BodyLight (1, 1, 1), every mesh lit and again RENDER_CHROME2 |
   // RENDER_BRIGHT in BITMAP_CHROME3 (Chrome03, loaded GL_CLAMP_TO_EDGE, ZzzOpenData.cpp:5312).

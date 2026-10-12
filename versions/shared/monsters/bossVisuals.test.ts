@@ -207,6 +207,42 @@ describe('the Aida and Kanturu swing blurs', () => {
   });
 });
 
+describe('Crywolf', () => {
+  const smoke = (numb: number) => rows(numb, 'body').map(r => `${r.every} ${r.recipe} ${r.colour?.join(',') ?? '-'} ${r.gate?.action?.join('/')}`);
+  const walk = `${A.Walk}/${A.Run}`;
+
+  // MoveCryWolf1stMonsterVisual: one SMOKE + 1 a tick in ten while walking or running, in each one's light; the
+  // Scout's and Balgass's pass none (:729-917).
+  it('smoke the walkers', () => {
+    for (const n of [318, 314, 349]) expect(smoke(n)).toEqual([`10 sandSmoke - ${walk}`]);
+    for (const n of [345, 410, 344, 436, 409]) expect(smoke(n)).toEqual([`10 sandSmoke 0.9,0.2,0.1 ${walk}`]);
+    for (const n of [341, 437, 411, 313, 315]) expect(smoke(n)).toEqual([`10 sandSmoke 1,1,1 ${walk}`]);
+  });
+
+  // MoveCryWolf1stBlurEffect (:1166-1410): the Scout, the Death Spirit, the Werewolf Hero, the Solam.
+  it('trail their swings', () => {
+    for (const n of [318, 314]) expect(blurs(n)).toEqual([12, 20].map(b => `${b}(20,0,0)>${b + 4}(60,0,0) blur02 1,1,1 ${A.Attack1} short`));
+    for (const n of [345, 410]) expect(blurs(n)).toEqual([`27(0,250,0)>27(0,0,0) blur02 0.2,1,0.4 ${A.Attack1}/${A.Attack2} short`]);
+    for (const n of [313, 315]) expect(blurs(n)).toEqual([`80(0,0,-90)>80(0,0,0) blur02 1,1,1 ${A.Attack2} short`, `82(0,0,90)>82(0,0,0) blur02 1,1,1 ${A.Attack2} short`]);
+    for (const n of [311, 317]) expect(blurs(n)).toEqual([`25(0,0,120)>25(0,0,0) blur02 1,1,1 ${A.Attack1} short`]);
+    expect(cards(315)).toEqual(['6:light@3.5 0.9,0.2,0.1']);
+  });
+
+  // RenderCryWolf1stMonsterVisual's Valam (:1948-1968), only in Crywolf and Devil Square, halved through Attack1 / 2.
+  it("light the Valam's centre and shine its ends", () => {
+    for (const n of [312, 316]) {
+      expect(cards(n)).toEqual([
+        '28:light@1 0,0.5,0.1', ...[27, 27, 29, 29].map(b => `${b}:shiny2@0.5 0.5,0.5,0.5`),
+        '28:light@0.5 0,0.5,0.1', ...[27, 27, 29, 29].map(b => `${b}:shiny2@0.25 0.5,0.5,0.5`),
+      ]);
+      const [light, , half] = rows(n, 'cards');
+      expect(light.pulse).toEqual({ speed: 0.0012, amount: 0.8, base: 1.3 });
+      expect(half.gate?.action).toEqual([A.Attack1, A.Attack2]);
+      expect(light.gate?.when?.()).toBe(false);
+    }
+  });
+});
+
 describe('Selupan', () => {
   // RenderMonsterVisual's MODEL_SELUPAN (GM_Raklion.cpp:2003-2049): blue lights breathing in colour and size on
   // bones 9 and 70-74, some turning on the world clock.
