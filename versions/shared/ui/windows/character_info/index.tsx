@@ -450,7 +450,7 @@ export const CharacterInfo = observer(() => {
             rate: stats.attackRate,
           })
         : t('charInfo.dmg', { min: damageMin, max: stats.damageMax }),
-    color: eventColour('damage', buffs, stats.dualWield ? TEXT_COLOR.buffed : TEXT_COLOR.white),
+    color: eventColour('damage', buffs, stats.damageBlue ? TEXT_COLOR.buffed : TEXT_COLOR.white),
   });
 
   if (stats.attackRatePvp > 0) {

@@ -86,6 +86,10 @@ const GROUP_BOOTS = 11;
 const GROUP_WING = 12;
 const GROUP_HELPER = 13;
 
+/** ITEM_BOLT and ITEM_ARROWS, ITEM_BOW + 7 and + 15 (_enum.h:2268, :2276). */
+const BOLT = 7;
+const ARROWS = 15;
+
 function isBow(item: Item): boolean {
   return item.group === GROUP_BOW && item.num <= 6;
 }
@@ -306,7 +310,8 @@ type DerivedStats = {
   defenseRatePvp: number;
   /** The PvP defense rate's "(+N)": harmony defense rate and the 380 defense. */
   defenseRatePvpBonus: number;
-  dualWield: boolean;
+  /** `GetAttackDamage`'s return: the damage line prints blue (NewUICharacterInfoWindow.cpp:765). */
+  damageBlue: boolean;
   /** The detail line the worn pet prints magenta, null for none. */
   petEvent: 'attackSpeed' | 'hp' | null;
   wizardryMin: number;
@@ -331,7 +336,7 @@ function calculateDamage(
   input: CharacterStatsInput,
   base: BaseClass,
   flat: Range
-): { min: number; max: number; dualWield: boolean } {
+): { min: number; max: number; blue: boolean } {
   const { strength, agility, energy, vitality, items } = input;
 
   const weaponRight = equipped(items, InventoryConstants.LeftHandSlot);
@@ -428,7 +433,8 @@ function calculateDamage(
     max = maxRight;
   }
 
-  let dualWield = false;
+  // GetAttackDamage's `Alpha` (ZzzInventory.cpp:5937-5966).
+  let blue = false;
 
   const bothHands = !!weaponRight && !!weaponLeft;
 
@@ -438,9 +444,14 @@ function calculateDamage(
       weaponRight!.group <= GROUP_STAFF &&
       weaponLeft!.group <= GROUP_STAFF
     ) {
-      dualWield = true;
+      blue = true;
       min = Math.trunc((minRight * 55) / 100) + Math.trunc((minLeft * 55) / 100);
       max = Math.trunc((maxRight * 55) / 100) + Math.trunc((maxLeft * 55) / 100);
+    }
+  } else if (base === BaseClass.Elf) {
+    // A bow or crossbow with +1 or better arrows or bolts in the other hand.
+    if (weaponRight?.group === GROUP_BOW && weaponLeft?.group === GROUP_BOW) {
+      blue = (weaponLeft.num === BOLT && (weaponLeft.lvl ?? 0) >= 1) || (weaponRight.num === ARROWS && (weaponRight.lvl ?? 0) >= 1);
     }
   } else if (base === BaseClass.RageFighter) {
     if (
@@ -448,13 +459,13 @@ function calculateDamage(
       weaponRight!.group <= GROUP_MACE &&
       weaponLeft!.group <= GROUP_MACE
     ) {
-      dualWield = true;
+      blue = true;
       min = Math.trunc(((minRight + minLeft) * 60) / 100);
       max = Math.trunc(((maxRight + maxLeft) * 65) / 100);
     }
   }
 
-  return { min, max, dualWield };
+  return { min, max, blue };
 }
 
 function calculateAttackRate(
@@ -927,7 +938,7 @@ export function deriveCharacterStats(bare: CharacterStatsInput): DerivedStats {
     magicSpeed: magicSpeedOf(bare.charClass, bare.agility),
     damageMin: damage.min + harmony.min,
     damageMax: damage.max + harmony.max,
-    dualWield: damage.dualWield,
+    damageBlue: damage.blue,
     petEvent: petEvent(pet, input),
     attackRate: calculateAttackRate(input, base) + setSum(lines, SET.attackRate) + socket.attackRate,
     attackRatePvp: calculateAttackRatePvp(input, base),

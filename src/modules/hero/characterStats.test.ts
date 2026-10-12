@@ -78,6 +78,33 @@ describe('the character window attack speed line', () => {
   });
 });
 
+// The damage line goes blue when GetAttackDamage returns true (NewUICharacterInfoWindow.cpp:490, :765; ZzzInventory.cpp:5937-5966).
+describe('the character window damage line colour', () => {
+  const held = (charClass: CharacterClassNumber, right: Item | null, left: Item | null) => {
+    const items: (Item | null)[] = new Array(12).fill(null);
+    items[0] = right;
+    items[1] = left;
+    return deriveCharacterStats({ charClass, level: 400, strength: 1000, agility: 1000, vitality: 100, energy: 1000, leadership: 0, items }).damageBlue;
+  };
+  const weapon = (group: number, num: number, lvl = 0): Item => ({ group, num, lvl, durability: 255 });
+
+  it('is blue for the knight and gladiator with two weapons up to staffs, the fighter up to maces', () => {
+    expect(held(CharacterClassNumber.DarkKnight, weapon(0, 0), weapon(1, 0))).toBe(true);
+    expect(held(CharacterClassNumber.MagicGladiator, weapon(0, 0), weapon(5, 0))).toBe(true);
+    expect(held(CharacterClassNumber.DarkKnight, weapon(0, 0), weapon(6, 0))).toBe(false);
+    expect(held(CharacterClassNumber.RageFighter, weapon(0, 0), weapon(2, 0))).toBe(true);
+    expect(held(CharacterClassNumber.RageFighter, weapon(0, 0), weapon(3, 0))).toBe(false);
+  });
+
+  it('is blue for the elf with a bow and +1 arrows or a crossbow and +1 bolts', () => {
+    expect(held(CharacterClassNumber.FairyElf, weapon(4, 15, 1), weapon(4, 0))).toBe(true);
+    expect(held(CharacterClassNumber.FairyElf, weapon(4, 8), weapon(4, 7, 2))).toBe(true);
+    expect(held(CharacterClassNumber.FairyElf, weapon(4, 15, 0), weapon(4, 0))).toBe(false);
+    expect(held(CharacterClassNumber.FairyElf, weapon(4, 8), weapon(4, 7, 0))).toBe(false);
+    expect(held(CharacterClassNumber.FairyElf, weapon(4, 15, 1), null)).toBe(false);
+  });
+});
+
 // CalculateSuccessfulBlocking reads EQUIPMENT_WEAPON_LEFT, slot 1 (ZzzInfomation.cpp:3222, _define.h:209).
 describe('the character window defense rate with a shield', () => {
   const held = (slot: number) => {
