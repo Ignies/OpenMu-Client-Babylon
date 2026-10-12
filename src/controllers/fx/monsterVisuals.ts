@@ -146,6 +146,7 @@ const CARDS: Readonly<Record<BodyCard, GlowTexture>> = {
   flare2: 'flare2',
   eventCloud: 'eventCloud',
   hole: 'hole',
+  lightning2: 'halo',
 };
 
 const PUFFS: Readonly<Record<BodyPuff, KindName>> = {

@@ -257,6 +257,11 @@ describe('Balgass', () => {
     expect(trails(349)).toEqual(['10 30cm x20 0.5,0.1,1', '9 30cm x8 0.5,0.1,1']);
   });
 
+  // SubType 2 / 3's head: a BITMAP_LIGHTNING + 1 SubType 0 a tick, Scale 0.15, living two ticks, in `0.5 + Luminosity *
+  // (0.25, 0.01, 1)` (ZzzEffectJoint.cpp:3200-3205, ZzzEffectParticle.cpp:230-262): blue held at 1, red within 0.08 of 0.7.
+  it('lays a lightning card at each ribbon head', () => {
+    expect(cards(349)).toEqual([10, 10, 9, 9].map(b => `${b}:lightning2@0.15 0.7,0.51,1`));
+  });
 });
 
 describe('Nightmare', () => {
@@ -363,7 +368,11 @@ describe('the Imperial Guardian bosses', () => {
       ...[93, 100, 47, 54].map(b => `${b}:light@3 0.1,0.6,1`),
       ...[92, 99, 46, 53, 95, 88, 42, 49].map(b => `${b}:light@1 0.1,1,0.2`),
       ...[80, 34].map(b => `${b}:light@3 0.1,1,0.3`),
+      // SubType 22 / 23's head: a BITMAP_LIGHTNING + 1 SubType 4 a tick, Scale 0.25, living two ticks (ZzzEffectJoint.cpp:3213-3218,
+      // ZzzEffectParticle.cpp:230-262): two cards a head in `sinf(WorldTime * 0.002f) * 0.2f + 0.8f`.
+      ...[34, 34, 80, 80].map(b => `${b}:lightning2@0.25 1,1,1`),
     ]);
+    expect(rows(515, 'cards')[3].pulse).toEqual({ speed: 0.002, amount: 0.2, base: 0.8 });
     expect(rows(515, 'cards').slice(0, 3).map(r => r.pulse)).toEqual(Array(3).fill({ speed: 0.08, amount: 0.15, base: 0.85 }));
   });
 });
