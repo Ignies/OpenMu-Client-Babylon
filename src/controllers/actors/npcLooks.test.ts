@@ -26,6 +26,11 @@ beforeAll(async () => {
 }, 120_000);
 
 describe('NPC looks from the original client', () => {
+  it('Santa Claus draws npcsanta at 1.7 (GMSantaTown.cpp:55-58, ZzzOpenData.cpp:2161)', () => {
+    expect(m.resolveModelFactory(465)).toBe(m.npcFactoryFor('npcsanta', 1.7, {}, undefined, idleOf(465)));
+    expect(m.npcSpawnScale(m.resolveModelFactory(465))).toBe(1.7);
+  });
+
   it('Hanzo the Blacksmith draws Smith01 at 0.95 (ZzzCharacter.cpp:14517-14522)', () => {
     expect(m.resolveModelFactory(251)).toBe(m.npcFactoryFor('Smith01', 0.95, {}, undefined, idleOf(251)));
   });

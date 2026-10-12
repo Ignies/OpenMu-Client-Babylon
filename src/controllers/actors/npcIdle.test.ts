@@ -37,6 +37,13 @@ describe('an NPC rolling its next idle clip', () => {
     expect(nextIdleAction(silvia, 0, 2, dice(3))).toBe(0);
   });
 
+  it('gives the 2008 Santa clip 1 or 2 one time in three, from clip 0 only', () => {
+    const santa = rollOf(465);
+    expect(santa).not.toBe(DEFAULT_IDLE_ROLL);
+    expect(nextIdleAction(santa, 0, 3, dice(2, 1))).toBe(2);
+    expect(nextIdleAction(santa, 2, 3, dice(2, 1))).toBe(0);
+  });
+
   it('splits the little Santas: 468-471 rest on clip 0, 472-475 on clip 1', () => {
     for (const type of [468, 469, 470, 471]) expect(nextIdleAction(rollOf(type), 3, 5, dice(1))).toBe(0);
     for (const type of [472, 473, 474, 475]) expect(nextIdleAction(rollOf(type), 3, 5, dice(1))).toBe(1);
@@ -44,9 +51,9 @@ describe('an NPC rolling its next idle clip', () => {
 
   it('names a roll for each of the original cases our NPC folders draw', () => {
     // Natasha (Wedding), Hanzo (Smith01), Pasi (Wizard01), Silvia, Rhea, Devin, the Seed Master and Researcher,
-    // the eight little Santas, the Snowman, Moss, Zyro, the Gens stewards, Raul, Julia, Christine, Leina, Bolo, David.
+    // the eight little Santas, Santa, the Snowman, Moss, Zyro, the Gens stewards, Raul, Julia, Christine, Leina, Bolo, David.
     const types = [
-      379, 251, 254, 415, 416, 406, 452, 453, 468, 469, 470, 471, 472, 473, 474, 475, 467, 492, 568, 543, 544,
+      379, 251, 254, 415, 416, 406, 452, 453, 468, 469, 470, 471, 472, 473, 474, 475, 465, 467, 492, 568, 543, 544,
       546, 547, 545, 577, 578, 579,
     ];
     expect(types.filter(type => !monsterRegistry.def(type)?.npcModel?.idle)).toEqual([]);
